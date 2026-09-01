@@ -1,0 +1,135 @@
+name: etsy-verify
+
+# SALT OKUR Etsy dogrulamasi. Tek listing'in state/fiyat/gorsel/video/dosya
+# durumunu okur, TEMP/WP_VERIFY_<tarih>.csv ve job summary'ye yazar.
+# Etsy'ye yazma YOK. Tek yan etki: OAuth token yenilenirse yeni refresh
+# token Drive'daki TEMP/ETSY_TOKEN.json'a GERI YAZILIR (docs/SECRETS.md,
+# "Etsy token sahibi"). Hicbir sir degeri loga dusmez.
+
+on:
+  workflow_dispatch:
+    inputs:
+      listing_id:
+        description: "Okunacak listing ID"
+        required: true
+        default: "4565911475"
+      expect_dir:
+        description: "Beklenen galeri gorselleri (Drive, ASTROLOVE altinda). Bos = imza eslestirme yok"
+        required: false
+        default: "WALLPAPER/MOCKUP_V2/CANCER_LIBRA"
+      expect_order:
+        description: "Beklenen galeri sirasi (SET kodlari, virgullu)"
+        required: false
+        default: "SET01,SET03,SET04,SET06,SET07,SET10Y"
+
+# Token dosyasini ayni anda yalnizca TEK kosu yeniler.
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Bagimliliklar
+        run: |
+          set -euo pipefail
+          pip install -q -r requirements.txt
+
+      - name: rclone kur
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          rclone version | head -1
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then
+            echo "HATA: RCLONE_CONF_B64 secret'i tanimli degil." >&2
+            exit 1
+          fi
+          mkdir -p ~/.config/rclone
+          umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+
+      - name: Token dosyasini Drive'dan al
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p _work
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          test -s _work/ETSY_TOKEN.json
+          echo "Token dosyasi alindi ($(wc -c < _work/ETSY_TOKEN.json) bayt)."
+
+      - name: Beklenen galeri gorsellerini al
+        if: ${{ inputs.expect_dir != '' }}
+        run: |
+          set -euo pipefail
+          mkdir -p _work/expect
+          rclone copy "gdrive:ASTROLOVE/${{ inputs.expect_dir }}" _work/expect \
+            --include "*_FINAL.jpg" --include "*_FINAL.jpeg"
+          ls -1 _work/expect | sed 's/^/  /'
+
+      - name: Listing'i oku (salt okur)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          LISTING_ID: ${{ inputs.listing_id }}
+          OUT_CSV: _out/verify.csv
+          EXPECT_DIR: ${{ inputs.expect_dir != '' && '_work/expect' || '' }}
+          EXPECT_ORDER: ${{ inputs.expect_order }}
+        run: |
+          set -euo pipefail
+          python scripts/etsy/verify_listing.py
+
+      # Yenilenen token, dogrulama basarisiz olsa bile GERI YAZILIR;
+      # aksi halde Drive'daki refresh token gecersiz kalir (zincir kopar).
+      - name: Yenilenen token'i Drive'a geri yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          if [ -f _work/ETSY_TOKEN.json.updated ]; then
+            rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json"
+            rclone lsl "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json"
+            echo "Token dosyasi Drive'a geri yazildi."
+          else
+            echo "Token yenilenmedi; geri yazma yok."
+          fi
+
+      - name: CSV'yi Drive'a yaz
+        if: ${{ success() }}
+        run: |
+          set -euo pipefail
+          stamp=$(TZ=Europe/Istanbul date +%Y%m%d_%H%M)
+          rclone copyto _out/verify.csv "gdrive:ASTROLOVE/TEMP/WP_VERIFY_${stamp}.csv"
+          echo "Yazildi: TEMP/WP_VERIFY_${stamp}.csv"
+
+      - name: CSV artifact
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: verify-csv
+          path: _out/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone

@@ -1,0 +1,73 @@
+name: wp-measure-spec
+
+# SALT OKUR. WALLPAPER/FINAL_V2/<PAIR> altindaki onayli wallpaper dosyalarini
+# olcer (zemin, poster kutusu, murekkep, tagline, watch sembol kutusu) ve
+# sonucu artifact + job summary olarak verir. Drive'a yazmaz, Etsy'ye dokunmaz.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pair:
+        description: "Olculecek cift klasoru (FINAL_V2 altinda)"
+        required: true
+        default: "CANCER_LIBRA"
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Bagimliliklar
+        run: |
+          set -euo pipefail
+          pip install -q -r requirements.txt
+
+      - name: rclone kur
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          rclone version | head -1
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone
+          umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+
+      - name: Dosyalari al
+        run: |
+          set -euo pipefail
+          mkdir -p _work/final
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/${{ inputs.pair }}" _work/final
+          ls -l _work/final
+
+      - name: Olc
+        run: |
+          set -euo pipefail
+          python scripts/etsy/wp_measure_spec.py --dir _work/final --json _out/spec.json --md _out/spec.md
+          { echo "## Wallpaper olcumu: ${{ inputs.pair }}"; echo; cat _out/spec.md; } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wp-spec-${{ inputs.pair }}
+          path: _out/
+          retention-days: 30
+
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
