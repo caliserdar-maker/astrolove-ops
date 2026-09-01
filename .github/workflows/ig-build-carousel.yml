@@ -1,0 +1,90 @@
+name: ig-build-carousel
+
+# Instagram carousel slaytlarini (5'li set) Drive'daki poster ve oda
+# render'larindan uretir, ASTROLOVE/TEMP/IG_CAROUSEL_V2/<GUN>/ altina yazar.
+# Elle tetiklenir; edisyon ve gun secimiyle kismi calistirilabilir.
+
+on:
+  workflow_dispatch:
+    inputs:
+      edition:
+        description: "CAROUSEL_EDITION (bos = hepsi), or. WARM_PARCHMENT"
+        required: false
+        default: ""
+      days:
+        description: "Gun secimi (bos = hepsi), or. 4 | 4,7 | 1-10"
+        required: false
+        default: ""
+      contact:
+        description: "Kontak sayfasi uret (inceleme icin)"
+        type: boolean
+        default: true
+      force:
+        description: "Drive'da var olan gunleri de yeniden uret"
+        type: boolean
+        default: false
+
+concurrency:
+  group: ig-build-carousel
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Bagimliliklar
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-liberation
+          pip install -r requirements.txt
+
+      - name: rclone kur
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash
+          rclone version
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then
+            echo "HATA: RCLONE_CONF_B64 secret'i tanimli degil." >&2
+            exit 1
+          fi
+          mkdir -p ~/.config/rclone
+          umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+
+      - name: Carousel uret
+        run: |
+          set -euo pipefail
+          args=()
+          [ -n "${{ inputs.edition }}" ] && args+=(--edition "${{ inputs.edition }}")
+          [ -n "${{ inputs.days }}" ]    && args+=(--days "${{ inputs.days }}")
+          [ "${{ inputs.contact }}" = "true" ] && args+=(--contact)
+          [ "${{ inputs.force }}" = "true" ]   && args+=(--force)
+          python scripts/instagram/build_carousel.py "${args[@]}"
+
+      - name: Kontak sayfalarini yukle
+        if: ${{ always() && inputs.contact }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: contact-sheets
+          path: _out/_contact/
+          if-no-files-found: ignore
+          retention-days: 14
