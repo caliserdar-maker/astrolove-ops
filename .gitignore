@@ -39,7 +39,6 @@ htmlcov/
 
 # --- Sirlar / kimlik bilgileri ---
 # Token ve kimlik dosyalari (JSON)
-*.json
 token*.json
 client_secret*.json
 credentials*.json
