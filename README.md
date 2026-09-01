@@ -11,7 +11,7 @@ uzerinden veya lokalde elle calistirilabilir.
 | Yol | Icerik |
 | --- | --- |
 | `scripts/etsy/` | Etsy API scriptleri (listeleme, siparis, envanter) |
-| `scripts/instagram/` | Instagram paylasim ve icerik scriptleri |
+| `scripts/instagram/` | Instagram scriptleri: `build_carousel.py` (5 slaytlik carousel uretimi) |
 | `scripts/pinterest/` | Pinterest pin ve board scriptleri |
 | `scripts/common/` | Ortak yardimci moduller (auth, http, log) |
 | `.github/workflows/` | Zamanlanmis ve manuel GitHub Actions workflow'lari |
@@ -30,3 +30,10 @@ pip install -r requirements.txt
 Calistirmak icin gereken ortam degiskenleri ve GitHub Secrets listesi
 [`docs/SECRETS.md`](docs/SECRETS.md) dosyasindadir. Gercek deger hicbir
 zaman depoya yazilmaz.
+
+## Workflow'lar
+
+| Workflow | Tetikleme | Is |
+| --- | --- | --- |
+| `drive-test` | elle | rclone ile Drive erisimini dogrular |
+| `ig-build-carousel` | elle (`edition`, `days`, `contact`) | Poster + oda render'larindan Instagram carousel slaytlarini uretir, `TEMP/IG_CAROUSEL_V2/` altina yazar; kontak sayfalarini artifact olarak verir |
