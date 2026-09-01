@@ -1,0 +1,47 @@
+name: drive-test
+
+# Bulut ortamindan Google Drive erisiminin GitHub Secrets uzerinden
+# calistigini dogrulayan elle tetiklenen test workflow'u.
+# Hicbir sir degeri loga yazilmaz; secret yalnizca dosyaya yazilir.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  drive-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: rclone kur
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash
+          rclone version
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then
+            echo "HATA: RCLONE_CONF_B64 secret'i tanimli degil." >&2
+            exit 1
+          fi
+          mkdir -p ~/.config/rclone
+          umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          echo "rclone.conf yazildi ($(wc -c < ~/.config/rclone/rclone.conf) bayt)."
+
+      - name: Drive kok klasorlerini listele
+        run: |
+          set -euo pipefail
+          rclone lsd gdrive:
+
+      - name: ASTROLOVE altini listele
+        run: |
+          set -euo pipefail
+          rclone lsf gdrive:ASTROLOVE --max-depth 1
