@@ -1,0 +1,61 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Sanal ortamlar
+.venv/
+venv/
+env/
+ENV/
+
+# Test / lint cache
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+
+# --- Sirlar / kimlik bilgileri ---
+# Token ve kimlik dosyalari (JSON)
+*.json
+token*.json
+client_secret*.json
+credentials*.json
+service_account*.json
+
+# Ortam dosyalari
+.env
+.env.*
+!.env.example
+
+# rclone yapilandirmasi
+rclone.conf
+*.rclone.conf
+
+# --- Editor / OS ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
