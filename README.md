@@ -12,7 +12,7 @@ uzerinden veya lokalde elle calistirilabilir.
 | --- | --- |
 | `scripts/etsy/` | Etsy API scriptleri (listeleme, siparis, envanter) |
 | `scripts/instagram/` | Instagram scriptleri: `build_carousel.py` (5 slaytlik carousel uretimi), `publish.py` (gunluk REEL/CAROUSEL/STORY yayini) |
-| `scripts/pinterest/` | Pinterest scriptleri: `merge_week.py` (haftalik toplu-pin CSV'si), `pin_media_perms.py` (PIN_MEDIA izin duzeltme) |
+| `scripts/pinterest/` | Pinterest scriptleri: `build_pins_v4.py` (pin gorselleri: poster 1000x1500, PIN_MEDIA_V2), `merge_week.py` (haftalik toplu-pin CSV'si), `pin_media_perms.py` (Drive "anyone" izin araci) |
 | `scripts/common/` | Ortak yardimci moduller (auth, http, log) |
 | `.github/workflows/` | Zamanlanmis ve manuel GitHub Actions workflow'lari |
 | `docs/` | Dokumantasyon |
@@ -37,6 +37,7 @@ zaman depoya yazilmaz.
 | --- | --- | --- |
 | `drive-test` | elle | rclone ile Drive erisimini dogrular |
 | `ig-build-carousel` | elle (`edition`, `days`, `contact`) | Poster + oda render'larindan Instagram carousel slaytlarini uretir, `TEMP/IG_CAROUSEL_V2/` altina yazar; kontak sayfalarini artifact olarak verir |
+| `pin-build-v4` | elle (`edition`) | Edisyonun 78 posterini (2X3) 1000x1500'e kucultur, `LISTING_MEDIA/PIN_MEDIA_V2/<ED>/` altina yazar, klasoru anyone:reader (miras kapali) yapip dogrular, `TEMP/PIN_UPLOAD_STATE_V2.csv` ve kontak sayfasini gunceller. Filigran/mockup yok |
 | `pin-merge-week` | elle (`week`, `day_from`, `day_to`, `start_date`) | `TEMP/PIN_CSVS/WA_PIN_GUN_xx..yy.csv` dosyalarini birlestirir, Publish date doldurur (gunde 13 pin, UTC 13:00'dan 30 dk arayla), dogrular, `WA_PIN_HAFTAn_GUNxx_yy.csv` yazar. Pinterest'e dokunmaz |
 | `pin-media-perms` | elle (`mode`, `apply`, `folder_id`, `keep_id`) | `fix`: agactaki "anyone" iznini reader'a ceker; `remove`: anyone iznini kaldirir, `keep_id` agacini korur ve anonim HTTP ile dogrular. Varsayilan dry-run |
 | `start-here-append` | elle (`record_file`) | Depodaki `docs/start_here/Bnn.txt` kaydini Drive'daki START_HERE dokumaninin sonuna ekler (Docs API); ayni numara varsa yazmaz |
