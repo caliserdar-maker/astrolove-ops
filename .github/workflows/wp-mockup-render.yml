@@ -1,0 +1,129 @@
+name: wp-mockup-render
+
+# Bir ciftin 6 galeri mockup'ini (SET01-03-04-06-07-10Y, 3000x2250) kalibre
+# pilot sahnelerinden uretir, QC yapar ve Drive'daki out_dir'e yazar
+# (varsayilan _CANDIDATE; ilanin galerisine ancak etsy-image-replace ile ve
+# onayla girer). Etsy'ye dokunmaz. docs/WP_MOCKUP_PIPELINE.md.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pair:
+        description: "Cift (dosya adi bicimi, or. Cancer_Libra)"
+        required: true
+        default: "Cancer_Libra"
+      scenes:
+        description: "Sahneler (virgullu)"
+        required: true
+        default: "SET01,SET03,SET04,SET06,SET07,SET10Y"
+      out_dir:
+        description: "Cikti klasoru (Drive, ASTROLOVE altinda); bos = WALLPAPER/MOCKUP_V2/_CANDIDATE/<CIFT>"
+        required: false
+        default: ""
+      compare_file:
+        description: "SET04 icin kiyas dosyasi (Drive); bos = kiyas yok"
+        required: false
+        default: "WALLPAPER/MOCKUP_V2/CANCER_LIBRA/WA_MOCKUP_V2_SET04_Cancer_Libra_FINAL.jpg"
+      calib_dir:
+        description: "Kalibrasyon klasoru (Drive)"
+        required: true
+        default: "WALLPAPER/MOCKUP_V2/_CALIB"
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Bagimliliklar
+        run: |
+          set -euo pipefail
+          pip install -q -r requirements.txt
+
+      - name: rclone kur
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone
+          umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+          fi
+
+      - name: Dosyalari al
+        run: |
+          set -euo pipefail
+          pair="${{ inputs.pair }}"
+          pair_dir="$(echo "$pair" | tr '[:lower:]' '[:upper:]')"
+          out_dir="${{ inputs.out_dir }}"; [ -n "$out_dir" ] || out_dir="WALLPAPER/MOCKUP_V2/_CANDIDATE/$pair_dir"
+          echo "PAIR_DIR=$pair_dir" >> "$GITHUB_ENV"
+          echo "OUT_DIR=$out_dir" >> "$GITHUB_ENV"
+          mkdir -p _work/calib _work/masters _work/pilot _work/wp _work/cmp
+          rclone copy "gdrive:ASTROLOVE/${{ inputs.calib_dir }}" _work/calib --include "calib.json" --include "masks/*.png"
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/CANCER_LIBRA" _work/masters --include "*_FINAL.jpg"
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/CANCER_LIBRA" _work/pilot --include "AstroLove_*.jpg"
+          if [ "$pair_dir" = "CANCER_LIBRA" ]; then
+            cp _work/pilot/*.jpg _work/wp/
+          else
+            rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/$pair_dir" _work/wp --include "AstroLove_*.jpg"
+          fi
+          cmp="${{ inputs.compare_file }}"
+          if [ -n "$cmp" ]; then rclone copyto "gdrive:ASTROLOVE/$cmp" "_work/cmp/$(basename "$cmp")"; fi
+          test -s _work/calib/calib.json
+          ls -l _work/calib _work/masters _work/wp _work/cmp
+
+      - name: Render + QC
+        run: |
+          set -euo pipefail
+          args=(--calib _work/calib --masters _work/masters --pilot _work/pilot --wallpapers _work/wp
+                --pair "${{ inputs.pair }}" --scenes "${{ inputs.scenes }}" --out _out)
+          cmp="${{ inputs.compare_file }}"
+          if [ -n "$cmp" ]; then args+=(--compare "_work/cmp/$(basename "$cmp")"); fi
+          python scripts/etsy/wp_mockup_render.py "${args[@]}" || echo "RENDER_FAIL=1" >> "$GITHUB_ENV"
+          { echo "## wp-mockup render: ${{ inputs.pair }} -> $OUT_DIR"; echo; cat _out/report.md; } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -d _out ] || exit 0
+          rclone copy _out "gdrive:ASTROLOVE/$OUT_DIR"
+          rclone lsl "gdrive:ASTROLOVE/$OUT_DIR"
+          echo "Yazildi: $OUT_DIR"
+
+      - name: Artifact
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: wp-mockup-${{ inputs.pair }}
+          path: _out/
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Sonuc
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          if [ "${RENDER_FAIL:-0}" = "1" ]; then echo "::error::QC FAIL (report.md)"; exit 1; fi
+
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
