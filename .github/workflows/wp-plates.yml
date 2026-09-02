@@ -19,6 +19,14 @@ on:
         description: "Drive cikti klasoru (ASTROLOVE altinda)"
         required: true
         default: "TEMP/WP_PLATES"
+      pair:
+        description: "Plakalardan uretilecek cift (bos = uretme)"
+        required: false
+        default: "Aries_Leo"
+      pair_out:
+        description: "Cift ciktisi (ASTROLOVE altinda; <PAIR> alt klasoru eklenir)"
+        required: false
+        default: "WALLPAPER/FINAL_V2/_CANDIDATE"
 
 jobs:
   plan:
@@ -90,11 +98,28 @@ jobs:
           python scripts/etsy/wp_plate_pilot.py --edition "${{ matrix.edition }}" --posters _work/posters --pilot _work/pilot --out _out
           { echo "## wp-plates: ${{ matrix.edition }}"; echo; echo "medyan murekkep QC: $(python3 -c "import json;d=json.load(open('_out/report_${{ matrix.edition }}.json'));print(d['median_ink_px'],'px,',len(d['median_ink_components']),'bilesen')")"; echo; echo '```'; cat "_out/report_${{ matrix.edition }}.json"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Cancer_Libra kendini yeniden uretme (kiyas)
+        run: |
+          set -euo pipefail
+          python scripts/etsy/wp_build_pair.py build --pair Cancer_Libra --plates _out --posters _work/posters --medians _out \
+            --out _out/selftest --editions "${{ matrix.edition }}" --compare _work/pilot
+          { echo "### Cancer_Libra kiyas (${{ matrix.edition }})"; echo '```'; cat _out/selftest/build_Cancer_Libra.json; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Cift uret
+        if: ${{ inputs.pair != '' }}
+        run: |
+          set -euo pipefail
+          python scripts/etsy/wp_build_pair.py build --pair "${{ inputs.pair }}" --plates _out --posters _work/posters --medians _out \
+            --out _out/pair --editions "${{ matrix.edition }}"
+          up="$(echo "${{ inputs.pair }}" | tr '[:lower:]' '[:upper:]')"
+          rclone copy _out/pair "gdrive:ASTROLOVE/${{ inputs.pair_out }}/$up" --include "AstroLove_*.jpg"
+
       - name: Drive'a yaz
         run: |
           set -euo pipefail
           rclone copy _out "gdrive:ASTROLOVE/${{ inputs.out_dir }}" --include "PLATE_*.png" --include "MEDIAN_*.png" --include "report_*.json"
           rclone copy _out/qc "gdrive:ASTROLOVE/${{ inputs.out_dir }}/qc"
+          rclone copy _out/selftest "gdrive:ASTROLOVE/${{ inputs.out_dir }}/selftest" --include "build_*.json"
           rclone lsl "gdrive:ASTROLOVE/${{ inputs.out_dir }}" | grep -i "${{ matrix.edition }}" || true
 
       - name: Artifact
@@ -105,9 +130,51 @@ jobs:
           path: |
             _out/qc/*.jpg
             _out/report_*.json
+            _out/selftest/*.json
+            _out/pair/*.json
           if-no-files-found: ignore
           retention-days: 30
 
       - name: Temizlik
         if: ${{ always() }}
         run: rm -rf _work ~/.config/rclone
+
+  contact:
+    needs: plate
+    if: ${{ inputs.pair != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Kontak sayfasi
+        run: |
+          set -euo pipefail
+          up="$(echo "${{ inputs.pair }}" | tr '[:lower:]' '[:upper:]')"
+          mkdir -p _pair
+          rclone copy "gdrive:ASTROLOVE/${{ inputs.pair_out }}/$up" _pair --include "AstroLove_*.jpg"
+          ls _pair | wc -l
+          python scripts/etsy/wp_build_pair.py contact --pair "${{ inputs.pair }}" --dir _pair --out "_pair/CONTACT_$up.jpg"
+          rclone copy "_pair/CONTACT_$up.jpg" "gdrive:ASTROLOVE/${{ inputs.pair_out }}/$up"
+          rclone lsl "gdrive:ASTROLOVE/${{ inputs.pair_out }}/$up"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wp-pair-contact
+          path: _pair/CONTACT_*.jpg
+      - if: ${{ always() }}
+        run: rm -rf _pair ~/.config/rclone
