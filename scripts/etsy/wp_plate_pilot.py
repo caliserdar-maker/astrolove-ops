@@ -48,7 +48,10 @@ REF_RING = (921, 1147, 6279, 4922)
 REF_SYMBOL = (1934, 1939, 5261, 5081)
 REF_TAGLINE = (1584, 7061, 5606, 7334)
 # murekkebin bulunabilecegi yerlesim kutulari (poster px, WP_LAYOUT_SPEC 7.1): halka kutusu, isim/tagline satirlari
-LAYOUT_BOXES = [(800, 1000, 6400, 5200), (1400, 5950, 5800, 8600)]
+# Tek kutu: Cancer sembolunun ince kuyruklari poster y~5400-5800'e sarkiyor (kosu 5: iki kutu arasi
+# boslukta kuyruk uclari kaldi). Kutu disindaki alan (kenar vinyeti) yine disarida.
+LAYOUT_BOXES = [(800, 1000, 6400, 8600)]
+HP_SIGMA = 16       # dolgu = medyanin yuksek frekans dokusu (sigma 16 ustu) + pilotun yerel tonu
 DILATE_INK = 24     # maske = murekkep + 24 px
 FEATHER = 22        # alfa: murekkep+2 px'te 1, maske sinirinda 0 (24 px'lik gecis maske ICINDE)
 RING_IN, RING_OUT = 16, 64
@@ -107,7 +110,7 @@ def otsu_thresh(vals):
     return float(t)
 
 
-def ink_mask_pilot(pilot, ed, dev, canvas_region, tol=70, dloc=18):
+def ink_mask_pilot(pilot, ed, dev, canvas_region, tex=None, tol=70, dloc=18):
     """Pilotun kendi murekkebi:
     cekirdek = murekkep rengine yakin (tol) + luma Otsu (MB/DB parlak, CI/WP koyu);
     uzanti   = yerel zeminden (medyan 51 px) >= dloc sapan pikseller (kenar
@@ -129,10 +132,15 @@ def ink_mask_pilot(pilot, ed, dev, canvas_region, tol=70, dloc=18):
     core = ((L > t) if ed in DARK else (L < t)) & (dist < tol) & reg
     bg = cv2.medianBlur(Lu, 51).astype(np.float32)
     d = L - bg
+    thr = np.full(L.shape, float(dloc if ed in DARK else dloc * 2 / 3), np.float32)
+    if tex is not None:
+        # zeminin kendi dokusu yuksek kontrastliysa (WP yanik kenar kivrimlari) uzanti esigi
+        # dokuyla olceklenir: doku murekkep sanilip medyanla degistirilmesin (kosu 5: WP halka dikisi)
+        thr = np.maximum(thr, 2.5 * tex)
     if ed in DARK:
-        ext = d > dloc                    # parlama beyaza yakin (R-B kucuk): ton sarti YOK; yildizlar cekirdege uzak oldugu icin disarida
+        ext = d > thr                     # parlama beyaza yakin (R-B kucuk): ton sarti YOK; yildizlar cekirdege uzak oldugu icin disarida
     else:
-        ext = np.abs(d) > (dloc * 2 / 3)  # kabartma parlamasi soluk (12)
+        ext = np.abs(d) > thr             # kabartma parlamasi soluk (12)
     ext &= reg
     cand = (ext | core).astype(np.uint8)
     cand = cv2.morphologyEx(cand, cv2.MORPH_OPEN, np.ones((2, 2), np.uint8))
@@ -203,23 +211,44 @@ def local_stats(img, w, sigma):
     return mu, np.sqrt(np.maximum(var, 1e-4))
 
 
+def texture_std(img, sigma_hp=6.0, sigma_win=12.0):
+    """Yerel doku siddeti: luma yuksek frekansinin (sigma_hp ustu) Gauss pencereli std'si."""
+    g = luma(img).astype(np.float32)
+    hp = g - cv2.GaussianBlur(g, (0, 0), sigma_hp)
+    return np.sqrt(np.maximum(cv2.GaussianBlur(hp * hp, (0, 0), sigma_win), 0.0))
+
+
 def build_plate(pilot, med_dev, ed, dev):
     F, region = aligned_median_canvas(med_dev, dev, pilot.shape)
-    ink, t = ink_mask_pilot(pilot, ed, dev, region)
+    tex = texture_std(F)
+    ink, t = ink_mask_pilot(pilot, ed, dev, region, tex=tex)
     mask = cv2.dilate(ink, np.ones((2 * DILATE_INK + 1, 2 * DILATE_INK + 1), np.uint8))
     mask &= region                              # dolgu kaynagi yalniz poster bolgesinde
-    # medyanin kendi murekkebi (sabit ogeler) -> medyan dokusunun kaydirilmis kopyasi
-    mm = ink_mask_median(F, ed) & region
-    F = shifted_fill(F, mm, region)
     Pf = pilot.astype(np.float32); Ff = F.astype(np.float32)
-    # yerel ton eslestirme: maske cevresi halkasi (16..64 px)
+    # Dolgu dokusu = medyanin yuksek frekansi (ton medyandan DEGIL, pilottan gelir).
+    # Kosu 5'te dolgu = (F - muF)*gain + muP idi: muF halkadan tahmin edildigi icin maske
+    # icinde medyanin kendi tonu tam cikmiyordu (CI halkada -2 seviyelik iz) ve kaydirilmis
+    # kopya bloklari ton basamagi birakiyordu (WP). Simdi: hp = F - G16(F), yogun/kesin.
+    lpF = cv2.GaussianBlur(Ff, (0, 0), float(HP_SIGMA))
+    hpF = Ff - lpF
+    # medyanin kendi murekkebi (sabit ogeler): yuksek frekans -> kaydirilmis kopya (tonsuz => dikissiz);
+    # alcak frekans -> cevreden normalize konvolusyonla (blok yok)
+    mm = ink_mask_median(F, ed) & region
+    hpF = shifted_fill(hpF, mm, region)
+    okw = ((region > 0) & (mm == 0)).astype(np.float32)
+    lp_fill, _ = local_stats(lpF, okw, 32.0)
+    toneF = np.where(mm[..., None] > 0, lp_fill, lpF)
+    # yerel ton eslestirme: maske cevresi halkasi (16..64 px). Ton = medyanin kendi alcak
+    # frekansi (yanik kenar egimi hizali gelir) + pilot-medyan farkinin halkadan olculen
+    # puruzsuz ofseti. (Kosu 5: ton yalniz halkadan harmanlaniyordu -> dik egimde bant.)
     d_in = cv2.dilate(mask, np.ones((2 * RING_IN + 1, 2 * RING_IN + 1), np.uint8))
     d_out = cv2.dilate(mask, np.ones((2 * RING_OUT + 1, 2 * RING_OUT + 1), np.uint8))
     ring = ((d_out > 0) & (d_in == 0) & (region > 0)).astype(np.float32)
     muP, sdP = local_stats(Pf, ring, 32.0)
-    muF, sdF = local_stats(Ff, ring, 32.0)
+    muT, _ = local_stats(toneF, ring, 32.0)
+    _, sdF = local_stats(hpF, region.astype(np.float32), 32.0)   # dolgu dokusunun yerel std'si (yogun)
     gain = np.clip(sdP / np.maximum(sdF, 1e-3), 0.15, 2.0)   # pilot zemini duzse (saat parlamasi, DB siyah) dolgu dokusu bastirilir
-    Fm = (Ff - muF) * gain + muP
+    Fm = hpF * gain + toneF + (muP - muT)
     # feather: murekkep cekirdegi (+2 px) tamamen dolgu (alfa 1); maske sinirina
     # dogru 22 px'te 0'a iner. (Onceki surum: alfa = mesafe/24 -> ince cizgilerde
     # hic 1'e ulasmiyor, pilot murekkebi %25-50 goruyordu = kabartma hayaleti.)
