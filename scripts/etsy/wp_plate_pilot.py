@@ -47,8 +47,8 @@ DARK = {"Midnight_Blue", "Deep_Black"}
 REF_RING = (921, 1147, 6279, 4922)
 REF_SYMBOL = (1934, 1939, 5261, 5081)
 REF_TAGLINE = (1584, 7061, 5606, 7334)
-DILATE_INK = 16
-FEATHER = 24
+DILATE_INK = 24     # maske = murekkep + 24 px
+FEATHER = 22        # alfa: murekkep+2 px'te 1, maske sinirinda 0 (24 px'lik gecis maske ICINDE)
 RING_IN, RING_OUT = 16, 64
 
 
@@ -210,10 +210,15 @@ def build_plate(pilot, med_dev, ed, dev):
     muF, sdF = local_stats(Ff, ring, 32.0)
     gain = np.clip(sdP / np.maximum(sdF, 1e-3), 0.5, 2.0)
     Fm = (Ff - muF) * gain + muP
-    # 24 px feather: maskenin icine dogru 0 -> 1
+    # feather: murekkep cekirdegi (+2 px) tamamen dolgu (alfa 1); maske sinirina
+    # dogru 22 px'te 0'a iner. (Onceki surum: alfa = mesafe/24 -> ince cizgilerde
+    # hic 1'e ulasmiyor, pilot murekkebi %25-50 goruyordu = kabartma hayaleti.)
+    core = cv2.dilate(ink, np.ones((5, 5), np.uint8))
     dist = cv2.distanceTransform(mask, cv2.DIST_L2, 5)
-    alpha = np.clip(dist / FEATHER, 0, 1).astype(np.float32)[..., None]
-    alpha[mask == 0] = 0.0
+    alpha = np.clip(dist / float(FEATHER), 0, 1).astype(np.float32)
+    alpha[core > 0] = 1.0
+    alpha = alpha[..., None]
+    alpha[mask[..., None] == 0] = 0.0
     out = Pf * (1 - alpha) + Fm * alpha
     out = np.clip(np.round(out), 0, 255).astype(np.uint8)
     out[mask == 0] = pilot[mask == 0]           # maske disi birebir
