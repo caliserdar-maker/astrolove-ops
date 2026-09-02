@@ -218,8 +218,11 @@ def main():
             # (SHIFTMAP maske disindaki altin parcalari yama olarak kopyalayabiliyor)
             rmask = cv2.dilate((luma_u8(plate) > 90).astype(np.uint8), np.ones((21, 21), np.uint8))
             res_px = int((rmask > 0).sum())
-        else:  # WP: yalniz inpaint edilmis (sabit) bolge icinde murekkep rengi
-            rmask = residual_ink_mask(plate, ed, cmask, tol=35)
+        else:  # WP: yalniz inpaint edilmis (sabit) bolge icinde: murekkep rengi VEYA yerel zeminden >40 koyu
+            g = luma_u8(plate).astype(np.float32)
+            dark = ((cv2.GaussianBlur(g, (0, 0), 25) - g) > 40).astype(np.uint8) & (cmask > 0)
+            dark = cv2.dilate(cv2.morphologyEx(dark, cv2.MORPH_OPEN, np.ones((2, 2), np.uint8)), np.ones((13, 13), np.uint8))
+            rmask = np.maximum(residual_ink_mask(plate, ed, cmask, tol=35), dark)
             res_px = int((rmask > 0).sum())
         if res_px:
             plate = fill_shift_lowpass(plate, rmask) if ed in DARK else inpaint_shiftmap(plate, rmask * 255)
