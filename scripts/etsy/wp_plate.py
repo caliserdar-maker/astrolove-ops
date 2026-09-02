@@ -175,6 +175,36 @@ def qc_sheet(plate, path, side=600):
     cv2.imwrite(str(path), np.hstack(tiles), [cv2.IMWRITE_JPEG_QUALITY, 92])
 
 
+INTERIOR = (900, 1000, 6300, 9000)   # acik edisyonlarda vinyet kenari disinda kalan ic bolge (poster px)
+
+
+def sweep_plate(plate, ed, tol=50, min_area=40, rounds=3):
+    """Son suzgec: plakada kalan murekkep rengi bilesenleri (>= min_area px)
+    kaydirmali kopya + alcak gecirgen dolgu ile silinir (SHIFTMAP kullanilmaz:
+    yama kaynagi olarak kalintiyi kopyalayabiliyor). Acik edisyonlarda yalniz
+    ic bolge (vinyet kenari murekkep rengine yakin). Donus: plaka, kalan sayisi."""
+    r, g, b = INK_RGB[ed]
+    x0, y0, x1, y1 = INTERIOR
+    for _ in range(rounds):
+        if ed in DARK:
+            m = (luma_u8(plate) > 90).astype(np.uint8)
+        else:
+            d = np.sqrt(((plate.astype(np.float32) - np.array([b, g, r], np.float32)) ** 2).sum(axis=2))
+            m = (d < tol).astype(np.uint8)
+            box = np.zeros_like(m); box[y0:y1, x0:x1] = 1; m &= box
+        n, lab, st, _ = cv2.connectedComponentsWithStats(m)
+        keep = np.zeros_like(m)
+        cnt = 0
+        for i in range(1, n):
+            if st[i, cv2.CC_STAT_AREA] >= min_area:
+                keep[lab == i] = 1; cnt += 1
+        if cnt == 0:
+            return plate, 0
+        keep = cv2.dilate(keep, np.ones((17, 17), np.uint8))
+        plate = fill_shift_lowpass(plate, keep)
+    return plate, cnt
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--posters", required=True)
@@ -182,7 +212,17 @@ def main():
     ap.add_argument("--pilot-pair", default="Cancer_Libra")
     ap.add_argument("--editions", default=",".join(EDITIONS))
     ap.add_argument("--out", required=True)
+    ap.add_argument("--sweep-only", default="", help="mevcut plaka klasoru: yalniz son suzgec + QC sayfasi")
     a = ap.parse_args()
+    if a.sweep_only:
+        out = Path(a.out); out.mkdir(parents=True, exist_ok=True); (out / "qc").mkdir(exist_ok=True)
+        for ed in a.editions.split(","):
+            plate = imread(Path(a.sweep_only) / f"WP_PLATE_{ED_UP[ed]}_3X4.png")
+            plate, left = sweep_plate(plate, ed)
+            cv2.imwrite(str(out / f"WP_PLATE_{ED_UP[ed]}_3X4.png"), plate, [cv2.IMWRITE_PNG_COMPRESSION, 3])
+            qc_sheet(plate, out / "qc" / f"PLATE_{ED_UP[ed]}.jpg")
+            log(f"{ed:16s} suzgec sonrasi kalan bilesen: {left}")
+        return
     pairs = a.pairs.split(",")
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True); (out / "qc").mkdir(exist_ok=True)
     # sabit murekkep maskesi: DB zemininden (tum edisyonlar ayni yerlesim)
@@ -233,6 +273,7 @@ def main():
             res_px = int((rmask > 0).sum())
         if res_px:
             plate = fill_shift_lowpass(plate, rmask) if ed in DARK else inpaint_shiftmap(plate, rmask * 255)
+        plate, left = sweep_plate(plate, ed)
         # guvenlik: V2 murekkep maskesi plakada
         v2m, t = v2_ink_mask(plate)
         v2_px = int(v2m.sum())
@@ -247,7 +288,7 @@ def main():
         name = f"WP_PLATE_{ED_UP[ed]}_3X4.png"
         cv2.imwrite(str(out / name), plate, [cv2.IMWRITE_PNG_COMPRESSION, 3])
         qc_sheet(plate, out / "qc" / f"PLATE_{ED_UP[ed]}.jpg")
-        report[ed] = dict(file=name, const_ink_px=int((cmask_ed > 0).sum()), pair_ink_px=int((pair_ink > 0).sum()), residual_pass_px=res_px,
+        report[ed] = dict(file=name, sweep_left=left, const_ink_px=int((cmask_ed > 0).sum()), pair_ink_px=int((pair_ink > 0).sum()), residual_pass_px=res_px,
                           v2_residual_px=v2_px, v2_residual_frac=v2_frac, v2_otsu=t,
                           hf_const=dict(inner=si_c, outer=so_c, ratio=r_c), hf_pair=dict(inner=si_p, outer=so_p, ratio=r_p), vignette=vign)
         log(f"{ed:16s} 2.gecis {res_px} px | V2 kalinti {v2_px} px ({v2_frac * 100:.3f}%, otsu {t}) | HF orani sabit-murekkep {r_c:.3f} ({si_c:.2f}/{so_c:.2f}) "
