@@ -14,6 +14,15 @@ versiyonlanmayan bir `.env` dosyasinda tutulur.
 | `RCLONE_CONF_B64` | Base64 ile kodlanmis `rclone.conf` icerigi (remote `gdrive`, kendi OAuth istemcimizle yetkilendirilmis, 2 Eyl 2026). Icindeki `client_secret` satiri bayattir; gecerli secret `GOOGLE_CLIENT_SECRET` ile calisma aninda ezilir. |
 | `GOOGLE_CLIENT_SECRET` | Kendi Google OAuth istemcimizin (proje `gen-lang-client-0835100486`) guncel secret'i. Her rclone kosusunda `RCLONE_CONFIG_GDRIVE_CLIENT_SECRET` olarak ortama yazilir ve conf'daki degeri ezer; secret Console'da sifirlaninca yalniz bu deger guncellenir, conf'a dokunulmaz. |
 | `GDRIVE_ROOT_FOLDER_ID` | Dosyalarin yazilacagi Google Drive kok klasorunun kimligi. |
+| `IG_TOKEN` | Instagram Login (Graph API) uzun omurlu kullanici erisim tokeni; `ig-publish` bunu kullanir. Kaynak: Drive `TEMP/ig_token.json` icindeki `token`. 60 gun gecerli; dosyada bitis tarihi YOK, yenileme takvimi elle izlenir (30 Agu 2026 tarihli token ~29 Ekim'de duser). |
+| `IG_USER_ID` | Instagram hesap kimligi (`ig_token.json` icindeki `ig_id`). |
+| `MEDIA_REPO_TOKEN` | `astrolove-media` reposuna push icin fine-grained PAT (yalniz o repo, Contents: read/write). `ig-media-sync` carousel_v2'yi GitHub Pages'e bununla iter; `GITHUB_TOKEN` baska repoya push edemez. |
+
+## Repo degiskenleri (Variables, sir degil)
+
+| Degisken | Aciklama |
+| --- | --- |
+| `IG_PUBLISH_ENABLED` | `true` olmadikca `ig-publish`'in zamanlanmis (06:00 UTC) kosusu atlanir. Yayina gecis karari bu degiskenle verilir; elle tetikleme `dry_run` varsayilani ile her zaman calisir. |
 
 ## Kurallar
 
@@ -68,3 +77,18 @@ versiyonlanmayan bir `.env` dosyasinda tutulur.
 - Gecici dosya `ASTROLOVE/TEMP/rclone_new_b64.txt` (yeni conf'un base64'u)
   secret guncellendikten sonra Drive'dan silinir; sir iceren dosya Drive'da
   birakilmaz.
+
+## Instagram yayin hatti (2 Eylul 2026)
+
+- `WA_IG_PLAN` sheet'i `ig-publish` tarafindan rclone.conf'daki OAuth
+  kimligiyle (Plan A) okunur ve yazilir; Sheets icin ayri secret yoktur.
+- Tekrar yayin korumasi: durum sutunu (`ST_REEL`/`ST_CAR`/`ST_STORY`) bos
+  degilse o tur atlanir. Yayindan ONCE `PENDING <ts>` yazilir, container
+  olusunca id eklenir, sonra `OK <media_id> <ts>` ya da `ERR <sebep> <ts>`.
+  `media_publish` hicbir zaman yeniden denenmez. `PENDING` kalmis hucre
+  otomatik acilmaz; container_id ile Graph API'den bakilip elle temizlenir.
+- Ayni cift + ayni medya daha erken gunde OK ise `SKIP_DUP D<NN>` yazilir
+  (plandaki D79 = D01 tekrari).
+- Carousel medyasi sheet'teki SLIDE_URLS'den degil,
+  `astrolove-media/carousel_v2/D<NN>/slide_1..5.jpg` yolundan turetilir;
+  `ig-media-sync` bu dosyalari Drive'dan Pages reposuna tasir.

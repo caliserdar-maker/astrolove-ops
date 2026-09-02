@@ -1,0 +1,108 @@
+name: ig-media-sync
+
+# Drive'daki TEMP/IG_CAROUSEL_V2/D<NN>/slide_1..5.jpg dosyalarini
+# astrolove-media reposuna (GitHub Pages) carousel_v2/D<NN>/ olarak tasir.
+# Instagram Graph API medyayi yalniz public URL'den cektigi icin gerekli.
+# Kontak sayfalari (_contact) tasinmaz.
+
+on:
+  workflow_dispatch:
+    inputs:
+      days:
+        description: "Gun secimi, or. 4 | 4,7 | 1-10 (bos = hepsi)"
+        required: false
+        default: ""
+      dry_run:
+        description: "Yalniz goster; repoya push etme"
+        type: boolean
+        default: true
+
+concurrency:
+  group: ig-media-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Medya reposunu al
+        uses: actions/checkout@v4
+        with:
+          repository: caliserdar-maker/astrolove-media
+          token: ${{ secrets.MEDIA_REPO_TOKEN }}
+          path: media
+
+      - name: rclone kur
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          rclone version | head -1
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then
+            echo "HATA: RCLONE_CONF_B64 secret'i tanimli degil." >&2
+            exit 1
+          fi
+          mkdir -p ~/.config/rclone
+          umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          # Yeni OAuth istemcisinin secret'i conf'daki degeri ezer (rclone env override).
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+          fi
+
+      - name: Drive -> carousel_v2
+        env:
+          DAYS: ${{ inputs.days }}
+        run: |
+          set -euo pipefail
+          # gun secimini rclone include listesine cevir
+          inc=()
+          if [ -n "${DAYS:-}" ]; then
+            for part in ${DAYS//,/ }; do
+              if [[ "$part" == *-* ]]; then
+                for n in $(seq "${part%-*}" "${part#*-}"); do inc+=(--include "D$(printf %02d "$n")/slide_*.jpg"); done
+              else
+                inc+=(--include "D$(printf %02d "$part")/slide_*.jpg")
+              fi
+            done
+          else
+            inc=(--include "D*/slide_*.jpg")
+          fi
+          rclone copy "gdrive:ASTROLOVE/TEMP/IG_CAROUSEL_V2" media/carousel_v2 "${inc[@]}" --stats-one-line -v 2>&1 | tail -3
+          echo "carousel_v2 altinda $(find media/carousel_v2 -name 'slide_*.jpg' | wc -l) slayt"
+
+      - name: Degisiklikleri gor
+        id: diff
+        working-directory: media
+        run: |
+          set -euo pipefail
+          git add -A carousel_v2
+          n=$(git diff --cached --name-only | wc -l)
+          echo "changed=$n" >> "$GITHUB_OUTPUT"
+          echo "degisen dosya: $n"
+          git diff --cached --stat | tail -5
+
+      - name: Push
+        if: ${{ inputs.dry_run != true && steps.diff.outputs.changed != '0' }}
+        working-directory: media
+        run: |
+          set -euo pipefail
+          git config user.name "astrolove-ops"
+          git config user.email "actions@users.noreply.github.com"
+          git commit -qm "carousel_v2: IG_CAROUSEL_V2 senkron ($(date -u +%Y-%m-%d))"
+          git push
+          echo "push edildi: $(git rev-parse --short HEAD)"
+
+      - name: Dry-run notu
+        if: ${{ inputs.dry_run == true }}
+        run: |
+          echo "dry-run, push edilmedi"
