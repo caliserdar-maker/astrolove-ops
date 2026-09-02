@@ -123,13 +123,13 @@ def ink_mask_pilot(pilot, ed, dev, canvas_region, tol=70, dloc=18):
     bg = cv2.medianBlur(Lu, 51).astype(np.float32)
     d = L - bg
     if ed in DARK:
-        ext = (d > dloc) & ((pilot[..., 2].astype(np.int16) - pilot[..., 0].astype(np.int16)) > 30)
+        ext = d > dloc                    # parlama beyaza yakin (R-B kucuk): ton sarti YOK; yildizlar cekirdege uzak oldugu icin disarida
     else:
-        ext = np.abs(d) > dloc
+        ext = np.abs(d) > (dloc * 2 / 3)  # kabartma parlamasi soluk (12)
     ext &= reg
     cand = (ext | core).astype(np.uint8)
     cand = cv2.morphologyEx(cand, cv2.MORPH_OPEN, np.ones((2, 2), np.uint8))
-    near_core = cv2.dilate(core.astype(np.uint8), np.ones((49, 49), np.uint8)) > 0
+    near_core = cv2.dilate(core.astype(np.uint8), np.ones((81, 81), np.uint8)) > 0
     n, lab, st, _ = cv2.connectedComponentsWithStats(cand)
     keep = np.zeros_like(cand)
     border = (cv2.dilate(canvas_region, np.ones((3, 3), np.uint8)) - cv2.erode(canvas_region, np.ones((3, 3), np.uint8))) > 0
@@ -208,7 +208,7 @@ def build_plate(pilot, med_dev, ed, dev):
     ring = ((d_out > 0) & (d_in == 0) & (region > 0)).astype(np.float32)
     muP, sdP = local_stats(Pf, ring, 32.0)
     muF, sdF = local_stats(Ff, ring, 32.0)
-    gain = np.clip(sdP / np.maximum(sdF, 1e-3), 0.5, 2.0)
+    gain = np.clip(sdP / np.maximum(sdF, 1e-3), 0.15, 2.0)   # pilot zemini duzse (saat parlamasi, DB siyah) dolgu dokusu bastirilir
     Fm = (Ff - muF) * gain + muP
     # feather: murekkep cekirdegi (+2 px) tamamen dolgu (alfa 1); maske sinirina
     # dogru 22 px'te 0'a iner. (Onceki surum: alfa = mesafe/24 -> ince cizgilerde
