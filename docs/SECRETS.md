@@ -14,15 +14,29 @@ versiyonlanmayan bir `.env` dosyasinda tutulur.
 | `RCLONE_CONF_B64` | Base64 ile kodlanmis `rclone.conf` icerigi (remote `gdrive`, kendi OAuth istemcimizle yetkilendirilmis, 2 Eyl 2026). Icindeki `client_secret` satiri bayattir; gecerli secret `GOOGLE_CLIENT_SECRET` ile calisma aninda ezilir. |
 | `GOOGLE_CLIENT_SECRET` | Kendi Google OAuth istemcimizin (proje `gen-lang-client-0835100486`) guncel secret'i. Her rclone kosusunda `RCLONE_CONFIG_GDRIVE_CLIENT_SECRET` olarak ortama yazilir ve conf'daki degeri ezer; secret Console'da sifirlaninca yalniz bu deger guncellenir, conf'a dokunulmaz. |
 | `GDRIVE_ROOT_FOLDER_ID` | Dosyalarin yazilacagi Google Drive kok klasorunun kimligi. |
-| `IG_TOKEN` | Instagram Login (Graph API) uzun omurlu kullanici erisim tokeni; `ig-publish` bunu kullanir. Kaynak: Drive `TEMP/ig_token.json` icindeki `token`. 60 gun gecerli; dosyada bitis tarihi YOK, yenileme takvimi elle izlenir (30 Agu 2026 tarihli token ~29 Ekim'de duser). |
-| `IG_USER_ID` | Instagram hesap kimligi (`ig_token.json` icindeki `ig_id`). |
-| `MEDIA_REPO_TOKEN` | `astrolove-media` reposuna push icin fine-grained PAT (yalniz o repo, Contents: read/write). `ig-media-sync` carousel_v2'yi GitHub Pages'e bununla iter; `GITHUB_TOKEN` baska repoya push edemez. |
+| `OPS_ADMIN_TOKEN` | Fine-grained GitHub PAT (astrolove-ops + astrolove-media; Secrets/Variables/Contents/Actions/Workflows RW, 1 yil). Tum otomasyon yetkisi buradan: `gh_secrets.py` secret/variable yazar, `ig-media-sync` medya reposuna push eder. HER IKI repoda da tanimli olmali. Tek elle kurulan sir budur (asagiya bakin). |
 
 ## Repo degiskenleri (Variables, sir degil)
 
 | Degisken | Aciklama |
 | --- | --- |
 | `IG_PUBLISH_ENABLED` | `true` olmadikca `ig-publish`'in zamanlanmis (06:00 UTC) kosusu atlanir. Yayina gecis karari bu degiskenle verilir; elle tetikleme `dry_run` varsayilani ile her zaman calisir. |
+
+## Otomasyon kurali (KARAR, 2 Eylul 2026)
+
+- GitHub/Drive/Console'da elle is yapilmaz. Secret ve variable'lar
+  `scripts/common/gh_secrets.py` ile (libsodium sealed box, GitHub REST)
+  yazilir; bu script Actions runner icinde `OPS_ADMIN_TOKEN` ile calisir.
+- ISTISNA (kacinilmaz): `OPS_ADMIN_TOKEN`'in kendisi bir kez tarayicidan
+  girilir. Otomasyonu yetkilendiren ilk kimlik, yetkilendirdigi otomasyonla
+  kurulamaz. Ayrica Claude Code sandbox proxy'si `api.github.com/.../actions/*`
+  yollarini (secrets, variables) engeller; bu yuzden sohbetten API ile secret
+  yazilamaz, yalniz Actions icinden yazilir.
+- Instagram kimligi secret DEGILDIR: Drive `TEMP/ig_token.json`
+  ({"token","ig_id","expiry"}). `publish.py` dosyayi rclone ile okur, 60
+  gunluk token bitise 10 gunden az kaldiysa `refresh_access_token` ile
+  yeniler ve dosyaya geri yazar (Etsy token modeliyle ayni: tek kaynak,
+  geri yazma zorunlu, tek yazici = concurrency grubu).
 
 ## Kurallar
 

@@ -10,6 +10,11 @@ bagimsiz islenir:
   CAROUSEL  carousel_v2/D<NN>/slide_1..5  + CAPTION_CAROUSEL   ST_CAR
   STORY     STORY_URL (caption yok)                            ST_STORY
 
+Instagram kimligi: Drive TEMP/ig_token.json (Etsy token modeliyle ayni;
+GitHub secret YOK). Dosya {"token", "ig_id", "expiry"?}. Token 60 gunluk;
+bitise 10 gunden az kaldiysa (ya da expiry alani yoksa) yenilenir ve
+dosyaya GERI YAZILIR. Dry-run hicbir sey yazmaz.
+
 Durum makinesi (tekrar yayin korumasi):
   bos                         -> yayinla
   PENDING <ts> [container]    -> ATLA + uyari (cokme sonrasi elle bak)
@@ -34,6 +39,7 @@ import datetime as dt
 import json
 import os
 import re
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -49,10 +55,13 @@ API_VER = os.environ.get("IG_API_VERSION", "v21.0")
 TZ = ZoneInfo("Europe/Istanbul")
 RCLONE_CONF = Path(os.environ.get("RCLONE_CONFIG", Path.home() / ".config/rclone/rclone.conf"))
 RCLONE_REMOTE = os.environ.get("RCLONE_REMOTE", "gdrive")
+IG_TOKEN_PATH = os.environ.get("IG_TOKEN_PATH", "ASTROLOVE/TEMP/ig_token.json")
+REFRESH_BEFORE_DAYS = 10             # bitise bundan az kaldiysa yenile
+TOKEN_LIFETIME_DAYS = 60             # expiry alani yoksa varsayilan omur
 
 CAPTION_MAX = 2200
 N_SLIDES = 5
-POLL_EVERY, POLL_MAX = 5, 300           # video container hazirlik yoklamasi (sn)
+POLL_EVERY, POLL_MAX = 5, 300        # video container hazirlik yoklamasi (sn)
 HTTP_TIMEOUT = 60
 
 # tur -> (durum sutunu, caption sutunu)
@@ -67,12 +76,30 @@ def log(msg):
     print(msg, flush=True)
 
 
+def utcnow():
+    return dt.datetime.now(dt.timezone.utc)
+
+
 def now_ts():
-    return dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def short(reason, n=60):
     return re.sub(r"\s+", "_", str(reason).strip())[:n]
+
+
+# ------------------------------------------------------------------ rclone
+def rclone_cat(path):
+    r = subprocess.run(["rclone", "cat", f"{RCLONE_REMOTE}:{path}"], capture_output=True, text=True)
+    if r.returncode != 0:
+        raise RuntimeError(f"rclone cat {path}: {r.stderr.strip()[:200]}")
+    return r.stdout
+
+
+def rclone_put(path, text):
+    r = subprocess.run(["rclone", "rcat", f"{RCLONE_REMOTE}:{path}"], input=text, capture_output=True, text=True)
+    if r.returncode != 0:
+        raise RuntimeError(f"rclone rcat {path}: {r.stderr.strip()[:200]}")
 
 
 # ------------------------------------------------------- Google (Sheets) kimligi
@@ -159,6 +186,43 @@ class Sheet:
             i, rem = divmod(i - 1, 26)
             s = chr(65 + rem) + s
         return s
+
+
+# ------------------------------------------------------------ Instagram kimligi
+def needs_refresh(expiry_iso, now=None):
+    """expiry yoksa ya da REFRESH_BEFORE_DAYS icindeyse True."""
+    if not expiry_iso:
+        return True
+    now = now or utcnow()
+    exp = dt.datetime.fromisoformat(expiry_iso.replace("Z", "+00:00"))
+    return (exp - now) < dt.timedelta(days=REFRESH_BEFORE_DAYS)
+
+
+def load_ig_identity(dry):
+    """
+    Drive TEMP/ig_token.json -> (token, ig_id, bilgi).
+    Gerekirse 60 gunluk token yenilenir ve dosyaya geri yazilir (dry-run'da yazilmaz).
+    """
+    obj = json.loads(rclone_cat(IG_TOKEN_PATH))
+    token, uid = obj["token"], str(obj["ig_id"])
+    expiry = obj.get("expiry")
+    info = f"expiry {expiry or 'YOK'}"
+    if needs_refresh(expiry):
+        if dry:
+            return token, uid, info + " -> (dry) yenilenmedi"
+        r = requests.get(f"{GRAPH_BASE}/refresh_access_token", timeout=HTTP_TIMEOUT,
+                         params={"grant_type": "ig_refresh_token", "access_token": token})
+        if r.status_code != 200:
+            raise RuntimeError(f"IG token yenilenemedi ({r.status_code}): {r.text[:200]} "
+                               "-- token suresi dolduysa yeniden yetkilendirme gerekir")
+        j = r.json()
+        token = j["access_token"]
+        new_exp = (utcnow() + dt.timedelta(seconds=int(j.get("expires_in", TOKEN_LIFETIME_DAYS * 86400))))
+        obj.update({"token": token, "expiry": new_exp.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "refreshed": now_ts()})
+        rclone_put(IG_TOKEN_PATH, json.dumps(obj, indent=2) + "\n")
+        info += f" -> YENILENDI, yeni bitis {obj['expiry']}"
+    return token, uid, info
 
 
 # ------------------------------------------------------------ Instagram Graph
@@ -331,7 +395,7 @@ def process_kind(kind, rec, plan, sheet, graph, dry):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--dry-run", action="store_true", help="sheet'e yazma, yayinlama; ne yapacagini goster")
+    ap.add_argument("--dry-run", action="store_true", help="sheet'e ve token dosyasina yazma, yayinlama")
     ap.add_argument("--date", help="YYYY-MM-DD (varsayilan: bugun, Europe/Istanbul)")
     ap.add_argument("--only", help="virgullu tur listesi: reel,carousel,story")
     a = ap.parse_args()
@@ -350,12 +414,9 @@ def main():
     rec = todays[0]
     log(f"satir {rec['_row']}: D{rec['GUN']:02d} {rec['PAIR']} | reel/story {rec['EDITION']} | carousel {rec['CAROUSEL_EDITION']}")
 
-    token, uid = os.environ.get("IG_TOKEN", ""), os.environ.get("IG_USER_ID", "")
-    if not a.dry_run and not (token and uid):
-        raise SystemExit("HATA: IG_TOKEN / IG_USER_ID yok (gercek yayin icin zorunlu).")
-    if a.dry_run and not (token and uid):
-        log("not: IG_TOKEN/IG_USER_ID tanimsiz; dry-run Graph API'ye dokunmaz.")
-    graph = Graph(token, uid) if (token and uid) else None
+    token, uid, tinfo = load_ig_identity(a.dry_run)
+    log(f"IG kimligi: ig_id {uid[:4]}… | {tinfo}")
+    graph = Graph(token, uid)
 
     results = {k: process_kind(k, rec, plan, sheet, graph, a.dry_run) for k in kinds}
     log("-" * 60)
@@ -365,6 +426,7 @@ def main():
     if gh:
         with open(gh, "a", encoding="utf-8") as f:
             f.write(f"## IG publish {today} — D{rec['GUN']:02d} {rec['PAIR']} ({'dry-run' if a.dry_run else 'yayin'})\n\n"
+                    f"IG token: {tinfo}\n\n"
                     "| Tur | Sonuc |\n|---|---|\n" + "".join(f"| {k} | {v} |\n" for k, v in results.items()))
     if "PENDING" in results.values():
         log("UYARI: PENDING kalmis tur var; container_id ile Graph API'den durumu kontrol et.")

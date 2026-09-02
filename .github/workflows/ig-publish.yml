@@ -77,8 +77,7 @@ jobs:
 
       - name: Yayinla
         env:
-          IG_TOKEN: ${{ secrets.IG_TOKEN }}
-          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          # Instagram kimligi Drive TEMP/ig_token.json'dan (rclone); GitHub secret yok.
           IG_PLAN_SHEET_ID: 1Cg--wybFqdCON9XCE-xF3F9FTiE5n6gIDnzJcpFdYhY
           MEDIA_BASE: https://caliserdar-maker.github.io/astrolove-media
           DRY_RUN: ${{ github.event_name == 'schedule' && 'false' || inputs.dry_run }}
