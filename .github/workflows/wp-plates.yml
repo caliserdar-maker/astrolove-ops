@@ -1,0 +1,110 @@
+name: wp-plates
+
+# 16 temiz plaka (edisyon x cihaz): taban = canli pilot FINAL_V2/CANCER_LIBRA,
+# murekkep maskesi ici = 78 OPTIMIZED 3X4 posterin medyani (afin hizali,
+# yerel ton eslestirme, 24 px feather). Edisyon basina paralel is.
+# Cikti: Drive TEMP/WP_PLATES/PLATE_<EDISYON>_<CIHAZ>.png + qc/. Etsy'ye dokunmaz.
+
+on:
+  workflow_dispatch:
+    inputs:
+      editions:
+        description: "Edisyonlar (virgullu)"
+        required: true
+        default: "Champagne_Ivory,Warm_Parchment,Midnight_Blue,Deep_Black"
+      out_dir:
+        description: "Drive cikti klasoru (ASTROLOVE altinda)"
+        required: true
+        default: "TEMP/WP_PLATES"
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.m.outputs.matrix }}
+    steps:
+      - id: m
+        run: |
+          eds='${{ inputs.editions }}'
+          echo "matrix=$(python3 -c "import json,sys;print(json.dumps([e for e in '$eds'.split(',') if e]))")" >> "$GITHUB_OUTPUT"
+
+  plate:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        edition: ${{ fromJson(needs.plan.outputs.matrix) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Bagimliliklar
+        run: |
+          set -euo pipefail
+          pip install -q -r requirements.txt
+
+      - name: rclone kur
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone
+          umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+          fi
+
+      - name: Posterleri ve pilotu al
+        run: |
+          set -euo pipefail
+          ed="${{ matrix.edition }}"; up="$(echo "$ed" | tr '[:lower:]' '[:upper:]')"
+          mkdir -p _work/posters _work/pilot
+          rclone copy "gdrive:ASTROLOVE/WALL_ART/POSTERS/OPTIMIZED_FOR_PRODUCTION/$up/3X4" _work/posters \
+            --include "WA_POSTER_*_${up}_3X4.jpg" --transfers 8
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/CANCER_LIBRA" _work/pilot --include "AstroLove_Cancer_Libra_${ed}_*.jpg"
+          echo "poster: $(ls _work/posters | wc -l)  pilot: $(ls _work/pilot | wc -l)"
+          du -sh _work/posters
+
+      - name: Plakalari uret
+        run: |
+          set -euo pipefail
+          python scripts/etsy/wp_plate_pilot.py --edition "${{ matrix.edition }}" --posters _work/posters --pilot _work/pilot --out _out
+          { echo "## wp-plates: ${{ matrix.edition }}"; echo; echo '```'; cat "_out/report_${{ matrix.edition }}.json"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Drive'a yaz
+        run: |
+          set -euo pipefail
+          rclone copy _out "gdrive:ASTROLOVE/${{ inputs.out_dir }}" --include "PLATE_*.png" --include "report_*.json"
+          rclone copy _out/qc "gdrive:ASTROLOVE/${{ inputs.out_dir }}/qc"
+          rclone lsl "gdrive:ASTROLOVE/${{ inputs.out_dir }}" | grep -i "${{ matrix.edition }}" || true
+
+      - name: Artifact
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: wp-plates-${{ matrix.edition }}
+          path: |
+            _out/qc/*.jpg
+            _out/report_*.json
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
