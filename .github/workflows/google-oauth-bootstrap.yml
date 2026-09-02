@@ -1,0 +1,73 @@
+name: google-oauth-bootstrap
+
+# Tek seferlik: kendi Google OAuth istemcimizle rclone token'i alir, yeni
+# rclone.conf uretir ve base64'unu Drive'a ASTROLOVE/TEMP/rclone_new_b64.txt
+# olarak yazar. client_secret ve auth_code yalnizca run girdisidir; loga
+# hicbir sir dusmez. Sonra RCLONE_CONF_B64 secret'i bu dosyanin icerigiyle
+# guncellenir.
+
+on:
+  workflow_dispatch:
+    inputs:
+      auth_code:
+        description: "Google yetkilendirme kodu (code=...)"
+        required: true
+      client_secret:
+        description: "OAuth istemci secret'i (GOCSPX-...)"
+        required: true
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: rclone kur
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          rclone version | head -1
+
+      - name: Token al, rclone.conf uret
+        env:
+          AUTH_CODE: ${{ inputs.auth_code }}
+          CLIENT_SECRET: ${{ inputs.client_secret }}
+          CLIENT_ID: 563638674023-srqntttm0dddc60frdrocmoas38sv9q4.apps.googleusercontent.com
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p ~/.config/rclone
+          python3 - <<'PY'
+          import os, sys, json, datetime, pathlib, urllib.request, urllib.parse, urllib.error
+          cid, cs, code = os.environ["CLIENT_ID"], os.environ["CLIENT_SECRET"], os.environ["AUTH_CODE"].strip()
+          data = urllib.parse.urlencode({
+              "code": code, "client_id": cid, "client_secret": cs,
+              "redirect_uri": "http://localhost:53682/", "grant_type": "authorization_code"}).encode()
+          try:
+              with urllib.request.urlopen(urllib.request.Request(
+                      "https://oauth2.googleapis.com/token", data=data,
+                      headers={"Content-Type": "application/x-www-form-urlencoded"})) as r:
+                  tok = json.load(r)
+          except urllib.error.HTTPError as e:
+              sys.exit("HATA: token alinamadi -> " + e.read().decode(errors="replace")[:300])
+          if "refresh_token" not in tok:
+              sys.exit("HATA: yanitta refresh_token yok (prompt=consent ile yeniden yetkilendir).")
+          exp = (datetime.datetime.now(datetime.timezone.utc)
+                 + datetime.timedelta(seconds=int(tok.get("expires_in", 3600)))).isoformat().replace("+00:00", "Z")
+          token = json.dumps({"access_token": tok["access_token"], "token_type": tok.get("token_type", "Bearer"),
+                              "refresh_token": tok["refresh_token"], "expiry": exp}, separators=(",", ":"))
+          conf = f"[gdrive]\ntype = drive\nclient_id = {cid}\nclient_secret = {cs}\nscope = drive\ntoken = {token}\n"
+          p = pathlib.Path.home() / ".config/rclone/rclone.conf"
+          p.write_text(conf); p.chmod(0o600)
+          print(f"rclone.conf yazildi ({len(conf)} bayt) | refresh_token: var | access token bitis: {exp}")
+          print("verilen scope:", tok.get("scope", "?"))
+          PY
+
+      - name: Drive'i dogrula, base64'u Drive'a yaz
+        run: |
+          set -euo pipefail
+          echo "--- ASTROLOVE kok klasorleri (yeni istemciyle) ---"
+          rclone lsd gdrive:ASTROLOVE
+          base64 -w0 ~/.config/rclone/rclone.conf | rclone rcat gdrive:ASTROLOVE/TEMP/rclone_new_b64.txt
+          echo "--- yazilan dosya ---"
+          rclone lsl gdrive:ASTROLOVE/TEMP/rclone_new_b64.txt
