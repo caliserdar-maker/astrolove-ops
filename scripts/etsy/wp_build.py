@@ -324,12 +324,19 @@ def synth_texture(bg, bg_clean, dev, shape):
     return tex
 
 
+def grain(tex, sigma=25.0):
+    """Dokunun yalniz yuksek frekansi (grain); ton/vinyet F alanindan gelir.
+    Boylece poster kenari ile bant arasinda ton basamagi olusmaz."""
+    return tex - cv2.GaussianBlur(tex, (0, 0), sigma)
+
+
 def synth_canvas(bg, bg_clean, F, dev, dark_black):
-    """Kural (b) tuvali = doku + F (pilottan olculen TEK surekli parlama/vinyet
-    alani, sigma 25). DB: bant saf siyah (pilot olcumu 0,0,0)."""
+    """Kural (b) tuvali = grain(doku) + F. F = pilottan olculen TEK surekli
+    alcak frekans alani (kagit tonu, vinyet, parlama; sigma 25). DB: bant saf
+    siyah (pilot olcumu 0,0,0)."""
     H, W = F.shape[:2]
     tex = synth_texture(bg, bg_clean, dev, (H, W))
-    out = tex + F
+    out = grain(tex) + F
     if dark_black:
         out[band_mask(dev, (H, W))] = 0.0
     return out
@@ -378,7 +385,7 @@ def build_templates(pilot_pair, pilot_dir, poster_dir, bg_pairs, out_dir):
             Ap[ys0:ys1, xs0:xs1] = alpha_of(Rp[ys0 - place["y0"]:ys1 - place["y0"], xs0 - place["x0"]:xs1 - place["x0"]],
                                             bg[ys0 - place["y0"]:ys1 - place["y0"], xs0 - place["x0"]:xs1 - place["x0"]], C, t0)
             wgt = (cv2.dilate((Ap > 0.02).astype(np.uint8), np.ones((9, 9), np.uint8)) == 0).astype(np.float32)
-            F = lowpass_field(pil - tex, wgt)
+            F = lowpass_field(pil - grain(tex), wgt)
             field_save(out / "fields" / f"{ed}_{dev}_F.npy", F)
             syn = synth_canvas(bg, bg_clean, F, dev, dark_black=(ed == "Deep_Black"))
             d = np.abs(pil - syn).mean(axis=2)
