@@ -1,0 +1,75 @@
+name: pin-sample-v2
+
+# Pinterest pin gorseli YENIDEN TASARIM ornegi: tek ilan, 4 varyant
+# (V1 ana + overlay, V1b overlaysiz, V2 hediye, V3 dekor) + kontak sayfasi +
+# filigran yakin cekimi. Kaynak LISTING_MEDIA/MOCKUPS render'lari (rclone),
+# cikti TEMP/PIN_SAMPLE_V2/<PAIR>_<ED>/. Toplu uretim DEGILDIR; Pinterest'e
+# dokunmaz. Hicbir sir degeri loga dusmez.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pair:
+        description: "Cift, or. CAPRICORN_VIRGO"
+        required: true
+        default: "CAPRICORN_VIRGO"
+      edition:
+        description: "Edisyon, or. WARM_PARCHMENT"
+        required: true
+        default: "WARM_PARCHMENT"
+
+jobs:
+  sample:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Bagimliliklar
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-ebgaramond fonts-liberation fonts-dejavu-core
+          pip install -q -r requirements.txt
+
+      - name: rclone kur
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          rclone version | head -1
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then
+            echo "HATA: RCLONE_CONF_B64 secret'i tanimli degil." >&2
+            exit 1
+          fi
+          mkdir -p ~/.config/rclone
+          umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+
+      - name: Ornek pinleri uret
+        run: |
+          set -euo pipefail
+          python scripts/pinterest/build_pin_sample.py --pair "${{ inputs.pair }}" --edition "${{ inputs.edition }}"
+
+      - name: Ciktilari artifact olarak sakla
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pin-sample-v2
+          path: _out/
+          if-no-files-found: ignore
+          retention-days: 30
