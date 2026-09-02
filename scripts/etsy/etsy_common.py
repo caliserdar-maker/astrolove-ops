@@ -137,6 +137,7 @@ class Etsy:
         self.store = store
         self.calls = 0
         self.remaining = None
+        self.pace = 0.25  # sn; 5 QPS sinirinin altinda kalir
 
     def _headers(self):
         return {
@@ -155,6 +156,7 @@ class Etsy:
     def _call(self, method, path, params=None, data=None, ok404=False):
         for attempt in range(3):
             self.calls += 1
+            time.sleep(self.pace)
             r = requests.request(method, API + path, params=params, data=data,
                                  headers=self._headers(), timeout=TIMEOUT)
             rem = r.headers.get("x-remaining-today")
@@ -167,6 +169,15 @@ class Etsy:
             if r.status_code == 404 and ok404:
                 return None
             if r.status_code == 429:
+                # Kisa retry-after = saniyelik hiz siniri (5 QPS): bekle, tekrar dene.
+                # Uzun retry-after = gunluk kota: temiz cik (B61 dersi).
+                try:
+                    wait = float(r.headers.get("retry-after") or 0)
+                except ValueError:
+                    wait = 0
+                if 0 < wait <= 60 and attempt < 2:
+                    time.sleep(wait + 0.5)
+                    continue
                 raise SystemExit(
                     f"HATA: 429 kota. retry-after={r.headers.get('retry-after')}"
                 )

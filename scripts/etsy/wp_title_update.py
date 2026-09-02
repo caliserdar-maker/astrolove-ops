@@ -56,8 +56,9 @@ def new_title(pair):
     return t
 
 
-def plan_tags(tags, title):
+def plan_tags(tags, title, prefer_drop=()):
     """Eksik zorunlu tag'leri ekler. 13 doluysa dusurulecek tag:
+    (0) prefer_drop listesinde olup mevcut olanlardan ilki (Mo secimi),
     (1) tum kelimeleri yeni baslikta zaten gecen tag'lerden ilki,
     (2) yoksa listenin sonuncusu. Donus: (yeni_liste, eklenen, dusurulen)."""
     tags = [t.strip().lower() for t in tags if t and t.strip()]
@@ -67,9 +68,10 @@ def plan_tags(tags, title):
         if req in tags:
             continue
         if len(tags) >= MAX_TAGS:
+            pref = [t for t in prefer_drop if t in tags and t not in REQUIRED_TAGS]
             cand = [t for t in tags if t not in REQUIRED_TAGS
                     and all(w in title_words for w in t.split())]
-            victim = cand[0] if cand else tags[-1]
+            victim = pref[0] if pref else (cand[0] if cand else tags[-1])
             tags.remove(victim)
             dropped.append(victim)
         tags.append(req)
@@ -87,7 +89,10 @@ def main():
     g = ap.add_mutually_exclusive_group(required=True)
     g.add_argument("--dry-run", action="store_true")
     g.add_argument("--apply", action="store_true")
+    ap.add_argument("--drop", default="",
+                    help="13 doluysa once dusurulecek tag(ler), virgullu (Mo secimi)")
     a = ap.parse_args()
+    prefer_drop = [t.strip().lower() for t in a.drop.split(",") if t.strip()]
 
     keystring = os.environ.get("ETSY_API_KEY", "")
     shared = os.environ.get("ETSY_SHARED_SECRET", "")
@@ -108,7 +113,7 @@ def main():
         old_title = cur.get("title") or ""
         old_tags = list(cur.get("tags") or [])
         nt = new_title(pair)
-        tags, added, dropped = plan_tags(old_tags, nt)
+        tags, added, dropped = plan_tags(old_tags, nt, prefer_drop)
         title_change = old_title != nt
         tag_change = tags != [t.lower() for t in old_tags]
         status = "DEGISIM_YOK" if not (title_change or tag_change) else "PLANLANDI"
