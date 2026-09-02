@@ -1,0 +1,77 @@
+name: wp-measure-spec-v2
+
+# SALT OKUR. FINAL_V2/<PAIR> wallpaper dosyalarini ve ayni ciftin OPTIMIZED 3X4
+# posterlerini V2 yontemiyle olcer (yuksek gecirgen + Otsu murekkep maskesi,
+# halka/sembol/metin satirlari, Desktop yan bant metrikleri). Drive'a yazmaz.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pair:
+        description: "Cift (FINAL_V2 klasoru ve OPTIMIZED poster adi)"
+        required: true
+        default: "CANCER_LIBRA"
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Bagimliliklar
+        run: |
+          set -euo pipefail
+          pip install -q -r requirements.txt
+
+      - name: rclone kur
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone
+          umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+
+      - name: Dosyalari al
+        run: |
+          set -euo pipefail
+          mkdir -p _work/final _work/posters
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/${{ inputs.pair }}" _work/final --include "*.jpg"
+          for ed in CHAMPAGNE_IVORY MIDNIGHT_BLUE WARM_PARCHMENT DEEP_BLACK; do
+            rclone copy "gdrive:ASTROLOVE/WALL_ART/POSTERS/OPTIMIZED_FOR_PRODUCTION/$ed/3X4" _work/posters \
+              --include "WA_POSTER_${{ inputs.pair }}_${ed}_3X4.jpg" || true
+          done
+          ls -l _work/final _work/posters
+
+      - name: Olc (V2)
+        run: |
+          set -euo pipefail
+          python scripts/etsy/wp_measure_spec_v2.py --dir _work/final --posters _work/posters \
+            --json _out/spec_v2.json --md _out/spec_v2.md
+          { echo "## V2 olcum: ${{ inputs.pair }}"; echo; cat _out/spec_v2.md; } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wp-spec-v2-${{ inputs.pair }}
+          path: _out/
+          retention-days: 30
+
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
