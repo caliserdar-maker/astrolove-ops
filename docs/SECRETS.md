@@ -43,3 +43,15 @@ versiyonlanmayan bir `.env` dosyasinda tutulur.
 - Not: Drive TEMP'te `etsy_tokens.json` adli ikinci, eski bir dosya daha
   vardir (9 Agu tarihli OAuth kurulumundan). Gecerli dosya `ETSY_TOKEN.json`
   olanidir; eski dosya karistirilmamalidir.
+
+## rclone OAuth istemcisi (NOT, 2 Eylul 2026)
+
+- `RCLONE_CONF_B64` icindeki `gdrive` remote'u rclone'un PAYLASIMLI varsayilan
+  OAuth istemcisiyle (proje 202264815644) yetkilendirilmis. Sonuclari:
+  (1) Drive API dakikalik sorgu kotasi diger rclone kullanicilariyla ortak,
+  yogun listeleme (`pin_media_perms.py --scan`) 403 "Quota exceeded" alir;
+  (2) Google Docs API bu projede kapali, `start_here_append.py` 403 alir.
+- Cozum: Google Cloud'da kendi projesi + OAuth istemcisi (Drive API ve Docs
+  API acik), rclone remote'u `client_id`/`client_secret` ile yeniden
+  yetkilendirilir, yeni `rclone.conf` base64'lenip secret guncellenir.
+  Token degerleri yine yalniz secret'ta durur.
