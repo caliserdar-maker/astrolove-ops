@@ -323,9 +323,13 @@ def mode_remove(drive, a):
     keep_ids = {i["id"] for i in walk(drive, a.keep_id)}
     under = ancestry_filter(drive, a.folder_id)
     pub = drive.public_items()
-    items = [i for i in pub if i["id"] not in keep_ids and i["id"] != a.folder_id and under(i)]
-    outside = [i["name"] for i in pub if i["id"] not in keep_ids and not under(i)]
-    log(f"herkese acik oge: {len(pub)}; kok altinda ve korunan disinda: {len(items)}; kok DISINDA (dokunulmaz): {len(outside)} {outside[:5]}")
+    # Gorunurluk dizini gecikmeli olabilir: yalniz izin listesinde gercekten
+    # anyone kaydi olan ogeler ele alinir (digerleri icin API cagrisi yok).
+    live = [i for i in pub if anyone_perms(i) and i["id"] not in keep_ids and i["id"] != a.folder_id]
+    items = [i for i in live if under(i)]
+    outside = [i["name"] for i in live if not under(i)]
+    log(f"herkese acik gorunen oge: {len(pub)}; gercek anyone izni olan: {len(live)}; "
+        f"kok altinda ve korunan disinda: {len(items)}; kok DISINDA (dokunulmaz): {len(outside)} {outside[:5]}")
     skipped = 0
     for it in items:
         for p in anyone_perms(it):
@@ -346,7 +350,7 @@ def mode_remove(drive, a):
     root2 = drive.get(a.folder_id)
     top2 = {c["name"]: c for c in drive.children(a.folder_id)}
     keep2 = drive.get(a.keep_id)
-    left = [i["name"] for i in drive.public_items() if i["id"] not in keep_ids and under(i) and anyone_perms(i)]
+    left = [i["name"] for i in drive.public_items() if anyone_perms(i) and i["id"] not in keep_ids and under(i)]
     checks = [(f"{root2['name']} (kok) anyone", roles(root2))]
     checks += [(f"{n} anyone", roles(top2[n])) for n in REPORT_NAMES if n in top2]
     checks.append((f"Drive'da kalan herkese-acik oge (korunan haric)", f"{len(left)} {left[:5] if left else ''}"))
