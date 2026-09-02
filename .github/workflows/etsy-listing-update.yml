@@ -1,13 +1,24 @@
-name: etsy-title-update
+name: etsy-listing-update
 
-# Wallpaper ilanlarinin basligini yeni sablona ceker ve zorunlu tag'leri
-# kontrol eder. dry_run=true (varsayilan) YALNIZ OKUR ve eski/yeni tabloyu
-# job summary + CSV olarak verir. dry_run=false ETSY'YE YAZAR (updateListing
-# PATCH) - yalnizca Mo onayindan sonra tetiklenir. RU cevirilerine dokunmaz.
+# Wallpaper ilanlarinda baslik / tag / aciklama katmanlarini
+# docs/WP_LISTING_TEMPLATE.md sablonuna gore gunceller (EN: updateListing,
+# RU: listing translation). dry_run=true (varsayilan) YALNIZ OKUR ve tabloyu
+# job summary + CSV olarak verir. dry_run=false ETSY'YE YAZAR - yalnizca Mo
+# onayindan sonra, once lang=en sonra lang=ru tetiklenir.
 
 on:
   workflow_dispatch:
     inputs:
+      layer:
+        description: "Katman"
+        type: choice
+        options: [all, title, tags, description]
+        default: all
+      lang:
+        description: "Dil katmani"
+        type: choice
+        options: [en, ru, both]
+        default: en
       dry_run:
         description: "true = yalniz raporla; false = Etsy'ye YAZ (onay gerekir)"
         type: boolean
@@ -16,19 +27,15 @@ on:
         description: "Cift,listing_id CSV'si (Drive, ASTROLOVE altinda)"
         required: true
         default: "TEMP/WA_WP_DRAFTS_STATE.csv"
-      drop_tag:
-        description: "13 tag doluysa once dusurulecek tag (bos = otomatik kural: kelimeleri baslikta gecen ilk tag)"
-        required: false
-        default: ""
 
 concurrency:
   group: etsy-token
   cancel-in-progress: false
 
 jobs:
-  titles:
+  update:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
 
     steps:
       - name: Checkout
@@ -71,7 +78,7 @@ jobs:
           test -s _work/ETSY_TOKEN.json && test -s _work/state.csv
           echo "Durum dosyasi: $(wc -l < _work/state.csv) satir."
 
-      - name: Basliklari isle
+      - name: Ilanlari isle
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
@@ -80,11 +87,13 @@ jobs:
         run: |
           set -euo pipefail
           if [ "${{ inputs.dry_run }}" = "true" ]; then
-            python scripts/etsy/wp_title_update.py --state _work/state.csv --out _out/title.csv --dry-run --drop "${{ inputs.drop_tag }}"
+            mode=--dry-run
           else
-            echo "::warning::APPLY modu: Etsy'ye yazilacak."
-            python scripts/etsy/wp_title_update.py --state _work/state.csv --out _out/title.csv --apply --drop "${{ inputs.drop_tag }}"
+            echo "::warning::APPLY modu: Etsy'ye yazilacak (lang=${{ inputs.lang }}, layer=${{ inputs.layer }})."
+            mode=--apply
           fi
+          python scripts/etsy/wp_listing_update.py --state _work/state.csv --out _out/listing.csv \
+            --layer "${{ inputs.layer }}" --lang "${{ inputs.lang }}" "$mode"
 
       - name: Yenilenen token'i Drive'a geri yaz
         if: ${{ always() }}
@@ -101,17 +110,17 @@ jobs:
         if: ${{ always() }}
         run: |
           set -euo pipefail
-          [ -f _out/title.csv ] || exit 0
+          [ -f _out/listing.csv ] || exit 0
           mode=$([ "${{ inputs.dry_run }}" = "true" ] && echo DRYRUN || echo APPLY)
           stamp=$(TZ=Europe/Istanbul date +%Y%m%d_%H%M)
-          rclone copyto _out/title.csv "gdrive:ASTROLOVE/TEMP/WP_TITLE_${mode}_${stamp}.csv"
-          echo "Yazildi: TEMP/WP_TITLE_${mode}_${stamp}.csv"
+          rclone copyto _out/listing.csv "gdrive:ASTROLOVE/TEMP/WP_LISTING_${mode}_${{ inputs.lang }}_${stamp}.csv"
+          echo "Yazildi: TEMP/WP_LISTING_${mode}_${{ inputs.lang }}_${stamp}.csv"
 
       - name: CSV artifact
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: title-csv
+          name: listing-csv-${{ inputs.lang }}
           path: _out/
           if-no-files-found: ignore
           retention-days: 30
