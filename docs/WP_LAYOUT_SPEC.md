@@ -167,3 +167,71 @@ Listing 4565911475: **active**, 3.99 USD, bolum 60120017, 6 gorsel
 (sira SET01-03-04-06-07-10Y, imza eslesmesi 6/6 skor 1.000), 1 video
 (840266730), 5 dijital dosya (4 ZIP + PDF). Bulgu: rank 3 (SET04)
 2048x1536, digerleri 3000x2250; B93 madde 4 standardi 3000x2250.
+
+## 7. V2 olcum sonuclari (wp-measure-spec-v2, kosu 33610791689, 2 Eyl 08:50 UTC)
+
+Yontem: yuksek gecirgen filtre (gri - 1/8 olcekli medyan arka plan) + Otsu
+esigi; polarite orta banttan (CI/WP acik, MB/DB koyu). 16 wallpaper + 4
+OPTIMIZED 3X4 poster ayni analizden gecti. Ham JSON: artifact
+wp-spec-v2-CANCER_LIBRA.
+
+### 7.1 Temel bulgu: her cihaz, OPTIMIZED posterin AFIN yerlesimidir
+
+Dort edisyonda murekkep bilesenleri (fuzyon 3 parca, halka yayi, isim
+satiri, 2 metin satiri) piksel duzeyinde AYNI koordinatlarda cikti; yalniz
+renk degisiyor. Poster koordinatlarindan (7200x9600) cihaz koordinatlarina
+en kucuk kareler uydurma (14 nokta/cihaz):
+
+| Cihaz   | Olcek s | Poster boyutu | Yatay | Dikey | Hata (maks/ort px) | Kural |
+|---------|---------|---------------|-------|-------|--------------------|-------|
+| Phone   | 0.2000  | 1440x1920     | tam genislik, x merkez %50.0 | y merkez %50.0 (ust/alt 640 px bant) | 2.7 / 0.4 | genislige sigdir, dikey ortala |
+| Tablet  | 0.2844  | 2048x2730     | tam genislik, x merkez %50.0 | ust kenar y=+182 (alt 182 px KIRPILIR), merkez %56.6 | 6.4 / 1.2 | genislige sigdir, ust 182 px bant, alt kirp |
+| Desktop | 0.2649  | 1907x2543     | x merkez %50.0 (poster genisligi = %49.7 W) | y merkez %49.9 (ust/alt ~193 px KIRPILIR) | 15.6 / 4.5 | poster genisligi = W/2, iki eksende ortala |
+| Watch   | 0.2372 (fuzyon birlesimine gore) | - | sembol merkez %50.0 | %49.8 | - | YALNIZ fuzyon sembolu, kutu 105,236,894,980 |
+
+Poster referans kutulari (CI OPTIMIZED, 7200x9600; DB/MB/WP +-15 px ayni):
+fuzyon ust 1965,1939,5261,3456 | orta 1934,3153,5153,4567 | alt
+2093,3672,5241,5081 | halka yayi 921,1147,6279,4922 (acik yay, tam cember
+degil) | isim satiri 2011,6110,5446,6691 | satir 2 1584,7061,5606,7334 |
+satir 3 2505,8223,4711,8450.
+
+Murekkep renkleri (poster = wallpaper, birebir; yeniden renklendirme YOK):
+CI 95,59,29 | WP 139,81,25 | MB 244,184,63 | DB 244,183,62.
+
+### 7.2 Watch: 4 edisyonda SEMBOL-ONLY, tutarli (V1 bulgusu GECERSIZ)
+
+V2'de her Watch dosyasi tam 3 bilesen (fuzyonun 3 parcasi) icerir; halka,
+glif, isim, tagline YOK. Birlesim kutusu: CI 105,236,894,980 | DB
+108,236,889,975 | MB 104,236,894,982 | WP 105,236,894,979 (merkez %50 /
+%49.8, genislik %78-79). V1'in "MB Watch'ta 3:4 tam poster" bulgusu
+gradyan zeminin parlak bolgesiydi; murekkep degildi. Karar 5a-3 icin
+YENIDEN URETIM GEREKMEZ; pilot dosyalar B93 kuralina uyuyor.
+
+### 7.3 Tagline: POSTERIN ICINDE (ayri katman degil)
+
+Posterde 3 metin satiri var: isimler (%66.7 H), satir 2 (%75.0 H, genislik
+%55.9, 12-16 bilesen = "TWO SOULS · ONE BOND" deseni), satir 3 (%86.8 H,
+genislik %30.6, 26-34 bilesen). Uc satir da 12 wallpaper dosyasinda ayni
+afin donusumle ayni yerde (Phone %60.0/%65.0/%72.1; Tablet %73.3/%81.6/
+%93.5; Desktop %69.6/%79.4/%93.5). Ayri basilan metin yok; kural 5a-4
+icin sonuc: secenek (a), tagline poster ile gelir.
+
+### 7.4 Desktop yan bantlar (poster disi alan) - kesit olcumleri
+
+Poster disinda kalan alan: Desktop x 0-966 ve 2873-3840 (edisyondan
+bagimsiz); Phone y 0-640 ve 2560-3200; Tablet y 0-182.
+
+| Edisyon | bant genisligi (luma esik) | ayna korelasyonu | dogrudan korelasyon | keskinlik bant/ic | luma dis kenar -> ic | renk sapmasi |
+|---------|---------------------------|------------------|---------------------|-------------------|---------------------|--------------|
+| CI      | 270 / 274 px              | -0.86 / -0.84    | +0.87 / +0.88       | 1.31 / 1.31       | 171 -> 194 (kagit 219) | 5-12 |
+| WP      | 333 / 243 px              | -0.43 / -0.45    | +0.47 / +0.46       | 1.30 / 1.35       | 72 -> 131 (kagit 194)  | 20-31 (parsomen dokusu) |
+| MB      | 1208 px (yavas gradyan)   | -0.09            | +0.09               | 0.007             | 21 -> 42 (kagit 46)    | 2-17 |
+| DB      | siyah                     | -                | -                   | -                 | 0                      | 2-3 |
+
+Okuma: ayna korelasyonu NEGATIF, dogrudan korelasyon POZITIF -> bant
+posterin yansitilmis kopyasi DEGIL; kenardan ice dogru monoton aydinlanan
+bir gradyan. Keskinlik orani ~1.3 (CI, WP) -> bant bulanik degil, kagit
+dokusu (grain) korunmus. MB'de bant duz (keskinlik 0.007), gradyan zaten
+posterin gokyuzu gecisi. Sonuc: bant = posterin KAGIT DOKUSUNUN
+uzatilmasi + kenara dogru koyulasan vinyet (CI kenar/kagit 0.78, WP 0.37,
+MB 0.46). Ayna (a) ELENIR; uzatma + vinyet (b) olculen desene uyar.
