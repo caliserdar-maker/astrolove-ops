@@ -1,0 +1,83 @@
+==================================================================
+B95 - WALLPAPER: PILOT YAYINDA, TOKEN SAHIBI, VERIFY, LAYOUT SPEC,
+      3 KATMAN ILAN GUNCELLEMESI (1-2 Eyl 2026)
+==================================================================
+(B94 numarasi ayni gun Pinterest oturumunda kullanildi; bu kayit B95.)
+
+PILOT YAYINI (1 Eyl 2026, ayri oturum; kayit burada):
+- Cancer_Libra wallpaper ilani 4565911475 yayinlandi (state active,
+  3.99 USD, bolum Couple Wallpapers 60120017). 6 galeri gorseli
+  (SET01-03-04-06-07-10Y), 1 video (840266730), 5 dijital dosya
+  (4 edisyon ZIP + HOW_TO_SET_YOUR_WALLPAPER.pdf). Diger 77 ilan taslak,
+  medyasiz.
+- MOCKUP_V2/CANCER_LIBRA altina 6 *_FINAL.jpg yazildi (1 Eyl 14:31 UTC).
+  BULGU: SET04_FINAL 2048x1536, digerleri 3000x2250 (B93 standardi
+  3000x2250). Duzeltme AYRI IS, yapilmadi.
+
+KARAR 1 - ETSY TOKEN SAHIBI (1 Eyl):
+- Drive TEMP/ETSY_TOKEN.json TEK KAYNAK. GitHub Actions workflow'lari
+  rclone ile okur, access token'i yeniler, yeni refresh token'i ayni
+  dosyaya GERI YAZAR (is basarisiz olsa bile, always adimi).
+- GitHub secret ETSY_REFRESH_TOKEN KULLANILMAZ; ETSY_API_KEY,
+  ETSY_SHARED_SECRET, ETSY_SHOP_ID sabit, secret'ta kalir.
+- Ayni anda tek Etsy kosusu (concurrency etsy-token). Kayit:
+  docs/SECRETS.md + CLAUDE.md (astrolove-ops).
+- TEMP/etsy_tokens.json (9 Agu OAuth kurulumu, ikinci zincir) ARCHIVE'a
+  tasindi (silinmedi).
+- Ilk gercek test 2 Eyl 06:33 UTC (etsy-verify): yenileme + geri yazma
+  PASS. Kalici: Colab'dan Etsy'ye baglanilmaz.
+
+KARAR 2-3 (1 Eyl): Apps Script IG zamanlayicisi kapatildi, IG yayini
+GitHub Actions'a tasiniyor. Wallpaper hattinda ChatGPT yok; tum uretim
+Actions'ta. Kural CLAUDE.md'de.
+
+DEPO (astrolove-ops, main; dogrudan push serbest, PR gerekmez):
+- scripts/etsy/etsy_common.py: ortak istemci (token deposu, GET/PATCH/
+  PUT/POST, 0.25 sn adim = 5 QPS alti, kisa 429'da bekle-tekrar, uzun
+  429'da temiz cikis, x-remaining-today takibi).
+- etsy-verify (salt okur): listing state/fiyat/gorsel sirasi (Drive
+  dosyalariyla imza eslestirme, B68 yontemi)/video/dosya; coklu ID;
+  show_text ile tag + aciklama tam metin.
+- wp-measure-spec + docs/WP_LAYOUT_SPEC.md: FINAL_V2/CANCER_LIBRA 16
+  dosya olculdu. KILIT: tuval boyutlari Phone 1440x3200, Tablet
+  2048x2732, Desktop 3840x2160, Watch 1000x1220. DB temiz okundu (siyah
+  zemin; halka %74.6 W Phone/Tablet, %37.1 W Desktop; metin blogu y
+  merkez %68.5/%81.0/%78.7; altin ~225,165,48; Watch sembol kutusu
+  106,236,895,976). ACIK: CI/MB/WP'de doku/gradyan yuzunden oge
+  kutulari okunamadi; Desktop yan bant yontemi; Watch 4 edisyonda
+  tutarsiz (MB'de 3:4 tam poster var, B93 "yalniz sembol" kuralina
+  aykiri); tagline konumu. 77 cifte gecmeden kapatilacak.
+- etsy-listing-update + docs/WP_LISTING_TEMPLATE.md: baslik + 13 tag +
+  aciklama, EN (updateListing) ve RU (listing translation) katmani,
+  dry-run/apply, geri okuma dogrulamali.
+
+ILAN GUNCELLEMESI (2 Eyl, Mo onayi):
+- Baslik (14 kelime): "<Sign1> <Sign2> Matching Couple Wallpaper,
+  4 Colors, Phone Tablet Desktop Watch, Zodiac Digital Download".
+  Etsy'nin AI baslik onerisi REDDEDILDI (renk/cihaz bilgisini
+  siliyordu).
+- Tag 13: cift + matching wallpaper, couple wallpaper, zodiac
+  wallpaper, zodiac compatibility, couple lock screen, phone wallpaper
+  set, desktop wallpaper, tablet wallpaper, watch wallpaper, astrology
+  couple, long distance couple, gift for couple. Cift tag 20'yi asan
+  2 ilanda "<sign1> love" (Capricorn_Sagittarius, Sagittarius_
+  Sagittarius).
+- Aciklama: WP_LISTING_TEMPLATE.md EN blogu; piksel degerleri
+  WP_LAYOUT_SPEC olcumuyle birebir dogrulandi.
+- EN apply sonucu: {{EN_SONUC}}
+- KALICI DERS (2 Eyl): Etsy v3 updateListing'de tags VIRGULLU TEK
+  METIN gonderilir. Tekrar eden form anahtari (tags=a&tags=b)
+  gonderilirse Etsy yalniz SONUNCUYU tutar; ilk kosuda 78 ilan tek
+  tag'e dustu, ikinci kosuda duzeltildi. Aciklama geri okumasi HTML
+  kacisli doner (&quot; &#39; &amp;), karsilastirma oncesi cozulur.
+  Geri okuma bayat olabilir: 10 sn arayla 3 deneme.
+- RU katmani: {{RU_SONUC}}
+
+ACIK ISLER:
+1. SET04 galeri gorseli 3000x2250 ile degistirilecek (ayri onay).
+2. WP_LAYOUT_SPEC bolum 5 acik isleri (olcum V2, Desktop yan bant,
+   Watch karari, tagline) - 77 cift uretimi bunlara kilitli.
+3. 77 taslagin medyasi (wallpaper 16 + galeri 6 + video + ZIP + PDF)
+   Actions hattinda uretilecek; yayin ayri onay.
+4. B59/B92/B93 acik isleri gecerli.
+SON: B95 KAPANDI.
