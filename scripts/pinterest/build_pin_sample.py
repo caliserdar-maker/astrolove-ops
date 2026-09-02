@@ -195,7 +195,7 @@ def add_band(img, lines, edition, font_reg, font_ita):
         size -= 2
     fb = ImageFont.truetype(font_reg, size)
     if small:
-        fs = ImageFont.truetype(font_ita, max(26, int(size * 0.42)))
+        fs = ImageFont.truetype(font_ita, max(30, int(size * 0.5)))
         gap = size * 0.18
         total = size + gap + fs.size
         y0 = band_h / 2 - total / 2
@@ -294,12 +294,9 @@ def main():
         rows.append((name, scene, info, f"{wm_size}pt {wm_color} lum {lum:.0f}", band_info, note or ""))
         log(f"{name}: {scene} | {info} | filigran {wm_size}pt {wm_color} | {band_info} | {note or ''}")
         if name == "V1_ANA":
-            x0, y0 = wm_box[0] - 30, wm_box[1] - 60
-            close = pin.crop((max(0, x0), max(0, y0), OUT_W, OUT_H))   # ~150x120 kose
-            side = max(close.size)
-            sq = Image.new("RGB", (side, side), (0, 0, 0))
-            sq.paste(close, (side - close.width, side - close.height))
-            sq.resize((300, 300), Image.LANCZOS).save(out / f"{tag}_FILIGRAN_YAKIN_300.jpg", "JPEG", quality=95)
+            # Sag alt 150x150 kose, 2x buyutulmus (300x300): filigran alani yakin cekimi.
+            close = pin.crop((OUT_W - 150, OUT_H - 150, OUT_W, OUT_H))
+            close.resize((300, 300), Image.LANCZOS).save(out / f"{tag}_FILIGRAN_YAKIN_300.jpg", "JPEG", quality=95)
 
     paths = [out / f"{tag}_{v[0]}.jpg" for v in VARIANTS]
     contact_sheet(paths, [v[0] for v in VARIANTS], font_reg).save(out / f"{tag}_KONTAK.jpg", "JPEG", quality=90)
