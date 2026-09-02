@@ -105,26 +105,44 @@ def otsu_thresh(vals):
     return float(t)
 
 
-def ink_mask_pilot(pilot, ed, dev, canvas_region, tol=70):
-    """Pilotun kendi murekkebi: renk yakinligi + luma Otsu (poster bolgesinde)."""
+def ink_mask_pilot(pilot, ed, dev, canvas_region, tol=70, dloc=18):
+    """Pilotun kendi murekkebi:
+    cekirdek = murekkep rengine yakin (tol) + luma Otsu (MB/DB parlak, CI/WP koyu);
+    uzanti   = yerel zeminden (medyan 51 px) >= dloc sapan pikseller (kenar
+               yumusatma, altin parlama/golge, kabartma kenari), YALNIZ
+               cekirdegin 24 px komsulugundaki bilesenler (doku benegi/lif
+               ve yildizlar disarida; MB/DB'de ayrica altin ton sarti R-B>30).
+    Poster bolgesine sinirli; kenara degen bloblar (vinyet) atilir."""
     r, g, b = INK_RGB[ed]
-    L = luma(pilot).astype(np.float32)
+    Lu = luma(pilot)
+    L = Lu.astype(np.float32)
     dist = np.sqrt(((pilot.astype(np.float32) - np.array([b, g, r], np.float32)) ** 2).sum(axis=2))
     reg = canvas_region > 0
-    t = otsu_thresh(L[reg])
-    core = (L > t) if ed in DARK else (L < t)
-    m = (core & (dist < tol) & reg).astype(np.uint8)
-    m = cv2.morphologyEx(m, cv2.MORPH_OPEN, np.ones((2, 2), np.uint8))
-    n, lab, st, _ = cv2.connectedComponentsWithStats(m)
-    keep = np.zeros_like(m)
+    t = otsu_thresh(Lu[reg])
+    core = ((L > t) if ed in DARK else (L < t)) & (dist < tol) & reg
+    bg = cv2.medianBlur(Lu, 51).astype(np.float32)
+    d = L - bg
+    if ed in DARK:
+        ext = (d > dloc) & ((pilot[..., 2].astype(np.int16) - pilot[..., 0].astype(np.int16)) > 30)
+    else:
+        ext = np.abs(d) > dloc
+    ext &= reg
+    cand = (ext | core).astype(np.uint8)
+    cand = cv2.morphologyEx(cand, cv2.MORPH_OPEN, np.ones((2, 2), np.uint8))
+    near_core = cv2.dilate(core.astype(np.uint8), np.ones((49, 49), np.uint8)) > 0
+    n, lab, st, _ = cv2.connectedComponentsWithStats(cand)
+    keep = np.zeros_like(cand)
     border = (cv2.dilate(canvas_region, np.ones((3, 3), np.uint8)) - cv2.erode(canvas_region, np.ones((3, 3), np.uint8))) > 0
     for i in range(1, n):
         if st[i, cv2.CC_STAT_AREA] < 12:
             continue
         comp = lab == i
-        if (comp & border).any():      # poster kenarina degen blob = vinyet/kose, murekkep degil
+        if not (comp & near_core).any():
+            continue
+        if (comp & border).any():
             continue
         keep[comp] = 1
+    keep |= core.astype(np.uint8)
     return keep, t
 
 
