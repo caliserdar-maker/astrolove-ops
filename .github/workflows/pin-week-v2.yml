@@ -1,9 +1,9 @@
 name: pin-week-v2
 
 # Pinterest haftalik toplu-pin CSV'si V2: gunde 12 pin (UTC 08:00-19:00,
-# saatlik), 390 pin = 33 gun, haftalik dosya 84 pin. Metin/pano/sira mevcut
-# TEMP/PIN_CSVS/WA_PIN_GUN_01..30.csv'den, Media URL PIN_MEDIA_V2 linkleri
-# (TEMP/PIN_UPLOAD_STATE_V2.csv). Cikti TEMP/PIN_CSVS_V2/WA_PIN_V2_HAFTAn_GUNxx_yy.csv
+# saatlik), 390 pin = 33 gun, haftalik dosya 84 pin. Metin kod icindeki
+# sablondan (docs/PIN_TEXT_TEMPLATE_V2.md), Media URL PIN_MEDIA_V2 linkleri
+# (TEMP/PIN_UPLOAD_STATE_V2.csv), Etsy linki TEMP/PIN_LISTING_MAP.csv. Cikti TEMP/PIN_CSVS_V2/WA_PIN_V2_HAFTAn_GUNxx_yy.csv
 # + WA_PIN_V2_PLAN_390.csv. Pinterest'e DOKUNMAZ; CSV elle yuklenir.
 
 on:
@@ -19,6 +19,10 @@ on:
         default: "2026-09-07"
       force:
         description: "Drive'da ayni adli dosya varsa uzerine yaz"
+        type: boolean
+        default: false
+      archive_v1:
+        description: "Eski TEMP/PIN_CSVS GUN/HAFTA dosyalarini ARCHIVE/PIN_CSVS_V1'e tasi (silmez)"
         type: boolean
         default: false
 
@@ -70,6 +74,7 @@ jobs:
           set -euo pipefail
           args=(--week "${{ inputs.week }}" --start-date "${{ inputs.start_date }}")
           [ "${{ inputs.force }}" = "true" ] && args+=(--force)
+          [ "${{ inputs.archive_v1 }}" = "true" ] && args+=(--archive-v1)
           python scripts/pinterest/build_week_v2.py "${args[@]}"
 
       - name: Ciktiyi artifact olarak sakla
