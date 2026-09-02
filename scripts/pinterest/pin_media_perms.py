@@ -83,8 +83,20 @@ class Drive:
                 return items
 
     def set_role(self, file_id, perm_id, role):
-        return self._call("PATCH", f"/files/{file_id}/permissions/{perm_id}",
-                          params={"fields": "id,type,role"}, json={"role": role})
+        """Rolu dusur. Izin ust klasorden miras ise Drive PATCH'i 403 ile
+        reddeder ("less than the inherited access"); o durumda miras izni
+        silinip oge "sinirli erisim"e cekilir ve ayni tipte yeni izin
+        istenen rolle olusturulur (limited access)."""
+        try:
+            return self._call("PATCH", f"/files/{file_id}/permissions/{perm_id}",
+                              params={"fields": "id,type,role"}, json={"role": role})
+        except RuntimeError as e:
+            if "403" not in str(e) or "inherited" not in str(e):
+                raise
+        self._call("DELETE", f"/files/{file_id}/permissions/{perm_id}")
+        return self._call("POST", f"/files/{file_id}/permissions",
+                          params={"fields": "id,type,role"},
+                          json={"type": "anyone", "role": role})
 
 
 def walk(drive, folder_id):
@@ -137,9 +149,15 @@ def main():
         return
 
     changed = 0
-    # Once klasorler (Drive rolu altina yayar), sonra kalanlar.
-    todo.sort(key=lambda t: 0 if t[0]["mimeType"] == FOLDER_MIME else 1)
-    for it, p in todo:
+    # Once kok klasor (Drive rolu altina yayar), sonra yeniden tarayip kalanlar.
+    for p in anyone_perms(items[0]):
+        if p["role"] != TARGET_ROLE:
+            drive.set_role(items[0]["id"], p["id"], TARGET_ROLE)
+            changed += 1
+    rest = [(it, p) for it in walk(drive, a.folder_id)[1:] for p in anyone_perms(it) if p["role"] != TARGET_ROLE]
+    log(f"kok sonrasi kalan: {len(rest)}")
+    rest.sort(key=lambda t: 0 if t[0]["mimeType"] == FOLDER_MIME else 1)
+    for it, p in rest:
         drive.set_role(it["id"], p["id"], TARGET_ROLE)
         changed += 1
     log(f"guncellenen izin: {changed}")
