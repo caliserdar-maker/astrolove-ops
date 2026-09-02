@@ -1,0 +1,108 @@
+name: etsy-image-replace
+
+# Tek listing gorselini Drive'daki dosyayla degistirir (ayni rank).
+# dry_run=true (varsayilan) yalniz okur: dosya boyutu + mevcut galeri.
+# dry_run=false ETSY'YE YAZAR (yukle -> kararlilik -> eski sil) - onay gerekir.
+
+on:
+  workflow_dispatch:
+    inputs:
+      listing_id:
+        description: "Listing ID"
+        required: true
+        default: "4565911475"
+      rank:
+        description: "Degistirilecek galeri sirasi (1-12)"
+        required: true
+        default: "3"
+      file:
+        description: "Yeni gorsel (Drive, ASTROLOVE altinda tam yol)"
+        required: true
+        default: "WALLPAPER/MOCKUP_V2/CANCER_LIBRA/WA_MOCKUP_V2_SET04_Cancer_Libra_FINAL.jpg"
+      min_size:
+        description: "Zorunlu boyut"
+        required: true
+        default: "3000x2250"
+      dry_run:
+        description: "true = yalniz raporla; false = Etsy'ye YAZ (onay gerekir)"
+        type: boolean
+        default: true
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  replace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Bagimliliklar
+        run: |
+          set -euo pipefail
+          pip install -q -r requirements.txt
+
+      - name: rclone kur
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone
+          umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+
+      - name: Token ve gorseli Drive'dan al
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p _work
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/${{ inputs.file }}" "_work/$(basename "${{ inputs.file }}")"
+          ls -l _work | grep -v ETSY_TOKEN
+
+      - name: Gorseli degistir
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          args=(--listing "${{ inputs.listing_id }}" --rank "${{ inputs.rank }}" \
+                --file "_work/$(basename "${{ inputs.file }}")" --min-size "${{ inputs.min_size }}")
+          if [ "${{ inputs.dry_run }}" != "true" ]; then
+            echo "::warning::APPLY modu: Etsy'ye yazilacak."
+            args+=(--apply)
+          fi
+          python scripts/etsy/wp_image_replace.py "${args[@]}"
+
+      - name: Yenilenen token'i Drive'a geri yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          if [ -f _work/ETSY_TOKEN.json.updated ]; then
+            rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json"
+            echo "Token dosyasi Drive'a geri yazildi."
+          else
+            echo "Token yenilenmedi; geri yazma yok."
+          fi
+
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone

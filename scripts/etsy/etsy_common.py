@@ -159,6 +159,35 @@ class Etsy:
     def post(self, path, data):
         return self._call("POST", path, data=data)
 
+    def delete(self, path):
+        return self._call("DELETE", path)
+
+    def post_file(self, path, files, data=None):
+        """Multipart yukleme (gorsel/dosya). Ilk denemede 400 normal olabilir
+        (B37); 3 deneme."""
+        for attempt in range(3):
+            self.calls += 1
+            time.sleep(self.pace)
+            for f in files.values():
+                try:
+                    f[1].seek(0)
+                except Exception:
+                    pass
+            r = requests.post(API + path, files=files, data=data, headers=self._headers(), timeout=180)
+            rem = r.headers.get("x-remaining-today")
+            if rem is not None:
+                self.remaining = rem
+            if r.status_code == 401 and attempt == 0:
+                self.store.refresh()
+                continue
+            if r.status_code in (200, 201):
+                return r.json()
+            if attempt < 2:
+                time.sleep(2 * (attempt + 1))
+                continue
+            raise SystemExit(f"HATA: POST(file) {path} -> {r.status_code}: {r.text[:300]}")
+        raise SystemExit(f"HATA: POST(file) {path} tekrarlar tukendi.")
+
     def _call(self, method, path, params=None, data=None, ok404=False):
         for attempt in range(3):
             self.calls += 1
@@ -190,6 +219,8 @@ class Etsy:
             if r.status_code >= 500 and attempt < 2:
                 time.sleep(2 * (attempt + 1))
                 continue
+            if r.status_code == 204:
+                return {}
             if r.status_code != 200:
                 raise SystemExit(f"HATA: {method} {path} -> {r.status_code}: {r.text[:300]}")
             return r.json()
