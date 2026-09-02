@@ -1,0 +1,67 @@
+name: start-here-append
+
+# Drive'daki START_HERE dokumaninin sonuna depodaki bir B-kaydi dosyasini
+# ekler (Google Docs API, rclone.conf token'i). Ayni numarali kayit zaten
+# varsa yazmaz. Hicbir sir degeri loga dusmez.
+
+on:
+  workflow_dispatch:
+    inputs:
+      record_file:
+        description: "Depodaki kayit dosyasi, or. docs/start_here/B94.txt"
+        required: true
+        default: "docs/start_here/B94.txt"
+      dry_run:
+        description: "Yalniz kontrol et, yazma"
+        type: boolean
+        default: false
+
+concurrency:
+  group: start-here
+  cancel-in-progress: false
+
+jobs:
+  append:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Bagimliliklar
+        run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+
+      - name: rclone kur
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          rclone version | head -1
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then
+            echo "HATA: RCLONE_CONF_B64 secret'i tanimli degil." >&2
+            exit 1
+          fi
+          mkdir -p ~/.config/rclone
+          umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+
+      - name: Kaydi ekle
+        run: |
+          set -euo pipefail
+          args=(--file "${{ inputs.record_file }}")
+          [ "${{ inputs.dry_run }}" = "true" ] && args+=(--dry-run)
+          python scripts/common/start_here_append.py "${args[@]}"
