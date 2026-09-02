@@ -1,27 +1,45 @@
 name: pin-media-perms
 
-# PIN_MEDIA klasor agacindaki "anyone" (linki olan herkes) iznini READER'a
-# ceker. B88 kosusunda rol writer kalmisti. Varsayilan dry-run (yalniz
-# rapor); apply=true ile uygular ve 3 rastgele dosyanin iznini yeniden
-# okuyup dogrular. Drive REST API'ye rclone.conf'taki token ile gidilir;
-# token maskelenir, loga yazilmaz.
+# Drive klasor agacinda "anyone" (linki olan herkes) iznini duzenler.
+#   mode=fix    : agactaki anyone iznini READER'a ceker (PIN_MEDIA icin; B88'de
+#                 writer kalmisti). Miras izinde sinirli erisim kullanir.
+#   mode=remove : agactaki anyone iznini TAMAMEN kaldirir (klasor ozel olur);
+#                 keep_id altindaki agaca dokunmaz ve onun anyone:reader
+#                 izninin mirastan bagimsiz kaldigini dogrular.
+# Varsayilan dry-run (yalniz rapor); apply=true ile uygular ve 3 rastgele
+# dosyayi yeniden okuyup dogrular; remove modunda ayrica keep agacindan bir
+# dosyanin webContentLink'ini anonim HTTP ile cekip erisimi dogrular.
+# Drive REST API'ye rclone.conf'taki token ile gidilir; token maskelenir.
 
 on:
   workflow_dispatch:
     inputs:
+      mode:
+        description: "fix (reader'a cek) | remove (anyone iznini kaldir)"
+        type: choice
+        options: [fix, remove]
+        default: fix
       apply:
         description: "Degisiklikleri uygula (false = dry-run)"
         type: boolean
         default: false
       folder_id:
-        description: "PIN_MEDIA klasor ID (bos = varsayilan)"
+        description: "Hedef klasor ID (bos = PIN_MEDIA)"
         required: false
         default: ""
+      keep_id:
+        description: "remove modunda korunacak alt agac ID (bos = PIN_MEDIA)"
+        required: false
+        default: ""
+
+concurrency:
+  group: drive-perms
+  cancel-in-progress: false
 
 jobs:
   perms:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
@@ -60,7 +78,8 @@ jobs:
       - name: Izinleri duzenle
         run: |
           set -euo pipefail
-          args=()
+          args=(--mode "${{ inputs.mode }}")
           [ "${{ inputs.apply }}" = "true" ] && args+=(--apply)
           [ -n "${{ inputs.folder_id }}" ] && args+=(--folder-id "${{ inputs.folder_id }}")
+          [ -n "${{ inputs.keep_id }}" ] && args+=(--keep-id "${{ inputs.keep_id }}")
           python scripts/pinterest/pin_media_perms.py "${args[@]}"
