@@ -74,7 +74,7 @@ def plan_tags(tags, title):
             dropped.append(victim)
         tags.append(req)
         added.append(req)
-    for t in tags:
+    for t in added:
         if len(t) > MAX_TAG_LEN:
             raise SystemExit(f"HATA: tag {t!r} {len(t)} karakter (> {MAX_TAG_LEN}).")
     return tags, added, dropped
