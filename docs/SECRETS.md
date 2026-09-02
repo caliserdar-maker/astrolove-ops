@@ -11,7 +11,8 @@ versiyonlanmayan bir `.env` dosyasinda tutulur.
 | `ETSY_SHARED_SECRET` | Etsy uygulamasinin gizli anahtari; OAuth token degisimi ve imzalama icin kullanilir. |
 | `ETSY_REFRESH_TOKEN` | KULLANILMAZ (1 Eyl 2026 karari). Etsy OAuth token zinciri Drive'daki `ASTROLOVE/TEMP/ETSY_TOKEN.json` dosyasindan yurur; asagidaki "Etsy token sahibi" bolumune bakin. Secret silinene kadar yalnizca tarihsel kayittir. |
 | `ETSY_SHOP_ID` | Islem yapilacak Etsy magazasinin sayisal kimligi. |
-| `RCLONE_CONF_B64` | Base64 ile kodlanmis `rclone.conf` icerigi; uzak depolama baglantisini calisma aninda olusturur. |
+| `RCLONE_CONF_B64` | Base64 ile kodlanmis `rclone.conf` icerigi (remote `gdrive`, kendi OAuth istemcimizle yetkilendirilmis, 2 Eyl 2026). Icindeki `client_secret` satiri bayattir; gecerli secret `GOOGLE_CLIENT_SECRET` ile calisma aninda ezilir. |
+| `GOOGLE_CLIENT_SECRET` | Kendi Google OAuth istemcimizin (proje `gen-lang-client-0835100486`) guncel secret'i. Her rclone kosusunda `RCLONE_CONFIG_GDRIVE_CLIENT_SECRET` olarak ortama yazilir ve conf'daki degeri ezer; secret Console'da sifirlaninca yalniz bu deger guncellenir, conf'a dokunulmaz. |
 | `GDRIVE_ROOT_FOLDER_ID` | Dosyalarin yazilacagi Google Drive kok klasorunun kimligi. |
 
 ## Kurallar
@@ -44,14 +45,26 @@ versiyonlanmayan bir `.env` dosyasinda tutulur.
   vardir (9 Agu tarihli OAuth kurulumundan). Gecerli dosya `ETSY_TOKEN.json`
   olanidir; eski dosya karistirilmamalidir.
 
-## rclone OAuth istemcisi (NOT, 2 Eylul 2026)
+## rclone OAuth istemcisi (KARAR, 2 Eylul 2026)
 
-- `RCLONE_CONF_B64` icindeki `gdrive` remote'u rclone'un PAYLASIMLI varsayilan
-  OAuth istemcisiyle (proje 202264815644) yetkilendirilmis. Sonuclari:
-  (1) Drive API dakikalik sorgu kotasi diger rclone kullanicilariyla ortak,
-  yogun listeleme (`pin_media_perms.py --scan`) 403 "Quota exceeded" alir;
-  (2) Google Docs API bu projede kapali, `start_here_append.py` 403 alir.
-- Cozum: Google Cloud'da kendi projesi + OAuth istemcisi (Drive API ve Docs
-  API acik), rclone remote'u `client_id`/`client_secret` ile yeniden
-  yetkilendirilir, yeni `rclone.conf` base64'lenip secret guncellenir.
-  Token degerleri yine yalniz secret'ta durur.
+- `gdrive` remote'u artik KENDI Google Cloud projemizin OAuth istemcisiyle
+  yetkilendirilmis (proje `gen-lang-client-0835100486`; Drive, Docs ve
+  Sheets API acik; scope `drive` + `documents` + `spreadsheets`, offline
+  refresh token). rclone'un paylasimli istemcisi kullanilmiyor; ortak kota
+  ve Docs API blokaji ortadan kalkti.
+- Kurulum tek seferlik `google-oauth-bootstrap` workflow'u ile yapildi ve
+  workflow sonra silindi: GitHub `workflow_dispatch` girdilerini loga acik
+  yazdigi icin `client_secret` run loguna dusmustu; log silindi, secret
+  Console'da sifirlandi, yeni deger `GOOGLE_CLIENT_SECRET` olarak eklendi.
+  DERS: sir hicbir zaman workflow girdisi olarak verilmez; yalniz GitHub
+  Secrets uzerinden gelir.
+- Refresh token `client_id`'ye baglidir, secret'a degil. Secret rotasyonunda
+  yeniden yetkilendirme GEREKMEZ: Console'da sifirla, `GOOGLE_CLIENT_SECRET`
+  secret'ini guncelle, bitti. `RCLONE_CONF_B64` degismez.
+- Her workflow'un `rclone.conf olustur` adimi `GOOGLE_CLIENT_SECRET`'i
+  `$GITHUB_ENV` uzerinden `RCLONE_CONFIG_GDRIVE_CLIENT_SECRET` olarak
+  yayar; boylece adimlardaki ve Python'dan cagrilan tum rclone komutlari
+  guncel secret'i kullanir.
+- Gecici dosya `ASTROLOVE/TEMP/rclone_new_b64.txt` (yeni conf'un base64'u)
+  secret guncellendikten sonra Drive'dan silinir; sir iceren dosya Drive'da
+  birakilmaz.
