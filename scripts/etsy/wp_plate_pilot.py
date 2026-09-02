@@ -143,7 +143,8 @@ def ink_mask_pilot(pilot, ed, dev, canvas_region, tex=None, tol=70, dloc=18):
         ext = np.abs(d) > thr             # kabartma parlamasi soluk (12)
     ext &= reg
     cand = (ext | core).astype(np.uint8)
-    cand = cv2.morphologyEx(cand, cv2.MORPH_OPEN, np.ones((2, 2), np.uint8))
+    # NOT: 2x2 acma yok — Cancer kuyruklari gibi 1 px'lik ince uclar aciliyordu (kosu 7:
+    # maskelenmemis kuyruk ucu ton halkasina giriyor -> koyu gri leke). Benek alan esigiyle (12) elenir.
     near_core = cv2.dilate(core.astype(np.uint8), np.ones((81, 81), np.uint8)) > 0
     n, lab, st, _ = cv2.connectedComponentsWithStats(cand)
     keep = np.zeros_like(cand)
@@ -158,7 +159,10 @@ def ink_mask_pilot(pilot, ed, dev, canvas_region, tex=None, tol=70, dloc=18):
             continue
         keep[comp] = 1
     keep |= core.astype(np.uint8)
-    return keep, t
+    # gevsek murekkep: aday piksellerin 8 px komsulugu; ton halkasindan dislanir (maskeye girmeyen
+    # ince uc/soluk kenar ton ortalamasini karartmasin)
+    loose = cv2.dilate(cand, np.ones((17, 17), np.uint8))
+    return keep, t, loose
 
 
 def ink_mask_median(med, ed, dloc=18, dlight=30):
@@ -202,12 +206,23 @@ def aligned_median_canvas(med_dev, dev, canvas_shape):
     return canvas, region
 
 
-def local_stats(img, w, sigma):
-    """Gauss-agirlikli yerel ortalama/std (normalize konvolusyon), kanal basina."""
+def local_stats(img, w, sigma, min_den=0.02, sigmas=(2, 4, 8)):
+    """Gauss-agirlikli yerel ortalama/std (normalize konvolusyon), kanal basina.
+    Agirlik kutlesi (den) yetersiz kalan piksellerde (genis maske ici: halkaya > ~2.5 sigma)
+    daha genis sigma'ya (x2, x4, x8) dusulur — kosu 7: den ~1e-5 -> mu rastgele -> koyu gri leke."""
     w3 = w[..., None]
     den = cv2.GaussianBlur(w, (0, 0), sigma)[..., None]
-    mu = cv2.GaussianBlur(img * w3, (0, 0), sigma) / np.maximum(den, 1e-4)
-    var = cv2.GaussianBlur((img ** 2) * w3, (0, 0), sigma) / np.maximum(den, 1e-4) - mu ** 2
+    mu = cv2.GaussianBlur(img * w3, (0, 0), sigma) / np.maximum(den, 1e-6)
+    m2 = cv2.GaussianBlur((img ** 2) * w3, (0, 0), sigma) / np.maximum(den, 1e-6)
+    for k in sigmas:
+        bad = den < min_den
+        if not bad.any():
+            break
+        den_k = cv2.GaussianBlur(w, (0, 0), sigma * k)[..., None]
+        mu_k = cv2.GaussianBlur(img * w3, (0, 0), sigma * k) / np.maximum(den_k, 1e-6)
+        m2_k = cv2.GaussianBlur((img ** 2) * w3, (0, 0), sigma * k) / np.maximum(den_k, 1e-6)
+        mu = np.where(bad, mu_k, mu); m2 = np.where(bad, m2_k, m2); den = np.where(bad, den_k, den)
+    var = m2 - mu ** 2
     return mu, np.sqrt(np.maximum(var, 1e-4))
 
 
@@ -221,7 +236,7 @@ def texture_std(img, sigma_hp=6.0, sigma_win=12.0):
 def build_plate(pilot, med_dev, ed, dev):
     F, region = aligned_median_canvas(med_dev, dev, pilot.shape)
     tex = texture_std(F)
-    ink, t = ink_mask_pilot(pilot, ed, dev, region, tex=tex)
+    ink, t, loose = ink_mask_pilot(pilot, ed, dev, region, tex=tex)
     mask = cv2.dilate(ink, np.ones((2 * DILATE_INK + 1, 2 * DILATE_INK + 1), np.uint8))
     mask &= region                              # dolgu kaynagi yalniz poster bolgesinde
     Pf = pilot.astype(np.float32); Ff = F.astype(np.float32)
@@ -239,8 +254,10 @@ def build_plate(pilot, med_dev, ed, dev):
     # (kosu 6: medyan halka/tagline parlamasi dolguya sizdi = hayalet); sigma 16 -> 13/10.
     d_in = cv2.dilate(mask, np.ones((2 * RING_IN + 1, 2 * RING_IN + 1), np.uint8))
     d_out = cv2.dilate(mask, np.ones((2 * RING_OUT + 1, 2 * RING_OUT + 1), np.uint8))
-    ring = ((d_out > 0) & (d_in == 0) & (region > 0)).astype(np.float32)
-    muP, sdP = local_stats(Pf, ring, 32.0)
+    ring = ((d_out > 0) & (d_in == 0) & (region > 0) & (loose == 0)).astype(np.float32)
+    muP, _ = local_stats(Pf, ring, 32.0)
+    hpP = Pf - cv2.GaussianBlur(Pf, (0, 0), float(HP_SIGMA))
+    _, sdP = local_stats(hpP, ring, 32.0)                        # pilot dokusu (ton egimi haric) — dolguyla ayni bant
     _, sdF = local_stats(hpF, region.astype(np.float32), 32.0)   # dolgu dokusunun yerel std'si (yogun)
     gain = np.clip(sdP / np.maximum(sdF, 1e-3), 0.15, 2.0)   # pilot zemini duzse (saat parlamasi, DB siyah) dolgu dokusu bastirilir
     Fm = hpF * gain + muP
