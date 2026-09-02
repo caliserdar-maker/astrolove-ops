@@ -13,7 +13,7 @@ butun olarak uretildi. Sahne masteri = pilot galeri dosyasinin kendisi:
 |---|---|---|
 | SET01 | WA_MOCKUP_V2_SET01_Cancer_Libra_FINAL.jpg | Phone MB, Phone CI |
 | SET03 | WA_MOCKUP_V2_SET03_Cancer_Libra_FINAL.jpg | Phone MB, DB, CI, WP |
-| SET04 | **SET01 masteri** + edisyon degisimi (DB, WP) | Phone DB, Phone WP |
+| SET04 | WA_MOCKUP_V2_SET04_Cancer_Libra_FINAL.jpg (3000, 2 Eyl onayli; SET01 sahnesinden DB+WP ile uretildi) | Phone DB, Phone WP |
 | SET06 | WA_MOCKUP_V2_SET06_Cancer_Libra_FINAL.jpg | Desktop MB (monitor), Desktop MB (laptop), Tablet MB |
 | SET07 | WA_MOCKUP_V2_SET07_Cancer_Libra_FINAL.jpg | Phone MB (Dynamic Island), Watch MB (yalniz sembol) |
 | SET10Y | WA_MOCKUP_V2_SET10_YAZILI_Cancer_Libra_FINAL.jpg | Phone MB; sag yazi alani ciftten bagimsiz, dokunulmaz |
@@ -120,8 +120,8 @@ medyan hata 0.25-0.53 px; sahne disi fark 0.10-0.12; SET04 kiyas: ekran ici
 
 ## 6. Acik
 
-- SET04 3000 onaylaninca SCENES["SET04"] masteri o dosyaya cevrilecek ve
-  MOCKUP_V2/CANCER_LIBRA'daki 2048 dosya ARCHIVE'a tasinacak.
+- SET04 3000 ONAYLANDI (2 Eyl): Etsy rank 3 = image 8514028941; master SET04
+  dosyasi; 2048 dosya ARCHIVE/WA_MOCKUP_V2_SET04_Cancer_Libra_FINAL_2048x1536_ARCHIVED_20260902.jpg.
 - Watch pilot ekrani FINAL_V2 saat dosyasindan farkli bir kaynakla basilmis
   (geometri ayni, cizgi kalinligi farkli). Relight modu bunu FINAL_V2
   cizimiyle degistirir; musterinin aldigi ZIP ile tutarli.
