@@ -1,0 +1,117 @@
+name: etsy-title-update
+
+# Wallpaper ilanlarinin basligini yeni sablona ceker ve zorunlu tag'leri
+# kontrol eder. dry_run=true (varsayilan) YALNIZ OKUR ve eski/yeni tabloyu
+# job summary + CSV olarak verir. dry_run=false ETSY'YE YAZAR (updateListing
+# PATCH) - yalnizca Mo onayindan sonra tetiklenir. RU cevirilerine dokunmaz.
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "true = yalniz raporla; false = Etsy'ye YAZ (onay gerekir)"
+        type: boolean
+        default: true
+      state_file:
+        description: "Cift,listing_id CSV'si (Drive, ASTROLOVE altinda)"
+        required: true
+        default: "TEMP/WA_WP_DRAFTS_STATE.csv"
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  titles:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Bagimliliklar
+        run: |
+          set -euo pipefail
+          pip install -q -r requirements.txt
+
+      - name: rclone kur
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          rclone version | head -1
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone
+          umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+
+      - name: Token ve durum dosyasini Drive'dan al
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p _work
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/${{ inputs.state_file }}" _work/state.csv
+          test -s _work/ETSY_TOKEN.json && test -s _work/state.csv
+          echo "Durum dosyasi: $(wc -l < _work/state.csv) satir."
+
+      - name: Basliklari isle
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            python scripts/etsy/wp_title_update.py --state _work/state.csv --out _out/title.csv --dry-run
+          else
+            echo "::warning::APPLY modu: Etsy'ye yazilacak."
+            python scripts/etsy/wp_title_update.py --state _work/state.csv --out _out/title.csv --apply
+          fi
+
+      - name: Yenilenen token'i Drive'a geri yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          if [ -f _work/ETSY_TOKEN.json.updated ]; then
+            rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json"
+            echo "Token dosyasi Drive'a geri yazildi."
+          else
+            echo "Token yenilenmedi; geri yazma yok."
+          fi
+
+      - name: CSV'yi Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _out/title.csv ] || exit 0
+          mode=$([ "${{ inputs.dry_run }}" = "true" ] && echo DRYRUN || echo APPLY)
+          stamp=$(TZ=Europe/Istanbul date +%Y%m%d_%H%M)
+          rclone copyto _out/title.csv "gdrive:ASTROLOVE/TEMP/WP_TITLE_${mode}_${stamp}.csv"
+          echo "Yazildi: TEMP/WP_TITLE_${mode}_${stamp}.csv"
+
+      - name: CSV artifact
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: title-csv
+          path: _out/
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
