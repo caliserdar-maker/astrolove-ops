@@ -178,7 +178,8 @@ def main():
         changed += 1
     log(f"guncellenen izin: {changed}")
 
-    # Yeniden tara ve dogrula.
+    # Yeniden tara ve dogrula (Drive kok iznini alta birkac saniyede yayar).
+    time.sleep(20)
     items2 = walk(drive, a.folder_id)
     after = tally(items2)
     log(f"SONRA anyone rolleri: {after}")
