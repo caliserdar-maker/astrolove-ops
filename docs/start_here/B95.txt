@@ -1,6 +1,6 @@
 ==================================================================
 B95 - WALLPAPER: PILOT YAYINDA, TOKEN SAHIBI, VERIFY, LAYOUT SPEC,
-      3 KATMAN ILAN GUNCELLEMESI (1-2 Eyl 2026)
+      3 KATMAN ILAN GUNCELLEMESI EN+RU (1-2 Eyl 2026)
 ==================================================================
 (B94 numarasi ayni gun Pinterest oturumunda kullanildi; bu kayit B95.)
 
@@ -9,7 +9,7 @@ PILOT YAYINI (1 Eyl 2026, ayri oturum; kayit burada):
   3.99 USD, bolum Couple Wallpapers 60120017). 6 galeri gorseli
   (SET01-03-04-06-07-10Y), 1 video (840266730), 5 dijital dosya
   (4 edisyon ZIP + HOW_TO_SET_YOUR_WALLPAPER.pdf). Diger 77 ilan taslak,
-  medyasiz.
+  medyasiz (gorsel 0, video 0, dosya 0).
 - MOCKUP_V2/CANCER_LIBRA altina 6 *_FINAL.jpg yazildi (1 Eyl 14:31 UTC).
   BULGU: SET04_FINAL 2048x1536, digerleri 3000x2250 (B93 standardi
   3000x2250). Duzeltme AYRI IS, yapilmadi.
@@ -29,15 +29,16 @@ KARAR 1 - ETSY TOKEN SAHIBI (1 Eyl):
 
 KARAR 2-3 (1 Eyl): Apps Script IG zamanlayicisi kapatildi, IG yayini
 GitHub Actions'a tasiniyor. Wallpaper hattinda ChatGPT yok; tum uretim
-Actions'ta. Kural CLAUDE.md'de.
+Actions'ta. Kural CLAUDE.md'de. Depoda main'e dogrudan push serbest, PR
+gerekmez; Etsy'ye yazan her adim onay bekler.
 
-DEPO (astrolove-ops, main; dogrudan push serbest, PR gerekmez):
+DEPO (astrolove-ops, main):
 - scripts/etsy/etsy_common.py: ortak istemci (token deposu, GET/PATCH/
   PUT/POST, 0.25 sn adim = 5 QPS alti, kisa 429'da bekle-tekrar, uzun
   429'da temiz cikis, x-remaining-today takibi).
 - etsy-verify (salt okur): listing state/fiyat/gorsel sirasi (Drive
   dosyalariyla imza eslestirme, B68 yontemi)/video/dosya; coklu ID;
-  show_text ile tag + aciklama tam metin.
+  show_text ile EN tag+aciklama ve RU ceviri tam metin.
 - wp-measure-spec + docs/WP_LAYOUT_SPEC.md: FINAL_V2/CANCER_LIBRA 16
   dosya olculdu. KILIT: tuval boyutlari Phone 1440x3200, Tablet
   2048x2732, Desktop 3840x2160, Watch 1000x1220. DB temiz okundu (siyah
@@ -51,11 +52,11 @@ DEPO (astrolove-ops, main; dogrudan push serbest, PR gerekmez):
   aciklama, EN (updateListing) ve RU (listing translation) katmani,
   dry-run/apply, geri okuma dogrulamali.
 
-ILAN GUNCELLEMESI (2 Eyl, Mo onayi):
+ILAN GUNCELLEMESI (2 Eyl, Mo onayi, 78 ilan = pilot + 77 taslak):
 - Baslik (14 kelime): "<Sign1> <Sign2> Matching Couple Wallpaper,
   4 Colors, Phone Tablet Desktop Watch, Zodiac Digital Download".
   Etsy'nin AI baslik onerisi REDDEDILDI (renk/cihaz bilgisini
-  siliyordu).
+  siliyordu). Eski basliklar 123-140, yeniler 100-112 karakter.
 - Tag 13: cift + matching wallpaper, couple wallpaper, zodiac
   wallpaper, zodiac compatibility, couple lock screen, phone wallpaper
   set, desktop wallpaper, tablet wallpaper, watch wallpaper, astrology
@@ -63,15 +64,32 @@ ILAN GUNCELLEMESI (2 Eyl, Mo onayi):
   2 ilanda "<sign1> love" (Capricorn_Sagittarius, Sagittarius_
   Sagittarius).
 - Aciklama: WP_LISTING_TEMPLATE.md EN blogu; piksel degerleri
-  WP_LAYOUT_SPEC olcumuyle birebir dogrulandi.
-- EN apply sonucu: {{EN_SONUC}}
-- KALICI DERS (2 Eyl): Etsy v3 updateListing'de tags VIRGULLU TEK
-  METIN gonderilir. Tekrar eden form anahtari (tags=a&tags=b)
-  gonderilirse Etsy yalniz SONUNCUYU tutar; ilk kosuda 78 ilan tek
-  tag'e dustu, ikinci kosuda duzeltildi. Aciklama geri okumasi HTML
-  kacisli doner (&quot; &#39; &amp;), karsilastirma oncesi cozulur.
-  Geri okuma bayat olabilir: 10 sn arayla 3 deneme.
-- RU katmani: {{RU_SONUC}}
+  WP_LAYOUT_SPEC olcumuyle birebir dogrulandi (adim 0).
+- EN apply: kosu 2 (07:31 UTC) baslik+aciklama 78/78 yazdi, tag'ler tek
+  tag'e dustu (asagidaki ders); kosu 3 (07:39-07:42) tag'leri duzeltti,
+  78/78 PASS. Geri okuma 6 rastgele ilanda birebir. CSV:
+  TEMP/WP_LISTING_APPLY_en_20260902_1034 ve _1042.csv.
+- RU katmani (listing translation, ru): 78/78 mevcut ceviri PUT ile
+  yeniden yazildi, 78/78 PASS (08:17-08:19 UTC, 234 cagri). Baslik
+  "<Знак1> <Знак2> парные обои для пары, 4 цвета, телефон планшет
+  компьютер часы, зодиак цифровое скачивание" (117-127 karakter);
+  13 RU tag (WP_LISTING_TEMPLATE.md); RU aciklama ayni yapida.
+  Дева (Basak) mevcut RU basliklarda zaten kullaniliyordu, degistirilmedi
+  (Mo). Geri okuma 3 ilanda birebir. CSV: TEMP/WP_LISTING_APPLY_ru_
+  20260902_1119.csv.
+- Gun sonu Etsy kotasi: ~3.960 kalan.
+
+KALICI DERSLER (2 Eyl):
+1) Etsy v3 updateListing'de tags VIRGULLU TEK METIN gonderilir. Tekrar
+   eden form anahtari (tags=a&tags=b) gonderilirse Etsy yalniz SONUNCUYU
+   tutar; 78 ilan ~8 dk tek tag'le kaldi. Ayni kural translation PUT'ta.
+2) Aciklama geri okumasi HTML kacisli doner (&quot; &#39; &amp;);
+   karsilastirma oncesi html.unescape.
+3) Yazma sonrasi tek okuma bayat olabilir: 10 sn arayla 3 deneme (B68).
+4) Google Docs API rclone'un paylasimli OAuth projesinde KAPALI (403);
+   start-here-append workflow'u kendi OAuth istemcisi kurulana kadar
+   calismaz. B-kayitlari Drive'a ayri Doc olarak birakilir, START_HERE'e
+   elle yapistirilir (B94 ile ayni yol).
 
 ACIK ISLER:
 1. SET04 galeri gorseli 3000x2250 ile degistirilecek (ayri onay).
@@ -79,5 +97,7 @@ ACIK ISLER:
    Watch karari, tagline) - 77 cift uretimi bunlara kilitli.
 3. 77 taslagin medyasi (wallpaper 16 + galeri 6 + video + ZIP + PDF)
    Actions hattinda uretilecek; yayin ayri onay.
-4. B59/B92/B93 acik isleri gecerli.
+4. Kendi Google OAuth istemcisi (Drive + Docs API) -> rclone.conf
+   yenilenir, Docs append acilir (docs/SECRETS.md notu).
+5. B59/B92/B93/B94 acik isleri gecerli.
 SON: B95 KAPANDI.
