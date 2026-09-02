@@ -77,7 +77,8 @@ def folder_id(remote_dir):
 
 # ------------------------------------------------------------------- uretim
 def pair_of(name, edition):
-    m = re.match(rf"WA_POSTER_([A-Z]+_[A-Z]+)_{edition}_2X3\.jpg$", name)
+    """'WA_POSTER_<PAIR>_<ED>_2X3.jpg' veya kisa 'PAIR.jpg' (PURE_WHITE klasoru boyle)."""
+    m = re.match(rf"WA_POSTER_([A-Z]+_[A-Z]+)_{edition}_2X3\.jpg$", name) or re.match(r"([A-Z]+_[A-Z]+)\.jpg$", name)
     return m.group(1) if m else None
 
 
