@@ -95,6 +95,16 @@ CORE_DEV = 60       # cekirdek icin morfolojik zeminden (kapama/acma 61 px) en a
                     # medianBlur 51 zemini kalin vuruslarda (Tablet/Desktop, >25 px) vurus icinde kaliyordu -> kullanilmaz.
 RING_IN, RING_OUT = 16, 64
 MEDIAN_CHUNK_ROWS = 800   # tam cozunurluk medyan: 78 x 800 x 7200 x 3 = 1.35 GB / parca
+# Dikey cizgili bant (Phone/Tablet ust-alt kenar): satir olcusu = yatay gradyan enerjisi / dikey gradyan
+# enerjisi; > BAND_RATIO olan satirlar bant (5 satir yumusatma). Olcum (pilot): CI Phone 31/33 px,
+# WP Phone 37/38 px; MB/DB Phone ve tum Tablet 0 (kenar satir oranlari 0.5-2.3).
+BAND_RATIO = 3.0
+BAND_OVERLAP = 48        # dolgu = bant + 48 px (feather tamamen bant DISINDA: bant satirlarinda alfa 1)
+BAND_FEATHER = 48        # dikey feather: bant sinirindan +48 px'e dogru 1 -> 0
+# NOT (iterasyon 1): overlap 24 / feather +-24 ile bant satirlarinin yarisi pilotun cizgili
+# satirlariyla harmanlaniyordu -> bant cizgi orani 1.5-2.8. Overlap 48 ile bant satirlari saf dolgu.
+BAND_QC_RATIO = 1.2      # QC: dolgu sonrasi bant satirlarinda cizgi orani < 1.2
+BAND_DEVICES = ("Phone", "Tablet")
 
 
 def luma(bgr):
@@ -398,6 +408,108 @@ def build_plate(pilot, med_dev, ed, dev):
     return out, mask, ink, ring, band, info
 
 
+# ------------------------------------------------------------------ dikey cizgili bant (ust/alt kenar)
+def stripe_ratio_rows(img, smooth=5):
+    """Satir basina yatay/dikey gradyan enerji orani (kenar dolgusu uzatilmis satirlarda >> 1)."""
+    L = luma(img).astype(np.float32)
+    gx = np.abs(np.diff(L, axis=1))[:-1, :]; gy = np.abs(np.diff(L, axis=0))[:, :-1]
+    r = ((gx ** 2).mean(axis=1) + 1e-3) / ((gy ** 2).mean(axis=1) + 1e-3)
+    k = smooth // 2
+    return np.convolve(np.pad(r, k, mode="edge"), np.ones(smooth) / smooth, mode="valid")
+
+
+def band_detect(pilot, thr=BAND_RATIO):
+    """Ust ve alt kenardan iceri tarama: oran > thr olan ardisik satirlar = bant. (ust_px, alt_px, oranlar)"""
+    rs = stripe_ratio_rows(pilot)
+    n = len(rs)
+    top = 0
+    while top < n and rs[top] > thr:
+        top += 1
+    bot = 0
+    while bot < n and rs[n - 1 - bot] > thr:
+        bot += 1
+    return int(top), int(bot), rs
+
+
+def cover_median(median, shape):
+    """Medyani tuval yuksekligine olcekler (INTER_AREA), genislikte ortadan kirpar (COVER)."""
+    H, W = shape[:2]
+    s = H / float(median.shape[0])
+    w = max(W, int(round(median.shape[1] * s)))
+    cov = cv2.resize(median, (w, H), interpolation=cv2.INTER_AREA)
+    x0 = (w - W) // 2
+    return cov[:, x0:x0 + W]
+
+
+def band_fill(plate, pilot, cover, ed, top, bot, overlap=BAND_OVERLAP, feather=BAND_FEATHER):
+    """Ust/alt bant + overlap satirlarini cover medyanla doldurur: medyanin dokusu (iki bant kazanc)
+    + medyanin kendi alcak frekansi (posterin kenar tonu, WP amber kenar) + pilot-medyan ofseti
+    (dolgu disindaki 16..64 px satirlardan, normalize konvolusyon) ; alfa dikeyde feather px'te
+    1 -> 0 (bant siniri +-feather/2). Donus: (plaka, bant maskesi)."""
+    H, W = plate.shape[:2]
+    out = plate.astype(np.float32)
+    Pf = pilot.astype(np.float32); Cf = cover.astype(np.float32)
+    mm = ink_mask_median(cover, ed)                       # halka ustu / tagline / isim hayaleti cover'da
+    Cf = shifted_fill(Cf, mm, None, k=48)
+    lpC = cv2.GaussianBlur(Cf, (0, 0), float(HP_SIGMA)); hpC = Cf - lpC
+    g4C = cv2.GaussianBlur(hpC, (0, 0), 4.0); fineC = hpC - g4C; midC = g4C
+    g4P = cv2.GaussianBlur(Pf, (0, 0), 4.0); fineP = Pf - g4P; midP = g4P - cv2.GaussianBlur(Pf, (0, 0), float(HP_SIGMA))
+    bmask = np.zeros((H, W), np.uint8)
+    ones = np.ones((H, W), np.float32)
+    for side, h in (("top", top), ("bot", bot)):
+        if h <= 0:
+            continue
+        fill_h = min(H, h + overlap)
+        mask = np.zeros((H, W), np.uint8)
+        ring = np.zeros((H, W), np.float32)
+        y = np.arange(H, dtype=np.float32)
+        if side == "top":
+            mask[:fill_h] = 1
+            ring[min(H, fill_h + RING_IN):min(H, fill_h + RING_OUT)] = 1
+            alpha = np.clip((fill_h - y) / float(feather), 0, 1)      # y <= h: 1 ; y = h + 48: 0
+        else:
+            mask[H - fill_h:] = 1
+            ring[max(0, H - fill_h - RING_OUT):max(0, H - fill_h - RING_IN)] = 1
+            alpha = np.clip((y - (H - fill_h)) / float(feather), 0, 1)
+        muP, _ = local_stats(Pf, ring, 32.0)
+        muT, _ = local_stats(lpC, ring, 32.0)
+        _, sdPf = local_stats(fineP, ring, 32.0); _, sdCf = local_stats(fineC, ones, 32.0, sigmas=())
+        _, sdPm = local_stats(midP, ring, 32.0); _, sdCm = local_stats(midC, ones, 32.0, sigmas=())
+        gf = np.clip(sdPf / np.maximum(sdCf, 1e-3), 0.02, 2.0); gm = np.clip(sdPm / np.maximum(sdCm, 1e-3), 0.02, 2.0)
+        Fm = fineC * gf + midC * gm + lpC + (muP - muT)
+        a = (alpha[:, None] * mask)[..., None]
+        out = out * (1 - a) + Fm * a
+        bmask |= mask
+    out = np.clip(np.round(out), 0, 255).astype(np.uint8)
+    out[bmask == 0] = plate[bmask == 0]
+    return out, bmask
+
+
+def band_qc(plate, pilot, top, bot, overlap=BAND_OVERLAP, feather=BAND_FEATHER):
+    """(a) dolgu sonrasi bant satirlarinda cizgi orani (maks) < BAND_QC_RATIO,
+    (b) harman seridinde (bant siniri +-feather/2) HF (luma - Gauss s=4) std / disaridaki 16..64 px satirlar in [0.75, 1.33].
+    Referans: pilotun bant disindaki dogal satir orani (bant+64..+164)."""
+    H = plate.shape[0]
+    rs = stripe_ratio_rows(plate); rp = stripe_ratio_rows(pilot)
+    g = luma(plate).astype(np.float32); hp = g - cv2.GaussianBlur(g, (0, 0), 4.0)
+    res = {}
+    for side, h in (("top", top), ("bot", bot)):
+        if h <= 0:
+            res[side] = dict(band_px=0)
+            continue
+        fill_h = min(H, h + overlap)
+        if side == "top":
+            band_rows = slice(0, h); blend = slice(h, fill_h); outside = slice(fill_h + RING_IN, fill_h + RING_OUT); ref = slice(h + 64, h + 164)
+        else:
+            band_rows = slice(H - h, H); blend = slice(H - fill_h, H - h); outside = slice(H - fill_h - RING_OUT, H - fill_h - RING_IN); ref = slice(H - h - 164, H - h - 64)
+        ratio_max = float(rs[band_rows].max()); ratio_ref = float(np.median(rp[ref]))
+        hf_blend = float(hp[blend].std()); hf_out = float(hp[outside].std()); hf_ratio = hf_blend / hf_out if hf_out > 0 else float("nan")
+        res[side] = dict(band_px=int(h), fill_px=int(fill_h), stripe_ratio_max=ratio_max, stripe_ratio_ref=ratio_ref,
+                         hf_blend=hf_blend, hf_outside=hf_out, hf_ratio=hf_ratio,
+                         pass_stripe=bool(ratio_max < BAND_QC_RATIO), pass_hf=bool(0.75 <= hf_ratio <= 1.33))
+    return res
+
+
 # ------------------------------------------------------------------ ink katmani (uretim adimi icin)
 def ink_layer_mask(poster, ed, tol=70):
     """Posterden (7200x9600) YALNIZ cifte ozel murekkep: sembol + glifler + isimler (+ ∞,
@@ -527,7 +639,7 @@ def main():
     cv2.imwrite(str(out / "qc" / f"MEDIAN_{ed.upper()}_qc.jpg"), mq_vis, [cv2.IMWRITE_JPEG_QUALITY, 85])
     log(f"medyan QC: eleman kutularinda murekkep {mq_px} px, {len(mq_comps)} bilesen (beklenen 0)")
     med = device_medians_from(median)
-    del median
+    median_full = median            # bant dolgusu (cover) icin tam cozunurluk medyan
     report = {}
     for dev in a.devices.split(","):
         pilot = imread(Path(a.pilot) / f"AstroLove_{a.pilot_pair}_{ed}_{dev}.jpg")
@@ -535,17 +647,32 @@ def main():
         if pilot.shape[1] != W or pilot.shape[0] != H:
             raise SystemExit(f"HATA: pilot {dev} {pilot.shape[1]}x{pilot.shape[0]}")
         plate, mask, ink, ring, band, info = build_plate(pilot, med[dev], ed, dev)
+        ink_mask = mask.copy()
+        # dikey cizgili bant (Phone/Tablet ust-alt): tespit -> cover medyanla dolgu -> QC
+        bq = {}
+        if dev in BAND_DEVICES:
+            btop, bbot, _ = band_detect(pilot)
+            if btop > 0 or bbot > 0:
+                cov = cover_median(median_full, plate.shape)
+                plate, bmask = band_fill(plate, pilot, cov, ed, btop, bbot)
+                mask = mask | bmask
+            bq = band_qc(plate, pilot, btop, bbot)
+            bq_pass = all(v.get("pass_stripe", True) and v.get("pass_hf", True) for v in bq.values())
+            log(f"  {dev:8s} bant ust {btop} px / alt {bbot} px -> " + ", ".join(
+                f"{k}: oran {v['stripe_ratio_max']:.2f} (ref {v['stripe_ratio_ref']:.2f}) HF {v['hf_ratio']:.2f}" for k, v in bq.items() if v.get('band_px', 0) > 0) + f" | {'PASS' if bq_pass else 'FAIL'}")
         diff = np.abs(plate.astype(np.int16) - pilot.astype(np.int16))
         outside = float(diff[mask == 0].max()) if (mask == 0).any() else 0.0
         band_diff = float(diff[band > 0].max()) if (band > 0).any() else 0.0
-        si, so, r = hf_ratio(plate, mask, ring)
+        si, so, r = hf_ratio(plate, ink_mask, ring)       # hayalet HF orani yalniz murekkep dolgusu icin
         name = f"PLATE_{ed.upper()}_{dev.upper()}.png"
         cv2.imwrite(str(out / name), plate, [cv2.IMWRITE_PNG_COMPRESSION, 3])
         cv2.imwrite(str(out / "qc" / f"MASK_{ed.upper()}_{dev.upper()}.png"), mask * 255)
         pts = qc_points(dev, ink, band, plate.shape)
+        if dev in BAND_DEVICES:
+            pts += [("ust kenar", (W / 2, 300)), ("alt kenar", (W / 2, H - 300))]
         qc_sheet(pilot, plate, dev, pts, out / "qc" / f"PLATE_{ed.upper()}_{dev.upper()}.jpg")
         report[dev] = dict(file=name, size=[W, H], outside_max_diff=outside, ring_band_max_diff=band_diff,
-                           hf_inside=si, hf_ring=so, hf_ratio=r, qc_points={k: [round(x), round(y)] for k, (x, y) in pts}, **info)
+                           hf_inside=si, hf_ring=so, hf_ratio=r, qc_points={k: [round(x), round(y)] for k, (x, y) in pts}, band=bq, **info)
         log(f"  {dev:8s} maske {info['mask_px']} px (murekkep {info['ink_px']}, otsu {info['otsu']:.0f}, halka bandi {info['ring_band_px']}, kesisim {info['ring_cross_px']}) | maske disi maks fark {outside:.0f} (halka {band_diff:.0f}) | HF ic/halka {si:.2f}/{so:.2f} = {r:.2f}")
     (out / f"report_{ed}.json").write_text(json.dumps(dict(edition=ed, posters=len(posters), median_file=med_path.name,
                                                              median_ink_px=mq_px, median_ink_components=mq_comps, devices=report), indent=1))
