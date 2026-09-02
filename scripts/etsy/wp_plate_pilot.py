@@ -47,6 +47,8 @@ DARK = {"Midnight_Blue", "Deep_Black"}
 REF_RING = (921, 1147, 6279, 4922)
 REF_SYMBOL = (1934, 1939, 5261, 5081)
 REF_TAGLINE = (1584, 7061, 5606, 7334)
+# murekkebin bulunabilecegi yerlesim kutulari (poster px, WP_LAYOUT_SPEC 7.1): halka kutusu, isim/tagline satirlari
+LAYOUT_BOXES = [(800, 1000, 6400, 5200), (1400, 5950, 5800, 8600)]
 DILATE_INK = 24     # maske = murekkep + 24 px
 FEATHER = 22        # alfa: murekkep+2 px'te 1, maske sinirinda 0 (24 px'lik gecis maske ICINDE)
 RING_IN, RING_OUT = 16, 64
@@ -118,7 +120,12 @@ def ink_mask_pilot(pilot, ed, dev, canvas_region, tol=70, dloc=18):
     L = Lu.astype(np.float32)
     dist = np.sqrt(((pilot.astype(np.float32) - np.array([b, g, r], np.float32)) ** 2).sum(axis=2))
     reg = canvas_region > 0
-    t = otsu_thresh(Lu[reg])
+    lay = np.zeros_like(canvas_region)
+    for (bx0, by0, bx1, by1) in LAYOUT_BOXES:
+        x0, y0 = poster_to_canvas(dev, bx0, by0); x1, y1 = poster_to_canvas(dev, bx1, by1)
+        lay[max(0, int(y0)):int(y1) + 1, max(0, int(x0)):int(x1) + 1] = 1
+    reg = reg & (lay > 0)                     # murekkep yalniz yerlesim kutularinda; vinyet/lif disarida
+    t = otsu_thresh(Lu[canvas_region > 0])
     core = ((L > t) if ed in DARK else (L < t)) & (dist < tol) & reg
     bg = cv2.medianBlur(Lu, 51).astype(np.float32)
     d = L - bg
@@ -146,24 +153,27 @@ def ink_mask_pilot(pilot, ed, dev, canvas_region, tol=70, dloc=18):
     return keep, t
 
 
-def ink_mask_median(med, ed, dloc=18):
+def ink_mask_median(med, ed, dloc=18, dlight=30):
     """Medyanin kendi murekkebi (halka, ∞, tagline; cifte ozel murekkep medyanda
     yok): yerel medyan zeminden sapma (koyu edisyon: parlak; acik: her iki yon),
     renk sarti YOK (halkanin beyaz parlamalari da dahil). 25 px genisletme."""
     Lu = luma(med)
     d = Lu.astype(np.float32) - cv2.medianBlur(Lu, 51).astype(np.float32)
-    m = ((d > dloc) if ed in DARK else (np.abs(d) > dloc * 2 / 3)).astype(np.uint8)
+    # acik edisyonda esik 30: parsomen lifleri (|d| 12-25) sabit murekkep sayilmasin
+    m = ((d > dloc) if ed in DARK else (np.abs(d) > dlight)).astype(np.uint8)
     m = cv2.morphologyEx(m, cv2.MORPH_OPEN, np.ones((2, 2), np.uint8))
     return cv2.dilate(m, np.ones((25, 25), np.uint8))
 
 
-def shifted_fill(img, mask, k=48):
+def shifted_fill(img, mask, region=None, k=48):
+    """Maske piksellerini k px kaydirilmis maske-disi (ve bolge-ici) kopyadan doldurur."""
     out = img.copy(); todo = mask.astype(bool).copy()
+    invalid = mask.astype(bool) | ((region == 0) if region is not None else False)
     for dx, dy in ((0, k), (0, -k), (k, 0), (-k, 0), (k, k), (-k, -k), (0, 2 * k), (0, -2 * k), (2 * k, 0), (-2 * k, 0)):
         if not todo.any():
             break
         src = np.roll(np.roll(img, dy, axis=0), dx, axis=1)
-        srcm = np.roll(np.roll(mask.astype(bool), dy, axis=0), dx, axis=1)
+        srcm = np.roll(np.roll(invalid, dy, axis=0), dx, axis=1)
         ok = todo & ~srcm
         out[ok] = src[ok]; todo &= ~ok
     return out
@@ -200,7 +210,7 @@ def build_plate(pilot, med_dev, ed, dev):
     mask &= region                              # dolgu kaynagi yalniz poster bolgesinde
     # medyanin kendi murekkebi (sabit ogeler) -> medyan dokusunun kaydirilmis kopyasi
     mm = ink_mask_median(F, ed) & region
-    F = shifted_fill(F, mm)
+    F = shifted_fill(F, mm, region)
     Pf = pilot.astype(np.float32); Ff = F.astype(np.float32)
     # yerel ton eslestirme: maske cevresi halkasi (16..64 px)
     d_in = cv2.dilate(mask, np.ones((2 * RING_IN + 1, 2 * RING_IN + 1), np.uint8))
