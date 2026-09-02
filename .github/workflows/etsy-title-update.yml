@@ -16,6 +16,10 @@ on:
         description: "Cift,listing_id CSV'si (Drive, ASTROLOVE altinda)"
         required: true
         default: "TEMP/WA_WP_DRAFTS_STATE.csv"
+      drop_tag:
+        description: "13 tag doluysa once dusurulecek tag (bos = otomatik kural: kelimeleri baslikta gecen ilk tag)"
+        required: false
+        default: ""
 
 concurrency:
   group: etsy-token
@@ -76,10 +80,10 @@ jobs:
         run: |
           set -euo pipefail
           if [ "${{ inputs.dry_run }}" = "true" ]; then
-            python scripts/etsy/wp_title_update.py --state _work/state.csv --out _out/title.csv --dry-run
+            python scripts/etsy/wp_title_update.py --state _work/state.csv --out _out/title.csv --dry-run --drop "${{ inputs.drop_tag }}"
           else
             echo "::warning::APPLY modu: Etsy'ye yazilacak."
-            python scripts/etsy/wp_title_update.py --state _work/state.csv --out _out/title.csv --apply
+            python scripts/etsy/wp_title_update.py --state _work/state.csv --out _out/title.csv --apply --drop "${{ inputs.drop_tag }}"
           fi
 
       - name: Yenilenen token'i Drive'a geri yaz
