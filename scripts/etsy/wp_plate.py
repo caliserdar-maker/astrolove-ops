@@ -181,9 +181,13 @@ def main():
         del posters
         plate = inpaint_shiftmap(bg, cmask * 255)
         # ikinci gecis: kalan murekkep parcalari (renk + bolge kurali)
-        near = cv2.dilate(np.maximum(cmask, pair_ink_union), np.ones((21, 21), np.uint8))
-        rmask = residual_ink_mask(plate, ed, near)
-        res_px = int((rmask > 0).sum())
+        # yalniz CI: koyu edisyonlarda (MB/DB) 2. gecis duz zeminde yama izi birakiyor
+        # (HF orani 0.97 -> 6.8), WP'de parsomen lifleri murekkep rengine yakin (8% yanlis).
+        res_px = 0
+        if ed == "Champagne_Ivory":
+            near = cv2.dilate(np.maximum(cmask, pair_ink_union), np.ones((21, 21), np.uint8))
+            rmask = residual_ink_mask(plate, ed, near)
+            res_px = int((rmask > 0).sum())
         if res_px:
             plate = inpaint_shiftmap(plate, rmask * 255)
         # guvenlik: V2 murekkep maskesi plakada
