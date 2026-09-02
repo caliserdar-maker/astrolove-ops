@@ -38,7 +38,8 @@ zaman depoya yazilmaz.
 | `drive-test` | elle | rclone ile Drive erisimini dogrular |
 | `ig-build-carousel` | elle (`edition`, `days`, `contact`) | Poster + oda render'larindan Instagram carousel slaytlarini uretir, `TEMP/IG_CAROUSEL_V2/` altina yazar; kontak sayfalarini artifact olarak verir |
 | `pin-build-v4` | elle (`edition`) | Edisyonun 78 posterini (2X3) 1000x1500'e kucultur, `LISTING_MEDIA/PIN_MEDIA_V2/<ED>/` altina yazar, klasoru anyone:reader (miras kapali) yapip dogrular, `TEMP/PIN_UPLOAD_STATE_V2.csv` ve kontak sayfasini gunceller. Filigran/mockup yok |
-| `pin-merge-week` | elle (`week`, `day_from`, `day_to`, `start_date`) | `TEMP/PIN_CSVS/WA_PIN_GUN_xx..yy.csv` dosyalarini birlestirir, Publish date doldurur (gunde 13 pin, UTC 13:00'dan 30 dk arayla), dogrular, `WA_PIN_HAFTAn_GUNxx_yy.csv` yazar. Pinterest'e dokunmaz |
+| `pin-week-v2` | elle (`week`, `start_date`, `force`) | V2 takvim: gunde 12 pin (UTC 08-19 saatlik), 33 gun, haftalik 84 pin. Metin GUN_01..30'dan, Media URL PIN_MEDIA_V2 linkleri; `TEMP/PIN_CSVS_V2/WA_PIN_V2_HAFTAn_GUNxx_yy.csv` + plan dosyasi. Pinterest'e dokunmaz |
+| `pin-merge-week` | elle (`week`, `day_from`, `day_to`, `start_date`) [ESKI hat, PIN_MEDIA linkli] | `TEMP/PIN_CSVS/WA_PIN_GUN_xx..yy.csv` dosyalarini birlestirir, Publish date doldurur (gunde 13 pin, UTC 13:00'dan 30 dk arayla), dogrular, `WA_PIN_HAFTAn_GUNxx_yy.csv` yazar. Pinterest'e dokunmaz |
 | `pin-media-perms` | elle (`mode`, `apply`, `folder_id`, `keep_id`) | `fix`: agactaki "anyone" iznini reader'a ceker; `remove`: anyone iznini kaldirir, `keep_id` agacini korur ve anonim HTTP ile dogrular. Varsayilan dry-run |
 | `start-here-append` | elle (`record_file`) | Depodaki `docs/start_here/Bnn.txt` kaydini Drive'daki START_HERE dokumaninin sonuna ekler (Docs API); ayni numara varsa yazmaz |
 | `ig-media-sync` | elle (`days`, `dry_run`) | `TEMP/IG_CAROUSEL_V2` slaytlarini `astrolove-media/carousel_v2/` olarak GitHub Pages'e iter |
