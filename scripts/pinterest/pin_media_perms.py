@@ -67,13 +67,13 @@ class Drive:
 
     def get(self, file_id):
         return self._call("GET", f"/files/{file_id}",
-                          params={"fields": "id,name,mimeType,permissions(id,type,role)"})
+                          params={"fields": "id,name,mimeType,permissions(id,type,role,view)"})
 
     def children(self, folder_id):
         items, token = [], None
         while True:
             params = {"q": f"'{folder_id}' in parents and trashed = false", "pageSize": 1000,
-                      "fields": "nextPageToken,files(id,name,mimeType,permissions(id,type,role))"}
+                      "fields": "nextPageToken,files(id,name,mimeType,permissions(id,type,role,view))"}
             if token:
                 params["pageToken"] = token
             data = self._call("GET", "/files", params=params)
@@ -98,7 +98,7 @@ class Drive:
         self._call("PATCH", f"/files/{file_id}", params={"fields": "id,inheritedPermissionsDisabled"},
                    json={"inheritedPermissionsDisabled": True})
         log(f"miras kapatildi: {file_id}")
-        direct = [p for p in self.get(file_id).get("permissions", []) if p.get("type") == "anyone"]
+        direct = anyone_perms(self.get(file_id))
         if direct:
             return self._call("PATCH", f"/files/{file_id}/permissions/{direct[0]['id']}",
                               params={"fields": "id,type,role"}, json={"role": role})
@@ -121,7 +121,9 @@ def walk(drive, folder_id):
 
 
 def anyone_perms(item):
-    return [p for p in item.get("permissions", []) if p.get("type") == "anyone"]
+    # "view" alanli kayitlar (metadata/published gorunumu) gercek erisim izni
+    # degildir; sayilmaz ve dokunulmaz.
+    return [p for p in item.get("permissions", []) if p.get("type") == "anyone" and not p.get("view")]
 
 
 def tally(items):
@@ -162,6 +164,12 @@ def main():
         if p["role"] != TARGET_ROLE:
             drive.set_role(items[0]["id"], p["id"], TARGET_ROLE)
             changed += 1
+    if not anyone_perms(drive.get(items[0]["id"])):
+        # Kokte hic "anyone" izni yok (or. miras kapatilmis): dogrudan reader ver.
+        drive._call("POST", f"/files/{items[0]['id']}/permissions", params={"fields": "id,type,role"},
+                    json={"type": "anyone", "role": TARGET_ROLE})
+        log("kok: anyone:reader eklendi")
+        changed += 1
     rest = [(it, p) for it in walk(drive, a.folder_id)[1:] for p in anyone_perms(it) if p["role"] != TARGET_ROLE]
     log(f"kok sonrasi kalan: {len(rest)}")
     rest.sort(key=lambda t: 0 if t[0]["mimeType"] == FOLDER_MIME else 1)
