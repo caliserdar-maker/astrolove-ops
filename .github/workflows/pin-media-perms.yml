@@ -31,6 +31,10 @@ on:
         description: "remove modunda korunacak alt agac ID (bos = PIN_MEDIA)"
         required: false
         default: ""
+      scan:
+        description: "remove: kok altinda dogrudan anyone izinlerini tara (yalniz rapor; agir sorgu)"
+        type: boolean
+        default: false
 
 concurrency:
   group: drive-perms
@@ -82,4 +86,5 @@ jobs:
           [ "${{ inputs.apply }}" = "true" ] && args+=(--apply)
           [ -n "${{ inputs.folder_id }}" ] && args+=(--folder-id "${{ inputs.folder_id }}")
           [ -n "${{ inputs.keep_id }}" ] && args+=(--keep-id "${{ inputs.keep_id }}")
+          [ "${{ inputs.scan }}" = "true" ] && args+=(--scan)
           python scripts/pinterest/pin_media_perms.py "${args[@]}"

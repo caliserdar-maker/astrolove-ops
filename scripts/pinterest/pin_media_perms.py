@@ -318,42 +318,30 @@ def mode_remove(drive, a):
         log(f"kok: anyone:{p['role']} izni SILINDI")
     time.sleep(20)
 
-    # Drive'da "linki olan herkes" gorunurlugundeki tum ogeleri tek sorguyla bul;
-    # korunan agac disinda kalanlarin anyone iznini sil (tum agaci gezmek kota asiyor).
+    # Artik-izin taramasi (--scan): Drive'in "linki olan herkes" gorunurluk
+    # sorgusu agirdir ve rclone'un PAYLASIMLI OAuth istemcisi dakikalik kotaya
+    # takilir; bu yuzden istege bagli ve YALNIZ RAPOR (silme yok). Kok altinda,
+    # korunan agac disinda dogrudan verilmis anyone izinleri listelenir.
     keep_ids = {i["id"] for i in walk(drive, a.keep_id)}
     under = ancestry_filter(drive, a.folder_id)
-    pub = drive.public_items()
-    # Gorunurluk dizini gecikmeli olabilir: yalniz izin listesinde gercekten
-    # anyone kaydi olan ogeler ele alinir (digerleri icin API cagrisi yok).
-    live = [i for i in pub if anyone_perms(i) and i["id"] not in keep_ids and i["id"] != a.folder_id]
-    items = [i for i in live if under(i)]
-    outside = [i["name"] for i in live if not under(i)]
-    log(f"herkese acik gorunen oge: {len(pub)}; gercek anyone izni olan: {len(live)}; "
-        f"kok altinda ve korunan disinda: {len(items)}; kok DISINDA (dokunulmaz): {len(outside)} {outside[:5]}")
-    skipped = 0
-    for it in items:
-        for p in anyone_perms(it):
-            try:
-                drive.delete_perm(it["id"], p["id"])
-                removed += 1
-                log(f"silindi: {it['name']} anyone:{p['role']}")
-            except RuntimeError as e:
-                if "403" in str(e) or "404" in str(e):
-                    skipped += 1
-                    continue
-                raise
-    log(f"silinen izin: {removed}, atlanan (miras/yok): {skipped}")
-    if skipped:
-        time.sleep(20)
+    residual = []
+    if a.scan:
+        pub = drive.public_items()
+        live = [i for i in pub if anyone_perms(i) and i["id"] not in keep_ids and i["id"] != a.folder_id]
+        residual = [f"{i['name']} anyone:{roles(i)}" for i in live if under(i)]
+        log(f"herkese acik gorunen oge: {len(pub)}; gercek anyone izni olan: {len(live)}; "
+            f"kok altinda ve korunan disinda (RAPOR, silinmedi): {len(residual)} {residual[:10]}")
+    else:
+        log("artik-izin taramasi atlandi (--scan ile istege bagli)")
 
     # Dogrulama.
     root2 = drive.get(a.folder_id)
     top2 = {c["name"]: c for c in drive.children(a.folder_id)}
     keep2 = drive.get(a.keep_id)
-    left = [i["name"] for i in drive.public_items() if anyone_perms(i) and i["id"] not in keep_ids and under(i)]
     checks = [(f"{root2['name']} (kok) anyone", roles(root2))]
     checks += [(f"{n} anyone", roles(top2[n])) for n in REPORT_NAMES if n in top2]
-    checks.append((f"Drive'da kalan herkese-acik oge (korunan haric)", f"{len(left)} {left[:5] if left else ''}"))
+    if a.scan:
+        checks.append(("kok altinda dogrudan anyone izni (korunan haric, rapor)", f"{len(residual)} {residual[:5] if residual else ''}"))
     checks.append((f"{keep2['name']} anyone", f"{roles(keep2)} miras_kapali={keep2.get('inheritedPermissionsDisabled')}"))
     keep_items = walk(drive, a.keep_id)
     checks += [(f"korunan/{n}", r) for n, r in sample_checks(drive, keep_items, a.sample)]
@@ -366,7 +354,7 @@ def mode_remove(drive, a):
     write_summary(summary_lines(title, dict(before_rows), None, checks))
 
     ok = (roles(root2) == "(yok)" and all(roles(top2[n]) == "(yok)" for n in REPORT_NAMES if n in top2)
-          and not left and roles(keep2) == TARGET_ROLE and keep2.get("inheritedPermissionsDisabled")
+          and roles(keep2) == TARGET_ROLE and keep2.get("inheritedPermissionsDisabled")
           and all(r == f"anyone:{TARGET_ROLE}" for n, r in checks if n.startswith("korunan/"))
           and st == 200 and ct.startswith("image/"))
     log("DOGRULAMA " + ("PASS" if ok else "FAIL"))
@@ -380,6 +368,7 @@ def main():
     ap.add_argument("--keep-id", default=DEFAULT_FOLDER_ID, help="remove modunda korunacak agac (varsayilan PIN_MEDIA)")
     ap.add_argument("--apply", action="store_true", help="degisiklikleri uygula (yoksa dry-run)")
     ap.add_argument("--sample", type=int, default=3, help="dogrulama icin rastgele dosya sayisi")
+    ap.add_argument("--scan", action="store_true", help="remove: kok altindaki dogrudan anyone izinlerini tara (yalniz rapor)")
     a = ap.parse_args()
     if a.mode == "remove" and a.folder_id == a.keep_id:
         sys.exit("HATA: remove modunda hedef klasor ile korunan klasor ayni olamaz")
