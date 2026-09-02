@@ -38,7 +38,7 @@ DEFAULT_FOLDER_ID = "1vFPNTyyLWqnkn0tfGP3hvNh0nlTLBNPs"
 API = "https://www.googleapis.com/drive/v3"
 FOLDER_MIME = "application/vnd.google-apps.folder"
 TARGET_ROLE = "reader"
-FIELDS = "id,name,mimeType,inheritedPermissionsDisabled,webContentLink,permissions(id,type,role,view)"
+FIELDS = "id,name,mimeType,parents,inheritedPermissionsDisabled,webContentLink,permissions(id,type,role,view)"
 # remove modunda ozellikle raporlanacak ust klasorler
 REPORT_NAMES = ("WALL_ART", "LISTING_MEDIA", "TEMP", "SCRIPTS", "WALLPAPER")
 
@@ -151,6 +151,30 @@ def walk(drive, folder_id, skip_id=None):
             if it["mimeType"] == FOLDER_MIME:
                 stack.append(it["id"])
     return out
+
+
+def ancestry_filter(drive, root_id):
+    """item -> kok klasorun altinda mi (parents zinciri, onbellekli)."""
+    cache = {root_id: True}
+
+    def under(item):
+        seen = []
+        cur = item
+        while True:
+            pid = (cur.get("parents") or [None])[0]
+            if pid is None:
+                result = False
+                break
+            if pid in cache:
+                result = cache[pid]
+                break
+            seen.append(pid)
+            cur = drive.get(pid)
+        for i in seen:
+            cache[i] = result
+        return result
+
+    return under
 
 
 def anyone_perms(item):
@@ -297,8 +321,11 @@ def mode_remove(drive, a):
     # Drive'da "linki olan herkes" gorunurlugundeki tum ogeleri tek sorguyla bul;
     # korunan agac disinda kalanlarin anyone iznini sil (tum agaci gezmek kota asiyor).
     keep_ids = {i["id"] for i in walk(drive, a.keep_id)}
-    items = [i for i in drive.public_items() if i["id"] not in keep_ids and i["id"] != a.folder_id]
-    log(f"herkese acik oge (korunan agac haric): {len(items)}")
+    under = ancestry_filter(drive, a.folder_id)
+    pub = drive.public_items()
+    items = [i for i in pub if i["id"] not in keep_ids and i["id"] != a.folder_id and under(i)]
+    outside = [i["name"] for i in pub if i["id"] not in keep_ids and not under(i)]
+    log(f"herkese acik oge: {len(pub)}; kok altinda ve korunan disinda: {len(items)}; kok DISINDA (dokunulmaz): {len(outside)} {outside[:5]}")
     skipped = 0
     for it in items:
         for p in anyone_perms(it):
@@ -319,7 +346,7 @@ def mode_remove(drive, a):
     root2 = drive.get(a.folder_id)
     top2 = {c["name"]: c for c in drive.children(a.folder_id)}
     keep2 = drive.get(a.keep_id)
-    left = [i["name"] for i in drive.public_items() if i["id"] not in keep_ids and anyone_perms(i)]
+    left = [i["name"] for i in drive.public_items() if i["id"] not in keep_ids and under(i) and anyone_perms(i)]
     checks = [(f"{root2['name']} (kok) anyone", roles(root2))]
     checks += [(f"{n} anyone", roles(top2[n])) for n in REPORT_NAMES if n in top2]
     checks.append((f"Drive'da kalan herkese-acik oge (korunan haric)", f"{len(left)} {left[:5] if left else ''}"))
