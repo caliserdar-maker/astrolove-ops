@@ -10,9 +10,13 @@ on:
   workflow_dispatch:
     inputs:
       listing_id:
-        description: "Okunacak listing ID"
+        description: "Okunacak listing ID (virgulle birden fazla olabilir)"
         required: true
         default: "4565911475"
+      show_text:
+        description: "Baslik, 13 tag ve aciklamayi summary'ye tam metin bas"
+        type: boolean
+        default: false
       expect_dir:
         description: "Beklenen galeri gorselleri (Drive, ASTROLOVE altinda). Bos = imza eslestirme yok"
         required: false
@@ -91,13 +95,16 @@ jobs:
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
           TOKEN_FILE: _work/ETSY_TOKEN.json
-          LISTING_ID: ${{ inputs.listing_id }}
-          OUT_CSV: _out/verify.csv
+          LISTING_IDS: ${{ inputs.listing_id }}
+          SHOW_TEXT: ${{ inputs.show_text && '1' || '' }}
           EXPECT_DIR: ${{ inputs.expect_dir != '' && '_work/expect' || '' }}
           EXPECT_ORDER: ${{ inputs.expect_order }}
         run: |
           set -euo pipefail
-          python scripts/etsy/verify_listing.py
+          mkdir -p _out
+          for id in ${LISTING_IDS//,/ }; do
+            LISTING_ID="$id" OUT_CSV="_out/verify_${id}.csv" python scripts/etsy/verify_listing.py
+          done
 
       # Yenilenen token, dogrulama basarisiz olsa bile GERI YAZILIR;
       # aksi halde Drive'daki refresh token gecersiz kalir (zincir kopar).
@@ -118,8 +125,11 @@ jobs:
         run: |
           set -euo pipefail
           stamp=$(TZ=Europe/Istanbul date +%Y%m%d_%H%M)
-          rclone copyto _out/verify.csv "gdrive:ASTROLOVE/TEMP/WP_VERIFY_${stamp}.csv"
-          echo "Yazildi: TEMP/WP_VERIFY_${stamp}.csv"
+          for f in _out/verify_*.csv; do
+            id=$(basename "$f" .csv); id=${id#verify_}
+            rclone copyto "$f" "gdrive:ASTROLOVE/TEMP/WP_VERIFY_${stamp}_${id}.csv"
+            echo "Yazildi: TEMP/WP_VERIFY_${stamp}_${id}.csv"
+          done
 
       - name: CSV artifact
         if: ${{ always() }}

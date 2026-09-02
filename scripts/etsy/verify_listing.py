@@ -200,6 +200,7 @@ def main():
         ("file_sizes", ";".join(str(f.get("size_bytes")) for f in file_rows)),
         ("api_calls", api.calls),
         ("x_remaining_today", api.remaining),
+        ("tags", " | ".join(listing.get("tags") or []) if os.environ.get("SHOW_TEXT") else "(SHOW_TEXT=1 ile)"),
         ("token_refreshed", store.updated),
         ("checked_at_utc", datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")),
     ]
@@ -224,6 +225,9 @@ def main():
     for m in matched:
         md.append(f"| {m['rank']} | {m['image_id']} | {m['w']}x{m['h']} | {m['match']} | "
                   f"{m['score']} | {m['second']} |")
+    if os.environ.get("SHOW_TEXT"):
+        md += ["", "**Aciklama (Etsy'den okunan):**", "", "```",
+               (listing.get("description") or ""), "```"]
     md_text = "\n".join(md)
     log(md_text)
     summary = os.environ.get("GITHUB_STEP_SUMMARY")
