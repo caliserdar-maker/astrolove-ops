@@ -149,6 +149,18 @@ esas alinir; dogrulama ACIK.
       karsilastirmasi: fark gurultu tabanina inmeden 77'ye gecilmez
       (B68 yontemi).
 
+## 5a. Kararlar (Mo, 2 Eyl 2026)
+
+| # | Konu | Karar |
+|---|---|---|
+| 1 | Olcum V2 | (a) Yuksek gecirgen filtre + Otsu ile yeniden olcum: `scripts/etsy/wp_measure_spec_v2.py`, workflow `wp-measure-spec-v2`. Sonuclar bolum 7'ye islenir. |
+| 2 | Desktop yan bant | V2 olcumde bant kesitleri alinir; ayna/uzatma karari olcumden sonra, tahminle secilmez. |
+| 3 | Watch | (a) B93 kurali KALIR: yalniz ozgun sembol. MB (gerekirse CI/WP) Watch dosyalari yeniden uretilir; pilot ZIP guncellenir. Referans kutu: DB 106,236,895,976. |
+| 4 | Tagline | (c) V2 olcumle posterin kendisinde olup olmadigi dogrulanir; sonra karar (buyuk olasilikla poster ici, ayri basilmaz). |
+| 5 | Kaynak poster | (a) POSTERS/OPTIMIZED_FOR_PRODUCTION/[ED]/3X4 (7200x9600). OHR kullanilmaz. |
+| 6 | Pilot kiyas esigi | (a) DB: ortalama mutlak fark < 1.0 ZORUNLU; CI/MB/WP: < 3.0 + Mo gozle. Esik saglanmadan 77'ye gecilmez. |
+| - | SET04 | Secenek A: 3000x2250 yeniden render, wp-mockup hattinin ILK ciktisi olarak (pilotta dogrulanir). 31 Agu dosyasi (farkli kompozisyon) ELENDI. |
+
 ## 6. Pilot Etsy durumu (etsy-verify, 2 Eyl 2026 06:33 UTC)
 
 Listing 4565911475: **active**, 3.99 USD, bolum 60120017, 6 gorsel
