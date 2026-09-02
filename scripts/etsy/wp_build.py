@@ -267,26 +267,21 @@ def field_load(path, shape):
 
 
 
-# sabit ogeler (poster px, WP_LAYOUT_SPEC 7.1): halka yayi (cember), isim satiri (∞ dahil), tagline satirlari
-CONST_RING = dict(cx=3600.0, cy=3034.5, r=2679.0, band=70)
-CONST_ROWS = [(2011, 6110, 5446, 6691), (1584, 7061, 5606, 7334), (2505, 8223, 4711, 8450)]
+def const_mask_from_db(bg_db):
+    """Sabit ogelerin (halka, ∞, tagline satirlari) maskesi: DB edisyon zemini
+    saf siyah oldugu icin uzerindeki tek murekkep sabit ogelerdir (luma > 40).
+    Ayni yerlesim 4 edisyonda ortaktir (WP_LAYOUT_SPEC 7.1). 6 px genisletilir."""
+    m = (luma(bg_db.astype(np.float32)) > 40).astype(np.uint8)
+    return cv2.dilate(m, np.ones((13, 13), np.uint8)) > 0
 
 
-def clean_bg(bg):
-    """BG'den sabit ogeleri (halka, ∞/isim satiri, tagline) kaldirir; bant doku
-    kaynagi olarak kullanilir. Maske geometrik (poster olcumleri), dolgu ayni
-    dokudan uzak kaydirmali kopya (poster 1500 px ~ cihazda 300-430 px)."""
+def clean_bg(bg, const_mask):
+    """BG'den sabit ogeleri kaldirir (bant doku kaynagi). Dolgu ayni dokudan
+    uzak kaydirmali kopya (poster 1500 px ~ cihazda 300-430 px)."""
     h, w = bg.shape[:2]
-    s = w / 7200.0
-    yy, xx = np.mgrid[0:h, 0:w]
-    d = np.sqrt((xx - CONST_RING["cx"] * s) ** 2 + (yy - CONST_RING["cy"] * s) ** 2)
-    m = np.abs(d - CONST_RING["r"] * s) < CONST_RING["band"] * s
-    for (x0, y0, x1, y1) in CONST_ROWS:
-        pad = int(40 * s)
-        m[max(0, int(y0 * s) - pad):int(y1 * s) + pad, max(0, int(x0 * s) - pad):int(x1 * s) + pad] = True
-    k = int(1500 * s)
+    k = int(1500 * w / 7200.0)
     shifts = ((0, k), (0, -k), (k, 0), (-k, 0), (k, k), (-k, -k), (0, 2 * k), (0, -2 * k))
-    return shifted_fill(bg.astype(np.float32), m, shifts)
+    return shifted_fill(bg.astype(np.float32), const_mask.copy(), shifts)
 
 
 def edge_continue(bg, dev, shape, zone=40):
@@ -300,28 +295,33 @@ def edge_continue(bg, dev, shape, zone=40):
     return bg[np.clip(ys, 0, h - 1)][:, np.clip(xs, 0, w - 1)]
 
 
-def seam_weight(dev, shape, zone=40):
-    """0 (poster icinde ve zone'dan uzak bant) .. 1 (poster kenarinin hemen disi)."""
+def seam_weights(dev, shape, z1=16, z2=64):
+    """d = poster kenarina uzaklik (disarida). wm: 0..z1 yansitilmis kenar
+    (C0 sureklilik); wt: z1..z2 arasinda doseme fazlari arasinda capraz gecis."""
     p = PLACEMENT[dev]; w, h = p["size"]; x0, y0 = p["x0"], p["y0"]; H, W = shape
     yy, xx = np.mgrid[0:H, 0:W]
     dy = np.maximum(np.maximum(y0 - yy, yy - (y0 + h - 1)), 0)
     dx = np.maximum(np.maximum(x0 - xx, xx - (x0 + w - 1)), 0)
     d = np.sqrt(dx * dx + dy * dy).astype(np.float32)
-    wgt = 1.0 - smoothstep(d, 0.0, float(zone))
-    wgt[d == 0] = 0.0
-    return wgt
+    wm = 1.0 - smoothstep(d, 0.0, float(z1)); wm[d == 0] = 0.0
+    wt = smoothstep(d, float(z1), float(z2))
+    return wm, wt
 
 
 def synth_texture(bg, bg_clean, dev, shape):
     """Kural (b) doku tuvali: poster bolgesi = BG (sabit ogeler dahil); bant =
-    TEMIZ BG'nin (sabit ogeler silinmis) periyodik uzatmasi; kenardaki 40 px
-    seritte yansitilmis temiz kenar dokusuyla capraz gecis (dikis yok)."""
+    TEMIZ BG'nin periyodik uzatmasi (ayna yok); kenarda 16 px yansitilmis
+    gecis + 16-64 px'te iki doseme fazi arasinda capraz gecis (sert dikis yok)."""
     p = PLACEMENT[dev]; w, h = p["size"]; x0, y0 = p["x0"], p["y0"]; H, W = shape
-    tex = tile_bg(bg_clean, dev, shape)
-    tex[max(0, y0):min(H, y0 + h), max(0, x0):min(W, x0 + w)] = bg[max(0, -y0):min(h, H - y0), max(0, -x0):min(w, W - x0)]
+    tile = tile_bg(bg_clean, dev, shape)
+    tile2 = np.roll(np.roll(tile, 37, axis=0), 53, axis=1)
     ext = edge_continue(bg_clean, dev, shape)
-    wgt = seam_weight(dev, shape)[..., None]
-    return tex * (1 - wgt) + ext * wgt
+    wm, wt = seam_weights(dev, shape)
+    wm = wm[..., None]; wt = wt[..., None]
+    band = tile * (1 - wt) + tile2 * wt
+    tex = ext * wm + band * (1 - wm)
+    tex[max(0, y0):min(H, y0 + h), max(0, x0):min(W, x0 + w)] = bg[max(0, -y0):min(h, H - y0), max(0, -x0):min(w, W - x0)]
+    return tex
 
 
 def synth_canvas(bg, bg_clean, F, dev, dark_black):
@@ -340,6 +340,9 @@ def build_templates(pilot_pair, pilot_dir, poster_dir, bg_pairs, out_dir):
     """Kalibrasyon: edisyon x cihaz sablonlari + BG + C + saat kutusu -> out_dir."""
     out = Path(out_dir); (out / "templates").mkdir(parents=True, exist_ok=True); (out / "bg").mkdir(exist_ok=True)
     meta = dict(pilot_pair=pilot_pair, bg_pairs=bg_pairs, editions={})
+    db_posters = [imread(Path(poster_dir) / poster_name(p, "Deep_Black")) for p in bg_pairs]
+    const_masks = {dev: const_mask_from_db(edition_bg(db_posters, place["size"], True)[0]) for dev, place in PLACEMENT.items()}
+    del db_posters
     for ed in EDITIONS:
         posters = [imread(Path(poster_dir) / poster_name(p, ed)) for p in bg_pairs]
         p_pilot = imread(Path(poster_dir) / poster_name(pilot_pair, ed))
@@ -365,7 +368,7 @@ def build_templates(pilot_pair, pilot_dir, poster_dir, bg_pairs, out_dir):
             # kural (b) alani: F = lowpass(pilot - doku) tum tuvalde (murekkep haric), TEK surekli alan
             (out / "fields").mkdir(exist_ok=True)
             Hc, Wc = pilot.shape[:2]
-            bg_clean = clean_bg(bg)
+            bg_clean = clean_bg(bg, const_masks[dev])
             cv2.imwrite(str(out / "bg" / f"{ed}_{dev}_clean.png"), np.clip(np.round(bg_clean), 0, 255).astype(np.uint8))
             tex = synth_texture(bg, bg_clean, dev, (Hc, Wc))
             bm = band_mask(dev, (Hc, Wc))
