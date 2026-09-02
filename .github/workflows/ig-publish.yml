@@ -1,0 +1,93 @@
+name: ig-publish
+
+# Gunluk Instagram yayini: WA_IG_PLAN'daki bugunun satirini REEL / CAROUSEL /
+# STORY olarak yayinlar, durum sutunlarini gunceller. Tekrar yayin korumasi
+# scriptte (PENDING -> OK/ERR, SKIP_DUP); burada ayrica concurrency kilidi.
+#
+# Zamanlanmis kosu yalniz repo degiskeni IG_PUBLISH_ENABLED=true ise calisir;
+# elle tetiklemede dry_run varsayilan olarak ACIK.
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Yalniz goster; sheet'e yazma, yayinlama"
+        type: boolean
+        default: true
+      date:
+        description: "Plan tarihi YYYY-MM-DD (bos = bugun, Europe/Istanbul)"
+        required: false
+        default: ""
+      only:
+        description: "Tur filtresi, or. reel,story (bos = hepsi)"
+        required: false
+        default: ""
+  schedule:
+    - cron: "0 6 * * *"        # 09:00 Europe/Istanbul (yil boyu UTC+3)
+
+concurrency:
+  group: ig-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: ${{ github.event_name != 'schedule' || vars.IG_PUBLISH_ENABLED == 'true' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Bagimliliklar
+        run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+
+      - name: rclone kur
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          rclone version | head -1
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then
+            echo "HATA: RCLONE_CONF_B64 secret'i tanimli degil." >&2
+            exit 1
+          fi
+          mkdir -p ~/.config/rclone
+          umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          # Yeni OAuth istemcisinin secret'i conf'daki degeri ezer (rclone env override).
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+          fi
+
+      - name: Yayinla
+        env:
+          IG_TOKEN: ${{ secrets.IG_TOKEN }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_PLAN_SHEET_ID: 1Cg--wybFqdCON9XCE-xF3F9FTiE5n6gIDnzJcpFdYhY
+          MEDIA_BASE: https://caliserdar-maker.github.io/astrolove-media
+          DRY_RUN: ${{ github.event_name == 'schedule' && 'false' || inputs.dry_run }}
+          PLAN_DATE: ${{ inputs.date }}
+          ONLY: ${{ inputs.only }}
+        run: |
+          set -euo pipefail
+          args=()
+          [ "$DRY_RUN" = "true" ] && args+=(--dry-run)
+          [ -n "${PLAN_DATE:-}" ] && args+=(--date "$PLAN_DATE")
+          [ -n "${ONLY:-}" ]      && args+=(--only "$ONLY")
+          python scripts/instagram/publish.py "${args[@]}"
