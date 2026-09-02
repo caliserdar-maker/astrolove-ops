@@ -11,6 +11,10 @@ on:
         description: "Olculecek cift klasoru (FINAL_V2 altinda)"
         required: true
         default: "CANCER_LIBRA"
+      dir:
+        description: "Istege bagli: FINAL_V2/<pair> yerine olculecek klasor (ASTROLOVE altinda tam yol)"
+        required: false
+        default: ""
 
 jobs:
   measure:
@@ -52,7 +56,8 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p _work/final
-          rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/${{ inputs.pair }}" _work/final
+          src="${{ inputs.dir }}"; [ -n "$src" ] || src="WALLPAPER/FINAL_V2/${{ inputs.pair }}"
+          rclone copy "gdrive:ASTROLOVE/$src" _work/final --include "*.jpg" --include "*.jpeg"
           ls -l _work/final
 
       - name: Olc
