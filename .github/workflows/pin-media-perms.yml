@@ -1,0 +1,66 @@
+name: pin-media-perms
+
+# PIN_MEDIA klasor agacindaki "anyone" (linki olan herkes) iznini READER'a
+# ceker. B88 kosusunda rol writer kalmisti. Varsayilan dry-run (yalniz
+# rapor); apply=true ile uygular ve 3 rastgele dosyanin iznini yeniden
+# okuyup dogrular. Drive REST API'ye rclone.conf'taki token ile gidilir;
+# token maskelenir, loga yazilmaz.
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "Degisiklikleri uygula (false = dry-run)"
+        type: boolean
+        default: false
+      folder_id:
+        description: "PIN_MEDIA klasor ID (bos = varsayilan)"
+        required: false
+        default: ""
+
+jobs:
+  perms:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Bagimliliklar
+        run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+
+      - name: rclone kur
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          rclone version | head -1
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then
+            echo "HATA: RCLONE_CONF_B64 secret'i tanimli degil." >&2
+            exit 1
+          fi
+          mkdir -p ~/.config/rclone
+          umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+
+      - name: Izinleri duzenle
+        run: |
+          set -euo pipefail
+          args=()
+          [ "${{ inputs.apply }}" = "true" ] && args+=(--apply)
+          [ -n "${{ inputs.folder_id }}" ] && args+=(--folder-id "${{ inputs.folder_id }}")
+          python scripts/pinterest/pin_media_perms.py "${args[@]}"

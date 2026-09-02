@@ -1,0 +1,86 @@
+name: pin-merge-week
+
+# Pinterest haftalik CSV: TEMP/PIN_CSVS/WA_PIN_GUN_xx..yy.csv dosyalarini
+# birlestirir, Publish date doldurur (her gun UTC 13:00'dan 30 dk arayla 13
+# pin), dogrular ve TEMP/PIN_CSVS/WA_PIN_HAFTAn_GUNxx_yy.csv olarak yazar.
+# Pinterest'e DOKUNMAZ; ciktiyi Mo Pinterest toplu pin olusturma ile elle
+# yukler. Hicbir sir degeri loga dusmez.
+
+on:
+  workflow_dispatch:
+    inputs:
+      week:
+        description: "Hafta numarasi (dosya adi HAFTAn)"
+        required: true
+        default: "2"
+      day_from:
+        description: "Ilk gun dosyasi (WA_PIN_GUN_xx)"
+        required: true
+        default: "9"
+      day_to:
+        description: "Son gun dosyasi (dahil)"
+        required: true
+        default: "15"
+      start_date:
+        description: "Ilk gunun yayin tarihi, YYYY-MM-DD (UTC)"
+        required: true
+        default: "2026-09-07"
+      force:
+        description: "Drive'da ayni adli dosya varsa uzerine yaz"
+        type: boolean
+        default: false
+
+concurrency:
+  group: pin-csvs
+  cancel-in-progress: false
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: rclone kur
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          rclone version | head -1
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then
+            echo "HATA: RCLONE_CONF_B64 secret'i tanimli degil." >&2
+            exit 1
+          fi
+          mkdir -p ~/.config/rclone
+          umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+
+      - name: Haftalik CSV birlestir
+        run: |
+          set -euo pipefail
+          args=(--week "${{ inputs.week }}" --day-from "${{ inputs.day_from }}"
+                --day-to "${{ inputs.day_to }}" --start-date "${{ inputs.start_date }}")
+          [ "${{ inputs.force }}" = "true" ] && args+=(--force)
+          python scripts/pinterest/merge_week.py "${args[@]}"
+
+      - name: Ciktiyi artifact olarak sakla
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pin-week-csv
+          path: _out/
+          if-no-files-found: ignore
+          retention-days: 30

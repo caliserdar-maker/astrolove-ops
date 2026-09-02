@@ -12,7 +12,7 @@ uzerinden veya lokalde elle calistirilabilir.
 | --- | --- |
 | `scripts/etsy/` | Etsy API scriptleri (listeleme, siparis, envanter) |
 | `scripts/instagram/` | Instagram scriptleri: `build_carousel.py` (5 slaytlik carousel uretimi) |
-| `scripts/pinterest/` | Pinterest pin ve board scriptleri |
+| `scripts/pinterest/` | Pinterest scriptleri: `merge_week.py` (haftalik toplu-pin CSV'si), `pin_media_perms.py` (PIN_MEDIA izin duzeltme) |
 | `scripts/common/` | Ortak yardimci moduller (auth, http, log) |
 | `.github/workflows/` | Zamanlanmis ve manuel GitHub Actions workflow'lari |
 | `docs/` | Dokumantasyon |
@@ -37,3 +37,5 @@ zaman depoya yazilmaz.
 | --- | --- | --- |
 | `drive-test` | elle | rclone ile Drive erisimini dogrular |
 | `ig-build-carousel` | elle (`edition`, `days`, `contact`) | Poster + oda render'larindan Instagram carousel slaytlarini uretir, `TEMP/IG_CAROUSEL_V2/` altina yazar; kontak sayfalarini artifact olarak verir |
+| `pin-merge-week` | elle (`week`, `day_from`, `day_to`, `start_date`) | `TEMP/PIN_CSVS/WA_PIN_GUN_xx..yy.csv` dosyalarini birlestirir, Publish date doldurur (gunde 13 pin, UTC 13:00'dan 30 dk arayla), dogrular, `WA_PIN_HAFTAn_GUNxx_yy.csv` yazar. Pinterest'e dokunmaz |
+| `pin-media-perms` | elle (`apply`) | PIN_MEDIA agacindaki "anyone" iznini reader'a ceker; varsayilan dry-run |
