@@ -1,0 +1,94 @@
+name: wp-mockup-calibrate
+
+# SALT OLCUM. Pilot (Cancer_Libra) galeri mockup'larindaki ekran
+# dortgenlerini olcer (SIFT+RANSAC homografi; saat: sablon), cihaz/edisyon
+# atar, paste maskelerini cikarir ve sonucu WALLPAPER/MOCKUP_V2/_CALIB
+# altina yazar (Drive; Etsy'ye dokunmaz). docs/WP_MOCKUP_PIPELINE.md.
+
+on:
+  workflow_dispatch:
+    inputs:
+      masters_dir:
+        description: "Pilot mockup klasoru (ASTROLOVE altinda)"
+        required: true
+        default: "WALLPAPER/MOCKUP_V2/CANCER_LIBRA"
+      pilot_dir:
+        description: "Pilot FINAL_V2 wallpaper klasoru"
+        required: true
+        default: "WALLPAPER/FINAL_V2/CANCER_LIBRA"
+      calib_dir:
+        description: "Kalibrasyon ciktisi (Drive)"
+        required: true
+        default: "WALLPAPER/MOCKUP_V2/_CALIB"
+
+jobs:
+  calibrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Bagimliliklar
+        run: |
+          set -euo pipefail
+          pip install -q -r requirements.txt
+
+      - name: rclone kur
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone
+          umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+          fi
+
+      - name: Dosyalari al
+        run: |
+          set -euo pipefail
+          mkdir -p _work/masters _work/pilot
+          rclone copy "gdrive:ASTROLOVE/${{ inputs.masters_dir }}" _work/masters --include "*_FINAL.jpg"
+          rclone copy "gdrive:ASTROLOVE/${{ inputs.pilot_dir }}" _work/pilot --include "AstroLove_*.jpg"
+          ls -l _work/masters _work/pilot
+
+      - name: Kalibre et
+        run: |
+          set -euo pipefail
+          python scripts/etsy/wp_mockup_calibrate.py --masters _work/masters --pilot _work/pilot --out _out
+          { echo "## wp-mockup kalibrasyon"; echo; cat _out/report.md; } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Drive'a yaz
+        run: |
+          set -euo pipefail
+          rclone copy _out "gdrive:ASTROLOVE/${{ inputs.calib_dir }}"
+          rclone lsl "gdrive:ASTROLOVE/${{ inputs.calib_dir }}" | head -30
+
+      - name: Artifact
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: wp-mockup-calib
+          path: _out/
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
