@@ -21,9 +21,11 @@ GITHUB_STEP_SUMMARY (istege bagli).
 """
 import argparse
 import csv
+import html
 import os
 import re
 import sys
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -115,14 +117,42 @@ def validate(title, tags):
 
 
 def norm(s):
-    return (s or "").replace("\r\n", "\n").strip()
+    """Etsy aciklamayi HTML kacisli dondurur (&quot; &#39; &amp;); karsilastirma
+    oncesi cozulur, satir sonu bosluklari atilir."""
+    s = html.unescape(s or "").replace("\r\n", "\n")
+    return "\n".join(line.rstrip() for line in s.split("\n")).strip()
+
+
+def tags_of(obj):
+    return [t.strip().lower() for t in (obj.get("tags") or []) if t and t.strip()]
+
+
+def readback(api, path, expect, tries=3, wait=10):
+    """Yazma sonrasi geri okuma; bayat okumaya karsi (B68) esitlik saglanana
+    kadar en fazla `tries` kez, `wait` sn arayla tekrar okur. Donus:
+    (son_kayit, {alan: bool})."""
+    back, ok = {}, {}
+    for i in range(tries):
+        back = api.get(path) or {}
+        ok = {}
+        if "title" in expect:
+            ok["title"] = (back.get("title") == expect["title"])
+        if "tags" in expect:
+            ok["tags"] = (tags_of(back) == expect["tags"])
+        if "description" in expect:
+            ok["description"] = (norm(back.get("description")) == norm(expect["description"]))
+        if all(ok.values()):
+            break
+        if i < tries - 1:
+            time.sleep(wait)
+    return back, ok
 
 
 # ------------------------------------------------------------------ katmanlar
 def process_en(api, shop_id, pair, lid, layers, desc_tpl, apply):
     cur = api.get(f"/listings/{lid}")
     title, tags, desc, note = build(pair, "en", desc_tpl)
-    old_title, old_tags, old_desc = cur.get("title") or "", [t.lower() for t in cur.get("tags") or []], cur.get("description") or ""
+    old_title, old_tags, old_desc = cur.get("title") or "", tags_of(cur), cur.get("description") or ""
     payload = {}
     if "title" in layers and old_title != title:
         payload["title"] = title
@@ -132,16 +162,14 @@ def process_en(api, shop_id, pair, lid, layers, desc_tpl, apply):
         payload["description"] = desc
     status = "DEGISIM_YOK" if not payload else "PLANLANDI"
     if apply and payload:
-        api.patch(f"/shops/{shop_id}/listings/{lid}", payload)
-        back = api.get(f"/listings/{lid}")
-        checks = []
-        if "title" in payload:
-            checks.append(back.get("title") == title)
-        if "tags" in payload:
-            checks.append([t.lower() for t in back.get("tags") or []] == tags)
-        if "description" in payload:
-            checks.append(norm(back.get("description")) == norm(desc))
-        status = "PASS" if all(checks) else "FAIL"
+        body = dict(payload)
+        if "tags" in body:
+            # Etsy v3 updateListing: tags VIRGULLU TEK METIN. Tekrar eden form
+            # anahtari gonderilirse yalniz sonuncusu kalir (2 Eyl 2026 dersi).
+            body["tags"] = ",".join(body["tags"])
+        api.patch(f"/shops/{shop_id}/listings/{lid}", body)
+        _, ok = readback(api, f"/listings/{lid}", payload)
+        status = "PASS" if all(ok.values()) else "FAIL(" + ",".join(k for k, v in ok.items() if not v) + ")"
     return dict(lang="en", pair=pair, listing_id=lid, state=cur.get("state"),
                 old_title_len=len(old_title), new_title=title, new_title_len=len(title),
                 n_tags=len(tags), tag_issue=validate(title, tags), pair_tag_note=note,
@@ -157,7 +185,7 @@ def process_ru(api, shop_id, pair, lid, layers, desc_tpl, apply):
     exists = cur is not None
     cur = cur or {}
     title, tags, desc, note = build(pair, "ru", desc_tpl)
-    old_title, old_tags, old_desc = cur.get("title") or "", [t.lower() for t in cur.get("tags") or []], cur.get("description") or ""
+    old_title, old_tags, old_desc = cur.get("title") or "", tags_of(cur), cur.get("description") or ""
     changed = {}
     if "title" in layers and old_title != title:
         changed["title"] = title
@@ -172,15 +200,13 @@ def process_ru(api, shop_id, pair, lid, layers, desc_tpl, apply):
         full = dict(title=changed.get("title", old_title or title),
                     description=changed.get("description", old_desc or desc),
                     tags=changed.get("tags", old_tags or tags))
+        body = dict(full, tags=",".join(full["tags"]))
         if exists:
-            api.put(path, full)
+            api.put(path, body)
         else:
-            api.post(path, full)
-        back = api.get(path)
-        checks = [back.get("title") == full["title"],
-                  [t.lower() for t in back.get("tags") or []] == full["tags"],
-                  norm(back.get("description")) == norm(full["description"])]
-        status = "PASS" if all(checks) else "FAIL"
+            api.post(path, body)
+        _, ok = readback(api, path, full)
+        status = "PASS" if all(ok.values()) else "FAIL(" + ",".join(k for k, v in ok.items() if not v) + ")"
     return dict(lang="ru", pair=pair, listing_id=lid, state="translation" if exists else "yok",
                 old_title_len=len(old_title), new_title=title, new_title_len=len(title),
                 n_tags=len(tags), tag_issue=validate(title, tags), pair_tag_note=note,
