@@ -188,6 +188,14 @@ def main():
             near = cv2.dilate(np.maximum(cmask, pair_ink_union), np.ones((21, 21), np.uint8))
             rmask = residual_ink_mask(plate, ed, near)
             res_px = int((rmask > 0).sum())
+        elif ed in DARK:
+            # koyu zeminde (maks luma ~46) luma > 90 yalniz altin murekkep kalintisidir
+            # (SHIFTMAP maske disindaki altin parcalari yama olarak kopyalayabiliyor)
+            rmask = cv2.dilate((luma_u8(plate) > 90).astype(np.uint8), np.ones((21, 21), np.uint8))
+            res_px = int((rmask > 0).sum())
+        else:  # WP: yalniz inpaint edilmis (sabit) bolge icinde murekkep rengi
+            rmask = residual_ink_mask(plate, ed, cmask, tol=35)
+            res_px = int((rmask > 0).sum())
         if res_px:
             plate = inpaint_shiftmap(plate, rmask * 255)
         # guvenlik: V2 murekkep maskesi plakada
