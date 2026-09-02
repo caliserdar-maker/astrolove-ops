@@ -27,7 +27,17 @@ IZIN BULGUSU VE DUZELTME (Drive):
 - Adim 2 (KARAR Mo): ASTROLOVE kokunden anyone izni TAMAMEN KALDIRILDI,
   klasor ozel (yalniz hesap sahibi). PIN_MEDIA'nin dogrudan reader izni
   mirastan bagimsiz, korundu.
-  Dogrulama: {{REMOVE_VERIFY}}
+  Dogrulama (workflow pin-media-perms #8 + Drive API'den bagimsiz okuma):
+  ASTROLOVE kok, WALL_ART, LISTING_MEDIA, TEMP, SCRIPTS, WALLPAPER ve
+  TEMP/ETSY_TOKEN.json: anyone izni YOK (yalniz sahip). PIN_MEDIA:
+  anyone:reader, miras kapali; 3 rastgele dosya reader; webContentLink
+  ANONIM HTTP 200 image/jpeg (Pinterest'in gordugu erisim). IG otomasyonu
+  Drive linkine bagli degil (B89-EK3: Drive video host elenmisti).
+  NOT: Kok altinda dogrudan verilmis baska "anyone" paylasimi kaldi mi,
+  tam tarama yapilamadi: rclone'un PAYLASIMLI OAuth istemcisi Drive
+  dakikalik kotasina takiliyor. Tarama --scan ile istege bagli, yalniz
+  rapor. Kalici cozum: rclone.conf icin kendi OAuth client_id'si
+  (docs/SECRETS.md'ye eklenecek).
 - KALICI KURAL: Pinterest'in cektigi gorseller yalniz PIN_MEDIA altinda,
   anyone:reader, miras kapali. Baska hicbir ASTROLOVE klasoru herkese acik
   degildir; yeni bir "herkese acik" ihtiyaci pin_media_perms.py ile,
