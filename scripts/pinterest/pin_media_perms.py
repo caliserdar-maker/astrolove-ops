@@ -66,10 +66,14 @@ class Drive:
         self.s.headers["Authorization"] = f"Bearer {token}"
 
     def _call(self, method, path, **kw):
-        for attempt in range(5):
+        for attempt in range(6):
+            time.sleep(0.25)  # dakikalik sorgu kotasini zorlamamak icin
             r = self.s.request(method, f"{API}{path}", timeout=60, **kw)
-            if r.status_code in (429, 500, 502, 503) and attempt < 4:
-                time.sleep(2 ** attempt)
+            quota = r.status_code == 403 and ("uota" in r.text or "rateLimit" in r.text)
+            if (r.status_code in (429, 500, 502, 503) or quota) and attempt < 5:
+                wait = 65 if quota else 2 ** attempt
+                log(f"Drive {r.status_code}, {wait} sn bekleyip tekrar ({attempt + 1}/5)")
+                time.sleep(wait)
                 continue
             if r.status_code >= 400:
                 raise RuntimeError(f"Drive {method} {path} -> {r.status_code}: {r.text[:300]}")
@@ -84,6 +88,20 @@ class Drive:
         while True:
             params = {"q": f"'{folder_id}' in parents and trashed = false", "pageSize": 1000,
                       "fields": f"nextPageToken,files({FIELDS})"}
+            if token:
+                params["pageToken"] = token
+            data = self._call("GET", "/files", params=params)
+            items += data.get("files", [])
+            token = data.get("nextPageToken")
+            if not token:
+                return items
+
+    def public_items(self):
+        """Drive'da 'linki olan herkes' / 'herkes bulabilir' gorunurlugundeki ogeler."""
+        items, token = [], None
+        while True:
+            params = {"q": "(visibility = 'anyoneWithLink' or visibility = 'anyoneCanFind') and trashed = false",
+                      "pageSize": 1000, "fields": f"nextPageToken,files({FIELDS})"}
             if token:
                 params["pageToken"] = token
             data = self._call("GET", "/files", params=params)
@@ -276,11 +294,13 @@ def mode_remove(drive, a):
         log(f"kok: anyone:{p['role']} izni SILINDI")
     time.sleep(20)
 
-    # Agacta dogrudan verilmis baska anyone izni kaldiysa (korunan agac haric) sil.
-    items = walk(drive, a.folder_id, skip_id=a.keep_id)
-    log(f"agac tarandi: {len(items)} oge (korunan agac haric)")
+    # Drive'da "linki olan herkes" gorunurlugundeki tum ogeleri tek sorguyla bul;
+    # korunan agac disinda kalanlarin anyone iznini sil (tum agaci gezmek kota asiyor).
+    keep_ids = {i["id"] for i in walk(drive, a.keep_id)}
+    items = [i for i in drive.public_items() if i["id"] not in keep_ids and i["id"] != a.folder_id]
+    log(f"herkese acik oge (korunan agac haric): {len(items)}")
     skipped = 0
-    for it in items[1:]:
+    for it in items:
         for p in anyone_perms(it):
             try:
                 drive.delete_perm(it["id"], p["id"])
@@ -299,11 +319,10 @@ def mode_remove(drive, a):
     root2 = drive.get(a.folder_id)
     top2 = {c["name"]: c for c in drive.children(a.folder_id)}
     keep2 = drive.get(a.keep_id)
-    items2 = walk(drive, a.folder_id, skip_id=a.keep_id)
-    left = [it["name"] for it in items2 if anyone_perms(it)]
+    left = [i["name"] for i in drive.public_items() if i["id"] not in keep_ids and anyone_perms(i)]
     checks = [(f"{root2['name']} (kok) anyone", roles(root2))]
     checks += [(f"{n} anyone", roles(top2[n])) for n in REPORT_NAMES if n in top2]
-    checks.append((f"agacta kalan anyone izni (korunan haric)", f"{len(left)} {left[:5] if left else ''}"))
+    checks.append((f"Drive'da kalan herkese-acik oge (korunan haric)", f"{len(left)} {left[:5] if left else ''}"))
     checks.append((f"{keep2['name']} anyone", f"{roles(keep2)} miras_kapali={keep2.get('inheritedPermissionsDisabled')}"))
     keep_items = walk(drive, a.keep_id)
     checks += [(f"korunan/{n}", r) for n, r in sample_checks(drive, keep_items, a.sample)]
