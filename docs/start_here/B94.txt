@@ -62,8 +62,11 @@ YENIDEN TASARIM KARARI - HAT DEPOYA TASINDI (astrolove-ops, main):
   (mode fix|remove, apply, folder_id, keep_id): Drive "anyone" izni araci,
   varsayilan dry-run, anonim HTTP dogrulamali.
 - scripts/common/start_here_append.py + workflow start-here-append: depodaki
-  docs/start_here/Bnn.txt kaydini bu dokumanin sonuna ekler (bu kayit
-  onunla yazildi).
+  docs/start_here/Bnn.txt kaydini bu dokumanin sonuna ekler. ILK KOSUDA
+  BLOKE: Google Docs API, rclone'un paylasimli OAuth projesinde kapali
+  (403 "Docs API has not been used in project"). Kendi OAuth istemcisi
+  kurulunca calisir; o zamana kadar B-kayitlari Drive'a ayri Doc olarak
+  birakilip elle yapistirilir.
 - Kalan partiler ve tetik degerleri (pin-merge-week):
   HAFTA3 = week 3, GUN 16..22, start_date 2026-09-14 (yukleme 13-14 Eyl)
   HAFTA4 = week 4, GUN 23..29, start_date 2026-09-21 (yukleme 20-21 Eyl)
