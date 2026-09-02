@@ -204,7 +204,14 @@ def main():
             dq = np.abs(luma_u8(q).astype(np.int16) - luma_u8(bg).astype(np.int16))
             pair_ink_union = np.maximum(pair_ink_union, (dq > 25).astype(np.uint8))
         del posters
-        plate = fill_shift_lowpass(bg, cmask) if ed in DARK else inpaint_shiftmap(bg, cmask * 255)
+        # edisyona ozel sabit maske: DB maskesinin 72 px komsulugunda, bu edisyonun
+        # zemininde yerel medyandan >35 sapan pikseller (edisyonlar arasi yerlesim
+        # kaymasi ve kenar yumusatma artigi; WP "T" serifi orn.) DB maskesine eklenir
+        gb = luma_u8(bg)
+        loc = (np.abs(gb.astype(np.int16) - cv2.medianBlur(gb, 31).astype(np.int16)) > 35).astype(np.uint8)
+        loc &= cv2.dilate(cmask, np.ones((145, 145), np.uint8))
+        cmask_ed = np.maximum(cmask, cv2.dilate(loc, np.ones((13, 13), np.uint8)))
+        plate = fill_shift_lowpass(bg, cmask_ed) if ed in DARK else inpaint_shiftmap(bg, cmask_ed * 255)
         # ikinci gecis: kalan murekkep parcalari (renk + bolge kurali)
         # yalniz CI: koyu edisyonlarda (MB/DB) 2. gecis duz zeminde yama izi birakiyor
         # (HF orani 0.97 -> 6.8), WP'de parsomen lifleri murekkep rengine yakin (8% yanlis).
@@ -220,7 +227,7 @@ def main():
             res_px = int((rmask > 0).sum())
         else:  # WP: yalniz inpaint edilmis (sabit) bolge icinde: murekkep rengi VEYA yerel zeminden >40 koyu
             g = luma_u8(plate).astype(np.float32)
-            dark = ((cv2.GaussianBlur(g, (0, 0), 25) - g) > 40).astype(np.uint8) & (cmask > 0)
+            dark = ((cv2.GaussianBlur(g, (0, 0), 25) - g) > 40).astype(np.uint8) & (cmask_ed > 0)
             dark = cv2.dilate(cv2.morphologyEx(dark, cv2.MORPH_OPEN, np.ones((2, 2), np.uint8)), np.ones((13, 13), np.uint8))
             rmask = np.maximum(residual_ink_mask(plate, ed, cmask, tol=35), dark)
             res_px = int((rmask > 0).sum())
@@ -231,7 +238,7 @@ def main():
         v2_px = int(v2m.sum())
         v2_frac = float(v2m.mean())
         # hayalet olcumu
-        si_c, so_c, r_c = hf_energy_ratio(plate, cmask)
+        si_c, so_c, r_c = hf_energy_ratio(plate, cmask_ed)
         si_p, so_p, r_p = hf_energy_ratio(plate, pair_ink)
         # plaka kenar/orta luma (vinyet kaydi)
         g = luma_u8(plate)
@@ -240,7 +247,7 @@ def main():
         name = f"WP_PLATE_{ED_UP[ed]}_3X4.png"
         cv2.imwrite(str(out / name), plate, [cv2.IMWRITE_PNG_COMPRESSION, 3])
         qc_sheet(plate, out / "qc" / f"PLATE_{ED_UP[ed]}.jpg")
-        report[ed] = dict(file=name, const_ink_px=int((cmask > 0).sum()), pair_ink_px=int((pair_ink > 0).sum()), residual_pass_px=res_px,
+        report[ed] = dict(file=name, const_ink_px=int((cmask_ed > 0).sum()), pair_ink_px=int((pair_ink > 0).sum()), residual_pass_px=res_px,
                           v2_residual_px=v2_px, v2_residual_frac=v2_frac, v2_otsu=t,
                           hf_const=dict(inner=si_c, outer=so_c, ratio=r_c), hf_pair=dict(inner=si_p, outer=so_p, ratio=r_p), vignette=vign)
         log(f"{ed:16s} 2.gecis {res_px} px | V2 kalinti {v2_px} px ({v2_frac * 100:.3f}%, otsu {t}) | HF orani sabit-murekkep {r_c:.3f} ({si_c:.2f}/{so_c:.2f}) "
