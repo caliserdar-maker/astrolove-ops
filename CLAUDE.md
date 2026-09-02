@@ -27,3 +27,16 @@ bolumu okunmadan baslanmaz.
   uretim hattinda yoktur (KARAR 3, 1 Eyl 2026).
 - Esik ve yerlesim kurallari tahminle degil, onayli dosyalardan olculerek
   turetilir (docs/WP_LAYOUT_SPEC.md bu yontemle yazilir).
+
+## HIZ VE KALITE KURALLARI (2 Eyl 2026 karari)
+
+1. Alt-ajan / review workflow / paralel ajan YASAK. Tek surec.
+2. Iterasyon YERELDE: kucuk ornek (6 poster / 1 cift) ile 60 sn altinda
+   test. Actions yalniz yerelde temiz cikan surum icin, en fazla 1 kez.
+3. Her gorev basinda 3 satir yaz: (a) yontem, (b) "bitti" tanimi (olculur
+   esik), (c) tahmini sure. Yontem degisecekse DUR, Mo'ya sor.
+4. En fazla 2 iterasyon. Ikincisi de temiz degilse DUR, durumu raporla,
+   devam etme.
+5. Uzun her kosuda ETA sayaci (islenen/toplam, gecen, kalan, yuzde).
+6. Rapor: en fazla 6 satir + dosya yollari. Aciklama yok.
+7. QC: tek script, olculebilir esik, PASS/FAIL. "Gozle bakiyorum" dongusu yok.
