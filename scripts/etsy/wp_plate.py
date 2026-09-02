@@ -96,9 +96,9 @@ def inpaint_shiftmap(img, mask_u8, pad=160, max_side=2600):
 INK_RGB = {"Champagne_Ivory": (95, 59, 29), "Warm_Parchment": (139, 81, 25), "Midnight_Blue": (244, 184, 63), "Deep_Black": (244, 183, 62)}
 
 
-def residual_ink_mask(plate, ed, near_mask, tol=45, dil=8):
+def residual_ink_mask(plate, ed, near_mask, tol=30, dil=6):
     """Ikinci gecis: bilinen murekkep rengine (WP_LAYOUT_SPEC 7.1) yakin
-    pikseller, yalniz bilinen murekkep bolgelerinin (sabit + cift) 40 px
+    pikseller, yalniz bilinen murekkep bolgelerinin (sabit + cift) 10 px
     komsulugunda. Kagit dokusunun koyu benekleri (WP) bu bolge disinda kalir."""
     r, g, b = INK_RGB[ed]
     d = np.sqrt(((plate.astype(np.float32) - np.array([b, g, r], np.float32)) ** 2).sum(axis=2))
@@ -181,7 +181,7 @@ def main():
         del posters
         plate = inpaint_shiftmap(bg, cmask * 255)
         # ikinci gecis: kalan murekkep parcalari (renk + bolge kurali)
-        near = cv2.dilate(np.maximum(cmask, pair_ink_union), np.ones((81, 81), np.uint8))
+        near = cv2.dilate(np.maximum(cmask, pair_ink_union), np.ones((21, 21), np.uint8))
         rmask = residual_ink_mask(plate, ed, near)
         res_px = int((rmask > 0).sum())
         if res_px:
