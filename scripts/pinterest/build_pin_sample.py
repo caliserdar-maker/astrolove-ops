@@ -12,8 +12,8 @@ gorselin %9'u, opaklik %50, ince serif "AstroLove", kenardan 30 px iceride.
 Capraz buyuk filigran YOK.
 
 Varyantlar:
-  V1   ANA     WA_11 (yere yasli). Ust %15 bant: "CAPRICORN & VIRGO" buyuk,
-               altinda "Zodiac Wall Art" kucuk; zemin sahne rengine uyumlu.
+  V1   ANA     WA_11 (yere yasli). Ust %15 serit (sahneyi ortmez): "CAPRICORN &
+               VIRGO" buyuk, altinda "Zodiac Wall Art" kucuk; zemin sahne rengine uyumlu.
   V1b  ANA     ayni sahne, overlay yok (A/B kontrol).
   V2   HEDIYE  WA_03 (masa, kadehler). Bant: "Gift for Couples".
   V3   DEKOR   WA_12 (konsol), genis kadraj (tam yukseklik), overlay yok.
@@ -53,9 +53,9 @@ SCENES = {
 }
 # (dosya adi, sahne, pencere yuksekligi/kaynak yuksekligi, overlay satirlari)
 VARIANTS = [
-    ("V1_ANA",             "WA_11", 0.92, ("{S1} & {S2}", "Zodiac Wall Art")),
-    ("V1b_ANA_OVERLAYSIZ", "WA_11", 0.92, None),
-    ("V2_HEDIYE",          "WA_03", 0.92, ("Gift for Couples", None)),
+    ("V1_ANA",             "WA_11", 1.00, ("{S1} & {S2}", "Zodiac Wall Art")),
+    ("V1b_ANA_OVERLAYSIZ", "WA_11", 1.00, None),
+    ("V2_HEDIYE",          "WA_03", 1.00, ("Gift for Couples", None)),
     ("V3_DEKOR",           "WA_12", 1.00, None),
 ]
 
@@ -104,11 +104,15 @@ def detect_bbox(target, reference):
     return (xs.min() * sx, ys.min() * sy, (xs.max() + 1) * sx, (ys.max() + 1) * sy), f"fark %{frac*100:.1f}"
 
 
-def crop_2x3(img, bbox, h_ratio, band):
-    """Poster merkezli 2:3 pencere. band=True ise posteri ust bandin altina yerlestirir."""
+def crop_window(img, bbox, h_ratio, out_w, out_h):
+    """Poster merkezli pencere (oran out_w:out_h), kenarlara kelepceli.
+    Dondurur: (kirpilmis goruntu, posterin cikti koordinatlarinda kutusu)."""
     W, H = img.size
     ch = H * h_ratio
-    cw = ch * 2 / 3
+    cw = ch * out_w / out_h
+    if cw > W:                       # genis kadraj kaynagi asarsa yukseklikten fedakarlik
+        cw = W
+        ch = cw * out_h / out_w
     if bbox:
         cx = (bbox[0] + bbox[2]) / 2
         cy = (bbox[1] + bbox[3]) / 2
@@ -116,41 +120,13 @@ def crop_2x3(img, bbox, h_ratio, band):
         cx, cy = W / 2, H / 2
     left = min(max(cx - cw / 2, 0), W - cw)
     top = min(max(cy - ch / 2, 0), H - ch)
-    note = None
-    if band and bbox:
-        # Poster ustu bandin altinda kalsin: once pencereyi yukari kaydir; kaynak
-        # yetmezse pencereyi kucult (yakinlas), poster cikti icinde asagi iner.
-        pw = bbox[2] - bbox[0]
-        placed = False
-        h = h_ratio
-        while h >= 0.55:
-            ch = H * h
-            cw = ch * 2 / 3
-            band_src = ch * BAND_RATIO
-            margin = ch * 0.03
-            top2 = min(max(bbox[1] - band_src - margin, 0), H - ch)
-            if (bbox[1] - top2 >= band_src + margin and top2 + ch >= bbox[3] + margin
-                    and cw >= pw + 2 * margin):
-                top = top2
-                left = min(max(cx - cw / 2, 0), W - cw)
-                placed = True
-                break
-            h -= 0.02
-        if not placed:
-            ch = H * h_ratio
-            cw = ch * 2 / 3
-            left = min(max(cx - cw / 2, 0), W - cw)
-            top = min(max(cy - ch / 2, 0), H - ch)
-            note = "poster bant altina sigmiyor, merkez kirpma"
-        elif h < h_ratio:
-            note = f"bant icin pencere {h:.2f}H'ye kucultuldu"
     box = tuple(int(round(v)) for v in (left, top, left + cw, top + ch))
-    out = img.crop(box).resize((OUT_W, OUT_H), Image.LANCZOS)
-    sc = OUT_W / cw
+    out = img.crop(box).resize((out_w, out_h), Image.LANCZOS)
+    sc = out_w / cw
     pb = None
     if bbox:
-        pb = ((bbox[0] - box[0]) * sc, (bbox[1] - box[1]) * sc, (bbox[2] - box[0]) * sc, (bbox[3] - box[1]) * sc)
-    return out, pb, note
+        pb = tuple((bbox[i] - box[i % 2]) * sc for i in range(4))
+    return out, pb
 
 
 # ------------------------------------------------------------------ overlay
@@ -171,26 +147,25 @@ def draw_tracked(d, xy_center, text, font, track, fill):
         x += font.getlength(c) + track
 
 
-def add_band(img, lines, edition, font_reg, font_ita):
-    """Ust %15 bant: zemin = sahnenin o bolgesinin ortalama rengi ile edisyon zemininin karisimi."""
+def add_band(scene, lines, edition, font_reg, font_ita):
+    """Ust %15 serit + altinda sahne (serit sahneyi ORTMEZ). Serit zemini =
+    sahnenin ust kenar rengi ile edisyon zemininin karisimi; murekkep edisyon rengi."""
     bg_ed, ink = PALETTE[edition]
-    band_h = int(round(OUT_H * BAND_RATIO))
-    region = np.asarray(img.crop((0, 0, OUT_W, band_h)).resize((50, 8))).reshape(-1, 3).mean(0)
-    scene = tuple(int(v) for v in region)
-    zemin = blend(scene, bg_ed, 0.55)
-    # Cok koyu/acik uclari edisyon zeminine yaklastir (metin kontrasti icin).
+    band_h = OUT_H - scene.height
+    region = np.asarray(scene.crop((0, 0, OUT_W, 40)).resize((50, 4))).reshape(-1, 3).mean(0)
+    zemin = blend(tuple(int(v) for v in region), bg_ed, 0.55)
+    img = Image.new("RGB", (OUT_W, OUT_H), zemin)
+    img.paste(scene, (0, band_h))
     d = ImageDraw.Draw(img)
-    d.rectangle((0, 0, OUT_W, band_h), fill=zemin)
     d.line((0, band_h - 1, OUT_W, band_h - 1), fill=blend(zemin, ink, 0.35), width=1)
 
     big, small = lines
     big = big.upper()
-    # Buyuk satir: poster tipografisi gibi bosluklu buyuk harf serif; genislik bandin %78'ini gecmesin.
+    # Buyuk satir: poster tipografisi gibi bosluklu buyuk harf serif; genislik seridin %78'ini gecmesin.
     size = 96
     while size > 24:
         f = ImageFont.truetype(font_reg, size)
-        track = size * 0.12
-        if tracked_width(f, big, track) <= OUT_W * 0.78:
+        if tracked_width(f, big, size * 0.12) <= OUT_W * 0.78:
             break
         size -= 2
     fb = ImageFont.truetype(font_reg, size)
@@ -280,14 +255,18 @@ def main():
             produced[scene] = (tgt, ref)
         img = Image.open(tgt).convert("RGB")
         bbox, info = detect_bbox(tgt, ref)
-        pin, pb, note = crop_2x3(img, bbox, h_ratio, band=overlay is not None)
+        note = None if bbox else "tespit basarisiz, merkez kirpma"
         band_info = ""
         if overlay:
+            band_h = int(round(OUT_H * BAND_RATIO))
+            scene_img, pb = crop_window(img, bbox, h_ratio, OUT_W, OUT_H - band_h)
             lines = (overlay[0].format(S1=s1.title(), S2=s2.title()), overlay[1])
-            pin, zemin, size = add_band(pin, lines, a.edition, font_reg, font_ita)
-            band_info = f"bant zemin {zemin}, punto {size}"
-            if pb and pb[1] < OUT_H * BAND_RATIO:
-                note = (note + "; " if note else "") + f"poster ustu bant altinda kaliyor ({pb[1]:.0f}px)"
+            pin, zemin, size = add_band(scene_img, lines, a.edition, font_reg, font_ita)
+            band_info = f"serit {band_h}px zemin {zemin}, punto {size}"
+            if pb and pb[1] < 12:
+                note = (note + "; " if note else "") + f"poster ust kenara cok yakin ({pb[1]:.0f}px)"
+        else:
+            pin, pb = crop_window(img, bbox, h_ratio, OUT_W, OUT_H)
         pin, wm_box, wm_size, wm_color, lum = add_watermark(pin, font_reg, a.edition)
         path = out / f"{tag}_{name}.jpg"
         pin.save(path, "JPEG", **JPEG_OPTS)
