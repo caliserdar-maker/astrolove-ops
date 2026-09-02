@@ -1,0 +1,82 @@
+name: pin-week-v2
+
+# Pinterest haftalik toplu-pin CSV'si V2: gunde 12 pin (UTC 08:00-19:00,
+# saatlik), 390 pin = 33 gun, haftalik dosya 84 pin. Metin/pano/sira mevcut
+# TEMP/PIN_CSVS/WA_PIN_GUN_01..30.csv'den, Media URL PIN_MEDIA_V2 linkleri
+# (TEMP/PIN_UPLOAD_STATE_V2.csv). Cikti TEMP/PIN_CSVS_V2/WA_PIN_V2_HAFTAn_GUNxx_yy.csv
+# + WA_PIN_V2_PLAN_390.csv. Pinterest'e DOKUNMAZ; CSV elle yuklenir.
+
+on:
+  workflow_dispatch:
+    inputs:
+      week:
+        description: "Hafta numarasi (1-5)"
+        required: true
+        default: "1"
+      start_date:
+        description: "Haftanin ilk gununun tarihi, YYYY-MM-DD (UTC)"
+        required: true
+        default: "2026-09-07"
+      force:
+        description: "Drive'da ayni adli dosya varsa uzerine yaz"
+        type: boolean
+        default: false
+
+concurrency:
+  group: pin-csvs
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: rclone kur
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          rclone version | head -1
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then
+            echo "HATA: RCLONE_CONF_B64 secret'i tanimli degil." >&2
+            exit 1
+          fi
+          mkdir -p ~/.config/rclone
+          umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          # Yeni OAuth istemcisinin secret'i conf'daki degeri ezer (rclone env override).
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+          fi
+
+      - name: Haftalik CSV uret
+        run: |
+          set -euo pipefail
+          args=(--week "${{ inputs.week }}" --start-date "${{ inputs.start_date }}")
+          [ "${{ inputs.force }}" = "true" ] && args+=(--force)
+          python scripts/pinterest/build_week_v2.py "${args[@]}"
+
+      - name: Ciktiyi artifact olarak sakla
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pin-week-v2
+          path: _out/
+          if-no-files-found: ignore
+          retention-days: 30
