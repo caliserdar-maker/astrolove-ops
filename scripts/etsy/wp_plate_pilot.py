@@ -229,26 +229,21 @@ def build_plate(pilot, med_dev, ed, dev):
     # Kosu 5'te dolgu = (F - muF)*gain + muP idi: muF halkadan tahmin edildigi icin maske
     # icinde medyanin kendi tonu tam cikmiyordu (CI halkada -2 seviyelik iz) ve kaydirilmis
     # kopya bloklari ton basamagi birakiyordu (WP). Simdi: hp = F - G16(F), yogun/kesin.
-    lpF = cv2.GaussianBlur(Ff, (0, 0), float(HP_SIGMA))
-    hpF = Ff - lpF
-    # medyanin kendi murekkebi (sabit ogeler): yuksek frekans -> kaydirilmis kopya (tonsuz => dikissiz);
-    # alcak frekans -> cevreden normalize konvolusyonla (blok yok)
+    hpF = Ff - cv2.GaussianBlur(Ff, (0, 0), float(HP_SIGMA))
+    # medyanin kendi murekkebi (sabit ogeler) -> yuksek frekans dokusunun kaydirilmis kopyasi (tonsuz => dikissiz)
     mm = ink_mask_median(F, ed) & region
     hpF = shifted_fill(hpF, mm, region)
-    okw = ((region > 0) & (mm == 0)).astype(np.float32)
-    lp_fill, _ = local_stats(lpF, okw, 32.0)
-    toneF = np.where(mm[..., None] > 0, lp_fill, lpF)
-    # yerel ton eslestirme: maske cevresi halkasi (16..64 px). Ton = medyanin kendi alcak
-    # frekansi (yanik kenar egimi hizali gelir) + pilot-medyan farkinin halkadan olculen
-    # puruzsuz ofseti. (Kosu 5: ton yalniz halkadan harmanlaniyordu -> dik egimde bant.)
+    # Ton YALNIZ pilottan: maske cevresi halkasi (16..64 px), normalize konvolusyon sigma 32.
+    # Olcum (sahte maske bandi, gercek pilot pikseline karsi, WP Phone): sigma 32 ton hatasi
+    # yanik kenarda 7.4 / duz alanda 3.7 seviye; medyanin alcak frekansini kullanmak 17/20
+    # (kosu 6: medyan halka/tagline parlamasi dolguya sizdi = hayalet); sigma 16 -> 13/10.
     d_in = cv2.dilate(mask, np.ones((2 * RING_IN + 1, 2 * RING_IN + 1), np.uint8))
     d_out = cv2.dilate(mask, np.ones((2 * RING_OUT + 1, 2 * RING_OUT + 1), np.uint8))
     ring = ((d_out > 0) & (d_in == 0) & (region > 0)).astype(np.float32)
     muP, sdP = local_stats(Pf, ring, 32.0)
-    muT, _ = local_stats(toneF, ring, 32.0)
     _, sdF = local_stats(hpF, region.astype(np.float32), 32.0)   # dolgu dokusunun yerel std'si (yogun)
     gain = np.clip(sdP / np.maximum(sdF, 1e-3), 0.15, 2.0)   # pilot zemini duzse (saat parlamasi, DB siyah) dolgu dokusu bastirilir
-    Fm = hpF * gain + toneF + (muP - muT)
+    Fm = hpF * gain + muP
     # feather: murekkep cekirdegi (+2 px) tamamen dolgu (alfa 1); maske sinirina
     # dogru 22 px'te 0'a iner. (Onceki surum: alfa = mesafe/24 -> ince cizgilerde
     # hic 1'e ulasmiyor, pilot murekkebi %25-50 goruyordu = kabartma hayaleti.)
