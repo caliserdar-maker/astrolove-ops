@@ -146,15 +146,15 @@ def ink_mask_pilot(pilot, ed, dev, canvas_region, tol=70, dloc=18):
     return keep, t
 
 
-def ink_mask_median(med, ed, tol=70):
-    """Medyanin kendi murekkebi (halka, ∞, tagline): ayni kural, tum kanvas."""
-    r, g, b = INK_RGB[ed]
-    L = luma(med).astype(np.float32)
-    dist = np.sqrt(((med.astype(np.float32) - np.array([b, g, r], np.float32)) ** 2).sum(axis=2))
-    t = otsu_thresh(L)
-    core = (L > t) if ed in DARK else (L < t)
-    m = (core & (dist < tol)).astype(np.uint8)
-    return cv2.dilate(cv2.morphologyEx(m, cv2.MORPH_OPEN, np.ones((2, 2), np.uint8)), np.ones((25, 25), np.uint8))
+def ink_mask_median(med, ed, dloc=18):
+    """Medyanin kendi murekkebi (halka, ∞, tagline; cifte ozel murekkep medyanda
+    yok): yerel medyan zeminden sapma (koyu edisyon: parlak; acik: her iki yon),
+    renk sarti YOK (halkanin beyaz parlamalari da dahil). 25 px genisletme."""
+    Lu = luma(med)
+    d = Lu.astype(np.float32) - cv2.medianBlur(Lu, 51).astype(np.float32)
+    m = ((d > dloc) if ed in DARK else (np.abs(d) > dloc * 2 / 3)).astype(np.uint8)
+    m = cv2.morphologyEx(m, cv2.MORPH_OPEN, np.ones((2, 2), np.uint8))
+    return cv2.dilate(m, np.ones((25, 25), np.uint8))
 
 
 def shifted_fill(img, mask, k=48):
