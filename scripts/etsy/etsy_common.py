@@ -153,6 +153,12 @@ class Etsy:
         cagiranin sorumlulugundadir."""
         return self._call("PATCH", path, data=data)
 
+    def put(self, path, data):
+        return self._call("PUT", path, data=data)
+
+    def post(self, path, data):
+        return self._call("POST", path, data=data)
+
     def _call(self, method, path, params=None, data=None, ok404=False):
         for attempt in range(3):
             self.calls += 1
