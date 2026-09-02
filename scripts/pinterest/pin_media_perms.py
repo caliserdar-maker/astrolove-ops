@@ -93,7 +93,15 @@ class Drive:
         except RuntimeError as e:
             if "403" not in str(e) or "inherited" not in str(e):
                 raise
-        self._call("DELETE", f"/files/{file_id}/permissions/{perm_id}")
+        # Sinirli erisim: ust klasorden miras kapatilir, oge yalniz kendi
+        # izinleriyle kalir; sonra "anyone" dogrudan istenen rolle verilir.
+        self._call("PATCH", f"/files/{file_id}", params={"fields": "id,inheritedPermissionsDisabled"},
+                   json={"inheritedPermissionsDisabled": True})
+        log(f"miras kapatildi: {file_id}")
+        direct = [p for p in self.get(file_id).get("permissions", []) if p.get("type") == "anyone"]
+        if direct:
+            return self._call("PATCH", f"/files/{file_id}/permissions/{direct[0]['id']}",
+                              params={"fields": "id,type,role"}, json={"role": role})
         return self._call("POST", f"/files/{file_id}/permissions",
                           params={"fields": "id,type,role"},
                           json={"type": "anyone", "role": role})
