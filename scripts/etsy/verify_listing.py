@@ -228,6 +228,14 @@ def main():
     if os.environ.get("SHOW_TEXT"):
         md += ["", "**Aciklama (Etsy'den okunan):**", "", "```",
                (listing.get("description") or ""), "```"]
+        ru = api.get(f"/shops/{shop_id}/listings/{listing_id}/translations/ru", ok404=True)
+        if ru:
+            md += ["", "**RU ceviri (Etsy'den okunan):**", "",
+                   f"- baslik: {ru.get('title')}",
+                   f"- tag ({len(ru.get('tags') or [])}): " + " | ".join(ru.get("tags") or []),
+                   "", "```", (ru.get("description") or ""), "```"]
+        else:
+            md += ["", "**RU ceviri:** yok (404)"]
     md_text = "\n".join(md)
     log(md_text)
     summary = os.environ.get("GITHUB_STEP_SUMMARY")
