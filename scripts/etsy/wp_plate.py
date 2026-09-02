@@ -93,6 +93,31 @@ def inpaint_shiftmap(img, mask_u8, pad=160, max_side=2600):
     return out
 
 
+def fill_shift_lowpass(img, mask_u8, k=300, sigma=25.0):
+    """Koyu, neredeyse duz zeminler (MB gece gradyani, DB siyah) icin dolgu:
+    maske pikselleri ayni goruntunun k px kaydirilmis maske-disi kopyasindan
+    alinir (SHIFTMAP gibi yama sinirlari ve maske disindan altin kopyalama
+    olmaz), sonra yavas gradyan farki alcak gecirgen duzeltmeyle kapatilir."""
+    m = mask_u8 > 0
+    out = img.astype(np.float32).copy()
+    todo = m.copy()
+    for dx, dy in ((0, k), (0, -k), (k, 0), (-k, 0), (k, k), (-k, -k), (0, 2 * k), (0, -2 * k), (2 * k, 0), (-2 * k, 0)):
+        if not todo.any():
+            break
+        src = np.roll(np.roll(img, dy, axis=0), dx, axis=1)
+        srcm = np.roll(np.roll(m, dy, axis=0), dx, axis=1)
+        ok = todo & ~srcm
+        out[ok] = src[ok]
+        todo &= ~ok
+    if todo.any():
+        out[todo] = cv2.blur(out, (51, 51))[todo]
+    wgt = (~m).astype(np.float32)
+    den = cv2.GaussianBlur(wgt, (0, 0), sigma)[..., None]
+    corr = cv2.GaussianBlur((img.astype(np.float32) - out) * wgt[..., None], (0, 0), sigma) / np.maximum(den, 1e-3)
+    out = out + corr * m[..., None]
+    return np.clip(np.round(out), 0, 255).astype(np.uint8)
+
+
 INK_RGB = {"Champagne_Ivory": (95, 59, 29), "Warm_Parchment": (139, 81, 25), "Midnight_Blue": (244, 184, 63), "Deep_Black": (244, 183, 62)}
 
 
@@ -179,7 +204,7 @@ def main():
             dq = np.abs(luma_u8(q).astype(np.int16) - luma_u8(bg).astype(np.int16))
             pair_ink_union = np.maximum(pair_ink_union, (dq > 25).astype(np.uint8))
         del posters
-        plate = inpaint_shiftmap(bg, cmask * 255)
+        plate = fill_shift_lowpass(bg, cmask) if ed in DARK else inpaint_shiftmap(bg, cmask * 255)
         # ikinci gecis: kalan murekkep parcalari (renk + bolge kurali)
         # yalniz CI: koyu edisyonlarda (MB/DB) 2. gecis duz zeminde yama izi birakiyor
         # (HF orani 0.97 -> 6.8), WP'de parsomen lifleri murekkep rengine yakin (8% yanlis).
@@ -197,7 +222,7 @@ def main():
             rmask = residual_ink_mask(plate, ed, cmask, tol=35)
             res_px = int((rmask > 0).sum())
         if res_px:
-            plate = inpaint_shiftmap(plate, rmask * 255)
+            plate = fill_shift_lowpass(plate, rmask) if ed in DARK else inpaint_shiftmap(plate, rmask * 255)
         # guvenlik: V2 murekkep maskesi plakada
         v2m, t = v2_ink_mask(plate)
         v2_px = int(v2m.sum())
