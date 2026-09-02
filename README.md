@@ -13,7 +13,7 @@ uzerinden veya lokalde elle calistirilabilir.
 | `scripts/etsy/` | Etsy API scriptleri (listeleme, siparis, envanter) |
 | `scripts/instagram/` | Instagram scriptleri: `build_carousel.py` (5 slaytlik carousel uretimi), `publish.py` (gunluk REEL/CAROUSEL/STORY yayini) |
 | `scripts/pinterest/` | Pinterest scriptleri: `build_pins_v4.py` (pin gorselleri: poster 1000x1500, PIN_MEDIA_V2), `merge_week.py` (haftalik toplu-pin CSV'si), `pin_media_perms.py` (Drive "anyone" izin araci) |
-| `scripts/common/` | Ortak yardimci moduller (auth, http, log) |
+| `scripts/common/` | Ortak yardimci moduller; `gh_secrets.py` (GitHub secret/variable yazma, OPS_ADMIN_TOKEN ile) |
 | `.github/workflows/` | Zamanlanmis ve manuel GitHub Actions workflow'lari |
 | `docs/` | Dokumantasyon |
 
