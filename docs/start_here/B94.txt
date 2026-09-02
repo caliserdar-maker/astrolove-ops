@@ -1,0 +1,68 @@
+==================================================================
+B94 - PINTEREST: IZIN DUZELTME + HAFTA2 + HAT DEPOYA TASINDI (2 Eyl 2026)
+==================================================================
+
+KESIF (Claude, salt okur; Pinterest'e dokunulmadi):
+- HAFTA1 CSV (WA_PIN_HAFTA1_GUN02_08.csv, 91 satir) kusursuz: 8 kolon,
+  91/91 benzersiz medya URL + listing linki, 91/91 medya ID'si
+  PIN_UPLOAD_STATE'te ve cift/edisyon eslesiyor, 7 gun x 13 pin, UTC
+  13:00-19:00 (TR 16:00-22:00). Pinterest'in planlamadigi 1 pin CSV'den
+  bulunamaz; Pinterest "Planlanan Pinler" listesiyle karsilastirma gerekir.
+  KARAR (Mo): simdilik birakildi, son partide toplu kontrol.
+- Drive'da hata kaydi/bulk-create logu yok. WA_PIN_HAFTA1_V1 Colab'da
+  kosulmus, SCRIPTS'e kaydedilmemis (B88-EK7 standardina aykiri).
+- START_HERE'de Pinterest kayitlari: B87, B88, B88-EK3, B89-EK, B89-EK2,
+  B90, B92 (B93'te yalniz acik is referansi).
+
+IZIN BULGUSU VE DUZELTME (Drive):
+- PIN_MEDIA ve 390 pin gorseli "anyone: WRITER" idi (linki olan herkes
+  degistirebilir/silebilirdi). Kaynak: ASTROLOVE KOK klasoru anyone:writer;
+  WALL_ART, LISTING_MEDIA, TEMP miras aliyordu.
+- Adim 1 (KARAR Mo): PIN_MEDIA -> anyone:reader. Drive miras izni alt
+  klasorde dusurtmedi (403); PIN_MEDIA'da miras KAPATILDI
+  (inheritedPermissionsDisabled) ve dogrudan anyone:reader verildi. 6 klasor
+  + 390 dosya reader; 3 rastgele dosya + kok dogrulandi.
+  Not: 07:05-07:08 UTC arasinda ~3 dk PIN_MEDIA ozel kaldi; o aralikta
+  planli pin yoktu.
+- Adim 2 (KARAR Mo): ASTROLOVE kokunden anyone izni TAMAMEN KALDIRILDI,
+  klasor ozel (yalniz hesap sahibi). PIN_MEDIA'nin dogrudan reader izni
+  mirastan bagimsiz, korundu.
+  Dogrulama: {{REMOVE_VERIFY}}
+- KALICI KURAL: Pinterest'in cektigi gorseller yalniz PIN_MEDIA altinda,
+  anyone:reader, miras kapali. Baska hicbir ASTROLOVE klasoru herkese acik
+  degildir; yeni bir "herkese acik" ihtiyaci pin_media_perms.py ile,
+  klasor bazinda ve reader olarak verilir.
+
+HAFTA2 (Parti 2):
+- TEMP/PIN_CSVS/WA_PIN_HAFTA2_GUN09_15.csv uretildi: 91 pin (GUN_09..15),
+  Publish date 2026-09-07 13:00 .. 2026-09-13 19:00 UTC (TR 16:00-22:00),
+  dogrulama GECTI, HAFTA1 ile sifir cakisma, 45.496 bayt.
+- Mo 6-7 Eylul'de Pinterest Ayarlar > Toplu Pin olusturma ile yukler;
+  "yukleme basarili" bandi gorulmeden sayfa terk edilmez (B89-EK dersi).
+  Planlanan Pinler sayisi 91 olmali.
+
+YENIDEN TASARIM KARARI - HAT DEPOYA TASINDI (astrolove-ops, main):
+- scripts/pinterest/merge_week.py + workflow pin-merge-week (girdiler:
+  week, day_from, day_to, start_date, force). GUN CSV'lerini birlestirir,
+  Publish date'i gunde 13 pin UTC 13:00'dan 30 dk arayla doldurur,
+  dogrular (satir sayisi, benzersiz URL/link/tarih, tarih araligi, 200 pin
+  siniri), Drive'a yazar. KANIT: HAFTA1 dosyasini bayt bayt yeniden uretti.
+  Colab WA_PIN_HAFTA1_V1 artik kullanilmaz.
+- scripts/pinterest/pin_media_perms.py + workflow pin-media-perms
+  (mode fix|remove, apply, folder_id, keep_id): Drive "anyone" izni araci,
+  varsayilan dry-run, anonim HTTP dogrulamali.
+- scripts/common/start_here_append.py + workflow start-here-append: depodaki
+  docs/start_here/Bnn.txt kaydini bu dokumanin sonuna ekler (bu kayit
+  onunla yazildi).
+- Kalan partiler ve tetik degerleri (pin-merge-week):
+  HAFTA3 = week 3, GUN 16..22, start_date 2026-09-14 (yukleme 13-14 Eyl)
+  HAFTA4 = week 4, GUN 23..29, start_date 2026-09-21 (yukleme 20-21 Eyl)
+  HAFTA5 = week 5, GUN 30..30, start_date 2026-09-28 (13 pin, yukleme 27-28 Eyl)
+
+ACIK ISLER:
+1. Parti 2: 6-7 Eyl HAFTA2 CSV yuklemesi (Mo); Planlanan Pinler = 91 kontrolu.
+2. Eksik 1 pin (HAFTA1): son partide toplu kontrol.
+3. HAFTA3-5 icin pin-merge-week tetikleri (yukaridaki degerlerle).
+4. B92/B93 diger acik isler gecerli (12 Eyl ad denemesi, token yenileme,
+   wallpaper zinciri).
+SON: B94 KAPANDI.
