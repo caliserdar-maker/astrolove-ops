@@ -1,27 +1,29 @@
-name: pin-sample-v2
+name: pin-build-v4
 
-# Pinterest pin gorseli YENIDEN TASARIM ornegi: tek ilan, 4 varyant
-# (V1 ana + overlay, V1b overlaysiz, V2 hediye, V3 dekor) + kontak sayfasi +
-# filigran yakin cekimi. Kaynak LISTING_MEDIA/MOCKUPS render'lari (rclone),
-# cikti TEMP/PIN_SAMPLE_V2/<PAIR>_<ED>/. Toplu uretim DEGILDIR; Pinterest'e
-# dokunmaz. Hicbir sir degeri loga dusmez.
+# Pinterest pin gorselleri V4 toplu uretim: POSTERS/OPTIMIZED_FOR_PRODUCTION/
+# <ED>/2X3 posterlerini 1000x1500'e kucultur (filigran/mockup YOK), Drive
+# WALL_ART/LISTING_MEDIA/PIN_MEDIA_V2/<ED>/ altina yazar, klasoru anyone:reader
+# (miras kapali) yapar ve dogrular, TEMP/PIN_UPLOAD_STATE_V2.csv'yi gunceller,
+# kontak sayfasini TEMP/PIN_KONTAK_V2/ altina koyar. Edisyon basina bir kosu.
+# Eski PIN_MEDIA'ya dokunmaz; Pinterest'e dokunmaz. Sir loga dusmez.
 
 on:
   workflow_dispatch:
     inputs:
-      pair:
-        description: "Cift, or. CAPRICORN_VIRGO"
-        required: true
-        default: "CAPRICORN_VIRGO"
       edition:
-        description: "Edisyon, or. WARM_PARCHMENT"
-        required: true
-        default: "WARM_PARCHMENT"
+        description: "Edisyon"
+        type: choice
+        options: [WARM_PARCHMENT, MIDNIGHT_BLUE, DEEP_BLACK, CHAMPAGNE_IVORY, PURE_WHITE]
+        default: WARM_PARCHMENT
+
+concurrency:
+  group: pin-media-v2
+  cancel-in-progress: false
 
 jobs:
-  sample:
+  build:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 40
 
     steps:
       - name: Checkout
@@ -37,7 +39,7 @@ jobs:
         run: |
           set -euo pipefail
           sudo apt-get update -qq
-          sudo apt-get install -y -qq fonts-ebgaramond fonts-liberation fonts-dejavu-core
+          sudo apt-get install -y -qq fonts-dejavu-core
           pip install -q -r requirements.txt
 
       - name: rclone kur
@@ -65,16 +67,16 @@ jobs:
             echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
           fi
 
-      - name: Ornek pinleri uret
+      - name: Pinleri uret ve yukle
         run: |
           set -euo pipefail
-          python scripts/pinterest/build_pin_sample.py --pair "${{ inputs.pair }}" --edition "${{ inputs.edition }}"
+          python scripts/pinterest/build_pins_v4.py --edition "${{ inputs.edition }}"
 
-      - name: Ciktilari artifact olarak sakla
+      - name: Kontak sayfasini artifact olarak sakla
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: pin-sample-v2
-          path: _out/
+          name: pin-kontak-v2-${{ inputs.edition }}
+          path: _out/PIN_KONTAK_V2/
           if-no-files-found: ignore
           retention-days: 30
