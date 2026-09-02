@@ -44,11 +44,9 @@ OUT_W, OUT_H = 3000, 2250
 SCENES = {
     "SET01": dict(master="WA_MOCKUP_V2_SET01_Cancer_Libra_FINAL.jpg", expect={"Phone": 2}),
     "SET03": dict(master="WA_MOCKUP_V2_SET03_Cancer_Libra_FINAL.jpg", expect={"Phone": 4}),
-    # SET04 = SET01 sahnesi, DB + WP telefon (pilot SET04_FINAL 2048x1536 ile
-    # sahne disi fark 0.5/255 olculdu = ayni sahne). Master 3000 uretilip
-    # onaylaninca buradaki master SET04 dosyasina cevrilir, edition_map kalkar.
-    "SET04": dict(master="WA_MOCKUP_V2_SET01_Cancer_Libra_FINAL.jpg", expect={"Phone": 2},
-                  calib_from="SET01", edition_map=["Deep_Black", "Warm_Parchment"]),
+    # SET04: 2 Eyl 2026 onayli 3000x2250 master (SET01 sahnesinden DB+WP ile
+    # uretildi, Etsy rank 3'e yuklendi; 2048 dosya ARCHIVE'da). Kendi masteri.
+    "SET04": dict(master="WA_MOCKUP_V2_SET04_Cancer_Libra_FINAL.jpg", expect={"Phone": 2}),
     "SET06": dict(master="WA_MOCKUP_V2_SET06_Cancer_Libra_FINAL.jpg", expect={"Desktop": 2, "Tablet": 1}),
     "SET07": dict(master="WA_MOCKUP_V2_SET07_Cancer_Libra_FINAL.jpg", expect={"Phone": 1, "Watch": 1}),
     "SET10Y": dict(master="WA_MOCKUP_V2_SET10_YAZILI_Cancer_Libra_FINAL.jpg", expect={"Phone": 1},
