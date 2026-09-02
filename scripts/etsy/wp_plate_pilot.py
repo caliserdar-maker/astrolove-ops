@@ -1,27 +1,46 @@
 #!/usr/bin/env python3
 """
 wp-plate-pilot: 16 temiz plaka (edisyon x cihaz), referans = CANLI PILOT
-wallpaper dosyalari (WALLPAPER/FINAL_V2/CANCER_LIBRA). Mo 2 Eyl yontemi:
+wallpaper dosyalari (WALLPAPER/FINAL_V2/CANCER_LIBRA). Mo 2 Eyl yontemi,
+kapsam 2 (2 Eyl aksam):
 
-1. Pilot dosyasi = taban. Murekkep maskesi pilotun kendisinden: murekkep
-   rengine yakinlik (WP_LAYOUT_SPEC 7.1: CI 95,59,29 | WP 139,81,25 |
-   MB 244,184,63 | DB 244,183,62) + luma Otsu (MB/DB'de parlak = murekkep),
-   yalniz poster bolgesinde, + 16 px dilate. Maske disina DOKUNULMAZ.
-2. Maske ici dolgu: OPTIMIZED 3X4 78 posterin piksel-medyani (cihaz
-   olceginde: her poster bir kez okunur, 4 cihaz boyutuna INTER_AREA ile
-   indirilir; medyan = uint8 partition, satir parcalariyla), olculen afin
-   yerlesimle (Phone 0.2000 y+640; Tablet 0.2844 y+182; Desktop 0.2649
-   x+966 y-193; Watch 0.2372 merkez (500,608)) pilot tuvaline hizalanir;
-   YEREL ton eslestirme (maske cevresi 16-64 px halkasinin Gauss-agirlikli
-   ort/std alanlari, sigma 32) + 24 px feather ile pilota harmanlanir.
-   ISTISNA (medyanin kendi murekkebi): halka, ∞ ve tagline 78 posterde ayni
-   yerde oldugu icin medyanda da vardir; bu piksellerde dolgu, medyanin
-   kendi murekkepsiz dokusunun 48 px kaydirilmis kopyasindan alinir
-   (inpaint/patch yok, ayni doku).
-3. QC: (a) maske disi fark pilotla = 0 (birebir), (b) maske ici yuksek
-   frekans (luma - Gauss s=4) std'si / cevre halkasi (hayalet/dikis),
-   (c) 3 kesit 600x600 1:1 (halka, sembol merkezi, tagline) + kucultulmus
-   tam plaka. ETA sayaci: poster okuma ilerlemesi.
+* Halka ve tagline ("Two Souls · One Bond") pilottan AYNEN kalir; plakada
+  silinmez (6 posterde de birebir ayni kutuda: halka 920,1147,6279,5696;
+  tagline 2485,8226,4715,8454).
+* Temizlenen yalniz cifte ozel murekkep: fuzyon sembolu (halka ici), iki
+  isim, iki glif. Maske = bu bolgelerdeki murekkep + 12 px dilate; halka
+  bandi (medyandan turetilen halka cizgisi + 2 px) maskeden DISLANIR: sembol
+  halkayi kestigi yerde halka cizgisi pilottaki gibi kalir.
+* OLCUM (6 CI posteri): ∞ logonun konumu cifte gore DEGISIR — "ISIM ∞ ISIM"
+  satiri bir butun olarak ortalaniyor: ∞ merkezi 2890..3812 poster px
+  (LEO_SAGITTARIUS 2578..3201, CANCER_LIBRA 3500..4124, GEMINI_SCORPIO
+  3112..3735). Bu yuzden ∞ isim satiriyla birlikte temizlenir
+  (KEEP_INFINITY=False) ve ink katmaninda posterden isimlerle beraber
+  alinir; aksi halde uzun isimler pilotun ∞'sinin ustune binerdi.
+* ∞ logo (pilotta poster kutusu 3500..4124 x 7110..7296) halka ve tagline gibi
+  pilottan AYNEN kalir (Mo, 2 Eyl aksam 2. talimat); maske ve aday tespiti bu
+  kutunun 6 px cevresini dislar. NOT (olcum, 6 CI posteri): ∞ konumu cifte
+  gore kayar (∞ merkezi 2890..3812 poster px); ink katmani posterin kendi
+  ∞'sini almaz — uzun isimli ciftlerde isimler pilot ∞'sinin ustune binebilir,
+  bu uretim adiminda kontrol edilecek.
+* Dolgu kaynagi: YALNIZ OPTIMIZED 3X4 78 posterin tam cozunurluk (7200x9600)
+  piksel-MEDYANI (satir parcalariyla, uint8 partition; edisyon basina bir kez,
+  MEDIAN_<EDISYON>.png). QC: medyanda eleman kutularinda (halka bandi ve ∞
+  kutusu haric) murekkep pikseli = 0 beklenir (sayi + bilesen listesi raporda).
+  Pilotun kendisinden doku orneklenmez. Medyan INTER_AREA ile cihaz olcegine
+  indirilir, olculen afin yerlesimle pilot tuvaline hizalanir; dokusu
+  (sigma-16 ustu, sabit ogelerin oldugu yerde 48 px kaydirilmis kopya) iki
+  bantta (ince <4 px, orta 4..16) pilotun maske cevresi halkasindaki std'ye
+  olceklenir + pilotun yerel tonu (halka 16..64 px, murekkepsiz, normalize
+  konvolusyon sigma 32; agirlik yetersizse x2/x4/x8). Feather 24 px: maske =
+  murekkep + 24 px; alfa murekkep+6 px'te 1 (olcum: kenar parlamasi 5 px'te
+  biter), maske sinirinda 0. Inpaint yok.
+* Yerel duman testi: ayni kod 6 posterle (6'nin medyani sembol/isim
+  hayaletlerini TAM silemez — QC sayisi raporlanir; 78 posterde medyan temiz).
+* QC her plakada: (a) maske disi fark pilotla = 0 (halka bandi dahil),
+  (b) maske ici HF (luma - Gauss s=4) std / cevre halkasi, (c) 3 kesit
+  600x600 1:1 pilot | plaka | fark x4: sembol merkezi, isim bolgesi, halka
+  kesisimi (sembol murekkebinin halka bandina en cok degdigi yer).
 """
 import argparse
 import json
@@ -43,18 +62,39 @@ WATCH_SRC_CENTER = (3600.0, 3510.0)
 WATCH_DST_CENTER = (500.0, 608.0)
 INK_RGB = {"Champagne_Ivory": (95, 59, 29), "Warm_Parchment": (139, 81, 25), "Midnight_Blue": (244, 184, 63), "Deep_Black": (244, 183, 62)}
 DARK = {"Midnight_Blue", "Deep_Black"}
-# poster px referans kutulari (7.1): halka yayi, fuzyon merkezi, tagline satiri
-REF_RING = (921, 1147, 6279, 4922)
-REF_SYMBOL = (1934, 1939, 5261, 5081)
-REF_TAGLINE = (1584, 7061, 5606, 7334)
-# murekkebin bulunabilecegi yerlesim kutulari (poster px, WP_LAYOUT_SPEC 7.1): halka kutusu, isim/tagline satirlari
-# Tek kutu: Cancer sembolunun ince kuyruklari poster y~5400-5800'e sarkiyor (kosu 5: iki kutu arasi
-# boslukta kuyruk uclari kaldi). Kutu disindaki alan (kenar vinyeti) yine disarida.
-LAYOUT_BOXES = [(800, 1000, 6400, 8600)]
+
+# Poster px eleman kutulari (6 CI posterinde olculdu; sabit ogeler kutu DISINDA):
+#   halka bbox (sabit)        : (920, 1147, 6279, 5696)
+#   tagline bbox (sabit)      : (2485, 8226, 4715, 8454)
+#   glif satiri (degisken)    : y 6066..6712, sol x 1533..2803, sag x 4494..5509
+#   isim satiri + ∞ (degisken): y 7042..7388, x 1323..5876
+REF_RING = (920, 1147, 6279, 5696)
+# Halka geometrisi (medyan halka bilesenine elips uydurma; Phone/Tablet/Desktop, CI ve MB birebir):
+# merkez (3602,3874), yari eksenler 2675 x 2710 poster px, egim ~1 derece, cizgi ~15 px;
+# altta ACIK yay: uclar y=5696'da (bbox alt siniri). Band bu elipsten cizilir (WP yanik kenarda
+# yerel kontrast tespiti bosluk birakiyordu -> halka orada maskelenip siliniyordu).
+RING_ELLIPSE = (3602.0, 3874.0, 2675.0, 2710.0)
+RING_TIP_Y = 5696
+RING_LINE_PX = 15.0
+REF_TAGLINE = (2485, 8226, 4715, 8454)
+BOX_SYMBOL = (900, 1100, 6300, 5950)      # halka kutusu; halka bandi ayrica dislanir
+BOX_GLYPHS = (1100, 5950, 6100, 6900)
+BOX_NAMES = (900, 6950, 6300, 7500)       # isimler (+ ∞ kutusu ayrica dislanir)
+ELEMENT_BOXES = [BOX_SYMBOL, BOX_GLYPHS, BOX_NAMES]
+REF_INFINITY = (3500, 7110, 4124, 7296)   # pilot (Cancer_Libra) ∞ logosu, poster px; +6 px maske disi
+INF_PAD = 6
+
 HP_SIGMA = 16       # dolgu = medyanin yuksek frekans dokusu (sigma 16 ustu) + pilotun yerel tonu
-DILATE_INK = 24     # maske = murekkep + 24 px
-FEATHER = 22        # alfa: murekkep+2 px'te 1, maske sinirinda 0 (24 px'lik gecis maske ICINDE)
+DILATE_INK = 24     # maske = murekkep + 24 px (feather 24)
+CORE_PAD = 6        # alfa = 1 bolgesi: murekkep + 6 px (olcum: kenar parlamasi/golgesi 5 px'te sifirlanir;
+                    # 2 px'te birakinca MB/DB'de kontur boyunca 3-6 seviyelik parlak iz kaliyordu)
+FEATHER = DILATE_INK - CORE_PAD   # 18 px'lik gecis maske ICINDE
+RING_BAND = 3       # halka cizgisi (elips) + 3 px: maske disi (halka elipsten +-%0.5 sapiyor)
+CORE_DEV = 60       # cekirdek icin morfolojik zeminden (kapama/acma 61 px) en az sapma. Olcum (WP, 3 cihaz):
+                    # gercek murekkep |d| p5 145-159, yanik kenar kivrimlari (renk+Otsu'yu gecen) p50 31-39, p95 7-13.
+                    # medianBlur 51 zemini kalin vuruslarda (Tablet/Desktop, >25 px) vurus icinde kaliyordu -> kullanilmaz.
 RING_IN, RING_OUT = 16, 64
+MEDIAN_CHUNK_ROWS = 800   # tam cozunurluk medyan: 78 x 800 x 7200 x 3 = 1.35 GB / parca
 
 
 def luma(bgr):
@@ -74,33 +114,75 @@ def poster_to_canvas(dev, x, y):
     return x * s + x0, y * s + y0
 
 
-# ------------------------------------------------------------------ 78 poster medyani (cihaz olceginde)
-def device_medians(poster_paths, log_every=5):
-    sizes = {dev: PLACEMENT[dev]["size"] for dev in PLACEMENT}
+def box_mask(shape, dev, boxes):
+    m = np.zeros(shape[:2], np.uint8)
+    for (bx0, by0, bx1, by1) in boxes:
+        x0, y0 = poster_to_canvas(dev, bx0, by0); x1, y1 = poster_to_canvas(dev, bx1, by1)
+        m[max(0, int(y0)):int(y1) + 1, max(0, int(x0)):int(x1) + 1] = 1
+    return m
+
+
+# ------------------------------------------------------------------ 78 poster medyani (tam cozunurluk)
+def poster_median_fullres(poster_paths, rows=MEDIAN_CHUNK_ROWS):
+    """7200x9600 posterlerin piksel medyani, satir parcalariyla (her parca icin posterler yeniden
+    okunur: bellek 78 x rows x 7200 x 3). Cift sayida n: iki ortanca degerin ortalamasi."""
     n = len(poster_paths)
-    stacks = {dev: np.empty((n, sizes[dev][1], sizes[dev][0], 3), np.uint8) for dev in sizes}
+    out = np.empty((9600, 7200, 3), np.uint8)
     t0 = time.time()
-    for i, p in enumerate(poster_paths):
-        im = imread(p)
-        if im.shape[1] != 7200 or im.shape[0] != 9600:
-            raise SystemExit(f"HATA: {Path(p).name} {im.shape[1]}x{im.shape[0]} (7200x9600 degil)")
-        for dev, (w, h) in sizes.items():
-            stacks[dev][i] = cv2.resize(im, (w, h), interpolation=cv2.INTER_AREA)
-        if (i + 1) % log_every == 0 or i + 1 == n:
-            el = time.time() - t0
-            log(f"  poster {i + 1}/{n}  gecen {el:5.0f}s  kalan {el / (i + 1) * (n - i - 1):5.0f}s  %{100 * (i + 1) / n:.0f}")
-    med = {}
-    for dev, st in stacks.items():
-        out = np.empty(st.shape[1:], np.uint8)
-        rows = 256
-        for y in range(0, st.shape[1], rows):
-            part = np.partition(st[:, y:y + rows], (n // 2 - 1, n // 2), axis=0)
+    chunks = list(range(0, 9600, rows))
+    for ci, y in enumerate(chunks):
+        h = min(rows, 9600 - y)
+        st = np.empty((n, h, 7200, 3), np.uint8)
+        for i, p in enumerate(poster_paths):
+            im = imread(p)
+            if im.shape[1] != 7200 or im.shape[0] != 9600:
+                raise SystemExit(f"HATA: {Path(p).name} {im.shape[1]}x{im.shape[0]} (7200x9600 degil)")
+            st[i] = im[y:y + h]
+        part = np.partition(st, (n // 2 - 1, n // 2) if n % 2 == 0 else (n // 2,), axis=0)
+        if n % 2 == 0:
             a = part[n // 2 - 1].astype(np.uint16); b = part[n // 2].astype(np.uint16)
-            out[y:y + rows] = ((a + b + 1) // 2).astype(np.uint8)
-        med[dev] = out
-        log(f"  medyan {dev}: {out.shape[1]}x{out.shape[0]}")
-    del stacks
-    return med
+            out[y:y + h] = ((a + b + 1) // 2).astype(np.uint8)
+        else:
+            out[y:y + h] = part[n // 2]
+        del st, part
+        el = time.time() - t0
+        log(f"  medyan parca {ci + 1}/{len(chunks)}  gecen {el:5.0f}s  kalan {el / (ci + 1) * (len(chunks) - ci - 1):5.0f}s")
+    return out
+
+
+def device_medians_from(median):
+    """Tam cozunurluk medyani 4 cihaz boyutuna INTER_AREA ile indirir (poster -> wallpaper ile ayni yol)."""
+    return {dev: cv2.resize(median, PLACEMENT[dev]["size"], interpolation=cv2.INTER_AREA) for dev in PLACEMENT}
+
+
+def median_ink_qc(median, ed, tol=70):
+    """Medyanda kalan cifte ozel murekkep (beklenen 0): eleman kutularinda, halka bandi ve ∞ kutusu
+    disinda, renk+Otsu+morfolojik sapma (>= CORE_DEV) ile aday pikseller; bilesen >= 100 px.
+    Donus: (piksel sayisi, bilesen bbox listesi, gorsel)."""
+    r, g, b = INK_RGB[ed]
+    Lu = luma(median); L = Lu.astype(np.float32)
+    dist = np.sqrt(((median.astype(np.float32) - np.array([b, g, r], np.float32)) ** 2).sum(axis=2))
+    t = otsu_thresh(Lu)
+    ker = np.ones((61, 61), np.uint8)
+    bg_m = (cv2.morphologyEx(Lu, cv2.MORPH_OPEN, ker) if ed in DARK else cv2.morphologyEx(Lu, cv2.MORPH_CLOSE, ker)).astype(np.float32)
+    cand = (((L > t) if ed in DARK else (L < t)) & (dist < tol) & (np.abs(L - bg_m) > CORE_DEV)).astype(np.uint8)
+    boxes = np.zeros(Lu.shape, np.uint8)
+    for (x0, y0, x1, y1) in ELEMENT_BOXES:
+        boxes[y0:y1 + 1, x0:x1 + 1] = 1
+    ring = np.zeros_like(cand)
+    cx, cy, ax, ay = RING_ELLIPSE
+    cv2.ellipse(ring, (int(cx), int(cy)), (int(ax), int(ay)), 0, 0, 360, 1, int(RING_LINE_PX) + 2 * 5 * RING_BAND, cv2.LINE_8)
+    ring[RING_TIP_Y + 1:, :] = 0
+    inf = np.zeros_like(cand); x0, y0, x1, y1 = REF_INFINITY; inf[y0 - 30:y1 + 31, x0 - 30:x1 + 31] = 1
+    cand = cand & boxes & (ring == 0) & (inf == 0)
+    n, lab, st, _ = cv2.connectedComponentsWithStats(cand)
+    comps = [tuple(int(v) for v in st[i, :5]) for i in range(1, n) if st[i, cv2.CC_STAT_AREA] >= 100]
+    px = int(sum(c[4] for c in comps))
+    vis = cv2.resize(median, (600, 800), interpolation=cv2.INTER_AREA)
+    for (x, y, w, h, a) in comps:
+        cv2.rectangle(vis, (int(x / 12), int(y / 12)), (int((x + w) / 12), int((y + h) / 12)), (0, 0, 255), 2)
+    cv2.putText(vis, f"{ed} medyan murekkep: {px} px / {len(comps)} bilesen", (8, 24), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+    return px, comps, vis
 
 
 # ------------------------------------------------------------------ maskeler
@@ -110,41 +192,83 @@ def otsu_thresh(vals):
     return float(t)
 
 
-def ink_mask_pilot(pilot, ed, dev, canvas_region, tex=None, tol=70, dloc=18):
-    """Pilotun kendi murekkebi:
+def texture_std(img, sigma_hp=6.0, sigma_win=12.0):
+    """Yerel doku siddeti: luma yuksek frekansinin (sigma_hp ustu) Gauss pencereli std'si."""
+    g = luma(img).astype(np.float32)
+    hp = g - cv2.GaussianBlur(g, (0, 0), sigma_hp)
+    return np.sqrt(np.maximum(cv2.GaussianBlur(hp * hp, (0, 0), sigma_win), 0.0))
+
+
+def median_ink_core(med, ed, dloc=18, dlight=30):
+    """Medyanin kendi murekkebi (halka, tagline, kismen isim/∞ hayaletleri), genisletmesiz."""
+    Lu = luma(med)
+    d = Lu.astype(np.float32) - cv2.medianBlur(Lu, 51).astype(np.float32)
+    m = ((d > dloc) if ed in DARK else (np.abs(d) > dlight)).astype(np.uint8)
+    return cv2.morphologyEx(m, cv2.MORPH_OPEN, np.ones((2, 2), np.uint8))
+
+
+def ink_mask_median(med, ed):
+    """Sabit ogeler + 25 px: dolgu dokusunun bu piksellerde kaydirilmis kopyadan alinacagi bolge."""
+    return cv2.dilate(median_ink_core(med, ed), np.ones((25, 25), np.uint8))
+
+
+def ring_band(med_canvas, ed, dev, region):
+    """Halka bandi = RING_ELLIPSE'in cihaz olcegine afin izdusumu, kalinlik = cizgi (15 poster px)
+    + 2*RING_BAND, yalniz y <= uc (acik yay). Dogrulama: medyanin halka kutusundaki en buyuk
+    murekkep bileseninin bant tarafindan kapsanma orani (log)."""
+    H, W = med_canvas.shape[:2]
+    s, _, x0, y0 = placement(dev)
+    cx, cy = poster_to_canvas(dev, RING_ELLIPSE[0], RING_ELLIPSE[1])
+    ax, ay = RING_ELLIPSE[2] * s, RING_ELLIPSE[3] * s
+    thick = int(round(RING_LINE_PX * s)) + 2 * RING_BAND
+    band = np.zeros((H, W), np.uint8)
+    cv2.ellipse(band, (int(round(cx)), int(round(cy))), (int(round(ax)), int(round(ay))), 0, 0, 360, 1, thick, cv2.LINE_8)
+    _, ytip = poster_to_canvas(dev, 0, RING_TIP_Y)
+    band[int(ytip) + 1:, :] = 0
+    band &= region
+    core = median_ink_core(med_canvas, ed) & region & box_mask(med_canvas.shape, dev, [BOX_SYMBOL])
+    n, lab, st, _ = cv2.connectedComponentsWithStats(core)
+    line = np.zeros_like(core)
+    if n > 1:
+        i = 1 + int(np.argmax(st[1:, cv2.CC_STAT_AREA]))
+        line = (lab == i).astype(np.uint8)
+        cov = float((line & band).sum()) / max(1, int(line.sum()))
+        log(f"    halka bandi {dev}: elips kalinlik {thick} px, medyan halka bileseni {int(line.sum())} px, bant kapsama %{100 * cov:.1f}")
+    return band, line
+
+
+def ink_mask_pilot(pilot, ed, dev, canvas_region, exclude, tex=None, tol=70, dloc=18):
+    """Pilotun cifte ozel murekkebi (eleman kutularinda; exclude = halka bandi + 6 px disari):
     cekirdek = murekkep rengine yakin (tol) + luma Otsu (MB/DB parlak, CI/WP koyu);
-    uzanti   = yerel zeminden (medyan 51 px) >= dloc sapan pikseller (kenar
-               yumusatma, altin parlama/golge, kabartma kenari), YALNIZ
-               cekirdegin 24 px komsulugundaki bilesenler (doku benegi/lif
-               ve yildizlar disarida; MB/DB'de ayrica altin ton sarti R-B>30).
-    Poster bolgesine sinirli; kenara degen bloblar (vinyet) atilir."""
+    uzanti   = yerel zeminden (medyan 51 px) sapan pikseller (kenar yumusatma, altin
+               parlama/golge, kabartma), esik zemin dokusuyla olceklenir (>= 2.5*tex),
+               YALNIZ cekirdegin 40 px komsulugundaki bilesenler (alan >= 12).
+    Kenara degen bloblar (vinyet) atilir. 2x2 acma YOK (1 px kuyruk uclari)."""
     r, g, b = INK_RGB[ed]
     Lu = luma(pilot)
     L = Lu.astype(np.float32)
     dist = np.sqrt(((pilot.astype(np.float32) - np.array([b, g, r], np.float32)) ** 2).sum(axis=2))
-    reg = canvas_region > 0
-    lay = np.zeros_like(canvas_region)
-    for (bx0, by0, bx1, by1) in LAYOUT_BOXES:
-        x0, y0 = poster_to_canvas(dev, bx0, by0); x1, y1 = poster_to_canvas(dev, bx1, by1)
-        lay[max(0, int(y0)):int(y1) + 1, max(0, int(x0)):int(x1) + 1] = 1
-    reg = reg & (lay > 0)                     # murekkep yalniz yerlesim kutularinda; vinyet/lif disarida
+    reg = (canvas_region > 0) & (box_mask(pilot.shape, dev, ELEMENT_BOXES) > 0) & (exclude == 0)
     t = otsu_thresh(Lu[canvas_region > 0])
-    core = ((L > t) if ed in DARK else (L < t)) & (dist < tol) & reg
     bg = cv2.medianBlur(Lu, 51).astype(np.float32)
     d = L - bg
+    ker = np.ones((61, 61), np.uint8)
+    bg_m = (cv2.morphologyEx(Lu, cv2.MORPH_OPEN, ker) if ed in DARK else cv2.morphologyEx(Lu, cv2.MORPH_CLOSE, ker)).astype(np.float32)
+    core = ((L > t) if ed in DARK else (L < t)) & (dist < tol) & reg & (np.abs(L - bg_m) > CORE_DEV)
+    # kucuk izole cekirdek benekleri (WP yanik kenar gozenekleri, koyu edisyonda yildiz cekirdegi) atilir:
+    # alan < 30 px (Phone olcegi; olcekle kare orantili). Murekkep bilesenleri bunun cok ustunde.
+    s_dev = placement(dev)[0]
+    min_area = int(30 * (s_dev / 0.2) ** 2)
+    core_u8 = core.astype(np.uint8)
+    n0, lab0, st0, _ = cv2.connectedComponentsWithStats(core_u8)
+    small = np.zeros(n0, bool); small[1:] = st0[1:, cv2.CC_STAT_AREA] < min_area
+    core = core & ~small[lab0]
     thr = np.full(L.shape, float(dloc if ed in DARK else dloc * 2 / 3), np.float32)
     if tex is not None:
-        # zeminin kendi dokusu yuksek kontrastliysa (WP yanik kenar kivrimlari) uzanti esigi
-        # dokuyla olceklenir: doku murekkep sanilip medyanla degistirilmesin (kosu 5: WP halka dikisi)
         thr = np.maximum(thr, 2.5 * tex)
-    if ed in DARK:
-        ext = d > thr                     # parlama beyaza yakin (R-B kucuk): ton sarti YOK; yildizlar cekirdege uzak oldugu icin disarida
-    else:
-        ext = np.abs(d) > thr             # kabartma parlamasi soluk (12)
+    ext = (d > thr) if ed in DARK else (np.abs(d) > thr)
     ext &= reg
     cand = (ext | core).astype(np.uint8)
-    # NOT: 2x2 acma yok — Cancer kuyruklari gibi 1 px'lik ince uclar aciliyordu (kosu 7:
-    # maskelenmemis kuyruk ucu ton halkasina giriyor -> koyu gri leke). Benek alan esigiyle (12) elenir.
     near_core = cv2.dilate(core.astype(np.uint8), np.ones((81, 81), np.uint8)) > 0
     n, lab, st, _ = cv2.connectedComponentsWithStats(cand)
     keep = np.zeros_like(cand)
@@ -159,22 +283,8 @@ def ink_mask_pilot(pilot, ed, dev, canvas_region, tex=None, tol=70, dloc=18):
             continue
         keep[comp] = 1
     keep |= core.astype(np.uint8)
-    # gevsek murekkep: aday piksellerin 8 px komsulugu; ton halkasindan dislanir (maskeye girmeyen
-    # ince uc/soluk kenar ton ortalamasini karartmasin)
-    loose = cv2.dilate(cand, np.ones((17, 17), np.uint8))
+    loose = cv2.dilate(cand, np.ones((17, 17), np.uint8))   # ton halkasindan dislanacak gevsek murekkep
     return keep, t, loose
-
-
-def ink_mask_median(med, ed, dloc=18, dlight=30):
-    """Medyanin kendi murekkebi (halka, ∞, tagline; cifte ozel murekkep medyanda
-    yok): yerel medyan zeminden sapma (koyu edisyon: parlak; acik: her iki yon),
-    renk sarti YOK (halkanin beyaz parlamalari da dahil). 25 px genisletme."""
-    Lu = luma(med)
-    d = Lu.astype(np.float32) - cv2.medianBlur(Lu, 51).astype(np.float32)
-    # acik edisyonda esik 30: parsomen lifleri (|d| 12-25) sabit murekkep sayilmasin
-    m = ((d > dloc) if ed in DARK else (np.abs(d) > dlight)).astype(np.uint8)
-    m = cv2.morphologyEx(m, cv2.MORPH_OPEN, np.ones((2, 2), np.uint8))
-    return cv2.dilate(m, np.ones((25, 25), np.uint8))
 
 
 def shifted_fill(img, mask, region=None, k=48):
@@ -206,10 +316,21 @@ def aligned_median_canvas(med_dev, dev, canvas_shape):
     return canvas, region
 
 
+def _gblur(img, sigma, ds=1):
+    """Gauss bulaniklik; ds>1: 1/ds cozunurlukte (sigma/ds) hesaplanip geri buyutulur (genis sigma icin hizli)."""
+    if ds == 1:
+        return cv2.GaussianBlur(img, (0, 0), sigma)
+    H, W = img.shape[:2]
+    small = cv2.resize(img, (max(1, int(W // ds)), max(1, int(H // ds))), interpolation=cv2.INTER_AREA)
+    b = cv2.GaussianBlur(small, (0, 0), sigma / ds)
+    out = cv2.resize(b, (W, H), interpolation=cv2.INTER_LINEAR)
+    return out if out.ndim == img.ndim else out[..., None]
+
+
 def local_stats(img, w, sigma, min_den=0.02, sigmas=(2, 4, 8)):
     """Gauss-agirlikli yerel ortalama/std (normalize konvolusyon), kanal basina.
-    Agirlik kutlesi (den) yetersiz kalan piksellerde (genis maske ici: halkaya > ~2.5 sigma)
-    daha genis sigma'ya (x2, x4, x8) dusulur — kosu 7: den ~1e-5 -> mu rastgele -> koyu gri leke."""
+    Agirlik kutlesi (den) yetersiz kalan piksellerde (genis maske ici) sigma x2/x4/x8'e
+    dusulur (1/k cozunurlukte hesaplanir: hiz)."""
     w3 = w[..., None]
     den = cv2.GaussianBlur(w, (0, 0), sigma)[..., None]
     mu = cv2.GaussianBlur(img * w3, (0, 0), sigma) / np.maximum(den, 1e-6)
@@ -218,53 +339,52 @@ def local_stats(img, w, sigma, min_den=0.02, sigmas=(2, 4, 8)):
         bad = den < min_den
         if not bad.any():
             break
-        den_k = cv2.GaussianBlur(w, (0, 0), sigma * k)[..., None]
-        mu_k = cv2.GaussianBlur(img * w3, (0, 0), sigma * k) / np.maximum(den_k, 1e-6)
-        m2_k = cv2.GaussianBlur((img ** 2) * w3, (0, 0), sigma * k) / np.maximum(den_k, 1e-6)
+        den_k = _gblur(w, sigma * k, k)
+        den_k = den_k if den_k.ndim == 3 else den_k[..., None]
+        mu_k = _gblur(img * w3, sigma * k, k) / np.maximum(den_k, 1e-6)
+        m2_k = _gblur((img ** 2) * w3, sigma * k, k) / np.maximum(den_k, 1e-6)
         mu = np.where(bad, mu_k, mu); m2 = np.where(bad, m2_k, m2); den = np.where(bad, den_k, den)
     var = m2 - mu ** 2
     return mu, np.sqrt(np.maximum(var, 1e-4))
 
 
-def texture_std(img, sigma_hp=6.0, sigma_win=12.0):
-    """Yerel doku siddeti: luma yuksek frekansinin (sigma_hp ustu) Gauss pencereli std'si."""
-    g = luma(img).astype(np.float32)
-    hp = g - cv2.GaussianBlur(g, (0, 0), sigma_hp)
-    return np.sqrt(np.maximum(cv2.GaussianBlur(hp * hp, (0, 0), sigma_win), 0.0))
-
-
 def build_plate(pilot, med_dev, ed, dev):
     F, region = aligned_median_canvas(med_dev, dev, pilot.shape)
+    band, ring_line = ring_band(F, ed, dev, region)
+    band_wide = cv2.dilate(band, np.ones((13, 13), np.uint8))          # cekirdek/uzanti icin halka + 6 px disari
+    inf = box_mask(pilot.shape, dev, [REF_INFINITY])
+    inf = cv2.dilate(inf, np.ones((2 * INF_PAD + 1, 2 * INF_PAD + 1), np.uint8))   # ∞ logosu + 6 px: pilottan aynen kalir
+    keep_out = ((band_wide > 0) | (inf > 0)).astype(np.uint8)
     tex = texture_std(F)
-    ink, t, loose = ink_mask_pilot(pilot, ed, dev, region, tex=tex)
-    mask = cv2.dilate(ink, np.ones((2 * DILATE_INK + 1, 2 * DILATE_INK + 1), np.uint8))
-    mask &= region                              # dolgu kaynagi yalniz poster bolgesinde
+    ink, t, loose = ink_mask_pilot(pilot, ed, dev, region, keep_out, tex=tex)
+    k = 2 * DILATE_INK + 1
+    mask = cv2.dilate(ink, np.ones((k, k), np.uint8)) & region
+    mask[band > 0] = 0                                                   # halka bandi pilottan aynen kalir
+    mask[inf > 0] = 0                                                    # ∞ logosu pilottan aynen kalir
     Pf = pilot.astype(np.float32); Ff = F.astype(np.float32)
-    # Dolgu dokusu = medyanin yuksek frekansi (ton medyandan DEGIL, pilottan gelir).
-    # Kosu 5'te dolgu = (F - muF)*gain + muP idi: muF halkadan tahmin edildigi icin maske
-    # icinde medyanin kendi tonu tam cikmiyordu (CI halkada -2 seviyelik iz) ve kaydirilmis
-    # kopya bloklari ton basamagi birakiyordu (WP). Simdi: hp = F - G16(F), yogun/kesin.
     hpF = Ff - cv2.GaussianBlur(Ff, (0, 0), float(HP_SIGMA))
-    # medyanin kendi murekkebi (sabit ogeler) -> yuksek frekans dokusunun kaydirilmis kopyasi (tonsuz => dikissiz)
     mm = ink_mask_median(F, ed) & region
     hpF = shifted_fill(hpF, mm, region)
-    # Ton YALNIZ pilottan: maske cevresi halkasi (16..64 px), normalize konvolusyon sigma 32.
-    # Olcum (sahte maske bandi, gercek pilot pikseline karsi, WP Phone): sigma 32 ton hatasi
-    # yanik kenarda 7.4 / duz alanda 3.7 seviye; medyanin alcak frekansini kullanmak 17/20
-    # (kosu 6: medyan halka/tagline parlamasi dolguya sizdi = hayalet); sigma 16 -> 13/10.
     d_in = cv2.dilate(mask, np.ones((2 * RING_IN + 1, 2 * RING_IN + 1), np.uint8))
     d_out = cv2.dilate(mask, np.ones((2 * RING_OUT + 1, 2 * RING_OUT + 1), np.uint8))
-    ring = ((d_out > 0) & (d_in == 0) & (region > 0) & (loose == 0)).astype(np.float32)
+    ring = ((d_out > 0) & (d_in == 0) & (region > 0) & (loose == 0) & (keep_out == 0)).astype(np.float32)
     muP, _ = local_stats(Pf, ring, 32.0)
-    hpP = Pf - cv2.GaussianBlur(Pf, (0, 0), float(HP_SIGMA))
-    _, sdP = local_stats(hpP, ring, 32.0)                        # pilot dokusu (ton egimi haric) — dolguyla ayni bant
-    _, sdF = local_stats(hpF, region.astype(np.float32), 32.0)   # dolgu dokusunun yerel std'si (yogun)
-    gain = np.clip(sdP / np.maximum(sdF, 1e-3), 0.15, 2.0)   # pilot zemini duzse (saat parlamasi, DB siyah) dolgu dokusu bastirilir
-    Fm = hpF * gain + muP
-    # feather: murekkep cekirdegi (+2 px) tamamen dolgu (alfa 1); maske sinirina
-    # dogru 22 px'te 0'a iner. (Onceki surum: alfa = mesafe/24 -> ince cizgilerde
-    # hic 1'e ulasmiyor, pilot murekkebi %25-50 goruyordu = kabartma hayaleti.)
-    core = cv2.dilate(ink, np.ones((5, 5), np.uint8))
+    # Doku kazanci iki bantta ayri (ince: sigma<4, orta: 4..16). Olcum (MB Watch): pilot parlama
+    # bolgesi ince bantta 0.32, poster zemini 0.73 (bulut greni) — tek bant (sigma16) kazanci 1'e
+    # yakin cikip ince greni oldugu gibi birakiyordu (lekeli gorunum). Taban 0.02: pilot puruzsuzse
+    # dolgu da puruzsuz (DB siyah, Watch parlama).
+    regw = region.astype(np.float32)
+    g4P = cv2.GaussianBlur(Pf, (0, 0), 4.0); g4F = cv2.GaussianBlur(Ff, (0, 0), 4.0)
+    fineP = Pf - g4P; midP = g4P - cv2.GaussianBlur(Pf, (0, 0), float(HP_SIGMA))
+    g4F_sh = cv2.GaussianBlur(hpF, (0, 0), 4.0)          # hpF: kaydirilmis kopya uygulanmis HF
+    fineF = hpF - g4F_sh; midF = g4F_sh
+    _, sdPf = local_stats(fineP, ring, 32.0); _, sdFf = local_stats(fineF, regw, 32.0, sigmas=())
+    _, sdPm = local_stats(midP, ring, 32.0); _, sdFm = local_stats(midF, regw, 32.0, sigmas=())
+    gain_f = np.clip(sdPf / np.maximum(sdFf, 1e-3), 0.02, 2.0)
+    gain_m = np.clip(sdPm / np.maximum(sdFm, 1e-3), 0.02, 2.0)
+    Fm = fineF * gain_f + midF * gain_m + muP
+    gain = gain_f
+    core = cv2.dilate(ink, np.ones((2 * CORE_PAD + 1, 2 * CORE_PAD + 1), np.uint8))
     dist = cv2.distanceTransform(mask, cv2.DIST_L2, 5)
     alpha = np.clip(dist / float(FEATHER), 0, 1).astype(np.float32)
     alpha[core > 0] = 1.0
@@ -272,8 +392,43 @@ def build_plate(pilot, med_dev, ed, dev):
     alpha[mask[..., None] == 0] = 0.0
     out = Pf * (1 - alpha) + Fm * alpha
     out = np.clip(np.round(out), 0, 255).astype(np.uint8)
-    out[mask == 0] = pilot[mask == 0]           # maske disi birebir
-    return out, mask, ink, ring, dict(otsu=t, ink_px=int(ink.sum()), mask_px=int(mask.sum()), median_ink_px=int(mm.sum()))
+    out[mask == 0] = pilot[mask == 0]           # maske disi birebir (halka bandi dahil)
+    info = dict(otsu=t, ink_px=int(ink.sum()), mask_px=int(mask.sum()), median_ink_px=int(mm.sum()),
+                ring_band_px=int(band.sum()), ring_cross_px=int((core & band).sum()), inf_px=int(inf.sum()))
+    return out, mask, ink, ring, band, info
+
+
+# ------------------------------------------------------------------ ink katmani (uretim adimi icin)
+def ink_layer_mask(poster, ed, tol=70):
+    """Posterden (7200x9600) YALNIZ cifte ozel murekkep: sembol + glifler + isimler (+ ∞,
+    KEEP_INFINITY=False). Halka ve tagline alinmaz. Halka cizgisi posterin kendisinden:
+    RING_ELLIPSE bandi (cizgi 15 px + 2*15 px) disinda. Donus: uint8 maske (1 = murekkep)."""
+    r, g, b = INK_RGB[ed]
+    Lu = luma(poster); L = Lu.astype(np.float32)
+    dist = np.sqrt(((poster.astype(np.float32) - np.array([b, g, r], np.float32)) ** 2).sum(axis=2))
+    t = otsu_thresh(Lu)
+    core = (((L > t) if ed in DARK else (L < t)) & (dist < tol)).astype(np.uint8)
+    boxes = np.zeros(Lu.shape, np.uint8)
+    for (x0, y0, x1, y1) in ELEMENT_BOXES:
+        boxes[y0:y1 + 1, x0:x1 + 1] = 1
+    ring = np.zeros_like(core)
+    cx, cy, ax, ay = RING_ELLIPSE
+    cv2.ellipse(ring, (int(cx), int(cy)), (int(ax), int(ay)), 0, 0, 360, 1, int(RING_LINE_PX) + 2 * 5 * RING_BAND, cv2.LINE_8)
+    ring[RING_TIP_Y + 1:, :] = 0
+    out = ((core & boxes) & (ring == 0)).astype(np.uint8)
+    n, lab, st, _ = cv2.connectedComponentsWithStats(out)          # kucuk benekler (yanik kenar gozenekleri) atilir
+    small = np.zeros(n, bool); small[1:] = st[1:, cv2.CC_STAT_AREA] < 750
+    out = (out & ~small[lab]).astype(np.uint8)
+    # posterin kendi ∞ logosu (isim satirinda, bbox ~620x190 poster px; harfler ~270 px yuksek) alinmaz:
+    # pilotun ∞'si kalir. Konumu cifte gore kayar (olcum: merkez 2890..3812).
+    x0, y0, x1, y1 = BOX_NAMES
+    row = np.zeros_like(out); row[y0:y1 + 1, x0:x1 + 1] = 1
+    n, lab, st, _ = cv2.connectedComponentsWithStats(cv2.dilate(out & row, np.ones((15, 15), np.uint8)))
+    for i in range(1, n):
+        x, y, w, h = st[i, :4]
+        if 500 <= w <= 760 and 140 <= h <= 240:
+            out[y:y + h, x:x + w] = 0
+    return out
 
 
 # ------------------------------------------------------------------ QC
@@ -284,24 +439,63 @@ def hf_ratio(img, mask, ring):
     return si, so, (si / so if so > 0 else float("nan"))
 
 
-def qc_sheet(plate, dev, path, side=600):
+def qc_points(dev, ink, band, shape):
+    """Kesit merkezleri (tuval px): sembol merkezi (halka kutusundaki murekkebin agirlik
+    merkezi), isim bolgesi (isim kutusu merkezi; tuval disindaysa sembolun en alt noktasi),
+    halka kesisimi (murekkep+2 px ile halka bandinin en buyuk kesisim bileseni)."""
+    H, W = shape[:2]
+    sym_box = box_mask(shape, dev, [BOX_SYMBOL])
+    ys, xs = np.nonzero(ink & sym_box)
+    pts = []
+    if len(xs):
+        pts.append(("sembol", (float(xs.mean()), float(ys.mean()))))
+    else:
+        pts.append(("sembol", poster_to_canvas(dev, 3600, 3500)))
+    nx, ny = poster_to_canvas(dev, (BOX_NAMES[0] + BOX_NAMES[2]) / 2, (BOX_NAMES[1] + BOX_NAMES[3]) / 2)
+    if 0 <= ny < H:
+        pts.append(("isimler", (nx, ny)))
+    elif len(xs):
+        j = int(np.argmax(ys)); pts.append(("sembol-alt (isimler tuval disi)", (float(xs[j]), float(ys[j]))))
+    else:
+        pts.append(("isimler (tuval disi)", (nx, min(ny, H - 1))))
+    cross = (cv2.dilate(ink, np.ones((5, 5), np.uint8)) & band).astype(np.uint8)
+    n, lab, st, cen = cv2.connectedComponentsWithStats(cross)
+    if n > 1:
+        i = 1 + int(np.argmax(st[1:, cv2.CC_STAT_AREA]))
+        pts.append(("halka kesisimi", (float(cen[i][0]), float(cen[i][1]))))
+    else:
+        pts.append(("halka (kesisim yok)", poster_to_canvas(dev, REF_RING[0] + 150, (REF_RING[1] + REF_RING[3]) / 2)))
+    return pts
+
+
+def qc_sheet(pilot, plate, dev, pts, path, side=600):
+    """Sol: kucultulmus pilot + plaka. Sag: her kesit icin pilot | plaka | fark x4 (1:1)."""
     H, W = plate.shape[:2]
     side = min(side, H, W)
-    small_w = 600
-    small = cv2.resize(plate, (small_w, int(small_w * H / W)), interpolation=cv2.INTER_AREA)
-    tiles = [np.full((max(800, small.shape[0]), small_w, 3), 40, np.uint8)]
-    tiles[0][:small.shape[0]] = small
-    pts = [("halka", (REF_RING[0] + 200, (REF_RING[1] + REF_RING[3]) / 2)),
-           ("sembol", ((REF_SYMBOL[0] + REF_SYMBOL[2]) / 2, (REF_SYMBOL[1] + REF_SYMBOL[3]) / 2)),
-           ("tagline", ((REF_TAGLINE[0] + REF_TAGLINE[2]) / 2, (REF_TAGLINE[1] + REF_TAGLINE[3]) / 2))]
-    for name, (px, py) in pts:
-        cx, cy = poster_to_canvas(dev, px, py)
+    small_w = 420
+    sp = cv2.resize(pilot, (small_w, int(small_w * H / W)), interpolation=cv2.INTER_AREA)
+    sq = cv2.resize(plate, (small_w, int(small_w * H / W)), interpolation=cv2.INTER_AREA)
+    rows = []
+    for name, (cx, cy) in pts:
         x0 = int(np.clip(cx - side // 2, 0, W - side)); y0 = int(np.clip(cy - side // 2, 0, H - side))
-        canvas = np.full((tiles[0].shape[0], 600, 3), 40, np.uint8)
-        canvas[100:100 + side, :side] = plate[y0:y0 + side, x0:x0 + side]
-        cv2.putText(canvas, f"{name} 1:1 @({x0},{y0})", (8, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2, cv2.LINE_AA)
-        tiles.append(canvas)
-    cv2.imwrite(str(path), np.hstack(tiles), [cv2.IMWRITE_JPEG_QUALITY, 92])
+        pc = pilot[y0:y0 + side, x0:x0 + side]; qc = plate[y0:y0 + side, x0:x0 + side]
+        d = np.abs(pc.astype(np.int16) - qc.astype(np.int16)).max(axis=2)
+        dv = cv2.applyColorMap(np.clip(d * 4, 0, 255).astype(np.uint8), cv2.COLORMAP_JET)
+        row = np.full((side + 40, 3 * side, 3), 40, np.uint8)
+        row[40:, :side] = pc; row[40:, side:2 * side] = qc; row[40:, 2 * side:] = dv
+        cv2.putText(row, f"{name}  1:1 @({x0},{y0})   pilot | plaka | fark x4 (maks {int(d.max())})", (8, 28),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2, cv2.LINE_AA)
+        rows.append(row)
+    right = np.vstack(rows)
+    left = np.full((right.shape[0], small_w + 20, 3), 40, np.uint8)
+    hh = min(sp.shape[0], (right.shape[0] - 60) // 2)
+    left[40:40 + hh, 10:10 + small_w] = sp[:hh]
+    y2 = 40 + hh + 20
+    h2 = min(hh, right.shape[0] - y2)
+    left[y2:y2 + h2, 10:10 + small_w] = sq[:h2]
+    cv2.putText(left, "pilot", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2, cv2.LINE_AA)
+    cv2.putText(left, "plaka", (10, y2 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2, cv2.LINE_AA)
+    cv2.imwrite(str(path), np.hstack([left, right]), [cv2.IMWRITE_JPEG_QUALITY, 92])
 
 
 def main():
@@ -312,32 +506,49 @@ def main():
     ap.add_argument("--pilot-pair", default="Cancer_Libra")
     ap.add_argument("--out", required=True)
     ap.add_argument("--min-posters", type=int, default=40)
+    ap.add_argument("--devices", default="Phone,Tablet,Desktop,Watch")
+    ap.add_argument("--median-in", default="", help="hazir MEDIAN_<ED>.png (varsa medyan yeniden hesaplanmaz)")
     a = ap.parse_args()
     ed = a.edition
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True); (out / "qc").mkdir(exist_ok=True)
     posters = sorted(Path(a.posters).glob(f"WA_POSTER_*_{ed.upper()}_3X4.jpg"))
     log(f"{ed}: {len(posters)} poster")
-    if len(posters) < a.min_posters:
-        raise SystemExit(f"HATA: {len(posters)} poster (>= {a.min_posters} beklenir)")
     t0 = time.time()
-    med = device_medians([str(p) for p in posters])
-    log(f"medyanlar hazir: {time.time() - t0:.0f}s")
+    med_path = out / f"MEDIAN_{ed.upper()}.png"
+    if a.median_in and Path(a.median_in).exists():
+        median = imread(a.median_in); log(f"medyan okundu: {a.median_in}")
+    else:
+        if len(posters) < a.min_posters:
+            raise SystemExit(f"HATA: {len(posters)} poster (>= {a.min_posters} beklenir)")
+        median = poster_median_fullres([str(p) for p in posters])
+        cv2.imwrite(str(med_path), median, [cv2.IMWRITE_PNG_COMPRESSION, 3])
+        log(f"medyan yazildi: {med_path.name} ({time.time() - t0:.0f}s)")
+    mq_px, mq_comps, mq_vis = median_ink_qc(median, ed)
+    cv2.imwrite(str(out / "qc" / f"MEDIAN_{ed.upper()}_qc.jpg"), mq_vis, [cv2.IMWRITE_JPEG_QUALITY, 85])
+    log(f"medyan QC: eleman kutularinda murekkep {mq_px} px, {len(mq_comps)} bilesen (beklenen 0)")
+    med = device_medians_from(median)
+    del median
     report = {}
-    for dev in ["Phone", "Tablet", "Desktop", "Watch"]:
+    for dev in a.devices.split(","):
         pilot = imread(Path(a.pilot) / f"AstroLove_{a.pilot_pair}_{ed}_{dev}.jpg")
         W, H = DEVICES[dev]
         if pilot.shape[1] != W or pilot.shape[0] != H:
             raise SystemExit(f"HATA: pilot {dev} {pilot.shape[1]}x{pilot.shape[0]}")
-        plate, mask, ink, ring, info = build_plate(pilot, med[dev], ed, dev)
-        outside = float(np.abs(plate.astype(np.int16) - pilot.astype(np.int16))[mask == 0].max()) if (mask == 0).any() else 0.0
+        plate, mask, ink, ring, band, info = build_plate(pilot, med[dev], ed, dev)
+        diff = np.abs(plate.astype(np.int16) - pilot.astype(np.int16))
+        outside = float(diff[mask == 0].max()) if (mask == 0).any() else 0.0
+        band_diff = float(diff[band > 0].max()) if (band > 0).any() else 0.0
         si, so, r = hf_ratio(plate, mask, ring)
         name = f"PLATE_{ed.upper()}_{dev.upper()}.png"
         cv2.imwrite(str(out / name), plate, [cv2.IMWRITE_PNG_COMPRESSION, 3])
         cv2.imwrite(str(out / "qc" / f"MASK_{ed.upper()}_{dev.upper()}.png"), mask * 255)
-        qc_sheet(plate, dev, out / "qc" / f"PLATE_{ed.upper()}_{dev.upper()}.jpg")
-        report[dev] = dict(file=name, size=[W, H], outside_max_diff=outside, hf_inside=si, hf_ring=so, hf_ratio=r, **info)
-        log(f"  {dev:8s} maske {info['mask_px']} px (murekkep {info['ink_px']}, otsu {info['otsu']:.0f}, medyan-murekkep {info['median_ink_px']}) | maske disi maks fark {outside:.0f} | HF ic/halka {si:.2f}/{so:.2f} = {r:.2f}")
-    (out / f"report_{ed}.json").write_text(json.dumps(dict(edition=ed, posters=len(posters), devices=report), indent=1))
+        pts = qc_points(dev, ink, band, plate.shape)
+        qc_sheet(pilot, plate, dev, pts, out / "qc" / f"PLATE_{ed.upper()}_{dev.upper()}.jpg")
+        report[dev] = dict(file=name, size=[W, H], outside_max_diff=outside, ring_band_max_diff=band_diff,
+                           hf_inside=si, hf_ring=so, hf_ratio=r, qc_points={k: [round(x), round(y)] for k, (x, y) in pts}, **info)
+        log(f"  {dev:8s} maske {info['mask_px']} px (murekkep {info['ink_px']}, otsu {info['otsu']:.0f}, halka bandi {info['ring_band_px']}, kesisim {info['ring_cross_px']}) | maske disi maks fark {outside:.0f} (halka {band_diff:.0f}) | HF ic/halka {si:.2f}/{so:.2f} = {r:.2f}")
+    (out / f"report_{ed}.json").write_text(json.dumps(dict(edition=ed, posters=len(posters), median_file=med_path.name,
+                                                             median_ink_px=mq_px, median_ink_components=mq_comps, devices=report), indent=1))
     log(f"toplam {time.time() - t0:.0f}s")
 
 

@@ -1,9 +1,12 @@
 name: wp-plates
 
-# 16 temiz plaka (edisyon x cihaz): taban = canli pilot FINAL_V2/CANCER_LIBRA,
-# murekkep maskesi ici = 78 OPTIMIZED 3X4 posterin medyani (afin hizali,
-# yerel ton eslestirme, 24 px feather). Edisyon basina paralel is.
-# Cikti: Drive TEMP/WP_PLATES/PLATE_<EDISYON>_<CIHAZ>.png + qc/. Etsy'ye dokunmaz.
+# 16 temiz plaka (edisyon x cihaz): taban = canli pilot FINAL_V2/CANCER_LIBRA;
+# halka, tagline ve ∞ pilotta kalir; sembol + isimler + glifler temizlenir.
+# Dolgu kaynagi YALNIZ 78 OPTIMIZED 3X4 posterin tam cozunurluk piksel medyani
+# (edisyon basina bir kez: MEDIAN_<EDISYON>.png, QC: medyanda murekkep 0),
+# afin hizali, yerel ton eslestirme, 24 px feather. Edisyon basina paralel is.
+# Cikti: Drive TEMP/WP_PLATES/{PLATE_<EDISYON>_<CIHAZ>.png, MEDIAN_<EDISYON>.png,
+# report_<EDISYON>.json} + qc/. Etsy'ye dokunmaz.
 
 on:
   workflow_dispatch:
@@ -31,7 +34,7 @@ jobs:
   plate:
     needs: plan
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
@@ -85,12 +88,12 @@ jobs:
         run: |
           set -euo pipefail
           python scripts/etsy/wp_plate_pilot.py --edition "${{ matrix.edition }}" --posters _work/posters --pilot _work/pilot --out _out
-          { echo "## wp-plates: ${{ matrix.edition }}"; echo; echo '```'; cat "_out/report_${{ matrix.edition }}.json"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          { echo "## wp-plates: ${{ matrix.edition }}"; echo; echo "medyan murekkep QC: $(python3 -c "import json;d=json.load(open('_out/report_${{ matrix.edition }}.json'));print(d['median_ink_px'],'px,',len(d['median_ink_components']),'bilesen')")"; echo; echo '```'; cat "_out/report_${{ matrix.edition }}.json"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Drive'a yaz
         run: |
           set -euo pipefail
-          rclone copy _out "gdrive:ASTROLOVE/${{ inputs.out_dir }}" --include "PLATE_*.png" --include "report_*.json"
+          rclone copy _out "gdrive:ASTROLOVE/${{ inputs.out_dir }}" --include "PLATE_*.png" --include "MEDIAN_*.png" --include "report_*.json"
           rclone copy _out/qc "gdrive:ASTROLOVE/${{ inputs.out_dir }}/qc"
           rclone lsl "gdrive:ASTROLOVE/${{ inputs.out_dir }}" | grep -i "${{ matrix.edition }}" || true
 
