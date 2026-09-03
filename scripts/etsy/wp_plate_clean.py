@@ -37,9 +37,10 @@ import cv2
 import numpy as np
 
 from wp_mockup_common import DEVICES, EDITIONS, imread, log
-from wp_plate_pilot import (CORE_PAD, DILATE_INK, FEATHER, HP_SIGMA, INF_PAD, REF_INFINITY, RING_IN, RING_OUT,
-                            aligned_median_canvas, apply_geom, box_mask, device_medians_from, hf_ratio,
-                            ink_mask_median, local_stats, ring_band, shifted_fill)
+from wp_plate_pilot import (CORE_DEV, CORE_PAD, DARK, DILATE_INK, FEATHER, HP_SIGMA, INF_PAD, REF_INFINITY,
+                            RING_ELLIPSE, RING_IN, RING_LINE_PX, RING_OUT, RING_TIP_Y, aligned_median_canvas,
+                            apply_geom, box_mask, device_medians_from, hf_ratio, ink_mask_median, local_stats,
+                            ring_band, shifted_fill)
 
 # docs/WP_LAYOUT_SPEC.md 7.1: poster px, "TWO SOULS · ONE BOND" satiri
 BOX_TAGLINE = (2505, 8223, 4711, 8450)
@@ -49,6 +50,7 @@ BAND_EXTRA = 6        # halka bandi + 6 px (kenar yumusatmasi)
 QC_HF_LO, QC_HF_HI = 0.7, 1.4
 QC_HF_ABS = 1.2       # oran disi kalinca: |HF ic - HF cevre| gri seviye siniri (olcum tabanli, qc()'ye bak)
 CROP = 600
+POSTER_W, POSTER_H = 3000, 4000   # poster orani temiz plaka (3:4)
 
 
 def target_mask(shape, dev, F, region, ed):
@@ -129,6 +131,62 @@ def qc(plate, out, mask, ring):
                 outside_max=outside, resid_p99=rp99, ring_p99=ringp99, ok=ok, empty=False)
 
 
+def poster_clean(median, ed, out_w=POSTER_W, out_h=POSTER_H):
+    """Poster oraninda temiz plaka: MEDIAN_<ED>.png (78 posterin medyani; cift-ozel
+    murekkep yok, halka/tagline/∞ sabit oldugu icin duruyor) olcege indirilir ve
+    olculen kutulardaki sabit ogeler silinir.
+
+    Dolgu kaynagi medyanin KENDI zemini (baska ink-free kaynak yok): sabit oge
+    bolgesinin yuksek frekansi shifted_fill ile komsu zemin dokusundan kopyalanir,
+    yerel ton maske cevresi halkasindan olculur (build_plate ile ayni yontem).
+    """
+    m = cv2.resize(median, (out_w, out_h), interpolation=cv2.INTER_AREA)
+    s = out_w / 7200.0                                   # poster px -> cikti px
+    H, W = m.shape[:2]
+
+    def box(b, pad):
+        x0, y0, x1, y1 = [int(round(v * s)) for v in b]
+        k = np.zeros((H, W), np.uint8)
+        k[max(0, y0 - pad):y1 + pad + 1, max(0, x0 - pad):x1 + pad + 1] = 1
+        return k
+    band = np.zeros((H, W), np.uint8)
+    cx, cy, ax, ay = [v * s for v in RING_ELLIPSE]
+    thick = int(round(RING_LINE_PX * s)) + 2 * BAND_EXTRA
+    cv2.ellipse(band, (int(round(cx)), int(round(cy))), (int(round(ax)), int(round(ay))), 0, 0, 360, 1, thick, cv2.LINE_8)
+    band[int(round(RING_TIP_Y * s)) + 1:, :] = 0
+    tgt = (band | box(REF_INFINITY, int(round(INF_PAD / 0.2 * s))) | box(BOX_TAGLINE, int(round(TAG_PAD / 0.2 * s)))).astype(np.uint8)
+
+    Mf = m.astype(np.float32)
+    bg_op = cv2.MORPH_OPEN if ed in DARK else cv2.MORPH_CLOSE
+    kb = int(round(61 / 0.2 * s)) | 1                    # 61 tuval px -> cikti olcegi
+    bg = cv2.morphologyEx(m, bg_op, np.ones((kb, kb), np.uint8)).astype(np.float32)
+    dev_max = np.abs(Mf - bg).max(axis=2)
+    ink = ((dev_max > CORE_DEV) & (tgt > 0)).astype(np.uint8)
+    dil = int(round(DILATE_INK / 0.2 * s)) | 1
+    mask = (cv2.dilate(ink, np.ones((dil, dil), np.uint8)) & tgt).astype(np.uint8)
+
+    region = np.ones((H, W), np.uint8)
+    sig = HP_SIGMA / 0.2 * s
+    hp = Mf - cv2.GaussianBlur(Mf, (0, 0), sig)
+    hp = shifted_fill(hp, mask, region, k=int(round(48 / 0.2 * s)))
+    r_in, r_out = int(round(RING_IN / 0.2 * s)) | 1, int(round(RING_OUT / 0.2 * s)) | 1
+    d_in = cv2.dilate(mask, np.ones((r_in, r_in), np.uint8))
+    d_out = cv2.dilate(mask, np.ones((r_out, r_out), np.uint8))
+    ring = ((d_out > 0) & (d_in == 0) & (tgt == 0)).astype(np.float32)
+    mu, _ = local_stats(Mf, ring, 32.0 / 0.2 * s)
+    fill = hp + mu
+    core = cv2.dilate(ink, np.ones((int(round(CORE_PAD / 0.2 * s)) | 1,) * 2, np.uint8))
+    dist = cv2.distanceTransform(mask, cv2.DIST_L2, 5)
+    alpha = np.clip(dist / max(1.0, FEATHER / 0.2 * s), 0, 1).astype(np.float32)
+    alpha[core > 0] = 1.0
+    alpha = alpha[..., None]
+    alpha[mask[..., None] == 0] = 0.0
+    out = np.clip(np.round(Mf * (1 - alpha) + fill * alpha), 0, 255).astype(np.uint8)
+    out[mask == 0] = m[mask == 0]
+    info = dict(scale=s, target_px=int(tgt.sum()), ink_px=int(ink.sum()), mask_px=int(mask.sum()))
+    return m, out, mask, (ring > 0).astype(np.uint8), info
+
+
 def crop_at(img, cx, cy, size=CROP):
     H, W = img.shape[:2]
     x0 = min(max(0, cx - size // 2), max(0, W - size)); y0 = min(max(0, cy - size // 2), max(0, H - size))
@@ -165,17 +223,40 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--editions", default=",".join(EDITIONS))
     ap.add_argument("--devices", default="Phone,Tablet,Desktop,Watch")
+    ap.add_argument("--poster", action="store_true", help="ayrica 3000x4000 poster orani temiz plaka (medyandan)")
+    ap.add_argument("--poster-only", action="store_true", help="yalniz poster orani ciktisi")
     a = ap.parse_args()
     out_dir = Path(a.out); out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "qc").mkdir(exist_ok=True)
     eds = [e for e in a.editions.split(",") if e]
     devs = [d for d in a.devices.split(",") if d]
-    t0 = time.time(); rep = {}; all_ok = True; n = 0; total = len(eds) * len(devs)
+    t0 = time.time(); rep = {}; all_ok = True; n = 0
+    if a.poster_only:
+        devs = []
+    total = len(eds) * (len(devs) + (1 if (a.poster or a.poster_only) else 0))
     for ed in eds:
         median = imread(Path(a.medians) / f"MEDIAN_{ed.upper()}.png")
-        med = device_medians_from(median)
-        del median
         rep[ed] = {}
+        if a.poster or a.poster_only:
+            src, out, mask, ring, info = poster_clean(median, ed)
+            q = qc(src, out, mask, ring)
+            name = f"PLATE_{ed.upper()}_POSTER_CLEAN.png"
+            cv2.imwrite(str(out_dir / name), out, [cv2.IMWRITE_PNG_COMPRESSION, 3])
+            sc = info["scale"]
+            crop_sheet(src, out, int((BOX_TAGLINE[0] + BOX_TAGLINE[2]) / 2 * sc), int((BOX_TAGLINE[1] + BOX_TAGLINE[3]) / 2 * sc),
+                       out_dir / "qc" / f"CROP_{ed.upper()}_POSTER_TAGLINE.png", "tagline")
+            crop_sheet(src, out, int((RING_ELLIPSE[0] - RING_ELLIPSE[2]) * sc), int(RING_ELLIPSE[1] * sc),
+                       out_dir / "qc" / f"CROP_{ed.upper()}_POSTER_RING.png", "halka yayi")
+            info.update(q, file=name)
+            rep[ed]["Poster"] = info
+            all_ok &= bool(q["ok"])
+            n += 1
+            log(f"  {ed} {'Poster':8s} -> {name} | hedef {info['target_px']} px, murekkep {info['ink_px']}, maske {info['mask_px']} | "
+                f"HF {q['hf_ratio']:.2f} (mutlak fark {q.get('hf_abs', 0):.2f}), disi {q['outside_max']}, kalinti p99 {q['resid_p99']:.1f} "
+                f"(cevre {q['ring_p99']:.1f}) -> {'PASS' if q['ok'] else 'FAIL'} | {n}/{total}")
+            del src, out, mask, ring
+        med = device_medians_from(median) if devs else {}
+        del median
         for dev in devs:
             plate = imread(Path(a.plates) / f"PLATE_{ed.upper()}_{dev.upper()}.png")
             gf = Path(a.plates) / f"GEOM_{ed.upper()}_{dev.upper()}.json"

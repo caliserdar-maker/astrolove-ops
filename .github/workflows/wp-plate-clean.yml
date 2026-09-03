@@ -1,0 +1,134 @@
+name: wp-plate-clean
+
+# 16 plakadan (ve istege bagli 4 poster orani plakadan) KALAN sabit ogeleri
+# siler: tagline, halka, ∞. Kapsam yalniz olculen kutular (wp_plate_clean.py).
+# Cikti Drive'da <out_dir>/CLEAN altina yazilir; grant=true ise CLEAN dosyalarina
+# anyone:reader verilir ve dogrudan indirme linkleri job summary'ye yazilir.
+# Etsy'ye dokunmaz.
+
+on:
+  workflow_dispatch:
+    inputs:
+      editions:
+        description: "Edisyonlar (virgullu)"
+        required: true
+        default: "Champagne_Ivory,Deep_Black,Midnight_Blue,Warm_Parchment"
+      devices:
+        description: "Cihazlar (virgullu; bos = poster orani disinda cikti yok)"
+        required: true
+        default: "Phone,Tablet,Desktop,Watch"
+      poster:
+        description: "3000x4000 poster orani temiz plaka da uret"
+        type: boolean
+        default: true
+      src_dir:
+        description: "Kaynak klasor (Drive, ASTROLOVE altinda): PLATE_*.png, GEOM_*.json, MEDIAN_*.png"
+        required: true
+        default: "TEMP/WP_PLATES"
+      grant:
+        description: "CLEAN dosyalarina anyone:reader ver ve linkleri yaz"
+        type: boolean
+        default: true
+
+concurrency:
+  group: drive-perms
+  cancel-in-progress: false
+
+jobs:
+  clean:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Bagimliliklar
+        run: |
+          set -euo pipefail
+          pip install -q -r requirements.txt
+
+      - name: rclone kur
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+          fi
+
+      - name: Plaka ve medyanlari al
+        run: |
+          set -euo pipefail
+          mkdir -p _plates
+          rclone copy "gdrive:ASTROLOVE/${{ inputs.src_dir }}" _plates \
+            --include "PLATE_*.png" --include "GEOM_*.json" --include "MEDIAN_*.png" --transfers 4
+          ls -l _plates | head -30
+          df -h / | tail -1
+
+      - name: Temizle + QC
+        run: |
+          set -euo pipefail
+          args=(--plates _plates --medians _plates --out _clean --editions "${{ inputs.editions }}")
+          if [ -n "${{ inputs.devices }}" ]; then args+=(--devices "${{ inputs.devices }}"); else args+=(--poster-only); fi
+          if [ "${{ inputs.poster }}" = "true" ] && [ -n "${{ inputs.devices }}" ]; then args+=(--poster); fi
+          python scripts/etsy/wp_plate_clean.py "${args[@]}" || echo "CLEAN_FAIL=1" >> "$GITHUB_ENV"
+          ls -l _clean | head -30
+          { echo "## wp-plate-clean"; echo; echo '```'; python3 -c "
+          import json
+          d = json.load(open('_clean/clean_report.json'))
+          print('SONUC', 'PASS' if d['ok'] else 'FAIL', d['files'], 'dosya')
+          for ed, v in d['editions'].items():
+              for dev, i in v.items():
+                  print(f\"{ed:16s} {dev:8s} maske {i['mask_px']:8d} HF {i['hf_ratio']:.2f} (mutlak {i.get('hf_abs', 0):.2f}) disi {i['outside_max']} kalinti {i['resid_p99']:.1f}/{i['ring_p99']:.1f} {'PASS' if i['ok'] else 'FAIL'}\")
+          "; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -d _clean ] || exit 0
+          rclone copy _clean "gdrive:ASTROLOVE/${{ inputs.src_dir }}/CLEAN" --include "PLATE_*_CLEAN.png" --include "clean_report.json"
+          rclone copy _clean/qc "gdrive:ASTROLOVE/${{ inputs.src_dir }}/CLEAN/qc"
+          rclone lsl "gdrive:ASTROLOVE/${{ inputs.src_dir }}/CLEAN" | grep CLEAN.png | sort
+
+      - name: Izin + linkler
+        if: ${{ always() && inputs.grant }}
+        run: |
+          set -euo pipefail
+          fid="$(rclone lsjson "gdrive:ASTROLOVE/${{ inputs.src_dir }}" --dirs-only \
+            | python3 -c "import json,sys;print([r['ID'] for r in json.load(sys.stdin) if r['Name']=='CLEAN'][0])")"
+          echo "CLEAN klasor ID: $fid"
+          python scripts/pinterest/pin_media_perms.py --mode grant --folder-id "$fid" --pattern "_CLEAN.png" --apply
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: wp-plate-clean
+          path: |
+            _clean/qc/*.png
+            _clean/clean_report.json
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Sonuc
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          if [ "${CLEAN_FAIL:-0}" = "1" ]; then echo "::error::QC FAIL (clean_report.json)"; exit 1; fi
+
+      - if: ${{ always() }}
+        run: rm -rf _plates _clean ~/.config/rclone
