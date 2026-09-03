@@ -15,6 +15,14 @@ on:
         description: "Test edilecek tek cift"
         required: true
         default: "Aries_Aries"
+      scenes:
+        description: "wp_mockup_render icin test edilecek sahneler"
+        required: true
+        default: "SET06,SET10Y"
+      skip_video:
+        description: "Video adimini atla (zaten PASS, tekrar test gerekmiyorsa)"
+        type: boolean
+        default: false
 
 concurrency:
   group: wp-fix-test
@@ -58,6 +66,7 @@ jobs:
           test -s _work/video_master.mp4
 
       - name: 2A - Video duzeltme testi (ECC homografi + isaret)
+        if: ${{ inputs.skip_video != true }}
         continue-on-error: true
         run: |
           set -euo pipefail
@@ -85,7 +94,7 @@ jobs:
           python scripts/etsy/wp_mockup_render.py \
             --calib _work/calib_fixed --masters _work/masters --pilot _work/pilot \
             --wallpapers _work/wp --pair "${{ inputs.pair }}" \
-            --scenes SET06,SET10Y --out _work/out_mock \
+            --scenes "${{ inputs.scenes }}" --out _work/out_mock \
             | tee _work/mock_log.txt
 
       - name: Oran dogrulamasi (bagimsiz, wp_audit_drive.py ile ayni formul)
