@@ -15,9 +15,9 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "fix (reader'a cek) | remove (anyone iznini kaldir)"
+        description: "fix (reader'a cek) | remove (anyone iznini kaldir) | grant (secili DOSYALARA reader ver)"
         type: choice
-        options: [fix, remove]
+        options: [fix, remove, grant]
         default: fix
       apply:
         description: "Degisiklikleri uygula (false = dry-run)"
@@ -35,6 +35,14 @@ on:
         description: "remove: kok altinda dogrudan anyone izinlerini tara (yalniz rapor; agir sorgu)"
         type: boolean
         default: false
+      pattern:
+        description: "grant: dosya adinda gecmesi gereken metin (or. PLATE_)"
+        required: false
+        default: ""
+      expect:
+        description: "grant: beklenen dosya sayisi (tutmazsa durur; 0 = kontrol yok)"
+        required: false
+        default: "0"
 
 concurrency:
   group: drive-perms
@@ -92,4 +100,6 @@ jobs:
           [ -n "${{ inputs.folder_id }}" ] && args+=(--folder-id "${{ inputs.folder_id }}")
           [ -n "${{ inputs.keep_id }}" ] && args+=(--keep-id "${{ inputs.keep_id }}")
           [ "${{ inputs.scan }}" = "true" ] && args+=(--scan)
+          [ -n "${{ inputs.pattern }}" ] && args+=(--pattern "${{ inputs.pattern }}")
+          [ "${{ inputs.expect }}" != "0" ] && args+=(--expect "${{ inputs.expect }}")
           python scripts/pinterest/pin_media_perms.py "${args[@]}"
