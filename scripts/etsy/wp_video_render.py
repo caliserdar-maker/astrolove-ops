@@ -2,25 +2,37 @@
 """
 wp-night c) Ilan videosu: pilot master videosunun (WA_WP_VIDEO_TOZ_V3.mp4, SET01
 sahnesi, 1800x1350, 11.5 sn, 30 fps, iki telefon MB + CI) ekran icerigini yeni
-ciftin FINAL_V2 Phone wallpaper'lariyla degistirir. Toz animasyonu master'dan
-gelir (ekran icinde fark modu):
+ciftin FINAL_V2 Phone wallpaper'lariyla degistirir.
 
-    out = master + M * (warp(yeni) - warp(pilot))
+YONTEM (3 Eyl 2026 karari - DOGRUDAN DEGISTIRME): pilot murekkebi hic isin
+icine katilmaz. Her karede ekran bolgesi dogrudan yenisiyle doldurulur:
 
-M = kalibre yumusak ekran maskesi. Toz, isik ve gren master'da kaldigi icin
-animasyon bozulmaz; yalniz murekkep farki tasinir.
+    out = kare * (1 - M) + M * (warp_cover(yeni) * G)
+
+  M = yumusak ekran maskesi (soft_mask, kenar gecisli)
+  warp_cover = oran-koruyan (crop-to-fill) yerlestirme, wp_mockup_common
+  G = kare-bazli dusuk frekansli parlaklik eslemesi: o karenin ekran
+      bolgesindeki blur(kare)/blur(yeni) orani (sigma 25) - sahnenin isik/
+      pozlama degisimini tasir, metin kenarlarina DOKUNMAZ.
+
+Neden cikarma birakildi: onceki "out = kare + M*L*(warp(yeni) - warp(pilot))"
+fark modu, pilot murekkebini ancak MUKEMMEL hizalamada iptal edebilirdi; keskin
+metin kenarlarinda alt-piksel kalinti bile gorunur hayalet cift-baski birakti
+(3 iterasyon, gorsel kanit). Dogrudan degistirmede pilot murekkebi denklemde
+hic yer almadigi icin iptal edilecek bir sey yoktur.
+
+Toz/hareket: toz katmani ekranin USTUNDE degil (maske disinda) oldugu icin
+dokunulmaz; maske disi pikseller aynen kareden gelir.
 
 Kalibrasyon: sahne durgun (yalniz toz hareket eder), bu yuzden ekran dortgeni
 BIR kez olculur: SET01 kalibrasyonundaki dortgenler video olcegine (1800/3000)
-indirilir ve ECC ile rafine edilir (olcum: kare0 ile SET01 masterinin 0.6
-olcegi arasinda ort fark 3.9, faz kaymasi ~1.8 px).
+indirilir ve ECC ile rafine edilir.
 
-QC (PASS/FAIL):
-  a) kendini yeniden uretme (pair = pilot): cikti karesi master karesiyle ayni
-     (fark tabani olculur, rapora yazilir);
-  b) ekran disi: |out - master| = 0 (maske disi hic dokunulmaz);
-  c) ekran ici murekkep degisimi: yeni murekkep bolgesinde ort |out - master| > 5;
-  d) olcu/fps/kare sayisi master ile ayni.
+QC (PASS/FAIL - SAYISAL, gorsel dogrulamanin YERINE GECMEZ):
+  a) ekran disi: |out - kare| = 0 (maske disi hic dokunulmaz);
+  b) ekran ici murekkep degisimi: yeni murekkep bolgesinde ort |out - kare| > 5;
+  c) olcu/fps/kare sayisi master ile ayni.
+Gorsel kontrol icin kare 0 / orta / son PNG olarak yazilir.
 Kullanim:
   wp_video_render.py --master WA_WP_VIDEO_TOZ_V3.mp4 --scene-master SET01.jpg
       --calib <dir> --pilot <dir> --wallpapers <dir> --pair Aries_Leo --out <dir>
@@ -34,12 +46,13 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from wp_mockup_common import imread, log
+from wp_mockup_common import cover_homography, imread, ink_mask, log, warp_cover, warp_mask
 
 SCENE = "SET01"
 INK_CHANGE_MIN = 5.0
 FPS_TOL = 0.01
-LIGHT_SIGMA = 25.0    # aydinlatma kazanci olcumu icin dusuk gecirgen yaricap (piksel)
+LIGHT_SIGMA = 25.0    # kare-bazli parlaklik eslemesi icin dusuk gecirgen yaricap (piksel)
+GAIN_LIMITS = (0.2, 3.0)
 
 
 def scaled_screens(calib, scale):
@@ -91,11 +104,6 @@ def refine(frame, master_img, screens):
     return out, shift
 
 
-def screen_H(wp, quad):
-    h, w = wp.shape[:2]
-    return cv2.getPerspectiveTransform(np.float32([[0, 0], [w, 0], [w, h], [0, h]]), quad.astype(np.float32))
-
-
 def soft_mask(shape, quad, feather=1.5, inset=1.0):
     """Dortgen ici yumusak maske (kenardan inset px iceri, feather px gecis)."""
     m = np.zeros(shape[:2], np.float32)
@@ -106,7 +114,7 @@ def soft_mask(shape, quad, feather=1.5, inset=1.0):
     return cv2.GaussianBlur(m, (0, 0), feather)
 
 
-def render(master_path, calib, master_img, pilot_dir, wp_dir, pair, pilot_pair, out_path, max_frames=0, encode=True):
+def render(master_path, calib, master_img, wp_dir, pair, pilot_pair, out_path, max_frames=0, encode=True):
     cap = cv2.VideoCapture(str(master_path))
     if not cap.isOpened():
         raise SystemExit(f"HATA: video acilamadi {master_path}")
@@ -117,27 +125,24 @@ def render(master_path, calib, master_img, pilot_dir, wp_dir, pair, pilot_pair, 
         raise SystemExit("HATA: ilk kare okunamadi")
     screens, shift = refine(frame0, master_img, scaled_screens(calib, W / master_img.shape[1]))
     log(f"  video {W}x{H} {fps:.3f} fps {n_master} kare; ECC kaydirma {shift[0]:+.2f},{shift[1]:+.2f}")
-    delta = np.zeros((H, W, 3), np.float32); msum = np.zeros((H, W), np.float32)
-    gains = []
+    # Ekran katmanlari: yeni wallpaper oran-korunarak (crop-to-fill) bir kez yerlestirilir;
+    # kare-bazli degisen tek sey parlaklik eslemesi (asagida, dongude).
+    layers = []
+    msum = np.zeros((H, W), np.float32)
+    ink = np.zeros((H, W), bool)
     for s in screens:
-        wp_p = imread(Path(pilot_dir) / f"AstroLove_{pilot_pair}_{s['edition']}_{s['device']}.jpg")
         wp_n = imread(Path(wp_dir) / f"AstroLove_{pair}_{s['edition']}_{s['device']}.jpg")
-        Hm = screen_H(wp_p, s["quad"])
-        wp = cv2.warpPerspective(wp_p.astype(np.float32), Hm, (W, H), flags=cv2.INTER_AREA)
-        wn = cv2.warpPerspective(wp_n.astype(np.float32), Hm, (W, H), flags=cv2.INTER_AREA)
         m = soft_mask((H, W), s["quad"])
-        # Sahne aydinlatma kazanci L: ekran, sahnede olculen bir carpanla goruntuleniyor
-        # (master_0 = L * warp(pilot)). Fark modu L olmadan pilot murekkebini iptal
-        # ETMIYOR (olcum: ARIES_LEO kare 0'da iki cift ust uste). L, dusuk gecirgen
-        # oranla (sigma 25) olculur; murekkep kenarlarindan etkilenmemesi icin blur.
-        num = cv2.GaussianBlur(frame0.astype(np.float32) * m[..., None], (0, 0), LIGHT_SIGMA)
-        den = cv2.GaussianBlur(wp * m[..., None], (0, 0), LIGHT_SIGMA)
-        L = np.clip(num / np.maximum(den, 1.0), 0.2, 3.0)
-        gains.append(float((L * m[..., None]).sum() / max(m.sum() * 3, 1)))
-        delta += L * (wn - wp) * m[..., None]; msum += m
-    log(f"  ekran aydinlatma kazanci L ort: {', '.join(f'{g:.3f}' for g in gains)}")
-    inside = msum > 0.05
-    ink = np.abs(delta).max(axis=2) > 8
+        wn = warp_cover(wp_n, s["quad"], (H, W, 3)).astype(np.float32)
+        Hc, _ = cover_homography(wp_n.shape, s["quad"])
+        layers.append(dict(mask=m, wn=wn, wn_low=cv2.GaussianBlur(wn * m[..., None], (0, 0), LIGHT_SIGMA)))
+        ink |= warp_mask(ink_mask(wp_n), Hc, (H, W, 3)) > 0
+        msum += m
+    # Dogrudan degistirmede maskenin SIFIR OLMADIGI her piksel harmanlanir; "dokunulmadi"
+    # kontrolu bu yuzden m == 0 uzerinden yapilir (eski fark modundaki 0.05 esigi,
+    # katkinin maske agirligiyla orantili kucuk oldugu varsayimina dayaniyordu).
+    inside = msum > 0
+    export = {0, n_master // 2, max(0, n_master - 1)}      # gorsel kontrol kareleri (PNG, kayipsiz)
     tmp = Path(tempfile.mkdtemp()) / "frames.raw"
     cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
     acc_ink = acc_self = self_max = out_max = 0.0
@@ -147,9 +152,19 @@ def render(master_path, calib, master_img, pilot_dir, wp_dir, pair, pilot_pair, 
             ok, fr = cap.read()
             if not ok or (max_frames and i >= max_frames):
                 break
-            outf = np.clip(np.round(fr.astype(np.float32) + delta), 0, 255).astype(np.uint8)
-            if i in (0, 120, 240):
-                cv2.imwrite(str(Path(out_path).parent / f"frame_{pair}_{i:03d}.jpg"), outf, [cv2.IMWRITE_JPEG_QUALITY, 92])
+            out = fr.astype(np.float32)
+            for lay in layers:
+                m = lay["mask"]
+                # G: bu KARENIN ekran bolgesindeki dusuk frekansli parlakligi yeni icerige tasir
+                # (pozlama/isik kare-kare degisebilir). Sigma 25 blur oldugu icin metin
+                # kenarlarini bulandirmaz, yalniz genel parlaklik/renk seviyesini esler.
+                fr_low = cv2.GaussianBlur(fr.astype(np.float32) * m[..., None], (0, 0), LIGHT_SIGMA)
+                g = np.clip(fr_low / np.maximum(lay["wn_low"], 1.0), *GAIN_LIMITS)
+                mm = m[..., None]
+                out = (1 - mm) * out + mm * (lay["wn"] * g)
+            outf = np.clip(np.round(out), 0, 255).astype(np.uint8)
+            if i in export:
+                cv2.imwrite(str(Path(out_path).parent / f"frame_{pair}_{i:03d}.png"), outf)
             d = np.abs(outf.astype(np.int16) - fr.astype(np.int16)).max(axis=2)
             if (~inside).any():
                 out_max = max(out_max, float(d[~inside].max()))
@@ -196,7 +211,7 @@ def main():
     ap.add_argument("--master", required=True)
     ap.add_argument("--scene-master", required=True, help="WA_MOCKUP_V2_SET01_<pilot>_FINAL.jpg")
     ap.add_argument("--calib", required=True)
-    ap.add_argument("--pilot", required=True)
+    ap.add_argument("--pilot", required=True, help="pilot wallpaper klasoru (dogrudan degistirme yonteminde okunmaz)")
     ap.add_argument("--wallpapers", required=True)
     ap.add_argument("--pair", required=True)
     ap.add_argument("--out", required=True)
@@ -206,7 +221,7 @@ def main():
     calib = json.loads((Path(a.calib) / "calib.json").read_text())
     out_dir = Path(a.out); out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / f"WA_WP_VIDEO_{a.pair.upper()}.mp4"
-    qc = render(a.master, calib, imread(a.scene_master), a.pilot, a.wallpapers, a.pair,
+    qc = render(a.master, calib, imread(a.scene_master), a.wallpapers, a.pair,
                 calib["pilot_pair"], out_path, a.frames, encode=not a.no_encode)
     (out_dir / f"video_{a.pair}.json").write_text(json.dumps(qc, indent=1))
     if a.no_encode:

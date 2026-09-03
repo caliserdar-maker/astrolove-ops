@@ -125,6 +125,7 @@ jobs:
           for f in _work/out_mock/qc/*.png; do [ -f "$f" ] || continue; rclone copyto "$f" "$dest/qc_$(basename "$f")"; done
           if [ -f _work/out_mock/report.md ]; then rclone copyto _work/out_mock/report.md "$dest/report.md"; fi
           for f in _work/out_video/*.mp4; do [ -f "$f" ] || continue; rclone copyto "$f" "$dest/$(basename "$f")"; done
+          for f in _work/out_video/frame_*.png; do [ -f "$f" ] || continue; rclone copyto "$f" "$dest/$(basename "$f")"; done
           for f in _work/out_video/video_*.json; do [ -f "$f" ] || continue; rclone copyto "$f" "$dest/$(basename "$f")"; done
           echo "Drive'a yuklendi: ASTROLOVE/TEMP/WP_FIX_TEST/${{ inputs.pair }}"
 
@@ -185,7 +186,7 @@ jobs:
           name: wp-fix-test-${{ inputs.pair }}
           path: |
             _work/out_video/*.mp4
-            _work/out_video/frame_*.jpg
+            _work/out_video/frame_*.png
             _work/out_video/video_*.json
             _work/out_mock/*.jpg
             _work/out_mock/qc/*.png
