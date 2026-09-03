@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 # canva-bulk-fetch: Canva export listesini tek kosuda indirir ve Drive'a yazar.
 #
-# Liste (TSV, repo icinde):  <SAYFA_BASLIGI>\t<CIHAZ>\t<URL>
-# Hedef: ASTROLOVE/<out_root>/<SIGN1>_<SIGN2>/AstroLove_<Sign1>_<Sign2>_<edition>_<Cihaz>.jpg
+# Liste (TSV, repo icinde):  <SAYFA_BASLIGI>\t<CIHAZ>\t<EDISYON>\t<URL>
+# Hedef: ASTROLOVE/<out_root>/<SIGN1>_<SIGN2>/AstroLove_<Sign1>_<Sign2>_<EDISYON>_<Cihaz>.jpg
+# Edisyon satir bazinda; tek kosuda birden fazla edisyon karisik olabilir.
 #
 # Imzali URL'ler yalniz dosyadan okunur ve alt surece argumanla gecer; loga yazilmaz.
 set -euo pipefail
 
 MANIFEST="${1:?liste dosyasi}"
 OUT_ROOT="${2:?drive kok klasoru}"
-EDITION="${3:-Midnight_Blue}"
+LABEL="${3:-}"
 PAR="${4:-8}"
 
 rm -rf _dl _log
@@ -17,19 +18,19 @@ mkdir -p _dl _log
 : > _log/progress.txt
 
 # TSV -> is listesi (<hedef yol>\t<url>). Ad kalibi ve yazim duzeltmesi burada.
-python3 - "$MANIFEST" "$EDITION" > _log/jobs.tsv <<'PY'
+python3 - "$MANIFEST" > _log/jobs.tsv <<'PY'
 import pathlib, sys
 
-man, edition = sys.argv[1], sys.argv[2]
+man = sys.argv[1]
 FIX = {"VIGRO": "VIRGO"}          # Canva sayfa basliklarindaki yazim hatasi
 seen, out = set(), []
 for ln, raw in enumerate(pathlib.Path(man).read_text().splitlines(), 1):
     if not raw.strip() or raw.lstrip().startswith("#"):
         continue
     parts = raw.split("\t")
-    if len(parts) != 3:
-        sys.exit(f"HATA: satir {ln} 3 alan degil ({len(parts)})")
-    title, device, url = (p.strip() for p in parts)
+    if len(parts) != 4:
+        sys.exit(f"HATA: satir {ln} 4 alan degil ({len(parts)})")
+    title, device, edition, url = (p.strip() for p in parts)
     signs = title.upper().split("_")
     if len(signs) != 2:
         sys.exit(f"HATA: satir {ln} baslik SIGN1_SIGN2 degil: {title}")
@@ -44,7 +45,7 @@ for line in out:
 PY
 
 total=$(wc -l < _log/jobs.tsv)
-echo "liste: $MANIFEST -> $total dosya, $PAR paralel, edisyon $EDITION"
+echo "liste: $MANIFEST -> $total dosya, $PAR paralel${LABEL:+, $LABEL}"
 
 start=$(date +%s)
 (
@@ -78,9 +79,12 @@ rclone check _dl "gdrive:ASTROLOVE/$OUT_ROOT" --one-way
   echo "## canva-bulk-fetch: $total dosya"
   echo
   echo '```'
-  echo "kok: ASTROLOVE/$OUT_ROOT   edisyon: $EDITION   sure: ${SECONDS}s"
+  echo "kok: ASTROLOVE/$OUT_ROOT${LABEL:+   etiket: $LABEL}   sure: ${SECONDS}s"
   for d in $(cut -f2 "$MANIFEST" | sort -u); do
     printf '%-8s %s dosya\n' "$d" "$(find _dl -name "*_${d}.jpg" | wc -l)"
+  done
+  for e in $(cut -f3 "$MANIFEST" | sort -u); do
+    printf '%-18s %s dosya\n' "$e" "$(find _dl -name "*_${e}_*.jpg" | wc -l)"
   done
   printf 'klasor   %s\n' "$(find _dl -mindepth 1 -maxdepth 1 -type d | wc -l)"
   echo '```'
