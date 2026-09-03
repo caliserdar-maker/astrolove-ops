@@ -83,6 +83,7 @@ BOX_NAMES = (900, 6950, 6300, 7500)       # isimler (+ ∞ kutusu ayrica dislani
 ELEMENT_BOXES = [BOX_SYMBOL, BOX_GLYPHS, BOX_NAMES]
 REF_INFINITY = (3500, 7110, 4124, 7296)   # pilot (Cancer_Libra) ∞ logosu, poster px; +6 px maske disi
 INF_PAD = 6
+CLEAN_INFINITY = True   # 3 Eyl: ∞ logosu da temizlenir (posterden gelir); False = pilottan kalir
 
 HP_SIGMA = 16       # dolgu = medyanin yuksek frekans dokusu (sigma 16 ustu) + pilotun yerel tonu
 DILATE_INK = 24     # maske = murekkep + 24 px (feather 24)
@@ -371,14 +372,20 @@ def build_plate(pilot, med_dev, ed, dev):
     band, ring_line = ring_band(F, ed, dev, region)
     band_wide = cv2.dilate(band, np.ones((13, 13), np.uint8))          # cekirdek/uzanti icin halka + 6 px disari
     inf = box_mask(pilot.shape, dev, [REF_INFINITY])
-    inf = cv2.dilate(inf, np.ones((2 * INF_PAD + 1, 2 * INF_PAD + 1), np.uint8))   # ∞ logosu + 6 px: pilottan aynen kalir
-    keep_out = ((band_wide > 0) | (inf > 0)).astype(np.uint8)
+    inf = cv2.dilate(inf, np.ones((2 * INF_PAD + 1, 2 * INF_PAD + 1), np.uint8))   # ∞ logosu + 6 px
+    # CLEAN_INFINITY (3 Eyl): ∞ logosu da plakadan temizlenir; cift kendi ∞'sini posterden
+    # getirir (konumu isim uzunluguna gore kayar: olcum x0 3108..3516, pilot 3500 -> cift
+    # ∞'si pilot ∞'siyle ust uste binmez, ikisi de kalsa cift ∞ gorunurdu).
+    keep_out = ((band_wide > 0) | ((inf > 0) & (not CLEAN_INFINITY))).astype(np.uint8)
     tex = texture_std(F)
     ink, t, loose = ink_mask_pilot(pilot, ed, dev, region, keep_out, tex=tex)
+    if CLEAN_INFINITY:
+        ink = (ink | (inf & region)).astype(np.uint8)
     k = 2 * DILATE_INK + 1
     mask = cv2.dilate(ink, np.ones((k, k), np.uint8)) & region
     mask[band > 0] = 0                                                   # halka bandi pilottan aynen kalir
-    mask[inf > 0] = 0                                                    # ∞ logosu pilottan aynen kalir
+    if not CLEAN_INFINITY:
+        mask[inf > 0] = 0                                                # ∞ logosu pilottan aynen kalir
     Pf = pilot.astype(np.float32); Ff = F.astype(np.float32)
     hpF = Ff - cv2.GaussianBlur(Ff, (0, 0), float(HP_SIGMA))
     mm = ink_mask_median(F, ed) & region
