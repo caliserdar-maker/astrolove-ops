@@ -1,0 +1,124 @@
+name: wp-tone-match
+
+# Temiz bir zemini (Canva export URL'si) pilot wallpaper'in tonuna cevirir
+# (scripts/etsy/wp_tone_match.py: murekkepsiz piksellerden kanal bazli kantil
+# regresyonu; piksel kopyalama / maske / inpaint yok). Ciktiyi Drive'a yazar,
+# grant=true ise anyone:reader verip dogrudan indirme linkini yazar.
+# Etsy'ye dokunmaz. Kaynak URL loga yazilmaz (::add-mask::).
+
+on:
+  workflow_dispatch:
+    inputs:
+      src_url:
+        description: "Temiz zeminin tam URL'si (Canva export; imzali link)"
+        required: true
+      edition:
+        description: "Edisyon"
+        type: choice
+        options: [Midnight_Blue, Deep_Black, Champagne_Ivory, Warm_Parchment]
+        default: Midnight_Blue
+      device:
+        description: "Cihaz (hedef pilot dosyasi ve cikti adi icin)"
+        type: choice
+        options: [Phone, Tablet, Desktop, Watch]
+        default: Phone
+      out_name:
+        description: "Cikti dosya adi"
+        required: true
+        default: "PLATE_MB_PHONE_TONE.png"
+      out_dir:
+        description: "Drive cikti klasoru (ASTROLOVE altinda)"
+        required: true
+        default: "TEMP/WP_PLATES/CLEAN"
+      grant:
+        description: "Ciktiya anyone:reader ver ve linki yaz"
+        type: boolean
+        default: true
+
+concurrency:
+  group: drive-perms
+  cancel-in-progress: false
+
+jobs:
+  tone:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -q -r requirements.txt
+
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+          fi
+
+      - name: Kaynak ve pilotu al
+        env:
+          SRC_URL: ${{ inputs.src_url }}
+        run: |
+          set -euo pipefail
+          echo "::add-mask::$SRC_URL"
+          mkdir -p _work
+          curl -fsSL --max-time 300 -o _work/src.png "$SRC_URL"
+          rclone copyto "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/CANCER_LIBRA/AstroLove_Cancer_Libra_${{ inputs.edition }}_${{ inputs.device }}.jpg" _work/ref.jpg
+          ls -l _work
+
+      - name: Ton eslesmesi + QC
+        run: |
+          set -euo pipefail
+          python scripts/etsy/wp_tone_match.py --src _work/src.png --ref _work/ref.jpg \
+            --edition "${{ inputs.edition }}" --out "_work/${{ inputs.out_name }}" --report _work/tone_report.json \
+            || echo "TONE_FAIL=1" >> "$GITHUB_ENV"
+          { echo "## wp-tone-match: ${{ inputs.out_name }}"; echo; echo '```'; cat _work/tone_report.json; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f "_work/${{ inputs.out_name }}" ] || exit 0
+          rclone copyto "_work/${{ inputs.out_name }}" "gdrive:ASTROLOVE/${{ inputs.out_dir }}/${{ inputs.out_name }}"
+          rclone copyto _work/tone_report.json "gdrive:ASTROLOVE/${{ inputs.out_dir }}/tone_report_${{ inputs.out_name }}.json" || true
+          rclone lsl "gdrive:ASTROLOVE/${{ inputs.out_dir }}" | grep "${{ inputs.out_name }}"
+
+      - name: Izin + link
+        if: ${{ always() && inputs.grant }}
+        run: |
+          set -euo pipefail
+          dir="${{ inputs.out_dir }}"; parent="$(dirname "$dir")"; leaf="$(basename "$dir")"
+          fid="$(rclone lsjson "gdrive:ASTROLOVE/$parent" --dirs-only \
+            | python3 -c "import json,sys;print([r['ID'] for r in json.load(sys.stdin) if r['Name']=='$leaf'][0])")"
+          python scripts/pinterest/pin_media_perms.py --mode grant --folder-id "$fid" \
+            --pattern "${{ inputs.out_name }}" --expect 1 --apply
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: wp-tone-match
+          path: _work/tone_report.json
+          if-no-files-found: ignore
+
+      - name: Sonuc
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          if [ "${TONE_FAIL:-0}" = "1" ]; then echo "::error::ton QC FAIL (tone_report.json)"; exit 1; fi
+
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
