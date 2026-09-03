@@ -51,6 +51,8 @@ QC_HF_LO, QC_HF_HI = 0.7, 1.4
 QC_HF_ABS = 1.2       # oran disi kalinca: |HF ic - HF cevre| gri seviye siniri (olcum tabanli, qc()'ye bak)
 CROP = 600
 POSTER_W, POSTER_H = 3000, 4000   # poster orani temiz plaka (3:4)
+TONE_MUL = 1.0        # poster modunda yerel ton penceresi carpani. 4.0 denendi (iterasyon 2):
+                      # CI poster kalintisi 9.8 -> 10.6, DUZELMEDI; ton penceresi sebep degil.
 
 
 def target_mask(shape, dev, F, region, ed):
@@ -173,7 +175,11 @@ def poster_clean(median, ed, out_w=POSTER_W, out_h=POSTER_H):
     d_in = cv2.dilate(mask, np.ones((r_in, r_in), np.uint8))
     d_out = cv2.dilate(mask, np.ones((r_out, r_out), np.uint8))
     ring = ((d_out > 0) & (d_in == 0) & (tgt == 0)).astype(np.float32)
-    mu, _ = local_stats(Mf, ring, 32.0 / 0.2 * s)
+    # Ton penceresi tagline bandinin genisliginden buyuk olmali: bant ~95 px yuksek,
+    # sigma 66'da normalize konvolusyonun agirlik kutlesi bandin ortasinda esigin altina
+    # dusup coklu-olcek yedegine geciyor ve yama sinirlari aciklik lekesi birakiyor
+    # (CI poster kosu 1: kalinti p99 9.8 / cevre 2.1). TONE_MUL ile pencere buyutulur.
+    mu, _ = local_stats(Mf, ring, TONE_MUL * 32.0 / 0.2 * s)
     fill = hp + mu
     core = cv2.dilate(ink, np.ones((int(round(CORE_PAD / 0.2 * s)) | 1,) * 2, np.uint8))
     dist = cv2.distanceTransform(mask, cv2.DIST_L2, 5)
