@@ -73,11 +73,14 @@ jobs:
       - name: Pilot arsivi (bir kez)
         run: |
           set -euo pipefail
-          n=$(rclone lsf "gdrive:ASTROLOVE/ARCHIVE/FINAL_V2_PILOT_V1" --include "AstroLove_*.jpg" 2>/dev/null | wc -l)
+          n=$(rclone lsf "gdrive:ASTROLOVE/ARCHIVE/FINAL_V2_PILOT_V1" --include "AstroLove_*.jpg" 2>/dev/null | wc -l || true)
+          n=${n:-0}
           echo "arsivde $n dosya"
           if [ "$n" -lt 16 ]; then
             rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/CANCER_LIBRA" "gdrive:ASTROLOVE/ARCHIVE/FINAL_V2_PILOT_V1" --include "AstroLove_*.jpg"
-            echo "arsivlendi: $(rclone lsf 'gdrive:ASTROLOVE/ARCHIVE/FINAL_V2_PILOT_V1' --include 'AstroLove_*.jpg' | wc -l) dosya"
+            m=$(rclone lsf "gdrive:ASTROLOVE/ARCHIVE/FINAL_V2_PILOT_V1" --include "AstroLove_*.jpg" | wc -l)
+            echo "arsivlendi: $m dosya"
+            test "$m" = "16"
           else
             echo "arsiv zaten dolu, dokunulmadi"
           fi
