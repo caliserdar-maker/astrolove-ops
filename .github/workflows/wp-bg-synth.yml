@@ -1,0 +1,121 @@
+name: wp-bg-synth
+
+# Referans wallpaper'in zeminini olcer (gradyan / yildiz / gren) ve ayni
+# parametrelerle 4 cihaz boyutunda SIFIRDAN zemin uretir: scripts/etsy/wp_bg_synth.py.
+# Referanstan piksel kopyalanmaz. Ciktilari Drive'a yazar, grant=true ise
+# anyone:reader verip linkleri yazar. Etsy'ye dokunmaz.
+
+on:
+  workflow_dispatch:
+    inputs:
+      edition:
+        description: "Edisyon (referans ve murekkep rengi)"
+        type: choice
+        options: [Midnight_Blue, Deep_Black, Champagne_Ivory, Warm_Parchment]
+        default: Midnight_Blue
+      ref_device:
+        description: "Olcum referansi olarak kullanilacak pilot dosya cihazi"
+        type: choice
+        options: [Phone, Tablet, Desktop, Watch]
+        default: Phone
+      sizes:
+        description: "Uretilecek cihaz boyutlari (virgullu)"
+        required: true
+        default: "Phone,Tablet,Desktop,Watch"
+      prefix:
+        description: "Cikti dosya adi oneki"
+        required: true
+        default: "BG_MB"
+      out_dir:
+        description: "Drive cikti klasoru (ASTROLOVE altinda)"
+        required: true
+        default: "TEMP/WP_PLATES/CLEAN"
+      grant:
+        description: "Ciktilara anyone:reader ver ve linkleri yaz"
+        type: boolean
+        default: true
+
+concurrency:
+  group: drive-perms
+  cancel-in-progress: false
+
+jobs:
+  synth:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+          fi
+
+      - name: Referansi al
+        run: |
+          set -euo pipefail
+          mkdir -p _work
+          rclone copyto "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/CANCER_LIBRA/AstroLove_Cancer_Libra_${{ inputs.edition }}_${{ inputs.ref_device }}.jpg" _work/ref.jpg
+          ls -l _work
+
+      - name: Olcum + sentez + QC
+        run: |
+          set -euo pipefail
+          cd scripts/etsy
+          python wp_bg_synth.py --ref ../../_work/ref.jpg --edition "${{ inputs.edition }}" \
+            --sizes "${{ inputs.sizes }}" --prefix "${{ inputs.prefix }}" \
+            --out-dir ../../_out --report ../../_out/bg_report.json \
+            || echo "BG_FAIL=1" >> "$GITHUB_ENV"
+          cd ../..
+          { echo "## wp-bg-synth: ${{ inputs.prefix }}"; echo; echo '```'; cat _out/bg_report.json; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          ls -l _out
+
+      - name: Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -d _out ] || exit 0
+          rclone copy _out "gdrive:ASTROLOVE/${{ inputs.out_dir }}" --include "${{ inputs.prefix }}_*.png"
+          rclone copyto _out/bg_report.json "gdrive:ASTROLOVE/${{ inputs.out_dir }}/bg_report_${{ inputs.edition }}.json" || true
+          rclone lsl "gdrive:ASTROLOVE/${{ inputs.out_dir }}" | grep "${{ inputs.prefix }}_" | sort
+
+      - name: Izin + linkler
+        if: ${{ always() && inputs.grant }}
+        run: |
+          set -euo pipefail
+          dir="${{ inputs.out_dir }}"; parent="$(dirname "$dir")"; leaf="$(basename "$dir")"
+          fid="$(rclone lsjson "gdrive:ASTROLOVE/$parent" --dirs-only \
+            | python3 -c "import json,sys;print([r['ID'] for r in json.load(sys.stdin) if r['Name']=='$leaf'][0])")"
+          python scripts/pinterest/pin_media_perms.py --mode grant --folder-id "$fid" \
+            --pattern "${{ inputs.prefix }}_" --apply
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: wp-bg-synth
+          path: _out/bg_report.json
+          if-no-files-found: ignore
+
+      - name: Sonuc
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          if [ "${BG_FAIL:-0}" = "1" ]; then echo "::error::zemin QC FAIL (bg_report.json)"; exit 1; fi
+
+      - if: ${{ always() }}
+        run: rm -rf _work _out ~/.config/rclone
