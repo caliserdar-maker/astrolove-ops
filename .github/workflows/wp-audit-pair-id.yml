@@ -1,0 +1,79 @@
+name: wp-audit-pair-id
+
+# DENETIM (SALT OKUR): Etsy'ye simdiye kadar yuklenmis ilanlarin rank=1
+# (SET01) galeri gorselini indirir, 78 ciftin kendi SET01 referanslariyla
+# (verify_listing.py'deki imza yontemi, degistirilmedi) karsilastirir ve
+# STATE'teki beklenen ciftle eslesip eslesmedigini raporlar. Hicbir
+# duzeltme/silme/yeniden-yukleme YAPMAZ. Tek yazma: OAuth token yenilenirse
+# Drive'a geri yazilir (digerleriyle ayni kural).
+
+on:
+  workflow_dispatch: {}
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Token, yukleme STATE'i ve referanslari al
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p _work/refs
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/WP_UPLOAD_STATE.csv" _work/UPLOAD_STATE.csv
+          wc -l _work/UPLOAD_STATE.csv
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2" _work/refs --include "*/WA_MOCKUP_V2_SET01_*_FINAL.jpg"
+          find _work/refs -mindepth 1 -maxdepth 1 -type d | wc -l
+      - name: Cift-kimlik denetimi (salt okur)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          python scripts/etsy/wp_audit_pair_id.py --state _work/UPLOAD_STATE.csv --refs _work/refs --out _work/AUDIT.csv
+      - name: Token'i Drive'a geri yaz (yenilendiyse)
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          if [ -f _work/ETSY_TOKEN.json.updated ]; then
+            rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json"
+            echo "Token Drive'a geri yazildi."
+          else
+            echo "Token yenilenmedi."
+          fi
+      - name: Sonucu Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/AUDIT.csv ] && rclone copyto _work/AUDIT.csv "gdrive:ASTROLOVE/TEMP/WP_AUDIT_PAIR_ID.csv" || true
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: wp-audit-pair-id
+          path: _work/AUDIT.csv
+          if-no-files-found: ignore
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
