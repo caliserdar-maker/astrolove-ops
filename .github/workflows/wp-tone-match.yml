@@ -94,7 +94,9 @@ jobs:
           set -euo pipefail
           [ -f "_work/${{ inputs.out_name }}" ] || exit 0
           rclone copyto "_work/${{ inputs.out_name }}" "gdrive:ASTROLOVE/${{ inputs.out_dir }}/${{ inputs.out_name }}"
-          rclone copyto _work/tone_report.json "gdrive:ASTROLOVE/${{ inputs.out_dir }}/tone_report_${{ inputs.out_name }}.json" || true
+          # rapor adi cikti adini ICERMEZ: izin adimindaki ad kalibi (out_name) rapora da
+          # eslesip "2 dosya bulundu" hatasi veriyordu (kosu 1).
+          rclone copyto _work/tone_report.json "gdrive:ASTROLOVE/${{ inputs.out_dir }}/tone_report_${{ inputs.edition }}_${{ inputs.device }}.json" || true
           rclone lsl "gdrive:ASTROLOVE/${{ inputs.out_dir }}" | grep "${{ inputs.out_name }}"
 
       - name: Izin + link
