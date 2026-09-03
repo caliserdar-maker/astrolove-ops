@@ -1,0 +1,89 @@
+name: wp-audit-full
+
+# KAPSAMLI DENETIM (SALT OKUR): 78 ilan icin 9 boyutlu PASS/FAIL matrisi
+# (cift eslesme, video, mockup, ZIP, baslik EN, tag EN, aciklama EN, RU
+# ceviri, fiyat/bolum/dosya/state). Duzeltme/silme/yeniden yukleme YAPMAZ.
+# Etsy'ye tek yazma: OAuth token yenilemesi (Drive'a geri yazilir).
+
+on:
+  workflow_dispatch:
+    inputs:
+      pairs:
+        description: "Cift alt kumesi (virgullu; bos = WA_WP_DRAFTS_STATE.csv'deki 78 cift)"
+        required: false
+        default: ""
+      limit:
+        description: "En fazla ilan (0 = sinirsiz; deneme icin kucuk sayi)"
+        required: true
+        default: "0"
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null && ffmpeg -version | head -1
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Token, STATE ve referanslari al
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p _work/refs_mock _work/refs_video
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/WA_WP_DRAFTS_STATE.csv" _work/drafts.csv
+          wc -l _work/drafts.csv
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2" _work/refs_mock --include "*/WA_MOCKUP_V2_*_FINAL.jpg" --transfers 8
+          find _work/refs_mock -mindepth 1 -maxdepth 1 -type d | wc -l
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/VIDEO_V2" _work/refs_video --include "*/WA_WP_VIDEO_*.mp4" --transfers 8
+          find _work/refs_video -mindepth 1 -maxdepth 1 -type d | wc -l
+      - name: Kapsamli denetim (salt okur)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          args=(--state _work/drafts.csv --refs-mock _work/refs_mock --refs-video _work/refs_video
+                --out _work/AUDIT_FULL.csv --limit "${{ inputs.limit }}")
+          if [ -n "${{ inputs.pairs }}" ]; then args+=(--pairs "${{ inputs.pairs }}"); fi
+          python scripts/etsy/wp_audit_full.py "${args[@]}" || echo "::warning::denetimde FAIL var"
+      - name: Token'i Drive'a geri yaz (yenilendiyse)
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          if [ -f _work/ETSY_TOKEN.json.updated ]; then
+            rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json"
+          fi
+      - name: Sonucu Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/AUDIT_FULL.csv ] && rclone copyto _work/AUDIT_FULL.csv "gdrive:ASTROLOVE/TEMP/WP_AUDIT_FULL.csv" || true
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: wp-audit-full
+          path: _work/AUDIT_FULL.csv
+          if-no-files-found: ignore
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
