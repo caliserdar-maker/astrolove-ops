@@ -1,0 +1,110 @@
+name: wp-audit-drive
+
+# DRIVE-TABANLI DENETIM (SALT OKUR): Etsy'ye HIC DOKUNMAZ, sadece Drive
+# okur. Kapsamli denetimin 1-6. maddeleri: 20 wallpaper orneginde OCR
+# (dosya adi/klasor vs icerik), 6 galeri + video icin imza (dogru cift)
+# ve OCR tam-string (kalinti/bozuk metin) kontrolu, ekran oran/sikisma
+# (kalibrasyon), 4 edisyon ZIP butunlugu, dosya saglamligi. Duzeltme yok.
+
+on:
+  workflow_dispatch:
+    inputs:
+      samples:
+        description: "Rastgele wallpaper ornegi sayisi (madde 1)"
+        required: true
+        default: "20"
+      pairs:
+        description: "Cift alt kumesi (virgullu; bos = WA_WP_DRAFTS_STATE.csv'deki 78 cift)"
+        required: false
+        default: ""
+
+concurrency:
+  group: wp-audit-drive
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg tesseract-ocr >/dev/null && ffmpeg -version | head -1 && tesseract --version | head -1
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Cift listesi + kalibrasyon
+        run: |
+          set -euo pipefail
+          mkdir -p _work/calib
+          if [ -n "${{ inputs.pairs }}" ]; then
+            printf '%s\n' ${{ inputs.pairs }} | tr ',' '\n' | sed '/^$/d' > _work/pairs.txt
+          else
+            rclone copyto "gdrive:ASTROLOVE/TEMP/WA_WP_DRAFTS_STATE.csv" _work/drafts.csv
+            cut -d, -f1 _work/drafts.csv | sed '/^$/d' > _work/pairs.txt
+          fi
+          wc -l < _work/pairs.txt
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CALIB" _work/calib --include "calib.json" --include "masks/*.png"
+      - name: 6 galeri + video + ZIP (78 cift, toplu)
+        run: |
+          set -euo pipefail
+          mkdir -p _work/mock _work/video _work/zip
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2" _work/mock --include "*/WA_MOCKUP_V2_*_FINAL.jpg" --transfers 8 --checkers 16
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/VIDEO_V2" _work/video --include "*/WA_WP_VIDEO_*.mp4" --transfers 8 --checkers 16
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/DELIVERY" _work/zip --include "*/*.zip" --transfers 8 --checkers 16
+          echo "mock: $(find _work/mock -mindepth 1 -maxdepth 1 -type d | wc -l) cift"
+          echo "video: $(find _work/video -mindepth 1 -maxdepth 1 -type d | wc -l) cift"
+          echo "zip: $(find _work/zip -mindepth 1 -maxdepth 1 -type d | wc -l) cift"
+      - name: Rastgele N wallpaper ornegi (madde 1)
+        run: |
+          set -euo pipefail
+          mkdir -p _work/wp_samples
+          python3 - <<'PY'
+          import random
+          from pathlib import Path
+          pairs = [p.strip() for p in Path("_work/pairs.txt").read_text().split() if p.strip()]
+          editions = ["Midnight_Blue", "Deep_Black", "Champagne_Ivory", "Warm_Parchment"]
+          devices = ["Phone", "Tablet", "Desktop", "Watch"]
+          n = int("${{ inputs.samples }}")
+          combos = [(p, e, d) for p in pairs for e in editions for d in devices]
+          random.shuffle(combos)
+          picked = combos[:n]
+          Path("_work/wp_sample_list.txt").write_text(
+              "\n".join(f"{p}\t{p.upper()}/AstroLove_{p}_{e}_{d}.jpg" for p, e, d in picked))
+          print(f"{len(picked)} ornek secildi")
+          PY
+          while IFS=$'\t' read -r pair relpath; do
+            up=$(echo "$pair" | tr '[:lower:]' '[:upper:]')
+            rclone copyto "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/$relpath" "_work/wp_samples/$(basename "$relpath")" || echo "eksik: $relpath"
+          done < _work/wp_sample_list.txt
+          ls _work/wp_samples | wc -l
+      - name: Drive denetimi (1-6, salt okur)
+        run: |
+          set -euo pipefail
+          python scripts/etsy/wp_audit_drive.py --pairs-file _work/pairs.txt \
+            --wp-samples _work/wp_samples --mock-dir _work/mock --video-dir _work/video \
+            --zip-dir _work/zip --calib _work/calib --out _work/AUDIT_DRIVE.csv || echo "::warning::denetimde FAIL var"
+      - name: Sonucu Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/AUDIT_DRIVE.csv ] && rclone copyto _work/AUDIT_DRIVE.csv "gdrive:ASTROLOVE/TEMP/WP_AUDIT_DRIVE.csv" || true
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: wp-audit-drive
+          path: _work/AUDIT_DRIVE.csv
+          if-no-files-found: ignore
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
