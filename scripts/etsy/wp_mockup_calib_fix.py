@@ -2,19 +2,29 @@
 """
 SET06 ekran-2 (id=1, Desktop) ve SET10Y ekran-1 (id=0, Phone) icin dogrulama
 esigi altinda kalan kalibrasyonu (dusuk inlier/yuksek RMS ya da beklenen
-cihaz oranindan sapan dortgen) ELLE DUZELTIR:
+cihaz oranindan sapan dortgen) ELLE DUZELTIR.
 
-  - dortgenin MERKEZI ve GENISLIK yonu/uzunlugu (ust+alt kenar ortalamasi -
-    en genis/en cok SIFT eslesmesi alan boyut) korunur;
-  - dik acili GERCEK bir dikdortgene regularize edilir (olculen kesme/carpiklik
-    atilir - fiziksel ekran zaten dikdortgen);
-  - YUKSEKLIK, hedef cihaz oranina gore yeniden hesaplanir (Desktop 3840/2160
-    =1.778, Phone 1440/3200=0.45 - DEVICES sozlugunden, wp_audit_drive.py'nin
-    c4 kontrolundeki AYNI kaynak);
-  - yeni H = getPerspectiveTransform(wallpaper koseleri -> duzeltilmis dortgen);
-  - maske (screen_soft_mask) YENI H/warp ile TUTARLI olacak sekilde yeniden
-    uretilir (eski maske yeni geometriyle uyumsuz kalmasin diye - paste modu
-    bunu ister).
+SET10Y ekran-1: "ideal dikdortgene" regularize edilir (merkez + genislik
+yonu/uzunlugu korunur, dik acili hale getirilir, yukseklik hedef orana gore
+yeniden hesaplanir) - bu yontem render'in kendi SIFT dogrulamasindan da
+(inlier>=20) GECTI (onceki test, Mo onayi).
+
+SET06 ekran-2: "ideal dikdortgene zorlama" yontemi render'in kendi SIFT
+dogrulamasinda FAIL verdi (16/20 inlier) - fotografdaki GERCEK perspektif
+(keystone) atilinca dortgen ~35-40px kayiyor. Bunun yerine KISITLI duzeltme:
+H'nin DOGRUSAL kismi A=[[a,b],[c,d]] iki sutuna ayrilir - sutun-1 (a,c) =
+YATAY (genislik) yonu/olcegi, sutun-2 (b,d) = DIKEY (yukseklik) yonu/olcegi.
+codebase'in kendi "scale" alani zaten sutun-1'in normu (bkz. quad_scale()).
+SADECE sutun-2'nin BUYUKLUGU (olcegi) sutun-1'e esitlenecek sekilde
+olceklenir - YONU (dolayisiyla kesme/donme) DEGISMEZ; sutun-1, kesme/donme
+terimleri (b,c) ve perspektif satiri (e,f) HIC DOKUNULMEZ. W0/H0 (wallpaper
+kendi orani) = hedef oran oldugundan (Desktop 3840/2160=1.778), sutun
+normlarini esitlemek c4 oranini tam hedefe getirir; gercek kamera
+perspektifi (kesme + perspektif satiri) korunur.
+
+Her iki ekran icin de: yeni H ile warp(pilot) yeniden hesaplanir, maske
+(screen_soft_mask) YENI H/warp ile TUTARLI olacak sekilde yeniden uretilir
+(eski maske yeni geometriyle uyumsuz kalmasin diye - paste modu bunu ister).
 
 SADECE bu 2 ekran icin calisir; calib.json'un geri kalanina dokunmaz. Girdi
 calib.json'u DEGISTIRMEZ - duzeltilmis kopyayi --out'a yazar (onay bekleyen
@@ -22,14 +32,16 @@ TEST script'idir).
 """
 import argparse
 import json
+import math
 from pathlib import Path
 
 import cv2
 import numpy as np
 
-from wp_mockup_common import DEVICES, dump_json, imread, ink_mask, quad_scale, screen_soft_mask, warp_full
+from wp_mockup_common import DEVICES, dump_json, imread, ink_mask, quad_of, quad_scale, screen_soft_mask, warp_full
 
 TARGETS = [("SET06", 1, "Desktop"), ("SET10Y", 0, "Phone")]
+METHOD = {"SET06": "scale_only", "SET10Y": "regularize"}
 
 
 def aspect_of_quad(quad):
@@ -38,6 +50,26 @@ def aspect_of_quad(quad):
     left = np.linalg.norm(q[3] - q[0]); right = np.linalg.norm(q[2] - q[1])
     w = (top + bottom) / 2; h = (left + right) / 2
     return w / h if h else 0.0
+
+
+def scale_only_fix(H, W0, target_aspect):
+    """H'nin dogrusal kismini sutunlarina ayirir: sutun-1 (a,c)=yatay yon/olcek
+    (codebase'in "scale" alaniyla ayni - quad_scale()), sutun-2 (b,d)=dikey
+    yon/olcek. Her iki sutunun YONU (dolayisiyla kesme/donme) DEGISMEZ;
+    perspektif satiri (H[2]) HIC DOKUNULMEZ. Sutunlarin BUYUKLUGU, GEOMETRIK
+    ORTALARINA esitlenecek sekilde simetrik olceklenir (tek sutunu digerine
+    zorlamak - ilk denemede - dortgeni gereksiz yere fazla kaydirdi, 83px;
+    simetrik dagitim toplam kaymayi kucultur). W0/H0=target_aspect oldugundan
+    (wallpaper kendi orani) bu, dortgen oranini tam target_aspect'e getirir."""
+    H = np.asarray(H, np.float64).copy()
+    a, b = H[0, 0], H[0, 1]
+    c, d = H[1, 0], H[1, 1]
+    scale_x = float(np.hypot(a, c))
+    scale_y = float(np.hypot(b, d))
+    geo = math.sqrt(scale_x * scale_y)
+    H[0, 0] = a * (geo / scale_x); H[1, 0] = c * (geo / scale_x)
+    H[0, 1] = b * (geo / scale_y); H[1, 1] = d * (geo / scale_y)
+    return H
 
 
 def regularize(quad, target_aspect):
@@ -70,12 +102,16 @@ def main():
         target_aspect = DEVICES[dev][0] / DEVICES[dev][1]
         old_quad = np.asarray(s["quad"], np.float32)
         old_aspect = aspect_of_quad(old_quad)
-        new_quad = regularize(old_quad, target_aspect)
-        new_aspect = aspect_of_quad(new_quad)
-
         W0, H0 = DEVICES[dev]
-        src_pts = np.float32([[0, 0], [W0, 0], [W0, H0], [0, H0]])
-        new_H = cv2.getPerspectiveTransform(src_pts, new_quad)
+
+        if METHOD[scene] == "scale_only":
+            new_H = scale_only_fix(s["H"], W0, target_aspect)
+            new_quad = quad_of(new_H, W0, H0)
+        else:
+            new_quad = regularize(old_quad, target_aspect)
+            src_pts = np.float32([[0, 0], [W0, 0], [W0, H0], [0, H0]])
+            new_H = cv2.getPerspectiveTransform(src_pts, new_quad)
+        new_aspect = aspect_of_quad(new_quad)
         new_scale = quad_scale(new_quad, W0)
 
         master = imread(Path(a.masters) / calib["scenes"][scene]["master"])
