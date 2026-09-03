@@ -39,6 +39,7 @@ from wp_mockup_common import imread, log
 SCENE = "SET01"
 INK_CHANGE_MIN = 5.0
 FPS_TOL = 0.01
+LIGHT_SIGMA = 25.0    # aydinlatma kazanci olcumu icin dusuk gecirgen yaricap (piksel)
 
 
 def scaled_screens(calib, scale):
@@ -92,6 +93,7 @@ def render(master_path, calib, master_img, pilot_dir, wp_dir, pair, pilot_pair, 
     screens, shift = refine(frame0, master_img, scaled_screens(calib, W / master_img.shape[1]))
     log(f"  video {W}x{H} {fps:.3f} fps {n_master} kare; ECC kaydirma {shift[0]:+.2f},{shift[1]:+.2f}")
     delta = np.zeros((H, W, 3), np.float32); msum = np.zeros((H, W), np.float32)
+    gains = []
     for s in screens:
         wp_p = imread(Path(pilot_dir) / f"AstroLove_{pilot_pair}_{s['edition']}_{s['device']}.jpg")
         wp_n = imread(Path(wp_dir) / f"AstroLove_{pair}_{s['edition']}_{s['device']}.jpg")
@@ -99,7 +101,16 @@ def render(master_path, calib, master_img, pilot_dir, wp_dir, pair, pilot_pair, 
         wp = cv2.warpPerspective(wp_p.astype(np.float32), Hm, (W, H), flags=cv2.INTER_AREA)
         wn = cv2.warpPerspective(wp_n.astype(np.float32), Hm, (W, H), flags=cv2.INTER_AREA)
         m = soft_mask((H, W), s["quad"])
-        delta += (wn - wp) * m[..., None]; msum += m
+        # Sahne aydinlatma kazanci L: ekran, sahnede olculen bir carpanla goruntuleniyor
+        # (master_0 = L * warp(pilot)). Fark modu L olmadan pilot murekkebini iptal
+        # ETMIYOR (olcum: ARIES_LEO kare 0'da iki cift ust uste). L, dusuk gecirgen
+        # oranla (sigma 25) olculur; murekkep kenarlarindan etkilenmemesi icin blur.
+        num = cv2.GaussianBlur(frame0.astype(np.float32) * m[..., None], (0, 0), LIGHT_SIGMA)
+        den = cv2.GaussianBlur(wp * m[..., None], (0, 0), LIGHT_SIGMA)
+        L = np.clip(num / np.maximum(den, 1.0), 0.2, 3.0)
+        gains.append(float((L * m[..., None]).sum() / max(m.sum() * 3, 1)))
+        delta += L * (wn - wp) * m[..., None]; msum += m
+    log(f"  ekran aydinlatma kazanci L ort: {', '.join(f'{g:.3f}' for g in gains)}")
     inside = msum > 0.05
     ink = np.abs(delta).max(axis=2) > 8
     tmp = Path(tempfile.mkdtemp()) / "frames.raw"
