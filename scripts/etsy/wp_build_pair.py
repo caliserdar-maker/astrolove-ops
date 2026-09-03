@@ -42,6 +42,7 @@ from wp_plate_pilot import (BOX_NAMES, BOX_SYMBOL, ELEMENT_BOXES, INK_RGB, RING_
                             RING_TIP_Y, placement)
 
 DIFF_THR = 12        # maks kanal |poster - medyan|
+DIFF_HI = 60         # murekkep renginde olmayan fark pikseli icin esik (parlama/golge kalir, zemin sapmasi atilir)
 CLOSE_PX = 9
 MIN_COMP = 750       # poster px^2 (ink_layer_mask ile ayni gren filtresi)
 INK_TOL = 70         # murekkep rengine uzaklik (ink_layer_mask ile ayni); bilesende en az INK_MIN murekkep renkli piksel
@@ -75,7 +76,6 @@ def diff_ink_mask(poster, median, ed):
     d = np.abs(poster.astype(np.int16) - median.astype(np.int16)).max(axis=2)
     raw = (d > DIFF_THR)
     m = (raw & (region_mask(poster.shape) > 0)).astype(np.uint8)
-    del d
     # Fark maskesi murekkep KOMSULUGU ile sinirlanir (EK KURAL, olcum ARIES_LEO MB/WP Phone):
     # posterin bulut/yanik zemin dokusu medyandan >12 sapiyor (MB 1.8M px, WP 5.9M px), stroka
     # bitisik koyu zemin parcalari 1:1 kesitte gorunuyordu. Murekkep renkli fark pikseli
@@ -86,6 +86,12 @@ def diff_ink_mask(poster, median, ed):
     d2 = ((poster[ys, xs].astype(np.int16) - np.array([b, g, r], np.int16)) ** 2).sum(axis=1)
     sel = d2 < INK_TOL * INK_TOL
     inkc = np.zeros(m.shape, np.uint8); inkc[ys[sel], xs[sel]] = 1
+    # Murekkep renginde OLMAYAN fark pikseli yalniz fark > DIFF_HI ise kalir: strok parlamasi/golgesi
+    # (olcum ARIES_LEO, temiz medyan: murekkepten 8-30 px uzak parlama pikselleri fark p10 127-158)
+    # kalir; zemin bulut/doku sapmasi (fark 12-40) ve isima (MB/DB, Gauss terimiyle eklenir) atilir.
+    strong = sel | (d[ys, xs] > DIFF_HI)
+    m[ys[~strong], xs[~strong]] = 0
+    del d
     if INK_HALO > 0:
         halo = cv2.dilate(inkc, np.ones((2 * INK_HALO + 1, 2 * INK_HALO + 1), np.uint8))
         m = (m & halo).astype(np.uint8)
