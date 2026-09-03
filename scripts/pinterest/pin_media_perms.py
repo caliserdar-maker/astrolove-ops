@@ -7,6 +7,8 @@ Drive klasor agacinda "anyone" (linki olan herkes) iznini duzenler.
                  writer kalmisti (2 Eyl 2026 tespiti). Ust klasordan miras
                  alinan izin dusurulemez; o durumda ogede miras kapatilir
                  (inheritedPermissionsDisabled) ve anyone:reader dogrudan verilir.
+  --mode grant   klasordeki ad kalibi eslesen DOSYALARA (klasore degil) anyone:reader
+                 verir, dogrudan indirme linklerini yazar (--pattern, --expect).
   --mode remove  agactaki anyone iznini TAMAMEN kaldirir (klasor ozel olur).
                  --keep-id altindaki agaca dokunmaz; onun anyone:reader izninin
                  mirastan bagimsiz oldugunu (miras kapali) dogrular. KARAR
@@ -361,19 +363,63 @@ def mode_remove(drive, a):
     return 0 if ok else 1
 
 
+def mode_grant(drive, a):
+    """Bir klasordeki ad kalibi eslesen DOSYALARA (klasore DEGIL) anyone:reader verir.
+
+    B94 kurali: ASTROLOVE klasorleri herkese acik degildir; yeni bir "herkese acik"
+    ihtiyaci reader olarak ve mumkun olan en dar kapsamda verilir. Bu mod klasoru
+    acmaz, yalniz secilen dosyalari acar. Cikti: dogrudan indirme linkleri.
+    """
+    items = drive.children(a.folder_id)
+    files = sorted((i for i in items if i["mimeType"] != FOLDER_MIME and a.pattern in i["name"]),
+                   key=lambda i: i["name"])
+    log(f"eslesen dosya: {len(files)} (kalip '{a.pattern}')")
+    if a.expect and len(files) != a.expect:
+        sys.exit(f"HATA: {len(files)} dosya bulundu, {a.expect} bekleniyordu.")
+    if not a.apply:
+        for f in files:
+            log(f"  dry-run {f['name']} -> anyone:{roles(f)}")
+        log("dry-run: degisiklik yapilmadi (--apply ile uygula)")
+        return 0
+    for f in files:
+        cur = anyone_perms(f)
+        if cur and all(p["role"] == TARGET_ROLE for p in cur):
+            continue
+        if cur:
+            drive.set_role(f["id"], cur[0]["id"], TARGET_ROLE)
+        else:
+            drive.create_anyone(f["id"], TARGET_ROLE)
+    time.sleep(5)
+    lines = [f"## anyone:{TARGET_ROLE} verildi - {len(files)} dosya", ""]
+    bad = []
+    for f in files:
+        fresh = drive.get(f["id"])
+        r = roles(fresh)
+        if r != TARGET_ROLE:
+            bad.append(f["name"])
+        link = f"https://drive.google.com/uc?export=download&id={f['id']}"
+        log(f"  {fresh['name']:34s} anyone:{r}  {link}")
+        lines.append(f"- `{fresh['name']}` - {link}")
+    write_summary(lines)
+    log("SONUC " + ("PASS" if not bad else f"FAIL: {bad}"))
+    return 0 if not bad else 1
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--mode", choices=("fix", "remove"), default="fix")
+    ap.add_argument("--mode", choices=("fix", "remove", "grant"), default="fix")
     ap.add_argument("--folder-id", default=DEFAULT_FOLDER_ID, help="hedef klasor ID (varsayilan PIN_MEDIA)")
     ap.add_argument("--keep-id", default=DEFAULT_FOLDER_ID, help="remove modunda korunacak agac (varsayilan PIN_MEDIA)")
     ap.add_argument("--apply", action="store_true", help="degisiklikleri uygula (yoksa dry-run)")
     ap.add_argument("--sample", type=int, default=3, help="dogrulama icin rastgele dosya sayisi")
     ap.add_argument("--scan", action="store_true", help="remove: kok altindaki dogrudan anyone izinlerini tara (yalniz rapor)")
+    ap.add_argument("--pattern", default="", help="grant: dosya adinda gecmesi gereken metin")
+    ap.add_argument("--expect", type=int, default=0, help="grant: beklenen dosya sayisi (tutmazsa durur)")
     a = ap.parse_args()
     if a.mode == "remove" and a.folder_id == a.keep_id:
         sys.exit("HATA: remove modunda hedef klasor ile korunan klasor ayni olamaz")
     drive = Drive(access_token())
-    sys.exit(mode_fix(drive, a) if a.mode == "fix" else mode_remove(drive, a))
+    sys.exit({"fix": mode_fix, "remove": mode_remove, "grant": mode_grant}[a.mode](drive, a))
 
 
 if __name__ == "__main__":
