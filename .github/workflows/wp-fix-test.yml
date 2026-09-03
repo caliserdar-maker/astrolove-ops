@@ -111,6 +111,16 @@ jobs:
             --scenes "${{ inputs.scenes }}" --out _work/out_mock \
             | tee _work/mock_log.txt
 
+      - name: Sonucu Drive TEMP'e yukle (gorsel dogrulama icin, goruntulenebilir link)
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          dest="gdrive:ASTROLOVE/TEMP/WP_FIX_TEST/${{ inputs.pair }}"
+          for f in _work/out_mock/*.jpg; do [ -f "$f" ] || continue; rclone copyto "$f" "$dest/$(basename "$f")"; done
+          for f in _work/out_mock/qc/*.png; do [ -f "$f" ] || continue; rclone copyto "$f" "$dest/qc_$(basename "$f")"; done
+          if [ -f _work/out_mock/report.md ]; then rclone copyto _work/out_mock/report.md "$dest/report.md"; fi
+          echo "Drive'a yuklendi: ASTROLOVE/TEMP/WP_FIX_TEST/${{ inputs.pair }}"
+
       - name: Oran dogrulamasi (bagimsiz, wp_audit_drive.py ile ayni formul)
         if: ${{ inputs.skip_calib_fix != true }}
         run: |
