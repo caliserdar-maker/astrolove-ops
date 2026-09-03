@@ -1,0 +1,70 @@
+name: canva-bulk-fetch
+
+# Canva export listesini (repo icindeki TSV) TEK kosuda indirir ve Drive'a yazar.
+# Liste satiri: <SAYFA_BASLIGI>\t<CIHAZ>\t<URL>   (bkz. scripts/canva_bulk_fetch.sh)
+# Imzali URL'ler dosyadan okunur; workflow girdisi degildir, bu yuzden loga dusmez.
+# Etsy'ye dokunmaz.
+
+on:
+  workflow_dispatch:
+    inputs:
+      manifest:
+        description: "Repo icindeki liste dosyasi (TSV)"
+        required: true
+        default: "_manifest/canva_bulk.tsv"
+      out_root:
+        description: "Drive kok klasoru (ASTROLOVE altinda)"
+        required: true
+        default: "WALLPAPER/FINAL_V2"
+      edition:
+        description: "Edisyon (dosya adinda kullanilir)"
+        type: choice
+        options: [Midnight_Blue, Deep_Black, Champagne_Ivory, Warm_Parchment]
+        default: Midnight_Blue
+      parallel:
+        description: "Es zamanli indirme sayisi"
+        required: true
+        default: "8"
+
+concurrency:
+  group: drive-perms
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+          fi
+
+      - name: Indir (ETA sayaci) + Drive'a yaz + dogrula
+        run: |
+          bash scripts/canva_bulk_fetch.sh \
+            "${{ inputs.manifest }}" "${{ inputs.out_root }}" \
+            "${{ inputs.edition }}" "${{ inputs.parallel }}"
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: canva-bulk-fetch
+          path: _log/progress.txt
+          if-no-files-found: ignore
+
+      - if: ${{ always() }}
+        run: rm -rf _dl _log ~/.config/rclone
