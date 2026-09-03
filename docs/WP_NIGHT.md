@@ -17,13 +17,18 @@ referansa gore yeniden tanimlanabilir (EK KURAL, gerekce rapora yazilir).
 
 ## Kosu
 
-- `wp-night` (asama a/b/d): `stage`, `shards` (paralel is), `limit` (parca basina
-  cift, 0 = hepsi), `force` (STATE'te PASS olanlari yeniden uret).
+- `wp-night` (asama a/b/c/d): `stage`, `shards` (paralel is), `limit` (parca
+  basina cift, 0 = hepsi), `force` (STATE'te PASS olanlari yeniden uret).
   STATE: Drive `TEMP/WP_NIGHT_STATE.csv` (parca dosyalari birlestirilir).
   Kesilen kosu ayni girdilerle yeniden tetiklenir; PASS olan cift atlanir.
-- `wp-media` (asama e + f): `dry_run` varsayilan true; `no_video` asama c hazir
-  degilse true; `limit`, `pairs`, `quota_stop`. Tek Etsy kosusu
-  (`concurrency: etsy-token`), token her kosuda Drive'a geri yazilir.
+- `wp-media` (asama e + f): `dry_run` varsayilan true; `no_video`; `limit`,
+  `pairs`, `quota_stop`. Tek Etsy kosusu (`concurrency: etsy-token`), token
+  her kosuda Drive'a geri yazilir.
+- `wp-full-chain` (3 Eyl, Mo karari): TEK workflow_dispatch kosusunda b -> c
+  -> d -> (e+f) zinciri; yukaridaki script'leri AYNEN kullanir (yeni kod
+  yalniz orkestrasyon). Girdiler: `shards`, `pairs`, `limit`, `upload_dry_run`,
+  `quota_stop`. `upload_verify` isi `concurrency: etsy-token` ile digerlerine
+  karsilikli disli.
 
 ## Pilot dosyalari
 
@@ -33,7 +38,14 @@ mockup/video referansi olarak ORADAN okunur: mockup masterlari ve ilan videosu
 o dosyalarla uretildi, referans degisirse `wp_mockup_render`'in relight/paste
 hesabi kayar.
 
-## ACIK: asama c (ilan videosu)
+## KARAR (3 Eyl, Mo): asama c yontemi sabitlendi
+
+wp_video_render.py mevcut haliyle (SET01 sahnesi + `WA_WP_VIDEO_TOZ_V3.mp4`
+master, asagidaki olcum) 78 cift icin kullanilir; guncelleme yok. Ayri bir
+"V02_ZOOM" kaynagi / "Reel V03" recetesi (21-30 Agu, Colab donemi, farkli
+olcek 1080x1350, KARAR 3 ile celisir) DEGERLENDIRILMEDI, kullanilmiyor.
+
+## ACIK (tarihsel, asagidaki olcum asamasinda cozuldu): asama c (ilan videosu)
 
 Pilotun ilan videosu `TEMP/WP_VIDEO_TEST/WA_WP_VIDEO_TOZ_V3.mp4`: SET01 sahnesi
 (iki telefon, MB + CI), 1800x1350, 11.5 sn, 30 fps, 345 kare. Ekran icerigi

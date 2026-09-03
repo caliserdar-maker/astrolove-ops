@@ -1,0 +1,510 @@
+name: wp-full-chain
+
+# TEK ZINCIR (Mo, 3 Eyl): galeri (b) -> video (c) -> zip (d) -> Etsy yukleme+
+# dogrulama (e+f), TEK workflow_dispatch kosusunda. Mevcut script'ler AYNEN
+# kullanilir (degistirilmedi): wp_night.py (b/c/d), wp_video_render.py (c,
+# SET01 sahnesi + WA_WP_VIDEO_TOZ_V3.mp4 master), wp_media_upload.py (e),
+# wp_verify_all.py (f, upload isinin sonunda kosar).
+# Yukleme: ilanlar taslak kalir (pilot zaten active); bu is YAYINLAMAZ.
+# Etsy'ye yazan tek is upload_verify; concurrency etsy-token ile diger Etsy
+# is'leriyle (wp-media, etsy-verify, etsy-listing-update...) karsilikli disli.
+
+on:
+  workflow_dispatch:
+    inputs:
+      shards:
+        description: "Uretim asamalarinda (b/c/d) parca sayisi (paralel is)"
+        required: true
+        default: "6"
+      pairs:
+        description: "Cift listesi (bos = STATE CSV'deki 78 cift)"
+        required: false
+        default: ""
+      limit:
+        description: "Parca/ilan basina en fazla is (0 = sinirsiz; deneme icin 1)"
+        required: true
+        default: "0"
+      upload_dry_run:
+        description: "true = yukleme adiminda yalniz oku/raporla; false = ETSY'YE YAZ"
+        type: boolean
+        default: false
+      quota_stop:
+        description: "Yukleme: kalan kota bu degerin altina dusunce temiz cik"
+        required: true
+        default: "300"
+
+concurrency:
+  group: wp-full-chain
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      shards: ${{ steps.m.outputs.shards }}
+    steps:
+      - id: m
+        run: |
+          python3 -c "import json,sys;n=int('${{ inputs.shards }}');print('shards='+json.dumps(list(range(n))))" >> "$GITHUB_OUTPUT"
+
+  archive:
+    # Pilotun (Cancer_Libra) OZGUN 16 wallpaper'i: mockup masterlari ve ilan
+    # videosu bu dosyalarla uretildi. Idempotent (arsiv doluysa atlanir).
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Pilot arsivi (bir kez)
+        run: |
+          set -euo pipefail
+          n=$(rclone lsf "gdrive:ASTROLOVE/ARCHIVE/FINAL_V2_PILOT_V1" --include "AstroLove_*.jpg" 2>/dev/null | wc -l || true)
+          n=${n:-0}
+          echo "arsivde $n dosya"
+          if [ "$n" -lt 16 ]; then
+            rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/CANCER_LIBRA" "gdrive:ASTROLOVE/ARCHIVE/FINAL_V2_PILOT_V1" --include "AstroLove_*.jpg"
+            m=$(rclone lsf "gdrive:ASTROLOVE/ARCHIVE/FINAL_V2_PILOT_V1" --include "AstroLove_*.jpg" | wc -l)
+            echo "arsivlendi: $m dosya"
+            test "$m" = "16"
+          else
+            echo "arsiv zaten dolu, dokunulmadi"
+          fi
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
+
+  pairs_file:
+    needs: archive
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: 78 ciftlik listeyi Drive'a yaz (asamalar ayni listeyi okur)
+        run: |
+          set -euo pipefail
+          mkdir -p _work
+          if [ -n "${{ inputs.pairs }}" ]; then
+            printf '%s\n' ${{ inputs.pairs }} | tr ',' '\n' | sed '/^$/d' > _work/pairs.txt
+          else
+            rclone copyto "gdrive:ASTROLOVE/TEMP/WA_WP_DRAFTS_STATE.csv" _work/drafts.csv
+            cut -d, -f1 _work/drafts.csv | sed '/^$/d' > _work/pairs.txt
+          fi
+          wc -l < _work/pairs.txt
+          rclone copyto _work/pairs.txt "gdrive:ASTROLOVE/TEMP/WP_FULL_CHAIN_PAIRS.txt"
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
+
+  gallery:
+    needs: [plan, pairs_file]
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        shard: ${{ fromJson(needs.plan.outputs.shards) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Girdiler (asama b)
+        run: |
+          set -euo pipefail
+          mkdir -p _work/calib _work/masters _work/pilot
+          rclone copyto "gdrive:ASTROLOVE/TEMP/WP_FULL_CHAIN_PAIRS.txt" _work/pairs.txt
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CALIB" _work/calib --include "calib.json" --include "masks/*.png"
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/CANCER_LIBRA" _work/masters --include "*_FINAL.jpg"
+          rclone copy "gdrive:ASTROLOVE/ARCHIVE/FINAL_V2_PILOT_V1" _work/pilot --include "AstroLove_*.jpg"
+          test "$(ls _work/pilot | wc -l)" = "16"
+          rclone copyto "gdrive:ASTROLOVE/TEMP/WP_NIGHT_STATE.csv" _work/STATE.csv || true
+          test -f _work/STATE.csv || : > _work/STATE.csv
+      - name: Uret (asama b, galeri)
+        run: |
+          set -euo pipefail
+          cp _work/STATE.csv "_work/STATE_${{ matrix.shard }}.csv"
+          python scripts/etsy/wp_night.py --stage b --pairs-file _work/pairs.txt \
+            --shard "${{ matrix.shard }}" --shards "${{ inputs.shards }}" \
+            --state "_work/STATE_${{ matrix.shard }}.csv" --work _work --limit "${{ inputs.limit }}"
+      - name: STATE parcasini Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          f="_work/STATE_${{ matrix.shard }}.csv"
+          [ -f "$f" ] || exit 0
+          rclone copyto "$f" "gdrive:ASTROLOVE/TEMP/WP_NIGHT_STATE_b_${{ matrix.shard }}.csv"
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
+
+  gallery_merge:
+    needs: gallery
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      fails: ${{ steps.merge.outputs.fails }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - id: merge
+        name: STATE birlestir + ozet
+        run: |
+          set -euo pipefail
+          mkdir -p _s
+          rclone copy "gdrive:ASTROLOVE/TEMP" _s --include "WP_NIGHT_STATE*.csv"
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import csv, glob, collections
+          rows = {}
+          for f in sorted(glob.glob("_s/WP_NIGHT_STATE*.csv")):
+              for r in csv.reader(open(f, encoding="utf-8")):
+                  if len(r) >= 5 and r[0] != "pair":
+                      rows[(r[0], r[1])] = r
+          out = "_s/WP_NIGHT_STATE.csv"
+          with open(out, "w", newline="", encoding="utf-8") as fh:
+              w = csv.writer(fh); w.writerow(["pair", "stage", "status", "ts_utc", "detail"])
+              for k in sorted(rows): w.writerow(rows[k])
+          c = collections.Counter((r[1], r[2]) for r in rows.values())
+          print("## gece STATE ozeti (galeri sonrasi)\n")
+          for (stage, status), n in sorted(c.items()):
+              print(f"- asama {stage}: {status} {n}")
+          fails = [r[0] for r in rows.values() if r[1] == "b" and r[2] != "PASS"]
+          if fails: print("\nFAIL ciftler (b): " + ", ".join(sorted(set(fails))))
+          PY
+          rclone copyto _s/WP_NIGHT_STATE.csv "gdrive:ASTROLOVE/TEMP/WP_NIGHT_STATE.csv"
+      - if: ${{ always() }}
+        run: rm -rf _s ~/.config/rclone
+
+  video:
+    needs: [plan, gallery_merge]
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        shard: ${{ fromJson(needs.plan.outputs.shards) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null && ffmpeg -version | head -1
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Girdiler (asama c)
+        run: |
+          set -euo pipefail
+          mkdir -p _work/calib _work/masters _work/pilot
+          rclone copyto "gdrive:ASTROLOVE/TEMP/WP_FULL_CHAIN_PAIRS.txt" _work/pairs.txt
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CALIB" _work/calib --include "calib.json" --include "masks/*.png"
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/CANCER_LIBRA" _work/masters --include "*_FINAL.jpg"
+          rclone copy "gdrive:ASTROLOVE/ARCHIVE/FINAL_V2_PILOT_V1" _work/pilot --include "AstroLove_*.jpg"
+          test "$(ls _work/pilot | wc -l)" = "16"
+          rclone copyto "gdrive:ASTROLOVE/TEMP/WP_VIDEO_TEST/WA_WP_VIDEO_TOZ_V3.mp4" _work/video_master.mp4
+          test -s _work/video_master.mp4
+          rclone copyto "gdrive:ASTROLOVE/TEMP/WP_NIGHT_STATE.csv" _work/STATE.csv || true
+          test -f _work/STATE.csv || : > _work/STATE.csv
+      - name: Uret (asama c, video)
+        run: |
+          set -euo pipefail
+          cp _work/STATE.csv "_work/STATE_${{ matrix.shard }}.csv"
+          python scripts/etsy/wp_night.py --stage c --pairs-file _work/pairs.txt \
+            --shard "${{ matrix.shard }}" --shards "${{ inputs.shards }}" \
+            --state "_work/STATE_${{ matrix.shard }}.csv" --work _work --limit "${{ inputs.limit }}"
+      - name: STATE parcasini Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          f="_work/STATE_${{ matrix.shard }}.csv"
+          [ -f "$f" ] || exit 0
+          rclone copyto "$f" "gdrive:ASTROLOVE/TEMP/WP_NIGHT_STATE_c_${{ matrix.shard }}.csv"
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
+
+  video_merge:
+    needs: video
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: STATE birlestir + ozet
+        run: |
+          set -euo pipefail
+          mkdir -p _s
+          rclone copy "gdrive:ASTROLOVE/TEMP" _s --include "WP_NIGHT_STATE*.csv"
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import csv, glob, collections
+          rows = {}
+          for f in sorted(glob.glob("_s/WP_NIGHT_STATE*.csv")):
+              for r in csv.reader(open(f, encoding="utf-8")):
+                  if len(r) >= 5 and r[0] != "pair":
+                      rows[(r[0], r[1])] = r
+          out = "_s/WP_NIGHT_STATE.csv"
+          with open(out, "w", newline="", encoding="utf-8") as fh:
+              w = csv.writer(fh); w.writerow(["pair", "stage", "status", "ts_utc", "detail"])
+              for k in sorted(rows): w.writerow(rows[k])
+          c = collections.Counter((r[1], r[2]) for r in rows.values())
+          print("## gece STATE ozeti (video sonrasi)\n")
+          for (stage, status), n in sorted(c.items()):
+              print(f"- asama {stage}: {status} {n}")
+          fails = [r[0] for r in rows.values() if r[1] == "c" and r[2] != "PASS"]
+          if fails: print("\nFAIL ciftler (c): " + ", ".join(sorted(set(fails))))
+          PY
+          rclone copyto _s/WP_NIGHT_STATE.csv "gdrive:ASTROLOVE/TEMP/WP_NIGHT_STATE.csv"
+      - if: ${{ always() }}
+        run: rm -rf _s ~/.config/rclone
+
+  zip:
+    needs: [plan, video_merge]
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        shard: ${{ fromJson(needs.plan.outputs.shards) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Girdiler (asama d)
+        run: |
+          set -euo pipefail
+          rclone copyto "gdrive:ASTROLOVE/TEMP/WP_FULL_CHAIN_PAIRS.txt" _work/pairs.txt
+          rclone copyto "gdrive:ASTROLOVE/TEMP/LICENSE.txt" _work/LICENSE.txt
+          wc -c _work/LICENSE.txt
+          rclone copyto "gdrive:ASTROLOVE/TEMP/WP_NIGHT_STATE.csv" _work/STATE.csv || true
+          test -f _work/STATE.csv || : > _work/STATE.csv
+      - name: Uret (asama d, zip)
+        run: |
+          set -euo pipefail
+          cp _work/STATE.csv "_work/STATE_${{ matrix.shard }}.csv"
+          python scripts/etsy/wp_night.py --stage d --pairs-file _work/pairs.txt \
+            --shard "${{ matrix.shard }}" --shards "${{ inputs.shards }}" \
+            --state "_work/STATE_${{ matrix.shard }}.csv" --work _work --limit "${{ inputs.limit }}"
+      - name: STATE parcasini Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          f="_work/STATE_${{ matrix.shard }}.csv"
+          [ -f "$f" ] || exit 0
+          rclone copyto "$f" "gdrive:ASTROLOVE/TEMP/WP_NIGHT_STATE_d_${{ matrix.shard }}.csv"
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
+
+  zip_merge:
+    needs: zip
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: STATE birlestir + ozet
+        run: |
+          set -euo pipefail
+          mkdir -p _s
+          rclone copy "gdrive:ASTROLOVE/TEMP" _s --include "WP_NIGHT_STATE*.csv"
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import csv, glob, collections
+          rows = {}
+          for f in sorted(glob.glob("_s/WP_NIGHT_STATE*.csv")):
+              for r in csv.reader(open(f, encoding="utf-8")):
+                  if len(r) >= 5 and r[0] != "pair":
+                      rows[(r[0], r[1])] = r
+          out = "_s/WP_NIGHT_STATE.csv"
+          with open(out, "w", newline="", encoding="utf-8") as fh:
+              w = csv.writer(fh); w.writerow(["pair", "stage", "status", "ts_utc", "detail"])
+              for k in sorted(rows): w.writerow(rows[k])
+          c = collections.Counter((r[1], r[2]) for r in rows.values())
+          print("## gece STATE ozeti (zip sonrasi, uretim TAMAM)\n")
+          for (stage, status), n in sorted(c.items()):
+              print(f"- asama {stage}: {status} {n}")
+          fails = [r[0] for r in rows.values() if r[1] == "d" and r[2] != "PASS"]
+          if fails: print("\nFAIL ciftler (d): " + ", ".join(sorted(set(fails))))
+          PY
+          rclone copyto _s/WP_NIGHT_STATE.csv "gdrive:ASTROLOVE/TEMP/WP_NIGHT_STATE.csv"
+      - if: ${{ always() }}
+        run: rm -rf _s ~/.config/rclone
+
+  upload_verify:
+    # asama e (Etsy medya yukleme) + f (son dogrulama, salt okur). Tek Etsy
+    # kosusu: baska hicbir Etsy is'i (wp-media, etsy-verify, ...) ayni anda
+    # calisamaz (concurrency etsy-token).
+    needs: zip_merge
+    if: ${{ always() && needs.zip_merge.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    concurrency:
+      group: etsy-token
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Token, STATE ve medyayi al
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p _work/media/mock _work/media/zip _work/media/video
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/WA_WP_DRAFTS_STATE.csv" _work/drafts.csv
+          rclone copyto "gdrive:ASTROLOVE/TEMP/WP_UPLOAD_STATE.csv" _work/UPLOAD_STATE.csv || true
+          rclone copyto "gdrive:ASTROLOVE/TEMP/HOW_TO_SET_YOUR_WALLPAPER.pdf" _work/media/HOW_TO_SET_YOUR_WALLPAPER.pdf
+          rclone copyto "gdrive:ASTROLOVE/TEMP/WP_FULL_CHAIN_PAIRS.txt" _work/want.txt
+          lim="${{ inputs.limit }}"
+          if [ "$lim" != "0" ]; then head -n "$lim" _work/want.txt > _work/want2.txt; mv _work/want2.txt _work/want.txt; fi
+          while read -r p; do
+            up=$(echo "$p" | tr '[:lower:]' '[:upper:]')
+            rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/$up" "_work/media/mock/$up" --include "WA_MOCKUP_V2_*_FINAL.jpg" || true
+            rclone copy "gdrive:ASTROLOVE/WALLPAPER/DELIVERY/$up" "_work/media/zip/$up" --include "*.zip" || true
+            rclone copy "gdrive:ASTROLOVE/WALLPAPER/VIDEO_V2/$up" "_work/media/video/$up" --include "WA_WP_VIDEO_*.mp4" || true
+          done < _work/want.txt
+          du -sh _work/media
+          cat _work/want.txt | paste -sd, > _work/pairs_csv.txt
+      - name: Medya yukle (asama e)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          args=(--state _work/drafts.csv --media _work/media --out _work/UPLOAD_STATE.csv
+                --pairs "$(cat _work/pairs_csv.txt)" --limit "${{ inputs.limit }}"
+                --quota-stop "${{ inputs.quota_stop }}")
+          if [ "${{ inputs.upload_dry_run }}" != "true" ]; then
+            echo "::warning::APPLY modu: Etsy'ye medya yazilacak (STATE draft kalir, yayin yok)."
+            args+=(--apply)
+          fi
+          python scripts/etsy/wp_media_upload.py "${args[@]}"
+      - name: STATE ve token'i Drive'a geri yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/UPLOAD_STATE.csv ] && rclone copyto _work/UPLOAD_STATE.csv "gdrive:ASTROLOVE/TEMP/WP_UPLOAD_STATE.csv" || true
+          if [ -f _work/ETSY_TOKEN.json.updated ]; then
+            rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json"
+            echo "Token Drive'a geri yazildi."
+          else
+            echo "Token yenilenmedi."
+          fi
+      - name: Son dogrulama (asama f, salt okur)
+        if: ${{ always() }}
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json ] || exit 0
+          args=(--state _work/drafts.csv --out _work/VERIFY_ALL.csv
+                --pairs "$(cat _work/pairs_csv.txt)" --limit "${{ inputs.limit }}" --expect-video true)
+          python scripts/etsy/wp_verify_all.py "${args[@]}" || echo "::warning::son dogrulamada FAIL var"
+          rclone copyto _work/VERIFY_ALL.csv "gdrive:ASTROLOVE/TEMP/WP_VERIFY_ALL.csv" || true
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
