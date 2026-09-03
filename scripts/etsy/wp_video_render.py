@@ -49,21 +49,46 @@ def scaled_screens(calib, scale):
 
 
 def refine(frame, master_img, screens):
-    """Master mockup'in video olcegine indirilmisi ile kare arasindaki oteleme (ECC)."""
+    """Master mockup'in video olcegine indirilmisi ile kare arasindaki TAM geometrik
+    kayit (ECC homografi: donme/olcek/kesme dahil, sadece oteleme degil). Fotograf
+    (kalibrasyon) ile video ayri cekim/render olduklarindan aralarinda oteleme-disi
+    fark kalabilir; bu fark duzeltilmezse pilot ekran icerigi tam iptal edilmez ve
+    hayalet cift-baski gorulur (bkz. render()'daki L yorumu). Homografi yakinsamazsa
+    eski oteleme-sadece davranisina duser.
+
+    ONEMLI (yerel sentetik testle sayisal dogrulandi): cv2.findTransformECC(template=g2,
+    input=g1, ...) dondurdugu warp, g1(master)'i degil g2(frame)'i g1 uzayina tasir
+    (yani warp: FRAME -> MASTER). quad'lar MASTER uzayinda olculdugu (calib.json) icin
+    FRAME'e tasimak icin warp'in TERSI uygulanmali (once bu koddaki "+dx,+dy" / duz
+    warp uygulamasi bu tersi yapmiyordu - gercek kaymayi duzeltmek yerine 2 katina
+    cikariyordu; SADECE Cift=Pilot oz-uretim QC'sinde kayma zaten ~0 oldugundan bu
+    isaret hatasi o testte hic gorunmuyordu)."""
     ms = cv2.resize(master_img, (frame.shape[1], frame.shape[0]), interpolation=cv2.INTER_AREA)
     g1 = cv2.cvtColor(ms, cv2.COLOR_BGR2GRAY).astype(np.float32)
     g2 = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY).astype(np.float32)
-    warp = np.eye(2, 3, dtype=np.float32)
+    criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 200, 1e-6)
+    warp = np.eye(3, 3, dtype=np.float32)
     try:
-        cv2.findTransformECC(g2, g1, warp, cv2.MOTION_TRANSLATION,
-                             (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 200, 1e-6), None, 5)
+        cv2.findTransformECC(g2, g1, warp, cv2.MOTION_HOMOGRAPHY, criteria, None, 5)
     except cv2.error:
-        log("  ECC rafine basarisiz; kaydirma 0 alinir")
-        return screens, (0.0, 0.0)
-    dx, dy = float(warp[0, 2]), float(warp[1, 2])
+        log("  ECC homografi basarisiz; oteleme-sadece rafine denenecek")
+        warp2 = np.eye(2, 3, dtype=np.float32)
+        try:
+            cv2.findTransformECC(g2, g1, warp2, cv2.MOTION_TRANSLATION, criteria, None, 5)
+        except cv2.error:
+            log("  ECC oteleme de basarisiz; kaydirma 0 alinir")
+            return screens, (0.0, 0.0)
+        dx, dy = float(warp2[0, 2]), float(warp2[1, 2])  # frame->master kaymasi; master->frame icin ters isaret
+        out = [dict(s, quad=s["quad"] - np.float32([dx, dy])) for s in screens]
+        return out, (-dx, -dy)
+    Hcorr = np.linalg.inv(warp.astype(np.float64)).astype(np.float32)  # frame->master'in tersi = master->frame
+    out = []
     for s in screens:
-        s["quad"] = s["quad"] + np.float32([dx, dy])
-    return screens, (dx, dy)
+        q = cv2.perspectiveTransform(s["quad"].reshape(-1, 1, 2).astype(np.float32), Hcorr).reshape(-1, 2)
+        out.append(dict(s, quad=q.astype(np.float32)))
+    shift = (float(Hcorr[0, 2]), float(Hcorr[1, 2]))
+    log(f"  ECC homografi rafine basarili (kayma bileseni ~{shift[0]:+.2f},{shift[1]:+.2f})")
+    return out, shift
 
 
 def screen_H(wp, quad):
