@@ -38,9 +38,22 @@ def transfer_weight(poster, ed):
     return cv2.GaussianBlur(w, (0, 0), INK_SOFT), ink
 
 
-def place(src, dev, canvas_shape):
-    """Poster olcegindeki (7200x9600) goruntuyu cihaz olcegine indirip tuvale yerlestirir (disi 0)."""
+def load_geom(plates, ed, dev):
+    """Plakanin bant kirpma geometrisi (GEOM_<ED>_<DEV>.json); yoksa birim."""
+    f = Path(plates) / f"GEOM_{ed.upper()}_{dev.upper()}.json"
+    if f.exists():
+        return json.loads(f.read_text())
+    return dict(crop_top=0, crop_bot=0, scale_y=1.0)
+
+
+def place(src, dev, canvas_shape, geom=None):
+    """Poster olcegindeki (7200x9600) goruntuyu cihaz olcegine indirip tuvale yerlestirir (disi 0).
+    geom: plakanin bant kirpma geometrisi -> ayni dikey carpan (scale_y) ve kaydirma uygulanir."""
     s, (w, h), x0, y0 = placement(dev)
+    sy = float(geom["scale_y"]) if geom else 1.0
+    if geom and sy != 1.0:
+        y0 = (y0 - geom["crop_top"]) * sy
+        h = int(round(h * sy))
     small = cv2.resize(src, (w, h), interpolation=cv2.INTER_AREA)
     H, W = canvas_shape[:2]
     out = np.zeros((H, W) + src.shape[2:], np.float32)
@@ -64,14 +77,17 @@ def build_edition(pair, ed, plates, poster_path, median_path, out_dir, devices, 
         W, H = DEVICES[dev]
         if plate.shape[1] != W or plate.shape[0] != H:
             raise SystemExit(f"HATA: plaka {dev} {plate.shape[1]}x{plate.shape[0]}")
-        D = place(diff, dev, plate.shape)
-        Wt = place(w_full, dev, plate.shape)[..., None]
+        geom = load_geom(plates, ed, dev)
+        D = place(diff, dev, plate.shape, geom)
+        Wt = place(w_full, dev, plate.shape, geom)[..., None]
         outp = np.clip(np.round(plate.astype(np.float32) + Wt * D), 0, 255).astype(np.uint8)
         name = f"AstroLove_{pair}_{ed}_{dev}.jpg"
         imwrite_jpeg(out_dir / name, outp)
-        info = dict(file=name, ink_px_canvas=int((Wt[..., 0] > 0.5).sum()))
+        info = dict(file=name, ink_px_canvas=int((Wt[..., 0] > 0.5).sum()), geom=geom)
         if compare_dir is not None:
             ref = imread(Path(compare_dir) / name)
+            if geom["scale_y"] != 1.0:                       # pilotu ayni geometriye getir
+                ref = cv2.resize(ref[geom["crop_top"]:ref.shape[0] - geom["crop_bot"]], (ref.shape[1], ref.shape[0]), interpolation=cv2.INTER_LANCZOS4)
             d = np.abs(outp.astype(np.int16) - ref.astype(np.int16)).max(axis=2)
             inkc = Wt[..., 0] > 0.5
             info.update(cmp_ink_mean=float(d[inkc].mean()) if inkc.any() else 0.0, cmp_ink_p95=float(np.percentile(d[inkc], 95)) if inkc.any() else 0.0,

@@ -117,7 +117,7 @@ jobs:
       - name: Drive'a yaz
         run: |
           set -euo pipefail
-          rclone copy _out "gdrive:ASTROLOVE/${{ inputs.out_dir }}" --include "PLATE_*.png" --include "MEDIAN_*.png" --include "report_*.json"
+          rclone copy _out "gdrive:ASTROLOVE/${{ inputs.out_dir }}" --include "PLATE_*.png" --include "GEOM_*.json" --include "MEDIAN_*.png" --include "report_*.json"
           rclone copy _out/qc "gdrive:ASTROLOVE/${{ inputs.out_dir }}/qc"
           rclone copy _out/selftest "gdrive:ASTROLOVE/${{ inputs.out_dir }}/selftest" --include "build_*.json"
           rclone lsl "gdrive:ASTROLOVE/${{ inputs.out_dir }}" | grep -i "${{ matrix.edition }}" || true

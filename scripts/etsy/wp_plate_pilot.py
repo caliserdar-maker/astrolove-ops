@@ -103,8 +103,16 @@ BAND_OVERLAP = 48        # dolgu = bant + 48 px (feather tamamen bant DISINDA: b
 BAND_FEATHER = 48        # dikey feather: bant sinirindan +48 px'e dogru 1 -> 0
 # NOT (iterasyon 1): overlap 24 / feather +-24 ile bant satirlarinin yarisi pilotun cizgili
 # satirlariyla harmanlaniyordu -> bant cizgi orani 1.5-2.8. Overlap 48 ile bant satirlari saf dolgu.
-BAND_QC_RATIO = 1.2      # QC: dolgu sonrasi bant satirlarinda cizgi orani < 1.2
+BAND_QC_RATIO = 1.2      # (eski dolgu QC'si; kirpma yonteminde kullanilmaz)
 BAND_DEVICES = ("Phone", "Tablet")
+# Bant yontemi 3 (Mo, 3 Eyl): dolgu YOK. Bant satirlari ust/alttan kirpilir (tespit + BAND_SAFETY px),
+# kalan goruntu LANCZOS ile tam tuval yuksekligine dikey olceklenir (genislik sabit). Geometri
+# (crop_top, crop_bot, scale_y) GEOM_<ED>_<DEV>.json'a yazilir; ink katmani ayni dikey carpani uygular.
+# QC: kenar satirlarinda oran > BAND_RATIO satir sayisi 0; kenar satir orani ile pilotun dogal satir
+# referansi (bant+64..+164) farki < BAND_QC_REF_DIFF.
+BAND_SAFETY = 4
+BAND_QC_REF_DIFF = 0.15
+BAND_EDGE_ROWS = 40
 
 
 def luma(bgr):
@@ -510,6 +518,45 @@ def band_qc(plate, pilot, top, bot, overlap=BAND_OVERLAP, feather=BAND_FEATHER):
     return res
 
 
+def band_crop_geom(H, top, bot, safety=BAND_SAFETY):
+    """Kirpma geometrisi: crop_top/crop_bot (px), scale_y = H / (H - crop_top - crop_bot)."""
+    ct = top + safety if top > 0 else 0
+    cb = bot + safety if bot > 0 else 0
+    return dict(crop_top=int(ct), crop_bot=int(cb), scale_y=float(H) / float(H - ct - cb))
+
+
+def apply_geom(img, geom, interpolation=cv2.INTER_LANCZOS4):
+    """Bant satirlarini kirpar, kalan goruntuyu tam yukseklige dikey olcekler (genislik sabit)."""
+    H, W = img.shape[:2]
+    ct, cb = geom["crop_top"], geom["crop_bot"]
+    if ct == 0 and cb == 0:
+        return img.copy()
+    cropped = img[ct:H - cb]
+    return cv2.resize(cropped, (W, H), interpolation=interpolation)
+
+
+def band_crop_qc(plate, pilot, top, bot, edge_rows=BAND_EDGE_ROWS):
+    """Kirpma sonrasi: (a) ust/alt kenar satirlarinda oran > BAND_RATIO satir sayisi (beklenen 0),
+    (b) kenar satirlarinin (40) oran ortalamasi, pilotun dogal satirlarinin (bant+8..+400, 40'lik
+    pencere ortalamalari) araliginda [p10 - 0.15, p90 + 0.15] olmali ("ayni aralik", BAND_QC_REF_DIFF)."""
+    H = plate.shape[0]
+    rs = stripe_ratio_rows(plate); rp = stripe_ratio_rows(pilot)
+    res = {}
+    for side, h in (("top", top), ("bot", bot)):
+        if side == "top":
+            edge = rs[:edge_rows]; nat = rp[h + 8:h + 400]
+        else:
+            edge = rs[H - edge_rows:]; nat = rp[H - h - 400:H - h - 8]
+        win = np.convolve(nat, np.ones(edge_rows) / edge_rows, mode="valid")     # 40 satirlik pencere ortalamalari
+        lo, hi = float(np.percentile(win, 10)), float(np.percentile(win, 90))
+        n_band = int((edge > BAND_RATIO).sum()); em = float(edge.mean())
+        res[side] = dict(band_px=int(h), edge_ratio_mean=em, edge_ratio_max=float(edge.max()),
+                         ref_ratio_p10=lo, ref_ratio_p90=hi, ref_ratio_mean=float(nat.mean()),
+                         band_rows_left=n_band, pass_trace=bool(n_band == 0),
+                         pass_ref=bool(lo - BAND_QC_REF_DIFF <= em <= hi + BAND_QC_REF_DIFF))
+    return res
+
+
 # ------------------------------------------------------------------ ink katmani (uretim adimi icin)
 def ink_layer_mask(poster, ed, tol=70):
     """Posterden (7200x9600) YALNIZ cifte ozel murekkep: sembol + glifler + isimler (+ ∞,
@@ -648,21 +695,32 @@ def main():
             raise SystemExit(f"HATA: pilot {dev} {pilot.shape[1]}x{pilot.shape[0]}")
         plate, mask, ink, ring, band, info = build_plate(pilot, med[dev], ed, dev)
         ink_mask = mask.copy()
-        # dikey cizgili bant (Phone/Tablet ust-alt): tespit -> cover medyanla dolgu -> QC
-        bq = {}
+        # dikey cizgili bant (Phone/Tablet ust-alt): tespit -> bant satirlarini kirp + LANCZOS dikey olcek
+        bq = {}; geom = dict(crop_top=0, crop_bot=0, scale_y=1.0)
+        pilot_ref = pilot
         if dev in BAND_DEVICES:
             btop, bbot, _ = band_detect(pilot)
             if btop > 0 or bbot > 0:
-                cov = cover_median(median_full, plate.shape)
-                plate, bmask = band_fill(plate, pilot, cov, ed, btop, bbot)
-                mask = mask | bmask
-            bq = band_qc(plate, pilot, btop, bbot)
-            bq_pass = all(v.get("pass_stripe", True) and v.get("pass_hf", True) for v in bq.values())
-            log(f"  {dev:8s} bant ust {btop} px / alt {bbot} px -> " + ", ".join(
-                f"{k}: oran {v['stripe_ratio_max']:.2f} (ref {v['stripe_ratio_ref']:.2f}) HF {v['hf_ratio']:.2f}" for k, v in bq.items() if v.get('band_px', 0) > 0) + f" | {'PASS' if bq_pass else 'FAIL'}")
-        diff = np.abs(plate.astype(np.int16) - pilot.astype(np.int16))
+                geom = band_crop_geom(H, btop, bbot)
+                plate = apply_geom(plate, geom)
+                pilot_ref = apply_geom(pilot, geom)
+                mask = (apply_geom(mask * 255, geom, cv2.INTER_LINEAR) > 0).astype(np.uint8)
+                mask = cv2.dilate(mask, np.ones((9, 9), np.uint8))          # LANCZOS 4 px komsuluk
+                ink = (apply_geom(ink * 255, geom, cv2.INTER_LINEAR) > 127).astype(np.uint8)
+                band = (apply_geom(band * 255, geom, cv2.INTER_LINEAR) > 127).astype(np.uint8)
+                ring = (apply_geom((ring * 255).astype(np.uint8), geom, cv2.INTER_LINEAR) > 127).astype(np.float32)
+                bq = band_crop_qc(plate, pilot, btop, bbot)
+                bq_pass = all(v["pass_trace"] and v["pass_ref"] for v in bq.values())
+                log(f"  {dev:8s} bant ust {btop} px / alt {bbot} px -> kirp {geom['crop_top']}/{geom['crop_bot']} px, scale_y {geom['scale_y']:.4f} | " + ", ".join(
+                    f"{k}: kenar oran {v['edge_ratio_mean']:.2f} (dogal p10-p90 {v['ref_ratio_p10']:.2f}-{v['ref_ratio_p90']:.2f}, oran>3 satir {v['band_rows_left']})" for k, v in bq.items()) + f" | {'PASS' if bq_pass else 'FAIL'}")
+            else:
+                log(f"  {dev:8s} bant yok (ust 0 / alt 0)")
+        (out / f"GEOM_{ed.upper()}_{dev.upper()}.json").write_text(json.dumps(geom))
+        diff = np.abs(plate.astype(np.int16) - pilot_ref.astype(np.int16))
         outside = float(diff[mask == 0].max()) if (mask == 0).any() else 0.0
         band_diff = float(diff[band > 0].max()) if (band > 0).any() else 0.0
+        if geom["scale_y"] != 1.0:
+            ink_mask = (apply_geom(ink_mask * 255, geom, cv2.INTER_LINEAR) > 127).astype(np.uint8)
         si, so, r = hf_ratio(plate, ink_mask, ring)       # hayalet HF orani yalniz murekkep dolgusu icin
         name = f"PLATE_{ed.upper()}_{dev.upper()}.png"
         cv2.imwrite(str(out / name), plate, [cv2.IMWRITE_PNG_COMPRESSION, 3])
@@ -670,9 +728,9 @@ def main():
         pts = qc_points(dev, ink, band, plate.shape)
         if dev in BAND_DEVICES:
             pts += [("ust kenar", (W / 2, 300)), ("alt kenar", (W / 2, H - 300))]
-        qc_sheet(pilot, plate, dev, pts, out / "qc" / f"PLATE_{ed.upper()}_{dev.upper()}.jpg")
+        qc_sheet(pilot_ref, plate, dev, pts, out / "qc" / f"PLATE_{ed.upper()}_{dev.upper()}.jpg")
         report[dev] = dict(file=name, size=[W, H], outside_max_diff=outside, ring_band_max_diff=band_diff,
-                           hf_inside=si, hf_ring=so, hf_ratio=r, qc_points={k: [round(x), round(y)] for k, (x, y) in pts}, band=bq, **info)
+                           hf_inside=si, hf_ring=so, hf_ratio=r, qc_points={k: [round(x), round(y)] for k, (x, y) in pts}, band=bq, geom=geom, **info)
         log(f"  {dev:8s} maske {info['mask_px']} px (murekkep {info['ink_px']}, otsu {info['otsu']:.0f}, halka bandi {info['ring_band_px']}, kesisim {info['ring_cross_px']}) | maske disi maks fark {outside:.0f} (halka {band_diff:.0f}) | HF ic/halka {si:.2f}/{so:.2f} = {r:.2f}")
     (out / f"report_{ed}.json").write_text(json.dumps(dict(edition=ed, posters=len(posters), median_file=med_path.name,
                                                              median_ink_px=mq_px, median_ink_components=mq_comps, devices=report), indent=1))
