@@ -144,6 +144,55 @@ def warp_full(wp, H, shape, scale):
                                flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_CONSTANT)
 
 
+def aspect_of_quad(quad):
+    """Dortgenin en/boy orani (ust+alt kenar ortalamasi / sol+sag kenar ortalamasi)."""
+    q = np.asarray(quad, np.float32)
+    top, bottom = np.linalg.norm(q[1] - q[0]), np.linalg.norm(q[2] - q[3])
+    left, right = np.linalg.norm(q[3] - q[0]), np.linalg.norm(q[2] - q[1])
+    h = (left + right) / 2
+    return (top + bottom) / 2 / h if h else 0.0
+
+
+def cover_src_rect(W0, H0, target_aspect):
+    """Kaynagin (W0xH0) hedef orana esit, ORTALANMIS, en buyuk alt-dikdortgeni
+    ("cover"/crop-to-fill): kaynak hedeften genisse yanlardan, darsa ust-alttan
+    kirpilir. Donus: 4 kose (orijinal piksel koord., quad_of ile ayni sira:
+    TL,TR,BR,BL)."""
+    src_aspect = W0 / H0
+    if src_aspect > target_aspect:
+        w = max(1, int(round(H0 * target_aspect)))
+        x0 = (W0 - w) // 2
+        return np.float32([[x0, 0], [x0 + w, 0], [x0 + w, H0], [x0, H0]])
+    h = max(1, int(round(W0 / target_aspect)))
+    y0 = (H0 - h) // 2
+    return np.float32([[0, y0], [W0, y0], [W0, y0 + h], [0, y0 + h]])
+
+
+def cover_homography(wp_shape, quad):
+    """quad'in olculen orani ile eslesen, kaynagin ORTALANMIS alt-dikdortgenini
+    (cover_src_rect) DOGRUDAN quad'in 4 kosesine esler (stretch yok, quad
+    DEGISMEZ). Donus: (Hc, src_rect)."""
+    H0, W0 = wp_shape[:2]
+    src = cover_src_rect(W0, H0, aspect_of_quad(quad))
+    return cv2.getPerspectiveTransform(src, np.asarray(quad, np.float32)), src
+
+
+def warp_cover(wp, quad, shape):
+    """warp_full'un stretch-to-fill'i YERINE: kaynagin TAMAMINI degil, quad
+    orani ile eslesen ORTALANMIS bir alt-bolgesini (cover_homography) quad'a
+    esler - dairesel/simetrik desenler orani BOZULMADAN (crop-to-fill) yerlesir.
+    Ayni alt-piksel-orneklem onlemi (once ~2x hedef olcege INTER_AREA)."""
+    H0, W0 = wp.shape[:2]
+    Hc, src = cover_homography(wp.shape, quad)
+    crop_w = float(src[1][0] - src[0][0])
+    scale = quad_scale(quad, crop_w)
+    f = max(1.0, 1.0 / (scale * 2.0))
+    pre = cv2.resize(wp, (max(1, int(round(W0 / f))), max(1, int(round(H0 / f)))), interpolation=cv2.INTER_AREA)
+    S = np.diag([W0 / pre.shape[1], H0 / pre.shape[0], 1.0])
+    return cv2.warpPerspective(pre, Hc.astype(np.float64) @ S, (shape[1], shape[0]),
+                               flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_CONSTANT)
+
+
 def warp_mask(mask_u8, H, shape):
     return cv2.warpPerspective(mask_u8, np.asarray(H, np.float64), (shape[1], shape[0]), flags=cv2.INTER_NEAREST)
 
@@ -385,11 +434,16 @@ def render_screen(out, master, screen, wp_new, wp_pilot, mode, soft_mask=None, e
              out = (1-P)*out + P*(warp(yeni) + L),  L = murekkep disi alcak
              gecirgen (master - warp(pilot)).  Pilot ekrani kaynakla birebir
              degilse (saat) hayalet birakmaz, dikdortgen sinir olusturmaz.
-    diff   : out = out + M*(warp(yeni) - warp(pilot))   (yalniz elle secim)"""
-    H = np.asarray(screen["H"], np.float64)
+    diff   : out = out + M*(warp(yeni) - warp(pilot))   (yalniz elle secim)
+
+    NOT (3 Eyl 2026, SET06 ekran-2 halka-oval kusuru): kalibrasyonun olctugu
+    quad DOGRU (SIFT/RANSAC), ama warp_full kaynagin TAMAMINI (orijinal
+    wallpaper orani) quad'a stretch-to-fill esler - quad orani kaynaktan
+    farkliysa (SET06 ekran-2: 1.536 vs kaynak 1.778) bu dairesel/simetrik
+    desenleri oval'e gerer. Bu yuzden burada warp_cover (crop-to-fill,
+    quad DEGISMEZ, kaynaktan ORTALANMIS kirpilir) kullanilir."""
     quad = np.asarray(screen["quad"], np.float32)
-    sc = quad_scale(quad, wp_new.shape[1])
-    w_new = warp_full(wp_new, H, master.shape, sc).astype(np.float32)
+    w_new = warp_cover(wp_new, quad, master.shape).astype(np.float32)
     M = poly_mask_aa(master.shape, quad)[..., None]
     if mode == "paste":
         if soft_mask is None:
@@ -401,15 +455,16 @@ def render_screen(out, master, screen, wp_new, wp_pilot, mode, soft_mask=None, e
         Mp = sm[..., None] * M
         out[...] = (1 - Mp) * out + Mp * w_new
     elif mode == "relight":
-        w_pil = warp_full(wp_pilot, H, master.shape, sc).astype(np.float32)
-        ink_w = warp_mask(ink_mask(wp_pilot), H, master.shape)
+        w_pil = warp_cover(wp_pilot, quad, master.shape).astype(np.float32)
+        Hc_pilot, _ = cover_homography(wp_pilot.shape, quad)
+        ink_w = warp_mask(ink_mask(wp_pilot), Hc_pilot, master.shape)
         L = relight_layer(master, w_pil, quad, ink_w)
         out[...] = out + M * (w_new - w_pil)
         P = cv2.GaussianBlur(cv2.dilate(ink_w, np.ones((13, 13), np.uint8)).astype(np.float32) / 255.0, (0, 0), 2.0)
         P = (P * M[..., 0])[..., None]
         out[...] = (1 - P) * out + P * (w_new + L)
     elif mode == "diff":
-        w_pil = warp_full(wp_pilot, H, master.shape, sc).astype(np.float32)
+        w_pil = warp_cover(wp_pilot, quad, master.shape).astype(np.float32)
         out[...] = out + M * (w_new - w_pil)
     else:
         raise SystemExit(f"bilinmeyen mod {mode}")

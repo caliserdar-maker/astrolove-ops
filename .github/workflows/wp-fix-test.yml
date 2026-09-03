@@ -23,6 +23,10 @@ on:
         description: "Video adimini atla (zaten PASS, tekrar test gerekmiyorsa)"
         type: boolean
         default: false
+      skip_calib_fix:
+        description: "Kalibrasyon duzeltmesini atla (orijinal calib.json'u degistirmeden kullan - compositing testi icin)"
+        type: boolean
+        default: false
 
 concurrency:
   group: wp-fix-test
@@ -78,6 +82,7 @@ jobs:
             | tee _work/video_log.txt
 
       - name: 2B - Mockup kalibrasyon duzeltmesi (SET06 ekran-2, SET10Y ekran-1)
+        if: ${{ inputs.skip_calib_fix != true }}
         run: |
           set -euo pipefail
           mkdir -p _work/calib_fixed/masks
@@ -86,6 +91,15 @@ jobs:
             --calib _work/calib --masters _work/masters --pilot _work/pilot \
             --out _work/calib_fixed
           # calib_fix.py SADECE SET06_1.png ve SET10Y_0.png'yi uzerine yazar; digerleri yukarida kopyalanmis oldu
+
+      - name: 2B' - Kalibrasyon duzeltmesi atlandi (orijinal calib.json/masks aynen kopyalanir)
+        if: ${{ inputs.skip_calib_fix == true }}
+        run: |
+          set -euo pipefail
+          mkdir -p _work/calib_fixed/masks
+          cp _work/calib/masks/*.png _work/calib_fixed/masks/
+          cp _work/calib/calib.json _work/calib_fixed/calib.json
+          echo "kalibrasyon duzeltmesi ATLANDI - orijinal calib.json degismeden kullanildi (compositing testi)" | tee _work/calib_fixed/report.md
 
       - name: 2C - Duzeltilmis kalibrasyonla SET06+SET10Y yeniden uret (SADECE 1 cift)
         continue-on-error: true
@@ -98,6 +112,7 @@ jobs:
             | tee _work/mock_log.txt
 
       - name: Oran dogrulamasi (bagimsiz, wp_audit_drive.py ile ayni formul)
+        if: ${{ inputs.skip_calib_fix != true }}
         run: |
           set -euo pipefail
           python3 - <<'PY' | tee _work/aspect_check.txt
@@ -143,7 +158,7 @@ jobs:
             echo ""
             echo "### Oran dogrulamasi"
             echo '```'
-            cat _work/aspect_check.txt
+            cat _work/aspect_check.txt 2>/dev/null || echo "atlandi (skip_calib_fix=true - compositing testi, quad/H degismedi)"
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
