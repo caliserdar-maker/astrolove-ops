@@ -99,44 +99,61 @@ def remeasure_screen(master, wps, other_quads, target_aspect, log=print):
     exclude = cv2.dilate(exclude, np.ones((15, 15), np.uint8))
     excl_u8 = exclude  # sift_matches: exclude>0 olan master anahtar noktalari elenir
 
-    candidates = []
+    all_candidates = []  # TESHIS: hicbir esik uygulanmadan (H gecerliyse) - gercek durumu gormek icin
     for ed in EDITIONS:
         wp = wps.get((ed, "Desktop"))
         if wp is None:
             continue
         for work_h in WORK_HS:
             p1, p2, _ = sift_matches(feats, wp, exclude=excl_u8, work_h=work_h)
-            if len(p1) < MIN_INLIERS:
+            if len(p1) < 8:
                 continue
             for thr in RANSAC_THRESHOLDS:
                 H, inl = cv2.findHomography(p1, p2, cv2.RANSAC, thr, maxIters=5000, confidence=0.999)
                 if H is None or inl is None:
                     continue
                 n = int(inl.sum())
-                if n < MIN_INLIERS:
-                    continue
                 W0, H0 = wp.shape[1], wp.shape[0]
                 quad = quad_of(H, W0, H0)
                 if not cv2.isContourConvex(np.round(quad).astype(np.int32)):
                     continue
                 aspect = aspect_of_quad(quad)
-                if abs(aspect - target_aspect) / target_aspect > ASPECT_TOL:
-                    continue
                 sel = inl.ravel() == 1
-                proj = cv2.perspectiveTransform(p1[sel].reshape(-1, 1, 2), H).reshape(-1, 2)
-                err = np.linalg.norm(proj - p2[sel], axis=1)
-                rms = float(np.sqrt((err ** 2).mean()))
-                candidates.append(dict(H=H, quad=quad, inliers=n, rms=rms, edition=ed,
-                                       work_h=work_h, ransac_thr=thr, aspect=aspect))
-    log(f"  SET06/1 yeniden olcum: {len(candidates)} aday (>={MIN_INLIERS} inlier + oran +-%{ASPECT_TOL*100:.0f} saglayan)")
-    if not candidates:
+                proj = cv2.perspectiveTransform(p1[sel].reshape(-1, 1, 2), H).reshape(-1, 2) if n else np.zeros((0, 2))
+                err = np.linalg.norm(proj - p2[sel], axis=1) if n else np.zeros(0)
+                rms = float(np.sqrt((err ** 2).mean())) if n else float("nan")
+                all_candidates.append(dict(H=H, quad=quad, inliers=n, rms=rms, edition=ed,
+                                           work_h=work_h, ransac_thr=thr, aspect=aspect,
+                                           n_matches=len(p1)))
+
+    qualifying = [c for c in all_candidates if c["inliers"] >= MIN_INLIERS
+                 and abs(c["aspect"] - target_aspect) / target_aspect <= ASPECT_TOL]
+    log(f"  SET06/1 yeniden olcum: {len(all_candidates)} toplam aday, {len(qualifying)} tanesi "
+        f">={MIN_INLIERS} inlier + oran +-%{ASPECT_TOL * 100:.0f} saglıyor")
+
+    if not all_candidates:
         return None
-    candidates.sort(key=lambda c: (-c["inliers"], c["rms"]))
-    best = candidates[0]
-    for c in candidates[:5]:
-        log(f"    aday: ed={c['edition']} work_h={c['work_h']} thr={c['ransac_thr']} "
+
+    # TESHIS (esik uygulanmadan): en yuksek inlier'li aday hangi orana sahip? oran
+    # toleransini saglayan en iyi aday kac inlier'e ulasabiliyor? Bu ikisi CAKISMIYORSA
+    # (asagida gorulecegi gibi) sorun arama derinligi degil - bu ekranin fotografta
+    # GERCEKTEN olculen SIFT eslesmeleri, yuksek inlier'de sistematik olarak baska bir
+    # orana isaret ediyor demektir.
+    by_inliers = sorted(all_candidates, key=lambda c: (-c["inliers"], c["rms"] if c["inliers"] else 1e9))[:5]
+    log("  -- teshis: sadece inlier'e gore en iyi 5 aday (oran esigi UYGULANMADAN) --")
+    for c in by_inliers:
+        log(f"    ed={c['edition']} work_h={c['work_h']} thr={c['ransac_thr']} matches={c['n_matches']} "
+            f"inlier={c['inliers']} rms={c['rms']:.2f} oran={c['aspect']:.3f} (hedef {target_aspect:.3f})")
+    in_tol = [c for c in all_candidates if abs(c["aspect"] - target_aspect) / target_aspect <= ASPECT_TOL]
+    log(f"  -- teshis: oran toleransini saglayan {len(in_tol)} aday (inlier esigi UYGULANMADAN) --")
+    for c in sorted(in_tol, key=lambda c: -c["inliers"])[:5]:
+        log(f"    ed={c['edition']} work_h={c['work_h']} thr={c['ransac_thr']} matches={c['n_matches']} "
             f"inlier={c['inliers']} rms={c['rms']:.2f} oran={c['aspect']:.3f}")
-    return best
+
+    if not qualifying:
+        return None
+    qualifying.sort(key=lambda c: (-c["inliers"], c["rms"]))
+    return qualifying[0]
 
 
 def regularize(quad, target_aspect):
