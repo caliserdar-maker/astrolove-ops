@@ -1,7 +1,8 @@
 name: wp-plates
 
 # 16 temiz plaka (edisyon x cihaz): taban = canli pilot FINAL_V2/CANCER_LIBRA;
-# halka, tagline ve ∞ pilotta kalir; sembol + isimler + glifler temizlenir.
+# halka ve tagline pilotta kalir; sembol + isimler + glifler + ∞ temizlenir
+# (∞ posterden gelir; konumu cifte gore kayar, 3 Eyl).
 # Dolgu kaynagi YALNIZ 78 OPTIMIZED 3X4 posterin tam cozunurluk piksel medyani
 # (edisyon basina bir kez: MEDIAN_<EDISYON>.png, QC: medyanda murekkep 0),
 # afin hizali, yerel ton eslestirme, 24 px feather. Edisyon basina paralel is.
@@ -102,17 +103,20 @@ jobs:
         run: |
           set -euo pipefail
           python scripts/etsy/wp_build_pair.py build --pair Cancer_Libra --plates _out --posters _work/posters --medians _out \
-            --out _out/selftest --editions "${{ matrix.edition }}" --compare _work/pilot
+            --out _out/selftest --editions "${{ matrix.edition }}" --compare _work/pilot --crops all || echo "::warning::Cancer_Libra kendini yeniden uretme QC FAIL (bilgi; kapi cift uretimidir)"
           { echo "### Cancer_Libra kiyas (${{ matrix.edition }})"; echo '```'; cat _out/selftest/build_Cancer_Libra.json; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Cift uret
         if: ${{ inputs.pair != '' }}
         run: |
           set -euo pipefail
-          python scripts/etsy/wp_build_pair.py build --pair "${{ inputs.pair }}" --plates _out --posters _work/posters --medians _out \
-            --out _out/pair --editions "${{ matrix.edition }}"
           up="$(echo "${{ inputs.pair }}" | tr '[:lower:]' '[:upper:]')"
-          rclone copy _out/pair "gdrive:ASTROLOVE/${{ inputs.pair_out }}/$up" --include "AstroLove_*.jpg"
+          python scripts/etsy/wp_build_pair.py build --pair "${{ inputs.pair }}" --plates _out --posters _work/posters --medians _out \
+            --out _out/pair --editions "${{ matrix.edition }}" --crops all || echo "PAIR_FAIL=1" >> "$GITHUB_ENV"
+          { echo "### Cift ${{ inputs.pair }} (${{ matrix.edition }}) QC"; echo '```'; python3 -c "import json;d=json.load(open('_out/pair/build_${{ inputs.pair }}.json'));print('SONUC', 'PASS' if d['ok'] else 'FAIL', d['passed'], '/', d['files']);[print(k, {kk: vv for kk, vv in v.items() if kk != 'geom'}) for e in d['editions'].values() for k, v in e.items()]"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          rclone copy _out/pair "gdrive:ASTROLOVE/${{ inputs.pair_out }}/$up" --include "AstroLove_*.jpg" --include "build_*.json"
+          rclone copy _out/pair/qc "gdrive:ASTROLOVE/${{ inputs.pair_out }}/$up/qc" --include "CROP_*.png"
+          if [ "${PAIR_FAIL:-0}" = "1" ]; then echo "::error::cift QC FAIL"; exit 1; fi
 
       - name: Drive'a yaz
         run: |
@@ -131,7 +135,9 @@ jobs:
             _out/qc/*.jpg
             _out/report_*.json
             _out/selftest/*.json
+            _out/selftest/qc/*.png
             _out/pair/*.json
+            _out/pair/qc/*.png
           if-no-files-found: ignore
           retention-days: 30
 
