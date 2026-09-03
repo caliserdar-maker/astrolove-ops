@@ -30,9 +30,9 @@ import cv2
 import numpy as np
 from PIL import Image
 
-from wp_mockup_common import (GALLERY_ORDER, SCENES, dump_json, imread, imwrite_jpeg, ink_mask, load_wallpapers,
-                              log, poly_mask, qc_sheet, render_screen, sift_matches, template_candidate,
-                              warp_mask)
+from wp_mockup_common import (GALLERY_ORDER, SCENES, cover_homography, dump_json, imread, imwrite_jpeg, ink_mask,
+                              load_wallpapers, log, poly_mask, qc_sheet, render_screen, sift_matches,
+                              template_candidate, warp_mask)
 
 
 def out_name(scene, pair):
@@ -53,14 +53,17 @@ def recheck(out_bgr, screen, wp_new):
             return dict(ok=False, reason="sablon bulunamadi")
         dev = float(np.abs(c["quad"] - q0).max())
         return dict(ok=(c["corr"] >= 0.90 and dev <= 1.5), corr=c["corr"], max_dev_px=dev, center_dev_px=dev)
-    # SIFT: ciktida bulunan eslesmeler KALIBRE H ile yeniden yansitilir;
-    # >= 20 eslesme 3 px icinde ve medyan hata <= 1.5 px ise yerlesim dogrulanir.
+    # SIFT: ciktida bulunan eslesmeler render'in KULLANDIGI cover homografisi
+    # (warp_cover; render_screen ile ayni - stretch-to-fill DEGIL) ile yeniden
+    # yansitilir; >= 20 eslesme 3 px icinde ve medyan hata <= 1.5 px ise
+    # yerlesim dogrulanir.
     inq = poly_mask(gray.shape, q0)
     excl = (cv2.dilate(inq, np.ones((41, 41), np.uint8)) == 0).astype(np.uint8) * 255   # dortgen disi haric
     p1, p2, _ = sift_matches(gray, wp_new, exclude=excl)
     if len(p1) < 20:
         return dict(ok=False, reason=f"SIFT eslesme {len(p1)} < 20")
-    proj = cv2.perspectiveTransform(p1.reshape(-1, 1, 2), np.asarray(screen["H"], np.float64)).reshape(-1, 2)
+    Hc, _ = cover_homography(wp_new.shape, q0)
+    proj = cv2.perspectiveTransform(p1.reshape(-1, 1, 2), Hc).reshape(-1, 2)
     err = np.linalg.norm(proj - p2, axis=1)
     inl = int((err < 3.0).sum())
     med = float(np.median(err[err < 3.0])) if inl else float("nan")
