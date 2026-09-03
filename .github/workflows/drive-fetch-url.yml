@@ -1,0 +1,60 @@
+name: drive-fetch-url
+
+# Verilen URL'den bir dosyayi indirip Drive'a (ASTROLOVE altinda) yazar.
+# Claude'un sandbox'i bazi hostlara cikamaz (ornek: export-download.canva.com,
+# kurum ag politikasi 403); indirme bu yuzden runner'da yapilir.
+# URL loga yazilmaz (::add-mask::). Etsy'ye dokunmaz.
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "Indirilecek dosyanin tam URL'si (imzali link olabilir)"
+        required: true
+      dest:
+        description: "Drive hedef yolu (ASTROLOVE altinda, dosya adi dahil)"
+        required: true
+        default: "WALLPAPER/FINAL_V2/_CANDIDATE/CANVA_TEST.png"
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Indir ve Drive'a yaz
+        env:
+          SRC_URL: ${{ inputs.url }}
+        run: |
+          set -euo pipefail
+          echo "::add-mask::$SRC_URL"
+          mkdir -p _dl
+          name="$(basename "${{ inputs.dest }}")"
+          curl -fsSL --max-time 300 -o "_dl/$name" "$SRC_URL"
+          ls -l "_dl/$name"
+          file "_dl/$name" || true
+          python3 - "_dl/$name" <<'PY'
+          import sys, struct
+          p = sys.argv[1]; d = open(p, "rb").read(64)
+          if d[:8] == b"\x89PNG\r\n\x1a\n":
+              w, h = struct.unpack(">II", d[16:24]); ct = d[25]
+              print(f"PNG {w}x{h} renk tipi {ct} ({'RGBA/alfa var' if ct in (4,6) else 'alfa yok'})")
+          else:
+              print("PNG degil:", d[:8])
+          PY
+          rclone copyto "_dl/$name" "gdrive:ASTROLOVE/${{ inputs.dest }}"
+          rclone lsjson "gdrive:ASTROLOVE/$(dirname "${{ inputs.dest }}")" --files-only \
+            | python3 -c "import json,sys;[print(f\"{r['Name']}  {r['Size']} bayt  id={r.get('ID','')}\") for r in json.load(sys.stdin) if r['Name']=='$name']" | tee -a "$GITHUB_STEP_SUMMARY"
+      - if: ${{ always() }}
+        run: rm -rf _dl ~/.config/rclone
