@@ -111,6 +111,22 @@ jobs:
             echo "Token yenilenmedi."
           fi
 
+      - name: Son dogrulama (salt okur)
+        if: ${{ always() }}
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json ] || exit 0
+          args=(--state _work/drafts.csv --out _work/VERIFY_ALL.csv --limit "${{ inputs.limit }}"
+                --expect-video "${{ inputs.no_video == true && 'false' || 'true' }}")
+          if [ -n "${{ inputs.pairs }}" ]; then args+=(--pairs "${{ inputs.pairs }}"); fi
+          python scripts/etsy/wp_verify_all.py "${args[@]}" || echo "::warning::son dogrulamada FAIL var"
+          rclone copyto _work/VERIFY_ALL.csv "gdrive:ASTROLOVE/TEMP/WP_VERIFY_ALL.csv" || true
+
       - name: Temizlik
         if: ${{ always() }}
         run: rm -rf _work ~/.config/rclone
