@@ -1,0 +1,159 @@
+name: wp-fix-test
+
+# TEK CIFT DOGRULAMA (Drive'a/Etsy'ye YAZMAZ, salt okur girdi + artifact cikti):
+# 1) wp_video_render.py duzeltmesi (ECC homografi + isaret duzeltmesi) - Aries_Aries
+#    icin video yeniden render edilir, PASS/FAIL + ornek kareler artifact'e.
+# 2) wp_mockup_calib_fix.py ile SET06 ekran-2 / SET10Y ekran-1 elle duzeltilir,
+#    Aries_Aries icin SADECE bu 2 sahne yeniden render edilir, oran + render'in
+#    kendi QC'si (SIFT geri-tespit) artifact'e.
+# 78 ciftlik toplu yeniden uretim BASLATMAZ; onay bekler.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pair:
+        description: "Test edilecek tek cift"
+        required: true
+        default: "Aries_Aries"
+
+concurrency:
+  group: wp-fix-test
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null && ffmpeg -version | head -1
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+
+      - name: Girdileri al (kalibrasyon, masterlar, pilot, hedef cift, video master)
+        run: |
+          set -euo pipefail
+          mkdir -p _work/calib _work/masters _work/pilot _work/wp _work/out_mock _work/out_video
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CALIB" _work/calib --include "calib.json" --include "masks/*.png"
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/CANCER_LIBRA" _work/masters --include "*_FINAL.jpg"
+          rclone copy "gdrive:ASTROLOVE/ARCHIVE/FINAL_V2_PILOT_V1" _work/pilot --include "AstroLove_*.jpg"
+          test "$(ls _work/pilot | wc -l)" = "16"
+          up=$(echo "${{ inputs.pair }}" | tr '[:lower:]' '[:upper:]')
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/$up" _work/wp --include "AstroLove_*.jpg"
+          test "$(ls _work/wp | wc -l)" = "16"
+          rclone copyto "gdrive:ASTROLOVE/TEMP/WP_VIDEO_TEST/WA_WP_VIDEO_TOZ_V3.mp4" _work/video_master.mp4
+          test -s _work/video_master.mp4
+
+      - name: 2A - Video duzeltme testi (ECC homografi + isaret)
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          python scripts/etsy/wp_video_render.py \
+            --master _work/video_master.mp4 \
+            --scene-master "_work/masters/WA_MOCKUP_V2_SET01_Cancer_Libra_FINAL.jpg" \
+            --calib _work/calib --pilot _work/pilot --wallpapers _work/wp \
+            --pair "${{ inputs.pair }}" --out _work/out_video \
+            | tee _work/video_log.txt
+
+      - name: 2B - Mockup kalibrasyon duzeltmesi (SET06 ekran-2, SET10Y ekran-1)
+        run: |
+          set -euo pipefail
+          mkdir -p _work/calib_fixed/masks
+          cp _work/calib/masks/*.png _work/calib_fixed/masks/
+          python scripts/etsy/wp_mockup_calib_fix.py \
+            --calib _work/calib --masters _work/masters --pilot _work/pilot \
+            --out _work/calib_fixed
+          # calib_fix.py SADECE SET06_1.png ve SET10Y_0.png'yi uzerine yazar; digerleri yukarida kopyalanmis oldu
+
+      - name: 2C - Duzeltilmis kalibrasyonla SET06+SET10Y yeniden uret (SADECE 1 cift)
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          python scripts/etsy/wp_mockup_render.py \
+            --calib _work/calib_fixed --masters _work/masters --pilot _work/pilot \
+            --wallpapers _work/wp --pair "${{ inputs.pair }}" \
+            --scenes SET06,SET10Y --out _work/out_mock \
+            | tee _work/mock_log.txt
+
+      - name: Oran dogrulamasi (bagimsiz, wp_audit_drive.py ile ayni formul)
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' | tee _work/aspect_check.txt
+          import json
+          import numpy as np
+          calib = json.loads(open("_work/calib_fixed/calib.json").read())
+          def aspect(q):
+              q = np.asarray(q, np.float32)
+              top = np.linalg.norm(q[1]-q[0]); bottom = np.linalg.norm(q[2]-q[3])
+              left = np.linalg.norm(q[3]-q[0]); right = np.linalg.norm(q[2]-q[1])
+              return (top+bottom)/2 / ((left+right)/2)
+          targets = {("SET06",1): 3840/2160, ("SET10Y",0): 1440/3200}
+          ok = True
+          for (scene,sid), target in targets.items():
+              s = next(x for x in calib["scenes"][scene]["screens"] if x["id"]==sid)
+              a = aspect(s["quad"])
+              tol = abs(a-target)/target
+              passed = tol <= 0.03
+              ok &= passed
+              print(f"{scene}/{sid}: oran {a:.4f} hedef {target:.4f} sapma %{tol*100:.2f} -> {'PASS' if passed else 'FAIL'}")
+          print("SONUC ORAN:", "PASS" if ok else "FAIL")
+          import sys
+          sys.exit(0 if ok else 1)
+          PY
+
+      - name: Ozet
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          {
+            echo "## wp-fix-test (${{ inputs.pair }})"
+            echo ""
+            echo "### Video (asama c duzeltmesi)"
+            echo '```'
+            cat _work/out_video/video_*.json 2>/dev/null || echo "video ciktisi yok"
+            echo '```'
+            echo ""
+            echo "### Mockup kalibrasyon duzeltmesi"
+            cat _work/calib_fixed/report.md 2>/dev/null || true
+            echo ""
+            echo "### Mockup render QC (SET06/SET10Y)"
+            cat _work/out_mock/report.md 2>/dev/null || true
+            echo ""
+            echo "### Oran dogrulamasi"
+            echo '```'
+            cat _work/aspect_check.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: wp-fix-test-${{ inputs.pair }}
+          path: |
+            _work/out_video/*.mp4
+            _work/out_video/frame_*.jpg
+            _work/out_video/video_*.json
+            _work/out_mock/*.jpg
+            _work/out_mock/qc/*.png
+            _work/out_mock/report.md
+            _work/out_mock/qc.json
+            _work/calib_fixed/report.md
+            _work/aspect_check.txt
+          if-no-files-found: warn
+
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
