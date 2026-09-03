@@ -1,7 +1,8 @@
 name: canva-bulk-fetch
 
 # Canva export listesini (repo icindeki TSV) TEK kosuda indirir ve Drive'a yazar.
-# Liste satiri: <SAYFA_BASLIGI>\t<CIHAZ>\t<URL>   (bkz. scripts/canva_bulk_fetch.sh)
+# Liste satiri: <SAYFA_BASLIGI>\t<CIHAZ>\t<EDISYON>\t<URL>   (bkz. scripts/canva_bulk_fetch.sh)
+# Edisyon satir bazinda geldigi icin tek kosuda birden fazla edisyon karisik olabilir.
 # Imzali URL'ler dosyadan okunur; workflow girdisi degildir, bu yuzden loga dusmez.
 # Etsy'ye dokunmaz.
 
@@ -16,11 +17,10 @@ on:
         description: "Drive kok klasoru (ASTROLOVE altinda)"
         required: true
         default: "WALLPAPER/FINAL_V2"
-      edition:
-        description: "Edisyon (dosya adinda kullanilir)"
-        type: choice
-        options: [Midnight_Blue, Deep_Black, Champagne_Ivory, Warm_Parchment]
-        default: Midnight_Blue
+      label:
+        description: "Rapor etiketi (bilgi amacli; dosya adlari manifest'teki edisyon sutunundan gelir)"
+        required: false
+        default: ""
       parallel:
         description: "Es zamanli indirme sayisi"
         required: true
@@ -57,7 +57,7 @@ jobs:
         run: |
           bash scripts/canva_bulk_fetch.sh \
             "${{ inputs.manifest }}" "${{ inputs.out_root }}" \
-            "${{ inputs.edition }}" "${{ inputs.parallel }}"
+            "${{ inputs.label }}" "${{ inputs.parallel }}"
 
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
