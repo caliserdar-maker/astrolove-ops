@@ -12,9 +12,13 @@ on:
         description: "Indirilecek dosyanin tam URL'si (imzali link olabilir)"
         required: true
       dest:
-        description: "Drive hedef yolu (ASTROLOVE altinda, dosya adi dahil)"
-        required: true
+        description: "Drive hedef yolu (ASTROLOVE altinda, dosya adi dahil); BOS = Drive'a yazma, yalniz olc"
+        required: false
         default: "WALLPAPER/FINAL_V2/_CANDIDATE/CANVA_TEST.png"
+      alpha_check:
+        description: "PNG alfa kanalini olc (alfa=0 orani, sol ust 200x200 ort alfa)"
+        type: boolean
+        default: false
 
 jobs:
   fetch:
@@ -33,28 +37,28 @@ jobs:
           printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
           chmod 600 ~/.config/rclone/rclone.conf
           if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
-      - name: Indir ve Drive'a yaz
+      - name: Indir, olc, Drive'a yaz
         env:
           SRC_URL: ${{ inputs.url }}
+          DEST: ${{ inputs.dest }}
+          ALPHA: ${{ inputs.alpha_check }}
         run: |
           set -euo pipefail
           echo "::add-mask::$SRC_URL"
           mkdir -p _dl
-          name="$(basename "${{ inputs.dest }}")"
+          name="$(basename "${DEST:-indirilen.png}")"
           curl -fsSL --max-time 300 -o "_dl/$name" "$SRC_URL"
           ls -l "_dl/$name"
-          file "_dl/$name" || true
-          python3 - "_dl/$name" <<'PY'
-          import sys, struct
-          p = sys.argv[1]; d = open(p, "rb").read(64)
-          if d[:8] == b"\x89PNG\r\n\x1a\n":
-              w, h = struct.unpack(">II", d[16:24]); ct = d[25]
-              print(f"PNG {w}x{h} renk tipi {ct} ({'RGBA/alfa var' if ct in (4,6) else 'alfa yok'})")
-          else:
-              print("PNG degil:", d[:8])
-          PY
-          rclone copyto "_dl/$name" "gdrive:ASTROLOVE/${{ inputs.dest }}"
-          rclone lsjson "gdrive:ASTROLOVE/$(dirname "${{ inputs.dest }}")" --files-only \
-            | python3 -c "import json,sys;[print(f\"{r['Name']}  {r['Size']} bayt  id={r.get('ID','')}\") for r in json.load(sys.stdin) if r['Name']=='$name']" | tee -a "$GITHUB_STEP_SUMMARY"
+          if [ "$ALPHA" = "true" ]; then
+            pip install -q pillow numpy
+            python3 -c 'import sys, numpy as np; from PIL import Image; Image.MAX_IMAGE_PIXELS=None; im=Image.open(sys.argv[1]); a=np.asarray(im.convert("RGBA"))[...,3]; z=float((a==0).mean())*100; tl=float(a[:200,:200].mean()); mn=int(a.min()); mx=int(a.max()); print(f"{im.size[0]}x{im.size[1]} mod {im.mode} | alfa=0 orani %{z:.1f} | sol ust 200x200 ort alfa {tl:.1f} | alfa min {mn} maks {mx} -> " + ("SEFFAF" if z>70 else ("ZEMIN VAR" if mn==255 else "KISMI")))' "_dl/$name" | tee -a "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ -n "$DEST" ]; then
+            rclone copyto "_dl/$name" "gdrive:ASTROLOVE/$DEST"
+            rclone lsjson "gdrive:ASTROLOVE/$(dirname "$DEST")" --files-only \
+              | python3 -c "import json,sys;[print(f\"{r['Name']}  {r['Size']} bayt  id={r.get('ID','')}\") for r in json.load(sys.stdin) if r['Name']=='$name']" | tee -a "$GITHUB_STEP_SUMMARY"
+          else
+            echo "dest bos: Drive'a yazilmadi." | tee -a "$GITHUB_STEP_SUMMARY"
+          fi
       - if: ${{ always() }}
         run: rm -rf _dl ~/.config/rclone
