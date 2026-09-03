@@ -27,6 +27,10 @@ on:
         description: "Kalibrasyon duzeltmesini atla (orijinal calib.json'u degistirmeden kullan - compositing testi icin)"
         type: boolean
         default: false
+      skip_mockup:
+        description: "Mockup adimlarini (2B/2B'/2C) atla - sadece video testi"
+        type: boolean
+        default: false
 
 concurrency:
   group: wp-fix-test
@@ -82,7 +86,7 @@ jobs:
             | tee _work/video_log.txt
 
       - name: 2B - Mockup kalibrasyon duzeltmesi (SET06 ekran-2, SET10Y ekran-1)
-        if: ${{ inputs.skip_calib_fix != true }}
+        if: ${{ inputs.skip_mockup != true && inputs.skip_calib_fix != true }}
         run: |
           set -euo pipefail
           mkdir -p _work/calib_fixed/masks
@@ -93,7 +97,7 @@ jobs:
           # calib_fix.py SADECE SET06_1.png ve SET10Y_0.png'yi uzerine yazar; digerleri yukarida kopyalanmis oldu
 
       - name: 2B' - Kalibrasyon duzeltmesi atlandi (orijinal calib.json/masks aynen kopyalanir)
-        if: ${{ inputs.skip_calib_fix == true }}
+        if: ${{ inputs.skip_mockup != true && inputs.skip_calib_fix == true }}
         run: |
           set -euo pipefail
           mkdir -p _work/calib_fixed/masks
@@ -102,6 +106,7 @@ jobs:
           echo "kalibrasyon duzeltmesi ATLANDI - orijinal calib.json degismeden kullanildi (compositing testi)" | tee _work/calib_fixed/report.md
 
       - name: 2C - Duzeltilmis kalibrasyonla SET06+SET10Y yeniden uret (SADECE 1 cift)
+        if: ${{ inputs.skip_mockup != true }}
         continue-on-error: true
         run: |
           set -euo pipefail
@@ -119,10 +124,12 @@ jobs:
           for f in _work/out_mock/*.jpg; do [ -f "$f" ] || continue; rclone copyto "$f" "$dest/$(basename "$f")"; done
           for f in _work/out_mock/qc/*.png; do [ -f "$f" ] || continue; rclone copyto "$f" "$dest/qc_$(basename "$f")"; done
           if [ -f _work/out_mock/report.md ]; then rclone copyto _work/out_mock/report.md "$dest/report.md"; fi
+          for f in _work/out_video/*.mp4; do [ -f "$f" ] || continue; rclone copyto "$f" "$dest/$(basename "$f")"; done
+          for f in _work/out_video/video_*.json; do [ -f "$f" ] || continue; rclone copyto "$f" "$dest/$(basename "$f")"; done
           echo "Drive'a yuklendi: ASTROLOVE/TEMP/WP_FIX_TEST/${{ inputs.pair }}"
 
       - name: Oran dogrulamasi (bagimsiz, wp_audit_drive.py ile ayni formul)
-        if: ${{ inputs.skip_calib_fix != true }}
+        if: ${{ inputs.skip_mockup != true && inputs.skip_calib_fix != true }}
         run: |
           set -euo pipefail
           python3 - <<'PY' | tee _work/aspect_check.txt
