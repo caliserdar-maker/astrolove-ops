@@ -56,6 +56,18 @@ GALLERY_ORDER = ["SET01", "SET03", "SET04", "SET06", "SET07", "SET10Y"]
 
 JPEG_QUALITY = 95
 
+# 4 Eyl 2026: kucultme yolu. "mevcut" = ~2x hedef olcege INTER_AREA on-indirme +
+# INTER_CUBIC perspektif; "lanczos" = on-indirme yok, dogrudan INTER_LANCZOS4
+# (olcum: SET07 saat halesi 13.68 -> 10.77; kaynak 5.03).
+WARP_MODE = "mevcut"
+
+
+def set_warp_mode(m):
+    global WARP_MODE
+    if m not in ("mevcut", "lanczos"):
+        raise SystemExit(f"bilinmeyen warp yontemi {m}")
+    WARP_MODE = m
+
 
 def log(msg):
     print(msg, flush=True)
@@ -177,13 +189,17 @@ def cover_homography(wp_shape, quad):
     return cv2.getPerspectiveTransform(src, np.asarray(quad, np.float32)), src
 
 
-def warp_cover(wp, quad, shape):
+def warp_cover(wp, quad, shape, yontem=None):
     """warp_full'un stretch-to-fill'i YERINE: kaynagin TAMAMINI degil, quad
     orani ile eslesen ORTALANMIS bir alt-bolgesini (cover_homography) quad'a
     esler - dairesel/simetrik desenler orani BOZULMADAN (crop-to-fill) yerlesir.
-    Ayni alt-piksel-orneklem onlemi (once ~2x hedef olcege INTER_AREA)."""
+    Ayni alt-piksel-orneklem onlemi (once ~2x hedef olcege INTER_AREA).
+    yontem="lanczos": on-indirme yok, dogrudan INTER_LANCZOS4."""
     H0, W0 = wp.shape[:2]
     Hc, src = cover_homography(wp.shape, quad)
+    if (yontem or WARP_MODE) == "lanczos":
+        return cv2.warpPerspective(wp, Hc.astype(np.float64), (shape[1], shape[0]),
+                                   flags=cv2.INTER_LANCZOS4, borderMode=cv2.BORDER_CONSTANT)
     crop_w = float(src[1][0] - src[0][0])
     scale = quad_scale(quad, crop_w)
     f = max(1.0, 1.0 / (scale * 2.0))

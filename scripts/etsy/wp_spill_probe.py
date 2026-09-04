@@ -84,10 +84,12 @@ def kenar_dagilimi(quad, ys, xs):
     return {KENAR_ADI[i]: int((idx == i).sum()) for i in range(4)}
 
 
-def tasma_olc(out, master, soft, quad, wn):
-    """Maskenin sert sinirindan disari dogru bant analizi."""
+def tasma_olc(out, master, soft, quad, wn, ref_soft=None):
+    """Maskenin sert sinirindan disari dogru bant analizi.
+    ref_soft verilirse sinir ondan alinir (maske degistirilen denemelerde
+    once/sonra ayni referans sinira gore olculsun diye)."""
     D = np.abs(out.astype(np.float32) - master.astype(np.float32)).mean(axis=2)
-    sert = (soft >= 0.5).astype(np.uint8)
+    sert = ((ref_soft if ref_soft is not None else soft) >= 0.5).astype(np.uint8)
     disari = cv2.distanceTransform(1 - sert, cv2.DIST_L2, 5)
     m_aa = poly_mask_aa(master.shape, quad)
     yakin = (disari > 0) & (disari <= BANT_N)
