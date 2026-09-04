@@ -53,9 +53,14 @@ HOLE_MAX = 2500      # poster px^2: bundan buyuk delikler (harf ici bosluk) dold
 DILATE_PX = 2
 FEATHER_PX = 2
 GLOW_EDITIONS = ("Midnight_Blue", "Deep_Black")
-# 4 Eyl 2026 (Mo): sembol dibindeki hale saat ekraninda kabul edilmiyor; glow
-# yalniz buyuk cihazlarda uygulanir (olcum: Watch MB hale 0-5 = 5.03, plaka 2.77).
-GLOW_DEVICES = ("Phone", "Tablet", "Desktop")
+# 4 Eyl 2026 DENEME VE SONUC: glow'u Watch'ta kapatmak DENENDI ve GERI ALINDI.
+# Olcum (wp-fix-try 33896961744, Leo_Pisces MB Watch): glow'lu kaynak hale 0-5
+# 5.03 / halka kalinti 1.013; glow KAPALI kaynak 50.88 / 47.227 (plaka 2.77 /
+# 1.176). Sebep: glow terimi (poster - medyan) plakanin yerel tonunu posterin
+# tonuna baglayan koprudur; kapatilinca maske icine kopyalanan poster murekkebi
+# ile disaridaki plaka arasinda sert bir basamak kalir - hale artar.
+# Karar Mo'ya birakildi; tuple degistirilerek tekrar denenebilir.
+GLOW_DEVICES = ("Phone", "Tablet", "Desktop", "Watch")
 GLOW_DILATE = 20     # poster px (olcum: halo ~5 px cihaz olcegi ~ 25 poster px)
 GLOW_SOFT = 6.0
 QC_JPEG_RATIO = 1.15  # JPEG turu hatasi / posterin kendi JPEG turu hatasi (dogal referans)
