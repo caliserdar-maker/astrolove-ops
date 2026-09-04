@@ -209,6 +209,19 @@ def warp_cover(wp, quad, shape, yontem=None):
                                flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_CONSTANT)
 
 
+def erode_soft_mask(soft, px):
+    """Kalibre yumusak maskeyi px kadar iceri alir: 0.5 seviyesi erode edilir,
+    ayni 0.8 sigma yumusakligi korunur. (4 Eyl 2026 olcumu: 2 px erozyon
+    SET03/3 ve SET04/1'de tasan pikseli 1141 / 1853 -> 0 yapiyor; bedeli
+    ekranin kenarindan ~2 px'lik serit.)"""
+    if px <= 0:
+        return soft
+    hard = (soft >= 0.5).astype(np.uint8)
+    k = 2 * int(px) + 1
+    er = cv2.erode(hard, np.ones((k, k), np.uint8))
+    return cv2.GaussianBlur(er.astype(np.float32), (0, 0), 0.8)
+
+
 def warp_mask(mask_u8, H, shape):
     return cv2.warpPerspective(mask_u8, np.asarray(H, np.float64), (shape[1], shape[0]), flags=cv2.INTER_NEAREST)
 
