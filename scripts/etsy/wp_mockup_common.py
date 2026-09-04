@@ -239,6 +239,73 @@ def expand_quad(quad, px):
     return np.asarray(out, np.float32)
 
 
+def _kose_yaricapi(mask_local, blok=80):
+    """Yerel dikdortgende 4 kosedeki eksik alandan yuvarlatma yaricapi (px).
+    r = sqrt(eksik / (1 - pi/4)); dort kosenin medyani dondurulur."""
+    h, w = mask_local.shape[:2]
+    b = min(blok, w // 3, h // 3)
+    m = (mask_local >= 0.5).astype(np.float32)
+    kose = [m[:b, :b], m[:b, w - b:], m[h - b:, :b], m[h - b:, w - b:]]
+    rs = []
+    for k in kose:
+        eksik = float(b * b - k.sum())
+        rs.append(math.sqrt(max(0.0, eksik) / (1 - math.pi / 4)))
+    return float(np.median(rs)), [round(x, 1) for x in rs]
+
+
+def hole_shape(soft, quad, inset=2.0, up=4, delik_min=200):
+    """CERCEVE-USTTE deligi: maskeden DEGIL, geometriden.
+    Ekranin yerel dikdortgeninde yuvarlatilmis dikdortgen up kat cozunurlukte
+    cizilir (kenar yumusatma icin INTER_AREA ile kucultulur) ve homografi ile
+    quad'a oturtulur. Yuvarlatma yaricapi mevcut maskeden OLCULUR. Maskenin
+    ic delikleri (centik / Dynamic Island gibi, kenara degmeyen ve alani
+    delik_min ustunde olanlar) sekilden CIKARILIR.
+    Donus: (delik 0..1, olculen yaricap px, kose yaricaplari)."""
+    q = np.asarray(quad, np.float32)
+    W = int(round((np.linalg.norm(q[1] - q[0]) + np.linalg.norm(q[2] - q[3])) / 2))
+    H = int(round((np.linalg.norm(q[3] - q[0]) + np.linalg.norm(q[2] - q[1])) / 2))
+    W, H = max(8, W), max(8, H)
+    rect = np.float32([[0, 0], [W, 0], [W, H], [0, H]])
+    Hl = cv2.getPerspectiveTransform(rect, q)
+    yerel = cv2.warpPerspective(soft, np.linalg.inv(Hl.astype(np.float64)), (W, H),
+                                flags=cv2.INTER_LINEAR)
+    r, rs = _kose_yaricapi(yerel)
+    ri = max(0.0, r - inset)
+    buyuk = np.zeros((H * up, W * up), np.uint8)
+    x0 = int(round(inset * up)); y0 = int(round(inset * up))
+    x1 = int(round((W - inset) * up)); y1 = int(round((H - inset) * up))
+    R = int(round(ri * up))
+    R = max(0, min(R, (x1 - x0) // 2, (y1 - y0) // 2))
+    if R > 0:
+        cv2.rectangle(buyuk, (x0 + R, y0), (x1 - R, y1), 255, -1)
+        cv2.rectangle(buyuk, (x0, y0 + R), (x1, y1 - R), 255, -1)
+        for cx, cy in ((x0 + R, y0 + R), (x1 - R, y0 + R), (x0 + R, y1 - R), (x1 - R, y1 - R)):
+            cv2.circle(buyuk, (cx, cy), R, 255, -1)
+    else:
+        cv2.rectangle(buyuk, (x0, y0), (x1, y1), 255, -1)
+    sekil = cv2.resize(buyuk, (W, H), interpolation=cv2.INTER_AREA).astype(np.float32) / 255.0
+
+    # maskenin ic delikleri (centik vb.) sekilden cikarilir
+    sert = (yerel >= 0.5).astype(np.uint8)
+    bosluk = (1 - sert).astype(np.uint8)
+    n, lab, st, _ = cv2.connectedComponentsWithStats(bosluk, 8)
+    ic = np.zeros((H, W), np.uint8)
+    for i in range(1, n):
+        x, y, w_, h_, alan = st[i]
+        if alan < delik_min:
+            continue
+        mg = int(round(inset)) + 3
+        if x <= mg or y <= mg or x + w_ >= W - mg or y + h_ >= H - mg:
+            continue                      # kenara yakin -> kenar centigi, ic delik degil
+        ic[lab == i] = 255
+    if ic.any():
+        ic = cv2.GaussianBlur(ic.astype(np.float32) / 255.0, (0, 0), 0.8)
+        sekil = np.clip(sekil - ic, 0.0, 1.0)
+    delik = cv2.warpPerspective(sekil, Hl.astype(np.float64), (soft.shape[1], soft.shape[0]),
+                                flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT)
+    return delik, round(r, 1), rs
+
+
 def erode_soft_mask(soft, px):
     """Kalibre yumusak maskeyi px kadar iceri alir: 0.5 seviyesi erode edilir,
     ayni 0.8 sigma yumusakligi korunur. (4 Eyl 2026 olcumu: 2 px erozyon
@@ -523,7 +590,8 @@ def render_screen(out, master, screen, wp_new, wp_pilot, mode, soft_mask=None, e
                                     flags=cv2.INTER_CUBIC,
                                     borderMode=cv2.BORDER_REPLICATE).astype(np.float32)
         bant = poly_mask_aa(master.shape, expand_quad(quad, disari))[..., None]
-        h = erode_soft_mask(soft_mask, delik)[..., None]   # fotografin deligi
+        h, r_olculen, _ = hole_shape(soft_mask, quad, inset=delik)
+        h = h[..., None]                                   # fotografin deligi (geometrik)
         # Ust katman, sahnenin O ANKI hali uzerine cizilir (master uzerine DEGIL):
         # coklu ekranli sahnede onceki ekranlarin yerlestirmesi korunur.
         out[...] = out + (h * bant) * (w_ext - out)
