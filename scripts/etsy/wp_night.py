@@ -132,9 +132,13 @@ def stage_d(pair, drive, work, args):
     wp_in.mkdir(parents=True, exist_ok=True)
     rclone("copy", f"{drive}/{args.wp_dir}/{up}", str(wp_in), "--include", "AstroLove_*.jpg")
     out = work / "zip" / up
-    rc, tail = run([sys.executable, str(Path(__file__).parent / "wp_zip.py"),
-                    "--pair", pair, "--wallpapers", str(wp_in), "--license", str(work / "LICENSE.txt"),
-                    "--out", str(out)])
+    cmd = [sys.executable, str(Path(__file__).parent / "wp_zip.py"),
+           "--pair", pair, "--wallpapers", str(wp_in), "--license", str(work / "LICENSE.txt"),
+           "--out", str(out)]
+    # 4 Eyl 2026 (Mo): kurulum PDF'i ZIP'lere 6. girdi olarak eklenir; LICENSE.txt kalir.
+    if getattr(args, "guide", "") and Path(args.guide).exists():
+        cmd += ["--guide", args.guide]
+    rc, tail = run(cmd)
     n = len(list(out.glob("*.zip"))) if out.exists() else 0
     ok = rc == 0 and n == 4
     if ok:
@@ -161,6 +165,7 @@ def main():
     ap.add_argument("--mock-dir", default="WALLPAPER/MOCKUP_V2")
     ap.add_argument("--zip-dir", default="WALLPAPER/DELIVERY")
     ap.add_argument("--crops", default="Deep_Black_Tablet,Champagne_Ivory_Phone")
+    ap.add_argument("--guide", default="", help="asama d: ZIP'e eklenecek kurulum PDF'i")
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--limit", type=int, default=0)
     a = ap.parse_args()
