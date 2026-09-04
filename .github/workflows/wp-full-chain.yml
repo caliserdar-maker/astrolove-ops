@@ -1,10 +1,12 @@
 name: wp-full-chain
 
-# TEK ZINCIR (Mo, 3 Eyl): galeri (b) -> video (c) -> zip (d) -> Etsy yukleme+
-# dogrulama (e+f), TEK workflow_dispatch kosusunda. Mevcut script'ler AYNEN
-# kullanilir (degistirilmedi): wp_night.py (b/c/d), wp_video_render.py (c,
-# SET01 sahnesi + WA_WP_VIDEO_TOZ_V3.mp4 master), wp_media_upload.py (e),
-# wp_verify_all.py (f, upload isinin sonunda kosar).
+# TEK ZINCIR (Mo, 3 Eyl): galeri (b) -> zip (d) -> Etsy yukleme+dogrulama
+# (e+f), TEK workflow_dispatch kosusunda. Script'ler: wp_night.py (b/d),
+# wp_media_upload.py (e), wp_verify_all.py (f, upload isinin sonunda kosar).
+#
+# VIDEO KAPSAM DISI (Mo, 4 Eyl 2026): 78 ilan VIDEOSUZ yayinlanacak.
+# video/video_merge isleri kaldirildi, asama c wp_night.py'den cikarildi,
+# yukleme --no-video ile kosar ve dogrulama --expect-video false bekler.
 # Yukleme: ilanlar taslak kalir (pilot zaten active); bu is YAYINLAMAZ.
 # Etsy'ye yazan tek is upload_verify; concurrency etsy-token ile diger Etsy
 # is'leriyle (wp-media, etsy-verify, etsy-listing-update...) karsilikli disli.
@@ -217,111 +219,8 @@ jobs:
       - if: ${{ always() }}
         run: rm -rf _s ~/.config/rclone
 
-  video:
-    needs: [plan, gallery_merge]
-    runs-on: ubuntu-latest
-    timeout-minutes: 350
-    strategy:
-      fail-fast: false
-      max-parallel: 6
-      matrix:
-        shard: ${{ fromJson(needs.plan.outputs.shards) }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: { python-version: "3.12", cache: pip }
-      - run: pip install -q -r requirements.txt
-      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
-      - run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null && ffmpeg -version | head -1
-      - name: rclone.conf olustur
-        env:
-          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
-          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-        run: |
-          set -euo pipefail
-          mkdir -p ~/.config/rclone; umask 077
-          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
-          chmod 600 ~/.config/rclone/rclone.conf
-          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
-      - name: Girdiler (asama c)
-        run: |
-          set -euo pipefail
-          mkdir -p _work/calib _work/masters _work/pilot
-          rclone copyto "gdrive:ASTROLOVE/TEMP/WP_FULL_CHAIN_PAIRS.txt" _work/pairs.txt
-          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CALIB" _work/calib --include "calib.json" --include "masks/*.png"
-          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/CANCER_LIBRA" _work/masters --include "*_FINAL.jpg"
-          rclone copy "gdrive:ASTROLOVE/ARCHIVE/FINAL_V2_PILOT_V1" _work/pilot --include "AstroLove_*.jpg"
-          test "$(ls _work/pilot | wc -l)" = "16"
-          rclone copyto "gdrive:ASTROLOVE/TEMP/WP_VIDEO_TEST/WA_WP_VIDEO_TOZ_V3.mp4" _work/video_master.mp4
-          test -s _work/video_master.mp4
-          rclone copyto "gdrive:ASTROLOVE/TEMP/WP_NIGHT_STATE.csv" _work/STATE.csv || true
-          test -f _work/STATE.csv || : > _work/STATE.csv
-      - name: Uret (asama c, video)
-        run: |
-          set -euo pipefail
-          cp _work/STATE.csv "_work/STATE_${{ matrix.shard }}.csv"
-          python scripts/etsy/wp_night.py --stage c --pairs-file _work/pairs.txt \
-            --shard "${{ matrix.shard }}" --shards "${{ inputs.shards }}" \
-            --state "_work/STATE_${{ matrix.shard }}.csv" --work _work --limit "${{ inputs.limit }}"
-      - name: STATE parcasini Drive'a yaz
-        if: ${{ always() }}
-        run: |
-          set -euo pipefail
-          f="_work/STATE_${{ matrix.shard }}.csv"
-          [ -f "$f" ] || exit 0
-          rclone copyto "$f" "gdrive:ASTROLOVE/TEMP/WP_NIGHT_STATE_c_${{ matrix.shard }}.csv"
-      - if: ${{ always() }}
-        run: rm -rf _work ~/.config/rclone
-
-  video_merge:
-    needs: video
-    if: ${{ always() }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: { python-version: "3.12" }
-      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
-      - name: rclone.conf olustur
-        env:
-          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
-          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-        run: |
-          set -euo pipefail
-          mkdir -p ~/.config/rclone; umask 077
-          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
-          chmod 600 ~/.config/rclone/rclone.conf
-          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
-      - name: STATE birlestir + ozet
-        run: |
-          set -euo pipefail
-          mkdir -p _s
-          rclone copy "gdrive:ASTROLOVE/TEMP" _s --include "WP_NIGHT_STATE*.csv"
-          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
-          import csv, glob, collections
-          rows = {}
-          for f in sorted(glob.glob("_s/WP_NIGHT_STATE*.csv")):
-              for r in csv.reader(open(f, encoding="utf-8")):
-                  if len(r) >= 5 and r[0] != "pair":
-                      rows[(r[0], r[1])] = r
-          out = "_s/WP_NIGHT_STATE.csv"
-          with open(out, "w", newline="", encoding="utf-8") as fh:
-              w = csv.writer(fh); w.writerow(["pair", "stage", "status", "ts_utc", "detail"])
-              for k in sorted(rows): w.writerow(rows[k])
-          c = collections.Counter((r[1], r[2]) for r in rows.values())
-          print("## gece STATE ozeti (video sonrasi)\n")
-          for (stage, status), n in sorted(c.items()):
-              print(f"- asama {stage}: {status} {n}")
-          fails = [r[0] for r in rows.values() if r[1] == "c" and r[2] != "PASS"]
-          if fails: print("\nFAIL ciftler (c): " + ", ".join(sorted(set(fails))))
-          PY
-          rclone copyto _s/WP_NIGHT_STATE.csv "gdrive:ASTROLOVE/TEMP/WP_NIGHT_STATE.csv"
-      - if: ${{ always() }}
-        run: rm -rf _s ~/.config/rclone
-
   zip:
-    needs: [plan, video_merge]
+    needs: [plan, gallery_merge]
     runs-on: ubuntu-latest
     timeout-minutes: 350
     strategy:
@@ -448,7 +347,7 @@ jobs:
         run: |
           set -euo pipefail
           umask 077
-          mkdir -p _work/media/mock _work/media/zip _work/media/video
+          mkdir -p _work/media/mock _work/media/zip
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
           rclone copyto "gdrive:ASTROLOVE/TEMP/WA_WP_DRAFTS_STATE.csv" _work/drafts.csv
           rclone copyto "gdrive:ASTROLOVE/TEMP/WP_UPLOAD_STATE.csv" _work/UPLOAD_STATE.csv || true
@@ -460,7 +359,6 @@ jobs:
             up=$(echo "$p" | tr '[:lower:]' '[:upper:]')
             rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/$up" "_work/media/mock/$up" --include "WA_MOCKUP_V2_*_FINAL.jpg" || true
             rclone copy "gdrive:ASTROLOVE/WALLPAPER/DELIVERY/$up" "_work/media/zip/$up" --include "*.zip" || true
-            rclone copy "gdrive:ASTROLOVE/WALLPAPER/VIDEO_V2/$up" "_work/media/video/$up" --include "WA_WP_VIDEO_*.mp4" || true
           done < _work/want.txt
           du -sh _work/media
           cat _work/want.txt | paste -sd, > _work/pairs_csv.txt
@@ -474,7 +372,7 @@ jobs:
           set -euo pipefail
           args=(--state _work/drafts.csv --media _work/media --out _work/UPLOAD_STATE.csv
                 --pairs "$(cat _work/pairs_csv.txt)" --limit "${{ inputs.limit }}"
-                --quota-stop "${{ inputs.quota_stop }}")
+                --quota-stop "${{ inputs.quota_stop }}" --no-video)
           if [ "${{ inputs.upload_dry_run }}" != "true" ]; then
             echo "::warning::APPLY modu: Etsy'ye medya yazilacak (STATE draft kalir, yayin yok)."
             args+=(--apply)
@@ -502,7 +400,7 @@ jobs:
           set -euo pipefail
           [ -f _work/ETSY_TOKEN.json ] || exit 0
           args=(--state _work/drafts.csv --out _work/VERIFY_ALL.csv
-                --pairs "$(cat _work/pairs_csv.txt)" --limit "${{ inputs.limit }}" --expect-video true)
+                --pairs "$(cat _work/pairs_csv.txt)" --limit "${{ inputs.limit }}" --expect-video false)
           python scripts/etsy/wp_verify_all.py "${args[@]}" || echo "::warning::son dogrulamada FAIL var"
           rclone copyto _work/VERIFY_ALL.csv "gdrive:ASTROLOVE/TEMP/WP_VERIFY_ALL.csv" || true
       - name: Temizlik

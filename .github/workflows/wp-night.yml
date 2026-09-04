@@ -3,8 +3,8 @@ name: wp-night
 # GECE ZINCIRI - ADIM 2 uretim asamalari (Etsy'ye DOKUNMAZ):
 #   a wallpaper (78 x 16 -> FINAL_V2/<CIFT>)
 #   b galeri    (78 x 6  -> MOCKUP_V2/<CIFT>)
-#   c video     (78 x 1  -> VIDEO_V2/<CIFT>, SET01/WA_WP_VIDEO_TOZ_V3.mp4, degismedi)
 #   d zip       (78 x 4  -> DELIVERY/<CIFT>)
+# Asama c (video) 4 Eyl 2026'da KALDIRILDI: 78 ilan videosuz yayinlanacak.
 # STATE CSV Drive'da (TEMP/WP_NIGHT_STATE.csv); PASS olan cift atlanir (resume).
 # Parcali kosu (shards) ile paralel; her parca kendi STATE satirlarini yazar,
 # birlestirme sonrasi adimda yapilir. Etsy medya yukleme ayri workflow.
@@ -15,7 +15,7 @@ on:
       stage:
         description: "Asama"
         type: choice
-        options: [a, b, c, d]
+        options: [a, b, d]
         default: a
       shards:
         description: "Parca sayisi (paralel is)"
@@ -144,14 +144,6 @@ jobs:
               # mockup masterlari OZGUN pilot dosyalariyla uretildi -> referans arsivden
               rclone copy "gdrive:ASTROLOVE/ARCHIVE/FINAL_V2_PILOT_V1" _work/pilot --include "AstroLove_*.jpg"
               test "$(ls _work/pilot | wc -l)" = "16" ;;
-            c)
-              mkdir -p _work/calib _work/masters _work/pilot
-              rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CALIB" _work/calib --include "calib.json" --include "masks/*.png"
-              rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/CANCER_LIBRA" _work/masters --include "*_FINAL.jpg"
-              rclone copy "gdrive:ASTROLOVE/ARCHIVE/FINAL_V2_PILOT_V1" _work/pilot --include "AstroLove_*.jpg"
-              test "$(ls _work/pilot | wc -l)" = "16"
-              rclone copyto "gdrive:ASTROLOVE/TEMP/WP_VIDEO_TEST/WA_WP_VIDEO_TOZ_V3.mp4" _work/video_master.mp4
-              test -s _work/video_master.mp4 ;;
             d)
               rclone copyto "gdrive:ASTROLOVE/TEMP/LICENSE.txt" _work/LICENSE.txt
               wc -c _work/LICENSE.txt ;;
