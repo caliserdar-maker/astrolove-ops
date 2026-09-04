@@ -7,7 +7,14 @@ ciftin FINAL_V2 Phone wallpaper'lariyla degistirir.
 YONTEM (3 Eyl 2026 karari - DOGRUDAN DEGISTIRME): pilot murekkebi hic isin
 icine katilmaz. Her karede ekran bolgesi dogrudan yenisiyle doldurulur:
 
-    out = kare * (1 - M) + M * (warp_cover(yeni) * G)
+    out = kare * (1 - M) + M * warp_cover(yeni)
+
+  Parlaklik/ton uyarlamasi YOK (4 Eyl 2026 karari). Onceki surumde ekranin
+  dusuk frekansli parlakligini karedan tasiyan bir G katmani vardi
+  (blur(kare)/blur(yeni), sigma 25); halka icinde ve sembol cevresinde
+  BULANIK SOLUK LEKELER birakiyordu (Mo gorsel tespiti). Kaynak wallpaper
+  zaten temiz oldugu icin katman tumuyle kaldirildi: ekrana wallpaper
+  BIREBIR yapistirilir. Ekran daha parlak/duz gorunebilir - kabul edildi.
 
   M = KALIBRE yumusak ekran maskesi (_CALIB/masks/SET01_<id>.png, gercek fotograftan
       olculmus: yuvarlak kose, cerceve ve Dynamic Island DISARIDA). Ham dortgen
@@ -54,13 +61,10 @@ from wp_mockup_common import cover_homography, imread, ink_mask, log, warp_cover
 SCENE = "SET01"
 INK_CHANGE_MIN = 5.0
 FPS_TOL = 0.01
-LIGHT_SIGMA = 25.0    # kare-bazli parlaklik eslemesi icin dusuk gecirgen yaricap (piksel)
-GAIN_LIMITS = (0.2, 3.0)
 ECC_CRITERIA = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 200, 1e-6)
 MASK_THRESH = 64      # kalibre maskenin YUMUSAK rampasinda esik (127 yerine 64: alt-piksel
                       # kenar payi maskenin kendi belirsizlik bandindan alinir, govdeye tasmadan)
 MASK_GROW_PX = 0      # kor buyutme YOK: 1 px dilate govde/yuvarlak kose uzerine tasiyordu
-GAIN_ERODE_PX = 6     # parlaklik olcumu icin maskeden bu kadar iceri girilir (kenar etkisi)
 
 
 def scaled_screens(calib, scale):
@@ -190,8 +194,8 @@ def render(master_path, calib, master_img, wp_dir, pair, pilot_pair, out_path, m
     ms_corr = cv2.warpPerspective(ms, np.asarray(Hcorr, np.float64), (W, H), flags=cv2.INTER_CUBIC)
     g_master = cv2.cvtColor(ms_corr, cv2.COLOR_BGR2GRAY).astype(np.float32)
     g_frame = cv2.cvtColor(frame0, cv2.COLOR_BGR2GRAY).astype(np.float32)
-    # Ekran katmanlari: yeni wallpaper oran-korunarak (crop-to-fill) bir kez yerlestirilir;
-    # kare-bazli degisen tek sey parlaklik eslemesi (asagida, dongude).
+    # Ekran katmanlari: yeni wallpaper oran-korunarak (crop-to-fill) BIR KEZ yerlestirilir
+    # ve her karede aynen kullanilir. Parlaklik eslemesi YOK (bkz. modul basligi).
     layers = []
     msum = np.zeros((H, W), np.float32)
     ink = np.zeros((H, W), bool)
@@ -210,17 +214,7 @@ def render(master_path, calib, master_img, wp_dir, pair, pilot_pair, out_path, m
         log(f"  ekran {s['id']} ({s['device']}/{s['edition']}): {src}, ekran-bazli artik duzeltme {d:.2f} px")
         wn = warp_cover(wp_n, quad, (H, W, 3)).astype(np.float32)
         Hc, _ = cover_homography(wp_n.shape, quad)
-        # Parlaklik eslemesi AGIRLIGI: maskenin kendisi degil, EROZYONLU ic bolge.
-        # Maskeyle olculurse kenar/kose civarindaki blur telefon govdesini de icine
-        # katar; toz kare-kare hareket ettigi icin oradaki oran kareden kareye
-        # degisir ve kenar gorunumu kare-bazli tutarsiz olur (3 Eyl bulgusu: kare 0).
-        er = cv2.erode((m > 0.5).astype(np.uint8), np.ones((GAIN_ERODE_PX * 2 + 1,) * 2, np.uint8))
-        if not er.any():                      # ekran erozyon icin fazla kucukse maskenin kendisi
-            er = (m > 0.5).astype(np.uint8)
-        wgt = cv2.GaussianBlur(er.astype(np.float32), (0, 0), 1.0)
-        wb = np.maximum(cv2.GaussianBlur(wgt, (0, 0), LIGHT_SIGMA), 1e-3)[..., None]
-        layers.append(dict(mask=m, wn=wn, wgt=wgt, wb=wb,
-                           wn_mean=cv2.GaussianBlur(wn * wgt[..., None], (0, 0), LIGHT_SIGMA) / wb))
+        layers.append(dict(mask=m[..., None], wn=wn))
         ink |= warp_mask(ink_mask(wp_n), Hc, (H, W, 3)) > 0
         msum += m
     # Dogrudan degistirmede maskenin SIFIR OLMADIGI her piksel harmanlanir; "dokunulmadi"
@@ -239,16 +233,8 @@ def render(master_path, calib, master_img, wp_dir, pair, pilot_pair, out_path, m
                 break
             out = fr.astype(np.float32)
             for lay in layers:
-                m = lay["mask"]
-                # G: bu KARENIN ekran ICINDEKI dusuk frekansli parlakligini yeni icerige
-                # tasir (pozlama/isik kare-kare degisebilir). Agirlikli ortalama olarak
-                # hesaplanir (blur(x*w)/blur(w)) - bolge disina duzgun genisler, kenarda
-                # govde pikseli karismaz. Sigma 25 oldugu icin metin kenarina dokunmaz.
-                fr_mean = cv2.GaussianBlur(fr.astype(np.float32) * lay["wgt"][..., None],
-                                           (0, 0), LIGHT_SIGMA) / lay["wb"]
-                g = np.clip(fr_mean / np.maximum(lay["wn_mean"], 1.0), *GAIN_LIMITS)
-                mm = m[..., None]
-                out = (1 - mm) * out + mm * (lay["wn"] * g)
+                mm = lay["mask"]
+                out = (1 - mm) * out + mm * lay["wn"]
             outf = np.clip(np.round(out), 0, 255).astype(np.uint8)
             if i in export:
                 cv2.imwrite(str(Path(out_path).parent / f"frame_{pair}_{i:03d}.png"), outf)
