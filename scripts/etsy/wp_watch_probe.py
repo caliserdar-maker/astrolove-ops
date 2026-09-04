@@ -228,7 +228,8 @@ def relight_panelleri(master, screen, wp_new, wp_pilot):
 
 
 # ------------------------------------------------------------------ cift islemi
-def do_pair(pair, calib, mock_dir, wp_dir, master_img, pilot_wp, crop_dir, satirlar, haleler):
+def do_pair(pair, calib, mock_dir, wp_dir, master_img, pilot_wp, crop_dir, satirlar, haleler,
+            mock_dir2=None, etiket2="YENI (paste)"):
     up = pair.upper()
     scr = next(s for s in calib["scenes"]["SET07"]["screens"] if s["device"] == "Watch")
     quad = np.asarray(scr["quad"], np.float32)
@@ -314,6 +315,45 @@ def do_pair(pair, calib, mock_dir, wp_dir, master_img, pilot_wp, crop_dir, satir
             etiket(u1, f"ONCE x{UP} NEAREST"), etiket(u2, f"SONRA x{UP} NEAREST")]),
             [int(cv2.IMWRITE_JPEG_QUALITY), 97])
         row["kirpma_2"] = n2
+    # --- ikinci render (or. relight KAPALI): ayni olcumler + uc panelli kanit
+    if mock_dir2:
+        ren2_p = Path(mock_dir2) / up / f"WA_MOCKUP_V2_SET07_{pair}_FINAL.jpg"
+        if not ren2_p.exists():
+            log(f"  {pair}: ikinci render yok ({ren2_p})")
+        else:
+            ren2 = imread(ren2_p)
+            k2 = kaplama_olcumu(ren2, src, quad)
+            for k, v in k2.items():
+                row[f"yeni_{k}"] = v
+            dew2 = dewarp_ekran(ren2, src.shape, quad)
+            h2, _ = hale_profili(dew2, ink_src)
+            for k, v in h2.items():
+                row[f"yeni_render_hale_{k}"] = v
+            g2 = gradyan_duzgunlugu(dew2, maske_disla=cv2.dilate(ink_src, np.ones((15, 15), np.uint8)))
+            for k, v in g2.items():
+                row[f"yeni_render_grad_{k}"] = v
+            hk2, _ = hale_kaynagi(dew2, ink_src, pilot_ink)
+            for k, v in hk2.items():
+                row[f"yeni_render_{k}"] = v
+            b1, _ = ekran_bolgesi(ren, quad)
+            b2, _ = ekran_bolgesi(ren2, quad)
+            bs = cv2.resize(src, (b1.shape[1], int(round(src.shape[0] * b1.shape[1] / src.shape[1]))),
+                            interpolation=cv2.INTER_AREA)
+            u1 = cv2.resize(b1, (b1.shape[1] * UP, b1.shape[0] * UP), interpolation=cv2.INTER_NEAREST)
+            u2 = cv2.resize(b2, (b2.shape[1] * UP, b2.shape[0] * UP), interpolation=cv2.INTER_NEAREST)
+            n3 = f"M07_{pair}_MEVCUT_YENI_KAYNAK.jpg"
+            cv2.imwrite(str(Path(crop_dir) / n3), yanyana([
+                etiket(b1, f"MEVCUT (relight) {b1.shape[1]}x{b1.shape[0]}"),
+                etiket(b2, f"{etiket2} {b2.shape[1]}x{b2.shape[0]}"),
+                etiket(bs, f"KAYNAK (panel enine olcekli, karsilastirma icin)"),
+                etiket(u1, f"MEVCUT x{UP} NEAREST"), etiket(u2, f"{etiket2} x{UP} NEAREST"),
+                etiket(src, f"KAYNAK {src.shape[1]}x{src.shape[0]} TAM COZUNURLUK")]),
+                [int(cv2.IMWRITE_JPEG_QUALITY), 97])
+            row["kirpma_3"] = n3
+            log(f"  {pair} YENI: kaplama %{k2['kaplama_yuzde']} "
+                f"(mevcut %{row['kaplama_yuzde']}) | hale 0-5 {h2.get('fark_0_5')} "
+                f"(mevcut {row.get('render_hale_fark_0_5')}, kaynak {row.get('kaynak_hale_fark_0_5')})")
+
     satirlar.append(row)
     log(f"  {pair}: olcek {row['olcek']}, kirpma %{row['kirpma_yuzde']} [{row['kirpma_kenar']}], "
         f"mod {row['mod']} | kaynak hale 0-5 {row.get('kaynak_hale_fark_0_5')} / "
@@ -330,6 +370,8 @@ def main():
     ap.add_argument("--pilot-wp", default="", help="pilot Watch MB wallpaper (arsiv)")
     ap.add_argument("--pairs", required=True, help="virgullu cift listesi")
     ap.add_argument("--crop-dir", default="_crops")
+    ap.add_argument("--mock-dir2", default="", help="ikinci render koku (or. relight kapali)")
+    ap.add_argument("--etiket2", default="YENI (paste)")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
 
@@ -354,7 +396,7 @@ def main():
     for pair in [p.strip() for p in a.pairs.split(",") if p.strip()]:
         log(f"\n--- {pair} ---")
         do_pair(pair, calib, a.mock_dir, a.wp_dir, master_img, pilot_wp, a.crop_dir,
-                satirlar, haleler)
+                satirlar, haleler, a.mock_dir2 or None, a.etiket2)
 
     if satirlar:
         cols = list(dict.fromkeys(k for r in satirlar for k in r))
@@ -384,6 +426,9 @@ def ozet(rows):
                "kaynak_kendi_halka_kalinti", "kaynak_pilot_halka_kalinti",
                "kaynak_uzak_zemin_kalinti", "render_kendi_halka_kalinti",
                "render_pilot_halka_kalinti", "render_uzak_zemin_kalinti",
+               "yeni_kaplama_yuzde", "yeni_render_hale_fark_0_5", "yeni_render_hale_fark_5_10",
+               "yeni_render_hale_fark_10_20", "yeni_render_kendi_halka_kalinti",
+               "yeni_render_uzak_zemin_kalinti",
                "olcek", "kirpma_yuzde", "kirpma_kenar", "kirpilan_oge", "mod",
                "kaynak_hale_fark_0_5", "kaynak_hale_fark_5_10", "kaynak_hale_fark_10_20",
                "render_hale_fark_0_5", "render_hale_fark_5_10", "render_hale_fark_10_20",

@@ -1,0 +1,114 @@
+name: wp-zip-guide-test
+
+# ZIP'E KURULUM PDF'I - TEK CIFT DENEMESI - 4 Eyl 2026.
+# Etsy'ye DOKUNMAZ. Uretim klasoru WALLPAPER/DELIVERY'ye YAZMAZ: yeni ZIP'ler
+# TEMP/ZIP_TEST/<CIFT> altina yazilir, mevcut teslimat ZIP'leri oldugu gibi kalir.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pair:
+        description: "Tek cift"
+        required: true
+        default: "Aries_Aries"
+      out_dir:
+        description: "Drive cikti klasoru (ASTROLOVE altinda)"
+        required: true
+        default: "TEMP/ZIP_TEST"
+
+concurrency:
+  group: wp-zip-guide-test
+  cancel-in-progress: false
+
+jobs:
+  zip:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+
+      - name: Girdiler (16 wallpaper + LICENSE + kurulum PDF'i)
+        run: |
+          set -euo pipefail
+          P="${{ inputs.pair }}"; UP=$(echo "$P" | tr '[:lower:]' '[:upper:]')
+          mkdir -p _work/wp _work/out
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/$UP" _work/wp --include "AstroLove_*.jpg"
+          echo "wallpaper: $(ls _work/wp | wc -l) dosya (beklenen 16)"
+          test "$(ls _work/wp | wc -l)" = "16"
+          rclone copyto "gdrive:ASTROLOVE/TEMP/LICENSE.txt" _work/LICENSE.txt
+          rclone copyto "gdrive:ASTROLOVE/TEMP/HOW_TO_SET_YOUR_WALLPAPER.pdf" _work/HOW_TO_SET_YOUR_WALLPAPER.pdf
+          ls -l _work/LICENSE.txt _work/HOW_TO_SET_YOUR_WALLPAPER.pdf
+
+      - name: 4 ZIP uret (PDF dahil)
+        run: |
+          set -euo pipefail
+          python scripts/etsy/wp_zip.py --pair "${{ inputs.pair }}" --wallpapers _work/wp \
+            --license _work/LICENSE.txt --guide _work/HOW_TO_SET_YOUR_WALLPAPER.pdf \
+            --out _work/out | tee _work/rapor.txt
+
+      - name: Ac, listele, PDF bayt esitligini dogrula
+        run: |
+          set -euo pipefail
+          python3 - "${{ inputs.pair }}" <<'PY' | tee -a _work/rapor.txt
+          import hashlib, sys, zipfile
+          from pathlib import Path
+          pair = sys.argv[1]
+          pdf = Path("_work/HOW_TO_SET_YOUR_WALLPAPER.pdf").read_bytes()
+          lic = Path("_work/LICENSE.txt").read_bytes()
+          print(f"\nkaynak PDF: {len(pdf)} bayt, sha256 {hashlib.sha256(pdf).hexdigest()[:16]}, "
+                f"basliği {pdf[:8]!r}")
+          tum_ok = True
+          for p in sorted(Path("_work/out").glob("*.zip")):
+              with zipfile.ZipFile(p) as zf:
+                  names = zf.namelist()
+                  bad = zf.testzip()
+                  ic = zf.read("HOW_TO_SET_YOUR_WALLPAPER.pdf")
+                  lc = zf.read("LICENSE.txt")
+              esit = ic == pdf
+              lok = lc == lic
+              tum_ok &= esit and lok and bad is None
+              print(f"\n{p.name}  ({p.stat().st_size} bayt, testzip {bad or 'temiz'})")
+              for n in names:
+                  print(f"   - {n}")
+              print(f"   PDF: {len(ic)} bayt, sha256 {hashlib.sha256(ic).hexdigest()[:16]} "
+                    f"-> {'BIREBIR AYNI' if esit else 'FARKLI'}")
+              print(f"   LICENSE: {'birebir ayni' if lok else 'FARKLI'}")
+          print(f"\nSONUC: {'TUM ZIPLER TEMIZ' if tum_ok else 'FARK VAR'}")
+          sys.exit(0 if tum_ok else 1)
+          PY
+
+      - name: Drive'a yaz (TEST klasoru; DELIVERY'ye dokunulmaz)
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          UP=$(echo "${{ inputs.pair }}" | tr '[:lower:]' '[:upper:]')
+          [ -d _work/out ] && rclone copy _work/out "gdrive:ASTROLOVE/${{ inputs.out_dir }}/$UP" --include "*.zip" || true
+          [ -f _work/rapor.txt ] && rclone copyto _work/rapor.txt "gdrive:ASTROLOVE/TEMP/WP_ZIP_GUIDE_TEST.txt" || true
+          rclone lsl "gdrive:ASTROLOVE/${{ inputs.out_dir }}/$UP" || true
+          { echo '```'; cat _work/rapor.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: wp-zip-guide-test
+          path: _work/rapor.txt
+          if-no-files-found: ignore
+
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone

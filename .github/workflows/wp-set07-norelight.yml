@@ -1,0 +1,120 @@
+name: wp-set07-norelight
+
+# SET07 SAAT EKRANI - RELIGHT KAPALI TEK CIFT DENEMESI - 4 Eyl 2026.
+# Etsy'ye DOKUNMAZ. Uretim klasorune (MOCKUP_V2) YAZMAZ: yeni render yalniz
+# kosu icinde kalir, Drive'a giden tek sey olcum CSV'si ve kanit kirpmalaridir.
+# calib.json degistirilmez; relight kod tarafinda (--no-relight) kapatilir.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pair:
+        description: "Tek cift"
+        required: true
+        default: "Leo_Pisces"
+      grant:
+        description: "Kirpmalara anyone:reader ver ve link yaz"
+        type: boolean
+        default: true
+
+concurrency:
+  group: wp-set07-norelight
+  cancel-in-progress: false
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+
+      - name: Girdiler
+        run: |
+          set -euo pipefail
+          P="${{ inputs.pair }}"; UP=$(echo "$P" | tr '[:lower:]' '[:upper:]')
+          mkdir -p _work/calib _work/masters _work/pilot _work/wp _work/mock/$UP _work/out
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CALIB" _work/calib \
+            --include "calib.json" --include "masks/*.png"
+          echo "maske: $(ls _work/calib/masks 2>/dev/null | wc -l) dosya"
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/CANCER_LIBRA" _work/masters --include "*_FINAL.jpg"
+          rclone copy "gdrive:ASTROLOVE/ARCHIVE/FINAL_V2_PILOT_V1" _work/pilot --include "AstroLove_*.jpg"
+          test "$(ls _work/pilot | wc -l)" = "16"
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/$UP" _work/wp --include "AstroLove_*.jpg"
+          # MEVCUT (relight) SET07 render'i - karsilastirma icin
+          rclone copyto "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/$UP/WA_MOCKUP_V2_SET07_${P}_FINAL.jpg" \
+            "_work/mock/$UP/WA_MOCKUP_V2_SET07_${P}_FINAL.jpg"
+          ls -l _work/wp | head -3
+
+      - name: SET07 render - relight KAPALI (yalniz bu sahne, yalniz bu cift)
+        run: |
+          set -euo pipefail
+          python scripts/etsy/wp_mockup_render.py \
+            --calib _work/calib --masters _work/masters --pilot _work/pilot \
+            --wallpapers _work/wp --pair "${{ inputs.pair }}" --scenes SET07 \
+            --no-relight --out _work/out
+          find _work/out -name "*.jpg" -exec ls -l {} \;
+
+      - name: Olcum + uc panelli kanit
+        run: |
+          set -euo pipefail
+          P="${{ inputs.pair }}"; UP=$(echo "$P" | tr '[:lower:]' '[:upper:]')
+          mkdir -p _work/out2/$UP
+          cp "_work/out/WA_MOCKUP_V2_SET07_${P}_FINAL.jpg" "_work/out2/$UP/" 2>/dev/null \
+            || cp "_work/out/$UP/WA_MOCKUP_V2_SET07_${P}_FINAL.jpg" "_work/out2/$UP/"
+          python scripts/etsy/wp_watch_probe.py \
+            --calib _work/calib --mock-dir _work/mock --wp-dir _work/wp \
+            --master "_work/masters/WA_MOCKUP_V2_SET07_Cancer_Libra_FINAL.jpg" \
+            --pilot-wp "_work/pilot/AstroLove_Cancer_Libra_Midnight_Blue_Watch.jpg" \
+            --pairs "$P" --crop-dir _work/crops --mock-dir2 _work/out2 \
+            --etiket2 "YENI (relight KAPALI, paste)" \
+            --out _work/WP_SET07_NORELIGHT.csv | tee _work/rapor.txt
+          { echo '```'; cat _work/rapor.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Drive'a yaz (yalniz olcum + kirpma; uretim klasorune DOKUNULMAZ)
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/WP_SET07_NORELIGHT.csv ] && rclone copyto _work/WP_SET07_NORELIGHT.csv "gdrive:ASTROLOVE/TEMP/WP_SET07_NORELIGHT.csv" || true
+          [ -f _work/rapor.txt ] && rclone copyto _work/rapor.txt "gdrive:ASTROLOVE/TEMP/WP_SET07_NORELIGHT.txt" || true
+          if [ -d _work/crops ]; then
+            rclone copy _work/crops "gdrive:ASTROLOVE/TEMP/AUDIT_CROPS" --include "M07_*.jpg"
+            ls -l _work/crops
+          fi
+
+      - name: Kirpmalara izin + linkler
+        if: ${{ always() && inputs.grant }}
+        run: |
+          set -euo pipefail
+          [ -d _work/crops ] || exit 0
+          fid="$(rclone lsjson "gdrive:ASTROLOVE/TEMP" --dirs-only \
+            | python3 -c "import json,sys;print([r['ID'] for r in json.load(sys.stdin) if r['Name']=='AUDIT_CROPS'][0])")"
+          python scripts/pinterest/pin_media_perms.py --mode grant --folder-id "$fid" \
+            --pattern "M07_" --apply
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: wp-set07-norelight
+          path: |
+            _work/WP_SET07_NORELIGHT.csv
+            _work/rapor.txt
+          if-no-files-found: ignore
+
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
