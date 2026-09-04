@@ -53,6 +53,9 @@ HOLE_MAX = 2500      # poster px^2: bundan buyuk delikler (harf ici bosluk) dold
 DILATE_PX = 2
 FEATHER_PX = 2
 GLOW_EDITIONS = ("Midnight_Blue", "Deep_Black")
+# 4 Eyl 2026 (Mo): sembol dibindeki hale saat ekraninda kabul edilmiyor; glow
+# yalniz buyuk cihazlarda uygulanir (olcum: Watch MB hale 0-5 = 5.03, plaka 2.77).
+GLOW_DEVICES = ("Phone", "Tablet", "Desktop")
 GLOW_DILATE = 20     # poster px (olcum: halo ~5 px cihaz olcegi ~ 25 poster px)
 GLOW_SOFT = 6.0
 QC_JPEG_RATIO = 1.15  # JPEG turu hatasi / posterin kendi JPEG turu hatasi (dogal referans)
@@ -210,7 +213,7 @@ def build_edition(pair, ed, plates, poster_path, median_path, out_dir, devices, 
         P = place(poster.astype(np.float32), dev, plate.shape, geom)
         A = place(alpha, dev, plate.shape, geom)[..., None]
         base = plate.astype(np.float32)
-        if glow_w is not None:
+        if glow_w is not None and dev in GLOW_DEVICES:
             base = base + place(glow_w, dev, plate.shape, geom)[..., None] * place(diff, dev, plate.shape, geom)
         outp = np.clip(np.round(A * P + (1.0 - A) * base), 0, 255).astype(np.uint8)
         name = f"AstroLove_{pair}_{ed}_{dev}.jpg"

@@ -1,0 +1,162 @@
+name: wp-fix-try
+
+# IKI DUZELTME DENEMESI (tek/iki cift) - 4 Eyl 2026.
+# 1) Saat: glow yalniz Phone/Tablet/Desktop'ta uygulanir (wp_build_pair
+#    GLOW_DEVICES); MB+DB Watch dosyalari yeniden uretilir ve SET07 bunlarla,
+#    LANCZOS4 + relight KAPALI render edilir.
+# 2) Tasma: ekran maskesi 2 px erode edilerek SET03/3 ve SET04/1 yerlestirilir.
+# Uretim klasorlerine YAZILMAZ: yeni dosyalar TEMP/FIX_TEST altina gider,
+# FINAL_V2 / MOCKUP_V2 / DELIVERY degismez, Etsy'ye dokunulmaz.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pairs:
+        description: "Saat denemesi ciftleri"
+        required: true
+        default: "Leo_Pisces,Aries_Aries"
+      spill_pair:
+        description: "Tasma denemesi cifti"
+        required: true
+        default: "Aries_Aries"
+      spill_screens:
+        description: "Tasma ekranlari (SAHNE:ID)"
+        required: true
+        default: "SET03:3,SET04:1"
+      erode:
+        description: "Maske erozyonu (px)"
+        required: true
+        default: "2"
+
+concurrency:
+  group: wp-fix-try
+  cancel-in-progress: false
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+
+      - name: Girdiler
+        run: |
+          set -euo pipefail
+          mkdir -p _work/calib _work/masters _work/pilot _work/plates _work/posters _work/mock _work/wpold _work/wpnew _work/wpmix _work/new _work/crops
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CALIB" _work/calib \
+            --include "calib.json" --include "masks/*.png"
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/CANCER_LIBRA" _work/masters --include "*_FINAL.jpg"
+          rclone copy "gdrive:ASTROLOVE/ARCHIVE/FINAL_V2_PILOT_V1" _work/pilot --include "AstroLove_*.jpg"
+          test "$(ls _work/pilot | wc -l)" = "16"
+          rclone copy "gdrive:ASTROLOVE/TEMP/WP_PLATES" _work/plates \
+            --include "PLATE_MIDNIGHT_BLUE_WATCH.png" --include "PLATE_DEEP_BLACK_WATCH.png" \
+            --include "GEOM_MIDNIGHT_BLUE_WATCH.json" --include "GEOM_DEEP_BLACK_WATCH.json" \
+            --include "MEDIAN_MIDNIGHT_BLUE.png" --include "MEDIAN_DEEP_BLACK.png"
+          ls -l _work/plates
+          IFS=',' read -ra PS <<< "${{ inputs.pairs }},${{ inputs.spill_pair }}"
+          for P in $(printf '%s\n' "${PS[@]}" | sort -u); do
+            UP=$(echo "$P" | tr '[:lower:]' '[:upper:]')
+            mkdir -p "_work/wpold/$UP" "_work/mock/$UP"
+            rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/$UP" "_work/wpold/$UP" --include "AstroLove_*.jpg"
+            rclone copyto "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/$UP/WA_MOCKUP_V2_SET07_${P}_FINAL.jpg" \
+              "_work/mock/$UP/WA_MOCKUP_V2_SET07_${P}_FINAL.jpg" || true
+          done
+          IFS=',' read -ra QS <<< "${{ inputs.pairs }}"
+          for P in "${QS[@]}"; do
+            UP=$(echo "$P" | tr '[:lower:]' '[:upper:]')
+            for ED in MIDNIGHT_BLUE DEEP_BLACK; do
+              rclone copyto "gdrive:ASTROLOVE/WALL_ART/POSTERS/OPTIMIZED_FOR_PRODUCTION/$ED/3X4/WA_POSTER_${UP}_${ED}_3X4.jpg" \
+                "_work/posters/WA_POSTER_${UP}_${ED}_3X4.jpg"
+            done
+          done
+          ls -l _work/posters
+
+      - name: 1) Yeni Watch dosyalari (glow yalniz buyuk cihazlarda)
+        run: |
+          set -euo pipefail
+          IFS=',' read -ra QS <<< "${{ inputs.pairs }}"
+          for P in "${QS[@]}"; do
+            UP=$(echo "$P" | tr '[:lower:]' '[:upper:]')
+            python scripts/etsy/wp_build_pair.py build --pair "$P" --plates _work/plates \
+              --posters _work/posters --medians _work/plates --out "_work/wpnew/$UP" \
+              --editions Midnight_Blue,Deep_Black --devices Watch --crops ""
+            mkdir -p "_work/wpmix/$UP"
+            cp "_work/wpold/$UP"/AstroLove_*.jpg "_work/wpmix/$UP/"
+            cp "_work/wpnew/$UP"/AstroLove_*_Watch.jpg "_work/wpmix/$UP/"
+          done
+          find _work/wpnew -name "*.jpg" -exec ls -l {} \;
+
+      - name: 2) SET07 render (yeni Watch + LANCZOS4 + relight KAPALI)
+        run: |
+          set -euo pipefail
+          IFS=',' read -ra QS <<< "${{ inputs.pairs }}"
+          for P in "${QS[@]}"; do
+            UP=$(echo "$P" | tr '[:lower:]' '[:upper:]')
+            python scripts/etsy/wp_mockup_render.py --calib _work/calib --masters _work/masters \
+              --pilot _work/pilot --wallpapers "_work/wpmix/$UP" --pair "$P" --scenes SET07 \
+              --no-relight --warp lanczos --out _work/new
+          done
+          ls -l _work/new
+
+      - name: 3) Olcum + kanit panelleri
+        run: |
+          set -euo pipefail
+          python scripts/etsy/wp_fix_probe.py --calib _work/calib --masters _work/masters \
+            --mock-dir _work/mock --new-dir _work/new --wp-old _work/wpold --wp-new _work/wpnew \
+            --plates _work/plates --pairs "${{ inputs.pairs }}" --spill-pair "${{ inputs.spill_pair }}" \
+            --spill-screens "${{ inputs.spill_screens }}" --erode "${{ inputs.erode }}" \
+            --crop-dir _work/crops --out _work/WP_FIX_TRY.csv | tee _work/rapor.txt
+
+      - name: Drive'a yaz (TEMP/FIX_TEST; uretim klasorleri degismez)
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/WP_FIX_TRY.csv ] && rclone copyto _work/WP_FIX_TRY.csv "gdrive:ASTROLOVE/TEMP/WP_FIX_TRY.csv" || true
+          [ -f _work/rapor.txt ] && rclone copyto _work/rapor.txt "gdrive:ASTROLOVE/TEMP/WP_FIX_TRY.txt" || true
+          [ -d _work/wpnew ] && rclone copy _work/wpnew "gdrive:ASTROLOVE/TEMP/FIX_TEST/WATCH_NOGLOW" --include "*/AstroLove_*.jpg" --include "*/build_*.json" || true
+          [ -d _work/new ] && rclone copy _work/new "gdrive:ASTROLOVE/TEMP/FIX_TEST/SET07" --include "*.jpg" || true
+          if [ -n "$(ls -A _work/crops 2>/dev/null)" ]; then
+            rclone copy _work/crops "gdrive:ASTROLOVE/TEMP/AUDIT_CROPS" --include "M10_*.jpg"
+            ls -l _work/crops
+          fi
+
+      - name: Kirpmalara izin + linkler
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -n "$(ls -A _work/crops 2>/dev/null)" ] || exit 0
+          cat > _fid.py <<'PY'
+          import json, sys
+          print([r["ID"] for r in json.load(sys.stdin) if r["Name"] == sys.argv[1]][0])
+          PY
+          fid="$(rclone lsjson "gdrive:ASTROLOVE/TEMP" --dirs-only | python3 _fid.py AUDIT_CROPS)"
+          python scripts/pinterest/pin_media_perms.py --mode grant --folder-id "$fid" \
+            --pattern "M10_" --apply
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: wp-fix-try
+          path: |
+            _work/WP_FIX_TRY.csv
+            _work/rapor.txt
+          if-no-files-found: ignore
+
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone _fid.py

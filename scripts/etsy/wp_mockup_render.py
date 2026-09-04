@@ -31,7 +31,8 @@ import numpy as np
 from PIL import Image
 
 from wp_mockup_common import (GALLERY_ORDER, SCENES, cover_homography, dump_json, imread, imwrite_jpeg, ink_mask,
-                              load_wallpapers, log, poly_mask, qc_sheet, render_screen, sift_matches,
+                              load_wallpapers, log, poly_mask, qc_sheet, render_screen, set_warp_mode,
+                              sift_matches,
                               template_candidate, warp_mask)
 
 
@@ -151,10 +152,13 @@ def main():
     ap.add_argument("--pair", required=True)
     ap.add_argument("--scenes", default=",".join(GALLERY_ORDER))
     ap.add_argument("--compare", default="")
+    ap.add_argument("--warp", default="mevcut", choices=("mevcut", "lanczos"),
+                    help="ekran kucultme yolu")
     ap.add_argument("--no-relight", action="store_true",
                     help="relight modundaki ekranlari paste ile uret (calib.json degismez)")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
+    set_warp_mode(a.warp)
     calib = json.loads((Path(a.calib) / "calib.json").read_text())
     calib["dir"] = a.calib
     pilot_wps = load_wallpapers(a.pilot, calib["pilot_pair"])
