@@ -74,7 +74,7 @@ def recheck(out_bgr, screen, wp_new):
 
 
 def render_scene(scene, calib, masters_dir, pilot_wps, new_wps, pair, out_dir, compare=None,
-                 no_relight=False, erode_mask=0):
+                 no_relight=False, erode_mask=0, frame_top=None):
     cfg = SCENES[scene]
     src = cfg.get("calib_from", scene)
     cs = calib["scenes"][src]
@@ -95,6 +95,8 @@ def render_scene(scene, calib, masters_dir, pilot_wps, new_wps, pair, out_dir, c
         mode = "paste" if new_ed != pilot_ed else s["mode"]
         if no_relight and mode == "relight":
             mode = "paste"
+        if frame_top:
+            mode = "paste"          # cerceve-ustte kalibre maske ister
         soft = None
         if mode == "paste":
             soft = cv2.imread(str(Path(calib["dir"]) / "masks" / f"{src}_{s['id']}.png"), cv2.IMREAD_GRAYSCALE)
@@ -103,7 +105,8 @@ def render_scene(scene, calib, masters_dir, pilot_wps, new_wps, pair, out_dir, c
             soft = soft.astype(np.float32) / 255.0
             if erode_mask:
                 soft = erode_soft_mask(soft, erode_mask)
-        render_screen(out, master, s, wp_new, wp_pilot, mode, soft, edition_swap=(new_ed != pilot_ed))
+        render_screen(out, master, s, wp_new, wp_pilot, mode, soft, edition_swap=(new_ed != pilot_ed),
+                      frame_top=frame_top)
         used.append(dict(id=s["id"], device=s["device"], pilot_edition=pilot_ed, edition=new_ed, mode=mode,
                          quad=s["quad"], scale=s["scale"], H=s["H"]))
     out_u8 = np.clip(np.round(out), 0, 255).astype(np.uint8)
@@ -155,6 +158,8 @@ def main():
     ap.add_argument("--pair", required=True)
     ap.add_argument("--scenes", default=",".join(GALLERY_ORDER))
     ap.add_argument("--compare", default="")
+    ap.add_argument("--frame-on-top", default="",
+                    help="cerceve-ustte: <disari_px>:<delik_erode_px> (or. 4:2)")
     ap.add_argument("--erode-mask", type=int, default=0,
                     help="kalibre maskeyi bu kadar px iceri al (tasma denemesi)")
     ap.add_argument("--warp", default="mevcut", choices=("mevcut", "lanczos"),
@@ -164,6 +169,9 @@ def main():
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
     set_warp_mode(a.warp)
+    ft = tuple(int(x) for x in a.frame_on_top.split(":")) if a.frame_on_top else None
+    if ft and len(ft) != 2:
+        raise SystemExit("--frame-on-top bicimi <disari>:<delik>")
     calib = json.loads((Path(a.calib) / "calib.json").read_text())
     calib["dir"] = a.calib
     pilot_wps = load_wallpapers(a.pilot, calib["pilot_pair"])
@@ -177,7 +185,8 @@ def main():
     for scene in [s for s in a.scenes.split(",") if s]:
         log(f"== {scene}")
         qc = render_scene(scene, calib, a.masters, pilot_wps, new_wps, a.pair, a.out,
-                          a.compare or None, no_relight=a.no_relight, erode_mask=a.erode_mask)
+                          a.compare or None, no_relight=a.no_relight, erode_mask=a.erode_mask,
+                          frame_top=ft)
         results[scene] = qc
         all_ok &= bool(qc["ok"])
         for r in qc["screens"]:
