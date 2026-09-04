@@ -302,7 +302,9 @@ def main():
     if s:
         with open(s, "a", encoding="utf-8") as fh:
             fh.write("\n".join(lines) + "\n")
-    return 0 if (n_pass == len(hedefler) and not durdu) else 1
+    # DRY-RUN yazma yapmadigi icin PASS uretmez; basarisizlik sayilmaz.
+    tamam = not durdu and all(r[2] in ("PASS", "DRY") for r in rows)
+    return 0 if tamam else 1
 
 
 if __name__ == "__main__":
