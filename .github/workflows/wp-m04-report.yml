@@ -1,0 +1,121 @@
+name: wp-m04-report
+
+# MADDE 4 TAM TABLOSU + SET06 METIN KIRPMA KANITI + FAZLA DOSYA DOKUMU.
+# SALT OKUR: Etsy'ye hic dokunmaz. Drive'a yalniz olcum ciktisi ve gorsel
+# kanit kirpmalari yazilir (silme/uretim yok).
+
+on:
+  workflow_dispatch:
+    inputs:
+      kanit_pairs:
+        description: "Kanit uretilecek 3 cift (ad uzunluklari farkli)"
+        required: true
+        default: "Leo_Leo,Aries_Virgo,Sagittarius_Sagittarius"
+      ornek_pair:
+        description: "Dosya dokumu ornek klasoru"
+        required: true
+        default: "Aries_Aries"
+      grant:
+        description: "Kirpmalara anyone:reader ver ve link yaz"
+        type: boolean
+        default: true
+
+concurrency:
+  group: wp-m04-report
+  cancel-in-progress: false
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+
+      - name: Girdiler (M04 tablosu, kalibrasyon, listeler)
+        run: |
+          set -euo pipefail
+          mkdir -p _work/calib _work/wp _work/zip
+          rclone copyto "gdrive:ASTROLOVE/TEMP/WP_AUDIT_M04.csv" _work/WP_AUDIT_M04.csv
+          rclone copyto "gdrive:ASTROLOVE/TEMP/WA_WP_DRAFTS_STATE.csv" _work/drafts.csv
+          cut -d, -f1 _work/drafts.csv | sed '/^$/d' > _work/pairs.txt
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CALIB" _work/calib --include "calib.json"
+          rclone lsjson -R "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2"  --files-only > _work/wp.json
+          rclone lsjson -R "gdrive:ASTROLOVE/WALLPAPER/DELIVERY"  --files-only > _work/zip.json
+          rclone lsjson -R "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2" --files-only > _work/mock.json
+          wc -l < _work/pairs.txt
+
+      - name: Kanit kaynaklari (3 cift Desktop MB) + ornek ZIP'ler
+        run: |
+          set -euo pipefail
+          IFS=',' read -ra P <<< "${{ inputs.kanit_pairs }}"
+          for p in "${P[@]}"; do
+            up=$(echo "$p" | tr '[:lower:]' '[:upper:]')
+            rclone copyto "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/$up/AstroLove_${p}_Midnight_Blue_Desktop.jpg" \
+              "_work/wp/AstroLove_${p}_Midnight_Blue_Desktop.jpg" || echo "eksik: $p"
+          done
+          ls -l _work/wp
+          oup=$(echo "${{ inputs.ornek_pair }}" | tr '[:lower:]' '[:upper:]')
+          mkdir -p "_work/zip/$oup"
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/DELIVERY/$oup" "_work/zip/$oup" --include "*.zip"
+          ls -l "_work/zip/$oup"
+
+      - name: Olcum + kanit
+        run: |
+          set -euo pipefail
+          python scripts/etsy/wp_m04_report.py \
+            --m04 _work/WP_AUDIT_M04.csv --out-geo _work/WP_AUDIT_M04_GEO.csv \
+            --calib _work/calib --wp-dir _work/wp \
+            --kanit-pairs "${{ inputs.kanit_pairs }}" --crop-dir _work/crops \
+            --wp-json _work/wp.json --zip-json _work/zip.json --mock-json _work/mock.json \
+            --pairs-file _work/pairs.txt --ornek-pair "${{ inputs.ornek_pair }}" \
+            --zip-dir _work/zip | tee _work/rapor.txt
+          { echo '```'; cat _work/rapor.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/WP_AUDIT_M04_GEO.csv ] && rclone copyto _work/WP_AUDIT_M04_GEO.csv "gdrive:ASTROLOVE/TEMP/WP_AUDIT_M04_GEO.csv" || true
+          [ -f _work/rapor.txt ] && rclone copyto _work/rapor.txt "gdrive:ASTROLOVE/TEMP/WP_M04_RAPOR.txt" || true
+          if [ -d _work/crops ]; then
+            rclone copy _work/crops "gdrive:ASTROLOVE/TEMP/AUDIT_CROPS" --include "M04_*.jpg"
+            ls -l _work/crops
+          fi
+
+      - name: Kirpmalara izin + linkler
+        if: ${{ always() && inputs.grant }}
+        run: |
+          set -euo pipefail
+          [ -d _work/crops ] || exit 0
+          fid="$(rclone lsjson "gdrive:ASTROLOVE/TEMP" --dirs-only \
+            | python3 -c "import json,sys;print([r['ID'] for r in json.load(sys.stdin) if r['Name']=='AUDIT_CROPS'][0])")"
+          python scripts/pinterest/pin_media_perms.py --mode grant --folder-id "$fid" \
+            --pattern "M04_SET06_" --apply
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: wp-m04-report
+          path: |
+            _work/WP_AUDIT_M04_GEO.csv
+            _work/rapor.txt
+          if-no-files-found: ignore
+
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
