@@ -28,8 +28,8 @@ import cv2
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from wp_mockup_common import (DEVICES, SCENES, cover_homography, imread, imwrite_jpeg,  # noqa: E402
-                              ink_mask, log, render_screen)
+from wp_mockup_common import (DEVICES, SCENES, cover_homography, erode_soft_mask, imread,  # noqa: E402
+                              imwrite_jpeg, ink_mask, log, render_screen)
 from wp_watch_probe import hale_profili, hale_haritasi  # noqa: E402
 from wp_spill_probe import KISA, KENAR_ADI, etiket, tasma_olc  # noqa: E402
 from wp_mockup_common import warp_cover  # noqa: E402
@@ -120,10 +120,7 @@ def kisim_a(pair, calib, mock_dir, new_dir, wp_old, wp_new, plates, satirlar, cr
 
 
 def erode_maske(soft, px):
-    hard = (soft >= 0.5).astype(np.uint8)
-    k = 2 * px + 1
-    er = cv2.erode(hard, np.ones((k, k), np.uint8))
-    return cv2.GaussianBlur(er.astype(np.float32), (0, 0), 0.8)
+    return erode_soft_mask(soft, px)
 
 
 def kenar_pencere(img, a, b):

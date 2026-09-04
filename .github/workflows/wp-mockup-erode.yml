@@ -1,0 +1,113 @@
+name: wp-mockup-erode
+
+# TASMA DUZELTMELI TAM MOCKUP (deneme) - 4 Eyl 2026.
+# Kalibre ekran maskesi N px iceri alinarak (--erode-mask) secilen sahnelerin
+# TAM galeri gorselleri uretilir. Uretim klasorlerine YAZILMAZ: cikti
+# TEMP/FIX_TEST/MOCKUP_ERODE altina gider; MOCKUP_V2 / FINAL_V2 / DELIVERY
+# degismez, Etsy'ye dokunulmaz. SET07 kapsam disi.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pairs:
+        description: "Ciftler (virgul)"
+        required: true
+        default: "Aries_Aries,Leo_Pisces"
+      scenes:
+        description: "Sahneler"
+        required: true
+        default: "SET01,SET03,SET04"
+      erode:
+        description: "Maske erozyonu (px)"
+        required: true
+        default: "2"
+      out_dir:
+        description: "Drive cikti klasoru (ASTROLOVE altinda)"
+        required: true
+        default: "TEMP/FIX_TEST/MOCKUP_ERODE"
+
+concurrency:
+  group: wp-mockup-erode
+  cancel-in-progress: false
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+
+      - name: Girdiler
+        run: |
+          set -euo pipefail
+          mkdir -p _work/calib _work/masters _work/pilot _work/wp _work/out
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CALIB" _work/calib \
+            --include "calib.json" --include "masks/*.png"
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/CANCER_LIBRA" _work/masters --include "*_FINAL.jpg"
+          rclone copy "gdrive:ASTROLOVE/ARCHIVE/FINAL_V2_PILOT_V1" _work/pilot --include "AstroLove_*.jpg"
+          test "$(ls _work/pilot | wc -l)" = "16"
+          IFS=',' read -ra PS <<< "${{ inputs.pairs }}"
+          for P in "${PS[@]}"; do
+            UP=$(echo "$P" | tr '[:lower:]' '[:upper:]')
+            mkdir -p "_work/wp/$UP"
+            rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/$UP" "_work/wp/$UP" --include "AstroLove_*.jpg"
+            test "$(ls _work/wp/$UP | wc -l)" = "16"
+          done
+
+      - name: Render (maske ${{ inputs.erode }} px iceri)
+        run: |
+          set -euo pipefail
+          IFS=',' read -ra PS <<< "${{ inputs.pairs }}"
+          for P in "${PS[@]}"; do
+            UP=$(echo "$P" | tr '[:lower:]' '[:upper:]')
+            python scripts/etsy/wp_mockup_render.py --calib _work/calib --masters _work/masters \
+              --pilot _work/pilot --wallpapers "_work/wp/$UP" --pair "$P" \
+              --scenes "${{ inputs.scenes }}" --erode-mask "${{ inputs.erode }}" \
+              --out _work/out | tee -a _work/rapor.txt
+          done
+          find _work/out -maxdepth 1 -name "*.jpg" -exec ls -l {} \;
+
+      - name: Drive'a yaz (TEMP; uretim klasorleri degismez)
+        run: |
+          set -euo pipefail
+          rclone copy _work/out "gdrive:ASTROLOVE/${{ inputs.out_dir }}" --include "*.jpg"
+          [ -f _work/rapor.txt ] && rclone copyto _work/rapor.txt "gdrive:ASTROLOVE/TEMP/WP_MOCKUP_ERODE.txt" || true
+          rclone lsl "gdrive:ASTROLOVE/${{ inputs.out_dir }}"
+
+      - name: anyone:reader + linkler
+        run: |
+          set -euo pipefail
+          cat > _fid.py <<'PY'
+          import json, sys
+          print([r["ID"] for r in json.load(sys.stdin) if r["Name"] == sys.argv[1]][0])
+          PY
+          base="$(dirname "${{ inputs.out_dir }}")"; leaf="$(basename "${{ inputs.out_dir }}")"
+          fid="$(rclone lsjson "gdrive:ASTROLOVE/$base" --dirs-only | python3 _fid.py "$leaf")"
+          python scripts/pinterest/pin_media_perms.py --mode grant --folder-id "$fid" \
+            --pattern "WA_MOCKUP_V2_" --apply
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: wp-mockup-erode
+          path: _work/rapor.txt
+          if-no-files-found: ignore
+
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone _fid.py

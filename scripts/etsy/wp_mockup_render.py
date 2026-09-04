@@ -31,7 +31,8 @@ import numpy as np
 from PIL import Image
 
 from wp_mockup_common import (GALLERY_ORDER, SCENES, cover_homography, dump_json, imread, imwrite_jpeg, ink_mask,
-                              load_wallpapers, log, poly_mask, qc_sheet, render_screen, set_warp_mode,
+                              erode_soft_mask, load_wallpapers, log, poly_mask, qc_sheet, render_screen,
+                              set_warp_mode,
                               sift_matches,
                               template_candidate, warp_mask)
 
@@ -73,7 +74,7 @@ def recheck(out_bgr, screen, wp_new):
 
 
 def render_scene(scene, calib, masters_dir, pilot_wps, new_wps, pair, out_dir, compare=None,
-                 no_relight=False):
+                 no_relight=False, erode_mask=0):
     cfg = SCENES[scene]
     src = cfg.get("calib_from", scene)
     cs = calib["scenes"][src]
@@ -100,6 +101,8 @@ def render_scene(scene, calib, masters_dir, pilot_wps, new_wps, pair, out_dir, c
             if soft is None:
                 raise SystemExit(f"HATA: maske yok {src}_{s['id']}.png")
             soft = soft.astype(np.float32) / 255.0
+            if erode_mask:
+                soft = erode_soft_mask(soft, erode_mask)
         render_screen(out, master, s, wp_new, wp_pilot, mode, soft, edition_swap=(new_ed != pilot_ed))
         used.append(dict(id=s["id"], device=s["device"], pilot_edition=pilot_ed, edition=new_ed, mode=mode,
                          quad=s["quad"], scale=s["scale"], H=s["H"]))
@@ -152,6 +155,8 @@ def main():
     ap.add_argument("--pair", required=True)
     ap.add_argument("--scenes", default=",".join(GALLERY_ORDER))
     ap.add_argument("--compare", default="")
+    ap.add_argument("--erode-mask", type=int, default=0,
+                    help="kalibre maskeyi bu kadar px iceri al (tasma denemesi)")
     ap.add_argument("--warp", default="mevcut", choices=("mevcut", "lanczos"),
                     help="ekran kucultme yolu")
     ap.add_argument("--no-relight", action="store_true",
@@ -172,7 +177,7 @@ def main():
     for scene in [s for s in a.scenes.split(",") if s]:
         log(f"== {scene}")
         qc = render_scene(scene, calib, a.masters, pilot_wps, new_wps, a.pair, a.out,
-                          a.compare or None, no_relight=a.no_relight)
+                          a.compare or None, no_relight=a.no_relight, erode_mask=a.erode_mask)
         results[scene] = qc
         all_ok &= bool(qc["ok"])
         for r in qc["screens"]:
