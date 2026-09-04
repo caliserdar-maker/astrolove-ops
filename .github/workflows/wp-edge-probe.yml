@@ -1,0 +1,116 @@
+name: wp-edge-probe
+
+# SET07 KUCULTME YONTEMI + SET03/SET04 EKRAN KENARI - SALT OLCUM - 4 Eyl 2026.
+# Uretim yok, duzeltme yok. Drive'a yalniz olcum CSV/TXT ve TEMP/AUDIT_CROPS
+# altina kanit kirpmalari yazilir; MOCKUP_V2, FINAL_V2, DELIVERY degismez,
+# Etsy'ye hic gidilmez.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pairs:
+        description: "Ciftler (virgul)"
+        required: true
+        default: "Aries_Aries,Leo_Pisces"
+      scenes:
+        description: "Kenar olculecek sahneler"
+        required: true
+        default: "SET03,SET04"
+      grant:
+        description: "Kirpmalara anyone:reader ver ve link yaz"
+        type: boolean
+        default: true
+
+concurrency:
+  group: wp-edge-probe
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+
+      - name: Girdiler (calib + maske, SET07 masteri, render'lar, kaynak Watch)
+        run: |
+          set -euo pipefail
+          mkdir -p _work/calib _work/masters _work/mock _work/wp _work/crops
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CALIB" _work/calib \
+            --include "calib.json" --include "masks/*.png"
+          echo "maske: $(ls _work/calib/masks | wc -l) dosya"
+          rclone copyto "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/CANCER_LIBRA/WA_MOCKUP_V2_SET07_Cancer_Libra_FINAL.jpg" \
+            _work/masters/WA_MOCKUP_V2_SET07_Cancer_Libra_FINAL.jpg
+          IFS=',' read -ra PS <<< "${{ inputs.pairs }}"
+          for P in "${PS[@]}"; do
+            UP=$(echo "$P" | tr '[:lower:]' '[:upper:]')
+            mkdir -p "_work/mock/$UP" "_work/wp/$UP"
+            IFS=',' read -ra SC <<< "${{ inputs.scenes }}"
+            for S in "${SC[@]}"; do
+              rclone copyto "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/$UP/WA_MOCKUP_V2_${S}_${P}_FINAL.jpg" \
+                "_work/mock/$UP/WA_MOCKUP_V2_${S}_${P}_FINAL.jpg"
+            done
+            rclone copyto "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/$UP/AstroLove_${P}_Midnight_Blue_Watch.jpg" \
+              "_work/wp/$UP/AstroLove_${P}_Midnight_Blue_Watch.jpg"
+          done
+          find _work/mock _work/wp -name "*.jpg" -exec ls -l {} \;
+
+      - name: Olcum
+        run: |
+          set -euo pipefail
+          python scripts/etsy/wp_edge_probe.py \
+            --calib _work/calib --masters _work/masters --mock-dir _work/mock \
+            --wp-dir _work/wp --pairs "${{ inputs.pairs }}" --scenes "${{ inputs.scenes }}" \
+            --crop-dir _work/crops --out _work/WP_EDGE_PROBE.csv | tee _work/rapor.txt
+
+      - name: Drive'a yaz (olcum + kanit kirpmalari)
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/WP_EDGE_PROBE.csv ] && rclone copyto _work/WP_EDGE_PROBE.csv "gdrive:ASTROLOVE/TEMP/WP_EDGE_PROBE.csv" || true
+          [ -f _work/rapor.txt ] && rclone copyto _work/rapor.txt "gdrive:ASTROLOVE/TEMP/WP_EDGE_PROBE.txt" || true
+          if [ -n "$(ls -A _work/crops 2>/dev/null)" ]; then
+            rclone copy _work/crops "gdrive:ASTROLOVE/TEMP/AUDIT_CROPS" --include "M08_*.jpg"
+            ls -l _work/crops
+          fi
+
+      - name: Kirpmalara izin + linkler
+        if: ${{ always() && inputs.grant }}
+        run: |
+          set -euo pipefail
+          [ -n "$(ls -A _work/crops 2>/dev/null)" ] || exit 0
+          cat > _fid.py <<'PY'
+          import json, sys
+          print([r["ID"] for r in json.load(sys.stdin) if r["Name"] == sys.argv[1]][0])
+          PY
+          fid="$(rclone lsjson "gdrive:ASTROLOVE/TEMP" --dirs-only | python3 _fid.py AUDIT_CROPS)"
+          python scripts/pinterest/pin_media_perms.py --mode grant --folder-id "$fid" \
+            --pattern "M08_" --apply
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: wp-edge-probe
+          path: |
+            _work/WP_EDGE_PROBE.csv
+            _work/rapor.txt
+          if-no-files-found: ignore
+
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone _fid.py
