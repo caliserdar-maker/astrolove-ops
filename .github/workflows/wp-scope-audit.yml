@@ -1,0 +1,97 @@
+name: wp-scope-audit
+
+# KAPSAM OLCUMU (SALT OKUR) - 4 Eyl 2026.
+# Drive yalniz LISTELENIR (rclone lsjson; indirme yok), Etsy yalniz GET edilir.
+# Yukleme/silme/yayin YOK. Tek yazma: OAuth token yenilemesi (Drive'a geri).
+# Cikti: TEMP/WP_SCOPE.csv + is ozeti.
+
+on:
+  workflow_dispatch:
+    inputs:
+      cutoff:
+        description: "Etsy yukleme bitis ani (UTC, RFC3339)"
+        required: true
+        default: "2026-09-03T19:00:36Z"
+      limit:
+        description: "En fazla ilan (0 = 78)"
+        required: true
+        default: "0"
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  scope:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+
+      - name: Drive listesi (indirme yok) + token + ilan listesi
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p _work
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/WA_WP_DRAFTS_STATE.csv" _work/drafts.csv
+          wc -l _work/drafts.csv
+          rclone lsjson -R "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2"  --files-only > _work/wp.json
+          rclone lsjson -R "gdrive:ASTROLOVE/WALLPAPER/DELIVERY"  --files-only > _work/zip.json
+          rclone lsjson -R "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2" --files-only > _work/mock.json
+          for f in wp zip mock; do
+            echo "$f: $(python3 -c "import json;print(len(json.load(open('_work/$f.json'))))") dosya"
+          done
+
+      - name: Kapsam olcumu (Drive listesi + Etsy GET)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          python scripts/etsy/wp_scope_audit.py --state _work/drafts.csv \
+            --wp-json _work/wp.json --zip-json _work/zip.json --mock-json _work/mock.json \
+            --cutoff "${{ inputs.cutoff }}" --limit "${{ inputs.limit }}" \
+            --out _work/WP_SCOPE.csv
+
+      - name: Token'i Drive'a geri yaz (yenilendiyse)
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          if [ -f _work/ETSY_TOKEN.json.updated ]; then
+            rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json"
+          fi
+
+      - name: Sonucu Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/WP_SCOPE.csv ] && rclone copyto _work/WP_SCOPE.csv "gdrive:ASTROLOVE/TEMP/WP_SCOPE.csv" || true
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: wp-scope-audit
+          path: _work/WP_SCOPE.csv
+          if-no-files-found: ignore
+
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
