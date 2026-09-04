@@ -523,9 +523,10 @@ def render_screen(out, master, screen, wp_new, wp_pilot, mode, soft_mask=None, e
                                     flags=cv2.INTER_CUBIC,
                                     borderMode=cv2.BORDER_REPLICATE).astype(np.float32)
         bant = poly_mask_aa(master.shape, expand_quad(quad, disari))[..., None]
-        katman1 = bant * w_ext + (1 - bant) * out          # wallpaper katmani
         h = erode_soft_mask(soft_mask, delik)[..., None]   # fotografin deligi
-        out[...] = h * katman1 + (1 - h) * master.astype(np.float32)
+        # Ust katman, sahnenin O ANKI hali uzerine cizilir (master uzerine DEGIL):
+        # coklu ekranli sahnede onceki ekranlarin yerlestirmesi korunur.
+        out[...] = out + (h * bant) * (w_ext - out)
         return "frame_top"
     if mode == "paste":
         if soft_mask is None:
