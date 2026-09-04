@@ -311,9 +311,11 @@ def check_meta(listing, files, images, videos, pair, inv=None):
     price_ok = price == PRICE
     section_ok = int(listing.get("shop_section_id") or 0) == SECTION
     files_ok = len(files) == 5
-    # 4 Eyl 2026: Mo pilotu (Cancer_Libra) taslaga aldi -> beklenen durum 78'inde
-    # de "draft". Onceki "active" beklentisi artik gecerli degil.
-    want_state = "draft"
+    # 4 Eyl 2026 (Mo karari): 77 taslak icin beklenen "draft"; pilot
+    # (Cancer_Libra, 4565911475) icin beklenen "edit". Pilot 1 Eyl'de
+    # yayinlandi, 3 Eyl'de geri cekildi; Etsy'de yayina alinmis bir ilan
+    # draft'a GERI DONEMEZ, bu yuzden pilotun dogru beklentisi "edit"tir.
+    want_state = "edit" if pair == PILOT_PAIR else "draft"
     state_ok = listing.get("state") == want_state
     ok = price_ok and section_ok and files_ok and state_ok
     detail = []
