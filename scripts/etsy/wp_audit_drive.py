@@ -325,7 +325,9 @@ def main():
     ap.add_argument("--pairs-file", required=True)
     ap.add_argument("--wp-samples", required=True, help="20 orneklenen wallpaper (duz klasor)")
     ap.add_argument("--mock-dir", required=True)
-    ap.add_argument("--video-dir", required=True)
+    ap.add_argument("--video-dir", default="", help="--no-video ile bos birakilabilir")
+    ap.add_argument("--no-video", action="store_true",
+                    help="video maddelerini atla (4 Eyl 2026: 78 ilan videosuz yayinlanacak)")
     ap.add_argument("--zip-dir", required=True)
     ap.add_argument("--calib", required=True)
     ap.add_argument("--out", required=True)
@@ -336,8 +338,9 @@ def main():
 
     log("referans bankalari yukleniyor...")
     mock_refs = load_mock_refs(a.mock_dir)
-    video_refs = load_video_refs(a.video_dir)
-    log(f"galeri referans: {len(mock_refs)}, video referans: {len(video_refs)}")
+    video_refs = {} if a.no_video else load_video_refs(a.video_dir)
+    log(f"galeri referans: {len(mock_refs)}, video referans: "
+        + ("ATLANDI (--no-video)" if a.no_video else str(len(video_refs))))
 
     sample_files = {p.name: p for p in Path(a.wp_samples).glob("*.jpg")}
     sample_by_pair = {}
@@ -362,7 +365,11 @@ def main():
             row["c1_wp_sample"], row["c1_detail"] = "NA", ""
 
         g = check_gallery_pair_text_aspect(a.mock_dir, pair, calib, mock_refs)
-        v = check_video(a.video_dir, pair, video_refs, calib)
+        # --no-video: video maddeleri denetim disi; notr (True) doner ki galeri
+        # sonuclari degismesin. Kapsam disi olan sey FAIL sayilmaz.
+        v = (dict(c2_ok=True, c2_detail="", c3_ok=True, c3_detail="",
+                  c4_ok=True, c4_detail="", c6_ok=True, c6_detail="")
+             if a.no_video else check_video(a.video_dir, pair, video_refs, calib))
         z_ok, z_detail = check_zip(a.zip_dir, pair)
 
         row["c2_pair_match"] = "PASS" if (g["c2_ok"] and v["c2_ok"]) else "FAIL"

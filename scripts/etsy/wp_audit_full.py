@@ -329,8 +329,12 @@ def check_meta(listing, files, images, videos, pair, inv=None):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--state", required=True)
-    ap.add_argument("--refs-mock", required=True)
-    ap.add_argument("--refs-video", required=True)
+    ap.add_argument("--refs-mock", default="", help="--skip-media ile bos birakilabilir")
+    ap.add_argument("--refs-video", default="", help="--skip-media ile bos birakilabilir")
+    ap.add_argument("--skip-media", action="store_true",
+                    help="c1-c4 (gorsel imza/video/mockup/ZIP) atlanir; yalniz metin+meta "
+                         "(c5-c9 = 7-11. maddeler) denetlenir. Video 4 Eyl'de kapsam disi kaldi; "
+                         "medya maddeleri Drive denetiminde (wp_audit_drive.py) zaten olculuyor.")
     ap.add_argument("--out", required=True)
     ap.add_argument("--pairs", default="")
     ap.add_argument("--limit", type=int, default=0)
@@ -343,10 +347,12 @@ def main():
         store.refresh()
     api = Etsy(store)
 
-    mock_refs = load_mock_refs(a.refs_mock)
-    log(f"galeri referans: {len(mock_refs)} (cift,sahne) imzasi")
-    video_refs = load_video_refs(a.refs_video)
-    log(f"video referans: {len(video_refs)} cift")
+    mock_refs = {} if a.skip_media else load_mock_refs(a.refs_mock)
+    video_refs = {} if a.skip_media else load_video_refs(a.refs_video)
+    if a.skip_media:
+        log("MEDYA MADDELERI ATLANDI (--skip-media): c1-c4 = NA, yalniz c5-c9 denetlenir")
+    else:
+        log(f"galeri referans: {len(mock_refs)} (cift,sahne) imzasi; video referans: {len(video_refs)} cift")
 
     rows = read_state(a.state)
     if a.pairs:
@@ -370,19 +376,24 @@ def main():
             ru = api.get(f"/shops/{shop_id}/listings/{lid}/translations/ru", ok404=True)
             inv = api.get(f"/listings/{lid}/inventory", ok404=True) or {}
 
-            c1_ok, c1_d, c3_ok, c3_d = check_pair_and_mockup(api, imgs, pair, mock_refs)
-            c2_ok, c2_d = check_video(api, lid, pair, video_refs, expect_video=True)
-            c4_ok, c4_d = check_zip(shop_id, api, lid, pair)
+            if a.skip_media:
+                c1_ok = c2_ok = c3_ok = c4_ok = "NA"
+                c1_d = c2_d = c3_d = c4_d = ""
+            else:
+                c1_ok, c1_d, c3_ok, c3_d = check_pair_and_mockup(api, imgs, pair, mock_refs)
+                c2_ok, c2_d = check_video(api, lid, pair, video_refs, expect_video=True)
+                c4_ok, c4_d = check_zip(shop_id, api, lid, pair)
             c5_ok, c6_ok, c7_ok, c8_ok, text_d = check_text(listing, ru, s1, s2, pair)
             c9_ok, c9_d = check_meta(listing, files, imgs, videos, pair, inv)
 
             cols = dict(c1_pair=c1_ok, c2_video=c2_ok, c3_mockup=c3_ok, c4_zip=c4_ok,
                         c5_title=c5_ok, c6_tags=c6_ok, c7_desc=c7_ok, c8_ru=c8_ok, c9_meta=c9_ok)
             row.update(cols)
-            row["overall"] = "PASS" if all(cols.values()) else "FAIL"
+            row["overall"] = "PASS" if all(v is not False for v in cols.values()) else "FAIL"
             row["detail"] = "; ".join(x for x in [
-                "" if c1_ok else f"c1:{c1_d}", "" if c2_ok else f"c2:{c2_d}", "" if c3_ok else f"c3:{c3_d}",
-                "" if c4_ok else f"c4:{c4_d}", "" if (c5_ok and c6_ok and c7_ok and c8_ok) else f"c5-8:{text_d}",
+                "" if c1_ok is not False else f"c1:{c1_d}", "" if c2_ok is not False else f"c2:{c2_d}",
+                "" if c3_ok is not False else f"c3:{c3_d}", "" if c4_ok is not False else f"c4:{c4_d}",
+                "" if (c5_ok and c6_ok and c7_ok and c8_ok) else f"c5-8:{text_d}",
                 "" if c9_ok else f"c9:{c9_d}"] if x)
         except Exception as e:  # noqa: BLE001 - 78 ilanlik denetimde tek ilan hatasi digerlerini durdurmasin
             row.update(c1_pair=False, c2_video=False, c3_mockup=False, c4_zip=False, c5_title=False,

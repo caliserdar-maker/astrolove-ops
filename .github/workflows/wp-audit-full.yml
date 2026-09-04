@@ -46,15 +46,12 @@ jobs:
         run: |
           set -euo pipefail
           umask 077
-          mkdir -p _work/refs_mock _work/refs_video
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
           rclone copyto "gdrive:ASTROLOVE/TEMP/WA_WP_DRAFTS_STATE.csv" _work/drafts.csv
           wc -l _work/drafts.csv
-          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2" _work/refs_mock --include "*/WA_MOCKUP_V2_*_FINAL.jpg" --transfers 8
-          find _work/refs_mock -mindepth 1 -maxdepth 1 -type d | wc -l
-          rclone copy "gdrive:ASTROLOVE/WALLPAPER/VIDEO_V2" _work/refs_video --include "*/WA_WP_VIDEO_*.mp4" --transfers 8
-          find _work/refs_video -mindepth 1 -maxdepth 1 -type d | wc -l
-      - name: Kapsamli denetim (salt okur)
+          # 1-6. maddeler Drive denetiminde olculuyor; sonucu birlestirme icin alinir.
+          rclone copyto "gdrive:ASTROLOVE/TEMP/WP_AUDIT_DRIVE.csv" _work/AUDIT_DRIVE.csv || true
+      - name: Etsy denetimi 7-11 (salt okur, medya maddeleri Drive tarafinda)
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
@@ -62,10 +59,17 @@ jobs:
           TOKEN_FILE: _work/ETSY_TOKEN.json
         run: |
           set -euo pipefail
-          args=(--state _work/drafts.csv --refs-mock _work/refs_mock --refs-video _work/refs_video
+          args=(--state _work/drafts.csv --skip-media
                 --out _work/AUDIT_FULL.csv --limit "${{ inputs.limit }}")
           if [ -n "${{ inputs.pairs }}" ]; then args+=(--pairs "${{ inputs.pairs }}"); fi
           python scripts/etsy/wp_audit_full.py "${args[@]}" || echo "::warning::denetimde FAIL var"
+
+      - name: 11 maddelik tek tabloyu birlestir
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          python scripts/etsy/wp_audit_merge.py --drive _work/AUDIT_DRIVE.csv \
+            --etsy _work/AUDIT_FULL.csv --out _work/AUDIT_11.csv || echo "::warning::denetimde FAIL var"
       - name: Token'i Drive'a geri yaz (yenilendiyse)
         if: ${{ always() }}
         run: |
@@ -78,11 +82,14 @@ jobs:
         run: |
           set -euo pipefail
           [ -f _work/AUDIT_FULL.csv ] && rclone copyto _work/AUDIT_FULL.csv "gdrive:ASTROLOVE/TEMP/WP_AUDIT_FULL.csv" || true
+          [ -f _work/AUDIT_11.csv ] && rclone copyto _work/AUDIT_11.csv "gdrive:ASTROLOVE/TEMP/WP_AUDIT_11.csv" || true
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:
           name: wp-audit-full
-          path: _work/AUDIT_FULL.csv
+          path: |
+            _work/AUDIT_FULL.csv
+            _work/AUDIT_11.csv
           if-no-files-found: ignore
       - name: Temizlik
         if: ${{ always() }}

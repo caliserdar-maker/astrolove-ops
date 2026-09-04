@@ -55,15 +55,13 @@ jobs:
           fi
           wc -l < _work/pairs.txt
           rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CALIB" _work/calib --include "calib.json" --include "masks/*.png"
-      - name: 6 galeri + video + ZIP (78 cift, toplu)
+      - name: 6 galeri + ZIP (78 cift, toplu; video kapsam disi)
         run: |
           set -euo pipefail
-          mkdir -p _work/mock _work/video _work/zip
+          mkdir -p _work/mock _work/zip
           rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2" _work/mock --include "*/WA_MOCKUP_V2_*_FINAL.jpg" --transfers 8 --checkers 16
-          rclone copy "gdrive:ASTROLOVE/WALLPAPER/VIDEO_V2" _work/video --include "*/WA_WP_VIDEO_*.mp4" --transfers 8 --checkers 16
           rclone copy "gdrive:ASTROLOVE/WALLPAPER/DELIVERY" _work/zip --include "*/*.zip" --transfers 8 --checkers 16
           echo "mock: $(find _work/mock -mindepth 1 -maxdepth 1 -type d | wc -l) cift"
-          echo "video: $(find _work/video -mindepth 1 -maxdepth 1 -type d | wc -l) cift"
           echo "zip: $(find _work/zip -mindepth 1 -maxdepth 1 -type d | wc -l) cift"
       - name: Rastgele N wallpaper ornegi (madde 1)
         run: |
@@ -92,7 +90,7 @@ jobs:
         run: |
           set -euo pipefail
           python scripts/etsy/wp_audit_drive.py --pairs-file _work/pairs.txt \
-            --wp-samples _work/wp_samples --mock-dir _work/mock --video-dir _work/video \
+            --wp-samples _work/wp_samples --mock-dir _work/mock --no-video \
             --zip-dir _work/zip --calib _work/calib --out _work/AUDIT_DRIVE.csv || echo "::warning::denetimde FAIL var"
       - name: Sonucu Drive'a yaz
         if: ${{ always() }}
