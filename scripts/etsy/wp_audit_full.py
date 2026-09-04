@@ -311,7 +311,9 @@ def check_meta(listing, files, images, videos, pair, inv=None):
     price_ok = price == PRICE
     section_ok = int(listing.get("shop_section_id") or 0) == SECTION
     files_ok = len(files) == 5
-    want_state = "active" if pair == PILOT_PAIR else "draft"
+    # 4 Eyl 2026: Mo pilotu (Cancer_Libra) taslaga aldi -> beklenen durum 78'inde
+    # de "draft". Onceki "active" beklentisi artik gecerli degil.
+    want_state = "draft"
     state_ok = listing.get("state") == want_state
     ok = price_ok and section_ok and files_ok and state_ok
     detail = []

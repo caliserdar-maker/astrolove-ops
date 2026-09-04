@@ -1,0 +1,205 @@
+name: wp-audit-close
+
+# DENETIM KAPANISI (SALT OKUR, DUZELTME YOK) - 4 Eyl 2026.
+#   is "measure" : madde 1 (tek FAIL alan ciftin 16 wallpaper'i, tam tarama),
+#                  madde 3 (iki dewarp ile OCR + bayrakli ekranlardan tam
+#                  cozunurluklu kirpma), madde 4 (yeni piksel tabanli olcut:
+#                  doluluk + kirpma yuzdesi + kirpilan alana oge giriyor mu).
+#                  Etsy'ye HIC DOKUNMAZ.
+#   is "pilot"   : madde 11, pilot ilanin gercek durumu (yalniz GET; tek yazma
+#                  OAuth token yenilemesi). concurrency: etsy-token.
+# Hicbir sey yuklenmez/silinmez; uretilen tek cikti olcum CSV'leri ve
+# gorsel kontrol icin kirpmalardir.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pairs:
+        description: "Cift alt kumesi (virgullu; bos = WA_WP_DRAFTS_STATE.csv'deki 78 cift)"
+        required: false
+        default: ""
+      limit:
+        description: "En fazla cift (0 = sinirsiz; deneme icin kucuk sayi)"
+        required: true
+        default: "0"
+      m01_pair:
+        description: "Madde 1'de tam taranacak cift"
+        required: true
+        default: "Cancer_Leo"
+      pilot_listing_id:
+        description: "Madde 11: pilot ilan ID"
+        required: true
+        default: "4565911475"
+      grant:
+        description: "Kirpmalara anyone:reader ver ve link yaz"
+        type: boolean
+        default: true
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    concurrency:
+      group: wp-audit-close
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq tesseract-ocr >/dev/null && tesseract --version | head -1
+      - run: python scripts/etsy/wp_audit_crop.py --selftest
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+
+      - name: Cift listesi + kalibrasyon
+        run: |
+          set -euo pipefail
+          mkdir -p _work/calib
+          if [ -n "${{ inputs.pairs }}" ]; then
+            printf '%s\n' ${{ inputs.pairs }} | tr ',' '\n' | sed '/^$/d' > _work/pairs.txt
+          else
+            rclone copyto "gdrive:ASTROLOVE/TEMP/WA_WP_DRAFTS_STATE.csv" _work/drafts.csv
+            cut -d, -f1 _work/drafts.csv | sed '/^$/d' > _work/pairs.txt
+          fi
+          wc -l < _work/pairs.txt
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CALIB" _work/calib --include "calib.json"
+
+      - name: Galeri gorselleri (78 x 6)
+        run: |
+          set -euo pipefail
+          mkdir -p _work/mock
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2" _work/mock \
+            --include "*/WA_MOCKUP_V2_*_FINAL.jpg" --transfers 8 --checkers 16
+          echo "mock: $(find _work/mock -mindepth 1 -maxdepth 1 -type d | wc -l) cift"
+
+      - name: Kaynak wallpaper'lar (doluluk olcumu icin, kalibrasyondan turetilir)
+        run: |
+          set -euo pipefail
+          mkdir -p _work/wp _work/wp_m01
+          # calib'de gercekten kullanilan (edisyon, cihaz) kombinasyonlari:
+          python3 - <<'PY' > _work/wp_filters.txt
+          import json
+          c = json.load(open("_work/calib/calib.json"))
+          combos = sorted({(s["edition"], s["device"])
+                           for sc in c["scenes"].values() for s in sc["screens"]})
+          for ed, dev in combos:
+              print(f"*/AstroLove_*_{ed}_{dev}.jpg")
+          PY
+          cat _work/wp_filters.txt
+          args=(); while read -r f; do args+=(--include "$f"); done < _work/wp_filters.txt
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2" _work/wp "${args[@]}" \
+            --transfers 8 --checkers 16
+          echo "wallpaper: $(find _work/wp -name '*.jpg' | wc -l) dosya"
+          # madde 1: tek ciftin 16 dosyasinin TAMAMI
+          up=$(echo "${{ inputs.m01_pair }}" | tr '[:lower:]' '[:upper:]')
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/$up" _work/wp_m01 --include "AstroLove_*.jpg"
+          echo "madde 1 dosya: $(ls _work/wp_m01 | wc -l)"
+
+      - name: Olcum (madde 1 + 3 + 4)
+        run: |
+          set -euo pipefail
+          python scripts/etsy/wp_audit_crop.py \
+            --pairs-file _work/pairs.txt --mock-dir _work/mock --calib _work/calib \
+            --wp-dir _work/wp --m01-pair "${{ inputs.m01_pair }}" --m01-wp-dir _work/wp_m01 \
+            --crop-dir _work/crops --limit "${{ inputs.limit }}" \
+            --out-m01 _work/WP_AUDIT_M01.csv --out-m03 _work/WP_AUDIT_M03.csv \
+            --out-m04 _work/WP_AUDIT_M04.csv
+
+      - name: Sonuclari Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          for f in WP_AUDIT_M01 WP_AUDIT_M03 WP_AUDIT_M04; do
+            [ -f "_work/$f.csv" ] && rclone copyto "_work/$f.csv" "gdrive:ASTROLOVE/TEMP/$f.csv" || true
+          done
+          if [ -d _work/crops ]; then
+            rclone copy _work/crops "gdrive:ASTROLOVE/TEMP/AUDIT_CROPS" --include "M0*.jpg" --transfers 8
+            echo "kirpma: $(ls _work/crops | wc -l) dosya"
+          fi
+
+      - name: Kirpmalara izin + linkler
+        if: ${{ always() && inputs.grant }}
+        run: |
+          set -euo pipefail
+          [ -d _work/crops ] || exit 0
+          fid="$(rclone lsjson "gdrive:ASTROLOVE/TEMP" --dirs-only \
+            | python3 -c "import json,sys;print([r['ID'] for r in json.load(sys.stdin) if r['Name']=='AUDIT_CROPS'][0])")"
+          python scripts/pinterest/pin_media_perms.py --mode grant --folder-id "$fid" \
+            --pattern "M0" --apply
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: wp-audit-close
+          path: |
+            _work/WP_AUDIT_M01.csv
+            _work/WP_AUDIT_M03.csv
+            _work/WP_AUDIT_M04.csv
+          if-no-files-found: ignore
+
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
+
+  pilot:
+    # Madde 11: yalniz GET. Ayni anda tek Etsy kosusu (token tek kaynak).
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      group: etsy-token
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Token al
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p _work
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+      - name: Pilot durumu oku (SALT OKUR)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          python scripts/etsy/wp_pilot_state.py --listing-id "${{ inputs.pilot_listing_id }}" \
+            --out _work/PILOT_STATE.json
+          { echo "## madde 11: pilot durumu"; echo; echo '```json';
+            cat _work/PILOT_STATE.json; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+      - name: Token'i Drive'a geri yaz (yenilendiyse)
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          if [ -f _work/ETSY_TOKEN.json.updated ]; then
+            rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json"
+          fi
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone

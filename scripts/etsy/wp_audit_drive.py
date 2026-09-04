@@ -10,9 +10,13 @@ boyutlu PASS/FAIL matrisi (kapsamli denetimin 1-6. maddeleri):
                  ile GERCEKTE dogru cift mi (verify_listing yontemi).
   c3_text        OCR TAM STRING karsilastirmasi (video + 6 galeri SET):
                  baska ciftten kalinti metin veya bozuk birlesme var mi.
-  c4_aspect      Tum galeri gorselleri (SET01/03/04/06/07/10Y) + video:
-                 ekran bolgesi en-boy orani kaynak wallpaper ile uyumlu mu
-                 (kalibrasyon quad'indan turetilir; ciftler arasi ortak).
+  c4_aspect      EMEKLI (4 Eyl 2026) -> her zaman NA. Eski olcut kalibrasyon
+                 quad'inin oranini kaynak wallpaper orani ile karsilastiriyordu;
+                 bu esitlik yalniz stretch-to-fill'de zorunluydu. Crop-to-fill'e
+                 gecildikten sonra quad orani ile kaynak oraninin farkli olmasi
+                 BEKLENEN durumdur, kusur degil. Yerine gecen piksel tabanli
+                 olcum: scripts/etsy/wp_audit_crop.py (doluluk + kirpma yuzdesi
+                 + kirpilan alana oge girip girmedigi).
   c5_zip         4 edisyon ZIP (Drive/DELIVERY): icerik+sayim+isim.
   c6_integrity   Video acilip oynuyor mu (ffprobe), gorsel bozuk mu (PIL
                  verify), ZIP gercekten aciliyor mu (testzip).
@@ -150,12 +154,12 @@ def check_gallery_pair_text_aspect(mock_dir, pair, calib, mock_refs):
     s1, s2 = up.split("_", 1)
     expected = {s1, s2}
     out = {"c2_ok": True, "c2_detail": [], "c3_ok": True, "c3_detail": [],
-           "c4_ok": True, "c4_detail": [], "c6_ok": True, "c6_detail": []}
+           "c4_ok": None, "c4_detail": [], "c6_ok": True, "c6_detail": []}
     for scene in GALLERY_ORDER:
         name = SCENES[scene].get("out_name", "WA_MOCKUP_V2_{scene}_{pair}_FINAL.jpg").format(scene=scene, pair=pair)
         p = Path(mock_dir) / up / name
         if not p.exists():
-            out["c2_ok"] = out["c3_ok"] = out["c4_ok"] = out["c6_ok"] = False
+            out["c2_ok"] = out["c3_ok"] = out["c6_ok"] = False
             out["c2_detail"].append(f"{scene}: dosya yok")
             continue
         try:
@@ -174,12 +178,8 @@ def check_gallery_pair_text_aspect(mock_dir, pair, calib, mock_refs):
                 out["c2_detail"].append(f"{scene}: eslesme {matched} (skor {score:.3f})")
         for s in calib["scenes"][scene]["screens"]:
             quad = s["quad"]; dev = s["device"]
-            # c4: ekran oran kontrolu (kalibrasyon-turetilen, ciftler arasi ortak)
-            q_aspect = aspect_of_quad(quad)
-            src_aspect = DEVICES[dev][0] / DEVICES[dev][1]
-            if abs(q_aspect - src_aspect) / src_aspect > ASPECT_TOL:
-                out["c4_ok"] = False
-                out["c4_detail"].append(f"{scene}/{s['id']}: oran {q_aspect:.3f} (kaynak {src_aspect:.3f})")
+            # c4 EMEKLI: quad orani vs kaynak orani karsilastirmasi crop-to-fill'de
+            # anlamsiz (bkz. dosya basi). Olculmez, NA doner; yerine wp_audit_crop.py.
             # c3: dewarp + metin
             if dev == "Watch":
                 continue
@@ -374,7 +374,7 @@ def main():
 
         row["c2_pair_match"] = "PASS" if (g["c2_ok"] and v["c2_ok"]) else "FAIL"
         row["c3_text"] = "PASS" if (g["c3_ok"] and v["c3_ok"]) else "FAIL"
-        row["c4_aspect"] = "PASS" if (g["c4_ok"] and v["c4_ok"]) else "FAIL"
+        row["c4_aspect"] = "NA"          # emekli olcut; yerine wp_audit_crop.py
         row["c5_zip"] = "PASS" if z_ok else "FAIL"
         row["c6_integrity"] = "PASS" if (g["c6_ok"] and v["c6_ok"]) else "FAIL"
         row["detail"] = "; ".join(x for x in [
