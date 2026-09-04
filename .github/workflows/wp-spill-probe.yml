@@ -65,7 +65,7 @@ jobs:
             rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/$UP" "_work/wp/$UP" \
               --include "AstroLove_*_Phone.jpg" --include "AstroLove_*_Watch.jpg"
           done
-          rclone copy "gdrive:ASTROLOVE/TEMP/WP_PLATES" _work/plates --include "PLATE_*_Watch.png" || true
+          rclone copy "gdrive:ASTROLOVE/TEMP/WP_PLATES" _work/plates --include "PLATE_*WATCH*.png" --include "PLATE_*Watch*.png" || true
           echo "--- plakalar"; ls -l _work/plates || true
           echo "--- KOKEN: FINAL_V2 Watch dosyalari (ModTime)"
           for P in $(printf '%s\n' "${PS[@]}" | sort -u); do
@@ -73,7 +73,7 @@ jobs:
             rclone lsl "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/$UP" --include "AstroLove_*_Watch.jpg"
           done
           echo "--- KOKEN: plakalar (ModTime)"
-          rclone lsl "gdrive:ASTROLOVE/TEMP/WP_PLATES" --include "PLATE_*_Watch.png" || true
+          rclone lsl "gdrive:ASTROLOVE/TEMP/WP_PLATES" --include "PLATE_*.png" | head -20 || true
 
       - name: Olcum
         run: |

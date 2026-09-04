@@ -214,7 +214,10 @@ def kisim2(pair, wp_dir, plate_dir, satirlar):
         satirlar.append(r)
         log(f"  {KISA[ed]} wallpaper: hale 0-5 {r['hale_0_5']} | 5-10 {r['hale_5_10']} | "
             f"10-20 {r['hale_10_20']} | halka {r['halka_kalinti']} | uzak {r['uzak_zemin']}")
-        pl = Path(plate_dir) / f"PLATE_{ed}_Watch.png"
+        # wp_build_pair plakalari BUYUK harf adlandirir: PLATE_<ED>_<DEV>.png
+        adaylar = [Path(plate_dir) / f"PLATE_{ed.upper()}_WATCH.png",
+                   Path(plate_dir) / f"PLATE_{ed}_Watch.png"]
+        pl = next((c for c in adaylar if c.exists()), adaylar[0])
         if pl.exists():
             plate = cv2.imread(str(pl), cv2.IMREAD_COLOR)
             if plate is not None and plate.shape[:2] == wp.shape[:2]:
