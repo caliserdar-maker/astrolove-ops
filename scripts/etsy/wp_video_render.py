@@ -9,7 +9,10 @@ icine katilmaz. Her karede ekran bolgesi dogrudan yenisiyle doldurulur:
 
     out = kare * (1 - M) + M * (warp_cover(yeni) * G)
 
-  M = yumusak ekran maskesi (soft_mask, kenar gecisli)
+  M = KALIBRE yumusak ekran maskesi (_CALIB/masks/SET01_<id>.png, gercek fotograftan
+      olculmus: yuvarlak kose, cerceve ve Dynamic Island DISARIDA). Ham dortgen
+      maske kullanilmaz - dortgenin kosesi keskin, gercek ekranin kosesi yuvarlaktir;
+      ham dortgen koseleri siler ve wallpaper'i telefon govdesine tasirir.
   warp_cover = oran-koruyan (crop-to-fill) yerlestirme, wp_mockup_common
   G = kare-bazli dusuk frekansli parlaklik eslemesi: o karenin ekran
       bolgesindeki blur(kare)/blur(yeni) orani (sigma 25) - sahnenin isik/
@@ -53,6 +56,11 @@ INK_CHANGE_MIN = 5.0
 FPS_TOL = 0.01
 LIGHT_SIGMA = 25.0    # kare-bazli parlaklik eslemesi icin dusuk gecirgen yaricap (piksel)
 GAIN_LIMITS = (0.2, 3.0)
+ECC_CRITERIA = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 200, 1e-6)
+MASK_THRESH = 64      # kalibre maskenin YUMUSAK rampasinda esik (127 yerine 64: alt-piksel
+                      # kenar payi maskenin kendi belirsizlik bandindan alinir, govdeye tasmadan)
+MASK_GROW_PX = 0      # kor buyutme YOK: 1 px dilate govde/yuvarlak kose uzerine tasiyordu
+GAIN_ERODE_PX = 6     # parlaklik olcumu icin maskeden bu kadar iceri girilir (kenar etkisi)
 
 
 def scaled_screens(calib, scale):
@@ -79,21 +87,20 @@ def refine(frame, master_img, screens):
     ms = cv2.resize(master_img, (frame.shape[1], frame.shape[0]), interpolation=cv2.INTER_AREA)
     g1 = cv2.cvtColor(ms, cv2.COLOR_BGR2GRAY).astype(np.float32)
     g2 = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY).astype(np.float32)
-    criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 200, 1e-6)
     warp = np.eye(3, 3, dtype=np.float32)
     try:
-        cv2.findTransformECC(g2, g1, warp, cv2.MOTION_HOMOGRAPHY, criteria, None, 5)
+        cv2.findTransformECC(g2, g1, warp, cv2.MOTION_HOMOGRAPHY, ECC_CRITERIA, None, 5)
     except cv2.error:
         log("  ECC homografi basarisiz; oteleme-sadece rafine denenecek")
         warp2 = np.eye(2, 3, dtype=np.float32)
         try:
-            cv2.findTransformECC(g2, g1, warp2, cv2.MOTION_TRANSLATION, criteria, None, 5)
+            cv2.findTransformECC(g2, g1, warp2, cv2.MOTION_TRANSLATION, ECC_CRITERIA, None, 5)
         except cv2.error:
             log("  ECC oteleme de basarisiz; kaydirma 0 alinir")
-            return screens, (0.0, 0.0)
+            return screens, (0.0, 0.0), np.eye(3, dtype=np.float32)
         dx, dy = float(warp2[0, 2]), float(warp2[1, 2])  # frame->master kaymasi; master->frame icin ters isaret
         out = [dict(s, quad=s["quad"] - np.float32([dx, dy])) for s in screens]
-        return out, (-dx, -dy)
+        return out, (-dx, -dy), np.float32([[1, 0, -dx], [0, 1, -dy], [0, 0, 1]])
     Hcorr = np.linalg.inv(warp.astype(np.float64)).astype(np.float32)  # frame->master'in tersi = master->frame
     out = []
     for s in screens:
@@ -101,16 +108,69 @@ def refine(frame, master_img, screens):
         out.append(dict(s, quad=q.astype(np.float32)))
     shift = (float(Hcorr[0, 2]), float(Hcorr[1, 2]))
     log(f"  ECC homografi rafine basarili (kayma bileseni ~{shift[0]:+.2f},{shift[1]:+.2f})")
-    return out, shift
+    return out, shift, Hcorr
 
 
-def soft_mask(shape, quad, feather=1.5, inset=1.0):
-    """Dortgen ici yumusak maske (kenardan inset px iceri, feather px gecis)."""
+def refine_screen(frame_gray, master_gray, quad, pad=48):
+    """EKRAN BAZLI artik kayit: global ECC tum sahne icin tek homografi bulur; iki
+    telefon arasinda kucuk bir artik fark kalirsa maske bir ekranda ekrandan kayar
+    ve kenarda orijinal ekran cizgisi sizar (3 Eyl gorsel bulgusu: sag telefon).
+    Burada YALNIZ o ekranin cevresinde ECC tekrar kosulur; sonuc global duzeltmenin
+    ustune eklenir. master_gray global duzeltme UYGULANMIS master olmalidir.
+    Yakinsamazsa birim matris (yani yalniz global duzeltme) doner."""
+    q = np.round(np.asarray(quad)).astype(int)
+    x0, y0 = max(0, q[:, 0].min() - pad), max(0, q[:, 1].min() - pad)
+    x1, y1 = min(master_gray.shape[1], q[:, 0].max() + pad), min(master_gray.shape[0], q[:, 1].max() + pad)
+    if x1 - x0 < 48 or y1 - y0 < 48:
+        return np.eye(3, dtype=np.float32)
+    g1 = np.ascontiguousarray(master_gray[y0:y1, x0:x1])
+    g2 = np.ascontiguousarray(frame_gray[y0:y1, x0:x1])
+    warp = np.eye(3, 3, dtype=np.float32)
+    try:
+        cv2.findTransformECC(g2, g1, warp, cv2.MOTION_HOMOGRAPHY, ECC_CRITERIA, None, 5)
+    except cv2.error:
+        return np.eye(3, dtype=np.float32)
+    # warp: frame->master (global ECC ile ayni yon); master->frame icin tersi alinir,
+    # sonra ROI koordinatindan tam goruntu koordinatina tasinir.
+    T = np.array([[1, 0, x0], [0, 1, y0], [0, 0, 1]], np.float64)
+    return (T @ np.linalg.inv(warp.astype(np.float64)) @ np.linalg.inv(T)).astype(np.float32)
+
+
+def screen_mask(calib_dir, scene, sid, Htot, shape, grow=1, feather=0.8):
+    """KALIBRE ekran maskesi (masks/<sahne>_<id>.png) master uzayindan kare uzayina.
+
+    Neden dortgen degil: dortgen keskin koselidir; gercek telefon ekraninin kosesi
+    YUVARLAKTIR. Ham dortgenle doldurmak koseleri siler ve wallpaper'i govdeye
+    tasirir (3 Eyl gorsel bulgusu). Kalibrasyon maskesi ise gercek fotograftan
+    olculmustur: yuvarlak kose, cerceve ve Dynamic Island DISARIDA kalir.
+
+    Kenar payi: eski kod dortgeni 1 px KIRPIYORDU (inset=1.0) - bu yuzden ekranin
+    en dis halkasinda orijinal (pilot) ekran gorunuyordu. Kirpma kaldirildi; esik
+    127 yerine MASK_THRESH (64) alinarak maskenin kendi yumusak rampasi kullanilir,
+    boylece kenar ekrani tam kapatir ama telefon govdesine tasmaz. grow>0 verilirse
+    ayrica dilate edilir (varsayilan 0 - kor buyutme koseleri govdeye tasiriyordu)."""
+    p = Path(calib_dir) / "masks" / f"{scene}_{sid}.png"
+    m = cv2.imread(str(p), cv2.IMREAD_GRAYSCALE)
+    if m is None:
+        return None
+    h, w = shape[:2]
+    small = cv2.resize(m, (w, h), interpolation=cv2.INTER_AREA)
+    warped = cv2.warpPerspective(small, np.asarray(Htot, np.float64), (w, h), flags=cv2.INTER_LINEAR)
+    # Kenar yumusatmasi maskenin KENDI kapsama rampasindan gelir (INTER_AREA kucultme +
+    # INTER_LINEAR warp zaten alt-piksel kapsama uretir). Blur KULLANILMAZ: blur maskeyi
+    # disari da tasirdi ve yuvarlak kose cevresinde govdeye 1 px wallpaper bulastirirdi.
+    t = MASK_THRESH / 255.0
+    soft = np.clip((warped.astype(np.float32) / 255.0 - t) / max(1e-6, 1.0 - t), 0.0, 1.0)
+    if grow > 0:
+        hard = cv2.dilate((soft > 0).astype(np.uint8), np.ones((2 * grow + 1, 2 * grow + 1), np.uint8))
+        soft = np.maximum(soft, cv2.GaussianBlur(hard.astype(np.float32), (0, 0), feather))
+    return soft
+
+
+def poly_soft_mask(shape, quad, feather=0.8):
+    """Kalibre maske bulunamazsa yedek: dortgen ici yumusak maske (kirpma YOK)."""
     m = np.zeros(shape[:2], np.float32)
-    c = quad.mean(axis=0)
-    v = quad - c
-    q = quad - v / np.linalg.norm(v, axis=1, keepdims=True) * inset
-    cv2.fillPoly(m, [np.round(q * 16).astype(np.int32)], 1.0, cv2.LINE_AA, shift=4)
+    cv2.fillPoly(m, [np.round(np.asarray(quad) * 16).astype(np.int32)], 1.0, cv2.LINE_AA, shift=4)
     return cv2.GaussianBlur(m, (0, 0), feather)
 
 
@@ -123,8 +183,13 @@ def render(master_path, calib, master_img, wp_dir, pair, pilot_pair, out_path, m
     ok, frame0 = cap.read()
     if not ok:
         raise SystemExit("HATA: ilk kare okunamadi")
-    screens, shift = refine(frame0, master_img, scaled_screens(calib, W / master_img.shape[1]))
+    screens, shift, Hcorr = refine(frame0, master_img, scaled_screens(calib, W / master_img.shape[1]))
     log(f"  video {W}x{H} {fps:.3f} fps {n_master} kare; ECC kaydirma {shift[0]:+.2f},{shift[1]:+.2f}")
+    # Global duzeltme uygulanmis master (ekran bazli artik kayit bunun uzerinden olculur).
+    ms = cv2.resize(master_img, (W, H), interpolation=cv2.INTER_AREA)
+    ms_corr = cv2.warpPerspective(ms, np.asarray(Hcorr, np.float64), (W, H), flags=cv2.INTER_CUBIC)
+    g_master = cv2.cvtColor(ms_corr, cv2.COLOR_BGR2GRAY).astype(np.float32)
+    g_frame = cv2.cvtColor(frame0, cv2.COLOR_BGR2GRAY).astype(np.float32)
     # Ekran katmanlari: yeni wallpaper oran-korunarak (crop-to-fill) bir kez yerlestirilir;
     # kare-bazli degisen tek sey parlaklik eslemesi (asagida, dongude).
     layers = []
@@ -132,10 +197,30 @@ def render(master_path, calib, master_img, wp_dir, pair, pilot_pair, out_path, m
     ink = np.zeros((H, W), bool)
     for s in screens:
         wp_n = imread(Path(wp_dir) / f"AstroLove_{pair}_{s['edition']}_{s['device']}.jpg")
-        m = soft_mask((H, W), s["quad"])
-        wn = warp_cover(wp_n, s["quad"], (H, W, 3)).astype(np.float32)
-        Hc, _ = cover_homography(wp_n.shape, s["quad"])
-        layers.append(dict(mask=m, wn=wn, wn_low=cv2.GaussianBlur(wn * m[..., None], (0, 0), LIGHT_SIGMA)))
+        Hres = refine_screen(g_frame, g_master, s["quad"])
+        quad = cv2.perspectiveTransform(s["quad"].reshape(-1, 1, 2).astype(np.float32),
+                                        Hres).reshape(-1, 2).astype(np.float32)
+        d = float(np.abs(quad - s["quad"]).max())
+        Htot = np.asarray(Hres, np.float64) @ np.asarray(Hcorr, np.float64)
+        m = screen_mask(calib.get("dir", ""), SCENE, s["id"], Htot, (H, W), grow=MASK_GROW_PX)
+        src = "kalibre maske"
+        if m is None:
+            m = poly_soft_mask((H, W), quad)
+            src = "YEDEK dortgen maske (kalibre maske yok!)"
+        log(f"  ekran {s['id']} ({s['device']}/{s['edition']}): {src}, ekran-bazli artik duzeltme {d:.2f} px")
+        wn = warp_cover(wp_n, quad, (H, W, 3)).astype(np.float32)
+        Hc, _ = cover_homography(wp_n.shape, quad)
+        # Parlaklik eslemesi AGIRLIGI: maskenin kendisi degil, EROZYONLU ic bolge.
+        # Maskeyle olculurse kenar/kose civarindaki blur telefon govdesini de icine
+        # katar; toz kare-kare hareket ettigi icin oradaki oran kareden kareye
+        # degisir ve kenar gorunumu kare-bazli tutarsiz olur (3 Eyl bulgusu: kare 0).
+        er = cv2.erode((m > 0.5).astype(np.uint8), np.ones((GAIN_ERODE_PX * 2 + 1,) * 2, np.uint8))
+        if not er.any():                      # ekran erozyon icin fazla kucukse maskenin kendisi
+            er = (m > 0.5).astype(np.uint8)
+        wgt = cv2.GaussianBlur(er.astype(np.float32), (0, 0), 1.0)
+        wb = np.maximum(cv2.GaussianBlur(wgt, (0, 0), LIGHT_SIGMA), 1e-3)[..., None]
+        layers.append(dict(mask=m, wn=wn, wgt=wgt, wb=wb,
+                           wn_mean=cv2.GaussianBlur(wn * wgt[..., None], (0, 0), LIGHT_SIGMA) / wb))
         ink |= warp_mask(ink_mask(wp_n), Hc, (H, W, 3)) > 0
         msum += m
     # Dogrudan degistirmede maskenin SIFIR OLMADIGI her piksel harmanlanir; "dokunulmadi"
@@ -155,11 +240,13 @@ def render(master_path, calib, master_img, wp_dir, pair, pilot_pair, out_path, m
             out = fr.astype(np.float32)
             for lay in layers:
                 m = lay["mask"]
-                # G: bu KARENIN ekran bolgesindeki dusuk frekansli parlakligi yeni icerige tasir
-                # (pozlama/isik kare-kare degisebilir). Sigma 25 blur oldugu icin metin
-                # kenarlarini bulandirmaz, yalniz genel parlaklik/renk seviyesini esler.
-                fr_low = cv2.GaussianBlur(fr.astype(np.float32) * m[..., None], (0, 0), LIGHT_SIGMA)
-                g = np.clip(fr_low / np.maximum(lay["wn_low"], 1.0), *GAIN_LIMITS)
+                # G: bu KARENIN ekran ICINDEKI dusuk frekansli parlakligini yeni icerige
+                # tasir (pozlama/isik kare-kare degisebilir). Agirlikli ortalama olarak
+                # hesaplanir (blur(x*w)/blur(w)) - bolge disina duzgun genisler, kenarda
+                # govde pikseli karismaz. Sigma 25 oldugu icin metin kenarina dokunmaz.
+                fr_mean = cv2.GaussianBlur(fr.astype(np.float32) * lay["wgt"][..., None],
+                                           (0, 0), LIGHT_SIGMA) / lay["wb"]
+                g = np.clip(fr_mean / np.maximum(lay["wn_mean"], 1.0), *GAIN_LIMITS)
                 mm = m[..., None]
                 out = (1 - mm) * out + mm * (lay["wn"] * g)
             outf = np.clip(np.round(out), 0, 255).astype(np.uint8)
@@ -219,6 +306,7 @@ def main():
     ap.add_argument("--no-encode", action="store_true", help="ffmpeg yok: yalniz olcum + ornek kareler")
     a = ap.parse_args()
     calib = json.loads((Path(a.calib) / "calib.json").read_text())
+    calib["dir"] = a.calib          # kalibre ekran maskeleri (masks/*.png) buradan okunur
     out_dir = Path(a.out); out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / f"WA_WP_VIDEO_{a.pair.upper()}.mp4"
     qc = render(a.master, calib, imread(a.scene_master), a.wallpapers, a.pair,
