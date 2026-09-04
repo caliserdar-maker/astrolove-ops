@@ -1,0 +1,108 @@
+name: wp-watch-probe
+
+# SET07 SAAT EKRANI - KUSUR OLCUMU (SALT OKUR) - 4 Eyl 2026.
+# Etsy'ye HIC dokunmaz, uretim/duzeltme yapmaz. Drive'a yalniz olcum CSV'si
+# ve gorsel kontrol icin kirpmalar yazilir.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pairs:
+        description: "Olculecek ciftler (virgullu)"
+        required: true
+        default: "Leo_Pisces,Aries_Aries,Cancer_Libra"
+      grant:
+        description: "Kirpmalara anyone:reader ver ve link yaz"
+        type: boolean
+        default: true
+
+concurrency:
+  group: wp-watch-probe
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+
+      - name: Girdiler (kalibrasyon, SET07 render'lari, Watch MB kaynaklari, pilot arsivi)
+        run: |
+          set -euo pipefail
+          mkdir -p _work/calib _work/mock _work/wp _work/pilot
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CALIB" _work/calib --include "calib.json"
+          IFS=',' read -ra P <<< "${{ inputs.pairs }}"
+          for p in "${P[@]}"; do
+            up=$(echo "$p" | tr '[:lower:]' '[:upper:]')
+            mkdir -p "_work/mock/$up"
+            rclone copyto "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/$up/WA_MOCKUP_V2_SET07_${p}_FINAL.jpg" \
+              "_work/mock/$up/WA_MOCKUP_V2_SET07_${p}_FINAL.jpg"
+            rclone copyto "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/$up/AstroLove_${p}_Midnight_Blue_Watch.jpg" \
+              "_work/wp/AstroLove_${p}_Midnight_Blue_Watch.jpg"
+          done
+          # relight icin: sahne masteri (pilot SET07) + pilotun OZGUN Watch wallpaper'i
+          rclone copyto "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/CANCER_LIBRA/WA_MOCKUP_V2_SET07_Cancer_Libra_FINAL.jpg" \
+            _work/pilot/MASTER_SET07.jpg
+          rclone copyto "gdrive:ASTROLOVE/ARCHIVE/FINAL_V2_PILOT_V1/AstroLove_Cancer_Libra_Midnight_Blue_Watch.jpg" \
+            _work/pilot/PILOT_WATCH_MB.jpg
+          ls -lR _work/wp _work/pilot | tail -20
+
+      - name: Olcum
+        run: |
+          set -euo pipefail
+          python scripts/etsy/wp_watch_probe.py \
+            --calib _work/calib --mock-dir _work/mock --wp-dir _work/wp \
+            --master _work/pilot/MASTER_SET07.jpg --pilot-wp _work/pilot/PILOT_WATCH_MB.jpg \
+            --pairs "${{ inputs.pairs }}" --crop-dir _work/crops \
+            --out _work/WP_WATCH_PROBE.csv | tee _work/rapor.txt
+          { echo '```'; cat _work/rapor.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/WP_WATCH_PROBE.csv ] && rclone copyto _work/WP_WATCH_PROBE.csv "gdrive:ASTROLOVE/TEMP/WP_WATCH_PROBE.csv" || true
+          [ -f _work/rapor.txt ] && rclone copyto _work/rapor.txt "gdrive:ASTROLOVE/TEMP/WP_WATCH_RAPOR.txt" || true
+          if [ -d _work/crops ]; then
+            rclone copy _work/crops "gdrive:ASTROLOVE/TEMP/AUDIT_CROPS" --include "M07_*.jpg"
+            ls -l _work/crops
+          fi
+
+      - name: Kirpmalara izin + linkler
+        if: ${{ always() && inputs.grant }}
+        run: |
+          set -euo pipefail
+          [ -d _work/crops ] || exit 0
+          fid="$(rclone lsjson "gdrive:ASTROLOVE/TEMP" --dirs-only \
+            | python3 -c "import json,sys;print([r['ID'] for r in json.load(sys.stdin) if r['Name']=='AUDIT_CROPS'][0])")"
+          python scripts/pinterest/pin_media_perms.py --mode grant --folder-id "$fid" \
+            --pattern "M07_" --apply
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: wp-watch-probe
+          path: |
+            _work/WP_WATCH_PROBE.csv
+            _work/rapor.txt
+          if-no-files-found: ignore
+
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
