@@ -81,12 +81,13 @@ jobs:
           done <<< "$WATCH_URLS"
           echo "indirilen: $n"
           ls -l _work/canva
-          python3 -c "
-import glob,sys
-from PIL import Image
-for f in sorted(glob.glob('_work/canva/*.png')):
-    im=Image.open(f); print(f, im.size, im.mode)
-"
+          python3 - <<'PY'
+          import glob
+          from PIL import Image
+          for f in sorted(glob.glob("_work/canva/*.png")):
+              im = Image.open(f)
+              print(f, im.size, im.mode)
+          PY
 
       - name: Dogrula (cift eslesmesi + edisyon) ve yerine koy
         run: |
