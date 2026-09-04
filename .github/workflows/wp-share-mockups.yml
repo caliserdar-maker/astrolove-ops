@@ -1,0 +1,84 @@
+name: wp-share-mockups
+
+# GALERI GORSELLERINE LINK - 4 Eyl 2026.
+# Uretim YOK, dosya degistirilmez, Etsy'ye dokunulmaz. Tek yapilan:
+# MOCKUP_V2/<CIFT> klasorundeki 6 galeri gorseline anyone:reader vermek ve
+# dosya ID + ModTime + dogrudan indirme linkini yazmak. Klasor acilmaz,
+# yalniz eslesen dosyalar acilir (B94 kurali).
+
+on:
+  workflow_dispatch:
+    inputs:
+      pairs:
+        description: "Ciftler (virgul)"
+        required: true
+        default: "Leo_Pisces,Aries_Aries"
+
+concurrency:
+  group: wp-share-mockups
+  cancel-in-progress: false
+
+jobs:
+  share:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+
+      - name: Yardimci betikler
+        run: |
+          set -euo pipefail
+          cat > _env.py <<'PY'
+          import json, sys
+          for r in sorted(json.load(sys.stdin), key=lambda r: r["Name"]):
+              n = r["Name"]
+              if n.startswith("WA_MOCKUP_V2_") and n.endswith("_FINAL.jpg"):
+                  print(f"{n:52s} {r['ModTime'][:19]}  {r['Size']:>9}  {r['ID']}")
+          PY
+          cat > _fid.py <<'PY'
+          import json, sys
+          ad = sys.argv[1]
+          print([r["ID"] for r in json.load(sys.stdin) if r["Name"] == ad][0])
+          PY
+
+      - name: Klasor envanteri (ID + ModTime) ve anyone:reader
+        run: |
+          set -euo pipefail
+          IFS=',' read -ra PS <<< "${{ inputs.pairs }}"
+          : > _env.txt
+          for P in "${PS[@]}"; do
+            UP=$(echo "$P" | tr '[:lower:]' '[:upper:]')
+            echo "=== $P ===" | tee -a _env.txt
+            rclone lsjson "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/$UP" --files-only \
+              | python3 _env.py | tee -a _env.txt
+            fid="$(rclone lsjson "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2" --dirs-only | python3 _fid.py "$UP")"
+            python scripts/pinterest/pin_media_perms.py --mode grant --folder-id "$fid" \
+              --pattern "WA_MOCKUP_V2_" --expect 6 --apply | tee -a _env.txt
+          done
+          { echo '```'; cat _env.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: wp-share-mockups
+          path: _env.txt
+          if-no-files-found: ignore
+
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf ~/.config/rclone _env.py _fid.py
