@@ -158,7 +158,8 @@ jobs:
           args=(--stage "${{ inputs.stage }}" --pairs-file _work/pairs.txt
                 --shard "${{ matrix.shard }}" --shards "${{ inputs.shards }}"
                 --state "_work/STATE_${{ matrix.shard }}.csv" --work _work
-                --wp-dir "${{ inputs.wp_dir }}" --limit "${{ inputs.limit }}")
+                --wp-dir "${{ inputs.wp_dir }}" --limit "${{ inputs.limit }}"
+                --state-remote "gdrive:ASTROLOVE/TEMP/WP_NIGHT_STATE_${{ inputs.stage }}_${{ matrix.shard }}.csv")
           cp _work/STATE.csv "_work/STATE_${{ matrix.shard }}.csv"
           if [ "${{ inputs.force }}" = "true" ]; then args+=(--force); fi
           python scripts/etsy/wp_night.py "${args[@]}"
