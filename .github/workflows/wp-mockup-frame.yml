@@ -48,6 +48,18 @@ jobs:
           chmod 600 ~/.config/rclone/rclone.conf
           if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
 
+      - name: TEYIT - onceki iki kosunun ciktilari bayt olarak ayni mi
+        run: |
+          set -euo pipefail
+          echo "MOCKUP_CANVA (maske erozyonu) ile MOCKUP_FRAME (cerceve-ustte) karsilastirmasi:"
+          if rclone check "gdrive:ASTROLOVE/TEMP/FIX_TEST/MOCKUP_CANVA" \
+               "gdrive:ASTROLOVE/TEMP/FIX_TEST/MOCKUP_FRAME" --one-way 2>&1 | tee _check.txt; then
+            echo "SONUC: TUM DOSYALAR AYNI -> yeni yol bir sey degistirmemis, DURULUYOR"
+            exit 1
+          fi
+          echo "SONUC: dosyalar FARKLI (asagidaki fark satirlari), devam ediliyor"
+          grep -c "differ\|ERROR" _check.txt || true
+
       - name: Girdiler (calib, masterlar, pilot, FINAL_V2 + Canva saat)
         run: |
           set -euo pipefail
@@ -65,7 +77,15 @@ jobs:
             rclone copy "gdrive:ASTROLOVE/TEMP/FIX_TEST/WATCH_CANVA/$UP" "_work/wpmix/$UP" --include "AstroLove_*_Watch.jpg"
             ls -l "_work/wpmix/$UP"/AstroLove_*_Watch.jpg
           done
-          rclone copy "gdrive:ASTROLOVE/TEMP/FIX_TEST/MOCKUP_CANVA" _work/prev --include "*.jpg" || true
+          rclone copy "gdrive:ASTROLOVE/TEMP/FIX_TEST/MOCKUP_FRAME" _work/prev --include "*.jpg" || true
+
+      - name: Delik konturu olcumu (maskeden -> geometriden)
+        run: |
+          set -euo pipefail
+          IC="$(echo "${{ inputs.frame }}" | cut -d: -f2)"
+          python scripts/etsy/wp_hole_probe.py --calib _work/calib \
+            --scenes "${{ inputs.scenes }}" --inset "$IC" \
+            --out _work/WP_HOLE_PROBE.csv | tee -a _work/rapor.txt
 
       - name: Render (cerceve-ustte ${{ inputs.frame }})
         run: |
@@ -84,8 +104,8 @@ jobs:
         run: |
           set -euo pipefail
           python scripts/etsy/wp_frame_probe.py --calib _work/calib --masters _work/masters \
-            --dir-a _work/prev --etiket-a "MASKE EROZYONU" \
-            --dir-b _work/out --etiket-b "CERCEVE-USTTE" \
+            --dir-a _work/prev --etiket-a "MASKEDEN" \
+            --dir-b _work/out --etiket-b "GEOMETRIDEN" \
             --pairs "${{ inputs.pairs }}" --scenes "${{ inputs.scenes }}" \
             --out _work/WP_FRAME_PROBE.csv | tee -a _work/rapor.txt
 
@@ -93,8 +113,9 @@ jobs:
         if: ${{ always() }}
         run: |
           set -euo pipefail
-          [ -d _work/out ] && rclone copy _work/out "gdrive:ASTROLOVE/TEMP/FIX_TEST/MOCKUP_FRAME" --include "*.jpg" || true
+          [ -d _work/out ] && rclone copy _work/out "gdrive:ASTROLOVE/TEMP/FIX_TEST/MOCKUP_GEOM" --include "*.jpg" || true
           [ -f _work/WP_FRAME_PROBE.csv ] && rclone copyto _work/WP_FRAME_PROBE.csv "gdrive:ASTROLOVE/TEMP/WP_FRAME_PROBE.csv" || true
+          [ -f _work/WP_HOLE_PROBE.csv ] && rclone copyto _work/WP_HOLE_PROBE.csv "gdrive:ASTROLOVE/TEMP/WP_HOLE_PROBE.csv" || true
           [ -f _work/rapor.txt ] && rclone copyto _work/rapor.txt "gdrive:ASTROLOVE/TEMP/WP_MOCKUP_FRAME.txt" || true
 
       - name: anyone:reader + linkler
@@ -105,7 +126,7 @@ jobs:
           import json, sys
           print([r["ID"] for r in json.load(sys.stdin) if r["Name"] == sys.argv[1]][0])
           PY
-          fid="$(rclone lsjson "gdrive:ASTROLOVE/TEMP/FIX_TEST" --dirs-only | python3 _fid.py MOCKUP_FRAME)"
+          fid="$(rclone lsjson "gdrive:ASTROLOVE/TEMP/FIX_TEST" --dirs-only | python3 _fid.py MOCKUP_GEOM)"
           python scripts/pinterest/pin_media_perms.py --mode grant --folder-id "$fid" \
             --pattern "WA_MOCKUP_V2_" --apply
 
@@ -115,6 +136,7 @@ jobs:
           name: wp-mockup-frame
           path: |
             _work/WP_FRAME_PROBE.csv
+            _work/WP_HOLE_PROBE.csv
             _work/rapor.txt
           if-no-files-found: ignore
 
