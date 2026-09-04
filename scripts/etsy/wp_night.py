@@ -35,7 +35,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from wp_mockup_common import EDITIONS, SCENES, log  # noqa: E402
 
 DEVICES4 = ["Phone", "Tablet", "Desktop", "Watch"]
-STAGES = ("a", "b", "c", "d")
+STAGES = ("a", "b", "d")   # asama c (video) 4 Eyl 2026 kaldirildi: 78 ilan VIDEOSUZ yayinlanacak
 
 
 def utc():
@@ -125,28 +125,6 @@ def stage_b(pair, drive, work, args):
     return ok, f"{n}/6 gorsel"
 
 
-def stage_c(pair, drive, work, args):
-    """1 ilan videosu -> VIDEO_V2/<PAIR>/ (wp_video_render QC'si kapidir, SET01/TOZ_V3, degismedi)."""
-    up = pair.upper()
-    wp_in = work / "wp" / up
-    wp_in.mkdir(parents=True, exist_ok=True)
-    rclone("copy", f"{drive}/{args.wp_dir}/{up}", str(wp_in), "--include", "AstroLove_*.jpg")
-    out = work / "video" / up
-    rc, tail = run([sys.executable, str(Path(__file__).parent / "wp_video_render.py"),
-                    "--master", str(work / "video_master.mp4"),
-                    "--scene-master", str(work / "masters" / SCENES["SET01"]["master"]),
-                    "--calib", str(work / "calib"), "--pilot", str(work / "pilot"),
-                    "--wallpapers", str(wp_in), "--pair", pair, "--out", str(out)])
-    n = len(list(out.glob("WA_WP_VIDEO_*.mp4"))) if out.exists() else 0
-    ok = rc == 0 and n == 1
-    if ok:
-        rclone("copy", str(out), f"{drive}/{args.video_dir}/{up}", "--include", "WA_WP_VIDEO_*.mp4",
-               "--include", "video_*.json")
-    shutil.rmtree(wp_in, ignore_errors=True)
-    shutil.rmtree(out, ignore_errors=True)
-    return ok, f"{n}/1 video"
-
-
 def stage_d(pair, drive, work, args):
     """4 teslim ZIP -> DELIVERY/<PAIR>/."""
     up = pair.upper()
@@ -166,7 +144,7 @@ def stage_d(pair, drive, work, args):
     return ok, f"{n}/4 ZIP"
 
 
-HANDLERS = dict(a=stage_a, b=stage_b, c=stage_c, d=stage_d)
+HANDLERS = dict(a=stage_a, b=stage_b, d=stage_d)
 
 
 def main():
@@ -181,7 +159,6 @@ def main():
     ap.add_argument("--work", default="_work")
     ap.add_argument("--wp-dir", default="WALLPAPER/FINAL_V2")
     ap.add_argument("--mock-dir", default="WALLPAPER/MOCKUP_V2")
-    ap.add_argument("--video-dir", default="WALLPAPER/VIDEO_V2")
     ap.add_argument("--zip-dir", default="WALLPAPER/DELIVERY")
     ap.add_argument("--crops", default="Deep_Black_Tablet,Champagne_Ivory_Phone")
     ap.add_argument("--force", action="store_true")
