@@ -13,7 +13,16 @@ referansa gore yeniden tanimlanabilir (EK KURAL, gerekce rapora yazilir).
 | c | 78 ilan videosu | `WALLPAPER/VIDEO_V2/<CIFT>` | ACIK (asagida) |
 | d | 78 x 4 teslim ZIP | `WALLPAPER/DELIVERY/<CIFT>` | ZIP yeniden acilir: 5 girdi, ad listesi birebir, cihaz tuval olculeri, LICENSE bayt bayt, <= 20 MB (kademe 95->92->90) |
 | e | Etsy medya yukleme | 78 ilan | yukleme sonrasi geri okuma: 6 gorsel rank 1-6, 1 video, 5 dosya; iki ardisik okuma ayni (10 sn, 3 deneme) |
-| f | Son dogrulama | - | ilan basina 6 gorsel 3000x2250, 1 video, 5 dosya adi, baslik sablonu, 3.99 USD, bolum 60120017, state (pilot active, digerleri draft) |
+| f | Son dogrulama | - | ilan basina 6 gorsel 3000x2250, 1 video, 5 dosya adi, baslik sablonu, 3.99 USD, bolum 60120017, state (pilot edit, digerleri draft) |
+
+## Asama e (medya yukleme) - 4 Eyl 2026 Mo notlari
+
+- Beklenen state: 77 taslakta `draft`, pilot 4565911475'te `edit`. Etsy'de
+  yayina alinmis bir ilan draft'a GERI DONEMEZ (pilot 1 Eyl'de yayinlandi,
+  3 Eyl'de geri cekildi). Pilotu draft'a cevirme denemesi YAPILMAZ.
+- Ornek kosuda ILK ilan pilot olur.
+- Pilotun gorsel yuklemesi `edit` durumunda hata verirse DUR ve raporla;
+  ornekteki diger 2 ilana GECILMEZ.
 
 ## Kosu
 
