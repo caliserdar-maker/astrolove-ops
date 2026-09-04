@@ -59,7 +59,7 @@ def main():
     for label, obj in (("magaza_gorunumu", shop_view), ("genel_gorunum", public_view)):
         log(f"\n=== {label} ===")
         if obj is None:
-            log("  404 / erisim yok  (yayinda olmayan ilan genel uc noktada gorunmez)")
+            log("  404 - kayit donmedi (bu uc nokta bu ilan icin sonuc vermiyor)")
             out[label] = None
             continue
         d = {k: obj.get(k) for k in FIELDS if k in obj}
