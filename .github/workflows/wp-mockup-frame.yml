@@ -1,0 +1,123 @@
+name: wp-mockup-frame
+
+# CERCEVE-USTTE YONTEMI - TEK/IKI CIFT DENEMESI - 4 Eyl 2026.
+# Wallpaper quad'in disina tasirilir, sahne fotografi USTE cizilir; fotografin
+# ortasindaki delik = kalibre maske N px erode. Saat dosyalari Canva ciktilari
+# (TEMP/FIX_TEST/WATCH_CANVA). Cikti TEMP altina; FINAL_V2 / MOCKUP_V2 /
+# DELIVERY / ZIP'ler degismez, Etsy'ye dokunulmaz.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pairs:
+        description: "Ciftler (virgul)"
+        required: true
+        default: "Aries_Aries,Leo_Pisces"
+      scenes:
+        description: "Sahneler"
+        required: true
+        default: "SET01,SET03,SET04,SET06,SET07,SET10Y"
+      frame:
+        description: "<disari_px>:<delik_erode_px>"
+        required: true
+        default: "4:2"
+
+concurrency:
+  group: wp-mockup-frame
+  cancel-in-progress: false
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+
+      - name: Girdiler (calib, masterlar, pilot, FINAL_V2 + Canva saat)
+        run: |
+          set -euo pipefail
+          mkdir -p _work/calib _work/masters _work/pilot _work/wpmix _work/prev _work/out
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CALIB" _work/calib \
+            --include "calib.json" --include "masks/*.png"
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/CANCER_LIBRA" _work/masters --include "*_FINAL.jpg"
+          rclone copy "gdrive:ASTROLOVE/ARCHIVE/FINAL_V2_PILOT_V1" _work/pilot --include "AstroLove_*.jpg"
+          test "$(ls _work/pilot | wc -l)" = "16"
+          IFS=',' read -ra PS <<< "${{ inputs.pairs }}"
+          for P in "${PS[@]}"; do
+            UP=$(echo "$P" | tr '[:lower:]' '[:upper:]')
+            mkdir -p "_work/wpmix/$UP"
+            rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/$UP" "_work/wpmix/$UP" --include "AstroLove_*.jpg"
+            rclone copy "gdrive:ASTROLOVE/TEMP/FIX_TEST/WATCH_CANVA/$UP" "_work/wpmix/$UP" --include "AstroLove_*_Watch.jpg"
+            ls -l "_work/wpmix/$UP"/AstroLove_*_Watch.jpg
+          done
+          rclone copy "gdrive:ASTROLOVE/TEMP/FIX_TEST/MOCKUP_CANVA" _work/prev --include "*.jpg" || true
+
+      - name: Render (cerceve-ustte ${{ inputs.frame }})
+        run: |
+          set -euo pipefail
+          IFS=',' read -ra PS <<< "${{ inputs.pairs }}"
+          for P in "${PS[@]}"; do
+            UP=$(echo "$P" | tr '[:lower:]' '[:upper:]')
+            python scripts/etsy/wp_mockup_render.py --calib _work/calib --masters _work/masters \
+              --pilot _work/pilot --wallpapers "_work/wpmix/$UP" --pair "$P" \
+              --scenes "${{ inputs.scenes }}" --frame-on-top "${{ inputs.frame }}" --no-relight \
+              --out _work/out | tee -a _work/rapor.txt
+          done
+          find _work/out -maxdepth 1 -name "*.jpg" -exec ls -l {} \;
+
+      - name: Olcum (once/sonra gorunur kenar)
+        run: |
+          set -euo pipefail
+          python scripts/etsy/wp_frame_probe.py --calib _work/calib --masters _work/masters \
+            --dir-a _work/prev --etiket-a "MASKE EROZYONU" \
+            --dir-b _work/out --etiket-b "CERCEVE-USTTE" \
+            --pairs "${{ inputs.pairs }}" --scenes "${{ inputs.scenes }}" \
+            --out _work/WP_FRAME_PROBE.csv | tee -a _work/rapor.txt
+
+      - name: Drive'a yaz (TEMP)
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -d _work/out ] && rclone copy _work/out "gdrive:ASTROLOVE/TEMP/FIX_TEST/MOCKUP_FRAME" --include "*.jpg" || true
+          [ -f _work/WP_FRAME_PROBE.csv ] && rclone copyto _work/WP_FRAME_PROBE.csv "gdrive:ASTROLOVE/TEMP/WP_FRAME_PROBE.csv" || true
+          [ -f _work/rapor.txt ] && rclone copyto _work/rapor.txt "gdrive:ASTROLOVE/TEMP/WP_MOCKUP_FRAME.txt" || true
+
+      - name: anyone:reader + linkler
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          cat > _fid.py <<'PY'
+          import json, sys
+          print([r["ID"] for r in json.load(sys.stdin) if r["Name"] == sys.argv[1]][0])
+          PY
+          fid="$(rclone lsjson "gdrive:ASTROLOVE/TEMP/FIX_TEST" --dirs-only | python3 _fid.py MOCKUP_FRAME)"
+          python scripts/pinterest/pin_media_perms.py --mode grant --folder-id "$fid" \
+            --pattern "WA_MOCKUP_V2_" --apply
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: wp-mockup-frame
+          path: |
+            _work/WP_FRAME_PROBE.csv
+            _work/rapor.txt
+          if-no-files-found: ignore
+
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone _fid.py

@@ -209,6 +209,36 @@ def warp_cover(wp, quad, shape, yontem=None):
                                flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_CONSTANT)
 
 
+def expand_quad(quad, px):
+    """Dortgeni her kenarindan px kadar DISARI oteler (kenar dogrularini
+    disari kaydirip komsu kenarlarla kesistirir; olcek degismez, sadece
+    sinir buyur)."""
+    q = np.asarray(quad, np.float64)
+    if px <= 0:
+        return q.astype(np.float32)
+    c = q.mean(axis=0)
+    dogru = []
+    for i in range(4):
+        a, b = q[i], q[(i + 1) % 4]
+        d = b - a
+        L = float(np.linalg.norm(d)) or 1.0
+        n = np.array([-d[1], d[0]]) / L
+        if np.dot(n, a - c) < 0:      # normal disari baksin
+            n = -n
+        dogru.append((a + n * px, d))
+    out = []
+    for i in range(4):
+        p0, d0 = dogru[(i - 1) % 4]
+        p1, d1 = dogru[i]
+        A = np.array([d0, -d1]).T
+        if abs(np.linalg.det(A)) < 1e-9:
+            out.append(q[i])
+            continue
+        t = np.linalg.solve(A, p1 - p0)
+        out.append(p0 + t[0] * d0)
+    return np.asarray(out, np.float32)
+
+
 def erode_soft_mask(soft, px):
     """Kalibre yumusak maskeyi px kadar iceri alir: 0.5 seviyesi erode edilir,
     ayni 0.8 sigma yumusakligi korunur. (4 Eyl 2026 olcumu: 2 px erozyon
@@ -452,7 +482,8 @@ def relight_layer(master, warped_pilot, quad, ink_w, sigma=6.0):
     return num / np.maximum(den, 1e-3)
 
 
-def render_screen(out, master, screen, wp_new, wp_pilot, mode, soft_mask=None, edition_swap=False):
+def render_screen(out, master, screen, wp_new, wp_pilot, mode, soft_mask=None, edition_swap=False,
+                  frame_top=None):
     """Tek ekrani out uzerine isler (out float32, yerinde).
     paste  : M = kalibre yumusak maske (edisyon degisiminde 1 px genisletilir:
              kenar yumusatma pikseli eski edisyon rengini tasimasin);
@@ -474,6 +505,28 @@ def render_screen(out, master, screen, wp_new, wp_pilot, mode, soft_mask=None, e
     quad = np.asarray(screen["quad"], np.float32)
     w_new = warp_cover(wp_new, quad, master.shape).astype(np.float32)
     M = poly_mask_aa(master.shape, quad)[..., None]
+    if frame_top:
+        # 4 Eyl 2026 (Mo) CERCEVE-USTTE: iki katman.
+        #  1) wallpaper quad'in disari_px kadar DISINA tasirilir. Olcek
+        #     DEGISMEZ: ayni cover homografisi kullanilir, ek bant kaynagin
+        #     kirpma disinda kalan pikselinden (yoksa kenar tekrari) gelir.
+        #  2) sahne fotografi USTE cizilir; ortasindaki delik = kalibre
+        #     maskenin delik_px kadar erode edilmisi. Boylece maskenin
+        #     centikli siniri fotografin ALTINDA kalir, gorunen kenar
+        #     cihazin fotograftaki kendi kenaridir.
+        disari, delik = frame_top
+        if soft_mask is None:
+            raise SystemExit("cerceve-ustte icin kalibre maske gerekli")
+        Hc, _ = cover_homography(wp_new.shape, quad)
+        w_ext = cv2.warpPerspective(wp_new, Hc.astype(np.float64),
+                                    (master.shape[1], master.shape[0]),
+                                    flags=cv2.INTER_CUBIC,
+                                    borderMode=cv2.BORDER_REPLICATE).astype(np.float32)
+        bant = poly_mask_aa(master.shape, expand_quad(quad, disari))[..., None]
+        katman1 = bant * w_ext + (1 - bant) * out          # wallpaper katmani
+        h = erode_soft_mask(soft_mask, delik)[..., None]   # fotografin deligi
+        out[...] = h * katman1 + (1 - h) * master.astype(np.float32)
+        return "frame_top"
     if mode == "paste":
         if soft_mask is None:
             raise SystemExit("paste modu icin maske gerekli")
