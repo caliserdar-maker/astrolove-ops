@@ -146,7 +146,8 @@ jobs:
               test "$(ls _work/pilot | wc -l)" = "16" ;;
             d)
               rclone copyto "gdrive:ASTROLOVE/TEMP/LICENSE.txt" _work/LICENSE.txt
-              wc -c _work/LICENSE.txt ;;
+              rclone copyto "gdrive:ASTROLOVE/TEMP/HOW_TO_SET_YOUR_WALLPAPER.pdf" _work/HOW_TO_SET_YOUR_WALLPAPER.pdf
+              wc -c _work/LICENSE.txt _work/HOW_TO_SET_YOUR_WALLPAPER.pdf ;;
           esac
           # STATE (varsa)
           rclone copyto "gdrive:ASTROLOVE/TEMP/WP_NIGHT_STATE.csv" _work/STATE.csv || true
@@ -162,6 +163,8 @@ jobs:
                 --state-remote "gdrive:ASTROLOVE/TEMP/WP_NIGHT_STATE_${{ inputs.stage }}_${{ matrix.shard }}.csv")
           cp _work/STATE.csv "_work/STATE_${{ matrix.shard }}.csv"
           if [ "${{ inputs.force }}" = "true" ]; then args+=(--force); fi
+          # asama d: kurulum PDF'i ZIP'lere 6. girdi olarak girer (4 Eyl 2026 karari)
+          if [ -f _work/HOW_TO_SET_YOUR_WALLPAPER.pdf ]; then args+=(--guide _work/HOW_TO_SET_YOUR_WALLPAPER.pdf); fi
           python scripts/etsy/wp_night.py "${args[@]}"
 
       - name: STATE parcasini Drive'a yaz
