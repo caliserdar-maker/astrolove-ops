@@ -71,7 +71,8 @@ def recheck(out_bgr, screen, wp_new):
                 center_dev_px=med, max_dev_px=float(np.percentile(err[err < 3.0], 95)) if inl else float("nan"))
 
 
-def render_scene(scene, calib, masters_dir, pilot_wps, new_wps, pair, out_dir, compare=None):
+def render_scene(scene, calib, masters_dir, pilot_wps, new_wps, pair, out_dir, compare=None,
+                 no_relight=False):
     cfg = SCENES[scene]
     src = cfg.get("calib_from", scene)
     cs = calib["scenes"][src]
@@ -86,7 +87,12 @@ def render_scene(scene, calib, masters_dir, pilot_wps, new_wps, pair, out_dir, c
         wp_new = new_wps.get((new_ed, s["device"]))
         if wp_new is None:
             raise SystemExit(f"HATA: {pair} {new_ed}/{s['device']} wallpaper yok")
+        # 4 Eyl 2026 (Mo): relight kod tarafinda kapatilabilir; calib.json'a
+        # DOKUNULMAZ. Kapaliyken relight ekranlari paste ile uretilir (kalibre
+        # yumusak maske gerekir), diger modlar aynen kalir.
         mode = "paste" if new_ed != pilot_ed else s["mode"]
+        if no_relight and mode == "relight":
+            mode = "paste"
         soft = None
         if mode == "paste":
             soft = cv2.imread(str(Path(calib["dir"]) / "masks" / f"{src}_{s['id']}.png"), cv2.IMREAD_GRAYSCALE)
@@ -145,6 +151,8 @@ def main():
     ap.add_argument("--pair", required=True)
     ap.add_argument("--scenes", default=",".join(GALLERY_ORDER))
     ap.add_argument("--compare", default="")
+    ap.add_argument("--no-relight", action="store_true",
+                    help="relight modundaki ekranlari paste ile uret (calib.json degismez)")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
     calib = json.loads((Path(a.calib) / "calib.json").read_text())
@@ -159,7 +167,8 @@ def main():
             "|---|---|---|---|---|---|---|---|---|---|---|"]
     for scene in [s for s in a.scenes.split(",") if s]:
         log(f"== {scene}")
-        qc = render_scene(scene, calib, a.masters, pilot_wps, new_wps, a.pair, a.out, a.compare or None)
+        qc = render_scene(scene, calib, a.masters, pilot_wps, new_wps, a.pair, a.out,
+                          a.compare or None, no_relight=a.no_relight)
         results[scene] = qc
         all_ok &= bool(qc["ok"])
         for r in qc["screens"]:
