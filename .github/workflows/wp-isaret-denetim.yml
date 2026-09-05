@@ -1,0 +1,99 @@
+name: wp-isaret-denetim
+
+# ISARET DENETIMI (SALT OKUR) - 5 Eyl 2026.
+# Isaretli dosya hangi render'in uzerine cizilmis, kirmizi/yesil konturlar
+# hangi quad'a denk geliyor ve render'da wallpaper gercekten nerede bitiyor.
+# Hicbir uretim yapilmaz, hicbir calib yazilmaz.
+
+on:
+  workflow_dispatch:
+    inputs:
+      isaret:
+        description: "Isaretli dosya (ASTROLOVE altinda yol)"
+        required: true
+        default: "TEMP/MO_ISARET/WA_MOCKUP_V2_SET07_Aries_Aries_B_DIK.jpg"
+      pair:
+        description: "Cift"
+        required: true
+        default: "Aries_Aries"
+      scene:
+        description: "Sahne"
+        required: true
+        default: "SET07"
+      screen:
+        description: "Ekran id"
+        required: true
+        default: "1"
+
+concurrency:
+  group: wp-isaret-denetim
+  cancel-in-progress: false
+
+jobs:
+  denetim:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+
+      - name: Girdiler
+        run: |
+          set -euo pipefail
+          P="${{ inputs.pair }}"; UP=$(echo "$P" | tr '[:lower:]' '[:upper:]')
+          S="${{ inputs.scene }}"
+          mkdir -p _work/masters _work/r _work/q
+          rclone copyto "gdrive:ASTROLOVE/${{ inputs.isaret }}" _work/isaret.jpg
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/CANCER_LIBRA" _work/masters --include "*_FINAL.jpg"
+          rclone copyto "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/$UP/WA_MOCKUP_V2_${S}_${P}_FINAL.jpg" _work/r/URETIM.jpg
+          rclone copyto "gdrive:ASTROLOVE/TEMP/FIX_TEST/MOCKUP_QUADTEST/WA_MOCKUP_V2_${S}_${P}_A_EGIK.jpg" _work/r/A_EGIK.jpg
+          rclone copyto "gdrive:ASTROLOVE/TEMP/FIX_TEST/MOCKUP_QUADTEST/WA_MOCKUP_V2_${S}_${P}_B_DIK.jpg" _work/r/B_DIK.jpg
+          rclone copyto "gdrive:ASTROLOVE/TEMP/FIX_TEST/MOCKUP_REDQUAD/WA_MOCKUP_V2_${S}_${P}_FINAL.jpg" _work/r/REDQUAD.jpg
+          rclone copyto "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CALIB/calib.json" _work/q/URETIM.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/FIX_TEST/calib_redquad.json" _work/q/A_EGIK.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/FIX_TEST/calib_redquad_dik.json" _work/q/B_DIK.json
+          cp _work/q/A_EGIK.json _work/q/REDQUAD.json
+          ls -l _work/r _work/q
+
+      - name: Olcum
+        run: |
+          set -euo pipefail
+          python scripts/etsy/wp_isaret_denetim.py --isaret _work/isaret.jpg --masters _work/masters \
+            --scene "${{ inputs.scene }}" --screen "${{ inputs.screen }}" \
+            --aday "URETIM=_work/r/URETIM.jpg" --aday "A_EGIK=_work/r/A_EGIK.jpg" \
+            --aday "B_DIK=_work/r/B_DIK.jpg" --aday "REDQUAD=_work/r/REDQUAD.jpg" \
+            --quad "URETIM=_work/q/URETIM.json" --quad "A_EGIK=_work/q/A_EGIK.json" \
+            --quad "B_DIK=_work/q/B_DIK.json" \
+            --render "URETIM=_work/r/URETIM.jpg" --render "A_EGIK=_work/r/A_EGIK.jpg" \
+            --render "B_DIK=_work/r/B_DIK.jpg" | tee _work/rapor.txt
+
+      - name: Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/rapor.txt ] && rclone copyto _work/rapor.txt "gdrive:ASTROLOVE/TEMP/WP_ISARET_DENETIM.txt" || true
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: wp-isaret-denetim
+          path: _work/rapor.txt
+          if-no-files-found: ignore
+
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
