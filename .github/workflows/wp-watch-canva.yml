@@ -5,7 +5,8 @@ name: wp-watch-canva
 # TEMP/WATCH_CANVA_RAW/<edisyon>/ altina yedeklenir (URL suresi dolarsa diye).
 # (imzali URL'ler workflow girdisinden; loga yazilmaz). Sayfa -> cift
 # eslemesi icerikten (FINAL_V2 MB saat murekkebiyle IoU); STATE'teki 78 ciftle
-# birebir degilse DUR, hicbir dosya yazilmaz. Gecerse
+# birebir degilse DUR, hicbir dosya yazilmaz. Esleme icin referans murekkebi
+# %80 olceklenir (tuval merkezi sabit). raw=true: RAW yedekten, indirme yok. Gecerse
 # <out_dir>/<UP>/AstroLove_<Cift>_<Edisyon>_Watch.jpg yazilir. QC: sembol
 # kutusu orani 0.78-0.82 ve arka plan farki <= 1.0 (FINAL_V2 %100 saate gore).
 # FINAL_V2, MOCKUP_V2, ZIP ve Etsy'ye dokunulmaz. 4 edisyon paralel kosabilir.
@@ -14,8 +15,14 @@ on:
   workflow_dispatch:
     inputs:
       urls:
-        description: "Satir basina: <sayfa_no>|<URL> (78 satir; loga yazilmaz)"
+        description: "Satir basina: <sayfa_no>|<URL> (78 satir; loga yazilmaz). raw=true ise '-' yaz"
         required: true
+        default: "-"
+      raw:
+        description: "true: indirme yok, sayfalar TEMP/WATCH_CANVA_RAW/<edisyon> yedeginden alinir"
+        required: true
+        type: boolean
+        default: false
       out_dir:
         description: "Cikti klasoru (ASTROLOVE altinda)"
         required: true
@@ -49,7 +56,16 @@ jobs:
           chmod 600 ~/.config/rclone/rclone.conf
           if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
 
+      - name: Sayfalari RAW yedekten al
+        if: ${{ inputs.raw }}
+        run: |
+          set -euo pipefail
+          mkdir -p _work/pages
+          rclone copy "gdrive:ASTROLOVE/TEMP/WATCH_CANVA_RAW/${{ inputs.edition }}" _work/pages --include "page_*.png" --transfers 8
+          n=$(ls _work/pages | wc -l); echo "RAW sayfa: $n (beklenen 78)"; test "$n" = "78"
+
       - name: Sayfalari indir (URL loga yazilmaz)
+        if: ${{ !inputs.raw }}
         env:
           URLS: ${{ inputs.urls }}
         run: |

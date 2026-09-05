@@ -33,13 +33,30 @@ IOU_MIN = 0.50
 MARJ = 1.25
 ED = "Midnight_Blue"
 ORAN_MIN, ORAN_MAX, BG_MAX = 0.78, 0.82, 1.0
+SAAT_OLCEK = 0.80      # yeni saat sembolu, referansin %80'i (tuval merkezi sabit)
+MIN_BILESEN = 200      # murekkep kutusu icin en kucuk bilesen (px); zemin yildizlari (<40 px) disarida
+
+
+def olcekle(mask, s=SAAT_OLCEK):
+    """Murekkep maskesini tuval merkezi etrafinda s kat olcekler (esleme icin;
+    %100 referans vs %80 sayfa dogrudan IoU ~0.15 verir, olcekli ~0.85)."""
+    h, w = mask.shape
+    M = cv2.getRotationMatrix2D((w / 2.0, h / 2.0), 0, s)
+    return cv2.warpAffine(mask.astype(np.uint8), M, (w, h), flags=cv2.INTER_NEAREST) > 0
 
 
 def kutu(ink):
-    ys, xs = np.where(ink)
-    if len(xs) < 50:
+    """Sembol kutusu: alani >= MIN_BILESEN olan bilesenlerin birlesik bbox'i
+    (yuzdelik yerine; kenar/yildiz benekleri kutuyu bozuyordu)."""
+    n, _, st, _ = cv2.connectedComponentsWithStats(ink.astype(np.uint8), 8)
+    st = st[1:]
+    st = st[st[:, cv2.CC_STAT_AREA] >= MIN_BILESEN]
+    if len(st) == 0:
         return None
-    return (int(np.percentile(xs, 0.5)), int(np.percentile(ys, 0.5)), int(np.percentile(xs, 99.5)), int(np.percentile(ys, 99.5)))
+    x0 = int(st[:, cv2.CC_STAT_LEFT].min()); y0 = int(st[:, cv2.CC_STAT_TOP].min())
+    x1 = int((st[:, cv2.CC_STAT_LEFT] + st[:, cv2.CC_STAT_WIDTH]).max()) - 1
+    y1 = int((st[:, cv2.CC_STAT_TOP] + st[:, cv2.CC_STAT_HEIGHT]).max()) - 1
+    return (x0, y0, x1, y1)
 
 
 def saat80_qc(yeni, ref):
@@ -102,7 +119,7 @@ def main():
             im = imread(f)
             ik = ink_mask(im) > 0
             if ed == ED:
-                ref_ink[p] = ik
+                ref_ink[p] = olcekle(ik)   # esleme %80 olcekli referansla
                 ref_img[p] = im
             zeminler[ed].append(zemin_bgr(im, ik))
     zemin_ed = {ed: np.median(np.stack(v), axis=0) for ed, v in zeminler.items() if v}
