@@ -1,0 +1,101 @@
+==================================================================
+B96 - WALLPAPER KAPANISI: 78/78 YAYINDA, SET07 SAAT, KASA KOPYASI,
+      KALICI CALIB, PIKSEL-KIYAS QC, GALERI YENILEME (3-5 Eyl 2026)
+==================================================================
+(B95 sonrasi 3-4 Eyl oturumlari ayri kayit birakmadi; bu kayit 3-5
+Eyl wallpaper hattinin kapanisini tek yerde toplar.)
+
+SET07 SAAT (5 Eyl):
+- Saat ekrani dortgeni Mo'nun kirmizi cizdigi quad ile yeniden
+  kalibre edildi (calib_set07.json); cerceve-ustte mod, delik=quad.
+  scale/H quad'dan yeniden hesaplanir (eski 0.225 -> 0.2803).
+- Saat gorselleri Canva "Blue saat" tasarimindan (DAHUIJYNS1c, 78
+  sayfa, yalniz Midnight_Blue) 1000x1220 jpg olarak alindi:
+  TEMP/WATCH_CANVA/<CIFT>/AstroLove_<Cift>_Midnight_Blue_Watch.jpg.
+  Sayfa->cift eslemesi murekkep IoU ile (0.923-0.991), sira alfabetik
+  (fark 0). Rapor TEMP/WP_WATCH_CANVA.csv/.txt. Canva URL'leri
+  workflow girdisiyle gecirildi, depoya/loga yazilmadi.
+- Kanva saat gorseli 1.22 orani, quad 1.145: geri tespit beklenen
+  dortgeni cover homografisinden turetir (aksi halde 10.97 px sapma).
+
+SET03/3 + SET04/1 KASA KOPYASI (komsu telefondan homografi):
+- wp_kasa_kopyala.py 2. deneme: kenar kalinligi 9 cizgide olculur
+  (duvar referansi bandin uzak ucu, esik 14), yuvarlak-kose siluet,
+  TAM telefon kopyasi (eski quad -> eski quad homografisi), delik
+  fotograftan olculur (L>45, alan orani 0.9-1.15 degilse kaynak
+  maskesinden). Mo onayi: "4 cozulmus", "3 de cozulmus".
+- Cift'ten BAGIMSIZ, bir kez uygulandi: temiz masterlar
+  MOCKUP_V2/CANCER_LIBRA/SET03, SET04; maskeler
+  MOCKUP_V2/_CALIB/MASKE_KASA_SET03_3.png, _SET04_1.png; calib'de
+  frame_top {"disari":12, "delik":"maske"}. 468 render bu masteri okur.
+
+KALICILIK (wp-kalici, etiket 20260905, 5. kosu PASS):
+- MOCKUP_V2/_CALIB/calib.json: 3 ekran degisti (SET07/1, SET03/3,
+  SET04/1), 11 ekran birebir ayni (wp_calib_birlestir dogrular).
+- Yedek: TEMP/YEDEK_KALICI_20260905/{_CALIB,CANCER_LIBRA};
+  eski galeriler ARCHIVE/MOCKUP_V2_YEDEK_20260905 (idempotent: yedek
+  varsa yeniden yazilmaz).
+
+QC KURALI - PIKSEL KIYAS (Mo karari 5 Eyl):
+- Cerceve-ustte 3 ekranda (SET07/1, SET03/3, SET04/1) geometrik QC
+  (SIFT/Watch sablonu) KALDIRILDI. Yerine uretilen Aries_Aries render'i
+  Mo'nun onayladigi ciktiyla (TEMP/FIX_TEST/MASTER_KASA ve
+  MOCKUP_KALICI_SET07ONLY) piksel karsilastirilir: ort fark < 2 PASS
+  (wp_piksel_kiyas.py; olculen 0.000). Diger 11 ekranda eski QC kalir.
+- Etsy geri okuma QC'si: Etsy'den indirilen gorsel vs Drive kaynagi
+  ort fark <= 6 (Etsy yeniden kodlar; olculen 1.12-1.53).
+
+468 GALERI GORSELI (5 Eyl): wp-night asama b run 33965482761, 6 shard,
+10.5 dk, 78/78 PASS (STATE TEMP/WP_NIGHT_STATE.csv, birlestirme "en
+yeni ts kazanir" - wp_state_merge.py). Pilot Cancer_Libra ciktisi
+MOCKUP_V2/_CANDIDATE/CANCER_LIBRA (masterlar korunur).
+
+D - GALERI YENILEME, 78 ILAN (5 Eyl, Mo onayi):
+- wp-gallery-refresh: 3 yukle / 3 sil / 3 yukle / 3 sil, sira
+  SET01->SET03->SET04->SET06->SET07->SET10Y; mevcut video silinir;
+  ZIP/PDF/fiyat/metne dokunulmaz; geri okuma gorsel 6 + sira (piksel),
+  dosya id KUMESI degismemis, video 0. Kota 400 altinda DUR.
+- Kosu 1 (run 33967382395): ornek 3 ilan PASS. Kosu 3 (run
+  33968055533, 13:09-15:56 UTC): 75/75 PASS; toplam 78/78, 450/450
+  gorsel ESLESIYOR. Ilan basi ~2.2 dk, 30 cagri; kota 4973 -> 2848.
+  STATE TEMP/WP_GALLERY_STATE.csv (ilan basi aninda yazilir, resume);
+  TEMP/WP_GALLERY_CMP.csv; TEMP/GALERI_D/.
+- PDF "EKSIK" TESHISI YANLISTI: Etsy'de 5. dosya
+  (HOW_TO_SET_YOUR_WALLPAPER.pdf) mevcut; 78/78 ilanda dosya 5
+  dogrulandi. DELIVERY ZIP'leri GEREKSIZ, yuklenmedi.
+
+FIYAT KURALI (Mo, 5 Eyl): liste fiyati $6.65, indirimli $3.99.
+Scriptlerdeki PRICE=3.99 beklentisi (wp_verify_all, wp_audit_full,
+etsy_aktif_denetim) 6.65 liste fiyatina gore guncellenecek (acik).
+
+YAYIN (5 Eyl): 77 ilan Mo tarafindan Etsy panelinden yayinlandi;
+Cancer_Libra 4565911475 wp-listing-activate (run 33976482706,
+on-kontrol gorsel 6 / dosya 5 / video 0, PATCH state=active, 16:02
+UTC) ile yayinlandi. 78/78 YAYINDA.
+- Yeni bolum adlari (6) Mo tarafindan Etsy panelinde tanimlandi;
+  Message to Buyers + Shop Announcement guncellendi (Mo).
+- Salt-okur aktif ilan denetimi (etsy-aktif-denetim, run 33976639283)
+  78 ilan icin kosuyor; sonucu B97'de.
+
+KALICI DERSLER (5 Eyl):
+1) workflow_dispatch'te BOS input gonderilirse GitHub input'un DEFAULT
+   degerini uygular (pairs="" -> 3 ornek ilan; kosu 2 bos gecti).
+   "Hepsi" icin listeyi acikca gonder ya da ayri anahtar kullan.
+2) concurrency grubunda (etsy-token) bekleyen ikinci kosu, onceki
+   BEKLEYEN kosuyu iptal eder; sira gerekiyorsa onceki bitince tetikle.
+3) STATE birlestirmede "son okunan kazanir" yanlis; (cift, asama)
+   basina en yeni ts_utc kazanir (wp_state_merge.py).
+4) Etsy gorsel rank numaralari silme sonrasi sikismayabilir (2-7);
+   sira icerikle (piksel) dogrulanir, rank degeriyle degil.
+5) Oturum GitHub token'i workflow_dispatch yapamaz (403); tetikleme
+   GitHub MCP (actions_run_trigger) ile.
+
+ACIK ISLER:
+1. Pilot Cancer_Libra'nin 4 ZIP'i 1 Eylul surumu (diger 77 ile ayni
+   hatta yeniden uretilmedi).
+2. Wallpaper aciklamasinda AI (yapay zeka ile uretildi) beyani yok.
+3. PRICE beklentisi 3.99 -> 6.65 (liste) scriptlerde.
+4. Aktif ilan denetimi (run 33976639283) sonucu ve varsa duzeltmeler.
+5. B59/B92/B93/B94/B95 acik isleri gecerli (SET04 3000x2250 galeri D
+   ile kapandi; 77 taslak medyasi + yayin kapandi).
+SON: B96 KAPANDI.
