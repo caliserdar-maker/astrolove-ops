@@ -1,21 +1,29 @@
 name: wp-gallery-refresh
 
-# GALERI YENILEME (3 ILANLIK ORNEK) - 4 Eyl 2026.
+# GALERI YENILEME - 4 Eyl 2026 (3 ilan ornek), 5 Eyl 2026 (D: 78 ilan).
 # ETSY'YE YAZAR: yalniz 6 galeri gorseli yenilenir ve mevcut video silinir.
 # ZIP/PDF, fiyat, metin ve state'e DOKUNULMAZ; yayinlama cagrisi YOKTUR.
 # Varsayilan DRY-RUN; yazma icin apply=true gerekir.
+# Ilan listesi: TEMP/WA_WP_DRAFTS_STATE.csv (78 cift); pairs ile alt kume.
+# Pilot (Cancer_Libra) kaynagi MOCKUP_V2/_CANDIDATE/CANCER_LIBRA.
+# STATE: TEMP/WP_GALLERY_STATE.csv, ilan basi aninda yazilir; resume=true ile
+# PASS olanlar atlanir (kesilen kosu kaldigi yerden surer).
 
 on:
   workflow_dispatch:
     inputs:
-      listings:
-        description: "cift:listing_id virgullu - ILK sirada pilot"
-        required: true
-        default: "Cancer_Libra:4565911475,Aries_Aries:4565911379,Leo_Pisces:4565934620"
+      pairs:
+        description: "Cift alt kumesi (virgullu, ilk = pilot); bos = DRAFTS_STATE'teki 78 cift"
+        required: false
+        default: "Cancer_Libra,Aries_Aries,Leo_Pisces"
       apply:
         description: "Yazmayi gercekten uygula (kapaliysa DRY-RUN)"
         type: boolean
         default: false
+      resume:
+        description: "TEMP/WP_GALLERY_STATE.csv'de PASS olan ilanlari atla"
+        type: boolean
+        default: true
 
 concurrency:
   group: etsy-token
@@ -24,7 +32,7 @@ concurrency:
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 340
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -43,20 +51,42 @@ jobs:
           chmod 600 ~/.config/rclone/rclone.conf
           if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
 
-      - name: Token + kaynak galeri gorselleri (yalniz 3 cift)
+      - name: Token + ilan listesi + kaynak galeri gorselleri
         run: |
           set -euo pipefail
           umask 077
           mkdir -p _work/mock
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
-          IFS=',' read -ra L <<< "${{ inputs.listings }}"
-          for item in "${L[@]}"; do
-            pair="${item%%:*}"
+          rclone copyto "gdrive:ASTROLOVE/TEMP/WA_WP_DRAFTS_STATE.csv" _work/drafts.csv
+          rclone copyto "gdrive:ASTROLOVE/TEMP/WP_GALLERY_STATE.csv" _work/WP_GALLERY_STATE.csv || true
+          test "$(cut -d, -f1 _work/drafts.csv | sed '/^$/d' | wc -l)" = "78"
+          if [ -n "${{ inputs.pairs }}" ]; then
+            printf '%s\n' "${{ inputs.pairs }}" | tr ',' '\n' | sed '/^$/d' > _work/pairs.txt
+          else
+            cut -d, -f1 _work/drafts.csv | sed '/^$/d' > _work/pairs.txt
+          fi
+          echo "ilan: $(wc -l < _work/pairs.txt)"
+          : > _work/filt.txt
+          while read -r pair; do
             up=$(echo "$pair" | tr '[:lower:]' '[:upper:]')
-            rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/$up" "_work/mock/$up" \
+            echo "+ /$up/WA_MOCKUP_V2_*_FINAL.jpg" >> _work/filt.txt
+          done < _work/pairs.txt
+          echo "- **" >> _work/filt.txt
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2" _work/mock --filter-from _work/filt.txt --transfers 8
+          # pilot: temiz masterlar korunur, galeri gorseli _CANDIDATE'ten
+          if grep -qx "Cancer_Libra" _work/pairs.txt; then
+            rm -rf _work/mock/CANCER_LIBRA
+            rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CANDIDATE/CANCER_LIBRA" _work/mock/CANCER_LIBRA \
               --include "WA_MOCKUP_V2_*_FINAL.jpg"
-            echo "$up: $(ls "_work/mock/$up" | wc -l) gorsel"
-          done
+          fi
+          n=0
+          while read -r pair; do
+            up=$(echo "$pair" | tr '[:lower:]' '[:upper:]')
+            k=$(ls "_work/mock/$up" 2>/dev/null | wc -l)
+            [ "$k" = "6" ] || { echo "EKSIK: $up $k gorsel"; exit 1; }
+            n=$((n+1))
+          done < _work/pairs.txt
+          echo "kaynak tam: $n ilan x 6 gorsel"
 
       - name: Galeri yenileme
         env:
@@ -66,9 +96,12 @@ jobs:
           TOKEN_FILE: _work/ETSY_TOKEN.json
         run: |
           set -euo pipefail
-          args=(--listings "${{ inputs.listings }}" --mock-dir _work/mock
-                --out _work/WP_GALLERY_REFRESH.csv --cmp-out _work/WP_GALLERY_CMP.csv)
+          args=(--state _work/drafts.csv --pairs "$(paste -sd, _work/pairs.txt)" --mock-dir _work/mock
+                --out _work/WP_GALLERY_REFRESH.csv --cmp-out _work/WP_GALLERY_CMP.csv
+                --state-out _work/WP_GALLERY_STATE.csv
+                --sync-cmd "rclone copyto _work/WP_GALLERY_STATE.csv gdrive:ASTROLOVE/TEMP/WP_GALLERY_STATE.csv")
           if [ "${{ inputs.apply }}" = "true" ]; then args+=(--apply); fi
+          if [ "${{ inputs.resume }}" = "true" ]; then args+=(--resume); fi
           python scripts/etsy/wp_gallery_refresh.py "${args[@]}"
 
       - name: Token'i Drive'a geri yaz (yenilendiyse)
@@ -83,9 +116,12 @@ jobs:
         if: ${{ always() }}
         run: |
           set -euo pipefail
+          ts=$(date -u +%Y%m%d_%H%M)
           for f in WP_GALLERY_REFRESH WP_GALLERY_CMP; do
             [ -f "_work/$f.csv" ] && rclone copyto "_work/$f.csv" "gdrive:ASTROLOVE/TEMP/$f.csv" || true
+            [ -f "_work/$f.csv" ] && rclone copyto "_work/$f.csv" "gdrive:ASTROLOVE/TEMP/GALERI_D/${f}_$ts.csv" || true
           done
+          [ -f _work/WP_GALLERY_STATE.csv ] && rclone copyto _work/WP_GALLERY_STATE.csv "gdrive:ASTROLOVE/TEMP/WP_GALLERY_STATE.csv" || true
 
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
@@ -94,6 +130,7 @@ jobs:
           path: |
             _work/WP_GALLERY_REFRESH.csv
             _work/WP_GALLERY_CMP.csv
+            _work/WP_GALLERY_STATE.csv
           if-no-files-found: ignore
 
       - name: Temizlik
