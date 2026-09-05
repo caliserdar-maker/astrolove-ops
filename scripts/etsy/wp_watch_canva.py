@@ -3,7 +3,7 @@
 CANVA SAAT SAYFALARI -> CIFT ESLEME (5 Eyl 2026, Mo). Edisyon --edition ile (4 edisyon).
 
 SAAT %80 (5 Eyl aksam): her sayfa ayni ciftin FINAL_V2 (100%) saatiyle kiyaslanir:
-  sembol kutusu orani (genislik/yukseklik) 0.78-0.82, kutu disi arka plan farki <= 1.0.
+  sembol kutusu orani (genislik/yukseklik) 0.78-0.82; arka plan farki yalniz raporlanir.
 Biri bile gecmezse FAIL, hicbir dosya yazilmaz.
 
 Canva API sayfa basligi vermiyor (design_content bos: sayfalarda metin yok).
@@ -32,7 +32,7 @@ from wp_mockup_common import DEVICES, EDITIONS, imread, imwrite_jpeg, ink_mask, 
 IOU_MIN = 0.50
 MARJ = 1.25
 ED = "Midnight_Blue"
-ORAN_MIN, ORAN_MAX, BG_MAX = 0.78, 0.82, 1.0
+ORAN_MIN, ORAN_MAX = 0.78, 0.82
 SAAT_OLCEK = 0.80      # yeni saat sembolu, referansin %80'i (tuval merkezi sabit)
 MIN_BILESEN = 200      # murekkep kutusu icin en kucuk bilesen (px); zemin yildizlari (<40 px) disarida
 
@@ -59,11 +59,6 @@ def kutu(ink):
     return (x0, y0, x1, y1)
 
 
-BG_BLUR = 0  # >0: arka plan farki NxN kutu bulaniklastirma sonrasi olculur (JPEG doku gurultusunu eler;
-             # ton kaymasi / yapisal fark kalir). 5 Eyl 2026 olcumu: Warm_Parchment ham 3.58 -> 9x9 ile 0.71.
-             # Varsayilan 0 = ham fark (Mo onayi olmadan yontem degismez).
-
-
 def saat80_qc(yeni, ref):
     """(oran_w, oran_h, bg_fark, PASS/FAIL) - yeni %80 saat vs referans %100 saat."""
     ky, kr = kutu(ink_mask(yeni) > 0), kutu(ink_mask(ref) > 0)
@@ -73,12 +68,10 @@ def saat80_qc(yeni, ref):
     m = np.ones(ref.shape[:2], bool)
     for k in (ky, kr):
         m[max(0, k[1] - 6):k[3] + 7, max(0, k[0] - 6):k[2] + 7] = False
-    a, b = ref, yeni
-    if BG_BLUR > 0:
-        a, b = cv2.blur(ref, (BG_BLUR, BG_BLUR)), cv2.blur(yeni, (BG_BLUR, BG_BLUR))
-    d = np.abs(a.astype(np.int16) - b.astype(np.int16)).mean(axis=2)
-    bg = float(d[m].mean()) if m.any() else 999.0
-    ok = ORAN_MIN <= ow <= ORAN_MAX and ORAN_MIN <= oh <= ORAN_MAX and bg <= BG_MAX
+    d = np.abs(ref.astype(np.int16) - yeni.astype(np.int16)).mean(axis=2)
+    bg = float(d[m].mean()) if m.any() else 999.0   # yalniz rapor (Mo, 5 Eyl 2026): FINAL_V2 saati
+    # plaka+murekkep uretimi, Canva degil; Canva-vs-Python farki olcut olamaz. Kapi: oran + esleme.
+    ok = ORAN_MIN <= ow <= ORAN_MAX and ORAN_MIN <= oh <= ORAN_MAX
     return ow, oh, bg, "PASS" if ok else "FAIL qc"
 
 
@@ -93,7 +86,7 @@ def iou(a, b):
 
 
 def main():
-    global ED, BG_BLUR
+    global ED
     ap = argparse.ArgumentParser()
     ap.add_argument("--pages", required=True, help="sayfa dosyalari (page_NN.png/jpg)")
     ap.add_argument("--ref", required=True, help="FINAL_V2 koku (<UP>/AstroLove_<Cift>_<Ed>_Watch.jpg)")
@@ -102,10 +95,8 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--report", required=True)
     ap.add_argument("--edition", default=ED, choices=EDITIONS)
-    ap.add_argument("--bg-blur", type=int, default=0, help="arka plan farki icin bulaniklastirma cekirdegi (0 = ham)")
     a = ap.parse_args()
     ED = a.edition
-    BG_BLUR = a.bg_blur
     pairs = [r[0].strip() for r in csv.reader(open(a.pairs, encoding="utf-8")) if r and r[0].strip() and r[0] != "pair"]
     FIX = {"VIGRO": "VIRGO"}
     sira = []

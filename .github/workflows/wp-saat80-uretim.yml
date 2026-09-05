@@ -70,7 +70,7 @@ jobs:
           n100=$(say "$G/TEMP/WATCH_CANVA" "*/AstroLove_*_Watch.jpg"); ny=$(say "$G/TEMP/WATCH_CANVA_YEDEK_100" "*/AstroLove_*_Watch.jpg")
           echo "WATCH_CANVA: $n100, YEDEK_100: $ny"
           if [ "$ny" = "0" ]; then
-            test "$n100" = "312"
+            test "$n100" -gt 0   # eski WATCH_CANVA yalniz Midnight_Blue (78) icerir
             rclone move "$G/TEMP/WATCH_CANVA" "$G/TEMP/WATCH_CANVA_YEDEK_100" --delete-empty-src-dirs
             echo "WATCH_CANVA -> WATCH_CANVA_YEDEK_100: $(say "$G/TEMP/WATCH_CANVA_YEDEK_100" "*/AstroLove_*_Watch.jpg")"
           else

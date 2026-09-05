@@ -77,7 +77,10 @@ def bir_cift(pair, a, work, lic):
         return dict(pair=pair, durum="FAIL zip yukleme", **{f"zip_{e}": sizes[e] for e in EDITIONS})
     # SET07: eski yedek, yeni render
     s7 = f"WA_MOCKUP_V2_SET07_{pair}_FINAL.jpg"
-    rclone("copyto", f"{a.drive}/{MOCK_DIR}/{up}/{s7}", f"{a.drive}/{MOCK_YEDEK}/{up}/{s7}", check=False)
+    # eski SET07 yedegi bir kez alinir (tekrar kosuda yeni SET07 yedegin uzerine yazilmaz)
+    var = rclone("lsf", f"{a.drive}/{MOCK_YEDEK}/{up}/{s7}", check=False)
+    if not var.stdout.strip():
+        rclone("copyto", f"{a.drive}/{MOCK_DIR}/{up}/{s7}", f"{a.drive}/{MOCK_YEDEK}/{up}/{s7}", check=False)
     mout = work / "mock" / up
     shutil.rmtree(mout, ignore_errors=True); mout.mkdir(parents=True)
     cmd = [sys.executable, str(Path(__file__).parent / "wp_mockup_render.py"), "--calib", a.calib, "--masters", a.masters,
