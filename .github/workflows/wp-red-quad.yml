@@ -1,0 +1,151 @@
+name: wp-red-quad
+
+# KIRMIZI ISARETTEN QUAD - 5 Eyl 2026.
+# Mo'nun mockup uzerine kirmizi ile cizdigi ekran siniri okunur, quad calib
+# KOPYASINA yazilir ve tek sahne yeniden uretilir. Olcum yapilmaz.
+# Orijinal calib.json, FINAL_V2, MOCKUP_V2, DELIVERY, ZIP ve Etsy DEGISMEZ;
+# cikti TEMP/FIX_TEST/MOCKUP_REDQUAD.
+
+on:
+  workflow_dispatch:
+    inputs:
+      isaret:
+        description: "Isaretli dosya (ASTROLOVE altinda yol). Bos: TEMP/MO_ISARET'te ara"
+        required: false
+        default: ""
+      pair:
+        description: "Cift"
+        required: true
+        default: "Aries_Aries"
+      scene:
+        description: "Sahne"
+        required: true
+        default: "SET07"
+      screen:
+        description: "Ekran id"
+        required: true
+        default: "1"
+      frame:
+        description: "<disari_px>:<delik_erode_px>"
+        required: true
+        default: "4:2"
+
+concurrency:
+  group: wp-red-quad
+  cancel-in-progress: false
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+
+      - name: Isaretli dosyayi bul
+        id: bul
+        run: |
+          set -euo pipefail
+          mkdir -p _work/isaret
+          YOL="${{ inputs.isaret }}"
+          if [ -z "$YOL" ]; then
+            echo "--- TEMP/MO_ISARET ---"
+            rclone lsf "gdrive:ASTROLOVE/TEMP/MO_ISARET" 2>/dev/null || echo "(klasor yok)"
+            ADET="$(rclone lsf "gdrive:ASTROLOVE/TEMP/MO_ISARET" --include '*.{jpg,jpeg,png,JPG,PNG}' 2>/dev/null | wc -l | tr -d ' ')"
+            if [ "$ADET" = "1" ]; then
+              YOL="TEMP/MO_ISARET/$(rclone lsf "gdrive:ASTROLOVE/TEMP/MO_ISARET" --include '*.{jpg,jpeg,png,JPG,PNG}')"
+              echo "tek dosya bulundu: $YOL"
+            else
+              echo "--- TEMP altinda son degisen gorseller ---"
+          cat > _son.py <<'PY'
+          import json, sys
+          rs = [r for r in json.load(sys.stdin) if r["Name"].lower().endswith((".jpg", ".jpeg", ".png"))]
+          rs.sort(key=lambda r: r["ModTime"], reverse=True)
+          for r in rs[:25]:
+              print(r["ModTime"][:16], r["Path"])
+          PY
+              rclone lsjson "gdrive:ASTROLOVE/TEMP" -R --files-only 2>/dev/null | python3 _son.py
+              echo "ISARET YOK: dosya adi verilmedi ve MO_ISARET'te tek dosya yok"
+              echo "var=0" >> "$GITHUB_OUTPUT"; exit 0
+            fi
+          fi
+          rclone copyto "gdrive:ASTROLOVE/$YOL" "_work/isaret/$(basename "$YOL")"
+          echo "dosya=_work/isaret/$(basename "$YOL")" >> "$GITHUB_OUTPUT"
+          echo "var=1" >> "$GITHUB_OUTPUT"
+          ls -l _work/isaret
+
+      - name: Girdiler
+        if: ${{ steps.bul.outputs.var == '1' }}
+        run: |
+          set -euo pipefail
+          P="${{ inputs.pair }}"; UP=$(echo "$P" | tr '[:lower:]' '[:upper:]')
+          mkdir -p _work/calib _work/masters _work/pilot _work/wp _work/out
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CALIB" _work/calib \
+            --include "calib.json" --include "masks/*.png"
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/CANCER_LIBRA" _work/masters --include "*_FINAL.jpg"
+          rclone copy "gdrive:ASTROLOVE/ARCHIVE/FINAL_V2_PILOT_V1" _work/pilot --include "AstroLove_*.jpg"
+          test "$(ls _work/pilot | wc -l)" = "16"
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/$UP" _work/wp --include "AstroLove_*.jpg"
+          rclone copy "gdrive:ASTROLOVE/TEMP/FIX_TEST/WATCH_CANVA/$UP" _work/wp --include "AstroLove_*_Watch.jpg"
+
+      - name: Kirmizi konturdan quad (KOPYA calib)
+        if: ${{ steps.bul.outputs.var == '1' }}
+        run: |
+          set -euo pipefail
+          mkdir -p _work/calib_red/masks _work/kanit
+          cp -r _work/calib/masks/. _work/calib_red/masks/
+          python scripts/etsy/wp_red_quad.py --calib _work/calib --masters _work/masters \
+            --isaret "${{ steps.bul.outputs.dosya }}" --scene "${{ inputs.scene }}" \
+            --screen "${{ inputs.screen }}" --out-calib _work/calib_red/calib.json \
+            --kanit "_work/kanit/K01_${{ inputs.scene }}_S${{ inputs.screen }}_QUAD.jpg" | tee _work/rapor.txt
+
+      - name: Render (kirmizi quad, cerceve-ustte)
+        if: ${{ steps.bul.outputs.var == '1' }}
+        run: |
+          set -euo pipefail
+          python scripts/etsy/wp_mockup_render.py --calib _work/calib_red --masters _work/masters \
+            --pilot _work/pilot --wallpapers _work/wp --pair "${{ inputs.pair }}" \
+            --scenes "${{ inputs.scene }}" --frame-on-top "${{ inputs.frame }}" --no-relight \
+            --out _work/out | tee -a _work/rapor.txt
+          find _work/out -maxdepth 1 -name "*.jpg" -exec ls -l {} \;
+
+      - name: Drive'a yaz + anyone:reader
+        if: ${{ always() && steps.bul.outputs.var == '1' }}
+        run: |
+          set -euo pipefail
+          [ -n "$(ls -A _work/out 2>/dev/null)" ] && rclone copy _work/out "gdrive:ASTROLOVE/TEMP/FIX_TEST/MOCKUP_REDQUAD" --include "*.jpg" || true
+          [ -n "$(ls -A _work/kanit 2>/dev/null)" ] && rclone copy _work/kanit "gdrive:ASTROLOVE/TEMP/FIX_TEST/MOCKUP_REDQUAD" --include "K01_*.jpg" || true
+          [ -f _work/calib_red/calib.json ] && rclone copyto _work/calib_red/calib.json "gdrive:ASTROLOVE/TEMP/FIX_TEST/calib_redquad.json" || true
+          [ -f _work/rapor.txt ] && rclone copyto _work/rapor.txt "gdrive:ASTROLOVE/TEMP/WP_RED_QUAD.txt" || true
+          cat > _fid.py <<'PY'
+          import json, sys
+          print([r["ID"] for r in json.load(sys.stdin) if r["Name"] == sys.argv[1]][0])
+          PY
+          fid="$(rclone lsjson "gdrive:ASTROLOVE/TEMP/FIX_TEST" --dirs-only | python3 _fid.py MOCKUP_REDQUAD)"
+          python scripts/pinterest/pin_media_perms.py --mode grant --folder-id "$fid" --pattern "WA_MOCKUP_V2_" --apply
+          python scripts/pinterest/pin_media_perms.py --mode grant --folder-id "$fid" --pattern "K01_" --apply
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: wp-red-quad
+          path: _work/rapor.txt
+          if-no-files-found: ignore
+
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone _fid.py _son.py
