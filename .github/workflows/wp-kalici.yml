@@ -7,7 +7,8 @@ name: wp-kalici
 #   Diger 11 ekran birebir ayni (script dogrular).
 # Once yedek: _CALIB (calib.json + masks) ve 2 master -> TEMP/YEDEK_KALICI_<etiket>;
 # 77 ciftin mevcut galeri gorselleri -> ARCHIVE/MOCKUP_V2_YEDEK_<etiket> (sunucu ici kopya).
-# Sonra pilot (Cancer_Libra) 6 sahne yeni calib ile TEMP/FIX_TEST/KALICI_TEST'e uretilir (duman testi).
+# Sonra Aries_Aries 6 sahne yeni calib ile uretilir; SET07/1, SET03/3, SET04/1 Mo'nun onayladigi
+# ciktilarla piksel kiyaslanir (ortalama fark < 2), diger 11 ekranda eski QC (5 Eyl 2026, Mo).
 # ZIP, DELIVERY ve Etsy'ye dokunulmaz.
 
 on:
@@ -100,19 +101,32 @@ jobs:
           rclone lsl "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/CANCER_LIBRA" | tee -a _work/rapor.txt
           rclone check _work/yeni "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CALIB" --one-way --include "calib.json" --include "masks/*.png"
 
-      - name: 4) Duman testi (pilot 6 sahne, yeni calib + masterlar)
+      - name: 4) Dogrulama (Aries_Aries 6 sahne + onayli ciktiyla piksel kiyas)
         run: |
           set +e
           set -uo pipefail
-          mkdir -p _work/masters _work/pilot _work/wp _work/out
+          mkdir -p _work/masters _work/pilot _work/wp _work/out _work/onay
           rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/CANCER_LIBRA" _work/masters --include "*_FINAL.jpg"
           rclone copy "gdrive:ASTROLOVE/ARCHIVE/FINAL_V2_PILOT_V1" _work/pilot --include "AstroLove_*.jpg"
-          rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/CANCER_LIBRA" _work/wp --include "AstroLove_*.jpg"
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/ARIES_ARIES" _work/wp --include "AstroLove_*.jpg"
+          rclone copy "gdrive:ASTROLOVE/TEMP/WATCH_CANVA/ARIES_ARIES" _work/wp --include "AstroLove_*_Watch.jpg"
+          test "$(ls _work/wp | wc -l)" = "16" || { echo "::error::Aries_Aries wallpaper 16 degil"; exit 1; }
+          # Mo'nun onayladigi ciktilar
+          rclone copy "gdrive:ASTROLOVE/TEMP/FIX_TEST/MASTER_KASA" _work/onay --include "WA_MOCKUP_V2_SET0*_Aries_Aries_KASA.jpg"
+          rclone copyto "gdrive:ASTROLOVE/TEMP/FIX_TEST/MOCKUP_KALICI_SET07ONLY/ARIES_ARIES/WA_MOCKUP_V2_SET07_Aries_Aries_FINAL.jpg" _work/onay/WA_MOCKUP_V2_SET07_Aries_Aries_ONAY.jpg
+          ls -l _work/onay
+          # Render: SET07/1, SET03/3, SET04/1 icin geometrik QC yok (frame_top); diger 11 ekranda eski QC
           python scripts/etsy/wp_mockup_render.py --calib _work/yeni --masters _work/masters --pilot _work/pilot \
-            --wallpapers _work/wp --pair Cancer_Libra --out _work/out 2>&1 | grep -v '^ *"' | tee -a _work/rapor.txt
-          rc=${PIPESTATUS[0]}; echo "duman testi cikis kodu: $rc" | tee -a _work/rapor.txt
+            --wallpapers _work/wp --pair Aries_Aries --out _work/out 2>&1 | grep -v '^ *"' | tee -a _work/rapor.txt
+          rc=${PIPESTATUS[0]}; echo "render (11 ekran eski QC) cikis kodu: $rc" | tee -a _work/rapor.txt
+          python scripts/etsy/wp_piksel_kiyas.py \
+            --cift _work/out/WA_MOCKUP_V2_SET03_Aries_Aries_FINAL.jpg=_work/onay/WA_MOCKUP_V2_SET03_Aries_Aries_KASA.jpg \
+            --cift _work/out/WA_MOCKUP_V2_SET04_Aries_Aries_FINAL.jpg=_work/onay/WA_MOCKUP_V2_SET04_Aries_Aries_KASA.jpg \
+            --cift _work/out/WA_MOCKUP_V2_SET07_Aries_Aries_FINAL.jpg=_work/onay/WA_MOCKUP_V2_SET07_Aries_Aries_ONAY.jpg \
+            | tee -a _work/rapor.txt
+          rk=${PIPESTATUS[0]}; echo "piksel kiyas cikis kodu: $rk" | tee -a _work/rapor.txt
           rclone copy _work/out "gdrive:ASTROLOVE/TEMP/FIX_TEST/KALICI_TEST" --include "*.jpg" --include "report.md" || true
-          exit $rc
+          [ "$rc" = "0" ] && [ "$rk" = "0" ]
 
       - name: Rapor
         if: ${{ always() }}
