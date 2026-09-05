@@ -1,0 +1,220 @@
+name: wp-saat80-uretim
+
+# SAAT SEMBOLU %80 - B ASAMASI: DOSYALAR (5 Eyl 2026, Mo). Etsy'ye yazma YOK.
+#  hazirlik: TEMP/WATCH_CANVA_SAAT80 (312 dosya) dogrulanir;
+#            TEMP/WATCH_CANVA -> TEMP/WATCH_CANVA_YEDEK_100, SAAT80 -> WATCH_CANVA;
+#            FINAL_V2 saatleri -> WALLPAPER/FINAL_V2_YEDEK_SAAT100/<UP>/ (312),
+#            yeni saatler FINAL_V2/<UP>/ uzerine (312, rclone check).
+#  uretim (4 parca): cift basina 4 ZIP (4 wallpaper + LICENSE.txt, PDF YOK) ->
+#            WALLPAPER/DELIVERY_SAAT80/<UP>/; eski SET07 -> MOCKUP_V2_YEDEK_SAAT100,
+#            yeni SET07 -> MOCKUP_V2/<UP>/ (diger 5 sahne dokunulmaz). ETA sayaci.
+#  ozet:     312 ZIP PASS sayisi, en buyuk ZIP; 5 rastgele ciftin SET07 + 4 saat
+#            dosyasi TEMP/SAAT80_ORNEK_5/ altina kopyalanir, anyone:reader link.
+# DELIVERY (PDF'li canli ZIP'ler) hic okunmaz/yazilmaz.
+
+on:
+  workflow_dispatch:
+    inputs:
+      shards:
+        description: "parca sayisi"
+        required: true
+        default: "4"
+      limit:
+        description: "parca basina en fazla cift (0 = hepsi; deneme icin 1)"
+        required: true
+        default: "0"
+      swap:
+        description: "true: hazirlik (WATCH_CANVA takasi + FINAL_V2 saat degisimi) yapilir; false: atlanir (zaten yapildiysa)"
+        required: true
+        type: boolean
+        default: true
+
+concurrency:
+  group: wp-saat80-uretim
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      shards: ${{ steps.m.outputs.shards }}
+    steps:
+      - id: m
+        run: python3 -c "import json;n=int('${{ inputs.shards }}');print('shards='+json.dumps(list(range(n))))" >> "$GITHUB_OUTPUT"
+
+  hazirlik:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Takas + FINAL_V2 saat degisimi
+        if: ${{ inputs.swap }}
+        run: |
+          set -euo pipefail
+          G=gdrive:ASTROLOVE
+          say() { rclone lsf -R --files-only "$1" --include "$2" 2>/dev/null | wc -l; }
+          n80=$(say "$G/TEMP/WATCH_CANVA_SAAT80" "*/AstroLove_*_Watch.jpg"); echo "SAAT80: $n80 (beklenen 312)"; test "$n80" = "312"
+          n100=$(say "$G/TEMP/WATCH_CANVA" "*/AstroLove_*_Watch.jpg"); ny=$(say "$G/TEMP/WATCH_CANVA_YEDEK_100" "*/AstroLove_*_Watch.jpg")
+          echo "WATCH_CANVA: $n100, YEDEK_100: $ny"
+          if [ "$ny" = "0" ]; then
+            test "$n100" = "312"
+            rclone move "$G/TEMP/WATCH_CANVA" "$G/TEMP/WATCH_CANVA_YEDEK_100" --delete-empty-src-dirs
+            echo "WATCH_CANVA -> WATCH_CANVA_YEDEK_100: $(say "$G/TEMP/WATCH_CANVA_YEDEK_100" "*/AstroLove_*_Watch.jpg")"
+          else
+            echo "YEDEK_100 dolu ($ny), takas 1 atlandi"
+          fi
+          rclone move "$G/TEMP/WATCH_CANVA_SAAT80" "$G/TEMP/WATCH_CANVA" --delete-empty-src-dirs
+          n=$(say "$G/TEMP/WATCH_CANVA" "*/AstroLove_*_Watch.jpg"); echo "WATCH_CANVA (yeni %80): $n"; test "$n" = "312"
+          # FINAL_V2 saat yedegi (idempotent: dolu ise atla)
+          nb=$(say "$G/WALLPAPER/FINAL_V2_YEDEK_SAAT100" "*/AstroLove_*_Watch.jpg")
+          if [ "$nb" = "0" ]; then
+            rclone copy "$G/WALLPAPER/FINAL_V2" "$G/WALLPAPER/FINAL_V2_YEDEK_SAAT100" --include "*/AstroLove_*_Watch.jpg" --transfers 16 --checkers 16
+            nb=$(say "$G/WALLPAPER/FINAL_V2_YEDEK_SAAT100" "*/AstroLove_*_Watch.jpg")
+          fi
+          echo "FINAL_V2_YEDEK_SAAT100: $nb"; test "$nb" = "312"
+          # yeni saatler FINAL_V2 uzerine
+          rclone copy "$G/TEMP/WATCH_CANVA" "$G/WALLPAPER/FINAL_V2" --include "*/AstroLove_*_Watch.jpg" --transfers 16 --checkers 16
+          rclone check "$G/TEMP/WATCH_CANVA" "$G/WALLPAPER/FINAL_V2" --one-way --include "*/AstroLove_*_Watch.jpg"
+          echo "FINAL_V2 saatleri %80 ile degistirildi: 312 OK"
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
+
+  uretim:
+    needs: [plan, hazirlik]
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: ${{ fromJson(needs.plan.outputs.shards) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Girdiler (STATE, LICENSE, calib, masterlar, pilot)
+        run: |
+          set -euo pipefail
+          mkdir -p _work/calib _work/masters _work/pilot
+          rclone copyto "gdrive:ASTROLOVE/TEMP/WA_WP_DRAFTS_STATE.csv" _work/drafts.csv
+          rclone copyto "gdrive:ASTROLOVE/TEMP/LICENSE.txt" _work/LICENSE.txt
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CALIB" _work/calib --include "calib.json" --include "masks/*.png"
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/CANCER_LIBRA" _work/masters --include "*_FINAL.jpg"
+          rclone copy "gdrive:ASTROLOVE/ARCHIVE/FINAL_V2_PILOT_V1" _work/pilot --include "AstroLove_*.jpg"
+          echo "cift: $(tail -n +2 _work/drafts.csv | wc -l), LICENSE $(wc -c < _work/LICENSE.txt) bayt, master $(ls _work/masters | wc -l), pilot $(ls _work/pilot | wc -l)"
+      - name: Uretim (ZIP + SET07)
+        run: |
+          set -euo pipefail
+          python scripts/etsy/wp_saat80_uretim.py --pairs-file _work/drafts.csv --shard ${{ matrix.shard }} --shards ${{ inputs.shards }} \
+            --license _work/LICENSE.txt --calib _work/calib --masters _work/masters --pilot _work/pilot \
+            --work _work --report "_work/rapor/saat80_parca${{ matrix.shard }}.csv" --limit ${{ inputs.limit }} 2>&1 | grep -v '^ *"' | tee _work/parca.log
+      - name: Rapor
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f "_work/rapor/saat80_parca${{ matrix.shard }}.csv" ] && rclone copyto "_work/rapor/saat80_parca${{ matrix.shard }}.csv" "gdrive:ASTROLOVE/TEMP/WP_SAAT80_URETIM_parca${{ matrix.shard }}.csv" || true
+          { echo '```'; tail -n 25 _work/parca.log 2>/dev/null; echo '```'; } >> "$GITHUB_STEP_SUMMARY" || true
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: saat80-parca-${{ matrix.shard }}
+          path: |
+            _work/rapor
+            _work/parca.log
+          if-no-files-found: ignore
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
+
+  ozet:
+    needs: [uretim]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: saat80-parca-*
+          path: _art
+          merge-multiple: true
+      - name: Ozet + 5 ornek cift linkleri
+        env:
+          LIMIT: ${{ inputs.limit }}
+        run: |
+          set -euo pipefail
+          mkdir -p _work/ornek
+          python3 - <<'PY' | tee _work/ozet.txt
+          import csv, glob, random, os
+          rows = [r for f in sorted(glob.glob("_art/rapor/*.csv")) for r in csv.DictReader(open(f))]
+          eds = ["Midnight_Blue", "Deep_Black", "Champagne_Ivory", "Warm_Parchment"]
+          ok = [r for r in rows if r["durum"] == "PASS"]
+          mx = max((int(r[f"zip_{e}"] or 0) for r in rows for e in eds), default=0)
+          print(f"cift {len(rows)}, PASS {len(ok)}, ZIP {4*len(ok)}/{4*len(rows)}, SET07 {len(ok)}/{len(rows)}, en buyuk ZIP {mx/1e6:.2f} MB ({'<20MB' if mx < 20*1024*1024 else 'ASIYOR'})")
+          for r in rows:
+              if r["durum"] != "PASS": print("  FAIL", r["pair"], r["durum"])
+          random.seed(80)
+          sec = random.sample([r["pair"] for r in ok], min(5, len(ok)))
+          open("_work/ornek5.txt", "w").write("\n".join(sec) + "\n")
+          print("ornek 5 cift:", ", ".join(sec))
+          print("SONUC B:", "PASS" if rows and len(ok) == len(rows) else "FAIL")
+          PY
+          G=gdrive:ASTROLOVE
+          rclone purge "$G/TEMP/SAAT80_ORNEK_5" 2>/dev/null || true
+          while read -r p; do
+            [ -z "$p" ] && continue; UP=$(echo "$p" | tr '[:lower:]' '[:upper:]')
+            rclone copy "$G/WALLPAPER/MOCKUP_V2/$UP" "$G/TEMP/SAAT80_ORNEK_5" --include "WA_MOCKUP_V2_SET07_${p}_FINAL.jpg"
+            rclone copy "$G/WALLPAPER/FINAL_V2/$UP" "$G/TEMP/SAAT80_ORNEK_5" --include "AstroLove_${p}_*_Watch.jpg"
+          done < _work/ornek5.txt
+          n=$(rclone lsf --files-only "$G/TEMP/SAAT80_ORNEK_5" | wc -l); echo "ornek dosya: $n"
+          fid="$(rclone lsjson "$G/TEMP" --dirs-only | python3 -c "import json,sys; print([r['ID'] for r in json.load(sys.stdin) if r['Name']=='SAAT80_ORNEK_5'][0])")"
+          python scripts/pinterest/pin_media_perms.py --mode grant --folder-id "$fid" --pattern "_" --expect "$n" --apply | tee -a _work/ozet.txt
+          rclone copyto _work/ozet.txt "$G/TEMP/WP_SAAT80_URETIM_OZET.txt"
+          { echo '```'; cat _work/ozet.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          grep -q "SONUC B: PASS" _work/ozet.txt
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: saat80-ozet
+          path: _work/ozet.txt
+          if-no-files-found: ignore
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work _art ~/.config/rclone
