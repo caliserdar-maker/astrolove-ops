@@ -1,0 +1,139 @@
+name: wp-set07-kalici
+
+# SET07 DUZELTMESI (KOPYA CALIB) + WP KOSE TASMASI OLCUMU + 12 GORSEL - 5 Eyl 2026.
+# c1: uretim calib + SET07 saat yeni quad + delik=quad (yalniz saat).
+# c2: c1 + kose tasmasi olculen telefon ekranlarina fotograftan yaricap.
+# Iki calib ile de 2 cift x 6 sahne uretilir. Uretim calib.json, FINAL_V2,
+# MOCKUP_V2, DELIVERY, ZIP ve Etsy DEGISMEZ.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pairs:
+        description: "Ciftler (virgul)"
+        required: true
+        default: "Aries_Aries,Leo_Pisces"
+      quad:
+        description: "SET07 saat quad (JSON, TL TR BR BL)"
+        required: true
+        default: "[[1916.6,1209.7],[2196.9,1209.7],[2196.9,1530.5],[1916.6,1530.5]]"
+      disari:
+        description: "Wallpaper quad disina tasma (px)"
+        required: true
+        default: "4"
+
+concurrency:
+  group: wp-set07-kalici
+  cancel-in-progress: false
+
+jobs:
+  uret:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+
+      - name: Girdiler
+        run: |
+          set -euo pipefail
+          mkdir -p _work/c0 _work/c1/masks _work/c2/masks _work/masters _work/pilot _work/wp _work/son
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CALIB" _work/c0 --include "calib.json" --include "masks/*.png"
+          cp -r _work/c0/masks/. _work/c1/masks/; cp -r _work/c0/masks/. _work/c2/masks/
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/CANCER_LIBRA" _work/masters --include "*_FINAL.jpg"
+          rclone copy "gdrive:ASTROLOVE/ARCHIVE/FINAL_V2_PILOT_V1" _work/pilot --include "AstroLove_*.jpg"
+          test "$(ls _work/pilot | wc -l)" = "16"
+          IFS=',' read -ra PS <<< "${{ inputs.pairs }}"
+          for P in "${PS[@]}"; do
+            UP=$(echo "$P" | tr '[:lower:]' '[:upper:]')
+            mkdir -p "_work/wp/$UP"
+            rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/$UP" "_work/wp/$UP" --include "AstroLove_*.jpg"
+            rclone copy "gdrive:ASTROLOVE/TEMP/FIX_TEST/WATCH_CANVA/$UP" "_work/wp/$UP" --include "AstroLove_*_Watch.jpg"
+            test "$(ls _work/wp/$UP | wc -l)" = "16"
+          done
+
+      - name: A) c1 = SET07 saat quad + delik=quad
+        run: |
+          set -euo pipefail
+          python scripts/etsy/wp_quad_yaz.py --calib-json _work/c0/calib.json --scene SET07 --screen 1 \
+            --quad '${{ inputs.quad }}' --frame-top-quad "${{ inputs.disari }}" \
+            --out _work/c1/calib.json | tee _work/rapor.txt
+
+      - name: B) kose yaricapi olcumu -> c2
+        run: |
+          set -euo pipefail
+          python scripts/etsy/wp_kose_probe.py --calib _work/c1 --masters _work/masters \
+            --out-calib _work/c2/calib.json --out _work/WP_KOSE_PROBE.csv | tee -a _work/rapor.txt
+
+      - name: C) 2 cift x 6 sahne, iki calib
+        run: |
+          set +e
+          set -uo pipefail
+          IFS=',' read -ra PS <<< "${{ inputs.pairs }}"
+          for K in c2 c1; do
+            for P in "${PS[@]}"; do
+              UP=$(echo "$P" | tr '[:lower:]' '[:upper:]')
+              rm -rf _work/out; mkdir -p _work/out "_work/son/$K/$UP"
+              echo "=== render $K $P ===" | tee -a _work/rapor.txt
+              python scripts/etsy/wp_mockup_render.py --calib "_work/$K" --masters _work/masters \
+                --pilot _work/pilot --wallpapers "_work/wp/$UP" --pair "$P" --out _work/out 2>&1 \
+                | grep -v '^ *"' | tee -a _work/rapor.txt
+              echo "render $K $P cikis kodu: ${PIPESTATUS[0]}" | tee -a _work/rapor.txt
+              cp _work/out/WA_MOCKUP_V2_*.jpg "_work/son/$K/$UP/"
+              echo "$K $UP: $(ls _work/son/$K/$UP | wc -l) gorsel" | tee -a _work/rapor.txt
+            done
+          done
+          find _work/son -name "*.jpg" | sort
+          test "$(find _work/son -name '*.jpg' | wc -l)" = "24"
+
+      - name: Drive'a yaz + anyone:reader
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          rclone copy _work/son/c2 "gdrive:ASTROLOVE/TEMP/FIX_TEST/MOCKUP_KALICI" --include "*.jpg" || true
+          rclone copy _work/son/c1 "gdrive:ASTROLOVE/TEMP/FIX_TEST/MOCKUP_KALICI_SET07ONLY" --include "*.jpg" || true
+          [ -f _work/c1/calib.json ] && rclone copyto _work/c1/calib.json "gdrive:ASTROLOVE/TEMP/FIX_TEST/calib_set07.json" || true
+          [ -f _work/c2/calib.json ] && rclone copyto _work/c2/calib.json "gdrive:ASTROLOVE/TEMP/FIX_TEST/calib_kalici.json" || true
+          [ -f _work/WP_KOSE_PROBE.csv ] && rclone copyto _work/WP_KOSE_PROBE.csv "gdrive:ASTROLOVE/TEMP/WP_KOSE_PROBE.csv" || true
+          [ -f _work/rapor.txt ] && rclone copyto _work/rapor.txt "gdrive:ASTROLOVE/TEMP/WP_SET07_KALICI.txt" || true
+          cat > _fid.py <<'PY'
+          import json, sys
+          print([r["ID"] for r in json.load(sys.stdin) if r["Name"] == sys.argv[1]][0])
+          PY
+          IFS=',' read -ra PS <<< "${{ inputs.pairs }}"
+          for D in MOCKUP_KALICI MOCKUP_KALICI_SET07ONLY; do
+            for P in "${PS[@]}"; do
+              UP=$(echo "$P" | tr '[:lower:]' '[:upper:]')
+              fid="$(rclone lsjson "gdrive:ASTROLOVE/TEMP/FIX_TEST/$D" --dirs-only | python3 _fid.py "$UP")"
+              python scripts/pinterest/pin_media_perms.py --mode grant --folder-id "$fid" --pattern "WA_MOCKUP_V2_" --apply | tee -a _work/linkler.txt
+            done
+          done
+          rclone copyto _work/linkler.txt "gdrive:ASTROLOVE/TEMP/WP_SET07_KALICI_LINKLER.txt" || true
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: wp-set07-kalici
+          path: |
+            _work/rapor.txt
+            _work/WP_KOSE_PROBE.csv
+            _work/linkler.txt
+          if-no-files-found: ignore
+
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone _fid.py

@@ -95,7 +95,15 @@ def render_scene(scene, calib, masters_dir, pilot_wps, new_wps, pair, out_dir, c
         mode = "paste" if new_ed != pilot_ed else s["mode"]
         if no_relight and mode == "relight":
             mode = "paste"
-        if frame_top:
+        # 5 Eyl 2026 (Mo): cerceve-ustte / delik=quad EKRAN BAZINDA calib'den de
+        # acilabilir ({"frame_top": {"disari": 4, "delik": "quad"}}); diger
+        # ekranlar mevcut yolda kalir. Komut satiri verilmisse o gecerlidir.
+        ft_s = frame_top
+        sf = s.get("frame_top")
+        if sf and not frame_top:
+            ft_s = (int(sf.get("disari", 4)), int(sf.get("delik_px", 0)), sf.get("delik", "sekil"),
+                    sf.get("yaricap"))
+        if ft_s:
             mode = "paste"          # cerceve-ustte kalibre maske ister
         soft = None
         if mode == "paste":
@@ -106,7 +114,7 @@ def render_scene(scene, calib, masters_dir, pilot_wps, new_wps, pair, out_dir, c
             if erode_mask:
                 soft = erode_soft_mask(soft, erode_mask)
         render_screen(out, master, s, wp_new, wp_pilot, mode, soft, edition_swap=(new_ed != pilot_ed),
-                      frame_top=frame_top)
+                      frame_top=ft_s)
         used.append(dict(id=s["id"], device=s["device"], pilot_edition=pilot_ed, edition=new_ed, mode=mode,
                          quad=s["quad"], scale=s["scale"], H=s["H"]))
     out_u8 = np.clip(np.round(out), 0, 255).astype(np.uint8)

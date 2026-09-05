@@ -253,7 +253,8 @@ def _kose_yaricapi(mask_local, blok=80):
     return float(np.median(rs)), [round(x, 1) for x in rs]
 
 
-def hole_shape(soft, quad, inset=2.0, up=4, delik_min=200, yuvarlat=True, ic_cikar=True, detay=None):
+def hole_shape(soft, quad, inset=2.0, up=4, delik_min=200, yuvarlat=True, ic_cikar=True, detay=None,
+               yaricap=None):
     """CERCEVE-USTTE deligi: maskeden DEGIL, geometriden.
     Ekranin yerel dikdortgeninde yuvarlatilmis dikdortgen up kat cozunurlukte
     cizilir (kenar yumusatma icin INTER_AREA ile kucultulur) ve homografi ile
@@ -272,6 +273,8 @@ def hole_shape(soft, quad, inset=2.0, up=4, delik_min=200, yuvarlat=True, ic_cik
     r, rs = _kose_yaricapi(yerel)                       # rs: SU, SG, AU, AG (TL,TR,BL,BR)
     if not yuvarlat:
         rs = [0.0, 0.0, 0.0, 0.0]
+    if yaricap is not None:
+        rs = [float(x) for x in yaricap]                # disaridan (fotograftan) verilen TL,TR,BL,BR
     buyuk = np.zeros((H * up, W * up), np.uint8)
     x0 = int(round(inset * up)); y0 = int(round(inset * up))
     x1 = int(round((W - inset) * up)); y1 = int(round((H - inset) * up))
@@ -598,8 +601,9 @@ def render_screen(out, master, screen, wp_new, wp_pilot, mode, soft_mask=None, e
         #     maskenin delik_px kadar erode edilmisi. Boylece maskenin
         #     centikli siniri fotografin ALTINDA kalir, gorunen kenar
         #     cihazin fotograftaki kendi kenaridir.
-        disari, delik, *mod = frame_top
-        mod = mod[0] if mod else "sekil"
+        disari, delik, *ek = frame_top
+        mod = ek[0] if ek else "sekil"
+        yaricap = ek[1] if len(ek) > 1 else None
         if soft_mask is None:
             raise SystemExit("cerceve-ustte icin kalibre maske gerekli")
         Hc, _ = cover_homography(wp_new.shape, quad)
@@ -612,7 +616,7 @@ def render_screen(out, master, screen, wp_new, wp_pilot, mode, soft_mask=None, e
             # 5 Eyl 2026 (Mo) DENEME: hicbir kucultme yok, delik = quad'in kendisi.
             h = poly_mask_aa(master.shape, quad)
         else:
-            h, r_olculen, _ = hole_shape(soft_mask, quad, inset=delik)
+            h, r_olculen, _ = hole_shape(soft_mask, quad, inset=delik, yaricap=yaricap)
         h = h[..., None]                                   # fotografin deligi (geometrik)
         # Ust katman, sahnenin O ANKI hali uzerine cizilir (master uzerine DEGIL):
         # coklu ekranli sahnede onceki ekranlarin yerlestirmesi korunur.
