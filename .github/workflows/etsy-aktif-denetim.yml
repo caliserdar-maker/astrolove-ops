@@ -1,0 +1,87 @@
+name: etsy-aktif-denetim
+
+# AKTIF (YAYINDA) ILAN DENETIMI - 5 Eyl 2026. SALT OKUR: Etsy'ye yazma yok
+# (yalniz OAuth token yenilemesi Drive'a geri yazilir). Magazadaki tum
+# state=active ilanlar okunur; metin/meta/gorsel/dosya/envanter/genel sayfa
+# kurallari uygulanir (scripts/etsy/etsy_aktif_denetim.py).
+
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "En fazla ilan (0 = hepsi)"
+        required: false
+        default: "0"
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  denetim:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+
+      - name: Token + taslak listesi
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p _work/mock
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/WA_WP_DRAFTS_STATE.csv" _work/drafts.csv
+          wc -l < _work/drafts.csv
+
+      - name: Aktif ilan denetimi (salt okur)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          python scripts/etsy/etsy_aktif_denetim.py --drafts _work/drafts.csv --mock-root _work/mock \
+            --rclone-remote "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2" \
+            --out _work/ETSY_AKTIF_DENETIM.csv --limit "${{ inputs.limit }}" \
+            || echo "::warning::denetimde FAIL var"
+
+      - name: Token'i Drive'a geri yaz (yenilendiyse)
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          if [ -f _work/ETSY_TOKEN.json.updated ]; then
+            rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json"
+          fi
+
+      - name: Sonucu Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_AKTIF_DENETIM.csv ] && rclone copyto _work/ETSY_AKTIF_DENETIM.csv "gdrive:ASTROLOVE/TEMP/ETSY_AKTIF_DENETIM.csv" || true
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: etsy-aktif-denetim
+          path: _work/ETSY_AKTIF_DENETIM.csv
+          if-no-files-found: ignore
+
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
