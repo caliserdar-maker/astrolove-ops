@@ -175,6 +175,52 @@ def dikdortgen(q):
     return np.array([[x0, y0], [x1, y0], [x1, y1], [x0, y1]], np.float64)
 
 
+def ince_cizgi_quad(im, eski, bant=25, pencere=130):
+    """INCE, KAPALI kirmizi cizgi (5 Eyl 2026, telefonlar): parsomen uzerinde anti-alias
+    yuzunden kontur parcalanir; bunun yerine gevsek kirmizi esigiyle
+      - her kenar icin eski quad'in ±bant px bandindaki kirmizi piksellerin medyani (kenar konumu)
+      - her kose icin kose penceresindeki yay piksellerine en kucuk kareler cemberi (yaricap)
+    okunur. Donus: dik dortgen quad (TL,TR,BR,BL), yaricaplar (TL,TR,BL,BR), sayimlar."""
+    b, g, r = [c.astype(np.int32) for c in cv2.split(im)]
+    kir = (r >= 120) & (r - g >= 45) & (r - b >= 35)
+    ys, xs = np.where(kir)
+    q = np.asarray(eski, np.float64); x0, y0 = q.min(0); x1, y1 = q.max(0)
+    ic_y = (ys > y0 + 120) & (ys < y1 - 120); ic_x = (xs > x0 + 120) & (xs < x1 - 120)
+
+    def kenar(sec, v):
+        v = v[sec]
+        return (float(np.median(v)), int(v.size)) if v.size > 50 else (None, 0)
+    L, R_ = kenar((np.abs(xs - x0) < bant) & ic_y, xs), kenar((np.abs(xs - x1) < bant) & ic_y, xs)
+    T, B = kenar((np.abs(ys - y0) < bant) & ic_x, ys), kenar((np.abs(ys - y1) < bant) & ic_x, ys)
+    log(f"  ince cizgi: kirmizi piksel {int(kir.sum())} | kenar medyanlari sol {L} sag {R_} ust {T} alt {B}")
+    if any(v[0] is None for v in (L, R_, T, B)):
+        return None, None
+    kx0, kx1, ky0, ky1 = L[0], R_[0], T[0], B[0]
+
+    def cember(pts):
+        x, y = pts[:, 0].astype(float), pts[:, 1].astype(float)
+        A = np.c_[2 * x, 2 * y, np.ones_like(x)]
+        c, *_ = np.linalg.lstsq(A, x * x + y * y, rcond=None)
+        rr = math.sqrt(max(c[2] + c[0] ** 2 + c[1] ** 2, 0.0))
+        return rr, float(np.abs(np.hypot(x - c[0], y - c[1]) - rr).mean())
+    rad = []
+    for k, (cx, cy, sx, sy) in (("TL", (kx0, ky0, 1, 1)), ("TR", (kx1, ky0, -1, 1)),
+                                ("BL", (kx0, ky1, 1, -1)), ("BR", (kx1, ky1, -1, -1))):
+        sel = ((xs * sx >= cx * sx - bant) & (xs * sx <= cx * sx + pencere) &
+               (ys * sy >= cy * sy - bant) & (ys * sy <= cy * sy + pencere))
+        p = np.c_[xs[sel], ys[sel]]
+        yay = p[(np.abs(p[:, 0] - cx) > 6) & (np.abs(p[:, 1] - cy) > 6)]
+        if len(yay) < 30:
+            log(f"  {k}: yay pikseli yetersiz ({len(yay)})")
+            rad.append(None)
+            continue
+        rr, res = cember(yay)
+        rad.append(round(rr, 1))
+        log(f"  {k}: yay {len(yay)} px, cember r={rr:.1f}, artik {res:.1f} px")
+    quad = np.array([[kx0, ky0], [kx1, ky0], [kx1, ky1], [kx0, ky1]], np.float64)
+    return quad, rad
+
+
 def yaz_quad(ad, q):
     log(f"  {ad}: {[[round(float(x), 1), round(float(y), 1)] for x, y in q]}")
 
@@ -212,6 +258,10 @@ def main():
     ap.add_argument("--frame-top-quad", type=int, default=-1,
                     help="verilirse ekrana cerceve-ustte + delik=quad bayragi yazilir (deger: disari px)")
     ap.add_argument("--calib-json", default="", help="taban calib dosyasi (bos: <calib>/calib.json)")
+    ap.add_argument("--ince", action="store_true",
+                    help="ince kapali kirmizi cizgi (tam sahne 1:1): kenar medyanlari + kose cember fiti")
+    ap.add_argument("--kose-yuvarlak", action="store_true",
+                    help="--frame-top-quad ile: delik = quad yerine kirmizidan olculen yaricapli yuvarlak dikdortgen")
     a = ap.parse_args()
 
     cfg = SCENES[a.scene]
@@ -221,6 +271,24 @@ def main():
     mh, mw = master.shape[:2]
     ih, iw = im.shape[:2]
     log(f"isaret {iw}x{ih}, master {mw}x{mh}")
+
+    calib = json.loads(Path(a.calib_json or (Path(a.calib) / "calib.json")).read_text())
+    ekranlar = calib["scenes"][src]["screens"]
+    hedef = next((s for s in ekranlar if int(s["id"]) == a.screen), None)
+    if hedef is None:
+        log(f"DUR: {src} sahnesinde {a.screen} numarali ekran yok")
+        return 3
+    eski = np.asarray(hedef["quad"], np.float64)
+    yaricap = None
+    if a.ince:
+        if (iw, ih) != (mw, mh):
+            log("DUR: --ince tam sahne 1:1 ister; isaret boyutu master ile ayni degil")
+            return 3
+        quad, yaricap = ince_cizgi_quad(im, eski)
+        if quad is None:
+            log("DUR: ince cizgi kenarlari bulunamadi")
+            return 3
+        return bitir(a, calib, hedef, eski, quad, yaricap, master, src)
 
     m = kirmizi_maske(im)
     say = int((m > 0).sum())
@@ -272,20 +340,18 @@ def main():
         log(f"  yamuk quad: {[[round(float(x), 1), round(float(y), 1)] for x, y in yamuk]}")
         log(f"  dik quad  : {[[round(float(x), 1), round(float(y), 1)] for x, y in quad]} "
             f"(yamuk->dik kose kaymasi {kaymalar(yamuk, quad)} px)")
-    quad_r = [[round(float(x), 1), round(float(y), 1)] for x, y in quad]
+    return bitir(a, calib, hedef, eski, quad, None, master, src)
 
-    calib = json.loads(Path(a.calib_json or (Path(a.calib) / "calib.json")).read_text())
-    ekranlar = calib["scenes"][src]["screens"]
-    hedef = next((s for s in ekranlar if int(s["id"]) == a.screen), None)
-    if hedef is None:
-        log(f"DUR: {src} sahnesinde {a.screen} numarali ekran yok")
-        return 3
-    eski = np.asarray(hedef["quad"], np.float64)
-    kayma = [round(math.hypot(quad[i][0] - eski[i][0], quad[i][1] - eski[i][1]), 2) for i in range(4)]
+
+def bitir(a, calib, hedef, eski, quad, yaricap, master, src):
+    quad_r = [[round(float(x), 1), round(float(y), 1)] for x, y in quad]
+    kayma = kaymalar(quad, eski)
     log(f"\n{a.scene}/{a.screen} {hedef['device']}")
     log(f"  eski quad : {[[round(float(x),1), round(float(y),1)] for x, y in eski]}")
     log(f"  yeni quad : {quad_r}")
     log(f"  kose kaymasi (TL,TR,BR,BL): {kayma} px | en buyuk {max(kayma)} px")
+    if yaricap is not None:
+        log(f"  kirmizidan olculen kose yaricaplari (TL,TR,BL,BR): {yaricap} px")
 
     if a.kanit:
         kan = master.copy()
@@ -301,8 +367,13 @@ def main():
 
     hedef["quad"] = quad_r
     if a.frame_top_quad >= 0:
-        hedef["frame_top"] = {"disari": a.frame_top_quad, "delik": "quad"}
-        log(f"  frame_top: disari {a.frame_top_quad} px, delik = quad (yalniz bu ekran)")
+        if a.kose_yuvarlak and yaricap is not None and all(v is not None for v in yaricap):
+            hedef["frame_top"] = {"disari": a.frame_top_quad, "delik": "sekil", "delik_px": 0,
+                                  "yaricap": [float(v) for v in yaricap]}
+            log(f"  frame_top: disari {a.frame_top_quad} px, delik = yuvarlak dikdortgen, yaricap {yaricap} (yalniz bu ekran)")
+        else:
+            hedef["frame_top"] = {"disari": a.frame_top_quad, "delik": "quad"}
+            log(f"  frame_top: disari {a.frame_top_quad} px, delik = quad (yalniz bu ekran)")
     Path(a.out_calib).write_text(json.dumps(calib, indent=1))
     log(f"\n{a.out_calib}: {a.scene}/{a.screen} quad'i guncellendi (orijinale dokunulmadi)")
     return 0
