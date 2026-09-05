@@ -1,12 +1,14 @@
 name: wp-watch-canva
 
-# CANVA SAAT DOSYALARI, 78 CIFT, YALNIZ MIDNIGHT_BLUE (5 Eyl 2026, Mo).
-# Blue tasarimi (DAHUIJYNS1c, 78 sayfa 1000x1220) sayfa sayfa PNG indirilir
+# CANVA SAAT DOSYALARI, 78 CIFT, EDISYON GIRDISI (5 Eyl 2026, Mo; %80 sembol).
+# Tasarim (78 sayfa 1000x1220) sayfa sayfa PNG indirilir; ham PNG'ler once
+# TEMP/WATCH_CANVA_RAW/<edisyon>/ altina yedeklenir (URL suresi dolarsa diye).
 # (imzali URL'ler workflow girdisinden; loga yazilmaz). Sayfa -> cift
 # eslemesi icerikten (FINAL_V2 MB saat murekkebiyle IoU); STATE'teki 78 ciftle
 # birebir degilse DUR, hicbir dosya yazilmaz. Gecerse
-# TEMP/WATCH_CANVA/<UP>/AstroLove_<Cift>_Midnight_Blue_Watch.jpg yazilir.
-# FINAL_V2, MOCKUP_V2, ZIP ve Etsy'ye dokunulmaz.
+# <out_dir>/<UP>/AstroLove_<Cift>_<Edisyon>_Watch.jpg yazilir. QC: sembol
+# kutusu orani 0.78-0.82 ve arka plan farki <= 1.0 (FINAL_V2 %100 saate gore).
+# FINAL_V2, MOCKUP_V2, ZIP ve Etsy'ye dokunulmaz. 4 edisyon paralel kosabilir.
 
 on:
   workflow_dispatch:
@@ -17,11 +19,13 @@ on:
       out_dir:
         description: "Cikti klasoru (ASTROLOVE altinda)"
         required: true
-        default: "TEMP/WATCH_CANVA"
-
-concurrency:
-  group: wp-watch-canva
-  cancel-in-progress: false
+        default: "TEMP/WATCH_CANVA_SAAT80"
+      edition:
+        description: "Edisyon"
+        required: true
+        type: choice
+        options: [Midnight_Blue, Deep_Black, Champagne_Ivory, Warm_Parchment]
+        default: "Midnight_Blue"
 
 jobs:
   saat:
@@ -77,6 +81,8 @@ jobs:
           fs = sorted(glob.glob("_work/pages/*.png")); boy = {Image.open(f).size for f in fs}
           print(len(fs), "sayfa, olculer:", boy)
           PY
+          rclone copy _work/pages "gdrive:ASTROLOVE/TEMP/WATCH_CANVA_RAW/${{ inputs.edition }}" --transfers 8
+          echo "ham PNG yedek: TEMP/WATCH_CANVA_RAW/${{ inputs.edition }}"
 
       - name: Referanslar + STATE
         run: |
@@ -90,7 +96,7 @@ jobs:
         run: |
           set -euo pipefail
           python scripts/etsy/wp_watch_canva.py --pages _work/pages --ref _work/ref --pairs _work/drafts.csv \
-            --out _work/out --report _work/WP_WATCH_CANVA.csv | tee _work/rapor.txt
+            --out _work/out --report _work/WP_WATCH_CANVA.csv --edition "${{ inputs.edition }}" | tee _work/rapor.txt
           n=$(find _work/out -name '*_Watch.jpg' | wc -l); echo "yazilacak: $n"; test "$n" = "78"
           rclone copy _work/out "gdrive:ASTROLOVE/${{ inputs.out_dir }}" --include "*/AstroLove_*_Watch.jpg" --transfers 8
           rclone check _work/out "gdrive:ASTROLOVE/${{ inputs.out_dir }}" --one-way --include "*/AstroLove_*_Watch.jpg"
@@ -99,13 +105,14 @@ jobs:
         if: ${{ always() }}
         run: |
           set -euo pipefail
-          [ -f _work/WP_WATCH_CANVA.csv ] && rclone copyto _work/WP_WATCH_CANVA.csv "gdrive:ASTROLOVE/TEMP/WP_WATCH_CANVA.csv" || true
-          [ -f _work/rapor.txt ] && rclone copyto _work/rapor.txt "gdrive:ASTROLOVE/TEMP/WP_WATCH_CANVA.txt" || true
+          [ -f _work/WP_WATCH_CANVA.csv ] && rclone copyto _work/WP_WATCH_CANVA.csv "gdrive:ASTROLOVE/TEMP/WP_WATCH_CANVA_${{ inputs.edition }}.csv" || true
+          [ -f _work/rapor.txt ] && rclone copyto _work/rapor.txt "gdrive:ASTROLOVE/TEMP/WP_WATCH_CANVA_${{ inputs.edition }}.txt" || true
+          { echo '```'; tail -n 30 _work/rapor.txt 2>/dev/null; echo '```'; } >> "$GITHUB_STEP_SUMMARY" || true
 
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:
-          name: wp-watch-canva
+          name: wp-watch-canva-${{ inputs.edition }}
           path: |
             _work/WP_WATCH_CANVA.csv
             _work/rapor.txt
