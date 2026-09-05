@@ -122,7 +122,7 @@ def render_scene(scene, calib, masters_dir, pilot_wps, new_wps, pair, out_dir, c
                 soft = erode_soft_mask(soft, erode_mask)
         render_screen(out, master, s, wp_new, wp_pilot, mode, soft, edition_swap=(new_ed != pilot_ed),
                       frame_top=ft_s)
-        used.append(dict(id=s["id"], device=s["device"], pilot_edition=pilot_ed, edition=new_ed, mode=mode,
+        used.append(dict(id=s["id"], device=s["device"], pilot_edition=pilot_ed, edition=new_ed, mode=mode, frame_top=bool(ft_s),
                          quad=s["quad"], scale=s["scale"], H=s["H"]))
     out_u8 = np.clip(np.round(out), 0, 255).astype(np.uint8)
     name = out_name(scene, pair)
@@ -142,7 +142,13 @@ def render_scene(scene, calib, masters_dir, pilot_wps, new_wps, pair, out_dir, c
     qc["ok"] &= d_out <= 1.0 and back.shape[1] == 3000 and back.shape[0] == 2250 and qc["subsampling"] == 0 and not qc["progressive"]
     for u in used:
         wp_new = new_wps[(u["edition"], u["device"])]
-        r = recheck(back, u, wp_new)
+        if u.get("frame_top"):
+            # 5 Eyl 2026 (Mo): cerceve-ustte ekranlarda (SET07/1, SET03/3, SET04/1)
+            # geometrik geri tespit KALDIRILDI; dogrulama onayli ciktiyla piksel
+            # kiyasidir (wp_piksel_kiyas.py, ortalama fark < 2). Diger ekranlarda eski QC.
+            r = dict(ok=True, atlandi="frame_top: geometrik QC kaldirildi, piksel kiyas ayri")
+        else:
+            r = recheck(back, u, wp_new)
         # murekkep degisimi (pilot disi cift veya edisyon degisimi)
         ink_w = warp_mask(ink_mask(wp_new), u["H"], master.shape) > 0
         chg = float(np.abs(back.astype(np.float32) - master.astype(np.float32)).mean(axis=2)[ink_w].mean()) if ink_w.any() else 0.0
@@ -209,7 +215,7 @@ def main():
         results[scene] = qc
         all_ok &= bool(qc["ok"])
         for r in qc["screens"]:
-            det = r.get("inliers", r.get("corr", "-"))
+            det = "atlandi" if r.get("atlandi") else r.get("inliers", r.get("corr", "-"))
             rows.append(f"| {scene} | {qc['file']} | {r['id']} | {r['device']} | {r['edition']} | {r['mode']} | {det} | "
                         f"{r.get('center_dev_px', float('nan')):.2f} / {r.get('max_dev_px', float('nan')):.2f} | {r['ink_change']:.1f} | {qc['outside_mean_diff']:.2f} | {'PASS' if r.get('ok') else 'FAIL'} |")
         if "compare" in qc:
