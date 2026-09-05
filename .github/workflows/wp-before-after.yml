@@ -1,0 +1,81 @@
+name: wp-before-after
+
+# ONCE/SONRA TEK DOSYA - 4 Eyl 2026. Uretimdeki MOCKUP_V2 ile son deneme
+# ciktisi (TEMP/FIX_TEST/MOCKUP_GEOM) ayni bolgeden kirpilip ust uste konur.
+# Salt okur; cikti TEMP/FIX_TEST/COMPARE. MOCKUP_V2 ve Etsy'ye dokunulmaz.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pair:
+        description: "Cift"
+        required: true
+        default: "Aries_Aries"
+      spec:
+        description: "SAHNE:kip listesi"
+        required: true
+        default: "SET03:ust,SET04:alt,SET07:ekran:Watch"
+      new_dir:
+        description: "Yeni ciktilarin klasoru (ASTROLOVE altinda)"
+        required: true
+        default: "TEMP/FIX_TEST/MOCKUP_GEOM"
+
+concurrency:
+  group: wp-before-after
+  cancel-in-progress: false
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+
+      - name: Girdiler
+        run: |
+          set -euo pipefail
+          P="${{ inputs.pair }}"; UP=$(echo "$P" | tr '[:lower:]' '[:upper:]')
+          mkdir -p _work/calib _work/old _work/new _work/out
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CALIB" _work/calib --include "calib.json"
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/$UP" _work/old --include "*_FINAL.jpg"
+          rclone copy "gdrive:ASTROLOVE/${{ inputs.new_dir }}" _work/new --include "*${P}_FINAL.jpg"
+          ls -l _work/old _work/new
+
+      - name: Panelleri uret
+        run: |
+          set -euo pipefail
+          python scripts/etsy/wp_before_after.py --calib _work/calib \
+            --old-dir _work/old --new-dir _work/new --pair "${{ inputs.pair }}" \
+            --spec "${{ inputs.spec }}" --out-dir _work/out | tee _work/rapor.txt
+          ls -l _work/out
+
+      - name: Drive'a yaz + anyone:reader
+        run: |
+          set -euo pipefail
+          rclone copy _work/out "gdrive:ASTROLOVE/TEMP/FIX_TEST/COMPARE" --include "M11_*.jpg"
+          cat > _fid.py <<'PY'
+          import json, sys
+          print([r["ID"] for r in json.load(sys.stdin) if r["Name"] == sys.argv[1]][0])
+          PY
+          fid="$(rclone lsjson "gdrive:ASTROLOVE/TEMP/FIX_TEST" --dirs-only | python3 _fid.py COMPARE)"
+          python scripts/pinterest/pin_media_perms.py --mode grant --folder-id "$fid" \
+            --pattern "M11_" --apply
+
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone _fid.py
