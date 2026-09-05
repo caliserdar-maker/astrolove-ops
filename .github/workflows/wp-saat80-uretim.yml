@@ -23,6 +23,10 @@ on:
         description: "parca basina en fazla cift (0 = hepsi; deneme icin 1)"
         required: true
         default: "0"
+      pairs:
+        description: "yalniz bu ciftler (virgulle; bos = parcalar). Tekrar kosu icin swap=false"
+        required: true
+        default: "-"
       swap:
         description: "true: hazirlik (WATCH_CANVA takasi + FINAL_V2 saat degisimi) yapilir; false: atlanir (zaten yapildiysa)"
         required: true
@@ -97,6 +101,18 @@ jobs:
           rclone copy "$G/TEMP/WATCH_CANVA" "$G/WALLPAPER/FINAL_V2" --include "*/AstroLove_*_Watch.jpg" --transfers 16 --checkers 16
           rclone check "$G/TEMP/WATCH_CANVA" "$G/WALLPAPER/FINAL_V2" --one-way --include "*/AstroLove_*_Watch.jpg"
           echo "FINAL_V2 saatleri %80 ile degistirildi: 312 OK"
+      - name: Klasor hazirligi (parcalar ayni anda kok klasor acmasin) + yinelenen klasor birlestirme
+        run: |
+          set -euo pipefail
+          G=gdrive:ASTROLOVE
+          # 5 Eyl: 4 parca DELIVERY_SAAT80 ve MOCKUP_V2_YEDEK_SAAT100 koklerini ayni anda acti -> 2'ser kopya.
+          # skip modu: yalniz ayni klasordeki BIREBIR ayni dosyalari siler, ayni adli klasorleri birlestirir.
+          rclone dedupe --dedupe-mode skip "$G/WALLPAPER" || true
+          for d in DELIVERY_SAAT80 MOCKUP_V2_YEDEK_SAAT100; do
+            rclone mkdir "$G/WALLPAPER/$d"
+            echo "$d: $(rclone lsf --dirs-only "$G/WALLPAPER" | grep -c "^$d/") kok klasor (beklenen 1)"
+          done
+          rclone mkdir "$G/TEMP/SAAT80_ORNEK_5"
       - name: Temizlik
         if: ${{ always() }}
         run: rm -rf ~/.config/rclone
@@ -138,14 +154,17 @@ jobs:
       - name: Uretim (ZIP + SET07)
         run: |
           set -euo pipefail
+          P="${{ inputs.pairs }}"; [ "$P" = "-" ] && P=""
+          AD="parca${{ matrix.shard }}"; [ -n "$P" ] && AD="secim_$(date -u +%H%M%S)"
+          echo "rapor_ad=$AD" >> "$GITHUB_ENV"
           python scripts/etsy/wp_saat80_uretim.py --pairs-file _work/drafts.csv --shard ${{ matrix.shard }} --shards ${{ inputs.shards }} \
-            --license _work/LICENSE.txt --calib _work/calib --masters _work/masters --pilot _work/pilot \
-            --work _work --report "_work/rapor/saat80_parca${{ matrix.shard }}.csv" --limit ${{ inputs.limit }} 2>&1 | grep -v '^ *"' | tee _work/parca.log
+            --license _work/LICENSE.txt --calib _work/calib --masters _work/masters --pilot _work/pilot --pairs-only "$P" \
+            --work _work --report "_work/rapor/saat80_$AD.csv" --limit ${{ inputs.limit }} 2>&1 | grep -v '^ *"' | tee _work/parca.log
       - name: Rapor
         if: ${{ always() }}
         run: |
           set -euo pipefail
-          [ -f "_work/rapor/saat80_parca${{ matrix.shard }}.csv" ] && rclone copyto "_work/rapor/saat80_parca${{ matrix.shard }}.csv" "gdrive:ASTROLOVE/TEMP/WP_SAAT80_URETIM_parca${{ matrix.shard }}.csv" || true
+          [ -f "_work/rapor/saat80_$rapor_ad.csv" ] && rclone copyto "_work/rapor/saat80_$rapor_ad.csv" "gdrive:ASTROLOVE/TEMP/WP_SAAT80_URETIM_$rapor_ad.csv" || true
           { echo '```'; tail -n 25 _work/parca.log 2>/dev/null; echo '```'; } >> "$GITHUB_STEP_SUMMARY" || true
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
@@ -180,31 +199,35 @@ jobs:
           printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
           chmod 600 ~/.config/rclone/rclone.conf
           if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
-      - uses: actions/download-artifact@v4
-        with:
-          pattern: saat80-parca-*
-          path: _art
-          merge-multiple: true
       - name: Ozet + 5 ornek cift linkleri
-        env:
-          LIMIT: ${{ inputs.limit }}
         run: |
           set -euo pipefail
-          mkdir -p _work/ornek
+          mkdir -p _work/csv
+          # tum kosularin raporlari (parca0-3 + secim_*) Drive'dan; cift bazinda birlestirilir (PASS varsa PASS)
+          rclone copy "gdrive:ASTROLOVE/TEMP" _work/csv --include "WP_SAAT80_URETIM_parca*.csv" --include "WP_SAAT80_URETIM_secim_*.csv" --max-depth 1
+          rclone copyto "gdrive:ASTROLOVE/TEMP/WA_WP_DRAFTS_STATE.csv" _work/drafts.csv
           python3 - <<'PY' | tee _work/ozet.txt
-          import csv, glob, random, os
-          rows = [r for f in sorted(glob.glob("_art/rapor/*.csv")) for r in csv.DictReader(open(f))]
+          import csv, glob, random
+          pairs = [r[0].strip() for r in csv.reader(open("_work/drafts.csv")) if r and r[0].strip() and r[0] != "pair"]
           eds = ["Midnight_Blue", "Deep_Black", "Champagne_Ivory", "Warm_Parchment"]
+          son = {}
+          for f in sorted(glob.glob("_work/csv/*.csv")):
+              for r in csv.DictReader(open(f)):
+                  if r["pair"] not in son or son[r["pair"]]["durum"] != "PASS":
+                      son[r["pair"]] = r
+          rows = [son[p] for p in pairs if p in son]
           ok = [r for r in rows if r["durum"] == "PASS"]
-          mx = max((int(r[f"zip_{e}"] or 0) for r in rows for e in eds), default=0)
-          print(f"cift {len(rows)}, PASS {len(ok)}, ZIP {4*len(ok)}/{4*len(rows)}, SET07 {len(ok)}/{len(rows)}, en buyuk ZIP {mx/1e6:.2f} MB ({'<20MB' if mx < 20*1024*1024 else 'ASIYOR'})")
+          eksik = [p for p in pairs if p not in son]
+          mx = max((int(r[f"zip_{e}"] or 0) for r in ok for e in eds), default=0)
+          print(f"cift {len(pairs)}, raporlanan {len(rows)}, PASS {len(ok)}, ZIP {4*len(ok)}/{4*len(pairs)}, SET07 {len(ok)}/{len(pairs)}, en buyuk ZIP {mx/1e6:.2f} MB ({'<20MB' if mx < 20*1024*1024 else 'ASIYOR'})")
           for r in rows:
               if r["durum"] != "PASS": print("  FAIL", r["pair"], r["durum"])
+          for p in eksik: print("  EKSIK", p)
           random.seed(80)
           sec = random.sample([r["pair"] for r in ok], min(5, len(ok)))
           open("_work/ornek5.txt", "w").write("\n".join(sec) + "\n")
           print("ornek 5 cift:", ", ".join(sec))
-          print("SONUC B:", "PASS" if rows and len(ok) == len(rows) else "FAIL")
+          print("SONUC B:", "PASS" if len(ok) == len(pairs) else "FAIL")
           PY
           G=gdrive:ASTROLOVE
           rclone purge "$G/TEMP/SAAT80_ORNEK_5" 2>/dev/null || true
@@ -216,7 +239,8 @@ jobs:
           done < _work/ornek5.txt
           n=$({ rclone lsf --files-only "$G/TEMP/SAAT80_ORNEK_5" || true; } | wc -l); echo "ornek dosya: $n"; test "$n" -gt 0
           fid="$(rclone lsjson "$G/TEMP" --dirs-only | python3 -c "import json,sys; print([r['ID'] for r in json.load(sys.stdin) if r['Name']=='SAAT80_ORNEK_5'][0])")"
-          python scripts/pinterest/pin_media_perms.py --mode grant --folder-id "$fid" --pattern "_" --expect "$n" --apply | tee -a _work/ozet.txt
+          # ::add-mask:: satiri (erisim jetonu) rapora yazilmaz
+          python scripts/pinterest/pin_media_perms.py --mode grant --folder-id "$fid" --pattern "_" --expect "$n" --apply | grep -v '::add-mask::' | tee -a _work/ozet.txt
           rclone copyto _work/ozet.txt "$G/TEMP/WP_SAAT80_URETIM_OZET.txt"
           { echo '```'; cat _work/ozet.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
           grep -q "SONUC B: PASS" _work/ozet.txt
