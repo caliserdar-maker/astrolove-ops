@@ -1,0 +1,139 @@
+name: wp-saat80-ornek
+
+# SAAT SEMBOLU %80 - ORNEK (Aries_Aries), 5 Eyl 2026.
+# Canva'dan disa aktarilan yeni saat PNG'sini (URL girdisi) 1000x1220 jpg'ye
+# cevirir, eski saatle yan yana koyar, SET07 mockup'ini uretir, ciktilari
+# TEMP/FIX_TEST/SAAT80/<CIFT>/ altina yazar ve anyone:reader link verir.
+# Uretim dosyalarina (WATCH_CANVA, MOCKUP_V2) DOKUNMAZ. Etsy'ye yazma yok.
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "Canva PNG disa aktarim URL'si (loga yazilmaz)"
+        required: true
+      pair:
+        description: "cift"
+        required: true
+        default: "Aries_Aries"
+
+jobs:
+  ornek:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+
+      - name: Girdiler (yeni saat PNG, eski saat, calib, masterlar, wallpaperlar)
+        env:
+          URL: ${{ inputs.url }}
+          PAIR: ${{ inputs.pair }}
+        run: |
+          set -euo pipefail
+          UP=$(echo "$PAIR" | tr '[:lower:]' '[:upper:]')
+          mkdir -p _work/yeni _work/eski _work/calib _work/masters _work/pilot _work/wp _work/out _work/cikti
+          curl -fsSL -o _work/yeni/saat.png "$URL"
+          python - <<'PY'
+          import cv2, sys
+          sys.path.insert(0, "scripts/etsy")
+          from wp_mockup_common import imwrite_jpeg
+          a = cv2.imread("_work/yeni/saat.png", cv2.IMREAD_COLOR)
+          assert a is not None, "PNG okunamadi"
+          print("yeni saat PNG", a.shape[1], "x", a.shape[0])
+          if (a.shape[1], a.shape[0]) != (1000, 1220):
+              a = cv2.resize(a, (1000, 1220), interpolation=cv2.INTER_AREA)
+          import os
+          pair = os.environ["PAIR"]
+          imwrite_jpeg(f"_work/yeni/AstroLove_{pair}_Midnight_Blue_Watch.jpg", a)
+          PY
+          rclone copy "gdrive:ASTROLOVE/TEMP/WATCH_CANVA/$UP" _work/eski --include "AstroLove_*_Watch.jpg"
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CALIB" _work/calib --include "calib.json" --include "masks/*.png"
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/CANCER_LIBRA" _work/masters --include "*_FINAL.jpg"
+          rclone copy "gdrive:ASTROLOVE/ARCHIVE/FINAL_V2_PILOT_V1" _work/pilot --include "AstroLove_*.jpg"
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/$UP" _work/wp --include "AstroLove_*.jpg"
+          cp _work/eski/AstroLove_*_Watch.jpg _work/wp/
+          ls _work/eski _work/yeni; echo "wp: $(ls _work/wp | wc -l)"
+          # SET07 eski (uretimdeki) mockup: karsilastirma icin
+          rclone copyto "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/$UP/WA_MOCKUP_V2_SET07_${PAIR}_FINAL.jpg" _work/eski/SET07_eski.jpg
+
+      - name: SET07 render (yeni saat) + yan yana
+        env:
+          PAIR: ${{ inputs.pair }}
+        run: |
+          set -euo pipefail
+          cp -f "_work/yeni/AstroLove_${PAIR}_Midnight_Blue_Watch.jpg" _work/wp/
+          python scripts/etsy/wp_mockup_render.py --calib _work/calib --masters _work/masters --pilot _work/pilot \
+            --wallpapers _work/wp --pair "$PAIR" --scenes SET07 --out _work/out 2>&1 | grep -v '^ *"' | tee _work/rapor.txt
+          python - <<'PY'
+          import cv2, numpy as np, os, sys
+          sys.path.insert(0, "scripts/etsy")
+          from wp_mockup_common import imwrite_jpeg
+          pair = os.environ["PAIR"]
+          e = cv2.imread(f"_work/eski/AstroLove_{pair}_Midnight_Blue_Watch.jpg"); y = cv2.imread(f"_work/yeni/AstroLove_{pair}_Midnight_Blue_Watch.jpg")
+          # sembol kutusu (murekkep = parlak altin): eski vs yeni genislik orani
+          def kutu(a):
+              hsv = cv2.cvtColor(a, cv2.COLOR_BGR2HSV); m = (hsv[..., 2] > 140) & (hsv[..., 1] > 80)
+              ys, xs = np.where(m); return (xs.min(), ys.min(), xs.max(), ys.max()) if len(xs) else None
+              
+          ke, ky = kutu(e), kutu(y)
+          if ke and ky:
+              print(f"sembol kutusu eski {ke} genislik {ke[2]-ke[0]} yukseklik {ke[3]-ke[1]}; yeni {ky} genislik {ky[2]-ky[0]} yukseklik {ky[3]-ky[1]}; oran w {(ky[2]-ky[0])/(ke[2]-ke[0]):.3f} h {(ky[3]-ky[1])/(ke[3]-ke[1]):.3f}")
+              print(f"merkez eski ({(ke[0]+ke[2])/2:.0f},{(ke[1]+ke[3])/2:.0f}) yeni ({(ky[0]+ky[2])/2:.0f},{(ky[1]+ky[3])/2:.0f})")
+          # arka plan farki: her iki sembol kutusunun disinda kalan pikseller
+          m = np.ones(e.shape[:2], bool)
+          for k in (ke, ky):
+              if k: m[k[1]-4:k[3]+5, k[0]-4:k[2]+5] = False
+          d = np.abs(e.astype(np.int16) - y.astype(np.int16)).mean(axis=2)
+          print(f"arka plan farki (sembol disi): ort {d[m].mean():.3f}, p99 {np.percentile(d[m], 99):.1f}")
+          yan = np.concatenate([e, np.full((e.shape[0], 20, 3), 255, np.uint8), y], axis=1)
+          cv2.putText(yan, "ESKI (100%)", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1.1, (255, 255, 255), 2)
+          cv2.putText(yan, "YENI (80%)", (1040, 40), cv2.FONT_HERSHEY_SIMPLEX, 1.1, (255, 255, 255), 2)
+          os.makedirs("_work/cikti", exist_ok=True)
+          cv2.imwrite(f"_work/cikti/SAAT80_{pair}_saat_eski_yeni.jpg", yan, [cv2.IMWRITE_JPEG_QUALITY, 95])
+          s = cv2.imread(f"_work/out/WA_MOCKUP_V2_SET07_{pair}_FINAL.jpg"); assert s is not None, "SET07 render yok"
+          imwrite_jpeg(f"_work/cikti/SAAT80_{pair}_SET07_sahne.jpg", s)
+          se = cv2.imread("_work/eski/SET07_eski.jpg")
+          if se is not None:
+              imwrite_jpeg(f"_work/cikti/SAAT80_{pair}_SET07_sahne_ESKI.jpg", se)
+          import shutil; shutil.copy(f"_work/yeni/AstroLove_{pair}_Midnight_Blue_Watch.jpg", f"_work/cikti/SAAT80_{pair}_Watch_yeni.jpg")
+          PY
+          ls -l _work/cikti
+
+      - name: Drive'a yaz + anyone:reader
+        env:
+          PAIR: ${{ inputs.pair }}
+        run: |
+          set -euo pipefail
+          UP=$(echo "$PAIR" | tr '[:lower:]' '[:upper:]')
+          rclone copy _work/cikti "gdrive:ASTROLOVE/TEMP/FIX_TEST/SAAT80/$UP"
+          rclone copyto _work/rapor.txt "gdrive:ASTROLOVE/TEMP/FIX_TEST/SAAT80/$UP/rapor.txt"
+          fid="$(rclone lsjson "gdrive:ASTROLOVE/TEMP/FIX_TEST/SAAT80" --dirs-only | python3 -c "import json,sys; print([r['ID'] for r in json.load(sys.stdin) if r['Name']=='$UP'][0])")"
+          n=$(ls _work/cikti | wc -l)
+          python scripts/pinterest/pin_media_perms.py --mode grant --folder-id "$fid" --pattern "SAAT80_" --expect "$n" --apply | tee -a _work/rapor.txt
+          { echo '```'; cat _work/rapor.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: wp-saat80-ornek
+          path: |
+            _work/cikti
+            _work/rapor.txt
+          if-no-files-found: ignore
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
