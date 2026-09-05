@@ -208,6 +208,10 @@ def main():
     ap.add_argument("--screen", type=int, required=True, help="calib ekran id")
     ap.add_argument("--out-calib", required=True)
     ap.add_argument("--kanit", default="", help="isaretli quad ciziminin yazilacagi jpg")
+    ap.add_argument("--dik", action="store_true", help="yamuklugu duzelt: quad'i eksene otur (merkez/boy korunur)")
+    ap.add_argument("--frame-top-quad", type=int, default=-1,
+                    help="verilirse ekrana cerceve-ustte + delik=quad bayragi yazilir (deger: disari px)")
+    ap.add_argument("--calib-json", default="", help="taban calib dosyasi (bos: <calib>/calib.json)")
     a = ap.parse_args()
 
     cfg = SCENES[a.scene]
@@ -262,9 +266,15 @@ def main():
             return 3
         quad = np.array([[float(x) * sx, float(y) * sy] for x, y in quad])
         log(f"  hizalama: YEDEK YOL - tam kare olcegi {sx:.4f}")
+    if a.dik:
+        yamuk = quad.copy()
+        quad = dikdortgen(quad)
+        log(f"  yamuk quad: {[[round(float(x), 1), round(float(y), 1)] for x, y in yamuk]}")
+        log(f"  dik quad  : {[[round(float(x), 1), round(float(y), 1)] for x, y in quad]} "
+            f"(yamuk->dik kose kaymasi {kaymalar(yamuk, quad)} px)")
     quad_r = [[round(float(x), 1), round(float(y), 1)] for x, y in quad]
 
-    calib = json.loads((Path(a.calib) / "calib.json").read_text())
+    calib = json.loads(Path(a.calib_json or (Path(a.calib) / "calib.json")).read_text())
     ekranlar = calib["scenes"][src]["screens"]
     hedef = next((s for s in ekranlar if int(s["id"]) == a.screen), None)
     if hedef is None:
@@ -290,6 +300,9 @@ def main():
         return 4
 
     hedef["quad"] = quad_r
+    if a.frame_top_quad >= 0:
+        hedef["frame_top"] = {"disari": a.frame_top_quad, "delik": "quad"}
+        log(f"  frame_top: disari {a.frame_top_quad} px, delik = quad (yalniz bu ekran)")
     Path(a.out_calib).write_text(json.dumps(calib, indent=1))
     log(f"\n{a.out_calib}: {a.scene}/{a.screen} quad'i guncellendi (orijinale dokunulmadi)")
     return 0
