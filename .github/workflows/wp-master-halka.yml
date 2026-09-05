@@ -70,7 +70,7 @@ jobs:
           set -euo pipefail
           python scripts/etsy/wp_master_halka.py --calib _work/c0 --calib-b _work/cb/calib.json \
             --masters _work/masters --ekran SET03:3 --ekran SET04:1 \
-            --disari "${{ inputs.disari }}" --serit "${{ inputs.serit }}" \
+            --disari "${{ inputs.disari }}" --serit "${{ inputs.serit }}" --dis-yuvarlak \
             --out-dir _work/masters_temiz --kanit-dir _work/kanit | tee _work/rapor.txt
           test "$(ls _work/masters_temiz/*_FINAL.jpg | wc -l)" = "$(ls _work/masters/*_FINAL.jpg | wc -l)"
 
@@ -95,16 +95,16 @@ jobs:
         if: ${{ always() }}
         run: |
           set -euo pipefail
-          rclone mkdir "gdrive:ASTROLOVE/TEMP/FIX_TEST/MASTER_HALKA"
-          rclone copy _work/son "gdrive:ASTROLOVE/TEMP/FIX_TEST/MASTER_HALKA" --include "*.jpg" || true
-          [ -f _work/rapor.txt ] && rclone copyto _work/rapor.txt "gdrive:ASTROLOVE/TEMP/WP_MASTER_HALKA.txt" || true
-          fid="$(rclone lsjson "gdrive:ASTROLOVE/TEMP/FIX_TEST" --dirs-only | python3 _fid.py MASTER_HALKA)"
+          rclone mkdir "gdrive:ASTROLOVE/TEMP/FIX_TEST/MASTER_HALKA2"
+          rclone copy _work/son "gdrive:ASTROLOVE/TEMP/FIX_TEST/MASTER_HALKA2" --include "*.jpg" || true
+          [ -f _work/rapor.txt ] && rclone copyto _work/rapor.txt "gdrive:ASTROLOVE/TEMP/WP_MASTER_HALKA2.txt" || true
+          fid="$(rclone lsjson "gdrive:ASTROLOVE/TEMP/FIX_TEST" --dirs-only | python3 _fid.py MASTER_HALKA2)"
           : > _work/linkler.txt
           for PAT in "WA_MOCKUP_V2_" "K03_" "MASTER_HALKA_"; do
             python scripts/pinterest/pin_media_perms.py --mode grant --folder-id "$fid" --pattern "$PAT" --apply \
               | grep -v '^::add-mask::' | tee -a _work/linkler.txt
           done
-          rclone copyto _work/linkler.txt "gdrive:ASTROLOVE/TEMP/WP_MASTER_HALKA_LINKLER.txt" || true
+          rclone copyto _work/linkler.txt "gdrive:ASTROLOVE/TEMP/WP_MASTER_HALKA2_LINKLER.txt" || true
 
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}

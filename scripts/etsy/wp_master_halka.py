@@ -38,6 +38,9 @@ def main():
     ap.add_argument("--out-dir", required=True)
     ap.add_argument("--kanit-dir", required=True)
     ap.add_argument("--boy", type=int, default=260)
+    ap.add_argument("--dis-yuvarlak", action="store_true",
+                    help="halkanin dis siniri eski quad+disari (kare kose) yerine delikle es merkezli "
+                         "yuvarlak dikdortgen (yeni quad+disari, yaricap r+disari) olsun")
     a = ap.parse_args()
 
     c0 = json.loads((Path(a.calib) / "calib.json").read_text())
@@ -60,7 +63,14 @@ def main():
         soft = cv2.imread(str(Path(a.calib) / "masks" / f"{src}_{eid}.png"), cv2.IMREAD_GRAYSCALE).astype(np.float32) / 255.0
         delik, _, rs = hole_shape(soft, yeni, inset=0.0, yaricap=yaricap)
         ic = (delik >= 0.5).astype(np.uint8)
-        genis = (poly_mask_aa(master.shape, expand_quad(eski, a.disari)) >= 0.5).astype(np.uint8)
+        if a.dis_yuvarlak:
+            # 2. deneme (5 Eyl 2026): kare koseli dis sinir cerceve kosesini ve duvari halkaya
+            # aliyordu; dis sinir artik delikle es merkezli yuvarlak dikdortgen.
+            dis_r = [float(v) + a.disari for v in yaricap] if yaricap else None
+            dis_delik, _, _ = hole_shape(soft, expand_quad(yeni, a.disari), inset=0.0, yaricap=dis_r, ic_cikar=False)
+            genis = (dis_delik >= 0.5).astype(np.uint8)
+        else:
+            genis = (poly_mask_aa(master.shape, expand_quad(eski, a.disari)) >= 0.5).astype(np.uint8)
         halka = genis & (1 - ic)
         k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * a.serit + 1, 2 * a.serit + 1))
         serit = cv2.dilate(genis, k) & (1 - genis)                     # halkanin hemen disi (cerceve)
@@ -71,7 +81,8 @@ def main():
         dolgu = cv2.inpaint(calis, (halka * 255).astype(np.uint8), 7, cv2.INPAINT_TELEA)
         temiz[halka > 0] = dolgu[halka > 0]
         L_sonra = L_ort(temiz, halka)
-        log(f"{scene}/{eid} {s0['device']} ({s0['edition']}): eski quad+{a.disari} px EKSI yuvarlak delik "
+        dis_ad = f"yeni quad+{a.disari} px yuvarlak (r+{a.disari})" if a.dis_yuvarlak else f"eski quad+{a.disari} px"
+        log(f"{scene}/{eid} {s0['device']} ({s0['edition']}): {dis_ad} EKSI yuvarlak delik "
             f"(yaricap {yaricap}) -> halka {int(halka.sum())} px, genislik ort {halka.sum() / max(1, cv2.arcLength(np.int32(eski).reshape(-1,1,2), True)):.1f} px | "
             f"L halka once {L_once:.1f} sonra {L_sonra:.1f} | cerceve seridi ({a.serit} px, {int(serit.sum())} px) L {L_serit:.1f}")
         cv2.imwrite(str(temiz_yol), temiz, [cv2.IMWRITE_JPEG_QUALITY, 97])
