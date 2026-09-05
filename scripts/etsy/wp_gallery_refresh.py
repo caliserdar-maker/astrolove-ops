@@ -25,6 +25,14 @@ Ilk ilan pilottur; pilotta yukleme hata verirse kosu DURUR, digerlerine
 gecilmez. Herhangi bir ilanda geri okuma tutmazsa yine DURULUR.
 
 Varsayilan DRY-RUN: --apply verilmeden hicbir yazma cagrisi yapilmaz.
+
+5 Eyl 2026 (D gorevi, 78 ilan) eklemeleri:
+  - --state: WA_WP_DRAFTS_STATE.csv (pair,listing_id) ile 78 ilan; --pairs alt kume.
+  - Dosyalar: sayi 5 yetmez, listing_file_id KUMESI oncesiyle AYNI olmali.
+  - Kota 400 altina inerse DUR.
+  - Ilan basi STATE satiri (--state-out) hemen yazilir; --sync-cmd verilirse her
+    ilandan sonra kosulur (Drive'a aninda kopya). Onceki STATE'te PASS olan
+    ilanlar --resume ile atlanir.
 """
 import argparse
 import csv
@@ -33,6 +41,8 @@ import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
+
+import subprocess
 
 import cv2
 import numpy as np
@@ -46,7 +56,7 @@ CHUNK = 3               # tur basina yuklenecek/silinecek gorsel
 IMG_LIMIT = 10          # Etsy ilan basina gorsel siniri
 READBACK_WAIT = 10
 READBACK_TRIES = 4
-QUOTA_STOP = 500
+QUOTA_STOP = 400
 PIX_MAD_MAX = 6.0       # Etsy yeniden kodladigi icin bayt esitligi beklenmez
 
 
@@ -138,6 +148,17 @@ def compare(url, src_path):
                 fark_ort=round(mad, 3), fark_p99=round(p99, 1))
 
 
+def _append_state(path, row):
+    p = Path(path)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    new = not p.exists() or p.stat().st_size == 0
+    with open(p, "a", newline="", encoding="utf-8") as fh:
+        w = csv.writer(fh)
+        if new:
+            w.writerow(["pair", "listing_id", "status", "ts_utc", "detail", "kota_kalan"])
+        w.writerow(row)
+
+
 # ------------------------------------------------------------------ ilan islemi
 def do_listing(g, pair, lid, mock_dir, rapor):
     up = pair.upper()
@@ -200,6 +221,8 @@ def do_listing(g, pair, lid, mock_dir, rapor):
         det.append(f"video {len(after_v)} (beklenen 0)")
     if len(after_f) != 5:
         det.append(f"dosya {len(after_f)} (beklenen 5)")
+    if sorted(map(str, after_f)) != sorted(map(str, before_f)):
+        det.append(f"dosya kumesi DEGISTI: once {sorted(map(str, before_f))} sonra {sorted(map(str, after_f))}")
 
     # --- 4) sira + icerik: her rank'i kaynagiyla piksel duzeyinde karsilastir
     for k, (rank, iid, w, h, url) in enumerate(after_i):
@@ -218,7 +241,12 @@ def do_listing(g, pair, lid, mock_dir, rapor):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--listings", required=True, help="cift:listing_id virgullu, ILK sirada pilot")
+    ap.add_argument("--listings", default="", help="cift:listing_id virgullu, ILK sirada pilot")
+    ap.add_argument("--state", default="", help="pair,listing_id CSV (WA_WP_DRAFTS_STATE.csv)")
+    ap.add_argument("--pairs", default="", help="alt kume (virgullu); bos = --state'teki hepsi")
+    ap.add_argument("--state-out", default="", help="ilan basi STATE CSV (append; --resume ile PASS atlanir)")
+    ap.add_argument("--resume", action="store_true", help="--state-out'ta PASS olan ilanlari atla")
+    ap.add_argument("--sync-cmd", default="", help="her ilandan sonra kosulacak kabuk komutu (STATE'i Drive'a kopyala)")
     ap.add_argument("--mock-dir", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--cmp-out", default="")
@@ -232,8 +260,36 @@ def main():
             continue
         pair, lid = item.split(":", 1)
         hedefler.append((pair.strip(), lid.strip()))
+    if a.state:
+        with open(a.state, newline="", encoding="utf-8") as fh:
+            for raw in csv.reader(fh):
+                if len(raw) >= 2 and raw[1].strip().isdigit():
+                    hedefler.append((raw[0].strip(), raw[1].strip()))
+    if a.pairs:
+        sec = [p.strip() for p in a.pairs.split(",") if p.strip()]
+        eks = [p for p in sec if p not in {h[0] for h in hedefler}]
+        if eks:
+            raise SystemExit(f"HATA: --pairs listede yok: {eks}")
+        hedefler = [h for h in hedefler if h[0] in set(sec)]
+        # verilen sirayi koru (ilk = pilot)
+        hedefler.sort(key=lambda h: sec.index(h[0]))
     if not hedefler:
-        raise SystemExit("HATA: --listings bos")
+        raise SystemExit("HATA: hedef ilan yok (--listings / --state)")
+    if len({h[0] for h in hedefler}) != len(hedefler):
+        raise SystemExit("HATA: cift tekrar ediyor")
+
+    done = {}
+    if a.state_out and Path(a.state_out).exists():
+        with open(a.state_out, newline="", encoding="utf-8") as fh:
+            for r in csv.reader(fh):
+                if len(r) >= 3 and r[0] != "pair":
+                    done[r[0]] = r[2]
+    if a.resume and done:
+        atla = [h[0] for h in hedefler if done.get(h[0]) == "PASS"]
+        hedefler = [h for h in hedefler if done.get(h[0]) != "PASS"]
+        log(f"resume: {len(atla)} ilan zaten PASS, atlaniyor; kalan {len(hedefler)}")
+        if not hedefler:
+            log("yapilacak ilan yok")
 
     keystring = os.environ.get("ETSY_API_KEY", ""); shared = os.environ.get("ETSY_SHARED_SECRET", "")
     mask(keystring); mask(shared)
@@ -254,6 +310,10 @@ def main():
         except SystemExit as e:                      # API hatasi: temiz dur
             status, detail = "FAIL", str(e)[:300]
         rows.append([pair, lid, status, utc(), detail, api.remaining])
+        if a.state_out:
+            _append_state(a.state_out, rows[-1])
+            if a.sync_cmd:
+                subprocess.run(a.sync_cmd, shell=True, check=False)
         el = time.time() - t0
         log(f"[{i+1}/{len(hedefler)}] {pair}: {status}" + (f" | {detail}" if detail else "")
             + f" | kota {api.remaining} | gecen {el/60:.1f} dk "
@@ -282,8 +342,10 @@ def main():
                 w.writerow(r)
 
     n_pass = sum(1 for r in rows if r[2] == "PASS")
+    n_once = sum(1 for v in done.values() if v == "PASS") if a.resume else 0
     lines = [f"## galeri yenileme ({'uygulandi' if a.apply else 'DRY-RUN'}): "
-             f"{n_pass}/{len(hedefler)} ilan PASS", ""]
+             f"{n_pass}/{len(hedefler)} ilan PASS (bu kosu)"
+             + (f"; onceki PASS {n_once}, toplam {n_pass + n_once}" if a.resume else ""), ""]
     lines += ["| pair | listing_id | sonuc | detay |", "|---|---|---|---|"]
     for r in rows:
         lines.append(f"| {r[0]} | {r[1]} | {r[2]} | {r[4][:200]} |")
