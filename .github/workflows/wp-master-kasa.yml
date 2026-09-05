@@ -1,0 +1,119 @@
+name: wp-master-kasa
+
+# KOMSU TELEFONUN TUM KASASINI KOPYALA - yalniz SET03/3 ve SET04/1 (5 Eyl 2026, Mo).
+# Halka = (eski quad + 10 px) EKSI (Mo'nun kirmizi yuvarlak deligi, calib B).
+# Halka, hemen disindaki 6 px seritten beslenen TELEA inpaint ile doldurulur;
+# temiz master KOPYADIR. Sonra calib B + temiz master ile SET03+SET04 uretilir.
+# Uretim master'i, calib.json, MOCKUP_V2, DELIVERY, ZIP, Etsy DEGISMEZ.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pair:
+        description: "Cift"
+        required: true
+        default: "Aries_Aries"
+      bant:
+        description: "Kasa arama bandi: quad disina (px)"
+        required: true
+        default: "60"
+      gecis:
+        description: "Dis siluet yumusak gecis (px)"
+        required: true
+        default: "4"
+
+concurrency:
+  group: wp-master-kasa
+  cancel-in-progress: false
+
+jobs:
+  halka:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+          cat > _fid.py <<'PY'
+          import json, sys
+          print([r["ID"] for r in json.load(sys.stdin) if r["Name"] == sys.argv[1]][0])
+          PY
+
+      - name: Girdiler
+        run: |
+          set -euo pipefail
+          P="${{ inputs.pair }}"; UP=$(echo "$P" | tr '[:lower:]' '[:upper:]')
+          mkdir -p _work/c0 _work/cb/masks _work/masters _work/pilot _work/wp _work/son _work/kanit
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CALIB" _work/c0 --include "calib.json" --include "masks/*.png"
+          cp -r _work/c0/masks/. _work/cb/masks/
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/CANCER_LIBRA" _work/masters --include "*_FINAL.jpg"
+          rclone copy "gdrive:ASTROLOVE/ARCHIVE/FINAL_V2_PILOT_V1" _work/pilot --include "AstroLove_*.jpg"
+          test "$(ls _work/pilot | wc -l)" = "16"
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/$UP" _work/wp --include "AstroLove_*.jpg"
+
+      - name: Kasayi komsu telefondan kopyala (KOPYA master + KOPYA calib)
+        run: |
+          set -euo pipefail
+          python scripts/etsy/wp_kasa_kopyala.py --calib _work/c0 --masters _work/masters \
+            --hedef SET03:3:2 --hedef SET04:1:0 --bant "${{ inputs.bant }}" --gecis "${{ inputs.gecis }}" \
+            --out-dir _work/masters_temiz --out-calib _work/cb/calib.json --kanit-dir _work/kanit | tee _work/rapor.txt
+          test "$(ls _work/masters_temiz/*_FINAL.jpg | wc -l)" = "$(ls _work/masters/*_FINAL.jpg | wc -l)"
+
+      - name: Render SET03 + SET04 (calib B + temiz master)
+        run: |
+          set +e
+          set -uo pipefail
+          P="${{ inputs.pair }}"
+          mkdir -p _work/out
+          python scripts/etsy/wp_mockup_render.py --calib _work/cb --masters _work/masters_temiz \
+            --pilot _work/pilot --wallpapers _work/wp --pair "$P" --scenes SET03,SET04 \
+            --out _work/out 2>&1 | grep -v '^ *"' | tee -a _work/rapor.txt
+          echo "render cikis kodu: ${PIPESTATUS[0]}" | tee -a _work/rapor.txt
+          for S in SET03 SET04; do cp "_work/out/WA_MOCKUP_V2_${S}_${P}_FINAL.jpg" "_work/son/WA_MOCKUP_V2_${S}_${P}_KASA.jpg"; done
+          cp _work/kanit/K05_*.jpg _work/son/
+          cp _work/masters_temiz/WA_MOCKUP_V2_SET03_Cancer_Libra_FINAL.jpg _work/son/MASTER_KASA_SET03.jpg
+          cp _work/masters_temiz/WA_MOCKUP_V2_SET04_Cancer_Libra_FINAL.jpg _work/son/MASTER_KASA_SET04.jpg
+          ls -l _work/son
+          test -s "_work/son/WA_MOCKUP_V2_SET03_${P}_KASA.jpg" && test -s "_work/son/WA_MOCKUP_V2_SET04_${P}_KASA.jpg"
+
+      - name: Drive'a yaz + anyone:reader
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          rclone mkdir "gdrive:ASTROLOVE/TEMP/FIX_TEST/MASTER_KASA"
+          rclone copy _work/son "gdrive:ASTROLOVE/TEMP/FIX_TEST/MASTER_KASA" --include "*.jpg" || true
+          [ -f _work/rapor.txt ] && rclone copyto _work/rapor.txt "gdrive:ASTROLOVE/TEMP/WP_MASTER_KASA.txt" || true
+          [ -f _work/cb/calib.json ] && rclone copyto _work/cb/calib.json "gdrive:ASTROLOVE/TEMP/FIX_TEST/calib_kasa.json" || true
+          fid="$(rclone lsjson "gdrive:ASTROLOVE/TEMP/FIX_TEST" --dirs-only | python3 _fid.py MASTER_KASA)"
+          : > _work/linkler.txt
+          for PAT in "WA_MOCKUP_V2_" "K05_" "MASTER_KASA_"; do
+            python scripts/pinterest/pin_media_perms.py --mode grant --folder-id "$fid" --pattern "$PAT" --apply \
+              | grep -v '^::add-mask::' | tee -a _work/linkler.txt
+          done
+          rclone copyto _work/linkler.txt "gdrive:ASTROLOVE/TEMP/WP_MASTER_KASA_LINKLER.txt" || true
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: wp-master-kasa
+          path: |
+            _work/rapor.txt
+            _work/linkler.txt
+          if-no-files-found: ignore
+
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone _fid.py
