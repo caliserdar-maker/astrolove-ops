@@ -38,7 +38,8 @@ def main():
     x1 = (q[1][0] + q[2][0]) / 2.0
     y0 = (q[0][1] + q[1][1]) / 2.0
     y1 = (q[2][1] + q[3][1]) / 2.0
-    yeni = [[x0, y0], [x1, y0], [x1, y1], [x0, y1]]
+    yeni = [[float(x0), float(y0)], [float(x1), float(y0)],
+            [float(x1), float(y1)], [float(x0), float(y1)]]
     ust = math.degrees(math.atan2(q[1][1] - q[0][1], q[1][0] - q[0][0]))
     log(f"egik quad : {[[round(float(x), 1), round(float(y), 1)] for x, y in q]}")
     log(f"dik quad  : {[[round(v, 1) for v in p] for p in yeni]}")
