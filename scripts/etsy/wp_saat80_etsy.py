@@ -206,8 +206,11 @@ def set07_degistir(il, lid, pair, mock_dir, apply_, rapor):
     eski = once[SET07_IDX]
     if not apply_:
         return "DRY", f"SET07: eski id {eski['id']} rank {eski['rank']} degisecek"
-    log(f"    SET07: yukle rank {SET07_IDX + 1}")
-    yeni_id = il.upload_image(lid, kaynak[SET07_IDX], SET07_IDX + 1)
+    # Etsy rank'lari ardisik olmayabilir (Leo_Pisces: SET07 rank 6); yeni gorsel eskinin rank'ina girer,
+    # eski bir alta kayar, silinince sira korunur. Dogrulama: 6 gorselin piksel kiyasi.
+    rank = eski["rank"] or (SET07_IDX + 1)
+    log(f"    SET07: yukle rank {rank} (eski id {eski['id']} rank {eski['rank']})")
+    yeni_id = il.upload_image(lid, kaynak[SET07_IDX], rank)
     cur = il.stable(il.images, lid, want=lambda c: len(c) == 7)
     if len(cur) != 7:
         return "FAIL", f"SET07 yukleme sonrasi gorsel {len(cur)} != 7"
