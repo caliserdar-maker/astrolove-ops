@@ -1,0 +1,76 @@
+name: wp-why-probe
+
+# NEDEN DEGISMEDI - SALT OKUM - 5 Eyl 2026. Uretimdeki MOCKUP_V2 ile deneme
+# ciktilari (MOCKUP_CANVA / MOCKUP_FRAME / MOCKUP_GEOM) ayni sahnede
+# karsilastirilir; ayrica geometrik delik ile kalibre maske arasindaki iliski
+# olculur. Hicbir sey yazilmaz (yalniz TEMP'e olcum CSV'si).
+
+on:
+  workflow_dispatch:
+    inputs:
+      pair:
+        description: "Cift"
+        required: true
+        default: "Aries_Aries"
+      scenes:
+        description: "Sahneler"
+        required: true
+        default: "SET03,SET04,SET07"
+
+concurrency:
+  group: wp-why-probe
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+
+      - name: Girdiler
+        run: |
+          set -euo pipefail
+          P="${{ inputs.pair }}"; UP=$(echo "$P" | tr '[:lower:]' '[:upper:]')
+          mkdir -p _work/calib _work/v2 _work/canva _work/frame _work/geom
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CALIB" _work/calib \
+            --include "calib.json" --include "masks/*.png"
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/$UP" _work/v2 --include "*${P}_FINAL.jpg"
+          rclone copy "gdrive:ASTROLOVE/TEMP/FIX_TEST/MOCKUP_CANVA" _work/canva --include "*${P}_FINAL.jpg" || true
+          rclone copy "gdrive:ASTROLOVE/TEMP/FIX_TEST/MOCKUP_FRAME" _work/frame --include "*${P}_FINAL.jpg" || true
+          rclone copy "gdrive:ASTROLOVE/TEMP/FIX_TEST/MOCKUP_GEOM"  _work/geom  --include "*${P}_FINAL.jpg" || true
+          ls -l _work/v2 _work/canva _work/frame _work/geom
+
+      - name: Olcum
+        run: |
+          set -euo pipefail
+          python scripts/etsy/wp_why_probe.py --calib _work/calib \
+            --dirs "MOCKUP_V2=_work/v2,CANVA=_work/canva,FRAME=_work/frame,GEOM=_work/geom" \
+            --pair "${{ inputs.pair }}" --scenes "${{ inputs.scenes }}" \
+            --out _work/WP_WHY_PROBE.csv | tee _work/rapor.txt
+
+      - name: Sonuclari Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/WP_WHY_PROBE.csv ] && rclone copyto _work/WP_WHY_PROBE.csv "gdrive:ASTROLOVE/TEMP/WP_WHY_PROBE.csv" || true
+          [ -f _work/rapor.txt ] && rclone copyto _work/rapor.txt "gdrive:ASTROLOVE/TEMP/WP_WHY_PROBE.txt" || true
+
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
