@@ -67,15 +67,16 @@ def main():
             d2, yar, koseler = hole_shape(soft, quad, inset=a.inset)
             o2, rms2, mx2 = kontur_olc(d2, quad)
             r.update(once_rms=rms1, once_maks=mx1, sonra_rms=rms2, sonra_maks=mx2,
-                     yaricap_px=yar, kose_yaricaplari=str(koseler),
+                     yaricap_medyan=yar, kose_TL=koseler[0], kose_TR=koseler[1],
+                     kose_BL=koseler[2], kose_BR=koseler[3],
                      hedef="PASS" if (mx2 is not None and mx2 < 1.0) else "FAIL")
             for k, v in o1.items():
                 r[f"once_{k}"] = v
             for k, v in o2.items():
                 r[f"sonra_{k}"] = v
             satirlar.append(r)
-            log(f"  {scene}/{s['id']} {s['device']:<7} once rms {rms1} maks {mx1} -> "
-                f"sonra rms {rms2} maks {mx2} | yaricap {yar} px | {r['hedef']}")
+            log(f"  {scene}/{s['id']} {s['device']:<7} kose SOL-UST {koseler[0]} SAG-UST {koseler[1]} "
+                f"SOL-ALT {koseler[2]} SAG-ALT {koseler[3]} (medyan {yar}) | maks {mx1} -> {mx2} | {r['hedef']}")
 
     cols = list(dict.fromkeys(k for r in satirlar for k in r))
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
@@ -87,11 +88,13 @@ def main():
 
     n_ok = sum(1 for r in satirlar if r["hedef"] == "PASS")
     lines = ["## Delik konturu: maskeden -> geometriden", "",
-             "| sahne | ekran | cihaz | once rms | once maks | sonra rms | sonra maks | yaricap px | hedef (<1 px) |",
-             "|---|---|---|---|---|---|---|---|---|"]
+             "| sahne | ekran | cihaz | kose SOL-UST | SAG-UST | SOL-ALT | SAG-ALT | medyan | "
+             "once maks | sonra maks | hedef |",
+             "|---|---|---|---|---|---|---|---|---|---|---|"]
     for r in satirlar:
-        lines.append(f"| {r['sahne']} | {r['ekran']} | {r['cihaz']} | {r['once_rms']} | {r['once_maks']} | "
-                     f"{r['sonra_rms']} | {r['sonra_maks']} | {r['yaricap_px']} | {r['hedef']} |")
+        lines.append(f"| {r['sahne']} | {r['ekran']} | {r['cihaz']} | {r['kose_TL']} | {r['kose_TR']} | "
+                     f"{r['kose_BL']} | {r['kose_BR']} | {r['yaricap_medyan']} | {r['once_maks']} | "
+                     f"{r['sonra_maks']} | {r['hedef']} |")
     mx_once = [r["once_maks"] for r in satirlar if r["once_maks"] is not None]
     mx_sonra = [r["sonra_maks"] for r in satirlar if r["sonra_maks"] is not None]
     lines.append(f"\n**{n_ok}/{len(satirlar)} ekran hedefi tutturdu. En buyuk maks: once "

@@ -269,20 +269,29 @@ def hole_shape(soft, quad, inset=2.0, up=4, delik_min=200):
     Hl = cv2.getPerspectiveTransform(rect, q)
     yerel = cv2.warpPerspective(soft, np.linalg.inv(Hl.astype(np.float64)), (W, H),
                                 flags=cv2.INTER_LINEAR)
-    r, rs = _kose_yaricapi(yerel)
-    ri = max(0.0, r - inset)
+    r, rs = _kose_yaricapi(yerel)                       # rs: SU, SG, AU, AG (TL,TR,BL,BR)
     buyuk = np.zeros((H * up, W * up), np.uint8)
     x0 = int(round(inset * up)); y0 = int(round(inset * up))
     x1 = int(round((W - inset) * up)); y1 = int(round((H - inset) * up))
-    R = int(round(ri * up))
-    R = max(0, min(R, (x1 - x0) // 2, (y1 - y0) // 2))
-    if R > 0:
-        cv2.rectangle(buyuk, (x0 + R, y0), (x1 - R, y1), 255, -1)
-        cv2.rectangle(buyuk, (x0, y0 + R), (x1, y1 - R), 255, -1)
-        for cx, cy in ((x0 + R, y0 + R), (x1 - R, y0 + R), (x0 + R, y1 - R), (x1 - R, y1 - R)):
-            cv2.circle(buyuk, (cx, cy), R, 255, -1)
-    else:
-        cv2.rectangle(buyuk, (x0, y0), (x1, y1), 255, -1)
+    cv2.rectangle(buyuk, (x0, y0), (x1, y1), 255, -1)
+    # 5 Eyl 2026 (Mo): HER KOSE kendi olculen yaricapiyla cizilir; tek medyan
+    # yaricap kullanmak koselerde tasma / bosluk birakiyordu.
+    sinir = min((x1 - x0) // 2, (y1 - y0) // 2)
+    for (rk, kose) in zip(rs, ("TL", "TR", "BL", "BR")):
+        R = int(round(max(0.0, rk - inset) * up))
+        R = max(0, min(R, sinir))
+        if R <= 0:
+            continue
+        if kose == "TL":
+            cx, cy, sx, sy = x0 + R, y0 + R, slice(y0, y0 + R), slice(x0, x0 + R)
+        elif kose == "TR":
+            cx, cy, sx, sy = x1 - R, y0 + R, slice(y0, y0 + R), slice(x1 - R, x1)
+        elif kose == "BL":
+            cx, cy, sx, sy = x0 + R, y1 - R, slice(y1 - R, y1), slice(x0, x0 + R)
+        else:
+            cx, cy, sx, sy = x1 - R, y1 - R, slice(y1 - R, y1), slice(x1 - R, x1)
+        buyuk[sx, sy] = 0
+        cv2.circle(buyuk, (cx, cy), R, 255, -1)
     sekil = cv2.resize(buyuk, (W, H), interpolation=cv2.INTER_AREA).astype(np.float32) / 255.0
 
     # maskenin ic delikleri (centik vb.) sekilden cikarilir
