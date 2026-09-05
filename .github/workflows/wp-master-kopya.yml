@@ -70,7 +70,7 @@ jobs:
           set -euo pipefail
           python scripts/etsy/wp_halka_kopyala.py --calib _work/c0 --calib-b _work/cb/calib.json \
             --masters _work/masters --hedef SET03:3:2 --hedef SET04:1:0 \
-            --disari "${{ inputs.disari }}" --gecis "${{ inputs.gecis }}" \
+            --disari "${{ inputs.disari }}" --gecis "${{ inputs.gecis }}" --hedef-quad yeni \
             --out-dir _work/masters_temiz --kanit-dir _work/kanit | tee _work/rapor.txt
           test "$(ls _work/masters_temiz/*_FINAL.jpg | wc -l)" = "$(ls _work/masters/*_FINAL.jpg | wc -l)"
 
@@ -86,8 +86,8 @@ jobs:
           echo "render cikis kodu: ${PIPESTATUS[0]}" | tee -a _work/rapor.txt
           for S in SET03 SET04; do cp "_work/out/WA_MOCKUP_V2_${S}_${P}_FINAL.jpg" "_work/son/WA_MOCKUP_V2_${S}_${P}_KOPYA.jpg"; done
           cp _work/kanit/K04_*.jpg _work/son/
-          cp _work/masters_temiz/WA_MOCKUP_V2_SET03_Cancer_Libra_FINAL.jpg _work/son/MASTER_KOPYA_SET03.jpg
-          cp _work/masters_temiz/WA_MOCKUP_V2_SET04_Cancer_Libra_FINAL.jpg _work/son/MASTER_KOPYA_SET04.jpg
+          cp _work/masters_temiz/WA_MOCKUP_V2_SET03_Cancer_Libra_FINAL.jpg _work/son/MASTER_KOPYA2_SET03.jpg
+          cp _work/masters_temiz/WA_MOCKUP_V2_SET04_Cancer_Libra_FINAL.jpg _work/son/MASTER_KOPYA2_SET04.jpg
           ls -l _work/son
           test -s "_work/son/WA_MOCKUP_V2_SET03_${P}_KOPYA.jpg" && test -s "_work/son/WA_MOCKUP_V2_SET04_${P}_KOPYA.jpg"
 
@@ -95,16 +95,16 @@ jobs:
         if: ${{ always() }}
         run: |
           set -euo pipefail
-          rclone mkdir "gdrive:ASTROLOVE/TEMP/FIX_TEST/MASTER_KOPYA"
-          rclone copy _work/son "gdrive:ASTROLOVE/TEMP/FIX_TEST/MASTER_KOPYA" --include "*.jpg" || true
-          [ -f _work/rapor.txt ] && rclone copyto _work/rapor.txt "gdrive:ASTROLOVE/TEMP/WP_MASTER_KOPYA.txt" || true
-          fid="$(rclone lsjson "gdrive:ASTROLOVE/TEMP/FIX_TEST" --dirs-only | python3 _fid.py MASTER_KOPYA)"
+          rclone mkdir "gdrive:ASTROLOVE/TEMP/FIX_TEST/MASTER_KOPYA2"
+          rclone copy _work/son "gdrive:ASTROLOVE/TEMP/FIX_TEST/MASTER_KOPYA2" --include "*.jpg" || true
+          [ -f _work/rapor.txt ] && rclone copyto _work/rapor.txt "gdrive:ASTROLOVE/TEMP/WP_MASTER_KOPYA2.txt" || true
+          fid="$(rclone lsjson "gdrive:ASTROLOVE/TEMP/FIX_TEST" --dirs-only | python3 _fid.py MASTER_KOPYA2)"
           : > _work/linkler.txt
-          for PAT in "WA_MOCKUP_V2_" "K04_" "MASTER_KOPYA_"; do
+          for PAT in "WA_MOCKUP_V2_" "K04_" "MASTER_KOPYA2_"; do
             python scripts/pinterest/pin_media_perms.py --mode grant --folder-id "$fid" --pattern "$PAT" --apply \
               | grep -v '^::add-mask::' | tee -a _work/linkler.txt
           done
-          rclone copyto _work/linkler.txt "gdrive:ASTROLOVE/TEMP/WP_MASTER_KOPYA_LINKLER.txt" || true
+          rclone copyto _work/linkler.txt "gdrive:ASTROLOVE/TEMP/WP_MASTER_KOPYA2_LINKLER.txt" || true
 
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
