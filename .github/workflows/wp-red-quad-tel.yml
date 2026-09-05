@@ -1,0 +1,152 @@
+name: wp-red-quad-tel
+
+# TELEFON EKRANLARI ICIN KIRMIZI ISARET YONTEMI (SET03/3, SET04/1) - 5 Eyl 2026.
+# mod=hazirla: uretim mockup'i + mevcut quad'lar 2 px mavi -> MO_ISARET/SABLON_*.
+# mod=uygula : Mo'nun kirmizi isaretli iki dosyasindan quad okunur, dik dortgene
+#              oturtulur, calib KOPYASINA yazilir (+ o iki ekranda cerceve-ustte,
+#              delik=quad), SET03+SET04 uretilir. Diger 12 ekran dokunulmaz.
+# Uretim calib.json, MOCKUP_V2, DELIVERY, ZIP, Etsy DEGISMEZ.
+
+on:
+  workflow_dispatch:
+    inputs:
+      mod:
+        description: "hazirla | uygula"
+        required: true
+        default: "hazirla"
+      pair:
+        description: "Cift"
+        required: true
+        default: "Aries_Aries"
+      isaret3:
+        description: "uygula: SET03 isaretli dosya (ASTROLOVE altinda yol)"
+        required: false
+        default: ""
+      isaret4:
+        description: "uygula: SET04 isaretli dosya (ASTROLOVE altinda yol)"
+        required: false
+        default: ""
+      disari:
+        description: "Wallpaper quad disina tasma (px)"
+        required: true
+        default: "4"
+
+concurrency:
+  group: wp-red-quad-tel
+  cancel-in-progress: false
+
+jobs:
+  tel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+          cat > _fid.py <<'PY'
+          import json, sys
+          print([r["ID"] for r in json.load(sys.stdin) if r["Name"] == sys.argv[1]][0])
+          PY
+
+      - name: Girdiler
+        run: |
+          set -euo pipefail
+          P="${{ inputs.pair }}"; UP=$(echo "$P" | tr '[:lower:]' '[:upper:]')
+          mkdir -p _work/c0 _work/masters _work/uretim _work/son
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CALIB" _work/c0 --include "calib.json" --include "masks/*.png"
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/CANCER_LIBRA" _work/masters --include "*_FINAL.jpg"
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/$UP" _work/uretim --include "WA_MOCKUP_V2_SET03_*" --include "WA_MOCKUP_V2_SET04_*"
+          rclone mkdir "gdrive:ASTROLOVE/TEMP/MO_ISARET"
+
+      - name: HAZIRLA - sablonlar
+        if: ${{ inputs.mod == 'hazirla' }}
+        run: |
+          set -euo pipefail
+          P="${{ inputs.pair }}"
+          mkdir -p _work/sablon
+          for S in SET03 SET04; do
+            python scripts/etsy/wp_quad_ciz.py --gorsel "_work/uretim/WA_MOCKUP_V2_${S}_${P}_FINAL.jpg" \
+              --calib-json _work/c0/calib.json --scene "$S" --screen -1 --kalinlik 2 --bgr "255,0,0" \
+              --out "_work/sablon/SABLON_${S}_${P}_TEL.jpg" | tee -a _work/rapor.txt
+          done
+          rclone copy _work/sablon "gdrive:ASTROLOVE/TEMP/MO_ISARET" --include "SABLON_*_TEL.jpg"
+          fid="$(rclone lsjson "gdrive:ASTROLOVE/TEMP" --dirs-only | python3 _fid.py MO_ISARET)"
+          python scripts/pinterest/pin_media_perms.py --mode grant --folder-id "$fid" --pattern "_TEL.jpg" --apply \
+            | grep -v '^::add-mask::' | tee _work/linkler.txt
+
+      - name: UYGULA - kirmizi konturdan quad (KOPYA calib)
+        if: ${{ inputs.mod == 'uygula' }}
+        run: |
+          set -euo pipefail
+          P="${{ inputs.pair }}"
+          mkdir -p _work/isaret _work/c1/masks _work/kanit
+          cp -r _work/c0/masks/. _work/c1/masks/
+          rclone copyto "gdrive:ASTROLOVE/${{ inputs.isaret3 }}" "_work/isaret/set03.jpg"
+          rclone copyto "gdrive:ASTROLOVE/${{ inputs.isaret4 }}" "_work/isaret/set04.jpg"
+          echo "=== SET03 ekran 3 ===" | tee _work/rapor.txt
+          python scripts/etsy/wp_red_quad.py --calib _work/c0 --masters _work/masters --isaret _work/isaret/set03.jpg \
+            --scene SET03 --screen 3 --dik --frame-top-quad "${{ inputs.disari }}" \
+            --out-calib _work/c1/calib.json --kanit "_work/kanit/K02_SET03_S3_QUAD.jpg" | tee -a _work/rapor.txt
+          echo "=== SET04 ekran 1 ===" | tee -a _work/rapor.txt
+          python scripts/etsy/wp_red_quad.py --calib _work/c0 --calib-json _work/c1/calib.json --masters _work/masters \
+            --isaret _work/isaret/set04.jpg --scene SET04 --screen 1 --dik --frame-top-quad "${{ inputs.disari }}" \
+            --out-calib _work/c1/calib.json --kanit "_work/kanit/K02_SET04_S1_QUAD.jpg" | tee -a _work/rapor.txt
+
+      - name: UYGULA - render SET03 + SET04
+        if: ${{ inputs.mod == 'uygula' }}
+        run: |
+          set +e
+          set -uo pipefail
+          P="${{ inputs.pair }}"; UP=$(echo "$P" | tr '[:lower:]' '[:upper:]')
+          mkdir -p _work/pilot _work/wp _work/out
+          rclone copy "gdrive:ASTROLOVE/ARCHIVE/FINAL_V2_PILOT_V1" _work/pilot --include "AstroLove_*.jpg"
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/$UP" _work/wp --include "AstroLove_*.jpg"
+          python scripts/etsy/wp_mockup_render.py --calib _work/c1 --masters _work/masters \
+            --pilot _work/pilot --wallpapers _work/wp --pair "$P" --scenes SET03,SET04 \
+            --out _work/out 2>&1 | grep -v '^ *"' | tee -a _work/rapor.txt
+          echo "render cikis kodu: ${PIPESTATUS[0]}" | tee -a _work/rapor.txt
+          cp _work/out/WA_MOCKUP_V2_*.jpg _work/son/
+          cp _work/kanit/K02_*.jpg _work/son/
+          ls -l _work/son
+          rclone mkdir "gdrive:ASTROLOVE/TEMP/FIX_TEST/MOCKUP_REDQUAD_TEL"
+          rclone copy _work/son "gdrive:ASTROLOVE/TEMP/FIX_TEST/MOCKUP_REDQUAD_TEL" --include "*.jpg"
+          rclone copyto _work/c1/calib.json "gdrive:ASTROLOVE/TEMP/FIX_TEST/calib_redquad_tel.json"
+          fid="$(rclone lsjson "gdrive:ASTROLOVE/TEMP/FIX_TEST" --dirs-only | python3 _fid.py MOCKUP_REDQUAD_TEL)"
+          : > _work/linkler.txt
+          for PAT in "WA_MOCKUP_V2_" "K02_"; do
+            python scripts/pinterest/pin_media_perms.py --mode grant --folder-id "$fid" --pattern "$PAT" --apply \
+              | grep -v '^::add-mask::' | tee -a _work/linkler.txt
+          done
+
+      - name: Rapor
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/rapor.txt ] && rclone copyto _work/rapor.txt "gdrive:ASTROLOVE/TEMP/WP_RED_QUAD_TEL.txt" || true
+          [ -f _work/linkler.txt ] && rclone copyto _work/linkler.txt "gdrive:ASTROLOVE/TEMP/WP_RED_QUAD_TEL_LINKLER.txt" || true
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: wp-red-quad-tel
+          path: |
+            _work/rapor.txt
+            _work/linkler.txt
+          if-no-files-found: ignore
+
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone _fid.py
