@@ -37,6 +37,10 @@ on:
         description: "Wallpaper cikti klasoru (ASTROLOVE altinda)"
         required: true
         default: "WALLPAPER/FINAL_V2"
+      watch_dir:
+        description: "Asama b: Canva saat klasoru (ASTROLOVE altinda; bos = FINAL_V2 saati)"
+        required: false
+        default: ""
 
 concurrency:
   group: wp-night-${{ inputs.stage }}
@@ -163,6 +167,7 @@ jobs:
                 --state-remote "gdrive:ASTROLOVE/TEMP/WP_NIGHT_STATE_${{ inputs.stage }}_${{ matrix.shard }}.csv")
           cp _work/STATE.csv "_work/STATE_${{ matrix.shard }}.csv"
           if [ "${{ inputs.force }}" = "true" ]; then args+=(--force); fi
+          if [ -n "${{ inputs.watch_dir }}" ]; then args+=(--watch-dir "${{ inputs.watch_dir }}"); fi
           # asama d: kurulum PDF'i ZIP'lere 6. girdi olarak girer (4 Eyl 2026 karari)
           if [ -f _work/HOW_TO_SET_YOUR_WALLPAPER.pdf ]; then args+=(--guide _work/HOW_TO_SET_YOUR_WALLPAPER.pdf); fi
           python scripts/etsy/wp_night.py "${args[@]}"
