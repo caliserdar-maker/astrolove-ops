@@ -126,12 +126,61 @@ def homografi(isaret, master, kirmizi):
     return H, n_ic
 
 
-def kirmizi_maske(img):
+def renk_maske(img, renk="kirmizi"):
+    """kirmizi: R yuksek, G/B dusuk. yesil: G yuksek, R dusuk (turkuaz dahil)."""
     b, g, r = (img[..., i].astype(np.int16) for i in range(3))
-    m = (r >= R_MIN) & ((r - np.maximum(g, b)) >= FARK_MIN)
+    if renk == "kirmizi":
+        m = (r >= R_MIN) & ((r - np.maximum(g, b)) >= FARK_MIN)
+    else:
+        m = (g >= 90) & ((g - r) >= FARK_MIN)
     m = m.astype(np.uint8) * 255
     k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (KAPAT, KAPAT))
     return cv2.morphologyEx(m, cv2.MORPH_CLOSE, k)
+
+
+def kirmizi_maske(img):
+    return renk_maske(img, "kirmizi")
+
+
+def quad_oku(maske, ad):
+    """Cizginin ORTA hattini veren dort kose (dis ve ic konturun ortalamasi)."""
+    say = int((maske > 0).sum())
+    log(f"{ad} piksel: {say}")
+    if say < 200:
+        return None
+    cnts, hier = cv2.findContours(maske, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+    if not cnts:
+        log(f"  {ad}: kontur yok")
+        return None
+    dis_i = max(range(len(cnts)), key=lambda i: cv2.contourArea(cnts[i]))
+    q_dis, yon_dis = dort_kose(cnts[dis_i])
+    log(f"  {ad} dis kontur alani {cv2.contourArea(cnts[dis_i]):.0f} px ({yon_dis})")
+    cocuklar = [i for i in range(len(cnts)) if hier[0][i][3] == dis_i]
+    if cocuklar:
+        ic_i = max(cocuklar, key=lambda i: cv2.contourArea(cnts[i]))
+        q_ic, yon_ic = dort_kose(cnts[ic_i])
+        log(f"  {ad} ic kontur alani {cv2.contourArea(cnts[ic_i]):.0f} px ({yon_ic}) -> orta hat")
+        return (sirala(q_dis) + sirala(q_ic)) / 2.0
+    log(f"  {ad}: ic kontur yok -> dis kontur")
+    return sirala(q_dis)
+
+
+def dikdortgen(q):
+    """Yamuklugu duzelt: merkezi ve boyu koruyarak eksene otur."""
+    q = np.asarray(q, np.float64)
+    x0 = (q[0][0] + q[3][0]) / 2.0
+    x1 = (q[1][0] + q[2][0]) / 2.0
+    y0 = (q[0][1] + q[1][1]) / 2.0
+    y1 = (q[2][1] + q[3][1]) / 2.0
+    return np.array([[x0, y0], [x1, y0], [x1, y1], [x0, y1]], np.float64)
+
+
+def yaz_quad(ad, q):
+    log(f"  {ad}: {[[round(float(x), 1), round(float(y), 1)] for x, y in q]}")
+
+
+def kaymalar(q1, q2):
+    return [round(math.hypot(q1[i][0] - q2[i][0], q1[i][1] - q2[i][1]), 2) for i in range(4)]
 
 
 def dort_kose(cnt):
