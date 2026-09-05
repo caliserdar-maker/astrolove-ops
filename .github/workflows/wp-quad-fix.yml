@@ -1,0 +1,111 @@
+name: wp-quad-fix
+
+# QUAD DUZELTMESI (KOPYA CALIB) + UC SAHNE YENIDEN URETIM - 5 Eyl 2026.
+# Gercek ekran siniri KROMA ile olculur (luminans gradyani kullanilmaz),
+# quad'lar kopya calib.json'da duzeltilir ve yalniz secilen sahneler yeniden
+# uretilir. ORIJINAL calib.json, FINAL_V2, MOCKUP_V2, DELIVERY, ZIP ve Etsy
+# DEGISMEZ; cikti TEMP/FIX_TEST/MOCKUP_QUADFIX.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pair:
+        description: "Cift"
+        required: true
+        default: "Aries_Aries"
+      scenes:
+        description: "Sahneler"
+        required: true
+        default: "SET03,SET04,SET07"
+      frame:
+        description: "<disari_px>:<delik_erode_px>"
+        required: true
+        default: "4:2"
+
+concurrency:
+  group: wp-quad-fix
+  cancel-in-progress: false
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+
+      - name: Girdiler
+        run: |
+          set -euo pipefail
+          P="${{ inputs.pair }}"; UP=$(echo "$P" | tr '[:lower:]' '[:upper:]')
+          mkdir -p _work/calib _work/masters _work/pilot _work/wp _work/v2 _work/out
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CALIB" _work/calib \
+            --include "calib.json" --include "masks/*.png"
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/CANCER_LIBRA" _work/masters --include "*_FINAL.jpg"
+          rclone copy "gdrive:ASTROLOVE/ARCHIVE/FINAL_V2_PILOT_V1" _work/pilot --include "AstroLove_*.jpg"
+          test "$(ls _work/pilot | wc -l)" = "16"
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/$UP" _work/wp --include "AstroLove_*.jpg"
+          rclone copy "gdrive:ASTROLOVE/TEMP/FIX_TEST/WATCH_CANVA/$UP" _work/wp --include "AstroLove_*_Watch.jpg"
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/$UP" _work/v2 --include "*${P}_FINAL.jpg"
+          ls -l _work/wp | head -5
+
+      - name: Olcum + duzeltilmis calib (KOPYA)
+        run: |
+          set -euo pipefail
+          mkdir -p _work/calib_fix/masks
+          cp -r _work/calib/masks/. _work/calib_fix/masks/
+          python scripts/etsy/wp_quad_fix.py --calib _work/calib --masters _work/masters \
+            --render-dir _work/v2 --pair "${{ inputs.pair }}" --scenes "${{ inputs.scenes }}" \
+            --out-calib _work/calib_fix/calib.json --out _work/WP_QUAD_FIX.csv | tee _work/rapor.txt
+
+      - name: Render (duzeltilmis quad, cerceve-ustte)
+        run: |
+          set -euo pipefail
+          python scripts/etsy/wp_mockup_render.py --calib _work/calib_fix --masters _work/masters \
+            --pilot _work/pilot --wallpapers _work/wp --pair "${{ inputs.pair }}" \
+            --scenes "${{ inputs.scenes }}" --frame-on-top "${{ inputs.frame }}" --no-relight \
+            --out _work/out | tee -a _work/rapor.txt
+          find _work/out -maxdepth 1 -name "*.jpg" -exec ls -l {} \;
+
+      - name: Drive'a yaz + anyone:reader
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -d _work/out ] && rclone copy _work/out "gdrive:ASTROLOVE/TEMP/FIX_TEST/MOCKUP_QUADFIX" --include "*.jpg" || true
+          [ -f _work/WP_QUAD_FIX.csv ] && rclone copyto _work/WP_QUAD_FIX.csv "gdrive:ASTROLOVE/TEMP/WP_QUAD_FIX.csv" || true
+          [ -f _work/calib_fix/calib.json ] && rclone copyto _work/calib_fix/calib.json "gdrive:ASTROLOVE/TEMP/FIX_TEST/calib_quadfix.json" || true
+          [ -f _work/rapor.txt ] && rclone copyto _work/rapor.txt "gdrive:ASTROLOVE/TEMP/WP_QUAD_FIX.txt" || true
+          cat > _fid.py <<'PY'
+          import json, sys
+          print([r["ID"] for r in json.load(sys.stdin) if r["Name"] == sys.argv[1]][0])
+          PY
+          fid="$(rclone lsjson "gdrive:ASTROLOVE/TEMP/FIX_TEST" --dirs-only | python3 _fid.py MOCKUP_QUADFIX)"
+          python scripts/pinterest/pin_media_perms.py --mode grant --folder-id "$fid" \
+            --pattern "WA_MOCKUP_V2_" --apply
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: wp-quad-fix
+          path: |
+            _work/WP_QUAD_FIX.csv
+            _work/rapor.txt
+          if-no-files-found: ignore
+
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone _fid.py
