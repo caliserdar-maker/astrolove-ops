@@ -21,6 +21,8 @@ def main():
     ap.add_argument("--scene", required=True)
     ap.add_argument("--screen", type=int, required=True)
     ap.add_argument("--quad", required=True, help="JSON: [[x,y],[x,y],[x,y],[x,y]] TL,TR,BR,BL")
+    ap.add_argument("--frame-top-quad", type=int, default=-1,
+                    help="verilirse ekrana cerceve-ustte + delik=quad bayragi yazilir (deger: disari px)")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
 
@@ -41,6 +43,9 @@ def main():
     log(f"  yeni quad: {quad}")
     log(f"  kose kaymasi: {kayma} px | en buyuk {max(kayma)} px")
     hedef["quad"] = [[float(x), float(y)] for x, y in quad]
+    if a.frame_top_quad >= 0:
+        hedef["frame_top"] = {"disari": a.frame_top_quad, "delik": "quad"}
+        log(f"  frame_top: disari {a.frame_top_quad} px, delik = quad (yalniz bu ekran)")
     Path(a.out).write_text(json.dumps(calib, indent=1))
     log(f"{a.out}: quad yazildi (orijinale dokunulmadi)")
     return 0
