@@ -210,26 +210,7 @@ jobs:
           set -euo pipefail
           mkdir -p _s
           rclone copy "gdrive:ASTROLOVE/TEMP" _s --include "WP_NIGHT_STATE*.csv"
-          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
-          import csv, glob, collections
-          rows = {}
-          for f in sorted(glob.glob("_s/WP_NIGHT_STATE*.csv")):
-              for r in csv.reader(open(f, encoding="utf-8")):
-                  if len(r) >= 5 and r[0] != "pair":
-                      rows[(r[0], r[1])] = r          # son yazan kazanir (ts sirali degil; PASS onceligi asagida)
-          for k, r in list(rows.items()):
-              pass
-          out = "_s/WP_NIGHT_STATE.csv"
-          with open(out, "w", newline="", encoding="utf-8") as fh:
-              w = csv.writer(fh); w.writerow(["pair", "stage", "status", "ts_utc", "detail"])
-              for k in sorted(rows): w.writerow(rows[k])
-          c = collections.Counter((r[1], r[2]) for r in rows.values())
-          print("## gece STATE ozeti\n")
-          for (stage, status), n in sorted(c.items()):
-              print(f"- asama {stage}: {status} {n}")
-          fails = [r[0] for r in rows.values() if r[2] != "PASS"]
-          if fails: print("\nFAIL ciftler: " + ", ".join(sorted(set(fails))))
-          PY
+          python scripts/etsy/wp_state_merge.py _s _s/WP_NIGHT_STATE.csv | tee -a "$GITHUB_STEP_SUMMARY"
           rclone copyto _s/WP_NIGHT_STATE.csv "gdrive:ASTROLOVE/TEMP/WP_NIGHT_STATE.csv"
       - if: ${{ always() }}
         run: rm -rf _s ~/.config/rclone

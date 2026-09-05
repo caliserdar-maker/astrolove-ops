@@ -1,0 +1,35 @@
+name: wp-state-merge
+
+# WP_NIGHT_STATE parcalarini yeniden birlestirir (en yeni ts kazanir). Uretim yok, Etsy yok.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Birlestir
+        run: |
+          set -euo pipefail
+          mkdir -p _s
+          rclone copy "gdrive:ASTROLOVE/TEMP" _s --include "WP_NIGHT_STATE*.csv"
+          python scripts/etsy/wp_state_merge.py _s _s/WP_NIGHT_STATE.csv | tee -a "$GITHUB_STEP_SUMMARY"
+          rclone copyto _s/WP_NIGHT_STATE.csv "gdrive:ASTROLOVE/TEMP/WP_NIGHT_STATE.csv"
+      - if: ${{ always() }}
+        run: rm -rf _s ~/.config/rclone
