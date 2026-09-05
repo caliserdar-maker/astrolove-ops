@@ -11,6 +11,11 @@ import argparse
 import json
 from pathlib import Path
 
+import cv2
+import numpy as np
+
+DEVICES = {"Phone": (1440, 3200), "Tablet": (2048, 2732), "Desktop": (3840, 2160), "Watch": (1000, 1220)}
+
 DEGISEN = {("SET07", 1): "set07", ("SET03", 3): "kasa", ("SET04", 1): "kasa"}
 
 
@@ -50,6 +55,15 @@ def main():
             eski_q = h["quad"]
             h["quad"] = o["quad"]
             h["frame_top"] = o["frame_top"]
+            # quad degistiyse scale ve H de quad'dan yeniden turetilir (QC geri tespiti
+            # screen["scale"] +-0.02 araliginda sablon arar; eski olcek kalirsa FAIL).
+            if json.dumps(o["quad"]) != json.dumps(eski_q):
+                w, hh = DEVICES[h["device"]]
+                q = np.asarray(o["quad"], np.float32)
+                h["scale"] = float(np.linalg.norm(q[1] - q[0]) / w)
+                Hm = cv2.getPerspectiveTransform(np.float32([[0, 0], [w, 0], [w, hh], [0, hh]]), q)
+                h["H"] = [[float(x) for x in r] for r in Hm]
+                print(f"   scale {ekran(u, sahne, eid)['scale']:.4f} -> {h['scale']:.4f}, H yeniden")
             print(f"{sahne}/{eid} <- {k}: quad {[[round(x, 1) for x in p] for p in eski_q]} -> "
                   f"{[[round(x, 1) for x in p] for p in o['quad']]} | frame_top {o['frame_top']}")
     if n_ayni != 11:
