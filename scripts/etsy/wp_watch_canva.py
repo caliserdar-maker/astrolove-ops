@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """
-CANVA SAAT SAYFALARI -> CIFT ESLEME (5 Eyl 2026, Mo). Yalniz Midnight_Blue.
+CANVA SAAT SAYFALARI -> CIFT ESLEME (5 Eyl 2026, Mo). Edisyon --edition ile (4 edisyon).
+
+SAAT %80 (5 Eyl aksam): her sayfa ayni ciftin FINAL_V2 (100%) saatiyle kiyaslanir:
+  sembol kutusu orani (genislik/yukseklik) 0.78-0.82, kutu disi arka plan farki <= 1.0.
+Biri bile gecmezse FAIL, hicbir dosya yazilmaz.
 
 Canva API sayfa basligi vermiyor (design_content bos: sayfalarda metin yok).
 Bu yuzden esleme ICERIKTEN yapilir: her sayfanin murekkep maskesi, 78 ciftin
@@ -28,6 +32,29 @@ from wp_mockup_common import DEVICES, EDITIONS, imread, imwrite_jpeg, ink_mask, 
 IOU_MIN = 0.50
 MARJ = 1.25
 ED = "Midnight_Blue"
+ORAN_MIN, ORAN_MAX, BG_MAX = 0.78, 0.82, 1.0
+
+
+def kutu(ink):
+    ys, xs = np.where(ink)
+    if len(xs) < 50:
+        return None
+    return (int(np.percentile(xs, 0.5)), int(np.percentile(ys, 0.5)), int(np.percentile(xs, 99.5)), int(np.percentile(ys, 99.5)))
+
+
+def saat80_qc(yeni, ref):
+    """(oran_w, oran_h, bg_fark, PASS/FAIL) - yeni %80 saat vs referans %100 saat."""
+    ky, kr = kutu(ink_mask(yeni) > 0), kutu(ink_mask(ref) > 0)
+    if not ky or not kr:
+        return 0.0, 0.0, 999.0, "FAIL kutu"
+    ow = (ky[2] - ky[0]) / max(1, kr[2] - kr[0]); oh = (ky[3] - ky[1]) / max(1, kr[3] - kr[1])
+    m = np.ones(ref.shape[:2], bool)
+    for k in (ky, kr):
+        m[max(0, k[1] - 6):k[3] + 7, max(0, k[0] - 6):k[2] + 7] = False
+    d = np.abs(ref.astype(np.int16) - yeni.astype(np.int16)).mean(axis=2)
+    bg = float(d[m].mean()) if m.any() else 999.0
+    ok = ORAN_MIN <= ow <= ORAN_MAX and ORAN_MIN <= oh <= ORAN_MAX and bg <= BG_MAX
+    return ow, oh, bg, "PASS" if ok else "FAIL qc"
 
 
 def zemin_bgr(img, ink):
@@ -41,6 +68,7 @@ def iou(a, b):
 
 
 def main():
+    global ED
     ap = argparse.ArgumentParser()
     ap.add_argument("--pages", required=True, help="sayfa dosyalari (page_NN.png/jpg)")
     ap.add_argument("--ref", required=True, help="FINAL_V2 koku (<UP>/AstroLove_<Cift>_<Ed>_Watch.jpg)")
@@ -48,7 +76,9 @@ def main():
     ap.add_argument("--sira", default=str(Path(__file__).parent / "watch_sayfa_sirasi.txt"))
     ap.add_argument("--out", required=True)
     ap.add_argument("--report", required=True)
+    ap.add_argument("--edition", default=ED, choices=EDITIONS)
     a = ap.parse_args()
+    ED = a.edition
     pairs = [r[0].strip() for r in csv.reader(open(a.pairs, encoding="utf-8")) if r and r[0].strip() and r[0] != "pair"]
     FIX = {"VIGRO": "VIRGO"}
     sira = []
@@ -60,7 +90,7 @@ def main():
                       key=lambda p: int(re.findall(r"\d+", p.stem)[-1]))
     log(f"sayfa {len(sayfalar)}, cift {len(pairs)}")
     # referans murekkepler (MB) + zemin renkleri (4 edisyon; edisyon tespiti icin)
-    ref_ink, zeminler = {}, {ed: [] for ed in EDITIONS}
+    ref_ink, ref_img, zeminler = {}, {}, {ed: [] for ed in EDITIONS}
     for p in pairs:
         up = p.upper()
         for ed in EDITIONS:
@@ -73,6 +103,7 @@ def main():
             ik = ink_mask(im) > 0
             if ed == ED:
                 ref_ink[p] = ik
+                ref_img[p] = im
             zeminler[ed].append(zemin_bgr(im, ik))
     zemin_ed = {ed: np.median(np.stack(v), axis=0) for ed, v in zeminler.items() if v}
     satirlar, esleme, hata = [], {}, []
@@ -95,23 +126,28 @@ def main():
             durum = "FAIL esleme"
         if ed != ED:
             durum = "FAIL edisyon"
+        ow = oh = bg = 0.0
+        if durum == "PASS":
+            ow, oh, bg, q = saat80_qc(im, ref_img[p1])
+            if q != "PASS":
+                durum = q
         if durum == "PASS":
             if p1 in esleme:
                 durum = f"FAIL cift sayfa ({esleme[p1]})"
             else:
                 esleme[p1] = no
         if durum != "PASS":
-            hata.append(f"sayfa {no}: {durum} (en iyi {p1} {s1:.3f}, ikinci {p2} {s2:.3f}, zemin {ed})")
-        satirlar.append([no, f.name, p1, f"{s1:.3f}", f"{p2}:{s2:.3f}", ed, durum + ("" if bekl == p1 else f" | sira farki: beklenen {bekl}")])
-        log(f"  sayfa {no:2d}: {p1:<24} IoU {s1:.3f} (2. {p2} {s2:.3f}) zemin {ed} {durum}"
+            hata.append(f"sayfa {no}: {durum} (en iyi {p1} {s1:.3f}, ikinci {p2} {s2:.3f}, zemin {ed}, oran {ow:.3f}/{oh:.3f}, bg {bg:.3f})")
+        satirlar.append([no, f.name, p1, f"{s1:.3f}", f"{p2}:{s2:.3f}", ed, f"{ow:.3f}", f"{oh:.3f}", f"{bg:.3f}", durum + ("" if bekl == p1 else f" | sira farki: beklenen {bekl}")])
+        log(f"  sayfa {no:2d}: {p1:<24} IoU {s1:.3f} (2. {p2} {s2:.3f}) zemin {ed} oran {ow:.3f}/{oh:.3f} bg {bg:.3f} {durum}"
             + ("" if bekl == p1 else f" | SIRA FARKI beklenen {bekl}"))
     eksik = sorted(set(pairs) - set(esleme))
     fazla = [p for p in esleme if p not in pairs]
     with open(a.report, "w", newline="", encoding="utf-8") as fh:
         w = csv.writer(fh)
-        w.writerow(["sayfa", "dosya", "cift", "iou", "ikinci", "zemin_edisyon", "durum"])
+        w.writerow(["sayfa", "dosya", "cift", "iou", "ikinci", "zemin_edisyon", "oran_w", "oran_h", "bg_fark", "durum"])
         w.writerows(satirlar)
-        w.writerow(["OZET", f"sayfa {len(sayfalar)}", f"eslesen {len(esleme)}", f"eksik {len(eksik)}", f"fazla {len(fazla)}", "", "PASS" if not (hata or eksik or fazla) else "FAIL"])
+        w.writerow(["OZET", ED, f"sayfa {len(sayfalar)}", f"eslesen {len(esleme)}", f"eksik {len(eksik)}", f"fazla {len(fazla)}", "", "", "", "PASS" if not (hata or eksik or fazla) else "FAIL"])
     if hata or eksik or fazla or len(esleme) != len(pairs):
         for h_ in hata:
             log("HATA " + h_)
@@ -125,7 +161,7 @@ def main():
         (Path(a.out) / up).mkdir(parents=True, exist_ok=True)
         imwrite_jpeg(Path(a.out) / up / f"AstroLove_{p}_{ED}_Watch.jpg", imread(sayfalar[no - 1]))
     sira_fark = sum(1 for i, f in enumerate(sayfalar) if i < len(sira) and satirlar[i][2] != sira[i])
-    log(f"SONUC PASS: {len(esleme)} sayfa -> {len(esleme)} cift, sira farki {sira_fark}, yazildi {a.out}")
+    log(f"SONUC PASS {ED}: {len(esleme)} sayfa -> {len(esleme)} cift, sira farki {sira_fark}, yazildi {a.out}")
 
 
 if __name__ == "__main__":
