@@ -9,6 +9,12 @@ calib.json'a dokunulmaz.
 
 Cizgi kalinligi icin: konturun disi ve (varsa) ici ayri okunur, iki quad'in
 ortalamasi cizginin ORTA hatti sayilir.
+
+Isaretli gorsel ekran goruntusu olabilir (kucultulmus VE kirpilmis). Bu yuzden
+olcek/ofset gorsel boyutundan degil, SAHNENIN KENDISINDEN cikarilir: kirmizi
+pikseller disarida birakilarak isaret ile master arasinda ozellik eslemesi
+yapilir, RANSAC ile homografi kurulur ve kirmizi koseler master koordinatina
+o homografi ile tasinir. Esleme tutmazsa tam kare olcegi yedek yoldur.
 """
 import argparse
 import json
@@ -26,6 +32,47 @@ R_MIN = 100          # kirmizi sayilmak icin en az R
 FARK_MIN = 45        # R - max(G,B)
 KAPAT = 5            # morfolojik kapatma cekirdegi
 KUCUK_KAYMA = 6.0    # kose kaymasi bunun altindaysa DUR (Mo: 4-5 px yanlis)
+EN_BUYUK = 1600      # esleme icin kucultulecek en buyuk kenar
+EN_AZ_ICERIDE = 15   # RANSAC ic nokta alt siniri
+
+
+def _kucult(img, en_buyuk=EN_BUYUK):
+    s = min(1.0, en_buyuk / max(img.shape[:2]))
+    if s >= 1.0:
+        return img, 1.0
+    return cv2.resize(img, None, fx=s, fy=s, interpolation=cv2.INTER_AREA), s
+
+
+def homografi(isaret, master, kirmizi):
+    """isaret -> master donusumu (sahne icerigine gore, gorsel boyutuna gore degil)."""
+    yok = cv2.dilate(kirmizi, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15)))
+    m_isaret = cv2.bitwise_not(yok)
+    a, sa = _kucult(cv2.cvtColor(isaret, cv2.COLOR_BGR2GRAY))
+    b, sb = _kucult(cv2.cvtColor(master, cv2.COLOR_BGR2GRAY))
+    ma = cv2.resize(m_isaret, (a.shape[1], a.shape[0]), interpolation=cv2.INTER_NEAREST)
+    try:
+        det = cv2.SIFT_create(nfeatures=6000)
+    except AttributeError:
+        det = cv2.ORB_create(nfeatures=6000)
+    ka, da = det.detectAndCompute(a, ma)
+    kb, db = det.detectAndCompute(b, None)
+    if da is None or db is None or len(ka) < 10 or len(kb) < 10:
+        log("  esleme: yeterli ozellik yok")
+        return None, 0
+    norm = cv2.NORM_L2 if da.dtype == np.float32 else cv2.NORM_HAMMING
+    esler = cv2.BFMatcher(norm).knnMatch(da, db, k=2)
+    iyi = [m for m, n in (e for e in esler if len(e) == 2) if m.distance < 0.75 * n.distance]
+    log(f"  esleme: {len(ka)} + {len(kb)} nokta, {len(iyi)} iyi es")
+    if len(iyi) < EN_AZ_ICERIDE:
+        return None, len(iyi)
+    src = np.float32([ka[m.queryIdx].pt for m in iyi]).reshape(-1, 1, 2) / sa
+    dst = np.float32([kb[m.trainIdx].pt for m in iyi]).reshape(-1, 1, 2) / sb
+    H, ic = cv2.findHomography(src, dst, cv2.RANSAC, 3.0)
+    n_ic = int(ic.sum()) if ic is not None else 0
+    log(f"  homografi ic nokta: {n_ic}")
+    if H is None or n_ic < EN_AZ_ICERIDE:
+        return None, n_ic
+    return H, n_ic
 
 
 def kirmizi_maske(img):
@@ -69,11 +116,7 @@ def main():
     im = imread(Path(a.isaret))
     mh, mw = master.shape[:2]
     ih, iw = im.shape[:2]
-    sx, sy = mw / iw, mh / ih
-    log(f"isaret {iw}x{ih}, master {mw}x{mh}, olcek {sx:.4f}x{sy:.4f}")
-    if abs(sx - sy) / max(sx, sy) > 0.01:
-        log("DUR: isaretli gorselin en-boy orani master ile uyusmuyor")
-        return 3
+    log(f"isaret {iw}x{ih}, master {mw}x{mh}")
 
     m = kirmizi_maske(im)
     say = int((m > 0).sum())
@@ -99,7 +142,19 @@ def main():
         log("ic kontur yok -> dis kontur kullanildi")
         quad = sirala(q_dis)
 
-    quad = np.array([[float(x) * sx, float(y) * sy] for x, y in quad])
+    log(f"  isaret koordinatinda quad: {[[round(float(x),1), round(float(y),1)] for x, y in quad]}")
+    H, n_ic = homografi(im, master, m)
+    if H is not None:
+        quad = cv2.perspectiveTransform(quad.reshape(-1, 1, 2).astype(np.float64), H).reshape(4, 2)
+        olc = math.sqrt(abs(np.linalg.det(H[:2, :2])))
+        log(f"  hizalama: sahne eslemesi (ic nokta {n_ic}), ortalama olcek {olc:.4f}")
+    else:
+        sx, sy = mw / iw, mh / ih
+        if abs(sx - sy) / max(sx, sy) > 0.01:
+            log("DUR: sahne eslemesi kurulamadi ve en-boy orani master ile uyusmuyor")
+            return 3
+        quad = np.array([[float(x) * sx, float(y) * sy] for x, y in quad])
+        log(f"  hizalama: YEDEK YOL - tam kare olcegi {sx:.4f}")
     quad_r = [[round(float(x), 1), round(float(y), 1)] for x, y in quad]
 
     calib = json.loads((Path(a.calib) / "calib.json").read_text())
