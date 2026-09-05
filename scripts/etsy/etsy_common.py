@@ -138,6 +138,7 @@ class Etsy:
         self.calls = 0
         self.remaining = None
         self.pace = 0.25  # sn; 5 QPS sinirinin altinda kalir
+        self.verbose_quota = False  # True: her istekten sonra x-remaining-today loglanir (C gorevi, 5 Eyl 2026)
 
     def _headers(self):
         return {
@@ -177,6 +178,8 @@ class Etsy:
             rem = r.headers.get("x-remaining-today")
             if rem is not None:
                 self.remaining = rem
+            if self.verbose_quota:
+                log(f"      kota {rem} | POST(file) {path} -> {r.status_code}")
             if r.status_code == 401 and attempt == 0:
                 self.store.refresh()
                 continue
@@ -197,6 +200,8 @@ class Etsy:
             rem = r.headers.get("x-remaining-today")
             if rem is not None:
                 self.remaining = rem
+            if self.verbose_quota:
+                log(f"      kota {rem} | {method} {path} -> {r.status_code}")
             if r.status_code == 401 and attempt == 0:
                 log("401 alindi, token yenilenip tekrar denenecek.")
                 self.store.refresh()

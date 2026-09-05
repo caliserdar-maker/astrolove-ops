@@ -1,0 +1,156 @@
+name: wp-saat80-etsy
+
+# C ASAMASI - ETSY 78 ILAN: 4 ZIP + SET07 DEGISIMI (5 Eyl 2026, Mo onayi).
+# ETSY'YE YAZAR (apply=true): ilan basina 4 teslim ZIP'i (DELIVERY_SAAT80, PDF'siz)
+# sil->yukle->geri oku; SET07 galeri gorseli yukle->eskisini sil, sira korunur.
+# PDF, diger 5 gorsel, fiyat, metin, state'e DOKUNULMAZ; yayinlama cagrisi YOK.
+# Kota: her istekte x-remaining-today loglanir, <400 DUR; STATE ile resume.
+# pairs ZORUNLU ve acik (bos verilmez). Varsayilan DRY-RUN.
+# Pilot Cancer_Libra: galeri kaynagi MOCKUP_V2/_CANDIDATE/CANCER_LIBRA; B kosusu
+# SET07 render'ini yanlislikla master klasorune yazdi -> hazirlik adimi master'i
+# MOCKUP_V2_YEDEK_SAAT100'den geri koyar, yeni render'i _CANDIDATE'e alir (idempotent).
+
+on:
+  workflow_dispatch:
+    inputs:
+      pairs:
+        description: "Cift listesi (virgullu, sirali; ZORUNLU)"
+        required: true
+        default: "Cancer_Libra,Aries_Aries,Leo_Pisces"
+      apply:
+        description: "Yazmayi gercekten uygula (kapaliysa DRY-RUN)"
+        type: boolean
+        default: false
+      resume:
+        description: "TEMP/WP_SAAT80_ETSY_STATE.csv'de PASS olan ilanlari atla"
+        type: boolean
+        default: true
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  etsy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+
+      - name: Pilot master duzeltme (Drive, idempotent)
+        run: |
+          set -euo pipefail
+          G=gdrive:ASTROLOVE/WALLPAPER
+          F=WA_MOCKUP_V2_SET07_Cancer_Libra_FINAL.jpg
+          M="$G/MOCKUP_V2/CANCER_LIBRA/$F"; Y="$G/MOCKUP_V2_YEDEK_SAAT100/CANCER_LIBRA/$F"; C="$G/MOCKUP_V2/_CANDIDATE/CANCER_LIBRA/$F"
+          h() { rclone md5sum "$1" 2>/dev/null | awk '{print $1}'; }
+          hm=$(h "$M"); hy=$(h "$Y"); hc=$(h "$C")
+          echo "master $hm | yedek(orijinal master) $hy | candidate $hc"
+          test -n "$hy"
+          if [ "$hm" != "$hy" ]; then
+            # master klasorunde B render'i var: once _CANDIDATE'in eskisini yedekle, render'i _CANDIDATE'e al, master'i geri koy
+            rclone copyto "$C" "$G/MOCKUP_V2_YEDEK_SAAT100/_CANDIDATE/CANCER_LIBRA/$F"
+            rclone copyto "$M" "$C"
+            rclone copyto "$Y" "$M"
+            echo "duzeltildi: master <- yedek; _CANDIDATE <- yeni render"
+          else
+            echo "master zaten orijinal; duzeltme yok"
+          fi
+          echo "sonra: master $(h "$M") | candidate $(h "$C")"
+          test "$(h "$M")" = "$hy"
+
+      - name: Token + ilan listesi + STATE + kaynaklar (ZIP, galeri)
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p _work/zip _work/mock
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/WA_WP_DRAFTS_STATE.csv" _work/drafts.csv
+          rclone copyto "gdrive:ASTROLOVE/TEMP/WP_SAAT80_ETSY_STATE.csv" _work/WP_SAAT80_ETSY_STATE.csv || true
+          test "$(cut -d, -f1 _work/drafts.csv | sed '/^$/d' | wc -l)" = "78"
+          printf '%s\n' "${{ inputs.pairs }}" | tr ',' '\n' | sed '/^$/d' > _work/pairs.txt
+          test "$(wc -l < _work/pairs.txt)" -gt 0
+          echo "ilan: $(wc -l < _work/pairs.txt)"
+          : > _work/fz.txt; : > _work/fm.txt
+          while read -r pair; do
+            up=$(echo "$pair" | tr '[:lower:]' '[:upper:]')
+            echo "+ /$up/AstroLove_*.zip" >> _work/fz.txt
+            echo "+ /$up/WA_MOCKUP_V2_*_FINAL.jpg" >> _work/fm.txt
+          done < _work/pairs.txt
+          echo "- **" >> _work/fz.txt; echo "- **" >> _work/fm.txt
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/DELIVERY_SAAT80" _work/zip --filter-from _work/fz.txt --transfers 8
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2" _work/mock --filter-from _work/fm.txt --transfers 8
+          if grep -qx "Cancer_Libra" _work/pairs.txt; then
+            rm -rf _work/mock/CANCER_LIBRA
+            rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CANDIDATE/CANCER_LIBRA" _work/mock/CANCER_LIBRA --include "WA_MOCKUP_V2_*_FINAL.jpg"
+          fi
+          while read -r pair; do
+            up=$(echo "$pair" | tr '[:lower:]' '[:upper:]')
+            z=$(ls "_work/zip/$up" 2>/dev/null | wc -l); m=$(ls "_work/mock/$up" 2>/dev/null | wc -l)
+            [ "$z" = "4" ] && [ "$m" = "6" ] || { echo "EKSIK: $up zip $z gorsel $m"; exit 1; }
+            for f in _work/zip/$up/*.zip; do python -c "import zipfile,sys; z=zipfile.ZipFile(sys.argv[1]); n=z.namelist(); assert len(n)==5 and 'LICENSE.txt' in n and not any(x.lower().endswith('.pdf') for x in n), n; assert z.testzip() is None" "$f"; done
+          done < _work/pairs.txt
+          echo "kaynak tam: $(wc -l < _work/pairs.txt) ilan x (4 ZIP PDF'siz + 6 gorsel)"
+
+      - name: Etsy degisim
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          args=(--state _work/drafts.csv --pairs "$(paste -sd, _work/pairs.txt)" --zip-dir _work/zip --mock-dir _work/mock
+                --out _work/WP_SAAT80_ETSY_RUN.csv --cmp-out _work/WP_SAAT80_ETSY_CMP.csv
+                --state-out _work/WP_SAAT80_ETSY_STATE.csv
+                --sync-cmd "rclone copyto _work/WP_SAAT80_ETSY_STATE.csv gdrive:ASTROLOVE/TEMP/WP_SAAT80_ETSY_STATE.csv")
+          if [ "${{ inputs.apply }}" = "true" ]; then args+=(--apply); fi
+          if [ "${{ inputs.resume }}" = "true" ]; then args+=(--resume); fi
+          python scripts/etsy/wp_saat80_etsy.py "${args[@]}"
+
+      - name: Token'i Drive'a geri yaz (yenilendiyse)
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          if [ -f _work/ETSY_TOKEN.json.updated ]; then
+            rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json"
+          fi
+
+      - name: Sonuclari Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          ts=$(date -u +%Y%m%d_%H%M)
+          for f in WP_SAAT80_ETSY_RUN WP_SAAT80_ETSY_CMP; do
+            [ -f "_work/$f.csv" ] && rclone copyto "_work/$f.csv" "gdrive:ASTROLOVE/TEMP/$f.csv" || true
+            [ -f "_work/$f.csv" ] && rclone copyto "_work/$f.csv" "gdrive:ASTROLOVE/TEMP/SAAT80_C/${f}_$ts.csv" || true
+          done
+          [ -f _work/WP_SAAT80_ETSY_STATE.csv ] && rclone copyto _work/WP_SAAT80_ETSY_STATE.csv "gdrive:ASTROLOVE/TEMP/WP_SAAT80_ETSY_STATE.csv" || true
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: wp-saat80-etsy
+          path: |
+            _work/WP_SAAT80_ETSY_RUN.csv
+            _work/WP_SAAT80_ETSY_CMP.csv
+            _work/WP_SAAT80_ETSY_STATE.csv
+          if-no-files-found: ignore
+
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
