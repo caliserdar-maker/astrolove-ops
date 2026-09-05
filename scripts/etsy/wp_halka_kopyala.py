@@ -48,6 +48,8 @@ def main():
     ap.add_argument("--out-dir", required=True)
     ap.add_argument("--kanit-dir", required=True)
     ap.add_argument("--boy", type=int, default=240)
+    ap.add_argument("--hedef-quad", default="eski", choices=("eski", "yeni"),
+                    help="kaynak ekran kenari hedefin ESKI quad'ina mi (1. deneme) YENI (B, Mo'nun kirmizisi) quad'ina mi otursun")
     a = ap.parse_args()
     c0 = json.loads((Path(a.calib) / "calib.json").read_text())
     cb = json.loads(Path(a.calib_b).read_text())
@@ -68,9 +70,12 @@ def main():
         yaricap = (sb.get("frame_top") or {}).get("yaricap")
         soft = cv2.imread(str(Path(a.calib) / "masks" / f"{src}_{tid}.png"), cv2.IMREAD_GRAYSCALE).astype(np.float32) / 255.0
         delik, _, _ = hole_shape(soft, q_b, inset=0.0, yaricap=yaricap)
-        H = cv2.getPerspectiveTransform(q_k, q_h)                 # kaynak -> hedef
+        # 2. deneme (5 Eyl 2026): kaynak ekran kenari hedefin YENI (kirmizi) quad'ina oturur; eski
+        # quad'a oturtunca delik ile eski quad arasindaki 14-16 px serit kaynagin ekran iciyle doluyordu.
+        q_ref = q_b if a.hedef_quad == "yeni" else q_h
+        H = cv2.getPerspectiveTransform(q_k, q_ref)               # kaynak -> hedef
         kaynak_w = cv2.warpPerspective(master, H, (master.shape[1], master.shape[0]), flags=cv2.INTER_CUBIC)
-        dis = (poly_mask_aa(master.shape, expand_quad(q_h, a.disari)) >= 0.5).astype(np.uint8)
+        dis = (poly_mask_aa(master.shape, expand_quad(q_ref, a.disari)) >= 0.5).astype(np.uint8)
         ic = (delik >= 0.5).astype(np.uint8)
         halka = dis & (1 - ic)
         d = cv2.distanceTransform(dis, cv2.DIST_L2, 5)             # dis kenara uzaklik
@@ -79,7 +84,7 @@ def main():
         temiz = (temiz.astype(np.float32) * (1 - w3) + kaynak_w.astype(np.float32) * w3).round().clip(0, 255).astype(np.uint8)
         olcek = np.sqrt(abs(np.linalg.det(H[:2, :2])))
         log(f"{scene}: hedef ekran {tid} ({ekr[int(tid)]['edition']}) <- kaynak ekran {sid} ({ekr[int(sid)]['edition']}) | "
-            f"homografi olcek {olcek:.4f} | halka {int(halka.sum())} px (eski quad+{a.disari} EKSI B deligi), dis gecis {a.gecis} px")
+            f"homografi olcek {olcek:.4f} | halka {int(halka.sum())} px ({a.hedef_quad} quad+{a.disari} EKSI B deligi), dis gecis {a.gecis} px")
         cv2.imwrite(str(yol), temiz, [cv2.IMWRITE_JPEG_QUALITY, 97])
         # kalinlik olcumu: hedef (sonra, yeni delik kenarindan) ve kaynak (kendi quad'indan)
         for kenar in ("ust", "sol"):
