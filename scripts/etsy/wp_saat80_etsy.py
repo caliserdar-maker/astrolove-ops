@@ -238,6 +238,10 @@ def set07_degistir(il, lid, pair, mock_dir, apply_, rapor):
 def ilan_isle(il, pair, lid, zip_dir, mock_dir, apply_, rapor):
     up = pair.upper()
     st = il.state(lid)
+    # kota kapisi ilan BASINDA (1 GET sonrasi): 400'un altina hic inilmez, yazma yapilmadan durulur
+    rem = il.api.remaining
+    if rem is not None and str(rem).isdigit() and int(rem) < QUOTA_STOP:
+        return "KOTA", f"kota {rem} < {QUOTA_STOP}; ilana dokunulmadi"
     if st != "active":
         return "FAIL", f"state {st} != active (dokunulmadi)"
     once = il.files(lid)
@@ -350,6 +354,9 @@ def main():
         el = time.time() - t0
         log(f"[{i + 1}/{n} %{100 * (i + 1) / n:.0f}] {pair}: {status} | {detail} | kota {api.remaining} | "
             f"gecen {el / 60:.1f} dk kalan {el / (i + 1) * (n - i - 1) / 60:.1f} dk")
+        if status == "KOTA":
+            durdu = f"kota {api.remaining} < {QUOTA_STOP}; {pair} dahil kalan {n - i} ilan STATE'ten devam eder"
+            log(f"DURDU: {durdu}"); break
         if status == "FAIL":
             durdu = f"{pair} ({lid}) FAIL -> kalan {n - i - 1} ilana GECILMEDI"
             log(f"DURDU: {durdu}"); break
@@ -377,7 +384,7 @@ def main():
     if s:
         with open(s, "a", encoding="utf-8") as fh:
             fh.write("\n".join(lines) + "\n")
-    return 0 if (not durdu or durdu.startswith("kota")) and all(r[2] in ("PASS", "DRY") for r in rows) else 1
+    return 0 if (not durdu or durdu.startswith("kota")) and all(r[2] in ("PASS", "DRY", "KOTA") for r in rows) else 1
 
 
 if __name__ == "__main__":
