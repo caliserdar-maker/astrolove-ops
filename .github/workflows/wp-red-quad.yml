@@ -146,6 +146,7 @@ jobs:
         if: ${{ always() && steps.bul.outputs.var == '1' }}
         run: |
           set -euo pipefail
+          rclone mkdir "gdrive:ASTROLOVE/TEMP/FIX_TEST/MOCKUP_REDQUAD"
           [ -n "$(ls -A _work/out 2>/dev/null)" ] && rclone copy _work/out "gdrive:ASTROLOVE/TEMP/FIX_TEST/MOCKUP_REDQUAD" --include "*.jpg" || true
           [ -n "$(ls -A _work/kanit 2>/dev/null)" ] && rclone copy _work/kanit "gdrive:ASTROLOVE/TEMP/FIX_TEST/MOCKUP_REDQUAD" --include "K01_*.jpg" || true
           [ -f _work/calib_red/calib.json ] && rclone copyto _work/calib_red/calib.json "gdrive:ASTROLOVE/TEMP/FIX_TEST/calib_redquad.json" || true

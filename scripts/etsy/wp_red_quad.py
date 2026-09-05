@@ -43,6 +43,57 @@ def _kucult(img, en_buyuk=EN_BUYUK):
     return cv2.resize(img, None, fx=s, fy=s, interpolation=cv2.INTER_AREA), s
 
 
+def hizala_sablon(isaret, master, kirmizi):
+    """Olcek+ofset'i sahnenin kendisinden bul: isaret, master icinde aranan sablondur.
+
+    Isaretli dosya saate yakinlasmis bir kirpma olabilir; bu yol donme
+    varsaymaz, coklu olcekte en yuksek korelasyonu arar."""
+    yok = cv2.dilate(kirmizi, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (9, 9)))
+    temiz = cv2.inpaint(isaret, yok, 3, cv2.INPAINT_TELEA)
+    g_i = cv2.cvtColor(temiz, cv2.COLOR_BGR2GRAY)
+    g_m = cv2.cvtColor(master, cv2.COLOR_BGR2GRAY)
+    m2 = cv2.resize(g_m, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_AREA)
+
+    def ara(kaynak, hedef, olcekler):
+        en = None
+        for s in olcekler:
+            t_ = cv2.resize(kaynak, None, fx=s, fy=s, interpolation=cv2.INTER_AREA)
+            if min(t_.shape[:2]) < 24 or t_.shape[0] > hedef.shape[0] or t_.shape[1] > hedef.shape[1]:
+                continue
+            r = cv2.matchTemplate(hedef, t_, cv2.TM_CCOEFF_NORMED)
+            _, mx, _, loc = cv2.minMaxLoc(r)
+            if en is None or mx > en[0]:
+                en = (float(mx), float(s), float(loc[0]), float(loc[1]))
+        return en
+
+    def dene(kaynak, kx, ky):
+        kaba = ara(kaynak, m2, np.geomspace(0.05, 2.0, 30))
+        if kaba is None:
+            return None
+        ince = ara(kaynak, m2, np.linspace(kaba[1] * 0.88, kaba[1] * 1.12, 25))
+        en = ince if ince and ince[0] >= kaba[0] else kaba
+        kor, s2, x2, y2 = en
+        olc = s2 / 0.5                  # isaret -> master tam cozunurluk olcegi
+        ox, oy = 2.0 * x2 - olc * kx, 2.0 * y2 - olc * ky
+        return kor, olc, ox, oy
+
+    en_iyi = dene(g_i, 0.0, 0.0)
+    if en_iyi is None:
+        log("  sablon: uygun olcek yok")
+        return None, 0.0
+    if en_iyi[0] < 0.6:                 # ekran goruntusunde arayuz seridi olabilir
+        h, w = g_i.shape[:2]
+        kx, ky = int(w * 0.2), int(h * 0.2)
+        orta = dene(g_i[ky:h - ky, kx:w - kx], kx, ky)
+        if orta and orta[0] > en_iyi[0]:
+            log(f"  sablon: orta kirpma daha iyi ({orta[0]:.3f} > {en_iyi[0]:.3f})")
+            en_iyi = orta
+    korelasyon, olc, ox, oy = en_iyi
+    log(f"  sablon eslemesi: olcek {olc:.4f}, ofset ({ox:.1f}, {oy:.1f}), korelasyon {korelasyon:.3f}")
+    H = np.array([[olc, 0.0, ox], [0.0, olc, oy], [0.0, 0.0, 1.0]], np.float64)
+    return H, korelasyon
+
+
 def homografi(isaret, master, kirmizi):
     """isaret -> master donusumu (sahne icerigine gore, gorsel boyutuna gore degil)."""
     yok = cv2.dilate(kirmizi, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15)))
@@ -144,10 +195,17 @@ def main():
 
     log(f"  isaret koordinatinda quad: {[[round(float(x),1), round(float(y),1)] for x, y in quad]}")
     H, n_ic = homografi(im, master, m)
+    kor = 0.0
+    if H is None:
+        H, kor = hizala_sablon(im, master, m)
+        if H is not None and kor < 0.45:
+            log(f"DUR: sablon korelasyonu dusuk ({kor:.3f}), hizalama guvenilir degil")
+            H = None
     if H is not None:
         quad = cv2.perspectiveTransform(quad.reshape(-1, 1, 2).astype(np.float64), H).reshape(4, 2)
         olc = math.sqrt(abs(np.linalg.det(H[:2, :2])))
-        log(f"  hizalama: sahne eslemesi (ic nokta {n_ic}), ortalama olcek {olc:.4f}")
+        nasil = f"ozellik eslemesi (ic nokta {n_ic})" if n_ic >= EN_AZ_ICERIDE else f"sablon eslemesi (korelasyon {kor:.3f})"
+        log(f"  hizalama: {nasil}, ortalama olcek {olc:.4f}")
     else:
         sx, sy = mw / iw, mh / ih
         if abs(sx - sy) / max(sx, sy) > 0.01:
