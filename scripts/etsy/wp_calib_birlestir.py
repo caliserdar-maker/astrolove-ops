@@ -57,13 +57,15 @@ def main():
             h["frame_top"] = o["frame_top"]
             # quad degistiyse scale ve H de quad'dan yeniden turetilir (QC geri tespiti
             # screen["scale"] +-0.02 araliginda sablon arar; eski olcek kalirsa FAIL).
-            if json.dumps(o["quad"]) != json.dumps(eski_q):
-                w, hh = DEVICES[h["device"]]
-                q = np.asarray(o["quad"], np.float32)
-                h["scale"] = float(np.linalg.norm(q[1] - q[0]) / w)
+            w, hh = DEVICES[h["device"]]
+            q = np.asarray(o["quad"], np.float32)
+            olcek = float(np.linalg.norm(q[1] - q[0]) / w)
+            if abs(olcek - float(h.get("scale", 0))) > 1e-3:
+                eski_s = h.get("scale")
+                h["scale"] = olcek
                 Hm = cv2.getPerspectiveTransform(np.float32([[0, 0], [w, 0], [w, hh], [0, hh]]), q)
                 h["H"] = [[float(x) for x in r] for r in Hm]
-                print(f"   scale {ekran(u, sahne, eid)['scale']:.4f} -> {h['scale']:.4f}, H yeniden")
+                print(f"   scale {eski_s} -> {h['scale']:.4f}, H quad'dan yeniden")
             print(f"{sahne}/{eid} <- {k}: quad {[[round(x, 1) for x in p] for p in eski_q]} -> "
                   f"{[[round(x, 1) for x in p] for p in o['quad']]} | frame_top {o['frame_top']}")
     if n_ayni != 11:
