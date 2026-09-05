@@ -16,6 +16,10 @@ on:
         description: "Kanit panelleri (SAHNE:EKRAN)"
         required: true
         default: "SET07:1,SET03:0"
+      tam:
+        description: "Tam sahne cizimi (virgul; bos = yok)"
+        required: false
+        default: ""
 
 concurrency:
   group: wp-quad-probe
@@ -55,7 +59,7 @@ jobs:
         run: |
           set -euo pipefail
           python scripts/etsy/wp_quad_probe.py --calib _work/calib --masters _work/masters \
-            --scenes "${{ inputs.scenes }}" --kanit "${{ inputs.kanit }}" \
+            --scenes "${{ inputs.scenes }}" --kanit "${{ inputs.kanit }}" --tam "${{ inputs.tam }}" \
             --crop-dir _work/crops --out _work/WP_QUAD_PROBE.csv | tee _work/rapor.txt
           ls -l _work/crops
 
@@ -66,7 +70,7 @@ jobs:
           [ -f _work/WP_QUAD_PROBE.csv ] && rclone copyto _work/WP_QUAD_PROBE.csv "gdrive:ASTROLOVE/TEMP/WP_QUAD_PROBE.csv" || true
           [ -f _work/rapor.txt ] && rclone copyto _work/rapor.txt "gdrive:ASTROLOVE/TEMP/WP_QUAD_PROBE.txt" || true
           if [ -n "$(ls -A _work/crops 2>/dev/null)" ]; then
-            rclone copy _work/crops "gdrive:ASTROLOVE/TEMP/AUDIT_CROPS" --include "M13_*.jpg"
+            rclone copy _work/crops "gdrive:ASTROLOVE/TEMP/AUDIT_CROPS" --include "M13_*.jpg" --include "M14_*.jpg"
             cat > _fid.py <<'PY'
           import json, sys
           print([r["ID"] for r in json.load(sys.stdin) if r["Name"] == sys.argv[1]][0])
@@ -74,6 +78,8 @@ jobs:
             fid="$(rclone lsjson "gdrive:ASTROLOVE/TEMP" --dirs-only | python3 _fid.py AUDIT_CROPS)"
             python scripts/pinterest/pin_media_perms.py --mode grant --folder-id "$fid" \
               --pattern "M13_" --apply
+            python scripts/pinterest/pin_media_perms.py --mode grant --folder-id "$fid" \
+              --pattern "M14_" --apply || true
           fi
 
       - uses: actions/upload-artifact@v4
