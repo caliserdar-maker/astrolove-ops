@@ -53,7 +53,14 @@ def recheck(out_bgr, screen, wp_new):
         c = template_candidate(gray, wp_new, roi=roi, s_lo=screen["scale"] - 0.02, s_hi=screen["scale"] + 0.02)
         if c is None:
             return dict(ok=False, reason="sablon bulunamadi")
-        dev = float(np.abs(c["quad"] - q0).max())
+        # 5 Eyl 2026: render warp_cover kullanir (kirp-doldur, quad DEGISMEZ). Quad orani
+        # kaynaktan farkliysa (SET07 saat kirmizi quad 1.145 vs 1.22) tam sablonun
+        # oturdugu dortgen kalibre quad'dan buyuktur; beklenen = cover homografisiyle
+        # kaynagin 4 kosesi. Oran esitse eski davranisla birebir ayni.
+        Hc0, _ = cover_homography(wp_new.shape, q0)
+        q_bekl = cv2.perspectiveTransform(np.float32([[0, 0], [wp_new.shape[1], 0], [wp_new.shape[1], wp_new.shape[0]],
+                                                      [0, wp_new.shape[0]]]).reshape(-1, 1, 2), Hc0).reshape(-1, 2)
+        dev = float(np.abs(c["quad"] - q_bekl).max())
         return dict(ok=(c["corr"] >= 0.90 and dev <= 1.5), corr=c["corr"], max_dev_px=dev, center_dev_px=dev)
     # SIFT: ciktida bulunan eslesmeler render'in KULLANDIGI cover homografisi
     # (warp_cover; render_screen ile ayni - stretch-to-fill DEGIL) ile yeniden
