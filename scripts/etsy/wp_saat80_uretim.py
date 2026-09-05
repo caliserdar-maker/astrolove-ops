@@ -72,8 +72,14 @@ def bir_cift(pair, a, work, lic):
     if not zip_ok:
         return dict(pair=pair, durum="FAIL zip " + "; ".join(f"{e}:{r['issues']}" for e, r in rows.items() if not r["ok"]), **{f"zip_{e}": sizes[e] for e in EDITIONS})
     rclone("copy", str(zout), f"{a.drive}/{ZIP_DIR}/{up}", "--include", "*.zip")
-    chk = rclone("check", str(zout), f"{a.drive}/{ZIP_DIR}/{up}", "--one-way", "--include", "*.zip", check=False)
-    if chk.returncode != 0:
+    # Drive listeleme gecikmesi: kontrol 3 denemeye kadar (5 Eyl: ilk ciftlerde yanlis FAIL)
+    for deneme in range(3):
+        chk = rclone("check", str(zout), f"{a.drive}/{ZIP_DIR}/{up}", "--one-way", "--include", "*.zip", check=False)
+        if chk.returncode == 0:
+            break
+        time.sleep(5)
+        rclone("copy", str(zout), f"{a.drive}/{ZIP_DIR}/{up}", "--include", "*.zip", check=False)
+    else:
         return dict(pair=pair, durum="FAIL zip yukleme", **{f"zip_{e}": sizes[e] for e in EDITIONS})
     # SET07: eski yedek, yeni render
     s7 = f"WA_MOCKUP_V2_SET07_{pair}_FINAL.jpg"
@@ -109,10 +115,17 @@ def main():
     ap.add_argument("--work", default="_work")
     ap.add_argument("--report", required=True)
     ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--pairs-only", default="", help="virgulle ayrilmis cift listesi (bos = parca)")
     a = ap.parse_args()
     work = Path(a.work)
     pairs = [r[0].strip() for r in csv.reader(open(a.pairs_file, encoding="utf-8")) if r and r[0].strip() and r[0] != "pair"]
     mine = [p for i, p in enumerate(pairs) if i % a.shards == a.shard]
+    if a.pairs_only.strip():
+        sec = [p.strip() for p in a.pairs_only.split(",") if p.strip()]
+        yok = [p for p in sec if p not in pairs]
+        if yok:
+            raise SystemExit(f"HATA: STATE'te olmayan cift: {yok}")
+        mine = sec
     if a.limit:
         mine = mine[:a.limit]
     log(f"parca {a.shard}/{a.shards}: {len(mine)} cift")
