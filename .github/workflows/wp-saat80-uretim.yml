@@ -64,6 +64,8 @@ jobs:
           set -euo pipefail
           G=gdrive:ASTROLOVE
           say() { rclone lsf -R --files-only "$1" --include "$2" 2>/dev/null | wc -l; }
+          rclone dedupe --dedupe-mode merge "$G/TEMP/WATCH_CANVA_SAAT80" || true
+          rclone dedupe --dedupe-mode merge "$G/TEMP/WATCH_CANVA" || true
           n80=$(say "$G/TEMP/WATCH_CANVA_SAAT80" "*/AstroLove_*_Watch.jpg"); echo "SAAT80: $n80 (beklenen 312)"; test "$n80" = "312"
           n100=$(say "$G/TEMP/WATCH_CANVA" "*/AstroLove_*_Watch.jpg"); ny=$(say "$G/TEMP/WATCH_CANVA_YEDEK_100" "*/AstroLove_*_Watch.jpg")
           echo "WATCH_CANVA: $n100, YEDEK_100: $ny"
@@ -76,13 +78,15 @@ jobs:
           fi
           rclone move "$G/TEMP/WATCH_CANVA_SAAT80" "$G/TEMP/WATCH_CANVA" --delete-empty-src-dirs
           n=$(say "$G/TEMP/WATCH_CANVA" "*/AstroLove_*_Watch.jpg"); echo "WATCH_CANVA (yeni %80): $n"; test "$n" = "312"
-          # FINAL_V2 saat yedegi (idempotent: dolu ise atla)
+          # FINAL_V2 saat yedegi (idempotent: dolu ise atla). FINAL_V2'de 316 saat var (4 fazla, cift disi);
+          # sayim yerine rclone check ile birebirlik dogrulanir.
           nb=$(say "$G/WALLPAPER/FINAL_V2_YEDEK_SAAT100" "*/AstroLove_*_Watch.jpg")
           if [ "$nb" = "0" ]; then
             rclone copy "$G/WALLPAPER/FINAL_V2" "$G/WALLPAPER/FINAL_V2_YEDEK_SAAT100" --include "*/AstroLove_*_Watch.jpg" --transfers 16 --checkers 16
             nb=$(say "$G/WALLPAPER/FINAL_V2_YEDEK_SAAT100" "*/AstroLove_*_Watch.jpg")
           fi
-          echo "FINAL_V2_YEDEK_SAAT100: $nb"; test "$nb" = "312"
+          echo "FINAL_V2_YEDEK_SAAT100: $nb"; test "$nb" -ge 312
+          rclone check "$G/WALLPAPER/FINAL_V2" "$G/WALLPAPER/FINAL_V2_YEDEK_SAAT100" --one-way --include "*/AstroLove_*_Watch.jpg"
           # yeni saatler FINAL_V2 uzerine
           rclone copy "$G/TEMP/WATCH_CANVA" "$G/WALLPAPER/FINAL_V2" --include "*/AstroLove_*_Watch.jpg" --transfers 16 --checkers 16
           rclone check "$G/TEMP/WATCH_CANVA" "$G/WALLPAPER/FINAL_V2" --one-way --include "*/AstroLove_*_Watch.jpg"

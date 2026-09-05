@@ -27,6 +27,10 @@ on:
         description: "Cikti klasoru (ASTROLOVE altinda)"
         required: true
         default: "TEMP/WATCH_CANVA_SAAT80"
+      bg_blur:
+        description: "arka plan farki: bulaniklastirma cekirdegi (0 = ham fark; 9 = doku gurultusu elenir)"
+        required: true
+        default: "0"
       edition:
         description: "Edisyon"
         required: true
@@ -112,9 +116,11 @@ jobs:
         run: |
           set -euo pipefail
           python scripts/etsy/wp_watch_canva.py --pages _work/pages --ref _work/ref --pairs _work/drafts.csv \
-            --out _work/out --report _work/WP_WATCH_CANVA.csv --edition "${{ inputs.edition }}" | tee _work/rapor.txt
+            --out _work/out --report _work/WP_WATCH_CANVA.csv --edition "${{ inputs.edition }}" --bg-blur "${{ inputs.bg_blur }}" | tee _work/rapor.txt
           n=$(find _work/out -name '*_Watch.jpg' | wc -l); echo "yazilacak: $n"; test "$n" = "78"
           rclone copy _work/out "gdrive:ASTROLOVE/${{ inputs.out_dir }}" --include "*/AstroLove_*_Watch.jpg" --transfers 8
+          # paralel kosular ayni alt klasoru ayni anda acinca Drive'da yinelenen klasor olusur (5 Eyl: 13 klasor); birlestir
+          rclone dedupe --dedupe-mode merge "gdrive:ASTROLOVE/${{ inputs.out_dir }}" || true
           rclone check _work/out "gdrive:ASTROLOVE/${{ inputs.out_dir }}" --one-way --include "*/AstroLove_*_Watch.jpg"
 
       - name: Rapor
