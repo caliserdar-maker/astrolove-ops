@@ -74,6 +74,7 @@ jobs:
 
       - name: Iki render
         run: |
+          set +e
           set -uo pipefail
           P="${{ inputs.pair }}"
           AD="WA_MOCKUP_V2_${{ inputs.scene }}_${P}_FINAL.jpg"
@@ -90,6 +91,8 @@ jobs:
             cp "_work/out/$AD" "_work/son/$YENI"
           done
           ls -l _work/son
+          test -s "_work/son/WA_MOCKUP_V2_${{ inputs.scene }}_${{ inputs.pair }}_A_EGIK.jpg"
+          test -s "_work/son/WA_MOCKUP_V2_${{ inputs.scene }}_${{ inputs.pair }}_B_DIK.jpg"
 
       - name: Drive'a yaz + anyone:reader
         if: ${{ always() }}
