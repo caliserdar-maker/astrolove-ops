@@ -119,7 +119,9 @@ jobs:
             for P in "${PS[@]}"; do
               UP=$(echo "$P" | tr '[:lower:]' '[:upper:]')
               fid="$(rclone lsjson "gdrive:ASTROLOVE/TEMP/FIX_TEST/$D" --dirs-only | python3 _fid.py "$UP")"
-              python scripts/pinterest/pin_media_perms.py --mode grant --folder-id "$fid" --pattern "WA_MOCKUP_V2_" --apply | tee -a _work/linkler.txt
+              # ::add-mask:: satirlari (jeton) dosyaya YAZILMAZ; yalniz Actions log maskeleyicisine gider
+              python scripts/pinterest/pin_media_perms.py --mode grant --folder-id "$fid" --pattern "WA_MOCKUP_V2_" --apply \
+                | tee >(grep -v '^::add-mask::' >> _work/linkler.txt)
             done
           done
           rclone copyto _work/linkler.txt "gdrive:ASTROLOVE/TEMP/WP_SET07_KALICI_LINKLER.txt" || true
