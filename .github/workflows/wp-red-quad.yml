@@ -17,6 +17,10 @@ on:
         description: "true: isaretlenecek sablonu MO_ISARET'e koy ve dur"
         required: false
         default: "false"
+      kaynak:
+        description: "sablon kaynagi: uretim | yeni (son redquad render + quad cizimi)"
+        required: false
+        default: "uretim"
       pair:
         description: "Cift"
         required: true
@@ -73,11 +77,24 @@ jobs:
           if [ "${{ inputs.hazirla }}" = "true" ]; then
             P="${{ inputs.pair }}"; UP=$(echo "$P" | tr '[:lower:]' '[:upper:]')
             AD="WA_MOCKUP_V2_${{ inputs.scene }}_${P}_FINAL.jpg"
-            rclone copyto "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/$UP/$AD" \
-              "gdrive:ASTROLOVE/TEMP/MO_ISARET/SABLON_${{ inputs.scene }}_${P}.jpg"
+            mkdir -p _work/sablon
+            if [ "${{ inputs.kaynak }}" = "yeni" ]; then
+              SAD="SABLON_${{ inputs.scene }}_${P}_T2.jpg"
+              rclone copyto "gdrive:ASTROLOVE/TEMP/FIX_TEST/MOCKUP_REDQUAD/$AD" _work/sablon/render.jpg
+              rclone copyto "gdrive:ASTROLOVE/TEMP/FIX_TEST/calib_redquad.json" _work/sablon/calib.json
+              python scripts/etsy/wp_quad_ciz.py --gorsel _work/sablon/render.jpg \
+                --calib-json _work/sablon/calib.json --scene "${{ inputs.scene }}" \
+                --screen "${{ inputs.screen }}" --kalinlik 2 --bgr "255,0,0" \
+                --out "_work/sablon/$SAD"
+              rclone copyto "_work/sablon/$SAD" "gdrive:ASTROLOVE/TEMP/MO_ISARET/$SAD"
+            else
+              SAD="SABLON_${{ inputs.scene }}_${P}.jpg"
+              rclone copyto "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/$UP/$AD" \
+                "gdrive:ASTROLOVE/TEMP/MO_ISARET/$SAD"
+            fi
             fid="$(rclone lsjson "gdrive:ASTROLOVE/TEMP" --dirs-only | python3 _fid.py MO_ISARET)"
             python scripts/pinterest/pin_media_perms.py --mode grant --folder-id "$fid" --pattern "SABLON_" --apply
-            echo "SABLON hazir: TEMP/MO_ISARET/SABLON_${{ inputs.scene }}_${P}.jpg"
+            echo "SABLON hazir: TEMP/MO_ISARET/$SAD"
             echo "var=0" >> "$GITHUB_OUTPUT"; exit 0
           fi
           YOL="${{ inputs.isaret }}"
