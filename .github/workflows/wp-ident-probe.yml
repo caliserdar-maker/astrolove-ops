@@ -1,0 +1,98 @@
+name: wp-ident-probe
+
+# CIKTI KIMLIGI - SALT OKUM - 5 Eyl 2026. Alti surumun sha256'si, iki calib
+# dosyasinin quad karsilastirmasi ve secilen kosede piksel farki. Hicbir sey
+# uretilmez; yalniz olcum ve tek kanit kirpmasi yazilir.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pair:
+        description: "Cift"
+        required: true
+        default: "Aries_Aries"
+      scenes:
+        description: "Sahneler"
+        required: true
+        default: "SET03,SET04,SET07"
+      kose:
+        description: "Kose karsilastirmasi SAHNE:EKRAN:KOSE(0-3)"
+        required: true
+        default: "SET07:1:0"
+
+concurrency:
+  group: wp-ident-probe
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+
+      - name: Girdiler (6 surum + iki calib)
+        run: |
+          set -euo pipefail
+          P="${{ inputs.pair }}"; UP=$(echo "$P" | tr '[:lower:]' '[:upper:]')
+          mkdir -p _work/v2 _work/canva _work/frame _work/geom _work/kose _work/quadfix _work/calib _work/crops
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/$UP" _work/v2 --include "*${P}_FINAL.jpg"
+          for d in MOCKUP_CANVA:canva MOCKUP_FRAME:frame MOCKUP_GEOM:geom MOCKUP_KOSE:kose MOCKUP_QUADFIX:quadfix; do
+            src="${d%%:*}"; dst="${d##*:}"
+            rclone copy "gdrive:ASTROLOVE/TEMP/FIX_TEST/$src" "_work/$dst" --include "*${P}_FINAL.jpg" || true
+          done
+          rclone copyto "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CALIB/calib.json" _work/calib/calib_orijinal.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/FIX_TEST/calib_quadfix.json" _work/calib/calib_quadfix.json
+          ls -l _work/v2 _work/quadfix _work/calib
+
+      - name: Olcum
+        run: |
+          set -euo pipefail
+          python scripts/etsy/wp_ident_probe.py \
+            --dirs "MOCKUP_V2=_work/v2,CANVA=_work/canva,FRAME=_work/frame,GEOM=_work/geom,KOSE=_work/kose,QUADFIX=_work/quadfix" \
+            --pair "${{ inputs.pair }}" --scenes "${{ inputs.scenes }}" \
+            --calib-a _work/calib/calib_orijinal.json --calib-b _work/calib/calib_quadfix.json \
+            --kose "${{ inputs.kose }}" --dir-a _work/v2 --dir-b _work/quadfix \
+            --crop-dir _work/crops | tee _work/rapor.txt
+
+      - name: Drive'a yaz + anyone:reader
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/rapor.txt ] && rclone copyto _work/rapor.txt "gdrive:ASTROLOVE/TEMP/WP_IDENT_PROBE.txt" || true
+          if [ -n "$(ls -A _work/crops 2>/dev/null)" ]; then
+            rclone copy _work/crops "gdrive:ASTROLOVE/TEMP/AUDIT_CROPS" --include "M15_*.jpg"
+            cat > _fid.py <<'PY'
+          import json, sys
+          print([r["ID"] for r in json.load(sys.stdin) if r["Name"] == sys.argv[1]][0])
+          PY
+            fid="$(rclone lsjson "gdrive:ASTROLOVE/TEMP" --dirs-only | python3 _fid.py AUDIT_CROPS)"
+            python scripts/pinterest/pin_media_perms.py --mode grant --folder-id "$fid" \
+              --pattern "M15_" --apply
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: wp-ident-probe
+          path: _work/rapor.txt
+          if-no-files-found: ignore
+
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone _fid.py
