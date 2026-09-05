@@ -1,0 +1,115 @@
+name: wp-watch-canva
+
+# CANVA SAAT DOSYALARI, 78 CIFT, YALNIZ MIDNIGHT_BLUE (5 Eyl 2026, Mo).
+# Blue tasarimi (DAHUIJYNS1c, 78 sayfa 1000x1220) sayfa sayfa PNG indirilir
+# (imzali URL'ler repo icindeki TSV'den; loga yazilmaz). Sayfa -> cift
+# eslemesi icerikten (FINAL_V2 MB saat murekkebiyle IoU); STATE'teki 78 ciftle
+# birebir degilse DUR, hicbir dosya yazilmaz. Gecerse
+# TEMP/WATCH_CANVA/<UP>/AstroLove_<Cift>_Midnight_Blue_Watch.jpg yazilir.
+# FINAL_V2, MOCKUP_V2, ZIP ve Etsy'ye dokunulmaz.
+
+on:
+  workflow_dispatch:
+    inputs:
+      manifest:
+        description: "Repo icindeki liste (TSV: <sayfa_no>\\t<URL>)"
+        required: true
+        default: "_manifest/watch_canva.tsv"
+      out_dir:
+        description: "Cikti klasoru (ASTROLOVE altinda)"
+        required: true
+        default: "TEMP/WATCH_CANVA"
+
+concurrency:
+  group: wp-watch-canva
+  cancel-in-progress: false
+
+jobs:
+  saat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+
+      - name: Sayfalari indir (URL loga yazilmaz)
+        run: |
+          set -euo pipefail
+          mkdir -p _work/pages _work/log
+          cat > _work/one.sh <<'SH'
+          #!/usr/bin/env bash
+          set -uo pipefail
+          no="${1%%$'\t'*}"; url="${1#*$'\t'}"
+          f=$(printf '_work/pages/page_%02d.png' "$no")
+          if curl -fsS --retry 3 --retry-delay 2 --max-time 300 -o "$f" "$url" 2>/dev/null \
+             && [ "$(head -c 8 "$f" | od -An -tx1 | tr -d ' \n')" = "89504e470d0a1a0a" ]; then
+            echo "OK $no" >> _work/log/progress.txt
+          else
+            rm -f "$f"; echo "FAIL $no" >> _work/log/progress.txt
+          fi
+          SH
+          chmod +x _work/one.sh
+          grep -v '^#' "${{ inputs.manifest }}" | sed '/^$/d' > _work/jobs.tsv
+          total=$(wc -l < _work/jobs.tsv); echo "liste: $total satir"
+          xargs -d '\n' -a _work/jobs.tsv -P 8 -n 1 _work/one.sh || true
+          ok=$(grep -c '^OK' _work/log/progress.txt || true); fail=$(grep -c '^FAIL' _work/log/progress.txt || true)
+          echo "indirme: OK $ok / FAIL $fail / $total"
+          grep '^FAIL' _work/log/progress.txt || true
+          test "$fail" = "0" && test "$ok" = "$total"
+          python3 - <<'PY'
+          import glob
+          from PIL import Image
+          fs = sorted(glob.glob("_work/pages/*.png")); boy = {Image.open(f).size for f in fs}
+          print(len(fs), "sayfa, olculer:", boy)
+          PY
+
+      - name: Referanslar + STATE
+        run: |
+          set -euo pipefail
+          mkdir -p _work/ref
+          rclone copyto "gdrive:ASTROLOVE/TEMP/WA_WP_DRAFTS_STATE.csv" _work/drafts.csv
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2" _work/ref --include "*/AstroLove_*_Watch.jpg" --transfers 16 --checkers 16
+          echo "referans saat: $(find _work/ref -name '*_Watch.jpg' | wc -l) (beklenen 312)"
+
+      - name: Esle (icerikten) + yaz
+        run: |
+          set -euo pipefail
+          python scripts/etsy/wp_watch_canva.py --pages _work/pages --ref _work/ref --pairs _work/drafts.csv \
+            --out _work/out --report _work/WP_WATCH_CANVA.csv | tee _work/rapor.txt
+          n=$(find _work/out -name '*_Watch.jpg' | wc -l); echo "yazilacak: $n"; test "$n" = "78"
+          rclone copy _work/out "gdrive:ASTROLOVE/${{ inputs.out_dir }}" --include "*/AstroLove_*_Watch.jpg" --transfers 8
+          rclone check _work/out "gdrive:ASTROLOVE/${{ inputs.out_dir }}" --one-way --include "*/AstroLove_*_Watch.jpg"
+
+      - name: Rapor
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/WP_WATCH_CANVA.csv ] && rclone copyto _work/WP_WATCH_CANVA.csv "gdrive:ASTROLOVE/TEMP/WP_WATCH_CANVA.csv" || true
+          [ -f _work/rapor.txt ] && rclone copyto _work/rapor.txt "gdrive:ASTROLOVE/TEMP/WP_WATCH_CANVA.txt" || true
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: wp-watch-canva
+          path: |
+            _work/WP_WATCH_CANVA.csv
+            _work/rapor.txt
+          if-no-files-found: ignore
+
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone

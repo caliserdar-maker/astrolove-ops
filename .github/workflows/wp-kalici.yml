@@ -1,0 +1,129 @@
+name: wp-kalici
+
+# KALICILASTIR (5 Eyl 2026, Mo): uretim calib + masterlara yaz.
+#   SET07/1 saat  : calib_set07.json quad + frame_top {delik: quad}
+#   SET03/3,SET04/1: MASTER_KASA masterlari -> MOCKUP_V2/CANCER_LIBRA,
+#                    calib_kasa.json frame_top {delik: maske} + MASKE_KASA_* -> _CALIB/masks
+#   Diger 11 ekran birebir ayni (script dogrular).
+# Once yedek: _CALIB (calib.json + masks) ve 2 master -> TEMP/YEDEK_KALICI_<etiket>;
+# 77 ciftin mevcut galeri gorselleri -> ARCHIVE/MOCKUP_V2_YEDEK_<etiket> (sunucu ici kopya).
+# Sonra pilot (Cancer_Libra) 6 sahne yeni calib ile TEMP/FIX_TEST/KALICI_TEST'e uretilir (duman testi).
+# ZIP, DELIVERY ve Etsy'ye dokunulmaz.
+
+on:
+  workflow_dispatch:
+    inputs:
+      etiket:
+        description: "Yedek etiketi"
+        required: true
+        default: "20260905"
+
+concurrency:
+  group: wp-kalici
+  cancel-in-progress: false
+
+jobs:
+  kalici:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+
+      - name: 1) Yedek (sunucu ici kopya)
+        run: |
+          set -euo pipefail
+          Y="gdrive:ASTROLOVE/TEMP/YEDEK_KALICI_${{ inputs.etiket }}"
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CALIB" "$Y/_CALIB" --include "calib.json" --include "masks/*.png"
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/CANCER_LIBRA" "$Y/CANCER_LIBRA" --include "*_FINAL.jpg"
+          echo "yedek _CALIB: $(rclone lsf "$Y/_CALIB" -R --files-only | wc -l) dosya; masterlar: $(rclone lsf "$Y/CANCER_LIBRA" | wc -l)"
+          test "$(rclone lsf "$Y/CANCER_LIBRA" | wc -l)" = "6"
+          A="gdrive:ASTROLOVE/ARCHIVE/MOCKUP_V2_YEDEK_${{ inputs.etiket }}"
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2" "$A" \
+            --filter "- _CALIB/**" --filter "- _CANDIDATE/**" --filter "- CANCER_LIBRA/**" \
+            --filter "+ */WA_MOCKUP_V2_*_FINAL.jpg" --filter "- **" --transfers 8 --checkers 16
+          n=$(rclone lsf "$A" -R --files-only | wc -l)
+          echo "galeri yedegi: $n dosya (beklenen 462)"
+          test "$n" -ge 462
+
+      - name: 2) Girdiler + birlestir
+        run: |
+          set -euo pipefail
+          mkdir -p _work/c0 _work/yeni/masks _work/kasa
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CALIB" _work/c0 --include "calib.json" --include "masks/*.png"
+          rclone copyto "gdrive:ASTROLOVE/TEMP/FIX_TEST/calib_set07.json" _work/calib_set07.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/FIX_TEST/calib_kasa.json" _work/calib_kasa.json
+          rclone copy "gdrive:ASTROLOVE/TEMP/FIX_TEST/MASTER_KASA" _work/kasa --include "MASTER_KASA_SET0*.jpg" --include "MASKE_KASA_SET0*.png"
+          ls -l _work/kasa; test -s _work/kasa/MASTER_KASA_SET03.jpg; test -s _work/kasa/MASTER_KASA_SET04.jpg
+          test -s _work/kasa/MASKE_KASA_SET03_3.png; test -s _work/kasa/MASKE_KASA_SET04_1.png
+          python scripts/etsy/wp_calib_birlestir.py --uretim _work/c0/calib.json --set07 _work/calib_set07.json \
+            --kasa _work/calib_kasa.json --out _work/yeni/calib.json | tee _work/rapor.txt
+          cp _work/c0/masks/*.png _work/yeni/masks/
+          cp _work/kasa/MASKE_KASA_SET03_3.png _work/yeni/masks/SET03_3.png
+          cp _work/kasa/MASKE_KASA_SET04_1.png _work/yeni/masks/SET04_1.png
+          python3 - <<'PY' | tee -a _work/rapor.txt
+          import cv2, glob
+          for f in sorted(glob.glob("_work/yeni/masks/*.png")):
+              m = cv2.imread(f, 0); print(f, m.shape, int((m > 127).sum()))
+          for f in ("_work/kasa/MASTER_KASA_SET03.jpg", "_work/kasa/MASTER_KASA_SET04.jpg"):
+              im = cv2.imread(f); assert im.shape[:2] == (2250, 3000), im.shape; print(f, im.shape)
+          PY
+
+      - name: 3) Uretime yaz
+        run: |
+          set -euo pipefail
+          rclone copyto _work/yeni/calib.json "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CALIB/calib.json"
+          rclone copyto _work/yeni/masks/SET03_3.png "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CALIB/masks/SET03_3.png"
+          rclone copyto _work/yeni/masks/SET04_1.png "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CALIB/masks/SET04_1.png"
+          rclone copyto _work/kasa/MASTER_KASA_SET03.jpg "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/CANCER_LIBRA/WA_MOCKUP_V2_SET03_Cancer_Libra_FINAL.jpg"
+          rclone copyto _work/kasa/MASTER_KASA_SET04.jpg "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/CANCER_LIBRA/WA_MOCKUP_V2_SET04_Cancer_Libra_FINAL.jpg"
+          rclone lsl "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CALIB" | tee -a _work/rapor.txt
+          rclone lsl "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/CANCER_LIBRA" | tee -a _work/rapor.txt
+          rclone check _work/yeni "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CALIB" --one-way --include "calib.json" --include "masks/*.png"
+
+      - name: 4) Duman testi (pilot 6 sahne, yeni calib + masterlar)
+        run: |
+          set +e
+          set -uo pipefail
+          mkdir -p _work/masters _work/pilot _work/wp _work/out
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/CANCER_LIBRA" _work/masters --include "*_FINAL.jpg"
+          rclone copy "gdrive:ASTROLOVE/ARCHIVE/FINAL_V2_PILOT_V1" _work/pilot --include "AstroLove_*.jpg"
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/CANCER_LIBRA" _work/wp --include "AstroLove_*.jpg"
+          python scripts/etsy/wp_mockup_render.py --calib _work/yeni --masters _work/masters --pilot _work/pilot \
+            --wallpapers _work/wp --pair Cancer_Libra --out _work/out 2>&1 | grep -v '^ *"' | tee -a _work/rapor.txt
+          rc=${PIPESTATUS[0]}; echo "duman testi cikis kodu: $rc" | tee -a _work/rapor.txt
+          rclone copy _work/out "gdrive:ASTROLOVE/TEMP/FIX_TEST/KALICI_TEST" --include "*.jpg" --include "report.md" || true
+          exit $rc
+
+      - name: Rapor
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/rapor.txt ] && rclone copyto _work/rapor.txt "gdrive:ASTROLOVE/TEMP/WP_KALICI.txt" || true
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: wp-kalici
+          path: |
+            _work/rapor.txt
+            _work/yeni/calib.json
+          if-no-files-found: ignore
+
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone

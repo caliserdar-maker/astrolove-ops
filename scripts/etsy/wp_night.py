@@ -22,6 +22,7 @@ Kullanim:
       --drive gdrive:ASTROLOVE --work _work
 """
 import argparse
+import json
 import csv
 import os
 import shutil
@@ -111,6 +112,18 @@ def stage_b(pair, drive, work, args):
     wp_in = work / "wp" / up
     wp_in.mkdir(parents=True, exist_ok=True)
     rclone("copy", f"{drive}/{args.wp_dir}/{up}", str(wp_in), "--include", "AstroLove_*.jpg")
+    # 5 Eyl 2026 (Mo): SET07 saati Canva disa aktarimindan (TEMP/WATCH_CANVA/<UP>);
+    # dosya yoksa cift FAIL (FINAL_V2 saatine sessizce dusulmez).
+    if args.watch_dir:
+        saat = work / "saat" / up
+        shutil.rmtree(saat, ignore_errors=True)
+        saat.mkdir(parents=True, exist_ok=True)
+        rclone("copy", f"{drive}/{args.watch_dir}/{up}", str(saat), "--include", "AstroLove_*_Watch.jpg", check=False)
+        f = saat / f"AstroLove_{pair}_Midnight_Blue_Watch.jpg"
+        if not f.exists():
+            shutil.rmtree(wp_in, ignore_errors=True)
+            return False, f"Canva saat yok: {args.watch_dir}/{up}"
+        shutil.copy2(f, wp_in / f.name)
     out = work / "mock" / up
     rc, tail = run([sys.executable, str(Path(__file__).parent / "wp_mockup_render.py"),
                     "--calib", str(work / "calib"), "--masters", str(work / "masters"),
@@ -118,11 +131,21 @@ def stage_b(pair, drive, work, args):
                     "--pair", pair, "--out", str(out)])
     n = len(list(out.glob("WA_MOCKUP_V2_*.jpg"))) if out.exists() else 0
     ok = rc == 0 and n == 6
+    # Pilot ciftin cikti adlari sahne MASTERLARIYLA aynidir (MOCKUP_V2/CANCER_LIBRA);
+    # masterlar uzerine yazilmaz, pilot _CANDIDATE/<UP> altina gider (5 Eyl 2026).
+    hedef = f"{drive}/{args.mock_dir}/{up}"
+    pilot = ""
+    try:
+        pilot = json.loads((work / "calib" / "calib.json").read_text()).get("pilot_pair", "")
+    except Exception:
+        pass
+    if pair == pilot:
+        hedef = f"{drive}/{args.mock_dir}/_CANDIDATE/{up}"
     if ok:
-        rclone("copy", str(out), f"{drive}/{args.mock_dir}/{up}", "--include", "WA_MOCKUP_V2_*.jpg",
+        rclone("copy", str(out), hedef, "--include", "WA_MOCKUP_V2_*.jpg",
                "--include", "qc.json", "--include", "report.md")
     shutil.rmtree(wp_in, ignore_errors=True)
-    return ok, f"{n}/6 gorsel"
+    return ok, f"{n}/6 gorsel" + (" -> _CANDIDATE (pilot)" if pair == pilot else "")
 
 
 def stage_d(pair, drive, work, args):
@@ -166,6 +189,7 @@ def main():
     ap.add_argument("--zip-dir", default="WALLPAPER/DELIVERY")
     ap.add_argument("--crops", default="Deep_Black_Tablet,Champagne_Ivory_Phone")
     ap.add_argument("--guide", default="", help="asama d: ZIP'e eklenecek kurulum PDF'i")
+    ap.add_argument("--watch-dir", default="", help="asama b: Canva saat klasoru (ASTROLOVE altinda), bos = FINAL_V2 saati")
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--limit", type=int, default=0)
     a = ap.parse_args()
