@@ -615,6 +615,11 @@ def render_screen(out, master, screen, wp_new, wp_pilot, mode, soft_mask=None, e
         if mod == "quad":
             # 5 Eyl 2026 (Mo) DENEME: hicbir kucultme yok, delik = quad'in kendisi.
             h = poly_mask_aa(master.shape, quad)
+        elif mod == "maske":
+            # 5 Eyl 2026 (Mo) KASA KOPYASI: delik = kalibre maskenin KENDISI (kasa
+            # kopyasinda bu maske komsu telefonun ekran maskesinin homografiyle
+            # tasinmisidir; kopyalanan cerceve ile ayni sinir -> kosede bosluk yok).
+            h = soft_mask.astype(np.float32)
         else:
             h, r_olculen, _ = hole_shape(soft_mask, quad, inset=delik, yaricap=yaricap)
         h = h[..., None]                                   # fotografin deligi (geometrik)

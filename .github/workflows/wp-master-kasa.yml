@@ -1,9 +1,11 @@
 name: wp-master-kasa
 
 # KOMSU TELEFONUN TUM KASASINI KOPYALA - yalniz SET03/3 ve SET04/1 (5 Eyl 2026, Mo).
-# Halka = (eski quad + 10 px) EKSI (Mo'nun kirmizi yuvarlak deligi, calib B).
-# Halka, hemen disindaki 6 px seritten beslenen TELEA inpaint ile doldurulur;
-# temiz master KOPYADIR. Sonra calib B + temiz master ile SET03+SET04 uretilir.
+# Deneme 2: kasa kalinligi kenar bazinda fotograftan olculur (duvar bandi
+# tasinmaz), komsu telefonun TAMAMI (kasa + ekran) eski quad homografisiyle
+# hedefe kopyalanir; delik = kopyalanan ekranin fotograftan olculen siniri
+# (koyu ekranda: tasinan maskeye oturtulmus yuvarlak dikdortgen) -> calib
+# kopyasinda hedef maske + frame_top {delik: maske}. Master ve calib KOPYADIR.
 # Uretim master'i, calib.json, MOCKUP_V2, DELIVERY, ZIP, Etsy DEGISMEZ.
 
 on:
@@ -21,6 +23,10 @@ on:
         description: "Dis siluet yumusak gecis (px)"
         required: true
         default: "4"
+      delik:
+        description: "Delik: maske (fotograftan olculen / tasinan maske) veya sekil (eski quad + yaricap)"
+        required: true
+        default: "maske"
 
 concurrency:
   group: wp-master-kasa
@@ -68,7 +74,7 @@ jobs:
         run: |
           set -euo pipefail
           python scripts/etsy/wp_kasa_kopyala.py --calib _work/c0 --masters _work/masters \
-            --hedef SET03:3:2 --hedef SET04:1:0 --bant "${{ inputs.bant }}" --gecis "${{ inputs.gecis }}" \
+            --hedef SET03:3:2 --hedef SET04:1:0 --bant "${{ inputs.bant }}" --gecis "${{ inputs.gecis }}" --delik "${{ inputs.delik }}" \
             --out-dir _work/masters_temiz --out-calib _work/cb/calib.json --kanit-dir _work/kanit | tee _work/rapor.txt
           test "$(ls _work/masters_temiz/*_FINAL.jpg | wc -l)" = "$(ls _work/masters/*_FINAL.jpg | wc -l)"
 
@@ -86,6 +92,7 @@ jobs:
           cp _work/kanit/K05_*.jpg _work/son/
           cp _work/masters_temiz/WA_MOCKUP_V2_SET03_Cancer_Libra_FINAL.jpg _work/son/MASTER_KASA_SET03.jpg
           cp _work/masters_temiz/WA_MOCKUP_V2_SET04_Cancer_Libra_FINAL.jpg _work/son/MASTER_KASA_SET04.jpg
+          cp _work/cb/masks/SET03_3.png _work/son/MASKE_KASA_SET03_3.png; cp _work/cb/masks/SET04_1.png _work/son/MASKE_KASA_SET04_1.png
           ls -l _work/son
           test -s "_work/son/WA_MOCKUP_V2_SET03_${P}_KASA.jpg" && test -s "_work/son/WA_MOCKUP_V2_SET04_${P}_KASA.jpg"
 
@@ -94,7 +101,7 @@ jobs:
         run: |
           set -euo pipefail
           rclone mkdir "gdrive:ASTROLOVE/TEMP/FIX_TEST/MASTER_KASA"
-          rclone copy _work/son "gdrive:ASTROLOVE/TEMP/FIX_TEST/MASTER_KASA" --include "*.jpg" || true
+          rclone copy _work/son "gdrive:ASTROLOVE/TEMP/FIX_TEST/MASTER_KASA" --include "*.jpg" --include "*.png" || true
           [ -f _work/rapor.txt ] && rclone copyto _work/rapor.txt "gdrive:ASTROLOVE/TEMP/WP_MASTER_KASA.txt" || true
           [ -f _work/cb/calib.json ] && rclone copyto _work/cb/calib.json "gdrive:ASTROLOVE/TEMP/FIX_TEST/calib_kasa.json" || true
           fid="$(rclone lsjson "gdrive:ASTROLOVE/TEMP/FIX_TEST" --dirs-only | python3 _fid.py MASTER_KASA)"
