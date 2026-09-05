@@ -153,12 +153,16 @@ def main():
     ap.add_argument("--masters", required=True)
     ap.add_argument("--scenes", required=True)
     ap.add_argument("--kanit", default="SET07:1,SET03:0")
+    ap.add_argument("--tam", default="", help="tam sahne cizimi uretilecek sahneler (virgul)")
+    ap.add_argument("--kalinlik", type=int, default=6)
     ap.add_argument("--crop-dir", required=True)
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
 
     calib = json.loads((Path(a.calib) / "calib.json").read_text())
     kanitlar = {(t.split(":")[0], int(t.split(":")[1])) for t in a.kanit.split(",") if t}
+    tam_sahneler = {t.strip() for t in a.tam.split(",") if t.strip()}
+    tam_ciz = {}
     Path(a.crop_dir).mkdir(parents=True, exist_ok=True)
     satirlar = []
     for scene in [s.strip() for s in a.scenes.split(",") if s.strip()]:
@@ -187,10 +191,26 @@ def main():
             log(f"  {scene}/{s['id']} {s['device']:<7} kenar UST {sap['UST'][0]} SAG {sap['SAG'][0]} "
                 f"ALT {sap['ALT'][0]} SOL {sap['SOL'][0]} px | en buyuk kose sapmasi {buyuk} px "
                 f"| kontrast {[sap[k][1] for k in KENAR]}")
+            if scene in tam_sahneler:
+                tam_ciz.setdefault(scene, master.copy())
+                im = tam_ciz[scene]
+                q = np.round(quad).astype(np.int32)
+                cv2.polylines(im, [q], True, (0, 0, 255), a.kalinlik, cv2.LINE_AA)
+                _, olculen, _ = kose_sapmalari(sap, W, H, PAY)
+                pts = np.float32([olculen["SOL UST"], olculen["SAG UST"],
+                                  olculen["SAG ALT"], olculen["SOL ALT"]]).reshape(-1, 1, 2)
+                sahne_pts = cv2.perspectiveTransform(pts, np.linalg.inv(M.astype(np.float64))).reshape(-1, 2)
+                cv2.polylines(im, [np.round(sahne_pts).astype(np.int32)], True, (0, 255, 0),
+                              a.kalinlik, cv2.LINE_AA)
             if (scene, s["id"]) in kanitlar:
                 kanit(master, quad, sap, W, H, PAY, np.linalg.inv(M.astype(np.float64)),
                       Path(a.crop_dir) / f"M13_{scene}_S{s['id']}_QUAD_vs_EKRAN.jpg",
                       f"{scene} ekran {s['id']} ({s['device']})")
+
+    for scene, im in tam_ciz.items():
+        p = Path(a.crop_dir) / f"M14_{scene}_QUAD_TAM.jpg"
+        imwrite_jpeg(p, im)
+        log(f"  {p.name}: tam sahne {im.shape[1]}x{im.shape[0]}")
 
     cols = list(dict.fromkeys(k for r in satirlar for k in r))
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
