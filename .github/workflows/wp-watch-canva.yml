@@ -117,7 +117,7 @@ jobs:
           n=$(find _work/out -name '*_Watch.jpg' | wc -l); echo "yazilacak: $n"; test "$n" = "78"
           rclone copy _work/out "gdrive:ASTROLOVE/${{ inputs.out_dir }}" --include "*/AstroLove_*_Watch.jpg" --transfers 8
           # paralel kosular ayni alt klasoru ayni anda acinca Drive'da yinelenen klasor olusur (5 Eyl: 13 klasor); birlestir
-          rclone dedupe --dedupe-mode merge "gdrive:ASTROLOVE/${{ inputs.out_dir }}" || true
+          rclone dedupe --dedupe-mode newest "gdrive:ASTROLOVE/${{ inputs.out_dir }}" || true
           rclone check _work/out "gdrive:ASTROLOVE/${{ inputs.out_dir }}" --one-way --include "*/AstroLove_*_Watch.jpg"
 
       - name: Rapor
