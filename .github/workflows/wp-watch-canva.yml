@@ -2,7 +2,7 @@ name: wp-watch-canva
 
 # CANVA SAAT DOSYALARI, 78 CIFT, YALNIZ MIDNIGHT_BLUE (5 Eyl 2026, Mo).
 # Blue tasarimi (DAHUIJYNS1c, 78 sayfa 1000x1220) sayfa sayfa PNG indirilir
-# (imzali URL'ler repo icindeki TSV'den; loga yazilmaz). Sayfa -> cift
+# (imzali URL'ler workflow girdisinden; loga yazilmaz). Sayfa -> cift
 # eslemesi icerikten (FINAL_V2 MB saat murekkebiyle IoU); STATE'teki 78 ciftle
 # birebir degilse DUR, hicbir dosya yazilmaz. Gecerse
 # TEMP/WATCH_CANVA/<UP>/AstroLove_<Cift>_Midnight_Blue_Watch.jpg yazilir.
@@ -11,10 +11,9 @@ name: wp-watch-canva
 on:
   workflow_dispatch:
     inputs:
-      manifest:
-        description: "Repo icindeki liste (TSV: <sayfa_no>\\t<URL>)"
+      urls:
+        description: "Satir basina: <sayfa_no>|<URL> (78 satir; loga yazilmaz)"
         required: true
-        default: "_manifest/watch_canva.tsv"
       out_dir:
         description: "Cikti klasoru (ASTROLOVE altinda)"
         required: true
@@ -47,6 +46,8 @@ jobs:
           if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
 
       - name: Sayfalari indir (URL loga yazilmaz)
+        env:
+          URLS: ${{ inputs.urls }}
         run: |
           set -euo pipefail
           mkdir -p _work/pages _work/log
@@ -63,7 +64,7 @@ jobs:
           fi
           SH
           chmod +x _work/one.sh
-          grep -v '^#' "${{ inputs.manifest }}" | sed '/^$/d' > _work/jobs.tsv
+          printf '%s\n' "$URLS" | sed '/^$/d' | tr '|' '\t' > _work/jobs.tsv
           total=$(wc -l < _work/jobs.tsv); echo "liste: $total satir"
           xargs -d '\n' -a _work/jobs.tsv -P 8 -n 1 _work/one.sh || true
           ok=$(grep -c '^OK' _work/log/progress.txt || true); fail=$(grep -c '^FAIL' _work/log/progress.txt || true)
