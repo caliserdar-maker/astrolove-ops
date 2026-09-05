@@ -48,8 +48,13 @@ jobs:
         run: |
           set -euo pipefail
           Y="gdrive:ASTROLOVE/TEMP/YEDEK_KALICI_${{ inputs.etiket }}"
-          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CALIB" "$Y/_CALIB" --include "calib.json" --include "masks/*.png"
-          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/CANCER_LIBRA" "$Y/CANCER_LIBRA" --include "*_FINAL.jpg"
+          # Idempotent: yedek zaten varsa uzerine YAZILMAZ (uretim degismis olabilir).
+          if rclone lsf "$Y/_CALIB/calib.json" >/dev/null 2>&1 && [ -n "$(rclone lsf "$Y/_CALIB/calib.json")" ]; then
+            echo "yedek zaten var ($Y), dokunulmadi"
+          else
+            rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CALIB" "$Y/_CALIB" --include "calib.json" --include "masks/*.png"
+            rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/CANCER_LIBRA" "$Y/CANCER_LIBRA" --include "*_FINAL.jpg"
+          fi
           echo "yedek _CALIB: $(rclone lsf "$Y/_CALIB" -R --files-only | wc -l) dosya; masterlar: $(rclone lsf "$Y/CANCER_LIBRA" | wc -l)"
           test "$(rclone lsf "$Y/CANCER_LIBRA" | wc -l)" = "6"
           A="gdrive:ASTROLOVE/ARCHIVE/MOCKUP_V2_YEDEK_${{ inputs.etiket }}"
