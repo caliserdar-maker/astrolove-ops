@@ -1,0 +1,119 @@
+name: wp-delik-probe
+
+# DELIK NEDEN QUAD'DAN KUCUK - 5 Eyl 2026 (Mo).
+# 1) Olcum: quad / cizilen delik / gorunen kutu ve delik zincirinin her
+#    adiminin kac px kucuttugu. 2) Deneme: butun kucultmeler kapali,
+#    delik = quad, wallpaper 4 px disari; tek sahne render.
+# calib.json, FINAL_V2, MOCKUP_V2, DELIVERY, ZIP ve Etsy DEGISMEZ.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pair:
+        description: "Cift"
+        required: true
+        default: "Aries_Aries"
+      scene:
+        description: "Sahne"
+        required: true
+        default: "SET07"
+      screen:
+        description: "Ekran id"
+        required: true
+        default: "1"
+      calib_json:
+        description: "Kullanilacak calib (ASTROLOVE altinda yol)"
+        required: true
+        default: "TEMP/FIX_TEST/calib_redquad_dik.json"
+      frame:
+        description: "<disari_px>:<delik_erode_px>"
+        required: true
+        default: "4:2"
+
+concurrency:
+  group: wp-delik-probe
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+
+      - name: Girdiler
+        run: |
+          set -euo pipefail
+          P="${{ inputs.pair }}"; UP=$(echo "$P" | tr '[:lower:]' '[:upper:]')
+          S="${{ inputs.scene }}"
+          mkdir -p _work/c/masks _work/masters _work/pilot _work/wp _work/out _work/son
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/_CALIB/masks" _work/c/masks --include "*.png"
+          rclone copyto "gdrive:ASTROLOVE/${{ inputs.calib_json }}" _work/c/calib.json
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/MOCKUP_V2/CANCER_LIBRA" _work/masters --include "*_FINAL.jpg"
+          rclone copy "gdrive:ASTROLOVE/ARCHIVE/FINAL_V2_PILOT_V1" _work/pilot --include "AstroLove_*.jpg"
+          test "$(ls _work/pilot | wc -l)" = "16"
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/$UP" _work/wp --include "AstroLove_*.jpg"
+          rclone copy "gdrive:ASTROLOVE/TEMP/FIX_TEST/WATCH_CANVA/$UP" _work/wp --include "AstroLove_*_Watch.jpg"
+          rclone copyto "gdrive:ASTROLOVE/TEMP/FIX_TEST/MOCKUP_QUADTEST/WA_MOCKUP_V2_${S}_${P}_B_DIK.jpg" _work/B_DIK.jpg || true
+
+      - name: Olcum
+        run: |
+          set -euo pipefail
+          D="$(echo '${{ inputs.frame }}' | cut -d: -f2)"
+          python scripts/etsy/wp_delik_probe.py --calib _work/c --masters _work/masters \
+            --scene "${{ inputs.scene }}" --screen "${{ inputs.screen }}" \
+            --render _work/B_DIK.jpg --inset "$D" | tee _work/rapor.txt
+
+      - name: Render (delik = quad)
+        run: |
+          set +e
+          set -uo pipefail
+          P="${{ inputs.pair }}"; S="${{ inputs.scene }}"
+          echo "=== render: delik=quad, cerceve ${{ inputs.frame }} ===" | tee -a _work/rapor.txt
+          python scripts/etsy/wp_mockup_render.py --calib _work/c --masters _work/masters \
+            --pilot _work/pilot --wallpapers _work/wp --pair "$P" --scenes "$S" \
+            --frame-on-top "${{ inputs.frame }}" --delik quad --no-relight \
+            --out _work/out 2>&1 | tee -a _work/rapor.txt
+          echo "render cikis kodu: ${PIPESTATUS[0]}" | tee -a _work/rapor.txt
+          cp "_work/out/WA_MOCKUP_V2_${S}_${P}_FINAL.jpg" "_work/son/WA_MOCKUP_V2_${S}_${P}_DELIK_QUAD.jpg"
+          test -s "_work/son/WA_MOCKUP_V2_${S}_${P}_DELIK_QUAD.jpg"
+
+      - name: Drive'a yaz + anyone:reader
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          rclone mkdir "gdrive:ASTROLOVE/TEMP/FIX_TEST/MOCKUP_DELIK"
+          [ -n "$(ls -A _work/son 2>/dev/null)" ] && rclone copy _work/son "gdrive:ASTROLOVE/TEMP/FIX_TEST/MOCKUP_DELIK" --include "*.jpg" || true
+          [ -f _work/rapor.txt ] && rclone copyto _work/rapor.txt "gdrive:ASTROLOVE/TEMP/WP_DELIK_PROBE.txt" || true
+          cat > _fid.py <<'PY'
+          import json, sys
+          print([r["ID"] for r in json.load(sys.stdin) if r["Name"] == sys.argv[1]][0])
+          PY
+          fid="$(rclone lsjson "gdrive:ASTROLOVE/TEMP/FIX_TEST" --dirs-only | python3 _fid.py MOCKUP_DELIK)"
+          python scripts/pinterest/pin_media_perms.py --mode grant --folder-id "$fid" --pattern "WA_MOCKUP_V2_" --apply
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: wp-delik-probe
+          path: _work/rapor.txt
+          if-no-files-found: ignore
+
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone _fid.py

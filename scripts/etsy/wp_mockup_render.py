@@ -160,6 +160,8 @@ def main():
     ap.add_argument("--compare", default="")
     ap.add_argument("--frame-on-top", default="",
                     help="cerceve-ustte: <disari_px>:<delik_erode_px> (or. 4:2)")
+    ap.add_argument("--delik", default="sekil", choices=("sekil", "quad"),
+                    help="cerceve-ustte deligi: sekil (yuvarlatilmis, erode) | quad (oldugu gibi)")
     ap.add_argument("--erode-mask", type=int, default=0,
                     help="kalibre maskeyi bu kadar px iceri al (tasma denemesi)")
     ap.add_argument("--warp", default="mevcut", choices=("mevcut", "lanczos"),
@@ -172,6 +174,8 @@ def main():
     ft = tuple(int(x) for x in a.frame_on_top.split(":")) if a.frame_on_top else None
     if ft and len(ft) != 2:
         raise SystemExit("--frame-on-top bicimi <disari>:<delik>")
+    if ft and a.delik == "quad":
+        ft = (ft[0], 0, "quad")
     calib = json.loads((Path(a.calib) / "calib.json").read_text())
     calib["dir"] = a.calib
     pilot_wps = load_wallpapers(a.pilot, calib["pilot_pair"])

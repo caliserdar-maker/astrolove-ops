@@ -253,7 +253,7 @@ def _kose_yaricapi(mask_local, blok=80):
     return float(np.median(rs)), [round(x, 1) for x in rs]
 
 
-def hole_shape(soft, quad, inset=2.0, up=4, delik_min=200):
+def hole_shape(soft, quad, inset=2.0, up=4, delik_min=200, yuvarlat=True, ic_cikar=True, detay=None):
     """CERCEVE-USTTE deligi: maskeden DEGIL, geometriden.
     Ekranin yerel dikdortgeninde yuvarlatilmis dikdortgen up kat cozunurlukte
     cizilir (kenar yumusatma icin INTER_AREA ile kucultulur) ve homografi ile
@@ -270,6 +270,8 @@ def hole_shape(soft, quad, inset=2.0, up=4, delik_min=200):
     yerel = cv2.warpPerspective(soft, np.linalg.inv(Hl.astype(np.float64)), (W, H),
                                 flags=cv2.INTER_LINEAR)
     r, rs = _kose_yaricapi(yerel)                       # rs: SU, SG, AU, AG (TL,TR,BL,BR)
+    if not yuvarlat:
+        rs = [0.0, 0.0, 0.0, 0.0]
     buyuk = np.zeros((H * up, W * up), np.uint8)
     x0 = int(round(inset * up)); y0 = int(round(inset * up))
     x1 = int(round((W - inset) * up)); y1 = int(round((H - inset) * up))
@@ -293,9 +295,13 @@ def hole_shape(soft, quad, inset=2.0, up=4, delik_min=200):
         buyuk[sx, sy] = 0
         cv2.circle(buyuk, (cx, cy), R, 255, -1)
     sekil = cv2.resize(buyuk, (W, H), interpolation=cv2.INTER_AREA).astype(np.float32) / 255.0
+    if detay is not None:
+        detay.update(W=W, H=H, rs=list(rs), sekil_yuvarlak=sekil.copy(), yerel=yerel.copy())
 
     # maskenin ic delikleri (centik vb.) sekilden cikarilir
     sert = (yerel >= 0.5).astype(np.uint8)
+    if not ic_cikar:
+        sert[:] = 1
     bosluk = (1 - sert).astype(np.uint8)
     n, lab, st, _ = cv2.connectedComponentsWithStats(bosluk, 8)
     ic = np.zeros((H, W), np.uint8)
@@ -310,6 +316,8 @@ def hole_shape(soft, quad, inset=2.0, up=4, delik_min=200):
     if ic.any():
         ic = cv2.GaussianBlur(ic.astype(np.float32) / 255.0, (0, 0), 0.8)
         sekil = np.clip(sekil - ic, 0.0, 1.0)
+    if detay is not None:
+        detay.update(sekil=sekil.copy(), ic_alan=int((ic > 0).sum()) if isinstance(ic, np.ndarray) else 0)
     delik = cv2.warpPerspective(sekil, Hl.astype(np.float64), (soft.shape[1], soft.shape[0]),
                                 flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT)
     return delik, round(r, 1), rs
@@ -590,7 +598,8 @@ def render_screen(out, master, screen, wp_new, wp_pilot, mode, soft_mask=None, e
         #     maskenin delik_px kadar erode edilmisi. Boylece maskenin
         #     centikli siniri fotografin ALTINDA kalir, gorunen kenar
         #     cihazin fotograftaki kendi kenaridir.
-        disari, delik = frame_top
+        disari, delik, *mod = frame_top
+        mod = mod[0] if mod else "sekil"
         if soft_mask is None:
             raise SystemExit("cerceve-ustte icin kalibre maske gerekli")
         Hc, _ = cover_homography(wp_new.shape, quad)
@@ -599,7 +608,11 @@ def render_screen(out, master, screen, wp_new, wp_pilot, mode, soft_mask=None, e
                                     flags=cv2.INTER_CUBIC,
                                     borderMode=cv2.BORDER_REPLICATE).astype(np.float32)
         bant = poly_mask_aa(master.shape, expand_quad(quad, disari))[..., None]
-        h, r_olculen, _ = hole_shape(soft_mask, quad, inset=delik)
+        if mod == "quad":
+            # 5 Eyl 2026 (Mo) DENEME: hicbir kucultme yok, delik = quad'in kendisi.
+            h = poly_mask_aa(master.shape, quad)
+        else:
+            h, r_olculen, _ = hole_shape(soft_mask, quad, inset=delik)
         h = h[..., None]                                   # fotografin deligi (geometrik)
         # Ust katman, sahnenin O ANKI hali uzerine cizilir (master uzerine DEGIL):
         # coklu ekranli sahnede onceki ekranlarin yerlestirmesi korunur.
