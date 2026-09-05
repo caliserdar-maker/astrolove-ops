@@ -87,43 +87,54 @@ jobs:
           python scripts/pinterest/pin_media_perms.py --mode grant --folder-id "$fid" --pattern "_TEL.jpg" --apply \
             | grep -v '^::add-mask::' | tee _work/linkler.txt
 
-      - name: UYGULA - kirmizi konturdan quad (KOPYA calib)
+      - name: UYGULA - ince kirmizi cizgiden quad (KOPYA calib, iki varyant)
         if: ${{ inputs.mod == 'uygula' }}
         run: |
           set -euo pipefail
-          P="${{ inputs.pair }}"
-          mkdir -p _work/isaret _work/c1/masks _work/kanit
-          cp -r _work/c0/masks/. _work/c1/masks/
+          mkdir -p _work/isaret _work/c1/masks _work/c2/masks _work/kanit
+          cp -r _work/c0/masks/. _work/c1/masks/; cp -r _work/c0/masks/. _work/c2/masks/
           rclone copyto "gdrive:ASTROLOVE/${{ inputs.isaret3 }}" "_work/isaret/set03.jpg"
           rclone copyto "gdrive:ASTROLOVE/${{ inputs.isaret4 }}" "_work/isaret/set04.jpg"
-          echo "=== SET03 ekran 3 ===" | tee _work/rapor.txt
+          D="${{ inputs.disari }}"
+          echo "=== A) delik = quad ===" | tee _work/rapor.txt
           python scripts/etsy/wp_red_quad.py --calib _work/c0 --masters _work/masters --isaret _work/isaret/set03.jpg \
-            --scene SET03 --screen 3 --dik --frame-top-quad "${{ inputs.disari }}" \
-            --out-calib _work/c1/calib.json --kanit "_work/kanit/K02_SET03_S3_QUAD.jpg" | tee -a _work/rapor.txt
-          echo "=== SET04 ekran 1 ===" | tee -a _work/rapor.txt
+            --scene SET03 --screen 3 --ince --frame-top-quad "$D" --out-calib _work/c1/calib.json \
+            --kanit _work/kanit/K02_SET03_S3_QUAD.jpg | tee -a _work/rapor.txt
           python scripts/etsy/wp_red_quad.py --calib _work/c0 --calib-json _work/c1/calib.json --masters _work/masters \
-            --isaret _work/isaret/set04.jpg --scene SET04 --screen 1 --dik --frame-top-quad "${{ inputs.disari }}" \
-            --out-calib _work/c1/calib.json --kanit "_work/kanit/K02_SET04_S1_QUAD.jpg" | tee -a _work/rapor.txt
+            --isaret _work/isaret/set04.jpg --scene SET04 --screen 1 --ince --frame-top-quad "$D" \
+            --out-calib _work/c1/calib.json --kanit _work/kanit/K02_SET04_S1_QUAD.jpg | tee -a _work/rapor.txt
+          echo "=== B) delik = yuvarlak dikdortgen (kirmizidan olculen yaricap) ===" | tee -a _work/rapor.txt
+          python scripts/etsy/wp_red_quad.py --calib _work/c0 --masters _work/masters --isaret _work/isaret/set03.jpg \
+            --scene SET03 --screen 3 --ince --frame-top-quad "$D" --kose-yuvarlak --out-calib _work/c2/calib.json | tee -a _work/rapor.txt
+          python scripts/etsy/wp_red_quad.py --calib _work/c0 --calib-json _work/c2/calib.json --masters _work/masters \
+            --isaret _work/isaret/set04.jpg --scene SET04 --screen 1 --ince --frame-top-quad "$D" --kose-yuvarlak \
+            --out-calib _work/c2/calib.json | tee -a _work/rapor.txt
 
-      - name: UYGULA - render SET03 + SET04
+      - name: UYGULA - render SET03 + SET04 (iki varyant)
         if: ${{ inputs.mod == 'uygula' }}
         run: |
           set +e
           set -uo pipefail
           P="${{ inputs.pair }}"; UP=$(echo "$P" | tr '[:lower:]' '[:upper:]')
-          mkdir -p _work/pilot _work/wp _work/out
+          mkdir -p _work/pilot _work/wp
           rclone copy "gdrive:ASTROLOVE/ARCHIVE/FINAL_V2_PILOT_V1" _work/pilot --include "AstroLove_*.jpg"
           rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/$UP" _work/wp --include "AstroLove_*.jpg"
-          python scripts/etsy/wp_mockup_render.py --calib _work/c1 --masters _work/masters \
-            --pilot _work/pilot --wallpapers _work/wp --pair "$P" --scenes SET03,SET04 \
-            --out _work/out 2>&1 | grep -v '^ *"' | tee -a _work/rapor.txt
-          echo "render cikis kodu: ${PIPESTATUS[0]}" | tee -a _work/rapor.txt
-          cp _work/out/WA_MOCKUP_V2_*.jpg _work/son/
+          for K in c1 c2; do
+            rm -rf _work/out; mkdir -p _work/out
+            EK="A_QUAD"; [ "$K" = "c2" ] && EK="B_YUVARLAK"
+            echo "=== render $EK ===" | tee -a _work/rapor.txt
+            python scripts/etsy/wp_mockup_render.py --calib "_work/$K" --masters _work/masters \
+              --pilot _work/pilot --wallpapers _work/wp --pair "$P" --scenes SET03,SET04 \
+              --out _work/out 2>&1 | grep -v '^ *"' | tee -a _work/rapor.txt
+            echo "render $EK cikis kodu: ${PIPESTATUS[0]}" | tee -a _work/rapor.txt
+            for S in SET03 SET04; do cp "_work/out/WA_MOCKUP_V2_${S}_${P}_FINAL.jpg" "_work/son/WA_MOCKUP_V2_${S}_${P}_${EK}.jpg"; done
+          done
           cp _work/kanit/K02_*.jpg _work/son/
           ls -l _work/son
           rclone mkdir "gdrive:ASTROLOVE/TEMP/FIX_TEST/MOCKUP_REDQUAD_TEL"
           rclone copy _work/son "gdrive:ASTROLOVE/TEMP/FIX_TEST/MOCKUP_REDQUAD_TEL" --include "*.jpg"
-          rclone copyto _work/c1/calib.json "gdrive:ASTROLOVE/TEMP/FIX_TEST/calib_redquad_tel.json"
+          rclone copyto _work/c1/calib.json "gdrive:ASTROLOVE/TEMP/FIX_TEST/calib_redquad_tel_A.json"
+          rclone copyto _work/c2/calib.json "gdrive:ASTROLOVE/TEMP/FIX_TEST/calib_redquad_tel_B.json"
           fid="$(rclone lsjson "gdrive:ASTROLOVE/TEMP/FIX_TEST" --dirs-only | python3 _fid.py MOCKUP_REDQUAD_TEL)"
           : > _work/linkler.txt
           for PAT in "WA_MOCKUP_V2_" "K02_"; do
