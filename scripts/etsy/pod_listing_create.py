@@ -55,12 +55,36 @@ TITLE = "{S1} and {S2} Zodiac Wall Art, Couple Compatibility Giclée Print, Unfr
 EDITIONS = ["MIDNIGHT_BLUE", "DEEP_BLACK", "WARM_PARCHMENT", "CHAMPAGNE_IVORY", "PURE_WHITE"]
 ED_NAME = {"MIDNIGHT_BLUE": "Midnight Blue", "DEEP_BLACK": "Deep Black", "WARM_PARCHMENT": "Warm Parchment",
            "CHAMPAGNE_IVORY": "Champagne Ivory", "PURE_WHITE": "Pure White"}
-SIZES = ["8x10", "A4", "11x14", "12x16", "A3", "12x18", "16x20", "16x24", "A2", "18x24", "20x30", "24x36", "30x40"]
-SIZE_LABEL = {"8x10": "8x10 in (20.3×25.4 cm) · 4:5", "A4": "A4 (21×29.7 cm) · A-series", "11x14": "11x14 in (27.9×35.6 cm) · 11:14",
-              "12x16": "12x16 in (30.5×40.6 cm) · 3:4", "A3": "A3 (29.7×42 cm) · A-series", "12x18": "12x18 in (30.5×45.7 cm) · 2:3",
-              "16x20": "16x20 in (40.6×50.8 cm) · 4:5", "16x24": "16x24 in (40.6×61 cm) · 2:3", "A2": "A2 (41.9×59.4 cm) · A-series",
-              "18x24": "18x24 in (45.7×61 cm) · 3:4", "20x30": "20x30 in (50.8×76.2 cm) · 2:3", "24x36": "24x36 in (61×91.4 cm) · 2:3",
-              "30x40": "30x40 in (76.2×101.6 cm) · 3:4"}   # Mo 6 Eyl (EK 1): oran eklendi; sira kucukten buyuge
+# Mo 6 Eyl (Size etiketi v3): oran once, cm tam sayi; SIRA oran gruplari 4:5, 3:4, 2:3, 11:14, A-series.
+# Tek kaynak: SIZE_SPEC -> SIZES (sira), SIZE_LABEL (varyasyon degeri), size_block() (aciklama blogu EN/RU).
+SIZE_SPEC = [  # (anahtar, grup, inc metni, cm metni)
+    ("8x10", "4:5", "8x10 in", "20×25"), ("16x20", "4:5", "16x20 in", "41×51"),
+    ("12x16", "3:4", "12x16 in", "30×41"), ("18x24", "3:4", "18x24 in", "46×61"), ("30x40", "3:4", "30x40 in", "76×102"),
+    ("12x18", "2:3", "12x18 in", "30×46"), ("16x24", "2:3", "16x24 in", "41×61"), ("20x30", "2:3", "20x30 in", "51×76"),
+    ("24x36", "2:3", "24x36 in", "61×91"),
+    ("11x14", "11:14", "11x14 in", "28×36"),
+    ("A4", "A-series", "A4", "21×30"), ("A3", "A-series", "A3", "30×42"), ("A2", "A-series", "A2", "42×59"),
+]
+SIZES = [k for k, *_ in SIZE_SPEC]
+SIZE_LABEL = {k: f"{g} · {inc} ({cm} cm)" for k, g, inc, cm in SIZE_SPEC}     # or. "4:5 · 8x10 in (20×25 cm)"
+GROUP_ORDER = ["4:5", "3:4", "2:3", "11:14", "A-series"]
+SIZE_BLOCK_TXT = {"en": {"head": "✦ 13 SIZES (choose from the Size menu)", "ratio": "Ratio {g}", "a": "A-series (ISO)", "cm": "cm",
+                         "tail": "Not sure? See the size guide photo."},
+                  "ru": {"head": "✦ 13 РАЗМЕРОВ (выберите в меню Size)", "ratio": "Соотношение {g}", "a": "Серия A (ISO)", "cm": "см",
+                         "tail": "Не уверены? Смотрите фото с таблицей размеров."}}
+
+
+def size_block(lang="en"):
+    """Aciklamadaki '✦ 13 SIZES' blogu (EN/RU); docs/POD_LISTING_TEMPLATE.md ile birebir ayni olmali (test)."""
+    t = SIZE_BLOCK_TXT[lang]
+    out = [t["head"]]
+    for g in GROUP_ORDER:
+        out += ["", t["a"] if g == "A-series" else t["ratio"].format(g=g)]
+        out += [f"{inc} — {cm} {t['cm']}" for k, gg, inc, cm in SIZE_SPEC if gg == g]
+    out += ["", t["tail"]]
+    return "\n".join(out)
+
+
 MATERIALS = ["Hahnemuhle Photo Rag 308 gsm cotton paper", "archival pigment ink"]
 WHO_MADE = "i_did"                # Mo 6 Eyl: tasarim bize ait; uretim partneri Prodigi (production_partner_ids)
 AUTO_RENEW = True

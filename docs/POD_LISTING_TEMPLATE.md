@@ -45,21 +45,32 @@ One original emblem merges the {S1} and {S2} symbols: fine lines on a calm, soli
 Champagne Ivory · Pure White · Warm Parchment · Midnight Blue · Deep Black
 Select your edition from the Color menu.
 
-✦ 13 SIZES (select from the Size menu)
-8x10 in (20.3×25.4 cm) · 4:5
-A4 (21×29.7 cm)
-11x14 in (27.9×35.6 cm) · 11:14
-12x16 in (30.5×40.6 cm) · 3:4
-A3 (29.7×42 cm)
-12x18 in (30.5×45.7 cm) · 2:3
-16x20 in (40.6×50.8 cm) · 4:5
-16x24 in (40.6×61 cm) · 2:3
-A2 (41.9×59.4 cm)
-18x24 in (45.7×61 cm) · 3:4
-20x30 in (50.8×76.2 cm) · 2:3
-24x36 in (61×91.4 cm) · 2:3
-30x40 in (76.2×101.6 cm) · 3:4
-See the size guide in the photos to compare sizes on a wall.
+✦ 13 SIZES (choose from the Size menu)
+
+Ratio 4:5
+8x10 in — 20×25 cm
+16x20 in — 41×51 cm
+
+Ratio 3:4
+12x16 in — 30×41 cm
+18x24 in — 46×61 cm
+30x40 in — 76×102 cm
+
+Ratio 2:3
+12x18 in — 30×46 cm
+16x24 in — 41×61 cm
+20x30 in — 51×76 cm
+24x36 in — 61×91 cm
+
+Ratio 11:14
+11x14 in — 28×36 cm
+
+A-series (ISO)
+A4 — 21×30 cm
+A3 — 30×42 cm
+A2 — 42×59 cm
+
+Not sure? See the size guide photo.
 
 ✦ MADE TO ORDER & SHIPPING
 Each print is made to order by our production partner, Prodigi. Processing time is shown in the shipping details above. 8x10 and A4 ship flat; all other sizes ship rolled in a sturdy tube. US orders are printed in the US; EU and UK orders are printed at our UK/EU lab for faster delivery.
@@ -136,20 +147,31 @@ Champagne Ivory · Pure White · Warm Parchment · Midnight Blue · Deep Black
 Выберите издание в меню Color.
 
 ✦ 13 РАЗМЕРОВ (выберите в меню Size)
-8x10 in (20.3×25.4 см) · 4:5
-A4 (21×29.7 см)
-11x14 in (27.9×35.6 см) · 11:14
-12x16 in (30.5×40.6 см) · 3:4
-A3 (29.7×42 см)
-12x18 in (30.5×45.7 см) · 2:3
-16x20 in (40.6×50.8 см) · 4:5
-16x24 in (40.6×61 см) · 2:3
-A2 (41.9×59.4 см)
-18x24 in (45.7×61 см) · 3:4
-20x30 in (50.8×76.2 см) · 2:3
-24x36 in (61×91.4 см) · 2:3
-30x40 in (76.2×101.6 см) · 3:4
-Сравните размеры на стене по гиду в фотографиях.
+
+Соотношение 4:5
+8x10 in — 20×25 см
+16x20 in — 41×51 см
+
+Соотношение 3:4
+12x16 in — 30×41 см
+18x24 in — 46×61 см
+30x40 in — 76×102 см
+
+Соотношение 2:3
+12x18 in — 30×46 см
+16x24 in — 41×61 см
+20x30 in — 51×76 см
+24x36 in — 61×91 см
+
+Соотношение 11:14
+11x14 in — 28×36 см
+
+Серия A (ISO)
+A4 — 21×30 см
+A3 — 30×42 см
+A2 — 42×59 см
+
+Не уверены? Смотрите фото с таблицей размеров.
 
 ✦ ПЕЧАТЬ НА ЗАКАЗ И ДОСТАВКА
 Каждый постер печатается на заказ нашим производственным партнёром Prodigi. Срок изготовления указан в деталях доставки выше. 8x10 и A4 отправляются плоскими; остальные размеры — в прочном тубусе. Заказы из США печатаются в США; заказы из ЕС и Великобритании — в нашей лаборатории в Великобритании/ЕС для более быстрой доставки.
@@ -180,8 +202,9 @@ A2 (41.9×59.4 см)
 - Hazirlik durumu (processing profile): made_to_order 1-3 gun, readiness-state-definitions ucundan
   okunur/olusturulur; ilan `readiness_state_id` ile acilir (Etsy fiziksel ilanda zorunlu).
 - GPSR uretici/sorumlu kisi alanlari: Prodigi cevabi sonrasi (simdilik bos).
-- Size varyasyon etiketi (EK 1, Mo 6 Eyl): "18x24 in (45.7×61 cm) · 3:4", A serisi "A4 (21×29.7 cm) · A-series"
-  (`pod_listing_create.SIZE_LABEL`; mevcut ilanda `pod-inventory-update` ile).
+- Size varyasyon etiketi (v3, Mo 6 Eyl): "4:5 · 8x10 in (20×25 cm)", A serisi "A-series · A4 (21×30 cm)";
+  SIRA oran gruplari 4:5, 3:4, 2:3, 11:14, A-series (`pod_listing_create.SIZE_SPEC` tek kaynak: SIZES, SIZE_LABEL,
+  aciklama blogu size_block(); mevcut ilanda `pod-inventory-update` ile: envanter + EN/RU aciklama blogu + renk->gorsel).
 - SKU: `POD-<burc3>_<burc3>-<edisyon2>-<boyut>` (or. POD-ARI_LEO-MB-30x40; Etsy 32 karakter siniri; `scripts/etsy/pod_sku.py`).
 - Ilan alanlari (Mo 6 Eyl): who_made=i_did (production partner Prodigi), should_auto_renew=true,
   ozellikler Orientation=Vertical (Etsy "Portrait" karsiligi), Framing=Unframed, Number of pieces included=1, Material=Paper
