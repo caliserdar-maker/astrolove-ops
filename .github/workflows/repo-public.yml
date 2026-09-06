@@ -1,0 +1,48 @@
+name: repo-public
+
+# astrolove-ops PUBLIC gecisi (6 Eyl 2026): run gecmisini siler, gorunurlugu
+# public yapar, secret ISIMLERINI dogrular. OPS_ADMIN_TOKEN yalniz ortamda;
+# hicbir sir loga yazilmaz. astrolove-media'ya dokunmaz.
+
+on:
+  workflow_dispatch:
+    inputs:
+      delete_runs:
+        description: "Bu kosu haric tum workflow run'larini sil"
+        type: boolean
+        default: true
+      set_public:
+        description: "Repo gorunurlugunu public yap (403 -> DUR)"
+        type: boolean
+        default: true
+
+concurrency:
+  group: repo-public
+  cancel-in-progress: false
+
+jobs:
+  repo-public:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      OPS_ADMIN_TOKEN: ${{ secrets.OPS_ADMIN_TOKEN }}
+      TARGET_REPO: caliserdar-maker/astrolove-ops
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Ozet basligi
+        run: |
+          printf '| adim | sonuc |\n|---|---|\n' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Run gecmisini sil
+        if: ${{ inputs.delete_runs }}
+        run: python3 scripts/common/repo_public.py runs-delete
+
+      - name: Gorunurluk -> public
+        if: ${{ inputs.set_public }}
+        run: python3 scripts/common/repo_public.py visibility
+
+      - name: Dogrula (visibility + secret isimleri)
+        if: ${{ always() }}
+        run: python3 scripts/common/repo_public.py verify

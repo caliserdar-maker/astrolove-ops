@@ -47,3 +47,4 @@ zaman depoya yazilmaz.
 | `prodigi-quote` | elle (`limit` 0=hepsi, `discover`, `skus`) | Prodigi pilot katalog + ABD fiyat/kargo okuma (salt okur); cikti Drive `TEMP/PRODIGI/` + artifact |
 | `pod-gallery-sample` | elle (`pair`, `editions`) | POD galeri ornegi: ETSY_UPLOAD_SETS'ten 10 kare (6 mockup + symbol + crafted + 3 yeni kart) -> Drive `TEMP/POD_SAMPLE/<PAIR>/` + kontak sayfalari |
 | `pod-listing-update` | elle (`pair`, `listing_id`, `dry_run` varsayilan acik, `wp_state_file`) | POD (Prodigi poster) ilaninda tag + aciklama katmanini `docs/POD_LISTING_TEMPLATE.md` sablonuna gore gunceller (EN). `listing_id` bos + dry_run: magazadaki taslaklari listeler (WP haric). dry_run=false Etsy'ye YAZAR (Mo onayi); basliga dokunmaz |
+| `repo-public` | elle (`delete_runs`, `set_public`) | PUBLIC gecis (6 Eyl 2026): run gecmisini siler, gorunurlugu public yapar, secret isimlerini dogrular (OPS_ADMIN_TOKEN, runner icinde) |
