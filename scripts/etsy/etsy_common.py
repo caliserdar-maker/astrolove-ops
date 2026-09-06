@@ -234,7 +234,7 @@ class Etsy:
                 continue
             if r.status_code == 204:
                 return {}
-            if r.status_code != 200:
+            if r.status_code not in (200, 201):          # 201: createShopShippingProfileDestination gibi olusturma uclari (6 Eyl)
                 raise SystemExit(f"HATA: {method} {path} -> {r.status_code}: {r.text[:300]}")
             return r.json()
         raise SystemExit(f"HATA: {method} {path} tekrarlar tukendi.")
