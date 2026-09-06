@@ -151,23 +151,77 @@ def draw_tracked(draw, xy, s, font, fill, tracking=0, anchor="l"):
     return w
 
 
-# ------------------------------------------------------------------ sablon
+# ------------------------------------------------------------------ sablon (04/09 referansindan olculdu, MB 3000x2250)
+# kicker cap y141-172 | baslik "Symbol Story" bandi y233-373 | cizgi y417-420 x972-2027 | cift satiri cap y489-522
+# rozet o130 x271-401, rakam bandi 34 px | satir basligi cap y736-777 x460 | 09 madde caps 27 px
+# bar y1990-2180 x105-2893 r30 | bar serif bandi 2031-2094 | bar caps 2121-2141 (x1255-1745) | (c) sagda ~x2795
+REF = {"kicker_cap": 31, "kicker_w": ("ASTROLOVE ORIGINAL COMPOSITION", 1147), "title_band": ("Symbol Story", 140),
+       "pair_cap": 33, "pair_w": ("ARIES \u2022 LEO", 357), "badge_d": 130, "digit_h": 34,
+       "head_cap": 41, "head_w": ("TWO SIGNS", 338), "body_cap": 27,
+       "foot_serif_band": ("The Shape of Your Connection", 63), "foot_cap": 20, "foot_w": ("TWO SOULS \u00b7 ONE BOND", 490)}
+_cal = {}
+
+
+def cap_h(font, txt="H"):
+    b = font.getbbox(txt)
+    return b[3] - b[1]
+
+
+def solve_size(F, kind, weight, target, txt="H"):
+    """bbox yuksekligi hedefe esit olacak font boyutunu bul (tam sayi, en yakin)."""
+    key = (kind, weight, target, txt)
+    if key not in _cal:
+        best = min(range(10, 400), key=lambda sz: abs(cap_h(F.f(kind, sz, weight), txt) - target))
+        _cal[key] = best
+    return _cal[key]
+
+
+def solve_tracking(d, font, txt, target_w):
+    base = sum(d.textlength(ch, font=font) for ch in txt)
+    return (target_w - base) / max(1, len(txt) - 1)
+
+
 def card_base(pal, F, kicker, title, pair_txt, footer):
-    """Olculmus sablon: kicker y142-171, baslik y233-374, cizgi y417 (x972-2027),
-    cift satiri ~y495, bar y1990-2181 x104-2894 r30, bar serif y2031-2094, caps y2121-2141."""
     im = Image.new("RGB", (W, H), pal["bg"])
     d = ImageDraw.Draw(im)
+    f_k = F.f("sans", solve_size(F, "sans", 500, REF["kicker_cap"]), 500)
+    tr_k = solve_tracking(d, f_k, *REF["kicker_w"])
     if kicker:
-        draw_tracked(d, (W / 2, 138), kicker, F.f("sans", 40, 500), pal["ink"], tracking=14, anchor="c")
-    d.text((W / 2, 352), title, font=F.f("serif", 190, 500), fill=pal["ink"], anchor="ms")
+        draw_tracked(d, (W / 2, 141 - f_k.getbbox("H")[1]), kicker, f_k, pal["ink"], tracking=tr_k, anchor="c")
+    f_t = F.f("serif", solve_size(F, "serif", 500, REF["title_band"][1], REF["title_band"][0]), 500)
+    d.text((W / 2, 233 - f_t.getbbox("Symbol Story")[1]), title, font=f_t, fill=pal["ink"], anchor="ma")
     d.rectangle([972, 417, 2027, 419], fill=pal["rule"])
-    draw_tracked(d, (W / 2, 482), pair_txt, F.f("sans", 44, 500), pal["ink"], tracking=16, anchor="c")
-    d.rounded_rectangle([104, 1990, 2894, 2181], radius=30, fill=pal["bar"])
+    f_p = F.f("sans", solve_size(F, "sans", 500, REF["pair_cap"]), 500)
+    draw_tracked(d, (W / 2, 489 - f_p.getbbox("H")[1]), pair_txt, f_p, pal["ink"], tracking=solve_tracking(d, f_p, *REF["pair_w"]), anchor="c")
+    d.rounded_rectangle([105, 1990, 2893, 2180], radius=30, fill=pal["bar"])
+    f_fs = F.f("serif", solve_size(F, "serif", 500, REF["foot_serif_band"][1], REF["foot_serif_band"][0]), 500)
     if footer:
-        d.text((W / 2, 2062), footer, font=F.f("serif", 78, 500), fill=pal["bartext"], anchor="mm")
-    draw_tracked(d, (W / 2, 2118), TEXT["common"]["bond"], F.f("sans", 28, 500), pal["bartext"], tracking=9, anchor="c")
-    draw_tracked(d, (2795, 2118), TEXT["common"]["copy"], F.f("sans", 28, 500), pal["bartext"], tracking=7, anchor="r")
+        d.text((W / 2, 2031 - f_fs.getbbox(REF["foot_serif_band"][0])[1]), footer, font=f_fs, fill=pal["bartext"], anchor="ma")
+    f_fc = F.f("sans", solve_size(F, "sans", 500, REF["foot_cap"]), 500)
+    tr_fc = solve_tracking(d, f_fc, *REF["foot_w"])
+    y_fc = 2121 - f_fc.getbbox("H")[1]
+    draw_tracked(d, (W / 2, y_fc), TEXT["common"]["bond"], f_fc, pal["bartext"], tracking=tr_fc, anchor="c")
+    draw_tracked(d, (2795, y_fc), TEXT["common"]["copy"], f_fc, pal["bartext"], tracking=tr_fc, anchor="r")
     return im, d
+
+
+def numbered_rows(d, F, pal, rows, y0=640, y1=1900):
+    """04 rozeti: o130 merkez x336; rakam serif 34 px; baslik caps cap 41 @x460; aciklama caps-olcek 27."""
+    r = REF["badge_d"] // 2
+    cx, tx = 336, 460
+    f_d = F.f("serif", solve_size(F, "serif", 700, REF["digit_h"], "01"), 700)
+    f_h = F.f("sans", solve_size(F, "sans", 600, REF["head_cap"]), 600)
+    tr_h = solve_tracking(d, f_h, *REF["head_w"])
+    f_b = F.f("sans", solve_size(F, "sans", 400, REF["body_cap"]), 400)
+    n = len(rows)
+    step = (y1 - y0) / n
+    for i, (head, body) in enumerate(rows):
+        cy = y0 + step * (i + 0.5)
+        d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=pal["bar"])
+        d.text((cx, cy), f"{i + 1:02d}", font=f_d, fill=pal["bartext"], anchor="mm")
+        hb = f_h.getbbox("H")
+        draw_tracked(d, (tx, cy - 6 - hb[3]), head, f_h, pal["ink"], tracking=tr_h)          # baslik: rozet merkezinin ustu
+        d.text((tx, cy + 18 - f_b.getbbox("H")[1]), body, font=f_b, fill=mix(pal["ink"], pal["bg"], 0.25))
 
 
 def paste_shadowed(im, thumb, xy, blur=28, alpha=90):
@@ -179,51 +233,43 @@ def paste_shadowed(im, thumb, xy, blur=28, alpha=90):
     im.paste(thumb, (x, y))
 
 
-def numbered_rows(d, F, pal, rows, x0, y0, step, r=52):
-    y0 = y0 + (5 - len(rows)) * step / 2       # 5 satirlik alan icinde dikey ortala
-    for i, (head, body) in enumerate(rows):
-        cy = y0 + i * step
-        d.ellipse([x0, cy - r, x0 + 2 * r, cy + r], fill=pal["bar"])
-        d.text((x0 + r, cy), f"{i + 1:02d}", font=F.f("serif", 46, 700), fill=pal["bartext"], anchor="mm")
-        draw_tracked(d, (x0 + 2 * r + 60, cy - 58), head, F.f("sans", 46, 600), pal["ink"], tracking=5)
-        d.text((x0 + 2 * r + 60, cy + 6), body, font=F.f("sans", 38, 400), fill=mix(pal["ink"], pal["bg"], 0.25))
-
-
 def card_paper(pal, F, poster, pair_txt):
     t = TEXT["PAPER"]
     im, d = card_base(pal, F, vtext(t["kicker"]), t["title"], pair_txt, vtext(t["footer"]))
-    th = poster.resize((840, 1120), Image.LANCZOS)
-    paste_shadowed(im, th, (330, 640))
-    numbered_rows(d, F, pal, rows_of("PAPER"), 1400, 760, 212)
+    th = poster.resize((780, 1040), Image.LANCZOS)
+    paste_shadowed(im, th, (1980, 660))
+    numbered_rows(d, F, pal, rows_of("PAPER"), 640, 1900)
     return im
 
 
-def tube_icon(pal):
-    """Sade, cizgisel kargo tupu: kontur silindir + sag agiz halkasi + sol kapak; poster yok."""
-    S = 3
-    tw, th = 1150 * S, 300 * S
-    ink, fill = pal["bar"], mix(pal["bar"], pal["bg"], 0.86)
-    body = Image.new("RGBA", (tw + 60 * S, th + 20 * S), (0, 0, 0, 0))
-    bd = ImageDraw.Draw(body)
-    lw = 7 * S
-    bd.rounded_rectangle([30 * S, 10 * S, tw - 150 * S, th + 10 * S], radius=52 * S, fill=fill + (255,), outline=ink + (255,), width=lw)
-    bd.ellipse([tw - 300 * S, 10 * S, tw, th + 10 * S], fill=fill + (255,), outline=ink + (255,), width=lw)        # sag agiz
-    bd.ellipse([tw - 258 * S, 52 * S, tw - 42 * S, th - 32 * S], fill=mix(pal["bar"], pal["bg"], 0.6) + (255,), outline=ink + (255,), width=lw)  # ic bosluk
-    bd.line([tw - 150 * S, 10 * S + lw, tw - 150 * S, th + 10 * S - lw], fill=fill + (255,), width=lw + 2)           # kavsak kapat
-    bd.line([tw - 150 * S, 10 * S, tw - 150 * S, th + 10 * S], fill=ink + (255,), width=2 * S)
-    bd.arc([30 * S - 40 * S, 10 * S, 30 * S + 60 * S, th + 10 * S], 270, 90, fill=ink + (255,), width=lw)            # sol kapak kavisi
-    bd.line([120 * S, 10 * S + 30 * S, tw - 320 * S, 10 * S + 30 * S], fill=mix(ink, fill, 0.55) + (255,), width=2 * S)  # ince isik cizgisi
-    body = body.resize((body.width // S, body.height // S), Image.LANCZOS)
-    return body.rotate(30, expand=True, resample=Image.BICUBIC)
+TABLER_PACKAGE = [  # tabler-icons "package" (MIT), 24x24 izgara, stroke 2
+    [(12, 3), (20, 7.5), (20, 16.5), (12, 21), (4, 16.5), (4, 7.5), (12, 3)],
+    [(12, 12), (20, 7.5)], [(12, 12), (12, 21)], [(12, 12), (4, 7.5)], [(16, 5.25), (8, 9.75)],
+]
+
+
+def package_icon(pal, size=760, stroke=4):
+    """Cizgisel paket ikonu; cizgi kalinligi 09 kartindaki panel/baglanti cizgisiyle ayni (4 px)."""
+    S = 4
+    img = Image.new("RGBA", (size * S, size * S), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    k = size * S / 24
+    col = pal["rule"] + (255,)
+    w = stroke * S
+    for path in TABLER_PACKAGE:
+        pts = [(x * k, y * k) for x, y in path]
+        d.line(pts, fill=col, width=w, joint="curve")
+        for x, y in pts:
+            d.ellipse([x - w / 2, y - w / 2, x + w / 2, y + w / 2], fill=col)
+    return img.resize((size, size), Image.LANCZOS)
 
 
 def card_care(pal, F, poster, pair_txt):
     t = TEXT["CARE"]
     im, d = card_base(pal, F, vtext(t["kicker"]), t["title"], pair_txt, vtext(t["footer"]))
-    icon = tube_icon(pal)
-    x, y = 200 + (1000 - icon.width) // 2, 700 + (1000 - icon.height) // 2
-    im.paste(icon, (x, y), icon)
-    numbered_rows(d, F, pal, rows_of("CARE"), 1400, 760, 212)
+    icon = package_icon(pal)
+    im.paste(icon, (2370 - icon.width // 2, 1270 - icon.height // 2), icon)
+    numbered_rows(d, F, pal, rows_of("CARE"), 640, 1900)
     return im
 
 
@@ -260,55 +306,137 @@ def silhouette(height_px, color):
     return img.resize((img.width // S, img.height // S), Image.LANCZOS)
 
 
+SG_SCALE = 6.2      # px/cm  (6.8 istendi; 30x40 = 518 px, 5 esit sutun + cetvel 3000 px'e sigmiyor -> 6.2: 472 px)
+SG_COLS = 5
+SG_COL_W, SG_GAP = 480, 40
+SG_X0 = 300         # ilk sutun sol kenari; cetvel x=180; sag bosluk 3000-2860=140 ~ cetvel-sutun araligi
+
+
 def card_sizes(pal, F, poster, pair_txt):
     t = TEXT["SIZES"]
     im, d = card_base(pal, F, vtext(t["kicker"]), t["title"], pair_txt, vtext(t["footer"]))
-    s = 6.8                                   # px / cm
+    s = SG_SCALE
     floor_y = 1905
-    hang = 52                                 # poster alt kenari yerden (cm)
-    accent = pal["bar"]
+    hang = 45
+    accent, rule = pal["bar"], pal["rule"]
     neutral_fill = mix(pal["ink"], pal["bg"], 0.90)
     neutral_line = mix(pal["ink"], pal["bg"], 0.45)
-    label_col = mix(pal["ink"], pal["bg"], 0.15)
-    d.line([250, floor_y, 2760, floor_y], fill=neutral_line, width=3)
-    # siluet 175 cm
-    sil = silhouette(175 * s, mix(pal["ink"], pal["bg"], 0.5))
-    px = 400
-    im.paste(sil, (px - sil.width // 2, floor_y - sil.height), sil)
-    d = ImageDraw.Draw(im)
-    if ok("S_human"):
-        draw_tracked(d, (px, floor_y + 24), "175 CM \u00b7 5'9\"", F.f("sans", 26, 500), mix(pal["ink"], pal["bg"], 0.3), tracking=4, anchor="c")
-    # 5 grup: esit aralikli sutunlar, ortak taban, alt-orta hizali ic ice dikdortgenler
-    pitch, x0 = 430, 640
+    f_lab = F.f("sans", solve_size(F, "sans", 600, 20), 600)
+    f_ttl = F.f("sans", solve_size(F, "sans", 700, REF["body_cap"]), 700)
+    f_txt = F.f("sans", solve_size(F, "sans", 400, 19), 400)
+    f_ruler = F.f("sans", solve_size(F, "sans", 500, 18), 500)
+    # ortak taban cizgisi
+    d.line([SG_X0 - 20, floor_y, SG_X0 + SG_COLS * SG_COL_W + (SG_COLS - 1) * SG_GAP + 20, floor_y], fill=neutral_line, width=3)
+    # dikey cetvel (metre): 04/09 ayraci ile ayni kalinlik (3 px) ve renk
+    rx = 180
+    top = floor_y - 175 * s
+    d.line([rx, floor_y, rx, top], fill=rule, width=3)
+    for cm in range(0, 176, 25):
+        y = floor_y - cm * s
+        long = cm % 50 == 0
+        d.line([rx - (40 if long else 20), y, rx, y], fill=rule, width=3)
+        if long and cm:
+            d.text((rx - 50, y), f"{cm} CM", font=f_ruler, fill=mix(pal["ink"], pal["bg"], 0.2), anchor="rm")
+    d.line([rx - 40, top, rx + 40, top], fill=rule, width=3)
+    draw_tracked(d, (rx, top - 48), "175 CM \u00b7 5'9\"", f_ruler, pal["ink"], tracking=3, anchor="c")
+    # 5 esit sutun, alt-orta hizali ic ice dikdortgenler
     base_y = floor_y - hang * s
     overlay = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     od = ImageDraw.Draw(overlay)
     labels = []
     for gi, g in enumerate(GROUP_ORDER):
-        cxg = x0 + gi * pitch + pitch // 2
+        cxg = SG_X0 + gi * (SG_COL_W + SG_GAP) + SG_COL_W // 2
         items = sorted([z for z in SIZES if z[5] == g], key=lambda z: -z[4])
         for k, (lab, win, hin, wcm, hcm, _) in enumerate(items):
             w, h = wcm * s, hcm * s
             x1, y1 = cxg - w / 2, base_y - h
             od.rectangle([x1, y1, x1 + w, base_y], fill=(neutral_fill if k == 0 else pal["bg"]) + (255,),
                          outline=(accent if k == 0 else neutral_line) + (255,), width=4 if k == 0 else 3)
-            labels.append(((cxg, y1 + 12), lab))
+            labels.append(((cxg, y1 + 10), lab))
     im.paste(overlay, (0, 0), overlay)
     d = ImageDraw.Draw(im)
     for xy, lab in labels:
-        d.text(xy, lab, font=F.f("sans", 27, 600), fill=label_col, anchor="ma")
+        d.text(xy, lab, font=f_lab, fill=mix(pal["ink"], pal["bg"], 0.15), anchor="ma")
     for gi, g in enumerate(GROUP_ORDER):
-        cxg = x0 + gi * pitch + pitch // 2
+        cxg = SG_X0 + gi * (SG_COL_W + SG_GAP) + SG_COL_W // 2
         items = sorted([z for z in SIZES if z[5] == g], key=lambda z: -z[4])
-        ly = base_y + 30
-        draw_tracked(d, (cxg, ly), GROUP_TITLE[g], F.f("sans", 30, 700), accent, tracking=4, anchor="c")
-        d.line([cxg - 60, ly + 44, cxg + 60, ly + 44], fill=accent, width=2)
-        ly += 62
+        ly = base_y + 26
+        draw_tracked(d, (cxg, ly), GROUP_TITLE[g], f_ttl, accent, tracking=4, anchor="c")
+        d.line([cxg - 60, ly + 40, cxg + 60, ly + 40], fill=accent, width=2)
+        ly += 56
         for lab, win, hin, wcm, hcm, _ in items:
             line = f"{lab} in \u00b7 {wcm:g}\u00d7{hcm:g} cm" if not lab.startswith("A") else f"{lab} \u00b7 {win:g}\u00d7{hin:g} in \u00b7 {wcm:g}\u00d7{hcm:g} cm"
-            d.text((cxg, ly), line, font=F.f("sans", 26, 400), fill=mix(pal["ink"], pal["bg"], 0.2), anchor="ma")
-            ly += 36
+            d.text((cxg, ly), line, font=f_txt, fill=mix(pal["ink"], pal["bg"], 0.2), anchor="ma")
+            ly += 32
     return im
+
+
+# ------------------------------------------------------------------ geometri olcumu (04/09 ile kiyas)
+def _bands(a, y0, y1, x0, x1, dark=True, th=150):
+    m = (a[y0:y1, x0:x1] < th) if dark else (a[y0:y1, x0:x1] > th)
+    rows = m.sum(1) > 0
+    out, st = [], None
+    for i, r in enumerate(rows):
+        if r and st is None:
+            st = i
+        if not r and st is not None:
+            out.append((y0 + st, y0 + i))
+            st = None
+    if st is not None:
+        out.append((y0 + st, y1))
+    return out
+
+
+def _xext(a, y0, y1, x0, x1, dark=True, th=150):
+    m = (a[y0:y1, x0:x1] < th) if dark else (a[y0:y1, x0:x1] > th)
+    xs = np.where(m.sum(0) > 0)[0]
+    return (int(x0 + xs.min()), int(x0 + xs.max())) if len(xs) else None
+
+
+def geometry(card_p, rows=True):
+    """kicker/baslik/cizgi/cift/bar bantlari (px). Acik zeminli kartlar icin koyu metin."""
+    im = Image.open(card_p).convert("RGB")
+    a = np.array(im.convert("L"))
+    rgb = np.array(im)
+    # zemin acik mi? (PURE_WHITE/WP gibi) -> esik zemin parlakligina gore
+    bg = float(np.median(a[400:1800, 4:16]))
+    th = bg - 60
+    hb = _bands(a, 80, 560, 600, 2400, th=th)
+    g = {"kicker": hb[0] if hb else None, "title": hb[1] if len(hb) > 1 else None,
+         "rule": hb[2] if len(hb) > 2 else None, "pair": hb[3] if len(hb) > 3 else None,
+         "rule_x": _xext(a, 414, 424, 0, 3000, th=th)}
+    colm = rgb[:, 1500]
+    bar = tuple(int(v) for v in rgb[2120, 1500])
+    ys = np.where(np.abs(colm.astype(int) - np.array(bar)).sum(1) < 20)[0]
+    ys = ys[ys > 1900]
+    row = rgb[2100]
+    xs = np.where(np.abs(row.astype(int) - np.array(bar)).sum(1) < 20)[0]
+    g["bar"] = (int(ys.min()), int(ys.max()), int(xs.min()), int(xs.max())) if len(ys) and len(xs) else None
+    # bar ici acik metin bantlari
+    bl = float(np.mean(a[2100, 1400:1600]))
+    g["bar_text"] = _bands(a, 2000, 2180, 900, 2100, dark=False, th=bl + 60)
+    # rozet (ilk koyu daire x200-500) ve satir basligi cap yuksekligi
+    from scipy import ndimage
+    if not rows:
+        g["badge"] = g["head_cap"] = g["head_x0"] = None
+        return g
+    lab, _ = ndimage.label(np.abs(rgb[600:1950, 200:500].astype(int) - np.array(bar)).sum(2) < 40)
+    objs = [sl for sl in ndimage.find_objects(lab) if (sl[1].stop - sl[1].start) > 80 and (sl[0].stop - sl[0].start) > 80]
+    if objs:
+        sl = objs[0]
+        y0, y1 = 600 + sl[0].start, 600 + sl[0].stop
+        g["badge"] = (200 + sl[1].start, 200 + sl[1].stop, y1 - y0)
+        hb = [b for b in _bands(a, y0 - 40, y1 + 60, 450, 1500, th=th) if b[1] - b[0] >= 20]   # umlaut/nokta bantlarini atla
+        g["head_cap"] = (hb[0][1] - hb[0][0]) if hb else None
+        g["head_x0"] = _xext(a, hb[0][0], hb[0][1], 450, 1500, th=th)[0] if hb else None
+    else:
+        g["badge"] = g["head_cap"] = g["head_x0"] = None
+    return g
+
+
+GEOM_REF = {"kicker": (141, 172), "title": (233, 373), "rule": (417, 420), "pair": (489, 522), "rule_x": (972, 2027),
+            "bar": (1990, 2180, 105, 2893), "bar_text": [(2031, 2094), (2121, 2141)],
+            "badge": (271, 401, 130), "head_cap": (41,), "head_x0": (460,)}
 
 
 # ------------------------------------------------------------------ spellcheck
@@ -404,7 +532,7 @@ def main():
                 save_jpg(im, p, 95)
                 mp = measure(p)
                 dev = max(abs(mp[k][i] - pal[k][i]) for k in ("bg", "bar", "ink") for i in range(3))
-                made.append((outno, what, "yeni", {"olcum": mp, "referans_sapma_max": dev}))
+                made.append((outno, what, "yeni", {"olcum": mp, "referans_sapma_max": dev, "geom": geometry(p, rows=(what != "SIZES"))}))
             else:
                 s = find_src(src, what)
                 p = out / f"{outno}_{s.stem.split('_', 1)[1]}.jpg"
@@ -427,6 +555,30 @@ def main():
                 o = m[3]["olcum"]
                 md.append(f"| {ed} | {m[1]} | {o['bg']} | {o['bar']} | {o['ink']} | {pal['bg']} / {pal['bar']} / {pal['ink']} | {m[3]['referans_sapma_max']} |")
     (Path(a.out) / "PALETTE_REPORT.md").write_text("\n".join(md) + "\n", encoding="utf-8")
+    gm = ["# Geometri / tipografi kiyasi (yeni kartlar vs 04 Symbol Story / 09 Crafted Detail, MB olcumu)", "",
+          "Referans (px): kicker cap y141-172 · baslik bandi y233-373 · cizgi y417-420 x972-2027 · cift satiri y489-522 · "
+          "bar y1990-2180 x105-2893 · bar serif y2031-2094 · bar caps y2121-2141", "",
+          "Referans rozet x271-401 o130 · satir basligi cap 41 px @x460 · 09 cizgi kalinligi 4 px (paket ikonu 4 px)", "",
+          "| edisyon | kart | kicker | baslik | cizgi | cift | cizgi x | bar (y0,y1,x0,x1) | bar metin | rozet (x0,x1,o) | baslik cap | baslik x0 | max sapma px |", "|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
+    for ed, r in report.items():
+        for m in r["frames"]:
+            if len(m) == 4:
+                g = m[3]["geom"]
+                devs = []
+                for k, ref in GEOM_REF.items():
+                    v = g.get(k)
+                    if v is None:
+                        continue
+                    if k == "bar_text":
+                        devs += [abs(x - y) for a_, b_ in zip(v, ref) for x, y in zip(a_, b_)]
+                    elif k == "title":
+                        devs.append(abs(v[0] - ref[0]))          # baslik alt siniri metne bagli (alt uzanti yoksa kisa)
+                    elif isinstance(v, tuple):
+                        devs += [abs(x - y) for x, y in zip(v, ref)]
+                    else:
+                        devs.append(abs(v - ref[0]))
+                gm.append(f"| {ed} | {m[1]} | {g['kicker']} | {g['title']} | {g['rule']} | {g['pair']} | {g['rule_x']} | {g['bar']} | {g['bar_text']} | {g['badge']} | {g['head_cap']} | {g['head_x0']} | {max(devs) if devs else '-'} |")
+    (Path(a.out) / "GEOMETRY_REPORT.md").write_text("\n".join(gm) + "\n", encoding="utf-8")
     log(f"bitti: {len(eds)} edisyon, {time.time() - t0:.0f}s")
 
 
