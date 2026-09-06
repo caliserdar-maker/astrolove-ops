@@ -88,6 +88,16 @@ Etsy iade politikasi: iade YOK, degisim YOK (`return_policy_spec=returns=0,excha
 durumunda 7 gun icinde fotografla ucretsiz yeniden baski; metin yukaridaki
 "RETURNS & REPRINTS" bolumunde.
 
+## Magaza nesneleri (pod-listing-create apply, 6 Eyl 2026 kosulari)
+
+- Kargo profili "POD Prints – Free Shipping" 314711751541: cikis US 28216 (Prodigi Charlotte);
+  US 3-8, CA/AU/GB 5-10, EU 5-12 is gunu 0 USD; Everywhere else 10.99 USD 7-21 gun (Prodigi 8 ulke
+  Standard ortalamasi 17.91 - Budget US 7.10, TEMP/PRODIGI/PRODIGI_SHIP_EVERYWHERE.md).
+- Bolum "Zodiac Fine Art Prints" 60204164; iade politikasi 1513990287785 (iade/degisim yok).
+- Hazirlik durumu (processing profile): made_to_order 1-3 gun, readiness-state-definitions ucundan
+  okunur/olusturulur; ilan `readiness_state_id` ile acilir (Etsy fiziksel ilanda zorunlu).
+- GPSR uretici/sorumlu kisi alanlari: Prodigi cevabi sonrasi (simdilik bos).
+
 ## Uygulama sirasi
 
 1. `pod-listing-update` dry_run=true, listing_id bos -> magazadaki taslak
