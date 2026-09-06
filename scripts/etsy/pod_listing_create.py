@@ -2,6 +2,7 @@
 """
 POD (Prodigi poster) YENI ILAN olusturma: createDraftListing + 10 gorsel +
 Color(5) x Size(13) = 65 varyant + renk secenegine edisyon 01 karesi - 6 Eyl 2026.
+SKU: POD-<burc3>_<burc3>-<edisyon2>-<boyut> (pod_sku.py; Etsy 32 karakter siniri).
 
 Kaynaklar:
   - baslik/tag/aciklama: docs/POD_LISTING_TEMPLATE.md (+ TITLE sablonu asagida)
@@ -32,6 +33,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from etsy_common import Etsy, TokenStore, log, mask  # noqa: E402
 from pod_listing_update import SIGNS, build as build_text, load_template  # noqa: E402
+from pod_sku import make_sku  # noqa: E402
 from pod_listing_update import TEMPLATE_MD  # noqa: E402
 from wp_listing_update import load_block  # noqa: E402
 from wp_listing_update import norm, tags_of, validate  # noqa: E402
@@ -176,7 +178,7 @@ def inventory_body(pair, prices, color_pid, size_pid, color_name, size_name, rea
             if readiness_state_id:
                 off["readiness_state_id"] = readiness_state_id
             products.append({
-                "sku": f"POD-{pair}-{ed}-{sz}",
+                "sku": make_sku(pair, ed, sz),                 # <= 32 karakter (Etsy; 9. kosu 400)
                 "property_values": [
                     {"property_id": color_pid, "property_name": color_name, "values": [ED_NAME[ed]]},
                     {"property_id": size_pid, "property_name": size_name, "values": [SIZE_LABEL[sz]]},

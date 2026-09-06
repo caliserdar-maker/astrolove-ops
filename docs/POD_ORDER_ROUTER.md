@@ -9,7 +9,7 @@
 
 ## Akis (her kosu, 30 dk)
 
-1. Etsy `getShopReceipts` (was_paid=true, was_shipped=false). SKU `POD-<PAIR>-<ED>-<SIZE>` olan islemler.
+1. Etsy `getShopReceipts` (was_paid=true, was_shipped=false). SKU `POD-<burc3>_<burc3>-<ed2>-<SIZE>` (`scripts/etsy/pod_sku.py`, or. POD-ARI_LEO-MB-18x24) olan islemler.
 2. Yeni receipt:
    - ulke `US/CA/AU/GB` degilse `manual` (elle islenir; dokunulmaz).
    - Prodigi teklif (Budget, USD) -> `prodigi_cost` (urun + kargo); `etsy_total` = islem fiyat x adet;
