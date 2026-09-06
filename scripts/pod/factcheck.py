@@ -45,7 +45,7 @@ FACTS = [
     ("P4", "PAPER", "ARCHIVAL PIGMENT GICLÉE — Giclée print with pigment inks at 300 DPI",
      [(PRO_HPR, ["pigment"]), (PRO_HPR, ["giclée"]), (PRO_HPR, ["giclee"]), (PRO_PAPERS, ["pigment"]),
       ("csv", "dpi", "== 300")]),
-    ("P5", "PAPER", "MUSEUM QUALITY — Highest age resistance, ISO 9706 conform",
+    ("P5", "PAPER", "MUSEUM QUALITY — Highest age resistance",
      [(HAH_PR, ["age resistance"]), (HAH_PR2, ["age resistance"]), (HAH_PR, ["9706"])]),
     ("P_footer", "PAPER", "Printed on Hahnemühle Photo Rag",
      [("csv", "sku", "startswith GLOBAL-HPR")]),

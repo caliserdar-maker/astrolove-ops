@@ -53,7 +53,7 @@ TEXT = {
                  ("P2", "100% COTTON", "Made from 100% cotton rag"),
                  ("P3", "ACID-FREE", "Acid- and lignin-free, ISO 9706 conform"),
                  ("P4", "ARCHIVAL PIGMENT GICLÉE", "Giclée print with pigment inks at 300 DPI"),
-                 ("P5", "MUSEUM QUALITY", "Highest age resistance, ISO 9706 conform")],
+                 ("P5", "MUSEUM QUALITY", "Highest age resistance")],
         "footer": ("P_footer", "Printed on Hahnemühle Photo Rag"),
     },
     "SIZES": {"kicker": ("S_kicker", "CHOOSE YOUR SIZE"), "title": "Size Guide",
@@ -156,7 +156,7 @@ def draw_tracked(draw, xy, s, font, fill, tracking=0, anchor="l"):
 # rozet o130 x271-401, rakam bandi 34 px | satir basligi cap y736-777 x460 | 09 madde caps 27 px
 # bar y1990-2180 x105-2893 r30 | bar serif bandi 2031-2094 | bar caps 2121-2141 (x1255-1745) | (c) sagda ~x2795
 REF = {"kicker_cap": 31, "kicker_w": ("ASTROLOVE ORIGINAL COMPOSITION", 1147), "title_band": ("Symbol Story", 140),
-       "pair_cap": 33, "pair_w": ("ARIES \u2022 LEO", 357), "badge_d": 130, "digit_h": 34,
+       "pair_cap": 33, "pair_w": ("ARIES \u2022 LEO", 357), "badge_d": 130, "digit_h": 35,
        "head_cap": 41, "head_w": ("TWO SIGNS", 338), "body_cap": 27,
        "foot_serif_band": ("The Shape of Your Connection", 63), "foot_cap": 20, "foot_w": ("TWO SOULS \u00b7 ONE BOND", 490)}
 _cal = {}
@@ -209,7 +209,7 @@ def numbered_rows(d, F, pal, rows, y0=640, y1=1900):
     """04 rozeti: o130 merkez x336; rakam serif 34 px; baslik caps cap 41 @x460; aciklama caps-olcek 27."""
     r = REF["badge_d"] // 2
     cx, tx = 336, 460
-    f_d = F.f("serif", solve_size(F, "serif", 700, REF["digit_h"], "01"), 700)
+    f_d = F.f("sans", solve_size(F, "sans", 600, REF["digit_h"], "01"), 600)     # 04: rakamlar Montserrat, ink yuk 35 px
     f_h = F.f("sans", solve_size(F, "sans", 600, REF["head_cap"]), 600)
     tr_h = solve_tracking(d, f_h, *REF["head_w"])
     f_b = F.f("sans", solve_size(F, "sans", 400, REF["body_cap"]), 400)
@@ -218,7 +218,9 @@ def numbered_rows(d, F, pal, rows, y0=640, y1=1900):
     for i, (head, body) in enumerate(rows):
         cy = y0 + step * (i + 0.5)
         d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=pal["bar"])
-        d.text((cx, cy), f"{i + 1:02d}", font=f_d, fill=pal["bartext"], anchor="mm")
+        num = f"{i + 1:02d}"
+        b0, b1, b2, b3 = f_d.getbbox(num)                                         # glif murekkep kutusu -> tam merkez
+        d.text((cx - (b0 + b2) / 2, cy - (b1 + b3) / 2), num, font=f_d, fill=pal["bartext"])
         hb = f_h.getbbox("H")
         draw_tracked(d, (tx, cy - 6 - hb[3]), head, f_h, pal["ink"], tracking=tr_h)          # baslik: rozet merkezinin ustu
         d.text((tx, cy + 18 - f_b.getbbox("H")[1]), body, font=f_b, fill=mix(pal["ink"], pal["bg"], 0.25))
@@ -307,40 +309,41 @@ def silhouette(height_px, color):
 
 
 SG_SCALE = 6.2      # px/cm  (6.8 istendi; 30x40 = 518 px, 5 esit sutun + cetvel 3000 px'e sigmiyor -> 6.2: 472 px)
-SG_COLS = 5
-SG_COL_W, SG_GAP = 480, 40
-SG_X0 = 300         # ilk sutun sol kenari; cetvel x=180; sag bosluk 3000-2860=140 ~ cetvel-sutun araligi
+SG_COLS, SG_COL_W = 5, 480
+SG_GAP = (W - SG_COLS * SG_COL_W) // 7        # 7 esit bosluk: kenar | cetvel | bosluk | 5 sutun (4 bosluk) | kenar = 85 px
+SG_RULER_X = SG_GAP                            # 85
+SG_X0 = 2 * SG_GAP                             # 170
+SG_BASE_Y = 1750                               # poster tabani = cetvel 0
 
 
 def card_sizes(pal, F, poster, pair_txt):
     t = TEXT["SIZES"]
     im, d = card_base(pal, F, vtext(t["kicker"]), t["title"], pair_txt, vtext(t["footer"]))
     s = SG_SCALE
-    floor_y = 1905
-    hang = 45
+    base_y = SG_BASE_Y
     accent, rule = pal["bar"], pal["rule"]
     neutral_fill = mix(pal["ink"], pal["bg"], 0.90)
     neutral_line = mix(pal["ink"], pal["bg"], 0.45)
     f_lab = F.f("sans", solve_size(F, "sans", 600, 20), 600)
     f_ttl = F.f("sans", solve_size(F, "sans", 700, REF["body_cap"]), 700)
     f_txt = F.f("sans", solve_size(F, "sans", 400, 19), 400)
-    f_ruler = F.f("sans", solve_size(F, "sans", 500, 18), 500)
-    # ortak taban cizgisi
-    d.line([SG_X0 - 20, floor_y, SG_X0 + SG_COLS * SG_COL_W + (SG_COLS - 1) * SG_GAP + 20, floor_y], fill=neutral_line, width=3)
-    # dikey cetvel (metre): 04/09 ayraci ile ayni kalinlik (3 px) ve renk
-    rx = 180
-    top = floor_y - 175 * s
-    d.line([rx, floor_y, rx, top], fill=rule, width=3)
+    f_ruler = F.f("sans", solve_size(F, "sans", 500, 16), 500)
+    x_end = SG_X0 + SG_COLS * SG_COL_W + (SG_COLS - 1) * SG_GAP
+    # ortak taban cizgisi (= cetvel 0)
+    d.line([SG_RULER_X, base_y, x_end, base_y], fill=neutral_line, width=3)
+    # dikey cetvel: 0 (taban) -> 175 cm; 04/09 ayraciyla ayni kalinlik (3 px) ve renk; centikler ve etiketler saga
+    rx = SG_RULER_X
+    top = base_y - 175 * s
+    d.line([rx, base_y, rx, top], fill=rule, width=3)
     for cm in range(0, 176, 25):
-        y = floor_y - cm * s
+        y = base_y - cm * s
         long = cm % 50 == 0
-        d.line([rx - (40 if long else 20), y, rx, y], fill=rule, width=3)
-        if long and cm:
-            d.text((rx - 50, y), f"{cm} CM", font=f_ruler, fill=mix(pal["ink"], pal["bg"], 0.2), anchor="rm")
-    d.line([rx - 40, top, rx + 40, top], fill=rule, width=3)
-    draw_tracked(d, (rx, top - 48), "175 CM \u00b7 5'9\"", f_ruler, pal["ink"], tracking=3, anchor="c")
-    # 5 esit sutun, alt-orta hizali ic ice dikdortgenler
-    base_y = floor_y - hang * s
+        d.line([rx, y, rx + (30 if long else 16), y], fill=rule, width=3)
+        if long and 0 < cm < 175:
+            d.text((rx + 40, y), f"{cm}", font=f_ruler, fill=mix(pal["ink"], pal["bg"], 0.2), anchor="lm")
+    d.line([rx - 12, top, rx + 30, top], fill=rule, width=3)
+    draw_tracked(d, (rx + 6, top - 40), "175 CM \u00b7 5'9\"", f_ruler, pal["ink"], tracking=3, anchor="l")
+    # 5 esit sutun, alt-orta hizali ic ice dikdortgenler, taban = cetvel 0
     overlay = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     od = ImageDraw.Draw(overlay)
     labels = []
@@ -360,15 +363,43 @@ def card_sizes(pal, F, poster, pair_txt):
     for gi, g in enumerate(GROUP_ORDER):
         cxg = SG_X0 + gi * (SG_COL_W + SG_GAP) + SG_COL_W // 2
         items = sorted([z for z in SIZES if z[5] == g], key=lambda z: -z[4])
-        ly = base_y + 26
+        ly = base_y + 24
         draw_tracked(d, (cxg, ly), GROUP_TITLE[g], f_ttl, accent, tracking=4, anchor="c")
-        d.line([cxg - 60, ly + 40, cxg + 60, ly + 40], fill=accent, width=2)
-        ly += 56
+        ly += 50
         for lab, win, hin, wcm, hcm, _ in items:
             line = f"{lab} in \u00b7 {wcm:g}\u00d7{hcm:g} cm" if not lab.startswith("A") else f"{lab} \u00b7 {win:g}\u00d7{hin:g} in \u00b7 {wcm:g}\u00d7{hcm:g} cm"
             d.text((cxg, ly), line, font=f_txt, fill=mix(pal["ink"], pal["bg"], 0.2), anchor="ma")
             ly += 32
     return im
+
+
+def sizes_gaps(card_p):
+    """Size Guide: cetvel x'i ve her sutunun en dis (aksan renkli) dikdortgen merkezi olculur;
+    sutun kenarlari = merkez +/- 240 -> araliklar (px). Hedef: 7 esit bosluk."""
+    rgb = np.array(Image.open(card_p).convert("RGB")).astype(int)
+    y = SG_BASE_Y - 30
+    bar, rule = rgb[2120, 1500], rgb[418, 1500]
+    rrow = np.abs(rgb[y] - rule).sum(1) < 60
+    rx = int(np.where(rrow[:SG_X0])[0].min()) if rrow[:SG_X0].any() else None
+    edges, centers = [], []
+    for gi in range(SG_COLS):
+        x0 = SG_X0 + gi * (SG_COL_W + SG_GAP)
+        seg = np.abs(rgb[y, x0 - 10:x0 + SG_COL_W + 10] - bar).sum(1) < 60
+        xs = np.where(seg)[0]
+        if len(xs):
+            c = (xs.min() + xs.max()) / 2 + x0 - 10
+            centers.append(round(c - (x0 + SG_COL_W / 2), 1))          # sutun merkezinden sapma
+            edges.append((x0, x0 + SG_COL_W))
+    gaps = {}
+    if rx is not None and edges:
+        gaps["kenar->cetvel"] = rx
+        gaps["cetvel->sutun1"] = edges[0][0] - rx
+        for i in range(len(edges) - 1):
+            gaps[f"sutun{i + 1}->sutun{i + 2}"] = edges[i + 1][0] - edges[i][1]
+        gaps["sutun5->kenar"] = W - edges[-1][1]
+        gaps["sutun genislikleri"] = [e[1] - e[0] for e in edges]
+        gaps["dikdortgen merkez sapmasi"] = centers
+    return gaps
 
 
 # ------------------------------------------------------------------ geometri olcumu (04/09 ile kiyas)
@@ -429,6 +460,14 @@ def geometry(card_p, rows=True):
             y1 += 1
         xs = np.where(m[ys[0]:y1 - 600].sum(0) > 0)[0]
         g["badge"] = (250 + int(xs.min()), 250 + int(xs.max()) + 1, y1 - y0)
+        cx_, cy_, r_ = (g["badge"][0] + g["badge"][1]) / 2, (y0 + y1) / 2, (y1 - y0) / 2
+        yy, xx = np.mgrid[y0:y1, g["badge"][0]:g["badge"][1]]
+        inside = ((xx - cx_) ** 2 + (yy - cy_) ** 2) < (r_ - 10) ** 2
+        dm = (a[y0:y1, g["badge"][0]:g["badge"][1]] > 170) & inside
+        dys, dxs = np.where(dm)
+        if len(dxs):
+            g["digit"] = {"dx": round((dxs.min() + dxs.max()) / 2 + g["badge"][0] - cx_, 1),
+                          "dy": round((dys.min() + dys.max()) / 2 + y0 - cy_, 1), "yuk": int(dys.max() - dys.min() + 1)}
         hb = [b for b in _bands(a, y0 - 40, y1 + 60, 450, 1500, th=th) if b[1] - b[0] >= 20]   # umlaut/nokta bantlarini atla
         g["head_cap"] = (hb[0][1] - hb[0][0]) if hb else None
         g["head_x0"] = _xext(a, hb[0][0], hb[0][1], 450, 1500, th=th)[0] if hb else None
@@ -441,6 +480,14 @@ def geometry(card_p, rows=True):
         sl = objs[0]
         y0, y1 = 600 + sl[0].start, 600 + sl[0].stop
         g["badge"] = (200 + sl[1].start, 200 + sl[1].stop, y1 - y0)
+        cx_, cy_, r_ = (g["badge"][0] + g["badge"][1]) / 2, (y0 + y1) / 2, (y1 - y0) / 2
+        yy, xx = np.mgrid[y0:y1, g["badge"][0]:g["badge"][1]]
+        inside = ((xx - cx_) ** 2 + (yy - cy_) ** 2) < (r_ - 10) ** 2
+        dm = (a[y0:y1, g["badge"][0]:g["badge"][1]] > 170) & inside
+        dys, dxs = np.where(dm)
+        if len(dxs):
+            g["digit"] = {"dx": round((dxs.min() + dxs.max()) / 2 + g["badge"][0] - cx_, 1),
+                          "dy": round((dys.min() + dys.max()) / 2 + y0 - cy_, 1), "yuk": int(dys.max() - dys.min() + 1)}
         hb = [b for b in _bands(a, y0 - 40, y1 + 60, 450, 1500, th=th) if b[1] - b[0] >= 20]   # umlaut/nokta bantlarini atla
         g["head_cap"] = (hb[0][1] - hb[0][0]) if hb else None
         g["head_x0"] = _xext(a, hb[0][0], hb[0][1], 450, 1500, th=th)[0] if hb else None
@@ -547,7 +594,7 @@ def main():
                 save_jpg(im, p, 95)
                 mp = measure(p)
                 dev = max(abs(mp[k][i] - pal[k][i]) for k in ("bg", "bar", "ink") for i in range(3))
-                made.append((outno, what, "yeni", {"olcum": mp, "referans_sapma_max": dev, "geom": geometry(p, rows=(what != "SIZES"))}))
+                made.append((outno, what, "yeni", {"olcum": mp, "referans_sapma_max": dev, "geom": geometry(p, rows=(what != "SIZES")), "gaps": sizes_gaps(p) if what == "SIZES" else None}))
             else:
                 s = find_src(src, what)
                 p = out / f"{outno}_{s.stem.split('_', 1)[1]}.jpg"
@@ -593,6 +640,16 @@ def main():
                     else:
                         devs.append(abs(v - ref[0]))
                 gm.append(f"| {ed} | {m[1]} | {g['kicker']} | {g['title']} | {g['rule']} | {g['pair']} | {g['rule_x']} | {g['bar']} | {g['bar_text']} | {g['badge']} | {g['head_cap']} | {g['head_x0']} | {max(devs) if devs else '-'} |")
+    gm += ["", "## Size Guide araliklari (px; hedef: 7 esit bosluk = %d, sutun 480)" % SG_GAP, ""]
+    for ed, r in report.items():
+        for m in r["frames"]:
+            if len(m) == 4 and m[3].get("gaps"):
+                gm.append(f"- {ed}: {m[3]['gaps']}")
+    gm += ["", "## Rozet rakam ofseti (04 referans: rakam ink merkezi - rozet merkezi = dx -0.5, dy -1.0; ink yuk 35 px)", ""]
+    for ed, r in report.items():
+        for m in r["frames"]:
+            if len(m) == 4 and m[3]["geom"].get("digit"):
+                gm.append(f"- {ed} {m[1]}: {m[3]['geom']['digit']}")
     (Path(a.out) / "GEOMETRY_REPORT.md").write_text("\n".join(gm) + "\n", encoding="utf-8")
     log(f"bitti: {len(eds)} edisyon, {time.time() - t0:.0f}s")
 
