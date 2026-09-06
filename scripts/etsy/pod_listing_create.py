@@ -57,7 +57,8 @@ MATERIALS = ["Hahnemuhle Photo Rag 308 gsm cotton paper", "archival pigment ink"
 WHO_MADE = "i_did"                # Mo 6 Eyl: tasarim bize ait; uretim partneri Prodigi (production_partner_ids)
 AUTO_RENEW = True
 # Ilan ozellikleri (taxonomy 121 property adi -> deger adi); id'ler API possible_values'tan eslenir, tahmin yok
-ATTRS = {"Orientation": "Portrait", "Framing": "Unframed", "Number of pieces included": "1", "Material multi": "Paper"}
+# Orientation: Etsy secenekleri Horizontal/Round/Square/Vertical (6 Eyl dry-run); "Portrait" karsiligi Vertical.
+ATTRS = {"Orientation": "Vertical", "Framing": "Unframed", "Number of pieces included": "1", "Material multi": "Paper"}
 # RU katmani (docs/POD_LISTING_TEMPLATE.md ile ayni)
 TITLE_RU = "{S1RU} и {S2RU} зодиак постер, совместимость пары, жикле принт без рамы, подарок паре"
 TAGS_RU = ["зодиак постер", "{pair}", "совместимость пары", "астрология декор", "подарок паре зодиак", "подарок на годовщину",
