@@ -1,0 +1,17 @@
+# prodigi.com urun sayfalari: --discover ile cekilir, GLOBAL-... kodlari toplanir.
+# Sandbox bu alan adina cikamaz; kesif yalniz Actions runner'inda calisir.
+https://www.prodigi.com/products/prints-and-posters/art-prints/enhanced-matte-art/
+https://www.prodigi.com/products/prints-and-posters/art-prints/budget-art-paper/
+https://www.prodigi.com/products/prints-and-posters/art-prints/hahnemuhle-german-etching/
+https://www.prodigi.com/products/prints-and-posters/photo-prints/hahnemuhle-photo-rag/
+https://www.prodigi.com/products/prints-and-posters/art-prints/museum-fine-art-paper/
+https://www.prodigi.com/products/prints-and-posters/art-prints/smooth-art-paper/
+https://www.prodigi.com/products/prints-and-posters/
+https://www.prodigi.com/products/home-and-living/drinkware/photo-mugs/
+https://www.prodigi.com/products/home-and-living/drinkware/large-ceramic-mugs/
+https://www.prodigi.com/products/home-and-living/drinkware/
+https://www.prodigi.com/products/technology/phone-cases/tough-phone-case/
+https://www.prodigi.com/products/technology/phone-cases/snap-phone-case/
+https://www.prodigi.com/products/device-cases/phone-cases/tough-phone-case/
+https://www.prodigi.com/products/technology/phone-cases/
+https://www.prodigi.com/print-api/docs/reference/

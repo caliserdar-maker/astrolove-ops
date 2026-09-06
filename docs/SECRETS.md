@@ -106,3 +106,12 @@ versiyonlanmayan bir `.env` dosyasinda tutulur.
 - Carousel medyasi sheet'teki SLIDE_URLS'den degil,
   `astrolove-media/carousel_v2/D<NN>/slide_1..5.jpg` yolundan turetilir;
   `ig-media-sync` bu dosyalari Drive'dan Pages reposuna tasir.
+
+## Prodigi anahtari (6 Eylul 2026)
+
+Prodigi Print API anahtari GitHub secret'i DEGILDIR; Etsy token modeliyle Drive'da
+durur: `ASTROLOVE/TEMP/PRODIGI_TOKEN.json` (`{"api_key": "..."}`). `prodigi-quote`
+workflow'u dosyayi rclone ile okur, `::add-mask::` ile maskeler ve cikti dosyalarinda
+sizinti kontrolu yapar (anahtar bulunursa dosya silinir, kosu hata verir). Anahtar
+hicbir loga, dosyaya, commit'e ve workflow girdisine yazilmaz. Yerel deneme icin
+yalniz `PRODIGI_API_KEY` ortam degiskeni kabul edilir.
