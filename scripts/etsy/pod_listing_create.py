@@ -243,7 +243,8 @@ def discover(api, shop, return_policy_id=""):
             if prop and val:
                 d["attr_plan"].append((prop.get("property_id"), pname, val.get("value_id"), val.get("name"), val.get("scale_id")))
             else:
-                d["attr_missing"].append(f"{pname}={vname}" + ("" if prop else " (ozellik yok)"))
+                opts = [str(v.get("name")) for v in (prop.get("possible_values") or [])] if prop else []
+                d["attr_missing"].append(f"{pname}={vname}" + (f" (ozellik yok)" if not prop else f" | secenekler: {opts[:40]}"))
         for p in props:
             nm = (p.get("name") or "").lower()
             if p.get("supports_variations") and "color" in nm and d["color_pid"] is None:
