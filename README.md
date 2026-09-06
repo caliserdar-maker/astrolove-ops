@@ -46,3 +46,4 @@ zaman depoya yazilmaz.
 | `ig-publish` | elle (`dry_run` varsayilan acik) + gunluk 06:00 UTC (`IG_PUBLISH_ENABLED=true` ise) | WA_IG_PLAN'daki bugunun satirini Instagram'da yayinlar, durum sutunlarini gunceller |
 | `prodigi-quote` | elle (`limit` 0=hepsi, `discover`, `skus`) | Prodigi pilot katalog + ABD fiyat/kargo okuma (salt okur); cikti Drive `TEMP/PRODIGI/` + artifact |
 | `pod-gallery-sample` | elle (`pair`, `editions`) | POD galeri ornegi: ETSY_UPLOAD_SETS'ten 10 kare (6 mockup + symbol + crafted + 3 yeni kart) -> Drive `TEMP/POD_SAMPLE/<PAIR>/` + kontak sayfalari |
+| `pod-listing-update` | elle (`pair`, `listing_id`, `dry_run` varsayilan acik, `wp_state_file`) | POD (Prodigi poster) ilaninda tag + aciklama katmanini `docs/POD_LISTING_TEMPLATE.md` sablonuna gore gunceller (EN). `listing_id` bos + dry_run: magazadaki taslaklari listeler (WP haric). dry_run=false Etsy'ye YAZAR (Mo onayi); basliga dokunmaz |

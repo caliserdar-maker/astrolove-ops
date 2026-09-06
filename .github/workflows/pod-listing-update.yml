@@ -1,0 +1,144 @@
+name: pod-listing-update
+
+# POD (Prodigi poster) ilaninda tag + aciklama katmanini
+# docs/POD_LISTING_TEMPLATE.md sablonuna gore gunceller (EN, updateListing).
+# dry_run=true (varsayilan) YALNIZ OKUR: listing_id bossa magazadaki taslak
+# ilanlari listeler (WP durum dosyasindakiler haric); doluysa fark tablosu.
+# dry_run=false ETSY'YE YAZAR - yalnizca Mo onayindan sonra. Basliga dokunmaz.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pair:
+        description: "Cift, or. ARIES_LEO"
+        required: true
+        default: "ARIES_LEO"
+      listing_id:
+        description: "POD ilan id (bos = taslak kesfi, salt okur)"
+        required: false
+        default: ""
+      dry_run:
+        description: "true = yalniz raporla; false = Etsy'ye YAZ (onay gerekir)"
+        type: boolean
+        default: true
+      wp_state_file:
+        description: "WP cift,listing_id CSV'si (Drive, ASTROLOVE altinda; kesifte haric tutulur)"
+        required: false
+        default: "TEMP/WA_WP_DRAFTS_STATE.csv"
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Bagimliliklar
+        run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+
+      - name: rclone kur
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          rclone version | head -1
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone
+          umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          # Yeni OAuth istemcisinin secret'i conf'daki degeri ezer (rclone env override).
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+          fi
+
+      - name: Token ve WP durum dosyasini Drive'dan al
+        env:
+          WP_STATE: ${{ inputs.wp_state_file }}
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p _work
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          test -s _work/ETSY_TOKEN.json
+          if [ -n "${WP_STATE:-}" ]; then
+            rclone copyto "gdrive:ASTROLOVE/$WP_STATE" _work/wp_state.csv || true
+            [ -f _work/wp_state.csv ] && echo "WP durum dosyasi: $(wc -l < _work/wp_state.csv) satir." || echo "WP durum dosyasi yok; kesifte haric tutma yok."
+          fi
+
+      - name: Ilani isle
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          PAIR: ${{ inputs.pair }}
+          LISTING_ID: ${{ inputs.listing_id }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          set -euo pipefail
+          if [ "$DRY_RUN" = "true" ]; then
+            mode=--dry-run
+          else
+            echo "::warning::APPLY modu: Etsy'ye yazilacak (listing $LISTING_ID, $PAIR)."
+            mode=--apply
+          fi
+          args=(--pair "$PAIR" --out _out/pod_listing.csv "$mode")
+          [ -n "${LISTING_ID:-}" ] && args+=(--listing-id "$LISTING_ID")
+          [ -f _work/wp_state.csv ] && args+=(--wp-state _work/wp_state.csv)
+          python scripts/etsy/pod_listing_update.py "${args[@]}"
+
+      - name: Yenilenen token'i Drive'a geri yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          if [ -f _work/ETSY_TOKEN.json.updated ]; then
+            rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json"
+            echo "Token dosyasi Drive'a geri yazildi."
+          else
+            echo "Token yenilenmedi; geri yazma yok."
+          fi
+
+      - name: CSV'yi Drive'a yaz
+        if: ${{ always() }}
+        env:
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          set -euo pipefail
+          [ -s _out/pod_listing.csv ] || exit 0
+          mode=$([ "$DRY_RUN" = "true" ] && echo DRYRUN || echo APPLY)
+          stamp=$(TZ=Europe/Istanbul date +%Y%m%d_%H%M)
+          rclone copyto _out/pod_listing.csv "gdrive:ASTROLOVE/TEMP/POD_LISTING_${mode}_${stamp}.csv"
+          echo "Yazildi: TEMP/POD_LISTING_${mode}_${stamp}.csv"
+
+      - name: CSV artifact
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pod-listing-csv
+          path: _out/
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
