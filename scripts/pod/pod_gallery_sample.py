@@ -308,12 +308,23 @@ def silhouette(height_px, color):
     return img.resize((img.width // S, img.height // S), Image.LANCZOS)
 
 
-SG_SCALE = 6.2      # px/cm  (6.8 istendi; 30x40 = 518 px, 5 esit sutun + cetvel 3000 px'e sigmiyor -> 6.2: 472 px)
-SG_COLS, SG_COL_W = 5, 480
-SG_GAP = (W - SG_COLS * SG_COL_W) // 7        # 7 esit bosluk: kenar | cetvel | bosluk | 5 sutun (4 bosluk) | kenar = 85 px
-SG_RULER_X = SG_GAP                            # 85
-SG_X0 = 2 * SG_GAP                             # 170
-SG_BASE_Y = 1750                               # poster tabani = cetvel 0
+SG_SCALE = 6.2      # px/cm  (6.8 istendi; 30x40 = 518 px, 5 kutu + cetvel 3000 px'e sigmiyor -> 6.2: 472 px)
+SG_BASE_Y = 1750    # poster tabani = cetvel 0
+
+
+def sg_layout(s=SG_SCALE):
+    """5 grubun EN DIS kutulari arasindaki gorunen bosluk esit: kenar|cetvel|g|kutu|g|...|kutu|g|kenar (7 esit)."""
+    outer = []
+    for g in GROUP_ORDER:
+        items = sorted([z for z in SIZES if z[5] == g], key=lambda z: -z[4])
+        outer.append(items[0][3] * s)                       # en dis kutu genisligi (px)
+    gap = (W - sum(outer)) / 7.0
+    ruler_x = gap
+    xs, x = [], 2 * gap
+    for w in outer:
+        xs.append((x, x + w))                               # kutu sol/sag kenari
+        x += w + gap
+    return ruler_x, xs, gap
 
 
 def card_sizes(pal, F, poster, pair_txt):
@@ -328,11 +339,10 @@ def card_sizes(pal, F, poster, pair_txt):
     f_ttl = F.f("sans", solve_size(F, "sans", 700, REF["body_cap"]), 700)
     f_txt = F.f("sans", solve_size(F, "sans", 400, 19), 400)
     f_ruler = F.f("sans", solve_size(F, "sans", 500, 16), 500)
-    x_end = SG_X0 + SG_COLS * SG_COL_W + (SG_COLS - 1) * SG_GAP
-    # ortak taban cizgisi (= cetvel 0)
-    d.line([SG_RULER_X, base_y, x_end, base_y], fill=neutral_line, width=3)
-    # dikey cetvel: 0 (taban) -> 175 cm; 04/09 ayraciyla ayni kalinlik (3 px) ve renk; centikler ve etiketler saga
-    rx = SG_RULER_X
+    rx, boxes, gap = sg_layout(s)
+    x_end = boxes[-1][1]
+    d.line([rx, base_y, x_end, base_y], fill=neutral_line, width=3)          # ortak taban (= cetvel 0)
+    # dikey cetvel 0 -> 175 cm, 04/09 ayraci ile ayni kalinlik/renk; centik ve etiketler saga
     top = base_y - 175 * s
     d.line([rx, base_y, rx, top], fill=rule, width=3)
     for cm in range(0, 176, 25):
@@ -343,12 +353,13 @@ def card_sizes(pal, F, poster, pair_txt):
             d.text((rx + 40, y), f"{cm}", font=f_ruler, fill=mix(pal["ink"], pal["bg"], 0.2), anchor="lm")
     d.line([rx - 12, top, rx + 30, top], fill=rule, width=3)
     draw_tracked(d, (rx + 6, top - 40), "175 CM \u00b7 5'9\"", f_ruler, pal["ink"], tracking=3, anchor="l")
-    # 5 esit sutun, alt-orta hizali ic ice dikdortgenler, taban = cetvel 0
+    # kutular: her grup en dis kutusu kendi yuvasinda, ic kutular alt-orta hizali
     overlay = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     od = ImageDraw.Draw(overlay)
     labels = []
     for gi, g in enumerate(GROUP_ORDER):
-        cxg = SG_X0 + gi * (SG_COL_W + SG_GAP) + SG_COL_W // 2
+        bx0, bx1 = boxes[gi]
+        cxg = (bx0 + bx1) / 2
         items = sorted([z for z in SIZES if z[5] == g], key=lambda z: -z[4])
         for k, (lab, win, hin, wcm, hcm, _) in enumerate(items):
             w, h = wcm * s, hcm * s
@@ -360,8 +371,8 @@ def card_sizes(pal, F, poster, pair_txt):
     d = ImageDraw.Draw(im)
     for xy, lab in labels:
         d.text(xy, lab, font=f_lab, fill=mix(pal["ink"], pal["bg"], 0.15), anchor="ma")
-    for gi, g in enumerate(GROUP_ORDER):
-        cxg = SG_X0 + gi * (SG_COL_W + SG_GAP) + SG_COL_W // 2
+    for gi, g in enumerate(GROUP_ORDER):                    # baslik + liste: kutu merkezine ortali
+        cxg = (boxes[gi][0] + boxes[gi][1]) / 2
         items = sorted([z for z in SIZES if z[5] == g], key=lambda z: -z[4])
         ly = base_y + 24
         draw_tracked(d, (cxg, ly), GROUP_TITLE[g], f_ttl, accent, tracking=4, anchor="c")
@@ -374,31 +385,30 @@ def card_sizes(pal, F, poster, pair_txt):
 
 
 def sizes_gaps(card_p):
-    """Size Guide: cetvel x'i ve her sutunun en dis (aksan renkli) dikdortgen merkezi olculur;
-    sutun kenarlari = merkez +/- 240 -> araliklar (px). Hedef: 7 esit bosluk."""
+    """Size Guide: cetvel x'i ve 5 grubun EN DIS kutu kenarlari (aksan renkli kontur) olculur -> 6 gorunen bosluk (px)."""
     rgb = np.array(Image.open(card_p).convert("RGB")).astype(int)
     y = SG_BASE_Y - 30
     bar, rule = rgb[2120, 1500], rgb[418, 1500]
+    rx_, boxes, gap = sg_layout()
     rrow = np.abs(rgb[y] - rule).sum(1) < 60
-    rx = int(np.where(rrow[:SG_X0])[0].min()) if rrow[:SG_X0].any() else None
-    edges, centers = [], []
-    for gi in range(SG_COLS):
-        x0 = SG_X0 + gi * (SG_COL_W + SG_GAP)
-        seg = np.abs(rgb[y, x0 - 10:x0 + SG_COL_W + 10] - bar).sum(1) < 60
+    lim = int(boxes[0][0]) - 20
+    rx = int(np.where(rrow[:lim])[0].min()) if rrow[:lim].any() else None
+    edges = []
+    for bx0, bx1 in boxes:
+        a0, a1 = int(bx0) - 30, int(bx1) + 30
+        seg = np.abs(rgb[y, a0:a1] - bar).sum(1) < 60
         xs = np.where(seg)[0]
         if len(xs):
-            c = (xs.min() + xs.max()) / 2 + x0 - 10
-            centers.append(round(c - (x0 + SG_COL_W / 2), 1))          # sutun merkezinden sapma
-            edges.append((x0, x0 + SG_COL_W))
+            edges.append((int(xs.min() + a0), int(xs.max() + a0)))
     gaps = {}
-    if rx is not None and edges:
+    if rx is not None and len(edges) == 5:
         gaps["kenar->cetvel"] = rx
-        gaps["cetvel->sutun1"] = edges[0][0] - rx
-        for i in range(len(edges) - 1):
-            gaps[f"sutun{i + 1}->sutun{i + 2}"] = edges[i + 1][0] - edges[i][1]
-        gaps["sutun5->kenar"] = W - edges[-1][1]
-        gaps["sutun genislikleri"] = [e[1] - e[0] for e in edges]
-        gaps["dikdortgen merkez sapmasi"] = centers
+        gaps["cetvel->kutu1"] = edges[0][0] - rx
+        for i in range(4):
+            gaps[f"kutu{i + 1}->kutu{i + 2}"] = edges[i + 1][0] - edges[i][1]
+        gaps["kutu5->kenar"] = W - edges[-1][1]
+        gaps["kutu genislikleri"] = [e[1] - e[0] + 1 for e in edges]
+        gaps["hedef bosluk"] = round(gap, 1)
     return gaps
 
 
@@ -640,7 +650,7 @@ def main():
                     else:
                         devs.append(abs(v - ref[0]))
                 gm.append(f"| {ed} | {m[1]} | {g['kicker']} | {g['title']} | {g['rule']} | {g['pair']} | {g['rule_x']} | {g['bar']} | {g['bar_text']} | {g['badge']} | {g['head_cap']} | {g['head_x0']} | {max(devs) if devs else '-'} |")
-    gm += ["", "## Size Guide araliklari (px; hedef: 7 esit bosluk = %d, sutun 480)" % SG_GAP, ""]
+    gm += ["", "## Size Guide gorunen bosluklar (px; en dis kutu kenarlari; hedef 6 esit + sol kenar = %.1f)" % sg_layout()[2], ""]
     for ed, r in report.items():
         for m in r["frames"]:
             if len(m) == 4 and m[3].get("gaps"):
