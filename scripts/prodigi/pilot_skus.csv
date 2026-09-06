@@ -1,15 +1,15 @@
 sinif,sku,not
-poster,GLOBAL-FAP-8x10,"standart poster: Enhanced Matte Art 200gsm (Mo ipucu, 6 Eyl)"
-poster,GLOBAL-FAP-11x14,"standart poster: Enhanced Matte Art 200gsm (Mo ipucu, 6 Eyl)"
-poster,GLOBAL-FAP-12x16,"standart poster: Enhanced Matte Art 200gsm (Mo ipucu, 6 Eyl)"
-poster,GLOBAL-FAP-12x18,"standart poster: Enhanced Matte Art 200gsm (Mo ipucu, 6 Eyl)"
-poster,GLOBAL-FAP-16x20,"standart poster: Enhanced Matte Art 200gsm (Mo ipucu, 6 Eyl)"
-poster,GLOBAL-FAP-16x24,"standart poster: Enhanced Matte Art 200gsm (Mo ipucu, 6 Eyl)"
-poster,GLOBAL-FAP-18x24,"standart poster: Enhanced Matte Art 200gsm (Mo ipucu, 6 Eyl)"
-poster,GLOBAL-FAP-24x36,"standart poster: Enhanced Matte Art 200gsm (Mo ipucu, 6 Eyl)"
-poster,GLOBAL-FAP-A4,"standart poster: Enhanced Matte Art 200gsm (Mo ipucu, 6 Eyl)"
-poster,GLOBAL-FAP-A3,"standart poster: Enhanced Matte Art 200gsm (Mo ipucu, 6 Eyl)"
-poster,GLOBAL-FAP-A2,"standart poster: Enhanced Matte Art 200gsm (Mo ipucu, 6 Eyl)"
+poster,GLOBAL-FAP-8x10,dogrulandi 6 Eyl (deneme kosusu #34019964076)
+poster,GLOBAL-FAP-11x14,standart poster: Enhanced Matte Art 200gsm; kalip dogrulandi (GLOBAL-FAP-8x10 OK)
+poster,GLOBAL-FAP-12x16,standart poster: Enhanced Matte Art 200gsm; kalip dogrulandi (GLOBAL-FAP-8x10 OK)
+poster,GLOBAL-FAP-12x18,standart poster: Enhanced Matte Art 200gsm; kalip dogrulandi (GLOBAL-FAP-8x10 OK)
+poster,GLOBAL-FAP-16x20,standart poster: Enhanced Matte Art 200gsm; kalip dogrulandi (GLOBAL-FAP-8x10 OK)
+poster,GLOBAL-FAP-16x24,standart poster: Enhanced Matte Art 200gsm; kalip dogrulandi (GLOBAL-FAP-8x10 OK)
+poster,GLOBAL-FAP-18x24,standart poster: Enhanced Matte Art 200gsm; kalip dogrulandi (GLOBAL-FAP-8x10 OK)
+poster,GLOBAL-FAP-24x36,standart poster: Enhanced Matte Art 200gsm; kalip dogrulandi (GLOBAL-FAP-8x10 OK)
+poster,GLOBAL-FAP-A4,standart poster: Enhanced Matte Art 200gsm; kalip dogrulandi (GLOBAL-FAP-8x10 OK)
+poster,GLOBAL-FAP-A3,standart poster: Enhanced Matte Art 200gsm; kalip dogrulandi (GLOBAL-FAP-8x10 OK)
+poster,GLOBAL-FAP-A2,standart poster: Enhanced Matte Art 200gsm; kalip dogrulandi (GLOBAL-FAP-8x10 OK)
 poster,GLOBAL-BLP-8x10,"budget poster kagidi (tahmin, API dogrular)"
 poster,GLOBAL-BLP-11x14,"budget poster kagidi (tahmin, API dogrular)"
 poster,GLOBAL-BLP-12x16,"budget poster kagidi (tahmin, API dogrular)"
@@ -21,73 +21,157 @@ poster,GLOBAL-BLP-24x36,"budget poster kagidi (tahmin, API dogrular)"
 poster,GLOBAL-BLP-A4,"budget poster kagidi (tahmin, API dogrular)"
 poster,GLOBAL-BLP-A3,"budget poster kagidi (tahmin, API dogrular)"
 poster,GLOBAL-BLP-A2,"budget poster kagidi (tahmin, API dogrular)"
-poster,GLOBAL-HGE-8x10,"fine art: Hahnemuhle German Etching (tahmin, API dogrular)"
-poster,GLOBAL-HGE-11x14,"fine art: Hahnemuhle German Etching (tahmin, API dogrular)"
-poster,GLOBAL-HGE-12x16,"fine art: Hahnemuhle German Etching (tahmin, API dogrular)"
-poster,GLOBAL-HGE-12x18,"fine art: Hahnemuhle German Etching (tahmin, API dogrular)"
-poster,GLOBAL-HGE-16x20,"fine art: Hahnemuhle German Etching (tahmin, API dogrular)"
-poster,GLOBAL-HGE-16x24,"fine art: Hahnemuhle German Etching (tahmin, API dogrular)"
-poster,GLOBAL-HGE-18x24,"fine art: Hahnemuhle German Etching (tahmin, API dogrular)"
-poster,GLOBAL-HGE-24x36,"fine art: Hahnemuhle German Etching (tahmin, API dogrular)"
-poster,GLOBAL-HGE-A4,"fine art: Hahnemuhle German Etching (tahmin, API dogrular)"
-poster,GLOBAL-HGE-A3,"fine art: Hahnemuhle German Etching (tahmin, API dogrular)"
-poster,GLOBAL-HGE-A2,"fine art: Hahnemuhle German Etching (tahmin, API dogrular)"
-poster,GLOBAL-HPR-8x10,"fine art: Hahnemuhle Photo Rag (tahmin, API dogrular)"
-poster,GLOBAL-HPR-11x14,"fine art: Hahnemuhle Photo Rag (tahmin, API dogrular)"
-poster,GLOBAL-HPR-12x16,"fine art: Hahnemuhle Photo Rag (tahmin, API dogrular)"
-poster,GLOBAL-HPR-12x18,"fine art: Hahnemuhle Photo Rag (tahmin, API dogrular)"
-poster,GLOBAL-HPR-16x20,"fine art: Hahnemuhle Photo Rag (tahmin, API dogrular)"
-poster,GLOBAL-HPR-16x24,"fine art: Hahnemuhle Photo Rag (tahmin, API dogrular)"
-poster,GLOBAL-HPR-18x24,"fine art: Hahnemuhle Photo Rag (tahmin, API dogrular)"
-poster,GLOBAL-HPR-24x36,"fine art: Hahnemuhle Photo Rag (tahmin, API dogrular)"
-poster,GLOBAL-HPR-A4,"fine art: Hahnemuhle Photo Rag (tahmin, API dogrular)"
-poster,GLOBAL-HPR-A3,"fine art: Hahnemuhle Photo Rag (tahmin, API dogrular)"
-poster,GLOBAL-HPR-A2,"fine art: Hahnemuhle Photo Rag (tahmin, API dogrular)"
-kupa,GLOBAL-MUG-11OZ,"seramik kupa adayi (tahmin, API dogrular)"
-kupa,GLOBAL-MUG-15OZ,"seramik kupa adayi (tahmin, API dogrular)"
-kupa,GLOBAL-MUG-11oz,"seramik kupa adayi (tahmin, API dogrular)"
-kupa,GLOBAL-MUG-15oz,"seramik kupa adayi (tahmin, API dogrular)"
-kupa,GLOBAL-MUG-W-11OZ,"seramik kupa adayi (tahmin, API dogrular)"
-kupa,GLOBAL-MUG-W-15OZ,"seramik kupa adayi (tahmin, API dogrular)"
-kupa,GLOBAL-MUG-CER-11OZ,"seramik kupa adayi (tahmin, API dogrular)"
-kupa,GLOBAL-MUG-CER-15OZ,"seramik kupa adayi (tahmin, API dogrular)"
-kupa,GLOBAL-MUG-11,"seramik kupa adayi (tahmin, API dogrular)"
-kupa,GLOBAL-MUG-15,"seramik kupa adayi (tahmin, API dogrular)"
-kupa,GLOBAL-CER-MUG-11OZ,"seramik kupa adayi (tahmin, API dogrular)"
-kupa,GLOBAL-CER-MUG-15OZ,"seramik kupa adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-IPH15-TC,"tough kilif adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-IPH15-SC,"snap kilif adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-IPH15PRO-TC,"tough kilif adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-IPH15PRO-SC,"snap kilif adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-IPH15PROMAX-TC,"tough kilif adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-IPH15PROMAX-SC,"snap kilif adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-IPH16-TC,"tough kilif adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-IPH16-SC,"snap kilif adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-IPH16PRO-TC,"tough kilif adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-IPH16PRO-SC,"snap kilif adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-IPH16PROMAX-TC,"tough kilif adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-IPH16PROMAX-SC,"snap kilif adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-IPH17-TC,"tough kilif adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-IPH17-SC,"snap kilif adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-IPH17PRO-TC,"tough kilif adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-IPH17PRO-SC,"snap kilif adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-IPH17PROMAX-TC,"tough kilif adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-IPH17PROMAX-SC,"snap kilif adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-IPHONE15-TC,"tough kilif adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-IPHONE15-SC,"snap kilif adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-IPHONE16-TC,"tough kilif adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-IPHONE16-SC,"snap kilif adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-IPHONE17-TC,"tough kilif adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-IPHONE17-SC,"snap kilif adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-SGS24-TC,"tough kilif adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-SGS24-SC,"snap kilif adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-SGS24U-TC,"tough kilif adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-SGS24U-SC,"snap kilif adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-SGS25-TC,"tough kilif adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-SGS25-SC,"snap kilif adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-SGS25U-TC,"tough kilif adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-SGS25U-SC,"snap kilif adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-GALAXYS24-TC,"tough kilif adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-GALAXYS24-SC,"snap kilif adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-GALAXYS25-TC,"tough kilif adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-GALAXYS25-SC,"snap kilif adayi (tahmin, API dogrular)"
+poster,GLOBAL-HGE-8x10,fine art: Hahnemuhle German Etching (kesif: sayfada 12X16/16X20/18X24/A2/A3)
+poster,GLOBAL-HGE-11x14,fine art: Hahnemuhle German Etching (kesif: sayfada 12X16/16X20/18X24/A2/A3)
+poster,GLOBAL-HGE-12x16,fine art: Hahnemuhle German Etching (kesif: sayfada 12X16/16X20/18X24/A2/A3)
+poster,GLOBAL-HGE-12x18,fine art: Hahnemuhle German Etching (kesif: sayfada 12X16/16X20/18X24/A2/A3)
+poster,GLOBAL-HGE-16x20,fine art: Hahnemuhle German Etching (kesif: sayfada 12X16/16X20/18X24/A2/A3)
+poster,GLOBAL-HGE-16x24,fine art: Hahnemuhle German Etching (kesif: sayfada 12X16/16X20/18X24/A2/A3)
+poster,GLOBAL-HGE-18x24,fine art: Hahnemuhle German Etching (kesif: sayfada 12X16/16X20/18X24/A2/A3)
+poster,GLOBAL-HGE-24x36,fine art: Hahnemuhle German Etching (kesif: sayfada 12X16/16X20/18X24/A2/A3)
+poster,GLOBAL-HGE-A4,fine art: Hahnemuhle German Etching (kesif: sayfada 12X16/16X20/18X24/A2/A3)
+poster,GLOBAL-HGE-A3,fine art: Hahnemuhle German Etching (kesif: sayfada 12X16/16X20/18X24/A2/A3)
+poster,GLOBAL-HGE-A2,fine art: Hahnemuhle German Etching (kesif: sayfada 12X16/16X20/18X24/A2/A3)
+poster,GLOBAL-HPR-8x10,fine art: Hahnemuhle Photo Rag (kesif: sayfada A2/A3/A4)
+poster,GLOBAL-HPR-11x14,fine art: Hahnemuhle Photo Rag (kesif: sayfada A2/A3/A4)
+poster,GLOBAL-HPR-12x16,fine art: Hahnemuhle Photo Rag (kesif: sayfada A2/A3/A4)
+poster,GLOBAL-HPR-12x18,fine art: Hahnemuhle Photo Rag (kesif: sayfada A2/A3/A4)
+poster,GLOBAL-HPR-16x20,fine art: Hahnemuhle Photo Rag (kesif: sayfada A2/A3/A4)
+poster,GLOBAL-HPR-16x24,fine art: Hahnemuhle Photo Rag (kesif: sayfada A2/A3/A4)
+poster,GLOBAL-HPR-18x24,fine art: Hahnemuhle Photo Rag (kesif: sayfada A2/A3/A4)
+poster,GLOBAL-HPR-24x36,fine art: Hahnemuhle Photo Rag (kesif: sayfada A2/A3/A4)
+poster,GLOBAL-HPR-A4,fine art: Hahnemuhle Photo Rag (kesif: sayfada A2/A3/A4)
+poster,GLOBAL-HPR-A3,fine art: Hahnemuhle Photo Rag (kesif: sayfada A2/A3/A4)
+poster,GLOBAL-HPR-A2,fine art: Hahnemuhle Photo Rag (kesif: sayfada A2/A3/A4)
+poster,GLOBAL-FAP-20x28,kesif: enhanced-matte-art sayfasi (ek boyut)
+kupa,GLOBAL-MUG-W,dogrulandi 6 Eyl (deneme kosusu #34019964076); 11oz White Ceramic Photo Mug
+kupa,GLOBAL-MUG-W-L,"15oz/renk adayi (tahmin, API dogrular)"
+kupa,GLOBAL-MUG-LW,"15oz/renk adayi (tahmin, API dogrular)"
+kupa,GLOBAL-MUG-L,"15oz/renk adayi (tahmin, API dogrular)"
+kupa,GLOBAL-MUG-W-15,"15oz/renk adayi (tahmin, API dogrular)"
+kupa,GLOBAL-MUG-W15,"15oz/renk adayi (tahmin, API dogrular)"
+kupa,GLOBAL-MUG-15-W,"15oz/renk adayi (tahmin, API dogrular)"
+kupa,GLOBAL-MUG-15OZ-W,"15oz/renk adayi (tahmin, API dogrular)"
+kupa,GLOBAL-MUG-XL,"15oz/renk adayi (tahmin, API dogrular)"
+kupa,GLOBAL-MUG-LARGE,"15oz/renk adayi (tahmin, API dogrular)"
+kupa,GLOBAL-MUG-W-XL,"15oz/renk adayi (tahmin, API dogrular)"
+kupa,GLOBAL-MUG-WL,"15oz/renk adayi (tahmin, API dogrular)"
+kupa,GLOBAL-MUG-15W,"15oz/renk adayi (tahmin, API dogrular)"
+kupa,GLOBAL-MUG-B,"15oz/renk adayi (tahmin, API dogrular)"
+kupa,GLOBAL-MUG-C,"15oz/renk adayi (tahmin, API dogrular)"
+kupa,GLOBAL-MUG-W-11,"15oz/renk adayi (tahmin, API dogrular)"
+kupa,GLOBAL-MUG-W-L-15OZ,"15oz/renk adayi (tahmin, API dogrular)"
+kupa,GLOBAL-MUG-L-W,"15oz/renk adayi (tahmin, API dogrular)"
+kupa,GLOBAL-MUG-15OZ,"15oz/renk adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-IP14-CS-G,snap gloss (kalip: kesif)
+kilif,GLOBAL-TECH-IP14-CS-M,snap matte (kalip: kesif)
+kilif,GLOBAL-TECH-IP14-TCB-CS-G,tough gloss (kalip: kesif)
+kilif,GLOBAL-TECH-IP14-TCB-CS-M,tough matte (kalip: kesif)
+kilif,GLOBAL-TECH-IP14PL-CS-G,snap gloss (kalip: kesif)
+kilif,GLOBAL-TECH-IP14PL-CS-M,snap matte (kalip: kesif)
+kilif,GLOBAL-TECH-IP14PL-TCB-CS-G,tough gloss (kalip: kesif)
+kilif,GLOBAL-TECH-IP14PL-TCB-CS-M,tough matte (kalip: kesif)
+kilif,GLOBAL-TECH-IP14PR-CS-G,snap gloss (kalip: kesif)
+kilif,GLOBAL-TECH-IP14PR-CS-M,snap matte (kalip: kesif)
+kilif,GLOBAL-TECH-IP14PR-TCB-CS-G,tough gloss (kalip: kesif)
+kilif,GLOBAL-TECH-IP14PR-TCB-CS-M,tough matte (kalip: kesif)
+kilif,GLOBAL-TECH-IP14PM-CS-G,snap gloss (kalip: kesif)
+kilif,GLOBAL-TECH-IP14PM-CS-M,snap matte (kalip: kesif)
+kilif,GLOBAL-TECH-IP14PM-TCB-CS-G,tough gloss (kalip: kesif)
+kilif,GLOBAL-TECH-IP14PM-TCB-CS-M,tough matte (kalip: kesif)
+kilif,GLOBAL-TECH-IP15-CS-G,snap gloss (kalip: kesif)
+kilif,GLOBAL-TECH-IP15-CS-M,snap matte (kalip: kesif)
+kilif,GLOBAL-TECH-IP15-TCB-CS-G,tough gloss (kalip: kesif)
+kilif,GLOBAL-TECH-IP15-TCB-CS-M,tough matte (kalip: kesif)
+kilif,GLOBAL-TECH-IP15PL-CS-G,snap gloss (kalip: kesif)
+kilif,GLOBAL-TECH-IP15PL-CS-M,snap matte (kalip: kesif)
+kilif,GLOBAL-TECH-IP15PL-TCB-CS-G,tough gloss (kalip: kesif)
+kilif,GLOBAL-TECH-IP15PL-TCB-CS-M,tough matte (kalip: kesif)
+kilif,GLOBAL-TECH-IP15PR-CS-G,snap gloss (kalip: kesif)
+kilif,GLOBAL-TECH-IP15PR-CS-M,snap matte (kalip: kesif)
+kilif,GLOBAL-TECH-IP15PR-TCB-CS-G,dogrulandi 6 Eyl (deneme kosusu #34019964076); iPhone 15 Pro Tough Gloss
+kilif,GLOBAL-TECH-IP15PR-TCB-CS-M,tough matte (kalip: kesif)
+kilif,GLOBAL-TECH-IP15PM-CS-G,snap gloss (kalip: kesif)
+kilif,GLOBAL-TECH-IP15PM-CS-M,snap matte (kalip: kesif)
+kilif,GLOBAL-TECH-IP15PM-TCB-CS-G,tough gloss (kalip: kesif)
+kilif,GLOBAL-TECH-IP15PM-TCB-CS-M,tough matte (kalip: kesif)
+kilif,GLOBAL-TECH-IP16-CS-G,snap gloss (kalip: kesif)
+kilif,GLOBAL-TECH-IP16-CS-M,snap matte (kalip: kesif)
+kilif,GLOBAL-TECH-IP16-TCB-CS-G,tough gloss (kalip: kesif)
+kilif,GLOBAL-TECH-IP16-TCB-CS-M,tough matte (kalip: kesif)
+kilif,GLOBAL-TECH-IP16PL-CS-G,snap gloss (kalip: kesif)
+kilif,GLOBAL-TECH-IP16PL-CS-M,snap matte (kalip: kesif)
+kilif,GLOBAL-TECH-IP16PL-TCB-CS-G,tough gloss (kalip: kesif)
+kilif,GLOBAL-TECH-IP16PL-TCB-CS-M,tough matte (kalip: kesif)
+kilif,GLOBAL-TECH-IP16PR-CS-G,snap gloss (kalip: kesif)
+kilif,GLOBAL-TECH-IP16PR-CS-M,snap matte (kalip: kesif)
+kilif,GLOBAL-TECH-IP16PR-TCB-CS-G,tough gloss (kalip: kesif)
+kilif,GLOBAL-TECH-IP16PR-TCB-CS-M,tough matte (kalip: kesif)
+kilif,GLOBAL-TECH-IP16PM-CS-G,snap gloss (kalip: kesif)
+kilif,GLOBAL-TECH-IP16PM-CS-M,snap matte (kalip: kesif)
+kilif,GLOBAL-TECH-IP16PM-TCB-CS-G,tough gloss (kalip: kesif)
+kilif,GLOBAL-TECH-IP16PM-TCB-CS-M,tough matte (kalip: kesif)
+kilif,GLOBAL-TECH-IP17-CS-G,snap gloss (kalip: kesif)
+kilif,GLOBAL-TECH-IP17-CS-M,snap matte (kalip: kesif)
+kilif,GLOBAL-TECH-IP17-TCB-CS-G,tough gloss (kalip: kesif)
+kilif,GLOBAL-TECH-IP17-TCB-CS-M,tough matte (kalip: kesif)
+kilif,GLOBAL-TECH-IP17PL-CS-G,snap gloss (kalip: kesif)
+kilif,GLOBAL-TECH-IP17PL-CS-M,snap matte (kalip: kesif)
+kilif,GLOBAL-TECH-IP17PL-TCB-CS-G,tough gloss (kalip: kesif)
+kilif,GLOBAL-TECH-IP17PL-TCB-CS-M,tough matte (kalip: kesif)
+kilif,GLOBAL-TECH-IP17PR-CS-G,snap gloss (kalip: kesif)
+kilif,GLOBAL-TECH-IP17PR-CS-M,snap matte (kalip: kesif)
+kilif,GLOBAL-TECH-IP17PR-TCB-CS-G,tough gloss (kalip: kesif)
+kilif,GLOBAL-TECH-IP17PR-TCB-CS-M,tough matte (kalip: kesif)
+kilif,GLOBAL-TECH-IP17PM-CS-G,snap gloss (kalip: kesif)
+kilif,GLOBAL-TECH-IP17PM-CS-M,snap matte (kalip: kesif)
+kilif,GLOBAL-TECH-IP17PM-TCB-CS-G,tough gloss (kalip: kesif)
+kilif,GLOBAL-TECH-IP17PM-TCB-CS-M,tough matte (kalip: kesif)
+kilif,GLOBAL-TECH-IP17AIR-CS-G,snap gloss (kalip: kesif)
+kilif,GLOBAL-TECH-IP17AIR-CS-M,snap matte (kalip: kesif)
+kilif,GLOBAL-TECH-IP17AIR-TCB-CS-G,tough gloss (kalip: kesif)
+kilif,GLOBAL-TECH-IP17AIR-TCB-CS-M,tough matte (kalip: kesif)
+kilif,GLOBAL-TECH-IP16E-CS-G,snap gloss (kalip: kesif)
+kilif,GLOBAL-TECH-IP16E-CS-M,snap matte (kalip: kesif)
+kilif,GLOBAL-TECH-IP16E-TCB-CS-G,tough gloss (kalip: kesif)
+kilif,GLOBAL-TECH-IP16E-TCB-CS-M,tough matte (kalip: kesif)
+kilif,GLOBAL-TECH-SGS24-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-SGS24-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-SGS24U-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-SGS24U-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-SGS24PL-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-SGS24PL-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-SGS25-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-SGS25-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-SGS25U-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-SGS25U-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-SGS25PL-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-SGS25PL-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-S24-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-S24-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-S24U-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-S24U-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-S25-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-S25-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-S25U-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-S25U-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-GS24-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-GS24-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-GS25-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-GS25-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-SAMS24-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-SAMS24-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-SAMS25-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-SAMS25-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-SG24-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-SG24-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-SG25-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-SG25-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-SS24-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-SS24-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-SS25-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-SS25-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-GALS24-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-GALS24-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-GALS25-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
+kilif,GLOBAL-TECH-GALS25-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
