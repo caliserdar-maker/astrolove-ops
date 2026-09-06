@@ -3,7 +3,7 @@
 PRODIGI SIPARIS YONLENDIRICI (6 Eyl 2026): Etsy POD siparisi -> Prodigi siparisi -> takip -> Etsy.
 
 Akis (her kosu):
-  1. Etsy getShopReceipts (was_paid, unshipped); SKU POD-<PAIR>-<ED>-<SIZE> olan islemler.
+  1. Etsy getShopReceipts (was_paid, unshipped); SKU POD-<burc3>_<burc3>-<ed2>-<SIZE> (pod_sku.py) olan islemler.
   2. Yeni receipt: ulke US/CA/AU/GB degilse MANUAL; Prodigi teklif (Budget) ile maliyet kontrolu,
      marj < --margin-min ise MARJ_DUSUK uyarisi (durdurmaz); apply'da baski dosyasina gecici Drive
      linki (anyone:reader) verilir, POST /orders (idempotencyKey = etsy-<receipt_id>) -> ordered.
@@ -36,12 +36,13 @@ sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent / "etsy"))
 sys.path.insert(0, str(HERE.parent / "pinterest"))
 from etsy_common import Etsy, TokenStore, log as elog, mask  # noqa: E402
+from pod_sku import parse_sku  # noqa: E402
 
 PRODIGI = {"live": "https://api.prodigi.com/v4.0", "sandbox": "https://api.sandbox.prodigi.com/v4.0"}
 KEY_REMOTE = {"live": "gdrive:ASTROLOVE/TEMP/PRODIGI_TOKEN.json", "sandbox": "gdrive:ASTROLOVE/TEMP/PRODIGI_SANDBOX_TOKEN.json"}
 PRINT_REMOTE = "gdrive:ASTROLOVE/TEMP/POD_PRINT"
 ALLOWED = {"US", "CA", "AU", "GB"}
-SKU_RE = re.compile(r"^POD-([A-Z]+_[A-Z]+)-([A-Z_]+)-([0-9x]+|A[234])$")
+# SKU semasi pod_sku.py: POD-<burc3>_<burc3>-<edisyon2>-<boyut>
 STAGES = ["dryrun", "manual", "ordered", "shipped", "tracked", "error"]
 COLS = ["receipt_id", "stage", "country", "items", "etsy_total", "prodigi_cost", "margin", "warn", "prodigi_order_id",
         "prodigi_status", "asset_perms", "tracking", "carrier", "ts_utc", "note"]
@@ -151,10 +152,10 @@ def parse_items(receipt):
     items, other = [], []
     for t in receipt.get("transactions") or []:
         sku = (t.get("sku") or "").strip()
-        m = SKU_RE.match(sku)
-        if not m:
+        parsed = parse_sku(sku)
+        if not parsed:
             other.append(sku or f"tx{t.get('transaction_id')}"); continue
-        pair, ed, size = m.groups()
+        pair, ed, size = parsed
         pr = t.get("price") or {}
         price = float(pr.get("amount") or 0) / float(pr.get("divisor") or 100)
         items.append(dict(transaction_id=t.get("transaction_id"), sku=sku, pair=pair, ed=ed, size=size,
