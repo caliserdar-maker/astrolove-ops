@@ -8,6 +8,10 @@ Kaynaklar:
   - baslik/tag/aciklama: docs/POD_LISTING_TEMPLATE.md (+ TITLE sablonu asagida)
   - 13 boyut fiyati: scripts/etsy/pod_prices.csv (size,price; USD, tum edisyonlarda ayni); bos fiyat -> apply reddedilir
   - gorseller: <images>/<PAIR>/<ED>/NN_*.jpg (Drive TEMP/POD_GALLERY/<PAIR>, 78 cift)
+  - EK 3 (6 Eyl): <media>/<PAIR>/ teknik kartlar (WA_02 Symbol Story .png, WA_05 Crafted Detail .jpg) + V01 video
+    (LISTING_MEDIA/TECHNICAL, VIDEOS; ana edisyon). Galeri 12: 1 hero, 2-3 sahne, 4 Symbol, 5 Crafted,
+    6 Paper, 7 Sizes, 8 Care, 9-12 diger edisyon hero; video 1 (1080x1350). Kart OCR on kontrolu
+    (dijitale ozgu ifade -> kart atlanir); dosya eksikse cift "eksik" ile raporlanir, kosu durmaz.
   - API'den okunur (tahmin yok): kargo profili, bolum, production partner (Prodigi),
     iade politikasi, taxonomy (Prints > Giclee), varyasyon property id'leri.
 
@@ -34,6 +38,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from etsy_common import Etsy, TokenStore, log, mask  # noqa: E402
 from pod_listing_update import SIGNS, build as build_text, load_template  # noqa: E402
 from pod_sku import make_sku  # noqa: E402
+from pod_media import CARD_FILES, VIDEO_WH, card_path, mp4_dims, precheck_card, video_path  # noqa: E402
 from pod_listing_update import TEMPLATE_MD  # noqa: E402
 from wp_listing_update import load_block  # noqa: E402
 from wp_listing_update import norm, tags_of, validate  # noqa: E402
@@ -43,7 +48,8 @@ PRICES_CSV = HERE / "pod_prices.csv"
 MAX_TITLE = 140
 QUOTA_MIN = 400
 QUANTITY = 999
-MAX_IMAGES = 10
+MAX_IMAGES = 12          # EK 3 (6 Eyl): 10 kare + 2 teknik kart
+CARDS_AFTER = 3          # kartlar ana edisyonun ilk 3 karesinden sonra (rank 4-5)
 
 TITLE = "{S1} and {S2} Zodiac Wall Art, Couple Compatibility Giclée Print, Unframed Fine Art Poster, Gift for Couples"
 EDITIONS = ["MIDNIGHT_BLUE", "DEEP_BLACK", "WARM_PARCHMENT", "CHAMPAGNE_IVORY", "PURE_WHITE"]
@@ -78,7 +84,7 @@ TAXONOMY_PATH = ["prints", "giclée"]           # ust dugum adi 'Prints', yaprak
 
 # 10 gorsel/ilan siniri: ana edisyonun 6 karesi + diger 4 edisyonun 01 karesi (renk secenegine baglanir)
 DEFAULT_FRAMES = "01,02,03,05,08,10"
-STAGES = ["created", "images", "fields", "inventory", "variation_images", "verified"]
+STAGES = ["created", "images", "video", "fields", "inventory", "variation_images", "verified"]
 
 
 # ------------------------------------------------------------------ girdi
@@ -106,15 +112,51 @@ def find_frame(img_root, pair, ed, no):
     return hits[0] if hits else None
 
 
-def image_plan(img_root, pair, primary, frames):
-    """[(rank, edisyon, dosya|None, renk_karesi_mi)] - en fazla 10."""
-    plan, rank = [], 1
-    for no in frames:
-        plan.append((rank, primary, find_frame(img_root, pair, primary, no), no == "01")); rank += 1
+def media_plan(media_root, pair, ed):
+    """Teknik kartlar + video (EK 3): {'SYMBOL','CRAFTED','VIDEO': yol|None, '<K>_file','<K>_words','<K>_hits','<K>_note'}.
+    On kontrol: kart OCR'inde dijitale ozgu ifade varsa kart plana girmez (yol None, not yazilir)."""
+    m = {}
+    for k in CARD_FILES:
+        p = card_path(media_root, pair, ed, k) if media_root else None
+        m[k + "_file"] = p; m[k + "_words"] = None; m[k + "_hits"] = None; m[k + "_note"] = "" if p else "dosya yok"
+        if p is not None:
+            n, hits = precheck_card(p)
+            m[k + "_words"], m[k + "_hits"] = n, hits
+            if hits:
+                m[k + "_note"] = f"yasakli ifade {hits}"; p = None
+            elif n is None:
+                m[k + "_note"] = "OCR yok (tesseract)"; p = None
+        m[k] = p
+    v = video_path(media_root, pair, ed) if media_root else None
+    m["VIDEO_file"] = v; m["VIDEO_note"] = "" if v else "dosya yok"
+    if v is not None:
+        d = mp4_dims(v)
+        if d != VIDEO_WH:
+            m["VIDEO_note"] = f"boyut {d} != {VIDEO_WH}"; v = None
+    m["VIDEO"] = v
+    return m
+
+
+def media_missing(media):
+    return [f"{k}: {media.get(k + '_note') or 'yok'}" for k in ("SYMBOL", "CRAFTED", "VIDEO") if media.get(k) is None]
+
+
+def image_plan(img_root, pair, primary, frames, media=None):
+    """[(rank, edisyon, dosya|None, renk_karesi_mi, kare)] - 12'ye kadar (EK 3 duzeni):
+    ana edisyon ilk 3 kare, SYMBOL, CRAFTED, kalan ana kareler (Paper/Sizes/Care), diger edisyon 01'leri.
+    Kart yoksa (media None ya da on kontrol FAIL) atlanir, ranklar sikisir (10 kare)."""
+    items = []
+    for i, no in enumerate(frames):
+        if i == CARDS_AFTER:
+            for k in ("SYMBOL", "CRAFTED"):
+                if media and media.get(k):
+                    items.append((primary, media[k], False, k))
+        items.append((primary, find_frame(img_root, pair, primary, no), no == "01", f"frame{no}"))
     for ed in EDITIONS:
         if ed == primary:
             continue
-        plan.append((rank, ed, find_frame(img_root, pair, ed, "01"), True)); rank += 1
+        items.append((ed, find_frame(img_root, pair, ed, "01"), True, "frame01"))
+    plan = [(i + 1, ed, p, c, k) for i, (ed, p, c, k) in enumerate(items)]
     if len(plan) > MAX_IMAGES:
         raise SystemExit(f"HATA: gorsel plani {len(plan)} > {MAX_IMAGES}")
     return plan
@@ -425,10 +467,12 @@ def listing_body(title, desc, tags, d, base_price):
             "production_partner_ids": str(d["production_partner_id"]), "type": "physical", "is_supply": "false"}
 
 
-def create_pair(api, shop, pair, d, prices, img_root, primary, frames, st, state_path, out_dir):
+def create_pair(api, shop, pair, d, prices, img_root, primary, frames, st, state_path, out_dir, media_root=None):
     title, tags, desc, note = build_listing(pair, load_template())
-    plan = image_plan(img_root, pair, primary, frames)
-    missing_img = [f"{ed}/{rk:02d}" for rk, ed, p, _ in plan if p is None]
+    media = media_plan(media_root, pair, primary)
+    eksik = media_missing(media)                      # kart/video eksik: kosu durmaz, raporlanir
+    plan = image_plan(img_root, pair, primary, frames, media)
+    missing_img = [f"{ed}/{k}" for rk, ed, p, _, k in plan if p is None]
     if missing_img:
         raise SystemExit(f"HATA: {pair}: eksik gorsel {missing_img}")
     row = st.get(pair, {})
@@ -446,14 +490,24 @@ def create_pair(api, shop, pair, d, prices, img_root, primary, frames, st, state
 
     if STAGES.index(stage) < STAGES.index("images"):
         have = {i.get("rank") for i in ((api.get(f"/listings/{lid}/images", ok404=True) or {}).get("results") or [])}
-        for rk, ed, p, _ in plan:
+        for rk, ed, p, _, _ in plan:
             if rk in have:
                 continue
+            mime = "image/png" if p.suffix.lower() == ".png" else "image/jpeg"
             with open(p, "rb") as fh:
-                api.post_file(f"/shops/{shop}/listings/{lid}/images", files={"image": (p.name, fh, "image/jpeg")},
+                api.post_file(f"/shops/{shop}/listings/{lid}/images", files={"image": (p.name, fh, mime)},
                               data={"rank": str(rk)})
         set_stage(st, state_path, pair, lid, "images")
         stage = "images"
+
+    if STAGES.index(stage) < STAGES.index("video"):
+        # EK 3: ana edisyon V01 videosu (1 adet); dosya yoksa atlanir (eksik raporlanir)
+        if media.get("VIDEO") and not ((api.get(f"/listings/{lid}/videos", ok404=True) or {}).get("results") or []):
+            vp = media["VIDEO"]
+            with open(vp, "rb") as fh:
+                api.post_file(f"/shops/{shop}/listings/{lid}/videos", files={"video": (vp.name, fh, "video/mp4")}, data={"name": vp.name})
+        set_stage(st, state_path, pair, lid, "video")
+        stage = "video"
 
     if STAGES.index(stage) < STAGES.index("fields"):
         # Etsy updateListing (6 Eyl 400): who_made / when_made / is_supply birlikte gonderilir
@@ -487,7 +541,7 @@ def create_pair(api, shop, pair, d, prices, img_root, primary, frames, st, state
         imgs = (api.get(f"/listings/{lid}/images") or {}).get("results") or []
         by_rank = {i.get("rank"): i.get("listing_image_id") for i in imgs}
         vi = []
-        for rk, ed, p, is_color in plan:
+        for rk, ed, p, is_color, _ in plan:
             if is_color and ED_NAME[ed] in value_ids and rk in by_rank:
                 vi.append({"property_id": d["color_pid"], "value_id": value_ids[ED_NAME[ed]], "image_id": by_rank[rk]})
         if len(vi) != len(EDITIONS):
@@ -502,6 +556,7 @@ def create_pair(api, shop, pair, d, prices, img_root, primary, frames, st, state
     inv = api.get(f"/listings/{lid}/inventory") or {}
     vimg = (api.get(f"/shops/{shop}/listings/{lid}/variation-images", ok404=True) or {}).get("results") or []
     tru = api.get(f"/shops/{shop}/listings/{lid}/translations/ru", ok404=True) or {}
+    vids = (api.get(f"/listings/{lid}/videos", ok404=True) or {}).get("results") or []
     props = (api.get(f"/shops/{shop}/listings/{lid}/properties", ok404=True) or {}).get("results") or []
     ru_title = build_ru(pair, load_ru_template())[0]
     checks = {"state_draft": L.get("state") == "draft", "title": L.get("title") == title,
@@ -510,12 +565,14 @@ def create_pair(api, shop, pair, d, prices, img_root, primary, frames, st, state
               "attrs": {p.get("property_id") for p in props} >= {a[0] for a in d.get("attr_plan") or []},
               "tags": tags_of(L) == tags, "desc": norm(L.get("description")) == norm(desc),
               "images": len(imgs) == len(plan), "products": len(inv.get("products") or []) == len(EDITIONS) * len(SIZES),
-              "variation_images": len(vimg) == len(EDITIONS), "partner": bool(L.get("production_partner_ids") or L.get("production_partners"))}
+              "variation_images": len(vimg) == len(EDITIONS), "partner": bool(L.get("production_partner_ids") or L.get("production_partners")),
+              "video": (len(vids) == 1) if media.get("VIDEO") else True}
     ok = all(checks.values())
-    set_stage(st, state_path, pair, lid, "verified" if ok else stage, "PASS" if ok else "FAIL " + ",".join(k for k, v in checks.items() if not v))
-    (Path(out_dir) / f"{pair}_readback.json").write_text(json.dumps({"listing": L, "checks": checks, "n_images": len(imgs),
+    set_stage(st, state_path, pair, lid, "verified" if ok else stage,
+              ("PASS" if ok else "FAIL " + ",".join(k for k, v in checks.items() if not v)) + (f" | eksik: {'; '.join(eksik)}" if eksik else ""))
+    (Path(out_dir) / f"{pair}_readback.json").write_text(json.dumps({"listing": L, "checks": checks, "n_images": len(imgs), "n_videos": len(vids), "eksik": eksik,
                                                                      "n_products": len(inv.get("products") or []), "variation_images": vimg}, indent=1, ensure_ascii=False))
-    return lid, ok, checks
+    return lid, ok, checks, eksik
 
 
 # ------------------------------------------------------------------ ana
@@ -525,6 +582,7 @@ def main():
     ap.add_argument("--pairs-file", default="", help="satir basina bir cift")
     ap.add_argument("--limit", type=int, default=0, help="en fazla N cift (0 = hepsi)")
     ap.add_argument("--images", required=True, help="<images>/<PAIR>/<ED>/NN_*.jpg")
+    ap.add_argument("--media", default="", help="<media>/<PAIR>/ teknik kartlar + video (EK 3); bos = 10 kare, video yok")
     ap.add_argument("--state", required=True, help="cift,listing_id,stage CSV (resume)")
     ap.add_argument("--out", required=True)
     ap.add_argument("--prices", default=str(PRICES_CSV))
@@ -594,22 +652,25 @@ def main():
     if a.dry_run:
         for pair in todo:
             title, tags, desc, note = build_listing(pair, load_template())
-            plan = image_plan(a.images, pair, a.primary, frames)
-            miss_img = [f"{ed}/{frames[i] if i < len(frames) else '01'}" for i, (rk, ed, p, _) in enumerate(plan) if p is None]
+            media = media_plan(a.media or None, pair, a.primary)
+            eksik = media_missing(media)
+            plan = image_plan(a.images, pair, a.primary, frames, media)
+            miss_img = [f"{ed}/{k}" for rk, ed, p, _, k in plan if p is None]
             body = listing_body(title, desc, tags, d, prices.get(SIZES[0], 0))
             inv = inventory_body(pair, prices, d["color_pid"], d["size_pid"], d["color_name"], d["size_name"], d.get("readiness_state_id"))
             ru_title, ru_tags, ru_desc, ru_note = build_ru(pair, ru_tpl)
             (out_dir / f"{pair}_payload.json").write_text(json.dumps(
-                {"listing": body, "images": [(rk, ed, str(p) if p else None, c) for rk, ed, p, c in plan], "inventory": inv,
+                {"listing": body, "images": [(rk, ed, str(p) if p else None, c, k) for rk, ed, p, c, k in plan], "inventory": inv,
+                 "video": str(media["VIDEO"]) if media.get("VIDEO") else None, "eksik": eksik,
                  "attrs": d.get("attr_plan"), "ru": {"title": ru_title, "tags": ru_tags, "description": ru_desc, "note": ru_note}},
                 indent=1, ensure_ascii=False))
             status = "HAZIR" if not (missing or miss_img or iss) else "EKSIK: " + "; ".join(
                 ([f"fiyat {missing}"] if missing else []) + ([f"gorsel {miss_img}"] if miss_img else []) + iss)
             rows.append(dict(pair=pair, title_len=len(title), n_tags=len(tags), desc_len=len(desc), n_images=len(plan),
-                             n_products=len(inv["products"]), pair_tag_note=note, status=status))
-            log(f"[dry-run] {pair}: baslik {len(title)} | gorsel {len(plan)} | varyant {len(inv['products'])} | {status}")
-        md.append("| cift | baslik | tag | aciklama | gorsel | varyant | durum |\n|---|---|---|---|---|---|---|")
-        md += [f"| {r['pair']} | {r['title_len']} | {r['n_tags']} | {r['desc_len']} | {r['n_images']} | {r['n_products']} | {r['status']} |" for r in rows]
+                             n_products=len(inv["products"]), pair_tag_note=note, status=status, video=1 if media.get("VIDEO") else 0, eksik="; ".join(eksik) or "-"))
+            log(f"[dry-run] {pair}: baslik {len(title)} | gorsel {len(plan)} | video {1 if media.get('VIDEO') else 0} | varyant {len(inv['products'])} | {status} | eksik: {'; '.join(eksik) or '-'}")
+        md.append("| cift | baslik | tag | aciklama | gorsel | video | varyant | durum | eksik medya |\n|---|---|---|---|---|---|---|---|---|")
+        md += [f"| {r['pair']} | {r['title_len']} | {r['n_tags']} | {r['desc_len']} | {r['n_images']} | {r['video']} | {r['n_products']} | {r['status']} | {r['eksik']} |" for r in rows]
         md.append("\nDRY-RUN: yazma yok. Payload: <out>/<PAIR>_payload.json")
     else:
         if missing or iss:
@@ -625,12 +686,12 @@ def main():
             if not quota_ok(api, a.quota_min):
                 log(f"KOTA {api.remaining} < {a.quota_min}: {pair} ve sonrasi islenmedi (resume ile devam)")
                 break
-            lid, ok, checks = create_pair(api, shop, pair, d, prices, a.images, a.primary, frames, st, a.state, out_dir)
-            rows.append(dict(pair=pair, listing_id=lid, status="PASS" if ok else "FAIL", checks=checks))
+            lid, ok, checks, eksik = create_pair(api, shop, pair, d, prices, a.images, a.primary, frames, st, a.state, out_dir, a.media or None)
+            rows.append(dict(pair=pair, listing_id=lid, status="PASS" if ok else "FAIL", checks=checks, eksik="; ".join(eksik) or "-"))
             el = time.time() - t0
             log(f"[{n}/{len(todo)}] {pair} {lid} {'PASS' if ok else 'FAIL ' + str(checks)} | gecen {el:.0f}s kalan~{el / n * (len(todo) - n):.0f}s | kota {api.remaining}")
-        md.append("| cift | listing_id | durum |\n|---|---|---|")
-        md += [f"| {r['pair']} | {r['listing_id']} | {r['status']} |" for r in rows]
+        md.append("| cift | listing_id | durum | eksik medya |\n|---|---|---|---|")
+        md += [f"| {r['pair']} | {r['listing_id']} | {r['status']} | {r['eksik']} |" for r in rows]
     text = "\n".join(md)
     log(text)
     p = os.environ.get("GITHUB_STEP_SUMMARY")

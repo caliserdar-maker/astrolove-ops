@@ -1,0 +1,116 @@
+name: pod-media-add
+
+# EK 3 (Mo 6 Eyl 2026): mevcut POD ilanina 2 teknik kart (Symbol Story rank 4, Crafted Detail rank 5)
+# + 1 video (ana edisyon V01, 1080x1350). Mevcut 10 gorsel SILINMEZ; yalniz 2 yukleme + rank.
+# On kontrol: kart OCR'inde dijitale ozgu ifade varsa YUKLEME yok, rapor. Geri okuma: 12/12 id + piksel, video 1.
+# Kaynak: WALL_ART/LISTING_MEDIA/TECHNICAL/{02_SYMBOL_STORY,05_CRAFTED_DETAIL}/<ED>/, VIDEOS/V01_FIREFLY_STORY/01_EXPORTS/<ED>/.
+# dry_run=true: on kontrol + mevcut galeri piksel dogrulama + hedef sira (yazma yok). false: Etsy'ye YAZAR (onay).
+
+on:
+  workflow_dispatch:
+    inputs:
+      listing_id:
+        description: "POD ilan id"
+        required: true
+        default: "4570031205"
+      pair:
+        description: "Cift (or. ARIES_LEO)"
+        required: true
+        default: "ARIES_LEO"
+      edition:
+        description: "Ana edisyon (kart + video buradan)"
+        type: choice
+        options: [MIDNIGHT_BLUE, DEEP_BLACK, WARM_PARCHMENT, CHAMPAGNE_IVORY, PURE_WHITE]
+        default: MIDNIGHT_BLUE
+      dry_run:
+        description: "true = yalniz on kontrol/rapor; false = Etsy'ye YAZ"
+        type: boolean
+        default: true
+      quota_min:
+        description: "Kota tabani (altinda yazma yok)"
+        required: false
+        default: "400"
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  media:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Bagimliliklar (tesseract OCR, rclone)
+        run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2 pillow numpy
+          sudo apt-get install -y -q tesseract-ocr >/dev/null
+          tesseract --version | head -1
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+      - name: Token, galeri kaynaklari, kartlar ve video
+        env:
+          PAIR: ${{ inputs.pair }}
+          ED: ${{ inputs.edition }}
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          pair=$(echo "$PAIR" | tr a-z A-Z)
+          rclone copy "gdrive:ASTROLOVE/TEMP/POD_GALLERY/$pair" "img/$pair" --include "*/0[1-9]_*.jpg" --include "*/10_*.jpg" --transfers 8 -q
+          echo "galeri: $(find img/$pair -name '*.jpg' | wc -l) kare"
+          mkdir -p "media/$pair"
+          for f in "TECHNICAL/02_SYMBOL_STORY/$ED/WA_02_TECH_SYMBOL_STORY_${pair}_${ED}.png" \
+                   "TECHNICAL/05_CRAFTED_DETAIL/$ED/WA_05_TECH_CRAFTED_DETAIL_${pair}_${ED}.jpg" \
+                   "VIDEOS/V01_FIREFLY_STORY/01_EXPORTS/$ED/WA_VIDEO_V01_${pair}_${ED}.mp4"; do
+            rclone copyto "gdrive:ASTROLOVE/WALL_ART/LISTING_MEDIA/$f" "media/$pair/$(basename "$f")" 2>/dev/null \
+              && echo "indi: $(basename "$f")" || echo "EKSIK: $f"
+          done
+      - name: Medya ekle
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          LID: ${{ inputs.listing_id }}
+          PAIR: ${{ inputs.pair }}
+          ED: ${{ inputs.edition }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          QMIN: ${{ inputs.quota_min }}
+        run: |
+          set -euo pipefail
+          [ "$DRY_RUN" = "true" ] && mode=--dry-run || { echo "::warning::APPLY: ilana medya yazilacak ($LID)"; mode=--apply; }
+          python scripts/etsy/pod_media_add.py --listing-id "$LID" --pair "$PAIR" --edition "$ED" \
+            --images img --media media --out _out --quota-min "${QMIN:-400}" "$mode"
+      - name: Token/cikti Drive'a
+        if: ${{ always() }}
+        env:
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
+          mode=$([ "$DRY_RUN" = "true" ] && echo DRYRUN || echo APPLY)
+          stamp=$(TZ=Europe/Istanbul date +%Y%m%d_%H%M)
+          [ -d _out ] && rclone copy _out "gdrive:ASTROLOVE/TEMP/POD_LISTING/MEDIA_${mode}_${stamp}" -q && echo "Cikti: TEMP/POD_LISTING/MEDIA_${mode}_${stamp}/"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: pod-media-add
+          path: _out/
+          if-no-files-found: ignore
+      - if: ${{ always() }}
+        run: rm -rf _work media ~/.config/rclone

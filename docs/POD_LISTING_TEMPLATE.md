@@ -185,7 +185,30 @@ A2 (41.9×59.4 см)
 - SKU: `POD-<burc3>_<burc3>-<edisyon2>-<boyut>` (or. POD-ARI_LEO-MB-30x40; Etsy 32 karakter siniri; `scripts/etsy/pod_sku.py`).
 - Ilan alanlari (Mo 6 Eyl): who_made=i_did (production partner Prodigi), should_auto_renew=true,
   ozellikler Orientation=Vertical (Etsy "Portrait" karsiligi), Framing=Unframed, Number of pieces included=1, Material=Paper
-  (taxonomy 121 possible_values'tan id), gumruk tarife 491191 (HS 4911.91) — API'de alan varsa.
+  (taxonomy 121 possible_values'tan id), gumruk tarife 491191 (HS 4911.91) — API'de alan yok, panelden.
+- Uretim yontemi / arac ("how it's made", "tools") alanlari (EK 2, 6 Eyl): Etsy Open API v3'te yok
+  (OAS taramasi etsy-oas-probe 34036607282 ve 34040431691; updateListing govdesinde alan yok) -> bos birakilir,
+  AI uretici ISARETLENMEZ. Tarife ve GPSR alanlarina dokunulmaz.
+
+## Galeri duzeni (EK 3, Mo 6 Eyl 2026): 12 gorsel + 1 video
+
+| rank | kaynak | not |
+|---|---|---|
+| 1 | ana edisyon 01 hero (POD_GALLERY) | renk secenegine bagli (variation image) |
+| 2-3 | ana edisyon 02, 03 sahne | |
+| 4 | `LISTING_MEDIA/TECHNICAL/02_SYMBOL_STORY/<ED>/WA_02_TECH_SYMBOL_STORY_<PAIR>_<ED>.png` | Symbol Story |
+| 5 | `LISTING_MEDIA/TECHNICAL/05_CRAFTED_DETAIL/<ED>/WA_05_TECH_CRAFTED_DETAIL_<PAIR>_<ED>.jpg` | Crafted Detail |
+| 6 | ana edisyon 05 Paper & Quality | |
+| 7 | ana edisyon 08 Size Guide | |
+| 8 | ana edisyon 10 Shipping & Care | |
+| 9-12 | DB / WP / CI / PW 01 hero | renk secenegine bagli |
+| video | `LISTING_MEDIA/VIDEOS/V01_FIREFLY_STORY/01_EXPORTS/<ED>/WA_VIDEO_V01_<PAIR>_<ED>.mp4` | 1 adet, 1080x1350 |
+
+- Kart ON KONTROLU (tesseract OCR): metinde dijitale ozgu ifade (download, instant, print at home,
+  JPG/PDF, file) varsa kart YUKLENMEZ, raporlanir; kart yeniden uretilir.
+- 78 ilan: kart ve video her cift icin kendi ana edisyon dosyasindan; dosya eksikse o cift raporda
+  "eksik" (ranklar sikisir), kosu durmaz. Mevcut ilana ekleme: `pod-media-add` (gorsel silinmez,
+  sira id + piksel ile dogrulanir).
 
 ## Uygulama sirasi
 
