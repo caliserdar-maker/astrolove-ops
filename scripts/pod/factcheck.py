@@ -24,6 +24,7 @@ HAH_PR = "https://www.hahnemuehle.com/en/digital-papers/fineart-collection/matt-
 HAH_PR2 = "https://www.hahnemuehle.com/en/digital-papers/fineart-collection/natural-line/p/Product/show/202/1.html"
 HAH_GLOVES = "https://www.hahnemuehle.store/us/gloves-12-pairs/10608863"
 HAH_BLOG_BOX = "https://blog.hahnemuehle.com/en/hahnemuehle-portfolio-box/"
+HAH_GLOVES2 = "https://www.hahnemuehle.shop/en/gloves-dual-pack/10608858"
 PRO_HPR = "https://www.prodigi.com/products/prints-and-posters/photo-prints/hahnemuhle-photo-rag/"
 PRO_PACK = "https://www.prodigi.com/faq/packaging/"
 PRO_PACK2 = "https://help.prodigi.com/support/solutions/articles/35000138786-how-are-your-products-packaged-for-shipping-"
@@ -59,7 +60,8 @@ FACTS = [
     ("C3", "CARE", "FLAT GOLDEN INK — Gold tones are printed as flat golden ink, not metallic foil",
      [(PRO_HPR, ["pigment"]), (PRO_HPR, ["giclée"]), (PRO_HPR, ["giclee"]), (PRO_PAPERS, ["pigment"])]),
     ("C4", "CARE", "HANDLE BY THE EDGES — Touch only the margins to avoid fingerprints",
-     [(HAH_GLOVES, ["fingerprints"]), (HAH_BLOG_BOX, ["fingerprints"]), (HAH_GLOVES, ["margins"]), (HAH_BLOG_BOX, ["margins"])]),
+     [(HAH_GLOVES, ["fingerprint"]), (HAH_BLOG_BOX, ["fingerprint"]), (HAH_GLOVES, ["margin"]), (HAH_BLOG_BOX, ["margin"]),
+      (HAH_GLOVES2, ["fingerprint"]), (HAH_GLOVES2, ["margin"])]),
     ("C5", "CARE", "SHIPS FROM THE US — EU and UK orders are printed at our UK/EU lab",
      [("csv", "lab_US", "startswith US/"), ("csv", "lab_DE", "in GB/ NL/")]),
     ("C_footer", "CARE", "Made to Order, Just for You",
@@ -69,6 +71,9 @@ FACTS = [
 _cache = {}
 
 
+_diag = {}
+
+
 def page_sentences(url, offline):
     if offline:
         return None
@@ -76,13 +81,17 @@ def page_sentences(url, offline):
         try:
             r = requests.get(url, headers=UA, timeout=30)
             txt = r.text if r.status_code == 200 else ""
-        except requests.RequestException:
+            _diag[url] = f"HTTP {r.status_code}, {len(r.text)} karakter"
+        except requests.RequestException as e:
             txt = ""
+            _diag[url] = f"HATA {type(e).__name__}"
         txt = re.sub(r"<(script|style)[^>]*>.*?</\1>", " ", txt, flags=re.S | re.I)
         txt = re.sub(r"<[^>]+>", " ", txt)
         txt = html.unescape(re.sub(r"\s+", " ", txt))
         sents = re.split(r"(?<=[.!?])\s+(?=[A-Z0-9])", txt)
-        _cache[url] = [s.strip() for s in sents if 20 < len(s.strip()) < 600]
+        # cumleler + 400 karakterlik kayan pencereler (accordion/satir sonu farklari icin)
+        wins = [txt[i:i + 400] for i in range(0, max(0, len(txt) - 200), 200)]
+        _cache[url] = [s.strip() for s in sents if 20 < len(s.strip()) < 600] + wins
     return _cache[url]
 
 
@@ -151,6 +160,7 @@ def main():
         st = "OK" if found else "KAYNAK YOK → karttan cikar"
         lines.append(f"| {card} | {text} | {src_txt} | {quote.replace('|', '/')} | {st} |")
         print(f"{fid:<9} {'OK ' if found else 'YOK'} {text[:60]}", flush=True)
+    lines += ["", "## Kaynak erisim tanisi", ""] + [f"- {u}: {d}" for u, d in _diag.items()]
     (out / "FACTCHECK.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     (out / "verified.json").write_text(json.dumps(verified, indent=1))
     n = sum(verified.values())

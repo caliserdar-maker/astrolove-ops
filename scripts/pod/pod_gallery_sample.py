@@ -81,7 +81,8 @@ VERIFIED = None                               # None = filtre yok; dict = kaynak
 
 
 def ok(fid):
-    return VERIFIED is None or VERIFIED.get(fid, False)
+    """factcheck listesinde olmayan kimlikler (kicker/footer gibi iddia icermeyen metin) her zaman gecer."""
+    return VERIFIED is None or VERIFIED.get(fid, True)
 
 
 def vtext(item):
