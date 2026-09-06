@@ -107,7 +107,11 @@ def palette(card10):
     d = np.abs(reg.astype(int) - np.array(bar)).sum(1)
     bt = reg[d > 150]
     bartext = tuple(int(v) for v in np.median(bt, axis=0)) if len(bt) else bg
-    return {"bg": bg, "bar": bar, "ink": ink, "rule": rule, "bartext": bartext}
+    # ust bant (04/09: y0-27, tam genislik, bar rengi) — edisyon basina olculur
+    col = a[:60, 1500].astype(int)
+    ys = np.where(np.abs(col - np.array(bg)).sum(1) > 60)[0]
+    top = {"y1": int(ys.max()), "color": tuple(int(v) for v in a[int(ys.max()) // 2, 1500])} if len(ys) else None
+    return {"bg": bg, "bar": bar, "ink": ink, "rule": rule, "bartext": bartext, "top": top}
 
 
 class Fonts:
@@ -184,6 +188,8 @@ def solve_tracking(d, font, txt, target_w):
 def card_base(pal, F, kicker, title, pair_txt, footer):
     im = Image.new("RGB", (W, H), pal["bg"])
     d = ImageDraw.Draw(im)
+    if pal.get("top"):
+        d.rectangle([0, 0, W - 1, pal["top"]["y1"]], fill=pal["top"]["color"])       # ust bant: 04/09 ile ayni y/kalinlik/renk
     f_k = F.f("sans", solve_size(F, "sans", 500, REF["kicker_cap"]), 500)
     tr_k = solve_tracking(d, f_k, *REF["kicker_w"])
     if kicker:
@@ -442,8 +448,12 @@ def geometry(card_p, rows=True):
     # zemin acik mi? (PURE_WHITE/WP gibi) -> esik zemin parlakligina gore
     bg = float(np.median(a[400:1800, 4:16]))
     th = bg - 60
+    bgc = np.median(rgb[400:1800, 4:16].reshape(-1, 3), axis=0)
+    tys = np.where(np.abs(rgb[:60, 1500].astype(int) - bgc).sum(1) > 60)[0]
+    txs = np.where(np.abs(rgb[10].astype(int) - bgc).sum(1) > 60)[0] if len(tys) else []
+    g0 = {"top": (int(tys.min()), int(tys.max()), int(txs.min()), int(txs.max()), tuple(int(v) for v in rgb[10, 1500])) if len(tys) else None}
     hb = _bands(a, 80, 560, 600, 2400, th=th)
-    g = {"kicker": hb[0] if hb else None, "title": hb[1] if len(hb) > 1 else None,
+    g = {**g0, "kicker": hb[0] if hb else None, "title": hb[1] if len(hb) > 1 else None,
          "rule": hb[2] if len(hb) > 2 else None, "pair": hb[3] if len(hb) > 3 else None,
          "rule_x": _xext(a, 414, 424, 0, 3000, th=th)}
     colm = rgb[:, 1500]
@@ -508,7 +518,7 @@ def geometry(card_p, rows=True):
 
 GEOM_REF = {"kicker": (141, 172), "title": (233, 373), "rule": (417, 420), "pair": (489, 522), "rule_x": (972, 2027),
             "bar": (1990, 2180, 105, 2893), "bar_text": [(2031, 2094), (2121, 2141)],
-            "badge": (271, 401, 130), "head_cap": (41,), "head_x0": (460,)}
+            "badge": (271, 401, 130), "head_cap": (41,), "head_x0": (460,), "top": (0, 27, 0, 2999)}
 
 
 # ------------------------------------------------------------------ spellcheck
@@ -631,7 +641,8 @@ def main():
           "Referans (px): kicker cap y141-172 · baslik bandi y233-373 · cizgi y417-420 x972-2027 · cift satiri y489-522 · "
           "bar y1990-2180 x105-2893 · bar serif y2031-2094 · bar caps y2121-2141", "",
           "Referans rozet x271-401 o130 · satir basligi cap 41 px @x460 · 09 cizgi kalinligi 4 px (paket ikonu 4 px)", "",
-          "| edisyon | kart | kicker | baslik | cizgi | cift | cizgi x | bar (y0,y1,x0,x1) | bar metin | rozet (x0,x1,o) | baslik cap | baslik x0 | max sapma px |", "|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
+          "Referans ust cizgi/bant: y0-27 (28 px), x0-2999, renk = bar rengi (edisyon basina 10_ karttan olculur)", "",
+          "| edisyon | kart | ust cizgi (y0,y1,x0,x1,renk) | kicker | baslik | cizgi | cift | cizgi x | bar (y0,y1,x0,x1) | bar metin | rozet (x0,x1,o) | baslik cap | baslik x0 | max sapma px |", "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
     for ed, r in report.items():
         for m in r["frames"]:
             if len(m) == 4:
@@ -645,11 +656,13 @@ def main():
                         devs += [abs(x - y) for a_, b_ in zip(v, ref) for x, y in zip(a_, b_)]
                     elif k == "title":
                         devs.append(abs(v[0] - ref[0]))          # baslik alt siniri metne bagli (alt uzanti yoksa kisa)
+                    elif k == "top":
+                        devs += [abs(x - y) for x, y in zip(v[:4], ref)]
                     elif isinstance(v, tuple):
                         devs += [abs(x - y) for x, y in zip(v, ref)]
                     else:
                         devs.append(abs(v - ref[0]))
-                gm.append(f"| {ed} | {m[1]} | {g['kicker']} | {g['title']} | {g['rule']} | {g['pair']} | {g['rule_x']} | {g['bar']} | {g['bar_text']} | {g['badge']} | {g['head_cap']} | {g['head_x0']} | {max(devs) if devs else '-'} |")
+                gm.append(f"| {ed} | {m[1]} | {g.get('top')} | {g['kicker']} | {g['title']} | {g['rule']} | {g['pair']} | {g['rule_x']} | {g['bar']} | {g['bar_text']} | {g['badge']} | {g['head_cap']} | {g['head_x0']} | {max(devs) if devs else '-'} |")
     gm += ["", "## Size Guide gorunen bosluklar (px; en dis kutu kenarlari; hedef 6 esit + sol kenar = %.1f)" % sg_layout()[2], ""]
     for ed, r in report.items():
         for m in r["frames"]:
