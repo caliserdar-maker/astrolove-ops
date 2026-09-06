@@ -20,9 +20,9 @@ on:
         required: false
         default: ""
       mode:
-        description: "pilot = pilot_skus.csv (US) | hpr_sizes = hpr_sizes.txt (US + DE)"
+        description: "pilot = pilot_skus.csv (US) | hpr_sizes = hpr_sizes.txt (US + DE) | ship_everywhere = 8 ulke Standard kargo (18x24)"
         type: choice
-        options: [pilot, hpr_sizes]
+        options: [pilot, hpr_sizes, ship_everywhere]
         default: pilot
 
 concurrency:
@@ -85,6 +85,13 @@ jobs:
           if [ "$MODE" = "hpr_sizes" ]; then
             python scripts/prodigi/prodigi_hpr_sizes.py --out-dir out
             exit 0
+          fi
+          if [ "$MODE" = "ship_everywhere" ]; then
+            rc=0; python scripts/prodigi/prodigi_ship_everywhere.py --out-dir out || rc=$?
+            cat out/PRODIGI_SHIP_EVERYWHERE.md >> "$GITHUB_STEP_SUMMARY" || true
+            rclone copy out "gdrive:ASTROLOVE/TEMP/PRODIGI" --include "PRODIGI_SHIP_EVERYWHERE.*" -q
+            [ "$rc" = "2" ] && echo "::warning::DUR: sapma/eksik var (rapor TEMP/PRODIGI/PRODIGI_SHIP_EVERYWHERE.md)"
+            exit $rc
           fi
           args=(--limit "${LIMIT:-0}" --out-dir out)
           [ "$DISCOVER" = "true" ] && args+=(--discover)
