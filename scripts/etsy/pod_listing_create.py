@@ -6,7 +6,7 @@ Color(5) x Size(13) = 65 varyant + renk secenegine edisyon 01 karesi - 6 Eyl 202
 Kaynaklar:
   - baslik/tag/aciklama: docs/POD_LISTING_TEMPLATE.md (+ TITLE sablonu asagida)
   - 13 boyut fiyati: scripts/etsy/pod_prices.csv (size,price; USD, tum edisyonlarda ayni); bos fiyat -> apply reddedilir
-  - gorseller: <images>/<PAIR>/<ED>/NN_*.jpg (Drive TEMP/POD_SAMPLE/<PAIR>)
+  - gorseller: <images>/<PAIR>/<ED>/NN_*.jpg (Drive TEMP/POD_GALLERY/<PAIR>, 78 cift)
   - API'den okunur (tahmin yok): kargo profili, bolum, production partner (Prodigi),
     iade politikasi, taxonomy (Prints > Giclee), varyasyon property id'leri.
 
