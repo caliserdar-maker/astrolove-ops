@@ -419,16 +419,16 @@ def geometry(card_p, rows=True):
     if not rows:
         g["badge"] = g["head_cap"] = g["head_x0"] = None
         return g
-    m = np.abs(rgb[600:1950, 200:500].astype(int) - np.array(bar)).sum(2) < 40
-    wide = m.sum(1) >= 80
+    m = np.abs(rgb[600:1950, 250:420].astype(int) - np.array(bar)).sum(2) < 40   # yalniz rozet sutunu (metin kenar yumusatmasi disarida)
+    wide = m.sum(1) >= 10
     ys = np.where(wide)[0]
     if len(ys):
-        y0 = 600 + ys[0]
+        y0 = int(600 + ys[0])
         y1 = y0
         while y1 - 600 < len(wide) and wide[y1 - 600]:
             y1 += 1
         xs = np.where(m[ys[0]:y1 - 600].sum(0) > 0)[0]
-        g["badge"] = (200 + int(xs.min()), 200 + int(xs.max()) + 1, y1 - y0)
+        g["badge"] = (250 + int(xs.min()), 250 + int(xs.max()) + 1, y1 - y0)
         hb = [b for b in _bands(a, y0 - 40, y1 + 60, 450, 1500, th=th) if b[1] - b[0] >= 20]   # umlaut/nokta bantlarini atla
         g["head_cap"] = (hb[0][1] - hb[0][0]) if hb else None
         g["head_x0"] = _xext(a, hb[0][0], hb[0][1], 450, 1500, th=th)[0] if hb else None
