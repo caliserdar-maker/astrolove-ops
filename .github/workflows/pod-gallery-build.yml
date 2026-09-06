@@ -1,0 +1,180 @@
+name: pod-gallery-build
+
+# 78 cift POD galerisi: cift x 5 edisyon x 10 kare (11_EXTRA yok). Kaynak
+# ETSY_UPLOAD_SETS, cikti Drive TEMP/POD_GALLERY/<PAIR>/<ED>/01..10.jpg, kontak
+# TEMP/POD_GALLERY/_CONTACT/CONTACT_<PAIR>.jpg. Shard basina STATE
+# TEMP/POD_GALLERY_STATE/shard_<n>.csv; birlestirme TEMP/POD_GALLERY_STATE.csv +
+# TEMP/POD_GALLERY_REPORT.md. Resume: PASS olan cift atlanir. Etsy'ye yazmaz.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pairs:
+        description: "ALL (ETSY_UPLOAD_SETS/MIDNIGHT_BLUE klasorleri) ya da virgullu liste, or. TAURUS_VIRGO"
+        required: true
+        default: "ALL"
+      shards:
+        description: "Parca sayisi (paralel)"
+        required: true
+        default: "6"
+      force:
+        description: "true = PASS olanlari da yeniden uret"
+        type: boolean
+        default: false
+
+concurrency:
+  group: pod-gallery-build
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      shards: ${{ steps.m.outputs.shards }}
+    steps:
+      - id: m
+        run: |
+          python3 -c "import json;n=int('${{ inputs.shards }}');print('shards='+json.dumps(list(range(n))))" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        shard: ${{ fromJson(needs.plan.outputs.shards) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Bagimliliklar + fontlar
+        run: |
+          set -euo pipefail
+          pip install -q pillow==12.3.0 numpy==2.4.6 requests==2.34.2 pyspellchecker
+          mkdir -p fonts
+          base=https://raw.githubusercontent.com/google/fonts/main/ofl
+          curl -fsSL -o "fonts/CormorantGaramond[wght].ttf"        "$base/cormorantgaramond/CormorantGaramond%5Bwght%5D.ttf"
+          curl -fsSL -o "fonts/CormorantGaramond-Italic[wght].ttf" "$base/cormorantgaramond/CormorantGaramond-Italic%5Bwght%5D.ttf"
+          curl -fsSL -o "fonts/Montserrat[wght].ttf"               "$base/montserrat/Montserrat%5Bwght%5D.ttf"
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          rclone version | head -1
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone
+          umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+          fi
+      - name: Cift listesi + STATE (resume)
+        env:
+          PAIRS: ${{ inputs.pairs }}
+        run: |
+          set -euo pipefail
+          mkdir -p _work
+          if [ "$PAIRS" = "ALL" ]; then
+            rclone lsf "gdrive:ASTROLOVE/WALL_ART/LISTING_MEDIA/ETSY_UPLOAD_SETS/MIDNIGHT_BLUE" --dirs-only | sed 's#/$##' | tr a-z A-Z | sort -u > _work/pairs.txt
+          else
+            echo "$PAIRS" | tr ',' '\n' | sed 's/ //g' | grep -v '^$' | tr a-z A-Z | sort -u > _work/pairs.txt
+          fi
+          echo "cift: $(wc -l < _work/pairs.txt)"
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_GALLERY_STATE/shard_${{ matrix.shard }}.csv" _work/state.csv 2>/dev/null || echo "STATE yok; yeni baslar"
+      - name: Kaynak dogrulama (FACTCHECK)
+        run: |
+          set -euo pipefail
+          rclone copyto "gdrive:ASTROLOVE/TEMP/PRODIGI/PRODIGI_HPR_SIZES.csv" hpr.csv
+          python scripts/pod/factcheck.py --csv hpr.csv --out _fc
+          grep -c "KAYNAK YOK" _fc/FACTCHECK.md && echo "::warning::kaynaksiz satir var (karttan dusuruldu)" || true
+      - name: Uret (shard ${{ matrix.shard }})
+        env:
+          FORCE: ${{ inputs.force }}
+        run: |
+          set -euo pipefail
+          args=(--pairs-file _work/pairs.txt --src src --out out --fonts fonts --state _work/state.csv --contact-dir contact
+                --verified _fc/verified.json --spellcheck --shard "${{ matrix.shard }}" --shards "${{ inputs.shards }}"
+                --rclone-src "gdrive:ASTROLOVE/WALL_ART/LISTING_MEDIA/ETSY_UPLOAD_SETS" --rclone-out "gdrive:ASTROLOVE/TEMP/POD_GALLERY")
+          [ "$FORCE" = "true" ] && args+=(--force)
+          python scripts/pod/pod_gallery_build.py "${args[@]}"
+      - name: STATE'i Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -s _work/state.csv ] && rclone copyto _work/state.csv "gdrive:ASTROLOVE/TEMP/POD_GALLERY_STATE/shard_${{ matrix.shard }}.csv" && echo "STATE shard_${{ matrix.shard }} yazildi" || echo "STATE yok"
+      - name: Artifact
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pod-gallery-shard-${{ matrix.shard }}
+          path: |
+            _work/state.csv
+            contact/
+            _fc/FACTCHECK.md
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
+
+  merge:
+    needs: build
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone
+          umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+          fi
+      - name: STATE birlestir + rapor
+        run: |
+          set -euo pipefail
+          mkdir -p _st
+          rclone copy "gdrive:ASTROLOVE/TEMP/POD_GALLERY_STATE" _st --include "shard_*.csv" -q
+          python3 - <<'PY'
+          import csv, glob, os
+          rows = {}
+          for f in sorted(glob.glob("_st/shard_*.csv")):
+              for r in csv.DictReader(open(f, encoding="utf-8")):
+                  if r["pair"] not in rows or r["ts_utc"] > rows[r["pair"]]["ts_utc"]:
+                      rows[r["pair"]] = r
+          cols = ["pair", "status", "frames", "fail", "secs", "ts_utc"]
+          with open("_st/POD_GALLERY_STATE.csv", "w", newline="", encoding="utf-8") as fh:
+              w = csv.DictWriter(fh, fieldnames=cols); w.writeheader()
+              for k in sorted(rows): w.writerow({c: rows[k].get(c, "") for c in cols})
+          n_pass = sum(1 for r in rows.values() if r["status"] == "PASS")
+          secs = sum(float(r.get("secs") or 0) for r in rows.values())
+          md = [f"# POD galeri durumu: {n_pass}/{len(rows)} PASS, {len(rows) - n_pass} FAIL, toplam cift suresi {secs/60:.1f} dk", "",
+                "| cift | durum | kare | sure sn | hata |", "|---|---|---|---|---|"]
+          md += [f"| {r['pair']} | {r['status']} | {r['frames']} | {r['secs']} | {r['fail'][:200].replace('|', '/')} |" for r in (rows[k] for k in sorted(rows))]
+          open("_st/POD_GALLERY_REPORT.md", "w", encoding="utf-8").write("\n".join(md) + "\n")
+          open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8").write("\n".join(md) + "\n")
+          PY
+          rclone copyto _st/POD_GALLERY_STATE.csv "gdrive:ASTROLOVE/TEMP/POD_GALLERY_STATE.csv"
+          rclone copyto _st/POD_GALLERY_REPORT.md "gdrive:ASTROLOVE/TEMP/POD_GALLERY_REPORT.md"
+          head -3 _st/POD_GALLERY_REPORT.md
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pod-gallery-state
+          path: _st/
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
