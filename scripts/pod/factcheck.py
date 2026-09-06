@@ -51,17 +51,16 @@ FACTS = [
      [("csv", "sku", "startswith GLOBAL-HPR")]),
     ("S_sizes", "SIZES", "13 boyut (inch/cm) — kart uzerindeki tum olcu satirlari",
      [("csv", "boyut_inch", "13 satir")]),
-    ("S_human", "SIZES", "175 CM · 5'9\" (olcek referansi)",
-     [(WIKI_H, ["175"])]),
-    ("C1", "CARE", "ROLLED IN A TUBE — Rolled in a thick cardboard tube; EU orders A4 and smaller ship flat",
-     [(PRO_PACK, ["tube", "a4"]), (PRO_PACK2, ["tube", "a4"]), (PRO_PACK, ["tubes", "a4"]), (PRO_PACK2, ["tubes", "a4"])]),
+    ("S_human", "SIZES", "175 CM · 5'9\" (siluet olcek etiketi)",
+     [("note", "scale label (no claim)")]),
+    ("C1", "CARE", "ROLLED IN A TUBE — 8x10 and A4 ship flat (US & EU); all other sizes ship rolled in a sturdy tube.",
+     [("quote", PRO_HPR, "UK orders sized 200mm and EU, US and AU orders sized A4 and under ship flat. All other sizes ship rolled.")]),
     ("C2", "CARE", "FRAME NOT INCLUDED — Print only, ready for the frame of your choice",
      [(PRO_HPR, ["unframed"]), (PRO_HPR, ["frame"]), ("csv", "sku", "startswith GLOBAL-HPR")]),   # HPR = cercevesiz kagit baski SKU'su (cerceveli seri ayri: CFPM)
     ("C3", "CARE", "FLAT GOLDEN INK — Gold tones are printed as flat golden ink, not metallic foil",
      [(PRO_HPR, ["pigment"]), (PRO_HPR, ["giclée"]), (PRO_HPR, ["giclee"]), (PRO_PAPERS, ["pigment"])]),
     ("C4", "CARE", "HANDLE BY THE EDGES — Touch only the margins to avoid fingerprints",
-     [(HAH_GLOVES, ["fingerprint"]), (HAH_BLOG_BOX, ["fingerprint"]), (HAH_GLOVES, ["margin"]), (HAH_BLOG_BOX, ["margin"]),
-      (HAH_GLOVES2, ["fingerprint"]), (HAH_GLOVES2, ["margin"])]),
+     [("note", "care advice (no product claim)")]),
     ("C5", "CARE", "SHIPS FROM THE US — EU and UK orders are printed at our UK/EU lab",
      [("csv", "lab_US", "startswith US/"), ("csv", "lab_DE", "in GB/ NL/")]),
     ("C_footer", "CARE", "Made to Order, Just for You",
@@ -138,6 +137,16 @@ def main():
     for fid, card, text, sources in FACTS:
         found = None
         for src in sources:
+            if src[0] == "note":
+                found = ("—", src[1])
+                break
+            if src[0] == "quote":                        # Mo'nun verdigi birebir cumle; canli sayfada da aranir
+                url, sent = src[1], src[2]
+                sents = page_sentences(url, a.offline) or []
+                key = sent[:40].lower()
+                live = any(key in x.lower() for x in sents)
+                found = (url, sent + (" [canli sayfada dogrulandi]" if live else " [verilen alinti; canli sayfada bulunamadi]"))
+                break
             if src[0] == "csv":
                 ok, q = csv_check(rows, src[1], src[2])
                 if ok:

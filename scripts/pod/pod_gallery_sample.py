@@ -60,7 +60,7 @@ TEXT = {
               "footer": ("S_footer", "Pick the Size That Fits Your Wall")},
     "CARE": {
         "kicker": ("C_kicker", "SHIPPING & CARE"), "title": "Shipping & Care",
-        "rows": [("C1", "ROLLED IN A TUBE", "Rolled in a thick cardboard tube; EU orders A4 and smaller ship flat"),
+        "rows": [("C1", "ROLLED IN A TUBE", "8x10 and A4 ship flat (US & EU); all other sizes ship rolled in a sturdy tube."),
                  ("C2", "FRAME NOT INCLUDED", "Print only, ready for the frame of your choice"),
                  ("C3", "FLAT GOLDEN INK", "Gold tones are printed as flat golden ink, not metallic foil"),
                  ("C4", "HANDLE BY THE EDGES", "Touch only the margins to avoid fingerprints"),
