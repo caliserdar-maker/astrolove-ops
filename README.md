@@ -44,3 +44,4 @@ zaman depoya yazilmaz.
 | `start-here-append` | elle (`record_file`) | Depodaki `docs/start_here/Bnn.txt` kaydini Drive'daki START_HERE dokumaninin sonuna ekler (Docs API); ayni numara varsa yazmaz |
 | `ig-media-sync` | elle (`days`, `dry_run`) | `TEMP/IG_CAROUSEL_V2` slaytlarini `astrolove-media/carousel_v2/` olarak GitHub Pages'e iter |
 | `ig-publish` | elle (`dry_run` varsayilan acik) + gunluk 06:00 UTC (`IG_PUBLISH_ENABLED=true` ise) | WA_IG_PLAN'daki bugunun satirini Instagram'da yayinlar, durum sutunlarini gunceller |
+| `prodigi-quote` | elle (`limit` 0=hepsi, `discover`, `skus`) | Prodigi pilot katalog + ABD fiyat/kargo okuma (salt okur); cikti Drive `TEMP/PRODIGI/` + artifact |

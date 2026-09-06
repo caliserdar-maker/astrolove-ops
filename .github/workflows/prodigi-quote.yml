@@ -1,0 +1,90 @@
+name: prodigi-quote
+
+# Prodigi pilot katalog + ABD fiyat/kargo okuma (salt okur, siparis yok).
+# Anahtar Drive TEMP/PRODIGI_TOKEN.json'dan rclone ile okunur; GitHub secret yok,
+# workflow girdisi olarak asla sir verilmez. Cikti Drive TEMP/PRODIGI/ + artifact.
+
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "Gecerli SKU sayisi (0 = hepsi; 3 = sinif basina 1 deneme)"
+        required: false
+        default: "0"
+      discover:
+        description: "prodigi.com sayfalarindan SKU kesfi (pilot_pages.txt)"
+        type: boolean
+        default: false
+      skus:
+        description: "Aday listesini ez: virgullu SKU listesi (bos = pilot_skus.csv)"
+        required: false
+        default: ""
+
+concurrency:
+  group: prodigi-quote
+  cancel-in-progress: false
+
+jobs:
+  quote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Bagimliliklar
+        run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+
+      - name: rclone kur
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          rclone version | head -1
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then
+            echo "HATA: RCLONE_CONF_B64 secret'i tanimli degil." >&2
+            exit 1
+          fi
+          mkdir -p ~/.config/rclone
+          umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          # Yeni OAuth istemcisinin secret'i conf'daki degeri ezer (rclone env override).
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+          fi
+
+      - name: Teklifleri oku
+        env:
+          LIMIT: ${{ inputs.limit }}
+          DISCOVER: ${{ inputs.discover }}
+          SKUS: ${{ inputs.skus }}
+        run: |
+          set -euo pipefail
+          args=(--limit "${LIMIT:-0}" --out-dir out)
+          [ "$DISCOVER" = "true" ] && args+=(--discover)
+          [ -n "${SKUS:-}" ] && args+=(--skus "$SKUS")
+          python scripts/prodigi/prodigi_pilot_quote.py "${args[@]}"
+
+      - name: Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: prodigi-quotes
+          path: out/
+          if-no-files-found: ignore
