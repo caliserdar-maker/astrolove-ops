@@ -2,7 +2,7 @@ name: pod-listing-create
 
 # POD (Prodigi poster) YENI ILAN: createDraftListing + 10 gorsel + Color(5)xSize(13)
 # varyant + renk secenegine edisyon 01 karesi. Metin docs/POD_LISTING_TEMPLATE.md,
-# fiyat scripts/etsy/pod_prices.csv, gorseller Drive TEMP/POD_SAMPLE/<PAIR>/<ED>/.
+# fiyat scripts/etsy/pod_prices.csv, gorseller Drive TEMP/POD_GALLERY/<PAIR>/<ED>/ (Mo onayi 6 Eyl).
 # dry_run=true (varsayilan) YALNIZ OKUR: kesif tablosu + payload JSON.
 # dry_run=false ETSY'YE YAZAR (kargo profili/bolum olusturma dahil) - yalnizca Mo onayi.
 # STATE: Drive TEMP/POD_LISTING/POD_LISTINGS_STATE.csv (resume).
@@ -99,7 +99,7 @@ jobs:
           fi
           echo "cift: $(wc -l < _work/pairs.txt)"
 
-      - name: Gorselleri indir (TEMP/POD_SAMPLE/<PAIR>)
+      - name: Gorselleri indir (TEMP/POD_GALLERY/<PAIR>)
         env:
           LIMIT: ${{ inputs.limit }}
         run: |
@@ -111,7 +111,7 @@ jobs:
               echo "$pair: verified, atlandi"; continue
             fi
             n=$((n+1)); if [ "${LIMIT:-0}" != "0" ] && [ "$n" -gt "$LIMIT" ]; then break; fi
-            rclone copy "gdrive:ASTROLOVE/TEMP/POD_SAMPLE/$pair" "img/$pair" --include "*/0[1-9]_*.jpg" --include "*/10_*.jpg" --transfers 8 -q || true
+            rclone copy "gdrive:ASTROLOVE/TEMP/POD_GALLERY/$pair" "img/$pair" --include "*/0[1-9]_*.jpg" --include "*/10_*.jpg" --transfers 8 -q || true
             echo "$pair: $(find img/$pair -name '*.jpg' 2>/dev/null | wc -l) gorsel"
           done < _work/pairs.txt
 
