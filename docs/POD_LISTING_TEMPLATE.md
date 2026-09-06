@@ -88,6 +88,89 @@ Etsy iade politikasi: iade YOK, degisim YOK (`return_policy_spec=returns=0,excha
 durumunda 7 gun icinde fotografla ucretsiz yeniden baski; metin yukaridaki
 "RETURNS & REPRINTS" bolumunde.
 
+## RU katmani (Etsy listing translation, language=ru; Mo 6 Eyl)
+
+Burc adlari (B59 haritasi): Aquarius=Водолей, Aries=Овен, Taurus=Телец, Gemini=Близнецы, Cancer=Рак,
+Leo=Лев, Virgo=Дева, Libra=Весы, Scorpio=Скорпион, Sagittarius=Стрелец, Capricorn=Козерог, Pisces=Рыбы.
+Yer tutucular: `{S1RU}`, `{S2RU}` (burc adi), `{PAIR_RU}` = "{S1RU} и {S2RU}"; tag'de `{s1ru}`, `{s2ru}` kucuk harf.
+
+Baslik (RU, <= 140):
+
+    {S1RU} и {S2RU} зодиак постер, совместимость пары, жикле принт без рамы, подарок паре
+
+Tag seti (RU, 13, <= 20 karakter):
+
+| # | tag |
+|---|---|
+| 1 | зодиак постер |
+| 2 | {s1ru} {s2ru} постер - 20'yi asarsa `{s1ru} постер` (raporlanir) |
+| 3 | совместимость пары |
+| 4 | астрология декор |
+| 5 | подарок паре зодиак |
+| 6 | подарок на годовщину |
+| 7 | постер знак зодиака |
+| 8 | декор для пары |
+| 9 | подарок астрологу |
+| 10 | минимализм постер |
+| 11 | арт принт |
+| 12 | свадебный подарок |
+| 13 | небесный декор |
+
+Aciklama (RU):
+
+<!-- RU_DESCRIPTION_BEGIN -->
+{PAIR_RU} — зодиакальный постер: минималистичный арт-принт, объединяющий оба знака в одном чистом линейном символе совместимости. Музейное качество жикле, печать на заказ, доставка без рамы.
+
+✦ АРТ
+Одна оригинальная эмблема объединяет символы {S1RU} и {S2RU}: тонкие линии на спокойном однотонном фоне. Разработано студией AstroLove для пар, которые любят астрологию. Тихий современный акцент для спальни, гостиной или галерейной стены.
+
+✦ МАТЕРИАЛЫ МУЗЕЙНОГО КАЧЕСТВА
+- Hahnemühle Photo Rag 308 г/м², 100% хлопковая художественная бумага
+- Без кислоты и лигнина, соответствует ISO 9706
+- Архивная пигментная печать жикле, 300 dpi
+- Матовая, неотражающая поверхность
+- Золотые тона печатаются плоской золотистой краской, не металлической фольгой
+
+✦ 5 ЦВЕТОВЫХ ИЗДАНИЙ
+Champagne Ivory · Pure White · Warm Parchment · Midnight Blue · Deep Black
+Выберите издание в меню Color.
+
+✦ 13 РАЗМЕРОВ (выберите в меню Size)
+8x10 in (20.3×25.4 см) · 4:5
+A4 (21×29.7 см)
+11x14 in (27.9×35.6 см) · 11:14
+12x16 in (30.5×40.6 см) · 3:4
+A3 (29.7×42 см)
+12x18 in (30.5×45.7 см) · 2:3
+16x20 in (40.6×50.8 см) · 4:5
+16x24 in (40.6×61 см) · 2:3
+A2 (41.9×59.4 см)
+18x24 in (45.7×61 см) · 3:4
+20x30 in (50.8×76.2 см) · 2:3
+24x36 in (61×91.4 см) · 2:3
+30x40 in (76.2×101.6 см) · 3:4
+Сравните размеры на стене по гиду в фотографиях.
+
+✦ ПЕЧАТЬ НА ЗАКАЗ И ДОСТАВКА
+Каждый постер печатается на заказ нашим производственным партнёром Prodigi. Срок изготовления указан в деталях доставки выше. 8x10 и A4 отправляются плоскими; остальные размеры — в прочном тубусе. Заказы из США печатаются в США; заказы из ЕС и Великобритании — в нашей лаборатории в Великобритании/ЕС для более быстрой доставки.
+
+✦ УХОД
+Держите за края. Если свёрнутый постер скручивается, положите его под груз на 24–48 часов перед оформлением в раму. Оформляйте под стекло, вдали от прямых солнечных лучей.
+
+✦ ОБРАТИТЕ ВНИМАНИЕ
+- Рама не входит в комплект: постеры продаются без рамы; рамы на фотографиях — только для демонстрации.
+- Цвета могут немного отличаться между экраном и печатью.
+- Предпочитаете мгновенное скачивание? Тот же дизайн доступен в нашем магазине как цифровое издание.
+
+✦ ВОЗВРАТ И ПЕРЕПЕЧАТКА
+Каждый постер печатается специально для вас, поэтому мы не принимаем возвраты и обмены. Если постер пришёл повреждённым или с дефектом, пришлите фото в течение 7 дней — мы бесплатно напечатаем его заново.
+
+✦ ПОДАРОК СО СМЫСЛОМ
+Продуманный подарок на годовщину, свадьбу, помолвку или День святого Валентина для пары, которая любит астрологию.
+
+Все дизайны AstroLove — оригинальные работы нашей студии.
+<!-- RU_DESCRIPTION_END -->
+
 ## Magaza nesneleri (pod-listing-create apply, 6 Eyl 2026 kosulari)
 
 - Kargo profili "POD Prints – Free Shipping" 314711751541: cikis US 28216 (Prodigi Charlotte);
@@ -97,6 +180,9 @@ durumunda 7 gun icinde fotografla ucretsiz yeniden baski; metin yukaridaki
 - Hazirlik durumu (processing profile): made_to_order 1-3 gun, readiness-state-definitions ucundan
   okunur/olusturulur; ilan `readiness_state_id` ile acilir (Etsy fiziksel ilanda zorunlu).
 - GPSR uretici/sorumlu kisi alanlari: Prodigi cevabi sonrasi (simdilik bos).
+- Ilan alanlari (Mo 6 Eyl): who_made=i_did (production partner Prodigi), should_auto_renew=true,
+  ozellikler Orientation=Portrait, Framing=Unframed, Number of pieces included=1, Material=Paper
+  (taxonomy 121 possible_values'tan id), gumruk tarife 491191 (HS 4911.91) — API'de alan varsa.
 
 ## Uygulama sirasi
 

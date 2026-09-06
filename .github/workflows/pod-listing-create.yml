@@ -66,7 +66,10 @@ jobs:
       - name: Bagimliliklar
         run: |
           set -euo pipefail
-          pip install -q requests==2.34.2
+          pip install -q requests==2.34.2 spylls
+          mkdir -p dict
+          curl -fsSL -o dict/ru_RU.dic https://raw.githubusercontent.com/LibreOffice/dictionaries/master/ru_RU/ru_RU.dic
+          curl -fsSL -o dict/ru_RU.aff https://raw.githubusercontent.com/LibreOffice/dictionaries/master/ru_RU/ru_RU.aff
 
       - name: rclone kur
         run: |
@@ -144,7 +147,7 @@ jobs:
             echo "::warning::APPLY modu: Etsy'ye ilan yazilacak."
             mode=--apply
           fi
-          args=(--pairs-file _work/pairs.txt --limit "${LIMIT:-0}" --images img --state _work/state.csv --out _out --primary "$PRIMARY" --quota-min "${QMIN:-400}" --origin-postal-code "${OZIP:-28216}" "$mode")
+          args=(--pairs-file _work/pairs.txt --limit "${LIMIT:-0}" --images img --state _work/state.csv --out _out --primary "$PRIMARY" --quota-min "${QMIN:-400}" --origin-postal-code "${OZIP:-28216}" --ru-dict dict/ru_RU "$mode")
           [ -n "${RPID:-}" ] && args+=(--return-policy-id "$RPID")
           [ -n "${RPSPEC:-}" ] && args+=(--return-policy-spec "$RPSPEC")
           python scripts/etsy/pod_listing_create.py "${args[@]}"
