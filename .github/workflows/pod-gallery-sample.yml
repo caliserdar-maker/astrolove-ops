@@ -98,7 +98,7 @@ jobs:
           set -euo pipefail
           python scripts/pod/pod_gallery_sample.py --src src --out out --fonts fonts \
             --pair "$PAIR" --editions "$EDS_RESOLVED" --spellcheck --verified out/verified.json
-          cat out/PALETTE_REPORT.md >> "$GITHUB_STEP_SUMMARY"
+          cat out/PALETTE_REPORT.md out/GEOMETRY_REPORT.md >> "$GITHUB_STEP_SUMMARY"
           python - <<'PY'
           import json, os
           from PIL import Image
@@ -135,4 +135,5 @@ jobs:
             out/build_report.json
             out/FACTCHECK.md
             out/PALETTE_REPORT.md
+            out/GEOMETRY_REPORT.md
           if-no-files-found: ignore
