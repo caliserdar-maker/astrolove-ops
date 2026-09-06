@@ -1,8 +1,10 @@
 name: pod-listing-create
 
-# POD (Prodigi poster) YENI ILAN: createDraftListing + 10 gorsel + Color(5)xSize(13)
-# varyant + renk secenegine edisyon 01 karesi. Metin docs/POD_LISTING_TEMPLATE.md,
-# fiyat scripts/etsy/pod_prices.csv, gorseller Drive TEMP/POD_GALLERY/<PAIR>/<ED>/ (Mo onayi 6 Eyl).
+# POD (Prodigi poster) YENI ILAN: createDraftListing + 12 gorsel (10 kare + 2 teknik kart, EK 3) + video
+# + Color(5)xSize(13) varyant + renk secenegine edisyon 01 karesi. Metin docs/POD_LISTING_TEMPLATE.md,
+# fiyat scripts/etsy/pod_prices.csv, gorseller Drive TEMP/POD_GALLERY/<PAIR>/<ED>/ (Mo onayi 6 Eyl),
+# kartlar LISTING_MEDIA/TECHNICAL/{02_SYMBOL_STORY,05_CRAFTED_DETAIL}/<ED>/, video VIDEOS/V01_FIREFLY_STORY/01_EXPORTS/<ED>/
+# (ana edisyon; dosya eksikse cift "eksik" ile raporlanir, kosu durmaz; kart OCR on kontrolu).
 # dry_run=true (varsayilan) YALNIZ OKUR: kesif tablosu + payload JSON.
 # dry_run=false ETSY'YE YAZAR (kargo profili/bolum olusturma dahil) - yalnizca Mo onayi.
 # STATE: Drive TEMP/POD_LISTING/POD_LISTINGS_STATE.csv (resume).
@@ -66,7 +68,8 @@ jobs:
       - name: Bagimliliklar
         run: |
           set -euo pipefail
-          pip install -q requests==2.34.2 spylls
+          pip install -q requests==2.34.2 spylls pillow numpy
+          sudo apt-get install -y -q tesseract-ocr >/dev/null      # EK 3: kart OCR on kontrolu
           mkdir -p dict
           curl -fsSL -o dict/ru_RU.dic https://raw.githubusercontent.com/LibreOffice/dictionaries/master/ru_RU/ru_RU.dic
           curl -fsSL -o dict/ru_RU.aff https://raw.githubusercontent.com/LibreOffice/dictionaries/master/ru_RU/ru_RU.aff
@@ -110,9 +113,10 @@ jobs:
           fi
           echo "cift: $(wc -l < _work/pairs.txt)"
 
-      - name: Gorselleri indir (TEMP/POD_GALLERY/<PAIR>)
+      - name: Gorselleri, kartlari ve videoyu indir (TEMP/POD_GALLERY/<PAIR>; LISTING_MEDIA TECHNICAL + VIDEOS)
         env:
           LIMIT: ${{ inputs.limit }}
+          ED: ${{ inputs.primary }}
         run: |
           set -euo pipefail
           n=0
@@ -123,7 +127,11 @@ jobs:
             fi
             n=$((n+1)); if [ "${LIMIT:-0}" != "0" ] && [ "$n" -gt "$LIMIT" ]; then break; fi
             rclone copy "gdrive:ASTROLOVE/TEMP/POD_GALLERY/$pair" "img/$pair" --include "*/0[1-9]_*.jpg" --include "*/10_*.jpg" --transfers 8 -q || true
-            echo "$pair: $(find img/$pair -name '*.jpg' 2>/dev/null | wc -l) gorsel"
+            mkdir -p "media/$pair"; m=0
+            for f in "TECHNICAL/02_SYMBOL_STORY/$ED/WA_02_TECH_SYMBOL_STORY_${pair}_${ED}.png"                      "TECHNICAL/05_CRAFTED_DETAIL/$ED/WA_05_TECH_CRAFTED_DETAIL_${pair}_${ED}.jpg"                      "VIDEOS/V01_FIREFLY_STORY/01_EXPORTS/$ED/WA_VIDEO_V01_${pair}_${ED}.mp4"; do
+              rclone copyto "gdrive:ASTROLOVE/WALL_ART/LISTING_MEDIA/$f" "media/$pair/$(basename "$f")" 2>/dev/null && m=$((m+1)) || echo "$pair: EKSIK $f"
+            done
+            echo "$pair: $(find img/$pair -name '*.jpg' 2>/dev/null | wc -l) gorsel, $m/3 medya"
           done < _work/pairs.txt
 
       - name: Ilanlari olustur
@@ -147,7 +155,7 @@ jobs:
             echo "::warning::APPLY modu: Etsy'ye ilan yazilacak."
             mode=--apply
           fi
-          args=(--pairs-file _work/pairs.txt --limit "${LIMIT:-0}" --images img --state _work/state.csv --out _out --primary "$PRIMARY" --quota-min "${QMIN:-400}" --origin-postal-code "${OZIP:-28216}" --ru-dict dict/ru_RU "$mode")
+          args=(--pairs-file _work/pairs.txt --limit "${LIMIT:-0}" --images img --state _work/state.csv --out _out --primary "$PRIMARY" --quota-min "${QMIN:-400}" --origin-postal-code "${OZIP:-28216}" --ru-dict dict/ru_RU --media media "$mode")
           [ -n "${RPID:-}" ] && args+=(--return-policy-id "$RPID")
           [ -n "${RPSPEC:-}" ] && args+=(--return-policy-spec "$RPSPEC")
           python scripts/etsy/pod_listing_create.py "${args[@]}"
