@@ -19,6 +19,11 @@ on:
         description: "Aday listesini ez: virgullu SKU listesi (bos = pilot_skus.csv)"
         required: false
         default: ""
+      mode:
+        description: "pilot = pilot_skus.csv (US) | hpr_sizes = hpr_sizes.txt (US + DE)"
+        type: choice
+        options: [pilot, hpr_sizes]
+        default: pilot
 
 concurrency:
   group: prodigi-quote
@@ -27,7 +32,7 @@ concurrency:
 jobs:
   quote:
     runs-on: ubuntu-latest
-    timeout-minutes: 6
+    timeout-minutes: 4
 
     steps:
       - name: Checkout
@@ -74,8 +79,13 @@ jobs:
           LIMIT: ${{ inputs.limit }}
           DISCOVER: ${{ inputs.discover }}
           SKUS: ${{ inputs.skus }}
+          MODE: ${{ inputs.mode }}
         run: |
           set -euo pipefail
+          if [ "$MODE" = "hpr_sizes" ]; then
+            python scripts/prodigi/prodigi_hpr_sizes.py --out-dir out
+            exit 0
+          fi
           args=(--limit "${LIMIT:-0}" --out-dir out)
           [ "$DISCOVER" = "true" ] && args+=(--discover)
           [ -n "${SKUS:-}" ] && args+=(--skus "$SKUS")
