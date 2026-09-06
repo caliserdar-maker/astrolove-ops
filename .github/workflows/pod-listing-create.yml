@@ -27,6 +27,10 @@ on:
         type: choice
         options: [MIDNIGHT_BLUE, DEEP_BLACK, WARM_PARCHMENT, CHAMPAGNE_IVORY, PURE_WHITE]
         default: MIDNIGHT_BLUE
+      quota_min:
+        description: "Etsy gunluk kota tabani; altinda yazma yok (varsayilan 400)"
+        required: false
+        default: "400"
       return_policy_id:
         description: "Iade politikasi id (bos = magazada tek politika varsa o)"
         required: false
@@ -126,6 +130,7 @@ jobs:
           PRIMARY: ${{ inputs.primary }}
           RPID: ${{ inputs.return_policy_id }}
           RPSPEC: ${{ inputs.return_policy_spec }}
+          QMIN: ${{ inputs.quota_min }}
         run: |
           set -euo pipefail
           if [ "$DRY_RUN" = "true" ]; then
@@ -134,7 +139,7 @@ jobs:
             echo "::warning::APPLY modu: Etsy'ye ilan yazilacak."
             mode=--apply
           fi
-          args=(--pairs-file _work/pairs.txt --limit "${LIMIT:-0}" --images img --state _work/state.csv --out _out --primary "$PRIMARY" "$mode")
+          args=(--pairs-file _work/pairs.txt --limit "${LIMIT:-0}" --images img --state _work/state.csv --out _out --primary "$PRIMARY" --quota-min "${QMIN:-400}" "$mode")
           [ -n "${RPID:-}" ] && args+=(--return-policy-id "$RPID")
           [ -n "${RPSPEC:-}" ] && args+=(--return-policy-spec "$RPSPEC")
           python scripts/etsy/pod_listing_create.py "${args[@]}"
