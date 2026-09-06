@@ -1,177 +1,118 @@
 sinif,sku,not
-poster,GLOBAL-FAP-8x10,dogrulandi 6 Eyl (deneme kosusu #34019964076)
-poster,GLOBAL-FAP-11x14,standart poster: Enhanced Matte Art 200gsm; kalip dogrulandi (GLOBAL-FAP-8x10 OK)
-poster,GLOBAL-FAP-12x16,standart poster: Enhanced Matte Art 200gsm; kalip dogrulandi (GLOBAL-FAP-8x10 OK)
-poster,GLOBAL-FAP-12x18,standart poster: Enhanced Matte Art 200gsm; kalip dogrulandi (GLOBAL-FAP-8x10 OK)
-poster,GLOBAL-FAP-16x20,standart poster: Enhanced Matte Art 200gsm; kalip dogrulandi (GLOBAL-FAP-8x10 OK)
-poster,GLOBAL-FAP-16x24,standart poster: Enhanced Matte Art 200gsm; kalip dogrulandi (GLOBAL-FAP-8x10 OK)
-poster,GLOBAL-FAP-18x24,standart poster: Enhanced Matte Art 200gsm; kalip dogrulandi (GLOBAL-FAP-8x10 OK)
-poster,GLOBAL-FAP-24x36,standart poster: Enhanced Matte Art 200gsm; kalip dogrulandi (GLOBAL-FAP-8x10 OK)
-poster,GLOBAL-FAP-A4,standart poster: Enhanced Matte Art 200gsm; kalip dogrulandi (GLOBAL-FAP-8x10 OK)
-poster,GLOBAL-FAP-A3,standart poster: Enhanced Matte Art 200gsm; kalip dogrulandi (GLOBAL-FAP-8x10 OK)
-poster,GLOBAL-FAP-A2,standart poster: Enhanced Matte Art 200gsm; kalip dogrulandi (GLOBAL-FAP-8x10 OK)
-poster,GLOBAL-BLP-8x10,"budget poster kagidi (tahmin, API dogrular)"
-poster,GLOBAL-BLP-11x14,"budget poster kagidi (tahmin, API dogrular)"
-poster,GLOBAL-BLP-12x16,"budget poster kagidi (tahmin, API dogrular)"
-poster,GLOBAL-BLP-12x18,"budget poster kagidi (tahmin, API dogrular)"
-poster,GLOBAL-BLP-16x20,"budget poster kagidi (tahmin, API dogrular)"
-poster,GLOBAL-BLP-16x24,"budget poster kagidi (tahmin, API dogrular)"
-poster,GLOBAL-BLP-18x24,"budget poster kagidi (tahmin, API dogrular)"
-poster,GLOBAL-BLP-24x36,"budget poster kagidi (tahmin, API dogrular)"
-poster,GLOBAL-BLP-A4,"budget poster kagidi (tahmin, API dogrular)"
-poster,GLOBAL-BLP-A3,"budget poster kagidi (tahmin, API dogrular)"
-poster,GLOBAL-BLP-A2,"budget poster kagidi (tahmin, API dogrular)"
-poster,GLOBAL-HGE-8x10,fine art: Hahnemuhle German Etching (kesif: sayfada 12X16/16X20/18X24/A2/A3)
-poster,GLOBAL-HGE-11x14,fine art: Hahnemuhle German Etching (kesif: sayfada 12X16/16X20/18X24/A2/A3)
-poster,GLOBAL-HGE-12x16,fine art: Hahnemuhle German Etching (kesif: sayfada 12X16/16X20/18X24/A2/A3)
-poster,GLOBAL-HGE-12x18,fine art: Hahnemuhle German Etching (kesif: sayfada 12X16/16X20/18X24/A2/A3)
-poster,GLOBAL-HGE-16x20,fine art: Hahnemuhle German Etching (kesif: sayfada 12X16/16X20/18X24/A2/A3)
-poster,GLOBAL-HGE-16x24,fine art: Hahnemuhle German Etching (kesif: sayfada 12X16/16X20/18X24/A2/A3)
-poster,GLOBAL-HGE-18x24,fine art: Hahnemuhle German Etching (kesif: sayfada 12X16/16X20/18X24/A2/A3)
-poster,GLOBAL-HGE-24x36,fine art: Hahnemuhle German Etching (kesif: sayfada 12X16/16X20/18X24/A2/A3)
-poster,GLOBAL-HGE-A4,fine art: Hahnemuhle German Etching (kesif: sayfada 12X16/16X20/18X24/A2/A3)
-poster,GLOBAL-HGE-A3,fine art: Hahnemuhle German Etching (kesif: sayfada 12X16/16X20/18X24/A2/A3)
-poster,GLOBAL-HGE-A2,fine art: Hahnemuhle German Etching (kesif: sayfada 12X16/16X20/18X24/A2/A3)
-poster,GLOBAL-HPR-8x10,fine art: Hahnemuhle Photo Rag (kesif: sayfada A2/A3/A4)
-poster,GLOBAL-HPR-11x14,fine art: Hahnemuhle Photo Rag (kesif: sayfada A2/A3/A4)
-poster,GLOBAL-HPR-12x16,fine art: Hahnemuhle Photo Rag (kesif: sayfada A2/A3/A4)
-poster,GLOBAL-HPR-12x18,fine art: Hahnemuhle Photo Rag (kesif: sayfada A2/A3/A4)
-poster,GLOBAL-HPR-16x20,fine art: Hahnemuhle Photo Rag (kesif: sayfada A2/A3/A4)
-poster,GLOBAL-HPR-16x24,fine art: Hahnemuhle Photo Rag (kesif: sayfada A2/A3/A4)
-poster,GLOBAL-HPR-18x24,fine art: Hahnemuhle Photo Rag (kesif: sayfada A2/A3/A4)
-poster,GLOBAL-HPR-24x36,fine art: Hahnemuhle Photo Rag (kesif: sayfada A2/A3/A4)
-poster,GLOBAL-HPR-A4,fine art: Hahnemuhle Photo Rag (kesif: sayfada A2/A3/A4)
-poster,GLOBAL-HPR-A3,fine art: Hahnemuhle Photo Rag (kesif: sayfada A2/A3/A4)
-poster,GLOBAL-HPR-A2,fine art: Hahnemuhle Photo Rag (kesif: sayfada A2/A3/A4)
-poster,GLOBAL-FAP-20x28,kesif: enhanced-matte-art sayfasi (ek boyut)
-kupa,GLOBAL-MUG-W,dogrulandi 6 Eyl (deneme kosusu #34019964076); 11oz White Ceramic Photo Mug
-kupa,GLOBAL-MUG-W-L,"15oz/renk adayi (tahmin, API dogrular)"
-kupa,GLOBAL-MUG-LW,"15oz/renk adayi (tahmin, API dogrular)"
-kupa,GLOBAL-MUG-L,"15oz/renk adayi (tahmin, API dogrular)"
-kupa,GLOBAL-MUG-W-15,"15oz/renk adayi (tahmin, API dogrular)"
-kupa,GLOBAL-MUG-W15,"15oz/renk adayi (tahmin, API dogrular)"
-kupa,GLOBAL-MUG-15-W,"15oz/renk adayi (tahmin, API dogrular)"
-kupa,GLOBAL-MUG-15OZ-W,"15oz/renk adayi (tahmin, API dogrular)"
-kupa,GLOBAL-MUG-XL,"15oz/renk adayi (tahmin, API dogrular)"
-kupa,GLOBAL-MUG-LARGE,"15oz/renk adayi (tahmin, API dogrular)"
-kupa,GLOBAL-MUG-W-XL,"15oz/renk adayi (tahmin, API dogrular)"
-kupa,GLOBAL-MUG-WL,"15oz/renk adayi (tahmin, API dogrular)"
-kupa,GLOBAL-MUG-15W,"15oz/renk adayi (tahmin, API dogrular)"
-kupa,GLOBAL-MUG-B,"15oz/renk adayi (tahmin, API dogrular)"
-kupa,GLOBAL-MUG-C,"15oz/renk adayi (tahmin, API dogrular)"
-kupa,GLOBAL-MUG-W-11,"15oz/renk adayi (tahmin, API dogrular)"
-kupa,GLOBAL-MUG-W-L-15OZ,"15oz/renk adayi (tahmin, API dogrular)"
-kupa,GLOBAL-MUG-L-W,"15oz/renk adayi (tahmin, API dogrular)"
-kupa,GLOBAL-MUG-15OZ,"15oz/renk adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-IP14-CS-G,snap gloss (kalip: kesif)
-kilif,GLOBAL-TECH-IP14-CS-M,snap matte (kalip: kesif)
-kilif,GLOBAL-TECH-IP14-TCB-CS-G,tough gloss (kalip: kesif)
-kilif,GLOBAL-TECH-IP14-TCB-CS-M,tough matte (kalip: kesif)
-kilif,GLOBAL-TECH-IP14PL-CS-G,snap gloss (kalip: kesif)
-kilif,GLOBAL-TECH-IP14PL-CS-M,snap matte (kalip: kesif)
-kilif,GLOBAL-TECH-IP14PL-TCB-CS-G,tough gloss (kalip: kesif)
-kilif,GLOBAL-TECH-IP14PL-TCB-CS-M,tough matte (kalip: kesif)
-kilif,GLOBAL-TECH-IP14PR-CS-G,snap gloss (kalip: kesif)
-kilif,GLOBAL-TECH-IP14PR-CS-M,snap matte (kalip: kesif)
-kilif,GLOBAL-TECH-IP14PR-TCB-CS-G,tough gloss (kalip: kesif)
-kilif,GLOBAL-TECH-IP14PR-TCB-CS-M,tough matte (kalip: kesif)
-kilif,GLOBAL-TECH-IP14PM-CS-G,snap gloss (kalip: kesif)
-kilif,GLOBAL-TECH-IP14PM-CS-M,snap matte (kalip: kesif)
-kilif,GLOBAL-TECH-IP14PM-TCB-CS-G,tough gloss (kalip: kesif)
-kilif,GLOBAL-TECH-IP14PM-TCB-CS-M,tough matte (kalip: kesif)
-kilif,GLOBAL-TECH-IP15-CS-G,snap gloss (kalip: kesif)
-kilif,GLOBAL-TECH-IP15-CS-M,snap matte (kalip: kesif)
-kilif,GLOBAL-TECH-IP15-TCB-CS-G,tough gloss (kalip: kesif)
-kilif,GLOBAL-TECH-IP15-TCB-CS-M,tough matte (kalip: kesif)
-kilif,GLOBAL-TECH-IP15PL-CS-G,snap gloss (kalip: kesif)
-kilif,GLOBAL-TECH-IP15PL-CS-M,snap matte (kalip: kesif)
-kilif,GLOBAL-TECH-IP15PL-TCB-CS-G,tough gloss (kalip: kesif)
-kilif,GLOBAL-TECH-IP15PL-TCB-CS-M,tough matte (kalip: kesif)
-kilif,GLOBAL-TECH-IP15PR-CS-G,snap gloss (kalip: kesif)
-kilif,GLOBAL-TECH-IP15PR-CS-M,snap matte (kalip: kesif)
-kilif,GLOBAL-TECH-IP15PR-TCB-CS-G,dogrulandi 6 Eyl (deneme kosusu #34019964076); iPhone 15 Pro Tough Gloss
-kilif,GLOBAL-TECH-IP15PR-TCB-CS-M,tough matte (kalip: kesif)
-kilif,GLOBAL-TECH-IP15PM-CS-G,snap gloss (kalip: kesif)
-kilif,GLOBAL-TECH-IP15PM-CS-M,snap matte (kalip: kesif)
-kilif,GLOBAL-TECH-IP15PM-TCB-CS-G,tough gloss (kalip: kesif)
-kilif,GLOBAL-TECH-IP15PM-TCB-CS-M,tough matte (kalip: kesif)
-kilif,GLOBAL-TECH-IP16-CS-G,snap gloss (kalip: kesif)
-kilif,GLOBAL-TECH-IP16-CS-M,snap matte (kalip: kesif)
-kilif,GLOBAL-TECH-IP16-TCB-CS-G,tough gloss (kalip: kesif)
-kilif,GLOBAL-TECH-IP16-TCB-CS-M,tough matte (kalip: kesif)
-kilif,GLOBAL-TECH-IP16PL-CS-G,snap gloss (kalip: kesif)
-kilif,GLOBAL-TECH-IP16PL-CS-M,snap matte (kalip: kesif)
-kilif,GLOBAL-TECH-IP16PL-TCB-CS-G,tough gloss (kalip: kesif)
-kilif,GLOBAL-TECH-IP16PL-TCB-CS-M,tough matte (kalip: kesif)
-kilif,GLOBAL-TECH-IP16PR-CS-G,snap gloss (kalip: kesif)
-kilif,GLOBAL-TECH-IP16PR-CS-M,snap matte (kalip: kesif)
-kilif,GLOBAL-TECH-IP16PR-TCB-CS-G,tough gloss (kalip: kesif)
-kilif,GLOBAL-TECH-IP16PR-TCB-CS-M,tough matte (kalip: kesif)
-kilif,GLOBAL-TECH-IP16PM-CS-G,snap gloss (kalip: kesif)
-kilif,GLOBAL-TECH-IP16PM-CS-M,snap matte (kalip: kesif)
-kilif,GLOBAL-TECH-IP16PM-TCB-CS-G,tough gloss (kalip: kesif)
-kilif,GLOBAL-TECH-IP16PM-TCB-CS-M,tough matte (kalip: kesif)
-kilif,GLOBAL-TECH-IP17-CS-G,snap gloss (kalip: kesif)
-kilif,GLOBAL-TECH-IP17-CS-M,snap matte (kalip: kesif)
-kilif,GLOBAL-TECH-IP17-TCB-CS-G,tough gloss (kalip: kesif)
-kilif,GLOBAL-TECH-IP17-TCB-CS-M,tough matte (kalip: kesif)
-kilif,GLOBAL-TECH-IP17PL-CS-G,snap gloss (kalip: kesif)
-kilif,GLOBAL-TECH-IP17PL-CS-M,snap matte (kalip: kesif)
-kilif,GLOBAL-TECH-IP17PL-TCB-CS-G,tough gloss (kalip: kesif)
-kilif,GLOBAL-TECH-IP17PL-TCB-CS-M,tough matte (kalip: kesif)
-kilif,GLOBAL-TECH-IP17PR-CS-G,snap gloss (kalip: kesif)
-kilif,GLOBAL-TECH-IP17PR-CS-M,snap matte (kalip: kesif)
-kilif,GLOBAL-TECH-IP17PR-TCB-CS-G,tough gloss (kalip: kesif)
-kilif,GLOBAL-TECH-IP17PR-TCB-CS-M,tough matte (kalip: kesif)
-kilif,GLOBAL-TECH-IP17PM-CS-G,snap gloss (kalip: kesif)
-kilif,GLOBAL-TECH-IP17PM-CS-M,snap matte (kalip: kesif)
-kilif,GLOBAL-TECH-IP17PM-TCB-CS-G,tough gloss (kalip: kesif)
-kilif,GLOBAL-TECH-IP17PM-TCB-CS-M,tough matte (kalip: kesif)
-kilif,GLOBAL-TECH-IP17AIR-CS-G,snap gloss (kalip: kesif)
-kilif,GLOBAL-TECH-IP17AIR-CS-M,snap matte (kalip: kesif)
-kilif,GLOBAL-TECH-IP17AIR-TCB-CS-G,tough gloss (kalip: kesif)
-kilif,GLOBAL-TECH-IP17AIR-TCB-CS-M,tough matte (kalip: kesif)
-kilif,GLOBAL-TECH-IP16E-CS-G,snap gloss (kalip: kesif)
-kilif,GLOBAL-TECH-IP16E-CS-M,snap matte (kalip: kesif)
-kilif,GLOBAL-TECH-IP16E-TCB-CS-G,tough gloss (kalip: kesif)
-kilif,GLOBAL-TECH-IP16E-TCB-CS-M,tough matte (kalip: kesif)
-kilif,GLOBAL-TECH-SGS24-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-SGS24-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-SGS24U-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-SGS24U-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-SGS24PL-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-SGS24PL-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-SGS25-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-SGS25-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-SGS25U-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-SGS25U-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-SGS25PL-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-SGS25PL-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-S24-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-S24-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-S24U-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-S24U-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-S25-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-S25-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-S25U-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-S25U-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-GS24-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-GS24-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-GS25-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-GS25-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-SAMS24-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-SAMS24-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-SAMS25-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-SAMS25-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-SG24-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-SG24-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-SG25-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-SG25-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-SS24-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-SS24-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-SS25-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-SS25-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-GALS24-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-GALS24-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-GALS25-CS-G,"Samsung Galaxy S snap adayi (tahmin, API dogrular)"
-kilif,GLOBAL-TECH-GALS25-TCB-CS-G,"Samsung Galaxy S tough adayi (tahmin, API dogrular)"
+poster,GLOBAL-FAP-8x10,"dogrulandi 6 Eyl (run 34020172810): EMA, Enhanced Matte Art Paper, 200gsm, 20x25cm / 8x10"""
+kupa,GLOBAL-MUG-W,dogrulandi 6 Eyl (run 34020172810): 11oz White Ceramic Photo Mug [full image wrap with top-to-bo
+kilif,GLOBAL-TECH-IP14-CS-G,dogrulandi 6 Eyl (run 34020172810): iPhone 14 Snap Case in Gloss
+poster,GLOBAL-FAP-11x14,"dogrulandi 6 Eyl (run 34020172810): EMA, Enhanced Matte Art Paper, 200gsm, 28x35.5cm / 11x14"""
+kilif,GLOBAL-TECH-IP14-CS-M,dogrulandi 6 Eyl (run 34020172810): iPhone 14 Snap Case in Matte
+poster,GLOBAL-FAP-12x16,"dogrulandi 6 Eyl (run 34020172810): EMA, Enhanced Matte Art Paper, 200gsm, 30x40cm / 12x16"""
+kilif,GLOBAL-TECH-IP14-TCB-CS-G,dogrulandi 6 Eyl (run 34020172810): iPhone 14 Tough Case in Gloss
+poster,GLOBAL-FAP-12x18,"dogrulandi 6 Eyl (run 34020172810): EMA, Enhanced Matte Art Paper, 200gsm, 30x45cm / 12x18"""
+kilif,GLOBAL-TECH-IP14-TCB-CS-M,dogrulandi 6 Eyl (run 34020172810): iPhone 14 Tough Case in Matte
+poster,GLOBAL-FAP-16x20,"dogrulandi 6 Eyl (run 34020172810): EMA, Enhanced Matte Art Paper, 200gsm, 40x50cm / 16x20"""
+kilif,GLOBAL-TECH-IP14PL-CS-G,dogrulandi 6 Eyl (run 34020172810): iPhone 14 Plus Snap Case in Gloss
+poster,GLOBAL-FAP-16x24,"dogrulandi 6 Eyl (run 34020172810): EMA, Enhanced Matte Art Paper, 200gsm, 40x60cm / 16x24"""
+kilif,GLOBAL-TECH-IP14PL-CS-M,dogrulandi 6 Eyl (run 34020172810): iPhone 14 Plus Snap Case in Matte
+poster,GLOBAL-FAP-18x24,"dogrulandi 6 Eyl (run 34020172810): EMA, Enhanced Matte Art Paper, 200gsm, 45x60cm / 18x24"""
+kilif,GLOBAL-TECH-IP14PL-TCB-CS-G,dogrulandi 6 Eyl (run 34020172810): iPhone 14 Plus Tough Case in Gloss
+poster,GLOBAL-FAP-24x36,"dogrulandi 6 Eyl (run 34020172810): EMA, Enhanced Matte Art Paper, 200gsm, 60x90cm / 24x36"""
+kilif,GLOBAL-TECH-IP14PL-TCB-CS-M,dogrulandi 6 Eyl (run 34020172810): iPhone 14 Plus Tough Case in Matte
+poster,GLOBAL-FAP-A4,"dogrulandi 6 Eyl (run 34020172810): EMA, Enhanced Matte Art Paper, 200gsm, 21x29.7cm / 8.3x11.7"""
+kilif,GLOBAL-TECH-IP14PR-CS-G,dogrulandi 6 Eyl (run 34020172810): iPhone 14 Pro Snap Case in Gloss
+poster,GLOBAL-FAP-A3,"dogrulandi 6 Eyl (run 34020172810): EMA, Enhanced Matte Art Paper, 200gsm, 29.7x42cm / 11.7x16.5"
+kilif,GLOBAL-TECH-IP14PR-CS-M,dogrulandi 6 Eyl (run 34020172810): iPhone 14 Pro Snap Case in Matte
+poster,GLOBAL-FAP-A2,"dogrulandi 6 Eyl (run 34020172810): EMA, Enhanced Matte Art Paper, 200gsm, 42x59.4cm / 16.5x23.4"
+kilif,GLOBAL-TECH-IP14PR-TCB-CS-G,dogrulandi 6 Eyl (run 34020172810): iPhone 14 Pro Tough Case in Gloss
+poster,GLOBAL-BLP-8x10,"dogrulandi 6 Eyl (run 34020172810): Budget poster, 8x10"" / 20x25cm"
+kilif,GLOBAL-TECH-IP14PR-TCB-CS-M,dogrulandi 6 Eyl (run 34020172810): iPhone 14 Pro Tough Case in Matte
+poster,GLOBAL-BLP-11x14,"dogrulandi 6 Eyl (run 34020172810): Budget poster, 11x14"" / 28x36cm"
+kilif,GLOBAL-TECH-IP14PM-CS-G,dogrulandi 6 Eyl (run 34020172810): iPhone 14 Pro Max Snap Case in Gloss
+poster,GLOBAL-BLP-12x16,"dogrulandi 6 Eyl (run 34020172810): Budget poster, 12x16"" / 30.0x40.0cm"
+kilif,GLOBAL-TECH-IP14PM-CS-M,dogrulandi 6 Eyl (run 34020172810): iPhone 14 Pro Max Snap Case in Matte
+poster,GLOBAL-BLP-12x18,"dogrulandi 6 Eyl (run 34020172810): Budget poster, 12x18"" / 30x45cm"
+kilif,GLOBAL-TECH-IP14PM-TCB-CS-G,dogrulandi 6 Eyl (run 34020172810): iPhone 14 Pro Max Tough Case in Gloss
+poster,GLOBAL-BLP-16x20,"dogrulandi 6 Eyl (run 34020172810): Budget poster, 16x20"" / 40.0x50.0cm"
+kilif,GLOBAL-TECH-IP14PM-TCB-CS-M,dogrulandi 6 Eyl (run 34020172810): iPhone 14 Pro Max Tough Case in Matte
+poster,GLOBAL-BLP-16x24,"dogrulandi 6 Eyl (run 34020172810): Budget poster, 16x24"" / 40x60cm"
+kilif,GLOBAL-TECH-IP15-CS-G,dogrulandi 6 Eyl (run 34020172810): iPhone 15 Snap Case in Gloss
+poster,GLOBAL-BLP-18x24,"dogrulandi 6 Eyl (run 34020172810): Budget poster, 18x24"" / 45x60cm"
+kilif,GLOBAL-TECH-IP15-CS-M,dogrulandi 6 Eyl (run 34020172810): iPhone 15 Snap Case in Matte
+poster,GLOBAL-BLP-24x36,"dogrulandi 6 Eyl (run 34020172810): Budget poster, 24x36"" / 61.0x91.0cm"
+kilif,GLOBAL-TECH-IP15-TCB-CS-G,dogrulandi 6 Eyl (run 34020172810): iPhone 15 Tough Case in Gloss
+poster,GLOBAL-BLP-A4,"dogrulandi 6 Eyl (run 34020172810): Budget poster, 8.27x11.69"" / 21.0x29.7cm (A4)"
+kilif,GLOBAL-TECH-IP15-TCB-CS-M,dogrulandi 6 Eyl (run 34020172810): iPhone 15 Tough Case in Matte
+poster,GLOBAL-BLP-A3,"dogrulandi 6 Eyl (run 34020172810): Budget poster, 11.7x16.5"" / 29.7x42.0cm (A3)"
+kilif,GLOBAL-TECH-IP15PL-CS-G,dogrulandi 6 Eyl (run 34020172810): iPhone 15 Plus Snap Case in Gloss
+poster,GLOBAL-BLP-A2,"dogrulandi 6 Eyl (run 34020172810): Budget poster, 16.5x23.4"" / 42.0x59.4cm (A2)"
+kilif,GLOBAL-TECH-IP15PL-CS-M,dogrulandi 6 Eyl (run 34020172810): iPhone 15 Plus Snap Case in Matte
+poster,GLOBAL-HGE-8x10,"dogrulandi 6 Eyl (run 34020172810): Hahnemühle German Etching, 20x25cm / 8x10"""
+kilif,GLOBAL-TECH-IP15PL-TCB-CS-G,dogrulandi 6 Eyl (run 34020172810): iPhone 15 Plus Tough Case in Gloss
+poster,GLOBAL-HGE-11x14,"dogrulandi 6 Eyl (run 34020172810): Hahnemühle German Etching, 28x35.5cm / 11x14"""
+kilif,GLOBAL-TECH-IP15PL-TCB-CS-M,dogrulandi 6 Eyl (run 34020172810): iPhone 15 Plus Tough Case in Matte
+poster,GLOBAL-HGE-12x16,"dogrulandi 6 Eyl (run 34020172810): Hahnemühle German Etching, 30x40cm / 12x16"""
+kilif,GLOBAL-TECH-IP15PR-CS-G,dogrulandi 6 Eyl (run 34020172810): iPhone 15 Pro Snap Case in Gloss
+poster,GLOBAL-HGE-12x18,"dogrulandi 6 Eyl (run 34020172810): Hahnemühle German Etching, 30x45cm / 12x18"""
+kilif,GLOBAL-TECH-IP15PR-CS-M,dogrulandi 6 Eyl (run 34020172810): iPhone 15 Pro Snap Case in Matte
+poster,GLOBAL-HGE-16x20,"dogrulandi 6 Eyl (run 34020172810): Hahnemühle German Etching, 40x50cm / 16x20"""
+kilif,GLOBAL-TECH-IP15PR-TCB-CS-G,dogrulandi 6 Eyl (run 34020172810): iPhone 15 Pro Tough Case in Gloss
+poster,GLOBAL-HGE-16x24,"dogrulandi 6 Eyl (run 34020172810): Hahnemühle German Etching, 40x60cm / 16x24"""
+kilif,GLOBAL-TECH-IP15PR-TCB-CS-M,dogrulandi 6 Eyl (run 34020172810): iPhone 15 ProTough Case in Matte
+poster,GLOBAL-HGE-18x24,"dogrulandi 6 Eyl (run 34020172810): Hahnemühle German Etching, 45x60cm / 18x24"""
+kilif,GLOBAL-TECH-IP15PM-CS-G,dogrulandi 6 Eyl (run 34020172810): iPhone 15 Pro Max Snap Case in Gloss
+poster,GLOBAL-HGE-24x36,"dogrulandi 6 Eyl (run 34020172810): Hahnemühle German Etching, 60x90cm / 24x36"""
+kilif,GLOBAL-TECH-IP15PM-CS-M,dogrulandi 6 Eyl (run 34020172810): iPhone 15 Pro Max Snap Case in Matte
+poster,GLOBAL-HGE-A4,"dogrulandi 6 Eyl (run 34020172810): Hahnemühle German Etching, 21x29.7cm / 8.3x11.7"" (A4)"
+kilif,GLOBAL-TECH-IP15PM-TCB-CS-G,dogrulandi 6 Eyl (run 34020172810): iPhone 15 Pro Max Tough Case in Gloss
+poster,GLOBAL-HGE-A3,"dogrulandi 6 Eyl (run 34020172810): Hahnemühle German Etching, 29.7x42cm / 11.7x16.5"" (A3)"
+kilif,GLOBAL-TECH-IP15PM-TCB-CS-M,dogrulandi 6 Eyl (run 34020172810): iPhone 15 Pro Max Tough Case in Matte
+poster,GLOBAL-HGE-A2,"dogrulandi 6 Eyl (run 34020172810): Hahnemühle German Etching, 42x59.4cm / 16.5x23.4"" (A2)"
+kilif,GLOBAL-TECH-IP16-CS-G,dogrulandi 6 Eyl (run 34020172810): iPhone 16 Snap Case in Gloss
+poster,GLOBAL-HPR-8x10,"dogrulandi 6 Eyl (run 34020172810): Hahnemühle Photo Rag, 20x25 cm / 8x10"""
+kilif,GLOBAL-TECH-IP16-CS-M,dogrulandi 6 Eyl (run 34020172810): iPhone 16 Snap Case in Matte
+poster,GLOBAL-HPR-11x14,"dogrulandi 6 Eyl (run 34020172810): Hahnemühle Photo Rag, 28x35.5 cm / 11x14"""
+kilif,GLOBAL-TECH-IP16-TCB-CS-G,dogrulandi 6 Eyl (run 34020172810): iPhone 16 Tough Case in Gloss
+poster,GLOBAL-HPR-12x16,"dogrulandi 6 Eyl (run 34020172810): Hahnemühle Photo Rag, 30x40 cm / 12x16"""
+kilif,GLOBAL-TECH-IP16-TCB-CS-M,dogrulandi 6 Eyl (run 34020172810): iPhone 16 Tough Case in Matte
+poster,GLOBAL-HPR-12x18,"dogrulandi 6 Eyl (run 34020172810): Hahnemühle Photo Rag, 30x45 cm / 12x18"""
+kilif,GLOBAL-TECH-IP16PL-CS-G,dogrulandi 6 Eyl (run 34020172810): iPhone 16 Plus Snap Case in Gloss
+poster,GLOBAL-HPR-16x20,"dogrulandi 6 Eyl (run 34020172810): Hahnemühle Photo Rag, 40x50 cm / 16x20"""
+kilif,GLOBAL-TECH-IP16PL-CS-M,dogrulandi 6 Eyl (run 34020172810): iPhone 16 Plus Snap Case in Matte
+poster,GLOBAL-HPR-16x24,"dogrulandi 6 Eyl (run 34020172810): Hahnemühle Photo Rag, 40x60 cm / 16x24"""
+kilif,GLOBAL-TECH-IP16PL-TCB-CS-G,dogrulandi 6 Eyl (run 34020172810): iPhone 16 Plus Tough Case in Gloss
+poster,GLOBAL-HPR-18x24,"dogrulandi 6 Eyl (run 34020172810): Hahnemühle Photo Rag, 45x60 cm / 18x24"""
+kilif,GLOBAL-TECH-IP16PL-TCB-CS-M,dogrulandi 6 Eyl (run 34020172810): iPhone 16 Plus Tough Case in Matte
+poster,GLOBAL-HPR-24x36,"dogrulandi 6 Eyl (run 34020172810): Hahnemühle Photo Rag, 60x90 cm / 24x36"""
+kilif,GLOBAL-TECH-IP16PR-CS-G,dogrulandi 6 Eyl (run 34020172810): iPhone 16 Pro Snap Case in Gloss
+poster,GLOBAL-HPR-A4,"dogrulandi 6 Eyl (run 34020172810): Hahnemühle Photo Rag, 21x29.7 cm / 8.3x11.7"" (A4)"
+kilif,GLOBAL-TECH-IP16PR-CS-M,dogrulandi 6 Eyl (run 34020172810): iPhone 16 Pro Snap Case in Matte
+poster,GLOBAL-HPR-A3,"dogrulandi 6 Eyl (run 34020172810): Hahnemühle Photo Rag, 29.7x42 cm / 11.7x16.5"" (A3)"
+kilif,GLOBAL-TECH-IP16PR-TCB-CS-G,dogrulandi 6 Eyl (run 34020172810): iPhone 16 Pro Tough Case in Gloss
+poster,GLOBAL-HPR-A2,"dogrulandi 6 Eyl (run 34020172810): Hahnemühle Photo Rag, 42x59.4 cm / 16.5x23.4"" (A2)"
+kilif,GLOBAL-TECH-IP16PR-TCB-CS-M,dogrulandi 6 Eyl (run 34020172810): iPhone 16 Pro Tough Case in Matte
+poster,GLOBAL-FAP-20x28,"dogrulandi 6 Eyl (run 34020172810): EMA, Enhanced Matte Art Paper, 200gsm, 50x70cm / 20x28"""
+kilif,GLOBAL-TECH-IP16PM-CS-G,dogrulandi 6 Eyl (run 34020172810): iPhone 16 Pro Max Snap Case in Gloss
+kilif,GLOBAL-TECH-IP16PM-CS-M,dogrulandi 6 Eyl (run 34020172810): iPhone 16 Pro Max Snap Case in Matte
+kilif,GLOBAL-TECH-IP16PM-TCB-CS-G,dogrulandi 6 Eyl (run 34020172810): iPhone 16 Pro Max Tough Case in Gloss
+kilif,GLOBAL-TECH-IP16PM-TCB-CS-M,dogrulandi 6 Eyl (run 34020172810): iPhone 16 Pro Max Tough Case in Matte
+kilif,GLOBAL-TECH-IP17-CS-G,dogrulandi 6 Eyl (run 34020172810): iPhone 17 Snap Case in Gloss
+kilif,GLOBAL-TECH-IP17-CS-M,dogrulandi 6 Eyl (run 34020172810): iPhone 17 Snap Case in Matte
+kilif,GLOBAL-TECH-IP17-TCB-CS-G,dogrulandi 6 Eyl (run 34020172810): iPhone 17 Tough Case in Gloss
+kilif,GLOBAL-TECH-IP17-TCB-CS-M,dogrulandi 6 Eyl (run 34020172810): iPhone 17 Tough Case in Matte
+kilif,GLOBAL-TECH-IP17PR-CS-G,dogrulandi 6 Eyl (run 34020172810): iPhone 17 Pro Snap Case in Gloss
+kilif,GLOBAL-TECH-IP17PR-CS-M,dogrulandi 6 Eyl (run 34020172810): iPhone 17 Pro Snap Case in Matte
+kilif,GLOBAL-TECH-IP17PR-TCB-CS-G,dogrulandi 6 Eyl (run 34020172810): iPhone 17 Pro Tough Case in Gloss
+kilif,GLOBAL-TECH-IP17PR-TCB-CS-M,dogrulandi 6 Eyl (run 34020172810): iPhone 17 Pro Tough Case in Matte
+kilif,GLOBAL-TECH-IP17PM-CS-G,dogrulandi 6 Eyl (run 34020172810): iPhone 17 Pro Max Snap Case in Gloss
+kilif,GLOBAL-TECH-IP17PM-CS-M,dogrulandi 6 Eyl (run 34020172810): iPhone 17 Pro Max Snap Case in Matte
+kilif,GLOBAL-TECH-IP17PM-TCB-CS-G,dogrulandi 6 Eyl (run 34020172810): iPhone 17 Pro Max Tough Case in Gloss
+kilif,GLOBAL-TECH-IP17PM-TCB-CS-M,dogrulandi 6 Eyl (run 34020172810): iPhone 17 Pro Max Tough Case in Matte
+kilif,GLOBAL-TECH-IP16E-TCB-CS-G,dogrulandi 6 Eyl (run 34020172810): iPhone 16e Tough Case in Gloss
+kilif,GLOBAL-TECH-IP16E-TCB-CS-M,dogrulandi 6 Eyl (run 34020172810): iPhone 16e Tough Case in Matte
+kilif,GLOBAL-TECH-SGS24-CS-G,dogrulandi 6 Eyl (run 34020172810): Samsung Galaxy S24 Snap Case In Gloss
+kilif,GLOBAL-TECH-SGS24-TCB-CS-G,dogrulandi 6 Eyl (run 34020172810): Samsung Galaxy S24 Tough Case In Gloss
+kilif,GLOBAL-TECH-SGS24U-CS-G,dogrulandi 6 Eyl (run 34020172810): Samsung Galaxy S24 Ultra Snap Case In Gloss
+kilif,GLOBAL-TECH-SGS24U-TCB-CS-G,dogrulandi 6 Eyl (run 34020172810): Samsung Galaxy S24 Ultra Tough Case In Gloss
+kilif,GLOBAL-TECH-SGS25-CS-G,dogrulandi 6 Eyl (run 34020172810): Samsung Galaxy S25 Snap Case In Gloss
+kilif,GLOBAL-TECH-SGS25-TCB-CS-G,dogrulandi 6 Eyl (run 34020172810): Samsung Galaxy S25 Tough Case In Gloss
+kilif,GLOBAL-TECH-SGS25U-CS-G,dogrulandi 6 Eyl (run 34020172810): Samsung Galaxy S25 Ultra Snap Case In Gloss
+kilif,GLOBAL-TECH-SGS25U-TCB-CS-G,dogrulandi 6 Eyl (run 34020172810): Samsung Galaxy S25 Ultra Tough Case In Gloss
+kupa,GLOBAL-MUG-B,"SKU var, US icin quote NotAvailable (6 Eyl); 15oz kupa SKU'su bulunamadi"
