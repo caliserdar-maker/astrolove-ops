@@ -1,0 +1,72 @@
+name: etsy-oas-probe
+
+# Etsy Open API v3 semasini (openapi/generated/oas/3.0.0.json) indirir; yol desenine uyan uclarin
+# istek alanlarini (required, enum, aciklama) job summary'ye yazar. Salt okur, sir kullanmaz.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pattern:
+        description: "Yol regex'i (or. readiness|listings$)"
+        required: true
+        default: "readiness"
+      fields:
+        description: "Ayrica bu alan adlarinin (virgullu) tanimini yaz (or. readiness_state_id)"
+        required: false
+        default: "readiness_state_id"
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: OAS indir ve tara
+        env:
+          PATTERN: ${{ inputs.pattern }}
+          FIELDS: ${{ inputs.fields }}
+        run: |
+          set -euo pipefail
+          curl -fsSL -o oas.json https://www.etsy.com/openapi/generated/oas/3.0.0.json
+          python3 - <<'PY' | tee -a "$GITHUB_STEP_SUMMARY"
+          import json, os, re
+          d = json.load(open("oas.json"))
+          pat = re.compile(os.environ["PATTERN"]); fields = [f for f in os.environ.get("FIELDS", "").split(",") if f.strip()]
+          def deref(s):
+              if "$ref" in s:
+                  node = d
+                  for k in s["$ref"].lstrip("#/").split("/"): node = node[k]
+                  return node
+              return s
+          for path, ops in d["paths"].items():
+              if not pat.search(path): continue
+              for m, op in ops.items():
+                  if m not in ("get", "post", "put", "patch", "delete"): continue
+                  print(f"\n## {m.upper()} {path}  ({op.get('operationId')})")
+                  for p in op.get("parameters", []):
+                      print(f"- param {p.get('in')} {p.get('name')} required={p.get('required')} {deref(p.get('schema', {})).get('enum', '')}")
+                  rb = op.get("requestBody")
+                  if rb:
+                      for ct, c in rb["content"].items():
+                          sc = deref(c["schema"]); print(f"- body {ct} required={sc.get('required')}")
+                          for k, v in (sc.get("properties") or {}).items():
+                              v = deref(v); print(f"  - {k}: {v.get('type')} {v.get('enum', '')} {'default=' + str(v['default']) if 'default' in v else ''} :: {(v.get('description') or '')[:160]}")
+                  for code, r in (op.get("responses") or {}).items():
+                      if code.startswith("2"):
+                          for ct, c in (r.get("content") or {}).items():
+                              sc = deref(c["schema"]); props = deref(sc).get("properties") or {}
+                              print(f"- response {code}: {list(props)[:25]}")
+          if fields:
+              print("\n## Alan tanimlari")
+              for name, sc in (d.get("components", {}).get("schemas") or {}).items():
+                  for k, v in (sc.get("properties") or {}).items():
+                      if k in fields:
+                          v = deref(v); print(f"- {name}.{k}: {v.get('type')} :: {(v.get('description') or '')[:300]}")
+              for path, ops in d["paths"].items():
+                  for m, op in ops.items():
+                      rb = op.get("requestBody") if isinstance(op, dict) else None
+                      if not rb: continue
+                      for ct, c in rb["content"].items():
+                          for k, v in (deref(c["schema"]).get("properties") or {}).items():
+                              if k in fields:
+                                  v = deref(v); print(f"- {m.upper()} {path} body.{k}: {v.get('type')} :: {(v.get('description') or '')[:300]}")
+          PY
