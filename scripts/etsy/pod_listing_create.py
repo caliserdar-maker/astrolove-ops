@@ -113,17 +113,21 @@ def build_listing(pair, desc_tpl):
     return title, tags, desc, note
 
 
-def inventory_body(pair, prices, color_pid, size_pid, color_name, size_name):
+def inventory_body(pair, prices, color_pid, size_pid, color_name, size_name, readiness_state_id=None):
+    """Etsy updateListingInventory: her offering'de readiness_state_id zorunlu (6 Eyl 400: "All offerings need readiness state")."""
     products = []
     for ed in EDITIONS:
         for sz in SIZES:
+            off = {"price": prices.get(sz, 0), "quantity": QUANTITY, "is_enabled": True}
+            if readiness_state_id:
+                off["readiness_state_id"] = readiness_state_id
             products.append({
                 "sku": f"POD-{pair}-{ed}-{sz}",
                 "property_values": [
                     {"property_id": color_pid, "property_name": color_name, "values": [ED_NAME[ed]]},
                     {"property_id": size_pid, "property_name": size_name, "values": [SIZE_LABEL[sz]]},
                 ],
-                "offerings": [{"price": prices.get(sz, 0), "quantity": QUANTITY, "is_enabled": True}],
+                "offerings": [off],
             })
     return {"products": products, "price_on_property": [size_pid], "quantity_on_property": [],
             "sku_on_property": [color_pid, size_pid]}
@@ -383,7 +387,7 @@ def create_pair(api, shop, pair, d, prices, img_root, primary, frames, st, state
         stage = "images"
 
     if STAGES.index(stage) < STAGES.index("inventory"):
-        api.put_json(f"/listings/{lid}/inventory", inventory_body(pair, prices, d["color_pid"], d["size_pid"], d["color_name"], d["size_name"]))
+        api.put_json(f"/listings/{lid}/inventory", inventory_body(pair, prices, d["color_pid"], d["size_pid"], d["color_name"], d["size_name"], d.get("readiness_state_id")))
         set_stage(st, state_path, pair, lid, "inventory")
         stage = "inventory"
 
@@ -495,7 +499,7 @@ def main():
             plan = image_plan(a.images, pair, a.primary, frames)
             miss_img = [f"{ed}/{frames[i] if i < len(frames) else '01'}" for i, (rk, ed, p, _) in enumerate(plan) if p is None]
             body = listing_body(title, desc, tags, d, prices.get(SIZES[0], 0))
-            inv = inventory_body(pair, prices, d["color_pid"], d["size_pid"], d["color_name"], d["size_name"])
+            inv = inventory_body(pair, prices, d["color_pid"], d["size_pid"], d["color_name"], d["size_name"], d.get("readiness_state_id"))
             (out_dir / f"{pair}_payload.json").write_text(json.dumps(
                 {"listing": body, "images": [(rk, ed, str(p) if p else None, c) for rk, ed, p, c in plan], "inventory": inv},
                 indent=1, ensure_ascii=False))
