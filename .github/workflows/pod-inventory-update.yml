@@ -1,8 +1,9 @@
 name: pod-inventory-update
 
-# POD ilani envanterinde Size degerlerine oran etiketi (EK 1, 6 Eyl 2026): SKU/fiyat/adet/gorunurluk
-# korunur, tek updateListingInventory. dry_run=true yalniz eski->yeni tablo; false Etsy'ye YAZAR (onay).
-# Kota quota_min altindaysa yazma yok.
+# POD ilani duzenlemesi (Mo 6 Eyl 2026): IS 1 Size etiketleri v3 + sira (tek updateListingInventory;
+# SKU/fiyat/adet/gorunurluk korunur), IS 2 aciklama yalniz "✦ 13 SIZES" blogu (EN PATCH + RU PUT),
+# IS 3 renk->gorsel dogrulama (fark varsa POST). dry_run=true yalniz tablolar/diff; false Etsy'ye YAZAR (onay).
+# Kota quota_min altindaysa yazma yok. Metin kaynagi docs/POD_LISTING_TEMPLATE.md + pod_listing_create.SIZE_SPEC.
 
 on:
   workflow_dispatch:
@@ -11,8 +12,16 @@ on:
         description: "POD ilan id"
         required: true
         default: "4570031205"
+      pair:
+        description: "Cift (aciklama sablonu icin)"
+        required: true
+        default: "ARIES_LEO"
+      expected_images:
+        description: "Renk=image_id listesi (bos = script sabiti, 11. kosu)"
+        required: false
+        default: ""
       dry_run:
-        description: "true = yalniz tablo; false = Etsy'ye YAZ"
+        description: "true = yalniz tablo/diff; false = Etsy'ye YAZ"
         type: boolean
         default: true
       quota_min:
@@ -36,7 +45,10 @@ jobs:
           cache: pip
       - run: |
           set -euo pipefail
-          pip install -q requests==2.34.2
+          pip install -q requests==2.34.2 spylls
+          mkdir -p dict
+          curl -fsSL -o dict/ru_RU.dic https://raw.githubusercontent.com/LibreOffice/dictionaries/master/ru_RU/ru_RU.dic
+          curl -fsSL -o dict/ru_RU.aff https://raw.githubusercontent.com/LibreOffice/dictionaries/master/ru_RU/ru_RU.aff
           curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
       - name: rclone.conf olustur
         env:
@@ -60,12 +72,15 @@ jobs:
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
           TOKEN_FILE: _work/ETSY_TOKEN.json
           LID: ${{ inputs.listing_id }}
+          PAIR: ${{ inputs.pair }}
+          EXPECT: ${{ inputs.expected_images }}
           DRY_RUN: ${{ inputs.dry_run }}
           QMIN: ${{ inputs.quota_min }}
         run: |
           set -euo pipefail
-          [ "$DRY_RUN" = "true" ] && mode=--dry-run || { echo "::warning::APPLY: envanter Etsy'ye yazilacak ($LID)"; mode=--apply; }
-          python scripts/etsy/pod_inventory_update.py --listing-id "$LID" --out _out --quota-min "${QMIN:-400}" "$mode"
+          [ "$DRY_RUN" = "true" ] && mode=--dry-run || { echo "::warning::APPLY: envanter/aciklama Etsy'ye yazilacak ($LID)"; mode=--apply; }
+          python scripts/etsy/pod_inventory_update.py --listing-id "$LID" --pair "$PAIR" --out _out --quota-min "${QMIN:-400}" \
+            --ru-dict dict/ru_RU --expect-images "$EXPECT" "$mode"
       - name: Token/cikti Drive'a
         if: ${{ always() }}
         env:
