@@ -129,7 +129,9 @@ def inventory_body(pair, prices, color_pid, size_pid, color_name, size_name, rea
                 ],
                 "offerings": [off],
             })
-    return {"products": products, "price_on_property": [size_pid], "quantity_on_property": [],
+    # Etsy (6 Eyl 400): sku_on_property iki ozellige bagliyken price_on_property bos ya da iki ozellik olmali;
+    # fiyat boyuta gore degisir, renkler arasi aynidir -> (renk, boyut) ciftine baglanir.
+    return {"products": products, "price_on_property": [color_pid, size_pid], "quantity_on_property": [],
             "sku_on_property": [color_pid, size_pid]}
 
 
