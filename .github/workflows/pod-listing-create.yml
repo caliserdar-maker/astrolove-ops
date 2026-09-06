@@ -32,9 +32,9 @@ on:
         required: false
         default: ""
       return_policy_spec:
-        description: "Magazada iade politikasi YOKSA apply'da olusturulur, or. returns=1,exchanges=1,deadline=30 (bos = olusturma)"
+        description: "Magazada iade politikasi YOKSA apply'da olusturulur (Mo 6 Eyl: iade/degisim yok; bos = olusturma)"
         required: false
-        default: ""
+        default: "returns=0,exchanges=0"
 
 concurrency:
   group: etsy-token

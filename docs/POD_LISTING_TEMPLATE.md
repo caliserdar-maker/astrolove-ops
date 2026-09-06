@@ -72,11 +72,21 @@ Handle by the edges. If a rolled print curls, lay it flat under a weight for 24�
 - Colors may vary slightly between your screen and the printed piece.
 - Prefer an instant download? The same design is available as a digital edition in our shop.
 
+✦ RETURNS & REPRINTS
+Every print is made just for you, so we can't accept returns or exchanges. If your print arrives damaged or with a defect, please send us a photo within 7 days and we'll happily reprint it at no cost.
+
 ✦ A GIFT THAT MEANS SOMETHING
 A thoughtful anniversary, wedding, engagement, or Valentine's gift for a couple who share a love of astrology.
 
 All AstroLove designs are original artwork created by our studio.
 <!-- EN_DESCRIPTION_END -->
+
+## Iade politikasi (Mo karari, 6 Eyl 2026)
+
+Etsy iade politikasi: iade YOK, degisim YOK (`return_policy_spec=returns=0,exchanges=0`;
+`pod-listing-create` apply'da olusturur, magazada baska politika yoktu). Hasar/kusur
+durumunda 7 gun icinde fotografla ucretsiz yeniden baski; metin yukaridaki
+"RETURNS & REPRINTS" bolumunde.
 
 ## Uygulama sirasi
 
