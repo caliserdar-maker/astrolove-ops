@@ -115,3 +115,5 @@ workflow'u dosyayi rclone ile okur, `::add-mask::` ile maskeler ve cikti dosyala
 sizinti kontrolu yapar (anahtar bulunursa dosya silinir, kosu hata verir). Anahtar
 hicbir loga, dosyaya, commit'e ve workflow girdisine yazilmaz. Yerel deneme icin
 yalniz `PRODIGI_API_KEY` ortam degiskeni kabul edilir.
+
+Sandbox: `ASTROLOVE/TEMP/PRODIGI_SANDBOX_TOKEN.json` (`{"api_key": "..."}`), Prodigi panelinde ayri uretilir; `pod-order-router` env=sandbox bunu okur. Ayni maskeleme kurallari gecerlidir.

@@ -258,11 +258,11 @@ def set_stage(st, path, pair, lid, stage, note=""):
 
 
 # ------------------------------------------------------------------ apply adimlari
-def quota_ok(api):
+def quota_ok(api, qmin=QUOTA_MIN):
     if api.remaining is None:
         return True
     try:
-        return int(api.remaining) >= QUOTA_MIN
+        return int(api.remaining) >= qmin
     except ValueError:
         return True
 
@@ -380,6 +380,7 @@ def main():
     ap.add_argument("--frames", default=DEFAULT_FRAMES, help="ana edisyondan alinacak kareler")
     ap.add_argument("--return-policy-id", default="")
     ap.add_argument("--return-policy-spec", default="", help="magazada iade politikasi yoksa apply'da olusturulur: returns=1,exchanges=1,deadline=30")
+    ap.add_argument("--quota-min", type=int, default=QUOTA_MIN, help="bu degerin altinda yazma yok (varsayilan 400)")
     ap.add_argument("--processing-min", type=int, default=3)
     ap.add_argument("--processing-max", type=int, default=5)
     g = ap.add_mutually_exclusive_group(required=True)
@@ -451,15 +452,15 @@ def main():
     else:
         if missing or iss:
             raise SystemExit(f"HATA: apply icin eksik: fiyat {missing}; kesif {iss}")
-        if not quota_ok(api):
-            raise SystemExit(f"HATA: kota {api.remaining} < {QUOTA_MIN}; yazma yok")
+        if not quota_ok(api, a.quota_min):
+            raise SystemExit(f"HATA: kota {api.remaining} < {a.quota_min}; yazma yok")
         ensure_shipping(api, shop, d, a.processing_min, a.processing_max)
         ensure_section(api, shop, d)
         ensure_return_policy(api, shop, d)
         t0 = time.time()
         for n, pair in enumerate(todo, 1):
-            if not quota_ok(api):
-                log(f"KOTA {api.remaining} < {QUOTA_MIN}: {pair} ve sonrasi islenmedi (resume ile devam)")
+            if not quota_ok(api, a.quota_min):
+                log(f"KOTA {api.remaining} < {a.quota_min}: {pair} ve sonrasi islenmedi (resume ile devam)")
                 break
             lid, ok, checks = create_pair(api, shop, pair, d, prices, a.images, a.primary, frames, st, a.state, out_dir)
             rows.append(dict(pair=pair, listing_id=lid, status="PASS" if ok else "FAIL", checks=checks))
