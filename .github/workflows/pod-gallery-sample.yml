@@ -38,7 +38,7 @@ jobs:
       - name: Bagimliliklar + fontlar
         run: |
           set -euo pipefail
-          pip install -q pillow==12.3.0 numpy==2.4.6 pyspellchecker
+          pip install -q pillow==12.3.0 numpy==2.4.6 requests==2.34.2 pyspellchecker
           mkdir -p fonts
           base=https://raw.githubusercontent.com/google/fonts/main/ofl
           curl -fsSL -o "fonts/CormorantGaramond[wght].ttf"        "$base/cormorantgaramond/CormorantGaramond%5Bwght%5D.ttf"

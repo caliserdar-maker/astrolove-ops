@@ -19,7 +19,7 @@ from pathlib import Path
 
 import requests
 
-UA = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) astrolove-ops factcheck"}
+UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36", "Accept-Language": "en"}
 HAH_PR = "https://www.hahnemuehle.com/en/digital-papers/fineart-collection/matt-fineart-smooth/p/Product/show/8/1.html"
 HAH_PR2 = "https://www.hahnemuehle.com/en/digital-papers/fineart-collection/natural-line/p/Product/show/202/1.html"
 HAH_GLOVES = "https://www.hahnemuehle.store/us/gloves-12-pairs/10608863"
