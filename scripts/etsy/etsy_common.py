@@ -163,6 +163,14 @@ class Etsy:
     def delete(self, path):
         return self._call("DELETE", path)
 
+    def post_json(self, path, body):
+        """JSON govdeli POST (ic ice dizi gerektiren uclar). Yazma cagrisi."""
+        return self._call("POST", path, json_body=body)
+
+    def put_json(self, path, body):
+        """JSON govdeli PUT (updateListingInventory, updateVariationImages). Yazma cagrisi."""
+        return self._call("PUT", path, json_body=body)
+
     def post_file(self, path, files, data=None):
         """Multipart yukleme (gorsel/dosya). Ilk denemede 400 normal olabilir
         (B37); 3 deneme."""
@@ -191,11 +199,11 @@ class Etsy:
             raise SystemExit(f"HATA: POST(file) {path} -> {r.status_code}: {r.text[:300]}")
         raise SystemExit(f"HATA: POST(file) {path} tekrarlar tukendi.")
 
-    def _call(self, method, path, params=None, data=None, ok404=False):
+    def _call(self, method, path, params=None, data=None, ok404=False, json_body=None):
         for attempt in range(3):
             self.calls += 1
             time.sleep(self.pace)
-            r = requests.request(method, API + path, params=params, data=data,
+            r = requests.request(method, API + path, params=params, data=data, json=json_body,
                                  headers=self._headers(), timeout=TIMEOUT)
             rem = r.headers.get("x-remaining-today")
             if rem is not None:
