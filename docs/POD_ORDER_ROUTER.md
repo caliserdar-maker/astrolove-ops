@@ -59,7 +59,8 @@ Kosu basina en fazla `--max-orders` (5) yeni siparis. Idempotent: STATE + Prodig
 3. `pod-order-router` dispatch: env=sandbox, dry_run=true, test_receipt=... -> teklif + marj raporu.
 4. `pod-order-router` dispatch: env=sandbox, dry_run=false, test_receipt=... -> sandbox siparis, izin ac/kapat,
    sonraki kosularda shipped (sandbox kargo simulasyonu) -> Etsy'ye yazilmaz (etsy_writes kapali).
-5. Canli: `POD_ROUTER_ENABLED=true` degiskeni (gh_secrets.py ile) -> cron 30 dk live/apply/etsy_writes.
+5. Canli: `POD_ROUTER_ENABLED=true` degiskeni (gh_secrets.py ile) + workflow'da `schedule` satiri acilir -> cron 30 dk
+   live/apply/etsy_writes. (Cron kapali tutuluyor: is atlansa bile etsy-token grubuna girip bekleyen Etsy kosusunu iptal ediyor.)
 
 ## Maliyet kontrolu
 

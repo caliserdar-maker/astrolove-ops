@@ -6,8 +6,9 @@ name: pod-order-router
 # STATE Drive TEMP/POD_ORDERS_STATE.csv (yalniz apply'da geri yazilir); rapor TEMP/POD_ORDERS/.
 
 on:
-  schedule:
-    - cron: "*/30 * * * *"
+  # Zamanlanmis kosu (30 dk) sandbox testi + POD_ROUTER_ENABLED sonrasi acilir. Kapali tutulma nedeni (6 Eyl):
+  # schedule kosusu is atlansa bile etsy-token concurrency grubuna girer ve bekleyen baska bir Etsy
+  # kosusunu (pod-listing-create 34038402562) iptal etti. Acarken: schedule: - cron: "*/30 * * * *"
   workflow_dispatch:
     inputs:
       env:
