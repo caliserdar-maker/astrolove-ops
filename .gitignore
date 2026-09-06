@@ -58,3 +58,6 @@ rclone.conf
 .idea/
 .DS_Store
 Thumbs.db
+
+# Yerel/runner font indirmeleri (workflow her kosuda indirir)
+fonts/
