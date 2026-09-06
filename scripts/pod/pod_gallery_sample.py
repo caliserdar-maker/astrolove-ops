@@ -415,11 +415,26 @@ def geometry(card_p, rows=True):
     # bar ici acik metin bantlari
     bl = float(np.mean(a[2100, 1400:1600]))
     g["bar_text"] = _bands(a, 2000, 2180, 900, 2100, dark=False, th=bl + 60)
-    # rozet (ilk koyu daire x200-500) ve satir basligi cap yuksekligi
-    from scipy import ndimage
+    # rozet (ilk bar-rengi daire, x200-500) ve satir basligi cap yuksekligi — saf numpy
     if not rows:
         g["badge"] = g["head_cap"] = g["head_x0"] = None
         return g
+    m = np.abs(rgb[600:1950, 200:500].astype(int) - np.array(bar)).sum(2) < 40
+    wide = m.sum(1) >= 80
+    ys = np.where(wide)[0]
+    if len(ys):
+        y0 = 600 + ys[0]
+        y1 = y0
+        while y1 - 600 < len(wide) and wide[y1 - 600]:
+            y1 += 1
+        xs = np.where(m[ys[0]:y1 - 600].sum(0) > 0)[0]
+        g["badge"] = (200 + int(xs.min()), 200 + int(xs.max()) + 1, y1 - y0)
+        hb = [b for b in _bands(a, y0 - 40, y1 + 60, 450, 1500, th=th) if b[1] - b[0] >= 20]   # umlaut/nokta bantlarini atla
+        g["head_cap"] = (hb[0][1] - hb[0][0]) if hb else None
+        g["head_x0"] = _xext(a, hb[0][0], hb[0][1], 450, 1500, th=th)[0] if hb else None
+    else:
+        g["badge"] = g["head_cap"] = g["head_x0"] = None
+    return g
     lab, _ = ndimage.label(np.abs(rgb[600:1950, 200:500].astype(int) - np.array(bar)).sum(2) < 40)
     objs = [sl for sl in ndimage.find_objects(lab) if (sl[1].stop - sl[1].start) > 80 and (sl[0].stop - sl[0].start) > 80]
     if objs:
