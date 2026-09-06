@@ -34,11 +34,13 @@ import sys
 import time
 from pathlib import Path
 
+import requests
+
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from etsy_common import Etsy, TokenStore, log, mask  # noqa: E402
 from pod_listing_update import SIGNS, build as build_text, load_template  # noqa: E402
 from pod_sku import make_sku  # noqa: E402
-from pod_media import CARD_FILES, VIDEO_WH, card_path, mp4_dims, precheck_card, video_path  # noqa: E402
+from pod_media import CARD_FILES, VIDEO_WH, card_path, img_sig, mp4_dims, precheck_card, sig_diff, video_path  # noqa: E402
 from pod_listing_update import TEMPLATE_MD  # noqa: E402
 from wp_listing_update import load_block  # noqa: E402
 from wp_listing_update import norm, tags_of, validate  # noqa: E402
@@ -49,6 +51,7 @@ MAX_TITLE = 140
 QUOTA_MIN = 400
 QUANTITY = 999
 MAX_IMAGES = 12          # EK 3 (6 Eyl): 10 kare + 2 teknik kart
+PIX_MAX = 6.0            # geri okuma piksel esigi (gri 48x48 ortalama fark; ayni gorsel yeniden kodlanmis <= 0.09 olculdu)
 CARDS_AFTER = 3          # kartlar ana edisyonun ilk 3 karesinden sonra (rank 4-5)
 
 TITLE = "{S1} and {S2} Zodiac Wall Art, Couple Compatibility Giclée Print, Unframed Fine Art Poster, Gift for Couples"
@@ -582,20 +585,50 @@ def create_pair(api, shop, pair, d, prices, img_root, primary, frames, st, state
     tru = api.get(f"/shops/{shop}/listings/{lid}/translations/ru", ok404=True) or {}
     vids = (api.get(f"/listings/{lid}/videos", ok404=True) or {}).get("results") or []
     props = (api.get(f"/shops/{shop}/listings/{lid}/properties", ok404=True) or {}).get("results") or []
-    ru_title = build_ru(pair, load_ru_template())[0]
+    ru_title, _, ru_desc_exp, _ = build_ru(pair, load_ru_template())
+    # 65/65: SKU + fiyat + Size etiketi (beklenen envanter govdesiyle birebir)
+    exp_inv = {pr["sku"]: (pr["property_values"][1]["values"][0], pr["offerings"][0]["price"]) for pr in
+               inventory_body(pair, prices, d["color_pid"], d["size_pid"], d["color_name"], d["size_name"], d.get("readiness_state_id"))["products"]}
+    got_inv = {}
+    for pr in inv.get("products") or []:
+        lbl = next((pv["values"][0] for pv in pr.get("property_values") or [] if pv.get("property_id") == d["size_pid"] and pv.get("values")), None)
+        pv0 = (pr.get("offerings") or [{}])[0].get("price")
+        price = round(float(pv0.get("amount") or 0) / float(pv0.get("divisor") or 100), 2) if isinstance(pv0, dict) else round(float(pv0 or 0), 2)
+        got_inv[pr.get("sku")] = (lbl, price)
+    n_inv_ok = sum(1 for k, v in exp_inv.items() if got_inv.get(k) == v)
+    # 12 gorsel sirasi: rank -> id (renk baglama ile tutarli) + piksel (kaynak dosya ile)
+    by_rank = {i.get("rank"): i for i in imgs}
+    pix = {}
+    for rk, ed, p, is_color, _ in plan:
+        im = by_rank.get(rk)
+        url = (im or {}).get("url_fullxfull") or (im or {}).get("url_570xN")
+        try:
+            r = requests.get(url, timeout=60); r.raise_for_status()
+            pix[rk] = round(sig_diff(img_sig(r.content), img_sig(p)), 2)
+        except Exception as e:                       # noqa: BLE001 - CDN hatasi da FAIL sayilir
+            pix[rk] = f"HATA {e}"
+    img_ok = len(imgs) == len(plan) and all(isinstance(v, float) and v <= PIX_MAX for v in pix.values())
+    # renk -> gorsel: her renk kendi edisyonunun hero karesine (rank'tan id)
+    hero_id = {ED_NAME[ed]: (by_rank.get(rk) or {}).get("listing_image_id") for rk, ed, p, is_color, _ in plan if is_color}
+    vi_map = {v.get("value"): v.get("image_id") for v in vimg}
+    n_vi_ok = sum(1 for c, i in hero_id.items() if i is not None and vi_map.get(c) == i)
     checks = {"state_draft": L.get("state") == "draft", "title": L.get("title") == title,
               "who_made": L.get("who_made") == WHO_MADE, "auto_renew": bool(L.get("should_auto_renew")) == AUTO_RENEW,
-              "ru": tru.get("title") == ru_title,
+              "ru": tru.get("title") == ru_title and norm(tru.get("description")) == norm(ru_desc_exp),
               "attrs": {p.get("property_id") for p in props} >= {a[0] for a in d.get("attr_plan") or []},
               "tags": tags_of(L) == tags, "desc": norm(L.get("description")) == norm(desc),
-              "images": len(imgs) == len(plan), "products": len(inv.get("products") or []) == len(EDITIONS) * len(SIZES),
-              "variation_images": len(vimg) == len(EDITIONS), "partner": bool(L.get("production_partner_ids") or L.get("production_partners")),
-              "video": (len(vids) == 1) if media.get("VIDEO") else True}
+              "images": img_ok, "products": n_inv_ok == len(EDITIONS) * len(SIZES) == len(inv.get("products") or []),
+              "variation_images": n_vi_ok == len(EDITIONS), "partner": bool(L.get("production_partner_ids") or L.get("production_partners")),
+              "video": (len(vids) == 1) if media.get("VIDEO") else True,
+              "section": L.get("shop_section_id") == d["shop_section_id"], "shipping": L.get("shipping_profile_id") == d["shipping_profile_id"],
+              "return_policy": (L.get("return_policy_id") == d["return_policy_id"]) if d.get("return_policy_id") else True}
     ok = all(checks.values())
+    log(f"  geri okuma {pair}: envanter {n_inv_ok}/{len(exp_inv)} | gorsel {len(imgs)}/{len(plan)} piksel {pix} | video {len(vids)} | renk->gorsel {n_vi_ok}/{len(EDITIONS)} | {'PASS' if ok else 'FAIL ' + ','.join(k for k, v in checks.items() if not v)}")
     set_stage(st, state_path, pair, lid, "verified" if ok else stage,
               ("PASS" if ok else "FAIL " + ",".join(k for k, v in checks.items() if not v)) + (f" | eksik: {'; '.join(eksik)}" if eksik else ""))
     (Path(out_dir) / f"{pair}_readback.json").write_text(json.dumps({"listing": L, "checks": checks, "n_images": len(imgs), "n_videos": len(vids), "eksik": eksik,
-                                                                     "n_products": len(inv.get("products") or []), "variation_images": vimg}, indent=1, ensure_ascii=False))
+                                                                     "n_products": len(inv.get("products") or []), "inventory_ok": n_inv_ok, "pixel": pix,
+                                                                     "variation_images": vimg, "hero_ids": hero_id}, indent=1, ensure_ascii=False))
     return lid, ok, checks, eksik
 
 
