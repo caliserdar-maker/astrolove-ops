@@ -454,7 +454,9 @@ def create_pair(api, shop, pair, d, prices, img_root, primary, frames, st, state
         stage = "images"
 
     if STAGES.index(stage) < STAGES.index("fields"):
-        api.patch(f"/shops/{shop}/listings/{lid}", {"who_made": WHO_MADE, "should_auto_renew": "true" if AUTO_RENEW else "false"})
+        # Etsy updateListing (6 Eyl 400): who_made / when_made / is_supply birlikte gonderilir
+        api.patch(f"/shops/{shop}/listings/{lid}", {"who_made": WHO_MADE, "when_made": "made_to_order", "is_supply": "false",
+                                                    "should_auto_renew": "true" if AUTO_RENEW else "false"})
         for pid, pname, vid, vname, scale in d.get("attr_plan") or []:
             body = {"value_ids": str(vid), "values": vname}
             if scale:
