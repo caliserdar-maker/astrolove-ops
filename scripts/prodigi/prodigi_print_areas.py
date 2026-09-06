@@ -2,7 +2,7 @@
 """
 Prodigi HPR 13 boyutun print-area pikselini API'den okur (salt okur) -> JSON.
 GET /products/GLOBAL-HPR-<SIZE> -> variants[0].printAreaSizes.default {horizontalResolution, verticalResolution}.
-Inc boyutlarda deger inc x 300 ile birebir olmali (degilse HATA); A serisi Prodigi'nin verdigi degerdir (tahmin yok).
+Prodigi print-area degeri esastir (inc x 300'den sapma yalniz not olarak yazilir; 11x14 = 3307x4200).
 Cikti: {"8x10": {"w": 2400, "h": 3000, "sku": "GLOBAL-HPR-8x10"}, ...}
 Kullanim: prodigi_print_areas.py --out PRODIGI_HPR_PRINT_AREAS.json
 """
@@ -37,10 +37,12 @@ def main():
             w, h = h, w
         if not w or not h:
             bad.append(f"{sku}: printAreaSizes yok"); continue
+        note = ""
         if inch and (w, h) != (inch[0] * 300, inch[1] * 300):
-            bad.append(f"{sku}: API {w}x{h} != inc x 300 {inch[0] * 300}x{inch[1] * 300}")
-        out[sz] = {"w": w, "h": h, "sku": sku}
-        log(f"{sz:<6} {w}x{h}")
+            # Prodigi print-area bazen inc x 300'den sapar (6 Eyl olcumu: 11x14 -> 3307x4200, 280 mm); API degeri esastir
+            note = f"inc x 300 = {inch[0] * 300}x{inch[1] * 300}; API farkli, API kullanildi"
+        out[sz] = {"w": w, "h": h, "sku": sku, "note": note}
+        log(f"{sz:<6} {w}x{h} {note}")
     if bad:
         sys.exit("HATA: " + "; ".join(bad))
     Path(a.out).write_text(json.dumps(out, indent=1))

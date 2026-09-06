@@ -270,12 +270,25 @@ def quota_ok(api, qmin=QUOTA_MIN):
 def ensure_shipping(api, shop, d, proc_min, proc_max):
     if d["shipping_profile_id"]:
         return d["shipping_profile_id"]
+    # Etsy createShopShippingProfile: destination_country_iso YA DA destination_region (eu/non_eu) zorunlu;
+    # "none" kabul edilmiyor (6 Eyl 400: "You must provide either a destination_country_iso code or a
+    # destination_region"). Birincil hedef US (ucretsiz); sonra eu ve non_eu bolgeleri ucretsiz eklenir.
     body = {"title": SHIPPING_TITLE, "origin_country_iso": "US", "primary_cost": 0, "secondary_cost": 0,
             "min_processing_time": proc_min, "max_processing_time": proc_max,
-            "processing_time_unit": "business_days", "destination_region": "none"}
+            "processing_time_unit": "business_days", "destination_country_iso": "US"}
     r = api.post(f"/shops/{shop}/shipping-profiles", body)
     d["shipping_profile_id"] = r.get("shipping_profile_id")
-    log(f"  kargo profili olusturuldu: {d['shipping_profile_id']}")
+    log(f"  kargo profili olusturuldu: {d['shipping_profile_id']} (US)")
+    added = []
+    for region in ("eu", "non_eu"):
+        try:
+            api.post(f"/shops/{shop}/shipping-profiles/{d['shipping_profile_id']}/destinations",
+                     {"primary_cost": 0, "secondary_cost": 0, "destination_region": region})
+            added.append(region)
+        except SystemExit as e:
+            log(f"  UYARI: {region} hedefi eklenemedi: {e}")
+    d["shipping_destinations"] = ["US"] + added
+    log(f"  kargo hedefleri: {d['shipping_destinations']}")
     return d["shipping_profile_id"]
 
 

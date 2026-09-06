@@ -152,8 +152,8 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p _st
-          rclone copy "gdrive:ASTROLOVE/TEMP/POD_PRINT_STATE" _st --include "shard_*.csv" -q
-          n_drive=$(rclone lsf "gdrive:ASTROLOVE/TEMP/POD_PRINT" -R --files-only --include "*.jpg" | wc -l)
+          rclone copy "gdrive:ASTROLOVE/TEMP/POD_PRINT_STATE" _st --include "shard_*.csv" -q || echo "shard STATE klasoru yok"
+          n_drive=$(rclone lsf "gdrive:ASTROLOVE/TEMP/POD_PRINT" -R --files-only --include "*.jpg" 2>/dev/null | wc -l || echo 0)
           echo "Drive TEMP/POD_PRINT jpg: $n_drive"
           N_DRIVE="$n_drive" python3 - <<'PY'
           import csv, glob, os
