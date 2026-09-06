@@ -93,7 +93,8 @@ jobs:
           set -euo pipefail
           rclone copyto "gdrive:ASTROLOVE/TEMP/PRODIGI/PRODIGI_HPR_SIZES.csv" hpr.csv
           python scripts/pod/factcheck.py --csv hpr.csv --out _fc
-          grep -c "KAYNAK YOK" _fc/FACTCHECK.md && echo "::warning::kaynaksiz satir var (karttan dusuruldu)" || true
+          n=$(grep -c "KAYNAK YOK →" _fc/FACTCHECK.md || true); echo "kaynaksiz satir: $n"
+          [ "$n" != "0" ] && echo "::warning::kaynaksiz satir var (karttan dusuruldu): $n" || true
       - name: Uret (shard ${{ matrix.shard }})
         env:
           FORCE: ${{ inputs.force }}
