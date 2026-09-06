@@ -50,11 +50,11 @@ EDITIONS = ["MIDNIGHT_BLUE", "DEEP_BLACK", "WARM_PARCHMENT", "CHAMPAGNE_IVORY", 
 ED_NAME = {"MIDNIGHT_BLUE": "Midnight Blue", "DEEP_BLACK": "Deep Black", "WARM_PARCHMENT": "Warm Parchment",
            "CHAMPAGNE_IVORY": "Champagne Ivory", "PURE_WHITE": "Pure White"}
 SIZES = ["8x10", "A4", "11x14", "12x16", "A3", "12x18", "16x20", "16x24", "A2", "18x24", "20x30", "24x36", "30x40"]
-SIZE_LABEL = {"8x10": "8x10 in (20.3×25.4 cm)", "A4": "A4 (21×29.7 cm)", "11x14": "11x14 in (27.9×35.6 cm)",
-              "12x16": "12x16 in (30.5×40.6 cm)", "A3": "A3 (29.7×42 cm)", "12x18": "12x18 in (30.5×45.7 cm)",
-              "16x20": "16x20 in (40.6×50.8 cm)", "16x24": "16x24 in (40.6×61 cm)", "A2": "A2 (41.9×59.4 cm)",
-              "18x24": "18x24 in (45.7×61 cm)", "20x30": "20x30 in (50.8×76.2 cm)", "24x36": "24x36 in (61×91.4 cm)",
-              "30x40": "30x40 in (76.2×101.6 cm)"}       # Mo, 6 Eyl: sira kucukten buyuge, tum edisyonlarda ayni fiyat
+SIZE_LABEL = {"8x10": "8x10 in (20.3×25.4 cm) · 4:5", "A4": "A4 (21×29.7 cm) · A-series", "11x14": "11x14 in (27.9×35.6 cm) · 11:14",
+              "12x16": "12x16 in (30.5×40.6 cm) · 3:4", "A3": "A3 (29.7×42 cm) · A-series", "12x18": "12x18 in (30.5×45.7 cm) · 2:3",
+              "16x20": "16x20 in (40.6×50.8 cm) · 4:5", "16x24": "16x24 in (40.6×61 cm) · 2:3", "A2": "A2 (41.9×59.4 cm) · A-series",
+              "18x24": "18x24 in (45.7×61 cm) · 3:4", "20x30": "20x30 in (50.8×76.2 cm) · 2:3", "24x36": "24x36 in (61×91.4 cm) · 2:3",
+              "30x40": "30x40 in (76.2×101.6 cm) · 3:4"}   # Mo 6 Eyl (EK 1): oran eklendi; sira kucukten buyuge
 MATERIALS = ["Hahnemuhle Photo Rag 308 gsm cotton paper", "archival pigment ink"]
 WHO_MADE = "i_did"                # Mo 6 Eyl: tasarim bize ait; uretim partneri Prodigi (production_partner_ids)
 AUTO_RENEW = True

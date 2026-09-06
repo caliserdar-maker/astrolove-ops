@@ -180,6 +180,8 @@ A2 (41.9×59.4 см)
 - Hazirlik durumu (processing profile): made_to_order 1-3 gun, readiness-state-definitions ucundan
   okunur/olusturulur; ilan `readiness_state_id` ile acilir (Etsy fiziksel ilanda zorunlu).
 - GPSR uretici/sorumlu kisi alanlari: Prodigi cevabi sonrasi (simdilik bos).
+- Size varyasyon etiketi (EK 1, Mo 6 Eyl): "18x24 in (45.7×61 cm) · 3:4", A serisi "A4 (21×29.7 cm) · A-series"
+  (`pod_listing_create.SIZE_LABEL`; mevcut ilanda `pod-inventory-update` ile).
 - SKU: `POD-<burc3>_<burc3>-<edisyon2>-<boyut>` (or. POD-ARI_LEO-MB-30x40; Etsy 32 karakter siniri; `scripts/etsy/pod_sku.py`).
 - Ilan alanlari (Mo 6 Eyl): who_made=i_did (production partner Prodigi), should_auto_renew=true,
   ozellikler Orientation=Vertical (Etsy "Portrait" karsiligi), Framing=Unframed, Number of pieces included=1, Material=Paper
