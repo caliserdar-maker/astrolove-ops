@@ -33,6 +33,7 @@ Baslik bu sablonda YOK: mevcut ilan basligina dokunulmaz.
 
 ✦ THE ARTWORK
 One original emblem merges the {S1} and {S2} symbols: fine lines on a calm, solid ground. Designed in-house by AstroLove for couples who love astrology. A quiet, modern statement for a bedroom, living room, or gallery wall.
+Sold unframed — the frames in the photos are for display only.
 
 ✦ MUSEUM-QUALITY MATERIALS
 - Hahnemühle Photo Rag 308 gsm, 100% cotton fine art paper
@@ -134,6 +135,7 @@ Aciklama (RU):
 
 ✦ АРТ
 Одна оригинальная эмблема объединяет символы {S1RU} и {S2RU}: тонкие линии на спокойном однотонном фоне. Разработано студией AstroLove для пар, которые любят астрологию. Тихий современный акцент для спальни, гостиной или галерейной стены.
+Продаётся без рамы — рамы на фото только для оформления кадра.
 
 ✦ МАТЕРИАЛЫ МУЗЕЙНОГО КАЧЕСТВА
 - Hahnemühle Photo Rag 308 г/м², 100% хлопковая художественная бумага
