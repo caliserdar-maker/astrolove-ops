@@ -217,7 +217,6 @@ def main():
     got = {v.get("value"): v.get("image_id") for v in vimg}
     md += ["", "### IS 3 Renk -> gorsel", "", "| renk | beklenen | okunan | sonuc |", "|---|---|---|---|"]
     md += [f"| {c} | {expect[c]} | {got.get(c)} | {'PASS' if got.get(c) == expect[c] else 'FARK -> POST'} |" for c in expect]
-    vi_fix = [c for c in expect if got.get(c) != expect[c]]
 
     status = mode
     if a.apply:
@@ -257,26 +256,29 @@ def main():
             res.append(f"aciklama EN {'PASS' if en_back else 'FAIL'}, RU {'PASS' if ru_back else 'FAIL'}; state {L2.get('state')}")
             if not (en_back and ru_back):
                 fails.append("aciklama")
-            # IS 3
-            if vi_fix:
-                vid_of = {v.get("value"): v.get("value_id") for v in vimg}
-                pid = next((v.get("property_id") for v in vimg), None)
-                if pid is None or any(vid_of.get(c) is None for c in expect):
-                    # value_id'ler envanterden
-                    for pr in back.get("products") or []:
-                        for pv in pr.get("property_values") or []:
-                            if (pv.get("property_name") or "").lower() != "size" and pv.get("values"):
-                                pid = pid or pv.get("property_id"); vid_of.setdefault(pv["values"][0], (pv.get("value_ids") or [None])[0])
-                api.post_json(f"/shops/{shop}/listings/{lid}/variation-images",
-                              {"variation_images": [{"property_id": pid, "value_id": vid_of[c], "image_id": expect[c]} for c in expect]})
-                vimg2 = (api.get(f"/shops/{shop}/listings/{lid}/variation-images", ok404=True) or {}).get("results") or []
-                got2 = {v.get("value"): v.get("image_id") for v in vimg2}
-                vi_ok = all(got2.get(c) == expect[c] for c in expect)
-                res.append(f"renk->gorsel duzeltildi {sum(1 for c in expect if got2.get(c) == expect[c])}/{len(expect)} {'PASS' if vi_ok else 'FAIL'}")
-                if not vi_ok:
-                    fails.append("renk->gorsel")
+            # IS 3: envanter PUT'u renk deger id'lerini yenileyebilir (EK 1 sonrasi 4 renk bagsiz kaldi) -> PUT SONRASI yeniden oku
+            vimg2 = (api.get(f"/shops/{shop}/listings/{lid}/variation-images", ok404=True) or {}).get("results") or []
+            got2 = {v.get("value"): v.get("image_id") for v in vimg2}
+            if any(got2.get(c) != expect[c] for c in expect):
+                vid_of, pid = {}, None
+                for pr in back.get("products") or []:            # deger id'leri PUT sonrasi envanterden
+                    for pv in pr.get("property_values") or []:
+                        if (pv.get("property_name") or "").lower() != "size" and pv.get("values"):
+                            pid = pid or pv.get("property_id"); vid_of.setdefault(pv["values"][0], (pv.get("value_ids") or [None])[0])
+                missing = [c for c in expect if vid_of.get(c) is None]
+                if pid is None or missing:
+                    fails.append(f"renk->gorsel value_id yok {missing}")
+                else:
+                    api.post_json(f"/shops/{shop}/listings/{lid}/variation-images",
+                                  {"variation_images": [{"property_id": pid, "value_id": vid_of[c], "image_id": expect[c]} for c in expect]})
+                    vimg3 = (api.get(f"/shops/{shop}/listings/{lid}/variation-images", ok404=True) or {}).get("results") or []
+                    got3 = {v.get("value"): v.get("image_id") for v in vimg3}
+                    n_ok = sum(1 for c in expect if got3.get(c) == expect[c])
+                    res.append(f"renk->gorsel POST ile duzeltildi {n_ok}/{len(expect)} {'PASS' if n_ok == len(expect) else 'FAIL ' + str(got3)}")
+                    if n_ok != len(expect):
+                        fails.append("renk->gorsel")
             else:
-                res.append("renk->gorsel 5/5 PASS (degisim yok)")
+                res.append(f"renk->gorsel {len(expect)}/{len(expect)} PASS (PUT sonrasi degisim yok)")
             status = ("PASS" if not fails else "FAIL") + " | " + " | ".join(res)
     md += ["", f"**Durum: {status}** | kota once {quota_before} / sonra {api.remaining}"]
     text = "\n".join(md)
