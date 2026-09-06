@@ -98,11 +98,11 @@ class Api:
             return None, f"outcome={d.get('outcome')}"
         return d["product"], ""
 
-    def quote(self, sku, attributes):
+    def quote(self, sku, attributes, dest=DEST_COUNTRY):
         item = {"sku": sku, "copies": 1, "assets": [{"printArea": "default"}]}
         if attributes:
             item["attributes"] = attributes
-        body = {"destinationCountryCode": DEST_COUNTRY, "currencyCode": CURRENCY, "items": [item]}
+        body = {"destinationCountryCode": dest, "currencyCode": CURRENCY, "items": [item]}
         r = self._call("POST", "/quotes", body)
         if r.status_code != 200:
             return None, f"quote HTTP {r.status_code}: {r.text[:160]}"
