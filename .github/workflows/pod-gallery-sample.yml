@@ -84,13 +84,21 @@ jobs:
           done
           echo "EDS_RESOLVED=$eds" >> "$GITHUB_ENV"
 
+      - name: Kaynak dogrulama (FACTCHECK)
+        run: |
+          set -euo pipefail
+          rclone copyto "gdrive:ASTROLOVE/TEMP/PRODIGI/PRODIGI_HPR_SIZES.csv" hpr.csv
+          python scripts/pod/factcheck.py --csv hpr.csv --out out
+          cat out/FACTCHECK.md >> "$GITHUB_STEP_SUMMARY"
+
       - name: Uret
         env:
           PAIR: ${{ inputs.pair }}
         run: |
           set -euo pipefail
           python scripts/pod/pod_gallery_sample.py --src src --out out --fonts fonts \
-            --pair "$PAIR" --editions "$EDS_RESOLVED" --spellcheck
+            --pair "$PAIR" --editions "$EDS_RESOLVED" --spellcheck --verified out/verified.json
+          cat out/PALETTE_REPORT.md >> "$GITHUB_STEP_SUMMARY"
           python - <<'PY'
           import json, os
           from PIL import Image
@@ -110,8 +118,12 @@ jobs:
           PAIR: ${{ inputs.pair }}
         run: |
           set -euo pipefail
-          rclone copy out "gdrive:ASTROLOVE/TEMP/POD_SAMPLE/$PAIR" --transfers 8 --stats-one-line -v 2>&1 | tail -2
-          echo "Drive: TEMP/POD_SAMPLE/$PAIR/ guncellendi"
+          # kareler: TEMP/POD_SAMPLE/<PAIR>/<ED>/ ; kontak + raporlar: TEMP/POD_SAMPLE/ (ust seviye)
+          rclone copy out "gdrive:ASTROLOVE/TEMP/POD_SAMPLE/$PAIR" --exclude "CONTACT_*.jpg" --exclude "*.md" --exclude "*.json" --transfers 8 --stats-one-line -v 2>&1 | tail -1
+          rclone copy out "gdrive:ASTROLOVE/TEMP/POD_SAMPLE" --include "CONTACT_*.jpg" --include "*.md" --include "build_report.json" --transfers 8 -q
+          # onceki kosunun cift altindaki eski kontak sayfalari (rev 1) kaldirilir
+          rclone delete "gdrive:ASTROLOVE/TEMP/POD_SAMPLE/$PAIR" --include "CONTACT_*.jpg" --include "build_report.json" -q || true
+          echo "Drive: TEMP/POD_SAMPLE/ (kontak, FACTCHECK.md, PALETTE_REPORT.md) + TEMP/POD_SAMPLE/$PAIR/<ED>/ guncellendi"
 
       - name: Artifact (kontak sayfalari)
         if: always()
@@ -121,4 +133,6 @@ jobs:
           path: |
             out/CONTACT_*.jpg
             out/build_report.json
+            out/FACTCHECK.md
+            out/PALETTE_REPORT.md
           if-no-files-found: ignore

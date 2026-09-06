@@ -41,39 +41,56 @@ SIZES = [  # (etiket, en_in, boy_in, en_cm, boy_cm, oran grubu)
     ("12x18", 12, 18, 30.5, 45.7, "2:3"), ("16x24", 16, 24, 40.6, 61.0, "2:3"),
     ("20x30", 20, 30, 50.8, 76.2, "2:3"), ("24x36", 24, 36, 61.0, 91.4, "2:3"),
     ("11x14", 11, 14, 27.9, 35.6, "11:14"),
-    ("A4", 8.3, 11.7, 21.0, 29.7, "A"), ("A3", 11.7, 16.5, 29.7, 42.0, "A"), ("A2", 16.5, 23.4, 42.0, 59.4, "A"),
+    ("A4", 8.3, 11.7, 21.0, 29.7, "A"), ("A3", 11.7, 16.5, 29.7, 42.0, "A"), ("A2", 16.5, 23.4, 41.9, 59.4, "A"),
 ]
 GROUP_ORDER = ["3:4", "2:3", "A", "4:5", "11:14"]
 GROUP_TITLE = {"3:4": "3:4", "2:3": "2:3", "A": "A SERIES", "4:5": "4:5", "11:14": "11:14"}
 
 TEXT = {
     "PAPER": {
-        "kicker": "MUSEUM-GRADE FINE ART PAPER", "title": "Paper & Quality",
-        "rows": [("HAHNEMÜHLE PHOTO RAG", "308 gsm fine art paper with a soft matte surface"),
-                 ("100% COTTON", "Pure cotton rag base, no wood pulp"),
-                 ("ACID-FREE", "Archival paper that will not yellow over time"),
-                 ("ARCHIVAL PIGMENT GICLÉE", "Fade-resistant pigment inks, printed at 300 DPI"),
-                 ("MUSEUM QUALITY", "The paper galleries and collectors choose")],
-        "footer": "Printed on Hahnemühle Photo Rag",
+        "kicker": ("P_kicker", "MUSEUM-GRADE FINE ART PAPER"), "title": "Paper & Quality",
+        "rows": [("P1", "HAHNEMÜHLE PHOTO RAG", "308 gsm fine art paper with a soft matte surface"),
+                 ("P2", "100% COTTON", "Made from 100% cotton rag"),
+                 ("P3", "ACID-FREE", "Acid- and lignin-free, ISO 9706 conform"),
+                 ("P4", "ARCHIVAL PIGMENT GICLÉE", "Giclée print with pigment inks at 300 DPI"),
+                 ("P5", "MUSEUM QUALITY", "Highest age resistance, ISO 9706 conform")],
+        "footer": ("P_footer", "Printed on Hahnemühle Photo Rag"),
     },
-    "SIZES": {"kicker": "CHOOSE YOUR SIZE", "title": "Size Guide", "footer": "Pick the Size That Fits Your Wall"},
+    "SIZES": {"kicker": ("S_kicker", "CHOOSE YOUR SIZE"), "title": "Size Guide",
+              "footer": ("S_footer", "Pick the Size That Fits Your Wall")},
     "CARE": {
-        "kicker": "SHIPPING & CARE", "title": "Shipping & Care",
-        "rows": [("ROLLED IN A TUBE", "Shipped rolled in a sturdy tube; 8x10 and A4 ship flat"),
-                 ("FRAME NOT INCLUDED", "Print only, ready for the frame of your choice"),
-                 ("FLAT GOLDEN INK", "Gold tones are printed as flat golden ink, not metallic foil"),
-                 ("HANDLE BY THE EDGES", "Keep out of direct sunlight and frame under glass"),
-                 ("SHIPS FROM THE US", "EU and UK orders are printed at our UK/EU lab")],
-        "footer": "Made to Order, Just for You",
+        "kicker": ("C_kicker", "SHIPPING & CARE"), "title": "Shipping & Care",
+        "rows": [("C1", "ROLLED IN A TUBE", "Rolled in a thick cardboard tube; EU orders A4 and smaller ship flat"),
+                 ("C2", "FRAME NOT INCLUDED", "Print only, ready for the frame of your choice"),
+                 ("C3", "FLAT GOLDEN INK", "Gold tones are printed as flat golden ink, not metallic foil"),
+                 ("C4", "HANDLE BY THE EDGES", "Touch only the margins to avoid fingerprints"),
+                 ("C5", "SHIPS FROM THE US", "EU and UK orders are printed at our UK/EU lab")],
+        "footer": ("C_footer", "Made to Order, Just for You"),
     },
     "common": {"bond": "TWO SOULS · ONE BOND", "copy": "© 2026 ASTROLOVE"},
 }
-SPELL_OK = {"hahnemühle", "giclée", "gsm", "astrolove", "dpi", "a4", "a3", "a2", "8x10", "uk", "eu", "us",
+SPELL_OK = {"hahnemühle", "giclée", "gsm", "astrolove", "dpi", "iso", "a4", "a3", "a2", "8x10", "uk", "eu", "us",
             "11x14", "12x16", "12x18", "16x20", "16x24", "18x24", "20x30", "24x36", "30x40", "in", "cm"}
 
 
 def log(m):
     print(m, flush=True)
+
+
+VERIFIED = None                               # None = filtre yok; dict = kaynaksiz satir dusur
+
+
+def ok(fid):
+    return VERIFIED is None or VERIFIED.get(fid, False)
+
+
+def vtext(item):
+    """(fid, metin) -> metin | '' (kaynaksizsa)."""
+    return item[1] if ok(item[0]) else ""
+
+
+def rows_of(card):
+    return [(h, b) for fid, h, b in TEXT[card]["rows"] if ok(fid)]
 
 
 # ------------------------------------------------------------------ palet / font
@@ -139,12 +156,14 @@ def card_base(pal, F, kicker, title, pair_txt, footer):
     cift satiri ~y495, bar y1990-2181 x104-2894 r30, bar serif y2031-2094, caps y2121-2141."""
     im = Image.new("RGB", (W, H), pal["bg"])
     d = ImageDraw.Draw(im)
-    draw_tracked(d, (W / 2, 138), kicker, F.f("sans", 40, 500), pal["ink"], tracking=14, anchor="c")
+    if kicker:
+        draw_tracked(d, (W / 2, 138), kicker, F.f("sans", 40, 500), pal["ink"], tracking=14, anchor="c")
     d.text((W / 2, 352), title, font=F.f("serif", 190, 500), fill=pal["ink"], anchor="ms")
     d.rectangle([972, 417, 2027, 419], fill=pal["rule"])
     draw_tracked(d, (W / 2, 482), pair_txt, F.f("sans", 44, 500), pal["ink"], tracking=16, anchor="c")
     d.rounded_rectangle([104, 1990, 2894, 2181], radius=30, fill=pal["bar"])
-    d.text((W / 2, 2062), footer, font=F.f("serif", 78, 500), fill=pal["bartext"], anchor="mm")
+    if footer:
+        d.text((W / 2, 2062), footer, font=F.f("serif", 78, 500), fill=pal["bartext"], anchor="mm")
     draw_tracked(d, (W / 2, 2118), TEXT["common"]["bond"], F.f("sans", 28, 500), pal["bartext"], tracking=9, anchor="c")
     draw_tracked(d, (2795, 2118), TEXT["common"]["copy"], F.f("sans", 28, 500), pal["bartext"], tracking=7, anchor="r")
     return im, d
@@ -160,6 +179,7 @@ def paste_shadowed(im, thumb, xy, blur=28, alpha=90):
 
 
 def numbered_rows(d, F, pal, rows, x0, y0, step, r=52):
+    y0 = y0 + (5 - len(rows)) * step / 2       # 5 satirlik alan icinde dikey ortala
     for i, (head, body) in enumerate(rows):
         cy = y0 + i * step
         d.ellipse([x0, cy - r, x0 + 2 * r, cy + r], fill=pal["bar"])
@@ -170,104 +190,123 @@ def numbered_rows(d, F, pal, rows, x0, y0, step, r=52):
 
 def card_paper(pal, F, poster, pair_txt):
     t = TEXT["PAPER"]
-    im, d = card_base(pal, F, t["kicker"], t["title"], pair_txt, t["footer"])
+    im, d = card_base(pal, F, vtext(t["kicker"]), t["title"], pair_txt, vtext(t["footer"]))
     th = poster.resize((840, 1120), Image.LANCZOS)
     paste_shadowed(im, th, (330, 640))
-    numbered_rows(d, F, pal, t["rows"], 1400, 760, 212)
+    numbered_rows(d, F, pal, rows_of("PAPER"), 1400, 760, 212)
     return im
 
 
-def tube_icon(pal, poster):
-    """Egik kargo tupu: gradyanli silindir, sol kapak, sag agizdan eksen boyunca cikan rulo poster."""
-    c_dark, c_mid, c_light = mix(pal["bar"], (0, 0, 0), 0.3), pal["bar"], mix(pal["bar"], pal["bg"], 0.4)
-    tw, th = 1150, 300
-    cw = tw + 420
-    body = Image.new("RGBA", (cw, th), (0, 0, 0, 0))
+def tube_icon(pal):
+    """Sade, cizgisel kargo tupu: kontur silindir + sag agiz halkasi + sol kapak; poster yok."""
+    S = 3
+    tw, th = 1150 * S, 300 * S
+    ink, fill = pal["bar"], mix(pal["bar"], pal["bg"], 0.86)
+    body = Image.new("RGBA", (tw + 60 * S, th + 20 * S), (0, 0, 0, 0))
     bd = ImageDraw.Draw(body)
-    for i in range(th):                       # dikey gradyan: ust acik -> orta koyu -> alt orta
-        tt = i / (th - 1)
-        c = mix(c_light, c_dark, min(1, tt * 1.7)) if tt < 0.6 else mix(c_dark, c_mid, (tt - 0.6) / 0.4)
-        bd.line([80, i, tw - 180, i], fill=c + (255,))
-    mask = Image.new("L", body.size, 0)
-    ImageDraw.Draw(mask).rounded_rectangle([80, 0, tw - 180, th - 1], radius=48, fill=255)
-    body.putalpha(mask)
-    bd = ImageDraw.Draw(body)
-    bd.ellipse([40, 0, 120, th - 1], fill=c_dark + (255,))                       # sol kapak (yandan)
-    bd.ellipse([tw - 330, 0, tw - 30, th - 1], fill=c_mid + (255,))              # sag agiz zemin
-    bd.ellipse([tw - 285, 45, tw - 75, th - 45], fill=mix(pal["ink"], (0, 0, 0), 0.45) + (255,))  # ic bosluk
-    # rulo: poster 90 derece, eksen boyunca disari; silindirik golge (dikey gradyan)
-    rw, rh = 520, 170
-    roll = poster.resize((rh, rw), Image.LANCZOS).rotate(90, expand=True).convert("RGB")
-    shade = Image.new("L", (rw, rh), 0)
-    sd = ImageDraw.Draw(shade)
-    for y in range(rh):
-        tt = abs(y - rh * 0.4) / (rh * 0.6)
-        sd.line([0, y, rw, y], fill=int(255 * min(1, 0.1 + 0.9 * tt ** 1.5)))
-    roll = Image.composite(Image.new("RGB", (rw, rh), (0, 0, 0)), roll, shade.point(lambda v: int(v * 0.8))).convert("RGBA")
-    rm = Image.new("L", (rw, rh), 0)
-    ImageDraw.Draw(rm).rounded_rectangle([0, 0, rw - 1, rh - 1], radius=80, fill=255)
-    roll.putalpha(rm)
-    body.paste(roll, (tw - 200, (th - rh) // 2), roll)
-    bd.ellipse([tw - 330, 0, tw - 30, th - 1], outline=c_light + (255,), width=8)  # agiz halkasi (rulo ustune)
+    lw = 7 * S
+    bd.rounded_rectangle([30 * S, 10 * S, tw - 150 * S, th + 10 * S], radius=52 * S, fill=fill + (255,), outline=ink + (255,), width=lw)
+    bd.ellipse([tw - 300 * S, 10 * S, tw, th + 10 * S], fill=fill + (255,), outline=ink + (255,), width=lw)        # sag agiz
+    bd.ellipse([tw - 258 * S, 52 * S, tw - 42 * S, th - 32 * S], fill=mix(pal["bar"], pal["bg"], 0.6) + (255,), outline=ink + (255,), width=lw)  # ic bosluk
+    bd.line([tw - 150 * S, 10 * S + lw, tw - 150 * S, th + 10 * S - lw], fill=fill + (255,), width=lw + 2)           # kavsak kapat
+    bd.line([tw - 150 * S, 10 * S, tw - 150 * S, th + 10 * S], fill=ink + (255,), width=2 * S)
+    bd.arc([30 * S - 40 * S, 10 * S, 30 * S + 60 * S, th + 10 * S], 270, 90, fill=ink + (255,), width=lw)            # sol kapak kavisi
+    bd.line([120 * S, 10 * S + 30 * S, tw - 320 * S, 10 * S + 30 * S], fill=mix(ink, fill, 0.55) + (255,), width=2 * S)  # ince isik cizgisi
+    body = body.resize((body.width // S, body.height // S), Image.LANCZOS)
     return body.rotate(30, expand=True, resample=Image.BICUBIC)
 
 
 def card_care(pal, F, poster, pair_txt):
     t = TEXT["CARE"]
-    im, d = card_base(pal, F, t["kicker"], t["title"], pair_txt, t["footer"])
-    icon = tube_icon(pal, poster)
-    sh = Image.new("RGBA", icon.size, (0, 0, 0, 0))
-    sh.paste((0, 0, 0, 70), (0, 0, icon.width, icon.height), icon.split()[3])
-    sh = sh.filter(ImageFilter.GaussianBlur(30))
+    im, d = card_base(pal, F, vtext(t["kicker"]), t["title"], pair_txt, vtext(t["footer"]))
+    icon = tube_icon(pal)
     x, y = 200 + (1000 - icon.width) // 2, 700 + (1000 - icon.height) // 2
-    im.paste(sh, (x + 10, y + 40), sh)
     im.paste(icon, (x, y), icon)
-    numbered_rows(d, F, pal, t["rows"], 1400, 760, 212)
+    numbered_rows(d, F, pal, rows_of("CARE"), 1400, 760, 212)
     return im
+
+
+def silhouette(height_px, color):
+    """Sade, anatomik oranli duz vektor siluet (on gorunus, ayakta). Yukseklik = 175 cm referansi."""
+    S = 4
+    Hh = height_px * S
+    u = lambda x, y: (x * Hh, y * Hh)          # birim: boy = 1
+    img = Image.new("RGBA", (int(0.34 * Hh), int(Hh)), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    cx = 0.17
+    # bas
+    d.ellipse([u(cx - 0.045, 0.0)[0], 0, u(cx + 0.045, 0.13)[0], 0.13 * Hh], fill=color)
+    # boyun
+    d.rectangle([u(cx - 0.02, 0.12), u(cx + 0.02, 0.165)], fill=color)
+    # govde (omuz -> bel -> kalca), sag yarim + ayna
+    torso = [(cx, 0.16), (cx + 0.09, 0.17), (cx + 0.115, 0.20), (cx + 0.10, 0.30), (cx + 0.082, 0.40),
+             (cx + 0.086, 0.47), (cx + 0.092, 0.53), (cx, 0.56)]
+    poly = torso + [(2 * cx - x, y) for x, y in reversed(torso)]
+    d.polygon([u(*p) for p in poly], fill=color)
+    # kollar (govdeden hafif ayrik)
+    for sgn in (1, -1):
+        arm = [(cx + sgn * 0.095, 0.185), (cx + sgn * 0.135, 0.20), (cx + sgn * 0.15, 0.42), (cx + sgn * 0.152, 0.60),
+               (cx + sgn * 0.125, 0.61), (cx + sgn * 0.118, 0.43), (cx + sgn * 0.10, 0.30)]
+        d.polygon([u(*p) for p in arm], fill=color)
+        d.ellipse([u(cx + sgn * 0.14 - 0.022, 0.59), u(cx + sgn * 0.14 + 0.022, 0.635)], fill=color)
+    # bacaklar (kalcadan ayaga incelen) ve ayaklar
+    for sgn in (1, -1):
+        leg = [(cx + sgn * 0.010, 0.545), (cx + sgn * 0.092, 0.53), (cx + sgn * 0.078, 0.75),
+               (cx + sgn * 0.066, 0.955), (cx + sgn * 0.026, 0.955), (cx + sgn * 0.028, 0.75)]
+        d.polygon([u(*p) for p in leg], fill=color)
+        foot = [(cx + sgn * 0.02, 0.955), (cx + sgn * 0.07, 0.955), (cx + sgn * 0.10, 0.99), (cx + sgn * 0.02, 1.0)]
+        d.polygon([u(*p) for p in foot], fill=color)
+    return img.resize((img.width // S, img.height // S), Image.LANCZOS)
 
 
 def card_sizes(pal, F, poster, pair_txt):
     t = TEXT["SIZES"]
-    im, d = card_base(pal, F, t["kicker"], t["title"], pair_txt, t["footer"])
+    im, d = card_base(pal, F, vtext(t["kicker"]), t["title"], pair_txt, vtext(t["footer"]))
     s = 6.8                                   # px / cm
     floor_y = 1905
     hang = 52                                 # poster alt kenari yerden (cm)
-    gold = (200, 150, 48)
-    colors = {"3:4": pal["ink"], "2:3": gold, "A": pal["bar"] if pal["bar"] != pal["ink"] else mix(pal["ink"], gold, 0.5),
-              "4:5": mix(pal["ink"], gold, 0.55), "11:14": mix(pal["ink"], pal["bg"], 0.5)}
-    if abs(sum(colors["A"]) - sum(colors["3:4"])) < 60:      # bar ~ ink ise ayirt edilsin
-        colors["A"] = mix(pal["ink"], pal["bg"], 0.3)
-    d.line([250, floor_y, 2760, floor_y], fill=mix(pal["ink"], pal["bg"], 0.6), width=3)
-    # insan silueti 175 cm
-    px, ph = 430, 175 * s
-    top = floor_y - ph
-    sil = mix(pal["ink"], pal["bg"], 0.55)
-    d.ellipse([px - 66, top, px + 66, top + 132], fill=sil)
-    d.rounded_rectangle([px - 125, top + 152, px + 125, top + 680], radius=100, fill=sil)
-    d.rounded_rectangle([px - 108, top + 660, px - 14, floor_y], radius=32, fill=sil)
-    d.rounded_rectangle([px + 14, top + 660, px + 108, floor_y], radius=32, fill=sil)
-    draw_tracked(d, (px, floor_y + 24), "175 CM \u00b7 5'9\"", F.f("sans", 26, 500), mix(pal["ink"], pal["bg"], 0.3), tracking=4, anchor="c")
-    # gruplar: sabit 430 px sutun, ic ice dikdortgenler sol-alt koseden hizali
-    pitch, x0 = 430, 660
+    accent = pal["bar"]
+    neutral_fill = mix(pal["ink"], pal["bg"], 0.90)
+    neutral_line = mix(pal["ink"], pal["bg"], 0.45)
+    label_col = mix(pal["ink"], pal["bg"], 0.15)
+    d.line([250, floor_y, 2760, floor_y], fill=neutral_line, width=3)
+    # siluet 175 cm
+    sil = silhouette(175 * s, mix(pal["ink"], pal["bg"], 0.5))
+    px = 400
+    im.paste(sil, (px - sil.width // 2, floor_y - sil.height), sil)
+    d = ImageDraw.Draw(im)
+    if ok("S_human"):
+        draw_tracked(d, (px, floor_y + 24), "175 CM \u00b7 5'9\"", F.f("sans", 26, 500), mix(pal["ink"], pal["bg"], 0.3), tracking=4, anchor="c")
+    # 5 grup: esit aralikli sutunlar, ortak taban, alt-orta hizali ic ice dikdortgenler
+    pitch, x0 = 430, 640
+    base_y = floor_y - hang * s
     overlay = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     od = ImageDraw.Draw(overlay)
-    base_y = floor_y - hang * s
+    labels = []
     for gi, g in enumerate(GROUP_ORDER):
-        x = x0 + gi * pitch
+        cxg = x0 + gi * pitch + pitch // 2
         items = sorted([z for z in SIZES if z[5] == g], key=lambda z: -z[4])
-        col = colors[g]
-        for lab, win, hin, wcm, hcm, _ in items:
+        for k, (lab, win, hin, wcm, hcm, _) in enumerate(items):
             w, h = wcm * s, hcm * s
-            od.rectangle([x, base_y - h, x + w, base_y], fill=col + (40,), outline=col + (255,), width=4)
-            d.text((x + w - 14, base_y - h + 12), lab, font=F.f("sans", 28, 600), fill=col, anchor="ra")
+            x1, y1 = cxg - w / 2, base_y - h
+            od.rectangle([x1, y1, x1 + w, base_y], fill=(neutral_fill if k == 0 else pal["bg"]) + (255,),
+                         outline=(accent if k == 0 else neutral_line) + (255,), width=4 if k == 0 else 3)
+            labels.append(((cxg, y1 + 12), lab))
+    im.paste(overlay, (0, 0), overlay)
+    d = ImageDraw.Draw(im)
+    for xy, lab in labels:
+        d.text(xy, lab, font=F.f("sans", 27, 600), fill=label_col, anchor="ma")
+    for gi, g in enumerate(GROUP_ORDER):
+        cxg = x0 + gi * pitch + pitch // 2
+        items = sorted([z for z in SIZES if z[5] == g], key=lambda z: -z[4])
         ly = base_y + 30
-        draw_tracked(d, (x, ly), GROUP_TITLE[g], F.f("sans", 30, 700), col, tracking=4)
-        ly += 46
+        draw_tracked(d, (cxg, ly), GROUP_TITLE[g], F.f("sans", 30, 700), accent, tracking=4, anchor="c")
+        d.line([cxg - 60, ly + 44, cxg + 60, ly + 44], fill=accent, width=2)
+        ly += 62
         for lab, win, hin, wcm, hcm, _ in items:
             line = f"{lab} in \u00b7 {wcm:g}\u00d7{hcm:g} cm" if not lab.startswith("A") else f"{lab} \u00b7 {win:g}\u00d7{hin:g} in \u00b7 {wcm:g}\u00d7{hcm:g} cm"
-            d.text((x, ly), line, font=F.f("sans", 26, 400), fill=mix(pal["ink"], pal["bg"], 0.2))
+            d.text((cxg, ly), line, font=F.f("sans", 26, 400), fill=mix(pal["ink"], pal["bg"], 0.2), anchor="ma")
             ly += 36
-    im.paste(overlay, (0, 0), overlay)
     return im
 
 
@@ -280,8 +319,8 @@ def spellcheck():
     sp = SpellChecker()
     words = set()
     for k in ("PAPER", "SIZES", "CARE"):
-        blob = " ".join([TEXT[k]["kicker"], TEXT[k]["title"], TEXT[k]["footer"]] +
-                        [a + " " + b for a, b in TEXT[k].get("rows", [])])
+        blob = " ".join([TEXT[k]["kicker"][1], TEXT[k]["title"], TEXT[k]["footer"][1]] +
+                        [h + " " + b for _, h, b in TEXT[k].get("rows", [])])
         words |= {w.lower() for w in re.findall(r"[A-Za-zÀ-ÿ']+", blob)}
     words |= {w.lower() for w in re.findall(r"[A-Za-z']+", " ".join(TEXT["common"].values()))}
     bad = sorted(w for w in sp.unknown(words) if w not in SPELL_OK)
@@ -300,6 +339,16 @@ def find_src(src_ed, rank):
     if not c:
         raise FileNotFoundError(f"{src_ed}/{rank}_WA_*")
     return c[0]
+
+
+def measure(card_p):
+    """Uretilen kartta zemin / bar / baslik murekkebi / aksan (numara dairesi) olcumu."""
+    a = np.array(Image.open(card_p).convert("RGB"))
+    t = a[200:360, 900:2100].reshape(-1, 3)
+    return {"bg": tuple(int(v) for v in np.median(a[400:1800, 4:16].reshape(-1, 3), axis=0)),
+            "bar": tuple(int(v) for v in a[2120, 1500]),
+            "ink": tuple(int(v) for v in t[t.sum(1).argmin()]),
+            "accent": tuple(int(v) for v in a[2120, 1500])}
 
 
 def contact(out_ed, name, out_p, F):
@@ -326,7 +375,12 @@ def main():
     ap.add_argument("--editions", default=",".join(EDITIONS))
     ap.add_argument("--spellcheck", action="store_true")
     ap.add_argument("--only-new", action="store_true", help="yalniz 3 yeni kart (yerel prototip)")
+    ap.add_argument("--verified", help="factcheck verified.json; kaynaksiz satirlar karttan dusurulur")
     a = ap.parse_args()
+    global VERIFIED
+    if a.verified:
+        VERIFIED = json.loads(Path(a.verified).read_text())
+        log(f"kaynak filtresi: {sum(VERIFIED.values())}/{len(VERIFIED)} satir kaynakli; dusenler: {[k for k, v in VERIFIED.items() if not v]}")
     if a.spellcheck:
         spellcheck()
     F = Fonts(a.fonts)
@@ -347,7 +401,9 @@ def main():
                 im = {"PAPER": card_paper, "SIZES": card_sizes, "CARE": card_care}[what](pal, F, poster, pair_txt)
                 p = out / f"{outno}_{what}_{a.pair}_{ed}.jpg"
                 save_jpg(im, p, 95)
-                made.append((outno, what, "yeni"))
+                mp = measure(p)
+                dev = max(abs(mp[k][i] - pal[k][i]) for k in ("bg", "bar", "ink") for i in range(3))
+                made.append((outno, what, "yeni", {"olcum": mp, "referans_sapma_max": dev}))
             else:
                 s = find_src(src, what)
                 p = out / f"{outno}_{s.stem.split('_', 1)[1]}.jpg"
@@ -361,6 +417,15 @@ def main():
         el = time.time() - t0
         log(f"[{n}/{len(eds)}] {ed:<16} {len(made)} kare  gecen={el:.0f}s kalan~{el / n * (len(eds) - n):.0f}s")
     (Path(a.out) / "build_report.json").write_text(json.dumps(report, indent=1, ensure_ascii=False))
+    md = ["# Palet uyumu raporu (yeni kartlar vs edisyonun mevcut 10_ karti)", "",
+          "| edisyon | kart | zemin | bar | baslik | referans zemin/bar/baslik | max sapma |", "|---|---|---|---|---|---|---|"]
+    for ed, r in report.items():
+        pal = r["palette"]
+        for m in r["frames"]:
+            if len(m) == 4:
+                o = m[3]["olcum"]
+                md.append(f"| {ed} | {m[1]} | {o['bg']} | {o['bar']} | {o['ink']} | {pal['bg']} / {pal['bar']} / {pal['ink']} | {m[3]['referans_sapma_max']} |")
+    (Path(a.out) / "PALETTE_REPORT.md").write_text("\n".join(md) + "\n", encoding="utf-8")
     log(f"bitti: {len(eds)} edisyon, {time.time() - t0:.0f}s")
 
 
