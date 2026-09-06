@@ -267,26 +267,33 @@ def quota_ok(api, qmin=QUOTA_MIN):
         return True
 
 
-def ensure_shipping(api, shop, d, proc_min, proc_max, origin_zip, days_us, days_eu):
-    """Mo karari (6 Eyl): hedefler US + EU (tum AB), ucret 0, teslim 5-12 is gunu (UK/EU lab).
-    Etsy: destination_country_iso ya da destination_region (eu/non_eu) zorunlu ('none' reddedilir);
-    origin_postal_code zorunlu; her hedef icin min/max_delivery_days (ya da kargo+sinif) zorunlu."""
+# Kargo profili karari (Mo, 6 Eyl 2026): cikis US 28216 (Prodigi Charlotte lab); US 3-8, CA/AU/UK 5-10,
+# EU (tum AB) 5-12 is gunu; ucret 0; islem suresi 1-3 is gunu. GPSR/uretici alanlari simdilik bos.
+SHIP_ORIGIN_ZIP = "28216"
+SHIP_DESTS = [("country", "US", 3, 8), ("country", "CA", 5, 10), ("country", "AU", 5, 10), ("country", "GB", 5, 10), ("region", "eu", 5, 12)]
+
+
+def ensure_shipping(api, shop, d, proc_min, proc_max, origin_zip):
+    """Etsy: destination_country_iso ya da destination_region zorunlu ('none' reddedilir); origin_postal_code
+    zorunlu; her hedef icin min/max_delivery_days zorunlu (6 Eyl 400'leri)."""
     if d["shipping_profile_id"]:
         return d["shipping_profile_id"]
-    if not origin_zip:
-        raise SystemExit("HATA: kargo profili icin --origin-postal-code gerekli (Etsy zorunlu tutuyor)")
+    kind, code, dmin, dmax = SHIP_DESTS[0]
     body = {"title": SHIPPING_TITLE, "origin_country_iso": "US", "origin_postal_code": origin_zip,
             "primary_cost": 0, "secondary_cost": 0,
             "min_processing_time": proc_min, "max_processing_time": proc_max, "processing_time_unit": "business_days",
-            "destination_country_iso": "US", "min_delivery_days": days_us[0], "max_delivery_days": days_us[1]}
+            "destination_country_iso": code, "min_delivery_days": dmin, "max_delivery_days": dmax}
     r = api.post(f"/shops/{shop}/shipping-profiles", body)
     d["shipping_profile_id"] = r.get("shipping_profile_id")
-    log(f"  kargo profili olusturuldu: {d['shipping_profile_id']} (US {days_us[0]}-{days_us[1]} gun, 0 USD)")
-    api.post(f"/shops/{shop}/shipping-profiles/{d['shipping_profile_id']}/destinations",
-             {"primary_cost": 0, "secondary_cost": 0, "destination_region": "eu",
-              "min_delivery_days": days_eu[0], "max_delivery_days": days_eu[1]})
-    d["shipping_destinations"] = ["US", "eu"]
-    log(f"  kargo hedefleri: {d['shipping_destinations']} (EU {days_eu[0]}-{days_eu[1]} gun, 0 USD)")
+    log(f"  kargo profili olusturuldu: {d['shipping_profile_id']} ({code} {dmin}-{dmax} gun, 0 USD, cikis {origin_zip})")
+    dests = [code]
+    for kind, code, dmin, dmax in SHIP_DESTS[1:]:
+        body = {"primary_cost": 0, "secondary_cost": 0, "min_delivery_days": dmin, "max_delivery_days": dmax}
+        body["destination_country_iso" if kind == "country" else "destination_region"] = code
+        api.post(f"/shops/{shop}/shipping-profiles/{d['shipping_profile_id']}/destinations", body)
+        dests.append(code)
+        log(f"  hedef eklendi: {code} {dmin}-{dmax} gun")
+    d["shipping_destinations"] = dests
     return d["shipping_profile_id"]
 
 
@@ -392,11 +399,9 @@ def main():
     ap.add_argument("--return-policy-id", default="")
     ap.add_argument("--return-policy-spec", default="", help="magazada iade politikasi yoksa apply'da olusturulur: returns=1,exchanges=1,deadline=30")
     ap.add_argument("--quota-min", type=int, default=QUOTA_MIN, help="bu degerin altinda yazma yok (varsayilan 400)")
-    ap.add_argument("--origin-postal-code", default="", help="Etsy kargo profili cikis posta kodu (zorunlu)")
-    ap.add_argument("--delivery-days-us", default="5,12", help="US teslim min,max is gunu")
-    ap.add_argument("--delivery-days-eu", default="5,12", help="EU teslim min,max is gunu (Mo 6 Eyl: 5-12)")
-    ap.add_argument("--processing-min", type=int, default=3)
-    ap.add_argument("--processing-max", type=int, default=5)
+    ap.add_argument("--origin-postal-code", default=SHIP_ORIGIN_ZIP, help="kargo profili cikis posta kodu (Mo: 28216)")
+    ap.add_argument("--processing-min", type=int, default=1)
+    ap.add_argument("--processing-max", type=int, default=3)
     g = ap.add_mutually_exclusive_group(required=True)
     g.add_argument("--dry-run", action="store_true")
     g.add_argument("--apply", action="store_true")
@@ -468,8 +473,7 @@ def main():
             raise SystemExit(f"HATA: apply icin eksik: fiyat {missing}; kesif {iss}")
         if not quota_ok(api, a.quota_min):
             raise SystemExit(f"HATA: kota {api.remaining} < {a.quota_min}; yazma yok")
-        days = lambda v: tuple(int(x) for x in v.split(","))
-        ensure_shipping(api, shop, d, a.processing_min, a.processing_max, a.origin_postal_code.strip(), days(a.delivery_days_us), days(a.delivery_days_eu))
+        ensure_shipping(api, shop, d, a.processing_min, a.processing_max, a.origin_postal_code.strip())
         ensure_section(api, shop, d)
         ensure_return_policy(api, shop, d)
         t0 = time.time()

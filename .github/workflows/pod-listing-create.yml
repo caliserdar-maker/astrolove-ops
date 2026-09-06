@@ -28,13 +28,9 @@ on:
         options: [MIDNIGHT_BLUE, DEEP_BLACK, WARM_PARCHMENT, CHAMPAGNE_IVORY, PURE_WHITE]
         default: MIDNIGHT_BLUE
       origin_postal_code:
-        description: "Kargo profili cikis posta kodu (Etsy zorunlu; profil yoksa gerekir)"
+        description: "Kargo profili cikis posta kodu (Mo 6 Eyl: 28216 Prodigi Charlotte)"
         required: false
-        default: ""
-      delivery_days:
-        description: "Teslim suresi min,max is gunu (US ve EU; Mo 6 Eyl: 5,12)"
-        required: false
-        default: "5,12"
+        default: "28216"
       quota_min:
         description: "Etsy gunluk kota tabani; altinda yazma yok (varsayilan 400)"
         required: false
@@ -140,7 +136,6 @@ jobs:
           RPSPEC: ${{ inputs.return_policy_spec }}
           QMIN: ${{ inputs.quota_min }}
           OZIP: ${{ inputs.origin_postal_code }}
-          DDAYS: ${{ inputs.delivery_days }}
         run: |
           set -euo pipefail
           if [ "$DRY_RUN" = "true" ]; then
@@ -149,8 +144,7 @@ jobs:
             echo "::warning::APPLY modu: Etsy'ye ilan yazilacak."
             mode=--apply
           fi
-          args=(--pairs-file _work/pairs.txt --limit "${LIMIT:-0}" --images img --state _work/state.csv --out _out --primary "$PRIMARY" --quota-min "${QMIN:-400}" --delivery-days-us "${DDAYS:-5,12}" --delivery-days-eu "${DDAYS:-5,12}" "$mode")
-          [ -n "${OZIP:-}" ] && args+=(--origin-postal-code "$OZIP")
+          args=(--pairs-file _work/pairs.txt --limit "${LIMIT:-0}" --images img --state _work/state.csv --out _out --primary "$PRIMARY" --quota-min "${QMIN:-400}" --origin-postal-code "${OZIP:-28216}" "$mode")
           [ -n "${RPID:-}" ] && args+=(--return-policy-id "$RPID")
           [ -n "${RPSPEC:-}" ] && args+=(--return-policy-spec "$RPSPEC")
           python scripts/etsy/pod_listing_create.py "${args[@]}"
