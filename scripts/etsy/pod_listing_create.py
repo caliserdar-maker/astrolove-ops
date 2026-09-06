@@ -166,6 +166,10 @@ def discover(api, shop, return_policy_id=""):
     else:
         d["return_policy_id"] = rp[0].get("return_policy_id") if len(rp) == 1 else None
     d["return_policy_spec"] = None
+    rs = (api.get(f"/shops/{shop}/readiness-state-definitions") or {}).get("results") or []
+    d["readiness_states"] = [(x.get("readiness_state_id"), x.get("readiness_state"), x.get("min_processing_days"), x.get("max_processing_days")) for x in rs]
+    d["readiness_state_id"] = next((x.get("readiness_state_id") for x in rs if x.get("readiness_state") == "made_to_order"
+                                    and (x.get("min_processing_days"), x.get("max_processing_days")) == (PROC_MIN, PROC_MAX)), None)
     tax = find_taxonomy(api.get("/seller-taxonomy/nodes") or {})
     d["taxonomy_hits"] = [(i, " > ".join(p)) for i, p in tax]
     d["taxonomy_id"] = tax[0][0] if len(tax) == 1 else None
@@ -270,6 +274,7 @@ def quota_ok(api, qmin=QUOTA_MIN):
 # Kargo profili karari (Mo, 6 Eyl 2026): cikis US 28216 (Prodigi Charlotte lab); US 3-8, CA/AU/UK 5-10,
 # EU (tum AB) 5-12 is gunu; ucret 0; islem suresi 1-3 is gunu. GPSR/uretici alanlari simdilik bos.
 SHIP_ORIGIN_ZIP = "28216"
+PROC_MIN, PROC_MAX = 1, 3        # islem suresi 1-3 is gunu (Mo); Etsy "processing profile" (readiness_state_id) zorunlu (6 Eyl 400)
 # (tur, kod, min gun, max gun, ucret USD). "Everywhere else": Prodigi 8 ulke Standard ortalamasi 17.91 - Budget US 7.10
 # = 10.81 -> 10.99 USD, 7-21 is gunu (Mo kurali, TEMP/PRODIGI/PRODIGI_SHIP_EVERYWHERE.md, 6 Eyl; sapma > %50 yok).
 # Etsy'de "everywhere else" hedefi ulke kodsuz destination_region="none" ile denenir; reddedilirse UYARI (kosu surer).
@@ -318,6 +323,17 @@ def ensure_shipping(api, shop, d, proc_min, proc_max, origin_zip):
     return d["shipping_profile_id"]
 
 
+def ensure_readiness(api, shop, d, proc_min, proc_max):
+    """Etsy: fiziksel ilanda readiness_state_id zorunlu (createShopReadinessStateDefinition; OAS 6 Eyl)."""
+    if d.get("readiness_state_id"):
+        return d["readiness_state_id"]
+    r = api.post(f"/shops/{shop}/readiness-state-definitions",
+                 {"readiness_state": "made_to_order", "min_processing_time": proc_min, "max_processing_time": proc_max, "processing_time_unit": "days"})
+    d["readiness_state_id"] = r.get("readiness_state_id")
+    log(f"  hazirlik durumu (processing profile) olusturuldu: {d['readiness_state_id']} made_to_order {proc_min}-{proc_max} gun")
+    return d["readiness_state_id"]
+
+
 def ensure_section(api, shop, d):
     if d["shop_section_id"]:
         return d["shop_section_id"]
@@ -331,7 +347,8 @@ def listing_body(title, desc, tags, d, base_price):
     return {"quantity": QUANTITY, "title": title, "description": desc, "price": base_price,
             "who_made": "someone_else", "when_made": "made_to_order", "taxonomy_id": d["taxonomy_id"],
             "shipping_profile_id": d["shipping_profile_id"], "return_policy_id": d["return_policy_id"],
-            "shop_section_id": d["shop_section_id"], "tags": ",".join(tags), "materials": ",".join(MATERIALS),
+            "shop_section_id": d["shop_section_id"], "readiness_state_id": d.get("readiness_state_id"),
+            "tags": ",".join(tags), "materials": ",".join(MATERIALS),
             "production_partner_ids": str(d["production_partner_id"]), "type": "physical", "is_supply": "false"}
 
 
@@ -466,6 +483,7 @@ def main():
           f"- iade politikasi: {d['return_policy_id'] or ('YOK -> apply olusturur ' + str(d['return_policy_spec']) if d['return_policy_spec'] else 'YOK')} | mevcut: {d['return_policies']}",
           f"- taxonomy: {d['taxonomy_id']} | eslesme: {d['taxonomy_hits']}",
           f"- varyasyon property: color {d['color_pid']} ({d['color_name']}), size {d['size_pid']} ({d['size_name']}) {d.get('size_note', '')}",
+          f"- hazirlik durumu (made_to_order {PROC_MIN}-{PROC_MAX} gun): {d.get('readiness_state_id') or 'YOK -> apply olusturur'} | mevcut: {d.get('readiness_states')}",
           f"- fiyat: {len(prices)}/13 dolu; eksik: {missing or 'yok'}",
           f"- kesif sorunlari: {iss or 'yok'}", ""]
     (out_dir / "discovery.json").write_text(json.dumps(d, indent=1, ensure_ascii=False, default=str))
@@ -497,6 +515,7 @@ def main():
         ensure_shipping(api, shop, d, a.processing_min, a.processing_max, a.origin_postal_code.strip())
         ensure_section(api, shop, d)
         ensure_return_policy(api, shop, d)
+        ensure_readiness(api, shop, d, a.processing_min, a.processing_max)
         t0 = time.time()
         for n, pair in enumerate(todo, 1):
             if not quota_ok(api, a.quota_min):
