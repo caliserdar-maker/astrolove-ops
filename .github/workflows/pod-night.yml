@@ -1,0 +1,134 @@
+name: pod-night
+
+# GECE KOSUSU (Mo 6 Eyl 2026, TEK SEFERLIK): kota sifirlandiktan sonra (00:00 UTC / 03:00 Izmir)
+#   ADIM 1  "Sold unframed ..." satiri 78 ilandan GERI ALINIR (sablon zaten geri alindi):
+#           pod_desc_update, bolum "✦ THE ARTWORK" / "✦ АРТ"; yalniz bu bolum degisir, aksi halde ilan atlanir.
+#   ADIM 2  ADIM 1 tamamen PASS ise alfabetik ilk 5 taslak YAYINA alinir (pod_publish; on kontrol
+#           12 gorsel + 1 video + 65 varyant + bolum/kargo/iade). Kalan taslaklar Mo onayini bekler.
+# Kota her adimin basinda okunur; quota_min altina inince o adim durur ve kalanlari raporlar.
+# NOT: cron TEK SEFERLIK; kosu basariyla bittikten sonra bir sonraki commit'te schedule satiri kaldirilir.
+
+on:
+  schedule:
+    - cron: "10 0 * * *"        # 00:10 UTC = 03:10 Izmir; tek seferlik (bkz. NOT)
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "true = yalniz rapor (Etsy'ye yazma yok); false = YAZAR"
+        type: boolean
+        default: true
+      publish_limit:
+        description: "ADIM 2'de yayinlanacak ilan sayisi"
+        required: false
+        default: "5"
+      desc_limit:
+        description: "ADIM 1'de en fazla N ilan (0 = hepsi; yalniz dry-run dogrulamasi icin)"
+        required: false
+        default: "0"
+      quota_min:
+        description: "Kota tabani"
+        required: false
+        default: "400"
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  night:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      DRY_RUN: ${{ inputs.dry_run || 'false' }}          # schedule ile calisirsa APPLY
+      PUB_LIMIT: ${{ inputs.publish_limit || '5' }}
+      QMIN: ${{ inputs.quota_min || '400' }}
+      DESC_LIMIT: ${{ inputs.desc_limit || '0' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2 spylls
+          mkdir -p dict
+          curl -fsSL -o dict/ru_RU.dic https://raw.githubusercontent.com/LibreOffice/dictionaries/master/ru_RU/ru_RU.dic
+          curl -fsSL -o dict/ru_RU.aff https://raw.githubusercontent.com/LibreOffice/dictionaries/master/ru_RU/ru_RU.aff
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+      - name: Token ve STATE
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_LISTING/POD_LISTINGS_STATE.csv" _work/state.csv
+          echo "verified ilan: $(grep -c ',verified,' _work/state.csv || true)"
+
+      - name: 'ADIM 1 - "Sold unframed" satirini geri al (78 ilan)'
+        id: adim1
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          [ "$DRY_RUN" = "true" ] && mode=--dry-run || { echo "::warning::ADIM 1 APPLY: aciklamalar Etsy'ye yazilacak"; mode=--apply; }
+          python scripts/etsy/pod_desc_update.py --state _work/state.csv --out _out/adim1 --limit "$DESC_LIMIT" \
+            --quota-min "$QMIN" --section "✦ THE ARTWORK" --section-ru "✦ АРТ" --ru-dict dict/ru_RU "$mode"
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os
+          d = json.load(open("_out/adim1/desc_result.json"))
+          rows = d["rows"]
+          bad = [r for r in rows if r[2] in ("FAIL", "SIRA DISI")]
+          # APPLY'da 78 ilanin tamami bitmis olmali; dry-run dogrulamasinda limit/kalan tolere edilir
+          ok = not bad and (not d["kalan"] or os.environ.get("DRY_RUN") == "true")
+          print(f"ok={'true' if ok else 'false'}")
+          print(f"ozet={len(rows)} islenen, {sum(1 for r in rows if r[2] == 'PASS')} PASS, {len(bad)} sorun, {len(d['kalan'])} kalan")
+          PY
+
+      - name: 'ADIM 2 - 5 taslagi yayina al (yalniz ADIM 1 tamamen PASS ise)'
+        if: ${{ steps.adim1.outputs.ok == 'true' }}
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          [ "$DRY_RUN" = "true" ] && mode=--dry-run || { echo "::warning::ADIM 2 APPLY: $PUB_LIMIT ilan YAYINA alinacak"; mode=--apply; }
+          python scripts/etsy/pod_publish.py --state _work/state.csv --out _out/adim2 \
+            --limit "$PUB_LIMIT" --quota-min "$QMIN" "$mode"
+
+      - name: 'ADIM 2 atlandi (ADIM 1 sorunlu)'
+        if: ${{ steps.adim1.outputs.ok != 'true' }}
+        run: |
+          echo "::warning::ADIM 2 ATLANDI - ADIM 1: ${{ steps.adim1.outputs.ozet }}"
+          echo "**ADIM 2 ATLANDI** (ADIM 1 tamamen PASS degil: ${{ steps.adim1.outputs.ozet }}); yayin yapilmadi." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Token/cikti Drive'a
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
+          mode=$([ "$DRY_RUN" = "true" ] && echo DRYRUN || echo APPLY)
+          stamp=$(TZ=Europe/Istanbul date +%Y%m%d_%H%M)
+          [ -d _out ] && rclone copy _out "gdrive:ASTROLOVE/TEMP/POD_LISTING/NIGHT_${mode}_${stamp}" -q && echo "Cikti: TEMP/POD_LISTING/NIGHT_${mode}_${stamp}/"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: pod-night
+          path: _out/
+          if-no-files-found: ignore
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
