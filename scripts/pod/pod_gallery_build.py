@@ -68,7 +68,7 @@ def qc_card(p, what, pal):
     top = g.get("top")
     if not top or any(abs(top[i] - G.GEOM_REF["top"][i]) > TH["top"] for i in range(4)):
         errs.append(f"ust bant {top[:4] if top else None}")
-    devs = []
+    devs = {}
     for k, ref in G.GEOM_REF.items():
         v = g.get(k)
         if v is None or k == "top":
@@ -79,21 +79,24 @@ def qc_card(p, what, pal):
             # bar serif bandinin alt siniri metnin alt uzantisina bagli (08'de 2077, 04'te 2094): ust sinirlar + caps bandi
             if len(v) < 2:
                 errs.append(f"bar metin bantlari {v}"); continue
-            devs += [abs(v[0][0] - ref[0][0]), abs(v[1][0] - ref[1][0]), abs(v[1][1] - ref[1][1])]
-        elif k == "title":
-            if what != "SIZES":
-                devs.append(abs(v[0] - ref[0]))
+            devs[k] = max(abs(v[0][0] - ref[0][0]), abs(v[1][0] - ref[1][0]), abs(v[1][1] - ref[1][1]))
+        elif k in ("title", "pair"):
+            # alt sinir metne bagli: 08 basligi kisa; cift satirinda Q alt uzantisi (AQUARIUS, 6 Eyl: 12 cift 7 px) -> yalniz ust sinir
+            if k == "title" and what == "SIZES":
+                continue
+            devs[k] = abs(v[0] - ref[0])
         elif k == "badge":
             if what != "SIZES" and any(abs(x - y) > TH["badge"] for x, y in zip(v, ref)):
                 errs.append(f"rozet {v}")
         elif isinstance(v, tuple):
-            devs += [abs(x - y) for x, y in zip(v, ref)]
+            devs[k] = max(abs(x - y) for x, y in zip(v, ref))
         else:
-            devs.append(abs(v - ref[0]))
+            devs[k] = abs(v - ref[0])
     if what != "SIZES" and g.get("badge") is None:
         errs.append("rozet olculemedi")
-    if devs and max(devs) > TH["geom"]:
-        errs.append(f"geometri {max(devs)}")
+    over = {k: d for k, d in devs.items() if d > TH["geom"]}
+    if over:
+        errs.append(f"geometri {over} (olculen {{k: g.get(k) for k in over}})".replace("{k: g.get(k) for k in over}", str({k: g.get(k) for k in over})))
     if what == "SIZES":
         gaps = G.sizes_gaps(p)
         keys = ["kenar->cetvel", "cetvel->kutu1", "kutu1->kutu2", "kutu2->kutu3", "kutu3->kutu4", "kutu4->kutu5", "kutu5->kenar"]
