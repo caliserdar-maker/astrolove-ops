@@ -35,7 +35,7 @@ from wp_media_upload import GALLERY_ORDER, mock_name  # noqa: E402
 from wp_mockup_common import EDITIONS  # noqa: E402
 
 SET07_IDX = GALLERY_ORDER.index("SET07")   # 4 -> rank 5
-READBACK_WAIT = 8
+READBACK_WAIT = 4      # 6 Eyl 2026 (Mo onayi): 8 -> 4 sn; Actions dakikasi ve kota tasarrufu
 READBACK_TRIES = 5
 QUOTA_STOP = 400
 PIX_MAD_MAX = 6.0
@@ -94,14 +94,16 @@ class Ilan:
                        for x in r.get("results", [])), key=lambda t: t["rank"])
 
     def stable(self, fn, lid, want):
-        prev = None
+        """Beklenen kosul (want) saglanan ILK okumada doner (6 Eyl 2026, Mo onayi:
+        "iki ozdes okuma" sarti kaldirildi; ilan sonu geri okuma + piksel kiyasi
+        asil kapidir). Saglanmazsa READBACK_TRIES kez 4 sn arayla tekrar dener."""
+        cur = None
         for _ in range(READBACK_TRIES):
             time.sleep(READBACK_WAIT)
             cur = fn(lid)
-            if want(cur) and prev is not None and self._key(cur) == self._key(prev):
+            if want(cur):
                 return cur
-            prev = cur
-        return prev
+        return cur
 
     @staticmethod
     def _key(cur):
