@@ -276,24 +276,32 @@ SHIP_DESTS = [("country", "US", 3, 8), ("country", "CA", 5, 10), ("country", "AU
 def ensure_shipping(api, shop, d, proc_min, proc_max, origin_zip):
     """Etsy: destination_country_iso ya da destination_region zorunlu ('none' reddedilir); origin_postal_code
     zorunlu; her hedef icin min/max_delivery_days zorunlu (6 Eyl 400'leri)."""
+    have = set()
     if d["shipping_profile_id"]:
-        return d["shipping_profile_id"]
-    kind, code, dmin, dmax = SHIP_DESTS[0]
-    body = {"title": SHIPPING_TITLE, "origin_country_iso": "US", "origin_postal_code": origin_zip,
-            "primary_cost": 0, "secondary_cost": 0,
-            "min_processing_time": proc_min, "max_processing_time": proc_max, "processing_time_unit": "business_days",
-            "destination_country_iso": code, "min_delivery_days": dmin, "max_delivery_days": dmax}
-    r = api.post(f"/shops/{shop}/shipping-profiles", body)
-    d["shipping_profile_id"] = r.get("shipping_profile_id")
-    log(f"  kargo profili olusturuldu: {d['shipping_profile_id']} ({code} {dmin}-{dmax} gun, 0 USD, cikis {origin_zip})")
-    dests = [code]
-    for kind, code, dmin, dmax in SHIP_DESTS[1:]:
+        # idempotent: mevcut hedefler okunur, eksikler eklenir (6 Eyl: 3. kosu CA'dan sonra 201'de durdu)
+        prof = api.get(f"/shops/{shop}/shipping-profiles/{d['shipping_profile_id']}") or {}
+        for x in prof.get("shipping_profile_destinations") or []:
+            have.add((x.get("destination_country_iso") or x.get("destination_region") or "").upper())
+        log(f"  kargo profili mevcut: {d['shipping_profile_id']} hedefler {sorted(have)}")
+    else:
+        kind, code, dmin, dmax = SHIP_DESTS[0]
+        body = {"title": SHIPPING_TITLE, "origin_country_iso": "US", "origin_postal_code": origin_zip,
+                "primary_cost": 0, "secondary_cost": 0,
+                "min_processing_time": proc_min, "max_processing_time": proc_max, "processing_time_unit": "business_days",
+                "destination_country_iso": code, "min_delivery_days": dmin, "max_delivery_days": dmax}
+        r = api.post(f"/shops/{shop}/shipping-profiles", body)
+        d["shipping_profile_id"] = r.get("shipping_profile_id")
+        have.add(code)
+        log(f"  kargo profili olusturuldu: {d['shipping_profile_id']} ({code} {dmin}-{dmax} gun, 0 USD, cikis {origin_zip})")
+    for kind, code, dmin, dmax in SHIP_DESTS:
+        if code.upper() in have:
+            continue
         body = {"primary_cost": 0, "secondary_cost": 0, "min_delivery_days": dmin, "max_delivery_days": dmax}
         body["destination_country_iso" if kind == "country" else "destination_region"] = code
         api.post(f"/shops/{shop}/shipping-profiles/{d['shipping_profile_id']}/destinations", body)
-        dests.append(code)
+        have.add(code.upper())
         log(f"  hedef eklendi: {code} {dmin}-{dmax} gun")
-    d["shipping_destinations"] = dests
+    d["shipping_destinations"] = sorted(have)
     return d["shipping_profile_id"]
 
 
