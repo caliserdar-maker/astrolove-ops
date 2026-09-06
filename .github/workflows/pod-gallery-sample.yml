@@ -1,0 +1,124 @@
+name: pod-gallery-sample
+
+# POD (Prodigi fiziksel poster) galeri ornegi: 1 cift x 5 edisyon, 10 kare.
+# Kaynak ETSY_UPLOAD_SETS; cikti Drive TEMP/POD_SAMPLE/<PAIR>/<ED>/01..10.jpg
+# + CONTACT_<ED>.jpg. Etsy'ye yazmaz.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pair:
+        description: "Cift, or. ARIES_LEO"
+        required: false
+        default: "ARIES_LEO"
+      editions:
+        description: "Edisyonlar (virgullu; bos = 5'i)"
+        required: false
+        default: ""
+
+concurrency:
+  group: pod-gallery-sample
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Bagimliliklar + fontlar
+        run: |
+          set -euo pipefail
+          pip install -q pillow==12.3.0 numpy==2.4.6 pyspellchecker
+          mkdir -p fonts
+          base=https://raw.githubusercontent.com/google/fonts/main/ofl
+          curl -fsSL -o "fonts/CormorantGaramond[wght].ttf"        "$base/cormorantgaramond/CormorantGaramond%5Bwght%5D.ttf"
+          curl -fsSL -o "fonts/CormorantGaramond-Italic[wght].ttf" "$base/cormorantgaramond/CormorantGaramond-Italic%5Bwght%5D.ttf"
+          curl -fsSL -o "fonts/Montserrat[wght].ttf"               "$base/montserrat/Montserrat%5Bwght%5D.ttf"
+          ls -la fonts
+
+      - name: rclone kur
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          rclone version | head -1
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then
+            echo "HATA: RCLONE_CONF_B64 secret'i tanimli degil." >&2
+            exit 1
+          fi
+          mkdir -p ~/.config/rclone
+          umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          # Yeni OAuth istemcisinin secret'i conf'daki degeri ezer (rclone env override).
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+          fi
+
+      - name: Kaynak setleri indir
+        env:
+          PAIR: ${{ inputs.pair }}
+          EDS: ${{ inputs.editions }}
+        run: |
+          set -euo pipefail
+          eds="${EDS:-MIDNIGHT_BLUE,DEEP_BLACK,WARM_PARCHMENT,CHAMPAGNE_IVORY,PURE_WHITE}"
+          for ed in ${eds//,/ }; do
+            rclone copy "gdrive:ASTROLOVE/WALL_ART/LISTING_MEDIA/ETSY_UPLOAD_SETS/$ed/$PAIR" "src/$ed" --transfers 8 -q
+            echo "$ed: $(ls src/$ed | wc -l) dosya"
+          done
+          echo "EDS_RESOLVED=$eds" >> "$GITHUB_ENV"
+
+      - name: Uret
+        env:
+          PAIR: ${{ inputs.pair }}
+        run: |
+          set -euo pipefail
+          python scripts/pod/pod_gallery_sample.py --src src --out out --fonts fonts \
+            --pair "$PAIR" --editions "$EDS_RESOLVED" --spellcheck
+          python - <<'PY'
+          import json, os
+          from PIL import Image
+          bad = []
+          for root, _, files in os.walk("out"):
+              for f in files:
+                  if f.endswith(".jpg") and not f.startswith("CONTACT"):
+                      im = Image.open(os.path.join(root, f))
+                      if im.size != (3000, 2250):
+                          bad.append((f, im.size))
+          print("QC boyut 3000x2250:", "PASS" if not bad else f"FAIL {bad}")
+          assert not bad
+          PY
+
+      - name: Drive'a yaz
+        env:
+          PAIR: ${{ inputs.pair }}
+        run: |
+          set -euo pipefail
+          rclone copy out "gdrive:ASTROLOVE/TEMP/POD_SAMPLE/$PAIR" --transfers 8 --stats-one-line -v 2>&1 | tail -2
+          echo "Drive: TEMP/POD_SAMPLE/$PAIR/ guncellendi"
+
+      - name: Artifact (kontak sayfalari)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pod-gallery-contact
+          path: |
+            out/CONTACT_*.jpg
+            out/build_report.json
+          if-no-files-found: ignore
