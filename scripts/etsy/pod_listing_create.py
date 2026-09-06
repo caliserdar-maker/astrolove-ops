@@ -270,7 +270,11 @@ def quota_ok(api, qmin=QUOTA_MIN):
 # Kargo profili karari (Mo, 6 Eyl 2026): cikis US 28216 (Prodigi Charlotte lab); US 3-8, CA/AU/UK 5-10,
 # EU (tum AB) 5-12 is gunu; ucret 0; islem suresi 1-3 is gunu. GPSR/uretici alanlari simdilik bos.
 SHIP_ORIGIN_ZIP = "28216"
-SHIP_DESTS = [("country", "US", 3, 8), ("country", "CA", 5, 10), ("country", "AU", 5, 10), ("country", "GB", 5, 10), ("region", "eu", 5, 12)]
+# (tur, kod, min gun, max gun, ucret USD). "Everywhere else": Prodigi 8 ulke Standard ortalamasi 17.91 - Budget US 7.10
+# = 10.81 -> 10.99 USD, 7-21 is gunu (Mo kurali, TEMP/PRODIGI/PRODIGI_SHIP_EVERYWHERE.md, 6 Eyl; sapma > %50 yok).
+# Etsy'de "everywhere else" hedefi ulke kodsuz destination_region="none" ile denenir; reddedilirse UYARI (kosu surer).
+SHIP_DESTS = [("country", "US", 3, 8, 0), ("country", "CA", 5, 10, 0), ("country", "AU", 5, 10, 0), ("country", "GB", 5, 10, 0),
+              ("region", "eu", 5, 12, 0), ("region", "none", 7, 21, 10.99)]
 
 
 def ensure_shipping(api, shop, d, proc_min, proc_max, origin_zip):
@@ -281,26 +285,35 @@ def ensure_shipping(api, shop, d, proc_min, proc_max, origin_zip):
         # idempotent: mevcut hedefler okunur, eksikler eklenir (6 Eyl: 3. kosu CA'dan sonra 201'de durdu)
         prof = api.get(f"/shops/{shop}/shipping-profiles/{d['shipping_profile_id']}") or {}
         for x in prof.get("shipping_profile_destinations") or []:
-            have.add((x.get("destination_country_iso") or x.get("destination_region") or "").upper())
+            cc, rg = x.get("destination_country_iso"), (x.get("destination_region") or "none")
+            have.add(cc.upper() if cc else ("EVERYWHERE" if rg == "none" else rg.upper()))
         log(f"  kargo profili mevcut: {d['shipping_profile_id']} hedefler {sorted(have)}")
     else:
-        kind, code, dmin, dmax = SHIP_DESTS[0]
+        kind, code, dmin, dmax, fee = SHIP_DESTS[0]
         body = {"title": SHIPPING_TITLE, "origin_country_iso": "US", "origin_postal_code": origin_zip,
-                "primary_cost": 0, "secondary_cost": 0,
+                "primary_cost": fee, "secondary_cost": fee,
                 "min_processing_time": proc_min, "max_processing_time": proc_max, "processing_time_unit": "business_days",
                 "destination_country_iso": code, "min_delivery_days": dmin, "max_delivery_days": dmax}
         r = api.post(f"/shops/{shop}/shipping-profiles", body)
         d["shipping_profile_id"] = r.get("shipping_profile_id")
         have.add(code)
         log(f"  kargo profili olusturuldu: {d['shipping_profile_id']} ({code} {dmin}-{dmax} gun, 0 USD, cikis {origin_zip})")
-    for kind, code, dmin, dmax in SHIP_DESTS:
-        if code.upper() in have:
+    for kind, code, dmin, dmax, fee in SHIP_DESTS:
+        key = "EVERYWHERE" if code == "none" else code.upper()
+        if key in have:
             continue
-        body = {"primary_cost": 0, "secondary_cost": 0, "min_delivery_days": dmin, "max_delivery_days": dmax}
+        body = {"primary_cost": fee, "secondary_cost": fee, "min_delivery_days": dmin, "max_delivery_days": dmax}
         body["destination_country_iso" if kind == "country" else "destination_region"] = code
-        api.post(f"/shops/{shop}/shipping-profiles/{d['shipping_profile_id']}/destinations", body)
-        have.add(code.upper())
-        log(f"  hedef eklendi: {code} {dmin}-{dmax} gun")
+        try:
+            api.post(f"/shops/{shop}/shipping-profiles/{d['shipping_profile_id']}/destinations", body)
+        except SystemExit as e:
+            if code != "none":
+                raise
+            log(f"  UYARI: 'everywhere else' hedefi eklenemedi (Etsy bolge kodu?): {e}")
+            d["shipping_warn"] = str(e)[:200]
+            continue
+        have.add(key)
+        log(f"  hedef eklendi: {code} {dmin}-{dmax} gun {fee} USD")
     d["shipping_destinations"] = sorted(have)
     return d["shipping_profile_id"]
 
