@@ -32,6 +32,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from etsy_common import Etsy, TokenStore, log, mask  # noqa: E402
 from pod_listing_update import SIGNS, build as build_text, load_template  # noqa: E402
+from pod_listing_update import TEMPLATE_MD  # noqa: E402
+from wp_listing_update import load_block  # noqa: E402
 from wp_listing_update import norm, tags_of, validate  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
@@ -52,6 +54,19 @@ SIZE_LABEL = {"8x10": "8x10 in (20.3×25.4 cm)", "A4": "A4 (21×29.7 cm)", "11x1
               "18x24": "18x24 in (45.7×61 cm)", "20x30": "20x30 in (50.8×76.2 cm)", "24x36": "24x36 in (61×91.4 cm)",
               "30x40": "30x40 in (76.2×101.6 cm)"}       # Mo, 6 Eyl: sira kucukten buyuge, tum edisyonlarda ayni fiyat
 MATERIALS = ["Hahnemuhle Photo Rag 308 gsm cotton paper", "archival pigment ink"]
+WHO_MADE = "i_did"                # Mo 6 Eyl: tasarim bize ait; uretim partneri Prodigi (production_partner_ids)
+AUTO_RENEW = True
+# Ilan ozellikleri (taxonomy 121 property adi -> deger adi); id'ler API possible_values'tan eslenir, tahmin yok
+ATTRS = {"Orientation": "Portrait", "Framing": "Unframed", "Number of pieces included": "1", "Material multi": "Paper"}
+# RU katmani (docs/POD_LISTING_TEMPLATE.md ile ayni)
+TITLE_RU = "{S1RU} и {S2RU} зодиак постер, совместимость пары, жикле принт без рамы, подарок паре"
+TAGS_RU = ["зодиак постер", "{pair}", "совместимость пары", "астрология декор", "подарок паре зодиак", "подарок на годовщину",
+           "постер знак зодиака", "декор для пары", "подарок астрологу", "минимализм постер", "арт принт", "свадебный подарок", "небесный декор"]
+SIGN_RU = {"Aquarius": "Водолей", "Aries": "Овен", "Taurus": "Телец", "Gemini": "Близнецы", "Cancer": "Рак", "Leo": "Лев",
+           "Virgo": "Дева", "Libra": "Весы", "Scorpio": "Скорпион", "Sagittarius": "Стрелец", "Capricorn": "Козерог", "Pisces": "Рыбы"}
+# Hunspell ru_RU disinda kalan gecerli terimler (6 Eyl olcumu): ЕС kisaltma, dizayn cogulu, giclee cevriyazisi,
+# minimalistichnyi/neotrazhayushchaya turetilmis sifatlar, print odunc sozcuk
+RU_SPELL_OK = {"ес", "дизайны", "жикле", "минималистичный", "неотражающая", "принт"}
 
 SHIPPING_TITLE = "POD Prints – Free Shipping"
 SECTION_TITLE = "Zodiac Fine Art Prints"
@@ -60,7 +75,7 @@ TAXONOMY_PATH = ["prints", "giclée"]           # ust dugum adi 'Prints', yaprak
 
 # 10 gorsel/ilan siniri: ana edisyonun 6 karesi + diger 4 edisyonun 01 karesi (renk secenegine baglanir)
 DEFAULT_FRAMES = "01,02,03,05,08,10"
-STAGES = ["created", "images", "inventory", "variation_images", "verified"]
+STAGES = ["created", "images", "fields", "inventory", "variation_images", "verified"]
 
 
 # ------------------------------------------------------------------ girdi
@@ -111,6 +126,44 @@ def build_listing(pair, desc_tpl):
     if issue:
         raise SystemExit(f"HATA: {pair}: {issue}")
     return title, tags, desc, note
+
+
+def load_ru_template():
+    return load_block(TEMPLATE_MD.read_text(encoding="utf-8"), "RU_DESCRIPTION")
+
+
+def build_ru(pair, ru_tpl):
+    s1, s2 = pair.split("_", 1)
+    R1, R2 = SIGN_RU[s1.capitalize()], SIGN_RU[s2.capitalize()]
+    ptag = f"{R1} {R2} постер".lower()
+    note = ""
+    if len(ptag) > 20:
+        note = f"{ptag} ({len(ptag)}) -> {R1.lower()} постер"
+        ptag = f"{R1} постер".lower()
+    tags = [t.format(pair=ptag) for t in TAGS_RU]
+    title = TITLE_RU.format(S1RU=R1, S2RU=R2)
+    desc = ru_tpl.replace("{PAIR_RU}", f"{R1} и {R2}").replace("{S1RU}", R1).replace("{S2RU}", R2)
+    left = re.findall(r"\{[A-Za-z0-9_]+\}", desc)
+    if left:
+        raise SystemExit(f"HATA: RU aciklamada doldurulmamis yer tutucu: {left}")
+    issue = validate(title, tags)
+    if issue:
+        raise SystemExit(f"HATA: RU {pair}: {issue}")
+    return title, tags, desc, note
+
+
+def spellcheck_ru(ru_dict, texts):
+    """Hunspell ru_RU (spylls). Bilinmeyen kelime (RU_SPELL_OK disinda) -> HATA."""
+    try:
+        from spylls.hunspell import Dictionary
+    except ImportError:
+        raise SystemExit("HATA: spylls yok (pip install spylls)")
+    d = Dictionary.from_files(str(ru_dict))
+    words = sorted({w for t in texts for w in re.findall(r"[А-Яа-яЁё]+", t)})
+    bad = [w for w in words if w.lower() not in RU_SPELL_OK and not (d.lookup(w) or d.lookup(w.lower()) or d.lookup(w.capitalize()))]
+    if bad:
+        raise SystemExit(f"HATA: RU yazim denetimi bilinmeyen kelime: {bad}")
+    log(f"RU yazim denetimi: {len(words)} kelime, PASS")
 
 
 def inventory_body(pair, prices, color_pid, size_pid, color_name, size_name, readiness_state_id=None):
@@ -183,6 +236,14 @@ def discover(api, shop, return_policy_id=""):
     if d["taxonomy_id"]:
         props = (api.get(f"/seller-taxonomy/nodes/{d['taxonomy_id']}/properties") or {}).get("results") or []
         d["properties"] = [(p.get("property_id"), p.get("name"), p.get("supports_variations")) for p in props]
+        d["attr_plan"], d["attr_missing"] = [], []
+        for pname, vname in ATTRS.items():
+            prop = next((p for p in props if (p.get("name") or "") == pname), None)
+            val = next((v for v in (prop.get("possible_values") or []) if str(v.get("name", "")).strip().lower() == vname.lower()), None) if prop else None
+            if prop and val:
+                d["attr_plan"].append((prop.get("property_id"), pname, val.get("value_id"), val.get("name"), val.get("scale_id")))
+            else:
+                d["attr_missing"].append(f"{pname}={vname}" + ("" if prop else " (ozellik yok)"))
         for p in props:
             nm = (p.get("name") or "").lower()
             if p.get("supports_variations") and "color" in nm and d["color_pid"] is None:
@@ -235,6 +296,8 @@ def discovery_issues(d):
         iss.append(f"taxonomy Prints > Giclee tek eslesme yok: {d['taxonomy_hits']}")
     if d["color_pid"] is None or d["size_pid"] is None:
         iss.append("varyasyon property (color/size) bulunamadi")
+    if d.get("attr_missing"):
+        iss.append(f"ozellik degeri eslesmedi: {d['attr_missing']}")
     return iss
 
 
@@ -351,7 +414,7 @@ def ensure_section(api, shop, d):
 
 def listing_body(title, desc, tags, d, base_price):
     return {"quantity": QUANTITY, "title": title, "description": desc, "price": base_price,
-            "who_made": "someone_else", "when_made": "made_to_order", "taxonomy_id": d["taxonomy_id"],
+            "who_made": WHO_MADE, "when_made": "made_to_order", "taxonomy_id": d["taxonomy_id"], "should_auto_renew": "true",
             "shipping_profile_id": d["shipping_profile_id"], "return_policy_id": d["return_policy_id"],
             "shop_section_id": d["shop_section_id"], "readiness_state_id": d.get("readiness_state_id"),
             "tags": ",".join(tags), "materials": ",".join(MATERIALS),
@@ -388,6 +451,21 @@ def create_pair(api, shop, pair, d, prices, img_root, primary, frames, st, state
         set_stage(st, state_path, pair, lid, "images")
         stage = "images"
 
+    if STAGES.index(stage) < STAGES.index("fields"):
+        api.patch(f"/shops/{shop}/listings/{lid}", {"who_made": WHO_MADE, "should_auto_renew": "true" if AUTO_RENEW else "false"})
+        for pid, pname, vid, vname, scale in d.get("attr_plan") or []:
+            body = {"value_ids": str(vid), "values": vname}
+            if scale:
+                body["scale_id"] = scale
+            api.put(f"/shops/{shop}/listings/{lid}/properties/{pid}", body)
+        ru_title, ru_tags, ru_desc, ru_note = build_ru(pair, load_ru_template())
+        tpath = f"/shops/{shop}/listings/{lid}/translations/ru"
+        cur = api.get(tpath, ok404=True)
+        tbody = {"title": ru_title, "description": ru_desc, "tags": ",".join(ru_tags)}
+        (api.put if cur is not None else api.post)(tpath, tbody)
+        set_stage(st, state_path, pair, lid, "fields", ("RU tag notu: " + ru_note) if ru_note else "")
+        stage = "fields"
+
     if STAGES.index(stage) < STAGES.index("inventory"):
         api.put_json(f"/listings/{lid}/inventory", inventory_body(pair, prices, d["color_pid"], d["size_pid"], d["color_name"], d["size_name"], d.get("readiness_state_id")))
         set_stage(st, state_path, pair, lid, "inventory")
@@ -417,7 +495,13 @@ def create_pair(api, shop, pair, d, prices, img_root, primary, frames, st, state
     imgs = (api.get(f"/listings/{lid}/images") or {}).get("results") or []
     inv = api.get(f"/listings/{lid}/inventory") or {}
     vimg = (api.get(f"/shops/{shop}/listings/{lid}/variation-images", ok404=True) or {}).get("results") or []
+    tru = api.get(f"/shops/{shop}/listings/{lid}/translations/ru", ok404=True) or {}
+    props = (api.get(f"/shops/{shop}/listings/{lid}/properties", ok404=True) or {}).get("results") or []
+    ru_title = build_ru(pair, load_ru_template())[0]
     checks = {"state_draft": L.get("state") == "draft", "title": L.get("title") == title,
+              "who_made": L.get("who_made") == WHO_MADE, "auto_renew": bool(L.get("should_auto_renew")) == AUTO_RENEW,
+              "ru": tru.get("title") == ru_title,
+              "attrs": {p.get("property_id") for p in props} >= {a[0] for a in d.get("attr_plan") or []},
               "tags": tags_of(L) == tags, "desc": norm(L.get("description")) == norm(desc),
               "images": len(imgs) == len(plan), "products": len(inv.get("products") or []) == len(EDITIONS) * len(SIZES),
               "variation_images": len(vimg) == len(EDITIONS), "partner": bool(L.get("production_partner_ids") or L.get("production_partners"))}
@@ -443,6 +527,7 @@ def main():
     ap.add_argument("--return-policy-id", default="")
     ap.add_argument("--return-policy-spec", default="", help="magazada iade politikasi yoksa apply'da olusturulur: returns=1,exchanges=1,deadline=30")
     ap.add_argument("--quota-min", type=int, default=QUOTA_MIN, help="bu degerin altinda yazma yok (varsayilan 400)")
+    ap.add_argument("--ru-dict", default="", help="Hunspell ru_RU sozluk on eki (ru_RU.dic/.aff); verilirse RU yazim denetimi")
     ap.add_argument("--origin-postal-code", default=SHIP_ORIGIN_ZIP, help="kargo profili cikis posta kodu (Mo: 28216)")
     ap.add_argument("--processing-min", type=int, default=1)
     ap.add_argument("--processing-max", type=int, default=3)
@@ -464,6 +549,10 @@ def main():
     out_dir = Path(a.out); out_dir.mkdir(parents=True, exist_ok=True)
     frames = [f.strip() for f in a.frames.split(",") if f.strip()]
     prices, missing = read_prices(a.prices)
+    ru_tpl = load_ru_template()
+    if a.ru_dict:
+        t, tg, dsc, _ = build_ru("ARIES_LEO", ru_tpl)
+        spellcheck_ru(a.ru_dict, [t, dsc, " ".join(tg), " ".join(SIGN_RU.values())])
     st = read_state(a.state)
     todo = [p for p in pairs if (st.get(p) or {}).get("stage") != "verified"]
     if a.limit:
@@ -490,6 +579,7 @@ def main():
           f"- taxonomy: {d['taxonomy_id']} | eslesme: {d['taxonomy_hits']}",
           f"- varyasyon property: color {d['color_pid']} ({d['color_name']}), size {d['size_pid']} ({d['size_name']}) {d.get('size_note', '')}",
           f"- hazirlik durumu (made_to_order {PROC_MIN}-{PROC_MAX} gun): {d.get('readiness_state_id') or 'YOK -> apply olusturur'} | mevcut: {d.get('readiness_states')}",
+          f"- ozellikler: {[(a_[1], a_[3], a_[2]) for a_ in d.get('attr_plan') or []]} | eslesmeyen: {d.get('attr_missing')}",
           f"- fiyat: {len(prices)}/13 dolu; eksik: {missing or 'yok'}",
           f"- kesif sorunlari: {iss or 'yok'}", ""]
     (out_dir / "discovery.json").write_text(json.dumps(d, indent=1, ensure_ascii=False, default=str))
@@ -502,8 +592,10 @@ def main():
             miss_img = [f"{ed}/{frames[i] if i < len(frames) else '01'}" for i, (rk, ed, p, _) in enumerate(plan) if p is None]
             body = listing_body(title, desc, tags, d, prices.get(SIZES[0], 0))
             inv = inventory_body(pair, prices, d["color_pid"], d["size_pid"], d["color_name"], d["size_name"], d.get("readiness_state_id"))
+            ru_title, ru_tags, ru_desc, ru_note = build_ru(pair, ru_tpl)
             (out_dir / f"{pair}_payload.json").write_text(json.dumps(
-                {"listing": body, "images": [(rk, ed, str(p) if p else None, c) for rk, ed, p, c in plan], "inventory": inv},
+                {"listing": body, "images": [(rk, ed, str(p) if p else None, c) for rk, ed, p, c in plan], "inventory": inv,
+                 "attrs": d.get("attr_plan"), "ru": {"title": ru_title, "tags": ru_tags, "description": ru_desc, "note": ru_note}},
                 indent=1, ensure_ascii=False))
             status = "HAZIR" if not (missing or miss_img or iss) else "EKSIK: " + "; ".join(
                 ([f"fiyat {missing}"] if missing else []) + ([f"gorsel {miss_img}"] if miss_img else []) + iss)
