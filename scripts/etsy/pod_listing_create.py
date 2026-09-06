@@ -165,6 +165,7 @@ def discover(api, shop, return_policy_id=""):
         d["return_policy_id"] = int(return_policy_id)
     else:
         d["return_policy_id"] = rp[0].get("return_policy_id") if len(rp) == 1 else None
+    d["return_policy_spec"] = None
     tax = find_taxonomy(api.get("/seller-taxonomy/nodes") or {})
     d["taxonomy_hits"] = [(i, " > ".join(p)) for i, p in tax]
     d["taxonomy_id"] = tax[0][0] if len(tax) == 1 else None
@@ -178,15 +179,48 @@ def discover(api, shop, return_policy_id=""):
                 d["color_pid"], d["color_name"] = p.get("property_id"), p.get("name")
             if p.get("supports_variations") and nm.startswith("size") and d["size_pid"] is None:
                 d["size_pid"], d["size_name"] = p.get("property_id"), p.get("name")
+        if d["size_pid"] is None:
+            # Giclee (121) taxonomy'sinde Size ozelligi yok (6 Eyl kesfi); Etsy panelindeki gibi
+            # ozel varyasyon Custom1 (513) "Size" etiketiyle kullanilir.
+            cust = next((p for p in props if p.get("supports_variations") and (p.get("name") or "").lower() == "custom1"), None)
+            if cust:
+                d["size_pid"], d["size_name"] = cust.get("property_id"), "Size"
+                d["size_note"] = f"taxonomy'de Size yok; Custom1 ({cust.get('property_id')}) 'Size' olarak kullanilir"
     return d
+
+
+def parse_rp_spec(spec):
+    """'returns=1,exchanges=1,deadline=30' -> createShopReturnPolicy govdesi (yalniz Mo'nun verdigi degerler)."""
+    if not spec:
+        return None
+    kv = dict(x.split("=", 1) for x in spec.split(",") if "=" in x)
+    try:
+        body = {"accepts_returns": kv["returns"].strip().lower() in ("1", "true", "yes"),
+                "accepts_exchanges": kv["exchanges"].strip().lower() in ("1", "true", "yes")}
+        if body["accepts_returns"] or body["accepts_exchanges"]:
+            body["return_deadline"] = int(kv["deadline"])
+    except (KeyError, ValueError) as e:
+        raise SystemExit(f"HATA: --return-policy-spec bicimi: returns=1,exchanges=1,deadline=30 ({e})")
+    return body
+
+
+def ensure_return_policy(api, shop, d):
+    if d["return_policy_id"]:
+        return d["return_policy_id"]
+    if not d.get("return_policy_spec"):
+        raise SystemExit("HATA: iade politikasi yok ve --return-policy-spec verilmedi")
+    r = api.post(f"/shops/{shop}/policies/return", d["return_policy_spec"])
+    d["return_policy_id"] = r.get("return_policy_id")
+    log(f"  iade politikasi olusturuldu: {d['return_policy_id']} {d['return_policy_spec']}")
+    return d["return_policy_id"]
 
 
 def discovery_issues(d):
     iss = []
     if d["production_partner_id"] is None:
         iss.append("Prodigi production partner yok (Etsy panelinden eklenmeli)")
-    if d["return_policy_id"] is None:
-        iss.append(f"iade politikasi secilemedi ({len(d['return_policies'])} adet; --return-policy-id ver)")
+    if d["return_policy_id"] is None and not d.get("return_policy_spec"):
+        iss.append(f"iade politikasi yok/secilemedi ({len(d['return_policies'])} adet; --return-policy-id ya da --return-policy-spec ver)")
     if d["taxonomy_id"] is None:
         iss.append(f"taxonomy Prints > Giclee tek eslesme yok: {d['taxonomy_hits']}")
     if d["color_pid"] is None or d["size_pid"] is None:
@@ -345,6 +379,7 @@ def main():
     ap.add_argument("--primary", default="MIDNIGHT_BLUE", choices=EDITIONS)
     ap.add_argument("--frames", default=DEFAULT_FRAMES, help="ana edisyondan alinacak kareler")
     ap.add_argument("--return-policy-id", default="")
+    ap.add_argument("--return-policy-spec", default="", help="magazada iade politikasi yoksa apply'da olusturulur: returns=1,exchanges=1,deadline=30")
     ap.add_argument("--processing-min", type=int, default=3)
     ap.add_argument("--processing-max", type=int, default=5)
     g = ap.add_mutually_exclusive_group(required=True)
@@ -380,14 +415,16 @@ def main():
     api = Etsy(store)
 
     d = discover(api, shop, a.return_policy_id)
+    if not d["return_policy_id"] and a.return_policy_spec:
+        d["return_policy_spec"] = parse_rp_spec(a.return_policy_spec)
     iss = discovery_issues(d)
     md = [f"## Kesif (kota {api.remaining})", "",
           f"- kargo profili '{SHIPPING_TITLE}': {d['shipping_profile_id'] or 'YOK -> apply olusturur'} | mevcut: {d['shipping_profiles']}",
           f"- bolum '{SECTION_TITLE}': {d['shop_section_id'] or 'YOK -> apply olusturur'} | mevcut: {d['sections']}",
           f"- production partner Prodigi: {d['production_partner_id']} | mevcut: {d['partners']}",
-          f"- iade politikasi: {d['return_policy_id']} | mevcut: {d['return_policies']}",
+          f"- iade politikasi: {d['return_policy_id'] or ('YOK -> apply olusturur ' + str(d['return_policy_spec']) if d['return_policy_spec'] else 'YOK')} | mevcut: {d['return_policies']}",
           f"- taxonomy: {d['taxonomy_id']} | eslesme: {d['taxonomy_hits']}",
-          f"- varyasyon property: color {d['color_pid']} ({d['color_name']}), size {d['size_pid']} ({d['size_name']})",
+          f"- varyasyon property: color {d['color_pid']} ({d['color_name']}), size {d['size_pid']} ({d['size_name']}) {d.get('size_note', '')}",
           f"- fiyat: {len(prices)}/13 dolu; eksik: {missing or 'yok'}",
           f"- kesif sorunlari: {iss or 'yok'}", ""]
     (out_dir / "discovery.json").write_text(json.dumps(d, indent=1, ensure_ascii=False, default=str))
@@ -418,6 +455,7 @@ def main():
             raise SystemExit(f"HATA: kota {api.remaining} < {QUOTA_MIN}; yazma yok")
         ensure_shipping(api, shop, d, a.processing_min, a.processing_max)
         ensure_section(api, shop, d)
+        ensure_return_policy(api, shop, d)
         t0 = time.time()
         for n, pair in enumerate(todo, 1):
             if not quota_ok(api):

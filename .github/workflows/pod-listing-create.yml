@@ -31,6 +31,10 @@ on:
         description: "Iade politikasi id (bos = magazada tek politika varsa o)"
         required: false
         default: ""
+      return_policy_spec:
+        description: "Magazada iade politikasi YOKSA apply'da olusturulur, or. returns=1,exchanges=1,deadline=30 (bos = olusturma)"
+        required: false
+        default: ""
 
 concurrency:
   group: etsy-token
@@ -121,6 +125,7 @@ jobs:
           LIMIT: ${{ inputs.limit }}
           PRIMARY: ${{ inputs.primary }}
           RPID: ${{ inputs.return_policy_id }}
+          RPSPEC: ${{ inputs.return_policy_spec }}
         run: |
           set -euo pipefail
           if [ "$DRY_RUN" = "true" ]; then
@@ -131,6 +136,7 @@ jobs:
           fi
           args=(--pairs-file _work/pairs.txt --limit "${LIMIT:-0}" --images img --state _work/state.csv --out _out --primary "$PRIMARY" "$mode")
           [ -n "${RPID:-}" ] && args+=(--return-policy-id "$RPID")
+          [ -n "${RPSPEC:-}" ] && args+=(--return-policy-spec "$RPSPEC")
           python scripts/etsy/pod_listing_create.py "${args[@]}"
 
       - name: Yenilenen token'i Drive'a geri yaz
