@@ -1,0 +1,103 @@
+name: pod-desc-update
+
+# Mevcut POD ilanlarinin aciklamasini sablona esitler (Mo 6 Eyl 2026: "THE ARTWORK" altina cercevesiz satiri).
+# STATE'teki verified ilanlar; yalniz secilen bolum degisiyorsa yazar (EN PATCH + RU translations PUT),
+# baska bolumde fark varsa o ilan atlanir. dry_run=true yalniz diff/tablo; false Etsy'ye YAZAR (onay).
+# Kota quota_min altina inince durur, kalan ilanlar raporlanir (ayni workflow tekrar kosulur).
+
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "En fazla N ilan (0 = hepsi)"
+        required: false
+        default: "0"
+      dry_run:
+        description: "true = yalniz diff/tablo; false = Etsy'ye YAZ"
+        type: boolean
+        default: true
+      section:
+        description: "EN bolum basligi"
+        required: false
+        default: "✦ THE ARTWORK"
+      section_ru:
+        description: "RU bolum basligi"
+        required: false
+        default: "✦ АРТ"
+      quota_min:
+        description: "Kota tabani (altinda durur)"
+        required: false
+        default: "400"
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  desc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2 spylls
+          mkdir -p dict
+          curl -fsSL -o dict/ru_RU.dic https://raw.githubusercontent.com/LibreOffice/dictionaries/master/ru_RU/ru_RU.dic
+          curl -fsSL -o dict/ru_RU.aff https://raw.githubusercontent.com/LibreOffice/dictionaries/master/ru_RU/ru_RU.aff
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+      - name: Token ve STATE
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_LISTING/POD_LISTINGS_STATE.csv" _work/state.csv
+          echo "verified ilan: $(grep -c ',verified,' _work/state.csv || true)"
+      - name: Aciklamalari guncelle
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          DRY_RUN: ${{ inputs.dry_run }}
+          LIMIT: ${{ inputs.limit }}
+          SEC: ${{ inputs.section }}
+          SEC_RU: ${{ inputs.section_ru }}
+          QMIN: ${{ inputs.quota_min }}
+        run: |
+          set -euo pipefail
+          [ "$DRY_RUN" = "true" ] && mode=--dry-run || { echo "::warning::APPLY: ilan aciklamalari Etsy'ye yazilacak"; mode=--apply; }
+          python scripts/etsy/pod_desc_update.py --state _work/state.csv --out _out --limit "${LIMIT:-0}" \
+            --quota-min "${QMIN:-400}" --section "$SEC" --section-ru "$SEC_RU" --ru-dict dict/ru_RU "$mode"
+      - name: Token/cikti Drive'a
+        if: ${{ always() }}
+        env:
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
+          mode=$([ "$DRY_RUN" = "true" ] && echo DRYRUN || echo APPLY)
+          stamp=$(TZ=Europe/Istanbul date +%Y%m%d_%H%M)
+          [ -d _out ] && rclone copy _out "gdrive:ASTROLOVE/TEMP/POD_LISTING/DESC_${mode}_${stamp}" -q && echo "Cikti: TEMP/POD_LISTING/DESC_${mode}_${stamp}/"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: pod-desc-update
+          path: _out/
+          if-no-files-found: ignore
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
