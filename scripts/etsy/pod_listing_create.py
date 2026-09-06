@@ -492,7 +492,7 @@ def create_pair(api, shop, pair, d, prices, img_root, primary, frames, st, state
                 vi.append({"property_id": d["color_pid"], "value_id": value_ids[ED_NAME[ed]], "image_id": by_rank[rk]})
         if len(vi) != len(EDITIONS):
             raise SystemExit(f"HATA: {pair}: renk-gorsel eslemesi {len(vi)}/{len(EDITIONS)} (value_ids {value_ids}, ranks {sorted(by_rank)})")
-        api.put_json(f"/shops/{shop}/listings/{lid}/variation-images", {"variation_images": vi})
+        api.post_json(f"/shops/{shop}/listings/{lid}/variation-images", {"variation_images": vi})   # OAS: updateVariationImages = POST (10. kosu 404 PUT)
         set_stage(st, state_path, pair, lid, "variation_images")
         stage = "variation_images"
 
