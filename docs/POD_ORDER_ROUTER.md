@@ -1,5 +1,10 @@
 # POD siparis yonlendirici (Etsy -> Prodigi -> Etsy), 6 Eyl 2026
 
+> **KULLANILMIYOR — Prodigi sales-channel entegrasyonu devrede (7 Eyl 2026).**
+> 78 ilanin 65/65 varyanti Prodigi panelinde "Fulfilled by Prodigi" olarak acildi;
+> siparisleri Prodigi kendi entegrasyonuyla cekiyor. Yonlendirici cron'u KAPALI,
+> Etsy `transactions_r` kapsami istenmiyor. Kod ve bu dokuman referans olarak durur.
+
 ## Parcalar
 
 | Parca | Dosya | Is |
