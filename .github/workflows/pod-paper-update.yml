@@ -4,8 +4,13 @@ name: pod-paper-update
 # Capalar tam satir; bulunmazsa ilan atlanir. Ilan state=active degilse kosu DURUR (yazma yok).
 # RU PUT'unda title/tags GET'ten birebir geri yazilir. Kota tabani 400; PAPER STATE ile resume.
 # apply=false (varsayilan) yalniz dry-run + diff uretir.
+# NOT: cron "2 0 * * *" TEK SEFERLIK (8 Eyl 2026, 00:02 UTC) — Etsy kotasi sifirlandiktan hemen
+# sonra 78 ilanin tam kosusu (schedule ile apply=true, limit=0). pod-night2 00:10'da; ikisi de
+# concurrency: etsy-token oldugundan sirayla kosar. Kosu bitince bu schedule blogu KALDIRILIR.
 
 on:
+  schedule:
+    - cron: "2 0 * * *"
   workflow_dispatch:
     inputs:
       apply:
@@ -30,7 +35,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
-      LIMIT: ${{ inputs.limit || '3' }}
+      # schedule ile tetiklenirse apply=true ve limit=0 (tum ilanlar)
+      APPLY: ${{ inputs.apply || github.event_name == 'schedule' }}
+      LIMIT: ${{ inputs.limit || '0' }}
       QMIN: ${{ inputs.quota_min || '400' }}
     steps:
       - uses: actions/checkout@v4
@@ -79,7 +86,7 @@ jobs:
           print(f"ozet={len(hazir)} guncellenecek, {len(bad)} sorunlu, kalan {d['kalan']}")
           PY
       - name: 'ADIM 2 - apply (yalniz onayla ve dry-run temizse)'
-        if: ${{ inputs.apply && steps.dry.outputs.ok == 'true' }}
+        if: ${{ env.APPLY == 'true' && steps.dry.outputs.ok == 'true' }}
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
