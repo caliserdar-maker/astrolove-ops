@@ -1,0 +1,122 @@
+name: pod-xsell
+
+# Capraz satis: wallpaper (78) ve dijital (390) ilanlara POD linki + dijitalde AI beyanini kaldirma.
+# mode=wallpaper: "HOW IT WORKS" sonrasi / "GOOD TO KNOW" oncesi blok (RU ayni yapida).
+# mode=digital  : "AI-ASSISTED CREATION DISCLOSURE" kaldirilir + "WHAT YOU WILL RECEIVE" sonrasi blok.
+# Tek kosuda ADIM 1 dry-run -> temizse ADIM 2 apply. Kota quota_min altina inince durur; islenen
+# ilanlar Drive TEMP/POD_LISTING/XSELL_STATE.csv'ye yazilir, sonraki kosu kaldigi yerden devam eder.
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Hangi ilan grubu"
+        type: choice
+        options: [wallpaper, digital]
+        default: wallpaper
+      apply:
+        description: "true = dry-run temizse Etsy'ye YAZ"
+        type: boolean
+        default: true
+      limit:
+        description: "En fazla N ilan (0 = hepsi; kota icin kisitlanabilir)"
+        required: false
+        default: "0"
+      quota_min:
+        description: "Kota tabani"
+        required: false
+        default: "400"
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  xsell:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      MODE: ${{ inputs.mode }}
+      LIMIT: ${{ inputs.limit || '0' }}
+      QMIN: ${{ inputs.quota_min || '400' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+      - name: Token ve STATE
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_LISTING/POD_LISTINGS_STATE.csv" _work/pod_state.csv
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_LISTING/XSELL_STATE.csv" _work/xsell.csv 2>/dev/null || echo "XSELL STATE yok; yeni baslar"
+          echo "POD verified: $(grep -c ',verified,' _work/pod_state.csv || true) | islenmis: $(($(wc -l < _work/xsell.csv 2>/dev/null || echo 1) - 1))"
+      - name: 'ADIM 1 - dry-run'
+        id: dry
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          python scripts/etsy/xsell_links.py --mode "$MODE" --pod-state _work/pod_state.csv \
+            --state _work/xsell.csv --out _out/dry --limit "$LIMIT" --quota-min "$QMIN" --dry-run
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os
+          d = json.load(open(f"_out/dry/xsell_{os.environ['MODE']}_result.json"))
+          rows = d["rows"]
+          fail = [r for r in rows if r[2] in ("FAIL", "SIRA DISI")]
+          hazir = [r for r in rows if r[2] == "HAZIR"]
+          print(f"ok={'true' if not fail and hazir else 'false'}")
+          print(f"ozet={len(hazir)} guncellenecek, {len(fail)} sorunlu, {sum(1 for r in rows if r[2] == 'ATLANDI')} atlandi, kalan {d['kalan']}")
+          PY
+      - name: 'ADIM 2 - apply (yalniz dry-run temizse)'
+        if: ${{ inputs.apply && steps.dry.outputs.ok == 'true' }}
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          echo "::warning::APPLY ($MODE): aciklamalar guncellenecek — ${{ steps.dry.outputs.ozet }}"
+          python scripts/etsy/xsell_links.py --mode "$MODE" --pod-state _work/pod_state.csv \
+            --state _work/xsell.csv --out _out/apply --limit "$LIMIT" --quota-min "$QMIN" --apply
+      - name: 'ADIM 2 atlandi'
+        if: ${{ !(inputs.apply && steps.dry.outputs.ok == 'true') }}
+        run: |
+          echo "::warning::APPLY ATLANDI - ${{ steps.dry.outputs.ozet }}"
+          echo "**APPLY ATLANDI** (${{ steps.dry.outputs.ozet }})" >> "$GITHUB_STEP_SUMMARY"
+      - name: Token/STATE/cikti Drive'a
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
+          [ -s _work/xsell.csv ] && rclone copyto _work/xsell.csv "gdrive:ASTROLOVE/TEMP/POD_LISTING/XSELL_STATE.csv" && echo "XSELL STATE yazildi" || true
+          stamp=$(TZ=Europe/Istanbul date +%Y%m%d_%H%M)
+          [ -d _out ] && rclone copy _out "gdrive:ASTROLOVE/TEMP/POD_LISTING/XSELL_${MODE}_${stamp}" -q && echo "Cikti: TEMP/POD_LISTING/XSELL_${MODE}_${stamp}/"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: pod-xsell-${{ inputs.mode }}
+          path: _out/
+          if-no-files-found: ignore
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
