@@ -4,13 +4,9 @@ name: pod-paper-update
 # Capalar tam satir; bulunmazsa ilan atlanir. Ilan state=active degilse kosu DURUR (yazma yok).
 # RU PUT'unda title/tags GET'ten birebir geri yazilir. Kota tabani 400; PAPER STATE ile resume.
 # apply=false (varsayilan) yalniz dry-run + diff uretir.
-# NOT: cron "2 0 * * *" TEK SEFERLIK (8 Eyl 2026, 00:02 UTC) — Etsy kotasi sifirlandiktan hemen
-# sonra 78 ilanin tam kosusu (schedule ile apply=true, limit=0). pod-night2 00:10'da; ikisi de
-# concurrency: etsy-token oldugundan sirayla kosar. Kosu bitince bu schedule blogu KALDIRILIR.
+# dry_limit: dry-run kapisini kucuk tutar (kota tasarrufu); apply yine limit kadar ilan isler.
 
 on:
-  schedule:
-    - cron: "2 0 * * *"
   workflow_dispatch:
     inputs:
       apply:
@@ -21,6 +17,10 @@ on:
         description: "En fazla N ilan (0 = hepsi)"
         required: false
         default: "3"
+      dry_limit:
+        description: "Dry-run kapisi icin N ilan (bos = limit ile ayni)"
+        required: false
+        default: ""
       quota_min:
         description: "Kota tabani"
         required: false
@@ -35,9 +35,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
-      # schedule ile tetiklenirse apply=true ve limit=0 (tum ilanlar)
-      APPLY: ${{ inputs.apply || github.event_name == 'schedule' }}
+      APPLY: ${{ inputs.apply }}
       LIMIT: ${{ inputs.limit || '0' }}
+      DRYLIMIT: ${{ inputs.dry_limit || inputs.limit || '0' }}
       QMIN: ${{ inputs.quota_min || '400' }}
     steps:
       - uses: actions/checkout@v4
@@ -76,7 +76,7 @@ jobs:
         run: |
           set -euo pipefail
           python scripts/etsy/pod_paper_update.py --pod-state _work/pod_state.csv --state _work/paper.csv \
-            --out _out/dry --limit "$LIMIT" --quota-min "$QMIN" --dry-run
+            --out _out/dry --limit "$DRYLIMIT" --quota-min "$QMIN" --dry-run
           python - <<'PY' >> "$GITHUB_OUTPUT"
           import json
           d = json.load(open("_out/dry/paper_result.json"))
