@@ -14,6 +14,10 @@ on:
         description: "true = ilanlarin EN aciklamasini da oldugu gibi yazdir (salt okur)"
         type: boolean
         default: false
+      show_ru:
+        description: "true = RU cevirisini (baslik + aciklama) oldugu gibi yazdir (salt okur)"
+        type: boolean
+        default: false
       counts:
         description: "true = magaza durum dagilimini da oku (4 cagri)"
         type: boolean
@@ -59,6 +63,7 @@ jobs:
           TOKEN_FILE: _work/ETSY_TOKEN.json
           IDS: ${{ inputs.listing_ids }}
           SHOW_DESC: ${{ inputs.show_desc }}
+          SHOW_RU: ${{ inputs.show_ru }}
           COUNTS: ${{ inputs.counts }}
         run: |
           set -euo pipefail
@@ -83,6 +88,14 @@ jobs:
               if os.environ.get("SHOW_DESC") == "true":
                   print(f"----- {lid} baslik -----\n{L.get('title')}")
                   print(f"----- {lid} EN aciklama (oldugu gibi) -----\n{L.get('description')}\n----- son -----")
+              if os.environ.get("SHOW_RU") == "true":
+                  t = api.get(f"/shops/{shop}/listings/{lid}/translations/ru", ok404=True)
+                  if t is None:
+                      print(f"----- {lid} RU: ceviri yok (404) -----")
+                  else:
+                      print(f"----- {lid} RU baslik -----\n{t.get('title')}")
+                      print(f"----- {lid} RU aciklama (oldugu gibi, {len(t.get('description') or '')} karakter) -----\n"
+                            f"{t.get('description')}\n----- RU son -----")
           print(f"x-remaining-today: {api.remaining}")
           PY
       - name: Token geri yaz
