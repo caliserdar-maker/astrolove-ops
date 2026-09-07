@@ -1,0 +1,128 @@
+name: etsy-ai-scan
+
+# SALT OKUR (Mo 7 Eyl 2026): (1) Etsy OAS'ta "AI generator / how it's made" alani var mi?
+# (2) Aktif ilanlarin kacinda aciklamada verilen ifade (varsayilan "AI-ASSISTED") geciyor?
+# Hicbir yazma yapmaz; OAS herkese acik, ilan taramasi getShopListings ile ~6 cagri.
+
+on:
+  workflow_dispatch:
+    inputs:
+      needle:
+        description: "Aciklamada aranacak ifade"
+        required: false
+        default: "AI-ASSISTED"
+      grep:
+        description: "OAS metin taramasi (regex)"
+        required: false
+        default: "\\bai[ _-]?generat|artificial intelligence|machine[ _-]?learning|how[ _-]?it'?s[ _-]?made|is_?supply|who_?made"
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: OAS taramasi (Etsy kotasi harcamaz)
+        env:
+          GREP: ${{ inputs.grep }}
+        run: |
+          set -euo pipefail
+          curl -fsSL -o oas.json https://www.etsy.com/openapi/generated/oas/3.0.0.json
+          python3 - <<'PY' | tee -a "$GITHUB_STEP_SUMMARY"
+          import json, os, re
+          d = json.load(open("oas.json"))
+          rx = re.compile(os.environ["GREP"], re.I)
+          hits = []
+          def walk(node, loc):
+              if isinstance(node, dict):
+                  for k, v in node.items():
+                      if rx.search(str(k)):
+                          hits.append(("ANAHTAR", loc + "/" + str(k), str(v)[:180]))
+                      walk(v, loc + "/" + str(k))
+              elif isinstance(node, list):
+                  for i, v in enumerate(node):
+                      walk(v, f"{loc}/{i}")
+              elif isinstance(node, str) and rx.search(node):
+                  hits.append(("METIN", loc, node[:220]))
+          walk(d, "")
+          print(f"## OAS taramasi /{os.environ['GREP']}/ -> {len(hits)} eslesme")
+          for kind, loc, txt in hits[:60]:
+              print(f"- {kind} {loc} :: {txt}")
+          if len(hits) > 60:
+              print(f"... ve {len(hits) - 60} eslesme daha")
+          PY
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+      - name: Token
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+      - name: Aktif ilanlarda ifade taramasi (salt okur)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          NEEDLE: ${{ inputs.needle }}
+        run: |
+          set -euo pipefail
+          python - <<'PY' | tee -a "$GITHUB_STEP_SUMMARY"
+          import os, sys
+          sys.path.insert(0, "scripts/etsy")
+          from etsy_common import Etsy, TokenStore, mask
+          k, s = os.environ.get("ETSY_API_KEY", ""), os.environ.get("ETSY_SHARED_SECRET", "")
+          mask(k); mask(s)
+          store = TokenStore(os.environ["TOKEN_FILE"], k, s)
+          if store.needs_refresh():
+              store.refresh()
+          api = Etsy(store)
+          shop = os.environ["ETSY_SHOP_ID"]
+          needle = (os.environ.get("NEEDLE") or "AI-ASSISTED").lower()
+          rows, offset = [], 0
+          while True:
+              r = api.get(f"/shops/{shop}/listings", params={"state": "active", "limit": 100, "offset": offset}) or {}
+              res = r.get("results") or []
+              rows += res
+              if len(res) < 100 or offset > 2000:
+                  break
+              offset += 100
+          desc_var = [x for x in rows if (x.get("description") or "").strip()]
+          hit = [x for x in rows if needle in (x.get("description") or "").lower()]
+          print(f"\n## Aktif ilan taramasi — '{os.environ.get('NEEDLE')}'")
+          print(f"- aktif ilan: {len(rows)}; aciklamasi gelen: {len(desc_var)}; ifade gecen: {len(hit)}")
+          if len(desc_var) < len(rows):
+              print(f"- NOT: {len(rows) - len(desc_var)} ilanin aciklamasi liste ucunda gelmedi; sayim eksik olabilir")
+          bolum = {}
+          for x in hit:
+              bolum[x.get("shop_section_id")] = bolum.get(x.get("shop_section_id"), 0) + 1
+          print(f"- bolume gore: {bolum}")
+          yok = [x for x in desc_var if needle not in (x.get("description") or "").lower()]
+          print(f"- ifade GECMEYEN ilan: {len(yok)} (ornek: " + ", ".join(str(x.get('listing_id')) for x in yok[:5]) + ")")
+          print(f"- x-remaining-today: {api.remaining}")
+          PY
+      - name: Token geri yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || echo "Token yenilenmedi"
+          rm -rf _work ~/.config/rclone
