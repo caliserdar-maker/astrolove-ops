@@ -1,0 +1,164 @@
+name: pod-night2
+
+# GECE KOSUSU (Mo 7 Eyl 2026, TEK SEFERLIK) — 00:10 UTC / 03:10 Izmir
+#   FAZ 1  Dijital ilanlarin KALANI (EN): xsell_links --mode digital (XSELL_STATE'ten devam, ~200 ilan).
+#   FAZ 2  RU gecisi: yalniz FAZ 1 sorunsuz bitince. RU govdesi dolu dijital ilanlar (~312; PW'de RU yok,
+#          govde bossa atlanir). Capa "КАК ЭТО РАБОТАЕТ:" oncesine capraz satis blogu + AI maddesinin
+#          silinmesi; RU baslik ve etiketler GET'ten birebir geri yazilir. EN'e DOKUNULMAZ.
+#          Once 3 ilan DRY-RUN kapisi: diff artifact'a yazilir; dogrulama basarisizsa FAZ 2 DURUR.
+# Kota: her fazda script ilan basina x-remaining-today okur, 400 altina inmeden ilanlar arasinda durur
+# (apply ortasinda kesilme yok); kalanlar STATE'te (durum / ru_done) kalir.
+# NOT: cron TEK SEFERLIK; basarili kosudan sonra bir sonraki commit'te schedule satiri kaldirilir.
+
+on:
+  schedule:
+    - cron: "10 0 * * *"        # 00:10 UTC; tek seferlik (bkz. NOT)
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "true = hicbir yazma yapma (yalniz rapor)"
+        type: boolean
+        default: true
+      quota_min:
+        description: "Kota tabani"
+        required: false
+        default: "400"
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  night:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    env:
+      DRY_RUN: ${{ inputs.dry_run || 'false' }}      # schedule ile calisirsa APPLY
+      QMIN: ${{ inputs.quota_min || '400' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+      - name: Token ve STATE
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_LISTING/POD_LISTINGS_STATE.csv" _work/pod_state.csv
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_LISTING/XSELL_STATE.csv" _work/xsell.csv
+          echo "XSELL STATE satir: $(($(wc -l < _work/xsell.csv) - 1))"
+
+      - name: 'FAZ 1 - dijital EN kalan (dry-run)'
+        id: f1dry
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          python scripts/etsy/xsell_links.py --mode digital --pod-state _work/pod_state.csv \
+            --state _work/xsell.csv --out _out/faz1_dry --quota-min "$QMIN" --dry-run
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          d = json.load(open("_out/faz1_dry/xsell_digital_result.json"))
+          bad = [r for r in d["rows"] if r[2] in ("FAIL", "SIRA DISI")]
+          print(f"ok={'true' if not bad else 'false'}")
+          print(f"ozet={sum(1 for r in d['rows'] if r[2] == 'HAZIR')} guncellenecek, {len(bad)} sorunlu, kalan {d['kalan']}")
+          PY
+      - name: 'FAZ 1 - apply'
+        id: f1
+        if: ${{ steps.f1dry.outputs.ok == 'true' }}
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          if [ "$DRY_RUN" = "true" ]; then echo "DRY_RUN: FAZ 1 apply atlandi"; echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0; fi
+          echo "::warning::FAZ 1 APPLY (dijital EN): ${{ steps.f1dry.outputs.ozet }}"
+          python scripts/etsy/xsell_links.py --mode digital --pod-state _work/pod_state.csv \
+            --state _work/xsell.csv --out _out/faz1 --quota-min "$QMIN" --apply
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          d = json.load(open("_out/faz1/xsell_digital_result.json"))
+          bad = [r for r in d["rows"] if r[2] in ("FAIL", "SIRA DISI")]
+          print(f"ok={'true' if not bad else 'false'}")
+          print(f"ozet={sum(1 for r in d['rows'] if r[2] == 'PASS')} PASS, {len(bad)} sorunlu, kalan {d['kalan']}, kota {d['quota'][1]}")
+          PY
+
+      - name: 'FAZ 2 - RU dry-run kapisi (3 ilan)'
+        id: f2dry
+        if: ${{ steps.f1.outputs.ok == 'true' }}
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          python scripts/etsy/xsell_links.py --mode digital --ru-only --pod-state _work/pod_state.csv \
+            --state _work/xsell.csv --out _out/faz2_dry --limit 3 --quota-min "$QMIN" --dry-run
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          d = json.load(open("_out/faz2_dry/xsell_digital_result.json"))
+          rows = d["rows"]
+          hazir = [r for r in rows if r[2] == "HAZIR"]
+          bad = [r for r in rows if r[2] in ("FAIL", "SIRA DISI")]
+          print(f"ok={'true' if hazir and not bad else 'false'}")
+          print(f"ozet={len(hazir)} hazir, {len(bad)} sorunlu, {sum(1 for r in rows if r[2] == 'ATLANDI')} atlandi")
+          PY
+      - name: 'FAZ 2 - RU apply'
+        if: ${{ steps.f2dry.outputs.ok == 'true' }}
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          echo "::warning::FAZ 2 APPLY (RU): ${{ steps.f2dry.outputs.ozet }}"
+          python scripts/etsy/xsell_links.py --mode digital --ru-only --pod-state _work/pod_state.csv \
+            --state _work/xsell.csv --out _out/faz2 --quota-min "$QMIN" --apply
+      - name: 'FAZ 2 atlandi'
+        if: ${{ steps.f2dry.outputs.ok != 'true' }}
+        run: |
+          echo "::warning::FAZ 2 CALISMADI — FAZ 1: ${{ steps.f1.outputs.ozet || steps.f1dry.outputs.ozet }} | FAZ 2 kapi: ${{ steps.f2dry.outputs.ozet || 'kosmadi' }}"
+          {
+            echo "**FAZ 2 CALISMADI** (hicbir RU yazmasi yapilmadi)"
+            echo "- FAZ 1: ${{ steps.f1.outputs.ozet || steps.f1dry.outputs.ozet }}"
+            echo "- FAZ 2 dry-run kapisi: ${{ steps.f2dry.outputs.ozet || 'kosmadi' }}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Token/STATE/rapor Drive'a
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
+          [ -s _work/xsell.csv ] && rclone copyto _work/xsell.csv "gdrive:ASTROLOVE/TEMP/POD_LISTING/XSELL_STATE.csv" && echo "XSELL STATE yazildi" || true
+          [ -d _out ] && rclone copy _out "gdrive:ASTROLOVE/TEMP/POD_LISTING/NIGHT_20260908" -q && echo "Cikti: TEMP/POD_LISTING/NIGHT_20260908/"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: pod-night2
+          path: _out/
+          if-no-files-found: ignore
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone

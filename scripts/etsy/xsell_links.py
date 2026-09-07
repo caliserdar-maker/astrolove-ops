@@ -37,6 +37,19 @@ from wp_listing_update import norm  # noqa: E402
 
 URL = "https://www.etsy.com/listing/{lid}"
 AI_HEAD = {"en": "AI-ASSISTED CREATION DISCLOSURE", "ru": "РАСКРЫТИЕ ОБ ИСПОЛЬЗОВАНИИ ИИ"}
+# RU gecisi (Mo 7 Eyl 2026; gercek RU metninden olculdu, ilan 4552211376):
+# blok "КАК ЭТО РАБОТАЕТ:" satirinin hemen onune girer; AI beyani ayri bolum degil,
+# "ОБРАТИТЕ ВНИМАНИЕ:" listesindeki TEK MADDE silinir (baslik ve diger 3 madde kalir).
+RU_ONLY = {
+    "anchor": "КАК ЭТО РАБОТАЕТ:",
+    "note_head": "ОБРАТИТЕ ВНИМАНИЕ:",
+    "note_bullets": 3,
+    "head": "ХОТИТЕ ЕГО НА СТЕНЕ?",
+    "body": "Тот же дизайн доступен как жикле принт музейного качества на бумаге Hahnemühle Photo Rag 308 г/м² — "
+            "печать на заказ, доставка без рамы, 13 размеров:",
+    "ai_rx": re.compile(r"^[•\-]\s*Дизайн создан с применением инструментов искусственного интеллекта[^\n]*\n?", re.M),
+}
+
 SPEC = {
     "wallpaper": {
         "en": {"after": "HOW IT WORKS", "before": "GOOD TO KNOW", "head": "PREFER IT ON YOUR WALL?",
@@ -72,17 +85,18 @@ def read_done(path):
     if p.exists():
         with open(p, newline="", encoding="utf-8") as fh:
             for r in csv.DictReader(fh):
-                done[(r.get("mode", ""), r.get("listing_id", ""))] = r.get("durum", "")
+                done[(r.get("mode", ""), r.get("listing_id", ""))] = dict(r)
     return done
 
 
 def write_done(path, rows):
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", newline="", encoding="utf-8") as fh:
-        w = csv.DictWriter(fh, fieldnames=["mode", "listing_id", "pair", "durum", "not", "ts_utc"])
+        cols = ["mode", "listing_id", "pair", "durum", "not", "ts_utc", "ru_done", "ru_not"]
+        w = csv.DictWriter(fh, fieldnames=cols, extrasaction="ignore")
         w.writeheader()
         for r in rows:
-            w.writerow(r)
+            w.writerow({c: r.get(c, "") for c in cols})
 
 
 def shop_listings(api, shop, max_pages=12):
@@ -202,6 +216,88 @@ def check(old, new, spec, drop_ai, lang):
     return not sorun, sorun
 
 
+def ru_block(url):
+    return [RU_ONLY["head"], RU_ONLY["body"], url]
+
+
+def ru_cut_block(t):
+    """Varsa mevcut capraz satis blogunu (3 satir + izleyen bos satir) cikarir."""
+    lines = t.split("\n")
+    i = next((k for k, l in enumerate(lines) if l.strip() == RU_ONLY["head"]), None)
+    if i is None:
+        return t, False
+    j = i + 3
+    while j < len(lines) and not lines[j].strip():
+        j += 1
+    yeni = lines[:i] + lines[j:]
+    return re.sub(r"\n{3,}", "\n\n", "\n".join(yeni)).strip(), True
+
+
+def ru_base(t):
+    """Karsilastirma tabani: blok ve AI maddesi cikarilmis RU metni."""
+    x, _ = ru_cut_block(norm(t))
+    return re.sub(r"\n{3,}", "\n\n", RU_ONLY["ai_rx"].sub("", x)).strip()
+
+
+def ru_bullets(t):
+    """ОБРАТИТЕ ВНИМАНИЕ: basligindan sonraki madde satirlari."""
+    lines = norm(t).split("\n")
+    i = next((k for k, l in enumerate(lines) if l.strip() == RU_ONLY["note_head"]), None)
+    if i is None:
+        return None
+    out = []
+    for l in lines[i + 1:]:
+        if not l.strip():
+            break
+        out.append(l.strip())
+    return out
+
+
+def ru_transform(text, url):
+    """(yeni_metin, hata). Blok capa oncesine girer, AI maddesi silinir; baska hicbir sey degismez."""
+    t = norm(text)
+    if not t.strip():
+        return None, "RU govdesi bos"
+    lines = t.split("\n")
+    if sum(1 for l in lines if l.strip() == RU_ONLY["anchor"]) != 1:
+        return None, f"'{RU_ONLY['anchor']}' capasi bulunamadi/birden fazla"
+    if RU_ONLY["note_head"] not in t:
+        return None, f"'{RU_ONLY['note_head']}' basligi yok"
+    x, _ = ru_cut_block(t)                      # tekrar kosuda blok yenilenir
+    x = re.sub(r"\n{3,}", "\n\n", RU_ONLY["ai_rx"].sub("", x)).strip()
+    lines = x.split("\n")
+    i = next(k for k, l in enumerate(lines) if l.strip() == RU_ONLY["anchor"])
+    yeni = lines[:i] + ru_block(url) + [""] + lines[i:]
+    return re.sub(r"\n{3,}", "\n\n", "\n".join(yeni)).strip(), ""
+
+
+def ru_check(old, new, url):
+    """Bagimsiz dogrulama; -> (ok, sorunlar)."""
+    sorun = []
+    if ru_base(old) != ru_base(new):
+        sorun.append("blok/AI maddesi disinda RU metni degismis")
+    lines = norm(new).split("\n")
+    idx = [k for k, l in enumerate(lines) if l.strip() == RU_ONLY["head"]]
+    if len(idx) != 1:
+        sorun.append(f"blok {len(idx)} kez")
+    else:
+        i = idx[0]
+        if lines[i + 1:i + 3] != [RU_ONLY["body"], url]:
+            sorun.append("blok govdesi/url beklenen degil")
+        elif not (i + 4 < len(lines) and not lines[i + 3].strip() and lines[i + 4].strip() == RU_ONLY["anchor"]):
+            sorun.append("blok capanin hemen oncesinde degil")
+    if RU_ONLY["ai_rx"].search(norm(new)):
+        sorun.append("AI maddesi duruyor")
+    b_old, b_new = ru_bullets(old), ru_bullets(new)
+    if b_new is None:
+        sorun.append("ОБРАТИТЕ ВНИМАНИЕ: basligi kayboldu")
+    elif len(b_new) != RU_ONLY["note_bullets"]:
+        sorun.append(f"madde sayisi {len(b_new)} (beklenen {RU_ONLY['note_bullets']})")
+    elif b_old is not None and [x for x in b_old if not RU_ONLY["ai_rx"].match(x + "\n")] != b_new:
+        sorun.append("kalan maddeler degismis")
+    return not sorun, sorun
+
+
 def diff_text(old, new):
     return "\n".join(difflib.unified_diff(norm(old).split("\n"), norm(new).split("\n"), "eski", "yeni", lineterm="", n=1))
 
@@ -213,6 +309,8 @@ def main():
     ap.add_argument("--state", required=True, help="XSELL STATE (islenen ilanlar; resume)")
     ap.add_argument("--out", required=True)
     ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--ru-only", action="store_true",
+                    help="yalniz RU gecisi (EN'e dokunulmaz; RU govdesi bos ilan atlanir)")
     ap.add_argument("--quota-min", type=int, default=400)
     g = ap.add_mutually_exclusive_group(required=True)
     g.add_argument("--dry-run", action="store_true")
@@ -235,7 +333,10 @@ def main():
     listings = shop_listings(api, shop)
     q0 = api.remaining
     hedef, belirsiz = targets(listings, pod, a.mode, set(pod.values()))
-    kalanlar = [h for h in hedef if done.get((a.mode, h[0])) not in ("PASS", "DEGISIM YOK")]
+    if a.ru_only:
+        kalanlar = [h for h in hedef if (done.get((a.mode, h[0])) or {}).get("ru_done") != "PASS"]
+    else:
+        kalanlar = [h for h in hedef if (done.get((a.mode, h[0])) or {}).get("durum") not in ("PASS", "DEGISIM YOK")]
     todo = kalanlar[:a.limit] if a.limit else kalanlar
     log(f"aktif ilan {len(listings)} | hedef {len(hedef)} | islenecek {len(todo)} | kota {q0}")
 
@@ -250,6 +351,52 @@ def main():
             log(f"KOTA {rem} < {a.quota_min}: {lid} ve sonrasi islenmedi")
             break
         url = URL.format(lid=pod[pair])
+        if a.ru_only:
+            tru = api.get(f"/shops/{shop}/listings/{lid}/translations/ru", ok404=True) or {}
+            eski_desc, eski_title = tru.get("description") or "", tru.get("title") or ""
+            eski_tags = [t.strip() for t in (tru.get("tags") or [])]
+            if not eski_desc.strip():
+                res.append((lid, pair, "ATLANDI", "RU govdesi bos (yazma yok)"))
+                rows.append({"mode": a.mode, "listing_id": lid, "pair": pair, "ru_done": "RU YOK",
+                             "ru_not": "govde bos", "ts_utc": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())})
+                log(f"[{n}/{len(todo)}] {lid} {pair} ATLANDI (RU govdesi bos)")
+                continue
+            new_ru, err = ru_transform(eski_desc, url)
+            if err:
+                res.append((lid, pair, "ATLANDI", f"RU: {err}"))
+                log(f"[{n}/{len(todo)}] {lid} {pair} ATLANDI RU: {err}")
+                continue
+            ok_ru, s_ru = ru_check(eski_desc, new_ru, url)
+            if not ok_ru:
+                res.append((lid, pair, "SIRA DISI", f"RU: {', '.join(s_ru)}"))
+                continue
+            if norm(eski_desc) == norm(new_ru):
+                res.append((lid, pair, "DEGISIM YOK", "RU zaten guncel"))
+                rows.append({"mode": a.mode, "listing_id": lid, "pair": pair, "ru_done": "PASS",
+                             "ru_not": "degisim yok", "ts_utc": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())})
+                continue
+            if ornek is None:
+                ornek = (pair, "(EN'e dokunulmadi)", diff_text(eski_desc, new_ru))
+            if a.dry_run:
+                res.append((lid, pair, "HAZIR", f"POD {pod[pair]} | RU hazir"))
+                log(f"[{n}/{len(todo)}] {lid} {pair} HAZIR (RU dry-run)")
+                continue
+            body = {"title": eski_title, "description": new_ru, "tags": ",".join(eski_tags)}
+            r = api.put(f"/shops/{shop}/listings/{lid}/translations/ru", body)
+            back = r if isinstance(r, dict) and r.get("description") else (api.get(f"/shops/{shop}/listings/{lid}/translations/ru", ok404=True) or {})
+            b_tags = [t.strip() for t in (back.get("tags") or [])]
+            ok_back = norm(back.get("description")) == norm(new_ru)
+            ok_meta = back.get("title") == eski_title and b_tags == eski_tags
+            durum = "PASS" if (ok_back and ok_meta) else "FAIL"
+            notu = (f"POD {pod[pair]} | RU {'PASS' if ok_back else 'FAIL'} | "
+                    f"baslik/etiket {'korundu' if ok_meta else 'DEGISTI (' + str(len(b_tags)) + ' etiket)'}")
+            res.append((lid, pair, durum, notu))
+            rows.append({"mode": a.mode, "listing_id": lid, "pair": pair, "ru_done": durum, "ru_not": notu,
+                         "ts_utc": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())})
+            el = time.time() - t0
+            log(f"[{n}/{len(todo)}] {lid} {pair} {durum} (RU) | gecen {el:.0f}s "
+                f"kalan~{el / n * (len(todo) - n):.0f}s %{100 * n // len(todo)} | kota {api.remaining}")
+            continue
         L = api.get(f"/listings/{lid}") or {}
         tru = api.get(f"/shops/{shop}/listings/{lid}/translations/ru", ok404=True) or {}
         new_en, err = transform(L.get("description") or "", spec_en, url, drop_ai, "en")
@@ -303,13 +450,16 @@ def main():
             f"%{100 * n // len(todo)} | kota {api.remaining}")
 
     if a.apply:
-        eski = [{"mode": m, "listing_id": l, "pair": "", "durum": d, "not": "", "ts_utc": ""}
-                for (m, l), d in done.items() if (m, l) not in {(a.mode, r["listing_id"]) for r in rows}]
-        write_done(a.state, eski + rows)
+        birlesik = {k: dict(v) for k, v in done.items()}
+        for r in rows:
+            k = (r["mode"], r["listing_id"])
+            birlesik.setdefault(k, {})
+            birlesik[k].update({kk: vv for kk, vv in r.items() if vv != ""})
+        write_done(a.state, list(birlesik.values()))
     islenen = [r for r in res if r[2] in ("PASS", "HAZIR")]
     bad = [r for r in res if r[2] in ("FAIL", "ATLANDI", "SIRA DISI")]
     kalan = len(kalanlar) - len(res)
-    md = [f"## Capraz satis — {a.mode.upper()} ({'APPLY' if a.apply else 'DRY-RUN'})", "",
+    md = [f"## Capraz satis — {a.mode.upper()}{' / RU' if a.ru_only else ''} ({'APPLY' if a.apply else 'DRY-RUN'})", "",
           f"- hedef {len(hedef)}; islenen {len(res)}; guncellenen {len(islenen)}; "
           f"degisim yok {sum(1 for r in res if r[2] == 'DEGISIM YOK')}; atlanan/sorunlu {len(bad)}; kalan {kalan}"
           + (f" (kota {api.remaining} < {a.quota_min}, {stopped} ve sonrasi)" if stopped else ""),
