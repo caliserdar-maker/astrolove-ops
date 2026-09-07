@@ -51,6 +51,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--file", required=True, help="eklenecek kayit metni (UTF-8)")
     ap.add_argument("--dry-run", action="store_true", help="yazma, yalniz kontrol et")
+    ap.add_argument("--tail", type=int, default=0, help="yazdiktan sonra dokumanin son N satirini yazdir (dogrulama)")
     a = ap.parse_args()
 
     text = open(a.file, encoding="utf-8").read().rstrip("\n") + "\n"
@@ -82,6 +83,10 @@ def main():
     body2 = doc_text(s.get(f"{DOCS}/{DOC_ID}", timeout=60).json())
     ok = re.search(rf"^\s*{tag}\s*-", body2, re.M) is not None and body2.rstrip().endswith(text.strip().splitlines()[-1])
     log(f"yazildi: {tag}, {len(text)} karakter; dogrulama {'PASS' if ok else 'FAIL'}")
+    if a.tail:
+        log(f"----- dokumanin son {a.tail} satiri -----")
+        log("\n".join(body2.rstrip().split("\n")[-a.tail:]))
+        log("----- son -----")
     step = os.environ.get("GITHUB_STEP_SUMMARY")
     if step:
         with open(step, "a", encoding="utf-8") as f:

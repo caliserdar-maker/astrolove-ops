@@ -1,0 +1,163 @@
+==================================================================
+B98 - POD DENETIMI, XSELL, RU CAPA TESHISI, INSERT FIYATLARI,
+      KAGIT/EKO KAYNAKLARI (7 Eyl 2026)
+==================================================================
+
+78 POD ILANI
+- Tam denetim 78/78 PASS. Boyut etiketleri oran-once formatta.
+- Prodigi sales-channel: 78 ilanin 65/65 varyanti "Fulfilled by
+  Prodigi" acildi. Siparis yonlendirici koduna gerek kalmadi;
+  repoda KULLANILMIYOR notuyla duruyor.
+- Banner V8 canli: "78 PAIRS · 5 COLOR EDITIONS · DOWNLOADS &
+  PRINTS".
+- RU etiket duzeltmesi: 17 ilan, "постер" dusuruldu, burc cifti
+  korundu.
+- POD aciklamalarina dijital capraz satis linkleri (5 renk).
+
+INDIRIM
+- ASTROLOVE40B: %40, yalniz 6 dijital bolum (468 ilan), POD haric,
+  yenileme ~6 Ekim.
+
+AI BEYANI (B97 ACIK ISI KAPANDI)
+- Paneldeki "How is this digital content created?" secimi zaten
+  "Created by me" (3 ornek ilanda dogrulandi: dijital, wallpaper,
+  POD). Panel isi YOK. Yalniz aciklama metnindeki "AI-ASSISTED
+  CREATION DISCLOSURE" bolumu kaldiriliyor.
+
+CAPRAZ SATIS KOSULARI
+- Wallpaper: 78/78 PASS, run 34111528179. Blok "HOW IT WORKS"
+  sonrasi, "GOOD TO KNOW" oncesi; RU 78/78 mevcuttu, ayni yapida.
+- Dijital: 190/390 PASS, run 34112009563, kalan 200. Kota tabani
+  400 icin parti 190'a kisildi.
+
+KRITIK TESHIS - "RU CEVIRISI YOK" YANLISTI
+- Ilk rapor "190 ilanda RU cevirisi yok" dedi. YANLIS.
+- Sonda (run 34113811546, salt okur, 10 ornek): RU CEVIRISI VAR.
+  Yalniz Pure White'ta govde bos.
+- Gercek sebep: CAPA UYUMSUZLUGU. Varsayilan capalar
+  "ЧТО ВЫ ПОЛУЧИТЕ" / "КАК СКАЧАТЬ" idi; gercekte
+  "ЧТО ВЫ ПОЛУЧАЕТЕ (мгновенное скачивание после оплаты):" ve
+  "КАК ЭТО РАБОТАЕТ:" var. Capa bulunamayinca RU atlandi, EN
+  yazildi.
+- RU dijital metin EN'in ucte biri (~1089 karakter), ayri ve kisa
+  bir surum. AI beyani RU'da ayri bolum DEGIL:
+  "ОБРАТИТЕ ВНИМАНИЕ:" listesinde tek madde -> bolum kaldirma
+  degil, MADDE SILME gerekiyor.
+- KURAL: capa varsayilmaz, once gercek metin okunur.
+
+ACIK IS - PURE WHITE RU
+- PW'nin 78 ilaninda RU cevirisi HIC yok (govde bos). Ayri is.
+
+INSERT FIYATLARI (PRODIGI BRANDING)
+- API'de insert fiyati DONMUYOR: quote semasinda "inserts" alani
+  yok (5 OpenAPI adayi + Print API dokumani + sitemap tarandi).
+  Fiyatlar yalniz prodigi.com "Custom packaging specs" tablosunda
+  (GBP).
+- Postcard A6 105x148mm 260gsm - £2.00 / Pro £0.50
+- Flyer A5 148x210mm 150gsm silk - £2.00 / Pro £0.50
+- Packing slip colour A4 - £2.00 / Pro £0.50
+- Packing slip b&w A4 - UCRETSIZ
+- Round packaging sticker 65mm - £1.00 / Pro £0.25
+- Rectangular packaging sticker 4x3 inc - £1.00 / Pro £0.25
+- Round product sticker 25mm - £1.00 / Pro £0.25
+- Rectangular product sticker 4x3 inc - £1.00 / Pro £0.25
+- Duzeltme: dikdortgen stickerlar 105x74 DEGIL, 4x3 inc
+  (101.6 x 76.2 mm). Packing slip'ler A5 degil A4/Letter.
+- HPR "Full range": tum insert tipleri destekli.
+- Dosya: jpg/pdf, 300 dpi. Gorsel otomatik ortalanip
+  sigdiriliyor, konum elle ayarlanamiyor.
+- SECILEN SET (~£5/siparis): Postcard A6 + Flyer A5 + 65mm
+  packaging sticker + ucretsiz b&w packing slip.
+  Disarida: 25mm urun stickeri, dikdortgen urun stickeri.
+- Cikti: Drive TEMP/PRODIGI/PRODIGI_INSERTS_QUOTE.md + .csv,
+  kaynak kaniti PRODIGI_INSERTS_PAGE.txt. Kod
+  scripts/prodigi/prodigi_inserts_quote.py, commit 9f09e22.
+
+PRODIGI PRO ESIGI DEGISTI
+- Eski esik ayda ~25 siparisti (yalniz urun indirimine bakiyordu).
+- Insert'lerde %75 indirim hesaba girince: £5'lik set £1.25'e
+  duser. Urun indirimiyle birlikte siparis basi ~$7 tasarruf.
+- YENI ESIK: ayda ~7 siparis. $564/yil.
+
+KAGIT VE EKO KAYNAKLARI (DOGRULANMIS)
+- Hahnemuhle Certificate of Conformity: hayvansal hammadde yok,
+  surdurulebilir kaynakli lif, RoHS uyumlu. Prodigi urun sayfasi
+  dogrudan "vegan-certified" diyor.
+- Eko liste: su bazli murekkep, surdurulebilir kagit, yerel
+  uretim, plastiksiz (sifir plastik Ecocap tup), vegan.
+- Whiteness: natural white. Finish: matt. 308gsm, 100% cotton.
+- Kaynak PDF'ler Drive'da saklanacak.
+- SOYLENMEYECEKLER: FSC, geri donusturulmus, asitsiz/arsivlik
+  iddiasi bu belgelerde YOK.
+
+KUCUK BOYUTLAR TUPLE GITMIYOR
+- UK'de 200mm alti, EU/US/AU'da A4 ve alti DUZ sevk ediliyor
+  (karton zarf). Yani 8x10 ve A4 tup degil zarf. Insert tasarimi
+  hem zarf hem tup kapagi icin calismali.
+
+ICC RENK PROFILI (ACIK IS)
+- Prodigi HPR icin ozel ICC profili indirtiyor. 5.070 print
+  dosyasi bu profil uygulanmadan uretildi. En cok DB ve MB'de
+  fark eder.
+- Plan: profil indirilecek, her edisyondan 1 dosyada (5 dosya)
+  soft-proof yapilacak. Kayma ciddiyse yalniz MB+DB yeniden
+  uretilir (2.028 dosya). Yerel is, Actions yok.
+
+MOCKUP
+- Panelde ucretsiz, limitsiz mockup generator VAR (kendi
+  tasariminla HPR baski gorseli). Mockup API yok.
+- Urun fotograflari toplu indirilebiliyor, pazarlamada serbest.
+
+URETIM LOKASYONLARI
+- UK / US / EU / AU. Tek SKU, musteriye en yakin laboratuvar
+  basiyor.
+- Aciklamadaki lab cumlesi AU'yu atliyor; duzeltme yapildi.
+
+POD ACIKLAMA YAPISI (ilan 4570031205 okundu, run 34116948875)
+- 10 bolum: THE ARTWORK · MUSEUM-QUALITY MATERIALS · 5 COLOR
+  EDITIONS · PREFER AN INSTANT DOWNLOAD? · 13 SIZES · MADE TO
+  ORDER & SHIPPING · CARE · PLEASE NOTE · RETURNS & REPRINTS ·
+  A GIFT THAT MEANS SOMETHING. RU ayni sirayla 10 bolum (2783
+  karakter).
+- Kagit bilgisi TEK yerde: MUSEUM-QUALITY MATERIALS. Eko iddiasi
+  hic yok.
+- Galeri: Paper & Quality karti Etsy'de rank 6 (Drive'daki 05
+  numaralandirmasi degil).
+- KARAR: yeni bolum acilmiyor; MUSEUM-QUALITY MATERIALS listesine
+  iki madde ekleniyor (vegan-certified/natural white;
+  surdurulebilir lif/plastiksiz ambalaj/en yakin lab) + lab
+  cumlesi duzeltiliyor. EN ve RU metinleri kilitlendi. 3 ilanlik
+  dry-run TEMIZ (run 34117648647, 3/3 HAZIR, yazma yok),
+  onaylandi. Tam kosu yarin: pod-paper-update, apply=true,
+  limit=0. Kod scripts/etsy/pod_paper_update.py, commit d2d3208.
+
+GECE KOSUSU KURULDU
+- .github/workflows/pod-night2.yml, cron 10 0 * * * (00:10 UTC /
+  03:10 Izmir), tek seferlik, concurrency: etsy-token.
+- FAZ 1: dijital EN kalan ~200 ilan, XSELL_STATE'ten devam.
+- FAZ 2: RU gecisi (~312 ilan, PW haric), yalniz FAZ 1 sorunsuzsa.
+  Capa "КАК ЭТО РАБОТАЕТ:", AI maddesi satir silme, title/tags
+  birebir geri yazma, ru_done sutunu.
+- Dry-run kapisi: FAZ 2'nin ilk 3 ilani dry-run; sorunluysa FAZ 2
+  durur, hicbir RU yazmasi olmaz.
+- Kota kapisi: taban 400, apply ortasinda kesilme yok.
+- Commit 82e48b1. Sonuc SABAH raporlanacak, B99'a yazilacak.
+
+MODEL KURALI DEGISTI
+- Fable 5.1 artik mevcut degil. Varsayilan model: Opus 5, High.
+
+ACIK ISLER
+1. Gece kosusu raporu + FAZ 2 dry-run onayi.
+2. POD kagit/eko tam kosusu (yarin, onaylandi).
+3. ICC soft-proof testi.
+4. Pure White RU cevirisi (78 ilan).
+5. Insert tasarimlari: A6 kart, A5 brosur, 65mm sticker.
+   Once gercek oranda ornek, sonra Branding paneline yukleme.
+6. Yorum daveti politikasi (Etsy tesvik kurali dogrulanacak).
+7. GPSR: Kosi'den telefon cevabi bekleniyor (Prodigi B.V., Venlo).
+8. Magaza bolum sirasi (panelden, elle).
+9. 15oz kupa pilotu (H-MUG-CERAMIC-150Z, H-MUG-15OZ-W).
+10. Cerceveli urun grubu (faz 2).
+11. Prodigi Pro karari (yeni esik: ayda ~7 siparis).
+12. ASTROLOVE40B yenileme ~6 Ekim.
+SON: B98 KAPANDI.
