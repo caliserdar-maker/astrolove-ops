@@ -7,6 +7,9 @@ Her ilan icin:
   2. Yalniz --section ile verilen bolum(ler) degisiyorsa yazilir (EN updateListing PATCH, RU translations/ru PUT);
      baska bolumde fark varsa o ilan ATLANIR (FAIL degil, "SIRA DISI" olarak raporlanir) - yanlislikla ustune yazma yok.
   3. Geri okuma: PATCH/PUT cevabindaki metin sablonla birebir (cevapta yoksa GET ile).
+UYARI (7 Eyl 2026): updateListing bir TASLAGI otomatik yayina alir - bu betikle yapilan
+toplu aciklama guncellemesi 72 taslagi `active` yapti. Taslak kalmasi gereken ilan varsa
+once state okunur ve o ilan bu betige verilmez.
 STATE (cift,listing_id,stage) dosyasindaki verified ilanlar islenir; kota --quota-min altina inince durur,
 kalan ilanlar raporlanir (sonraki kosu ayni STATE ile devam eder). ETA sayaci her ilanda.
 Ortam: ETSY_API_KEY, ETSY_SHARED_SECRET, ETSY_SHOP_ID, TOKEN_FILE.

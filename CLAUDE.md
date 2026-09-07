@@ -20,6 +20,10 @@ bolumu okunmadan baslanmaz.
   refresh token her kosuda geri yazilir (bkz. docs/SECRETS.md). Ayni anda tek
   Etsy kosusu (`concurrency: etsy-token`).
 - Hicbir sir loga yazilmaz; token degerleri `::add-mask::` ile maskelenir.
+- **updateListing bir TASLAGI otomatik yayina alir** (7 Eyl 2026 olcumu: gece
+  aciklama guncellemesi 72 taslagi `active` yapti; `state_timestamp` = PATCH ani).
+  Toplu guncellemede "ilan taslak kalir" varsayimi YAPILMAZ: yazmadan once state
+  okunur, taslak kalmasi gerekiyorsa o ilan guncellenmez ve Mo'ya sorulur.
 
 ## Uretim
 
