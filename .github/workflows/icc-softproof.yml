@@ -1,0 +1,121 @@
+name: icc-softproof
+
+# ICC soft-proof olcumu (salt okur): kaynak baski dosyalari ve HPR profili
+# Drive'dan alinir, scripts/icc/icc_softproof.py kosar, karsilastirma PNG'leri
+# ve CSV Drive TEMP/ICC_TEST/ altina yazilir. Etsy cagrisi yok.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pair:
+        description: "Cift klasoru (TEMP/POD_PRINT/<PAIR>)"
+        required: false
+        default: "ARIES_LEO"
+      size:
+        description: "Boyut dosyasi (or. 8x10)"
+        required: false
+        default: "8x10"
+      profile:
+        description: "TEMP/ICC_TEST altindaki ICC dosyasi"
+        required: false
+        default: "prodigi-hahnemuhle-photo-rag-308gsm-hpr.icc"
+      max_px:
+        description: "Olcum/PNG uzun kenar (0 = tam cozunurluk)"
+        required: false
+        default: "1500"
+      gamut_esik:
+        description: "Gamut disi deltaE00 esigi"
+        required: false
+        default: "2.0"
+
+concurrency:
+  group: icc-softproof
+  cancel-in-progress: false
+
+jobs:
+  softproof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Bagimliliklar
+        run: pip install --quiet pillow==12.3.0 numpy==2.4.6
+
+      - name: rclone kur
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          rclone version | head -1
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then
+            echo "HATA: RCLONE_CONF_B64 secret'i tanimli degil." >&2
+            exit 1
+          fi
+          mkdir -p ~/.config/rclone
+          umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+          fi
+
+      - name: Profil ve kaynaklari al
+        env:
+          PAIR: ${{ inputs.pair }}
+          SIZE: ${{ inputs.size }}
+          PROFILE: ${{ inputs.profile }}
+        run: |
+          set -euo pipefail
+          mkdir -p work/src out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ICC_TEST/$PROFILE" "work/$PROFILE" -q
+          for ed in MIDNIGHT_BLUE DEEP_BLACK WARM_PARCHMENT CHAMPAGNE_IVORY PURE_WHITE; do
+            rclone copyto "gdrive:ASTROLOVE/TEMP/POD_PRINT/$PAIR/$ed/$SIZE.jpg" "work/src/$ed.jpg" -q
+          done
+          ls -l "work/$PROFILE" work/src
+
+      - name: Olcum
+        env:
+          PROFILE: ${{ inputs.profile }}
+          MAX_PX: ${{ inputs.max_px }}
+          GAMUT: ${{ inputs.gamut_esik }}
+        run: |
+          set -euo pipefail
+          python3 scripts/icc/icc_softproof.py --self-test
+          python3 scripts/icc/icc_softproof.py --profile "work/$PROFILE" --src work/src \
+            --out out --max-px "$MAX_PX" --gamut-esik "$GAMUT" | tee out/kosu.log
+          {
+            echo '### ICC soft-proof olcumu'
+            echo '```'
+            cat out/kosu.log
+            echo '```'
+            echo '| edisyon | ort dE00 | maks dE00 | p95 | gamut disi % |'
+            echo '|---|---|---|---|---|'
+            tail -n +2 out/ICC_TEST_REPORT.csv | awk -F, '{print "| "$1" | "$4" | "$5" | "$6" | "$7" |"}'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Drive TEMP/ICC_TEST'e yaz
+        run: |
+          set -euo pipefail
+          rclone copy out "gdrive:ASTROLOVE/TEMP/ICC_TEST" --include "ICC_*.png" --include "ICC_TEST_REPORT.csv" -q
+          rclone lsl "gdrive:ASTROLOVE/TEMP/ICC_TEST"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: icc-softproof
+          path: |
+            out/ICC_*.png
+            out/ICC_TEST_REPORT.csv
+          if-no-files-found: error
