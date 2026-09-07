@@ -1,0 +1,90 @@
+==================================================================
+B97 - POD HATTI: 78/78 ILAN YAYINDA, 12+1 MEDYA, BOYUT ETIKETI V3,
+      TAM DENETIM PASS, INDIRIM AYRIMI (6 Eyl aksami - 7 Eyl 2026)
+==================================================================
+
+78 ILAN:
+- 78/78 POD ilani uretildi ve YAYINDA; bolum "Zodiac Fine Art
+  Prints" (60204164). Ilan id'leri TEMP/POD_LISTING/
+  POD_LISTINGS_STATE.csv dosyasinda. Referans ilan Aries-Leo
+  4570031205.
+- Sablon (her ilanda ayni): 12 gorsel + 1 video - MB hero, 2 MB
+  sahne, Symbol Story karti, Crafted Detail karti, Paper & Quality,
+  Size Guide, Shipping & Care, ardindan DB/WP/CI/PW hero (rank
+  9-12); video 1080x1350 MB V01.
+- 65 varyant (5 renk x 13 boyut), renk -> gorsel baglama (5/5),
+  kargo profili 314711751541, iade 1513990287785, made to order
+  1-3 gun (readiness 1512772362964), RU baslik + aciklama.
+
+BOYUT FORMATI (SON HALI):
+- Varyasyon etiketi: "4:5 · 8x10 in (20×25 cm)" (oran once, cm tam
+  sayi).
+- Oran gruplari ve sira: 4:5 -> 3:4 -> 2:3 -> 11:14 -> A-series.
+- Aciklamada satir basina tek boyut; blok sonunda "Not sure? See
+  the size guide photo."
+
+"SOLD UNFRAMED" SATIRI:
+- THE ARTWORK altina eklendi, sonra GERI ALINDI (ilk paragrafla
+  tekrar ediyordu). Ilk paragraftaki "shipped unframed" ve PLEASE
+  NOTE'taki "prints are sold unframed" satiri AYNEN KALDI.
+
+AI BEYANI (ACIK IS):
+- Ilanlarda AI generator isaretlenmedi: poster artwork AI degil,
+  yalnizca mockup fotograflari. Dijital ilanlardaki "With an AI
+  generator" beyani bununla celisiyor - duzeltilecek.
+
+TARIFE:
+- 4911.91 tarife kodu GEREKSIZ: Etsy bu kodu yalnizca kendi kargo
+  etiketinde kullaniyor, gonderiyi Prodigi yapiyor.
+
+ETSY API BULGULARI:
+- variation-images ucu PUT degil POST (OAS).
+- "How it's made" uretim yontemi / arac alani API'de YOK.
+- GPSR alani (responsible person / manufacturer) API'de YOK: OAS
+  taramalarinda 0 eslesme (run 34094891439, 34095024674) -> panel.
+
+KRITIK KURAL (7 Eyl olcumu):
+- updateListing bir TASLAGI otomatik YAYINA alir: gece toplu
+  aciklama guncellemesi 72 taslagi active yapti (state_timestamp =
+  PATCH ani). Toplu guncellemede "ilan taslak kalir" varsayimi
+  YAPILMAZ; yazmadan once state okunur. Kural CLAUDE.md'ye ve
+  pod_desc_update.py basligina yazildi.
+
+INDIRIM KURALI:
+- Shop-wide indirim POD'u da kapsiyor ve fiyati maliyetin altina
+  dusuruyor. ASTROLOVE40 sonlandirildi; yerine ASTROLOVE40B: %40,
+  yalniz 6 dijital bolum (468 ilan), POD HARIC, yenileme ~6 Ekim.
+
+DENETIM:
+- Tam denetim (salt okur, run 34093719172): 78/78 ilan, ilan basina
+  7 GET; ilan alanlari, aciklama (9 bolum), RU katmani, 12 gorsel +
+  1 video, 65 varyant (SKU/etiket/fiyat/adet/gorunurluk), renk ->
+  gorsel 5/5, ilan ozellikleri. SAPMA YOK: 78/78 uyumlu.
+  Cikti TEMP/POD_LISTING/AUDIT_20260907_1009/.
+
+PRODIGI CEVABI (6 Eyl maili):
+- AB sorumlu kisisi olarak Prodigi B.V., Jan van Riebeeckweg 15,
+  5928 LG Venlo, Netherlands kullanilabilir - yalnizca Prodigi'nin
+  urettigi urunlerde. Uretici/satici olarak Mo'nun kendi bilgileri
+  girilir.
+- 15oz kupa: H-MUG-CERAMIC-150Z (48 saat) ve H-MUG-15OZ-W (120
+  saat), GB + US uretim.
+- Mockup API'si YOK; yalnizca hazir sablon/fotograf ve panelde 3D
+  onizleme.
+
+EKONOMIK OPERATOR KAYDI:
+- Etsy formu telefon zorunlu tutuyor, Prodigi telefon yayinlamiyor.
+  Kosi'ye soruldu, CEVAP BEKLENIYOR.
+
+ACIK ISLER:
+1. Siparis yonlendirici: onayli mod + cron; kod hazir degil.
+2. RU etiket kisaltmalari (20 karakter siniri; ikinci burc dusuyor).
+3. Capraz satis linkleri (wallpaper/dijital <-> POD).
+4. Magaza banner'indaki "INSTANT DOWNLOAD" ifadesi (artik fiziksel
+   urun de var).
+5. Bolum sirasi (panelden).
+6. 15oz kupa pilotu.
+7. Prodigi Pro karari.
+8. Tesekkur karti / sticker.
+9. AI beyani celiskisi (yukarida).
+SON: B97 KAPANDI.
