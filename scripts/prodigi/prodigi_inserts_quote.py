@@ -57,6 +57,24 @@ DOC_URLS = [
     "https://www.prodigi.com/print-api/",
 ]
 PAGE_DUMP = "PRODIGI_INSERTS_PAGE.txt"        # indirilen insert sayfasinin duz metni (kanit)
+
+# Sayfadaki "Custom packaging specs" tablosunun satirlari (kaynak: branded-packaging-inserts)
+SPEC_RE = re.compile(
+    r"(Sticker|Flyer|Postcard|Packing slip)\s+(.+?)\s+"
+    r"((?:\d+mm diameter)|(?:\d+x\d+\")|(?:A\d, \d+x\d+mm.*?)|(?:A4 / Letter))\s+"
+    r"(.+?)\s+(£[\d.]+|Free)\s+(£[\d.]+|Free)")
+# Mo'nun 8 tipi -> spec tablosu satiri (insert turu, yerlesim kalibi, olcu kalibi)
+SPEC_MATCH = {
+    "Postcard (A6)": ("Postcard", r"", r"A6"),
+    "Flyer (A5)": ("Flyer", r"", r"A5"),
+    "Packing slip (colour)": ("Packing slip", r"", r"A4"),
+    "Packing slip (b&w)": ("Packing slip", r"", r"A4"),
+    "Round packaging sticker (65 mm)": ("Sticker", r"exterior|tube end-caps", r"65mm"),
+    "Rectangular packaging sticker (105x74 mm)": ("Sticker", r"exterior packaging$", r'4x3"'),
+    "Round product sticker (25 mm)": ("Sticker", r"tissue seal|back of the product", r"25mm"),
+    "Rectangular product sticker (105x74 mm)": ("Sticker", r"back of the product", r'4x3"'),
+}
+SUBSTRATE_MATCH = {"Packing slip (colour)": "full colour", "Packing slip (b&w)": "B&W"}
 SITEMAPS = ["https://www.prodigi.com/sitemap.xml", "https://www.prodigi.com/sitemap_index.xml"]
 
 # Mo'nun listesi: rapor satirlari bu sirada; olcu/format/tesis kaynaktan doldurulur.
@@ -83,7 +101,8 @@ NOPRICE = "API fiyat donmuyor"
 
 # ------------------------------------------------------------------ yardimci
 def px300(mm_txt):
-    """'148 x 105' -> '1748 x 1240'; '65 (cap)' -> '768 (cap)' (300 dpi)."""
+    """'148 x 105 mm' -> '1748 x 1240'; '65 mm (cap)' -> '768 (cap)';
+    '4x3 inc (101.6 x 76.2 mm)' ve 'A4 (210 x 297 mm)' de desteklenir (300 dpi)."""
     n = re.findall(r"(\d+(?:[.,]\d+)?)", mm_txt or "")
     if not n:
         return ""
@@ -182,6 +201,62 @@ def find_in_pages(sources):
 
 
 # ------------------------------------------------------------------ 2) ozellikler
+def availability(text):
+    """Sayfadaki urun-bazli insert uygunlugunu dondurur (tesis kirilimi sayfada yoktur)."""
+    txt = re.sub(r"\s+", " ", text.replace("Â", ""))
+    m = re.search(r"Hahnem(?:&uuml;|ü)hle photo rag.{0,40}?"
+                  r"(Full range|B&W packing slip|Not available)", txt, re.I)
+    dep = "fulfilment location" in txt.lower()
+    out = []
+    if m:
+        out.append(f"HPR (referans urun): {m.group(1)}")
+    if dep:
+        out.append("tesis kirilimi sayfada yok; uygunluk fulfilment location'a bagli")
+    return "; ".join(out)
+
+
+def parse_specs(text):
+    """Sayfa metnindeki spec tablosunu (insert, yerlesim, olcu, malzeme, fiyatlar) dondurur."""
+    txt = re.sub(r"\s+", " ", text.replace("Â", ""))
+    i, j = txt.find("Custom packaging specs"), txt.find("Availability of branded")
+    if i < 0:
+        return []
+    return [tuple(g.strip() for g in m.groups()) for m in SPEC_RE.finditer(txt[i:j if j > i else len(txt)])]
+
+
+def spec_row(specs, name):
+    """Tipe karsilik gelen spec satirini bulur; olcu/malzeme/fiyat/px doldurur."""
+    kind, place_pat, dim_pat = SPEC_MATCH[name]
+    sub_pat = SUBSTRATE_MATCH.get(name, "")
+    for ins, place, dim, sub, std, pro in specs:
+        if ins != kind:
+            continue
+        if place_pat and not re.search(place_pat, place, re.I):
+            continue
+        if dim_pat and not re.search(re.escape(dim_pat) if '"' in dim_pat else dim_pat, dim, re.I):
+            continue
+        if sub_pat and sub_pat.lower() not in sub.lower():
+            continue
+        mm = re.search(r"(\d+)x(\d+)mm", dim)
+        rnd = re.search(r"(\d+)mm diameter", dim)
+        inch = re.search(r'(\d+)x(\d+)"', dim)
+        if mm:
+            olcu, px = f"{mm.group(1)} x {mm.group(2)} mm", f"{round(int(mm.group(1))/25.4*300)} x {round(int(mm.group(2))/25.4*300)}"
+        elif rnd:
+            olcu, px = f"{rnd.group(1)} mm (cap)", f"{round(int(rnd.group(1))/25.4*300)} (cap)"
+        elif inch:
+            a, b = int(inch.group(1)), int(inch.group(2))
+            olcu = f'{a}x{b} inc ({a*25.4:.1f} x {b*25.4:.1f} mm)'
+            px = f"{a*300} x {b*300}"
+        elif "A4" in dim:
+            olcu, px = "A4 / Letter (A4 210 x 297 mm)", "2480 x 3508"
+        else:
+            olcu, px = dim, ""
+        return {"olcu_mm": olcu, "olcu_px_300dpi": px, "dosya_formati": sub,
+                "fiyat_sayfa": f"standart {std} / Pro {pro}", "yerlesim": place}
+    return {}
+
+
 def spec_from_sources(sources, name, anchors):
     """Tip adinin sayfada gectigi yeri (capa) bulur ve capadan sonraki 220 karakterden
     olcu / format / tesis / fiyat cikarir. Capa yoksa alan bos kalir (uydurma yok)."""
@@ -314,9 +389,33 @@ def main():
     ap.add_argument("--out-dir", default="out")
     ap.add_argument("--no-drive", action="store_true")
     ap.add_argument("--self-test", action="store_true")
+    ap.add_argument("--page-file", help="indirilmis sayfa metninden yeniden uretim (ag/quote yok)")
+    ap.add_argument("--note", action="append", default=[], help="rapora ek not (tekrarlanabilir)")
     a = ap.parse_args()
     if a.self_test:
         return self_test()
+
+    if a.page_file:
+        sources = {"https://www.prodigi.com/branded-packaging-inserts/":
+                   ("text", Path(a.page_file).read_text(encoding="utf-8"))}
+        schema, api, base = None, None, {}
+        specs = parse_specs(sources["https://www.prodigi.com/branded-packaging-inserts/"][1])
+        rows = []
+        for name, anchors in TYPES:
+            avail = availability(sources["https://www.prodigi.com/branded-packaging-inserts/"][1])
+            r = {"tip": name, "US_maliyet": NOPRICE, "EU_maliyet": NOPRICE, "tesis_uygunluk": avail}
+            r.update(spec_row(specs, name) or spec_from_sources(sources, name, anchors))
+            r["kaynak"] = "https://www.prodigi.com/branded-packaging-inserts/"
+            r["alinti"] = f"spec tablosu: {r.pop('yerlesim', '')}"
+            r.setdefault("olcu_px_300dpi", px300(r.get("olcu_mm", "")))
+            rows.append(r)
+            log(f"  {name}: {r.get('olcu_mm', '-')} | {r.get('olcu_px_300dpi', '-')} | {r.get('fiyat_sayfa', '-')}")
+        write_out(rows, [f"sayfa metni: {Path(a.page_file).name} (kaynak "
+                         f"https://www.prodigi.com/branded-packaging-inserts/)",
+                         f"spec tablosu satiri: {len(specs)}",
+                         f"quote ucu: {NOPRICE} (semada 'inserts' alani yok)"] + a.note,
+                  Path(a.out_dir), drive=not a.no_drive)
+        return
 
     sess = requests.Session()
     log("1) sema/dokuman kesfi")
@@ -353,11 +452,29 @@ def main():
     if ids:
         notes.append(f"sema insert tanimlayicilari: {ids}")
 
+    specs = []
+    for u, (kind, raw) in sources.items():
+        if "insert" in u:
+            specs = parse_specs(text_of(raw) if kind == "html" else raw) or specs
+    if specs:
+        notes.append(f"sayfa spec tablosu okundu: {len(specs)} satir "
+                     f"(https://www.prodigi.com/branded-packaging-inserts/)")
+
     rows = []
     for name, anchors in TYPES:
         r = {"tip": name}
         r.update(spec_from_sources(sources, name, anchors))
-        r["olcu_px_300dpi"] = px300(r["olcu_mm"])
+        tab = spec_row(specs, name) if specs else {}
+        if tab:                                            # spec tablosu capadan onceliklidir
+            for u, (kind, raw) in sources.items():
+                if "insert" in u:
+                    r["tesis_uygunluk"] = availability(text_of(raw) if kind == "html" else raw)
+            r.update({k: v for k, v in tab.items() if k != "yerlesim"})
+            r["alinti"] = f"spec tablosu: {tab.get('yerlesim', '')} | {tab['olcu_mm']} | {tab['dosya_formati']}"
+            r["kaynak"] = "https://www.prodigi.com/branded-packaging-inserts/"
+        r.setdefault("olcu_px_300dpi", "")
+        if not r["olcu_px_300dpi"]:
+            r["olcu_px_300dpi"] = px300(r["olcu_mm"])
         for dest, col in DESTS:
             r[col] = NOPRICE
         if schema:
