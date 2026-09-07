@@ -18,6 +18,10 @@ on:
         description: "true = RU cevirisini (baslik + aciklama) oldugu gibi yazdir (salt okur)"
         type: boolean
         default: false
+      show_images:
+        description: "true = galeri gorsellerini (rank + dosya adi) listele (salt okur)"
+        type: boolean
+        default: false
       counts:
         description: "true = magaza durum dagilimini da oku (4 cagri)"
         type: boolean
@@ -64,6 +68,7 @@ jobs:
           IDS: ${{ inputs.listing_ids }}
           SHOW_DESC: ${{ inputs.show_desc }}
           SHOW_RU: ${{ inputs.show_ru }}
+          SHOW_IMG: ${{ inputs.show_images }}
           COUNTS: ${{ inputs.counts }}
         run: |
           set -euo pipefail
@@ -88,6 +93,14 @@ jobs:
               if os.environ.get("SHOW_DESC") == "true":
                   print(f"----- {lid} baslik -----\n{L.get('title')}")
                   print(f"----- {lid} EN aciklama (oldugu gibi) -----\n{L.get('description')}\n----- son -----")
+              if os.environ.get("SHOW_IMG") == "true":
+                  ims = (api.get(f"/listings/{lid}/images", ok404=True) or {}).get("results") or []
+                  print(f"----- {lid} galeri ({len(ims)} gorsel) -----")
+                  for im in sorted(ims, key=lambda x: x.get("rank") or 0):
+                      u = im.get("url_fullxfull") or ""
+                      print(f"rank {im.get('rank')} | id {im.get('listing_image_id')} | {u.rsplit('/', 1)[-1]}")
+                  vids = (api.get(f"/listings/{lid}/videos", ok404=True) or {}).get("results") or []
+                  print(f"video: {len(vids)}")
               if os.environ.get("SHOW_RU") == "true":
                   t = api.get(f"/shops/{shop}/listings/{lid}/translations/ru", ok404=True)
                   if t is None:
