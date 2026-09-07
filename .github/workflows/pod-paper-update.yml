@@ -1,0 +1,108 @@
+name: pod-paper-update
+
+# POD ilanlarina kagit/eko maddeleri + lab cumlesi duzeltmesi (Mo 7 Eyl 2026), EN + RU.
+# Capalar tam satir; bulunmazsa ilan atlanir. Ilan state=active degilse kosu DURUR (yazma yok).
+# RU PUT'unda title/tags GET'ten birebir geri yazilir. Kota tabani 400; PAPER STATE ile resume.
+# apply=false (varsayilan) yalniz dry-run + diff uretir.
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "true = dry-run temizse Etsy'ye YAZ (onay gerekir)"
+        type: boolean
+        default: false
+      limit:
+        description: "En fazla N ilan (0 = hepsi)"
+        required: false
+        default: "3"
+      quota_min:
+        description: "Kota tabani"
+        required: false
+        default: "400"
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  paper:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      LIMIT: ${{ inputs.limit || '3' }}
+      QMIN: ${{ inputs.quota_min || '400' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+      - name: Token ve STATE
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_LISTING/POD_LISTINGS_STATE.csv" _work/pod_state.csv
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_LISTING/PAPER_STATE.csv" _work/paper.csv 2>/dev/null || echo "PAPER STATE yok; yeni baslar"
+      - name: 'ADIM 1 - dry-run (diff)'
+        id: dry
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          python scripts/etsy/pod_paper_update.py --pod-state _work/pod_state.csv --state _work/paper.csv \
+            --out _out/dry --limit "$LIMIT" --quota-min "$QMIN" --dry-run
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          d = json.load(open("_out/dry/paper_result.json"))
+          bad = [r for r in d["rows"] if r[2] in ("FAIL", "SIRA DISI", "ATLANDI")]
+          hazir = [r for r in d["rows"] if r[2] == "HAZIR"]
+          print(f"ok={'true' if hazir and not bad else 'false'}")
+          print(f"ozet={len(hazir)} guncellenecek, {len(bad)} sorunlu, kalan {d['kalan']}")
+          PY
+      - name: 'ADIM 2 - apply (yalniz onayla ve dry-run temizse)'
+        if: ${{ inputs.apply && steps.dry.outputs.ok == 'true' }}
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          echo "::warning::APPLY: POD aciklamalari (EN+RU) guncellenecek — ${{ steps.dry.outputs.ozet }}"
+          python scripts/etsy/pod_paper_update.py --pod-state _work/pod_state.csv --state _work/paper.csv \
+            --out _out/apply --limit "$LIMIT" --quota-min "$QMIN" --apply
+      - name: Token/STATE/cikti Drive'a
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
+          [ -s _work/paper.csv ] && rclone copyto _work/paper.csv "gdrive:ASTROLOVE/TEMP/POD_LISTING/PAPER_STATE.csv" && echo "PAPER STATE yazildi" || true
+          stamp=$(TZ=Europe/Istanbul date +%Y%m%d_%H%M)
+          [ -d _out ] && rclone copy _out "gdrive:ASTROLOVE/TEMP/POD_LISTING/PAPER_${stamp}" -q && echo "Cikti: TEMP/POD_LISTING/PAPER_${stamp}/"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: pod-paper-update
+          path: _out/
+          if-no-files-found: ignore
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
