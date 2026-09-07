@@ -10,6 +10,14 @@ on:
         description: "Virgullu ilan id listesi (state tek tek okunur; bos birakilabilir)"
         required: false
         default: ""
+      show_desc:
+        description: "true = ilanlarin EN aciklamasini da oldugu gibi yazdir (salt okur)"
+        type: boolean
+        default: false
+      counts:
+        description: "true = magaza durum dagilimini da oku (4 cagri)"
+        type: boolean
+        default: true
 
 concurrency:
   group: etsy-token
@@ -50,6 +58,8 @@ jobs:
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
           TOKEN_FILE: _work/ETSY_TOKEN.json
           IDS: ${{ inputs.listing_ids }}
+          SHOW_DESC: ${{ inputs.show_desc }}
+          COUNTS: ${{ inputs.counts }}
         run: |
           set -euo pipefail
           python - <<'PY' | tee -a "$GITHUB_STEP_SUMMARY"
@@ -63,12 +73,16 @@ jobs:
               store.refresh()
           api = Etsy(store)
           shop = os.environ["ETSY_SHOP_ID"]
-          for st in ("draft", "active", "inactive", "expired"):
-              r = api.get(f"/shops/{shop}/listings", params={"state": st, "limit": 1}) or {}
-              print(f"{st}: {r.get('count')}")
+          if os.environ.get("COUNTS", "true") != "false":
+              for st in ("draft", "active", "inactive", "expired"):
+                  r = api.get(f"/shops/{shop}/listings", params={"state": st, "limit": 1}) or {}
+                  print(f"{st}: {r.get('count')}")
           for lid in [x.strip() for x in (os.environ.get("IDS") or "").split(",") if x.strip()]:
               L = api.get(f"/listings/{lid}") or {}
               print(f"{lid}: state={L.get('state')} | created={L.get('creation_timestamp')} | updated={L.get('last_modified_timestamp')} | state_ts={L.get('state_timestamp')}")
+              if os.environ.get("SHOW_DESC") == "true":
+                  print(f"----- {lid} baslik -----\n{L.get('title')}")
+                  print(f"----- {lid} EN aciklama (oldugu gibi) -----\n{L.get('description')}\n----- son -----")
           print(f"x-remaining-today: {api.remaining}")
           PY
       - name: Token geri yaz
