@@ -15,6 +15,7 @@ import argparse
 import csv
 import json
 import os
+import re
 import sys
 import time
 from pathlib import Path
@@ -22,14 +23,15 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from etsy_common import Etsy, TokenStore, log, mask  # noqa: E402
 from pod_inventory_update import sections  # noqa: E402
-from pod_listing_create import (ATTRS, AUTO_RENEW, ED_NAME, EDITIONS, MATERIALS, QUANTITY, SIZE_LABEL,  # noqa: E402
-                                SIZES, WHO_MADE, build_listing, build_ru, load_ru_template, read_prices)
+from pod_listing_create import (ATTRS, AUTO_RENEW, DIGITAL_HEAD, DIGITAL_ORDER, ED_NAME, EDITIONS,  # noqa: E402
+                                MATERIALS, QUANTITY, SIZE_LABEL, SIZES, WHO_MADE, build_listing, build_ru,
+                                load_ru_template, read_prices)
 from pod_listing_update import load_template  # noqa: E402
 from pod_publish import RETURN_ID, SECTION_ID, SHIPPING_ID  # noqa: E402
 from pod_sku import make_sku  # noqa: E402
 from wp_listing_update import norm, tags_of  # noqa: E402
 
-N_IMAGES, N_VIDEOS, N_TAGS, N_SECTIONS = 12, 1, 13, 9
+N_IMAGES, N_VIDEOS, N_TAGS, N_SECTIONS = 12, 1, 13, 10   # 7 Eyl: capraz satis bolumu ile 10
 COLOR_RANKS = {1, 9, 10, 11, 12}          # renk secenegine baglanan kareler (hero + 4 edisyon hero)
 FIRST_PARA_MUST = "shipped unframed"      # ilk paragrafta bulunmali
 # 7 Eyl geri alinan satir (PLEASE NOTE'taki "prints are sold unframed" MESRU, karistirilmaz)
@@ -115,8 +117,17 @@ def audit(pair, lid, data, prices, tpl, ru_tpl, ref_props, a):
     got_desc = norm(L.get("description"))
     if got_desc != norm(desc):
         so, sn = sections(got_desc), sections(norm(desc))
-        farkli = [k or "(giris)" for k in sn if so.get(k) != sn.get(k)] + [k or "(giris)" for k in so if k not in sn]
-        add("aciklama", "sablonla ayni", "farkli bolum: " + ", ".join(farkli))
+        # Capraz satis bolumu ilana ozel link icerir (sablonda {DIGITAL_LINKS}); bolum bolum kiyasta atlanir,
+        # varligi ve 5 link satiri ayrica kontrol edilir.
+        atla = {DIGITAL_HEAD["en"]}
+        farkli = [k or "(giris)" for k in sn if k not in atla and so.get(k) != sn.get(k)] \
+            + [k or "(giris)" for k in so if k not in sn and k not in atla]
+        if farkli:
+            add("aciklama", "sablonla ayni", "farkli bolum: " + ", ".join(farkli))
+    dig_en = sections(got_desc).get(DIGITAL_HEAD["en"], "")
+    n_link = len(re.findall(r"https://www\.etsy\.com/listing/\d+", dig_en))
+    if n_link != len(DIGITAL_ORDER):
+        add("dijital surum bolumu", f"{len(DIGITAL_ORDER)} link", f"{n_link} link" if dig_en else "bolum yok")
     n_sec = sum(1 for line in got_desc.split("\n") if line.startswith("✦ "))
     if n_sec != N_SECTIONS:
         add("aciklama bolum sayisi", N_SECTIONS, n_sec)
@@ -131,8 +142,14 @@ def audit(pair, lid, data, prices, tpl, ru_tpl, ref_props, a):
     got_ru = norm(data["ru"].get("description"))
     if got_ru != norm(ru_desc):
         so, sn = sections(got_ru), sections(norm(ru_desc))
-        farkli = [k or "(giris)" for k in sn if so.get(k) != sn.get(k)] + [k or "(giris)" for k in so if k not in sn]
-        add("RU aciklama", "sablonla ayni", ("yok" if not got_ru else "farkli bolum: " + ", ".join(farkli)))
+        atla_ru = {DIGITAL_HEAD["ru"]}
+        farkli = [k or "(giris)" for k in sn if k not in atla_ru and so.get(k) != sn.get(k)] \
+            + [k or "(giris)" for k in so if k not in sn and k not in atla_ru]
+        if farkli or not got_ru:
+            add("RU aciklama", "sablonla ayni", ("yok" if not got_ru else "farkli bolum: " + ", ".join(farkli)))
+    n_link_ru = len(re.findall(r"https://www\.etsy\.com/listing/\d+", sections(got_ru).get(DIGITAL_HEAD["ru"], "")))
+    if n_link_ru != len(DIGITAL_ORDER):
+        add("RU dijital surum bolumu", f"{len(DIGITAL_ORDER)} link", f"{n_link_ru} link")
     if FORBIDDEN_LINE_RU in got_ru:
         add("RU 'без рамы' satiri", "yok", "VAR")
     if len(data["ru"].get("tags") or []) != N_TAGS:
