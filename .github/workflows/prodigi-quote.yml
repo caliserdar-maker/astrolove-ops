@@ -20,9 +20,9 @@ on:
         required: false
         default: ""
       mode:
-        description: "pilot = pilot_skus.csv (US) | hpr_sizes = hpr_sizes.txt (US + DE) | ship_everywhere = 8 ulke Standard kargo (18x24)"
+        description: "pilot = pilot_skus.csv (US) | hpr_sizes = hpr_sizes.txt (US + DE) | ship_everywhere = 8 ulke Standard kargo (18x24) | inserts = branded insert fiyat/ozellik (8 tip, US + DE)"
         type: choice
-        options: [pilot, hpr_sizes, ship_everywhere]
+        options: [pilot, hpr_sizes, ship_everywhere, inserts]
         default: pilot
 
 concurrency:
@@ -32,7 +32,7 @@ concurrency:
 jobs:
   quote:
     runs-on: ubuntu-latest
-    timeout-minutes: 4
+    timeout-minutes: 8
 
     steps:
       - name: Checkout
@@ -84,6 +84,12 @@ jobs:
           set -euo pipefail
           if [ "$MODE" = "hpr_sizes" ]; then
             python scripts/prodigi/prodigi_hpr_sizes.py --out-dir out
+            exit 0
+          fi
+          if [ "$MODE" = "inserts" ]; then
+            python scripts/prodigi/prodigi_inserts_quote.py --self-test
+            python scripts/prodigi/prodigi_inserts_quote.py --out-dir out
+            cat out/PRODIGI_INSERTS_QUOTE.md >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
           if [ "$MODE" = "ship_everywhere" ]; then
