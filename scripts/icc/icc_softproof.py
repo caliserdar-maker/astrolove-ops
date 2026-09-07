@@ -46,9 +46,10 @@ def to_lab(im, src_profile):
     tr = ImageCms.buildTransform(src_profile, lab_p, "RGB", "LAB",
                                  renderingIntent=INTENT,
                                  flags=ImageCms.Flags.BLACKPOINTCOMPENSATION)
-    a = np.asarray(ImageCms.applyTransform(im, tr)).astype(np.float64)
-    L = a[..., 0] * 100.0 / 255.0
-    return np.stack([L, a[..., 1] - 128.0, a[..., 2] - 128.0], axis=-1)
+    a = np.asarray(ImageCms.applyTransform(im, tr))
+    L = a[..., 0].astype(np.float64) * 100.0 / 255.0
+    ab = a[..., 1:3].view(np.int8).astype(np.float64)   # a/b isaretli saklanir (offset yok)
+    return np.stack([L, ab[..., 0], ab[..., 1]], axis=-1)
 
 
 def ciede2000(lab1, lab2):
@@ -137,8 +138,31 @@ def measure(path, proof_p, out_dir, max_px, gamut_thr):
     }, png
 
 
+# CIEDE2000 dogrulama ciftleri (Sharma, Wu, Dalal 2005 - Tablo 1)
+DE_CASES = [
+    ((50.0000, 2.6772, -79.7751), (50.0000, 0.0000, -82.7485), 2.0425),
+    ((50.0000, 3.1571, -77.2803), (50.0000, 0.0000, -82.7485), 2.8615),
+    ((50.0000, -1.3802, -84.2814), (50.0000, 0.0000, -82.7485), 1.0000),
+    ((50.0000, 2.5000, 0.0000), (50.0000, 0.0000, -2.5000), 4.3065),
+    ((50.0000, 2.5000, 0.0000), (73.0000, 25.0000, -18.0000), 27.1492),
+    ((50.0000, 2.5000, 0.0000), (50.0000, 3.1736, 0.5854), 1.0000),
+    ((60.2574, -34.0099, 36.2677), (60.4626, -34.1751, 39.4387), 1.2644),
+    ((22.7233, 20.0904, -46.6940), (23.0331, 14.9730, -42.5619), 2.0373),
+]
+
+
 def self_test():
-    """Proof profili = kaynak profil -> deltaE ~ 0, gamut disi ~ %0."""
+    """(a) CIEDE2000 literatur ciftleri, (b) Lab kodlamasi, (c) proof=kaynak -> dE ~ 0."""
+    for lab1, lab2, want in DE_CASES:
+        got = float(ciede2000(np.array([lab1]), np.array([lab2]))[0])
+        assert abs(got - want) < 0.02, (lab1, lab2, got, want)
+    log(f"  CIEDE2000: {len(DE_CASES)}/{len(DE_CASES)} literatur cifti PASS")
+    probe = Image.new("RGB", (3, 1))
+    probe.putdata([(0, 0, 0), (128, 128, 128), (255, 255, 255)])
+    lab = to_lab(probe, srgb())
+    assert abs(lab[0, 0, 0] - 0) < 1 and abs(lab[0, 1, 0] - 53.6) < 1.5 and abs(lab[0, 2, 0] - 100) < 1, lab
+    assert abs(lab[0, 1, 1]) < 2 and abs(lab[0, 1, 2]) < 2, lab      # notr gri: a,b ~ 0
+    log(f"  Lab kodlamasi: siyah L={lab[0,0,0]:.1f} gri L={lab[0,1,0]:.1f} beyaz L={lab[0,2,0]:.1f} PASS")
     d = Path("/tmp/icc_selftest")
     (d / "src").mkdir(parents=True, exist_ok=True)
     rng = np.random.default_rng(7)
