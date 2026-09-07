@@ -10,13 +10,17 @@ on:
   workflow_dispatch:
     inputs:
       listing_id:
-        description: "POD ilan id"
+        description: "Tek ilan id (bos = STATE'teki tum ilanlar)"
         required: false
-        default: "4570031205"
+        default: ""
       pair:
-        description: "Cift (STATE adi)"
+        description: "Tek ilan icin cift adi"
         required: false
-        default: "ARIES_LEO"
+        default: ""
+      limit:
+        description: "En fazla N ilan (0 = hepsi)"
+        required: false
+        default: "0"
       apply:
         description: "true = dry-run temizse Etsy'ye YAZ"
         type: boolean
@@ -33,10 +37,11 @@ concurrency:
 jobs:
   crosslink:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 90
     env:
-      LID: ${{ inputs.listing_id || '4570031205' }}
-      PAIR: ${{ inputs.pair || 'ARIES_LEO' }}
+      LID: ${{ inputs.listing_id }}
+      PAIR: ${{ inputs.pair }}
+      LIMIT: ${{ inputs.limit || '0' }}
       QMIN: ${{ inputs.quota_min || '400' }}
     steps:
       - uses: actions/checkout@v4
@@ -58,11 +63,15 @@ jobs:
           printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
           chmod 600 ~/.config/rclone/rclone.conf
           [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
-      - name: Token
+      - name: Token ve STATE
         run: |
           set -euo pipefail
           umask 077; mkdir -p _work _out
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_LISTING/POD_LISTINGS_STATE.csv" _work/state.csv
+          if [ -n "${LID:-}" ]; then echo "ARGS=--listing-id $LID --pair $PAIR" >> "$GITHUB_ENV";
+          else echo "ARGS=--state _work/state.csv --limit ${LIMIT:-0}" >> "$GITHUB_ENV"; fi
+          echo "verified ilan: $(grep -c ',verified,' _work/state.csv || true)"
       - name: 'ADIM 1 - dry-run (dijital id kesfi + diff)'
         id: dry
         env:
@@ -72,8 +81,7 @@ jobs:
           TOKEN_FILE: _work/ETSY_TOKEN.json
         run: |
           set -euo pipefail
-          python scripts/etsy/pod_crosslink.py --listing-id "$LID" --pair "$PAIR" --out _out/dry \
-            --quota-min "$QMIN" --dry-run
+          python scripts/etsy/pod_crosslink.py $ARGS --out _out/dry --quota-min "$QMIN" --dry-run
           echo "ok=true" >> "$GITHUB_OUTPUT"
       - name: 'ADIM 2 - apply (yalniz dry-run temizse)'
         if: ${{ inputs.apply && steps.dry.outputs.ok == 'true' }}
@@ -84,9 +92,8 @@ jobs:
           TOKEN_FILE: _work/ETSY_TOKEN.json
         run: |
           set -euo pipefail
-          echo "::warning::APPLY: $LID aciklamasi (EN+RU) guncellenecek"
-          python scripts/etsy/pod_crosslink.py --listing-id "$LID" --pair "$PAIR" --out _out/apply \
-            --quota-min "$QMIN" --apply
+          echo "::warning::APPLY: aciklamalar (EN+RU) guncellenecek ($ARGS)"
+          python scripts/etsy/pod_crosslink.py $ARGS --out _out/apply --quota-min "$QMIN" --apply
       - name: Token/cikti Drive'a
         if: ${{ always() }}
         run: |

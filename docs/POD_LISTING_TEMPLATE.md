@@ -45,6 +45,10 @@ One original emblem merges the {S1} and {S2} symbols: fine lines on a calm, soli
 Champagne Ivory · Pure White · Warm Parchment · Midnight Blue · Deep Black
 Select your edition from the Color menu.
 
+✦ PREFER AN INSTANT DOWNLOAD?
+The same design is available as a digital edition:
+{DIGITAL_LINKS}
+
 ✦ 13 SIZES (choose from the Size menu)
 
 Ratio 4:5
@@ -81,7 +85,6 @@ Handle by the edges. If a rolled print curls, lay it flat under a weight for 24�
 ✦ PLEASE NOTE
 - Frame not included: prints are sold unframed; frames in photos are for display only.
 - Colors may vary slightly between your screen and the printed piece.
-- Prefer an instant download? The same design is available as a digital edition in our shop.
 
 ✦ RETURNS & REPRINTS
 Every print is made just for you, so we can't accept returns or exchanges. If your print arrives damaged or with a defect, please send us a photo within 7 days and we'll happily reprint it at no cost.
@@ -146,6 +149,10 @@ Aciklama (RU):
 Champagne Ivory · Pure White · Warm Parchment · Midnight Blue · Deep Black
 Выберите издание в меню Color.
 
+✦ ХОТИТЕ МГНОВЕННУЮ ЗАГРУЗКУ?
+Тот же дизайн доступен как цифровое издание:
+{DIGITAL_LINKS}
+
 ✦ 13 РАЗМЕРОВ (выберите в меню Size)
 
 Соотношение 4:5
@@ -182,7 +189,6 @@ A2 — 42×59 см
 ✦ ОБРАТИТЕ ВНИМАНИЕ
 - Рама не входит в комплект: постеры продаются без рамы; рамы на фотографиях — только для демонстрации.
 - Цвета могут немного отличаться между экраном и печатью.
-- Предпочитаете мгновенное скачивание? Тот же дизайн доступен в нашем магазине как цифровое издание.
 
 ✦ ВОЗВРАТ И ПЕРЕПЕЧАТКА
 Каждый постер печатается специально для вас, поэтому мы не принимаем возвраты и обмены. Если постер пришёл повреждённым или с дефектом, пришлите фото в течение 7 дней — мы бесплатно напечатаем его заново.

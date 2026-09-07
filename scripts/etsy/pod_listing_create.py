@@ -88,6 +88,28 @@ def size_block(lang="en"):
     return "\n".join(out)
 
 
+# Capraz satis (Mo 7 Eyl 2026): PLEASE NOTE'tan sonraki dijital surum bolumu. Sablonda {DIGITAL_LINKS}
+# yer tutucusu vardir; links verilmezse bolum tamamen cikarilir (yeni ilan olustururken linkler henuz yok).
+DIGITAL_ORDER = ["Champagne Ivory", "Pure White", "Warm Parchment", "Midnight Blue", "Deep Black"]
+DIGITAL_HEAD = {"en": "✦ PREFER AN INSTANT DOWNLOAD?", "ru": "✦ ХОТИТЕ МГНОВЕННУЮ ЗАГРУЗКУ?"}
+DIGITAL_LEAD = {"en": "The same design is available as a digital edition:",
+                "ru": "Тот же дизайн доступен как цифровое издание:"}
+DIGITAL_PH = "{DIGITAL_LINKS}"
+
+
+def digital_lines(links):
+    """{renk: url} -> '<Renk> — <url>' satirlari (renk adlari iki dilde de Ingilizce)."""
+    return "\n".join(f"{c} — {links[c]}" for c in DIGITAL_ORDER)
+
+
+def fill_digital(tpl, links, lang="en"):
+    if DIGITAL_PH not in tpl:
+        return tpl
+    if links:
+        return tpl.replace(DIGITAL_PH, digital_lines(links))
+    return re.sub(rf"{re.escape(DIGITAL_HEAD[lang])}\n[^\n]*\n{re.escape(DIGITAL_PH)}\n\n", "", tpl, count=1)
+
+
 MATERIALS = ["Hahnemuhle Photo Rag 308 gsm cotton paper", "archival pigment ink"]
 WHO_MADE = "i_did"                # Mo 6 Eyl: tasarim bize ait; uretim partneri Prodigi (production_partner_ids)
 AUTO_RENEW = True
@@ -190,10 +212,10 @@ def image_plan(img_root, pair, primary, frames, media=None):
     return plan
 
 
-def build_listing(pair, desc_tpl):
+def build_listing(pair, desc_tpl, links=None):
     s1, s2 = pair.split("_", 1)
     S1, S2 = s1.capitalize(), s2.capitalize()
-    tags, desc, note = build_text(pair, desc_tpl)
+    tags, desc, note = build_text(pair, fill_digital(desc_tpl, links, "en"))
     title = TITLE.format(S1=S1, S2=S2)
     issue = validate(title, tags)
     if issue:
@@ -205,7 +227,8 @@ def load_ru_template():
     return load_block(TEMPLATE_MD.read_text(encoding="utf-8"), "RU_DESCRIPTION")
 
 
-def build_ru(pair, ru_tpl):
+def build_ru(pair, ru_tpl, links=None):
+    ru_tpl = fill_digital(ru_tpl, links, "ru")
     s1, s2 = pair.split("_", 1)
     R1, R2 = SIGN_RU[s1.capitalize()], SIGN_RU[s2.capitalize()]
     # Mo 7 Eyl 2026: 20 karaktere sigmazsa BURC CIFTI korunur, "постер" dusulur (eskiden 2. burc dusuyordu).

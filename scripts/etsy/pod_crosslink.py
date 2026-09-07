@@ -1,22 +1,26 @@
 #!/usr/bin/env python3
 """
-POD ilanina DIJITAL SURUM LINKLERI ekler (Mo 7 Eyl 2026, ADIM 0: yalniz ARIES_LEO 4570031205).
+POD ilanlarina DIJITAL SURUM LINKLERI ekler (Mo 7 Eyl 2026; ADIM 0 tek ilan, sonra 78 ilan).
 
-Yapilan:
+Her ilan icin:
   1. PLEASE NOTE (RU: ОБРАТИТЕ ВНИМАНИЕ) blogundaki "- Prefer an instant download? ..." satiri KALDIRILIR.
-  2. Bu blogun HEMEN ARDINA yeni bolum eklenir:
-       ✦ PREFER AN INSTANT DOWNLOAD?  /  ✦ ХОТИТЕ МГНОВЕННУЮ ЗАГРУЗКУ?
-       ardindan 5 renk icin "<Renk> — <url>" satirlari (renk adlari iki dilde de Ingilizce).
-  3. Diger tum bolumler BIREBIR korunur (bolum bolum karsilastirilir; baska fark varsa YAZILMAZ).
+  2. Dijital surum bolumu "✦ 5 COLOR EDITIONS" / "✦ 5 ЦВЕТОВЫХ ИЗДАНИЙ" bolumunun HEMEN ARDINA,
+     "✦ 13 SIZES" / "✦ 13 РАЗМЕРОВ" oncesine konur (Mo 7 Eyl, yer degisikligi):
+       ✦ PREFER AN INSTANT DOWNLOAD? / ✦ ХОТИТЕ МГНОВЕННУЮ ЗАГРУЗКУ?
+       + "<Renk> — https://www.etsy.com/listing/<id>" (5 satir, kisa URL, slug yok).
+     Bolum baska bir yerdeyse (ADIM 0'daki gibi PLEASE NOTE altinda) oradan alinip yeni yere TASINIR.
+  3. Diger bolumler BIREBIR korunur; bolum bolum karsilastirilir, baska fark varsa ilan YAZILMAZ.
 
-Dijital ilan id'leri Etsy'den BULUNUR (tahmin yok): aktif ilanlar taranir, basliginda her iki burc ve
-renk adi gecen, POD bolumu DISINDAKI ilan aranir. Bir renk icin tam bir eslesme yoksa kosu DURUR ve
-adaylari raporlar. Yazma: updateListing (EN) + translations/ru PUT (baslik/tag Etsy'deki gibi).
-Geri okuma: yazilan metin beklenenle birebir; degisen bolumler yalniz PLEASE NOTE + yeni bolum.
+Dijital ilan id'leri Etsy'den bulunur (tahmin yok): aktif ilanlar bir kez taranir; basliginda ciftin iki
+burcu ve renk adi gecen, POD bolumu disindaki ilan aranir. Bir renk icin tam bir eslesme yoksa O ILAN
+ATLANIR ve raporlanir. Kota --quota-min altina inince durur, kalanlar raporlanir. ETA sayaci her ilanda.
 Ortam: ETSY_API_KEY, ETSY_SHARED_SECRET, ETSY_SHOP_ID, TOKEN_FILE.
-Kullanim: pod_crosslink.py --listing-id 4570031205 --pair ARIES_LEO --out OUT --dry-run|--apply
+Kullanim:
+  pod_crosslink.py --state STATE.csv --out OUT --dry-run|--apply [--limit N] [--quota-min 400]
+  pod_crosslink.py --listing-id 4570031205 --pair ARIES_LEO --out OUT --apply      # tek ilan
 """
 import argparse
+import csv
 import difflib
 import json
 import os
@@ -28,15 +32,26 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from etsy_common import Etsy, TokenStore, log, mask  # noqa: E402
 from pod_inventory_update import sections  # noqa: E402
+from pod_listing_create import DIGITAL_HEAD, DIGITAL_LEAD, DIGITAL_ORDER, digital_lines  # noqa: E402
 from wp_listing_update import norm  # noqa: E402
 
 POD_SECTION = 60204164
-COLORS = ["Champagne Ivory", "Pure White", "Warm Parchment", "Midnight Blue", "Deep Black"]
-SEC = {"en": ("✦ PLEASE NOTE", "✦ PREFER AN INSTANT DOWNLOAD?", "The same design is available as a digital edition:",
-              re.compile(r"^-\s*Prefer an instant download\?.*$", re.M)),
-       "ru": ("✦ ОБРАТИТЕ ВНИМАНИЕ", "✦ ХОТИТЕ МГНОВЕННУЮ ЗАГРУЗКУ?", "Тот же дизайн доступен как цифровое издание:",
-              re.compile(r"^-\s*Предпочитаете мгновенное скачивание\?.*$", re.M))}
 URL = "https://www.etsy.com/listing/{lid}"
+NOTE_HEAD = {"en": "✦ PLEASE NOTE", "ru": "✦ ОБРАТИТЕ ВНИМАНИЕ"}
+COLOR_HEAD = {"en": "✦ 5 COLOR EDITIONS", "ru": "✦ 5 ЦВЕТОВЫХ ИЗДАНИЙ"}      # bolum bunun hemen ardina girer
+OLD_LINE = {"en": re.compile(r"^-\s*Prefer an instant download\?.*$\n?", re.M),
+            "ru": re.compile(r"^-\s*Предпочитаете мгновенное скачивание\?.*$\n?", re.M)}
+
+
+def read_state(path):
+    rows = []
+    p = Path(path)
+    if p.exists():
+        with open(p, newline="", encoding="utf-8") as fh:
+            for r in csv.DictReader(fh):
+                if (r.get("stage") or "") == "verified" and (r.get("listing_id") or "").isdigit():
+                    rows.append((r["pair"], r["listing_id"]))
+    return sorted(rows)
 
 
 def shop_listings(api, shop, state="active", max_pages=12):
@@ -53,13 +68,15 @@ def shop_listings(api, shop, state="active", max_pages=12):
 
 
 def find_digitals(listings, pair, skip_id, pod_section=POD_SECTION):
-    """-> ({renk: (id, baslik)}, {renk: [adaylar]}) - renk basina TAM BIR eslesme sart."""
+    """-> ({renk: (id, baslik)}, {renk: [aday]}) - renk basina TAM BIR eslesme sart."""
     s1, s2 = [s.capitalize() for s in pair.split("_", 1)]
-    rx = [re.compile(rf"\b{s}\b", re.I) for s in {s1, s2}]
+    # Ayni burclu ciftlerde (or. LEO_LEO) tek burc adi baska ciftlerin basligina da uyuyor:
+    # baslikta CIFT IFADESI aranir ("<S1> and <S2>", iki siralama da kabul).
+    rx = re.compile(rf"\b{s1}\s+and\s+{s2}\b|\b{s2}\s+and\s+{s1}\b", re.I)
     base = [x for x in listings if x["listing_id"] != str(skip_id) and x["section"] != pod_section
-            and all(r.search(x["title"]) for r in rx)]
+            and rx.search(x["title"])]
     found, cand = {}, {}
-    for c in COLORS:
+    for c in DIGITAL_ORDER:
         hits = [x for x in base if re.search(re.escape(c), x["title"], re.I)]
         cand[c] = hits
         if len(hits) == 1:
@@ -67,53 +84,126 @@ def find_digitals(listings, pair, skip_id, pod_section=POD_SECTION):
     return found, cand
 
 
-def new_block(lang, found):
-    head, title, lead, _ = SEC[lang]
-    return "\n".join([title, lead] + [f"{c} — {URL.format(lid=found[c][0])}" for c in COLORS])
+def block_body(lang, found):
+    links = {c: URL.format(lid=found[c][0]) for c in DIGITAL_ORDER}
+    return DIGITAL_LEAD[lang] + "\n" + digital_lines(links)
+
+
+def block(lang, found):
+    return DIGITAL_HEAD[lang] + "\n" + block_body(lang, found)
+
+
+def cut_section(t, head):
+    """Bolumu (baslik + govde) metinden cikarir -> (metin, vardi_mi)."""
+    if head not in t:
+        return t, False
+    i = t.index(head)
+    rest = t[i + len(head):]
+    m = re.search(r"\n✦ ", rest)
+    end = i + len(head) + (m.start() if m else len(rest))
+    return (t[:i].rstrip("\n") + "\n\n" + t[end:].lstrip("\n")).strip(), True
+
+
+def insert_after(t, head, blok):
+    """Bolumu 'head' bolumunun hemen ardina (bir sonraki '✦ ' basligindan once) koyar."""
+    i = t.index(head)
+    rest = t[i + len(head):]
+    m = re.search(r"\n✦ ", rest)
+    pos = i + len(head) + (m.start() if m else len(rest))
+    kuyruk = t[pos:].lstrip("\n")
+    return t[:pos].rstrip("\n") + "\n\n" + blok + (("\n\n" + kuyruk) if kuyruk else "")
+
+
+def base(t, lang):
+    """Karsilastirma tabani: dijital bolum ve eski 'instant download' satiri cikarilmis metin."""
+    x, _ = cut_section(norm(t), DIGITAL_HEAD[lang])
+    x = OLD_LINE[lang].sub("", x)
+    return re.sub(r"\n{3,}", "\n\n", x).strip()
 
 
 def transform(text, lang, found):
-    """(yeni_metin, hata). Satiri kaldirir, PLEASE NOTE blogundan sonra yeni bolumu ekler."""
-    head, title, lead, line_rx = SEC[lang]
+    """(yeni_metin, ne_yapildi, hata). ne: 'eklendi' | 'tasindi' | 'esitlendi' | 'ayni'."""
     t = norm(text)
-    if title in t:
-        return None, f"{lang}: '{title}' bolumu zaten var"
-    if head not in t:
-        return None, f"{lang}: '{head}' bolumu bulunamadi"
-    parts = t.split("\n" + head + "\n")
-    if len(parts) != 2:
-        return None, f"{lang}: '{head}' bolumu {len(parts) - 1} kez gecti"
-    before, rest = parts
-    m = re.search(r"\n✦ ", rest)
-    blok, kalan = (rest[:m.start()], rest[m.start():]) if m else (rest, "")
-    yeni_blok = line_rx.sub("", blok).rstrip("\n")
-    yeni_blok = re.sub(r"\n{3,}", "\n\n", yeni_blok)
-    if yeni_blok == blok.rstrip("\n"):
-        return None, f"{lang}: kaldirilacak 'instant download' satiri bulunamadi"
-    kuyruk = ("\n" + kalan) if kalan else ""          # bolum basliklarindan once bos satir korunur
-    return f"{before}\n{head}\n{yeni_blok}\n\n{new_block(lang, found)}{kuyruk}", ""
+    dig, note, color = DIGITAL_HEAD[lang], NOTE_HEAD[lang], COLOR_HEAD[lang]
+    if color not in t:
+        return None, "", f"{lang}: '{color}' bolumu bulunamadi"
+    if note not in t:
+        return None, "", f"{lang}: '{note}' bolumu bulunamadi"
+    if t.count(dig) > 1 or t.count(color) > 1:
+        return None, "", f"{lang}: bolum basligi birden fazla kez geciyor"
+    govde, vardi = cut_section(t, dig)
+    eski_yer = t.index(dig) if vardi else -1
+    govde = re.sub(r"\n{3,}", "\n\n", OLD_LINE[lang].sub("", govde)).strip()
+    new = insert_after(govde, color, block(lang, found))
+    if new == t:
+        return new, "ayni", ""
+    ne = "eklendi" if not vardi else ("esitlendi" if eski_yer == new.index(dig) else "tasindi")
+    return new, ne, ""
 
 
-def check(old, new, lang):
-    """Bolum bolum: yalniz PLEASE NOTE degismis + yeni bolum eklenmis olmali."""
-    head, title, _, _ = SEC[lang]
-    so, sn = sections(old), sections(new)
-    eklenen = [k for k in sn if k not in so]
-    silinen = [k for k in so if k not in sn]
-    degisen = [k for k in so if k in sn and so[k] != sn[k]]
-    ok = eklenen == [title] and not silinen and degisen == [head]
-    return ok, {"eklenen": eklenen, "silinen": silinen, "degisen": degisen}
+def check(old, new, lang, found):
+    """Bagimsiz dogrulama: (1) dijital bolum + eski satir disinda metin BIREBIR ayni,
+    (2) bolum sirasi dogru (renk bolumunun hemen ardi), (3) dijital govde beklenen."""
+    dig, color = DIGITAL_HEAD[lang], COLOR_HEAD[lang]
+    sorun = []
+    if base(old, lang) != base(new, lang):
+        sorun.append("dijital bolum/eski satir disinda metin degismis")
+    sn = list(sections(norm(new)))
+    if dig not in sn:
+        sorun.append("dijital bolum yok")
+    elif color not in sn or sn.index(dig) != sn.index(color) + 1:
+        sorun.append(f"bolum sirasi yanlis: {sn}")
+    if sections(norm(new)).get(dig) != block_body(lang, found):
+        sorun.append("dijital bolum govdesi beklenen degil")
+    if OLD_LINE[lang].search(norm(new)):
+        sorun.append("eski 'instant download' satiri duruyor")
+    return not sorun, sorun
 
 
 def diff_text(old, new):
     return "\n".join(difflib.unified_diff(norm(old).split("\n"), norm(new).split("\n"), "eski", "yeni", lineterm="", n=1))
 
 
+def one(api, shop, pair, lid, listings, a, ornek):
+    """-> (durum, not, diff_ciftti) ; Etsy yazmasi yalniz --apply ile."""
+    found, cand = find_digitals(listings, pair, lid, a.pod_section)
+    if len(found) != len(DIGITAL_ORDER):
+        eksik = [f"{c}({len(cand[c])} aday)" for c in DIGITAL_ORDER if c not in found]
+        return "ATLANDI", "dijital ilan eslesmedi: " + ", ".join(eksik), None
+    L = api.get(f"/listings/{lid}") or {}
+    tru = api.get(f"/shops/{shop}/listings/{lid}/translations/ru", ok404=True) or {}
+    new_en, ne_en, err_en = transform(L.get("description") or "", "en", found)
+    new_ru, ne_ru, err_ru = transform(tru.get("description") or "", "ru", found)
+    if err_en or err_ru:
+        return "ATLANDI", f"{err_en} {err_ru}".strip(), None
+    ok_en, d_en = check(L.get("description"), new_en, "en", found)
+    ok_ru, d_ru = check(tru.get("description"), new_ru, "ru", found)
+    if not (ok_en and ok_ru):
+        return "SIRA DISI", f"beklenmeyen bolum farki EN {d_en} RU {d_ru}", None
+    ids = ", ".join(found[c][0] for c in DIGITAL_ORDER)
+    if ne_en == "ayni" and ne_ru == "ayni":
+        return "DEGISIM YOK", ids, None
+    d = (diff_text(L.get("description"), new_en), diff_text(tru.get("description"), new_ru)) if ornek else None
+    if a.dry_run:
+        return "HAZIR", f"{ne_en}/{ne_ru} | {ids}", d
+    r = api.patch(f"/shops/{shop}/listings/{lid}", {"description": new_en})
+    back_en = r if isinstance(r, dict) and r.get("description") else (api.get(f"/listings/{lid}") or {})
+    body = {"title": tru.get("title") or "", "description": new_ru, "tags": ",".join(tru.get("tags") or [])}
+    r = api.put(f"/shops/{shop}/listings/{lid}/translations/ru", body)
+    back_ru = r if isinstance(r, dict) and r.get("description") else (api.get(f"/shops/{shop}/listings/{lid}/translations/ru", ok404=True) or {})
+    p_en = norm(back_en.get("description")) == norm(new_en)
+    p_ru = (norm(back_ru.get("description")) == norm(new_ru) and back_ru.get("title") == tru.get("title")
+            and [t.strip() for t in (back_ru.get("tags") or [])] == [t.strip() for t in (tru.get("tags") or [])])
+    return ("PASS" if (p_en and p_ru) else "FAIL"), f"EN {'PASS' if p_en else 'FAIL'}, RU {'PASS' if p_ru else 'FAIL'} | {ids}", d
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--listing-id", required=True)
-    ap.add_argument("--pair", required=True)
+    ap.add_argument("--state", default="", help="cift,listing_id,stage CSV (verified olanlar)")
+    ap.add_argument("--listing-id", default="")
+    ap.add_argument("--pair", default="")
     ap.add_argument("--out", required=True)
+    ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--quota-min", type=int, default=400)
     ap.add_argument("--pod-section", type=int, default=POD_SECTION)
     g = ap.add_mutually_exclusive_group(required=True)
@@ -121,6 +211,15 @@ def main():
     g.add_argument("--apply", action="store_true")
     a = ap.parse_args()
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
+    if a.state:
+        rows = read_state(a.state)
+    elif a.listing_id and a.pair:
+        rows = [(a.pair, str(a.listing_id))]
+    else:
+        raise SystemExit("HATA: --state ya da --listing-id + --pair gerekir")
+    if not rows:
+        raise SystemExit(f"HATA: islenecek ilan yok: {a.state}")
+    todo = rows[:a.limit] if a.limit else rows
 
     keystring = os.environ.get("ETSY_API_KEY", ""); shared = os.environ.get("ETSY_SHARED_SECRET", "")
     shop = os.environ.get("ETSY_SHOP_ID", "")
@@ -130,75 +229,54 @@ def main():
         store.refresh()
     api = Etsy(store)
     t0 = time.time()
-    lst = shop_listings(api, shop)
+    listings = shop_listings(api, shop)
     q0 = api.remaining
-    log(f"aktif ilan: {len(lst)} | kota {q0} | gecen {time.time() - t0:.0f}s")
-    try:
-        rem = int(api.remaining) if api.remaining is not None else None
-    except ValueError:
-        rem = None
-    if rem is not None and rem < a.quota_min:
-        raise SystemExit(f"DUR: kota {rem} < {a.quota_min}")
+    log(f"aktif ilan: {len(listings)} | kota {q0} | gecen {time.time() - t0:.0f}s")
 
-    found, cand = find_digitals(lst, a.pair, a.listing_id, a.pod_section)
-    md = [f"## Capraz satis linkleri — {a.pair} {a.listing_id} ({'APPLY' if a.apply else 'DRY-RUN'})", "",
-          "| renk | dijital listing_id | baslik |", "|---|---|---|"]
-    md += [f"| {c} | {found[c][0] if c in found else '**BULUNAMADI**'} | {found[c][1] if c in found else ', '.join(x['title'] for x in cand[c]) or '-'} |"
-           for c in COLORS]
-    if len(found) != len(COLORS):
-        eksik = [c for c in COLORS if c not in found]
-        md += ["", f"**DUR: {len(eksik)} renk icin tek eslesme yok: {', '.join(eksik)}**",
-               "", "Aday ilanlar (her iki burc + POD disi bolum):", ""]
-        md += [f"- {x['listing_id']} | bolum {x['section']} | {x['title']}"
-               for x in sorted({x['listing_id']: x for c in COLORS for x in cand[c]}.values(), key=lambda y: y["listing_id"])] or ["- (aday yok)"]
-        text = "\n".join(md + ["", f"**Kota once {q0} / sonra {api.remaining}**"])
-        log(text); (out / "CROSSLINK_REPORT.md").write_text(text + "\n", encoding="utf-8")
-        p = os.environ.get("GITHUB_STEP_SUMMARY")
-        if p:
-            open(p, "a", encoding="utf-8").write(text + "\n")
-        sys.exit("DUR: dijital ilan eslesmesi eksik")
+    res, ornek, stopped = [], None, None
+    for n, (pair, lid) in enumerate(todo, 1):
+        try:
+            rem = int(api.remaining) if api.remaining is not None else None
+        except ValueError:
+            rem = None
+        if rem is not None and rem < a.quota_min:
+            stopped = pair
+            log(f"KOTA {rem} < {a.quota_min}: {pair} ve sonrasi islenmedi")
+            break
+        durum, notu, d = one(api, shop, pair, lid, listings, a, ornek is None)
+        if d and ornek is None:
+            ornek = (pair, d[0], d[1])
+        res.append((pair, lid, durum, notu))
+        el = time.time() - t0
+        log(f"[{n}/{len(todo)}] {pair} {lid} {durum} {notu[:80]} | gecen {el:.0f}s "
+            f"kalan~{el / n * (len(todo) - n):.0f}s %{100 * n // len(todo)} | kota {api.remaining}")
 
-    L = api.get(f"/listings/{a.listing_id}") or {}
-    tru = api.get(f"/shops/{shop}/listings/{a.listing_id}/translations/ru", ok404=True) or {}
-    new_en, err_en = transform(L.get("description") or "", "en", found)
-    new_ru, err_ru = transform(tru.get("description") or "", "ru", found)
-    if err_en or err_ru:
-        raise SystemExit(f"DUR: {err_en or ''} {err_ru or ''}".strip())
-    ok_en, d_en = check(norm(L.get("description")), new_en, "en")
-    ok_ru, d_ru = check(norm(tru.get("description")), new_ru, "ru")
-    if not (ok_en and ok_ru):
-        raise SystemExit(f"DUR: beklenmeyen bolum farki EN {d_en} RU {d_ru}")
-    md += ["", "### Diff (EN)", "", "```diff", diff_text(L.get("description"), new_en), "```",
-           "", "### Diff (RU)", "", "```diff", diff_text(tru.get("description"), new_ru), "```"]
-    (out / "new_en.txt").write_text(new_en + "\n", encoding="utf-8")
-    (out / "new_ru.txt").write_text(new_ru + "\n", encoding="utf-8")
-
-    if a.apply:
-        r = api.patch(f"/shops/{shop}/listings/{a.listing_id}", {"description": new_en})
-        back_en = r if isinstance(r, dict) and r.get("description") else (api.get(f"/listings/{a.listing_id}") or {})
-        body = {"title": tru.get("title") or "", "description": new_ru, "tags": ",".join(tru.get("tags") or [])}
-        r = api.put(f"/shops/{shop}/listings/{a.listing_id}/translations/ru", body)
-        back_ru = r if isinstance(r, dict) and r.get("description") else (api.get(f"/shops/{shop}/listings/{a.listing_id}/translations/ru", ok404=True) or {})
-        p_en = norm(back_en.get("description")) == norm(new_en)
-        p_ru = norm(back_ru.get("description")) == norm(new_ru) and back_ru.get("title") == tru.get("title") \
-            and [t.strip() for t in (back_ru.get("tags") or [])] == [t.strip() for t in (tru.get("tags") or [])]
-        md += ["", f"- Geri okuma: EN {'PASS' if p_en else 'FAIL'}, RU {'PASS' if p_ru else 'FAIL'} "
-                   f"(RU baslik/etiket degismedi: {'evet' if p_ru else 'HAYIR'})"]
-        durum = p_en and p_ru
-    else:
-        md += ["", "- DRY-RUN: Etsy'ye yazilmadi"]
-        durum = True
+    islenen = [r for r in res if r[2] in ("PASS", "HAZIR")]
+    bad = [r for r in res if r[2] in ("FAIL", "ATLANDI", "SIRA DISI")]
+    kalan = [p for p, _ in todo[len(res):]] + [p for p, _ in rows[len(todo):]]
+    md = [f"## POD capraz satis linkleri ({'APPLY' if a.apply else 'DRY-RUN'})", "",
+          f"- Ilan {len(rows)}; islenen {len(res)}; guncellenen {len(islenen)}; "
+          f"degisim yok {sum(1 for r in res if r[2] == 'DEGISIM YOK')}; atlanan/sorunlu {len(bad)}; kalan {len(kalan)}"
+          + (f" (kota {api.remaining} < {a.quota_min}, {stopped} ve sonrasi)" if stopped else ""), ""]
+    if ornek:
+        md += [f"### Ornek diff ({ornek[0]})", "", "```diff", ornek[1], "```", "```diff", ornek[2], "```", ""]
+    if bad:
+        md += ["### Atlanan / sorunlu", "", "| cift | listing_id | durum | neden |", "|---|---|---|---|"]
+        md += [f"| {p} | {l} | {s} | {d} |" for p, l, s, d in bad] + [""]
+    md += ["| cift | listing_id | durum | not |", "|---|---|---|---|"]
+    md += [f"| {p} | {l} | {s} | {d} |" for p, l, s, d in res]
+    if kalan:
+        md += ["", f"Kalan: {', '.join(kalan)}"]
     md += ["", f"**Kota once {q0} / sonra {api.remaining}**"]
     text = "\n".join(md)
     log(text)
     (out / "CROSSLINK_REPORT.md").write_text(text + "\n", encoding="utf-8")
     (out / "crosslink_result.json").write_text(json.dumps(
-        {"listing_id": a.listing_id, "pair": a.pair, "digital": {c: found[c][0] for c in COLORS},
-         "quota": [q0, api.remaining], "ok": durum}, indent=1, ensure_ascii=False), encoding="utf-8")
+        {"rows": res, "kalan": kalan, "quota": [q0, api.remaining]}, indent=1, ensure_ascii=False), encoding="utf-8")
     p = os.environ.get("GITHUB_STEP_SUMMARY")
     if p:
         open(p, "a", encoding="utf-8").write(text + "\n")
-    if not durum:
+    if [r for r in res if r[2] == "FAIL"]:
         sys.exit(1)
 
 
