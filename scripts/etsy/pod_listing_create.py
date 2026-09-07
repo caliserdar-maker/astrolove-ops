@@ -98,6 +98,7 @@ ATTRS = {"Orientation": "Vertical", "Framing": "Unframed", "Number of pieces inc
 TITLE_RU = "{S1RU} и {S2RU} зодиак постер, совместимость пары, жикле принт без рамы, подарок паре"
 TAGS_RU = ["зодиак постер", "{pair}", "совместимость пары", "астрология декор", "подарок паре зодиак", "подарок на годовщину",
            "постер знак зодиака", "декор для пары", "подарок астрологу", "минимализм постер", "арт принт", "свадебный подарок", "небесный декор"]
+MAX_TAG_RU = 20                   # Etsy etiket siniri (wp_listing_update.MAX_TAG ile ayni)
 SIGN_RU = {"Aquarius": "Водолей", "Aries": "Овен", "Taurus": "Телец", "Gemini": "Близнецы", "Cancer": "Рак", "Leo": "Лев",
            "Virgo": "Дева", "Libra": "Весы", "Scorpio": "Скорпион", "Sagittarius": "Стрелец", "Capricorn": "Козерог", "Pisces": "Рыбы"}
 # Hunspell ru_RU disinda kalan gecerli terimler (6 Eyl olcumu): ЕС kisaltma, dizayn cogulu, giclee cevriyazisi,
@@ -207,11 +208,16 @@ def load_ru_template():
 def build_ru(pair, ru_tpl):
     s1, s2 = pair.split("_", 1)
     R1, R2 = SIGN_RU[s1.capitalize()], SIGN_RU[s2.capitalize()]
+    # Mo 7 Eyl 2026: 20 karaktere sigmazsa BURC CIFTI korunur, "постер" dusulur (eskiden 2. burc dusuyordu).
+    # Cift de sigmiyorsa kendi basimiza kisaltma YAPILMAZ; not birakilir ve validate() hata verir.
     ptag = f"{R1} {R2} постер".lower()
     note = ""
-    if len(ptag) > 20:
-        note = f"{ptag} ({len(ptag)}) -> {R1.lower()} постер"
-        ptag = f"{R1} постер".lower()
+    if len(ptag) > MAX_TAG_RU:
+        short = f"{R1} {R2}".lower()
+        note = f"{ptag} ({len(ptag)}) -> {short} ({len(short)})"
+        if len(short) > MAX_TAG_RU:
+            note += " [SIGMIYOR: elle karar gerekir]"
+        ptag = short
     tags = [t.format(pair=ptag) for t in TAGS_RU]
     title = TITLE_RU.format(S1RU=R1, S2RU=R2)
     desc = ru_tpl.replace("{PAIR_RU}", f"{R1} и {R2}").replace("{S1RU}", R1).replace("{S2RU}", R2)
