@@ -7,6 +7,24 @@
 | Baski dosyalari | `scripts/pod/pod_print_build.py`, `pod-print-build` | 78 cift x 5 edisyon x 13 boyut = 5.070 JPEG; hedef piksel Prodigi print-area (`scripts/prodigi/prodigi_print_areas.py` -> `TEMP/PRODIGI/PRODIGI_HPR_PRINT_AREAS.json`; inc boyutlar inc x 300 ile dogrulanir, A serisi API degeri). Drive `TEMP/POD_PRINT/<PAIR>/<ED>/<SIZE>.jpg`, PAYLASIM YOK. STATE `TEMP/POD_PRINT_STATE.csv`, rapor `TEMP/POD_PRINT_REPORT.md`. QC: geri okuma, piksel tam esit. |
 | Yonlendirici | `scripts/prodigi/order_router.py`, `pod-order-router` | asagida |
 
+## ONAYLI MOD (Mo 7 Eyl 2026 karari, varsayilan)
+
+78 ilan yayinda oldugu icin yonlendirici CANLI ama iki adimli:
+
+1. **Paket hazirlama (cron 30 dk, `--approve-mode on`)** — yeni her POD receipt'i icin Prodigi
+   siparis govdesi (GLOBAL-HPR SKU, `TEMP/POD_PRINT/<PAIR>/<ED>/<SIZE>.jpg`, Budget kargo, alici
+   adresi) + teklif/marj hesaplanir, `TEMP/POD_ORDERS/<receipt_id>.json` olarak yazilir, STATE
+   `bekliyor`. **Prodigi'ye siparis GONDERILMEZ**; asset icin Drive izni ACILMAZ.
+2. **Gonderim (elle, `submit=<receipt_id>`)** — yalniz o paket okunur, asset linkleri acilir,
+   `POST /orders` yapilir; sonuc `TEMP/POD_ORDERS/<receipt_id>.result.json` + STATE `ordered`
+   (+ `prodigi_order_id`). Ayni receipt IKINCI KEZ GONDERILEMEZ: STATE stage `ordered/shipped/
+   tracked` ya da `.result.json` varsa atlanir (ustune Prodigi `idempotencyKey = etsy-<rid>`).
+
+Kargo takibi bu asamada Etsy'ye YAZILMAZ, yalnizca raporda loglanir (ayri adim, sonra acilir).
+Etsy okumasi `--since-days 7` + en fazla `--max-pages 10` cagri, kota 400 altina inince durur
+(cron basina ~1-2 cagri, ~48/gun). Yerel dogrulama: sahte receipt ile paket/idempotens testi
+(`scripts/prodigi/test_receipt_sample.json`, Prodigi ve Drive sahte).
+
 ## Akis (her kosu, 30 dk)
 
 1. Etsy `getShopReceipts` (was_paid=true, was_shipped=false). SKU `POD-<burc3>_<burc3>-<ed2>-<SIZE>` (`scripts/etsy/pod_sku.py`, or. POD-ARI_LEO-MB-18x24) olan islemler.
@@ -59,8 +77,9 @@ Kosu basina en fazla `--max-orders` (5) yeni siparis. Idempotent: STATE + Prodig
 3. `pod-order-router` dispatch: env=sandbox, dry_run=true, test_receipt=... -> teklif + marj raporu.
 4. `pod-order-router` dispatch: env=sandbox, dry_run=false, test_receipt=... -> sandbox siparis, izin ac/kapat,
    sonraki kosularda shipped (sandbox kargo simulasyonu) -> Etsy'ye yazilmaz (etsy_writes kapali).
-5. Canli: `POD_ROUTER_ENABLED=true` degiskeni (gh_secrets.py ile) + workflow'da `schedule` satiri acilir -> cron 30 dk
-   live/apply/etsy_writes. (Cron kapali tutuluyor: is atlansa bile etsy-token grubuna girip bekleyen Etsy kosusunu iptal ediyor.)
+5. Canli (7 Eyl 2026): `schedule: */30` ACIK, cron = live + ONAYLI MOD (yalniz paket hazirlar).
+   `POD_ROUTER_ENABLED=false` repo degiskeni cron'u kapatir. Cron etsy-token grubunda oldugu icin
+   uzun bir Etsy kosusu sirasinda bekleyen kosular iptal olabilir (5 Eyl dersi).
 
 ## Maliyet kontrolu
 
