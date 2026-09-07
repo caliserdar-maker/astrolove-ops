@@ -6,11 +6,9 @@ name: pod-night
 #   ADIM 2  ADIM 1 tamamen PASS ise alfabetik ilk 5 taslak YAYINA alinir (pod_publish; on kontrol
 #           12 gorsel + 1 video + 65 varyant + bolum/kargo/iade). Kalan taslaklar Mo onayini bekler.
 # Kota her adimin basinda okunur; quota_min altina inince o adim durur ve kalanlari raporlar.
-# NOT: cron TEK SEFERLIK; kosu basariyla bittikten sonra bir sonraki commit'te schedule satiri kaldirilir.
+# NOT: cron TEK SEFERLIK idi; 7 Eyl 2026 kosusu (run 34070091952) basarili bitti, schedule kaldirildi.
 
 on:
-  schedule:
-    - cron: "10 0 * * *"        # 00:10 UTC = 03:10 Izmir; tek seferlik (bkz. NOT)
   workflow_dispatch:
     inputs:
       dry_run:
