@@ -1,0 +1,116 @@
+name: pod-ru-tags
+
+# POD ilanlarinin RU cift etiketini yeni kurala esitler (Mo 7 Eyl 2026): 20 karaktere sigmazsa
+# "постер" duser, BURC CIFTI korunur; cift de sigmazsa ilan guncellenmez, raporlanir.
+# Tek kosuda ADIM 1 dry-run (diff tablosu) -> temizse ADIM 2 apply (translations/ru PUT; baslik ve
+# aciklama Etsy'den okundugu gibi geri gonderilir, yalniz tags degisir). Kota quota_min altinda durur.
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "true = dry-run temizse Etsy'ye YAZ; false = yalniz dry-run"
+        type: boolean
+        default: true
+      limit:
+        description: "En fazla N ilan (0 = hepsi)"
+        required: false
+        default: "0"
+      quota_min:
+        description: "Kota tabani"
+        required: false
+        default: "400"
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  ru-tags:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      LIMIT: ${{ inputs.limit || '0' }}
+      QMIN: ${{ inputs.quota_min || '400' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2 spylls
+          mkdir -p dict
+          curl -fsSL -o dict/ru_RU.dic https://raw.githubusercontent.com/LibreOffice/dictionaries/master/ru_RU/ru_RU.dic
+          curl -fsSL -o dict/ru_RU.aff https://raw.githubusercontent.com/LibreOffice/dictionaries/master/ru_RU/ru_RU.aff
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+      - name: Token ve STATE
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_LISTING/POD_LISTINGS_STATE.csv" _work/state.csv
+          echo "verified ilan: $(grep -c ',verified,' _work/state.csv || true)"
+      - name: 'ADIM 1 - dry-run (diff tablosu)'
+        id: dry
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          python scripts/etsy/pod_ru_tags.py --state _work/state.csv --out _out/dry --limit "$LIMIT" \
+            --quota-min "$QMIN" --ru-dict dict/ru_RU --dry-run
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          d = json.load(open("_out/dry/ru_tags_result.json"))
+          rows = d["rows"]
+          bad = [r for r in rows if r[2] in ("FAIL", "SIRA DISI", "SIGMIYOR")]
+          hazir = [r for r in rows if r[2] == "HAZIR"]
+          print(f"ok={'true' if not bad and hazir else 'false'}")
+          print(f"ozet={len(hazir)} degisecek, {len(bad)} sorunlu, kalan {len(d['kalan'])}")
+          PY
+      - name: 'ADIM 2 - apply (yalniz dry-run temizse)'
+        if: ${{ inputs.apply && steps.dry.outputs.ok == 'true' }}
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          echo "::warning::APPLY: RU cift etiketleri Etsy'ye yazilacak (${{ steps.dry.outputs.ozet }})"
+          python scripts/etsy/pod_ru_tags.py --state _work/state.csv --out _out/apply --limit "$LIMIT" \
+            --quota-min "$QMIN" --ru-dict dict/ru_RU --apply
+      - name: 'ADIM 2 atlandi'
+        if: ${{ !(inputs.apply && steps.dry.outputs.ok == 'true') }}
+        run: |
+          echo "::warning::APPLY ATLANDI - ${{ steps.dry.outputs.ozet }}"
+          echo "**APPLY ATLANDI** (${{ steps.dry.outputs.ozet }})" >> "$GITHUB_STEP_SUMMARY"
+      - name: Token/cikti Drive'a
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
+          stamp=$(TZ=Europe/Istanbul date +%Y%m%d_%H%M)
+          [ -d _out ] && rclone copy _out "gdrive:ASTROLOVE/TEMP/POD_LISTING/RU_TAGS_${stamp}" -q && echo "Cikti: TEMP/POD_LISTING/RU_TAGS_${stamp}/"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: pod-ru-tags
+          path: _out/
+          if-no-files-found: ignore
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone

@@ -114,7 +114,7 @@ Tag seti (RU, 13, <= 20 karakter):
 | # | tag |
 |---|---|
 | 1 | зодиак постер |
-| 2 | {s1ru} {s2ru} постер - 20'yi asarsa `{s1ru} постер` (raporlanir) |
+| 2 | {s1ru} {s2ru} постер - 20'yi asarsa `{s1ru} {s2ru}` (burc cifti korunur, "постер" dusulur; 7 Eyl 2026). Cift de sigmazsa kisaltma yapilmaz, raporlanir |
 | 3 | совместимость пары |
 | 4 | астрология декор |
 | 5 | подарок паре зодиак |
