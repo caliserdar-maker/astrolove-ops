@@ -14,6 +14,10 @@ on:
         description: "Ayrica bu alan adlarinin (virgullu) tanimini yaz (or. readiness_state_id)"
         required: false
         default: "readiness_state_id"
+      grep:
+        description: "Tum semada metin taramasi (regex; anahtar adi + aciklama). Bos = kapali"
+        required: false
+        default: ""
 
 jobs:
   probe:
@@ -24,6 +28,7 @@ jobs:
         env:
           PATTERN: ${{ inputs.pattern }}
           FIELDS: ${{ inputs.fields }}
+          GREP: ${{ inputs.grep }}
         run: |
           set -euo pipefail
           curl -fsSL -o oas.json https://www.etsy.com/openapi/generated/oas/3.0.0.json
@@ -69,4 +74,25 @@ jobs:
                           for k, v in (deref(c["schema"]).get("properties") or {}).items():
                               if k in fields:
                                   v = deref(v); print(f"- {m.upper()} {path} body.{k}: {v.get('type')} :: {(v.get('description') or '')[:300]}")
+          g = os.environ.get("GREP", "").strip()
+          if g:
+              rx = re.compile(g, re.I)
+              hits = []
+              def walk(node, loc):
+                  if isinstance(node, dict):
+                      for k, v in node.items():
+                          if rx.search(str(k)):
+                              hits.append((loc + "/" + str(k), "ANAHTAR", str(v)[:200]))
+                          walk(v, loc + "/" + str(k))
+                  elif isinstance(node, list):
+                      for i, v in enumerate(node):
+                          walk(v, f"{loc}/{i}")
+                  elif isinstance(node, str) and rx.search(node):
+                      hits.append((loc, "METIN", node[:300]))
+              walk(d, "")
+              print(f"\n## Metin taramasi /{g}/ -> {len(hits)} eslesme")
+              for loc, kind, txt in hits[:120]:
+                  print(f"- {kind} {loc} :: {txt}")
+              if len(hits) > 120:
+                  print(f"... ve {len(hits) - 120} eslesme daha")
           PY
