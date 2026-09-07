@@ -1,0 +1,122 @@
+name: brand-banner
+
+# Etsy magaza banner'i: onayli V7 tabanindan YALNIZ alt satiri yeniden cizer
+# (START_HERE B81-EK kilitli kompozisyon). Taban ve cikti Drive BRAND'da.
+# Etsy'ye yukleme YAPILMAZ; Mo elle yukler.
+
+on:
+  workflow_dispatch:
+    inputs:
+      line2:
+        description: "Alt satir metni"
+        required: false
+        default: "78 PAIRS · 5 COLOR EDITIONS · DOWNLOADS & PRINTS"
+      out_name:
+        description: "Cikti dosya adi"
+        required: false
+        default: "ASTROLOVE_BANNER_ETSY_3360x840_V8.png"
+      base_name:
+        description: "Taban (onayli) banner adi"
+        required: false
+        default: "ASTROLOVE_BANNER_ETSY_3360x840_V7.png"
+      upload:
+        description: "Ciktiyi Drive BRAND'a yaz"
+        type: boolean
+        default: true
+
+concurrency:
+  group: brand-banner
+  cancel-in-progress: false
+
+jobs:
+  banner:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Bagimliliklar
+        run: pip install --quiet pillow==12.3.0 numpy==2.4.6
+
+      - name: rclone kur
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          rclone version | head -1
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then
+            echo "HATA: RCLONE_CONF_B64 secret'i tanimli degil." >&2
+            exit 1
+          fi
+          mkdir -p ~/.config/rclone
+          umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+          fi
+
+      - name: Taban banner'i al
+        env:
+          BASE: ${{ inputs.base_name }}
+        run: |
+          set -euo pipefail
+          mkdir -p work
+          rclone copyto "gdrive:ASTROLOVE/BRAND/$BASE" "work/$BASE" -q
+          ls -l "work/$BASE"
+
+      - name: Banner uret + dogrula
+        env:
+          BASE: ${{ inputs.base_name }}
+          OUT: ${{ inputs.out_name }}
+          LINE2: ${{ inputs.line2 }}
+        run: |
+          set -euo pipefail
+          python3 scripts/brand/banner_v8.py \
+            --base "work/$BASE" --out "work/$OUT" --line2 "$LINE2" \
+            --fonts work/fonts --fetch-fonts --verify | tee work/rapor.txt
+          {
+            echo '### banner uretim raporu'
+            echo '```'
+            cat work/rapor.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          python3 - <<'PY'
+          import os
+          from PIL import Image
+          out = os.path.join("work", os.environ["OUT"])
+          im = Image.open(out)
+          print("QC boyut:", "PASS" if im.size == (3360, 840) else f"FAIL {im.size}")
+          assert im.size == (3360, 840)
+          im.convert("RGB").resize((1400, 350)).save("work/onizleme.jpg", quality=90)
+          PY
+
+      - name: Drive BRAND'a yaz
+        if: ${{ inputs.upload }}
+        env:
+          OUT: ${{ inputs.out_name }}
+        run: |
+          set -euo pipefail
+          rclone copyto "work/$OUT" "gdrive:ASTROLOVE/BRAND/$OUT" -q
+          rclone lsl "gdrive:ASTROLOVE/BRAND/$OUT"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: brand-banner
+          path: |
+            work/*.png
+            work/onizleme.jpg
+            work/rapor.txt
+          if-no-files-found: error
