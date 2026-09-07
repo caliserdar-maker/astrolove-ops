@@ -1,0 +1,131 @@
+name: etsy-ru-probe
+
+# SALT OKUR (Mo 7 Eyl 2026): XSELL_STATE'te islenmis dijital ilanlardan her edisyondan 2'ser ornek
+# secip GET /shops/{shop}/listings/{listing_id}/translations/ru cagirir; HAM HTTP kodunu, RU'nun olup
+# olmadigini, RU aciklamada "AI-ASSISTED" ve capraz satis blogunun gecip gecmedigini yazar.
+# Kontrol icin 1 wallpaper ilani da okunur (RU'nun orada bulundugu dogrulanir). HICBIR YAZMA YOK.
+
+on:
+  workflow_dispatch:
+    inputs:
+      per_edition:
+        description: "Edisyon basina ornek sayisi"
+        required: false
+        default: "2"
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+      - name: Token ve XSELL STATE
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_LISTING/XSELL_STATE.csv" _work/xsell.csv
+          echo "XSELL STATE satir: $(($(wc -l < _work/xsell.csv) - 1))"
+      - name: RU cevirisi sondasi (salt okur)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          PER: ${{ inputs.per_edition }}
+        run: |
+          set -euo pipefail
+          python - <<'PY' | tee -a "$GITHUB_STEP_SUMMARY"
+          import csv, os, sys, requests
+          sys.path.insert(0, "scripts/etsy")
+          from etsy_common import API, Etsy, TokenStore, mask
+          from pod_listing_create import DIGITAL_ORDER
+          k, s = os.environ.get("ETSY_API_KEY", ""), os.environ.get("ETSY_SHARED_SECRET", "")
+          mask(k); mask(s)
+          store = TokenStore(os.environ["TOKEN_FILE"], k, s)
+          if store.needs_refresh():
+              store.refresh()
+          api = Etsy(store)
+          shop = os.environ["ETSY_SHOP_ID"]
+          per = int(os.environ.get("PER") or 2)
+
+          islenen = {}
+          with open("_work/xsell.csv", newline="", encoding="utf-8") as fh:
+              for r in csv.DictReader(fh):
+                  islenen[r["listing_id"]] = r
+          # aktif ilan basliklari (edisyon eslemesi icin)
+          rows, offset = [], 0
+          while True:
+              r = api.get(f"/shops/{shop}/listings", params={"state": "active", "limit": 100, "offset": offset}) or {}
+              res = r.get("results") or []
+              rows += res
+              if len(res) < 100:
+                  break
+              offset += 100
+          title = {str(x["listing_id"]): x.get("title") or "" for x in rows}
+          sec = {str(x["listing_id"]): x.get("shop_section_id") for x in rows}
+
+          sec_dig = None
+          ornek, sayac = [], {c: 0 for c in DIGITAL_ORDER}
+          for lid, r in islenen.items():
+              t = title.get(lid, "")
+              if r.get("mode") != "digital" or not t:
+                  continue
+              for c in DIGITAL_ORDER:
+                  if c.lower() in t.lower() and sayac[c] < per:
+                      sayac[c] += 1
+                      ornek.append((lid, c, r.get("pair") or "", t))
+                      sec_dig = sec.get(lid)
+          wp = next((lid for lid, r in islenen.items() if r.get("mode") == "wallpaper"), None)
+          if wp:
+              ornek.append((wp, "WALLPAPER (kontrol)", islenen[wp].get("pair") or "", title.get(wp, "")))
+
+          def ham_get(path):
+              rr = requests.get(API + path, headers={"x-api-key": store.api_key_header,
+                                                     "Authorization": f"Bearer {store.access_token}"}, timeout=60)
+              try:
+                  return rr.status_code, rr.json()
+              except ValueError:
+                  return rr.status_code, {"raw": rr.text[:200]}
+
+          print("## RU cevirisi sondasi — GET /shops/{shop_id}/listings/{listing_id}/translations/ru\n")
+          print("| listing_id | edisyon | cift | HTTP | RU var mi | AI-ASSISTED | capraz satis blogu | RU aciklama uzunlugu |")
+          print("|---|---|---|---|---|---|---|---|")
+          for lid, c, pair, t in ornek:
+              st, d = ham_get(f"/shops/{shop}/listings/{lid}/translations/ru")
+              desc = (d or {}).get("description") or ""
+              var = "VAR" if st == 200 and desc.strip() else ("YOK (govde bos)" if st == 200 else "YOK")
+              ai = ("EVET" if "ai-assisted" in desc.lower() else "hayir") if desc else "-"
+              xs = ("EVET" if ("ХОТИТЕ ЕГО" in desc or "ХОТИТЕ ГОТОВЫЙ" in desc) else "hayir") if desc else "-"
+              print(f"| {lid} | {c} | {pair} | {st} | {var} | {ai} | {xs} | {len(desc)} |")
+              if st != 200:
+                  print(f"|  |  |  |  | cevap: {str(d)[:120]} |  |  |  |")
+          print(f"\n- dijital bolum id ornegi: {sec_dig} | x-remaining-today: {api.remaining}")
+          PY
+      - name: Token geri yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || echo "Token yenilenmedi"
+          rm -rf _work ~/.config/rclone
