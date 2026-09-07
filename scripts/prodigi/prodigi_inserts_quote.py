@@ -51,35 +51,46 @@ SCHEMA_URLS = [
     "https://www.prodigi.com/print-api/docs/swagger.json",
 ]
 DOC_URLS = [
+    "https://www.prodigi.com/branded-packaging-inserts/",
     "https://www.prodigi.com/print-api/docs/reference/",
     "https://www.prodigi.com/print-api/docs/",
     "https://www.prodigi.com/print-api/",
 ]
+PAGE_DUMP = "PRODIGI_INSERTS_PAGE.txt"        # indirilen insert sayfasinin duz metni (kanit)
 SITEMAPS = ["https://www.prodigi.com/sitemap.xml", "https://www.prodigi.com/sitemap_index.xml"]
 
 # Mo'nun listesi: rapor satirlari bu sirada; olcu/format/tesis kaynaktan doldurulur.
+# (rapor adi, sayfa metnindeki capa kaliplari) - capa bulunmadan olcu/tesis yazilmaz
 TYPES = [
-    ("Postcard (A6)", ["postcard", "a6"]),
-    ("Flyer (A5)", ["flyer", "a5"]),
-    ("Packing slip (colour)", ["packing slip", "colour", "color"]),
-    ("Packing slip (b&w)", ["packing slip", "b&w", "black and white", "mono"]),
-    ("Round packaging sticker (65 mm)", ["round", "packaging sticker", "65"]),
-    ("Rectangular packaging sticker (105x74 mm)", ["rectangular", "packaging sticker", "105"]),
-    ("Round product sticker (25 mm)", ["round", "product sticker", "25"]),
-    ("Rectangular product sticker (105x74 mm)", ["rectangular", "product sticker", "105"]),
+    ("Postcard (A6)", [r"postcards?\b", r"\bA6\b[^.]{0,60}postcard"]),
+    ("Flyer (A5)", [r"flyers?\b", r"\bA5\b[^.]{0,60}flyer"]),
+    ("Packing slip (colour)", [r"(colou?r)[^.]{0,30}packing slips?", r"packing slips?[^.]{0,30}(colou?r)"]),
+    ("Packing slip (b&w)", [r"(b&w|black\s*(?:and|&)\s*white|mono)[^.]{0,30}packing slips?",
+                            r"packing slips?[^.]{0,30}(b&w|black\s*(?:and|&)\s*white|mono)"]),
+    ("Round packaging sticker (65 mm)", [r"round[^.]{0,30}packaging stickers?",
+                                         r"packaging stickers?[^.]{0,30}round"]),
+    ("Rectangular packaging sticker (105x74 mm)", [r"rectangular[^.]{0,30}packaging stickers?",
+                                                   r"packaging stickers?[^.]{0,30}rectangular"]),
+    ("Round product sticker (25 mm)", [r"round[^.]{0,30}product stickers?",
+                                       r"product stickers?[^.]{0,30}round"]),
+    ("Rectangular product sticker (105x74 mm)", [r"rectangular[^.]{0,30}product stickers?",
+                                                 r"product stickers?[^.]{0,30}rectangular"]),
 ]
 FIELDS = ["tip", "olcu_mm", "olcu_px_300dpi", "US_maliyet", "EU_maliyet",
-          "tesis_uygunluk", "dosya_formati", "kaynak"]
+          "tesis_uygunluk", "dosya_formati", "fiyat_sayfa", "kaynak", "alinti"]
 NOPRICE = "API fiyat donmuyor"
 
 
 # ------------------------------------------------------------------ yardimci
 def px300(mm_txt):
-    """'148 x 105' -> '1748 x 1240' (300 dpi). Bos/anlasilmazsa '' doner."""
+    """'148 x 105' -> '1748 x 1240'; '65 (cap)' -> '768 (cap)' (300 dpi)."""
     n = re.findall(r"(\d+(?:[.,]\d+)?)", mm_txt or "")
-    if len(n) < 2:
+    if not n:
         return ""
-    return " x ".join(str(int(round(float(v.replace(",", ".")) / 25.4 * 300))) for v in n[:2])
+    px = [str(int(round(float(v.replace(",", ".")) / 25.4 * 300))) for v in n[:2]]
+    if len(n) == 1:
+        return f"{px[0]} (cap)" if "cap" in (mm_txt or "") else ""
+    return " x ".join(px)
 
 
 def text_of(html):
@@ -171,26 +182,44 @@ def find_in_pages(sources):
 
 
 # ------------------------------------------------------------------ 2) ozellikler
-def spec_from_sources(sources, name, keys):
-    """Tip icin olcu/format/tesis satirini kaynak metinden alintiyla cikarir."""
-    best = None
+def spec_from_sources(sources, name, anchors):
+    """Tip adinin sayfada gectigi yeri (capa) bulur ve capadan sonraki 220 karakterden
+    olcu / format / tesis / fiyat cikarir. Capa yoksa alan bos kalir (uydurma yok)."""
+    cands = []
     for u, (kind, raw) in sources.items():
         txt = text_of(raw) if kind == "html" else raw
-        for sent in re.split(r"(?<=[.!?])\s+|\n", txt):
-            low = sent.lower()
-            if all(k.split()[0] in low for k in keys[:2]) and len(sent) < 400:
-                score = sum(1 for k in keys if k in low)
-                if best is None or score > best[0]:
-                    best = (score, sent.strip(), u)
-    if not best:
-        return {"olcu_mm": "", "dosya_formati": "", "tesis_uygunluk": "", "kaynak": ""}
-    _, sent, url = best
-    mm = re.search(r"(\d+(?:[.,]\d+)?)\s*(?:mm)?\s*[x×]\s*(\d+(?:[.,]\d+)?)\s*mm", sent, re.I)
-    rnd = re.search(r"(\d+(?:[.,]\d+)?)\s*mm", sent, re.I)
-    fmt = ", ".join(dict.fromkeys(re.findall(r"\b(PDF|PNG|JPE?G|TIFF|AI|EPS|SVG)\b", sent, re.I)))
-    fac = ", ".join(dict.fromkeys(re.findall(r"\b(Charlotte|United States|USA|US|GB|United Kingdom|UK|EU|Europe|Netherlands|Germany)\b", sent)))
-    return {"olcu_mm": (f"{mm.group(1)} x {mm.group(2)}" if mm else (rnd.group(1) if rnd else "")),
-            "dosya_formati": fmt, "tesis_uygunluk": fac, "kaynak": url}
+        for pat in anchors:
+            for m in re.finditer(pat, txt, re.I):
+                w = txt[m.start():m.start() + 240]        # yalniz capadan ileri
+                cands.append((u, w))
+    for u, w in cands:                                    # once olcu iceren capa
+        got = _parse_window(w, u)
+        if got["olcu_mm"]:
+            return got
+    return _parse_window(cands[0][1], cands[0][0]) if cands else {
+        "olcu_mm": "", "dosya_formati": "", "tesis_uygunluk": "",
+        "fiyat_sayfa": "", "kaynak": "", "alinti": ""}
+
+
+def _parse_window(win, url):
+    mm = re.search(r"(\d+(?:[.,]\d+)?)\s*(?:mm)?\s*[x×]\s*(\d+(?:[.,]\d+)?)\s*mm", win, re.I)
+    rnd = re.search(r"(\d+(?:[.,]\d+)?)\s*mm\s*(?:diameter|round|circle|\(diameter\))", win, re.I)
+    fmt = ", ".join(dict.fromkeys(x.upper() for x in
+                                  re.findall(r"\b(PDF|PNG|JPE?G|TIFF?|AI|EPS|SVG)\b", win, re.I)))
+    fac = ", ".join(dict.fromkeys(re.findall(
+        r"\b(Charlotte|United States|USA|GB|United Kingdom|UK|EU|Europe|Netherlands|Germany|Australia)\b", win)))
+    price = ", ".join(dict.fromkeys(re.findall(r"[$£€]\s?\d+(?:[.,]\d{1,2})?", win)))
+    if mm and rnd:                                        # capaya en yakin olcu kazanir
+        olcu = (f"{mm.group(1)} x {mm.group(2)}" if mm.start() <= rnd.start()
+                else f"{rnd.group(1)} (cap)")
+    elif mm:
+        olcu = f"{mm.group(1)} x {mm.group(2)}"
+    elif rnd:
+        olcu = f"{rnd.group(1)} (cap)"
+    else:
+        olcu = ""
+    return {"olcu_mm": olcu, "dosya_formati": fmt, "tesis_uygunluk": fac,
+            "fiyat_sayfa": price, "kaynak": url, "alinti": re.sub(r"\s+", " ", win)[:220]}
 
 
 # ------------------------------------------------------------------ 3) teklifler
@@ -248,7 +277,8 @@ def write_out(rows, notes, out_dir, drive):
         lines.append("| " + " | ".join(str(r.get(k, "")) for k in FIELDS) + " |")
     lines += ["", "## Notlar"] + [f"- {n}" for n in notes]
     md_p.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    for p in (csv_p, md_p):
+    extra = out_dir / "PRODIGI_INSERTS_PAGE.txt"
+    for p in (csv_p, md_p) + ((extra,) if extra.exists() else ()):
         leak_check(p)
         log(f"yazildi: {p}")
         if drive:
@@ -264,12 +294,13 @@ def self_test():
     assert px300("65 x 65") == "768 x 768"
     src = {"https://x/insert": ("html", "<p>Our A6 postcard inserts are 148 x 105 mm, "
                                         "supplied as a PDF, printed in Charlotte US and GB.</p>")}
-    s = spec_from_sources(src, "Postcard (A6)", ["postcard", "a6"])
+    s = spec_from_sources(src, "Postcard (A6)", [r"postcards?\b"])
     assert s["olcu_mm"] == "148 x 105" and "PDF" in s["dosya_formati"], s
+    assert "Charlotte" in s["tesis_uygunluk"] and s["alinti"], s
     assert find_in_pages({"u": ("html", '{"inserts": [{"type": "postcard"}]}')})
     rows = [{"tip": t, "olcu_mm": "", "olcu_px_300dpi": "", "US_maliyet": NOPRICE,
-             "EU_maliyet": NOPRICE, "tesis_uygunluk": "", "dosya_formati": "", "kaynak": ""}
-            for t, _ in TYPES]
+             "EU_maliyet": NOPRICE, "tesis_uygunluk": "", "dosya_formati": "",
+             "fiyat_sayfa": "", "kaynak": "", "alinti": ""} for t, _ in TYPES]
     d = Path("/tmp/prodigi_selftest")
     write_out(rows, ["self-test"], d, drive=False)
     assert (d / "PRODIGI_INSERTS_QUOTE.csv").exists()
@@ -291,6 +322,15 @@ def main():
     log("1) sema/dokuman kesfi")
     sources, schema = discover(sess)
     notes = [f"indirilen kaynak: {len(sources)}"]
+    out_dir = Path(a.out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    dump = []
+    for u, (kind, raw) in sources.items():
+        if "insert" in u or "packing" in u or "sticker" in u:
+            dump.append(f"===== {u}\n{text_of(raw) if kind == 'html' else raw}\n")
+    if dump:
+        (out_dir / PAGE_DUMP).write_text("\n".join(dump), encoding="utf-8")
+        log(f"  sayfa metni yazildi: {out_dir / PAGE_DUMP} ({sum(len(d) for d in dump)} karakter)")
     if schema:
         notes.append(f"quote semasinda 'inserts' bulundu: {schema.get('url', '')}")
         log(f"  inserts tanimi bulundu: {str(schema)[:400]}")
@@ -314,9 +354,9 @@ def main():
         notes.append(f"sema insert tanimlayicilari: {ids}")
 
     rows = []
-    for name, keys in TYPES:
+    for name, anchors in TYPES:
         r = {"tip": name}
-        r.update(spec_from_sources(sources, name, keys))
+        r.update(spec_from_sources(sources, name, anchors))
         r["olcu_px_300dpi"] = px300(r["olcu_mm"])
         for dest, col in DESTS:
             r[col] = NOPRICE
@@ -335,7 +375,7 @@ def main():
 
     if all(r["US_maliyet"] == NOPRICE for r in rows):
         notes.append(f"SONUC: {NOPRICE} - insert'ler quote ucundan fiyatlandirilamadi.")
-    write_out(rows, notes, Path(a.out_dir), drive=not a.no_drive)
+    write_out(rows, notes, out_dir, drive=not a.no_drive)
 
 
 if __name__ == "__main__":
