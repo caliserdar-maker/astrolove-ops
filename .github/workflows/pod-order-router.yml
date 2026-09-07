@@ -9,8 +9,13 @@ name: pod-order-router
 # Cron 30 dk: env=live, onayli mod (Etsy ~48 cagri/gun). STATE Drive TEMP/POD_ORDERS_STATE.csv.
 
 on:
-  schedule:
-    - cron: "*/30 * * * *"        # onayli mod: yalniz paket hazirlar, siparis gondermez
+  # CRON BEKLEMEDE (7 Eyl 2026): Etsy access token'inda transactions_r kapsami YOK
+  # (GET /shops/{id}/receipts -> 403 "requires scope: transactions_r", run 34097249381).
+  # Kapsam olmadan her cron kosusu hata verir ve etsy-token grubunu mesgul eder.
+  # Mo Etsy uygulamasini transactions_r (+ ileride tracking icin transactions_w) ile yeniden
+  # yetkilendirip ETSY_TOKEN.json'i yeniledikten sonra asagidaki iki satir acilir:
+  #   schedule:
+  #     - cron: "*/30 * * * *"     # onayli mod: yalniz paket hazirlar, siparis gondermez
   workflow_dispatch:
     inputs:
       submit:

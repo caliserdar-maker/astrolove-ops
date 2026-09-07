@@ -77,7 +77,9 @@ Kosu basina en fazla `--max-orders` (5) yeni siparis. Idempotent: STATE + Prodig
 3. `pod-order-router` dispatch: env=sandbox, dry_run=true, test_receipt=... -> teklif + marj raporu.
 4. `pod-order-router` dispatch: env=sandbox, dry_run=false, test_receipt=... -> sandbox siparis, izin ac/kapat,
    sonraki kosularda shipped (sandbox kargo simulasyonu) -> Etsy'ye yazilmaz (etsy_writes kapali).
-5. Canli (7 Eyl 2026): `schedule: */30` ACIK, cron = live + ONAYLI MOD (yalniz paket hazirlar).
+5. Canli (7 Eyl 2026): cron BEKLEMEDE - Etsy token'inda `transactions_r` kapsami yok
+   (`GET /shops/{id}/receipts` 403, run 34097249381). Kapsam eklenince workflow'daki
+   `schedule: */30` satirlari acilir; cron = live + ONAYLI MOD (yalniz paket hazirlar).
    `POD_ROUTER_ENABLED=false` repo degiskeni cron'u kapatir. Cron etsy-token grubunda oldugu icin
    uzun bir Etsy kosusu sirasinda bekleyen kosular iptal olabilir (5 Eyl dersi).
 
