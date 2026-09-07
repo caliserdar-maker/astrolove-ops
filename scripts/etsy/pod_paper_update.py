@@ -2,10 +2,12 @@
 """
 POD ilanlarina kagit/eko maddeleri + lab cumlesi duzeltmesi (Mo 7 Eyl 2026). EN + RU.
 
-Uc degisiklik (her ikisi de birebir metin; capalar TAM SATIR eslesmesiyle bulunur):
+Dort degisiklik (hepsi birebir metin; capalar TAM SATIR eslesmesiyle bulunur):
   1. EN "✦ MUSEUM-QUALITY MATERIALS" listesinde altin murekkep maddesinin ALTINA 2 madde.
   2. RU "✦ МАТЕРИАЛЫ МУЗЕЙНОГО КАЧЕСТВА" listesinde ayni yere 2 madde.
   3. EN/RU "MADE TO ORDER & SHIPPING" icindeki lab cumlesi yeni haliyle degistirilir.
+  4. EN "✦ PLEASE NOTE" / RU "✦ ОБРАТИТЕ ВНИМАНИЕ" listesinin SONUNA matte siyah maddesi
+     (ICC soft-proof olcumu: matte pamuk kagitta maksimum siyah L=53; beklenti yonetimi).
 Capalar bulunmazsa ilan ATLANIR (metin uydurulmaz). Ilan state=active degilse KOSU DURUR.
 RU yazmasinda title/tags GET'ten birebir geri gonderilir (etiket kaybi yok). Baslik, etiket,
 gorsel, fiyat, varyant degismez. Kota --quota-min altina inince ilanlar arasinda durur; islenenler
@@ -34,6 +36,9 @@ EN = {
             "- Sustainably sourced fibres, plastic-free packaging, printed at the lab nearest you"],
     "old_lab": "US orders are printed in the US; EU and UK orders are printed at our UK/EU lab for faster delivery.",
     "new_lab": "US orders are printed in the US; EU and UK orders at our UK/EU lab; orders elsewhere at the nearest available lab.",
+    "note_head": "✦ PLEASE NOTE",
+    "note_add": "- On matte cotton paper, deep blacks print as a rich charcoal rather than screen black \u2014 this is the "
+                "natural character of fine art paper.",
 }
 RU = {
     "anchor": "- Золотые тона печатаются плоской золотистой краской, не металлической фольгой",
@@ -43,6 +48,9 @@ RU = {
                "для более быстрой доставки.",
     "new_lab": "Заказы из США печатаются в США; заказы из ЕС и Великобритании — в нашей лаборатории в Великобритании/ЕС; "
                "остальные заказы — в ближайшей доступной лаборатории.",
+    "note_head": "✦ ОБРАТИТЕ ВНИМАНИЕ",
+    "note_add": "- На матовой хлопковой бумаге глубокий чёрный печатается как насыщенный угольный, а не как чёрный "
+                "на экране — это естественное свойство художественной бумаги.",
 }
 
 
@@ -75,8 +83,32 @@ def write_done(path, rows):
             w.writerow({c: r.get(c, "") for c in cols})
 
 
+def note_blok_sonu(lines, spec):
+    """PLEASE NOTE basliginin indeksi ve listesinin bittigi indeks. (i, j) veya (None, hata)."""
+    head = spec["note_head"]
+    if sum(1 for l in lines if l.strip() == head) != 1:
+        return None, "PLEASE NOTE capasi bulunamadi/birden fazla"
+    i = next(k for k, l in enumerate(lines) if l.strip() == head)
+    j = i + 1
+    while j < len(lines) and lines[j].strip().startswith("- "):
+        j += 1
+    if j == i + 1:
+        return None, "PLEASE NOTE listesi bos"
+    return i, j
+
+
+def note_insert(lines, spec):
+    """Matte siyah maddesini PLEASE NOTE listesinin SONUNA ekler. (yeni_lines, hata)."""
+    i, j = note_blok_sonu(lines, spec)
+    if i is None:
+        return None, j
+    if spec["note_add"] in [l.strip() for l in lines[i + 1:j]]:
+        return lines, ""
+    return lines[:j] + [spec["note_add"]] + lines[j:], ""
+
+
 def transform(text, spec):
-    """(yeni_metin, hata). Iki madde capanin hemen altina; lab cumlesi degistirilir."""
+    """(yeni_metin, hata). Iki madde capanin altina, lab cumlesi degisir, matte maddesi PLEASE NOTE sonuna."""
     t = norm(text)
     if not t.strip():
         return None, "metin bos"
@@ -86,6 +118,9 @@ def transform(text, spec):
     i = next(k for k, l in enumerate(lines) if l.strip() == spec["anchor"])
     var = [l.strip() for l in lines[i + 1:i + 3]] == spec["add"]
     yeni = lines if var else lines[:i + 1] + list(spec["add"]) + lines[i + 1:]
+    yeni, err = note_insert(yeni, spec)
+    if err:
+        return None, err
     x = "\n".join(yeni)
     if spec["old_lab"] in x:
         x = x.replace(spec["old_lab"], spec["new_lab"])
@@ -96,7 +131,8 @@ def transform(text, spec):
 
 def base(t, spec):
     """Karsilastirma tabani: eklenen 2 madde cikarilir, yeni lab cumlesi eskiye cevrilir."""
-    lines = [l for l in norm(t).split("\n") if l.strip() not in spec["add"]]
+    atilacak = set(spec["add"]) | {spec["note_add"]}
+    lines = [l for l in norm(t).split("\n") if l.strip() not in atilacak]
     return "\n".join(lines).replace(spec["new_lab"], spec["old_lab"]).strip()
 
 
@@ -118,6 +154,14 @@ def check(old, new, spec):
         sorun.append("eski lab cumlesi duruyor")
     if spec["new_lab"] not in norm(new):
         sorun.append("yeni lab cumlesi yok")
+    if lines.count(spec["note_add"]) != 1:
+        sorun.append(f"matte siyah maddesi {lines.count(spec['note_add'])} kez")
+    else:
+        i, j = note_blok_sonu(norm(new).split("\n"), spec)
+        if i is None:
+            sorun.append(f"PLEASE NOTE: {j}")
+        elif norm(new).split("\n")[j - 1].strip() != spec["note_add"]:
+            sorun.append("matte siyah maddesi PLEASE NOTE listesinin sonunda degil")
     return not sorun, sorun
 
 
