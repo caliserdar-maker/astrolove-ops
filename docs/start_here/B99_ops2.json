@@ -1,0 +1,8 @@
+[
+  {"op": "replace_line", "find": "GPSR - TIKANDI:", "text": "GPSR - TAMAMLANDI (elle):"},
+  {"op": "insert_after", "anchor": "Dispose of with paper recycling.",
+   "text_file": "docs/start_here/B99_ek2.txt"},
+  {"op": "replace_block", "from": "1. GPSR: 77 POD ilani elle (API ve bulk edit yok).",
+   "to": "8. ASTROLOVE40B yenileme ~6 Ekim.",
+   "text_file": "docs/start_here/B99_acik_isler2.txt"}
+]
