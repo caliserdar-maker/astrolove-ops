@@ -1,0 +1,66 @@
+name: pw-ru-probe
+
+# SALT OKUR: Pure White RU cevirisi icin kaynak metin tespiti. Verilen ciftlerin secilen
+# edisyonlarindaki CANLI EN + RU metinlerini (baslik, etiket, aciklama) oldugu gibi yazdirir.
+# Hicbir yazma yapmaz; token donusumu gercek metinden turetilsin diye kullanilir.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pairs:
+        description: "Virgullu cift listesi (ARIES_LEO,AQUARIUS_AQUARIUS)"
+        required: true
+        default: "ARIES_LEO"
+      editions:
+        description: "Virgullu edisyon listesi"
+        required: false
+        default: "Champagne Ivory,Pure White,Midnight Blue"
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+      - name: Token
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+      - name: Kaynak metinleri oku (salt okur)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          python scripts/etsy/pw_ru_probe.py --pairs "${{ inputs.pairs }}" --editions "${{ inputs.editions }}" \
+            | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Token geri yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || echo "Token yenilenmedi"
+          rm -rf _work ~/.config/rclone
