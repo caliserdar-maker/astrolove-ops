@@ -83,13 +83,22 @@ def targets(listings, pairs, pod_ids):
     return hedef, belirsiz
 
 
+def boyut(f):
+    """Sayisal boyut: size_bytes tercih edilir; filesize METIN olabilir ('16.62 MB',
+    run 34247197024 olcumu). Sayiya cevrilemiyorsa metin haliyle karsilastirilir."""
+    for alan in ("size_bytes", "filesize"):
+        v = f.get(alan)
+        try:
+            return int(v)
+        except (TypeError, ValueError):
+            continue
+    return str(f.get("filesize") or f.get("size_bytes") or "")
+
+
 def ozet(files):
     """Dosya listesi -> karsilastirilabilir ozet (id, ad, boyut)."""
-    out = []
-    for f in files or []:
-        out.append((str(f.get("listing_file_id")), f.get("filename") or "",
-                    int(f.get("filesize") or f.get("size_bytes") or 0)))
-    return sorted(out)
+    return sorted((str(f.get("listing_file_id")), f.get("filename") or "", boyut(f))
+                  for f in files or [])
 
 
 def plan(before, pdf_name):
@@ -118,7 +127,7 @@ def verify(before, after, pdf_name, pdf_size):
         _, ad, boy = yeni[0]
         if ad != pdf_name:
             s.append(f"eklenen dosya adi '{ad}' (beklenen '{pdf_name}')")
-        if pdf_size and boy and abs(boy - pdf_size) > 0:
+        if pdf_size and isinstance(boy, int) and boy != pdf_size:
             s.append(f"eklenen dosya boyutu {boy} (yerel {pdf_size})")
     return not s, s
 
