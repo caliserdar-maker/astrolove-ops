@@ -103,6 +103,9 @@ def main():
             sys.exit(f"HATA: batchUpdate {r.status_code}: {r.text[:300]}")
         done += 1
 
+    if a.dry_run:
+        log("dry-run: yazilmadi (3 islem plani yukarida, capalar tek eslesme)")
+        return
     body = doc_text(get_doc(s))
     ok = True
     for op in ops:                                        # geri okuma dogrulamasi
@@ -115,13 +118,12 @@ def main():
         if gone and gone in body:
             log(f"DOGRULAMA FAIL: silinmemis -> {gone[:70]!r}")
             ok = False
-    log(f"{'dry-run: yazilmadi' if a.dry_run else f'uygulanan islem: {done}'}; "
-        f"dogrulama {'PASS' if ok or a.dry_run else 'FAIL'}")
+    log(f"uygulanan islem: {done}; dogrulama {'PASS' if ok else 'FAIL'}")
     step = os.environ.get("GITHUB_STEP_SUMMARY")
-    if step and not a.dry_run:
+    if step:
         with open(step, "a", encoding="utf-8") as f:
             f.write(f"## START_HERE duzenleme: {done} islem, {'PASS' if ok else 'FAIL'}\n")
-    sys.exit(0 if (ok or a.dry_run) else 1)
+    sys.exit(0 if ok else 1)
 
 
 if __name__ == "__main__":
