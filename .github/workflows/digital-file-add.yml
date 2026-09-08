@@ -1,0 +1,130 @@
+name: digital-file-add
+
+# Dijital poster ilanlarina (78 cift x 5 edisyon = 390) tesekkur PDF'i EKLER. Yalniz ekleme;
+# mevcut ZIP'e dokunulmaz (ekleme oncesi/sonrasi dosya listesi karsilastirilarak dogrulanir).
+# Wallpaper ilanlarina dokunulmaz. Ayni adli PDF varsa ilan atlanir (idempotens);
+# 5/5 dosya limiti dolu ilan atlanir ve raporlanir. apply=false yalniz dry-run uretir.
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "true = dry-run temizse Etsy'ye YAZ (dosya ekler; onay gerekir)"
+        type: boolean
+        default: false
+      limit:
+        description: "En fazla N ilan (0 = hepsi)"
+        required: false
+        default: "3"
+      dry_limit:
+        description: "Dry-run kapisi icin N ilan (bos = limit ile ayni)"
+        required: false
+        default: ""
+      quota_min:
+        description: "Kota tabani"
+        required: false
+        default: "400"
+      verify_state:
+        description: "true = ekleme sonrasi ilan state'ini yeniden oku (1 ek cagri/ilan)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  dfile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      APPLY: ${{ inputs.apply }}
+      LIMIT: ${{ inputs.limit || '0' }}
+      DRYLIMIT: ${{ inputs.dry_limit || inputs.limit || '0' }}
+      QMIN: ${{ inputs.quota_min || '400' }}
+      VSTATE: ${{ inputs.verify_state }}
+      PDF: _work/ASTROLOVE_DIGITAL_THANKYOU_EN.pdf
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+      - name: Token, STATE ve PDF
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_LISTING/POD_LISTINGS_STATE.csv" _work/pod_state.csv
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_LISTING/DFILE_STATE.csv" _work/dfile.csv 2>/dev/null || echo "DFILE STATE yok; yeni baslar"
+          rclone copyto "gdrive:ASTROLOVE/DIGITAL/THANKYOU/ASTROLOVE_DIGITAL_THANKYOU_EN.pdf" "$PDF"
+          ls -l "$PDF"; sha256sum "$PDF"
+          python - <<'PY'
+          import os, pathlib
+          p = pathlib.Path(os.environ["PDF"]); b = p.read_bytes()
+          assert b[:5] == b"%PDF-", "PDF imzasi yok"
+          print(f"PDF dogrulandi: {p.name} {len(b)} bayt, {b[:8]!r}")
+          PY
+      - name: 'ADIM 1 - dry-run (dosya listeleri, yazma yok)'
+        id: dry
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          python scripts/etsy/digital_file_add.py --pod-state _work/pod_state.csv --state _work/dfile.csv \
+            --pdf "$PDF" --out _out/dry --limit "$DRYLIMIT" --quota-min "$QMIN" --dry-run
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          d = json.load(open("_out/dry/dfile_result.json"))
+          bad = [r for r in d["rows"] if r[2] in ("FAIL", "ATLANDI")]
+          hazir = [r for r in d["rows"] if r[2] == "HAZIR"]
+          zaten = [r for r in d["rows"] if r[2] == "ZATEN VAR"]
+          print(f"ok={'true' if (hazir or zaten) and not bad else 'false'}")
+          print(f"ozet={len(hazir)} eklenecek, {len(zaten)} zaten var, {len(bad)} sorunlu, kalan {d['kalan']}")
+          PY
+      - name: 'ADIM 2 - apply (yalniz onayla ve dry-run temizse)'
+        if: ${{ env.APPLY == 'true' && steps.dry.outputs.ok == 'true' }}
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          echo "::warning::APPLY: dijital ilanlara tesekkur PDF'i eklenecek — ${{ steps.dry.outputs.ozet }}"
+          python scripts/etsy/digital_file_add.py --pod-state _work/pod_state.csv --state _work/dfile.csv \
+            --pdf "$PDF" --out _out/apply --limit "$LIMIT" --quota-min "$QMIN" \
+            $([ "$VSTATE" = "true" ] && echo --verify-state) --apply
+      - name: Token/STATE/cikti Drive'a
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
+          [ -s _work/dfile.csv ] && rclone copyto _work/dfile.csv "gdrive:ASTROLOVE/TEMP/POD_LISTING/DFILE_STATE.csv" && echo "DFILE STATE yazildi" || true
+          stamp=$(TZ=Europe/Istanbul date +%Y%m%d_%H%M)
+          [ -d _out ] && rclone copy _out "gdrive:ASTROLOVE/TEMP/POD_LISTING/DFILE_${stamp}" -q && echo "Cikti: TEMP/POD_LISTING/DFILE_${stamp}/"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: digital-file-add
+          path: _out/
+          if-no-files-found: ignore
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
