@@ -115,6 +115,9 @@ def main():
         if want not in body:
             log(f"DOGRULAMA FAIL: yok -> {want[:70]!r}")
             ok = False
+        # yeni metin de ayni satirla basliyorsa (blok basi korunuyorsa) silinme kontrolu yapilmaz
+        if gone and gone in (op.get("text") or payload_text(op)):
+            gone = None
         if gone and gone in body:
             log(f"DOGRULAMA FAIL: silinmemis -> {gone[:70]!r}")
             ok = False
