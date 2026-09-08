@@ -1,0 +1,115 @@
+==================================================================
+B99 - INSERT SETI TAMAM, DIJITAL PDF 390/390, KAGIT/EKO GUNCELLEME,
+      GECE KOSUSU, GPSR TIKANIKLIGI (7-8 Eyl 2026)
+==================================================================
+
+TAMAMLANAN KOSULAR:
+- pod-paper-update (run 34129224205): 78/78 POD ilani, EN+RU.
+  4 degisiklik canlida: 2 kagit/eko maddesi, yeni lab cumlesi
+  (AU dahil), PLEASE NOTE / ОБРАТИТЕ ВНИМАНИЕ sonuna matte siyah
+  maddesi. Atlanan 0. Kota 678 -> 367.
+- pod-night2 (run 34173796646): FAZ 1 dijital EN 200/200;
+  FAZ 2 RU 312 guncellendi, 78 atlandi (Pure White, RU govdesi bos).
+  EN'e dokunulmadi. Kota 1885 -> 568.
+- digital-file-add (run 34248155218): tesekkur PDF'i 390 poster
+  dijital ilanina eklendi. 390/390, atlanan 0. Kota 3174 -> 1812.
+  Wallpaper'a KONMADI (karar: iptal).
+
+ICC SOFT-PROOF - KAPANDI:
+- Olcum: matte pamuk kagidin maksimum siyahi L=53. Dosya hatasi
+  degil, kagidin fiziksel siniri.
+- KARAR: yeniden uretim YOK, 5.070 print dosyasi oldugu gibi kaldi.
+- Tek cikti: beklenti yonetimi satiri (matte siyah maddesi),
+  pod-paper-update ile 78 ilana girdi.
+- PNG'ler Drive TEMP/ICC_TEST/, kod .github/workflows/icc-softproof.yml
+
+DIJITAL VARYASYON SORUSU - KAPANDI (run 34121615868, salt okur):
+- Etsy API'de varyasyona dosya baglanamaz. ShopListingFile alanlari
+  yalniz listing_id tasiyor; updateListingInventory govdesinde
+  file_on_property YOK. Varyasyona baglanabilen tek medya gorsel.
+- Etsy Help: dijital ilanda varyasyon sunulamaz, ilana en fazla
+  5 dosya, alici hepsini alir.
+- SONUC: 5 renk edisyonu AYRI ILAN kalir (mevcut yapi dogru).
+  Konsolidasyon fikri kapandi.
+
+INSERT SETI - FINAL:
+- 3 parca, siparis basina $5.00: A6 kartpostal $2.50 +
+  65 mm packaging sticker $1.25 + 25 mm tissue sticker $1.25.
+- IPTAL: A5 brosur, A4 irsaliye (renkli ve s/b).
+- Renk: LACIVERT (Lena karari, bordo yerine).
+- Prodigi Branding paneli: set adi "AstroLoveArt", varsayilan
+  API + Online order + AstroLoveArt kanallarinda.
+- Dosyalar Drive BRAND/INSERTS:
+  ASTROLOVE_INSERT_POSTCARD_A6_EN_LACIVERT_1240x1748_V1.jpg
+  ASTROLOVE_INSERT_STICKER_65MM_LACIVERT_V2.png
+  ASTROLOVE_INSERT_TISSUE_25MM_LACIVERT_331x331_V1.png
+- Kartpostal metni: Lena'nin Rusca taslagindan cevrildi, gramer
+  duzeltildi. Yorum daveti YOK, sosyal medya daveti YOK, link/QR YOK.
+  Uzun tire (em dash) YOK - Serdar bunu AI isareti sayiyor.
+  Basilan kart yalniz INGILIZCE: Prodigi tek dosya aliyor,
+  alici diline gore ayrilamiyor.
+
+DIJITAL TESEKKUR PDF:
+- Basili kartin birebir ayni gorseli, tek sayfa PDF, 156 KB.
+- Drive ASTROLOVE/DIGITAL/THANKYOU/ASTROLOVE_DIGITAL_THANKYOU_EN.pdf
+- 390 poster ilanina ZIP'in YANINA eklendi (ZIP'e dokunulmadi).
+- Rusca surum uretilmedi (gerek gorulmedi).
+
+ETSY API BULGULARI (yeni):
+- ShopListingFile.filesize INSAN-OKUR METIN ("16.62 MB").
+  Sayisal alan size_bytes. int(filesize) coker - dikkat.
+- Dijital ilana dosya EKLEMEK ilani yayina almiyor, state
+  degismiyor (active -> active olculdu). updateListing'in
+  taslagi yayina alma davranisindan FARKLI.
+- Dosya ekleme idempotent kurulabilir: ayni ad varsa atla.
+- GitHub artifact yukleme adimi 403 verebilir (altyapi kaynakli).
+  Kosu "failure" gorunur ama Etsy isi basarili olabilir -
+  raporu Drive'dan dogrula.
+
+PURE WHITE RU - OLCUM:
+- Dijital RU govdesi EDISYONDAN BAGIMSIZ: CI ve Midnight Blue
+  RU aciklamalari birebir ayni (1203 karakter), RU etiketleri
+  ayni 13 genel etiket (renk etiketi yok).
+- Fark yalniz baslikta: "серия Champagne Ivory" -> "серия Pure White".
+- Yeni ceviri uretilmiyor, govde + etiket birebir kopyalaniyor.
+- Kagit/eko 4 maddesi kaynak CI RU'da YOK (o degisiklik yalniz
+  78 POD ilanina yapildi); dijital aciklamada kagit bolumu yok.
+- Kod scripts/etsy/pw_ru_fill.py, workflow pw-ru-fill.yml.
+
+GPSR - TIKANDI:
+- Alan Etsy API'de YOK (iki OAS taramasi, 0 eslesme).
+- Toplu duzenleme (bulk edit) menusunde de YOK.
+- Yani ilan basina ELLE. 78 POD ilanindan 1'i dolduruldu, 77 kaldi.
+- Kosi (Prodigi) cevabi: telefon numarasi yok, iletisim
+  support@prodigi.com. Prodigi B.V. YALNIZCA Prodigi'nin urettigi
+  urunlerde referans gosterilebilir - dijital ilanlara YAZILMAZ.
+- Girilecek bilgi:
+  Manufacturers: Prodigi B.V., Jan van Riebeeckweg 15,
+  5928 LG Venlo, Netherlands, support@prodigi.com
+  Product safety: Fine art print on paper. Not a toy. Keep away
+  from children under 3 due to small parts in framing hardware.
+  Keep away from fire and moisture. Dispose of with paper recycling.
+
+ACIK CELISKI (cozulmedi):
+- Canli Paper & Quality galeri karti (78 POD ilaninin 6. gorseli,
+  Drive'da 390 dosya) su iddialari tasiyor: ACID-FREE
+  ("Acid- and lignin-free, ISO 9706 conform"), ARCHIVAL PIGMENT
+  GICLEE, MUSEUM QUALITY.
+- Bu iddialar B98'deki "SOYLENMEYECEKLER" listesiyle celisiyor.
+- Serdar karari: insert'lerde bu iddialar KULLANILMADI.
+  Kartin kendisinin duzeltilip duzeltilmeyecegi AYRI ACIK IS.
+
+MODEL POLITIKASI (8 Eyl):
+- Tum Claude Code oturumlari OPUS 5 / HIGH. Fable kullanilmayacak.
+
+ACIK ISLER:
+1. GPSR: 77 POD ilani elle (API ve bulk edit yok).
+2. Paper & Quality karti: asitsiz/arsivlik iddialari duzeltilecek mi.
+3. Sablon: docs/POD_LISTING_TEMPLATE.md + pod_listing_create.py
+   4 kagit/eko degisikligini icermiyor; yeni ilan eski metinle uretilir.
+4. 15oz kupa piloti (H-MUG-CERAMIC-150Z).
+5. Cerceveli urun grubu - faz 2.
+6. Bolumleri 7'den 3'e indir + 312 ilani tasi (panel isi).
+7. Prodigi Pro karari (yeni esik ~7 siparis/ay).
+8. ASTROLOVE40B yenileme ~6 Ekim.
+SON: B99 KAPANDI.
