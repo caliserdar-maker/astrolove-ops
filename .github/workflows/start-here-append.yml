@@ -8,8 +8,8 @@ on:
   workflow_dispatch:
     inputs:
       record_file:
-        description: "Depodaki kayit dosyasi, or. docs/start_here/B94.txt"
-        required: true
+        description: "Depodaki kayit dosyasi, or. docs/start_here/B94.txt (duzenleme modunda kullanilmaz)"
+        required: false
         default: "docs/start_here/B94.txt"
       dry_run:
         description: "Yalniz kontrol et, yazma"
@@ -28,6 +28,10 @@ on:
         type: choice
         options: [tek, ilk, son]
         default: tek
+      ops_file:
+        description: "Doluysa DUZENLEME MODU: JSON islem listesi (satir/blok degistir, ekle)"
+        required: false
+        default: ""
 
 concurrency:
   group: start-here
@@ -77,8 +81,19 @@ jobs:
             echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
           fi
 
+      - name: Kaydi duzenle (islem listesi)
+        if: ${{ inputs.ops_file != '' }}
+        env:
+          OPS: ${{ inputs.ops_file }}
+          DRY: ${{ inputs.dry_run }}
+        run: |
+          set -euo pipefail
+          args=(--ops "$OPS")
+          [ "$DRY" = "true" ] && args+=(--dry-run)
+          python scripts/common/start_here_edit.py "${args[@]}"
+
       - name: Kaydin icine satir ekle (capa modu)
-        if: ${{ inputs.anchor != '' }}
+        if: ${{ inputs.ops_file == '' && inputs.anchor != '' }}
         env:
           ANCHOR: ${{ inputs.anchor }}
           RECORD: ${{ inputs.record_file }}
@@ -91,7 +106,7 @@ jobs:
           python scripts/common/start_here_insert.py "${args[@]}"
 
       - name: Kaydi ekle
-        if: ${{ inputs.anchor == '' }}
+        if: ${{ inputs.ops_file == '' && inputs.anchor == '' }}
         run: |
           set -euo pipefail
           args=(--file "${{ inputs.record_file }}")

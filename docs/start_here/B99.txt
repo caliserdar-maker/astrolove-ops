@@ -80,7 +80,7 @@ PURE WHITE RU - OLCUM:
   Tek seferlik cron kaldirildi (commit 6bb0155).
   Artik 468 dijital ilanin TAMAMINDA RU katmani var.
 
-GPSR - TIKANDI:
+GPSR - TAMAMLANDI (elle):
 - Alan Etsy API'de YOK (iki OAS taramasi, 0 eslesme).
 - Toplu duzenleme (bulk edit) menusunde de YOK.
 - Yani ilan basina ELLE. 78 POD ilanindan 1'i dolduruldu, 77 kaldi.
@@ -93,6 +93,11 @@ GPSR - TIKANDI:
   Product safety: Fine art print on paper. Not a toy. Keep away
   from children under 3 due to small parts in framing hardware.
   Keep away from fire and moisture. Dispose of with paper recycling.
+- TAMAMLANDI 8 Eyl: 78/78 POD ilani ELLE dolduruldu.
+  API ve bulk edit destegi olmadigi icin baska yol yoktu.
+  Etsy open-api tartisma #1307'de saticilar ayni sorunu
+  bildiriyor, Etsy tarih vermemis.
+  IZLENECEK: alan API'ye eklenirse is 5 dakikaya duser.
 
 ACIK CELISKI (cozulmedi):
 - Canli Paper & Quality galeri karti (78 POD ilaninin 6. gorseli,
@@ -107,13 +112,12 @@ MODEL POLITIKASI (8 Eyl):
 - Tum Claude Code oturumlari OPUS 5 / HIGH. Fable kullanilmayacak.
 
 ACIK ISLER:
-1. GPSR: 77 POD ilani elle (API ve bulk edit yok).
-2. Paper & Quality karti: asitsiz/arsivlik iddialari duzeltilecek mi.
-3. Sablon: docs/POD_LISTING_TEMPLATE.md + pod_listing_create.py
+1. Paper & Quality karti: asitsiz/arsivlik iddialari duzeltilecek mi.
+2. Sablon: docs/POD_LISTING_TEMPLATE.md + pod_listing_create.py
    4 kagit/eko degisikligini icermiyor; yeni ilan eski metinle uretilir.
-4. 15oz kupa piloti (H-MUG-CERAMIC-150Z).
-5. Cerceveli urun grubu - faz 2.
-6. Bolumleri 7'den 3'e indir + 312 ilani tasi (panel isi).
-7. Prodigi Pro karari (yeni esik ~7 siparis/ay).
-8. ASTROLOVE40B yenileme ~6 Ekim.
+3. 15oz kupa piloti (H-MUG-CERAMIC-150Z).
+4. Cerceveli urun grubu - faz 2.
+5. Bolumleri 7'den 3'e indir + 312 ilani tasi (panel isi).
+6. Prodigi Pro karari (yeni esik ~7 siparis/ay).
+7. ASTROLOVE40B yenileme ~6 Ekim.
 SON: B99 KAPANDI.

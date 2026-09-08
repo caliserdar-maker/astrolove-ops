@@ -1,0 +1,5 @@
+- TAMAMLANDI 8 Eyl: 78/78 POD ilani ELLE dolduruldu.
+  API ve bulk edit destegi olmadigi icin baska yol yoktu.
+  Etsy open-api tartisma #1307'de saticilar ayni sorunu
+  bildiriyor, Etsy tarih vermemis.
+  IZLENECEK: alan API'ye eklenirse is 5 dakikaya duser.
