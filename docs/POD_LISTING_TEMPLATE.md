@@ -40,6 +40,8 @@ One original emblem merges the {S1} and {S2} symbols: fine lines on a calm, soli
 - Archival pigment giclée printing at 300 dpi
 - Matte, non-reflective surface
 - Gold tones are printed as flat golden ink, not metallic foil
+- Vegan-certified paper, natural white tone
+- Sustainably sourced fibres, plastic-free packaging, printed at the lab nearest you
 
 ✦ 5 COLOR EDITIONS
 Champagne Ivory · Pure White · Warm Parchment · Midnight Blue · Deep Black
@@ -77,7 +79,7 @@ A2 — 42×59 cm
 Not sure? See the size guide photo.
 
 ✦ MADE TO ORDER & SHIPPING
-Each print is made to order by our production partner, Prodigi. Processing time is shown in the shipping details above. 8x10 and A4 ship flat; all other sizes ship rolled in a sturdy tube. US orders are printed in the US; EU and UK orders are printed at our UK/EU lab for faster delivery.
+Each print is made to order by our production partner, Prodigi. Processing time is shown in the shipping details above. 8x10 and A4 ship flat; all other sizes ship rolled in a sturdy tube. US orders are printed in the US; EU and UK orders at our UK/EU lab; orders elsewhere at the nearest available lab.
 
 ✦ CARE
 Handle by the edges. If a rolled print curls, lay it flat under a weight for 24–48 hours before framing. Frame behind glass, away from direct sunlight.
@@ -85,6 +87,7 @@ Handle by the edges. If a rolled print curls, lay it flat under a weight for 24�
 ✦ PLEASE NOTE
 - Frame not included: prints are sold unframed; frames in photos are for display only.
 - Colors may vary slightly between your screen and the printed piece.
+- On matte cotton paper, deep blacks print as a rich charcoal rather than screen black — this is the natural character of fine art paper.
 
 ✦ RETURNS & REPRINTS
 Every print is made just for you, so we can't accept returns or exchanges. If your print arrives damaged or with a defect, please send us a photo within 7 days and we'll happily reprint it at no cost.
@@ -144,6 +147,8 @@ Aciklama (RU):
 - Архивная пигментная печать жикле, 300 dpi
 - Матовая, неотражающая поверхность
 - Золотые тона печатаются плоской золотистой краской, не металлической фольгой
+- Веганская сертифицированная бумага, натуральный белый тон
+- Сырьё из устойчивых источников, упаковка без пластика, печать в ближайшей к вам лаборатории
 
 ✦ 5 ЦВЕТОВЫХ ИЗДАНИЙ
 Champagne Ivory · Pure White · Warm Parchment · Midnight Blue · Deep Black
@@ -181,7 +186,7 @@ A2 — 42×59 см
 Не уверены? Смотрите фото с таблицей размеров.
 
 ✦ ПЕЧАТЬ НА ЗАКАЗ И ДОСТАВКА
-Каждый постер печатается на заказ нашим производственным партнёром Prodigi. Срок изготовления указан в деталях доставки выше. 8x10 и A4 отправляются плоскими; остальные размеры — в прочном тубусе. Заказы из США печатаются в США; заказы из ЕС и Великобритании — в нашей лаборатории в Великобритании/ЕС для более быстрой доставки.
+Каждый постер печатается на заказ нашим производственным партнёром Prodigi. Срок изготовления указан в деталях доставки выше. 8x10 и A4 отправляются плоскими; остальные размеры — в прочном тубусе. Заказы из США печатаются в США; заказы из ЕС и Великобритании — в нашей лаборатории в Великобритании/ЕС; остальные заказы — в ближайшей доступной лаборатории.
 
 ✦ УХОД
 Держите за края. Если свёрнутый постер скручивается, положите его под груз на 24–48 часов перед оформлением в раму. Оформляйте под стекло, вдали от прямых солнечных лучей.
@@ -189,6 +194,7 @@ A2 — 42×59 см
 ✦ ОБРАТИТЕ ВНИМАНИЕ
 - Рама не входит в комплект: постеры продаются без рамы; рамы на фотографиях — только для демонстрации.
 - Цвета могут немного отличаться между экраном и печатью.
+- На матовой хлопковой бумаге глубокий чёрный печатается как насыщенный угольный, а не как чёрный на экране — это естественное свойство художественной бумаги.
 
 ✦ ВОЗВРАТ И ПЕРЕПЕЧАТКА
 Каждый постер печатается специально для вас, поэтому мы не принимаем возвраты и обмены. Если постер пришёл повреждённым или с дефектом, пришлите фото в течение 7 дней — мы бесплатно напечатаем его заново.
