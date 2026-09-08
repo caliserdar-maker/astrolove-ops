@@ -104,7 +104,7 @@ def main():
         done += 1
 
     if a.dry_run:
-        log("dry-run: yazilmadi (3 islem plani yukarida, capalar tek eslesme)")
+        log(f"dry-run: yazilmadi ({len(ops)} islem plani yukarida, capalar tek eslesme)")
         return
     body = doc_text(get_doc(s))
     ok = True
