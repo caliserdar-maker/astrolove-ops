@@ -5,8 +5,13 @@ name: pw-ru-fill
 # birebir kopyalanir. Yeni ceviri URETILMEZ. Yalniz RU yazilir, EN'e dokunulmaz.
 # Kaynak/cikti dogrulamasi saglanmayan ilan ATLANIR (kalinti taramasi: Latin + Kiril).
 # apply=false (varsayilan) yalniz dry-run + ornek uretir. dry_limit kota tasarrufu icindir.
+# NOT: cron "2 0 * * *" TEK SEFERLIK (9 Eyl 2026, 00:02 UTC) — Etsy kotasi sifirlandiktan hemen
+# sonra 78 PW ilaninin tam kosusu (schedule ile apply=true, limit=0, dry_limit=3).
+# Kosu bitince bu schedule blogu KALDIRILIR.
 
 on:
+  schedule:
+    - cron: "2 0 * * *"
   workflow_dispatch:
     inputs:
       apply:
@@ -35,9 +40,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
-      APPLY: ${{ inputs.apply }}
+      # schedule ile tetiklenirse: apply=true, limit=0 (tum ilanlar), dry-run kapisi 3 ilan
+      APPLY: ${{ inputs.apply || github.event_name == 'schedule' }}
       LIMIT: ${{ inputs.limit || '0' }}
-      DRYLIMIT: ${{ inputs.dry_limit || inputs.limit || '0' }}
+      DRYLIMIT: ${{ inputs.dry_limit || (github.event_name == 'schedule' && '3') || inputs.limit || '0' }}
       QMIN: ${{ inputs.quota_min || '400' }}
     steps:
       - uses: actions/checkout@v4
