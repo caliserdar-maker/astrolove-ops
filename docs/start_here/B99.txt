@@ -99,7 +99,7 @@ GPSR - TAMAMLANDI (elle):
   bildiriyor, Etsy tarih vermemis.
   IZLENECEK: alan API'ye eklenirse is 5 dakikaya duser.
 
-ACIK CELISKI (cozulmedi):
+KAGIT IDDIALARI - COZULDU:
 - Canli Paper & Quality galeri karti (78 POD ilaninin 6. gorseli,
   Drive'da 390 dosya) su iddialari tasiyor: ACID-FREE
   ("Acid- and lignin-free, ISO 9706 conform"), ARCHIVAL PIGMENT
@@ -107,17 +107,29 @@ ACIK CELISKI (cozulmedi):
 - Bu iddialar B98'deki "SOYLENMEYECEKLER" listesiyle celisiyor.
 - Serdar karari: insert'lerde bu iddialar KULLANILMADI.
   Kartin kendisinin duzeltilip duzeltilmeyecegi AYRI ACIK IS.
+- COZUM 8 Eyl: Hahnemuhle'nin kendi urun sayfasi Photo Rag 308
+  icin BIREBIR su ifadeleri yayimliyor: "Acid- and lignin-free",
+  "ISO 9706 conform / museum quality for highest age resistance",
+  "Compatible with pigment and dye inkjet systems".
+  Kaynak: hahnemuehle.com urun sayfasi + datasheet-PhotoRag308.pdf
+- Yani galeri kartindaki ACID-FREE / MUSEUM QUALITY / ARCHIVAL
+  PIGMENT GICLEE iddialari YANLIS DEGIL, kaynagi ureticinin
+  teknik verisi. B98'deki yasak, o gun yalniz PRODIGI belgelerine
+  bakildigi icin konmustu; kagidin ureticisi Hahnemuhle.
+- KARAR: 390 galeri dosyasina DOKUNULMAYACAK, kart oldugu gibi kalir.
+- GUNCEL YASAK LISTESI (daralttildi): FSC ve geri donusturulmus
+  kagit iddialari hala KULLANILMAZ - bunlar icin dogrulama
+  yapilmadi. Asitsiz / arsivlik / muze kalitesi ARTIK SERBEST.
 
 MODEL POLITIKASI (8 Eyl):
 - Tum Claude Code oturumlari OPUS 5 / HIGH. Fable kullanilmayacak.
 
 ACIK ISLER:
-1. Paper & Quality karti: asitsiz/arsivlik iddialari duzeltilecek mi.
-2. Sablon: docs/POD_LISTING_TEMPLATE.md + pod_listing_create.py
+1. Sablon: docs/POD_LISTING_TEMPLATE.md + pod_listing_create.py
    4 kagit/eko degisikligini icermiyor; yeni ilan eski metinle uretilir.
-3. 15oz kupa piloti (H-MUG-CERAMIC-150Z).
-4. Cerceveli urun grubu - faz 2.
-5. Bolumleri 7'den 3'e indir + 312 ilani tasi (panel isi).
-6. Prodigi Pro karari (yeni esik ~7 siparis/ay).
-7. ASTROLOVE40B yenileme ~6 Ekim.
+2. 15oz kupa piloti (H-MUG-CERAMIC-150Z).
+3. Cerceveli urun grubu - faz 2.
+4. Bolumleri 7'den 3'e indir + 312 ilani tasi (panel isi).
+5. Prodigi Pro karari (yeni esik ~7 siparis/ay).
+6. ASTROLOVE40B yenileme ~6 Ekim.
 SON: B99 KAPANDI.

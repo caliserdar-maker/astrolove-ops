@@ -1,0 +1,7 @@
+1. Sablon: docs/POD_LISTING_TEMPLATE.md + pod_listing_create.py
+   4 kagit/eko degisikligini icermiyor; yeni ilan eski metinle uretilir.
+2. 15oz kupa piloti (H-MUG-CERAMIC-150Z).
+3. Cerceveli urun grubu - faz 2.
+4. Bolumleri 7'den 3'e indir + 312 ilani tasi (panel isi).
+5. Prodigi Pro karari (yeni esik ~7 siparis/ay).
+6. ASTROLOVE40B yenileme ~6 Ekim.
