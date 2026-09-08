@@ -19,6 +19,15 @@ on:
         description: "Yazdiktan sonra dokumanin son N satirini yazdir (0 = kapali)"
         required: false
         default: "0"
+      anchor:
+        description: "Doluysa EKLEME MODU: bu satirin ardina record_file eklenir (yazilmis kaydin icine)"
+        required: false
+        default: ""
+      occurrence:
+        description: "Ekleme modu: capa birden cok geciyorsa tek | ilk | son"
+        type: choice
+        options: [tek, ilk, son]
+        default: tek
 
 concurrency:
   group: start-here
@@ -68,7 +77,21 @@ jobs:
             echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
           fi
 
+      - name: Kaydin icine satir ekle (capa modu)
+        if: ${{ inputs.anchor != '' }}
+        env:
+          ANCHOR: ${{ inputs.anchor }}
+          RECORD: ${{ inputs.record_file }}
+          OCC: ${{ inputs.occurrence }}
+          DRY: ${{ inputs.dry_run }}
+        run: |
+          set -euo pipefail
+          args=(--anchor "$ANCHOR" --text-file "$RECORD" --occurrence "$OCC")
+          [ "$DRY" = "true" ] && args+=(--dry-run)
+          python scripts/common/start_here_insert.py "${args[@]}"
+
       - name: Kaydi ekle
+        if: ${{ inputs.anchor == '' }}
         run: |
           set -euo pipefail
           args=(--file "${{ inputs.record_file }}")

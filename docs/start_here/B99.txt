@@ -75,6 +75,10 @@ PURE WHITE RU - OLCUM:
 - Kagit/eko 4 maddesi kaynak CI RU'da YOK (o degisiklik yalniz
   78 POD ilanina yapildi); dijital aciklamada kagit bolumu yok.
 - Kod scripts/etsy/pw_ru_fill.py, workflow pw-ru-fill.yml.
+- TAMAMLANDI 8 Eyl (run 34250311342): 78/78 yazildi, atlanan 0,
+  kalinti taramasi 0 (Latin + Kiril). Kota 1791 -> 1401.
+  Tek seferlik cron kaldirildi (commit 6bb0155).
+  Artik 468 dijital ilanin TAMAMINDA RU katmani var.
 
 GPSR - TIKANDI:
 - Alan Etsy API'de YOK (iki OAS taramasi, 0 eslesme).
