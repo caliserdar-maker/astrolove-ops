@@ -1,0 +1,8 @@
+[
+  {"op": "replace_line", "find": "ACIK CELISKI (cozulmedi):", "text": "KAGIT IDDIALARI - COZULDU:"},
+  {"op": "insert_after", "anchor": "Kartin kendisinin duzeltilip duzeltilmeyecegi AYRI ACIK IS.",
+   "text_file": "docs/start_here/B99_ek3.txt"},
+  {"op": "replace_block", "from": "1. Paper & Quality karti: asitsiz/arsivlik iddialari duzeltilecek mi.",
+   "to": "7. ASTROLOVE40B yenileme ~6 Ekim.",
+   "text_file": "docs/start_here/B99_acik_isler3.txt"}
+]
