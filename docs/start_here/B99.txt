@@ -83,7 +83,7 @@ PURE WHITE RU - OLCUM:
 GPSR - TAMAMLANDI (elle):
 - Alan Etsy API'de YOK (iki OAS taramasi, 0 eslesme).
 - Toplu duzenleme (bulk edit) menusunde de YOK.
-- Yani ilan basina ELLE. 78 POD ilanindan 1'i dolduruldu, 77 kaldi.
+- Yani ilan basina ELLE, baska yol yok.
 - Kosi (Prodigi) cevabi: telefon numarasi yok, iletisim
   support@prodigi.com. Prodigi B.V. YALNIZCA Prodigi'nin urettigi
   urunlerde referans gosterilebilir - dijital ilanlara YAZILMAZ.
