@@ -125,13 +125,14 @@ MODEL POLITIKASI (8 Eyl):
 - Tum Claude Code oturumlari OPUS 5 / HIGH. Fable kullanilmayacak.
 
 ACIK ISLER:
-1. Bolumleri 7'den 3'e indir + 312 ilani tasi (panel isi).
-2. Prodigi Pro karari (askida) - yeni esik ~7 siparis/ay.
-3. ASTROLOVE40B yenileme ~6 Ekim.
+1. Prodigi Pro karari (askida) - yeni esik ~7 siparis/ay.
+2. ASTROLOVE40B yenileme ~6 Ekim.
 - IPTAL 8 Eyl: 15oz kupa piloti ve cerceveli urun grubu faz 2
   kapsamdan cikarildi.
 - TAMAMLANDI 8 Eyl: docs/POD_LISTING_TEMPLATE.md 4 kagit/eko
   degisikligiyle esitlendi (commit d74b493). transform() testi
   sifir degisiklik veriyor; yeni ilan artik canlilarla ayni
   metinle uretilir.
+- TAMAMLANDI 8 Eyl: bolumler 7'den 3'e indirildi, 312 ilan
+  tasindi (panel isi, elle).
 SON: B99 KAPANDI.
