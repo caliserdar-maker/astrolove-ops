@@ -8,11 +8,10 @@ name: pod-night2
 #          Once 3 ilan DRY-RUN kapisi: diff artifact'a yazilir; dogrulama basarisizsa FAZ 2 DURUR.
 # Kota: her fazda script ilan basina x-remaining-today okur, 400 altina inmeden ilanlar arasinda durur
 # (apply ortasinda kesilme yok); kalanlar STATE'te (durum / ru_done) kalir.
-# NOT: cron TEK SEFERLIK; basarili kosudan sonra bir sonraki commit'te schedule satiri kaldirilir.
+# NOT: tek seferlik cron 8 Eyl 2026 00:35 UTC'de kostu (run 34173796646: FAZ 1 200/200, FAZ 2 312
+# guncellendi + 78 RU govdesi bos atlandi) ve kaldirildi; workflow artik yalniz elle tetiklenir.
 
 on:
-  schedule:
-    - cron: "10 0 * * *"        # 00:10 UTC; tek seferlik (bkz. NOT)
   workflow_dispatch:
     inputs:
       dry_run:
