@@ -196,6 +196,7 @@ def main():
     ap.add_argument("--ref-pair")
     ap.add_argument("--tol", type=float, default=0.05, help="bbox kiyas toleransi (oran)")
     ap.add_argument("--preview", type=int, default=260, help="0 = onizleme uretme")
+    ap.add_argument("--ascii", type=int, default=0, help="alfa kanalini N karakter genisliginde ASCII yazdir (gozle kontrol)")
     a = ap.parse_args()
     istenen = [x.strip().upper() for x in a.layers.split(",") if x.strip()]
     for k in istenen:
@@ -228,6 +229,14 @@ def main():
             arka = Image.new("RGBA", p.size, (18, 18, 22, 255))
             arka.alpha_composite(p)
             arka.convert("RGB").save(out / f"{k}_preview.png")
+        if a.ascii:
+            al = img.getchannel("A").resize((a.ascii, max(1, int(a.ascii * img.size[1] / img.size[0] / 2))),
+                                            Image.LANCZOS)
+            ramp = " .:-=+*#%@"
+            print(f"----- {k} alfa (ASCII {al.size[0]}x{al.size[1]}) -----")
+            for satir in np.asarray(al).reshape(al.size[1], al.size[0]):
+                print("".join(ramp[min(9, int(v) * 10 // 256)] for v in satir))
+            print(f"----- {k} son -----")
         rapor["katmanlar"][k] = {"bbox": list(bb), "png": [img.size[0], img.size[1]],
                                  "alan": int(m[k].sum()), "dosya": f"{k}.png"}
         print(f"{k}: bbox {bb} | png {img.size} | alan {int(m[k].sum())}")
