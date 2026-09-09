@@ -1,0 +1,117 @@
+name: symbol-extract
+
+# Poster'dan sembol katmani cikarimi (RGBA seffaf PNG). Etsy'ye DOKUNMAZ; yalniz Drive okur/yazar.
+# Kaynak: WALL_ART/POSTERS/ORIGINAL_HIGH_RES/<EDISYON>/3X4/<CIFT>.jpg
+# Cikti:  TEMP/SYMBOL_LIB/<out_dir>/<CIFT>/{FUSION,GLIF_SOL,GLIF_SAG}.png + onizleme + rapor
+# ADIM A: tek cift (CANCER_LIBRA) + MASK_V5_RAPOR.json ile bbox kiyasi (tolerans %2).
+
+on:
+  workflow_dispatch:
+    inputs:
+      pairs:
+        description: "Virgullu cift listesi (poster dosya adlari)"
+        required: true
+        default: "CANCER_LIBRA"
+      edition:
+        description: "Poster edisyonu"
+        required: false
+        default: "DEEP_BLACK"
+      out_dir:
+        description: "TEMP/SYMBOL_LIB altindaki hedef klasor"
+        required: false
+        default: "_TEST"
+      layers:
+        description: "Cikarilacak katmanlar"
+        required: false
+        default: "FUSION,GLIF_SOL,GLIF_SAG"
+      compare_ref:
+        description: "true = MASK_V5_RAPOR.json ile bbox kiyasi yap (tolerans %2)"
+        type: boolean
+        default: true
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Bagimliliklar + import dogrulamasi
+        run: |
+          set -euo pipefail
+          pip install -q pillow==12.3.0 numpy==2.4.6
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          # scriptin import ettigi her paket pip list ciktisinda olmali
+          python - <<'PY'
+          import re, subprocess, sys, pathlib
+          src = pathlib.Path("scripts/symbols/extract_symbol.py").read_text(encoding="utf-8")
+          mods = set(re.findall(r"^\s*(?:import|from)\s+([A-Za-z_][A-Za-z0-9_]*)", src, re.M))
+          std = {"argparse", "json", "sys", "pathlib", "re", "os"}
+          pip_ad = {"PIL": "pillow"}
+          kurulu = {l.split()[0].lower() for l in
+                    subprocess.run([sys.executable, "-m", "pip", "list"], capture_output=True, text=True
+                                   ).stdout.splitlines()[2:] if l.strip()}
+          eksik = [m for m in mods - std if pip_ad.get(m, m).lower() not in kurulu]
+          print("import:", sorted(mods - std), "| pip list'te:", sorted(kurulu & {"pillow", "numpy"}))
+          if eksik:
+              raise SystemExit(f"HATA: kurulu olmayan import: {eksik}")
+          PY
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+      - name: Poster(ler)i ve referansi indir
+        env:
+          PAIRS: ${{ inputs.pairs }}
+          ED: ${{ inputs.edition }}
+        run: |
+          set -euo pipefail
+          mkdir -p _work _out
+          for p in $(echo "$PAIRS" | tr ',' ' '); do
+            rclone copyto "gdrive:ASTROLOVE/WALL_ART/POSTERS/ORIGINAL_HIGH_RES/${ED}/3X4/${p}.jpg" "_work/${p}.jpg"
+          done
+          rclone copyto "gdrive:ASTROLOVE/WALLPAPER/MASK_V5/MASK_V5_RAPOR.json" _work/MASK_V5_RAPOR.json || echo "referans yok"
+          ls -l _work
+      - name: Cikarim
+        env:
+          PAIRS: ${{ inputs.pairs }}
+          LAYERS: ${{ inputs.layers }}
+          CMP: ${{ inputs.compare_ref }}
+        run: |
+          set -euo pipefail
+          for p in $(echo "$PAIRS" | tr ',' ' '); do
+            echo "::group::$p"
+            args=(--poster "_work/${p}.jpg" --out "_out/${p}" --layers "$LAYERS" --preview 260)
+            if [ "$CMP" = "true" ] && [ -f _work/MASK_V5_RAPOR.json ]; then
+              args+=(--ref _work/MASK_V5_RAPOR.json --ref-pair "$p" --tol 0.02)
+            fi
+            python scripts/symbols/extract_symbol.py "${args[@]}"
+            echo "::endgroup::"
+          done
+          find _out -name '*.png' -printf '%p %s\n' | sort
+      - name: Drive'a yaz
+        if: ${{ always() }}
+        env:
+          OUTDIR: ${{ inputs.out_dir }}
+        run: |
+          set -euo pipefail
+          [ -d _out ] && rclone copy _out "gdrive:ASTROLOVE/TEMP/SYMBOL_LIB/${OUTDIR}" -q && \
+            echo "Cikti: TEMP/SYMBOL_LIB/${OUTDIR}/"
+          rclone lsf -R "gdrive:ASTROLOVE/TEMP/SYMBOL_LIB/${OUTDIR}" || true
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: symbol-extract
+          path: _out/
+          if-no-files-found: ignore
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
