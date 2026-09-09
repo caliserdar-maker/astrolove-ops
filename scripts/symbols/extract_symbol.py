@@ -38,6 +38,15 @@ LAYERS = ("HALKA", "FUSION", "GLIF_SOL", "GLIF_SAG")
 RING_PRIOR = (3602.0 / 7200, 3874.0 / 9600, 2675.0 / 7200, 2710.0 / 9600)
 RING_TOL = 0.012          # |rho-1| <= tol -> halka cizgisi (cizgi ~15/7200 = %0.2 W, +-pay)
 FUSION_MAX_RHO = 0.98     # halka icindeki her sey fusion (olcum: fusion max rho 0.77)
+# Yildiz/toz temizligi: referans (MASK_V5_RAPOR) FUSION icin 490 kaynak parcadan 3'e filtreliyor.
+# Olcut YOGUNLUK: yildizlar yalnizdir (genis pencerede cok az murekkep), fusion vuruslari yogun
+# bir yapinin parcasidir. 1/8 olcekte kapsama haritasi -> BoxBlur (yaricap 7 blok = ~%6 tuval) ->
+# yogunluk esigi. Morfolojik acma DENENDI ve BIRAKILDI: 1/8'te vurus 1.2 px'e dusuyor, erozyon
+# fusion'i da siliyordu (olcum: FUSION bbox 751x801 -> 137x558).
+SPECK_W = 1200            # kucuk harita genisligi (blok boyu tuvale ORANTILI -> olcek degismez)
+SPECK_BLUR = 7            # blok yaricapi (~%0.6 tuval genisligi)
+SPECK_MIN_DENSITY = 32    # 0-255 yogunluk esigi; olcum (sentetik, iki olcek): 32 yildizlari tam
+                          # eler, fusion bbox degismez (olcek sapmasi %0.12); 8-24 arasi yildiz birakiyor.
 
 
 def otsu(gray):
@@ -110,6 +119,16 @@ def ellipse_fit(xs, ys, W, H, adim=13, tur=2):
     return p[0], p[1], p[2], p[3], skor
 
 
+def lekesiz(mask, W, H):
+    """Kucuk lekeleri (yildiz/toz) dusurur: 1/8 olcekte acma -> tam cozunurlukte kirpma maskesi."""
+    olcek = max(1, round(W / SPECK_W))
+    kucuk = Image.fromarray((mask * 255).astype(np.uint8)).resize(
+        (max(1, W // olcek), max(1, H // olcek)), Image.BOX)
+    yogun = kucuk.filter(ImageFilter.BoxBlur(SPECK_BLUR))
+    tut = np.asarray(yogun.resize((W, H), Image.NEAREST)) >= SPECK_MIN_DENSITY
+    return mask & tut
+
+
 def katmanlar(ink, W, H):
     """-> {katman: maske}, tespit bilgisi. Halka elipsle, glifler satir bandiyla ayrilir."""
     ys, xs = np.nonzero(ink)
@@ -129,7 +148,7 @@ def katmanlar(ink, W, H):
                     ("FUSION", (rho < FUSION_MAX_RHO) & (ys < glif_bant[0]))):
         mm = np.zeros_like(ink)
         mm[ys[sec], xs[sec]] = True
-        m[ad] = mm
+        m[ad] = lekesiz(mm, W, H) if ad == "FUSION" else mm
 
     gb = np.zeros_like(ink)
     gb[glif_bant[0]:glif_bant[1] + 1] = ink[glif_bant[0]:glif_bant[1] + 1]
