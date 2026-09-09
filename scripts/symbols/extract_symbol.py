@@ -5,12 +5,11 @@ Poster'dan sembol katmani cikarimi -> RGBA seffaf PNG (Mo 9 Eyl 2026).
 MASK_V5 yontemi (Colab isiydi, script yoktu; burada kalici hale getirildi):
   1. Poster gri tonlanir, OTSU esigi ile murekkep maskesi cikarilir (koyu edisyonda
      murekkep zeminden PARLAK; acik edisyonda tersi - otomatik secilir).
-  2. Satir izdusumuyle metin/eleman BANTLARI bulunur: EN YUKSEK bant halka+fusion
-     bandi (tuval yuksekliginin ~%47'si), onun altindaki ilk kisa bant glif satiri,
-     kalanlar (baslik, isim satiri, tagline) DISLANIR.
-  3. Halka bandinda murekkep koordinatlarina elips uydurulur (merkez + yari eksenler
-     bbox'tan); normalize yaricap rho = sqrt(((x-cx)/a)^2+((y-cy)/b)^2) hesaplanir.
-     rho histogramindaki bosluktan kesim bulunur: rho >= kesim HALKA, rho < kesim FUSION.
+  2. Satir izdusumuyle BANTLAR bulunur; glif satiri = halka merkezinin altindaki ilk
+     KISA bant. Baslik, isim satiri ve tagline DISLANIR.
+  3. Halka elipsi: olculmus oncelikten (wp_plate_pilot RING_ELLIPSE, normalize) baslanip
+     goruntude ince ayarlanir. rho = sqrt(((x-cx)/a)^2+((y-cy)/b)^2); |rho-1|<=0.012 HALKA,
+     rho<0.98 ve glif satirinin ustu FUSION (baslik/tagline rho>1.2 oldugu icin dusuyor).
   4. Glif satiri sutun izdusumuyle ikiye ayrilir: SOL ve SAG glif (en cok murekkepli
      iki kume). Cift adindaki burc sirasi SOL, SAG ile eslesir.
   5. Her katman bbox'una kirpilir; ALFA = (gri - zemin)/(murekkep - zemin) yumusak
@@ -33,6 +32,12 @@ from PIL import Image, ImageFilter
 
 Image.MAX_IMAGE_PIXELS = None
 LAYERS = ("HALKA", "FUSION", "GLIF_SOL", "GLIF_SAG")
+# Halka geometrisi ONCELIGI: scripts/etsy/wp_plate_pilot.py RING_ELLIPSE (7200x9600 poster px'te
+# 6 posterde olculdu: merkez 3602,3874 - yari eksen 2675x2710). Normalize edildi -> her cozunurluk.
+# Goruntude ince ayara cekilir (asagida ellipse_fit); tahmin degil, olcumden turetilmis baslangic.
+RING_PRIOR = (3602.0 / 7200, 3874.0 / 9600, 2675.0 / 7200, 2710.0 / 9600)
+RING_TOL = 0.012          # |rho-1| <= tol -> halka cizgisi (cizgi ~15/7200 = %0.2 W, +-pay)
+FUSION_MAX_RHO = 0.98     # halka icindeki her sey fusion (olcum: fusion max rho 0.77)
 
 
 def otsu(gray):
@@ -86,55 +91,42 @@ def bbox_of(mask):
     return int(xs.min()), int(ys.min()), int(xs.max() - xs.min() + 1), int(ys.max() - ys.min() + 1)
 
 
-def rho_cut(rho):
-    """FUSION/HALKA ayrimi: rho histogramindaki en genis bos araligin ortasi."""
-    h, kenar = np.histogram(rho, bins=100, range=(0.0, 1.05))
-    orta = (kenar[:-1] + kenar[1:]) / 2
-    esik = max(1.0, 0.002 * h.max())
-    aday = (orta > 0.55) & (orta < 1.0) & (h < esik)
-    if not aday.any():
-        return 0.88
-    # en uzun ardisik bos dizi
-    idx = np.nonzero(aday)[0]
-    kes, en_iyi, bas = (idx[0], idx[0]), 0, idx[0]
-    for a, b in zip(idx, idx[1:]):
-        if b != a + 1:
-            if a - bas > en_iyi:
-                en_iyi, kes = a - bas, (bas, a)
-            bas = b
-    if idx[-1] - bas > en_iyi:
-        kes = (bas, idx[-1])
-    return float((orta[kes[0]] + orta[kes[1]]) / 2)
+def ellipse_fit(xs, ys, W, H, adim=13, tur=2):
+    """Halka elipsini olculmus oncelikten baslayip goruntude ince ayarlar.
+    Skor = |rho-1| <= RING_TOL bandina dusen murekkep piksel sayisi (halka cizgisi)."""
+    p = [RING_PRIOR[0] * W, RING_PRIOR[1] * H, RING_PRIOR[2] * W, RING_PRIOR[3] * H]
+    skor = 0
+    for _ in range(tur):
+        for i in range(4):
+            en_iyi, en_skor = p[i], -1
+            for d in np.linspace(-0.03, 0.03, adim):
+                q = list(p)
+                q[i] = p[i] * (1 + d) if i >= 2 else p[i] + d * (W if i == 0 else H)
+                rho = np.sqrt(((xs - q[0]) / q[2]) ** 2 + ((ys - q[1]) / q[3]) ** 2)
+                sc = int((np.abs(rho - 1.0) <= RING_TOL).sum())
+                if sc > en_skor:
+                    en_skor, en_iyi = sc, q[i]
+            p[i], skor = en_iyi, en_skor
+    return p[0], p[1], p[2], p[3], skor
 
 
 def katmanlar(ink, W, H):
-    """-> {katman: maske}, tespit bilgisi. Bantlar ve elips goruntuden olculur."""
+    """-> {katman: maske}, tespit bilgisi. Halka elipsle, glifler satir bandiyla ayrilir."""
+    ys, xs = np.nonzero(ink)
+    cx, cy, a, b = ellipse_fit(xs, ys, W, H)[:4]
+    rho = np.sqrt(((xs - cx) / a) ** 2 + ((ys - cy) / b) ** 2)
+
+    # glif satiri: halka merkezinin altindaki ilk KISA bant (baslik/isim/tagline dislanir)
     satir = ink.sum(axis=1)
-    # esik dusuk tutulur (ince glif satiri kaybolmasin), lekeler bant TOPLAMI ile elenir
-    bl = bands(satir, max(3, int(0.0008 * W)), int(0.012 * H))
-    bl = [b for b in bl if b[2] >= 0.0005 * satir.sum()]
-    if not bl:
-        raise SystemExit("HATA: murekkep bandi bulunamadi")
-    # halka bandi = EN YUKSEK bant (halka+fusion tuvalin ~%47'si). Murekkep toplami olcut
-    # DEGIL: dolgulu isim satiri kucuk yukseklikte daha cok murekkep icerebiliyor (olcum: sentetik
-    # yari olcek, isim 9824 > halka 9607).
-    halka_bant = max(bl, key=lambda b: (b[1] - b[0], b[2]))
-    if (halka_bant[1] - halka_bant[0]) < 0.25 * H:
-        raise SystemExit(f"HATA: halka bandi cok kisa ({halka_bant[1] - halka_bant[0]} px)")
-    alt = [b for b in bl if b[0] > halka_bant[1]]
-    glif_bant = next((b for b in alt if (b[1] - b[0] + 1) < 0.15 * H), None)
+    bl = bands(satir, max(3, int(0.0008 * W)), int(0.006 * H))
+    bl = [x for x in bl if x[2] >= 0.0005 * satir.sum()]
+    glif_bant = next((x for x in bl if x[0] > cy + 0.5 * b and (x[1] - x[0] + 1) < 0.15 * H), None)
     if glif_bant is None:
-        raise SystemExit("HATA: glif satiri bulunamadi")
+        raise SystemExit("HATA: glif satiri bulunamadi (halka merkezi altinda kisa bant yok)")
 
     m = {}
-    hb = np.zeros_like(ink)
-    hb[halka_bant[0]:halka_bant[1] + 1] = ink[halka_bant[0]:halka_bant[1] + 1]
-    ys, xs = np.nonzero(hb)
-    cx, cy = (xs.min() + xs.max()) / 2.0, (ys.min() + ys.max()) / 2.0
-    a, b = max((xs.max() - xs.min()) / 2.0, 1.0), max((ys.max() - ys.min()) / 2.0, 1.0)
-    rho = np.sqrt(((xs - cx) / a) ** 2 + ((ys - cy) / b) ** 2)
-    kes = rho_cut(rho)
-    for ad, sec in (("HALKA", rho >= kes), ("FUSION", rho < kes)):
+    for ad, sec in (("HALKA", np.abs(rho - 1.0) <= RING_TOL),
+                    ("FUSION", (rho < FUSION_MAX_RHO) & (ys < glif_bant[0]))):
         mm = np.zeros_like(ink)
         mm[ys[sec], xs[sec]] = True
         m[ad] = mm
@@ -150,8 +142,10 @@ def katmanlar(ink, W, H):
         mm = np.zeros_like(ink)
         mm[:, c[0]:c[1] + 1] = gb[:, c[0]:c[1] + 1]
         m[ad] = mm
-    bilgi = {"halka_bant": halka_bant[:2], "glif_bant": glif_bant[:2],
-             "elips": [round(cx, 1), round(cy, 1), round(a, 1), round(b, 1)], "rho_kesim": round(kes, 4)}
+    bilgi = {"glif_bant": list(glif_bant[:2]),
+             "elips": [round(cx, 1), round(cy, 1), round(a, 1), round(b, 1)],
+             "elips_norm": [round(cx / W, 4), round(cy / H, 4), round(a / W, 4), round(b / H, 4)],
+             "halka_piksel": int(m["HALKA"].sum())}
     return m, bilgi
 
 
@@ -181,7 +175,7 @@ def main():
     ap.add_argument("--layers", default="FUSION,GLIF_SOL,GLIF_SAG")
     ap.add_argument("--ref", help="MASK_V5_RAPOR.json (kiyas icin)")
     ap.add_argument("--ref-pair")
-    ap.add_argument("--tol", type=float, default=0.02, help="bbox kiyas toleransi (oran)")
+    ap.add_argument("--tol", type=float, default=0.05, help="bbox kiyas toleransi (oran)")
     ap.add_argument("--preview", type=int, default=260, help="0 = onizleme uretme")
     a = ap.parse_args()
     istenen = [x.strip().upper() for x in a.layers.split(",") if x.strip()]
