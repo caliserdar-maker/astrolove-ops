@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
+# UNUSED as of 2026-09-09. Poster-derived extraction abandoned; clean isolated symbol assets exist in Canva (Signs Gold / Gold / Signs Name Gold). Kept for reference only.
 """
+[UNUSED as of 2026-09-09. Poster-derived extraction abandoned; clean isolated symbol assets exist in Canva (Signs Gold / Gold / Signs Name Gold). Kept for reference only.]
+
 Poster'dan sembol katmani cikarimi -> RGBA seffaf PNG (Mo 9 Eyl 2026).
 
 MASK_V5 yontemi (Colab isiydi, script yoktu; burada kalici hale getirildi):

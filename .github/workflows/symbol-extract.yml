@@ -1,5 +1,7 @@
 name: symbol-extract
 
+# UNUSED as of 2026-09-09. Poster-derived extraction abandoned; clean isolated symbol assets exist in Canva (Signs Gold / Gold / Signs Name Gold). Kept for reference only.
+#
 # Poster'dan sembol katmani cikarimi (RGBA seffaf PNG). Etsy'ye DOKUNMAZ; yalniz Drive okur/yazar.
 # Kaynak: WALL_ART/POSTERS/ORIGINAL_HIGH_RES/<EDISYON>/3X4/<CIFT>.jpg
 # Cikti:  TEMP/SYMBOL_LIB/<out_dir>/<CIFT>/{FUSION,GLIF_SOL,GLIF_SAG}.png + onizleme + rapor
