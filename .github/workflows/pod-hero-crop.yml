@@ -1,0 +1,157 @@
+name: pod-hero-crop
+
+# POD hero kirpma ORNEGI (Mo 13 Eyl 2026): oda sahnesini 4:5 kadraja daraltir.
+# Kural: cerceve yuksekligi kadrajin %78'i, ortalanmis, 4:5. Goreli kutu ana
+# edisyondan (MB) turetilir, 5 edisyona ve videoya aynen uygulanir.
+# Cikti: Drive TEMP/POD_HERO_CROP/<out_dir>/ (5 hero + video + karsilastirma +
+# preview_cards.png + crop_box.json). Etsy'ye YAZMAZ (yalniz opsiyonel salt-okur
+# gorsel olcusu), Prodigi'ye dokunmaz.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pair:
+        description: "Cift (poster/klasor adi)"
+        required: true
+        default: "AQUARIUS_AQUARIUS"
+      out_dir:
+        description: "TEMP/POD_HERO_CROP altindaki hedef klasor"
+        required: false
+        default: "AQU_AQU"
+      ratio:
+        description: "Cerceve yuksekligi / kadraj yuksekligi"
+        required: false
+        default: "0.78"
+      listing_id:
+        description: "Salt-okur karsilastirma icin Etsy ilan no (bos = atla)"
+        required: false
+        default: "4570110121"
+      ocr:
+        description: "Kadrajda bulunmasi gereken metinler (virgullu)"
+        required: false
+        default: "AQUARIUS,One Bond"
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  crop:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      PAIR: ${{ inputs.pair }}
+      OUTDIR: ${{ inputs.out_dir }}
+      RATIO: ${{ inputs.ratio || '0.78' }}
+      LISTING: ${{ inputs.listing_id }}
+      OCR: ${{ inputs.ocr }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Bagimliliklar + import dogrulamasi
+        run: |
+          set -euo pipefail
+          pip install -q pillow==12.3.0 numpy==2.4.6 requests==2.34.2
+          sudo apt-get update -qq && sudo apt-get install -y -qq tesseract-ocr >/dev/null
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          ffmpeg -version | head -1; ffprobe -version | head -1; tesseract --version | head -1
+          python - <<'PY'
+          import re, subprocess, sys, pathlib
+          src = pathlib.Path("scripts/pod/hero_crop.py").read_text(encoding="utf-8")
+          mods = set(re.findall(r"^\s*(?:import|from)\s+([A-Za-z_][A-Za-z0-9_]*)", src, re.M))
+          std = {"argparse", "json", "pathlib", "subprocess", "sys", "time", "re", "shutil"}
+          pip_ad = {"PIL": "pillow"}
+          kurulu = {l.split()[0].lower() for l in
+                    subprocess.run([sys.executable, "-m", "pip", "list"], capture_output=True,
+                                   text=True).stdout.splitlines()[2:] if l.strip()}
+          eksik = [m for m in mods - std if pip_ad.get(m, m).lower() not in kurulu]
+          print("import:", sorted(mods - std), "| pip list:", sorted(kurulu & {"pillow", "numpy", "requests"}))
+          if eksik:
+              raise SystemExit(f"HATA: kurulu olmayan import: {eksik}")
+          PY
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+      - name: Hero ve video indir
+        run: |
+          set -euo pipefail
+          mkdir -p _work/heroes _out
+          for ed in MIDNIGHT_BLUE DEEP_BLACK WARM_PARCHMENT CHAMPAGNE_IVORY PURE_WHITE; do
+            if rclone copyto "gdrive:ASTROLOVE/TEMP/POD_GALLERY/${PAIR}/${ed}/01.jpg" "_work/heroes/${ed}.jpg" 2>/dev/null; then
+              echo "$ed: TEMP/POD_GALLERY"
+            else
+              f=$(rclone lsf "gdrive:ASTROLOVE/WALL_ART/LISTING_MEDIA/ETSY_UPLOAD_SETS/${ed}/${PAIR}" --include "01_*" | head -1)
+              [ -n "$f" ] || { echo "HATA: $ed hero bulunamadi"; exit 1; }
+              rclone copyto "gdrive:ASTROLOVE/WALL_ART/LISTING_MEDIA/ETSY_UPLOAD_SETS/${ed}/${PAIR}/$f" "_work/heroes/${ed}.jpg"
+              echo "$ed: ETSY_UPLOAD_SETS/$f"
+            fi
+          done
+          rclone copyto "gdrive:ASTROLOVE/WALL_ART/LISTING_MEDIA/VIDEOS/V01_FIREFLY_STORY/01_EXPORTS/MIDNIGHT_BLUE/WA_VIDEO_V01_${PAIR}_MIDNIGHT_BLUE.mp4" _work/video.mp4 \
+            || echo "UYARI: video bulunamadi"
+          ls -l _work/heroes _work/video.mp4 2>/dev/null || true
+      - name: 'Salt okur: Etsy ana gorsel olcusu (elle kirpma referansi)'
+        id: etsy
+        continue-on-error: true
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          [ -n "$LISTING" ] || { echo "atlandi"; exit 0; }
+          umask 077
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import os, sys
+          sys.path.insert(0, "scripts/etsy")
+          from etsy_common import Etsy, TokenStore
+          st = TokenStore(os.environ["TOKEN_FILE"], os.environ.get("ETSY_API_KEY"),
+                          os.environ.get("ETSY_SHARED_SECRET"))
+          api = Etsy(st)
+          d = api.get(f"/listings/{os.environ['LISTING']}/images")
+          for im in d.get("results", []):
+              print(f"# rank={im.get('rank')} {im.get('full_width')}x{im.get('full_height')}", file=sys.stderr)
+          ilk = (d.get("results") or [{}])[0]
+          w, h = ilk.get("full_width"), ilk.get("full_height")
+          print(f"boyut={w}x{h}" if w and h else "boyut=")
+          PY
+          if [ -f _work/ETSY_TOKEN.json.updated ]; then
+            rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi"
+          fi
+      - name: Kirpma
+        run: |
+          set -euo pipefail
+          ref="${{ steps.etsy.outputs.boyut }}"
+          [ -n "$ref" ] || ref="1029x1291"
+          echo "Etsy elle kirpma referansi: $ref"
+          args=(--heroes "MB=_work/heroes/MIDNIGHT_BLUE.jpg,DB=_work/heroes/DEEP_BLACK.jpg,WP=_work/heroes/WARM_PARCHMENT.jpg,CI=_work/heroes/CHAMPAGNE_IVORY.jpg,PW=_work/heroes/PURE_WHITE.jpg"
+                --out _out --ratio "$RATIO" --etsy-ref "$ref" --ocr "$OCR")
+          [ -f _work/video.mp4 ] && args+=(--video _work/video.mp4)
+          python scripts/pod/hero_crop.py "${args[@]}"
+      - name: Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -d _out ] || exit 0
+          rclone copy _out "gdrive:ASTROLOVE/TEMP/POD_HERO_CROP/${OUTDIR}" --exclude "_*" -q
+          echo "Cikti: TEMP/POD_HERO_CROP/${OUTDIR}/"
+          rclone lsf -l "gdrive:ASTROLOVE/TEMP/POD_HERO_CROP/${OUTDIR}"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: pod-hero-crop
+          path: _out/
+          if-no-files-found: ignore
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
