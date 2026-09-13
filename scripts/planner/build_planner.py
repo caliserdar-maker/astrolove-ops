@@ -119,6 +119,11 @@ def fetch_fonts(cache: Path):
             if key not in found:
                 raise RuntimeError(f"Google Fonts CSS'inde bulunamadi: {key}")
             dst.write_bytes(urllib.request.urlopen(found[key], timeout=60).read())
+        # fitz.Font woff/woff2 okumaz; Google Fonts UA'ya gore format degistirir.
+        head = dst.read_bytes()[:4]
+        if head in (b"wOFF", b"wOF2"):
+            raise RuntimeError(f"{dst.name}: woff geldi, TTF bekleniyordu "
+                               f"(Google Fonts UA pazarligi degismis)")
         out[key] = dst
     return out
 
@@ -134,23 +139,25 @@ def extract_symbol(poster: Path, out_png: Path, preview_png: Path, pad=0.06):
     alfa = altinlik rampasi, RGB posterden BIREBIR. Yeniden cizim yok.
     """
     im = Image.open(poster).convert("RGB")
-    a = np.asarray(im).astype(np.int16)
-    r, g, b = a[..., 0], a[..., 1], a[..., 2]
+    a8 = np.asarray(im)                     # uint8; tam boy int16 kopyasi ALINMAZ
+    r, g, b = a8[..., 0], a8[..., 1], a8[..., 2]
 
     # Altin (#C9A227) lacivert (#1A1A2E) zeminde: r>g>b, r-b genis, r yeterince parlak.
-    warm = (r - b).astype(np.float32)
-    gold = (r > g) & (g > b) & (warm >= 40) & (r >= 80)
+    gold = (r > g) & (g > b) & ((r.astype(np.int16) - b) >= 40) & (r >= 80)
     if gold.sum() < 500:
         raise RuntimeError(f"altin maske bos ({int(gold.sum())} px) - poster beklenen "
                            f"lacivert/altin edisyon degil: {poster}")
 
     # Yildiz/toz temizligi: 1 px'lik tekil noktalari ele, sonra parcala.
-    clean = ndimage.binary_opening(gold, structure=np.ones((3, 3), bool))
+    box3 = np.ones((3, 3), bool)
+    clean = ndimage.binary_opening(gold, structure=box3)
     if clean.sum() < 500:
         clean = gold
     # Halka ile fusion arasinda kucuk boslik olabilir: hafif kapama ile birlestir.
-    k = max(3, int(round(min(a.shape[:2]) * 0.004)) | 1)
-    joined = ndimage.binary_closing(clean, structure=np.ones((k, k), bool))
+    # 3x3 + iterations kullanilir: kxk tek adim O(k^2)/px olur, 20+ MP posterde
+    # dakikalar surer; iterasyonlu hali O(iter)/px.
+    it = max(1, int(round(min(a8.shape[:2]) * 0.002)))
+    joined = ndimage.binary_closing(clean, structure=box3, iterations=it)
 
     lab, n = ndimage.label(joined)
     if n == 0:
@@ -167,7 +174,7 @@ def extract_symbol(poster: Path, out_png: Path, preview_png: Path, pad=0.06):
     y0, y1 = max(0, y0 - py), min(H - 1, y1 + py)
     x0, x1 = max(0, x0 - px), min(W - 1, x1 + px)
 
-    sub = a[y0:y1 + 1, x0:x1 + 1]
+    sub = a8[y0:y1 + 1, x0:x1 + 1].astype(np.int16)
     subm = comp[y0:y1 + 1, x0:x1 + 1]
 
     # Alfa: zemin (lacivert) ile altin arasinda yumusak rampa; maske disi 0.

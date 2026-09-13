@@ -1,0 +1,172 @@
+name: planner-sample
+
+# AstroLove Couple Digital Planner - Aries-Leo Midnight Blue ORNEK uretimi.
+# Bu bir ORNEKTIR; 78 ciftlik toplu uretim degildir (Mo onayi olmadan yok).
+# Kaynak sembol: WALL_ART/POSTERS/ORIGINAL_HIGH_RES/MIDNIGHT_BLUE/2X3/ARIES_LEO.jpg
+# Cikti: PLANNER/SYMBOLS/ (kirpilmis sembol + onizleme) ve PLANNER/SAMPLE/
+# (iki PDF, alti PNG onizleme, build_report.json). Etsy'ye yazmaz.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pair:
+        description: "Cift kodu (cikti dosya adi), or. ARIES_LEO_MB"
+        required: false
+        default: "ARIES_LEO_MB"
+      poster:
+        description: "Drive'daki poster yolu (gdrive: haric)"
+        required: false
+        default: "ASTROLOVE/WALL_ART/POSTERS/ORIGINAL_HIGH_RES/MIDNIGHT_BLUE/2X3/ARIES_LEO.jpg"
+
+concurrency:
+  group: planner-sample
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Bagimliliklar
+        run: |
+          set -euo pipefail
+          pip install -q pymupdf==1.28.2 pillow==12.3.0 numpy==2.4.6 scipy==1.17.1
+          python -c "import fitz, PIL, numpy, scipy; print('fitz', fitz.version[0])"
+
+      - name: rclone kur
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          rclone version | head -1
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then
+            echo "HATA: RCLONE_CONF_B64 secret'i tanimli degil." >&2
+            exit 1
+          fi
+          mkdir -p ~/.config/rclone
+          umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          # Yeni OAuth istemcisinin secret'i conf'daki degeri ezer (rclone env override).
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+          fi
+
+      - name: Posteri indir
+        env:
+          POSTER: ${{ inputs.poster }}
+        run: |
+          set -euo pipefail
+          rclone copyto "gdrive:${POSTER}" poster.jpg -q
+          ls -l poster.jpg
+          python - <<'PY'
+          from PIL import Image
+          Image.MAX_IMAGE_PIXELS = None
+          im = Image.open("poster.jpg")
+          print("poster:", im.size, im.mode)
+          PY
+
+      - name: Sembolu kirp + planner kur
+        env:
+          PAIR: ${{ inputs.pair }}
+        run: |
+          set -euo pipefail
+          python scripts/planner/build_planner.py \
+            --poster poster.jpg --out out --pair "$PAIR" | tee build.log
+          {
+            echo "## planner-sample"
+            echo '```'
+            cat build.log
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Drive'a yaz
+        run: |
+          set -euo pipefail
+          rclone copy out/SYMBOLS "gdrive:ASTROLOVE/PLANNER/SYMBOLS" --transfers 4 -q
+          rclone copy out/SAMPLE  "gdrive:ASTROLOVE/PLANNER/SAMPLE"  --transfers 4 -q
+          echo "Drive: PLANNER/SYMBOLS + PLANNER/SAMPLE yazildi."
+
+      - name: Geri-okuma dogrulamasi
+        env:
+          PAIR: ${{ inputs.pair }}
+        run: |
+          set -euo pipefail
+          echo "### Drive icerigi" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo '```'
+            echo "PLANNER/SYMBOLS:"; rclone lsl "gdrive:ASTROLOVE/PLANNER/SYMBOLS"
+            echo "PLANNER/SAMPLE:";  rclone lsl "gdrive:ASTROLOVE/PLANNER/SAMPLE"
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+          # Onizlemeyi ve bir PDF'i Drive'dan GERI indirip yerelle karsilastir.
+          mkdir -p verify
+          prev="_preview_${PAIR%_MB}.png"
+          rclone copyto "gdrive:ASTROLOVE/PLANNER/SYMBOLS/${prev}" "verify/${prev}" -q
+          rclone copyto "gdrive:ASTROLOVE/PLANNER/SAMPLE/ASTROLOVE_PLANNER_${PAIR}_MON_SAMPLE.pdf" \
+            "verify/MON.pdf" -q
+          PREV="$prev" python - <<'PY'
+          import os, sys
+          from pathlib import Path
+          import fitz
+          from PIL import Image
+
+          prev = os.environ["PREV"]
+          pair = os.environ["PAIR"]
+          fails = []
+
+          a, b = Path("out/SYMBOLS") / prev, Path("verify") / prev
+          if a.stat().st_size != b.stat().st_size:
+              fails.append(f"{prev}: yerel {a.stat().st_size} != Drive {b.stat().st_size}")
+          im = Image.open(b)
+          print(f"geri-okundu {prev}: {im.size} {im.mode} {b.stat().st_size} bayt")
+          if im.width != 800:
+              fails.append(f"{prev}: genislik {im.width}, 800 bekleniyordu")
+
+          src = Path("out/SAMPLE") / f"ASTROLOVE_PLANNER_{pair}_MON_SAMPLE.pdf"
+          dst = Path("verify/MON.pdf")
+          if src.stat().st_size != dst.stat().st_size:
+              fails.append(f"MON pdf: yerel {src.stat().st_size} != Drive {dst.stat().st_size}")
+          doc = fitz.open(dst)
+          broken = sum(1 for p in range(doc.page_count) for l in doc[p].get_links()
+                       if l["kind"] != fitz.LINK_GOTO
+                       or not (0 <= l.get("page", -1) < doc.page_count))
+          links = sum(len(doc[p].get_links()) for p in range(doc.page_count))
+          print(f"geri-okundu MON.pdf: {doc.page_count} sayfa, {links} link, kirik {broken}, "
+                f"{dst.stat().st_size} bayt")
+          if broken:
+              fails.append(f"MON pdf: {broken} kirik link")
+          doc.close()
+
+          print("GERI-OKUMA:", "PASS" if not fails else "FAIL " + "; ".join(fails))
+          sys.exit(1 if fails else 0)
+          PY
+
+      - name: Artifact (onizlemeler + rapor)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: planner-sample
+          path: |
+            out/SYMBOLS/_preview_*.png
+            out/SAMPLE/*.png
+            out/SAMPLE/build_report.json
+            build.log
+          if-no-files-found: ignore
