@@ -1,0 +1,89 @@
+name: digital-pod-map
+
+# DIJITAL -> POD ESLEME + RENK CUMLESI - SALT OKUR (Mo 14 Eyl 2026).
+# Etsy'ye yazma yok: yalniz GET /listings/{id}. Capraz satis linkindeki POD no'su
+# ile POD_LISTINGS_STATE.csv karsilastirilir; celiskide hakem, baglanti verilen POD
+# ilaninin kendi basligidir. Ayni geciste her ilanin renk tarifi cumlesi cikarilir.
+
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "En fazla N dijital ilan (0 = hepsi)"
+        required: false
+        default: "0"
+      quota_min:
+        description: "Kota tabani"
+        required: false
+        default: "200"
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  map:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      LIMIT: ${{ inputs.limit || '0' }}
+      QMIN: ${{ inputs.quota_min || '200' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Girdiler
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_LISTING/DFILE_STATE.csv" _work/dfile_state.csv
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_LISTING/POD_LISTINGS_STATE.csv" _work/pod_state.csv
+          echo "dijital satir: $(( $(wc -l < _work/dfile_state.csv) - 1 )) | pod satir: $(( $(wc -l < _work/pod_state.csv) - 1 ))"
+      - name: Esleme + renk cumlesi (salt okur)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          python scripts/etsy/digital_pod_map.py --dfile-state _work/dfile_state.csv \
+            --pod-state _work/pod_state.csv --out _out --limit "$LIMIT" --quota-min "$QMIN"
+      - name: Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          stamp=$(date -u +%Y%m%d_%H%M)
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
+          [ -d _out ] && rclone copy _out "gdrive:ASTROLOVE/TEMP/POD_LISTING/DIGITAL_POD_MAP_${stamp}" -q && \
+            echo "Cikti: TEMP/POD_LISTING/DIGITAL_POD_MAP_${stamp}/" || true
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: digital-pod-map
+          path: _out/
+          if-no-files-found: ignore
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
