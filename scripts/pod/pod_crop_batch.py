@@ -215,6 +215,7 @@ def main():
     ap.add_argument("--shards", type=int, default=1)
     ap.add_argument("--skip", default="")
     ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--pairs", default="", help="yalniz bu ciftler (virgullu)")
     ap.add_argument("--quota-min", type=int, default=400)
     ap.add_argument("--force", action="store_true")
     a = ap.parse_args()
@@ -222,6 +223,9 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     skip = {x for x in a.skip.split(",") if x}
     ciftler = pod_state(a.pod_state, skip, a.shard, a.shards, a.limit)
+    if a.pairs:
+        sec = {x.strip() for x in a.pairs.split(",") if x.strip()}
+        ciftler = [c for c in ciftler if c[0] in sec]
     satirlar = state_oku(a.state)
     log(f"MOD {a.mode}: {len(ciftler)} cift (shard {a.shard}/{a.shards}), "
         f"mevcut durum satiri {len(satirlar)}")
