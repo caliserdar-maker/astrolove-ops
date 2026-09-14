@@ -113,17 +113,7 @@ jobs:
           if [ -f _work/desc_state.csv ]; then
             cp _work/desc_state.csv _out/DESC_BATCH_REPORT.csv
             rclone copyto _work/desc_state.csv "gdrive:ASTROLOVE/TEMP/POD_LISTING/DESC_BATCH_STATE.csv"
-            python - <<'PY'
-            import csv, collections
-            rows = list(csv.DictReader(open("_work/desc_state.csv", newline="", encoding="utf-8")))
-            say = collections.Counter(r["sonuc"] for r in rows)
-            print("### Sonuc:", dict(say))
-            for d in ("ATLANDI", "FAIL"):
-                kotu = [(r["pair"], r["not"][:80]) for r in rows if r["sonuc"] == d]
-                if kotu:
-                    print(f"\n{d}:")
-                    for p, n in kotu: print(f"  - {p}: {n}")
-            PY
+            python scripts/etsy/desc_report.py _work/desc_state.csv
           fi
           [ -d _out ] && rclone copy _out "gdrive:ASTROLOVE/TEMP/POD_LISTING/DESC_BATCH_${stamp}" -q && \
             echo "Cikti: TEMP/POD_LISTING/DESC_BATCH_${stamp}/" || true

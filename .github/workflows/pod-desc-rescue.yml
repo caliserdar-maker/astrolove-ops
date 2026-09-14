@@ -1,0 +1,73 @@
+name: pod-desc-rescue
+
+# pod-desc-batch kosusunun artifact'ini Drive'a tasir (Etsy'ye dokunmaz).
+# 14 Eyl 2026: kosu 34846167553'te 77/77 PASS oldu ama "Rapor + Drive" adimi
+# bash sozdizimi hatasiyla dustu; yedekler ve durum CSV'si yalniz artifact'te kaldi.
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: "Artifact'i alinacak kosu no"
+        required: true
+        default: "34846167553"
+      artifact:
+        description: "Artifact adi"
+        required: false
+        default: "pod-desc-batch"
+      dest:
+        description: "Drive klasoru (TEMP/POD_LISTING/ altinda)"
+        required: false
+        default: "DESC_BATCH_20260914_1306"
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  rescue:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DEST: ${{ inputs.dest || 'DESC_BATCH_20260914_1306' }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.artifact || 'pod-desc-batch' }}
+          run-id: ${{ inputs.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: _dl
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Drive'a yaz + ozet
+        run: |
+          set -euo pipefail
+          find _dl -type f | head -5
+          echo "toplam dosya: $(find _dl -type f | wc -l)"
+          csv=$(find _dl -name desc_state.csv -o -name DESC_BATCH_REPORT.csv | head -1)
+          if [ -n "$csv" ]; then
+            cp "$csv" _dl/_out/DESC_BATCH_REPORT.csv 2>/dev/null || true
+            rclone copyto "$csv" "gdrive:ASTROLOVE/TEMP/POD_LISTING/DESC_BATCH_STATE.csv"
+            python scripts/etsy/desc_report.py "$csv"
+          else
+            echo "::error::durum CSV'si artifact'te yok"; exit 1
+          fi
+          rclone copy _dl/_out "gdrive:ASTROLOVE/TEMP/POD_LISTING/${DEST}" -q
+          echo "Cikti: TEMP/POD_LISTING/${DEST}/  ($(rclone lsf "gdrive:ASTROLOVE/TEMP/POD_LISTING/${DEST}" | wc -l) dosya)"
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
