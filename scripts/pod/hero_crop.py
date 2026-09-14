@@ -56,8 +56,19 @@ def font(px):
     return ImageFont.load_default()
 
 
-def gri(path_or_im):
-    im = Image.open(path_or_im) if not isinstance(path_or_im, Image.Image) else path_or_im
+# Kaynaklar kendi uretimimiz (Drive); baski dosyalari 200+ MP oldugu icin PIL'in
+# "decompression bomb" siniri kaldirilir, buyuk JPEG'ler draft() ile dusuk
+# cozunurlukte cozulur (bellek ve sure icin).
+Image.MAX_IMAGE_PIXELS = None
+
+
+def gri(path_or_im, en_fazla=None):
+    if isinstance(path_or_im, Image.Image):
+        im = path_or_im
+    else:
+        im = Image.open(path_or_im)
+        if en_fazla:
+            im.draft("L", (en_fazla, en_fazla))
     return np.asarray(im.convert("L"), dtype=np.uint8)
 
 
@@ -165,9 +176,10 @@ def cerceve_bul(hero_path, poster_paths):
     g = gri(hero_path)
     en = (0.0, None, None)
     for p in poster_paths:
-        pg = gri(p)
-        if max(pg.shape) > 4000:
-            pg = cv2.resize(pg, (0, 0), fx=0.25, fy=0.25, interpolation=cv2.INTER_AREA)
+        pg = gri(p, 1600)                      # sablon: en fazla ~1600 px kenar
+        if max(pg.shape) > 1800:
+            k = 1600 / max(pg.shape)
+            pg = cv2.resize(pg, (0, 0), fx=k, fy=k, interpolation=cv2.INTER_AREA)
         skor, rect = sablon_esle(g, pg)
         log(f"    sablon {pathlib.Path(p).name}: skor {skor:.3f} kutu {rect}")
         if skor > en[0]:
