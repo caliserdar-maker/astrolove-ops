@@ -1,0 +1,139 @@
+name: pod-desc-batch
+
+# 77 POD ilanina onaylanan aciklamayi uygular (Mo 14 Eyl 2026).
+# Metin sablonun birebir aynisi; yalniz acilis cumlesindeki iki burc adi degisir
+# ("merges the <SIGN1> and <SIGN2> glyphs"). Burc adlari ILANIN BASLIGINDAN
+# dogrulanir (yazim + sira); baslikla uyusmazsa o ilan ATLANIR.
+# Ilan basina: yedek -> yalniz description PATCH -> geri okuma (aciklama birebir
+# [HTML kacislari cozulerek], baslik/etiket/fiyat/envanter/bolum/gorseller/
+# varyasyon/video ayni, state active, uzun tire yok). Gecmeyen ilan atlanir.
+# ETA sayaci, kota izleme (taban altinda DURUR), durum CSV'si her ilanda Drive'a.
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "true = Etsy'ye YAZ"
+        type: boolean
+        default: false
+      skip:
+        description: "Atlanacak ilan no(lari)"
+        required: false
+        default: "4570110121"
+      limit:
+        description: "En fazla N ilan (0 = hepsi)"
+        required: false
+        default: "0"
+      quota_min:
+        description: "Kota tabani"
+        required: false
+        default: "400"
+      template:
+        description: "Metin sablonu"
+        required: false
+        default: "scripts/etsy/desc/AQUARIUS_AQUARIUS_4570110121.txt"
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  desc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      APPLY: ${{ inputs.apply }}
+      SKIP: ${{ inputs.skip }}
+      LIMIT: ${{ inputs.limit || '0' }}
+      QMIN: ${{ inputs.quota_min || '400' }}
+      TPL: ${{ inputs.template || 'scripts/etsy/desc/AQUARIUS_AQUARIUS_4570110121.txt' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Token + durum + metin kontrolu
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_LISTING/POD_LISTINGS_STATE.csv" _work/pod_state.csv
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_LISTING/DESC_BATCH_STATE.csv" _work/desc_state.csv \
+            2>/dev/null || echo "durum dosyasi yok; yeni baslar"
+          python - <<'PY'
+          import os, pathlib, unicodedata
+          t = pathlib.Path(os.environ["TPL"]).read_text(encoding="utf-8")
+          kotu = {unicodedata.name(c): t.count(c) for c in "—–‒―−" if c in t}
+          capa = "merges the Aquarius and Aquarius glyphs"
+          print(f"sablon: {len(t)} karakter, capa {t.count(capa)} kez, ascii disi "
+                f"{sorted({c for c in t if ord(c) > 127})}")
+          if kotu:
+              raise SystemExit(f"HATA: uzun tire: {kotu}")
+          if t.count(capa) != 1:
+              raise SystemExit("HATA: burc capasi tam olarak 1 kez olmali")
+          PY
+      - name: 'Aciklama guncelleme (dry-run / apply)'
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          args=(--pod-state _work/pod_state.csv --template "$TPL" --out _out \
+                --state _work/desc_state.csv --skip "$SKIP" --limit "$LIMIT" --quota-min "$QMIN")
+          if [ "$APPLY" = "true" ]; then
+            echo "::warning::APPLY: POD ilanlarinda YALNIZ description degisecek"
+            args+=(--apply)
+          fi
+          python scripts/etsy/pod_desc_batch.py "${args[@]}"
+      - name: Rapor + Drive
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          stamp=$(date -u +%Y%m%d_%H%M)
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
+          if [ -f _work/desc_state.csv ]; then
+            cp _work/desc_state.csv _out/DESC_BATCH_REPORT.csv
+            rclone copyto _work/desc_state.csv "gdrive:ASTROLOVE/TEMP/POD_LISTING/DESC_BATCH_STATE.csv"
+            python - <<'PY'
+            import csv, collections
+            rows = list(csv.DictReader(open("_work/desc_state.csv", newline="", encoding="utf-8")))
+            say = collections.Counter(r["sonuc"] for r in rows)
+            print("### Sonuc:", dict(say))
+            for d in ("ATLANDI", "FAIL"):
+                kotu = [(r["pair"], r["not"][:80]) for r in rows if r["sonuc"] == d]
+                if kotu:
+                    print(f"\n{d}:")
+                    for p, n in kotu: print(f"  - {p}: {n}")
+            PY
+          fi
+          [ -d _out ] && rclone copy _out "gdrive:ASTROLOVE/TEMP/POD_LISTING/DESC_BATCH_${stamp}" -q && \
+            echo "Cikti: TEMP/POD_LISTING/DESC_BATCH_${stamp}/" || true
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: pod-desc-batch
+          path: |
+            _out/
+            _work/desc_state.csv
+          if-no-files-found: ignore
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
