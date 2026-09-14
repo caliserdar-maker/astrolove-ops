@@ -1,0 +1,188 @@
+name: pod-hero-batch
+
+# 77 POD listelemesi icin hero kirpma + video eslemesi (+ onaylanmissa Etsy degisimi).
+# Onaylanan tek-ilan akisinin aynisi (Aquarius-Aquarius 4570110121 haric tutulur).
+# 1) uret: 5 shard paralel; cift basina 5 hero (hero_crop, iki gecis) + video (video_match),
+#    cikti Drive TEMP/POD_HERO_CROP/<PAIR>/, durum TEMP/POD_HERO_CROP/_STATE/shard_<n>.csv
+# 2) son: shard durumlari birlestirilir; apply=true ise SIRAYLA Etsy (yedek + 5 hero + video);
+#    uretimi PASS olmayan cift Etsy'de ATLANIR, kosu surer. Kota tabani asilirsa DURULUR.
+# Metin alanlari (baslik/etiket/fiyat/aciklama/bolum) DEGISMEZ; updateListing cagrilmaz.
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "true = uretimi PASS olan ilanlarda Etsy'ye YAZ"
+        type: boolean
+        default: false
+      skip:
+        description: "Atlanacak ilan no(lari), virgullu"
+        required: false
+        default: "4570110121"
+      limit:
+        description: "Shard basina en fazla N cift (0 = hepsi)"
+        required: false
+        default: "0"
+      quota_min:
+        description: "Etsy kota tabani"
+        required: false
+        default: "400"
+
+jobs:
+  uret:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Bagimliliklar
+        run: |
+          set -euo pipefail
+          pip install -q pillow==12.3.0 numpy==2.4.6 opencv-python-headless==5.0.0.93
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg tesseract-ocr >/dev/null
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          ffmpeg -version | head -1
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Uretim (shard ${{ matrix.shard }}/5)
+        env:
+          SKIP: ${{ inputs.skip }}
+          LIMIT: ${{ inputs.limit || '0' }}
+        run: |
+          set -euo pipefail
+          mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_LISTING/POD_LISTINGS_STATE.csv" _work/pod_state.csv
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_HERO_CROP/_STATE/shard_${{ matrix.shard }}.csv" \
+            _work/shard_${{ matrix.shard }}.csv 2>/dev/null || echo "shard durumu yok; yeni baslar"
+          python scripts/pod/pod_crop_batch.py --mode uret --pod-state _work/pod_state.csv \
+            --out _out --state _work/shard_${{ matrix.shard }}.csv \
+            --shard ${{ matrix.shard }} --shards 5 --skip "$SKIP" --limit "$LIMIT"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: uret-shard-${{ matrix.shard }}
+          path: _work/shard_*.csv
+          if-no-files-found: ignore
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
+
+  son:
+    needs: uret
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    concurrency:
+      group: etsy-token
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Shard durumlarini birlestir
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out _st
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_LISTING/POD_LISTINGS_STATE.csv" _work/pod_state.csv
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copy "gdrive:ASTROLOVE/TEMP/POD_HERO_CROP/_STATE" _st --include "shard_*.csv" -q
+          python - <<'PY'
+          import csv, glob, pathlib
+          SUT = ["pair","listing_id","edisyon","sonuc","oran","kaciklik_x","kaciklik_y",
+                 "gecis","etsy_sonuc","not","ts_utc"]
+          rows = []
+          for f in sorted(glob.glob("_st/shard_*.csv")):
+              rows += list(csv.DictReader(open(f, newline="", encoding="utf-8")))
+          rows.sort(key=lambda r: (r["pair"], r["edisyon"]))
+          with open("_work/POD_HERO_CROP_STATE.csv", "w", newline="", encoding="utf-8") as fh:
+              w = csv.DictWriter(fh, fieldnames=SUT); w.writeheader()
+              for r in rows: w.writerow({k: r.get(k, "") for k in SUT})
+          cift = {r["pair"] for r in rows}
+          ok = {r["pair"] for r in rows if r["edisyon"] == "VIDEO" and r["sonuc"] == "PASS"}
+          tam = {p for p in cift if all(x.get("sonuc") == "PASS" for x in rows if x["pair"] == p)}
+          print(f"birlesik: {len(rows)} satir, {len(cift)} cift, uretim tam PASS {len(tam)}")
+          PY
+      - name: 'ETSY - sirayla degisim (yalniz apply)'
+        if: ${{ inputs.apply == true }}
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          SKIP: ${{ inputs.skip }}
+          QMIN: ${{ inputs.quota_min || '400' }}
+        run: |
+          set -euo pipefail
+          echo "::warning::APPLY: uretimi PASS olan POD ilanlarinda 5 hero + video degisecek"
+          python scripts/pod/pod_crop_batch.py --mode etsy --pod-state _work/pod_state.csv \
+            --out _out --state _work/POD_HERO_CROP_STATE.csv --skip "$SKIP" --quota-min "$QMIN"
+      - name: Rapor + Drive
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          python - <<'PY' | tee _out/RAPOR.md
+          import csv, pathlib
+          rows = list(csv.DictReader(open("_work/POD_HERO_CROP_STATE.csv", newline="", encoding="utf-8")))
+          cift = sorted({r["pair"] for r in rows})
+          tam = [p for p in cift if all(r.get("sonuc") == "PASS" for r in rows if r["pair"] == p)]
+          etsy_ok = sorted({r["pair"] for r in rows if r.get("etsy_sonuc") == "PASS"})
+          atlandi = sorted({r["pair"] for r in rows if r.get("etsy_sonuc") in ("ATLANDI", "FAIL")})
+          islenmemis = [p for p in cift if not any(r.get("etsy_sonuc") for r in rows if r["pair"] == p)]
+          fail = [(r["pair"], r["edisyon"], r.get("not", "")) for r in rows if r.get("sonuc") == "FAIL"]
+          print(f"# POD hero/video toplu kosu\n")
+          print(f"- cift: {len(cift)} | uretim tam PASS: {len(tam)} | Etsy PASS: {len(etsy_ok)} "
+                f"| Etsy atlandi: {len(atlandi)} | Etsy'ye hic gelmeyen: {len(islenmemis)}")
+          if fail:
+              print("\n## Uretim FAIL\n")
+              for p, e, n in fail: print(f"- {p} / {e}: {n}")
+          if atlandi: print("\n## Etsy atlandi\n\n" + ", ".join(atlandi))
+          if islenmemis: print("\n## Etsy'ye gelmeyen (kota/durus)\n\n" + ", ".join(islenmemis))
+          PY
+          cp _work/POD_HERO_CROP_STATE.csv _out/POD_HERO_CROP_REPORT.csv
+          rclone copyto _out/POD_HERO_CROP_REPORT.csv "gdrive:ASTROLOVE/TEMP/POD_HERO_CROP/POD_HERO_CROP_REPORT.csv"
+          rclone copyto _out/RAPOR.md "gdrive:ASTROLOVE/TEMP/POD_HERO_CROP/POD_HERO_CROP_RAPOR.md"
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: pod-hero-batch
+          path: |
+            _out/
+            _work/POD_HERO_CROP_STATE.csv
+          if-no-files-found: ignore
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
