@@ -54,7 +54,7 @@ jobs:
       - name: Bagimliliklar + import dogrulamasi
         run: |
           set -euo pipefail
-          pip install -q pillow==12.3.0 numpy==2.4.6 requests==2.34.2
+          pip install -q pillow==12.3.0 numpy==2.4.6 requests==2.34.2 opencv-python-headless==5.0.0.93
           sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg tesseract-ocr >/dev/null
           curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
           ffmpeg -version | head -1; ffprobe -version | head -1; tesseract --version | head -1
@@ -63,12 +63,13 @@ jobs:
           src = pathlib.Path("scripts/pod/hero_crop.py").read_text(encoding="utf-8")
           mods = set(re.findall(r"^\s*(?:import|from)\s+([A-Za-z_][A-Za-z0-9_]*)", src, re.M))
           std = {"argparse", "json", "pathlib", "subprocess", "sys", "time", "re", "shutil"}
-          pip_ad = {"PIL": "pillow"}
+          pip_ad = {"PIL": "pillow", "cv2": "opencv-python-headless"}
           kurulu = {l.split()[0].lower() for l in
                     subprocess.run([sys.executable, "-m", "pip", "list"], capture_output=True,
                                    text=True).stdout.splitlines()[2:] if l.strip()}
           eksik = [m for m in mods - std if pip_ad.get(m, m).lower() not in kurulu]
-          print("import:", sorted(mods - std), "| pip list:", sorted(kurulu & {"pillow", "numpy", "requests"}))
+          print("import:", sorted(mods - std), "| pip list:",
+                sorted(kurulu & {"pillow", "numpy", "requests", "opencv-python-headless"}))
           if eksik:
               raise SystemExit(f"HATA: kurulu olmayan import: {eksik}")
           PY
@@ -98,7 +99,16 @@ jobs:
           done
           rclone copyto "gdrive:ASTROLOVE/WALL_ART/LISTING_MEDIA/VIDEOS/V01_FIREFLY_STORY/01_EXPORTS/MIDNIGHT_BLUE/WA_VIDEO_V01_${PAIR}_MIDNIGHT_BLUE.mp4" _work/video.mp4 \
             || echo "UYARI: video bulunamadi"
-          ls -l _work/heroes _work/video.mp4 2>/dev/null || true
+          # sablon esleme icin edisyonun BASKI dosyalari (3X4 birincil, 2X3 yedek)
+          mkdir -p _work/posters
+          for ed in MIDNIGHT_BLUE DEEP_BLACK WARM_PARCHMENT CHAMPAGNE_IVORY PURE_WHITE; do
+            for r in 3X4 2X3; do
+              rclone copyto "gdrive:ASTROLOVE/WALL_ART/POSTERS/ORIGINAL_HIGH_RES/${ed}/${r}/${PAIR}.jpg" \
+                "_work/posters/${ed}_${r}.jpg" 2>/dev/null && echo "baski: ${ed}/${r}" || true
+            done
+            ls _work/posters/${ed}_*.jpg >/dev/null 2>&1 || { echo "HATA: ${ed} baski dosyasi yok - DUR"; exit 1; }
+          done
+          ls -l _work/heroes _work/posters _work/video.mp4 2>/dev/null || true
       - name: 'Salt okur: Etsy ana gorsel olcusu (elle kirpma referansi)'
         id: etsy
         continue-on-error: true
@@ -135,12 +145,22 @@ jobs:
           ref="${{ steps.etsy.outputs.boyut }}"
           [ -n "$ref" ] || ref="1029x1291"
           echo "Etsy elle kirpma referansi: $ref"
+          pos=""
+          for kisa in MB:MIDNIGHT_BLUE DB:DEEP_BLACK WP:WARM_PARCHMENT CI:CHAMPAGNE_IVORY PW:PURE_WHITE; do
+            k="${kisa%%:*}"; ed="${kisa##*:}"
+            liste=$(ls _work/posters/${ed}_*.jpg | tr '\n' ';' | sed 's/;$//')
+            pos="${pos:+$pos,}${k}=${liste}"
+          done
+          echo "baski sablonlari: $pos"
           args=(--heroes "MB=_work/heroes/MIDNIGHT_BLUE.jpg,DB=_work/heroes/DEEP_BLACK.jpg,WP=_work/heroes/WARM_PARCHMENT.jpg,CI=_work/heroes/CHAMPAGNE_IVORY.jpg,PW=_work/heroes/PURE_WHITE.jpg"
-                --out _out --ratio "$RATIO" --etsy-ref "$ref" --ocr "$OCR")
-          [ -f _work/video.mp4 ] && args+=(--video _work/video.mp4)
+                --posters "$pos" --out _out --ratio "$RATIO" --etsy-ref "$ref" --ocr "$OCR")
+          if [ -f _work/video.mp4 ]; then
+            args+=(--video _work/video.mp4
+                   --video-poster "$(ls _work/posters/MIDNIGHT_BLUE_*.jpg | tr '\n' ';' | sed 's/;$//')")
+          fi
           python scripts/pod/hero_crop.py "${args[@]}"
       - name: Drive'a yaz
-        if: ${{ always() }}
+        if: ${{ success() }}
         run: |
           set -euo pipefail
           [ -d _out ] || exit 0
