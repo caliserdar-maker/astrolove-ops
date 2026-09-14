@@ -316,6 +316,16 @@ def dogrula(hedef_yol, cerceve, goreli, kaynak_boyut, oran, W=OUT_W, H=OUT_H):
             "merkez_kacikligi": {"x": round(kx, 4), "y": round(ky, 4)}}, hata
 
 
+def geri_haritala(goreli, kaynak_boyut, olculen, cikti_boyut):
+    """Ciktida OLCULEN kenarlari kaynak piksel koordinatlarindaki cerceve kutusuna cevir."""
+    sw, sh = kaynak_boyut
+    cw, ch = cikti_boyut
+    sol, ust, sag, alt = olculen
+    kx, ky = goreli[2] * sw / cw, goreli[3] * sh / ch
+    return (goreli[0] * sw + sol * kx, goreli[1] * sh + ust * ky,
+            (sag - sol) * kx, (alt - ust) * ky)
+
+
 # ------------------------------------------------------------------ ocr/video
 def ocr_var(path, kelimeler):
     import re
@@ -407,34 +417,48 @@ def main():
         im = Image.open(p)
         log(f"[{i}/{len(heroes)}] {ed}: {p.name} {im.size}")
         cerceve, bilgi = cerceve_bul(p, posters[ed])
-        goreli = kutu_hesapla(*im.size, cerceve, a.ratio)
         hedef = out / f"hero_{ed}.jpg"
-        q, boyut = kirp_kaydet(im, goreli, hedef)
-        olcum, h2 = dogrula(hedef, cerceve, goreli, im.size, a.ratio)
+        gecisler, h2, olcum, goreli, q, boyut = [], [], {}, None, 0, 0
+        # IKI GECIS: 1) tespit kutusuyla kirp, 2) ciktida OLCULEN kenarlari kaynaga
+        # geri haritalayip duzeltilmis kutuyla bir kez daha kirp. Son PASS/FAIL,
+        # son ciktida yapilan taze olcumdur.
+        for gecis in (1, 2):
+            goreli = kutu_hesapla(*im.size, cerceve, a.ratio)
+            q, boyut = kirp_kaydet(im, goreli, hedef)
+            olcum, h2 = dogrula(hedef, cerceve, goreli, im.size, a.ratio)
+            gecisler.append({"gecis": gecis, "cerceve_px": [round(v, 1) for v in cerceve],
+                             "olculen_cerceve_orani": olcum.get("olculen_cerceve_orani"),
+                             "merkez_kacikligi": olcum.get("merkez_kacikligi"),
+                             "hata": h2})
+            log(f"    gecis {gecis}: cerceve={[round(v) for v in cerceve]} "
+                f"oran={olcum.get('olculen_cerceve_orani')} kaciklik={olcum.get('merkez_kacikligi')}")
+            if gecis == 2 or not h2 or not olcum.get("olculen_kenarlar"):
+                break
+            cerceve = geri_haritala(goreli, im.size, olcum["olculen_kenarlar"], (OUT_W, OUT_H))
         hata += h2
         bulundu, eksik = ocr_var(hedef, [k for k in a.ocr.split(",") if k])
         if eksik:
             uyari.append(f"{ed}: OCR'da bulunamayan metin {eksik}")
-        rapor["edisyonlar"][ed] = {"dosya": hedef.name, "tespit": bilgi,
-                                   "cerceve_px": list(cerceve),
+        rapor["edisyonlar"][ed] = {"dosya": hedef.name, "sonuc": "PASS" if not h2 else "FAIL",
+                                   "tespit": bilgi, "cerceve_px": [round(v, 1) for v in cerceve],
                                    "goreli_kutu": {k: round(v, 6) for k, v in zip("xywh", goreli)},
-                                   "kalite": q, "bayt": boyut, "dogrulama": olcum,
-                                   "ocr_bulunan": bulundu, "ocr_eksik": eksik}
-        log(f"    {bilgi['yontem']} skor={bilgi['sablon_skoru']} cerceve={cerceve} pay={bilgi['cerceve_payi_px']}")
-        log(f"    DOGRULAMA: {olcum.get('olculen_cerceve_orani')} kaciklik={olcum.get('merkez_kacikligi')} "
+                                   "kalite": q, "bayt": boyut, "gecisler": gecisler,
+                                   "dogrulama": olcum, "ocr_bulunan": bulundu, "ocr_eksik": eksik}
+        log(f"    {ed}: {'PASS' if not h2 else 'FAIL ' + str(h2)} | {boyut/1024:.0f} KB q{q} "
             f"| gecen {time.time()-t0:.0f}s")
         kartlar.append((ed, Image.open(hedef).resize((CARD_W, CARD_H), Image.LANCZOS),
-                        olcum.get("merkez_kacikligi"), olcum.get("olculen_cerceve_orani")))
+                        olcum.get("merkez_kacikligi"), olcum.get("olculen_cerceve_orani"), not h2))
 
     # onizleme kartlari (kaciklik yazili)
     pad, ust, altyazi = 12, 34, 46
     pv = Image.new("RGB", (len(kartlar) * CARD_W + (len(kartlar) + 1) * pad,
                            CARD_H + ust + altyazi + 2 * pad), (250, 250, 252))
     d = ImageDraw.Draw(pv)
-    for i, (ed, c, kac, o) in enumerate(kartlar):
+    for i, (ed, c, kac, o, gecti) in enumerate(kartlar):
         x = pad + i * (CARD_W + pad)
         pv.paste(c, (x, ust + pad))
-        d.text((x + 4, 8), f"{ed}  {CARD_W}x{CARD_H}", font=font(20), fill=(30, 30, 40))
+        d.text((x + 4, 8), f"{ed}  {CARD_W}x{CARD_H}   {'PASS' if gecti else 'FAIL'}", font=font(20),
+               fill=(20, 110, 60) if gecti else (170, 30, 30))
         t1 = f"kaciklik x={kac['x']*100:+.2f}%  y={kac['y']*100:+.2f}%" if kac else "kaciklik olculemedi"
         d.text((x + 4, ust + pad + CARD_H + 6), t1, font=font(18), fill=(40, 40, 60))
         d.text((x + 4, ust + pad + CARD_H + 26), f"cerceve/kadraj = {o}", font=font(18), fill=(40, 40, 60))
@@ -448,19 +472,31 @@ def main():
         k0yol = out / "_video_frame0.png"
         kare0(v, k0yol)
         vcerceve, vinfo = cerceve_bul(k0yol, vp)
-        vgoreli = kutu_hesapla(vbilgi["w"], vbilgi["h"], vcerceve, a.ratio)
-        crf, vboyut = video_kirp(v, (vgoreli[0] * vbilgi["w"], vgoreli[1] * vbilgi["h"],
-                                     vgoreli[2] * vbilgi["w"], vgoreli[3] * vbilgi["h"]),
-                                 vbilgi, out / "video_MB_cropped.mp4")
+        vgecisler, vh, volcum, vgoreli, crf, vboyut = [], [], {}, None, 0, 0
+        for gecis in (1, 2):
+            vgoreli = kutu_hesapla(vbilgi["w"], vbilgi["h"], vcerceve, a.ratio)
+            crf, vboyut = video_kirp(v, (vgoreli[0] * vbilgi["w"], vgoreli[1] * vbilgi["h"],
+                                         vgoreli[2] * vbilgi["w"], vgoreli[3] * vbilgi["h"]),
+                                     vbilgi, out / "video_MB_cropped.mp4")
+            k1 = kare0(out / "video_MB_cropped.mp4", out / "_video_crop_frame0.png")
+            volcum, vh = dogrula(out / "_video_crop_frame0.png", vcerceve, vgoreli,
+                                 (vbilgi["w"], vbilgi["h"]), a.ratio, W=k1.width, H=k1.height)
+            vgecisler.append({"gecis": gecis, "cerceve_px": [round(x, 1) for x in vcerceve],
+                              "olculen_cerceve_orani": volcum.get("olculen_cerceve_orani"),
+                              "merkez_kacikligi": volcum.get("merkez_kacikligi"), "hata": vh})
+            log(f"    video gecis {gecis}: oran={volcum.get('olculen_cerceve_orani')} "
+                f"kaciklik={volcum.get('merkez_kacikligi')}")
+            if gecis == 2 or not vh or not volcum.get("olculen_kenarlar"):
+                break
+            vcerceve = geri_haritala(vgoreli, (vbilgi["w"], vbilgi["h"]),
+                                     volcum["olculen_kenarlar"], (k1.width, k1.height))
+        hata += vh
         yeni = ffprobe(out / "video_MB_cropped.mp4")
         k1 = kare0(out / "video_MB_cropped.mp4", out / "_video_crop_frame0.png")
-        k1yol = out / "_video_crop_frame0.png"
-        volcum, vh = dogrula(k1yol, vcerceve, vgoreli, (vbilgi["w"], vbilgi["h"]), a.ratio,
-                             W=k1.width, H=k1.height)
-        hata += vh
-        rapor["video"] = {"kaynak": vbilgi, "tespit": vinfo, "cerceve_px": list(vcerceve),
+        rapor["video"] = {"kaynak": vbilgi, "sonuc": "PASS" if not vh else "FAIL", "tespit": vinfo,
+                          "cerceve_px": [round(x, 1) for x in vcerceve],
                           "goreli_kutu": {k: round(x, 6) for k, x in zip("xywh", vgoreli)},
-                          "cikti": {**yeni, "crf": crf}, "dogrulama": volcum}
+                          "cikti": {**yeni, "crf": crf}, "gecisler": vgecisler, "dogrulama": volcum}
         log(f"video: {vinfo['yontem']} skor={vinfo['sablon_skoru']} crf{crf} {vboyut/1024:.0f} KB "
             f"DOGRULAMA {volcum.get('olculen_cerceve_orani')} kaciklik={volcum.get('merkez_kacikligi')}")
         cmp_im = Image.new("RGB", (2 * 1080 + 3 * pad, 1350 + ust + 2 * pad), (250, 250, 252))
