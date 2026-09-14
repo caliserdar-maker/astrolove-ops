@@ -82,7 +82,14 @@ jobs:
           mkdir -p ~/.config/rclone; umask 077
           printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
           chmod 600 ~/.config/rclone/rclone.conf
-          [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          # client_secret YALNIZ remote'un kendi client_id'si varsa enjekte edilir:
+          # client_id bos (rclone'un paylasilan id'si) + yabanci secret = invalid_client (14 Eyl).
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+            echo "client_id var: client_secret enjekte edildi"
+          else
+            echo "client_id bos: rclone paylasilan id kullanilacak, client_secret enjekte EDILMEDI"
+          fi
       - name: Hero ve video indir
         run: |
           set -euo pipefail
