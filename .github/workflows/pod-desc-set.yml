@@ -1,0 +1,117 @@
+name: pod-desc-set
+
+# Tek ilanin aciklamasini repodaki metin dosyasiyla BIREBIR degistirir
+# (Mo 14 Eyl 2026, Aquarius-Aquarius 4570110121). Yalniz `description` yazilir;
+# baslik, etiket, fiyat, bolum, materials, gorseller, varyasyonlar ve video
+# degismez. Yazmadan once tum alanlar JSON olarak Drive'a yedeklenir.
+
+on:
+  workflow_dispatch:
+    inputs:
+      listing_id:
+        description: "Etsy ilan no"
+        required: true
+        default: "4570110121"
+      desc_file:
+        description: "Repodaki metin dosyasi"
+        required: false
+        default: "scripts/etsy/desc/AQUARIUS_AQUARIUS_4570110121.txt"
+      out_dir:
+        description: "TEMP/POD_LISTING altindaki hedef klasor eki"
+        required: false
+        default: "DESC"
+      apply:
+        description: "true = Etsy'ye YAZ"
+        type: boolean
+        default: false
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  desc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      LISTING: ${{ inputs.listing_id }}
+      DESCFILE: ${{ inputs.desc_file || 'scripts/etsy/desc/AQUARIUS_AQUARIUS_4570110121.txt' }}
+      OUTDIR: ${{ inputs.out_dir || 'DESC' }}
+      APPLY: ${{ inputs.apply }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Token + metin kontrolu
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          python - <<'PY'
+          import os, pathlib, unicodedata
+          t = pathlib.Path(os.environ["DESCFILE"]).read_text(encoding="utf-8")
+          kotu = {unicodedata.name(c): t.count(c) for c in "—–‒―−" if c in t}
+          print(f"metin: {len(t)} karakter, {t.count(chr(10))+1} satir, ascii disi "
+                f"{sorted({c for c in t if ord(c) > 127})}")
+          if kotu:
+              raise SystemExit(f"HATA: uzun tire var: {kotu}")
+          PY
+      - name: 'ADIM 1 - yedek + dry-run (salt okur)'
+        id: dry
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          python scripts/etsy/pod_desc_set.py --listing-id "$LISTING" --desc-file "$DESCFILE" \
+            --out _out/dry
+          stamp=$(date -u +%Y%m%d_%H%M); echo "STAMP=$stamp" >> "$GITHUB_ENV"
+          rclone copy _out/dry "gdrive:ASTROLOVE/TEMP/POD_LISTING/${OUTDIR}_${LISTING}_${stamp}" -q
+          rclone lsf "gdrive:ASTROLOVE/TEMP/POD_LISTING/${OUTDIR}_${LISTING}_${stamp}"
+      - name: 'ADIM 2 - apply (yalniz onayla)'
+        if: ${{ inputs.apply == true }}
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          echo "::warning::APPLY: ilan $LISTING - YALNIZ description degisecek"
+          python scripts/etsy/pod_desc_set.py --listing-id "$LISTING" --desc-file "$DESCFILE" \
+            --out _out/apply --apply
+      - name: Token + cikti Drive a
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
+          [ -d _out ] && rclone copy _out "gdrive:ASTROLOVE/TEMP/POD_LISTING/${OUTDIR}_${LISTING}_${STAMP:-elle}" -q && \
+            rclone lsf -R "gdrive:ASTROLOVE/TEMP/POD_LISTING/${OUTDIR}_${LISTING}_${STAMP:-elle}" || true
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: pod-desc-set
+          path: _out/
+          if-no-files-found: ignore
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
