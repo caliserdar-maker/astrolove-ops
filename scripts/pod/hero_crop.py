@@ -183,11 +183,27 @@ def cerceve_payi(g, rect):
                                     ("ust", sat, y, -1, lim_y), ("alt", sat, y + h, +1, lim_y)):
         pay, bilgi = koyu_bant(prof, bas, yon, lim)
         paylar[ad], ayrinti[ad] = pay, bilgi
-    log(f"    cerceve bandi: {paylar} ({ayrinti})")
-    if not any(paylar.values()):
-        return rect, paylar
-    return (x - paylar["sol"], y - paylar["ust"],
-            w + paylar["sol"] + paylar["sag"], h + paylar["ust"] + paylar["alt"]), paylar
+    # 14 Eyl olcumu: paylar dort kenarda tutarsiz cikabiliyor (bir kenar 0-1 px,
+    # karsi kenar 17-36 px) ve asimetri kutu merkezini kaydiriyor. Bu yuzden:
+    #   - anlamli bant bulan kenar sayisi 3'ten azsa baski CERCEVESIZ sayilir (pay 0),
+    #   - aksi halde TEK SIMETRIK pay = bulunan paylarin medyani, dort kenara esit.
+    # Boylece kutu merkezi dogrudan sablon eslemenin merkezine oturur.
+    # Cerceve bandi UNIFORM'dur; tek yonlu golge bir-iki kenarda sahte genis bant
+    # verir. Bu yuzden anlamli paylar once medyanla TUTARLILIK suzgecinden gecer
+    # (medyanin +-%40'i disi atilir); geriye 3 kenar kalmazsa baski cercevesizdir.
+    en_az = max(3, int(0.004 * max(w, h)))
+    aday = sorted(v for v in paylar.values() if v >= en_az)
+    med = float(np.median(aday)) if aday else 0.0
+    tutarli = [v for v in aday if 0.6 * med <= v <= 1.4 * med]
+    cerceveli = len(tutarli) >= 3
+    pay = int(round(float(np.median(tutarli)))) if cerceveli else 0
+    olcum = {"ham": paylar, "en_az_px": en_az, "aday": aday, "tutarli": tutarli,
+             "cerceveli": cerceveli, "uygulanan_pay": pay}
+    log(f"    cerceve bandi: ham={paylar} aday={aday} tutarli={tutarli} -> "
+        f"{'cerceveli' if cerceveli else 'CERCEVESIZ'} simetrik pay={pay} px")
+    if not pay:
+        return rect, olcum
+    return (x - pay, y - pay, w + 2 * pay, h + 2 * pay), olcum
 
 
 def cerceve_bul(hero_path, poster_paths):
@@ -236,7 +252,10 @@ def kenar_olc(g, beklenen):
         if b <= a:
             return None
         alt = d[a:b]
-        if alt.max() < GRAD_MIN:
+        # Cercevesiz acik baskida duvar-baski gecisi zayif olabilir: mutlak esik
+        # yerine GURULTUYE gore esik (pencere medyaninin 3 kati, en az 3 gri).
+        gurultu = float(np.median(alt)) if len(alt) else 0.0
+        if alt.max() < max(3.0, 3.0 * gurultu):
             return None
         aday = np.flatnonzero(alt >= 0.6 * alt.max())
         j = aday[0] if dis == "min" else aday[-1]      # en distaki guclu gecis
