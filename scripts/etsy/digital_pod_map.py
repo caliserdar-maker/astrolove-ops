@@ -77,11 +77,20 @@ def link_bul(desc):
 def renk_cumlesi(desc, edisyon):
     """'This is the <Edition> edition, ...' cumlesi; bulunamazsa edisyon adi ve
     'background' gecen ilk cumle. Cumle sinirlari: nokta + bosluk/satir sonu."""
-    duz = html.unescape(desc)
-    cumleler = re.split(r"(?<=\.)\s+", duz.replace("\r\n", "\n"))
+    duz = html.unescape(desc).replace("\r\n", "\n")
+    # once satirlara (basliklar kendi satirinda), sonra cumlelere bol
+    cumleler = [c.strip() for satir in duz.split("\n")
+                for c in re.split(r"(?<=\.)\s+", satir) if c.strip()]
     for c in cumleler:
         if re.search(rf"This is the\s+{re.escape(edisyon)}\s+edition\b", c, re.I):
             return c.strip(), "capa"
+    for c in cumleler:
+        if re.search(r"\bIt features\b.*\bbackground\b", c, re.I):
+            return c.strip(), "features"
+    for c in cumleler:
+        if re.search(r"\bbackground\b.*\bartwork\b", c, re.I) or \
+           re.search(r"\bbackground with\b", c, re.I):
+            return c.strip(), "background"
     for c in cumleler:
         if re.search(r"This is the\s+\w[\w ]*?\s+edition\b", c, re.I):
             return c.strip(), "capa_farkli_edisyon"
