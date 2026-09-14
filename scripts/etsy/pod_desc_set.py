@@ -13,6 +13,7 @@ Kullanim:
   pod_desc_set.py --listing-id 4570110121 --desc-file D.txt --out OUT [--apply]
 """
 import argparse
+import html
 import json
 import os
 import pathlib
@@ -61,11 +62,19 @@ def envanter(api, lid):
 
 
 def esit(a, b):
-    """('tam' | 'sondaki_newline' | 'farkli')"""
+    """('tam' | 'sondaki_newline' | 'html_kacis' | 'farkli')
+
+    Etsy API cevabinda kesme isaretini &#39; olarak kacisla dondurur (14 Eyl
+    olcumu: yazmadan ONCEKI aciklamada da 3 kez &#39;, ham ' yok; & ise ham).
+    Bu, kayitli/gorunen metni degil yalniz cevabi etkiler; karsilastirmada
+    HTML kacislari cozulur."""
+    n = lambda t: t.replace("\r\n", "\n").rstrip("\n")
     if a == b:
         return "tam"
-    if a.replace("\r\n", "\n").rstrip("\n") == b.replace("\r\n", "\n").rstrip("\n"):
+    if n(a) == n(b):
         return "sondaki_newline"
+    if html.unescape(n(a)) == html.unescape(n(b)):
+        return "html_kacis"
     return "farkli"
 
 
@@ -145,10 +154,11 @@ def main():
              "envanter_fiyat": envanter(api, lid)}
     metin = esit(yazilan, yeni)
     yazilan_tire = {UZUN_TIRE[c]: yazilan.count(c) for c in UZUN_TIRE if c in yazilan}
+    kacis = {e: yazilan.count(e) for e in ("&#39;", "&quot;", "&amp;") if e in yazilan}
     degisen = {k: (once["ozet"].get(k), sonra["ozet"].get(k))
                for k in ALANLAR if once["ozet"].get(k) != sonra["ozet"].get(k)}
     kontrol = {
-        "aciklama_birebir": metin in ("tam", "sondaki_newline"),
+        "aciklama_birebir": metin in ("tam", "sondaki_newline", "html_kacis"),
         "uzun_tire_yok": not yazilan_tire,
         "baslik_ayni": L2.get("title") == L.get("title"),
         "etiketler_ayni": (L2.get("tags") or []) == (L.get("tags") or []),
@@ -164,7 +174,8 @@ def main():
     }
     rapor.update({"sonuc": "PASS" if all(kontrol.values()) else "FAIL", "kontrol": kontrol,
                   "metin_eslesmesi": metin, "yazilan_uzunluk": len(yazilan),
-                  "yazilan_uzun_tire": yazilan_tire, "degisen_alanlar": degisen,
+                  "yazilan_uzun_tire": yazilan_tire, "cevaptaki_html_kacislari": kacis,
+                  "degisen_alanlar": degisen,
                   "state_sonra": L2.get("state"), "kota_sonra": api.remaining,
                   "api_cagrisi": api.calls})
     (out / "desc_set_result.json").write_text(json.dumps(rapor, ensure_ascii=False, indent=1),
