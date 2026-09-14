@@ -1,0 +1,127 @@
+name: pod-hero-swap
+
+# POD ilaninda 5 edisyon hero'sunu ve videoyu KIRPILMIS surumleriyle degistirir
+# (Mo 14 Eyl 2026, tek ilan). Kaynak: Drive TEMP/POD_HERO_CROP/<dir>/.
+# Yeni gorsel eskisinin RANK'ine gelir, varyasyon baglantisi yeni id ile yazilir.
+# Galerinin geri kalanina ve baslik/etiket/fiyat/aciklama/bolume DOKUNULMAZ.
+# ADIM 1 yedek + dry-run (salt okur) -> Drive'a yedek -> ADIM 2 apply (onayla).
+
+on:
+  workflow_dispatch:
+    inputs:
+      listing_id:
+        description: "Etsy ilan no"
+        required: true
+        default: "4570110121"
+      out_dir:
+        description: "TEMP/POD_HERO_CROP altindaki kaynak klasor"
+        required: false
+        default: "AQU_AQU"
+      apply:
+        description: "true = dry-run temizse Etsy'ye YAZ"
+        type: boolean
+        default: false
+      quota_min:
+        description: "Kota tabani"
+        required: false
+        default: "300"
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  swap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      LISTING: ${{ inputs.listing_id }}
+      OUTDIR: ${{ inputs.out_dir || 'AQU_AQU' }}
+      APPLY: ${{ inputs.apply }}
+      QMIN: ${{ inputs.quota_min || '300' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Token ve kirpilmis medya
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copy "gdrive:ASTROLOVE/TEMP/POD_HERO_CROP/${OUTDIR}" _work/medya \
+            --include "hero_*.jpg" --include "video_MB_cropped.mp4" -q
+          ls -l _work/medya
+          for f in hero_MB.jpg hero_DB.jpg hero_WP.jpg hero_CI.jpg hero_PW.jpg video_MB_cropped.mp4; do
+            [ -s "_work/medya/$f" ] || { echo "HATA: $f yok - DUR"; exit 1; }
+          done
+      - name: 'ADIM 1 - yedek + dry-run (salt okur)'
+        id: dry
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          python scripts/etsy/pod_hero_swap.py --listing-id "$LISTING" --out _out/dry \
+            --heroes "MB=_work/medya/hero_MB.jpg,DB=_work/medya/hero_DB.jpg,WP=_work/medya/hero_WP.jpg,CI=_work/medya/hero_CI.jpg,PW=_work/medya/hero_PW.jpg" \
+            --video _work/medya/video_MB_cropped.mp4 --quota-min "$QMIN"
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, pathlib
+          d = json.load(open("_out/dry/swap_result.json"))
+          print(f"ok={'true' if not d['sorunlar'] and len(d['plan']) == 5 else 'false'}")
+          print(f"ozet={len(d['plan'])} hero, galeri {d['gorsel_sayisi_once']}, kota {d['kota_once']}")
+          PY
+      - name: 'Yedegi Drive a yaz (apply oncesi)'
+        run: |
+          set -euo pipefail
+          stamp=$(date -u +%Y%m%d_%H%M)
+          echo "STAMP=$stamp" >> "$GITHUB_ENV"
+          rclone copy _out/dry "gdrive:ASTROLOVE/TEMP/POD_HERO_CROP/${OUTDIR}/ETSY_SWAP_${stamp}" -q
+          rclone lsf "gdrive:ASTROLOVE/TEMP/POD_HERO_CROP/${OUTDIR}/ETSY_SWAP_${stamp}"
+      - name: 'ADIM 2 - apply (yalniz onayla ve dry-run temizse)'
+        if: ${{ env.APPLY == 'true' && steps.dry.outputs.ok == 'true' }}
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          echo "::warning::APPLY: ilan $LISTING - 5 hero + video degisecek (${{ steps.dry.outputs.ozet }})"
+          python scripts/etsy/pod_hero_swap.py --listing-id "$LISTING" --out _out/apply --apply \
+            --heroes "MB=_work/medya/hero_MB.jpg,DB=_work/medya/hero_DB.jpg,WP=_work/medya/hero_WP.jpg,CI=_work/medya/hero_CI.jpg,PW=_work/medya/hero_PW.jpg" \
+            --video _work/medya/video_MB_cropped.mp4 --quota-min "$QMIN"
+      - name: Token ve cikti Drive a
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
+          [ -d _out ] && rclone copy _out "gdrive:ASTROLOVE/TEMP/POD_HERO_CROP/${OUTDIR}/ETSY_SWAP_${STAMP:-elle}" -q && \
+            rclone lsf -R "gdrive:ASTROLOVE/TEMP/POD_HERO_CROP/${OUTDIR}/ETSY_SWAP_${STAMP:-elle}" || true
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: pod-hero-swap
+          path: _out/
+          if-no-files-found: ignore
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
