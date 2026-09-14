@@ -1,0 +1,133 @@
+name: pod-video-match
+
+# Videoyu HERO ile ayni kadraja getirir ve (onaylanmissa) Etsy'de YALNIZ videoyu
+# degistirir (Mo 14 Eyl 2026). Kadraj videonun kendi tespitinden degil, hero_MB'de
+# OLCULEN oran/dx/dy'den gelir. Sapma esigi asarsa Etsy'ye YAZILMAZ.
+# Cikti: Drive TEMP/POD_HERO_CROP/<dir>/ (video_MB_cropped.mp4, compare_hero_vs_video.png,
+# video_match.json) + ETSY_VIDEO_<stamp>/ (yedek + sonuc).
+
+on:
+  workflow_dispatch:
+    inputs:
+      listing_id:
+        description: "Etsy ilan no"
+        required: true
+        default: "4570110121"
+      pair:
+        description: "Cift (video/poster dosya adi)"
+        required: true
+        default: "AQUARIUS_AQUARIUS"
+      out_dir:
+        description: "TEMP/POD_HERO_CROP altindaki klasor"
+        required: false
+        default: "AQU_AQU"
+      tol:
+        description: "Izin verilen sapma (0.002 = %0.2)"
+        required: false
+        default: "0.002"
+      apply:
+        description: "true = sapma esik altiysa Etsy'de videoyu degistir"
+        type: boolean
+        default: false
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  match:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      LISTING: ${{ inputs.listing_id }}
+      PAIR: ${{ inputs.pair }}
+      OUTDIR: ${{ inputs.out_dir || 'AQU_AQU' }}
+      TOL: ${{ inputs.tol || '0.002' }}
+      APPLY: ${{ inputs.apply }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Bagimliliklar
+        run: |
+          set -euo pipefail
+          pip install -q pillow==12.3.0 numpy==2.4.6 opencv-python-headless==5.0.0.93 requests==2.34.2
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          ffmpeg -version | head -1; ffprobe -version | head -1
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Kaynaklari indir
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work/posters _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_HERO_CROP/${OUTDIR}/hero_MB.jpg" _work/hero_MB.jpg
+          rclone copyto "gdrive:ASTROLOVE/WALL_ART/LISTING_MEDIA/VIDEOS/V01_FIREFLY_STORY/01_EXPORTS/MIDNIGHT_BLUE/WA_VIDEO_V01_${PAIR}_MIDNIGHT_BLUE.mp4" _work/video.mp4
+          for r in 3X4 2X3; do
+            rclone copyto "gdrive:ASTROLOVE/WALL_ART/POSTERS/ORIGINAL_HIGH_RES/MIDNIGHT_BLUE/${r}/${PAIR}.jpg" \
+              "_work/posters/MB_${r}.jpg" 2>/dev/null && echo "baski: MIDNIGHT_BLUE/${r}" || true
+          done
+          ls _work/posters/MB_*.jpg >/dev/null 2>&1 || { echo "HATA: MB baski dosyasi yok - DUR"; exit 1; }
+          ls -l _work _work/posters
+      - name: 'ADIM 1 - videoyu hero kadrajina getir'
+        id: match
+        run: |
+          set -euo pipefail
+          pos=$(ls _work/posters/MB_*.jpg | tr '\n' ';' | sed 's/;$//')
+          python scripts/pod/video_match.py --video _work/video.mp4 --video-poster "$pos" \
+            --hero _work/hero_MB.jpg --hero-poster "$pos" --out _out/match --tol "$TOL"
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          d = json.load(open("_out/match/video_match.json"))
+          print(f"ok={'true' if d['sonuc'] == 'PASS' else 'false'}")
+          print(f"sapma={d['olcum']['sapma']}")
+          print(f"ozet=oran {d['olcum']['oran']} dx {d['olcum']['dx']} dy {d['olcum']['dy']} "
+                f"(hero {d['hedef_hero']['oran']} / {d['hedef_hero']['dx']} / {d['hedef_hero']['dy']})")
+          PY
+      - name: Drive a yaz (video + karsilastirma)
+        run: |
+          set -euo pipefail
+          stamp=$(date -u +%Y%m%d_%H%M); echo "STAMP=$stamp" >> "$GITHUB_ENV"
+          rclone copy _out/match "gdrive:ASTROLOVE/TEMP/POD_HERO_CROP/${OUTDIR}" \
+            --include "video_MB_cropped.mp4" --include "compare_hero_vs_video.png" --include "video_match.json" -q
+          rclone lsf -l "gdrive:ASTROLOVE/TEMP/POD_HERO_CROP/${OUTDIR}"
+      - name: 'ADIM 2 - Etsy: yalniz video (yedekli)'
+        if: ${{ env.APPLY == 'true' && steps.match.outputs.ok == 'true' }}
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          echo "::warning::APPLY: ilan $LISTING - YALNIZ video degisecek (${{ steps.match.outputs.ozet }})"
+          python scripts/etsy/pod_hero_swap.py --listing-id "$LISTING" --out _out/etsy --apply --video-only \
+            --video _out/match/video_MB_cropped.mp4 --quota-min 300
+      - name: Token ve cikti Drive a
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
+          [ -d _out/etsy ] && rclone copy _out/etsy "gdrive:ASTROLOVE/TEMP/POD_HERO_CROP/${OUTDIR}/ETSY_VIDEO_${STAMP:-elle}" -q && \
+            rclone lsf "gdrive:ASTROLOVE/TEMP/POD_HERO_CROP/${OUTDIR}/ETSY_VIDEO_${STAMP:-elle}" || true
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: pod-video-match
+          path: _out/
+          if-no-files-found: ignore
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone

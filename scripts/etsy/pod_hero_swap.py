@@ -88,7 +88,8 @@ def hero_degistir(api, shop, lid, eski_id, rank, dosya, alt_text, sinirda):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--listing-id", required=True)
-    ap.add_argument("--heroes", required=True, help="MB=yol,DB=yol,...")
+    ap.add_argument("--heroes", default="", help="MB=yol,DB=yol,... (--video-only ile gerekmez)")
+    ap.add_argument("--video-only", action="store_true", help="yalniz videoyu degistir")
     ap.add_argument("--video", default="")
     ap.add_argument("--out", required=True)
     ap.add_argument("--apply", action="store_true")
@@ -97,10 +98,15 @@ def main():
     out = pathlib.Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
     lid = a.listing_id
-    heroes = {s.split("=", 1)[0]: pathlib.Path(s.split("=", 1)[1]) for s in a.heroes.split(",")}
-    eksik = [k for k, v in heroes.items() if not v.exists()]
-    if eksik or set(heroes) != set(ED_NAME):
-        raise SystemExit(f"HATA: hero dosyalari eksik/hatali: eksik={eksik} verilen={sorted(heroes)}")
+    heroes = {s.split("=", 1)[0]: pathlib.Path(s.split("=", 1)[1]) for s in a.heroes.split(",") if s}
+    if a.video_only:
+        if not a.video or not pathlib.Path(a.video).exists():
+            raise SystemExit("HATA: --video-only icin video dosyasi gerekli")
+        heroes = {}
+    else:
+        eksik = [k for k, v in heroes.items() if not v.exists()]
+        if eksik or set(heroes) != set(ED_NAME):
+            raise SystemExit(f"HATA: hero dosyalari eksik/hatali: eksik={eksik} verilen={sorted(heroes)}")
 
     st = TokenStore(os.environ["TOKEN_FILE"], os.environ.get("ETSY_API_KEY"),
                     os.environ.get("ETSY_SHARED_SECRET"))
@@ -128,7 +134,7 @@ def main():
     pid_of = {v.get("value"): v.get("property_id") for v in vimg}
     vid_of = {v.get("value"): v.get("value_id") for v in vimg}
     plan, sorun = [], []
-    for ed, dosya in heroes.items():
+    for ed, dosya in ({} if a.video_only else heroes).items():
         ad = ED_NAME[ed]
         iid = ad_id.get(ad)
         if iid is None:
@@ -146,9 +152,13 @@ def main():
              "video_once": [{"video_id": v.get("video_id"), "video_state": v.get("video_state")} for v in vids],
              "kota_once": api.remaining}
     log(json.dumps({"plan": plan, "sorunlar": sorun}, ensure_ascii=False, indent=1))
+    if a.video_only:
+        log("VIDEO-ONLY: galeri ve varyasyon baglantilarina dokunulmayacak.")
     if sorun:
         (out / "swap_result.json").write_text(json.dumps(rapor, ensure_ascii=False, indent=1), encoding="utf-8")
         raise SystemExit(f"HATA: plan eksik: {sorun}")
+    if not a.video_only and len(plan) != len(ED_NAME):
+        raise SystemExit(f"HATA: plan {len(plan)}/{len(ED_NAME)} - DUR")
     if not a.apply:
         rapor["sonuc"] = "DRY-RUN (yazma yok)"
         (out / "swap_result.json").write_text(json.dumps(rapor, ensure_ascii=False, indent=1), encoding="utf-8")
@@ -157,16 +167,21 @@ def main():
     if not kota_yeter(api, a.quota_min):
         raise SystemExit(f"HATA: kota {api.remaining} < {a.quota_min}: yazma yok")
 
-    # ---------------- 3) HERO DEGISIMI
+    # ---------------- 3) HERO DEGISIMI (video-only'de atlanir)
+    son_imgs, son_vimg = imgs, vimg
     sinirda = len(imgs) >= ETSY_MAX_IMG
-    log(f"UYGULA: {len(plan)} hero degisecek (galeri {len(imgs)}/{ETSY_MAX_IMG}, "
-        f"{'sinir dolu: once sil-sonra yukle' if sinirda else 'once yukle-sonra sil'})")
+    if a.video_only:
+        log("hero degisimi ve variation-images ATLANDI (--video-only)")
+    if not a.video_only:
+        log(f"UYGULA: {len(plan)} hero degisecek (galeri {len(imgs)}/{ETSY_MAX_IMG}, "
+            f"{'sinir dolu: once sil-sonra yukle' if sinirda else 'once yukle-sonra sil'})")
     for n, p in enumerate(plan, 1):
         log(f"  [{n}/{len(plan)}] {p['edisyon']} rank {p['rank']} eski {p['eski_image_id']}")
         p["yeni_image_id"] = hero_degistir(api, shop, lid, p["eski_image_id"], p["rank"],
                                            heroes[p["edisyon"]], p["alt_text"], sinirda)
 
-    son_imgs = kararli(lambda: galeri(api, lid), bekle=lambda g: len(g) == len(imgs))
+    if plan:
+        son_imgs = kararli(lambda: galeri(api, lid), bekle=lambda g: len(g) == len(imgs))
     id_rank2 = {i.get("listing_image_id"): i.get("rank") for i in son_imgs}
     # rank duzeltmesi (gerekiyorsa)
     for p in plan:
@@ -175,13 +190,14 @@ def main():
             api.post_file(f"/shops/{shop}/listings/{lid}/images",
                           files={"listing_image_id": (None, str(p["yeni_image_id"])),
                                  "rank": (None, str(p["rank"]))})
-    son_imgs = kararli(lambda: galeri(api, lid), bekle=lambda g: len(g) == len(imgs))
+    if plan:
+        son_imgs = kararli(lambda: galeri(api, lid), bekle=lambda g: len(g) == len(imgs))
 
-    # ---------------- 4) VARYASYON BAGLANTISI
-    vi = [{"property_id": p["property_id"], "value_id": p["value_id"], "image_id": p["yeni_image_id"]}
-          for p in plan]
-    api.post_json(f"/shops/{shop}/listings/{lid}/variation-images", {"variation_images": vi})
-    log(f"variation-images yazildi: {len(vi)} baglanti")
+        # ---------------- 4) VARYASYON BAGLANTISI
+        vi = [{"property_id": p["property_id"], "value_id": p["value_id"], "image_id": p["yeni_image_id"]}
+              for p in plan]
+        api.post_json(f"/shops/{shop}/listings/{lid}/variation-images", {"variation_images": vi})
+        log(f"variation-images yazildi: {len(vi)} baglanti")
 
     # ---------------- 5) VIDEO
     if a.video:
@@ -206,6 +222,10 @@ def main():
                           if i.get("listing_image_id") in dokunulmayan_once}
     kontrol = {
         "gorsel_sayisi": len(son_imgs) == len(imgs),
+        "galeri_hic_degismedi": ([(i.get("listing_image_id"), i.get("rank")) for i in son_imgs] ==
+                                 [(i.get("listing_image_id"), i.get("rank")) for i in imgs]) if a.video_only else None,
+        "varyasyon_degismedi": ({v.get("value"): v.get("image_id") for v in son_vimg} ==
+                                {v.get("value"): v.get("image_id") for v in vimg}) if a.video_only else None,
         "hero_ranklari": all(
             next((i.get("rank") for i in son_imgs if i.get("listing_image_id") == p["yeni_image_id"]), None) == p["rank"]
             for p in plan),
