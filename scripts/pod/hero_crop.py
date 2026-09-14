@@ -137,21 +137,39 @@ def canny_kutu(hero_g):
 
 
 # ------------------------------------------------------------ cerceve payi
-def kenar_ara(prof, bas, yon, limit):
-    """prof uzerinde bas'tan yon yonunde EN DISTAKI guclu gecis; (offset, siddet).
-    Baski kenarinda iki gecis olur (baski->cerceve ve cerceve->duvar); cerceve
-    kutusu icin distaki (duvar siniri) alinir."""
-    d = np.abs(np.diff(prof.astype(np.float64)))
+def koyu_bant(prof, bas, yon, limit):
+    """Baski kenarindan disa dogru KOYU BANT (cerceve) uzanimi.
+
+    Gradyan tepesi yumusak/golgeli kenarlarda zayifliyor (14 Eyl olcumu: CI'da
+    pay 8 px olculdu, gercegi ~25 px). Bunun yerine bant olcumu: pencerenin dis
+    ucu duvar referansi alinir, baski kenarindan itibaren duvardan belirgin koyu
+    kalan bitisik dizi cerceve bandidir; sinir yerel gradyanla keskinlestirilir.
+    Donus: (pay, {duvar, koyu, esik})."""
     idx = [bas + yon * i for i in range(1, limit + 1)]
-    idx = [i for i in idx if 0 <= i < len(d)]
-    if not idx:
-        return 0, 0.0
-    v = np.array([d[i] for i in idx])
-    if v.max() < GRAD_MIN:
-        return 0, float(v.max())
-    aday = np.flatnonzero(v >= max(0.5 * v.max(), GRAD_MIN))
-    j = int(aday[-1])
-    return (j + 1) * yon, float(v[j])
+    idx = [i for i in idx if 0 <= i < len(prof)]
+    if len(idx) < 6:
+        return 0, {}
+    v = np.array([prof[i] for i in idx], dtype=np.float64)
+    duvar = float(np.median(v[-max(3, len(v) // 4):]))       # pencerenin dis ucu = duvar
+    koyu = float(v.min())
+    if duvar - koyu < 2 * GRAD_MIN:                          # belirgin koyu bant yok
+        return 0, {"duvar": round(duvar, 1), "koyu": round(koyu, 1)}
+    esik = koyu + 0.5 * (duvar - koyu)
+    # sablon dikdortgeni birkac px icerde/disarida olabilir: koyu bandin baslangici
+    # kucuk bir bosluk icinde aranir, sonra bitisik koyu dizi izlenir.
+    bosluk = max(6, int(0.03 * len(v)))
+    bas_i = next((i for i in range(min(bosluk, len(v))) if v[i] < esik), None)
+    if bas_i is None:
+        return 0, {"duvar": round(duvar, 1), "koyu": round(koyu, 1), "esik": round(esik, 1),
+                   "not": "koyu bant baslangici bulunamadi"}
+    n = bas_i
+    while n < len(v) and v[n] < esik:
+        n += 1
+    d = np.abs(np.diff(v))
+    a, b = max(0, n - 4), min(len(d), n + 4)                 # sinirin yerel gradyanla rotusu
+    if b > a:
+        n = a + int(np.argmax(d[a:b])) + 1
+    return n, {"duvar": round(duvar, 1), "koyu": round(koyu, 1), "esik": round(esik, 1)}
 
 
 def cerceve_payi(g, rect):
@@ -159,12 +177,13 @@ def cerceve_payi(g, rect):
     x, y, w, h = rect
     sut = g[max(0, y + int(0.2 * h)):y + int(0.8 * h), :].mean(0)
     sat = g[:, max(0, x + int(0.2 * w)):x + int(0.8 * w)].mean(1)
-    paylar = {}
-    lim_x, lim_y = int(PAY_MAX * w), int(PAY_MAX * h)
+    paylar, ayrinti = {}, {}
+    lim_x, lim_y = max(8, int(PAY_MAX * w)), max(8, int(PAY_MAX * h))
     for ad, prof, bas, yon, lim in (("sol", sut, x, -1, lim_x), ("sag", sut, x + w, +1, lim_x),
                                     ("ust", sat, y, -1, lim_y), ("alt", sat, y + h, +1, lim_y)):
-        off, sid = kenar_ara(prof, bas, yon, lim)
-        paylar[ad] = abs(off) if sid >= GRAD_MIN else 0
+        pay, bilgi = koyu_bant(prof, bas, yon, lim)
+        paylar[ad], ayrinti[ad] = pay, bilgi
+    log(f"    cerceve bandi: {paylar} ({ayrinti})")
     if not any(paylar.values()):
         return rect, paylar
     return (x - paylar["sol"], y - paylar["ust"],
