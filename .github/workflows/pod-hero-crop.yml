@@ -167,7 +167,8 @@ jobs:
           fi
           python scripts/pod/hero_crop.py "${args[@]}"
       - name: Drive'a yaz
-        if: ${{ success() }}
+        # Mo 14 Eyl: sonuc ne olursa olsun cikti Drive'a yazilir (FAIL olanlar da).
+        if: ${{ always() }}
         run: |
           set -euo pipefail
           [ -d _out ] || exit 0
