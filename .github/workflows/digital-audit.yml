@@ -1,0 +1,100 @@
+name: digital-audit
+
+# DIJITAL ILAN DENETIMI - SALT OKUR (Mo 14 Eyl 2026). Etsy'ye hicbir yazma yok:
+# yalniz GET /listings/{id}, GET /shops/{shop}/listings/{id}/files.
+# Ornek ilanin ZIP'i Drive'dan cekilip acilir (JPG sayisi, oran, piksel, DPI, ICC,
+# kirpma kaniti); aciklamadaki iddialar olculen degerlerle karsilastirilir;
+# ayni dosya yapisi tum dijital ilanlarda taranir.
+
+on:
+  workflow_dispatch:
+    inputs:
+      listing:
+        description: "Ornek ilan no"
+        required: false
+        default: "4552211376"
+      all_limit:
+        description: "Taranacak dijital ilan sayisi (0 = hepsi)"
+        required: false
+        default: "0"
+      quota_min:
+        description: "Kota tabani"
+        required: false
+        default: "300"
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      LISTING: ${{ inputs.listing || '4552211376' }}
+      ALL_LIMIT: ${{ inputs.all_limit || '0' }}
+      QMIN: ${{ inputs.quota_min || '300' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2 pillow==11.3.0
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Girdiler (token, dijital ilan listesi, ZIP dizini)
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out _work/zip
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_LISTING/DFILE_STATE.csv" _work/dfile_state.csv \
+            || rclone copyto "gdrive:ASTROLOVE/TEMP/DFILE_STATE.csv" _work/dfile_state.csv
+          echo "dijital ilan satiri: $(( $(wc -l < _work/dfile_state.csv) - 1 ))"
+          rclone lsjson "gdrive:ASTROLOVE" -R --files-only --include "*.zip" \
+            --no-modtime --no-mimetype --fast-list > _work/zips.json
+          python -c "import json;d=json.load(open('_work/zips.json'));print('Drive ZIP sayisi:',len(d))"
+      - name: Denetim (salt okur)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          python scripts/etsy/digital_audit.py --listing "$LISTING" \
+            --zip-index _work/zips.json --zip-dir _work/zip \
+            --dfile-state _work/dfile_state.csv --out _out \
+            --all-limit "$ALL_LIMIT" --quota-min "$QMIN"
+      - name: Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          stamp=$(date -u +%Y%m%d_%H%M)
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
+          [ -d _out ] && rclone copy _out "gdrive:ASTROLOVE/TEMP/POD_LISTING/DIGITAL_AUDIT_${stamp}" -q && \
+            echo "Cikti: TEMP/POD_LISTING/DIGITAL_AUDIT_${stamp}/" || true
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: digital-audit
+          path: _out/
+          if-no-files-found: ignore
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
