@@ -1,0 +1,148 @@
+name: pod-hero-fix
+
+# Toplu kosunun iki artigini kapatir (Mo 14 Eyl 2026):
+#  1) CANCER_TAURUS (4570160260): uretim tekrar + Drive'a yukleme + Etsy degisimi
+#     (yedek + 5 hero + video + geri okuma)
+#  2) 5 ilanda rank cakismasi duzeltmesi: rank 1'de kalan HERO OLMAYAN gorsel
+#     bos rank'e (2) geri alinir; hero'lara, varyasyon baglantilarina, videoya
+#     ve metin alanlarina dokunulmaz (updateListing cagrilmaz).
+# Her adimda gecen/kalan sure yazilir.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pair:
+        description: "Uretimi tekrarlanacak cift"
+        required: false
+        default: "CANCER_TAURUS"
+      rank_listings:
+        description: "Rank duzeltmesi yapilacak ilan no'lari (virgullu)"
+        required: false
+        default: "4570157258,4570161266,4570198669,4570204167,4570224058"
+      apply:
+        description: "true = Etsy'ye YAZ"
+        type: boolean
+        default: false
+      quota_min:
+        description: "Kota tabani"
+        required: false
+        default: "300"
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      PAIR: ${{ inputs.pair || 'CANCER_TAURUS' }}
+      RANKS: ${{ inputs.rank_listings }}
+      APPLY: ${{ inputs.apply }}
+      QMIN: ${{ inputs.quota_min || '300' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Bagimliliklar
+        run: |
+          set -euo pipefail
+          pip install -q pillow==12.3.0 numpy==2.4.6 opencv-python-headless==5.0.0.93 requests==2.34.2
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg tesseract-ocr >/dev/null
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          echo "BASLANGIC=$(date -u +%s)" >> "$GITHUB_ENV"
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Token + POD durumu
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_LISTING/POD_LISTINGS_STATE.csv" _work/pod_state.csv
+      - name: "ADIM 1 - ${{ inputs.pair || 'CANCER_TAURUS' }} uretimi (hero + video)"
+        run: |
+          set -euo pipefail
+          t=$(date -u +%s)
+          python scripts/pod/pod_crop_batch.py --mode uret --pod-state _work/pod_state.csv \
+            --out _out/uret --state _work/fix_state.csv --pairs "$PAIR" --force
+          echo "ADIM 1 suresi: $((($(date -u +%s)-t)/60)) dk $((($(date -u +%s)-t)%60)) sn"
+          rclone lsf -l "gdrive:ASTROLOVE/TEMP/POD_HERO_CROP/${PAIR}" || echo "UYARI: cikti klasoru gorunmuyor"
+      - name: "ADIM 2 - ${{ inputs.pair || 'CANCER_TAURUS' }} Etsy degisimi"
+        if: ${{ inputs.apply == true }}
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          t=$(date -u +%s)
+          echo "::warning::APPLY: $PAIR - 5 hero + video degisecek"
+          python scripts/pod/pod_crop_batch.py --mode etsy --pod-state _work/pod_state.csv \
+            --out _out/etsy --state _work/fix_state.csv --pairs "$PAIR" --quota-min "$QMIN" --force
+          echo "ADIM 2 suresi: $((($(date -u +%s)-t)/60)) dk $((($(date -u +%s)-t)%60)) sn"
+      - name: 'ADIM 3 - 5 ilanda rank duzeltmesi'
+        if: ${{ always() }}
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          t=$(date -u +%s)
+          args=(--listings "$RANKS" --out _out/rank --quota-min "$QMIN")
+          [ "$APPLY" = "true" ] && args+=(--apply)
+          python scripts/etsy/pod_rank_fix.py "${args[@]}"
+          echo "ADIM 3 suresi: $((($(date -u +%s)-t)/60)) dk $((($(date -u +%s)-t)%60)) sn"
+      - name: Rapor + Drive
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          stamp=$(date -u +%Y%m%d_%H%M)
+          # ana rapor CSV'sini guncelle (bu ciftin satirlari)
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_HERO_CROP/POD_HERO_CROP_REPORT.csv" _work/rapor.csv 2>/dev/null || true
+          python - <<'PY'
+          import csv, pathlib
+          SUT = ["pair","listing_id","edisyon","sonuc","oran","kaciklik_x","kaciklik_y",
+                 "gecis","etsy_sonuc","not","ts_utc"]
+          ana, yeni = pathlib.Path("_work/rapor.csv"), pathlib.Path("_work/fix_state.csv")
+          if ana.exists() and yeni.exists():
+              rows = list(csv.DictReader(open(ana, newline="", encoding="utf-8")))
+              guncel = list(csv.DictReader(open(yeni, newline="", encoding="utf-8")))
+              ciftler = {r["pair"] for r in guncel}
+              rows = [r for r in rows if r["pair"] not in ciftler] + guncel
+              rows.sort(key=lambda r: (r["pair"], r["edisyon"]))
+              with open(ana, "w", newline="", encoding="utf-8") as fh:
+                  w = csv.DictWriter(fh, fieldnames=SUT); w.writeheader()
+                  for r in rows: w.writerow({k: r.get(k, "") for k in SUT})
+              print(f"rapor guncellendi: {len(rows)} satir, guncellenen cift {sorted(ciftler)}")
+          PY
+          [ -f _work/rapor.csv ] && rclone copyto _work/rapor.csv "gdrive:ASTROLOVE/TEMP/POD_HERO_CROP/POD_HERO_CROP_REPORT.csv" || true
+          [ -d _out ] && rclone copy _out "gdrive:ASTROLOVE/TEMP/POD_HERO_CROP/_FIX_${stamp}" -q && \
+            rclone lsf -R "gdrive:ASTROLOVE/TEMP/POD_HERO_CROP/_FIX_${stamp}" || true
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
+          echo "TOPLAM SURE: $((($(date -u +%s)-BASLANGIC)/60)) dk"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: pod-hero-fix
+          path: |
+            _out/
+            _work/fix_state.csv
+          if-no-files-found: ignore
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
