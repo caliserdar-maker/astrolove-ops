@@ -8,6 +8,11 @@ name: digital-desc-batch
 # sonraki kosu kaldigi yerden devam eder.
 
 on:
+  schedule:
+    # Her gun 05:00 UTC (TR 08:00) - Etsy gunluk kotasi yenilendikten sonra.
+    # Zamanlanmis kosu her zaman APPLY=true calisir; yapacak ilan kalmadiysa
+    # betik Etsy'ye hic dokunmadan cikar (bos kosu).
+    - cron: "0 5 * * *"
   workflow_dispatch:
     inputs:
       apply:
@@ -40,8 +45,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 180
     env:
-      APPLY: ${{ inputs.apply }}
-      SKIP: ${{ inputs.skip }}
+      APPLY: ${{ github.event_name == 'schedule' && 'true' || inputs.apply }}
+      SKIP: ${{ inputs.skip || '4552211376' }}
       LIMIT: ${{ inputs.limit || '0' }}
       QMIN: ${{ inputs.quota_min || '30' }}
       MAPDIR: ${{ inputs.map_dir }}
@@ -121,6 +126,17 @@ jobs:
             cp _work/desc_state.csv _out/DIGITAL_DESC_REPORT.csv
             rclone copyto _work/desc_state.csv "$REMOTE"
             python scripts/etsy/desc_report.py _work/desc_state.csv
+          fi
+          if [ -f _out/DIGITAL_DESC_OZET.json ]; then
+            python - <<'PY' | tee -a "$GITHUB_STEP_SUMMARY"
+          import json, pathlib
+          o = json.loads(pathlib.Path("_out/DIGITAL_DESC_OZET.json").read_text())
+          print(f"### digital-desc: {o['sonuclar']} | kalan {o.get('kalan')} | kota {o.get('kota')}")
+          if o.get("tamamlandi"):
+              print("::notice::TAMAMLANDI - tum dijital ilanlar guncel; cron kaldirilabilir.")
+          else:
+              print(f"::notice::KALAN {o.get('kalan')} ilan - bir sonraki zamanlanmis kosu devam edecek.")
+          PY
           fi
           [ -d _out ] && rclone copy _out "gdrive:ASTROLOVE/TEMP/POD_LISTING/DIGITAL_DESC_${stamp}" -q && \
             echo "Cikti: TEMP/POD_LISTING/DIGITAL_DESC_${stamp}/" || true

@@ -22,6 +22,7 @@ import csv
 import json
 import os
 import pathlib
+import re
 import subprocess
 import sys
 import time
@@ -47,6 +48,27 @@ TARIF = {
 }
 SUTUN = ["digital_id", "pair", "edisyon", "burclar", "pod_link", "sonuc", "not", "yedek",
          "kota", "ts_utc"]
+POD_URL = "https://www.etsy.com/listing/{lid}/{slug}"
+
+
+def slug(baslik):
+    """Etsy slug'i: baslikta ilk virgule kadar olan bolum, kucuk harf, bosluk -> tire.
+    Ornek: 'Aquarius and Aquarius Zodiac Wall Art, Giclee Print' ->
+           'aquarius-and-aquarius-zodiac-wall-art' (4552211376'da onaylanan bicim)."""
+    bas = (baslik or "").split(",")[0]
+    s = re.sub(r"[^a-z0-9]+", "-", bas.lower()).strip("-")
+    return s
+
+
+def pod_slug(api, pod_id, bellek, yedek_baslik=""):
+    """POD ilaninin KENDI basligindan slug; cift basina bir kez okunur."""
+    if pod_id not in bellek:
+        try:
+            P = api.get(f"/listings/{pod_id}", ok404=True) or {}
+            bellek[pod_id] = slug(P.get("title") or "") or slug(yedek_baslik)
+        except Exception:                             # noqa: BLE001
+            bellek[pod_id] = slug(yedek_baslik)
+    return bellek[pod_id]
 
 
 def simdi():
@@ -156,8 +178,24 @@ def main():
     satirlar = []
     if pathlib.Path(a.state).exists():
         satirlar = list(csv.DictReader(open(a.state, newline="", encoding="utf-8")))
-    bitti = {r["digital_id"] for r in satirlar if r.get("sonuc") in ("PASS", "DEGISIM YOK")}
-    log(f"{len(ilanlar)} ilan | sablon {len(sablon)} karakter | tamamlanmis {len(bitti)}")
+    # Tamamlanmis sayilmak icin: sonuc PASS/DEGISIM YOK VE yazilan POD linki slug'li
+    # olmali. 14 Eyl'in ilk kosusunda linkler slug'siz yazilmisti; o satirlar yeniden
+    # islenir (Mo 14 Eyl karari: link .../listing/<id>/<slug> bicimine normallestirilir).
+    bitti = {r["digital_id"] for r in satirlar
+             if r.get("sonuc") in ("PASS", "DEGISIM YOK")
+             and re.search(r"/listing/\d+/\S", r.get("pod_link") or "")}
+    kalan = [r for r in ilanlar if r["digital_id"] not in bitti]
+    log(f"{len(ilanlar)} ilan | sablon {len(sablon)} karakter | tamamlanmis {len(bitti)} | "
+        f"kalan {len(kalan)}")
+    if not kalan:
+        ozet = {"hedef": len(ilanlar), "tamamlandi": True, "kalan": 0,
+                "sonuclar": {"ONCEDEN PASS": len(bitti)}, "durdu": None, "atlanan": [],
+                "islenmemis": [], "sure_dk": 0.0, "kota": None, "api_cagrisi": 0}
+        (out / "DIGITAL_DESC_OZET.json").write_text(json.dumps(ozet, ensure_ascii=False, indent=2),
+                                                    encoding="utf-8")
+        log("TAMAMLANDI: islenecek ilan kalmadi, Etsy'ye hic dokunulmadi (bos kosu).")
+        log(f"OZET: {json.dumps(ozet, ensure_ascii=False)}")
+        return
 
     k, s = os.environ.get("ETSY_API_KEY", ""), os.environ.get("ETSY_SHARED_SECRET", "")
     mask(k); mask(s)
@@ -166,17 +204,14 @@ def main():
         st.refresh()
     api = Etsy(st)
     shop = os.environ["ETSY_SHOP_ID"]
-    t0, durdu = time.time(), None
+    t0, durdu, slug_bellek = time.time(), None, {}
 
-    for i, r in enumerate(ilanlar, 1):
+    for i, r in enumerate(kalan, 1):
         lid, pair, ed = r["digital_id"], r.get("pair", ""), r.get("edisyon", "")
         gecen = time.time() - t0
-        kalan = gecen / (i - 1) * (len(ilanlar) - i + 1) if i > 1 else 0
-        log(f"[{i}/{len(ilanlar)} %{(i-1)/len(ilanlar)*100:.0f}] {pair} / {ed} ({lid}) | "
-            f"gecen {gecen/60:.1f} dk, kalan ~{kalan/60:.1f} dk | kota {api.remaining}")
-        if lid in bitti:
-            log("    zaten islenmis, atlandi")
-            continue
+        sure = gecen / (i - 1) * (len(kalan) - i + 1) if i > 1 else 0
+        log(f"[{i}/{len(kalan)} %{(i-1)/len(kalan)*100:.0f}] {pair} / {ed} ({lid}) | "
+            f"gecen {gecen/60:.1f} dk, kalan ~{sure/60:.1f} dk | kota {api.remaining}")
         if api.remaining is not None and str(api.remaining).isdigit() \
                 and int(api.remaining) < a.quota_min:
             durdu = (f"kota {api.remaining} < {a.quota_min}; {i-1}/{len(ilanlar)} ilandan sonra "
@@ -187,9 +222,11 @@ def main():
         try:
             if (r.get("eslesme") or "") != "AYNI":
                 raise SystemExit(f"esleme {r.get('eslesme')!r} (AYNI degil)")
-            link = (r.get("link_url") or "").strip()
-            if not link.startswith("https://www.etsy.com/listing/"):
-                raise SystemExit(f"POD linki gecersiz: {link[:60]!r}")
+            ham = (r.get("link_url") or "").strip()
+            m = re.search(r"/listing/(\d+)", ham)
+            if not ham.startswith("https://www.etsy.com/listing/") or not m:
+                raise SystemExit(f"POD linki gecersiz: {ham[:60]!r}")
+            pod_id = m.group(1)
             L = api.get(f"/listings/{lid}") or {}
             baslik = L.get("title") or ""
             burclar = basliktan_burclar(baslik, pair)
@@ -197,6 +234,10 @@ def main():
                 raise SystemExit(f"basliktan burc cikarilamadi: {baslik[:70]!r}")
             if ed.lower() not in baslik.lower():
                 raise SystemExit(f"baslikta edisyon yok ({ed!r}): {baslik[:70]!r}")
+            s_pod = pod_slug(api, pod_id, slug_bellek, baslik)
+            if not s_pod:
+                raise SystemExit(f"POD slug'i uretilemedi (pod {pod_id})")
+            link = POD_URL.format(lid=pod_id, slug=s_pod)
             yeni = metin_uret(sablon, burclar, ed, link)
             durum, notu, yedek = islet(api, shop, lid, L, yeni, out, a.apply)
             satir.update({"burclar": " + ".join(burclar), "pod_link": link, "sonuc": durum,
@@ -220,7 +261,9 @@ def main():
     for x in satirlar:
         say[x.get("sonuc", "?")] = say.get(x.get("sonuc", "?"), 0) + 1
     islenen = {x.get("digital_id") for x in satirlar}
-    ozet = {"hedef": len(ilanlar), "sonuclar": say, "durdu": durdu,
+    islenmemis_n = len([x for x in ilanlar if x["digital_id"] not in islenen])
+    ozet = {"hedef": len(ilanlar), "tamamlandi": islenmemis_n == 0, "kalan": islenmemis_n,
+            "sonuclar": say, "durdu": durdu,
             "atlanan": sorted(x["digital_id"] for x in satirlar
                               if x.get("sonuc") in ("ATLANDI", "FAIL")),
             "islenmemis": sorted(x["digital_id"] for x in ilanlar
