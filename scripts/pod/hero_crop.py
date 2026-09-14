@@ -265,26 +265,39 @@ def main():
         im = Image.open(p)
         if im.size != ref_im.size:
             hata.append(f"{ed}: kaynak boyutu {im.size} != {ref_im.size}")
+        # 1) her edisyon KENDI cercevesiyle; 2) tespit olmazsa referans (MB) kutusu
+        c_src = ref_cerceve if ed == ref_ed else cerceve_bul(im)
+        if c_src:
+            kutu, kaydi_ed = kutu_hesapla(*im.size, c_src, a.ratio)
+            kaynak = "tespit"
+        else:
+            kutu, kaydi_ed, kaynak = goreli, kaydi, f"{ref_ed} kutusu (tespit basarisiz)"
         hedef = out / f"hero_{ed}.jpg"
-        q, boyut = kirp_kaydet(im, goreli, hedef)
+        q, boyut = kirp_kaydet(im, kutu, hedef)
         c2 = cerceve_bul(Image.open(hedef))
-        olcum = None
+        olcum = kacikliK = None
         if c2:
             olcum = round(c2[3] / OUT_H, 4)
+            kacikliK = {"x": round((c2[0] + c2[2] / 2 - OUT_W / 2) / OUT_W, 4),
+                        "y": round((c2[1] + c2[3] / 2 - OUT_H / 2) / OUT_H, 4)}
             icinde = c2[0] >= 0 and c2[1] >= 0 and c2[0] + c2[2] <= OUT_W and c2[1] + c2[3] <= OUT_H
             if abs(olcum - a.ratio) > RATIO_TOL:
                 hata.append(f"{ed}: olculen cerceve/kadraj {olcum} (hedef {a.ratio}+-{RATIO_TOL})")
             if not icinde:
                 hata.append(f"{ed}: cerceve kadraj disinda {c2}")
+            if max(abs(kacikliK["x"]), abs(kacikliK["y"])) > 0.02:
+                uyari.append(f"{ed}: cerceve kadrajda ortali degil {kacikliK}")
         bulundu, eksik = ocr_var(hedef, [k for k in a.ocr.split(",") if k]) if a.ocr else (None, None)
         if eksik:
             uyari.append(f"{ed}: OCR'da bulunamayan metin {eksik} (geometrik kapsama gecerli)")
-        rapor["edisyonlar"][ed] = {"dosya": hedef.name, "kalite": q, "bayt": boyut,
+        rapor["edisyonlar"][ed] = {"dosya": hedef.name, "kutu_kaynagi": kaynak,
+                                   "goreli_kutu": {k: round(v, 6) for k, v in zip("xywh", kutu)},
+                                   "kalite": q, "bayt": boyut,
                                    "ocr_bulunan": bulundu, "ocr_eksik": eksik,
-                                   "olculen_cerceve_orani": olcum,
-                                   "kaynak_cerceve_px": list(cerceve_bul(im) or [])}
-        log(f"[{i}/{len(heroes)}] {ed}: {hedef.name} q{q} {boyut/1024:.0f} KB "
-            f"cerceve/kadraj={olcum} | gecen {time.time()-t0:.0f}s")
+                                   "olculen_cerceve_orani": olcum, "merkez_kacikligi": kacikliK,
+                                   "kaynak_cerceve_px": list(c_src or [])}
+        log(f"[{i}/{len(heroes)}] {ed}: {hedef.name} q{q} {boyut/1024:.0f} KB kutu={kaynak} "
+            f"cerceve/kadraj={olcum} kaciklik={kacikliK} | gecen {time.time()-t0:.0f}s")
         kartlar.append((ed, Image.open(hedef).resize((CARD_W, CARD_H), Image.LANCZOS)))
 
     # onizleme kartlari
