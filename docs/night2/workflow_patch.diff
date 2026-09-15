@@ -1,0 +1,1618 @@
+diff --git a/.github/workflows/brand-banner.yml b/.github/workflows/brand-banner.yml
+index 98ad0c5..c2cea93 100644
+--- a/.github/workflows/brand-banner.yml
++++ b/.github/workflows/brand-banner.yml
+@@ -4,6 +4,9 @@ name: brand-banner
+ # (START_HERE B81-EK kilitli kompozisyon). Taban ve cikti Drive BRAND'da.
+ # Etsy'ye yukleme YAPILMAZ; Mo elle yukler.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/canva-bulk-fetch.yml b/.github/workflows/canva-bulk-fetch.yml
+index 515d947..32b208c 100644
+--- a/.github/workflows/canva-bulk-fetch.yml
++++ b/.github/workflows/canva-bulk-fetch.yml
+@@ -6,6 +6,9 @@ name: canva-bulk-fetch
+ # Imzali URL'ler dosyadan okunur; workflow girdisi degildir, bu yuzden loga dusmez.
+ # Etsy'ye dokunmaz.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/digital-desc-batch.yml b/.github/workflows/digital-desc-batch.yml
+index 5b5c0cb..82ceae7 100644
+--- a/.github/workflows/digital-desc-batch.yml
++++ b/.github/workflows/digital-desc-batch.yml
+@@ -7,6 +7,9 @@ name: digital-desc-batch
+ # Kota tabaninin altina inince DURUR; durum CSV'si her ilanda Drive'a yazilir, bir
+ # sonraki kosu kaldigi yerden devam eder.
+ 
++permissions:
++  contents: read
++
+ on:
+   schedule:
+     # Her 4 saatte bir (gunde 6 kez). Etsy kotasi kayan 24 saatlik pencere (15 Eyl
+diff --git a/.github/workflows/digital-file-add.yml b/.github/workflows/digital-file-add.yml
+index 5dbf6c5..fb2da11 100644
+--- a/.github/workflows/digital-file-add.yml
++++ b/.github/workflows/digital-file-add.yml
+@@ -5,6 +5,9 @@ name: digital-file-add
+ # Wallpaper ilanlarina dokunulmaz. Ayni adli PDF varsa ilan atlanir (idempotens);
+ # 5/5 dosya limiti dolu ilan atlanir ve raporlanir. apply=false yalniz dry-run uretir.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/drive-fetch-url.yml b/.github/workflows/drive-fetch-url.yml
+index 1360ab9..b5c3411 100644
+--- a/.github/workflows/drive-fetch-url.yml
++++ b/.github/workflows/drive-fetch-url.yml
+@@ -5,6 +5,9 @@ name: drive-fetch-url
+ # kurum ag politikasi 403); indirme bu yuzden runner'da yapilir.
+ # URL loga yazilmaz (::add-mask::). Etsy'ye dokunmaz.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/drive-test.yml b/.github/workflows/drive-test.yml
+index c15f868..ee6705f 100644
+--- a/.github/workflows/drive-test.yml
++++ b/.github/workflows/drive-test.yml
+@@ -4,6 +4,9 @@ name: drive-test
+ # calistigini dogrulayan elle tetiklenen test workflow'u.
+ # Hicbir sir degeri loga yazilmaz; secret yalnizca dosyaya yazilir.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+ 
+diff --git a/.github/workflows/etsy-ai-scan.yml b/.github/workflows/etsy-ai-scan.yml
+index c8f0579..9cc4e82 100644
+--- a/.github/workflows/etsy-ai-scan.yml
++++ b/.github/workflows/etsy-ai-scan.yml
+@@ -4,6 +4,9 @@ name: etsy-ai-scan
+ # (2) Aktif ilanlarin kacinda aciklamada verilen ifade (varsayilan "AI-ASSISTED") geciyor?
+ # Hicbir yazma yapmaz; OAS herkese acik, ilan taramasi getShopListings ile ~6 cagri.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/etsy-aktif-denetim.yml b/.github/workflows/etsy-aktif-denetim.yml
+index 4206c2a..c81be42 100644
+--- a/.github/workflows/etsy-aktif-denetim.yml
++++ b/.github/workflows/etsy-aktif-denetim.yml
+@@ -5,6 +5,9 @@ name: etsy-aktif-denetim
+ # state=active ilanlar okunur; metin/meta/gorsel/dosya/envanter/genel sayfa
+ # kurallari uygulanir (scripts/etsy/etsy_aktif_denetim.py).
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/etsy-image-replace.yml b/.github/workflows/etsy-image-replace.yml
+index 44e00b2..360daf1 100644
+--- a/.github/workflows/etsy-image-replace.yml
++++ b/.github/workflows/etsy-image-replace.yml
+@@ -4,6 +4,9 @@ name: etsy-image-replace
+ # dry_run=true (varsayilan) yalniz okur: dosya boyutu + mevcut galeri.
+ # dry_run=false ETSY'YE YAZAR (yukle -> kararlilik -> eski sil) - onay gerekir.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/etsy-listing-update.yml b/.github/workflows/etsy-listing-update.yml
+index 680e3c1..e58d75d 100644
+--- a/.github/workflows/etsy-listing-update.yml
++++ b/.github/workflows/etsy-listing-update.yml
+@@ -6,6 +6,9 @@ name: etsy-listing-update
+ # job summary + CSV olarak verir. dry_run=false ETSY'YE YAZAR - yalnizca Mo
+ # onayindan sonra, once lang=en sonra lang=ru tetiklenir.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/etsy-oas-probe.yml b/.github/workflows/etsy-oas-probe.yml
+index 231eadf..ba10eba 100644
+--- a/.github/workflows/etsy-oas-probe.yml
++++ b/.github/workflows/etsy-oas-probe.yml
+@@ -3,6 +3,9 @@ name: etsy-oas-probe
+ # Etsy Open API v3 semasini (openapi/generated/oas/3.0.0.json) indirir; yol desenine uyan uclarin
+ # istek alanlarini (required, enum, aciklama) job summary'ye yazar. Salt okur, sir kullanmaz.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/etsy-quota-probe.yml b/.github/workflows/etsy-quota-probe.yml
+index b9a9685..3d718cb 100644
+--- a/.github/workflows/etsy-quota-probe.yml
++++ b/.github/workflows/etsy-quota-probe.yml
+@@ -2,6 +2,9 @@ name: etsy-quota-probe
+ 
+ # SALT OKUR: tek getShop cagrisi, x-remaining-today (gunluk kota) yazdirir. Baska hicbir sey yapmaz.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+ 
+diff --git a/.github/workflows/etsy-ru-probe.yml b/.github/workflows/etsy-ru-probe.yml
+index 043e614..a7d7ce8 100644
+--- a/.github/workflows/etsy-ru-probe.yml
++++ b/.github/workflows/etsy-ru-probe.yml
+@@ -5,6 +5,9 @@ name: etsy-ru-probe
+ # olmadigini, RU aciklamada "AI-ASSISTED" ve capraz satis blogunun gecip gecmedigini yazar.
+ # Kontrol icin 1 wallpaper ilani da okunur (RU'nun orada bulundugu dogrulanir). HICBIR YAZMA YOK.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/etsy-state-probe.yml b/.github/workflows/etsy-state-probe.yml
+index 2f5f1c1..c79ae17 100644
+--- a/.github/workflows/etsy-state-probe.yml
++++ b/.github/workflows/etsy-state-probe.yml
+@@ -3,6 +3,9 @@ name: etsy-state-probe
+ # SALT OKUR: magazadaki ilanlarin durum dagilimi (draft/active/inactive/expired sayilari) + istege bagli
+ # tek ilanin state'i. Dogrulama amacli, 4-5 GET. Hicbir yazma yapmaz.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/etsy-verify.yml b/.github/workflows/etsy-verify.yml
+index b15cc66..07dbd81 100644
+--- a/.github/workflows/etsy-verify.yml
++++ b/.github/workflows/etsy-verify.yml
+@@ -6,6 +6,9 @@ name: etsy-verify
+ # token Drive'daki TEMP/ETSY_TOKEN.json'a GERI YAZILIR (docs/SECRETS.md,
+ # "Etsy token sahibi"). Hicbir sir degeri loga dusmez.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/icc-softproof.yml b/.github/workflows/icc-softproof.yml
+index 9a7c5a2..7cfb3ad 100644
+--- a/.github/workflows/icc-softproof.yml
++++ b/.github/workflows/icc-softproof.yml
+@@ -4,6 +4,9 @@ name: icc-softproof
+ # Drive'dan alinir, scripts/icc/icc_softproof.py kosar, karsilastirma PNG'leri
+ # ve CSV Drive TEMP/ICC_TEST/ altina yazilir. Etsy cagrisi yok.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/ig-build-carousel.yml b/.github/workflows/ig-build-carousel.yml
+index 384071a..70e28ef 100644
+--- a/.github/workflows/ig-build-carousel.yml
++++ b/.github/workflows/ig-build-carousel.yml
+@@ -4,6 +4,9 @@ name: ig-build-carousel
+ # render'larindan uretir, ASTROLOVE/TEMP/IG_CAROUSEL_V2/<GUN>/ altina yazar.
+ # Elle tetiklenir; edisyon ve gun secimiyle kismi calistirilabilir.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/ig-media-sync.yml b/.github/workflows/ig-media-sync.yml
+index 7395b54..245e4ff 100644
+--- a/.github/workflows/ig-media-sync.yml
++++ b/.github/workflows/ig-media-sync.yml
+@@ -5,6 +5,9 @@ name: ig-media-sync
+ # Instagram Graph API medyayi yalniz public URL'den cektigi icin gerekli.
+ # Kontak sayfalari (_contact) tasinmaz.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/ig-publish.yml b/.github/workflows/ig-publish.yml
+index 2f08601..baddd06 100644
+--- a/.github/workflows/ig-publish.yml
++++ b/.github/workflows/ig-publish.yml
+@@ -7,6 +7,9 @@ name: ig-publish
+ # Zamanlanmis kosu yalniz repo degiskeni IG_PUBLISH_ENABLED=true ise calisir;
+ # elle tetiklemede dry_run varsayilan olarak ACIK.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/pin-build-v4.yml b/.github/workflows/pin-build-v4.yml
+index c9904e7..42d5cc6 100644
+--- a/.github/workflows/pin-build-v4.yml
++++ b/.github/workflows/pin-build-v4.yml
+@@ -7,6 +7,9 @@ name: pin-build-v4
+ # kontak sayfasini TEMP/PIN_KONTAK_V2/ altina koyar. Edisyon basina bir kosu.
+ # Eski PIN_MEDIA'ya dokunmaz; Pinterest'e dokunmaz. Sir loga dusmez.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/pin-media-perms.yml b/.github/workflows/pin-media-perms.yml
+index 7abfe07..aae3f10 100644
+--- a/.github/workflows/pin-media-perms.yml
++++ b/.github/workflows/pin-media-perms.yml
+@@ -11,6 +11,9 @@ name: pin-media-perms
+ # dosyanin webContentLink'ini anonim HTTP ile cekip erisimi dogrular.
+ # Drive REST API'ye rclone.conf'taki token ile gidilir; token maskelenir.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/pin-merge-week.yml b/.github/workflows/pin-merge-week.yml
+index b784854..88d2af3 100644
+--- a/.github/workflows/pin-merge-week.yml
++++ b/.github/workflows/pin-merge-week.yml
+@@ -6,6 +6,9 @@ name: pin-merge-week
+ # Pinterest'e DOKUNMAZ; ciktiyi Mo Pinterest toplu pin olusturma ile elle
+ # yukler. Hicbir sir degeri loga dusmez.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/pin-week-v2.yml b/.github/workflows/pin-week-v2.yml
+index 59d42a0..3a0288e 100644
+--- a/.github/workflows/pin-week-v2.yml
++++ b/.github/workflows/pin-week-v2.yml
+@@ -6,6 +6,9 @@ name: pin-week-v2
+ # (TEMP/PIN_UPLOAD_STATE_V2.csv), Etsy linki TEMP/PIN_LISTING_MAP.csv. Cikti TEMP/PIN_CSVS_V2/WA_PIN_V2_HAFTAn_GUNxx_yy.csv
+ # + WA_PIN_V2_PLAN_390.csv. Pinterest'e DOKUNMAZ; CSV elle yuklenir.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/planner-sample.yml b/.github/workflows/planner-sample.yml
+index 0ae9a14..8cf686f 100644
+--- a/.github/workflows/planner-sample.yml
++++ b/.github/workflows/planner-sample.yml
+@@ -6,6 +6,9 @@ name: planner-sample
+ # Cikti: PLANNER/SYMBOLS/ (kirpilmis sembol + onizleme) ve PLANNER/SAMPLE/
+ # (iki PDF, alti PNG onizleme, build_report.json). Etsy'ye yazmaz.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/pod-audit.yml b/.github/workflows/pod-audit.yml
+index 384ccbf..1ac1cfa 100644
+--- a/.github/workflows/pod-audit.yml
++++ b/.github/workflows/pod-audit.yml
+@@ -5,6 +5,9 @@ name: pod-audit
+ # Beklenen: sablon (docs/POD_LISTING_TEMPLATE.md) + sabitler + referans ilan (ARIES_LEO) ozellik haritasi.
+ # Cikti: yalniz sapma tablosu (AUDIT_REPORT.md) + audit_result.json. Kota quota_min altina inince durur.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/pod-crosslink.yml b/.github/workflows/pod-crosslink.yml
+index 7c2985a..a404e92 100644
+--- a/.github/workflows/pod-crosslink.yml
++++ b/.github/workflows/pod-crosslink.yml
+@@ -6,6 +6,9 @@ name: pod-crosslink
+ # bir renk icin tam eslesme yoksa kosu DURUR. Diger bolumler birebir korunur (bolum bolum kontrol).
+ # Tek kosuda ADIM 1 dry-run (diff) -> temizse ADIM 2 apply.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/pod-desc-batch.yml b/.github/workflows/pod-desc-batch.yml
+index 459ef3f..84935d5 100644
+--- a/.github/workflows/pod-desc-batch.yml
++++ b/.github/workflows/pod-desc-batch.yml
+@@ -9,6 +9,9 @@ name: pod-desc-batch
+ # varyasyon/video ayni, state active, uzun tire yok). Gecmeyen ilan atlanir.
+ # ETA sayaci, kota izleme (taban altinda DURUR), durum CSV'si her ilanda Drive'a.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/pod-desc-set.yml b/.github/workflows/pod-desc-set.yml
+index cfb5ce6..a5ae2be 100644
+--- a/.github/workflows/pod-desc-set.yml
++++ b/.github/workflows/pod-desc-set.yml
+@@ -5,6 +5,9 @@ name: pod-desc-set
+ # baslik, etiket, fiyat, bolum, materials, gorseller, varyasyonlar ve video
+ # degismez. Yazmadan once tum alanlar JSON olarak Drive'a yedeklenir.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/pod-desc-update.yml b/.github/workflows/pod-desc-update.yml
+index 4f40fee..e3849f8 100644
+--- a/.github/workflows/pod-desc-update.yml
++++ b/.github/workflows/pod-desc-update.yml
+@@ -5,6 +5,9 @@ name: pod-desc-update
+ # baska bolumde fark varsa o ilan atlanir. dry_run=true yalniz diff/tablo; false Etsy'ye YAZAR (onay).
+ # Kota quota_min altina inince durur, kalan ilanlar raporlanir (ayni workflow tekrar kosulur).
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/pod-gallery-build.yml b/.github/workflows/pod-gallery-build.yml
+index 648d750..52d4d5d 100644
+--- a/.github/workflows/pod-gallery-build.yml
++++ b/.github/workflows/pod-gallery-build.yml
+@@ -6,6 +6,9 @@ name: pod-gallery-build
+ # TEMP/POD_GALLERY_STATE/shard_<n>.csv; birlestirme TEMP/POD_GALLERY_STATE.csv +
+ # TEMP/POD_GALLERY_REPORT.md. Resume: PASS olan cift atlanir. Etsy'ye yazmaz.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/pod-gallery-sample.yml b/.github/workflows/pod-gallery-sample.yml
+index ed9cadc..02a64b9 100644
+--- a/.github/workflows/pod-gallery-sample.yml
++++ b/.github/workflows/pod-gallery-sample.yml
+@@ -4,6 +4,9 @@ name: pod-gallery-sample
+ # Kaynak ETSY_UPLOAD_SETS; cikti Drive TEMP/POD_SAMPLE/<PAIR>/<ED>/01..10.jpg
+ # + CONTACT_<ED>.jpg. Etsy'ye yazmaz.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/pod-hero-batch.yml b/.github/workflows/pod-hero-batch.yml
+index 1c81bec..0b5d362 100644
+--- a/.github/workflows/pod-hero-batch.yml
++++ b/.github/workflows/pod-hero-batch.yml
+@@ -8,6 +8,9 @@ name: pod-hero-batch
+ #    uretimi PASS olmayan cift Etsy'de ATLANIR, kosu surer. Kota tabani asilirsa DURULUR.
+ # Metin alanlari (baslik/etiket/fiyat/aciklama/bolum) DEGISMEZ; updateListing cagrilmaz.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+@@ -28,6 +31,10 @@ on:
+         required: false
+         default: "400"
+ 
++concurrency:
++  group: etsy-token
++  cancel-in-progress: false
++
+ jobs:
+   uret:
+     runs-on: ubuntu-latest
+diff --git a/.github/workflows/pod-hero-crop.yml b/.github/workflows/pod-hero-crop.yml
+index 48f5fa9..8f82f67 100644
+--- a/.github/workflows/pod-hero-crop.yml
++++ b/.github/workflows/pod-hero-crop.yml
+@@ -7,6 +7,9 @@ name: pod-hero-crop
+ # preview_cards.png + crop_box.json). Etsy'ye YAZMAZ (yalniz opsiyonel salt-okur
+ # gorsel olcusu), Prodigi'ye dokunmaz.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/pod-hero-fix.yml b/.github/workflows/pod-hero-fix.yml
+index e002d9d..ecb6b87 100644
+--- a/.github/workflows/pod-hero-fix.yml
++++ b/.github/workflows/pod-hero-fix.yml
+@@ -8,6 +8,9 @@ name: pod-hero-fix
+ #     ve metin alanlarina dokunulmaz (updateListing cagrilmaz).
+ # Her adimda gecen/kalan sure yazilir.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/pod-hero-grid.yml b/.github/workflows/pod-hero-grid.yml
+index c3d69a1..b09e193 100644
+--- a/.github/workflows/pod-hero-grid.yml
++++ b/.github/workflows/pod-hero-grid.yml
+@@ -5,6 +5,9 @@ name: pod-hero-grid
+ # Cikti: Drive TEMP/POD_HERO_CROP/<out_dir>/GRID/grid_<ED>.png
+ # Etsy'ye DOKUNMAZ; yalniz Drive okur/yazar.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/pod-hero-swap.yml b/.github/workflows/pod-hero-swap.yml
+index 57acf67..41eee7f 100644
+--- a/.github/workflows/pod-hero-swap.yml
++++ b/.github/workflows/pod-hero-swap.yml
+@@ -6,6 +6,9 @@ name: pod-hero-swap
+ # Galerinin geri kalanina ve baslik/etiket/fiyat/aciklama/bolume DOKUNULMAZ.
+ # ADIM 1 yedek + dry-run (salt okur) -> Drive'a yedek -> ADIM 2 apply (onayla).
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/pod-inventory-update.yml b/.github/workflows/pod-inventory-update.yml
+index 0de33e9..8b77241 100644
+--- a/.github/workflows/pod-inventory-update.yml
++++ b/.github/workflows/pod-inventory-update.yml
+@@ -5,6 +5,9 @@ name: pod-inventory-update
+ # IS 3 renk->gorsel dogrulama (fark varsa POST). dry_run=true yalniz tablolar/diff; false Etsy'ye YAZAR (onay).
+ # Kota quota_min altindaysa yazma yok. Metin kaynagi docs/POD_LISTING_TEMPLATE.md + pod_listing_create.SIZE_SPEC.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/pod-listing-create.yml b/.github/workflows/pod-listing-create.yml
+index 25a1f94..6e429ee 100644
+--- a/.github/workflows/pod-listing-create.yml
++++ b/.github/workflows/pod-listing-create.yml
+@@ -9,6 +9,9 @@ name: pod-listing-create
+ # dry_run=false ETSY'YE YAZAR (kargo profili/bolum olusturma dahil) - yalnizca Mo onayi.
+ # STATE: Drive TEMP/POD_LISTING/POD_LISTINGS_STATE.csv (resume).
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/pod-listing-update.yml b/.github/workflows/pod-listing-update.yml
+index a02a78f..8383ddd 100644
+--- a/.github/workflows/pod-listing-update.yml
++++ b/.github/workflows/pod-listing-update.yml
+@@ -6,6 +6,9 @@ name: pod-listing-update
+ # ilanlari listeler (WP durum dosyasindakiler haric); doluysa fark tablosu.
+ # dry_run=false ETSY'YE YAZAR - yalnizca Mo onayindan sonra. Basliga dokunmaz.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/pod-media-add.yml b/.github/workflows/pod-media-add.yml
+index c57d27a..cb4b6a6 100644
+--- a/.github/workflows/pod-media-add.yml
++++ b/.github/workflows/pod-media-add.yml
+@@ -6,6 +6,9 @@ name: pod-media-add
+ # Kaynak: WALL_ART/LISTING_MEDIA/TECHNICAL/{02_SYMBOL_STORY,05_CRAFTED_DETAIL}/<ED>/, VIDEOS/V01_FIREFLY_STORY/01_EXPORTS/<ED>/.
+ # dry_run=true: on kontrol + mevcut galeri piksel dogrulama + hedef sira (yazma yok). false: Etsy'ye YAZAR (onay).
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/pod-night.yml b/.github/workflows/pod-night.yml
+index 7713fa2..4ce63d3 100644
+--- a/.github/workflows/pod-night.yml
++++ b/.github/workflows/pod-night.yml
+@@ -8,6 +8,9 @@ name: pod-night
+ # Kota her adimin basinda okunur; quota_min altina inince o adim durur ve kalanlari raporlar.
+ # NOT: cron TEK SEFERLIK idi; 7 Eyl 2026 kosusu (run 34070091952) basarili bitti, schedule kaldirildi.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/pod-night2.yml b/.github/workflows/pod-night2.yml
+index f6d5811..13e80b0 100644
+--- a/.github/workflows/pod-night2.yml
++++ b/.github/workflows/pod-night2.yml
+@@ -11,6 +11,9 @@ name: pod-night2
+ # NOT: tek seferlik cron 8 Eyl 2026 00:35 UTC'de kostu (run 34173796646: FAZ 1 200/200, FAZ 2 312
+ # guncellendi + 78 RU govdesi bos atlandi) ve kaldirildi; workflow artik yalniz elle tetiklenir.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/pod-order-router.yml b/.github/workflows/pod-order-router.yml
+index b613cef..4af6054 100644
+--- a/.github/workflows/pod-order-router.yml
++++ b/.github/workflows/pod-order-router.yml
+@@ -8,6 +8,9 @@ name: pod-order-router
+ # (--apply); ayni receipt ikinci kez gonderilemez (STATE + .result.json + Prodigi idempotencyKey).
+ # Cron 30 dk: env=live, onayli mod (Etsy ~48 cagri/gun). STATE Drive TEMP/POD_ORDERS_STATE.csv.
+ 
++permissions:
++  contents: read
++
+ on:
+   # CRON BEKLEMEDE (7 Eyl 2026): Etsy access token'inda transactions_r kapsami YOK
+   # (GET /shops/{id}/receipts -> 403 "requires scope: transactions_r", run 34097249381).
+diff --git a/.github/workflows/pod-paper-update.yml b/.github/workflows/pod-paper-update.yml
+index 6299fb7..c3b4dff 100644
+--- a/.github/workflows/pod-paper-update.yml
++++ b/.github/workflows/pod-paper-update.yml
+@@ -6,6 +6,9 @@ name: pod-paper-update
+ # apply=false (varsayilan) yalniz dry-run + diff uretir.
+ # dry_limit: dry-run kapisini kucuk tutar (kota tasarrufu); apply yine limit kadar ilan isler.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/pod-print-build.yml b/.github/workflows/pod-print-build.yml
+index 2b5524a..081c8dc 100644
+--- a/.github/workflows/pod-print-build.yml
++++ b/.github/workflows/pod-print-build.yml
+@@ -6,6 +6,9 @@ name: pod-print-build
+ # TEMP/POD_PRINT/<PAIR>/<ED>/<SIZE>.jpg (paylasim YOK; siparis aninda gecici link).
+ # STATE shard TEMP/POD_PRINT_STATE/shard_<n>.csv -> birlesik TEMP/POD_PRINT_STATE.csv + rapor.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/pod-ru-tags.yml b/.github/workflows/pod-ru-tags.yml
+index 032d779..5df8858 100644
+--- a/.github/workflows/pod-ru-tags.yml
++++ b/.github/workflows/pod-ru-tags.yml
+@@ -5,6 +5,9 @@ name: pod-ru-tags
+ # Tek kosuda ADIM 1 dry-run (diff tablosu) -> temizse ADIM 2 apply (translations/ru PUT; baslik ve
+ # aciklama Etsy'den okundugu gibi geri gonderilir, yalniz tags degisir). Kota quota_min altinda durur.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/pod-video-match.yml b/.github/workflows/pod-video-match.yml
+index 34631cf..46bd862 100644
+--- a/.github/workflows/pod-video-match.yml
++++ b/.github/workflows/pod-video-match.yml
+@@ -6,6 +6,9 @@ name: pod-video-match
+ # Cikti: Drive TEMP/POD_HERO_CROP/<dir>/ (video_MB_cropped.mp4, compare_hero_vs_video.png,
+ # video_match.json) + ETSY_VIDEO_<stamp>/ (yedek + sonuc).
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/pod-xsell.yml b/.github/workflows/pod-xsell.yml
+index 121d356..134cc9d 100644
+--- a/.github/workflows/pod-xsell.yml
++++ b/.github/workflows/pod-xsell.yml
+@@ -6,6 +6,9 @@ name: pod-xsell
+ # Tek kosuda ADIM 1 dry-run -> temizse ADIM 2 apply. Kota quota_min altina inince durur; islenen
+ # ilanlar Drive TEMP/POD_LISTING/XSELL_STATE.csv'ye yazilir, sonraki kosu kaldigi yerden devam eder.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/prodigi-quote.yml b/.github/workflows/prodigi-quote.yml
+index 64a3de1..96ccc24 100644
+--- a/.github/workflows/prodigi-quote.yml
++++ b/.github/workflows/prodigi-quote.yml
+@@ -4,6 +4,9 @@ name: prodigi-quote
+ # Anahtar Drive TEMP/PRODIGI_TOKEN.json'dan rclone ile okunur; GitHub secret yok,
+ # workflow girdisi olarak asla sir verilmez. Cikti Drive TEMP/PRODIGI/ + artifact.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/pw-ru-fill.yml b/.github/workflows/pw-ru-fill.yml
+index 29b9513..20d01f0 100644
+--- a/.github/workflows/pw-ru-fill.yml
++++ b/.github/workflows/pw-ru-fill.yml
+@@ -8,6 +8,9 @@ name: pw-ru-fill
+ # NOT: tek seferlik cron kaldirildi (8 Eyl 2026) — tam kosu kota yeterli oldugu icin elle
+ # yapildi; workflow artik yalniz workflow_dispatch ile calisir.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/pw-ru-probe.yml b/.github/workflows/pw-ru-probe.yml
+index d25435f..3b90cdb 100644
+--- a/.github/workflows/pw-ru-probe.yml
++++ b/.github/workflows/pw-ru-probe.yml
+@@ -4,6 +4,9 @@ name: pw-ru-probe
+ # edisyonlarindaki CANLI EN + RU metinlerini (baslik, etiket, aciklama) oldugu gibi yazdirir.
+ # Hicbir yazma yapmaz; token donusumu gercek metinden turetilsin diye kullanilir.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/repo-public.yml b/.github/workflows/repo-public.yml
+index 2774287..f9e8a21 100644
+--- a/.github/workflows/repo-public.yml
++++ b/.github/workflows/repo-public.yml
+@@ -4,6 +4,9 @@ name: repo-public
+ # public yapar, secret ISIMLERINI dogrular. OPS_ADMIN_TOKEN yalniz ortamda;
+ # hicbir sir loga yazilmaz. astrolove-media'ya dokunmaz.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/start-here-append.yml b/.github/workflows/start-here-append.yml
+index 59aef3a..ddcabdd 100644
+--- a/.github/workflows/start-here-append.yml
++++ b/.github/workflows/start-here-append.yml
+@@ -4,6 +4,9 @@ name: start-here-append
+ # ekler (Google Docs API, rclone.conf token'i). Ayni numarali kayit zaten
+ # varsa yazmaz. Hicbir sir degeri loga dusmez.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/symbol-extract.yml b/.github/workflows/symbol-extract.yml
+index e68ef86..4f098d0 100644
+--- a/.github/workflows/symbol-extract.yml
++++ b/.github/workflows/symbol-extract.yml
+@@ -7,6 +7,9 @@ name: symbol-extract
+ # Cikti:  TEMP/SYMBOL_LIB/<out_dir>/<CIFT>/{FUSION,GLIF_SOL,GLIF_SAG}.png + onizleme + rapor
+ # ADIM A: tek cift (CANCER_LIBRA) + MASK_V5_RAPOR.json ile bbox kiyasi (tolerans %2).
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-audit-close.yml b/.github/workflows/wp-audit-close.yml
+index 55aa596..e400d60 100644
+--- a/.github/workflows/wp-audit-close.yml
++++ b/.github/workflows/wp-audit-close.yml
+@@ -11,6 +11,9 @@ name: wp-audit-close
+ # Hicbir sey yuklenmez/silinmez; uretilen tek cikti olcum CSV'leri ve
+ # gorsel kontrol icin kirpmalardir.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+@@ -35,6 +38,10 @@ on:
+         type: boolean
+         default: true
+ 
++concurrency:
++  group: etsy-token
++  cancel-in-progress: false
++
+ jobs:
+   measure:
+     runs-on: ubuntu-latest
+diff --git a/.github/workflows/wp-audit-drive.yml b/.github/workflows/wp-audit-drive.yml
+index 0e10af5..2e554e9 100644
+--- a/.github/workflows/wp-audit-drive.yml
++++ b/.github/workflows/wp-audit-drive.yml
+@@ -6,6 +6,9 @@ name: wp-audit-drive
+ # ve OCR tam-string (kalinti/bozuk metin) kontrolu, ekran oran/sikisma
+ # (kalibrasyon), 4 edisyon ZIP butunlugu, dosya saglamligi. Duzeltme yok.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-audit-full.yml b/.github/workflows/wp-audit-full.yml
+index c9b8f0a..dfe58d1 100644
+--- a/.github/workflows/wp-audit-full.yml
++++ b/.github/workflows/wp-audit-full.yml
+@@ -5,6 +5,9 @@ name: wp-audit-full
+ # ceviri, fiyat/bolum/dosya/state). Duzeltme/silme/yeniden yukleme YAPMAZ.
+ # Etsy'ye tek yazma: OAuth token yenilemesi (Drive'a geri yazilir).
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-audit-pair-id.yml b/.github/workflows/wp-audit-pair-id.yml
+index 6853e12..7deb067 100644
+--- a/.github/workflows/wp-audit-pair-id.yml
++++ b/.github/workflows/wp-audit-pair-id.yml
+@@ -7,6 +7,9 @@ name: wp-audit-pair-id
+ # duzeltme/silme/yeniden-yukleme YAPMAZ. Tek yazma: OAuth token yenilenirse
+ # Drive'a geri yazilir (digerleriyle ayni kural).
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch: {}
+ 
+diff --git a/.github/workflows/wp-before-after.yml b/.github/workflows/wp-before-after.yml
+index 1796d7b..b686562 100644
+--- a/.github/workflows/wp-before-after.yml
++++ b/.github/workflows/wp-before-after.yml
+@@ -4,6 +4,9 @@ name: wp-before-after
+ # ciktisi (TEMP/FIX_TEST/MOCKUP_GEOM) ayni bolgeden kirpilip ust uste konur.
+ # Salt okur; cikti TEMP/FIX_TEST/COMPARE. MOCKUP_V2 ve Etsy'ye dokunulmaz.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-bg-synth.yml b/.github/workflows/wp-bg-synth.yml
+index 93a4004..20242bc 100644
+--- a/.github/workflows/wp-bg-synth.yml
++++ b/.github/workflows/wp-bg-synth.yml
+@@ -5,6 +5,9 @@ name: wp-bg-synth
+ # Referanstan piksel kopyalanmaz. Ciktilari Drive'a yazar, grant=true ise
+ # anyone:reader verip linkleri yazar. Etsy'ye dokunmaz.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-build.yml b/.github/workflows/wp-build.yml
+index 0c4970a..87eef89 100644
+--- a/.github/workflows/wp-build.yml
++++ b/.github/workflows/wp-build.yml
+@@ -6,6 +6,9 @@ name: wp-build
+ # step=build: bir ciftin 16 wallpaper'i + kontak sayfasi -> WALLPAPER/FINAL_V2/_CANDIDATE/<CIFT>
+ #   (pilot cift verilirse FINAL_V2 ile piksel kiyas raporu). Etsy'ye dokunmaz.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-delik-probe.yml b/.github/workflows/wp-delik-probe.yml
+index 07a4b9b..98e1b12 100644
+--- a/.github/workflows/wp-delik-probe.yml
++++ b/.github/workflows/wp-delik-probe.yml
+@@ -6,6 +6,9 @@ name: wp-delik-probe
+ #    delik = quad, wallpaper 4 px disari; tek sahne render.
+ # calib.json, FINAL_V2, MOCKUP_V2, DELIVERY, ZIP ve Etsy DEGISMEZ.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-edge-probe.yml b/.github/workflows/wp-edge-probe.yml
+index c07ac0e..45fa5c4 100644
+--- a/.github/workflows/wp-edge-probe.yml
++++ b/.github/workflows/wp-edge-probe.yml
+@@ -5,6 +5,9 @@ name: wp-edge-probe
+ # altina kanit kirpmalari yazilir; MOCKUP_V2, FINAL_V2, DELIVERY degismez,
+ # Etsy'ye hic gidilmez.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-fix-test.yml b/.github/workflows/wp-fix-test.yml
+index 817f3e8..363086b 100644
+--- a/.github/workflows/wp-fix-test.yml
++++ b/.github/workflows/wp-fix-test.yml
+@@ -8,6 +8,9 @@ name: wp-fix-test
+ #    kendi QC'si (SIFT geri-tespit) artifact'e.
+ # 78 ciftlik toplu yeniden uretim BASLATMAZ; onay bekler.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-fix-try.yml b/.github/workflows/wp-fix-try.yml
+index 6a2e3ef..2e3ddaa 100644
+--- a/.github/workflows/wp-fix-try.yml
++++ b/.github/workflows/wp-fix-try.yml
+@@ -8,6 +8,9 @@ name: wp-fix-try
+ # Uretim klasorlerine YAZILMAZ: yeni dosyalar TEMP/FIX_TEST altina gider,
+ # FINAL_V2 / MOCKUP_V2 / DELIVERY degismez, Etsy'ye dokunulmaz.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-full-chain.yml b/.github/workflows/wp-full-chain.yml
+index 6e12097..8deab1e 100644
+--- a/.github/workflows/wp-full-chain.yml
++++ b/.github/workflows/wp-full-chain.yml
+@@ -11,6 +11,9 @@ name: wp-full-chain
+ # Etsy'ye yazan tek is upload_verify; concurrency etsy-token ile diger Etsy
+ # is'leriyle (wp-media, etsy-verify, etsy-listing-update...) karsilikli disli.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-gallery-refresh.yml b/.github/workflows/wp-gallery-refresh.yml
+index 4059a09..2cfeee7 100644
+--- a/.github/workflows/wp-gallery-refresh.yml
++++ b/.github/workflows/wp-gallery-refresh.yml
+@@ -9,6 +9,9 @@ name: wp-gallery-refresh
+ # STATE: TEMP/WP_GALLERY_STATE.csv, ilan basi aninda yazilir; resume=true ile
+ # PASS olanlar atlanir (kesilen kosu kaldigi yerden surer).
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-ident-probe.yml b/.github/workflows/wp-ident-probe.yml
+index 4db4ad1..7a3a7f9 100644
+--- a/.github/workflows/wp-ident-probe.yml
++++ b/.github/workflows/wp-ident-probe.yml
+@@ -4,6 +4,9 @@ name: wp-ident-probe
+ # dosyasinin quad karsilastirmasi ve secilen kosede piksel farki. Hicbir sey
+ # uretilmez; yalniz olcum ve tek kanit kirpmasi yazilir.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-isaret-denetim.yml b/.github/workflows/wp-isaret-denetim.yml
+index b146a82..7fdb60b 100644
+--- a/.github/workflows/wp-isaret-denetim.yml
++++ b/.github/workflows/wp-isaret-denetim.yml
+@@ -5,6 +5,9 @@ name: wp-isaret-denetim
+ # hangi quad'a denk geliyor ve render'da wallpaper gercekten nerede bitiyor.
+ # Hicbir uretim yapilmaz, hicbir calib yazilmaz.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-kalici.yml b/.github/workflows/wp-kalici.yml
+index 9a80406..e489231 100644
+--- a/.github/workflows/wp-kalici.yml
++++ b/.github/workflows/wp-kalici.yml
+@@ -11,6 +11,9 @@ name: wp-kalici
+ # ciktilarla piksel kiyaslanir (ortalama fark < 2), diger 11 ekranda eski QC (5 Eyl 2026, Mo).
+ # ZIP, DELIVERY ve Etsy'ye dokunulmaz.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-listing-activate.yml b/.github/workflows/wp-listing-activate.yml
+index c36e7fa..478ad6b 100644
+--- a/.github/workflows/wp-listing-activate.yml
++++ b/.github/workflows/wp-listing-activate.yml
+@@ -4,6 +4,9 @@ name: wp-listing-activate
+ # ETSY'YE YAZAR: yalniz state=active. Medya/dosya/fiyat/metne dokunmaz.
+ # On-kontrol (gorsel 6, dosya 5, video 0) gecmezse yazmaz. Varsayilan DRY-RUN.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-m04-report.yml b/.github/workflows/wp-m04-report.yml
+index 171c209..f7f1926 100644
+--- a/.github/workflows/wp-m04-report.yml
++++ b/.github/workflows/wp-m04-report.yml
+@@ -4,6 +4,9 @@ name: wp-m04-report
+ # SALT OKUR: Etsy'ye hic dokunmaz. Drive'a yalniz olcum ciktisi ve gorsel
+ # kanit kirpmalari yazilir (silme/uretim yok).
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-master-halka.yml b/.github/workflows/wp-master-halka.yml
+index 9998ca2..829eb9c 100644
+--- a/.github/workflows/wp-master-halka.yml
++++ b/.github/workflows/wp-master-halka.yml
+@@ -6,6 +6,9 @@ name: wp-master-halka
+ # temiz master KOPYADIR. Sonra calib B + temiz master ile SET03+SET04 uretilir.
+ # Uretim master'i, calib.json, MOCKUP_V2, DELIVERY, ZIP, Etsy DEGISMEZ.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-master-kasa.yml b/.github/workflows/wp-master-kasa.yml
+index 8e47e21..42d1e7a 100644
+--- a/.github/workflows/wp-master-kasa.yml
++++ b/.github/workflows/wp-master-kasa.yml
+@@ -8,6 +8,9 @@ name: wp-master-kasa
+ # kopyasinda hedef maske + frame_top {delik: maske}. Master ve calib KOPYADIR.
+ # Uretim master'i, calib.json, MOCKUP_V2, DELIVERY, ZIP, Etsy DEGISMEZ.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-master-kopya.yml b/.github/workflows/wp-master-kopya.yml
+index 5a70a95..515febe 100644
+--- a/.github/workflows/wp-master-kopya.yml
++++ b/.github/workflows/wp-master-kopya.yml
+@@ -6,6 +6,9 @@ name: wp-master-kopya
+ # temiz master KOPYADIR. Sonra calib B + temiz master ile SET03+SET04 uretilir.
+ # Uretim master'i, calib.json, MOCKUP_V2, DELIVERY, ZIP, Etsy DEGISMEZ.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-master-temiz.yml b/.github/workflows/wp-master-temiz.yml
+index 169dc00..99c3c77 100644
+--- a/.github/workflows/wp-master-temiz.yml
++++ b/.github/workflows/wp-master-temiz.yml
+@@ -7,6 +7,9 @@ name: wp-master-temiz
+ # 3) TEMIZ MASTER: serit cerceve rengiyle doldurulur (kopya), SET03/SET04
+ #    yeniden uretilir. Uretim calib/master/MOCKUP_V2/DELIVERY/Etsy DEGISMEZ.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-measure-spec-v2.yml b/.github/workflows/wp-measure-spec-v2.yml
+index 311ad45..ade2d6c 100644
+--- a/.github/workflows/wp-measure-spec-v2.yml
++++ b/.github/workflows/wp-measure-spec-v2.yml
+@@ -4,6 +4,9 @@ name: wp-measure-spec-v2
+ # posterlerini V2 yontemiyle olcer (yuksek gecirgen + Otsu murekkep maskesi,
+ # halka/sembol/metin satirlari, Desktop yan bant metrikleri). Drive'a yazmaz.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-measure-spec.yml b/.github/workflows/wp-measure-spec.yml
+index c82cc70..9065ce0 100644
+--- a/.github/workflows/wp-measure-spec.yml
++++ b/.github/workflows/wp-measure-spec.yml
+@@ -4,6 +4,9 @@ name: wp-measure-spec
+ # olcer (zemin, poster kutusu, murekkep, tagline, watch sembol kutusu) ve
+ # sonucu artifact + job summary olarak verir. Drive'a yazmaz, Etsy'ye dokunmaz.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-media.yml b/.github/workflows/wp-media.yml
+index 13c369d..fe5746e 100644
+--- a/.github/workflows/wp-media.yml
++++ b/.github/workflows/wp-media.yml
+@@ -4,6 +4,9 @@ name: wp-media
+ # 5 dijital dosya). ETSY'YE YAZAR (dry_run=false). STATE degistirmez, yayin yok.
+ # Tek Etsy kosusu: concurrency etsy-token. Resume: TEMP/WP_UPLOAD_STATE.csv.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-mockup-calibrate.yml b/.github/workflows/wp-mockup-calibrate.yml
+index 0d37b1c..883a229 100644
+--- a/.github/workflows/wp-mockup-calibrate.yml
++++ b/.github/workflows/wp-mockup-calibrate.yml
+@@ -5,6 +5,9 @@ name: wp-mockup-calibrate
+ # atar, paste maskelerini cikarir ve sonucu WALLPAPER/MOCKUP_V2/_CALIB
+ # altina yazar (Drive; Etsy'ye dokunmaz). docs/WP_MOCKUP_PIPELINE.md.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-mockup-canva.yml b/.github/workflows/wp-mockup-canva.yml
+index 80bd58f..13105e8 100644
+--- a/.github/workflows/wp-mockup-canva.yml
++++ b/.github/workflows/wp-mockup-canva.yml
+@@ -6,6 +6,9 @@ name: wp-mockup-canva
+ # FINAL_V2, MOCKUP_V2, DELIVERY ve ZIP'ler DEGISMEZ; cikti TEMP altina yazilir.
+ # Etsy'ye dokunulmaz.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-mockup-corner.yml b/.github/workflows/wp-mockup-corner.yml
+index 83166a4..3bc3fad 100644
+--- a/.github/workflows/wp-mockup-corner.yml
++++ b/.github/workflows/wp-mockup-corner.yml
+@@ -5,6 +5,9 @@ name: wp-mockup-corner
+ # kirpmalari (uretim | onceki medyan yaricap | yeni kose bazli) TEMP/FIX_TEST/
+ # COMPARE altina. FINAL_V2 / MOCKUP_V2 / DELIVERY / ZIP / Etsy DEGISMEZ.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-mockup-erode.yml b/.github/workflows/wp-mockup-erode.yml
+index 15113e1..61f0fef 100644
+--- a/.github/workflows/wp-mockup-erode.yml
++++ b/.github/workflows/wp-mockup-erode.yml
+@@ -6,6 +6,9 @@ name: wp-mockup-erode
+ # TEMP/FIX_TEST/MOCKUP_ERODE altina gider; MOCKUP_V2 / FINAL_V2 / DELIVERY
+ # degismez, Etsy'ye dokunulmaz. SET07 kapsam disi.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-mockup-frame.yml b/.github/workflows/wp-mockup-frame.yml
+index ec9e3b5..173cf80 100644
+--- a/.github/workflows/wp-mockup-frame.yml
++++ b/.github/workflows/wp-mockup-frame.yml
+@@ -6,6 +6,9 @@ name: wp-mockup-frame
+ # (TEMP/FIX_TEST/WATCH_CANVA). Cikti TEMP altina; FINAL_V2 / MOCKUP_V2 /
+ # DELIVERY / ZIP'ler degismez, Etsy'ye dokunulmaz.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-mockup-render.yml b/.github/workflows/wp-mockup-render.yml
+index b7d7513..35da4d9 100644
+--- a/.github/workflows/wp-mockup-render.yml
++++ b/.github/workflows/wp-mockup-render.yml
+@@ -5,6 +5,9 @@ name: wp-mockup-render
+ # (varsayilan _CANDIDATE; ilanin galerisine ancak etsy-image-replace ile ve
+ # onayla girer). Etsy'ye dokunmaz. docs/WP_MOCKUP_PIPELINE.md.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-night.yml b/.github/workflows/wp-night.yml
+index c4b1a04..401ade5 100644
+--- a/.github/workflows/wp-night.yml
++++ b/.github/workflows/wp-night.yml
+@@ -9,6 +9,9 @@ name: wp-night
+ # Parcali kosu (shards) ile paralel; her parca kendi STATE satirlarini yazar,
+ # birlestirme sonrasi adimda yapilir. Etsy medya yukleme ayri workflow.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-pdf-probe.yml b/.github/workflows/wp-pdf-probe.yml
+index 0b1cdd5..b008002 100644
+--- a/.github/workflows/wp-pdf-probe.yml
++++ b/.github/workflows/wp-pdf-probe.yml
+@@ -4,6 +4,9 @@ name: wp-pdf-probe
+ # Hicbir yazma/uretim/ZIP degisikligi yok. Etsy'ye tek dokunus GET
+ # (aciklama + RU cevirisi); token yenilemesi disinda yazma yoktur.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-plate-clean.yml b/.github/workflows/wp-plate-clean.yml
+index 4c0a724..bf18683 100644
+--- a/.github/workflows/wp-plate-clean.yml
++++ b/.github/workflows/wp-plate-clean.yml
+@@ -6,6 +6,9 @@ name: wp-plate-clean
+ # anyone:reader verilir ve dogrudan indirme linkleri job summary'ye yazilir.
+ # Etsy'ye dokunmaz.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-plates.yml b/.github/workflows/wp-plates.yml
+index 9439c2d..bb35d90 100644
+--- a/.github/workflows/wp-plates.yml
++++ b/.github/workflows/wp-plates.yml
+@@ -9,6 +9,9 @@ name: wp-plates
+ # Cikti: Drive TEMP/WP_PLATES/{PLATE_<EDISYON>_<CIHAZ>.png, MEDIAN_<EDISYON>.png,
+ # report_<EDISYON>.json} + qc/. Etsy'ye dokunmaz.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-probe-fields.yml b/.github/workflows/wp-probe-fields.yml
+index 428f1eb..2381b4b 100644
+--- a/.github/workflows/wp-probe-fields.yml
++++ b/.github/workflows/wp-probe-fields.yml
+@@ -3,6 +3,9 @@ name: wp-probe-fields
+ # GECICI/TEK KULLANIMLIK: video/dosya API alan adlarini dogrulamak icin
+ # tek ilanin ham JSON'unu job summary'ye basar (salt okur).
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-probe-media-ids.yml b/.github/workflows/wp-probe-media-ids.yml
+index 9ae3036..ca48966 100644
+--- a/.github/workflows/wp-probe-media-ids.yml
++++ b/.github/workflows/wp-probe-media-ids.yml
+@@ -5,6 +5,9 @@ name: wp-probe-media-ids
+ # YOK. Tek yan etki: OAuth token yenilenirse Drive'daki TEMP/ETSY_TOKEN.json
+ # geri yazilir (docs/SECRETS.md).
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-quad-fix.yml b/.github/workflows/wp-quad-fix.yml
+index 96da0c7..7c1825c 100644
+--- a/.github/workflows/wp-quad-fix.yml
++++ b/.github/workflows/wp-quad-fix.yml
+@@ -6,6 +6,9 @@ name: wp-quad-fix
+ # uretilir. ORIJINAL calib.json, FINAL_V2, MOCKUP_V2, DELIVERY, ZIP ve Etsy
+ # DEGISMEZ; cikti TEMP/FIX_TEST/MOCKUP_QUADFIX.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-quad-probe.yml b/.github/workflows/wp-quad-probe.yml
+index dfd379c..03425ff 100644
+--- a/.github/workflows/wp-quad-probe.yml
++++ b/.github/workflows/wp-quad-probe.yml
+@@ -5,6 +5,9 @@ name: wp-quad-probe
+ # calib.json'daki quad ile karsilastirilir. calib.json'a DOKUNULMAZ; uretim
+ # yok. Cikti: TEMP/WP_QUAD_PROBE.csv + TEMP/AUDIT_CROPS/M13_* kanit panelleri.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-quad-test.yml b/.github/workflows/wp-quad-test.yml
+index 05af474..0c66f23 100644
+--- a/.github/workflows/wp-quad-test.yml
++++ b/.github/workflows/wp-quad-test.yml
+@@ -4,6 +4,9 @@ name: wp-quad-test
+ # dortgene oturtulmus - 5 Eyl 2026. Ikisi de tam sahne, TEMP altina yazilir.
+ # calib.json, FINAL_V2, MOCKUP_V2, DELIVERY, ZIP ve Etsy DEGISMEZ.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-quad-uygula.yml b/.github/workflows/wp-quad-uygula.yml
+index 6fc2921..07764d7 100644
+--- a/.github/workflows/wp-quad-uygula.yml
++++ b/.github/workflows/wp-quad-uygula.yml
+@@ -5,6 +5,9 @@ name: wp-quad-uygula
+ # KOPYASINA yazilir. calib.json, FINAL_V2, MOCKUP_V2, DELIVERY, ZIP ve Etsy
+ # DEGISMEZ; cikti TEMP/FIX_TEST/MOCKUP_REDQUAD3.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-red-quad-tel.yml b/.github/workflows/wp-red-quad-tel.yml
+index 60507c1..3d8e060 100644
+--- a/.github/workflows/wp-red-quad-tel.yml
++++ b/.github/workflows/wp-red-quad-tel.yml
+@@ -7,6 +7,9 @@ name: wp-red-quad-tel
+ #              delik=quad), SET03+SET04 uretilir. Diger 12 ekran dokunulmaz.
+ # Uretim calib.json, MOCKUP_V2, DELIVERY, ZIP, Etsy DEGISMEZ.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-red-quad.yml b/.github/workflows/wp-red-quad.yml
+index 56510a0..bdc8466 100644
+--- a/.github/workflows/wp-red-quad.yml
++++ b/.github/workflows/wp-red-quad.yml
+@@ -6,6 +6,9 @@ name: wp-red-quad
+ # Orijinal calib.json, FINAL_V2, MOCKUP_V2, DELIVERY, ZIP ve Etsy DEGISMEZ;
+ # cikti TEMP/FIX_TEST/MOCKUP_REDQUAD.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-saat80-etsy.yml b/.github/workflows/wp-saat80-etsy.yml
+index cbdaf68..b74d4d9 100644
+--- a/.github/workflows/wp-saat80-etsy.yml
++++ b/.github/workflows/wp-saat80-etsy.yml
+@@ -10,6 +10,9 @@ name: wp-saat80-etsy
+ # SET07 render'ini yanlislikla master klasorune yazdi -> hazirlik adimi master'i
+ # MOCKUP_V2_YEDEK_SAAT100'den geri koyar, yeni render'i _CANDIDATE'e alir (idempotent).
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-saat80-ornek.yml b/.github/workflows/wp-saat80-ornek.yml
+index 7f496dc..416fa67 100644
+--- a/.github/workflows/wp-saat80-ornek.yml
++++ b/.github/workflows/wp-saat80-ornek.yml
+@@ -6,6 +6,9 @@ name: wp-saat80-ornek
+ # TEMP/FIX_TEST/SAAT80/<CIFT>/ altina yazar ve anyone:reader link verir.
+ # Uretim dosyalarina (WATCH_CANVA, MOCKUP_V2) DOKUNMAZ. Etsy'ye yazma yok.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-saat80-uretim.yml b/.github/workflows/wp-saat80-uretim.yml
+index 28ebf23..8f2a25e 100644
+--- a/.github/workflows/wp-saat80-uretim.yml
++++ b/.github/workflows/wp-saat80-uretim.yml
+@@ -12,6 +12,9 @@ name: wp-saat80-uretim
+ #            dosyasi TEMP/SAAT80_ORNEK_5/ altina kopyalanir, anyone:reader link.
+ # DELIVERY (PDF'li canli ZIP'ler) hic okunmaz/yazilmaz.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-scope-audit.yml b/.github/workflows/wp-scope-audit.yml
+index e1f9b39..1e553a7 100644
+--- a/.github/workflows/wp-scope-audit.yml
++++ b/.github/workflows/wp-scope-audit.yml
+@@ -5,6 +5,9 @@ name: wp-scope-audit
+ # Yukleme/silme/yayin YOK. Tek yazma: OAuth token yenilemesi (Drive'a geri).
+ # Cikti: TEMP/WP_SCOPE.csv + is ozeti.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-set07-kalici.yml b/.github/workflows/wp-set07-kalici.yml
+index d85a6b9..b5d2bcc 100644
+--- a/.github/workflows/wp-set07-kalici.yml
++++ b/.github/workflows/wp-set07-kalici.yml
+@@ -6,6 +6,9 @@ name: wp-set07-kalici
+ # Iki calib ile de 2 cift x 6 sahne uretilir. Uretim calib.json, FINAL_V2,
+ # MOCKUP_V2, DELIVERY, ZIP ve Etsy DEGISMEZ.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-set07-norelight.yml b/.github/workflows/wp-set07-norelight.yml
+index 394bebc..fa46dd7 100644
+--- a/.github/workflows/wp-set07-norelight.yml
++++ b/.github/workflows/wp-set07-norelight.yml
+@@ -5,6 +5,9 @@ name: wp-set07-norelight
+ # kosu icinde kalir, Drive'a giden tek sey olcum CSV'si ve kanit kirpmalaridir.
+ # calib.json degistirilmez; relight kod tarafinda (--no-relight) kapatilir.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-share-mockups.yml b/.github/workflows/wp-share-mockups.yml
+index 2cbd5b9..9409e3e 100644
+--- a/.github/workflows/wp-share-mockups.yml
++++ b/.github/workflows/wp-share-mockups.yml
+@@ -6,6 +6,9 @@ name: wp-share-mockups
+ # dosya ID + ModTime + dogrudan indirme linkini yazmak. Klasor acilmaz,
+ # yalniz eslesen dosyalar acilir (B94 kurali).
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-spill-probe.yml b/.github/workflows/wp-spill-probe.yml
+index 7fab261..5dfdc8d 100644
+--- a/.github/workflows/wp-spill-probe.yml
++++ b/.github/workflows/wp-spill-probe.yml
+@@ -5,6 +5,9 @@ name: wp-spill-probe
+ # kirpmalari yazilir; FINAL_V2, MOCKUP_V2, WP_PLATES, DELIVERY degismez,
+ # Etsy'ye hic gidilmez.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-state-merge.yml b/.github/workflows/wp-state-merge.yml
+index 156fcd8..7678924 100644
+--- a/.github/workflows/wp-state-merge.yml
++++ b/.github/workflows/wp-state-merge.yml
+@@ -2,6 +2,9 @@ name: wp-state-merge
+ 
+ # WP_NIGHT_STATE parcalarini yeniden birlestirir (en yeni ts kazanir). Uretim yok, Etsy yok.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+ 
+diff --git a/.github/workflows/wp-tone-match.yml b/.github/workflows/wp-tone-match.yml
+index e579409..8c0ba4f 100644
+--- a/.github/workflows/wp-tone-match.yml
++++ b/.github/workflows/wp-tone-match.yml
+@@ -6,6 +6,9 @@ name: wp-tone-match
+ # grant=true ise anyone:reader verip dogrudan indirme linkini yazar.
+ # Etsy'ye dokunmaz. Kaynak URL loga yazilmaz (::add-mask::).
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-watch-ablation.yml b/.github/workflows/wp-watch-ablation.yml
+index 9b399ae..1a7b359 100644
+--- a/.github/workflows/wp-watch-ablation.yml
++++ b/.github/workflows/wp-watch-ablation.yml
+@@ -4,6 +4,9 @@ name: wp-watch-ablation
+ # Uretim yok, Drive'a yalniz olcum CSV/TXT yazilir; MOCKUP_V2 ve DELIVERY'ye
+ # dokunulmaz, Etsy'ye hic gidilmez.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-watch-canva.yml b/.github/workflows/wp-watch-canva.yml
+index 5f17e0b..a3caece 100644
+--- a/.github/workflows/wp-watch-canva.yml
++++ b/.github/workflows/wp-watch-canva.yml
+@@ -12,6 +12,9 @@ name: wp-watch-canva
+ # (Mo, 5 Eyl 2026: FINAL_V2 saati plaka uretimi, Canva-vs-Python farki olcut degil).
+ # FINAL_V2, MOCKUP_V2, ZIP ve Etsy'ye dokunulmaz. 4 edisyon paralel kosabilir.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-watch-probe.yml b/.github/workflows/wp-watch-probe.yml
+index 2da6bb1..f77231f 100644
+--- a/.github/workflows/wp-watch-probe.yml
++++ b/.github/workflows/wp-watch-probe.yml
+@@ -4,6 +4,9 @@ name: wp-watch-probe
+ # Etsy'ye HIC dokunmaz, uretim/duzeltme yapmaz. Drive'a yalniz olcum CSV'si
+ # ve gorsel kontrol icin kirpmalar yazilir.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-why-probe.yml b/.github/workflows/wp-why-probe.yml
+index 0a4c081..465d1c8 100644
+--- a/.github/workflows/wp-why-probe.yml
++++ b/.github/workflows/wp-why-probe.yml
+@@ -5,6 +5,9 @@ name: wp-why-probe
+ # karsilastirilir; ayrica geometrik delik ile kalibre maske arasindaki iliski
+ # olculur. Hicbir sey yazilmaz (yalniz TEMP'e olcum CSV'si).
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-zip-guide-test.yml b/.github/workflows/wp-zip-guide-test.yml
+index c098694..7ac4852 100644
+--- a/.github/workflows/wp-zip-guide-test.yml
++++ b/.github/workflows/wp-zip-guide-test.yml
+@@ -4,6 +4,9 @@ name: wp-zip-guide-test
+ # Etsy'ye DOKUNMAZ. Uretim klasoru WALLPAPER/DELIVERY'ye YAZMAZ: yeni ZIP'ler
+ # TEMP/ZIP_TEST/<CIFT> altina yazilir, mevcut teslimat ZIP'leri oldugu gibi kalir.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-zip-replace.yml b/.github/workflows/wp-zip-replace.yml
+index f1ad8a1..e4be080 100644
+--- a/.github/workflows/wp-zip-replace.yml
++++ b/.github/workflows/wp-zip-replace.yml
+@@ -4,6 +4,9 @@ name: wp-zip-replace
+ # ETSY'YE YAZAR: hedef dosyayi sil + yenisini yukle. Diger dosyalara dokunmaz.
+ # Kaynak Drive WALLPAPER/DELIVERY/<CIFT>/<dosya>. Varsayilan DRY-RUN.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
+diff --git a/.github/workflows/wp-zip-verify.yml b/.github/workflows/wp-zip-verify.yml
+index ba324a3..ca85696 100644
+--- a/.github/workflows/wp-zip-verify.yml
++++ b/.github/workflows/wp-zip-verify.yml
+@@ -4,6 +4,9 @@ name: wp-zip-verify
+ # DELIVERY'deki 312 ZIP cift cift indirilir, acilir ve olculur; hicbir sey
+ # yazilmaz, Etsy'ye dokunulmaz. Cikti: TEMP/WP_ZIP_VERIFY.csv + rapor.
+ 
++permissions:
++  contents: read
++
+ on:
+   workflow_dispatch:
+     inputs:
