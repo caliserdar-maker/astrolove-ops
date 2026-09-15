@@ -1,0 +1,183 @@
+name: nightly-batch2
+
+# GECE BATCH 2 - TAM KATALOG + OTOMASYON ALTYAPISI (Mo 15 Eyl 2026).
+# SALT OKUR: Etsy'de canli yazma YOK, Ads ayari YOK, panel girisi YOK, sosyal
+# medya YOK, dosya silme/tasima/uzerine yazma YOK, yeni gorsel uretimi YOK.
+# Her oncelik kendi adiminda; biri patlarsa digerleri surer (continue-on-error).
+# Cikti: ASTROLOVE/TEMP/NIGHTLY_BATCH_2/<UTC damga>/
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      ornek:
+        description: "ONCELIK 3 teknik analiz icin indirilecek ornek dosya sayisi"
+        required: false
+        default: "60"
+      ornek_mb:
+        description: "Ornek indirme ust siniri (MB)"
+        required: false
+        default: "1500"
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  batch2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    env:
+      ORNEK: ${{ inputs.ornek || '60' }}
+      ORNEK_MB: ${{ inputs.ornek_mb || '1500' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2 pillow==11.3.0
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Girdiler (token, POD state, cache, Drive listesi + MD5)
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out _work/ornek
+          stamp=$(date -u +%Y%m%d_%H%M); echo "STAMP=$stamp" >> "$GITHUB_ENV"
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_LISTING/POD_LISTINGS_STATE.csv" _work/pod_state.csv
+          # cache: onceki kosunun dijital dosya envanteri (ilan basina yeni cagri yapmamak icin)
+          d=$(rclone lsf "gdrive:ASTROLOVE/TEMP/POD_LISTING/" --dirs-only | grep '^DIGITAL_AUDIT_' | sort | tail -1)
+          if [ -n "$d" ]; then
+            rclone copyto "gdrive:ASTROLOVE/TEMP/POD_LISTING/${d%/}/DIGITAL_FILES_ALL.csv" _work/files_cache.csv || true
+          fi
+          echo "dosya cache satiri: $( [ -f _work/files_cache.csv ] && wc -l < _work/files_cache.csv || echo 0 )"
+          # TAM tarama: metadata + MD5 (indirme yok)
+          rclone lsjson "gdrive:ASTROLOVE" -R --files-only --fast-list --hash --no-modtime --no-mimetype \
+            > _work/drive_files.json || echo "[]" > _work/drive_files.json
+          python -c "import json;d=json.load(open('_work/drive_files.json'));print('Drive dosya:',len(d))"
+      - name: 'ONCELIK 1+2 katalog ve SEO denetimi'
+        continue-on-error: true
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          python scripts/night2/catalog.py --out _out --files-cache _work/files_cache.csv \
+            --pod-state _work/pod_state.csv
+      - name: 'ONCELIK 3 ornek dosya indirme (disk korumali)'
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          python - <<'PY' > _work/ornek_liste.txt
+          import json, os, random, re
+          d = json.load(open("_work/drive_files.json"))
+          sinir = int(os.environ["ORNEK_MB"]) * 1024 * 1024
+          n = int(os.environ["ORNEK"])
+          tur = lambda p: ("zip" if p.lower().endswith(".zip") else
+                           "pdf" if p.lower().endswith(".pdf") else
+                           "video" if p.lower().endswith((".mp4", ".mov")) else
+                           "gorsel" if p.lower().endswith((".jpg", ".jpeg", ".png")) else "diger")
+          havuz = {}
+          for x in d:
+              p = x.get("Path") or ""
+              b = int(x.get("Size") or 0)
+              if not p or b > 120 * 1024 * 1024:      # cok buyuk dosyalari ornege alma
+                  continue
+              havuz.setdefault(tur(p), []).append((p, b))
+          random.seed(20260915)
+          secili, toplam = [], 0
+          for t in ("gorsel", "zip", "pdf", "video"):
+              adaylar = havuz.get(t, [])
+              random.shuffle(adaylar)
+              for p, b in adaylar[: max(1, n // 4)]:
+                  if toplam + b > sinir:
+                      break
+                  secili.append(p); toplam += b
+          print("\n".join(secili))
+          import sys; print(f"ornek {len(secili)} dosya, {toplam/1e6:.0f} MB", file=sys.stderr)
+          PY
+          wc -l < _work/ornek_liste.txt
+          rclone copy "gdrive:ASTROLOVE" _work/ornek --files-from _work/ornek_liste.txt \
+            --flatten-dirs --transfers 8 -q || true
+          echo "indirilen: $(ls _work/ornek | wc -l) dosya, $(du -sh _work/ornek | cut -f1)"
+      - name: 'ONCELIK 3+4 medya QA ve matris'
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          python scripts/night2/media_qa.py --listing _work/drive_files.json \
+            --pod-state _work/pod_state.csv --catalog _out/full_etsy_catalog.json \
+            --ornek-dir _work/ornek --out _out
+      - name: 'ONCELIK 5+6+7 icerik veri seti, Ads altyapisi, GPSR tablosu'
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          python scripts/night2/assets_kit.py --catalog _out/full_etsy_catalog.json \
+            --pod-state _work/pod_state.csv --out _out
+          cp scripts/night2/ads_kpi.py _out/ads_kpi.py
+      - name: 'ONCELIK 8 workflow sertlestirme yamasi (main e push YOK)'
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          python scripts/night2/wf_harden.py --out _out
+      - name: 'ONCELIK 9 runbook + ONCELIK 6 talimat'
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          cp docs/night2/RUNBOOKS.md _out/runbooks.md
+          cat > _out/etsy_ads_kullanim_talimati.md <<'MD'
+          # Etsy Ads veri altyapisi - kullanim talimati
+
+          1. Shop Manager > Marketing > Etsy Ads ekranini ac, tarih araligini sec.
+          2. Disa aktarim (CSV) indir.
+          3. Kolonlari `etsy_ads_column_dictionary.csv` ile karsilastir; adlar farkliysa
+             CSV basligini bu adlara cevir (date, listing_id, listing_title, impressions,
+             clicks, spend, orders, revenue, currency).
+          4. Dosyayi Drive'a koy: ASTROLOVE/TEMP/ADS/etsy_ads_stats_<tarih>.csv
+          5. Calistir: python ads_kpi.py --csv etsy_ads_stats_<tarih>.csv --out <klasor>
+          6. Cikti: ads_kpi_by_listing.csv (CTR, CPC, donusum, ROAS, wasted spend,
+             KEEP/WATCH/REDUCE/REVIEW) ve ads_kpi_summary.md.
+
+          Esikler: --min-click 15, --min-spend 3.0, --roas-dusuk 1.0, --roas-iyi 2.0.
+          Betik veri UYDURMAZ: CSV yoksa ya da kolon eksikse DURUR.
+          Butce, kampanya ve teklif degisikligi bu betigin isi DEGILDIR.
+          MD
+          ls -la _out | head -30
+      - name: Token + cikti Drive'a
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
+          if grep -rqE '"(access_token|refresh_token)"[[:space:]]*:[[:space:]]*"[A-Za-z0-9._-]{20,}"|x-api-key[[:space:]]*:[[:space:]]*[A-Za-z0-9_-]{16,}|\b[0-9]{6,}\.[A-Za-z0-9_-]{30,}\b|GOCSPX-[A-Za-z0-9_-]{10,}' _out/ 2>/dev/null; then
+            echo "::error::ciktida sir DEGERI bulundu, Drive'a yazilmadi"; exit 1
+          fi
+          hedef="gdrive:ASTROLOVE/TEMP/NIGHTLY_BATCH_2/${STAMP}"
+          rclone copy _out "$hedef" -q
+          echo "Cikti: TEMP/NIGHTLY_BATCH_2/${STAMP}/"
+          rclone lsf "$hedef"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        continue-on-error: true
+        with:
+          name: nightly-batch2
+          path: _out/
+          if-no-files-found: ignore
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
