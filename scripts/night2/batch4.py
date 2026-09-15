@@ -201,6 +201,14 @@ def main():
         plan = oku_csv(b3 / "duplicate_archive_plan.csv")
         if not plan:
             return 0, 1, "Batch 3 duplicate_archive_plan.csv yok"
+        KORU_RX = re.compile(r"MASTER|FINAL|APPROVED|ONAYLI|/PRINT|ETSY_ZIPS", re.I)
+        ARSIV_RX = re.compile(r"YEDEK|BACKUP|ARCHIVE|ARSIV|/OLD|ESKI|COPY|KOPYA|_v\d|TEMP/", re.I)
+        kullanilan = set()
+        for m in oku_json(b2 / "product_listing_media_matrix.json"):
+            for k in ("ana_zip", "pdf_guide", "video"):
+                if m.get(k):
+                    kullanilan.add(m[k])
+        haric = []
         # md5 -> yol listesi: once Drive metadata (TAM), yoksa Batch 2 (6 yol siniri var)
         ham = {r.get("anahtar"): r for r in oku_csv(b2 / "duplicate_candidates.csv")}
         satir, bayt = [], 0
@@ -219,8 +227,24 @@ def main():
                                            or "").split("|") if y.strip()]
                 kesik += 1
             master = r.get("master_adayi", "")
-            adaylar = [y for y in tum if y != master] or \
-                      [y.strip() for y in (r.get("arsiv_adaylari") or "").split("|") if y.strip()]
+            # Batch 3 grubu en fazla 6 yol gorerek siniflamisti. Metadata ile tam listeye
+            # cikarken guvenlik filtresi HER DOSYAYA yeniden uygulanir; disarida kalan
+            # yollar plana ALINMAZ, ayri dosyaya yazilir.
+            adaylar, haric_grup = [], []
+            for y in tum:
+                if y == master:
+                    continue
+                if y in kullanilan:
+                    haric_grup.append((y, "ilan tarafindan kullaniliyor"))
+                elif KORU_RX.search(y):
+                    haric_grup.append((y, "MASTER/FINAL/PRINT yolunda"))
+                elif not ARSIV_RX.search(y):
+                    haric_grup.append((y, "arsiv deseni tasimiyor (YEDEK/OLD/TEMP vb. degil)"))
+                else:
+                    adaylar.append(y)
+            for y, neden in haric_grup:
+                haric.append({"grup_md5": anahtar, "yol": y, "neden": neden,
+                              "korunan_master": master})
             try:
                 kopya = int(r.get("kopya_sayisi") or 0)
             except ValueError:
@@ -251,6 +275,8 @@ def main():
                 })
                 bayt += birim_bayt
         yaz_csv(out / "duplicate_archive_plan.csv", satir)
+        yaz_csv(out / "duplicate_excluded_paths.csv", haric,
+                ["grup_md5", "yol", "neden", "korunan_master"])
         # geri alma betigi (calistirilmaz, dosya olarak uretilir)
         geri = ["#!/usr/bin/env bash", "# BATCH 4 - duplicate arsiv GERI ALMA betigi.",
                 "# Bu betik BATCH 4 tarafindan CALISTIRILMADI. Yalniz tasima yapildiktan",
@@ -261,6 +287,7 @@ def main():
                                                            encoding="utf-8")
         return len(satir), 0, (f"{len(satir)} dosya, {bayt/1e9:.2f} GB, "
                                f"{len({x['grup_md5'] for x in satir})} grup; "
+                               f"guvenlik filtresi disladi {len(haric)}; "
                                f"metadata disi grup {kesik}; TASIMA YAPILMADI")
 
     # ------------------------------------------------------------------ GOREV 4
@@ -284,13 +311,18 @@ def main():
             for r in oku_csv(p):
                 d = {k.lower().strip(): (v or "").strip() for k, v in r.items() if k}
                 # Prodigi teklif dosyasi (PRODIGI_PILOT_QUOTES.csv) ve genel maliyet CSV'si
-                boyut = d.get("boyut") or d.get("size") or d.get("urun") or d.get("product") or ""
+                sku = d.get("sku", "")
+                # uretimde kullanilan SKU semasi GLOBAL-HPR-<boyut> (order_router.py);
+                # boyut anahtari SKU sonekidir ("11.0x14.0 in" degil)
+                boyut = (sku.rsplit("-", 1)[-1] if sku.count("-") >= 2 else "") or \
+                    d.get("size") or d.get("boyut") or ""
                 mal = (d.get("birim_fiyat") or d.get("unit_cost") or d.get("unitcost")
                        or d.get("cost") or d.get("maliyet") or d.get("price") or "")
-                kargo = (d.get("kargo_standard") or d.get("kargo_budget")
+                kargo = (d.get("kargo_standard") or d.get("standard")
+                         or d.get("kargo_budget") or d.get("budget")
                          or d.get("shipping") or d.get("kargo") or "")
                 if boyut and sayi(mal) > 0:
-                    gercek.append({"boyut": boyut, "sku": d.get("sku", ""),
+                    gercek.append({"boyut": boyut, "sku": sku, "urun": d.get("urun", ""),
                                    "maliyet": round(sayi(mal), 2),
                                    "kargo": round(sayi(kargo), 2) if kargo else "",
                                    "para": d.get("para_birimi") or d.get("currency") or "",
@@ -300,10 +332,18 @@ def main():
         v2 = []
         if gercek:
             fiyat_tab = {r["size"]: sayi(r["price"]) for r in oku_csv("scripts/etsy/pod_prices.csv")}
+            # uretim ailesi HPR (Hahnemuhle Photo Rag): order_router.py GLOBAL-HPR-<boyut>
+            # gonderir. HPR yoksa o boyutun en ucuz adayi kullanilir ve isaretlenir.
             en_ucuz = {}
             for g in gercek:
                 b = g["boyut"].replace('"', "").replace(" ", "").lower()
-                if b not in en_ucuz or g["maliyet"] < en_ucuz[b]["maliyet"]:
+                mevcut = en_ucuz.get(b)
+                hpr = "-HPR-" in g["sku"].upper()
+                if mevcut is None:
+                    en_ucuz[b] = g
+                elif hpr and "-HPR-" not in mevcut["sku"].upper():
+                    en_ucuz[b] = g
+                elif hpr == ("-HPR-" in mevcut["sku"].upper()) and g["maliyet"] < mevcut["maliyet"]:
                     en_ucuz[b] = g
             for boyut, fiyat in sorted(fiyat_tab.items()):
                 g = en_ucuz.get(boyut.lower().replace(" ", ""))
@@ -321,7 +361,10 @@ def main():
                            "toplam_maliyet": round(toplam, 2), "birim_kar": round(kar, 2),
                            "brut_marj_yuzde": round(kar / fiyat * 100, 1),
                            "basabas_roas": round(fiyat / kar, 2) if kar > 0 else "kar yok",
-                           "veri_kaynagi": f"GERCEK ({g['sku'] or kaynak})"})
+                           "veri_kaynagi": f"GERCEK ({g['sku'] or kaynak})",
+                           "uretim_ailesi": ("HPR - uretimde kullanilan" if "-HPR-"
+                                             in g["sku"].upper() else
+                                             "HPR DISI - bu boyutta HPR teklifi yok")})
             if v2:
                 yaz_csv(out / "astrolove_unit_economics_v2.csv", v2)
         md = [f"# GOREV 4 - Prodigi gercek maliyet kaynagi ({simdi()} UTC)", ""]
