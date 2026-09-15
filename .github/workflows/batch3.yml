@@ -1,0 +1,127 @@
+name: batch3
+
+# BATCH 3 - bulgulari ise cevirme (Mo 15 Eyl 2026). SALT OKUR + TASLAK.
+# Etsy'ye canli yazma YOK, GPSR panel girisi YOK, dosya tasima/silme YOK,
+# Ads ayari YOK, sosyal medya/Metricool YOK, main'e push YOK.
+# Girdi: Batch 2 ciktilari (yeniden katalog/medya taramasi YAPILMAZ).
+# Cikti: ASTROLOVE/TEMP/BATCH_3/<UTC damga>/
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      b2_dir:
+        description: "NIGHTLY_BATCH_2 altindaki klasor (bos = en yenisi)"
+        required: false
+        default: ""
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  b3:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      B2DIR: ${{ inputs.b2_dir }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Girdiler (Batch 2 ciktilari + magaza salt okur)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out _work/b2
+          stamp=$(date -u +%Y%m%d_%H%M); echo "STAMP=$stamp" >> "$GITHUB_ENV"
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          d="$B2DIR"
+          if [ -z "$d" ]; then
+            d=$(rclone lsf "gdrive:ASTROLOVE/TEMP/NIGHTLY_BATCH_2/" --dirs-only | sort | tail -1)
+            d="${d%/}"
+          fi
+          echo "Batch 2 klasoru: $d"
+          rclone copy "gdrive:ASTROLOVE/TEMP/NIGHTLY_BATCH_2/${d}" _work/b2 -q
+          ls _work/b2 | wc -l
+          # magaza bilgisi: TEK salt okur cagri (GOREV 5)
+          python - <<'PY'
+          import json, os, pathlib, sys
+          sys.path.insert(0, "scripts/etsy")
+          from etsy_common import Etsy, TokenStore, mask
+          k, s = os.environ.get("ETSY_API_KEY",""), os.environ.get("ETSY_SHARED_SECRET","")
+          mask(k); mask(s)
+          shop = os.environ["ETSY_SHOP_ID"]; mask(shop)
+          st = TokenStore(os.environ["TOKEN_FILE"], k, s)
+          if st.needs_refresh(): st.refresh()
+          api = Etsy(st)
+          d = api.get(f"/shops/{shop}", ok404=True) or {}
+          # sir tasimayan alanlari sakla
+          tut = ["shop_name","title","announcement","sale_message","digital_sale_message",
+                 "icon_url_fullxfull","listing_active_count","digital_listing_count",
+                 "transaction_sold_count","review_count","review_average","policy_welcome",
+                 "is_vacation","currency_code","url"]
+          pathlib.Path("_work/shop.json").write_text(
+              json.dumps({x: d.get(x) for x in tut if x in d}, ensure_ascii=False, indent=1),
+              encoding="utf-8")
+          print("magaza alanlari:", sorted(x for x in tut if x in d), "| kota", api.remaining)
+          PY
+      - name: 'GOREV 2,3,4,5,7,8,9,10'
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          python scripts/night2/batch3.py --b2-dir _work/b2 --out _out \
+            --shop-json _work/shop.json --prices scripts/etsy/pod_prices.csv
+      - name: 'GOREV 1 + 6 dosyalari'
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          [ -f docs/night2/workflow_test_report.md ] && cp docs/night2/workflow_test_report.md _out/ || true
+          [ -f docs/night2/workflow_patch.diff ] && cp docs/night2/workflow_patch.diff _out/ || true
+          [ -f docs/night2/competitor_research.md ] && cp docs/night2/competitor_research.md _out/ || true
+          ls -la _out | head -30
+      - name: Token + cikti Drive'a
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
+          if grep -rqE '"(access_token|refresh_token)"[[:space:]]*:[[:space:]]*"[A-Za-z0-9._-]{20,}"|x-api-key[[:space:]]*:[[:space:]]*[A-Za-z0-9_-]{16,}|\b[0-9]{6,}\.[A-Za-z0-9_-]{30,}\b|GOCSPX-[A-Za-z0-9_-]{10,}' _out/ 2>/dev/null; then
+            echo "::error::ciktida sir DEGERI bulundu, Drive'a yazilmadi"; exit 1
+          fi
+          hedef="gdrive:ASTROLOVE/TEMP/BATCH_3/${STAMP}"
+          rclone copy _out "$hedef" -q
+          echo "Cikti: TEMP/BATCH_3/${STAMP}/"
+          rclone lsf "$hedef"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        continue-on-error: true
+        with:
+          name: batch3
+          path: _out/
+          if-no-files-found: ignore
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
