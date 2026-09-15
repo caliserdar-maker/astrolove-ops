@@ -1,0 +1,101 @@
+name: etsy-envanter
+
+# SALT OKUR ENVANTER RAPORU (Mo 15 Eyl 2026). Etsy'ye yazma yok, reklam ayarina dokunma yok.
+# 1) Etsy OAS semasinda reklam ucu var mi (indirilen oas.json taranir; kota harcamaz),
+# 2) Drive'da Etsy Ads CSV'si var mi (ad taramasi), 3) tum aktif ilanlar CSV'ye,
+# 4) tip/bolum ozeti MD'ye. Cagri siniri (varsayilan 400) betikte zorlanir.
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_calls:
+        description: "En fazla Etsy API cagrisi"
+        required: false
+        default: "400"
+      receipt_pages:
+        description: "Makbuz sayfasi (100'luk) ust siniri"
+        required: false
+        default: "8"
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  rapor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      MAXC: ${{ inputs.max_calls || '400' }}
+      RPAGES: ${{ inputs.receipt_pages || '8' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Girdiler (token, OAS, Drive reklam CSV taramasi)
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          curl -fsSL -o _work/oas.json https://www.etsy.com/openapi/generated/oas/3.0.0.json
+          echo "oas: $(wc -c < _work/oas.json) bayt"
+          # Drive'in tamaminda adinda 'ads' gecen csv/xlsx dosyalari
+          rclone lsf "gdrive:" -R --files-only --fast-list --ignore-case \
+            --include "*ads*.csv" --include "*ads*.xlsx" --include "*ads*.xls" --include "*advert*" \
+            > _work/ads_files.txt 2>/dev/null || true
+          n=$(grep -c . _work/ads_files.txt || true)
+          echo "Drive'da 'ads' adli dosya: $n"
+          if [ "$n" -gt 0 ]; then
+            { echo "Drive'da adinda 'ads/advert' gecen dosyalar ($n):"; sed 's/^/- /' _work/ads_files.txt | head -50; } > _work/ads_drive.md
+          fi
+      - name: Envanter raporu (salt okur)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          python scripts/etsy/envanter_raporu.py --oas _work/oas.json --out _out \
+            --max-calls "$MAXC" --receipt-pages "$RPAGES" --ads-drive _work/ads_drive.md
+      - name: Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          stamp=$(date -u +%Y%m%d_%H%M)
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
+          if ! grep -rqE 'x-api-key|refresh_token|access_token' _out/ 2>/dev/null; then
+            [ -d _out ] && rclone copy _out "gdrive:ASTROLOVE/TEMP/RAPOR/ENVANTER_${stamp}" -q && \
+              echo "Cikti: TEMP/RAPOR/ENVANTER_${stamp}/" || true
+          else
+            echo "::error::ciktida sir benzeri anahtar bulundu, Drive'a yazilmadi"; exit 1
+          fi
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: etsy-envanter
+          path: _out/
+          if-no-files-found: ignore
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
