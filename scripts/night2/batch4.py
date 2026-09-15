@@ -270,28 +270,84 @@ def main():
             bulunan = [x.strip() for x in
                        pathlib.Path(a.drive_index).read_text(encoding="utf-8").split("\n")
                        if x.strip()]
+        def sayi(x):
+            try:
+                return float(str(x).replace("$", "").replace(",", ".").strip())
+            except (TypeError, ValueError):
+                return 0.0
+
         gercek = []
         kaynak = ""
         p = pathlib.Path(a.prodigi_list) if a.prodigi_list else None
-        if p and p.exists():
+        if p and p.exists() and p.stat().st_size > 0:
             kaynak = p.name
             for r in oku_csv(p):
                 d = {k.lower().strip(): (v or "").strip() for k, v in r.items() if k}
-                boyut = d.get("size") or d.get("boyut") or d.get("product") or ""
-                mal = d.get("cost") or d.get("maliyet") or d.get("price") or ""
-                if boyut and mal:
-                    gercek.append({"boyut": boyut, "maliyet": mal,
-                                   "kargo": d.get("shipping") or d.get("kargo") or "",
-                                   "para": d.get("currency") or d.get("para") or ""})
+                # Prodigi teklif dosyasi (PRODIGI_PILOT_QUOTES.csv) ve genel maliyet CSV'si
+                boyut = d.get("boyut") or d.get("size") or d.get("urun") or d.get("product") or ""
+                mal = (d.get("birim_fiyat") or d.get("unit_cost") or d.get("unitcost")
+                       or d.get("cost") or d.get("maliyet") or d.get("price") or "")
+                kargo = (d.get("kargo_standard") or d.get("kargo_budget")
+                         or d.get("shipping") or d.get("kargo") or "")
+                if boyut and sayi(mal) > 0:
+                    gercek.append({"boyut": boyut, "sku": d.get("sku", ""),
+                                   "maliyet": round(sayi(mal), 2),
+                                   "kargo": round(sayi(kargo), 2) if kargo else "",
+                                   "para": d.get("para_birimi") or d.get("currency") or "",
+                                   "kaynak_dosya": kaynak})
         eski = oku_csv(b3 / "astrolove_unit_economics.csv")
+        # gercek veri varsa birim ekonomi yeniden hesaplanir
+        v2 = []
+        if gercek:
+            fiyat_tab = {r["size"]: sayi(r["price"]) for r in oku_csv("scripts/etsy/pod_prices.csv")}
+            en_ucuz = {}
+            for g in gercek:
+                b = g["boyut"].replace('"', "").replace(" ", "").lower()
+                if b not in en_ucuz or g["maliyet"] < en_ucuz[b]["maliyet"]:
+                    en_ucuz[b] = g
+            for boyut, fiyat in sorted(fiyat_tab.items()):
+                g = en_ucuz.get(boyut.lower().replace(" ", ""))
+                if not g or not fiyat:
+                    continue
+                kargo = sayi(g["kargo"])
+                islem, odeme, ilan = fiyat * 0.065, fiyat * 0.03 + 0.25, 0.20
+                toplam = g["maliyet"] + kargo + islem + odeme + ilan
+                kar = fiyat - toplam
+                v2.append({"boyut": boyut, "etsy_fiyat": round(fiyat, 2),
+                           "prodigi_birim_maliyet": g["maliyet"],
+                           "prodigi_kargo": round(kargo, 2),
+                           "etsy_islem_6.5": round(islem, 2),
+                           "etsy_odeme_3+0.25": round(odeme, 2), "listeleme_0.20": ilan,
+                           "toplam_maliyet": round(toplam, 2), "birim_kar": round(kar, 2),
+                           "brut_marj_yuzde": round(kar / fiyat * 100, 1),
+                           "basabas_roas": round(fiyat / kar, 2) if kar > 0 else "kar yok",
+                           "veri_kaynagi": f"GERCEK ({g['sku'] or kaynak})"})
+            if v2:
+                yaz_csv(out / "astrolove_unit_economics_v2.csv", v2)
         md = [f"# GOREV 4 - Prodigi gercek maliyet kaynagi ({simdi()} UTC)", ""]
         if gercek:
             md += [f"**GERCEK VERI BULUNDU:** `{kaynak}` ({len(gercek)} satir). "
-                   "Ekonomik model bu degerlerle guncellendi.", "",
-                   "| boyut | maliyet | kargo | para birimi |", "|---|---:|---:|---|"]
-            md += [f"| {x['boyut']} | {x['maliyet']} | {x['kargo'] or '-'} | {x['para'] or '?'} |"
-                   for x in gercek]
+                   "Ekonomik model bu degerlerle guncellendi "
+                   "(`astrolove_unit_economics_v2.csv`).", "",
+                   "## Prodigi gercek maliyetleri", "",
+                   "| boyut | sku | birim maliyet | kargo | para |",
+                   "|---|---|---:|---:|---|"]
+            md += [f"| {x['boyut']} | {x['sku'] or '-'} | {x['maliyet']} | "
+                   f"{x['kargo'] if x['kargo'] != '' else '-'} | {x['para'] or '?'} |"
+                   for x in sorted(gercek, key=lambda z: z["maliyet"])]
             yaz_csv(out / "prodigi_costs_real.csv", gercek)
+            if v2:
+                md += ["", "## Gercek veriyle birim ekonomi", "",
+                       "| boyut | Etsy fiyat | Prodigi maliyet | kargo | toplam maliyet | "
+                       "birim kar | marj | basabas ROAS |",
+                       "|---|---:|---:|---:|---:|---:|---:|---:|"]
+                md += [f"| {x['boyut']} | {x['etsy_fiyat']} | {x['prodigi_birim_maliyet']} | "
+                       f"{x['prodigi_kargo']} | {x['toplam_maliyet']} | {x['birim_kar']} | "
+                       f"%{x['brut_marj_yuzde']} | {x['basabas_roas']} |" for x in v2]
+                zarar = [x["boyut"] for x in v2 if x["birim_kar"] <= 0]
+                if zarar:
+                    md += ["", f"**UYARI: zarar eden boyut(lar): {', '.join(zarar)}** - "
+                           "fiyat guncellenmeden bu boyutlarda reklam verilmemeli.", ""]
         else:
             md += ["**GERCEK VERI BULUNAMADI.** Drive'da Prodigi maliyet listesi aranmasina ragmen",
                    "maliyet kolonu tasiyan dosya cikmadi. Veri UYDURULMADI; asagidaki model",
@@ -308,12 +364,14 @@ def main():
             else:
                 md += ["Ad eslesmesi veren dosya **bulunamadi**.", ""]
         md += ["", "## Model durumu (Batch 3 birim ekonomisi)", "",
-               "| aile | fiyat | urun maliyeti | kaynak |", "|---|---:|---:|---|"]
+               "| aile | fiyat | Batch 3 urun maliyeti | durum |", "|---|---:|---:|---|"]
         for x in eski:
             aile = x.get("urun_ailesi", "")
-            kayn = ("GERCEK (Prodigi listesi)" if gercek and "POD" in aile
-                    else "VARSAYIM - dogrulanmadi" if "POD" in aile
-                    else "GERCEK (maliyet yok, dijital urun)")
+            if "POD" in aile:
+                kayn = ("GECERSIZ - varsayim; gecerli deger v2 tablosunda" if v2
+                        else "VARSAYIM - dogrulanmadi")
+            else:
+                kayn = "GECERLI (dijital urun, marjinal maliyet 0)"
             md.append(f"| {aile} | {x.get('fiyat')} | {x.get('urun_maliyeti')} | {kayn} |")
         md += ["", "## Isaretleme kurali", "",
                "- **GERCEK**: Prodigi listesinden ya da sifir maliyetli dijital urunden gelir.",
@@ -327,7 +385,7 @@ def main():
         (out / "prodigi_cost_source.md").write_text("\n".join(md) + "\n", encoding="utf-8")
         return len(gercek) or len(bulunan), 0, (
             f"gercek maliyet satiri {len(gercek)}, ad eslesmesi {len(bulunan)}; "
-            f"{'model guncellendi' if gercek else 'varsayimlar ayri isaretlendi'}")
+            f"{'model guncellendi (' + str(len(v2)) + ' boyut)' if v2 else ('kaynak bulundu, boyut eslesmedi' if gercek else 'varsayimlar ayri isaretlendi')}")
 
     # ------------------------------------------------------------------ GOREV 5
     def g5():
