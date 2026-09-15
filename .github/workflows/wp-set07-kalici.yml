@@ -6,6 +6,9 @@ name: wp-set07-kalici
 # Iki calib ile de 2 cift x 6 sahne uretilir. Uretim calib.json, FINAL_V2,
 # MOCKUP_V2, DELIVERY, ZIP ve Etsy DEGISMEZ.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

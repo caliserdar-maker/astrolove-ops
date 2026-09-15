@@ -6,6 +6,9 @@ name: pod-gallery-build
 # TEMP/POD_GALLERY_STATE/shard_<n>.csv; birlestirme TEMP/POD_GALLERY_STATE.csv +
 # TEMP/POD_GALLERY_REPORT.md. Resume: PASS olan cift atlanir. Etsy'ye yazmaz.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

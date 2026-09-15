@@ -5,6 +5,9 @@ name: pod-desc-update
 # baska bolumde fark varsa o ilan atlanir. dry_run=true yalniz diff/tablo; false Etsy'ye YAZAR (onay).
 # Kota quota_min altina inince durur, kalan ilanlar raporlanir (ayni workflow tekrar kosulur).
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

@@ -8,6 +8,9 @@ name: pw-ru-fill
 # NOT: tek seferlik cron kaldirildi (8 Eyl 2026) — tam kosu kota yeterli oldugu icin elle
 # yapildi; workflow artik yalniz workflow_dispatch ile calisir.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

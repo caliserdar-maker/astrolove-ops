@@ -8,6 +8,9 @@ name: wp-master-kasa
 # kopyasinda hedef maske + frame_top {delik: maske}. Master ve calib KOPYADIR.
 # Uretim master'i, calib.json, MOCKUP_V2, DELIVERY, ZIP, Etsy DEGISMEZ.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

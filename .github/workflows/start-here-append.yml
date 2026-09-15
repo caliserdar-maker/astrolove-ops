@@ -4,6 +4,9 @@ name: start-here-append
 # ekler (Google Docs API, rclone.conf token'i). Ayni numarali kayit zaten
 # varsa yazmaz. Hicbir sir degeri loga dusmez.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

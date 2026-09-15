@@ -4,6 +4,9 @@ name: brand-banner
 # (START_HERE B81-EK kilitli kompozisyon). Taban ve cikti Drive BRAND'da.
 # Etsy'ye yukleme YAPILMAZ; Mo elle yukler.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

@@ -4,6 +4,9 @@ name: pod-gallery-sample
 # Kaynak ETSY_UPLOAD_SETS; cikti Drive TEMP/POD_SAMPLE/<PAIR>/<ED>/01..10.jpg
 # + CONTACT_<ED>.jpg. Etsy'ye yazmaz.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

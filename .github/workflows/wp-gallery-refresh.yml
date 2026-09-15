@@ -9,6 +9,9 @@ name: wp-gallery-refresh
 # STATE: TEMP/WP_GALLERY_STATE.csv, ilan basi aninda yazilir; resume=true ile
 # PASS olanlar atlanir (kesilen kosu kaldigi yerden surer).
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

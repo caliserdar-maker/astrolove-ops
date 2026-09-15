@@ -4,6 +4,9 @@ name: wp-zip-guide-test
 # Etsy'ye DOKUNMAZ. Uretim klasoru WALLPAPER/DELIVERY'ye YAZMAZ: yeni ZIP'ler
 # TEMP/ZIP_TEST/<CIFT> altina yazilir, mevcut teslimat ZIP'leri oldugu gibi kalir.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

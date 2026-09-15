@@ -7,6 +7,9 @@ name: digital-desc-batch
 # Kota tabaninin altina inince DURUR; durum CSV'si her ilanda Drive'a yazilir, bir
 # sonraki kosu kaldigi yerden devam eder.
 
+permissions:
+  contents: read
+
 on:
   schedule:
     # Her 4 saatte bir (gunde 6 kez). Etsy kotasi kayan 24 saatlik pencere (15 Eyl

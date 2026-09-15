@@ -5,6 +5,9 @@ name: wp-mockup-corner
 # kirpmalari (uretim | onceki medyan yaricap | yeni kose bazli) TEMP/FIX_TEST/
 # COMPARE altina. FINAL_V2 / MOCKUP_V2 / DELIVERY / ZIP / Etsy DEGISMEZ.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

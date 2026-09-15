@@ -5,6 +5,9 @@ name: etsy-ru-probe
 # olmadigini, RU aciklamada "AI-ASSISTED" ve capraz satis blogunun gecip gecmedigini yazar.
 # Kontrol icin 1 wallpaper ilani da okunur (RU'nun orada bulundugu dogrulanir). HICBIR YAZMA YOK.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

@@ -6,6 +6,9 @@ name: wp-red-quad
 # Orijinal calib.json, FINAL_V2, MOCKUP_V2, DELIVERY, ZIP ve Etsy DEGISMEZ;
 # cikti TEMP/FIX_TEST/MOCKUP_REDQUAD.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

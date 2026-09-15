@@ -4,6 +4,9 @@ name: wp-measure-spec
 # olcer (zemin, poster kutusu, murekkep, tagline, watch sembol kutusu) ve
 # sonucu artifact + job summary olarak verir. Drive'a yazmaz, Etsy'ye dokunmaz.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

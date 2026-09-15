@@ -9,6 +9,9 @@ name: pod-desc-batch
 # varyasyon/video ayni, state active, uzun tire yok). Gecmeyen ilan atlanir.
 # ETA sayaci, kota izleme (taban altinda DURUR), durum CSV'si her ilanda Drive'a.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

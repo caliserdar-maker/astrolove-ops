@@ -4,6 +4,9 @@ name: wp-zip-verify
 # DELIVERY'deki 312 ZIP cift cift indirilir, acilir ve olculur; hicbir sey
 # yazilmaz, Etsy'ye dokunulmaz. Cikti: TEMP/WP_ZIP_VERIFY.csv + rapor.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

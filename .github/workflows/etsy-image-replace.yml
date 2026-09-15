@@ -4,6 +4,9 @@ name: etsy-image-replace
 # dry_run=true (varsayilan) yalniz okur: dosya boyutu + mevcut galeri.
 # dry_run=false ETSY'YE YAZAR (yukle -> kararlilik -> eski sil) - onay gerekir.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

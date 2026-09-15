@@ -4,6 +4,9 @@ name: wp-ident-probe
 # dosyasinin quad karsilastirmasi ve secilen kosede piksel farki. Hicbir sey
 # uretilmez; yalniz olcum ve tek kanit kirpmasi yazilir.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

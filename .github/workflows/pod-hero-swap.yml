@@ -6,6 +6,9 @@ name: pod-hero-swap
 # Galerinin geri kalanina ve baslik/etiket/fiyat/aciklama/bolume DOKUNULMAZ.
 # ADIM 1 yedek + dry-run (salt okur) -> Drive'a yedek -> ADIM 2 apply (onayla).
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

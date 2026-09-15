@@ -4,6 +4,9 @@ name: wp-pdf-probe
 # Hicbir yazma/uretim/ZIP degisikligi yok. Etsy'ye tek dokunus GET
 # (aciklama + RU cevirisi); token yenilemesi disinda yazma yoktur.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

@@ -5,6 +5,9 @@ name: wp-probe-media-ids
 # YOK. Tek yan etki: OAuth token yenilenirse Drive'daki TEMP/ETSY_TOKEN.json
 # geri yazilir (docs/SECRETS.md).
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

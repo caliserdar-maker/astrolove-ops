@@ -6,6 +6,9 @@ name: pod-listing-update
 # ilanlari listeler (WP durum dosyasindakiler haric); doluysa fark tablosu.
 # dry_run=false ETSY'YE YAZAR - yalnizca Mo onayindan sonra. Basliga dokunmaz.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

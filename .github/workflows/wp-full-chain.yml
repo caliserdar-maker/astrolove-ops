@@ -11,6 +11,9 @@ name: wp-full-chain
 # Etsy'ye yazan tek is upload_verify; concurrency etsy-token ile diger Etsy
 # is'leriyle (wp-media, etsy-verify, etsy-listing-update...) karsilikli disli.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

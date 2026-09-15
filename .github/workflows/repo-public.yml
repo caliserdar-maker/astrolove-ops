@@ -4,6 +4,9 @@ name: repo-public
 # public yapar, secret ISIMLERINI dogrular. OPS_ADMIN_TOKEN yalniz ortamda;
 # hicbir sir loga yazilmaz. astrolove-media'ya dokunmaz.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

@@ -5,6 +5,9 @@ name: pod-inventory-update
 # IS 3 renk->gorsel dogrulama (fark varsa POST). dry_run=true yalniz tablolar/diff; false Etsy'ye YAZAR (onay).
 # Kota quota_min altindaysa yazma yok. Metin kaynagi docs/POD_LISTING_TEMPLATE.md + pod_listing_create.SIZE_SPEC.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

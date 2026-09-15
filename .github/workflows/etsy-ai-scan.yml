@@ -4,6 +4,9 @@ name: etsy-ai-scan
 # (2) Aktif ilanlarin kacinda aciklamada verilen ifade (varsayilan "AI-ASSISTED") geciyor?
 # Hicbir yazma yapmaz; OAS herkese acik, ilan taramasi getShopListings ile ~6 cagri.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

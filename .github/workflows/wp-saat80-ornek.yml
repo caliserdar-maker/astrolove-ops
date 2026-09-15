@@ -6,6 +6,9 @@ name: wp-saat80-ornek
 # TEMP/FIX_TEST/SAAT80/<CIFT>/ altina yazar ve anyone:reader link verir.
 # Uretim dosyalarina (WATCH_CANVA, MOCKUP_V2) DOKUNMAZ. Etsy'ye yazma yok.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

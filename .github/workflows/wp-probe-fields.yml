@@ -3,6 +3,9 @@ name: wp-probe-fields
 # GECICI/TEK KULLANIMLIK: video/dosya API alan adlarini dogrulamak icin
 # tek ilanin ham JSON'unu job summary'ye basar (salt okur).
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

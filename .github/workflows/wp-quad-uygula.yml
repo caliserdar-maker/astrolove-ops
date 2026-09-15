@@ -5,6 +5,9 @@ name: wp-quad-uygula
 # KOPYASINA yazilir. calib.json, FINAL_V2, MOCKUP_V2, DELIVERY, ZIP ve Etsy
 # DEGISMEZ; cikti TEMP/FIX_TEST/MOCKUP_REDQUAD3.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

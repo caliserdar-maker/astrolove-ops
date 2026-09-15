@@ -5,6 +5,9 @@ name: wp-scope-audit
 # Yukleme/silme/yayin YOK. Tek yazma: OAuth token yenilemesi (Drive'a geri).
 # Cikti: TEMP/WP_SCOPE.csv + is ozeti.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

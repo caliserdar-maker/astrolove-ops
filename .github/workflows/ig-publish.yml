@@ -7,6 +7,9 @@ name: ig-publish
 # Zamanlanmis kosu yalniz repo degiskeni IG_PUBLISH_ENABLED=true ise calisir;
 # elle tetiklemede dry_run varsayilan olarak ACIK.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

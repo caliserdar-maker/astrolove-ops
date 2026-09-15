@@ -5,6 +5,9 @@ name: pod-ru-tags
 # Tek kosuda ADIM 1 dry-run (diff tablosu) -> temizse ADIM 2 apply (translations/ru PUT; baslik ve
 # aciklama Etsy'den okundugu gibi geri gonderilir, yalniz tags degisir). Kota quota_min altinda durur.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

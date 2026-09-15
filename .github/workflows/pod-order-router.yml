@@ -8,6 +8,9 @@ name: pod-order-router
 # (--apply); ayni receipt ikinci kez gonderilemez (STATE + .result.json + Prodigi idempotencyKey).
 # Cron 30 dk: env=live, onayli mod (Etsy ~48 cagri/gun). STATE Drive TEMP/POD_ORDERS_STATE.csv.
 
+permissions:
+  contents: read
+
 on:
   # CRON BEKLEMEDE (7 Eyl 2026): Etsy access token'inda transactions_r kapsami YOK
   # (GET /shops/{id}/receipts -> 403 "requires scope: transactions_r", run 34097249381).

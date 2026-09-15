@@ -5,6 +5,9 @@ name: wp-isaret-denetim
 # hangi quad'a denk geliyor ve render'da wallpaper gercekten nerede bitiyor.
 # Hicbir uretim yapilmaz, hicbir calib yazilmaz.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

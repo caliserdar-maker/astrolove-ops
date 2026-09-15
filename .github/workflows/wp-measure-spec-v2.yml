@@ -4,6 +4,9 @@ name: wp-measure-spec-v2
 # posterlerini V2 yontemiyle olcer (yuksek gecirgen + Otsu murekkep maskesi,
 # halka/sembol/metin satirlari, Desktop yan bant metrikleri). Drive'a yazmaz.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

@@ -6,6 +6,9 @@ name: pin-merge-week
 # Pinterest'e DOKUNMAZ; ciktiyi Mo Pinterest toplu pin olusturma ile elle
 # yukler. Hicbir sir degeri loga dusmez.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

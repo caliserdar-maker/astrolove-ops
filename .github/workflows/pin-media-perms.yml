@@ -11,6 +11,9 @@ name: pin-media-perms
 # dosyanin webContentLink'ini anonim HTTP ile cekip erisimi dogrular.
 # Drive REST API'ye rclone.conf'taki token ile gidilir; token maskelenir.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

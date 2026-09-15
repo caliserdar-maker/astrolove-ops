@@ -6,6 +6,9 @@ name: pin-week-v2
 # (TEMP/PIN_UPLOAD_STATE_V2.csv), Etsy linki TEMP/PIN_LISTING_MAP.csv. Cikti TEMP/PIN_CSVS_V2/WA_PIN_V2_HAFTAn_GUNxx_yy.csv
 # + WA_PIN_V2_PLAN_390.csv. Pinterest'e DOKUNMAZ; CSV elle yuklenir.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

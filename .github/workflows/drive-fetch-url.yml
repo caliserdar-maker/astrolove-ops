@@ -5,6 +5,9 @@ name: drive-fetch-url
 # kurum ag politikasi 403); indirme bu yuzden runner'da yapilir.
 # URL loga yazilmaz (::add-mask::). Etsy'ye dokunmaz.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

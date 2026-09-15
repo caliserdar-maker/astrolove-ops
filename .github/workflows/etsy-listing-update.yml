@@ -6,6 +6,9 @@ name: etsy-listing-update
 # job summary + CSV olarak verir. dry_run=false ETSY'YE YAZAR - yalnizca Mo
 # onayindan sonra, once lang=en sonra lang=ru tetiklenir.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

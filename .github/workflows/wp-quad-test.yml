@@ -4,6 +4,9 @@ name: wp-quad-test
 # dortgene oturtulmus - 5 Eyl 2026. Ikisi de tam sahne, TEMP altina yazilir.
 # calib.json, FINAL_V2, MOCKUP_V2, DELIVERY, ZIP ve Etsy DEGISMEZ.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

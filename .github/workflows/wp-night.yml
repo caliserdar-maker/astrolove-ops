@@ -9,6 +9,9 @@ name: wp-night
 # Parcali kosu (shards) ile paralel; her parca kendi STATE satirlarini yazar,
 # birlestirme sonrasi adimda yapilir. Etsy medya yukleme ayri workflow.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

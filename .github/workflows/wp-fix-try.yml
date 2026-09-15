@@ -8,6 +8,9 @@ name: wp-fix-try
 # Uretim klasorlerine YAZILMAZ: yeni dosyalar TEMP/FIX_TEST altina gider,
 # FINAL_V2 / MOCKUP_V2 / DELIVERY degismez, Etsy'ye dokunulmaz.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

@@ -8,6 +8,9 @@ name: pod-hero-batch
 #    uretimi PASS olmayan cift Etsy'de ATLANIR, kosu surer. Kota tabani asilirsa DURULUR.
 # Metin alanlari (baslik/etiket/fiyat/aciklama/bolum) DEGISMEZ; updateListing cagrilmaz.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:
@@ -27,6 +30,10 @@ on:
         description: "Etsy kota tabani"
         required: false
         default: "400"
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
 
 jobs:
   uret:

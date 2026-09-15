@@ -6,6 +6,9 @@ name: wp-mockup-erode
 # TEMP/FIX_TEST/MOCKUP_ERODE altina gider; MOCKUP_V2 / FINAL_V2 / DELIVERY
 # degismez, Etsy'ye dokunulmaz. SET07 kapsam disi.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

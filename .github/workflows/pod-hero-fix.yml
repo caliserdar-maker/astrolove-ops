@@ -8,6 +8,9 @@ name: pod-hero-fix
 #     ve metin alanlarina dokunulmaz (updateListing cagrilmaz).
 # Her adimda gecen/kalan sure yazilir.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

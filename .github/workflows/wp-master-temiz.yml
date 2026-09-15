@@ -7,6 +7,9 @@ name: wp-master-temiz
 # 3) TEMIZ MASTER: serit cerceve rengiyle doldurulur (kopya), SET03/SET04
 #    yeniden uretilir. Uretim calib/master/MOCKUP_V2/DELIVERY/Etsy DEGISMEZ.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

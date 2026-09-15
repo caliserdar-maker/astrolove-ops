@@ -8,6 +8,9 @@ name: wp-fix-test
 #    kendi QC'si (SIFT geri-tespit) artifact'e.
 # 78 ciftlik toplu yeniden uretim BASLATMAZ; onay bekler.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

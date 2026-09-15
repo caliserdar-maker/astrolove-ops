@@ -5,6 +5,9 @@ name: pod-audit
 # Beklenen: sablon (docs/POD_LISTING_TEMPLATE.md) + sabitler + referans ilan (ARIES_LEO) ozellik haritasi.
 # Cikti: yalniz sapma tablosu (AUDIT_REPORT.md) + audit_result.json. Kota quota_min altina inince durur.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:
