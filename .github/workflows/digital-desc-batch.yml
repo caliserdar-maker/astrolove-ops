@@ -24,6 +24,10 @@ on:
         description: "true = Etsy'ye YAZ"
         type: boolean
         default: false
+      confirm:
+        description: "apply=true icin tam olarak: CANLI"
+        required: false
+        default: ""
       skip:
         description: "Atlanacak ilan no(lari)"
         required: false
@@ -58,6 +62,25 @@ jobs:
       TPL: scripts/etsy/desc/AQUARIUS_AQUARIUS_DIGITAL_4552211376.txt
       REMOTE: gdrive:ASTROLOVE/TEMP/POD_LISTING/DIGITAL_DESC_STATE.csv
     steps:
+      - name: Onay kapisi
+        env:
+          APPLY_IN: ${{ inputs.apply }}
+          CONFIRM: ${{ inputs.confirm }}
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            echo "Zamanlanmis kosu: onay kapisi muaf (Mo 15 Eyl 2026 karari)."
+            exit 0
+          fi
+          if [ "$APPLY_IN" = "true" ] && [ "$CONFIRM" != "CANLI" ]; then
+            echo "::error::apply=true icin confirm tam olarak 'CANLI' olmali (gelen: '$CONFIRM'). DUR."
+            exit 1
+          fi
+          if [ "$APPLY_IN" = "true" ]; then
+            echo "::warning::APPLY: Etsy yazma acik."
+          else
+            echo "KURU DENEME: Etsy yazma yok."
+          fi
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:

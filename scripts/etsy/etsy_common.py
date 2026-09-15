@@ -49,6 +49,8 @@ class TokenStore:
         self.data = json.loads(raw)
         for k in ("refresh_token", "access_token", "shared_secret", "keystring"):
             mask(self.data.get(k))
+        mask(keystring)
+        mask(shared_secret)
         self.keystring = self.data.get("keystring") or keystring
         self.shared_secret = self.data.get("shared_secret") or shared_secret
         if not self.keystring or not self.shared_secret:

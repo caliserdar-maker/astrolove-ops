@@ -21,6 +21,10 @@ on:
         description: "true = dry-run temizse Etsy'ye YAZ"
         type: boolean
         default: true
+      confirm:
+        description: "apply=true icin tam olarak: CANLI"
+        required: false
+        default: ""
       limit:
         description: "En fazla N ilan (0 = hepsi; kota icin kisitlanabilir)"
         required: false
@@ -43,6 +47,21 @@ jobs:
       LIMIT: ${{ inputs.limit || '0' }}
       QMIN: ${{ inputs.quota_min || '400' }}
     steps:
+      - name: Onay kapisi
+        env:
+          APPLY_IN: ${{ inputs.apply }}
+          CONFIRM: ${{ inputs.confirm }}
+        run: |
+          set -euo pipefail
+          if [ "$APPLY_IN" = "true" ] && [ "$CONFIRM" != "CANLI" ]; then
+            echo "::error::apply=true icin confirm tam olarak 'CANLI' olmali (gelen: '$CONFIRM'). DUR."
+            exit 1
+          fi
+          if [ "$APPLY_IN" = "true" ]; then
+            echo "::warning::APPLY: Etsy yazma acik."
+          else
+            echo "KURU DENEME: Etsy yazma yok."
+          fi
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:

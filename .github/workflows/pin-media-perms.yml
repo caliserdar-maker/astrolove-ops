@@ -26,6 +26,10 @@ on:
         description: "Degisiklikleri uygula (false = dry-run)"
         type: boolean
         default: false
+      confirm:
+        description: "apply=true icin tam olarak: CANLI"
+        required: false
+        default: ""
       folder_id:
         description: "Hedef klasor ID (bos = PIN_MEDIA)"
         required: false
@@ -57,6 +61,21 @@ jobs:
     timeout-minutes: 30
 
     steps:
+      - name: Onay kapisi
+        env:
+          APPLY: ${{ inputs.apply }}
+          CONFIRM: ${{ inputs.confirm }}
+        run: |
+          set -euo pipefail
+          if [ "$APPLY" = "true" ] && [ "$CONFIRM" != "CANLI" ]; then
+            echo "::error::apply=true icin confirm tam olarak 'CANLI' olmali (gelen: '$CONFIRM'). DUR."
+            exit 1
+          fi
+          if [ "$APPLY" = "true" ]; then
+            echo "::warning::APPLY: Etsy/Drive yazma acik."
+          else
+            echo "KURU DENEME: yazma yok."
+          fi
       - name: Checkout
         uses: actions/checkout@v4
 
