@@ -81,12 +81,15 @@ jobs:
           done
           sort -u _work/prodigi_hits.txt -o _work/prodigi_hits.txt
           echo "Prodigi ad eslesmesi: $(wc -l < _work/prodigi_hits.txt)"
-          # maliyet kolonu tasiyan ilk CSV'yi indir (varsa)
+          # bilinen Prodigi teklif dosyasi once denenir (gercek API teklifleri)
           : > _work/prodigi_costs.csv
-          while read -r y; do
+          rclone copyto "gdrive:ASTROLOVE/TEMP/PRODIGI/PRODIGI_PILOT_QUOTES.csv" \
+            _work/prodigi_costs.csv -q 2>/dev/null \
+            && echo "Prodigi teklif dosyasi bulundu: TEMP/PRODIGI/PRODIGI_PILOT_QUOTES.csv" || true
+          [ -s _work/prodigi_costs.csv ] || while read -r y; do
             case "$y" in *.csv) ;; *) continue;; esac
             rclone copyto "gdrive:ASTROLOVE/$y" _work/aday.csv -q 2>/dev/null || continue
-            if head -1 _work/aday.csv | grep -qiE '(^|,)(cost|maliyet|price)(,|$)'; then
+            if head -1 _work/aday.csv | grep -qiE '(^|,)(cost|maliyet|price|birim_fiyat|unit_cost)(,|$)'; then
               cp _work/aday.csv _work/prodigi_costs.csv
               echo "Prodigi maliyet dosyasi bulundu: $y"
               break
