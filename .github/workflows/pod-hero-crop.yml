@@ -132,6 +132,7 @@ jobs:
           [ -n "$LISTING" ] || { echo "atlandi"; exit 0; }
           umask 077
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          python scripts/etsy/mask_secrets.py
           python - <<'PY' >> "$GITHUB_OUTPUT"
           import os, sys
           sys.path.insert(0, "scripts/etsy")

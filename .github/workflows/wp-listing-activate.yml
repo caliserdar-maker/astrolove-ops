@@ -22,6 +22,10 @@ on:
         description: "Yazmayi gercekten uygula"
         type: boolean
         default: false
+      confirm:
+        description: "apply=true icin tam olarak: CANLI"
+        required: false
+        default: ""
 
 concurrency:
   group: etsy-token
@@ -32,6 +36,21 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
+      - name: Onay kapisi
+        env:
+          APPLY: ${{ inputs.apply }}
+          CONFIRM: ${{ inputs.confirm }}
+        run: |
+          set -euo pipefail
+          if [ "$APPLY" = "true" ] && [ "$CONFIRM" != "CANLI" ]; then
+            echo "::error::apply=true icin confirm tam olarak 'CANLI' olmali (gelen: '$CONFIRM'). DUR."
+            exit 1
+          fi
+          if [ "$APPLY" = "true" ]; then
+            echo "::warning::APPLY: Etsy/Drive yazma acik."
+          else
+            echo "KURU DENEME: yazma yok."
+          fi
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.12", cache: pip }

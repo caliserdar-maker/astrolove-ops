@@ -23,6 +23,9 @@ import sys
 import time
 from datetime import datetime, timezone
 
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent / "etsy"))
+from etsy_common import mask  # noqa: E402
+
 KOK = pathlib.Path(__file__).resolve().parent
 EDS = {"MB": "MIDNIGHT_BLUE", "DB": "DEEP_BLACK", "WP": "WARM_PARCHMENT",
        "CI": "CHAMPAGNE_IVORY", "PW": "PURE_WHITE"}
@@ -181,6 +184,18 @@ def uret(pair, lid, is_dir, cikti):
 
 
 # ------------------------------------------------------------------ ETSY
+def sirlari_maskele(token_file):
+    """Alt surecin ciktisi kirpildigi icin maskeyi UST surecte kaydet."""
+    for ad in ("ETSY_API_KEY", "ETSY_SHARED_SECRET"):
+        mask(os.environ.get(ad))
+    try:
+        d = json.loads(pathlib.Path(token_file).read_text(encoding="utf-8"))
+    except Exception:
+        return
+    for k in ("refresh_token", "access_token", "shared_secret", "keystring"):
+        mask(d.get(k))
+
+
 def etsy(pair, lid, is_dir, out_dir, qmin):
     """Donus: (durum, not, kalan_kota)."""
     d = is_dir / "medya"
@@ -221,6 +236,8 @@ def main():
     a = ap.parse_args()
     out = pathlib.Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
+    if a.mode == "etsy":
+        sirlari_maskele(os.environ.get("TOKEN_FILE", ""))
     skip = {x for x in a.skip.split(",") if x}
     ciftler = pod_state(a.pod_state, skip, a.shard, a.shards, a.limit)
     if a.pairs:
