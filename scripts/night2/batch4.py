@@ -689,6 +689,9 @@ def main():
     gorev("GOREV 7 ads sablon + karar motoru", g7, sonuclar)
 
     yaz_csv(out / "batch4_task_log.csv", sonuclar)
+    dup = oku_csv(out / "duplicate_archive_plan.csv")
+    dup_gb = sum(int(x.get("bayt") or 0) for x in dup) / 1e9
+    dup_ozet = f"{dup_gb:.2f} GB / {len(dup)} dosya" if dup else "plan bos"
     gecen = sum(1 for x in sonuclar if x["durum"] == "PASS")
     md = [f"# BATCH 4 - uygulamaya hazir karar paketi ({simdi()} UTC)", "",
           f"Gorev: **{gecen}/{len(sonuclar)} PASS**. Canli Etsy yazmasi, GPSR panel girisi,",
@@ -703,7 +706,9 @@ def main():
            "| dosya | icerik |", "|---|---|",
            "| workflow_final_test.md | GOREV 1 - 16/16 test PASS, branch main'e merge EDILMEDI |",
            "| wallpaper_title_description_approval.csv | 78 aciklama + 54 baslik: mevcut, onerilen, fark, listing_id, onay kolonu |",
-           "| duplicate_archive_plan.csv | dosya bazli kaynak/hedef/hash/geri alma yolu |",
+           f"| duplicate_archive_plan.csv | {dup_ozet}: kaynak/hedef/hash/geri alma yolu |",
+           "| duplicate_excluded_paths.csv | guvenlik filtresinin plana ALMADIGI yollar + neden |",
+           "| astrolove_unit_economics_v2.csv | gercek Prodigi maliyetiyle birim ekonomi |",
            "| duplicate_archive_rollback.sh | geri alma betigi (CALISTIRILMADI) |",
            "| prodigi_cost_source.md | Drive aramasi + gercek/varsayim isaretlemesi |",
            "| store_conversion_actions.md / .csv | P0-P3 aksiyon listesi |",
@@ -717,7 +722,7 @@ def main():
            "| 1 | Etsy wallpaper aciklama degisikligi | 78 ilan | pod-desc-set / digital-desc workflow (apply=true + confirm=CANLI) | wallpaper_title_description_approval.csv |",
            "| 2 | Etsy baslik degisikligi | 54 ilan | ayni workflow, ayri kosu | wallpaper_title_description_approval.csv |",
            "| 3 | GPSR panel girisi | 78 POD ilani | Etsy Shop Manager (API'de alan yok) | gpsr_panel_ready.csv (Batch 3) |",
-           "| 4 | Duplicate arsivleme | 0.57 GB | rclone moveto (plan hazir) | duplicate_archive_plan.csv |",
+           f"| 4 | Duplicate arsivleme | {dup_ozet} | rclone moveto (plan hazir) | duplicate_archive_plan.csv |",
            "| 5 | Workflow hardening merge | claude/wf-hardening -> main | git merge | workflow_final_test.md |",
            "| 6 | Sosyal medya / Metricool yayini | 546 satir | Metricool | platform_content_final.csv |",
            "| 7 | Magaza paneli duzeltmeleri | P0-P1 maddeler | Etsy Shop Manager | store_conversion_actions.md |", ""]
