@@ -118,8 +118,9 @@ jobs:
         run: |
           set -euo pipefail
           [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
-          if grep -rqE 'x-api-key|refresh_token|"access_token"' _out/ 2>/dev/null; then
-            echo "::error::ciktida sir benzeri anahtar bulundu, Drive'a yazilmadi"; exit 1
+          # Sir KAPISI: kelime degil DEGER arar (rapor metinlerinde alan adlari gecebilir).
+          if grep -rqE '"(access_token|refresh_token)"[[:space:]]*:[[:space:]]*"[A-Za-z0-9._-]{20,}"|x-api-key[[:space:]]*:[[:space:]]*[A-Za-z0-9_-]{16,}|\b[0-9]{6,}\.[A-Za-z0-9_-]{30,}\b|GOCSPX-[A-Za-z0-9_-]{10,}' _out/ 2>/dev/null; then
+            echo "::error::ciktida sir DEGERI bulundu, Drive'a yazilmadi"; exit 1
           fi
           hedef="gdrive:ASTROLOVE/TEMP/NIGHTLY_AUDIT/${STAMP}"
           rclone copy _out "$hedef" -q
