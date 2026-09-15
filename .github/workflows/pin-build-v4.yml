@@ -7,6 +7,9 @@ name: pin-build-v4
 # kontak sayfasini TEMP/PIN_KONTAK_V2/ altina koyar. Edisyon basina bir kosu.
 # Eski PIN_MEDIA'ya dokunmaz; Pinterest'e dokunmaz. Sir loga dusmez.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

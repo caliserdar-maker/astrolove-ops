@@ -2,6 +2,9 @@ name: etsy-quota-probe
 
 # SALT OKUR: tek getShop cagrisi, x-remaining-today (gunluk kota) yazdirir. Baska hicbir sey yapmaz.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
 

@@ -6,6 +6,9 @@ name: wp-share-mockups
 # dosya ID + ModTime + dogrudan indirme linkini yazmak. Klasor acilmaz,
 # yalniz eslesen dosyalar acilir (B94 kurali).
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

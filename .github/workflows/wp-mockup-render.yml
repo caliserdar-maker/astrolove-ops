@@ -5,6 +5,9 @@ name: wp-mockup-render
 # (varsayilan _CANDIDATE; ilanin galerisine ancak etsy-image-replace ile ve
 # onayla girer). Etsy'ye dokunmaz. docs/WP_MOCKUP_PIPELINE.md.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

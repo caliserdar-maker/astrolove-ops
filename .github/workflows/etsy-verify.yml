@@ -6,6 +6,9 @@ name: etsy-verify
 # token Drive'daki TEMP/ETSY_TOKEN.json'a GERI YAZILIR (docs/SECRETS.md,
 # "Etsy token sahibi"). Hicbir sir degeri loga dusmez.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

@@ -5,6 +5,9 @@ name: pod-hero-grid
 # Cikti: Drive TEMP/POD_HERO_CROP/<out_dir>/GRID/grid_<ED>.png
 # Etsy'ye DOKUNMAZ; yalniz Drive okur/yazar.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

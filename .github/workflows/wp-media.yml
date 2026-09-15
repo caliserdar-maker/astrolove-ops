@@ -4,6 +4,9 @@ name: wp-media
 # 5 dijital dosya). ETSY'YE YAZAR (dry_run=false). STATE degistirmez, yayin yok.
 # Tek Etsy kosusu: concurrency etsy-token. Resume: TEMP/WP_UPLOAD_STATE.csv.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

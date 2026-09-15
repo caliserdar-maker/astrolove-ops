@@ -6,6 +6,9 @@ name: canva-bulk-fetch
 # Imzali URL'ler dosyadan okunur; workflow girdisi degildir, bu yuzden loga dusmez.
 # Etsy'ye dokunmaz.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

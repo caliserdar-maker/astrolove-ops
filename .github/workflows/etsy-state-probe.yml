@@ -3,6 +3,9 @@ name: etsy-state-probe
 # SALT OKUR: magazadaki ilanlarin durum dagilimi (draft/active/inactive/expired sayilari) + istege bagli
 # tek ilanin state'i. Dogrulama amacli, 4-5 GET. Hicbir yazma yapmaz.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

@@ -5,6 +5,9 @@ name: wp-spill-probe
 # kirpmalari yazilir; FINAL_V2, MOCKUP_V2, WP_PLATES, DELIVERY degismez,
 # Etsy'ye hic gidilmez.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

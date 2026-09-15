@@ -4,6 +4,9 @@ name: wp-m04-report
 # SALT OKUR: Etsy'ye hic dokunmaz. Drive'a yalniz olcum ciktisi ve gorsel
 # kanit kirpmalari yazilir (silme/uretim yok).
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

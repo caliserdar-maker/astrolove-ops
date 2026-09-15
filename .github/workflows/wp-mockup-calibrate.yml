@@ -5,6 +5,9 @@ name: wp-mockup-calibrate
 # atar, paste maskelerini cikarir ve sonucu WALLPAPER/MOCKUP_V2/_CALIB
 # altina yazar (Drive; Etsy'ye dokunmaz). docs/WP_MOCKUP_PIPELINE.md.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

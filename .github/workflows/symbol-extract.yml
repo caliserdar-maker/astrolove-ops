@@ -7,6 +7,9 @@ name: symbol-extract
 # Cikti:  TEMP/SYMBOL_LIB/<out_dir>/<CIFT>/{FUSION,GLIF_SOL,GLIF_SAG}.png + onizleme + rapor
 # ADIM A: tek cift (CANCER_LIBRA) + MASK_V5_RAPOR.json ile bbox kiyasi (tolerans %2).
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

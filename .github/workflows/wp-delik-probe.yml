@@ -6,6 +6,9 @@ name: wp-delik-probe
 #    delik = quad, wallpaper 4 px disari; tek sahne render.
 # calib.json, FINAL_V2, MOCKUP_V2, DELIVERY, ZIP ve Etsy DEGISMEZ.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

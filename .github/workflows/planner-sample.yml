@@ -6,6 +6,9 @@ name: planner-sample
 # Cikti: PLANNER/SYMBOLS/ (kirpilmis sembol + onizleme) ve PLANNER/SAMPLE/
 # (iki PDF, alti PNG onizleme, build_report.json). Etsy'ye yazmaz.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

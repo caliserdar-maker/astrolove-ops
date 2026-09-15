@@ -9,6 +9,9 @@ name: pod-listing-create
 # dry_run=false ETSY'YE YAZAR (kargo profili/bolum olusturma dahil) - yalnizca Mo onayi.
 # STATE: Drive TEMP/POD_LISTING/POD_LISTINGS_STATE.csv (resume).
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

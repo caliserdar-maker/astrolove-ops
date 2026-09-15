@@ -4,6 +4,9 @@ name: pw-ru-probe
 # edisyonlarindaki CANLI EN + RU metinlerini (baslik, etiket, aciklama) oldugu gibi yazdirir.
 # Hicbir yazma yapmaz; token donusumu gercek metinden turetilsin diye kullanilir.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

@@ -4,6 +4,9 @@ name: wp-zip-replace
 # ETSY'YE YAZAR: hedef dosyayi sil + yenisini yukle. Diger dosyalara dokunmaz.
 # Kaynak Drive WALLPAPER/DELIVERY/<CIFT>/<dosya>. Varsayilan DRY-RUN.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

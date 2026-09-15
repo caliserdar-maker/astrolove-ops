@@ -5,6 +5,9 @@ name: pod-desc-set
 # baslik, etiket, fiyat, bolum, materials, gorseller, varyasyonlar ve video
 # degismez. Yazmadan once tum alanlar JSON olarak Drive'a yedeklenir.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

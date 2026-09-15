@@ -8,6 +8,9 @@ name: pod-night
 # Kota her adimin basinda okunur; quota_min altina inince o adim durur ve kalanlari raporlar.
 # NOT: cron TEK SEFERLIK idi; 7 Eyl 2026 kosusu (run 34070091952) basarili bitti, schedule kaldirildi.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

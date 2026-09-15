@@ -4,6 +4,9 @@ name: wp-before-after
 # ciktisi (TEMP/FIX_TEST/MOCKUP_GEOM) ayni bolgeden kirpilip ust uste konur.
 # Salt okur; cikti TEMP/FIX_TEST/COMPARE. MOCKUP_V2 ve Etsy'ye dokunulmaz.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

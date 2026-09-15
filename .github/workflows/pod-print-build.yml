@@ -6,6 +6,9 @@ name: pod-print-build
 # TEMP/POD_PRINT/<PAIR>/<ED>/<SIZE>.jpg (paylasim YOK; siparis aninda gecici link).
 # STATE shard TEMP/POD_PRINT_STATE/shard_<n>.csv -> birlesik TEMP/POD_PRINT_STATE.csv + rapor.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

@@ -12,6 +12,9 @@ name: wp-saat80-uretim
 #            dosyasi TEMP/SAAT80_ORNEK_5/ altina kopyalanir, anyone:reader link.
 # DELIVERY (PDF'li canli ZIP'ler) hic okunmaz/yazilmaz.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

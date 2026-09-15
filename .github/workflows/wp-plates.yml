@@ -9,6 +9,9 @@ name: wp-plates
 # Cikti: Drive TEMP/WP_PLATES/{PLATE_<EDISYON>_<CIHAZ>.png, MEDIAN_<EDISYON>.png,
 # report_<EDISYON>.json} + qc/. Etsy'ye dokunmaz.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

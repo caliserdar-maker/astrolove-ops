@@ -4,6 +4,9 @@ name: wp-watch-ablation
 # Uretim yok, Drive'a yalniz olcum CSV/TXT yazilir; MOCKUP_V2 ve DELIVERY'ye
 # dokunulmaz, Etsy'ye hic gidilmez.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

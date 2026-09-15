@@ -6,6 +6,9 @@ name: wp-mockup-canva
 # FINAL_V2, MOCKUP_V2, DELIVERY ve ZIP'ler DEGISMEZ; cikti TEMP altina yazilir.
 # Etsy'ye dokunulmaz.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

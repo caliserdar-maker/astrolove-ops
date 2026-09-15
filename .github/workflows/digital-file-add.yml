@@ -5,6 +5,9 @@ name: digital-file-add
 # Wallpaper ilanlarina dokunulmaz. Ayni adli PDF varsa ilan atlanir (idempotens);
 # 5/5 dosya limiti dolu ilan atlanir ve raporlanir. apply=false yalniz dry-run uretir.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

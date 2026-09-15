@@ -6,6 +6,9 @@ name: wp-build
 # step=build: bir ciftin 16 wallpaper'i + kontak sayfasi -> WALLPAPER/FINAL_V2/_CANDIDATE/<CIFT>
 #   (pilot cift verilirse FINAL_V2 ile piksel kiyas raporu). Etsy'ye dokunmaz.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

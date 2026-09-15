@@ -6,6 +6,9 @@ name: pod-crosslink
 # bir renk icin tam eslesme yoksa kosu DURUR. Diger bolumler birebir korunur (bolum bolum kontrol).
 # Tek kosuda ADIM 1 dry-run (diff) -> temizse ADIM 2 apply.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

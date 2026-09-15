@@ -5,6 +5,9 @@ name: wp-bg-synth
 # Referanstan piksel kopyalanmaz. Ciktilari Drive'a yazar, grant=true ise
 # anyone:reader verip linkleri yazar. Etsy'ye dokunmaz.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

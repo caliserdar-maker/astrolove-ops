@@ -11,6 +11,9 @@ name: wp-audit-close
 # Hicbir sey yuklenmez/silinmez; uretilen tek cikti olcum CSV'leri ve
 # gorsel kontrol icin kirpmalardir.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:
@@ -34,6 +37,10 @@ on:
         description: "Kirpmalara anyone:reader ver ve link yaz"
         type: boolean
         default: true
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
 
 jobs:
   measure:

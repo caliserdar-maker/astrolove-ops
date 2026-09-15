@@ -2,6 +2,9 @@ name: wp-state-merge
 
 # WP_NIGHT_STATE parcalarini yeniden birlestirir (en yeni ts kazanir). Uretim yok, Etsy yok.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
 

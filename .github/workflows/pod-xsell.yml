@@ -6,6 +6,9 @@ name: pod-xsell
 # Tek kosuda ADIM 1 dry-run -> temizse ADIM 2 apply. Kota quota_min altina inince durur; islenen
 # ilanlar Drive TEMP/POD_LISTING/XSELL_STATE.csv'ye yazilir, sonraki kosu kaldigi yerden devam eder.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

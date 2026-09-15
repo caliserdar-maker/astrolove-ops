@@ -5,6 +5,9 @@ name: wp-set07-norelight
 # kosu icinde kalir, Drive'a giden tek sey olcum CSV'si ve kanit kirpmalaridir.
 # calib.json degistirilmez; relight kod tarafinda (--no-relight) kapatilir.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

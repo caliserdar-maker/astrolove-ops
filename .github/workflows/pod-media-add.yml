@@ -6,6 +6,9 @@ name: pod-media-add
 # Kaynak: WALL_ART/LISTING_MEDIA/TECHNICAL/{02_SYMBOL_STORY,05_CRAFTED_DETAIL}/<ED>/, VIDEOS/V01_FIREFLY_STORY/01_EXPORTS/<ED>/.
 # dry_run=true: on kontrol + mevcut galeri piksel dogrulama + hedef sira (yazma yok). false: Etsy'ye YAZAR (onay).
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

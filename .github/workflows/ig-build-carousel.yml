@@ -4,6 +4,9 @@ name: ig-build-carousel
 # render'larindan uretir, ASTROLOVE/TEMP/IG_CAROUSEL_V2/<GUN>/ altina yazar.
 # Elle tetiklenir; edisyon ve gun secimiyle kismi calistirilabilir.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

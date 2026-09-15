@@ -5,6 +5,9 @@ name: etsy-aktif-denetim
 # state=active ilanlar okunur; metin/meta/gorsel/dosya/envanter/genel sayfa
 # kurallari uygulanir (scripts/etsy/etsy_aktif_denetim.py).
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

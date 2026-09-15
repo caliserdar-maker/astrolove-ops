@@ -5,6 +5,9 @@ name: wp-why-probe
 # karsilastirilir; ayrica geometrik delik ile kalibre maske arasindaki iliski
 # olculur. Hicbir sey yazilmaz (yalniz TEMP'e olcum CSV'si).
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

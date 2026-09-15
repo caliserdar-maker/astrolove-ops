@@ -11,6 +11,9 @@ name: pod-night2
 # NOT: tek seferlik cron 8 Eyl 2026 00:35 UTC'de kostu (run 34173796646: FAZ 1 200/200, FAZ 2 312
 # guncellendi + 78 RU govdesi bos atlandi) ve kaldirildi; workflow artik yalniz elle tetiklenir.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

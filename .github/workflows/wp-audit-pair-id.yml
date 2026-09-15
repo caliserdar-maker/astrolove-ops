@@ -7,6 +7,9 @@ name: wp-audit-pair-id
 # duzeltme/silme/yeniden-yukleme YAPMAZ. Tek yazma: OAuth token yenilenirse
 # Drive'a geri yazilir (digerleriyle ayni kural).
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch: {}
 

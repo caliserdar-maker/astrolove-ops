@@ -5,6 +5,9 @@ name: wp-audit-full
 # ceviri, fiyat/bolum/dosya/state). Duzeltme/silme/yeniden yukleme YAPMAZ.
 # Etsy'ye tek yazma: OAuth token yenilemesi (Drive'a geri yazilir).
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

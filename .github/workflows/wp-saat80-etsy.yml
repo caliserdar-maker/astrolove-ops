@@ -10,6 +10,9 @@ name: wp-saat80-etsy
 # SET07 render'ini yanlislikla master klasorune yazdi -> hazirlik adimi master'i
 # MOCKUP_V2_YEDEK_SAAT100'den geri koyar, yeni render'i _CANDIDATE'e alir (idempotent).
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

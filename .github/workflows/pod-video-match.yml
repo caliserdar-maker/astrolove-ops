@@ -6,6 +6,9 @@ name: pod-video-match
 # Cikti: Drive TEMP/POD_HERO_CROP/<dir>/ (video_MB_cropped.mp4, compare_hero_vs_video.png,
 # video_match.json) + ETSY_VIDEO_<stamp>/ (yedek + sonuc).
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

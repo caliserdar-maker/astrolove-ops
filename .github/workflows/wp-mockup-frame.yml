@@ -6,6 +6,9 @@ name: wp-mockup-frame
 # (TEMP/FIX_TEST/WATCH_CANVA). Cikti TEMP altina; FINAL_V2 / MOCKUP_V2 /
 # DELIVERY / ZIP'ler degismez, Etsy'ye dokunulmaz.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

@@ -4,6 +4,9 @@ name: wp-watch-probe
 # Etsy'ye HIC dokunmaz, uretim/duzeltme yapmaz. Drive'a yalniz olcum CSV'si
 # ve gorsel kontrol icin kirpmalar yazilir.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

@@ -4,6 +4,9 @@ name: wp-listing-activate
 # ETSY'YE YAZAR: yalniz state=active. Medya/dosya/fiyat/metne dokunmaz.
 # On-kontrol (gorsel 6, dosya 5, video 0) gecmezse yazmaz. Varsayilan DRY-RUN.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

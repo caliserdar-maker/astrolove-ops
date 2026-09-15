@@ -6,6 +6,9 @@ name: pod-paper-update
 # apply=false (varsayilan) yalniz dry-run + diff uretir.
 # dry_limit: dry-run kapisini kucuk tutar (kota tasarrufu); apply yine limit kadar ilan isler.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

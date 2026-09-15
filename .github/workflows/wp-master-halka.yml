@@ -6,6 +6,9 @@ name: wp-master-halka
 # temiz master KOPYADIR. Sonra calib B + temiz master ile SET03+SET04 uretilir.
 # Uretim master'i, calib.json, MOCKUP_V2, DELIVERY, ZIP, Etsy DEGISMEZ.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

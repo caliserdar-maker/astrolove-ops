@@ -6,6 +6,9 @@ name: wp-plate-clean
 # anyone:reader verilir ve dogrudan indirme linkleri job summary'ye yazilir.
 # Etsy'ye dokunmaz.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

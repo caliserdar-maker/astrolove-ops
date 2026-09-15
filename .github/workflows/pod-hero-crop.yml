@@ -7,6 +7,9 @@ name: pod-hero-crop
 # preview_cards.png + crop_box.json). Etsy'ye YAZMAZ (yalniz opsiyonel salt-okur
 # gorsel olcusu), Prodigi'ye dokunmaz.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

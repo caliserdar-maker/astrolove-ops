@@ -4,6 +4,9 @@ name: drive-test
 # calistigini dogrulayan elle tetiklenen test workflow'u.
 # Hicbir sir degeri loga yazilmaz; secret yalnizca dosyaya yazilir.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
 

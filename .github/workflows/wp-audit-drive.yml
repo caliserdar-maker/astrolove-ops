@@ -6,6 +6,9 @@ name: wp-audit-drive
 # ve OCR tam-string (kalinti/bozuk metin) kontrolu, ekran oran/sikisma
 # (kalibrasyon), 4 edisyon ZIP butunlugu, dosya saglamligi. Duzeltme yok.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

@@ -4,6 +4,9 @@ name: prodigi-quote
 # Anahtar Drive TEMP/PRODIGI_TOKEN.json'dan rclone ile okunur; GitHub secret yok,
 # workflow girdisi olarak asla sir verilmez. Cikti Drive TEMP/PRODIGI/ + artifact.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

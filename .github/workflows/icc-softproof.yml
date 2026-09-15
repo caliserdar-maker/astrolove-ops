@@ -4,6 +4,9 @@ name: icc-softproof
 # Drive'dan alinir, scripts/icc/icc_softproof.py kosar, karsilastirma PNG'leri
 # ve CSV Drive TEMP/ICC_TEST/ altina yazilir. Etsy cagrisi yok.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

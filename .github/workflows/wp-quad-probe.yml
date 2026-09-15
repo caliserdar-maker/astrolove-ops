@@ -5,6 +5,9 @@ name: wp-quad-probe
 # calib.json'daki quad ile karsilastirilir. calib.json'a DOKUNULMAZ; uretim
 # yok. Cikti: TEMP/WP_QUAD_PROBE.csv + TEMP/AUDIT_CROPS/M13_* kanit panelleri.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

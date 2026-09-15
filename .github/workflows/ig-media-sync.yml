@@ -5,6 +5,9 @@ name: ig-media-sync
 # Instagram Graph API medyayi yalniz public URL'den cektigi icin gerekli.
 # Kontak sayfalari (_contact) tasinmaz.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

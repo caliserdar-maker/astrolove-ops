@@ -11,6 +11,9 @@ name: wp-kalici
 # ciktilarla piksel kiyaslanir (ortalama fark < 2), diger 11 ekranda eski QC (5 Eyl 2026, Mo).
 # ZIP, DELIVERY ve Etsy'ye dokunulmaz.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

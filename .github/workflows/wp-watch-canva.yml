@@ -12,6 +12,9 @@ name: wp-watch-canva
 # (Mo, 5 Eyl 2026: FINAL_V2 saati plaka uretimi, Canva-vs-Python farki olcut degil).
 # FINAL_V2, MOCKUP_V2, ZIP ve Etsy'ye dokunulmaz. 4 edisyon paralel kosabilir.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

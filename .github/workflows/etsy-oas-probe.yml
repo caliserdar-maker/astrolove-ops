@@ -3,6 +3,9 @@ name: etsy-oas-probe
 # Etsy Open API v3 semasini (openapi/generated/oas/3.0.0.json) indirir; yol desenine uyan uclarin
 # istek alanlarini (required, enum, aciklama) job summary'ye yazar. Salt okur, sir kullanmaz.
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

@@ -6,6 +6,9 @@ name: wp-tone-match
 # grant=true ise anyone:reader verip dogrudan indirme linkini yazar.
 # Etsy'ye dokunmaz. Kaynak URL loga yazilmaz (::add-mask::).
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:
