@@ -1,0 +1,136 @@
+name: nightly-audit
+
+# GECE DENETIMI (Mo 15 Eyl 2026) - SALT OKUR. Etsy'ye hicbir yazma cagrisi yok;
+# reklam/butce/kampanya, gorsel, fiyat, varyasyon, kargo, kategori, envanter
+# alanlarina dokunulmaz. Drive'da hicbir dosya silinmez/tasinmaz/uzerine yazilmaz;
+# yalniz yeni NIGHTLY_AUDIT/<damga>/ klasoru olusturulur.
+#
+# GOREV 2 apply sonrasi dogrulama | GOREV 3 korunan alanlar | GOREV 4 Ads salt okur
+# GOREV 5 ilan kalitesi | GOREV 6 Drive envanteri | GOREV 1/7/8 dosyalari eklenir.
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply_dir:
+        description: "POD_SEO altindaki apply klasoru (bos = en yenisi)"
+        required: false
+        default: ""
+      ornek:
+        description: "GOREV 3 medya ornegi (ilan sayisi)"
+        required: false
+        default: "6"
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      APPLY_DIR: ${{ inputs.apply_dir }}
+      ORNEK: ${{ inputs.ornek || '6' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Girdiler (token, apply yedekleri, OAS, Drive listesi)
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out _work/apply
+          stamp=$(date -u +%Y%m%d_%H%M); echo "STAMP=$stamp" >> "$GITHUB_ENV"
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_LISTING/POD_LISTINGS_STATE.csv" _work/pod_state.csv
+          python scripts/etsy/seo/pod_seo_v2_build.py --out _work/pod_changes_v2.json
+          dir="$APPLY_DIR"
+          if [ -z "$dir" ]; then
+            dir=$(rclone lsf "gdrive:ASTROLOVE/TEMP/POD_SEO/" --dirs-only | grep '^APPLY_' | sort | tail -1)
+            dir="${dir%/}"
+          fi
+          echo "apply klasoru: ${dir:-YOK}"
+          if [ -n "$dir" ]; then
+            rclone copy "gdrive:ASTROLOVE/TEMP/POD_SEO/${dir}" _work/apply -q
+            echo "apply yedek dosyasi: $(ls _work/apply/backups 2>/dev/null | wc -l)"
+            echo "APPLY_SRC=$dir" >> "$GITHUB_ENV"
+          fi
+          curl -fsSL -o _work/oas.json https://www.etsy.com/openapi/generated/oas/3.0.0.json || echo "OAS indirilemedi"
+          rclone lsf "gdrive:" -R --files-only --fast-list --ignore-case \
+            --include "*ads*.csv" --include "*ads*.xlsx" --include "*advert*" \
+            > _work/ads_files.txt 2>/dev/null || true
+          n=$(grep -c . _work/ads_files.txt || true)
+          if [ "$n" -gt 0 ]; then
+            { echo "Drive'da adinda 'ads/advert' gecen dosyalar ($n):"; sed 's/^/- /' _work/ads_files.txt | head -50; } > _work/ads_drive.md
+          fi
+          rclone lsjson "gdrive:ASTROLOVE" -R --files-only --fast-list --no-modtime --no-mimetype \
+            > _work/drive_files.json || echo "[]" > _work/drive_files.json
+          python -c "import json;d=json.load(open('_work/drive_files.json'));print('Drive dosya:',len(d))"
+      - name: 'GOREV 2/3/4/5 (salt okur)'
+        continue-on-error: true
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          python scripts/night/post_apply_audit.py --changes _work/pod_changes_v2.json \
+            --pod-state _work/pod_state.csv --apply-dir _work/apply --oas _work/oas.json \
+            --ads-drive _work/ads_drive.md --out _out --ornek "$ORNEK"
+      - name: 'GOREV 6 (Drive envanteri, salt okur)'
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          python scripts/night/drive_inventory.py --listing _work/drive_files.json \
+            --pod-state _work/pod_state.csv --out _out
+      - name: 'GOREV 1/7/8 dosyalari'
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          cp docs/night/PLATFORM_CONTENT_PLAN.md _out/task_07_platform_content_plan.md
+          [ -f docs/night/task_01_apply.md ] && cp docs/night/task_01_apply.md _out/ || true
+          [ -f docs/night/task_08_code_security.md ] && cp docs/night/task_08_code_security.md _out/ || true
+          [ -f _work/apply/report.md ] && cp _work/apply/report.md _out/apply_report_kaynak.md || true
+          ls -la _out
+      - name: Token + cikti Drive'a
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
+          if grep -rqE 'x-api-key|refresh_token|"access_token"' _out/ 2>/dev/null; then
+            echo "::error::ciktida sir benzeri anahtar bulundu, Drive'a yazilmadi"; exit 1
+          fi
+          hedef="gdrive:ASTROLOVE/TEMP/NIGHTLY_AUDIT/${STAMP}"
+          rclone copy _out "$hedef" -q
+          echo "Cikti: TEMP/NIGHTLY_AUDIT/${STAMP}/"
+          rclone lsf "$hedef"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        continue-on-error: true
+        with:
+          name: nightly-audit
+          path: _out/
+          if-no-files-found: ignore
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
