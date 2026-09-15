@@ -9,10 +9,12 @@ name: digital-desc-batch
 
 on:
   schedule:
-    # Her gun 05:00 UTC (TR 08:00) - Etsy gunluk kotasi yenilendikten sonra.
-    # Zamanlanmis kosu her zaman APPLY=true calisir; yapacak ilan kalmadiysa
-    # betik Etsy'ye hic dokunmadan cikar (bos kosu).
-    - cron: "0 5 * * *"
+    # Her 4 saatte bir (gunde 6 kez). Etsy kotasi kayan 24 saatlik pencere (15 Eyl
+    # 2026 olcumu: 05:15 UTC'de hala 26 kalmisti), o yuzden sabit saat yerine sik
+    # deneme: betik kosu basinda 1 cagrilik kota sondasi yapar, taban altindaysa
+    # hicbir ilana dokunmadan cikar. Zamanlanmis kosu her zaman APPLY=true calisir;
+    # yapacak ilan kalmadiysa Etsy'ye sifir cagriyla cikar (bos kosu).
+    - cron: "0 */4 * * *"
   workflow_dispatch:
     inputs:
       apply:
