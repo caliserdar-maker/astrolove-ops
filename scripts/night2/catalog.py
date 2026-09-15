@@ -153,6 +153,10 @@ def seo_denetle(satirlar, bulgular):
         if bos:
             bulgu_ekle(bulgular, lid, ail, "HIGH", "TAG_BOS", f"{len(bos)} bos tag")
         # urun ailesi - aciklama uyumu
+        # Capraz satis blogu (POD ilanini tanitir) fiziksel ifade icerir; cikarilir.
+        desc_xsell_yok = re.sub(
+            r"(?is)(PREFER IT READY TO HANG.*?)(?=\n\s*(?:✦|GOOD TO KNOW|HOW TO DOWNLOAD|LICENSE|$))",
+            "", desc)
         dijital_ifade = bool(re.search(r"instant download|digital download|\bZIP\b|printable file|"
                                        r"no physical item|nothing is shipped", desc, re.I))
         fiziksel_ifade = bool(re.search(r"shipped unframed|made to order|giclee|giclée|"
@@ -171,9 +175,9 @@ def seo_denetle(satirlar, bulgular):
             if not dijital_ifade:
                 bulgu_ekle(bulgular, lid, ail, "HIGH", "DIJITAL_IFADE_YOK",
                            "dijital ilanda teslimat ifadesi yok")
-            if re.search(r"shipped unframed|protective tube", desc, re.I):
+            if re.search(r"shipped unframed|protective tube", desc_xsell_yok, re.I):
                 bulgu_ekle(bulgular, lid, ail, "CRITICAL", "DIJITAL_ICINDE_KARGO_IFADESI",
-                           "dijital ilanda fiziksel kargo ifadesi")
+                           "dijital ilanda (capraz satis blogu disinda) fiziksel kargo ifadesi")
             if s["dijital_fiziksel"] != "download":
                 bulgu_ekle(bulgular, lid, ail, "CRITICAL", "TIP_KARISIKLIGI",
                            f"listing_type={s['dijital_fiziksel']}")
@@ -202,11 +206,16 @@ def seo_denetle(satirlar, bulgular):
                 bulgu_ekle(bulgular, lid, ail, "MEDIUM", "VIDEO_YOK", "POD ilaninda video yok")
         if s["durum"] != "active":
             bulgu_ekle(bulgular, lid, ail, "HIGH", "PASIF", s["durum"])
-        if s["dosya_teslim"] == "dosya yok" and ail != "POD baski":
+        if s["dosya_teslim"].startswith("0 dosya") and ail != "POD baski":
             bulgu_ekle(bulgular, lid, ail, "CRITICAL", "DIJITAL_DOSYA_YOK",
                        "dijital ilanda teslim dosyasi kaydi yok")
-        if any(c in baslik + desc for c in "—–‒―−"):
-            bulgu_ekle(bulgular, lid, ail, "MEDIUM", "UZUN_TIRE", "em/en dash var")
+        elif s["dosya_teslim"].startswith("bilinmiyor") and ail != "POD baski":
+            bulgu_ekle(bulgular, lid, ail, "LOW", "DOSYA_TESLIM_BILINMIYOR",
+                       "dosya envanteri cache'inde yok; ayri salt okur kosuyla dogrulanmali")
+        tire = [c for c in "—–‒―−" if c in baslik + desc]
+        if tire:
+            nerede = "baslik" if any(c in baslik for c in tire) else "aciklama"
+            bulgu_ekle(bulgular, lid, ail, "MEDIUM", "UZUN_TIRE", f"{nerede}: {tire}")
     return tag_kullanim
 
 
@@ -267,7 +276,8 @@ def main():
             "video_durumu": "var" if videolar else "yok",
             "dijital_fiziksel": L.get("listing_type") or "",
             "dosya_teslim": (f"{dosya[0]} dosya ({dosya[1]})" if dosya else
-                             ("fiziksel urun" if ail == "POD baski" else "dosya yok")),
+                             ("fiziksel urun" if ail == "POD baski"
+                              else "bilinmiyor (cache kapsami disi)")),
             "durum": L.get("state") or "",
             "quantity": L.get("quantity"),
             "url": L.get("url") or "",

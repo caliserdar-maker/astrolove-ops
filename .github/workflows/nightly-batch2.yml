@@ -116,8 +116,8 @@ jobs:
           PY
           wc -l < _work/ornek_liste.txt
           rclone copy "gdrive:ASTROLOVE" _work/ornek --files-from _work/ornek_liste.txt \
-            --flatten-dirs --transfers 8 -q || true
-          echo "indirilen: $(ls _work/ornek | wc -l) dosya, $(du -sh _work/ornek | cut -f1)"
+            --transfers 8 --checkers 8 -q || echo "::warning::ornek indirme kismi/basarisiz"
+          echo "indirilen: $(find _work/ornek -type f | wc -l) dosya, $(du -sh _work/ornek | cut -f1)"
       - name: 'ONCELIK 3+4 medya QA ve matris'
         continue-on-error: true
         run: |
