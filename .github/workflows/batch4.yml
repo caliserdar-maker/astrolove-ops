@@ -1,0 +1,127 @@
+name: batch4
+
+# BATCH 4 - uygulamaya hazir karar paketi (Mo 15 Eyl 2026). SALT OKUR + TASLAK.
+# Etsy'ye HICBIR cagri yok (token bile okunmaz), GPSR panel girisi YOK,
+# dosya tasima/silme YOK, Ads ayari YOK, sosyal medya/Metricool YOK.
+# Girdi: Batch 2 + Batch 3 ciktilari ve TEK Drive metadata listesi (indirme yok).
+# Cikti: ASTROLOVE/TEMP/BATCH_4/<UTC damga>/
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      b2_dir:
+        description: "NIGHTLY_BATCH_2 altindaki klasor (bos = en yenisi)"
+        required: false
+        default: ""
+      b3_dir:
+        description: "BATCH_3 altindaki klasor (bos = en yenisi)"
+        required: false
+        default: ""
+
+concurrency:
+  group: batch4
+  cancel-in-progress: false
+
+jobs:
+  b4:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      B2DIR: ${{ inputs.b2_dir }}
+      B3DIR: ${{ inputs.b3_dir }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Girdiler (Batch 2 + Batch 3 ciktilari, Drive metadata, Prodigi aramasi)
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work/b2 _work/b3 _out
+          stamp=$(date -u +%Y%m%d_%H%M); echo "STAMP=$stamp" >> "$GITHUB_ENV"
+          d2="$B2DIR"
+          [ -z "$d2" ] && d2=$(rclone lsf "gdrive:ASTROLOVE/TEMP/NIGHTLY_BATCH_2/" --dirs-only | sort | tail -1)
+          d3="$B3DIR"
+          [ -z "$d3" ] && d3=$(rclone lsf "gdrive:ASTROLOVE/TEMP/BATCH_3/" --dirs-only | sort | tail -1)
+          echo "Batch 2: ${d2%/} | Batch 3: ${d3%/}"
+          rclone copy "gdrive:ASTROLOVE/TEMP/NIGHTLY_BATCH_2/${d2%/}" _work/b2 -q
+          rclone copy "gdrive:ASTROLOVE/TEMP/BATCH_3/${d3%/}" _work/b3 -q
+          echo "b2 dosya: $(ls _work/b2 | wc -l) | b3 dosya: $(ls _work/b3 | wc -l)"
+          # TEK metadata listesi (indirme YOK): duplicate hash'leri + cift medya eslemesi icin
+          rclone lsjson "gdrive:ASTROLOVE" -R --files-only --fast-list --hash --no-modtime \
+            --no-mimetype > _work/drive_files.json || echo "[]" > _work/drive_files.json
+          python -c "import json;d=json.load(open('_work/drive_files.json'));print('Drive dosya:',len(d))"
+          # sonraki batch'ler tekrar taramasin diye metadata cache olarak saklanir
+          rclone copyto _work/drive_files.json \
+            "gdrive:ASTROLOVE/TEMP/BATCH_4/${stamp}/_cache/drive_files.json" -q || true
+          # GOREV 4: Prodigi maliyet listesi aramasi (yalniz ad eslesmesi)
+          : > _work/prodigi_hits.txt
+          for kal in "*rodigi*" "*cost*" "*maliyet*" "*price*list*" "*pricing*" "*fiyat*"; do
+            rclone lsf "gdrive:ASTROLOVE" -R --files-only --fast-list --include "$kal" \
+              >> _work/prodigi_hits.txt 2>/dev/null || true
+          done
+          sort -u _work/prodigi_hits.txt -o _work/prodigi_hits.txt
+          echo "Prodigi ad eslesmesi: $(wc -l < _work/prodigi_hits.txt)"
+          # maliyet kolonu tasiyan ilk CSV'yi indir (varsa)
+          : > _work/prodigi_costs.csv
+          while read -r y; do
+            case "$y" in *.csv) ;; *) continue;; esac
+            rclone copyto "gdrive:ASTROLOVE/$y" _work/aday.csv -q 2>/dev/null || continue
+            if head -1 _work/aday.csv | grep -qiE '(^|,)(cost|maliyet|price)(,|$)'; then
+              cp _work/aday.csv _work/prodigi_costs.csv
+              echo "Prodigi maliyet dosyasi bulundu: $y"
+              break
+            fi
+          done < _work/prodigi_hits.txt
+      - name: 'GOREV 2,3,4,5,6,7'
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          python scripts/night2/batch4.py --b2-dir _work/b2 --b3-dir _work/b3 --out _out \
+            --drive-files _work/drive_files.json --drive-index _work/prodigi_hits.txt \
+            --prodigi-list _work/prodigi_costs.csv
+      - name: 'GOREV 1 raporu'
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          [ -f docs/batch4/workflow_final_test.md ] && cp docs/batch4/workflow_final_test.md _out/ || true
+          ls -la _out | head -30
+      - name: Cikti Drive'a
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          if grep -rqE '"(access_token|refresh_token)"[[:space:]]*:[[:space:]]*"[A-Za-z0-9._-]{20,}"|x-api-key[[:space:]]*:[[:space:]]*[A-Za-z0-9_-]{16,}|\b[0-9]{6,}\.[A-Za-z0-9_-]{30,}\b|GOCSPX-[A-Za-z0-9_-]{10,}' _out/ 2>/dev/null; then
+            echo "::error::ciktida sir DEGERI bulundu, Drive'a yazilmadi"; exit 1
+          fi
+          hedef="gdrive:ASTROLOVE/TEMP/BATCH_4/${STAMP}"
+          rclone copy _out "$hedef" -q
+          echo "Cikti: TEMP/BATCH_4/${STAMP}/"
+          rclone lsf "$hedef"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        continue-on-error: true
+        with:
+          name: batch4
+          path: _out/
+          if-no-files-found: ignore
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
