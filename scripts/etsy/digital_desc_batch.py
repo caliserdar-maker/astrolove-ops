@@ -206,6 +206,23 @@ def main():
     shop = os.environ["ETSY_SHOP_ID"]
     t0, durdu, slug_bellek = time.time(), None, {}
 
+    # KOTA SONDASI (1 cagri): Etsy kotasi kayan 24 saatlik pencere (15 Eyl 2026 olcumu:
+    # 05:15 UTC'de hala 26). Tabanin altindaysa hicbir ilana dokunmadan cik.
+    api.get(f"/shops/{shop}/sections", ok404=True)
+    if api.remaining is not None and str(api.remaining).isdigit() \
+            and int(api.remaining) < a.quota_min:
+        durdu = f"kota sondasi: {api.remaining} < {a.quota_min}; hicbir ilan islenmedi"
+        log(f"DUR: {durdu}")
+        ozet = {"hedef": len(ilanlar), "tamamlandi": False, "kalan": len(kalan),
+                "sonuclar": {"ONCEDEN PASS": len(bitti)}, "durdu": durdu, "atlanan": [],
+                "islenmemis": [x["digital_id"] for x in kalan], "sure_dk": 0.0,
+                "kota": api.remaining, "api_cagrisi": api.calls}
+        (out / "DIGITAL_DESC_OZET.json").write_text(json.dumps(ozet, ensure_ascii=False, indent=2),
+                                                    encoding="utf-8")
+        log(f"OZET: {json.dumps({k: v for k, v in ozet.items() if k != 'islenmemis'}, ensure_ascii=False)}")
+        return
+    log(f"kota sondasi: {api.remaining} (taban {a.quota_min}) - devam")
+
     for i, r in enumerate(kalan, 1):
         lid, pair, ed = r["digital_id"], r.get("pair", ""), r.get("edisyon", "")
         gecen = time.time() - t0
