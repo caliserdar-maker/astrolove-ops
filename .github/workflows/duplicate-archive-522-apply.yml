@@ -1,0 +1,79 @@
+name: duplicate-archive-522-apply-once
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [main]
+    paths: [config/duplicate_archive_522_authorization.json]
+
+concurrency:
+  group: drive-duplicate-archive
+  cancel-in-progress: false
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Tek seferlik yetkiyi dogrula
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          p = json.load(open("config/duplicate_archive_522_authorization.json"))
+          assert p == {
+              "authorized_at": "2026-09-16",
+              "task": "duplicate_archive_722_corrected",
+              "scope": "522 files / 541913817 bytes / 200 duplicate groups",
+              "operation": "Move only; keep 200 masters in place; no delete",
+              "confirm": "CANLI",
+              "approval_text": "ok",
+              "original_plan_sha256": "ed00ee541d8be25aeab540a996bb70b5c9c70abbb9fa215f70e7ba5d12c58023",
+              "nonce": "duplicate-archive-522-20260916-1",
+          }
+          PY
+      - name: rclone kur ve sabit plani indir
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          mkdir -p ~/.config/rclone _work _out; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+          fi
+          rclone copyto gdrive:ASTROLOVE/TEMP/BATCH_4/20260915_2054/duplicate_archive_plan.csv _work/plan.csv
+          rclone copyto gdrive:ASTROLOVE/TEMP/BATCH_4/20260915_2054/duplicate_excluded_paths.csv _work/excluded.csv
+          test -s _work/plan.csv && test -s _work/excluded.csv
+      - name: 522 duplicate kopyayi guvenli arsive tasi
+        run: |
+          set -euo pipefail
+          python scripts/ops/duplicate_archive_apply.py \
+            --plan _work/plan.csv --excluded _work/excluded.csv \
+            --out _out --apply --confirm CANLI
+      - name: Kaniti Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          stamp=$(date -u +%Y%m%d_%H%M)
+          target="gdrive:ASTROLOVE/TEMP/DUPLICATE_ARCHIVE_522_APPLY/$stamp"
+          rclone copy _out "$target" -q
+          echo "Drive: ASTROLOVE/TEMP/DUPLICATE_ARCHIVE_522_APPLY/$stamp/"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: duplicate-archive-522-apply
+          path: _out/
+          if-no-files-found: error
+          retention-days: 30
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone

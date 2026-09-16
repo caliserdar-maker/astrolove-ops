@@ -89,6 +89,12 @@ def fark_ozeti(eski, yeni):
     return ozet, detay
 
 
+def drive_yolu(yol):
+    """Drive indeksindeki yolları karşılaştırma için tek biçime getir."""
+    yol = (yol or "").lstrip("/")
+    return yol if yol.startswith("ASTROLOVE/") else f"ASTROLOVE/{yol}"
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--b2-dir", required=True)
@@ -187,13 +193,13 @@ def main():
                 tum = [y.strip() for y in (h.get("yollar") or r.get("arsiv_adaylari")
                                            or "").split("|") if y.strip()]
                 kesik += 1
-            master = r.get("master_adayi", "")
+            master = drive_yolu(r.get("master_adayi", ""))
             # Batch 3 grubu en fazla 6 yol gorerek siniflamisti. Metadata ile tam listeye
             # cikarken guvenlik filtresi HER DOSYAYA yeniden uygulanir; disarida kalan
             # yollar plana ALINMAZ, ayri dosyaya yazilir.
             adaylar, haric_grup = [], []
             for y in tum:
-                if y == master:
+                if drive_yolu(y) == master:
                     continue
                 if y in kullanilan:
                     haric_grup.append((y, "ilan tarafindan kullaniliyor"))
