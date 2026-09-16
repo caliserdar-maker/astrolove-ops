@@ -50,13 +50,13 @@ jobs:
           TOKEN_FILE: _work/ETSY_TOKEN.json
         run: |
           set -euo pipefail
-          python scripts/night2/catalog.py --out _out --pod-state _work/pod_state.csv
-          python scripts/night2/ads_kpi.py --csv docs/operations/ETSY_ADS_20260916_RAW.csv --out _out/ads
+          python scripts/night2/catalog.py --out _out --files-cache _work/no-files-cache.csv --pod-state _work/pod_state.csv
+          python scripts/night2/ads_kpi.py --csv _work/etsy_ads.csv --out _out/ads
           python - <<'PY'
           import csv, json, pathlib
           out=pathlib.Path("_out")
           catalog=list(csv.DictReader((out/"full_etsy_catalog.csv").open(encoding="utf-8")))
-          ads={r["listing_id"]:r for r in csv.DictReader(open("docs/operations/ETSY_ADS_20260916_RAW.csv",encoding="utf-8-sig"))}
+          ads={r["listing_id"]:r for r in csv.DictReader(open("_work/etsy_ads.csv",encoding="utf-8-sig"))}
           assert len(catalog)==546, f"catalog {len(catalog)} != 546"
           assert len({r["listing_id"] for r in catalog})==546
           assert len(ads)==546
