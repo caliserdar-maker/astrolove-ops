@@ -5,7 +5,7 @@ on:
     branches:
       - codex/etsy-546-content-audit-20260916
     paths:
-      - docs/operations/ETSY_ADS_20260916_RAW.csv
+      - .audit/etsy-546-trigger.txt
 
 permissions:
   contents: read
@@ -41,7 +41,7 @@ jobs:
             [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
           fi
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
-          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_LISTING/POD_LISTINGS_STATE.csv" _work/pod_state.csv || true
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_LISTING/POD_LISTINGS_STATE.csv" _work/pod_state.csv || true\n          rclone copyto "gdrive:ASTROLOVE/TEMP/ADS/etsy_ads_stats_2026-09-16.csv" _work/etsy_ads.csv
       - name: Read all 546 live listings and audit content
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
