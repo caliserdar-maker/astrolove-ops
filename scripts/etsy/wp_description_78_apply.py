@@ -2,7 +2,8 @@
 """78 wallpaper aciklamasinda yalniz uzun tireleri duz tireye cevirir.
 
 Girdi Batch 4 onay CSV'sidir. Yazmadan once 78/78 canli aciklama CSV'deki
-mevcut_metin ile birebir eslesmelidir; tek sapmada hicbir sey yazmadan DURUR.
+mevcut_metin ya da onerilen_metin ile birebir eslesmelidir; baska bir sapmada
+hicbir sey yazmadan DURUR. Onerilen metinde olan ilan idempotent olarak atlanir.
 Yazma yalniz --apply --confirm CANLI ile acilir. PATCH govdesi yalniz
 description alanini icerir. Her yazmadan sonra ve kosu sonunda geri okuma
 yapilir; title/tags ve korunan alanlarin degismedigi kanitlanir.
@@ -14,7 +15,6 @@ import json
 import os
 import sys
 import time
-from collections import Counter
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -56,6 +56,19 @@ def get_listing(api, lid):
     return api.get(f"/listings/{lid}", ok404=True) or {}
 
 
+def batch_listings(api, ids):
+    """78 ilani tek GET ile getir; eksik donenleri yalniz tek tek tamamla."""
+    try:
+        data = api.get("/listings/batch", params={"listing_ids": ",".join(ids)}) or {}
+        found = {str(x.get("listing_id")): x for x in data.get("results") or [] if x.get("listing_id")}
+    except SystemExit:
+        found = {}
+    for lid in ids:
+        if lid not in found:
+            found[lid] = get_listing(api, lid)
+    return found
+
+
 def media(api, shop, lid):
     return {
         "images": DS.galeri(api, lid),
@@ -80,7 +93,8 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--confirm", default="")
-    ap.add_argument("--quota-min", type=int, default=250)
+    ap.add_argument("--quota-min", type=int, default=20,
+                    help="Tahmini zorunlu cagrilar bittikten sonra kalacak guvenlik rezervi")
     args = ap.parse_args()
     if args.apply and args.confirm != "CANLI":
         raise SystemExit("HATA: --apply icin --confirm CANLI gerekli. DUR.")
@@ -96,39 +110,62 @@ def main():
         store.refresh()
     api = Etsy(store)
 
-    # Kapi 1: 78/78 canli durum CSV ile eslesmeden hicbir yazma yok.
-    before = {}
+    # Kapi 1: 78/78 canli durum eski ya da hedef metinle eslesmeden yazma yok.
+    ids = [r["listing_id"].strip() for r in plan]
+    live = batch_listings(api, ids)
+    before, done_ids, pending = {}, set(), []
     for i, r in enumerate(plan, 1):
         lid = r["listing_id"].strip()
-        L = get_listing(api, lid)
+        L = live.get(lid) or {}
         if L.get("state") != "active":
             raise SystemExit(f"HATA: {lid} state={L.get('state')}; hicbir sey yazilmadi. DUR.")
-        if norm(L.get("description")) != norm(r.get("mevcut_metin")):
-            raise SystemExit(f"HATA: {lid} canli aciklama plandaki mevcut_metin ile farkli; hicbir sey yazilmadi. DUR.")
-        if any(c not in (L.get("description") or "") for c in "—"):
-            raise SystemExit(f"HATA: {lid} canli aciklamada beklenen uzun tire yok; hicbir sey yazilmadi. DUR.")
+        current = norm(L.get("description"))
+        if current == norm(r.get("onerilen_metin")):
+            done_ids.add(lid)
+        elif current == norm(r.get("mevcut_metin")):
+            if not any(c in (L.get("description") or "") for c in LONG_DASH):
+                raise SystemExit(f"HATA: {lid} eski metinde uzun tire yok; hicbir sey yazilmadi. DUR.")
+            pending.append(r)
+        else:
+            raise SystemExit(f"HATA: {lid} canli aciklama ne eski ne hedef metin; hicbir sey yazilmadi. DUR.")
         before[lid] = L
         (backups / f"{lid}.before.json").write_text(json.dumps(L, ensure_ascii=False, indent=1), encoding="utf-8")
-        if i % 20 == 0 or i == N:
-            log(f"On kontrol {i}/{N} | kota {api.remaining}")
+    log(f"On kontrol {N}/{N} | zaten hedef {len(done_ids)} | bekleyen {len(pending)} | kota {api.remaining}")
 
     if not args.apply:
         result = [{"listing_id": r["listing_id"], "pair": r.get("burc_cifti", ""),
-                   "status": "READY", "dash_before": sum((r.get("mevcut_metin") or "").count(c) for c in LONG_DASH),
+                   "status": "ALREADY_PASS" if r["listing_id"] in done_ids else "READY",
+                   "dash_before": sum((r.get("mevcut_metin") or "").count(c) for c in LONG_DASH),
                    "dash_after": 0, "note": "78/78 canli on kontrol gecti"} for r in plan]
         write_csv(out / "result.csv", result)
         return 0
 
-    first_media_before = media(api, shop, plan[0]["listing_id"].strip())
-    result = []
-    for i, r in enumerate(plan, 1):
+    try:
+        remaining = int(api.remaining) if api.remaining is not None else None
+    except (TypeError, ValueError):
+        remaining = None
+    required = len(pending) * 2 + 1 + (8 if pending else 0) + args.quota_min
+    if remaining is not None and remaining < required:
+        raise SystemExit(f"HATA: kota {remaining}; guvenli devam icin gereken {required}. Hicbir yeni yazma yapilmadi. DUR.")
+
+    first_pending = pending[0]["listing_id"].strip() if pending else None
+    first_media_before = media(api, shop, first_pending) if first_pending else None
+    result = [{"listing_id": r["listing_id"], "pair": r.get("burc_cifti", ""),
+               "status": "ALREADY_PASS", "dash_before": sum((r.get("mevcut_metin") or "").count(c) for c in LONG_DASH),
+               "dash_after": 0, "note": "onceki kosuda hedef metin dogrulandi"}
+              for r in plan if r["listing_id"] in done_ids]
+    write_csv(out / "result.csv", result)
+    written_this_run = 0
+    for i, r in enumerate(pending, 1):
         lid = r["listing_id"].strip()
         try:
             remaining = int(api.remaining) if api.remaining is not None else None
         except (TypeError, ValueError):
             remaining = None
-        if remaining is not None and remaining < args.quota_min:
-            raise SystemExit(f"HATA: kota {remaining} < {args.quota_min}; {i-1}/{N} yazildi. DUR.")
+        still_needed = (len(pending) - i + 1) * 2 + 1 + (4 if i == 1 else 0) + args.quota_min
+        if remaining is not None and remaining < still_needed:
+            raise SystemExit(f"HATA: kota {remaining}; kalan is icin gereken {still_needed}. "
+                             f"Bu kosuda {written_this_run} yazildi. DUR.")
         new = r.get("onerilen_metin") or ""
         api.patch(f"/shops/{shop}/listings/{lid}", {"description": new})
         after = {}
@@ -142,7 +179,7 @@ def main():
         if norm(after.get("description")) != norm(new) or changed or bad_dash:
             (backups / f"{lid}.after_FAIL.json").write_text(json.dumps(after, ensure_ascii=False, indent=1), encoding="utf-8")
             raise SystemExit(f"HATA: {lid} geri okuma FAIL; protected={changed}, uzun_tire={bad_dash}. DUR.")
-        if i == 1:
+        if lid == first_pending:
             first_media_after = media(api, shop, lid)
             if first_media_after != first_media_before:
                 raise SystemExit(f"HATA: {lid} ilk ilan medya/envanter degisti. DUR.")
@@ -152,21 +189,25 @@ def main():
                        "dash_after": sum((after.get("description") or "").count(c) for c in LONG_DASH),
                        "note": "yalniz description; korunan alanlar ayni"})
         write_csv(out / "result.csv", result)
-        log(f"[{i}/{N}] {lid} PASS | kota {api.remaining}")
+        written_this_run += 1
+        log(f"[{len(done_ids)+i}/{N}] {lid} PASS | kota {api.remaining}")
 
-    # Kapi 2: kosu sonunda 78/78 yeniden oku.
+    # Kapi 2: kosu sonunda 78/78 tek batch GET ile yeniden oku.
+    final_live = batch_listings(api, ids)
     final_fail = []
     for r in plan:
-        lid = r["listing_id"].strip(); L = get_listing(api, lid)
+        lid = r["listing_id"].strip(); L = final_live.get(lid) or {}
         if norm(L.get("description")) != norm(r.get("onerilen_metin")) or protected_diff(before[lid], L):
             final_fail.append(lid)
-    summary = {"target": N, "written": len(result), "pass": len(result) - len(final_fail),
+    summary = {"target": N, "written_this_run": written_this_run, "already_pass": len(done_ids),
+               "pass": N - len(final_fail),
                "final_fail": final_fail, "fields_written": ["description"],
                "protected_fields_unchanged": not final_fail, "quota_remaining": api.remaining}
     (out / "summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
     (out / "summary.md").write_text(
         "# Wallpaper aciklama uygulamasi\n\n"
-        f"- Hedef: {N}\n- Yazilan: {len(result)}\n- Final PASS: {len(result)-len(final_fail)}/{N}\n"
+        f"- Hedef: {N}\n- Bu kosuda yazilan: {written_this_run}\n- Onceden PASS: {len(done_ids)}\n"
+        f"- Final PASS: {N-len(final_fail)}/{N}\n"
         f"- Degisen alan: yalniz description\n- Basarisiz: {final_fail or 'yok'}\n"
         f"- Kalan kota: {api.remaining}\n", encoding="utf-8")
     if final_fail or len(result) != N:
