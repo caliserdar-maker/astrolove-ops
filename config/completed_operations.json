@@ -28,6 +28,15 @@
         "path": "docs/batch4/workflow_final_test.md",
         "contains": "main'e merge EDILDI: 163e5ad"
       }
+    },
+    {
+      "task_id": "wallpaper_description_78",
+      "completed_at": "2026-09-16",
+      "scope": "78/78 wallpaper ilanı; yalnız description",
+      "evidence": {
+        "path": "docs/operations/WP_DESCRIPTION_78_APPLY_20260916.md",
+        "contains": "TAMAMLANDI: 78/78 PASS; yalnızca description değişti."
+      }
     }
   ]
 }
