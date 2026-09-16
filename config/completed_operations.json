@@ -3,6 +3,15 @@
   "rule": "Bu defterdeki bir task_id operasyon durumunda yalnızca completed olabilir.",
   "records": [
     {
+      "task_id": "etsy_title_54",
+      "completed_at": "2026-09-16",
+      "scope": "54/54 yanlış pozitif; 0 canlı değişiklik",
+      "evidence": {
+        "path": "docs/batch4/TITLE_54_REVIEW.md",
+        "contains": "54/54 bulgu yanlış pozitiftir. Canlı Etsy başlık değişikliği yapılmadı (0 yazma)."
+      }
+    },
+    {
       "task_id": "gpsr_pod_78",
       "completed_at": "2026-09-08",
       "scope": "78/78 POD ilanı",

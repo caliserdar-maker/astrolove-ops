@@ -23,9 +23,6 @@ from datetime import datetime, timezone
 
 UZUN_TIRE = {"—": "em dash", "–": "en dash", "―": "horizontal bar",
              "‒": "figure dash", "−": "minus"}
-URUN_KELIME = {"Digital wallpaper": "Wallpaper", "Digital wall art": "Printable Wall Art",
-               "POD baski": "Wall Art Print"}
-BASLIK_SINIR = 140
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 STATE_FILE = ROOT / "config" / "operational_state.json"
 
@@ -92,29 +89,6 @@ def fark_ozeti(eski, yeni):
     return ozet, detay
 
 
-def baslik_onerisi(baslik, urun_kelime):
-    """Urun kelimesini ilk 40 karaktere tasir; kelime zaten varsa one alir."""
-    if not baslik:
-        return baslik, "baslik bos"
-    if urun_kelime.lower() in baslik[:40].lower():
-        return baslik, "degisiklik gerekmiyor"
-    parcalar = [p.strip() for p in baslik.split(",") if p.strip()]
-    tasinan = next((p for p in parcalar if urun_kelime.lower() in p.lower()), None)
-    if tasinan:
-        kalan = [p for p in parcalar if p != tasinan]
-        yeni = ", ".join([tasinan] + kalan)
-        gerekce = f"'{tasinan}' parcasi basa tasindi"
-    else:
-        yeni = f"{parcalar[0]} {urun_kelime}" + ("" if len(parcalar) == 1 else
-                                                 ", " + ", ".join(parcalar[1:]))
-        gerekce = f"'{urun_kelime}' ilk parcaya eklendi"
-    if len(yeni) > BASLIK_SINIR:
-        kes = yeni[:BASLIK_SINIR]
-        yeni = kes[:kes.rfind(",")] if "," in kes else kes.rstrip()
-        gerekce += f"; {BASLIK_SINIR} karaktere kirpildi"
-    return yeni, gerekce
-
-
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--b2-dir", required=True)
@@ -147,9 +121,8 @@ def main():
     # ------------------------------------------------------------------ GOREV 2
     def g2():
         wp_v2 = oku_json(b3 / "wallpaper_description_v2.json")
-        triaj = oku_csv(b3 / "seo_findings_triaged.csv")
-        if not wp_v2 and not triaj:
-            return 0, 1, "Batch 3 girdileri yok (wallpaper_description_v2.json / triaj)"
+        if not wp_v2:
+            return 0, 1, "Batch 3 girdisi yok (wallpaper_description_v2.json)"
         satir = []
         # --- 78 wallpaper aciklamasi
         for r in wp_v2:
@@ -174,34 +147,11 @@ def main():
                 "degisti_mi": "evet" if yeni != eski else "hayir",
                 "onay_EVET_HAYIR": "",
             })
-        # --- 54 baslik
-        bas_hedef = [t for t in triaj if t.get("kod") == "ILK40_URUN"
-                     and t.get("yeni_oncelik") != "FALSE_POSITIVE"]
-        for t in bas_hedef:
-            lid = str(t["id"])
-            L = kat.get(lid, {})
-            eski = L.get("baslik") or t.get("baslik") or ""
-            aile = L.get("urun_ailesi") or t.get("urun_ailesi") or ""
-            kelime = URUN_KELIME.get(aile, "Print")
-            yeni, gerekce = baslik_onerisi(eski, kelime)
-            ozet, detay = fark_ozeti(eski, yeni)
-            satir.append({
-                "sira": len(satir) + 1, "tur": "title", "alan": "title",
-                "listing_id": lid, "urun_ailesi": aile,
-                "burc_cifti": L.get("burc_cifti", ""),
-                "baslik_referans": eski[:90],
-                "mevcut_metin": eski, "onerilen_metin": yeni,
-                "mevcut_uzunluk": len(eski), "onerilen_uzunluk": len(yeni),
-                "fark_ozeti": ozet, "fark_detay": detay,
-                "degisiklik_gerekcesi": f"ilk 40 karakterde urun kelimesi yok; {gerekce}",
-                "risk": ("140 karakter asildi" if len(yeni) > BASLIK_SINIR else
-                         "SEO sirasi degisir, anahtar kelime kaybi yok"),
-                "degisti_mi": "evet" if yeni != eski else "hayir",
-                "onay_EVET_HAYIR": "",
-            })
+        # ILK40_URUN (54) 16 Eyl incelemesinde yanlis pozitif kapatildi.
+        # Etsy'ye gore ifadenin basliktaki yeri siralamayi etkilemez; taslak uretilmez.
         yaz_csv(out / "wallpaper_title_description_approval.csv", satir)
         d_say = sum(1 for x in satir if x["tur"] == "description")
-        t_say = sum(1 for x in satir if x["tur"] == "title")
+        t_say = 0
         degisen = sum(1 for x in satir if x["degisti_mi"] == "evet")
         riskli = sum(1 for x in satir if x["risk"] not in ("yok",))
         return len(satir), 0, (f"{d_say} aciklama + {t_say} baslik; degisen {degisen}; "
@@ -692,7 +642,7 @@ def main():
                                    f"sablon bos; gercek veri yok")
 
     print("BATCH 4 gorevleri")
-    gorev("GOREV 2 wallpaper/baslik onay dosyasi", g2, sonuclar)
+    gorev("GOREV 2 wallpaper aciklama onay dosyasi", g2, sonuclar)
     gorev("GOREV 3 duplicate tasima plani", g3, sonuclar)
     gorev("GOREV 4 Prodigi maliyet kaynagi", g4, sonuclar)
     gorev("GOREV 5 magaza donusum aksiyonlari", g5, sonuclar)
@@ -717,7 +667,7 @@ def main():
     md += ["", "## Uretilen dosyalar", "",
            "| dosya | icerik |", "|---|---|",
            "| workflow_final_test.md | GOREV 1 - 16/16 test PASS, main merge 163e5ad ile tamamlandi |",
-           "| wallpaper_title_description_approval.csv | 78 aciklama + 54 baslik: mevcut, onerilen, fark, listing_id, onay kolonu |",
+           "| wallpaper_title_description_approval.csv | yalniz 78 aciklama: mevcut, onerilen, fark, listing_id, onay kolonu |",
            f"| duplicate_archive_plan.csv | {dup_ozet}: kaynak/hedef/hash/geri alma yolu |",
            "| duplicate_excluded_paths.csv | guvenlik filtresinin plana ALMADIGI yollar + neden |",
            "| astrolove_unit_economics_v2.csv | gercek Prodigi maliyetiyle birim ekonomi |",
