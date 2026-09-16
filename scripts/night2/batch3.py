@@ -120,7 +120,9 @@ def main():
             "DOSYA_TESLIM_BILINMIYOR": ("FALSE_POSITIVE",
                 "dosya envanteri cache'i yalniz 390 poster dijitalini kapsiyor"),
             "UZUN_TIRE": ("HIGH", "marka kurali: uzun tire AI isareti sayiliyor"),
-            "ILK40_URUN": ("MEDIUM", "ilk 40 karakterde urun kelimesi yok, arama gucu dusuk"),
+            "ILK40_URUN": ("FALSE_POSITIVE",
+                "Etsy 26 Agustos 2025: ifadenin basliktaki yeri siralamayi etkilemez; "
+                "kisa, acik ve alici odakli baslik esastir"),
         }
         triaj = []
         for b in bulgular:
@@ -151,17 +153,13 @@ def main():
             if x["kod"] == "UZUN_TIRE":
                 mevcut = "aciklamada em/en dash"
                 onerilen = "duz tire ( - ) ile degistir (wallpaper_description_v2.json hazir)"
-            elif x["kod"] == "ILK40_URUN":
-                mevcut = (L.get("baslik") or "")[:40]
-                onerilen = "ilk 40 karaktere urun kelimesi tasi (or. 'Wallpaper' / 'Print')"
             else:
                 mevcut, onerilen = x["aciklama"][:40], "kural bazli duzeltme"
             md.append(f"| {i} | {x['id']} | {x['urun_ailesi']} | {x['yeni_oncelik']} | "
                       f"{x['kod']} | {mevcut} | {onerilen} | {x['gerekce'][:50]} |")
         md += ["", "## Not", "",
-               "Gercek duzeltmelerin tamami 2 kodda toplaniyor: UZUN_TIRE (78 wallpaper) ve",
-               "ILK40_URUN (54 ilan). Ilki icin taslak metin hazir (GOREV 2), ikincisi baslik",
-               "degisikligi gerektirir ve ayri onay ister.", ""]
+               "ILK40_URUN bulgusu yanlis pozitiftir; baslik degisikligi uretilmez.",
+               "Dogrulanmis metin duzeltmesi UZUN_TIRE (78 wallpaper) grubudur.", ""]
         (out / "top_50_seo_actions.md").write_text("\n".join(md) + "\n", encoding="utf-8")
         say = Counter(x["yeni_oncelik"] for x in triaj)
         return len(triaj), 0, f"{dict(say)}; gercek {len(gercek)}, top 50 secildi"

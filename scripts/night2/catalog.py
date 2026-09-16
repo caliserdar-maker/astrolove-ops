@@ -120,14 +120,12 @@ def seo_denetle(satirlar, bulgular):
             bulgu_ekle(bulgular, lid, ail, "CRITICAL", "BASLIK_UZUN", f"{len(baslik)}>140")
         elif len(baslik) < 40:
             bulgu_ekle(bulgular, lid, ail, "HIGH", "BASLIK_KISA", f"{len(baslik)} karakter")
-        ilk40 = baslik[:40]
-        b40 = burclar(ilk40)
-        if len(b40) < 2:
-            bulgu_ekle(bulgular, lid, ail, "HIGH", "ILK40_BURC",
-                       f"ilk 40 karakterde iki burc yok: {ilk40!r}")
-        if not re.search(r"print|art|poster|wallpaper|download", ilk40, re.I):
-            bulgu_ekle(bulgular, lid, ail, "MEDIUM", "ILK40_URUN",
-                       f"ilk 40 karakterde urun kelimesi yok: {ilk40!r}")
+        # Etsy (26 Agustos 2025): bir ifadenin basliktaki yeri siralamayi
+        # etkilemez. Sabit "ilk 40" testi uzun burc adlarinda yanlis pozitif ve
+        # tekrarli, aliciya kotu basliklar uretiyordu. Urun tanimi tum baslikta aranir.
+        if not re.search(r"print|art|poster|wallpaper|download", baslik, re.I):
+            bulgu_ekle(bulgular, lid, ail, "HIGH", "BASLIK_URUN_YOK",
+                       "basligin tamaminda urun tanimi yok")
         # burc cifti
         bb = burclar(baslik)
         if len(bb) < 2:

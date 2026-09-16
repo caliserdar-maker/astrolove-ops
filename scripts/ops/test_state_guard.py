@@ -30,7 +30,13 @@ class OperationalStateGuardTest(unittest.TestCase):
     def test_next_task_excludes_completed_work(self):
         pending = [x for x in self.state["tasks"] if x["status"] != "completed"]
         pending.sort(key=lambda x: (x.get("priority", 999), x["id"]))
-        self.assertEqual("etsy_title_54", pending[0]["id"])
+        self.assertEqual("wallpaper_description_78", pending[0]["id"])
+
+    def test_first_40_title_rule_cannot_generate_candidates(self):
+        catalog = (state_guard.ROOT / "scripts/night2/catalog.py").read_text(encoding="utf-8")
+        batch4 = (state_guard.ROOT / "scripts/night2/batch4.py").read_text(encoding="utf-8")
+        self.assertNotIn('"ILK40_URUN"', catalog)
+        self.assertNotIn("def baslik_onerisi", batch4)
 
 
 if __name__ == "__main__":
