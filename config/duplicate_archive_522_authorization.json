@@ -1,0 +1,10 @@
+{
+  "authorized_at": "2026-09-16",
+  "task": "duplicate_archive_722_corrected",
+  "scope": "522 files / 541913817 bytes / 200 duplicate groups",
+  "operation": "Move only; keep 200 masters in place; no delete",
+  "confirm": "CANLI",
+  "approval_text": "ok",
+  "original_plan_sha256": "ed00ee541d8be25aeab540a996bb70b5c9c70abbb9fa215f70e7ba5d12c58023",
+  "nonce": "duplicate-archive-522-20260916-1"
+}
