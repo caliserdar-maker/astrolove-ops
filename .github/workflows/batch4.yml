@@ -1,7 +1,7 @@
 name: batch4
 
 # BATCH 4 - uygulamaya hazir karar paketi (Mo 15 Eyl 2026). SALT OKUR + TASLAK.
-# Etsy'ye HICBIR cagri yok (token bile okunmaz), GPSR panel girisi YOK,
+# Etsy'ye HICBIR cagri yok (token bile okunmaz),
 # dosya tasima/silme YOK, Ads ayari YOK, sosyal medya/Metricool YOK.
 # Girdi: Batch 2 + Batch 3 ciktilari ve TEK Drive metadata listesi (indirme yok).
 # Cikti: ASTROLOVE/TEMP/BATCH_4/<UTC damga>/
@@ -38,6 +38,11 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
+      - name: Operasyon durumu celiski kontrolu
+        run: |
+          set -euo pipefail
+          python scripts/ops/state_guard.py
+          python scripts/ops/test_state_guard.py
       - run: |
           set -euo pipefail
           curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null

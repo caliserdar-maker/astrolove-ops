@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "rule": "Bu defterdeki bir task_id operasyon durumunda yalnızca completed olabilir.",
+  "records": [
+    {
+      "task_id": "gpsr_pod_78",
+      "completed_at": "2026-09-08",
+      "scope": "78/78 POD ilanı",
+      "evidence": {
+        "path": "docs/start_here/B99.txt",
+        "contains": "TAMAMLANDI 8 Eyl: 78/78 POD ilani ELLE dolduruldu."
+      }
+    },
+    {
+      "task_id": "workflow_hardening_merge",
+      "completed_at": "2026-09-16",
+      "scope": "main commit 163e5ad",
+      "evidence": {
+        "path": "docs/batch4/workflow_final_test.md",
+        "contains": "main'e merge EDILDI: 163e5ad"
+      }
+    }
+  ]
+}

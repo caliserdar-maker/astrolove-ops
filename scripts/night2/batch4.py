@@ -26,6 +26,16 @@ UZUN_TIRE = {"—": "em dash", "–": "en dash", "―": "horizontal bar",
 URUN_KELIME = {"Digital wallpaper": "Wallpaper", "Digital wall art": "Printable Wall Art",
                "POD baski": "Wall Art Print"}
 BASLIK_SINIR = 140
+ROOT = pathlib.Path(__file__).resolve().parents[2]
+STATE_FILE = ROOT / "config" / "operational_state.json"
+
+
+def operasyon_durumu():
+    """Kanonik durumu doğrula; çelişkide rapor üretmeden dur."""
+    guard = ROOT / "scripts" / "ops" / "state_guard.py"
+    subprocess.run([sys.executable, str(guard)], cwd=ROOT, check=True)
+    data = json.loads(STATE_FILE.read_text(encoding="utf-8"))
+    return data
 
 
 def simdi():
@@ -115,6 +125,7 @@ def main():
     ap.add_argument("--drive-files", default="", help="rclone lsjson --hash ciktisi (metadata)")
     ap.add_argument("--arsiv-kok", default="ASTROLOVE/ARCHIVE/DUPLICATES")
     a = ap.parse_args()
+    state = operasyon_durumu()
     b2, b3 = pathlib.Path(a.b2_dir), pathlib.Path(a.b3_dir)
     out = pathlib.Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -694,8 +705,9 @@ def main():
     dup_ozet = f"{dup_gb:.2f} GB / {len(dup)} dosya" if dup else "plan bos"
     gecen = sum(1 for x in sonuclar if x["durum"] == "PASS")
     md = [f"# BATCH 4 - uygulamaya hazir karar paketi ({simdi()} UTC)", "",
-          f"Gorev: **{gecen}/{len(sonuclar)} PASS**. Canli Etsy yazmasi, GPSR panel girisi,",
-          "dosya tasima/silme, Ads ayari ve sosyal medya yayini YAPILMADI.", "",
+          f"Gorev: **{gecen}/{len(sonuclar)} PASS**. Bu batch kosusunda canli Etsy yazmasi,",
+          "dosya tasima/silme, Ads ayari ve sosyal medya yayini YAPILMADI.",
+          "Kalici is durumu yalniz config/operational_state.json kaynagindan okunur.", "",
           "| gorev | baslangic | bitis | durum | islenen | hata | aciklama |",
           "|---|---|---|---|---:|---:|---|"]
     for x in sonuclar:
@@ -704,7 +716,7 @@ def main():
                   f"{x['aciklama'][:110]} |")
     md += ["", "## Uretilen dosyalar", "",
            "| dosya | icerik |", "|---|---|",
-           "| workflow_final_test.md | GOREV 1 - 16/16 test PASS, branch main'e merge EDILMEDI |",
+           "| workflow_final_test.md | GOREV 1 - 16/16 test PASS, main merge 163e5ad ile tamamlandi |",
            "| wallpaper_title_description_approval.csv | 78 aciklama + 54 baslik: mevcut, onerilen, fark, listing_id, onay kolonu |",
            f"| duplicate_archive_plan.csv | {dup_ozet}: kaynak/hedef/hash/geri alma yolu |",
            "| duplicate_excluded_paths.csv | guvenlik filtresinin plana ALMADIGI yollar + neden |",
@@ -716,16 +728,17 @@ def main():
            "| ads_import_template.csv | bos import sablonu |",
            "| ads_decision_engine_validation.csv | karar motoru sentetik test sonucu |",
            "| batch4_task_log.csv | gorev bazli calisma kaydi |", "",
-           "## CANLI ONAY BEKLEYEN ISLEMLER", "",
-           "Asagidakilerin hicbiri yapilmadi; her biri Serdar'in ayri onayini bekler.", "",
-           "| # | islem | kapsam | nerede yapilir | hazir dosya |", "|---:|---|---|---|---|",
-           "| 1 | Etsy wallpaper aciklama degisikligi | 78 ilan | pod-desc-set / digital-desc workflow (apply=true + confirm=CANLI) | wallpaper_title_description_approval.csv |",
-           "| 2 | Etsy baslik degisikligi | 54 ilan | ayni workflow, ayri kosu | wallpaper_title_description_approval.csv |",
-           "| 3 | GPSR panel girisi | 78 POD ilani | Etsy Shop Manager (API'de alan yok) | gpsr_panel_ready.csv (Batch 3) |",
-           f"| 4 | Duplicate arsivleme | {dup_ozet} | rclone moveto (plan hazir) | duplicate_archive_plan.csv |",
-           "| 5 | Workflow hardening merge | claude/wf-hardening -> main | git merge | workflow_final_test.md |",
-           "| 6 | Sosyal medya / Metricool yayini | 546 satir | Metricool | platform_content_final.csv |",
-           "| 7 | Magaza paneli duzeltmeleri | P0-P1 maddeler | Etsy Shop Manager | store_conversion_actions.md |", ""]
+           "## DOGRULANMIS ACIK ISLEMLER", "",
+           "Tamamlanmis isler bu tabloya giremez. Canli islemler Serdar'in o isleme ozel",
+           "acik onayini bekler; `pending_input` kayitlari once gercek girdi ister.", "",
+           "| # | islem | durum | kapsam | nerede yapilir | hazir dosya |",
+           "|---:|---|---|---|---|---|"]
+    pending = sorted((x for x in state["tasks"] if x["status"] != "completed"),
+                     key=lambda x: (x.get("priority", 999), x["id"]))
+    for i, task in enumerate(pending, 1):
+        md.append(f"| {i} | {task['name']} | {task['status']} | {task.get('scope', '-')} | "
+                  f"{task.get('location', '-')} | {task.get('ready_file', '-')} |")
+    md.append("")
     (out / "final_summary.md").write_text("\n".join(md) + "\n", encoding="utf-8")
     print(f"BATCH 4 bitti: {gecen}/{len(sonuclar)} PASS -> {out}")
 

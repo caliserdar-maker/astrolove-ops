@@ -213,7 +213,9 @@ A2 — 42×59 см
 - Bolum "Zodiac Fine Art Prints" 60204164; iade politikasi 1513990287785 (iade/degisim yok).
 - Hazirlik durumu (processing profile): made_to_order 1-3 gun, readiness-state-definitions ucundan
   okunur/olusturulur; ilan `readiness_state_id` ile acilir (Etsy fiziksel ilanda zorunlu).
-- GPSR uretici/sorumlu kisi alanlari: Prodigi cevabi sonrasi (simdilik bos).
+- GPSR uretici/sorumlu kisi alanlari: 8 Eyl 2026'da 78/78 POD ilanina Etsy
+  panelinden elle girildi. Kanit `docs/start_here/B99.txt`; kanonik durum
+  `config/operational_state.json`. API'de gorunmemesi eksik oldugu anlamina gelmez.
 - Size varyasyon etiketi (v3, Mo 6 Eyl): "4:5 · 8x10 in (20×25 cm)", A serisi "A-series · A4 (21×30 cm)";
   SIRA oran gruplari 4:5, 3:4, 2:3, 11:14, A-series (`pod_listing_create.SIZE_SPEC` tek kaynak: SIZES, SIZE_LABEL,
   aciklama blogu size_block(); mevcut ilanda `pod-inventory-update` ile: envanter + EN/RU aciklama blogu + renk->gorsel).
