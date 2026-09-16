@@ -6,9 +6,10 @@ Girdi: Shop Manager > Marketing > Etsy Ads ekranindan indirilen CSV
 revenue, currency - bkz. etsy_ads_column_dictionary.csv).
 
 Hesaplar: CTR, CPC, donusum orani, ROAS, bosa giden harcama (wasted spend);
-ilan basina karar sinifi: KEEP / WATCH / REDUCE / REVIEW.
+ilan basina karar sinifi: PAUSE / REVIEW / REDUCE / KEEP / WATCH.
 
-Karar kurallari (esikler --ile degistirilebilir):
+Karar kurallari (esikler --ile degistirilebilir; sira onemlidir):
+  PAUSE   : tiklama >= pause_click ve siparis = 0 ve harcama >= pause_spend
   REVIEW  : tiklama >= min_click ve siparis = 0            (para harciyor, satis yok)
   REDUCE  : ROAS < roas_dusuk ve harcama >= min_spend
   KEEP    : ROAS >= roas_iyi
@@ -40,6 +41,8 @@ def main():
     ap.add_argument("--csv", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--min-click", type=int, default=15)
+    ap.add_argument("--pause-click", type=int, default=30)
+    ap.add_argument("--pause-spend", type=float, default=10.0)
     ap.add_argument("--min-spend", type=float, default=3.0)
     ap.add_argument("--roas-dusuk", type=float, default=1.0)
     ap.add_argument("--roas-iyi", type=float, default=2.0)
@@ -80,7 +83,10 @@ def main():
         cr = d["orders"] / d["clicks"] * 100 if d["clicks"] else 0.0
         roas = d["revenue"] / d["spend"] if d["spend"] else 0.0
         bosa = d["spend"] if d["orders"] == 0 else 0.0
-        if d["clicks"] >= a.min_click and d["orders"] == 0:
+        if d["clicks"] >= a.pause_click and d["orders"] == 0 and d["spend"] >= a.pause_spend:
+            karar, neden = "PAUSE", (f"{d['clicks']} tiklama, 0 siparis, "
+                                     f"{d['spend']:.2f} harcama")
+        elif d["clicks"] >= a.min_click and d["orders"] == 0:
             karar, neden = "REVIEW", f"{d['clicks']} tiklama, 0 siparis"
         elif d["spend"] >= a.min_spend and roas < a.roas_dusuk:
             karar, neden = "REDUCE", f"ROAS {roas:.2f} < {a.roas_dusuk}"
