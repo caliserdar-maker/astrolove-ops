@@ -35,7 +35,7 @@ jobs:
               "change": "Replace em/en dashes with ASCII hyphen using the verified Batch 4 approval CSV",
               "confirm": "CANLI",
               "approval_text": "78 wallpaper açıklamasını tek seferlik otomatik tetiklemeyle Etsy’de uygula",
-              "nonce": "wp-desc-78-20260916-0615",
+              "nonce": "wp-desc-78-20260916-resume-2",
           }
           PY
       - run: |
@@ -66,7 +66,7 @@ jobs:
         run: |
           set -euo pipefail
           python scripts/etsy/wp_description_78_apply.py --plan _work/approval.csv --out _out \
-            --apply --confirm CANLI --quota-min 250
+            --apply --confirm CANLI --quota-min 20
       - name: Token ve kaniti Drive'a yaz
         if: ${{ always() }}
         run: |
