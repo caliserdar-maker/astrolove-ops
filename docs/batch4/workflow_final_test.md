@@ -1,6 +1,6 @@
 # BATCH 4 GOREV 1 - Workflow sertlestirme: son test raporu
 
-Branch: `claude/wf-hardening` - **main'e merge EDILMEDI** (onay bekliyor).
+Branch: `claude/wf-hardening` - **main'e merge EDILDI: 163e5ad** (16 Eyl 2026).
 Test takimi: `scripts/night2/wf_test.py` (salt okur; GitHub/Etsy/Drive cagrisi yok).
 Kosu: `python scripts/night2/wf_test.py`
 
@@ -71,11 +71,9 @@ yine `CANLI` ister. Dogrulandi: schedule -> gecer, workflow_dispatch+apply -> du
 
 ## Kalan bulgular
 
-Kod tarafinda kalan FAIL **yok**. Uygulama tarafinda tek acik madde:
+Kod tarafinda kalan FAIL **yok**. Merge tamamlandi ve yerel/uzak `main`
+`163e5ad` commit'inde dogrulandi.
 
-- **Merge onayi:** branch main'e alinmadi. Sertlestirmenin yururluge girmesi icin
-  (ve `workflow_dispatch` yalniz main'deki surumu kostugu icin) merge gerekir.
-  `git checkout main && git merge --ff-only origin/claude/wf-hardening`
 - Merge sonrasi davranis degisikligi: **17 workflow'da `apply=true` artik tek
   basina yetmez**, `confirm=CANLI` de girilmelidir. Zamanlanmis digital-desc kosusu
   etkilenmez.

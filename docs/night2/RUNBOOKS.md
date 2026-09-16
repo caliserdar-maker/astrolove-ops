@@ -1,4 +1,4 @@
-# ONCELIK 9 - Canli islem runbook'lari (HAZIRLIK; hicbiri calistirilmadi)
+# ONCELIK 9 - Canli islem runbook'lari
 
 Ortak kural: her runbook once DRY-RUN ile kosar, ciktisi Drive'a yazilir, Serdar
 sohbette onay verir, ancak ondan sonra canli adim calisir. Etsy yazan her kosu
@@ -7,29 +7,18 @@ yazma baslamaz. Uzun tire (em/en dash) hicbir metinde kullanilmaz.
 
 ---
 
-## R1 - GPSR panel girisi (78 POD ilani)
+## R1 - GPSR panel girisi - TAMAMLANDI
 
-**On kosullar**
-- `gpsr_panel_ready.csv` hazir (78 satir, bu batch'te uretildi).
-- Prodigi B.V. Venlo adresi ve telefon sorusu netlesmis olmali (B98 acik is 7).
-- Etsy panelinde Shop Manager > Listings erisimi.
+Bu runbook tarihsel kayittir; acik is degildir.
 
-**Gerekli onay:** Serdar'in yazili onayi. API'de GPSR alani YOK; islem tamamen elle.
-
-**Dry-run:** Tek ilanda (4570031205 Aries-Leo) alanlar girilir, kaydedilmez ya da
-kaydedilip ekran goruntusu alinir. `pod_seo_update.py --limit 1` ile salt okur
-geri okuma yapilarak title/description/tags'in degismedigi dogrulanir.
-
-**Geri alma:** Panel alanlari elle bosaltilir. Onceki durum
-`APPLY_20260915_1845/backups/<id>.after.json` yedeginde duruyor (GPSR alani
-API'de olmadigi icin yedekte yer almaz; ekran goruntusu alinmalidir).
-
-**Durma kosulu:** Ilk ilanda alan adlari beklenenden farkliysa ya da panel
-"required" bir alan daha isterse DUR, Serdar'a sor.
-
-**Canli adim:** 78 ilan icin panelde Product safety bolumune uretici, AB sorumlu
-kisi, malzeme ve guvenlik notu girilir. Her 10 ilanda bir ara verilip rastgele
-1 ilan kontrol edilir.
+- Tamamlanma: **8 Eyl 2026**
+- Kapsam: **78/78 POD ilani**, Etsy panelinden elle
+- Kanit: `docs/start_here/B99.txt`
+- Kanonik durum: `config/operational_state.json` (`gpsr_pod_78=completed`)
+- Etsy API ve bulk edit GPSR alanini gostermedigi icin API taramasinda alanin
+  gorunmemesi eksik giris kaniti sayilamaz.
+- Bu is yeniden onerilmez veya calistirilmaz. Ancak kullanici belirli bir ilanda
+  eksik alan bildirdiginde yeni ve ayri bir duzeltme isi acilir.
 
 ---
 
