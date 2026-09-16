@@ -27,10 +27,17 @@ class OperationalStateGuardTest(unittest.TestCase):
         errors = state_guard.validate(changed, self.ledger)
         self.assertTrue(any("tamamlanan is yeniden acilmis: workflow_hardening_merge" in x for x in errors))
 
+    def test_completed_wallpaper_description_cannot_return_to_pending(self):
+        changed = copy.deepcopy(self.state)
+        task = next(x for x in changed["tasks"] if x["id"] == "wallpaper_description_78")
+        task["status"] = "pending_approval"
+        errors = state_guard.validate(changed, self.ledger)
+        self.assertTrue(any("tamamlanan is yeniden acilmis: wallpaper_description_78" in x for x in errors))
+
     def test_next_task_excludes_completed_work(self):
         pending = [x for x in self.state["tasks"] if x["status"] != "completed"]
         pending.sort(key=lambda x: (x.get("priority", 999), x["id"]))
-        self.assertEqual("wallpaper_description_78", pending[0]["id"])
+        self.assertEqual("duplicate_archive_722", pending[0]["id"])
 
     def test_first_40_title_rule_cannot_generate_candidates(self):
         catalog = (state_guard.ROOT / "scripts/night2/catalog.py").read_text(encoding="utf-8")
