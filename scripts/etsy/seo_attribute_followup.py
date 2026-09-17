@@ -82,13 +82,14 @@ def main():
         # before validating download/physical type; this remains GET-only.
         full = api.get(f"/listings/{lid}") or {}
         props = (api.get(f"/shops/{shop}/listings/{lid}/properties", ok404=True) or {}).get("results") or []
+        files = (api.get(f"/listings/{lid}/files", ok404=True) or {}).get("results") or []
         names = sorted(str(p.get("property_name") or p.get("name") or p.get("property_id")) for p in props)
         schema = " | ".join(names) if names else "(empty)"
         schemas[schema] += 1
         core = {
             "taxonomy": int(full.get("taxonomy_id") or listing.get("taxonomy_id") or 0) == TAXONOMY_ID,
             "section": int(full.get("shop_section_id") or listing.get("shop_section_id") or 0) == SECTION_ID,
-            "type": full.get("type") == "download",
+            "digital_files": len(files) > 0,
             "state": full.get("state") == "active",
         }
         if not all(core.values()):
@@ -97,7 +98,8 @@ def main():
             "listing_id": lid,
             "taxonomy_id": full.get("taxonomy_id") or listing.get("taxonomy_id"),
             "shop_section_id": full.get("shop_section_id") or listing.get("shop_section_id"),
-            "type": full.get("type"),
+            "type": ("download" if files else full.get("type")),
+            "digital_file_count": len(files),
             "state": full.get("state"),
             "properties": names,
             "schema": schema,
