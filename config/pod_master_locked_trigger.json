@@ -1,0 +1,8 @@
+{
+  "apply": true,
+  "confirm": "MASTER_LOCKED_78",
+  "limit": 1,
+  "quota_min": 900,
+  "requested_utc": "2026-09-17T19:45:00Z",
+  "note": "Guarded one-listing validation before remaining POD batch"
+}
