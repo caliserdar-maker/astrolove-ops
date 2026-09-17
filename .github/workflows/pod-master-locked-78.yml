@@ -1,0 +1,144 @@
+name: pod-master-locked-78
+
+# Aries-Pisces onayli referans: oda/cerceve/masa geometrisi kilitlidir.
+# Yeni kapak rank=1 EKLENIR; eski gorseller ve variation-images korunur.
+# Yalniz eski video silinip yeni master-locked video yuklenir.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "true = kalan POD ilanlarina Etsy'de uygula"
+        type: boolean
+        default: false
+      confirm:
+        description: "apply=true icin tam olarak MASTER_LOCKED_78"
+        required: false
+        default: ""
+      limit:
+        description: "0=tumu; test icin hedef sayisi"
+        required: false
+        default: "0"
+      quota_min:
+        description: "Her yeni ilana baslarken kota tabani"
+        required: false
+        default: "900"
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  master-locked:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      APPLY: ${{ inputs.apply }}
+      LIMIT: ${{ inputs.limit || '0' }}
+      QMIN: ${{ inputs.quota_min || '900' }}
+      STATE_REMOTE: ASTROLOVE/TEMP/POD_MASTER_LOCKED_78/state.json
+    steps:
+      - name: Onay kapisi
+        env:
+          CONFIRM: ${{ inputs.confirm }}
+        run: |
+          set -euo pipefail
+          if [ "$APPLY" = "true" ] && [ "$CONFIRM" != "MASTER_LOCKED_78" ]; then
+            echo "::error::apply=true icin confirm tam olarak MASTER_LOCKED_78 olmali. DUR."
+            exit 1
+          fi
+          [ "$APPLY" = "true" ] && echo "::warning::APPLY: kalan POD kapak/video medyasi degisecek." || echo "DRY-RUN: Etsy yazma yok."
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Bagimliliklar
+        run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2 pillow==12.3.0 numpy==2.4.6
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone ve token
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone _work/source _out
+          umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:${STATE_REMOTE}" _work/state.json 2>/dev/null || true
+      - name: Kalan kaynak videolari indir
+        run: |
+          set -euo pipefail
+          python - <<'PY' > _work/targets.tsv
+          import json
+          done = {}
+          try:
+              done = json.load(open('_work/state.json')).get('rows', {})
+          except (FileNotFoundError, json.JSONDecodeError):
+              pass
+          skip = {'4570138967','4570166282','4570110121','4570031205','4570205899','4570204681'}
+          rows = []
+          for row in json.load(open('scripts/etsy/seo/pod_changes_v2.json')):
+              lid = str(row['id'])
+              if lid in skip or done.get(lid, {}).get('status') == 'PASS':
+                  continue
+              pair = '_'.join(x.strip().upper() for x in row['pair'].split('+'))
+              rows.append((lid, pair))
+          limit = int('${{ inputs.limit || '0' }}')
+          if limit:
+              rows = rows[:limit]
+          for lid, pair in rows:
+              print(f'{lid}\t{pair}')
+          PY
+          while IFS=$'\t' read -r lid pair; do
+            [ -n "$pair" ] || continue
+            echo "Kaynak: $pair ($lid)"
+            rclone copyto \
+              "gdrive:ASTROLOVE/WALL_ART/LISTING_MEDIA/VIDEOS/V01_FIREFLY_STORY/01_EXPORTS/MIDNIGHT_BLUE/WA_VIDEO_V01_${pair}_MIDNIGHT_BLUE.mp4" \
+              "_work/source/${pair}.mp4" -q
+          done < _work/targets.tsv
+          echo "Kaynak video: $(find _work/source -type f | wc -l)"
+      - name: Master-locked uret ve uygula
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          args=(--catalog scripts/etsy/seo/pod_changes_v2.json --source-dir _work/source \
+            --out _out --state _work/state.json --limit "$LIMIT" --quota-min "$QMIN")
+          [ "$APPLY" = "true" ] && args+=(--apply)
+          python scripts/etsy/pod_master_locked_batch.py "${args[@]}"
+      - name: Token, state ve raporlar Drive'a
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" || true
+          [ -f _work/state.json ] && rclone copyto _work/state.json "gdrive:${STATE_REMOTE}" || true
+          mkdir -p _out/persist
+          [ -f _out/summary.json ] && cp _out/summary.json _out/persist/ || true
+          [ -d _out/backups ] && cp -a _out/backups _out/persist/ || true
+          rclone copy _out/persist "gdrive:ASTROLOVE/TEMP/POD_MASTER_LOCKED_78/RUN_${GITHUB_RUN_ID}" -q || true
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: pod-master-locked-78
+          path: |
+            _work/state.json
+            _out/summary.json
+            _out/backups/
+          if-no-files-found: ignore
+      - if: ${{ always() }}
+        run: rm -rf _work _out ~/.config/rclone
