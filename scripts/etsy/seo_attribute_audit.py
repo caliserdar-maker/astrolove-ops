@@ -19,7 +19,7 @@ from etsy_common import Etsy, TokenStore, log, mask  # noqa: E402
 
 FIELDS = [
     ("primary_color", ("Primary color", "Color", "Primary colour", "Colour")),
-    ("material", ("Material multi", "Material")),
+    ("material", ("Material multi", "Materials", "Material")),
     ("framing", ("Framing",)),
     ("orientation", ("Orientation",)),
     ("number_of_pieces", ("Number of pieces included", "Number of pieces")),
@@ -119,7 +119,7 @@ def run(api, snapshot_path, out_dir, expected_count=546):
     path_by_id = {x["taxonomy_id"]: x["taxonomy_path"] for x in nodes}
     wallpaper_candidates = [
         x for x in nodes
-        if re.search(r"wallpaper|phone|screen|desktop|digital background", x["taxonomy_path"], re.I)
+        if re.search(r"(?:^| > )[^>]*\bwallpaper\b", x["taxonomy_path"], re.I)
     ]
 
     taxonomy_ids = sorted({str(r.get("taxonomy_id") or "") for r in rows if r.get("taxonomy_id")})
