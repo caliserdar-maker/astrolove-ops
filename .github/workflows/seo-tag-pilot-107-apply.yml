@@ -1,0 +1,104 @@
+name: seo-tag-pilot-107-apply
+
+permissions:
+  contents: read
+
+on:
+  push:
+    paths:
+      - config/seo_tag_pilot_107_apply.trigger
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    if: github.event.head_commit.message == 'Authorize SEO tag pilot 107 apply once'
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: Tek seferlik yetki kapisi
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('config/seo_tag_pilot_107_apply.trigger').read_text())
+          expected={'operation':'seo_tag_pilot_107','apply':True,'confirm':'CANLI',
+                    'scope':107,'field':'tags','language':'en','date':'2026-09-17'}
+          if d != expected:
+              raise SystemExit(f'HATA: yetki dosyasi birebir uyusmuyor: {d}')
+          PY
+      - name: rclone.conf ve token
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone _work _out/dry_run _out/apply; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+          stamp=$(date -u +%Y%m%d_%H%M); echo "STAMP=$stamp" >> "$GITHUB_ENV"
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto \
+            "gdrive:ASTROLOVE/TEMP/SEO_TAG_PILOT_107_PLAN_20260917/seo_tag_pilot_107_plan.json" \
+            _work/seo_tag_pilot_107_plan.json
+          echo "c22f8804ee0dfdd9ff39a8bfc553906aaa0cf2d0bc0e69f2f0676f9e433ded42  _work/seo_tag_pilot_107_plan.json" | sha256sum -c -
+      - name: Kod ve plan testleri
+        run: |
+          set -euo pipefail
+          python -m unittest scripts/etsy/test_seo_tag_pilot_107_apply.py
+          python scripts/ops/state_guard.py
+          python scripts/etsy/seo_tag_pilot_107_apply.py --help >/dev/null
+      - name: Canli salt-okur on kontrol
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          python scripts/etsy/seo_tag_pilot_107_apply.py \
+            --plan _work/seo_tag_pilot_107_plan.json --out _out/dry_run
+      - name: Canli uygula ve geri oku
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          python scripts/etsy/seo_tag_pilot_107_apply.py \
+            --plan _work/seo_tag_pilot_107_plan.json --out _out/apply \
+            --apply --confirm CANLI --quota-buffer 120
+      - name: Token ve kanit Drive'a
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" || true
+          if grep -rqE '"(access_token|refresh_token)"[[:space:]]*:[[:space:]]*"[A-Za-z0-9._-]{20,}"|x-api-key[[:space:]]*:' _out/ 2>/dev/null; then
+            echo "::error::Ciktida sir bulundu; Drive'a yazilmadi"; exit 1
+          fi
+          rclone copy _out "gdrive:ASTROLOVE/TEMP/SEO_TAG_PILOT_107_APPLY/${STAMP}" -q
+          echo "Kanit: ASTROLOVE/TEMP/SEO_TAG_PILOT_107_APPLY/${STAMP}/"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: seo-tag-pilot-107-apply
+          path: _out/
+          if-no-files-found: ignore
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
