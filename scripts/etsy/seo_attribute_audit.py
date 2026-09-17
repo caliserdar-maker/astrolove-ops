@@ -131,6 +131,12 @@ def run(api, snapshot_path, out_dir, expected_count=546):
         raw_schema_by_id[taxonomy_id] = schema
         schema_by_id[taxonomy_id] = property_names(schema)
 
+    candidate_schema_by_id = {}
+    for candidate in wallpaper_candidates:
+        taxonomy_id = candidate["taxonomy_id"]
+        response = api.get(f"/seller-taxonomy/nodes/{taxonomy_id}/properties") or {}
+        candidate_schema_by_id[taxonomy_id] = response.get("results") or []
+
     audit_rows = []
     for row in rows:
         taxonomy_id = str(row.get("taxonomy_id") or "")
@@ -218,6 +224,7 @@ def run(api, snapshot_path, out_dir, expected_count=546):
         "used_taxonomy_ids": taxonomy_ids,
         "property_schemas": raw_schema_by_id,
         "wallpaper_candidates": wallpaper_candidates,
+        "wallpaper_candidate_property_schemas": candidate_schema_by_id,
     }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     manifest = {
         "created_utc": datetime.now(timezone.utc).isoformat(),
