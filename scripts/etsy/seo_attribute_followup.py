@@ -78,24 +78,27 @@ def main():
     failures = []
     for listing in wallpapers:
         lid = str(listing.get("listing_id") or "")
+        # Shop listing collection omits the `type` field. Read the full listing
+        # before validating download/physical type; this remains GET-only.
+        full = api.get(f"/listings/{lid}") or {}
         props = (api.get(f"/shops/{shop}/listings/{lid}/properties", ok404=True) or {}).get("results") or []
         names = sorted(str(p.get("property_name") or p.get("name") or p.get("property_id")) for p in props)
         schema = " | ".join(names) if names else "(empty)"
         schemas[schema] += 1
         core = {
-            "taxonomy": int(listing.get("taxonomy_id") or 0) == TAXONOMY_ID,
-            "section": int(listing.get("shop_section_id") or 0) == SECTION_ID,
-            "type": listing.get("type") == "download",
-            "state": listing.get("state") == "active",
+            "taxonomy": int(full.get("taxonomy_id") or listing.get("taxonomy_id") or 0) == TAXONOMY_ID,
+            "section": int(full.get("shop_section_id") or listing.get("shop_section_id") or 0) == SECTION_ID,
+            "type": full.get("type") == "download",
+            "state": full.get("state") == "active",
         }
         if not all(core.values()):
             failures.append({"listing_id": lid, "core": core})
         rows.append({
             "listing_id": lid,
-            "taxonomy_id": listing.get("taxonomy_id"),
-            "shop_section_id": listing.get("shop_section_id"),
-            "type": listing.get("type"),
-            "state": listing.get("state"),
+            "taxonomy_id": full.get("taxonomy_id") or listing.get("taxonomy_id"),
+            "shop_section_id": full.get("shop_section_id") or listing.get("shop_section_id"),
+            "type": full.get("type"),
+            "state": full.get("state"),
             "properties": names,
             "schema": schema,
             "core_pass": all(core.values()),
