@@ -30,9 +30,6 @@ on:
     branches: [main]
     paths:
       - "config/pod_master_locked_trigger.json"
-  workflow_run:
-    workflows: ["pod-audit"]
-    types: [completed]
 
 concurrency:
   group: etsy-token
@@ -51,7 +48,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Harici tetikleyici ayarlari
-        if: ${{ github.event_name == 'push' || github.event_name == 'workflow_run' }}
+        if: ${{ github.event_name == 'push' }}
         run: |
           set -euo pipefail
           file=config/pod_master_locked_trigger.json
