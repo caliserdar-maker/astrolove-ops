@@ -26,6 +26,10 @@ on:
         description: "Her yeni ilana baslarken kota tabani"
         required: false
         default: "900"
+  push:
+    branches: [main]
+    paths:
+      - "config/pod_master_locked_trigger.json"
 
 concurrency:
   group: etsy-token
@@ -36,14 +40,23 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 120
     env:
-      APPLY: ${{ inputs.apply }}
+      APPLY: ${{ inputs.apply || 'false' }}
+      CONFIRM: ${{ inputs.confirm || '' }}
       LIMIT: ${{ inputs.limit || '0' }}
       QMIN: ${{ inputs.quota_min || '900' }}
       STATE_REMOTE: ASTROLOVE/TEMP/POD_MASTER_LOCKED_78/state.json
     steps:
+      - uses: actions/checkout@v4
+      - name: Push tetikleyici ayarlari
+        if: ${{ github.event_name == 'push' }}
+        run: |
+          set -euo pipefail
+          file=config/pod_master_locked_trigger.json
+          echo "APPLY=$(jq -r '.apply // false' "$file")" >> "$GITHUB_ENV"
+          echo "CONFIRM=$(jq -r '.confirm // ""' "$file")" >> "$GITHUB_ENV"
+          echo "LIMIT=$(jq -r '.limit // 0' "$file")" >> "$GITHUB_ENV"
+          echo "QMIN=$(jq -r '.quota_min // 900' "$file")" >> "$GITHUB_ENV"
       - name: Onay kapisi
-        env:
-          CONFIRM: ${{ inputs.confirm }}
         run: |
           set -euo pipefail
           if [ "$APPLY" = "true" ] && [ "$CONFIRM" != "MASTER_LOCKED_78" ]; then
@@ -51,7 +64,6 @@ jobs:
             exit 1
           fi
           [ "$APPLY" = "true" ] && echo "::warning::APPLY: kalan POD kapak/video medyasi degisecek." || echo "DRY-RUN: Etsy yazma yok."
-      - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -81,7 +93,7 @@ jobs:
         run: |
           set -euo pipefail
           python - <<'PY' > _work/targets.tsv
-          import json
+          import json, os
           done = {}
           try:
               done = json.load(open('_work/state.json')).get('rows', {})
@@ -95,7 +107,7 @@ jobs:
                   continue
               pair = '_'.join(x.strip().upper() for x in row['pair'].split('+'))
               rows.append((lid, pair))
-          limit = int('${{ inputs.limit || '0' }}')
+          limit = int(os.environ.get('LIMIT', '0'))
           if limit:
               rows = rows[:limit]
           for lid, pair in rows:
