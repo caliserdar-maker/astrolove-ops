@@ -9,6 +9,9 @@ permissions:
   contents: read
 
 on:
+  push:
+    paths:
+      - "config/pod_audit_readonly.trigger"
   workflow_dispatch:
     inputs:
       limit:
