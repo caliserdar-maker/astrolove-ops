@@ -82,7 +82,7 @@ def main():
         # before validating download/physical type; this remains GET-only.
         full = api.get(f"/listings/{lid}") or {}
         props = (api.get(f"/shops/{shop}/listings/{lid}/properties", ok404=True) or {}).get("results") or []
-        files = (api.get(f"/listings/{lid}/files", ok404=True) or {}).get("results") or []
+        files = (api.get(f"/shops/{shop}/listings/{lid}/files", ok404=True) or {}).get("results") or []
         names = sorted(str(p.get("property_name") or p.get("name") or p.get("property_id")) for p in props)
         schema = " | ".join(names) if names else "(empty)"
         schemas[schema] += 1
