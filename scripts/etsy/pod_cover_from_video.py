@@ -133,7 +133,7 @@ def main() -> None:
     checks = {
         "target_title": "Aquarius and Gemini" in (listing.get("title") or ""),
         "active": listing.get("state") == "active",
-        "image_count_13": len(before_images) == 13,
+        "image_count_13_or_recovery_14": len(before_images) in (13, 14),
         "single_video": len(before_videos) == 1,
         "five_variation_links": len(before_variations) == 5,
         "rank1_exists": bool(before_images and before_images[0].get("rank") == 1),
@@ -160,6 +160,26 @@ def main() -> None:
     }
     if not qa["exact_visual_source"]:
         raise SystemExit(f"HATA: video karesi-kapak eslesmesi: {qa}")
+
+    recovery_candidate = None
+    if len(before_images) == 14:
+        # A prior guarded run may have uploaded the exact frame at rank 2 and
+        # intentionally stopped before deleting the old cover.  Reuse it only
+        # after comparing its pixels with the current live video's frame 0.
+        candidate = before_images[1]
+        candidate_url = candidate.get("url_fullxfull") or candidate.get("url_570xN")
+        candidate_path = out / "existing_rank2_candidate.jpg"
+        if candidate.get("rank") != 2 or not candidate_url:
+            raise SystemExit("HATA: 14 gorselli kurtarma durumunda rank-2 aday yok")
+        if candidate.get("listing_image_id") in variation_image_ids:
+            raise SystemExit("HATA: rank-2 aday varyasyona bagli; silme/yazma yok")
+        download(candidate_url, candidate_path)
+        candidate_mae = qa_frame_match(native_frame, candidate_path)
+        qa["existing_rank2_mae"] = round(candidate_mae, 4)
+        qa["existing_rank2_matches_video"] = candidate_mae <= 5.0
+        if not qa["existing_rank2_matches_video"]:
+            raise SystemExit(f"HATA: rank-2 aday video karesi degil: {qa}")
+        recovery_candidate = candidate
 
     stamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
     backup_path = out / f"backup_{listing_id}_{stamp}.json"
@@ -195,31 +215,42 @@ def main() -> None:
     if api.remaining is not None and int(api.remaining) < args.quota_min:
         raise SystemExit(f"HATA: kota {api.remaining} < {args.quota_min}; yazma yok")
 
-    with new_cover.open("rb") as handle:
-        uploaded = api.post_file(
+    if recovery_candidate:
+        new_cover_id = recovery_candidate.get("listing_image_id")
+        mid_images = before_images
+        untouched_before = [row.get("listing_image_id") for row in before_images[2:]]
+        result["reused_existing_rank2"] = True
+    else:
+        with new_cover.open("rb") as handle:
+            uploaded = api.post_file(
+                f"/shops/{shop_id}/listings/{listing_id}/images",
+                files={"image": (new_cover.name, handle, "image/png")},
+                data={
+                    "rank": "1",
+                    "alt_text": "Aquarius and Gemini gold zodiac couple art matching the video opening frame",
+                },
+            )
+        new_cover_id = uploaded.get("listing_image_id")
+        if not new_cover_id:
+            raise SystemExit("HATA: yeni kapak image_id donmedi")
+        api.post_file(
             f"/shops/{shop_id}/listings/{listing_id}/images",
-            files={"image": (new_cover.name, handle, "image/png")},
-            data={
-                "rank": "1",
-                "alt_text": "Aquarius and Gemini gold zodiac couple art matching the video opening frame",
+            files={
+                "listing_image_id": (None, str(new_cover_id)),
+                "rank": (None, "1"),
             },
         )
-    new_cover_id = uploaded.get("listing_image_id")
-    if not new_cover_id:
-        raise SystemExit("HATA: yeni kapak image_id donmedi")
-    api.post_file(
-        f"/shops/{shop_id}/listings/{listing_id}/images",
-        files={
-            "listing_image_id": (None, str(new_cover_id)),
-            "rank": (None, "1"),
-        },
-    )
-    mid_images = eventually(
-        lambda: gallery(api, listing_id),
-        lambda rows: bool(rows and rows[0].get("listing_image_id") == new_cover_id),
-    )
-    if not mid_images or mid_images[0].get("listing_image_id") != new_cover_id:
-        raise SystemExit("HATA: yeni kapak rank 1 olmadi; eski kapak silinmedi")
+        mid_images = eventually(
+            lambda: gallery(api, listing_id),
+            lambda rows: any(row.get("listing_image_id") == new_cover_id for row in rows),
+        )
+        new_rank = next(
+            (row.get("rank") for row in mid_images if row.get("listing_image_id") == new_cover_id),
+            None,
+        )
+        if new_rank not in (1, 2):
+            raise SystemExit(f"HATA: yeni kapak guvenli rank 1/2 konumunda degil: {new_rank}")
+        untouched_before = [row.get("listing_image_id") for row in before_images[1:]]
     # Only now is the former cover removed.  All variation-linked images are
     # separate and were verified before this delete.
     api.delete(f"/shops/{shop_id}/listings/{listing_id}/images/{old_cover_id}")
@@ -231,9 +262,6 @@ def main() -> None:
     after_videos = videos(api, listing_id)
     after_variations = variation_images(api, shop_id, listing_id)
     after_listing = api.get(f"/listings/{listing_id}") or {}
-    untouched_before = [
-        row.get("listing_image_id") for row in before_images[1:]
-    ]
     untouched_after = [
         row.get("listing_image_id") for row in after_images[1:]
     ]
