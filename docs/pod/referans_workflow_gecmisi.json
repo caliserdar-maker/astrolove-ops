@@ -1,0 +1,52 @@
+{
+  "toplandi_utc": "2026-09-18",
+  "kaynak": "GitHub Actions kosu gecmisi (salt okur)",
+  "workflowlar": [
+    {
+      "ad": "pod-video-cover-match",
+      "onay_dizesi": "AQUARIUS_GEMINI_VIDEO",
+      "betikler": ["scripts/etsy/pod_hero_swap.py", "scripts/pod/match_video_to_cover.py"],
+      "hedef": "TEK ilan - workflow'da sabit LISTING_ID: 4570112095",
+      "kosu_sayisi": 2,
+      "kosular": [
+        {"no": 1, "utc": "2026-09-18 09:32", "sonuc": "failure", "baslik": "Run Aquarius Gemini cover-matched video fix"},
+        {"no": 2, "utc": "2026-09-18 09:35", "sonuc": "success", "baslik": "Retry Aquarius Gemini video fix with verified cover guard"}
+      ],
+      "referansa_etkisi": "Videoyu kapagin yeni dikey konumuna getirdi; gorseller, varyasyon baglantilari, baslik, fiyat, envanter degismedi.",
+      "77_ilana_neden_uygulanmadi": "Workflow tek ilanlik yazilmis: LISTING_ID sabit 4570112095, toplu girdi (only_ids/limit) yok."
+    },
+    {
+      "ad": "pod-cover-from-video",
+      "onay_dizesi": "VIDEO_FRAME0_COVER",
+      "betikler": ["scripts/etsy/pod_cover_from_video.py"],
+      "hedef": "TEK ilan - workflow'da sabit LISTING_ID: 4570112095",
+      "kosu_sayisi": 7,
+      "kosular": [
+        {"no": 1, "utc": "2026-09-18 09:48", "sonuc": "failure", "baslik": "Apply live video frame zero as Aquarius Gemini cover"},
+        {"no": 2, "utc": "2026-09-18 09:54", "sonuc": "failure", "baslik": "Finalize frame-zero cover from verified rank-two candidate"},
+        {"no": 3, "utc": "2026-09-18 09:59", "sonuc": "success", "baslik": "Apply exact video frame cover recovery"},
+        {"no": 4, "utc": "2026-09-18 10:53", "sonuc": "success", "baslik": "Publish mobile-calibrated Aquarius Gemini cover"},
+        {"no": 5, "utc": "2026-09-18 11:22", "sonuc": "success", "baslik": "Publish pixel-calibrated Aquarius Gemini cover"},
+        {"no": 6, "utc": "2026-09-18 11:45", "sonuc": "success", "baslik": "Publish mobile-matched Aquarius Gemini cover"},
+        {"no": 7, "utc": "2026-09-18 12:00", "sonuc": "success", "baslik": "Restore previous Aquarius Gemini cover (rollback_from_run 35341198659)"}
+      ],
+      "referansa_etkisi": "Canli videonun 0. karesi rank-1 kapak yapildi; 7 denemede kapak defalarca yeniden uretildi (mobil kalibrasyon, piksel kalibrasyon) ve 7. kosuda onceki kapaga geri donuldu.",
+      "77_ilana_neden_uygulanmadi": "Workflow tek ilanlik: LISTING_ID sabit 4570112095. Ayrica kapak hala kalibrasyon dongusunde; 7. kosu geri alma."
+    },
+    {
+      "ad": "pod-master-locked-78",
+      "onay_dizesi": "MASTER_LOCKED_78",
+      "betikler": ["scripts/etsy/pod_master_locked_batch.py"],
+      "hedef": "78 ilan (toplu) - Aries-Pisces onayli referans geometrisi",
+      "kosu_sayisi": 4,
+      "kosular": [
+        {"no": 1, "utc": "2026-09-17 19:27", "sonuc": "failure", "baslik": "Trigger one-listing POD master-locked validation"},
+        {"no": 2, "utc": "2026-09-17 19:28", "sonuc": "success", "baslik": "Run one-listing POD master-locked validation (TEK ilan dogrulamasi)"},
+        {"no": 3, "utc": "2026-09-17 19:38", "sonuc": "failure", "baslik": "Temporarily trigger guarded POD batch after pod-audit"},
+        {"no": 4, "utc": "2026-09-17 21:50", "sonuc": "failure", "baslik": "Run POD master-locked batch within remaining Etsy quota (limit 0, quota_min 25)"}
+      ],
+      "referansa_etkisi": "Yeni kapak rank=1 EKLENIR, eski gorseller ve variation-images korunur, eski video silinip master-locked video yuklenir.",
+      "77_ilana_neden_uygulanmadi": "Toplu kosu 4 denemenin 3'unde basarisiz; tek basarili kosu TEK ilanlik dogrulamaydi. Durum dosyasi Drive'da ASTROLOVE/TEMP/POD_MASTER_LOCKED_78/state.json."
+    }
+  ]
+}

@@ -1,0 +1,95 @@
+name: pod-referans-fark
+
+# Referans POD ilani (Aquarius+Gemini, 4570112095) ile 4 ornek ilan arasindaki
+# farki olcer. SALT OKUR: Etsy'ye yalniz GET yapilir, hicbir yazma yoktur.
+# Cikti: ASTROLOVE/TEMP/POD_REFERANS_FARK/KARSILASTIRMA.jpg + FARK_RAPORU.md
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  fark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2 numpy==2.1.3 pillow==11.0.0 scipy==1.14.1
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Girdiler (token + Drive uretim dosyasi aramasi)
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          # ADIM 3: uretim klasorlerinde dosya aramasi (yalniz listeleme, indirme yok)
+          : > _work/drive_index.txt
+          for k in "TEMP/POD_COVER_GOLD_B" "TEMP/POD_COVER_GOLD_B_77" "TEMP/POD_SAMPLE" \
+                   "TEMP/POD_MASTER_LOCKED_78" "TEMP/POD_COVER_FROM_VIDEO" \
+                   "TEMP/POD_VIDEO_COVER_MATCH"; do
+            rclone lsf "gdrive:ASTROLOVE/$k" -R --files-only 2>/dev/null \
+              | sed "s#^#$k/#" >> _work/drive_index.txt || true
+          done
+          sort -u _work/drive_index.txt -o _work/drive_index.txt
+          echo "Drive uretim dosyasi: $(wc -l < _work/drive_index.txt)"
+          # toplu is durum dosyalari (salt okur)
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_MASTER_LOCKED_78/state.json" \
+            _work/master_state.json 2>/dev/null || echo "master state yok"
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_COVER_GOLD_B_77/state.json" \
+            _work/gold_state.json 2>/dev/null || echo "gold state yok"
+      - name: 'ADIM 1-2-3 (salt okur)'
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          python scripts/etsy/pod_referans_fark.py --out _out \
+            --drive-index _work/drive_index.txt --repo-kok . \
+            --wf-gecmis docs/pod/referans_workflow_gecmisi.json \
+            --master-state _work/master_state.json --gold-state _work/gold_state.json
+      - name: Token geri yazma + cikti Drive'a
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
+          rm -rf _out/_medya
+          if grep -rqE '"(access_token|refresh_token)"[[:space:]]*:[[:space:]]*"[A-Za-z0-9._-]{20,}"|x-api-key[[:space:]]*:[[:space:]]*[A-Za-z0-9_-]{16,}|GOCSPX-[A-Za-z0-9_-]{10,}' _out/ 2>/dev/null; then
+            echo "::error::ciktida sir DEGERI bulundu, Drive'a yazilmadi"; exit 1
+          fi
+          rclone copy _out "gdrive:ASTROLOVE/TEMP/POD_REFERANS_FARK" -q
+          rclone lsf "gdrive:ASTROLOVE/TEMP/POD_REFERANS_FARK"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        continue-on-error: true
+        with:
+          name: pod-referans-fark
+          path: _out/
+          if-no-files-found: ignore
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
