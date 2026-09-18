@@ -168,7 +168,17 @@ def validate_snapshot(snapshot: dict, expected_title: str) -> tuple[dict, dict]:
         checks["delete_target_exists"], checks["delete_target_not_variation_linked"],
     )
     if not all(required):
-        raise RuntimeError(f"onkosul: {checks}")
+        diagnostic = [
+            {
+                "id": str(row.get("listing_image_id")),
+                "rank": row.get("rank"),
+                "size": [row.get("full_width"), row.get("full_height")],
+                "variation_linked": str(row.get("listing_image_id")) in variation_ids,
+                "alt_text": (row.get("alt_text") or "")[:120],
+            }
+            for row in images
+        ]
+        raise RuntimeError(f"onkosul: {checks}; gallery={diagnostic}")
     return checks, {
         "mode": "standard_13" if standard_13 else "legacy_14_recovery",
         "legacy_selector": (
@@ -372,6 +382,7 @@ def main() -> None:
     ap.add_argument("--out", required=True)
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--only", default="")
     ap.add_argument("--quota-min", type=int, default=300)
     args = ap.parse_args()
 
@@ -432,6 +443,12 @@ def main() -> None:
         if not args.apply
         or state.get("rows", {}).get(str(row["id"]), {}).get("apply", {}).get("status") != "PASS"
     ]
+    only = {item.strip() for item in args.only.split(",") if item.strip()}
+    if only:
+        selected = [row for row in selected if str(row["id"]) in only]
+        found = {str(row["id"]) for row in selected}
+        if found != only:
+            raise SystemExit(f"HATA: --only hedefleri bulunamadi: {sorted(only - found)}")
     if args.limit:
         selected = selected[: args.limit]
     failures = 0
