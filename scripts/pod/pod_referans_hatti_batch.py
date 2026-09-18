@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
-"""Referans (Aquarius+Gemini) kapak/video hattini TOPLU calistirir.
+"""Referans (Aquarius+Gemini) VIDEO hattini TOPLU calistirir.
 
-Iki hattin birlesimi:
-  match_video_to_cover.py  - ilanin kendi kapagini videonun ilk 0.6 sn'si yapar,
-                             hareketi kapak uzayinda 200 px asagi kaydirir.
-  pod_cover_from_video.py  - yeni videonun 0. karesini 2400x3000 kapak yapar.
+Mo 18 Eyl 2026 duzeltmesi: referansin canli kapagi Gold B kosusundan gelir
+(run 35349346706), video karesinden DEGIL. Bu yuzden YENI KAPAK URETILMEZ;
+her ilanin mevcut Gold B kapagi korunur ve yalniz VIDEO o kapaga hizalanir.
 
-Kaynak her ilan icin KENDI canli videosu ve KENDI canli kapagidir.
+Kaydirma miktari ilan basina OLCULUR (86 px sabit degildir): ilanin kapagi ile
+kendi videosunun hareket karesi arasindaki dikey kayma aranir.
+
+Kaynak her ilan icin KENDI canli videosu ve KENDI canli Gold B kapagidir.
 Etsy'ye YAZMA YOK: varsayilan --dry-run, yazma kodu devre disi (--apply reddedilir).
 Hedef ilanlar katalogdan (pod_changes_v2.json) okunur; sabit LISTING_ID yoktur.
 
@@ -67,16 +69,23 @@ def video_kur(kapak, kaynak_video, cikti, shift_cover_px, still, fade, motion_st
     shift = round(shift_cover_px * h / KAPAK_OLCU[1])
     if shift % 2:
         shift += 1
-    govde = h - shift
-    ust_ornek = max(8, min(32, shift))
     fade_offset = still - fade
+    if shift > 0:
+        govde = h - shift
+        ust_ornek = max(8, min(32, shift))
+        hareket = (
+            f"[1:v]fps=30,setpts=PTS-STARTPTS,split=2[motion0][top0];"
+            f"[top0]crop={w}:{ust_ornek}:0:0,vflip,scale={w}:{shift}:flags=lanczos[top];"
+            f"[motion0]crop={w}:{govde}:0:0[body];"
+            f"[top][body]vstack=inputs=2[shifted];"
+        )
+    else:
+        govde, ust_ornek = h, 0
+        hareket = f"[1:v]fps=30,setpts=PTS-STARTPTS[shifted];"
     graf = (
         f"[0:v]scale={w}:{h}:flags=lanczos,fps=30[still0];"
         f"[still0]trim=duration={still},setpts=PTS-STARTPTS[still];"
-        f"[1:v]fps=30,setpts=PTS-STARTPTS,split=2[motion0][top0];"
-        f"[top0]crop={w}:{ust_ornek}:0:0,vflip,scale={w}:{shift}:flags=lanczos[top];"
-        f"[motion0]crop={w}:{govde}:0:0[body];"
-        f"[top][body]vstack=inputs=2[shifted];"
+        + hareket +
         f"[shifted]trim=start={motion_start},setpts=PTS-STARTPTS[motion];"
         f"[still][motion]xfade=transition=fade:duration={fade}:offset={fade_offset}[out]"
     )
@@ -90,15 +99,70 @@ def video_kur(kapak, kaynak_video, cikti, shift_cover_px, still, fade, motion_st
             "ust_ayna_px": ust_ornek, "still_sn": still, "fade_sn": fade}
 
 
-def kapak_kur(video, ham_kare, kapak):
-    """Videonun 0. karesi -> 2400x3000 kapak (pod_cover_from_video ile ayni)."""
-    extract_frame(video, ham_kare, 0)
-    with Image.open(ham_kare) as im:
+ARAMA_PX = 360          # kapak uzayinda aranan en buyuk kayma
+ARAMA_OLCU = (600, 750)  # kaba arama icin kucultulmus tuval
+
+
+def _gri(yol, olcu):
+    with Image.open(yol) as im:
+        return np.asarray(im.convert("L").resize(olcu, Image.Resampling.LANCZOS),
+                          dtype=np.float32)
+
+
+def kayma_olc(kapak, video, is_dir):
+    """Kapak ile videonun hareket karesi arasindaki dikey kaymayi OLCER.
+
+    Videonun son karesi (yerlesmis kompozisyon) kapakla karsilastirilir; kare
+    asagi dogru dy kadar kaydirilip ortalama mutlak fark en kucuk oldugunda
+    aranan kayma bulunur. Donus kapak uzayindadir (2400x3000).
+    """
+    meta = probe(video)
+    sure = float(meta["format"]["duration"])
+    son_kare = is_dir / "kaynak_son_kare.png"
+    extract_frame(video, son_kare, max(sure - 0.15, 0.0))
+    k = _gri(kapak, ARAMA_OLCU)
+    f = _gri(son_kare, ARAMA_OLCU)
+    olcek = KAPAK_OLCU[1] / ARAMA_OLCU[1]
+    en_iyi, en_iyi_dy = None, 0
+    egri = []
+    for dy in range(0, int(ARAMA_PX / olcek) + 1):
+        if dy:
+            kes_k, kes_f = k[dy:], f[:-dy]
+        else:
+            kes_k, kes_f = k, f
+        skor = float(np.abs(kes_k - kes_f).mean())
+        egri.append((dy, round(skor, 3)))
+        if en_iyi is None or skor < en_iyi:
+            en_iyi, en_iyi_dy = skor, dy
+    kayma = int(round(en_iyi_dy * olcek))
+    return {"olculen_kayma_kapak_px": kayma, "arama_skoru": round(en_iyi, 3),
+            "kayma_egrisi_ilk10": egri[:10], "kaynak_sure_sn": round(sure, 3)}
+
+
+def hiza_olc(kapak):
+    """Kapaktaki altin bolgelerin dikey konumu (simge/yazi hizasi).
+
+    artwork_mask'in uc bolgesi ayri ayri olculur: her bolgede maskeli
+    piksellerin en ust, en alt satiri ve agirlik merkezi.
+    """
+    with Image.open(kapak) as im:
         rgb = im.convert("RGB")
-        if rgb.width * 5 != rgb.height * 4:
-            raise RuntimeError(f"ilk kare 4:5 degil: {rgb.size}")
-        rgb.resize(KAPAK_OLCU, Image.Resampling.LANCZOS).save(
-            kapak, format="PNG", compress_level=3)
+        if rgb.size != KAPAK_OLCU:
+            rgb = rgb.resize(KAPAK_OLCU, Image.Resampling.LANCZOS)
+        a = np.asarray(rgb, dtype=np.uint8)
+    m = artwork_mask(a)
+    bolgeler = {"ana_gorsel": (650, 1735), "alt_blok": (1775, 2165), "yazi": (2260, 2425)}
+    cikti = {}
+    for ad, (y0, y1) in bolgeler.items():
+        alt = m[y0:y1]
+        if not alt.any():
+            cikti[ad] = None
+            continue
+        satir = np.nonzero(alt.any(axis=1))[0]
+        agirlik = float((np.nonzero(alt)[0]).mean())
+        cikti[ad] = {"ust": int(y0 + satir.min()), "alt": int(y0 + satir.max()),
+                     "merkez": round(y0 + agirlik, 1)}
+    return cikti
 
 
 def altin_olc(kapak):
@@ -124,7 +188,8 @@ def main():
     ap.add_argument("--only-ids", default="", help="virgullu ilan kimlikleri")
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--referans-kapak", default="", help="karsilastirma icin referans kapak")
-    ap.add_argument("--shift-cover-px", type=int, default=200)
+    ap.add_argument("--shift-cover-px", type=int, default=0,
+                    help="0 = ilan basina olc (varsayilan); >0 = sabit kaydirma")
     ap.add_argument("--still", type=float, default=0.6)
     ap.add_argument("--fade", type=float, default=0.2)
     ap.add_argument("--motion-start", type=float, default=0.4)
@@ -203,40 +268,52 @@ def main():
 
             ad = (cift or lid).replace(" + ", "_").replace(" ", "_")
             yeni_video = out / f"{ad}_{lid}_video.mp4"
-            ham_kare = is_dir / "yeni_kare0.png"
-            yeni_kapak = out / f"{ad}_{lid}_kapak.png"
-            vmeta = video_kur(canli_kapak, canli_video, yeni_video, a.shift_cover_px,
-                              a.still, a.fade, a.motion_start)
-            kapak_kur(yeni_video, ham_kare, yeni_kapak)
+            # KAPAK URETILMEZ: ilanin mevcut Gold B kapagi korunur, Drive'a kopyalanir
+            kapak_kopya = out / f"{ad}_{lid}_kapak_MEVCUT.png"
+            with Image.open(canli_kapak) as im:
+                im.convert("RGB").save(kapak_kopya, format="PNG", compress_level=3)
 
-            # QA: yeni kapak = yeni videonun ilk karesi mi
-            kare_mae = mae(ham_kare, yeni_kapak)
-            # QA: yeni kapak ile ilanin ESKI kapagi arasindaki ton/gecis farki
-            eski_mae = mae(canli_kapak, yeni_kapak)
-            yeni_olcum = altin_olc(yeni_kapak)
-            eski_olcum = altin_olc(canli_kapak)
+            # kaydirma ILAN BASINA olculur (86 px sabit degil)
+            kayma = kayma_olc(canli_kapak, canli_video, is_dir)
+            vmeta = video_kur(canli_kapak, canli_video, yeni_video,
+                              kayma["olculen_kayma_kapak_px"], a.still, a.fade,
+                              a.motion_start)
+
+            # QA: yeni videonun ilk karesi ile KAPAK arasindaki fark (referans: 1.5404)
+            yeni_kare0 = is_dir / "yeni_kare0.png"
+            extract_frame(yeni_video, yeni_kare0, 0)
+            kapak_olcekli = is_dir / "kapak_video_olcusu.png"
+            with Image.open(canli_kapak) as im:
+                im.convert("RGB").resize(tuple(vmeta["video_px"]),
+                                         Image.Resampling.LANCZOS).save(kapak_olcekli)
+            kare_mae = mae(yeni_kare0, kapak_olcekli)
+            eski_kare0 = is_dir / "eski_kare0.png"
+            extract_frame(canli_video, eski_kare0, 0)
+            eski_kare_mae = mae(eski_kare0, kapak_olcekli)
+            kapak_olcum = altin_olc(canli_kapak)
             kayit.update({
                 "durum": "URETILDI",
-                "eski_kapak_id": str(gorseller[0].get("listing_image_id")),
-                "eski_kapak_px": f"{gorseller[0].get('full_width')}x{gorseller[0].get('full_height')}",
+                "kapak_id": str(gorseller[0].get("listing_image_id")),
+                "kapak_px": f"{gorseller[0].get('full_width')}x{gorseller[0].get('full_height')}",
                 "video_id": str(vids[0].get("video_id")),
                 **{f"video_{k}": v for k, v in vmeta.items()},
-                "yeni_kapak_px": "x".join(str(x) for x in KAPAK_OLCU),
-                "kapak_kare_mae": round(kare_mae, 4),
-                "kapak_kare_ayni": kare_mae <= 1.0,
-                "eski_yeni_kapak_mae": round(eski_mae, 4),
-                "altin_rgb_eski": eski_olcum["altin_rgb"],
-                "altin_rgb_yeni": yeni_olcum["altin_rgb"],
-                "maske_orani_yeni": yeni_olcum["maske_orani"],
-                "maske_kutusu_yeni": yeni_olcum["kutu"],
+                **kayma,
+                "yeni_kare_kapak_mae": round(kare_mae, 4),
+                "referans_1_54_fark": round(kare_mae - 1.5404, 4),
+                "eski_kare_kapak_mae": round(eski_kare_mae, 4),
+                "altin_rgb_kapak": kapak_olcum["altin_rgb"],
+                "maske_orani_kapak": kapak_olcum["maske_orani"],
+                "maske_kutusu_kapak": kapak_olcum["kutu"],
+                "hiza": hiza_olc(canli_kapak),
                 "video_dosya": yeni_video.name,
-                "kapak_dosya": yeni_kapak.name,
+                "kapak_dosya": kapak_kopya.name,
                 "kota": api.remaining,
+                "_olcum": kapak_olcum,
             })
-            kayit["_olcum"] = yeni_olcum
             log(f"{eta(i, len(hedefler), t0)} {lid} {cift}: URETILDI | "
-                f"kare MAE {kare_mae:.3f} | altin {yeni_olcum['altin_rgb']} | "
-                f"kota={api.remaining}")
+                f"kayma {kayma['olculen_kayma_kapak_px']} px | "
+                f"kare-kapak MAE {kare_mae:.3f} (eski video {eski_kare_mae:.3f}) | "
+                f"altin {kapak_olcum['altin_rgb']} | kota={api.remaining}")
         except Exception as ex:                                   # noqa: BLE001
             kayit["durum"] = "HATA"
             kayit["not"] = f"{type(ex).__name__}: {ex}"
@@ -269,7 +346,9 @@ def main():
             "hata": sum(1 for x in sonuclar if x["durum"] == "HATA"),
             "kota_once": kota_once, "kota_sonra": api.remaining,
             "cagri_ilan_basina": 4,
-            "tarif": {"shift_cover_px": a.shift_cover_px, "still_sn": a.still,
+            "kapak_uretimi": "YOK - ilanin mevcut Gold B kapagi korunur",
+            "tarif": {"shift_cover_px": "ilan basina OLCULUR (sabit degil)",
+                      "still_sn": a.still,
                       "fade_sn": a.fade, "motion_start_sn": a.motion_start,
                       "kapak_olcu": list(KAPAK_OLCU), "codec": "libx264 crf18 medium",
                       "pix_fmt": "yuv420p", "fps": 30},
