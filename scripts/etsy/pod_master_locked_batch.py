@@ -146,6 +146,32 @@ def compact_images(items: list[dict]) -> list[dict]:
              "alt_text": x.get("alt_text"), "url": x.get("url_fullxfull")} for x in items]
 
 
+def marked_cover(items: list[dict]) -> dict | None:
+    """Galerinin herhangi bir sirasindaki master-locked kapagi bul."""
+    marker = MARKER.lower()
+    return next((item for item in items if marker in (item.get("alt_text") or "").lower()), None)
+
+
+def remaining_below(api: Etsy, minimum: int) -> bool:
+    if api.remaining is None:
+        return False
+    try:
+        return int(api.remaining) < minimum
+    except (TypeError, ValueError):
+        return False
+
+
+def set_image_rank(api: Etsy, shop: str, lid: str, image_id: int | str, rank: int) -> None:
+    """Etsy'nin upload sirasinda yok sayabildigi rank'i ikinci ve acik bir cagriyla yaz."""
+    api.post_file(
+        f"/shops/{shop}/listings/{lid}/images",
+        files={
+            "listing_image_id": (None, str(image_id)),
+            "rank": (None, str(rank)),
+        },
+    )
+
+
 def download(url: str, path: pathlib.Path) -> None:
     response = requests.get(url, timeout=120)
     response.raise_for_status()
@@ -221,10 +247,16 @@ def main() -> None:
 
     failures = 0
     for index, (lid, pair, catalog_row) in enumerate(targets, 1):
+        # Bu kontrol ilanla ilgili dort geri-okumadan ONCE yapilir. Esik altinda
+        # tek bir GET dahi atilmaz; state sonraki kosuda kaldigi yerden devam eder.
+        if remaining_below(api, args.quota_min):
+            log(f"KOTA DUR: {api.remaining} < {args.quota_min}; {lid} ve sonrasi islenmedi")
+            break
         row_state = {"listing_id": lid, "pair": pair, "started_utc": now(), "status": "RUNNING"}
         state.setdefault("rows", {})[lid] = row_state
         save_state(state_path, state)
         log(f"[{index}/{len(targets)}] {pair} {lid}")
+        stop_after_row = False
         try:
             source = source_dir / f"{pair}.mp4"
             if not source.exists() or source.stat().st_size < 10000:
@@ -261,14 +293,11 @@ def main() -> None:
                                  image_count=len(before_images), video_count=len(before_videos))
                 save_state(state_path, state)
                 continue
-            if api.remaining is not None and int(api.remaining) < args.quota_min:
-                raise RuntimeError(f"kota {api.remaining} < {args.quota_min}")
-
-            first = before_images[0] if before_images else {}
-            already_cover = MARKER.lower() in (first.get("alt_text") or "").lower()
-            if already_cover:
-                new_image_id = first.get("listing_image_id")
-                log("  kapak zaten master-locked; tekrar yuklenmedi")
+            existing_cover = marked_cover(before_images)
+            already_cover = existing_cover is not None
+            if existing_cover:
+                new_image_id = existing_cover.get("listing_image_id")
+                log(f"  mevcut master-locked kapak bulundu: {new_image_id} rank={existing_cover.get('rank')}")
             else:
                 with cover.open("rb") as fh:
                     uploaded = api.post_file(
@@ -280,6 +309,14 @@ def main() -> None:
                 if not new_image_id:
                     raise RuntimeError("yeni kapak image_id donmedi")
                 log(f"  kapak eklendi: {new_image_id} rank=1")
+
+            # Etsy bazen multipart upload icindeki rank=1 alanini kabul edip
+            # gorseli listenin sonuna ekliyor. Ayrı rank yazimi deterministiktir
+            # ve mevcut variation-image baglantilarini degistirmez.
+            current_rank = existing_cover.get("rank") if existing_cover else uploaded.get("rank")
+            if str(current_rank) != "1":
+                set_image_rank(api, shop, lid, new_image_id, 1)
+                log(f"  kapak rank duzeltme: {new_image_id} -> 1")
 
             mid_images = eventually(lambda: gallery(api, lid),
                                     lambda rows: bool(rows and rows[0].get("listing_image_id") == new_image_id))
@@ -323,12 +360,27 @@ def main() -> None:
                              backup=backup_path.name, new_image_id=new_image_id,
                              new_video_id=uploaded_video.get("video_id"), quota=api.remaining)
             log("  PASS")
+        except SystemExit as exc:
+            # Etsy istemcisi 429'da SystemExit uretir. Bunu yakalayip state ve
+            # summary'yi kaydet; sonraki ilanlara gecerek kotayi tuketme.
+            message = str(exc)
+            if "429" in message or "kota" in message.lower():
+                row_state.update(status="STOPPED_QUOTA", finished_utc=now(),
+                                 error=message, quota=api.remaining)
+                log(f"  KOTA DUR: {message}")
+                stop_after_row = True
+            else:
+                failures += 1
+                row_state.update(status="FAIL", finished_utc=now(), error=message, quota=api.remaining)
+                log(f"  FAIL: {message}")
         except Exception as exc:  # tek ilan hatasi digerlerini durdurmaz; state'e yazilir
             failures += 1
             row_state.update(status="FAIL", finished_utc=now(), error=str(exc), quota=api.remaining)
             log(f"  FAIL: {exc}")
         finally:
             save_state(state_path, state)
+        if stop_after_row:
+            break
 
     summary = {
         "utc": now(), "apply": args.apply, "targets": len(targets), "failures": failures,
