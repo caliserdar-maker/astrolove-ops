@@ -82,6 +82,7 @@ jobs:
         if: ${{ always() }}
         run: |
           set -euo pipefail
+          mkdir -p _out
           [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
           rm -rf _out/_is
           if grep -rqE '"(access_token|refresh_token)"[[:space:]]*:[[:space:]]*"[A-Za-z0-9._-]{20,}"|x-api-key[[:space:]]*:[[:space:]]*[A-Za-z0-9_-]{16,}|GOCSPX-[A-Za-z0-9_-]{10,}' _out/ 2>/dev/null; then
