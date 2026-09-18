@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 """Guarded candidate-B cover replacement for the remaining 77 POD listings.
 
-Dry-run reads every listing and locks its current cover ID, video ID, gallery,
-variation-image map and deterministic candidate pixel hash.  Apply is refused
-unless all 77 dry-runs passed.  During apply, every locked value is rechecked
-before the candidate is uploaded.  An old rank-1 cover is deleted only when it
-is unlinked; a variation-linked rank-1 image is preserved and shifted behind
-the new standalone cover.
+Dry-run reads every listing and locks its current cover ID, video ID, gallery
+and variation-image map. Apply is refused unless all 77 dry-runs passed.
+During apply, every stable listing value is rechecked before the candidate is
+uploaded. Candidate pixel hashes remain audit evidence, but are deliberately
+not a cross-run lock: Etsy's CDN can serve byte-different JPEG encodings for
+the same immutable image ID in different runner regions. The geometry-free,
+gold-mask-only QA gates are enforced on every run. An old rank-1 cover is
+deleted only when it is unlinked; a variation-linked rank-1 image is preserved
+and shifted behind the new standalone cover.
 """
 
 from __future__ import annotations
@@ -496,8 +499,13 @@ def main() -> None:
                     "video_ids": locked.get("video_ids") == current["video_ids"],
                     "snapshot_signature": locked.get("snapshot_signature")
                     == current["snapshot_signature"],
-                    "candidate_pixel_sha256": locked.get("candidate_pixel_sha256")
-                    == current["candidate_pixel_sha256"],
+                    "source_cover_size": locked.get("qa", {}).get("source_cover_size")
+                    == qa.get("source_cover_size"),
+                    "candidate_generation_safe": bool(
+                        qa.get("geometry_unchanged")
+                        and qa.get("background_pixels_changed_after_normalization") == 0
+                        and all(qa.get("transform_checks", {}).values())
+                    ),
                 }
                 if not all(lock_checks.values()):
                     raise RuntimeError(f"kuru prova-canli kilidi: {lock_checks}")
