@@ -183,7 +183,7 @@ def altin_esitle(kapak_rgb, hedef_rgb):
     hedef = np.asarray(hedef_rgb, dtype=np.float32)
     toplam = np.zeros(3, dtype=np.float32)
     cikti = a
-    for _ in range(2):
+    for _ in range(5):
         mm = artwork_mask(cikti)
         if not mm.any():
             break
@@ -202,8 +202,8 @@ def altin_esitle(kapak_rgb, hedef_rgb):
 def video_yaz(kare_dir, hedef, fps, sure):
     subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-framerate", str(fps),
                     "-start_number", "0", "-i", str(kare_dir / "%05d.png"),
-                    "-t", f"{sure:.3f}", "-c:v", "libx264", "-preset", "medium",
-                    "-crf", "16", "-pix_fmt", "yuv420p", "-movflags", "+faststart",
+                    "-t", f"{sure:.3f}", "-c:v", "libx264", "-preset", "slow",
+                    "-crf", "12", "-pix_fmt", "yuv420p", "-movflags", "+faststart",
                     str(hedef)], check=True)
 
 
