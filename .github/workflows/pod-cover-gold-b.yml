@@ -18,10 +18,6 @@ on:
         description: "Canlı rank-1 image id"
         required: true
         default: "8542130896"
-  push:
-    branches: [codex/pod-cover-gold-b-20260918]
-    paths:
-      - "config/pod_cover_gold_b.trigger"
 
 concurrency:
   group: etsy-token
