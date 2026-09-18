@@ -121,11 +121,30 @@ def validate_snapshot(snapshot: dict, expected_title: str) -> tuple[dict, dict]:
         if LEGACY_MASTER_MARKER in (row.get("alt_text") or "").lower()
         and str(row.get("listing_image_id")) not in variation_ids
     ]
+    newest_image = max(
+        images,
+        key=lambda row: int(row.get("listing_image_id") or 0),
+        default={},
+    )
+    newest_id = str(newest_image.get("listing_image_id") or "")
+    newest_is_unlinked_2400 = bool(
+        newest_id
+        and newest_id not in variation_ids
+        and [newest_image.get("full_width"), newest_image.get("full_height")]
+        == [2400, 3000]
+    )
     standard_13 = len(images) == 13 and source_cover_id not in variation_ids
-    legacy_14 = len(images) == 14 and len(marked_unlinked) == 1
+    legacy_14_marked = len(images) == 14 and len(marked_unlinked) == 1
+    legacy_14_newest = bool(
+        len(images) == 14
+        and source_cover_id in variation_ids
+        and newest_is_unlinked_2400
+    )
+    legacy_14 = legacy_14_marked or legacy_14_newest
     delete_target_id = (
         source_cover_id if standard_13
-        else str(marked_unlinked[0].get("listing_image_id")) if legacy_14
+        else str(marked_unlinked[0].get("listing_image_id")) if legacy_14_marked
+        else newest_id if legacy_14_newest
         else ""
     )
     checks = {
@@ -133,7 +152,8 @@ def validate_snapshot(snapshot: dict, expected_title: str) -> tuple[dict, dict]:
         "active": snapshot["listing"].get("state") == "active",
         "gallery_shape_supported": standard_13 or legacy_14,
         "standard_13": standard_13,
-        "legacy_14_with_one_marked_unlinked_cover": legacy_14,
+        "legacy_14_with_one_marked_unlinked_cover": legacy_14_marked,
+        "legacy_14_with_newest_unlinked_2400_cover": legacy_14_newest,
         "single_video": len(listing_videos) == 1,
         "five_variation_links": len(variations) == 5,
         "rank1_exists": bool(images and int(images[0].get("rank") or 0) == 1),
@@ -151,6 +171,11 @@ def validate_snapshot(snapshot: dict, expected_title: str) -> tuple[dict, dict]:
         raise RuntimeError(f"onkosul: {checks}")
     return checks, {
         "mode": "standard_13" if standard_13 else "legacy_14_recovery",
+        "legacy_selector": (
+            "none" if standard_13
+            else "alt_text_marker" if legacy_14_marked
+            else "newest_unlinked_2400"
+        ),
         "source_cover_id": source_cover_id,
         "delete_target_id": delete_target_id,
         "image_count": len(images),
@@ -327,6 +352,7 @@ def apply_candidate(api: Etsy, shop_id: str, listing_id: str, pair: str,
         raise RuntimeError(f"son geri-okuma: {final_checks}")
     return {
         "replacement_mode": replacement_plan["mode"],
+        "legacy_selector": replacement_plan["legacy_selector"],
         "source_cover_id": source_cover_id,
         "deleted_image_id": delete_target_id,
         "new_cover_id": str(new_cover_id),
@@ -433,6 +459,7 @@ def main() -> None:
                 "source_cover_id": str(before["images"][0].get("listing_image_id")),
                 "delete_target_id": replacement_plan["delete_target_id"],
                 "replacement_mode": replacement_plan["mode"],
+                "legacy_selector": replacement_plan["legacy_selector"],
                 "image_count": replacement_plan["image_count"],
                 "video_ids": as_strings(video_ids(before["videos"])),
                 "snapshot_signature": snapshot_signature(before),
@@ -467,6 +494,7 @@ def main() -> None:
                     "source_cover_id": locked.get("source_cover_id") == current["source_cover_id"],
                     "delete_target_id": locked.get("delete_target_id") == current["delete_target_id"],
                     "replacement_mode": locked.get("replacement_mode") == current["replacement_mode"],
+                    "legacy_selector": locked.get("legacy_selector") == current["legacy_selector"],
                     "image_count": locked.get("image_count") == current["image_count"],
                     "video_ids": locked.get("video_ids") == current["video_ids"],
                     "snapshot_signature": locked.get("snapshot_signature")
