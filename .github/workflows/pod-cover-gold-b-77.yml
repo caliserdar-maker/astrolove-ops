@@ -1,0 +1,138 @@
+name: pod-cover-gold-b-77
+
+# Basarili Aquarius-Gemini B kapak yontemini kalan 77 POD ilanina uygular.
+# Once 77/77 kuru prova kilidi gerekir. Video, diger 12 gorsel, variation-images,
+# baslik ve ilan durumu degismez; yalniz baglantisiz rank-1 kapak degistirilir.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "true = 77/77 kuru prova kilidinden sonra uygula"
+        type: boolean
+        default: false
+      confirm:
+        description: "apply=true icin tam olarak GOLD_ONLY_B_77"
+        required: false
+        default: ""
+      limit:
+        description: "0=tumu; yalniz tanilama icin hedef siniri"
+        required: false
+        default: "0"
+      quota_min:
+        description: "Her ilan oncesi mutlak kota tabani"
+        required: false
+        default: "300"
+  push:
+    branches: [codex/pod-cover-gold-b-20260918]
+    paths:
+      - "config/pod_cover_gold_b_77.trigger"
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  gold-b-77:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    env:
+      APPLY: ${{ inputs.apply || 'false' }}
+      CONFIRM: ${{ inputs.confirm || '' }}
+      LIMIT: ${{ inputs.limit || '0' }}
+      QMIN: ${{ inputs.quota_min || '300' }}
+      STATE_REMOTE: ASTROLOVE/TEMP/POD_COVER_GOLD_B_77/state.json
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tetikleyici ayarlari
+        if: ${{ github.event_name == 'push' }}
+        run: |
+          set -euo pipefail
+          file=config/pod_cover_gold_b_77.trigger
+          echo "APPLY=$(jq -r '.apply // false' "$file")" >> "$GITHUB_ENV"
+          echo "CONFIRM=$(jq -r '.confirm // ""' "$file")" >> "$GITHUB_ENV"
+          echo "LIMIT=$(jq -r '.limit // 0' "$file")" >> "$GITHUB_ENV"
+          echo "QMIN=$(jq -r '.quota_min // 300' "$file")" >> "$GITHUB_ENV"
+      - name: Onay kapisi
+        run: |
+          set -euo pipefail
+          if [ "$APPLY" = "true" ] && [ "$CONFIRM" != "GOLD_ONLY_B_77" ]; then
+            echo "::error::Yanlis onay anahtari; Etsy yazma yok."
+            exit 1
+          fi
+          [ "$APPLY" = "true" ] && \
+            echo "::warning::APPLY: kalan 77 POD ilaninda yalniz rank-1 kapak degisecek." || \
+            echo "DRY-RUN: 77 POD ilani okunacak; Etsy yazma yok."
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Bagimliliklar
+        run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2 pillow==12.3.0 numpy==2.4.6 scipy==1.17.0
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg rclone >/dev/null
+      - name: Token ve onceki state
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone _work _out
+          umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && \
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:${STATE_REMOTE}" _work/state.json 2>/dev/null || true
+      - name: B kapaklari dogrula veya uygula
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          args=(
+            --catalog scripts/etsy/seo/pod_changes_v2.json
+            --luts config/pod_cover_gold_b_luts.json
+            --state _work/state.json
+            --out _out
+            --limit "$LIMIT"
+            --quota-min "$QMIN"
+          )
+          [ "$APPLY" = "true" ] && args+=(--apply)
+          python scripts/etsy/pod_cover_gold_b_batch.py "${args[@]}"
+      - name: Token, state ve kanitlari sakla
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && \
+            rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" || true
+          [ -f _work/state.json ] && rclone copyto _work/state.json "gdrive:${STATE_REMOTE}" || true
+          mkdir -p _out/persist
+          [ -f _out/summary.json ] && cp _out/summary.json _out/persist/ || true
+          [ -d _out/evidence ] && cp -a _out/evidence _out/persist/ || true
+          [ -d _out/backups ] && cp -a _out/backups _out/persist/ || true
+          rclone copy _out/persist \
+            "gdrive:ASTROLOVE/TEMP/POD_COVER_GOLD_B_77/RUN_${GITHUB_RUN_ID}" -q || true
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: pod-cover-gold-b-77
+          path: |
+            _work/state.json
+            _out/summary.json
+            _out/evidence/
+            _out/backups/
+          if-no-files-found: ignore
+          retention-days: 14
+      - if: ${{ always() }}
+        run: rm -rf _work _out ~/.config/rclone
+
