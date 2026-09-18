@@ -162,6 +162,123 @@ def validate_snapshot(snapshot: dict, expected_title: str) -> tuple[dict, dict]:
     }
 
 
+def partial_add_recovery(snapshot: dict, locked: dict, pair: str) -> dict | None:
+    """Recognize our completed upload when Etsy delayed its rank-1 update.
+
+    This recovery is intentionally limited to the no-delete 12->13 path. It
+    requires the complete locked gallery, video and variation map to remain
+    present, plus exactly one new unlinked 2400x3000 image with our alt text.
+    """
+    if locked.get("replacement_mode") != "missing_cover_12_add":
+        return None
+    signature = locked.get("snapshot_signature", {})
+    original_ids = [str(item[0]) for item in signature.get("images", [])]
+    current_images = snapshot.get("images", [])
+    current_ids = [str(row.get("listing_image_id")) for row in current_images]
+    original_in_current_order = [item for item in current_ids if item in set(original_ids)]
+    extra_ids = [item for item in current_ids if item not in set(original_ids)]
+    extra = next(
+        (row for row in current_images
+         if str(row.get("listing_image_id")) == (extra_ids[0] if len(extra_ids) == 1 else "")),
+        {},
+    )
+    checks = {
+        "locked_12_image_mode": locked.get("image_count") == 12 and len(original_ids) == 12,
+        "current_13_images": len(current_images) == 13,
+        "all_original_images_preserved": set(original_ids).issubset(set(current_ids)),
+        "original_relative_order_preserved": original_in_current_order == original_ids,
+        "exactly_one_new_image": len(extra_ids) == 1,
+        "new_image_2400x3000": [extra.get("full_width"), extra.get("full_height")]
+        == [2400, 3000],
+        "new_image_unlinked": str(extra.get("listing_image_id"))
+        not in {str(row.get("image_id")) for row in snapshot.get("variations", [])},
+        "new_image_alt_text": extra.get("alt_text")
+        == f"{pair} gold zodiac couple art in a midnight blue interior",
+        "title_unchanged": snapshot.get("listing", {}).get("title") == signature.get("title"),
+        "state_unchanged": snapshot.get("listing", {}).get("state")
+        == signature.get("state") == "active",
+        "video_unchanged": as_strings(video_ids(snapshot.get("videos", [])))
+        == signature.get("video_ids"),
+        "variation_images_unchanged": [list(item) for item in variation_map(
+            snapshot.get("variations", [])
+        )] == signature.get("variation_images"),
+    }
+    if not all(checks.values()):
+        return None
+    return {
+        "new_cover_id": extra_ids[0],
+        "original_ids": original_ids,
+        "checks": checks,
+    }
+
+
+def repair_partial_add(api: Etsy, shop_id: str, listing_id: str, snapshot: dict,
+                       locked: dict, recovery: dict) -> dict:
+    """Finish a verified 12->13 upload by moving its existing image to rank 1."""
+    new_cover_id = str(recovery["new_cover_id"])
+    original_ids = list(recovery["original_ids"])
+
+    def final_gallery_ok(rows: list[dict]) -> bool:
+        ids = [str(row.get("listing_image_id")) for row in rows]
+        return (
+            len(rows) == 13
+            and bool(ids)
+            and ids[0] == new_cover_id
+            and [item for item in ids if item != new_cover_id] == original_ids
+        )
+
+    after_images = snapshot["images"]
+    for _ in range(2):
+        api.post_file(
+            f"/shops/{shop_id}/listings/{listing_id}/images",
+            files={"listing_image_id": (None, new_cover_id), "rank": (None, "1")},
+        )
+        after_images = eventually(
+            lambda: gallery(api, listing_id), final_gallery_ok, attempts=20, pause=3
+        )
+        if final_gallery_ok(after_images):
+            break
+
+    after_videos = videos(api, listing_id)
+    after_variations = variation_images(api, shop_id, listing_id)
+    after_listing = api.get(f"/listings/{listing_id}") or {}
+    new_metadata = next(
+        (row for row in after_images
+         if str(row.get("listing_image_id")) == new_cover_id),
+        {},
+    )
+    signature = locked["snapshot_signature"]
+    final_checks = {
+        "new_cover_rank1": final_gallery_ok(after_images),
+        "new_cover_2400x3000": [
+            new_metadata.get("full_width"), new_metadata.get("full_height")
+        ] == [2400, 3000],
+        "image_count_expected": len(after_images) == 13,
+        "other_images_unchanged": [
+            str(row.get("listing_image_id")) for row in after_images
+            if str(row.get("listing_image_id")) != new_cover_id
+        ] == original_ids,
+        "video_unchanged": as_strings(video_ids(after_videos)) == signature["video_ids"],
+        "variation_images_unchanged": [list(item) for item in variation_map(after_variations)]
+        == signature["variation_images"],
+        "title_unchanged": after_listing.get("title") == signature["title"],
+        "state_unchanged": after_listing.get("state") == signature["state"] == "active",
+    }
+    if not all(final_checks.values()):
+        raise RuntimeError(f"yarim yukleme kurtarma geri-okuma: {final_checks}")
+    return {
+        "replacement_mode": "missing_cover_12_add_recovered",
+        "source_cover_id": locked["source_cover_id"],
+        "deleted_image_id": None,
+        "new_cover_id": new_cover_id,
+        "cover_backup": None,
+        "recovery_checks": recovery["checks"],
+        "final_checks": final_checks,
+        "gallery_after": image_map(after_images),
+        "video_ids_after": video_ids(after_videos),
+    }
+
+
 def make_candidate(snapshot: dict, work: pathlib.Path, luts: list[np.ndarray]) -> tuple[pathlib.Path, dict]:
     images = snapshot["images"]
     listing_videos = snapshot["videos"]
@@ -312,11 +429,27 @@ def apply_candidate(api: Etsy, shop_id: str, listing_id: str, pair: str,
             raise RuntimeError("silme plani var ancak hedef kimligi yok")
         api.delete(f"/shops/{shop_id}/listings/{listing_id}/images/{delete_target_id}")
     expected_final_count = len(before_images) if delete_target_id else len(before_images) + 1
+
+    def final_gallery_ok(rows: list[dict]) -> bool:
+        ids = [str(row.get("listing_image_id")) for row in rows]
+        return (
+            len(rows) == expected_final_count
+            and bool(ids)
+            and ids[0] == str(new_cover_id)
+            and ids[1:] == untouched_before
+        )
+
     after_images = eventually(
-        lambda: gallery(api, listing_id),
-        lambda rows: len(rows) == expected_final_count
-        and str(rows[0].get("listing_image_id")) == str(new_cover_id),
+        lambda: gallery(api, listing_id), final_gallery_ok, attempts=20, pause=3
     )
+    if not final_gallery_ok(after_images):
+        api.post_file(
+            f"/shops/{shop_id}/listings/{listing_id}/images",
+            files={"listing_image_id": (None, str(new_cover_id)), "rank": (None, "1")},
+        )
+        after_images = eventually(
+            lambda: gallery(api, listing_id), final_gallery_ok, attempts=20, pause=3
+        )
     after_videos = videos(api, listing_id)
     after_variations = variation_images(api, shop_id, listing_id)
     after_listing = api.get(f"/listings/{listing_id}") or {}
@@ -452,6 +585,41 @@ def main() -> None:
             if args.apply:
                 require_apply_quota(api, len(selected) - index + 1, args.quota_min)
             before = current_snapshot(api, shop_id, listing_id)
+            if args.apply:
+                locked = row_state.get("dry_run", {})
+                recovery = partial_add_recovery(before, locked, pair)
+                if recovery:
+                    stamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+                    backup_json = backup_dir / f"backup_{listing_id}_{stamp}.json"
+                    backup_snapshot(
+                        backup_json, row, before,
+                        {"recovery": "verified delayed rank-1 update", **recovery["checks"]},
+                    )
+                    applied = repair_partial_add(
+                        api, shop_id, listing_id, before, locked, recovery
+                    )
+                    evidence = {
+                        "listing_id": listing_id,
+                        "pair": pair,
+                        "phase": phase,
+                        "recovery": recovery,
+                        "backup": backup_json.name,
+                        "applied": applied,
+                    }
+                    row_state[phase] = {
+                        "status": "PASS",
+                        "finished_utc": now(),
+                        "recovered_partial_add": True,
+                        **applied,
+                        "quota": api.remaining,
+                    }
+                    (evidence_dir / f"{listing_id}_{phase}.json").write_text(
+                        json.dumps(evidence, ensure_ascii=False, indent=2) + "\n",
+                        encoding="utf-8",
+                    )
+                    processed += 1
+                    log(f"  PASS_RECOVERED | kota={api.remaining}")
+                    continue
             checks, replacement_plan = validate_snapshot(before, str(row["title"]))
             candidate, qa = make_candidate(before, work, luts)
             current = {
