@@ -44,6 +44,7 @@ KENAR_TOLERANS = 3
 ARAMA_PX = 400
 ARAMA_OLCU = (600, 750)
 UYUMSUZ_ESIK = 10.0
+MEVCUT_UYUMSUZ_MAE = 20.0   # mevcut kapak ile video 0. karesi arasindaki kabul siniri
 
 
 def simdi():
@@ -57,18 +58,63 @@ def eta(i, toplam, t0):
             f"kalan ~{kalan / 60:4.1f} dk")
 
 
-def altin_maske_genis(a):
-    """Genis pencerede altin maskesi (artwork_mask ile ayni renk olcutu)."""
-    zones = np.zeros(a.shape[:2], dtype=bool)
-    zones[PENCERE["y0"]:PENCERE["y1"], PENCERE["x0"]:PENCERE["x1"]] = True
+DAR_BOLGE = [(650, 1735, 565, 1870), (1775, 2165, 630, 1810), (2260, 2425, 900, 1540)]
+PARLAK_TABAN = 140      # oda/ahsap tonlarini disarida birakan parlaklik tabani
+
+
+def _altin(a, zones, parlaklik=0):
     f = a.astype(np.float32)
     r, g, b = f[..., 0], f[..., 1], f[..., 2]
-    ham = zones & (r > 44) & (g > 29) & (r > b * 1.16) & (g > b * 1.04) & (r > g * 1.01)
+    ham = (zones & (r > max(44, parlaklik)) & (g > max(29, parlaklik * 0.72))
+           & (r > b * 1.16) & (g > b * 1.04) & (r > g * 1.01))
     etiket, _ = ndimage.label(ham, structure=np.ones((3, 3), dtype=np.uint8))
     boyut = np.bincount(etiket.ravel())
     tut = boyut >= 45
     tut[0] = False
     return ndimage.binary_dilation(tut[etiket], iterations=2)
+
+
+def altin_maske_dar(a):
+    """Orijinal artwork_mask bolgeleri (POD mockup duzenine gore)."""
+    zones = np.zeros(a.shape[:2], dtype=bool)
+    for y0, y1, x0, x1 in DAR_BOLGE:
+        zones[y0:y1, x0:x1] = True
+    return _altin(a, zones)
+
+
+def altin_maske_genis(a):
+    """Genis pencere + parlaklik tabani: oda sahnesini disarida birakir."""
+    zones = np.zeros(a.shape[:2], dtype=bool)
+    zones[PENCERE["y0"]:PENCERE["y1"], PENCERE["x0"]:PENCERE["x1"]] = True
+    return _altin(a, zones, PARLAK_TABAN)
+
+
+def _bloklar(m, y0, y1, x0, x1):
+    profil = m.sum(axis=1)
+    if not profil.any():
+        return [], True
+    esik = max(20, int(profil.max() * 0.05))
+    dolu = profil >= esik
+    cikti, i = [], 0
+    while i < len(dolu):
+        if not dolu[i]:
+            i += 1
+            continue
+        j = i
+        while j + 1 < len(dolu) and dolu[j + 1]:
+            j += 1
+        if j - i >= 15:
+            agirlik = float((np.arange(i, j + 1) * profil[i:j + 1]).sum()
+                            / max(profil[i:j + 1].sum(), 1))
+            cikti.append({"ust": int(i), "alt": int(j), "merkez": round(agirlik, 1),
+                          "yukseklik": int(j - i + 1), "piksel": int(profil[i:j + 1].sum())})
+        i = j + 1
+    ys, xs = np.nonzero(m)
+    kenar = bool(len(ys) and (ys.min() <= y0 + KENAR_TOLERANS or ys.max() >= y1 - KENAR_TOLERANS
+                              or xs.min() <= x0 + KENAR_TOLERANS
+                              or xs.max() >= x1 - KENAR_TOLERANS))
+    cikti.sort(key=lambda x: x["ust"])
+    return cikti, kenar
 
 
 def duzen_olc(kapak):
@@ -82,37 +128,26 @@ def duzen_olc(kapak):
         if rgb.size != KAPAK_OLCU:
             rgb = rgb.resize(KAPAK_OLCU, Image.Resampling.LANCZOS)
         a = np.asarray(rgb, dtype=np.uint8)
-    m = altin_maske_genis(a)
-    if not m.any():
-        return {"bloklar": [], "altin_rgb": None, "maske_orani": 0.0, "kenar": True}
-    profil = m.sum(axis=1)
-    esik = max(20, int(profil.max() * 0.05))
-    dolu = profil >= esik
-    bloklar = []
-    i = 0
-    while i < len(dolu):
-        if not dolu[i]:
-            i += 1
+    olcum = {}
+    for ad, m, sinir in (
+            ("dar", altin_maske_dar(a),
+             (min(z[0] for z in DAR_BOLGE), max(z[1] for z in DAR_BOLGE),
+              min(z[2] for z in DAR_BOLGE), max(z[3] for z in DAR_BOLGE))),
+            ("genis", altin_maske_genis(a),
+             (PENCERE["y0"], PENCERE["y1"], PENCERE["x0"], PENCERE["x1"]))):
+        if not m.any():
+            olcum[ad] = {"bloklar": [], "altin_rgb": None, "maske_orani": 0.0,
+                         "kenar": True, "not": "maske bos"}
             continue
-        j = i
-        while j + 1 < len(dolu) and dolu[j + 1]:
-            j += 1
-        if j - i >= 15:                      # kucuk gurultuyu at
-            agirlik = float((np.arange(i, j + 1) * profil[i:j + 1]).sum()
-                            / max(profil[i:j + 1].sum(), 1))
-            bloklar.append({"ust": int(i), "alt": int(j), "merkez": round(agirlik, 1),
-                            "yukseklik": int(j - i + 1),
-                            "piksel": int(profil[i:j + 1].sum())})
-        i = j + 1
-    bloklar.sort(key=lambda x: -x["piksel"])
-    kenar = any(b["ust"] <= PENCERE["y0"] + KENAR_TOLERANS
-                or b["alt"] >= PENCERE["y1"] - KENAR_TOLERANS for b in bloklar)
-    ys, xs = np.nonzero(m)
-    kenar = kenar or xs.min() <= PENCERE["x0"] + KENAR_TOLERANS \
-        or xs.max() >= PENCERE["x1"] - KENAR_TOLERANS
-    return {"bloklar": bloklar[:4], "altin_rgb":
-            [round(float(x), 1) for x in a[m].astype(np.float32).mean(axis=0)],
-            "maske_orani": round(float(m.mean()), 6), "kenar": bool(kenar)}
+        bloklar, kenar = _bloklar(m, *sinir)
+        olcum[ad] = {"bloklar": bloklar[:4],
+                     "altin_rgb": [round(float(x), 1)
+                                   for x in a[m].astype(np.float32).mean(axis=0)],
+                     "maske_orani": round(float(m.mean()), 6), "kenar": kenar}
+    # gecerli olcum: kenara degmeyen ilk maske
+    olcum["gecerli"] = ("dar" if not olcum["dar"]["kenar"]
+                        else "genis" if not olcum["genis"]["kenar"] else None)
+    return olcum
 
 
 def _gri(yol, olcu):
@@ -268,6 +303,13 @@ def main():
             duzen_yeni = duzen_olc(yeni_kapak)
             duzen_mevcut = duzen_olc(mevcut_kapak)
             kayma = kayma_olc(yeni_kapak, canli_video, is_dir)
+            # MEVCUT kapak ile videonun ilk karesi ortusuyor mu (Capricorn sorusu)
+            with Image.open(mevcut_kapak) as im:
+                mv = is_dir / "mevcut_kapak_video_olcusu.png"
+                im.convert("RGB").resize(Image.open(kare0).size,
+                                         Image.Resampling.LANCZOS).save(mv)
+            mevcut_video_mae = round(mae(kare0, mv), 4)
+            mevcut_kayma = kayma_olc(mevcut_kapak, canli_video, is_dir, "_mevcut")
             uyumsuz = kayma["arama_skoru"] > UYUMSUZ_ESIK
             kayit.update({
                 "durum": "URETILDI", "kapak_id": str(gorseller[0].get("listing_image_id")),
@@ -276,13 +318,20 @@ def main():
                 "state": listing.get("state"),
                 "goldb_qa": qa, "duzen_yeni": duzen_yeni, "duzen_mevcut": duzen_mevcut,
                 **kayma, "video_uyumsuz": uyumsuz,
+                "mevcut_kapak_video_kare0_mae": mevcut_video_mae,
+                "mevcut_kapak_arama_skoru": mevcut_kayma["arama_skoru"],
+                "mevcut_kapak_kayma_px": mevcut_kayma["olculen_kayma_kapak_px"],
                 "kapak_dosya_yeni": yeni_kapak.name,
                 "kapak_dosya_mevcut": mevcut_kopya.name, "kota": api.remaining,
             })
-            if uyumsuz:
-                kayit["not"] = (f"video uyumsuz: arama skoru {kayma['arama_skoru']} > "
-                                f"{UYUMSUZ_ESIK}; video URETILMEDI")
+            if mevcut_video_mae > MEVCUT_UYUMSUZ_MAE:
                 kayit["kimlik"] = video_kimlik(kare0, a.kaynak_video_dizin, is_dir)
+                kayit["not"] = (f"mevcut kapak videoyla ortusmuyor (MAE "
+                                f"{mevcut_video_mae}); kimlik taramasi yapildi")
+            if uyumsuz or mevcut_video_mae > MEVCUT_UYUMSUZ_MAE:
+                if uyumsuz:
+                    kayit["not"] = (f"video uyumsuz: arama skoru {kayma['arama_skoru']} > "
+                                    f"{UYUMSUZ_ESIK}; video URETILMEDI")
                 # kanit gorseli: video ilk karesi | mevcut kapak
                 with Image.open(kare0) as k, Image.open(mevcut_kapak) as m:
                     kk = k.convert("RGB").resize((700, 875), Image.Resampling.LANCZOS)
@@ -291,10 +340,10 @@ def main():
                     yan.paste(kk, (0, 0))
                     yan.paste(mm, (714, 0))
                     yan.save(out / f"UYUMSUZ_{ad}_{lid}.jpg", quality=90)
-                log(f"{eta(i, len(hedefler), t0)} {lid} {cift}: VIDEO UYUMSUZ "
-                    f"(skor {kayma['arama_skoru']}) | en yakin kaynak: "
-                    f"{(kayit['kimlik'].get('adaylar') or [{}])[0].get('dosya', '?')}")
-            else:
+                log(f"{eta(i, len(hedefler), t0)} {lid} {cift}: mevcut kapak-video MAE "
+                    f"{mevcut_video_mae} | en yakin kaynak: "
+                    f"{(kayit.get('kimlik', {}).get('adaylar') or [{}])[0].get('dosya', '?')}")
+            if not uyumsuz:
                 yeni_video = out / f"{ad}_{lid}_video.mp4"
                 vmeta = video_kur(yeni_kapak, canli_video, yeni_video,
                                   kayma["olculen_kayma_kapak_px"], a.still, a.fade,
@@ -321,25 +370,36 @@ def main():
     ref = next((x for x in sonuclar if x["listing_id"] == REFERANS_ID
                 and x["durum"] == "URETILDI"), None)
     if ref:
-        rb = ref["duzen_yeni"]["bloklar"]
+        # gecerli maske: referansta ve orneklerde kenara degmeyen ortak maske
         for k in sonuclar:
             if k["durum"] != "URETILDI" or not k.get("duzen_yeni"):
                 continue
-            kb = k["duzen_yeni"]["bloklar"]
-            farklar = []
-            for j in range(min(len(rb), len(kb))):
-                farklar.append({"blok": j + 1,
-                                "ust_fark": kb[j]["ust"] - rb[j]["ust"],
-                                "alt_fark": kb[j]["alt"] - rb[j]["alt"],
-                                "merkez_fark": round(kb[j]["merkez"] - rb[j]["merkez"], 1)})
-            k["hiza_fark"] = farklar
-            k["hiza_5px_alti"] = bool(farklar) and all(
-                abs(f["ust_fark"]) <= 5 and abs(f["alt_fark"]) <= 5
-                and abs(f["merkez_fark"]) <= 5 for f in farklar)
-            ra, ka = ref["duzen_yeni"]["altin_rgb"], k["duzen_yeni"]["altin_rgb"]
-            if ra and ka:
-                k["renk_fark"] = [round(ka[j] - ra[j], 1) for j in range(3)]
-                k["renk_ort_fark"] = round(sum(abs(x) for x in k["renk_fark"]) / 3, 2)
+            for maske in ("dar", "genis"):
+                rd, kd = ref["duzen_yeni"].get(maske), k["duzen_yeni"].get(maske)
+                if not rd or not kd or rd["kenar"] or kd["kenar"]:
+                    continue
+                rb, kb = rd["bloklar"], kd["bloklar"]
+                farklar = [{"blok": j + 1,
+                            "ust_fark": kb[j]["ust"] - rb[j]["ust"],
+                            "alt_fark": kb[j]["alt"] - rb[j]["alt"],
+                            "merkez_fark": round(kb[j]["merkez"] - rb[j]["merkez"], 1)}
+                           for j in range(min(len(rb), len(kb)))]
+                k["hiza_maske"] = maske
+                k["hiza_fark"] = farklar
+                k["hiza_blok_sayisi"] = [len(rb), len(kb)]
+                k["hiza_5px_alti"] = bool(farklar) and len(rb) == len(kb) and all(
+                    abs(f["ust_fark"]) <= 5 and abs(f["alt_fark"]) <= 5
+                    and abs(f["merkez_fark"]) <= 5 for f in farklar)
+                ra, ka = rd["altin_rgb"], kd["altin_rgb"]
+                if ra and ka:
+                    k["renk_fark"] = [round(ka[j] - ra[j], 1) for j in range(3)]
+                    k["renk_ort_fark"] = round(sum(abs(x) for x in k["renk_fark"]) / 3, 2)
+                break
+            else:
+                k["hiza_maske"] = None
+                k["hiza_5px_alti"] = None
+                k["not"] = ((k.get("not") or "") + " | hiza olculemedi: "
+                            "her iki maske de pencere kenarina degiyor").strip(" |")
 
     # kanit zinciri
     zincir = []
