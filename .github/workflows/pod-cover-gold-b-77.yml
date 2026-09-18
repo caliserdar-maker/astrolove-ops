@@ -31,10 +31,6 @@ on:
         description: "Her ilan oncesi mutlak kota tabani"
         required: false
         default: "300"
-  push:
-    branches: [codex/pod-cover-gold-b-20260918]
-    paths:
-      - "config/pod_cover_gold_b_77.trigger"
 
 concurrency:
   group: etsy-token
