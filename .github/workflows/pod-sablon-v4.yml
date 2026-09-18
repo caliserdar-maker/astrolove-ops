@@ -57,13 +57,17 @@ jobs:
           set -euo pipefail
           umask 077; mkdir -p _work/poster _out
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
-          for cift in Aquarius_Gemini Aries_Leo Aquarius_Cancer Aquarius_Aries \
-                      Scorpio_Taurus Aquarius_Capricorn; do
+          # Drive'da dosya adlari BUYUK HARF (ORIGINAL_HIGH_RES/MIDNIGHT_BLUE/<ORAN>/<CIFT>.jpg),
+          # rclone --include harf duyarli: cift adi buyuk harfe cevrilir.
+          for cift in AQUARIUS_GEMINI ARIES_LEO AQUARIUS_CANCER AQUARIUS_ARIES \
+                      SCORPIO_TAURUS AQUARIUS_CAPRICORN; do
             rclone copy "gdrive:ASTROLOVE/WALL_ART/POSTERS/ORIGINAL_HIGH_RES/MIDNIGHT_BLUE" \
               _work/poster --include "**/${cift}.jpg" -q || true
+            [ "$(find _work/poster -iname "${cift}.jpg" | wc -l)" -ge 1 ] || {
+              echo "::error::poster indirilemedi: ${cift}"; exit 1; }
           done
           echo "poster dosyasi: $(find _work/poster -name '*.jpg' | wc -l)"
-          find _work/poster -name '*.jpg' | head -12
+          find _work/poster -name '*.jpg' | head -20
       - name: 'Sablon uretimi (kuru deneme)'
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
