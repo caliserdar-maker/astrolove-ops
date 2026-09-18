@@ -142,35 +142,55 @@ def main():
            f"Olcum penceresi: y {d['pencere']['y0']}-{d['pencere']['y1']}, "
            f"x {d['pencere']['x0']}-{d['pencere']['x1']}. Blok olcumu pencere kenarina "
            "degerse KENAR olarak isaretlenir ve kabul edilmez.", "",
-           "| ilan | blok | ust | alt | merkez | referanstan fark (ust/alt/merkez) | "
-           "<=5px | kenar |", "|---|---:|---:|---:|---:|---|---|---|"]
+           "Iki maske olculur: **dar** (POD mockup bolgeleri) ve **genis** "
+           f"(y {d['pencere']['y0']}-{d['pencere']['y1']} + parlaklik tabani). "
+           "Kenara degen olcum kabul edilmez; karsilastirma ikisinin de temiz "
+           "oldugu maskeyle yapilir.", "",
+           "| ilan | maske | blok | ust | alt | merkez | referanstan fark | <=5px | kenar |",
+           "|---|---|---:|---:|---:|---:|---|---|---|"]
     for r in satirlar:
-        bloklar = (r.get("duzen_yeni") or {}).get("bloklar", [])
+        dz = r.get("duzen_yeni") or {}
+        secilen = r.get("hiza_maske") or dz.get("gecerli") or "dar"
+        blok_kaynak = dz.get(secilen) or {}
+        bloklar = blok_kaynak.get("bloklar", [])
         farklar = {f["blok"]: f for f in (r.get("hiza_fark") or [])}
+        if not bloklar:
+            md.append(f"| {r['cift']} | {secilen} | - | - | - | - | olculemedi | - | "
+                      f"{'KENAR' if blok_kaynak.get('kenar') else 'temiz'} |")
+            continue
         for j, b in enumerate(bloklar, 1):
             f = farklar.get(j)
             fs = ("referans" if r["listing_id"] == a.referans_id else
                   (f"{f['ust_fark']:+d} / {f['alt_fark']:+d} / {f['merkez_fark']:+.1f}"
-                   if f else "-"))
-            md.append(f"| {r['cift']} | {j} | {b['ust']} | {b['alt']} | {b['merkez']} | "
-                      f"{fs} | {'-' if r['listing_id'] == a.referans_id else ('EVET' if r.get('hiza_5px_alti') else 'HAYIR')} | "
-                      f"{'KENAR' if (r.get('duzen_yeni') or {}).get('kenar') else 'temiz'} |")
+                   if f else "olculemedi"))
+            v5 = ("-" if r["listing_id"] == a.referans_id else
+                  {True: "EVET", False: "HAYIR", None: "olculemedi"}[r.get("hiza_5px_alti")])
+            md.append(f"| {r['cift']} | {secilen} | {j} | {b['ust']} | {b['alt']} | "
+                      f"{b['merkez']} | {fs} | {v5} | "
+                      f"{'KENAR' if blok_kaynak.get('kenar') else 'temiz'} |")
     md += ["", "## Altin renk (yalniz olcum)", "",
            "| ilan | altin RGB | maske orani | referanstan fark | ort |",
            "|---|---|---:|---|---:|"]
     for r in satirlar:
-        dz = r.get("duzen_yeni") or {}
-        md.append(f"| {r['cift']} | {dz.get('altin_rgb')} | {dz.get('maske_orani')} | "
-                  f"{r.get('renk_fark', '-')} | {r.get('renk_ort_fark', '-')} |")
+        dz = (r.get("duzen_yeni") or {})
+        sec = r.get("hiza_maske") or dz.get("gecerli") or "dar"
+        blok = dz.get(sec) or {}
+        md.append(f"| {r['cift']} ({sec}) | {blok.get('altin_rgb')} | "
+                  f"{blok.get('maske_orani')} | {r.get('renk_fark', '-')} | "
+                  f"{r.get('renk_ort_fark', '-')} |")
     md += ["", "## Video hizalama", "",
            f"Arama skoru > {d['uyumsuz_esik']} olan ilanda video URETILMEZ.", "",
-           "| ilan | olculen kaydirma | arama skoru | video | yeni kare0 vs kapak MAE |",
-           "|---|---:|---:|---|---:|"]
+           "| ilan | olculen kaydirma | arama skoru | video | yeni kare0 vs YENI kapak | "
+           "video kare0 vs MEVCUT kapak |", "|---|---:|---:|---|---:|---:|"]
     for r in satirlar:
         md.append(f"| {r['cift']} | {r.get('olculen_kayma_kapak_px', '-')} | "
                   f"{r.get('arama_skoru', '-')} | "
                   f"{'URETILMEDI (uyumsuz)' if r.get('video_uyumsuz') else 'uretildi'} | "
-                  f"{r.get('yeni_kare_kapak_mae', '-')} |")
+                  f"{r.get('yeni_kare_kapak_mae', '-')} | "
+                  f"**{r.get('mevcut_kapak_video_kare0_mae', '-')}** |")
+    md += ["", f"Son sutun, ilanin SU ANKI kapagi ile kendi videosunun ilk karesinin "
+           f"ortusme olcusudur; {d['mevcut_uyumsuz_mae']} uzerinde olan ilanlarda kimlik "
+           "taramasi calistirilir."]
     for r in satirlar:
         if not r.get("kimlik"):
             continue
