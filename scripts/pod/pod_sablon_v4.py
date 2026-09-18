@@ -36,6 +36,11 @@ from pod_cover_from_video import download, gallery, videos, video_url  # noqa: E
 from pod_cover_gold_b_transform import artwork_mask  # noqa: E402
 from match_video_to_cover import extract_frame, probe  # noqa: E402
 
+# Kaynak posterler kendi Drive'imizdan gelir ve 200 MP'i asabilir
+# (ORIGINAL_HIGH_RES, or. 12500x18750); PIL'in varsayilan "decompression bomb"
+# siniri bu guvenilir dosyalari reddediyordu.
+Image.MAX_IMAGE_PIXELS = None
+
 KAPAK = (2400, 3000)
 REFERANS_ID = "4570112095"
 
@@ -340,6 +345,18 @@ def poster_bul(kok, cift):
     return adaylar
 
 
+def poster_ac(yol, hedef_w, hedef_h):
+    """Posteri hedefe yetecek olcekte acar.
+
+    ORIGINAL_HIGH_RES posterleri 200 MP'i asabiliyor; tam cozunurlukte acmak
+    ~700 MB dizi demek. JPEG draft'i, istenen boyutun ALTINA inmeden, kod
+    cozmeyi 1/2-1/8 olceginde yapar.
+    """
+    with Image.open(yol) as im:
+        im.draft("RGB", (hedef_w, hedef_h))
+        return np.asarray(im.convert("RGB"), dtype=np.uint8)
+
+
 def poster_sec(adaylar, hedef_oran):
     """Panel oranina en yakin posteri secer."""
     en_iyi, en_fark = None, None
@@ -477,7 +494,9 @@ def main():
     if not ref_adaylar:
         raise SystemExit(f"HATA: referans posteri bulunamadi ({ref_cift}) -> DUR")
     ref_poster_yol, ref_oran_fark = poster_sec(ref_adaylar, hedef_oran)
-    ref_poster = np.asarray(Image.open(ref_poster_yol).convert("RGB"), dtype=np.uint8)
+    kapak_w = kapak_kutu["sag"] - kapak_kutu["sol"] + 1
+    kapak_h = kapak_kutu["alt"] - kapak_kutu["ust"] + 1
+    ref_poster = poster_ac(ref_poster_yol, kapak_w, kapak_h)
     ham_yerlesim = Image.fromarray(ref_poster).resize(
         (ref_bolge.shape[1], ref_bolge.shape[0]), Image.Resampling.LANCZOS)
     ton = ton_olc(ref_bolge, np.asarray(ham_yerlesim, dtype=np.uint8))
@@ -509,7 +528,7 @@ def main():
                 if not adaylar:
                     raise RuntimeError(f"poster dosyasi yok: {cift}")
                 poster_yol, oran_fark = poster_sec(adaylar, hedef_oran)
-                poster = np.asarray(Image.open(poster_yol).convert("RGB"), dtype=np.uint8)
+                poster = poster_ac(poster_yol, kapak_w, kapak_h)
                 ham = np.asarray(Image.fromarray(poster).resize(
                     (ref_bolge.shape[1], ref_bolge.shape[0]),
                     Image.Resampling.LANCZOS), dtype=np.uint8)
