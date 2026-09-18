@@ -41,6 +41,7 @@ PILOT_ID = "4570112095"
 EXPECTED_CATALOG_SHA256 = "51386f4ad727f446deecf55dac4f154ac58934a4ce74d6a61704f68aaf383917"
 EXPECTED_CATALOG_COUNT = 78
 EXPECTED_TARGET_COUNT = 77
+LEGACY_MASTER_MARKER = "astroLove master-locked POD cover".lower()
 
 
 def now() -> str:
@@ -109,24 +110,51 @@ def snapshot_signature(snapshot: dict) -> dict:
     }
 
 
-def validate_snapshot(snapshot: dict, expected_title: str) -> dict:
+def validate_snapshot(snapshot: dict, expected_title: str) -> tuple[dict, dict]:
     images = snapshot["images"]
     listing_videos = snapshot["videos"]
     variations = snapshot["variations"]
-    old_cover_id = str(images[0].get("listing_image_id")) if images else ""
+    source_cover_id = str(images[0].get("listing_image_id")) if images else ""
     variation_ids = {str(row.get("image_id")) for row in variations}
+    marked_unlinked = [
+        row for row in images
+        if LEGACY_MASTER_MARKER in (row.get("alt_text") or "").lower()
+        and str(row.get("listing_image_id")) not in variation_ids
+    ]
+    standard_13 = len(images) == 13 and source_cover_id not in variation_ids
+    legacy_14 = len(images) == 14 and len(marked_unlinked) == 1
+    delete_target_id = (
+        source_cover_id if standard_13
+        else str(marked_unlinked[0].get("listing_image_id")) if legacy_14
+        else ""
+    )
     checks = {
         "expected_title": snapshot["listing"].get("title") == expected_title,
         "active": snapshot["listing"].get("state") == "active",
-        "image_count_13": len(images) == 13,
+        "gallery_shape_supported": standard_13 or legacy_14,
+        "standard_13": standard_13,
+        "legacy_14_with_one_marked_unlinked_cover": legacy_14,
         "single_video": len(listing_videos) == 1,
         "five_variation_links": len(variations) == 5,
         "rank1_exists": bool(images and int(images[0].get("rank") or 0) == 1),
-        "rank1_not_variation_linked": bool(old_cover_id and old_cover_id not in variation_ids),
+        "delete_target_exists": bool(delete_target_id),
+        "delete_target_not_variation_linked": bool(
+            delete_target_id and delete_target_id not in variation_ids
+        ),
     }
-    if not all(checks.values()):
+    required = (
+        checks["expected_title"], checks["active"], checks["gallery_shape_supported"],
+        checks["single_video"], checks["five_variation_links"], checks["rank1_exists"],
+        checks["delete_target_exists"], checks["delete_target_not_variation_linked"],
+    )
+    if not all(required):
         raise RuntimeError(f"onkosul: {checks}")
-    return checks
+    return checks, {
+        "mode": "standard_13" if standard_13 else "legacy_14_recovery",
+        "source_cover_id": source_cover_id,
+        "delete_target_id": delete_target_id,
+        "image_count": len(images),
+    }
 
 
 def make_candidate(snapshot: dict, work: pathlib.Path, luts: list[np.ndarray]) -> tuple[pathlib.Path, dict]:
@@ -198,15 +226,24 @@ def backup_snapshot(path: pathlib.Path, row: dict, snapshot: dict, qa: dict) -> 
 
 
 def apply_candidate(api: Etsy, shop_id: str, listing_id: str, pair: str,
-                    candidate: pathlib.Path, before: dict, backup_dir: pathlib.Path) -> dict:
+                    candidate: pathlib.Path, before: dict, replacement_plan: dict,
+                    backup_dir: pathlib.Path) -> dict:
     before_images = before["images"]
     before_videos = before["videos"]
     before_variations = before["variations"]
-    old_cover_id = str(before_images[0].get("listing_image_id"))
-    old_url = before_images[0].get("url_fullxfull") or before_images[0].get("url_570xN")
+    source_cover_id = str(before_images[0].get("listing_image_id"))
+    delete_target_id = str(replacement_plan["delete_target_id"])
+    delete_target = next(
+        (row for row in before_images
+         if str(row.get("listing_image_id")) == delete_target_id),
+        None,
+    )
+    if not delete_target:
+        raise RuntimeError("silinecek eski baglantisiz kapak galeride yok")
+    old_url = delete_target.get("url_fullxfull") or delete_target.get("url_570xN")
     if not old_url:
         raise RuntimeError("eski kapak URL yok")
-    old_backup = backup_dir / f"old_cover_{listing_id}_{old_cover_id}.jpg"
+    old_backup = backup_dir / f"deleted_cover_{listing_id}_{delete_target_id}.jpg"
     download(old_url, old_backup)
 
     with candidate.open("rb") as handle:
@@ -227,9 +264,9 @@ def apply_candidate(api: Etsy, shop_id: str, listing_id: str, pair: str,
     )
     mid_images = eventually(
         lambda: gallery(api, listing_id),
-        lambda rows: len(rows) == 14
+        lambda rows: len(rows) == len(before_images) + 1
         and any(str(x.get("listing_image_id")) == str(new_cover_id) for x in rows)
-        and any(str(x.get("listing_image_id")) == old_cover_id for x in rows),
+        and any(str(x.get("listing_image_id")) == delete_target_id for x in rows),
     )
     mid_videos = videos(api, listing_id)
     mid_variations = variation_images(api, shop_id, listing_id)
@@ -241,7 +278,7 @@ def apply_candidate(api: Etsy, shop_id: str, listing_id: str, pair: str,
     )
     mid_checks = {
         "new_cover_safe_rank": new_rank in (1, 2),
-        "image_count_14": len(mid_images) == 14,
+        "image_count_plus_one": len(mid_images) == len(before_images) + 1,
         "old_gallery_preserved": all(
             str(x.get("listing_image_id")) in mid_ids for x in before_images
         ),
@@ -254,12 +291,12 @@ def apply_candidate(api: Etsy, shop_id: str, listing_id: str, pair: str,
 
     untouched_before = [
         str(x.get("listing_image_id")) for x in before_images
-        if str(x.get("listing_image_id")) != old_cover_id
+        if str(x.get("listing_image_id")) != delete_target_id
     ]
-    api.delete(f"/shops/{shop_id}/listings/{listing_id}/images/{old_cover_id}")
+    api.delete(f"/shops/{shop_id}/listings/{listing_id}/images/{delete_target_id}")
     after_images = eventually(
         lambda: gallery(api, listing_id),
-        lambda rows: len(rows) == 13
+        lambda rows: len(rows) == len(before_images)
         and str(rows[0].get("listing_image_id")) == str(new_cover_id),
     )
     after_videos = videos(api, listing_id)
@@ -277,8 +314,8 @@ def apply_candidate(api: Etsy, shop_id: str, listing_id: str, pair: str,
         "new_cover_2400x3000": [
             new_metadata.get("full_width"), new_metadata.get("full_height")
         ] == [2400, 3000],
-        "image_count_13": len(after_images) == 13,
-        "other_12_images_unchanged": untouched_before == untouched_after,
+        "image_count_preserved": len(after_images) == len(before_images),
+        "other_images_unchanged": untouched_before == untouched_after,
         "video_unchanged": video_ids(before_videos) == video_ids(after_videos),
         "variation_images_unchanged": variation_map(before_variations)
         == variation_map(after_variations),
@@ -289,9 +326,11 @@ def apply_candidate(api: Etsy, shop_id: str, listing_id: str, pair: str,
     if not all(final_checks.values()):
         raise RuntimeError(f"son geri-okuma: {final_checks}")
     return {
-        "old_cover_id": old_cover_id,
+        "replacement_mode": replacement_plan["mode"],
+        "source_cover_id": source_cover_id,
+        "deleted_image_id": delete_target_id,
         "new_cover_id": str(new_cover_id),
-        "old_cover_backup": old_backup.name,
+        "deleted_cover_backup": old_backup.name,
         "mid_checks": mid_checks,
         "final_checks": final_checks,
         "gallery_after": image_map(after_images),
@@ -388,10 +427,13 @@ def main() -> None:
             if args.apply:
                 require_apply_quota(api, len(selected) - index + 1, args.quota_min)
             before = current_snapshot(api, shop_id, listing_id)
-            checks = validate_snapshot(before, str(row["title"]))
+            checks, replacement_plan = validate_snapshot(before, str(row["title"]))
             candidate, qa = make_candidate(before, work, luts)
             current = {
-                "old_cover_id": str(before["images"][0].get("listing_image_id")),
+                "source_cover_id": str(before["images"][0].get("listing_image_id")),
+                "delete_target_id": replacement_plan["delete_target_id"],
+                "replacement_mode": replacement_plan["mode"],
+                "image_count": replacement_plan["image_count"],
                 "video_ids": as_strings(video_ids(before["videos"])),
                 "snapshot_signature": snapshot_signature(before),
                 "candidate_pixel_sha256": qa["transform"]["pixel_sha256"],
@@ -404,6 +446,7 @@ def main() -> None:
                 "pair": pair,
                 "phase": phase,
                 "before_checks": checks,
+                "replacement_plan": replacement_plan,
                 "current": current,
                 "qa": qa,
                 "backup": backup_json.name,
@@ -421,7 +464,10 @@ def main() -> None:
             else:
                 locked = row_state.get("dry_run", {})
                 lock_checks = {
-                    "old_cover_id": locked.get("old_cover_id") == current["old_cover_id"],
+                    "source_cover_id": locked.get("source_cover_id") == current["source_cover_id"],
+                    "delete_target_id": locked.get("delete_target_id") == current["delete_target_id"],
+                    "replacement_mode": locked.get("replacement_mode") == current["replacement_mode"],
+                    "image_count": locked.get("image_count") == current["image_count"],
                     "video_ids": locked.get("video_ids") == current["video_ids"],
                     "snapshot_signature": locked.get("snapshot_signature")
                     == current["snapshot_signature"],
@@ -431,7 +477,8 @@ def main() -> None:
                 if not all(lock_checks.values()):
                     raise RuntimeError(f"kuru prova-canli kilidi: {lock_checks}")
                 applied = apply_candidate(
-                    api, shop_id, listing_id, pair, candidate, before, backup_dir
+                    api, shop_id, listing_id, pair, candidate, before,
+                    replacement_plan, backup_dir
                 )
                 evidence["lock_checks"] = lock_checks
                 evidence["applied"] = applied
