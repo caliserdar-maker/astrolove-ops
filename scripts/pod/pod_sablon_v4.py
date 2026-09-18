@@ -71,39 +71,50 @@ def _otsu(g):
     return float(np.argmax(varyans))
 
 
-def panel_kutusu(a, en_az=0.04, en_cok=0.80, doluluk=0.80):
-    """Koyu baski panelinin kutusu.
-
-    Otsu esigiyle koyu maske cikarilir; panel, kutusunu en az `doluluk` oraninda
-    dolduran (yani dikdortgen olan) en buyuk bilesendir. Altin maskesi
-    kullanilmaz.
-    """
-    g = np.asarray(Image.fromarray(a).convert("L"), dtype=np.float32)
-    esik = _otsu(g)
-    koyu = ndimage.binary_closing(g < esik, structure=np.ones((9, 9), dtype=bool))
-    koyu = ndimage.binary_fill_holes(koyu)
+def _bilesenler(koyu, toplam, en_az, en_cok):
     etiket, adet = ndimage.label(koyu, structure=np.ones((3, 3), dtype=np.uint8))
+    cikti = []
     if not adet:
-        return None
-    toplam = g.size
-    nesneler = ndimage.find_objects(etiket)
-    adaylar = []
-    for i, dilim in enumerate(nesneler, start=1):
+        return cikti
+    for i, dilim in enumerate(ndimage.find_objects(etiket), start=1):
         if dilim is None:
             continue
         alan = int((etiket[dilim] == i).sum())
-        if not (en_az * toplam <= alan <= en_cok * toplam):
-            continue
         ky, kx = dilim
         kutu_alan = (ky.stop - ky.start) * (kx.stop - kx.start)
-        if alan / max(kutu_alan, 1) < doluluk:
+        cikti.append({"alan": alan, "oran": alan / toplam,
+                      "doluluk": alan / max(kutu_alan, 1),
+                      "ust": int(ky.start), "alt": int(ky.stop) - 1,
+                      "sol": int(kx.start), "sag": int(kx.stop) - 1})
+    return [c for c in cikti if en_az <= c["oran"] <= en_cok]
+
+
+def panel_kutusu(a, en_az=0.04, en_cok=0.85, doluluk=0.80, tani=None):
+    """Koyu baski panelinin kutusu. Altin maskesi KULLANILMAZ.
+
+    Kademeli: once medyan tabanli esik (gercek kapaklarda dogrulanmis), sonra
+    Otsu; her esikte once dikdortgen (doluluk >= esik) aday, yoksa en buyuk
+    gecerli aday secilir. Hicbir kademe sonuc vermezse None doner ve `tani`
+    listesine aday dokumu yazilir.
+    """
+    g = np.asarray(Image.fromarray(a).convert("L"), dtype=np.float32)
+    toplam = float(g.size)
+    taban, orta = float(g.min()), float(np.median(g))
+    esikler = [("medyan", taban + 0.35 * max(orta - taban, 1.0)), ("otsu", _otsu(g))]
+    for ad, esik in esikler:
+        koyu = ndimage.binary_closing(g < esik, structure=np.ones((9, 9), dtype=bool))
+        koyu = ndimage.binary_fill_holes(koyu)
+        adaylar = _bilesenler(koyu, toplam, en_az, en_cok)
+        if tani is not None:
+            tani.append({"esik_adi": ad, "esik": round(esik, 1),
+                         "aday_sayisi": len(adaylar),
+                         "en_buyuk": sorted(adaylar, key=lambda c: -c["alan"])[:3]})
+        if not adaylar:
             continue
-        adaylar.append((alan, ky, kx))
-    if not adaylar:
-        return None
-    _, ky, kx = max(adaylar, key=lambda x: x[0])
-    return {"ust": int(ky.start), "alt": int(ky.stop) - 1,
-            "sol": int(kx.start), "sag": int(kx.stop) - 1}
+        dikdortgen = [c for c in adaylar if c["doluluk"] >= doluluk]
+        secilen = max(dikdortgen or adaylar, key=lambda c: c["alan"])
+        return {k: secilen[k] for k in ("ust", "alt", "sol", "sag")}
+    return None
 
 
 def kutu_olcekle(kutu, kaynak_yuk, hedef_yuk, kaynak_gen, hedef_gen):
@@ -411,9 +422,15 @@ def main():
     # olceklenir; kare basina esik kaymasi boylece devre disi kalir.
     ref_kapak_a = np.asarray(Image.open(ref_kapak).convert("RGB").resize(
         KAPAK, Image.Resampling.LANCZOS), dtype=np.uint8)
-    kapak_kutu = panel_kutusu(ref_kapak_a)
+    tani = []
+    kapak_kutu = panel_kutusu(ref_kapak_a, tani=tani)
+    (out / "PANEL_TANI.json").write_text(json.dumps(
+        {"kapak_boyut": list(ref_kapak_a.shape[:2]), "adaylar": tani},
+        ensure_ascii=False, indent=1), encoding="utf-8")
     if kapak_kutu is None:
-        raise SystemExit("HATA: kapakta panel bulunamadi -> DUR")
+        log(f"PANEL TANI: {json.dumps(tani, ensure_ascii=False)[:1200]}")
+        raise SystemExit("HATA: kapakta panel bulunamadi -> DUR "
+                         "(aday dokumu PANEL_TANI.json)")
     ref_kutu = kutu_olcekle(kapak_kutu, KAPAK[1], vh, KAPAK[0], vw)
     log(f"Panel kapakta {kapak_kutu} -> videoda {ref_kutu}")
 
