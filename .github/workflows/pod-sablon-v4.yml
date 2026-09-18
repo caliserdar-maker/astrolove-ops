@@ -50,21 +50,46 @@ jobs:
           printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
           chmod 600 ~/.config/rclone/rclone.conf
           if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
-            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+            if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
           fi
-      - name: Token + poster kaynaklari
+      - name: 'Poster on kontrolu (salt okuma, lsf)'
+        env:
+          POSTER_KOK: gdrive:ASTROLOVE/WALL_ART/POSTERS/ORIGINAL_HIGH_RES/MIDNIGHT_BLUE
+        run: |
+          set -euo pipefail
+          # Drive'da dosya adlari BUYUK HARF (<ORAN>/<CIFT>.jpg) ve rclone --include
+          # harf duyarli. Indirmeden once 6 ciftin de var oldugu dogrulanir.
+          eksik=0
+          for cift in AQUARIUS_GEMINI ARIES_LEO AQUARIUS_CANCER AQUARIUS_ARIES \
+                      SCORPIO_TAURUS AQUARIUS_CAPRICORN; do
+            rclone lsf -R "$POSTER_KOK" --include "**/${cift}.jpg" > "_lsf_${cift}.txt"
+            adet=$(wc -l < "_lsf_${cift}.txt")
+            echo "${cift}: ${adet} dosya"
+            sed 's/^/  /' "_lsf_${cift}.txt"
+            if [ "$adet" -lt 1 ]; then
+              echo "::error::Drive'da poster yok: ${cift}"; eksik=1
+            fi
+          done
+          rm -f _lsf_*.txt
+          if [ "$eksik" -ne 0 ]; then
+            echo "::error::poster on kontrolu basarisiz -> kosu durduruldu"; exit 1
+          fi
+      - name: Token + poster indirme
+        env:
+          POSTER_KOK: gdrive:ASTROLOVE/WALL_ART/POSTERS/ORIGINAL_HIGH_RES/MIDNIGHT_BLUE
         run: |
           set -euo pipefail
           umask 077; mkdir -p _work/poster _out
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
-          # Drive'da dosya adlari BUYUK HARF (ORIGINAL_HIGH_RES/MIDNIGHT_BLUE/<ORAN>/<CIFT>.jpg),
-          # rclone --include harf duyarli: cift adi buyuk harfe cevrilir.
           for cift in AQUARIUS_GEMINI ARIES_LEO AQUARIUS_CANCER AQUARIUS_ARIES \
                       SCORPIO_TAURUS AQUARIUS_CAPRICORN; do
-            rclone copy "gdrive:ASTROLOVE/WALL_ART/POSTERS/ORIGINAL_HIGH_RES/MIDNIGHT_BLUE" \
-              _work/poster --include "**/${cift}.jpg" -q || true
-            [ "$(find _work/poster -iname "${cift}.jpg" | wc -l)" -ge 1 ] || {
-              echo "::error::poster indirilemedi: ${cift}"; exit 1; }
+            rclone copy "$POSTER_KOK" _work/poster --include "**/${cift}.jpg" -q
+            adet=$(find _work/poster -iname "${cift}.jpg" | wc -l)
+            if [ "$adet" -lt 1 ]; then
+              echo "::error::poster indirilemedi (0 dosya): ${cift}"; exit 1
+            fi
           done
           echo "poster dosyasi: $(find _work/poster -name '*.jpg' | wc -l)"
           find _work/poster -name '*.jpg' | head -20
@@ -87,7 +112,10 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p _out
-          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
+          if [ -f _work/ETSY_TOKEN.json.updated ]; then
+            rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json"
+            echo "Token geri yazildi"
+          fi
           rm -rf _out/_is
           if grep -rqE '"(access_token|refresh_token)"[[:space:]]*:[[:space:]]*"[A-Za-z0-9._-]{20,}"|x-api-key[[:space:]]*:[[:space:]]*[A-Za-z0-9_-]{16,}|GOCSPX-[A-Za-z0-9_-]{10,}' _out/ 2>/dev/null; then
             echo "::error::ciktida sir DEGERI bulundu, Drive'a yazilmadi"; exit 1
