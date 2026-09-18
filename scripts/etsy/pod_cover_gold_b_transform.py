@@ -35,27 +35,19 @@ def artwork_mask(base: np.ndarray) -> np.ndarray:
     return ndimage.binary_dilation(keep[labels], iterations=2)
 
 
-def main() -> None:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--input", required=True)
-    ap.add_argument("--output", required=True)
-    ap.add_argument("--qa", required=True)
-    ap.add_argument("--luts", required=True)
-    ap.add_argument("--expected-pixel-sha256", required=True)
-    args = ap.parse_args()
-    source = pathlib.Path(args.input)
-    output = pathlib.Path(args.output)
-    qa_path = pathlib.Path(args.qa)
-
-    with Image.open(source) as image:
-        base = np.asarray(image.convert("RGB"), dtype=np.uint8)
-    if list(base.shape) != [3000, 2400, 3]:
-        raise SystemExit(f"HATA: taban boyutu {base.shape}")
-    mask = artwork_mask(base)
-    lut_data = json.loads(pathlib.Path(args.luts).read_text(encoding="utf-8"))
+def load_luts(path: pathlib.Path) -> list[np.ndarray]:
+    lut_data = json.loads(path.read_text(encoding="utf-8"))
     luts = [np.frombuffer(bytes.fromhex(lut_data[channel]), dtype=np.uint8) for channel in "RGB"]
     if any(len(lut) != 256 for lut in luts):
-        raise SystemExit("HATA: LUT uzunlugu")
+        raise ValueError("LUT uzunlugu")
+    return luts
+
+
+def build_candidate(base: np.ndarray, luts: list[np.ndarray]) -> tuple[np.ndarray, dict]:
+    """Return candidate B plus deterministic, geometry-free QA metrics."""
+    if list(base.shape) != [3000, 2400, 3] or base.dtype != np.uint8:
+        raise ValueError(f"taban ozellikleri: shape={base.shape} dtype={base.dtype}")
+    mask = artwork_mask(base)
     corrected = np.empty_like(base)
     for channel, lut in enumerate(luts):
         corrected[..., channel] = lut[base[..., channel]]
@@ -77,6 +69,31 @@ def main() -> None:
         "mask_fraction": round(float(mask.mean()), 6),
         "pixel_sha256": pixel_digest,
     }
+    return candidate, qa
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--input", required=True)
+    ap.add_argument("--output", required=True)
+    ap.add_argument("--qa", required=True)
+    ap.add_argument("--luts", required=True)
+    ap.add_argument("--expected-pixel-sha256", required=True)
+    args = ap.parse_args()
+    source = pathlib.Path(args.input)
+    output = pathlib.Path(args.output)
+    qa_path = pathlib.Path(args.qa)
+
+    with Image.open(source) as image:
+        base = np.asarray(image.convert("RGB"), dtype=np.uint8)
+    if list(base.shape) != [3000, 2400, 3]:
+        raise SystemExit(f"HATA: taban boyutu {base.shape}")
+    try:
+        luts = load_luts(pathlib.Path(args.luts))
+        candidate, qa = build_candidate(base, luts)
+    except ValueError as exc:
+        raise SystemExit(f"HATA: {exc}") from exc
+    pixel_digest = qa["pixel_sha256"]
     if qa["changed_pixels_outside_mask"] != 0:
         raise SystemExit(f"HATA: maske disi degisim: {qa}")
     if pixel_digest != args.expected_pixel_sha256:
