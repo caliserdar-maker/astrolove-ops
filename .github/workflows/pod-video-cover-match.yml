@@ -18,10 +18,6 @@ on:
         description: "apply=true icin tam olarak AQUARIUS_GEMINI_VIDEO"
         required: false
         default: ""
-  push:
-    branches: [main]
-    paths:
-      - "config/pod_video_cover_match.trigger"
 
 concurrency:
   group: etsy-token
