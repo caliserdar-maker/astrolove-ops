@@ -22,6 +22,10 @@ on:
         description: "0=tumu; yalniz tanilama icin hedef siniri"
         required: false
         default: "0"
+      only_ids:
+        description: "Tanilama icin virgullu ilan kimlikleri"
+        required: false
+        default: ""
       quota_min:
         description: "Her ilan oncesi mutlak kota tabani"
         required: false
@@ -43,6 +47,7 @@ jobs:
       APPLY: ${{ inputs.apply || 'false' }}
       CONFIRM: ${{ inputs.confirm || '' }}
       LIMIT: ${{ inputs.limit || '0' }}
+      ONLY_IDS: ${{ inputs.only_ids || '' }}
       QMIN: ${{ inputs.quota_min || '300' }}
       STATE_REMOTE: ASTROLOVE/TEMP/POD_COVER_GOLD_B_77/state.json
     steps:
@@ -55,6 +60,7 @@ jobs:
           echo "APPLY=$(jq -r '.apply // false' "$file")" >> "$GITHUB_ENV"
           echo "CONFIRM=$(jq -r '.confirm // ""' "$file")" >> "$GITHUB_ENV"
           echo "LIMIT=$(jq -r '.limit // 0' "$file")" >> "$GITHUB_ENV"
+          echo "ONLY_IDS=$(jq -r '.only_ids // ""' "$file")" >> "$GITHUB_ENV"
           echo "QMIN=$(jq -r '.quota_min // 300' "$file")" >> "$GITHUB_ENV"
       - name: Onay kapisi
         run: |
@@ -105,6 +111,7 @@ jobs:
             --state _work/state.json
             --out _out
             --limit "$LIMIT"
+            --only "$ONLY_IDS"
             --quota-min "$QMIN"
           )
           [ "$APPLY" = "true" ] && args+=(--apply)
@@ -135,4 +142,3 @@ jobs:
           retention-days: 14
       - if: ${{ always() }}
         run: rm -rf _work _out ~/.config/rclone
-
