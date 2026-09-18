@@ -102,8 +102,9 @@ jobs:
           if len(images) != 13 or len(videos) != 1 or len(variations) < 5:
               raise SystemExit(f'HATA: medya onkosulu: images={len(images)} videos={len(videos)} vars={len(variations)}')
           cover = images[0]
-          if 'AstroLove master-locked POD cover' not in (cover.get('alt_text') or ''):
-              raise SystemExit('HATA: rank-1 yeni master kapak degil')
+          cover_dims = (cover.get('full_width'), cover.get('full_height'))
+          if cover.get('rank') != 1 or cover_dims != (2400, 3000):
+              raise SystemExit(f'HATA: rank-1 kapak kimligi/olcusu uyusmadi: rank={cover.get("rank")} dims={cover_dims}')
           cover_url = cover.get('url_fullxfull') or cover.get('url_570xN')
           video_url = videos[0].get('video_url') or videos[0].get('url') or videos[0].get('download_url')
           if not cover_url or not video_url:
