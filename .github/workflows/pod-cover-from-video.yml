@@ -21,10 +21,6 @@ on:
         description: "Android Chrome video gorunumu icin ton telafisi"
         type: boolean
         default: false
-  push:
-    branches: [main]
-    paths:
-      - "config/pod_cover_from_video.trigger"
 
 concurrency:
   group: etsy-token
