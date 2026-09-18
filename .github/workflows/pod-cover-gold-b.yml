@@ -1,0 +1,127 @@
+name: pod-cover-gold-b
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "true = yalnız Aquarius-Gemini 1. kapağını B ile değiştir"
+        type: boolean
+        default: false
+      confirm:
+        description: "apply=true için tam olarak GOLD_ONLY_B_COVER"
+        required: false
+        default: ""
+      expected_old_cover_id:
+        description: "Canlı rank-1 image id"
+        required: true
+        default: "8542130896"
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  replace-cover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      LISTING_ID: "4570112095"
+      APPLY: ${{ inputs.apply || 'false' }}
+      CONFIRM: ${{ inputs.confirm || '' }}
+      EXPECTED_OLD_COVER_ID: ${{ inputs.expected_old_cover_id || '8542130896' }}
+      CANDIDATE: _out/candidate_B_gold_only_100_safe_base.png
+      CANDIDATE_PIXEL_SHA256: "aaa73ce32c0ea0327baa925600afa7977618bfd0278b639cedf51054c03f78e8"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tetikleyici ayarları
+        if: ${{ github.event_name == 'push' }}
+        run: |
+          set -euo pipefail
+          file=config/pod_cover_gold_b.trigger
+          echo "APPLY=$(jq -r '.apply // false' "$file")" >> "$GITHUB_ENV"
+          echo "CONFIRM=$(jq -r '.confirm // ""' "$file")" >> "$GITHUB_ENV"
+          echo "EXPECTED_OLD_COVER_ID=$(jq -r '.expected_old_cover_id // ""' "$file")" >> "$GITHUB_ENV"
+      - name: Onay kapısı
+        run: |
+          set -euo pipefail
+          if [ "$APPLY" = "true" ] && [ "$CONFIRM" != "GOLD_ONLY_B_COVER" ]; then
+            echo "::error::Yanlış onay anahtarı; Etsy yazma yok."
+            exit 1
+          fi
+          [ -n "$EXPECTED_OLD_COVER_ID" ] || { echo "::error::Eski kapak id yok"; exit 1; }
+          [ "$APPLY" = "true" ] && echo "::warning::APPLY: yalnız 4570112095 rank-1 kapağı B ile değişecek." || echo "DRY-RUN: Etsy yazma yok."
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Bağımlılıklar
+        run: |
+          pip install -q requests==2.34.2 pillow==12.3.0 numpy==2.4.6 scipy==1.17.0
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg rclone >/dev/null
+      - name: Token
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone _out
+          umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _out/ETSY_TOKEN.json
+      - name: B kapağını doğrula veya uygula
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _out/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          python scripts/etsy/pod_cover_from_video.py \
+            --listing-id "$LISTING_ID" \
+            --out _out/generate \
+            --quota-min 50 \
+            --mobile-display-compensation
+          python scripts/etsy/pod_cover_gold_b_transform.py \
+            --input _out/generate/Aquarius_Gemini_video_frame0_cover.png \
+            --output "$CANDIDATE" \
+            --qa _out/transform_qa.json \
+            --luts config/pod_cover_gold_b_luts.json \
+            --expected-pixel-sha256 "$CANDIDATE_PIXEL_SHA256"
+          args=(
+            --listing-id "$LISTING_ID"
+            --cover-file "$CANDIDATE"
+            --expected-pixel-sha256 "$CANDIDATE_PIXEL_SHA256"
+            --expected-old-cover-id "$EXPECTED_OLD_COVER_ID"
+            --out _out/result
+            --quota-min 50
+          )
+          [ "$APPLY" = "true" ] && args+=(--apply)
+          python scripts/etsy/pod_cover_replace_file.py "${args[@]}"
+      - name: Token ve kanıtları sakla
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _out/ETSY_TOKEN.json.updated ] && rclone copyto _out/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" || true
+          rclone copy _out/result "gdrive:ASTROLOVE/TEMP/POD_COVER_GOLD_B/RUN_${GITHUB_RUN_ID}" -q || true
+          [ -f _out/transform_qa.json ] && rclone copyto _out/transform_qa.json "gdrive:ASTROLOVE/TEMP/POD_COVER_GOLD_B/RUN_${GITHUB_RUN_ID}/transform_qa.json" || true
+          [ -f "$CANDIDATE" ] && rclone copyto "$CANDIDATE" "gdrive:ASTROLOVE/TEMP/POD_COVER_GOLD_B/RUN_${GITHUB_RUN_ID}/candidate_B.png" || true
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: pod-cover-gold-b
+          path: |
+            _out/result/result.json
+            _out/result/backup_*.json
+            _out/result/old_cover_*.jpg
+            _out/transform_qa.json
+            _out/candidate_B_gold_only_100_safe_base.png
+          if-no-files-found: ignore
+      - if: ${{ always() }}
+        run: rm -rf _out ~/.config/rclone
