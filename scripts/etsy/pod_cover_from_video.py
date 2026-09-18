@@ -99,6 +99,36 @@ def extract_cover(video: pathlib.Path, frame_native: pathlib.Path, cover: pathli
         )
 
 
+def apply_mobile_geometry_compensation(cover: pathlib.Path) -> None:
+    """Match Etsy mobile video's first visible composition.
+
+    Paired 14:32 Android screenshots show that Etsy presents the video at
+    1.097902x the static-image scale, anchored near (50.5%, 22.1%). Pre-zoom
+    the cover around that anchor so its visible composition matches the video.
+    """
+    scale = 1.09790218
+    anchor_x = 1212.0
+    anchor_y = 663.0
+    inverse = 1.0 / scale
+    matrix = (
+        inverse,
+        0.0,
+        anchor_x * (1.0 - inverse),
+        0.0,
+        inverse,
+        anchor_y * (1.0 - inverse),
+    )
+    with Image.open(cover) as image:
+        rgb = image.convert("RGB")
+        adjusted = rgb.transform(
+            rgb.size,
+            Image.Transform.AFFINE,
+            matrix,
+            resample=Image.Resampling.BICUBIC,
+        )
+    adjusted.save(cover, format="PNG", compress_level=3)
+
+
 def apply_mobile_display_compensation(cover: pathlib.Path) -> None:
     """Match Etsy Android image rendering to the brighter video rendering.
 
@@ -111,9 +141,9 @@ def apply_mobile_display_compensation(cover: pathlib.Path) -> None:
         dtype=np.float32,
     )
     target_points = (
-        [0, 3, 6, 10, 14, 26, 33, 53, 73, 88, 98, 106, 113, 124, 137, 162, 224, 247],
-        [2, 7, 14, 16, 18, 28, 38, 63, 80, 84, 89, 96, 104, 124, 154, 193, 227, 245],
-        [4, 4, 7, 12, 14, 28, 38, 64, 82, 95, 96, 102, 114, 136, 156, 204, 213, 221],
+        [0, 2, 6, 10, 13, 25, 31, 46, 61, 72, 78, 84, 88, 93, 100, 110, 162, 221],
+        [3, 9, 16, 17, 19, 28, 37, 57, 69, 72, 75, 79, 80, 87, 111, 162, 206, 228],
+        [7, 7, 11, 13, 14, 30, 44, 67, 77, 84, 85, 88, 93, 110, 131, 180, 189, 197],
     )
     channel_luts = [
         np.interp(np.arange(256), source_points, values).round().astype(np.uint8)
@@ -186,6 +216,7 @@ def main() -> None:
     extract_cover(source_video, native_frame, new_cover)
     frame_mae = qa_frame_match(native_frame, new_cover)
     if args.mobile_display_compensation:
+        apply_mobile_geometry_compensation(new_cover)
         apply_mobile_display_compensation(new_cover)
     delivered_mae = qa_frame_match(native_frame, new_cover)
     qa = {
