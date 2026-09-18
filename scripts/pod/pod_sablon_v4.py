@@ -199,12 +199,70 @@ def altin_esitle(kapak_rgb, hedef_rgb):
                    "maske_disi_degisim": int(np.any(cikti[~m] != a[~m]))}
 
 
-def video_yaz(kare_dir, hedef, fps, sure):
-    subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-framerate", str(fps),
-                    "-start_number", "0", "-i", str(kare_dir / "%05d.png"),
-                    "-t", f"{sure:.3f}", "-c:v", "libx264", "-preset", "slow",
-                    "-crf", "12", "-pix_fmt", "yuv420p", "-movflags", "+faststart",
-                    str(hedef)], check=True)
+def yuv_ac(video, hedef, w, h):
+    """Videoyu ham yuv420p'ye acar. RGB'ye hic cikilmaz."""
+    subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", str(video),
+                    "-f", "rawvideo", "-pix_fmt", "yuv420p", str(hedef)], check=True)
+    kare_bayt = w * h * 3 // 2
+    veri = np.fromfile(hedef, dtype=np.uint8)
+    return veri, kare_bayt, len(veri) // kare_bayt
+
+
+def cift_hizala(kutu):
+    """Kroma duzlemi yari cozunurluk oldugu icin kutu cift koordinata oturtulur."""
+    return {"ust": kutu["ust"] // 2 * 2, "sol": kutu["sol"] // 2 * 2,
+            "alt": (kutu["alt"] + 1) // 2 * 2 - 1,
+            "sag": (kutu["sag"] + 1) // 2 * 2 - 1}
+
+
+def rgb_yuv_doseme(rgb):
+    """RGB doseme -> BT.601 sinirli aralik Y, U, V (U/V yari cozunurluk)."""
+    f = rgb.astype(np.float32)
+    r, g, b = f[..., 0], f[..., 1], f[..., 2]
+    Y = np.clip(0.257 * r + 0.504 * g + 0.098 * b + 16, 16, 235)
+    U = np.clip(-0.148 * r - 0.291 * g + 0.439 * b + 128, 16, 240)
+    V = np.clip(0.439 * r - 0.368 * g - 0.071 * b + 128, 16, 240)
+    return (Y.astype(np.uint8), U[::2, ::2].astype(np.uint8),
+            V[::2, ::2].astype(np.uint8))
+
+
+def yuv_kompozit(veri, kare_bayt, adet, kutu, Yp, Up, Vp, w, h, cikti):
+    """Her karede YALNIZ panel bolgesini degistirir; disi bayt bayt korunur."""
+    with open(cikti, "wb") as fh:
+        for i in range(adet):
+            blok = veri[i * kare_bayt:(i + 1) * kare_bayt].copy()
+            y = blok[:w * h].reshape(h, w)
+            u = blok[w * h:w * h + w * h // 4].reshape(h // 2, w // 2)
+            v = blok[w * h + w * h // 4:].reshape(h // 2, w // 2)
+            y[kutu["ust"]:kutu["alt"] + 1, kutu["sol"]:kutu["sag"] + 1] = Yp
+            u[kutu["ust"] // 2:(kutu["alt"] + 1) // 2,
+              kutu["sol"] // 2:(kutu["sag"] + 1) // 2] = Up
+            v[kutu["ust"] // 2:(kutu["alt"] + 1) // 2,
+              kutu["sol"] // 2:(kutu["sag"] + 1) // 2] = Vp
+            blok.tofile(fh)
+
+
+def yuv_video_yaz(ham, hedef, w, h, fps, sure, crf=12):
+    subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-f", "rawvideo",
+                    "-pix_fmt", "yuv420p", "-s", f"{w}x{h}", "-framerate", str(fps),
+                    "-i", str(ham), "-t", f"{sure:.3f}", "-c:v", "libx264",
+                    "-preset", "slow", "-crf", str(crf), "-pix_fmt", "yuv420p",
+                    "-movflags", "+faststart", str(hedef)], check=True)
+
+
+def yuv_dis_mae(ref_veri, yeni_veri, kare_bayt, kutu, w, h):
+    """Poster DISI Y-duzlemi ortalama mutlak farki (RGB'ye cikmadan)."""
+    adet = min(len(ref_veri), len(yeni_veri)) // kare_bayt
+    ph = kutu["alt"] - kutu["ust"] + 1
+    pw = kutu["sag"] - kutu["sol"] + 1
+    toplam = 0.0
+    for i in range(adet):
+        a1 = ref_veri[i * kare_bayt:i * kare_bayt + w * h].astype(np.float32).reshape(h, w)
+        a2 = yeni_veri[i * kare_bayt:i * kare_bayt + w * h].astype(np.float32).reshape(h, w)
+        fark = np.abs(a1 - a2)
+        fark[kutu["ust"]:kutu["alt"] + 1, kutu["sol"]:kutu["sag"] + 1] = 0
+        toplam += float(fark.sum() / (fark.size - ph * pw))
+    return toplam / max(adet, 1), adet
 
 
 def ocr(a, kutu):
@@ -384,6 +442,10 @@ def main():
         raise SystemExit(f"HATA: panel kutusu bazi karelerde gecerli degil "
                          f"(kontrast {kontrast_min}) -> DUR")
 
+    ref_ham = ref_dir / "ref.yuv"
+    ref_yuv, kare_bayt, kare_adet = yuv_ac(ref_video, ref_ham, vw, vh)
+    log(f"Ham YUV: {kare_adet} kare, kare basina {kare_bayt} bayt")
+
     hedef_oran = (ref_kutu["sag"] - ref_kutu["sol"] + 1) / \
                  (ref_kutu["alt"] - ref_kutu["ust"] + 1)
     ref_kare0 = np.asarray(Image.open(kareler[0]).convert("RGB"), dtype=np.uint8)
@@ -437,42 +499,64 @@ def main():
                 ton_i = ton_olc(ref_bolge, ham)
                 ton_i["bulaniklik"], ton_i["gren"] = ton["bulaniklik"], ton["gren"]
 
-                yeni_kare_dir = is_dir / "kare"
-                yeni_kare_dir.mkdir(exist_ok=True)
-                for i, p in enumerate(kareler):
-                    kare = np.asarray(Image.open(p).convert("RGB"), dtype=np.uint8)
-                    yeni = poster_yerlestir(kare, ref_kutu, poster, ton_i)
-                    Image.fromarray(yeni, "RGB").save(yeni_kare_dir / f"{i:05d}.png")
-                yeni_video = out / f"{ad}_{lid}_video.mp4"
-                video_yaz(yeni_kare_dir, yeni_video, fps, sure)
+                # --- poster dosemesi: ton esitleme + altin esitlemesi (kapak uzayinda)
+                doseme = ham.copy()
+                kapak_kutu_c = kapak_kutu
+                altin_gecmis = []
+                for _ in range(3):
+                    deneme = ref_kapak_a.copy()
+                    dk = Image.fromarray(doseme).resize(
+                        (kapak_kutu_c["sag"] - kapak_kutu_c["sol"] + 1,
+                         kapak_kutu_c["alt"] - kapak_kutu_c["ust"] + 1),
+                        Image.Resampling.LANCZOS)
+                    deneme[kapak_kutu_c["ust"]:kapak_kutu_c["alt"] + 1,
+                           kapak_kutu_c["sol"]:kapak_kutu_c["sag"] + 1] = np.asarray(dk)
+                    olculen, _ = altin_ort(deneme)
+                    if not olculen or not hedef_altin:
+                        break
+                    fark = np.asarray(hedef_altin, np.float32) - np.asarray(olculen, np.float32)
+                    altin_gecmis.append([round(float(x), 2) for x in fark])
+                    if np.all(np.abs(fark) < 0.3):
+                        break
+                    doseme = np.clip(doseme.astype(np.float32) + fark, 0, 255).astype(np.uint8)
 
-                # kapak = yeni videonun 0. karesi
+                # --- video: YUV duzleminde kompozit (panel disi bayt bayt korunur)
+                kutu_c = cift_hizala(ref_kutu)
+                dh = kutu_c["alt"] - kutu_c["ust"] + 1
+                dw = kutu_c["sag"] - kutu_c["sol"] + 1
+                doseme_v = np.asarray(Image.fromarray(doseme).resize(
+                    (dw, dh), Image.Resampling.LANCZOS), dtype=np.uint8)
+                Yp, Up, Vp = rgb_yuv_doseme(doseme_v)
+                ham_yeni = is_dir / "yeni.yuv"
+                yuv_kompozit(ref_yuv, kare_bayt, kare_adet, kutu_c, Yp, Up, Vp,
+                             vw, vh, ham_yeni)
+                yeni_video = out / f"{ad}_{lid}_video.mp4"
+                yuv_video_yaz(ham_yeni, yeni_video, vw, vh, fps, sure)
+
+                # kapak = yeni videonun 0. karesi (ek renk islemi YOK)
                 ham0 = is_dir / "yeni_kare0.png"
                 extract_frame(yeni_video, ham0, 0)
                 with Image.open(ham0) as im:
-                    kapak_a = np.asarray(im.convert("RGB").resize(
+                    kapak_b = np.asarray(im.convert("RGB").resize(
                         KAPAK, Image.Resampling.LANCZOS), dtype=np.uint8)
-                kapak_b, esit = altin_esitle(kapak_a, hedef_altin)
                 kapak_yol = out / f"{ad}_{lid}_kapak.png"
                 Image.fromarray(kapak_b, "RGB").save(kapak_yol, "PNG", compress_level=3)
 
-                # KONTROLLER
-                yeni_kare_dir_c = is_dir / "kontrol"
-                yeni_kareler = kareleri_ac(yeni_video, yeni_kare_dir_c)
-                dis_mae, n = 0.0, 0
-                for i, p in enumerate(yeni_kareler[:len(kareler)]):
-                    yk = np.asarray(Image.open(p).convert("RGB"), dtype=np.float32)
-                    rk = np.asarray(Image.open(kareler[i]).convert("RGB"), dtype=np.float32)
-                    fark = np.abs(yk - rk)
-                    fark[ic_dilim] = 0.0
-                    dis_piksel = fark.size - (fark[ic_dilim].size)
-                    dis_mae += float(fark.sum() / max(dis_piksel, 1))
-                    n += 1
-                dis_mae = dis_mae / max(n, 1)
-                kapak_kare_mae = float(np.abs(
-                    np.asarray(Image.open(ham0).convert("RGB").resize(
-                        KAPAK, Image.Resampling.LANCZOS), dtype=np.float32)
-                    - kapak_a.astype(np.float32)).mean())
+                # --- KONTROLLER
+                geri = is_dir / "geri.yuv"
+                yeni_veri, _, _ = yuv_ac(yeni_video, geri, vw, vh)
+                dis_mae, olculen_kare = yuv_dis_mae(ref_yuv, yeni_veri, kare_bayt,
+                                                    kutu_c, vw, vh)
+                # kapak gercekten videonun 0. karesi mi: kapagi video olcusune
+                # indirip yeniden cikarilan kare ile karsilastir
+                kare0_tekrar = is_dir / "kare0_tekrar.png"
+                extract_frame(yeni_video, kare0_tekrar, 0)
+                with Image.open(kare0_tekrar) as im:
+                    k0 = np.asarray(im.convert("RGB"), dtype=np.float32)
+                kapak_kucuk = np.asarray(Image.fromarray(kapak_b).resize(
+                    (k0.shape[1], k0.shape[0]), Image.Resampling.LANCZOS),
+                    dtype=np.float32)
+                kapak_kare_mae = round(float(np.abs(k0 - kapak_kucuk).mean()), 4)
                 altin_yeni, _ = altin_ort(kapak_b)
                 altin_fark = ([round(altin_yeni[j] - hedef_altin[j], 2) for j in range(3)]
                               if altin_yeni and hedef_altin else None)
@@ -484,10 +568,11 @@ def main():
                 kayit.update({
                     "durum": "URETILDI", "poster_dosya": poster_yol.name,
                     "poster_oran_farki": oran_fark, "ton": ton_i,
-                    "renk_esitleme": esit,
+                    "altin_esitleme_gecmisi": altin_gecmis,
                     "poster_disi_mae": round(dis_mae, 4),
                     "poster_disi_mae_1_alti": dis_mae < 1.0,
-                    "kapak_kare_mae": round(kapak_kare_mae, 4),
+                    "olculen_kare": olculen_kare,
+                    "kapak_kare_mae": kapak_kare_mae,
                     "altin_rgb": altin_yeni, "altin_fark": altin_fark,
                     "altin_2_alti": bool(altin_fark
                                          and max(abs(x) for x in altin_fark) < 2),
@@ -495,11 +580,10 @@ def main():
                     "video_dosya": yeni_video.name, "kapak_dosya": kapak_yol.name,
                     "mevcut_kapak": str(mev_kapak),
                 })
-                log(f"{cift}: URETILDI | poster disi MAE {dis_mae:.3f} | "
-                    f"altin fark {altin_fark} | OCR {ocr_ok} | "
-                    f"kapak-kare MAE {kapak_kare_mae:.3f}")
-                shutil.rmtree(yeni_kare_dir, ignore_errors=True)
-                shutil.rmtree(yeni_kare_dir_c, ignore_errors=True)
+                log(f"{cift}: URETILDI | poster disi Y MAE {dis_mae:.4f} "
+                    f"({olculen_kare} kare) | altin fark {altin_fark} | OCR {ocr_ok}")
+                ham_yeni.unlink(missing_ok=True)
+                geri.unlink(missing_ok=True)
             except Exception as ex:                               # noqa: BLE001
                 kayit.update({"durum": "HATA", "not": f"{type(ex).__name__}: {ex}"})
                 log(f"{cift}: HATA {kayit['not'][:200]}")
