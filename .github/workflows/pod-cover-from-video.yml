@@ -1,0 +1,106 @@
+name: pod-cover-from-video
+
+# Tek ilanlik kontrollu onarim: canli videonun 0. karesi rank-1 kapak olur.
+# Video, diger 12 gorsel ve variation-images baglantilari korunur.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "true = yalniz Aquarius-Gemini 1. gorselini degistir"
+        type: boolean
+        default: false
+      confirm:
+        description: "apply=true icin tam olarak VIDEO_FRAME0_COVER"
+        required: false
+        default: ""
+  push:
+    branches: [main]
+    paths:
+      - "config/pod_cover_from_video.trigger"
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  frame0-cover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      LISTING_ID: "4570112095"
+      APPLY: ${{ inputs.apply || 'false' }}
+      CONFIRM: ${{ inputs.confirm || '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tetikleyici ayarlari
+        if: ${{ github.event_name == 'push' }}
+        run: |
+          set -euo pipefail
+          file=config/pod_cover_from_video.trigger
+          echo "APPLY=$(jq -r '.apply // false' "$file")" >> "$GITHUB_ENV"
+          echo "CONFIRM=$(jq -r '.confirm // ""' "$file")" >> "$GITHUB_ENV"
+      - name: Onay kapisi
+        run: |
+          set -euo pipefail
+          if [ "$APPLY" = "true" ] && [ "$CONFIRM" != "VIDEO_FRAME0_COVER" ]; then
+            echo "::error::Yanlis onay anahtari; Etsy yazma yok."
+            exit 1
+          fi
+          [ "$APPLY" = "true" ] && echo "::warning::APPLY: yalniz 4570112095 rank-1 kapagi degisecek." || echo "DRY-RUN: Etsy yazma yok."
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Bagimliliklar
+        run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2 pillow==12.3.0 numpy==2.4.6
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: Token
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone _out
+          umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _out/ETSY_TOKEN.json
+      - name: Video karesinden kapagi uret ve uygula
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _out/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          args=(--listing-id "$LISTING_ID" --out _out/result --quota-min 50)
+          [ "$APPLY" = "true" ] && args+=(--apply)
+          python scripts/etsy/pod_cover_from_video.py "${args[@]}"
+      - name: Token ve kanitlari sakla
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _out/ETSY_TOKEN.json.updated ] && rclone copyto _out/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" || true
+          rclone copy _out/result "gdrive:ASTROLOVE/TEMP/POD_COVER_FROM_VIDEO/RUN_${GITHUB_RUN_ID}" -q || true
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: pod-cover-from-video
+          path: |
+            _out/result/result.json
+            _out/result/live_video_frame0.png
+            _out/result/Aquarius_Gemini_video_frame0_cover.png
+            _out/result/backup_*.json
+          if-no-files-found: ignore
+      - if: ${{ always() }}
+        run: rm -rf _out ~/.config/rclone
