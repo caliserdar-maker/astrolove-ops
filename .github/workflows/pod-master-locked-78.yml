@@ -26,10 +26,6 @@ on:
         description: "Her yeni ilana baslarken kota tabani"
         required: false
         default: "900"
-  push:
-    branches: [main]
-    paths:
-      - "config/pod_master_locked_trigger.json"
 
 concurrency:
   group: etsy-token

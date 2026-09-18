@@ -4,9 +4,7 @@ permissions:
   contents: read
 
 on:
-  push:
-    paths:
-      - config/seo_tag_pilot_107_apply.trigger
+  workflow_dispatch:
 
 concurrency:
   group: etsy-token
