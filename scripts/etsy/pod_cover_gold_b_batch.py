@@ -192,7 +192,8 @@ def partial_add_recovery(snapshot: dict, locked: dict, pair: str) -> dict | None
         == [2400, 3000],
         "new_image_unlinked": str(extra.get("listing_image_id"))
         not in {str(row.get("image_id")) for row in snapshot.get("variations", [])},
-        "new_image_alt_text": extra.get("alt_text")
+        "new_image_alt_text_valid_if_returned": not extra.get("alt_text")
+        or extra.get("alt_text")
         == f"{pair} gold zodiac couple art in a midnight blue interior",
         "title_unchanged": snapshot.get("listing", {}).get("title") == signature.get("title"),
         "state_unchanged": snapshot.get("listing", {}).get("state")
@@ -228,16 +229,17 @@ def repair_partial_add(api: Etsy, shop_id: str, listing_id: str, snapshot: dict,
         )
 
     after_images = snapshot["images"]
-    for _ in range(2):
-        api.post_file(
-            f"/shops/{shop_id}/listings/{listing_id}/images",
-            files={"listing_image_id": (None, new_cover_id), "rank": (None, "1")},
-        )
-        after_images = eventually(
-            lambda: gallery(api, listing_id), final_gallery_ok, attempts=20, pause=3
-        )
-        if final_gallery_ok(after_images):
-            break
+    if not final_gallery_ok(after_images):
+        for _ in range(2):
+            api.post_file(
+                f"/shops/{shop_id}/listings/{listing_id}/images",
+                files={"listing_image_id": (None, new_cover_id), "rank": (None, "1")},
+            )
+            after_images = eventually(
+                lambda: gallery(api, listing_id), final_gallery_ok, attempts=20, pause=3
+            )
+            if final_gallery_ok(after_images):
+                break
 
     after_videos = videos(api, listing_id)
     after_variations = variation_images(api, shop_id, listing_id)
