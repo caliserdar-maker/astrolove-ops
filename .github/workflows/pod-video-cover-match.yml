@@ -1,0 +1,158 @@
+name: pod-video-cover-match
+
+# Tek ilanlik kontrollu onarim. Ilanin mevcut rank-1 kapagi ve videosu Etsy'den
+# okunur; video kapagin yeni dikey konumuna getirilir. Gorseller, varyasyon
+# baglantilari, baslik, fiyat ve envanter degismez.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "true = yalniz Aquarius-Gemini videosunu degistir"
+        type: boolean
+        default: false
+      confirm:
+        description: "apply=true icin tam olarak AQUARIUS_GEMINI_VIDEO"
+        required: false
+        default: ""
+  push:
+    branches: [main]
+    paths:
+      - "config/pod_video_cover_match.trigger"
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  cover-match:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      LISTING_ID: "4570112095"
+      APPLY: ${{ inputs.apply || 'false' }}
+      CONFIRM: ${{ inputs.confirm || '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tetikleyici ayarlari
+        if: ${{ github.event_name == 'push' }}
+        run: |
+          set -euo pipefail
+          file=config/pod_video_cover_match.trigger
+          echo "APPLY=$(jq -r '.apply // false' "$file")" >> "$GITHUB_ENV"
+          echo "CONFIRM=$(jq -r '.confirm // ""' "$file")" >> "$GITHUB_ENV"
+      - name: Onay kapisi
+        run: |
+          set -euo pipefail
+          if [ "$APPLY" = "true" ] && [ "$CONFIRM" != "AQUARIUS_GEMINI_VIDEO" ]; then
+            echo "::error::Yanlis onay anahtari; Etsy yazma yok."
+            exit 1
+          fi
+          [ "$APPLY" = "true" ] && echo "::warning::APPLY: yalniz 4570112095 videosu degisecek." || echo "DRY-RUN: Etsy yazma yok."
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Bagimliliklar
+        run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2 pillow==12.3.0 numpy==2.4.6
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: Token
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone _work _out
+          umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+      - name: Canli kapak ve videoyu al
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os, pathlib, sys
+          import requests
+          sys.path.insert(0, 'scripts/etsy')
+          from etsy_common import Etsy, TokenStore
+
+          lid = os.environ['LISTING_ID']
+          store = TokenStore(os.environ['TOKEN_FILE'], os.environ.get('ETSY_API_KEY'), os.environ.get('ETSY_SHARED_SECRET'))
+          api = Etsy(store)
+          listing = api.get(f'/listings/{lid}') or {}
+          images = sorted((api.get(f'/listings/{lid}/images') or {}).get('results') or [], key=lambda x: x.get('rank') or 0)
+          videos = (api.get(f'/listings/{lid}/videos') or {}).get('results') or []
+          variations = (api.get(f"/shops/{os.environ['ETSY_SHOP_ID']}/listings/{lid}/variation-images") or {}).get('results') or []
+          if listing.get('state') != 'active' or 'Aquarius and Gemini' not in (listing.get('title') or ''):
+              raise SystemExit('HATA: hedef ilan kimligi/state uyusmadi')
+          if len(images) != 13 or len(videos) != 1 or len(variations) < 5:
+              raise SystemExit(f'HATA: medya onkosulu: images={len(images)} videos={len(videos)} vars={len(variations)}')
+          cover = images[0]
+          if 'AstroLove master-locked POD cover' not in (cover.get('alt_text') or ''):
+              raise SystemExit('HATA: rank-1 yeni master kapak degil')
+          cover_url = cover.get('url_fullxfull') or cover.get('url_570xN')
+          video_url = videos[0].get('video_url') or videos[0].get('url') or videos[0].get('download_url')
+          if not cover_url or not video_url:
+              raise SystemExit(f'HATA: medya URL eksik; video alanlari={sorted(videos[0])}')
+          for url, path in ((cover_url, '_work/cover.jpg'), (video_url, '_work/current.mp4')):
+              response = requests.get(url, timeout=120)
+              response.raise_for_status()
+              pathlib.Path(path).write_bytes(response.content)
+          pathlib.Path('_out/before.json').write_text(json.dumps({
+              'listing': {'listing_id': lid, 'state': listing.get('state'), 'title': listing.get('title')},
+              'images': [{'id': x.get('listing_image_id'), 'rank': x.get('rank'), 'alt_text': x.get('alt_text')} for x in images],
+              'variation_images': variations,
+              'videos': videos,
+              'quota': api.remaining,
+          }, ensure_ascii=False, indent=2), encoding='utf-8')
+          PY
+      - name: Videoyu yeni kapakla eslestir
+        run: |
+          set -euo pipefail
+          python scripts/pod/match_video_to_cover.py \
+            --cover _work/cover.jpg --video _work/current.mp4 \
+            --out _out/AstroLove_AQUARIUS_GEMINI_POD_CoverMatched.mp4
+      - name: Etsy videosunu degistir ve geri oku
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          args=(--listing-id "$LISTING_ID" --video-only \
+            --video _out/AstroLove_AQUARIUS_GEMINI_POD_CoverMatched.mp4 \
+            --out _out/etsy --quota-min 50)
+          [ "$APPLY" = "true" ] && args+=(--apply)
+          python scripts/etsy/pod_hero_swap.py "${args[@]}"
+      - name: Token ve kanitlari sakla
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" || true
+          rclone copy _out "gdrive:ASTROLOVE/TEMP/POD_VIDEO_COVER_MATCH/RUN_${GITHUB_RUN_ID}" -q || true
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: pod-video-cover-match
+          path: |
+            _out/before.json
+            _out/etsy/swap_result.json
+            _out/AstroLove_AQUARIUS_GEMINI_POD_CoverMatched_qa/
+          if-no-files-found: ignore
+      - if: ${{ always() }}
+        run: rm -rf _work _out ~/.config/rclone
