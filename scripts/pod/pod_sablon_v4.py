@@ -52,28 +52,85 @@ def kareleri_ac(video, hedef_dir):
     return sorted(hedef_dir.glob("*.png"))
 
 
-def panel_kutusu(a):
-    """Karedeki koyu baski panelinin kutusu ve maskesi (altin maskesi degil)."""
+def _otsu(g):
+    """Iki modlu esik (Otsu). Panel goruntunun yarisini kaplasa da kayar esik
+    gibi cokmez."""
+    hist, _ = np.histogram(g, bins=256, range=(0, 256))
+    toplam = hist.sum()
+    if toplam == 0:
+        return 128.0
+    seviye = np.arange(256, dtype=np.float64)
+    agirlik1 = np.cumsum(hist)
+    agirlik2 = toplam - agirlik1
+    kum = np.cumsum(hist * seviye)
+    gecerli = (agirlik1 > 0) & (agirlik2 > 0)
+    ort1 = np.where(gecerli, kum / np.maximum(agirlik1, 1), 0)
+    ort2 = np.where(gecerli, (kum[-1] - kum) / np.maximum(agirlik2, 1), 0)
+    varyans = agirlik1 * agirlik2 * (ort1 - ort2) ** 2
+    varyans[~gecerli] = -1
+    return float(np.argmax(varyans))
+
+
+def panel_kutusu(a, en_az=0.04, en_cok=0.80, doluluk=0.80):
+    """Koyu baski panelinin kutusu.
+
+    Otsu esigiyle koyu maske cikarilir; panel, kutusunu en az `doluluk` oraninda
+    dolduran (yani dikdortgen olan) en buyuk bilesendir. Altin maskesi
+    kullanilmaz.
+    """
     g = np.asarray(Image.fromarray(a).convert("L"), dtype=np.float32)
-    taban, orta = float(g.min()), float(np.median(g))
-    esik = taban + 0.35 * max(orta - taban, 1.0)
+    esik = _otsu(g)
     koyu = ndimage.binary_closing(g < esik, structure=np.ones((9, 9), dtype=bool))
+    koyu = ndimage.binary_fill_holes(koyu)
     etiket, adet = ndimage.label(koyu, structure=np.ones((3, 3), dtype=np.uint8))
     if not adet:
-        return None, None
-    alan = np.bincount(etiket.ravel())
-    alan[0] = 0
+        return None
     toplam = g.size
-    aday = [i for i in range(1, adet + 1)
-            if 0.04 * toplam <= alan[i] <= 0.75 * toplam] or [int(np.argmax(alan))]
-    en_iyi = max(aday, key=lambda i: alan[i])
-    m = etiket == en_iyi
-    ys, xs = np.nonzero(m)
-    return {"ust": int(ys.min()), "alt": int(ys.max()),
-            "sol": int(xs.min()), "sag": int(xs.max())}, m
+    nesneler = ndimage.find_objects(etiket)
+    adaylar = []
+    for i, dilim in enumerate(nesneler, start=1):
+        if dilim is None:
+            continue
+        alan = int((etiket[dilim] == i).sum())
+        if not (en_az * toplam <= alan <= en_cok * toplam):
+            continue
+        ky, kx = dilim
+        kutu_alan = (ky.stop - ky.start) * (kx.stop - kx.start)
+        if alan / max(kutu_alan, 1) < doluluk:
+            continue
+        adaylar.append((alan, ky, kx))
+    if not adaylar:
+        return None
+    _, ky, kx = max(adaylar, key=lambda x: x[0])
+    return {"ust": int(ky.start), "alt": int(ky.stop) - 1,
+            "sol": int(kx.start), "sag": int(kx.stop) - 1}
 
 
-def poster_yerlestir(kare, kutu, maske, poster_rgb, ton):
+def kutu_olcekle(kutu, kaynak_yuk, hedef_yuk, kaynak_gen, hedef_gen):
+    sy, sx = hedef_yuk / kaynak_yuk, hedef_gen / kaynak_gen
+    return {"ust": int(round(kutu["ust"] * sy)), "alt": int(round(kutu["alt"] * sy)),
+            "sol": int(round(kutu["sol"] * sx)), "sag": int(round(kutu["sag"] * sx))}
+
+
+def kutu_dogrula(kare, kutu, pay=40):
+    """Kutunun kare icinde gercekten koyu panel oldugunu ve kenarlarinin
+    disariya gore koyu kaldigini olcer. Donus: (uyum, ic_ort, dis_ort)."""
+    g = np.asarray(Image.fromarray(kare).convert("L"), dtype=np.float32)
+    h, w = g.shape
+    u, al = max(kutu["ust"], 0), min(kutu["alt"], h - 1)
+    s, sa = max(kutu["sol"], 0), min(kutu["sag"], w - 1)
+    ic = g[u:al + 1, s:sa + 1]
+    dis = np.concatenate([
+        g[max(u - pay, 0):u, s:sa + 1].ravel(),
+        g[al + 1:min(al + 1 + pay, h), s:sa + 1].ravel(),
+        g[u:al + 1, max(s - pay, 0):s].ravel(),
+        g[u:al + 1, sa + 1:min(sa + 1 + pay, w)].ravel()])
+    ic_ort = float(ic.mean())
+    dis_ort = float(dis.mean()) if dis.size else ic_ort
+    return (dis_ort - ic_ort), round(ic_ort, 2), round(dis_ort, 2)
+
+
+def poster_yerlestir(kare, kutu, poster_rgb, ton):
     """Panel icini poster ile degistirir; panel disi bire bir korunur."""
     h = kutu["alt"] - kutu["ust"] + 1
     w = kutu["sag"] - kutu["sol"] + 1
@@ -89,10 +146,7 @@ def poster_yerlestir(kare, kutu, maske, poster_rgb, ton):
         p = p + rng.normal(0.0, ton["gren"], p.shape)
     p = np.clip(p, 0, 255).astype(np.uint8)
     cikti = kare.copy()
-    alt_maske = maske[kutu["ust"]:kutu["alt"] + 1, kutu["sol"]:kutu["sag"] + 1]
-    bolge = cikti[kutu["ust"]:kutu["alt"] + 1, kutu["sol"]:kutu["sag"] + 1]
-    bolge[alt_maske] = p[alt_maske]
-    cikti[kutu["ust"]:kutu["alt"] + 1, kutu["sol"]:kutu["sag"] + 1] = bolge
+    cikti[kutu["ust"]:kutu["alt"] + 1, kutu["sol"]:kutu["sag"] + 1] = p
     return cikti
 
 
@@ -295,27 +349,46 @@ def main():
     kareler = kareleri_ac(ref_video, kare_dir)
     log(f"Referans video {vw}x{vh}, {sure:.2f} sn, {fps} fps, {len(kareler)} kare")
 
-    kutular, maskeler = [], []
-    for p in kareler:
-        a_k = np.asarray(Image.open(p).convert("RGB"), dtype=np.uint8)
-        kutu, m = panel_kutusu(a_k)
-        if kutu is None:
-            raise RuntimeError(f"panel bulunamadi: {p.name}")
-        kutular.append(kutu)
-        maskeler.append(m)
-    hareket = {k: [max(x[k] for x in kutular) - min(x[k] for x in kutular)]
-               for k in ("ust", "alt", "sol", "sag")}
-    hareket = {k: v[0] for k, v in hareket.items()}
-    log(f"Panel kutusu kare kare: hareket araligi {hareket} px")
+    # Panel, TEMIZ kapak uzerinde (2400x3000) tespit edilir ve video uzayina
+    # olceklenir; kare basina esik kaymasi boylece devre disi kalir.
+    ref_kapak_a = np.asarray(Image.open(ref_kapak).convert("RGB").resize(
+        KAPAK, Image.Resampling.LANCZOS), dtype=np.uint8)
+    kapak_kutu = panel_kutusu(ref_kapak_a)
+    if kapak_kutu is None:
+        raise SystemExit("HATA: kapakta panel bulunamadi -> DUR")
+    ref_kutu = kutu_olcekle(kapak_kutu, KAPAK[1], vh, KAPAK[0], vw)
+    log(f"Panel kapakta {kapak_kutu} -> videoda {ref_kutu}")
 
-    ref_kutu = kutular[0]
+    # kararlilik: kutunun ic/dis kontrasti her karede korunuyor mu
+    kontrast = []
+    for p_k in kareler:
+        kare = np.asarray(Image.open(p_k).convert("RGB"), dtype=np.uint8)
+        fark, ic_o, dis_o = kutu_dogrula(kare, ref_kutu)
+        kontrast.append(fark)
+    kontrast_min = round(float(min(kontrast)), 2)
+    # bagimsiz tespitle kaydirma kontrolu (ilk/orta/son kare)
+    ornek_kutular = []
+    for i in (0, len(kareler) // 2, len(kareler) - 1):
+        kare = np.asarray(Image.open(kareler[i]).convert("RGB"), dtype=np.uint8)
+        k = panel_kutusu(kare)
+        if k:
+            ornek_kutular.append({"kare": i, **k})
+    hareket = {}
+    if len(ornek_kutular) >= 2:
+        for anahtar in ("ust", "alt", "sol", "sag"):
+            deger = [x[anahtar] for x in ornek_kutular]
+            hareket[anahtar] = max(deger) - min(deger)
+    log(f"Panel ic/dis kontrast en dusuk {kontrast_min} | bagimsiz tespit "
+        f"kaydirmasi {hareket}")
+    if kontrast_min <= 0:
+        raise SystemExit(f"HATA: panel kutusu bazi karelerde gecerli degil "
+                         f"(kontrast {kontrast_min}) -> DUR")
+
     hedef_oran = (ref_kutu["sag"] - ref_kutu["sol"] + 1) / \
                  (ref_kutu["alt"] - ref_kutu["ust"] + 1)
     ref_kare0 = np.asarray(Image.open(kareler[0]).convert("RGB"), dtype=np.uint8)
     ref_bolge = ref_kare0[ref_kutu["ust"]:ref_kutu["alt"] + 1,
                           ref_kutu["sol"]:ref_kutu["sag"] + 1]
-    ref_kapak_a = np.asarray(Image.open(ref_kapak).convert("RGB").resize(
-        KAPAK, Image.Resampling.LANCZOS), dtype=np.uint8)
     hedef_altin, _ = altin_ort(ref_kapak_a)
     log(f"Panel orani {hedef_oran:.4f} | referans altin RGB {hedef_altin}")
 
@@ -331,10 +404,11 @@ def main():
     ton = ton_olc(ref_bolge, np.asarray(ham_yerlesim, dtype=np.uint8))
     ton["bulaniklik"] = 0.6
     ton["gren"] = 1.2
-    yeniden = poster_yerlestir(ref_kare0, ref_kutu, maskeler[0], ref_poster, ton)
-    ic = maskeler[0]
-    dogrulama_mae = float(np.abs(yeniden[ic].astype(np.float32)
-                                 - ref_kare0[ic].astype(np.float32)).mean())
+    yeniden = poster_yerlestir(ref_kare0, ref_kutu, ref_poster, ton)
+    ic_dilim = (slice(ref_kutu["ust"], ref_kutu["alt"] + 1),
+                slice(ref_kutu["sol"], ref_kutu["sag"] + 1))
+    dogrulama_mae = float(np.abs(yeniden[ic_dilim].astype(np.float32)
+                                 - ref_kare0[ic_dilim].astype(np.float32)).mean())
     log(f"YONTEM KAPISI: referans kendini yeniden uretme panel ici MAE = "
         f"{dogrulama_mae:.3f} (esik {a.dogrulama_esigi})")
     kapi_gecti = dogrulama_mae < a.dogrulama_esigi
@@ -367,7 +441,7 @@ def main():
                 yeni_kare_dir.mkdir(exist_ok=True)
                 for i, p in enumerate(kareler):
                     kare = np.asarray(Image.open(p).convert("RGB"), dtype=np.uint8)
-                    yeni = poster_yerlestir(kare, kutular[i], maskeler[i], poster, ton_i)
+                    yeni = poster_yerlestir(kare, ref_kutu, poster, ton_i)
                     Image.fromarray(yeni, "RGB").save(yeni_kare_dir / f"{i:05d}.png")
                 yeni_video = out / f"{ad}_{lid}_video.mp4"
                 video_yaz(yeni_kare_dir, yeni_video, fps, sure)
@@ -389,8 +463,10 @@ def main():
                 for i, p in enumerate(yeni_kareler[:len(kareler)]):
                     yk = np.asarray(Image.open(p).convert("RGB"), dtype=np.float32)
                     rk = np.asarray(Image.open(kareler[i]).convert("RGB"), dtype=np.float32)
-                    dis = ~maskeler[i]
-                    dis_mae += float(np.abs(yk[dis] - rk[dis]).mean())
+                    fark = np.abs(yk - rk)
+                    fark[ic_dilim] = 0.0
+                    dis_piksel = fark.size - (fark[ic_dilim].size)
+                    dis_mae += float(fark.sum() / max(dis_piksel, 1))
                     n += 1
                 dis_mae = dis_mae / max(n, 1)
                 kapak_kare_mae = float(np.abs(
@@ -401,7 +477,7 @@ def main():
                 altin_fark = ([round(altin_yeni[j] - hedef_altin[j], 2) for j in range(3)]
                               if altin_yeni and hedef_altin else None)
                 ocr_s = ocr(np.asarray(Image.open(ham0).convert("RGB"), dtype=np.uint8),
-                            kutular[0])
+                            ref_kutu)
                 beklenen = [x.strip().lower() for x in cift.split("+")]
                 ocr_ok = all(b[:5] in ocr_s["metin"].lower() for b in beklenen) \
                     if ocr_s["metin"] else None
@@ -455,7 +531,8 @@ def main():
             "referans_id": a.referans_id, "referans_video": ref_kim,
             "video": {"px": [vw, vh], "sure_sn": round(sure, 3), "fps": fps,
                       "kare": len(kareler)},
-            "panel_hareketi_px": hareket, "panel_kutusu_kare0": ref_kutu,
+            "panel_hareketi_px": hareket, "panel_kutusu_video": ref_kutu,
+            "panel_kutusu_kapak": kapak_kutu, "panel_kontrast_min": kontrast_min,
             "panel_orani": round(hedef_oran, 4),
             "referans_altin_rgb": hedef_altin,
             "referans_poster": ref_poster_yol.name,
@@ -470,9 +547,11 @@ def main():
           "Etsy'ye hicbir yazma cagrisi yapilmadi; uretim yereldir.", "",
           "## Sablon", "", "| olcum | deger |", "|---|---|",
           f"| referans video | {vw}x{vh}, {sure:.2f} sn, {fps} fps, {len(kareler)} kare |",
-          f"| panel kutusu (kare 0) | ust {ref_kutu['ust']}, alt {ref_kutu['alt']}, "
+          f"| panel kutusu (video) | ust {ref_kutu['ust']}, alt {ref_kutu['alt']}, "
           f"sol {ref_kutu['sol']}, sag {ref_kutu['sag']} |",
-          f"| panel kutusu hareket araligi | {hareket} px |",
+          f"| panel kutusu (kapak 2400x3000) | {kapak_kutu} |",
+          f"| bagimsiz tespit kaydirmasi | {hareket} px |",
+          f"| panel ic/dis kontrast (en dusuk kare) | {kontrast_min} |",
           f"| panel orani | {hedef_oran:.4f} |",
           f"| referans poster | `{ref_poster_yol.name}` (oran farki {ref_oran_fark}) |",
           f"| ton donusumu | kazanc {ton['kazanc']}, ofset {ton['ofset']}, "
