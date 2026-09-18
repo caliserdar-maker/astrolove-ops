@@ -4,9 +4,7 @@ permissions:
   contents: read
 
 on:
-  push:
-    branches: [main]
-    paths: [config/duplicate_archive_522_authorization.json]
+  workflow_dispatch:
 
 concurrency:
   group: drive-duplicate-archive
