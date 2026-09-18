@@ -2,7 +2,8 @@ name: pod-cover-gold-b-77
 
 # Basarili Aquarius-Gemini B kapak yontemini kalan 77 POD ilanina uygular.
 # Once 77/77 kuru prova kilidi gerekir. Video, diger 12 gorsel, variation-images,
-# baslik ve ilan durumu degismez; yalniz baglantisiz rank-1 kapak degistirilir.
+# baslik ve ilan durumu degismez. Baglantisiz rank-1 kapak degistirilir;
+# bagimsiz kapagi eksik 12-gorselli ilanlara yeni kapak eklenir.
 
 permissions:
   contents: read
