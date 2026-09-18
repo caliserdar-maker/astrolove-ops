@@ -17,6 +17,10 @@ on:
         description: "apply=true icin tam olarak VIDEO_FRAME0_COVER"
         required: false
         default: ""
+      mobile_display_compensation:
+        description: "Android Chrome video gorunumu icin ton telafisi"
+        type: boolean
+        default: false
   push:
     branches: [main]
     paths:
@@ -34,6 +38,7 @@ jobs:
       LISTING_ID: "4570112095"
       APPLY: ${{ inputs.apply || 'false' }}
       CONFIRM: ${{ inputs.confirm || '' }}
+      MOBILE_DISPLAY_COMPENSATION: ${{ inputs.mobile_display_compensation || 'false' }}
     steps:
       - uses: actions/checkout@v4
       - name: Tetikleyici ayarlari
@@ -43,6 +48,7 @@ jobs:
           file=config/pod_cover_from_video.trigger
           echo "APPLY=$(jq -r '.apply // false' "$file")" >> "$GITHUB_ENV"
           echo "CONFIRM=$(jq -r '.confirm // ""' "$file")" >> "$GITHUB_ENV"
+          echo "MOBILE_DISPLAY_COMPENSATION=$(jq -r '.mobile_display_compensation // false' "$file")" >> "$GITHUB_ENV"
       - name: Onay kapisi
         run: |
           set -euo pipefail
@@ -85,6 +91,7 @@ jobs:
           set -euo pipefail
           args=(--listing-id "$LISTING_ID" --out _out/result --quota-min 50)
           [ "$APPLY" = "true" ] && args+=(--apply)
+          [ "$MOBILE_DISPLAY_COMPENSATION" = "true" ] && args+=(--mobile-display-compensation)
           python scripts/etsy/pod_cover_from_video.py "${args[@]}"
       - name: Token ve kanitlari sakla
         if: ${{ always() }}
