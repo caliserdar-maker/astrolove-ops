@@ -43,6 +43,9 @@ Image.MAX_IMAGE_PIXELS = None
 
 KAPAK = (2400, 3000)
 REFERANS_ID = "4570112095"
+# Karsilastirma gorselindeki referans "SU ANKI kapak" karesi bu canli kapak
+# gorseliyle dogrulanir; tutmazsa gorsel uretilmez.
+KONTROL_KAPAK_ID = "8590281557"
 
 
 def simdi():
@@ -644,6 +647,44 @@ def main():
                          [("SU ANKI kapak", Image.open(k["mevcut_kapak"]).convert("RGB")),
                           ("YENI kapak", Image.open(out / k["kapak_dosya"]).convert("RGB")),
                           ("video orta kare", Image.open(orta).convert("RGB"))]))
+    # Gorsel kapisi: referans satirindaki "SU ANKI kapak" gercekten canli kapak
+    # mi? Bagimsiz ikinci GET ile id bazli dogrulama; tutmazsa gorsel YAZILMAZ.
+    kapak_kontrol_mae = None
+    if not a.yerel_girdi:
+        gor_k = gallery(api, a.referans_id)
+        hedef = next((g for g in gor_k
+                      if str(g.get("listing_image_id")) == KONTROL_KAPAK_ID), None)
+        if hedef is None:
+            (out / "KONTROL_BASARISIZ.md").write_text(
+                f"Canli kapak {KONTROL_KAPAK_ID} referans galerisinde bulunamadi.\n"
+                f"Indirilen kapak id: {ref_kim.get('kapak_id')}\n"
+                f"Galerideki id'ler: "
+                f"{[str(g.get('listing_image_id')) for g in gor_k]}\n",
+                encoding="utf-8")
+            raise SystemExit(f"HATA: canli kapak {KONTROL_KAPAK_ID} referans "
+                             f"galerisinde yok -> gorsel yazilmadi, DUR")
+        kontrol_yol = ref_dir / "kontrol_kapak.png"
+        download(hedef.get("url_fullxfull") or hedef.get("url_570xN"), kontrol_yol)
+        with Image.open(ref_kapak) as im_a, Image.open(kontrol_yol) as im_b:
+            a_rgb = im_a.convert("RGB")
+            b_rgb = im_b.convert("RGB")
+            if b_rgb.size != a_rgb.size:
+                b_rgb = b_rgb.resize(a_rgb.size, Image.Resampling.LANCZOS)
+            kapak_kontrol_mae = float(np.abs(
+                np.asarray(a_rgb, dtype=np.float32)
+                - np.asarray(b_rgb, dtype=np.float32)).mean())
+        log(f"GORSEL KAPISI: referans 'SU ANKI kapak' vs canli kapak "
+            f"{KONTROL_KAPAK_ID} MAE = {kapak_kontrol_mae:.4f} (esik 2.0) | "
+            f"indirilen kapak id {ref_kim.get('kapak_id')}")
+        if kapak_kontrol_mae >= 2.0:
+            (out / "KONTROL_BASARISIZ.md").write_text(
+                f"Referans satirindaki 'SU ANKI kapak' canli kapakla tutmadi.\n"
+                f"MAE {kapak_kontrol_mae:.4f} (esik 2.0)\n"
+                f"Indirilen kapak id: {ref_kim.get('kapak_id')} | "
+                f"beklenen: {KONTROL_KAPAK_ID}\n", encoding="utf-8")
+            raise SystemExit("HATA: karsilastirma gorselindeki referans kapagi "
+                             "canli kapakla tutmadi -> gorsel yazilmadi, DUR")
+
     boyut = karsilastirma(satirlar, out / "KARSILASTIRMA_V4.jpg")
     log(f"KARSILASTIRMA_V4.jpg {boyut[0]}x{boyut[1]} ({len(satirlar)} satir)")
 
@@ -658,6 +699,9 @@ def main():
             "referans_poster": ref_poster_yol.name,
             "referans_poster_oran_farki": ref_oran_fark,
             "ton": ton, "dogrulama_mae": round(dogrulama_mae, 4),
+            "kapak_kontrol_id": KONTROL_KAPAK_ID,
+            "kapak_kontrol_mae": (round(kapak_kontrol_mae, 4)
+                                  if kapak_kontrol_mae is not None else None),
             "dogrulama_esigi": a.dogrulama_esigi, "kapi_gecti": kapi_gecti,
             "kota_once": kota_once, "kota_sonra": kota_sonra,
             "gecen_sn": round(time.time() - t0, 1), "satirlar": sonuclar}
