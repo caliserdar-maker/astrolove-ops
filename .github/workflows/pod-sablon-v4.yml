@@ -1,6 +1,6 @@
-name: pod-sablon-v4 (V11 toplu uretim 77 cift)
+name: pod-sablon-v4 (V11 PILOT yayin 4570110641)
 
-# 77 cift icin V11 kompoziti uretir, Drive'a yukler. Etsy: yalniz GET.
+# YALNIZ Aquarius+Aries (4570110641). apply=false kuru denemedir.
 
 permissions:
   contents: read
@@ -8,19 +8,35 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-      limit:
-        description: "kac cift (0 = hepsi)"
-        default: "0"
+      apply:
+        description: "true = Etsy'ye yaz (yalniz 4570110641)"
+        type: boolean
+        default: false
+      confirm:
+        description: "apply=true icin tam olarak PILOT_4570110641"
+        required: false
+        default: ""
 
 concurrency:
   group: etsy-token
   cancel-in-progress: false
 
 jobs:
-  uretim:
+  yayin:
     runs-on: ubuntu-latest
-    timeout-minutes: 330
+    timeout-minutes: 30
+    env:
+      APPLY: ${{ inputs.apply && 'true' || 'false' }}
+      CONFIRM: ${{ inputs.confirm || '' }}
     steps:
+      - name: Onay kapisi
+        run: |
+          set -euo pipefail
+          if [ "$APPLY" = "true" ] && [ "$CONFIRM" != "PILOT_4570110641" ]; then
+            echo "::error::apply=true icin confirm 'PILOT_4570110641' olmali. DUR."
+            exit 1
+          fi
+          [ "$APPLY" = "true" ] && echo "::warning::APPLY: yalniz 4570110641 medyasi degisecek." || echo "KURU DENEME: Etsy yazma yok."
       - uses: actions/checkout@v4
         with:
           ref: pod-v4
@@ -30,11 +46,8 @@ jobs:
           cache: pip
       - run: |
           set -euo pipefail
-          pip install -q requests==2.34.2 numpy==2.1.3 pillow==11.0.0 \
-            opencv-python-headless==4.10.0.84 scipy==1.14.1
-          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null
+          pip install -q requests==2.34.2 numpy==2.1.3 pillow==11.0.0
           curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
-          ffmpeg -version | head -1
       - name: rclone.conf olustur
         env:
           RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
@@ -54,16 +67,19 @@ jobs:
           set -euo pipefail
           umask 077; mkdir -p _work
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
-      - name: 'V11 uretim (77 cift)'
+      - name: 'Pilot yayin'
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
           TOKEN_FILE: _work/ETSY_TOKEN.json
-          LIMIT: ${{ inputs.limit || '0' }}
         run: |
           set -euo pipefail
-          python scripts/pod/pod_v11_uretim.py --limit "$LIMIT"
+          if [ "$APPLY" = "true" ]; then
+            python scripts/pod/pod_v11_yayin.py --listing 4570110641 --apply --confirm "$CONFIRM"
+          else
+            python scripts/pod/pod_v11_yayin.py --listing 4570110641
+          fi
       - name: Token geri yazma
         if: ${{ always() }}
         run: |
