@@ -63,4 +63,4 @@ Thumbs.db
 fonts/
 
 # V8 gecici ham medya ve ciktilari (depoda tutulmaz)
-_veri/
+# _veri/  (gecici: v10.1 cikti yukleme)
