@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       mod:
-        description: "pilot | kuru"
+        description: "pilot | kuru | toplu"
         default: "kuru"
       listing:
         description: "pilot icin ilan id"
@@ -36,7 +36,7 @@ concurrency:
 jobs:
   duzen:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 300
     env:
       MOD: ${{ inputs.mod || 'kuru' }}
       APPLY: ${{ inputs.apply && 'true' || 'false' }}
@@ -48,12 +48,16 @@ jobs:
       - name: Onay kapisi
         run: |
           set -euo pipefail
-          if [ "$APPLY" = "true" ] && [ "$CONFIRM" != "GALERI_DUZEN" ]; then
-            echo "::error::apply=true icin confirm 'GALERI_DUZEN' olmali. DUR."
+          if [ "$APPLY" = "true" ] && [ "$MOD" = "pilot" ] && [ "$CONFIRM" != "GALERI_DUZEN" ]; then
+            echo "::error::pilot yazma icin confirm 'GALERI_DUZEN' olmali. DUR."
             exit 1
           fi
-          if [ "$APPLY" = "true" ] && [ "$MOD" != "pilot" ]; then
-            echo "::error::yazma yalniz mod=pilot ile. DUR."
+          if [ "$APPLY" = "true" ] && [ "$MOD" = "toplu" ] && [ "$CONFIRM" != "GALERI_TOPLU" ]; then
+            echo "::error::toplu yazma icin confirm 'GALERI_TOPLU' olmali. DUR."
+            exit 1
+          fi
+          if [ "$APPLY" = "true" ] && [ "$MOD" = "kuru" ]; then
+            echo "::error::mod=kuru ile yazma olmaz. DUR."
             exit 1
           fi
           [ "$APPLY" = "true" ] && echo "::warning::APPLY: $LISTING galeri sirasi degisecek." || echo "KURU DENEME: Etsy yazma yok."
@@ -95,7 +99,13 @@ jobs:
           TOKEN_FILE: _work/ETSY_TOKEN.json
         run: |
           set -euo pipefail
-          if [ "$MOD" = "pilot" ]; then
+          if [ "$MOD" = "toplu" ]; then
+            if [ "$APPLY" = "true" ]; then
+              python scripts/pod/pod_galeri_toplu.py --apply --confirm "$CONFIRM" --limit "$LIMIT"
+            else
+              python scripts/pod/pod_galeri_toplu.py --limit "$LIMIT"
+            fi
+          elif [ "$MOD" = "pilot" ]; then
             if [ "$APPLY" = "true" ]; then
               python scripts/pod/pod_galeri_duzen.py pilot --listing "$LISTING" --hedef "$HEDEF" --apply --confirm "$CONFIRM"
             else
