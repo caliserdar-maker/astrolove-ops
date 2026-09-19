@@ -1,10 +1,10 @@
-name: pod-sablon-v4 (V8 cikti yukleme)
+name: pod-sablon-v4 (V8.1 veri)
 
-# V8 ciktilarini Drive'a yukler (tek adim). Etsy cagrisi YOK.
-# Kaynak: dalda _veri/v8_cikti/ ; hedef: ASTROLOVE/TEMP/POD_REFERANS_ORNEK_V8/
+# V8.1 icin ek gercek medya: V5 kosusunun Aries+Leo ve Aquarius+Cancer
+# videolari Drive'dan alinip dala commit'lenir. Etsy cagrisi YOK.
 
 permissions:
-  contents: read
+  contents: write
 
 on:
   workflow_dispatch:
@@ -32,11 +32,21 @@ jobs:
               echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
             fi
           fi
-      - name: Drive'a yukle
+      - name: V5 videolarini indir
         run: |
           set -euo pipefail
-          test -s _veri/v8_cikti/KARE_KARSILASTIRMA_V8.jpg
-          rclone copy _veri/v8_cikti "gdrive:ASTROLOVE/TEMP/POD_REFERANS_ORNEK_V8" -q
-          rclone lsf --format "sp" "gdrive:ASTROLOVE/TEMP/POD_REFERANS_ORNEK_V8"
+          mkdir -p _veri/v8
+          for f in Aries_Leo_4570031205_video.mp4 Aquarius_Cancer_4570125580_video.mp4; do
+            rclone copyto "gdrive:ASTROLOVE/TEMP/POD_REFERANS_ORNEK_V5/$f" "_veri/v8/v5_$f"
+          done
+          ls -la _veri/v8
+      - name: Dala commit
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f _veri/v8
+          git commit -m "pod v8.1: ek V5 videolari (Aries+Leo, Aquarius+Cancer)" || echo "degisiklik yok"
+          git push origin HEAD:pod-v4
       - if: ${{ always() }}
         run: rm -rf ~/.config/rclone
