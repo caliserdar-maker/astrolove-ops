@@ -30,6 +30,10 @@ on:
         description: "true = duzeltmeyi Etsy'ye yaz (confirm=RANK_DUZELT)"
         type: boolean
         default: false
+      onar:
+        description: "true = pilot onarimi (rank 10 + varyasyon PUT), confirm=PILOT_ONARIM"
+        type: boolean
+        default: false
 
 concurrency:
   group: etsy-token
@@ -43,12 +47,17 @@ jobs:
       APPLY: ${{ inputs.apply && 'true' || 'false' }}
       CONFIRM: ${{ inputs.confirm || '' }}
       DUZELT_APPLY: ${{ inputs.duzelt_apply && 'true' || 'false' }}
+      ONAR: ${{ inputs.onar && 'true' || 'false' }}
     steps:
       - name: Onay kapisi
         run: |
           set -euo pipefail
           if [ "$APPLY" = "true" ] && [ "$CONFIRM" != "RANK3_TO_11" ]; then
             echo "::error::apply=true icin confirm 'RANK3_TO_11' olmali. DUR."
+            exit 1
+          fi
+          if [ "${ONAR:-false}" = "true" ] && [ "$CONFIRM" != "PILOT_ONARIM" ]; then
+            echo "::error::onar=true icin confirm 'PILOT_ONARIM' olmali. DUR."
             exit 1
           fi
           if [ "${DUZELT_APPLY:-false}" = "true" ] && [ "$CONFIRM" != "RANK_DUZELT" ]; then
@@ -96,10 +105,13 @@ jobs:
           OKU_LISTING: ${{ inputs.oku || '' }}
           DUZELT_LISTING: ${{ inputs.duzelt || '' }}
           DUZELT_APPLY: ${{ inputs.duzelt_apply && 'true' || 'false' }}
+          ONAR: ${{ inputs.onar && 'true' || 'false' }}
         run: |
           set -euo pipefail
           if [ "$APPLY" = "true" ]; then
             python scripts/pod/pod_rank3_uygula.py --apply --confirm "$CONFIRM" --limit "$LIMIT"
+          elif [ "${ONAR:-false}" = "true" ]; then
+            python scripts/pod/pod_rank3_onar.py --apply --confirm "$CONFIRM"
           elif [ -n "${DUZELT_LISTING:-}" ]; then
             if [ "$DUZELT_APPLY" = "true" ]; then
               python scripts/pod/pod_rank3_duzelt.py --listing "$DUZELT_LISTING" --apply --confirm "$CONFIRM"
