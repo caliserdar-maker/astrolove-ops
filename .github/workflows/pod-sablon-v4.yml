@@ -1,6 +1,6 @@
-name: pod-sablon-v4 (V11 TOPLU yayin 76 ilan)
+name: pod-sablon-v4 (RANK3->11 kuru deneme)
 
-# 76 ilan (referans 4570112095 ve pilot 4570110641 haric). apply=false kuru deneme.
+# SALT OKUMA: 78 ilanin galerisi okunur, plan + tablo uretilir. Etsy YAZMA YOK.
 
 permissions:
   contents: read
@@ -8,14 +8,6 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-      apply:
-        description: "true = Etsy'ye yaz (76 ilan)"
-        type: boolean
-        default: false
-      confirm:
-        description: "apply=true icin tam olarak YAYIN_76"
-        required: false
-        default: ""
       limit:
         description: "kac ilan (0 = hepsi)"
         default: "0"
@@ -25,21 +17,10 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  yayin76:
+  rank3:
     runs-on: ubuntu-latest
-    timeout-minutes: 330
-    env:
-      APPLY: ${{ inputs.apply && 'true' || 'false' }}
-      CONFIRM: ${{ inputs.confirm || '' }}
+    timeout-minutes: 60
     steps:
-      - name: Onay kapisi
-        run: |
-          set -euo pipefail
-          if [ "$APPLY" = "true" ] && [ "$CONFIRM" != "YAYIN_76" ]; then
-            echo "::error::apply=true icin confirm 'YAYIN_76' olmali. DUR."
-            exit 1
-          fi
-          [ "$APPLY" = "true" ] && echo "::warning::APPLY: 76 ilanin kapak+videosu degisecek." || echo "KURU DENEME: Etsy yazma yok."
       - uses: actions/checkout@v4
         with:
           ref: pod-v4
@@ -49,7 +30,7 @@ jobs:
           cache: pip
       - run: |
           set -euo pipefail
-          pip install -q requests==2.34.2 numpy==2.1.3 pillow==11.0.0
+          pip install -q requests==2.34.2 pillow==11.0.0
           curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
       - name: rclone.conf olustur
         env:
@@ -70,7 +51,7 @@ jobs:
           set -euo pipefail
           umask 077; mkdir -p _work
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
-      - name: 'Toplu yayin (76 ilan)'
+      - name: 'Kuru deneme (salt okuma)'
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
@@ -79,11 +60,7 @@ jobs:
           LIMIT: ${{ inputs.limit || '0' }}
         run: |
           set -euo pipefail
-          if [ "$APPLY" = "true" ]; then
-            python scripts/pod/pod_v11_yayin_toplu.py --apply --confirm "$CONFIRM" --limit "$LIMIT"
-          else
-            python scripts/pod/pod_v11_yayin_toplu.py --limit "$LIMIT"
-          fi
+          python scripts/pod/pod_rank3_plan.py --limit "$LIMIT"
       - name: Token geri yazma
         if: ${{ always() }}
         run: |
