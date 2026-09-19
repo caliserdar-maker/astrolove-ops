@@ -23,6 +23,13 @@ on:
       oku:
         description: "salt okuma: tek ilan id (apply=false ile)"
         default: ""
+      duzelt:
+        description: "rank duzeltme: tek ilan id"
+        default: ""
+      duzelt_apply:
+        description: "true = duzeltmeyi Etsy'ye yaz (confirm=RANK_DUZELT)"
+        type: boolean
+        default: false
 
 concurrency:
   group: etsy-token
@@ -35,12 +42,17 @@ jobs:
     env:
       APPLY: ${{ inputs.apply && 'true' || 'false' }}
       CONFIRM: ${{ inputs.confirm || '' }}
+      DUZELT_APPLY: ${{ inputs.duzelt_apply && 'true' || 'false' }}
     steps:
       - name: Onay kapisi
         run: |
           set -euo pipefail
           if [ "$APPLY" = "true" ] && [ "$CONFIRM" != "RANK3_TO_11" ]; then
             echo "::error::apply=true icin confirm 'RANK3_TO_11' olmali. DUR."
+            exit 1
+          fi
+          if [ "${DUZELT_APPLY:-false}" = "true" ] && [ "$CONFIRM" != "RANK_DUZELT" ]; then
+            echo "::error::duzelt_apply=true icin confirm 'RANK_DUZELT' olmali. DUR."
             exit 1
           fi
           [ "$APPLY" = "true" ] && echo "::warning::APPLY: 78 ilanda rank-3 -> rank-11." || echo "KURU DENEME: Etsy yazma yok."
@@ -82,10 +94,18 @@ jobs:
           TOKEN_FILE: _work/ETSY_TOKEN.json
           LIMIT: ${{ inputs.limit || '0' }}
           OKU_LISTING: ${{ inputs.oku || '' }}
+          DUZELT_LISTING: ${{ inputs.duzelt || '' }}
+          DUZELT_APPLY: ${{ inputs.duzelt_apply && 'true' || 'false' }}
         run: |
           set -euo pipefail
           if [ "$APPLY" = "true" ]; then
             python scripts/pod/pod_rank3_uygula.py --apply --confirm "$CONFIRM" --limit "$LIMIT"
+          elif [ -n "${DUZELT_LISTING:-}" ]; then
+            if [ "$DUZELT_APPLY" = "true" ]; then
+              python scripts/pod/pod_rank3_duzelt.py --listing "$DUZELT_LISTING" --apply --confirm "$CONFIRM"
+            else
+              python scripts/pod/pod_rank3_duzelt.py --listing "$DUZELT_LISTING"
+            fi
           elif [ -n "${OKU_LISTING:-}" ]; then
             python scripts/pod/pod_rank3_oku.py
           else
