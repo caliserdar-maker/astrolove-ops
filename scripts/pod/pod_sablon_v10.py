@@ -91,6 +91,72 @@ def poster_kapak_yap(poster_yol, kutu_kapak):
                                                "yerlesim": [x, y, yeni_w, yeni_h]}
 
 
+def poster_ogeleri(poster_panel, ref_m):
+    """Poster panelinden ogeleri, REFERANS DUZENINI oncelik alarak ayirir.
+
+    Sablon ayni oldugu icin her ogenin yeri referanstakiyle ortusur:
+    - ana sembol: referans ana kutusuyla ortusen, kutusu referanstan cok
+      buyuk olmayan (halka disarida kalir) bilesenler,
+    - kucuk semboller: merkezi referans kucuk sembol kutusunun icinde
+      (25 px pay) olan bilesenler,
+    - isim: merkezi referans isim bandinda olan bilesenler; referans isim
+      maskesindeki sonsuzluk boslugu icine dusenler (sonsuzluk) haric.
+    """
+    r, g, b = poster_panel[..., 0], poster_panel[..., 1], poster_panel[..., 2]
+    altin = (r > 44) & (g > 29) & (r > b * 1.16) & (g > b * 1.04) & (r > g * 1.01)
+    et, _ = ndimage.label(altin, structure=np.ones((3, 3), np.uint8))
+    sekil = altin.shape
+
+    def kutu_of(m):
+        ys, xs = np.where(m)
+        return [int(ys.min()), int(ys.max()), int(xs.min()), int(xs.max())]
+
+    rk = {ad: kutu_of(m) for ad, m in ref_m.items() if m.any()}
+    # referans isim maskesinde sonsuzluk boslugu (ortadaki bos sutunlar)
+    sut = ref_m["isim"].any(axis=0)
+    orta = sekil[1] // 2
+    sol = orta
+    while sol > 0 and not sut[sol]:
+        sol -= 1
+    sag = orta
+    while sag < sekil[1] - 1 and not sut[sag]:
+        sag += 1
+    bosluk = (sol, sag)
+    cikti = {ad: np.zeros(sekil, dtype=bool) for ad in
+             ("ana_sembol", "kucuk_burc_1", "kucuk_burc_2", "isim")}
+    for i, dil in enumerate(ndimage.find_objects(et), start=1):
+        if dil is None:
+            continue
+        c = et[dil] == i
+        alan = int(c.sum())
+        if alan < 30:
+            continue
+        y0, y1, x0, x1 = dil[0].start, dil[0].stop - 1, dil[1].start, dil[1].stop - 1
+        cy, cx = (y0 + y1) / 2, (x0 + x1) / 2
+        m = np.zeros(sekil, dtype=bool)
+        m[dil] = c
+        ra = rk["ana_sembol"]
+        if (alan >= 500 and y1 >= ra[0] - 20 and y0 <= ra[1] + 20
+                and x1 >= ra[2] - 20 and x0 <= ra[3] + 20
+                and (x1 - x0) <= (ra[3] - ra[2]) + 40
+                and (y1 - y0) <= (ra[1] - ra[0]) + 40):
+            cikti["ana_sembol"] |= m
+            continue
+        yer = False
+        for ad in ("kucuk_burc_1", "kucuk_burc_2"):
+            k = rk.get(ad)
+            if k and k[0] - 25 <= cy <= k[1] + 25 and k[2] - 25 <= cx <= k[3] + 25:
+                cikti[ad] |= m
+                yer = True
+                break
+        if yer:
+            continue
+        ki = rk["isim"]
+        if ki[0] - 12 <= cy <= ki[1] + 12 and not (bosluk[0] < cx < bosluk[1]):
+            cikti["isim"] |= m
+    return cikti, {"sonsuzluk_boslugu": list(bosluk)}
+
+
 def vurus_kalinligi(maske):
     """Medyan vurus kalinligi (px): uzaklik donusumunun sirt piksellerinde 2*dt."""
     if not maske.any():
@@ -153,21 +219,37 @@ def main():
     # ---- A: cift maskeleri POSTERDEN
     poster_kapak, poster_not = poster_kapak_yap(poster_yol, kutu_kapak)
     Image.fromarray(poster_kapak).save(out / "_is" / "poster_sanal_kapak.png")
-    cift_k, cift_not, _ = katman_maskeleri(poster_kapak)
-    cift_isim_k, cift_isim_not = isim_maskesi(
-        poster_kapak, cift_k["ana_sembol"],
-        (cift_k.get("kucuk_burc_1"), cift_k.get("kucuk_burc_2")))
-    cift_m = {ad: kapat(maske_panele(m, kutu_kapak, pw, ph))
-              for ad, m in cift_k.items() if m.any()}
-    cift_m["isim"] = kapat(maske_panele(cift_isim_k, kutu_kapak, pw, ph))
-    # B: kucuk semboller isimden kesin ayri
-    for ad in ("kucuk_burc_1", "kucuk_burc_2"):
-        if ad in cift_m:
-            cift_m["isim"] &= ~ndimage.binary_dilation(cift_m[ad], iterations=2)
     poster_panel = np.asarray(Image.fromarray(poster_kapak).crop(
         (kutu_kapak["sol"], kutu_kapak["ust"], kutu_kapak["sag"] + 1,
          kutu_kapak["alt"] + 1)).resize((pw, ph), Image.Resampling.LANCZOS),
         dtype=np.uint8).astype(np.float32)
+    cift_ham, cift_not = poster_ogeleri(poster_panel, ref_m)
+    cift_m = {ad: kapat(m) for ad, m in cift_ham.items() if m.any()}
+    # B: kucuk semboller isimden kesin ayri
+    for ad in ("kucuk_burc_1", "kucuk_burc_2"):
+        if ad in cift_m and "isim" in cift_m:
+            cift_m["isim"] &= ~ndimage.binary_dilation(cift_m[ad], iterations=2)
+    log(f"poster ayrim notu: {cift_not}")
+    # A/K4: poster vuruslari referansin kapaktaki (anti-alias haleli) vurusundan
+    # ince olculuyor. Her oge, referans kalinligina +-1 px oturana kadar
+    # genisletilir; renk cekirdek maskeden alinip genisleyen halkaya yayilir.
+    cift_cekirdek = dict(cift_m)
+    genisletme = {}
+    for ad, m in cift_cekirdek.items():
+        ref_kal = vurus_kalinligi(ref_m[ad]) if ad in ref_m else None
+        if ref_kal is None:
+            continue
+        en_iyi, en_fark = 0, None
+        for k in range(0, 5):
+            mk = ndimage.binary_dilation(m, iterations=k) if k else m
+            kal = vurus_kalinligi(mk)
+            fark = abs((kal or 0) - ref_kal)
+            if en_fark is None or fark < en_fark:
+                en_iyi, en_fark = k, fark
+        genisletme[ad] = en_iyi
+        if en_iyi:
+            cift_m[ad] = ndimage.binary_dilation(m, iterations=en_iyi)
+    log(f"kalinlik genisletmesi (px): {genisletme}")
 
     def kutu_of(m):
         ys, xs = np.where(m)
@@ -200,15 +282,21 @@ def main():
     alfa, boyali, maske_k = {}, {}, {}
     for ad in OGELER:
         m = cift_m.get(ad)
+        cek = cift_cekirdek.get(ad)
         kay = kaynak_of.get(ad)
         if m is None or not m.any() or kay is None or not kay.any():
             continue
         lut, ref_l = gradient_lut(ref0, kay)
-        eslenen = histogram_esle(poster_l[m], ref_l)
+        eslenen = histogram_esle(poster_l[cek], ref_l)
         idx = np.clip(np.rint(eslenen), 0, 255).astype(np.int32)
         renk = np.zeros((ph, pw, 3), dtype=np.float32)
-        renk[m] = lut[idx]
-        renk = cekirdekten_yay(renk, m)
+        renk[cek] = lut[idx]
+        # K2: maske icinde Y < 40 piksel kalmasin (en koyu kuyruk 42'ye cekilir)
+        l_r = luma(renk)
+        koyu = cek & (l_r < 42.0)
+        if koyu.any():
+            renk[koyu] *= (42.0 / np.maximum(l_r[koyu], 1e-6))[:, None]
+        renk = cekirdekten_yay(renk, cek)      # halkaya cekirdek rengi
         al = kapsam_alfa(m, rampa=RAMPA)
         if ad in ("kucuk_burc_1", "kucuk_burc_2"):
             renk, _ = parlama_esitle(renk, al, ref_l)
@@ -286,6 +374,8 @@ def main():
 
     # ---- D: ana sembol bulanikligi - her karede kenar enerjisi oranini esitle
     ana_m = maske_k["ana_sembol"]
+    ana_yumusak = np.clip(ndimage.gaussian_filter(
+        ndimage.binary_dilation(ana_m, iterations=8).astype(np.float32), 4.0), 0, 1)
 
     def kompozit(i, sigma):
         taban = zemin0 * oran[i]
@@ -300,6 +390,10 @@ def main():
             taban = taban * (1 - aa) + renk * aa
         vy = panel_y(v5_veri, kare_bayt, i, kutu, vw, vh).astype(np.float32)
         toz = np.clip(vy - v5_y0 - TOZ_TABAN, 0, None) * toz_olcek[i]
+        if sigma > 0:
+            # D: sembolun ustunden gecen toz da ayni olcude yumusar (yalniz ana
+            # sembol cevresinde); referansta toz sembolu perdeler, keskin degil
+            toz = toz * (1 - ana_yumusak) + ndimage.gaussian_filter(toz, sigma) * ana_yumusak
         return np.clip(screen(taban, toz[..., None] * toz_renk[None, None, :]),
                        0, 255)                  # C: toz EN USTTE, screen
 
@@ -315,7 +409,7 @@ def main():
                 if i == 0:
                     yeni_ke0 = kenar_enerji(luma(kare), ana_m)
             else:
-                lo, hi, sigma, kare = 0.0, 6.0, 0.0, None
+                lo, hi, sigma, kare = 0.0, 8.0, 0.0, None
                 k_lo = kompozit(i, 0.0)
                 r_lo = kenar_enerji(luma(k_lo), ana_m) / max(yeni_ke0, 1e-6)
                 if r_lo <= hedef + 0.02:
@@ -405,6 +499,7 @@ def main():
     hepsi = all(kapilar[k]["gecti"] for k in ("K1", "K2", "K3", "K4", "K5"))
     kapilar["HEPSI_GECTI"] = bool(hepsi)
     kapilar["ek"] = {"konum_farki": konum_fark, "kaydirma": kaydirma,
+                     "kalinlik_genisletmesi_px": genisletme,
                      "poster": poster_not, "sinir_kutulari":
                      {k: kutu_of(v) for k, v in maske_k.items()},
                      "sonme_kareleri": [k0s, k1s], "sigma_araligi":
