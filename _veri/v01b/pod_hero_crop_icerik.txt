@@ -1,0 +1,12 @@
+AQUARIUS_GEMINI
+ETSY_SWAP/
+compare_hero_vs_video.png
+crop_box.json
+hero_CI.jpg
+hero_DB.jpg
+hero_MB.jpg
+hero_PW.jpg
+hero_WP.jpg
+preview_cards.png
+video_MB_cropped.mp4
+video_match.json
