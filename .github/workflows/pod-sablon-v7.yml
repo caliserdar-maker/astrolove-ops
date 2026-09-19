@@ -1,4 +1,4 @@
-name: pod-sablon-v4 (V7 hatti)
+name: pod-sablon-v7
 
 # V5 hatti + referansin ISIK ALANININ aktarimi (oge bazli egri iptal).
 # new(t) = own(t) * LP(ref(t))/LP(ref(0)) * LP(own(0))/LP(own(t)), yalniz panel
