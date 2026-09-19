@@ -1,0 +1,3 @@
+zoom60=78
+video=78
+eksik=
