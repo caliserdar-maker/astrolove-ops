@@ -1,20 +1,15 @@
-name: pod-sablon-v4 (V7 hatti)
+name: pod-sablon-v4 (V8 veri disa aktarim)
 
-# V5 hatti + referansin ISIK ALANININ aktarimi (oge bazli egri iptal).
-# new(t) = own(t) * LP(ref(t))/LP(ref(0)) * LP(own(0))/LP(own(t)), yalniz panel
-# ici; panel disi referansin baytlari. Tozlar own(t)'den gelir.
-# Etsy'ye YAZMA YOK. Cikti: ASTROLOVE/TEMP/POD_REFERANS_ORNEK_V7/
+# V8 icin GERCEK medyayi dala aktarir: Etsy'den referans kapak+video ve ornek
+# kapak (yalniz GET), Drive'dan V5 ornek videosu. Actions artifact indirme bu
+# ortamda engelli oldugu icin dosyalar dala commit'lenir.
+# Etsy'ye YAZMA YOK.
 
 permissions:
-  contents: read
+  contents: write
 
 on:
   workflow_dispatch:
-    inputs:
-      ornek_id:
-        description: "Tek ornek ilan kimligi"
-        required: false
-        default: "4570110641"
 
 concurrency:
   group: etsy-token
@@ -23,22 +18,19 @@ concurrency:
 jobs:
   sablon:
     runs-on: ubuntu-latest
-    timeout-minutes: 150
-    env:
-      ORNEK_ID: ${{ inputs.ornek_id }}
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: pod-v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: pip
       - run: |
           set -euo pipefail
-          pip install -q requests==2.34.2 numpy==2.1.3 pillow==11.0.0 scipy==1.14.1
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq ffmpeg tesseract-ocr >/dev/null
+          pip install -q requests==2.34.2
           curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
-          tesseract --version | head -1
       - name: rclone.conf olustur
         env:
           RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
@@ -56,9 +48,9 @@ jobs:
       - name: Token
         run: |
           set -euo pipefail
-          umask 077; mkdir -p _work _out
+          umask 077; mkdir -p _work
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
-      - name: 'V7 isik alani aktarimi (kuru deneme)'
+      - name: 'Gercek medyayi indir (salt okur)'
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
@@ -66,39 +58,26 @@ jobs:
           TOKEN_FILE: _work/ETSY_TOKEN.json
         run: |
           set -euo pipefail
-          python scripts/pod/pod_sablon_v7.py \
-            --catalog scripts/etsy/seo/pod_changes_v2.json --out _out \
-            --ornek-id "$ORNEK_ID"
-          boyut=$(stat -c%s _out/KARE_KARSILASTIRMA_V7.jpg)
-          echo "KARE_KARSILASTIRMA_V7.jpg: $boyut bayt"
-          [ "$boyut" -ge 200000 ] || { echo "::error::kare karsilastirma bos"; exit 1; }
-          [ -s _out/EGRI_V7.png ] || { echo "::error::EGRI_V7.png yok"; exit 1; }
-      - name: Token geri yazma + cikti Drive'a
+          python scripts/pod/pod_v8_veri.py
+          ls -la _veri/v8
+      - name: Token geri yazma
         if: ${{ always() }}
         run: |
           set -euo pipefail
-          mkdir -p _out
           if [ -f _work/ETSY_TOKEN.json.updated ]; then
             rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json"
             echo "Token geri yazildi"
           fi
-          rm -rf _out/_is
-          if grep -rqE '"(access_token|refresh_token)"[[:space:]]*:[[:space:]]*"[A-Za-z0-9._-]{20,}"|x-api-key[[:space:]]*:[[:space:]]*[A-Za-z0-9_-]{16,}|GOCSPX-[A-Za-z0-9_-]{10,}' _out/ 2>/dev/null; then
-            echo "::error::ciktida sir DEGERI bulundu, Drive'a yazilmadi"; exit 1
+      - name: Dala commit
+        run: |
+          set -euo pipefail
+          if grep -rqE '"(access_token|refresh_token)"' _veri/v8 2>/dev/null; then
+            echo "::error::veride sir bulundu"; exit 1
           fi
-          rclone copy _out "gdrive:ASTROLOVE/TEMP/POD_REFERANS_ORNEK_V7" -q
-          rclone lsf --format "sp" "gdrive:ASTROLOVE/TEMP/POD_REFERANS_ORNEK_V7"
-      - uses: actions/upload-artifact@v4
-        if: ${{ always() }}
-        continue-on-error: true
-        with:
-          name: pod-sablon-v7
-          path: |
-            _out/*.csv
-            _out/*.json
-            _out/*.md
-            _out/*.jpg
-            _out/*.png
-          if-no-files-found: ignore
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f _veri/v8
+          git commit -m "pod v8: gercek medya (referans kapak+video, ornek kapak, V5 video)" || echo "degisiklik yok"
+          git push origin HEAD:pod-v4
       - if: ${{ always() }}
         run: rm -rf _work ~/.config/rclone
