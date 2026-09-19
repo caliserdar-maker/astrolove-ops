@@ -1,6 +1,7 @@
-name: pod-sablon-v4 (RANK3->11 kuru deneme)
+name: pod-sablon-v4 (RANK3->11 uygulama)
 
-# SALT OKUMA: 78 ilanin galerisi okunur, plan + tablo uretilir. Etsy YAZMA YOK.
+# PLAN.csv'ye gore rank-3 gorseli rank-11'e tasir. apply=false kuru denemedir.
+# Once pilot 4570031205; gecmezse toplu kosu baslamaz.
 
 permissions:
   contents: read
@@ -8,6 +9,14 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
+      apply:
+        description: "true = Etsy'ye yaz (78 ilan)"
+        type: boolean
+        default: false
+      confirm:
+        description: "apply=true icin tam olarak RANK3_TO_11"
+        required: false
+        default: ""
       limit:
         description: "kac ilan (0 = hepsi)"
         default: "0"
@@ -19,8 +28,19 @@ concurrency:
 jobs:
   rank3:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 180
+    env:
+      APPLY: ${{ inputs.apply && 'true' || 'false' }}
+      CONFIRM: ${{ inputs.confirm || '' }}
     steps:
+      - name: Onay kapisi
+        run: |
+          set -euo pipefail
+          if [ "$APPLY" = "true" ] && [ "$CONFIRM" != "RANK3_TO_11" ]; then
+            echo "::error::apply=true icin confirm 'RANK3_TO_11' olmali. DUR."
+            exit 1
+          fi
+          [ "$APPLY" = "true" ] && echo "::warning::APPLY: 78 ilanda rank-3 -> rank-11." || echo "KURU DENEME: Etsy yazma yok."
       - uses: actions/checkout@v4
         with:
           ref: pod-v4
@@ -51,7 +71,7 @@ jobs:
           set -euo pipefail
           umask 077; mkdir -p _work
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
-      - name: 'Kuru deneme (salt okuma)'
+      - name: 'RANK3 -> RANK11'
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
@@ -60,7 +80,11 @@ jobs:
           LIMIT: ${{ inputs.limit || '0' }}
         run: |
           set -euo pipefail
-          python scripts/pod/pod_rank3_plan.py --limit "$LIMIT"
+          if [ "$APPLY" = "true" ]; then
+            python scripts/pod/pod_rank3_uygula.py --apply --confirm "$CONFIRM" --limit "$LIMIT"
+          else
+            python scripts/pod/pod_rank3_uygula.py --limit "$LIMIT"
+          fi
       - name: Token geri yazma
         if: ${{ always() }}
         run: |
