@@ -1,0 +1,315 @@
+{
+ "genisletme_px": 3,
+ "zamanlama": {
+  "ana_sembol": {
+   "sonme_basi_kare": 18,
+   "sonme_basi_sn": 0.6,
+   "tam_yok_ilk_kare": null,
+   "tam_yok_ilk_sn": null,
+   "tam_yok_son_kare": null,
+   "tam_yok_son_sn": null,
+   "geri_kare": 131,
+   "geri_sn": 4.37,
+   "en_dusuk": 0.188,
+   "en_dusuk_kare": 119
+  },
+  "kucuk_burc_1": {
+   "sonme_basi_kare": 13,
+   "sonme_basi_sn": 0.43,
+   "tam_yok_ilk_kare": 17,
+   "tam_yok_ilk_sn": 0.57,
+   "tam_yok_son_kare": 105,
+   "tam_yok_son_sn": 3.5,
+   "geri_kare": 115,
+   "geri_sn": 3.83,
+   "en_dusuk": 0.0,
+   "en_dusuk_kare": 22
+  },
+  "kucuk_burc_2": {
+   "sonme_basi_kare": 13,
+   "sonme_basi_sn": 0.43,
+   "tam_yok_ilk_kare": 17,
+   "tam_yok_ilk_sn": 0.57,
+   "tam_yok_son_kare": 105,
+   "tam_yok_son_sn": 3.5,
+   "geri_kare": 116,
+   "geri_sn": 3.87,
+   "en_dusuk": 0.0,
+   "en_dusuk_kare": 19
+  }
+ },
+ "referans_maske_notu": {
+  "ana_bilesen": [
+   {
+    "alan": 67191,
+    "kalinlik": 8.9
+   }
+  ],
+  "ana_disi_ince": [
+   3.3,
+   3.3,
+   3.3,
+   3.2,
+   3.1,
+   2.9
+  ],
+  "glif_sayisi": 3,
+  "glif_kutulari": [
+   {
+    "y": [
+     1828,
+     1952
+    ],
+    "x": [
+     1560,
+     1659
+    ],
+    "alan": 5410
+   },
+   {
+    "y": [
+     1845,
+     1890
+    ],
+    "x": [
+     819,
+     1000
+    ],
+    "alan": 3263
+   },
+   {
+    "y": [
+     1891,
+     1935
+    ],
+    "x": [
+     816,
+     998
+    ],
+    "alan": 3223
+   }
+  ],
+  "yazi_ust": 2038
+ },
+ "ornekler": [
+  {
+   "etiket": "Aquarius_Aries",
+   "listing_id": "4570110641",
+   "video": "/tmp/claude-0/-home-user-astrolove-ops/a2769b40-4a4d-5543-b7cd-2831346d17eb/scratchpad/v8/v81/Aquarius_Aries_4570110641_video_V8_1.mp4",
+   "kapak": "/tmp/claude-0/-home-user-astrolove-ops/a2769b40-4a4d-5543-b7cd-2831346d17eb/scratchpad/v8/v81/Aquarius_Aries_4570110641_kapak_V8_1.png",
+   "maske_px": {
+    "kucuk_burc_1": 1296,
+    "kucuk_burc_2": 806
+   },
+   "genis_px": {
+    "kucuk_burc_1": 2371,
+    "kucuk_burc_2": 1429
+   },
+   "katmanlar": [
+    "kucuk_burc_1",
+    "kucuk_burc_2"
+   ],
+   "maske_notu": {
+    "ana_bilesen": [
+     {
+      "alan": 60340,
+      "kalinlik": 7.5
+     },
+     {
+      "alan": 21942,
+      "kalinlik": 7.3
+     }
+    ],
+    "ana_disi_ince": [
+     3.6,
+     3.0,
+     3.2,
+     3.7,
+     3.0
+    ],
+    "glif_sayisi": 3,
+    "glif_kutulari": [
+     {
+      "y": [
+       1821,
+       1948
+      ],
+      "x": [
+       1540,
+       1685
+      ],
+      "alan": 4473
+     },
+     {
+      "y": [
+       1849,
+       1894
+      ],
+      "x": [
+       846,
+       1027
+      ],
+      "alan": 3411
+     },
+     {
+      "y": [
+       1892,
+       1941
+      ],
+      "x": [
+       828,
+       1024
+      ],
+      "alan": 3652
+     }
+    ],
+    "yazi_ust": 2041
+   }
+  },
+  {
+   "etiket": "Aries_Leo",
+   "listing_id": "4570031205",
+   "video": "/tmp/claude-0/-home-user-astrolove-ops/a2769b40-4a4d-5543-b7cd-2831346d17eb/scratchpad/v8/v81/Aries_Leo_4570031205_video_V8_1.mp4",
+   "kapak": "/tmp/claude-0/-home-user-astrolove-ops/a2769b40-4a4d-5543-b7cd-2831346d17eb/scratchpad/v8/v81/Aries_Leo_4570031205_kapak_V8_1.png",
+   "maske_px": {
+    "kucuk_burc_1": 790,
+    "kucuk_burc_2": 1000
+   },
+   "genis_px": {
+    "kucuk_burc_1": 1380,
+    "kucuk_burc_2": 1832
+   },
+   "katmanlar": [
+    "kucuk_burc_1",
+    "kucuk_burc_2"
+   ],
+   "maske_notu": {
+    "ana_bilesen": [
+     {
+      "alan": 78326,
+      "kalinlik": 7.0
+     }
+    ],
+    "ana_disi_ince": [
+     3.4,
+     3.5,
+     3.3,
+     3.1
+    ],
+    "glif_sayisi": 2,
+    "glif_kutulari": [
+     {
+      "y": [
+       1819,
+       1959
+      ],
+      "x": [
+       1460,
+       1559
+      ],
+      "alan": 5440
+     },
+     {
+      "y": [
+       1821,
+       1952
+      ],
+      "x": [
+       916,
+       1043
+      ],
+      "alan": 4294
+     }
+    ],
+    "yazi_ust": 2038
+   }
+  },
+  {
+   "etiket": "Aquarius_Cancer",
+   "listing_id": "4570125580",
+   "video": "/tmp/claude-0/-home-user-astrolove-ops/a2769b40-4a4d-5543-b7cd-2831346d17eb/scratchpad/v8/v81/Aquarius_Cancer_4570125580_video_V8_1.mp4",
+   "kapak": "/tmp/claude-0/-home-user-astrolove-ops/a2769b40-4a4d-5543-b7cd-2831346d17eb/scratchpad/v8/v81/Aquarius_Cancer_4570125580_kapak_V8_1.png",
+   "maske_px": {
+    "kucuk_burc_1": 1263,
+    "kucuk_burc_2": 1544
+   },
+   "genis_px": {
+    "kucuk_burc_1": 2327,
+    "kucuk_burc_2": 2758
+   },
+   "katmanlar": [
+    "kucuk_burc_1",
+    "kucuk_burc_2"
+   ],
+   "maske_notu": {
+    "ana_bilesen": [
+     {
+      "alan": 40376,
+      "kalinlik": 7.3
+     },
+     {
+      "alan": 43561,
+      "kalinlik": 7.7
+     }
+    ],
+    "ana_disi_ince": [
+     3.4,
+     5.4,
+     3.4,
+     3.4,
+     5.9,
+     2.8,
+     3.0
+    ],
+    "glif_sayisi": 4,
+    "glif_kutulari": [
+     {
+      "y": [
+       1825,
+       1912
+      ],
+      "x": [
+       1535,
+       1673
+      ],
+      "alan": 4242
+     },
+     {
+      "y": [
+       1849,
+       1893
+      ],
+      "x": [
+       794,
+       981
+      ],
+      "alan": 3312
+     },
+     {
+      "y": [
+       1873,
+       1962
+      ],
+      "x": [
+       1544,
+       1687
+      ],
+      "alan": 4145
+     },
+     {
+      "y": [
+       1892,
+       1939
+      ],
+      "x": [
+       785,
+       980
+      ],
+      "alan": 3589
+     }
+    ],
+    "yazi_ust": 2041
+   }
+  }
+ ]
+}
