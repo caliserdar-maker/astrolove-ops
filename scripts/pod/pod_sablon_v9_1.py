@@ -69,6 +69,22 @@ def kapat(m, en_cok_delik=60):
     return m | kucuk
 
 
+def kapsam_alfa(maske, rampa=2.0):
+    """Alfa SEKIL KAPSAMINDAN: maske ici 1.0, sinirda `rampa` px dogrusal gecis.
+
+    V9.1'de alfa parlakliktan turetiliyordu; metalin koyu bolgeleri yari
+    saydam olup zemin siziyordu (benekli/sonuk gorunum). Burada isaretli
+    uzaklik kullanilir: maske icinde >=1 px iceride alfa 1, disinda >=1 px
+    disarida 0, arasinda dogrusal.
+    """
+    if not maske.any():
+        return maske.astype(np.float32)
+    ic = ndimage.distance_transform_edt(maske)
+    dis = ndimage.distance_transform_edt(~maske)
+    isaretli = ic - dis
+    return np.clip((isaretli + rampa / 2.0) / rampa, 0.0, 1.0).astype(np.float32)
+
+
 def yumusak_alfa(l, maske, genislet=3):
     """Cift posterinin kendi kenar yumusatmasindan alfa.
 
@@ -133,6 +149,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--veri", default="_veri/v8")
     ap.add_argument("--out", required=True)
+    ap.add_argument("--alfa", choices=("parlaklik", "kapsam"),
+                    default="parlaklik")
+    ap.add_argument("--etiket", default="V9_1")
     a = ap.parse_args()
     veri = pathlib.Path(a.veri)
     out = pathlib.Path(a.out)
@@ -206,10 +225,14 @@ def main():
         kay = kaynak_of.get(ad)
         if m is None or not m.any() or kay is None or not kay.any():
             continue
-        al = yumusak_alfa(v5_l, m)
-        cek = al > CEKIRDEK
-        if not cek.any():
-            cek = m
+        if a.alfa == "kapsam":
+            al = kapsam_alfa(m)
+            cek = m                      # renk TUM maskeden, cekirdekle sinirli degil
+        else:
+            al = yumusak_alfa(v5_l, m)
+            cek = al > CEKIRDEK
+            if not cek.any():
+                cek = m
         lut, ref_l = gradient_lut(ref0, kay)
         eslenen = histogram_esle(v5_l[cek], ref_l)
         idx = np.clip(np.rint(eslenen), 0, 255).astype(np.int32)
@@ -318,9 +341,9 @@ def main():
               kutu["sol"] // 2:kutu["sol"] // 2 + pw // 2] = V
             blok.tofile(fh)
 
-    video = out / "Aquarius_Aries_4570110641_video_V9_1.mp4"
+    video = out / f"Aquarius_Aries_4570110641_video_{a.etiket}.mp4"
     yuv_video_yaz(ham_yuv, video, vw, vh, fps, sure)
-    kapak = out / "Aquarius_Aries_4570110641_kapak_V9_1.png"
+    kapak = out / f"Aquarius_Aries_4570110641_kapak_{a.etiket}.png"
     k0 = out / "_is" / "yeni_kare0.png"
     extract_frame(video, k0, 0)
     with Image.open(k0) as im:
@@ -332,7 +355,7 @@ def main():
     zamanlar = [round(sure * i / 7, 3) for i in range(8)]
     satir = []
     for ad, yol in [("REFERANS  Aquarius + Gemini", ref_video),
-                    ("YENI V9.1  Aquarius + Aries", video)]:
+                    (f"YENI {a.etiket}  Aquarius + Aries", video)]:
         g, kl = [], out / "_is" / "k8" / ad.split()[0]
         kl.mkdir(parents=True, exist_ok=True)
         for i, z in enumerate(zamanlar):
@@ -341,7 +364,7 @@ def main():
             extract_frame(yol, pp, zz)
             g.append((f"{zz:.2f} sn", Image.open(pp).convert("RGB")))
         satir.append((ad, g))
-    b1 = karsilastirma(satir, out / "KARE_KARSILASTIRMA_V9_1.jpg")
+    b1 = karsilastirma(satir, out / f"KARE_KARSILASTIRMA_{a.etiket}.jpg")
 
     def kirp(img, kutu4, olcek=2, pay=12):
         y0, y1, x0, x1 = kutu4
@@ -365,14 +388,14 @@ def main():
                             ("kucuk sembol", kirp(ref0u, kutu_of(ref_m["kucuk_burc_1"]))),
                             ("burc adi", kirp(ref0u, isim_kt)),
                             ("daire", kirp(ref0u, daire))]),
-              ("YENI V9.1", [("ana sembol", kirp(yeni0, kutu_of(ref_m["ana_sembol"]))),
+              (f"YENI {a.etiket}", [("ana sembol", kirp(yeni0, kutu_of(ref_m["ana_sembol"]))),
                              ("kucuk sembol", kirp(yeni0, kutu_of(ref_m["kucuk_burc_1"]))),
                              ("burc adi", kirp(yeni0, isim_kt)),
                              ("daire", kirp(yeni0, daire))])]
-    b2 = karsilastirma(satir2, out / "ALTIN_YAKIN_V9_1.jpg", hucre=520)
+    b2 = karsilastirma(satir2, out / f"ALTIN_YAKIN_{a.etiket}.jpg", hucre=520)
 
     satir3 = []
-    for ad, yol in [("REFERANS", ref_video), ("YENI V9.1", video)]:
+    for ad, yol in [("REFERANS", ref_video), (f"YENI {a.etiket}", video)]:
         g = []
         for sn in (1.314, 1.971):
             pp = out / "_is" / f"{ad[:3]}_{sn}.png"
@@ -382,11 +405,11 @@ def main():
             pan = arr[kutu["ust"]:kutu["alt"] + 1, kutu["sol"]:kutu["sag"] + 1]
             g.append((f"{sn:.2f} sn", kirp(pan, kutu_of(ref_m["ana_sembol"]))))
         satir3.append((ad, g))
-    b3 = karsilastirma(satir3, out / "YAKIN_131_197_V9_1.jpg", hucre=640)
+    b3 = karsilastirma(satir3, out / f"YAKIN_131_197_{a.etiket}.jpg", hucre=640)
     log(f"gorseller: KARE {b1} | ALTIN {b2} | YAKIN {b3}")
 
-    (out / "URETIM_SONUC_V9_1.json").write_text(json.dumps(
-        {"konum_kaydirma": kaydirma, "konum_farki": konum_fark,
+    (out / f"URETIM_SONUC_{a.etiket}.json").write_text(json.dumps(
+        {"alfa_modu": a.alfa, "konum_kaydirma": kaydirma, "konum_farki": konum_fark,
          "boyama": boya_not, "parlama": parlama_not, "zamanlama": zaman,
          "kare_orani": [round(x, 4) for x in oran],
          "toz_olcek": [round(x, 3) for x in toz_olcek],
