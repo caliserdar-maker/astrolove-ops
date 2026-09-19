@@ -1,4 +1,4 @@
-name: pod-sablon-v4 (V02 veri)
+name: pod-sablon-v4 (V11 veri+envanter)
 
 # V9 icin gercek medya: Etsy'den referans kapak+video ve ornek kapak (yalniz
 # GET), Drive'dan V5 Aquarius+Aries videosu. Dosyalar dala commit'lenir.
@@ -16,7 +16,7 @@ concurrency:
 jobs:
   sablon:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
         with:
@@ -27,7 +27,7 @@ jobs:
           cache: pip
       - run: |
           set -euo pipefail
-          pip install -q requests==2.34.2 numpy==2.1.3 pillow==11.0.0
+          pip install -q requests==2.34.2 numpy==2.1.3 pillow==11.0.0 opencv-python-headless==4.10.0.84
           curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
       - name: rclone.conf olustur
         env:
@@ -56,8 +56,8 @@ jobs:
           TOKEN_FILE: _work/ETSY_TOKEN.json
         run: |
           set -euo pipefail
-          python scripts/pod/pod_v02_veri4.py
-          ls -la _veri/v02d
+          python scripts/pod/pod_v11_veri.py
+          ls -la _veri/v11
       - name: Token geri yazma
         if: ${{ always() }}
         run: |
@@ -71,8 +71,8 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f _veri/v02d
-          git commit -m "pod v02: ilan kayitlari (gecici)" || echo "degisiklik yok"
+          git add -f _veri/v11
+          git commit -m "pod v11: envanter + ornek videolar (gecici)" || echo "degisiklik yok"
           git push origin HEAD:pod-v4
       - if: ${{ always() }}
         run: rm -rf _work ~/.config/rclone
