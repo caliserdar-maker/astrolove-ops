@@ -63,4 +63,4 @@ Thumbs.db
 fonts/
 
 # V8 gecici ham medya ve ciktilari (depoda tutulmaz)
-# _veri/  (gecici: v02 kesif)
+_veri/
