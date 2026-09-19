@@ -20,6 +20,9 @@ on:
       limit:
         description: "kac ilan (0 = hepsi)"
         default: "0"
+      oku:
+        description: "salt okuma: tek ilan id (apply=false ile)"
+        default: ""
 
 concurrency:
   group: etsy-token
@@ -78,10 +81,13 @@ jobs:
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
           TOKEN_FILE: _work/ETSY_TOKEN.json
           LIMIT: ${{ inputs.limit || '0' }}
+          OKU_LISTING: ${{ inputs.oku || '' }}
         run: |
           set -euo pipefail
           if [ "$APPLY" = "true" ]; then
             python scripts/pod/pod_rank3_uygula.py --apply --confirm "$CONFIRM" --limit "$LIMIT"
+          elif [ -n "${OKU_LISTING:-}" ]; then
+            python scripts/pod/pod_rank3_oku.py
           else
             python scripts/pod/pod_rank3_uygula.py --limit "$LIMIT"
           fi
