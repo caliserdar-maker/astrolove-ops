@@ -1,0 +1,8 @@
+WA_MOCKUP_V2_SET01_Aquarius_Gemini_FINAL.jpg
+WA_MOCKUP_V2_SET03_Aquarius_Gemini_FINAL.jpg
+WA_MOCKUP_V2_SET04_Aquarius_Gemini_FINAL.jpg
+WA_MOCKUP_V2_SET06_Aquarius_Gemini_FINAL.jpg
+WA_MOCKUP_V2_SET07_Aquarius_Gemini_FINAL.jpg
+WA_MOCKUP_V2_SET10_YAZILI_Aquarius_Gemini_FINAL.jpg
+qc.json
+report.md
