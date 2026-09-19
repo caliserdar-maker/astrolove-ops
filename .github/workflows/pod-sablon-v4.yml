@@ -16,6 +16,9 @@ on:
         description: "apply=true icin tam olarak YAYIN_76"
         required: false
         default: ""
+      limit:
+        description: "kac ilan (0 = hepsi)"
+        default: "0"
 
 concurrency:
   group: etsy-token
