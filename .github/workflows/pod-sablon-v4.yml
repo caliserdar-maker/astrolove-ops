@@ -30,7 +30,7 @@ jobs:
           cache: pip
       - run: |
           set -euo pipefail
-          pip install -q requests==2.34.2 pillow==11.0.0
+          pip install -q requests==2.34.2 pillow==11.0.0 numpy==2.1.3
           curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
       - name: rclone.conf olustur
         env:
