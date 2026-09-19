@@ -56,8 +56,8 @@ jobs:
           TOKEN_FILE: _work/ETSY_TOKEN.json
         run: |
           set -euo pipefail
-          python scripts/pod/pod_v01_veri.py
-          ls -la _veri/v01
+          python scripts/pod/pod_v01_veri2.py
+          ls -la _veri/v01b
       - name: Token geri yazma
         if: ${{ always() }}
         run: |
@@ -71,8 +71,8 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f _veri/v01
-          git commit -m "pod v01: gercek veri (gecici)" || echo "degisiklik yok"
+          git add -f _veri/v01b
+          git commit -m "pod v01: kesif ek verisi (gecici)" || echo "degisiklik yok"
           git push origin HEAD:pod-v4
       - if: ${{ always() }}
         run: rm -rf _work ~/.config/rclone
