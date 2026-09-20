@@ -192,6 +192,9 @@ def uret(usta_yol, cikti_yol, oran, tani_dizin=None, tani_ad="", referans=None):
             "alt_kayma": alt_k, "serit_std": max(std1, std2),
             "ust_blok_sapma": ust_b, "alt_blok_sapma": alt_b, "blok_esik": max(ust_e, alt_e),
             "blok_ustu": ust_n + alt_n,
+            "ref_sapma": ref_sapma if ref_sapma is not None else "",
+            "ref_esik": ref_esik if ref_esik is not None else "",
+            "_harita": harita,
             "bayt": cikti_yol.stat().st_size, "sn": round(time.time() - t0, 1),
             "durum": "GECTI" if gecti else "KONTROL", "neden": ""}
 
