@@ -32,8 +32,8 @@ USTA_KOK = ["gdrive:ASTROLOVE/WALL_ART/POSTERS/ORIGINAL_HIGH_RES",
 MEVCUT = ["8x10", "11x14", "12x16", "12x18", "16x20", "16x24", "18x24",
           "20x30", "24x36", "30x40", "A4", "A3", "A2"]
 ADAY = ["4x6", "5x7", "6x8"]
-# aday -> (kullanilacak usta orani, hedef en/boy)
-ADAY_USTA = {"4x6": ("2X3", 4, 6), "5x7": ("A_SERIES", 5, 7), "6x8": ("3X4", 6, 8)}
+# aday -> kullanilacak usta orani (hedef oran/olcu Prodigi baski alanindan olculur)
+ADAY_USTA = {"4x6": "2X3", "5x7": "A_SERIES", "6x8": "3X4"}
 FIYAT = {"4x6": [16.99, 17.99, 18.99], "5x7": [18.99, 19.99, 21.99],
          "6x8": [23.99, 24.99, 25.99], "8x10": [29.99, 30.99]}
 # Etsy ucretleri (Mo 20 Eyl 2026 tanimi)
@@ -139,12 +139,17 @@ def usta_kok_bul():
     return None
 
 
-def onizleme(isd, kok, hedefler):
-    """Aries+Leo MB: 3 aday boy yan yana, gercek fiziksel oran (100 px/inc)."""
+def onizleme(isd, kok, alanlar):
+    """Aries+Leo MB: 3 aday boy yan yana; oran ve fiziksel olcu Prodigi baski
+    alanindan (300 dpi) olculur, 100 px/inc olcekle cizilir."""
     olcek, bosluk, kenar = 100, 60, 40
     paneller, bilgi = [], {}
     for boy in ADAY:
-        oran, w_in, h_in = ADAY_USTA[boy]
+        oran = ADAY_USTA[boy]
+        pa = alanlar[boy]
+        if not pa:
+            raise SystemExit(f"HATA: {boy} baski alani okunamadi")
+        w_in, h_in = pa[0] / 300.0, pa[1] / 300.0
         yerel = isd / f"usta_{oran}.jpg"
         if not yerel.exists():
             r = rclone("copyto", f"{kok}/MIDNIGHT_BLUE/{oran}/ARIES_LEO.jpg", str(yerel))
@@ -160,11 +165,11 @@ def onizleme(isd, kok, hedefler):
             nh = round(sw / hedef_oran); y0 = (sh - nh) // 2
             kirp = im.crop((0, y0, sw, y0 + nh)); kirpma = f"dikeyde {sh - nh} px (her kenar {(sh - nh) // 2})"
         bilgi[boy] = {"usta_orani": oran, "usta_px": [sw, sh],
+                      "baski_alani_px": list(pa), "fiziksel_inc": [round(w_in, 3), round(h_in, 3)],
                       "usta_oran_degeri": round(sw / sh, 4), "hedef_oran": round(hedef_oran, 4),
                       "oran_farki_yuzde": round(abs((sw / sh) / hedef_oran - 1) * 100, 2),
                       "kirpma": kirpma, "kirp_sonrasi_px": list(kirp.size)}
-        paneller.append((boy, kirp.resize((w_in * olcek, h_in * olcek), Image.LANCZOS)))
-        hedefler.setdefault(boy, {})["usta"] = bilgi[boy]
+        paneller.append((boy, kirp.resize((round(w_in * olcek), round(h_in * olcek)), Image.LANCZOS)))
     gen = kenar * 2 + sum(p.size[0] for _, p in paneller) + bosluk * (len(paneller) - 1)
     yuk = kenar * 2 + max(p.size[1] for _, p in paneller) + 46
     tuval = Image.new("RGB", (gen, yuk), (245, 244, 241))
@@ -176,7 +181,8 @@ def onizleme(isd, kok, hedefler):
         tuval.paste(p, (x, y))
         ciz.rectangle([x, y, x + p.size[0] - 1, y + p.size[1] - 1], outline=(120, 120, 120))
         ciz.text((x, kenar + max(q.size[1] for _, q in paneller) + 14),
-                 f'{boy} in  ({ADAY_USTA[boy][0]} ustasi)', fill=(30, 30, 30))
+                 f'{boy}  {bilgi[boy]["fiziksel_inc"][0]}x{bilgi[boy]["fiziksel_inc"][1]} in'
+                 f'  ({ADAY_USTA[boy]} ustasi)', fill=(30, 30, 30))
         x += p.size[0] + bosluk
     yol = isd / "ORNEK_KUCUK.jpg"
     for q in (88, 82, 74, 66):
@@ -252,12 +258,12 @@ def main():
                 ozet.append(s)
 
     # --- onizleme + dosya eslemesi
-    hedefler = {}
+    alanlar = {b: baski_alani(ham, f"GLOBAL-HPR-{b}") for b in ADAY}
     kok = usta_kok_bul()
     if kok is None:
-        raise SystemExit("HATA: ORIGINAL_HIGH_RES kokü bulunamadi")
-    ilerle(f"usta kok: {kok}")
-    onizleme_yol, bilgi = onizleme(isd, kok, hedefler)
+        raise SystemExit("HATA: ORIGINAL_HIGH_RES koku bulunamadi")
+    ilerle(f"usta kok: {kok} | baski alanlari {alanlar}")
+    onizleme_yol, bilgi = onizleme(isd, kok, alanlar)
 
     plan = {"zaman_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "kur_usdtry": kur, "kur_kaynak": kur_kaynak, "usta_kok": kok, "adaylar": {}}
@@ -271,7 +277,7 @@ def main():
             kw, kh = b["kirp_sonrasi_px"]
             b["yeterli_cozunurluk"] = bool(kw >= pa[0] and kh >= pa[1])
             b["eksik_px"] = [max(0, pa[0] - kw), max(0, pa[1] - kh)]
-            b["kirp_sonrasi_dpi"] = [round(kw / ADAY_USTA[boy][1]), round(kh / ADAY_USTA[boy][2])]
+            b["kirp_sonrasi_dpi"] = [round(kw / (pa[0] / 300.0)), round(kh / (pa[1] / 300.0))]
         plan["adaylar"][boy] = b
     plan_yol = isd / "PLAN_KUCUK.json"
     plan_yol.write_text(json.dumps(plan, ensure_ascii=False, indent=1), encoding="utf-8")
@@ -292,7 +298,7 @@ def main():
                       "kar_ozet": [{k: s[k] for k in ("boy", "fiyat", "kar", "kar_offsite_ads")}
                                    for s in ozet],
                       "plan": {b: {k: plan["adaylar"][b].get(k) for k in
-                                   ("usta_orani", "usta_px", "oran_farki_yuzde", "kirpma",
+                                   ("usta_orani", "usta_px", "hedef_oran", "oran_farki_yuzde", "kirpma",
                                     "prodigi_baski_alani_px", "yeterli_cozunurluk", "kirp_sonrasi_dpi")}
                                for b in ADAY}}, ensure_ascii=False))
     return 0
