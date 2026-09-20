@@ -169,8 +169,8 @@ jobs:
           set -euo pipefail
           echo "birlestirme oncesi:"
           rclone lsf "$CIKTI" --dirs-only | sed 's/^/  - /'
-          rclone dedupe --dedupe-mode merge "$CIKTI" -v 2>&1 | tail -20
-          rclone dedupe --dedupe-mode merge "$CIKTI/GALERI_FINAL" -v 2>&1 | tail -20
+          rclone dedupe --dedupe-mode newest "$CIKTI" -v 2>&1 | tail -20
+          rclone dedupe --dedupe-mode newest "$CIKTI/GALERI_FINAL" -v 2>&1 | tail -20
           N=$(rclone lsf "$CIKTI/GALERI_FINAL" --dirs-only | wc -l)
           echo "GALERI_FINAL cift klasoru: $N"
           EKSIK=0
