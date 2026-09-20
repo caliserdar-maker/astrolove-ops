@@ -23,6 +23,7 @@ sys.path.insert(0, str(KOK))
 import pod_gallery_sample as G  # noqa: E402
 
 YENI = ("5x7", 5, 7, 13, 18, "5:7")
+YENI_A1 = ("A1", 23.4, 33.1, 59.4, 84.1, "A")      # Serdar karari 20 Eyl: A serisine A1
 DURUM_SUT = ["pair", "status", "cards", "fail", "secs", "ts_utc"]
 CSV_SUT = ["pair", "edition", "dosya", "boyut", "palet_sapma", "bosluk_sapma", "bosluk_yayilim",
            "durum", "neden"]
@@ -39,9 +40,11 @@ def sure(sn):
 
 
 def yamali():
-    """14 boy: 5x7 SIZES'a, '5:7' grubu GROUP_ORDER sonuna (en kucuk grup)."""
+    """15 boy: 5x7 -> yeni '5:7' grubu (en sona), A1 -> A SERIES grubunun en dis kutusu."""
     if YENI not in G.SIZES:
         G.SIZES.append(YENI)
+    if YENI_A1 not in G.SIZES:
+        G.SIZES.append(YENI_A1)
     if "5:7" not in G.GROUP_ORDER:
         G.GROUP_ORDER.append("5:7")
     G.GROUP_TITLE["5:7"] = "5:7"
@@ -352,15 +355,15 @@ def main():
             if errs:
                 hatalar.append(f"{ed}: " + "; ".join(errs))
             if a.ornek_cift and cift == a.ornek_cift.upper() and ed == "MIDNIGHT_BLUE":
-                ornek = pathlib.Path(a.out) / "SIZE_GUIDE_14_ORNEK_v3.jpg"
+                ornek = pathlib.Path(a.out) / "SIZE_GUIDE_15_ORNEK.jpg"
                 im = Image.open(cikti).convert("RGB")
                 for genislik, kal in ((2200, 86), (2000, 84), (1800, 80), (1600, 78), (1400, 74)):
                     im.resize((genislik, round(genislik * im.size[1] / im.size[0])),
                               Image.LANCZOS).save(ornek, "JPEG", quality=kal, optimize=True)
                     if ornek.stat().st_size <= 300_000:
                         break
-                rclone("copyto", str(ornek), f"{a.ornek_drv}/SIZE_GUIDE_14_ORNEK_v3.jpg")
-                log(f"SIZE_GUIDE_14_ORNEK_v3.jpg {ornek.stat().st_size / 1024:.0f} KB "
+                rclone("copyto", str(ornek), f"{a.ornek_drv}/SIZE_GUIDE_15_ORNEK.jpg")
+                log(f"SIZE_GUIDE_15_ORNEK.jpg {ornek.stat().st_size / 1024:.0f} KB "
                     f"{im.size[0]}x{im.size[1]} -> {genislik}px")
             if a.rclone_out:
                 rclone("copyto", str(cikti), f"{a.rclone_out}/{cift}/{ed}/{cikti.name}")
