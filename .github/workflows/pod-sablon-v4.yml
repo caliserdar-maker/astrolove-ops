@@ -86,8 +86,8 @@ jobs:
       SIPARIS_DOSYA_ID: ${{ inputs.siparis_dosya_id || '' }}
       SIPARIS_REMOTE: ${{ inputs.siparis_remote || '' }}
       SIPARIS_ALICI: ${{ inputs.siparis_alici || '' }}
-      SIPARIS_MASTER: ${{ inputs.siparis_master || '' }}
-      SIPARIS_KONTROL: ${{ inputs.siparis_kontrol || '' }}
+      SIPARIS_MASTER: ${{ inputs.siparis_master }}
+      SIPARIS_KONTROL: ${{ inputs.siparis_kontrol }}
     steps:
       - name: Onay kapisi
         run: |
