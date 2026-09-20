@@ -57,7 +57,7 @@ ALLOWED = {"US", "CA", "AU", "GB"}
 # SKU semasi pod_sku.py: POD-<burc3>_<burc3>-<edisyon2>-<boyut>
 STAGES = ["dryrun", "bekliyor", "manual", "ordered", "shipped", "tracked", "error"]
 COLS = ["receipt_id", "stage", "country", "items", "etsy_total", "prodigi_cost", "margin", "warn", "prodigi_order_id",
-        "prodigi_status", "asset_perms", "tracking", "carrier", "ts_utc", "note"]
+        "prodigi_status", "asset_perms", "tracking", "carrier", "sent_tx", "ts_utc", "note"]
 _secret = None
 
 
@@ -170,25 +170,32 @@ def etsy_receipts(api, shop, since_days=0, max_pages=10, quota_min=0):
     return out
 
 
-def parse_items(receipt):
-    items, other = [], []
+def parse_items(receipt, only_size=""):
+    """(gonderilecek kalemler, POD disi SKU'lar, atlanan POD kalemleri).
+    only_size verilirse (or. '5x7') YALNIZ o boyun kalemleri gonderilir; ayni sepetteki
+    diger boylar atlanir (Prodigi sales-channel entegrasyonu onlari kendi ceker)."""
+    items, other, atlanan = [], [], []
     for t in receipt.get("transactions") or []:
         sku = (t.get("sku") or "").strip()
         parsed = parse_sku(sku)
         if not parsed:
             other.append(sku or f"tx{t.get('transaction_id')}"); continue
         pair, ed, size = parsed
+        if only_size and size != only_size:
+            atlanan.append(f"{sku}x{int(t.get('quantity') or 1)}"); continue
         pr = t.get("price") or {}
         price = float(pr.get("amount") or 0) / float(pr.get("divisor") or 100)
         items.append(dict(transaction_id=t.get("transaction_id"), sku=sku, pair=pair, ed=ed, size=size,
                           prodigi_sku=f"GLOBAL-HPR-{size}", qty=int(t.get("quantity") or 1), price=price,
                           asset_remote=f"{PRINT_REMOTE}/{pair}/{ed}/{size}.jpg"))
-    return items, other
+    return items, other, atlanan
 
 
-def order_body(receipt, items, urls):
+def order_body(receipt, items, urls, only_size=""):
     rid = receipt["receipt_id"]
-    return {"merchantReference": f"etsy-{rid}", "shippingMethod": "Budget", "idempotencyKey": f"etsy-{rid}",
+    # only_size modunda anahtar boy ekiyle ayrilir: ayni receipt icin tam sepet siparisiyle carpismaz
+    ref = f"etsy-{rid}" + (f"-{only_size}" if only_size else "")
+    return {"merchantReference": ref, "shippingMethod": "Budget", "idempotencyKey": ref,
             "recipient": {"name": receipt.get("name") or "", "email": receipt.get("buyer_email") or None,
                           "address": {"line1": receipt.get("first_line") or "", "line2": receipt.get("second_line") or None,
                                       "postalOrZipCode": receipt.get("zip") or "", "countryCode": receipt.get("country_iso") or "",
@@ -198,15 +205,15 @@ def order_body(receipt, items, urls):
 
 
 # ------------------------------------------------------------------ onayli mod: paket + gonderim
-def package_of(receipt, items, country, etsy_total, cost, margin, warn, env):
+def package_of(receipt, items, country, etsy_total, cost, margin, warn, env, only_size=""):
     """Prodigi'ye gonderilmeye HAZIR paket (asset url'leri gonderim aninda doldurulur)."""
     rid = str(receipt["receipt_id"])
-    return {"receipt_id": rid, "env": env, "created_utc": now(), "country": country,
+    return {"receipt_id": rid, "env": env, "created_utc": now(), "country": country, "only_size": only_size,
             "etsy_total": etsy_total, "prodigi_cost": cost, "margin": margin, "warn": warn,
             "recipient_name": receipt.get("name") or "",
             "items": [{k: i[k] for k in ("transaction_id", "sku", "prodigi_sku", "pair", "ed", "size", "qty", "price", "asset_remote")}
                       for i in items],
-            "order": order_body(receipt, items, {i["sku"]: "" for i in items})}
+            "order": order_body(receipt, items, {i["sku"]: "" for i in items}, only_size)}
 
 
 def submit_package(a, prod, st, rid, report):
@@ -215,6 +222,16 @@ def submit_package(a, prod, st, rid, report):
     pkg_path = Path(a.packages or a.out) / f"{rid}.json"
     res_paths = [Path(d) / f"{rid}.result.json" for d in {a.packages or a.out, a.out}]
     row = st.get(rid) or {}
+    gonderilen = {x for x in (row.get("sent_tx") or "").split(";") if x}
+    if not pkg_path.exists() and gonderilen:
+        report.append(f"- {rid}: IDEMPOTENS - kalemler zaten gonderildi ({len(gonderilen)} tx)")
+        return False, ""
+    if pkg_path.exists() and gonderilen:
+        istenen = {str(i["transaction_id"]) for i in json.loads(pkg_path.read_text(encoding="utf-8")).get("items") or []}
+        if istenen & gonderilen:
+            report.append(f"- {rid}: IDEMPOTENS - ayni kalem(ler) zaten gonderildi: "
+                          f"{sorted(istenen & gonderilen)}; YENIDEN GONDERILMEDI")
+            return False, ""
     if row.get("stage") in ("ordered", "shipped", "tracked") or any(r.exists() for r in res_paths):
         report.append(f"- {rid}: IDEMPOTENS - zaten gonderildi (stage {row.get('stage') or '-'}, "
                       f"prodigi {row.get('prodigi_order_id') or '-'}); YENIDEN GONDERILMEDI")
@@ -245,7 +262,9 @@ def submit_package(a, prod, st, rid, report):
            "prodigi_order_id": oid, "order": d.get("order") or {}}
     Path(a.out).mkdir(parents=True, exist_ok=True)
     (Path(a.out) / f"{rid}.result.json").write_text(json.dumps(res, indent=1, ensure_ascii=False), encoding="utf-8")
-    upd(st, a.state, rid, stage="ordered", country=pkg.get("country", ""), items=", ".join(f"{i['sku']}x{i['qty']}" for i in pkg["items"]),
+    upd(st, a.state, rid, stage="ordered", country=pkg.get("country", ""),
+        sent_tx=";".join(str(i["transaction_id"]) for i in pkg["items"]),
+        items=", ".join(f"{i['sku']}x{i['qty']}" for i in pkg["items"]),
         etsy_total=pkg.get("etsy_total", ""), prodigi_cost=pkg.get("prodigi_cost", ""), margin=pkg.get("margin", ""),
         warn=pkg.get("warn", ""), prodigi_order_id=oid, prodigi_status=outcome, asset_perms=perms,
         note=f"onayli gonderim ({a.env})")
@@ -302,6 +321,8 @@ def main():
     ap.add_argument("--since-days", type=int, default=0, help="yalniz son N gunun receipt'leri (0 = hepsi)")
     ap.add_argument("--quota-min", type=int, default=400, help="Etsy kota tabani; altinda receipt okumasi durur")
     ap.add_argument("--max-pages", type=int, default=10, help="receipt okumasinda en fazla N cagri")
+    ap.add_argument("--only-size", default="", help="yalniz bu boyun kalemlerini isle (or. 5x7); "
+                                                   "ayni sepetteki diger boylar atlanir")
     g = ap.add_mutually_exclusive_group(required=False)
     g.add_argument("--dry-run", action="store_true")
     g.add_argument("--apply", action="store_true")
@@ -343,15 +364,16 @@ def main():
         receipts = etsy_receipts(api, shop, a.since_days, a.max_pages, a.quota_min)
         report.append(f"- Etsy odenmis/gonderilmemis receipt: {len(receipts)}"
                       + (f" (son {a.since_days} gun)" if a.since_days else "") + f" | kota {q0} -> {api.remaining}")
-    pod = [(r, *parse_items(r)) for r in receipts]
-    pod = [(r, items, other) for r, items, other in pod if items]
-    report.append(f"- POD urunlu receipt: {len(pod)}")
+    pod = [(r, *parse_items(r, a.only_size)) for r in receipts]
+    pod = [(r, items, other, atlanan) for r, items, other, atlanan in pod if items]
+    report.append(f"- POD urunlu receipt: {len(pod)}"
+                  + (f" (yalniz {a.only_size} kalemleri)" if a.only_size else ""))
     links = None
     new_orders = 0
 
     # ---- 1) yeni receipt'ler
     t0 = time.time()
-    for n, (r, items, other) in enumerate(pod, 1):
+    for n, (r, items, other, atlanan) in enumerate(pod, 1):
         rid = str(r.get("receipt_id"))
         row = st.get(rid) or {}
         if row.get("stage") in ("bekliyor", "ordered", "shipped", "tracked", "manual", "error"):
@@ -364,6 +386,8 @@ def main():
         warn = []
         if other:
             warn.append(f"POD disi urun: {other}")
+        if atlanan:
+            warn.append(f"Prodigi entegrasyonunda kalan boylar: {atlanan}")
         if country not in ALLOWED:
             upd(st, a.state, rid, stage="manual", country=country, items=desc, etsy_total=etsy_total, warn="; ".join(warn),
                 note=f"ulke {country} otomatik listede degil (US/CA/AU/GB); elle islenecek")
@@ -378,7 +402,7 @@ def main():
         if margin < a.margin_min:
             warn.append(f"MARJ_DUSUK {margin:.0%} (< {a.margin_min:.0%}): Etsy {etsy_total} / Prodigi {cost}")
         if approve:
-            pkg = package_of(r, items, country, etsy_total, cost, margin, "; ".join(warn), a.env)
+            pkg = package_of(r, items, country, etsy_total, cost, margin, "; ".join(warn), a.env, a.only_size)
             (out / f"{rid}.json").write_text(json.dumps(pkg, indent=1, ensure_ascii=False), encoding="utf-8")
             upd(st, a.state, rid, stage="bekliyor", country=country, items=desc, etsy_total=etsy_total, prodigi_cost=cost,
                 margin=margin, warn="; ".join(warn), note=f"paket hazir ({rid}.json); onay bekliyor (--submit {rid})")
@@ -399,7 +423,7 @@ def main():
             for i in items:
                 fid, pid, url = links.open(i["asset_remote"])
                 perms.append([fid, pid]); urls[i["sku"]] = url
-            stc, d = prod.create_order(order_body(r, items, urls))
+            stc, d = prod.create_order(order_body(r, items, urls, a.only_size))
             outcome = (d.get("outcome") or "")
             oid = (d.get("order") or {}).get("id")
             if stc != 200 or not oid or outcome.lower() not in ("created", "createdwithissues", "onhold"):
