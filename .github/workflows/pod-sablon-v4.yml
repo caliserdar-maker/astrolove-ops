@@ -37,6 +37,24 @@ on:
       state:
         description: "yetki_degistir icin callback adresindeki state (PKCE ile karsilastirilir)"
         default: ""
+      siparis_ref:
+        description: "siparis_* : merchantReference = idempotencyKey"
+        default: "etsy-1000000001-8x10"
+      siparis_sku:
+        description: "siparis_* : Prodigi SKU"
+        default: "GLOBAL-HPR-8x10"
+      siparis_adet:
+        description: "siparis_* : adet"
+        default: "1"
+      siparis_dosya_id:
+        description: "siparis_* : Drive baski dosyasi id"
+        default: "1oEkU6eYEFxqd1tcS6DMcEnu43XFW38vp"
+      siparis_remote:
+        description: "siparis_* : Drive yolu (cift/edisyon/boy kaniti)"
+        default: "gdrive:ASTROLOVE/TEMP/POD_PRINT/AQUARIUS_LIBRA/MIDNIGHT_BLUE/8x10.jpg"
+      siparis_alici:
+        description: "siparis_* : alici adi + adres (ad|adres1|sehir|eyalet|posta|ulke)"
+        default: "MUSTERI_ADI|ADRES|SEHIR|NH|POSTAKODU|US"
 
 concurrency:
   group: etsy-token
@@ -56,16 +74,27 @@ jobs:
       REDIRECT: ${{ inputs.redirect || 'https://astrolove.art/oauth/callback' }}
       KOD: ${{ inputs.kod || '' }}
       STATE: ${{ inputs.state || '' }}
+      SIPARIS_REF: ${{ inputs.siparis_ref || 'etsy-1000000001-8x10' }}
+      SIPARIS_SKU: ${{ inputs.siparis_sku || 'GLOBAL-HPR-8x10' }}
+      SIPARIS_ADET: ${{ inputs.siparis_adet || '1' }}
+      SIPARIS_DOSYA_ID: ${{ inputs.siparis_dosya_id || '' }}
+      SIPARIS_REMOTE: ${{ inputs.siparis_remote || '' }}
+      SIPARIS_ALICI: ${{ inputs.siparis_alici || '' }}
     steps:
       - name: Onay kapisi
         run: |
           set -euo pipefail
           case "$MOD" in
-            kuru|maliyet|dogrula|hpr|buyuk|yetki|yetki_test|pilot15_oku)
+            kuru|maliyet|dogrula|hpr|buyuk|yetki|yetki_test|pilot15_oku|siparis_hazirla)
               if [ "$APPLY" = "true" ]; then
                 echo "::error::mod=$MOD ile yazma olmaz. DUR."; exit 1
               fi
               echo "SALT OKUMA: Etsy'ye yazma yok ($MOD)." ;;
+            siparis_gonder)
+              if [ "$APPLY" != "true" ] || [ "$CONFIRM" != "$SIPARIS_REF" ]; then
+                echo "::error::siparis_gonder icin apply=true ve confirm '$SIPARIS_REF' olmali. DUR."; exit 1
+              fi
+              echo "::warning::CANLI PRODIGI SIPARISI: $SIPARIS_SKU x$SIPARIS_ADET, ref $SIPARIS_REF." ;;
             pilot15_yaz)
               if [ "$APPLY" != "true" ] || [ "$CONFIRM" != "PILOT_15" ]; then
                 echo "::error::pilot15_yaz icin apply=true ve confirm 'PILOT_15' olmali. DUR."; exit 1
@@ -122,7 +151,17 @@ jobs:
           TOKEN_FILE: _work/ETSY_TOKEN.json
         run: |
           set -euo pipefail
-          if [ "$MOD" = "pilot15_oku" ]; then
+          if [ "$MOD" = "siparis_hazirla" ] || [ "$MOD" = "siparis_gonder" ]; then
+            IFS='|' read -r S_AD S_ADR S_SEHIR S_EYALET S_POSTA S_ULKE <<< "$SIPARIS_ALICI"
+            args=(--file-id "$SIPARIS_DOSYA_ID" --remote "$SIPARIS_REMOTE" --sku "$SIPARIS_SKU"
+                  --adet "$SIPARIS_ADET" --ref "$SIPARIS_REF" --alici "$S_AD" --adres1 "$S_ADR"
+                  --sehir "$S_SEHIR" --eyalet "$S_EYALET" --posta "$S_POSTA" --ulke "$S_ULKE")
+            if [ "$MOD" = "siparis_gonder" ]; then
+              python scripts/prodigi/manuel_siparis.py gonder "${args[@]}" --confirm "$CONFIRM"
+            else
+              python scripts/prodigi/manuel_siparis.py hazirla "${args[@]}"
+            fi
+          elif [ "$MOD" = "pilot15_oku" ]; then
             python scripts/pod/pod_pilot_15.py oku --listing "$LISTING" --kota-alt "$KOTA_ALT"
           elif [ "$MOD" = "pilot15_yaz" ]; then
             python scripts/pod/pod_pilot_15.py yaz --listing "$LISTING" --kota-alt "$KOTA_ALT" --confirm "$CONFIRM"
