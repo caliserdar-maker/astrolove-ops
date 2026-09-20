@@ -293,6 +293,19 @@ def main():
         for r in satirlar:
             w.writerow(r)
 
+    # ------------------------------------------------ envanter capraz kontrolu
+    env_eksik, zip_fazla, env_sayi = [], [], 0
+    if a.envanter and Path(a.envanter).exists():
+        zip_kume = {(r["cift"], r["edisyon"]) for r in satirlar if r["cift"]}
+        env_kume = set()
+        with open(a.envanter, newline="", encoding="utf-8") as fh:
+            for r in csv.DictReader(fh):
+                env_sayi += 1
+                if r.get("cift") and r.get("edisyon"):
+                    env_kume.add((r["cift"], r["edisyon"]))
+        env_eksik = sorted(env_kume - zip_kume)   # canli ilan var, ZIP yok
+        zip_fazla = sorted(zip_kume - env_kume)   # ZIP var, canli ilan yok
+
     # ------------------------------------------------ ozet
     cift_ed = defaultdict(set)
     for r in satirlar:
@@ -312,6 +325,8 @@ def main():
           f"- Dosya adi 70 karakteri asan: {len(asan_ad)}",
           f"- En uzun ZIP adi: {max((len(r['zip_adi']) for r in satirlar), default=0)} karakter",
           f"- En buyuk ZIP (PDF ekli): {max((r['pdf_ekli_mb'] for r in satirlar), default=0)} MB",
+          f"- Canli ilanla capraz kontrol: envanter {env_sayi} ilan | ZIP'i olmayan ilan "
+          f"{len(env_eksik)} | ilani olmayan ZIP {len(zip_fazla)}",
           "", "## Ic yapi imzasi dagilimi", "", "| imza | ZIP |", "|---|---:|"]
     for k, v in yapi.most_common():
         md.append(f"| {k} | {v} |")
@@ -339,6 +354,14 @@ def main():
         md += ["", "## Okunamayan ZIP'ler", ""]
         for k, v in list(hatalar.items())[:40]:
             md.append(f"- {k}: {v}")
+    if env_eksik:
+        md += ["", "## Canli ilani olup ZIP'i bulunamayan (cift, edisyon)", ""]
+        for c, e in env_eksik[:60]:
+            md.append(f"- {c} / {e}")
+    if zip_fazla:
+        md += ["", "## ZIP'i olup canli ilanda bulunmayan (cift, edisyon)", ""]
+        for c, e in zip_fazla[:60]:
+            md.append(f"- {c} / {e}")
     if piksel:
         md += ["", "## Tam indirilip olculen ornek ZIP'ler", ""]
         for k in sorted(piksel):

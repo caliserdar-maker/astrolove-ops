@@ -97,6 +97,7 @@ jobs:
             --dfiles _work/digital_files_all.csv --pin-map _work/pin_listing_map.csv
 
       - name: 'ADIM 3  ZIP kontrolu (Drive, Etsy cagrisi yok)'
+        if: ${{ always() }}
         run: |
           set -euo pipefail
           mkdir -p _work/ornek_zip
@@ -106,11 +107,13 @@ jobs:
             --tam-ornek-dizin _work/ornek_zip
 
       - name: 'ADIM 5  Metin taslaklari + QC'
+        if: ${{ always() }}
         run: |
           set -euo pipefail
           python scripts/etsy/dijital78_metin.py --zip-csv _out/ZIP_KONTROL.csv --out _out
 
       - name: 'ADIM 7  Kapak ornegi (2 duzen)'
+        if: ${{ always() }}
         run: |
           set -euo pipefail
           python scripts/etsy/dijital78_kapak.py --zip-dizin _work/ornek_zip \
@@ -127,12 +130,13 @@ jobs:
           if [ -d _out ] && grep -rqaE 'x-api-key|refresh_token|access_token|client_secret' _out/ 2>/dev/null; then
             echo "::error::ciktida sir benzeri anahtar bulundu, Drive'a yazilmadi"; exit 1
           fi
+          if [ -z "$(ls -A _out 2>/dev/null)" ]; then
+            echo "::warning::_out bos, Drive'a yazilmadi"; exit 0
+          fi
           rclone copy _out "$CIKTI" -q
-          echo "Cikti: ASTROLOVE/TEMP/DIJITAL_78/"
-          rclone lsf "$CIKTI" | sed 's/^/  - /'
-          echo "KAPAK_ORNEK.jpg Drive id:"
-          rclone lsjson "$CIKTI" --files-only 2>/dev/null \
-            | python -c "import json,sys;[print(' ',x['Name'],x.get('ID',''),x['Size']) for x in json.load(sys.stdin)]"
+          echo "Cikti: ASTROLOVE/TEMP/DIJITAL_78/  (dosya | bayt | Drive id)"
+          rclone lsf "$CIKTI" --format "psi" --separator " | " 2>/dev/null \
+            | sed 's/^/  - /' || true
 
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}

@@ -136,13 +136,22 @@ def ilanlar_durum(api, shop, durum, butce, max_sayfa=12):
 
 
 def satislar(api, shop, sayfa_siniri, butce):
+    """Ilan basina satilan adet. Kapsam/izin yoksa (None, ...) doner, COKMEZ:
+    token'da transactions_r yoksa Etsy 403 verir (20 Eyl 2026 olcumu)."""
     say, makbuz, sayfa = defaultdict(int), 0, 0
     offset = 0
     for _ in range(sayfa_siniri):
         if api.calls >= butce:
             return say, makbuz, f"butce siniri - {sayfa} sayfa okundu (EKSIK)"
-        r = api.get(f"/shops/{shop}/receipts", params={"limit": 100, "offset": offset},
-                    ok404=True) or {}
+        try:
+            r = api.get(f"/shops/{shop}/receipts", params={"limit": 100, "offset": offset},
+                        ok404=True) or {}
+        except SystemExit as ex:
+            mesaj = str(ex)
+            if "transactions_r" in mesaj or "403" in mesaj:
+                return None, makbuz, ("OKUNAMADI: token'da transactions_r kapsami yok "
+                                      "(Etsy 403). Satis onceligi (b) uygulanamadi.")
+            return None, makbuz, f"OKUNAMADI: {mesaj[:140]}"
         res = r.get("results") or []
         sayfa += 1
         for rc in res:
@@ -231,9 +240,15 @@ def main():
         hepsi += ilan
         log(f"   {d:9s} {len(ilan):4d} ilan | cagri {api.calls} | gecen {time.time()-t0:.0f}s")
 
-    log("3) Makbuzlar (satis gecmisi)")
+    log("3) Magaza ozeti (toplam satis sayisi)")
+    shop_bilgi = api.get(f"/shops/{shop}", ok404=True) or {}
+    magaza_satis = shop_bilgi.get("transaction_sold_count")
+    log(f"   transaction_sold_count = {magaza_satis} | cagri {api.calls}")
+
+    log("4) Makbuzlar (satis gecmisi)")
     sat_ham, makbuz, sat_not = satislar(api, shop, a.receipt_pages,
                                         butce - a.ornek_dosya)
+    satis_okunabildi = sat_ham is not None
     log(f"   makbuz {makbuz} | {sat_not} | cagri {api.calls}")
 
     # ------------------------------------------------------------- siniflama
@@ -264,7 +279,8 @@ def main():
             "bolum": bolum.get(str(L.get("shop_section_id")), ""),
             "fiyat": f, "para": para, "views": L.get("views") or 0,
             "num_favorers": L.get("num_favorers") or 0,
-            "satis_adedi": sat_ham.get(lid, 0), "etiket_sayisi": len(tags),
+            "satis_adedi": (sat_ham.get(lid, 0) if sat_ham is not None else "OKUNAMADI"),
+            "etiket_sayisi": len(tags),
             "olusturma": tarih(L.get("original_creation_timestamp")),
             "url": L.get("url") or "",
         }
@@ -296,7 +312,12 @@ def main():
                                   "kalan_views": r["views"], "cift_ilan_sayisi": len(grup),
                                   "not": "basliktan iki burc cikarilamadi"})
             continue
-        secilen, gerekce = kalan_sec(grup, {r["listing_id"]: r["satis_adedi"] for r in grup})
+        satis_haritasi = ({r["listing_id"]: r["satis_adedi"] for r in grup}
+                          if satis_okunabildi else {})
+        secilen, gerekce = kalan_sec(grup, satis_haritasi)
+        # Oncelik (a) kosulsuzdur: satis verisi olmasa da etkilenmez.
+        if not satis_okunabildi and not gerekce.startswith("a)"):
+            gerekce = "b) satis verisi OKUNAMADI -> " + gerekce
         kapali = [r for r in grup if r["listing_id"] != secilen["listing_id"]]
         kapanacak += kapali
         kalan_idler[cift] = secilen
@@ -304,7 +325,9 @@ def main():
                "kalan_edisyon": secilen["edisyon"], "gerekce": gerekce,
                "kalan_satis": secilen["satis_adedi"], "kalan_favori": secilen["num_favorers"],
                "kalan_views": secilen["views"], "cift_ilan_sayisi": len(grup),
-               "not": "" if len(grup) == 5 else f"UYARI: ciftte {len(grup)} ilan (5 bekleniyor)"}
+               "not": ("" if len(grup) == 5 else f"UYARI: ciftte {len(grup)} ilan (5 bekleniyor)")
+                      + ("" if satis_okunabildi or gerekce.startswith("a)") else
+                         " | GECICI: satis gecmisi okunamadi, oncelik (b) uygulanmadi")}
         for i in range(4):
             row[f"kapanacak_{i+1}"] = kapali[i]["listing_id"] if i < len(kapali) else ""
         kal_satir.append(row)
@@ -394,6 +417,7 @@ def main():
             f"- POD: {len(pod_ilan)} | Wallpaper: {len(wp_ilan)} | Siniflanamadi: {len(siniflanamayan)}",
             f"- Durum sayfalari tam mi: {json.dumps(tam_durum)}",
             f"- Satis okuma: {sat_not}, makbuz {makbuz}",
+            f"- Magaza toplam satis (transaction_sold_count): {magaza_satis}",
             f"- Etsy cagrisi: {api.calls}, kalan gunluk kota: {api.remaining}"]
     if siniflanamayan:
         amd += ["", "## Siniflanamayan ilanlar", ""]
@@ -480,6 +504,7 @@ def main():
         "kapanacak": len(kapanacak), "link_toplam": len(link_satir), "link_kirilacak": kirilacak,
         "pin_kirilacak": pin_kirilacak,
         "durum_tam": tam_durum, "satis_notu": sat_not, "makbuz": makbuz,
+        "satis_okunabildi": satis_okunabildi, "magaza_toplam_satis": magaza_satis,
         "kalan": {c: {"listing_id": r["listing_id"], "edisyon": r["edisyon"],
                       "baslik": r["baslik"]} for c, r in kalan_idler.items()},
     }
