@@ -342,8 +342,8 @@ def main():
             errs, p_sapma, b_sapma, yayilim = qc(cikti, pal, F)
             errs = errs + qc_v2(kayit)
             if ed == "MIDNIGHT_BLUE" and not satirlar:
-                log(f"  yerlesim: olcek {kayit['olcek']} | bosluk {kayit['bosluk']} px | "
-                    f"rx {kayit['rx']} | kolonlar {kayit['kolonlar']}")
+                log(f"  yerlesim: olcek {kayit['olcek']} | G {kayit['bosluk']} px | "
+                    f"rx {kayit['rx']} | kutular {kayit['kutu_plan']}")
             satirlar.append({"pair": cift, "edition": ed, "bosluk_yayilim": yayilim,
                              "dosya": str(cikti.relative_to(a.out)),
                              "boyut": "x".join(map(str, Image.open(cikti).size)),
