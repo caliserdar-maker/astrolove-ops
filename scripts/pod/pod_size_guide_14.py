@@ -24,7 +24,8 @@ import pod_gallery_sample as G  # noqa: E402
 
 YENI = ("5x7", 5, 7, 13, 18, "5:7")
 DURUM_SUT = ["pair", "status", "cards", "fail", "secs", "ts_utc"]
-CSV_SUT = ["pair", "edition", "dosya", "boyut", "palet_sapma", "bosluk_sapma", "durum", "neden"]
+CSV_SUT = ["pair", "edition", "dosya", "boyut", "palet_sapma", "bosluk_sapma", "bosluk_yayilim",
+           "durum", "neden"]
 T0 = time.time()
 
 
@@ -49,6 +50,7 @@ def yamali():
 # ------------------------------------------------------------------ v2 yerlesim (20 Eyl: 5:7 sag kenara tasiyordu)
 KENAR = 70          # tuval kenarlarindan korunacak en az bosluk (metin ve kutular)
 BOSLUK_MIN = 24     # gruplar arasi en az gorunur bosluk
+METIN_PAY = 10      # komsu alt yazilar arasinda en az bosluk (px)
 CETVEL_PAY = 210    # eksen cizgisi + "175 CM" yazisi + cm etiketleri icin ayrilan sag pay
 
 
@@ -77,36 +79,53 @@ def cetvel_x():
     return (G.W - sum(dis)) / 7.0
 
 
-def yerlesim_v2(d, F):
-    """6 grup: sutun genisligi = max(kutu, metin); esit bosluk; gerekirse ORTAK olcek kucultulur.
-    Donus: (olcek, rx, [(x0,x1)] sutunlar, bosluk, [kutu_genislikleri])."""
+def metin_genislikleri(d, F):
+    """Grup basina en genis metin (oran adi ya da boy satiri) px."""
     f = _fontlar(F)
-    rx = cetvel_x()
-    x0_alan, x1_alan = rx + CETVEL_PAY, G.W - KENAR
-    metin_w = []
+    out = []
     for g in G.GROUP_ORDER:
-        ogeler = _grup_ogeleri(g)
         w = G.text_w(d, G.GROUP_TITLE[g], f["ttl"], 4)
-        for z in ogeler:
+        for z in _grup_ogeleri(g):
             w = max(w, d.textlength(_satir(z), font=f["txt"]))
-        metin_w.append(w)
+        out.append(w)
+    return out
+
+
+def yerlesim_v3(d, F):
+    """v3 (20 Eyl, Serdar): 6 grubun EN DIS kutularinin dis kenarlari arasindaki bosluk G
+    BIREBIR esit; eksen->ilk kutu = G, son kutu->sag icerik siniri (W-KENAR) = G.
+    G = (icerik_genisligi - toplam_kutu) / 7. Alt yazilar kutu merkezine ortali; komsu
+    metinler cakisirsa (pay METIN_PAY) ORTAK olcek kucultulur -> kutular daralir, G buyur.
+    Donus: (olcek, rx, [(kutu_x0, kutu_x1)], G, [merkezler])."""
+    rx = cetvel_x()
+    x1_alan = G.W - KENAR
+    metin_w = metin_genislikleri(d, F)
     olcek = G.SG_SCALE
     while True:
         kutu_w = [max(z[3] for z in _grup_ogeleri(g)) * olcek for g in G.GROUP_ORDER]
-        kolon_w = [max(a, b) for a, b in zip(kutu_w, metin_w)]
-        bosluk = (x1_alan - x0_alan - sum(kolon_w)) / (len(kolon_w) + 1)
-        if bosluk >= BOSLUK_MIN or olcek <= 3.0:
+        bos = (x1_alan - rx - sum(kutu_w)) / (len(kutu_w) + 1)
+        # kutu yerlesimi
+        kutular, x = [], rx + bos
+        for w in kutu_w:
+            kutular.append((x, x + w))
+            x += w + bos
+        merkez = [(a + b) / 2 for a, b in kutular]
+        tamam = bos >= BOSLUK_MIN
+        for i in range(len(merkez) - 1):        # komsu metin cakismasi
+            if (merkez[i + 1] - metin_w[i + 1] / 2) - (merkez[i] + metin_w[i] / 2) < METIN_PAY:
+                tamam = False
+        if merkez[0] - metin_w[0] / 2 < rx:      # ilk metin ekseni gecmesin
+            tamam = False
+        if merkez[-1] + metin_w[-1] / 2 > G.W - KENAR:   # son metin icerik sinirini gecmesin
+            tamam = False
+        if tamam or olcek <= 3.0:
             break
         olcek = round(olcek - 0.1, 2)
-    kolonlar, x = [], x0_alan + bosluk
-    for w in kolon_w:
-        kolonlar.append((x, x + w))
-        x += w + bosluk
-    return olcek, rx, kolonlar, bosluk, kutu_w
+    return olcek, rx, kutular, bos, merkez
 
 
 def card_sizes_v2(pal, F, poster, pair_txt):
-    """Onayli card_sizes ile ayni tasarim; yalniz sutun yerlesimi yeni. Donus: (im, kayit)."""
+    """Onayli card_sizes ile ayni tasarim; yerlesim v3 (esit kutu araliklari). Donus: (im, kayit)."""
     from PIL import ImageDraw
     t = G.TEXT["SIZES"]
     im, d = G.card_base(pal, F, G.vtext(t["kicker"]), t["title"], pair_txt, G.vtext(t["footer"]))
@@ -115,10 +134,10 @@ def card_sizes_v2(pal, F, poster, pair_txt):
     accent, rule = pal["bar"], pal["rule"]
     zemin = G.mix(pal["ink"], pal["bg"], 0.90)
     cizgi = G.mix(pal["ink"], pal["bg"], 0.45)
-    s, rx, kolonlar, bosluk, kutu_w = yerlesim_v2(d, F)
-    kayit = {"metin": [], "kutu": [], "olcek": s, "bosluk": round(bosluk, 1), "rx": round(rx, 1),
-             "kolonlar": [(round(a, 1), round(b, 1)) for a, b in kolonlar]}
-    x_end = kolonlar[-1][0] + (kolonlar[-1][1] - kolonlar[-1][0] + kutu_w[-1]) / 2
+    s, rx, kutular, Gb, merkez = yerlesim_v3(d, F)
+    kayit = {"metin": [], "kutu": [], "olcek": s, "bosluk": round(Gb, 2), "rx": round(rx, 1),
+             "kutu_plan": [(round(a, 1), round(b, 1)) for a, b in kutular]}
+    x_end = kutular[-1][1]
     d.line([rx, base_y, x_end, base_y], fill=cizgi, width=3)
     top = base_y - 175 * s
     d.line([rx, base_y, rx, top], fill=rule, width=3)
@@ -135,7 +154,7 @@ def card_sizes_v2(pal, F, poster, pair_txt):
     od = ImageDraw.Draw(overlay)
     etiketler = []
     for gi, g in enumerate(G.GROUP_ORDER):
-        cx = (kolonlar[gi][0] + kolonlar[gi][1]) / 2
+        cx = merkez[gi]
         for k, z in enumerate(_grup_ogeleri(g)):
             w, h = z[3] * s, z[4] * s
             x1, y1 = cx - w / 2, base_y - h
@@ -150,7 +169,7 @@ def card_sizes_v2(pal, F, poster, pair_txt):
         w = d.textlength(lab, font=f["lab"])
         kayit["metin"].append((xy[0] - w / 2, xy[1], xy[0] + w / 2, xy[1] + 26, lab))
     for gi, g in enumerate(G.GROUP_ORDER):
-        cx = (kolonlar[gi][0] + kolonlar[gi][1]) / 2
+        cx = merkez[gi]
         ly = base_y + 24
         w = G.text_w(d, G.GROUP_TITLE[g], f["ttl"], 4)
         G.draw_tracked(d, (cx, ly), G.GROUP_TITLE[g], f["ttl"], accent, tracking=4, anchor="c")
@@ -198,10 +217,8 @@ def kutu_olcumu(kart, F):
     y = G.SG_BASE_Y - 30
     bar = rgb[2120, 1500]
     d0 = ImageDraw.Draw(Image.new("RGB", (G.W, G.H), (255, 255, 255)))
-    s, rx, kolonlar, bosluk, kutu_w = yerlesim_v2(d0, F)
-    kutular = [((k0 + k1) / 2 - w / 2, (k0 + k1) / 2 + w / 2)
-               for (k0, k1), w in zip(kolonlar, kutu_w)]
-    sapmalar, n = [], 0
+    s, rx, kutular, Gb, merkez = yerlesim_v3(d0, F)
+    sapmalar, n, kenarlar = [], 0, []
     for bx0, bx1 in kutular:
         a0, a1 = max(0, int(bx0) - 20), min(G.W, int(bx1) + 20)
         seg = np.abs(rgb[y, a0:a1] - bar).sum(1) < 60
@@ -209,8 +226,13 @@ def kutu_olcumu(kart, F):
         if not len(xs):
             continue
         n += 1
-        sapmalar += [abs(int(xs.min() + a0) - bx0), abs(int(xs.max() + a0) - bx1)]
-    return (round(max(sapmalar), 1) if sapmalar else None), n
+        sol, sag = int(xs.min() + a0), int(xs.max() + a0)
+        kenarlar.append((sol, sag))
+        sapmalar += [abs(sol - bx0), abs(sag - bx1)]
+    araliklar = ([kenarlar[0][0] - rx] + [kenarlar[i + 1][0] - kenarlar[i][1] for i in range(len(kenarlar) - 1)]
+                 + [(G.W - KENAR) - kenarlar[-1][1]]) if len(kenarlar) == len(kutular) else []
+    yayilim = round(max(araliklar) - min(araliklar), 1) if araliklar else None
+    return (round(max(sapmalar), 1) if sapmalar else None), n, yayilim
 
 
 def bosluklar(kart):
@@ -246,12 +268,16 @@ def qc(kart, pal, F):
     sapma = max(abs(mp[k][i] - pal[k][i]) for k in ("bg", "bar", "ink") for i in range(3))
     if sapma > 16:
         errs.append(f"palet sapmasi {sapma}")
-    k_sapma, n_kutu = kutu_olcumu(kart, F)
+    k_sapma, n_kutu, yayilim = kutu_olcumu(kart, F)
     if n_kutu != len(G.GROUP_ORDER):
         errs.append(f"kutu {n_kutu}/{len(G.GROUP_ORDER)}")
     elif k_sapma is None or k_sapma > 2.5:
         errs.append(f"kutu konum sapmasi {k_sapma}")
-    return errs, sapma, (k_sapma if k_sapma is not None else "")
+    if yayilim is None:
+        errs.append("bosluk yayilimi olculemedi")
+    elif yayilim > 1.0:
+        errs.append(f"bosluk yayilimi {yayilim} px (esik 1.0)")
+    return errs, sapma, (k_sapma if k_sapma is not None else ""), yayilim
 
 
 def main():
@@ -313,27 +339,28 @@ def main():
             cikti.parent.mkdir(parents=True, exist_ok=True)
             kart, kayit = card_sizes_v2(pal, F, poster, pair_txt)
             G.save_jpg(kart, cikti, 95)
-            errs, p_sapma, b_sapma = qc(cikti, pal, F)
+            errs, p_sapma, b_sapma, yayilim = qc(cikti, pal, F)
             errs = errs + qc_v2(kayit)
             if ed == "MIDNIGHT_BLUE" and not satirlar:
                 log(f"  yerlesim: olcek {kayit['olcek']} | bosluk {kayit['bosluk']} px | "
                     f"rx {kayit['rx']} | kolonlar {kayit['kolonlar']}")
-            satirlar.append({"pair": cift, "edition": ed, "dosya": str(cikti.relative_to(a.out)),
+            satirlar.append({"pair": cift, "edition": ed, "bosluk_yayilim": yayilim,
+                             "dosya": str(cikti.relative_to(a.out)),
                              "boyut": "x".join(map(str, Image.open(cikti).size)),
                              "palet_sapma": p_sapma, "bosluk_sapma": b_sapma,
                              "durum": "PASS" if not errs else "FAIL", "neden": "; ".join(errs)[:160]})
             if errs:
                 hatalar.append(f"{ed}: " + "; ".join(errs))
             if a.ornek_cift and cift == a.ornek_cift.upper() and ed == "MIDNIGHT_BLUE":
-                ornek = pathlib.Path(a.out) / "SIZE_GUIDE_14_ORNEK_v2.jpg"
+                ornek = pathlib.Path(a.out) / "SIZE_GUIDE_14_ORNEK_v3.jpg"
                 im = Image.open(cikti).convert("RGB")
                 for genislik, kal in ((2200, 86), (2000, 84), (1800, 80), (1600, 78), (1400, 74)):
                     im.resize((genislik, round(genislik * im.size[1] / im.size[0])),
                               Image.LANCZOS).save(ornek, "JPEG", quality=kal, optimize=True)
                     if ornek.stat().st_size <= 300_000:
                         break
-                rclone("copyto", str(ornek), f"{a.ornek_drv}/SIZE_GUIDE_14_ORNEK_v2.jpg")
-                log(f"SIZE_GUIDE_14_ORNEK_v2.jpg {ornek.stat().st_size / 1024:.0f} KB "
+                rclone("copyto", str(ornek), f"{a.ornek_drv}/SIZE_GUIDE_14_ORNEK_v3.jpg")
+                log(f"SIZE_GUIDE_14_ORNEK_v3.jpg {ornek.stat().st_size / 1024:.0f} KB "
                     f"{im.size[0]}x{im.size[1]} -> {genislik}px")
             if a.rclone_out:
                 rclone("copyto", str(cikti), f"{a.rclone_out}/{cift}/{ed}/{cikti.name}")
