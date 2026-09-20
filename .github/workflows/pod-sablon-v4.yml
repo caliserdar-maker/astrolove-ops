@@ -93,7 +93,7 @@ jobs:
         run: |
           set -euo pipefail
           case "$MOD" in
-            kuru|maliyet|dogrula|hpr|buyuk|yetki|yetki_test|pilot15_oku|siparis_hazirla|siparis_onizleme)
+            kuru|maliyet|dogrula|hpr|buyuk|yetki|yetki_test|pilot15_oku|siparis_hazirla|siparis_onizleme|siparis_izin_kapat)
               if [ "$APPLY" = "true" ]; then
                 echo "::error::mod=$MOD ile yazma olmaz. DUR."; exit 1
               fi
@@ -159,7 +159,11 @@ jobs:
           TOKEN_FILE: _work/ETSY_TOKEN.json
         run: |
           set -euo pipefail
-          if [ "$MOD" = "siparis_onizleme" ]; then
+          if [ "$MOD" = "siparis_izin_kapat" ]; then
+            python scripts/prodigi/manuel_siparis.py izin_kapat --file-id "$SIPARIS_DOSYA_ID" \
+              --remote "$SIPARIS_REMOTE" --sku "$SIPARIS_SKU" --ref "$SIPARIS_REF" \
+              --alici x --adres1 x --sehir x --posta x
+          elif [ "$MOD" = "siparis_onizleme" ]; then
             python scripts/prodigi/manuel_siparis.py onizleme --file-id "$SIPARIS_DOSYA_ID" \
               --remote "$SIPARIS_REMOTE" --sku "$SIPARIS_SKU" --ref "$SIPARIS_REF" \
               --alici x --adres1 x --sehir x --posta x

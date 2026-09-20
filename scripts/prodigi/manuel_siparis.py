@@ -51,7 +51,7 @@ def rclone(*a, sert=True):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("mod", choices=["onizleme", "hazirla", "gonder"])
+    ap.add_argument("mod", choices=["onizleme", "hazirla", "gonder", "izin_kapat"])
     ap.add_argument("--file-id", required=True)
     ap.add_argument("--remote", required=True, help="dosyanin Drive yolu (cift/edisyon/boy kaniti)")
     ap.add_argument("--sku", required=True)
@@ -77,6 +77,29 @@ def main():
     isd = pathlib.Path(a.is_dizin)
     isd.mkdir(parents=True, exist_ok=True)
     bek_w, bek_h = (int(x) for x in a.olcu.lower().split("x"))
+
+    if a.mod == "izin_kapat":
+        # Prodigi dosyayi CEKTIYSE (downloadAssets Complete) gecici genel izni kaldir.
+        yerel = isd / "sonuc.json"
+        rclone("copyto", f"{DRV}/MANUEL_{a.ref}.json", str(yerel))
+        sonuc = json.loads(yerel.read_text(encoding="utf-8"))
+        prod = Prodigi(load_prodigi_key(a.env), a.env)
+        st, d = prod.get_order(sonuc["order_id"])
+        o = (d.get("order") or {}) if st == 200 else {}
+        durum = o.get("status") or {}
+        ayrinti = durum.get("details") or {}
+        log(f"siparis {sonuc['order_id']}: stage {durum.get('stage')} | details {json.dumps(ayrinti)}")
+        if str(ayrinti.get("downloadAssets", "")).lower() != "complete":
+            log("DUR: dosya henuz cekilmedi (downloadAssets != Complete); izin ACIK birakildi.")
+            return 2
+        Drive(access_token()).delete_perm(a.file_id, sonuc["dosya"]["izin_id"])
+        sonuc["izin_kapatildi_utc"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        sonuc["durum_son"] = {"stage": durum.get("stage"), "details": ayrinti,
+                              "issues": durum.get("issues")}
+        yerel.write_text(json.dumps(sonuc, ensure_ascii=False, indent=1), encoding="utf-8")
+        rclone("copyto", str(yerel), f"{DRV}/MANUEL_{a.ref}.json")
+        log("genel okuma izni KALDIRILDI; dosya yeniden yalniz sahibine acik.")
+        return 0
 
     if a.mod == "onizleme":       # yalniz gozle dogrulama karesi; API cagrisi yok
         yerel = isd / "kaynak.jpg"
