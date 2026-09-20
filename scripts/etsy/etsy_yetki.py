@@ -38,6 +38,7 @@ AUTH = "https://www.etsy.com/oauth/connect"
 TOKEN = "https://api.etsy.com/v3/public/oauth/token"
 DRV = "gdrive:ASTROLOVE/TEMP/POD_5X7"
 TOKEN_DRV = "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json"
+KOD_DRV = f"{DRV}/ETSY_YETKI_KOD.txt"  # tek kullanimlik authorization code (kosuda silinir)
 # Taban: bilinen mevcut kapsamlar + yonlendiricinin siparis okumasi icin transactions_r.
 # Gercek liste kosuda canli token'dan okunur; bu taban yalnizca alt sinirdir.
 TABAN = ["listings_r", "listings_w", "shops_r", "shops_w"]
@@ -117,7 +118,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("mod", choices=["link", "degistir", "test"])
     ap.add_argument("--redirect", default="", help="Etsy uygulamasinda KAYITLI redirect URI")
-    ap.add_argument("--code", default="")
+    ap.add_argument("--code", default="", help="bos birakilirsa Drive'daki KOD_DRV dosyasindan okunur")
+    ap.add_argument("--state", default="", help="callback adresindeki state; PKCE dosyasiyla karsilastirilir")
     ap.add_argument("--is-dizin", default="_work/yetki")
     a = ap.parse_args()
     isd = pathlib.Path(a.is_dizin)
@@ -162,13 +164,23 @@ def main():
         log(f"baglanti ve PKCE Drive'a yazildi: {DRV}/ETSY_YETKI_LINK.txt")
         return 0
 
-    if not a.code:
-        raise SystemExit("HATA: degistir icin --code gerekir")
     rclone("copyto", f"{DRV}/ETSY_YETKI_PKCE.json", str(isd / "pkce.json"))
     pkce = json.loads((isd / "pkce.json").read_text(encoding="utf-8"))
-    r = requests.post(TOKEN, data={"grant_type": "authorization_code", "client_id": key,
-                                   "redirect_uri": pkce["redirect"], "code": a.code,
-                                   "code_verifier": pkce["code_verifier"]}, timeout=60)
+    if a.state and a.state != pkce.get("state"):
+        raise SystemExit("HATA: state PKCE dosyasiyla uyusmuyor. DUR (kod kullanilmadi).")
+    log(f"state dogrulandi: {'evet' if a.state else 'atlandi (--state verilmedi)'}")
+    kod = a.code
+    if not kod:  # kod GitHub loglarina girmesin diye Drive'dan okunur, sonra silinir
+        kod = rclone("cat", KOD_DRV).stdout.strip()
+    if not kod:
+        raise SystemExit(f"HATA: kod yok (--code ya da {KOD_DRV})")
+    print(f"::add-mask::{kod}", flush=True)
+    try:
+        r = requests.post(TOKEN, data={"grant_type": "authorization_code", "client_id": key,
+                                       "redirect_uri": pkce["redirect"], "code": kod,
+                                       "code_verifier": pkce["code_verifier"]}, timeout=60)
+    finally:
+        rclone("deletefile", KOD_DRV, sert=False)  # tek kullanimlik kod diskte kalmaz
     if r.status_code != 200:
         raise SystemExit(f"HATA: token degisimi {r.status_code}: {r.text[:200]}")
     d = r.json()

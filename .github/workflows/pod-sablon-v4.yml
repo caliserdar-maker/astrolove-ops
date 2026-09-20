@@ -32,7 +32,10 @@ on:
         description: "yetki modlari icin kayitli redirect URI"
         default: "https://astrolove.art/oauth/callback"
       kod:
-        description: "yetki_degistir icin Etsy'nin verdigi code"
+        description: "yetki_degistir: BOS BIRAK (kod Drive'daki ETSY_YETKI_KOD.txt'den okunur, loga girmez)"
+        default: ""
+      state:
+        description: "yetki_degistir icin callback adresindeki state (PKCE ile karsilastirilir)"
         default: ""
 
 concurrency:
@@ -52,6 +55,7 @@ jobs:
       KOTA_ALT: ${{ inputs.kota_alt || '400' }}
       REDIRECT: ${{ inputs.redirect || 'https://astrolove.art/oauth/callback' }}
       KOD: ${{ inputs.kod || '' }}
+      STATE: ${{ inputs.state || '' }}
     steps:
       - name: Onay kapisi
         run: |
@@ -63,8 +67,8 @@ jobs:
               fi
               echo "SALT OKUMA: Etsy'ye yazma yok ($MOD)." ;;
             yetki_degistir)
-              if [ "$CONFIRM" != "YETKI_DEGISTIR" ] || [ -z "$KOD" ]; then
-                echo "::error::yetki_degistir icin confirm 'YETKI_DEGISTIR' ve kod gerekir. DUR."; exit 1
+              if [ "$CONFIRM" != "YETKI_DEGISTIR" ]; then
+                echo "::error::yetki_degistir icin confirm 'YETKI_DEGISTIR' gerekir. DUR."; exit 1
               fi
               echo "::warning::YETKI DEGISIMI: ETSY_TOKEN.json yenilenir, eski zincir kapanir." ;;
             pilot|toplu)
@@ -118,7 +122,7 @@ jobs:
           elif [ "$MOD" = "yetki_test" ]; then
             python scripts/etsy/etsy_yetki.py test
           elif [ "$MOD" = "yetki_degistir" ]; then
-            python scripts/etsy/etsy_yetki.py degistir --redirect "$REDIRECT" --code "$KOD"
+            python scripts/etsy/etsy_yetki.py degistir --redirect "$REDIRECT" --code "$KOD" --state "$STATE"
           elif [ "$MOD" = "buyuk" ]; then
             python scripts/prodigi/pod_hpr_buyuk_boy.py --is-dizin _work/buyuk
           elif [ "$MOD" = "hpr" ]; then
