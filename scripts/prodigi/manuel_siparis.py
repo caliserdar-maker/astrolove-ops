@@ -33,6 +33,7 @@ sys.path.insert(0, str(KOK.parent / "pinterest"))
 from order_router import Prodigi, load_prodigi_key  # noqa: E402
 from pin_media_perms import Drive, access_token  # noqa: E402
 
+Image.MAX_IMAGE_PIXELS = None   # master dosyalari 12500x15625 (PIL bomba esigi asiliyor)
 DRV = "gdrive:ASTROLOVE/TEMP/POD_5X7"
 T0 = time.time()
 
@@ -119,7 +120,9 @@ def main():
     olcumler = {}
     if a.master:
         def kucult(p):
-            g = Image.open(p).convert("RGB").resize((160, 200), Image.LANCZOS)
+            g = Image.open(p)
+            g.draft("RGB", (320, 400))          # buyuk master'i JPEG cozerken kucult
+            g = g.convert("RGB").resize((160, 200), Image.LANCZOS)
             return np.asarray(g, dtype=np.int16)
 
         hedef = kucult(io.BytesIO(r.content))
