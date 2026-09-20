@@ -23,9 +23,14 @@ Image.MAX_IMAGE_PIXELS = None
 EDITIONS = ["MIDNIGHT_BLUE", "DEEP_BLACK", "WARM_PARCHMENT", "CHAMPAGNE_IVORY", "PURE_WHITE"]
 RATIO_TOL_5X7 = 0.025
 BOY = "5x7"
-SAPMA = 12          # bant medyanindan kanal sapmasi; ustu "zemin disi" sayilir
-CSV_SUT = ["pair", "edition", "dosya", "usta_px", "kirp_px", "kirpma_px", "ust_sapma",
-           "alt_sapma", "ust_ink_px", "alt_ink_px", "bayt", "sn", "durum", "neden"]
+# Zemin olcutu: kirpilan bandin hemen ICINDEKI ayni yukseklikteki serit "zemin" kabul edilir
+# (tasarim bu seride de yok). Bant, bu seridin dagilimiyla karsilastirilir:
+#   ink = |piksel - serit_medyani| > INK esigi  -> tasarim/mureккep sayilir
+#   parlaklik kaymasi |bant_ort - serit_ort| > KAYMA -> gorunur ton farki
+INK, KAYMA = 40, 3.0
+CSV_SUT = ["pair", "edition", "dosya", "usta_px", "kirp_px", "kirpma_px",
+           "ust_ink_px", "alt_ink_px", "ust_max_sapma", "alt_max_sapma",
+           "ust_kayma", "alt_kayma", "serit_std", "bayt", "sn", "durum", "neden"]
 T0 = time.time()
 
 
@@ -55,16 +60,35 @@ def hedef_oran(sizes_json):
     return w, h, w / h
 
 
-def bant_kontrol(arr):
-    """(max kanal sapmasi, SAPMA ustu piksel sayisi) — bant medyanina gore."""
-    if arr.size == 0:
-        return 0, 0
-    med = np.median(arr.reshape(-1, arr.shape[-1]), axis=0)
-    fark = np.abs(arr.astype(np.int16) - med.astype(np.int16)).max(axis=2)
-    return int(fark.max()), int((fark > SAPMA).sum())
+def bant_kontrol(bant, serit):
+    """Bandi komsu zemin seridiyle kiyasla -> (ink_px, max_sapma, kayma, serit_std)."""
+    if bant.size == 0 or serit.size == 0:
+        return 0, 0, 0.0, 0.0
+    med = np.median(serit.reshape(-1, serit.shape[-1]), axis=0)
+    fark = np.abs(bant.astype(np.int16) - med.astype(np.int16)).max(axis=2)
+    kayma = float(abs(bant.reshape(-1, bant.shape[-1]).mean(0).mean()
+                      - serit.reshape(-1, serit.shape[-1]).mean(0).mean()))
+    return int((fark > INK).sum()), int(fark.max()), round(kayma, 2), round(float(serit.std()), 2)
 
 
-def uret(usta_yol, cikti_yol, oran):
+def tani(im, y0, nh, dizin, ad):
+    """Tani goruntusu: ust bant | ust serit || alt serit | alt bant (kucultulmus)."""
+    sw, sh = im.size
+    alt_h = sh - (y0 + nh)
+    parcalar = [im.crop((0, 0, sw, y0)), im.crop((0, y0, sw, y0 + y0)),
+                im.crop((0, y0 + nh - alt_h, sw, y0 + nh)), im.crop((0, y0 + nh, sw, sh))]
+    g = 1400
+    kucuk = [p.resize((g, max(1, round(g * p.size[1] / p.size[0]))), Image.LANCZOS) for p in parcalar]
+    yuk = sum(p.size[1] for p in kucuk) + 3 * 8
+    tuval = Image.new("RGB", (g, yuk), (255, 0, 0))
+    y = 0
+    for p in kucuk:
+        tuval.paste(p, (0, y)); y += p.size[1] + 8
+    dizin.mkdir(parents=True, exist_ok=True)
+    tuval.save(dizin / f"BANT_{ad}.jpg", "JPEG", quality=88, optimize=True)
+
+
+def uret(usta_yol, cikti_yol, oran, tani_dizin=None, tani_ad=""):
     """Kirp + kaydet. Donus: satir sozlugu."""
     t0 = time.time()
     im = Image.open(usta_yol)
@@ -79,17 +103,22 @@ def uret(usta_yol, cikti_yol, oran):
         raise ValueError(f"hedef yukseklik {nh} > usta {sh}")
     y0 = (sh - nh) // 2
     a = np.asarray(im)
-    ust_s, ust_i = bant_kontrol(a[:y0])
-    alt_s, alt_i = bant_kontrol(a[y0 + nh:])
+    ust_i, ust_s, ust_k, std1 = bant_kontrol(a[:y0], a[y0:y0 + y0])
+    alt_h = sh - (y0 + nh)
+    alt_i, alt_s, alt_k, std2 = bant_kontrol(a[y0 + nh:], a[y0 + nh - alt_h:y0 + nh])
+    if tani_dizin is not None:
+        tani(im, y0, nh, tani_dizin, tani_ad)
     kirp = im.crop((0, y0, sw, y0 + nh))
     dpi = round(kirp.size[0] / (1535 / 300.0))
     cikti_yol.parent.mkdir(parents=True, exist_ok=True)
     kirp.save(cikti_yol, "JPEG", quality=95, subsampling=0, dpi=(dpi, dpi), optimize=True)
+    gecti = (ust_i == 0 and alt_i == 0 and ust_k <= KAYMA and alt_k <= KAYMA)
     return {"usta_px": f"{sw}x{sh}", "kirp_px": f"{kirp.size[0]}x{kirp.size[1]}",
-            "kirpma_px": sh - nh, "ust_sapma": ust_s, "alt_sapma": alt_s,
-            "ust_ink_px": ust_i, "alt_ink_px": alt_i,
+            "kirpma_px": sh - nh, "ust_ink_px": ust_i, "alt_ink_px": alt_i,
+            "ust_max_sapma": ust_s, "alt_max_sapma": alt_s, "ust_kayma": ust_k,
+            "alt_kayma": alt_k, "serit_std": max(std1, std2),
             "bayt": cikti_yol.stat().st_size, "sn": round(time.time() - t0, 1),
-            "durum": "GECTI" if (ust_i == 0 and alt_i == 0) else "KONTROL", "neden": ""}
+            "durum": "GECTI" if gecti else "KONTROL", "neden": ""}
 
 
 def onizleme(dosyalar, yol):
@@ -139,6 +168,7 @@ def main():
     ap.add_argument("--onizleme-cift", default="")
     ap.add_argument("--onizleme-drv", default="gdrive:ASTROLOVE/TEMP/POD_5X7")
     ap.add_argument("--force", action="store_true")
+    ap.add_argument("--tani", action="store_true", help="kirpilan bant tani goruntusu uret")
     a = ap.parse_args()
 
     w, h, oran = hedef_oran(a.sizes_json)
@@ -177,7 +207,9 @@ def main():
                 continue
             cikti = pathlib.Path(a.out) / cift / ed / f"{BOY}.jpg"
             try:
-                s = uret(usta, cikti, oran)
+                s = uret(usta, cikti, oran,
+                         tani_dizin=(pathlib.Path(a.out) / "_tani") if a.tani else None,
+                         tani_ad=f"{cift}_{ed}")
             except Exception as e:  # noqa: BLE001
                 hatalar.append(f"{ed}: {type(e).__name__}: {e}")
                 usta.unlink(missing_ok=True)
@@ -222,6 +254,9 @@ def main():
             if a.rclone_out:
                 rclone("copyto", str(p), f"{a.rclone_out}/{a.onizleme_cift.upper()}/{ed}/{BOY}.jpg")
                 p.unlink(missing_ok=True)
+    if a.tani and (pathlib.Path(a.out) / "_tani").exists():
+        rclone("copy", str(pathlib.Path(a.out) / "_tani"), "gdrive:ASTROLOVE/TEMP/POD_5X7/TANI",
+               "--include", "*.jpg", sert=False)
     if a.rclone_out:
         rclone("copyto", str(csv_yol), f"gdrive:ASTROLOVE/TEMP/POD_5X7/parca/{csv_yol.name}")
     print(json.dumps({"shard": a.shard, "pass": n_ok, "fail": n_fail,

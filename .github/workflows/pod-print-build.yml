@@ -28,6 +28,10 @@ on:
       onizleme:
         description: "ONIZLEME_5X7.jpg icin cift (bos = yok)"
         default: ""
+      tani:
+        description: "true = kirpilan bant tani goruntuleri"
+        type: boolean
+        default: false
 
 concurrency:
   group: pod-print-build
@@ -125,6 +129,7 @@ jobs:
         env:
           FORCE: ${{ inputs.force }}
           ONIZLEME: ${{ inputs.onizleme }}
+          TANI: ${{ inputs.tani }}
         run: |
           set -euo pipefail
           args=(--pairs-file _work/pairs.txt --sizes-json _work/sizes.json --src src --out out --state _work/state.csv
@@ -132,6 +137,7 @@ jobs:
                 --rclone-src "gdrive:ASTROLOVE/WALL_ART/POSTERS/ORIGINAL_HIGH_RES" --rclone-out "gdrive:ASTROLOVE/TEMP/POD_PRINT")
           [ "$FORCE" = "true" ] && args+=(--force)
           [ -n "${ONIZLEME:-}" ] && args+=(--onizleme-cift "$ONIZLEME")
+          [ "${TANI:-false}" = "true" ] && args+=(--tani)
           python scripts/pod/pod_print_5x7.py "${args[@]}"
       - name: STATE'i Drive'a yaz
         if: ${{ always() }}
