@@ -21,7 +21,7 @@ from PIL import Image, ImageDraw, ImageFilter
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from pod_gallery_sample import (  # noqa: E402
     W, H, REF, TEXT, Fonts, card_base, draw_tracked, mix, numbered_rows,
-    palette, paste_shadowed, solve_size, solve_tracking,
+    palette, paste_shadowed, solve_size, solve_tracking, text_w,
 )
 
 EDISYONLAR = ["Midnight Blue", "Deep Black", "Warm Parchment", "Champagne Ivory", "Pure White"]
@@ -94,8 +94,8 @@ KART = {
         "kicker": "AFTER YOUR PAYMENT CLEARS",
         "title": "How to Download & Print",
         "rows": [
-            ("DOWNLOAD", "Open Etsy on a computer or mobile browser, go to Your account, "
-                         "then Purchases and reviews. Download all 5 ZIP files"),
+            ("DOWNLOAD", "Open Etsy on a computer or mobile browser, go to Your account,\n"
+                         "then Purchases and reviews. Download all 5 ZIP files."),
             ("UNZIP", "Extract the color edition you want to print"),
             ("CHOOSE", "Pick the JPG that matches your print size"),
             ("PRINT", "At home, at a local print shop or with an online service"),
@@ -190,28 +190,86 @@ def oran_diyagrami(pal, F, genislik=880, yukseklik=900, kutular=None):
     return img.resize((genislik, yukseklik), Image.LANCZOS)
 
 
-def numbered_rows3(d, F, pal, rows, y0=620, y1=1900):
-    """numbered_rows ile ayni dil; ek olarak her satirin altina kucuk 3. satir (boylar)."""
+GOVDE_KAT = 1.30          # aciklama yazilari POD kartina gore %30 buyuk
+BOY_KAT = 1.55            # "4x6 . 8x12 ..." satiri eski puntonun 1.55 kati
+KENAR_PAY = 70            # metin sinir kutulari kenardan en az bu kadar uzak
+
+
+def _sar(d, metin, font, en_sinir):
+    """Acik satir sonlarini korur, gerekirse kelime sarmasi yapar."""
+    ciktilar = []
+    for parca in metin.split("\n"):
+        aktif = ""
+        for kelime in parca.split():
+            deneme = (aktif + " " + kelime).strip()
+            if d.textlength(deneme, font=font) <= en_sinir or not aktif:
+                aktif = deneme
+            else:
+                ciktilar.append(aktif)
+                aktif = kelime
+        ciktilar.append(aktif)
+    return ciktilar
+
+
+def satirlar_ciz(d, F, pal, rows, y0=620, y1=1900, en_sinir=1380, boy_satiri=False):
+    """POD rozetli satir dili; aciklama %30 buyuk, satir sarmali.
+    Doner: cizilen tum metin sinir kutulari [(x0, y0, x1, y1)] (kapi olcumu icin)."""
     r = REF["badge_d"] // 2
     cx, tx = 336, 460
     f_d = F.f("sans", solve_size(F, "sans", 600, REF["digit_h"], "01"), 600)
     f_h = F.f("sans", solve_size(F, "sans", 600, REF["head_cap"]), 600)
     tr_h = solve_tracking(d, f_h, *REF["head_w"])
-    f_b = F.f("sans", solve_size(F, "sans", 400, REF["body_cap"]), 400)
-    f_s = F.f("sans", solve_size(F, "sans", 500, REF["body_cap"] - 5), 500)
+    f_b = F.f("sans", solve_size(F, "sans", 400, int(REF["body_cap"] * GOVDE_KAT)), 400)
+    f_s = F.f("sans", solve_size(F, "sans", 500, int((REF["body_cap"] - 5) * BOY_KAT)), 500)
+    govde_h = int(REF["body_cap"] * GOVDE_KAT * 1.52)
+    kutular = []
     step = (y1 - y0) / len(rows)
-    for i, (head, body, boylar) in enumerate(rows):
+    for i, satir in enumerate(rows):
+        head, body = satir[0], satir[1]
+        boylar = satir[2] if boy_satiri and len(satir) > 2 else None
+        govde = _sar(d, body, f_b, en_sinir)
+        hb0 = f_h.getbbox("H")
+        basl_h = hb0[3] - hb0[1]
+        ara = int(basl_h * 0.55)
+        blok = basl_h + ara + len(govde) * govde_h + (int(govde_h * 1.2) if boylar else 0)
         cy = y0 + step * (i + 0.5)
+        ust = cy - blok / 2
         d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=pal["bar"])
         num = f"{i + 1:02d}"
         b0, b1, b2, b3 = f_d.getbbox(num)
         d.text((cx - (b0 + b2) / 2, cy - (b1 + b3) / 2), num, font=f_d, fill=pal["bartext"])
-        hb = f_h.getbbox("H")
-        draw_tracked(d, (tx, cy - 34 - hb[3]), head, f_h, pal["ink"], tracking=tr_h)
-        d.text((tx, cy - 6 - f_b.getbbox("H")[1]), body, font=f_b,
-               fill=mix(pal["ink"], pal["bg"], 0.25))
-        d.text((tx, cy + 40 - f_s.getbbox("H")[1]), boylar, font=f_s,
-               fill=mix(pal["ink"], pal["bg"], 0.42))
+        draw_tracked(d, (tx, ust - hb0[1]), head, f_h, pal["ink"], tracking=tr_h)
+        kutular.append((tx, ust - 4, tx + text_w(d, head, f_h, tr_h), ust + basl_h + 4))
+        y = ust + basl_h + ara
+        for sat in govde:
+            d.text((tx, y - f_b.getbbox("H")[1]), sat, font=f_b,
+                   fill=mix(pal["ink"], pal["bg"], 0.22))
+            kutular.append((tx, y - 2, tx + d.textlength(sat, font=f_b), y + govde_h - 4))
+            y += govde_h
+        if boylar:
+            y += int(govde_h * 0.20)
+            d.text((tx, y - f_s.getbbox("H")[1]), boylar, font=f_s,
+                   fill=mix(pal["ink"], pal["bg"], 0.26))
+            kutular.append((tx, y - 2, tx + d.textlength(boylar, font=f_s), y + govde_h - 4))
+    return kutular
+
+
+def kutu_kapisi(kutular, yasak=None):
+    """Olculebilir kapi: kenar payi >= KENAR_PAY ve kutular arasi cakisma = 0."""
+    hata = []
+    for x0, y0, x1, y1 in kutular:
+        if x0 < KENAR_PAY or y0 < KENAR_PAY or x1 > W - KENAR_PAY or y1 > H - KENAR_PAY:
+            hata.append(f"kenar payi ihlali: ({int(x0)},{int(y0)})-({int(x1)},{int(y1)})")
+    for i in range(len(kutular)):
+        for j in range(i + 1, len(kutular)):
+            a, b = kutular[i], kutular[j]
+            if a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]:
+                hata.append(f"cakisma: {tuple(int(v) for v in a)} x {tuple(int(v) for v in b)}")
+    if yasak:
+        for x0, y0, x1, y1 in kutular:
+            if x0 < yasak[2] and yasak[0] < x1 and y0 < yasak[3] and yasak[1] < y1:
+                hata.append(f"gorsel sutununa tasma: ({int(x0)},{int(y0)})-({int(x1)},{int(y1)})")
+    return hata
 
 
 INDIRME_IKON = [  # 24x24 izgara, tabler "download" dili: ok + tepsi
@@ -244,39 +302,35 @@ def kart_included(pal, F, pair_txt, posterler):
     k = KART["INCLUDED"]
     im, d = card_base(pal, F, k["kicker"], k["title"], pair_txt, k["footer"])
     fan = poster_yelpazesi(posterler, 960)
+    yasak = None
     if fan is not None:
         oran = min(1.0, 1080 / fan.width, 1180 / fan.height)
         fan = fan.resize((int(fan.width * oran), int(fan.height * oran)), Image.LANCZOS)
-        im.paste(fan, (2440 - fan.width // 2, 1290 - fan.height // 2), fan)
-    numbered_rows(d, F, pal, k["rows"], 640, 1900)
-    return im
+        yer = (2440 - fan.width // 2, 1290 - fan.height // 2)
+        im.paste(fan, yer, fan)
+        yasak = (yer[0] + 70, yer[1] + 70, yer[0] + fan.width - 70, yer[1] + fan.height - 70)
+    kutular = satirlar_ciz(d, F, pal, k["rows"], 620, 1900, en_sinir=1340)
+    return im, kutular, yasak
 
 
 def kart_sizes(pal, F, pair_txt, posterler):
+    """Gercek olcekli oran kutulari KALDIRILDI; satirlar tum genisligi kullanir."""
     k = KART["SIZES"]
     im, d = card_base(pal, F, k["kicker"], k["title"], pair_txt, k["footer"])
     satirlar, _ = boy_satirlari(OLCUM or None)
-    kutular = []
-    for oran, liste in BOYLAR.items():
-        uygun = liste
-        if OLCUM and oran in OLCUM:
-            en_px, boy_px = OLCUM[oran]
-            uygun = [b for b in liste if b[1] * 300 <= en_px + 2 and b[2] * 300 <= boy_px + 2]
-        if uygun:
-            kutular.append((ORAN_ADI[oran].replace(" RATIO", ""), uygun[-1][1], uygun[-1][2]))
-    diy = oran_diyagrami(pal, F, 980, 900, kutular)
-    im.paste(diy, (2450 - diy.width // 2, 1290 - diy.height // 2), diy)
-    numbered_rows3(d, F, pal, satirlar, 620, 1900)
-    return im
+    kutular = satirlar_ciz(d, F, pal, satirlar, 600, 1920, en_sinir=2200, boy_satiri=True)
+    return im, kutular, None
 
 
 def kart_howto(pal, F, pair_txt, posterler):
     k = KART["HOWTO"]
     im, d = card_base(pal, F, k["kicker"], k["title"], pair_txt, k["footer"])
-    ikon = indirme_ikonu(pal, 520, 4)
-    im.paste(ikon, (2440 - ikon.width // 2, 1270 - ikon.height // 2), ikon)
-    numbered_rows(d, F, pal, k["rows"], 640, 1880)
-    return im
+    ikon = indirme_ikonu(pal, 460, 4)
+    yer = (2560 - ikon.width // 2, 1270 - ikon.height // 2)
+    im.paste(ikon, yer, ikon)
+    yasak = (yer[0], yer[1], yer[0] + ikon.width, yer[1] + ikon.height)
+    kutular = satirlar_ciz(d, F, pal, k["rows"], 620, 1880, en_sinir=1780)
+    return im, kutular, yasak
 
 
 def bes_renk(pal, F, pair_txt, posterler, yukseklik=1080):
@@ -288,22 +342,22 @@ def bes_renk(pal, F, pair_txt, posterler, yukseklik=1080):
     f_ad = F.f("sans", solve_size(F, "sans", 600, 26), 600)
     draw_tracked(d, (W / 2, 210), "FIVE COLOR EDITIONS", f_kick, mix(pal["ink"], pal["bg"], 0.35),
                  tracking=solve_tracking(d, f_kick, *REF["kicker_w"]), anchor="c")
-    d.text((W / 2, 300), "5 Colors, One Download", font=f_baslik, fill=pal["ink"], anchor="ma")
+    d.text((W / 2, 300), "Five Colors, One Download", font=f_baslik, fill=pal["ink"], anchor="ma")
     d.line([(W / 2 - 240, 520), (W / 2 + 240, 520)], fill=pal["rule"], width=3)
 
     if not posterler:
         return im
     n = len(posterler)
-    bosluk, kenar = 46, 150
+    bosluk, kenar = 34, 70                                    # ~%20 daha buyuk poster
     pw = int((W - kenar * 2 - bosluk * (n - 1)) / n)
     yukseklik = int(pw * posterler[0].height / posterler[0].width)
-    ust, alt = 560, H - 150                                   # rule alti ile alt bar arasi
-    if yukseklik + 120 > alt - ust:
-        yukseklik = alt - ust - 120
+    ust, alt = 540, H - 150                                   # rule alti ile alt bar arasi
+    if yukseklik + 110 > alt - ust:
+        yukseklik = alt - ust - 110
         pw = int(yukseklik * posterler[0].width / posterler[0].height)
     toplam = pw * n + bosluk * (n - 1)
     x0 = (W - toplam) // 2
-    y0 = ust + int((alt - ust - (yukseklik + 120)) / 2)
+    y0 = ust + int((alt - ust - (yukseklik + 110)) / 2)
     for i, (poster, ad) in enumerate(zip(posterler, EDISYONLAR)):
         th = poster.convert("RGB").resize((pw, yukseklik), Image.LANCZOS)
         x = x0 + i * (pw + bosluk)

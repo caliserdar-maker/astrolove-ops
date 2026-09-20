@@ -25,6 +25,7 @@ on:
       - 'config/dijital78_v3.trigger'
       - 'config/dijital78_v4.trigger'
       - 'config/dijital78_v5.trigger'
+      - 'config/dijital78_v6.trigger'
 
 concurrency:
   group: etsy-token
@@ -96,7 +97,7 @@ jobs:
           done
 
       - name: 'ADIM 1  Galeri kaynak eslemesi + ornek galeri (Etsy salt okur, tavan 30)'
-        if: ${{ steps.girdiler.outcome == 'success' && inputs.galeri != 'hayir' && !contains(github.event.head_commit.message, '[zip-only]') }}
+        if: ${{ steps.girdiler.outcome == 'success' && inputs.galeri != 'hayir' && !contains(github.event.head_commit.message, '[zip-only]') && !contains(github.event.head_commit.message, '[v2-only]') && !contains(github.event.head_commit.message, '[v3-only]') }}
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
@@ -111,7 +112,7 @@ jobs:
           ls -la _out
 
       - name: 'ADIM 2  ZIP uretimi (390 ZIP, kayipsiz + tesekkur PDF, en uzun adim)'
-        if: ${{ always() && steps.girdiler.outcome == 'success' && !contains(github.event.head_commit.message, '[v2-only]') }}
+        if: ${{ always() && steps.girdiler.outcome == 'success' && !contains(github.event.head_commit.message, '[v2-only]') && !contains(github.event.head_commit.message, '[v3-only]') }}
         run: |
           set -euo pipefail
           python scripts/etsy/dijital78_zipfinal.py --kok "$ZIP_KOK" --pdf _work/thankyou.pdf \
@@ -122,9 +123,12 @@ jobs:
           df -h /
 
       - name: 'ADIM 3  Galeri V2 (plakali kapak, 3 kart, 5 RENK, dizilim) - Etsy cagrisi YOK'
-        if: ${{ steps.girdiler.outcome == 'success' && contains(github.event.head_commit.message, '[v2-only]') }}
+        if: ${{ steps.girdiler.outcome == 'success' && (contains(github.event.head_commit.message, '[v2-only]') || contains(github.event.head_commit.message, '[v3-only]')) }}
+        env:
+          HEDEF: ${{ contains(github.event.head_commit.message, '[v3-only]') && 'GALERI_V3' || 'GALERI_V2' }}
         run: |
           set -euo pipefail
+          echo "GALERI_HEDEF=$HEDEF" >> "$GITHUB_ENV"
           mkdir -p _out_v2 _work/ziplar
           rclone copyto "$CIKTI/GALERI_V1/GALERI_KAYNAK.csv" _work/GALERI_KAYNAK.csv
           rclone copy "$CIKTI/ZIP_FINAL/$CIFT" _work/ziplar -q --transfers 4
@@ -150,9 +154,9 @@ jobs:
             rclone lsf "$CIKTI/GALERI_V1" --format "psi" --separator " | " | sed 's/^/  - /'
           fi
           if [ -n "$(ls -A _out_v2 2>/dev/null)" ]; then
-            rclone copy _out_v2 "$CIKTI/GALERI_V2" -q
-            echo "GALERI_V2 (dosya | bayt | Drive id)"
-            rclone lsf "$CIKTI/GALERI_V2" --format "psi" --separator " | " | sed 's/^/  - /'
+            rclone copy _out_v2 "$CIKTI/${GALERI_HEDEF:-GALERI_V2}" -q
+            echo "${GALERI_HEDEF:-GALERI_V2} (dosya | bayt | Drive id)"
+            rclone lsf "$CIKTI/${GALERI_HEDEF:-GALERI_V2}" --format "psi" --separator " | " | sed 's/^/  - /'
           fi
           if [ -n "$(ls -A _out_zip 2>/dev/null)" ]; then
             rclone copy _out_zip "$CIKTI/ZIP_FINAL" -q

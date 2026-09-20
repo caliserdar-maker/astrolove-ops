@@ -35,7 +35,7 @@ from pod_gallery_sample import Fonts, palette  # noqa: E402
 
 EDISYON_SIRA = ["Midnight_Blue", "Deep_Black", "Warm_Parchment", "Champagne_Ivory", "Pure_White"]
 ORANLAR = {"2:3": 2 / 3, "3:4": 3 / 4, "4:5": 4 / 5, "11:14": 11 / 14, "A": 1 / 2 ** 0.5}
-KUTU = ["1 KAPAK (plakali)", "2 VIDEO (V11)", "3 5 COLORS", "4 ODA 1", "5 ODA 2",
+KUTU = ["1 KAPAK (etiketsiz)", "2 VIDEO (V11)", "3 5 COLORS", "4 ODA 1", "5 ODA 2",
         "6 SYMBOL STORY", "7 CRAFTED", "8 WHAT'S INCLUDED", "9 PRINT SIZES",
         "10 HOW TO DOWNLOAD", "11 MIDNIGHT BLUE", "12 DEEP BLACK", "13 WARM PARCHMENT",
         "14 CHAMPAGNE IVORY", "15 PURE WHITE"]
@@ -99,7 +99,10 @@ def main():
     ap.add_argument("--fonts", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--medya", default="_work/galeri_v2")
-    ap.add_argument("--plaka-betik", default="scripts/pod/dijital_kapak_plaka.py")
+    ap.add_argument("--plaka-betik", default="")
+    ap.add_argument("--kartlar-ad", default="DIJITAL_KARTLAR_V3.jpg")
+    ap.add_argument("--bes-ad", default="BES_RENK_V2.jpg")
+    ap.add_argument("--dizilim-ad", default="GALERI_DIZILIM_V3.jpg")
     a = ap.parse_args()
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
     medya = Path(a.medya); medya.mkdir(parents=True, exist_ok=True)
@@ -136,17 +139,16 @@ def main():
     print(f"olculen piksel: {olcum}", flush=True)
     K.OLCUM = olcum
 
-    # --------------------------------------------------- kapak plakasi
-    kapak_yol = medya / "01.jpg"
-    r2 = subprocess.run([sys.executable, a.plaka_betik, "--kapak", str(kapak_yol),
-                         "--fonts", a.fonts, "--out", str(out),
-                         "--plaka-genislik", "0.62", "--plaka-yukseklik", "200"],
-                        capture_output=True, text=True, timeout=1200)
-    print((r2.stdout or "").strip()[-900:], flush=True)
-    if r2.returncode != 0:
-        print(f"::error::plaka: {(r2.stderr or '')[-400:]}", flush=True)
-        raise SystemExit(2)
-    plakali = Image.open(out / "KAPAK_PLAKA.jpg").convert("RGB")
+    # --------------------------------------------------- kapak: ETIKETSIZ (Serdar karari)
+    kapak = canli.get(1)
+    if a.plaka_betik:
+        r2 = subprocess.run([sys.executable, a.plaka_betik, "--kapak", str(medya / "01.jpg"),
+                             "--fonts", a.fonts, "--out", str(out)],
+                            capture_output=True, text=True, timeout=1200)
+        print((r2.stdout or "").strip()[-600:], flush=True)
+        if r2.returncode == 0:
+            kapak = Image.open(out / "KAPAK_PLAKA.jpg").convert("RGB")
+    print("kapak: canli POD kapagi birebir (etiket/plaka yok)", flush=True)
 
     # --------------------------------------------------- kartlar + 5 renk
     hatalar = K.qc(K.KART)
@@ -159,14 +161,21 @@ def main():
     F = Fonts(a.fonts)
     a1, b1 = a.cift.split("_")[0], a.cift.split("_")[-1]
     pair_txt = f"{a1} • {b1}"
-    kartlar = []
+    kartlar, kapi_hata = [], []
     for ad, fn in K.CIZ:
-        im = fn(pal, F, pair_txt, posterler)
+        im, kutular, yasak = fn(pal, F, pair_txt, posterler)
+        h = K.kutu_kapisi(kutular, yasak)
+        kapi_hata += [f"{ad}: {x}" for x in h]
+        print(f"  kart {ad} {im.size} | {len(kutular)} metin kutusu | "
+              f"yerlesim kapisi {'PASS' if not h else 'FAIL'}", flush=True)
         kartlar.append(im)
-        print(f"  kart {ad} {im.size}", flush=True)
+    if kapi_hata:
+        for x in kapi_hata[:8]:
+            print("::error::" + x, flush=True)
+        raise SystemExit(3)
     bes = K.bes_renk(pal, F, pair_txt, posterler)
-    q = kaydet_sinirli(bes, out / "BES_RENK.jpg", 800_000)
-    print(f"BES_RENK.jpg {bes.size} q{q} {(out/'BES_RENK.jpg').stat().st_size/1e3:.0f} KB", flush=True)
+    q = kaydet_sinirli(bes, out / a.bes_ad, 800_000)
+    print(f"{a.bes_ad} {bes.size} q{q} {(out/a.bes_ad).stat().st_size/1e3:.0f} KB", flush=True)
 
     kw, kh, bosluk = 1000, 750, 40
     sayfa = Image.new("RGB", (3 * kw + 4 * bosluk, kh + 2 * bosluk + 90), (250, 250, 248))
@@ -177,9 +186,9 @@ def main():
         sayfa.paste(im.resize((kw, kh), Image.LANCZOS), (x, bosluk))
         d.rectangle([x, bosluk, x + kw - 1, bosluk + kh - 1], outline=(210, 208, 202), width=2)
         d.text((x, bosluk + kh + 16), f"{8+i}. {ad}", font=F.f("sans", 30, 600), fill=(30, 34, 46))
-    q = kaydet_sinirli(sayfa, out / "DIJITAL_KARTLAR_V2.jpg", 800_000)
-    print(f"DIJITAL_KARTLAR_V2.jpg {sayfa.size} q{q} "
-          f"{(out/'DIJITAL_KARTLAR_V2.jpg').stat().st_size/1e3:.0f} KB", flush=True)
+    q = kaydet_sinirli(sayfa, out / a.kartlar_ad, 800_000)
+    print(f"{a.kartlar_ad} {sayfa.size} q{q} "
+          f"{(out/a.kartlar_ad).stat().st_size/1e3:.0f} KB", flush=True)
 
     # --------------------------------------------------- 15 kutuluk dizilim
     kare0 = None
@@ -202,7 +211,7 @@ def main():
     symbol = int(rol["SYMBOL_STORY"][0]["sira"]) if rol.get("SYMBOL_STORY") else None
     craft = int(rol["CRAFTED"][0]["sira"]) if rol.get("CRAFTED") else None
     edisyon = [int(r["sira"]) for r in rol.get("EDISYON", [])][:5]
-    kutular = [(plakali, "POD kapak + plaka"), (kare0, "V11 video, kare 0"), (bes, "YENI gorsel")]
+    kutular = [(kapak, "POD kapagi (etiketsiz)"), (kare0, "V11 video, kare 0"), (bes, "YENI gorsel")]
     kutular += [(canli.get(s), f"POD gorsel {s}") for s in oda]
     kutular += [(canli.get(symbol), f"POD gorsel {symbol}"), (canli.get(craft), f"POD gorsel {craft}")]
     kutular += [(k, "YENI kart") for k in kartlar]
@@ -213,7 +222,7 @@ def main():
     sayfa2 = Image.new("RGB", (sut * kw2 + (sut + 1) * bo, 130 + sat * (kh2 + 100) + bo),
                        (250, 250, 248))
     d2 = ImageDraw.Draw(sayfa2)
-    d2.text((bo, 34), f"DIJITAL GALERI DIZILIMI V2 - {a.cift.replace('_', ' + ')} "
+    d2.text((bo, 34), f"DIJITAL GALERI DIZILIMI V3 - {a.cift.replace('_', ' + ')} "
             f"(Etsy duzenleme ekrani sirasi)", font=F.f("sans", 34, 700), fill=(28, 38, 62))
     d2.text((bo, 82), "14 gorsel + 1 video. 'YENI' olanlar bu oturumda uretildi.",
             font=F.f("sans", 26, 400), fill=(110, 110, 116))
@@ -229,9 +238,9 @@ def main():
         d2.rectangle([x, y, x + kw2 - 1, y + kh2 - 1], outline=(200, 198, 192), width=2)
         d2.text((x, y + kh2 + 10), KUTU[i], font=F.f("sans", 26, 600), fill=(30, 34, 46))
         d2.text((x, y + kh2 + 46), kaynak, font=F.f("sans", 24, 400), fill=(120, 120, 126))
-    q = kaydet_sinirli(sayfa2, out / "GALERI_DIZILIM_V2.jpg", 800_000)
-    print(f"GALERI_DIZILIM_V2.jpg {sayfa2.size} q{q} "
-          f"{(out/'GALERI_DIZILIM_V2.jpg').stat().st_size/1e3:.0f} KB", flush=True)
+    q = kaydet_sinirli(sayfa2, out / a.dizilim_ad, 800_000)
+    print(f"{a.dizilim_ad} {sayfa2.size} q{q} "
+          f"{(out/a.dizilim_ad).stat().st_size/1e3:.0f} KB", flush=True)
 
     (out / "OLCUM_V2.json").write_text(json.dumps(
         {"olculen_piksel": olcum, "poster_sayisi": len(posterler),
