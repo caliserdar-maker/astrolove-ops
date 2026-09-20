@@ -92,21 +92,51 @@ def bant_kontrol(bant, serit):
     return int((fark > INK).sum()), int(fark.max()), round(kayma, 2), round(float(serit.std()), 2)
 
 
+def _germe(arr):
+    """Kontrast germe: bandin kendi min-max araligi 0-255'e acilir (yapi gorunur olsun)."""
+    a = arr.astype(np.float32)
+    lo, hi = np.percentile(a, 0.5), np.percentile(a, 99.5)
+    if hi - lo < 1e-3:
+        hi = lo + 1
+    return Image.fromarray(np.clip((a - lo) * 255.0 / (hi - lo), 0, 255).astype(np.uint8))
+
+
 def tani(im, y0, nh, dizin, ad):
-    """Tani goruntusu: ust bant | ust serit || alt serit | alt bant (kucultulmus)."""
+    """Tani: ust bant (ham + gerilmis) | ust serit || alt serit | alt bant; sapan bloklar kirmizi."""
+    from PIL import ImageDraw
     sw, sh = im.size
     alt_h = sh - (y0 + nh)
-    parcalar = [im.crop((0, 0, sw, y0)), im.crop((0, y0, sw, y0 + y0)),
-                im.crop((0, y0 + nh - alt_h, sw, y0 + nh)), im.crop((0, y0 + nh, sw, sh))]
+    a = np.asarray(im)
+    parcalar = [("ust_bant", a[:y0]), ("ust_serit", a[y0:y0 + y0]),
+                ("alt_serit", a[y0 + nh - alt_h:y0 + nh]), ("alt_bant", a[y0 + nh:])]
     g = 1400
-    kucuk = [p.resize((g, max(1, round(g * p.size[1] / p.size[0]))), Image.LANCZOS) for p in parcalar]
-    yuk = sum(p.size[1] for p in kucuk) + 3 * 8
-    tuval = Image.new("RGB", (g, yuk), (255, 0, 0))
-    y = 0
-    for p in kucuk:
-        tuval.paste(p, (0, y)); y += p.size[1] + 8
+    katlar = []
+    for ad2, arr in parcalar:
+        ham = Image.fromarray(arr).resize((g, max(1, round(g * arr.shape[0] / arr.shape[1]))), Image.LANCZOS)
+        ger = _germe(arr).resize(ham.size, Image.LANCZOS).convert("RGB")
+        katlar.append((ad2, ham, ger))
+    yuk = sum(h.size[1] + ge.size[1] + 22 for _, h, ge in katlar) + 20
+    tuval = Image.new("RGB", (g, yuk), (250, 250, 250))
+    d = ImageDraw.Draw(tuval)
+    y = 6
+    for ad2, ham, ger in katlar:
+        tuval.paste(ham, (0, y)); y += ham.size[1] + 2
+        tuval.paste(ger, (0, y)); y += ger.size[1] + 4
+        d.text((6, y), f"{ad2} (ust: ham, alt: kontrast gerilmis)", fill=(180, 0, 0)); y += 16
     dizin.mkdir(parents=True, exist_ok=True)
-    tuval.save(dizin / f"BANT_{ad}.jpg", "JPEG", quality=88, optimize=True)
+    tuval.save(dizin / f"BANT_{ad}.jpg", "JPEG", quality=90, optimize=True)
+
+
+def sapan_bloklar(bant, serit, n=3):
+    """En cok sapan bloklarin (satir, sutun, sapma) listesi — konum teshisi icin."""
+    if bant.size == 0 or serit.size == 0:
+        return []
+    b, r = bloklar(bant), bloklar(serit)
+    sap = np.abs(b - float(r.mean()))
+    idx = np.dstack(np.unravel_index(np.argsort(-sap, axis=None), sap.shape))[0][:n]
+    return [(int(i), int(j), round(float(sap[i, j]), 1),
+             f"px y~{int(i) * BLOK[0]}-{(int(i) + 1) * BLOK[0]}, x~{int(j) * BLOK[1]}-{(int(j) + 1) * BLOK[1]}")
+            for i, j in idx]
 
 
 def uret(usta_yol, cikti_yol, oran, tani_dizin=None, tani_ad=""):
@@ -131,6 +161,9 @@ def uret(usta_yol, cikti_yol, oran, tani_dizin=None, tani_ad=""):
     alt_b, alt_e, alt_n = yapi_kontrol(a[y0 + nh:], a[y0 + nh - alt_h:y0 + nh])
     if tani_dizin is not None:
         tani(im, y0, nh, tani_dizin, tani_ad)
+        log(f"  {tani_ad} ust bant sapan bloklar: {sapan_bloklar(a[:y0], a[y0:y0 + y0])}")
+        log(f"  {tani_ad} alt bant sapan bloklar: "
+            f"{sapan_bloklar(a[y0 + nh:], a[y0 + nh - alt_h:y0 + nh])}")
     kirp = im.crop((0, y0, sw, y0 + nh))
     dpi = round(kirp.size[0] / (1535 / 300.0))
     cikti_yol.parent.mkdir(parents=True, exist_ok=True)
