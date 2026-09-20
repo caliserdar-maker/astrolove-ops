@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       mod:
-        description: "kuru | pilot | toplu | maliyet | dogrula"
+        description: "kuru | pilot | toplu | maliyet | dogrula | hpr"
         default: "kuru"
       listing:
         description: "pilot icin ilan id"
@@ -48,11 +48,11 @@ jobs:
       - name: Onay kapisi
         run: |
           set -euo pipefail
-          if [ "$MOD" != "kuru" ] && [ "$MOD" != "maliyet" ] && [ "$MOD" != "dogrula" ] && { [ "$APPLY" != "true" ] || [ "$CONFIRM" != "FIYAT_2999" ]; }; then
+          if [ "$MOD" != "kuru" ] && [ "$MOD" != "maliyet" ] && [ "$MOD" != "dogrula" ] && [ "$MOD" != "hpr" ] && { [ "$APPLY" != "true" ] || [ "$CONFIRM" != "FIYAT_2999" ]; }; then
             echo "::error::pilot/toplu icin apply=true ve confirm 'FIYAT_2999' olmali. DUR."
             exit 1
           fi
-          if [ "$APPLY" = "true" ] && { [ "$MOD" = "kuru" ] || [ "$MOD" = "maliyet" ] || [ "$MOD" = "dogrula" ]; }; then
+          if [ "$APPLY" = "true" ] && { [ "$MOD" = "kuru" ] || [ "$MOD" = "maliyet" ] || [ "$MOD" = "dogrula" ] || [ "$MOD" = "hpr" ]; }; then
             echo "::error::mod=$MOD ile yazma olmaz. DUR."
             exit 1
           fi
@@ -66,7 +66,7 @@ jobs:
           cache: pip
       - run: |
           set -euo pipefail
-          pip install -q requests==2.34.2
+          pip install -q requests==2.34.2 pillow==11.0.0
           curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
       - name: rclone.conf olustur
         env:
@@ -83,6 +83,7 @@ jobs:
             fi
           fi
       - name: Token
+        if: ${{ inputs.mod != 'hpr' && inputs.mod != 'maliyet' }}
         run: |
           set -euo pipefail
           umask 077; mkdir -p _work
@@ -95,7 +96,9 @@ jobs:
           TOKEN_FILE: _work/ETSY_TOKEN.json
         run: |
           set -euo pipefail
-          if [ "$MOD" = "dogrula" ]; then
+          if [ "$MOD" = "hpr" ]; then
+            python scripts/prodigi/pod_hpr_kucuk_boy.py --is-dizin _work/hpr
+          elif [ "$MOD" = "dogrula" ]; then
             python scripts/pod/pod_fiyat_2999.py dogrula --limit "$LIMIT"
           elif [ "$MOD" = "maliyet" ]; then
             python scripts/prodigi/pod_maliyet_2999.py --out-dir _work/maliyet
