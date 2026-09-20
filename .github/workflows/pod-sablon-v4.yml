@@ -1,7 +1,7 @@
-name: pod-sablon-v4 (galeri duzeni)
+name: pod-sablon-v4 (fiyat 30.99 -> 29.99)
 
-# Hedef duzen: 1 kapak | 2-3 oda | 4-8 bilgi | 9-13 edisyon (MB,DB,WP,CI,PW).
-# mod=pilot: tek ilan (apply icin confirm=GALERI_DUZEN). mod=kuru: 78 ilan salt okuma.
+# mod=kuru : 78 ilan salt okuma denetimi -> FIYAT_PLANI.csv (Drive POD_FIYAT_2999).
+# mod=pilot: tek ilan yazma (confirm=FIYAT_2999). mod=toplu: kalan ilanlar.
 
 permissions:
   contents: read
@@ -10,23 +10,20 @@ on:
   workflow_dispatch:
     inputs:
       mod:
-        description: "pilot | kuru | toplu"
+        description: "kuru | pilot | toplu"
         default: "kuru"
       listing:
         description: "pilot icin ilan id"
-        default: "4570031205"
-      hedef:
-        description: "pilot icin acik hedef sira (virgulle 13 id, bos = kural)"
-        default: ""
+        default: "4570110641"
       apply:
-        description: "true = Etsy'ye yaz (yalniz pilot)"
+        description: "true = Etsy'ye yaz (pilot/toplu)"
         type: boolean
         default: false
       confirm:
-        description: "apply=true icin tam olarak GALERI_DUZEN"
+        description: "apply=true icin tam olarak FIYAT_2999"
         default: ""
       limit:
-        description: "kuru: kac ilan (0 = hepsi)"
+        description: "kac ilan (0 = hepsi)"
         default: "0"
 
 concurrency:
@@ -34,33 +31,28 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  duzen:
+  fiyat:
     runs-on: ubuntu-latest
     timeout-minutes: 300
     env:
       MOD: ${{ inputs.mod || 'kuru' }}
       APPLY: ${{ inputs.apply && 'true' || 'false' }}
       CONFIRM: ${{ inputs.confirm || '' }}
-      LISTING: ${{ inputs.listing || '4570031205' }}
-      HEDEF: ${{ inputs.hedef || '' }}
+      LISTING: ${{ inputs.listing || '4570110641' }}
       LIMIT: ${{ inputs.limit || '0' }}
     steps:
       - name: Onay kapisi
         run: |
           set -euo pipefail
-          if [ "$APPLY" = "true" ] && [ "$MOD" = "pilot" ] && [ "$CONFIRM" != "GALERI_DUZEN" ]; then
-            echo "::error::pilot yazma icin confirm 'GALERI_DUZEN' olmali. DUR."
-            exit 1
-          fi
-          if [ "$APPLY" = "true" ] && [ "$MOD" = "toplu" ] && [ "$CONFIRM" != "GALERI_TOPLU" ]; then
-            echo "::error::toplu yazma icin confirm 'GALERI_TOPLU' olmali. DUR."
+          if [ "$MOD" != "kuru" ] && { [ "$APPLY" != "true" ] || [ "$CONFIRM" != "FIYAT_2999" ]; }; then
+            echo "::error::pilot/toplu icin apply=true ve confirm 'FIYAT_2999' olmali. DUR."
             exit 1
           fi
           if [ "$APPLY" = "true" ] && [ "$MOD" = "kuru" ]; then
             echo "::error::mod=kuru ile yazma olmaz. DUR."
             exit 1
           fi
-          [ "$APPLY" = "true" ] && echo "::warning::APPLY: $LISTING galeri sirasi degisecek." || echo "KURU DENEME: Etsy yazma yok."
+          [ "$APPLY" = "true" ] && echo "::warning::APPLY: 30.99 USD secenekler 29.99 olacak ($MOD)." || echo "KURU DENEME: Etsy yazma yok."
       - uses: actions/checkout@v4
         with:
           ref: pod-v4
@@ -70,7 +62,7 @@ jobs:
           cache: pip
       - run: |
           set -euo pipefail
-          pip install -q requests==2.34.2 pillow==11.0.0 numpy==2.1.3
+          pip install -q requests==2.34.2
           curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
       - name: rclone.conf olustur
         env:
@@ -91,7 +83,7 @@ jobs:
           set -euo pipefail
           umask 077; mkdir -p _work
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
-      - name: 'Galeri duzeni'
+      - name: 'Fiyat 30.99 -> 29.99'
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
@@ -99,20 +91,12 @@ jobs:
           TOKEN_FILE: _work/ETSY_TOKEN.json
         run: |
           set -euo pipefail
-          if [ "$MOD" = "toplu" ]; then
-            if [ "$APPLY" = "true" ]; then
-              python scripts/pod/pod_galeri_toplu.py --apply --confirm "$CONFIRM" --limit "$LIMIT"
-            else
-              python scripts/pod/pod_galeri_toplu.py --limit "$LIMIT"
-            fi
-          elif [ "$MOD" = "pilot" ]; then
-            if [ "$APPLY" = "true" ]; then
-              python scripts/pod/pod_galeri_duzen.py pilot --listing "$LISTING" --hedef "$HEDEF" --apply --confirm "$CONFIRM"
-            else
-              python scripts/pod/pod_galeri_duzen.py pilot --listing "$LISTING" --hedef "$HEDEF"
-            fi
+          if [ "$MOD" = "pilot" ]; then
+            python scripts/pod/pod_fiyat_2999.py pilot --listing "$LISTING" --apply --confirm "$CONFIRM"
+          elif [ "$MOD" = "toplu" ]; then
+            python scripts/pod/pod_fiyat_2999.py toplu --apply --confirm "$CONFIRM" --limit "$LIMIT"
           else
-            python scripts/pod/pod_galeri_duzen.py kuru --limit "$LIMIT"
+            python scripts/pod/pod_fiyat_2999.py kuru --limit "$LIMIT"
           fi
       - name: Token geri yazma
         if: ${{ always() }}
