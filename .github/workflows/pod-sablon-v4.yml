@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       mod:
-        description: "kuru | pilot | toplu"
+        description: "kuru | pilot | toplu | maliyet"
         default: "kuru"
       listing:
         description: "pilot icin ilan id"
@@ -44,12 +44,12 @@ jobs:
       - name: Onay kapisi
         run: |
           set -euo pipefail
-          if [ "$MOD" != "kuru" ] && { [ "$APPLY" != "true" ] || [ "$CONFIRM" != "FIYAT_2999" ]; }; then
+          if [ "$MOD" != "kuru" ] && [ "$MOD" != "maliyet" ] && { [ "$APPLY" != "true" ] || [ "$CONFIRM" != "FIYAT_2999" ]; }; then
             echo "::error::pilot/toplu icin apply=true ve confirm 'FIYAT_2999' olmali. DUR."
             exit 1
           fi
-          if [ "$APPLY" = "true" ] && [ "$MOD" = "kuru" ]; then
-            echo "::error::mod=kuru ile yazma olmaz. DUR."
+          if [ "$APPLY" = "true" ] && { [ "$MOD" = "kuru" ] || [ "$MOD" = "maliyet" ]; }; then
+            echo "::error::mod=$MOD ile yazma olmaz. DUR."
             exit 1
           fi
           [ "$APPLY" = "true" ] && echo "::warning::APPLY: 30.99 USD secenekler 29.99 olacak ($MOD)." || echo "KURU DENEME: Etsy yazma yok."
@@ -91,7 +91,9 @@ jobs:
           TOKEN_FILE: _work/ETSY_TOKEN.json
         run: |
           set -euo pipefail
-          if [ "$MOD" = "pilot" ]; then
+          if [ "$MOD" = "maliyet" ]; then
+            python scripts/prodigi/pod_maliyet_2999.py --out-dir _work/maliyet
+          elif [ "$MOD" = "pilot" ]; then
             python scripts/pod/pod_fiyat_2999.py pilot --listing "$LISTING" --apply --confirm "$CONFIRM"
           elif [ "$MOD" = "toplu" ]; then
             python scripts/pod/pod_fiyat_2999.py toplu --apply --confirm "$CONFIRM" --limit "$LIMIT"
