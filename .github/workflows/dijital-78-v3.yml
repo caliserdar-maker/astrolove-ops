@@ -24,6 +24,7 @@ on:
     paths:
       - 'config/dijital78_v3.trigger'
       - 'config/dijital78_v4.trigger'
+      - 'config/dijital78_v5.trigger'
 
 concurrency:
   group: etsy-token
@@ -86,7 +87,7 @@ jobs:
         id: girdiler
         run: |
           set -euo pipefail
-          umask 077; mkdir -p _work _out _out_zip
+          umask 077; mkdir -p _work _out _out_zip _out_v2
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
           rclone copyto "$CROSSLINK" _work/crosslink_result.json
           rclone copyto "$THANKYOU"  _work/thankyou.pdf
@@ -110,7 +111,7 @@ jobs:
           ls -la _out
 
       - name: 'ADIM 2  ZIP uretimi (390 ZIP, kayipsiz + tesekkur PDF, en uzun adim)'
-        if: ${{ always() && steps.girdiler.outcome == 'success' }}
+        if: ${{ always() && steps.girdiler.outcome == 'success' && !contains(github.event.head_commit.message, '[v2-only]') }}
         run: |
           set -euo pipefail
           python scripts/etsy/dijital78_zipfinal.py --kok "$ZIP_KOK" --pdf _work/thankyou.pdf \
@@ -120,6 +121,19 @@ jobs:
             --yukle-kok "$DIJITAL_KOK" --yukle-yol "ZIP_FINAL"
           df -h /
 
+      - name: 'ADIM 3  Galeri V2 (plakali kapak, 3 kart, 5 RENK, dizilim) - Etsy cagrisi YOK'
+        if: ${{ steps.girdiler.outcome == 'success' && contains(github.event.head_commit.message, '[v2-only]') }}
+        run: |
+          set -euo pipefail
+          mkdir -p _out_v2 _work/ziplar
+          rclone copyto "$CIKTI/GALERI_V1/GALERI_KAYNAK.csv" _work/GALERI_KAYNAK.csv
+          rclone copy "$CIKTI/ZIP_FINAL/$CIFT" _work/ziplar -q --transfers 4
+          find _work/ziplar -name '*.zip' | wc -l
+          python scripts/etsy/dijital78_galeri_v2.py --kaynak-csv _work/GALERI_KAYNAK.csv \
+            --zip-dizin _work/ziplar --cift "$CIFT" --fonts fonts \
+            --out _out_v2 --medya _work/galeri_v2
+          ls -la _out_v2
+
       - name: Sir taramasi + Drive'a yaz
         if: ${{ always() }}
         run: |
@@ -127,13 +141,18 @@ jobs:
           [ -f _work/ETSY_TOKEN.json.updated ] && \
             rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && \
             echo "Token geri yazildi" || true
-          if grep -rqaE 'x-api-key|refresh_token|access_token|client_secret' _out _out_zip 2>/dev/null; then
+          if grep -rqaE 'x-api-key|refresh_token|access_token|client_secret' _out _out_zip _out_v2 2>/dev/null; then
             echo "::error::ciktida sir benzeri anahtar bulundu, Drive'a yazilmadi"; exit 1
           fi
           if [ -n "$(ls -A _out 2>/dev/null)" ]; then
             rclone copy _out "$CIKTI/GALERI_V1" -q
             echo "GALERI_V1 (dosya | bayt | Drive id)"
             rclone lsf "$CIKTI/GALERI_V1" --format "psi" --separator " | " | sed 's/^/  - /'
+          fi
+          if [ -n "$(ls -A _out_v2 2>/dev/null)" ]; then
+            rclone copy _out_v2 "$CIKTI/GALERI_V2" -q
+            echo "GALERI_V2 (dosya | bayt | Drive id)"
+            rclone lsf "$CIKTI/GALERI_V2" --format "psi" --separator " | " | sed 's/^/  - /'
           fi
           if [ -n "$(ls -A _out_zip 2>/dev/null)" ]; then
             rclone copy _out_zip "$CIKTI/ZIP_FINAL" -q
@@ -148,6 +167,7 @@ jobs:
           path: |
             _out/
             _out_zip/
+            _out_v2/
           if-no-files-found: ignore
 
       - if: ${{ always() }}

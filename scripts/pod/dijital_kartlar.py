@@ -16,23 +16,62 @@ import re
 import sys
 from pathlib import Path
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFilter
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from pod_gallery_sample import (  # noqa: E402
     W, H, REF, TEXT, Fonts, card_base, draw_tracked, mix, numbered_rows,
-    palette, paste_shadowed, solve_size,
+    palette, paste_shadowed, solve_size, solve_tracking,
 )
 
-EDISYONLAR = ["Champagne Ivory", "Pure White", "Warm Parchment", "Midnight Blue", "Deep Black"]
+EDISYONLAR = ["Midnight Blue", "Deep Black", "Warm Parchment", "Champagne Ivory", "Pure White"]
+# 300 DPI'de yaygin baski boylari (cm = inc x 2.54, POD Size Guide bicimi: x ve bir ondalik)
+BOYLAR = {
+    "2:3": [("4x6", 4, 6), ("8x12", 8, 12), ("12x18", 12, 18), ("16x24", 16, 24),
+            ("20x30", 20, 30), ("24x36", 24, 36)],
+    "3:4": [("6x8", 6, 8), ("9x12", 9, 12), ("12x16", 12, 16), ("18x24", 18, 24), ("24x32", 24, 32)],
+    "4:5": [("8x10", 8, 10), ("16x20", 16, 20), ("24x30", 24, 30)],
+    "11:14": [("11x14", 11, 14), ("22x28", 22, 28)],
+    "A": [("A5", 5.8, 8.3), ("A4", 8.3, 11.7), ("A3", 11.7, 16.5), ("A2", 16.5, 23.4),
+          ("A1", 23.4, 33.1), ("A0", 33.1, 46.8)],
+}
+ORAN_ADI = {"2:3": "2:3 RATIO", "3:4": "3:4 RATIO", "4:5": "4:5 RATIO",
+            "11:14": "11:14 RATIO", "A": "A SERIES"}
+A_CM = {"A5": (14.8, 21.0), "A4": (21.0, 29.7), "A3": (29.7, 42.0),
+        "A2": (42.0, 59.4), "A1": (59.4, 84.1), "A0": (84.1, 118.9)}   # ISO 216 resmi olculer
+
+
+def cm(inc):
+    """POD Size Guide bicimi: bir ondalik."""
+    return f"{inc * 2.54:.1f}"
+
+
+def boy_satirlari(olculen=None):
+    """Oran -> (baslik, 'Up to ...', 'boy . boy . boy in') uclusu.
+    olculen: {oran: (px_en, px_boy)} verilirse 300 DPI'de sigmayan boylar dusurulur."""
+    satirlar, dusen = [], []
+    for oran, liste in BOYLAR.items():
+        uygun = liste
+        if olculen and oran in olculen:
+            en_px, boy_px = olculen[oran]
+            uygun = [b for b in liste if b[1] * 300 <= en_px + 2 and b[2] * 300 <= boy_px + 2]
+            dusen += [b[0] for b in liste if b not in uygun]
+        if not uygun:
+            continue
+        ad, e, b = uygun[-1]
+        buyuk = (f"Up to {ad} in · {cm(e)}×{cm(b)} cm" if oran != "A"
+                 else f"Up to {ad} · {e:g}×{b:g} in · {cm(e)}×{cm(b)} cm")
+        satirlar.append((ORAN_ADI[oran], buyuk,
+                         " · ".join(x[0] for x in uygun) + ("" if oran == "A" else " in")))
+    return satirlar, dusen
 
 KART = {
     "INCLUDED": {
         "kicker": "EVERY COLOR IN ONE PURCHASE",
         "title": "What's Included",
         "rows": [
-            ("5 COLOR EDITIONS", "Champagne Ivory, Pure White, Warm Parchment, Midnight Blue, Deep Black"),
-            ("5 ZIP FILES", "One archive per color edition, all in the same order"),
+            ("5 COLOR EDITIONS", "Midnight Blue, Deep Black, Warm Parchment, Champagne Ivory, Pure White"),
+            ("5 ZIP FILES", "One archive per color edition, the same files in every archive"),
             ("5 PRINT RATIOS", "2:3, 3:4, 4:5, 11:14 and A series inside every ZIP"),
             ("PRINT AND CARE GUIDE", "A PDF with printing advice in every ZIP"),
             ("THANK YOU NOTE", "A PDF note from us in every ZIP"),
@@ -55,7 +94,8 @@ KART = {
         "kicker": "AFTER YOUR PAYMENT CLEARS",
         "title": "How to Download & Print",
         "rows": [
-            ("DOWNLOAD", "Open Etsy, go to Your account, then Purchases and reviews"),
+            ("DOWNLOAD", "Open Etsy on a computer or mobile browser, go to Your account, "
+                         "then Purchases and reviews. Download all 5 ZIP files"),
             ("UNZIP", "Extract the color edition you want to print"),
             ("CHOOSE", "Pick the JPG that matches your print size"),
             ("PRINT", "At home, at a local print shop or with an online service"),
@@ -86,55 +126,92 @@ def qc(kart):
 
 
 # ------------------------------------------------------------------ sag gorseller
-def poster_yelpazesi(posterler, yukseklik=640):
-    """5 edisyon posteri kademeli yelpaze (soldan saga, sonuncusu onde).
-    Olcu sag sutuna (genislik <= 880 px) sigacak sekilde secildi."""
+def poster_golgesi(w, h, kayma=(16, 26), blur=26, alpha=95):
+    """Yumusak, gercekci dusen golge (kartin acik zeminine)."""
+    dx, dy = kayma
+    pay = blur * 3
+    g = Image.new("RGBA", (w + pay * 2, h + pay * 2), (0, 0, 0, 0))
+    ImageDraw.Draw(g).rectangle([pay + dx, pay + dy, pay + dx + w, pay + dy + h], fill=(18, 22, 34, alpha))
+    return g.filter(ImageFilter.GaussianBlur(blur)), pay
+
+
+def poster_yelpazesi(posterler, yukseklik=700, ortusme=0.42):
+    """5 edisyon posteri: ARKA PLAN YOK, kademeli dizilim, her birinde yumusak golge.
+    Acik posterlerin (Pure White) kenari kaybolmasin diye ince bir kenar cizgisi var."""
     if not posterler:
         return None
-    w = int(yukseklik * 0.75)
-    adim, kademe = int(w * 0.21), int(yukseklik * 0.035)
-    tuval = Image.new("RGBA", (w + adim * (len(posterler) - 1) + 60,
-                               yukseklik + kademe * (len(posterler) - 1) + 60), (0, 0, 0, 0))
-    for i, p in enumerate(posterler):
-        th = p.convert("RGB").resize((w, yukseklik), Image.LANCZOS)
-        golge = Image.new("RGBA", (w + 40, yukseklik + 40), (0, 0, 0, 0))
-        ImageDraw.Draw(golge).rectangle([20, 24, 20 + w, 24 + yukseklik], fill=(0, 0, 0, 70))
-        x, y = i * adim, i * kademe
-        tuval.paste(golge, (x - 10, y - 10), golge)
+    ilk = posterler[0]
+    w = max(1, int(round(yukseklik * ilk.width / ilk.height)))
+    adim, kademe = int(w * (1 - ortusme)), int(yukseklik * 0.045)
+    pay = 90
+    tuval = Image.new("RGBA", (w + adim * (len(posterler) - 1) + pay * 2,
+                               yukseklik + kademe * (len(posterler) - 1) + pay * 2), (0, 0, 0, 0))
+    for i, poster in enumerate(posterler):
+        th = poster.convert("RGB").resize((w, yukseklik), Image.LANCZOS)
+        x, y = pay + i * adim, pay + i * kademe
+        golge, gp = poster_golgesi(w, yukseklik)
+        tuval.alpha_composite(golge, (x - gp, y - gp))
         tuval.paste(th, (x, y))
         ImageDraw.Draw(tuval).rectangle([x, y, x + w - 1, y + yukseklik - 1],
-                                        outline=(255, 255, 255, 150), width=3)
+                                        outline=(120, 124, 136, 110), width=2)
     return tuval
 
 
-def oran_diyagrami(pal, F, genislik=880, yukseklik=880):
-    """5 oran esit YUKSEKLIKTE, 3+2 izgara; etiket kutunun altinda.
-    Oran kutulari birbirine gore olcekli degil, ORAN SEKLINI gosterir; en buyuk
-    basim boyu metin satirlarinda yazar."""
+def oran_diyagrami(pal, F, genislik=880, yukseklik=900, kutular=None):
+    """POD Size Guide dilinde GERCEK OLCEKLI oran kutulari: her oranin en buyuk
+    boyu, ortak tabana oturmus yan yana, dolgusuz ince cizgi, altinda oran adi."""
     S = 2
+    kutular = kutular or [("2:3", 24, 36), ("3:4", 24, 32), ("4:5", 24, 30),
+                          ("11:14", 22, 28), ("A SERIES", 33.1, 46.8)]
     img = Image.new("RGBA", (genislik * S, yukseklik * S), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
-    notr_cizgi = mix(pal["ink"], pal["bg"], 0.45) + (255,)
-    f_lab = F.f("sans", solve_size(F, "sans", 600, 22) * S, 600)
-    kutu_h = 330 * S
-    etiket_h = 60 * S
-    satir_bosluk = 70 * S
-    siralar = [ORAN_KUTU[:3], ORAN_KUTU[3:]]
-    toplam_h = len(siralar) * (kutu_h + etiket_h) + (len(siralar) - 1) * satir_bosluk
-    y = (yukseklik * S - toplam_h) / 2
-    for sira in siralar:
-        genislikler = [kutu_h * en / boy for _, en, boy in sira]
-        bosluk = 46 * S
-        x = (genislik * S - sum(genislikler) - bosluk * (len(sira) - 1)) / 2
-        for (ad, _, _), w in zip(sira, genislikler):
-            d.rectangle([x, y, x + w, y + kutu_h],
-                        fill=mix(pal["ink"], pal["bg"], 0.94) + (255,),
-                        outline=notr_cizgi, width=5)
-            d.text((x + w / 2, y + kutu_h + 14 * S), ad, font=f_lab,
-                   fill=mix(pal["ink"], pal["bg"], 0.12) + (255,), anchor="ma")
-            x += w + bosluk
-        y += kutu_h + etiket_h + satir_bosluk
+    f_lab = F.f("sans", solve_size(F, "sans", 600, 21) * S, 600)
+    f_alt = F.f("sans", solve_size(F, "sans", 400, 17) * S, 400)
+    bosluk = 30 * S
+    toplam_in = sum(k[1] for k in kutular)
+    olcek = min((genislik * S - bosluk * (len(kutular) - 1) - 20 * S) / toplam_in,
+                (yukseklik * S - 150 * S) / max(k[2] for k in kutular))
+    toplam_px = toplam_in * olcek + bosluk * (len(kutular) - 1)
+    x = (genislik * S - toplam_px) / 2
+    taban = (yukseklik * S + max(k[2] for k in kutular) * olcek) / 2 - 30 * S
+    cizgi = mix(pal["ink"], pal["bg"], 0.35) + (255,)
+    d.line([(x - 14 * S, taban), (x + toplam_px + 14 * S, taban)],
+           fill=mix(pal["ink"], pal["bg"], 0.62) + (255,), width=max(2, int(1.6 * S)))
+    for ad, e, b in kutular:
+        w, h = e * olcek, b * olcek
+        d.rectangle([x, taban - h, x + w, taban], outline=cizgi, width=max(2, int(2.4 * S)))
+        d.text((x + w / 2, taban + 30 * S), ad, font=f_lab,
+               fill=mix(pal["ink"], pal["bg"], 0.1) + (255,), anchor="ma")
+        d.text((x + w / 2, taban + 64 * S), f"{e:g}x{b:g} in" if not ad.startswith("A") else "A0",
+               font=f_alt, fill=mix(pal["ink"], pal["bg"], 0.45) + (255,), anchor="ma")
+        x += w + bosluk
+    d.text((genislik * S / 2, taban + 118 * S), "REAL SCALE \u00b7 LARGEST SIZE IN EACH RATIO",
+           font=f_alt, fill=mix(pal["ink"], pal["bg"], 0.5) + (255,), anchor="ma")
     return img.resize((genislik, yukseklik), Image.LANCZOS)
+
+
+def numbered_rows3(d, F, pal, rows, y0=620, y1=1900):
+    """numbered_rows ile ayni dil; ek olarak her satirin altina kucuk 3. satir (boylar)."""
+    r = REF["badge_d"] // 2
+    cx, tx = 336, 460
+    f_d = F.f("sans", solve_size(F, "sans", 600, REF["digit_h"], "01"), 600)
+    f_h = F.f("sans", solve_size(F, "sans", 600, REF["head_cap"]), 600)
+    tr_h = solve_tracking(d, f_h, *REF["head_w"])
+    f_b = F.f("sans", solve_size(F, "sans", 400, REF["body_cap"]), 400)
+    f_s = F.f("sans", solve_size(F, "sans", 500, REF["body_cap"] - 5), 500)
+    step = (y1 - y0) / len(rows)
+    for i, (head, body, boylar) in enumerate(rows):
+        cy = y0 + step * (i + 0.5)
+        d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=pal["bar"])
+        num = f"{i + 1:02d}"
+        b0, b1, b2, b3 = f_d.getbbox(num)
+        d.text((cx - (b0 + b2) / 2, cy - (b1 + b3) / 2), num, font=f_d, fill=pal["bartext"])
+        hb = f_h.getbbox("H")
+        draw_tracked(d, (tx, cy - 34 - hb[3]), head, f_h, pal["ink"], tracking=tr_h)
+        d.text((tx, cy - 6 - f_b.getbbox("H")[1]), body, font=f_b,
+               fill=mix(pal["ink"], pal["bg"], 0.25))
+        d.text((tx, cy + 40 - f_s.getbbox("H")[1]), boylar, font=f_s,
+               fill=mix(pal["ink"], pal["bg"], 0.42))
 
 
 INDIRME_IKON = [  # 24x24 izgara, tabler "download" dili: ok + tepsi
@@ -160,14 +237,17 @@ def indirme_ikonu(pal, size=760, stroke=4):
 
 
 # ------------------------------------------------------------------ kartlar
+OLCUM = {}          # {oran: (px_en, px_boy)} - koşuda ZIP'ten olculur
+
+
 def kart_included(pal, F, pair_txt, posterler):
     k = KART["INCLUDED"]
     im, d = card_base(pal, F, k["kicker"], k["title"], pair_txt, k["footer"])
-    fan = poster_yelpazesi(posterler, 700)
+    fan = poster_yelpazesi(posterler, 960)
     if fan is not None:
-        oran = min(1.0, 880 / fan.width)
+        oran = min(1.0, 1080 / fan.width, 1180 / fan.height)
         fan = fan.resize((int(fan.width * oran), int(fan.height * oran)), Image.LANCZOS)
-        im.paste(fan, (2430 - fan.width // 2, 1270 - fan.height // 2), fan)
+        im.paste(fan, (2440 - fan.width // 2, 1290 - fan.height // 2), fan)
     numbered_rows(d, F, pal, k["rows"], 640, 1900)
     return im
 
@@ -175,22 +255,73 @@ def kart_included(pal, F, pair_txt, posterler):
 def kart_sizes(pal, F, pair_txt, posterler):
     k = KART["SIZES"]
     im, d = card_base(pal, F, k["kicker"], k["title"], pair_txt, k["footer"])
-    diy = oran_diyagrami(pal, F, 880, 900)
-    im.paste(diy, (2430 - diy.width // 2, 1270 - diy.height // 2), diy)
-    numbered_rows(d, F, pal, k["rows"], 640, 1900)
+    satirlar, _ = boy_satirlari(OLCUM or None)
+    kutular = []
+    for oran, liste in BOYLAR.items():
+        uygun = liste
+        if OLCUM and oran in OLCUM:
+            en_px, boy_px = OLCUM[oran]
+            uygun = [b for b in liste if b[1] * 300 <= en_px + 2 and b[2] * 300 <= boy_px + 2]
+        if uygun:
+            kutular.append((ORAN_ADI[oran].replace(" RATIO", ""), uygun[-1][1], uygun[-1][2]))
+    diy = oran_diyagrami(pal, F, 980, 900, kutular)
+    im.paste(diy, (2450 - diy.width // 2, 1290 - diy.height // 2), diy)
+    numbered_rows3(d, F, pal, satirlar, 620, 1900)
     return im
 
 
 def kart_howto(pal, F, pair_txt, posterler):
     k = KART["HOWTO"]
     im, d = card_base(pal, F, k["kicker"], k["title"], pair_txt, k["footer"])
-    ikon = indirme_ikonu(pal)
-    im.paste(ikon, (2430 - ikon.width // 2, 1270 - ikon.height // 2), ikon)
+    ikon = indirme_ikonu(pal, 520, 4)
+    im.paste(ikon, (2440 - ikon.width // 2, 1270 - ikon.height // 2), ikon)
     numbered_rows(d, F, pal, k["rows"], 640, 1880)
     return im
 
 
+def bes_renk(pal, F, pair_txt, posterler, yukseklik=1080):
+    """5 RENK galeri gorseli (3000x2250): arka plansiz 5 poster + altlarinda edisyon adi."""
+    im = Image.new("RGB", (W, H), pal["bg"])
+    d = ImageDraw.Draw(im)
+    f_kick = F.f("sans", solve_size(F, "sans", 500, REF["kicker_cap"]), 500)
+    f_baslik = F.f("serif", solve_size(F, "serif", 500, REF["title_band"][1], "Hxg"), 500)
+    f_ad = F.f("sans", solve_size(F, "sans", 600, 26), 600)
+    draw_tracked(d, (W / 2, 210), "FIVE COLOR EDITIONS", f_kick, mix(pal["ink"], pal["bg"], 0.35),
+                 tracking=solve_tracking(d, f_kick, *REF["kicker_w"]), anchor="c")
+    d.text((W / 2, 300), "5 Colors, One Download", font=f_baslik, fill=pal["ink"], anchor="ma")
+    d.line([(W / 2 - 240, 520), (W / 2 + 240, 520)], fill=pal["rule"], width=3)
+
+    if not posterler:
+        return im
+    n = len(posterler)
+    bosluk, kenar = 46, 150
+    pw = int((W - kenar * 2 - bosluk * (n - 1)) / n)
+    yukseklik = int(pw * posterler[0].height / posterler[0].width)
+    ust, alt = 560, H - 150                                   # rule alti ile alt bar arasi
+    if yukseklik + 120 > alt - ust:
+        yukseklik = alt - ust - 120
+        pw = int(yukseklik * posterler[0].width / posterler[0].height)
+    toplam = pw * n + bosluk * (n - 1)
+    x0 = (W - toplam) // 2
+    y0 = ust + int((alt - ust - (yukseklik + 120)) / 2)
+    for i, (poster, ad) in enumerate(zip(posterler, EDISYONLAR)):
+        th = poster.convert("RGB").resize((pw, yukseklik), Image.LANCZOS)
+        x = x0 + i * (pw + bosluk)
+        golge, gp = poster_golgesi(pw, yukseklik, (10, 20), 22, 90)
+        im.paste(golge, (x - gp, y0 - gp), golge)
+        im.paste(th, (x, y0))
+        d.rectangle([x, y0, x + pw - 1, y0 + yukseklik - 1], outline=(120, 124, 136), width=2)
+        draw_tracked(d, (x + pw / 2, y0 + yukseklik + 58), ad.upper(), f_ad,
+                     mix(pal["ink"], pal["bg"], 0.2), tracking=6, anchor="c")
+    d.rectangle([0, H - 150, W, H], fill=pal["bar"])
+    f_foot = F.f("sans", solve_size(F, "sans", 500, REF["foot_cap"]), 500)
+    draw_tracked(d, (W / 2, H - 105), TEXT["common"]["bond"], f_foot, pal["bartext"],
+                 tracking=solve_tracking(d, f_foot, *REF["foot_w"]), anchor="c")
+    return im
+
+
 CIZ = [("WHATS_INCLUDED", kart_included), ("PRINT_SIZES", kart_sizes), ("HOW_TO_DOWNLOAD", kart_howto)]
+CIZ_EK = [("BES_RENK", bes_renk)]
 
 
 def main():
