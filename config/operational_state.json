@@ -1,103 +1,112 @@
 {
-  "schema_version": 1,
-  "as_of": "2026-09-16",
-  "rule": "Bu dosya operasyon durumunun tek doğruluk kaynağıdır. Raporlar eski runbook veya batch metninden durum tahmin edemez.",
-  "tasks": [
+ "schema_version": 1,
+ "as_of": "2026-09-20",
+ "rule": "Bu dosya operasyon durumunun tek doğruluk kaynağıdır. Raporlar eski runbook veya batch metninden durum tahmin edemez.",
+ "tasks": [
+  {
+   "id": "gpsr_pod_78",
+   "name": "GPSR panel girişi",
+   "status": "completed",
+   "priority": 0,
+   "scope": "78/78 POD ilanı",
+   "completed_at": "2026-09-08",
+   "evidence": [
     {
-      "id": "gpsr_pod_78",
-      "name": "GPSR panel girişi",
-      "status": "completed",
-      "priority": 0,
-      "scope": "78/78 POD ilanı",
-      "completed_at": "2026-09-08",
-      "evidence": [
-        {
-          "path": "docs/start_here/B99.txt",
-          "contains": "TAMAMLANDI 8 Eyl: 78/78 POD ilani ELLE dolduruldu."
-        }
-      ],
-      "note": "Etsy API ve bulk edit bu alanı göstermediği için panelden elle tamamlandı. Yeniden yapılmayacak."
-    },
-    {
-      "id": "workflow_hardening_merge",
-      "name": "Workflow hardening merge",
-      "status": "completed",
-      "priority": 0,
-      "scope": "claude/wf-hardening -> main",
-      "completed_at": "2026-09-16",
-      "evidence": [
-        {
-          "path": "docs/batch4/workflow_final_test.md",
-          "contains": "main'e merge EDILDI: 163e5ad"
-        }
-      ],
-      "note": "Birleşik ağaç 16/16 testten geçti."
-    },
-    {
-      "id": "etsy_title_54",
-      "name": "54 Etsy başlık bulgusu incelemesi",
-      "status": "completed",
-      "priority": 0,
-      "scope": "54/54 yanlış pozitif; 0 canlı değişiklik",
-      "completed_at": "2026-09-16",
-      "evidence": [
-        {
-          "path": "docs/batch4/TITLE_54_REVIEW.md",
-          "contains": "54/54 bulgu yanlış pozitiftir. Canlı Etsy başlık değişikliği yapılmadı (0 yazma)."
-        }
-      ],
-      "note": "İlk 40 karakter kuralı Etsy'nin resmî rehberiyle çelişiyordu; tekrar üreten öneriler reddedildi."
-    },
-    {
-      "id": "wallpaper_description_78",
-      "name": "Wallpaper açıklama düzeltmesi",
-      "status": "completed",
-      "priority": 0,
-      "scope": "78/78 wallpaper ilanı; yalnız description",
-      "completed_at": "2026-09-16",
-      "evidence": [
-        {
-          "path": "docs/operations/WP_DESCRIPTION_78_APPLY_20260916.md",
-          "contains": "TAMAMLANDI: 78/78 PASS; yalnızca description değişti."
-        }
-      ],
-      "note": "77 ilan son koşuda yazıldı; ilk koşuda doğrulanan 1 ilan zaten hedef metindeydi. Başlık, etiket ve diğer korunan alanlar değişmedi."
-    },
-    {
-      "id": "duplicate_archive_722",
-      "name": "Duplicate arşivleme",
-      "status": "pending_approval",
-      "priority": 10,
-      "scope": "722 dosya / 0,99 GB / 200 grup",
-      "location": "Drive arşiv planı",
-      "ready_file": "duplicate_archive_plan.csv"
-    },
-    {
-      "id": "etsy_ads_import",
-      "name": "Etsy Ads veri içe alma",
-      "status": "pending_input",
-      "priority": 20,
-      "scope": "Gerçek Etsy Ads CSV",
-      "location": "Etsy Shop Manager / Drive",
-      "ready_file": "ads_import_template.csv"
-    },
-    {
-      "id": "store_panel_p0_p1",
-      "name": "Mağaza paneli P0-P1 düzeltmeleri",
-      "status": "pending_approval",
-      "priority": 30,
-      "scope": "P0-P1 maddeleri",
-      "location": "Etsy Shop Manager",
-      "ready_file": "store_conversion_actions.md"
-    },
-    {
-      "id": "social_metricool_publish",
-      "name": "Sosyal medya / Metricool yayını",
-      "status": "pending_approval",
-      "priority": 40,
-      "scope": "546 satır",
-      "location": "Metricool",
-      "ready_file": "platform_content_final.csv"
+     "path": "docs/start_here/B99.txt",
+     "contains": "TAMAMLANDI 8 Eyl: 78/78 POD ilani ELLE dolduruldu."
     }
-  ]
+   ],
+   "note": "Etsy API ve bulk edit bu alanı göstermediği için panelden elle tamamlandı. Yeniden yapılmayacak."
+  },
+  {
+   "id": "workflow_hardening_merge",
+   "name": "Workflow hardening merge",
+   "status": "completed",
+   "priority": 0,
+   "scope": "claude/wf-hardening -> main",
+   "completed_at": "2026-09-16",
+   "evidence": [
+    {
+     "path": "docs/batch4/workflow_final_test.md",
+     "contains": "main'e merge EDILDI: 163e5ad"
+    }
+   ],
+   "note": "Birleşik ağaç 16/16 testten geçti."
+  },
+  {
+   "id": "etsy_title_54",
+   "name": "54 Etsy başlık bulgusu incelemesi",
+   "status": "completed",
+   "priority": 0,
+   "scope": "54/54 yanlış pozitif; 0 canlı değişiklik",
+   "completed_at": "2026-09-16",
+   "evidence": [
+    {
+     "path": "docs/batch4/TITLE_54_REVIEW.md",
+     "contains": "54/54 bulgu yanlış pozitiftir. Canlı Etsy başlık değişikliği yapılmadı (0 yazma)."
+    }
+   ],
+   "note": "İlk 40 karakter kuralı Etsy'nin resmî rehberiyle çelişiyordu; tekrar üreten öneriler reddedildi."
+  },
+  {
+   "id": "wallpaper_description_78",
+   "name": "Wallpaper açıklama düzeltmesi",
+   "status": "completed",
+   "priority": 0,
+   "scope": "78/78 wallpaper ilanı; yalnız description",
+   "completed_at": "2026-09-16",
+   "evidence": [
+    {
+     "path": "docs/operations/WP_DESCRIPTION_78_APPLY_20260916.md",
+     "contains": "TAMAMLANDI: 78/78 PASS; yalnızca description değişti."
+    }
+   ],
+   "note": "77 ilan son koşuda yazıldı; ilk koşuda doğrulanan 1 ilan zaten hedef metindeydi. Başlık, etiket ve diğer korunan alanlar değişmedi."
+  },
+  {
+   "id": "duplicate_archive_722",
+   "name": "Duplicate arşivleme",
+   "status": "pending_approval",
+   "priority": 10,
+   "scope": "722 dosya / 0,99 GB / 200 grup",
+   "location": "Drive arşiv planı",
+   "ready_file": "duplicate_archive_plan.csv"
+  },
+  {
+   "id": "etsy_ads_import",
+   "name": "Etsy Ads veri içe alma",
+   "status": "pending_input",
+   "priority": 20,
+   "scope": "Gerçek Etsy Ads CSV",
+   "location": "Etsy Shop Manager / Drive",
+   "ready_file": "ads_import_template.csv"
+  },
+  {
+   "id": "store_panel_p0_p1",
+   "name": "Mağaza paneli P0-P1 düzeltmeleri",
+   "status": "pending_approval",
+   "priority": 30,
+   "scope": "P0-P1 maddeleri",
+   "location": "Etsy Shop Manager",
+   "ready_file": "store_conversion_actions.md"
+  },
+  {
+   "id": "social_metricool_publish",
+   "name": "Sosyal medya / Metricool yayını",
+   "status": "pending_approval",
+   "priority": 40,
+   "scope": "546 satır",
+   "location": "Metricool",
+   "ready_file": "platform_content_final.csv"
+  },
+  {
+   "id": "dijital_390_to_78",
+   "name": "Dijital 390 -> 78 birlestirme",
+   "status": "pending_approval",
+   "priority": 5,
+   "scope": "78 cift; 78 ilan kalir, 312 ilan devre disi",
+   "location": "Etsy + Drive TEMP/DIJITAL_78",
+   "ready_file": "docs/operations/DIJITAL_78_PLAN_20260920.md"
+  }
+ ]
 }
