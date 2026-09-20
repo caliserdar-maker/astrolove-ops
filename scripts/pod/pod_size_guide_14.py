@@ -53,8 +53,28 @@ def rclone(*a, sert=True):
     return r
 
 
+def kutu_olcumu(kart):
+    """Cizilen aksan konturlu kutular planlanan yerde mi? -> (max_sapma_px, olculen_kutu_sayisi).
+    Her grup icin beklenen kutu penceresinde (±20 px) aksan renkli kenarlar aranir; olculen
+    sol/sag kenar plandan ne kadar sapiyor, en buyugu dondurulur (grup sayisindan bagimsiz)."""
+    rgb = np.array(Image.open(kart).convert("RGB")).astype(int)
+    y = G.SG_BASE_Y - 30
+    bar = rgb[2120, 1500]
+    _, kutular, _ = G.sg_layout()
+    sapmalar, n = [], 0
+    for bx0, bx1 in kutular:
+        a0, a1 = max(0, int(bx0) - 20), min(G.W, int(bx1) + 20)
+        seg = np.abs(rgb[y, a0:a1] - bar).sum(1) < 60
+        xs = np.where(seg)[0]
+        if not len(xs):
+            continue
+        n += 1
+        sapmalar += [abs(int(xs.min() + a0) - bx0), abs(int(xs.max() + a0) - bx1)]
+    return (round(max(sapmalar), 1) if sapmalar else None), n
+
+
 def bosluklar(kart):
-    """sizes_gaps'in grup sayisindan bagimsiz surumu -> (bosluk listesi, hedef)."""
+    """(bilgi amacli) bosluk listesi -> (bosluk listesi, hedef)."""
     rgb = np.array(Image.open(kart).convert("RGB")).astype(int)
     y = G.SG_BASE_Y - 30
     bar, rule = rgb[2120, 1500], rgb[418, 1500]
@@ -86,13 +106,12 @@ def qc(kart, pal):
     sapma = max(abs(mp[k][i] - pal[k][i]) for k in ("bg", "bar", "ink") for i in range(3))
     if sapma > 16:
         errs.append(f"palet sapmasi {sapma}")
-    g, hedef = bosluklar(kart)
-    b_sapma = max(abs(x - hedef) for x in g) if g else None
-    if not g:
-        errs.append("bosluk olculemedi")
-    elif b_sapma > 2.5:
-        errs.append(f"bosluk sapmasi {b_sapma:.1f} (hedef {hedef:.1f})")
-    return errs, sapma, (round(b_sapma, 1) if b_sapma is not None else "")
+    k_sapma, n_kutu = kutu_olcumu(kart)
+    if n_kutu != len(G.GROUP_ORDER):
+        errs.append(f"kutu {n_kutu}/{len(G.GROUP_ORDER)}")
+    elif k_sapma is None or k_sapma > 2.5:
+        errs.append(f"kutu konum sapmasi {k_sapma}")
+    return errs, sapma, (k_sapma if k_sapma is not None else "")
 
 
 def main():
