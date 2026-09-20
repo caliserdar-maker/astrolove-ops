@@ -324,7 +324,10 @@ def main():
         md += ["", "## ICC ve progressive farki (asan 23 uzerinde)", "",
                f"- `-copy icc` surumu `-copy none`'dan **{icc_kz/1e6:.3f} MB daha buyuk** "
                f"(ICC profili korunursa odenen bedel).",
-               f"- `-progressive` eklemek `-copy none`'a gore **{prog_kz/1e6:.3f} MB daha kazandirir**.",
+               (f"- `-progressive` eklemek `-copy none`'a gore **{prog_kz/1e6:.3f} MB daha "
+                f"kazandirir**." if prog_kz > 0 else
+                f"- `-progressive` bu dosyalarda KAZANC SAGLAMIYOR: `-copy none`'a gore toplam "
+                f"**{-prog_kz/1e6:.3f} MB DAHA BUYUK**. Bu yuzden kullanilmadi."),
                f"- Olculen ICC profilleri: {dict(Counter(s['icc_profil'] for s in asan_s))}",
                f"- ICC korunan surumle 19.8 MB'i asan: "
                f"{sum(1 for s in asan_s if s.get('icc_korunursa_sinir') == 'HALA ASIYOR')}",

@@ -11,7 +11,7 @@ Guncelleme: **2026-09-20**
 | 0 | GPSR panel girişi | **TAMAMLANDI** | 78/78 POD ilanı | `docs/start_here/B99.txt` |
 | 0 | Wallpaper açıklama düzeltmesi | **TAMAMLANDI** | 78/78 wallpaper ilanı; yalnız description | `docs/operations/WP_DESCRIPTION_78_APPLY_20260916.md` |
 | 0 | Workflow hardening merge | **TAMAMLANDI** | claude/wf-hardening -> main | `docs/batch4/workflow_final_test.md` |
-| 5 | Dijital 390 -> 78 birlestirme | **ONAY BEKLIYOR** | 78 cift; 78 ilan kalir, 312 ilan devre disi | `docs/operations/DIJITAL_78_PLAN_20260920.md` |
+| 5 | Dijital 390 -> 78 birlestirme | **ONAY BEKLIYOR** | 78 cift; 78 ilan kalir, 312 ilan devre disi; ARIES_SCORPIO karar bekliyor | `docs/operations/DIJITAL_78_V2_20260920.md` |
 | 10 | Duplicate arşivleme | **ONAY BEKLIYOR** | 722 dosya / 0,99 GB / 200 grup | `duplicate_archive_plan.csv` |
 | 20 | Etsy Ads veri içe alma | **GIRDI BEKLIYOR** | Gerçek Etsy Ads CSV | `ads_import_template.csv` |
 | 30 | Mağaza paneli P0-P1 düzeltmeleri | **ONAY BEKLIYOR** | P0-P1 maddeleri | `store_conversion_actions.md` |

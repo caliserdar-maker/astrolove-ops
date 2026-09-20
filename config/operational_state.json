@@ -104,9 +104,9 @@
    "name": "Dijital 390 -> 78 birlestirme",
    "status": "pending_approval",
    "priority": 5,
-   "scope": "78 cift; 78 ilan kalir, 312 ilan devre disi",
+   "scope": "78 cift; 78 ilan kalir, 312 ilan devre disi; ARIES_SCORPIO karar bekliyor",
    "location": "Etsy + Drive TEMP/DIJITAL_78",
-   "ready_file": "docs/operations/DIJITAL_78_PLAN_20260920.md"
+   "ready_file": "docs/operations/DIJITAL_78_V2_20260920.md"
   }
  ]
 }

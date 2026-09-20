@@ -276,13 +276,23 @@ def main():
           "## Tarihler (hangisi yeni)", "",
           f"- Canli dosyalarin Etsy'ye yuklenme tarihi: {dict(c_tarih)}",
           f"- Drive dosyalarinin son degisiklik tarihi: {dict(d_tarih)}", ""]
-    if c_tarih and d_tarih:
-        en_canli, en_drive = max(c_tarih), max(d_tarih)
-        md.append(f"- **Drive surumu {'YENI' if en_drive > en_canli else 'ESKI'}**: "
-                  f"Drive son degisiklik {en_drive}, Etsy'ye yuklenme {en_canli}.")
+    # Karsilastirma YALNIZ farkli cikan ilanlar uzerinden yapilir; ayni cikanlar
+    # zaten es surumdur ve max-vs-max karsilastirmasini yaniltir (20 Eyl 2026 hatasi).
+    fc = Counter(r2["canli_yuklenme"][:10] for r2 in farkli if r2["canli_yuklenme"])
+    fd = Counter(r2["drive_degisiklik"][:10] for r2 in farkli if r2["drive_degisiklik"])
+    if fc and fd:
+        en_canli, en_drive = max(fc), max(fd)
+        md += [f"- FARKLI {len(farkli)} ilanda: Etsy'ye yuklenme {dict(fc)}, "
+               f"Drive son degisiklik {dict(fd)}"]
         if en_drive > en_canli:
-            md.append("  Yani PW ZIP'leri Etsy'ye yuklendikten SONRA Drive'da yeniden uretilmis; "
-                      "yeni surum canli ilanlara hic yuklenmemis.")
+            md += [f"- **Drive surumu YENI** ({en_drive} > {en_canli}): PW ZIP'leri Etsy'ye "
+                   "yuklendikten SONRA Drive'da degismis; yeni surum canli ilanlara "
+                   "hic yuklenmemis."]
+        elif en_drive < en_canli:
+            md += [f"- **Drive surumu ESKI** ({en_drive} < {en_canli}): canli dosya Drive'daki "
+                   "surumden sonra uretilmis."]
+        else:
+            md += [f"- Iki taraf da {en_drive}: tarihler ayni gun, yon tarihten cikarilamaz."]
     md += ["", "## Alternatif surum aramasi", "",
            f"- Drive `{a.ara_kok}` altinda `*Pure_White*ALL_SIZES.zip` adiyla bulunan farkli ad: {len(alt)}",
            f"- Ad basina kopya sayisi dagilimi: {dict(kopya_sayisi)}",
