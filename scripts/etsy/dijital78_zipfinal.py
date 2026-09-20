@@ -5,8 +5,14 @@ DIJITAL 78 - ZIP URETIMI (Etsy cagrisi YOK).
 390 ZIP'in hepsine kayipsiz JPEG optimizasyonu (`jpegtran -copy icc -optimize`)
 uygulanir, her ZIP'e tesekkur PDF'i eklenir ve ciktilar cift bazinda toplanir.
 
-Kayipsizlik kaniti: her JPG icin `djpeg -pnm | sha256` ile cozulmus piksel akisi
-karsilastirilir. Fark varsa o JPG ORIJINAL haliyle paketlenir.
+Secim olcutu ZIP ICINDEKI (deflate sonrasi) boyuttur, ham JPG boyutu degil:
+Deep Black gibi dosyalarda `-optimize` ham JPG'i kucultur ama bit akisini
+sikistirilamaz hale getirdigi icin ZIP'i BUYUTUR. Bu yuzden her JPG icin
+{orijinal, -optimize, -optimize -progressive} adaylari deflate(9) ile olculur ve
+EN KUCUK olan secilir; ucu de piksel-birebirdir, orijinal her zaman adaydir.
+
+Kayipsizlik kaniti: secilen aday icin `djpeg -pnm | sha256` ile cozulmus piksel
+akisi karsilastirilir. Fark varsa o JPG ORIJINAL haliyle paketlenir.
 
 Kapilar (her ZIP icin):
   1) boyut < 19.8 MB
@@ -26,6 +32,7 @@ import shutil
 import subprocess
 import time
 import zipfile
+import zlib
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
@@ -35,9 +42,11 @@ ESIK = 19_800_000
 AD_SINIR = 70
 JPG_SAYISI = 5
 JPEG_UZANTI = (".jpg", ".jpeg")
+ADAYLAR = ("orijinal", "opt", "opt_prog")
 SUTUN = ["zip_adi", "cift", "edisyon", "ad_uzunluk", "orijinal_zip", "orijinal_mb",
-         "jpg_sayisi", "jpg_orijinal_toplam", "jpg_opt_icc", "jpg_kazanc", "jpg_kazanc_yuzde",
-         "yeni_zip", "yeni_mb", "kapi_boyut", "kapi_ad", "kapi_icerik",
+         "jpg_sayisi", "jpg_orijinal_toplam", "jpg_secilen_toplam", "secim_dagilimi",
+         "deflate_orijinal", "deflate_secilen", "yeni_zip", "yeni_mb", "fark_orijinal_mb",
+         "kapi_boyut", "kapi_ad", "kapi_icerik",
          "icerik_jpg", "icerik_kilavuz_pdf", "icerik_tesekkur_pdf",
          "piksel_dogrulama", "dogrulanan_jpg", "geri_alinan_jpg", "icc_profil",
          "drive_yolu", "sonuc", "not"]
@@ -64,11 +73,20 @@ def rclone_yukle(remote, kok, yerel, uzak_yol):
         raise RuntimeError(f"rclone yukleme {uzak_yol}: {r.stderr.decode('utf-8', 'replace')[:160]}")
 
 
-def jpegtran_icc(src, dst):
-    r = kos(["jpegtran", "-copy", "icc", "-optimize", "-outfile", str(dst), str(src)])
+def jpegtran_icc(src, dst, progressive=False):
+    """ICC korunarak kayipsiz yeniden paketleme (yeniden kodlama yok)."""
+    cmd = ["jpegtran", "-copy", "icc", "-optimize"]
+    if progressive:
+        cmd.append("-progressive")
+    r = kos(cmd + ["-outfile", str(dst), str(src)])
     if r.returncode != 0 or not Path(dst).exists():
         raise RuntimeError(f"jpegtran {Path(src).name}: {r.stderr.decode('utf-8', 'replace')[:120]}")
     return Path(dst).stat().st_size
+
+
+def deflate_boyut(veri):
+    """ZIP icindeki gercek maliyet: deflate(9) sonrasi bayt."""
+    return len(zlib.compress(veri, 9))
 
 
 def piksel_hash(path):
@@ -137,41 +155,54 @@ def zip_isle(gorev):
         satir["jpg_orijinal_toplam"] = sum(zi.file_size for zi in jpgler)
         satir["icc_profil"] = icc_oku(ac / jpgler[0].filename) if jpgler else "-"
 
-        # 1) kayipsiz optimizasyon (ICC korunur) + piksel birebirlik kaniti
-        toplam, geri_alinan = 0, []
+        # 1) her JPG icin en kucuk ZIP maliyetli aday (hepsi piksel-birebir)
+        secim, toplam, geri_alinan = Counter(), 0, []
+        deflate_orj = deflate_sec = 0
+        secilen_veri = {}
         for zi in jpgler:
             src = ac / zi.filename
-            dst = ac / f"{zi.filename}.opt"
-            jpegtran_icc(src, dst)
-            if piksel_hash(src) != piksel_hash(dst):
+            ham = src.read_bytes()
+            adaylar = {"orijinal": (src, ham)}
+            for etiket, prog in (("opt", False), ("opt_prog", True)):
+                dst = ac / f"{zi.filename}.{etiket}"
+                try:
+                    jpegtran_icc(src, dst, prog)
+                    adaylar[etiket] = (dst, dst.read_bytes())
+                except RuntimeError as ex:                   # noqa: PERF203
+                    satir["not"] = (satir["not"] + f" | {etiket}: {str(ex)[:40]}").strip(" |")
+            olcum = {k: deflate_boyut(v[1]) for k, v in adaylar.items()}
+            deflate_orj += olcum["orijinal"]
+            en_iyi = min(ADAYLAR, key=lambda k: (olcum.get(k, 1 << 62), ADAYLAR.index(k)))
+            if en_iyi != "orijinal" and piksel_hash(adaylar[en_iyi][0]) != piksel_hash(src):
                 geri_alinan.append(zi.filename)
-                shutil.copyfile(src, dst)
+                en_iyi = "orijinal"
             satir["dogrulanan_jpg"] += 1
-            toplam += dst.stat().st_size
-        satir["jpg_opt_icc"] = toplam
-        satir["jpg_kazanc"] = satir["jpg_orijinal_toplam"] - toplam
-        satir["jpg_kazanc_yuzde"] = round(100.0 * satir["jpg_kazanc"]
-                                          / max(1, satir["jpg_orijinal_toplam"]), 2)
+            secim[en_iyi] += 1
+            deflate_sec += olcum[en_iyi]
+            toplam += len(adaylar[en_iyi][1])
+            secilen_veri[zi.filename] = adaylar[en_iyi][1]
+        satir["jpg_secilen_toplam"] = toplam
+        satir["secim_dagilimi"] = ",".join(f"{k}:{secim[k]}" for k in ADAYLAR if secim[k])
+        satir["deflate_orijinal"] = deflate_orj
+        satir["deflate_secilen"] = deflate_sec
         satir["geri_alinan_jpg"] = len(geri_alinan)
         satir["piksel_dogrulama"] = "BIREBIR" if not geri_alinan else f"FARK: {len(geri_alinan)}"
         if geri_alinan:
-            satir["not"] = "orijinal birakilan: " + ",".join(geri_alinan[:3])
+            satir["not"] = (satir["not"] + " | orijinal birakilan: "
+                            + ",".join(geri_alinan[:3])).strip(" |")
 
-        # 2) yeniden paketle + tesekkur PDF
+        # 2) yeniden paketle (deflate 9) + tesekkur PDF
         hedef = Path(out_dizin) / cift / ad
         hedef.parent.mkdir(parents=True, exist_ok=True)
-        with zipfile.ZipFile(hedef, "w") as z:
+        with zipfile.ZipFile(hedef, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as z:
             for zi in [x for x in bilgi if not x.is_dir()]:
-                if zi.filename.lower().endswith(JPEG_UZANTI):
-                    veri = (ac / f"{zi.filename}.opt").read_bytes()
-                else:
-                    veri = (ac / zi.filename).read_bytes()
+                veri = secilen_veri.get(zi.filename) or (ac / zi.filename).read_bytes()
                 yeni = zipfile.ZipInfo(zi.filename, date_time=zi.date_time)
-                yeni.compress_type = zi.compress_type
+                yeni.compress_type = zipfile.ZIP_DEFLATED
                 yeni.external_attr = zi.external_attr
                 z.writestr(yeni, veri)
         if PDF_ADI not in [zi.filename for zi in bilgi]:
-            with zipfile.ZipFile(hedef, "a", zipfile.ZIP_DEFLATED) as z:
+            with zipfile.ZipFile(hedef, "a", zipfile.ZIP_DEFLATED, compresslevel=9) as z:
                 z.write(pdf["yol"], PDF_ADI)
         else:
             satir["not"] = (satir["not"] + " | tesekkur PDF kaynakta zaten vardi").strip(" |")
@@ -179,6 +210,7 @@ def zip_isle(gorev):
         # 3) kapilar: dogrudan URETILEN dosyadan olculur
         satir["yeni_zip"] = hedef.stat().st_size
         satir["yeni_mb"] = round(satir["yeni_zip"] / 1e6, 2)
+        satir["fark_orijinal_mb"] = round((satir["yeni_zip"] - boyut) / 1e6, 2)
         with zipfile.ZipFile(hedef) as z:
             adlar = [zi.filename for zi in z.infolist() if not zi.is_dir()]
             bozuk = z.testzip()
@@ -228,6 +260,8 @@ def main():
     ap.add_argument("--yukle-kok", default="", help="hedef Drive folder id (DIJITAL_78)")
     ap.add_argument("--yukle-yol", default="ZIP_FINAL")
     ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--ilk-grup", default="", help="once bu listedeki ZIP'ler kosar; biri "
+                    "boyut kapisindan gecemezse kalanlar ISLENMEZ (kapi)")
     a = ap.parse_args()
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
     Path(a.calisma).mkdir(parents=True, exist_ok=True)
@@ -247,20 +281,53 @@ def main():
     print(f"{len(zipler)} ZIP islenecek | hedef {a.yukle_yol if a.yukle_kok else a.out_dizin}",
           flush=True)
 
-    gorevler = [(a.remote, a.kok, d, pdf, a.out_dizin, a.calisma, a.esik,
-                 a.yukle_kok, a.yukle_yol) for d in zipler]
-    satirlar, islenen, son = [], 0, time.time()
-    with cf.ThreadPoolExecutor(max_workers=a.is_parca) as ex:
-        for s in ex.map(zip_isle, gorevler):
-            satirlar.append(s)
-            islenen += 1
-            if time.time() - son >= 60 or islenen == len(gorevler):
-                gecen = time.time() - t0
-                kalan = gecen / max(1, islenen) * (len(gorevler) - islenen)
-                kotu = sum(1 for x in satirlar if x.get("sonuc") != "GECTI")
-                print(f"   ETA {islenen}/{len(gorevler)} | gecen {gecen:.0f}s | kalan ~{kalan:.0f}s "
-                      f"| %{100*islenen/len(gorevler):.1f} | gecmeyen {kotu}", flush=True)
-                son = time.time()
+    ilk = set()
+    if a.ilk_grup and Path(a.ilk_grup).exists():
+        ilk = {x.strip() for x in Path(a.ilk_grup).read_text(encoding="utf-8").splitlines()
+               if x.strip()}
+        zipler = ([d for d in zipler if d["Name"] in ilk]
+                  + [d for d in zipler if d["Name"] not in ilk])
+        print(f"KAPI: once {len([d for d in zipler if d['Name'] in ilk])} ZIP dogrulanacak",
+              flush=True)
+
+    def kos_grup(kume, etiket):
+        gorevler = [(a.remote, a.kok, d, pdf, a.out_dizin, a.calisma, a.esik,
+                     a.yukle_kok, a.yukle_yol) for d in kume]
+        cikti, islenen, son = [], 0, time.time()
+        with cf.ThreadPoolExecutor(max_workers=a.is_parca) as ex:
+            for r in ex.map(zip_isle, gorevler):
+                cikti.append(r)
+                islenen += 1
+                if time.time() - son >= 60 or islenen == len(gorevler):
+                    gecen = time.time() - t0
+                    kalan = gecen / max(1, islenen) * (len(gorevler) - islenen)
+                    kotu = sum(1 for x in cikti if x.get("sonuc") != "GECTI")
+                    print(f"   [{etiket}] ETA {islenen}/{len(gorevler)} | gecen {gecen:.0f}s | "
+                          f"kalan ~{kalan:.0f}s | %{100*islenen/len(gorevler):.1f} | "
+                          f"gecmeyen {kotu}", flush=True)
+                    son = time.time()
+        return cikti
+
+    satirlar = []
+    if ilk:
+        kapi = kos_grup([d for d in zipler if d["Name"] in ilk], "KAPI")
+        satirlar += kapi
+        kotu = [r for r in kapi if r.get("sonuc") != "GECTI"]
+        print(f"KAPI SONUCU: {len(kapi)-len(kotu)}/{len(kapi)} GECTI | en buyuk "
+              f"{max((r.get('yeni_mb') or 0) for r in kapi):.2f} MB", flush=True)
+        for r in kapi:
+            print(f"   {r['zip_adi']}: {r.get('orijinal_mb')} -> {r.get('yeni_mb')} MB "
+                  f"[{r.get('secim_dagilimi')}] {r.get('sonuc')}", flush=True)
+        if kotu:
+            print(f"::error::KAPI BASARISIZ: {len(kotu)} ZIP esigi asiyor, kalanlar islenmedi",
+                  flush=True)
+            kalanlar = []
+        else:
+            kalanlar = [d for d in zipler if d["Name"] not in ilk]
+    else:
+        kalanlar = zipler
+    if kalanlar:
+        satirlar += kos_grup(kalanlar, "TUM")
 
     satirlar.sort(key=lambda s: (s["cift"], s["zip_adi"]))
     with open(out / "ZIP_FINAL.csv", "w", newline="", encoding="utf-8") as fh:
@@ -274,20 +341,29 @@ def main():
     ciftler = Counter(s["cift"] for s in gecti)
     eksik_cift = {c: n for c, n in ciftler.items() if n != 5}
     en_buyuk = max(gecti, key=lambda s: s["yeni_zip"]) if gecti else None
-    orj = sum(s.get("jpg_orijinal_toplam", 0) for s in satirlar if s.get("jpg_opt_icc"))
-    opt = sum(s.get("jpg_opt_icc", 0) for s in satirlar if s.get("jpg_opt_icc"))
+    orj = sum(s.get("deflate_orijinal", 0) for s in satirlar if s.get("deflate_secilen"))
+    opt = sum(s.get("deflate_secilen", 0) for s in satirlar if s.get("deflate_secilen"))
     birebir = sum(1 for s in satirlar if s.get("piksel_dogrulama") == "BIREBIR")
+    secim_toplam = Counter()
+    for r in satirlar:
+        for parca in (r.get("secim_dagilimi") or "").split(","):
+            if ":" in parca:
+                k, n = parca.split(":")
+                secim_toplam[k] += int(n)
     geri = sum(s.get("geri_alinan_jpg", 0) for s in satirlar)
 
     md = [f"# ZIP_FINAL ({simdi()} UTC)", "",
-          "Yontem: `jpegtran -copy icc -optimize` (yeniden kodlama YOK, ICC profili korunur).",
-          "Kanit: her JPG icin `djpeg -pnm | sha256`; fark cikarsa JPG orijinal birakilir.", "",
+          "Yontem: her JPG icin {orijinal, `-copy icc -optimize`, `+ -progressive`} adaylari",
+          "deflate(9) ile olculur, ZIP icinde EN KUCUK yer kaplayan secilir (hepsi kayipsiz).",
+          "Kanit: secilen aday icin `djpeg -pnm | sha256`; fark cikarsa JPG orijinal birakilir.", "",
           "## Ozet", "",
           f"- ZIP: {len(satirlar)} islendi, **{len(gecti)} GECTI**, {len(kaldi)} gecemedi",
           f"- Cift sayisi: {len(ciftler)} (5 ZIP'i tam olmayan: {len(eksik_cift)})",
           f"- Piksel dogrulamasi BIREBIR ZIP: {birebir} | orijinal birakilan JPG: {geri}",
-          f"- JPG toplami: {orj/1e6:.1f} MB -> {opt/1e6:.1f} MB "
-          f"(kazanc {(orj-opt)/1e6:.1f} MB, %{100*(orj-opt)/max(1,orj):.2f})", ""]
+          f"- ZIP icindeki JPG maliyeti (deflate): {orj/1e6:.1f} MB -> {opt/1e6:.1f} MB "
+          f"(kazanc {(orj-opt)/1e6:.1f} MB, %{100*(orj-opt)/max(1,orj):.2f})",
+          f"- Aday secimi (JPG sayisi): {dict(secim_toplam)}",
+          ""]
     if en_buyuk:
         md += [f"- **En buyuk ZIP: {en_buyuk['yeni_mb']} MB** ({en_buyuk['zip_adi']}) "
                f"- esik 19.8 MB", ""]

@@ -15,10 +15,15 @@ on:
         description: "ZIP sayisi siniri (0 = 390 ZIP'in tamami)"
         required: false
         default: "0"
+      galeri:
+        description: "ADIM 1 (galeri) kosulsun mu: evet/hayir"
+        required: false
+        default: "evet"
   push:
     branches: [dijital-v1]
     paths:
       - 'config/dijital78_v3.trigger'
+      - 'config/dijital78_v4.trigger'
 
 concurrency:
   group: etsy-token
@@ -90,7 +95,7 @@ jobs:
           done
 
       - name: 'ADIM 1  Galeri kaynak eslemesi + ornek galeri (Etsy salt okur, tavan 30)'
-        if: ${{ steps.girdiler.outcome == 'success' }}
+        if: ${{ steps.girdiler.outcome == 'success' && inputs.galeri != 'hayir' && !contains(github.event.head_commit.message, '[zip-only]') }}
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
@@ -111,6 +116,7 @@ jobs:
           python scripts/etsy/dijital78_zipfinal.py --kok "$ZIP_KOK" --pdf _work/thankyou.pdf \
             --out _out_zip --out-dizin _work/zipcikti --calisma _work/zipfinal \
             --esik 19800000 --is-parca 6 --limit "$ZIPLIMIT" \
+            --ilk-grup config/dijital78_kapi15.txt \
             --yukle-kok "$DIJITAL_KOK" --yukle-yol "ZIP_FINAL"
           df -h /
 
