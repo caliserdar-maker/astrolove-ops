@@ -1,0 +1,145 @@
+name: dijital-78-plan
+
+# SALT OKUR PLAN KOSUSU (Serdar 20 Eyl 2026): 390 dijital poster -> 78 ilan.
+# ETSY'YE HICBIR YAZMA YOK. Drive'a yalniz TEMP/DIJITAL_78/ altina RAPOR yazilir.
+# Etsy cagri tavani girdiyle zorlanir (varsayilan 58); ilan bazinda tek tek
+# okuma yoktur, yalniz toplu uclar (listings limit=100, receipts limit=100).
+# Dal uzerinde calisir: workflow_dispatch main disinda gorunmedigi icin
+# tetikleyici dosya push'u kullanilir.
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_calls:
+        description: "En fazla Etsy API cagrisi"
+        required: false
+        default: "58"
+      receipt_pages:
+        description: "Makbuz sayfasi (100'luk) ust siniri"
+        required: false
+        default: "10"
+      ornek_dosya:
+        description: "Canli dosya dogrulamasi yapilacak ilan sayisi"
+        required: false
+        default: "20"
+  push:
+    branches: [dijital-v1]
+    paths:
+      - 'config/dijital78.trigger'
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  ZIP_KOK: 1QH-lfhmgaTI8Ac6CK_WgU-2o5vFRgTGF     # Drive ALL_312_ZIPS
+  CIKTI: "gdrive:ASTROLOVE/TEMP/DIJITAL_78"
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      MAXC: ${{ inputs.max_calls || '58' }}
+      RPAGES: ${{ inputs.receipt_pages || '10' }}
+      ORNEK: ${{ inputs.ornek_dosya || '20' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Bagimliliklar
+        run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2 Pillow==11.3.0
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          rclone version | head -1
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+
+      - name: Girdiler (token + canli dosya anlik goruntusu)
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_LISTING/DIGITAL_AUDIT_20260914_1345/DIGITAL_FILES_ALL.csv" \
+            _work/digital_files_all.csv 2>/dev/null || echo "::warning::DIGITAL_FILES_ALL.csv bulunamadi, surum karsilastirmasi atlanir"
+          rclone copyto "gdrive:ASTROLOVE/TEMP/PIN_LISTING_MAP.csv" _work/pin_listing_map.csv 2>/dev/null \
+            || echo "::warning::PIN_LISTING_MAP.csv bulunamadi, pin eslemesi atlanir"
+          [ -f _work/digital_files_all.csv ] && echo "anlik goruntu satiri: $(( $(wc -l < _work/digital_files_all.csv) - 1 ))" || true
+          [ -f _work/pin_listing_map.csv ] && echo "pin haritasi satiri: $(( $(wc -l < _work/pin_listing_map.csv) - 1 ))" || true
+
+      - name: 'ADIM 1-2-4-6  Envanter / kalacak ilan / linkler / fiyat (Etsy salt okur)'
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          python scripts/etsy/dijital78_envanter.py --out _out \
+            --max-calls "$MAXC" --receipt-pages "$RPAGES" --ornek-dosya "$ORNEK" \
+            --dfiles _work/digital_files_all.csv --pin-map _work/pin_listing_map.csv
+
+      - name: 'ADIM 3  ZIP kontrolu (Drive, Etsy cagrisi yok)'
+        run: |
+          set -euo pipefail
+          mkdir -p _work/ornek_zip
+          python scripts/etsy/dijital78_zip.py --kok "$ZIP_KOK" --out _out \
+            --dfiles _work/digital_files_all.csv --envanter _out/ENVANTER.csv \
+            --is-parca 8 --tam-ornek ARIES_LEO,CANCER_SCORPIO,GEMINI_GEMINI \
+            --tam-ornek-dizin _work/ornek_zip
+
+      - name: 'ADIM 5  Metin taslaklari + QC'
+        run: |
+          set -euo pipefail
+          python scripts/etsy/dijital78_metin.py --zip-csv _out/ZIP_KONTROL.csv --out _out
+
+      - name: 'ADIM 7  Kapak ornegi (2 duzen)'
+        run: |
+          set -euo pipefail
+          python scripts/etsy/dijital78_kapak.py --zip-dizin _work/ornek_zip \
+            --cift Aries_Leo --out _out
+
+      - name: Sir taramasi + Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && \
+            rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && \
+            echo "Token geri yazildi" || true
+          rm -rf _out/_ornek
+          if [ -d _out ] && grep -rqaE 'x-api-key|refresh_token|access_token|client_secret' _out/ 2>/dev/null; then
+            echo "::error::ciktida sir benzeri anahtar bulundu, Drive'a yazilmadi"; exit 1
+          fi
+          rclone copy _out "$CIKTI" -q
+          echo "Cikti: ASTROLOVE/TEMP/DIJITAL_78/"
+          rclone lsf "$CIKTI" | sed 's/^/  - /'
+          echo "KAPAK_ORNEK.jpg Drive id:"
+          rclone lsjson "$CIKTI" --files-only 2>/dev/null \
+            | python -c "import json,sys;[print(' ',x['Name'],x.get('ID',''),x['Size']) for x in json.load(sys.stdin)]"
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: dijital-78-plan
+          path: _out/
+          if-no-files-found: ignore
+
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
