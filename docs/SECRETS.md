@@ -117,3 +117,26 @@ hicbir loga, dosyaya, commit'e ve workflow girdisine yazilmaz. Yerel deneme icin
 yalniz `PRODIGI_API_KEY` ortam degiskeni kabul edilir.
 
 Sandbox: `ASTROLOVE/TEMP/PRODIGI_SANDBOX_TOKEN.json` (`{"api_key": "..."}`), Prodigi panelinde ayri uretilir; `pod-order-router` env=sandbox bunu okur. Ayni maskeleme kurallari gecerlidir.
+
+## Etsy yeniden yetkilendirme — transactions_r (20 Eyl 2026)
+
+Yonlendiricinin siparisleri okumasi icin token'a `transactions_r` gerekiyor
+(7 Eyl olcumu: `GET /shops/{id}/receipts` -> 403 "requires scope: transactions_r").
+
+- Betik: `scripts/etsy/etsy_yetki.py` (PKCE S256). Workflow: `pod-sablon-v4`
+  mod=`yetki` (link uret) / `yetki_degistir` (kodu token'a cevir, confirm=`YETKI_DEGISTIR`) /
+  `yetki_test` (salt okuma kaniti).
+- Redirect URI (9 Agu 2026 ilk kurulumdan): `https://astrolove.art/oauth/callback`.
+  Etsy uygulama ayarlarindaki kayitli deger budur, degistirilmez.
+- Kapsam kaybolmaz: `link` modu canli `ETSY_TOKEN.json`'daki `scope`'u okur, uzerine
+  eksikleri ekler. Olculen: eski `listings_r listings_w shops_r shops_w` ->
+  yeni `listings_r listings_w shops_r shops_w transactions_r`.
+  `listings_d` GEREKMEZ: depodaki tum `DELETE` cagrilari alt kaynaklara
+  (images/videos/files) gider ve mevcut kapsamla calisir; ilan silme cagrisi yok.
+  `email_r`/`profile_r` mevcut token'da yok, `/users/me` bunlarsiz calisiyor.
+- keystring (client_id) degismez; hicbir GitHub secret'i guncellenmez.
+- Tek kaynak: 70 Etsy workflow'unun 70'i token'i `gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json`
+  dosyasindan ceker ve hepsi `concurrency: etsy-token` grubundadir. `degistir` bu tek
+  dosyayi yeniler; eski surum `POD_5X7/YEDEK/ETSY_TOKEN_<zaman>.json` olarak saklanir.
+- Baglanti ve PKCE dogrulayici yalniz Drive'a yazilir
+  (`POD_5X7/ETSY_YETKI_LINK.txt`, `POD_5X7/ETSY_YETKI_PKCE.json`); loga/sohbete asla.
