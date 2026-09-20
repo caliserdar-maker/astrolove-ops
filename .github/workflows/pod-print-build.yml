@@ -1,6 +1,7 @@
 name: pod-print-build
 
-# POD baski dosyalari: 78 cift x 5 edisyon x 13 boyut = 5.070 JPEG (300 dpi, q95).
+# 20 Eyl 2026: 5x7 (GLOBAL-HPR-5x7, 13x18 cm) hatti. 78 cift x 5 edisyon = 390 JPEG;
+# ISO ustasindan YALNIZ dikey kirpma (usta cozunurlugu korunur), bant kontrolu + URETIM_5X7.csv.
 # Kaynak WALL_ART/POSTERS/ORIGINAL_HIGH_RES/<ED>/<RATIO>/<PAIR>.jpg; hedef piksel Prodigi
 # API print-area (plan isi okur, TEMP/PRODIGI/PRODIGI_HPR_PRINT_AREAS.json). Cikti Drive
 # TEMP/POD_PRINT/<PAIR>/<ED>/<SIZE>.jpg (paylasim YOK; siparis aninda gecici link).
@@ -24,6 +25,9 @@ on:
         description: "true = PASS olanlari da yeniden uret"
         type: boolean
         default: false
+      onizleme:
+        description: "ONIZLEME_5X7.jpg icin cift (bos = yok)"
+        default: ""
 
 concurrency:
   group: pod-print-build
@@ -83,7 +87,7 @@ jobs:
           cache: pip
       - run: |
           set -euo pipefail
-          pip install -q pillow==12.3.0
+          pip install -q pillow==12.3.0 numpy==2.1.3
           curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
       - name: rclone.conf olustur
         env:
@@ -108,22 +112,24 @@ jobs:
             echo "$PAIRS" | tr ',' '\n' | sed 's/ //g' | grep -v '^$' | tr a-z A-Z | sort -u > _work/pairs.txt
           fi
           echo "cift: $(wc -l < _work/pairs.txt)"
-          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_PRINT_STATE/shard_${{ matrix.shard }}.csv" _work/state.csv 2>/dev/null || echo "STATE yok; yeni baslar"
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_5X7_STATE/shard_${{ matrix.shard }}.csv" _work/state.csv 2>/dev/null || echo "STATE yok; yeni baslar"
       - name: Uret (shard ${{ matrix.shard }})
         env:
           FORCE: ${{ inputs.force }}
+          ONIZLEME: ${{ inputs.onizleme }}
         run: |
           set -euo pipefail
           args=(--pairs-file _work/pairs.txt --sizes-json _work/sizes.json --src src --out out --state _work/state.csv
                 --shard "${{ matrix.shard }}" --shards "${{ inputs.shards }}"
                 --rclone-src "gdrive:ASTROLOVE/WALL_ART/POSTERS/ORIGINAL_HIGH_RES" --rclone-out "gdrive:ASTROLOVE/TEMP/POD_PRINT")
           [ "$FORCE" = "true" ] && args+=(--force)
-          python scripts/pod/pod_print_build.py "${args[@]}"
+          [ -n "${ONIZLEME:-}" ] && args+=(--onizleme-cift "$ONIZLEME")
+          python scripts/pod/pod_print_5x7.py "${args[@]}"
       - name: STATE'i Drive'a yaz
         if: ${{ always() }}
         run: |
           set -euo pipefail
-          [ -s _work/state.csv ] && rclone copyto _work/state.csv "gdrive:ASTROLOVE/TEMP/POD_PRINT_STATE/shard_${{ matrix.shard }}.csv" && echo "STATE shard_${{ matrix.shard }} yazildi" || echo "STATE yok"
+          [ -s _work/state.csv ] && rclone copyto _work/state.csv "gdrive:ASTROLOVE/TEMP/POD_5X7_STATE/shard_${{ matrix.shard }}.csv" && echo "STATE shard_${{ matrix.shard }} yazildi" || echo "STATE yok"
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:
@@ -155,8 +161,23 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p _st
-          rclone copy "gdrive:ASTROLOVE/TEMP/POD_PRINT_STATE" _st --include "shard_*.csv" -q || echo "shard STATE klasoru yok"
-          n_drive=$(rclone lsf "gdrive:ASTROLOVE/TEMP/POD_PRINT" -R --files-only --include "*.jpg" 2>/dev/null | wc -l || echo 0)
+          rclone copy "gdrive:ASTROLOVE/TEMP/POD_5X7_STATE" _st --include "shard_*.csv" -q || echo "shard STATE klasoru yok"
+          rclone copy "gdrive:ASTROLOVE/TEMP/POD_5X7/parca" _st --include "URETIM_5X7_shard*.csv" -q || echo "parca CSV yok"
+          python3 - <<'PY2'
+          import csv, glob
+          sut = None; rows = []
+          for f in sorted(glob.glob("_st/URETIM_5X7_shard*.csv")):
+              rd = csv.DictReader(open(f, encoding="utf-8")); sut = rd.fieldnames or sut
+              rows += list(rd)
+          if sut:
+              rows.sort(key=lambda r: (r["pair"], r["edition"]))
+              with open("_st/URETIM_5X7.csv", "w", newline="", encoding="utf-8") as fh:
+                  w = csv.DictWriter(fh, fieldnames=sut); w.writeheader(); w.writerows(rows)
+              print("URETIM_5X7.csv satir:", len(rows),
+                    "| GECTI:", sum(1 for r in rows if r.get("durum") == "GECTI"))
+          PY2
+          [ -s _st/URETIM_5X7.csv ] && rclone copyto _st/URETIM_5X7.csv "gdrive:ASTROLOVE/TEMP/POD_5X7/URETIM_5X7.csv"
+          n_drive=$(rclone lsf "gdrive:ASTROLOVE/TEMP/POD_PRINT" -R --files-only --include "5x7.jpg" 2>/dev/null | wc -l || echo 0)
           echo "Drive TEMP/POD_PRINT jpg: $n_drive"
           N_DRIVE="$n_drive" python3 - <<'PY'
           import csv, glob, os
@@ -178,8 +199,8 @@ jobs:
           open("_st/POD_PRINT_REPORT.md", "w", encoding="utf-8").write("\n".join(md) + "\n")
           open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8").write("\n".join(md) + "\n")
           PY
-          rclone copyto _st/POD_PRINT_STATE.csv "gdrive:ASTROLOVE/TEMP/POD_PRINT_STATE.csv"
-          rclone copyto _st/POD_PRINT_REPORT.md "gdrive:ASTROLOVE/TEMP/POD_PRINT_REPORT.md"
+          rclone copyto _st/POD_PRINT_STATE.csv "gdrive:ASTROLOVE/TEMP/POD_5X7_STATE.csv"
+          rclone copyto _st/POD_PRINT_REPORT.md "gdrive:ASTROLOVE/TEMP/POD_5X7/POD_5X7_REPORT.md"
           head -1 _st/POD_PRINT_REPORT.md
       - uses: actions/upload-artifact@v4
         with:

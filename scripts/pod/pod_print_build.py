@@ -31,6 +31,10 @@ RATIO_OF = {"8x10": "4X5", "16x20": "4X5", "12x16": "3X4", "18x24": "3X4", "30x4
             "A4": "A_SERIES", "A3": "A_SERIES", "A2": "A_SERIES"}
 SIZES = list(RATIO_OF)
 RATIO_TOL = 0.01
+# 5x7 (13x18 cm) ISO ustasindan turetilir, oran farki %2.11 -> yalniz bu boyda tolerans 0.025.
+# Uretimi pod_print_5x7.py yapar (yeniden boyutlandirma yok); burada tolerans/oran kaydi durur.
+RATIO_OF_5X7 = "A_SERIES"
+TOL_OF = {"5x7": 0.025}
 STATE_COLS = ["pair", "status", "files", "fail", "secs", "ts_utc"]
 
 
@@ -44,10 +48,10 @@ def rclone(*args):
         raise RuntimeError(f"rclone {args[0]} {args[1]}: rc={r.returncode} {r.stderr.strip()[-200:]}")
 
 
-def fit(im, w, h):
-    """Merkez kirp (hedef orana) + LANCZOS. Oran farki > %1 ise ValueError."""
+def fit(im, w, h, size_key=""):
+    """Merkez kirp (hedef orana) + LANCZOS. Oran farki toleransi: TOL_OF[boy] ya da RATIO_TOL."""
     sw, sh = im.size
-    if abs((sw / sh) / (w / h) - 1) > RATIO_TOL:
+    if abs((sw / sh) / (w / h) - 1) > TOL_OF.get(size_key, RATIO_TOL):
         raise ValueError(f"oran {sw}x{sh} ({sw / sh:.4f}) hedef {w}x{h} ({w / h:.4f})")
     if sw / sh > w / h:
         nw = round(sh * w / h); x0 = (sw - nw) // 2; im = im.crop((x0, 0, x0 + nw, sh))
@@ -76,7 +80,7 @@ def build_pair(pair, sizes, src_root, out_root):
                     im = Image.open(src); im.load()
                     cache = {key: im.convert("RGB")}          # edisyon+oran basina tek decode; bellek icin tek giris
                 im = cache[key]
-                fit(im, w, h).save(out, "JPEG", quality=95, subsampling=0, dpi=(300, 300), optimize=False)
+                fit(im, w, h, sz).save(out, "JPEG", quality=95, subsampling=0, dpi=(300, 300), optimize=False)
                 with Image.open(out) as chk:
                     if chk.size != (w, h) or out.stat().st_size == 0:
                         errs.append(f"{ed}/{sz}: QC {chk.size} != {w}x{h}"); continue

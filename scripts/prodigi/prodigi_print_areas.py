@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Prodigi HPR 13 boyutun print-area pikselini API'den okur (salt okur) -> JSON.
+Prodigi HPR boyutlarinin (13 mevcut + 5x7 = 13x18 cm)  print-area pikselini API'den okur (salt okur) -> JSON.
 GET /products/GLOBAL-HPR-<SIZE> -> variants[0].printAreaSizes.default {horizontalResolution, verticalResolution}.
 Prodigi print-area degeri esastir (inc x 300'den sapma yalniz not olarak yazilir; 11x14 = 3307x4200).
 Cikti: {"8x10": {"w": 2400, "h": 3000, "sku": "GLOBAL-HPR-8x10"}, ...}
@@ -14,7 +14,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from prodigi_pilot_quote import Api, load_key, log  # noqa: E402
 
-SIZES = {"8x10": (8, 10), "A4": None, "11x14": (11, 14), "12x16": (12, 16), "A3": None, "12x18": (12, 18),
+SIZES = {"5x7": None, "8x10": (8, 10), "A4": None, "11x14": (11, 14), "12x16": (12, 16), "A3": None, "12x18": (12, 18),
          "16x20": (16, 20), "16x24": (16, 24), "A2": None, "18x24": (18, 24), "20x30": (20, 30),
          "24x36": (24, 36), "30x40": (30, 40)}
 
