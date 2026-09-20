@@ -30,10 +30,16 @@ BOY = "5x7"
 INK, KAYMA = 40, 3.0
 BLOK = (32, 128)     # blok ortalamasi (satir, sutun): doku ortalanir, tasarim (yogun mürekkep) kalir
 BLOK_K = 4.0         # blok sapmasi esigi = max(2.0, BLOK_K * serit_blok_std)
+# KAPI (20 Eyl olcumu): kirpilan bantlar CIFTE OZGU icerik tasimamali. Bantlar tum ciftlerde
+# ayni arka plan plakasidir (DEEP_BLACK yildiz dokusu, WARM_PARCHMENT kagit dokusu; tani
+# goruntuleri TEMP/POD_5X7/TANI). Tasarim (halka, semboller, isimler, "Two Souls One Bond")
+# cifte ozgudur: bant blok haritasi edisyonun REFERANS ciftininkinden saparsa tasarim girmis
+# demektir. Esik: blok basina <= 1.0 luma.
+REF_ESIK = 1.0
 CSV_SUT = ["pair", "edition", "dosya", "usta_px", "kirp_px", "kirpma_px",
            "ust_ink_px", "alt_ink_px", "ust_max_sapma", "alt_max_sapma",
            "ust_kayma", "alt_kayma", "serit_std", "ust_blok_sapma", "alt_blok_sapma",
-           "blok_esik", "blok_ustu", "bayt", "sn", "durum", "neden"]
+           "blok_esik", "blok_ustu", "ref_sapma", "bayt", "sn", "durum", "neden"]
 T0 = time.time()
 
 
@@ -139,7 +145,7 @@ def sapan_bloklar(bant, serit, n=3):
             for i, j in idx]
 
 
-def uret(usta_yol, cikti_yol, oran, tani_dizin=None, tani_ad=""):
+def uret(usta_yol, cikti_yol, oran, tani_dizin=None, tani_ad="", referans=None):
     """Kirp + kaydet. Donus: satir sozlugu."""
     t0 = time.time()
     im = Image.open(usta_yol)
@@ -159,6 +165,11 @@ def uret(usta_yol, cikti_yol, oran, tani_dizin=None, tani_ad=""):
     alt_i, alt_s, alt_k, std2 = bant_kontrol(a[y0 + nh:], a[y0 + nh - alt_h:y0 + nh])
     ust_b, ust_e, ust_n = yapi_kontrol(a[:y0], a[y0:y0 + y0])
     alt_b, alt_e, alt_n = yapi_kontrol(a[y0 + nh:], a[y0 + nh - alt_h:y0 + nh])
+    harita = (bloklar(a[:y0]), bloklar(a[y0 + nh:]))
+    ref_sapma = None
+    if referans is not None:
+        ref_sapma = round(float(max(np.abs(harita[0] - referans[0]).max(),
+                                    np.abs(harita[1] - referans[1]).max())), 2)
     if tani_dizin is not None:
         tani(im, y0, nh, tani_dizin, tani_ad)
         log(f"  {tani_ad} ust bant sapan bloklar: {sapan_bloklar(a[:y0], a[y0:y0 + y0])}")
@@ -169,7 +180,9 @@ def uret(usta_yol, cikti_yol, oran, tani_dizin=None, tani_ad=""):
     cikti_yol.parent.mkdir(parents=True, exist_ok=True)
     kirp.save(cikti_yol, "JPEG", quality=95, subsampling=0, dpi=(dpi, dpi), optimize=True)
     # GECTI: blok duzeyinde tasarim izi yok (doku/vinyet bloklarda ortalanir) ve ton kaymasi kucuk
-    gecti = (ust_n == 0 and alt_n == 0 and ust_k <= KAYMA and alt_k <= KAYMA)
+    # KAPI: cifte ozgu icerik yok (referans bant haritasina esit) -> GECTI.
+    gecti = (ref_sapma is not None and ref_sapma <= REF_ESIK) if referans is not None else \
+            (ust_n == 0 and alt_n == 0 and ust_k <= KAYMA and alt_k <= KAYMA)
     return {"usta_px": f"{sw}x{sh}", "kirp_px": f"{kirp.size[0]}x{kirp.size[1]}",
             "kirpma_px": sh - nh, "ust_ink_px": ust_i, "alt_ink_px": alt_i,
             "ust_max_sapma": ust_s, "alt_max_sapma": alt_s, "ust_kayma": ust_k,
@@ -249,6 +262,7 @@ def main():
         with csv_yol.open("w", newline="", encoding="utf-8") as fh:
             csv.writer(fh).writerow(CSV_SUT)
     onizleme_dosyalari = []
+    referanslar = {}          # edisyon -> (ust_blok_haritasi, alt_blok_haritasi)
     t0, n_ok, n_fail = time.time(), 0, 0
     for i, cift in enumerate(todo, start=1):
         tp = time.time()
@@ -268,14 +282,19 @@ def main():
             try:
                 s = uret(usta, cikti, oran,
                          tani_dizin=(pathlib.Path(a.out) / "_tani") if a.tani else None,
-                         tani_ad=f"{cift}_{ed}")
+                         tani_ad=f"{cift}_{ed}", referans=referanslar.get(ed))
             except Exception as e:  # noqa: BLE001
                 hatalar.append(f"{ed}: {type(e).__name__}: {e}")
                 usta.unlink(missing_ok=True)
                 continue
+            if ed not in referanslar:
+                referanslar[ed] = s.pop("_harita")
+                s["durum"], s["neden"] = "REFERANS", "edisyonun ilk cifti: bant referansi"
+            else:
+                s.pop("_harita", None)
             s.update({"pair": cift, "edition": ed, "dosya": f"{cift}/{ed}/{BOY}.jpg"})
-            if s["durum"] != "GECTI":
-                hatalar.append(f"{ed}: bant yapi kontrolu blok {s['blok_ustu']} "
+            if s["durum"] not in ("GECTI", "REFERANS"):
+                hatalar.append(f"{ed}: bant referans sapmasi {s.get('ref_sapma')} (esik {REF_ESIK}); blok {s['blok_ustu']} "
                                f"(sapma {s['ust_blok_sapma']}/{s['alt_blok_sapma']} esik {s['blok_esik']}, "
                                f"kayma {s['ust_kayma']}/{s['alt_kayma']})")
             satirlar.append(s)
