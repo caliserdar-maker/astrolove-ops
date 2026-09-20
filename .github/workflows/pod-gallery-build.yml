@@ -24,6 +24,9 @@ on:
         description: "true = PASS olanlari da yeniden uret"
         type: boolean
         default: false
+      ornek:
+        description: "SIZE_GUIDE_14_ORNEK.jpg icin cift (bos = yok)"
+        default: ""
 
 concurrency:
   group: pod-gallery-build
@@ -75,8 +78,10 @@ jobs:
           umask 077
           printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
           chmod 600 ~/.config/rclone/rclone.conf
-          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
-            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
           fi
       - name: Cift listesi + STATE (resume)
         env:
@@ -90,29 +95,30 @@ jobs:
             echo "$PAIRS" | tr ',' '\n' | sed 's/ //g' | grep -v '^$' | tr a-z A-Z | sort -u > _work/pairs.txt
           fi
           echo "cift: $(wc -l < _work/pairs.txt)"
-          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_GALLERY_STATE/shard_${{ matrix.shard }}.csv" _work/state.csv 2>/dev/null || echo "STATE yok; yeni baslar"
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_SG14_STATE/shard_${{ matrix.shard }}.csv" _work/state.csv 2>/dev/null || echo "STATE yok; yeni baslar"
       - name: Kaynak dogrulama (FACTCHECK)
         run: |
           set -euo pipefail
-          rclone copyto "gdrive:ASTROLOVE/TEMP/PRODIGI/PRODIGI_HPR_SIZES.csv" hpr.csv
-          python scripts/pod/factcheck.py --csv hpr.csv --out _fc
-          n=$(grep -c "KAYNAK YOK →" _fc/FACTCHECK.md || true); echo "kaynaksiz satir: $n"
-          [ "$n" != "0" ] && echo "::warning::kaynaksiz satir var (karttan dusuruldu): $n" || true
+          mkdir -p _fc
+          echo "Size Guide 14: yalniz 08_SIZES karti cizilir, factcheck gerekmez."
       - name: Uret (shard ${{ matrix.shard }})
         env:
           FORCE: ${{ inputs.force }}
+          ORNEK: ${{ inputs.ornek }}
         run: |
           set -euo pipefail
-          args=(--pairs-file _work/pairs.txt --src src --out out --fonts fonts --state _work/state.csv --contact-dir contact
-                --verified _fc/verified.json --spellcheck --shard "${{ matrix.shard }}" --shards "${{ inputs.shards }}"
-                --rclone-src "gdrive:ASTROLOVE/WALL_ART/LISTING_MEDIA/ETSY_UPLOAD_SETS" --rclone-out "gdrive:ASTROLOVE/TEMP/POD_GALLERY")
+          args=(--pairs-file _work/pairs.txt --src src --out out --fonts fonts --state _work/state.csv
+                --shard "${{ matrix.shard }}" --shards "${{ inputs.shards }}"
+                --rclone-src "gdrive:ASTROLOVE/WALL_ART/LISTING_MEDIA/ETSY_UPLOAD_SETS"
+                --rclone-out "gdrive:ASTROLOVE/TEMP/POD_SIZE_GUIDE_14")
           [ "$FORCE" = "true" ] && args+=(--force)
-          python scripts/pod/pod_gallery_build.py "${args[@]}"
+          [ -n "${ORNEK:-}" ] && args+=(--ornek-cift "$ORNEK")
+          python scripts/pod/pod_size_guide_14.py "${args[@]}"
       - name: STATE'i Drive'a yaz
         if: ${{ always() }}
         run: |
           set -euo pipefail
-          [ -s _work/state.csv ] && rclone copyto _work/state.csv "gdrive:ASTROLOVE/TEMP/POD_GALLERY_STATE/shard_${{ matrix.shard }}.csv" && echo "STATE shard_${{ matrix.shard }} yazildi" || echo "STATE yok"
+          [ -s _work/state.csv ] && rclone copyto _work/state.csv "gdrive:ASTROLOVE/TEMP/POD_SG14_STATE/shard_${{ matrix.shard }}.csv" && echo "STATE shard_${{ matrix.shard }} yazildi" || echo "STATE yok"
       - name: Artifact
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
@@ -146,14 +152,16 @@ jobs:
           umask 077
           printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
           chmod 600 ~/.config/rclone/rclone.conf
-          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
-            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
           fi
       - name: STATE birlestir + rapor
         run: |
           set -euo pipefail
           mkdir -p _st
-          rclone copy "gdrive:ASTROLOVE/TEMP/POD_GALLERY_STATE" _st --include "shard_*.csv" -q
+          rclone copy "gdrive:ASTROLOVE/TEMP/POD_SG14_STATE" _st --include "shard_*.csv" -q
           python3 - <<'PY'
           import csv, glob, os
           rows = {}
@@ -161,7 +169,7 @@ jobs:
               for r in csv.DictReader(open(f, encoding="utf-8")):
                   if r["pair"] not in rows or r["ts_utc"] > rows[r["pair"]]["ts_utc"]:
                       rows[r["pair"]] = r
-          cols = ["pair", "status", "frames", "fail", "secs", "ts_utc"]
+          cols = ["pair", "status", "cards", "fail", "secs", "ts_utc"]
           with open("_st/POD_GALLERY_STATE.csv", "w", newline="", encoding="utf-8") as fh:
               w = csv.DictWriter(fh, fieldnames=cols); w.writeheader()
               for k in sorted(rows): w.writerow({c: rows[k].get(c, "") for c in cols})
@@ -169,12 +177,12 @@ jobs:
           secs = sum(float(r.get("secs") or 0) for r in rows.values())
           md = [f"# POD galeri durumu: {n_pass}/{len(rows)} PASS, {len(rows) - n_pass} FAIL, toplam cift suresi {secs/60:.1f} dk", "",
                 "| cift | durum | kare | sure sn | hata |", "|---|---|---|---|---|"]
-          md += [f"| {r['pair']} | {r['status']} | {r['frames']} | {r['secs']} | {r['fail'][:200].replace('|', '/')} |" for r in (rows[k] for k in sorted(rows))]
+          md += [f"| {r['pair']} | {r['status']} | {r['cards']} | {r['secs']} | {r['fail'][:200].replace('|', '/')} |" for r in (rows[k] for k in sorted(rows))]
           open("_st/POD_GALLERY_REPORT.md", "w", encoding="utf-8").write("\n".join(md) + "\n")
           open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8").write("\n".join(md) + "\n")
           PY
-          rclone copyto _st/POD_GALLERY_STATE.csv "gdrive:ASTROLOVE/TEMP/POD_GALLERY_STATE.csv"
-          rclone copyto _st/POD_GALLERY_REPORT.md "gdrive:ASTROLOVE/TEMP/POD_GALLERY_REPORT.md"
+          rclone copyto _st/POD_GALLERY_STATE.csv "gdrive:ASTROLOVE/TEMP/POD_SIZE_GUIDE_14/STATE.csv"
+          rclone copyto _st/POD_GALLERY_REPORT.md "gdrive:ASTROLOVE/TEMP/POD_SIZE_GUIDE_14/REPORT.md"
           head -3 _st/POD_GALLERY_REPORT.md
       - uses: actions/upload-artifact@v4
         with:
