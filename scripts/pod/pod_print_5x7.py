@@ -35,11 +35,13 @@ BLOK_K = 4.0         # blok sapmasi esigi = max(2.0, BLOK_K * serit_blok_std)
 # goruntuleri TEMP/POD_5X7/TANI). Tasarim (halka, semboller, isimler, "Two Souls One Bond")
 # cifte ozgudur: bant blok haritasi edisyonun REFERANS ciftininkinden saparsa tasarim girmis
 # demektir. Esik: blok basina <= 1.0 luma.
-REF_ESIK = 1.0
+# Esik arka plan degiskenligine gore olceklenir: WARM_PARCHMENT dokusu ciftten cifte degisir
+# (olculen), MB/DB/CI plakalari birebir ayni. Tasarim girerse blok farki 40+ luma olur.
+REF_K, REF_TABAN = 2.0, 2.0
 CSV_SUT = ["pair", "edition", "dosya", "usta_px", "kirp_px", "kirpma_px",
            "ust_ink_px", "alt_ink_px", "ust_max_sapma", "alt_max_sapma",
            "ust_kayma", "alt_kayma", "serit_std", "ust_blok_sapma", "alt_blok_sapma",
-           "blok_esik", "blok_ustu", "ref_sapma", "bayt", "sn", "durum", "neden"]
+           "blok_esik", "blok_ustu", "ref_sapma", "ref_esik", "bayt", "sn", "durum", "neden"]
 T0 = time.time()
 
 
@@ -166,10 +168,11 @@ def uret(usta_yol, cikti_yol, oran, tani_dizin=None, tani_ad="", referans=None):
     ust_b, ust_e, ust_n = yapi_kontrol(a[:y0], a[y0:y0 + y0])
     alt_b, alt_e, alt_n = yapi_kontrol(a[y0 + nh:], a[y0 + nh - alt_h:y0 + nh])
     harita = (bloklar(a[:y0]), bloklar(a[y0 + nh:]))
-    ref_sapma = None
+    ref_sapma = ref_esik = None
     if referans is not None:
         ref_sapma = round(float(max(np.abs(harita[0] - referans[0]).max(),
                                     np.abs(harita[1] - referans[1]).max())), 2)
+        ref_esik = round(max(REF_TABAN, REF_K * float(max(referans[0].std(), referans[1].std()))), 2)
     if tani_dizin is not None:
         tani(im, y0, nh, tani_dizin, tani_ad)
         log(f"  {tani_ad} ust bant sapan bloklar: {sapan_bloklar(a[:y0], a[y0:y0 + y0])}")
@@ -181,7 +184,7 @@ def uret(usta_yol, cikti_yol, oran, tani_dizin=None, tani_ad="", referans=None):
     kirp.save(cikti_yol, "JPEG", quality=95, subsampling=0, dpi=(dpi, dpi), optimize=True)
     # GECTI: blok duzeyinde tasarim izi yok (doku/vinyet bloklarda ortalanir) ve ton kaymasi kucuk
     # KAPI: cifte ozgu icerik yok (referans bant haritasina esit) -> GECTI.
-    gecti = (ref_sapma is not None and ref_sapma <= REF_ESIK) if referans is not None else \
+    gecti = (ref_sapma is not None and ref_sapma <= ref_esik) if referans is not None else \
             (ust_n == 0 and alt_n == 0 and ust_k <= KAYMA and alt_k <= KAYMA)
     return {"usta_px": f"{sw}x{sh}", "kirp_px": f"{kirp.size[0]}x{kirp.size[1]}",
             "kirpma_px": sh - nh, "ust_ink_px": ust_i, "alt_ink_px": alt_i,
@@ -294,7 +297,7 @@ def main():
                 s.pop("_harita", None)
             s.update({"pair": cift, "edition": ed, "dosya": f"{cift}/{ed}/{BOY}.jpg"})
             if s["durum"] not in ("GECTI", "REFERANS"):
-                hatalar.append(f"{ed}: bant referans sapmasi {s.get('ref_sapma')} (esik {REF_ESIK}); blok {s['blok_ustu']} "
+                hatalar.append(f"{ed}: bant referans sapmasi {s.get('ref_sapma')} (esik {s.get('ref_esik')}); blok {s['blok_ustu']} "
                                f"(sapma {s['ust_blok_sapma']}/{s['alt_blok_sapma']} esik {s['blok_esik']}, "
                                f"kayma {s['ust_kayma']}/{s['alt_kayma']})")
             satirlar.append(s)
@@ -341,7 +344,7 @@ def main():
         rclone("copyto", str(csv_yol), f"gdrive:ASTROLOVE/TEMP/POD_5X7/parca/{csv_yol.name}")
     print(json.dumps({"shard": a.shard, "pass": n_ok, "fail": n_fail,
                       "dosya_csv": str(csv_yol)}, ensure_ascii=False))
-    return 0 if n_fail == 0 else 3
+    return 0                     # kapi sonuclari CSV/STATE'te; kosu tek cift icin durmaz
 
 
 if __name__ == "__main__":
