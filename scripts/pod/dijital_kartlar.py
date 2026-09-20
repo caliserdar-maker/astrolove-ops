@@ -71,7 +71,7 @@ KART = {
         "title": "What's Included",
         "rows": [
             ("5 COLOR EDITIONS", "Midnight Blue, Deep Black, Warm Parchment, Champagne Ivory, Pure White"),
-            ("5 ZIP FILES", "One archive per color edition, the same files in every archive"),
+            ("5 ZIP FILES", "One archive per color, same files in each"),
             ("5 PRINT RATIOS", "2:3, 3:4, 4:5, 11:14 and A series inside every ZIP"),
             ("PRINT AND CARE GUIDE", "A PDF with printing advice in every ZIP"),
             ("THANK YOU NOTE", "A PDF note from us in every ZIP"),
@@ -211,7 +211,8 @@ def _sar(d, metin, font, en_sinir):
     return ciktilar
 
 
-def satirlar_ciz(d, F, pal, rows, y0=620, y1=1900, en_sinir=1380, boy_satiri=False):
+def satirlar_ciz(d, F, pal, rows, y0=620, y1=1900, en_sinir=1380, boy_satiri=False,
+                 merkez=False):
     """POD rozetli satir dili; aciklama %30 buyuk, satir sarmali.
     Doner: cizilen tum metin sinir kutulari [(x0, y0, x1, y1)] (kapi olcumu icin)."""
     r = REF["badge_d"] // 2
@@ -222,6 +223,17 @@ def satirlar_ciz(d, F, pal, rows, y0=620, y1=1900, en_sinir=1380, boy_satiri=Fal
     f_b = F.f("sans", solve_size(F, "sans", 400, int(REF["body_cap"] * GOVDE_KAT)), 400)
     f_s = F.f("sans", solve_size(F, "sans", 500, int((REF["body_cap"] - 5) * BOY_KAT)), 500)
     govde_h = int(REF["body_cap"] * GOVDE_KAT * 1.52)
+    if merkez:                       # blok (rozet + metin) kartin icerik alaninda ortalanir
+        en_genis = 0
+        for satir in rows:
+            en_genis = max(en_genis, text_w(d, satir[0], f_h, tr_h))
+            for sat in _sar(d, satir[1], f_b, en_sinir):
+                en_genis = max(en_genis, d.textlength(sat, font=f_b))
+            if boy_satiri and len(satir) > 2:
+                en_genis = max(en_genis, d.textlength(satir[2], font=f_s))
+        blok_sol, blok_sag = cx - r, tx + en_genis
+        kaydir = int((W - (blok_sag - blok_sol)) / 2 - blok_sol)
+        cx, tx = cx + kaydir, tx + kaydir
     kutular = []
     step = (y1 - y0) / len(rows)
     for i, satir in enumerate(rows):
@@ -252,6 +264,17 @@ def satirlar_ciz(d, F, pal, rows, y0=620, y1=1900, en_sinir=1380, boy_satiri=Fal
                    fill=mix(pal["ink"], pal["bg"], 0.26))
             kutular.append((tx, y - 2, tx + d.textlength(boylar, font=f_s), y + govde_h - 4))
     return kutular
+
+
+def yetim_kapisi(d, rows, F, en_sinir):
+    """Sarilan aciklamalarda son satirda tek kelime (yetim) kalmasin."""
+    f_b = F.f("sans", solve_size(F, "sans", 400, int(REF["body_cap"] * GOVDE_KAT)), 400)
+    hata = []
+    for satir in rows:
+        sat = _sar(d, satir[1], f_b, en_sinir)
+        if len(sat) > 1 and len(sat[-1].split()) < 2:
+            hata.append(f"yetim kelime: '{satir[0]}' -> '{sat[-1]}'")
+    return hata
 
 
 def kutu_kapisi(kutular, yasak=None):
@@ -318,7 +341,8 @@ def kart_sizes(pal, F, pair_txt, posterler):
     k = KART["SIZES"]
     im, d = card_base(pal, F, k["kicker"], k["title"], pair_txt, k["footer"])
     satirlar, _ = boy_satirlari(OLCUM or None)
-    kutular = satirlar_ciz(d, F, pal, satirlar, 600, 1920, en_sinir=2200, boy_satiri=True)
+    kutular = satirlar_ciz(d, F, pal, satirlar, 600, 1920, en_sinir=2200, boy_satiri=True,
+                           merkez=True)
     return im, kutular, None
 
 

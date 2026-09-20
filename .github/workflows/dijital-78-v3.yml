@@ -26,6 +26,7 @@ on:
       - 'config/dijital78_v4.trigger'
       - 'config/dijital78_v5.trigger'
       - 'config/dijital78_v6.trigger'
+      - 'config/dijital78_v7.trigger'
 
 concurrency:
   group: etsy-token
@@ -88,7 +89,7 @@ jobs:
         id: girdiler
         run: |
           set -euo pipefail
-          umask 077; mkdir -p _work _out _out_zip _out_v2
+          umask 077; mkdir -p _work _out _out_zip _out_v2 _out_gal _out_pazar
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
           rclone copyto "$CROSSLINK" _work/crosslink_result.json
           rclone copyto "$THANKYOU"  _work/thankyou.pdf
@@ -112,7 +113,7 @@ jobs:
           ls -la _out
 
       - name: 'ADIM 2  ZIP uretimi (390 ZIP, kayipsiz + tesekkur PDF, en uzun adim)'
-        if: ${{ always() && steps.girdiler.outcome == 'success' && !contains(github.event.head_commit.message, '[v2-only]') && !contains(github.event.head_commit.message, '[v3-only]') }}
+        if: ${{ always() && steps.girdiler.outcome == 'success' && !contains(github.event.head_commit.message, '[v2-only]') && !contains(github.event.head_commit.message, '[v3-only]') && !contains(github.event.head_commit.message, '[final]') }}
         run: |
           set -euo pipefail
           python scripts/etsy/dijital78_zipfinal.py --kok "$ZIP_KOK" --pdf _work/thankyou.pdf \
@@ -138,6 +139,30 @@ jobs:
             --out _out_v2 --medya _work/galeri_v2
           ls -la _out_v2
 
+      - name: 'ADIM 4  78 cift galeri uretimi (Etsy cagrisi YOK)'
+        if: ${{ steps.girdiler.outcome == 'success' && contains(github.event.head_commit.message, '[final]') }}
+        run: |
+          set -euo pipefail
+          mkdir -p _out_gal _work/galeri_final
+          rclone copyto "$CIKTI/GALERI_V1/GALERI_KAYNAK.csv" _work/GALERI_KAYNAK.csv
+          python scripts/etsy/dijital78_galeri_final.py --zip-uzak "$CIKTI/ZIP_FINAL" \
+            --kaynak-csv _work/GALERI_KAYNAK.csv --crosslink _work/crosslink_result.json \
+            --fonts fonts --out _work/galeri_cikti --rapor _out_gal \
+            --calisma _work/galeri_final --yukle "$CIKTI/GALERI_FINAL" --is-parca 3
+          df -h / | tail -1
+
+      - name: 'ADIM 5  Pazar fiyat verisi (Etsy SALT OKUR, tavan 60)'
+        if: ${{ always() && steps.girdiler.outcome == 'success' && contains(github.event.head_commit.message, '[final]') }}
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          mkdir -p _out_pazar
+          python scripts/etsy/dijital78_pazar.py --out _out_pazar --max-calls 60 --sayfa 2
+
       - name: Sir taramasi + Drive'a yaz
         if: ${{ always() }}
         run: |
@@ -145,13 +170,24 @@ jobs:
           [ -f _work/ETSY_TOKEN.json.updated ] && \
             rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && \
             echo "Token geri yazildi" || true
-          if grep -rqaE 'x-api-key|refresh_token|access_token|client_secret' _out _out_zip _out_v2 2>/dev/null; then
+          if grep -rqaE 'x-api-key|refresh_token|access_token|client_secret' _out _out_zip _out_v2 _out_gal _out_pazar 2>/dev/null; then
             echo "::error::ciktida sir benzeri anahtar bulundu, Drive'a yazilmadi"; exit 1
           fi
           if [ -n "$(ls -A _out 2>/dev/null)" ]; then
             rclone copy _out "$CIKTI/GALERI_V1" -q
             echo "GALERI_V1 (dosya | bayt | Drive id)"
             rclone lsf "$CIKTI/GALERI_V1" --format "psi" --separator " | " | sed 's/^/  - /'
+          fi
+          if [ -n "$(ls -A _out_gal 2>/dev/null)" ]; then
+            rclone copy _out_gal "$CIKTI/GALERI_FINAL" -q
+            echo "GALERI_FINAL raporlari (dosya | bayt | Drive id)"
+            rclone lsf "$CIKTI/GALERI_FINAL" --format "psi" --separator " | " --files-only | sed 's/^/  - /'
+            echo "GALERI_FINAL cift klasoru: $(rclone lsf "$CIKTI/GALERI_FINAL" --dirs-only | wc -l)"
+          fi
+          if [ -n "$(ls -A _out_pazar 2>/dev/null)" ]; then
+            rclone copy _out_pazar "$CIKTI" -q
+            echo "PAZAR dosyalari (dosya | bayt | Drive id)"
+            rclone lsf "$CIKTI" --format "psi" --separator " | " --files-only --include "PAZAR_*" | sed 's/^/  - /'
           fi
           if [ -n "$(ls -A _out_v2 2>/dev/null)" ]; then
             rclone copy _out_v2 "$CIKTI/${GALERI_HEDEF:-GALERI_V2}" -q
@@ -172,6 +208,8 @@ jobs:
             _out/
             _out_zip/
             _out_v2/
+            _out_gal/
+            _out_pazar/
           if-no-files-found: ignore
 
       - if: ${{ always() }}
