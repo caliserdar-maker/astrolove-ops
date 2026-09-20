@@ -396,9 +396,51 @@ def toplu(api, shop, isd, sadece, limit, apply_):
     return 0
 
 
+def dogrula(api, isd, limit):
+    """Salt okuma: 78 ilanda 30.99 kalmadi mi, 29.99 kac secenekte?"""
+    liste = ilanlar()
+    if limit:
+        liste = liste[:limit]
+    sut = ["listing_id", "cift", "adet_3099", "adet_2999", "teklif", "para", "durum"]
+    yol = isd / "DOGRULAMA.csv"
+    kotu, t0 = [], time.time()
+    with yol.open("w", newline="", encoding="utf-8") as fh:
+        w = csv.DictWriter(fh, fieldnames=sut, extrasaction="ignore")
+        w.writeheader()
+        for j, (lid, cift) in enumerate(liste, start=1):
+            inv = envanter(api, lid)
+            n99 = n29 = teklif = 0
+            paralar = set()
+            for pr in inv.get("products") or []:
+                for o in pr.get("offerings") or []:
+                    teklif += 1
+                    f, pb = para(o.get("price"))
+                    if pb:
+                        paralar.add(pb)
+                    if abs(f - ESKI) < 1e-9:
+                        n99 += 1
+                    if abs(f - YENI) < 1e-9:
+                        n29 += 1
+            ok = (n99 == 0 and n29 == 5 and teklif == 65 and paralar == {"USD"})
+            if not ok:
+                kotu.append((lid, n99, n29, teklif))
+            w.writerow({"listing_id": lid, "cift": cift, "adet_3099": n99, "adet_2999": n29,
+                        "teklif": teklif, "para": ",".join(sorted(paralar)),
+                        "durum": "PASS" if ok else "FAIL"})
+            fh.flush()
+            if j % 10 == 0 or j == len(liste):
+                gec = time.time() - t0
+                ilerle(f"{j}/{len(liste)} (%{100 * j / len(liste):.1f}) | gecen {sure_yaz(gec)} "
+                       f"| kalan ~{sure_yaz(gec / j * (len(liste) - j))} | kota {api.remaining}")
+    yukle(yol, "DOGRULAMA.csv")
+    print(json.dumps({"ilan": len(liste), "fail": len(kotu), "ilk_fail": kotu[:5],
+                      "kota": api.remaining}, ensure_ascii=False))
+    return 0 if not kotu else 3
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("mod", choices=["kuru", "pilot", "toplu"])
+    ap.add_argument("mod", choices=["kuru", "pilot", "toplu", "dogrula"])
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--confirm", default="")
     ap.add_argument("--limit", type=int, default=0)
@@ -421,6 +463,8 @@ def main():
     ilerle(f"baslangic kotasi {api.remaining} | mod {a.mod}")
     if a.mod == "kuru":
         return kuru(api, shop, isd, a.limit)
+    if a.mod == "dogrula":
+        return dogrula(api, isd, a.limit)
     if a.mod == "pilot":
         return toplu(api, shop, isd, {a.listing}, 0, True)
     return toplu(api, shop, isd, None, a.limit, True)
