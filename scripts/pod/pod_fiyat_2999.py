@@ -102,10 +102,13 @@ def denetle(inv):
             if abs(f - ESKI) < 1e-9:
                 vur_3099.append((pr.get("sku"), b))
                 boyutlar.add(b)
-    yapi = "|".join([str(len(urunler)), str(teklif), ";".join(sorted(etiketler)),
-                     ",".join(sorted(inv.get("price_on_property") or [], key=str)),
-                     ",".join(sorted(inv.get("quantity_on_property") or [], key=str)),
-                     ",".join(sorted(inv.get("sku_on_property") or [], key=str))])
+    def _liste(ad):
+        return ",".join(sorted(str(x) for x in (inv.get(ad) or [])))
+
+    yapi = "|".join([str(len(urunler)), str(teklif),
+                     ";".join(sorted(str(e) for e in etiketler)),
+                     _liste("price_on_property"), _liste("quantity_on_property"),
+                     _liste("sku_on_property")])
     hatalar = []
     if not vur_3099:
         hatalar.append(f"{ESKI} yok")
