@@ -51,7 +51,7 @@ def rclone(*a, sert=True):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("mod", choices=["hazirla", "gonder"])
+    ap.add_argument("mod", choices=["onizleme", "hazirla", "gonder"])
     ap.add_argument("--file-id", required=True)
     ap.add_argument("--remote", required=True, help="dosyanin Drive yolu (cift/edisyon/boy kaniti)")
     ap.add_argument("--sku", required=True)
@@ -77,6 +77,22 @@ def main():
     isd = pathlib.Path(a.is_dizin)
     isd.mkdir(parents=True, exist_ok=True)
     bek_w, bek_h = (int(x) for x in a.olcu.lower().split("x"))
+
+    if a.mod == "onizleme":       # yalniz gozle dogrulama karesi; API cagrisi yok
+        yerel = isd / "kaynak.jpg"
+        rclone("copyto", a.remote, str(yerel))
+        im = Image.open(yerel)
+        im.load()
+        hedef = isd / "ONIZLEME_SIPARIS.jpg"
+        kucuk = im.convert("RGB").resize((600, round(600 * im.size[1] / im.size[0])), Image.LANCZOS)
+        for kal in (88, 82, 76, 70, 62):
+            kucuk.save(hedef, "JPEG", quality=kal, optimize=True)
+            if hedef.stat().st_size <= 150_000:
+                break
+        rclone("copyto", str(hedef), f"{DRV}/ONIZLEME_SIPARIS.jpg")
+        log(f"kaynak {a.remote} | {im.size[0]}x{im.size[1]} -> onizleme {kucuk.size[0]}x{kucuk.size[1]} "
+            f"{hedef.stat().st_size / 1024:.0f} KB (kalite {kal}) -> {DRV}/ONIZLEME_SIPARIS.jpg")
+        return 0
 
     # ---------------------------------------------------------- 1) dosya kimligi (Drive)
     kayit = json.loads(rclone("lsjson", a.remote).stdout)
