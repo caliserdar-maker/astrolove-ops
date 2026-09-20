@@ -198,6 +198,11 @@ def main():
     if a.limit:
         ciftler = ciftler[:a.limit]
     print(f"{len(ciftler)} cift islenecek | hedef {a.yukle or a.out}", flush=True)
+    # Paralel isciler ayni uzak yolu ayni anda olusturursa Drive ayni adli iki
+    # klasor yaratir (20 Eyl 2026 kosusu: iki GALERI_FINAL). Havuzdan once tek
+    # seferde olustur.
+    if a.yukle:
+        rclone("mkdir", a.yukle)
 
     gorevler = [(c, a.zip_uzak, a.calisma, a.out, a.fonts, pal, a.yukle) for c in ciftler]
     satirlar, islenen, son = [], 0, time.time()

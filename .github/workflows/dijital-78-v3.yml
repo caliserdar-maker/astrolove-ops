@@ -98,7 +98,7 @@ jobs:
           done
 
       - name: 'ADIM 1  Galeri kaynak eslemesi + ornek galeri (Etsy salt okur, tavan 30)'
-        if: ${{ steps.girdiler.outcome == 'success' && inputs.galeri != 'hayir' && !contains(github.event.head_commit.message, '[zip-only]') && !contains(github.event.head_commit.message, '[v2-only]') && !contains(github.event.head_commit.message, '[v3-only]') && !contains(github.event.head_commit.message, '[final]') }}
+        if: ${{ steps.girdiler.outcome == 'success' && inputs.galeri != 'hayir' && !contains(github.event.head_commit.message, '[zip-only]') && !contains(github.event.head_commit.message, '[v2-only]') && !contains(github.event.head_commit.message, '[v3-only]') && !contains(github.event.head_commit.message, '[final]') && !contains(github.event.head_commit.message, '[dedupe]') }}
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
@@ -113,7 +113,7 @@ jobs:
           ls -la _out
 
       - name: 'ADIM 2  ZIP uretimi (390 ZIP, kayipsiz + tesekkur PDF, en uzun adim)'
-        if: ${{ always() && steps.girdiler.outcome == 'success' && !contains(github.event.head_commit.message, '[v2-only]') && !contains(github.event.head_commit.message, '[v3-only]') && !contains(github.event.head_commit.message, '[final]') }}
+        if: ${{ always() && steps.girdiler.outcome == 'success' && !contains(github.event.head_commit.message, '[v2-only]') && !contains(github.event.head_commit.message, '[v3-only]') && !contains(github.event.head_commit.message, '[final]') && !contains(github.event.head_commit.message, '[dedupe]') }}
         run: |
           set -euo pipefail
           python scripts/etsy/dijital78_zipfinal.py --kok "$ZIP_KOK" --pdf _work/thankyou.pdf \
@@ -162,6 +162,25 @@ jobs:
           set -euo pipefail
           mkdir -p _out_pazar
           python scripts/etsy/dijital78_pazar.py --out _out_pazar --max-calls 60 --sayfa 2
+
+      - name: ADIM 6 - GALERI_FINAL ikiz klasor birlestirme
+        if: ${{ steps.girdiler.outcome == 'success' && contains(github.event.head_commit.message, '[dedupe]') }}
+        run: |
+          set -euo pipefail
+          echo "birlestirme oncesi:"
+          rclone lsf "$CIKTI" --dirs-only | sed 's/^/  - /'
+          rclone dedupe --dedupe-mode merge "$CIKTI" -v 2>&1 | tail -20
+          rclone dedupe --dedupe-mode merge "$CIKTI/GALERI_FINAL" -v 2>&1 | tail -20
+          N=$(rclone lsf "$CIKTI/GALERI_FINAL" --dirs-only | wc -l)
+          echo "GALERI_FINAL cift klasoru: $N"
+          EKSIK=0
+          for c in $(rclone lsf "$CIKTI/GALERI_FINAL" --dirs-only | tr -d '/'); do
+            K=$(rclone lsf "$CIKTI/GALERI_FINAL/$c" --files-only | wc -l)
+            [ "$K" -eq 4 ] || { echo "::warning::$c dosya sayisi $K"; EKSIK=$((EKSIK+1)); }
+          done
+          echo "4 dosyasi eksik cift: $EKSIK"
+          [ "$N" -eq 78 ] && [ "$EKSIK" -eq 0 ] || { echo "::error::kapi FAIL (n=$N eksik=$EKSIK)"; exit 1; }
+          echo "KAPI PASS: 78 cift x 4 dosya, tek GALERI_FINAL"
 
       - name: Sir taramasi + Drive'a yaz
         if: ${{ always() }}
