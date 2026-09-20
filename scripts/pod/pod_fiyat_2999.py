@@ -328,7 +328,7 @@ def kuru(api, shop, isd, limit):
     return 0
 
 
-def toplu(api, shop, isd, sadece, limit, apply_):
+def toplu(api, shop, isd, sadece, limit, apply_, kota_alt=KOTA_ALT):
     liste = [(l, c) for l, c in ilanlar() if (not sadece or l in sadece)]
     if limit:
         liste = liste[:limit]
@@ -361,8 +361,8 @@ def toplu(api, shop, isd, sadece, limit, apply_):
     for j, (lid, cift) in enumerate(kalan, start=1):
         ts = time.time()
         kota = int(api.remaining or 0)
-        if kota and kota < KOTA_ALT:
-            ilerle(f"DUR: kota {kota} < {KOTA_ALT}")
+        if kota and kota < kota_alt:
+            ilerle(f"DUR: kota {kota} < {kota_alt}")
             break
         satir = {"listing_id": lid, "cift": cift, "durum": "ATLANDI", "degisen": 0,
                  "eski_fiyat": f"{ESKI:.2f}", "yeni_fiyat": f"{YENI:.2f}", "kota": kota,
@@ -445,6 +445,7 @@ def main():
     ap.add_argument("--confirm", default="")
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--listing", default=PILOT)
+    ap.add_argument("--kota-alt", type=int, default=KOTA_ALT)
     ap.add_argument("--is-dizin", default="_work/fiyat")
     a = ap.parse_args()
     if a.mod in ("pilot", "toplu") and a.apply and a.confirm != "FIYAT_2999":
@@ -466,8 +467,8 @@ def main():
     if a.mod == "dogrula":
         return dogrula(api, isd, a.limit)
     if a.mod == "pilot":
-        return toplu(api, shop, isd, {a.listing}, 0, True)
-    return toplu(api, shop, isd, None, a.limit, True)
+        return toplu(api, shop, isd, {a.listing}, 0, True, a.kota_alt)
+    return toplu(api, shop, isd, None, a.limit, True, a.kota_alt)
 
 
 if __name__ == "__main__":
