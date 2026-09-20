@@ -172,8 +172,10 @@ def etsy_receipts(api, shop, since_days=0, max_pages=10, quota_min=0):
 
 def parse_items(receipt, only_size=""):
     """(gonderilecek kalemler, POD disi SKU'lar, atlanan POD kalemleri).
-    only_size verilirse (or. '5x7') YALNIZ o boyun kalemleri gonderilir; ayni sepetteki
-    diger boylar atlanir (Prodigi sales-channel entegrasyonu onlari kendi ceker)."""
+    only_size virgulle birden cok boy alir (or. '5x7,A1'): YALNIZ bu boylarin kalemleri
+    gonderilir, ayni sepetteki diger boylar atlanir (onlari Prodigi entegrasyonu ceker).
+    Secilen boylar TEK Prodigi siparisinde birlesir (kargo tek sefer)."""
+    boylar = {b.strip() for b in (only_size or "").split(",") if b.strip()}
     items, other, atlanan = [], [], []
     for t in receipt.get("transactions") or []:
         sku = (t.get("sku") or "").strip()
@@ -181,7 +183,7 @@ def parse_items(receipt, only_size=""):
         if not parsed:
             other.append(sku or f"tx{t.get('transaction_id')}"); continue
         pair, ed, size = parsed
-        if only_size and size != only_size:
+        if boylar and size not in boylar:
             atlanan.append(f"{sku}x{int(t.get('quantity') or 1)}"); continue
         pr = t.get("price") or {}
         price = float(pr.get("amount") or 0) / float(pr.get("divisor") or 100)
@@ -193,8 +195,10 @@ def parse_items(receipt, only_size=""):
 
 def order_body(receipt, items, urls, only_size=""):
     rid = receipt["receipt_id"]
-    # only_size modunda anahtar boy ekiyle ayrilir: ayni receipt icin tam sepet siparisiyle carpismaz
-    ref = f"etsy-{rid}" + (f"-{only_size}" if only_size else "")
+    # Anahtar SIPARISTEKI boylardan turetilir (or. etsy-123-5x7, etsy-123-5x7+A1): tam sepet
+    # siparisiyle de, tek boyluk bir siparisle de carpismaz. Kalemler TEK siparistedir.
+    ek = "+".join(sorted({i["size"] for i in items})) if only_size else ""
+    ref = f"etsy-{rid}" + (f"-{ek}" if ek else "")
     return {"merchantReference": ref, "shippingMethod": "Budget", "idempotencyKey": ref,
             "recipient": {"name": receipt.get("name") or "", "email": receipt.get("buyer_email") or None,
                           "address": {"line1": receipt.get("first_line") or "", "line2": receipt.get("second_line") or None,
