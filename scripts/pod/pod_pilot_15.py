@@ -83,7 +83,7 @@ def anlik(api, shop, lid):
     return {
         "listing": L,
         "inventory": api.get(f"/listings/{lid}/inventory") or {},
-        "images": sorted((api.get(f"/shops/{shop}/listings/{lid}/images") or {}).get("results") or [],
+        "images": sorted(((api.get(f"/listings/{lid}/images", ok404=True) or {}).get("results") or []),
                          key=lambda x: x.get("rank") or 0),
         "variation_images": (api.get(f"/shops/{shop}/listings/{lid}/variation-images", ok404=True) or {}).get("results") or [],
         "videos": (api.get(f"/listings/{lid}/videos", ok404=True) or {}).get("results") or [],
