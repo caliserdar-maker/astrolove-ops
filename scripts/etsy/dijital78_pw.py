@@ -154,8 +154,10 @@ def main():
     alt = {}
     if r.returncode == 0:
         for d in json.loads(r.stdout):
+            # lsjson yollari --ara-kok'a GORECELIDIR; tam uzak yolu sakla
             alt.setdefault(Path(d["Path"]).name, []).append(
-                {"yol": d["Path"], "bayt": int(d["Size"]), "mtime": (d.get("ModTime") or "")[:19]})
+                {"yol": f"{a.ara_kok.rstrip('/')}/{d['Path']}", "bayt": int(d["Size"]),
+                 "mtime": (d.get("ModTime") or "")[:19]})
     else:
         print(f"   UYARI: alternatif arama basarisiz: {r.stderr.decode('utf-8','replace')[:160]}",
               flush=True)
@@ -225,7 +227,7 @@ def main():
             gb = calisma / f"canli_{r2['canli_ad']}"
             kos(["rclone", "copyto", f"--drive-root-folder-id={a.kok}",
                  f"{a.remote}:{r2['canli_ad']}", str(ga)])
-            kos(["rclone", "copyto", f"{a.remote}:{r2['alternatif_eslesiyor']}", str(gb)])
+            kos(["rclone", "copyto", r2["alternatif_eslesiyor"], str(gb)])
             if ga.exists() and gb.exists():
                 for x in surum_karsilastir(ga, gb, calisma, "drive", "canli"):
                     x["cift"] = r2["cift"]
@@ -288,6 +290,7 @@ def main():
     if kars:
         ayni_px = sum(1 for x in kars if x["durum"] == "PIKSEL AYNI")
         md += ["## Piksel karsilastirmasi (iki Drive surumu)", "",
+               "`canli` sutunu = Drive'da bulunan, canli ilan dosyasiyla BAYT BAYT ayni olan kopya.", "",
                f"- Karsilastirilan JPG: {len(kars)} | PIKSEL AYNI: {ayni_px} | "
                f"FARKLI: {len(kars) - ayni_px}", "",
                "| cift | dosya | durum | drive bayt | canli bayt | drive q | canli q | "

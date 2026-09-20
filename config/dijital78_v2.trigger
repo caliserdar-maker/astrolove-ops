@@ -10,5 +10,13 @@
     "5": "METIN_TASLAK_v2.md + QC"
   },
   "cakisma": "4556456919 = ARIES_SCORPIO / Pure White; ayni ciftte koruma altindaki 4555411521 var",
-  "yazma_onayi": "YOK"
+  "yazma_onayi": "YOK",
+  "kosu_2_neden": "run 35503248021: 'rclone version | head -1' SIGPIPE (exit 141), pipefail adimi dusurdu",
+  "kosu_2_duzeltme": [
+    "boru hatti yerine dosyaya yazip sed ile ilk satir",
+    "ZIPYUKLE ifadesi push olayinda dogru degerlendirilir",
+    "ADIM 3/4/5 yalniz Girdiler basariliysa kosar",
+    "ls glob yerine find (eslesme yoksa set -e dusurmez",
+    "PW alternatif surum yolu --ara-kok koku ile tam uzak yola cevrildi"
+  ]
 }

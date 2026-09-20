@@ -40,7 +40,7 @@ jobs:
     timeout-minutes: 180
     env:
       MAXC: ${{ inputs.max_calls || '85' }}
-      ZIPYUKLE: ${{ inputs.zip_yukle == false && 'hayir' || 'evet' }}
+      ZIPYUKLE: ${{ github.event_name == 'push' && 'evet' || (inputs.zip_yukle && 'evet' || 'hayir') }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -54,8 +54,9 @@ jobs:
           pip install -q requests==2.34.2 Pillow==11.3.0
           sudo apt-get update -qq && sudo apt-get install -y -qq libjpeg-turbo-progs
           curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
-          rclone version | head -1; jpegtran -version 2>&1 | head -1; djpeg -version 2>&1 | head -1
-          df -h / | tail -1
+          rclone version > _rc.txt 2>&1 || true; sed -n 1p _rc.txt; rm -f _rc.txt
+          command -v jpegtran djpeg
+          df -h /
 
       - name: rclone.conf olustur
         env:
@@ -71,6 +72,7 @@ jobs:
           fi
 
       - name: Girdiler
+        id: girdiler
         run: |
           set -euo pipefail
           umask 077; mkdir -p _work _out _work/optzip
@@ -95,7 +97,7 @@ jobs:
             --crosslink _work/crosslink_result.json --xsell _work/XSELL_STATE.csv --out _out
 
       - name: 'ADIM 4  Pure White surum farki (Etsy salt okur)'
-        if: ${{ always() }}
+        if: ${{ always() && steps.girdiler.outcome == 'success' }}
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
@@ -108,20 +110,20 @@ jobs:
             --out _out --calisma _work/pw --ornek-cift 5 --max-calls "$MAXC"
 
       - name: 'ADIM 5  Metin taslaklari v2 + QC'
-        if: ${{ always() }}
+        if: ${{ always() && steps.girdiler.outcome == 'success' }}
         run: |
           set -euo pipefail
           python scripts/etsy/dijital78_metin_v2.py --zip-csv _work/ZIP_KONTROL.csv \
             --pod-json _out/KALACAK_V2_OZET.json --out _out
 
       - name: 'ADIM 3  Kayipsiz JPEG optimizasyonu (390 ZIP, en uzun adim)'
-        if: ${{ always() }}
+        if: ${{ always() && steps.girdiler.outcome == 'success' }}
         run: |
           set -euo pipefail
           python scripts/etsy/dijital78_zipopt.py --kok "$ZIP_KOK" --pdf _work/thankyou.pdf \
             --out _out --opt-dizin _work/optzip --calisma _work/zipopt \
             --esik 19800000 --is-parca 6 --ornek-dogrula 25
-          df -h / | tail -1
+          df -h /
 
       - name: Sir taramasi + Drive'a yaz
         if: ${{ always() }}
@@ -139,7 +141,7 @@ jobs:
           rclone copy _out "$CIKTI" -q
           echo "Cikti: ASTROLOVE/TEMP/DIJITAL_78/  (dosya | bayt | Drive id)"
           rclone lsf "$CIKTI" --format "psi" --separator " | " 2>/dev/null | sed 's/^/  - /' || true
-          n=$(ls -1 _work/optzip/*.zip 2>/dev/null | wc -l)
+          n=$(find _work/optzip -maxdepth 1 -name '*.zip' 2>/dev/null | wc -l)
           if [ "$ZIPYUKLE" = "evet" ] && [ "$n" -gt 0 ]; then
             rclone copy _work/optzip "$CIKTI/ZIP_OPT" -q --transfers 4
             echo "Optimize ZIP yuklendi: $n dosya -> TEMP/DIJITAL_78/ZIP_OPT/"
