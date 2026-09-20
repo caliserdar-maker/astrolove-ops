@@ -28,9 +28,12 @@ BOY = "5x7"
 #   ink = |piksel - serit_medyani| > INK esigi  -> tasarim/mureккep sayilir
 #   parlaklik kaymasi |bant_ort - serit_ort| > KAYMA -> gorunur ton farki
 INK, KAYMA = 40, 3.0
+BLOK = (32, 128)     # blok ortalamasi (satir, sutun): doku ortalanir, tasarim (yogun mürekkep) kalir
+BLOK_K = 4.0         # blok sapmasi esigi = max(2.0, BLOK_K * serit_blok_std)
 CSV_SUT = ["pair", "edition", "dosya", "usta_px", "kirp_px", "kirpma_px",
            "ust_ink_px", "alt_ink_px", "ust_max_sapma", "alt_max_sapma",
-           "ust_kayma", "alt_kayma", "serit_std", "bayt", "sn", "durum", "neden"]
+           "ust_kayma", "alt_kayma", "serit_std", "ust_blok_sapma", "alt_blok_sapma",
+           "blok_esik", "blok_ustu", "bayt", "sn", "durum", "neden"]
 T0 = time.time()
 
 
@@ -58,6 +61,24 @@ def hedef_oran(sizes_json):
         raise SystemExit(f"HATA: {sizes_json} icinde {BOY} yok")
     w, h = int(v["w"]), int(v["h"])
     return w, h, w / h
+
+
+def bloklar(a):
+    """Blok ortalamalari (luma) -> doku ortalanir."""
+    h, w = a.shape[0] - a.shape[0] % BLOK[0], a.shape[1] - a.shape[1] % BLOK[1]
+    luma = a[:h, :w].astype(np.float32).mean(axis=2)
+    return luma.reshape(h // BLOK[0], BLOK[0], w // BLOK[1], BLOK[1]).mean(axis=(1, 3))
+
+
+def yapi_kontrol(bant, serit):
+    """Blok duzeyinde tasarim izi -> (max_blok_sapma, esik, blok_ustu_sayi)."""
+    if bant.size == 0 or serit.size == 0:
+        return 0.0, 0.0, 0
+    b, r = bloklar(bant), bloklar(serit)
+    ort, std = float(r.mean()), float(r.std())
+    esik = max(2.0, BLOK_K * std)
+    sap = np.abs(b - ort)
+    return round(float(sap.max()), 2), round(esik, 2), int((sap > esik).sum())
 
 
 def bant_kontrol(bant, serit):
@@ -106,17 +127,22 @@ def uret(usta_yol, cikti_yol, oran, tani_dizin=None, tani_ad=""):
     ust_i, ust_s, ust_k, std1 = bant_kontrol(a[:y0], a[y0:y0 + y0])
     alt_h = sh - (y0 + nh)
     alt_i, alt_s, alt_k, std2 = bant_kontrol(a[y0 + nh:], a[y0 + nh - alt_h:y0 + nh])
+    ust_b, ust_e, ust_n = yapi_kontrol(a[:y0], a[y0:y0 + y0])
+    alt_b, alt_e, alt_n = yapi_kontrol(a[y0 + nh:], a[y0 + nh - alt_h:y0 + nh])
     if tani_dizin is not None:
         tani(im, y0, nh, tani_dizin, tani_ad)
     kirp = im.crop((0, y0, sw, y0 + nh))
     dpi = round(kirp.size[0] / (1535 / 300.0))
     cikti_yol.parent.mkdir(parents=True, exist_ok=True)
     kirp.save(cikti_yol, "JPEG", quality=95, subsampling=0, dpi=(dpi, dpi), optimize=True)
-    gecti = (ust_i == 0 and alt_i == 0 and ust_k <= KAYMA and alt_k <= KAYMA)
+    # GECTI: blok duzeyinde tasarim izi yok (doku/vinyet bloklarda ortalanir) ve ton kaymasi kucuk
+    gecti = (ust_n == 0 and alt_n == 0 and ust_k <= KAYMA and alt_k <= KAYMA)
     return {"usta_px": f"{sw}x{sh}", "kirp_px": f"{kirp.size[0]}x{kirp.size[1]}",
             "kirpma_px": sh - nh, "ust_ink_px": ust_i, "alt_ink_px": alt_i,
             "ust_max_sapma": ust_s, "alt_max_sapma": alt_s, "ust_kayma": ust_k,
             "alt_kayma": alt_k, "serit_std": max(std1, std2),
+            "ust_blok_sapma": ust_b, "alt_blok_sapma": alt_b, "blok_esik": max(ust_e, alt_e),
+            "blok_ustu": ust_n + alt_n,
             "bayt": cikti_yol.stat().st_size, "sn": round(time.time() - t0, 1),
             "durum": "GECTI" if gecti else "KONTROL", "neden": ""}
 
@@ -216,7 +242,9 @@ def main():
                 continue
             s.update({"pair": cift, "edition": ed, "dosya": f"{cift}/{ed}/{BOY}.jpg"})
             if s["durum"] != "GECTI":
-                hatalar.append(f"{ed}: bant kontrolu ust {s['ust_ink_px']} alt {s['alt_ink_px']} px")
+                hatalar.append(f"{ed}: bant yapi kontrolu blok {s['blok_ustu']} "
+                               f"(sapma {s['ust_blok_sapma']}/{s['alt_blok_sapma']} esik {s['blok_esik']}, "
+                               f"kayma {s['ust_kayma']}/{s['alt_kayma']})")
             satirlar.append(s)
             if a.onizleme_cift and cift == a.onizleme_cift.upper():
                 onizleme_dosyalari.append((ed, cikti))
