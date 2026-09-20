@@ -31,7 +31,7 @@ DRV = "gdrive:ASTROLOVE/TEMP/POD_FIYAT_2999"
 ILAN_JSON = KOK.parent / "etsy" / "seo" / "pod_changes_v2.json"
 PILOT = "4570110641"
 ESKI, YENI = 30.99, 29.99
-BOYUT_3099 = "8x10"
+BOYUT_3099 = "8x10"   # etiket: "4:5 · 8x10 in (20x25 cm)" -> icerik esleseme
 KOTA_ALT = 400
 PLAN_SUTUN = ["listing_id", "cift", "urun", "teklif", "para", "adet_3099", "boyut_3099",
               "fiyatlar", "yapi", "durum", "neden"]
@@ -112,7 +112,7 @@ def denetle(inv):
     hatalar = []
     if not vur_3099:
         hatalar.append(f"{ESKI} yok")
-    kotu = sorted({b for b in boyutlar if not str(b).startswith(BOYUT_3099)})
+    kotu = sorted({b for b in boyutlar if BOYUT_3099 not in str(b)})
     if kotu:
         hatalar.append(f"{ESKI} {BOYUT_3099} disinda: {kotu}")
     if paralar - {"USD"}:
