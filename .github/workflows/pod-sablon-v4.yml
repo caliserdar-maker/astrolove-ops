@@ -56,11 +56,11 @@ on:
         description: "siparis_* : alici adi + adres (ad|adres1|sehir|eyalet|posta|ulke)"
         default: "MUSTERI_ADI|ADRES|SEHIR|NH|POSTAKODU|US"
       siparis_master:
-        description: "siparis_* : icerik kaniti icin master"
-        default: "gdrive:ASTROLOVE/WALL_ART/POSTERS/ORIGINAL_HIGH_RES/MIDNIGHT_BLUE/4X5/AQUARIUS_LIBRA.jpg"
+        description: "siparis_* : (istege bagli) icerik karsilastirmasi icin master yolu; bos = karsilastirma yok"
+        default: ""
       siparis_kontrol:
-        description: "siparis_* : ayirt edicilik icin BASKA cift master"
-        default: "gdrive:ASTROLOVE/WALL_ART/POSTERS/ORIGINAL_HIGH_RES/MIDNIGHT_BLUE/4X5/AQUARIUS_ARIES.jpg"
+        description: "siparis_* : (istege bagli) ayirt edicilik icin BASKA cift master; bos = yok"
+        default: ""
 
 concurrency:
   group: etsy-token
