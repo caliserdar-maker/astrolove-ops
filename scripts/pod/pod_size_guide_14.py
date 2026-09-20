@@ -4,7 +4,7 @@ tasarimi/fontu/duzeni degistirmez; yalniz SIZES listesine 5x7 (13x18 cm) ve "5:7
 
 Cift x edisyon basina 08_SIZES karti yeniden cizilir; QC: 3000x2250, palet sapmasi <= 16,
 grup bosluklari esit (|bosluk - hedef| <= 2.5 px, grup sayisi kadar + 2 bosluk).
-Cikti: <out>/<PAIR>/<ED>/08_SIZES_<PAIR>_<ED>.jpg -> Drive TEMP/POD_SIZE_GUIDE_14/...
+Cikti: <out>/<PAIR>/<ED>/08_SIZES_<PAIR>_<ED>.jpg -> Drive TEMP/POD_SIZE_GUIDE_15/...
 ETSY'YE YUKLEME YOK.
 """
 import argparse
@@ -26,7 +26,7 @@ YENI = ("5x7", 5, 7, 13, 18, "5:7")
 YENI_A1 = ("A1", 23.4, 33.1, 59.4, 84.1, "A")      # Serdar karari 20 Eyl: A serisine A1
 DURUM_SUT = ["pair", "status", "cards", "fail", "secs", "ts_utc"]
 CSV_SUT = ["pair", "edition", "dosya", "boyut", "palet_sapma", "bosluk_sapma", "bosluk_yayilim",
-           "durum", "neden"]
+           "metin_bosluk", "durum", "neden"]
 T0 = time.time()
 
 
@@ -53,7 +53,7 @@ def yamali():
 # ------------------------------------------------------------------ v2 yerlesim (20 Eyl: 5:7 sag kenara tasiyordu)
 KENAR = 70          # tuval kenarlarindan korunacak en az bosluk (metin ve kutular)
 BOSLUK_MIN = 24     # gruplar arasi en az gorunur bosluk
-METIN_PAY = 10      # komsu alt yazilar arasinda en az bosluk (px)
+METIN_PAY = 60      # komsu GRUPLARIN metin sinir kutulari arasinda en az yatay bosluk (Serdar, 20 Eyl)
 CETVEL_PAY = 210    # eksen cizgisi + "175 CM" yazisi + cm etiketleri icin ayrilan sag pay
 
 
@@ -64,10 +64,14 @@ def _fontlar(F):
             "ruler": F.f("sans", G.solve_size(F, "sans", 500, 16), 500)}
 
 
-def _satir(z):
+def _satirlar(z, tek):
+    """Boy yazisi satirlari. Tek boylu grupta (11:14, 5:7) iki satir: 'x in' / 'y cm'."""
     lab, win, hin, wcm, hcm, _ = z
-    return (f"{lab} \u00b7 {win:g}\u00d7{hin:g} in \u00b7 {wcm:g}\u00d7{hcm:g} cm" if lab.startswith("A")
-            else f"{lab} in \u00b7 {wcm:g}\u00d7{hcm:g} cm")
+    if tek:
+        return [f"{lab} in", f"{wcm:g}\u00d7{hcm:g} cm"]
+    if lab.startswith("A"):
+        return [f"{lab} \u00b7 {win:g}\u00d7{hin:g} in \u00b7 {wcm:g}\u00d7{hcm:g} cm"]
+    return [f"{lab} in \u00b7 {wcm:g}\u00d7{hcm:g} cm"]
 
 
 def _grup_ogeleri(g):
@@ -87,9 +91,12 @@ def metin_genislikleri(d, F):
     f = _fontlar(F)
     out = []
     for g in G.GROUP_ORDER:
+        ogeler = _grup_ogeleri(g)
         w = G.text_w(d, G.GROUP_TITLE[g], f["ttl"], 4)
-        for z in _grup_ogeleri(g):
-            w = max(w, d.textlength(_satir(z), font=f["txt"]))
+        for z in ogeler:
+            w = max(w, d.textlength(z[0], font=f["lab"]))          # kutu ici etiket
+            for s in _satirlar(z, len(ogeler) == 1):
+                w = max(w, d.textlength(s, font=f["txt"]))
         out.append(w)
     return out
 
@@ -164,33 +171,35 @@ def card_sizes_v2(pal, F, poster, pair_txt):
             od.rectangle([x1, y1, x1 + w, base_y], fill=(zemin if k == 0 else pal["bg"]) + (255,),
                          outline=(accent if k == 0 else cizgi) + (255,), width=4 if k == 0 else 3)
             kayit["kutu"].append((round(x1, 1), round(y1, 1), round(x1 + w, 1), base_y, z[0]))
-            etiketler.append(((cx, y1 + 10), z[0]))
+            etiketler.append(((cx, y1 + 10), z[0], gi))
     im.paste(overlay, (0, 0), overlay)
     d = ImageDraw.Draw(im)
-    for xy, lab in etiketler:
+    for xy, lab, gi in etiketler:
         d.text(xy, lab, font=f["lab"], fill=G.mix(pal["ink"], pal["bg"], 0.15), anchor="ma")
         w = d.textlength(lab, font=f["lab"])
-        kayit["metin"].append((xy[0] - w / 2, xy[1], xy[0] + w / 2, xy[1] + 26, lab))
+        kayit["metin"].append((xy[0] - w / 2, xy[1], xy[0] + w / 2, xy[1] + 26, lab, gi))
     for gi, g in enumerate(G.GROUP_ORDER):
         cx = merkez[gi]
+        ogeler = _grup_ogeleri(g)
         ly = base_y + 24
         w = G.text_w(d, G.GROUP_TITLE[g], f["ttl"], 4)
         G.draw_tracked(d, (cx, ly), G.GROUP_TITLE[g], f["ttl"], accent, tracking=4, anchor="c")
-        kayit["metin"].append((cx - w / 2, ly, cx + w / 2, ly + 38, G.GROUP_TITLE[g]))
+        kayit["metin"].append((cx - w / 2, ly, cx + w / 2, ly + 38, G.GROUP_TITLE[g], gi))
         ly += 50
-        for z in _grup_ogeleri(g):
-            satir = _satir(z)
-            d.text((cx, ly), satir, font=f["txt"], fill=G.mix(pal["ink"], pal["bg"], 0.2), anchor="ma")
-            w = d.textlength(satir, font=f["txt"])
-            kayit["metin"].append((cx - w / 2, ly, cx + w / 2, ly + 28, satir))
-            ly += 32
+        for z in ogeler:
+            for satir in _satirlar(z, len(ogeler) == 1):
+                d.text((cx, ly), satir, font=f["txt"], fill=G.mix(pal["ink"], pal["bg"], 0.2), anchor="ma")
+                w = d.textlength(satir, font=f["txt"])
+                kayit["metin"].append((cx - w / 2, ly, cx + w / 2, ly + 28, satir, gi))
+                ly += 32
     return im, kayit
 
 
 def qc_v2(kayit):
-    """Metin/kutu sinir kutulari: kenardan >= KENAR, metinler kesismiyor. -> hata listesi."""
+    """Kapilar: metin/kutu kenardan >= KENAR, metinler kesismiyor, komsu GRUP metin
+    sinir kutulari arasinda >= METIN_PAY px yatay bosluk. -> hata listesi."""
     errs = []
-    for x0, y0, x1, y1, txt in kayit["metin"]:
+    for x0, y0, x1, y1, txt, _gi in kayit["metin"]:
         if x0 < KENAR or y0 < KENAR or x1 > G.W - KENAR or y1 > G.H - KENAR:
             errs.append(f"metin kenara tasti: {txt!r} ({x0:.0f},{y0:.0f})-({x1:.0f},{y1:.0f})")
     for x0, y0, x1, y1, lab in kayit["kutu"]:
@@ -199,10 +208,21 @@ def qc_v2(kayit):
     m = kayit["metin"]
     for i in range(len(m)):
         for j in range(i + 1, len(m)):
-            ax0, ay0, ax1, ay1, at = m[i]
-            bx0, by0, bx1, by1, bt = m[j]
+            ax0, ay0, ax1, ay1, at, _ = m[i]
+            bx0, by0, bx1, by1, bt, _ = m[j]
             if ax0 < bx1 and bx0 < ax1 and ay0 < by1 and by0 < ay1:
                 errs.append(f"metin cakismasi: {at!r} x {bt!r}")
+    kume = {}
+    for x0, _y0, x1, _y1, _t, gi in m:
+        a, b = kume.get(gi, (x0, x1))
+        kume[gi] = (min(a, x0), max(b, x1))
+    sirali = [kume[k] for k in sorted(kume)]
+    araliklar = [sirali[i + 1][0] - sirali[i][1] for i in range(len(sirali) - 1)]
+    kayit["metin_bosluk"] = round(min(araliklar), 1) if araliklar else None
+    if araliklar and min(araliklar) < METIN_PAY:
+        kotu = min(range(len(araliklar)), key=lambda i: araliklar[i])
+        errs.append(f"komsu metin boslugu {araliklar[kotu]:.0f} px < {METIN_PAY} "
+                    f"(grup {G.GROUP_ORDER[kotu]}-{G.GROUP_ORDER[kotu + 1]})")
     return errs
 
 def rclone(*a, sert=True):
@@ -314,7 +334,7 @@ def main():
             durum[r["pair"]] = r
     todo = [p for p in benim if a.force or durum.get(p, {}).get("status") != "PASS"]
     log(f"shard {a.shard}/{a.shards}: {len(benim)} cift, {len(todo)} islenecek")
-    csv_yol = pathlib.Path(a.csv or (durum_yol.parent / f"SIZE_GUIDE_14_shard{a.shard}.csv"))
+    csv_yol = pathlib.Path(a.csv or (durum_yol.parent / f"SIZE_GUIDE_15_shard{a.shard}.csv"))
     if not csv_yol.exists():
         with csv_yol.open("w", newline="", encoding="utf-8") as fh:
             csv.writer(fh).writerow(CSV_SUT)
@@ -348,6 +368,7 @@ def main():
                 log(f"  yerlesim: olcek {kayit['olcek']} | G {kayit['bosluk']} px | "
                     f"rx {kayit['rx']} | kutular {kayit['kutu_plan']}")
             satirlar.append({"pair": cift, "edition": ed, "bosluk_yayilim": yayilim,
+                             "metin_bosluk": kayit.get("metin_bosluk"),
                              "dosya": str(cikti.relative_to(a.out)),
                              "boyut": "x".join(map(str, Image.open(cikti).size)),
                              "palet_sapma": p_sapma, "bosluk_sapma": b_sapma,
@@ -355,15 +376,15 @@ def main():
             if errs:
                 hatalar.append(f"{ed}: " + "; ".join(errs))
             if a.ornek_cift and cift == a.ornek_cift.upper() and ed == "MIDNIGHT_BLUE":
-                ornek = pathlib.Path(a.out) / "SIZE_GUIDE_15_ORNEK.jpg"
+                ornek = pathlib.Path(a.out) / "SIZE_GUIDE_15_ORNEK_v2.jpg"
                 im = Image.open(cikti).convert("RGB")
                 for genislik, kal in ((2200, 86), (2000, 84), (1800, 80), (1600, 78), (1400, 74)):
                     im.resize((genislik, round(genislik * im.size[1] / im.size[0])),
                               Image.LANCZOS).save(ornek, "JPEG", quality=kal, optimize=True)
                     if ornek.stat().st_size <= 300_000:
                         break
-                rclone("copyto", str(ornek), f"{a.ornek_drv}/SIZE_GUIDE_15_ORNEK.jpg")
-                log(f"SIZE_GUIDE_15_ORNEK.jpg {ornek.stat().st_size / 1024:.0f} KB "
+                rclone("copyto", str(ornek), f"{a.ornek_drv}/SIZE_GUIDE_15_ORNEK_v2.jpg")
+                log(f"SIZE_GUIDE_15_ORNEK_v2.jpg {ornek.stat().st_size / 1024:.0f} KB "
                     f"{im.size[0]}x{im.size[1]} -> {genislik}px")
             if a.rclone_out:
                 rclone("copyto", str(cikti), f"{a.rclone_out}/{cift}/{ed}/{cikti.name}")
@@ -389,7 +410,7 @@ def main():
             f"{n}/5 kart {('; '.join(hatalar))[:60]} | gecen {sure(gec)} "
             f"| kalan ~{sure(gec / i * (len(todo) - i))}")
     if a.rclone_out:
-        rclone("copyto", str(csv_yol), f"gdrive:ASTROLOVE/TEMP/POD_SIZE_GUIDE_14/parca/{csv_yol.name}")
+        rclone("copyto", str(csv_yol), f"gdrive:ASTROLOVE/TEMP/POD_SIZE_GUIDE_15/parca/{csv_yol.name}")
     print(json.dumps({"shard": a.shard,
                       "pass": sum(1 for p in todo if durum.get(p, {}).get("status") == "PASS"),
                       "fail": sum(1 for p in todo if durum.get(p, {}).get("status") == "FAIL")},

@@ -25,7 +25,7 @@ on:
         type: boolean
         default: false
       ornek:
-        description: "SIZE_GUIDE_14_ORNEK.jpg icin cift (bos = yok)"
+        description: "SIZE_GUIDE_15_ORNEK_v2.jpg icin cift (bos = yok)"
         default: ""
 
 concurrency:
@@ -95,7 +95,7 @@ jobs:
             echo "$PAIRS" | tr ',' '\n' | sed 's/ //g' | grep -v '^$' | tr a-z A-Z | sort -u > _work/pairs.txt
           fi
           echo "cift: $(wc -l < _work/pairs.txt)"
-          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_SG14_STATE/shard_${{ matrix.shard }}.csv" _work/state.csv 2>/dev/null || echo "STATE yok; yeni baslar"
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_SG15_STATE/shard_${{ matrix.shard }}.csv" _work/state.csv 2>/dev/null || echo "STATE yok; yeni baslar"
       - name: Kaynak dogrulama (FACTCHECK)
         run: |
           set -euo pipefail
@@ -110,7 +110,7 @@ jobs:
           args=(--pairs-file _work/pairs.txt --src src --out out --fonts fonts --state _work/state.csv
                 --shard "${{ matrix.shard }}" --shards "${{ inputs.shards }}"
                 --rclone-src "gdrive:ASTROLOVE/WALL_ART/LISTING_MEDIA/ETSY_UPLOAD_SETS"
-                --rclone-out "gdrive:ASTROLOVE/TEMP/POD_SIZE_GUIDE_14")
+                --rclone-out "gdrive:ASTROLOVE/TEMP/POD_SIZE_GUIDE_15")
           [ "$FORCE" = "true" ] && args+=(--force)
           [ -n "${ORNEK:-}" ] && args+=(--ornek-cift "$ORNEK")
           python scripts/pod/pod_size_guide_14.py "${args[@]}"
@@ -118,7 +118,7 @@ jobs:
         if: ${{ always() }}
         run: |
           set -euo pipefail
-          [ -s _work/state.csv ] && rclone copyto _work/state.csv "gdrive:ASTROLOVE/TEMP/POD_SG14_STATE/shard_${{ matrix.shard }}.csv" && echo "STATE shard_${{ matrix.shard }} yazildi" || echo "STATE yok"
+          [ -s _work/state.csv ] && rclone copyto _work/state.csv "gdrive:ASTROLOVE/TEMP/POD_SG15_STATE/shard_${{ matrix.shard }}.csv" && echo "STATE shard_${{ matrix.shard }} yazildi" || echo "STATE yok"
       - name: Artifact
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
@@ -160,8 +160,9 @@ jobs:
       - name: STATE birlestir + rapor
         run: |
           set -euo pipefail
-          mkdir -p _st
-          rclone copy "gdrive:ASTROLOVE/TEMP/POD_SG14_STATE" _st --include "shard_*.csv" -q
+          mkdir -p _st _kart
+          rclone copy "gdrive:ASTROLOVE/TEMP/POD_SG15_STATE" _st --include "shard_*.csv" -q
+          rclone copy "gdrive:ASTROLOVE/TEMP/POD_SIZE_GUIDE_15/parca" _kart --include "SIZE_GUIDE_15_shard*.csv" -q || true
           python3 - <<'PY'
           import csv, glob, os
           rows = {}
@@ -180,9 +181,28 @@ jobs:
           md += [f"| {r['pair']} | {r['status']} | {r['cards']} | {r['secs']} | {r['fail'][:200].replace('|', '/')} |" for r in (rows[k] for k in sorted(rows))]
           open("_st/POD_GALLERY_REPORT.md", "w", encoding="utf-8").write("\n".join(md) + "\n")
           open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8").write("\n".join(md) + "\n")
+          # kart bazli birlesik CSV (390 satir): URETIM_SG15.csv
+          kart, kols = [], []
+          for f in sorted(glob.glob("_kart/SIZE_GUIDE_15_shard*.csv")):
+              rd = csv.DictReader(open(f, encoding="utf-8"))
+              kols = kols or rd.fieldnames
+              kart += list(rd)
+          if kart:
+              kart.sort(key=lambda r: (r["pair"], r["edition"]))
+              with open("_st/URETIM_SG15.csv", "w", newline="", encoding="utf-8") as fh:
+                  w = csv.DictWriter(fh, fieldnames=kols); w.writeheader(); w.writerows(kart)
+              gec = [r["metin_bosluk"] for r in kart if r.get("metin_bosluk")]
+              ozet = (f"kart {len(kart)} | PASS {sum(1 for r in kart if r['durum'] == 'PASS')} | "
+                      f"en kucuk metin boslugu {min(float(x) for x in gec):.1f} px" if gec else f"kart {len(kart)}")
+              print(ozet)
+              open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8").write(ozet + "\n")
           PY
-          rclone copyto _st/POD_GALLERY_STATE.csv "gdrive:ASTROLOVE/TEMP/POD_SIZE_GUIDE_14/STATE.csv"
-          rclone copyto _st/POD_GALLERY_REPORT.md "gdrive:ASTROLOVE/TEMP/POD_SIZE_GUIDE_14/REPORT.md"
+          rclone copyto _st/POD_GALLERY_STATE.csv "gdrive:ASTROLOVE/TEMP/POD_SIZE_GUIDE_15/STATE.csv"
+          rclone copyto _st/POD_GALLERY_REPORT.md "gdrive:ASTROLOVE/TEMP/POD_SIZE_GUIDE_15/REPORT.md"
+          if [ -s _st/URETIM_SG15.csv ]; then
+            rclone copyto _st/URETIM_SG15.csv "gdrive:ASTROLOVE/TEMP/POD_SIZE_GUIDE_15/URETIM_SG15.csv"
+            rclone copyto _st/URETIM_SG15.csv "gdrive:ASTROLOVE/TEMP/POD_5X7/URETIM_SG15.csv"
+          fi
           head -3 _st/POD_GALLERY_REPORT.md
       - uses: actions/upload-artifact@v4
         with:
