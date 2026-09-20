@@ -23,6 +23,7 @@ import subprocess
 import sys
 import time
 
+import numpy as np
 import requests
 from PIL import Image
 
@@ -64,6 +65,8 @@ def main():
     ap.add_argument("--ulke", default="US")
     ap.add_argument("--kargo", default="Budget")
     ap.add_argument("--olcu", default="2400x3000")
+    ap.add_argument("--master", default="", help="dogrulama icin ORIGINAL_HIGH_RES master yolu")
+    ap.add_argument("--kontrol", default="", help="ayni yapida BASKA cift master (ayirt edicilik kanti)")
     ap.add_argument("--env", default="live", choices=["live", "sandbox"])
     ap.add_argument("--confirm", default="")
     ap.add_argument("--is-dizin", default="_work/manuel")
@@ -112,6 +115,27 @@ def main():
     log(f"URL dogrulandi: {im.size[0]}x{im.size[1]} JPEG, md5 Drive ile ayni, {len(r.content) / 1e6:.2f} MB "
         f"| onizleme {DRV}/SIPARIS_ONIZLEME.jpg")
 
+    # ---------------------------------------------------------- 3b) icerik kaniti: master ile piksel karsilastirmasi
+    olcumler = {}
+    if a.master:
+        def kucult(p):
+            g = Image.open(p).convert("RGB").resize((160, 200), Image.LANCZOS)
+            return np.asarray(g, dtype=np.int16)
+
+        hedef = kucult(io.BytesIO(r.content))
+        for ad, yol in (("master", a.master), ("kontrol", a.kontrol)):
+            if not yol:
+                continue
+            yerel = isd / f"{ad}.jpg"
+            rclone("copyto", yol, str(yerel))
+            olcumler[ad] = round(float(np.abs(hedef - kucult(yerel)).mean()), 2)
+            yerel.unlink(missing_ok=True)
+        log(f"icerik karsilastirmasi (ortalama mutlak fark, 0-255): {olcumler}")
+        if olcumler.get("master") is None or olcumler["master"] > 12:
+            raise SystemExit(f"DUR: baski dosyasi master ile eslesmiyor: {olcumler}")
+        if "kontrol" in olcumler and olcumler["kontrol"] - olcumler["master"] < 10:
+            raise SystemExit(f"DUR: karsilastirma ayirt edici degil: {olcumler}")
+
     # ---------------------------------------------------------- 4) teklif
     key = load_prodigi_key(a.env)
     prod = Prodigi(key, a.env)
@@ -138,7 +162,8 @@ def main():
                         "assets": [{"printArea": "default", "url": url}]}]}
     sonuc = {"ref": a.ref, "sku": a.sku, "adet": a.adet, "env": a.env, "kargo": a.kargo,
              "dosya": {"remote": a.remote, "id": a.file_id, "olcu": list(im.size), "md5": md5,
-                       "bayt": len(r.content), "url": url, "izin_id": izin["id"]},
+                       "bayt": len(r.content), "url": url, "izin_id": izin["id"],
+                       "icerik_fark": olcumler},
              "teklif": {"kalem": round(kalem, 2), "kargo": round(kargo_tut, 2),
                         "toplam": round(kalem + kargo_tut, 2)},
              "order_body": {**govde, "items": [{**govde["items"][0], "assets": [{"printArea": "default", "url": "(URL)"}]}]},

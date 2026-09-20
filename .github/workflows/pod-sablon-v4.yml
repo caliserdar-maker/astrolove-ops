@@ -55,6 +55,12 @@ on:
       siparis_alici:
         description: "siparis_* : alici adi + adres (ad|adres1|sehir|eyalet|posta|ulke)"
         default: "MUSTERI_ADI|ADRES|SEHIR|NH|POSTAKODU|US"
+      siparis_master:
+        description: "siparis_* : icerik kaniti icin master"
+        default: "gdrive:ASTROLOVE/WALL_ART/POSTERS/ORIGINAL_HIGH_RES/MIDNIGHT_BLUE/4X5/AQUARIUS_LIBRA.jpg"
+      siparis_kontrol:
+        description: "siparis_* : ayirt edicilik icin BASKA cift master"
+        default: "gdrive:ASTROLOVE/WALL_ART/POSTERS/ORIGINAL_HIGH_RES/MIDNIGHT_BLUE/4X5/AQUARIUS_ARIES.jpg"
 
 concurrency:
   group: etsy-token
@@ -80,6 +86,8 @@ jobs:
       SIPARIS_DOSYA_ID: ${{ inputs.siparis_dosya_id || '' }}
       SIPARIS_REMOTE: ${{ inputs.siparis_remote || '' }}
       SIPARIS_ALICI: ${{ inputs.siparis_alici || '' }}
+      SIPARIS_MASTER: ${{ inputs.siparis_master || '' }}
+      SIPARIS_KONTROL: ${{ inputs.siparis_kontrol || '' }}
     steps:
       - name: Onay kapisi
         run: |
@@ -155,7 +163,8 @@ jobs:
             IFS='|' read -r S_AD S_ADR S_SEHIR S_EYALET S_POSTA S_ULKE <<< "$SIPARIS_ALICI"
             args=(--file-id "$SIPARIS_DOSYA_ID" --remote "$SIPARIS_REMOTE" --sku "$SIPARIS_SKU"
                   --adet "$SIPARIS_ADET" --ref "$SIPARIS_REF" --alici "$S_AD" --adres1 "$S_ADR"
-                  --sehir "$S_SEHIR" --eyalet "$S_EYALET" --posta "$S_POSTA" --ulke "$S_ULKE")
+                  --sehir "$S_SEHIR" --eyalet "$S_EYALET" --posta "$S_POSTA" --ulke "$S_ULKE"
+                  --master "$SIPARIS_MASTER" --kontrol "$SIPARIS_KONTROL")
             if [ "$MOD" = "siparis_gonder" ]; then
               python scripts/prodigi/manuel_siparis.py gonder "${args[@]}" --confirm "$CONFIRM"
             else
