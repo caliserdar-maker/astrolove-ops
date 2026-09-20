@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       mod:
-        description: "kuru | pilot | toplu | maliyet | dogrula | hpr | buyuk"
+        description: "kuru | pilot | toplu | maliyet | dogrula | hpr | buyuk | yetki | yetki_test | yetki_degistir"
         default: "kuru"
       listing:
         description: "pilot icin ilan id"
@@ -28,6 +28,12 @@ on:
       kota_alt:
         description: "kota tabani (varsayilan 400)"
         default: "400"
+      redirect:
+        description: "yetki modlari icin kayitli redirect URI"
+        default: "https://astrolove.art/oauth/callback"
+      kod:
+        description: "yetki_degistir icin Etsy'nin verdigi code"
+        default: ""
 
 concurrency:
   group: etsy-token
@@ -44,19 +50,30 @@ jobs:
       LISTING: ${{ inputs.listing || '4570110641' }}
       LIMIT: ${{ inputs.limit || '0' }}
       KOTA_ALT: ${{ inputs.kota_alt || '400' }}
+      REDIRECT: ${{ inputs.redirect || 'https://astrolove.art/oauth/callback' }}
+      KOD: ${{ inputs.kod || '' }}
     steps:
       - name: Onay kapisi
         run: |
           set -euo pipefail
-          if [ "$MOD" != "kuru" ] && [ "$MOD" != "maliyet" ] && [ "$MOD" != "dogrula" ] && [ "$MOD" != "hpr" ] && [ "$MOD" != "buyuk" ] && { [ "$APPLY" != "true" ] || [ "$CONFIRM" != "FIYAT_2999" ]; }; then
-            echo "::error::pilot/toplu icin apply=true ve confirm 'FIYAT_2999' olmali. DUR."
-            exit 1
-          fi
-          if [ "$APPLY" = "true" ] && { [ "$MOD" = "kuru" ] || [ "$MOD" = "maliyet" ] || [ "$MOD" = "dogrula" ] || [ "$MOD" = "hpr" ] || [ "$MOD" = "buyuk" ]; }; then
-            echo "::error::mod=$MOD ile yazma olmaz. DUR."
-            exit 1
-          fi
-          [ "$APPLY" = "true" ] && echo "::warning::APPLY: 30.99 USD secenekler 29.99 olacak ($MOD)." || echo "KURU DENEME: Etsy yazma yok."
+          case "$MOD" in
+            kuru|maliyet|dogrula|hpr|buyuk|yetki|yetki_test)
+              if [ "$APPLY" = "true" ]; then
+                echo "::error::mod=$MOD ile yazma olmaz. DUR."; exit 1
+              fi
+              echo "SALT OKUMA: Etsy'ye yazma yok ($MOD)." ;;
+            yetki_degistir)
+              if [ "$CONFIRM" != "YETKI_DEGISTIR" ] || [ -z "$KOD" ]; then
+                echo "::error::yetki_degistir icin confirm 'YETKI_DEGISTIR' ve kod gerekir. DUR."; exit 1
+              fi
+              echo "::warning::YETKI DEGISIMI: ETSY_TOKEN.json yenilenir, eski zincir kapanir." ;;
+            pilot|toplu)
+              if [ "$APPLY" != "true" ] || [ "$CONFIRM" != "FIYAT_2999" ]; then
+                echo "::error::pilot/toplu icin apply=true ve confirm 'FIYAT_2999' olmali. DUR."; exit 1
+              fi
+              echo "::warning::APPLY: 30.99 USD secenekler 29.99 olacak ($MOD)." ;;
+            *) echo "::error::bilinmeyen mod: $MOD. DUR."; exit 1 ;;
+          esac
       - uses: actions/checkout@v4
         with:
           ref: pod-v4
@@ -96,7 +113,13 @@ jobs:
           TOKEN_FILE: _work/ETSY_TOKEN.json
         run: |
           set -euo pipefail
-          if [ "$MOD" = "buyuk" ]; then
+          if [ "$MOD" = "yetki" ]; then
+            python scripts/etsy/etsy_yetki.py link --redirect "$REDIRECT"
+          elif [ "$MOD" = "yetki_test" ]; then
+            python scripts/etsy/etsy_yetki.py test
+          elif [ "$MOD" = "yetki_degistir" ]; then
+            python scripts/etsy/etsy_yetki.py degistir --redirect "$REDIRECT" --code "$KOD"
+          elif [ "$MOD" = "buyuk" ]; then
             python scripts/prodigi/pod_hpr_buyuk_boy.py --is-dizin _work/buyuk
           elif [ "$MOD" = "hpr" ]; then
             python scripts/prodigi/pod_hpr_kucuk_boy.py --is-dizin _work/hpr
