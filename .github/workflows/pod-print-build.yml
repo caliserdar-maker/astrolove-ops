@@ -32,6 +32,9 @@ on:
         description: "true = kirpilan bant tani goruntuleri"
         type: boolean
         default: false
+      boy:
+        description: "5x7 | A1"
+        default: "5x7"
 
 concurrency:
   group: pod-print-build
@@ -130,6 +133,7 @@ jobs:
           FORCE: ${{ inputs.force }}
           ONIZLEME: ${{ inputs.onizleme }}
           TANI: ${{ inputs.tani }}
+          BOY: ${{ inputs.boy }}
         run: |
           set -euo pipefail
           args=(--pairs-file _work/pairs.txt --sizes-json _work/sizes.json --src src --out out --state _work/state.csv
@@ -137,8 +141,15 @@ jobs:
                 --rclone-src "gdrive:ASTROLOVE/WALL_ART/POSTERS/ORIGINAL_HIGH_RES" --rclone-out "gdrive:ASTROLOVE/TEMP/POD_PRINT")
           [ "$FORCE" = "true" ] && args+=(--force)
           [ -n "${ONIZLEME:-}" ] && args+=(--onizleme-cift "$ONIZLEME")
-          [ "${TANI:-false}" = "true" ] && args+=(--tani)
-          python scripts/pod/pod_print_5x7.py "${args[@]}"
+          if [ "${BOY:-5x7}" = "A1" ]; then
+            python scripts/pod/pod_print_a1.py --pairs-file _work/pairs.txt --sizes-json _work/sizes.json \
+              --state _work/state.csv --shard "${{ matrix.shard }}" --shards "${{ inputs.shards }}" \
+              --rclone-src "gdrive:ASTROLOVE/WALL_ART/POSTERS/ORIGINAL_HIGH_RES" \
+              --rclone-out "gdrive:ASTROLOVE/TEMP/POD_PRINT" $([ "$FORCE" = "true" ] && echo --force)
+          else
+            [ "${TANI:-false}" = "true" ] && args+=(--tani)
+            python scripts/pod/pod_print_5x7.py "${args[@]}"
+          fi
       - name: STATE'i Drive'a yaz
         if: ${{ always() }}
         run: |
@@ -176,26 +187,31 @@ jobs:
             fi
           fi
       - name: STATE birlestir + rapor + Drive sayimi
+        env:
+          BOY_M: ${{ inputs.boy }}
         run: |
           set -euo pipefail
           mkdir -p _st
           rclone copy "gdrive:ASTROLOVE/TEMP/POD_5X7_STATE" _st --include "shard_*.csv" -q || echo "shard STATE klasoru yok"
-          rclone copy "gdrive:ASTROLOVE/TEMP/POD_5X7/parca" _st --include "URETIM_5X7_shard*.csv" -q || echo "parca CSV yok"
+          rclone copy "gdrive:ASTROLOVE/TEMP/POD_5X7/parca" _st --include "URETIM_*_shard*.csv" -q || echo "parca CSV yok"
           python3 - <<'PY2'
           import csv, glob
           sut = None; rows = []
-          for f in sorted(glob.glob("_st/URETIM_5X7_shard*.csv")):
+          import os
+          onek = "URETIM_A1" if os.environ.get("BOY_M") == "A1" else "URETIM_5X7"
+          for f in sorted(glob.glob(f"_st/{onek}_shard*.csv")):
               rd = csv.DictReader(open(f, encoding="utf-8")); sut = rd.fieldnames or sut
               rows += list(rd)
           if sut:
               rows.sort(key=lambda r: (r["pair"], r["edition"]))
-              with open("_st/URETIM_5X7.csv", "w", newline="", encoding="utf-8") as fh:
+              with open(f"_st/{onek}.csv", "w", newline="", encoding="utf-8") as fh:
                   w = csv.DictWriter(fh, fieldnames=sut); w.writeheader(); w.writerows(rows)
-              print("URETIM_5X7.csv satir:", len(rows),
+              print(f"{onek}.csv satir:", len(rows),
                     "| GECTI:", sum(1 for r in rows if r.get("durum") == "GECTI"))
           PY2
-          [ -s _st/URETIM_5X7.csv ] && rclone copyto _st/URETIM_5X7.csv "gdrive:ASTROLOVE/TEMP/POD_5X7/URETIM_5X7.csv"
-          n_drive=$(rclone lsf "gdrive:ASTROLOVE/TEMP/POD_PRINT" -R --files-only --include "5x7.jpg" 2>/dev/null | wc -l || echo 0)
+          onek=$([ "${{ inputs.boy }}" = "A1" ] && echo URETIM_A1 || echo URETIM_5X7)
+          [ -s "_st/$onek.csv" ] && rclone copyto "_st/$onek.csv" "gdrive:ASTROLOVE/TEMP/POD_5X7/$onek.csv"
+          n_drive=$(rclone lsf "gdrive:ASTROLOVE/TEMP/POD_PRINT" -R --files-only --include "${{ inputs.boy }}.jpg" 2>/dev/null | wc -l || echo 0)
           echo "Drive TEMP/POD_PRINT jpg: $n_drive"
           N_DRIVE="$n_drive" python3 - <<'PY'
           import csv, glob, os
