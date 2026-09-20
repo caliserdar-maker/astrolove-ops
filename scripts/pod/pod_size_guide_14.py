@@ -190,14 +190,17 @@ def rclone(*a, sert=True):
     return r
 
 
-def kutu_olcumu(kart):
-    """Cizilen aksan konturlu kutular planlanan yerde mi? -> (max_sapma_px, olculen_kutu_sayisi).
-    Her grup icin beklenen kutu penceresinde (±20 px) aksan renkli kenarlar aranir; olculen
-    sol/sag kenar plandan ne kadar sapiyor, en buyugu dondurulur (grup sayisindan bagimsiz)."""
+def kutu_olcumu(kart, F):
+    """Cizilen aksan konturlu kutular V2 PLANINDAKI yerde mi? -> (max_sapma_px, olculen_kutu).
+    Her grup icin beklenen kutu penceresinde (±20 px) aksan renkli kenarlar aranir."""
+    from PIL import ImageDraw
     rgb = np.array(Image.open(kart).convert("RGB")).astype(int)
     y = G.SG_BASE_Y - 30
     bar = rgb[2120, 1500]
-    _, kutular, _ = G.sg_layout()
+    d0 = ImageDraw.Draw(Image.new("RGB", (G.W, G.H), (255, 255, 255)))
+    s, rx, kolonlar, bosluk, kutu_w = yerlesim_v2(d0, F)
+    kutular = [((k0 + k1) / 2 - w / 2, (k0 + k1) / 2 + w / 2)
+               for (k0, k1), w in zip(kolonlar, kutu_w)]
     sapmalar, n = [], 0
     for bx0, bx1 in kutular:
         a0, a1 = max(0, int(bx0) - 20), min(G.W, int(bx1) + 20)
@@ -234,7 +237,7 @@ def bosluklar(kart):
     return g, hedef
 
 
-def qc(kart, pal):
+def qc(kart, pal, F):
     errs = []
     im = Image.open(kart)
     if im.size != (G.W, G.H):
@@ -243,7 +246,7 @@ def qc(kart, pal):
     sapma = max(abs(mp[k][i] - pal[k][i]) for k in ("bg", "bar", "ink") for i in range(3))
     if sapma > 16:
         errs.append(f"palet sapmasi {sapma}")
-    k_sapma, n_kutu = kutu_olcumu(kart)
+    k_sapma, n_kutu = kutu_olcumu(kart, F)
     if n_kutu != len(G.GROUP_ORDER):
         errs.append(f"kutu {n_kutu}/{len(G.GROUP_ORDER)}")
     elif k_sapma is None or k_sapma > 2.5:
@@ -310,7 +313,7 @@ def main():
             cikti.parent.mkdir(parents=True, exist_ok=True)
             kart, kayit = card_sizes_v2(pal, F, poster, pair_txt)
             G.save_jpg(kart, cikti, 95)
-            errs, p_sapma, b_sapma = qc(cikti, pal)
+            errs, p_sapma, b_sapma = qc(cikti, pal, F)
             errs = errs + qc_v2(kayit)
             if ed == "MIDNIGHT_BLUE" and not satirlar:
                 log(f"  yerlesim: olcek {kayit['olcek']} | bosluk {kayit['bosluk']} px | "
