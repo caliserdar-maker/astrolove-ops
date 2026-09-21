@@ -331,6 +331,45 @@ def iz_kontrol(poster, s, oran, etiket=""):
 # -------------------------------------------------------------------- akis
 
 
+# --------------------------------------------------------------- girdi kapisi
+
+OLCUM_SAYFALARI = 4        # uretim olcumu 20/28/36/72 sayfalarini kapsar
+
+
+def girdi_kapisi(olcum, oranlar):
+    """Bayat girdi kosuyu durdurur (21 Eyl 2026 olcumu).
+
+    Yerel calisma dizininde onceki iterasyonlardan kalan iki girdi, kapilari
+    sessizce bozdu: (1) 2400 px'e kucultulmus referans sayfa punto'yu 112
+    yerine 111 yapti, (2) yalniz sayfa 28'den olculmus OLCUM.json bosluk_ort'u
+    137.5 (uretimde 135.8) verdi; bosluk 138 olunca iki isim de 2 px disa
+    itildi ve onayli isim satiri kapisi KALDI. Kapi bunlari kosu basinda
+    yakalar; eksik girdiyle poster uretilmez.
+    """
+    hata = []
+    for o in oranlar:
+        kayit = olcum[o]
+        sayfa = kayit["sayfalar"].get(str(REF_SAYFA))
+        if sayfa is None:
+            hata.append(f"{o}: OLCUM.json'da sayfa {REF_SAYFA} yok")
+            continue
+        bekl = tuple(sayfa["kaynak_boyut"])
+        with Image.open(HAM / f"{o}_p{REF_SAYFA}.jpg") as im:
+            varsa = im.size
+        if varsa != bekl:
+            hata.append(f"{o}: referans sayfa {varsa}, OLCUM.json {bekl} diyor "
+                        f"(bayat ya da kucultulmus kopya)")
+        n = len(kayit["sayfalar"])
+        if n < OLCUM_SAYFALARI:
+            hata.append(f"{o}: OLCUM.json {n} sayfadan olculmus, uretim "
+                        f"{OLCUM_SAYFALARI} sayfa bekliyor (bosluk ortalamasi kayar)")
+    if hata:
+        for h in hata:
+            log(f"GIRDI KAPISI: {h}")
+        raise SystemExit("GIRDI KAPISI: bayat girdi, kosu durduruldu.")
+    log(f"girdi kapisi GECTI ({len(oranlar)} oran)")
+
+
 def kos(a):
     YOL.mkdir(parents=True, exist_ok=True)
     if not a.yerel:
@@ -349,6 +388,7 @@ def kos(a):
     bg_im = Image.open(OUT / "hazir" / "bg.png")
     oranlar = [o for o in ORANLAR if o in olcum and (HAM / f"{o}_p{REF_SAYFA}.jpg").exists()]
     log(f"oranlar: {oranlar}")
+    girdi_kapisi(olcum, oranlar)
 
     kapi, isim_kapi, test, iz, sure = {}, {}, {}, {}, {}
     for o in oranlar:
