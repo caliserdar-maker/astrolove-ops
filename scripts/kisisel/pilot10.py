@@ -515,6 +515,7 @@ def rapor(d):
 
 
 def canva_indir(urls):
+    OUT.mkdir(parents=True, exist_ok=True)
     yollar = {}
     for ad, u in zip(("sayfa20", "sayfa36", "sayfa72"), urls):
         p = OUT / f"canva_{ad}.jpg"
