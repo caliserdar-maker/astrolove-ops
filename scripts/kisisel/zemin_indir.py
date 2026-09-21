@@ -4,13 +4,17 @@ Neden Actions: bu depo kabugundan Canva'nin indirme sunucusuna cikis yok
 (ag politikasi yalniz GitHub'a izin veriyor), Drive'a da yalniz rclone
 yetkili runner erisiyor. Bu yuzden indirme + yukleme adimi buraya alindi.
 
-Girdi: Drive TEMP/KISISEL_PILOT/zemin_urls.json  -> {"dosya_adi": "imzali_url"}
-Cikti: Drive TEMP/KISISEL_PILOT/HAZIR/<dosya_adi>
+Girdi: Drive TEMP/KISISEL_PILOT/<liste>.json -> {"goreli_yol": "imzali_url"}
+Cikti: Drive TEMP/KISISEL_PILOT/<goreli_yol> (klasor yapisi korunur)
+
+Goreli yol DEST'e goredir, ornek: "HAZIR/zemin_modern_4x5.png" ya da
+"EDISYONLAR/vintage/ham/2x3_p28.jpg".
 
 URL'ler imzali ve kisa omurlu; loga hicbiri yazilmaz, ::add-mask:: ile
 maskelenir. Rapor yalniz dosya adi, bayt ve olcu icerir.
 """
 
+import argparse
 import json
 import subprocess
 import sys
@@ -23,7 +27,7 @@ from PIL import Image
 Image.MAX_IMAGE_PIXELS = None
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / "out" / "zemin"
+OUT = ROOT / "out" / "indir"
 DEST = "gdrive:ASTROLOVE/TEMP/KISISEL_PILOT"
 RC_SINIR = ["--timeout", "60s", "--contimeout", "20s", "--retries", "2"]
 T0 = time.time()
@@ -65,10 +69,10 @@ def indir(url, hedef, deneme=3):
     raise RuntimeError(f"indirilemedi ({hedef.name}): {type(son).__name__}")
 
 
-def kos():
+def kos(liste_adi):
     OUT.mkdir(parents=True, exist_ok=True)
-    liste_yolu = OUT / "zemin_urls.json"
-    rc("copy", f"{DEST}/zemin_urls.json", str(OUT))
+    liste_yolu = OUT / liste_adi
+    rc("copy", f"{DEST}/{liste_adi}", str(OUT))
     liste = json.loads(liste_yolu.read_text(encoding="utf-8"))
     liste_yolu.unlink()
     for url in liste.values():
@@ -77,12 +81,15 @@ def kos():
 
     satirlar, hata = [], []
     for i, (ad, url) in enumerate(liste.items(), 1):
+        if ad.startswith("/") or ".." in ad.split("/"):
+            raise ValueError(f"gecersiz hedef yol: {ad}")
         hedef = OUT / ad
+        hedef.parent.mkdir(parents=True, exist_ok=True)
         try:
             n = indir(url, hedef)
             with Image.open(hedef) as im:
-                if im.format != "PNG":
-                    raise RuntimeError(f"PNG degil: {im.format}")
+                if im.format not in ("PNG", "JPEG"):
+                    raise RuntimeError(f"beklenmeyen bicim: {im.format}")
                 w, h = im.size
                 mod = im.mode
             satirlar.append((ad, n, w, h, mod))
@@ -93,11 +100,11 @@ def kos():
             hedef.unlink(missing_ok=True)
 
     if satirlar:
-        rc("copy", str(OUT), f"{DEST}/HAZIR", "--include", "zemin_*.png",
-           capture=False, timeout=600)
-        log(f"{len(satirlar)} dosya {DEST}/HAZIR altina yazildi")
+        rc("copy", str(OUT), DEST, "--exclude", f"/{liste_adi}",
+           capture=False, timeout=900)
+        log(f"{len(satirlar)} dosya {DEST} altina yazildi")
 
-    print("\n## ZEMIN INDIRME", flush=True)
+    print("\n## INDIRME", flush=True)
     for ad, n, w, h, mod in satirlar:
         print(f"- {ad}: {w}x{h} {mod}, {n/1e6:.2f} MB", flush=True)
     for ad, e in hata:
@@ -107,4 +114,7 @@ def kos():
 
 
 if __name__ == "__main__":
-    kos()
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--liste", default="zemin_urls.json",
+                    help="Drive TEMP/KISISEL_PILOT altindaki url listesi")
+    kos(ap.parse_args().liste)
