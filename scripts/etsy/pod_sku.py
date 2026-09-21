@@ -11,7 +11,7 @@ SIGN3 = {"AQUARIUS": "AQU", "ARIES": "ARI", "TAURUS": "TAU", "GEMINI": "GEM", "C
 ED2 = {"MIDNIGHT_BLUE": "MB", "DEEP_BLACK": "DB", "WARM_PARCHMENT": "WP", "CHAMPAGNE_IVORY": "CI", "PURE_WHITE": "PW"}
 SIGN_OF = {v: k for k, v in SIGN3.items()}
 ED_OF = {v: k for k, v in ED2.items()}
-SKU_RE = re.compile(r"^POD-([A-Z]{3})_([A-Z]{3})-([A-Z]{2})-([0-9]+x[0-9]+|A[234])$")
+SKU_RE = re.compile(r"^POD-([A-Z]{3})_([A-Z]{3})-([A-Z]{2})-([0-9]+x[0-9]+|A[1234])$")  # A1: 20 Eyl 2026
 MAX_LEN = 32
 
 
