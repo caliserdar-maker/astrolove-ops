@@ -69,13 +69,14 @@ def log(*a):
 # --------------------------------------------------------------- oge kesme
 
 
-def fark_haritasi(ref, bg_im, s, dy):
-    """bg'yi olculen (olcek, dy) ile hizalayip mutlak fark haritasini dondur."""
+def fark_haritasi(ref, bg_im, s, dy, dx=0):
+    """bg'yi olculen (olcek, dx, dy) ile hizalayip mutlak fark haritasini dondur."""
     w = int(round(NORM_W * s))
     b = bg_im.convert("RGB").resize((w, int(round(bg_im.height * w / bg_im.width))),
                                     Image.LANCZOS)
-    bx = (w - NORM_W) // 2
+    bx = (w - NORM_W) // 2 + dx
     y0 = (b.height - ref.height) // 2 + dy
+    bx = max(0, min(bx, b.width - NORM_W))
     y0 = max(0, min(y0, b.height - ref.height))
     zemin = b.crop((bx, y0, bx + NORM_W, y0 + ref.height))
     a = np.asarray(ref).astype(np.float32)
@@ -84,17 +85,31 @@ def fark_haritasi(ref, bg_im, s, dy):
 
 
 def ince_hiza(ref, bg_im, kaba):
-    """Kaba aramanin cevresinde 0.01 / 8 px adimla ince arama."""
+    """Kaba aramanin cevresinde ince arama; olcut bos alandaki ORTALAMA fark.
+
+    Medyan bir cok (olcek, dy) kombinasyonunda 1.0 cikip ayirt etmiyordu ve
+    kotu bir hizalama secilebiliyordu; ortalama duyarli olcuttur. dx de aranir.
+    """
     A = np.asarray(ref).astype(np.float32)
     bos = (A @ LUMA) < MUREKKEP
     en = None
     for s in np.arange(kaba["olcek"] - 0.04, kaba["olcek"] + 0.041, 0.01):
-        for dy in range(kaba["dy"] - 32, kaba["dy"] + 33, 8):
-            f, _ = fark_haritasi(ref, bg_im, float(s), int(dy))
-            m = float(np.median(f[bos][::5]))
-            if en is None or m < en[0]:
-                en = (m, round(float(s), 3), int(dy))
-    return {"medyan_fark": round(en[0], 2), "olcek": en[1], "dy": en[2]}
+        for dx in range(-8, 9, 4):
+            for dy in range(kaba["dy"] - 32, kaba["dy"] + 33, 8):
+                f, _ = fark_haritasi(ref, bg_im, float(s), int(dy), dx)
+                v = float(f[bos][::5].mean())
+                if en is None or v < en[0]:
+                    en = (v, round(float(s), 3), int(dx), int(dy))
+    # ince tur: en iyinin cevresinde 1 px / 0.005 adim
+    v0, s0, dx0, dy0 = en
+    for s in (s0 - 0.005, s0, s0 + 0.005):
+        for dx in range(dx0 - 3, dx0 + 4):
+            for dy in range(dy0 - 3, dy0 + 4):
+                f, _ = fark_haritasi(ref, bg_im, float(s), int(dy), dx)
+                v = float(f[bos][::5].mean())
+                if v < en[0]:
+                    en = (v, round(float(s), 4), int(dx), int(dy))
+    return {"ort_fark": round(en[0], 3), "olcek": en[1], "dx": en[2], "dy": en[3]}
 
 
 def kume_kutusu(fark, bant, x0, x1, esik=FARK_ESIK):
@@ -171,7 +186,7 @@ def oran_kur(oran, olcum_kaydi, bg_im):
     o28 = olcum_kaydi["sayfalar"][str(REF_SAYFA)]
     ozet = olcum_kaydi["ozet"]
     hiza = ince_hiza(ref, bg_im, olcum_kaydi["bg"])
-    fark, zemin = fark_haritasi(ref, bg_im, hiza["olcek"], hiza["dy"])
+    fark, zemin = fark_haritasi(ref, bg_im, hiza["olcek"], hiza["dy"], hiza.get("dx", 0))
 
     ib, sb = o28["isim_bant"], o28["sembol_bant"]
     kutu = {"sonsuz": kume_kutusu(fark, ib, *o28["sonsuz"]),
