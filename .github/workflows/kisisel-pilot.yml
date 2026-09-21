@@ -33,7 +33,7 @@ concurrency: kisisel-pilot
 jobs:
   kosu:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 25
 
     steps:
       - name: Checkout (secilen dal)
@@ -81,6 +81,7 @@ jobs:
         env:
           SCRIPT: ${{ inputs.script }}
           ARGS: ${{ inputs.args }}
+          PYTHONUNBUFFERED: "1"
         run: |
           set -euo pipefail
           case "$SCRIPT" in
