@@ -492,8 +492,9 @@ def rapor(sonuc):
           "Olculen taban: Blue'nun KENDI posteri ayni IoU olcusunde "
           + ", ".join(f"{o} {v['iou']}/{v['iou_hizali']}"
                       for o, v in taban.items() if v) + " (hizasiz/hizali). "
-          "Onayli ISIM_SATIRI bir referans render'dir, posterin birebir kirpimi "
-          "degildir; bu yuzden IoU 1.0'a cikmaz.", "",
+          "Taban 1.0 ise esik ulasilabilirdir ve edisyondaki dusus gercek bir "
+          "sekil farkidir (olculen cap -> punto sapmasi ya da edisyonun kendi "
+          "isim bandinin dikey kaymasi).", "",
           "| edisyon | oran | kayma (<=1) | IoU (>=0.95) | ort RGB | std | profil | sonuc |",
           "| --- | --- | --- | --- | --- | --- | --- | --- |"]
     for ed, oranlar in sonuc.items():
