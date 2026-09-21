@@ -26,24 +26,53 @@
       "olcum": "ortak murekkep maskesi 1 px asindirilir; onayli kirpim baska zeminde alindigi icin kenar yumusatma pikselleri zeminle karisir ve yapisal olarak eslesemez"
     },
     "sonsuzluk_boslugu": "Serdar onayi 21 Eylul 2026: isim ile sonsuzluk arasindaki bosluk referanstaki CANCER-sonsuzluk boslugundan (136 px) az olamaz. Sigmayan isim YALNIZ KENDISI orantili kuculur; bu durumda ciftteki cap yuksekligi farki buyur, kural geregidir.",
-    "sembol_acikligi": "Serdar onayi 21 Eylul 2026: ustteki kucuk sembollerle en az 20 px bosluk (aksan noktalari dahil)."
+    "sembol_acikligi": "Serdar onayi 21 Eylul 2026: ustteki kucuk sembollerle en az 20 px bosluk (aksan noktalari dahil).",
+    "kilit": "Serdar onayi 21 Eylul 2026: kilitli; yalniz isim METNI degisir."
   },
   "tagline": {
-    "onay": "pilot5 - Mo: doku, boyut ve font onayli",
+    "onay": "Serdar onayi 21 Eylul 2026: SECENEK 1 ONAYLANDI. Secenek 2 (libra profili) kodu kaldirildi.",
     "font": "EBGaramond-Italic.ttf",
     "agirlik": 400,
     "punto": 102,
     "cap_yuksekligi": 71,
     "harf_araligi": 0,
     "genislik_siniri": 1673,
-    "doku": "isimlerle ayni altin profili; gecis cap bandina oturur, bandin disi altin uclara sabitlenir",
-    "kucultme": "yok",
+    "doku": "SECENEK 1 (Serdar onayi 21 Eylul 2026): cancer_name_gold.png satir profili, profilin kendi alt ucu yerinde duzlestirilmis (DUZ_ORAN 0.80), kabartma glif seklinden turetilir. Bant disi sabit renk YOK.",
+    "kucultme": "sinir asilirsa YALNIZ tagline orantili kuculur; genislik siniri 1670 px (Mo, 21 Eylul 2026 olcumu)",
     "kabartma": "Serdar onayi 21 Eylul 2026: kabartma glifin kendi seklinden turetilir (bulanik maskenin dikey gradyani); bant disi sabit renk YOK, metal gecis bant sinirinda yansitilarak surer. Profilin kendi alt golgesi yerinde duzlestirilir (gerdirme yok).",
-    "taban_kapisi": "Serdar onayi 21 Eylul 2026: 'oran <= 1.5' KALDIRILDI - referansin kendisi o olcutte 8.63 veriyor. Bloklayan esik: taban sicramasi <= 48 (A4'un yarisi; A4 = 97.6, referans = 17.7)."
+    "taban_kapisi": "Serdar onayi 21 Eylul 2026: 'oran <= 1.5' KALDIRILDI - referansin kendisi o olcutte 8.63 veriyor. Bloklayan esik: taban sicramasi <= 48 (A4'un yarisi; A4 = 97.6, referans = 17.7).",
+    "profil_kaynagi": "cancer_name_gold.png",
+    "kirpim": [
+      760,
+      2545,
+      1650,
+      2670
+    ],
+    "referans_dosya": "onayli/TAGLINE_ALTIN.png",
+    "kontrol": {
+      "harf_konumu_px": 1,
+      "murekkep_ortalama_fark": 3,
+      "olcum": "isim kapisiyla ayni: ortak murekkep maskesi 1 px asindirilir",
+      "kapi": "Serdar onayi 21 Eylul 2026: her kosuda dogrulanir, tutmazsa kosu HATA ile durur"
+    }
   },
   "zemin": {
     "onay": "pilot5 TEMIZ_ZEMIN - Mo onayli",
     "yontem": "REFERANS_CANCER_LIBRA.jpg zemin; eski isim ve tagline dikdortgenleri HAZIR/bg.png'nin ayni koordinatlarindan yumusak maskeyle doldurulur",
-    "korunan": "logo, halka, kucuk semboller, sonsuzluk isareti, yildizlar - referanstan aynen"
+    "korunan": "logo, halka, kucuk semboller, sonsuzluk isareti, yildizlar - referanstan aynen",
+    "kilit": "Serdar onayi 21 Eylul 2026: kilitli, degistirilemez."
+  },
+  "kilit": {
+    "onay": "Serdar onayi 21 Eylul 2026: zemin, logo, isimler ve tagline KILITLI.",
+    "kilitli": [
+      "zemin (referans posterden; logo, halka, kucuk semboller, sonsuzluk, yildizlar)",
+      "isimler (font, punto kurali, harf araligi, doku, kutular)",
+      "tagline (font, punto 102, doku = SECENEK 1, kabartma, taban kapisi)"
+    ],
+    "degistirilebilir": [
+      "isim metinleri",
+      "tagline metni"
+    ],
+    "referans_poster": "onayli/ALTIN_POSTER.jpg (SECENEK1_A, 2400x3000)"
   }
 }
