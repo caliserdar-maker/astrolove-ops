@@ -73,8 +73,14 @@ def bantlar(mask, en_az=3, en_ince=6):
     return out
 
 
-def sayfa_olc(path):
-    """Isim satiri, semboller ve tagline'i oranlardan bagimsiz olcer."""
+def sayfa_olc(path, maske=None):
+    """Isim satiri, semboller ve tagline'i oranlardan bagimsiz olcer.
+
+    `maske`: istege bagli murekkep maskesi uretici (L, acik_zemin) -> bool dizi.
+    Verilmezse Blue/Black icin kullanilan duz esik kullanilir (davranis aynidir);
+    edisyonlar yerel kontrast maskesi gecirir (Vintage'in parsomen dokusu duz
+    esikte tum sayfayi tek bant yapiyordu).
+    """
     ham = Image.open(path).convert("RGB")
     im, k = norm(ham)
     A = np.asarray(im).astype(np.float32)
@@ -82,7 +88,9 @@ def sayfa_olc(path):
     # Maske yonu zemine gore: koyu zeminde parlak yazi (Blue/Black), acik
     # zeminde koyu yazi (Pure White, Modern, Vintage).
     acik_zemin = float(np.median(L)) > 128
-    if acik_zemin:
+    if maske is not None:
+        m = maske(L, acik_zemin)
+    elif acik_zemin:
         # Acik zeminde yazi koyu; esik zemin ile en koyu piksel arasinda
         # olculur (Modern/Vintage'da kontrast dusuk).
         z = float(np.median(L))
