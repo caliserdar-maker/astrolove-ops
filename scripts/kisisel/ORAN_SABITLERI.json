@@ -7,8 +7,8 @@
         6000
       ],
       "bosluk": 153,
-      "kenar_payi": 321,
-      "kullanilabilir_genislik": 1758,
+      "kenar_payi": 240,
+      "kullanilabilir_genislik": 1920,
       "isim_cap": {
         "sol": 96,
         "sag": 95
@@ -20,7 +20,8 @@
         "medyan_fark": 1.0,
         "olcek": 1.11,
         "dy": -32
-      }
+      },
+      "kenar_orani": 0.1
     },
     "3x4": {
       "tuval": [
@@ -28,8 +29,8 @@
         4000
       ],
       "bosluk": 144,
-      "kenar_payi": 370,
-      "kullanilabilir_genislik": 1660,
+      "kenar_payi": 240,
+      "kullanilabilir_genislik": 1920,
       "isim_cap": {
         "sol": 90,
         "sag": 89
@@ -41,27 +42,28 @@
         "medyan_fark": 0.0,
         "olcek": 1.0,
         "dy": 0
-      }
+      },
+      "kenar_orani": 0.1
     },
     "4x5": {
       "tuval": [
-        2400,
-        3000
+        4000,
+        5000
       ],
-      "bosluk": 138,
+      "bosluk": 136,
       "kenar_payi": 240,
       "kullanilabilir_genislik": 1920,
       "isim_cap": {
         "sol": 85,
-        "sag": 83
+        "sag": 84
       },
       "tagline_cap": 71,
       "tagline_genislik_siniri": 1670,
-      "sonsuzluk_genisligi": 186,
+      "sonsuzluk_genisligi": 187,
       "bg_hizasi": {
-        "medyan_fark": 1.0,
-        "olcek": 0.98,
-        "dy": -40
+        "medyan_fark": 0.0,
+        "olcek": 1.0,
+        "dy": 0
       },
       "kenar_orani": 0.1
     },
@@ -71,8 +73,8 @@
         4200
       ],
       "bosluk": 138,
-      "kenar_payi": 407,
-      "kullanilabilir_genislik": 1586,
+      "kenar_payi": 240,
+      "kullanilabilir_genislik": 1920,
       "isim_cap": {
         "sol": 86,
         "sag": 85
@@ -84,7 +86,8 @@
         "medyan_fark": 0.0,
         "olcek": 1.0,
         "dy": 0
-      }
+      },
+      "kenar_orani": 0.1
     },
     "A": {
       "tuval": [
@@ -92,8 +95,8 @@
         4961
       ],
       "bosluk": 144,
-      "kenar_payi": 370,
-      "kullanilabilir_genislik": 1660,
+      "kenar_payi": 240,
+      "kullanilabilir_genislik": 1920,
       "isim_cap": {
         "sol": 90,
         "sag": 88
@@ -105,7 +108,8 @@
         "medyan_fark": 0.0,
         "olcek": 1.06,
         "dy": -72
-      }
+      },
+      "kenar_orani": 0.1
     }
   }
 }
