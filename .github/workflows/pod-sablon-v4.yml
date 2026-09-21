@@ -61,6 +61,9 @@ on:
       siparis_kontrol:
         description: "siparis_* : (istege bagli) ayirt edicilik icin BASKA cift master; bos = yok"
         default: ""
+      test_receipt:
+        description: "router_kuru | router_teklif : sahte receipt dosyasi (Etsy okunmaz, canli siparis yok)"
+        default: "scripts/prodigi/test_receipt_pilot15_aqu_ari.json"
 
 concurrency:
   group: etsy-token
@@ -88,12 +91,13 @@ jobs:
       SIPARIS_ALICI: ${{ inputs.siparis_alici || '' }}
       SIPARIS_MASTER: ${{ inputs.siparis_master }}
       SIPARIS_KONTROL: ${{ inputs.siparis_kontrol }}
+      TEST_RECEIPT: ${{ inputs.test_receipt || 'scripts/prodigi/test_receipt_pilot15_aqu_ari.json' }}
     steps:
       - name: Onay kapisi
         run: |
           set -euo pipefail
           case "$MOD" in
-            kuru|maliyet|dogrula|hpr|buyuk|yetki|yetki_test|pilot15_oku|siparis_hazirla|siparis_onizleme|siparis_izin_kapat|eslesme_kanit|router_kuru)
+            kuru|maliyet|dogrula|hpr|buyuk|yetki|yetki_test|pilot15_oku|siparis_hazirla|siparis_onizleme|siparis_izin_kapat|eslesme_kanit|router_kuru|router_teklif)
               if [ "$APPLY" = "true" ]; then
                 echo "::error::mod=$MOD ile yazma olmaz. DUR."; exit 1
               fi
@@ -168,9 +172,16 @@ jobs:
             echo "== 2) sahte POD receipt teklifi (Etsy okunmaz)"
             python scripts/prodigi/order_router.py --env live --state _out/kuru/state_test.csv \
               --out _out/kuru/test --dry-run --approve-mode off \
-              --test-receipt scripts/prodigi/test_receipt_gemini_leo_16x20.json || true
+              --test-receipt "$TEST_RECEIPT" || true
             rclone copy _out/kuru "gdrive:ASTROLOVE/TEMP/POD_5X7/ROUTER_KURU" --include "*.md" --include "*.json" --include "*.csv" -q
             echo "ciktilar: gdrive:ASTROLOVE/TEMP/POD_5X7/ROUTER_KURU"
+          elif [ "$MOD" = "router_teklif" ]; then
+            # Yalniz sahte receipt uzerinden kuru teklif: Etsy okunmaz, canli siparis yok.
+            mkdir -p _out/teklif
+            python scripts/prodigi/order_router.py --env live --state _out/teklif/state_test.csv \
+              --out _out/teklif --dry-run --approve-mode off --test-receipt "$TEST_RECEIPT"
+            rclone copy _out/teklif "gdrive:ASTROLOVE/TEMP/POD_5X7/ROUTER_KURU/teklif" --include "*.md" --include "*.json" --include "*.csv" -q
+            echo "ciktilar: gdrive:ASTROLOVE/TEMP/POD_5X7/ROUTER_KURU/teklif"
           elif [ "$MOD" = "eslesme_kanit" ]; then
             python scripts/prodigi/eslesme_kanit.py --limit "$LIMIT" --kota-alt 150
           elif [ "$MOD" = "siparis_izin_kapat" ]; then

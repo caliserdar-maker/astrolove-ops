@@ -1,0 +1,31 @@
+{
+ "receipt_id": 9900015701,
+ "name": "Test Buyer (SAHTE)",
+ "first_line": "123 Test Street",
+ "second_line": "Apt 4",
+ "city": "Austin",
+ "state": "TX",
+ "zip": "78701",
+ "country_iso": "US",
+ "buyer_email": "test@example.com",
+ "transactions": [
+  {
+   "transaction_id": 9900015711,
+   "sku": "POD-AQU_ARI-MB-5x7",
+   "quantity": 1,
+   "price": {
+    "amount": 1999,
+    "divisor": 100
+   }
+  },
+  {
+   "transaction_id": 9900015712,
+   "sku": "POD-AQU_ARI-MB-A1",
+   "quantity": 1,
+   "price": {
+    "amount": 8999,
+    "divisor": 100
+   }
+  }
+ ]
+}
