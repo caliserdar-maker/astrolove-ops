@@ -193,37 +193,47 @@ def prodigi_indeks(prod, top=50):
     """Prodigi'deki (iptal edilmemis) siparislerin referanslari: receipt id'leri ve kalem referanslari."""
     ref, kalem_ref, kayit = set(), set(), {}
     for o in prod.siparisler(top):
-        if str(((o.get("status") or {}).get("stage") or "")).lower() == "cancelled":
+        durum = o.get("status") or {}
+        stage = str(durum.get("stage") or "")
+        if stage.lower() == "cancelled":
             continue
+        bilgi = {"id": o.get("id"), "stage": stage, "issues": bool(durum.get("issues"))}
         mr = str(o.get("merchantReference") or "")
         if mr:
             ref.add(mr)
-            kayit.setdefault(mr, o.get("id"))
+            kayit.setdefault(mr, bilgi)
             if "-" in mr:                      # etsy-<receipt>-<boy>
                 parca = mr.split("-")
                 if len(parca) > 1 and parca[1].isdigit():
                     ref.add(parca[1])
-                    kayit.setdefault(parca[1], o.get("id"))
+                    kayit.setdefault(parca[1], bilgi)
         for k in o.get("items") or []:
             kr = str(k.get("merchantReference") or "")
             if kr:
                 kalem_ref.add(kr)
-                kayit.setdefault(kr, o.get("id"))
+                kayit.setdefault(kr, bilgi)
     return {"ref": ref, "kalem_ref": kalem_ref, "kayit": kayit}
+
+
+def _neden(idx, anahtar, aciklama):
+    b = idx["kayit"].get(anahtar) or {}
+    ek = " [DIKKAT: taslak/sorunlu - Serdar iptal etmeli]" if (b.get("issues") or
+                                                               str(b.get("stage", "")).lower() == "draft") else ""
+    return f"{aciklama} ({anahtar} -> {b.get('id')}, {b.get('stage')}){ek}"
 
 
 def zaten_siparis(idx, rid, items):
     """Bu receipt icin Prodigi'de siparis var mi? -> '' ya da neden."""
     rid = str(rid)
     if rid in idx["ref"]:
-        return f"Prodigi siparisi var (referans {rid} -> {idx['kayit'].get(rid)})"
+        return _neden(idx, rid, "Prodigi siparisi var")
     for i in items:
         tx = str(i.get("transaction_id") or "")
         if tx and tx in idx["kalem_ref"]:
-            return f"Prodigi kanal siparisi var (kalem {tx} -> {idx['kayit'].get(tx)})"
+            return _neden(idx, tx, "Prodigi kanal siparisi var")
         for ek in (f"etsy-{rid}", f"etsy-{rid}-{i.get('size')}"):
             if ek in idx["ref"]:
-                return f"Prodigi siparisi var (referans {ek} -> {idx['kayit'].get(ek)})"
+                return _neden(idx, ek, "Prodigi siparisi var")
     return ""
 
 
@@ -513,6 +523,11 @@ def main():
             upd(st, a.state, rid, stage="error", country=country, items=desc, etsy_total=etsy_total, note=err)
             break
         margin = round((etsy_total - cost) / etsy_total, 3) if etsy_total else 0
+        sec = kargo_ayrinti.get("secilen") or {}
+        kargo_metin = (f"kargo {sec.get('yontem')} {sec.get('kargo')} + ekler {EKLER_USD:.2f} "
+                       f"(secenekler: " + ", ".join(f"{x['yontem']} {x['toplam']:.2f}"
+                                                    for x in kargo_ayrinti.get("secenekler", [])) + ")"
+                       ) if sec else ""
         if margin < a.margin_min:
             warn.append(f"MARJ_DUSUK {margin:.0%} (< {a.margin_min:.0%}): Etsy {etsy_total} / Prodigi {cost}")
         if approve:
@@ -524,12 +539,14 @@ def main():
             upd(st, a.state, rid, stage="bekliyor", country=country, items=desc, etsy_total=etsy_total, prodigi_cost=cost,
                 margin=margin, warn="; ".join(warn), note=f"paket hazir ({rid}.json); onay bekliyor (--submit {rid})")
             report.append(f"- {rid}: BEKLIYOR (paket {rid}.json) {country} {desc} | Etsy {etsy_total} USD, "
-                          f"Prodigi {cost} USD, marj {margin:.0%}" + (f" | {'; '.join(warn)}" if warn else ""))
+                          f"Prodigi {cost} USD, marj {margin:.0%} | {kargo_metin}"
+                          + (f" | {'; '.join(warn)}" if warn else ""))
             continue
         if a.dry_run:
             upd(st, a.state, rid, stage="dryrun", country=country, items=desc, etsy_total=etsy_total, prodigi_cost=cost,
                 margin=margin, warn="; ".join(warn), note="dry-run: siparis verilmedi")
-            report.append(f"- {rid}: DRY-RUN {country} {desc} | Etsy {etsy_total} USD, Prodigi {cost} USD, marj {margin:.0%}" + (f" | {'; '.join(warn)}" if warn else ""))
+            report.append(f"- {rid}: DRY-RUN {country} {desc} | Etsy {etsy_total} USD, Prodigi {cost} USD, "
+                          f"marj {margin:.0%} | {kargo_metin}" + (f" | {'; '.join(warn)}" if warn else ""))
             continue
         if new_orders >= a.max_orders:
             report.append(f"- {rid}: kosu siniri ({a.max_orders}); sonraki kosuda")
