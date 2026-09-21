@@ -253,8 +253,17 @@ def iou(a, b):
     return float((a & b).sum() / u) if u else 0.0
 
 
-def font_esle(ref_mask_img, metin, adaylar, etiket):
-    """Her aday fontu referansin kutusuna oturtup IoU olcer."""
+def font_esle(ref_mask_img, metin, adaylar, etiket, maks_h=200):
+    """Her aday fontu referansin kutusuna oturtup IoU olcer.
+
+    IoU olcek-degismez oldugu icin tarama normalize yukseklikte yapilir:
+    tagline referansi 1000+ px olunca her aday icin ~50 buyuk render gerekiyor
+    ve tarama dakikalar suruyor. Kucultme sonucu degistirmez, sureyi ~50x kisar.
+    """
+    if ref_mask_img.height > maks_h:
+        o = maks_h / ref_mask_img.height
+        ref_mask_img = ref_mask_img.resize(
+            (max(int(ref_mask_img.width * o), 1), maks_h), Image.LANCZOS)
     hedef_w, hedef_h = ref_mask_img.size
     ref = np.asarray(ref_mask_img)
     sonuc = []
@@ -422,11 +431,12 @@ def stage_kesif(a):
     (OUT / "kesif.json").write_text(json.dumps(rapor, ensure_ascii=False, indent=1))
     log("OLCUMLER: " + json.dumps(rapor["olcumler"], ensure_ascii=False))
     log("kesif bitti -> out/kesif.json")
+    return rapor
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--stage", default="kesif", choices=["kesif", "uret"])
+    ap.add_argument("--stage", default="kesif", choices=["kesif", "uret", "tam"])
     ap.add_argument("--isim-font", default="")
     ap.add_argument("--isim-wght", default="")
     ap.add_argument("--tagline-font", default="")
@@ -434,9 +444,32 @@ def main():
     a = ap.parse_args()
     if a.stage == "kesif":
         stage_kesif(a)
-    else:
-        from kisisel_uret import stage_uret     # ayri dosya, kesif bulgusuyla yazilir
-        stage_uret(a)
+        return
+    if a.stage == "tam":
+        rapor = stage_kesif(a)
+        sec = en_iyi(rapor)
+        a.isim_font, a.isim_wght = sec["isim"][0], sec["isim"][1]
+        a.tagline_font, a.tagline_wght = sec["tagline"][0], sec["tagline"][1]
+    from kisisel_uret import stage_uret
+    stage_uret(a)
+
+
+def en_iyi(rapor):
+    """Kesif siralamasindan font secer. Esik altinda kalirsa uyarir ama durmaz."""
+    sec = {}
+    for rol in ("isim", "tagline"):
+        sira = [r for r in rapor["font"].get(rol, []) if "hata" not in r]
+        if not sira:
+            raise RuntimeError(f"{rol}: font eslemesi bos")
+        ilk = sira[0]
+        ikinci = sira[1]["iou"] if len(sira) > 1 else 0.0
+        log(f"SECIM {rol}: {ilk['font']} wght={ilk['wght']} IoU={ilk['iou']} "
+            f"(2. {ikinci}, fark {ilk['iou'] - ikinci:+.3f})")
+        if ilk["iou"] < 0.50:
+            log(f"UYARI {rol}: en iyi IoU {ilk['iou']} < 0.50; orijinal font aday "
+                f"setinde olmayabilir, en yakin esdeger kullanilacak.")
+        sec[rol] = (ilk["font"], str(ilk["wght"]) if ilk["wght"] else "")
+    return sec
 
 
 if __name__ == "__main__":
