@@ -67,12 +67,35 @@
     "kilitli": [
       "zemin (referans posterden; logo, halka, kucuk semboller, sonsuzluk, yildizlar)",
       "isimler (font, punto kurali, harf araligi, doku, kutular)",
-      "tagline (font, punto 102, doku = SECENEK 1, kabartma, taban kapisi)"
+      "tagline (font, punto 102, doku = SECENEK 1, kabartma, taban kapisi)",
+      "isim satiri yerlesimi (SECENEK D)"
     ],
     "degistirilebilir": [
       "isim metinleri",
       "tagline metni"
     ],
-    "referans_poster": "onayli/ALTIN_POSTER.jpg (SECENEK1_A, 2400x3000)"
+    "referans_poster": "onayli/ALTIN_<oran>.jpg (her oran icin bir tane); 4:5 oncesi surum onayli/eski/ALTIN_POSTER.jpg"
+  },
+  "isim_satiri": {
+    "onay": "Serdar onayi 21 Eylul 2026: SECENEK D ONAYLANDI (orijinal 78 tasarimin kurali). A, B ve C secenekleri kaldirildi.",
+    "kural": [
+      "Satir = sol isim + bosluk + sonsuzluk + bosluk + sag isim; satir BIR BUTUN olarak posterin yatay ortasina hizalanir. Sonsuzluk sabit degil, uzun isim tarafindan uzaklasir.",
+      "Her kucuk sembol, altindaki ismin yatay merkezine ortalidir; isimle birlikte kayar.",
+      "Isim ile sonsuzluk arasindaki bosluk sabittir (o oranin sabiti).",
+      "Isimler TAM BOY. Satir kenar payina sigmazsa iki isim BIRLIKTE, ayni oranda kuculur.",
+      "Tagline tam boy. Sigmazsa YALNIZ tagline orantili kuculur."
+    ],
+    "tasinan_ogeler": "Sonsuzluk ve iki kucuk sembol YENIDEN CIZILMEZ: referans sayfadan alfa farkiyla (referans - bg) kesilir, eski yerleri temizlenir, yeni yerlerine ayni piksellerle yapistirilir.",
+    "sabitler": "Bosluk, kenar payi, isim puntosu/cap yuksekligi ve tagline genislik siniri HER ORAN ICIN AYRI; o oranin orijinal Canva sayfalarindan (28, 20, 36, 72) olculur. Oran sabitleri: scripts/kisisel/ORAN_SABITLERI.json",
+    "dogrulama": "Kural dort sayfada olculerek dogrulandi (21 Eylul 2026): bosluk iki yanda esit, satir merkezi poster merkezinde, sembol-isim merkez farki <=2 px."
+  },
+  "kapilar": {
+    "onay": "Serdar onayi 21 Eylul 2026: konum kapilari yerine sekil/doku ve yerlesim kapilari.",
+    "isim_sekli": "Onayli isim satiri ile HIZALANMIS karsilastirma (mutlak konum degil): ortak murekkep maskesi 1 px asindirilir, ic fark <= 3.",
+    "satir_merkezi": "Satir merkezi = poster merkezi +-1 px.",
+    "sembol_hizasi": "Sembol merkezi ile isim merkezi farki <= 2 px.",
+    "tasinan_oge": "Tasinan oge ile referanstaki orijinali arasinda murekkep farki <= 3.",
+    "kalinti": "Ogelerin ESKI konumlarinda kalinti yok: temizlenen alan ile zemin arasinda fark <= 3.",
+    "tagline": "onayli/TAGLINE_ALTIN.png ile karsilastirma (SECENEK 1 dokusu)."
   }
 }
