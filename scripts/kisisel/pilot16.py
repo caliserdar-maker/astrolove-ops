@@ -378,11 +378,17 @@ def kos(a):
                 iz[o] = iz_kontrol(p, s, o, "SERDAR-LENA")
                 kaydet(iz[o], YOL / f"IZ_KONTROL_{o}.jpg", maks=1_500_000)
                 log(f"{o} isim kapisi: {json.dumps(isim_kapi[o])}")
-        sure[o] = {"kurulum_sn": s["kurulum_sn"],
+        sure[o] = {"kalibrasyon_sn": s["kurulum_sn"] if s["hiza_arandi"] else None,
                    "poster_ort_sn": round((time.time() - t_uret) / len(CIFTLER), 1),
-                   "hiza_arandi": s["hiza_arandi"]}
+                   "hiza": {k: v for k, v in s["bg_hiza"].items()}}
+        if s["hiza_arandi"]:            # kayitli degerle gercek uretim kurulumu
+            s3, _ = oran_kur(o, olcum[o], bg_im)
+            sure[o]["kurulum_sn"] = s3["kurulum_sn"]
+        else:
+            sure[o]["kurulum_sn"] = s["kurulum_sn"]
         log(f"{o} SURE: kurulum {sure[o]['kurulum_sn']} sn + poster basina "
-            f"{sure[o]['poster_ort_sn']} sn")
+            f"{sure[o]['poster_ort_sn']} sn (kalibrasyon "
+            f"{sure[o]['kalibrasyon_sn']} sn) hiza {sure[o]['hiza']}")
         yanyana(kucuk, o)
 
     # kapinin kendini testi: kasten birakilan soluk iz
@@ -406,6 +412,7 @@ def kos(a):
     if not a.yerel:
         for f in ["SINIR_V5.md", "v5.json", f"IZ_TESTI_{o0}.jpg"]:
             rc("copy", str(YOL / f), DEST_O)
+        rc("copy", str(SABIT_YOL), DEST_O)        # kilitlenen hizalama degerleri
         for o in oranlar:
             rc("copy", str(YOL / f"TEST_V5_{o}.jpg"), DEST_O)
             rc("copy", str(YOL / f"IZ_KONTROL_{o}.jpg"), DEST_O)
@@ -442,9 +449,11 @@ def rapor(d):
          "yumusatma birlikte gider, yeni zemin gradyani bozulmaz.",
          f"- **Kalinti kapisi** (ONAYLI.json kapilar): alan ortalamasi yerine "
          f"{BLOK}x{BLOK} BLOK bazli. Yeni yazilan ogelerin {GENISLET} px genisletilmis "
-         f"maskesi DISINDA, sembol bandi + isim satiri boyunca her blokta ortalama fark "
-         f"<= {BLOK_ORT:.0f} ve tek piksel farki <= {BLOK_TEPE:.0f}. Tutmazsa kosu HATA "
-         "verir ve sorunlu blogun koordinati raporlanir.", "",
+         f"maskesi (kendi pikselleri + {KAPI_PAY} px pay) ve yildizlar DISINDA, eski oge "
+         f"bolgesi boyunca her blokta ortalama fark <= {BLOK_ORT:.0f} ve tek piksel "
+         f"farki <= {BLOK_TEPE:.0f}. Tutmazsa kosu HATA verir ve sorunlu blogun "
+         f"koordinati raporlanir. (Mo'nun onerdigi 12 px pay denendi: eski ve yeni "
+         f"ogeler ayni bantta oldugu icin izleri ortuyor, kapi kor kaliyordu.)", "",
          "### Degismeyen", "",
          "- D kurali, kenar payi %10, bosluk, cap hedefleri, punto kurali, tagline, "
          "altin doku, Etsy sinirlari, buyuk harf kurali.", "",
@@ -492,12 +501,15 @@ def rapor(d):
           "Hizalama (olcek, dx, dy) her oran icin BIR KEZ hesaplanip "
           "`ORAN_SABITLERI.json`'a `bg_hizasi_kilit` olarak yazildi; uretimde arama "
           "yapilmaz.", "",
-          "| oran | kurulum (sn) | poster basina (sn) | hizalama |",
-          "| --- | --- | --- | --- |"]
+          "| oran | uretim kurulumu (sn) | poster basina (sn) | toplam (sn) "
+          "| kilitli hizalama (olcek / dx / dy) | bir kerelik kalibrasyon (sn) |",
+          "| --- | --- | --- | --- | --- | --- |"]
     for o in o_:
-        v = d["sure"][o]
+        v, h = d["sure"][o], d["sure"][o]["hiza"]
         m.append(f"| Blue {o} | {v['kurulum_sn']} | {v['poster_ort_sn']} "
-                 f"| {'ARANDI (kalibrasyon)' if v['hiza_arandi'] else 'kayitli deger'} |")
+                 f"| {round(v['kurulum_sn'] + v['poster_ort_sn'], 1)} "
+                 f"| {h.get('olcek')} / {h.get('dx')} / {h.get('dy')} "
+                 f"| {v['kalibrasyon_sn'] or '-'} |")
     en_yavas = max(v["kurulum_sn"] + v["poster_ort_sn"] for v in d["sure"].values())
     m += ["", f"Bir siparis icin en yavas oran: **{en_yavas} sn** "
           + ("(hedef 30 sn icinde)." if en_yavas <= 30
