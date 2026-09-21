@@ -79,7 +79,10 @@ def sayfa_olc(path):
     im, k = norm(ham)
     A = np.asarray(im).astype(np.float32)
     L = A @ LUMA
-    m = L > MUREKKEP
+    # Maske yonu zemine gore: koyu zeminde parlak yazi (Blue/Black), acik
+    # zeminde koyu yazi (Pure White, Modern, Vintage).
+    acik_zemin = float(np.median(L)) > 128
+    m = (L < np.median(L) - 35) if acik_zemin else (L > MUREKKEP)
     H = im.height
     bl = bantlar(m)
     aday = []
@@ -95,6 +98,7 @@ def sayfa_olc(path):
     isim_b, km = max(aday, key=lambda t: t[1][2][1] - t[1][0][0])
     sol, inf, sag = km
     d = {"kaynak_boyut": list(ham.size), "olcek": round(k, 5),
+         "acik_zemin": bool(acik_zemin),
          "norm_boyut": [im.width, im.height],
          "isim_bant": list(isim_b), "sol_isim": list(sol), "sonsuz": list(inf),
          "sag_isim": list(sag),

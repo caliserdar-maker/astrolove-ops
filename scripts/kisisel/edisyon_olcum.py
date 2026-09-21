@@ -104,8 +104,8 @@ def kos(a):
                 f"sembol-isim {o.get('sembol_isim_kaymasi')} "
                 f"isim_sol rgb {kayit['doku']['isim_sol']['ort_rgb']} "
                 f"std {kayit['doku']['isim_sol']['parlaklik_std']}")
-        except Exception as e:
-            kayit["olcum_hata"] = str(e)[:200]
+        except BaseException as e:            # SystemExit dahil: digerleri devam etsin
+            kayit["olcum_hata"] = f"{type(e).__name__}: {str(e)[:180]}"
             log(f"{ed} OLCULEMEDI: {str(e)[:160]}")
         d["edisyon"][ed] = kayit
 
@@ -137,8 +137,8 @@ def kos(a):
                 "bos_p99": round(float(np.percentile(f[bos], 99)), 1),
                 "gecti": bool(f[bos].mean() <= 1.5 and np.percentile(f[bos], 99) <= 5)}
             log(f"{ed} ZEMIN: {json.dumps(d['edisyon'][ed]['zemin'])}")
-        except Exception as e:
-            d["edisyon"][ed]["zemin"] = {"hata": str(e)[:160]}
+        except BaseException as e:
+            d["edisyon"][ed]["zemin"] = {"hata": f"{type(e).__name__}: {str(e)[:150]}"}
             log(f"{ed} ZEMIN HATA: {str(e)[:160]}")
 
     # Pure White: zemin dosyasi yok - sayfanin bos bolgesi duz mu?
