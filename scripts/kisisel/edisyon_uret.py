@@ -128,6 +128,18 @@ def satir_olc(a, bant, pay=10):
     return out
 
 
+def sembol_olc(a, bant):
+    """Sembol bandindaki iki kumenin merkezi (poster ya da referans)."""
+    y0, y1 = bant
+    if y1 <= y0:
+        return None
+    m = murekkep(a[y0:y1])
+    km = [c for c in _kumeler(m, 20) if c[1] - c[0] > 30]
+    if len(km) != 2:
+        return None
+    return [round((k[0] + k[1]) / 2, 1) for k in km]
+
+
 def doku_ozeti(a, m):
     """Cekirdek piksellerin dokusu (maske DOKU_EROZYON px asindirilir)."""
     k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * DOKU_EROZYON + 1,) * 2)
@@ -154,6 +166,13 @@ def profil_cikar(ref_a, bant, x_araligi):
     x0, x1 = x_araligi
     kes = ref_a[y0:y1, x0:x1]
     m = murekkep(kes)
+    # Profil CEKIRDEK piksellerden cikarilir: tam maskede anti-aliased kenar
+    # pikselleri satir medyanini zemine dogru cekiyor, uretilen yazi da o
+    # acik profille boyaniyordu (olculdu: Pure White'ta ort RGB farki 22).
+    k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * DOKU_EROZYON + 1,) * 2)
+    c = cv2.erode(m.astype(np.uint8), k).astype(bool)
+    if c.sum() >= 200:
+        m = c
     prof = []
     for y in range(kes.shape[0]):
         if m[y].sum() >= 3:
@@ -327,8 +346,8 @@ def geometri_kapisi(poster, o28, s):
     olcu edisyonun kendi orijinalidir.
     """
     ref_g = o28["geometri"]
-    yeni = satir_olc(np.asarray(poster.convert("RGB")).astype(np.float32),
-                     s["isim_bant"])
+    pa = np.asarray(poster.convert("RGB")).astype(np.float32)
+    yeni = satir_olc(pa, s["isim_bant"])
     if "hata" in yeni:
         return {"gecti": False, "sebep": yeni["hata"]}
     d = {}
@@ -338,7 +357,9 @@ def geometri_kapisi(poster, o28, s):
     d["satir_merkez"] = round(yeni["satir_merkez"] - ref_g["satir_merkez"], 1)
     d["bosluk_sol"] = yeni["bosluk"][0] - ref_g["bosluk"][0]
     d["bosluk_sag"] = yeni["bosluk"][1] - ref_g["bosluk"][1]
-    semb = o28.get("sembol_merkez")
+    # Semboller isim merkezine tasindigi icin olcu URETILEN posterde alinir;
+    # orijinal sayfanin sembol konumu ile karsilastirmak yanlisti.
+    semb = sembol_olc(pa, s["sembol_bant"])
     d["sembol_isim"] = ([round(semb[i] - yeni["isim_merkez"][i], 1) for i in (0, 1)]
                         if semb else None)
     gecti = (all(abs(d[f"cap_{y}"]) <= G_CAP for y in ("sol", "sag"))
@@ -388,7 +409,7 @@ def _font(boy):
     return font_yukle(FONT_DIR / ISIM_FONT, boy, ISIM_W)
 
 
-def iz_kontrol(poster, s, ed, oran):
+def iz_kontrol(poster, s, ed, oran, etiket=""):
     y0 = max(s["sembol_bant"][0] - 20, 0)
     y1 = min(s["isim_bant"][1] + 20, poster.height)
     k = poster.crop((0, y0, NORM_W, y1))
@@ -396,12 +417,12 @@ def iz_kontrol(poster, s, ed, oran):
     k = ImageEnhance.Brightness(k).enhance(2.5)
     k = k.resize((k.width // 2, k.height // 2), Image.LANCZOS)
     ImageDraw.Draw(k).text(
-        (14, 8), f"{ed} {oran} - 3x buyutme, 2.5x parlaklik",
+        (14, 8), f"{ed} {oran}{etiket} - 3x buyutme, 2.5x parlaklik",
         fill=(40, 30, 20) if s["acik_zemin"] else (255, 220, 140), font=_font(28))
     return k
 
 
-def kiyas(ed, orijinal, poster, s):
+def kiyas(ed, orijinal, poster, s, etiket=""):
     """Solda edisyonun orijinal 4:5 sayfasi, sagda SERDAR - LENA 4:5;
     altta isim satiri ve tagline 3x, orijinal ustte uretilen altta."""
     W = 560
@@ -426,7 +447,8 @@ def kiyas(ed, orijinal, poster, s):
     out = Image.new("RGB", (2 * W + 24, ust_h + alt_h + 46), zemin_renk)
     d = ImageDraw.Draw(out)
     out.paste(o, (0, 30)); out.paste(u, (W + 24, 30))
-    d.text((6, 4), f"{ed} 4x5 orijinal (sayfa {REF_SAYFA})", fill=yazi, font=_font(20))
+    d.text((6, 4), f"{ed} 4x5 orijinal (sayfa {REF_SAYFA}){etiket}", fill=yazi,
+           font=_font(20))
     d.text((W + 30, 4), f"{ed} 4x5 SERDAR - LENA", fill=yazi, font=_font(20))
     y = ust_h + 40
     for etiket, k in seritler:
@@ -492,14 +514,13 @@ def kos(a):
                 sonuc[ed][oran] = {"durum": "ZEMIN YOK"}
                 log(f"{ed} {oran}: ZEMIN YOK")
                 continue
-            if not girdi_kapisi(ed, oran, kilit, o28, zem):
-                sonuc[ed][oran] = {"durum": "GIRDI KAPISI KALDI"}
-                continue
+            gk_ok = girdi_kapisi(ed, oran, kilit, o28, zem)
             s, S = oran_kur(ed, oran, kilit, o28)
             log(f"{ed} {oran}: kurulum {s['kurulum_sn']} sn, acik_zemin "
                 f"{s['acik_zemin']}, yildiz {s['yildiz_bileseni']}, maske "
                 f"{s['maske_px']} px, cap {s['cap']}, bosluk {s['bosluk']}")
-            kayit = {"durum": "URETILDI", "kurulum_sn": s["kurulum_sn"],
+            kayit = {"durum": "URETILDI" if gk_ok else "GIRDI KAPISI KALDI",
+                     "girdi_kapisi": gk_ok, "kurulum_sn": s["kurulum_sn"],
                      "acik_zemin": s["acik_zemin"], "cap": s["cap"],
                      "bosluk": s["bosluk"], "ciftler": []}
             sure = []
@@ -517,10 +538,12 @@ def kos(a):
                     satir["geometri"], satir["doku"] = gk, dk
                     kayit["geometri"], kayit["doku"] = gk, dk
                     pilot12.kaydet(poster, YOL / ed / f"ALTIN_{oran}.jpg")
-                    iz_kontrol(poster, s, ed, oran).save(
+                    etiket = "" if (gk_ok and gk["gecti"] and dk["gecti"]) \
+                        else "  [KAPI KALDI]"
+                    iz_kontrol(poster, s, ed, oran, etiket).save(
                         YOL / ed / f"IZ_KONTROL_{ed}_{oran}.jpg", quality=88)
                     if oran == "4x5":
-                        kiyas(ed, S["ref"], poster, s).save(
+                        kiyas(ed, S["ref"], poster, s, etiket).save(
                             YOL / ed / f"KIYAS_{ed}.jpg", quality=90)
                     log(f"{ed} {oran} geometri: {json.dumps(gk['fark'], ensure_ascii=False)}"
                         f" -> {'GECTI' if gk['gecti'] else 'KALDI'}")
@@ -585,7 +608,7 @@ def rapor(sonuc, olcumler):
           "| --- | --- | --- | --- | --- | --- | --- |"]
     for ed, oranlar in sonuc.items():
         for oran, k in oranlar.items():
-            if k.get("durum") != "URETILDI":
+            if not k.get("ciftler"):
                 m.append(f"| {ed} | {oran} | - | - | - | - | **{k['durum']}** |")
                 continue
             for c in k["ciftler"]:
@@ -597,20 +620,22 @@ def rapor(sonuc, olcumler):
           f"Esikler: cap +-{G_CAP} px, taban y +-{G_TABAN} px, satir merkezi "
           f"+-{G_MERKEZ} px, isim-sonsuz boslugu +-{G_BOSLUK} px, sembol-isim "
           f"<= {G_SEMBOL} px.", "",
-          "| edisyon | oran | cap sol/sag | taban sol/sag | satir merkez | bosluk sol/sag | sembol-isim | sonuc |",
-          "| --- | --- | --- | --- | --- | --- | --- | --- |"]
+          "| edisyon | oran | girdi kapisi | cap sol/sag | taban sol/sag | satir merkez | bosluk sol/sag | sembol-isim | sonuc |",
+          "| --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
     for ed, oranlar in sonuc.items():
         for oran, k in oranlar.items():
             g = k.get("geometri")
+            gk = "GECTI" if k.get("girdi_kapisi") else "KALDI"
             if not g:
-                m.append(f"| {ed} | {oran} | - | - | - | - | - | **{k.get('durum','-')}** |")
+                m.append(f"| {ed} | {oran} | {gk} | - | - | - | - | - | "
+                         f"**{k.get('durum','-')}** |")
                 continue
             if "fark" not in g:
-                m.append(f"| {ed} | {oran} | - | - | - | - | - | "
+                m.append(f"| {ed} | {oran} | {gk} | - | - | - | - | - | "
                          f"**KALDI ({g.get('sebep')})** |")
                 continue
             f = g["fark"]
-            m.append(f"| {ed} | {oran} | {f['cap_sol']:+d}/{f['cap_sag']:+d} | "
+            m.append(f"| {ed} | {oran} | {gk} | {f['cap_sol']:+d}/{f['cap_sag']:+d} | "
                      f"{f['taban_sol']:+d}/{f['taban_sag']:+d} | "
                      f"{f['satir_merkez']:+} | {f['bosluk_sol']:+d}/{f['bosluk_sag']:+d} | "
                      f"{f['sembol_isim']} | "
@@ -633,7 +658,7 @@ def rapor(sonuc, olcumler):
           "| --- | --- | --- | --- | --- |"]
     for ed, oranlar in sonuc.items():
         for oran, k in oranlar.items():
-            if k.get("durum") == "URETILDI":
+            if "poster_sn" in k:
                 m.append(f"| {ed} | {oran} | {k['kurulum_sn']} | {k['poster_sn']} | "
                          f"{k['toplam_sn']} |")
     m += ["", "## 6) Onay durumu", "",
