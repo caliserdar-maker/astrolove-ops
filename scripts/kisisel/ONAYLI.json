@@ -6,13 +6,27 @@
     "font": "Cinzel.ttf",
     "agirlik": 500,
     "harf_araligi": "CANCER ve LIBRA icin olculen tracking/punto oranlarinin ORTALAMASI, iki isme de ayni uygulanir",
-    "punto": "cap_icin_boyut ile kutunun cam yuksekliginden turetilir",
-    "kutular": {"sol": "BOX.name_left x0.6", "sag": "BOX.name_right x0.6"},
+    "punto": "Serdar onayi 21 Eylul 2026: punto AKSANI CIKARILMIS metnin cam yuksekliginden hesaplanir (Unicode NFD ile birlesik isaretler atilir). U/O/I noktalari ve S/C cengelleri cam yuksekligini buyutup govdeyi kucultuyordu. Aksansiz isimde sonuc eski yontemle BIREBIR aynidir (SERDAR/LENA punto 117/112).",
+    "kutular": {
+      "sol": "BOX.name_left x0.6",
+      "sag": "BOX.name_right x0.6"
+    },
     "doku": "altin(): ilgili plakanin (cancer/libra_name_gold.png) satir profili, cam kutusuna gerilir",
     "kucultme": "yok (maks_w verilmez)",
-    "kirpim": [550, 2186, 1849, 2311],
+    "kirpim": [
+      550,
+      2186,
+      1849,
+      2311
+    ],
     "referans_dosya": "onayli/ISIM_SATIRI_ALTIN.png",
-    "kontrol": {"harf_konumu_px": 1, "murekkep_ortalama_fark": 3, "olcum": "ortak murekkep maskesi 1 px asindirilir; onayli kirpim baska zeminde alindigi icin kenar yumusatma pikselleri zeminle karisir ve yapisal olarak eslesemez"}
+    "kontrol": {
+      "harf_konumu_px": 1,
+      "murekkep_ortalama_fark": 3,
+      "olcum": "ortak murekkep maskesi 1 px asindirilir; onayli kirpim baska zeminde alindigi icin kenar yumusatma pikselleri zeminle karisir ve yapisal olarak eslesemez"
+    },
+    "sonsuzluk_boslugu": "Serdar onayi 21 Eylul 2026: isim ile sonsuzluk arasindaki bosluk referanstaki CANCER-sonsuzluk boslugundan (136 px) az olamaz. Sigmayan isim YALNIZ KENDISI orantili kuculur; bu durumda ciftteki cap yuksekligi farki buyur, kural geregidir.",
+    "sembol_acikligi": "Serdar onayi 21 Eylul 2026: ustteki kucuk sembollerle en az 20 px bosluk (aksan noktalari dahil)."
   },
   "tagline": {
     "onay": "pilot5 - Mo: doku, boyut ve font onayli",
@@ -23,7 +37,9 @@
     "harf_araligi": 0,
     "genislik_siniri": 1673,
     "doku": "isimlerle ayni altin profili; gecis cap bandina oturur, bandin disi altin uclara sabitlenir",
-    "kucultme": "yok"
+    "kucultme": "yok",
+    "kabartma": "Serdar onayi 21 Eylul 2026: kabartma glifin kendi seklinden turetilir (bulanik maskenin dikey gradyani); bant disi sabit renk YOK, metal gecis bant sinirinda yansitilarak surer. Profilin kendi alt golgesi yerinde duzlestirilir (gerdirme yok).",
+    "taban_kapisi": "Serdar onayi 21 Eylul 2026: 'oran <= 1.5' KALDIRILDI - referansin kendisi o olcutte 8.63 veriyor. Bloklayan esik: taban sicramasi <= 48 (A4'un yarisi; A4 = 97.6, referans = 17.7)."
   },
   "zemin": {
     "onay": "pilot5 TEMIZ_ZEMIN - Mo onayli",
