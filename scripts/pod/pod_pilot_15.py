@@ -223,10 +223,14 @@ def govde_15(inv):
     ornek = {r: next(pr for pr in urunler_eski if deger(pr, renk_pv_adi) == r) for r in renkler}
 
     yeni_etiket, notlar, yeni_urun = {}, [], {"bas": [], "a_sonu": []}
+    mevcut_etiket = {deger(pr, "size") for pr in urunler_eski}
     for y in YENI:
         grup = a_grup if y["konum"] == "a_sonu" else y["grup"]
         et = etiket_uret(grup, y["inc"], y["cm"])
         yeni_etiket[y["anahtar"]] = et
+        if et in mevcut_etiket:          # tekrar kosuda ayni boyu IKINCI kez ekleme
+            notlar.append(f"{y['anahtar']}: '{et}' ZATEN VAR, eklenmedi")
+            continue
         for r in renkler:
             pr = ornek[r]
             eski_sku = pr.get("sku") or ""
@@ -394,7 +398,13 @@ def main():
     ap.add_argument("--is-dizin", default="_work/pilot15")
     ap.add_argument("--kota-alt", type=int, default=400)
     ap.add_argument("--confirm", default="")
+    ap.add_argument("--adim", default="1,2,3",
+                    help="yalniz bu adimlari yaz (or. '3' = yalniz aciklama). Atlanan adim "
+                         "icin canli durum oldugu gibi kabul edilir.")
     a = ap.parse_args()
+    adimlar = {s.strip() for s in a.adim.split(",") if s.strip()}
+    if not adimlar <= {"1", "2", "3"}:
+        raise SystemExit(f"DUR: --adim degeri gecersiz: {a.adim}")
     if a.mod == "yaz" and a.confirm != "PILOT_15":
         raise SystemExit("DUR: yaz icin --confirm PILOT_15 gerekir")
     isd = pathlib.Path(a.is_dizin)
@@ -466,116 +476,128 @@ def main():
     # ---------------------------------------------------------- ADIM 1: envanter
     v_once = v_renk_haritasi(inv, sn["variation_images"])
     f_once = fiyat_haritasi(inv)
-    log(f"ADIM 1: envanter PUT ({len(b['products'])} urun)")
-    try:
-        api.put_json(f"/listings/{lid}/inventory", b)
-    except SystemExit as e:
-        log(f"  PUT (value_ids ile) basarisiz: {str(e)[:160]} -> value_ids'siz tekrar")
-        for pr in b["products"]:
-            for pv in pr["property_values"]:
-                if (pv.get("property_name") or "").lower() == "size":
-                    pv.pop("value_ids", None)
-        api.put_json(f"/listings/{lid}/inventory", b)
-    sn1 = anlik(api, shop, lid)
-    inv1 = sn1["inventory"]
-    f_sonra = fiyat_haritasi(inv1)
-    hatalar = []
-    if len(inv1.get("products") or []) != 75:
-        hatalar.append(f"urun {len(inv1.get('products') or [])} != 75")
-    for k, v in f_once.items():
-        if f_sonra.get(k) != v:
-            hatalar.append(f"eski fiyat degisti {k}: {v} -> {f_sonra.get(k)}")
-    for y in YENI:
-        et = yeni_etiket[y["anahtar"]]
-        yeni_k = [k for k in f_sonra if k[1] == et]
-        if len(yeni_k) != 5:
-            hatalar.append(f"{y['anahtar']}: {len(yeni_k)} urun (5 bekleniyor)")
-        kotu = [k for k in yeni_k if abs(f_sonra[k][0] - y["fiyat"]) > 1e-9]
-        if kotu:
-            hatalar.append(f"{y['anahtar']} fiyat: {[(k, f_sonra[k][0]) for k in kotu][:3]}")
-    v_sonra = v_renk_haritasi(inv1, sn1["variation_images"])
-    if v_sonra != v_once:
-        log(f"  varyasyon baglantisi degisti: {v_once} -> {v_sonra}; geri yaziliyor")
-        pid = (sn["variation_images"][0] or {}).get("property_id")
-        ad_to_vid = {}
-        for pr in inv1.get("products") or []:
-            pv = pv_of(pr, "primary color") or pv_of(pr, "color")
-            if pv and pv.get("value_ids"):
-                ad_to_vid[(pv.get("values") or [""])[0]] = pv["value_ids"][0]
-        vi = [{"property_id": pid, "value_id": ad_to_vid[ad], "image_id": int(img)}
-              for ad, img in v_once.items() if ad in ad_to_vid]
-        api.post_json(f"/shops/{shop}/listings/{lid}/variation-images", {"variation_images": vi})
+    if "1" in adimlar:
+        log(f"ADIM 1: envanter PUT ({len(b['products'])} urun)")
+        try:
+            api.put_json(f"/listings/{lid}/inventory", b)
+        except SystemExit as e:
+            log(f"  PUT (value_ids ile) basarisiz: {str(e)[:160]} -> value_ids'siz tekrar")
+            for pr in b["products"]:
+                for pv in pr["property_values"]:
+                    if (pv.get("property_name") or "").lower() == "size":
+                        pv.pop("value_ids", None)
+            api.put_json(f"/listings/{lid}/inventory", b)
         sn1 = anlik(api, shop, lid)
-        v_sonra = v_renk_haritasi(sn1["inventory"], sn1["variation_images"])
+        inv1 = sn1["inventory"]
+        f_sonra = fiyat_haritasi(inv1)
+        hatalar = []
+        if len(inv1.get("products") or []) != 75:
+            hatalar.append(f"urun {len(inv1.get('products') or [])} != 75")
+        for k, v in f_once.items():
+            if f_sonra.get(k) != v:
+                hatalar.append(f"eski fiyat degisti {k}: {v} -> {f_sonra.get(k)}")
+        for y in YENI:
+            et = yeni_etiket[y["anahtar"]]
+            yeni_k = [k for k in f_sonra if k[1] == et]
+            if len(yeni_k) != 5:
+                hatalar.append(f"{y['anahtar']}: {len(yeni_k)} urun (5 bekleniyor)")
+            kotu = [k for k in yeni_k if abs(f_sonra[k][0] - y["fiyat"]) > 1e-9]
+            if kotu:
+                hatalar.append(f"{y['anahtar']} fiyat: {[(k, f_sonra[k][0]) for k in kotu][:3]}")
+        v_sonra = v_renk_haritasi(inv1, sn1["variation_images"])
         if v_sonra != v_once:
-            hatalar.append(f"varyasyon baglantisi onarilamadi: {v_sonra}")
-        else:
-            log("  varyasyon baglantilari geri yazildi (5/5)")
-    if galeri_imza(sn1["images"]) != galeri_imza(sn["images"]):
-        hatalar.append("galeri degisti")
-    if [v.get("video_id") for v in sn1["videos"]] != [v.get("video_id") for v in sn["videos"]]:
-        hatalar.append("video degisti")
-    if sn1["listing"].get("state") != durum:
-        hatalar.append(f"durum {sn1['listing'].get('state')}")
-    sonuc["adim1"] = {"urun": len(inv1.get("products") or []), "hatalar": hatalar,
-                      "boy_sirasi": boy_sirasi(inv1), "varyasyon": v_sonra}
-    log(f"ADIM 1 {'PASS' if not hatalar else 'FAIL'}: urun {len(inv1.get('products') or [])} | "
-        f"boy sirasi {boy_sirasi(inv1)}")
-    if hatalar:
-        raise SystemExit("DUR (ADIM 1): " + "; ".join(hatalar)[:400])
+            log(f"  varyasyon baglantisi degisti: {v_once} -> {v_sonra}; geri yaziliyor")
+            pid = (sn["variation_images"][0] or {}).get("property_id")
+            ad_to_vid = {}
+            for pr in inv1.get("products") or []:
+                pv = pv_of(pr, "primary color") or pv_of(pr, "color")
+                if pv and pv.get("value_ids"):
+                    ad_to_vid[(pv.get("values") or [""])[0]] = pv["value_ids"][0]
+            vi = [{"property_id": pid, "value_id": ad_to_vid[ad], "image_id": int(img)}
+                  for ad, img in v_once.items() if ad in ad_to_vid]
+            api.post_json(f"/shops/{shop}/listings/{lid}/variation-images", {"variation_images": vi})
+            sn1 = anlik(api, shop, lid)
+            v_sonra = v_renk_haritasi(sn1["inventory"], sn1["variation_images"])
+            if v_sonra != v_once:
+                hatalar.append(f"varyasyon baglantisi onarilamadi: {v_sonra}")
+            else:
+                log("  varyasyon baglantilari geri yazildi (5/5)")
+        if galeri_imza(sn1["images"]) != galeri_imza(sn["images"]):
+            hatalar.append("galeri degisti")
+        if [v.get("video_id") for v in sn1["videos"]] != [v.get("video_id") for v in sn["videos"]]:
+            hatalar.append("video degisti")
+        if sn1["listing"].get("state") != durum:
+            hatalar.append(f"durum {sn1['listing'].get('state')}")
+        sonuc["adim1"] = {"urun": len(inv1.get("products") or []), "hatalar": hatalar,
+                          "boy_sirasi": boy_sirasi(inv1), "varyasyon": v_sonra}
+        log(f"ADIM 1 {'PASS' if not hatalar else 'FAIL'}: urun {len(inv1.get('products') or [])} | "
+            f"boy sirasi {boy_sirasi(inv1)}")
+        if hatalar:
+            raise SystemExit("DUR (ADIM 1): " + "; ".join(hatalar)[:400])
+    else:
+        sn1, inv1 = sn, inv
+        log(f"ADIM 1 ATLANDI (--adim {a.adim}): canli envanter {len(inv.get('products') or [])} urun | {boy_sirasi(inv)}")
 
     # ---------------------------------------------------------- ADIM 2: Size Guide gorseli
-    rank, eski_id = sg.get("rank"), sg.get("listing_image_id")
-    alt = sg.get("alt_text") or ""
-    sinirda = len(sn1["images"]) >= 10
-    log(f"ADIM 2: Size Guide rank {rank} (eski {eski_id}) -> {yeni_kart.name} "
-        f"({'once sil' if sinirda else 'once yukle'})")
-    if sinirda:
-        api.delete(f"/shops/{shop}/listings/{lid}/images/{eski_id}")
-    veri = {"rank": str(rank)}
-    if alt:
-        veri["alt_text"] = alt
-    with open(yeni_kart, "rb") as fh:
-        r = api.post_file(f"/shops/{shop}/listings/{lid}/images",
-                          files={"image": (yeni_kart.name, fh, "image/jpeg")}, data=veri)
-    yeni_id = r.get("listing_image_id")
-    if not sinirda:
-        api.delete(f"/shops/{shop}/listings/{lid}/images/{eski_id}")
-    sn2 = anlik(api, shop, lid)
-    g_once, g_sonra = galeri_imza(sn1["images"]), galeri_imza(sn2["images"])
-    hatalar = []
-    if len(g_sonra) != len(g_once):
-        hatalar.append(f"galeri {len(g_sonra)} != {len(g_once)}")
-    bekle = [(str(yeni_id), rk) if i == str(eski_id) else (i, rk) for i, rk in g_once]
-    if sorted(g_sonra) != sorted(bekle):
-        hatalar.append(f"galeri imzasi farkli: {g_sonra} != {bekle}")
-    v2 = v_renk_haritasi(sn2["inventory"], sn2["variation_images"])
-    if v2 != v_once:
-        hatalar.append(f"varyasyon baglantisi bozuldu: {v2}")
-    sonuc["adim2"] = {"rank": rank, "eski_image_id": eski_id, "yeni_image_id": yeni_id,
-                      "galeri": g_sonra, "hatalar": hatalar}
-    log(f"ADIM 2 {'PASS' if not hatalar else 'FAIL'}: yeni id {yeni_id}, galeri {len(g_sonra)} gorsel")
-    if hatalar:
-        raise SystemExit("DUR (ADIM 2): " + "; ".join(hatalar)[:400])
+    if "2" in adimlar:
+        rank, eski_id = sg.get("rank"), sg.get("listing_image_id")
+        alt = sg.get("alt_text") or ""
+        sinirda = len(sn1["images"]) >= 10
+        log(f"ADIM 2: Size Guide rank {rank} (eski {eski_id}) -> {yeni_kart.name} "
+            f"({'once sil' if sinirda else 'once yukle'})")
+        if sinirda:
+            api.delete(f"/shops/{shop}/listings/{lid}/images/{eski_id}")
+        veri = {"rank": str(rank)}
+        if alt:
+            veri["alt_text"] = alt
+        with open(yeni_kart, "rb") as fh:
+            r = api.post_file(f"/shops/{shop}/listings/{lid}/images",
+                              files={"image": (yeni_kart.name, fh, "image/jpeg")}, data=veri)
+        yeni_id = r.get("listing_image_id")
+        if not sinirda:
+            api.delete(f"/shops/{shop}/listings/{lid}/images/{eski_id}")
+        sn2 = anlik(api, shop, lid)
+        g_once, g_sonra = galeri_imza(sn1["images"]), galeri_imza(sn2["images"])
+        hatalar = []
+        if len(g_sonra) != len(g_once):
+            hatalar.append(f"galeri {len(g_sonra)} != {len(g_once)}")
+        bekle = [(str(yeni_id), rk) if i == str(eski_id) else (i, rk) for i, rk in g_once]
+        if sorted(g_sonra) != sorted(bekle):
+            hatalar.append(f"galeri imzasi farkli: {g_sonra} != {bekle}")
+        v2 = v_renk_haritasi(sn2["inventory"], sn2["variation_images"])
+        if v2 != v_once:
+            hatalar.append(f"varyasyon baglantisi bozuldu: {v2}")
+        sonuc["adim2"] = {"rank": rank, "eski_image_id": eski_id, "yeni_image_id": yeni_id,
+                          "galeri": g_sonra, "hatalar": hatalar}
+        log(f"ADIM 2 {'PASS' if not hatalar else 'FAIL'}: yeni id {yeni_id}, galeri {len(g_sonra)} gorsel")
+        if hatalar:
+            raise SystemExit("DUR (ADIM 2): " + "; ".join(hatalar)[:400])
+    else:
+        g_sonra = galeri_imza(sn1["images"])
+        log(f"ADIM 2 ATLANDI (--adim {a.adim}): galeri {len(g_sonra)} gorsel, Size Guide rank {sg.get('rank')} id {sg.get('listing_image_id')}")
 
     # ---------------------------------------------------------- ADIM 3: aciklama
-    log("ADIM 3: aciklama EN PATCH + RU PUT")
-    api.patch(f"/shops/{shop}/listings/{lid}", {"description": en_yeni})
-    if ru_eski:
-        api.put(f"/shops/{shop}/listings/{lid}/translations/ru",
-                {"title": sn["ru"].get("title") or "", "description": ru_yeni,
-                 "tags": ",".join(sn["ru"].get("tags") or [])})
-    sn3 = anlik(api, shop, lid)
-    hatalar = []
-    if (sn3["listing"].get("description") or "") != en_yeni:
-        hatalar.append("EN aciklama geri okuma farkli")
-    if ru_eski and (sn3["ru"].get("description") or "") != ru_yeni:
-        hatalar.append("RU aciklama geri okuma farkli")
-    if sn3["listing"].get("state") != durum:
-        hatalar.append(f"durum {sn3['listing'].get('state')}")
-    if galeri_imza(sn3["images"]) != g_sonra:
-        hatalar.append("galeri degisti (ADIM 3)")
-    sonuc["adim3"] = {"en_diff": en_diff, "ru_diff": ru_diff, "hatalar": hatalar}
+    if "3" in adimlar:
+        log("ADIM 3: aciklama EN PATCH + RU PUT")
+        api.patch(f"/shops/{shop}/listings/{lid}", {"description": en_yeni})
+        if ru_eski:
+            api.put(f"/shops/{shop}/listings/{lid}/translations/ru",
+                    {"title": sn["ru"].get("title") or "", "description": ru_yeni,
+                     "tags": ",".join(sn["ru"].get("tags") or [])})
+        sn3 = anlik(api, shop, lid)
+        hatalar = []
+        if (sn3["listing"].get("description") or "") != en_yeni:
+            hatalar.append("EN aciklama geri okuma farkli")
+        if ru_eski and (sn3["ru"].get("description") or "") != ru_yeni:
+            hatalar.append("RU aciklama geri okuma farkli")
+        if sn3["listing"].get("state") != durum:
+            hatalar.append(f"durum {sn3['listing'].get('state')}")
+        if galeri_imza(sn3["images"]) != g_sonra:
+            hatalar.append("galeri degisti (ADIM 3)")
+        sonuc["adim3"] = {"en_diff": en_diff, "ru_diff": ru_diff, "hatalar": hatalar}
+    else:
+        sn3, hatalar = sn1, []
+        log(f"ADIM 3 ATLANDI (--adim {a.adim})")
     sonuc["kota_sonra"] = api.remaining
     sonuc["galeri_sonra"] = galeri_imza(sn3["images"])
     sonuc["varyasyon_sonra"] = v_renk_haritasi(sn3["inventory"], sn3["variation_images"])

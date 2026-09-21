@@ -64,6 +64,9 @@ on:
       test_receipt:
         description: "router_kuru | router_teklif : sahte receipt dosyasi (Etsy okunmaz, canli siparis yok)"
         default: "scripts/prodigi/test_receipt_pilot15_aqu_ari.json"
+      adim:
+        description: "pilot15_yaz : yazilacak adimlar (1=envanter, 2=Size Guide, 3=aciklama)"
+        default: "1,2,3"
 
 concurrency:
   group: etsy-token
@@ -92,6 +95,7 @@ jobs:
       SIPARIS_MASTER: ${{ inputs.siparis_master }}
       SIPARIS_KONTROL: ${{ inputs.siparis_kontrol }}
       TEST_RECEIPT: ${{ inputs.test_receipt || 'scripts/prodigi/test_receipt_pilot15_aqu_ari.json' }}
+      ADIM: ${{ inputs.adim || '1,2,3' }}
     steps:
       - name: Onay kapisi
         run: |
@@ -206,7 +210,7 @@ jobs:
           elif [ "$MOD" = "pilot15_oku" ]; then
             python scripts/pod/pod_pilot_15.py oku --listing "$LISTING" --kota-alt "$KOTA_ALT"
           elif [ "$MOD" = "pilot15_yaz" ]; then
-            python scripts/pod/pod_pilot_15.py yaz --listing "$LISTING" --kota-alt "$KOTA_ALT" --confirm "$CONFIRM"
+            python scripts/pod/pod_pilot_15.py yaz --listing "$LISTING" --kota-alt "$KOTA_ALT" --confirm "$CONFIRM" --adim "$ADIM"
           elif [ "$MOD" = "yetki" ]; then
             python scripts/etsy/etsy_yetki.py link --redirect "$REDIRECT"
           elif [ "$MOD" = "yetki_test" ]; then
