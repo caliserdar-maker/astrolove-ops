@@ -545,6 +545,9 @@ def main():
             continue
         tur, bilgi, neden = kanal_durumu(idx, rid, items)
         if tur in ("bizim", "uretimde"):
+            if a.dry_run and bilgi.get("id"):       # salt okuma: iptal alaninin varligi kanitlanir
+                olur_p, ham_p = prod.iptal_edilebilir(bilgi["id"])
+                neden += f" | iptal API alani: cancel.isAvailable={ham_p}"
             upd(st, a.state, rid, stage="atlandi", items=desc0, note=neden)
             report.append(f"- {rid}: ATLA ({neden})")
             continue
