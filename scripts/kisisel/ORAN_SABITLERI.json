@@ -65,7 +65,13 @@
         "olcek": 1.0,
         "dy": 0
       },
-      "kenar_orani": 0.1
+      "kenar_orani": 0.1,
+      "bg_hizasi_kilit": {
+        "ort_fark": 1.74,
+        "olcek": 1.0,
+        "dx": -12,
+        "dy": -4
+      }
     },
     "11x14": {
       "tuval": [

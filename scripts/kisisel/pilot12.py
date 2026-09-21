@@ -84,31 +84,49 @@ def fark_haritasi(ref, bg_im, s, dy, dx=0):
     return np.abs(a - c).max(axis=2), zemin
 
 
-def ince_hiza(ref, bg_im, kaba):
+def ince_hiza(ref, bg_im, kaba, alt=4):
     """Kaba aramanin cevresinde ince arama; olcut bos alandaki ORTALAMA fark.
 
-    Medyan bir cok (olcek, dy) kombinasyonunda 1.0 cikip ayirt etmiyordu ve
-    kotu bir hizalama secilebiliyordu; ortalama duyarli olcuttur. dx de aranir.
+    Medyan bircok (olcek, dy) kombinasyonunda 1.0 cikip ayirt etmiyordu ve kotu
+    bir hizalama secilebiliyordu; ortalama duyarli olcuttur. dx de aranir.
+    Hiz icin kaba tur 1/alt olcekte yapilir, ince tur tam cozunurlukte.
     """
+    kucuk_ref = ref.resize((ref.width // alt, ref.height // alt), Image.LANCZOS)
+    A_k = np.asarray(kucuk_ref).astype(np.float32)
+    bos_k = (A_k @ LUMA) < MUREKKEP
     A = np.asarray(ref).astype(np.float32)
     bos = (A @ LUMA) < MUREKKEP
+
+    def olc(s, dx, dy, kucuk):
+        if kucuk:
+            w = int(round(NORM_W / alt * s))
+            b = bg_im.convert("RGB").resize(
+                (w, int(round(bg_im.height * w / bg_im.width))), Image.LANCZOS)
+            bx = (w - kucuk_ref.width) // 2 + dx // alt
+            y0 = (b.height - kucuk_ref.height) // 2 + dy // alt
+            bx = max(0, min(bx, b.width - kucuk_ref.width))
+            y0 = max(0, min(y0, b.height - kucuk_ref.height))
+            c = np.asarray(b.crop((bx, y0, bx + kucuk_ref.width,
+                                   y0 + kucuk_ref.height))).astype(np.float32)
+            return float(np.abs(A_k - c).max(axis=2)[bos_k].mean())
+        f, _ = fark_haritasi(ref, bg_im, s, dy, dx)
+        return float(f[bos][::5].mean())
+
     en = None
     for s in np.arange(kaba["olcek"] - 0.04, kaba["olcek"] + 0.041, 0.01):
         for dx in range(-8, 9, 4):
             for dy in range(kaba["dy"] - 32, kaba["dy"] + 33, 8):
-                f, _ = fark_haritasi(ref, bg_im, float(s), int(dy), dx)
-                v = float(f[bos][::5].mean())
+                v = olc(float(s), dx, dy, True)
                 if en is None or v < en[0]:
-                    en = (v, round(float(s), 3), int(dx), int(dy))
-    # ince tur: en iyinin cevresinde 1 px / 0.005 adim
-    v0, s0, dx0, dy0 = en
+                    en = (v, round(float(s), 3), dx, dy)
+    _, s0, dx0, dy0 = en
+    en = None
     for s in (s0 - 0.005, s0, s0 + 0.005):
-        for dx in range(dx0 - 3, dx0 + 4):
-            for dy in range(dy0 - 3, dy0 + 4):
-                f, _ = fark_haritasi(ref, bg_im, float(s), int(dy), dx)
-                v = float(f[bos][::5].mean())
-                if v < en[0]:
-                    en = (v, round(float(s), 4), int(dx), int(dy))
+        for dx in range(dx0 - 4, dx0 + 5, 2):
+            for dy in range(dy0 - 4, dy0 + 5, 2):
+                v = olc(float(s), dx, dy, False)
+                if en is None or v < en[0]:
+                    en = (v, round(float(s), 4), dx, dy)
     return {"ort_fark": round(en[0], 3), "olcek": en[1], "dx": en[2], "dy": en[3]}
 
 

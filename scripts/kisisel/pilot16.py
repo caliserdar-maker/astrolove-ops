@@ -36,6 +36,7 @@ import giris_dogrula as gd
 YOL = OUT / "ORANLAR"
 CEKIRDEK = 18.0            # kesin oge esigi (olculen zemin gurultusu p99 = 4)
 YUMUSAK = 6                # genisletilmis maskenin disa dogru rampasi (px)
+KAPI_PAY = 3               # kapida yeni ogelerin etrafinda birakilan pay (px)
 MIN_ALAN = 20              # gurultu bileseni esigi (px)
 GENISLET = 12              # Mo: 12 px dilate
 BLOK = 16
@@ -54,7 +55,7 @@ def log(*a):
 # ------------------------------------------------- maske + delta temizligi
 
 
-def oge_ve_yildiz(fark, bolgeler, hedefler):
+def oge_ve_yildiz(fark, bolgeler, hedefler, luma_maske):
     """Bolgedeki bilesenleri OGE ve YILDIZ (mesru icerik) olarak ayirir.
 
     Mo'nun istedigi "fark > 1" esigi olculdugunde kullanilamaz cikti: hizalanmis
@@ -67,8 +68,11 @@ def oge_ve_yildiz(fark, bolgeler, hedefler):
     ham = np.zeros(fark.shape, np.uint8)
     for (x0, y0, x1, y1) in bolgeler:
         ham[y0:y1, x0:x1] = (fark[y0:y1, x0:x1] > CEKIRDEK).astype(np.uint8)
-    n, etiket, stat, _ = cv2.connectedComponentsWithStats(ham, connectivity=8)
-    buyuk = [i for i in range(1, n) if stat[i, cv2.CC_STAT_AREA] >= MIN_ALAN]
+    k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * GENISLET + 1,) * 2)
+    ham_g = cv2.dilate(ham, k)          # harfler tek bilesende toplansin
+    n, etiket, stat, _ = cv2.connectedComponentsWithStats(ham_g, connectivity=8)
+    buyuk = [i for i in range(1, n)
+             if (ham[etiket == i].sum()) >= MIN_ALAN]
 
     esles, kullanilan = {}, set()
     for ad, (hx0, hy0, hx1, hy1) in hedefler.items():
@@ -84,19 +88,24 @@ def oge_ve_yildiz(fark, bolgeler, hedefler):
             kullanilan.add(sec)
     yildiz_no = [i for i in buyuk if i not in kullanilan]
 
-    k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * GENISLET + 1,) * 2)
-    oge_cek = np.isin(etiket, list(kullanilan)).astype(np.uint8)
-    genis = cv2.dilate(oge_cek, k)
+    genis = np.isin(etiket, list(kullanilan)).astype(np.uint8)
     uzak = cv2.distanceTransform((1 - genis).astype(np.uint8), cv2.DIST_L2, 5)
     alfa = np.clip(1.0 - uzak / YUMUSAK, 0.0, 1.0)      # ic 1, disa YUMUSAK px rampa
-    yildiz = cv2.dilate(np.isin(etiket, yildiz_no).astype(np.uint8), k).astype(bool)
+    yildiz = np.isin(etiket, yildiz_no).astype(bool)
 
     kutu = {}
     for ad, i in esles.items():
-        m = cv2.dilate((etiket == i).astype(np.uint8), k)
+        m = (etiket == i).astype(np.uint8)
         ys, xs = np.nonzero(m)
+        # gorsel kutu: luma esigi (OLCUM.json ile ayni olcut), fark esigi degil
+        cy, cx = np.nonzero((etiket == i) & luma_maske)
         kutu[ad] = {"kutu": (int(xs.min()), int(ys.min()), int(xs.max()) + 1,
-                             int(ys.max()) + 1), "etiket": i, "genis": m}
+                             int(ys.max()) + 1),
+                    # gorsel (cekirdek) kutu: satir duzeni bununla kurulur,
+                    # genisletilmis maske yalniz delta tasimasi icindir
+                    "gorsel": (int(cx.min()), int(cy.min()), int(cx.max()) + 1,
+                               int(cy.max()) + 1),
+                    "etiket": i, "genis": m}
     return kutu, alfa, genis.astype(bool), yildiz, len(yildiz_no)
 
 
@@ -122,13 +131,35 @@ def delta_koy(hedef_a, delta, m, x, y):
 # ----------------------------------------------------------- oran kurulumu
 
 
-def oran_kur(oran, olcum_kaydi, bg_im, iz_birak=False):
+SABIT_YOL = Path(__file__).resolve().parent / "ORAN_SABITLERI.json"
+
+
+def hizalama(oran, ref, bg_im, kaba, kalibre=False):
+    """Hizalama (olcek, dx, dy) ORAN_SABITLERI.json'dan okunur.
+
+    Serdar karari 21 Eylul 2026: her oran/edisyon icin BIR KEZ hesaplanir ve
+    dosyaya yazilir; uretimde arama YAPILMAZ.
+    """
+    d = json.loads(SABIT_YOL.read_text(encoding="utf-8")) if SABIT_YOL.exists() else {}
+    kayit = d.get("oranlar", {}).get(oran, {}).get("bg_hizasi_kilit")
+    if kayit and not kalibre:
+        return dict(kayit), False
+    h = ince_hiza(ref, bg_im, kaba)
+    d.setdefault("oranlar", {}).setdefault(oran, {})["bg_hizasi_kilit"] = h
+    SABIT_YOL.write_text(json.dumps(d, ensure_ascii=False, indent=2) + "\n",
+                         encoding="utf-8")
+    return h, True
+
+
+def oran_kur(oran, olcum_kaydi, bg_im, iz_birak=False, kalibre=False):
+    t0 = time.time()
     ham = Image.open(HAM / f"{oran}_p{REF_SAYFA}.jpg").convert("RGB")
     ref, k = norm(ham)
     o28 = olcum_kaydi["sayfalar"][str(REF_SAYFA)]
     ozet = olcum_kaydi["ozet"]
-    hiza = ince_hiza(ref, bg_im, olcum_kaydi["bg"])
-    fark, zemin = fark_haritasi(ref, bg_im, hiza["olcek"], hiza["dy"])
+    hiza, arandi = hizalama(oran, ref, bg_im, olcum_kaydi["bg"], kalibre)
+    fark, zemin = fark_haritasi(ref, bg_im, hiza["olcek"], hiza["dy"],
+                                hiza.get("dx", 0))
     ref_a = np.asarray(ref).astype(np.float32)
     zemin_a = np.asarray(zemin).astype(np.float32)
 
@@ -141,14 +172,17 @@ def oran_kur(oran, olcum_kaydi, bg_im, iz_birak=False):
              "isim_sol": kume_kutusu(fark, ib, *o28["sol_isim"]),
              "isim_sag": kume_kutusu(fark, ib, *o28["sag_isim"]),
              "tagline": (o28["tag_x"][0], tb[0], o28["tag_x"][1], tb[1])}
-    bil, alfa, genis, yildiz, yildiz_n = oge_ve_yildiz(fark, bolge, hedef)
+    luma_maske = (ref_a @ LUMA) > MUREKKEP
+    bil, alfa, genis, yildiz, yildiz_n = oge_ve_yildiz(fark, bolge, hedef, luma_maske)
 
     # Temiz zemin: maskeli bolgede referans yerine bg (yumusak gecisle)
     a3 = alfa[..., None]
-    if iz_birak:                       # KAPI TESTI: sag sembolun alt ucu silinmez
-        x0, y0, x1, y1 = bil["sembol_sag"]["kutu"]
+    if iz_birak:
+        # KAPI TESTI: eski SOL ismin dis ucu (yeni isim daha dar oldugu icin
+        # burasi acikta kalir) kasten %75 eksik temizlenir.
+        x0, y0, x1, y1 = bil["isim_sol"]["gorsel"]
         a3 = a3.copy()
-        a3[y1 - 30:y1, x0:x1] *= 0.25
+        a3[y0:y1, x0:min(x0 + 25, x1)] *= 0.25
     temiz_a = ref_a * (1 - a3) + zemin_a * a3
 
     oge = {}
@@ -156,8 +190,10 @@ def oran_kur(oran, olcum_kaydi, bg_im, iz_birak=False):
         if ad == "tagline":                 # tagline yeniden cizilir, tasinmaz
             continue
         d, m = delta_kes(ref_a, zemin_a, b, alfa)
-        oge[ad] = {"delta": d, "maske": m, "kutu": b["kutu"],
-                   "w": b["kutu"][2] - b["kutu"][0], "h": b["kutu"][3] - b["kutu"][1]}
+        g = b["gorsel"]
+        oge[ad] = {"delta": d, "maske": m, "kutu": b["kutu"], "gorsel": g,
+                   "w": g[2] - g[0], "h": g[3] - g[1],
+                   "pay": (g[0] - b["kutu"][0], g[1] - b["kutu"][1])}
 
     cap = {"sol": hedef["isim_sol"][3] - hedef["isim_sol"][1],
            "sag": hedef["isim_sag"][3] - hedef["isim_sag"][1]}
@@ -169,12 +205,13 @@ def oran_kur(oran, olcum_kaydi, bg_im, iz_birak=False):
          "tag_sinir": int(round(TAG_TABAN_SINIR * (tb[1] - tb[0]) / TAG_TABAN_CAP)),
          "sonsuz_w": oge["sonsuz"]["w"],
          "isim_y": (ib[0] + ib[1]) / 2,
-         "sembol_y": {y: oge[f"sembol_{y}"]["kutu"][1] for y in ("sol", "sag")},
+         "sembol_y": {y: oge[f"sembol_{y}"]["gorsel"][1] for y in ("sol", "sag")},
          "isim_bant": list(ib), "sembol_bant": list(sb), "tag_bant": list(tb),
          "tag_y": (tb[0] + tb[1]) / 2,
          "kutular": {a: list(b["kutu"]) for a, b in oge.items()},
          "maske_px": int(genis.sum()), "yildiz_bileseni": yildiz_n,
-         "iz_birak": iz_birak}
+         "iz_birak": iz_birak, "hiza_arandi": arandi,
+         "kurulum_sn": round(time.time() - t0, 1)}
     S = {"ref": ref, "zemin_a": zemin_a, "temiz_a": temiz_a, "oge": oge,
          "prof": pilot12.PROFIL, "alfa": alfa, "genis": genis, "yildiz": yildiz}
     return s, S
@@ -197,13 +234,14 @@ def poster_kur(s, S, isimler, tagline):
     merkez = {y: x[y] + w[y] / 2 for y in ("sol", "sag")}
 
     # 1) tasinan ogeler (delta)
-    yer = {"sonsuz": (x["inf"], S["oge"]["sonsuz"]["kutu"][1])}
+    # hedef = ogenin GORSEL sol-ust kosesi; delta kutusu paylarla kaydirilir
+    yer = {"sonsuz": (x["inf"], S["oge"]["sonsuz"]["gorsel"][1])}
     for y in ("sol", "sag"):
         o = S["oge"][f"sembol_{y}"]
-        yer[f"sembol_{y}"] = (merkez[y] - o["w"] / 2, o["kutu"][1])
+        yer[f"sembol_{y}"] = (merkez[y] - o["w"] / 2, o["gorsel"][1])
     for ad, (px, py) in yer.items():
         o = S["oge"][ad]
-        delta_koy(a, o["delta"], o["maske"], px, py)
+        delta_koy(a, o["delta"], o["maske"], px - o["pay"][0], py - o["pay"][1])
 
     # 2) yeni isimler ve tagline (alfa birlestirme)
     t = Image.fromarray(np.clip(a, 0, 255).astype(np.uint8), "RGB").convert("RGBA")
@@ -220,9 +258,13 @@ def poster_kur(s, S, isimler, tagline):
     isaretle(yeni_maske, np.asarray(tg)[..., 3] > 8, tx, ty)
     for ad, (px, py) in yer.items():
         o = S["oge"][ad]
-        isaretle(yeni_maske, o["maske"] > 0.02, int(round(px)), int(round(py)))
+        isaretle(yeni_maske, o["maske"] > 0.02, int(round(px - o["pay"][0])),
+                 int(round(py - o["pay"][1])))
 
-    k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * GENISLET + 1,) * 2)
+    # Kapi icin yeni ogelerin etki alani: kendi pikselleri + KAPI_PAY px.
+    # Mo'nun onerdigi 12 px genisletme denendi, kapiyi kor birakiyordu (eski ve
+    # yeni ogeler ayni bantta oldugu icin izler maskenin altinda kaliyordu).
+    k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * KAPI_PAY + 1,) * 2)
     yeni_genis = cv2.dilate(yeni_maske, k).astype(bool)
     bilgi = {"olcek": round(olcek, 3), "punto": [pl["sol"][1], pl["sag"][1]],
              "genislik": [w["sol"], w["sag"]], "satir": round(toplam, 1),
@@ -241,26 +283,33 @@ def isaretle(hedef, maske, x, y):
 
 
 def blok_kapisi(poster, S, s, yeni_genis):
-    """Yeni ogelerin disinda kalan alanda 16x16 blok farki (zemine gore)."""
+    """Eski oge bolgesinde kalinti var mi? (yeni ogeler ve yildizlar haric)
+
+    Olcum alani = eski ogelerin genisletilmis maskesi MINUS yeni yazilan
+    ogeler MINUS yildizlar. Orada poster zemine esit olmali. Maskenin disini
+    olcmek yaniltici olurdu: orada poster zaten orijinal tasarimdir (yildizlar,
+    gradyan) ve bg'den farki kalinti degildir.
+    """
     a = np.asarray(poster.convert("RGB")).astype(np.float32)
-    z = S["zemin_a"]
-    fark = np.abs(a - z).max(axis=2)
-    y0 = max(s["sembol_bant"][0] - GENISLET, 0)
-    y1 = min(s["isim_bant"][1] + GENISLET, a.shape[0])
-    kotu, en_ort, en_tepe = [], 0.0, 0.0
-    for by in range(y0, y1 - BLOK + 1, BLOK):
-        for bx in range(0, NORM_W - BLOK + 1, BLOK):
-            m = ~(yeni_genis | S["yildiz"])[by:by + BLOK, bx:bx + BLOK]
-            if m.sum() < BLOK * BLOK * 0.5:          # ogenin kendisi: atla
+    fark = np.abs(a - S["zemin_a"]).max(axis=2)
+    alan = S["genis"] & ~yeni_genis & ~S["yildiz"]
+    kotu, en_ort, en_tepe, blok_n = [], 0.0, 0.0, 0
+    H, W = alan.shape
+    for by in range(0, H - BLOK + 1, BLOK):
+        if not alan[by:by + BLOK].any():
+            continue
+        for bx in range(0, W - BLOK + 1, BLOK):
+            m = alan[by:by + BLOK, bx:bx + BLOK]
+            if m.sum() < 32:
                 continue
             f = fark[by:by + BLOK, bx:bx + BLOK][m]
             ort, tepe = float(f.mean()), float(f.max())
-            en_ort, en_tepe = max(en_ort, ort), max(en_tepe, tepe)
+            en_ort, en_tepe, blok_n = max(en_ort, ort), max(en_tepe, tepe), blok_n + 1
             if ort > BLOK_ORT or tepe > BLOK_TEPE:
                 kotu.append({"x": bx, "y": by, "ort": round(ort, 2),
-                             "tepe": round(tepe, 1)})
+                             "tepe": round(tepe, 1), "px": int(m.sum())})
     return {"gecti": not kotu, "en_ort": round(en_ort, 2), "en_tepe": round(en_tepe, 1),
-            "kotu_blok": len(kotu), "ornek": kotu[:6],
+            "kotu_blok": len(kotu), "blok": blok_n, "ornek": kotu[:6],
             "esik": {"ort": BLOK_ORT, "tepe": BLOK_TEPE}}
 
 
@@ -301,10 +350,13 @@ def kos(a):
     oranlar = [o for o in ORANLAR if o in olcum and (HAM / f"{o}_p{REF_SAYFA}.jpg").exists()]
     log(f"oranlar: {oranlar}")
 
-    kapi, isim_kapi, test, iz = {}, {}, {}, {}
+    kapi, isim_kapi, test, iz, sure = {}, {}, {}, {}, {}
     for o in oranlar:
-        s, S = oran_kur(o, olcum[o], bg_im)
-        log(f"{o}: maske {s['maske_px']} px, kutular "
+        s, S = oran_kur(o, olcum[o], bg_im, kalibre=a.kalibre)
+        t_uret = time.time()
+        log(f"{o}: kurulum {s['kurulum_sn']} sn (hiza "
+            f"{'ARANDI' if s['hiza_arandi'] else 'kayitli'}), yildiz bileseni "
+            f"{s['yildiz_bileseni']}, maske {s['maske_px']} px, kutular "
             f"{ {k: v[2] - v[0] for k, v in s['kutular'].items()} }")
         test[o], kucuk = [], []
         for sol_ham, sag_ham, ulke in CIFTLER:
@@ -317,8 +369,8 @@ def kos(a):
             kucuk.append(p.resize((560, int(round(560 * p.height / p.width))),
                                   Image.LANCZOS))
             log(f"{o} {sol}+{sag}: olcek %{bilgi['olcek'] * 100:.0f} blok kapisi "
-                f"{'GECTI' if bk['gecti'] else 'KALDI'} en_ort {bk['en_ort']} "
-                f"en_tepe {bk['en_tepe']} kotu {bk['kotu_blok']}")
+                f"{'GECTI' if bk['gecti'] else 'KALDI'} ({bk['blok']} blok) en_ort "
+                f"{bk['en_ort']} en_tepe {bk['en_tepe']} kotu {bk['kotu_blok']}")
             if sol == NEW_LEFT:
                 kapi[o] = bk
                 kaydet(p, YOL / f"_kapi_{o}.jpg")
@@ -326,6 +378,11 @@ def kos(a):
                 iz[o] = iz_kontrol(p, s, o, "SERDAR-LENA")
                 kaydet(iz[o], YOL / f"IZ_KONTROL_{o}.jpg", maks=1_500_000)
                 log(f"{o} isim kapisi: {json.dumps(isim_kapi[o])}")
+        sure[o] = {"kurulum_sn": s["kurulum_sn"],
+                   "poster_ort_sn": round((time.time() - t_uret) / len(CIFTLER), 1),
+                   "hiza_arandi": s["hiza_arandi"]}
+        log(f"{o} SURE: kurulum {sure[o]['kurulum_sn']} sn + poster basina "
+            f"{sure[o]['poster_ort_sn']} sn")
         yanyana(kucuk, o)
 
     # kapinin kendini testi: kasten birakilan soluk iz
@@ -336,11 +393,13 @@ def kos(a):
     kendi = blok_kapisi(p2, S2, s2, yeni2)
     kaydet(iz_kontrol(p2, s2, o0, "KASTEN IZ"), YOL / f"IZ_TESTI_{o0}.jpg",
            maks=1_500_000)
-    log(f"KAPI KENDI TESTI ({o0}): {'HATA VERDI (dogru)' if not kendi['gecti'] else 'KACIRDI'} "
-        f"en_ort {kendi['en_ort']} en_tepe {kendi['en_tepe']} kotu {kendi['kotu_blok']}")
+    log(f"KAPI KENDI TESTI ({o0}): "
+        f"{'HATA VERDI (dogru)' if not kendi['gecti'] else 'KACIRDI'} "
+        f"({kendi['blok']} blok) en_ort {kendi['en_ort']} en_tepe {kendi['en_tepe']} "
+        f"kotu {kendi['kotu_blok']}")
 
     d = {"oranlar": oranlar, "kapi": kapi, "isim_kapi": isim_kapi, "test": test,
-         "kendi_testi": {"oran": o0, **kendi}}
+         "sure": sure, "kendi_testi": {"oran": o0, **kendi}}
     (YOL / "v5.json").write_text(json.dumps(d, ensure_ascii=False, indent=1, default=str),
                                  encoding="utf-8")
     rapor(d)
@@ -375,7 +434,7 @@ def rapor(d):
          f"Kosu: {datetime.now(timezone.utc).isoformat(timespec='seconds')}", "",
          "## DEGISEN OGELER", "",
          f"- **Temizleme maskesi**: eski oge maskesi = referans ile bg arasinda farki "
-         f">{FARK_ESIK:.0f} olan pikseller; {MIN_ALAN} px'den kucuk gurultu bilesenleri "
+         f">{CEKIRDEK:.0f} olan pikseller; {MIN_ALAN} px'den kucuk gurultu bilesenleri "
          f"atilir, maske {GENISLET} px genisletilir (dilate) ve yumusak kenarli hale "
          f"getirilir. Eski oge bolgesi TAM zemine doner.",
          "- **Tasima yontemi**: oge artik RGBA kirpim olarak degil, zeminden FARKI "
@@ -390,12 +449,12 @@ def rapor(d):
          "- D kurali, kenar payi %10, bosluk, cap hedefleri, punto kurali, tagline, "
          "altin doku, Etsy sinirlari, buyuk harf kurali.", "",
          "## 1) Blok bazli kalinti kapisi (SERDAR - LENA)", "",
-         f"| oran | en yuksek blok ortalamasi (<= {BLOK_ORT:.0f}) | en yuksek tek piksel "
-         f"(<= {BLOK_TEPE:.0f}) | esigi asan blok | sonuc |",
-         "| --- | --- | --- | --- | --- |"]
+         f"| oran | olculen blok | en yuksek blok ortalamasi (<= {BLOK_ORT:.0f}) "
+         f"| en yuksek tek piksel (<= {BLOK_TEPE:.0f}) | esigi asan blok | sonuc |",
+         "| --- | --- | --- | --- | --- | --- |"]
     for o in o_:
         k = d["kapi"][o]
-        m.append(f"| Blue {o} | {k['en_ort']} | {k['en_tepe']} | {k['kotu_blok']} "
+        m.append(f"| Blue {o} | {k['blok']} | {k['en_ort']} | {k['en_tepe']} | {k['kotu_blok']} "
                  f"| {'**GECTI**' if k['gecti'] else 'KALDI'} |")
     kt = d["kendi_testi"]
     m += ["", "### Kapinin kendini testi", "",
@@ -429,7 +488,21 @@ def rapor(d):
                  f"| {'GECTI' if k['gecti'] else 'KALDI'} |")
     m += ["", "Temizleme degisikligi harfleri etkilemedi; yalniz zemindeki izler "
           "silindi.", "",
-          "## 4) Gorsel kanit", "",
+          "## 4) Uretim suresi (hedef: oran basina <= 30 sn)", "",
+          "Hizalama (olcek, dx, dy) her oran icin BIR KEZ hesaplanip "
+          "`ORAN_SABITLERI.json`'a `bg_hizasi_kilit` olarak yazildi; uretimde arama "
+          "yapilmaz.", "",
+          "| oran | kurulum (sn) | poster basina (sn) | hizalama |",
+          "| --- | --- | --- | --- |"]
+    for o in o_:
+        v = d["sure"][o]
+        m.append(f"| Blue {o} | {v['kurulum_sn']} | {v['poster_ort_sn']} "
+                 f"| {'ARANDI (kalibrasyon)' if v['hiza_arandi'] else 'kayitli deger'} |")
+    en_yavas = max(v["kurulum_sn"] + v["poster_ort_sn"] for v in d["sure"].values())
+    m += ["", f"Bir siparis icin en yavas oran: **{en_yavas} sn** "
+          + ("(hedef 30 sn icinde)." if en_yavas <= 30
+             else "- **hedef 30 sn asildi**."), "",
+          "## 5) Gorsel kanit", "",
           "IZ_KONTROL_<oran>.jpg: sembol bandi + isim satiri, 3x buyutulmus ve "
           "parlaklik 2.5 kat artirilmis. Eski oge yerlerinde iz gorunmemeli.",
           "TEST_V5_<oran>.jpg: uc cift yan yana.", ""]
@@ -440,6 +513,8 @@ def rapor(d):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--yerel", action="store_true")
+    ap.add_argument("--kalibre", action="store_true",
+                    help="hizalamayi yeniden hesapla ve ORAN_SABITLERI.json'a yaz")
     kos(ap.parse_args())
 
 

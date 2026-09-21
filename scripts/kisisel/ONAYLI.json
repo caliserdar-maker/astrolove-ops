@@ -60,7 +60,10 @@
     "onay": "pilot5 TEMIZ_ZEMIN - Mo onayli",
     "yontem": "REFERANS_CANCER_LIBRA.jpg zemin; eski isim ve tagline dikdortgenleri HAZIR/bg.png'nin ayni koordinatlarindan yumusak maskeyle doldurulur",
     "korunan": "logo, halka, kucuk semboller, sonsuzluk isareti, yildizlar - referanstan aynen",
-    "kilit": "Serdar onayi 21 Eylul 2026: kilitli, degistirilemez."
+    "kilit": "Serdar onayi 21 Eylul 2026: kilitli, degistirilemez.",
+    "temizleme": "Serdar onayi 21 Eylul 2026 (V5): eski oge maskesi = referans ile bg farkinin cekirdegi (esik 18; 'fark > 1' olculdugunde kullanilamaz cikti - hizalanmis bos zeminde bile ortalama 1.2, p99 4), 20 px'den kucuk gurultu bilesenleri atilir, maske 12 px genisletilir ve disa dogru 6 px yumusak rampa ile biter. Yildizlar ayri bilesen olarak taninir, SILINMEZ.",
+    "tasima": "Serdar onayi 21 Eylul 2026 (V5): tasinan ogeler (sonsuzluk ve kucuk semboller) RGBA kirpim olarak degil, zeminden FARKI (delta) olarak tasinir ve yeni yerinde zemine eklenir; parilti ve kenar yumusatma birlikte gider, yeni zemin gradyani bozulmaz. Satir duzeni ogenin GORSEL (luma esigi) kutusuna gore kurulur, genisletilmis maskeye gore degil.",
+    "hizalama": "Serdar onayi 21 Eylul 2026: bg hizalamasi (olcek, dx, dy) her oran/edisyon icin BIR KEZ hesaplanip ORAN_SABITLERI.json'da bg_hizasi_kilit olarak saklanir; uretimde arama YAPILMAZ. Hedef uretim suresi: oran basina <= 30 sn."
   },
   "kilit": {
     "onay": "Serdar onayi 21 Eylul 2026: zemin, logo, isimler ve tagline KILITLI.",
@@ -96,7 +99,7 @@
     "satir_merkezi": "Satir merkezi = poster merkezi +-1 px.",
     "sembol_hizasi": "Sembol merkezi ile isim merkezi farki <= 2 px.",
     "tasinan_oge": "Tasinan oge ile referanstaki orijinali arasinda murekkep farki <= 3.",
-    "kalinti": "Ogelerin ESKI konumlarinda kalinti yok: temizlenen alan ile zemin arasinda fark <= 3.",
+    "kalinti": "Serdar onayi 21 Eylul 2026 (V5): alan ortalamasi yerine 16x16 BLOK bazli. Olcum alani = eski ogelerin genisletilmis maskesi MINUS yeni yazilan ogeler (3 px pay) MINUS yildizlar; bu alanda poster zemine esit olmalidir. Her blokta ortalama fark <= 2 ve tek piksel farki <= 6; tutmazsa kosu HATA verir ve sorunlu blogun koordinati raporlanir. Kapi kendini test eder: kasten birakilan soluk iz HATA vermelidir.",
     "tagline": "onayli/TAGLINE_ALTIN.png ile karsilastirma (SECENEK 1 dokusu)."
   },
   "etsy_sinirlari": {
