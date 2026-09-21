@@ -17,7 +17,6 @@ isim uzunlugu degisince olcek kaymaz.
 """
 import json
 import re
-import shutil
 import subprocess
 from pathlib import Path
 
@@ -27,7 +26,7 @@ from PIL import Image, ImageDraw
 from kisisel_pilot import (BOX, CANVAS, DEST, FOLDERS, FONT_DIR, NEW_LEFT, NEW_RIGHT,
                            ORIG_TAGLINE, OUT, REF, TAGLINES, alpha_of, altin_plaka,
                            bbox_of, cap_icin_boyut, ciz_metin, eta, fetch, font_yukle,
-                           ink_mask, iou, jpg_kaydet, log, lsf, olc, rc, satir_profili)
+                           ink_mask, iou, jpg_kaydet, log, lsf, rc, satir_profili)
 
 Image.MAX_IMAGE_PIXELS = None
 TR_TEST = "ğıİöüşçŞÇÜÖ"
@@ -58,7 +57,7 @@ def tuval_hedefi(kutu, met):
 
 
 def ciz_yaz(tuval, metin, font_path, wght, met, kutu, maks_w=None, min_oran=0.70,
-            punto_sabit=None):
+            punto_sabit=None, tr_orani=0.0):
     """Metni tuvale, referansla ayni cam yuksekligi/merkez/altin dokuyla cizer."""
     mx, my, cam_h = tuval_hedefi(kutu, met)
     if punto_sabit is None:
@@ -67,17 +66,18 @@ def ciz_yaz(tuval, metin, font_path, wght, met, kutu, maks_w=None, min_oran=0.70
         size = punto_sabit
     olcek = 1.0
     f = font_yukle(font_path, size, wght)
-    cr, _ = ciz_metin(f, metin, 0.0)
+    cr, _ = ciz_metin(f, metin, size * tr_orani)
     if maks_w and cr.width > maks_w:
         olcek = max(maks_w / cr.width, min_oran)
         size = max(int(round(size * olcek)), 4)
         f = font_yukle(font_path, size, wght)
-        cr, _ = ciz_metin(f, metin, 0.0)
+        cr, _ = ciz_metin(f, metin, size * tr_orani)
     plaka = altin_govde(cr, met)
     x = int(round(mx - plaka.width / 2))
     y = int(round(my - plaka.height / 2))
     tuval.alpha_composite(plaka, (x, y))
     return {"metin": metin, "punto": size, "olcek": round(olcek, 3),
+            "tracking": round(size * tr_orani, 2),
             "boyut": [plaka.width, plaka.height], "yer": [x, y],
             "sigdi": not (maks_w and cr.width > maks_w and olcek <= min_oran + 1e-6)}
 
@@ -108,9 +108,21 @@ def altin_govde(mask_img, met):
 
 
 def kutuya_koy(tuval, im, kutu):
+    """Kutuyu tuvale yapistirir. Negatif ofset (ornek bg top=-168.1) kirpilarak
+    karsilanir; alpha_composite negatif hedef kabul etmez."""
     top, left, w, h = kutu
     yeni = im.convert("RGBA").resize((max(int(round(w)), 1), max(int(round(h)), 1)), Image.LANCZOS)
-    tuval.alpha_composite(yeni, (int(round(left)), int(round(top))))
+    x, y = int(round(left)), int(round(top))
+    kx, ky = max(-x, 0), max(-y, 0)
+    if kx or ky:
+        if kx >= yeni.width or ky >= yeni.height:
+            return
+        yeni = yeni.crop((kx, ky, yeni.width, yeni.height))
+        x, y = x + kx, y + ky
+    if x >= tuval.width or y >= tuval.height:
+        return
+    yeni = yeni.crop((0, 0, min(yeni.width, tuval.width - x), min(yeni.height, tuval.height - y)))
+    tuval.alpha_composite(yeni, (x, y))
 
 
 def tr_destek(font_path):
@@ -166,6 +178,13 @@ def stage_uret(a):
     _, _, tag_cam_h = tuval_hedefi(BOX["tagline"], m_tag)
     tag_punto = cap_icin_boyut(tag_font, ORIG_TAGLINE, tag_cam_h, tw)
     tag_maks_w = BOX["tagline"][2]
+    from kisisel_pilot import tracking_icin as _tr
+    tpw = m_tag["png"][0]
+    tx0, _ty0, tx1, _ty1 = m_tag["bb"]
+    tag_tr = _tr(font_yukle(tag_font, tag_punto, tw), ORIG_TAGLINE,
+                 (tx1 - tx0) * (BOX["tagline"][2] / tpw))
+    tag_tr_orani = tag_tr / tag_punto
+    log(f"tagline tracking orani {tag_tr_orani:.4f} (orijinal genislikten olculdu)")
     log(f"tagline cam yuksekligi {tag_cam_h:.1f} px -> punto {tag_punto}, maks genislik {tag_maks_w:.0f}")
 
     # --- zemin (yazisiz poster): her varyant bunun kopyasi
@@ -180,6 +199,7 @@ def stage_uret(a):
 
     # --- dogrulama: ayni yontemle CANCER/LIBRA uret, orijinalle karsilastir
     rapor["stil_testi"] = {}
+    tr_oranlari = []
     for ad, metin, met in (("CANCER", "CANCER", m_cancer), ("LIBRA", "LIBRA", m_libra)):
         kutu = BOX["name_left"] if ad == "CANCER" else BOX["name_right"]
         _, _, cam_h = tuval_hedefi(kutu, met)
@@ -200,22 +220,29 @@ def stage_uret(a):
         y_pl = altin_govde(cr, met)
         y_arr = np.asarray(y_pl)
         y_rgb = np.median(y_arr[..., :3][y_arr[..., 3] > 40], axis=0)
+        tr_oranlari.append(tr / size)
         rapor["stil_testi"][ad] = {"iou": round(skor, 4), "punto": size,
                                    "tracking": round(tr, 2),
+                                   "tracking_orani": round(tr / size, 4),
                                    "orijinal_rgb": [int(v) for v in o_rgb],
                                    "yeni_rgb": [int(v) for v in y_rgb],
                                    "rgb_fark": round(float(np.abs(o_rgb - y_rgb).max()), 1)}
         log(f"STIL TESTI {ad}: " + json.dumps(rapor["stil_testi"][ad]))
+
+    isim_tr_orani = sum(tr_oranlari) / len(tr_oranlari)
+    log(f"isim tracking orani {isim_tr_orani:.4f} (CANCER/LIBRA ortalamasi)")
 
     # --- posterler
     rapor["yerlesim"] = {}
     posterler = {}
     for kod in ("A", "B", "C"):
         t = zemin.copy()
-        sol = ciz_yaz(t, NEW_LEFT, isim_font, iw, m_cancer, BOX["name_left"])
-        sag = ciz_yaz(t, NEW_RIGHT, isim_font, iw, m_libra, BOX["name_right"])
+        sol = ciz_yaz(t, NEW_LEFT, isim_font, iw, m_cancer, BOX["name_left"],
+                      tr_orani=isim_tr_orani)
+        sag = ciz_yaz(t, NEW_RIGHT, isim_font, iw, m_libra, BOX["name_right"],
+                      tr_orani=isim_tr_orani)
         tg = ciz_yaz(t, TAGLINES[kod], tag_font, tw, m_tag, BOX["tagline"],
-                     maks_w=tag_maks_w, punto_sabit=tag_punto)
+                     maks_w=tag_maks_w, punto_sabit=tag_punto, tr_orani=tag_tr_orani)
         rapor["yerlesim"][kod] = {"sol": sol, "sag": sag, "tagline": tg}
         posterler[kod] = t
         p = OUT / f"PILOT_{kod}.jpg"
@@ -275,11 +302,12 @@ def stage_uret(a):
         "## Piksel karsilastirmasi (stil sadakati)", "",
         "Ayni yontemle uretilen CANCER/LIBRA plakasi, orijinal *_name_gold.png ile",
         "ayni kutuya olceklenip karsilastirildi.", "",
-        "| plaka | maske IoU | altin RGB (orijinal) | altin RGB (yeni) | maks kanal farki |",
-        "| --- | --- | --- | --- | --- |",
+        "| plaka | maske IoU | harf araligi/punto | altin RGB (orijinal) | altin RGB (yeni) | maks kanal farki |",
+        "| --- | --- | --- | --- | --- | --- |",
     ]
     for ad, v in st.items():
-        md.append(f"| {ad} | {v['iou']} | {tuple(v['orijinal_rgb'])} | {tuple(v['yeni_rgb'])} | {v['rgb_fark']} |")
+        md.append(f"| {ad} | {v['iou']} | {v['tracking_orani']} | {tuple(v['orijinal_rgb'])} "
+                  f"| {tuple(v['yeni_rgb'])} | {v['rgb_fark']} |")
     md += ["", "## Turkce karakter", "",
            f"Test dizisi: `{TR_TEST}`", "",
            f"- isim fontu eksik glif: {tr_e['isim_font_eksik'] or 'YOK'}",
