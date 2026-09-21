@@ -48,6 +48,15 @@ HEDEF = [
     ("A3", 42.99), ("12x18", 43.99), ("16x20", 47.99), ("16x24", 49.99), ("A2", 49.99),
     ("18x24", 56.99), ("20x30", 79.99), ("A1", 89.99), ("24x36", 99.99), ("30x40", 124.99),
 ]
+# Serdar karari 21 Eyl: etiketlerden oran oneki ("4:5 · ", "A-series · " ...) KALDIRILIR.
+# Tek kaynak: asagidaki tablo. Etiket degisen boyda size value_ids dusurulur (Etsy yeni uretir).
+ETIKET = {
+    "5x7": "5x7 in (13×18 cm)", "8x10": "8x10 in (20×25 cm)", "A4": "A4 (21×30 cm)",
+    "11x14": "11x14 in (28×36 cm)", "12x16": "12x16 in (30×41 cm)", "A3": "A3 (30×42 cm)",
+    "12x18": "12x18 in (30×46 cm)", "16x20": "16x20 in (41×51 cm)", "16x24": "16x24 in (41×61 cm)",
+    "A2": "A2 (42×59 cm)", "18x24": "18x24 in (46×61 cm)", "20x30": "20x30 in (51×76 cm)",
+    "A1": "A1 (59×84 cm)", "24x36": "24x36 in (61×91 cm)", "30x40": "30x40 in (76×102 cm)",
+}
 HEDEF_FIYAT = dict(HEDEF)
 HEDEF_SIRA = [k for k, _ in HEDEF]
 FIYAT_DESE = re.compile(r"(?:US\s*)?\$\s*\d|\b\d{1,3}[.,]\d{2}\s*(?:USD|\$)")
@@ -59,31 +68,20 @@ def log(m):
 
 
 def anahtar_of(etiket):
-    """'4:5 · 8x10 in (20×25 cm)' -> '8x10' ; 'A-series · A4 (21×30 cm)' -> 'A4'."""
-    m = re.match(r"^.*? · (\S+?)(?: in)? \(", etiket or "")
+    """Eski ('4:5 · 8x10 in (20×25 cm)') ve yeni ('8x10 in (20×25 cm)') etiketten boy anahtari."""
+    m = re.match(r"^(?:.*? · )?(\S+?)(?: in)? \(", etiket or "")
     return m.group(1) if m else None
 
 
 def hedef_etiketler(inv):
-    """Hedef sirayla canli/yeni boy etiketleri (menu sirasinin dogrulanacagi liste)."""
-    etiket_of, a_grup = {}, None
+    """Hedef sirayla etiketler (sabit tablo) + canli etiket haritasi."""
+    etiket_of = {}
     for pr in inv.get("products") or []:
         lab = P.deger(pr, "size") or ""
         k = anahtar_of(lab)
         if k:
             etiket_of.setdefault(k, lab)
-        m = re.match(r"^(.*?) · (A[0-9]) \(", lab)
-        if m:
-            a_grup = m.group(1)
-    out = []
-    for k, _f in HEDEF:
-        if k in etiket_of:
-            out.append(etiket_of[k])
-        else:
-            y = next(y for y in P.YENI if y["anahtar"] == k)
-            grup = a_grup if y["konum"] == "a_sonu" else y["grup"]
-            out.append(P.etiket_uret(grup, y["inc"], y["cm"]))
-    return out, etiket_of, a_grup
+    return [ETIKET[k] for k, _f in HEDEF], etiket_of, None
 
 
 def govde_hedef(inv):
@@ -94,9 +92,7 @@ def govde_hedef(inv):
     renk_pv_adi = "primary color" if P.pv_of(urunler_eski[0], "primary color") else "color"
     if not P.pv_of(urunler_eski[0], "size"):
         raise ValueError("Size ozelligi yok")
-    etiketler, etiket_of, a_grup = hedef_etiketler(inv)
-    if a_grup is None:
-        raise ValueError("A serisi etiketi okunamadi")
+    etiketler, etiket_of, _ = hedef_etiketler(inv)
     bilinmeyen = sorted(k for k in etiket_of if k not in HEDEF_FIYAT)
     if bilinmeyen:
         raise ValueError(f"tabloda olmayan boy: {bilinmeyen}")
@@ -123,16 +119,17 @@ def govde_hedef(inv):
             if pv.get("value_ids"):
                 d["value_ids"] = list(pv["value_ids"])
             if yeni_etiket and (pv.get("property_name") or "").lower() == "size":
-                d["values"] = [yeni_etiket]
-                d.pop("value_ids", None)          # yeni deger: id'yi Etsy uretir
+                if (pv.get("values") or [None])[0] != yeni_etiket:
+                    d["values"] = [yeni_etiket]
+                    d.pop("value_ids", None)      # yeni deger metni: id'yi Etsy uretir
             pvs.append(d)
         return pvs
 
-    def urun(pr, fiyat, yeni_etiket=None, yeni_sku=None):
+    def urun(pr, fiyat, yeni_etiket=None, yeni_sku=None, yeni_urun=False):
         offs = []
         for o in pr.get("offerings") or []:
             off = {"price": fiyat, "quantity": o.get("quantity"),
-                   "is_enabled": True if yeni_etiket else bool(o.get("is_enabled"))}
+                   "is_enabled": True if yeni_urun else bool(o.get("is_enabled"))}
             if o.get("readiness_state_id"):
                 off["readiness_state_id"] = o["readiness_state_id"]
             offs.append(off)
@@ -147,10 +144,12 @@ def govde_hedef(inv):
                 pr = mevcut.get((k, r))
                 if pr is None:
                     raise ValueError(f"{k}: '{r}' edisyonu yok")
-                urunler.append(urun(pr, fiyat))
+                urunler.append(urun(pr, fiyat, yeni_etiket=et))
             eski = P.para(((mevcut[(k, renkler[0])].get("offerings") or [{}])[0]).get("price"))
             if abs(eski - fiyat) > 1e-9:
                 notlar.append(f"fiyat {k}: {eski:.2f} -> {fiyat:.2f}")
+            if etiket_of[k] != et:
+                notlar.append(f"etiket {k}: {etiket_of[k]!r} -> {et!r}")
         else:
             eklenen.append(k)
             for r in renkler:
@@ -158,7 +157,7 @@ def govde_hedef(inv):
                 yeni_sku = re.sub(r"-[^-]+$", f"-{k}", pr.get("sku") or "")
                 if not SKU_RE.match(yeni_sku):
                     raise ValueError(f"SKU kalibi tutmadi: {pr.get('sku')} -> {yeni_sku}")
-                urunler.append(urun(pr, fiyat, yeni_etiket=et, yeni_sku=yeni_sku))
+                urunler.append(urun(pr, fiyat, yeni_etiket=et, yeni_sku=yeni_sku, yeni_urun=True))
             notlar.append(f"eklendi {k}: '{et}' @ {fiyat:.2f} x5")
     b = {"products": urunler,
          "price_on_property": inv.get("price_on_property") or [],
@@ -297,6 +296,11 @@ def isle(api, shop, lid, cift, isd, yaz, kota_alt):
         hata.append(f"menu sirasi hedefle ayni degil: {P.boy_sirasi(inv1)}")
     if len(inv1.get("products") or []) != 75:
         hata.append(f"urun {len(inv1.get('products') or [])} != 75")
+    sku_once = {pr.get("sku") for pr in b["products"]}
+    sku_sonra = {pr.get("sku") for pr in inv1.get("products") or []}
+    if sku_sonra != sku_once:
+        hata.append(f"SKU kumesi degisti: eksik {sorted(sku_once - sku_sonra)[:3]} "
+                    f"fazla {sorted(sku_sonra - sku_once)[:3]}")
     v1 = P.v_renk_haritasi(inv1, sn1["variation_images"])
     if v1 != v_once:
         pid = (sn["variation_images"][0] or {}).get("property_id")
