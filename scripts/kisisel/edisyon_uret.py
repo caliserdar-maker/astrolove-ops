@@ -395,7 +395,12 @@ def kos(a):
                 log(f"{ed} {oran}: GIRDI YOK (ham={ham_yol.exists()} "
                     f"zemin={zem_yol.exists()})")
                 continue
-            o28 = sayfa_olc(ham_yol)
+            try:
+                o28 = sayfa_olc(ham_yol)
+            except (SystemExit, Exception) as e:                  # noqa: BLE001
+                sonuc[ed][oran] = {"durum": "OLCUM YAPILAMADI", "sebep": str(e)[:200]}
+                log(f"{ed} {oran}: OLCUM YAPILAMADI - {str(e)[:160]}")
+                continue
             if not girdi_kapisi(ed, oran, ham_yol, zem_yol, o28, sab[oran]):
                 sonuc[ed][oran] = {"durum": "GIRDI KAPISI KALDI"}
                 continue
