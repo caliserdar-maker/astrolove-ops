@@ -37,6 +37,7 @@ from pod_sku import SKU_RE  # noqa: E402
 DRV = "gdrive:ASTROLOVE/TEMP/POD_5X7"
 SG15 = "gdrive:ASTROLOVE/TEMP/POD_SIZE_GUIDE_15"
 EDISYONLAR = ["MIDNIGHT_BLUE", "DEEP_BLACK", "WARM_PARCHMENT", "CHAMPAGNE_IVORY", "PURE_WHITE"]
+SG_RANK = 7          # docs/POD_LISTING_TEMPLATE.md EK 3: rank 7 = ana edisyon 08 Size Guide
 # (anahtar, grup, inc metni, cm metni, fiyat, konum, aciklama satiri)
 YENI = [
     {"anahtar": "5x7", "grup": "5:7", "inc": "5x7 in", "cm": "13×18", "fiyat": 19.99, "konum": "bas"},
@@ -438,8 +439,14 @@ def main():
     sg, sg_ed, fark, fark2, yeni_kart = size_guide_bul(sn["images"], a.cift, isd)
     log(f"Size Guide karesi: rank {sg.get('rank')} id {sg.get('listing_image_id')} | edisyon {sg_ed} "
         f"| fark {fark} (ikinci en iyi {fark2}) | yeni kart {yeni_kart}")
-    if fark > 12 or (fark2 is not None and fark2 - fark < 5):
-        raise SystemExit(f"DUR: Size Guide karesi kesin degil (fark {fark}, ikinci {fark2})")
+    # Kapi: benzerlik esigi + (ayirt edicilik VEYA belgelenmis galeri sirasi rank 7)
+    ayirt = fark2 is None or (fark2 - fark) >= 5
+    if fark > 12 or not (ayirt or sg.get("rank") == SG_RANK):
+        raise SystemExit(f"DUR: Size Guide karesi kesin degil (fark {fark}, ikinci {fark2}, "
+                         f"rank {sg.get('rank')} != {SG_RANK})")
+    if not ayirt:
+        log(f"  not: ikinci en iyi kare yakin ({fark2}); rank {SG_RANK} (belgelenmis Size Guide sirasi) "
+            f"ile dogrulandi")
 
     sonuc = {"listing_id": lid, "cift": a.cift, "mod": a.mod, "kota_once": kota0,
              "urun_once": len(inv.get("products") or []), "urun_plan": len(b["products"]),
