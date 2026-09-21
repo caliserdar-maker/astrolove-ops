@@ -16,14 +16,11 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-import numpy as np
 from PIL import Image, ImageDraw
 
 from kisisel_pilot import rc, DEST, FONT_DIR
 from pilot6 import ISIM_FONT, ISIM_W
-from pilot11 import norm, sayfa_olc
-from pilot12 import NORM_W, ORANLAR, OUT
-import pilot12
+from pilot12 import OUT
 import edisyon_uret as eu
 import giris_dogrula as gd
 from pilot16 import blok_kapisi, poster_kur
@@ -121,17 +118,50 @@ def kart(no, sip, dogru, poster, kapilar, sure):
             satir(f"  {ad}", ozet, renk)
         satir("  uretim suresi", f"{sure:.2f} sn")
     else:
-        d.text((x + 10, y), "uretim yapilmadi (ELLE KONTROL)", fill=(170, 40, 40),
-               font=f18)
+        sebep = ("hattin girdisi eksik: " + "; ".join(dogru.get("sistem", []))
+                 if dogru["durum"] == "SISTEM HATASI"
+                 else "uretim yapilmadi (ELLE KONTROL)")
+        d.text((x + 10, y), sebep[:60], fill=(170, 40, 40), font=f18)
     d.text((24, H - 34), "ONAY BEKLIYOR - bu kart yalniz onizlemedir, Etsy'ye "
            "hicbir sey yazilmamistir.", fill=(120, 115, 108), font=f16)
     return out
 
 
+_KURULUM = {}
+
+
+def kurulum(ed, oran):
+    """Edisyon x oran kurulumu: bir kez olculur, siparisler arasinda paylasilir.
+
+    Kilit degerleri edisyonun KENDI 20/28/36/72 sayfalarindan burada olculur
+    (edisyon_uret ile ayni yol). Boylece simulasyon, uretim kosusunun gecici
+    checkout'una yazdigi ORAN_SABITLERI.json'a bagli olmaz.
+    """
+    if (ed, oran) in _KURULUM:
+        return _KURULUM[(ed, oran)]
+    ham = eu.YOL / ed / "ham" / f"{oran}_p{eu.REF_SAYFA}.jpg"
+    zem = eu.YOL / ed / "zemin" / f"{oran}.png"
+    if not ham.exists() or not zem.exists():
+        eksik = [x for x, y in (("ham", ham), ("zemin", zem)) if not y.exists()]
+        v = (None, f"{ed} {oran}: girdi yok ({', '.join(eksik)})")
+    else:
+        olcum, hata = eu.edisyon_olc(ed, oran)
+        if not olcum:
+            v = (None, f"{ed} {oran}: olcum yapilamadi "
+                       f"({(hata or {}).get('sebep', '?')})")
+        else:
+            s, S = eu.oran_kur(ed, oran, olcum["kilit"], olcum["o28"])
+            v = ((s, S, olcum["o28"]), None)
+    _KURULUM[(ed, oran)] = v
+    return v
+
+
 def kos(a):
     YOL.mkdir(parents=True, exist_ok=True)
-    sab = json.loads(eu.SABIT_YOL.read_text(encoding="utf-8"))
-    ed_sabit = sab.get("edisyonlar", {})
+    eu.girdileri_indir(a.yerel)
+    for ed, oran in sorted({(x[6], x[7]) for x in SIPARISLER}):
+        _, e = kurulum(ed, oran)
+        log(f"kurulum {ed} {oran}: {'hazir' if not e else e}")
     ozet = []
     for sip in SIPARISLER:
         no, burc, sol, sag, tag, ulke, ed, oran, aciklama = sip
@@ -139,19 +169,13 @@ def kos(a):
         dogru = gd.siparis_dogrula(sol, sag, tag, ulke)
         poster, kapilar = None, None
         if dogru["durum"] == "TAMAM":
-            kilit = ed_sabit.get(ed, {}).get(oran)
-            ham = eu.YOL / ed / "ham" / f"{oran}_p{eu.REF_SAYFA}.jpg"
-            zem = eu.YOL / ed / "zemin" / f"{oran}.png"
-            if not kilit or not ham.exists() or not zem.exists():
-                dogru["durum"] = "ELLE KONTROL"
-                dogru.setdefault("sistem", []).append(
-                    f"{ed} {oran} girdisi yok (kilit/ham/zemin)")
+            kur, kur_hata = kurulum(ed, oran)
+            if kur is None:
+                # Musteri girisi degil, hattin girdisi eksik: ayri durum.
+                dogru["durum"] = "SISTEM HATASI"
+                dogru.setdefault("sistem", []).append(kur_hata)
             else:
-                o28 = sayfa_olc(ham, maske=eu.edisyon_maske)
-                im, _ = norm(Image.open(ham).convert("RGB"))
-                o28["geometri"] = eu.satir_olc(
-                    np.asarray(im).astype(np.float32), o28["isim_bant"])
-                s, S = eu.oran_kur(ed, oran, kilit, o28)
+                s, S, o28 = kur
                 poster, bilgi, _, _, yeni_genis = poster_kur(
                     s, S, {"sol": dogru["sol"]["deger"],
                            "sag": dogru["sag"]["deger"]},
