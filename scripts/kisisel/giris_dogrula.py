@@ -26,18 +26,26 @@ FONTLAR = {"isim": "Cinzel.ttf", "tagline": "EBGaramond-Italic.ttf"}
 # Turkce ozel: i/I donusumu
 TR_BUYUK = str.maketrans({"i": "İ", "ı": "I"})
 # Turkce kural yalniz metinde Turkce'ye ozgu harf varsa uygulanir.
+TR_ULKE = {"TR", "TUR", "TURKEY", "T\u00dcRK\u0130YE", "TURKIYE"}
 TR_ISARET = set("çğıöşüÇĞİÖŞÜ")
 
 
-def buyut(s):
+def buyut(s, ulke=None):
     """Isimleri buyuk harfe cevir.
 
-    Metinde Turkce'ye ozgu bir harf varsa (c g i o s u ve buyukleri) Turkce
-    i -> I kurali uygulanir; yoksa standart upper() kullanilir. Boylece
-    "Gulizar" -> "GULIZAR" ama "Christopher" -> "CHRISTOPHER" olur.
+    Serdar karari 21 Eylul 2026:
+      - Teslimat ulkesi TR ise Turkce kural: i -> I, i -> I (DENIZ, ELIF).
+      - Diger ulkelerde standart kural: i -> I.
+      - Ulke bilgisi yoksa: isimde Turkce'ye ozgu harf varsa Turkce kural,
+        yoksa standart.
     """
     s = unicodedata.normalize("NFC", s).replace("i\u0307", "\u0130")
-    if TR_ISARET & set(s):
+    u = (ulke or "").strip().upper()
+    if u:
+        turkce = u in TR_ULKE
+    else:
+        turkce = bool(TR_ISARET & set(s))
+    if turkce:
         s = s.translate(TR_BUYUK)
     return unicodedata.normalize("NFC", s.upper())
 
@@ -89,15 +97,13 @@ def emoji_mi(c):
             or o == 0x200D or 0x1F1E6 <= o <= 0x1F1FF)
 
 
-def isim_dogrula(ham):
+def isim_dogrula(ham, ulke=None):
     """(durum, deger, notlar) -> durum: 'TAMAM' | 'ELLE KONTROL'"""
     notlar = []
     s = unicodedata.normalize("NFC", (ham or "").strip())
     if not s:
         return "ELLE KONTROL", "", ["isim bos"]
-    s = buyut(s)
-    if s != buyut(ham.strip()):
-        pass
+    s = buyut(s, ulke)
     yabanci = {c for c in s if not c.isalpha() and c not in AYIRICI}
     if yabanci:
         notlar.append("izin verilmeyen karakter: " + " ".join(sorted(yabanci)))
@@ -142,10 +148,11 @@ def olcek_kontrol(olcek, oge="isim"):
     return "TAMAM", []
 
 
-def siparis_dogrula(sol, sag, tagline):
-    d = {}
-    d["sol"] = dict(zip(("durum", "deger", "notlar"), isim_dogrula(sol)))
-    d["sag"] = dict(zip(("durum", "deger", "notlar"), isim_dogrula(sag)))
+def siparis_dogrula(sol, sag, tagline, ulke=None):
+    """ulke: teslimat ulkesi kodu (TR, US, DE...). Yoksa isimden karar verilir."""
+    d = {"ulke": (ulke or "").strip().upper() or None}
+    d["sol"] = dict(zip(("durum", "deger", "notlar"), isim_dogrula(sol, ulke)))
+    d["sag"] = dict(zip(("durum", "deger", "notlar"), isim_dogrula(sag, ulke)))
     d["tagline"] = dict(zip(("durum", "deger", "notlar"), tagline_dogrula(tagline)))
     d["durum"] = ("ELLE KONTROL"
                   if any(d[k]["durum"] != "TAMAM" for k in ("sol", "sag", "tagline"))

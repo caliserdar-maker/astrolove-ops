@@ -219,12 +219,49 @@ def kalinti_olc(temiz, zemin, kutular):
     return round(en, 2)
 
 
+
+# --------------------------------------------------- punto: govde yuksekligi
+
+_INEN = {}
+
+
+def _inen_harf(fp, wght, c, punto=200, esik=0.05):
+    """Harf taban cizgisinin altina iniyor mu (J, Q)? Fontdan olculur."""
+    anahtar = (str(fp), wght, c)
+    if anahtar in _INEN:
+        return _INEN[anahtar]
+    ft = font_yukle(fp, punto, wght)
+
+    def taban(t):
+        im = Image.new("L", (punto * 3, punto * 3), 0)
+        ImageDraw.Draw(im).text((punto // 2, punto // 2), t, fill=255, font=ft)
+        b = bbox_of(np.asarray(im) > 40)
+        return b[3] if b else 0
+
+    _INEN[anahtar] = (taban(c) - taban("T")) > punto * esik
+    return _INEN[anahtar]
+
+
+def govde(metin, fp=None, wght=None):
+    """Punto hesabi icin govde metni: aksanlar ve ALTA INEN harfler (J, Q) atilir.
+
+    Serdar onayi 21 Eylul 2026: punto harf GOVDESININ yuksekliginden hesaplanir
+    (tagline'daki "T" referansiyla ayni mantik). Inen harfi olmayan isimlerde
+    sonuc eski yontemle BIREBIR aynidir.
+    """
+    fp = fp or (FONT_DIR / ISIM_FONT)
+    wght = ISIM_W if wght is None else wght
+    d = sade(metin)
+    kalan = "".join(c for c in d if not (c.isalpha() and _inen_harf(fp, wght, c)))
+    return kalan if any(c.isalpha() for c in kalan) else "T"
+
+
 # --------------------------------------------------------------- yerlesim
 
 
 def plaka(metin, prof, hedef_cap, olcek=1.0, tam=None):
     fp = FONT_DIR / ISIM_FONT
-    tam = tam or cap_icin_boyut(fp, sade(metin), hedef_cap, ISIM_W)
+    tam = tam or cap_icin_boyut(fp, govde(metin, fp, ISIM_W), hedef_cap, ISIM_W)
     size = max(int(round(tam * olcek)), 4)
     tr = -0.0388                                  # onayli harf araligi orani
     cr, _ = ciz_metin(font_yukle(fp, size, ISIM_W), metin, size * tr)

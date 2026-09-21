@@ -6,7 +6,7 @@
     "font": "Cinzel.ttf",
     "agirlik": 500,
     "harf_araligi": "CANCER ve LIBRA icin olculen tracking/punto oranlarinin ORTALAMASI, iki isme de ayni uygulanir",
-    "punto": "Serdar onayi 21 Eylul 2026: punto AKSANI CIKARILMIS metnin cam yuksekliginden hesaplanir (Unicode NFD ile birlesik isaretler atilir). U/O/I noktalari ve S/C cengelleri cam yuksekligini buyutup govdeyi kucultuyordu. Aksansiz isimde sonuc eski yontemle BIREBIR aynidir (SERDAR/LENA punto 117/112).",
+    "punto": "Serdar onayi 21 Eylul 2026 (V4): punto harf GOVDESININ yuksekliginden hesaplanir. Govde metni = isim metninden aksanlar (Unicode NFD ile birlesik isaretler) ve TABAN CIZGISININ ALTINA INEN harfler (Cinzel'de J ve Q; fonttan olculerek belirlenir) cikarilarak elde edilir. Tagline'daki 'T' referans yontemiyle ayni mantik. Inen harfi olmayan isimlerde sonuc onceki yontemle BIREBIR aynidir (SERDAR 115, LENA 111 - oran ici kapi gecer). Onceki karar (21 Eylul 2026, yalniz aksanlarin cikarilmasi) bu kararla genisletildi.",
     "kutular": {
       "sol": "BOX.name_left x0.6",
       "sag": "BOX.name_right x0.6"
@@ -107,6 +107,7 @@
     "alt_sinir": "Olcek %65'in altina inecek giris URETILMEZ; siparis 'ELLE KONTROL' ile durur.",
     "isim_karakterleri": "Yalniz harf (Latin + Turkce), bosluk, tire ve kesme isareti. Isimler her zaman BUYUK harfe cevrilir (Turkce i -> I kurali). Desteklenmeyen alfabe, emoji veya fontta olmayan karakter -> ELLE KONTROL.",
     "tagline_karakterleri": "Musterinin yazdigi gibi birakilir; buyuk/kucuk harf degistirilmez. Emoji veya fontta olmayan karakter -> ELLE KONTROL.",
-    "kod": "scripts/kisisel/giris_dogrula.py - siparis_dogrula(sol, sag, tagline)"
+    "kod": "scripts/kisisel/giris_dogrula.py - siparis_dogrula(sol, sag, tagline)",
+    "buyuk_harf": "Serdar onayi 21 Eylul 2026: teslimat ulkesi TR ise Turkce kural (i -> I, i -> I; DENIZ, ELIF), diger ulkelerde standart kural (i -> I). Ulke bilgisi yoksa (dijital siparis vb.) isimde Turkce'ye ozgu harf varsa Turkce, yoksa standart kural. Tagline musterinin yazdigi gibi kalir."
   }
 }
