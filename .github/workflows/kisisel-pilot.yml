@@ -67,9 +67,13 @@ jobs:
           umask 077
           printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
           chmod 600 ~/.config/rclone/rclone.conf
-          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
-            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
-            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+          # Secret override YALNIZ conf'ta dolu bir client_id varsa yapilir; conf
+          # rclone'un varsayilan istemcisini kullaniyorsa override invalid_client verir.
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+              echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
           fi
           echo "rclone.conf yazildi ($(wc -c < ~/.config/rclone/rclone.conf) bayt)."
 
