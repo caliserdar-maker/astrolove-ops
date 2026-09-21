@@ -1,0 +1,110 @@
+{
+  "_": "pilot11/pilot12 olcumunden turetildi (21 Eylul 2026). Olcu birimi: poster genisligi 2400 px'e normalize edilmis piksel.",
+  "oranlar": {
+    "2x3": {
+      "tuval": [
+        4000,
+        6000
+      ],
+      "bosluk": 153,
+      "kenar_payi": 321,
+      "kullanilabilir_genislik": 1758,
+      "isim_cap": {
+        "sol": 96,
+        "sag": 95
+      },
+      "tagline_cap": 81,
+      "tagline_genislik_siniri": 1905,
+      "sonsuzluk_genisligi": 212,
+      "bg_hizasi": {
+        "medyan_fark": 1.0,
+        "olcek": 1.11,
+        "dy": -32
+      }
+    },
+    "3x4": {
+      "tuval": [
+        3000,
+        4000
+      ],
+      "bosluk": 144,
+      "kenar_payi": 370,
+      "kullanilabilir_genislik": 1660,
+      "isim_cap": {
+        "sol": 90,
+        "sag": 89
+      },
+      "tagline_cap": 76,
+      "tagline_genislik_siniri": 1788,
+      "sonsuzluk_genisligi": 200,
+      "bg_hizasi": {
+        "medyan_fark": 0.0,
+        "olcek": 1.0,
+        "dy": 0
+      }
+    },
+    "4x5": {
+      "tuval": [
+        4000,
+        5000
+      ],
+      "bosluk": 136,
+      "kenar_payi": 423,
+      "kullanilabilir_genislik": 1554,
+      "isim_cap": {
+        "sol": 85,
+        "sag": 84
+      },
+      "tagline_cap": 71,
+      "tagline_genislik_siniri": 1670,
+      "sonsuzluk_genisligi": 187,
+      "bg_hizasi": {
+        "medyan_fark": 0.0,
+        "olcek": 1.0,
+        "dy": 0
+      }
+    },
+    "11x14": {
+      "tuval": [
+        3300,
+        4200
+      ],
+      "bosluk": 138,
+      "kenar_payi": 407,
+      "kullanilabilir_genislik": 1586,
+      "isim_cap": {
+        "sol": 86,
+        "sag": 85
+      },
+      "tagline_cap": 72,
+      "tagline_genislik_siniri": 1694,
+      "sonsuzluk_genisligi": 191,
+      "bg_hizasi": {
+        "medyan_fark": 0.0,
+        "olcek": 1.0,
+        "dy": 0
+      }
+    },
+    "A": {
+      "tuval": [
+        3508,
+        4961
+      ],
+      "bosluk": 144,
+      "kenar_payi": 370,
+      "kullanilabilir_genislik": 1660,
+      "isim_cap": {
+        "sol": 90,
+        "sag": 88
+      },
+      "tagline_cap": 76,
+      "tagline_genislik_siniri": 1788,
+      "sonsuzluk_genisligi": 199,
+      "bg_hizasi": {
+        "medyan_fark": 0.0,
+        "olcek": 1.06,
+        "dy": -72
+      }
+    }
+  }
+}
