@@ -81,6 +81,7 @@ jobs:
             echo "HATA: script bulunamadi: $SCRIPT" >&2
             exit 1
           fi
+          set -f            # ARGS icinde imzali URL olabilir; ? ve * glob olmasin
           # shellcheck disable=SC2086
           python "$SCRIPT" $ARGS
 
