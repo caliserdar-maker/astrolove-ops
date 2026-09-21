@@ -43,6 +43,10 @@ YENI = [
     {"anahtar": "A1", "grup": "A", "inc": "A1", "cm": "59×84", "fiyat": 89.99, "konum": "a_sonu"},
 ]
 EN_KARGO_ESKI = "8x10 and A4 ship flat; all other sizes ship rolled in a sturdy tube."
+EN_KARGO_DUZ = re.compile(r"The 8 ?[×x] ?10 in and A4 sizes ship flat; all other sizes ship rolled in a "
+                          r"[a-z]+ tube\.")
+EN_DUZ_BASLIK = "CHOOSE YOUR SIZE"
+BASLIK_DESE = re.compile(r"^[A-Z][A-Z0-9 &',\.]{3,}$")
 EN_KARGO_YENI = ("5x7, 8x10 and A4 ship flat; all other sizes, including A1, "
                  "ship rolled in a sturdy tube.")
 T0 = time.time()
@@ -255,6 +259,22 @@ def _blok_sinirlari(satirlar, bas_dese):
     return i, j
 
 
+def en_blok():
+    """15 boyluk '\u2726 15 SIZES' blogu (ayirici '/'); tek kaynak pod_listing_create.SIZE_SPEC."""
+    from pod_listing_create import GROUP_ORDER, SIZE_SPEC     # noqa: E402
+    gruplar = {}
+    for _k, g, inc, cm in SIZE_SPEC:
+        gruplar.setdefault(g, []).append((inc, cm))
+    gruplar["5:7"] = [(YENI[0]["inc"], YENI[0]["cm"])]
+    gruplar["A-series"] = gruplar.get("A-series", []) + [(YENI[1]["inc"], YENI[1]["cm"])]
+    out = ["\u2726 15 SIZES (choose from the Size menu)"]
+    for g in ["5:7"] + list(GROUP_ORDER):
+        out += ["", "A-series (ISO)" if g == "A-series" else f"Ratio {g}"]
+        out += [f"{inc} / {cm} cm" for inc, cm in gruplar[g]]
+    out += ["", "Not sure? See the size guide photo."]
+    return out
+
+
 def aciklama_15(metin, dil="en"):
     """13 boy blogunu 15 boya cevirir. Donus: (yeni_metin, degisiklikler)."""
     if not metin:
@@ -262,6 +282,21 @@ def aciklama_15(metin, dil="en"):
     satirlar = metin.split("\n")
     bas = re.compile(r"^✦ 13 (SIZES|РАЗМЕРОВ)\b")
     i, j = _blok_sinirlari(satirlar, bas)
+    if i is None and dil == "en" and EN_DUZ_BASLIK in satirlar:
+        # canli EN aciklama duz bicimde: "CHOOSE YOUR SIZE" bolumu ✦ 15 SIZES blogu ile degistirilir
+        b = satirlar.index(EN_DUZ_BASLIK)
+        son = next((n for n in range(b + 1, len(satirlar)) if BASLIK_DESE.match(satirlar[n].strip())),
+                   len(satirlar))
+        eski_bolum = [x for x in satirlar[b:son] if x.strip()]
+        satirlar[b:son] = en_blok() + [""]
+        yeni = "\n".join(satirlar)
+        dgs = [f"EN boy bolumu degistirildi: {len(eski_bolum)} satir -> '✦ 15 SIZES' blogu (15 boy, '/')"]
+        if EN_KARGO_DUZ.search(yeni):
+            yeni = EN_KARGO_DUZ.sub(lambda _m: EN_KARGO_YENI, yeni)
+            dgs.append("kargo cumlesi guncellendi")
+        elif EN_KARGO_YENI not in yeni:
+            raise SystemExit("HATA: EN kargo cumlesi bulunamadi (metin beklenenden farkli)")
+        return yeni, dgs
     if i is None:
         raise SystemExit(f"HATA: {dil}: '✦ 13 SIZES' blogu bulunamadi")
     blok = satirlar[i:j]
