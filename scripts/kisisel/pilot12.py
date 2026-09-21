@@ -337,7 +337,8 @@ def isim_sekil_kapisi(poster, s):
     P = poster.convert("RGB")
     a = np.asarray(P).astype(np.float32)
     mp = (a @ LUMA) > 40
-    y0, y1 = int(s["isim_y"] - 90), int(s["isim_y"] + 90)
+    pay = int(max(90, max(s["cap"].values()) * 1.6))
+    y0, y1 = int(s["isim_y"] - pay), int(s["isim_y"] + pay)
     kp = [c for c in kumeler(mp[y0:y1], 20) if c[1] - c[0] > 40]
     if len(kp) != 3:
         return {"gecti": False, "sebep": f"posterde {len(kp)} kume"}

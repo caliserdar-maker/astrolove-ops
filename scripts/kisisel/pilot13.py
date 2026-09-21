@@ -154,9 +154,13 @@ def kos(a):
     for ad in GERCEK:
         v = min(gercek["simetrik"][ad][o] for o in oranlar)
         harf_min.setdefault(len(ad), []).append(v)
-    uygun = [k for k, v in sorted(harf_min.items()) if min(v) >= KUCULME_TABANI]
+    uygun = [k for k, v in sorted(harf_min.items()) if round(min(v), 2) >= KUCULME_TABANI]
     n_esnek = max(uygun) if uygun else n_tam
     n_esnek_ort = min(esnek[o]["esit_normal"] for o in oranlar)   # ortalama harfle
+    # Katman 1'i de GERCEK isimlerle dogrula (ortalama harf genisligi yaniltici)
+    tam_uygun = [k for k, v in sorted(harf_min.items()) if min(v) >= 0.999]
+    n_tam_gercek = max(tam_uygun) if tam_uygun else 0
+    eslesen = {k: round(min(v), 3) for k, v in sorted(harf_min.items())}
 
     # Katman 2 tagline: gercek cumlelerde tum oranlarda olcek >= 0.90
     kar_min = {}
@@ -175,13 +179,15 @@ def kos(a):
     kotu_tam = {o: round(cift_olcek(sab[o], yap[o], "M" * n_tam, "M" * n_tam), 3)
                 for o in oranlar}
     wm = {o: tagl[o]["wm_olcek"] for o in oranlar}
-    oneri = {"tam": {"isim": n_tam, "isim_M": n_tam_m, "tagline": t_tam,
+    oneri = {"tam": {"isim": n_tam_gercek, "isim_ortalama_harf": n_tam,
+                     "harf_olcekleri": eslesen, "isim_M": n_tam_m, "tagline": t_tam,
                      "tagline_normal": t_tam_normal, "tagline_gercek": t_tam_gercek,
                      "en_kotu": kotu_tam},
              "esnek": {"isim": n_esnek, "isim_ortalama_harf": n_esnek_ort,
                        "tagline": t_esnek, "en_kotu": kotu, "wm_tagline": wm}}
-    log(f"ONERI tam boy: isim {n_tam} normal ({n_tam_m} M) harf, tagline {t_tam} "
-        f"karakter (gercek cumlede {t_tam_gercek})")
+    log(f"ONERI tam boy: gercek isimde {n_tam_gercek} harf (ortalama harfle {n_tam}, "
+        f"M/W {n_tam_m}), tagline {t_tam} karakter (gercek cumlede {t_tam_gercek})")
+    log(f"harf bazinda en kotu olcek: {eslesen}")
     log(f"ONERI %10: isim {n_esnek} harf (ortalama harfle {n_esnek_ort}), tagline "
         f"{t_esnek} karakter, en kotu M/W olcek {kotu}")
 
@@ -363,16 +369,25 @@ def rapor(d):
         m.append(satir)
     m += ["", "## 3) ETSY ONERISI - iki katman", "",
           "### Katman 1: her oranda TAM BOY garanti", "",
-          f"- Her isim en fazla **{on['tam']['isim']} harf** (normal isimlerde). "
-          f"En genis harflerle (M/W) garanti: {on['tam']['isim_M']} harf.",
+          f"- Her isim en fazla **{on['tam']['isim']} harf**. Bu, 10 gercek isimle "
+          f"dogrulandi: {on['tam']['isim']} harfe kadar bes oranda da hicbir isim "
+          f"kuculmuyor. (Ortalama harf genisligiyle teorik deger "
+          f"{on['tam']['isim_ortalama_harf']} harf cikiyor, ama 8 harfli MUHAMMED gibi "
+          f"genis isimler Blue 2x3'te kuculuyor - bu yuzden gercek olculen deger "
+          f"baglayici.) En genis harflerle (M/W) garanti: {on['tam']['isim_M']} harf.",
           f"- Tagline en fazla **{on['tam']['tagline']} karakter** (en genis harflerle "
           f"bile); normal cumlede {on['tam']['tagline_normal']} karaktere kadar sigar.",
           "", f"Bu sinirda {on['tam']['isim']} harfli M/W dizisiyle olcek: "
           + ", ".join(f"Blue {o} %{int(round(on['tam']['en_kotu'][o] * 100))}"
                       for o in o_) + ".", "",
           "### Katman 2: en fazla %10 kuculme", "",
-          f"- Her isim en fazla **{on['esnek']['isim']} harf**.",
-          f"- Tagline en fazla **{on['esnek']['tagline']} karakter**.", "",
+          f"- Her isim en fazla **{on['esnek']['isim']} harf** (gercek isimlerle "
+          f"olculdu; ortalama harf genisligiyle {on['esnek']['isim_ortalama_harf']}).",
+          f"- Tagline en fazla **{on['esnek']['tagline']} karakter** (13 gercek cumlenin "
+          f"bes oranda olculen olcekleriyle).", "",
+          "Harf sayisina gore en kotu gercek isim olcegi (bes oranin en dusugu): "
+          + ", ".join(f"{k} harf %{int(round(v * 100))}"
+                      for k, v in on["tam"]["harf_olcekleri"].items()) + ".", "",
           "Bu sinirda en kotu durumda (tamami M/W harfli isim cifti) olcek:", "",
           "| oran | olcek | kuculme |", "| --- | --- | --- |"]
     for o in o_:
