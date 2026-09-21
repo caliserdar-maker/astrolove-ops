@@ -131,11 +131,20 @@ def bbox_of(mask):
     return int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1
 
 
+def orneklem(arr, n=400_000):
+    """Buyuk dizide medyan icin ornek al: opak bir JPEG'de tum pikseller uzerinde
+    medyan (sort) dakikalar suruyor, ornek ayni degeri veriyor."""
+    if len(arr) <= n:
+        return arr
+    adim = len(arr) // n + 1
+    return arr[::adim]
+
+
 def olc(path, ad):
     im, a = alpha_of(path)
     m = ink_mask(a)
     bb = bbox_of(m)
-    rgb = a[..., :3][m]
+    rgb = orneklem(a[..., :3][m])
     info = {
         "ad": ad, "dosya": Path(path).name, "tuval": [im.width, im.height],
         "bbox": bb, "doluluk": round(float(m.mean()), 4),
@@ -160,7 +169,7 @@ def satir_profili(rgba, mask, bb):
         row = rgba[y, x0:x1]
         mrow = mask[y, x0:x1]
         if mrow.sum() >= 3:
-            prof.append(np.median(row[mrow][:, :3], axis=0))
+            prof.append(np.median(orneklem(row[mrow][:, :3], 4000), axis=0))
         else:
             prof.append(prof[-1] if prof else np.array([200.0, 170.0, 110.0]))
     return np.asarray(prof, dtype=np.float32)          # (h, 3)
