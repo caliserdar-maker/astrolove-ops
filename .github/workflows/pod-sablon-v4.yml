@@ -93,7 +93,7 @@ jobs:
         run: |
           set -euo pipefail
           case "$MOD" in
-            kuru|maliyet|dogrula|hpr|buyuk|yetki|yetki_test|pilot15_oku|siparis_hazirla|siparis_onizleme|siparis_izin_kapat|eslesme_kanit)
+            kuru|maliyet|dogrula|hpr|buyuk|yetki|yetki_test|pilot15_oku|siparis_hazirla|siparis_onizleme|siparis_izin_kapat|eslesme_kanit|router_kuru)
               if [ "$APPLY" = "true" ]; then
                 echo "::error::mod=$MOD ile yazma olmaz. DUR."; exit 1
               fi
@@ -159,7 +159,19 @@ jobs:
           TOKEN_FILE: _work/ETSY_TOKEN.json
         run: |
           set -euo pipefail
-          if [ "$MOD" = "eslesme_kanit" ]; then
+          if [ "$MOD" = "router_kuru" ]; then
+            mkdir -p _out/kuru
+            echo "== 1) son 60 gun Etsy receipt'leri: karar tablosu (canli siparis YOK)"
+            python scripts/prodigi/order_router.py --env live --state _out/kuru/state_kuru.csv \
+              --out _out/kuru --dry-run --approve-mode off --since-days 60 --max-pages 3 \
+              --devral "1000000001=ord_14538276" || true
+            echo "== 2) sahte POD receipt teklifi (Etsy okunmaz)"
+            python scripts/prodigi/order_router.py --env live --state _out/kuru/state_test.csv \
+              --out _out/kuru/test --dry-run --approve-mode off \
+              --test-receipt scripts/prodigi/test_receipt_gemini_leo_16x20.json || true
+            rclone copy _out/kuru "gdrive:ASTROLOVE/TEMP/POD_5X7/ROUTER_KURU" --include "*.md" --include "*.json" --include "*.csv" -q
+            echo "ciktilar: gdrive:ASTROLOVE/TEMP/POD_5X7/ROUTER_KURU"
+          elif [ "$MOD" = "eslesme_kanit" ]; then
             python scripts/prodigi/eslesme_kanit.py --limit "$LIMIT" --kota-alt 150
           elif [ "$MOD" = "siparis_izin_kapat" ]; then
             python scripts/prodigi/manuel_siparis.py izin_kapat --file-id "$SIPARIS_DOSYA_ID" \

@@ -42,7 +42,7 @@ KOD_DRV = f"{DRV}/ETSY_YETKI_KOD.txt"  # tek kullanimlik authorization code (kos
 # Taban: bilinen mevcut kapsamlar + yonlendiricinin siparis okumasi icin transactions_r.
 # Gercek liste kosuda canli token'dan okunur; bu taban yalnizca alt sinirdir.
 TABAN = ["listings_r", "listings_w", "shops_r", "shops_w"]
-EKLENECEK = ["transactions_r"]
+EKLENECEK = ["transactions_r", "transactions_w"]   # 21 Eyl: kargo takibini Etsy'ye yazmak icin
 
 
 def log(m):
