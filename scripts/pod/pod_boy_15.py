@@ -192,6 +192,31 @@ def fiyat_kontrol(inv, etiketler):
     return hata
 
 
+def galeri_bekle(api, lid, bekle, deneme=6, ara=6):
+    """Gorsel yazmasindan sonra galeriyi bekleyerek okur.
+
+    Olcum (pilot 4570110641, 21 Eyl): silme+yukleme sonrasi ILK okuma gecici olarak iki
+    gorseli ayni rank'ta (7) gosterebiliyor; birkac saniye sonraki okuma 1..n temiz donuyor.
+    Donus: (galeri_imzasi, hata_listesi).
+    """
+    g = []
+    for i in range(deneme):
+        imgs = sorted(((api.get(f"/listings/{lid}/images", ok404=True) or {}).get("results") or []),
+                      key=lambda x: x.get("rank") or 0)
+        g = P.galeri_imza(imgs)
+        duzgun = [rk for _i, rk in g] == list(range(1, len(g) + 1))
+        if sorted(g) == sorted(bekle) and duzgun:
+            if i:
+                log(f"  {lid}: galeri {i + 1}. okumada oturdu ({(i) * ara} sn)")
+            return g, []
+        if i < deneme - 1:
+            time.sleep(ara)
+    hata = [f"galeri imzasi farkli: {g}"]
+    if [rk for _i, rk in g] != list(range(1, len(g) + 1)):
+        hata.append("galeri siralari bozuk")
+    return g, hata
+
+
 def yedek_hizli(sn, isd, lid, etiket):
     """Anlik goruntuyu tek rclone cagrisiyla Drive'a yazar (6 ayri copyto yerine)."""
     d = isd / f"yedek_{etiket}"
@@ -304,19 +329,12 @@ def isle(api, shop, lid, cift, isd, yaz, kota_alt):
             r = api.post_file(f"/shops/{shop}/listings/{lid}/images",
                               files={"image": (yeni_kart.name, fh, "image/jpeg")}, data=veri)
         yeni_id = r.get("listing_image_id")
-        sn2 = P.anlik(api, shop, lid)
-        g_sonra = P.galeri_imza(sn2["images"])
         bekle = [(str(yeni_id), rk) if i == str(eski_id) else (i, rk) for i, rk in g_once]
-        hata = []
-        if sorted(g_sonra) != sorted(bekle):
-            hata.append(f"galeri imzasi farkli: {g_sonra}")
-        if [rk for _i, rk in g_sonra] != list(range(1, len(g_sonra) + 1)):
-            hata.append(f"galeri siralari bozuk: {g_sonra}")
+        g_sonra, hata = galeri_bekle(api, lid, bekle)
         if hata:
             return "HATA", "ADIM 2: " + "; ".join(hata)[:300], ayrinti
         ayrinti["adim2"] = {"rank": rank, "eski": eski_id, "yeni": yeni_id, "galeri": len(g_sonra)}
     else:
-        sn2 = sn1
         g_sonra = P.galeri_imza(sn1["images"])
         ayrinti["adim2"] = {"atlandi": "kart zaten 15 boyluk", "galeri": len(g_sonra)}
 
