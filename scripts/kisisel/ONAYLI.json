@@ -86,12 +86,13 @@
       "Tagline tam boy. Sigmazsa YALNIZ tagline orantili kuculur."
     ],
     "tasinan_ogeler": "Sonsuzluk ve iki kucuk sembol YENIDEN CIZILMEZ: referans sayfadan alfa farkiyla (referans - bg) kesilir, eski yerleri temizlenir, yeni yerlerine ayni piksellerle yapistirilir.",
-    "sabitler": "Bosluk, kenar payi, isim puntosu/cap yuksekligi ve tagline genislik siniri HER ORAN ICIN AYRI; o oranin orijinal Canva sayfalarindan (28, 20, 36, 72) olculur. Oran sabitleri: scripts/kisisel/ORAN_SABITLERI.json",
-    "dogrulama": "Kural dort sayfada olculerek dogrulandi (21 Eylul 2026): bosluk iki yanda esit, satir merkezi poster merkezinde, sembol-isim merkez farki <=2 px."
+    "sabitler": "Bosluk, isim puntosu/cap yuksekligi ve tagline genislik siniri HER ORAN ICIN AYRI; o oranin orijinal Canva sayfalarindan (28, 20, 36, 72) olculur. Kenar payi sabittir (%10). Oran sabitleri: scripts/kisisel/ORAN_SABITLERI.json",
+    "dogrulama": "Kural dort sayfada olculerek dogrulandi (21 Eylul 2026): bosluk iki yanda esit, satir merkezi poster merkezinde, sembol-isim merkez farki <=2 px.",
+    "kenar_payi": "Serdar onayi 21 Eylul 2026: satirin iki yanindaki kenar payi HER ORANDA poster genisliginin %10'udur (2400 px'e normalize tuvalde 240 px). Satir bu paya sigmazsa iki isim birlikte, ayni oranda kuculur."
   },
   "kapilar": {
     "onay": "Serdar onayi 21 Eylul 2026: konum kapilari yerine sekil/doku ve yerlesim kapilari.",
-    "isim_sekli": "Onayli isim satiri ile HIZALANMIS karsilastirma (mutlak konum degil): ortak murekkep maskesi 1 px asindirilir, ic fark <= 3.",
+    "isim_sekli": "Onayli isim satiri ile HIZALANMIS karsilastirma (mutlak konum degil): her iki kirpim ayni kutuya getirilir, doku satir murekkep medyani (profil) ile olculur, fark <= 3. Piksel bazli fark ve IoU bilgi olarak raporlanir.",
     "satir_merkezi": "Satir merkezi = poster merkezi +-1 px.",
     "sembol_hizasi": "Sembol merkezi ile isim merkezi farki <= 2 px.",
     "tasinan_oge": "Tasinan oge ile referanstaki orijinali arasinda murekkep farki <= 3.",

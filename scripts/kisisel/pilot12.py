@@ -34,6 +34,7 @@ YOL = OUT / "ORANLAR"
 DEST_O = DEST + "/ORANLAR"
 ORANLAR = ["2x3", "3x4", "4x5", "11x14", "A"]
 REF_SAYFA = 28
+KENAR_ORAN = 0.10                 # Serdar onayi: kenar payi = poster genisliginin %10'u
 TAG_TABAN_SINIR = 1670.0          # 4:5'te Mo'nun onayladigi sinir
 TAG_TABAN_CAP = 71.0              # 4:5'te olculen tagline bant yuksekligi
 FARK_ESIK = 18
@@ -49,6 +50,10 @@ TAGLINELER = [
     # W/M agirlikli
     "We Married Well, My Wonderful Wife", "Mmmm Wwww Mmmm Wwww Mmmm",
     "Where We Wander, We Welcome More",
+    # kisa, gercekci cumleler (sinir orneklerinde kullanilir)
+    "Forever Us, Forever Now", "Two Hearts, One Home",
+    "Always You, Always Me", "İki Kalp, Tek Yürek",
+    "Our Story Starts Here",
 ]
 ADLAR = ["JONATHAN", "ELIZABETH", "ALEXANDRA", "KATHERINE", "NATHANIEL",
          "CHRISTINA", "MAXIMILIAN", "WILHELMINA", "CHRISTOPHER", "MUHAMMED",
@@ -190,8 +195,8 @@ def oran_kur(oran, olcum_kaydi, bg_im):
     d = {"oran": oran, "tuval": list(ham.size), "norm": [ref.width, ref.height],
          "olcek": round(1 / k, 4), "bg_hiza": hiza,
          "bosluk": int(round(ozet["bosluk_ort"])),
-         "kenar_payi": int(ozet["en_dar_kenar"]),
-         "kullanilabilir": int(NORM_W - 2 * ozet["en_dar_kenar"]),
+         "kenar_payi": int(round(NORM_W * KENAR_ORAN)),
+         "kullanilabilir": int(NORM_W - 2 * round(NORM_W * KENAR_ORAN)),
          "cap": cap, "tag_cap": tag_cap,
          "tag_sinir": int(round(TAG_TABAN_SINIR * tag_cap / TAG_TABAN_CAP)),
          "sonsuz_w": oge["sonsuz"].width,
@@ -346,12 +351,26 @@ def isim_sekil_kapisi(poster, s):
     oa, na = np.asarray(o).astype(np.float32), np.asarray(n).astype(np.float32)
     mo, mn = (oa @ LUMA) > 40, (na @ LUMA) > 40
     iou = float((mo & mn).sum()) / max(float((mo | mn).sum()), 1.0)
+    # Doku: her satirin murekkep medyani (kenar pikselleri disarida kalir, bu
+    # yuzden olcek/yeniden orneklemeden etkilenmez).
+    def profil(arr, mask):
+        sat = []
+        for y in range(arr.shape[0]):
+            if mask[y].sum() >= 3:
+                sat.append(np.median(arr[y, mask[y], :3], axis=0))
+            else:
+                sat.append(np.full(3, np.nan))
+        return np.asarray(sat, np.float32)
+
+    po, pn = profil(oa, mo), profil(na, mn)
+    ok = ~(np.isnan(po).any(axis=1) | np.isnan(pn).any(axis=1))
+    doku = float(np.abs(po[ok] - pn[ok]).mean()) if ok.sum() else 999.0
     ic = np.asarray(Image.fromarray(((mo & mn) * 255).astype(np.uint8), "L").filter(
         ImageFilter.MinFilter(5))) > 127
-    doku = float(np.abs(oa[ic] - na[ic]).mean()) if ic.sum() else 999.0
+    piksel = float(np.abs(oa[ic] - na[ic]).mean()) if ic.sum() else 999.0
     return {"gecti": bool(doku <= 3.0), "iou": round(iou, 3),
-            "doku_fark": round(doku, 2), "px": int(ic.sum()),
-            "genislik": [o.width, n.width]}
+            "doku_fark": round(doku, 2), "piksel_fark": round(piksel, 2),
+            "satir": int(ok.sum()), "genislik": [o.width, n.width]}
 
 
 def yerlesim_kapisi(poster, s, bilgi, merkez, x, inf_w):
@@ -467,7 +486,7 @@ def kaydet(im, p, maks=2_200_000):
 
 def en_uzun_ad(s, S, n):
     """n harfe sigan gercekci en uzun ad cifti."""
-    havuz = {6: ("SERDAR", "MEHMET"), 7: ("WILLIAM", "GULIZAR"),
+    havuz = {6: ("SERDAR", "MEHMET"), 7: ("WILLIAM", "GÜLİZAR"),
              8: ("JONATHAN", "MUHAMMED"), 9: ("ELIZABETH", "ALEXANDRA"),
              10: ("MAXIMILIAN", "WILHELMINA"), 11: ("CHRISTOPHER", "ABDURRAHMAN"),
              5: ("SELIM", "DERYA"), 4: ("LENA", "MARK"), 3: ("ECE", "ADA")}

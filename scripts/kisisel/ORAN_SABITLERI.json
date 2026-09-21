@@ -1,5 +1,5 @@
 {
-  "_": "pilot11/pilot12 olcumunden turetildi (21 Eylul 2026). Olcu birimi: poster genisligi 2400 px'e normalize edilmis piksel.",
+  "_": "pilot11/pilot12/pilot13 olcumunden turetildi (21 Eylul 2026). Olcu birimi: poster genisligi 2400 px'e normalize edilmis piksel. Kenar payi Serdar onayi ile poster genisliginin %10'u.",
   "oranlar": {
     "2x3": {
       "tuval": [
@@ -45,24 +45,25 @@
     },
     "4x5": {
       "tuval": [
-        4000,
-        5000
+        2400,
+        3000
       ],
-      "bosluk": 136,
-      "kenar_payi": 423,
-      "kullanilabilir_genislik": 1554,
+      "bosluk": 138,
+      "kenar_payi": 240,
+      "kullanilabilir_genislik": 1920,
       "isim_cap": {
         "sol": 85,
-        "sag": 84
+        "sag": 83
       },
       "tagline_cap": 71,
       "tagline_genislik_siniri": 1670,
-      "sonsuzluk_genisligi": 187,
+      "sonsuzluk_genisligi": 186,
       "bg_hizasi": {
-        "medyan_fark": 0.0,
-        "olcek": 1.0,
-        "dy": 0
-      }
+        "medyan_fark": 1.0,
+        "olcek": 0.98,
+        "dy": -40
+      },
+      "kenar_orani": 0.1
     },
     "11x14": {
       "tuval": [
