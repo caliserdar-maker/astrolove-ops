@@ -61,7 +61,8 @@ STAGES = ["dryrun", "bekliyor", "manual", "atlandi", "ordered", "shipped", "trac
 TUM_BOYLAR = ["5x7", "8x10", "11x14", "12x16", "12x18", "16x20", "16x24", "18x24", "20x30",
               "24x36", "30x40", "A4", "A3", "A2", "A1"]      # 13 mevcut + 5x7 + A1
 COLS = ["receipt_id", "stage", "country", "items", "etsy_total", "prodigi_cost", "margin", "warn", "prodigi_order_id",
-        "prodigi_status", "asset_perms", "tracking", "carrier", "sent_tx", "ts_utc", "note"]
+        "prodigi_status", "asset_perms", "tracking", "carrier", "sent_tx", "kanal_iptal", "alarm_kosu",
+        "ts_utc", "note"]
 _secret = None
 
 
@@ -129,6 +130,19 @@ class Prodigi:
 
     def urun(self, sku):
         return self.call("GET", f"/products/{sku}")
+
+    def iptal(self, oid):
+        """Taslak/submit edilmemis siparisi iptal eder; geri okuyarak dogrular. -> (ok, aciklama)."""
+        st, d = self.call("POST", f"/orders/{oid}/actions/cancel", {})
+        st2, d2 = self.get_order(oid)
+        stage = str((((d2.get("order") or {}).get("status") or {}).get("stage")) or "")
+        return stage.lower() == "cancelled", f"iptal HTTP {st} outcome={d.get('outcome')} -> stage {stage or '?'}"
+
+    def iptal_edilebilir(self, oid):
+        """GET /orders/{id} -> actions.cancel.isAvailable. -> (evet_mi, ham_deger)."""
+        st, d = self.get_order(oid)
+        v = ((((d.get("order") or {}).get("actions") or {}).get("cancel") or {}).get("isAvailable"))
+        return str(v).lower() == "yes", str(v)
 
     def siparisler(self, top=50):
         st, d = self.call("GET", f"/orders?top={top}")
@@ -215,11 +229,32 @@ def prodigi_indeks(prod, top=50):
     return {"ref": ref, "kalem_ref": kalem_ref, "kayit": kayit}
 
 
+URETIMDE = {"inprogress", "complete", "shipped"}
+
+
 def _neden(idx, anahtar, aciklama):
     b = idx["kayit"].get(anahtar) or {}
-    ek = " [DIKKAT: taslak/sorunlu - Serdar iptal etmeli]" if (b.get("issues") or
-                                                               str(b.get("stage", "")).lower() == "draft") else ""
-    return f"{aciklama} ({anahtar} -> {b.get('id')}, {b.get('stage')}){ek}"
+    return f"{aciklama} ({anahtar} -> {b.get('id')}, {b.get('stage')})"
+
+
+def kanal_durumu(idx, rid, items):
+    """Bu receipt icin Prodigi'de ne var? -> (tur, bilgi, aciklama).
+    tur: '' yok | 'bizim' | 'uretimde' | 'taslak'."""
+    rid = str(rid)
+    anahtarlar = [rid] + [f"etsy-{rid}"] + [f"etsy-{rid}-{i.get('size')}" for i in items] \
+        + [str(i.get("transaction_id") or "") for i in items]
+    for k in anahtarlar:
+        if not k:
+            continue
+        if k in idx["ref"] or k in idx["kalem_ref"]:
+            b = idx["kayit"].get(k) or {}
+            stage = str(b.get("stage", "")).lower()
+            if k.startswith(f"etsy-{rid}"):
+                return "bizim", b, _neden(idx, k, "kendi yonlendirici siparisimiz var")
+            if stage in URETIMDE and not b.get("issues"):
+                return "uretimde", b, _neden(idx, k, "kanal siparisi uretimde")
+            return "taslak", b, _neden(idx, k, "kanal kaydi taslak/sorunlu")
+    return "", {}, ""
 
 
 def zaten_siparis(idx, rid, items):
@@ -414,6 +449,8 @@ def main():
     ap.add_argument("--since-days", type=int, default=0, help="yalniz son N gunun receipt'leri (0 = hepsi)")
     ap.add_argument("--quota-min", type=int, default=400, help="Etsy kota tabani; altinda receipt okumasi durur")
     ap.add_argument("--max-pages", type=int, default=10, help="receipt okumasinda en fazla N cagri")
+    ap.add_argument("--min-yas-dk", type=int, default=60,
+                    help="receipt bu kadar dakika eskimeden islenmez (kanal ice aktarmasi bitsin)")
     ap.add_argument("--devral", default="", help="disarida acilan siparisleri STATE'e al: receipt=order_id[,...]")
     ap.add_argument("--only-size", default="", help="yalniz bu boyun kalemlerini isle (or. 5x7); "
                                                    "ayni sepetteki diger boylar atlanir")
@@ -489,7 +526,9 @@ def main():
     for n, (r, items, other, atlanan) in enumerate(pod, 1):
         rid = str(r.get("receipt_id"))
         row = st.get(rid) or {}
-        if row.get("stage") in ("bekliyor", "ordered", "shipped", "tracked", "manual", "error"):
+        if row.get("stage") in ("bekliyor", "ordered", "shipped", "tracked", "manual", "error", "atlandi"):
+            report.append(f"- {rid}: ATLA (STATE {row.get('stage')}"
+                          + (f", prodigi {row.get('prodigi_order_id')}" if row.get("prodigi_order_id") else "") + ")")
             continue
         el = time.time() - t0
         log(f"[{n}/{len(pod)}] receipt {rid} | gecen {el:.0f}s kalan~{el / n * (len(pod) - n):.0f}s %{100 * n // len(pod)}")
@@ -498,12 +537,37 @@ def main():
         if r.get("is_shipped"):
             report.append(f"- {rid}: ATLA (Etsy'de gonderilmis)")
             continue
-        neden = zaten_siparis(idx, rid, items)
-        if neden:
-            upd(st, a.state, rid, stage="atlandi", items=", ".join(f"{i['sku']}x{i['qty']}" for i in items),
-                note=neden)
+        desc0 = ", ".join(f"{i['sku']}x{i['qty']}" for i in items)
+        yas_dk = (time.time() - float(r.get("created_timestamp") or r.get("create_timestamp") or 0)) / 60 \
+            if (r.get("created_timestamp") or r.get("create_timestamp")) else 1e9
+        if yas_dk < a.min_yas_dk:
+            report.append(f"- {rid}: BEKLE ({yas_dk:.0f} dk < {a.min_yas_dk} dk; kanal ice aktarmasi bitsin)")
+            continue
+        tur, bilgi, neden = kanal_durumu(idx, rid, items)
+        if tur in ("bizim", "uretimde"):
+            upd(st, a.state, rid, stage="atlandi", items=desc0, note=neden)
             report.append(f"- {rid}: ATLA ({neden})")
             continue
+        if tur == "taslak":
+            oid_t = bilgi.get("id")
+            olur, ham = prod.iptal_edilebilir(oid_t)
+            if not olur:
+                mesaj = f"{neden}; Prodigi iptal API'si bu siparis icin kapali (cancel.isAvailable={ham}) - SERDAR IPTAL ETMELI"
+                upd(st, a.state, rid, stage="manual", items=desc0, warn="KANAL_TASLAK", note=mesaj)
+                report.append(f"- {rid}: DIKKAT ({mesaj}); siparis ACILMADI")
+                continue
+            if a.dry_run:
+                report.append(f"- {rid}: (kuru) kanal taslagi {oid_t} IPTAL EDILEBILIR -> iptal + kendi siparisimiz")
+                continue
+            ok_i, aciklama = prod.iptal(oid_t)
+            if not ok_i:
+                mesaj = f"{neden}; iptal BASARISIZ: {aciklama}"
+                upd(st, a.state, rid, stage="manual", items=desc0, warn="KANAL_TASLAK_IPTAL_HATA", note=mesaj)
+                report.append(f"- {rid}: DUR ({mesaj}); siparis ACILMADI")
+                errors.append(f"{rid}: {mesaj}")
+                continue
+            report.append(f"- {rid}: kanal taslagi {oid_t} IPTAL EDILDI ({aciklama}); kendi siparisimiz aciliyor")
+            upd(st, a.state, rid, kanal_iptal=oid_t)
         country = (r.get("country_iso") or "").upper()
         etsy_total = round(sum(i["price"] * i["qty"] for i in items), 2)
         desc = ", ".join(f"{i['sku']}x{i['qty']}" for i in items)
@@ -572,6 +636,32 @@ def main():
             upd(st, a.state, rid, stage="error", country=country, items=desc, etsy_total=etsy_total, prodigi_cost=cost,
                 margin=margin, warn="; ".join(warn), asset_perms=locals().get("perms", []), note=str(e)[:300])
             break
+
+    # ---- 1b) ALARM: kendi siparisimizden sonra kanalda yeni submit edilmis siparis belirdi mi (3 kosu)
+    if not a.test_receipt:
+        for rid, row in list(st.items()):
+            if row.get("stage") not in ("ordered", "shipped", "tracked"):
+                continue
+            try:
+                sayac = int(row.get("alarm_kosu") or 0)
+            except ValueError:
+                sayac = 0
+            if sayac >= 3:
+                continue
+            bizim = str(row.get("prodigi_order_id") or "")
+            adaylar = [str(rid)] + [x for x in (row.get("sent_tx") or "").split(";") if x]
+            carpisan = []
+            for k in adaylar:
+                b = idx["kayit"].get(k) or {}
+                if b.get("id") and b["id"] != bizim and str(b.get("stage", "")).lower() in URETIMDE:
+                    carpisan.append(f"{k} -> {b['id']} ({b['stage']})")
+            upd(st, a.state, rid, alarm_kosu=sayac + 1)
+            if carpisan:
+                mesaj = ("ALARM: ayni receipt icin kanalda YENI siparis var: " + "; ".join(carpisan)
+                         + f" | bizim {bizim}. Otomatik iptal YAPILMADI - Serdar bakmali.")
+                upd(st, a.state, rid, warn="CIFT_SIPARIS_ALARM", note=mesaj)
+                report.append(f"- {rid}: {mesaj}")
+                errors.append(f"{rid}: CIFT_SIPARIS_ALARM")
 
     # ---- 2) ordered: asset izinleri + kargo (onayli modda da: acik izinler kapanir, kargo yakalanir)
     if a.apply or approve or a.submit:
