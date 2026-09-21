@@ -211,7 +211,8 @@ def prodigi_indeks(prod, top=50):
         stage = str(durum.get("stage") or "")
         if stage.lower() == "cancelled":
             continue
-        bilgi = {"id": o.get("id"), "stage": stage, "issues": bool(durum.get("issues"))}
+        bilgi = {"id": o.get("id"), "stage": stage, "issues": bool(durum.get("issues")),
+                 "mr": str(o.get("merchantReference") or "")}
         mr = str(o.get("merchantReference") or "")
         if mr:
             ref.add(mr)
@@ -249,7 +250,7 @@ def kanal_durumu(idx, rid, items):
         if k in idx["ref"] or k in idx["kalem_ref"]:
             b = idx["kayit"].get(k) or {}
             stage = str(b.get("stage", "")).lower()
-            if k.startswith(f"etsy-{rid}"):
+            if k.startswith(f"etsy-{rid}") or str(b.get("mr", "")).startswith(f"etsy-{rid}"):
                 return "bizim", b, _neden(idx, k, "kendi yonlendirici siparisimiz var")
             if stage in URETIMDE and not b.get("issues"):
                 return "uretimde", b, _neden(idx, k, "kanal siparisi uretimde")

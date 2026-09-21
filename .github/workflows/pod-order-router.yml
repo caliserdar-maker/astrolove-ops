@@ -182,7 +182,8 @@ jobs:
             args+=(--submit "$R_SUBMIT" --apply)
           elif [ "${R_OTO:-false}" = "true" ]; then
             echo "::warning::CANLI OTOMATIK MOD: kosu basina en fazla ${R_MAX} siparis; takip Etsy'ye yazilir"
-            args+=(--apply --approve-mode off --max-orders "${R_MAX}" --min-yas-dk 60)
+            args+=(--apply --approve-mode off --max-orders "${R_MAX}" --min-yas-dk 60
+                   --devral "1000000001=ord_14538276")     # elden acilan siparis: takibi buradan yazilir
             [ -n "${R_EW:-}" ] && args+=("$R_EW") || true
           elif [ "$R_APPROVE" = "off" ]; then
             echo "::warning::onayli mod KAPALI"
