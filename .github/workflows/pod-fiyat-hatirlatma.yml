@@ -1,0 +1,88 @@
+name: pod-fiyat-hatirlatma
+
+# Gunluk hafif kontrol (Serdar onayi 21 Eyl 2026): magaza satisi >= 30 VEYA yorum >= 10 VEYA
+# 21 Eyl'den bu yana 60 gun dolunca BIR KEZ POD fiyat raporu uretir
+# (Drive TEMP/POD_ORDERS/FIYAT_RAPORU.md) ve kosuyu bilincli basarisiz yapar (GitHub e-postasi).
+# Tekrar etmez: durum TEMP/POD_ORDERS/FIYAT_HATIRLATMA.json. Etsy'ye YAZMA YOK.
+
+permissions:
+  contents: read
+
+on:
+  schedule:
+    - cron: "17 6 * * *"          # her gun 06:17 UTC (09:17 Istanbul)
+  workflow_dispatch:
+    inputs:
+      kuru:
+        description: "true = yalniz olcum yazdir (rapor uretme, hata verme)"
+        type: boolean
+        default: false
+      satis_esik:
+        description: "satis esigi"
+        default: "30"
+      yorum_esik:
+        description: "yorum esigi"
+        default: "10"
+      gun:
+        description: "baslangictan itibaren gun esigi"
+        default: "60"
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  hatirlat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Token
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+      - name: Kontrol
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          args=(--satis-esik "${{ inputs.satis_esik || '30' }}" --yorum-esik "${{ inputs.yorum_esik || '10' }}"
+                --gun "${{ inputs.gun || '60' }}")
+          [ "${{ inputs.kuru }}" = "true" ] && args+=(--kuru)
+          python scripts/etsy/fiyat_hatirlatma.py "${args[@]}"
+      - name: Token geri yazma
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          if [ -f _work/ETSY_TOKEN.json.updated ]; then
+            rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json"
+            echo "Token geri yazildi"
+          fi
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
