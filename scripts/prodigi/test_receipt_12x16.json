@@ -1,0 +1,19 @@
+{
+ "receipt_id": 990003999,
+ "name": "Test Buyer (SAHTE)",
+ "first_line": "123 Test Street",
+ "second_line": "Apt 4",
+ "city": "Austin",
+ "state": "TX",
+ "zip": "78701",
+ "country_iso": "US",
+ "buyer_email": "test@example.com",
+ "transactions": [
+  {
+   "transaction_id": 990013999,
+   "sku": "POD-AQU_ARI-MB-12x16",
+   "quantity": 1,
+   "price": { "amount": 3999, "divisor": 100 }
+  }
+ ]
+}

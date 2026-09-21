@@ -195,9 +195,15 @@ jobs:
             echo "ciktilar: gdrive:ASTROLOVE/TEMP/POD_5X7/ROUTER_KURU"
           elif [ "$MOD" = "router_teklif" ]; then
             # Yalniz sahte receipt uzerinden kuru teklif: Etsy okunmaz, canli siparis yok.
+            # TEST_RECEIPT virgulle birden cok dosya alir; her biri ayri teklif olarak kosar.
             mkdir -p _out/teklif
-            python scripts/prodigi/order_router.py --env live --state _out/teklif/state_test.csv \
-              --out _out/teklif --dry-run --approve-mode off --test-receipt "$TEST_RECEIPT"
+            i=0
+            for rcp in ${TEST_RECEIPT//,/ }; do
+              i=$((i+1))
+              echo "== teklif $i: $rcp"
+              python scripts/prodigi/order_router.py --env live --state "_out/teklif/state_$i.csv" \
+                --out "_out/teklif/$i" --dry-run --approve-mode off --test-receipt "$rcp"
+            done
             rclone copy _out/teklif "gdrive:ASTROLOVE/TEMP/POD_5X7/ROUTER_KURU/teklif" --include "*.md" --include "*.json" --include "*.csv" -q
             echo "ciktilar: gdrive:ASTROLOVE/TEMP/POD_5X7/ROUTER_KURU/teklif"
           elif [ "$MOD" = "eslesme_kanit" ]; then
