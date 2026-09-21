@@ -1,0 +1,33 @@
+{
+  "_": "Serdar'in acik onayi olmadan degistirilemez.",
+  "isimler": {
+    "onay": "ilk PILOT_A (pilot3.py, commit 77b8f31) - defalarca onaylandi",
+    "kaynak_fonksiyon": "pilot3.py: yaz_metin + altin + hedef",
+    "font": "Cinzel.ttf",
+    "agirlik": 500,
+    "harf_araligi": "CANCER ve LIBRA icin olculen tracking/punto oranlarinin ORTALAMASI, iki isme de ayni uygulanir",
+    "punto": "cap_icin_boyut ile kutunun cam yuksekliginden turetilir",
+    "kutular": {"sol": "BOX.name_left x0.6", "sag": "BOX.name_right x0.6"},
+    "doku": "altin(): ilgili plakanin (cancer/libra_name_gold.png) satir profili, cam kutusuna gerilir",
+    "kucultme": "yok (maks_w verilmez)",
+    "kirpim": [550, 2186, 1849, 2311],
+    "referans_dosya": "onayli/ISIM_SATIRI_ALTIN.png",
+    "kontrol": {"harf_konumu_px": 1, "murekkep_ortalama_fark": 3, "olcum": "ortak murekkep maskesi 1 px asindirilir; onayli kirpim baska zeminde alindigi icin kenar yumusatma pikselleri zeminle karisir ve yapisal olarak eslesemez"}
+  },
+  "tagline": {
+    "onay": "pilot5 - Mo: doku, boyut ve font onayli",
+    "font": "EBGaramond-Italic.ttf",
+    "agirlik": 400,
+    "punto": 102,
+    "cap_yuksekligi": 71,
+    "harf_araligi": 0,
+    "genislik_siniri": 1673,
+    "doku": "isimlerle ayni altin profili; gecis cap bandina oturur, bandin disi altin uclara sabitlenir",
+    "kucultme": "yok"
+  },
+  "zemin": {
+    "onay": "pilot5 TEMIZ_ZEMIN - Mo onayli",
+    "yontem": "REFERANS_CANCER_LIBRA.jpg zemin; eski isim ve tagline dikdortgenleri HAZIR/bg.png'nin ayni koordinatlarindan yumusak maskeyle doldurulur",
+    "korunan": "logo, halka, kucuk semboller, sonsuzluk isareti, yildizlar - referanstan aynen"
+  }
+}

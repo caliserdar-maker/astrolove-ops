@@ -44,3 +44,13 @@ bolumu okunmadan baslanmaz.
 5. Uzun her kosuda ETA sayaci (islenen/toplam, gecen, kalan, yuzde).
 6. Rapor: en fazla 6 satir + dosya yollari. Aciklama yok.
 7. QC: tek script, olculebilir esik, PASS/FAIL. "Gozle bakiyorum" dongusu yok.
+
+## Onayli ogeler (21 Eyl 2026 karari)
+
+- Onaylanmis bir ogeye (`scripts/kisisel/ONAYLI.json`) gorevde ACIKCA
+  yazilmadikca dokunulmaz. Dosyanin ilk satiri baglayicidir:
+  "Serdar'in acik onayi olmadan degistirilemez."
+- Her raporda **DEGISEN OGELER** basligi altinda neyin degistigi listelenir;
+  degismeyenler de ayrica belirtilir.
+- Onayli oge kilitleri kosuda otomatik dogrulanir (isim satiri karsilastirmasi
+  ve harf testi); tutmazsa kosu HATA ile durur, cikti uretilmez.
