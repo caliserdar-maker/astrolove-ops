@@ -32,6 +32,7 @@ Kullanim:
   order_router.py --env live    --state ST.csv --out OUT --submit 3412345678                # tek paketi GONDER (onay)
 """
 import argparse
+import calendar
 import csv
 import json
 import os
@@ -61,7 +62,7 @@ STAGES = ["dryrun", "bekliyor", "manual", "atlandi", "ordered", "shipped", "trac
 TUM_BOYLAR = ["5x7", "8x10", "11x14", "12x16", "12x18", "16x20", "16x24", "18x24", "20x30",
               "24x36", "30x40", "A4", "A3", "A2", "A1"]      # 13 mevcut + 5x7 + A1
 COLS = ["receipt_id", "stage", "country", "items", "etsy_total", "prodigi_cost", "margin", "warn", "prodigi_order_id",
-        "prodigi_status", "asset_perms", "tracking", "carrier", "sent_tx", "kanal_iptal", "alarm_kosu",
+        "prodigi_status", "asset_perms", "tracking", "carrier", "sent_tx", "kanal_iptal", "kanal_oid", "alarm_kosu",
         "ts_utc", "note"]
 _secret = None
 
@@ -211,8 +212,9 @@ def prodigi_indeks(prod, top=50):
         stage = str(durum.get("stage") or "")
         if stage.lower() == "cancelled":
             continue
-        bilgi = {"id": o.get("id"), "stage": stage, "issues": bool(durum.get("issues")),
-                 "mr": str(o.get("merchantReference") or "")}
+        _mr = str(o.get("merchantReference") or "")
+        bilgi = {"id": o.get("id"), "stage": stage, "issues": bool(durum.get("issues")), "mr": _mr,
+                 "created": o.get("created") or "", "kanal": not _mr.startswith("etsy-")}
         mr = str(o.get("merchantReference") or "")
         if mr:
             ref.add(mr)
@@ -231,6 +233,11 @@ def prodigi_indeks(prod, top=50):
 
 
 URETIMDE = {"inprogress", "complete", "shipped"}
+META_ID = "_META"            # STATE icinde tek satirlik kosu hafizasi (note alaninda JSON)
+SINIR_SAAT = 24              # ilk canli kosudan sonra hatasiz gecmesi gereken sure
+SINIRSIZ = 25                # sinir kalkinca kosu basina ust sinir
+KANAL_SESSIZ_GUN = 7         # bu kadar gun yeni kanal siparisi yoksa kanal kopuk sayilir
+DIKKAT_EK = []               # DIKKAT.md'ye eklenecek serbest satirlar
 
 
 def _neden(idx, anahtar, aciklama):
@@ -256,6 +263,84 @@ def kanal_durumu(idx, rid, items):
                 return "uretimde", b, _neden(idx, k, "kanal siparisi uretimde")
             return "taslak", b, _neden(idx, k, "kanal kaydi taslak/sorunlu")
     return "", {}, ""
+
+
+def meta_oku(st):
+    try:
+        return json.loads((st.get(META_ID) or {}).get("note") or "{}")
+    except ValueError:
+        return {}
+
+
+def meta_yaz(st, path, m):
+    upd(st, path, META_ID, stage="meta", note=json.dumps(m, ensure_ascii=False))
+
+
+def _utc_ts(metin, bicim="%Y-%m-%d %H:%M:%S"):
+    try:
+        return calendar.timegm(time.strptime(str(metin)[:19], bicim))
+    except (ValueError, TypeError):
+        return 0
+
+
+def otomasyonlar(a, prod, st, idx, report, errors, hata_var):
+    """1) 24 saat hatasizsa --max-orders sinirini kaldirir. 2) kanal siparisi sevk edilince
+    TEK SEFER 'kanali kopar' hatirlatmasi (DIKKAT + kosu basarisiz). Kanal kopuksa kanali aramaz."""
+    m = meta_oku(st)
+    simdi = time.time()
+    m.setdefault("ilk_canli_utc", now())
+    if hata_var:
+        m["hata_sayaci"] = int(m.get("hata_sayaci") or 0) + 1
+        m["son_hata_utc"] = now()
+
+    # --- 2) kanal siparisi sevk edildi mi (tek seferlik hatirlatma)
+    if not m.get("kanal_kopuk") and not m.get("kanal_hatirlatma_utc"):
+        for rid, row in list(st.items()):
+            oid = row.get("kanal_oid")
+            if not oid:
+                continue
+            _stc, d = prod.get_order(oid)
+            o = d.get("order") or {}
+            asama = str(((o.get("status") or {}).get("stage") or "")).lower()
+            sevk = any((sp.get("tracking") or {}).get("number") for sp in (o.get("shipments") or [])) \
+                or asama in ("complete", "shipped")
+            if not sevk:
+                continue
+            mesaj = (f"Kanal siparisi {oid} (Etsy {rid}) sevk edildi. TEK ADIM: "
+                     "Prodigi paneli -> Sales channels -> Etsy -> baglantiyi kaldir (Disconnect).")
+            m["kanal_hatirlatma_utc"] = now()
+            upd(st, a.state, rid, warn="KANAL_KOPAR", note=mesaj)
+            DIKKAT_EK.append(f"- KANAL: {mesaj}")
+            report.append(f"- {rid}: HATIRLATMA - {mesaj}")
+            errors.append(f"{rid}: KANAL_KOPAR hatirlatmasi (kosu bilincli basarisiz)")
+            break
+
+    # --- kanal sessizligi: hatirlatmadan sonra 7 gun yeni kanal siparisi yoksa bayrak
+    if m.get("kanal_hatirlatma_utc") and not m.get("kanal_kopuk"):
+        zamanlar = [b.get("created") or "" for b in idx["kayit"].values() if b.get("kanal")]
+        en_yeni = max(zamanlar) if zamanlar else ""
+        t = _utc_ts(en_yeni, "%Y-%m-%dT%H:%M:%S")
+        if not en_yeni or (t and (simdi - t) / 86400 >= KANAL_SESSIZ_GUN):
+            m["kanal_kopuk"] = True
+            m["kanal_kopuk_utc"] = now()
+            report.append(f"- KANAL KOPUK: {KANAL_SESSIZ_GUN} gundur yeni kanal siparisi yok "
+                          f"(son {en_yeni or 'yok'}); kanal artik aranmaz")
+
+    # --- 1) sinir kaldirma
+    if not m.get("sinir_kalkti_utc"):
+        gecen = (simdi - _utc_ts(m.get("ilk_canli_utc"))) / 3600
+        if gecen >= SINIR_SAAT:
+            if int(m.get("hata_sayaci") or 0) == 0:
+                m["sinir_kalkti_utc"] = now()
+                report.append(f"- SINIR KALKTI: ilk canli kosudan bu yana {gecen:.0f} saat hatasiz; "
+                              f"bundan sonra kosu basina en fazla {SINIRSIZ} siparis")
+            else:
+                mesaj = (f"SINIR KALKMADI: {gecen:.0f} saatte {m.get('hata_sayaci')} hata/DIKKAT "
+                         f"(son {m.get('son_hata_utc')}); --max-orders 1 suruyor")
+                report.append(f"- {mesaj}")
+                DIKKAT_EK.append(f"- SINIR: {mesaj}")
+    meta_yaz(st, a.state, m)
+    return m
 
 
 def zaten_siparis(idx, rid, items):
@@ -452,6 +537,8 @@ def main():
     ap.add_argument("--max-pages", type=int, default=10, help="receipt okumasinda en fazla N cagri")
     ap.add_argument("--min-yas-dk", type=int, default=60,
                     help="receipt bu kadar dakika eskimeden islenmez (kanal ice aktarmasi bitsin)")
+    ap.add_argument("--kanal-kopuk", action="store_true",
+                    help="Serdar onayi: Etsy kanali Prodigi'den koparildi; kanal artik aranmaz")
     ap.add_argument("--devral", default="", help="disarida acilan siparisleri STATE'e al: receipt=order_id[,...]")
     ap.add_argument("--only-size", default="", help="yalniz bu boyun kalemlerini isle (or. 5x7); "
                                                    "ayni sepetteki diger boylar atlanir")
@@ -467,6 +554,14 @@ def main():
     mod = "ONAYLI MOD (paket hazirlama)" if approve else ("GONDERIM" if a.submit else ("DRY-RUN" if a.dry_run else "APPLY"))
     report = [f"# POD siparis yonlendirici — {a.env.upper()} — {mod} — {now()} UTC", ""]
     errors = []
+
+    meta0 = meta_oku(st)
+    kanal_kopuk = bool(meta0.get("kanal_kopuk")) or a.kanal_kopuk
+    if meta0.get("sinir_kalkti_utc"):
+        a.max_orders = max(a.max_orders, SINIRSIZ)
+        report.append(f"- SINIR KALKMIS ({meta0['sinir_kalkti_utc']}): kosu basina en fazla {a.max_orders}")
+    if kanal_kopuk:
+        report.append("- KANAL KOPUK: kanal siparisi aranmaz, 60 dk bekleme uygulanmaz")
 
     prod = Prodigi(load_prodigi_key(a.env), a.env)
     api = shop = None
@@ -541,7 +636,7 @@ def main():
         desc0 = ", ".join(f"{i['sku']}x{i['qty']}" for i in items)
         yas_dk = (time.time() - float(r.get("created_timestamp") or r.get("create_timestamp") or 0)) / 60 \
             if (r.get("created_timestamp") or r.get("create_timestamp")) else 1e9
-        if yas_dk < a.min_yas_dk:
+        if yas_dk < (0 if kanal_kopuk else a.min_yas_dk):
             report.append(f"- {rid}: BEKLE ({yas_dk:.0f} dk < {a.min_yas_dk} dk; kanal ice aktarmasi bitsin)")
             continue
         tur, bilgi, neden = kanal_durumu(idx, rid, items)
@@ -549,7 +644,8 @@ def main():
             if a.dry_run and bilgi.get("id"):       # salt okuma: iptal alaninin varligi kanitlanir
                 olur_p, ham_p = prod.iptal_edilebilir(bilgi["id"])
                 neden += f" | iptal API alani: cancel.isAvailable={ham_p}"
-            upd(st, a.state, rid, stage="atlandi", items=desc0, note=neden)
+            upd(st, a.state, rid, stage="atlandi", items=desc0, note=neden,
+                **({"kanal_oid": bilgi.get("id")} if tur == "uretimde" and bilgi.get("kanal") else {}))
             report.append(f"- {rid}: ATLA ({neden})")
             continue
         if tur == "taslak":
@@ -721,6 +817,11 @@ def main():
             upd(st, a.state, rid, stage="error", note=f"Etsy tracking: {e}")
             break
 
+    if (a.apply or a.submit) and not a.test_receipt:
+        hata_var = bool(errors) or any(
+            (v.get("stage") in ("manual", "error") or v.get("warn")) for k, v in st.items() if k != META_ID)
+        otomasyonlar(a, prod, st, idx, report, errors, hata_var)
+
     counts = {}
     for row in st.values():
         counts[row.get("stage", "")] = counts.get(row.get("stage", ""), 0) + 1
@@ -729,10 +830,11 @@ def main():
     log(text)
     (out / "REPORT.md").write_text(text + "\n", encoding="utf-8")
     dikkat = [r for r in st.values() if r.get("stage") in ("manual", "error") or r.get("warn")]
-    if dikkat:
+    if dikkat or DIKKAT_EK:
         satir = ["# DIKKAT: elle islem gereken siparisler", f"(kosu {now()} UTC)", ""]
         satir += [f"- {r['receipt_id']}: {r.get('stage')} | {r.get('country', '')} {r.get('items', '')} "
                   f"| {r.get('warn') or ''} {r.get('note') or ''}".strip() for r in dikkat]
+        satir += DIKKAT_EK
         (out / "DIKKAT.md").write_text("\n".join(satir) + "\n", encoding="utf-8")
     p = os.environ.get("GITHUB_STEP_SUMMARY")
     if p:
