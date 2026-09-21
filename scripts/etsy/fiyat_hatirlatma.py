@@ -91,6 +91,7 @@ def rapor_uret(api, shop, prod, gun):
     prod_sip = prod.siparisler(100) if prod else []
     maliyet_haritasi = prodigi_maliyet(prod_sip)
     toplam_gelir = toplam_maliyet = 0.0
+    kullanilan = set()          # ayni Prodigi siparisi iki kez sayilmasin
     for rc in receipts:
         rid = str(rc.get("receipt_id"))
         for t in rc.get("transactions") or []:
@@ -105,24 +106,29 @@ def rapor_uret(api, shop, prod, gun):
             b["adet"] += adet
             b["gelir"] += fiyat * adet
             toplam_gelir += fiyat * adet
-            m = maliyet_haritasi.get(rid) or maliyet_haritasi.get(f"etsy-{rid}-{boy}")
-            if m:
-                b["maliyet"] += m
+            boy_anahtar = f"etsy-{rid}-{boy}"
+            if boy_anahtar in maliyet_haritasi and boy_anahtar not in kullanilan:
+                kullanilan.add(boy_anahtar)                  # boy bazli siparis: boya yazilir
+                b["maliyet"] += maliyet_haritasi[boy_anahtar]
                 b["maliyet_bilinen"] += adet
-                toplam_maliyet += m
+                toplam_maliyet += maliyet_haritasi[boy_anahtar]
+            elif rid in maliyet_haritasi and rid not in kullanilan:
+                kullanilan.add(rid)                          # sepet siparisi: yalniz toplama yazilir
+                toplam_maliyet += maliyet_haritasi[rid]
     ucret = toplam_gelir * UCRET_ORAN + (UCRET_SABIT + TRY_SABIT_USD) * sum(
         b["adet"] for b in boylar.values())
     net = toplam_gelir - toplam_maliyet - ucret
     satirlar = ["# POD fiyat gozden gecirme raporu", f"(uretim {time.strftime('%Y-%m-%d %H:%M UTC', time.gmtime())}"
                 f" | son {gun} gun)", "",
-                "| boy | adet | Etsy geliri | Prodigi maliyeti (ekler dahil) | maliyeti bilinen adet |",
+                "| boy | adet | Etsy geliri | Prodigi maliyeti (boy bazli siparisler) | maliyeti bilinen adet |",
                 "|---|---|---|---|---|"]
     for boy in sorted(boylar, key=lambda x: -boylar[x]["adet"]):
         b = boylar[boy]
         satirlar.append(f"| {boy} | {b['adet']} | {b['gelir']:.2f} | {b['maliyet']:.2f} | "
                         f"{b['maliyet_bilinen']} |")
     satirlar += ["", f"- Toplam Etsy geliri: **{toplam_gelir:.2f} USD**",
-                 f"- Toplam Prodigi maliyeti (ekler dahil, bilinen siparisler): **{toplam_maliyet:.2f} USD**",
+                 f"- Toplam Prodigi maliyeti (ekler dahil, her siparis bir kez): **{toplam_maliyet:.2f} USD**",
+                 "  (sepet siparislerinin maliyeti boy satirlarina bolunmez, yalniz toplamda gorunur)",
                  f"- Etsy ucretleri (model: %{UCRET_ORAN * 100:.2f} + {UCRET_SABIT + TRY_SABIT_USD:.2f}/kalem, "
                  f"Offsite Ads haric): **{ucret:.2f} USD**",
                  f"- **Net: {net:.2f} USD**", "",
