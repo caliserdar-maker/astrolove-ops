@@ -92,11 +92,21 @@
   },
   "kapilar": {
     "onay": "Serdar onayi 21 Eylul 2026: konum kapilari yerine sekil/doku ve yerlesim kapilari.",
-    "isim_sekli": "Onayli isim satiri ile HIZALANMIS karsilastirma (mutlak konum degil): her iki kirpim ayni kutuya getirilir, doku satir murekkep medyani (profil) ile olculur, fark <= 3. Piksel bazli fark ve IoU bilgi olarak raporlanir.",
+    "isim_sekli": "Serdar onayi 21 Eylul 2026: kapi ORAN ICINDE birebir. Her oranin kendi referansi onayli/ISIM_SATIRI_<oran>.png (o oranin ALTIN posterinden kirpildi; koordinatlar onayli/ISIM_SATIRI_KIRPIM.json). Olcut: harf konumu kaymasi <= 1 px ve murekkep ici farki <= 3. Olcek normalize edilmez.",
     "satir_merkezi": "Satir merkezi = poster merkezi +-1 px.",
     "sembol_hizasi": "Sembol merkezi ile isim merkezi farki <= 2 px.",
     "tasinan_oge": "Tasinan oge ile referanstaki orijinali arasinda murekkep farki <= 3.",
     "kalinti": "Ogelerin ESKI konumlarinda kalinti yok: temizlenen alan ile zemin arasinda fark <= 3.",
     "tagline": "onayli/TAGLINE_ALTIN.png ile karsilastirma (SECENEK 1 dokusu)."
+  },
+  "etsy_sinirlari": {
+    "onay": "Serdar onayi 21 Eylul 2026.",
+    "isim_azami_harf": 11,
+    "tagline_azami_karakter": 35,
+    "kucultme": "Sinir icinde sigmazsa mevcut kural: iki isim BIRLIKTE ayni oranda, tagline TEK BASINA orantili kuculur.",
+    "alt_sinir": "Olcek %65'in altina inecek giris URETILMEZ; siparis 'ELLE KONTROL' ile durur.",
+    "isim_karakterleri": "Yalniz harf (Latin + Turkce), bosluk, tire ve kesme isareti. Isimler her zaman BUYUK harfe cevrilir (Turkce i -> I kurali). Desteklenmeyen alfabe, emoji veya fontta olmayan karakter -> ELLE KONTROL.",
+    "tagline_karakterleri": "Musterinin yazdigi gibi birakilir; buyuk/kucuk harf degistirilmez. Emoji veya fontta olmayan karakter -> ELLE KONTROL.",
+    "kod": "scripts/kisisel/giris_dogrula.py - siparis_dogrula(sol, sag, tagline)"
   }
 }
