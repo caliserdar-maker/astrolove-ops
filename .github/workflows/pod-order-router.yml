@@ -17,8 +17,10 @@ on:
   # Kapsam olmadan her cron kosusu hata verir ve etsy-token grubunu mesgul eder.
   # Mo Etsy uygulamasini transactions_r (+ ileride tracking icin transactions_w) ile yeniden
   # yetkilendirip ETSY_TOKEN.json'i yeniledikten sonra asagidaki iki satir acilir:
-  #   schedule:
-  #     - cron: "*/30 * * * *"     # onayli mod: yalniz paket hazirlar, siparis gondermez
+  # 21 Eyl 2026 (Serdar onayi): transactions_r + transactions_w alindi, cron CANLI otomatik moda acildi.
+  # NOT: schedule yalniz VARSAYILAN DALDAKI (main) surumden tetiklenir.
+  schedule:
+    - cron: "*/15 * * * *"        # canli otomatik mod: kosu basina en fazla 1 siparis + takip yazma
   workflow_dispatch:
     inputs:
       submit:
@@ -44,6 +46,22 @@ on:
         default: ""
       etsy_writes:
         description: "true = kargo takibini Etsy'ye yaz (onayli mod kapaliyken; onay)"
+        type: boolean
+        default: false
+      only_size:
+        description: "Yalniz bu boyun kalemleri islenir (or. 5x7); bos = tum boylar"
+        required: false
+        default: ""
+      otomatik:
+        description: "true = CANLI otomatik mod: kendi siparisimizi ac + takibi Etsy'ye yaz"
+        type: boolean
+        default: false
+      max_orders:
+        description: "otomatik modda kosu basina en fazla siparis"
+        required: false
+        default: "1"
+      sadece_test:
+        description: "true = yalniz sahte receipt kuru testi (Etsy okunmaz, siparis yok)"
         type: boolean
         default: false
 
@@ -75,7 +93,11 @@ jobs:
           mkdir -p ~/.config/rclone; umask 077
           printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
           chmod 600 ~/.config/rclone/rclone.conf
-          [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
       - name: Girdiler (cron = live + onayli mod)
         env:
           EV: ${{ github.event_name }}
@@ -85,15 +107,22 @@ jobs:
           IN_DAYS: ${{ inputs.since_days }}
           IN_TR: ${{ inputs.test_receipt }}
           IN_EW: ${{ inputs.etsy_writes }}
+          IN_ONLY: ${{ inputs.only_size }}
+          IN_OTO: ${{ inputs.otomatik }}
+          IN_MAX: ${{ inputs.max_orders }}
         run: |
           set -euo pipefail
           if [ "$EV" = "schedule" ]; then
-            { echo "R_ENV=live"; echo "R_APPROVE=on"; echo "R_SUBMIT="; echo "R_DAYS=7"; echo "R_TR="; echo "R_EW="; } >> "$GITHUB_ENV"
+            { echo "R_ENV=live"; echo "R_APPROVE=off"; echo "R_SUBMIT="; echo "R_DAYS=7"; echo "R_TR=";
+              echo "R_EW=--etsy-writes"; echo "R_ONLY="; echo "R_OTO=true"; echo "R_MAX=1"; } >> "$GITHUB_ENV"
           else
             echo "R_ENV=${IN_ENV:-live}" >> "$GITHUB_ENV"
             echo "R_SUBMIT=${IN_SUBMIT}" >> "$GITHUB_ENV"
             echo "R_DAYS=${IN_DAYS:-7}" >> "$GITHUB_ENV"
             echo "R_TR=${IN_TR}" >> "$GITHUB_ENV"
+            echo "R_ONLY=${IN_ONLY}" >> "$GITHUB_ENV"
+            echo "R_OTO=${IN_OTO:-false}" >> "$GITHUB_ENV"
+            echo "R_MAX=${IN_MAX:-1}" >> "$GITHUB_ENV"
             if [ -n "${IN_SUBMIT}" ]; then
               echo "R_APPROVE=off" >> "$GITHUB_ENV"; echo "R_EW=" >> "$GITHUB_ENV"
             else
@@ -105,7 +134,9 @@ jobs:
         run: |
           set -euo pipefail
           umask 077; mkdir -p _work _out _work/packages
-          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          if [ "${{ inputs.sadece_test }}" != "true" ]; then
+            rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          fi
           rclone copyto "gdrive:ASTROLOVE/TEMP/POD_ORDERS_STATE.csv" _work/state.csv 2>/dev/null || echo "STATE yok; yeni baslar"
           rclone copy "gdrive:ASTROLOVE/TEMP/POD_ORDERS" _work/packages --include "*.json" -q 2>/dev/null || true
           echo "hazir paket: $(ls _work/packages/*.json 2>/dev/null | wc -l)"
@@ -120,9 +151,22 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p _out/test
-          python scripts/prodigi/order_router.py --env "$R_ENV" --state _work/state_test.csv --out _out/test \
-            --packages _out/test --approve-mode on --test-receipt _work/test_receipt.json
+          env_kullan="$R_ENV"
+          if [ "$env_kullan" = "sandbox" ] && ! rclone lsf "gdrive:ASTROLOVE/TEMP/PRODIGI_SANDBOX_TOKEN.json" >/dev/null 2>&1; then
+            echo "::warning::sandbox anahtari yok -> live ortamda YALNIZ teklif (siparis yok)"
+            env_kullan="live"
+          fi
+          echo "kuru test ortami: $env_kullan"
+          args=(--env "$env_kullan" --state _work/state_test.csv --out _out/test --packages _out/test
+                --approve-mode on --test-receipt _work/test_receipt.json)
+          [ -n "${R_ONLY:-}" ] && args+=(--only-size "$R_ONLY")
+          python scripts/prodigi/order_router.py "${args[@]}"
+          for f in _out/test/*.json; do
+            echo "--- $f"; python3 -c "import json,sys; d=json.load(open(sys.argv[1])); print(json.dumps({k: d[k] for k in ('receipt_id','only_size','country','etsy_total','prodigi_cost','margin','warn') if k in d}, ensure_ascii=False)); print('kalemler:', [(i['sku'], i['prodigi_sku'], i['asset_remote']) for i in d.get('items', [])]); print('idempotencyKey:', d.get('order', {}).get('idempotencyKey'))" "$f"
+          done
+          rclone copy _out/test "gdrive:ASTROLOVE/TEMP/POD_5X7/ROUTER_TEST" --include "*.json" || true
       - name: Yonlendir
+        if: ${{ inputs.sadece_test != true }}
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
@@ -132,9 +176,15 @@ jobs:
           set -euo pipefail
           args=(--env "$R_ENV" --state _work/state.csv --out _out --packages _work/packages
                 --approve-mode "$R_APPROVE" --since-days "$R_DAYS" --quota-min 400)
+          [ -n "${R_ONLY:-}" ] && args+=(--only-size "$R_ONLY")
           if [ -n "${R_SUBMIT:-}" ]; then
             echo "::warning::GONDERIM: receipt $R_SUBMIT canli Prodigi siparisine cevrilecek"
             args+=(--submit "$R_SUBMIT" --apply)
+          elif [ "${R_OTO:-false}" = "true" ]; then
+            echo "::warning::CANLI OTOMATIK MOD: kosu basina en fazla ${R_MAX} siparis; takip Etsy'ye yazilir"
+            args+=(--apply --approve-mode off --max-orders "${R_MAX}" --min-yas-dk 60
+                   --devral "1000000001=ord_14538276")     # elden acilan siparis: takibi buradan yazilir
+            [ -n "${R_EW:-}" ] && args+=("$R_EW") || true
           elif [ "$R_APPROVE" = "off" ]; then
             echo "::warning::onayli mod KAPALI"
             args+=(--dry-run)
@@ -150,6 +200,7 @@ jobs:
           ls _out/*.json >/dev/null 2>&1 && rclone copy _out "gdrive:ASTROLOVE/TEMP/POD_ORDERS" --include "*.json" --max-depth 1 -q && echo "Paketler Drive'a yazildi" || true
           stamp=$(TZ=Europe/Istanbul date +%Y%m%d_%H%M)
           [ -f _out/REPORT.md ] && rclone copyto _out/REPORT.md "gdrive:ASTROLOVE/TEMP/POD_ORDERS/REPORT_${R_ENV}_${stamp}.md" || true
+          [ -f _out/DIKKAT.md ] && rclone copyto _out/DIKKAT.md "gdrive:ASTROLOVE/TEMP/POD_ORDERS/DIKKAT.md" && echo "DIKKAT.md Drive'a yazildi" || true
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:
