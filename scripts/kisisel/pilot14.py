@@ -219,7 +219,12 @@ def rapor(d):
                      f"| {t['satir']} | {t['kenar'][0]} / {t['kenar'][1]} "
                      f"| %{int(round(t['tagline_olcek'] * 100))} | {t['durum']} |")
     en_dusuk = min(t["olcek"] for o in o_ for t in d["test"][o])
-    m += ["", f"En dusuk olcek: %{int(round(en_dusuk * 100))} "
+    m += ["", "Not: JACQUELINE gibi taban cizgisinin altina inen harf iceren (J, Q) "
+          "isimlerde punto belirgin kucuk cikar (orn. 4:5'te 87'ye karsi 112). Sebep: "
+          "onayli punto kurali metnin TAM murekkep yuksekligini cap kabul eder; inen "
+          "harf bu yuksekligi buyutunce govde kuculur. Duzeltme (cap'i 'T' harfiyle "
+          "olcmek - tagline'da zaten boyle) ONAYLI ogeye dokunacagi icin onay bekler.", "",
+          f"En dusuk olcek: %{int(round(en_dusuk * 100))} "
           f"(alt sinir %{int(d['sinir']['alt_sinir'] * 100)}). "
           + ("Tum ciftler sinir icinde." if en_dusuk >= d["sinir"]["alt_sinir"]
              else "**Alt sinirin altina inen cift var - ELLE KONTROL.**"), "",

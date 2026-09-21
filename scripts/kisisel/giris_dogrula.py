@@ -25,12 +25,21 @@ FONTLAR = {"isim": "Cinzel.ttf", "tagline": "EBGaramond-Italic.ttf"}
 
 # Turkce ozel: i/I donusumu
 TR_BUYUK = str.maketrans({"i": "İ", "ı": "I"})
+# Turkce kural yalniz metinde Turkce'ye ozgu harf varsa uygulanir.
+TR_ISARET = set("çğıöşüÇĞİÖŞÜ")
 
 
 def buyut(s):
-    """Isimleri buyuk harfe cevir (Turkce i -> I kurali dogru)."""
+    """Isimleri buyuk harfe cevir.
+
+    Metinde Turkce'ye ozgu bir harf varsa (c g i o s u ve buyukleri) Turkce
+    i -> I kurali uygulanir; yoksa standart upper() kullanilir. Boylece
+    "Gulizar" -> "GULIZAR" ama "Christopher" -> "CHRISTOPHER" olur.
+    """
     s = unicodedata.normalize("NFC", s).replace("i\u0307", "\u0130")
-    return unicodedata.normalize("NFC", s.translate(TR_BUYUK).upper())
+    if TR_ISARET & set(s):
+        s = s.translate(TR_BUYUK)
+    return unicodedata.normalize("NFC", s.upper())
 
 
 def harf_sayisi(s):
