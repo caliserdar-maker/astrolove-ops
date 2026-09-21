@@ -82,7 +82,14 @@ def sayfa_olc(path):
     # Maske yonu zemine gore: koyu zeminde parlak yazi (Blue/Black), acik
     # zeminde koyu yazi (Pure White, Modern, Vintage).
     acik_zemin = float(np.median(L)) > 128
-    m = (L < np.median(L) - 35) if acik_zemin else (L > MUREKKEP)
+    if acik_zemin:
+        # Acik zeminde yazi koyu; esik zemin ile en koyu piksel arasinda
+        # olculur (Modern/Vintage'da kontrast dusuk).
+        z = float(np.median(L))
+        alt = float(np.percentile(L, 0.5))
+        m = L < z - max(12.0, (z - alt) * 0.35)
+    else:
+        m = L > MUREKKEP
     H = im.height
     bl = bantlar(m)
     aday = []

@@ -24,7 +24,7 @@ from pilot12 import ince_hiza, fark_haritasi
 OUT = Path(__file__).resolve().parents[2] / "out"
 YOL = OUT / "EDISYONLAR"
 DEST_E = DEST + "/EDISYONLAR"
-ZEMIN = {"black": ("drive", "deep_black_bg.jpg", "1cBuZyGHSA7pX9ccobGUGWnqOpDVaGXX-"),
+ZEMIN = {"black": ("klasor", "deep_black_bg.jpg", "1AMdYwBXUVa8GfZ4i1Q4_rji2Y5i9yz7o"),
          "blue": ("hazir", "bg.png", None)}
 T0 = time.time()
 
@@ -114,11 +114,10 @@ def kos(a):
         if ed not in d["edisyon"] or "olcum" not in d["edisyon"][ed]:
             continue
         try:
-            if tur == "drive":
-                rc("copy", f"gdrive:ASTROLOVE/TEMP/KISISEL_PILOT/HAZIR/{ad}", str(YOL))
+            if tur == "klasor":
+                rc("--drive-root-folder-id", fid, "copy", f"gdrive:{ad}", str(YOL),
+                   timeout=600)
                 zp = YOL / ad
-                if not zp.exists():
-                    rc("--drive-root-folder-id", fid, "copy", "gdrive:", str(YOL))
             else:
                 (OUT / "hazir").mkdir(parents=True, exist_ok=True)
                 rc("copy", f"{DEST}/HAZIR/{ad}", str(OUT / "hazir"))
