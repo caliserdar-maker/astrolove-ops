@@ -87,11 +87,26 @@ def eta(i, n, what):
     log(f"{what}: {i}/{n} (%{100 * i / n:.0f}) gecen {el:.0f}s kalan ~{kalan:.0f}s")
 
 
-def rc(*args, capture=True):
-    cmd = ["rclone", *args]
-    r = subprocess.run(cmd, capture_output=capture, text=True)
+RC_SINIR = ["--timeout", "60s", "--contimeout", "20s", "--retries", "2"]
+
+
+def rc(*args, capture=True, timeout=120):
+    """rclone cagirisi: ag ve surec zaman sinirlari zorunlu.
+
+    stdin DEVNULL: token yenilemesi interaktif onay isterse rclone stdin'de
+    suresiz bekler; boyle bir kosu SIGALRM ile de kesilemez (kosu 3 ve 4 bu
+    sekilde 25+ dk hicbir sey yazmadan asili kaldi).
+    """
+    cmd = ["rclone", *RC_SINIR, *args]
+    t0 = time.time()
+    try:
+        r = subprocess.run(cmd, capture_output=capture, text=True, timeout=timeout,
+                           stdin=subprocess.DEVNULL)
+    except subprocess.TimeoutExpired:
+        raise RuntimeError(f"rclone {timeout}s icinde donmedi: rclone {' '.join(args[:3])}")
     if r.returncode != 0:
-        raise RuntimeError(f"rclone hata ({r.returncode}): {' '.join(args[:3])}\n{r.stderr[-800:]}")
+        raise RuntimeError(f"rclone hata ({r.returncode}, {time.time() - t0:.1f}s): "
+                           f"{' '.join(args[:3])}\n{(r.stderr or '')[-800:]}")
     return r.stdout if capture else ""
 
 
