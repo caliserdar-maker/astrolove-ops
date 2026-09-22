@@ -105,7 +105,7 @@ jobs:
         run: |
           set -euo pipefail
           case "$MOD" in
-            kuru|maliyet|dogrula|hpr|buyuk|yetki|yetki_test|pilot15_oku|boy15_oku|durum15|cerceve_sonda|siparis_hazirla|siparis_onizleme|siparis_izin_kapat|eslesme_kanit|router_kuru|router_teklif)
+            kuru|maliyet|dogrula|hpr|buyuk|yetki|yetki_test|pilot15_oku|boy15_oku|durum15|cerceve_sonda|cerceve_hazirlik|siparis_hazirla|siparis_onizleme|siparis_izin_kapat|eslesme_kanit|router_kuru|router_teklif)
               if [ "$APPLY" = "true" ]; then
                 echo "::error::mod=$MOD ile yazma olmaz. DUR."; exit 1
               fi
@@ -231,6 +231,12 @@ jobs:
             python scripts/pod/pod_pilot_15.py oku --listing "$LISTING" --kota-alt "$KOTA_ALT"
           elif [ "$MOD" = "pilot15_yaz" ]; then
             python scripts/pod/pod_pilot_15.py yaz --listing "$LISTING" --kota-alt "$KOTA_ALT" --confirm "$CONFIRM" --adim "$ADIM"
+          elif [ "$MOD" = "cerceve_hazirlik" ]; then
+            # SALT OKUMA: urun kayitlari + fiyat teklifleri. Siparis YOK, Etsy'ye dokunulmaz.
+            python scripts/prodigi/cerceve_hazirlik.py --env live --out _out/cerceve2
+            rclone copy _out/cerceve2 "gdrive:ASTROLOVE/TEMP/POD_5X7" --include "CERCEVE_FIYAT.csv" -q
+            rclone copy _out/cerceve2 "gdrive:ASTROLOVE/TEMP/POD_5X7/CERCEVE" -q
+            echo "cikti: TEMP/POD_5X7/CERCEVE_FIYAT.csv + TEMP/POD_5X7/CERCEVE/"
           elif [ "$MOD" = "cerceve_sonda" ]; then
             # SALT OKUMA: katalog sorgusu + maliyet teklifi. Siparis YOK, Etsy'ye dokunulmaz.
             python scripts/prodigi/cerceve_sonda.py --env live --out _out/cerceve
