@@ -27,6 +27,10 @@ on:
         description: "Script'e gecilecek ek argumanlar"
         required: false
         default: ""
+      kilit_commit:
+        description: "Onayli kilitleri depoya yaz (yalniz onayli/ ve ORAN_SABITLERI.json)"
+        required: false
+        default: "false"
 
 concurrency: kisisel-pilot
 
@@ -34,6 +38,11 @@ jobs:
   kosu:
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    # Yazma izni yalniz kilit commit'i icin; asagidaki adim SADECE
+    # scripts/kisisel/onayli/** ve scripts/kisisel/ORAN_SABITLERI.json
+    # yollarini ekler ve baska bir sey staged ise HATA ile durur.
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout (secilen dal)
@@ -84,6 +93,37 @@ jobs:
           set -f            # ARGS icinde imzali URL olabilir; ? ve * glob olmasin
           # shellcheck disable=SC2086
           python "$SCRIPT" $ARGS
+
+      - name: Onayli kilitleri depoya yaz
+        if: inputs.kilit_commit == 'true'
+        env:
+          DAL: ${{ inputs.branch }}
+          SCRIPT: ${{ inputs.script }}
+        run: |
+          set -euo pipefail
+          IZIN="scripts/kisisel/onayli scripts/kisisel/ORAN_SABITLERI.json"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # shellcheck disable=SC2086
+          git add -A -- $IZIN
+          # Izin verilen yollarin disinda staged dosya olmamali.
+          DISARIDA="$(git diff --cached --name-only \
+            | grep -Ev '^scripts/kisisel/(onayli/|ORAN_SABITLERI\.json$)' || true)"
+          if [ -n "$DISARIDA" ]; then
+            echo "HATA: izin verilmeyen yollar staged:" >&2
+            echo "$DISARIDA" >&2
+            exit 1
+          fi
+          if git diff --cached --quiet; then
+            echo "kilitlerde degisiklik yok, commit atlaniyor"
+            exit 0
+          fi
+          git diff --cached --stat
+          git commit -m "kisisel: onayli kilitler (Serdar onayi 22 Eyl 2026)" \
+                     -m "Kosu: $SCRIPT (run ${GITHUB_RUN_ID})"
+          git push origin "HEAD:${DAL}"
+          echo "DOGRULAMA: $(git rev-parse --short HEAD) -> ${DAL}"
+          git show --stat --oneline HEAD | head -40
 
       - name: Kosu ciktilarini artifact yap
         if: always()

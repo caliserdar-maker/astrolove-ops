@@ -84,24 +84,69 @@ def log(*a):
           *a, flush=True)
 
 
-def edisyon_maske(L, acik):
+def edisyon_maske(L, acik, kenar=None):
     """Yerel kontrast maskesi: buyuk yaricapli zemin medyani cikarilir."""
     zemin = cv2.medianBlur(np.clip(L, 0, 255).astype(np.uint8),
                            MASKE_YARICAP).astype(np.float32)
     m = ((zemin - L) if acik else (L - zemin)) > MASKE_ESIK
-    W = L.shape[1]
-    m[:, :int(W * MASKE_KENAR)] = False
-    m[:, int(W * (1 - MASKE_KENAR)):] = False
+    k = MASKE_KENAR if kenar is None else kenar
+    if k:
+        W = L.shape[1]
+        m[:, :int(W * k)] = False
+        m[:, int(W * (1 - k)):] = False
     n, lab, st, _ = cv2.connectedComponentsWithStats(m.astype(np.uint8), connectivity=8)
     tut = np.zeros(n, bool)
     tut[1:] = st[1:, cv2.CC_STAT_AREA] >= MASKE_MIN_ALAN
     return tut[lab]
 
 
-def murekkep(a):
-    """Bir kirpimin murekkep maskesi (ayni yerel kontrast olcutu)."""
+def murekkep(a, kenar=None):
+    """Bir kirpimin murekkep maskesi (ayni yerel kontrast olcutu).
+
+    `kenar=0` kucuk kirpimlar icindir: kenar payi kirpimi tam sayfa taramasi
+    icindir, onayli kilit karsilastirmasinda kirpimin kendisini yok eder.
+    """
     L = a @ LUMA
-    return edisyon_maske(L, float(np.median(L)) > 128)
+    return edisyon_maske(L, float(np.median(L)) > 128, kenar)
+
+
+UZAT_AZAMI = 8          # kume kenarini en fazla bu kadar sutun disa tasi
+
+
+def kume_uzat(m, km):
+    """Kume kenarlarini GERCEK murekkep uzanimina tasir.
+
+    `kumeler()` bir sutunu ancak en az IKI murekkep pikseli varsa sayar. Bu
+    kural bandi bulmak icin dogru (tek piksellik gurultuyu eler), ama GENISLIK
+    olcusu icin yaniltici: ince biten bir harf ucu (orn. Cinzel 'R'nin bacagi)
+    sutun basina 1 px kalinca kume erken bitiyor.
+
+    Olculdu (Blue 4x5, SERDAR): uretilen ismin sag ucunda x=1040..1043
+    sutunlari 1'er piksel murekkep tasiyor; kume 1040'ta bitiyor ve olculen
+    bosluk 136 yerine 139 cikiyordu. Yerlestirme dogruydu (plaka sag kenari
+    1044, sonsuz sol kenari 1180, fark = 136 = kilitli bosluk). Canva'nin
+    kendi cizdigi 'R' ucu daha kalin bittigi icin referansta bu kayip yok;
+    kapi bu yuzden yalniz SOL boslukta +2..+5 px gosteriyordu.
+
+    Uzatma her iki tarafta da (referans ve uretilen) ayni sekilde uygulanir,
+    en fazla UZAT_AZAMI sutun ve komsu kumeye girmeden.
+    """
+    sut = m.any(axis=0)
+    W = m.shape[1]
+    out = []
+    for i, (a, b) in enumerate(km):
+        alt = km[i - 1][1] if i > 0 else 0
+        ust = km[i + 1][0] if i + 1 < len(km) else W
+        n = 0
+        while a - 1 >= alt and n < UZAT_AZAMI and sut[a - 1]:
+            a -= 1
+            n += 1
+        n = 0
+        while b < ust and n < UZAT_AZAMI and sut[b]:
+            b += 1
+            n += 1
+        out.append((a, b))
+    return out
 
 
 def satir_olc(a, bant, pay=10):
@@ -117,6 +162,7 @@ def satir_olc(a, bant, pay=10):
     km = [c for c in _kumeler(m, 20) if c[1] - c[0] > 40]
     if len(km) != 3:
         return {"hata": f"{len(km)} kume"}
+    km = kume_uzat(m, km)
     sol, inf, sag = km
     out = {"sol_isim": list(sol), "sonsuz": list(inf), "sag_isim": list(sag),
            "bosluk": [inf[0] - sol[1], sag[0] - inf[1]],
@@ -257,6 +303,95 @@ def sabitleri_yaz(olcumler):
 
 
 # ----------------------------------------------------------- girdi kapisi
+
+
+# --- ONAYLI KILITLER (Serdar onayi 22 Eyl 2026) ---------------------------
+ONAYLI_ED = Path(__file__).resolve().parent / "onayli"
+KIRPIM_PAY = 20         # kilit kirpimlarinda birakilan pay (px)
+KILIT_KAYMA = 1         # onayli kirpima gore azami kayma (px)
+KILIT_FARK = 3.0        # murekkep ici azami ortalama RGB farki
+
+
+def kilit_kutulari(poster, s):
+    """Onayli kirpimlarin kutulari: isim satiri ve tagline."""
+    pa = np.asarray(poster.convert("RGB")).astype(np.float32)
+    g = satir_olc(pa, s["isim_bant"])
+    if "hata" in g:
+        return None, g["hata"]
+    W, H = poster.width, poster.height
+    ib, tb = s["isim_bant"], s["tag_bant"]
+    isim = (max(g["sol_isim"][0] - KIRPIM_PAY, 0), max(ib[0] - KIRPIM_PAY, 0),
+            min(g["sag_isim"][1] + KIRPIM_PAY, W), min(ib[1] + KIRPIM_PAY, H))
+    ty0, ty1 = max(tb[0] - KIRPIM_PAY, 0), min(tb[1] + KIRPIM_PAY, H)
+    tm = murekkep(pa[ty0:ty1])
+    tk = [c for c in _kumeler(tm, 60) if c[1] - c[0] > 20]
+    if not tk:
+        return None, "tagline kumesi bulunamadi"
+    tag = (max(tk[0][0] - KIRPIM_PAY, 0), ty0,
+           min(tk[-1][1] + KIRPIM_PAY, W), ty1)
+    return {"isim": list(isim), "tagline": list(tag),
+            "kume": [list(g["sol_isim"]), list(g["sonsuz"]), list(g["sag_isim"])]}, None
+
+
+def kilit_yaz(poster, ed, oran, s):
+    """Bir edisyon x oran icin onayli kirpimlari ve ALTIN posteri yazar."""
+    kutu, hata = kilit_kutulari(poster, s)
+    if hata:
+        return None, hata
+    yol = ONAYLI_ED / ed
+    yol.mkdir(parents=True, exist_ok=True)
+    poster.crop(tuple(kutu["isim"])).save(yol / f"ISIM_SATIRI_{oran}.png")
+    poster.crop(tuple(kutu["tagline"])).save(yol / f"TAGLINE_{oran}.png")
+    pilot12.kaydet(poster, yol / f"ALTIN_{ed}_{oran}.jpg")
+    kj = yol / "KIRPIM.json"
+    d = json.loads(kj.read_text(encoding="utf-8")) if kj.exists() else {}
+    d[oran] = kutu
+    d["_"] = ("Serdar onayi 22 Eylul 2026. Bu kirpimlar edisyonun uretim "
+              "regresyon kapisidir; Serdar'in acik onayi olmadan "
+              "degistirilemez.")
+    kj.write_text(json.dumps(d, ensure_ascii=False, indent=1) + "\n",
+                  encoding="utf-8")
+    return kutu, None
+
+
+def kilit_kapisi(poster, ref_yol, kutu):
+    """Uretilen poster, onayli kirpimla BIREBIR ayni mi? (Blue'daki olcut)"""
+    if not ref_yol.exists():
+        return {"gecti": None, "sebep": "kilit yok"}
+    ref = Image.open(ref_yol).convert("RGB")
+    x0, y0 = int(kutu[0]), int(kutu[1])
+    yeni = poster.convert("RGB").crop((x0, y0, x0 + ref.width, y0 + ref.height))
+    ao = np.asarray(ref).astype(np.float32)
+    an = np.asarray(yeni).astype(np.float32)
+    mo, mn = murekkep(ao, kenar=0), murekkep(an, kenar=0)
+    ko, kn = _kumeler(mo, 12), _kumeler(mn, 12)
+    if not ko or not kn:
+        return {"gecti": False, "sebep": f"kume {len(ko)}/{len(kn)}"}
+    kayma = max(abs(ko[0][0] - kn[0][0]), abs(ko[-1][1] - kn[-1][1]))
+    ortak = (mo & mn).astype(np.uint8)
+    ic = cv2.erode(ortak, np.ones((3, 3), np.uint8)) > 0
+    fark = float(np.abs(ao[ic] - an[ic]).mean()) if ic.sum() else 999.0
+    return {"gecti": bool(kayma <= KILIT_KAYMA and fark <= KILIT_FARK),
+            "kayma_px": int(kayma), "ic_fark": round(fark, 2),
+            "px": int(ic.sum()), "kume": [len(ko), len(kn)]}
+
+
+def kilit_dogrula(poster, ed, oran):
+    """Onayli kilitler varsa isim satiri ve tagline kapilarini kosar."""
+    kj = ONAYLI_ED / ed / "KIRPIM.json"
+    if not kj.exists():
+        return None
+    d = json.loads(kj.read_text(encoding="utf-8"))
+    if oran not in d:
+        return None
+    out = {}
+    for tur, ad in (("isim", "ISIM_SATIRI"), ("tagline", "TAGLINE")):
+        out[tur] = kilit_kapisi(poster, ONAYLI_ED / ed / f"{ad}_{oran}.png",
+                                d[oran][tur])
+    out["gecti"] = all(v.get("gecti") for v in out.values()
+                       if isinstance(v, dict))
+    return out
+
 
 def girdi_kapisi(ed, oran, kilit, o28, zemin_yol):
     hata = []
@@ -575,6 +710,27 @@ def kos(a):
                     satir["geometri"], satir["doku"] = gk, dk
                     kayit["geometri"], kayit["doku"] = gk, dk
                     pilot12.kaydet(poster, YOL / ed / f"ALTIN_{oran}.jpg")
+                    # Onayli kilitler: once mevcut kilide gore regresyon
+                    # kapisi (varsa), sonra --kilitle ile yazma.
+                    kk = kilit_dogrula(poster, ed, oran)
+                    if kk:
+                        satir["kilit_kapisi"] = kk
+                        kayit["kilit_kapisi"] = kk
+                        log(f"{ed} {oran} kilit kapisi: isim "
+                            f"{kk['isim'].get('kayma_px')} px / "
+                            f"{kk['isim'].get('ic_fark')} - tagline "
+                            f"{kk['tagline'].get('kayma_px')} px / "
+                            f"{kk['tagline'].get('ic_fark')} -> "
+                            f"{'GECTI' if kk['gecti'] else 'KALDI'}")
+                    if a.kilitle:
+                        kutu, khata = kilit_yaz(poster, ed, oran, s)
+                        kayit["kilit_yazildi"] = bool(kutu)
+                        if khata:
+                            kayit["kilit_hata"] = khata
+                            log(f"{ed} {oran} KILIT YAZILAMADI: {khata}")
+                        else:
+                            log(f"{ed} {oran} kilit yazildi: isim {kutu['isim']}, "
+                                f"tagline {kutu['tagline']}")
                     # Doku, Black ve Pure White'ta bloklamaz (Serdar, 22 Eyl).
                     dk_blok = dk["gecti"] or ed in DOKU_BLOKLAMAZ
                     satir["doku_bloklar"] = ed not in DOKU_BLOKLAMAZ
@@ -832,6 +988,9 @@ def rapor(sonuc, olcumler):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--yerel", action="store_true")
+    ap.add_argument("--kilitle", action="store_true",
+                    help="onayli/<edisyon>/ kirpimlarini ve ALTIN'i yaz "
+                         "(Serdar onayi gerekir)")
     ap.add_argument("--edisyon", nargs="*", default=None)
     kos(ap.parse_args())
 

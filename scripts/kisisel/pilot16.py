@@ -462,6 +462,47 @@ def girdi_kapisi(olcum, oranlar):
     log(f"girdi kapisi GECTI ({len(oranlar)} oran)")
 
 
+
+def blue_kilit_guncelle(poster, oran, s, kirpimlar):
+    """Blue'nun ALTIN ve TAGLINE kilitlerini yeni ciktiyla gunceller.
+
+    Serdar onayi 22 Eylul 2026 (2. madde): temizlik duzeltmesiyle sembol ve
+    tagline bandi degisti, isim bandi 0 px degisti. ISIM_SATIRI_<oran>.png
+    kilitlerine DOKUNULMAZ (regresyon kapisi odur ve gecmeye devam ediyor);
+    ALTIN_<oran>.jpg ve tagline kilidi yenilenir, eskileri onayli/eski/
+    altina TASINIR (silinmez).
+    """
+    eski_dir = ONAYLI_DIR / "eski"
+    eski_dir.mkdir(parents=True, exist_ok=True)
+    tasinan = []
+    for ad in (f"ALTIN_{oran}.jpg", f"TAGLINE_{oran}.png"):
+        kaynak = ONAYLI_DIR / ad
+        if kaynak.exists():
+            hedef = eski_dir / f"{Path(ad).stem}_20260921{Path(ad).suffix}"
+            if not hedef.exists():
+                kaynak.replace(hedef)
+                tasinan.append(hedef.name)
+            else:
+                kaynak.unlink()
+    kaydet(poster, ONAYLI_DIR / f"ALTIN_{oran}.jpg")
+
+    # tagline kirpimi: tag bandi + pay, murekkebin yatay uzanimi
+    pa = np.asarray(poster.convert("RGB")).astype(np.float32)
+    tb = s["tag_bant"]
+    y0, y1 = max(tb[0] - 20, 0), min(tb[1] + 20, poster.height)
+    L = pa[y0:y1] @ LUMA
+    tm = L > MUREKKEP
+    tk = [c for c in kumeler(tm, 60) if c[1] - c[0] > 20]
+    if not tk:
+        return {"hata": "tagline kumesi bulunamadi", "tasinan": tasinan}
+    x0 = max(tk[0][0] - 20, 0)
+    x1 = min(tk[-1][1] + 20, poster.width)
+    poster.crop((x0, y0, x1, y1)).save(ONAYLI_DIR / f"TAGLINE_{oran}.png")
+    kirpimlar.setdefault(oran, {})["tagline_kirpim"] = [int(x0), int(y0),
+                                                        int(x1), int(y1)]
+    return {"tasinan": tasinan, "tagline_kirpim": [int(x0), int(y0), int(x1), int(y1)]}
+
+
 def kos(a):
     YOL.mkdir(parents=True, exist_ok=True)
     if not a.yerel:
@@ -483,7 +524,7 @@ def kos(a):
     girdi_kapisi(olcum, oranlar)
 
     kapi, isim_kapi, test, iz, sure = {}, {}, {}, {}, {}
-    olcum_kapi = {}
+    olcum_kapi, kilit_bilgi = {}, {}
     for o in oranlar:
         s, S = oran_kur(o, olcum[o], bg_im, kalibre=a.kalibre)
         olcum_kapi[o] = s["temiz_ara_kapisi"]
@@ -515,6 +556,9 @@ def kos(a):
                 kapi[o] = bk
                 kaydet(p, YOL / f"_kapi_{o}.jpg")
                 isim_kapi[o] = isim_kapisi(Image.open(YOL / f"_kapi_{o}.jpg"), o, kirpimlar)
+                if a.kilitle:
+                    kilit_bilgi[o] = blue_kilit_guncelle(p, o, s, kirpimlar)
+                    log(f"{o} Blue kilidi guncellendi: {kilit_bilgi[o]}")
                 iz[o] = iz_kontrol(p, s, o, "SERDAR-LENA")
                 kaydet(iz[o], YOL / f"IZ_KONTROL_{o}.jpg", maks=1_500_000)
                 log(f"{o} isim kapisi: {json.dumps(isim_kapi[o])}")
@@ -555,9 +599,17 @@ def kos(a):
         f"(alan {ara_iz['alan_px']} px, {ara_iz['blok']} blok) en_ort "
         f"{ara_iz['en_ort']} en_tepe {ara_iz['en_tepe']} kotu {ara_iz['kotu_blok']}")
 
+    if a.kilitle:
+        (ONAYLI_DIR / "ISIM_SATIRI_KIRPIM.json").write_text(
+            json.dumps(kirpimlar, ensure_ascii=False, indent=1) + "\n",
+            encoding="utf-8")
+        log(f"Blue kilitleri yenilendi: {len(kilit_bilgi)} oran, "
+            f"eskiler onayli/eski/ altina tasindi")
+
     d = {"oranlar": oranlar, "kapi": kapi, "isim_kapi": isim_kapi, "test": test,
          "sure": sure, "kendi_testi": {"oran": o0, **kendi},
          "temiz_ara_kapisi": {o: olcum_kapi[o] for o in oranlar},
+         "kilit_guncelleme": kilit_bilgi,
          "temiz_ara_iz_testi": {"oran": o0, "beklenen": "KALDI",
                                 "sonuc": "PASS" if not ara_iz["gecti"]
                                 else "FAIL (kapi izi goremedi)", **ara_iz}}
@@ -680,6 +732,9 @@ def rapor(d):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--yerel", action="store_true")
+    ap.add_argument("--kilitle", action="store_true",
+                    help="Blue ALTIN ve TAGLINE kilitlerini yenile, eskileri "
+                         "onayli/eski/ altina tasi (Serdar onayi gerekir)")
     ap.add_argument("--kalibre", action="store_true",
                     help="hizalamayi yeniden hesapla ve ORAN_SABITLERI.json'a yaz")
     kos(ap.parse_args())
