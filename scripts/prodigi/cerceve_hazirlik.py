@@ -63,8 +63,8 @@ def hedef_fiyat(maliyet, hedef=HEDEF_NET, ads=True):
 
 
 def cm(o):
-    """productDimensions -> (genislik_cm, yukseklik_cm)."""
-    if not o:
+    """productDimensions -> (genislik_cm, yukseklik_cm). Sozluk degilse None."""
+    if not isinstance(o, dict):
         return None
     w, h = float(o.get("width") or 0), float(o.get("height") or 0)
     if (o.get("units") or "").lower().startswith("in"):
@@ -101,14 +101,16 @@ def main():
         for aile, kisa in (("GLOBAL-CFP", "cfp"), ("GLOBAL-CFPM", "cfpm"), ("GLOBAL-HPR", "hpr")):
             u = ham[aile].get(b) or {}
             pa = (u.get("printAreas") or {}).get("default") or {}
-            olc = cm(pa.get("required") or pa.get("productDimensions") or u.get("productDimensions"))
+            # Prodigi v4: printAreas.default.required BOOL; olcu urun duzeyinde geliyor.
+            olc = cm(pa.get("productDimensions")) or cm(u.get("productDimensions"))
+            satir[f"{kisa}_ham_printarea"] = json.dumps(pa, ensure_ascii=False)[:80]
             satir[f"{kisa}_alan_cm"] = f"{olc[0]}x{olc[1]}" if olc else ""
             satir[f"{kisa}_oran"] = round(olc[1] / olc[0], 4) if olc and olc[0] else ""
         alan_satir.append(satir)
         log(f"  {b}: CFP {satir['cfp_alan_cm']} (oran {satir['cfp_oran']}) | "
             f"CFPM {satir['cfpm_alan_cm']} (oran {satir['cfpm_oran']}) | HPR {satir['hpr_alan_cm']}")
     with open(out / "BASKI_ALANI.csv", "w", newline="", encoding="utf-8") as fh:
-        w = csv.DictWriter(fh, fieldnames=list(alan_satir[0]))
+        w = csv.DictWriter(fh, fieldnames=list(alan_satir[0]), extrasaction="ignore")
         w.writeheader()
         w.writerows(alan_satir)
 
