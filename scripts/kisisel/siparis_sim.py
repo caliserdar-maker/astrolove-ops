@@ -181,7 +181,7 @@ def kos(a):
                            "sag": dogru["sag"]["deger"]},
                     dogru["tagline"]["deger"])
                 bk = blok_kapisi(poster, S, s, yeni_genis)
-                gk = eu.geometri_kapisi(poster, o28, s)
+                gk = eu.geometri_kapisi(poster, o28, s, bilgi)
                 dk = eu.doku_kapisi(poster, S["ref"], o28, s)
                 kapilar = {
                     "blok kalinti": {"gecti": bk["gecti"],

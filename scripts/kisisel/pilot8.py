@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 """
-Kisisellestirme v9 (Serdar karari, 21 Eyl 2026): SECENEK 1 ONAYLANDI.
+LEGACY - Kisisellestirme v9 (Serdar karari, 21 Eyl 2026).
+
+Bu betik oran-bazli uretim akisindan onceki olcum aracidir. Yalniz eski
+`onayli/TAGLINE_ALTIN.png` kilidini kullanir; guncel uretim ve regresyon
+kapilari `pilot16.py` / `edisyon_uret.py` icindeki `TAGLINE_<oran>.png`
+kilitleridir. Uretim icin bu betigi kullanmayin.
 
 DEGISEN OGELER
   - Tagline dokusu icin SECENEK 1 kilitlendi (cancer plakasi profili, alt ucu

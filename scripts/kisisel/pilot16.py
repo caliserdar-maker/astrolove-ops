@@ -294,11 +294,19 @@ def poster_kur(s, S, isimler, tagline):
     # 2) yeni isimler ve tagline (alfa birlestirme)
     t = Image.fromarray(np.clip(a, 0, 255).astype(np.uint8), "RGB").convert("RGBA")
     yeni_maske = np.zeros(a.shape[:2], np.uint8)
+    isim_geometri = {}
     for y in ("sol", "sag"):
         p = pl[y][0]
         px, py = int(round(x[y])), int(round(s["isim_y"] - p.height / 2))
         t.alpha_composite(p, (px, py))
-        isaretle(yeni_maske, np.asarray(p)[..., 3] > 8, px, py)
+        alfa = np.asarray(p)[..., 3]
+        pm = alfa > 40
+        isaretle(yeni_maske, alfa > 8, px, py)
+        ys = np.nonzero(pm.any(axis=1))[0]
+        isim_geometri[y] = {
+            "cap": int(ys[-1] - ys[0] + 1),
+            "dikey_merkez": round(py + (int(ys[0]) + int(ys[-1])) / 2, 1),
+        }
     tg, tbilgi = tagline_plaka(s, {"prof": S["prof"]}, tagline)
     tx, ty = (int(round(NORM_W / 2 - tg.width / 2)),
               int(round(s["tag_y"] - tg.height / 2)))
@@ -317,7 +325,8 @@ def poster_kur(s, S, isimler, tagline):
     bilgi = {"olcek": round(olcek, 3), "punto": [pl["sol"][1], pl["sag"][1]],
              "genislik": [w["sol"], w["sag"]], "satir": round(toplam, 1),
              "kenar": [x0, NORM_W - x0 - toplam],
-             "satir_merkez": round(x0 + toplam / 2, 1), "tagline": tbilgi}
+             "satir_merkez": round(x0 + toplam / 2, 1),
+             "isim_geometri": isim_geometri, "tagline": tbilgi}
     return t.convert("RGB"), bilgi, merkez, x, yeni_genis
 
 

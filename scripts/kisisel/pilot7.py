@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """
-Kisisellestirme pilotu v7 (Mo kararlari, 21 Eyl 2026).
+LEGACY asama notu - Kisisellestirme pilotu v7 (Mo kararlari, 21 Eyl 2026).
+
+Asagidaki maddeler v7 kosusunun tarihsel degisiklik kaydidir. Guncel uretim
+yerlesimi `pilot12.d_olcek` ile iki ismi birlikte kucultur; bu dosyadaki
+"yalniz kendisi" ifadesi guncel uretim sozlesmesi degildir.
 
 DEGISEN OGELER
   - Tagline kabartmasi: bant disi sabit renk KALKTI. Kabartma glifin kendi

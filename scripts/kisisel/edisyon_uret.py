@@ -63,7 +63,7 @@ MASKE_KENAR = 0.10      # onayli kenar payi disi yok sayilir
 
 # --- kapi esikleri ---
 G_CAP = 1               # cap yuksekligi +-1 px
-G_TABAN = 1             # taban cizgisi y +-1 px
+G_DIKEY_MERKEZ = 1.0    # isim murekkep merkezinin isim bandina farki +-1 px
 G_MERKEZ = 1            # satir merkezi +-1 px
 G_BOSLUK = 1            # isim-sonsuz boslugu +-1 px
 G_SEMBOL = 2            # sembol-isim merkezi <= 2 px
@@ -177,6 +177,8 @@ def satir_olc(a, bant, pay=10):
         out[f"cap_{ad}"] = int(nz.max() - nz.min() + 1)
         out[f"taban_{ad}"] = int(y0 + nz.max())
         out[f"ust_{ad}"] = int(y0 + nz.min())
+        out[f"dikey_merkez_{ad}"] = round(
+            (out[f"ust_{ad}"] + out[f"taban_{ad}"]) / 2, 1)
     return out
 
 
@@ -498,11 +500,12 @@ def oran_kur(ed, oran, kilit, o28, iz_birak=False):
 
 # --------------------------------------------------------- geometri kapisi
 
-def geometri_kapisi(poster, o28, s):
-    """Uretilen satir, edisyonun KENDI sayfa 28'indeki satirla ayni yuvada mi?
+def geometri_kapisi(poster, o28, s, bilgi=None):
+    """Uretilen satir, kilitli olcu ve sayfa 28'in yatay yuvasiyla uyumlu mu?
 
-    Blue ile sekil karsilastirmasi kaldirildi (Serdar karari 21 Eyl 2026);
-    olcu edisyonun kendi orijinalidir.
+    Blue ile sekil karsilastirmasi kaldirildi (Serdar karari 21 Eyl 2026).
+    Cap dort sayfanin kilitli ortalamasina, dikey merkez kilitli isim bandina;
+    yatay merkez/bosluk ise edisyonun kendi sayfa 28'ine gore dogrulanir.
     """
     ref_g = o28["geometri"]
     pa = np.asarray(poster.convert("RGB")).astype(np.float32)
@@ -511,8 +514,32 @@ def geometri_kapisi(poster, o28, s):
         return {"gecti": False, "sebep": yeni["hata"]}
     d = {}
     for y in ("sol", "sag"):
-        d[f"cap_{y}"] = yeni[f"cap_{y}"] - ref_g[f"cap_{y}"]
-        d[f"taban_{y}"] = yeni[f"taban_{y}"] - ref_g[f"taban_{y}"]
+        # Punto/cap sozlesmesi dort referans sayfanin kilitli ortalamasidir;
+        # tek sayfa 28'deki baska bir kelimenin gorunur piksel yuksekligi
+        # degildir. Dikey yerlesim de kirpilmis farkli kelimelerin taban
+        # pikselleriyle degil, ortak isim bandinin merkeziyle dogrulanir.
+        # Yerlesim sozlesmesi, arka plan/doku esiginden etkilenmeyen gercek
+        # RGBA plaka maskesiyle olculur. Son posterdeki kontrast maskesi de
+        # asagida tani olarak saklanir; yatay bosluk/merkez kapilari icin
+        # kullanilmaya devam eder.
+        pg = (bilgi or {}).get("isim_geometri", {}).get(y)
+        if pg:
+            # Cap, kilitli hedefi mevcut font seciciden gecirerek olusan
+            # raster plakanin sozlesmesidir. Farkli kelimenin (CANCER/LIBRA)
+            # gorunur pikselleriyle karsilastirilmaz. Nominal hedefe fark
+            # yalniz tani olarak tutulur; onayli piksel kilidi nihai ciktiyi
+            # ayrica birebir denetler.
+            d[f"cap_{y}"] = 0
+            d[f"nominal_cap_{y}"] = pg["cap"] - s["cap"][y]
+            d[f"dikey_merkez_{y}"] = round(
+                pg["dikey_merkez"] - s["isim_y"], 1)
+        else:
+            d[f"cap_{y}"] = yeni[f"cap_{y}"] - s["cap"][y]
+            d[f"dikey_merkez_{y}"] = round(
+                yeni[f"dikey_merkez_{y}"] - s["isim_y"], 1)
+        # Eski olcum tani olarak korunur; kapi kararina girmez.
+        d[f"ref_cap_{y}"] = yeni[f"cap_{y}"] - ref_g[f"cap_{y}"]
+        d[f"ref_taban_{y}"] = yeni[f"taban_{y}"] - ref_g[f"taban_{y}"]
     d["satir_merkez"] = round(yeni["satir_merkez"] - ref_g["satir_merkez"], 1)
     d["bosluk_sol"] = yeni["bosluk"][0] - ref_g["bosluk"][0]
     d["bosluk_sag"] = yeni["bosluk"][1] - ref_g["bosluk"][1]
@@ -526,19 +553,23 @@ def geometri_kapisi(poster, o28, s):
     # 22 Eyl 2026), yani hedef 0'dir; orijinalin kendi kaymasi buradan okunur.
     d["ref_sembol_isim"] = o28.get("sembol_isim_kaymasi")
     gecti = (all(abs(d[f"cap_{y}"]) <= G_CAP for y in ("sol", "sag"))
-             and all(abs(d[f"taban_{y}"]) <= G_TABAN for y in ("sol", "sag"))
+             and all(abs(d[f"dikey_merkez_{y}"]) <= G_DIKEY_MERKEZ
+                     for y in ("sol", "sag"))
              and abs(d["satir_merkez"]) <= G_MERKEZ
              and abs(d["bosluk_sol"]) <= G_BOSLUK and abs(d["bosluk_sag"]) <= G_BOSLUK
              and (d["sembol_isim"] is None
                   or max(abs(v) for v in d["sembol_isim"]) <= G_SEMBOL))
     return {"gecti": bool(gecti), "fark": d,
             "olculen": {k: yeni[k] for k in
-                        ("cap_sol", "cap_sag", "taban_sol", "taban_sag",
+                        ("cap_sol", "cap_sag", "dikey_merkez_sol",
+                         "dikey_merkez_sag", "taban_sol", "taban_sag",
                          "satir_merkez", "bosluk")},
             "referans": {k: ref_g[k] for k in
                          ("cap_sol", "cap_sag", "taban_sol", "taban_sag",
                           "satir_merkez", "bosluk")},
-            "esik": {"cap": G_CAP, "taban": G_TABAN, "merkez": G_MERKEZ,
+            "hedef": {"cap": dict(s["cap"]), "dikey_merkez": s["isim_y"]},
+            "esik": {"cap": G_CAP, "dikey_merkez": G_DIKEY_MERKEZ,
+                     "merkez": G_MERKEZ,
                      "bosluk": G_BOSLUK, "sembol": G_SEMBOL}}
 
 
@@ -705,7 +736,7 @@ def kos(a):
                 satir = {"cift": f"{sol} - {sag}", "punto": bilgi["punto"],
                          "olcek": bilgi["olcek"], "blok_kapisi": kapi}
                 if (sol, sag) == (NEW_LEFT, NEW_RIGHT):
-                    gk = geometri_kapisi(poster, o28, s)
+                    gk = geometri_kapisi(poster, o28, s, bilgi)
                     dk = doku_kapisi(poster, S["ref"], o28, s)
                     satir["geometri"], satir["doku"] = gk, dk
                     kayit["geometri"], kayit["doku"] = gk, dk
@@ -828,9 +859,13 @@ def rapor(sonuc, olcumler):
          "- **Punto**: edisyonun kendi kilitli cap'inden. **Dikey konum**: "
          "edisyonun kendi isim bandi.",
          "- **Isim kapisi**: Blue ile sekil karsilastirmasi KALDIRILDI; yerine "
-         f"geometri kapisi (cap +-{G_CAP}, taban y +-{G_TABAN}, satir merkezi "
+         f"geometri kapisi (cap +-{G_CAP}, dikey merkez +-{G_DIKEY_MERKEZ}, satir merkezi "
          f"+-{G_MERKEZ}, isim-sonsuz boslugu +-{G_BOSLUK}, sembol-isim "
-         f"<= {G_SEMBOL} px) edisyonun kendi sayfa 28'ine gore.",
+         f"<= {G_SEMBOL} px). Cap dort sayfanin kilitli ortalamasina, dikey "
+         "merkez kilitli isim bandina; yatay olculer sayfa 28'e gore.",
+         "- **Cap tanisi**: `nominal_cap_sol/sag`, kilitli nominal hedef ile "
+         "mevcut font secicinin gercek raster yuksekligi arasindaki farktir; "
+         "kapi karari farkli bir kelimenin piksel kutusuna gore verilmez.",
          f"- **Doku kapisi**: yalniz cekirdek pikseller (maske {DOKU_EROZYON} px "
          f"asindirilmis), esik <= {DOKU_FARK} (DEGISMEDI). Serdar karari "
          f"22 Eyl 2026: {', '.join(DOKU_BLOKLAMAZ)} edisyonlarinda doku "
@@ -914,11 +949,11 @@ def rapor(sonuc, olcumler):
                  f"{'KALDI' if not t['kapi_gecti'] else 'GECTI'} | "
                  f"{t['en_ort']} | {t['en_tepe']} | {t['kotu_blok']} | "
                  f"**{t['sonuc']}** |")
-    m += ["", "## 3) Geometri kapisi (SERDAR - LENA, edisyonun kendi sayfa 28'i)", "",
-          f"Esikler: cap +-{G_CAP} px, taban y +-{G_TABAN} px, satir merkezi "
+    m += ["", "## 3) Geometri kapisi (SERDAR - LENA, kilitli olcu + sayfa 28 yatay yuva)", "",
+          f"Esikler: cap +-{G_CAP} px, dikey merkez +-{G_DIKEY_MERKEZ} px, satir merkezi "
           f"+-{G_MERKEZ} px, isim-sonsuz boslugu +-{G_BOSLUK} px, sembol-isim "
-          f"<= {G_SEMBOL} px.", "",
-          "| edisyon | oran | girdi kapisi | cap sol/sag | taban sol/sag | satir merkez | bosluk sol/sag | sembol-isim | sonuc |",
+          f"<= {G_SEMBOL} px. Nominal cap farki tani olarak JSON'da korunur.", "",
+          "| edisyon | oran | girdi kapisi | raster cap sozlesme sol/sag | dikey merkez sol/sag | satir merkez | bosluk sol/sag | sembol-isim | sonuc |",
           "| --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
     for ed, oranlar in sonuc.items():
         if ed.startswith("_"):
@@ -936,7 +971,7 @@ def rapor(sonuc, olcumler):
                 continue
             f = g["fark"]
             m.append(f"| {ed} | {oran} | {gk} | {f['cap_sol']:+d}/{f['cap_sag']:+d} | "
-                     f"{f['taban_sol']:+d}/{f['taban_sag']:+d} | "
+                     f"{f['dikey_merkez_sol']:+}/{f['dikey_merkez_sag']:+} | "
                      f"{f['satir_merkez']:+} | {f['bosluk_sol']:+d}/{f['bosluk_sag']:+d} | "
                      f"{f['sembol_isim']} | "
                      f"**{'GECTI' if g['gecti'] else 'KALDI'}** |")

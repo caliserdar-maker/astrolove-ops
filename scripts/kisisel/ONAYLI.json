@@ -25,7 +25,7 @@
       "murekkep_ortalama_fark": 3,
       "olcum": "ortak murekkep maskesi 1 px asindirilir; onayli kirpim baska zeminde alindigi icin kenar yumusatma pikselleri zeminle karisir ve yapisal olarak eslesemez"
     },
-    "sonsuzluk_boslugu": "Serdar onayi 21 Eylul 2026: isim ile sonsuzluk arasindaki bosluk referanstaki CANCER-sonsuzluk boslugundan (136 px) az olamaz. Sigmayan isim YALNIZ KENDISI orantili kuculur; bu durumda ciftteki cap yuksekligi farki buyur, kural geregidir.",
+    "sonsuzluk_boslugu": "Serdar onayi 21 Eylul 2026: isim ile sonsuzluk arasindaki bosluk referanstaki CANCER-sonsuzluk boslugundan (136 px) az olamaz. Satir kenar payina sigmazsa iki isim BIRLIKTE, ayni oranda kuculur.",
     "sembol_acikligi": "Serdar onayi 21 Eylul 2026: ustteki kucuk sembollerle en az 20 px bosluk (aksan noktalari dahil).",
     "kilit": "Serdar onayi 21 Eylul 2026: kilitli; yalniz isim METNI degisir."
   },
@@ -48,7 +48,7 @@
       1650,
       2670
     ],
-    "referans_dosya": "onayli/TAGLINE_ALTIN.png",
+    "referans_dosya": "onayli/TAGLINE_<oran>.png (oran bazli guncel kilit); onayli/TAGLINE_ALTIN.png yalniz legacy pilot8 icindir",
     "kontrol": {
       "harf_konumu_px": 1,
       "murekkep_ortalama_fark": 3,
@@ -100,7 +100,7 @@
     "sembol_hizasi": "Sembol merkezi ile isim merkezi farki <= 2 px.",
     "tasinan_oge": "Tasinan oge ile referanstaki orijinali arasinda murekkep farki <= 3.",
     "kalinti": "Serdar onayi 21 Eylul 2026 (V5): alan ortalamasi yerine 16x16 BLOK bazli. Olcum alani = eski ogelerin genisletilmis maskesi MINUS yeni yazilan ogeler (3 px pay) MINUS yildizlar; bu alanda poster zemine esit olmalidir. Her blokta ortalama fark <= 2 ve tek piksel farki <= 6; tutmazsa kosu HATA verir ve sorunlu blogun koordinati raporlanir. Kapi kendini test eder: kasten birakilan soluk iz HATA vermelidir.",
-    "tagline": "onayli/TAGLINE_ALTIN.png ile karsilastirma (SECENEK 1 dokusu)."
+    "tagline": "onayli/TAGLINE_<oran>.png ile oran bazli karsilastirma (SECENEK 1 dokusu). TAGLINE_ALTIN.png legacy pilot8 disinda kullanilmaz."
   },
   "etsy_sinirlari": {
     "onay": "Serdar onayi 21 Eylul 2026.",
@@ -108,9 +108,9 @@
     "tagline_azami_karakter": 35,
     "kucultme": "Sinir icinde sigmazsa mevcut kural: iki isim BIRLIKTE ayni oranda, tagline TEK BASINA orantili kuculur.",
     "alt_sinir": "Olcek %65'in altina inecek giris URETILMEZ; siparis 'ELLE KONTROL' ile durur.",
-    "isim_karakterleri": "Yalniz harf (Latin + Turkce), bosluk, tire ve kesme isareti. Isimler her zaman BUYUK harfe cevrilir (Turkce i -> I kurali). Desteklenmeyen alfabe, emoji veya fontta olmayan karakter -> ELLE KONTROL.",
+    "isim_karakterleri": "Yalniz harf (Latin + Turkce), bosluk, tire ve kesme isareti. Isimler her zaman BUYUK harfe cevrilir (Turkce i -> İ, ı -> I). Desteklenmeyen alfabe, emoji veya fontta olmayan karakter -> ELLE KONTROL.",
     "tagline_karakterleri": "Musterinin yazdigi gibi birakilir; buyuk/kucuk harf degistirilmez. Emoji veya fontta olmayan karakter -> ELLE KONTROL.",
     "kod": "scripts/kisisel/giris_dogrula.py - siparis_dogrula(sol, sag, tagline)",
-    "buyuk_harf": "Serdar onayi 21 Eylul 2026: teslimat ulkesi TR ise Turkce kural (i -> I, i -> I; DENIZ, ELIF), diger ulkelerde standart kural (i -> I). Ulke bilgisi yoksa (dijital siparis vb.) isimde Turkce'ye ozgu harf varsa Turkce, yoksa standart kural. Tagline musterinin yazdigi gibi kalir."
+    "buyuk_harf": "Serdar onayi 21 Eylul 2026: teslimat ulkesi TR ise Turkce kural (i -> İ, ı -> I; DENİZ, ELİF), diger ulkelerde standart Unicode buyuk harf kurali (i -> I). Ulke bilgisi yoksa (dijital siparis vb.) isimde Turkce'ye ozgu harf varsa Turkce, yoksa standart kural. Tagline musterinin yazdigi gibi kalir."
   }
 }
