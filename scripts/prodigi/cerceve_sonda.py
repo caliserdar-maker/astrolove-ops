@@ -48,6 +48,32 @@ def urun_oku(prod, sku):
             "olculer": u.get("productDimensions")}
 
 
+def teklif(prod, sku, ulke, nitelikler):
+    """Cerceveli urunlerde 'attributes' (renk vb.) ZORUNLU: ilk sonda HTTP 400 dondu.
+    Tum kargo yontemleri sorulur, en ucuzu secilir. Bu bir SIPARIS DEGILDIR."""
+    kalem = {"sku": sku, "copies": 1, "assets": [{"printArea": "default"}]}
+    if nitelikler:
+        kalem["attributes"] = nitelikler
+    secenekler, hatalar = [], []
+    for yontem in KARGO_SECENEK:
+        st, d = prod.call("POST", "/quotes", {"shippingMethod": yontem,
+                                              "destinationCountryCode": ulke,
+                                              "currencyCode": "USD", "items": [kalem]})
+        if st != 200 or not d.get("quotes"):
+            hatalar.append(f"{yontem}: HTTP {st} {json.dumps(d)[:160]}")
+            continue
+        for q in d["quotes"]:
+            cs = q.get("costSummary") or {}
+            it = float((cs.get("items") or {}).get("amount") or 0)
+            kg = float((cs.get("shipping") or {}).get("amount") or 0)
+            secenekler.append({"yontem": q.get("shipmentMethod") or yontem,
+                               "birim": round(it, 2), "kargo": round(kg, 2),
+                               "toplam": round(it + kg, 2)})
+    if not secenekler:
+        return None, "; ".join(hatalar)[:300]
+    return min(secenekler, key=lambda x: x["toplam"]), ""
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--env", default="live")
@@ -55,6 +81,7 @@ def main():
     ap.add_argument("--teklif-boy", default="8x10,16x20,18x24",
                     help="maliyet teklifi alinacak boylar (virgullu)")
     ap.add_argument("--ulke", default="US,GB")
+    ap.add_argument("--renk", default="black,white,natural")
     a = ap.parse_args()
     out = pathlib.Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -84,25 +111,27 @@ def main():
         sonuc["hpr_karsilastirma"][b] = bool(u)
     log(f"HPR katalogda: {sum(sonuc['hpr_karsilastirma'].values())}/{len(BOYLAR)} boy")
 
-    # 2) maliyet teklifi (SIPARIS DEGIL)
+    # 2) maliyet teklifi (SIPARIS DEGIL) — cerceve renkleri ayri ayri
     boylar = [x.strip() for x in a.teklif_boy.split(",") if x.strip()]
+    renkler = [x.strip() for x in a.renk.split(",") if x.strip()]
     for aile, bulunan in sonuc["urunler"].items():
+        if not bulunan:
+            continue
+        mevcut_renk = (next(iter(bulunan.values()))["nitelikler"].get("color") or [])
         for b in boylar:
             if b not in bulunan:
                 continue
             sku = bulunan[b]["sku"]
-            for ulke in [x.strip() for x in a.ulke.split(",") if x.strip()]:
-                maliyet, hata, ayrinti = prod.quote(
-                    [{"prodigi_sku": sku, "qty": 1}], ulke)
-                anahtar = f"{sku}|{ulke}"
-                sonuc["teklifler"][anahtar] = {"toplam_ekler_dahil": maliyet, "hata": hata,
-                                               "ayrinti": ayrinti}
-                if ayrinti:
-                    s = ayrinti["secilen"]
-                    log(f"teklif {anahtar}: birim {s['kalem']:.2f} + kargo {s['kargo']:.2f} "
-                        f"({s['yontem']}) = {s['toplam']:.2f} USD")
-                else:
-                    log(f"teklif {anahtar}: HATA {hata}")
+            for renk in [r for r in renkler if r in mevcut_renk]:
+                for ulke in [x.strip() for x in a.ulke.split(",") if x.strip()]:
+                    secilen, hata = teklif(prod, sku, ulke, {"color": renk})
+                    anahtar = f"{sku}|{renk}|{ulke}"
+                    sonuc["teklifler"][anahtar] = {"secilen": secilen, "hata": hata}
+                    if secilen:
+                        log(f"teklif {anahtar}: birim {secilen['birim']:.2f} + kargo "
+                            f"{secilen['kargo']:.2f} ({secilen['yontem']}) = {secilen['toplam']:.2f} USD")
+                    else:
+                        log(f"teklif {anahtar}: HATA {hata[:160]}")
 
     p = out / "CERCEVE_SONDA.json"
     p.write_text(json.dumps(sonuc, ensure_ascii=False, indent=1), encoding="utf-8")
