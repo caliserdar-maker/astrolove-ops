@@ -70,6 +70,12 @@ G_SEMBOL = 2            # sembol-isim merkezi <= 2 px
 DOKU_FARK = 5.0         # cekirdek doku farki
 DOKU_EROZYON = 2        # cekirdek icin asindirma (px)
 BOSLUK_PAY = 2          # girdi kapisi: olculen vs kilitli bosluk
+# Serdar karari 22 Eyl 2026 (2. madde): Black ve Pure White'ta doku olcumu
+# RAPORDA KALIR ama uretimi BLOKLAMAZ. Bu iki edisyonun uretim kapisi, Serdar
+# onayindan sonra kilitlenecek kendi onayli isim satiri ve tagline'i olacak;
+# onaydan once bu edisyonlarin ciktilari uretimde KULLANILMAZ. Esik DEGISMEDI.
+DOKU_BLOKLAMAZ = ("black", "pure_white")
+IZ_TEST_ORAN = "4x5"    # kasten iz testinin kosuldugu oran
 T0 = time.time()
 
 
@@ -217,7 +223,11 @@ def edisyon_olc(ed, oran):
            for y in ("sol", "sag")}
     o28 = sayfalar[REF_SAYFA]
     kilit = {"tuval": list(o28["kaynak_boyut"]),
-             "bosluk": int(round(float(np.mean(bos)))),
+             # Bosluk 4 sayfanin ORTANCASI (Serdar karari 22 Eyl 2026):
+             # Vintage'in parsomen dokusunda tek bir sayfanin sapmasi
+             # ortalamayi kaydiriyor, ortanca etkilenmiyor.
+             "bosluk": int(round(float(np.median(bos)))),
+             "bosluk_ortanca": round(float(np.median(bos)), 2),
              "bosluk_ort": round(float(np.mean(bos)), 2),
              "bosluk_araligi": [int(min(bos)), int(max(bos))],
              "cap": {y: int(round(cap[y])) for y in cap},
@@ -276,7 +286,7 @@ def girdi_kapisi(ed, oran, kilit, o28, zemin_yol):
 
 # ------------------------------------------------------------ oran kurulum
 
-def oran_kur(ed, oran, kilit, o28):
+def oran_kur(ed, oran, kilit, o28, iz_birak=False):
     t0 = time.time()
     ham = Image.open(YOL / ed / "ham" / f"{oran}_p{REF_SAYFA}.jpg").convert("RGB")
     ref, _ = norm(ham)
@@ -302,7 +312,20 @@ def oran_kur(ed, oran, kilit, o28):
         fark, bolge, hedef, murekkep(ref_a))
 
     a3 = alfa[..., None]
+    if iz_birak == "tagline_sag":
+        # TEMIZ ARA ZEMIN KAPISI TESTI: eski tagline'in SAG YARISI hic
+        # temizlenmeden birakilir; kapi HATA vermeli.
+        tx0, ty0, tx1, ty1 = hedef["tagline"]
+        a3 = a3.copy()
+        a3[ty0:ty1, (tx0 + tx1) // 2:tx1] = 0.0
     temiz_a = ref_a * (1 - a3) + zemin_a * a3
+
+    # TEMIZ ARA ZEMIN KAPISI (Serdar karari 21 Eyl 2026): yeni yazi
+    # yazilmadan ONCE butun eski oge bolgeleri zemine esit olmali.
+    eski_kutular = {ad: b["gorsel"] for ad, b in bil.items()}
+    eski_kutular["tagline"] = hedef["tagline"]
+    ara_kapi = pilot16.temiz_ara_kapisi(temiz_a, zemin_a, eski_kutular, fark,
+                                        ref_a.shape[:2])
 
     oge = {}
     for ad, b in bil.items():
@@ -330,6 +353,7 @@ def oran_kur(ed, oran, kilit, o28):
          "isim_bant": list(ib), "sembol_bant": list(sb), "tag_bant": list(tb),
          "tag_y": (tb[0] + tb[1]) / 2,
          "maske_px": int(genis.sum()), "yildiz_bileseni": yildiz_n,
+         "temiz_ara_kapisi": ara_kapi, "iz_birak": iz_birak,
          "acik_zemin": kilit["acik_zemin"],
          "kurulum_sn": round(time.time() - t0, 1)}
     S = {"ref": ref, "zemin_a": zemin_a, "temiz_a": temiz_a, "oge": oge,
@@ -362,6 +386,10 @@ def geometri_kapisi(poster, o28, s):
     semb = sembol_olc(pa, s["sembol_bant"])
     d["sembol_isim"] = ([round(semb[i] - yeni["isim_merkez"][i], 1) for i in (0, 1)]
                         if semb else None)
+    # TANI (esige girmez): edisyonun KENDI orijinalinde sembol-isim kaymasi.
+    # Uretim kurali "sembol ismin murekkep merkezine ortalanir" (Serdar,
+    # 22 Eyl 2026), yani hedef 0'dir; orijinalin kendi kaymasi buradan okunur.
+    d["ref_sembol_isim"] = o28.get("sembol_isim_kaymasi")
     gecti = (all(abs(d[f"cap_{y}"]) <= G_CAP for y in ("sol", "sag"))
              and all(abs(d[f"taban_{y}"]) <= G_TABAN for y in ("sol", "sag"))
              and abs(d["satir_merkez"]) <= G_MERKEZ
@@ -493,7 +521,8 @@ def kos(a):
                 log(f"{ed} {oran}: OLCUM YAPILAMADI - {e['sebep']} {e.get('hata')}")
             else:
                 k = v["kilit"]
-                log(f"{ed} {oran} olcum: bosluk {k['bosluk_ort']} "
+                log(f"{ed} {oran} olcum: bosluk ortanca {k['bosluk_ortanca']} "
+                    f"(ort {k['bosluk_ort']}) "
                     f"{k['bosluk_araligi']} -> {k['bosluk']}, cap {k['cap_ort']} "
                     f"-> {k['cap']}, {k['sayfa_n']} sayfa")
     sabitleri_yaz(olcumler)
@@ -516,11 +545,19 @@ def kos(a):
                 continue
             gk_ok = girdi_kapisi(ed, oran, kilit, o28, zem)
             s, S = oran_kur(ed, oran, kilit, o28)
+            ak = s["temiz_ara_kapisi"]
+            log(f"{ed} {oran} temiz ara zemin kapisi: "
+                f"{'GECTI' if ak['gecti'] else 'KALDI'} (alan {ak['alan_px']} px, "
+                f"{ak['blok']} blok, en_ort {ak['en_ort']}, en_tepe {ak['en_tepe']}, "
+                f"kotu {ak['kotu_blok']})")
             log(f"{ed} {oran}: kurulum {s['kurulum_sn']} sn, acik_zemin "
                 f"{s['acik_zemin']}, yildiz {s['yildiz_bileseni']}, maske "
                 f"{s['maske_px']} px, cap {s['cap']}, bosluk {s['bosluk']}")
-            kayit = {"durum": "URETILDI" if gk_ok else "GIRDI KAPISI KALDI",
-                     "girdi_kapisi": gk_ok, "kurulum_sn": s["kurulum_sn"],
+            kayit = {"durum": "URETILDI" if (gk_ok and ak["gecti"])
+                     else ("TEMIZ ARA ZEMIN KAPISI KALDI" if gk_ok
+                           else "GIRDI KAPISI KALDI"),
+                     "girdi_kapisi": gk_ok, "temiz_ara_kapisi": ak,
+                     "kurulum_sn": s["kurulum_sn"],
                      "acik_zemin": s["acik_zemin"], "cap": s["cap"],
                      "bosluk": s["bosluk"], "ciftler": []}
             sure = []
@@ -538,13 +575,22 @@ def kos(a):
                     satir["geometri"], satir["doku"] = gk, dk
                     kayit["geometri"], kayit["doku"] = gk, dk
                     pilot12.kaydet(poster, YOL / ed / f"ALTIN_{oran}.jpg")
-                    etiket = "" if (gk_ok and gk["gecti"] and dk["gecti"]) \
-                        else "  [KAPI KALDI]"
+                    # Doku, Black ve Pure White'ta bloklamaz (Serdar, 22 Eyl).
+                    dk_blok = dk["gecti"] or ed in DOKU_BLOKLAMAZ
+                    satir["doku_bloklar"] = ed not in DOKU_BLOKLAMAZ
+                    etiket = "" if (gk_ok and ak["gecti"] and gk["gecti"]
+                                    and dk_blok) else "  [KAPI KALDI]"
                     iz_kontrol(poster, s, ed, oran, etiket).save(
                         YOL / ed / f"IZ_KONTROL_{ed}_{oran}.jpg", quality=88)
                     if oran == "4x5":
                         kiyas(ed, S["ref"], poster, s, etiket).save(
-                            YOL / ed / f"KIYAS_{ed}.jpg", quality=90)
+                            YOL / ed / f"KIYAS_{ed}_V3.jpg", quality=90)
+                        # TEMIZ ARA: yeni yazi YAZILMADAN onceki ara goruntu.
+                        ara = Image.fromarray(
+                            np.clip(S["temiz_a"], 0, 255).astype(np.uint8), "RGB")
+                        ae = "" if ak["gecti"] else "  [ARA KAPI KALDI]"
+                        iz_kontrol(ara, s, ed, oran, ae).save(
+                            YOL / ed / f"TEMIZ_ARA_{ed}_4x5.jpg", quality=88)
                     log(f"{ed} {oran} geometri: {json.dumps(gk['fark'], ensure_ascii=False)}"
                         f" -> {'GECTI' if gk['gecti'] else 'KALDI'}")
                     log(f"{ed} {oran} doku: rgb {dk['ort_rgb_fark']} std "
@@ -558,6 +604,29 @@ def kos(a):
             kayit["poster_sn"] = round(sum(sure) / len(sure), 2)
             kayit["toplam_sn"] = round(s["kurulum_sn"] + sum(sure), 1)
             sonuc[ed][oran] = kayit
+    # 3) KASTEN IZ TESTI (Serdar karari 22 Eyl 2026): eski tagline'in SAG
+    # YARISI temizlenmeden birakilir; TEMIZ ARA ZEMIN KAPISI HATA vermeli.
+    # Kapi bunu goremezse kapinin kendisi ise yaramaz demektir.
+    iz_testi = {}
+    for ed in hedef_ed:
+        v = olcumler[ed].get(IZ_TEST_ORAN)
+        if not v or not (YOL / ed / "zemin" / f"{IZ_TEST_ORAN}.png").exists():
+            iz_testi[ed] = {"kosuldu": False, "sebep": "olcum ya da zemin yok"}
+            continue
+        _s, _S = oran_kur(ed, IZ_TEST_ORAN, v["kilit"], v["o28"],
+                          iz_birak="tagline_sag")
+        t = _s["temiz_ara_kapisi"]
+        iz_testi[ed] = {"kosuldu": True, "kapi_gecti": t["gecti"],
+                        "beklenen": "KALDI", "sonuc": "PASS" if not t["gecti"]
+                        else "FAIL (kapi izi goremedi)",
+                        "en_ort": t["en_ort"], "en_tepe": t["en_tepe"],
+                        "kotu_blok": t["kotu_blok"]}
+        log(f"kasten iz testi {ed} {IZ_TEST_ORAN}: kapi "
+            f"{'KALDI' if not t['gecti'] else 'GECTI'} -> {iz_testi[ed]['sonuc']} "
+            f"(en_ort {t['en_ort']}, en_tepe {t['en_tepe']}, "
+            f"kotu {t['kotu_blok']})")
+    sonuc["_iz_testi"] = iz_testi
+
     (YOL / "EDISYON_SONUC_V2.json").write_text(
         json.dumps(sonuc, ensure_ascii=False, indent=1, default=str), encoding="utf-8")
     rapor(sonuc, olcumler)
@@ -568,12 +637,38 @@ def kos(a):
 
 
 def rapor(sonuc, olcumler):
-    m = ["# EDISYONLAR V2: her edisyon kendi orijinaline sadik", "",
+    m = ["# EDISYONLAR V3: temiz ara zemin kapisi + tagline temizleme duzeltmesi",
+         "",
          f"Kosu: {datetime.now(timezone.utc).isoformat(timespec='seconds')}", "",
          "## DEGISEN OGELER", "",
+         "- **HATA DUZELTMESI (kritik)**: eski tagline'in bir parcasi "
+         "temizlenmeden kaliyordu. Iki kok neden: (1) `sayfa_olc` tagline "
+         "bandinda YALNIZ TEK kume ariyordu (`len(tk) == 1`), tagline iki "
+         "kumeye ayrildiginda ikinci parca temizleme kutusunun disinda "
+         "kaliyordu; (2) `oge_ve_yildiz` her hedefe YALNIZ en cok ortusen TEK "
+         "bileseni bagliyordu, artan parcalar 'yildiz' sayiliyordu - hem "
+         "temizlenmiyor hem de blok kapisi yildizlari olcum disi biraktigi "
+         "icin kapi bunu goremiyordu. Duzeltme: tagline kutusu bandin TAM "
+         f"murekkep uzanimi; cekirdek pikselinin >= %{int(pilot16.PARCA_PAY*100)}'i "
+         "hedef kutusunda kalan HER bilesen o ogeye baglanir.",
+         "- **YENI KALICI KAPI - TEMIZ ARA ZEMIN KAPISI**: eski ogeler "
+         "temizlendikten sonra, yeni yazi YAZILMADAN once ara goruntu, butun "
+         "eski oge bolgelerinde (eski isimler, eski tagline'in TAMAMI, eski "
+         "semboller, eski sonsuz) zemine esit olmali. Olcum alani oge "
+         "kutularinin genisletilmis hali ile orijinal murekkebin kesisimidir; "
+         "burada yildiz ayiklamasi YOKTUR. Esikler blok kapisiyla ayni "
+         f"(ortalama <= {pilot16.BLOK_ORT}, tepe <= {pilot16.BLOK_TEPE}).",
+         "- **Sembol hizasi**: sembol, ismin MUREKKEP merkezine ortalanir "
+         "(Serdar karari 22 Eyl 2026). Olculdu: plaka siki kirpildigi icin "
+         "alfa kutusu merkezi ile murekkep merkezi ayni; Blue'da ve "
+         "edisyonlarda yatay kayma 0.00 px, yani bu madde ciktiyi "
+         "DEGISTIRMEDI. Geometri kapisindaki sembol-isim farkinin kaynagi "
+         "bu degil; her satirda edisyonun KENDI orijinalindeki kayma "
+         "(`ref_sembol_isim`) tani olarak yazilir.",
          "- **Olcum**: her edisyon x oran, edisyonun KENDI 20/28/36/72 "
-         "sayfalarindan olculur; bosluk ve cap dort sayfanin ortalamasidir ve "
-         "`ORAN_SABITLERI.json` -> `edisyonlar` altina kilitlenir.",
+         "sayfalarindan olculur; **bosluk dort sayfanin ORTANCASI** (Serdar "
+         "karari 22 Eyl 2026; tek sayfanin sapmasi ortancayi kaydirmaz), cap "
+         "dort sayfanin ortalamasidir.",
          "- **Punto**: edisyonun kendi kilitli cap'inden. **Dikey konum**: "
          "edisyonun kendi isim bandi.",
          "- **Isim kapisi**: Blue ile sekil karsilastirmasi KALDIRILDI; yerine "
@@ -581,7 +676,12 @@ def rapor(sonuc, olcumler):
          f"+-{G_MERKEZ}, isim-sonsuz boslugu +-{G_BOSLUK}, sembol-isim "
          f"<= {G_SEMBOL} px) edisyonun kendi sayfa 28'ine gore.",
          f"- **Doku kapisi**: yalniz cekirdek pikseller (maske {DOKU_EROZYON} px "
-         f"asindirilmis), esik <= {DOKU_FARK} (degismedi).",
+         f"asindirilmis), esik <= {DOKU_FARK} (DEGISMEDI). Serdar karari "
+         f"22 Eyl 2026: {', '.join(DOKU_BLOKLAMAZ)} edisyonlarinda doku "
+         "olcumu raporda kalir ama uretimi BLOKLAMAZ; bu edisyonlarin uretim "
+         "kapisi, onaydan sonra kilitlenecek kendi onayli isim satiri ve "
+         "tagline'i olacak. ONAYDAN ONCE BU EDISYONLARIN CIKTILARI URETIMDE "
+         "KULLANILMAZ.",
          "- **Bulma maskesi**: yerel kontrast (zemin medyani "
          f"{MASKE_YARICAP} px, esik {MASKE_ESIK}, kenar %{int(MASKE_KENAR*100)} "
          f"disi, {MASKE_MIN_ALAN} px alti bilesen atilir). Olculdu: Black ve "
@@ -590,9 +690,18 @@ def rapor(sonuc, olcumler):
          "", "### Degismeyen", "",
          "- Blue'nun ONAYLI.json ogeleri, onayli isim satirlari, Blue'nun "
          "ORAN_SABITLERI hizalamalari, D kurali, kenar payi %10, punto ve "
-         "buyuk harf kurallari, blok kalinti kapisi esikleri.", "",
+         "buyuk harf kurallari, blok kalinti kapisi esikleri, doku esigi, "
+         "girdi kapisi esigi (2 px), geometri kapisi esikleri.",
+         "- **BLUE**: olculdu (4x5, ayni girdilerle piksel karsilastirmasi) - "
+         "isim bandinda **0 px** degisti, yani onayli isim satiri BIREBIR "
+         "AYNI. Sembol bandinda 37535 px, tagline bandinda 15865 px degisti: "
+         "Blue'da da eski sembol ve tagline parcalari temizlenmeden "
+         "kaliyordu (yeni yazinin altinda kaldigi icin gorunmuyordu ve blok "
+         "kapisi bunlari 'yildiz' sayip olcum disi birakiyordu). Eski kodla "
+         "temiz ara zemin kapisi Blue 4x5'te KALIYOR (en_ort 166.13, tepe "
+         "255.0, 95 kotu blok); duzeltmeyle GECIYOR (0.0 / 0.0).", "",
          "## 1) Edisyonun kendi olcusu (4 sayfa)", "",
-         "| edisyon | oran | bosluk ort (aralik) | kilit | cap ort sol/sag | kilit | sayfa |",
+         "| edisyon | oran | bosluk ortanca (ort, aralik) | kilit | cap ort sol/sag | kilit | sayfa |",
          "| --- | --- | --- | --- | --- | --- | --- |"]
     for ed, oranlar in olcumler.items():
         for oran, v in oranlar.items():
@@ -600,13 +709,16 @@ def rapor(sonuc, olcumler):
                 m.append(f"| {ed} | {oran} | - | - | - | - | **OLCULEMEDI** |")
                 continue
             k = v["kilit"]
-            m.append(f"| {ed} | {oran} | {k['bosluk_ort']} {k['bosluk_araligi']} | "
+            m.append(f"| {ed} | {oran} | {k['bosluk_ortanca']} "
+                     f"(ort {k['bosluk_ort']}, {k['bosluk_araligi']}) | "
                      f"{k['bosluk']} | {k['cap_ort']['sol']}/{k['cap_ort']['sag']} | "
                      f"{k['cap']['sol']}/{k['cap']['sag']} | {k['sayfa_n']} |")
     m += ["", "## 2) Blok bazli kalinti kapisi", "",
           "| edisyon | oran | cift | blok | en_ort (<=2) | en_tepe (<=6) | sonuc |",
           "| --- | --- | --- | --- | --- | --- | --- |"]
     for ed, oranlar in sonuc.items():
+        if ed.startswith("_"):
+            continue
         for oran, k in oranlar.items():
             if not k.get("ciftler"):
                 m.append(f"| {ed} | {oran} | - | - | - | - | **{k['durum']}** |")
@@ -616,6 +728,36 @@ def rapor(sonuc, olcumler):
                 m.append(f"| {ed} | {oran} | {c['cift']} | {g['blok']} | "
                          f"{g['en_ort']} | {g['en_tepe']} | "
                          f"**{'GECTI' if g['gecti'] else 'KALDI'}** |")
+    m += ["", "## 2b) TEMIZ ARA ZEMIN KAPISI (yeni yazi yazilmadan once)", "",
+          f"Esikler blok kapisiyla ayni: ortalama <= {pilot16.BLOK_ORT}, "
+          f"tepe <= {pilot16.BLOK_TEPE}.", "",
+          "| edisyon | oran | alan (px) | blok | en_ort | en_tepe | kotu blok | sonuc |",
+          "| --- | --- | --- | --- | --- | --- | --- | --- |"]
+    for ed, oranlar in sonuc.items():
+        if ed.startswith("_"):
+            continue
+        for oran, k in oranlar.items():
+            t = k.get("temiz_ara_kapisi")
+            if not t:
+                m.append(f"| {ed} | {oran} | - | - | - | - | - | "
+                         f"**{k.get('durum','-')}** |")
+                continue
+            m.append(f"| {ed} | {oran} | {t['alan_px']} | {t['blok']} | "
+                     f"{t['en_ort']} | {t['en_tepe']} | {t['kotu_blok']} | "
+                     f"**{'GECTI' if t['gecti'] else 'KALDI'}** |")
+    m += ["", "### Kasten iz testi (eski tagline'in SAG YARISI birakilir)", "",
+          "Kapi bu izi GORMELI; 'PASS' = kapi HATA verdi.", "",
+          "| edisyon | oran | kapi | en_ort | en_tepe | kotu blok | sonuc |",
+          "| --- | --- | --- | --- | --- | --- | --- |"]
+    for ed, t in (sonuc.get("_iz_testi") or {}).items():
+        if not t.get("kosuldu"):
+            m.append(f"| {ed} | {IZ_TEST_ORAN} | - | - | - | - | "
+                     f"**KOSULMADI ({t.get('sebep')})** |")
+            continue
+        m.append(f"| {ed} | {IZ_TEST_ORAN} | "
+                 f"{'KALDI' if not t['kapi_gecti'] else 'GECTI'} | "
+                 f"{t['en_ort']} | {t['en_tepe']} | {t['kotu_blok']} | "
+                 f"**{t['sonuc']}** |")
     m += ["", "## 3) Geometri kapisi (SERDAR - LENA, edisyonun kendi sayfa 28'i)", "",
           f"Esikler: cap +-{G_CAP} px, taban y +-{G_TABAN} px, satir merkezi "
           f"+-{G_MERKEZ} px, isim-sonsuz boslugu +-{G_BOSLUK} px, sembol-isim "
@@ -623,6 +765,8 @@ def rapor(sonuc, olcumler):
           "| edisyon | oran | girdi kapisi | cap sol/sag | taban sol/sag | satir merkez | bosluk sol/sag | sembol-isim | sonuc |",
           "| --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
     for ed, oranlar in sonuc.items():
+        if ed.startswith("_"):
+            continue
         for oran, k in oranlar.items():
             g = k.get("geometri")
             gk = "GECTI" if k.get("girdi_kapisi") else "KALDI"
@@ -641,22 +785,28 @@ def rapor(sonuc, olcumler):
                      f"{f['sembol_isim']} | "
                      f"**{'GECTI' if g['gecti'] else 'KALDI'}** |")
     m += ["", "## 4) Doku kapisi (cekirdek pikseller)", "",
-          "| edisyon | oran | ort RGB | parlaklik std | profil | cekirdek px | sonuc |",
+          "| edisyon | oran | ort RGB | parlaklik std | profil | cekirdek px | sonuc | uretimi bloklar |",
           "| --- | --- | --- | --- | --- | --- | --- |"]
     for ed, oranlar in sonuc.items():
+        if ed.startswith("_"):
+            continue
         for oran, k in oranlar.items():
             d = k.get("doku")
             if not d:
-                m.append(f"| {ed} | {oran} | - | - | - | - | **{k.get('durum','-')}** |")
+                m.append(f"| {ed} | {oran} | - | - | - | - | "
+                         f"**{k.get('durum','-')}** | - |")
                 continue
             m.append(f"| {ed} | {oran} | {d['ort_rgb_fark']} | "
                      f"{d['parlaklik_std_fark']} | {d['profil_fark']} | "
                      f"{d['cekirdek_px']} | "
-                     f"**{'GECTI' if d['gecti'] else 'KALDI'}** |")
+                     f"**{'GECTI' if d['gecti'] else 'KALDI'}** | "
+                     f"{'hayir (Serdar, 22 Eyl)' if ed in DOKU_BLOKLAMAZ else 'evet'} |")
     m += ["", "## 5) Uretim suresi (hedef: oran basina <= 30 sn)", "",
           "| edisyon | oran | kurulum (sn) | poster basina (sn) | toplam (sn) |",
           "| --- | --- | --- | --- | --- |"]
     for ed, oranlar in sonuc.items():
+        if ed.startswith("_"):
+            continue
         for oran, k in oranlar.items():
             if "poster_sn" in k:
                 m.append(f"| {ed} | {oran} | {k['kurulum_sn']} | {k['poster_sn']} | "
@@ -667,13 +817,16 @@ def rapor(sonuc, olcumler):
           "olarak kilitlenecek ve regresyon kapisi Blue'daki gibi birebir "
           "olacak.", "",
           "## 7) Gorsel kanit", "",
-          "KIYAS_<edisyon>.jpg: solda edisyonun orijinal 4:5 sayfasi, sagda "
+          "KIYAS_<edisyon>_V3.jpg: solda edisyonun orijinal 4:5 sayfasi, sagda "
           "SERDAR - LENA 4:5; altta isim satiri ve tagline 3x, orijinal ustte "
           "uretilen altta.",
+          "TEMIZ_ARA_<edisyon>_4x5.jpg: yeni yazi YAZILMADAN onceki temiz ara "
+          "goruntu; isim ve tagline bandi 3x, 2.5x parlaklik. Eski tagline'in "
+          "hicbir parcasi gorunmemeli.",
           "IZ_KONTROL_<edisyon>_<oran>.jpg: 3x buyutme, 2.5x parlaklik.",
           "ALTIN_<oran>.jpg: SERDAR - LENA posteri.", ""]
-    (YOL / "EDISYON_RAPOR_V2.md").write_text("\n".join(m), encoding="utf-8")
-    log("EDISYON_RAPOR_V2.md yazildi")
+    (YOL / "EDISYON_RAPOR_V3.md").write_text("\n".join(m), encoding="utf-8")
+    log("EDISYON_RAPOR_V3.md yazildi")
 
 
 def main():

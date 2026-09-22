@@ -38,6 +38,7 @@ CEKIRDEK = 18.0            # kesin oge esigi (olculen zemin gurultusu p99 = 4)
 YUMUSAK = 6                # genisletilmis maskenin disa dogru rampasi (px)
 KAPI_PAY = 3               # kapida yeni ogelerin etrafinda birakilan pay (px)
 MIN_ALAN = 20              # gurultu bileseni esigi (px)
+PARCA_PAY = 0.6            # bilesenin hedef kutusundaki cekirdek payi
 GENISLET = 12              # Mo: 12 px dilate
 BLOK = 16
 BLOK_ORT, BLOK_TEPE = 2.0, 6.0
@@ -74,18 +75,40 @@ def oge_ve_yildiz(fark, bolgeler, hedefler, luma_maske):
     buyuk = [i for i in range(1, n)
              if (ham[etiket == i].sum()) >= MIN_ALAN]
 
+    # Bir hedefe DUSEN HER bilesen o ogeye aittir.
+    # 21 Eyl 2026 hatasi: eski kod hedef basina yalniz en cok ortusen TEK
+    # bileseni aliyordu. Tagline iki bilesene ayrildiginda ikincisi "yildiz"
+    # sayiliyor, hem temizlenmiyor hem de blok kapisi yildizlari olcum disi
+    # biraktigi icin kapi bunu goremiyordu. Artik cekirdek piksellerinin
+    # en az PARCA_PAY'i hedef kutusunun icinde kalan her bilesen o ogeye
+    # baglanir; en cok ortusen bilesen her durumda baglanir (eski davranis
+    # taban olarak korunur).
+    cy_all, cx_all = np.nonzero(ham)
+    lab_all = etiket[cy_all, cx_all]
+    toplam_cekirdek = np.bincount(lab_all, minlength=n).astype(np.float32)
+
     esles, kullanilan = {}, set()
     for ad, (hx0, hy0, hx1, hy1) in hedefler.items():
-        en, sec = 0, None
+        ic = ((cx_all >= hx0) & (cx_all < hx1)
+              & (cy_all >= hy0) & (cy_all < hy1))
+        ic_sayi = np.bincount(lab_all[ic], minlength=n).astype(np.float32)
+        oran = np.divide(ic_sayi, np.maximum(toplam_cekirdek, 1.0))
+        en, sec, ids = 0, None, []
         for i in buyuk:
+            if i in kullanilan:
+                continue
             x, y, w, h, _ = stat[i]
             ort = (max(0, min(x + w, hx1) - max(x, hx0))
                    * max(0, min(y + h, hy1) - max(y, hy0)))
             if ort > en:
                 en, sec = ort, i
-        if sec is not None:
-            esles[ad] = sec
-            kullanilan.add(sec)
+            if oran[i] >= PARCA_PAY and ic_sayi[i] >= MIN_ALAN:
+                ids.append(i)
+        if sec is not None and sec not in ids:
+            ids.append(sec)
+        if ids:
+            esles[ad] = ids
+            kullanilan.update(ids)
     yildiz_no = [i for i in buyuk if i not in kullanilan]
 
     genis = np.isin(etiket, list(kullanilan)).astype(np.uint8)
@@ -94,18 +117,18 @@ def oge_ve_yildiz(fark, bolgeler, hedefler, luma_maske):
     yildiz = np.isin(etiket, yildiz_no).astype(bool)
 
     kutu = {}
-    for ad, i in esles.items():
-        m = (etiket == i).astype(np.uint8)
+    for ad, ids in esles.items():
+        m = np.isin(etiket, ids).astype(np.uint8)
         ys, xs = np.nonzero(m)
         # gorsel kutu: luma esigi (OLCUM.json ile ayni olcut), fark esigi degil
-        cy, cx = np.nonzero((etiket == i) & luma_maske)
+        cy, cx = np.nonzero((m > 0) & luma_maske)
         kutu[ad] = {"kutu": (int(xs.min()), int(ys.min()), int(xs.max()) + 1,
                              int(ys.max()) + 1),
                     # gorsel (cekirdek) kutu: satir duzeni bununla kurulur,
                     # genisletilmis maske yalniz delta tasimasi icindir
                     "gorsel": (int(cx.min()), int(cy.min()), int(cx.max()) + 1,
                                int(cy.max()) + 1),
-                    "etiket": i, "genis": m}
+                    "etiket": list(ids), "genis": m}
     return kutu, alfa, genis.astype(bool), yildiz, len(yildiz_no)
 
 
@@ -177,13 +200,25 @@ def oran_kur(oran, olcum_kaydi, bg_im, iz_birak=False, kalibre=False):
 
     # Temiz zemin: maskeli bolgede referans yerine bg (yumusak gecisle)
     a3 = alfa[..., None]
-    if iz_birak:
+    if iz_birak == "tagline_sag":
+        # TEMIZ ARA ZEMIN KAPISI TESTI: eski tagline'in SAG YARISI hic
+        # temizlenmeden birakilir; kapi HATA vermeli.
+        tx0, ty0, tx1, ty1 = hedef["tagline"]
+        a3 = a3.copy()
+        a3[ty0:ty1, (tx0 + tx1) // 2:tx1] = 0.0
+    elif iz_birak:
         # KAPI TESTI: eski SOL ismin dis ucu (yeni isim daha dar oldugu icin
         # burasi acikta kalir) kasten %75 eksik temizlenir.
         x0, y0, x1, y1 = bil["isim_sol"]["gorsel"]
         a3 = a3.copy()
         a3[y0:y1, x0:min(x0 + 25, x1)] *= 0.25
     temiz_a = ref_a * (1 - a3) + zemin_a * a3
+
+    # Eski oge kutulari: olculen gorsel kutular + tagline'in tam bandi.
+    eski_kutular = {ad: b["gorsel"] for ad, b in bil.items()}
+    eski_kutular["tagline"] = hedef["tagline"]
+    ara_kapi = temiz_ara_kapisi(temiz_a, zemin_a, eski_kutular, fark,
+                                ref_a.shape[:2])
 
     oge = {}
     for ad, b in bil.items():
@@ -211,6 +246,8 @@ def oran_kur(oran, olcum_kaydi, bg_im, iz_birak=False, kalibre=False):
          "kutular": {a: list(b["kutu"]) for a, b in oge.items()},
          "maske_px": int(genis.sum()), "yildiz_bileseni": yildiz_n,
          "iz_birak": iz_birak, "hiza_arandi": arandi,
+         "temiz_ara_kapisi": ara_kapi,
+         "eski_kutular": {a: list(b) for a, b in eski_kutular.items()},
          "kurulum_sn": round(time.time() - t0, 1)}
     S = {"ref": ref, "zemin_a": zemin_a, "temiz_a": temiz_a, "oge": oge,
          "prof": pilot12.PROFIL, "alfa": alfa, "genis": genis, "yildiz": yildiz}
@@ -218,6 +255,13 @@ def oran_kur(oran, olcum_kaydi, bg_im, iz_birak=False, kalibre=False):
 
 
 # --------------------------------------------------------- poster ve kapi
+
+
+def murekkep_merkezi(p):
+    """Plakanin yatay MUREKKEP merkezi (alfa kutusunun degil)."""
+    a = np.asarray(p)[..., 3] > 8
+    sut = np.nonzero(a.any(axis=0))[0]
+    return float(sut[0] + sut[-1] + 1) / 2 if sut.size else p.width / 2
 
 
 def poster_kur(s, S, isimler, tagline):
@@ -231,7 +275,11 @@ def poster_kur(s, S, isimler, tagline):
     x = {"sol": x0, "inf": x0 + w["sol"] + s["bosluk"],
          "sag": x0 + w["sol"] + s["bosluk"] + inf["w"] + s["bosluk"]}
     a = S["temiz_a"].copy()
-    merkez = {y: x[y] + w[y] / 2 for y in ("sol", "sag")}
+    # Sembol, ismin MUREKKEP merkezine ortalanir (orijinal kural; Serdar karari
+    # 21 Eyl 2026). Onceki kod plaka ALFA kutusunun merkezini kullaniyordu;
+    # plakanin sol/sag bosluklari esit olmadigi icin sembol ismin uzerinden
+    # kayiyordu (Modern 4x5'te 11 px).
+    merkez = {y: x[y] + murekkep_merkezi(pl[y][0]) for y in ("sol", "sag")}
 
     # 1) tasinan ogeler (delta)
     # hedef = ogenin GORSEL sol-ust kosesi; delta kutusu paylarla kaydirilir
@@ -280,6 +328,50 @@ def isaretle(hedef, maske, x, y):
     x1, y1 = min(x + w, W), min(y + h, H)
     if x1 > x0 and y1 > y0:
         hedef[y0:y1, x0:x1] |= maske[y0 - y:y1 - y, x0 - x:x1 - x].astype(np.uint8)
+
+
+def temiz_ara_kapisi(temiz_a, zemin_a, hedef, fark, sekil):
+    """TEMIZ ARA ZEMIN KAPISI (Serdar karari 21 Eyl 2026).
+
+    Eski ogeler temizlendikten SONRA, yeni yazi yazilmadan ONCE: butun eski
+    oge bolgelerinde (eski isimler, eski tagline'in TAMAMI, eski semboller,
+    eski sonsuz) ara goruntu zemine esit olmali. Olcum alani, oge kutularinin
+    GENISLET kadar buyutulmus hali ile orijinalin murekkep maskesinin
+    kesisimidir; boylece bir ogenin ikinci parcasi temizlenmeden kalirsa
+    (bkz. oge_ve_yildiz) kapi bunu yakalar - blok kapisindan farkli olarak
+    burada yildiz ayiklamasi YOKTUR, cunku olcum yalniz eski oge kutularinin
+    icinde yapilir.
+
+    Esikler blok kapisiyla ayni: ortalama <= 2, tepe <= 6.
+    """
+    H, W = sekil
+    kutu_m = np.zeros((H, W), np.uint8)
+    for (x0, y0, x1, y1) in hedef.values():
+        kutu_m[max(y0 - GENISLET, 0):min(y1 + GENISLET, H),
+               max(x0 - GENISLET, 0):min(x1 + GENISLET, W)] = 1
+    k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * GENISLET + 1,) * 2)
+    murekkep = cv2.dilate((fark > CEKIRDEK).astype(np.uint8), k)
+    alan = (kutu_m > 0) & (murekkep > 0)
+
+    d = np.abs(temiz_a - zemin_a).max(axis=2)
+    kotu, en_ort, en_tepe, blok_n = [], 0.0, 0.0, 0
+    for by in range(0, H - BLOK + 1, BLOK):
+        if not alan[by:by + BLOK].any():
+            continue
+        for bx in range(0, W - BLOK + 1, BLOK):
+            mm = alan[by:by + BLOK, bx:bx + BLOK]
+            if mm.sum() < 32:
+                continue
+            f = d[by:by + BLOK, bx:bx + BLOK][mm]
+            ort, tepe = float(f.mean()), float(f.max())
+            en_ort, en_tepe, blok_n = max(en_ort, ort), max(en_tepe, tepe), blok_n + 1
+            if ort > BLOK_ORT or tepe > BLOK_TEPE:
+                kotu.append({"x": bx, "y": by, "ort": round(ort, 2),
+                             "tepe": round(tepe, 1), "px": int(mm.sum())})
+    return {"gecti": not kotu, "en_ort": round(en_ort, 2),
+            "en_tepe": round(en_tepe, 1), "kotu_blok": len(kotu),
+            "blok": blok_n, "ornek": kotu[:6], "alan_px": int(alan.sum()),
+            "esik": {"ort": BLOK_ORT, "tepe": BLOK_TEPE}}
 
 
 def blok_kapisi(poster, S, s, yeni_genis):
@@ -391,8 +483,16 @@ def kos(a):
     girdi_kapisi(olcum, oranlar)
 
     kapi, isim_kapi, test, iz, sure = {}, {}, {}, {}, {}
+    olcum_kapi = {}
     for o in oranlar:
         s, S = oran_kur(o, olcum[o], bg_im, kalibre=a.kalibre)
+        olcum_kapi[o] = s["temiz_ara_kapisi"]
+        ak = olcum_kapi[o]
+        log(f"{o} temiz ara zemin kapisi: "
+            f"{'GECTI' if ak['gecti'] else 'KALDI'} (alan "
+            f"{ak['alan_px']} px, {ak['blok']} blok, en_ort "
+            f"{ak['en_ort']}, en_tepe {ak['en_tepe']}, kotu "
+            f"{ak['kotu_blok']})")
         t_uret = time.time()
         log(f"{o}: kurulum {s['kurulum_sn']} sn (hiza "
             f"{'ARANDI' if s['hiza_arandi'] else 'kayitli'}), yildiz bileseni "
@@ -444,8 +544,23 @@ def kos(a):
         f"({kendi['blok']} blok) en_ort {kendi['en_ort']} en_tepe {kendi['en_tepe']} "
         f"kotu {kendi['kotu_blok']}")
 
+    # TEMIZ ARA ZEMIN KAPISI kendi testi (Serdar karari 22 Eyl 2026):
+    # eski tagline'in SAG YARISI temizlenmeden birakilir, kapi HATA vermeli.
+    s4, S4 = oran_kur(o0, olcum[o0], bg_im, iz_birak="tagline_sag")
+    ara_iz = s4["temiz_ara_kapisi"]
+    kaydet(Image.fromarray(np.clip(S4["temiz_a"], 0, 255).astype(np.uint8), "RGB"),
+           YOL / f"TEMIZ_ARA_IZ_TESTI_{o0}.jpg", maks=1_500_000)
+    log(f"TEMIZ ARA ZEMIN KAPISI KENDI TESTI ({o0}): "
+        f"{'HATA VERDI (dogru)' if not ara_iz['gecti'] else 'KACIRDI'} "
+        f"(alan {ara_iz['alan_px']} px, {ara_iz['blok']} blok) en_ort "
+        f"{ara_iz['en_ort']} en_tepe {ara_iz['en_tepe']} kotu {ara_iz['kotu_blok']}")
+
     d = {"oranlar": oranlar, "kapi": kapi, "isim_kapi": isim_kapi, "test": test,
-         "sure": sure, "kendi_testi": {"oran": o0, **kendi}}
+         "sure": sure, "kendi_testi": {"oran": o0, **kendi},
+         "temiz_ara_kapisi": {o: olcum_kapi[o] for o in oranlar},
+         "temiz_ara_iz_testi": {"oran": o0, "beklenen": "KALDI",
+                                "sonuc": "PASS" if not ara_iz["gecti"]
+                                else "FAIL (kapi izi goremedi)", **ara_iz}}
     (YOL / "v5.json").write_text(json.dumps(d, ensure_ascii=False, indent=1, default=str),
                                  encoding="utf-8")
     rapor(d)

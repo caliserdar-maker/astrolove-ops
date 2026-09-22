@@ -73,6 +73,9 @@ def bantlar(mask, en_az=3, en_ince=6):
     return out
 
 
+TAG_GURULTU = 20           # tagline bandinda gurultu kumesi esigi (px)
+
+
 def sayfa_olc(path, maske=None):
     """Isim satiri, semboller ve tagline'i oranlardan bagimsiz olcer.
 
@@ -138,16 +141,26 @@ def sayfa_olc(path, maske=None):
                                         for i in (0, 1)]
             break
     # tagline bandi: isim bandinin altinda, tek genis kume
+    # tagline bandi: isim bandinin altinda, murekkebin TAM yatay uzanimi.
+    # 21 Eyl 2026 hatasi: eski kod tek kume ("len(tk) == 1") ariyordu; tagline
+    # "Two Souls * One Bond" gibi iki kumeye ayrildiginda yalniz genis olani
+    # aliniyor, ikinci parca temizleme kutusunun DISINDA kaliyordu. Artik
+    # banttaki gurultu disi butun kumelerin ilk basi - son sonu alinir.
     alt = [b for b in bl if b[0] >= isim_b[1]]
     for b in alt:
-        tk = [c for c in kumeler(m[b[0]:b[1]], 60) if c[1] - c[0] > 200]
-        if len(tk) == 1 and b[1] - b[0] > 30:
-            d["tag_bant"] = list(b)
-            d["tag_x"] = list(tk[0])
-            d["tag_genislik"] = tk[0][1] - tk[0][0]
-            d["tag_yuksekligi"] = b[1] - b[0]
-            d["tag_merkez"] = round((tk[0][0] + tk[0][1]) / 2, 1)
-            break
+        tk = [c for c in kumeler(m[b[0]:b[1]], 60) if c[1] - c[0] > TAG_GURULTU]
+        if not tk or b[1] - b[0] <= 30:
+            continue
+        x0, x1 = tk[0][0], tk[-1][1]
+        if x1 - x0 <= 200:
+            continue
+        d["tag_bant"] = list(b)
+        d["tag_x"] = [x0, x1]
+        d["tag_genislik"] = x1 - x0
+        d["tag_yuksekligi"] = b[1] - b[0]
+        d["tag_merkez"] = round((x0 + x1) / 2, 1)
+        d["tag_kumeleri"] = [[c[0], c[1]] for c in tk]
+        break
     # halka / en genis oge (tagline guvenli alani icin)
     ustler = [b for b in bl if b[1] < isim_b[0]]
     if ustler:
