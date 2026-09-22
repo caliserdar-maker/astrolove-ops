@@ -573,26 +573,67 @@ def geometri_kapisi(poster, o28, s, bilgi=None):
                      "bosluk": G_BOSLUK, "sembol": G_SEMBOL}}
 
 
-def doku_kapisi(poster, ref, o28, s):
-    """Uretilen isim satirinin CEKIRDEK dokusu, edisyonun kendi isimleriyle."""
+def doku_kapisi(poster, ref, o28, s, S, isimler, bilgi):
+    """Isim dokusunu kaynak profil ve renderer plakasi uzerinden dogrula.
+
+    Eski olcum iki yeni ismi ve sonsuz isaretini tek kirpimda birlestirip bu
+    kirpimin satir profilini farkli harf bicimlerindeki CANCER/LIBRA ile
+    karsilastiriyordu. Vintage 11x14'te onayli piksel kilidi birebir ayniyken
+    bu nedenle yanlis pozitif uretiyordu. Profil kapisi artik renderer'in
+    gercek RGBA isim plakasini, o plakaya verilen kaynak profille karsilastirir.
+    Nihai posterdeki renk ortalamasi ve dagilim da her isim icin kendi alfa
+    cekirdeginde ayrica denetlenir; poster pikselleri degismez.
+    """
     ra = np.asarray(ref).astype(np.float32)
     ib = o28["isim_bant"]
     kaynak = {}
     for y, xr in (("sol", o28["sol_isim"]), ("sag", o28["sag_isim"])):
         kes = ra[ib[0]:ib[1], xr[0]:xr[1]]
-        kaynak[y] = doku_ozeti(kes, murekkep(kes))
+        kaynak[y] = doku_ozeti(kes, murekkep(kes, kenar=0))
     pa = np.asarray(poster.convert("RGB")).astype(np.float32)
-    kes = pa[ib[0]:ib[1], o28["sol_isim"][0]:o28["sag_isim"][1]]
-    uretilen = doku_ozeti(kes, murekkep(kes))
-    ref_rgb = np.mean([kaynak["sol"]["ort_rgb"], kaynak["sag"]["ort_rgb"]], axis=0)
-    ref_std = np.mean([kaynak["sol"]["parlaklik_std"], kaynak["sag"]["parlaklik_std"]])
-    d_rgb = float(np.abs(uretilen["ort_rgb"] - ref_rgb).max())
-    d_std = float(abs(uretilen["parlaklik_std"] - ref_std))
-    d_prof = min(profil_farki(uretilen["profil"], kaynak[y]["profil"])
-                 for y in ("sol", "sag"))
+    taraf, toplam_px = {}, 0
+    for y in ("sol", "sag"):
+        pl = pilot12.plaka(isimler[y], S["prof"][y], s["cap"][y],
+                           bilgi["olcek"])[0]
+        pla = np.asarray(pl).astype(np.float32)
+        alfa = pla[..., 3] > 160
+        prof = np.asarray(
+            [np.median(pla[i, alfa[i], :3], axis=0)
+             for i in range(pla.shape[0]) if alfa[i].sum() >= 3],
+            dtype=np.float32)
+        k = cv2.getStructuringElement(
+            cv2.MORPH_ELLIPSE, (2 * DOKU_EROZYON + 1,) * 2)
+        cekirdek = cv2.erode(alfa.astype(np.uint8), k).astype(bool)
+        if cekirdek.sum() < 200:
+            cekirdek = alfa
+        x0, y0, x1, y1 = bilgi["isim_kutu"][y]
+        son = pa[y0:y1, x0:x1]
+        px = son[cekirdek]
+        toplam_px += int(cekirdek.sum())
+        final_prof = np.asarray(
+            [np.median(son[i, cekirdek[i]], axis=0)
+             for i in range(son.shape[0]) if cekirdek[i].sum() >= 3],
+            dtype=np.float32)
+        taraf[y] = {
+            "ort_rgb_fark": float(
+                np.abs(px.mean(axis=0) - kaynak[y]["ort_rgb"]).max()),
+            "parlaklik_std_fark": float(
+                abs((px @ LUMA).std() - kaynak[y]["parlaklik_std"])),
+            "profil_fark": profil_farki(prof, S["prof"][y]),
+            # Farkli harf bicimlerinden etkilendigi icin yalniz tani.
+            "goruntu_profil_tani": profil_farki(
+                final_prof, kaynak[y]["profil"]),
+            "cekirdek_px": int(cekirdek.sum()),
+        }
+    d_rgb = max(v["ort_rgb_fark"] for v in taraf.values())
+    d_std = max(v["parlaklik_std_fark"] for v in taraf.values())
+    d_prof = max(v["profil_fark"] for v in taraf.values())
     return {"gecti": bool(max(d_rgb, d_std, d_prof) <= DOKU_FARK),
             "ort_rgb_fark": round(d_rgb, 2), "parlaklik_std_fark": round(d_std, 2),
-            "profil_fark": round(d_prof, 2), "cekirdek_px": uretilen["px"],
+            "profil_fark": round(d_prof, 2), "cekirdek_px": toplam_px,
+            "taraf": {y: {k: round(v, 2) if isinstance(v, float) else v
+                            for k, v in d.items()}
+                      for y, d in taraf.items()},
             "esik": DOKU_FARK, "erozyon_px": DOKU_EROZYON}
 
 
@@ -737,7 +778,9 @@ def kos(a):
                          "olcek": bilgi["olcek"], "blok_kapisi": kapi}
                 if (sol, sag) == (NEW_LEFT, NEW_RIGHT):
                     gk = geometri_kapisi(poster, o28, s, bilgi)
-                    dk = doku_kapisi(poster, S["ref"], o28, s)
+                    dk = doku_kapisi(
+                        poster, S["ref"], o28, s, S,
+                        {"sol": sol, "sag": sag}, bilgi)
                     satir["geometri"], satir["doku"] = gk, dk
                     kayit["geometri"], kayit["doku"] = gk, dk
                     pilot12.kaydet(poster, YOL / ed / f"ALTIN_{oran}.jpg")
@@ -868,8 +911,11 @@ def rapor(sonuc, olcumler):
          "- **Cap tanisi**: `nominal_cap_sol/sag`, kilitli nominal hedef ile "
          "mevcut font secicinin gercek raster yuksekligi arasindaki farktir; "
          "kapi karari farkli bir kelimenin piksel kutusuna gore verilmez.",
-         f"- **Doku kapisi**: yalniz cekirdek pikseller (maske {DOKU_EROZYON} px "
-         f"asindirilmis), esik <= {DOKU_FARK} (DEGISMEDI). Serdar karari "
+         f"- **Doku kapisi**: renderer'in gercek RGBA isim plakasi kaynak "
+         f"profille; nihai poster rengi her ismin kendi {DOKU_EROZYON} px "
+         f"asindirilmis alfa cekirdegiyle karsilastirilir. Esik <= {DOKU_FARK} "
+         f"(DEGISMEDI). Farkli harf bicimlerinden etkilenen nihai goruntu "
+         f"profili yalniz tani olarak JSON'da kalir. Serdar karari "
          f"22 Eyl 2026: {', '.join(DOKU_BLOKLAMAZ)} edisyonlarinda doku "
          "olcumu raporda kalir ama uretimi BLOKLAMAZ; bu edisyonlarin uretim "
          "kapisi, onaydan sonra kilitlenecek kendi onayli isim satiri ve "

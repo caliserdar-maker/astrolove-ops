@@ -295,10 +295,12 @@ def poster_kur(s, S, isimler, tagline):
     t = Image.fromarray(np.clip(a, 0, 255).astype(np.uint8), "RGB").convert("RGBA")
     yeni_maske = np.zeros(a.shape[:2], np.uint8)
     isim_geometri = {}
+    isim_kutu = {}
     for y in ("sol", "sag"):
         p = pl[y][0]
         px, py = int(round(x[y])), int(round(s["isim_y"] - p.height / 2))
         t.alpha_composite(p, (px, py))
+        isim_kutu[y] = [px, py, px + p.width, py + p.height]
         alfa = np.asarray(p)[..., 3]
         pm = alfa > 40
         isaretle(yeni_maske, alfa > 8, px, py)
@@ -326,7 +328,8 @@ def poster_kur(s, S, isimler, tagline):
              "genislik": [w["sol"], w["sag"]], "satir": round(toplam, 1),
              "kenar": [x0, NORM_W - x0 - toplam],
              "satir_merkez": round(x0 + toplam / 2, 1),
-             "isim_geometri": isim_geometri, "tagline": tbilgi}
+             "isim_geometri": isim_geometri, "isim_kutu": isim_kutu,
+             "tagline": tbilgi}
     return t.convert("RGB"), bilgi, merkez, x, yeni_genis
 
 
