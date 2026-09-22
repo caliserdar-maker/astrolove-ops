@@ -141,5 +141,716 @@
         "dy": -76
       }
     }
+  },
+  "edisyonlar": {
+    "black": {
+      "2x3": {
+        "tuval": [
+          4000,
+          6000
+        ],
+        "bosluk": 152,
+        "bosluk_ortanca": 152.0,
+        "bosluk_ort": 152.0,
+        "bosluk_araligi": [
+          151,
+          153
+        ],
+        "cap": {
+          "sol": 97,
+          "sag": 95
+        },
+        "cap_ort": {
+          "sol": 96.75,
+          "sag": 94.75
+        },
+        "sayfa_n": 4,
+        "isim_bant": [
+          2599,
+          2695
+        ],
+        "sembol_bant": [
+          2263,
+          2467
+        ],
+        "tag_bant": [
+          3009,
+          3090
+        ],
+        "acik_zemin": false
+      },
+      "3x4": {
+        "tuval": [
+          3000,
+          4000
+        ],
+        "bosluk": 143,
+        "bosluk_ortanca": 143.0,
+        "bosluk_ort": 143.38,
+        "bosluk_araligi": [
+          143,
+          144
+        ],
+        "cap": {
+          "sol": 91,
+          "sag": 90
+        },
+        "cap_ort": {
+          "sol": 91.25,
+          "sag": 89.5
+        },
+        "sayfa_n": 4,
+        "isim_bant": [
+          2355,
+          2446
+        ],
+        "sembol_bant": [
+          2037,
+          2231
+        ],
+        "tag_bant": [
+          2742,
+          2819
+        ],
+        "acik_zemin": false
+      },
+      "4x5": {
+        "tuval": [
+          4000,
+          5000
+        ],
+        "bosluk": 134,
+        "bosluk_ortanca": 134.0,
+        "bosluk_ort": 134.25,
+        "bosluk_araligi": [
+          134,
+          135
+        ],
+        "cap": {
+          "sol": 86,
+          "sag": 84
+        },
+        "cap_ort": {
+          "sol": 85.5,
+          "sag": 83.5
+        },
+        "sayfa_n": 4,
+        "isim_bant": [
+          2206,
+          2291
+        ],
+        "sembol_bant": [
+          1909,
+          2091
+        ],
+        "tag_bant": [
+          2568,
+          2640
+        ],
+        "acik_zemin": false
+      },
+      "11x14": {
+        "tuval": [
+          3300,
+          4200
+        ],
+        "bosluk": 137,
+        "bosluk_ortanca": 137.0,
+        "bosluk_ort": 137.12,
+        "bosluk_araligi": [
+          137,
+          138
+        ],
+        "cap": {
+          "sol": 87,
+          "sag": 86
+        },
+        "cap_ort": {
+          "sol": 87.0,
+          "sag": 85.5
+        },
+        "sayfa_n": 4,
+        "isim_bant": [
+          2248,
+          2335
+        ],
+        "sembol_bant": [
+          1945,
+          2130
+        ],
+        "tag_bant": [
+          2617,
+          2691
+        ],
+        "acik_zemin": false
+      },
+      "A": {
+        "tuval": [
+          3508,
+          4961
+        ],
+        "bosluk": 143,
+        "bosluk_ortanca": 143.0,
+        "bosluk_ort": 143.38,
+        "bosluk_araligi": [
+          143,
+          144
+        ],
+        "cap": {
+          "sol": 91,
+          "sag": 90
+        },
+        "cap_ort": {
+          "sol": 91.0,
+          "sag": 89.5
+        },
+        "sayfa_n": 4,
+        "isim_bant": [
+          2452,
+          2543
+        ],
+        "sembol_bant": [
+          2134,
+          2328
+        ],
+        "tag_bant": [
+          2838,
+          2916
+        ],
+        "acik_zemin": false
+      }
+    },
+    "pure_white": {
+      "2x3": {
+        "tuval": [
+          4000,
+          6000
+        ],
+        "bosluk": 152,
+        "bosluk_ortanca": 152.0,
+        "bosluk_ort": 151.88,
+        "bosluk_araligi": [
+          151,
+          153
+        ],
+        "cap": {
+          "sol": 97,
+          "sag": 95
+        },
+        "cap_ort": {
+          "sol": 97.0,
+          "sag": 94.75
+        },
+        "sayfa_n": 4,
+        "isim_bant": [
+          2599,
+          2696
+        ],
+        "sembol_bant": [
+          2263,
+          2468
+        ],
+        "tag_bant": [
+          3009,
+          3090
+        ],
+        "acik_zemin": true
+      },
+      "3x4": {
+        "tuval": [
+          3000,
+          4000
+        ],
+        "bosluk": 143,
+        "bosluk_ortanca": 143.0,
+        "bosluk_ort": 143.38,
+        "bosluk_araligi": [
+          143,
+          144
+        ],
+        "cap": {
+          "sol": 91,
+          "sag": 89
+        },
+        "cap_ort": {
+          "sol": 91.0,
+          "sag": 89.0
+        },
+        "sayfa_n": 4,
+        "isim_bant": [
+          2355,
+          2446
+        ],
+        "sembol_bant": [
+          2037,
+          2231
+        ],
+        "tag_bant": [
+          2742,
+          2819
+        ],
+        "acik_zemin": true
+      },
+      "4x5": {
+        "tuval": [
+          4000,
+          5000
+        ],
+        "bosluk": 134,
+        "bosluk_ortanca": 134.0,
+        "bosluk_ort": 134.38,
+        "bosluk_araligi": [
+          134,
+          135
+        ],
+        "cap": {
+          "sol": 86,
+          "sag": 84
+        },
+        "cap_ort": {
+          "sol": 85.5,
+          "sag": 83.5
+        },
+        "sayfa_n": 4,
+        "isim_bant": [
+          2206,
+          2292
+        ],
+        "sembol_bant": [
+          1909,
+          2091
+        ],
+        "tag_bant": [
+          2569,
+          2640
+        ],
+        "acik_zemin": true
+      },
+      "11x14": {
+        "tuval": [
+          3300,
+          4200
+        ],
+        "bosluk": 137,
+        "bosluk_ortanca": 137.0,
+        "bosluk_ort": 137.38,
+        "bosluk_araligi": [
+          137,
+          138
+        ],
+        "cap": {
+          "sol": 87,
+          "sag": 85
+        },
+        "cap_ort": {
+          "sol": 87.0,
+          "sag": 85.0
+        },
+        "sayfa_n": 4,
+        "isim_bant": [
+          2248,
+          2335
+        ],
+        "sembol_bant": [
+          1945,
+          2130
+        ],
+        "tag_bant": [
+          2618,
+          2691
+        ],
+        "acik_zemin": true
+      },
+      "A": {
+        "tuval": [
+          3508,
+          4961
+        ],
+        "bosluk": 143,
+        "bosluk_ortanca": 143.0,
+        "bosluk_ort": 143.25,
+        "bosluk_araligi": [
+          143,
+          144
+        ],
+        "cap": {
+          "sol": 91,
+          "sag": 89
+        },
+        "cap_ort": {
+          "sol": 91.25,
+          "sag": 89.25
+        },
+        "sayfa_n": 4,
+        "isim_bant": [
+          2452,
+          2543
+        ],
+        "sembol_bant": [
+          2134,
+          2328
+        ],
+        "tag_bant": [
+          2839,
+          2916
+        ],
+        "acik_zemin": true
+      }
+    },
+    "modern": {
+      "2x3": {
+        "tuval": [
+          4000,
+          6000
+        ],
+        "bosluk": 152,
+        "bosluk_ortanca": 152.0,
+        "bosluk_ort": 152.0,
+        "bosluk_araligi": [
+          151,
+          153
+        ],
+        "cap": {
+          "sol": 97,
+          "sag": 95
+        },
+        "cap_ort": {
+          "sol": 97.0,
+          "sag": 95.0
+        },
+        "sayfa_n": 4,
+        "isim_bant": [
+          2599,
+          2696
+        ],
+        "sembol_bant": [
+          2263,
+          2467
+        ],
+        "tag_bant": [
+          3009,
+          3090
+        ],
+        "acik_zemin": true
+      },
+      "3x4": {
+        "tuval": [
+          3000,
+          4000
+        ],
+        "bosluk": 143,
+        "bosluk_ortanca": 143.0,
+        "bosluk_ort": 143.38,
+        "bosluk_araligi": [
+          143,
+          144
+        ],
+        "cap": {
+          "sol": 91,
+          "sag": 90
+        },
+        "cap_ort": {
+          "sol": 91.25,
+          "sag": 89.5
+        },
+        "sayfa_n": 4,
+        "isim_bant": [
+          2355,
+          2446
+        ],
+        "sembol_bant": [
+          2037,
+          2231
+        ],
+        "tag_bant": [
+          2742,
+          2819
+        ],
+        "acik_zemin": true
+      },
+      "4x5": {
+        "tuval": [
+          4000,
+          5000
+        ],
+        "bosluk": 135,
+        "bosluk_ortanca": 135.0,
+        "bosluk_ort": 134.62,
+        "bosluk_araligi": [
+          134,
+          135
+        ],
+        "cap": {
+          "sol": 86,
+          "sag": 84
+        },
+        "cap_ort": {
+          "sol": 85.75,
+          "sag": 84.25
+        },
+        "sayfa_n": 4,
+        "isim_bant": [
+          2208,
+          2293
+        ],
+        "sembol_bant": [
+          1910,
+          2092
+        ],
+        "tag_bant": [
+          2570,
+          2643
+        ],
+        "acik_zemin": true
+      },
+      "11x14": {
+        "tuval": [
+          3300,
+          4200
+        ],
+        "bosluk": 137,
+        "bosluk_ortanca": 137.0,
+        "bosluk_ort": 137.12,
+        "bosluk_araligi": [
+          136,
+          138
+        ],
+        "cap": {
+          "sol": 88,
+          "sag": 86
+        },
+        "cap_ort": {
+          "sol": 87.5,
+          "sag": 85.5
+        },
+        "sayfa_n": 4,
+        "isim_bant": [
+          2248,
+          2336
+        ],
+        "sembol_bant": [
+          1945,
+          2130
+        ],
+        "tag_bant": [
+          2618,
+          2692
+        ],
+        "acik_zemin": true
+      },
+      "A": {
+        "tuval": [
+          3508,
+          4961
+        ],
+        "bosluk": 149,
+        "bosluk_ortanca": 149.0,
+        "bosluk_ort": 149.0,
+        "bosluk_araligi": [
+          149,
+          149
+        ],
+        "cap": {
+          "sol": 95,
+          "sag": 93
+        },
+        "cap_ort": {
+          "sol": 95.0,
+          "sag": 93.0
+        },
+        "sayfa_n": 4,
+        "isim_bant": [
+          2481,
+          2576
+        ],
+        "sembol_bant": [
+          2151,
+          2352
+        ],
+        "tag_bant": [
+          2883,
+          2963
+        ],
+        "acik_zemin": true
+      }
+    },
+    "vintage": {
+      "2x3": {
+        "tuval": [
+          4000,
+          6000
+        ],
+        "bosluk": 152,
+        "bosluk_ortanca": 152.0,
+        "bosluk_ort": 149.25,
+        "bosluk_araligi": [
+          129,
+          153
+        ],
+        "cap": {
+          "sol": 96,
+          "sag": 94
+        },
+        "cap_ort": {
+          "sol": 96.5,
+          "sag": 94.0
+        },
+        "sayfa_n": 4,
+        "isim_bant": [
+          2599,
+          2700
+        ],
+        "sembol_bant": [
+          2263,
+          2467
+        ],
+        "tag_bant": [
+          3009,
+          3090
+        ],
+        "acik_zemin": true
+      },
+      "3x4": {
+        "tuval": [
+          3000,
+          4000
+        ],
+        "bosluk": 143,
+        "bosluk_ortanca": 143.0,
+        "bosluk_ort": 141.25,
+        "bosluk_araligi": [
+          126,
+          144
+        ],
+        "cap": {
+          "sol": 91,
+          "sag": 89
+        },
+        "cap_ort": {
+          "sol": 91.0,
+          "sag": 89.25
+        },
+        "sayfa_n": 4,
+        "isim_bant": [
+          2355,
+          2446
+        ],
+        "sembol_bant": [
+          2037,
+          2231
+        ],
+        "tag_bant": [
+          2742,
+          2819
+        ],
+        "acik_zemin": true
+      },
+      "4x5": {
+        "tuval": [
+          4000,
+          5000
+        ],
+        "bosluk": 135,
+        "bosluk_ortanca": 135.0,
+        "bosluk_ort": 134.75,
+        "bosluk_araligi": [
+          134,
+          135
+        ],
+        "cap": {
+          "sol": 85,
+          "sag": 84
+        },
+        "cap_ort": {
+          "sol": 85.25,
+          "sag": 83.75
+        },
+        "sayfa_n": 4,
+        "isim_bant": [
+          2208,
+          2293
+        ],
+        "sembol_bant": [
+          1910,
+          2092
+        ],
+        "tag_bant": [
+          2565,
+          2643
+        ],
+        "acik_zemin": true
+      },
+      "11x14": {
+        "tuval": [
+          3300,
+          4200
+        ],
+        "bosluk": 137,
+        "bosluk_ortanca": 137.0,
+        "bosluk_ort": 137.25,
+        "bosluk_araligi": [
+          137,
+          138
+        ],
+        "cap": {
+          "sol": 90,
+          "sag": 85
+        },
+        "cap_ort": {
+          "sol": 90.5,
+          "sag": 85.0
+        },
+        "sayfa_n": 4,
+        "isim_bant": [
+          2249,
+          2342
+        ],
+        "sembol_bant": [
+          1945,
+          2130
+        ],
+        "tag_bant": [
+          2618,
+          2692
+        ],
+        "acik_zemin": true
+      },
+      "A": {
+        "tuval": [
+          3508,
+          4961
+        ],
+        "bosluk": 149,
+        "bosluk_ortanca": 149.0,
+        "bosluk_ort": 148.0,
+        "bosluk_araligi": [
+          139,
+          150
+        ],
+        "cap": {
+          "sol": 95,
+          "sag": 93
+        },
+        "cap_ort": {
+          "sol": 94.75,
+          "sag": 93.0
+        },
+        "sayfa_n": 4,
+        "isim_bant": [
+          2481,
+          2576
+        ],
+        "sembol_bant": [
+          2151,
+          2356
+        ],
+        "tag_bant": [
+          2877,
+          2974
+        ],
+        "acik_zemin": true
+      }
+    },
+    "_": "Her edisyonun KENDI 20/28/36/72 sayfalarindan olculdu (Serdar karari 21 Eyl 2026: her edisyon kendi orijinaline sadik). Blue bolumu degismedi."
   }
 }
