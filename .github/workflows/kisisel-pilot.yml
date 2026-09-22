@@ -13,6 +13,11 @@ permissions:
   contents: read
 
 on:
+  push:
+    branches:
+      - kisisel-v1
+    paths:
+      - config/kisisel_readonly_validation.trigger
   workflow_dispatch:
     inputs:
       branch:
@@ -48,7 +53,7 @@ jobs:
       - name: Checkout (secilen dal)
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.branch }}
+          ref: ${{ inputs.branch || github.ref_name }}
 
       - uses: actions/setup-python@v5
         with:
@@ -74,8 +79,8 @@ jobs:
           fi
       - name: Script'i kosu
         env:
-          SCRIPT: ${{ inputs.script }}
-          ARGS: ${{ inputs.args }}
+          SCRIPT: ${{ inputs.script || 'scripts/kisisel/edisyon_uret.py' }}
+          ARGS: ${{ inputs.args || '--drive-yazma-yok' }}
           PYTHONUNBUFFERED: "1"
         run: |
           set -euo pipefail
