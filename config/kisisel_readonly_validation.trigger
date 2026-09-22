@@ -1,1 +1,1 @@
-2026-09-22 geometry-contract-readonly-validation
+2026-09-22 texture-contract-readonly-validation
