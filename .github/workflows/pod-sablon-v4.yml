@@ -105,7 +105,7 @@ jobs:
         run: |
           set -euo pipefail
           case "$MOD" in
-            kuru|maliyet|dogrula|hpr|buyuk|yetki|yetki_test|pilot15_oku|boy15_oku|durum15|cerceve_sonda|cerceve_hazirlik|siparis_hazirla|siparis_onizleme|siparis_izin_kapat|eslesme_kanit|router_kuru|router_teklif)
+            kuru|maliyet|dogrula|hpr|buyuk|yetki|yetki_test|pilot15_oku|boy15_oku|durum15|cerceve_sonda|cerceve_hazirlik|cerceve_mockup|siparis_hazirla|siparis_onizleme|siparis_izin_kapat|eslesme_kanit|router_kuru|router_teklif)
               if [ "$APPLY" = "true" ]; then
                 echo "::error::mod=$MOD ile yazma olmaz. DUR."; exit 1
               fi
@@ -231,6 +231,23 @@ jobs:
             python scripts/pod/pod_pilot_15.py oku --listing "$LISTING" --kota-alt "$KOTA_ALT"
           elif [ "$MOD" = "pilot15_yaz" ]; then
             python scripts/pod/pod_pilot_15.py yaz --listing "$LISTING" --kota-alt "$KOTA_ALT" --confirm "$CONFIRM" --adim "$ADIM"
+          elif [ "$MOD" = "cerceve_mockup" ]; then
+            # ORNEK mockup (toplu uretim YOK). Kaynaklar Drive'dan okunur, Etsy'ye yukleme yok.
+            set -euo pipefail
+            mkdir -p _work/mk/poster _work/mk/oda _out/mockup
+            rclone copy "gdrive:ASTROLOVE/WALL_ART/POSTERS/ORIGINAL_HIGH_RES/MIDNIGHT_BLUE" \
+              _work/mk/poster --include "**/AQUARIUS_ARIES.jpg" -q
+            rclone copy "gdrive:ASTROLOVE/WALL_ART/LISTING_MEDIA/ETSY_UPLOAD_SETS/MIDNIGHT_BLUE/AQUARIUS_ARIES" \
+              _work/mk/oda --include "*_WA_*" -q || true
+            echo "poster dosyalari:"; find _work/mk/poster -name '*.jpg' | head -20
+            echo "oda kareleri:"; find _work/mk/oda -type f | head -20
+            python scripts/pod/cerceve_kaynak_sec.py --poster-kok _work/mk/poster \
+              --oda-kok _work/mk/oda --out _work/mk/secim.txt
+            P=$(sed -n '1p' _work/mk/secim.txt); O=$(sed -n '2p' _work/mk/secim.txt)
+            echo "secilen poster: $P"; echo "secilen oda: $O"
+            python scripts/pod/cerceve_mockup.py --poster "$P" --oda "$O" --out _out/mockup
+            rclone copy _out/mockup "gdrive:ASTROLOVE/TEMP/POD_5X7/CERCEVE_MOCKUP" -q
+            rclone lsf "gdrive:ASTROLOVE/TEMP/POD_5X7/CERCEVE_MOCKUP"
           elif [ "$MOD" = "cerceve_hazirlik" ]; then
             # SALT OKUMA: urun kayitlari + fiyat teklifleri. Siparis YOK, Etsy'ye dokunulmaz.
             python scripts/prodigi/cerceve_hazirlik.py --env live --out _out/cerceve2
