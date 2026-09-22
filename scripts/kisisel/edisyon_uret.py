@@ -817,10 +817,12 @@ def kos(a):
     (YOL / "EDISYON_SONUC_V2.json").write_text(
         json.dumps(sonuc, ensure_ascii=False, indent=1, default=str), encoding="utf-8")
     rapor(sonuc, olcumler)
-    if not a.yerel:
+    if not a.yerel and not a.drive_yazma_yok:
         rc("copy", str(YOL), DEST_E, "--exclude", "*/ham/**", "--exclude",
            "*/zemin/**", capture=False, timeout=900)
         log(f"ciktilar {DEST_E} altina yazildi")
+    elif not a.yerel:
+        log("salt okunur kosu: ciktilar Drive'a yazilmadi")
 
 
 def rapor(sonuc, olcumler):
@@ -1023,6 +1025,8 @@ def rapor(sonuc, olcumler):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--yerel", action="store_true")
+    ap.add_argument("--drive-yazma-yok", action="store_true",
+                    help="girdileri Drive'dan oku, ciktilari Drive'a yukleme")
     ap.add_argument("--kilitle", action="store_true",
                     help="onayli/<edisyon>/ kirpimlarini ve ALTIN'i yaz "
                          "(Serdar onayi gerekir)")
