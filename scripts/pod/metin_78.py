@@ -244,8 +244,17 @@ def oas_kisisellestirme(url=OAS_URL):
                         adlar.add(k)
             if adlar:
                 uclar.append((yontem.upper(), yol, op.get("operationId"), sorted(adlar)))
+    ayrinti = {}
+    for ad in sema_adlari:
+        props = (sema.get(ad) or {}).get("properties") or {}
+        ayrinti[ad] = {k: {kk: vv for kk, vv in (v or {}).items()
+                           if kk in ("type", "maxLength", "minimum", "maximum", "description", "items")}
+                       for k, v in props.items()}
+    coklu = sorted({a for _, _, _, adlar in uclar for a in adlar
+                    if "question" in a.lower() or "multiple" in a.lower()})
     return {"listing_alanlari": listing_alan, "personalizasyon_semalari": sema_adlari,
-            "uclar": sorted(uclar, key=lambda t: (t[1], t[0]))}
+            "uclar": sorted(uclar, key=lambda t: (t[1], t[0])),
+            "coklu_alan_izleri": coklu, "sema_ayrinti": ayrinti}
 
 
 # ------------------------------------------------------------------ Etsy okuma
@@ -386,15 +395,30 @@ def main():
                f"- Adinda 'personaliz' gecen sema: {oas['personalizasyon_semalari'] or 'YOK'}",
                "- Kisisellestirme alani yazan/okuyan uclar:", ""]
         md += [f"  - `{y} {yol}` ({oid}): {', '.join(adlar)}" for y, yol, oid, adlar in oas["uclar"]]
-        coklu = any(len([a for a in adlar if a.endswith("_char_count_max")]) > 1 for _, _, _, adlar in oas["uclar"])
-        md += ["",
-               "**Sonuc:** OAS'ta ilan basina kisisellestirme TEK bir serbest metin alanidir "
-               "(`is_personalizable`, `personalization_is_required`, `personalization_char_count_max`, "
-               "`personalization_instructions`). Ayri ayri adlandirilmis BIRDEN COK alan icin sema veya uc "
-               f"bulunmadi (coklu alan izi: {'VAR' if coklu else 'YOK'}). Yani 3 ayri alan API ile yazilamaz; "
-               "Etsy panelinden (Listings > ilan > Personalization) kurulmasi gerekir. API ile yapilabilecek "
-               "tek sey: alani acmak/zorunlu yapmak, karakter sinirini ve yonerge metnini yazmak "
-               "(`PATCH /v3/application/shops/{shop_id}/listings/{listing_id}`).", ""]
+        coklu_uc = [(y, yol, oid) for y, yol, oid, adlar in oas["uclar"]
+                    if any("question" in a.lower() or "multiple" in a.lower() for a in adlar)]
+        md += ["", f"- Coklu alan izi (uc parametreleri): {oas['coklu_alan_izleri'] or 'YOK'}", ""]
+        for ad, props in (oas.get("sema_ayrinti") or {}).items():
+            md += [f"**Sema `{ad.split('_')[-1]}`** (`{ad}`):", "",
+                   "| alan | tip | sinir | aciklama |", "|---|---|---|---|"]
+            for k, v in props.items():
+                sinir = v.get("maxLength") or (f"{v.get('minimum')}..{v.get('maximum')}"
+                                               if v.get("maximum") is not None else "")
+                md += [f"| `{k}` | {v.get('type') or ''} | {sinir} | {(v.get('description') or '')[:160]} |"]
+            md += [""]
+        if coklu_uc:
+            y, yol, oid = coklu_uc[0]
+            md += ["**Sonuc: Etsy API coklu kisisellestirme alanini DESTEKLIYOR.** Kanit: "
+                   f"`{y} {yol}` ({oid}), govdede `personalization_questions` dizisi ve "
+                   "`supports_multiple_personalization_questions` bayragi. Yani 3 alan (iki isim + mesaj) "
+                   "panelden degil, bu uc ile yazilabilir. Listing seviyesindeki tek alanlik eski model "
+                   "(`is_personalizable`, `personalization_is_required`, `personalization_char_count_max`, "
+                   "`personalization_instructions`; `PATCH /v3/application/shops/{shop_id}/listings/{listing_id}`) "
+                   "yerini bu uca birakir. BU GOREVDE YAZILMADI; yazma ayri onay ister.", ""]
+        else:
+            md += ["**Sonuc: OAS'ta coklu alan icin uc/sema bulunamadi.** Kisisellestirme ilan basina tek "
+                   "serbest metin alanidir; 3 ayri alan ancak Etsy panelinden "
+                   "(Listings > ilan > Personalization) kurulabilir.", ""]
     if hata_ilan:
         md += ["## Kontrol hatalari", ""] + [f"- {lid}: {'; '.join(h)}" for lid, h in hata_ilan] + [""]
 
