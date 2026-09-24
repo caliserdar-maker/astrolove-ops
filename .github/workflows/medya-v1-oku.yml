@@ -1,0 +1,116 @@
+name: medya-v1-oku
+
+# medya-v1 (Kova-Kova POD) icin SALT OKUR girdi toplama (24 Eyl 2026).
+# - Etsy: referans (Cancer-Libra POD) + Kova-Kova canli ilan dokumu, gorsel
+#   ve video indirme; magazadaki tum Cancer+Libra ilanlarinin listesi. Yalniz GET.
+# - Drive: baslangic ZIP'i acilip ayni klasore yazilir.
+# Cikti: gdrive:ASTROLOVE/TEMP/POD_KISISEL/AQUARIUS_AQUARIUS_v1/_girdi/
+# Etsy'ye/Prodigi'ye yazma YOK. Tek yan etki: yenilenen Etsy token'i
+# TEMP/ETSY_TOKEN.json'a geri yazilir (docs/SECRETS.md). Sir loga yazilmaz.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Script dali"
+        required: true
+        default: "medya-v1"
+      ref_id:
+        description: "Referans ilan ID"
+        required: true
+        default: "4570143815"
+      live_id:
+        description: "Kova-Kova canli ilan ID"
+        required: true
+        default: "4570110121"
+      zip_id:
+        description: "Baslangic ZIP Drive file ID (bos = atla)"
+        required: false
+        default: "1WpPbP86Em0WNMTj9muUyvADbOa3Axxd4"
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  oku:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -q requests
+      - name: rclone kur
+        run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          test -n "${RCLONE_CONF_B64:-}" || { echo "HATA: RCLONE_CONF_B64 yok" >&2; exit 1; }
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Token dosyasini Drive'dan al
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          test -s _work/ETSY_TOKEN.json
+      - name: Etsy salt okur dokum
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          REF_ID: ${{ inputs.ref_id }}
+          LIVE_ID: ${{ inputs.live_id }}
+          OUT_DIR: _out/etsy
+        run: python scripts/medya_v1/etsy_oku.py
+      - name: Yenilenen token'i Drive'a geri yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          if [ -f _work/ETSY_TOKEN.json.updated ]; then
+            rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json"
+            echo "Token geri yazildi."
+          else
+            echo "Token yenilenmedi."
+          fi
+      - name: Baslangic ZIP'ini ac
+        if: ${{ inputs.zip_id != '' }}
+        env:
+          ZIP_ID: ${{ inputs.zip_id }}
+        run: |
+          set -euo pipefail
+          mkdir -p _work/zip _out/baslangic
+          rclone backend copyid gdrive: "$ZIP_ID" _work/zip/
+          ls -l _work/zip
+          unzip -q _work/zip/*.zip -d _out/baslangic
+          find _out/baslangic -type f | sed 's/^/  /' | head -400
+          echo "dosya sayisi: $(find _out/baslangic -type f | wc -l)"
+      - name: Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          if [ -d _out ]; then
+            rclone copy _out "gdrive:ASTROLOVE/TEMP/POD_KISISEL/AQUARIUS_AQUARIUS_v1/_girdi" --transfers 8
+            rclone size "gdrive:ASTROLOVE/TEMP/POD_KISISEL/AQUARIUS_AQUARIUS_v1/_girdi"
+          fi
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work _out ~/.config/rclone
