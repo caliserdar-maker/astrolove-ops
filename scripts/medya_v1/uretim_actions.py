@@ -41,7 +41,10 @@ shutil.copytree(z / 'x/workspace/production_run/completed/AQUARIUS_AQUARIUS/imag
 print('GIRDI SHA256 (ilk 12):', flush=True)
 for p in sorted(list((W / 'src').rglob('*.*')) + list((W / 'refs_centered').glob('*')) + list((W / 'etsy').rglob('*.jpg'))):
     print(' ', hashlib.sha256(p.read_bytes()).hexdigest()[:12], p.relative_to(W), flush=True)
-r = subprocess.run([sys.executable, '-u', 'run_all.py'], cwd=W)
+r = subprocess.run([sys.executable, '-u', 'run_all.py', 'uretim'], cwd=W)
+if r.returncode == 0:
+    sh(['rclone', 'copy', str(W / 'paket'), DR, '--transfers', '8'])   # teslim once yazilir, QC sonra
+    r = subprocess.run([sys.executable, '-u', 'run_all.py', 'qc'], cwd=W)
 qc = W / 'paket/QC'; qc.mkdir(parents=True, exist_ok=True)
 for f in (W / 'out').glob('qc_*.json'): shutil.copy(f, qc / f.name)
 for f in ('master_meta.json', 'video_plan.json', 'video_states_meta.json', 'cards_log_2_3_4_5_6_7_8_9_10.json'):
