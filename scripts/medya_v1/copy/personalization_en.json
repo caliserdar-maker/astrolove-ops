@@ -1,0 +1,23 @@
+{
+ "personalization_questions": [
+  {
+   "question_text": "First name",
+   "instructions": "Printed on the left, under the Aquarius sign. Max 11 characters. Printed in uppercase.",
+   "required": true,
+   "max_allowed_characters": 11
+  },
+  {
+   "question_text": "Second name",
+   "instructions": "Printed on the right, under the Aquarius sign. Max 11 characters. Printed in uppercase.",
+   "required": true,
+   "max_allowed_characters": 11
+  },
+  {
+   "question_text": "Your personal message",
+   "instructions": "Enter the message to print below your names. Max 35 characters, including spaces.",
+   "required": true,
+   "max_allowed_characters": 35
+  }
+ ],
+ "note": "Sign order sorusu yok (Serdar karari 24 Eyl 2026)."
+}
