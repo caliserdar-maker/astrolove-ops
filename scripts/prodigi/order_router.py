@@ -50,6 +50,7 @@ sys.path.insert(0, str(HERE.parent / "etsy"))
 sys.path.insert(0, str(HERE.parent / "pinterest"))
 from etsy_common import Etsy, TokenStore, log as elog, mask  # noqa: E402
 from pod_sku import parse_sku  # noqa: E402
+import takip  # noqa: E402
 
 PRODIGI = {"live": "https://api.prodigi.com/v4.0", "sandbox": "https://api.sandbox.prodigi.com/v4.0"}
 KEY_REMOTE = {"live": "gdrive:ASTROLOVE/TEMP/PRODIGI_TOKEN.json", "sandbox": "gdrive:ASTROLOVE/TEMP/PRODIGI_SANDBOX_TOKEN.json"}
@@ -62,8 +63,8 @@ STAGES = ["dryrun", "bekliyor", "manual", "atlandi", "ordered", "shipped", "trac
 TUM_BOYLAR = ["5x7", "8x10", "11x14", "12x16", "12x18", "16x20", "16x24", "18x24", "20x30",
               "24x36", "30x40", "A4", "A3", "A2", "A1"]      # 13 mevcut + 5x7 + A1
 COLS = ["receipt_id", "stage", "country", "items", "etsy_total", "prodigi_cost", "margin", "warn", "prodigi_order_id",
-        "prodigi_status", "asset_perms", "tracking", "carrier", "sent_tx", "kanal_iptal", "kanal_oid", "alarm_kosu",
-        "ts_utc", "note"]
+        "prodigi_status", "asset_perms", "tracking", "carrier", "carrier_service", "tracking_url", "tracking_son_ayak",
+        "carrier_etsy", "sent_tx", "kanal_iptal", "kanal_oid", "alarm_kosu", "ts_utc", "note"]
 _secret = None
 
 
@@ -403,13 +404,15 @@ def parse_items(receipt, only_size=""):
     return items, other, atlanan
 
 
-def order_body(receipt, items, urls, only_size=""):
+def order_body(receipt, items, urls, only_size="", shipping_method="Budget"):
     rid = receipt["receipt_id"]
     # Anahtar SIPARISTEKI boylardan turetilir (or. etsy-123-5x7, etsy-123-5x7+A1): tam sepet
     # siparisiyle de, tek boyluk bir siparisle de carpismaz. Kalemler TEK siparistedir.
     ek = "+".join(sorted({i["size"] for i in items})) if only_size else ""
     ref = f"etsy-{rid}" + (f"-{ek}" if ek else "")
-    return {"merchantReference": ref, "shippingMethod": "Budget", "idempotencyKey": ref,
+    # Kargo yontemi TEK KAYNAK: teklifte secilen (kargo_ayrinti["secilen"]["yontem"]) buraya gelir;
+    # maliyet hesabi ile siparis govdesi ayni yontemi kullanir (23 Eyl bulgusu 1).
+    return {"merchantReference": ref, "shippingMethod": shipping_method or "Budget", "idempotencyKey": ref,
             "recipient": {"name": receipt.get("name") or "", "email": receipt.get("buyer_email") or None,
                           "address": {"line1": receipt.get("first_line") or "", "line2": receipt.get("second_line") or None,
                                       "postalOrZipCode": receipt.get("zip") or "", "countryCode": receipt.get("country_iso") or "",
@@ -419,7 +422,7 @@ def order_body(receipt, items, urls, only_size=""):
 
 
 # ------------------------------------------------------------------ onayli mod: paket + gonderim
-def package_of(receipt, items, country, etsy_total, cost, margin, warn, env, only_size=""):
+def package_of(receipt, items, country, etsy_total, cost, margin, warn, env, only_size="", shipping_method="Budget"):
     """Prodigi'ye gonderilmeye HAZIR paket (asset url'leri gonderim aninda doldurulur)."""
     rid = str(receipt["receipt_id"])
     return {"receipt_id": rid, "env": env, "created_utc": now(), "country": country, "only_size": only_size,
@@ -427,7 +430,7 @@ def package_of(receipt, items, country, etsy_total, cost, margin, warn, env, onl
             "recipient_name": receipt.get("name") or "",
             "items": [{k: i[k] for k in ("transaction_id", "sku", "prodigi_sku", "pair", "ed", "size", "qty", "price", "asset_remote")}
                       for i in items],
-            "order": order_body(receipt, items, {i["sku"]: "" for i in items}, only_size)}
+            "order": order_body(receipt, items, {i["sku"]: "" for i in items}, only_size, shipping_method)}
 
 
 def submit_package(a, prod, st, rid, report):
@@ -505,6 +508,18 @@ def write_state(p, st):
             w.writerow({c: st[k].get(c, "") for c in COLS})
 
 
+def takip_url_durumu(url, zaman_asimi=20):
+    """Takip linki calisiyor mu: 2xx/3xx -> 'ok'. Ag yoksa/hata varsa nedeni dondurur."""
+    if not url:
+        return "url yok"
+    try:
+        r = requests.get(url, timeout=zaman_asimi, allow_redirects=True,
+                         headers={"User-Agent": "astrolove-ops/1.0"})
+        return "ok" if r.status_code < 400 else f"HTTP {r.status_code}"
+    except Exception as e:
+        return f"{type(e).__name__}"
+
+
 def now():
     return time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
 
@@ -540,6 +555,9 @@ def main():
     ap.add_argument("--kanal-kopuk", action="store_true",
                     help="Serdar onayi: Etsy kanali Prodigi'den koparildi; kanal artik aranmaz")
     ap.add_argument("--devral", default="", help="disarida acilan siparisleri STATE'e al: receipt=order_id[,...]")
+    ap.add_argument("--takip-baslangic", default="",
+                    help="Etsy takip yazimi icin yeni siparis siniri (UTC 'YYYY-MM-DD HH:MM:SS'); "
+                         "takip.YENI_SIPARIS_BASLANGIC_UTC'den yalniz ILERI tasinabilir")
     ap.add_argument("--only-size", default="", help="yalniz bu boyun kalemlerini isle (or. 5x7); "
                                                    "ayni sepetteki diger boylar atlanir")
     g = ap.add_mutually_exclusive_group(required=False)
@@ -548,6 +566,10 @@ def main():
     a = ap.parse_args()
     if not (a.dry_run or a.apply):
         a.dry_run = True                       # onayli modda varsayilan: Prodigi'ye yazma yok
+    try:
+        takip_sinir = takip.sinir_ts(a.takip_baslangic)   # hatali bicim: kosu basinda dur, yazma yok
+    except ValueError:
+        sys.exit(f"HATA: --takip-baslangic bicimi 'YYYY-MM-DD HH:MM:SS' olmali: {a.takip_baslangic!r}")
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
     st = read_state(a.state)
     approve = (a.approve_mode == "on") and not a.submit
@@ -695,10 +717,10 @@ def main():
         if margin < a.margin_min:
             warn.append(f"MARJ_DUSUK {margin:.0%} (< {a.margin_min:.0%}): Etsy {etsy_total} / Prodigi {cost}")
         if approve:
-            pkg = package_of(r, items, country, etsy_total, cost, margin, "; ".join(warn), a.env, a.only_size)
+            secilen_yontem = (kargo_ayrinti.get("secilen") or {}).get("yontem") or "Budget"
+            pkg = package_of(r, items, country, etsy_total, cost, margin, "; ".join(warn), a.env, a.only_size,
+                             secilen_yontem)
             pkg["kargo"] = kargo_ayrinti
-            if kargo_ayrinti.get("secilen"):
-                pkg["order"]["shippingMethod"] = kargo_ayrinti["secilen"]["yontem"]
             (out / f"{rid}.json").write_text(json.dumps(pkg, indent=1, ensure_ascii=False), encoding="utf-8")
             upd(st, a.state, rid, stage="bekliyor", country=country, items=desc, etsy_total=etsy_total, prodigi_cost=cost,
                 margin=margin, warn="; ".join(warn), note=f"paket hazir ({rid}.json); onay bekliyor (--submit {rid})")
@@ -721,7 +743,8 @@ def main():
             for i in items:
                 fid, pid, url = links.open(i["asset_remote"])
                 perms.append([fid, pid]); urls[i["sku"]] = url
-            stc, d = prod.create_order(order_body(r, items, urls, a.only_size))
+            secilen_yontem = (kargo_ayrinti.get("secilen") or {}).get("yontem") or "Budget"
+            stc, d = prod.create_order(order_body(r, items, urls, a.only_size, secilen_yontem))
             outcome = (d.get("outcome") or "")
             oid = (d.get("order") or {}).get("id")
             if stc != 200 or not oid or outcome.lower() not in ("created", "createdwithissues", "onhold"):
@@ -794,9 +817,35 @@ def main():
             ship = next((s for s in o.get("shipments") or [] if (s.get("tracking") or {}).get("number")), None)
             kw = dict(prodigi_status=f"{status.get('stage')}/{details.get('downloadAssets')}/{details.get('inProduction', details.get('printReadyAssetsPrepared'))}", asset_perms=perms)
             if ship:
-                kw.update(stage="shipped", tracking=ship["tracking"]["number"], carrier=(ship.get("carrier") or {}).get("name") or "")
-                report.append(f"- {rid}: SHIPPED {kw['carrier']} {kw['tracking']}")
+                bilgi = takip.takip_bilgi(ship)
+                plan = takip.etsy_plani(bilgi)
+                kw.update(stage="shipped", tracking=bilgi["numara"], carrier=bilgi["tasiyici_ad"],
+                          carrier_service=bilgi["tasiyici_hizmet"], tracking_url=plan["takip_url"],
+                          tracking_son_ayak=bilgi["son_ayak_numara"], carrier_etsy=plan["carrier_name"])
+                report.append(f"- {rid}: SHIPPED {bilgi['tasiyici_ad']} / {bilgi['tasiyici_hizmet']} "
+                              f"{bilgi['numara']} -> Etsy {plan['carrier_name']} {plan['tracking_code']}"
+                              + (f" | {plan['uyari']}" if plan["uyari"] else ""))
             upd(st, a.state, rid, **kw)
+
+    # ---- 2b) TAKIP KORUMASI raporu (salt okuma): hangi siparise neden Etsy takibi yazilmaz
+    report.append(f"- TAKIP KORUMASI: sinir {takip.utc_metin(takip_sinir)} UTC; Etsy'ye yalniz STATE 'shipped' "
+                  "+ yazma_karari 'yaz' olan receipt yazilir")
+    bilinen = set()
+    for rid, row in st.items():
+        if rid == META_ID:
+            continue
+        bilinen.update(x for x in (rid, row.get("prodigi_order_id"), row.get("kanal_oid")) if x)
+        if row.get("stage") != "shipped":
+            report.append(f"- TAKIP KORUMASI {rid}: YAZMAZ (STATE '{row.get('stage')}', adim 3 disi)"
+                          + (f"; kayitli takip {row.get('carrier') or '-'} {row.get('tracking')}" if row.get("tracking") else ""))
+        else:
+            report.append(f"- TAKIP KORUMASI {rid}: STATE 'shipped' -> karar adim 3'te receipt okunarak verilir")
+    for ref, b in sorted((idx.get("kayit") or {}).items(), key=lambda kv: str(kv[1].get("id"))):
+        if b.get("id") in bilinen or ref in bilinen:
+            continue
+        bilinen.add(b.get("id"))
+        report.append(f"- TAKIP KORUMASI {b.get('id')} (ref {b.get('mr') or '-'}): YAZMAZ (STATE'te yok; "
+                      "router bu siparise takip yazmaz)")
 
     # ---- 3) shipped -> Etsy tracking
     for rid, row in list(st.items()):
@@ -807,11 +856,40 @@ def main():
             report.append(f"- {rid}: Etsy tracking YAZILMADI ({nedeni}); tracking {row.get('tracking')} {row.get('carrier') or ''}")
             continue
         try:
-            api.post(f"/shops/{shop}/receipts/{rid}/tracking", {"tracking_code": row["tracking"], "carrier_name": row.get("carrier") or "other", "send_bcc": "true"})
+            bilgi = {"numara": row.get("tracking") or "", "url": row.get("tracking_url") or "",
+                     "tasiyici_ad": row.get("carrier") or "", "tasiyici_hizmet": row.get("carrier_service") or "",
+                     "son_ayak_numara": row.get("tracking_son_ayak") or ""}
+            plan = takip.etsy_plani(bilgi)
+            # Tekrar POST yok + GECMIS SIPARISE HIC yazma yok (24 Eyl, Serdar): Etsy her POST'ta
+            # aliciya e-posta atar. Once receipt okunur; yalniz karar "yaz" ise tek POST yapilir.
+            onceki = api.get(f"/shops/{shop}/receipts/{rid}") or {}
+            karar, neden = takip.yazma_karari(onceki, rid, plan, takip_sinir)
+            if karar == "gecmis":
+                upd(st, a.state, rid, stage="atlandi", note=f"Etsy takip YAZILMADI: {neden}"[:300])
+                report.append(f"- {rid}: Etsy tracking YAZILMADI (kalici) - {neden}")
+                continue
+            if karar == "hata":
+                report.append(f"- {rid}: Etsy tracking YAZILMADI - {neden}")
+                errors.append(f"{rid}: takip yazilmadi: {neden}")
+                continue
+            if karar == "dogrula":
+                report.append(f"- {rid}: {neden}; POST YAPILMADI")
+            else:
+                api.post(f"/shops/{shop}/receipts/{rid}/tracking",
+                         {"tracking_code": plan["tracking_code"], "carrier_name": plan["carrier_name"],
+                          "send_bcc": "true"})
             back = api.get(f"/shops/{shop}/receipts/{rid}") or {}
-            ok = bool(back.get("is_shipped")) or any((s.get("tracking_code") == row["tracking"]) for s in back.get("shipments") or [])
-            upd(st, a.state, rid, stage="tracked" if ok else "shipped", note="Etsy tracking yazildi" + ("" if ok else " (geri okuma dogrulanamadi)"))
-            report.append(f"- {rid}: TRACKED -> Etsy {'PASS' if ok else 'FAIL geri okuma'}")
+            url_durumu = takip_url_durumu(plan.get("takip_url"))
+            ok, eksik = takip.dogrula(back, rid, plan, url_durumu)   # is_shipped TEK BASINA PASS DEGIL
+            upd(st, a.state, rid, stage="tracked" if ok else "shipped", carrier_etsy=plan["carrier_name"],
+                tracking_url=plan["takip_url"],
+                note=("Etsy tracking dogrulandi" if ok else "Etsy tracking DOGRULANAMADI: " + "; ".join(eksik))[:300])
+            report.append(f"- {rid}: {'TRACKED PASS' if ok else 'FAIL'} -> Etsy {plan['carrier_name']} "
+                          f"{plan['tracking_code']} | link {url_durumu} {plan.get('takip_url') or 'YOK'}"
+                          + ("" if ok else " | eksik: " + "; ".join(eksik))
+                          + (f" | {plan['uyari']}" if plan.get("uyari") else ""))
+            if not ok:
+                errors.append(f"{rid}: takip dogrulanamadi: {'; '.join(eksik)}")
         except SystemExit as e:
             errors.append(f"{rid}: Etsy tracking {e}")
             upd(st, a.state, rid, stage="error", note=f"Etsy tracking: {e}")
