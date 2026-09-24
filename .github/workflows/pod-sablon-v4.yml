@@ -241,7 +241,7 @@ jobs:
             python scripts/pod/metin_78.py --out _out/metin78 --kota-alt "$KOTA_ALT" --limit "$LIMIT"
             rclone copy _out/metin78 "gdrive:ASTROLOVE/TEMP/METIN_78" -q
             rclone lsf "gdrive:ASTROLOVE/TEMP/METIN_78"
-            rclone lsf "gdrive:ASTROLOVE/TEMP/METIN_78/YEDEK" | head -6
+            echo "YEDEK dosya sayisi: $(rclone lsf 'gdrive:ASTROLOVE/TEMP/METIN_78/YEDEK' | wc -l)"
           elif [ "$MOD" = "fiyat_b_oku" ]; then
             # SALT OKUMA: yedek + 80 varyantlik kuru fiyat tablosu. Etsy'ye yazma yok.
             python scripts/pod/fiyat_b.py oku --listing "$LISTING" --out _out/fiyat_b --kota-alt "$KOTA_ALT"
