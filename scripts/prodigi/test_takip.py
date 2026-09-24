@@ -155,7 +155,8 @@ R.TokenStore = FakeStore; R.Etsy = FakeEtsy
 R.sku_haritasi = lambda prod, boylar: ({b: f"GLOBAL-HPR-{b}" for b in boylar}, [])
 R.etsy_receipts = lambda *a, **k: []
 R.otomasyonlar = lambda *a, **k: None
-R.takip_url_durumu = lambda url, zaman_asimi=20: "ok"
+LINK = {}   # url -> sahte link durumu (varsayilan ok)
+R.takip_url_durumu = lambda url, zaman_asimi=20: LINK.get(url, "ok")
 os.environ.update(TOKEN_FILE=str(WORK / "tok.json"), ETSY_SHOP_ID="39729443", ETSY_API_KEY="k", ETSY_SHARED_SECRET="s")
 
 def state_yaz():
@@ -198,6 +199,37 @@ rapor = (OUT / "REPORT.md").read_text(encoding="utf-8")
 kontrol("I10 koruma logu: STATE disi siparisler YAZMAZ olarak listelenir",
         "TAKIP KORUMASI ord_IVAN" in rapor and "TAKIP KORUMASI ord_NUMUNE" in rapor, "")
 kontrol("I11 koruma logu: STATE satirlari listelenir", all(f"TAKIP KORUMASI {r}:" in rapor for r in ("101", "102")), "")
+
+# ================= link erisim engeli (403/429) = uyari; 404/bozuk = gercek hata
+rec_ok = {"receipt_id": 1, "shipments": [{"carrier_name": "usps", "tracking_code": N}]}
+for durum, beklenen in (("HTTP 403", True), ("HTTP 429", True), ("HTTP 401", True),
+                        ("HTTP 404", False), ("HTTP 500", False), ("ConnectionError", False), ("url yok", False)):
+    ok_l, e_l = T.dogrula(rec_ok, 1, plan, durum)
+    kontrol(f"L {durum}: {'PASS+uyari' if beklenen else 'FAIL'}",
+            ok_l == beklenen and bool(T.link_uyarisi(durum)) == beklenen, e_l)
+ok_c, e_c = T.dogrula({"receipt_id": 1, "shipments": [{"carrier_name": "ups", "tracking_code": N}]}, 1, plan, "HTTP 403")
+kontrol("L 403 + yanlis carrier: yine FAIL (engel carrier hatasini ortmez)", not ok_c and any("carrier" in e for e in e_c), e_c)
+
+SP = "LX104881201NL"
+for rid, url, durum in (("106", "https://engel.example/" + SP, "HTTP 403"), ("107", "https://yok.example/" + SP, "HTTP 404")):
+    RECEIPTS[rid] = {"receipt_id": int(rid), "create_timestamp": YENI, "shipments": [], "is_shipped": False}
+    LINK[url] = durum
+with STATE.open("w", encoding="utf-8", newline="") as fh:
+    w = csv.DictWriter(fh, fieldnames=R.COLS); w.writeheader()
+    for rid, url in (("106", "https://engel.example/" + SP), ("107", "https://yok.example/" + SP)):
+        w.writerow({"receipt_id": rid, "stage": "shipped", "prodigi_order_id": f"ord_{rid}", "tracking": SP,
+                    "carrier": "Royal Mail", "carrier_service": "Tracked", "tracking_url": url})
+POSTS.clear(); rc_l1 = run(); st_l = {r["receipt_id"]: r for r in csv.DictReader(STATE.open(encoding="utf-8"))}
+rap1 = (OUT / "REPORT.md").read_text(encoding="utf-8")
+kontrol("L-I1 403: tek POST, tracked + UYARI notu", ("106" in [x[0] for x in POSTS]) and st_l["106"]["stage"] == "tracked"
+        and "UYARI" in st_l["106"]["note"] and "HATA: 106" not in rap1, st_l["106"]["note"])
+kontrol("L-I2 404: POST yapildi ama shipped kalir + gercek hata", st_l["107"]["stage"] == "shipped"
+        and "HATA: 107" in rap1 and rc_l1 not in (0, None), rc_l1)
+POSTS.clear(); rc_l2 = run(); rap2 = (OUT / "REPORT.md").read_text(encoding="utf-8")
+kontrol("L-I3 ikinci kosu: 106 icin hata/uyari tekrari yok, sifir POST", POSTS == [] and "106: TRACKED" not in rap2
+        and "HATA: 106" not in rap2, POSTS)
+kontrol("L-I4 ikinci kosu: 404 hatasi durur (gercek hata), POST yok", "HATA: 107" in rap2, "")
+
 gecen = sum(o for _, o in sonuc)
 print(f"koruma testleri: {gecen}/{len(sonuc)} PASS")
 sys.exit(0 if gecen == len(sonuc) else 1)

@@ -881,12 +881,17 @@ def main():
             back = api.get(f"/shops/{shop}/receipts/{rid}") or {}
             url_durumu = takip_url_durumu(plan.get("takip_url"))
             ok, eksik = takip.dogrula(back, rid, plan, url_durumu)   # is_shipped TEK BASINA PASS DEGIL
+            # 403/429 = tasiyici sitesi erisim engeli: numara+carrier dogruysa tracked + uyari notu (tek sefer;
+            # tracked satir bir daha islenmez). 404/bozuk link gercek hata olarak kalir.
+            link_uyari = takip.link_uyarisi(url_durumu) if ok else ""
             upd(st, a.state, rid, stage="tracked" if ok else "shipped", carrier_etsy=plan["carrier_name"],
                 tracking_url=plan["takip_url"],
-                note=("Etsy tracking dogrulandi" if ok else "Etsy tracking DOGRULANAMADI: " + "; ".join(eksik))[:300])
+                note=(("Etsy tracking dogrulandi" + (f"; UYARI: {link_uyari}" if link_uyari else "")) if ok
+                      else "Etsy tracking DOGRULANAMADI: " + "; ".join(eksik))[:300])
             report.append(f"- {rid}: {'TRACKED PASS' if ok else 'FAIL'} -> Etsy {plan['carrier_name']} "
                           f"{plan['tracking_code']} | link {url_durumu} {plan.get('takip_url') or 'YOK'}"
                           + ("" if ok else " | eksik: " + "; ".join(eksik))
+                          + (f" | UYARI: {link_uyari}" if link_uyari else "")
                           + (f" | {plan['uyari']}" if plan.get("uyari") else ""))
             if not ok:
                 errors.append(f"{rid}: takip dogrulanamadi: {'; '.join(eksik)}")

@@ -166,9 +166,25 @@ def yazma_karari(receipt, rid, plan, sinir):
     return "yaz", "yeni siparis, Etsy'de gonderi kaydi yok"
 
 
+# Tasiyici sitesinin bot/erisim engeli: link BOZUK degil, yalniz bizden dogrulanamadi (24 Eyl, Serdar).
+ERISIM_ENGELI = ("HTTP 401", "HTTP 403", "HTTP 429")
+
+
+def link_engeli(url_durumu):
+    """url_durumu tasiyici sitesinin erisim engeli mi (403/429...)? 404, 5xx, ag hatasi = gercek hata."""
+    return str(url_durumu or "").strip() in ERISIM_ENGELI
+
+
+def link_uyarisi(url_durumu):
+    """Erisim engelinde siparisi durdurmayan uyari metni; digerlerinde bos."""
+    return (f"takip linki dogrulanamadi ({url_durumu}, tasiyici sitesi erisim engeli; link bozuk sayilmadi)"
+            if link_engeli(url_durumu) else "")
+
+
 def dogrula(receipt, rid, plan, url_durumu):
     """Basari olcutu: dogru receipt + tam numara + dogru carrier_name + calisan link.
-    is_shipped TEK BASINA yeterli degildir. -> (pass_mi, [eksikler])."""
+    is_shipped TEK BASINA yeterli degildir. Link erisim engeli (403/429) eksik SAYILMAZ, uyari olur
+    (link_uyarisi); 404 / bozuk link / ag hatasi eksiktir. -> (pass_mi, [eksikler])."""
     eksik = []
     if str((receipt or {}).get("receipt_id") or "") != str(rid):
         eksik.append(f"receipt eslesmedi ({(receipt or {}).get('receipt_id')} != {rid})")
@@ -182,6 +198,6 @@ def dogrula(receipt, rid, plan, url_durumu):
             eksik.append(f"carrier_name farkli: Etsy {kayitli} != plan '{plan['carrier_name']}'")
     if not plan.get("takip_url"):
         eksik.append("takip linki uretilemedi")
-    elif url_durumu not in ("ok",):
+    elif url_durumu != "ok" and not link_engeli(url_durumu):
         eksik.append(f"takip linki calismiyor ({url_durumu})")
     return (not eksik), eksik
