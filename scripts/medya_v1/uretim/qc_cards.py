@@ -3,9 +3,10 @@
 K1 boyut 3000x2250.
 K2 dokunulmayan alan: degistirilen bolgeler (poster/panel dikdortgenleri, metin kutulari, 07 gosterge) DISI referansla maks fark 0.
 K3 Cancer artigi: poster/panel icinde referans Cancer murekkebi (dilate) - beklenen Kova murekkebi (dilate) bolgesinde,
-   |out-yerel zemin|>T olan >=6 px bilesen sayisi <= referansin kendi temiz zeminindeki yogunluk x alan (doku tabani) + 1.
+   |out-yerel zemin|>T olan >=6 px bilesen sayisi (dikdortgenin 8 px cerceve bandi haric) <= referansin kendi temiz zeminindeki yogunluk x alan (doku tabani) + 1.
 K4 sembol hizasi: ciktida olculen Kova sembol bbox merkezi - hedef (referans sembol merkezi) |dx|,|dy| <= 2 px.
-K5 metin: yeniden kurma RMS (eski metin, uydurulan font ile) <= 30 (JPEG referans)."""
+K5 metin: yeniden kurma RMS (eski metin, uydurulan font ile) <= 30 (JPEG referans).
+K6 panel sembol hizasi (02/03): ciktida olculen Kova sembol merkezi - hedef <= 2 px."""
 import glob, json, sys
 import numpy as np
 from scipy import ndimage
@@ -24,6 +25,7 @@ for n, name in C.CARDS.items():
         for p in L.get(key, []):
             x0, y0, x1, y1 = p['rect']; touched[y0:y1, x0:x1] = True
     if n == 4: touched[480:2011, 1320:2831] = True
+    if n == 3: touched[470:1830, 100:2900] = True   # tek ornek: sag sutun kaldirildi, sol sutun ortalandi
     if n == 7: touched[560:1870, 160:2830] = True
     d = np.abs(out - ref).max(2); d[touched] = 0
     r['K2_dokunulmayan_maks_fark'] = float(d.max())
@@ -48,6 +50,7 @@ for n, name in C.CARDS.items():
             g = M.components(dv[box] > T, 10); gy, gx = np.where(g)
             k4.append([float((gx.min() + gx.max()) / 2 + box[1].start - dcx), float((gy.min() + gy.max()) / 2 + box[0].start - dcy)])
         zone = ndimage.binary_dilation(cancer, iterations=3) & ~ndimage.binary_dilation(E, iterations=4)
+        zone[:8] = zone[-8:] = False; zone[:, :8] = zone[:, -8:] = False   # inset cerceve cizgisi (cikti=referans, fark 0) olcum disi
         dv = dev_of(O); lab, nn = ndimage.label(zone & (dv > T)); cnt = int((np.bincount(lab.ravel())[1:] >= 6).sum()) if nn else 0
         rd = dev_of(R); ctrl = np.zeros((H, W), bool); ctrl[int(0.02 * H):int(0.12 * H), int(0.05 * W):int(0.95 * W)] = True
         lb, nb = ndimage.label(ctrl & (rd > T)); base = ((np.bincount(lb.ravel())[1:] >= 6).sum() if nb else 0) / ctrl.sum()

@@ -46,23 +46,29 @@ def card02(card):
     return glyph_panel(card, 2, (145, 536, 2855, 1768), (0.03, 0.40))
 
 def card03(card):
+    """Ek karar (24 Eyl): sol/sag secim yok; Serdar onayi (iterasyon 3): TEK ornek, ortalanmis."""
     card = header(card, 3)
     card = glyph_panel(card, 3, (145, 830, 1425, 1414), (0.03, 0.36))
-    card = glyph_panel(card, 3, (1575, 830, 2855, 1414), (0.03, 0.36))
-    # Ek karar (24 Eyl): sol/sag burc secimi sunulmaz; kart secimden bahsetmez.
     card = txt(card, 3, (130, 180, 1800, 330), 'Choose which sign goes on the left.', 'Your names, in one fixed layout.', 'ebg')
     card = txt(card, 3, (130, 325, 1800, 395), 'Each name stays with its zodiac sign when you switch the order.',
                'Both names sit under the Aquarius sign. The layout stays as shown.', 'mont')
-    card = txt(card, 3, (560, 490, 1010, 590), 'Cancer left', 'Example 1', 'mont', align='center')
-    card = txt(card, 3, (2020, 490, 2420, 590), 'Libra left', 'Example 2', 'mont', align='center')
-    for full, part, new in (((400, 1730, 1170, 1800), (400, 1730, 790, 1800), 'EMILY  +  JAMES'),
-                            ((1830, 1730, 2600, 1800), (1830, 1730, 2220, 1800), 'JAMES  +  EMILY')):
-        p = T.fit(card, part, 'EMILY = CANCER', 'mont', BG)
-        (fx0, fy0, fx1, fy1), _, _ = T.ink_of(card, full, BG)
-        card = card.copy(); card[fy0 - 5:fy1 + 5, fx0 - 5:fx1 + 5] = BG
-        card = T.draw_with(card, p, new, cx=(fx0 + fx1) / 2, base=p['oy'] + p['base0'])
-        log.setdefault(3, {}).setdefault('text', []).append({'old': 'EMILY = CANCER (parca)', 'new': new, **{k: p[k] for k in ('size', 'w', 'track', 'mse', 'box')}})
     card = txt(card, 3, (1000, 1975, 2000, 2060), 'Choose by zodiac sign, not by gender.', 'Names in the photos are examples.', 'ebg', align='center')
+    card = txt(card, 3, (560, 490, 1010, 590), 'Cancer left', 'Example', 'mont', align='center')
+    # alt yazi: referans alt yazi fontu kelime bazinda (JAMES) alt piksel uyumla olculur
+    pc = T.fit(card, (822, 1738, 972, 1792), 'JAMES', 'mont', BG, (500,), sub=True, sizes_fixed=list(np.arange(38.0, 40.51, 0.25)))
+    log.setdefault(3, {}).setdefault('text', []).append({'old': 'JAMES (alt yazi olcum)', 'new': 'FIRST NAME ...', **{k: pc[k] for k in ('size', 'w', 'track', 'mse', 'box')}})
+    base_c = pc['oy'] + pc['base0']
+    card = card.copy()
+    card[1740:1800, 400:1180] = BG           # sol alt yazi
+    card[470:1830, 1440:2900] = BG           # sag sutun (2. ornek: etiket, panel, alt yazi) kaldirildi
+    card = T.draw_with(card, pc, 'FIRST NAME = EMILY    SECOND NAME = JAMES', cx=785, base=base_c)
+    # sol sutunu (etiket + panel + alt yazi) karta ortala: dx = 1500 - 785
+    dx = 1500 - 785
+    blk = card[470:1830, 100:1470].copy()
+    card[470:1830, 100:1470] = BG
+    card[470:1830, 100 + dx:1470 + dx] = blk
+    log[3]['tek_ornek'] = {'kaldirilan': [1440, 470, 2900, 1830], 'kaydirma_dx': dx}
+    gp = log[3]['glyph_panel'][0]; x0, y0, x1, y1 = gp['rect']; gp['rect_out'] = [x0 + dx, y0, x1 + dx, y1]
     return card
 
 def card04(card):
@@ -85,8 +91,11 @@ def card04(card):
     f = ((sides[0][1] - sides[0][0] + 1) / S.REF_GLYPH_W[0] + (sides[1][1] - sides[1][0] + 1) / S.REF_GLYPH_W[1]) / 2
     ys, xs = np.where(fus); fb = (xs.min(), xs.max(), ys.min(), ys.max())
     ff = ((fb[1] - fb[0] + 1) / S.REF_FUSION_WH[0] + (fb[3] - fb[2] + 1) / S.REF_FUSION_WH[1]) / 2
-    P[ndimage.binary_dilation(gly | fus, iterations=6)] = flat
-    out = P
+    prot4 = ndimage.binary_dilation(M.components(ink & ~(top | low), 20), iterations=3)
+    r4, _ = M.halo_radius(P, gly | fus, np.broadcast_to(flat, P.shape).astype(float), ~prot4)
+    rem4 = ndimage.binary_dilation(gly | fus, iterations=r4 + 1) & ~prot4
+    fill4 = P.copy(); fill4[rem4] = flat
+    out = M.soft_blend(P, fill4, rem4)
     for side, (a0, a1, b0, b1) in enumerate(sides):
         m = S.glyph_src_mask('MB', side); yy, xx = np.where(m)
         s = M.S * f
@@ -96,7 +105,7 @@ def card04(card):
     a, Fa = S.layer_mask('MB', m, s, W, H, (fb[0] + fb[1]) / 2 - (xx.min() + xx.max()) / 2 * s, (fb[2] + fb[3]) / 2 - (yy.min() + yy.max()) / 2 * s)
     out = S.composite(out, a, Fa)
     card = card.copy(); card[y0:y1, x0:x1] = np.clip(out, 0, 255)
-    log.setdefault(4, {})['panel'] = {'glyph_f': float(f), 'fusion_f': float(ff), 'glyph_boxes': [list(map(int, b)) for b in sides], 'fusion_box': list(map(int, fb))}
+    log.setdefault(4, {})['panel'] = {'halo_r': int(r4), 'glyph_f': float(f), 'fusion_f': float(ff), 'glyph_boxes': [list(map(int, b)) for b in sides], 'fusion_box': list(map(int, fb))}
     # etiketler (lacivert panel uzerinde altin)
     card = txt(card, 4, (1540, 860, 1790, 945), 'CANCER', 'AQUARIUS', 'mont', align='center', bg=flat)
     card = txt(card, 4, (2380, 860, 2580, 945), 'LIBRA', 'AQUARIUS', 'mont', align='center', bg=flat)

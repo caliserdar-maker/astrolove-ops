@@ -151,11 +151,42 @@ def subst_poster(R, c, rings_out=None, rel=None):
         p = np.linalg.lstsq(np.c_[x, np.ones_like(x)], y, rcond=None)[0]
         if not (0.7 <= p[0] <= 1.4) or x.std() < 4: p = np.array([1.0, float(np.median(y - x))])
         kt[..., ch] = kb[..., ch] * p[0] + p[1]
-    rem = ndimage.binary_dilation(art | gly, iterations=max(3, int(round(4 * s / M.S))))
-    clean = R.copy()
+    Ew = warp_full(k['art'].astype(float), s, ox, oy, W, H) > 0.02
+    # koruma yalniz metin: sembol kutusunun (+%4 r) tamamen icinde kalan kucuk murekkep parcalari (esik alti Cancer/Libra
+    # uclari) korunmaz, silinir
+    gzone = np.zeros((H, W), bool)
+    if gly.any():
+        lab_g, ng = ndimage.label(gly); pz = int(round(0.04 * r))
+        for side in (0, 1):
+            pts = [np.where(lab_g == i) for i in range(1, ng + 1)]
+            pts = [p for p in pts if (p[1].mean() < cx) == (side == 0)]
+            if not pts: continue
+            ys = np.concatenate([p[0] for p in pts]); xs = np.concatenate([p[1] for p in pts])
+            gzone[max(ys.min() - pz, 0):ys.max() + pz + 1, max(xs.min() - pz, 0):xs.max() + pz + 1] = True
+    low = ink & (yy >= cy + 0.80 * r) & ~gly
+    lab_t, nt = ndimage.label(low)
+    inside = ndimage.minimum(gzone.astype(int), lab_t, index=np.arange(1, nt + 1)) if nt else []
+    frag = np.isin(lab_t, [i + 1 for i, v in enumerate(inside) if v == 1])
+    protect = ndimage.binary_dilation(low & ~frag, iterations=3)
+    allowed = valid & ~ndimage.binary_dilation(Ew, iterations=3) & ~protect
+    r_art, _ = M.halo_radius(R, art, kt, allowed & (yy < cy + 0.80 * r + 20), local=True)
+    r_gly, _ = M.halo_radius(R, gly, kt, allowed & (yy >= cy + 0.70 * r), local=True) if gly.any() else (0, [])
+    rem = (ndimage.binary_dilation(art, iterations=r_art + 1) | ndimage.binary_dilation(gly, iterations=r_gly + 1)) & ~protect
+    # kucuk sembol: esikte kopan ince uc kiriktilari da gitsin diye her tarafin sembol kutusu (+halo) komple silinir
+    if gly.any():
+        lab_g, ng = ndimage.label(gly); gbox = np.zeros((H, W), bool); pg = r_gly + 2
+        for side in (0, 1):
+            pts = [np.where(lab_g == i) for i in range(1, ng + 1)]
+            pts = [p for p in pts if (p[1].mean() < cx) == (side == 0)]
+            if not pts: continue
+            ys = np.concatenate([p[0] for p in pts]); xs = np.concatenate([p[1] for p in pts])
+            gbox[max(ys.min() - pg, 0):ys.max() + pg + 1, max(xs.min() - pg, 0):xs.max() + pg + 1] = True
+        rem |= gbox & (yy < cy + 1.10 * r) & ~protect
+    fill = R.copy()
     ok = rem & valid
-    clean[ok] = kt[ok]
-    clean = M.harmonic(clean, rem & ~valid)
+    fill[ok] = kt[ok]
+    fill = M.harmonic(fill, rem & ~valid)
+    clean = M.soft_blend(R, fill, rem)
     a, Fa = layer(c, 'art', s, W, H, ox, oy)
     out = composite(clean, a, Fa)
     meta = {'ring': [float(cx), float(cy), float(r)], 's': float(s), 'glyph_dst': []}
@@ -175,7 +206,7 @@ def subst_poster(R, c, rings_out=None, rel=None):
         ga, gFa = layer(c, 'gly', s, W, H, dcx - scx * s, dcy - scy * s, side=side)
         out = composite(out, ga, gFa)
         meta['glyph_dst'].append([float(dcx), float(dcy)])
-    meta.update({'art_px': int(art.sum()), 'gly_px': int(gly.sum()), 'light': bool(light)})
+    meta.update({'art_px': int(art.sum()), 'gly_px': int(gly.sum()), 'light': bool(light), 'halo_r_art': int(r_art), 'halo_r_gly': int(r_gly)})
     return np.clip(out, 0, 255), meta, {'rem': rem, 'art': art, 'gly': gly}
 
 def layer_part_mask(c, part):
@@ -217,6 +248,12 @@ def glyph_src_mask(c, side):
 REF_GLYPH_W = (68.0, 79.0)   # referans kapakta Cancer / Libra kucuk sembol genisligi (px, S olceginde)
 REF_FUSION_WH = (344.0, 326.0)
 
+def smooth_bg(img, allink, sigma=25):
+    w = (~ndimage.binary_dilation(allink, iterations=6)).astype(float)
+    num = np.stack([ndimage.gaussian_filter(img[..., i] * w, sigma) for i in range(3)], 2)
+    den = ndimage.gaussian_filter(w, sigma)[..., None]
+    return num / np.maximum(den, 1e-3)
+
 def subst_glyphs(R, c, band, flat_bg=None, thr=30):
     """Panel: yalniz kucuk semboller. band=(y0,y1) satir araligi. Olcek referans sembol genisliginden."""
     H, W = R.shape[:2]
@@ -234,13 +271,18 @@ def subst_glyphs(R, c, band, flat_bg=None, thr=30):
     ws = sorted([b[1] - b[0] + 1 for b in sides])
     f = (ws[0] / REF_GLYPH_W[0] + ws[1] / REF_GLYPH_W[1]) / 2
     s = M.S * f
-    rem = ndimage.binary_dilation(gly, iterations=max(4, int(round(7 * f))))
+    other = M.components(ink & ~z, 30)
+    protect = ndimage.binary_dilation(other, iterations=3)
+    bgest = smooth_bg(R, ink)
+    r_h, _ = M.halo_radius(R, gly, bgest, ~protect, local=True)
+    rem = ndimage.binary_dilation(gly, iterations=r_h + 1) & ~protect
     if flat_bg is not None:
-        out = R.copy(); out[rem] = flat_bg
+        fill = R.copy(); fill[rem] = flat_bg
     else:
-        ring = ndimage.binary_dilation(rem, iterations=6) & ~rem
-        out = grain_fill(R, rem, ring)
-    meta = {'scale_f': float(f), 's': float(s), 'dst': []}
+        ring = ndimage.binary_dilation(rem, iterations=6) & ~rem & ~protect
+        fill = grain_fill(R, rem, ring)
+    out = M.soft_blend(R, fill, rem)
+    meta = {'scale_f': float(f), 's': float(s), 'dst': [], 'halo_r': int(r_h)}
     for side, (x0, x1, y0, y1) in enumerate(sides):
         dcx, dcy = (x0 + x1) / 2, (y0 + y1) / 2
         m = glyph_src_mask(c, side); ys, xs = np.where(m)

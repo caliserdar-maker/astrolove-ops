@@ -37,7 +37,7 @@ def _w(text, key, size, w, track):
     f = font(key, size, w)
     return sum(f.getlength(ch) for ch in text) + track * size * (len(text) - 1)
 
-def fit(card, box, text, key, bg, weights=(300, 400, 500, 600)):
+def fit(card, box, text, key, bg, weights=(300, 400, 500, 600), sub=False, sizes_fixed=None):
     """Murekkep: kalin cekirdek pikseller (sabit). Boyut kesirli; izleme genislikten analitik; ofset +-3 px;
     secim olcutu yeniden kurma MSE."""
     (bx0, by0, bx1, by1), ink0, cov = ink_of(card, box, bg)
@@ -52,26 +52,29 @@ def fit(card, box, text, key, bg, weights=(300, 400, 500, 600)):
             m = render_mask(text, key, float(size), w, 0.0, x=10, base=int(size * 1.6))
             ys = np.where(m.max(1) > 0.5)[0]
             if ys.max() - ys.min() + 1 >= Ht - 0.5: sizes = [size - 0.25, size, size + 0.25]; break
+        if sizes_fixed is not None: sizes = sizes_fixed
         for size in sizes:
             size = float(size)
             m0 = render_mask(text, key, size, w, 0.0, x=10, base=int(size * 1.6))
-            xs = np.where(m0.max(0) > 0.5)[0]
-            track = (Wt - (xs.max() - xs.min() + 1)) / (size * max(len(text) - 1, 1))
+            xs0 = np.where(m0.max(0) > 0.5)[0]
+            track = (Wt - (xs0.max() - xs0.min() + 1)) / (size * max(len(text) - 1, 1))
             if abs(track) > 0.15: continue
-            m = render_mask(text, key, size, w, track, x=10, base=int(size * 1.6))
-            ys = np.where(m.max(1) > 0.5)[0]; xs = np.where(m.max(0) > 0.5)[0]
-            for ddy in range(-2, 3):
-                for ddx in range(-2, 3):
-                    y0 = ys.min() - pad + ddy; x0 = xs.min() - pad + ddx
-                    if y0 < 0 or x0 < 0: continue
-                    sub = m[y0:y0 + tgt.shape[0], x0:x0 + tgt.shape[1]]
-                    mm = np.zeros(tgt.shape[:2]); mm[:sub.shape[0], :sub.shape[1]] = sub
-                    rec = bg * (1 - mm[..., None]) + ink0 * mm[..., None]
-                    err = float(((rec - tgt) ** 2).mean())
-                    if best is None or err < best['mse']:
-                        best = dict(mse=err, key=key, w=w, track=float(track), size=size,
-                                    ox=int(bx0 - pad - x0 + 10), oy=int(by0 - pad - y0), base0=int(size * 1.6),
-                                    ink=[float(v) for v in ink0])
+            for fxo in ((0.0, 0.25, 0.5, 0.75) if sub else (0.0,)):
+                for fyo in ((0.0, 0.5) if sub else (0.0,)):
+                    m = render_mask(text, key, size, w, track, x=10 + fxo, base=int(size * 1.6) + fyo)
+                    ys = np.where(m.max(1) > 0.5)[0]; xs = np.where(m.max(0) > 0.5)[0]
+                    for ddy in range(-2, 3):
+                        for ddx in range(-2, 3):
+                            y0 = ys.min() - pad + ddy; x0 = xs.min() - pad + ddx
+                            if y0 < 0 or x0 < 0: continue
+                            part = m[y0:y0 + tgt.shape[0], x0:x0 + tgt.shape[1]]
+                            mm = np.zeros(tgt.shape[:2]); mm[:part.shape[0], :part.shape[1]] = part
+                            rec = bg * (1 - mm[..., None]) + ink0 * mm[..., None]
+                            err = float(((rec - tgt) ** 2).mean())
+                            if best is None or err < best['mse']:
+                                best = dict(mse=err, key=key, w=w, track=float(track), size=size,
+                                            ox=float(bx0 - pad - x0 + 10 + fxo), oy=float(by0 - pad - y0 + fyo), base0=int(size * 1.6),
+                                            ink=[float(v) for v in ink0])
     best['box'] = [int(bx0), int(by0), int(bx1), int(by1)]
     return best
 

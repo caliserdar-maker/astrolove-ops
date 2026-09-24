@@ -4,7 +4,7 @@ master (5 renk) -> QC master -> video (4 durum, referans zaman cizelgesi) -> QC 
 -> REVIEW + images + kanit. Her adimda ETA. Etsy/Prodigi erisimi yok."""
 import subprocess, sys, time, json
 ALL = {'uretim': [['master.py'], ['video.py'], ['cards.py'], ['review.py'], ['kanit.py']],
-       'qc': [['qc_master.py'], ['qc_video.py'], ['qc_cards.py']]}
+       'qc': [['qc_master.py'], ['qc_video.py'], ['qc_cards.py'], ['iz_tarama.py'], ['iz_kanit.py']]}
 mode = sys.argv[1] if len(sys.argv) > 1 else 'hepsi'
 steps = ALL['uretim'] + ALL['qc'] if mode == 'hepsi' else ALL[mode]
 t0 = time.time()

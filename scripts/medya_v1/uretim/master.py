@@ -65,6 +65,33 @@ def matte(pix, bg, core_r=3):
     return a, F
 
 
+def halo_radius(R, m, bgest, allowed, dmax=40, local=False):
+    """Cancer/Libra murekkebinin parlama/golge halesi: m'den d uzakliktaki halkada |R-bgest| ortalamasi,
+    uzak zemin tabanina orani <=1.08 olana (2 ardisik) kadar. allowed: olcume izin verilen pikseller.
+    local=True (insetler, paneller): taban d=dmax+1..dmax+15 halkasi. Kucuk insette uzak zemin (vinyet, kose) tabani
+    sisirip yaricapi erken kesiyordu (kart05 MB: referans Cancer parlamasi d~25'e kadar suruyordu)."""
+    dev = np.abs(R - bgest).max(2)
+    far = allowed & ~ndimage.binary_dilation(m, iterations=dmax + 5)
+    if local:
+        loc = allowed & ndimage.binary_dilation(m, iterations=dmax + 15) & ~ndimage.binary_dilation(m, iterations=dmax)
+        if loc.sum() > 200: far = loc
+    base = max(dev[far].mean(), 0.5) if far.sum() > 200 else max(np.median(dev[allowed]), 0.5)
+    prev = m; ok = 0; prof = []
+    for d in range(1, dmax + 1):
+        cur = ndimage.binary_dilation(m, iterations=d)
+        ring = cur & ~prev & allowed; prev = cur
+        r = dev[ring].mean() / base if ring.sum() > 20 else 1.0
+        prof.append(round(float(r), 2))
+        ok = ok + 1 if r <= 1.08 else 0
+        if ok >= 2: return d + 2, prof
+    return dmax, prof
+
+
+def soft_blend(R, fill, rem, sigma=1.0):
+    w = ndimage.gaussian_filter(rem.astype(float), sigma); w[rem] = 1.0
+    return R * (1 - w[..., None]) + fill * w[..., None]
+
+
 def components(mask, min_area):
     lab, n = ndimage.label(mask)
     if not n: return mask & False
@@ -123,13 +150,18 @@ def build(c, cov=None, tag=None, rois=None, detect_dst=False):
             p = np.array([1.0, float(np.median(y - x))])
         Kt[..., ch] = K[..., ch] * p[0] + p[1]; tone.append([float(p[0]), float(p[1])])
     Kt = np.clip(Kt, 0, 255)
-    # 1) Cancer sanatini sil: tam bilesen bolgesi (dilate 3)
-    rem = ndimage.binary_dilation(R_art | R_gly, iterations=4)
+    # 1) Cancer sanatini + halesini sil: yaricap veriden (halo_radius), metin korunur
+    protect = ndimage.binary_dilation(Rink & (yy >= GLYPH_Y[1]) & ~R_gly, iterations=3)
+    allowed = valid & ~ndimage.binary_dilation(Kink, iterations=3) & ~protect
+    r_art, prof_art = halo_radius(R, R_art, Kt, allowed & (yy < GLYPH_Y[0] + 20))
+    r_gly, prof_gly = halo_radius(R, R_gly, Kt, allowed & (yy >= GLYPH_Y[0] - 20))
+    rem = (ndimage.binary_dilation(R_art, iterations=r_art + 1) | ndimage.binary_dilation(R_gly, iterations=r_gly + 1)) & ~protect
     kova_dirty = ndimage.binary_dilation(Kink, iterations=3) | ~valid
-    clean = R.copy()
+    fill = R.copy()
     fill_k = rem & ~kova_dirty
-    clean[fill_k] = Kt[fill_k]
-    clean = harmonic(clean, rem & kova_dirty)
+    fill[fill_k] = Kt[fill_k]
+    fill = harmonic(fill, rem & kova_dirty)
+    clean = soft_blend(R, fill, rem)
     # 2) Kova halka + birlesik sembol: gercek alpha
     Kbg_raw = harmonic(K, ndimage.binary_dilation(K_art | K_gly | K_txt, iterations=3))
     a, F = matte(K, Kbg_raw)
@@ -176,7 +208,7 @@ def build(c, cov=None, tag=None, rois=None, detect_dst=False):
     Image.fromarray(cover).save(ROOT / f'out/cover_{tag}.png')
     np.savez_compressed(ROOT / f'out/masks_{tag}.npz', R_art=R_art, R_gly=R_gly, K_art=K_art, K_gly=K_gly, rem=rem, Kt=Kt.astype(np.uint8))
     meta.update({'light': bool(light), 'thr': thr, 'R_art_px': int(R_art.sum()), 'K_art_px': int(K_art.sum()),
-                 'harmonic_px': int((rem & kova_dirty).sum())})
+                 'harmonic_px': int((rem & kova_dirty).sum()), 'halo_r_art': r_art, 'halo_r_gly': r_gly})
     return meta
 
 

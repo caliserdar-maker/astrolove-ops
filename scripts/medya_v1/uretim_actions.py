@@ -47,7 +47,7 @@ if r.returncode == 0:
     r = subprocess.run([sys.executable, '-u', 'run_all.py', 'qc'], cwd=W)
 qc = W / 'paket/QC'; qc.mkdir(parents=True, exist_ok=True)
 for f in (W / 'out').glob('qc_*.json'): shutil.copy(f, qc / f.name)
-for f in ('master_meta.json', 'video_plan.json', 'video_states_meta.json', 'cards_log_2_3_4_5_6_7_8_9_10.json'):
+for f in ('iz_tarama.json', 'master_meta.json', 'video_plan.json', 'video_states_meta.json', 'cards_log_2_3_4_5_6_7_8_9_10.json'):
     if (W / 'out' / f).exists(): shutil.copy(W / 'out' / f, qc / f)
 sh(['rclone', 'copy', str(W / 'paket'), DR, '--transfers', '8'])
 sh(['rclone', 'lsf', '-R', DR, '--exclude', '_girdi/**'])
