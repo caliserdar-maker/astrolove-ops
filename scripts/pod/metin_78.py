@@ -29,7 +29,7 @@ RU_AD = {"Aquarius": "Водолей", "Aries": "Овен", "Cancer": "Рак", 
 ORTAK = ["personalized couple", "custom couple print", "zodiac couple print",
          "couple names print", "zodiac couple gift", "astrology wall art",
          "anniversary gift", "star sign print", "giclee print"]
-YASAK_KELIME = ["archival", "acid-free", "museum"]
+YASAK_KELIME = ["archival", "acid-free", "museum", "studio", "студи"]
 UZUN_TIRE = ["—", "–"]          # em dash, en dash
 
 BASLIK = ("{A} and {B} Zodiac Wall Art, Personalized Couple Print with Names and Message, "
@@ -77,7 +77,7 @@ RU_GOVDE = """Именной постер для пары {A} и {B} с ваши
 Имена: до 11 букв, печатаются заглавными. Надпись: до 35 символов, печатается так, как вы её напишете. Пожалуйста, проверьте написание. Если имя длиннее или нужны особые символы, напишите нам до заказа.
 
 О РИСУНКЕ
-Символ, объединяющий знаки {A} и {B}, нарисован студией AstroLove. Имена стоят под двумя небольшими знаками, а ваша надпись напечатана под ними.
+Символ, объединяющий знаки {A} и {B}. Оригинальный рисунок AstroLove. Имена стоят под двумя небольшими знаками, а ваша надпись напечатана под ними.
 
 БУМАГА И ПЕЧАТЬ
 - Hahnemühle Photo Rag, 308 г/м2, 100% хлопок, матовая поверхность
@@ -228,7 +228,7 @@ def oas_kisisellestirme(url=OAS_URL):
     listing_alan = sorted(k for k in ((sema.get("ShopListing") or {}).get("properties") or {})
                           if "personaliz" in k.lower())
     sema_adlari = sorted(k for k in sema if "personaliz" in k.lower())
-    uclar = []
+    uclar, aciklama = [], {}
     for yol, islemler in (d.get("paths") or {}).items():
         for yontem, op in (islemler or {}).items():
             if yontem not in ("get", "post", "put", "patch", "delete"):
@@ -239,11 +239,18 @@ def oas_kisisellestirme(url=OAS_URL):
                     adlar.add(prm["name"])
             rb = ((op.get("requestBody") or {}).get("content") or {})
             for ictyp in rb.values():
-                for k in ((ictyp.get("schema") or {}).get("properties") or {}):
+                sema_g = (ictyp.get("schema") or {})
+                for k, v in (sema_g.get("properties") or {}).items():
                     if "personaliz" in k.lower():
                         adlar.add(k)
-            if adlar:
+                        if (v or {}).get("description"):
+                            aciklama[f"{op.get('operationId')}:{k}"] = v["description"]
+            # yolunda personalization gecen uclari da al (parametresiz GET dahil)
+            if adlar or "personaliz" in yol.lower():
                 uclar.append((yontem.upper(), yol, op.get("operationId"), sorted(adlar)))
+                for alan in ("summary", "description"):
+                    if op.get(alan):
+                        aciklama[f"{op.get('operationId')}:{alan}"] = op[alan]
     ayrinti = {}
     for ad in sema_adlari:
         props = (sema.get(ad) or {}).get("properties") or {}
@@ -252,12 +259,62 @@ def oas_kisisellestirme(url=OAS_URL):
                        for k, v in props.items()}
     coklu = sorted({a for _, _, _, adlar in uclar for a in adlar
                     if "question" in a.lower() or "multiple" in a.lower()})
+    okuma_uclari = [(y, yol, oid) for y, yol, oid, _ in uclar if y == "GET"]
     return {"listing_alanlari": listing_alan, "personalizasyon_semalari": sema_adlari,
             "uclar": sorted(uclar, key=lambda t: (t[1], t[0])),
-            "coklu_alan_izleri": coklu, "sema_ayrinti": ayrinti}
+            "coklu_alan_izleri": coklu, "sema_ayrinti": ayrinti,
+            "okuma_uclari": okuma_uclari, "aciklamalar": aciklama}
 
 
 # ------------------------------------------------------------------ Etsy okuma
+# Serdar karari 24 Eyl: tum ilanlarda bu iki nitelik planlanir (YAZILMAZ, yalniz CSV).
+NITELIK_PLAN = [("Can be personalized", "Yes"), ("Occasion", "Anniversary")]
+
+
+def taksonomi_nitelik(props, ad, deger_ad):
+    """taxonomy properties -> (property_id, property_adi, value_id, deger_adi). Bulunmazsa None."""
+    for pr in props or []:
+        adlar = {(pr.get("name") or "").lower(), (pr.get("display_name") or "").lower()}
+        if ad.lower() in adlar:
+            for v in pr.get("possible_values") or []:
+                if (v.get("name") or "").lower() == deger_ad.lower():
+                    return pr.get("property_id"), pr.get("name") or pr.get("display_name"), v.get("value_id"), v.get("name")
+            return pr.get("property_id"), pr.get("name") or pr.get("display_name"), None, None
+    return None, None, None, None
+
+
+def sorulari_oku(api, shop, lid):
+    """Kisisellestirme sorularini OKUMA denemesi: once ilana ozel uc, sonra listing include."""
+    r = api.get(f"/shops/{shop}/listings/{lid}/personalization", ok404=True)
+    if isinstance(r, dict) and r:
+        return r, "GET /shops/{shop_id}/listings/{listing_id}/personalization"
+    r2 = api.get(f"/listings/{lid}", params={"includes": "Personalization"}, ok404=True) or {}
+    if r2.get("personalization_questions") or r2.get("personalization"):
+        return {k: v for k, v in r2.items() if "personaliz" in k.lower()}, "GET /listings/{listing_id}?includes=Personalization"
+    return None, "YOK"
+
+
+def soru_ozeti(veri):
+    """{'personalization_questions':[...]} -> 'Sign order[sec:Cancer left/Libra left, zorunlu]' gibi."""
+    if not veri:
+        return "OKUNAMADI"
+    sorular = veri.get("personalization_questions") or veri.get("personalization") or []
+    if isinstance(sorular, dict):
+        sorular = sorular.get("personalization_questions") or []
+    if not sorular:
+        return "SORU YOK"
+    out = []
+    for q in sorular:
+        if not isinstance(q, dict):
+            continue
+        sec = "/".join(str(o.get("label")) for o in (q.get("options") or []) if isinstance(o, dict))
+        out.append(f"{q.get('question_text')}[{q.get('question_type')}"
+                   + (f", sec:{sec}" if sec else "")
+                   + (f", max:{q.get('max_allowed_characters')}" if q.get("max_allowed_characters") else "")
+                   + (", zorunlu" if q.get("required") else "") + "]")
+    return " | ".join(out) or "SORU YOK"
+
+
 def oku(api, shop, lid, yedek_dir, taksonomi_onbellek):
     L = api.get(f"/listings/{lid}") or {}
     ru = api.get(f"/shops/{shop}/listings/{lid}/translations/ru", ok404=True) or {}
@@ -265,9 +322,11 @@ def oku(api, shop, lid, yedek_dir, taksonomi_onbellek):
     tid = L.get("taxonomy_id")
     if tid and tid not in taksonomi_onbellek:
         taksonomi_onbellek[tid] = (api.get(f"/seller-taxonomy/nodes/{tid}/properties", ok404=True) or {}).get("results") or []
-    for ad, veri in (("listing", L), ("translations_ru", ru), ("properties", props)):
+    sorular, soru_uc = sorulari_oku(api, shop, lid)
+    for ad, veri in (("listing", L), ("translations_ru", ru), ("properties", props),
+                     ("personalization", sorular)):
         (yedek_dir / f"{lid}_{ad}.json").write_text(json.dumps(veri, ensure_ascii=False, indent=1), encoding="utf-8")
-    return L, ru, props, tid
+    return L, ru, props, tid, sorular, soru_uc
 
 
 def nitelik_ozeti(props):
@@ -310,12 +369,16 @@ def main():
 
     for i, k in enumerate(katalog, 1):
         lid = str(k["id"])
-        L, ru, props, tid = oku(api, shop, lid, out / "YEDEK", taksonomi)
+        L, ru, props, tid, sorular, soru_uc = oku(api, shop, lid, out / "YEDEK", taksonomi)
         A, B, kaynak = burc_sirasi(L.get("title") or "", k.get("pair"))
         m = metinler(A, B)
         alanlar = kisisel_alanlar(A, B)
         yonerge = L.get("personalization_instructions") or ""
-        sign_order = "kaldirilacak" if "sign order" in yonerge.lower() else "yok"
+        ozet = soru_ozeti(sorular)
+        sign_order = ("kaldirilacak" if ("sign order" in ozet.lower() or "sign order" in yonerge.lower())
+                      else ("okunamadi" if ozet == "OKUNAMADI" else "yok"))
+        tks = taksonomi.get(tid) or []
+        nplan = [taksonomi_nitelik(tks, ad, dg) for ad, dg in NITELIK_PLAN]
         h = kontrol(m)
         if h:
             hata_ilan.append((lid, h))
@@ -334,6 +397,11 @@ def main():
             "kisisel_max_mevcut": L.get("personalization_char_count_max"),
             "kisisel_yonerge_mevcut": yonerge,
             "sign_order_alani": sign_order,
+            "mevcut_sorular": ozet, "sorular_okuma_ucu": soru_uc,
+            "nitelik1_ad": NITELIK_PLAN[0][0], "nitelik1_property_id": nplan[0][0],
+            "nitelik1_deger": NITELIK_PLAN[0][1], "nitelik1_value_id": nplan[0][2],
+            "nitelik2_ad": NITELIK_PLAN[1][0], "nitelik2_property_id": nplan[1][0],
+            "nitelik2_deger": NITELIK_PLAN[1][1], "nitelik2_value_id": nplan[1][2],
             "alan1_ad": alanlar[0]["ad"], "alan1_aciklama": alanlar[0]["aciklama"],
             "alan1_max": alanlar[0]["max"], "alan1_zorunlu": "E",
             "alan2_ad": alanlar[1]["ad"], "alan2_aciklama": alanlar[1]["aciklama"],
@@ -382,6 +450,10 @@ def main():
            "- `Sign order` alani YOK. Mevcut yonergesinde 'sign order' gecen ilan: "
            f"{sum(1 for s2 in satirlar if s2['sign_order_alani'] == 'kaldirilacak')}/{toplam} "
            "(CSV `sign_order_alani` sutununda 'kaldirilacak' olarak isaretli).",
+           f"- Mevcut kisisellestirme SORULARI okuma ucu: {satirlar[0]['sorular_okuma_ucu']}; "
+           f"soru okunabilen ilan: {sum(1 for s2 in satirlar if s2['mevcut_sorular'] not in ('OKUNAMADI',))}/{toplam}; "
+           f"'Sign order' sorusu bulunan: {sum(1 for s2 in satirlar if s2['sign_order_alani'] == 'kaldirilacak')}/{toplam}; "
+           f"okunamayan: {sum(1 for s2 in satirlar if s2['sign_order_alani'] == 'okunamadi')}/{toplam}",
            f"- Ilanlarin kisisellestirme durumu (okunan): acik {sum(1 for s2 in satirlar if s2['kisisel_acik'] == 'E')}/{toplam}; "
            f"mevcut karakter siniri degerleri: {sorted({str(s2['kisisel_max_mevcut']) for s2 in satirlar})}; "
            f"mevcut zorunluluk: {sorted({str(s2['kisisel_zorunlu_mevcut']) for s2 in satirlar})}; "
@@ -397,7 +469,13 @@ def main():
         md += [f"  - `{y} {yol}` ({oid}): {', '.join(adlar)}" for y, yol, oid, adlar in oas["uclar"]]
         coklu_uc = [(y, yol, oid) for y, yol, oid, adlar in oas["uclar"]
                     if any("question" in a.lower() or "multiple" in a.lower() for a in adlar)]
-        md += ["", f"- Coklu alan izi (uc parametreleri): {oas['coklu_alan_izleri'] or 'YOK'}", ""]
+        md += ["", f"- Coklu alan izi (uc parametreleri): {oas['coklu_alan_izleri'] or 'YOK'}",
+               f"- Kisisellestirme OKUMA ucu (GET): "
+               + (", ".join(f"`{y} {yol}` ({oid})" for y, yol, oid in oas["okuma_uclari"]) or "YOK"), ""]
+        if oas.get("aciklamalar"):
+            md += ["OAS aciklamalari (kanit):", ""]
+            md += [f"- `{k}`: {v[:400]}" for k, v in sorted(oas["aciklamalar"].items())]
+            md += [""]
         for ad, props in (oas.get("sema_ayrinti") or {}).items():
             md += [f"**Sema `{ad.split('_')[-1]}`** (`{ad}`):", "",
                    "| alan | tip | sinir | aciklama |", "|---|---|---|---|"]
@@ -422,6 +500,16 @@ def main():
     if hata_ilan:
         md += ["## Kontrol hatalari", ""] + [f"- {lid}: {'; '.join(h)}" for lid, h in hata_ilan] + [""]
 
+    md += ["## Nitelik plani (YAZILMADI, taxonomy 121'den okundu)", "",
+           "| nitelik | deger | property_id | value_id | ilan sayisi |", "|---|---|---|---|---|"]
+    for i in (1, 2):
+        pid = {str(s2[f"nitelik{i}_property_id"]) for s2 in satirlar}
+        vid = {str(s2[f"nitelik{i}_value_id"]) for s2 in satirlar}
+        md += [f"| {satirlar[0][f'nitelik{i}_ad']} | {satirlar[0][f'nitelik{i}_deger']} | "
+               f"{', '.join(sorted(pid))} | {', '.join(sorted(vid))} | {toplam} |"]
+    md += ["", "Bu iki nitelik TUM ilanlara planlanir; yazma ayri onay ister "
+           "(`PUT /v3/application/shops/{shop_id}/listings/{listing_id}/properties/{property_id}`).", ""]
+
     ornekler = [x.strip() for x in a.ornek.split(",") if x.strip()]
     md += ["## Ornek ilanlar (tam metin)", ""]
     for o in ornekler:
@@ -442,7 +530,12 @@ def main():
                f"| 1 | {s['alan1_ad']} | {s['alan1_aciklama']} | {s['alan1_max']} | E |",
                f"| 2 | {s['alan2_ad']} | {s['alan2_aciklama']} | {s['alan2_max']} | E |",
                f"| 3 | {s['alan3_ad']} | {s['alan3_aciklama']} | {s['alan3_max']} | E |",
-               "", f"**Sign order alani:** {s['sign_order_alani']} | "
+               "", f"**Mevcut kisisellestirme sorulari (Etsy'den okunan):** {s['mevcut_sorular']}", "",
+               f"**Nitelik plani:** {s['nitelik1_ad']}={s['nitelik1_deger']} "
+               f"(property_id {s['nitelik1_property_id']}, value_id {s['nitelik1_value_id']}); "
+               f"{s['nitelik2_ad']}={s['nitelik2_deger']} "
+               f"(property_id {s['nitelik2_property_id']}, value_id {s['nitelik2_value_id']})", "",
+               f"**Sign order alani:** {s['sign_order_alani']} | "
                f"**mevcut kisisellestirme:** acik={s['kisisel_acik']}, zorunlu={s['kisisel_zorunlu_mevcut']}, "
                f"max={s['kisisel_max_mevcut']}, yonerge={s['kisisel_yonerge_mevcut'] or 'YOK'}", "",
                "**Yeni EN aciklama:**", "", "```", s["yeni_aciklama_en"], "```", "",
