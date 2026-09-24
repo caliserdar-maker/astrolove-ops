@@ -555,6 +555,9 @@ def main():
     ap.add_argument("--kanal-kopuk", action="store_true",
                     help="Serdar onayi: Etsy kanali Prodigi'den koparildi; kanal artik aranmaz")
     ap.add_argument("--devral", default="", help="disarida acilan siparisleri STATE'e al: receipt=order_id[,...]")
+    ap.add_argument("--takip-baslangic", default="",
+                    help="Etsy takip yazimi icin yeni siparis siniri (UTC 'YYYY-MM-DD HH:MM:SS'); "
+                         "takip.YENI_SIPARIS_BASLANGIC_UTC'den yalniz ILERI tasinabilir")
     ap.add_argument("--only-size", default="", help="yalniz bu boyun kalemlerini isle (or. 5x7); "
                                                    "ayni sepetteki diger boylar atlanir")
     g = ap.add_mutually_exclusive_group(required=False)
@@ -563,6 +566,10 @@ def main():
     a = ap.parse_args()
     if not (a.dry_run or a.apply):
         a.dry_run = True                       # onayli modda varsayilan: Prodigi'ye yazma yok
+    try:
+        takip_sinir = takip.sinir_ts(a.takip_baslangic)   # hatali bicim: kosu basinda dur, yazma yok
+    except ValueError:
+        sys.exit(f"HATA: --takip-baslangic bicimi 'YYYY-MM-DD HH:MM:SS' olmali: {a.takip_baslangic!r}")
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
     st = read_state(a.state)
     approve = (a.approve_mode == "on") and not a.submit
@@ -833,11 +840,20 @@ def main():
                      "tasiyici_ad": row.get("carrier") or "", "tasiyici_hizmet": row.get("carrier_service") or "",
                      "son_ayak_numara": row.get("tracking_son_ayak") or ""}
             plan = takip.etsy_plani(bilgi)
-            # Ayni numara icin TEKRAR POST yok: once mevcut gonderi okunur (23 Eyl bulgusu 5).
+            # Tekrar POST yok + GECMIS SIPARISE HIC yazma yok (24 Eyl, Serdar): Etsy her POST'ta
+            # aliciya e-posta atar. Once receipt okunur; yalniz karar "yaz" ise tek POST yapilir.
             onceki = api.get(f"/shops/{shop}/receipts/{rid}") or {}
-            vardi, kayitli = takip.zaten_var(onceki, plan)
-            if vardi:
-                report.append(f"- {rid}: Etsy'de ayni numara zaten kayitli (carrier '{kayitli}'); POST YAPILMADI")
+            karar, neden = takip.yazma_karari(onceki, rid, plan, takip_sinir)
+            if karar == "gecmis":
+                upd(st, a.state, rid, stage="atlandi", note=f"Etsy takip YAZILMADI: {neden}"[:300])
+                report.append(f"- {rid}: Etsy tracking YAZILMADI (kalici) - {neden}")
+                continue
+            if karar == "hata":
+                report.append(f"- {rid}: Etsy tracking YAZILMADI - {neden}")
+                errors.append(f"{rid}: takip yazilmadi: {neden}")
+                continue
+            if karar == "dogrula":
+                report.append(f"- {rid}: {neden}; POST YAPILMADI")
             else:
                 api.post(f"/shops/{shop}/receipts/{rid}/tracking",
                          {"tracking_code": plan["tracking_code"], "carrier_name": plan["carrier_name"],

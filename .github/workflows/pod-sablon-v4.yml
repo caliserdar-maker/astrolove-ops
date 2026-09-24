@@ -241,7 +241,7 @@ jobs:
           elif [ "$MOD" = "takip_kuru" ]; then
             # SALT OKUMA: Prodigi gonderileri okunur, yeni takip kodunun Etsy'ye ne yazacagi tablolanir.
             # Etsy'ye POST YOK, Prodigi'ye yazma YOK, canli siparislere dokunulmaz.
-            python scripts/prodigi/takip_kuru.py --env live --out _out/takip --top 50 --receipt 1000000001
+            python scripts/prodigi/takip_kuru.py --env live --out _out/takip --top 50
             rclone copy _out/takip "gdrive:ASTROLOVE/TEMP/TAKIP_DUZELT" -q
             rclone lsf "gdrive:ASTROLOVE/TEMP/TAKIP_DUZELT"
           elif [ "$MOD" = "metin78_kuru" ]; then
