@@ -105,7 +105,7 @@ jobs:
         run: |
           set -euo pipefail
           case "$MOD" in
-            kuru|maliyet|dogrula|hpr|buyuk|yetki|yetki_test|pilot15_oku|boy15_oku|durum15|fiyat_b_oku|cerceve_sonda|cerceve_hazirlik|cerceve_mockup|prodigi_teklif|siparis_hazirla|siparis_onizleme|siparis_izin_kapat|eslesme_kanit|router_kuru|router_teklif)
+            kuru|maliyet|dogrula|hpr|buyuk|yetki|yetki_test|pilot15_oku|boy15_oku|durum15|fiyat_b_oku|metin78_kuru|cerceve_sonda|cerceve_hazirlik|cerceve_mockup|prodigi_teklif|siparis_hazirla|siparis_onizleme|siparis_izin_kapat|eslesme_kanit|router_kuru|router_teklif)
               if [ "$APPLY" = "true" ]; then
                 echo "::error::mod=$MOD ile yazma olmaz. DUR."; exit 1
               fi
@@ -236,6 +236,12 @@ jobs:
             python scripts/pod/pod_pilot_15.py oku --listing "$LISTING" --kota-alt "$KOTA_ALT"
           elif [ "$MOD" = "pilot15_yaz" ]; then
             python scripts/pod/pod_pilot_15.py yaz --listing "$LISTING" --kota-alt "$KOTA_ALT" --confirm "$CONFIRM" --adim "$ADIM"
+          elif [ "$MOD" = "metin78_kuru" ]; then
+            # SALT OKUMA: 78 ilanin metinleri okunur, yeni metinler URETILIR (Etsy'ye yazma yok).
+            python scripts/pod/metin_78.py --out _out/metin78 --kota-alt "$KOTA_ALT" --limit "$LIMIT"
+            rclone copy _out/metin78 "gdrive:ASTROLOVE/TEMP/METIN_78" -q
+            rclone lsf "gdrive:ASTROLOVE/TEMP/METIN_78"
+            rclone lsf "gdrive:ASTROLOVE/TEMP/METIN_78/YEDEK" | head -6
           elif [ "$MOD" = "fiyat_b_oku" ]; then
             # SALT OKUMA: yedek + 80 varyantlik kuru fiyat tablosu. Etsy'ye yazma yok.
             python scripts/pod/fiyat_b.py oku --listing "$LISTING" --out _out/fiyat_b --kota-alt "$KOTA_ALT"
