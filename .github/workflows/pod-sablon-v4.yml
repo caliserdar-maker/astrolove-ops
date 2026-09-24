@@ -149,7 +149,9 @@ jobs:
           esac
       - uses: actions/checkout@v4
         with:
-          ref: pod-v4
+          # Kod, workflow'un tetiklendigi dalla AYNI daldan alinir (once sabit pod-v4 idi; baska bir
+          # dalda calisirken o dalin kodu hic kosmuyordu). main'e dokunulmaz.
+          ref: ${{ github.ref_name }}
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
