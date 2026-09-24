@@ -38,10 +38,10 @@ BASLIK = ("{A} and {B} Zodiac Wall Art, Personalized Couple Print with Names and
 EN_GOVDE = """Personalized {A} and {B} zodiac wall art with your two names and your own short message. One original AstroLove design that joins both signs into a single symbol, printed on Hahnemühle Photo Rag 308 gsm cotton paper and shipped unframed.
 
 HOW TO PERSONALIZE
-1. Choose your color and size.
-2. {ADIM2}
-3. Add your message, up to 35 characters including spaces. We keep the capitalization you type.
-Please check your spelling before ordering. For longer names or special characters, send us a message before you order.
+1. Pick a color and size.
+2. Type the two names. Each name goes under its own sign.
+3. Type your message.
+Names: up to 11 letters, printed in capitals. Message: up to 35 characters, printed as you type it. Please check your spelling. For longer names or special characters, send us a message before you order.
 
 THE ARTWORK
 The {A} and {B} fusion symbol is original AstroLove artwork. Your names sit under the two small signs, and your message appears below them.
@@ -66,20 +66,15 @@ Every print is personalized, so we can't accept returns or exchanges. If your pr
 
 A meaningful anniversary, wedding or Valentine's gift for a {A} and {B} couple."""
 
-EN_ADIM2_FARKLI = ("Enter the name for {A} and the name for {B}, up to 11 letters each. "
-                   "Names are printed in uppercase, each under its own sign.")
-EN_ADIM2_AYNI = ("Enter the two names, up to 11 letters each. "
-                 "Names are printed in uppercase, each under its own sign.")
-
 RU_BASLIK = "Знаки зодиака {A} и {B}: именной постер для пары с вашими именами и посланием, без рамы"
 
 RU_GOVDE = """Именной постер для пары {A} и {B} с вашими двумя именами и короткой надписью. Оригинальный дизайн AstroLove объединяет оба знака в один символ. Печать на хлопковой бумаге Hahnemühle Photo Rag 308 г/м2, отправляем без рамы.
 
 КАК ПЕРСОНАЛИЗИРОВАТЬ
 1. Выберите цвет и размер.
-2. {ADIM2}
-3. Добавьте свою надпись, до 35 символов с пробелами. Регистр букв сохраняем таким, каким вы его напишете.
-Пожалуйста, проверьте написание до заказа. Если имя длиннее или нужны особые символы, напишите нам перед оформлением заказа.
+2. Впишите два имени. Каждое имя печатается под своим знаком.
+3. Впишите свою надпись.
+Имена: до 11 букв, печатаются заглавными. Надпись: до 35 символов, печатается так, как вы её напишете. Пожалуйста, проверьте написание. Если имя длиннее или нужны особые символы, напишите нам до заказа.
 
 О РИСУНКЕ
 Символ, объединяющий знаки {A} и {B}, нарисован студией AstroLove. Имена стоят под двумя небольшими знаками, а ваша надпись напечатана под ними.
@@ -104,10 +99,6 @@ Midnight Blue, Deep Black, Champagne Ivory, Pure White и Warm Parchment. Выб
 
 Хороший подарок на годовщину, свадьбу или День святого Валентина для пары {A} и {B}."""
 
-RU_ADIM2_FARKLI = ("Введите имя для знака {A} и имя для знака {B}, до 11 букв каждое. "
-                   "Имена печатаются заглавными буквами, каждое под своим знаком.")
-RU_ADIM2_AYNI = ("Введите два имени, до 11 букв каждое. "
-                 "Имена печатаются заглавными буквами, каждое под своим знаком.")
 
 
 # ------------------------------------------------------------------ uretim
@@ -166,12 +157,25 @@ def etiketler(A, B):
     return t
 
 
+def kisisel_alanlar(A, B):
+    """Kisisellestirme alani PLANI (yalniz CSV/rapor; Etsy'ye yazilmaz). 3 alan, hepsi zorunlu.
+    Ayni burclu ciftlerde ad ayrimi 'Left name' / 'Right name' olur. 'Sign order' alani YOK."""
+    if A == B:
+        ad1, ad2 = "Left name", "Right name"
+    else:
+        ad1, ad2 = f"Name under {A}", f"Name under {B}"
+    return [
+        {"ad": ad1, "aciklama": "Up to 11 letters. Printed in capitals.", "max": 11, "zorunlu": True},
+        {"ad": ad2, "aciklama": "Up to 11 letters. Printed in capitals.", "max": 11, "zorunlu": True},
+        {"ad": "Your message",
+         "aciklama": "Up to 35 characters, including spaces. Printed as you type it.",
+         "max": 35, "zorunlu": True},
+    ]
+
+
 def metinler(A, B):
-    ayni = A == B
-    en = EN_GOVDE.replace("{ADIM2}", EN_ADIM2_AYNI if ayni else EN_ADIM2_FARKLI)
-    en = en.replace("{A}", A).replace("{B}", B)
-    ru = RU_GOVDE.replace("{ADIM2}", RU_ADIM2_AYNI if ayni else RU_ADIM2_FARKLI)
-    ru = ru.replace("{A}", RU_AD.get(A, A)).replace("{B}", RU_AD.get(B, B))
+    en = EN_GOVDE.replace("{A}", A).replace("{B}", B)
+    ru = RU_GOVDE.replace("{A}", RU_AD.get(A, A)).replace("{B}", RU_AD.get(B, B))
     return {
         "baslik": BASLIK.replace("{A}", A).replace("{B}", B),
         "etiketler": etiketler(A, B),
@@ -207,6 +211,41 @@ def kontrol(m):
         if k in dusuk:
             h.append(f"yasak kelime: {k}")
     return h
+
+
+# ------------------------------------------------------------ Etsy API yetenegi (OAS)
+OAS_URL = "https://www.etsy.com/openapi/generated/oas/3.0.0.json"
+
+
+def oas_kisisellestirme(url=OAS_URL):
+    """Etsy OAS'i indirip kisisellestirme ile ilgili ALAN ve UC'lari cikarir. Yalniz okuma."""
+    import requests
+    try:
+        d = requests.get(url, timeout=120).json()
+    except Exception as e:                       # ag yoksa rapor 'OKUNAMADI' der
+        return {"hata": f"{type(e).__name__}: {e}"[:200]}
+    sema = (d.get("components") or {}).get("schemas") or {}
+    listing_alan = sorted(k for k in ((sema.get("ShopListing") or {}).get("properties") or {})
+                          if "personaliz" in k.lower())
+    sema_adlari = sorted(k for k in sema if "personaliz" in k.lower())
+    uclar = []
+    for yol, islemler in (d.get("paths") or {}).items():
+        for yontem, op in (islemler or {}).items():
+            if yontem not in ("get", "post", "put", "patch", "delete"):
+                continue
+            adlar = set()
+            for prm in op.get("parameters") or []:
+                if "personaliz" in (prm.get("name") or "").lower():
+                    adlar.add(prm["name"])
+            rb = ((op.get("requestBody") or {}).get("content") or {})
+            for ictyp in rb.values():
+                for k in ((ictyp.get("schema") or {}).get("properties") or {}):
+                    if "personaliz" in k.lower():
+                        adlar.add(k)
+            if adlar:
+                uclar.append((yontem.upper(), yol, op.get("operationId"), sorted(adlar)))
+    return {"listing_alanlari": listing_alan, "personalizasyon_semalari": sema_adlari,
+            "uclar": sorted(uclar, key=lambda t: (t[1], t[0]))}
 
 
 # ------------------------------------------------------------------ Etsy okuma
@@ -265,6 +304,9 @@ def main():
         L, ru, props, tid = oku(api, shop, lid, out / "YEDEK", taksonomi)
         A, B, kaynak = burc_sirasi(L.get("title") or "", k.get("pair"))
         m = metinler(A, B)
+        alanlar = kisisel_alanlar(A, B)
+        yonerge = L.get("personalization_instructions") or ""
+        sign_order = "kaldirilacak" if "sign order" in yonerge.lower() else "yok"
         h = kontrol(m)
         if h:
             hata_ilan.append((lid, h))
@@ -278,6 +320,17 @@ def main():
             "eski_ru_baslik": ru.get("title") or "", "yeni_ru_baslik": m["ru_baslik"],
             "eski_ru_aciklama_var": "E" if (ru.get("description") or "").strip() else "H",
             "yeni_ru_aciklama": m["ru_aciklama"],
+            "kisisel_acik": "E" if L.get("is_personalizable") else "H",
+            "kisisel_zorunlu_mevcut": L.get("personalization_is_required"),
+            "kisisel_max_mevcut": L.get("personalization_char_count_max"),
+            "kisisel_yonerge_mevcut": yonerge,
+            "sign_order_alani": sign_order,
+            "alan1_ad": alanlar[0]["ad"], "alan1_aciklama": alanlar[0]["aciklama"],
+            "alan1_max": alanlar[0]["max"], "alan1_zorunlu": "E",
+            "alan2_ad": alanlar[1]["ad"], "alan2_aciklama": alanlar[1]["aciklama"],
+            "alan2_max": alanlar[1]["max"], "alan2_zorunlu": "E",
+            "alan3_ad": alanlar[2]["ad"], "alan3_aciklama": alanlar[2]["aciklama"],
+            "alan3_max": alanlar[2]["max"], "alan3_zorunlu": "E",
             "kontrol": "PASS" if not h else "FAIL: " + "; ".join(h),
         })
         simdi = time.time()
@@ -310,6 +363,38 @@ def main():
           f"- ilanlarda dolu nitelikler: {', '.join(nitelik_adlari) or 'YOK'}",
           f"- kategoride tanimli nitelikler (taxonomy {sorted(taksonomi)}): {', '.join(taks_adlari) or 'YOK'}",
           "- nitelikler DEGISTIRILMEDI, yalniz raporlandi.", ""]
+    oas = oas_kisisellestirme()
+    (out / "OAS_KISISELLESTIRME.json").write_text(json.dumps(oas, ensure_ascii=False, indent=1), encoding="utf-8")
+    md += ["## Kisisellestirme alani plani (YAZILMADI)", "",
+           "- Her ilanda 3 alan, hepsi ZORUNLU: iki isim (en fazla 11 harf, buyuk harf basilir) + mesaj "
+           "(en fazla 35 karakter, yazildigi gibi basilir).",
+           "- Farkli burclu ciftlerde alan adlari `Name under {A}` / `Name under {B}`; ayni burclu ciftlerde "
+           "`Left name` / `Right name`. Ucuncu alan her ilanda `Your message`.",
+           "- `Sign order` alani YOK. Mevcut yonergesinde 'sign order' gecen ilan: "
+           f"{sum(1 for s2 in satirlar if s2['sign_order_alani'] == 'kaldirilacak')}/{toplam} "
+           "(CSV `sign_order_alani` sutununda 'kaldirilacak' olarak isaretli).",
+           f"- Ilanlarin kisisellestirme durumu (okunan): acik {sum(1 for s2 in satirlar if s2['kisisel_acik'] == 'E')}/{toplam}; "
+           f"mevcut karakter siniri degerleri: {sorted({str(s2['kisisel_max_mevcut']) for s2 in satirlar})}; "
+           f"mevcut zorunluluk: {sorted({str(s2['kisisel_zorunlu_mevcut']) for s2 in satirlar})}; "
+           f"mevcut yonerge dolu olan: {sum(1 for s2 in satirlar if (s2['kisisel_yonerge_mevcut'] or '').strip())}/{toplam}", "",
+           "## Etsy API coklu kisisellestirme alanini destekliyor mu? (OAS okumasi)", ""]
+    if oas.get("hata"):
+        md += [f"- OAS OKUNAMADI: {oas['hata']}", ""]
+    else:
+        md += [f"- Kaynak: {OAS_URL}",
+               f"- ShopListing semasindaki kisisellestirme alanlari: {oas['listing_alanlari']}",
+               f"- Adinda 'personaliz' gecen sema: {oas['personalizasyon_semalari'] or 'YOK'}",
+               "- Kisisellestirme alani yazan/okuyan uclar:", ""]
+        md += [f"  - `{y} {yol}` ({oid}): {', '.join(adlar)}" for y, yol, oid, adlar in oas["uclar"]]
+        coklu = any(len([a for a in adlar if a.endswith("_char_count_max")]) > 1 for _, _, _, adlar in oas["uclar"])
+        md += ["",
+               "**Sonuc:** OAS'ta ilan basina kisisellestirme TEK bir serbest metin alanidir "
+               "(`is_personalizable`, `personalization_is_required`, `personalization_char_count_max`, "
+               "`personalization_instructions`). Ayri ayri adlandirilmis BIRDEN COK alan icin sema veya uc "
+               f"bulunmadi (coklu alan izi: {'VAR' if coklu else 'YOK'}). Yani 3 ayri alan API ile yazilamaz; "
+               "Etsy panelinden (Listings > ilan > Personalization) kurulmasi gerekir. API ile yapilabilecek "
+               "tek sey: alani acmak/zorunlu yapmak, karakter sinirini ve yonerge metnini yazmak "
+               "(`PATCH /v3/application/shops/{shop_id}/listings/{listing_id}`).", ""]
     if hata_ilan:
         md += ["## Kontrol hatalari", ""] + [f"- {lid}: {'; '.join(h)}" for lid, h in hata_ilan] + [""]
 
@@ -328,12 +413,21 @@ def main():
                "**Yeni 13 etiket:**", ""]
         md += [f"{i}. `{t}` ({len(t)})" for i, t in enumerate(s["yeni_etiketler"].split("|"), 1)]
         md += ["", f"**Nitelikler (degismedi):** {s['nitelikler']}", "",
+               "**Kisisellestirme alani plani (yazilmadi):**", "",
+               "| # | alan adi | aciklama | en fazla | zorunlu |", "|---|---|---|---|---|",
+               f"| 1 | {s['alan1_ad']} | {s['alan1_aciklama']} | {s['alan1_max']} | E |",
+               f"| 2 | {s['alan2_ad']} | {s['alan2_aciklama']} | {s['alan2_max']} | E |",
+               f"| 3 | {s['alan3_ad']} | {s['alan3_aciklama']} | {s['alan3_max']} | E |",
+               "", f"**Sign order alani:** {s['sign_order_alani']} | "
+               f"**mevcut kisisellestirme:** acik={s['kisisel_acik']}, zorunlu={s['kisisel_zorunlu_mevcut']}, "
+               f"max={s['kisisel_max_mevcut']}, yonerge={s['kisisel_yonerge_mevcut'] or 'YOK'}", "",
                "**Yeni EN aciklama:**", "", "```", s["yeni_aciklama_en"], "```", "",
                f"**Yeni RU baslik:** {s['yeni_ru_baslik']}", "",
                "**Yeni RU aciklama:**", "", "```", s["yeni_ru_aciklama"], "```", ""]
     md += ["## Dosyalar", "",
            "- `METIN_78.csv` — ilan_id, cift, eski/yeni baslik, eski/yeni etiketler, yeni EN aciklama, yeni RU baslik + aciklama, nitelikler, kontrol",
-           "- `YEDEK/<ilan>_listing.json`, `_translations_ru.json`, `_properties.json` — Etsy'den okunan ham hali", ""]
+           "- `YEDEK/<ilan>_listing.json`, `_translations_ru.json`, `_properties.json` — Etsy'den okunan ham hali",
+           "- `OAS_KISISELLESTIRME.json` — Etsy OAS'tan cikarilan kisisellestirme alanlari ve uclari (kanit)", ""]
     metin = "\n".join(md)
     (out / "METIN_78.md").write_text(metin + "\n", encoding="utf-8")
     log(f"CSV {out / 'METIN_78.csv'} ({len(satirlar)} satir) | MD {out / 'METIN_78.md'} | PASS {pass_n}/{toplam}")
