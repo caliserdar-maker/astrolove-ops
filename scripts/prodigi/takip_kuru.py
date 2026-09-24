@@ -61,10 +61,10 @@ def main():
     out = pathlib.Path(a.out); out.mkdir(parents=True, exist_ok=True)
 
     prod = R.Prodigi(R.load_prodigi_key(a.env), a.env)
-    stc, d = prod.siparisler(top=a.top)
-    if stc != 200:
-        sys.exit(f"HATA: GET /orders HTTP {stc}: {json.dumps(d)[:300]}")
-    orders = d.get("orders") or []
+    # order_router.Prodigi.siparisler() dogrudan LISTE dondurur (status/dict degil).
+    orders = prod.siparisler(top=a.top)
+    if not orders:
+        sys.exit(f"HATA: GET /orders?top={a.top} bos dondu (yetki/kota?) - salt okuma, hicbir sey yazilmadi.")
     R.log(f"Prodigi siparis: {len(orders)} (top={a.top})")
 
     api = shop = None
