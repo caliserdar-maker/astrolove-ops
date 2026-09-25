@@ -106,6 +106,47 @@ def murekkep_rengi(img_bgr, ed, kutu=None):
     return m
 
 
+def sutun_kumeleri(maske, kopr=40, en_az=60):
+    """Sutun projeksiyonunda bitisik murekkep kumeleri (kopr px'e kadar bosluk koprulenir)."""
+    sut = maske.any(0)
+    kume, i = [], 0
+    while i < len(sut):
+        if sut[i]:
+            j = i
+            while j < len(sut) and (sut[j] or (j + kopr < len(sut) and sut[j:j + kopr].any())):
+                j += 1
+            kume.append((int(i), int(j))); i = j
+        else:
+            i += 1
+    return [k for k in kume if k[1] - k[0] >= en_az]
+
+
+def uc_grup(kume):
+    """Isim satirini [sol isim | ∞ | sag isim] olarak ayirir.
+
+    KURAL (Serdar 25 Eyl 2026, 4. deneme): kume SAYISI sabitlenmez. Ardisik
+    bosluklarin EN BUYUK IKISI secilir; aralarinda kalan kume(ler) = ∞, solunda
+    kalanlar = sol isim, saginda kalanlar = sag isim. Boylece harf araligi
+    (olcum: 46 px) kume birlestirme esigini assa bile isim bolunmez.
+    """
+    if len(kume) < 3:
+        raise SystemExit(f"HATA: isim satirinda en az 3 kume gerekli, {len(kume)}: {kume}")
+    bosluk = [kume[i + 1][0] - kume[i][1] for i in range(len(kume) - 1)]
+    sira = sorted(range(len(bosluk)), key=lambda i: -bosluk[i])
+    i1, i2 = sorted(sira[:2])
+    kalan = max([bosluk[i] for i in sira[2:]], default=0)
+    secilen = min(bosluk[i1], bosluk[i2])
+    if secilen < 2 * kalan:
+        raise SystemExit(f"HATA: isim/∞ ayrimi belirsiz - secilen bosluk {secilen}, "
+                         f"kalan en buyuk {kalan}, kumeler {kume}, bosluklar {bosluk}")
+    grup = [kume[:i1 + 1], kume[i1 + 1:i2 + 1], kume[i2 + 1:]]
+    sol, orta, sag = [(g[0][0], g[-1][1]) for g in grup]
+    return sol, orta, sag, {"kume": kume, "bosluk": bosluk, "secilen": [bosluk[i1], bosluk[i2]],
+                            "kalan_en_buyuk": int(kalan),
+                            "grup": [len(g) for g in grup], "sol": list(sol), "sonsuz": list(orta),
+                            "sag": list(sag)}
+
+
 def metin_olcumu(poster, median, ed):
     """Poster olceginde isim satiri, ∞ ve mesaj satirinin OLCULEN geometrisi."""
     d_c = np.abs(poster.astype(np.int16) - median.astype(np.int16)).max(2) > WBP.DIFF_THR
@@ -115,22 +156,7 @@ def metin_olcumu(poster, median, ed):
     for ad, m in (("isim satiri", satir), ("mesaj", tag)):
         if not m.any():
             raise SystemExit(f"HATA: {ad} murekkebi olculemedi")
-    # isim satiri sutun kumeleri: [isim, ∞, isim]. ∞ SABIT KUTUYLA DEGIL, OLCULEN
-    # ORTA KUMEYLE alinir (25 Eyl karari; REF_INFINITY pilot posterin olcumudur).
-    sut = satir.any(0)
-    kume, i = [], 0
-    while i < len(sut):
-        if sut[i]:
-            j = i
-            while j < len(sut) and (sut[j] or (j + 40 < len(sut) and sut[j:j + 40].any())):
-                j += 1
-            kume.append((i, j)); i = j
-        else:
-            i += 1
-    kume = [k for k in kume if k[1] - k[0] > 200]
-    if len(kume) != 3:
-        raise SystemExit(f"HATA: isim satirinda 3 kume bekleniyordu (isim, ∞, isim), {len(kume)}: {kume}")
-    sol, orta, sag = kume
+    sol, orta, sag, kbilgi = uc_grup(sutun_kumeleri(satir))
     sut_ix = np.arange(poster.shape[1])
     inf = satir & ((sut_ix >= orta[0]) & (sut_ix < orta[1]))
     isim = satir & ~inf
@@ -141,6 +167,7 @@ def metin_olcumu(poster, median, ed):
         "isim_govde": [int(g0), int(g1)], "cap": int(g1 - g0),
         "sonsuz": list(bbox(inf)),
         "mesaj_kutu": list(t), "mesaj_govde": [int(tg[0]), int(tg[1])], "mesaj_cap": int(tg[1] - tg[0]),
+        "kume": kbilgi,
     }, isim, inf
 
 
@@ -383,23 +410,42 @@ def main():
     ap.add_argument("--cift", default="Aries_Leo")
     ap.add_argument("--isimler", default="EMILY,JAMES")
     ap.add_argument("--mesaj", default="It Began With a Kiss in the Rain")
+    ap.add_argument("--sadece-olcum", action="store_true", help="yalniz 1. asama: 4 renkte olcum, uretim yok")
     a = ap.parse_args()
     P6, P7, P12, kp = kisisel_kur(a.kisisel)
     sol, sag = [s.strip() for s in a.isimler.split(",")]
     cikti = Path(a.cikti); cikti.mkdir(parents=True, exist_ok=True)
     rapor, geo_ref, urun = [], None, {}
 
+    # --- 1. ASAMA: 4 RENGIN TAMAMI ONCE OLCULUR (uretim yok) -------------
+    olcum = {}
     for ed in EDISYONLAR:
-        t0 = time.time()
         poster = imread(Path(a.posterler) / f"WA_POSTER_{a.cift.upper()}_{ed.upper()}_3X4.jpg")
         if (poster.shape[1], poster.shape[0]) != (POSTER_W, POSTER_H):
             raise SystemExit(f"HATA: poster {ed} {poster.shape[1]}x{poster.shape[0]}")
         median = imread(Path(a.plakalar) / f"MEDIAN_{ed.upper()}.png")
         if (median.shape[1], median.shape[0]) != (POSTER_W, POSTER_H):
             raise SystemExit(f"HATA: MEDIAN {ed} {median.shape[1]}x{median.shape[0]}")
+        geo, _, _ = metin_olcumu(poster, median, ed)
+        olcum[ed] = geo
+        log(f"OLCUM {ed}: kume={json.dumps(geo['kume'])}")
+        log(f"       sol={geo['sol']} ∞={geo['sonsuz']} sag={geo['sag']} cap={geo['cap']} mesaj_cap={geo['mesaj_cap']}")
+        del poster, median
+    (cikti / "WP_V2_OLCUM.json").write_text(json.dumps(olcum, indent=1))
+    sapma = {k: int(np.abs(np.asarray([olcum[e][k] for e in EDISYONLAR]) -
+                           np.asarray(olcum[EDISYONLAR[0]][k])).max())
+             for k in ("sol", "sag", "sonsuz", "isim_govde")}
+    log(f"4 renk geometri sapmasi (px): {json.dumps(sapma)}")
+    if a.sadece_olcum:
+        log("SADECE OLCUM: uretim yapilmadi")
+        return [], {}, olcum[EDISYONLAR[0]]
 
+    # --- 2. ASAMA: URETIM ------------------------------------------------
+    for ed in EDISYONLAR:
+        t0 = time.time()
+        poster = imread(Path(a.posterler) / f"WA_POSTER_{a.cift.upper()}_{ed.upper()}_3X4.jpg")
+        median = imread(Path(a.plakalar) / f"MEDIAN_{ed.upper()}.png")
         geo, isim_m, inf_m = metin_olcumu(poster, median, ed)
-        log(f"{ed} olcum: {json.dumps({k: geo[k] for k in ('sol', 'sag', 'sonsuz', 'cap', 'mesaj_cap')})}")
         if geo_ref is None:
             geo_ref = geo                      # 4 renkte AYNI geometri (kapi 3)
         prof = {"sol": profil(poster, isim_m & (np.arange(POSTER_W) < geo_ref["sonsuz"][0]),
@@ -583,6 +629,8 @@ if __name__ == "__main__":
     rapor, urun, geo = main()
     import sys as _s
     _a = _s.argv
+    if not rapor:                      # --sadece-olcum: 1. asama, kapi/sayfa yok
+        _s.exit(0)
     cikti = _a[_a.index("--cikti") + 1]
     orij = _a[_a.index("--orijinal") + 1] if "--orijinal" in _a else ""
     cift = _a[_a.index("--cift") + 1] if "--cift" in _a else "Aries_Leo"

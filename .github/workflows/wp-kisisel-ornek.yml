@@ -116,8 +116,8 @@ jobs:
           python scripts/wp_kisisel/uret.py --girdi _wp --cikti _out \
             --kisisel _kis --isimler "$ISIMLER" --mesaj "$MESAJ" --rapor "$RAPOR" $ESKI
 
-      - name: V2 - temiz plaka + poster murekkebi (yalniz [v2])
-        if: ${{ contains(github.event.head_commit.message, '[v2]') }}
+      - name: V2 - temiz plaka + poster murekkebi ([v2] uretim / [olcum] yalniz 1. asama)
+        if: ${{ contains(github.event.head_commit.message, '[v2]') || contains(github.event.head_commit.message, '[olcum]') }}
         env:
           MSG: ${{ github.event.head_commit.message }}
         run: |
@@ -132,12 +132,13 @@ jobs:
           echo "poster $(ls _v2/posterler | wc -l) | plaka $(ls _v2/plakalar | wc -l) | temiz $(ls _v2/temiz | wc -l) | orijinal $(ls _v2/orijinal | wc -l)"
           free -g | head -2; df -h / | tail -1
           mkdir -p _out2
-          cp docs/operations/WP_V2_HATA_27_DURUM.md _out2/
+          EK=""
+          case "$MSG" in *"[olcum]"*) EK="--sadece-olcum";; *) cp docs/operations/WP_V2_HATA_27_DURUM.md _out2/;; esac
           python scripts/wp_kisisel/wp_v2.py --posterler _v2/posterler --plakalar _v2/plakalar \
             --temiz _v2/temiz --orijinal _v2/orijinal --kisisel _kis --cikti _out2 \
-            --cift Aries_Leo --isimler "$ISIMLER" --mesaj "$MESAJ"
+            --cift Aries_Leo --isimler "$ISIMLER" --mesaj "$MESAJ" $EK
 
-      - name: V2 Drive'a yaz
+      - name: V2 Drive'a yaz (yalniz [v2]; [olcum] Drive'a yazmaz)
         if: ${{ always() && contains(github.event.head_commit.message, '[v2]') }}
         run: |
           set -euo pipefail
