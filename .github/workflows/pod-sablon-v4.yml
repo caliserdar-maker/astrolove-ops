@@ -105,7 +105,7 @@ jobs:
         run: |
           set -euo pipefail
           case "$MOD" in
-            kuru|maliyet|dogrula|hpr|buyuk|yetki|yetki_test|pilot15_oku|boy15_oku|durum15|fiyat_b_oku|metin78_kuru|yayilim_hazirlik|galeri_oku|kota_oku|oas_kisisel|kanal_oku|iptal_dok|cerceve_sonda|cerceve_hazirlik|cerceve_mockup|prodigi_teklif|siparis_hazirla|siparis_onizleme|siparis_izin_kapat|eslesme_kanit|router_kuru|router_teklif)
+            kuru|maliyet|dogrula|hpr|buyuk|yetki|yetki_test|pilot15_oku|boy15_oku|durum15|fiyat_b_oku|metin78_kuru|yayilim_hazirlik|galeri_oku|kota_oku|oas_kisisel|kanal_oku|iptal_dok|galeri_tek_plan|cerceve_sonda|cerceve_hazirlik|cerceve_mockup|prodigi_teklif|siparis_hazirla|siparis_onizleme|siparis_izin_kapat|eslesme_kanit|router_kuru|router_teklif)
               if [ "$APPLY" = "true" ]; then
                 echo "::error::mod=$MOD ile yazma olmaz. DUR."; exit 1
               fi
@@ -264,6 +264,18 @@ jobs:
             rclone copyto "gdrive:ASTROLOVE/TEMP/YAYILIM_78/KOTA_LOG.csv" _out/KOTA_LOG.csv 2>/dev/null || true
             python scripts/etsy/kota_oku.py _out/KOTA_LOG.csv
             rclone copyto _out/KOTA_LOG.csv "gdrive:ASTROLOVE/TEMP/YAYILIM_78/KOTA_LOG.csv"
+          elif [ "$MOD" = "galeri_tek_plan" ]; then
+            # SALT OKUMA, Etsy API kotasi HARCAMAZ: GALERI_PLAN + METIN_78 + Drive girdi listeleri + statik OAS.
+            mkdir -p _work _out/galeri_tek
+            rclone copyto "gdrive:ASTROLOVE/TEMP/METIN_78/METIN_78.csv" _work/METIN_78.csv
+            rclone copyto "gdrive:ASTROLOVE/TEMP/GALERI_GENEL/GALERI_PLAN.json" _work/GALERI_PLAN.json
+            rclone lsf -R "gdrive:ASTROLOVE/TEMP/POD_KISISEL/A1_77" > _work/lsf_medya.txt || true
+            echo "A1_77: $(grep -c KAPAK.jpg _work/lsf_medya.txt) KAPAK, $(grep -c KART09.jpg _work/lsf_medya.txt) KART09"
+            curl -sS -o _work/oas.json https://www.etsy.com/openapi/generated/oas/3.0.0.json || true
+            rc=0; python scripts/pod/galeri_tek.py plan --csv _work/METIN_78.csv --plan _work/GALERI_PLAN.json \
+              --girdiler _work/lsf_medya.txt --oas _work/oas.json --out _out/galeri_tek || rc=$?
+            rclone copy _out/galeri_tek "gdrive:ASTROLOVE/TEMP/GALERI_TEK" -q
+            echo "Drive: TEMP/GALERI_TEK"; exit $rc
           elif [ "$MOD" = "galeri_oku" ]; then
             # SALT OKUMA, Etsy API kotasi HARCAMAZ: Drive yedekleri + Etsy CDN kucuk resimleri.
             mkdir -p _work/yedek _out/galeri
