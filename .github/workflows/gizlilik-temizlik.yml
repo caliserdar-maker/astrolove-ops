@@ -1,0 +1,63 @@
+name: gizlilik-temizlik
+
+# ACIL (25 Eyl 2026): musteri verisi sizintisi temizligi. Yalniz elle tetiklenir.
+# tara: yalniz sayar. sil: riskli artifact'lari ve musteri verisi gecen kosu loglarini siler.
+# Ciktida YALNIZ SAYILAR; arama terimleri Drive'dan okunur, loga yazilmaz.
+
+permissions:
+  actions: write
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      mod:
+        description: "tara | sil"
+        required: true
+        default: "tara"
+
+concurrency: gizlilik-temizlik
+
+jobs:
+  temizlik:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Arama terimleri (Drive; loga yazilmaz)
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _gizli/paket _gizli/kart
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_ORDERS_STATE.csv" _gizli/state.csv -q || true
+          rclone copy "gdrive:ASTROLOVE/TEMP/POD_ORDERS" _gizli/paket --include "*.json" --max-depth 1 -q || true
+          rclone lsf "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM" --include "*.md" --max-depth 1 2>/dev/null | while read -r f; do : > "_gizli/kart/$f"; done || true
+          echo "terim dosyalari: $(find _gizli -type f | wc -l)"
+      - name: Tara / sil
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MOD: ${{ inputs.mod }}
+        run: |
+          set -euo pipefail
+          case "$MOD" in tara|sil) : ;; *) echo "mod tara|sil olmali"; exit 1 ;; esac
+          python scripts/ops/gizlilik_temizlik.py "$MOD" --terim-kok _gizli
+      - if: ${{ always() }}
+        run: rm -rf _gizli ~/.config/rclone
