@@ -36,6 +36,8 @@ RENKLER = ['blue', 'black', 'modern', 'pure_white', 'vintage']
 import os
 if os.environ.get('TS_RENKLER'): RENKLER = os.environ['TS_RENKLER'].split(',')   # yalniz yerel deneme
 if YALNIZ06: RENKLER = ['blue']
+DUZELT = '--duzelt' in sys.argv                         # Serdar 25 Eyl duzeltmeleri: yalniz etkilenen kartlar
+KORU = {1, 3, 4, 9} if DUZELT else set()               # CL no: kapak, kart 3 (Serdar onayli, DOKUNMA), ortak sembol, KART09
 DOKULU = {'vintage'}                                  # parsomen dokusu: sembol kapisi doku-dengeli (Serdar 25 Eyl)
 RENK_AD = {'blue': 'MIDNIGHT_BLUE', 'black': 'DEEP_BLACK', 'modern': 'CHAMPAGNE_IVORY', 'pure_white': 'PURE_WHITE', 'vintage': 'WARM_PARCHMENT'}
 REF_DOSYA = {1: '01_8568298334', 2: '02_8567954544', 3: '03_8615800647', 4: '04_8567954548', 5: '05_8567954574', 6: '06_8567954580',
@@ -58,7 +60,8 @@ class EdPoster:
         self.kilit = d['edisyonlar'][ed]['4x5']
         (E.YOL / ed / 'ham').mkdir(parents=True, exist_ok=True)
 
-    def sayfa_kur(self, sayfa_png, n):
+    def sayfa_kur(self, sayfa_png, n, referans=False, ust=None):
+        """referans (CL 28): o edisyonun mesaj boyu tavani. Cift: mesaj boyu <= CL (ayni edisyon) ve <= Blue (5 renkte ayni oran)."""
         E = self.E; t0 = time.time()
         yol = E.YOL / self.ed / 'ham' / f'4x5_p{n}.jpg'
         Image.open(io.BytesIO(sayfa_png)).convert('RGB').save(yol, 'PNG')
@@ -68,7 +71,12 @@ class EdPoster:
         E.REF_SAYFA = n
         s, S = E.oran_kur(self.ed, '4x5', self.kilit, o)
         g0, g1 = o['isim_govde']; s['isim_y'] = (g0 + g1) / 2
-        return {'sayfa': n, 's': s, 'S': S, 'm': m, 'o': o, 'duz': duz, 'sn': round(time.time() - t0, 1)}
+        ilk = {'tag_cap': s['tag_cap'], 'tag_sinir': s['tag_sinir']}
+        if referans: self.tavan = dict(ilk)
+        else:
+            s['tag_cap'] = min(s['tag_cap'], self.tavan['tag_cap'], *([ust['tag_cap']] if ust else []))
+            s['tag_sinir'] = min(s['tag_sinir'], self.tavan['tag_sinir'], *([ust['tag_sinir']] if ust else []))
+        return {'ilk': ilk, 'tag_son': {'tag_cap': s['tag_cap'], 'tag_sinir': s['tag_sinir']}, 'sayfa': n, 's': s, 'S': S, 'm': m, 'o': o, 'duz': duz, 'sn': round(time.time() - t0, 1)}
 
     def uret(self, B, isimler, tagline):
         import giris_dogrula as gd
@@ -93,11 +101,14 @@ def posterler(sayfa):
             M['blue'] = {'B': Ba, 'X': PB, 'Bc': Bc}
         else:
             EP = EdPoster(renk)
-            Bc = EP.sayfa_kur(sayfa[f'{renk}_28'], 28); cl, clb, _ = EP.uret(Bc, ISIM, TAG)
-            Ba = EP.sayfa_kur(sayfa[f'{renk}_{NO}'], NO); al, alb, kk = EP.uret(Ba, ISIM, TAG)
-            M[renk] = {'o': {k: Ba['s'].get(k) for k in ('sembol_bant', 'isim_bant')}, 'tag_bant': Ba['s'].get('tag_bant')}
+            ust = {k: M['blue']['B']['s'][k] for k in ('tag_cap', 'tag_sinir')} if 'blue' in M else None
+            Bc = EP.sayfa_kur(sayfa[f'{renk}_28'], 28, referans=True); cl, clb, _ = EP.uret(Bc, ISIM, TAG)
+            Ba = EP.sayfa_kur(sayfa[f'{renk}_{NO}'], NO, ust=ust); al, alb, kk = EP.uret(Ba, ISIM, TAG)
+            M[renk] = {'o': {k: Ba['s'].get(k) for k in ('sembol_bant', 'isim_bant')}, 'tag_bant': Ba['s'].get('tag_bant'),
+                       'B': Ba, 'Bc': Bc, 'tag': {'ilk': Ba['ilk'], 'son': Ba['tag_son'], 'CL': Bc['ilk'], 'blue': ust}}
         kap = {'kalinti': alb['kalinti_kapisi']['gecti'], 'temiz_zemin': alb['temiz_ara_kapisi']['gecti'], 'sembol': alb['sembol_kapisi']['gecti']}
         P[renk] = {'CL': cl, 'AL': al}; K[renk] = kap
+        M[renk]['mesaj_px'] = {'AL': mesaj_boy(al, M[renk]['B']), 'CL': mesaj_boy(cl, M[renk]['Bc'])}
         R.setdefault('poster', {})[renk] = {'kapi': kap, 'gecti': all(kap.values()), 'punto': alb['punto'], 'olcek': alb['olcek'],
                                             'sembol': {y: alb['sembol_kapisi'][y] for y in ('sol', 'sag')},
                                             'CL_kapi': {'kalinti': clb['kalinti_kapisi']['gecti'], 'sembol': clb['sembol_kapisi']['gecti']},
@@ -140,9 +151,50 @@ def dis_fark(a, b, yer):
     x0, y0, x1, y1 = yer['aciklik']; m = np.ones(d.shape, bool); m[y0:y1, x0:x1] = False
     return int(d[m].max())
 
+# ------------------------------------------------------------------ mesaj boyu kapisi (Serdar 25 Eyl)
+MESAJ_ESIK = {'renkler_arasi': 0.02, 'CL_ustu_px': 1}
+
+def mesaj_boy(p, B):
+    """Mesaj (tagline) harf yuksekligi: tag bandi +-80 satirda |poster - temiz zemin| > 40 olan satirlarin yuksekligi (px)."""
+    tb = B['o']['tag_bant']; Z = B['S']['zemin_a']; P = np.asarray(p.convert('RGB')).astype(np.float32)
+    y0, y1 = max(tb[0] - 80, 0), min(tb[1] + 80, P.shape[0]); x0, x1 = int(P.shape[1] * 0.1), int(P.shape[1] * 0.9)
+    d = (np.abs(P[y0:y1, x0:x1] - Z[y0:y1, x0:x1]).max(2) > 40).sum(1) >= 3
+    ys = np.where(d)[0]
+    return int(ys[-1] - ys[0] + 1) if len(ys) else 0
+
+def mesaj_kapisi(M):
+    h = {r: M[r]['mesaj_px'] for r in M if 'mesaj_px' in M[r]}; al = [v['AL'] for v in h.values()]
+    fark = max(al) / max(min(al), 1) - 1
+    cl_ok = {r: v['AL'] <= v['CL'] + MESAJ_ESIK['CL_ustu_px'] for r, v in h.items()}
+    return {'px': h, 'renkler_arasi_fark': round(fark, 4), 'CL_ustu_degil': cl_ok, 'esik': MESAJ_ESIK,
+            'tag_cap': {r: M[r].get('tag') for r in M if r != 'blue'},
+            'gecti': fark <= MESAJ_ESIK['renkler_arasi'] and all(cl_ok.values())}
+
 # ------------------------------------------------------------------ kart metinleri
 def etiket_yaz(kart, etiket):
     X = A.k9_hazirla(kart); return Image.fromarray(np.clip(A.k9_etiket_ciz(X, etiket), 0, 255).astype(np.uint8))
+
+def baslik_ekle(genel, cl_kart, etiket):
+    """GENEL kartta yalniz 'ASTROLOVE' var: ust satir CL karsiligindan olculen font/konumla 'ASTROLOVE / <ETIKET>' olur
+    (CL kartinda yeniden yazilan etiket satirinin zeminden farki, GENEL kartin temizlenmis ust bandina eklenir)."""
+    X = A.k9_hazirla(cl_kart); lab = A.k9_etiket_ciz(X, etiket)
+    g = np.asarray(genel.convert('RGB')).astype(np.float64).copy(); y0, y1 = A.K9_BANT; W = g.shape[1]
+    a0, a1 = y0 - 25, y1 + 10
+    bgG = np.median(g[a0:a1, 60:W - 60].reshape(-1, 3), 0)
+    g[a0:a1, 60:W - 60] = bgG + (lab[a0:a1, 60:W - 60] - X['bg'])
+    return Image.fromarray(np.clip(g, 0, 255).astype(np.uint8))
+
+def baslik_kapisi(kart, etiket):
+    y0, y1 = A.K9_BANT; a = kart.convert('L'); b = a.crop((100, y0, a.width - 60, y1))
+    okunan = A.ocr(b.resize((b.width * 2, b.height * 2), Image.LANCZOS))
+    return {'ocr': okunan, 'gecti': okunan.replace(' ', '') == f'ASTROLOVE/{etiket}'.replace(' ', '')}
+
+KAGIT06 = (150, 550, 1230, 1880)                                    # CL 06 kagit kartinda poster kaba kutusu (3000x2250)
+
+def kart_kagit(ref6, cl_mb, al_mb, etiket):
+    """Galeri 05 = CL 06 ile birebir duzen: canli CL kartinda CL posterinin yeri olculur, ciftin isimli MB posteri oraya."""
+    y = sahne_yer(ref6, cl_mb, KAGIT06); k = A.yerlestir(ref6, al_mb, y)
+    return etiket_yaz(k, etiket), {'yer': y, 'aciklik_disi_maks_fark': dis_fark(ref6, k, y)}
 
 def metin(kart, kutu, eski, yeni, align='left', bg=BG):
     tl = _tl()
@@ -332,6 +384,14 @@ def onizleme(S, SIRA, yol, H=900, gen=4200, bosluk=30):
             T.paste(t, (xx, yy + 50)); d.text((xx, yy + 10), f'{i:02d} {ad} ({S[SIRA[i - 1][0]].width}x{S[SIRA[i - 1][0]].height})', fill=(0, 0, 0)); xx += t.width + bosluk
     T.save(yol, quality=88)
 
+def kart04_tam(ref, M, etk, A_, B_):
+    k4, flat = kart04(ref[4], M, M['blue']['Bc'])
+    k4 = etiket_yaz(k4, etk)
+    k4 = metin(k4, (130, 325, 1700, 395), 'Cancer and Libra, united in an original AstroLove design.',
+               f'{A_.title()} and {B_.title()}, united in an original AstroLove design.')
+    k4 = metin(k4, (1540, 860, 1790, 945), 'CANCER', A_, align='center', bg=flat)
+    return metin(k4, (2380, 860, 2580, 945), 'LIBRA', B_, align='center', bg=flat)
+
 # ------------------------------------------------------------------ ana akis
 if __name__ == '__main__':
     t_bas = time.time()
@@ -382,18 +442,18 @@ if __name__ == '__main__':
             print(json.dumps(R['ozet'], ensure_ascii=False, indent=1, default=str), flush=True); sys.exit(0)
         beklenen = sorted({A_, B_})
         S = {}; K = {}
+        if DUZELT:                                               # korunan kartlar Drive'daki dosyalarindan (yeniden kodlanmaz)
+            if not YEREL: rc('copy', HEDEF, str(CIK), '--include', '0[1-4]_*.jpg', '--include', '08_*.jpg')
+            for n, dosya in ((1, '01_kapak_MB.jpg'), (3, '02_kart3_isimler.jpg'), (4, '03_ortak_sembol.jpg'), (9, '08_eser_isim_mesaj.jpg')):
+                S[n] = Image.open(CIK / dosya).convert('RGB')
         # 01 kapak (onayli a1 kurali)
-        yk = A.kapak_yer(ref[1], P['blue']['CL'], A.aciklik_olc(ref[1])); S[1] = A.yerlestir(ref[1], P['blue']['AL'], yk)
-        K[1] = {'yer': yk, 'aciklik_disi_maks_fark': dis_fark(ref[1], S[1], yk)}
+        if 1 not in KORU:
+            yk = A.kapak_yer(ref[1], P['blue']['CL'], A.aciklik_olc(ref[1])); S[1] = A.yerlestir(ref[1], P['blue']['AL'], yk)
+            K[1] = {'yer': yk, 'aciklik_disi_maks_fark': dis_fark(ref[1], S[1], yk)}
         # 03 kart 3 (video oturumu)
-        S[3] = Image.open(next((W / 'k3').glob('*.jpg'))).convert('RGB')
+        if 3 not in KORU: S[3] = Image.open(next((W / 'k3').glob('*.jpg'))).convert('RGB')
         # 04 ortak sembol
-        k4, flat = kart04(ref[4], M, M['blue']['Bc'])
-        k4 = etiket_yaz(k4, etk)
-        k4 = metin(k4, (130, 325, 1700, 395), 'Cancer and Libra, united in an original AstroLove design.',
-                   f'{A_.title()} and {B_.title()}, united in an original AstroLove design.')
-        k4 = metin(k4, (1540, 860, 1790, 945), 'CANCER', A_, align='center', bg=flat)
-        S[4] = metin(k4, (2380, 860, 2580, 945), 'LIBRA', B_, align='center', bg=flat)
+        if 4 not in KORU: S[4] = kart04_tam(ref, M, etk, A_, B_)
         # 05 bes palet
         k5 = ref[5]; K[5] = {}
         for rect, renk in (((269, 499, 791, 1151), 'blue'), ((1240, 500, 1760, 1150), 'black'), ((2208, 497, 2734, 1152), 'modern'),
@@ -406,13 +466,16 @@ if __name__ == '__main__':
         # 07 yakin detay
         S[7] = etiket_yaz(kart07(ref[7], P['blue']['CL'], P['blue']['AL'], Image.open(W / 'hi' / '30x40.jpg').convert('RGB'), M['blue']['B']), etk)
         # 09 KART09
-        X9 = A.k9_hazirla(ref[9]); y9 = A.yer_olc(ref[9], P['blue']['CL'], A.SAHNE['kart09'][1])
-        S[9] = A.kart09_uret(X9, P['blue']['AL'], y9, etk)
-        K[9] = A.k9_kapisi(S[9], X9, etk, list(A.etiketler().values()), y9)
-        # 06/08/10 GENEL
-        S[6] = Image.open(W / 'genel' / 'GENEL_3_kagit.png').convert('RGB')
-        S[8] = Image.open(W / 'genel' / 'GENEL_2_olcu.png').convert('RGB')
-        S[10] = Image.open(W / 'genel' / 'GENEL_4_siparis.png').convert('RGB')
+        if 9 not in KORU:
+            X9 = A.k9_hazirla(ref[9]); y9 = A.yer_olc(ref[9], P['blue']['CL'], A.SAHNE['kart09'][1])
+            S[9] = A.kart09_uret(X9, P['blue']['AL'], y9, etk)
+            K[9] = A.k9_kapisi(S[9], X9, etk, list(A.etiketler().values()), y9)
+        # 06 kagit: CL 06 ile birebir duzen + ciftin posteri (Serdar 25 Eyl); 08/10 GENEL + ust satirda cift adi
+        S[6], K[6] = kart_kagit(ref[6], P['blue']['CL'], P['blue']['AL'], etk)
+        S[8] = baslik_ekle(Image.open(W / 'genel' / 'GENEL_2_olcu.png').convert('RGB'), ref[8], etk)
+        S[10] = baslik_ekle(Image.open(W / 'genel' / 'GENEL_4_siparis.png').convert('RGB'), ref[10], etk)
+        R['baslik_kapisi'] = {n: baslik_kapisi(S[n], etk) for n in (5, 6, 7, 8, 10)}
+        R['mesaj_kapisi'] = mesaj_kapisi(M)
         # 11-14 renk sahneleri
         for n, renk in SAHNE_RENK.items():
             if renk not in P: S[n] = ref[n]; continue           # yalniz yerel deneme
@@ -425,11 +488,12 @@ if __name__ == '__main__':
                 (12, 'cerceve_CHAMPAGNE_IVORY'), (13, 'cerceve_PURE_WHITE'), (14, 'cerceve_WARM_PARCHMENT')]
         R['galeri'] = []; kucuk = []
         for i, (n, ad) in enumerate(SIRA, 1):
-            im = S[n]; dosya = f'{i:02d}_{ad}.jpg'; im.save(CIK / dosya, quality=95)
+            im = S[n]; dosya = f'{i:02d}_{ad}.jpg'
+            if n not in KORU: im.save(CIK / dosya, quality=95)
             bt = burc_tarama(im, beklenen)
             R['galeri'].append({'sira': i, 'dosya': dosya, 'cl_karsiligi': f'CL {n:02d} ({REF_DOSYA[n]})', 'boyut': list(im.size),
                                 'ref_boyut': list(ref[n].size), 'burc_kapisi': bt})
-            yanyana(ref[n], im, CIK / f'YANYANA_{i:02d}_{ad}_vs_CL{n:02d}.jpg')
+            if n not in KORU: yanyana(ref[n], im, CIK / f'YANYANA_{i:02d}_{ad}_vs_CL{n:02d}.jpg')
             t = im.copy(); t.thumbnail((600, 600)); kucuk.append((i, ad, t))
         sw = 620; T = Image.new('RGB', (sw * 7, 2 * 640), 'white'); d = ImageDraw.Draw(T)
         for j, (i, ad, t) in enumerate(kucuk):
@@ -462,7 +526,9 @@ if __name__ == '__main__':
         (CIK / 'SET.json').write_text(json.dumps(SET, ensure_ascii=False, indent=1))
         if not YEREL: rc('copy', str(CIK / 'SET.json'), f'{A.A77}/{CIFT}')
         R['ozet'] = {'foto': len(SIRA), 'poster_kapilari': {r: R['poster'][r]['gecti'] for r in RENKLER},
-                     'burc_kapisi': all(g['burc_kapisi']['gecti'] for g in R['galeri']), 'kart09_kapisi': K[9]['gecti'],
+                     'burc_kapisi': all(g['burc_kapisi']['gecti'] for g in R['galeri']), 'kart09_kapisi': K[9]['gecti'] if 9 in K else 'korundu',
+                     'mesaj_kapisi': {k: R['mesaj_kapisi'][k] for k in ('px', 'renkler_arasi_fark', 'CL_ustu_degil', 'gecti')},
+                     'baslik_kapisi': R['baslik_kapisi'], 'kagit_kart_dis_fark': K[6]['aciklik_disi_maks_fark'],
                      'kart06_buyutec_kapisi': R['kart07']['detay']['kapi']['gecti'],
                      'sure_sn': round(time.time() - t_bas, 1)}
     finally:
