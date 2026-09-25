@@ -131,6 +131,8 @@ jobs:
           rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/ARIES_LEO" _v2/orijinal -q --include "AstroLove_*.jpg"
           echo "poster $(ls _v2/posterler | wc -l) | plaka $(ls _v2/plakalar | wc -l) | temiz $(ls _v2/temiz | wc -l) | orijinal $(ls _v2/orijinal | wc -l)"
           free -g | head -2; df -h / | tail -1
+          mkdir -p _out2
+          cp docs/operations/WP_V2_HATA_27_DURUM.md _out2/
           python scripts/wp_kisisel/wp_v2.py --posterler _v2/posterler --plakalar _v2/plakalar \
             --temiz _v2/temiz --orijinal _v2/orijinal --kisisel _kis --cikti _out2 \
             --cift Aries_Leo --isimler "$ISIMLER" --mesaj "$MESAJ"

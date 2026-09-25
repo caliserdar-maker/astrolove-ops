@@ -15,6 +15,10 @@
              wp_build_pair.place ile birebir ayni yol. Parlama (glow) YOK:
              maske disinda cikti = CLEAN plaka (kapi 1).
 
+∞ SABIT KUTUYLA (REF_INFINITY) DEGIL, isim satirinda OLCULEN ORTA KUME olarak
+alinir (25 Eyl 2026, 3. iterasyon duzeltmesi): REF_INFINITY pilot posterin
+(Cancer_Libra) olcumudur ve ARIES_LEO ∞'unu tam kapsamaz.
+
 ∞ yalnizca YATAYDA tam sayi piksel kayar: tasarim kurali "satir ortali + esit
 bosluk"tur (olcum: ARIES 252 / LEO 196 px, bosluk 57/55, satir merkezi 726 ~
 tuval merkezi 720). Isimler degisince esit bosluk ve ortalama ancak ∞ ile
@@ -31,7 +35,7 @@ KOK = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(KOK / "etsy"))
 from wp_mockup_common import DEVICES, imread                                  # noqa: E402
 import wp_build_pair as WBP                                                   # noqa: E402
-from wp_plate_pilot import (BOX_NAMES, INF_PAD, INK_RGB, REF_INFINITY,            # noqa: E402
+from wp_plate_pilot import (BOX_NAMES, INF_PAD, INK_RGB,                          # noqa: E402
                             REF_TAGLINE, RING_BAND, RING_ELLIPSE, RING_LINE_PX, RING_TIP_Y, placement)
 
 Image.MAX_IMAGE_PIXELS = None
@@ -43,6 +47,7 @@ KENAR_ORAN = 0.08        # mesaj kenar payi: tuval genisliginin %8'i (Serdar kap
 BOX_SYMBOL_RING = (900, 1100, 6300, 5696)     # halka yayi + ici (glif satirinin ustunde biter)
 BOX_SYMBOL_CORE = (1900, 1900, 5300, 5100)    # fuzyon sembolu (3 parca birlesimi)
 ESIK_OGE = 60        # halka/sembol olcumu: zemin doku sapmasinin (<=40) uzerinde, murekkep kesin
+ESIK_METIN = 32      # isim/mesaj kenar olcumu: JPEG q95 halkalanmasinin (<=15) uzerinde
 EDISYONLAR = ["Midnight_Blue", "Deep_Black", "Champagne_Ivory", "Warm_Parchment"]
 CIHAZLAR = ["Phone", "Tablet", "Desktop"]
 
@@ -105,16 +110,14 @@ def metin_olcumu(poster, median, ed):
     """Poster olceginde isim satiri, ∞ ve mesaj satirinin OLCULEN geometrisi."""
     d_c = np.abs(poster.astype(np.int16) - median.astype(np.int16)).max(2) > WBP.DIFF_THR
     d_s = murekkep_rengi(median, ed, REF_TAGLINE)
-    inf_kutu = (REF_INFINITY[0] - INF_PAD, REF_INFINITY[1] - INF_PAD,
-                REF_INFINITY[2] + INF_PAD, REF_INFINITY[3] + INF_PAD)
-    inf = (d_c & (kutu_maske(poster.shape, inf_kutu) > 0))
-    isim = (d_c & (kutu_maske(poster.shape, BOX_NAMES) > 0) & ~inf)
+    satir = (d_c & (kutu_maske(poster.shape, BOX_NAMES) > 0))
     tag = (d_s & (kutu_maske(poster.shape, REF_TAGLINE) > 0))
-    for ad, m in (("isim", isim), ("sonsuz", inf), ("mesaj", tag)):
+    for ad, m in (("isim satiri", satir), ("mesaj", tag)):
         if not m.any():
             raise SystemExit(f"HATA: {ad} murekkebi olculemedi")
-    # isim sutun kumeleri: iki isim
-    sut = isim.any(0)
+    # isim satiri sutun kumeleri: [isim, ∞, isim]. ∞ SABIT KUTUYLA DEGIL, OLCULEN
+    # ORTA KUMEYLE alinir (25 Eyl karari; REF_INFINITY pilot posterin olcumudur).
+    sut = satir.any(0)
     kume, i = [], 0
     while i < len(sut):
         if sut[i]:
@@ -125,9 +128,12 @@ def metin_olcumu(poster, median, ed):
         else:
             i += 1
     kume = [k for k in kume if k[1] - k[0] > 200]
-    if len(kume) != 2:
-        raise SystemExit(f"HATA: isim satirinda 2 kume bekleniyordu, {len(kume)}")
-    sol, sag = kume
+    if len(kume) != 3:
+        raise SystemExit(f"HATA: isim satirinda 3 kume bekleniyordu (isim, ∞, isim), {len(kume)}: {kume}")
+    sol, orta, sag = kume
+    sut_ix = np.arange(poster.shape[1])
+    inf = satir & ((sut_ix >= orta[0]) & (sut_ix < orta[1]))
+    isim = satir & ~inf
     g0, g1 = govde(isim, sol[0], sag[1])
     t = bbox(tag); tg = govde(tag, t[0], t[2])
     return {
@@ -159,6 +165,20 @@ def kisisel_kur(kok):
     return pilot6, pilot7, pilot12, kp
 
 
+def plaka_murekkep(pl):
+    """Plakanin YATAY murekkep sinirlari (alfa/maske >40) - yan bosluklar haric.
+
+    kisisel-v1 render'i plakayi zaten >40 esiginde kirpar; bu olcum kuralin
+    ACIK yazilmis halidir (EK KAPI 3: sol/sag bosluk esit).
+    """
+    a = np.asarray(pl)
+    a = a[..., 3] if (a.ndim == 3 and a.shape[2] == 4) else (a if a.ndim == 2 else a.max(2))
+    sut = np.nonzero((a > 40).any(0))[0]
+    if not len(sut):
+        raise SystemExit("HATA: plakada murekkep yok")
+    return int(sut.min()), int(sut.max()) + 1
+
+
 def plaka_govde(pl):
     """Plakanin govde bandi ve murekkep merkezi (yatay)."""
     a = np.asarray(pl)[..., 3]
@@ -176,14 +196,17 @@ def metin_katmani(P6, P7, P12, kp, geo, prof, isimler, mesaj):
     """
     cap = geo["cap"]
     pl = {y: P12.plaka(isimler[y], prof[y], cap, 1.0)[0] for y in ("sol", "sag")}
+    mrk = {y: plaka_murekkep(pl[y]) for y in ("sol", "sag")}   # yan bosluk haric murekkep
     g_sol = geo["sonsuz"][0] - geo["sol"][1]
     g_sag = geo["sag"][0] - geo["sonsuz"][2]
     g = int(round((g_sol + g_sag) / 2))                     # esit bosluk (tasarim kurali)
     w_inf = geo["sonsuz"][2] - geo["sonsuz"][0]
-    toplam = pl["sol"].width + g + w_inf + g + pl["sag"].width
-    x0 = int(round(POSTER_W / 2 - toplam / 2))
-    yer = {"sol": x0, "inf": x0 + pl["sol"].width + g,
-           "sag": x0 + pl["sol"].width + g + w_inf + g}
+    w_sol, w_sag = (mrk["sol"][1] - mrk["sol"][0]), (mrk["sag"][1] - mrk["sag"][0])
+    # EK KAPI 3: sol/sag bosluk ESIT -> satir MUREKKEP sinirlarina gore ortalanir
+    toplam = w_sol + g + w_inf + g + w_sag
+    i0 = int(round(POSTER_W / 2 - toplam / 2))              # satirin murekkep sol kenari
+    yer = {"sol": i0 - mrk["sol"][0], "inf": i0 + w_sol + g,
+           "sag": i0 + w_sol + g + w_inf + g - mrk["sag"][0]}
     dx_inf = yer["inf"] - geo["sonsuz"][0]
 
     yerlesim, kutular = [], {}
@@ -191,7 +214,7 @@ def metin_katmani(P6, P7, P12, kp, geo, prof, isimler, mesaj):
         (b0, b1), _ = plaka_govde(pl[y])
         py = int(round((geo["isim_govde"][0] + geo["isim_govde"][1]) / 2 - (b0 + b1) / 2))
         yerlesim.append((pl[y], yer[y], py))
-        kutular[y] = [yer[y], py, yer[y] + pl[y].width, py + pl[y].height]
+        kutular[y] = [yer[y] + mrk[y][0], py, yer[y] + mrk[y][1], py + pl[y].height]
 
     # mesaj: kenar payi tuval genisliginin %8'i (cihazda) -> poster olceginde en dar cihaz belirler
     pay = max(int(round(KENAR_ORAN * DEVICES[d][0] / placement(d)[0])) for d in ("Phone", "Tablet"))
@@ -200,20 +223,23 @@ def metin_katmani(P6, P7, P12, kp, geo, prof, isimler, mesaj):
     punto = P6.cap_punto(fp, P6.TAG_W, geo["mesaj_cap"])
     cr, cu, ct = P6.ciz_cap(fp, P6.TAG_W, punto, mesaj)
     olcek = 1.0
-    if cr.width > sinir:
-        olcek = sinir / cr.width
+    mx0, mx1 = plaka_murekkep(cr)
+    if mx1 - mx0 > sinir:
+        olcek = sinir / (mx1 - mx0)
         punto = max(int(round(punto * olcek)), 4)
         cr, cu, ct = P6.ciz_cap(fp, P6.TAG_W, punto, mesaj)
+        mx0, mx1 = plaka_murekkep(cr)
     p1, _ = P7.kuyruk_duzlestir(prof["tag"])
     tg = P7.altin_sekil(cr, p1, (cu, ct))
     (tb0, tb1), tmx = plaka_govde(tg)
-    tx = int(round(POSTER_W / 2 - tg.width / 2))
+    tx = int(round(POSTER_W / 2 - (mx0 + mx1) / 2))          # EK KAPI 3: murekkebe gore ortali
     ty = int(round((geo["mesaj_govde"][0] + geo["mesaj_govde"][1]) / 2 - (tb0 + tb1) / 2))
     yerlesim.append((tg, tx, ty))
-    kutular["mesaj"] = [tx, ty, tx + tg.width, ty + tg.height]
+    kutular["mesaj"] = [tx + mx0, ty, tx + mx1, ty + tg.height]
     bilgi = {"bosluk": [int(g_sol), int(g_sag), g], "satir": int(toplam), "dx_sonsuz": int(dx_inf),
-             "mesaj_punto": punto, "mesaj_olcek": round(olcek, 3), "mesaj_sinir": int(sinir),
-             "mesaj_kenar_payi": int(pay), "kutular": kutular}
+             "isim_murekkep": [w_sol, w_sag, int(w_inf)],
+             "mesaj_punto": punto, "mesaj_olcek": round(olcek, 3), "mesaj_genislik": int(mx1 - mx0),
+             "mesaj_sinir": int(sinir), "mesaj_kenar_payi": int(pay), "kutular": kutular}
     return yerlesim, dx_inf, bilgi
 
 
@@ -297,6 +323,55 @@ def yanyana(gorseller, yol, hedef_h=1500, ara=20, zemin=(245, 245, 245)):
     return t.size
 
 
+# ------------------------------------------------------------------ EK KAPI olcumleri
+def _luma(rgb):
+    return float(0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2])
+
+
+def _ton(rgb):
+    t = float(sum(rgb)) or 1.0
+    return np.asarray(rgb, np.float32) / t
+
+
+def renk_olcumu(im, plaka, maske):
+    """Murekkep pikselleri: medyan RGB, zeminin medyan RGB'si ve kontrast."""
+    if int(maske.sum()) < 20:
+        return None
+    ink = np.median(im[maske][:, ::-1], axis=0)
+    zem = np.median(plaka[maske][:, ::-1], axis=0)
+    return {"ink_rgb": [round(float(v), 1) for v in ink], "zemin_rgb": [round(float(v), 1) for v in zem],
+            "kontrast": round(abs(_luma(ink) - _luma(zem)), 1), "px": int(maske.sum())}
+
+
+def _parlak(img_bgr):
+    g = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
+    fon = cv2.GaussianBlur(g, (0, 0), 9)
+    return ((g.astype(np.int16) - fon.astype(np.int16)) > 12).astype(np.uint8)
+
+
+def yildiz_olcumu(plaka, im, degisen):
+    """CLEAN plakadaki yildizlar: toplam / murekkeple ortulen / KAYBOLAN (maske disi).
+
+    Kaybolan = plakada yildiz, murekkep maskesiyle hic kesismiyor (dok==0) ve
+    ciktida ayni yontemle tespit edilemiyor. Bagimsiz olcumdur; kapi 1'in
+    tautolojisi degil (cikti goruntusunden yeniden tespit edilir).
+    """
+    par = _parlak(plaka)
+    n, lab, st, _ = cv2.connectedComponentsWithStats(par, 8)
+    alan = st[:, cv2.CC_STAT_AREA]
+    sec = np.zeros(n, bool)
+    sec[1:] = (alan[1:] >= 3) & (alan[1:] <= 600)
+    if not sec.any():
+        return {"toplam": 0, "ortulen": 0, "kaybolan": 0}
+    dok = np.bincount(lab.ravel(), weights=(degisen > 0).ravel().astype(np.float64), minlength=n)
+    yeni_par = _parlak(im)
+    var = np.bincount(lab.ravel(), weights=yeni_par.ravel().astype(np.float64), minlength=n)
+    kayip = sec & (dok == 0) & (var == 0)
+    return {"toplam": int(sec.sum()), "ortulen": int((sec & (dok > 0)).sum()),
+            "kaybolan": int(kayip.sum())}
+
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--posterler", required=True)
@@ -335,8 +410,8 @@ def main():
         yerlesim, dx_inf, bilgi = metin_katmani(P6, P7, P12, kp, geo_ref, prof, {"sol": sol, "sag": sag}, a.mesaj)
 
         alpha_c, core_c, mst = WBP.diff_ink_mask(poster, median, ed)
-        inf_kutu = (REF_INFINITY[0] - INF_PAD, REF_INFINITY[1] - INF_PAD,
-                    REF_INFINITY[2] + INF_PAD, REF_INFINITY[3] + INF_PAD)
+        sx0, sy0, sx1, sy1 = geo["sonsuz"]                    # OLCULEN ∞ (orta kume)
+        inf_kutu = (sx0 - INF_PAD, sy0 - INF_PAD, sx1 + INF_PAD, sy1 + INF_PAD)
         inf_box = kutu_maske(poster.shape, inf_kutu).astype(np.float32)
         isim_box = kutu_maske(poster.shape, BOX_NAMES).astype(np.float32)
         a_inf = alpha_c * inf_box
@@ -371,35 +446,46 @@ def main():
             Image.fromarray(cv2.cvtColor(out, cv2.COLOR_BGR2RGB)).save(cikti / ad, "JPEG", quality=95, subsampling=0)
             geri = imread(cikti / ad)
             dis = A[..., 0] <= 0
+            # EK5: mesaj bandinda doku kopuklugu / duz yama yok (murekkep maskesi disi, JPEG oncesi)
+            mb = kirp(cihaz_kutusu(bilgi["kutular"]["mesaj"], dev, geom), W, H, 4)
+            b0, b1 = max(mb[1] - 8, 0), min(mb[3] + 8, H)
+            bd = np.abs(out.astype(np.int16) - plaka.astype(np.int16)).max(2)[b0:b1][dis[b0:b1]]
+            ek5 = {"bant": [int(b0), int(b1)], "murekkep_disi_maks_fark": int(bd.max()) if bd.size else 0,
+                   "jpeg_sonrasi": int(np.abs(geri.astype(np.int16) - plaka.astype(np.int16)).max(2)[b0:b1][dis[b0:b1]].max()) if bd.size else 0,
+                   "piksel": int(bd.size), "gecti": bool((bd.max() if bd.size else 0) == 0)}
             k1 = {"gecti": bool(np.abs(out.astype(np.int16) - plaka.astype(np.int16)).max(2)[dis].max() == 0),
                   "maks_fark": int(np.abs(out.astype(np.int16) - plaka.astype(np.int16)).max(2)[dis].max()),
                   "jpeg_sonrasi": int(np.abs(geri.astype(np.int16) - plaka.astype(np.int16)).max(2)[dis].max()),
                   "piksel": int(dis.sum())}
             urun[(ed, dev)] = dict(yol=str(cikti / ad), plaka=str(Path(a.temiz) / f"PLATE_{ed.upper()}_{dev.upper()}_CLEAN.png"),
-                                   geom=geom, kapi1=k1)
+                                   geom=geom, kapi1=k1, ek5=ek5)
             rapor.append({"edisyon": ed, "cihaz": dev, "dosya": ad, "kapi1_maske_disi": k1,
+                          "ek5_mesaj_bandi": ek5,
                           "duzen": bilgi, "olcum": geo_ref, "sure_sn": round(time.time() - t0, 1)})
             log(f"{ed} {dev}: maske disi fark {k1['maks_fark']} (JPEG sonrasi {k1['jpeg_sonrasi']})")
-        del src, alfa, P, A, poster
+        del src, alfa, poster
     (cikti / "WP_V2_URETIM.json").write_text(json.dumps(rapor, indent=1))
     return rapor, urun, geo_ref
 
 
 def kapilar(urun, geo_ref, duzen, orijinal, cift, cikti):
     """Kapi 2-5: halka/sembol yeri, 4 renkte metin birebirligi, ortalama, kenar payi."""
-    K = {"halka_sembol": [], "metin_4renk": {}, "ortalama": [], "kenar_payi": []}
-    olculen = {}
+    K = {"halka_sembol": [], "metin_4renk": {}, "ortalama": [], "kenar_payi": [],
+         "ek1_mesaj_renk": [], "ek2_yildiz": [], "ek3_esit_bosluk": [], "ek4_harf_yuksekligi": {},
+         "ek4_mesaj_isimden_buyuk_degil": [], "ek5_mesaj_bandi": []}
+    olculen, ek4_olcu = {}, {}
     for (ed, dev), u in urun.items():
         im = imread(u["yol"]); plaka = imread(u["plaka"]); geom = u["geom"]
         W, H = DEVICES[dev]
+        degisen = np.abs(im.astype(np.int16) - plaka.astype(np.int16)).max(2)
         kutular = {
             "halka": kirp(cihaz_kutusu(BOX_SYMBOL_RING, dev, geom), W, H),
             "sembol": kirp(cihaz_kutusu(BOX_SYMBOL_CORE, dev, geom), W, H),   # ESIK_OGE ile olculur
-            "sol": kirp(cihaz_kutusu(duzen["kutular"]["sol"], dev, geom), W, H, 4),
-            "sag": kirp(cihaz_kutusu(duzen["kutular"]["sag"], dev, geom), W, H, 4),
-            "mesaj": kirp(cihaz_kutusu(duzen["kutular"]["mesaj"], dev, geom), W, H, 4),
+            "sol": kirp(cihaz_kutusu(duzen["kutular"]["sol"], dev, geom), W, H, 12),
+            "sag": kirp(cihaz_kutusu(duzen["kutular"]["sag"], dev, geom), W, H, 12),
+            "mesaj": kirp(cihaz_kutusu(duzen["kutular"]["mesaj"], dev, geom), W, H, 12),
         }
-        olculen[(ed, dev)] = {k: murekkep_kutusu(im, plaka, v, ESIK_OGE if k in ("halka", "sembol") else 12)
+        olculen[(ed, dev)] = {k: murekkep_kutusu(im, plaka, v, ESIK_OGE if k in ("halka", "sembol") else ESIK_METIN)
                               for k, v in kutular.items()}
         # kapi 2: orijinal wallpaper ile halka + sembol yeri
         o = Path(orijinal) / f"AstroLove_{cift}_{ed}_{dev}.jpg" if orijinal else None
@@ -412,19 +498,46 @@ def kapilar(urun, geo_ref, duzen, orijinal, cift, cikti):
                             *[abs(y["kutu"][i] - x["kutu"][i]) for i in range(4)])
                     K["halka_sembol"].append({"edisyon": ed, "cihaz": dev, "oge": ad, "sapma_px": round(float(d), 1),
                                               "gecti": bool(d <= 6.4)})
-        # kapi 4: isim satiri ve mesaj yatayda ortali
+        # kapi 4: isim satiri ve mesaj yatayda ortali  (+ EK3: sol/sag bosluk esit)
         so, sa, me = (olculen[(ed, dev)][k] for k in ("sol", "sag", "mesaj"))
-        if so and sa:
-            mrk = (so["kutu"][0] + sa["kutu"][2]) / 2
-            K["ortalama"].append({"edisyon": ed, "cihaz": dev, "oge": "isim_satiri",
+        for ad, kut in (("isim_satiri", [so["kutu"][0], 0, sa["kutu"][2], 0] if (so and sa) else None),
+                        ("mesaj", me["kutu"] if me else None)):
+            if not kut:
+                continue
+            mrk = (kut[0] + kut[2]) / 2
+            K["ortalama"].append({"edisyon": ed, "cihaz": dev, "oge": ad,
                                   "sapma_px": round(abs(mrk - W / 2), 1), "gecti": bool(abs(mrk - W / 2) <= 2)})
+            bs, bg = int(kut[0]), int(W - kut[2])
+            K["ek3_esit_bosluk"].append({"edisyon": ed, "cihaz": dev, "oge": ad, "sol_px": bs, "sag_px": bg,
+                                         "fark_px": abs(bs - bg), "gecti": bool(abs(bs - bg) <= 2)})
         if me:
-            mrk = (me["kutu"][0] + me["kutu"][2]) / 2
-            K["ortalama"].append({"edisyon": ed, "cihaz": dev, "oge": "mesaj",
-                                  "sapma_px": round(abs(mrk - W / 2), 1), "gecti": bool(abs(mrk - W / 2) <= 2)})
             pay = min(me["kutu"][0], W - me["kutu"][2])
             K["kenar_payi"].append({"edisyon": ed, "cihaz": dev, "pay_px": int(pay),
                                     "gereken": int(KENAR_ORAN * W), "gecti": bool(pay >= KENAR_ORAN * W)})
+        # EK1: mesaj rengi isimlerle ayni ton ailesinde + acik zeminde kontrast dusuk degil
+        gm = degisen >= 40
+        r_i = renk_olcumu(im, plaka, gm & (kutu_maske(im.shape, kutular["sol"]) > 0))
+        r_m = renk_olcumu(im, plaka, gm & (kutu_maske(im.shape, kutular["mesaj"]) > 0))
+        if r_i and r_m:
+            ton = float(np.abs(_ton(r_i["ink_rgb"]) - _ton(r_m["ink_rgb"])).sum())
+            acik = ed in ("Champagne_Ivory", "Warm_Parchment")
+            gec = ton <= 0.08 and (not acik or r_m["kontrast"] >= r_i["kontrast"] - 3)
+            K["ek1_mesaj_renk"].append({"edisyon": ed, "cihaz": dev, "isim": r_i, "mesaj": r_m,
+                                        "ton_farki": round(ton, 4), "acik_zemin": acik, "gecti": bool(gec)})
+        # EK2: CLEAN plakadaki yildizlar korunuyor mu
+        yz = yildiz_olcumu(plaka, im, degisen)
+        yz.update({"edisyon": ed, "cihaz": dev, "gecti": bool(yz["kaybolan"] == 0)})
+        K["ek2_yildiz"].append(yz)
+        # EK4: harf yuksekligi olcusu (4 renk karsilastirmasi asagida) + mesaj isimden buyuk degil
+        if so and me:
+            hi, hm = so["kutu"][3] - so["kutu"][1], me["kutu"][3] - me["kutu"][1]
+            ek4_olcu[(ed, dev)] = int(hi)
+            K["ek4_mesaj_isimden_buyuk_degil"].append({"edisyon": ed, "cihaz": dev, "isim_px": int(hi),
+                                                       "mesaj_px": int(hm), "gecti": bool(hm <= hi)})
+        # EK5: mesaj bandinda doku kopuklugu / duz yama yok - olcum main()'te (JPEG oncesi,
+        # kapi 1 ile ayni maske). Burada yalniz raporlanir.
+        if u.get("ek5"):
+            K["ek5_mesaj_bandi"].append(dict(edisyon=ed, cihaz=dev, **u["ek5"]))
     # kapi 3: ayni cihazda 4 renkte isim/mesaj kutulari birebir (<= 1 px)
     for dev in CIHAZLAR:
         d = {}
@@ -434,9 +547,17 @@ def kapilar(urun, geo_ref, duzen, orijinal, cift, cikti):
                 k = np.asarray(kut)
                 d[ad] = {"maks_sapma_px": int(np.abs(k - k[0]).max()), "gecti": bool(np.abs(k - k[0]).max() <= 1)}
         K["metin_4renk"][dev] = d
-    K["gecti"] = bool(all(x["gecti"] for x in K["halka_sembol"]) and all(x["gecti"] for x in K["ortalama"])
-                      and all(x["gecti"] for x in K["kenar_payi"])
+    # EK4: ayni cihazda 4 renkte isim harf yuksekligi (+-1 px)
+    for dev in CIHAZLAR:
+        h = [ek4_olcu[(ed, dev)] for ed in EDISYONLAR if (ed, dev) in ek4_olcu]
+        if len(h) == len(EDISYONLAR):
+            K["ek4_harf_yuksekligi"][dev] = {"px": h, "yayilim_px": int(max(h) - min(h)),
+                                             "gecti": bool(max(h) - min(h) <= 1)}
+    liste = ("halka_sembol", "ortalama", "kenar_payi", "ek1_mesaj_renk", "ek2_yildiz",
+             "ek3_esit_bosluk", "ek4_mesaj_isimden_buyuk_degil", "ek5_mesaj_bandi")
+    K["gecti"] = bool(all(x["gecti"] for ad in liste for x in K[ad])
                       and all(v["gecti"] for dv in K["metin_4renk"].values() for v in dv.values())
+                      and all(v["gecti"] for v in K["ek4_harf_yuksekligi"].values())
                       and all(u["kapi1"]["gecti"] for u in urun.values()))
     (Path(cikti) / "WP_V2_KAPILAR.json").write_text(json.dumps(K, indent=1))
     return K
@@ -467,10 +588,12 @@ if __name__ == "__main__":
     cift = _a[_a.index("--cift") + 1] if "--cift" in _a else "Aries_Leo"
     K = kapilar(urun, geo, rapor[0]["duzen"], orij, cift, cikti)
     log(f"KAPILAR gecti={K['gecti']}")
-    for ad in ("halka_sembol", "ortalama", "kenar_payi"):
+    for ad in ("halka_sembol", "ortalama", "kenar_payi", "ek1_mesaj_renk", "ek2_yildiz",
+               "ek3_esit_bosluk", "ek4_mesaj_isimden_buyuk_degil", "ek5_mesaj_bandi"):
         kot = [x for x in K[ad] if not x["gecti"]]
         log(f"  {ad}: {len(K[ad]) - len(kot)}/{len(K[ad])} gecti" + (f" | KALAN {kot[:3]}" if kot else ""))
     log(f"  metin_4renk: {json.dumps(K['metin_4renk'])}")
+    log(f"  ek4_harf_yuksekligi: {json.dumps(K['ek4_harf_yuksekligi'])}")
     s = sayfalar(urun, orij, cift, cikti)
     log(f"sayfa: {len(s)} dosya")
     _s.exit(0 if K["gecti"] else 1)
