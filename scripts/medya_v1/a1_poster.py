@@ -71,18 +71,29 @@ def murekkep(ref_norm):
 
 def olcum_duzelt(o, m):
     """sayfa_olc sonucunu sayfanin kendisinden duzeltir (render kodu degismez, yalniz girdisi).
-    1) Sembol bandi: isimlere en yakin bandin ustunde, <= SEMBOL_BIRLES px bosluklu ve ayni x araliginda
-       2 kume veren bantlar ayni sembolun parcasidir; banda ve x araligina katilir.
+    1) Sembol bandi: olculen bandin USTUNDE veya ALTINDA (isim bandindan once) <= SEMBOL_BIRLES px bosluklu komsu
+       bantlar, butun kumeleri bir sembolun x araliginda ise ayni sembolun parcasidir (Kova'nin ust dalgasi, Terazi'nin
+       alt cizgisi); banda ve o sembolun x araligina katilir.
     2) Isim govde bandi: inen kuyruklar (Q) haric satirlar; isim_y ve punto tavani icin."""
     import pilot11
     from pilot6 import kumeler
     d = dict(o); ek = []
     sb = list(d['sembol_bant']); sx = [list(x) for x in d['sembol']]
-    for b in sorted([b for b in pilot11.bantlar(m) if b[1] <= sb[0]], key=lambda b: -b[1]):
-        if sb[0] - b[1] > SEMBOL_BIRLES: break
-        k = [c for c in kumeler(m[b[0]:b[1]], 20) if c[1] - c[0] > 30]
-        if len(k) == 2 and all(min(k[i][1], sx[i][1]) - max(k[i][0], sx[i][0]) > 0.5 * (k[i][1] - k[i][0]) for i in (0, 1)):
-            sb[0] = b[0]; sx = [[min(k[i][0], sx[i][0]), max(k[i][1], sx[i][1])] for i in (0, 1)]; ek.append(list(b))
+    ib0 = d['isim_bant'][0]
+    def ortusur(c, x): return min(c[1], x[1]) - max(c[0], x[0]) > 0.5 * (c[1] - c[0])
+    bl = pilot11.bantlar(m); degisti = True
+    while degisti:                                   # ust VE alt komsu bantlar (Kova'nin ust dalgasi, Terazi'nin alt cizgisi)
+        degisti = False
+        for b in bl:
+            if b[0] >= sb[0] and b[1] <= sb[1]: continue
+            ust = b[1] <= sb[0] and sb[0] - b[1] <= SEMBOL_BIRLES
+            alt = b[0] >= sb[1] and b[0] - sb[1] <= SEMBOL_BIRLES and b[1] <= ib0 - 10
+            if not (ust or alt): continue
+            k = [c for c in kumeler(m[b[0]:b[1]], 20) if c[1] - c[0] > 30]
+            if not k or not all(any(ortusur(c, x) for x in sx) for c in k): continue
+            for c in k:
+                i = next(i for i in (0, 1) if ortusur(c, sx[i])); sx[i] = [min(c[0], sx[i][0]), max(c[1], sx[i][1])]
+            sb = [min(sb[0], b[0]), max(sb[1], b[1])]; ek.append(list(b)); degisti = True
     d['sembol_bant'], d['sembol'] = sb, sx
     d['sembol_merkez'] = [round((x[0] + x[1]) / 2, 1) for x in sx]
     b0, b1 = d['isim_bant']; satir = np.zeros(b1 - b0)
