@@ -64,7 +64,7 @@ def main():
     eksik = [k for k in ("name", "line1", "postalOrZipCode", "townOrCity", "countryCode") if not adres.get(k)]
     if eksik:
         bitir(2, f"ADRES YOK/EKSIK ({ADRES_REMOTE}: {','.join(eksik)}) - siparis VERILMEDI")
-    log(f"adres okundu (ulke {adres['countryCode']})")
+    log("adres okundu (icerik loga yazilmaz)")
 
     # 2) sahte kisisel siparis karti + gercek baski uretec
     # kart girdisi ulkesi US: isim buyuk harf kurali EMILY (TR kurali EMILY'yi noktali I ile basardi); alici adresi ayri
