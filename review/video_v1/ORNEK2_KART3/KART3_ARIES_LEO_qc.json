@@ -1,0 +1,19 @@
+{
+ "boyut": true,
+ "sol_panel": 4.65721269218537,
+ "sol_alt_yazi": 32.28947293447293,
+ "sag_lacivert_px": 0,
+ "etiket_zemin": 0.0,
+ "metin_kurali": [],
+ "sol_panel_poster_fark": 0.7748988155534365,
+ "sol_panel_ref_blok_maks": 108.83593750000001,
+ "PASS": {
+  "boyut": true,
+  "sol_panel": true,
+  "sol_alt_yazi": true,
+  "sag_poster_yok": true,
+  "eski_etiket_yok": true,
+  "metin_kurali": true
+ },
+ "SONUC": "PASS"
+}

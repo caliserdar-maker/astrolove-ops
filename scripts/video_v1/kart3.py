@@ -3,7 +3,10 @@
 Sol panel aynen (poster + alt yazi). Sag panel: ters sirali poster yerine Etsy kisisellestirme alanlarinin dolu hali.
 Baslik/alt baslik/alt not referans kartin olculen font, boyut, izleme ve taban cizgisiyle (medya_v1 textlayer.fit/replace).
 Alan etiketleri ve degerleri referans alt yazi fontundan (EMILY = CANCER) olculen parametrelerle.
-Kullanim: kart3.py REF_KART.jpg CIKTI.jpg SOL_BURC SAG_BURC [ISIM1 ISIM2 MESAJ]"""
+Kullanim: kart3.py REF_KART.jpg CIKTI.jpg SOL_BURC SAG_BURC [--poster POSTER_EJ.png --hiza kart3_panel_hiza.json]
+77 cift (Serdar, 25 Eyl): ust satir burc adlari; sol panel cift posterinden (POSTER_EJ, kisisel-v1), Cancer-Libra kisisel posterinden
+olculen afin (ECC 0.992) + ton ile; sol alt yazi burc adlariyla. Ayni burc: Left/Right name, 'Each name goes under its own side.',
+'Type each name in its own field.'"""
 import json, sys, time
 from pathlib import Path
 import numpy as np
@@ -12,13 +15,16 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'medya_v1/uretim'))
 import textlayer as T
 from metin_kurali import denetle
 
-ref, out, s1, s2 = sys.argv[1:5]
-n1, n2, msg = (sys.argv[5:8] + ['EMILY', 'JAMES', 'It Began With a Kiss in the Rain'])[:3] if len(sys.argv) < 8 else sys.argv[5:8]
+import argparse, cv2
+ap_ = argparse.ArgumentParser(); ap_.add_argument('ref'); ap_.add_argument('out'); ap_.add_argument('s1'); ap_.add_argument('s2')
+ap_.add_argument('--poster'); ap_.add_argument('--hiza'); a_ = ap_.parse_args()
+ref, out, s1, s2 = a_.ref, a_.out, a_.s1.upper(), a_.s2.upper()
+n1, n2, msg = 'EMILY', 'JAMES', 'It Began With a Kiss in the Rain'
 t0 = time.time()
 BG = np.array([237., 232., 226.])
 ayni = s1.upper() == s2.upper()
 if ayni:
-    BASLIK, ALT = 'Each name goes under its own side.', 'Type each name in the field for its side.'
+    BASLIK, ALT = 'Each name goes under its own side.', 'Type each name in its own field.'
     ALANLAR = [('Left name', n1), ('Right name', n2), ('Your message', msg)]
 else:
     BASLIK, ALT = 'Each name goes under its own sign.', 'Type each name in the field for its sign.'
@@ -34,6 +40,8 @@ def rep(box, old, new, key, align='left'):
     global card
     card, p = T.replace(card, box, old, new, key, align=align, bg=BG)
     log.setdefault('metin', []).append({'old': old, 'new': new, **{k: p[k] for k in ('size', 'w', 'track', 'mse', 'box')}})
+if (s1, s2) != ('CANCER', 'LIBRA'):
+    rep((418, 80, 760, 135), 'CANCER + LIBRA', f'{s1} + {s2}', 'mont')
 rep((130, 180, 1800, 330), 'Choose which sign goes on the left.', BASLIK, 'ebg')
 rep((130, 325, 1800, 395), 'Each name stays with its zodiac sign when you switch the order.', ALT, 'mont')
 rep((1000, 1975, 2000, 2060), 'Choose by zodiac sign, not by gender.', NOT, 'ebg', align='center')
@@ -43,10 +51,18 @@ log['alt_yazi_font'] = {k: pc[k] for k in ('size', 'w', 'track', 'mse', 'box', '
 # kaldirilanlar: 'Cancer left' / 'Libra left' etiketleri (sira secimi yok), sag panel, sag alt yazi
 for x0, y0, x1, y1 in ((560, 490, 1010, 590), (2030, 490, 2400, 590), (1560, 815, 2870, 1430), (1840, 1735, 2590, 1795)):
     card[y0:y1, x0:x1] = BG
-if ayni:   # sol alt yazi: cards.caption03 kurali
+if a_.poster:   # sol panel: cift posteri (panel ici, 1 px kenar referanstan)
+    h = json.load(open(a_.hiza)); Mp = np.array(h['M_panel'], np.float32); ton = [np.array(t) for t in h['ton']]
+    P = np.asarray(Image.open(a_.poster).convert('RGB')).astype(np.float32)
+    Pw = cv2.warpAffine(P, Mp, (1281, 585), flags=cv2.INTER_AREA)
+    Pt = np.clip(np.stack([np.polyval(ton[c], Pw[..., c]) for c in range(3)], 2), 0, 255)
+    card[830:1413, 145:1424] = Pt[1:584, 1:1280]
+    log['sol_panel'] = {'poster': Path(a_.poster).name, 'M_panel': h['M_panel']}
+if ayni or (s1, s2) != ('CANCER', 'LIBRA'):   # sol alt yazi: cards.caption03 kurali
     card[1735:1795, 400:1180] = BG
     base_c = pc['oy'] + pc['base0']
-    card = T.draw_with(card, pc, f'LEFT NAME = {n1}   RIGHT NAME = {n2}', cx=784.5, base=base_c)
+    cap = f'LEFT NAME = {n1}   RIGHT NAME = {n2}' if ayni else f'{n1} = {s1}   {n2} = {s2}'
+    card = T.draw_with(card, pc, cap, cx=786, base=base_c); log['sol_alt_yazi'] = cap
 # sag panel: dolu Etsy alanlari, panel kutusu 1575..2855 x 829..1413 (olculdu)
 PX0, PY0, PX1, PY1 = 1575, 829, 2856, 1414
 lab_p = dict(pc)                                   # etiket: alt yazi fontu (Montserrat 500), koyu
