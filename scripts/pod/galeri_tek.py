@@ -1,30 +1,34 @@
 #!/usr/bin/env python3
-"""TEK GALERI GECISI (Serdar, 25 Eyl 2026). 77 ilan (Cancer-Libra 4570143815 HARIC), medya + video ciktilari
-gelince TEK seferde yazilir. Bu dosya plan + yazma kodunu tasir; yazma yalniz --confirm GALERI_TEK ile.
+"""TEK GALERI GECISI — TAM YENI SET (Serdar, 25 Eyl 2026). 77 ilan (Cancer-Libra 4570143815 HARIC).
 
-Hedef sira (en fazla 20 gorsel + 1 video; onerilen, Serdar onayi bekler):
-   1 KAPAK            medya A1_77/<CIFT>/KAPAK.jpg (mevcut kapagin YERINE; eski kapak silinir)
-   2 GENEL_1          kisisellestirme karti
-   3 KART3            video ciktisi karti (yeni)
-   4 KART09           isimli poster, medya A1_77/<CIFT>/KART09.jpg
-   5-6 sahne 02, 03   mevcut oda sahneleri (korunur)
-   7 Symbol Story     mevcut (korunur)
-   8 Crafted Detail   mevcut (korunur)
-   9-13 5 renk        mevcut MB/DB/WP/CI/PW hero, renk bagi KORUNUR (hic silinmez, yeniden yuklenmez)
-  14-16 GENEL_2/3/4   olcu / kagit / siparis
-  video               video oturumunun <CIFT> videosu (mevcut videonun YERINE)
-  Toplam 16 gorsel. Eski 6/7/8 (kagit / olcu / teslimat) silinir.
+Karar: galeri Cancer-Libra ile birebir ayni yapida TAMAMEN YENI setle degisir. Eski gorsellerin HEPSI silinir
+(kapak, sahneler, Symbol Story, Crafted, renk gorselleri, GENEL_1..4 dahil). GENEL_1 kisisellestirme karti
+galeriye GIRMEZ (setinde olan cift reddedilir). Renk baglari (variation images) yeni renk gorsellerine TASINIR.
+Video mevcut videonun yerine gecer. Etsy'ye yazma yalniz --confirm GALERI_TEK ile.
 
-Ilan tipleri: 'yeni' (13 gorsel, eski 6/7/8 duruyor) ve 'genel_var' (galeri_genel ile 4 kart almis 5 ilan:
-kapak, kart 3, kart 09, video eklenir; G1..G4 korunur).
+Girdiler:
+  REFERANS_SIRA.json  Cancer-Libra'nin canli yapisi (mod 'referans', 3 GET): [{rank, renk|null}], video var mi.
+  <yerel>/<CIFT>/SET.json  medyanin cift basina seti: {"gorseller": [{"dosya": "01_KAPAK.jpg", "renk": null},
+                       ..., {"dosya": "09_MB.jpg", "renk": "Midnight Blue"}], "video": "VIDEO.mp4"}
+                       Sira = galeri sirasi; renk = o gorselin baglanacagi renk secenegi (envanterdeki ad).
+
+Yazma sirasi (ilan hep en az 5 renk gorselli, 20 siniri hicbir anda asilmaz, renk bagi hic bosta kalmaz):
+  1 oku: ilan (Images,Videos) + variation-images + envanter            3 cagri
+  2 renge BAGLI OLMAYAN eski gorselleri sil                             eski - renk
+  3 yeni RENK gorsellerini yukle                                        renk
+  4 variation-images: renk -> yeni gorsel (tek POST, tumu)              1
+  5 eski renk gorsellerini sil                                          renk
+  6 kalan yeni gorselleri yukle                                         yeni - renk
+  7 sira: updateListing image_ids (SET sirasi)                          1
+  8 video: eskiyi sil + yeniyi yukle                                    0-1 + 1
+  9 geri okuma: ilan + variation-images                                 2
+  Toplam = eski + yeni + 8 + (eski video varsa 1). 13 eski + 13 yeni + video: 35 cagri.
 
 Modlar:
-  plan : SALT OKUMA, Etsy API KOTASI HARCAMAZ. GALERI_PLAN.json (ilk durum id'leri + renk baglari) + METIN_78.csv
-         (ilan -> cift) + Drive girdi listeleri (rclone lsf) -> TEK_PLAN.json + RAPOR; ilan basina cagri sayisi,
-         eksik girdi, 20 siniri. --oas verilirse statik Etsy OAS ile uclar dogrulanir.
-  yaz  : --listing (virgullu) ya da --hepsi, --confirm GALERI_TEK, --kota-alt. Her ilan: canli okuma -> kapilar
-         (state active, id kumesi plandaki durumlardan biriyle AYNI, silinecek gorsel renge bagli degil, 20 siniri)
-         -> sil / yukle / video / image_ids PATCH -> tam geri okuma (sira, renk baglari, state, video).
+  referans : Cancer-Libra canli okuma (3 GET, yazma yok) -> REFERANS_SIRA.json
+  plan     : SALT OKUMA, Etsy kotasi HARCAMAZ. REFERANS + SET.json'lar + GALERI_PLAN/SONUC (eski sayi) ->
+             ilan basina kapilar ve cagri sayisi, TEK_PLAN.json + rapor.
+  yaz      : --listing (virgullu) ya da bos (77 ilan), --confirm GALERI_TEK, --kota-alt.
 """
 import argparse
 import csv
@@ -42,15 +46,7 @@ REF = "4570143815"
 ONAY = "GALERI_TEK"
 AZAMI_GORSEL = 20
 GENEL_VAR = ["4570110641", "4570113157", "4570114301", "4570224058", "4570160260"]
-# GALERI_PLAN once_ids (rank sirasi, 13): 1 kapak | 2-3 sahne | 4 symbol | 5 crafted | 6-8 eski kart | 9-13 renk
-ROL_ILK = ["kapak_eski", "sahne02", "sahne03", "symbol", "crafted", "eski6", "eski7", "eski8",
-           "renk1", "renk2", "renk3", "renk4", "renk5"]
-KORUNAN = ["sahne02", "sahne03", "symbol", "crafted", "renk1", "renk2", "renk3", "renk4", "renk5"]
-SILINEN = ["kapak_eski", "eski6", "eski7", "eski8"]
-HEDEF_SIRA = ["KAPAK", "GENEL_1", "KART3", "KART09", "sahne02", "sahne03", "symbol", "crafted",
-              "renk1", "renk2", "renk3", "renk4", "renk5", "GENEL_2", "GENEL_3", "GENEL_4"]
-GENEL_DOSYA = {"GENEL_1": "GENEL_1_kisisellestirme.jpg", "GENEL_2": "GENEL_2_olcu.jpg",
-               "GENEL_3": "GENEL_3_kagit.jpg", "GENEL_4": "GENEL_4_siparis.jpg"}
+YASAK_AD = ("GENEL_1", "KISISELLESTIRME", "PERSONALIZ")      # GENEL_1 galeriden cikti (Serdar 25 Eyl)
 csv.field_size_limit(10 ** 8)
 
 
@@ -58,164 +54,153 @@ def log(m):
     print(m, flush=True)
 
 
+def ad_norm(s):
+    return "".join(c for c in (s or "").upper() if c.isalnum())
+
+
 # ------------------------------------------------------------------ saf fonksiyonlar (yerel test)
-def roller(p, mevcut_ids):
-    """GALERI_PLAN kaydi + canli (ya da yedek) id sirasi -> (tip, {rol: id}, hatalar).
-    tip 'yeni': mevcut == once_ids (13). tip 'genel_var': once_ids - sil_ids korunmus + 4 fazla kart
-    (G1 kapaktan hemen sonra, G2..G4 sonda; galeri_genel yaz sirasi)."""
-    once = [int(x) for x in p["once_ids"]]
-    sil = {int(x) for x in p["sil_ids"]}
-    mevcut = [int(x) for x in mevcut_ids]
+def set_dogrula(setj, referans, klasor=None):
+    """SET.json -> hatalar. Referans: ayni gorsel sayisi, renkli ranklar ayni yerde ve ayni renkte, <= 20,
+    GENEL_1 yok, dosyalar var, video var."""
     h = []
-    if len(once) != len(ROL_ILK):
-        return None, {}, [f"ilk durum {len(once)} gorsel (13 beklenir)"]
-    rol = {r: i for r, i in zip(ROL_ILK, once)}
-    if [rol[r] for r in ("eski6", "eski7", "eski8")] != [int(x) for x in p["sil_ids"]]:
-        h.append("planin sil_ids'i 6/7/8 ile ayni degil")
-    if mevcut == once:
-        return "yeni", rol, h
-    kalan = [x for x in once if x not in sil]
-    fazla = [x for x in mevcut if x not in once]
-    if [x for x in mevcut if x in once] == kalan and len(fazla) == 4 and len(mevcut) == len(once) - len(sil) + 4 \
-            and mevcut[1] == fazla[0] and mevcut[-3:] == fazla[1:]:
-        for r in ("eski6", "eski7", "eski8"):
-            rol.pop(r)
-        rol.update({"GENEL_1": fazla[0], "GENEL_2": fazla[1], "GENEL_3": fazla[2], "GENEL_4": fazla[3]})
-        return "genel_var", rol, h
-    return None, rol, h + [f"gorseller plandaki iki durumdan da farkli ({len(mevcut)} gorsel)"]
+    g = setj.get("gorseller") or []
+    if not g:
+        return ["SET bos"]
+    if len(g) > AZAMI_GORSEL:
+        h.append(f"{len(g)} gorsel > {AZAMI_GORSEL}")
+    for x in g:
+        if any(y in ad_norm(x.get("dosya")) for y in map(ad_norm, YASAK_AD)):
+            h.append(f"GENEL_1/kisisellestirme karti sette: {x.get('dosya')}")
+    renkler = [ad_norm(x.get("renk")) for x in g if x.get("renk")]
+    if len(renkler) != len(set(renkler)):
+        h.append("ayni renk iki gorselde")
+    if referans:
+        rs = referans.get("sira") or []
+        if len(rs) != len(g):
+            h.append(f"gorsel sayisi {len(g)} != referans {len(rs)}")
+        else:
+            fark = [i + 1 for i, (a, b) in enumerate(zip(rs, g)) if ad_norm(a.get("renk")) != ad_norm(b.get("renk"))]
+            if fark:
+                h.append(f"renk yerlesimi referanstan farkli (rank {fark})")
+        if referans.get("video") and not setj.get("video"):
+            h.append("video yok (referansta var)")
+    if klasor is not None:
+        eksik = [x["dosya"] for x in g if not (klasor / x["dosya"]).exists()]
+        if setj.get("video") and not (klasor / setj["video"]).exists():
+            eksik.append(setj["video"])
+        if eksik:
+            h.append(f"dosya yok: {eksik[:4]}")
+    return h
 
 
-def islem_plani(tip, rol, bagli_ids, video_var=True):
-    """-> dict: silinecek id'ler, yuklenecek roller, video islemi, sonuc sayisi, cagri sayisi, kapilar."""
-    sil = [rol[r] for r in SILINEN if r in rol]
-    yukle = [r for r in HEDEF_SIRA if r not in KORUNAN and not (tip == "genel_var" and r.startswith("GENEL_"))]
-    bagli = {int(x) for x in bagli_ids}
+def renk_haritasi(inventory):
+    """envanter -> (property_id, {renk_norm: value_id})."""
+    pid, vid = None, {}
+    for pr in (inventory or {}).get("products") or []:
+        for pv in pr.get("property_values") or []:
+            if (pv.get("property_name") or "").lower() in ("primary color", "color"):
+                pid = pid or pv.get("property_id")
+                for v_id, ad in zip(pv.get("value_ids") or [], pv.get("values") or []):
+                    vid.setdefault(ad_norm(ad), v_id)
+    return pid, vid
+
+
+def islem_plani(eski_ids, bagli_ids, setj, video_var, renk_vid):
+    """-> dict: adimlar (silinecek bagsiz/bagli, yuklenecek renk/diger), cagri sayisi, kapilar."""
+    bagli = [i for i in eski_ids if i in set(bagli_ids)]
+    bagsiz = [i for i in eski_ids if i not in set(bagli_ids)]
+    g = setj.get("gorseller") or []
+    renkli = [x for x in g if x.get("renk")]
+    diger = [x for x in g if not x.get("renk")]
     h = []
-    if set(sil) & bagli:
-        h.append("silinecek gorsel renge bagli")
-    if {rol[r] for r in ("renk1", "renk2", "renk3", "renk4", "renk5")} != bagli:
-        h.append("renk bagli 5 gorsel 9-13 ile ayni degil")
-    sonuc = len(HEDEF_SIRA)
-    if sonuc > AZAMI_GORSEL:
-        h.append(f"{sonuc} gorsel > {AZAMI_GORSEL}")
-    cagri = {"oku (ilan+gorsel+video, varyasyon-gorsel)": 2, "gorsel sil": len(sil), "gorsel yukle": len(yukle),
-             "video sil": 1 if video_var else 0, "video yukle": 1, "sira PATCH": 1, "geri okuma": 2}
-    return {"tip": tip, "sil": sil, "yukle": yukle, "sonuc_sayi": sonuc, "cagri": cagri,
+    if len(bagli) != len(bagli_ids):
+        h.append("renk bagli gorsel ilanda yok")
+    eksik_renk = [x["renk"] for x in renkli if ad_norm(x["renk"]) not in renk_vid]
+    if eksik_renk:
+        h.append(f"envanterde olmayan renk: {eksik_renk}")
+    if len(renkli) < len(bagli_ids):
+        h.append(f"yeni sette {len(renkli)} renk gorseli < mevcut bag {len(bagli_ids)} (renk bagsiz kalir)")
+    # 20 siniri: en kalabalik an = bagli eski + yeni renk
+    if len(bagli) + len(renkli) > AZAMI_GORSEL or len(g) > AZAMI_GORSEL:
+        h.append("20 gorsel siniri asilir")
+    cagri = {"oku": 3, "bagsiz eski sil": len(bagsiz), "renk yukle": len(renkli), "renk bagi POST": 1,
+             "bagli eski sil": len(bagli), "diger yukle": len(diger), "sira PATCH": 1,
+             "video sil": 1 if video_var else 0, "video yukle": 1 if setj.get("video") else 0, "geri okuma": 2}
+    return {"bagsiz": bagsiz, "bagli": bagli, "renkli": renkli, "diger": diger, "cagri": cagri,
             "cagri_toplam": sum(cagri.values()), "kapi": h}
 
 
-def hedef_ids(rol, yeni):
-    """rol -> id (korunan) + yeni yuklenen {rol: id} -> PATCH image_ids sirasi."""
-    tum = dict(rol)
-    tum.update(yeni)
-    return [tum[r] for r in HEDEF_SIRA]
+def cagri_tahmini(eski_sayi, yeni_sayi, video_var=True, video_yeni=True):
+    return 3 + eski_sayi + yeni_sayi + 1 + 1 + (1 if video_var else 0) + (1 if video_yeni else 0) + 2
 
 
-def girdi_yollari(cift, a):
-    return {"KAPAK": f"{a.medya}/{cift}/KAPAK.jpg", "KART09": f"{a.medya}/{cift}/KART09.jpg",
-            "KART3": a.kart3.replace("{CIFT}", cift), "VIDEO": a.video.replace("{CIFT}", cift)}
+# ------------------------------------------------------------------ Etsy okuma
+def anlik(api, shop, lid):
+    L = api.get(f"/listings/{lid}", params={"includes": "Images,Videos"}) or {}
+    vi = (api.get(f"/shops/{shop}/listings/{lid}/variation-images", ok404=True) or {}).get("results") or []
+    inv = api.get(f"/listings/{lid}/inventory") or {}
+    imgs = sorted(L.get("images") or [], key=lambda x: x.get("rank") or 0)
+    return L.get("state"), [x.get("listing_image_id") for x in imgs], L.get("videos") or [], vi, inv
 
 
-def eksik_girdi(cift, a, var):
-    """var: medya (A1_77) ve video kokunun rclone lsf -R satirlari. --kart3 / --video bu koklere GORELI
-    {CIFT} sablonudur (orn. '{CIFT}/KART3.jpg'); bos ise yol henuz belirlenmemistir."""
-    e = [k for k in ("KAPAK", "KART09") if f"{cift}/{k}.jpg" not in var]
-    for k, sablon in (("KART3", a.kart3), ("VIDEO", a.video)):
-        if not sablon:
-            e.append(f"{k} (yol henuz yok)")
-        elif sablon.replace("{CIFT}", cift) not in var:
-            e.append(k)
-    return e
+def api_kur():
+    from etsy_common import Etsy, TokenStore
+    store = TokenStore(os.environ["TOKEN_FILE"], os.environ.get("ETSY_API_KEY", ""), os.environ.get("ETSY_SHARED_SECRET", ""))
+    if store.needs_refresh():
+        store.refresh()
+    return Etsy(store), os.environ["ETSY_SHOP_ID"]
 
 
-def oas_dogrula(yol):
-    """Statik Etsy OAS: uclar + includes=Videos + image_ids alani."""
-    d = json.loads(pathlib.Path(yol).read_text(encoding="utf-8"))
-    ops = {}
-    for pth, v in (d.get("paths") or {}).items():
-        for m, o in v.items():
-            if isinstance(o, dict) and o.get("operationId"):
-                ops[o["operationId"]] = (m.upper(), pth, o)
-    sonuc = {}
-    for op in ("getListing", "getListingImages", "uploadListingImage", "deleteListingImage", "updateListing",
-               "getListingVideos", "uploadListingVideo", "deleteListingVideo", "getListingVariationImages"):
-        sonuc[op] = f"{ops[op][0]} {ops[op][1]}" if op in ops else "YOK"
-    inc = []
-    if "getListing" in ops:
-        for prm in ops["getListing"][2].get("parameters") or []:
-            if prm.get("name") == "includes":
-                sch = prm.get("schema") or {}
-                inc = (sch.get("items") or {}).get("enum") or sch.get("enum") or []
-    sonuc["getListing includes"] = inc
-    if "updateListing" in ops:
-        body = json.dumps(ops["updateListing"][2].get("requestBody") or {})
-        sonuc["updateListing image_ids"] = "image_ids" in body or "var ($ref)"
-    if "uploadListingVideo" in ops:
-        sonuc["uploadListingVideo govde"] = json.dumps(ops["uploadListingVideo"][2].get("requestBody") or {})[:400]
-    return sonuc
+def referans(a, api=None, shop=None):
+    """Cancer-Libra canli yapisi (salt okuma, 3 GET)."""
+    if api is None:
+        api, shop = api_kur()
+    st, ids, vids, vi, inv = anlik(api, shop, REF)
+    renk_ad = {}
+    for pr in inv.get("products") or []:
+        for pv in pr.get("property_values") or []:
+            if (pv.get("property_name") or "").lower() in ("primary color", "color"):
+                renk_ad.update(dict(zip(pv.get("value_ids") or [], pv.get("values") or [])))
+    bag = {v.get("image_id"): renk_ad.get(v.get("value_id"), str(v.get("value_id"))) for v in vi}
+    R = {"ilan": REF, "state": st, "sira": [{"rank": i, "image_id": x, "renk": bag.get(x)} for i, x in enumerate(ids, 1)],
+         "video": bool(vids), "utc": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())}
+    out = pathlib.Path(a.out)
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "REFERANS_SIRA.json").write_text(json.dumps(R, indent=1, ensure_ascii=False), encoding="utf-8")
+    log(f"REFERANS {REF}: {len(ids)} gorsel, renkli rank {[s['rank'] for s in R['sira'] if s['renk']]}, video {R['video']} "
+        f"| kota {getattr(api, 'remaining', '?')}")
+    return 0
 
 
-# ------------------------------------------------------------------ plan
+# ------------------------------------------------------------------ plan (kotasiz)
 def plan(a):
     out = pathlib.Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
     with open(a.csv, encoding="utf-8") as fh:
         cift = {r["ilan_id"]: r["cift"] for r in csv.DictReader(fh)}
-    P = json.loads(pathlib.Path(a.plan).read_text(encoding="utf-8"))["plan"]
-    var = set()
-    for f in (a.girdiler or "").split(","):
-        if f and pathlib.Path(f).exists():
-            var |= {x.strip().rstrip("/") for x in pathlib.Path(f).read_text(encoding="utf-8").splitlines() if x.strip()}
-    sonra = {}                                           # galeri_genel yaz sonrasi sira (5 ilan)
-    for f in (a.sonuc or "").split(","):
-        if f and pathlib.Path(f).exists():
-            for r in csv.DictReader(open(f, encoding="utf-8")):
-                if r.get("sonuc") == "PASS" and r.get("sonra_sira"):
-                    sonra[r["ilan"]] = [int(x) for x in r["sonra_sira"].split(",")]
-    kayit, top = {}, {"yeni": 0, "genel_var": 0, "HATA": 0}
+    R = json.loads(pathlib.Path(a.referans).read_text(encoding="utf-8")) if a.referans and pathlib.Path(a.referans).exists() else None
+    P = json.loads(pathlib.Path(a.plan).read_text(encoding="utf-8"))["plan"] if pathlib.Path(a.plan).exists() else {}
+    yeni_sayi = len(R["sira"]) if R else a.varsayilan_sayi
+    kayit, toplam, hatali = {}, 0, 0
     for lid in [k for k in cift if k != REF]:
-        p = P.get(lid)
-        if not p:
-            kayit[lid] = {"hata": ["GALERI_PLAN'da yok"]}
-            top["HATA"] += 1
-            continue
-        durum = sonra.get(lid) or (None if lid in GENEL_VAR else [int(x) for x in p["once_ids"]])
-        if durum is None:                                # 4 kartli ilanin sonrasi bilinmiyor: yazmada canli okunur
-            kayit[lid] = {"cift": cift[lid], "tip": "genel_var", "not": "sonra_sira yok; yazmada canli okunur",
-                          "cagri_toplam": 11}
-            top["genel_var"] += 1
-            continue
-        tip, rol, h = roller(p, durum)
-        if not tip:
-            kayit[lid] = {"cift": cift[lid], "hata": h}
-            top["HATA"] += 1
-            continue
-        ip = islem_plani(tip, rol, p.get("bagli_ids") or [])
-        g = girdi_yollari(cift[lid], a)
-        eksik = eksik_girdi(cift[lid], a, var)
-        ip.update({"cift": cift[lid], "roller": rol, "girdi": g, "eksik_girdi": eksik,
-                   "hata": h + ip["kapi"]})
-        kayit[lid] = ip
-        top["HATA" if ip["hata"] else tip] += 1
-    toplam_cagri = sum(v.get("cagri_toplam", 0) for v in kayit.values())
-    oas = oas_dogrula(a.oas) if a.oas and pathlib.Path(a.oas).exists() else {}
-    (out / "TEK_PLAN.json").write_text(json.dumps({"hedef_sira": HEDEF_SIRA, "ilan": kayit, "oas": oas},
-                                                  indent=1, ensure_ascii=False, default=str), encoding="utf-8")
-    ornek = next((v for v in kayit.values() if v.get("tip") == "yeni" and "cagri" in v), {})
-    ornek5 = next((v for v in kayit.values() if v.get("tip") == "genel_var" and "cagri" in v), {})
-    rapor = [f"# Tek galeri gecisi — PLAN (salt okuma, Etsy kotasi harcanmadi) — {time.strftime('%Y-%m-%d %H:%M')} UTC", "",
-             f"- ilan: {len(kayit)} | yeni (13 gorsel): {top['yeni']} | 4 kartli: {top['genel_var']} | hata: {top['HATA']}",
-             f"- hedef sira ({len(HEDEF_SIRA)} gorsel + video): " + " | ".join(f"{i}:{r}" for i, r in enumerate(HEDEF_SIRA, 1)),
-             f"- cagri/ilan yeni: {ornek.get('cagri_toplam')} {ornek.get('cagri')}",
-             f"- cagri/ilan 4 kartli: {ornek5.get('cagri_toplam', 11)} {ornek5.get('cagri', '')}",
-             f"- toplam tahmini cagri (yuklemede tekrar deneme haric): {toplam_cagri}",
-             f"- eksik girdili ilan: {sum(1 for v in kayit.values() if isinstance(v.get('eksik_girdi'), list) and v['eksik_girdi'])}",
-             "", "## OAS", ""] + [f"- {k}: {v}" for k, v in oas.items()] + \
-            ["", "## Hatalar", ""] + ([f"- {k}: {v['hata']}" for k, v in kayit.items() if v.get("hata")] or ["- yok"])
-    metin = "\n".join(rapor)
+        eski = 14 if lid in GENEL_VAR else len((P.get(lid) or {}).get("once_ids") or []) or 13
+        klasor = pathlib.Path(a.yerel) / cift[lid]
+        sj = klasor / "SET.json"
+        h = set_dogrula(json.loads(sj.read_text(encoding="utf-8")), R) if sj.exists() else ["SET.json yok"]   # dosya varligi: yaz
+        n = cagri_tahmini(eski, yeni_sayi)
+        kayit[lid] = {"cift": cift[lid], "eski_sayi": eski, "cagri": n, "hata": h}
+        toplam += n
+        hatali += bool(h)
+    (out / "TEK_PLAN.json").write_text(json.dumps({"referans": R, "ilan": kayit}, indent=1, ensure_ascii=False), encoding="utf-8")
+    metin = "\n".join([
+        f"# Tek galeri gecisi (tam yeni set) — PLAN, Etsy kotasi harcanmadi — {time.strftime('%Y-%m-%d %H:%M')} UTC", "",
+        f"- referans: {'Cancer-Libra ' + str(len(R['sira'])) + ' gorsel, video ' + str(R['video']) if R else f'YOK (yeni set {yeni_sayi} varsayildi)'}",
+        f"- ilan: {len(kayit)} | hazir olmayan (SET/kapi): {hatali}",
+        f"- cagri/ilan: eski + yeni + 9 (13 eski: {cagri_tahmini(13, yeni_sayi)}, 14 eski: {cagri_tahmini(14, yeni_sayi)})",
+        f"- toplam tahmini cagri: {toplam}", ""] + [f"- {k}: {v['hata']}" for k, v in list(kayit.items())[:10] if v["hata"]])
     (out / "RAPOR_galeri_tek_plan.md").write_text(metin + "\n", encoding="utf-8")
     log(metin)
-    return 1 if top["HATA"] else 0
+    return 0
 
 
 # ------------------------------------------------------------------ yaz
@@ -226,25 +211,11 @@ def yaz(a, api=None, shop=None):
     (out / "YEDEK").mkdir(parents=True, exist_ok=True)
     with open(a.csv, encoding="utf-8") as fh:
         cift = {r["ilan_id"]: r["cift"] for r in csv.DictReader(fh)}
-    P = json.loads(pathlib.Path(a.plan).read_text(encoding="utf-8"))["plan"]
-    kart = pathlib.Path(a.kartlar)
+    R = json.loads(pathlib.Path(a.referans).read_text(encoding="utf-8"))
     if api is None:
-        from etsy_common import Etsy, TokenStore
-        store = TokenStore(os.environ["TOKEN_FILE"], os.environ.get("ETSY_API_KEY", ""), os.environ.get("ETSY_SHARED_SECRET", ""))
-        if store.needs_refresh():
-            store.refresh()
-        api = Etsy(store)
-        shop = os.environ["ETSY_SHOP_ID"]
+        api, shop = api_kur()
     hedef = [x.strip() for x in a.listing.split(",") if x.strip()] if a.listing else [k for k in cift if k != REF]
     sonuc, t0 = [], time.time()
-
-    def anlik(lid):
-        L = api.get(f"/listings/{lid}", params={"includes": "Images,Videos"}) or {}
-        vi = (api.get(f"/shops/{shop}/listings/{lid}/variation-images", ok404=True) or {}).get("results") or []
-        imgs = sorted(L.get("images") or [], key=lambda x: x.get("rank") or 0)
-        return L.get("state"), [x.get("listing_image_id") for x in imgs], L.get("videos") or [], \
-            {v.get("value_id"): v.get("image_id") for v in vi}
-
     for i, lid in enumerate(hedef, 1):
         try:
             kota = int(api.remaining or 99999)
@@ -253,61 +224,85 @@ def yaz(a, api=None, shop=None):
         if kota < a.kota_alt:
             sonuc.append((lid, "DURDU", f"kota {api.remaining} < {a.kota_alt}"))
             break
-        if lid == REF or lid not in P or lid not in cift:
-            sonuc.append((lid, "ATLANDI", "kapsam/plan disi"))
+        if lid == REF or lid not in cift:
+            sonuc.append((lid, "ATLANDI", "kapsam disi"))
+            continue
+        klasor = pathlib.Path(a.yerel) / cift[lid]
+        sj = klasor / "SET.json"
+        setj = json.loads(sj.read_text(encoding="utf-8")) if sj.exists() else {}
+        h = set_dogrula(setj, R, klasor) if setj else ["SET.json yok"]
+        if h:
+            sonuc.append((lid, "ATLANDI", "; ".join(h)))
             continue
         c0 = getattr(api, "calls", 0)
-        st0, ids0, vid0, vb0 = anlik(lid)
-        (out / "YEDEK" / f"{lid}_TEK_ONCE.json").write_text(json.dumps({"state": st0, "images": ids0, "videos": vid0, "var": vb0}, indent=1), encoding="utf-8")
-        tip, rol, h = roller(P[lid], ids0)
-        g = girdi_yollari(cift[lid], a)
-        dosya = {"KAPAK": pathlib.Path(a.yerel) / cift[lid] / "KAPAK.jpg", "KART09": pathlib.Path(a.yerel) / cift[lid] / "KART09.jpg",
-                 "KART3": pathlib.Path(a.yerel) / cift[lid] / "KART3.jpg", "VIDEO": pathlib.Path(a.yerel) / cift[lid] / "VIDEO.mp4"}
-        dosya.update({k: kart / v for k, v in GENEL_DOSYA.items()})
-        if tip:
-            ip = islem_plani(tip, rol, list(vb0.values()), video_var=bool(vid0))
-            h += ip["kapi"]
-            h += [f"dosya yok: {k}" for k in ip["yukle"] + ["VIDEO"] if not dosya[k].exists()]
+        st0, ids0, vid0, vi0, inv0 = anlik(api, shop, lid)
+        (out / "YEDEK" / f"{lid}_TEK_ONCE.json").write_text(json.dumps(
+            {"state": st0, "images": ids0, "videos": vid0, "variation_images": vi0}, indent=1), encoding="utf-8")
+        pid, renk_vid = renk_haritasi(inv0)
+        bagli0 = [v.get("image_id") for v in vi0]
+        ip = islem_plani(ids0, bagli0, setj, bool(vid0), renk_vid)
+        h = list(ip["kapi"])
         if st0 != "active":
             h.append(f"state {st0} (updateListing taslagi yayina alir)")
-        if not tip or h:
-            sonuc.append((lid, "ATLANDI", "; ".join(h) or "tip yok"))
+        if pid is None:
+            h.append("envanterde renk ozelligi yok")
+        if h:
+            sonuc.append((lid, "ATLANDI", "; ".join(h)))
             continue
+        adim = "baslangic"
         try:
-            for iid in ip["sil"]:
+            def yukle(x):
+                p = klasor / x["dosya"]
+                with open(p, "rb") as fh:
+                    return api.post_file(f"/shops/{shop}/listings/{lid}/images", {"image": (p.name, fh, "image/jpeg")}).get("listing_image_id")
+            adim = "bagsiz eski sil"
+            for iid in ip["bagsiz"]:
                 api.delete(f"/shops/{shop}/listings/{lid}/images/{iid}")
-            yeni = {}
-            for r in ip["yukle"]:
-                with open(dosya[r], "rb") as fh:
-                    res = api.post_file(f"/shops/{shop}/listings/{lid}/images", {"image": (dosya[r].name, fh, "image/jpeg")},
-                                        {"rank": str(HEDEF_SIRA.index(r) + 1)})
-                yeni[r] = res.get("listing_image_id")
+            adim = "renk yukle"
+            yeni = {id(x): yukle(x) for x in ip["renkli"]}
+            adim = "renk bagi tasi"
+            api.post_json(f"/shops/{shop}/listings/{lid}/variation-images",
+                          {"variation_images": [{"property_id": pid, "value_id": renk_vid[ad_norm(x["renk"])], "image_id": int(yeni[id(x)])}
+                                                for x in ip["renkli"]]})
+            adim = "bagli eski sil"
+            for iid in ip["bagli"]:
+                api.delete(f"/shops/{shop}/listings/{lid}/images/{iid}")
+            adim = "diger yukle"
+            yeni.update({id(x): yukle(x) for x in ip["diger"]})
+            adim = "sira"
+            bek = [int(yeni[id(x)]) for x in setj["gorseller"]]
+            api.patch(f"/shops/{shop}/listings/{lid}", {"image_ids": ",".join(str(x) for x in bek)})
+            adim = "video"
             for v in vid0:
                 api.delete(f"/shops/{shop}/listings/{lid}/videos/{v.get('video_id')}")
-            with open(dosya["VIDEO"], "rb") as fh:
-                api.post_file(f"/shops/{shop}/listings/{lid}/videos", {"video": (f"AstroLove_{cift[lid]}.mp4", fh, "video/mp4")},
-                              {"name": f"AstroLove_{cift[lid]}.mp4"})
-            bek = hedef_ids(rol, yeni)
-            api.patch(f"/shops/{shop}/listings/{lid}", {"image_ids": ",".join(str(x) for x in bek)})
-        except SystemExit as e:
-            sonuc.append((lid, "FAIL", f"yazma hatasi: {str(e)[:200]}"))
+            if setj.get("video"):
+                vp = klasor / setj["video"]
+                with open(vp, "rb") as fh:
+                    api.post_file(f"/shops/{shop}/listings/{lid}/videos", {"video": (f"AstroLove_{cift[lid]}.mp4", fh, "video/mp4")},
+                                  {"name": f"AstroLove_{cift[lid]}.mp4"})
+        except (SystemExit, Exception) as e:
+            sonuc.append((lid, "FAIL", f"'{adim}' adiminda hata: {str(e)[:160]} (yedek YEDEK/{lid}_TEK_ONCE.json)"))
             break
-        st1, ids1, vid1, vb1 = anlik(lid)
+        L1 = api.get(f"/listings/{lid}", params={"includes": "Images,Videos"}) or {}
+        vi1 = (api.get(f"/shops/{shop}/listings/{lid}/variation-images", ok404=True) or {}).get("results") or []
+        ids1 = [x.get("listing_image_id") for x in sorted(L1.get("images") or [], key=lambda x: x.get("rank") or 0)]
+        bag1 = {v.get("value_id"): v.get("image_id") for v in vi1}
+        bek_bag = {renk_vid[ad_norm(x["renk"])]: int(yeni[id(x)]) for x in ip["renkli"]}
         hh = []
         if ids1 != bek:
-            hh.append("sira beklenenden farkli")
-        if len(ids1) > AZAMI_GORSEL:
-            hh.append(f"{len(ids1)} gorsel")
-        if vb1 != vb0:
-            hh.append("renk baglari degisti")
-        if st1 != st0:
-            hh.append(f"state {st0} -> {st1}")
-        if len(vid1) != 1:
-            hh.append(f"video sayisi {len(vid1)}")
-        cagri = getattr(api, "calls", 0) - c0
-        sonuc.append((lid, "PASS" if not hh else "FAIL", ("geri okuma temiz" if not hh else "; ".join(hh)) + f" | cagri {cagri}"))
-        gg = time.time() - t0
-        log(f"  [{i}/{len(hedef)}] {lid} {sonuc[-1][1]} | gecen {gg / 60:.1f} dk | kalan {gg / i * (len(hedef) - i) / 60:.1f} dk "
+            hh.append("sira SET'ten farkli")
+        if bag1 != bek_bag:
+            hh.append("renk baglari yeni gorsellerde degil")
+        if L1.get("state") != st0:
+            hh.append(f"state {st0} -> {L1.get('state')}")
+        if setj.get("video") and len(L1.get("videos") or []) != 1:
+            hh.append(f"video sayisi {len(L1.get('videos') or [])}")
+        if set(ids0) & set(ids1):
+            hh.append("eski gorsel kaldi")
+        n = getattr(api, "calls", 0) - c0
+        sonuc.append((lid, "PASS" if not hh else "FAIL", ("geri okuma temiz" if not hh else "; ".join(hh)) + f" | cagri {n}"))
+        g = time.time() - t0
+        log(f"  [{i}/{len(hedef)}] {lid} {sonuc[-1][1]} | gecen {g / 60:.1f} dk | kalan {g / i * (len(hedef) - i) / 60:.1f} dk "
             f"| %{i * 100 // len(hedef)} | kota {api.remaining}")
         if hh:
             break
@@ -322,23 +317,18 @@ def yaz(a, api=None, shop=None):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("mod", choices=["plan", "yaz"])
+    ap.add_argument("mod", choices=["referans", "plan", "yaz"])
     ap.add_argument("--csv", default="_work/METIN_78.csv")
     ap.add_argument("--plan", default="_work/GALERI_PLAN.json")
-    ap.add_argument("--sonuc", default="", help="galeri_genel SONUC_GALERI.csv (virgullu)")
-    ap.add_argument("--girdiler", default="", help="rclone lsf -R ciktilari (virgullu)")
-    ap.add_argument("--oas", default="")
-    ap.add_argument("--medya", default="gdrive:ASTROLOVE/TEMP/POD_KISISEL/A1_77")
-    ap.add_argument("--kart3", default="", help="kart 3 yolu, {CIFT} yer tutuculu (video oturumu belirleyecek)")
-    ap.add_argument("--video", default="", help="video yolu, {CIFT} yer tutuculu (video oturumu belirleyecek)")
-    ap.add_argument("--yerel", default="_work/tek", help="yazmada indirilen <CIFT>/KAPAK|KART09|KART3|VIDEO")
-    ap.add_argument("--kartlar", default="_work/kartlar")
+    ap.add_argument("--referans", default="_work/REFERANS_SIRA.json")
+    ap.add_argument("--varsayilan-sayi", type=int, default=13, help="referans yokken plan icin yeni set gorsel sayisi")
+    ap.add_argument("--yerel", default="_work/tek", help="<CIFT>/SET.json + dosyalar")
     ap.add_argument("--out", default="_out/galeri_tek")
     ap.add_argument("--listing", default="")
     ap.add_argument("--confirm", default="")
     ap.add_argument("--kota-alt", type=int, default=230)
     a = ap.parse_args()
-    sys.exit(plan(a) if a.mod == "plan" else yaz(a))
+    sys.exit({"referans": referans, "plan": plan, "yaz": yaz}[a.mod](a))
 
 
 if __name__ == "__main__":
