@@ -27,6 +27,10 @@ on:
         description: "Kac paralel parca (matris bunu kullanmaz, yalniz script'e gecer)"
         required: true
         default: "10"
+      yenile:
+        description: "PLATES'te olanlari da yeniden uret (true/false)"
+        required: false
+        default: "false"
 
 concurrency: plate-uret
 
@@ -86,6 +90,10 @@ jobs:
         env:
           PARCA: ${{ matrix.parca }}
           TOPLAM: ${{ inputs.parca_sayisi }}
+          YENILE: ${{ inputs.yenile }}
         run: |
           set -euo pipefail
-          python scripts/medya_v1/plate_uret.py --parca "${PARCA}/${TOPLAM}"
+          EK=""
+          [ "${YENILE:-false}" = "true" ] && EK="--yenile"
+          # shellcheck disable=SC2086
+          python scripts/medya_v1/plate_uret.py --parca "${PARCA}/${TOPLAM}" $EK
