@@ -69,6 +69,18 @@ KENAR_YUMUSAT = 2.0      # hibrit birlestirmede maske yumusatmasi (2400 uzayinda
 OLCUM_EN = {'2x3': 4000, '3x4': 3000, '4x5': 4000, '11x14': 3300, 'A': 3508}
 OLCUM_MERDIVEN = (1.0, 0.8, 1.2)        # olcum basarisizsa denenecek genislik carpanlari
 
+# Urun turu (router kartindan). POD: tek renk+boy baski dosyasi. DIJITAL: 5 renk x 5 oran ZIP.
+# DUVAR_KAGIDI: dijital-78 oturumunun wallpaper kodu (henuz onaylanmadi) -> BEKLIYOR.
+URUN_ES = {'pod': 'POD', 'print': 'POD', 'baski': 'POD', 'poster': 'POD',
+           'dijital': 'DIJITAL', 'digital': 'DIJITAL', 'dijital_duvar_sanati': 'DIJITAL',
+           'duvar_kagidi': 'DUVAR_KAGIDI', 'wallpaper': 'DUVAR_KAGIDI'}
+# Dijital pakette her oran icin kullanilan onayli baski dosyasi (hepsi 300 dpi)
+DIJITAL_BOY = {'4x5': '16x20', '3x4': '18x24', '2x3': '24x36', '11x14': '11x14', 'A': 'A2'}
+DIJITAL_ORANLAR = ('4x5', '3x4', '2x3', '11x14', 'A')
+ZIP_AZAMI_MB = 20.0
+RENKLER = ('MIDNIGHT_BLUE', 'DEEP_BLACK', 'PURE_WHITE', 'CHAMPAGNE_IVORY', 'WARM_PARCHMENT')
+BUYUT = 3                               # kontrol paketinde bant buyutme
+
 
 def log(*a): print(f'[{time.time() - T0:7.1f}s]', *a, flush=True)
 
@@ -116,7 +128,8 @@ def kart_oku(metin):
           'boy': 'boy', 'size': 'boy', 'olcu': 'boy', 'ölçü': 'boy',
           'isim1': 'isim1', 'isim 1': 'isim1', 'name1': 'isim1', 'name 1': 'isim1',
           'isim2': 'isim2', 'isim 2': 'isim2', 'name2': 'isim2', 'name 2': 'isim2',
-          'mesaj': 'mesaj', 'message': 'mesaj', 'tagline': 'mesaj'}
+          'mesaj': 'mesaj', 'message': 'mesaj', 'tagline': 'mesaj',
+          'urun': 'urun', 'product': 'urun', 'urun_turu': 'urun', 'tur': 'urun'}
     d = {}
     for satir in metin.splitlines():
         s = satir.strip().lstrip('-*# ').strip()
@@ -126,7 +139,12 @@ def kart_oku(metin):
         a = a.strip().strip('*_`').lower()
         if a in ES:
             d[ES[a]] = b.strip().strip('*_`')
-    eksik = [k for k in ('cift', 'renk', 'boy', 'isim1', 'isim2') if not d.get(k)]
+    zorunlu = ('cift', 'isim1', 'isim2')
+    if URUN_ES.get(str(d.get('urun', 'pod')).strip().lower().replace(' ', '_'), 'POD') == 'POD':
+        zorunlu += ('renk', 'boy')
+    else:
+        d.setdefault('renk', 'MIDNIGHT_BLUE')          # dijitalde 5 renk uretilir; alan sart degil
+    eksik = [k for k in zorunlu if not d.get(k)]
     if eksik:
         raise SystemExit(f'kartta eksik alan: {eksik}')
     return d
@@ -139,12 +157,15 @@ def normalize(d):
     renk = RENK_TAKMA.get(renk, renk)
     if renk not in RENK_ED:
         raise SystemExit(f'bilinmeyen renk: {d["renk"]} (beklenen {sorted(RENK_ED)})')
+    urun = URUN_ES.get(str(d.get('urun', 'pod')).strip().lower().replace(' ', '_'), 'POD')
+    out = {**d, 'cift': cift, 'renk': renk, 'urun': urun, 'edisyon': RENK_ED[renk]}
+    if urun != 'POD':
+        return {**out, 'boy': d.get('boy') or '-', 'oran': None, 'hedef_px': None, 'inc': None}
     boy = d['boy'].strip().upper().replace(' ', '').replace('×', 'x').replace('X', 'x')
-    boy = boy.replace('A3', 'A3').replace('A4', 'A4').replace('A2', 'A2')
     if boy not in BOY:
         raise SystemExit(f'bilinmeyen boy: {d["boy"]} (beklenen {sorted(BOY)})')
-    return {**d, 'cift': cift, 'renk': renk, 'boy': boy, 'edisyon': RENK_ED[renk],
-            'oran': BOY[boy][0], 'hedef_px': [round(BOY[boy][1] * DPI), round(BOY[boy][2] * DPI)],
+    return {**out, 'boy': boy, 'oran': BOY[boy][0],
+            'hedef_px': [round(BOY[boy][1] * DPI), round(BOY[boy][2] * DPI)],
             'inc': [BOY[boy][1], BOY[boy][2]]}
 
 
@@ -280,53 +301,266 @@ def sayfa_no_tablosu():
     return {c: i + 1 for i, c in enumerate(ciftler)}, ciftler
 
 
-def uret(sip, kaynak_bayt, P_blue, P_ed, cik):
-    ed, oran = sip['edisyon'], sip['oran']
-    isimler = (sip['isim1'], sip['isim2'])
-    mesaj = sip.get('mesaj') or ''
+
+# ------------------------------------------------------------------ Blue sarmalayicisi (a1, onayli)
+class BluePoster:
+    """Blue hatti: a1_poster.Poster (pilot16). Boy tavani her oran icin Cancer-Libra'dan alinir."""
+
+    def __init__(self):
+        from a1_poster import Poster
+        self.P = Poster()
+        self.hazir_oran = set()
+
+    def __call__(self, kaynak_bayt, sayfa_no, oran, isimler, tagline, ref_bayt=None, ref_sayfa=28):
+        if oran not in self.hazir_oran:
+            if ref_bayt is None:
+                raise RuntimeError(f'Blue {oran}: Cancer-Libra referansi verilmedi (boy tavani)')
+            self.P.tavan = None
+            self.P(ref_bayt, ref_sayfa, 'blue', oran, isimler, tagline, referans=True)
+            self.hazir_oran.add(oran)
+        p, bi, kirp = self.P(kaynak_bayt, sayfa_no, 'blue', oran, isimler, tagline)
+        return p, {**bi, 'edisyon': 'blue', 'oran': oran, 'durum': 'URETILDI'}, {'kirp': kirp}
+
+
+def degisim_maskesi(poster, kaynak_bayt):
+    """Precise maske yoksa: uretilen poster ile normalize kaynak arasindaki gercek degisim."""
+    import cv2, pilot11
+    ref = pilot11.norm(Image.open(io.BytesIO(kaynak_bayt)).convert('RGB'))[0]
+    a = np.asarray(ref).astype(np.int16)
+    b = np.asarray(poster.convert('RGB')).astype(np.int16)
+    n = min(a.shape[0], b.shape[0])
+    d = np.zeros(b.shape[:2], bool)
+    d[:n] = np.abs(a[:n] - b[:n]).max(2) > 2
+    return cv2.dilate(d.astype(np.uint8), np.ones((9, 9), np.uint8)) > 0
+
+
+# ------------------------------------------------------------------ kontrol paketi
+def bant_kirpim(baski, bant, x_araligi, ad, cik, buyut=BUYUT, azami_en=3000):
+    """Tam cozunurluklu dosyadan bir bandi kirpip buyutur (Serdar gozle kontrol eder)."""
+    k = baski.width / 2400.0
+    x0 = max(int(x_araligi[0] * k) - 30, 0); x1 = min(int(x_araligi[1] * k) + 30, baski.width)
+    y0 = max(int(bant[0] * k) - 20, 0); y1 = min(int(bant[1] * k) + 20, baski.height)
+    kirp = baski.crop((x0, y0, x1, y1))
+    en = min(kirp.width * buyut, azami_en)
+    kirp = kirp.resize((en, max(round(kirp.height * en / kirp.width), 1)), Image.LANCZOS)
+    kirp.save(cik / ad, quality=95, subsampling=0)
+    return {'kutu_2400': [x_araligi[0], bant[0], x_araligi[1], bant[1]],
+            'kirpim_px': [x1 - x0, y1 - y0], 'gorsel_px': list(kirp.size), 'buyutme': buyut}
+
+
+def font_kapsami(isimler, mesaj):
+    import giris_dogrula as gd
+    r = gd.siparis_dogrula(isimler[0], isimler[1], mesaj, None)
+    eksik = {'isim1': gd.eksik_karakterler(r['sol']['deger'], 'isim'),
+             'isim2': gd.eksik_karakterler(r['sag']['deger'], 'isim'),
+             'mesaj': gd.eksik_karakterler(r['tagline']['deger'], 'tagline')}
+    return {'gecti': not any(eksik.values()) and r['durum'] == 'TAMAM',
+            'dogrulama': r['durum'], 'eksik_karakter': eksik,
+            'notlar': {k: r[k]['notlar'] for k in ('sol', 'sag', 'tagline') if r[k]['notlar']}}
+
+
+def boy_kapisi(baski_px, beklenen_px, dosya_mb=None, azami_mb=None):
+    tam = list(baski_px) == list(beklenen_px)
+    d = {'gecti': tam, 'baski_px': list(baski_px), 'beklenen_px_300dpi': list(beklenen_px)}
+    if azami_mb is not None:
+        d['dosya_MB'] = dosya_mb; d['azami_MB'] = azami_mb
+        d['gecti'] = tam and dosya_mb is not None and dosya_mb <= azami_mb
+    return d
+
+
+def renk_onizleme(yollar, ad, cik, yukseklik=900):
+    """Bes rengin tek gorselde yan yana onizlemesi."""
+    ims = []
+    for renk, yol in yollar:
+        im = Image.open(yol).convert('RGB')
+        im = im.resize((max(round(im.width * yukseklik / im.height), 1), yukseklik), Image.LANCZOS)
+        ims.append((renk, im))
+    en = sum(i.width for _, i in ims) + 20 * (len(ims) + 1)
+    t = Image.new('RGB', (en, yukseklik + 40), 'white')
+    x = 20
+    for _, im in ims:
+        t.paste(im, (x, 30)); x += im.width + 20
+    t.save(cik / ad, quality=92)
+    return {'renkler': [r for r, _ in ims], 'px': list(t.size)}
+
+
+def render_et(ed, oran, sayfa, kaynak_bayt, isimler, mesaj, P_blue, P_ed, cift=None, ref_boy=None):
+    """Tek poster: blue -> a1 (pilot16), diger dort edisyon -> edisyon_uret. Render kodu degismez."""
     if ed == 'blue':
-        raise SystemExit('Blue yolu a1_poster.Poster ile kosar; bu testler dort edisyon uzerinde')
-    poster, bi, ek = P_ed(kaynak_bayt, sip['sayfa'], ed, oran, isimler, mesaj)
+        ref_bayt = None
+        if oran not in P_blue.hazir_oran:
+            # boy tavani Cancer-Libra'dan (a1 kurali); ayni orandan herhangi bir onayli boy yeter
+            boy = ref_boy or DIJITAL_BOY.get(oran)
+            if not boy:
+                raise RuntimeError(f'Blue {oran}: Cancer-Libra referans boyu bulunamadi')
+            ref_bayt = pod_kaynak('CANCER_LIBRA', 'MIDNIGHT_BLUE', boy).read_bytes()
+        poster, bi, ek = P_blue(kaynak_bayt, sayfa, oran, isimler, mesaj, ref_bayt=ref_bayt)
+    else:
+        poster, bi, ek = P_ed(kaynak_bayt, sayfa, ed, oran, isimler, mesaj)
+    if poster is None:
+        return None, bi, None
+    if ek is None or 'maske' not in ek:
+        ek = dict(ek or {}); ek['maske'] = degisim_maskesi(poster, kaynak_bayt)
+    return poster, bi, ek
+
+
+def tek_dosya(poster, bi, ek, kaynak_bayt, hedef_px, yol, kalite=95):
+    baski, bpx = baski_dosyasi(poster, ek, kaynak_bayt, hedef_px)
+    baski.save(yol, 'JPEG', quality=kalite, subsampling=0, optimize=True)
+    return baski, {**bpx, 'dosya_MB': round(yol.stat().st_size / 1e6, 2)}
+
+
+def kapilari_topla(bi, isimler, mesaj, baski_px, beklenen_px, dosya_mb=None, azami_mb=None):
+    k = {'kalinti': bi['kalinti_kapisi']['gecti'],
+         'temiz_ara_zemin': bi.get('temiz_ara_kapisi', {}).get('gecti'),
+         'sembol': bi['sembol_kapisi']['gecti'],
+         'boy_siniri': boy_kapisi(baski_px, beklenen_px, dosya_mb, azami_mb)['gecti'],
+         'font_kapsami': font_kapsami(isimler, mesaj)['gecti']}
+    return k, {'boy_siniri': boy_kapisi(baski_px, beklenen_px, dosya_mb, azami_mb),
+               'font_kapsami': font_kapsami(isimler, mesaj)}
+
+
+def pod_uret(sip, kaynak_bayt, P_blue, P_ed, cik):
+    ed, oran = sip['edisyon'], sip['oran']
+    isimler = (sip['isim1'], sip['isim2']); mesaj = sip.get('mesaj') or ''
+    poster, bi, ek = render_et(ed, oran, sip['sayfa'], kaynak_bayt, isimler, mesaj,
+                               P_blue, P_ed, sip['cift'], ref_boy=sip['boy'])
     if poster is None:
         return {**sip, **bi}
-    baski, bpx = baski_dosyasi(poster, ek, kaynak_bayt, sip['hedef_px'])
     ad = f'BASKI_{sip["boy"]}.jpg'
-    baski.save(cik / ad, 'JPEG', quality=95, subsampling=0, optimize=True)
+    baski, bpx = tek_dosya(poster, bi, ek, kaynak_bayt, sip['hedef_px'], cik / ad)
     onizleme(baski, poster, ek, f'ONIZLEME_{sip["boy"]}.jpg', cik)
-    from a1_poster import sembol_gorseli, CIK as A1_CIK
+
+    kon = cik / 'KONTROL'; kon.mkdir(parents=True, exist_ok=True)
+    (kon / ad).write_bytes((cik / ad).read_bytes())            # tam cozunurluklu ana dosya
+    o = bi['olcum']
+    isim_x = [o['sembol'][0][0] - 60, o['sembol'][1][1] + 60] if o.get('sembol') else [0, 2400]
+    bant = {}
     try:
+        bant['isim'] = bant_kirpim(baski, o['isim_bant'], isim_x, 'ISIM_BANDI_x3.jpg', kon)
+        bant['mesaj'] = bant_kirpim(baski, o['tag_bant'], [300, 2100], 'MESAJ_BANDI_x3.jpg', kon)
+    except Exception as e:                                      # noqa: BLE001
+        bant['hata'] = f'{type(e).__name__}: {e}'
+    try:
+        from a1_poster import sembol_gorseli, CIK as A1_CIK
         A1_CIK.mkdir(parents=True, exist_ok=True)
-        sembol_gorseli(ek['kirp'], f'SEMBOL_{sip["cift"]}_{sip["boy"]}.jpg')
-        (A1_CIK / f'SEMBOL_{sip["cift"]}_{sip["boy"]}.jpg').replace(
-            cik / f'SEMBOL_{sip["cift"]}_{sip["boy"]}.jpg')
-    except Exception as e:                                        # noqa: BLE001
-        bi['sembol_gorseli'] = f'uretilemedi: {e}'
+        sembol_gorseli(ek['kirp'], 'SEMBOL.jpg')
+        (A1_CIK / 'SEMBOL.jpg').replace(kon / 'SEMBOL_kaynak_vs_yeni.jpg')
+    except Exception as e:                                      # noqa: BLE001
+        bant['sembol_gorseli'] = f'uretilemedi: {e}'
+
     inc = sip['inc']
-    bi.update({
-        **bpx,
-        'dosya_MB': round((cik / ad).stat().st_size / 1e6, 2),
-        'gorsel_dpi': [round(bpx['baski_px'][0] / inc[0], 1), round(bpx['baski_px'][1] / inc[1], 1)],
-        'metin_dpi': round(2400 / inc[0], 1),
-        'metin_buyutme': round(bpx['baski_px'][0] / 2400, 2),
-        'not_dpi': ('gorsel_dpi: Canva sayfasinin hedef boydaki gercek cozunurlugu. '
-                    'metin_dpi: kisisellestirilen isim/tagline bandinin gercek cozunurlugu '
-                    '(onayli render hatti NORM_W=2400 ile calisir).'),
-    })
-    kapilar = {'kalinti': bi['kalinti_kapisi']['gecti'],
-               'temiz_ara_zemin': bi['temiz_ara_kapisi']['gecti'],
-               'sembol': bi['sembol_kapisi']['gecti']}
-    bi['kapilar'] = kapilar
-    bi['kapilar_gecti'] = all(kapilar.values())
+    kapilar, ayrinti = kapilari_topla(bi, isimler, mesaj, bpx['baski_px'], sip['beklenen_px_300dpi'])
+    bi.update({**bpx, 'bant_kirpimlari': bant, 'kapi_ayrinti': ayrinti,
+               'gorsel_dpi': [round(bpx['baski_px'][0] / inc[0], 1), round(bpx['baski_px'][1] / inc[1], 1)],
+               'metin_dpi': round(2400 / inc[0], 1),
+               'metin_buyutme': round(bpx['baski_px'][0] / 2400, 2),
+               'not_dpi': ('gorsel_dpi: onayli baski dosyasinin gercek cozunurlugu. metin_dpi: '
+                           'kisisellestirilen isim/mesaj bandinin gercek cozunurlugu '
+                           '(onayli render hatti NORM_W=2400 ile calisir).'),
+               'kapilar': kapilar, 'kapilar_gecti': all(bool(v) for v in kapilar.values())})
     return {**sip, **bi}
 
 
+def dijital_uret(sip, P_blue, P_ed, cik):
+    """Bes renk, her renk icin bes oran JPG -> renk basina tek ZIP (<= 20 MB)."""
+    import zipfile
+    isimler = (sip['isim1'], sip['isim2']); mesaj = sip.get('mesaj') or ''
+    kon = cik / 'KONTROL'; kon.mkdir(parents=True, exist_ok=True)
+    R = {'urun': 'DIJITAL', 'renkler': {}, 'zip_azami_MB': ZIP_AZAMI_MB}
+    onizleme_yollari = []
+    for renk in RENKLER:
+        ed = RENK_ED[renk]
+        rk = {'edisyon': ed, 'oranlar': {}, 'durum': 'URETILDI'}
+        klas = cik / renk; klas.mkdir(parents=True, exist_ok=True)
+        for oran in DIJITAL_ORANLAR:
+            boy = DIJITAL_BOY[oran]
+            try:
+                yol = pod_kaynak(sip['cift'], renk, boy)
+                kb = yol.read_bytes()
+                with Image.open(yol) as im:
+                    hedef = list(im.size)
+                poster, bi, ek = render_et(ed, oran, sip['sayfa'], kb, isimler, mesaj,
+                                           P_blue, P_ed, sip['cift'], ref_boy=boy)
+                if poster is None:
+                    rk['oranlar'][oran] = {'durum': 'ELLE KONTROL', **bi}; continue
+                jpg = klas / f'{sip["cift"]}_{renk}_{oran}_{boy}.jpg'
+                baski, bpx = tek_dosya(poster, bi, ek, kb, hedef, jpg, kalite=90)
+                bek = [round(BOY[boy][1] * DPI), round(BOY[boy][2] * DPI)]
+                kapilar, ayrinti = kapilari_topla(bi, isimler, mesaj, bpx['baski_px'], bek)
+                rk['oranlar'][oran] = {'durum': 'URETILDI', 'boy': boy, **bpx,
+                                       'kapilar': kapilar, 'kapi_ayrinti': ayrinti,
+                                       'kapilar_gecti': all(bool(v) for v in kapilar.values()),
+                                       'sure_sn': bi.get('sure_sn')}
+                if oran == '3x4':
+                    # KONTROL'e tam cozunurluklu ornek: klasor ZIP sonrasi silinecegi icin once kopyala
+                    ornek = kon / f'ORNEK_3x4_{renk}.jpg'
+                    ornek.write_bytes(jpg.read_bytes())
+                    onizleme_yollari.append((renk, ornek))
+                    try:
+                        o = bi['olcum']
+                        ix = [o['sembol'][0][0] - 60, o['sembol'][1][1] + 60] if o.get('sembol') else [0, 2400]
+                        bant_kirpim(baski, o['isim_bant'], ix, f'ISIM_BANDI_x3_{renk}.jpg', kon)
+                        bant_kirpim(baski, o['tag_bant'], [300, 2100], f'MESAJ_BANDI_x3_{renk}.jpg', kon)
+                    except Exception as e:                       # noqa: BLE001
+                        rk['bant_hata'] = f'{type(e).__name__}: {e}'
+            except BaseException as e:                           # noqa: BLE001
+                rk['oranlar'][oran] = {'durum': 'HATA', 'hata': f'{type(e).__name__}: {e}'}
+                rk['durum'] = 'EKSIK'
+        # ZIP: 20 MB'i asarsa kalite dusurulur
+        zp = cik / f'{sip["cift"]}_{renk}.zip'
+        kalite = 90
+        while True:
+            with zipfile.ZipFile(zp, 'w', zipfile.ZIP_DEFLATED) as z:
+                for f in sorted(klas.glob('*.jpg')):
+                    z.write(f, f.name)
+            mb = round(zp.stat().st_size / 1e6, 2)
+            if mb <= ZIP_AZAMI_MB or kalite <= 70:
+                break
+            kalite -= 6
+            for f in sorted(klas.glob('*.jpg')):
+                Image.open(f).convert('RGB').save(f, 'JPEG', quality=kalite,
+                                                  subsampling=1, optimize=True)
+        rk['zip_MB'] = mb; rk['zip_kalite'] = kalite
+        rk['zip_kapisi'] = mb <= ZIP_AZAMI_MB
+        rk['dosya_sayisi'] = len(list(klas.glob('*.jpg')))
+        rk['zip_icerik'] = sorted(f.name for f in klas.glob('*.jpg'))
+        if rk['dosya_sayisi'] != len(DIJITAL_ORANLAR):
+            rk['durum'] = 'EKSIK'
+        for f in klas.glob('*.jpg'):                          # Drive'a yalniz ZIP + KONTROL
+            f.unlink()
+        klas.rmdir()
+        R['renkler'][renk] = rk
+        log('dijital', renk, {k: rk.get(k) for k in ('durum', 'zip_MB', 'zip_kapisi', 'dosya_sayisi')})
+    if onizleme_yollari:
+        R['renk_onizleme'] = renk_onizleme(onizleme_yollari, 'BES_RENK_ONIZLEME.jpg', kon)
+    R['toplam_zip'] = len(R['renkler'])
+    R['durum'] = ('URETILDI' if all(v.get('durum') == 'URETILDI' and v.get('zip_kapisi')
+                                    for v in R['renkler'].values()) else 'EKSIK')
+    R['kapilar_gecti'] = R['durum'] == 'URETILDI' and all(
+        o.get('kapilar_gecti') for v in R['renkler'].values() for o in v['oranlar'].values()
+        if isinstance(o, dict) and o.get('durum') == 'URETILDI')
+    return {**sip, **R}
+
+
+def duvar_kagidi_uret(sip, cik):
+    return {**sip, 'urun': 'DUVAR_KAGIDI', 'durum': 'BEKLIYOR',
+            'sebep': ('dijital-78 oturumunun wallpaper kodu bu depoda yok ve henuz onaylanmadi; '
+                      '4 renk ZIP + 1 PDF (her biri <= 20 MB) o kod onaylaninca uretilecek.'),
+            'kapilar_gecti': None}
+
+
+# Testlerde SAHTE isim kullanilir; musteri verisi asla depoya girmez (yalniz Drive).
+SAHTE = {'isim1': 'EMILY', 'isim2': 'JAMES', 'mesaj': 'It Began With a Kiss in the Rain'}
 TESTLER = [
     {'receipt': 'TEST_A_ARIES_LEO', 'cift': 'ARIES_LEO', 'renk': 'DEEP_BLACK', 'boy': '12x16',
-     'isim1': 'EMILY', 'isim2': 'JAMES', 'mesaj': 'It Began With a Kiss in the Rain'},
-    {'receipt': 'TEST_B_AQUARIUS_AQUARIUS', 'cift': 'AQUARIUS_AQUARIUS', 'renk': 'PURE_WHITE', 'boy': 'A3',
-     'isim1': 'EMILY', 'isim2': 'JAMES', 'mesaj': 'It Began With a Kiss in the Rain'},
-    {'receipt': 'TEST_C_CANCER_LIBRA', 'cift': 'CANCER_LIBRA', 'renk': 'WARM_PARCHMENT', 'boy': '30x40',
-     'isim1': 'EMILY', 'isim2': 'JAMES', 'mesaj': 'It Began With a Kiss in the Rain'},
+     'urun': 'pod', **SAHTE},
+    {'receipt': 'TEST_B_AQUARIUS_AQUARIUS', 'cift': 'AQUARIUS_AQUARIUS', 'renk': 'PURE_WHITE',
+     'boy': 'A3', 'urun': 'pod', **SAHTE},
+    {'receipt': 'TEST_C_CANCER_LIBRA', 'cift': 'CANCER_LIBRA', 'renk': 'WARM_PARCHMENT',
+     'boy': '30x40', 'urun': 'pod', **SAHTE},
+    {'receipt': 'TEST_D_DIJITAL_ARIES_LEO', 'cift': 'ARIES_LEO', 'boy': '-',
+     'urun': 'dijital', **SAHTE},
 ]
 
 
@@ -356,69 +590,84 @@ def main():
         raise SystemExit('--kart, --test ya da elle parametre gerekir')
 
     no, _ = sayfa_no_tablosu()
-    siparisler = [normalize(s) for s in siparisler]
+    siparisler = [normalize(x) for x in siparisler]
     kaynak_b = {}
-    for s in siparisler:
-        if s['cift'] not in no:
-            raise SystemExit(f'cift POD_PRINT\'te yok: {s["cift"]}')
-        s['sayfa'] = no[s['cift']]
-        s['canva_design'] = CANVA[s['edisyon']][s['oran']]
+    for x in siparisler:
+        if x['cift'] not in no:
+            raise SystemExit(f'cift POD_PRINT\'te yok: {x["cift"]}')
+        x['sayfa'] = no[x['cift']]
+        if x['urun'] != 'POD':
+            continue
+        x['canva_design'] = CANVA[x['edisyon']][x['oran']]
         if a.kaynak == 'pod':
-            yol = pod_kaynak(s['cift'], s['renk'], s['boy'])
+            yol = pod_kaynak(x['cift'], x['renk'], x['boy'])
             with Image.open(yol) as im:
-                s['hedef_px'] = list(im.size)          # hedef boy onayli baski dosyasindan
-            s['kaynak'] = f'POD_PRINT/{s["cift"]}/{s["renk"]}/{s["boy"]}.jpg'
-            kaynak_b[s['receipt']] = yol.read_bytes()
+                x['hedef_px'] = list(im.size)          # hedef boy onayli baski dosyasindan
+            x['kaynak'] = f'POD_PRINT/{x["cift"]}/{x["renk"]}/{x["boy"]}.jpg'
+            kaynak_b[x['receipt']] = yol.read_bytes()
         else:
-            s['kaynak'] = f'canva:{s["canva_design"]} p{s["sayfa"]}'
-        s['beklenen_px_300dpi'] = [round(s['inc'][0] * DPI), round(s['inc'][1] * DPI)]
-    log('siparisler', [{k: s.get(k) for k in ('receipt', 'cift', 'renk', 'boy', 'edisyon', 'oran',
-                                              'sayfa', 'kaynak', 'hedef_px', 'beklenen_px_300dpi')}
-                       for s in siparisler])
+            x['kaynak'] = f'canva:{x["canva_design"]} p{x["sayfa"]}'
+        x['beklenen_px_300dpi'] = [round(x['inc'][0] * DPI), round(x['inc'][1] * DPI)]
+    log('siparisler', [{k: x.get(k) for k in ('receipt', 'urun', 'cift', 'renk', 'boy',
+                                              'edisyon', 'oran', 'sayfa', 'kaynak', 'hedef_px')}
+                       for x in siparisler])
 
     if a.kaynak != 'pod':
         rc('copy', f'{KP}/{a.liste}', str(W))
         L = json.loads((W / a.liste).read_text())
-        for s in siparisler:
-            k = f'{s["edisyon"]}_{s["oran"]}_p{s["sayfa"]}'
+        for x in siparisler:
+            if x['urun'] != 'POD':
+                continue
+            k = f'{x["edisyon"]}_{x["oran"]}_p{x["sayfa"]}'
             v = L.get(k)
             if v is None:
                 raise SystemExit(f'URL listesinde anahtar yok: {k} (liste: {sorted(L)})')
             u = v['url'] if isinstance(v, dict) else v
             maskele(u)
-            kaynak_b[s['receipt']] = indir(u)
-            with Image.open(io.BytesIO(kaynak_b[s['receipt']])) as im:
-                s['hedef_px'] = s.get('hedef_px') or list(im.size)
-            log('sayfa indi', k, len(kaynak_b[s['receipt']]), 'bayt')
+            kaynak_b[x['receipt']] = indir(u)
+            with Image.open(io.BytesIO(kaynak_b[x['receipt']])) as im:
+                x['hedef_px'] = x.get('hedef_px') or list(im.size)
 
     kisisel_hazirla(); log('kisisel-v1 hazir')
     sys.path.insert(0, str(Path(__file__).resolve().parent))
     P_ed = EdisyonPoster()
-    P_blue = None
-    R = {'kosu': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), 'dpi_hedefi': DPI, 'siparisler': []}
-    for s in siparisler:
-        cik = W / s['receipt']; cik.mkdir(parents=True, exist_ok=True)
+    P_blue = BluePoster()
+    R = {'kosu': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), 'dpi_hedefi': DPI,
+         'siparisler': []}
+    for x in siparisler:
+        cik = W / x['receipt']; cik.mkdir(parents=True, exist_ok=True)
+        t0 = time.time()
         try:
-            r = uret(s, kaynak_b[s['receipt']], P_blue, P_ed, cik)
+            if x['urun'] == 'POD':
+                r = pod_uret(x, kaynak_b[x['receipt']], P_blue, P_ed, cik)
+            elif x['urun'] == 'DIJITAL':
+                r = dijital_uret(x, P_blue, P_ed, cik)
+            else:
+                r = duvar_kagidi_uret(x, cik)
         except BaseException as e:                                # noqa: BLE001
             import traceback
-            r = {**s, 'durum': 'HATA', 'hata': f'{type(e).__name__}: {e}',
+            r = {**x, 'durum': 'HATA', 'hata': f'{type(e).__name__}: {e}',
                  'iz': traceback.format_exc()[-1500:]}
-            log(s['receipt'], 'HATA', r['hata'])
+            log(x['receipt'], 'HATA', r['hata'])
+        r['toplam_sn'] = round(time.time() - t0, 1)
         R['siparisler'].append(r)
         (cik / 'KAPI_RAPORU.json').write_text(json.dumps(r, ensure_ascii=False, indent=1, default=str))
-        rc('copy', str(cik), f'{SIP}/{s["receipt"]}')
-        log(s['receipt'], {k: r.get(k) for k in ('durum', 'baski_px', 'gorsel_dpi', 'metin_dpi',
-                                                 'kapilar', 'kapilar_gecti', 'sure_sn', 'dosya_MB')})
+        rc('copy', str(cik), f'{SIP}/{x["receipt"]}', timeout=1800)
+        log(x['receipt'], {k: r.get(k) for k in ('urun', 'durum', 'baski_px', 'gorsel_dpi',
+                                                 'metin_dpi', 'kapilar', 'kapilar_gecti',
+                                                 'toplam_sn', 'dosya_MB', 'toplam_zip')})
     R['toplam_sn'] = round(time.time() - T0, 1)
-    R['ozet'] = [{k: x.get(k) for k in ('receipt', 'durum', 'baski_px', 'gorsel_dpi', 'metin_dpi',
-                                        'metin_buyutme', 'kapilar', 'kapilar_gecti', 'sure_sn',
-                                        'dosya_MB', 'olcum_girdisi')} for x in R['siparisler']]
+    R['ozet'] = [{k: x.get(k) for k in ('receipt', 'urun', 'durum', 'baski_px', 'gorsel_dpi',
+                                        'metin_dpi', 'metin_buyutme', 'kapilar', 'kapilar_gecti',
+                                        'toplam_sn', 'dosya_MB', 'olcum_girdisi', 'toplam_zip',
+                                        'sebep')} for x in R['siparisler']]
     (W / 'SIPARIS_RAPOR.json').write_text(json.dumps(R, ensure_ascii=False, indent=1, default=str))
     rc('copy', str(W / 'SIPARIS_RAPOR.json'), f'{SIP}')
     print(json.dumps(R['ozet'], ensure_ascii=False, indent=1, default=str), flush=True)
-    if not all(x.get('kapilar_gecti') for x in R['siparisler']):
-        raise SystemExit('en az bir siparis kapilari gecemedi ya da uretilemedi')
+    kotu = [x['receipt'] for x in R['siparisler']
+            if x.get('durum') not in ('URETILDI', 'BEKLIYOR') or x.get('kapilar_gecti') is False]
+    if kotu:
+        raise SystemExit(f'kapilari gecemeyen ya da uretilemeyen siparis: {kotu}')
 
 
 if __name__ == '__main__':

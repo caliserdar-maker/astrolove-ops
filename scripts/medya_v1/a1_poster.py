@@ -171,7 +171,9 @@ class Poster:
 
     def sayfa_kur(self, sayfa_png, sayfa_no, renk, oran, referans=False):
         """cift_sayfa (Canva sayfa PNG, bayt) + sayfa no, renk, oran -> sayfa baglami (olcum + temiz zemin)."""
-        assert renk == 'blue' and oran == ORAN, 'bu adim yalniz Blue 4x5'
+        # Blue hatti: oran siniri kaldirildi (siparis ureticisi 5 oran ister). Renk siniri durur:
+        # diger dort edisyon edisyon_uret yolundan gecer. Tavan yine Cancer-Libra referansindan.
+        assert renk == 'blue', 'bu sarmalayici yalniz Blue icindir'
         assert referans or self.tavan, 'once Cancer-Libra referansi uretilmeli (boy tavani)'
         t0 = time.time()
         yol = self.HAM / f'{oran}_p{sayfa_no}.jpg'            # render kodu bu adi okur; icerik kayipsiz PNG
