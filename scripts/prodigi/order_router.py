@@ -566,7 +566,40 @@ def upd(st, path, rid, **kw):
 
 
 # ------------------------------------------------------------------ ana
+RECEIPT_DESEN = re.compile(r"(?<!\d)4[01]\d{8}(?!\d)")      # Etsy receipt bicimi (ilan 45..., gorsel 8...)
+
+
+def receipt_kod(rid):
+    """Loga / Actions ozetine receipt yerine yazilan opak kod (anahtar: ETSY_SHARED_SECRET)."""
+    import hashlib
+    import hmac
+    anahtar = (os.environ.get("SIPARIS_KOD_ANAHTARI") or os.environ.get("ETSY_SHARED_SECRET") or "astrolove").encode()
+    return "S-" + hmac.new(anahtar, str(rid).encode(), hashlib.sha256).hexdigest()[:8]
+
+
+def maskele_metin(t):
+    return RECEIPT_DESEN.sub(lambda m: receipt_kod(m.group(0)), t)
+
+
+class _MaskeliCikti:
+    """ACIL 25 Eyl: musteri verisi loga yazilmaz. stdout'a giden her satirda receipt -> opak kod.
+    Drive'daki REPORT.md / DIKKAT.md / STATE tam kalir."""
+    def __init__(self, akis):
+        self._a = akis
+
+    def write(self, t):
+        return self._a.write(maskele_metin(t))
+
+    def flush(self):
+        return self._a.flush()
+
+    def __getattr__(self, ad):
+        return getattr(self._a, ad)
+
+
 def main():
+    if not isinstance(sys.stdout, _MaskeliCikti):
+        sys.stdout = _MaskeliCikti(sys.stdout)
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--env", choices=["sandbox", "live"], default="sandbox")
     ap.add_argument("--state", required=True)
@@ -979,7 +1012,7 @@ def main():
     p = os.environ.get("GITHUB_STEP_SUMMARY")
     if p:
         with open(p, "a", encoding="utf-8") as fh:
-            fh.write(text + "\n")
+            fh.write(maskele_metin(text) + "\n")
     if errors:
         sys.exit("DUR: hata var, STATE yazildi")
 

@@ -196,6 +196,8 @@ jobs:
           python scripts/prodigi/order_router.py "${args[@]}"        # sahte receipt ayri adimda kosar
       - name: Token/STATE/paket/rapor Drive'a
         if: ${{ always() }}
+        env:
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}      # yalniz opak receipt kodu icin
         run: |
           set -euo pipefail
           [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
@@ -212,7 +214,8 @@ jobs:
             while read -r rid; do
               [ -z "$rid" ] && continue
               fid=$(rclone lsjson "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/${rid}.md" 2>/dev/null | python3 -c "import json,sys;d=json.load(sys.stdin);print(d[0]['ID'] if d else '')" || true)
-              echo "::error title=ISIM_BEKLIYOR ${rid}::Kisisellestirmeli siparis ${rid} Prodigi'ye GONDERILMEDI. Kart: https://drive.google.com/file/d/${fid}/view"
+              kod=$(python3 -c "import sys;sys.path.insert(0,'scripts/prodigi');import order_router as R;print(R.receipt_kod(sys.argv[1]))" "$rid")
+              echo "::error title=ISIM_BEKLIYOR ${kod}::Kisisellestirmeli siparis ${kod} Prodigi'ye GONDERILMEDI. Kart: https://drive.google.com/file/d/${fid}/view"
             done < _out/ISIM_YENI.txt
           fi
       # Artifact'ta musteri verisi YOK (kart, paket/adres, STATE/receipt yalniz Drive'da): yalniz SKU haritasi.
