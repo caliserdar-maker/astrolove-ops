@@ -23,9 +23,9 @@ on:
         required: false
         default: ""
       mode:
-        description: "pilot = pilot_skus.csv (US) | hpr_sizes = hpr_sizes.txt (US + DE) | ship_everywhere = 8 ulke Standard kargo (18x24) | inserts = branded insert fiyat/ozellik (8 tip, US + DE) | maliyet_api = 16 HPR boy x 7 ulke Budget/Standard + net (DIJITAL_78) | ekstra_tesis = kartpostal/sticker: canli siparis tesis + fatura kalemi (yalniz GET) + ECB kuru | hesap_oku = hesap ayari/adres ucu var mi (yalniz GET)"
+        description: "pilot = pilot_skus.csv (US) | hpr_sizes = hpr_sizes.txt (US + DE) | ship_everywhere = 8 ulke Standard kargo (18x24) | inserts = branded insert fiyat/ozellik (8 tip, US + DE) | maliyet_api = 16 HPR boy x 7 ulke Budget/Standard + net (DIJITAL_78) | ekstra_tesis = kartpostal/sticker: canli siparis tesis + fatura kalemi (yalniz GET) + ECB kuru | hesap_oku = hesap ayari/adres ucu var mi (yalniz GET) | canli_guvenli_test = TEK canli sahte siparis + HEMEN iptal (Serdar onayi 25 Eyl; Pause indefinitely acik)"
         type: choice
-        options: [pilot, hpr_sizes, ship_everywhere, inserts, maliyet_api, ekstra_tesis, hesap_oku]
+        options: [pilot, hpr_sizes, ship_everywhere, inserts, maliyet_api, ekstra_tesis, hesap_oku, canli_guvenli_test]
         default: pilot
 
 concurrency:
@@ -35,7 +35,7 @@ concurrency:
 jobs:
   quote:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 45     # canli_guvenli_test gercek baski uretecini kosar (~30 dk); diger modlar dakikalar
 
     steps:
       - name: Checkout
@@ -96,6 +96,13 @@ jobs:
             python scripts/prodigi/prodigi_inserts_quote.py --out-dir out
             cat out/PRODIGI_INSERTS_QUOTE.md >> "$GITHUB_STEP_SUMMARY"
             exit 0
+          fi
+          if [ "$MODE" = "canli_guvenli_test" ]; then
+            # Script siparis-onay dalindan (canliya alinmamis akis); adres Drive'dan, loga yazilmaz. Cikis 3 = IPTAL BASARISIZ.
+            pip install -q pillow opencv-python-headless numpy fonttools scipy
+            git fetch -q --depth 1 origin siparis-onay && git checkout -q FETCH_HEAD -- scripts/
+            python scripts/prodigi/canli_guvenli_test.py
+            exit $?
           fi
           if [ "$MODE" = "hesap_oku" ]; then
             python scripts/prodigi/prodigi_hesap_oku.py
