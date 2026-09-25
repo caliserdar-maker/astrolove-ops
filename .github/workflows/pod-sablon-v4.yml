@@ -53,8 +53,8 @@ on:
         description: "siparis_* : Drive yolu (cift/edisyon/boy kaniti)"
         default: "gdrive:ASTROLOVE/TEMP/POD_PRINT/AQUARIUS_LIBRA/MIDNIGHT_BLUE/8x10.jpg"
       siparis_alici:
-        description: "siparis_* : alici adi + adres (ad|adres1|sehir|eyalet|posta|ulke)"
-        default: "MUSTERI_ADI|ADRES|SEHIR|NH|POSTAKODU|US"
+        description: "BOS BIRAK (musteri verisi loga girmez): alici Drive TEMP/SIPARIS_ALICI.txt'den okunur (ad|adres1|sehir|eyalet|posta|ulke)"
+        default: ""
       siparis_master:
         description: "siparis_* : (istege bagli) icerik karsilastirmasi icin master yolu; bos = karsilastirma yok"
         default: ""
@@ -232,7 +232,11 @@ jobs:
               --remote "$SIPARIS_REMOTE" --sku "$SIPARIS_SKU" --ref "$SIPARIS_REF" \
               --alici x --adres1 x --sehir x --posta x
           elif [ "$MOD" = "siparis_hazirla" ] || [ "$MOD" = "siparis_gonder" ]; then
-            IFS='|' read -r S_AD S_ADR S_SEHIR S_EYALET S_POSTA S_ULKE <<< "$SIPARIS_ALICI"
+            # alici yalniz Drive'dan (dispatch girdisi / env loga yazilir; 25 Eyl gizlilik duzeltmesi)
+            ALICI="$(rclone cat gdrive:ASTROLOVE/TEMP/SIPARIS_ALICI.txt 2>/dev/null || true)"
+            [ -n "$ALICI" ] || { echo "::error::Drive TEMP/SIPARIS_ALICI.txt yok. DUR."; exit 1; }
+            while IFS= read -r p_; do [ -n "$p_" ] && echo "::add-mask::$p_"; done < <(tr '|' '\n' <<< "$ALICI")
+            IFS='|' read -r S_AD S_ADR S_SEHIR S_EYALET S_POSTA S_ULKE <<< "$ALICI"
             args=(--file-id "$SIPARIS_DOSYA_ID" --remote "$SIPARIS_REMOTE" --sku "$SIPARIS_SKU"
                   --adet "$SIPARIS_ADET" --ref "$SIPARIS_REF" --alici "$S_AD" --adres1 "$S_ADR"
                   --sehir "$S_SEHIR" --eyalet "$S_EYALET" --posta "$S_POSTA" --ulke "$S_ULKE"
