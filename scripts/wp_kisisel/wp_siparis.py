@@ -88,7 +88,12 @@ def murekkep(baski, plate, ed, hayalet="birak"):
     """
     r, g, b = INK_RGB[ed]
     f = baski.astype(np.float32) - plate.astype(np.float32)
-    yon = np.array([b, g, r], np.float32) - plate.astype(np.float32)
+    # Yon vektoru PLATE'e bagli OLAMAZ: plate'te murekkep olan pikselde
+    # (eski ∞, eski slogan) INK_RGB - plate ~ 0 olur ve isaret belirsizlesir
+    # (yerel olcum 25 Eyl: 79.982 px "yonsuz"). Bunun yerine edisyonun SABIT
+    # zemin->murekkep ekseni kullanilir: zemin = plate'in medyan rengi.
+    zemin = np.median(plate[::16, ::16].reshape(-1, 3), axis=0).astype(np.float32)
+    yon = np.array([b, g, r], np.float32) - zemin
     p = (f * yon).sum(2)
     var = np.abs(f).max(2) > 0
     poz = var & (p > 0)
@@ -96,7 +101,8 @@ def murekkep(baski, plate, ed, hayalet="birak"):
     sifir = var & (p == 0)                     # yon belirsiz (plate zaten murekkep rengi)
     fark = f if hayalet == "gecir" else f * poz[..., None]
     alfa = (np.abs(fark).max(2) > 0).astype(np.float32)
-    tani = {"poz_px": int(poz.sum()), "neg_px": int(neg.sum()), "yonsuz_px": int(sifir.sum()),
+    tani = {"zemin_bgr": [round(float(v), 1) for v in zemin],
+            "poz_px": int(poz.sum()), "neg_px": int(neg.sum()), "yonsuz_px": int(sifir.sum()),
             "neg_kutu": [int(v) for v in V2.bbox(neg)] if neg.any() else None,
             "neg_maks": round(float(np.abs(f).max(2)[neg].max()), 1) if neg.any() else 0.0}
     return fark, alfa, tani
@@ -146,8 +152,10 @@ def kutular_olc(alfa, halka_ayri=False):
     kutu["mesaj"] = list(V2.bbox(mesaj))
     # PLATE'in SABIT ogeleri (halka, fuzyon sembolu) ICERMEDIGI dogrulanir:
     # wallpaper CLEAN plakasinda da yoklar, aktarilmazlarsa kapi 2 duser.
-    say = {ad: int((m & (V2.kutu_maske(alfa.shape, kt) > 0)).sum())
-           for ad, kt in (("halka", V2.BOX_SYMBOL_RING), ("sembol", V2.BOX_SYMBOL_CORE))}
+    # HALKA sayimi BOX_SYMBOL_RING ile YAPILMAZ: o kutu fuzyon sembolunu de kapsar
+    # (yerel olcum 25 Eyl: halka=sembol=233.264 px, yaniltici uyari). Halka bandi kullanilir.
+    say = {"halka": int((m & (halka_bandi() > 0)).sum()),
+           "sembol": int((m & (V2.kutu_maske(alfa.shape, V2.BOX_SYMBOL_CORE) > 0)).sum())}
     bekle = ["sembol"] if halka_ayri else ["halka", "sembol"]
     bos = [ad for ad in bekle if say[ad] == 0]
     if bos:

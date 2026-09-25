@@ -126,9 +126,14 @@ def kur(T, ed, kis):
 
 
 def hayalet_kutusu(x_inf):
-    """Eski ∞'nin poster kutusu (yeni konumun DX_ESKI kadar solu) + eski slogan bandi."""
+    """Eski ∞'nin YENI ∞ ile ORTUSMEYEN kismi (hayalet burada olculur).
+
+    Eski ve yeni ∞ kutulari DX_ESKI kadar kaydik; ortusen bolgede YENI murekkep
+    mesru olarak CLEAN'den farklidir, oraya bakmak olcumu gecersiz kilar.
+    """
     ymid = (BOX_NAMES[1] + BOX_NAMES[3]) // 2
-    return {"eski_sonsuz": [x_inf + DX_ESKI, ymid - 95, x_inf + DX_ESKI + W_INF, ymid + 95],
+    x0 = x_inf + DX_ESKI
+    return {"eski_sonsuz": [x0, ymid - 95, x_inf, ymid + 95],       # yalniz ortusmeyen sol parca
             "eski_slogan": list(SP.MESAJ_BANT)}
 
 
