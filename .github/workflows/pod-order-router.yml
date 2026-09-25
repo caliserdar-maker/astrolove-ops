@@ -260,7 +260,7 @@ jobs:
           python-version: "3.12"
       - run: |
           set -euo pipefail
-          pip install -q requests==2.34.2 pillow opencv-python-headless numpy fonttools
+          pip install -q requests==2.34.2 pillow opencv-python-headless numpy fonttools scipy
           curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
       - name: rclone.conf olustur
         env:
@@ -295,6 +295,9 @@ jobs:
             [ -f "_siparis/${rid}/KAPI_RAPORU.json" ] || echo "{\"durum\": \"HATA\", \"hata\": \"uretec cikis $rc\"}" > "_siparis/${rid}/KAPI_RAPORU.json"
             echo "$rid" >> _work/biten.txt
           done < _work/kuyruk.txt
+          # kisiye ozel kartpostal (Serdar 25 Eyl): ciftin POSTER_AM'i + Cinzel; cikti yalniz Drive SIPARIS/<rid>/(KONTROL/)
+          git fetch -q --depth 1 origin kisisel-v1 && git show FETCH_HEAD:assets/fonts/Cinzel.ttf > _work/Cinzel.ttf
+          python scripts/prodigi/siparis_onay.py kartpostal --rid-dosya _work/biten.txt --rapor-kok _siparis --font _work/Cinzel.ttf || true
           rc=0; python scripts/prodigi/siparis_onay.py uretildi --rid-dosya _work/biten.txt --rapor-kok _siparis || rc=$?
           # islenenler kuyruktan cikar (bu arada eklenenler korunur)
           rclone copyto "gdrive:ASTROLOVE/TEMP/SIPARIS/_URETIM_KUYRUK.txt" _work/kuyruk2.txt

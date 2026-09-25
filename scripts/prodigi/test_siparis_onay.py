@@ -195,6 +195,7 @@ k("POD kartinda uretim girdisi (cift/renk/boy/isimler/mesaj/urun)", "- cift: ARI
   and "- isim1: EMILY" in kart and f"- mesaj: {MESAJ}" in kart and "- urun: pod" in kart)
 k("Kiril kartinda uretim girdisi YOK", "## Uretim girdisi" not in (W / f"k1/SIPARIS_ISIM/{KIR}.md").read_text(encoding="utf-8"))
 pkg = json.loads((W / f"k1/{POD}.json").read_text())
+k("POD paketi: kisiye ozel kartpostal yolu", pkg.get("kartpostal_remote") == f"{O.DRIVE_KOK}/{POD}/KARTPOSTAL_A6.jpg", pkg.get("kartpostal_remote"))
 k("POD paketi: kisisel baski dosyasi yolu + SKU + adres", pkg["items"][0]["asset_remote"] == f"{O.DRIVE_KOK}/{POD}/BASKI_8x10.jpg"
   and pkg["order"]["items"][0]["sku"] == "GLOBAL-HPR-8x10" and pkg["order"]["recipient"]["address"]["postalOrZipCode"] == "10001")
 k("POD paketi: kargo EN UCUZ (US Budget) + tabloda net kar", pkg["order"]["shippingMethod"] == "Budget"
@@ -212,14 +213,15 @@ tb = O.YerelTablo(TABLO)
 buf = io.StringIO()
 with contextlib.redirect_stdout(buf):
     O.BILDIRIMLER.clear()
-    d1 = O.uretildi(tb, str(POD), {"urun": "POD", "boy": "8x10", "durum": "URETILDI", "kapilar_gecti": True}, link=link)
+    d1 = O.uretildi(tb, str(POD), {"urun": "POD", "boy": "8x10", "durum": "URETILDI", "kapilar_gecti": True, "kartpostal": {"PASS": True}}, link=link)
     d2 = O.uretildi(tb, str(DIJ), {"urun": "DIJITAL", "durum": "URETILDI", "kapilar_gecti": True}, link=link)
     d3 = O.uretildi(tb, str(POD), {"urun": "POD", "boy": "8x10", "durum": "URETILDI", "kapilar_gecti": True}, link=link)
 log2 = buf.getvalue(); LOGLAR.append(log2)
 T = tablo()
 k("uretildi: POD + dijital ONAY_BEKLIYOR, tekrar cagri degistirmez", d1 == d2 == O.D_ONAY and d3 == O.D_ONAY and T[KP]["DURUM"] == O.D_ONAY)
 k("bildirimde net kar (kartpostal+sticker dusulmus)", f"net kar {O.net_kar(49.99, 10.0, 6.85, 0, ekstra_usd=EK_US):.2f} USD (kartpostal+sticker dusulmus) | kargo Budget 6.85" in log2)
-k("tabloda KONTROL / BASKI / x3 linkleri", all(T[KP][c].startswith("https://drive.google.com/") for c in ("KONTROL_KLASOR", "BASKI", "ISIM_x3", "MESAJ_x3")))
+k("tabloda KONTROL / BASKI / x3 / KARTPOSTAL linkleri", all(T[KP][c].startswith("https://drive.google.com/") for c in ("KONTROL_KLASOR", "BASKI", "ISIM_x3", "MESAJ_x3", "KARTPOSTAL")))
+k("e-posta: kartpostal linki + 'kisiye ozel kartpostal hazir'", "kartpostal: https://drive.google.com/" in log2 and "baski dosyasi + kisiye ozel kartpostal hazir" in log2)
 k("bildirim: ozet + x3 linkleri + tam cozunurluk + tablo satiri", f"::error title=ONAY BEKLIYOR {KP}::POD DEEP_BLACK 8x10" in log2
   and "isim x3: https://" in log2 and "tam cozunurluk: https://" in log2 and "tablo satiri: file://" in log2 and log2.count("ONAY BEKLIYOR") == 2)
 
@@ -235,20 +237,25 @@ T = tablo()
 post = [c for c in S.cagri if c[0] == "POST" and c[1] == "/orders"]
 govde = post[0][2] if post else {}
 k("POD: tek Prodigi siparisi, idempotencyKey etsy-<receipt>", len(post) == 1 and govde["idempotencyKey"] == f"etsy-{POD}")
+k("POD: branding.postcard.url = gecici Drive linki (kisiye ozel kart)", (govde.get("branding") or {}).get("postcard", {}).get("url", "").startswith("https://drive.google.com/uc?")
+  and f"{O.DRIVE_KOK}/{POD}/KARTPOSTAL_A6.jpg" in LINK["acik"].values(), govde.get("branding"))
 k("POD: dosya linki gecici Drive linki (kisisel BASKI), dogru SKU", govde["items"][0]["assets"][0]["url"].startswith("https://drive.google.com/uc?")
-  and govde["items"][0]["sku"] == "GLOBAL-HPR-8x10" and list(LINK["acik"].values()) in ([], [f"{O.DRIVE_KOK}/{POD}/BASKI_8x10.jpg"]))
+  and govde["items"][0]["sku"] == "GLOBAL-HPR-8x10" and f"{O.DRIVE_KOK}/{POD}/BASKI_8x10.jpg" not in LINK["acik"].values())
 k("POD: tablo PRODIGI_GONDERILDI + order id", T[KP]["DURUM"] == O.D_PRODIGI and T[KP]["PRODIGI"] == "ord_T1", T[KP]["DURUM"])
 k("dijital: CHATGPT_YUKLEME_BEKLIYOR, Prodigi'ye gitmez", T[KD]["DURUM"] == O.D_CHATGPT and len(post) == 1)
 k("bildirimler: PRODIGI GONDERILDI + CHATGPT", f"::error title=PRODIGI GONDERILDI {KP}::" in log4 and f"::error title=CHATGPT YUKLEME BEKLIYOR {KD}::" in log4)
 st = {r["receipt_id"]: r for r in csv.DictReader(open(W / "state.csv", encoding="utf-8"))}
 k("STATE: POD ordered, dijital dijital_bekliyor, Kiril ISIM_BEKLIYOR", st[str(POD)]["stage"] == "ordered"
   and st[str(DIJ)]["stage"] == "dijital_bekliyor" and st[str(KIR)]["stage"] == "ISIM_BEKLIYOR")
-k("indirilince gecici izin kapandi", not LINK["acik"] and LINK["kapali"], LINK)
+k("assetler indirilince baski izni kapandi; kart linki gonderime kadar acik", list(LINK["acik"].values()) == [f"{O.DRIVE_KOK}/{POD}/KARTPOSTAL_A6.jpg"] and LINK["kapali"], LINK)
+for o_ in S.orders.values():
+    o_["status"]["stage"] = "Complete"                   # Prodigi isi bitti -> kart linki kapanir
 
 # ---- 5) tekrar kosu: idempotent
 rc5, log5 = run("k5"); LOGLAR.append(log5)
 k("tekrar: ikinci Prodigi siparisi YOK", len([c for c in S.cagri if c[0] == "POST" and c[1] == "/orders"]) == 1)
 k("tekrar: yeni bildirim yok", "::error title=" not in log5, [l for l in log5.splitlines() if l.startswith("::error")][:2])
+k("siparis Complete -> kart linki kapandi", not LINK["acik"], LINK["acik"])
 k("tekrar: tablo degismedi", tablo()[KP]["DURUM"] == O.D_PRODIGI and tablo()[KD]["DURUM"] == O.D_CHATGPT)
 
 # ---- 6) Prodigi hatasi -> HATA + DUR + bildirim
@@ -343,6 +350,36 @@ log7 = buf.getvalue(); LOGLAR.append(log7)
 k("JP zarar: bildirim 'ONAY BEKLIYOR - ZARAR' + kirmizi ZARAR + net", f"::error title=ONAY BEKLIYOR - ZARAR {KJ}::POD DEEP_BLACK 8x10: {O.ZARAR}: net -6.53 USD (kartpostal+sticker dusulmus)" in log7, log7[:300])
 k("JP zarar: tablo KAR_UYARI kirmizi ZARAR, ONAY yokken gonderim YOK", O.ZARAR in tb3.satirlar()[0]["KAR_UYARI"] and not gonder
   and tb3.satirlar()[0]["DURUM"] == O.D_ONAY)
+
+# ---- kartpostal: uretim girdisi -> kart; kart yok -> e-postada uyari; QC'de isim yok
+import kartpostal as KPM
+md = (W / f"k1/SIPARIS_ISIM/{POD}.md").read_text(encoding="utf-8")
+g = O.uretim_girdisi(md)
+k("uretim girdisi okunur (cift/isim1/isim2/urun)", g.get("cift") == "ARIES_LEO" and g.get("isim1") == "EMILY" and g.get("isim2") == "JAMES" and g.get("urun") == "pod", g)
+k("kart metni 'EMILY & JAMES'", KPM.kart_metni("EMILY", "JAMES") == "EMILY & JAMES")
+cagri = []
+def sahte_uret(kaynak, poster, font, metin, cikti):
+    cagri.append((Path(poster).name, metin)); Path(cikti).write_bytes(b"jpg")
+    return {"PASS": True, "kapilar": {"olcu_1240x1748_300dpi": True}, "punto": 30}
+gercek_uret, KPM.kartpostal_uret = KPM.kartpostal_uret, sahte_uret
+indir_ = lambda uzak, yerel: (Path(yerel).write_bytes(b"x") or True) if "A1_77/ARIES_LEO/POSTER_AM.png" in uzak or "INSERT_POSTCARD" in uzak else False
+qc = O.kartpostal_hazirla(POD, md, W / "kp", "Cinzel.ttf", indir_)
+qcm = (W / "kp" / str(POD) / "KARTPOSTAL_qc.json").read_text()
+k("kartpostal_hazirla: ciftin POSTER_AM'i + 'EMILY & JAMES' ile uretir, gecici girdiler silinir", qc["PASS"] and cagri == [("_POSTER_AM.png", "EMILY & JAMES")]
+  and (W / "kp" / str(POD) / "KARTPOSTAL_A6.jpg").exists() and not (W / "kp" / str(POD) / "_POSTER_AM.png").exists())
+k("kartpostal QC raporunda isim YOK", "EMILY" not in qcm and "JAMES" not in qcm, qcm)
+qc2 = O.kartpostal_hazirla(POD, md.replace("ARIES_LEO", "CANCER_LIBRA"), W / "kp2", "Cinzel.ttf", indir_)
+k("POSTER_AM yoksa kart YOK + neden", not qc2["PASS"] and "POSTER_AM yok" in qc2["neden"], qc2)
+KPM.kartpostal_uret = gercek_uret
+tb5 = O.YerelTablo(W / "kartyok.csv"); KY = O.kod(7700000011)
+tb5.ekle({"KOD": KY, "RECEIPT": "7700000011", "URUN": "POD", "RENK": "DEEP_BLACK", "BOY": "8x10", "DURUM": O.D_DOSYA})
+buf = io.StringIO()
+with contextlib.redirect_stdout(buf):
+    O.uretildi(tb5, "7700000011", {"urun": "POD", "boy": "8x10", "durum": "URETILDI", "kapilar_gecti": True, "kartpostal": qc2}, link=link)
+k("kart yok: e-posta + tablo 'KARTPOSTAL YOK ... panel karti gider', durum yine ONAY_BEKLIYOR",
+  "KARTPOSTAL YOK (POSTER_AM yok (CANCER_LIBRA))" in buf.getvalue() and "KARTPOSTAL YOK" in tb5.satirlar()[0]["NOT"]
+  and not tb5.satirlar()[0]["KARTPOSTAL"] and tb5.satirlar()[0]["DURUM"] == O.D_ONAY, buf.getvalue()[:300])
+LOGLAR.append(buf.getvalue())
 
 # ---- 8) guvenlik: loglarda musteri verisi yok
 sz = sorted({g for lg in LOGLAR for g in sizinti(lg)})

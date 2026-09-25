@@ -30,7 +30,7 @@ import sys
 import time
 
 KOLON = ["KOD", "RECEIPT", "TARIH_UTC", "URUN", "CIFT", "RENK", "BOY", "ISIM1", "ISIM2", "MESAJ", "ULKE",
-         "ON_KONTROL", "SABLON", "KONTROL_KLASOR", "BASKI", "ISIM_x3", "MESAJ_x3", "FIYAT", "KARGO", "NET_KAR", "KAR_UYARI",
+         "ON_KONTROL", "SABLON", "KONTROL_KLASOR", "BASKI", "ISIM_x3", "MESAJ_x3", "KARTPOSTAL", "FIYAT", "KARGO", "NET_KAR", "KAR_UYARI",
          "ONAY", "DURUM", "PRODIGI", "NOT"]
 D_MESAJ = "MUSTERIYE_MESAJ_GEREKLI"
 D_DOSYA = "DOSYA_URETILIYOR"
@@ -40,6 +40,10 @@ D_CHATGPT = "CHATGPT_YUKLEME_BEKLIYOR"
 D_HATA = "HATA"
 DRIVE_KOK = "gdrive:ASTROLOVE/TEMP/SIPARIS"
 TABLO_AD = "SIPARIS_ONAY"
+# kisiye ozel kartpostal (Serdar 25 Eyl): kaynak kart + ciftin POSTER_AM'i + Cinzel; Prodigi branding.postcard.url
+KART_KAYNAK = "gdrive:ASTROLOVE/BRAND/INSERTS/ASTROLOVE_INSERT_POSTCARD_A6_EN_LACIVERT_1240x1748_V1.jpg"
+A1_77 = "gdrive:ASTROLOVE/TEMP/POD_KISISEL/A1_77"
+KART_AD = "KARTPOSTAL_A6.jpg"
 EVET = {"TRUE", "EVET", "X", "YES", "1", "✓", "✔"}
 ETSY_SABIT, ETSY_ORAN = 0.582, 0.176     # Etsy kesintisi = 0.582 x adet + 0.176 x fiyat (Serdar, 25 Eyl 2026)
 ZARAR = "🔴 ZARAR"
@@ -451,16 +455,24 @@ def uretildi(tablo, rid, rapor, link=drive_link, kok=DRIVE_KOK):
     L = {"KONTROL_KLASOR": link(f"{base}/KONTROL", klasor=True),
          "BASKI": link(f"{base}/BASKI_{boy}.jpg") if urun == "POD" else link(base, klasor=True),
          "ISIM_x3": link(f"{base}/KONTROL/ISIM_BANDI_x3.jpg"), "MESAJ_x3": link(f"{base}/KONTROL/MESAJ_BANDI_x3.jpg")}
+    kp = rapor.get("kartpostal") or {}
+    kart_not = ""
+    if urun == "POD":
+        if kp.get("PASS"):
+            L["KARTPOSTAL"] = link(f"{base}/KONTROL/{KART_AD}")
+        else:
+            kart_not = f"KARTPOSTAL YOK ({kp.get('neden') or 'uretilmedi'}): Prodigi'ye panel karti gider"
     durum = D_ONAY if ok else D_HATA
     tablo.guncelle(satir["_no"], {**L, "DURUM": durum,
-                                  "NOT": "" if ok else f"uretim: {rapor.get('durum')} kapi={rapor.get('kapilar')} {str(rapor.get('hata') or '')[:120]}"})
+                                  "NOT": "; ".join(x for x in ([] if ok else [f"uretim: {rapor.get('durum')} kapi={rapor.get('kapilar')} {str(rapor.get('hata') or '')[:120]}"]) + [kart_not] if x)})
     ozet = f"{urun} {satir.get('RENK', '')} {boy}".strip()
     linkler = {"isim x3": L["ISIM_x3"], "mesaj x3": L["MESAJ_x3"], "tam cozunurluk": L["BASKI"],
-               "KONTROL": L["KONTROL_KLASOR"], "tablo satiri": tablo.satir_link(satir["_no"])}
+               "kartpostal": L.get("KARTPOSTAL", ""), "KONTROL": L["KONTROL_KLASOR"], "tablo satiri": tablo.satir_link(satir["_no"])}
     if ok:
         zarar = ZARAR in (satir.get("KAR_UYARI") or "")
         bildir("ONAY BEKLIYOR - ZARAR" if zarar else "ONAY BEKLIYOR", k,
-               f"{ozet}: {kar_metni(satir)} | baski dosyasi hazir, kontrol edip ONAY sutununa EVET yazin"
+               f"{ozet}: {kar_metni(satir)} | baski dosyasi" + (" + kisiye ozel kartpostal" if L.get("KARTPOSTAL") else "")
+               + " hazir, kontrol edip ONAY sutununa EVET yazin" + (f" | {kart_not}" if kart_not else "")
                + (" (ZARARINA SIPARIS: otomatik gonderim yok, karar Serdar'in)" if zarar else ""), linkler)
     else:
         bildir("SIPARIS HATA", k, f"{ozet}: baski dosyasi uretilemedi / kapi gecilmedi (DUR)", linkler)
@@ -536,21 +548,86 @@ def dijital_kalemler(receipt):
     return out
 
 
+# ------------------------------------------------------------------ kisiye ozel kartpostal (uretim isi)
+def uretim_girdisi(md):
+    """Siparis kartindaki '## Uretim girdisi' blogu -> {cift, renk, boy, isim1, isim2, mesaj, urun}."""
+    d, ic = {}, False
+    for satir in md.splitlines():
+        if satir.startswith("## "):
+            ic = satir.strip().lower().startswith("## uretim girdisi")
+            continue
+        if ic and satir.startswith("- ") and ":" in satir:
+            k, _, v = satir[2:].partition(":")
+            d[k.strip().lower()] = v.strip()
+    return d
+
+
+def kartpostal_hazirla(rid, md, cikti_kok, font, indir):
+    """POD siparisi icin kart: cikti_kok/<rid>/KARTPOSTAL_A6.jpg + KARTPOSTAL_qc.json (isim YOK).
+    indir(uzak, yerel) -> bool. -> qc dict {PASS, neden, kapilar}."""
+    import kartpostal as KP
+    g = uretim_girdisi(md)
+    hedef = pathlib.Path(cikti_kok) / str(rid)
+    hedef.mkdir(parents=True, exist_ok=True)
+    if (g.get("urun") or "pod").lower() != "pod":
+        qc = {"PASS": False, "neden": "POD degil"}
+    elif not g.get("cift") or not g.get("isim1"):
+        qc = {"PASS": False, "neden": "uretim girdisi eksik (cift/isim)"}
+    else:
+        poster, kaynak = hedef / "_POSTER_AM.png", hedef / "_KART_KAYNAK.jpg"
+        if not indir(f"{A1_77}/{g['cift']}/POSTER_AM.png", poster):
+            qc = {"PASS": False, "neden": f"POSTER_AM yok ({g['cift']})"}
+        elif not indir(KART_KAYNAK, kaynak):
+            qc = {"PASS": False, "neden": "kaynak kart yok"}
+        else:
+            try:
+                qc = KP.kartpostal_uret(kaynak, poster, font, KP.kart_metni(g["isim1"], g.get("isim2")), hedef / KART_AD)
+                qc["neden"] = "" if qc["PASS"] else "QC FAIL: " + ",".join(k for k, v in qc["kapilar"].items() if not v)
+            except Exception as e:                       # noqa: BLE001 - kart yoksa siparis durmaz, bildirimde yazar
+                qc = {"PASS": False, "neden": f"uretim hatasi {type(e).__name__}"}
+        for f in (poster, kaynak):
+            f.unlink(missing_ok=True)
+    (hedef / "KARTPOSTAL_qc.json").write_text(json.dumps(qc, indent=1, ensure_ascii=False, default=str), encoding="utf-8")
+    return qc
+
+
+def _rclone_indir(uzak, yerel):
+    try:
+        return subprocess.run(["rclone", "copyto", uzak, str(yerel)], capture_output=True).returncode == 0 \
+            and pathlib.Path(yerel).exists()
+    except OSError:
+        return False
+
+
 # ------------------------------------------------------------------ CLI (workflow adimlari)
 def main():
     import argparse
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("mod", choices=["uretildi"])
+    ap.add_argument("mod", choices=["uretildi", "kartpostal"])
+    ap.add_argument("--font", default="_work/Cinzel.ttf")
     ap.add_argument("--tablo", default=f"csv:{TABLO_AD}")
     ap.add_argument("--rid-dosya", required=True, help="uretilen receipt listesi (satir basina bir)")
     ap.add_argument("--rapor-kok", required=True, help="yerel: <kok>/<rid>/KAPI_RAPORU.json")
     ap.add_argument("--drive-kok", default=DRIVE_KOK)
     a = ap.parse_args()
+    if a.mod == "kartpostal":                            # Drive: SIPARIS_ISIM/<rid>.md -> SIPARIS/<rid>/KARTPOSTAL_A6.jpg (+ KONTROL)
+        for rid in [x.strip() for x in pathlib.Path(a.rid_dosya).read_text().split() if x.strip()]:
+            r = subprocess.run(["rclone", "cat", f"gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/{rid}.md"], capture_output=True, text=True)
+            qc = kartpostal_hazirla(rid, r.stdout if r.returncode == 0 else "", a.rapor_kok, a.font, _rclone_indir)
+            if qc.get("PASS"):
+                yerel = pathlib.Path(a.rapor_kok) / rid / KART_AD
+                for uzak in (f"{a.drive_kok}/{rid}/{KART_AD}", f"{a.drive_kok}/{rid}/KONTROL/{KART_AD}"):
+                    subprocess.run(["rclone", "copyto", str(yerel), uzak, "-q"], check=False)
+            print(f"{kod(rid)}: kartpostal {'PASS' if qc.get('PASS') else 'YOK - ' + str(qc.get('neden'))}", flush=True)
+        sys.exit(0)
     tablo = tablo_ac(a.tablo)
     hata = 0
     for rid in [x.strip() for x in pathlib.Path(a.rid_dosya).read_text().split() if x.strip()]:
         p = pathlib.Path(a.rapor_kok) / rid / "KAPI_RAPORU.json"
         rapor = json.loads(p.read_text(encoding="utf-8")) if p.exists() else {"durum": "HATA", "hata": "KAPI_RAPORU yok"}
+        kq = pathlib.Path(a.rapor_kok) / rid / "KARTPOSTAL_qc.json"
+        if kq.exists():
+            rapor["kartpostal"] = json.loads(kq.read_text(encoding="utf-8"))
         d = uretildi(tablo, rid, rapor, kok=a.drive_kok)
         print(f"{kod(rid)}: {d}", flush=True)
         hata += d == D_HATA

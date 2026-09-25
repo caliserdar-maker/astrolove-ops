@@ -5,7 +5,9 @@ Etsy: SAHTE (receipt'ler bu dosyada; Etsy'ye hic cagri yok). Prodigi: SANDBOX (a
 Drive + onay tablosu: GERCEK, test klasoru TEMP/SIPARIS_TEST (canli TEMP/SIPARIS'e dokunulmaz).
 Baski dosyasi: GERCEK uretec (siparis-baski-v1 siparis_dosyasi.py), logu yalniz Drive'a.
 Siparisler (sahte): 1 POD (EMILY/JAMES, Aries-Leo Deep Black 8x10), 1 dijital (EMILY/JAMES), 1 hatali (Kiril isim).
-Adimlar: router (kayit) -> uretec -> uretildi -> ONAY isaretle (Serdar yerine) -> router (izle: POD sandbox siparisi,
+Kisiye ozel kartpostal: gercek kartpostal_uret (ciftin POSTER_AM'i), Prodigi sandbox siparisinde branding.postcard.url;
+sandbox yaniti (issues / branding) ile A6 olcu sarti dogrulanir.
+Adimlar: router (kayit) -> uretec -> kartpostal -> uretildi -> ONAY isaretle (Serdar yerine) -> router (izle: POD sandbox siparisi,
 dijital CHATGPT) -> router tekrar (idempotens) -> izin kapat + temizlik. Actions loguna yalniz PASS/FAIL + opak kod.
 """
 import contextlib
@@ -18,7 +20,7 @@ import sys
 import time
 from pathlib import Path
 
-subprocess.run([sys.executable, "-m", "pip", "install", "-q", "requests==2.34.2"], check=True)
+subprocess.run([sys.executable, "-m", "pip", "install", "-q", "requests==2.34.2", "scipy"], check=True)
 ROOT = Path(__file__).resolve().parents[2]
 os.chdir(ROOT)
 sys.path.insert(0, str(ROOT / "scripts/prodigi")); sys.path.insert(0, str(ROOT / "scripts/etsy"))
@@ -144,6 +146,17 @@ for rid, lim in ((POD, 1800), (DIJ, 2700)):
     subprocess.run(["rclone", "copyto", str(lp), f"{KOK}/{rid}/URETIM.log", "-q"])
     rp = ROOT / "_siparis" / str(rid) / "KAPI_RAPORU.json"
     rapor = json.loads(rp.read_text()) if rp.exists() else {"durum": "HATA", "hata": f"uretec {rcu}"}
+    if rid == POD:                                     # kisiye ozel kartpostal (gercek uretec)
+        font = W / "Cinzel.ttf"
+        subprocess.run(["git", "fetch", "-q", "--depth", "1", "origin", "kisisel-v1"], check=True)
+        font.write_bytes(subprocess.run(["git", "show", "FETCH_HEAD:assets/fonts/Cinzel.ttf"], capture_output=True, check=True).stdout)
+        md = subprocess.run(["rclone", "cat", f"gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/{rid}.md"], capture_output=True, text=True).stdout
+        kq = O.kartpostal_hazirla(rid, md, W / "kart", font, O._rclone_indir)
+        if kq.get("PASS"):
+            for uzak in (f"{KOK}/{rid}/{O.KART_AD}", f"{KOK}/{rid}/KONTROL/{O.KART_AD}"):
+                subprocess.run(["rclone", "copyto", str(W / "kart" / str(rid) / O.KART_AD), uzak, "-q"], check=True)
+        rapor["kartpostal"] = kq
+        k("kartpostal: gercek uretec PASS (1240x1748, 300 dpi), KONTROL'e yuklendi", kq.get("PASS"), kq.get("neden", ""))
     buf = io.StringIO()
     with contextlib.redirect_stdout(buf):
         O.BILDIRIMLER.clear()
@@ -152,7 +165,8 @@ for rid, lim in ((POD, 1800), (DIJ, 2700)):
     k(f"uretec {O.kod(rid)}: {rapor.get('durum')} kapi={rapor.get('kapilar_gecti')} -> {d} ({sure[O.kod(rid)]} dk)",
       d == O.D_ONAY, f"cikis {rcu}")
 T = tablo()
-k("tabloda KONTROL/BASKI/x3 linkleri (POD)", all(str(T[KP].get(c, "")).startswith("https://") for c in ("KONTROL_KLASOR", "BASKI", "ISIM_x3", "MESAJ_x3")))
+k("tabloda KONTROL/BASKI/x3/KARTPOSTAL linkleri (POD)", all(str(T[KP].get(c, "")).startswith("https://") for c in ("KONTROL_KLASOR", "BASKI", "ISIM_x3", "MESAJ_x3", "KARTPOSTAL")))
+k("onay bildiriminde kartpostal linki", any(f"ONAY BEKLIYOR {KP}" in l and "kartpostal: https://" in l for l in BILDIRIM))
 
 # 3) Serdar yerine ONAY (POD + dijital)
 tb = O.tablo_ac(TABLO)
@@ -165,9 +179,25 @@ k("POD onaylandi -> Prodigi SANDBOX siparisi", T[KP].get("DURUM") == O.D_PRODIGI
 k("dijital onaylandi -> CHATGPT_YUKLEME_BEKLIYOR", T[KD].get("DURUM") == O.D_CHATGPT)
 k("Kiril: onay yok, Prodigi yok", T[KK].get("DURUM") == O.D_MESAJ)
 
+# 3b) sandbox siparisi: branding.postcard kabul edildi mi, olcu/tasma sorunu (issue) var mi -> yalniz kodlar loga
+prod = R.Prodigi(R.load_prodigi_key("sandbox"), "sandbox")
+oid = str(T[KP].get("PRODIGI", ""))
+o_ = {}
+for _ in range(12):                                   # sandbox assetleri indirsin (en fazla ~4 dk)
+    st_, d_ = prod.get_order(oid) if oid.startswith("ord_") else (0, {})
+    o_ = (d_ or {}).get("order") or {}
+    if str(((o_.get("status") or {}).get("details") or {}).get("downloadAssets", "")).lower() in ("complete", "error"):
+        break
+    time.sleep(20)
+issues = [f"{i.get('errorCode')}:{str(i.get('description') or '')[:120]}" for i in (o_.get("status") or {}).get("issues") or []]
+brand = o_.get("branding") or {}
+print(f"SANDBOX {oid}: stage={(o_.get('status') or {}).get('stage')} details={(o_.get('status') or {}).get('details')} "
+      f"branding_anahtar={sorted(brand)} postcard_alanlari={sorted((brand.get('postcard') or {}))} issues={issues}", flush=True)
+k("sandbox: branding.postcard siparise islendi", bool(brand.get("postcard")), f"branding={sorted(brand)}")
+k("sandbox: olcu/tasma/indirme issue YOK (A6 1240x1748 kabul)", not issues, "; ".join(issues)[:300])
+
 # 4) idempotens: tekrar kosu -> ikinci siparis yok
 rc3, log3 = router("r3")
-prod = R.Prodigi(R.load_prodigi_key("sandbox"), "sandbox")
 ayni = [o for o in prod.siparisler(100) if str(o.get("merchantReference")) == f"etsy-{POD}"]
 k("sandbox'ta etsy-<receipt> siparisi TEK", len(ayni) == 1, f"{len(ayni)} adet")
 k("tekrar kosuda yeni bildirim yok", not [l for l in log3.splitlines() if l.startswith("::error")])
@@ -179,6 +209,12 @@ k("gecici Drive izni kapandi (Prodigi indirdi)", not acik, f"{len(acik)} acik")
 if acik:
     dl = R.DriveLinks()
     for fid, pid in acik:
+        dl.close(fid, pid)
+kart_acik = json.loads((st.get(str(POD)) or {}).get("kart_perms") or "[]")
+k("kartpostal gecici linki acildi (siparis gonderilene kadar), test sonunda kapatildi", len(kart_acik) == 1, f"{len(kart_acik)} acik")
+if kart_acik:
+    dl = R.DriveLinks()
+    for fid, pid in kart_acik:
         dl.close(fid, pid)
 
 # 6) guvenlik: Actions'a gidecek her ciktida musteri verisi yok

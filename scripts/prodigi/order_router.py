@@ -65,7 +65,7 @@ TUM_BOYLAR = ["5x7", "8x10", "11x14", "12x16", "12x18", "16x20", "16x24", "18x24
               "24x36", "30x40", "A4", "A3", "A2", "A1"]      # 13 mevcut + 5x7 + A1
 COLS = ["receipt_id", "stage", "country", "items", "etsy_total", "prodigi_cost", "margin", "warn", "prodigi_order_id",
         "prodigi_status", "asset_perms", "tracking", "carrier", "carrier_service", "tracking_url", "tracking_son_ayak",
-        "carrier_etsy", "sent_tx", "kanal_iptal", "kanal_oid", "alarm_kosu", "ts_utc", "note"]
+        "carrier_etsy", "sent_tx", "kanal_iptal", "kanal_oid", "alarm_kosu", "kart_perms", "ts_utc", "note"]
 _secret = None
 
 
@@ -557,19 +557,26 @@ def submit_package(a, prod, st, rid, report):
     body = pkg["order"]
     if len(body.get("items") or []) != len(pkg.get("items") or []):
         return False, f"{rid}: paket bozuk (kalem sayisi uyusmuyor)"
-    links, perms = DriveLinks(), []
+    links, perms, kart = DriveLinks(), [], []
     try:
         for n, it in enumerate(pkg["items"]):
             fid, pid, url = links.open(it["asset_remote"])
             perms.append([fid, pid])
             body["items"][n]["assets"][0]["url"] = url
+        if pkg.get("kartpostal_remote"):                 # kisiye ozel kartpostal: gecici link (stickerlar panelden)
+            try:
+                kfid, kpid, kurl = links.open(pkg["kartpostal_remote"])
+                kart.append([kfid, kpid])
+                body["branding"] = {"postcard": {"url": kurl}}
+            except Exception as e:                       # noqa: BLE001 - kart yoksa panel karti gider
+                report.append(f"- {rid}: kisiye ozel kartpostal ACILAMADI ({type(e).__name__}); panel karti gider")
         stc, d = prod.create_order(body)
         outcome = (d.get("outcome") or "")
         oid = (d.get("order") or {}).get("id")
         if stc != 200 or not oid or outcome.lower() not in ("created", "createdwithissues", "onhold"):
             raise RuntimeError(f"order HTTP {stc} outcome={outcome}: {json.dumps(d)[:300]}")
     except Exception as e:                       # noqa: BLE001 - hata da STATE'e yazilir
-        upd(st, a.state, rid, stage="error", asset_perms=perms, note=f"submit: {str(e)[:280]}")
+        upd(st, a.state, rid, stage="error", asset_perms=perms + kart, note=f"submit: {str(e)[:280]}")
         return False, f"{rid}: {type(e).__name__} {str(e)[:300]}"
     res = {"receipt_id": rid, "env": a.env, "submitted_utc": now(), "http": stc, "outcome": outcome,
            "prodigi_order_id": oid, "order": d.get("order") or {}}
@@ -579,8 +586,8 @@ def submit_package(a, prod, st, rid, report):
         sent_tx=";".join(str(i["transaction_id"]) for i in pkg["items"]),
         items=", ".join(f"{i['sku']}x{i['qty']}" for i in pkg["items"]),
         etsy_total=pkg.get("etsy_total", ""), prodigi_cost=pkg.get("prodigi_cost", ""), margin=pkg.get("margin", ""),
-        warn=pkg.get("warn", ""), prodigi_order_id=oid, prodigi_status=outcome, asset_perms=perms,
-        note=f"onayli gonderim ({a.env})")
+        warn=pkg.get("warn", ""), prodigi_order_id=oid, prodigi_status=outcome, asset_perms=perms, kart_perms=kart,
+        note=f"onayli gonderim ({a.env})" + ("; kisiye ozel kartpostal" if kart else ""))
     report.append(f"- {rid}: GONDERILDI {oid} ({outcome}) | Etsy {pkg.get('etsy_total')} USD, "
                   f"Prodigi {pkg.get('prodigi_cost')} USD, marj {pkg.get('margin')}")
     return True, ""
@@ -797,6 +804,7 @@ def main():
                     pkg = package_of(r, kis_items, (r.get("country_iso") or "").upper(),
                                      round(sum(i["price"] * i["qty"] for i in kis_items), 2), "", "", "kisisel (onay akisi)", a.env,
                                      shipping_method=yontem_k or "Budget")
+                    pkg["kartpostal_remote"] = f"{siparis_onay.DRIVE_KOK}/{rid}/{siparis_onay.KART_AD}"
                     if yontem_k:
                         pkg["kargo"] = ayr_k
                     pkg["net_kar"] = kar
@@ -1024,6 +1032,13 @@ def main():
                 report.append(f"- {rid}: SHIPPED {bilgi['tasiyici_ad']} / {bilgi['tasiyici_hizmet']} "
                               f"{bilgi['numara']} -> Etsy {plan['carrier_name']} {plan['tracking_code']}"
                               + (f" | {plan['uyari']}" if plan["uyari"] else ""))
+            kart_p = json.loads(row.get("kart_perms") or "[]")
+            if kart_p and (ship or str(status.get("stage") or "").lower() in ("complete", "cancelled")):
+                links = links or DriveLinks()                 # kartpostal linki: is bitti (gonderildi) -> kapanir
+                for fid, pid in kart_p:
+                    links.close(fid, pid)
+                kw["kart_perms"] = []
+                report.append(f"- {rid}: kartpostal gecici linki kapatildi")
             upd(st, a.state, rid, **kw)
 
     # ---- 2b) TAKIP KORUMASI raporu (salt okuma): hangi siparise neden Etsy takibi yazilmaz
