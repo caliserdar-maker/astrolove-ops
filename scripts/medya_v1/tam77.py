@@ -14,14 +14,14 @@ import a1_poster as A
 from a1_poster import rc, log, W, KP, REF_CIFT
 
 Image.MAX_IMAGE_PIXELS = None
-LISTE = f'{KP}/TS77_LISTE.json'
+LISTE = f'{KP}/TS77'                                  # TS77_<renk>.json (5 dosya, imzali, kullanimdan sonra silinir)
 RAPOR = f'{A.A77}/_tamset'
 RENKLER = ['blue', 'black', 'modern', 'pure_white', 'vintage']
 TS = Path(__file__).resolve().parent / 'tam_set.py'
 
 def liste():
-    rc('copy', LISTE, str(W)); L = json.loads((W / 'TS77_LISTE.json').read_text())
-    return {r: A.liste_ac(L[r]) for r in RENKLER}
+    rc('copy', KP, str(W / 'ts77l'), '--include', 'TS77_*.json')
+    return {r: A.liste_ac(json.loads((W / 'ts77l' / f'TS77_{r}.json').read_text())) for r in RENKLER}
 
 def kucuk(c):
     d = W / 'TAM_SET'; ims = [Image.open(d / f) for f in ('04_bes_palet.jpg', '06_yakin_detay.jpg')]
@@ -89,8 +89,9 @@ def serit():
         for f in list(O.glob('SERIT_*.jpg')) + [O / 'RAPOR_TAMSET_77.json']: rc('copy', str(f), RAPOR)
         print(json.dumps(ozet, ensure_ascii=False, indent=1, default=str), flush=True)
     finally:
-        try: rc('deletefile', LISTE)                                  # imzali liste kullanimdan sonra silinir
-        except Exception: pass                                        # noqa: BLE001
+        for r in RENKLER:                                             # imzali liste kullanimdan sonra silinir
+            try: rc('deletefile', f'{LISTE}_{r}.json')
+            except Exception: pass                                    # noqa: BLE001
 
 if __name__ == '__main__':
     if sys.argv[1:2] == ['serit']: serit()
