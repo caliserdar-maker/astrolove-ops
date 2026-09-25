@@ -117,17 +117,63 @@ def yer_olc(sahne, poster, kaba):
     v, w, x, y = en_iyi
     return {'x': int(x), 'y': int(y), 'w': int(w), 'h': int(round(w * 1.25)), 'eslesme': round(float(v), 4)}
 
+def aciklik_olc(sahne):
+    """Cercevenin ic acikligi: lacivert poster zemininin satir/sutun doluluk >%90 siniri (olculur)."""
+    a = np.asarray(sahne.convert('RGB')).astype(np.float32); H, Wd = a.shape[:2]
+    d = (a.mean(2) < 70) & (a[..., 2] > a[..., 0])
+    xs = np.where(d[int(H * .22):int(H * .74)].mean(0) > .9)[0]; ys = np.where(d[:, int(Wd * .28):int(Wd * .74)].mean(1) > .9)[0]
+    return int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1
+
+def kapak_yer(sahne, poster, ac):
+    """Acikligi tam kaplayan 4:5 poster yeri; isim/tagline disindaki ust bolgede gri fark en kucuk (olculur)."""
+    x0, y0, x1, y1 = ac; Rg = np.asarray(sahne.convert('L')).astype(np.float32); g = poster.convert('L'); en = None
+    ust = int((y1 - y0) * 0.55)
+    for w in range(int((y1 - y0) / 1.25) - 6, int((y1 - y0) / 1.25) + 8):
+        h = round(w * 1.25); q = np.asarray(g.resize((w, h), Image.BOX)).astype(np.float32)
+        for x in range(x1 - w, x0 + 1):
+            for y in range(y1 - h, y0 + 1):
+                f = float(np.abs(q[y0 - y:y0 - y + ust, x0 - x:x1 - x] - Rg[y0:y0 + ust, x0:x1]).mean())
+                if en is None or f < en[0]: en = (f, x, y, w, h)
+    f, x, y, w, h = en
+    return {'x': x, 'y': y, 'w': w, 'h': h, 'aciklik': list(ac), 'ust_gri_fark': round(f, 2)}
+
 def yerlestir(sahne, poster, yer):
     a = np.asarray(sahne.convert('RGB')).copy()
     p = np.asarray(poster.convert('RGB').resize((yer['w'], yer['h']), Image.LANCZOS))
-    a[yer['y']:yer['y'] + yer['h'], yer['x']:yer['x'] + yer['w']] = p
+    x0, y0, x1, y1 = yer.get('aciklik') or (yer['x'], yer['y'], yer['x'] + yer['w'], yer['y'] + yer['h'])
+    a[y0:y1, x0:x1] = p[y0 - yer['y']:y1 - yer['y'], x0 - yer['x']:x1 - yer['x']]   # cerceve korunur
     return Image.fromarray(a)
+
+def kapak_modu():
+    """Iterasyon 2: yalniz kapak; posterler A_ORNEK'ten (yeniden render yok)."""
+    t0 = time.time(); src = W / 'src'
+    rc('copy', f'{DR}/REVIEW/A_ORNEK', str(src), '--include', 'POSTER_*.png')
+    rc('copy', f'{DR}/_girdi/etsy/REF_4570143815', str(W / 'ref'), '--include', '*.jpg')
+    sahne = Image.open(sorted((W / 'ref').glob('[01]*.jpg'))[0]).convert('RGB')
+    P = {c: Image.open(src / f'POSTER_{c}_MB_4x5.png') for c in [REF_CIFT] + [c for c, _ in ORNEK]}
+    ac = aciklik_olc(sahne); yer = kapak_yer(sahne, P[REF_CIFT], ac)
+    R = {'kapak_yer': yer}
+    for c, im in P.items():
+        t = time.time(); y = yerlestir(sahne, im, yer)
+        d = np.abs(np.asarray(y).astype(np.int16) - np.asarray(sahne).astype(np.int16)).max(2)
+        m = np.ones(d.shape, bool); m[ac[1]:ac[3], ac[0]:ac[2]] = False
+        ad = f'KAPAK_{c}_yeniden.jpg' if c == REF_CIFT else f'KAPAK_{c}.jpg'
+        y.save(CIK / ad, quality=95); R[c] = {'aciklik_disi_maks_fark': int(d[m].max()), 'sn': round(time.time() - t, 2)}
+    for c, _ in ORNEK:
+        yanyana(Image.open(CIK / f'KAPAK_{REF_CIFT}_yeniden.jpg'), Image.open(CIK / f'KAPAK_{c}.jpg'), f'YANYANA_KAPAK_{c}_vs_CANCER_LIBRA.jpg')
+    R['toplam_sn'] = round(time.time() - t0, 1)
+    (CIK / 'A1_KAPAK_v2.json').write_text(json.dumps(R, indent=1))
+    rc('copy', str(CIK), f'{DR}/REVIEW/A_ORNEK')
+    print(json.dumps(R, indent=1), flush=True)
 
 def yanyana(sol, sag, ad):
     H = 1100
     a = sol.resize((round(sol.width * H / sol.height), H), Image.LANCZOS); b = sag.resize((round(sag.width * H / sag.height), H), Image.LANCZOS)
     c = Image.new('RGB', (a.width + b.width + 30, H), 'white'); c.paste(a, (0, 0)); c.paste(b, (a.width + 30, 0))
     c.save(CIK / ad, quality=92)
+
+if __name__ == '__main__' and sys.argv[1:] == ['kapak']:
+    kapak_modu(); sys.exit(0)
 
 if __name__ == '__main__':
     R = {'renk': 'Cancer-Libra kapagi Midnight Blue (renk esleme: blue p28 -> MIDNIGHT_BLUE fark 1.35; kaynak Canva Blue 4/5)',
