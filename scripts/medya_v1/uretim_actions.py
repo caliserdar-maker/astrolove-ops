@@ -41,6 +41,14 @@ shutil.copytree(z / 'x/workspace/production_run/completed/AQUARIUS_AQUARIUS/imag
 print('GIRDI SHA256 (ilk 12):', flush=True)
 for p in sorted(list((W / 'src').rglob('*.*')) + list((W / 'refs_centered').glob('*')) + list((W / 'etsy').rglob('*.jpg'))):
     print(' ', hashlib.sha256(p.read_bytes()).hexdigest()[:12], p.relative_to(W), flush=True)
+if len(sys.argv) > 1 and sys.argv[1] == 'genel':
+    # ciftten bagimsiz 4 genel kart (onayli Kova-Kova kart 02/06/08/10 stilinden) -> REVIEW/GENEL
+    (W / 'out').mkdir(exist_ok=True)
+    subprocess.run([sys.executable, '-u', 'cards.py', '2', '6', '8', '10'], cwd=W, check=True)
+    subprocess.run([sys.executable, '-u', 'genel.py'], cwd=W, check=True)
+    sh(['rclone', 'copy', str(W / 'paket/GENEL'), f'{DR}/REVIEW/GENEL', '--include', '*.jpg', '--include', '*.png', '--include', '*.json'])
+    sh(['rclone', 'lsl', f'{DR}/REVIEW/GENEL'])
+    print(f'bitti {time.time()-t0:.0f}s genel', flush=True); sys.exit(0)
 if len(sys.argv) > 1 and sys.argv[1] == 'kart':
     # yalniz secilen kartlar (ornek: kart 3 7): uret, paket gorseli + REVIEW yan yana, Drive'daki ayni adlarin ustune yaz
     ns = sys.argv[2:]
