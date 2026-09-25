@@ -1,0 +1,103 @@
+{
+ "metin": [
+  {
+   "old": "Choose which sign goes on the left.",
+   "new": "Each name goes under its own sign.",
+   "size": 119.55,
+   "w": 500,
+   "track": -0.004920412330553301,
+   "mse": 603.2728117016787,
+   "box": [
+    145,
+    201,
+    1768,
+    320
+   ]
+  },
+  {
+   "old": "Each name stays with its zodiac sign when you switch the order.",
+   "new": "Type each name in the field for its sign.",
+   "size": 48.65,
+   "w": 500,
+   "track": 0.0016576600470775455,
+   "mse": 666.987711497731,
+   "box": [
+    150,
+    336,
+    1737,
+    383
+   ]
+  },
+  {
+   "old": "Choose by zodiac sign, not by gender.",
+   "new": "Names print in capitals. Your message prints as you type it.",
+   "size": 61.699999999999996,
+   "w": 300,
+   "track": 0.013506212857914642,
+   "mse": 777.8710741327105,
+   "box": [
+    1045,
+    1991,
+    1956,
+    2052
+   ]
+  }
+ ],
+ "alt_yazi_font": {
+  "size": 39.5,
+  "w": 500,
+  "track": 0.006329113924050633,
+  "mse": 68.66459992229893,
+  "box": [
+   829,
+   1751,
+   966,
+   1779
+  ],
+  "ink": [
+   20.0,
+   24.5,
+   34.0
+  ]
+ },
+ "alanlar": [
+  [
+   "Name under Cancer",
+   "EMILY"
+  ],
+  [
+   "Name under Libra",
+   "JAMES"
+  ],
+  [
+   "Your message",
+   "It Began With a Kiss in the Rain"
+  ]
+ ],
+ "kutular": [
+  [
+   1575,
+   885,
+   2856,
+   997
+  ],
+  [
+   1575,
+   1090,
+   2856,
+   1202
+  ],
+  [
+   1575,
+   1296,
+   2856,
+   1408
+  ]
+ ],
+ "baslik": "Each name goes under its own sign.",
+ "alt_baslik": "Type each name in the field for its sign.",
+ "alt_not": "Names print in capitals. Your message prints as you type it.",
+ "ayni_burc": false,
+ "metin_kurali": "PASS",
+ "sure_sn": 21.7
+}
