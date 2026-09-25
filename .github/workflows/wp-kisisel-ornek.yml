@@ -147,6 +147,38 @@ jobs:
           echo "WALLPAPER_ORNEK_V2 (dosya | bayt | Drive id)"
           rclone lsf "gdrive:ASTROLOVE/TEMP/DIJITAL_78/WALLPAPER_ORNEK_V2" --format "psi" --separator " | " --files-only | sed 's/^/  - /'
 
+      - name: V3 - kisisel siparis murekkebi + CLEAN plaka (yalniz [v3])
+        # Murekkep kaynagi kisisel'in SIPARIS URETICISI: maske = baski - kisisel PLATE.
+        # Esik yok. [v3olcum] ile yalniz 1. asama (olcum) kosar, Drive'a yazilmaz.
+        if: ${{ contains(github.event.head_commit.message, '[v3]') || contains(github.event.head_commit.message, '[v3olcum]') }}
+        env:
+          MSG: ${{ github.event.head_commit.message }}
+          V3_BASKI: ${{ vars.V3_BASKI || 'gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/ORNEK_ARIES_LEO' }}
+        run: |
+          set -euo pipefail
+          mkdir -p _v3/baski _v3/plate _v3/temiz _v3/geom _v3/orijinal _out3
+          rclone copy "$V3_BASKI" _v3/baski -q --include "*24X32*"
+          rclone copy "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PLATES" _v3/plate -q --include "*_24X32.png"
+          rclone copy "gdrive:ASTROLOVE/TEMP/WP_PLATES/CLEAN" _v3/temiz -q --include "PLATE_*_CLEAN.png"
+          rclone copy "gdrive:ASTROLOVE/TEMP/WP_PLATES" _v3/geom -q --include "GEOM_*.json" --max-depth 1
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/ARIES_LEO" _v3/orijinal -q --include "AstroLove_*.jpg"
+          echo "baski $(ls _v3/baski | wc -l) | plate $(ls _v3/plate | wc -l) | temiz $(ls _v3/temiz | wc -l) | orijinal $(ls _v3/orijinal | wc -l)"
+          free -g | head -2; df -h / | tail -1
+          EK=""
+          case "$MSG" in *"[v3olcum]"*) EK="--sadece-olcum";; *) cp docs/operations/WP_V2_HATA_27_DURUM.md _out3/;; esac
+          python scripts/wp_kisisel/wp_siparis.py --baski _v3/baski --plate _v3/plate \
+            --temiz _v3/temiz --plakalar _v3/geom --orijinal _v3/orijinal --cikti _out3 \
+            --cift Aries_Leo $EK
+
+      - name: V3 Drive'a yaz (yalniz [v3])
+        if: ${{ always() && contains(github.event.head_commit.message, '[v3]') }}
+        run: |
+          set -euo pipefail
+          [ -d _out3 ] || exit 0
+          rclone copy _out3 "gdrive:ASTROLOVE/TEMP/DIJITAL_78/WALLPAPER_ORNEK_V2" -q
+          echo "WALLPAPER_ORNEK_V2 (dosya | bayt | Drive id)"
+          rclone lsf "gdrive:ASTROLOVE/TEMP/DIJITAL_78/WALLPAPER_ORNEK_V2" --format "psi" --separator " | " --files-only | sed 's/^/  - /'
+
       - name: Rapor birlestir (yalniz [rapor])
         if: ${{ contains(github.event.head_commit.message, '[rapor]') }}
         run: |
@@ -175,7 +207,8 @@ jobs:
           path: |
             _out/
             _out2/
+            _out3/
           if-no-files-found: ignore
 
       - if: ${{ always() }}
-        run: rm -rf _zip _wp _eski _v2 ~/.config/rclone
+        run: rm -rf _zip _wp _eski _v2 _v3 ~/.config/rclone
