@@ -6,7 +6,9 @@
   murekkep (poster olceginde 7200x9600, tek katman):
      - ciftin murekkebi  : wp_build_pair.diff_ink_mask(poster, MEDIAN_<ED>) -> sembol,
                            glifler, ∞ ve isimler; ISIM SATIRI cikarilir (∞ kalir)
-     - halka             : |MEDIAN - PLATE_<ED>_POSTER_CLEAN| halka bandi icinde
+     - halka             : MEDIAN'daki murekkep renkli pikseller (INK_RGB/INK_TOL),
+                           halka bandi icinde (POSTER_CLEAN plaka 3000x4000 kucultulmus,
+                           poster olceginde kullanilamaz - 25 Eyl olcumu)
      - yeni isimler/mesaj: kisisel-v1 onayli render (Cinzel 500 / EB Garamond Italic),
                            altin doku o edisyonun KENDI posterinden olculur
   yerlesim = wp_plate_pilot.placement (WP_LAYOUT_SPEC 7.1) + GEOM yan dosyasi,
@@ -29,8 +31,8 @@ KOK = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(KOK / "etsy"))
 from wp_mockup_common import DEVICES, imread                                  # noqa: E402
 import wp_build_pair as WBP                                                   # noqa: E402
-from wp_plate_pilot import (BOX_NAMES, INF_PAD, REF_INFINITY, REF_TAGLINE,    # noqa: E402
-                            RING_BAND, RING_ELLIPSE, RING_LINE_PX, RING_TIP_Y, placement)
+from wp_plate_pilot import (BOX_NAMES, INF_PAD, INK_RGB, REF_INFINITY,            # noqa: E402
+                            REF_TAGLINE, RING_BAND, RING_ELLIPSE, RING_LINE_PX, RING_TIP_Y, placement)
 
 Image.MAX_IMAGE_PIXELS = None
 T0 = time.time()
@@ -83,10 +85,26 @@ def govde(m, x0, x1):
     return kos
 
 
-def metin_olcumu(poster, median, temiz):
+def murekkep_rengi(img_bgr, ed, kutu=None):
+    """Olculen murekkep rengine (INK_RGB) INK_TOL'den yakin pikseller.
+
+    Sabit ogeler (halka, tagline) MEDIAN'da vardir; ayri "temiz" referans
+    gerekmez - gece hattinin kendi renk kurali kullanilir.
+    """
+    r, g, b = INK_RGB[ed]
+    h, w = img_bgr.shape[:2]
+    m = np.zeros((h, w), bool)
+    x0, y0, x1, y1 = kutu if kutu else (0, 0, w, h)
+    x0, y0 = max(x0, 0), max(y0, 0); x1, y1 = min(x1, w), min(y1, h)
+    b_ = img_bgr[y0:y1, x0:x1].astype(np.int16) - np.array([b, g, r], np.int16)
+    m[y0:y1, x0:x1] = (b_ ** 2).sum(2) < WBP.INK_TOL * WBP.INK_TOL
+    return m
+
+
+def metin_olcumu(poster, median, ed):
     """Poster olceginde isim satiri, ∞ ve mesaj satirinin OLCULEN geometrisi."""
     d_c = np.abs(poster.astype(np.int16) - median.astype(np.int16)).max(2) > WBP.DIFF_THR
-    d_s = np.abs(median.astype(np.int16) - temiz.astype(np.int16)).max(2) > WBP.DIFF_THR
+    d_s = murekkep_rengi(median, ed, REF_TAGLINE)
     inf_kutu = (REF_INFINITY[0] - INF_PAD, REF_INFINITY[1] - INF_PAD,
                 REF_INFINITY[2] + INF_PAD, REF_INFINITY[3] + INF_PAD)
     inf = (d_c & (kutu_maske(poster.shape, inf_kutu) > 0))
@@ -215,15 +233,15 @@ def katman_ekle(src, alfa, rgba, x, y):
     alfa[y0:y1, x0:x1] = np.maximum(alfa[y0:y1, x0:x1], al)
 
 
-def halka_maskesi(median, temiz):
-    """Halka murekkebi: |MEDIAN - CLEAN| halka bandi icinde (cift-bagimsiz)."""
-    d = np.abs(median.astype(np.int16) - temiz.astype(np.int16)).max(2)
+def halka_maskesi(median, ed):
+    """Halka murekkebi: MEDIAN'daki murekkep renkli pikseller, halka bandi icinde."""
+    d = murekkep_rengi(median, ed)
     bant = np.zeros(d.shape, np.uint8)
     cx, cy, ax, ay = RING_ELLIPSE
     cv2.ellipse(bant, (int(cx), int(cy)), (int(ax), int(ay)), 0, 0, 360, 1,
                 int(RING_LINE_PX) + 2 * 5 * RING_BAND, cv2.LINE_8)
     bant[RING_TIP_Y + 1:, :] = 0
-    m = ((d > WBP.DIFF_THR) & (bant > 0)).astype(np.uint8)
+    m = (d & (bant > 0)).astype(np.uint8)
     m = cv2.morphologyEx(m, cv2.MORPH_CLOSE, np.ones((WBP.CLOSE_PX,) * 2, np.uint8))
     k = 2 * WBP.DILATE_PX + 1
     dil = cv2.dilate(m, np.ones((k, k), np.uint8))
@@ -283,7 +301,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--posterler", required=True)
     ap.add_argument("--plakalar", required=True, help="MEDIAN_<ED>.png + GEOM_*.json")
-    ap.add_argument("--temiz", required=True, help="PLATE_<ED>_<DEV>_CLEAN.png + PLATE_<ED>_POSTER_CLEAN.png")
+    ap.add_argument("--temiz", required=True, help="PLATE_<ED>_<DEV>_CLEAN.png (cihaz tuvali olcusunde)")
     ap.add_argument("--orijinal", default="", help="karsilastirma icin canli wallpaper'lar")
     ap.add_argument("--kisisel", required=True)
     ap.add_argument("--cikti", required=True)
@@ -302,9 +320,11 @@ def main():
         if (poster.shape[1], poster.shape[0]) != (POSTER_W, POSTER_H):
             raise SystemExit(f"HATA: poster {ed} {poster.shape[1]}x{poster.shape[0]}")
         median = imread(Path(a.plakalar) / f"MEDIAN_{ed.upper()}.png")
-        temiz = imread(Path(a.temiz) / f"PLATE_{ed.upper()}_POSTER_CLEAN.png")
+        if (median.shape[1], median.shape[0]) != (POSTER_W, POSTER_H):
+            raise SystemExit(f"HATA: MEDIAN {ed} {median.shape[1]}x{median.shape[0]}")
 
-        geo, isim_m, inf_m = metin_olcumu(poster, median, temiz)
+        geo, isim_m, inf_m = metin_olcumu(poster, median, ed)
+        log(f"{ed} olcum: {json.dumps({k: geo[k] for k in ('sol', 'sag', 'sonsuz', 'cap', 'mesaj_cap')})}")
         if geo_ref is None:
             geo_ref = geo                      # 4 renkte AYNI geometri (kapi 3)
         prof = {"sol": profil(poster, isim_m & (np.arange(POSTER_W) < geo_ref["sonsuz"][0]),
@@ -321,7 +341,7 @@ def main():
         isim_box = kutu_maske(poster.shape, BOX_NAMES).astype(np.float32)
         a_inf = alpha_c * inf_box
         a_kalan = alpha_c * (1 - np.maximum(isim_box, inf_box))       # eski isimler ve ∞ cikarildi
-        a_halka, _ = halka_maskesi(median, temiz)
+        a_halka, _ = halka_maskesi(median, ed)
         del median
 
         src = poster.astype(np.float32)
@@ -340,7 +360,9 @@ def main():
             plaka = imread(Path(a.temiz) / f"PLATE_{ed.upper()}_{dev.upper()}_CLEAN.png")
             W, H = DEVICES[dev]
             if (plaka.shape[1], plaka.shape[0]) != (W, H):
-                raise SystemExit(f"HATA: plaka {ed} {dev} {plaka.shape[1]}x{plaka.shape[0]}")
+                log(f"ATLANDI {ed} {dev}: CLEAN plaka {plaka.shape[1]}x{plaka.shape[0]}, beklenen {W}x{H}")
+                rapor.append({"edisyon": ed, "cihaz": dev, "hata": f"plaka olcusu {plaka.shape[1]}x{plaka.shape[0]}"})
+                continue
             geom = WBP.load_geom(a.plakalar, ed, dev)
             P = WBP.place(src, dev, plaka.shape, geom)
             A = WBP.place(alfa, dev, plaka.shape, geom)[..., None]
@@ -358,7 +380,7 @@ def main():
             rapor.append({"edisyon": ed, "cihaz": dev, "dosya": ad, "kapi1_maske_disi": k1,
                           "duzen": bilgi, "olcum": geo_ref, "sure_sn": round(time.time() - t0, 1)})
             log(f"{ed} {dev}: maske disi fark {k1['maks_fark']} (JPEG sonrasi {k1['jpeg_sonrasi']})")
-        del src, alfa, P, A, poster, temiz
+        del src, alfa, P, A, poster
     (cikti / "WP_V2_URETIM.json").write_text(json.dumps(rapor, indent=1))
     return rapor, urun, geo_ref
 
