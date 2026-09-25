@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
     inputs:
       mod:
-        description: "tam (EJ+IN[+AM]+kapak+kart09) | am (yalniz AM, onceki PASS ciftler)"
+        description: "tam (EJ+IN[+AM]+kapak+kart09) | am (yalniz AM, onceki PASS ciftler) | kart (yalniz KART09 yeniden)"
         required: true
         default: "tam"
 
@@ -66,13 +66,16 @@ jobs:
           fi
           echo "rclone.conf yazildi ($(wc -c < ~/.config/rclone/rclone.conf) bayt)."
 
+      - name: tesseract (KART09 etiket kapisi)
+        run: sudo apt-get install -y -q tesseract-ocr >/dev/null && tesseract --version | head -1
+
       - name: Uret (parca ${{ matrix.parca }}/8)
         env:
           MOD: ${{ inputs.mod }}
           PARCA: ${{ matrix.parca }}
         run: |
           set -euo pipefail
-          case "$MOD" in tam|am) : ;; *) echo "HATA: mod tam|am olmali" >&2; exit 1 ;; esac
+          case "$MOD" in tam|am|kart) : ;; *) echo "HATA: mod tam|am|kart olmali" >&2; exit 1 ;; esac
           python scripts/medya_v1/a1_poster.py uret77 "$PARCA" 8 "$MOD"
 
   serit:
