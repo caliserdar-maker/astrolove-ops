@@ -35,7 +35,7 @@ UZUN_TIRE = ["—", "–"]          # em dash, en dash
 BASLIK = ("{A} and {B} Zodiac Wall Art, Personalized Couple Print with Names and Message, "
           "Unframed")
 
-EN_GOVDE = """Personalized {A} and {B} zodiac wall art with your two names and your own short message. One original AstroLove design that joins both signs into a single symbol, printed on Hahnemühle Photo Rag 308 gsm cotton paper and shipped unframed.
+EN_GOVDE = """Personalized {A} and {B} zodiac wall art with your two names and your own short message. Our original AstroLove design joins both signs into a single symbol and is printed on Hahnemühle Photo Rag 308 gsm cotton paper. It ships unframed.
 
 HOW TO PERSONALIZE
 1. Pick a color and size.
@@ -49,7 +49,7 @@ The {A} and {B} fusion symbol is original AstroLove artwork. Your names sit unde
 PAPER AND PRINT
 - Hahnemühle Photo Rag, 308 gsm, 100% cotton, matte finish
 - Giclée print
-- Unframed, ready for a frame of your choice
+- Unframed, ready for the frame of your choice
 The gold look is a printed color. It is not metallic foil or raised ink. Colors may vary slightly between screens and paper.
 
 5 COLORS
@@ -59,7 +59,7 @@ Midnight Blue, Deep Black, Champagne Ivory, Pure White and Warm Parchment. Choos
 8 × 10, 11 × 14, 12 × 16, 12 × 18, 16 × 20, 16 × 24, 18 × 24, 20 × 30, 24 × 30, 24 × 32, 24 × 36 and 30 × 40 inches, plus A4, A3, A2 and A1. See the size guide photo.
 
 MADE TO ORDER
-Each print is made for your order by our production partner Prodigi. It ships flat or rolled, depending on the size. See the delivery estimate for your address.
+Each print is made to order by our production partner Prodigi. It ships flat or rolled, depending on the size. See the delivery estimate for your address.
 
 RETURNS
 Every print is personalized, so we can't accept returns or exchanges. If your print arrives damaged, send us a photo within 7 days and we'll happily reprint it at no cost.
@@ -68,7 +68,7 @@ A meaningful anniversary, wedding or Valentine's gift for a {A} and {B} couple."
 
 RU_BASLIK = "Знаки зодиака {A} и {B}: именной постер для пары с вашими именами и посланием, без рамы"
 
-RU_GOVDE = """Именной постер для пары {A} и {B} с вашими двумя именами и короткой надписью. Оригинальный дизайн AstroLove объединяет оба знака в один символ. Печать на хлопковой бумаге Hahnemühle Photo Rag 308 г/м2, отправляем без рамы.
+RU_GOVDE = """Именной постер для пары {A} и {B} с вашими двумя именами и короткой надписью. Наш оригинальный дизайн AstroLove объединяет оба знака в один символ и печатается на хлопковой бумаге Hahnemühle Photo Rag 308 г/м2. Отправляем без рамы.
 
 КАК ПЕРСОНАЛИЗИРОВАТЬ
 1. Выберите цвет и размер.
@@ -92,7 +92,7 @@ Midnight Blue, Deep Black, Champagne Ivory, Pure White и Warm Parchment. Выб
 8 × 10, 11 × 14, 12 × 16, 12 × 18, 16 × 20, 16 × 24, 18 × 24, 20 × 30, 24 × 30, 24 × 32, 24 × 36 и 30 × 40 дюймов, а также A4, A3, A2 и A1. Смотрите фото с таблицей размеров.
 
 ПЕЧАТАЕМ ПОД ЗАКАЗ
-Каждый постер печатается по вашему заказу нашим партнером Prodigi. В зависимости от размера отправляем плоско или в тубусе. Сроки доставки для вашего адреса указаны в карточке товара.
+Каждый постер печатается под заказ нашим партнером Prodigi. В зависимости от размера отправляем плоско или в тубусе. Сроки доставки для вашего адреса указаны в карточке товара.
 
 ВОЗВРАТ
 Каждый постер именной, поэтому возврат и обмен невозможны. Если постер придет поврежденным, пришлите фото в течение 7 дней, и мы бесплатно напечатаем новый.
