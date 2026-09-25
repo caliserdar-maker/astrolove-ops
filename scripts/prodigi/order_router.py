@@ -123,11 +123,16 @@ class Prodigi:
                 cs = q.get("costSummary") or {}
                 kalem = float((cs.get("items") or {}).get("amount") or 0)
                 kargo = float((cs.get("shipping") or {}).get("amount") or 0)
+                # Prodigi'nin fatura ettigi vergi: totalTax (yoksa totalCost - items - shipping); 25 Eyl olcumu
+                vergi = float((cs.get("totalTax") or {}).get("amount") or 0)
+                if not vergi and (cs.get("totalCost") or {}).get("amount") is not None:
+                    vergi = max(0.0, float(cs["totalCost"]["amount"]) - kalem - kargo)
                 secenekler.append({"yontem": q.get("shipmentMethod") or yontem, "kalem": round(kalem, 2),
-                                   "kargo": round(kargo, 2), "toplam": round(kalem + kargo, 2)})
+                                   "kargo": round(kargo, 2), "vergi": round(vergi, 2),
+                                   "toplam": round(kalem + kargo + vergi, 2)})
         if not secenekler:
             return None, f"quote basarisiz: {'; '.join(hatalar)[:200]}", {}
-        en_ucuz = min(secenekler, key=lambda x: x["toplam"])
+        en_ucuz = siparis_onay.kargo_sec(secenekler)          # EN UCUZ = urun + kargo + vergi (ulke sabiti yok)
         ayrinti = {"secenekler": sorted(secenekler, key=lambda x: x["toplam"]), "secilen": en_ucuz,
                    "ekler_tahmini": EKLER_USD}
         return round(en_ucuz["toplam"] + EKLER_USD, 2), "", ayrinti
@@ -300,6 +305,43 @@ def kanal_kisisel_bekci(a, prod, st, idx, pod, report, errors):
         errors.append(f"{k}: {mesaj_log}")
         print(f"::error title=ACIL {k}::{mesaj_log}", flush=True)
     return notlar
+
+
+def offsite_kesinti(api, shop, receipt):
+    """Etsy Offsite Ads kesintisi (salt okuma, 1 cagri): odeme hesabi defterinde bu receipt'e (ya da kalemlerine)
+    bagli 'offsite' kaydi. -> USD (bulunamazsa 0.0) ya da None (okunamadi / test)."""
+    if api is None or not shop:
+        return None
+    rid = str(receipt.get("receipt_id"))
+    ref = {rid} | {str(t.get("transaction_id")) for t in receipt.get("transactions") or []}
+    t0 = int(receipt.get("created_timestamp") or receipt.get("create_timestamp") or time.time()) - 3600
+    try:
+        d = api.get(f"/application/shops/{shop}/payment-account/ledger-entries",
+                    {"min_created": t0, "max_created": int(time.time()), "limit": 100})
+    except Exception:                                   # noqa: BLE001 - okunamadi: tabloda not
+        return None
+    tutar = 0.0
+    for e in (d or {}).get("results") or []:
+        tur = f"{e.get('ledger_type') or ''} {e.get('description') or ''}".lower()
+        if "offsite" in tur and str(e.get("reference_id")) in ref:
+            tutar += abs(float(e.get("amount") or 0)) / 100.0
+    return round(tutar, 2)
+
+
+def teklif_net(prod, api, shop, receipt, items):
+    """Onay istenirken: Prodigi teklifi (tum kargo secenekleri, EN UCUZ) + net kar alanlari.
+    -> (tablo_alanlari, secilen_yontem | None, kargo_ayrinti)."""
+    country = (receipt.get("country_iso") or "").upper()
+    fiyat = round(sum(i["price"] * i["qty"] for i in items), 2)
+    try:
+        _, err, ayr = prod.quote(items, country)
+    except Exception as e:                              # noqa: BLE001
+        err, ayr = f"{type(e).__name__}", {}
+    alan, sec = siparis_onay.kar_alanlari(fiyat, (ayr or {}).get("secenekler") or [],
+                                          offsite_kesinti(api, shop, receipt), sum(i["qty"] for i in items))
+    if not sec and err:
+        alan["KAR_UYARI"] += f": {str(err)[:120]}"
+    return alan, (sec or {}).get("yontem"), ayr
 
 
 def _onay_sonrasi(out, rid, k, durum, uret, tablo, report):
@@ -609,7 +651,7 @@ def main():
     ap.add_argument("--sablonlar", default="_work/MUSTERI_MESAJLARI.md",
                     help="kisisel musteri mesaji sablonlari (Drive TEMP/SIPARIS_ISIM/MUSTERI_MESAJLARI.md)")
     ap.add_argument("--onay-tablo", default="",
-                    help="kisisel siparis ONAY akisi (25 Eyl): 'sheets:SIPARIS_ONAY' | 'yerel:<csv>'; bos = eski akis")
+                    help="kisisel siparis ONAY akisi (25 Eyl): 'csv:SIPARIS_ONAY' (Drive CSV) | 'sheets:<ad>' | 'yerel:<csv>'; bos = eski akis")
     ap.add_argument("--only-size", default="", help="yalniz bu boyun kalemlerini isle (or. 5x7); "
                                                    "ayni sepetteki diger boylar atlanir")
     g = ap.add_mutually_exclusive_group(required=False)
@@ -740,8 +782,16 @@ def main():
                 k_, durum_, uret_ = siparis_onay.kayit_ac(tablo, rid, r, kis, urun="POD")
                 if uret_:
                     kis_items = [dict(i, asset_remote=f"{siparis_onay.DRIVE_KOK}/{rid}/BASKI_{i['size']}.jpg") for i in items]
+                    kar, yontem_k, ayr_k = teklif_net(prod, None if a.test_receipt else api, shop, r, kis_items)
+                    satir_k = next((x for x in tablo.satirlar() if x.get("KOD") == k_), None)
+                    if satir_k:
+                        tablo.guncelle(satir_k["_no"], kar)
                     pkg = package_of(r, kis_items, (r.get("country_iso") or "").upper(),
-                                     round(sum(i["price"] * i["qty"] for i in kis_items), 2), "", "", "kisisel (onay akisi)", a.env)
+                                     round(sum(i["price"] * i["qty"] for i in kis_items), 2), "", "", "kisisel (onay akisi)", a.env,
+                                     shipping_method=yontem_k or "Budget")
+                    if yontem_k:
+                        pkg["kargo"] = ayr_k
+                    pkg["net_kar"] = kar
                     (out / f"{rid}.json").write_text(json.dumps(pkg, indent=1, ensure_ascii=False), encoding="utf-8")
                 upd(st, a.state, rid, stage="ISIM_BEKLIYOR", country=(r.get("country_iso") or "").upper(), items=desc0,
                     note=f"POD kisisel; {k_}; {durum_}" + (f"; {kanal_notu}" if kanal_notu else ""))
@@ -891,6 +941,16 @@ def main():
     if tablo:
         def _gonder(rid):
             row = st.get(rid) or {}
+            pkg_p = Path(a.packages or a.out) / f"{rid}.json"
+            if pkg_p.exists():                           # teklif paket aninda alinamadiysa: simdi al, EN UCUZ kargo
+                pkg_ = json.loads(pkg_p.read_text(encoding="utf-8"))
+                if not pkg_.get("kargo"):
+                    r_ = {"receipt_id": rid, "country_iso": pkg_.get("country")}
+                    kar_, yontem_, ayr_ = teklif_net(prod, None, None, r_, pkg_.get("items") or [])
+                    if not yontem_:
+                        return False, "Prodigi teklifi alinamadi; kargo secilemedi (gonderilmedi)", ""
+                    pkg_["order"]["shippingMethod"], pkg_["kargo"], pkg_["net_kar"] = yontem_, ayr_, kar_
+                    pkg_p.write_text(json.dumps(pkg_, indent=1, ensure_ascii=False), encoding="utf-8")
             if row.get("stage") == "ISIM_BEKLIYOR":
                 upd(st, a.state, rid, stage="bekliyor", note="onay akisi: ONAY isaretlendi")
             ok, err = submit_package(a, prod, st, rid, gizli)

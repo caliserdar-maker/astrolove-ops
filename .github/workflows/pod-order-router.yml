@@ -180,7 +180,7 @@ jobs:
           set -euo pipefail
           # ONAY AKISI (25 Eyl, siparis-onay dali; CANLI DEGIL): kisisel siparis -> tablo + uretim + onay izleyici
           args=(--env "$R_ENV" --state _work/state.csv --out _out --packages _work/packages
-                --approve-mode "$R_APPROVE" --since-days "$R_DAYS" --quota-min 400 --onay-tablo "sheets:SIPARIS_ONAY")
+                --approve-mode "$R_APPROVE" --since-days "$R_DAYS" --quota-min 400 --onay-tablo "csv:SIPARIS_ONAY")
           [ -n "${R_ONLY:-}" ] && args+=(--only-size "$R_ONLY")
           if [ -n "${R_SUBMIT:-}" ]; then
             echo "::warning::GONDERIM: receipt $R_SUBMIT canli Prodigi siparisine cevrilecek"

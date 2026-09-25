@@ -30,7 +30,8 @@ import sys
 import time
 
 KOLON = ["KOD", "RECEIPT", "TARIH_UTC", "URUN", "CIFT", "RENK", "BOY", "ISIM1", "ISIM2", "MESAJ", "ULKE",
-         "ON_KONTROL", "SABLON", "KONTROL_KLASOR", "BASKI", "ISIM_x3", "MESAJ_x3", "ONAY", "DURUM", "PRODIGI", "NOT"]
+         "ON_KONTROL", "SABLON", "KONTROL_KLASOR", "BASKI", "ISIM_x3", "MESAJ_x3", "FIYAT", "KARGO", "NET_KAR", "KAR_UYARI",
+         "ONAY", "DURUM", "PRODIGI", "NOT"]
 D_MESAJ = "MUSTERIYE_MESAJ_GEREKLI"
 D_DOSYA = "DOSYA_URETILIYOR"
 D_ONAY = "ONAY_BEKLIYOR"
@@ -40,6 +41,8 @@ D_HATA = "HATA"
 DRIVE_KOK = "gdrive:ASTROLOVE/TEMP/SIPARIS"
 TABLO_AD = "SIPARIS_ONAY"
 EVET = {"TRUE", "EVET", "X", "YES", "1", "✓", "✔"}
+ETSY_SABIT, ETSY_ORAN = 0.582, 0.176     # Etsy kesintisi = 0.582 x adet + 0.176 x fiyat (Serdar, 25 Eyl 2026)
+ZARAR = "🔴 ZARAR"
 
 
 def kod(rid):
@@ -219,7 +222,8 @@ def _drive_klasor_id(tok, yol):
 
 
 def tablo_ac(spec):
-    """'yerel:<csv>' | 'sheets:<ad>' (Drive TEMP/SIPARIS altinda; yoksa olusturulur) -> tablo."""
+    """'yerel:<csv>' | 'csv:<ad>' (Drive CSV-donusumlu tablo; Serdar karari 25 Eyl) | 'sheets:<ad>'
+    (Drive TEMP/SIPARIS altinda; yoksa olusturulur) -> tablo."""
     tur, _, deger = spec.partition(":")
     if tur == "yerel":
         return YerelTablo(deger)
@@ -238,6 +242,8 @@ def tablo_ac(spec):
                           json={"name": deger or TABLO_AD, "parents": [klasor], "mimeType": "application/vnd.google-apps.spreadsheet"})
         r.raise_for_status()
         f = r.json()
+    if tur == "csv":
+        return DriveCsvTablo(f["id"], tok).hazirla()
     try:
         return SheetsTablo(f["id"], tok).hazirla()
     except RuntimeError as e:
@@ -245,6 +251,50 @@ def tablo_ac(spec):
             print("::warning::Sheets API kullanilamadi (403); Drive CSV-donusumlu tablo kullaniliyor", flush=True)
             return DriveCsvTablo(f["id"], tok).hazirla()
         raise
+
+
+# ------------------------------------------------------------------ kargo secimi + net kar (Serdar, 25 Eyl 2026)
+def kargo_sec(secenekler):
+    """Prodigi teklif secenekleri [{yontem, kalem, kargo, vergi}] -> EN UCUZ (kalem + kargo + vergi).
+    Ulke bazli sabit secim YOK: TR'de Budget, CA'da Standard pahali cikabilir."""
+    ok = [x for x in secenekler or [] if x.get("kalem") is not None and x.get("kargo") is not None]
+    if not ok:
+        return None
+    return min(ok, key=lambda x: round(float(x["kalem"]) + float(x["kargo"]) + float(x.get("vergi") or 0), 2))
+
+
+def net_kar(fiyat, urun, kargo, vergi, offsite=0.0, adet=1):
+    """net = fiyat - (0.582 x adet + 0.176 x fiyat) - urun - kargo - Prodigi vergisi - Offsite Ads kesintisi."""
+    return round(float(fiyat) - (ETSY_SABIT * adet + ETSY_ORAN * float(fiyat)) - float(urun) - float(kargo)
+                 - float(vergi or 0) - float(offsite or 0), 2)
+
+
+def kar_alanlari(fiyat, secenekler, offsite=None, adet=1):
+    """Tablo alanlari: FIYAT, KARGO (secilen + digerleri), NET_KAR, KAR_UYARI. offsite None = okunamadi."""
+    sec = kargo_sec(secenekler)
+    if not sec:
+        return {"FIYAT": f"{float(fiyat):.2f}", "KARGO": "", "NET_KAR": "",
+                "KAR_UYARI": "TEKLIF ALINAMADI (net hesaplanmadi)"}, None
+    net = net_kar(fiyat, sec["kalem"], sec["kargo"], sec.get("vergi"), offsite or 0, adet)
+    digerleri = ", ".join(f"{x['yontem']} {float(x['kalem']) + float(x['kargo']) + float(x.get('vergi') or 0):.2f}"
+                          for x in secenekler if x is not sec)
+    uyari = [ZARAR] if net < 0 else []
+    if offsite is None:
+        uyari.append("Offsite Ads okunamadi (dusulmedi)")
+    return {"FIYAT": f"{float(fiyat):.2f}",
+            "KARGO": f"{sec['yontem']} {float(sec['kargo']):.2f} (urun {float(sec['kalem']):.2f}, vergi "
+                     f"{float(sec.get('vergi') or 0):.2f})" + (f" | diger: {digerleri}" if digerleri else ""),
+            "NET_KAR": f"{net:.2f}" + (f" (offsite -{float(offsite):.2f})" if offsite else ""),
+            "KAR_UYARI": "; ".join(uyari)}, sec
+
+
+def kar_metni(satir):
+    """Bildirim satiri icin: 'net 12.34 USD' ya da '🔴 ZARAR: net -1.28 USD'."""
+    net = str(satir.get("NET_KAR") or "").split(" ")[0]
+    if not net:
+        return f"net kar: {satir.get('KAR_UYARI') or 'hesaplanmadi'}"
+    ek = f" | kargo {str(satir.get('KARGO') or '').split(' (')[0]}"
+    return (f"{ZARAR}: net {net} USD" if ZARAR in (satir.get("KAR_UYARI") or "") else f"net kar {net} USD") + ek
 
 
 # ------------------------------------------------------------------ bildirim (yalniz kod + link)
@@ -319,7 +369,10 @@ def uretildi(tablo, rid, rapor, link=drive_link, kok=DRIVE_KOK):
     linkler = {"isim x3": L["ISIM_x3"], "mesaj x3": L["MESAJ_x3"], "tam cozunurluk": L["BASKI"],
                "KONTROL": L["KONTROL_KLASOR"], "tablo satiri": tablo.satir_link(satir["_no"])}
     if ok:
-        bildir("ONAY BEKLIYOR", k, f"{ozet}: baski dosyasi hazir, kontrol edip ONAY kutusunu isaretleyin", linkler)
+        zarar = ZARAR in (satir.get("KAR_UYARI") or "")
+        bildir("ONAY BEKLIYOR - ZARAR" if zarar else "ONAY BEKLIYOR", k,
+               f"{ozet}: {kar_metni(satir)} | baski dosyasi hazir, kontrol edip ONAY sutununa EVET yazin"
+               + (" (ZARARINA SIPARIS: otomatik gonderim yok, karar Serdar'in)" if zarar else ""), linkler)
     else:
         bildir("SIPARIS HATA", k, f"{ozet}: baski dosyasi uretilemedi / kapi gecilmedi (DUR)", linkler)
     return durum
@@ -346,7 +399,7 @@ def onay_izle(tablo, st, submit, upd, gizli_rapor, dry_run=False):
             ok, hata, oid = submit(str(rid))
             if ok:
                 tablo.guncelle(r["_no"], {"DURUM": D_PRODIGI, "PRODIGI": oid, "NOT": ""})
-                bildir("PRODIGI GONDERILDI", k, "onayli POD siparisi Prodigi'de (pause: elle serbest birakilir)",
+                bildir("PRODIGI GONDERILDI", k, f"onayli POD siparisi Prodigi'de (pause: elle serbest birakilir) | {kar_metni(r)}",
                        {"tablo satiri": tablo.satir_link(r["_no"])})
             else:
                 tablo.guncelle(r["_no"], {"DURUM": D_HATA, "NOT": f"Prodigi: {str(hata)[:180]}"})
@@ -399,7 +452,7 @@ def main():
     import argparse
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("mod", choices=["uretildi"])
-    ap.add_argument("--tablo", default=f"sheets:{TABLO_AD}")
+    ap.add_argument("--tablo", default=f"csv:{TABLO_AD}")
     ap.add_argument("--rid-dosya", required=True, help="uretilen receipt listesi (satir basina bir)")
     ap.add_argument("--rapor-kok", required=True, help="yerel: <kok>/<rid>/KAPI_RAPORU.json")
     ap.add_argument("--drive-kok", default=DRIVE_KOK)

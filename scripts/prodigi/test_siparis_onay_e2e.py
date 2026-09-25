@@ -71,7 +71,7 @@ R.etsy_receipts = lambda *a, **k: copy.deepcopy(REC)
 R.otomasyonlar = lambda *a, **k: None
 os.environ.update(TOKEN_FILE="/dev/null", ETSY_SHOP_ID="0")
 subprocess.run(["rclone", "copyto", "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/MUSTERI_MESAJLARI.md", str(W / "MUSTERI_MESAJLARI.md")], check=True)
-TABLO = f"sheets:SIPARIS_ONAY_TEST_{DAMGA}"
+TABLO = f"csv:SIPARIS_ONAY_TEST_{DAMGA}"
 LOGLAR, BILDIRIM, sonuc = [], [], []
 
 
