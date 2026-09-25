@@ -242,7 +242,17 @@ class EdisyonPoster:
 
         # 1) ONAYLI 2400 render (referans, butun mevcut kapilar burada kosar)
         olcek_kur(2400)
-        s0, S0, p0, ek0, bi0 = self.render(ed, oran, sayfa_no, o, kilit, isimler, mesaj)
+        try:
+            s0, S0, p0, ek0, bi0 = self.render(ed, oran, sayfa_no, o, kilit, isimler, mesaj)
+        except KeyError as e:
+            # Eski oge ayristirilamadi (WP 1. iterasyon: KeyError 'sembol_sol').
+            # Yigin izi yerine OLCUM raporlanir; siparis durur ama kosu devam eder.
+            self.eu.REF_SAYFA = sayfa_no
+            return None, {'durum': 'SISTEM HATASI', 'edisyon': ed, 'oran': oran,
+                          'hata': f'oge baglanamadi: KeyError {e}',
+                          'oge_tanisi': oge_tanisi(self.eu, self.p16, ed, oran, o),
+                          'olcum_kaynagi': ('MIDNIGHT_BLUE' if olcum_yolu is not yol
+                                            else 'kendi rengi')}, None
         if p0 is None:
             return None, bi0, None
         merkez0, yeni0 = ek0
@@ -262,16 +272,21 @@ class EdisyonPoster:
             maske1 = (S1['genis'] | yeni1)
             silinen1 = S1['genis'] & ~yeni1
             leke = leke_kapisi(S1['temiz_a'], np.asarray(S1['ref']).astype(np.float32),
-                               silinen1, k=k)
-            kucuk = self.p11.norm(p1)[0] if p1.width != 2400 else p1
-            olcek_kapi = olcek_kapisi(kucuk, p0, s0)
+                               silinen1, k=k, ed=ed)
+            kucuk = (p1 if p1.width == 2400 else
+                     p1.resize((2400, round(p1.height * 2400 / p1.width)), Image.LANCZOS))
+            # KOK NEDEN (1. iterasyon, kosu 36135774762): kapi olcek_kur(2400)'den ONCE
+            # kosuyordu, yani edisyon_uret.MASKE_YARICAP hala 117 (9000 olcegi) idi;
+            # 2400'luk goruntude medianBlur 117 kumeleri eritti ("2 kume"). Once sabitler
+            # 2400'e geri alinir, sonra olculur - iki taraf ayni olcutle olculsun diye.
             olcek_kur(2400)
+            olcek_kapi = olcek_kapisi(kucuk, p0, s0)
         else:
             k, s1, S1, p1 = 1.0, s0, S0, p0
             maske1, silinen1 = maske0, silinen0
             olcek = {'hedef_en': 2400, 'k': 1.0}
             leke = leke_kapisi(S0['temiz_a'], np.asarray(S0['ref']).astype(np.float32),
-                               silinen0, k=1.0)
+                               silinen0, k=1.0, ed=ed)
             olcek_kapi = {'gecti': True, 'not': 'hedef zaten 2400'}
             bi1 = bi0
 
@@ -289,6 +304,71 @@ class EdisyonPoster:
         }
         return p1, bilgi, {'maske': maske1, 'silinen': silinen1, 'kirp': kirp,
                            'maske_2400': maske0, 'silinen_2400': silinen0}
+
+
+def oge_tanisi(eu, p16, ed, oran, o28):
+    """SALT OKUR tani: (ref, zemin) ciftinde eski ogeler ayrilabiliyor mu?
+
+    1. iterasyonda Warm Parchment `KeyError: 'sembol_sol'` ile durdu: oge_ve_yildiz
+    hedeflerin bir kismina hicbir bilesen baglayamadi ve olcum yerine yigin izi
+    raporlandi. Bu fonksiyon hatanin yerine SAYI koyar: fark yuzdelikleri, bilesen
+    sayisi, en buyuk bilesenin alani/kutusu ve her hedefe baglanan bilesenler.
+    Iki ayirt edici durum: (a) fark her yerde yuksek -> dilate sonrasi TEK dev bilesen,
+    ilk hedef ('sonsuz') onu kapar, geri kalan hedefler bos kalir; (b) fark cok dusuk
+    -> hicbir bilesen yok. Kod degistirmez, yalnizca olcer.
+    """
+    import cv2
+    import pilot16
+    d = {'edisyon': ed, 'oran': oran}
+    try:
+        ham = Image.open(eu.YOL / ed / 'ham' / f'{oran}_p{eu.REF_SAYFA}.jpg').convert('RGB')
+        ref, _ = eu.norm(ham)
+        zem = Image.open(eu.YOL / ed / 'zemin' / f'{oran}.png').convert('RGB')
+        zemin, _ = eu.norm(zem)
+        if zemin.size != ref.size:
+            zemin = zemin.resize(ref.size, Image.LANCZOS)
+        ref_a = np.asarray(ref).astype(np.float32)
+        zemin_a = np.asarray(zemin).astype(np.float32)
+        fark = np.abs(ref_a - zemin_a).max(axis=2)
+        ib, sb, tb = o28['isim_bant'], o28['sembol_bant'], o28['tag_bant']
+        pay = pilot16.GENISLET + 8
+        y0, y1 = max(sb[0] - pay, 0), min(tb[1] + pay, ref.height)
+        kes = fark[y0:y1]
+        d['tuval_px'] = list(ref.size)
+        d['bant'] = {'isim': list(ib), 'sembol': list(sb), 'tag': list(tb)}
+        d['fark_yuzdelik'] = {f'p{q}': round(float(np.percentile(kes, q)), 2)
+                              for q in (50, 90, 99, 99.9)}
+        d['cekirdek_esigi'] = pilot16.CEKIRDEK
+        d['cekirdek_ustu_oran'] = round(float((kes > pilot16.CEKIRDEK).mean()), 4)
+        ham_m = (kes > pilot16.CEKIRDEK).astype(np.uint8)
+        k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * pilot16.GENISLET + 1,) * 2)
+        n, etiket, stat, _ = cv2.connectedComponentsWithStats(cv2.dilate(ham_m, k), 8)
+        alanlar = sorted((int(stat[i][4]) for i in range(1, n)), reverse=True)
+        d['bilesen_sayisi'] = int(n - 1)
+        d['en_buyuk_bilesen_alan'] = alanlar[0] if alanlar else 0
+        d['ilk_bes_alan'] = alanlar[:5]
+        d['bant_alani'] = int(kes.shape[0] * kes.shape[1])
+        d['en_buyuk_bilesen_pay'] = (round(alanlar[0] / d['bant_alani'], 3)
+                                     if alanlar else 0.0)
+        hedef = {'sonsuz': pilot16.kume_kutusu(fark, ib, *o28['sonsuz']),
+                 'sembol_sol': pilot16.kume_kutusu(fark, sb, *o28['sembol'][0]),
+                 'sembol_sag': pilot16.kume_kutusu(fark, sb, *o28['sembol'][1]),
+                 'isim_sol': pilot16.kume_kutusu(fark, ib, *o28['sol_isim']),
+                 'isim_sag': pilot16.kume_kutusu(fark, ib, *o28['sag_isim'])}
+        d['hedef_kutulari'] = {a: [int(v) for v in b] for a, b in hedef.items()}
+        bil, _alfa, _g, _y, _yn = pilot16.oge_ve_yildiz(
+            fark, [(0, y0, eu.NORM_W, y1)], hedef, eu.murekkep(ref_a))
+        d['baglanan_hedefler'] = sorted(bil.keys())
+        d['bos_hedefler'] = sorted(set(hedef) - set(bil))
+        d['teshis'] = ('fark her yerde yuksek: tek dev bilesen ilk hedefi kapiyor'
+                       if d['en_buyuk_bilesen_pay'] > 0.5 else
+                       'fark cok dusuk: oge bileseni olusmuyor'
+                       if d['bilesen_sayisi'] < len(hedef) else
+                       'bilesenler var ama hedef kutulariyla eslesmiyor'
+                       if d['bos_hedefler'] else 'tum hedefler baglandi')
+    except BaseException as e:                                    # noqa: BLE001
+        d['tani_hatasi'] = f'{type(e).__name__}: {e}'
+    return d
 
 
 def olcek_kapisi(kucuk, p0, s0):
@@ -457,13 +537,29 @@ def kilit_olcekle(kilit, k):
 LEKE_YARICAP = 9        # yuksek frekans olcumu icin medyan yaricapi (2400 uzayinda px)
 LEKE_HALKA = 24         # karsilastirma halkasinin kalinligi (2400 uzayinda px)
 LEKE_ORAN = 0.55        # silinen bolge enerjisi / halka enerjisi bu orandan kucukse YAMA
-LEKE_TON = 3.0          # silinen bolge ile halka arasinda azami ortalama ton farki
+LEKE_TABAN = 1.5        # halka enerjisi bunun altindaysa zemin ZATEN duz -> kapi uygulanmaz
+# Not: ton farki bilgi olarak raporlanir, kapiyi belirlemez. Zemin gradyanli oldugu
+# icin silinen bant ile ustunu/altini kapsayan halkanin ortalama tonu dogal olarak
+# farklidir (olculdu: Deep Black 30x40'ta 13.55) - bu yama demek degildir.
 
 
-def leke_kapisi(temiz_a, ref_a, maske, k=1.0, bloklar=True):
-    """Silinen bolgede doku kayboldu mu (yama/leke)? Oran ve ton farki ile."""
+def leke_kapisi(temiz_a, ref_a, maske, k=1.0, bloklar=True, ed=None):
+    """Silinen bolgede doku kayboldu mu (yama/leke)? Oran ve ton farki ile.
+
+    KAPSAM (Serdar 2. madde: "WP icin ... sikilastir"): kapi yalniz DOKULU
+    edisyonlarda anlamlidir. Deep Black / Pure White zemini zaten duz; 1. iterasyonda
+    (kosu 36135774762, Deep Black 30x40) olculen silinen_enerji 0.00 / halka_enerji
+    2.58 bunun kaniti - halka enerjisi yildizlardan geliyor, silinen bant ise gercekten
+    duz zemin. Orada oran her zaman ~0 cikar ve kapi YANLIS HATA verir. Bu yuzden
+    edisyon_uret.DOKU_BLOKLAMAZ listesindeki renklerde kapi UYGULANMAZ (gecti=None).
+    """
     import cv2
     from pilot6 import LUMA
+    if ed is not None:
+        import edisyon_uret as eu
+        if ed in getattr(eu, 'DOKU_BLOKLAMAZ', ()):
+            return {'gecti': None, 'uygulandi': False, 'edisyon': ed,
+                    'sebep': 'dokusuz edisyon (edisyon_uret.DOKU_BLOKLAMAZ) - leke kapisi uygulanmaz'}
     r = max(int(round(LEKE_YARICAP * k)), 3); r = r if r % 2 else r + 1
     h = max(int(round(LEKE_HALKA * k)), 3)
     L = (temiz_a @ LUMA).astype(np.float32)
@@ -474,15 +570,17 @@ def leke_kapisi(temiz_a, ref_a, maske, k=1.0, bloklar=True):
     genis = cv2.dilate(ic.astype(np.uint8), np.ones((2 * h + 1, 2 * h + 1), np.uint8)) > 0
     halka = genis & ~cv2.dilate(ic.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
     if ic.sum() < 100 or halka.sum() < 100:
-        return {'gecti': None, 'sebep': 'olcum alani kucuk',
+        return {'gecti': None, 'uygulandi': False, 'sebep': 'olcum alani kucuk',
                 'ic_px': int(ic.sum()), 'halka_px': int(halka.sum())}
     ic_e = float(hf[ic].mean()); hal_e = float(hfr[halka].mean())
     oran = ic_e / hal_e if hal_e > 0 else 0.0
     ton = abs(float(L[ic].mean()) - float(Lr[halka].mean()))
-    d = {'gecti': bool(oran >= LEKE_ORAN and ton <= LEKE_TON),
-         'doku_orani': round(oran, 3), 'esik_oran': LEKE_ORAN,
+    duz = hal_e < LEKE_TABAN
+    d = {'gecti': (None if duz else bool(oran >= LEKE_ORAN)),
+         'uygulandi': not duz, 'zemin_duz': duz, 'edisyon': ed,
+         'doku_orani': round(oran, 3), 'esik_oran': LEKE_ORAN, 'esik_taban': LEKE_TABAN,
          'silinen_enerji': round(ic_e, 2), 'halka_enerji': round(hal_e, 2),
-         'ton_farki': round(ton, 2), 'esik_ton': LEKE_TON,
+         'ton_farki_bilgi': round(ton, 2),
          'ic_px': int(ic.sum()), 'halka_px': int(halka.sum()),
          'yaricap': r, 'halka_kalinlik': h}
     if bloklar:                                   # en kotu 64x64 blok (yerel yama)
@@ -505,7 +603,7 @@ def leke_kapisi(temiz_a, ref_a, maske, k=1.0, bloklar=True):
                     en, yer = o, [bx, by]
         d['en_kotu_blok_orani'] = None if en is None else round(en, 3)
         d['en_kotu_blok_yeri'] = yer
-        if en is not None and en < LEKE_ORAN * 0.8:
+        if not duz and en is not None and en < LEKE_ORAN * 0.8:
             d['gecti'] = False
     return d
 
@@ -799,7 +897,7 @@ def dijital_uret(sip, P_blue, P_ed, cik, paralel=3):
     for renk in RENKLER:
         klas = cik / renk; klas.mkdir(parents=True, exist_ok=True)
         # buyukten kucuge: uzun isler once baslasin
-        for oran in sorted(DIJITAL_ORANLAR, key=lambda o: -BOY[DIJITAL_BOY[o]][0]):
+        for oran in sorted(DIJITAL_ORANLAR, key=lambda o: -BOY[DIJITAL_BOY[o]][1]):
             isler.append((renk, oran, sip, klas, kon))
     ctx = get_context('fork')
     with ctx.Pool(processes=paralel) as havuz:
