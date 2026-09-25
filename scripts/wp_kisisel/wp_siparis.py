@@ -52,16 +52,24 @@ def log(*a):
 
 
 # ------------------------------------------------------------------ girdi
+UZANTI = {".png", ".jpg", ".jpeg", ".tif", ".tiff", ".webp"}
+
+
 def dosya_bul(kok, desen, ne):
-    """Tek eslesme bekler; 0 veya >1 eslesmede DURur (tahmin yok)."""
-    d = sorted(Path(kok).glob(desen))
+    """Tek eslesme bekler; 0 veya >1 eslesmede DURur (tahmin yok).
+
+    Yalniz goruntu uzantilari sayilir: kisisel'in cikti klasorunde yan dosya
+    (json, kucuk onizleme, kontrol raporu) olabilir, bunlar eslesmeyi bozmasin.
+    """
+    d = sorted(x for x in Path(kok).glob(desen) if x.suffix.lower() in UZANTI)
     if len(d) != 1:
-        raise SystemExit(f"HATA: {ne} icin {desen} -> {len(d)} eslesme: {[x.name for x in d]}")
+        raise SystemExit(f"HATA: {ne} icin '{desen}' -> {len(d)} goruntu eslesmesi: "
+                         f"{[x.name for x in d]}. Tek dosya bekleniyor.")
     return d[0]
 
 
 def kaynak_oku(baski_kok, plate_kok, ed):
-    b = dosya_bul(baski_kok, f"*{ed.upper()}*", f"{ed} baski")
+    b = dosya_bul(baski_kok, f"*{ed.upper()}*24X32*", f"{ed} baski")
     p = dosya_bul(plate_kok, f"{ed.upper()}_24X32.*", f"{ed} plate")
     baski, plate = imread(b), imread(p)
     for ad, im in ((b.name, baski), (p.name, plate)):
