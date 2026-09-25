@@ -44,6 +44,10 @@ for p in sorted(list((W / 'src').rglob('*.*')) + list((W / 'refs_centered').glob
 if len(sys.argv) > 1 and sys.argv[1] == 'kart':
     # yalniz secilen kartlar (ornek: kart 3 7): uret, paket gorseli + REVIEW yan yana, Drive'daki ayni adlarin ustune yaz
     ns = sys.argv[2:]
+    # kart 7 detay paneli: yuksek cozunurluklu baski dosyasi (TEMP/POD_PRINT/AQUARIUS_AQUARIUS/MIDNIGHT_BLUE/30x40.jpg)
+    (W / 'hires').mkdir(exist_ok=True)
+    sh(['rclone', 'backend', 'copyid', 'gdrive:', '17wv3lIJkgw2Ymx1xHyFh_c0vtLa2NgAz', str(W / 'hires/MB_30x40.jpg')])
+    print('hires sha256', hashlib.sha256((W / 'hires/MB_30x40.jpg').read_bytes()).hexdigest()[:12], flush=True)
     for cmd in (['cards.py'] + ns, ['tek_kart.py'] + ns):
         subprocess.run([sys.executable, '-u'] + cmd, cwd=W, check=True)
     qc = W / 'paket/QC'; qc.mkdir(parents=True, exist_ok=True)

@@ -135,6 +135,27 @@ def card06(card):
 def card09(card):
     card = header(card, 9); card, _ = poster(card, 9, (180, 606, 1190, 1869), 'MB'); return card
 
+HIRES = ['hires/MB_30x40.jpg', 'hires/MB_18x24.jpg']   # TEMP/POD_PRINT/AQUARIUS_AQUARIUS/MIDNIGHT_BLUE; en buyuk olan kullanilir
+MAX_BUYUTME = 1.5
+
+def hires_detail(K, DET, tw, th):
+    """Detay paneli yuksek cozunurluklu baski dosyasindan: K (05_WA_01 poster) ile hizalanir (olcek = en orani,
+    ofset = K olceginde sablon eslestirme), kutu hi-res'e tasinir, panele en fazla 1.5x olceklenir."""
+    import cv2
+    path = next(M.ROOT / p for p in HIRES if (M.ROOT / p).exists())
+    Hi = Image.open(path).convert('RGB'); f = Hi.width / K.shape[1]
+    Hk = np.asarray(Hi.resize((K.shape[1], round(Hi.height / f)), Image.LANCZOS)).astype(np.uint8)
+    pad = 60; P = K[DET[1] - pad:DET[3] + pad, DET[0] - pad:DET[2] + pad].astype(np.uint8)
+    r = cv2.matchTemplate(cv2.cvtColor(Hk, cv2.COLOR_RGB2GRAY), cv2.cvtColor(P, cv2.COLOR_RGB2GRAY), cv2.TM_CCOEFF_NORMED)
+    _, score, _, (lx, ly) = cv2.minMaxLoc(r)
+    dx, dy = lx - (DET[0] - pad), ly - (DET[1] - pad)
+    box = tuple(round((v + d) * f) for v, d in zip(DET, (dx, dy, dx, dy)))
+    buy = tw / (box[2] - box[0])
+    if buy > MAX_BUYUTME: raise SystemExit(f'HATA: detay buyutmesi {buy:.2f} > {MAX_BUYUTME} ({path.name})')
+    crop = Hi.crop(box).resize((tw, th), Image.LANCZOS)
+    return crop, {'dosya': path.name, 'boyut': [Hi.width, Hi.height], 'olcek_f': round(f, 4), 'ofset_K': [int(dx), int(dy)],
+                  'eslesme': round(float(score), 4), 'hires_box': list(box), 'buyutme': round(buy, 3)}
+
 def card07(card):
     card = header(card, 7)
     ins = (170, 717, 952, 1692)
@@ -151,9 +172,9 @@ def card07(card):
     # yakin plan (Serdar, 25 Eyl): dalgalarin ic ice gectigi kesisim. Kaynak: Kova ozgun poster 05_WA_01 (KP kirpimi),
     # kutu kaynak koordinatinda secilir -> panel ve inset kutusu ayni geometriden (sablon eslestirme gerekmez)
     tw, th = 2821 - 1169, 1854 - 569
-    DET = (662, 672, 962, 905)   # kaynak px, en/boy = panel en/boy (300/233 ~ 1652/1285)
+    DET = (647, 661, 977, 918)   # 05_WA_01 KP koordinati; en/boy = panel en/boy (330/257 ~ 1652/1285)
     K = S.kova_src('MB')['K']
-    crop = Image.fromarray(K.astype(np.uint8)).crop(DET).resize((tw, th), Image.LANCZOS)
+    crop, hi = hires_detail(K, DET, tw, th)
     card = card.copy(); card[569:1854, 1169:2821] = np.asarray(crop).astype(np.float64)
     s = meta['s']; cxr, cyr, rr = meta['ring']; ox = cxr - 767.4 * s; oy = cyr - 819.7 * s
     bx0, by0 = ins[0] + ox + DET[0] * s, ins[1] + oy + DET[1] * s
@@ -171,7 +192,7 @@ def card07(card):
     yc = (by0 + by1) / 2
     d.line([(bx1, yc), (1169, yc)], fill=tuple(int(v) for v in line_col), width=lw)
     card = np.asarray(im).astype(np.float64)
-    log.setdefault(7, {})['detail'] = {'kaynak': '05_WA_01 KP', 'src_box': list(DET), 'buyutme': round(tw / (DET[2] - DET[0]), 2),
+    log.setdefault(7, {})['detail'] = {'kaynak': hi, 'src_box_KP': list(DET),
                                         'card_box': [float(bx0), float(by0), float(bx1), float(by1)], 'kutu_panel_ncc': round(ncc, 4)}
     return card
 
