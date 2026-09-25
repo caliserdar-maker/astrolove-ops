@@ -25,6 +25,16 @@ bolumu okunmadan baslanmaz.
   Toplu guncellemede "ilan taslak kalir" varsayimi YAPILMAZ: yazmadan once state
   okunur, taslak kalmasi gerekiyorsa o ilan guncellenmez ve Mo'ya sorulur.
 
+## Urun metni (25 Eyl 2026 karari; 24 Eyl B-5'i gunceller)
+
+- Birincil kaynak: Hahnemuhle Photo Rag datasheet + urun sayfasi, Prodigi HPR urun foyu.
+- Izinli: acid-free, 100% cotton, pigment-based archival inks, natural white,
+  matte, "Hahnemühle rates Photo Rag as museum quality (ISO 9706)".
+- Yasak: OBA-free, bright white, omur yili (orn. 100-200 years), "12-colour".
+  Ingilizce metinde uzun/orta tire yok.
+- Tek kaynak ve PASS/FAIL denetim: `scripts/medya_v1/uretim/metin_kurali.py`
+  (medya-v1 dali).
+
 ## Uretim
 
 - Wallpaper hatti dahil tum uretim GitHub Actions'ta kosar; ChatGPT/Colab
