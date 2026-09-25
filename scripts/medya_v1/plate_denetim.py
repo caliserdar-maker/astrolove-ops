@@ -29,6 +29,8 @@ BUYUT = 3
 YARICAP = 31          # yerel kontrast medyan yaricapi (2400 uzayi, onayli deger)
 ESIK = 26             # yerel kontrast esigi (onayli deger)
 MIN_ALAN = 40
+# pilot6.LUMA ile ayni katsayilar (Rec.601)
+LUMA = np.array([0.299, 0.587, 0.114], np.float32)
 
 # 2400 uzayindaki bantlar (25 Eyl olcumu)
 BANT = {'30x40': {'isim': [2355, 2446], 'sembol': [2037, 2231], 'tag': [2742, 2818],
@@ -84,15 +86,19 @@ def main():
         try:
             yol = W / f'{anahtar}.png'
             if not yol.exists():
-                rc('copy', f'{PLATES}/{anahtar}.png', str(W), timeout=1800)
+                try:
+                    rc('copy', f'{PLATES}/{anahtar}.png', str(W), timeout=1800)
+                except RuntimeError:
+                    pass
             if not yol.exists():
-                rapor['hata'][anahtar] = 'PLATES\'te yok (uretim surmus olabilir)'
+                rapor['hata'][anahtar] = 'PLATES\'te henuz yok (uretim surmus olabilir)'
+                log(anahtar, 'PLATES\'te yok, atlandi')
                 continue
             with Image.open(yol) as im0:
                 tam = im0.size
                 nh = round(tam[1] * NORM_W / tam[0])
                 im = im0.convert('RGB').resize((NORM_W, nh), Image.LANCZOS)
-            from pilot6 import LUMA
+            # LUMA yerelde tanimli: bu script kisisel-v1 arsivini indirmez.
             A = np.asarray(im).astype(np.float32)
             L = A @ LUMA
             m = maske(L)
