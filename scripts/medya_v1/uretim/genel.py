@@ -18,6 +18,13 @@ def etiket(card, n):
     log.setdefault(n, {})['etiket_rms'] = round(float(np.sqrt(p['mse'])), 1)
     return card, p
 
+HEDEF_X = 434   # card10 'One unframed print' sol murekkep kenari (olculdu)
+
+def txt(card, n, box, old, new, key):
+    out, p = T.replace(card, box, old, new, key, bg=BG)
+    log.setdefault(n, {}).setdefault('metin', []).append({'eski': old, 'yeni': new, 'rms': round(float(np.sqrt(p['mse'])), 1)})
+    return out
+
 def satir(card, n, p, metin, x, base):
     log.setdefault(n, {}).setdefault('satirlar', []).append(metin)
     return T.draw_with(card, p, metin, x=x, base=base)
@@ -43,19 +50,24 @@ def kart2():
 
 def kart3():
     c = M.arr('out/card06.png'); c, _ = etiket(c, 3)
-    c[560:1860, 150:1240] = BG   # kucuk poster + golgesi yerine bosluk (Serdar: sade doku veya bosluk); olculen golge 176-1183 x 592-1823
-    # sag sutunu (olculen bbox x 1362-2330) karta ortala
-    blk = c[540:1810, 1330:2360].copy(); c[540:1810, 1330:2360] = BG
-    dx = 1500 - (1362 + 2330) // 2
-    c[540:1810, 1330 + dx:2360 + dx] = blk
-    log.setdefault(3, {}).update(poster_alani='bos (BG)', sutun_kaydirma_dx=int(dx))
+    c[560:1860, 150:1240] = BG   # kucuk poster + golgesi yerine bosluk; olculen golge 176-1183 x 592-1823
+    # 4. madde (Serdar, 25 Eyl): 'Pigment giclee / Printed with pigment inks.' -> 'Giclee print / Fine art printing on cotton paper.'
+    c = txt(c, 3, (1350, 1615, 2000, 1738), 'Pigment gicl\u00e9e', 'Gicl\u00e9e print', 'ebg')
+    c = txt(c, 3, (1355, 1738, 2200, 1797), 'Printed with pigment inks.', 'Fine art printing on cotton paper.', 'mont')
+    # sutunu sola hizala: sol murekkep kenari = GENEL_4 baslik sutunu (card10 'One unframed print' olculen x0 = 434)
+    d = np.abs(c[540:1810, 1300:2600] - BG).max(2) > 60
+    x_sol = int(np.where(d.any(0))[0].min()) + 1300
+    blk = c[540:1810, 1300:2600].copy(); c[540:1810, 1300:2600] = BG
+    dx = HEDEF_X - x_sol
+    c[540:1810, 1300 + dx:2600 + dx] = blk
+    log.setdefault(3, {}).update(poster_alani='bos (BG)', sutun_sol_x=[x_sol, HEDEF_X], sutun_kaydirma_dx=int(dx))
     return c
 
 def kart4():
     c = M.arr('out/card10.png'); c, _ = etiket(c, 4)
-    out, p = T.replace(c, (430, 1215, 1230, 1285), 'the size and fulfilment location.', 'the size and fulfillment location.', 'mont', bg=BG)
-    log.setdefault(4, {})['fulfillment_rms'] = round(float(np.sqrt(p['mse'])), 1)
-    return out
+    c = txt(c, 4, (430, 1215, 1230, 1285), 'the size and fulfilment location.', 'the size and fulfillment location.', 'mont')
+    c = txt(c, 4, (430, 705, 1700, 770), 'Your chosen size, palette, names and message.', 'Your chosen size, color, names and message.', 'mont')
+    return c
 
 ADLAR = {1: 'GENEL_1_kisisellestirme', 2: 'GENEL_2_olcu', 3: 'GENEL_3_kagit', 4: 'GENEL_4_siparis'}
 for n, f in ((1, kart1), (2, kart2), (3, kart3), (4, kart4)):
