@@ -40,7 +40,7 @@ jobs:
         run: |
           set -euo pipefail
           python -m pip install -q --upgrade pip
-          python -m pip install -q pillow==12.3.0 numpy==2.4.6 opencv-python-headless
+          python -m pip install -q pillow==12.3.0 numpy==2.4.6 opencv-python-headless scipy
           curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
           rclone version > _rc.txt 2>&1 || true; sed -n 1p _rc.txt; rm -f _rc.txt
           command -v rclone unzip
@@ -67,7 +67,7 @@ jobs:
           ls _kis/assets/fonts/Cinzel.ttf _kis/assets/fonts/EBGaramond-Italic.ttf
 
       - name: Kaynak duvar kagitlari (salt okur)
-        if: ${{ !contains(github.event.head_commit.message, '[rapor]') }}
+        if: ${{ !contains(github.event.head_commit.message, '[rapor]') && !contains(github.event.head_commit.message, '[v2]') }}
         env:
           MSG: ${{ github.event.head_commit.message }}
         run: |
@@ -106,7 +106,7 @@ jobs:
           du -sh _wp
 
       - name: Uretim + kapilar
-        if: ${{ !contains(github.event.head_commit.message, '[rapor]') }}
+        if: ${{ !contains(github.event.head_commit.message, '[rapor]') && !contains(github.event.head_commit.message, '[v2]') }}
         run: |
           set -euo pipefail
           RAPOR=WP_KISISEL_RAPOR.json
@@ -115,6 +115,34 @@ jobs:
           [ -d _eski ] && ESKI="--eski _eski"
           python scripts/wp_kisisel/uret.py --girdi _wp --cikti _out \
             --kisisel _kis --isimler "$ISIMLER" --mesaj "$MESAJ" --rapor "$RAPOR" $ESKI
+
+      - name: V2 - temiz plaka + poster murekkebi (yalniz [v2])
+        if: ${{ contains(github.event.head_commit.message, '[v2]') }}
+        env:
+          MSG: ${{ github.event.head_commit.message }}
+        run: |
+          set -euo pipefail
+          mkdir -p _v2/posterler _v2/plakalar _v2/temiz _v2/orijinal
+          for E in MIDNIGHT_BLUE DEEP_BLACK CHAMPAGNE_IVORY WARM_PARCHMENT; do
+            rclone copy "gdrive:ASTROLOVE/WALL_ART/POSTERS/OPTIMIZED_FOR_PRODUCTION/$E/3X4/WA_POSTER_ARIES_LEO_${E}_3X4.jpg" _v2/posterler -q
+          done
+          rclone copy "gdrive:ASTROLOVE/TEMP/WP_PLATES" _v2/plakalar -q --include "MEDIAN_*.png" --include "GEOM_*.json" --max-depth 1
+          rclone copy "gdrive:ASTROLOVE/TEMP/WP_PLATES/CLEAN" _v2/temiz -q --include "PLATE_*_CLEAN.png"
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/ARIES_LEO" _v2/orijinal -q --include "AstroLove_*.jpg"
+          echo "poster $(ls _v2/posterler | wc -l) | plaka $(ls _v2/plakalar | wc -l) | temiz $(ls _v2/temiz | wc -l) | orijinal $(ls _v2/orijinal | wc -l)"
+          free -g | head -2; df -h / | tail -1
+          python scripts/wp_kisisel/wp_v2.py --posterler _v2/posterler --plakalar _v2/plakalar \
+            --temiz _v2/temiz --orijinal _v2/orijinal --kisisel _kis --cikti _out2 \
+            --cift Aries_Leo --isimler "$ISIMLER" --mesaj "$MESAJ"
+
+      - name: V2 Drive'a yaz
+        if: ${{ always() && contains(github.event.head_commit.message, '[v2]') }}
+        run: |
+          set -euo pipefail
+          [ -d _out2 ] || exit 0
+          rclone copy _out2 "gdrive:ASTROLOVE/TEMP/DIJITAL_78/WALLPAPER_ORNEK_V2" -q
+          echo "WALLPAPER_ORNEK_V2 (dosya | bayt | Drive id)"
+          rclone lsf "gdrive:ASTROLOVE/TEMP/DIJITAL_78/WALLPAPER_ORNEK_V2" --format "psi" --separator " | " --files-only | sed 's/^/  - /'
 
       - name: Rapor birlestir (yalniz [rapor])
         if: ${{ contains(github.event.head_commit.message, '[rapor]') }}
@@ -141,8 +169,10 @@ jobs:
         if: ${{ always() }}
         with:
           name: wp-kisisel-ornek
-          path: _out/
+          path: |
+            _out/
+            _out2/
           if-no-files-found: ignore
 
       - if: ${{ always() }}
-        run: rm -rf _zip _wp _eski ~/.config/rclone
+        run: rm -rf _zip _wp _eski _v2 ~/.config/rclone
