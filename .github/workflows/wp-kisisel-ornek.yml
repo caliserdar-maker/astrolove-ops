@@ -40,8 +40,10 @@ jobs:
         run: |
           set -euo pipefail
           python -m pip install -q --upgrade pip
-          python -m pip install -q pillow numpy opencv-python-headless
-          rclone version | head -1
+          python -m pip install -q pillow==12.3.0 numpy==2.4.6 opencv-python-headless
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          rclone version > _rc.txt 2>&1 || true; sed -n 1p _rc.txt; rm -f _rc.txt
+          command -v rclone unzip
 
       - name: rclone.conf olustur
         env:
