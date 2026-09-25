@@ -110,12 +110,14 @@ def olcum_duzelt(o, m):
     d['isim_govde'] = [int(b0 + kos[0]), int(b0 + kos[1])]
     return d, {'sembol_ek_bant': ek, 'sembol_bant_ilk': o['sembol_bant'], 'isim_govde': d['isim_govde'], 'isim_bant': o['isim_bant']}
 
-def sembol_kapisi(poster, S, s, merkez, m_src, esik, ink=None):
+def sembol_kapisi(poster, S, s, merkez, m_src, esik, ink=None, zemin=None):
     """YENI KAPI: kucuk sembol bolgesi kaynak sayfadakiyle birebir mi? (olcek/aynalama/parca kaymasi yok)
     Bolge olculen banda BAGLI DEGIL: sembol x araligi (+pay) x [sembol bandi ustu - SEMBOL_UST, isim bandi ustu - 5].
     Bolgeye tamamen sigan murekkep bilesenleri (daire yayi gibi disari tasanlar haric) sembolun tamamidir.
     Yeni posterde ayni bilesenler TEK bir yatay kaymayla (|dx| <= 1 yuvarlama, dy = 0) aranir;
-    murekkep piksellerinde ortalama mutlak fark <= esik['fark'] ve murekkep IoU >= esik['iou'] olmali."""
+    murekkep piksellerinde ortalama mutlak fark <= esik['fark'] ve murekkep IoU >= esik['iou'] olmali.
+    zemin (dokulu edisyon, Serdar 25 Eyl): yeni yerdeki doku cikarilip kaynak yerin dokusu eklenir
+    (q - Z_yeni + Z_eski); ayni esik, ayni murekkep fonksiyonu; yalniz zeminin konum farki olcumden cikar."""
     import cv2
     from pilot6 import LUMA, MUREKKEP
     ref = np.asarray(S['ref']).astype(np.float32); P = np.asarray(poster.convert('RGB')).astype(np.float32)
@@ -133,13 +135,27 @@ def sembol_kapisi(poster, S, s, merkez, m_src, esik, ink=None):
         src = ref[y0:y1, x0:x1]; mk = ic(m_src[y0:y1, x0:x1])
         ex = int(round(merkez[y] - o['w'] / 2)) - (g[0] - x0) + (g[0] - o['gorsel'][0])
         en = None
+        def al(dx, dy):
+            q = P[y0 + dy:y1 + dy, ex + dx:ex + dx + (x1 - x0)]
+            if zemin is None: return q
+            return np.clip(q - zemin[y0 + dy:y1 + dy, ex + dx:ex + dx + (x1 - x0)] + zemin[y0:y1, x0:x1], 0, 255)
         for dy in range(-SEMBOL_KAYMA, SEMBOL_KAYMA + 1):
             for dx in range(-SEMBOL_KAYMA, SEMBOL_KAYMA + 1):
-                q = P[y0 + dy:y1 + dy, ex + dx:ex + dx + (x1 - x0)]
-                f = float(np.abs(q - src).max(2)[mk].mean())
+                f = float(np.abs(al(dx, dy) - src).max(2)[mk].mean())
                 if en is None or f < en[0]: en = (f, dx, dy)
         f, dx, dy = en
-        q = P[y0 + dy:y1 + dy, ex + dx:ex + dx + (x1 - x0)]; qm = ic(Pm[y0 + dy:y1 + dy, ex + dx:ex + dx + (x1 - x0)])
+        q = al(dx, dy)
+        if zemin is None: qm = ic(Pm[y0 + dy:y1 + dy, ex + dx:ex + dx + (x1 - x0)])
+        else:                                                   # murekkep, dengelenmis pencerede (yerel medyan icin pay)
+            pd = 40; H, Wd = P.shape[:2]
+            a0, a1 = max(y0 - pd, 0), min(y1 + pd, H); b0 = max(min(x0, ex + dx) - pd, 0)
+            b1 = min(max(x1, ex + dx + (x1 - x0)) + pd, Wd); w = x1 - x0
+            ox, nx = x0 - pd, ex + dx - pd
+            if ox < 0 or nx < 0 or ox + w + 2 * pd > Wd or nx + w + 2 * pd > Wd or a0 != y0 - pd or a1 != y1 + pd:
+                raise RuntimeError('sembol kapisi: dengeli pencere sayfa disinda')
+            pen = np.clip(P[a0 + dy:a1 + dy, nx:nx + w + 2 * pd] - zemin[a0 + dy:a1 + dy, nx:nx + w + 2 * pd]
+                          + zemin[a0:a1, ox:ox + w + 2 * pd], 0, 255)
+            qm = ic((ink(pen) if ink else (pen @ LUMA) > MUREKKEP)[pd:pd + (y1 - y0), pd:pd + w])
         iou = float((qm & mk).sum() / max((qm | mk).sum(), 1))
         sonuc[y] = {'fark': round(f, 2), 'dx': dx, 'dy': dy, 'iou': round(iou, 4), 'kaynak_kutu': [x0, y0, x1, y1],
                     'murekkep_px': int(mk.sum()), 'gecti': abs(dx) <= 1 and dy == 0 and f <= esik['fark'] and iou >= esik['iou']}

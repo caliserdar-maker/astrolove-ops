@@ -34,6 +34,7 @@ HEDEF = f'{DR}/REVIEW/TAM_SET_{CIFT}'
 RENKLER = ['blue', 'black', 'modern', 'pure_white', 'vintage']
 import os
 if os.environ.get('TS_RENKLER'): RENKLER = os.environ['TS_RENKLER'].split(',')   # yalniz yerel deneme
+DOKULU = {'vintage'}                                  # parsomen dokusu: sembol kapisi doku-dengeli (Serdar 25 Eyl)
 RENK_AD = {'blue': 'MIDNIGHT_BLUE', 'black': 'DEEP_BLACK', 'modern': 'CHAMPAGNE_IVORY', 'pure_white': 'PURE_WHITE', 'vintage': 'WARM_PARCHMENT'}
 REF_DOSYA = {1: '01_8568298334', 2: '02_8567954544', 3: '03_8615800647', 4: '04_8567954548', 5: '05_8567954574', 6: '06_8567954580',
              7: '07_8615800641', 8: '08_8616354969', 9: '09_8615800661', 10: '10_8615800655', 11: '11_8616144677',
@@ -73,8 +74,8 @@ class EdPoster:
         r = gd.siparis_dogrula(isimler[0], isimler[1], tagline, None)
         p, bilgi, merkez, x, yeni = self.p16.poster_kur(s, S, {'sol': r['sol']['deger'], 'sag': r['sag']['deger']}, tagline)
         kapi = self.p16.blok_kapisi(p, S, s, yeni)
-        sk, kirp = A.sembol_kapisi(p, S, s, merkez, B['m'], A.SEMBOL_ESIK,
-                                   ink=lambda P: self.E.murekkep(P, kenar=0))
+        sk, kirp = A.sembol_kapisi(p, S, s, merkez, B['m'], A.SEMBOL_ESIK, ink=lambda P: self.E.murekkep(P, kenar=0),
+                                   zemin=S['zemin_a'] if self.ed in DOKULU else None)
         return p, {'kalinti_kapisi': kapi, 'temiz_ara_kapisi': s['temiz_ara_kapisi'], 'sembol_kapisi': sk,
                    'punto': bilgi['punto'], 'olcek': bilgi['olcek'], 'olcum_duzeltme': B['duz']}, kirp
 
@@ -92,6 +93,7 @@ def posterler(sayfa):
             EP = EdPoster(renk)
             Bc = EP.sayfa_kur(sayfa[f'{renk}_28'], 28); cl, clb, _ = EP.uret(Bc, ISIM, TAG)
             Ba = EP.sayfa_kur(sayfa[f'{renk}_{NO}'], NO); al, alb, kk = EP.uret(Ba, ISIM, TAG)
+            M[renk] = {'o': {k: Ba['s'].get(k) for k in ('sembol_bant', 'isim_bant')}, 'tag_bant': Ba['s'].get('tag_bant')}
         kap = {'kalinti': alb['kalinti_kapisi']['gecti'], 'temiz_zemin': alb['temiz_ara_kapisi']['gecti'], 'sembol': alb['sembol_kapisi']['gecti']}
         P[renk] = {'CL': cl, 'AL': al}; K[renk] = kap
         R.setdefault('poster', {})[renk] = {'kapi': kap, 'gecti': all(kap.values()), 'punto': alb['punto'], 'olcek': alb['olcek'],
@@ -282,6 +284,33 @@ def yanyana(sol, sag, yol, H=900):
     d = ImageDraw.Draw(c); d.text((10, 10), 'CANCER + LIBRA (canli referans)', fill=(0, 0, 0)); d.text((a.width + 40, 10), CIFT.replace('_', ' + '), fill=(0, 0, 0))
     c.save(yol, quality=90)
 
+def wp_buyutme(im, yer, psize, M, ad, k=3):
+    """Warm Parchment x3 (Serdar incelemesi): sembol bolgesi + isim/mesaj bandi; poster koordinatlari sahneye olceklenir."""
+    PW, PH = psize; x, y, w, h = yer; sx, sy = w / PW, h / PH
+    sb, ib = M['o']['sembol_bant'], M['o']['isim_bant']; tb = M['tag_bant'] or [ib[1] + 200, ib[1] + 330]
+    bolge = {'sembol': (0, sb[0] - 120, PW, sb[1] + 40), 'isim_mesaj': (0, ib[0] - 60, PW, tb[1] + 60)}
+    for b, (a0, b0, a1, b1) in bolge.items():
+        kutu = (round(x + a0 * sx), round(y + b0 * sy), round(x + a1 * sx), round(y + b1 * sy))
+        c = im.crop(kutu)
+        if c.width * k > 6000: c = c.resize((6000 // k, round(c.height * 6000 / k / c.width)), Image.LANCZOS)
+        c.resize((c.width * k, c.height * k), Image.LANCZOS).save(CIK / f'WP_x3_{ad}_{b}.jpg', quality=93)
+
+def onizleme(S, SIRA, yol, H=900, gen=4200, bosluk=30):
+    """Galeri sirasiyla tum gorseller, gercek oranda (ayni yukseklik, en/boy korunur), tek sayfa."""
+    ims = [(i, ad, S[n].resize((round(S[n].width * H / S[n].height), H), Image.LANCZOS)) for i, (n, ad) in enumerate(SIRA, 1)]
+    satir, cur, gx = [], [], 0
+    for t in ims:
+        if cur and gx + t[2].width > gen: satir.append(cur); cur, gx = [], 0
+        cur.append(t); gx += t[2].width + bosluk
+    satir.append(cur)
+    Wt = max(sum(t[2].width + bosluk for t in r) for r in satir) + bosluk
+    T = Image.new('RGB', (Wt, len(satir) * (H + 70) + bosluk), 'white'); d = ImageDraw.Draw(T)
+    for j, r in enumerate(satir):
+        xx = bosluk; yy = bosluk + j * (H + 70)
+        for i, ad, t in r:
+            T.paste(t, (xx, yy + 50)); d.text((xx, yy + 10), f'{i:02d} {ad} ({S[SIRA[i - 1][0]].width}x{S[SIRA[i - 1][0]].height})', fill=(0, 0, 0)); xx += t.width + bosluk
+    T.save(yol, quality=88)
+
 # ------------------------------------------------------------------ ana akis
 if __name__ == '__main__':
     t_bas = time.time()
@@ -369,6 +398,11 @@ if __name__ == '__main__':
         for j, (i, ad, t) in enumerate(kucuk):
             x, y = (j % 7) * sw, (j // 7) * 640; T.paste(t, (x + (600 - t.width) // 2, y)); d.text((x, y + 610), f'{i:02d} {ad}', fill=(0, 0, 0))
         T.save(CIK / f'SERIT_TAM_SET_{CIFT}.jpg', quality=90)
+        onizleme(S, SIRA, CIK / f'ONIZLEME_TAM_SET_{CIFT}.jpg')
+        if 'vintage' in P:                                       # Warm Parchment x3 (poster, kart 05, kart 14)
+            pv = P['vintage']['AL']; wp_buyutme(pv, (0, 0, pv.width, pv.height), pv.size, M['vintage'], 'POSTER')
+            v5 = K[5]['vintage']; wp_buyutme(S[5], (v5['x'], v5['y'], v5['w'], v5['h']), pv.size, M['vintage'], 'KART05')
+            v14 = K[14]['yer']; wp_buyutme(S[14], (v14['x'], v14['y'], v14['w'], v14['h']), pv.size, M['vintage'], 'KART14')
         # SET.json (pod galeri_tek.py okur): galeri sirasi, renk baglari, video yolu
         RENK_BAGI = {1: 'Midnight Blue', 11: 'Deep Black', 12: 'Champagne Ivory', 13: 'Pure White', 14: 'Warm Parchment'}
         TUR = {1: 'kapak', 3: 'kart', 4: 'kart', 5: 'kart', 6: 'kart', 7: 'kart', 8: 'kart', 9: 'kart', 10: 'kart',
