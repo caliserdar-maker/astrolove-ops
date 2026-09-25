@@ -140,6 +140,9 @@ jobs:
           rclone copyto "gdrive:ASTROLOVE/TEMP/POD_ORDERS_STATE.csv" _work/state.csv 2>/dev/null || echo "STATE yok; yeni baslar"
           rclone copy "gdrive:ASTROLOVE/TEMP/POD_ORDERS" _work/packages --include "*.json" -q 2>/dev/null || true
           echo "hazir paket: $(ls _work/packages/*.json 2>/dev/null | wc -l)"
+          # kisisellestirme musteri mesaji sablonlari (yoksa kartta "sablon eksik" yazar)
+          rclone copyto "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/MUSTERI_MESAJLARI.md" _work/MUSTERI_MESAJLARI.md 2>/dev/null \
+            && echo "musteri mesaj sablonlari alindi" || echo "musteri mesaj sablonlari YOK (TEMP/SIPARIS_ISIM/MUSTERI_MESAJLARI.md)"
           if [ -n "${R_TR:-}" ]; then
             case "$R_TR" in
               TEMP/*) rclone copyto "gdrive:ASTROLOVE/$R_TR" _work/test_receipt.json ;;
@@ -201,6 +204,17 @@ jobs:
           stamp=$(TZ=Europe/Istanbul date +%Y%m%d_%H%M)
           [ -f _out/REPORT.md ] && rclone copyto _out/REPORT.md "gdrive:ASTROLOVE/TEMP/POD_ORDERS/REPORT_${R_ENV}_${stamp}.md" || true
           [ -f _out/DIKKAT.md ] && rclone copyto _out/DIKKAT.md "gdrive:ASTROLOVE/TEMP/POD_ORDERS/DIKKAT.md" && echo "DIKKAT.md Drive'a yazildi" || true
+          # ISIM_BEKLIYOR: kartlar Drive'a; her YENI siparis icin bildirim (GitHub hata e-postasina dusen annotation)
+          if [ -d _out/SIPARIS_ISIM ]; then
+            rclone copy _out/SIPARIS_ISIM "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM" --include "*.md" -q && echo "siparis kartlari Drive'a yazildi"
+          fi
+          if [ -s _out/ISIM_YENI.txt ]; then
+            while read -r rid; do
+              [ -z "$rid" ] && continue
+              fid=$(rclone lsjson "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/${rid}.md" 2>/dev/null | python3 -c "import json,sys;d=json.load(sys.stdin);print(d[0]['ID'] if d else '')" || true)
+              echo "::error title=ISIM_BEKLIYOR ${rid}::Kisisellestirmeli siparis ${rid} Prodigi'ye GONDERILMEDI. Kart: https://drive.google.com/file/d/${fid}/view"
+            done < _out/ISIM_YENI.txt
+          fi
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:

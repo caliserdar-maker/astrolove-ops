@@ -51,6 +51,7 @@ sys.path.insert(0, str(HERE.parent / "pinterest"))
 from etsy_common import Etsy, TokenStore, log as elog, mask  # noqa: E402
 from pod_sku import parse_sku  # noqa: E402
 import takip  # noqa: E402
+import kisisel_siparis  # noqa: E402
 
 PRODIGI = {"live": "https://api.prodigi.com/v4.0", "sandbox": "https://api.sandbox.prodigi.com/v4.0"}
 KEY_REMOTE = {"live": "gdrive:ASTROLOVE/TEMP/PRODIGI_TOKEN.json", "sandbox": "gdrive:ASTROLOVE/TEMP/PRODIGI_SANDBOX_TOKEN.json"}
@@ -59,7 +60,7 @@ ALLOWED = {"US", "CA", "AU", "GB"}
 KARGO_SECENEK = ["Budget", "Standard", "Express", "Overnight"]   # teklifte hepsi sorulur, EN UCUZ secilir
 EKLER_USD = 5.00        # hesap ayarindaki ekler (postcard 2.50 + 2 sticker 1.25x2); ord_14538276 olcumu
 # SKU semasi pod_sku.py: POD-<burc3>_<burc3>-<edisyon2>-<boyut>
-STAGES = ["dryrun", "bekliyor", "manual", "atlandi", "ordered", "shipped", "tracked", "error"]
+STAGES = ["dryrun", "bekliyor", "manual", "atlandi", "ordered", "shipped", "tracked", "error", "ISIM_BEKLIYOR"]
 TUM_BOYLAR = ["5x7", "8x10", "11x14", "12x16", "12x18", "16x20", "16x24", "18x24", "20x30",
               "24x36", "30x40", "A4", "A3", "A2", "A1"]      # 13 mevcut + 5x7 + A1
 COLS = ["receipt_id", "stage", "country", "items", "etsy_total", "prodigi_cost", "margin", "warn", "prodigi_order_id",
@@ -558,6 +559,8 @@ def main():
     ap.add_argument("--takip-baslangic", default="",
                     help="Etsy takip yazimi icin yeni siparis siniri (UTC 'YYYY-MM-DD HH:MM:SS'); "
                          "takip.YENI_SIPARIS_BASLANGIC_UTC'den yalniz ILERI tasinabilir")
+    ap.add_argument("--sablonlar", default="_work/MUSTERI_MESAJLARI.md",
+                    help="kisisel musteri mesaji sablonlari (Drive TEMP/SIPARIS_ISIM/MUSTERI_MESAJLARI.md)")
     ap.add_argument("--only-size", default="", help="yalniz bu boyun kalemlerini isle (or. 5x7); "
                                                    "ayni sepetteki diger boylar atlanir")
     g = ap.add_mutually_exclusive_group(required=False)
@@ -644,7 +647,7 @@ def main():
     for n, (r, items, other, atlanan) in enumerate(pod, 1):
         rid = str(r.get("receipt_id"))
         row = st.get(rid) or {}
-        if row.get("stage") in ("bekliyor", "ordered", "shipped", "tracked", "manual", "error", "atlandi"):
+        if row.get("stage") in ("bekliyor", "ordered", "shipped", "tracked", "manual", "error", "atlandi", "ISIM_BEKLIYOR"):
             report.append(f"- {rid}: ATLA (STATE {row.get('stage')}"
                           + (f", prodigi {row.get('prodigi_order_id')}" if row.get("prodigi_order_id") else "") + ")")
             continue
@@ -656,6 +659,25 @@ def main():
             report.append(f"- {rid}: ATLA (Etsy'de gonderilmis)")
             continue
         desc0 = ", ".join(f"{i['sku']}x{i['qty']}" for i in items)
+        # ---- KISISELLESTIRME KORUMASI (25 Eyl, Serdar): cevabi olan POD siparisi Prodigi'ye GONDERILMEZ.
+        # Kanal/bekleme/teklif/siparis adimlarinin HEPSINDEN once: isimsiz baski yolu yok.
+        kis = kisisel_siparis.cevaplar(r, parse_sku)
+        if kis:
+            tur_k, bilgi_k, neden_k = kanal_durumu(idx, rid, items)
+            kanal_notu = "" if tur_k in ("yok", "", None) else f"Prodigi'de bu receipt icin kayit var ({tur_k}): {neden_k}"
+            metin_k, kod_k = kisisel_siparis.kart(r, kis, kisisel_siparis.sablon_oku(a.sablonlar), kanal_notu)
+            kdir = out / "SIPARIS_ISIM"; kdir.mkdir(parents=True, exist_ok=True)
+            (kdir / f"{rid}.md").write_text(metin_k, encoding="utf-8")
+            with (out / "ISIM_YENI.txt").open("a", encoding="utf-8") as fh:
+                fh.write(f"{rid}\n")
+            not_k = (f"kisisellestirme cevabi var; Prodigi'ye GONDERILMEDI; kart SIPARIS_ISIM/{rid}.md"
+                     + (f"; sorun: {','.join(kod_k)}" if kod_k else "; dogrulama TAMAM") + (f"; {kanal_notu}" if kanal_notu else ""))
+            upd(st, a.state, rid, stage="ISIM_BEKLIYOR", country=(r.get("country_iso") or "").upper(), items=desc0,
+                note=not_k[:300])
+            report.append(f"- {rid}: ISIM_BEKLIYOR ({not_k})")
+            DIKKAT_EK.append(f"- ISIM_BEKLIYOR {rid}: kart TEMP/SIPARIS_ISIM/{rid}.md" + (f" | {kanal_notu}" if kanal_notu else ""))
+            errors.append(f"{rid}: ISIM_BEKLIYOR - yeni kisisellestirmeli siparis (kosu bilincli basarisiz: bildirim)")
+            continue
         yas_dk = (time.time() - float(r.get("created_timestamp") or r.get("create_timestamp") or 0)) / 60 \
             if (r.get("created_timestamp") or r.get("create_timestamp")) else 1e9
         if yas_dk < (0 if kanal_kopuk else a.min_yas_dk):
@@ -912,7 +934,7 @@ def main():
     text = "\n".join(report)
     log(text)
     (out / "REPORT.md").write_text(text + "\n", encoding="utf-8")
-    dikkat = [r for r in st.values() if r.get("stage") in ("manual", "error") or r.get("warn")]
+    dikkat = [r for r in st.values() if r.get("stage") in ("manual", "error", "ISIM_BEKLIYOR") or r.get("warn")]
     if dikkat or DIKKAT_EK:
         satir = ["# DIKKAT: elle islem gereken siparisler", f"(kosu {now()} UTC)", ""]
         satir += [f"- {r['receipt_id']}: {r.get('stage')} | {r.get('country', '')} {r.get('items', '')} "
