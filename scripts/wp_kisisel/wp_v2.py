@@ -315,14 +315,23 @@ def kaydir(a, dx):
 
 
 def murekkep_kutusu(im, plaka, kutu, esik=12):
-    """Goruntunun plakadan ayrildigi (murekkep) bolgenin kutusu + agirlik merkezi."""
+    """Goruntunun plakadan ayrildigi (murekkep) bolgenin kutusu + agirlik merkezi.
+
+    `govde`: kuyruklar (cikan/inen harfler) haric ana govde bandi - isim ve mesaj
+    ayni kuralla olculsun diye (EK KAPI 4: "mesaj isimlerden buyuk olmasin").
+    Tam kutu yuksekligi de `yukseklik` olarak doner; hicbir olcum gizlenmez.
+    """
     x0, y0, x1, y1 = [int(v) for v in kutu]
     d = np.abs(im[y0:y1, x0:x1].astype(np.int16) - plaka[y0:y1, x0:x1].astype(np.int16)).max(2) > esik
     if not d.any():
         return None
     ys, xs = np.nonzero(d)
+    g = govde(d.astype(np.uint8), 0, d.shape[1])
     return {"kutu": [int(xs.min()) + x0, int(ys.min()) + y0, int(xs.max()) + 1 + x0, int(ys.max()) + 1 + y0],
-            "merkez": [round(float(xs.mean()) + x0, 1), round(float(ys.mean()) + y0, 1)], "px": int(d.sum())}
+            "merkez": [round(float(xs.mean()) + x0, 1), round(float(ys.mean()) + y0, 1)], "px": int(d.sum()),
+            "yukseklik": int(ys.max()) + 1 - int(ys.min()),
+            "govde": [int(g[0]) + y0, int(g[1]) + y0] if g else None,
+            "govde_h": int(g[1] - g[0]) if g else 0}
 
 
 def cihaz_kutusu(kutu, dev, geom):
@@ -576,10 +585,14 @@ def kapilar(urun, geo_ref, duzen, orijinal, cift, cikti):
         K["ek2_yildiz"].append(yz)
         # EK4: harf yuksekligi olcusu (4 renk karsilastirmasi asagida) + mesaj isimden buyuk degil
         if so and me:
-            hi, hm = so["kutu"][3] - so["kutu"][1], me["kutu"][3] - me["kutu"][1]
+            # AYNI kuralla olculur: govde bandi (kuyruklar haric). Tam kutu yukseklikleri
+            # de yazilir - mesajda inen harf (g, y) tam kutuyu isim capinin ustune cikarir.
+            hi, hm = so["govde_h"], me["govde_h"]
             ek4_olcu[(ed, dev)] = int(hi)
-            K["ek4_mesaj_isimden_buyuk_degil"].append({"edisyon": ed, "cihaz": dev, "isim_px": int(hi),
-                                                       "mesaj_px": int(hm), "gecti": bool(hm <= hi)})
+            K["ek4_mesaj_isimden_buyuk_degil"].append(
+                {"edisyon": ed, "cihaz": dev, "isim_govde_px": int(hi), "mesaj_govde_px": int(hm),
+                 "isim_kutu_px": int(so["yukseklik"]), "mesaj_kutu_px": int(me["yukseklik"]),
+                 "gecti": bool(hm <= hi)})
         # EK5: mesaj bandinda doku kopuklugu / duz yama yok - olcum main()'te (JPEG oncesi,
         # kapi 1 ile ayni maske). Burada yalniz raporlanir.
         if u.get("ek5"):
