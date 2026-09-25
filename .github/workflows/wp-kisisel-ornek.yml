@@ -87,6 +87,11 @@ jobs:
               rmdir _wp/AQUARIUS_AQUARIUS
               ;;
             *)
+              case "$MSG" in *"[son]"*) echo "SON modu: onceki ciktilar da indirilir"
+                mkdir -p _eski
+                rclone copy "$CIKTI" _eski -q --include "*/AstroLove*.jpg"
+                echo "_eski: $(find _eski -name '*.jpg' | wc -l) dosya" ;;
+              esac
               for e in Midnight_Blue Deep_Black Champagne_Ivory Warm_Parchment; do
                 rclone copy "$KAYNAK/ARIES_LEO/AstroLove_Aries_Leo_$e.zip" _zip -q
               done
@@ -106,8 +111,10 @@ jobs:
           set -euo pipefail
           RAPOR=WP_KISISEL_RAPOR.json
           [ -f _mod ] && RAPOR=WP_KISISEL_RAPOR_EKSIK3.json
+          ESKI=""
+          [ -d _eski ] && ESKI="--eski _eski"
           python scripts/wp_kisisel/uret.py --girdi _wp --cikti _out \
-            --kisisel _kis --isimler "$ISIMLER" --mesaj "$MESAJ" --rapor "$RAPOR"
+            --kisisel _kis --isimler "$ISIMLER" --mesaj "$MESAJ" --rapor "$RAPOR" $ESKI
 
       - name: Rapor birlestir (yalniz [rapor])
         if: ${{ contains(github.event.head_commit.message, '[rapor]') }}
@@ -138,4 +145,4 @@ jobs:
           if-no-files-found: ignore
 
       - if: ${{ always() }}
-        run: rm -rf _zip _wp ~/.config/rclone
+        run: rm -rf _zip _wp _eski ~/.config/rclone

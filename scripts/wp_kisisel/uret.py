@@ -123,14 +123,13 @@ def blok_tasi(kaynak_a, hedef_a, mask, kutu, dx, tuy=3):
             "yeni_kutu": [hx0, y0, hx0 + (x1 - x0), y1]}
 
 
-def isim_yerlesimi(P12, isimler, prof, o, W):
+def isim_yerlesimi(P12, isimler, prof, o, W, kenar):
     """Onayli poster kurali: satir = sol + bosluk + sonsuzluk + bosluk + sag,
     olculen bosluklar ve satir merkezi korunur; sigmazsa iki isim BIRLIKTE kuculur."""
     g_sol = o["sonsuz"][0] - o["sol"][1]
     g_sag = o["sag"][0] - o["sonsuz"][1]
     w_inf = o["sonsuz"][1] - o["sonsuz"][0]
     merkez = (o["sol"][0] + o["sag"][1]) / 2
-    kenar = o.get("sanat_kenar") or min(o["sol"][0], W - o["sag"][1])
     olcek, adim = 1.0, []
     for _ in range(8):
         pl = {y: P12.plaka(isimler[y], prof[y], o["cap"], olcek)[0] for y in ("sol", "sag")}
@@ -184,11 +183,15 @@ def blok_maks(h, m):
     return en, yer
 
 
-def kalinti_kapisi(temiz_a, temiz_maske, ref_kutular):
+def kalinti_kapisi(temiz_a, temiz_maske, ref_kutular, kenar=0):
     """Eski yazi silindikten SONRA, yeni yazi eklenmeden ONCE olculur:
     temizlenen alandaki yuksek gecirgen artik, ayni gorseldeki temiz bir
     seritten (ayni yukseklik, ayni x araligi) buyuk olamaz."""
     h = hp_harita(temiz_a)
+    if kenar > 0:                            # Serdar 25 Eyl: kenar payi bandi olcume girmez
+        temiz_maske = temiz_maske.copy()
+        temiz_maske[:, :kenar] = False
+        temiz_maske[:, temiz_maske.shape[1] - kenar:] = False
     r_blok, r_p999 = 0.0, 0.0
     for (x0, y0, x1, y1) in ref_kutular:     # ayni satirlarda / hemen yanindaki TEMIZ pencereler
         if x1 - x0 < BLOK or y1 - y0 < BLOK:
@@ -220,16 +223,27 @@ def yanyana(eski, yeni, yol, hedef_h=1600):
     return t.size
 
 
+def maskeye_yaz(hedef, alfa, x, y):
+    """Plakayi maskeye islerken tuval disinda kalan kismi KIRPAR."""
+    h, w = alfa.shape
+    H, W = hedef.shape
+    x0, y0 = max(x, 0), max(y, 0)
+    x1, y1 = min(x + w, W), min(y + h, H)
+    if x1 > x0 and y1 > y0:
+        hedef[y0:y1, x0:x1] |= alfa[y0 - y:y1 - y, x0 - x:x1 - x]
+    return [x, y, x + w, y + h]
+
+
 def ink_merkez(mask, kutu):
     x0, y0, x1, y1 = kutu
     sut = mask[y0:y1, x0:x1].sum(0).astype(np.float32)
     return x0 + float((sut * np.arange(x1 - x0)).sum() / max(sut.sum(), 1))
 
 
-def dosya_isle(yol, cihaz, isimler, mesaj, cikti, P6, P7, P12, kp):
+def dosya_isle(yol, cihaz, isimler, mesaj, cikti, P6, P7, P12, kp, kenar, olcum_hazir=None):
     t0 = time.time()
     im = Image.open(yol).convert("RGB")
-    o, mask, hp = olcum.olc(im, cihaz)
+    o, mask, hp = olcum_hazir if olcum_hazir else olcum.olc(im, cihaz)
     a = np.asarray(im)
     W, H = im.size
 
@@ -240,8 +254,8 @@ def dosya_isle(yol, cihaz, isimler, mesaj, cikti, P6, P7, P12, kp):
             for y in ("sol", "sag")}
     tprof = profil(a, hp, (o["tag_kutu"][0], o["tag_bant"][0], o["tag_kutu"][2], o["tag_bant"][1]))
 
-    olcek, pl, yer, duzen = isim_yerlesimi(P12, isimler, prof, o, W)
-    kenar = o.get("sanat_kenar") or min(o["sol"][0], W - o["sag"][1])
+    olcek, pl, yer, duzen = isim_yerlesimi(P12, isimler, prof, o, W, kenar)
+    duzen["kenar_kaynak"] = "MIDNIGHT_BLUE"  # dokulu zeminde kendi olcumu guvenilir degil
     sinir = W - 2 * kenar                    # mesaj da sanat eserinin kendi genislik zarfina sigar
     tg, tbilgi = tag_plakasi(P6, P7, kp, mesaj, tprof, o["tag_cap"], sinir)
 
@@ -296,14 +310,12 @@ def dosya_isle(yol, cihaz, isimler, mesaj, cikti, P6, P7, P12, kp):
         p = pl[y]
         px, py = yeni_kutu[y]
         t.alpha_composite(p, (px, py))
-        yeni_maske[py:py + p.height, px:px + p.width] |= np.asarray(p)[..., 3] > 8
-        kutular[y] = [px, py, px + p.width, py + p.height]
+        kutular[y] = maskeye_yaz(yeni_maske, np.asarray(p)[..., 3] > 8, px, py)
     (tgy0, tgy1), tmx = govde_kutu(tg)
     tx = int(round((o["tag_kutu"][0] + o["tag_kutu"][2]) / 2 - tmx))
     ty = int(round((o["tag_govde"][0] + o["tag_govde"][1]) / 2 - (tgy0 + tgy1) / 2))
     t.alpha_composite(tg, (tx, ty))
-    yeni_maske[ty:ty + tg.height, tx:tx + tg.width] |= np.asarray(tg)[..., 3] > 8
-    kutular["tag"] = [tx, ty, tx + tg.width, ty + tg.height]
+    kutular["tag"] = maskeye_yaz(yeni_maske, np.asarray(tg)[..., 3] > 8, tx, ty)
 
     son = t.convert("RGB")
     son_a = np.asarray(son)
@@ -338,7 +350,7 @@ def dosya_isle(yol, cihaz, isimler, mesaj, cikti, P6, P7, P12, kp):
     kapi = {
         "boy": {"gecti": all(kapi_cap[y] <= o["cap"] for y in ("sol", "sag")) and yeni_tag_cap <= o["tag_cap"],
                 "cap": o["cap"], "yeni_cap": kapi_cap, "tag_cap": o["tag_cap"], "yeni_tag_cap": yeni_tag_cap},
-        "kalinti": kalinti_kapisi(temiz_kopya, temiz_maske, ref_kutular),
+        "kalinti": kalinti_kapisi(temiz_kopya, temiz_maske, ref_kutular, kenar),
         "sembol": {"gecti": sembol_fark == 0, "maks_fark": sembol_fark, "oge": len(tasima),
                    "dx": [tt["dx"] for tt in tasima]},
         "cakisma": {"gecti": not cak},
@@ -363,6 +375,41 @@ def dosya_isle(yol, cihaz, isimler, mesaj, cikti, P6, P7, P12, kp):
             "cikti": [str(yeni_yol), str(kars)], "sure_sn": round(time.time() - t0, 1)}
 
 
+def yerlesim_dogrula(olcumler, esik=2.0):
+    """Ayni cihazda 4 rengin YERLESIMI ayni mi? (Serdar 25 Eyl kurali)
+
+    Karsilastirma capasi sonsuzluk isaretinin merkezidir: simetrik ve yuksek
+    kontrastli oldugu icin doku esigine duyarli DEGILDIR. Kenar tabanli kutular
+    (isim kutusu, glif kutusu) dokulu zeminde esik yukseldigi icin 10-25 px
+    daralir; bunlar yalniz BILGI olarak raporlanir.
+    """
+    rapor = {}
+    for cihaz, kayit in olcumler.items():
+        inf = {r: (o["sonsuz"][0] + o["sonsuz"][1]) / 2 for r, o in kayit.items()}
+        ref = inf.get("Midnight_Blue")
+        if ref is None:
+            rapor[cihaz] = {"gecti": False, "not": "Midnight_Blue dosyasi yok"}
+            continue
+        sapma = {r: round(v - ref, 1) for r, v in inf.items()}
+        en = max(abs(v) for v in sapma.values())
+        rapor[cihaz] = {
+            "gecti": bool(en <= esik), "sonsuz_merkez_sapma": sapma, "maks": round(en, 1),
+            "kenar_mb": kayit["Midnight_Blue"].get("sanat_kenar"),
+            "kenar_kendi": {r: o.get("sanat_kenar") for r, o in kayit.items()},
+            "isim_kutu_sapma": {r: [o["sol"][0] - kayit["Midnight_Blue"]["sol"][0],
+                                    o["sag"][1] - kayit["Midnight_Blue"]["sag"][1]]
+                                for r, o in kayit.items()},
+        }
+    return rapor
+
+
+def renk_adi(ad):
+    for r in ("Midnight_Blue", "Deep_Black", "Champagne_Ivory", "Warm_Parchment"):
+        if r in ad:
+            return r
+    return "?"
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--girdi", required=True, help="kaynak JPG klasoru")
@@ -370,28 +417,64 @@ def main():
     ap.add_argument("--kisisel", required=True, help="kisisel-v1 arsiv koku")
     ap.add_argument("--isimler", default="EMILY,JAMES")
     ap.add_argument("--mesaj", default="It Began With a Kiss in the Rain")
-    ap.add_argument("--rapor", default="WP_KISISEL_RAPOR.json", help="rapor dosya adi")
+    ap.add_argument("--rapor", default="WP_KISISEL_RAPOR.json")
+    ap.add_argument("--eski", default="", help="onceki ciktilar (fark kontrolu icin)")
     a = ap.parse_args()
     P6, P7, P12, kp = kisisel_kur(a.kisisel)
     sol, sag = a.isimler.split(",")
     isimler = {"sol": sol.strip(), "sag": sag.strip()}
     cikti = Path(a.cikti)
-    sonuc = []
-    dosyalar = sorted(p for p in Path(a.girdi).rglob("*.jpg") if "Watch" not in p.name)
-    for i, p in enumerate(dosyalar, 1):
-        cihaz = next((c for c in ("phone", "tablet", "desktop") if c in p.stem.lower()), None)
-        if not cihaz:
+    cikti.mkdir(parents=True, exist_ok=True)
+
+    dosyalar = []
+    for p in sorted(Path(a.girdi).rglob("*.jpg")):
+        if "Watch" in p.name:
             continue
+        cihaz = next((c for c in ("phone", "tablet", "desktop") if c in p.stem.lower()), None)
+        if cihaz:
+            dosyalar.append((p, cihaz))
+
+    # 1. GECIS: olcum (yerlesim dogrulamasi icin)
+    olcumler, ham = {}, {}
+    for p, cihaz in dosyalar:
         try:
-            r = dosya_isle(p, cihaz, isimler, a.mesaj, cikti / p.parent.name, P6, P7, P12, kp)
+            o, m, hp = olcum.olc(Image.open(p).convert("RGB"), cihaz)
+            ham[p] = (o, m, hp)
+            olcumler.setdefault(cihaz, {})[renk_adi(p.name)] = o
+        except Exception as e:                                     # noqa: BLE001
+            log(f"olcum HATA {p.name}: {e!r}")
+    dog = yerlesim_dogrula(olcumler)
+    (cikti / "YERLESIM_DOGRULAMA.json").write_text(json.dumps(dog, indent=1))
+    for cihaz, d in dog.items():
+        log(f"yerlesim {cihaz}: gecti={d['gecti']} maks_sapma={d.get('maks')} kenar_mb={d.get('kenar_mb')}")
+    if not all(d["gecti"] for d in dog.values()):
+        log("DUR: 4 renkte yerlesim sapmasi 2 px'i asiyor")
+        return 2
+
+    # 2. GECIS: uretim (kenar payi ayni cihazin Midnight_Blue olcumunden)
+    sonuc = []
+    for i, (p, cihaz) in enumerate(dosyalar, 1):
+        kenar = dog[cihaz]["kenar_mb"]
+        try:
+            r = dosya_isle(p, cihaz, isimler, a.mesaj, cikti / p.parent.name,
+                           P6, P7, P12, kp, kenar, ham.get(p))
         except Exception as e:                                     # noqa: BLE001
             r = {"dosya": p.name, "cihaz": cihaz, "hata": repr(e), "kapi": {"gecti": False}}
+        if a.eski:
+            onceki = Path(a.eski) / p.parent.name / p.name
+            if onceki.exists() and "hata" not in r:
+                x = np.asarray(Image.open(onceki).convert("RGB")).astype(np.int16)
+                y = np.asarray(Image.open(r["cikti"][0]).convert("RGB")).astype(np.int16)
+                r["onceki_fark"] = int(np.abs(x - y).max()) if x.shape == y.shape else -1
         sonuc.append(r)
-        log(f"{i}/{len(dosyalar)} {p.name} kapi={r['kapi']['gecti']} sure={r.get('sure_sn')}")
-    (cikti).mkdir(parents=True, exist_ok=True)
+        log(f"{i}/{len(dosyalar)} {p.name} kapi={r['kapi']['gecti']} "
+            f"fark={r.get('onceki_fark', '-')} sure={r.get('sure_sn')}")
     (cikti / a.rapor).write_text(json.dumps(sonuc, indent=1))
     gecen = sum(1 for r in sonuc if r["kapi"]["gecti"])
-    log(f"TOPLAM {gecen}/{len(sonuc)} dosya kapilardan gecti")
+    degisen = [r["dosya"] for r in sonuc if r.get("onceki_fark", 0) not in (0, None)]
+    log(f"TOPLAM {gecen}/{len(sonuc)} kapidan gecti | onceki ciktidan farkli: {len(degisen)}")
+    for d in degisen:
+        log(f"  farkli: {d}")
     return 0 if gecen == len(sonuc) else 1
 
 
