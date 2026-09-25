@@ -353,8 +353,14 @@ def csv_yenile(satirlar):
 
 
 def ru_of(api, shop, lid, L):
-    for t in L.get("translations") or []:
-        if (t.get("language") or "").lower().startswith("ru"):
+    """includes=Translations bicimi sabit degil (25 Eyl: liste degil, str ogeli dondu): yalniz sozluk ogesi
+    kabul edilir; bulunamazsa RU ucu dogrudan okunur."""
+    tr = L.get("translations")
+    adaylar = list(tr.values()) if isinstance(tr, dict) else (tr if isinstance(tr, list) else [])
+    if isinstance(tr, dict) and isinstance(tr.get("ru"), dict):
+        adaylar = [dict(tr["ru"], language="ru")] + adaylar
+    for t in adaylar:
+        if isinstance(t, dict) and (t.get("language") or "").lower().startswith("ru") and "title" in t:
             return t
     return api.get(f"/shops/{shop}/listings/{lid}/translations/ru", ok404=True) or {}
 
