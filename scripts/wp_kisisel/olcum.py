@@ -147,6 +147,10 @@ def olc(im, cihaz):
 
     bosluk = int(KUME_BOSLUK * W)
     isim_k = [k for k in kumeler(m[ib[0]:ib[1]], bosluk) if k[1] - k[0] > 0.01 * W]
+    if len(isim_k) > 3:
+        # Tuval kenarindaki doku lekeleri ayri kume uretebilir (WP/DB masaustu
+        # olcumu): murekkep kutlesi en buyuk 3 kume satirin kendisidir.
+        isim_k = sorted(sorted(isim_k, key=lambda k: -m[ib[0]:ib[1], k[0]:k[1]].sum())[:3])
     if len(isim_k) != 3:
         raise RuntimeError(f"isim satirinda 3 kume bekleniyordu, {len(isim_k)} bulundu: {isim_k}")
     sol, inf, sag = isim_k

@@ -103,6 +103,12 @@ def blok_tasi(kaynak_a, hedef_a, mask, kutu, dx, tuy=3):
     ince bir zemin halkasi yumusatilarak yeni zemine karisir.
     """
     x0, y0, x1, y1 = kutu
+    H, W = mask.shape
+    hx0 = x0 + dx
+    if hx0 < 0:                              # tasinan blok tuval disina tasarsa kirpilir
+        x0, hx0 = x0 - hx0, 0
+    if hx0 + (x1 - x0) > W:
+        x1 -= hx0 + (x1 - x0) - W
     blok = kaynak_a[y0:y1, x0:x1].astype(np.float32)
     m = mask[y0:y1, x0:x1].astype(np.uint8)
     k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * tuy + 1,) * 2)
@@ -110,7 +116,6 @@ def blok_tasi(kaynak_a, hedef_a, mask, kutu, dx, tuy=3):
     mg = cv2.GaussianBlur(md.astype(np.float32), (0, 0), tuy / 2.0)
     mg[cv2.erode(md, k) > 0] = 1.0          # cekirdekte birebir kopya (yumusatma yok)
     mg = mg[:, :, None]
-    hx0 = x0 + dx
     hedef = hedef_a[y0:y1, hx0:hx0 + (x1 - x0)].astype(np.float32)
     hedef_a[y0:y1, hx0:hx0 + (x1 - x0)] = np.clip(blok * mg + hedef * (1 - mg), 0, 255).astype(np.uint8)
     cekirdek = (cv2.erode(md, k) > 0) & (m > 0)   # kapida karsilastirilan piksel
