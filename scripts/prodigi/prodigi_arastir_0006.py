@@ -74,6 +74,23 @@ def dokuman():
                 break
 
 
+def ozet(o):
+    """Alici YAZILMAZ: yalniz durum, tesis, kalem SKU, branding alan adlari, ucretler."""
+    st = o.get("status") or {}
+    return json.dumps({
+        "id": o.get("id"), "stage": st.get("stage"), "details": st.get("details"),
+        "issues": [f"{i.get('errorCode')}:{str(i.get('description') or '')[:120]}" for i in st.get("issues") or []],
+        "shippingMethod": o.get("shippingMethod"), "kalem": [i.get("sku") for i in o.get("items") or []],
+        "branding": sorted(o.get("branding") or {}),
+        "tesis": sorted({f"{(s.get('fulfillmentLocation') or {}).get('countryCode')}/{(s.get('fulfillmentLocation') or {}).get('labCode')}"
+                         for s in o.get("shipments") or [] if s.get("fulfillmentLocation")}),
+        "charges": [{"tip": c.get("chargeType"), "toplam": (c.get("totalCost") or {}).get("amount"),
+                     "para": (c.get("totalCost") or {}).get("currency"), "fatura_no_var": bool(c.get("prodigiInvoiceNumber")),
+                     "kalemler": [[x.get("description") or "", x.get("itemSku") or "", bool(x.get("itemId")),
+                                   (x.get("cost") or {}).get("amount")] for x in c.get("items") or []]}
+                    for c in o.get("charges") or []]}, ensure_ascii=False)
+
+
 def siparis(oid):
     from prodigi_pilot_quote import Api, load_key
     log("== 2) SIPARIS (yalniz GET)")
@@ -92,6 +109,8 @@ def siparis(oid):
         o = d.get("order") or {}
         log(f"  GET {yol}: HTTP {st} outcome={d.get('outcome')} stage={(o.get('status') or {}).get('stage')} "
             f"details={(o.get('status') or {}).get('details')}")
+        if o:
+            log("    " + ozet(o))
     st, d = oku("/orders?top=100")
     L = d.get("orders") or []
     log(f"  GET /orders?top=100: HTTP {st}, {len(L)} siparis, test var={any(o.get('id') == oid for o in L)}, "
@@ -101,6 +120,9 @@ def siparis(oid):
         L = d.get("orders") or []
         log(f"  GET /orders?status={s}: HTTP {st}, {len(L)} siparis, test var={any(o.get('id') == oid for o in L)}"
             + (f", hata={str(d.get('failures') or d.get('statusText') or '')[:120]}" if st != 200 else ""))
+        for o in L:
+            if o.get("id") == oid:
+                log("    " + ozet(o))
     st, d = oku(f"/orders?top=10&orderIds={oid}")
     log(f"  GET /orders?orderIds=<test>: HTTP {st}, {len(d.get('orders') or [])} siparis")
 
@@ -157,7 +179,10 @@ def linkler():
 
 
 def main():
-    oid = sys.argv[1] if len(sys.argv) > 1 else "ord_72692295730813440"
+    oid, _, mod = (sys.argv[1] if len(sys.argv) > 1 else "ord_72692295730813440").partition(",")
+    if mod == "siparis":                             # GOREV 0009: yalniz siparis okuma
+        siparis(oid)
+        return
     dokuman()
     siparis(oid)
     linkler()
