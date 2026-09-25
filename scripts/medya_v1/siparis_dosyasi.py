@@ -965,7 +965,10 @@ def main():
     ap.add_argument('--kart')
     ap.add_argument('--cift'); ap.add_argument('--renk'); ap.add_argument('--boy')
     ap.add_argument('--isim1'); ap.add_argument('--isim2'); ap.add_argument('--mesaj', default='')
-    ap.add_argument('--test', action='store_true', help='uc ornek siparis (canli siparis yok)')
+    ap.add_argument('--test', action='store_true', help='ornek siparisler (canli siparis yok)')
+    ap.add_argument('--yalniz', default='',
+                    help='--test ile: virgulle ayrilmis receipt parcasi. Dijital paket POD'
+                         ' testlerinden ayri kosulabilsin diye (45 dk is siniri).')
     ap.add_argument('--kaynak', default='pod', choices=('pod', 'canva'),
                     help="pod: POD_PRINT'teki onayli baski dosyasi (varsayilan). "
                          "canva: imzali URL listesinden tek sayfa")
@@ -975,6 +978,11 @@ def main():
 
     if a.test:
         siparisler = [dict(t) for t in TESTLER]
+        if a.yalniz:
+            se = [x.strip() for x in a.yalniz.split(',') if x.strip()]
+            siparisler = [t for t in siparisler if any(x in t['receipt'] for x in se)]
+            if not siparisler:
+                raise SystemExit(f'--yalniz hicbir teste uymadi: {a.yalniz}')
     elif a.kart:
         rc('copy', f'{SIP}/{a.kart}', str(W))
         d = kart_oku((W / a.kart).read_text(encoding='utf-8'))
