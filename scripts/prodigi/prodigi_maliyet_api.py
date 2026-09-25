@@ -191,7 +191,8 @@ def ozet(rows, hatalar, eski, out):
     md = ["# Prodigi maliyet (Quote API, canli, salt okuma) - 16 HPR boy x 7 ulke x Budget/Standard", "",
           f"- satir: {len(rows)}; hesaplanan: {len(tam)}; eksik/hata: {len(hatalar)}",
           f"- net < $3: {len(dusuk)} satir (zarar: {len(zarar)}); offsite dahil zarar: {len(off_zarar)} satir",
-          "- net = fiyat - (0.582 + 0.176 x fiyat) - urun - kargo; vergi ayri sutunda, net'e dahil degil.", "",
+          "- net_vergisiz = fiyat - (0.582 + 0.176 x fiyat) - urun - kargo; net = net_vergisiz - vergi; net_offsite = net - 0.15 x fiyat.",
+          f"- vergi_faturada (yanit alanlarindan): {say}", f"- **Hukum:** {hukum}", "",
           "## Net (vergi dusulmus) < $3 veya zarar", "", "| boyut | ulke | kargo | urun | kargo | vergi | vergi_faturada | fiyat | net | net_vergisiz | net_offsite | lab |", "|---|---|---|---|---|---|---|---|---|---|---|---|"]
     md += [f"| {r['boyut']} | {r['ulke']} | {r['kargo_tipi']} | {r['urun']} | {r['kargo']} | {r['vergi']} | {r['vergi_faturada']} | {r['fiyat']} | **{r['net']}** | {r['net_vergisiz']} | {r['net_offsite']} | {r['uretim_yeri']} |"
            for r in dusuk] or ["| - | yok | | | | | | | | | | |"]
