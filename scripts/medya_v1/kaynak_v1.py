@@ -161,10 +161,15 @@ def boyut_ve_p28(L, R):
         except Exception as e:                                   # noqa: BLE001
             R['p28_fark'][anah] = {'hata': f'ham yok: {yol}'}; continue
         eski = Image.open(h / f'{oran}_p28.jpg').convert('RGB')
-        if eski.size != yeni.size: eski = eski.resize(yeni.size, Image.LANCZOS)
+        if eski.size != yeni.size:
+            R['p28_fark'][anah] = {'hata': f'boyut farkli: yeni {yeni.size}, ham {eski.size}', 'kapi': 'FAIL'}; continue
         a = np.asarray(yeni).astype(np.int16); b = np.asarray(eski).astype(np.int16); d = np.abs(a - b).max(2)
         m = d > 24; ys, xs = np.where(m)
-        R['p28_fark'][anah] = {'boyut_yeni': list(yeni.size), 'ort_fark': round(float(d.mean()), 3), 'p99': float(np.percentile(d, 99)),
+        Hh, Ww = d.shape; bl = d[:Hh // 16 * 16, :Ww // 16 * 16].reshape(Hh // 16, 16, Ww // 16, 16).mean((1, 3))
+        kapi = bool(bl.max() <= 2 and d.max() <= 6)
+        R['p28_fark'][anah] = {'kapi_blok_ort_maks': round(float(bl.max()), 2), 'kapi_tek_px_maks': int(d.max()),
+                               'blok_ort_gt2_sayisi': int((bl > 2).sum()), 'kapi': 'PASS' if kapi else 'FAIL',
+                               'ham_bicim': 'jpg', 'boyut_yeni': list(yeni.size), 'ort_fark': round(float(d.mean()), 3), 'p99': float(np.percentile(d, 99)),
                                'maks': int(d.max()), 'degisen_px_24': int(m.sum()),
                                'degisen_kutu': [int(xs.min()), int(ys.min()), int(xs.max()), int(ys.max())] if len(ys) else None}
         log('p28', anah, R['p28_fark'][anah])
@@ -184,6 +189,8 @@ def aktar(L, R):
     try:
         rc('copy', f'{DEST}/KAYNAK_DURUM.json', str(W))
         d = json.loads((W / 'KAYNAK_DURUM.json').read_text())
+        olc = {tuple(v['olcu']) for k, v in d['bitti'].items() if '/4x5/' in k}
+        R['aktarim_tuval_4000x5000'] = olc == {(4000, 5000)}
         R['aktarim'] = {'bitti_4x5': sum(1 for k in d['bitti'] if '/4x5/' in k), 'hata': len(d.get('hata', {})),
                         'olcu_ornek': next(iter(d['bitti'].values()))['olcu'] if d['bitti'] else None}
     except Exception as e:                                       # noqa: BLE001
@@ -196,10 +203,12 @@ if __name__ == '__main__':
     L = json.loads((W / 'KAYNAK_LISTE_v1.json').read_text())
     R = {'mod': mod}
     try:
-        if mod in ('hepsi', 'aktar') and L.get('aktar'): aktar(L, R)
         if mod in ('hepsi', 'dogrula'):
             boyut_ve_p28(L, R)
             if L.get('birlesik'): esleme(L, R)
+        p28_ok = all(v.get('kapi') == 'PASS' for k, v in R.get('p28_fark', {}).items() if k.endswith('/4x5'))
+        R['aktarim_karari'] = 'AKTAR' if p28_ok else 'DUR: sayfa 28 kalinti kapisi tutmadi'
+        if mod in ('hepsi', 'aktar') and L.get('aktar') and p28_ok: aktar(L, R)
     finally:
         (RAP / 'RAPOR.json').write_text(json.dumps(R, ensure_ascii=False, indent=1))
         rc('copy', str(RAP), f'{DEST}/KAYNAK_RAPOR_v1')
