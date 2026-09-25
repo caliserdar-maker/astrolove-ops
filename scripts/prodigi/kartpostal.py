@@ -24,6 +24,10 @@ ALT_BAS = 456                                          # alt baslik ust siniri: 
 IS_CAP = 32                                            # isim cap yuksekligi (px)
 G_TY_IS, G_IS_ALT = 32, 44                             # Thank you alti -> isim cap ustu, isim tabani -> alt baslik
 G_SEM_TY = 44                                          # sembol alti -> Thank you ustu
+G_SEM_TY_MIN = 24                                      # uzun sembolde (cerceve payi >= 40 icin) inilebilecek en kucuk bosluk
+CERCEVE_PAY = 40
+TR_ONAY = -0.0697                                      # onayli ornek kartin harf araligi orani (ALEXANDER olcumu)
+TR_TOLERANS = 0.01
 OLCU = (1240, 1748)                                    # A6 @ 300 dpi
 
 
@@ -111,6 +115,9 @@ class Kartpostal:
             else:
                 hi = mid
         self.TR_ORAN = mid / pb
+        self.tr_olcum = self.TR_ORAN
+        if abs(self.TR_ORAN - TR_ONAY) > TR_TOLERANS:  # poster ismi ALEXANDER degil / farkli dizgi (or. CANCER_LIBRA POD_PRINT)
+            self.TR_ORAN = TR_ONAY
 
     # ------------------------------------------------ yazi
     def font_yukle(self, boy):
@@ -164,7 +171,9 @@ class Kartpostal:
         nw, nh = round(sw * s), round(sh * s)
         Fi = np.asarray(Image.fromarray(self.F.astype(np.uint8)).resize((nw, nh), Image.LANCZOS)).astype(np.float64)
         Ai = np.asarray(Image.fromarray((self.A * 255).astype(np.uint8)).resize((nw, nh), Image.LANCZOS)).astype(np.float64)[..., None] / 255
-        cx = (SONSUZ[0] + SONSUZ[2]) / 2; sx = int(round(cx - nw / 2)); sy = TY[0] + D - G_SEM_TY - nh
+        # uzun sembol: once sembol -> Thank you boslugu (44 -> en az 24) daralir ki cerceve payi >= 40 kalsin
+        g = max(G_SEM_TY_MIN, min(G_SEM_TY, TY[0] + D - nh - (CERCEVE[1] + CERCEVE_PAY)))
+        cx = (SONSUZ[0] + SONSUZ[2]) / 2; sx = int(round(cx - nw / 2)); sy = TY[0] + D - g - nh
         C[sy:sy + nh, sx:sx + nw] = C[sy:sy + nh, sx:sx + nw] * (1 - Ai) + Fi * Ai
         a, rgb, taban, cap, boy, olcek, w = self.isim_katman(metin)
         ix = int(round(self.W / 2 - a.shape[1] / 2)); iy = is_ust + cap - taban
@@ -173,7 +182,8 @@ class Kartpostal:
         C[y0:y1, ix:ix + a.shape[1]] = C[y0:y1, ix:ix + a.shape[1]] * (1 - Aa[y0 - iy:]) + rgb[y0 - iy:] * Aa[y0 - iy:]
         bilgi = {'punto': boy, 'olcek': round(olcek, 3), 'isim_en_px': int(w), 'isim_azami_en_px': SUTUN[1] - SUTUN[0] + 1,
                  'isim_x': [ix, ix + a.shape[1]], 'isim_cap_ust_taban': [is_ust, is_ust + cap], 'ust_blok_kayma_px': D,
-                 'sembol_kutu': [sx, sy, sx + nw, sy + nh], 'sembol_alan_px2': nw * nh, 'sonsuz_alan_px2': alan}
+                 'sembol_kutu': [sx, sy, sx + nw, sy + nh], 'sembol_alan_px2': nw * nh, 'sonsuz_alan_px2': alan,
+                 'sembol_ty_boslugu': int(g), 'tr_olcum': round(self.tr_olcum, 4), 'tr_kullanilan': round(self.TR_ORAN, 4)}
         return C, bilgi
 
     @staticmethod
@@ -195,7 +205,12 @@ class Kartpostal:
         J = np.asarray(Image.open(yol)).astype(np.float64)
         alt_fark_ham = float(np.abs(C8[ALT_BAS - 2:].astype(np.float64) - self.K[ALT_BAS - 2:]).max())
         alt_fark_jpg = float(np.abs(J[ALT_BAS - 2:] - self.K[ALT_BAS - 2:]).mean())
-        bn = self.bantlar(C8.astype(np.float64)); yb = [x for x in bn if x[0] < ALT_BAS] + [x for x in bn if x[0] >= ALT_BAS][:1]
+        bn = self.bantlar(C8.astype(np.float64))
+        sk = b['sembol_kutu']                          # sembolun kendi ic bosluklari (or. terazi cizgileri) tek bant sayilir
+        sem_b = [x for x in bn if x[0] >= sk[1] - 2 and x[1] <= sk[3] + 2]
+        if sem_b:
+            bn = sorted([x for x in bn if x not in sem_b] + [(min(x[0] for x in sem_b), max(x[1] for x in sem_b))])
+        yb = [x for x in bn if x[0] < ALT_BAS] + [x for x in bn if x[0] >= ALT_BAS][:1]
         bosluk = min(yb[i + 1][0] - yb[i][1] - 1 for i in range(len(yb) - 1))
         ic = b['isim_x'][0] >= SUTUN[0] and b['isim_x'][1] <= SUTUN[1] + 1
         im = Image.open(yol)
