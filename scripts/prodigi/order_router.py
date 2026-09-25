@@ -738,6 +738,8 @@ def main():
                   + (f" (yalniz {a.only_size} kalemleri)" if a.only_size else ""))
     kanal_bekci = kanal_kisisel_bekci(a, prod, st, idx, pod, report, errors) if not a.test_receipt else {}
     tablo = siparis_onay.tablo_ac(a.onay_tablo) if a.onay_tablo else None
+    if tablo and not a.test_receipt:
+        siparis_onay.ekstra_tablo_yukle()                # Drive: faturadan ogrenilmis tesis ekstralari
     gizli = []                                           # receipt/isim iceren satirlar: yalniz Drive (SIPARIS_ONAY_RAPOR.md)
     if tablo:
         report.append(f"- ONAY AKISI: tablo {tablo.tur}")
@@ -987,6 +989,13 @@ def main():
                 errors.append(f"{rid}: get_order HTTP {stc}"); continue
             status = o.get("status") or {}
             details = status.get("details") or {}
+            try:                                           # yeni tesisin ilk faturasi: ekstra tutari ogrenilir
+                ogr = siparis_onay.ekstra_ogren(o)
+            except Exception as e:                        # noqa: BLE001 - ogrenme hatasi siparisi durdurmaz
+                ogr = None
+                report.append(f"- ekstra ogrenme hatasi: {type(e).__name__}")
+            if ogr:
+                report.append(f"- EKSTRA OGRENILDI: tesis {ogr[0]} {ogr[1]:.2f} USD (fatura {o.get('id')})")
             perms = json.loads(row.get("asset_perms") or "[]")
             if perms and str(details.get("downloadAssets", "")).lower() == "complete":
                 links = links or DriveLinks()

@@ -55,7 +55,8 @@ TEKLIF = {("US", "Budget"): (10.0, 6.85, 0), ("US", "Standard"): (10.0, 11.85, 0
 # uretim tesisi (maliyet CSV uretim_yeri sutunu, 8x10)
 LAB = {"US": ("US", "prodigi_us"), "TR": ("NL", "prodigi_eu"), "DE": ("NL", "prodigi_eu"), "CA": ("GB", "prodigi_gb3"),
        "GB": ("GB", "prodigi_gb3"), "JP": ("AU", "au1"), "AU": ("AU", "au1")}
-EK = round(4.00 * 1.3252, 2)          # 5.30 USD: Prodigi fiyat tablosu 4.00 GBP x ECB 25 Eyl
+EK = round(4.00 * 1.3252, 2)          # 5.30 USD: Prodigi fiyat tablosu 4.00 GBP x ECB 25 Eyl (dogrulanmamis tesis)
+EK_US, EK_EU = 5.00, 5.73              # canli fatura (prodigi_us / prodigi_eu)
 
 
 class Sahte:
@@ -197,7 +198,7 @@ pkg = json.loads((W / f"k1/{POD}.json").read_text())
 k("POD paketi: kisisel baski dosyasi yolu + SKU + adres", pkg["items"][0]["asset_remote"] == f"{O.DRIVE_KOK}/{POD}/BASKI_8x10.jpg"
   and pkg["order"]["items"][0]["sku"] == "GLOBAL-HPR-8x10" and pkg["order"]["recipient"]["address"]["postalOrZipCode"] == "10001")
 k("POD paketi: kargo EN UCUZ (US Budget) + tabloda net kar", pkg["order"]["shippingMethod"] == "Budget"
-  and tablo()[KP]["NET_KAR"] == f"{O.net_kar(49.99, 10.0, 6.85, 0, ekstra_usd=EK):.2f}" and tablo()[KP]["KARGO"].startswith("Budget 6.85")
+  and tablo()[KP]["NET_KAR"] == f"{O.net_kar(49.99, 10.0, 6.85, 0, ekstra_usd=EK_US):.2f}" and tablo()[KP]["KARGO"].startswith("Budget 6.85")
   and not tablo()[KP]["KAR_UYARI"], (tablo()[KP]["NET_KAR"], tablo()[KP]["KARGO"]))
 k("Prodigi'ye siparis YOK (onay yok)", not [c for c in S.cagri if c[0] == "POST" and c[1] == "/orders"])
 k("Kiril bildirimi (musteri mesaji gerekli)", f"::error title=MUSTERIYE MESAJ GEREKLI {KK}::" in log1 and rc1 not in (0, None))
@@ -217,7 +218,7 @@ with contextlib.redirect_stdout(buf):
 log2 = buf.getvalue(); LOGLAR.append(log2)
 T = tablo()
 k("uretildi: POD + dijital ONAY_BEKLIYOR, tekrar cagri degistirmez", d1 == d2 == O.D_ONAY and d3 == O.D_ONAY and T[KP]["DURUM"] == O.D_ONAY)
-k("bildirimde net kar (kartpostal+sticker dusulmus)", f"net kar {O.net_kar(49.99, 10.0, 6.85, 0, ekstra_usd=EK):.2f} USD (kartpostal+sticker dusulmus) | kargo Budget 6.85" in log2)
+k("bildirimde net kar (kartpostal+sticker dusulmus)", f"net kar {O.net_kar(49.99, 10.0, 6.85, 0, ekstra_usd=EK_US):.2f} USD (kartpostal+sticker dusulmus) | kargo Budget 6.85" in log2)
 k("tabloda KONTROL / BASKI / x3 linkleri", all(T[KP][c].startswith("https://drive.google.com/") for c in ("KONTROL_KLASOR", "BASKI", "ISIM_x3", "MESAJ_x3")))
 k("bildirim: ozet + x3 linkleri + tam cozunurluk + tablo satiri", f"::error title=ONAY BEKLIYOR {KP}::POD DEEP_BLACK 8x10" in log2
   and "isim x3: https://" in log2 and "tam cozunurluk: https://" in log2 and "tablo satiri: file://" in log2 and log2.count("ONAY BEKLIYOR") == 2)
@@ -272,7 +273,7 @@ def teklif(ulke, rid=7700000001):
     it = [{"prodigi_sku": "GLOBAL-HPR-8x10", "qty": 1, "price": 34.99}]
     return R.teklif_net(P, FE(None), "1", r, it)
 kar, y, _ = teklif("TR")
-k("TR 8x10 (NL): Standard secildi (Budget 26.41 pahali), net 12.11 - ekstra 5.30 = 6.81, uyari yok", y == "Standard" and kar["NET_KAR"] == "6.81" and not kar["KAR_UYARI"], (y, kar))
+k("TR 8x10 (NL): Standard secildi (Budget 26.41 pahali), net 12.11 - fatura ekstrasi 5.73 = 6.38, uyari yok", y == "Standard" and kar["NET_KAR"] == "6.38" and not kar["KAR_UYARI"] and "ekstra 5.73 [fatura ord_72296317183912448]" in kar["KARGO"], (y, kar))
 kar, y, _ = teklif("CA")
 k("CA 8x10 (GB): Budget secildi (Standard 18.49 pahali), net 15.08 - 5.30 = 9.78, tesis dogrulanmadi notu", y == "Budget" and kar["NET_KAR"] == "9.78" and "prodigi_gb3 icin ekstra dogrulanmadi" in kar["KAR_UYARI"] and O.ZARAR not in kar["KAR_UYARI"], (y, kar))
 kar_jp, y, _ = teklif("JP")
@@ -281,13 +282,14 @@ kar, y, _ = teklif("GB")
 k("GB 8x10: Prodigi vergisi (totalTax 2.23) dusuldu, net 14.83 - 5.30 = 9.53", y == "Budget" and kar["NET_KAR"] == "9.53" and "vergi 2.23" in kar["KARGO"], (y, kar))
 OFFSITE[7700000002] = 525
 kar, y, _ = teklif("US", 7700000002)
-k("Offsite Ads kesintisi dusuldu (5.25)", kar["NET_KAR"] == f"{O.net_kar(34.99, 10.0, 6.85, 0, 5.25, ekstra_usd=EK):.2f} (offsite -5.25)", kar)
+k("Offsite Ads kesintisi dusuldu (5.25)", kar["NET_KAR"] == f"{O.net_kar(34.99, 10.0, 6.85, 0, 5.25, ekstra_usd=EK_US):.2f} (offsite -5.25)", kar)
 kar, y, _ = R.teklif_net(P, None, None, {"receipt_id": 1, "country_iso": "US"}, [{"prodigi_sku": "GLOBAL-HPR-8x10", "qty": 1, "price": 34.99}])
 k("Offsite okunamazsa uyari (dusulmedi)", "Offsite Ads okunamadi" in kar["KAR_UYARI"], kar)
-k("ekstra 5.30 = 4.00 GBP x 1.3252, kaynak 'Prodigi fiyat tablosu', tesis KARGO'da", O.ekstra_usd() == 5.30
+k("dogrulanmamis tesis (au1): 5.30 = 4.00 GBP x 1.3252, kaynak 'Prodigi fiyat tablosu' + dogrulanmadi notu", O.ekstra_usd() == 5.30
+  and "tesis au1 icin ekstra dogrulanmadi" in kar_jp["KAR_UYARI"]
   and "ekstra 5.30 [Prodigi fiyat tablosu (4.00 GBP, ECB 2026-09-25 kuru 1.3252)], tesis AU/au1" in kar_jp["KARGO"], kar_jp["KARGO"])
-k("US (prodigi_us, faturayla dogrulandi): uyari yok", not teklif("US", 7700000003)[0]["KAR_UYARI"])
-O.EKSTRA_TESIS["au1"] = False                    # ekstra basilmayan tesis: maliyet 0 + e-posta notu
+k("US (prodigi_us): fatura 5.00, uyari yok", not teklif("US", 7700000003)[0]["KAR_UYARI"] and "ekstra 5.00 [fatura ord_14538276]" in teklif("US", 7700000003)[0]["KARGO"])
+O.EKSTRA_BASILMAYAN.add("au1")                   # (yalniz test) kanitla basilmayan tesis: maliyet 0 + e-posta notu
 kar_au, y, _ = teklif("JP")
 k("ekstra basilmayan tesis: ekstra 0, net -1.23 (hala ZARAR), not", kar_au["NET_KAR"] == "-1.23" and "ekstra 0.00" in kar_au["KARGO"]
   and O.NOT_EKSTRA_YOK in kar_au["KAR_UYARI"] and O.ZARAR in kar_au["KAR_UYARI"], kar_au)
@@ -298,11 +300,36 @@ with contextlib.redirect_stdout(buf):
     O.uretildi(tb4, str(AU), {"urun": "POD", "boy": "8x10", "durum": "URETILDI", "kapilar_gecti": True}, link=link)
 k("e-posta: 'Bu tesiste kartpostal/sticker eklenmiyor'", f"{O.ZARAR}: net -1.23 USD | Bu tesiste kartpostal/sticker eklenmiyor" in buf.getvalue(), buf.getvalue()[:200])
 LOGLAR.append(buf.getvalue())
-del O.EKSTRA_TESIS["au1"]
+O.EKSTRA_BASILMAYAN.discard("au1")
+k("gercek tabloda basilmayan tesis YOK (AU tahmin edilmez)", not O.EKSTRA_BASILMAYAN and "au1" not in O.EKSTRA_DOGRULANMIS)
 class _Kapsam:
     data = {"scope": "listings_r listings_w transactions_r transactions_w shops_r"}
 fe_kapsamsiz = FE(None); fe_kapsamsiz.store = _Kapsam(); fe_kapsamsiz.get = lambda *a, **kw: (_ for _ in ()).throw(AssertionError("ledger cagrisi"))
 k("billing_r yoksa ledger cagrisi YOK, 'Offsite Ads okunamadi' notu", R.offsite_kesinti(fe_kapsamsiz, "1", {"receipt_id": 7700000002}) is None)
+# ---- ekstra ogrenme: dogrulanmamis tesisin (gb3) ilk faturasi -> tablo + Drive
+DRIVE = {}
+oku_ = lambda yol: DRIVE.get(yol, ""); yaz_ = lambda yol, m: DRIVE.__setitem__(yol, m) or True
+def fatura(oid, labc, tutarlar, skulu=()):
+    o = {"id": oid, "created": "2026-09-30T10:00:00Z", "items": [{"id": f"it{i}", "sku": "GLOBAL-HPR-8x10"} for i, _ in enumerate(skulu)],
+         "shipments": [{"fulfillmentLocation": {"countryCode": labc[0], "labCode": labc[1]}}],
+         "recipient": {"name": "Emily", "address": {"countryCode": "GB"}},
+         "charges": [{"totalCost": {"amount": "0", "currency": "USD"}, "items":
+                      [{"description": "", "itemSku": "", "itemId": f"it{i}", "cost": {"amount": str(t), "currency": "USD"}} for i, t in enumerate(skulu)]
+                      + [{"description": "", "itemSku": "", "cost": {"amount": str(t), "currency": "USD"}} for t in tutarlar]}]}
+    return o
+k("US faturasi (zaten dogrulanmis) -> ogrenme yok", O.ekstra_ogren(fatura("ord_U", ("US", "prodigi_us"), [6.85, 2.5, 1.25, 1.25], [10.0]), oku_, yaz_) is None and not DRIVE)
+k("gb3 ekstrasiz fatura -> ogrenme yok", O.ekstra_ogren(fatura("ord_G0", ("GB", "prodigi_gb3"), [4.57], [6.62]), oku_, yaz_) is None)
+og = O.ekstra_ogren(fatura("ord_G1", ("GB", "prodigi_gb3"), [4.57, 2.64, 1.32, 1.32], [6.62]), oku_, yaz_)
+dj = json.loads(DRIVE.get(O.EKSTRA_REMOTE, "{}"))
+k("gb3 ilk fatura: SKU'lu baski cikarildi, desen 2.64+1.32+1.32 = 5.28 ogrenildi, Drive'a yazildi", og == ("prodigi_gb3", 5.28)
+  and dj["prodigi_gb3"]["usd"] == 5.28 and dj["prodigi_gb3"]["kaynak"] == "fatura ord_G1" and "Emily" not in DRIVE[O.EKSTRA_REMOTE], dj)
+kar, y, _ = teklif("CA")
+k("sonraki CA teklifi: gb3 fatura ekstrasi 5.28, dogrulanmadi notu yok, net 15.08 - 5.28 = 9.80", kar["NET_KAR"] == "9.80"
+  and "dogrulanmadi" not in kar["KAR_UYARI"] and "ekstra 5.28 [fatura ord_G1]" in kar["KARGO"], kar)
+k("ikinci gb3 faturasi -> tekrar ogrenme yok", O.ekstra_ogren(fatura("ord_G2", ("GB", "prodigi_gb3"), [4.57, 2.7, 1.35, 1.35], [6.62]), oku_, yaz_) is None)
+del O.EKSTRA_DOGRULANMIS["prodigi_gb3"]
+k("kosu basi Drive tablosu yuklenir", O.ekstra_tablo_yukle(oku_) == 1 and O.EKSTRA_DOGRULANMIS["prodigi_gb3"] == (5.28, "fatura ord_G1"))
+del O.EKSTRA_DOGRULANMIS["prodigi_gb3"]
 # JP zarar: onay bildirimi KIRMIZI ZARAR, ONAY yokken gonderim YOK
 tb3 = O.YerelTablo(W / "zarar.csv"); JP = 7700000009; KJ = O.kod(JP)
 tb3.ekle({"KOD": KJ, "RECEIPT": str(JP), "URUN": "POD", "RENK": "DEEP_BLACK", "BOY": "8x10", "ULKE": "JP", "DURUM": O.D_DOSYA, **kar_jp})

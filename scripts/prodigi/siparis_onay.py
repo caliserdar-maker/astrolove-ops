@@ -44,32 +44,85 @@ EVET = {"TRUE", "EVET", "X", "YES", "1", "✓", "✔"}
 ETSY_SABIT, ETSY_ORAN = 0.582, 0.176     # Etsy kesintisi = 0.582 x adet + 0.176 x fiyat (Serdar, 25 Eyl 2026)
 ZARAR = "🔴 ZARAR"
 # Paket ekstralari (kartpostal + 2 sticker; hesap ayari, her pakette - Serdar 25 Eyl). Prodigi Quote API bunlari
-# FIYATLAMIYOR (7 Eyl kosu 34115064337). Tutar: Prodigi fiyat tablosu (kartpostal 2.00 GBP + 2 x sticker 1.00 GBP)
-# x ECB kuru. Ekstra yalniz basildigi tesiste faturalanir: tesis teklifteki shipments[].fulfillmentLocation'dan gelir.
+# FIYATLAMIYOR (7 Eyl kosu 34115064337). Tesis teklifteki shipments[].fulfillmentLocation'dan gelir.
+# Dogrulanmis tesis: GERCEK FATURA tutari (Serdar karari 25 Eyl). Dogrulanmamis tesis: Prodigi fiyat tablosu
+# (kartpostal 2.00 GBP + 2 x sticker 1.00 GBP) x ECB kuru + "dogrulanmadi" notu. Tahminle "basilmiyor" isaretlenmez.
 EKSTRA_GBP = 4.00
 KUR_GBP_USD, KUR_TARIH = 1.3252, "2026-09-25"     # ECB referans kuru (prodigi-quote ekstra_tesis, kosu 36162621950)
 EKSTRA_KAYNAK = "Prodigi fiyat tablosu"
-# tesis (labCode) -> True: ekstra basiliyor | False: eklenmiyor. Kanit: canli siparis faturalari (kosu 36162621950):
-#   prodigi_us: ord_14538276 + ord_72470448809534464 -> 2.50 + 1.25 + 1.25 = 5.00 USD
-#   prodigi_eu: ord_72296317183912448 (17 Eyl)       -> 2.87 + 1.43 + 1.43 = 5.73 USD
-#   prodigi_gb3, au1: canli siparis yok -> DOGRULANMADI (maliyet dusulur, not yazilir). Dokuman tesis listesi vermiyor
-#   ("Availability of branded inserts is dependent on fulfilment location").
-EKSTRA_TESIS = {"prodigi_us": True, "prodigi_eu": True}
+# labCode -> (USD, kaynak). Canli faturalar (kosu 36162621950, salt okuma). Router yeni tesisin ilk faturasindan
+# ogrenir ve Drive EKSTRA_REMOTE'a yazar (ekstra_ogren); kosu basinda ekstra_tablo_yukle ile birlesir.
+EKSTRA_DOGRULANMIS = {"prodigi_us": (5.00, "fatura ord_14538276"),
+                      "prodigi_eu": (5.73, "fatura ord_72296317183912448")}
+EKSTRA_BASILMAYAN = set()                         # kanitla (fatura/dokuman) basilmadigi gosterilen tesis; tahmin YOK
+EKSTRA_REMOTE = "gdrive:ASTROLOVE/TEMP/PRODIGI/EKSTRA_TESIS.json"
 NOT_EKSTRA_YOK = "Bu tesiste kartpostal/sticker eklenmiyor"
 
 
 def ekstra_usd():
-    return round(EKSTRA_GBP * KUR_GBP_USD, 2) if KUR_GBP_USD else 5.00
+    return round(EKSTRA_GBP * KUR_GBP_USD, 2)
 
 
 def ekstra(lab):
-    """tesis -> (USD, kaynak, not). Tesiste ekstra basilmiyorsa 0 + not; tesis bilinmiyorsa tutar dusulur + not."""
+    """tesis -> (USD, kaynak, not)."""
     lab = (lab or "").split("/")[-1].strip()
-    durum = EKSTRA_TESIS.get(lab)
-    if durum is False:
-        return 0.0, f"{EKSTRA_KAYNAK}; tesis {lab}", NOT_EKSTRA_YOK
-    kaynak = f"{EKSTRA_KAYNAK} ({EKSTRA_GBP:.2f} GBP" + (f", ECB {KUR_TARIH} kuru {KUR_GBP_USD})" if KUR_GBP_USD else ")")
-    return ekstra_usd(), kaynak, ("" if durum else f"tesis {lab or '?'} icin ekstra dogrulanmadi (maliyet dusuldu)")
+    if lab in EKSTRA_BASILMAYAN:
+        return 0.0, f"tesis {lab}", NOT_EKSTRA_YOK
+    if lab in EKSTRA_DOGRULANMIS:
+        usd, kaynak = EKSTRA_DOGRULANMIS[lab]
+        return float(usd), kaynak, ""
+    return (ekstra_usd(), f"{EKSTRA_KAYNAK} ({EKSTRA_GBP:.2f} GBP, ECB {KUR_TARIH} kuru {KUR_GBP_USD})",
+            f"tesis {lab or '?'} icin ekstra dogrulanmadi ({ekstra_usd():.2f} fiyat tablosundan)")
+
+
+def _rclone_oku(yol):
+    try:
+        r = subprocess.run(["rclone", "cat", yol], capture_output=True, text=True)
+    except OSError:
+        return ""
+    return r.stdout if r.returncode == 0 else ""
+
+
+def _rclone_yaz(yol, metin):
+    try:
+        return subprocess.run(["rclone", "rcat", yol], input=metin, capture_output=True, text=True).returncode == 0
+    except OSError:
+        return False
+
+
+def ekstra_tablo_yukle(oku=_rclone_oku):
+    """Drive EKSTRA_TESIS.json {lab: {usd, kaynak, tarih}} -> EKSTRA_DOGRULANMIS (kod sabitleri korunur)."""
+    try:
+        d = json.loads(oku(EKSTRA_REMOTE) or "{}")
+    except ValueError:
+        return 0
+    n = 0
+    for lab, v in d.items():
+        if lab not in EKSTRA_DOGRULANMIS and isinstance(v, dict) and v.get("usd") is not None:
+            EKSTRA_DOGRULANMIS[lab] = (float(v["usd"]), str(v.get("kaynak") or "fatura"))
+            n += 1
+    return n
+
+
+def ekstra_ogren(order, oku=_rclone_oku, yaz=_rclone_yaz):
+    """Dogrulanmamis tesisin ILK faturalanan siparisi: ekstra tutari faturadan (SKU/tutar eslesmesi) okunur,
+    tabloya eklenir, Drive'a yazilir. -> (lab, usd) ya da None."""
+    from prodigi_ekstra_tesis import ekstra_faturadan
+    ek = ekstra_faturadan(order or {})
+    if not ek:
+        return None
+    lab = ek["tesis"].split("/")[-1]
+    if lab in EKSTRA_DOGRULANMIS:
+        return None
+    try:
+        d = json.loads(oku(EKSTRA_REMOTE) or "{}")
+    except ValueError:
+        d = {}
+    d[lab] = {"usd": ek["usd"], "kaynak": f"fatura {order.get('id')}", "tarih": str(order.get("created") or "")[:10],
+              "kalemler": ek["kalemler"], "yontem": ek["yontem"]}
+    yaz(EKSTRA_REMOTE, json.dumps(d, indent=1))
+    EKSTRA_DOGRULANMIS[lab] = (ek["usd"], f"fatura {order.get('id')}")
+    return lab, ek["usd"]
 
 
 def kod(rid):
