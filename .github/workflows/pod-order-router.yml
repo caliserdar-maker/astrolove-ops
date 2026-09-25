@@ -65,15 +65,16 @@ on:
         type: boolean
         default: false
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
-
 jobs:
   route:
     if: ${{ github.event_name == 'workflow_dispatch' || vars.POD_ROUTER_ENABLED != 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    concurrency:                  # Etsy token'i tek kosu (uretim isi bu kilidi TUTMAZ)
+      group: etsy-token
+      cancel-in-progress: false
+    outputs:
+      uretim: ${{ steps.kuyruk.outputs.uretim }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -177,8 +178,9 @@ jobs:
           TOKEN_FILE: _work/ETSY_TOKEN.json
         run: |
           set -euo pipefail
+          # ONAY AKISI (25 Eyl, siparis-onay dali; CANLI DEGIL): kisisel siparis -> tablo + uretim + onay izleyici
           args=(--env "$R_ENV" --state _work/state.csv --out _out --packages _work/packages
-                --approve-mode "$R_APPROVE" --since-days "$R_DAYS" --quota-min 400)
+                --approve-mode "$R_APPROVE" --since-days "$R_DAYS" --quota-min 400 --onay-tablo "sheets:SIPARIS_ONAY")
           [ -n "${R_ONLY:-}" ] && args+=(--only-size "$R_ONLY")
           if [ -n "${R_SUBMIT:-}" ]; then
             echo "::warning::GONDERIM: receipt $R_SUBMIT canli Prodigi siparisine cevrilecek"
@@ -208,6 +210,14 @@ jobs:
           if [ -d _out/SIPARIS_ISIM ]; then
             rclone copy _out/SIPARIS_ISIM "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM" --include "*.md" -q && echo "siparis kartlari Drive'a yazildi"
           fi
+          # ONAY AKISI: musteri verili rapor yalniz Drive'a; uretim kuyrugu Drive'da birikir (uretim isi tuketir)
+          [ -f _out/SIPARIS_ONAY_RAPOR.md ] && rclone copyto _out/SIPARIS_ONAY_RAPOR.md "gdrive:ASTROLOVE/TEMP/SIPARIS/_RAPOR/SIPARIS_ONAY_${stamp}.md" -q || true
+          if [ -s _out/URETIM.txt ]; then
+            rclone copyto "gdrive:ASTROLOVE/TEMP/SIPARIS/_URETIM_KUYRUK.txt" _work/kuyruk.txt 2>/dev/null || : > _work/kuyruk.txt
+            cat _out/URETIM.txt >> _work/kuyruk.txt
+            sort -u _work/kuyruk.txt -o _work/kuyruk.txt
+            rclone copyto _work/kuyruk.txt "gdrive:ASTROLOVE/TEMP/SIPARIS/_URETIM_KUYRUK.txt" -q
+          fi
           if [ -s _out/ISIM_YENI.txt ]; then
             while read -r rid; do
               [ -z "$rid" ] && continue
@@ -215,14 +225,81 @@ jobs:
               echo "::error title=ISIM_BEKLIYOR ${rid}::Kisisellestirmeli siparis ${rid} Prodigi'ye GONDERILMEDI. Kart: https://drive.google.com/file/d/${fid}/view"
             done < _out/ISIM_YENI.txt
           fi
+      - name: Uretim kuyrugu var mi
+        id: kuyruk
+        if: ${{ always() }}
+        run: |
+          n=$(rclone cat "gdrive:ASTROLOVE/TEMP/SIPARIS/_URETIM_KUYRUK.txt" 2>/dev/null | grep -c . || true)
+          echo "uretim kuyrugu: ${n:-0}"
+          [ "${n:-0}" -gt 0 ] && echo "uretim=true" >> "$GITHUB_OUTPUT" || echo "uretim=false" >> "$GITHUB_OUTPUT"
+      # Artifact'ta musteri verisi YOK (kart, paket/adres, STATE/receipt yalniz Drive'da): yalniz SKU haritasi.
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:
           name: pod-order-router
-          path: |
-            _out/
-            _work/state.csv
+          path: _out/PRODIGI_SKU_HARITA.json
           if-no-files-found: ignore
           retention-days: 30
       - if: ${{ always() }}
         run: rm -rf _work ~/.config/rclone
+
+  # ONAY AKISI - baski dosyasi uretimi (siparis-baski-v1 siparis_dosyasi.py). Etsy/Prodigi kimligi YOK, yalniz Drive.
+  # Ciktilar Drive TEMP/SIPARIS/<receipt>/; uretec logu yalniz Drive'a (Actions loguna musteri verisi yazilmaz).
+  uretim:
+    needs: route
+    if: ${{ always() && needs.route.outputs.uretim == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    concurrency:
+      group: siparis-uretim
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2 pillow opencv-python-headless numpy fonttools
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Baski dosyalari (kuyruk)
+        env:
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}     # yalniz opak kod anahtari (Etsy'ye cagri yok)
+        run: |
+          set -euo pipefail
+          mkdir -p _work _sb
+          git fetch -q --depth 1 origin siparis-baski-v1
+          git archive FETCH_HEAD scripts/medya_v1 | tar -x -C _sb
+          rclone copyto "gdrive:ASTROLOVE/TEMP/SIPARIS/_URETIM_KUYRUK.txt" _work/kuyruk.txt
+          : > _work/biten.txt
+          i=0
+          while read -r rid; do
+            [ -z "$rid" ] && continue
+            i=$((i+1)); echo "uretim $i: $(python3 -c "import sys;sys.path.insert(0,'scripts/prodigi');import siparis_onay as O;print(O.kod(sys.argv[1]))" "$rid")"
+            rc=0; python _sb/scripts/medya_v1/siparis_dosyasi.py --kart "${rid}.md" > "_work/uretim_${i}.log" 2>&1 || rc=$?
+            rclone move "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/${rid}" "gdrive:ASTROLOVE/TEMP/SIPARIS/${rid}" -q || true
+            rclone copyto "_work/uretim_${i}.log" "gdrive:ASTROLOVE/TEMP/SIPARIS/${rid}/URETIM.log" -q || true
+            mkdir -p "_siparis/${rid}"
+            [ -f "_siparis/${rid}/KAPI_RAPORU.json" ] || echo "{\"durum\": \"HATA\", \"hata\": \"uretec cikis $rc\"}" > "_siparis/${rid}/KAPI_RAPORU.json"
+            echo "$rid" >> _work/biten.txt
+          done < _work/kuyruk.txt
+          rc=0; python scripts/prodigi/siparis_onay.py uretildi --rid-dosya _work/biten.txt --rapor-kok _siparis || rc=$?
+          # islenenler kuyruktan cikar (bu arada eklenenler korunur)
+          rclone copyto "gdrive:ASTROLOVE/TEMP/SIPARIS/_URETIM_KUYRUK.txt" _work/kuyruk2.txt
+          grep -vxF -f _work/biten.txt _work/kuyruk2.txt > _work/kalan.txt || true
+          rclone copyto _work/kalan.txt "gdrive:ASTROLOVE/TEMP/SIPARIS/_URETIM_KUYRUK.txt" -q
+          exit $rc
+      - if: ${{ always() }}
+        run: rm -rf _work _siparis _sb ~/.config/rclone

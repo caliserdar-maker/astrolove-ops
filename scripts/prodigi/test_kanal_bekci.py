@@ -120,8 +120,10 @@ dk = (W / "k1/DIKKAT.md").read_text(encoding="utf-8")
 k("DIKKAT: ACIL metni (siparis no + Prodigi id)",
   "ACIL: kisisellestirilmis Etsy siparisi Prodigi'de gorundu - siparis 9101, Prodigi ord_K1" in dk
   and "siparis 9102, Prodigi ord_K2" in dk and "9104" not in "".join(l for l in dk.splitlines() if "ACIL" in l))
-k("bildirim: ::error ACIL satirlari (yalniz K1, K2)", "::error title=ACIL 9101::" in log1 and "::error title=ACIL 9102::" in log1
-  and log1.count("::error title=ACIL") == 2)
+K1, K2 = R.siparis_onay.kod("9101"), R.siparis_onay.kod("9102")
+k("bildirim: ::error ACIL satirlari (yalniz K1, K2; receipt yerine opak kod)", f"::error title=ACIL {K1}::" in log1
+  and f"::error title=ACIL {K2}::" in log1 and log1.count("::error title=ACIL") == 2
+  and not [l for l in log1.splitlines() if l.startswith("::error") and ("9101" in l or "9102" in l)])
 k("kosu bildirim icin basarisiz", rc not in (0, None), rc)
 k("kartta ACIL notu", "ACIL" in (W / "k1/SIPARIS_ISIM/9101.md").read_text(encoding="utf-8")
   and "ACIL" not in (W / "k1/SIPARIS_ISIM/9106.md").read_text(encoding="utf-8"))
@@ -132,5 +134,5 @@ k("ikinci kosu: tekrar bildirim yok", "::error title=ACIL" not in log2 and log2.
 k("ikinci kosu: hata yok (rc 0)", rc2 in (0, None), rc2)
 os.remove(W / "state.csv"); S.cagri.clear()
 rc3, log3 = run(kuru=True, ad="kuru")
-k("kuru kosu: uyari calisir, yazma yok", "::error title=ACIL 9101::" in log3 and not yasak())
+k("kuru kosu: uyari calisir, yazma yok", f"::error title=ACIL {K1}::" in log3 and not yasak())
 print(f"{sum(sonuc)}/{len(sonuc)} PASS"); sys.exit(0 if all(sonuc) else 1)

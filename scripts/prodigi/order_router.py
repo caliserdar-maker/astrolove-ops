@@ -52,6 +52,7 @@ from etsy_common import Etsy, TokenStore, log as elog, mask  # noqa: E402
 from pod_sku import parse_sku  # noqa: E402
 import takip  # noqa: E402
 import kisisel_siparis  # noqa: E402
+import siparis_onay  # noqa: E402
 
 PRODIGI = {"live": "https://api.prodigi.com/v4.0", "sandbox": "https://api.sandbox.prodigi.com/v4.0"}
 KEY_REMOTE = {"live": "gdrive:ASTROLOVE/TEMP/PRODIGI_TOKEN.json", "sandbox": "gdrive:ASTROLOVE/TEMP/PRODIGI_SANDBOX_TOKEN.json"}
@@ -288,15 +289,29 @@ def kanal_kisisel_bekci(a, prod, st, idx, pod, report, errors):
         mesaj = (f"ACIL: kisisellestirilmis Etsy siparisi Prodigi'de gorundu - siparis {rid}, Prodigi {oid} "
                  f"(stage {bilgi.get('stage')}); elle serbest BIRAKILMAMALI")
         notlar[rid] = mesaj
+        k = siparis_onay.kod(rid)                        # loga receipt yazilmaz (yalniz DIKKAT.md / Drive)
+        mesaj_log = mesaj.replace(f"siparis {rid}", f"siparis {k}")
         if row.get("kanal_oid") == oid and row.get("warn") == ACIL_KOD:
-            report.append(f"- {rid}: KANAL BEKCISI {oid} zaten bildirildi (tekrar yok)")
+            report.append(f"- {k}: KANAL BEKCISI {oid} zaten bildirildi (tekrar yok)")
             continue
         upd(st, a.state, rid, kanal_oid=oid, warn=ACIL_KOD, note=mesaj[:300])
-        report.append(f"- {rid}: {mesaj}")
+        report.append(f"- {k}: {mesaj_log}")
         DIKKAT_EK.append(f"- {mesaj}")
-        errors.append(f"{rid}: {mesaj}")
-        print(f"::error title=ACIL {rid}::{mesaj}", flush=True)
+        errors.append(f"{k}: {mesaj_log}")
+        print(f"::error title=ACIL {k}::{mesaj_log}", flush=True)
     return notlar
+
+
+def _onay_sonrasi(out, rid, k, durum, uret, tablo, report):
+    """Kayit acildiktan sonra: uretim listesi (workflow siparis_dosyasi.py calistirir) ya da musteri mesaji bildirimi."""
+    if uret:
+        with (out / "URETIM.txt").open("a", encoding="utf-8") as fh:
+            fh.write(f"{rid}\n")
+    satir = next((x for x in tablo.satirlar() if x.get("KOD") == k), {})
+    report.append(f"- {k}: KISISEL -> {durum}" + (" (baski dosyasi uretilecek)" if uret else ""))
+    if durum == siparis_onay.D_MESAJ and satir:
+        siparis_onay.bildir("MUSTERIYE MESAJ GEREKLI", k, f"on kontrol: {satir.get('ON_KONTROL')} | sablon {satir.get('SABLON')} "
+                            "(mesaj GONDERILMEDI, dosya uretilmedi)", {"tablo satiri": tablo.satir_link(satir["_no"])})
 
 
 def meta_oku(st):
@@ -593,6 +608,8 @@ def main():
                          "takip.YENI_SIPARIS_BASLANGIC_UTC'den yalniz ILERI tasinabilir")
     ap.add_argument("--sablonlar", default="_work/MUSTERI_MESAJLARI.md",
                     help="kisisel musteri mesaji sablonlari (Drive TEMP/SIPARIS_ISIM/MUSTERI_MESAJLARI.md)")
+    ap.add_argument("--onay-tablo", default="",
+                    help="kisisel siparis ONAY akisi (25 Eyl): 'sheets:SIPARIS_ONAY' | 'yerel:<csv>'; bos = eski akis")
     ap.add_argument("--only-size", default="", help="yalniz bu boyun kalemlerini isle (or. 5x7); "
                                                    "ayni sepetteki diger boylar atlanir")
     g = ap.add_mutually_exclusive_group(required=False)
@@ -672,6 +689,22 @@ def main():
     report.append(f"- POD urunlu receipt: {len(pod)}"
                   + (f" (yalniz {a.only_size} kalemleri)" if a.only_size else ""))
     kanal_bekci = kanal_kisisel_bekci(a, prod, st, idx, pod, report, errors) if not a.test_receipt else {}
+    tablo = siparis_onay.tablo_ac(a.onay_tablo) if a.onay_tablo else None
+    gizli = []                                           # receipt/isim iceren satirlar: yalniz Drive (SIPARIS_ONAY_RAPOR.md)
+    if tablo:
+        report.append(f"- ONAY AKISI: tablo {tablo.tur}")
+        for r in receipts:                               # dijital / duvar kagidi kisisel siparisler (POD disi)
+            rid = str(r.get("receipt_id"))
+            dk = siparis_onay.dijital_kalemler(r)
+            if not dk or r.get("is_shipped") or (st.get(rid) or {}).get("stage"):
+                continue
+            metin_k, _ = kisisel_siparis.kart(r, dk, kisisel_siparis.sablon_oku(a.sablonlar), "", urun=dk[0]["urun"].lower())
+            kdir = out / "SIPARIS_ISIM"; kdir.mkdir(parents=True, exist_ok=True)
+            (kdir / f"{rid}.md").write_text(metin_k, encoding="utf-8")
+            k_, durum_, uret_ = siparis_onay.kayit_ac(tablo, rid, r, dk, urun=dk[0]["urun"])
+            upd(st, a.state, rid, stage="ISIM_BEKLIYOR", country=(r.get("country_iso") or "").upper(),
+                items=", ".join(f"{x['sku']}x{x['qty']}" for x in dk), note=f"{dk[0]['urun']} kisisel; {k_}; {durum_}")
+            _onay_sonrasi(out, rid, k_, durum_, uret_, tablo, report)
     links = None
     new_orders = 0
 
@@ -681,11 +714,11 @@ def main():
         rid = str(r.get("receipt_id"))
         row = st.get(rid) or {}
         if row.get("stage") in ("bekliyor", "ordered", "shipped", "tracked", "manual", "error", "atlandi", "ISIM_BEKLIYOR"):
-            report.append(f"- {rid}: ATLA (STATE {row.get('stage')}"
+            report.append(f"- {siparis_onay.kod(rid) if row.get('stage') == 'ISIM_BEKLIYOR' else rid}: ATLA (STATE {row.get('stage')}"
                           + (f", prodigi {row.get('prodigi_order_id')}" if row.get("prodigi_order_id") else "") + ")")
             continue
         el = time.time() - t0
-        log(f"[{n}/{len(pod)}] receipt {rid} | gecen {el:.0f}s kalan~{el / n * (len(pod) - n):.0f}s %{100 * n // len(pod)}")
+        log(f"[{n}/{len(pod)}] receipt | gecen {el:.0f}s kalan~{el / n * (len(pod) - n):.0f}s %{100 * n // len(pod)}")
         for i in items:                       # katalogdaki tam SKU yazimi
             i["prodigi_sku"] = harita.get(i["size"], i["prodigi_sku"])
         if r.get("is_shipped"):
@@ -703,6 +736,17 @@ def main():
             metin_k, kod_k = kisisel_siparis.kart(r, kis, kisisel_siparis.sablon_oku(a.sablonlar), kanal_notu)
             kdir = out / "SIPARIS_ISIM"; kdir.mkdir(parents=True, exist_ok=True)
             (kdir / f"{rid}.md").write_text(metin_k, encoding="utf-8")
+            if tablo:                                    # ONAY AKISI: tablo satiri + uretim listesi + paket
+                k_, durum_, uret_ = siparis_onay.kayit_ac(tablo, rid, r, kis, urun="POD")
+                if uret_:
+                    kis_items = [dict(i, asset_remote=f"{siparis_onay.DRIVE_KOK}/{rid}/BASKI_{i['size']}.jpg") for i in items]
+                    pkg = package_of(r, kis_items, (r.get("country_iso") or "").upper(),
+                                     round(sum(i["price"] * i["qty"] for i in kis_items), 2), "", "", "kisisel (onay akisi)", a.env)
+                    (out / f"{rid}.json").write_text(json.dumps(pkg, indent=1, ensure_ascii=False), encoding="utf-8")
+                upd(st, a.state, rid, stage="ISIM_BEKLIYOR", country=(r.get("country_iso") or "").upper(), items=desc0,
+                    note=f"POD kisisel; {k_}; {durum_}" + (f"; {kanal_notu}" if kanal_notu else ""))
+                _onay_sonrasi(out, rid, k_, durum_, uret_, tablo, report)
+                continue
             with (out / "ISIM_YENI.txt").open("a", encoding="utf-8") as fh:
                 fh.write(f"{rid}\n")
             not_k = (f"kisisellestirme cevabi var; Prodigi'ye GONDERILMEDI; kart SIPARIS_ISIM/{rid}.md"
@@ -843,6 +887,29 @@ def main():
                 report.append(f"- {rid}: {mesaj}")
                 errors.append(f"{rid}: CIFT_SIPARIS_ALARM")
 
+    # ---- 1c) ONAY AKISI: ONAY isaretli satirlar (POD -> Prodigi, dijital -> ChatGPT yukleme bekliyor)
+    if tablo:
+        def _gonder(rid):
+            row = st.get(rid) or {}
+            if row.get("stage") == "ISIM_BEKLIYOR":
+                upd(st, a.state, rid, stage="bekliyor", note="onay akisi: ONAY isaretlendi")
+            ok, err = submit_package(a, prod, st, rid, gizli)
+            if not ok:                                   # hata: acilmis gecici Drive izni hemen kapanir
+                perms = json.loads((st.get(rid) or {}).get("asset_perms") or "[]")
+                if perms:
+                    dl = DriveLinks()
+                    for fid, pid in perms:
+                        dl.close(fid, pid)
+                    upd(st, a.state, rid, asset_perms=[])
+            return ok, err, (st.get(rid) or {}).get("prodigi_order_id", "")
+        hatalar = siparis_onay.onay_izle(tablo, st, _gonder, lambda st_, rid_, **kw: upd(st_, a.state, rid_, **kw),
+                                         gizli, dry_run=a.dry_run or approve)
+        errors += [f"{k}: onayli siparis gonderilemedi (DUR)" for k in hatalar]
+        if siparis_onay.BILDIRIMLER:
+            errors.append(f"{len(siparis_onay.BILDIRIMLER)} siparis bildirimi (kosu bilincli basarisiz: e-posta)")
+        (out / "SIPARIS_ONAY_RAPOR.md").write_text("\n".join([f"# Siparis onay akisi {now()} UTC", ""] + gizli) + "\n",
+                                                  encoding="utf-8")
+
     # ---- 2) ordered: asset izinleri + kargo (onayli modda da: acik izinler kapanir, kargo yakalanir)
     if a.apply or approve or a.submit:
         for rid, row in list(st.items()):
@@ -893,7 +960,7 @@ def main():
             continue
         bilinen.update(x for x in (rid, row.get("prodigi_order_id"), row.get("kanal_oid")) if x)
         if row.get("stage") != "shipped":
-            report.append(f"- TAKIP KORUMASI {rid}: YAZMAZ (STATE '{row.get('stage')}', adim 3 disi)"
+            report.append(f"- TAKIP KORUMASI {siparis_onay.kod(rid) if row.get('stage') in ('ISIM_BEKLIYOR', 'dijital_bekliyor') else rid}: YAZMAZ (STATE '{row.get('stage')}', adim 3 disi)"
                           + (f"; kayitli takip {row.get('carrier') or '-'} {row.get('tracking')}" if row.get("tracking") else ""))
         else:
             report.append(f"- TAKIP KORUMASI {rid}: STATE 'shipped' -> karar adim 3'te receipt okunarak verilir")
@@ -967,7 +1034,12 @@ def main():
         counts[row.get("stage", "")] = counts.get(row.get("stage", ""), 0) + 1
     report += ["", f"STATE: {counts}", ""] + ([f"HATA: {e}" for e in errors] or ["hata yok"])
     text = "\n".join(report)
-    log(text)
+    # ONAY AKISI: kisisel siparislerin receipt'i loga / Actions ozetine yazilmaz (opak kod); Drive raporu tam kalir
+    gizli_rid = {rid for rid, row in st.items() if row.get("stage") in ("ISIM_BEKLIYOR", "dijital_bekliyor")}
+    if tablo:
+        gizli_rid |= {x.get("RECEIPT") for x in tablo.satirlar()}
+    gorunur = siparis_onay.gizle(text, gizli_rid) if tablo else text
+    log(gorunur)
     (out / "REPORT.md").write_text(text + "\n", encoding="utf-8")
     dikkat = [r for r in st.values() if r.get("stage") in ("manual", "error", "ISIM_BEKLIYOR") or r.get("warn")]
     if dikkat or DIKKAT_EK:
@@ -979,7 +1051,7 @@ def main():
     p = os.environ.get("GITHUB_STEP_SUMMARY")
     if p:
         with open(p, "a", encoding="utf-8") as fh:
-            fh.write(text + "\n")
+            fh.write(gorunur + "\n")
     if errors:
         sys.exit("DUR: hata var, STATE yazildi")
 

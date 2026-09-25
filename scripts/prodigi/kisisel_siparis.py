@@ -237,8 +237,34 @@ def _sure_notu(receipt):
     return _t.strftime("%Y-%m-%d %H:%M UTC", _t.gmtime(float(ts) + HATIRLATMA_GUN * 86400))
 
 
-def kart(receipt, kalemler, sablonlar, kanal_notu=""):
-    """-> (markdown, ozet_sorun_kodlari)"""
+def kalem_kontrol(kalem, ulke=""):
+    """Tek kalemin on kontrolu (siparis onay akisi, 25 Eyl). -> dict: isim1/isim2/mesaj (gelen), bas1/bas2
+    (basilacak), kodlar (sorun), sablonlar (1 disindaki sorun sablonlari), elle (sablonu olmayan sorun), temiz."""
+    ulke = (ulke or "").upper()
+    e = eslestir(kalem)
+    _, b1, s1 = isim_dogrula(e["isim1"], ulke)
+    _, b2, s2 = isim_dogrula(e["isim2"], ulke)
+    _, bm, sm = mesaj_dogrula(e["mesaj"])
+    kodlar = [c for c, _ in s1 + s2 + sm] + (["EKSIK_SORU"] if e["eksik_soru"] else [])
+    nolar = {SABLON_ISIM[c] for c, _ in s1 + s2 if c in SABLON_ISIM} | {SABLON_MESAJ[c] for c, _ in sm if c in SABLON_MESAJ}
+    if e["eksik_soru"]:
+        nolar.add(5)
+    elle = [x for c, x in s1 + s2 if c not in SABLON_ISIM]
+    if e["eslesmeyen"]:
+        elle.append(f"taninmayan alan: {[q for q, _ in e['eslesmeyen']]}")
+    return {"isim1": e["isim1"], "isim2": e["isim2"], "mesaj": e["mesaj"], "bas1": b1, "bas2": b2, "bas_mesaj": bm,
+            "kodlar": kodlar, "sablonlar": sorted(nolar), "elle": elle, "temiz": not kodlar and not elle}
+
+
+def uretim_girdisi(kalem, kk, urun="pod"):
+    """siparis_dosyasi.py kart_oku() bicimi ('anahtar: deger'); kartin EN SONUNA yazilir (onceki satirlari ezer)."""
+    return ["", "## Uretim girdisi (siparis_dosyasi.py)", "",
+            f"- cift: {kalem['pair']}", f"- renk: {kalem.get('ed') or 'MIDNIGHT_BLUE'}", f"- boy: {kalem.get('size') or '-'}",
+            f"- isim1: {kk['bas1']}", f"- isim2: {kk['bas2']}", f"- mesaj: {kk['bas_mesaj']}", f"- urun: {urun}"]
+
+
+def kart(receipt, kalemler, sablonlar, kanal_notu="", urun="pod"):
+    """-> (markdown, ozet_sorun_kodlari). Tek ve temiz kalemde sonda uretim girdisi bolumu olur."""
     rid = receipt.get("receipt_id")
     ulke = (receipt.get("country_iso") or "").upper()
     dil = "RU" if ulke in RU_ULKE else "EN"
@@ -310,4 +336,8 @@ def kart(receipt, kalemler, sablonlar, kanal_notu=""):
                 md.append(f"- Doldurulmadi (Serdar yazar): {', '.join(kalan)}")
         else:
             md.append(f"Sablon {n_}/{dil} dosyada bulunamadi.")
+    if len(kalemler) == 1:
+        kk = kalem_kontrol(kalemler[0], ulke)
+        if kk["temiz"]:
+            md += uretim_girdisi(kalemler[0], kk, urun)
     return "\n".join(md) + "\n", sorted(set(tum_kod))
