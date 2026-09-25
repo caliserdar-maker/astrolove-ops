@@ -15,6 +15,7 @@ yazilmaz, raporda 'ATLANDI (state=...)' olarak sorulur.
 """
 import argparse
 import csv
+import html
 import json
 import os
 import pathlib
@@ -45,7 +46,8 @@ csv.field_size_limit(10 ** 8)
 
 # ------------------------------------------------------------------ yardimcilar
 def norm(s):
-    return "\n".join(x.rstrip() for x in str(s or "").replace("\r\n", "\n").strip().split("\n"))
+    """Etsy metni HTML-escape ile dondurur (' -> &#39;, pilot 4570110641 olcumu): once unescape."""
+    return "\n".join(x.rstrip() for x in html.unescape(str(s or "")).replace("\r\n", "\n").strip().split("\n"))
 
 
 def csv_oku(yol):
@@ -197,18 +199,19 @@ def dogrula(sn0, sn1, row, sab, rs_id, pair):
     L1 = sn1["listing"]
     if L1.get("state") != sn0["listing"].get("state"):
         h.append(f"state degisti {sn0['listing'].get('state')} -> {L1.get('state')}")
-    if (L1.get("title") or "") != row["yeni_baslik"]:
+    if html.unescape(L1.get("title") or "") != row["yeni_baslik"]:
         h.append("baslik farkli")
     et = row["yeni_etiketler"].split("|")
-    if [t.lower() for t in (L1.get("tags") or [])] != [t.lower() for t in et]:
-        if sorted(t.lower() for t in (L1.get("tags") or [])) == sorted(et):
+    gelen_et = [html.unescape(t).lower() for t in (L1.get("tags") or [])]
+    if gelen_et != [t.lower() for t in et]:
+        if sorted(gelen_et) == sorted(et):
             pass                                                  # Etsy sirayi degistirebilir: kume esit yeter
         else:
             h.append(f"etiketler farkli ({len(L1.get('tags') or [])})")
     if norm(L1.get("description")) != norm(row["yeni_aciklama_en"]):
         h.append("EN aciklama farkli")
     ru = sn1.get("ru") or {}
-    if (ru.get("title") or "") != row["yeni_ru_baslik"]:
+    if html.unescape(ru.get("title") or "") != row["yeni_ru_baslik"]:
         h.append("RU baslik farkli")
     if norm(ru.get("description")) != norm(row["yeni_ru_aciklama"]):
         h.append("RU aciklama farkli")
