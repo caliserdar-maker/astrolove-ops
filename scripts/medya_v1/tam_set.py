@@ -237,6 +237,7 @@ def kart04(kart, M, sahne_cl_B):
 INSET07 = (170, 717, 952, 1692); PANEL07 = (1169, 569, 2821, 1854); CIZGI = (147, 118, 73)
 
 DETAY_ESIK = {'murekkep_oran': 0.15, 'halka_px': 0}               # Serdar 25 Eyl: buyutec = sembolun birlesim bolgesi
+DETAY_KUTU_ORAN = 0.224     # buyutec kutusu / poster eni: canli CL kart 07'de olculdu (kutu 175 px / inset poster 781 px)
 
 def detay(al_mb, hi, B):
     """Buyutec: birlesik sembolun BIRLESIM bolgesi (Serdar 25 Eyl, CL kart 06 mantigi). Aday kutular (panel en/boy):
@@ -245,7 +246,7 @@ def detay(al_mb, hi, B):
     import cv2
     from scipy import ndimage
     tw, th = PANEL07[2] - PANEL07[0], PANEL07[3] - PANEL07[1]
-    f = hi.width / al_mb.width; kw = int(np.ceil(tw / 1.5 / f)) + 20; kh = round(kw * th / tw)
+    f = hi.width / al_mb.width; kw = round(DETAY_KUTU_ORAN * al_mb.width); kh = round(kw * th / tw)
     ust = birlesik_maske(B)
     tum = B['m'].copy(); tum[B['o']['sembol_bant'][0] - 40:] = False
     halka = tum & ~ndimage.binary_dilation(ust, iterations=4)
