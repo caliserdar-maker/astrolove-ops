@@ -26,7 +26,7 @@ on:
       parca_sayisi:
         description: "Kac paralel parca (matris bunu kullanmaz, yalniz script'e gecer)"
         required: true
-        default: "5"
+        default: "10"
 
 concurrency: plate-uret
 
@@ -37,7 +37,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        parca: [1, 2, 3, 4, 5]
+        parca: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
     steps:
       - name: Checkout (secilen dal)
