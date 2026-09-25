@@ -1,0 +1,119 @@
+name: tamset-77
+
+# 77 cift TAM SET (Serdar onayi 25 Eyl 2026; Aries+Leo onayli kodla): tam77.py (medya-v1).
+# 16 paralel is (her biri 77 ciftin 1/16'si; Canva sayfalari is basinda indirilir), sonra tek serit isi
+# (PASS/FAIL, FAIL listesi, kart 04 + kart 06 seridi; imzali liste silinir).
+# Kapsam: YALNIZ Drive (rclone). Etsy/Prodigi secret'i yok; Etsy'ye yazan adim yok. Tetik yalniz workflow_dispatch.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+
+concurrency: tamset-77
+
+jobs:
+  uret:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 16
+      matrix:
+        parca: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+    steps:
+      - name: Checkout (medya-v1)
+        uses: actions/checkout@v4
+        with:
+          ref: medya-v1
+
+      - name: Python bagimliliklari
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet --upgrade pip
+          python -m pip install --quiet pillow opencv-python-headless numpy fonttools scipy
+
+      - name: rclone kur
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          rclone version | head -1
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then
+            echo "HATA: RCLONE_CONF_B64 secret'i tanimli degil." >&2
+            exit 1
+          fi
+          mkdir -p ~/.config/rclone
+          umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+          echo "rclone.conf yazildi ($(wc -c < ~/.config/rclone/rclone.conf) bayt)."
+
+      - name: tesseract (KART09 etiket kapisi)
+        run: sudo apt-get install -y -q tesseract-ocr >/dev/null && tesseract --version | head -1
+
+      - name: Tam set (parca ${{ matrix.parca }}/16)
+        env:
+          PARCA: ${{ matrix.parca }}
+        run: python scripts/medya_v1/tam77.py "$PARCA" 16
+
+  serit:
+    needs: uret
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout (medya-v1)
+        uses: actions/checkout@v4
+        with:
+          ref: medya-v1
+
+      - name: Python bagimliliklari
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet --upgrade pip
+          python -m pip install --quiet pillow opencv-python-headless numpy fonttools scipy
+
+      - name: rclone kur
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          rclone version | head -1
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then
+            echo "HATA: RCLONE_CONF_B64 secret'i tanimli degil." >&2
+            exit 1
+          fi
+          mkdir -p ~/.config/rclone
+          umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+          echo "rclone.conf yazildi ($(wc -c < ~/.config/rclone/rclone.conf) bayt)."
+
+      - name: Seritler + rapor
+        run: python scripts/medya_v1/tam77.py serit
