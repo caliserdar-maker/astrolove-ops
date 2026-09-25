@@ -61,6 +61,12 @@ def sembol_kutusu(P, pay=60):
     return (max(int(xs.min()) - pay, 0), max(int(ys.min()) - pay, 0), min(int(xs.max()) + 1 + pay, W), min(int(ys.max()) + 1 + pay, H))
 
 
+def halka_sembol_wh(P):
+    """Halka olcumlu birlesik sembol en/boy (poster px) - kirpilmamis kapisinin referansi (video ref_sembol_wh ile ayni)."""
+    x0, y0, x1, y1 = sembol_kutusu(P, pay=0)
+    return x1 - x0, y1 - y0
+
+
 class Kartpostal:
     """Kaynak kart + poster bir kez hazirlanir; uret() her isim icin kart cizer."""
 
@@ -80,6 +86,7 @@ class Kartpostal:
         buyuk = al.argmax(); tut = [i for i in range(1, n + 1) if al[i] >= 0.05 * al[buyuk]]
         sm = np.isin(lab, tut) & m
         ys, xs = np.where(sm); sb = (xs.min(), ys.min(), xs.max() + 1, ys.max() + 1)
+        kes_kenara_degmiyor = bool(sb[0] > 0 and sb[1] > 0 and sb[2] < kes.shape[1] and sb[3] < kes.shape[0])
         pad = 24
         x0, y0, x1, y1 = sb[0] - pad, sb[1] - pad, sb[2] + pad, sb[3] + pad
         I = kes[y0:y1, x0:x1]
@@ -93,6 +100,11 @@ class Kartpostal:
         ys, xs = np.where(A > 0.3); kb = (xs.min(), ys.min(), xs.max() + 1, ys.max() + 1)
         self.F, self.A = F[kb[1]:kb[3], kb[0]:kb[2]], A[kb[1]:kb[3], kb[0]:kb[2]]
         self.sem_poster_wh = (self.A.shape[1], self.A.shape[0])
+        hw, hh = halka_sembol_wh(P)                    # sembol kirpilmamis kapisi (GOREV 0004): kesit kutu kenarina degmez
+        self.sembol_kirpilmamis = kes_kenara_degmiyor and self.sem_poster_wh[0] >= hw - 6 and self.sem_poster_wh[1] >= hh - 6
+        self.halka_sembol_wh = (hw, hh)
+        from fontTools.ttLib import TTFont
+        self.cmap = set(TTFont(self.font).getBestCmap())
 
         nb = (450, 2150, 1250, 2350)
         nk = P[nb[1]:nb[3], nb[0]:nb[2]]; nm = murekkep(nk, pz, 60)
@@ -223,6 +235,9 @@ class Kartpostal:
             'alt_bolge_ham_fark=0': alt_fark_ham == 0,
             'alt_bolge_jpg_ort_fark<1': alt_fark_jpg < 1.0,
         }
+        kapilar['sembol_kirpilmamis'] = self.sembol_kirpilmamis
+        kapilar['cinzel_glif_kapsami'] = all(ord(c) in self.cmap for c in metin if c != ' ')
+        kapilar['isim_cap>=16'] = (b['isim_cap_ust_taban'][1] - b['isim_cap_ust_taban'][0]) >= 16
         kapilar = {k: bool(v) for k, v in kapilar.items()}
         b.update({'min_bant_boslugu': int(bosluk), 'alt_fark_ham_max': alt_fark_ham, 'alt_fark_jpg_ort': round(alt_fark_jpg, 3),
                   'kapilar': kapilar, 'PASS': all(kapilar.values())})
@@ -231,7 +246,8 @@ class Kartpostal:
 
 def kart_metni(isim1, isim2):
     """Kartta tek satir: 'ISIM1 & ISIM2' (basilacak buyuk harfli bicim, kisisel_siparis ciktisi)."""
-    return f"{isim1} & {isim2}" if isim2 else f"{isim1}"
+    m = f"{isim1} & {isim2}" if isim2 else f"{isim1}"
+    return m.upper()                                   # kisisel_siparis zaten buyuk harfli verir (TR kurali orada); guvence
 
 
 def kartpostal_uret(kaynak, poster, font, metin, cikti):
