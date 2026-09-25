@@ -992,6 +992,12 @@ def main():
                 continue
             stc, d = prod.get_order(row["prodigi_order_id"])
             o = d.get("order") or {}
+            if stc == 404 and str(row.get("prodigi_status") or "").lower() == "onhold":
+                # Prodigi dokumani: pause penceresi dolmamis siparis GET /orders/{id} ve listede DONMEZ (yalniz
+                # olusturma yaniti id verir). Hata degil; linkler acik kalir (serbest birakilinca indirilir).
+                report.append(f"- {rid}: Prodigi'de DURAKLATILMIS (OnHold, {row['prodigi_order_id']}); API okumaz, "
+                              "panelden serbest birakilinca izlenir")
+                continue
             if stc != 200 or not o:
                 errors.append(f"{rid}: get_order HTTP {stc}"); continue
             status = o.get("status") or {}

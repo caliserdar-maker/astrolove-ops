@@ -61,7 +61,7 @@ EK_US, EK_EU = 5.00, 5.73              # canli fatura (prodigi_us / prodigi_eu)
 
 class Sahte:
     def __init__(s, hata=False):
-        s.cagri, s.orders, s.hata = [], {}, hata
+        s.cagri, s.orders, s.hata, s.durakli = [], {}, hata, set()
 
     def call(s, method, path, body=None):
         s.cagri.append((method, path, body))
@@ -92,6 +92,8 @@ class Sahte:
                 s.orders[o["id"]] = o
             return 200, {"outcome": "Created", "order": o}
         if method == "GET" and path.startswith("/orders/"):
+            if path.split("/")[2] in s.durakli:           # Prodigi: pause penceresindeki siparis GET'te donmez
+                return 404, {"outcome": "EntityNotFound"}
             return 200, {"order": s.orders[path.split("/")[2]]}
         raise AssertionError(f"beklenmeyen Prodigi cagrisi {method} {path}")
 
@@ -255,6 +257,20 @@ k("STATE: POD ordered, dijital dijital_bekliyor, Kiril ISIM_BEKLIYOR", st[str(PO
   and st[str(DIJ)]["stage"] == "dijital_bekliyor" and st[str(KIR)]["stage"] == "ISIM_BEKLIYOR")
 k("assetler indirilince baski izni kapandi; kart + 2 sticker linki gonderime kadar acik",
   sorted(LINK["acik"].values()) == sorted([f"{O.DRIVE_KOK}/{POD}/KARTPOSTAL_A6.jpg", *O.STICKER_REMOTE.values()]) and LINK["kapali"], LINK)
+# ---- 4b) Prodigi pause penceresi: olusturma OnHold, GET 404 -> hata DEGIL, linkler acik kalir
+_st_yol = W / "state.csv"
+_rows = list(csv.DictReader(open(_st_yol, encoding="utf-8"))); _alan = list(_rows[0].keys())
+for r_ in _rows:
+    if r_["receipt_id"] == str(POD):
+        r_["prodigi_status"] = "OnHold"
+with open(_st_yol, "w", newline="", encoding="utf-8") as fh:
+    w_ = csv.DictWriter(fh, fieldnames=_alan); w_.writeheader(); w_.writerows(_rows)
+S.durakli.add("ord_T1"); _acik = dict(LINK["acik"])
+rc4b, log4b = run("k4b"); LOGLAR.append(log4b)
+_rap = "".join(p_.read_text(encoding="utf-8") for p_ in (W / "k4b").glob("*.md"))
+k("OnHold siparis GET 404: kosu hata vermez, 'DURAKLATILMIS' raporu, kart/sticker linkleri acik", rc4b in (0, None)
+  and "get_order HTTP 404" not in log4b + _rap and "DURAKLATILMIS" in log4b + _rap and LINK["acik"] == _acik, (rc4b, log4b[-300:]))
+S.durakli.clear()
 for o_ in S.orders.values():
     o_["status"]["stage"] = "Complete"                   # Prodigi isi bitti -> kart linki kapanir
 
