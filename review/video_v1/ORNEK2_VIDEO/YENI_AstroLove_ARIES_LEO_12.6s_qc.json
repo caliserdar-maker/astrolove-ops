@@ -1,0 +1,62 @@
+{
+ "cift": "ARIES_LEO",
+ "gecis_bas_sn": [
+  0.2,
+  1.6,
+  3.0,
+  4.4,
+  5.8,
+  7.2,
+  8.6,
+  10.0,
+  11.4
+ ],
+ "sabit_fark_maks": 0.0207,
+ "uc_durum_artik": 1.652,
+ "tagline": {
+  "EJ": {
+   "taban_y": 1051,
+   "altin_ort": [
+    205.4,
+    160.3,
+    66.9
+   ],
+   "genislik": 424
+  },
+  "IN": {
+   "taban_y": 1051,
+   "altin_ort": [
+    206.7,
+    159.0,
+    63.3
+   ],
+   "genislik": 418
+  },
+  "AM": {
+   "taban_y": 1051,
+   "altin_ort": [
+    209.3,
+    163.3,
+    67.0
+   ],
+   "genislik": 252
+  }
+ },
+ "tagline_fark": {
+  "taban_px": 0,
+  "altin_kanal": 4.3
+ },
+ "dongu_dikisi_bilgi": 0.252,
+ "PASS": {
+  "ozellik": true,
+  "kare_378": true,
+  "ilk_gecis_0.20": true,
+  "sira_9": true,
+  "aralik_42": true,
+  "sabit": true,
+  "uc_durum": true,
+  "tagline_taban_<=1": true,
+  "tagline_altin_<=6": true
+ },
+ "SONUC": "PASS"
+}
