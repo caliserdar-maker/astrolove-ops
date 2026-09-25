@@ -105,7 +105,7 @@ jobs:
         run: |
           set -euo pipefail
           case "$MOD" in
-            kuru|maliyet|dogrula|hpr|buyuk|yetki|yetki_test|pilot15_oku|boy15_oku|durum15|fiyat_b_oku|metin78_kuru|cerceve_sonda|cerceve_hazirlik|cerceve_mockup|prodigi_teklif|siparis_hazirla|siparis_onizleme|siparis_izin_kapat|eslesme_kanit|router_kuru|router_teklif)
+            kuru|maliyet|dogrula|hpr|buyuk|yetki|yetki_test|pilot15_oku|boy15_oku|durum15|fiyat_b_oku|metin78_kuru|yayilim_hazirlik|cerceve_sonda|cerceve_hazirlik|cerceve_mockup|prodigi_teklif|siparis_hazirla|siparis_onizleme|siparis_izin_kapat|eslesme_kanit|router_kuru|router_teklif)
               if [ "$APPLY" = "true" ]; then
                 echo "::error::mod=$MOD ile yazma olmaz. DUR."; exit 1
               fi
@@ -130,6 +130,11 @@ jobs:
                 echo "::error::boy15_yaz icin apply=true ve confirm 'BOY_15' olmali. DUR."; exit 1
               fi
               echo "::warning::BOY 15 YAZMA (tek ilan $LISTING): menu sirasi + fiyat tablosu." ;;
+            yayilim_yaz)
+              if [ "$APPLY" != "true" ] || [ "$CONFIRM" != "YAYILIM_78" ]; then
+                echo "::error::yayilim_yaz icin apply=true ve confirm 'YAYILIM_78' olmali. DUR."; exit 1
+              fi
+              echo "::warning::YAYILIM 78 YAZMA: listing=$LISTING (metin+kisisellestirme+nitelik+envanter; gorsel YOK)." ;;
             boy15_toplu)
               if [ "$APPLY" != "true" ] || [ "$CONFIRM" != "BOY_15" ]; then
                 echo "::error::boy15_toplu icin apply=true ve confirm 'BOY_15' olmali. DUR."; exit 1
@@ -236,6 +241,21 @@ jobs:
             python scripts/pod/pod_pilot_15.py oku --listing "$LISTING" --kota-alt "$KOTA_ALT"
           elif [ "$MOD" = "pilot15_yaz" ]; then
             python scripts/pod/pod_pilot_15.py yaz --listing "$LISTING" --kota-alt "$KOTA_ALT" --confirm "$CONFIRM" --adim "$ADIM"
+          elif [ "$MOD" = "yayilim_hazirlik" ] || [ "$MOD" = "yayilim_yaz" ]; then
+            # 78 ilan yayilimi. hazirlik = SALT OKUMA (yedek + plan); yaz = onayli yazma + tam geri okuma.
+            mkdir -p _out/yayilim78
+            rclone copyto "gdrive:ASTROLOVE/TEMP/METIN_78/METIN_78.csv" _work/METIN_78.csv
+            rc=0
+            if [ "$MOD" = "yayilim_hazirlik" ]; then
+              python scripts/pod/yayilim_78.py hazirlik --csv _work/METIN_78.csv --out _out/yayilim78 --kota-alt "$KOTA_ALT" || rc=$?
+            elif [ "$LISTING" = "hepsi" ]; then
+              python scripts/pod/yayilim_78.py yaz --hepsi --csv _work/METIN_78.csv --out _out/yayilim78 --confirm "$CONFIRM" --kota-alt "$KOTA_ALT" || rc=$?
+            else
+              python scripts/pod/yayilim_78.py yaz --listing "$LISTING" --csv _work/METIN_78.csv --out _out/yayilim78 --confirm "$CONFIRM" --kota-alt "$KOTA_ALT" || rc=$?
+            fi
+            rclone copy _out/yayilim78 "gdrive:ASTROLOVE/TEMP/YAYILIM_78" -q
+            echo "Drive: TEMP/YAYILIM_78 ($(rclone lsf -R gdrive:ASTROLOVE/TEMP/YAYILIM_78 | wc -l) dosya)"
+            exit $rc
           elif [ "$MOD" = "metin78_kuru" ]; then
             # SALT OKUMA: 78 ilanin metinleri okunur, yeni metinler URETILIR (Etsy'ye yazma yok).
             python scripts/pod/metin_78.py --out _out/metin78 --kota-alt "$KOTA_ALT" --limit "$LIMIT"
