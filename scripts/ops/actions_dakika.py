@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """GitHub Actions kullanim olcumu (SALT OKUMA, GOREV 0005): son N gunde bu reponun workflow kosulari.
 Kaynak: GET /repos/{repo}/actions/runs?created=<gun> (gun gun; API filtreli sorguda 1000 sonuc siniri var).
-Sure = updated_at - run_started_at (kosu duvar saati). Faturalanan dakika her JOB icin ayri yukari yuvarlanir;
-bu olcum kosu bazli oldugu icin cok isli kosularda ALT SINIRDIR (ayrica kosu basina yukari yuvarlanmis deger verilir).
+Sure = GET /repos/{repo}/actions/runs/{id}/timing -> run_duration_ms (GitHub'in olctugu kosu suresi; updated_at
+KULLANILMAZ: log silme vb. sonradan guncelliyor, iter 1'de sisirdi). Faturalanan dakika her JOB icin ayri yukari
+yuvarlanir; kosu bazli yuvarlama ALT SINIRDIR. timing.billable (private repo icin dolu) de toplanir.
 Cikti: yalniz sayilar (workflow adi, kosu sayisi, dakika)."""
 import datetime as dt
 import math
@@ -10,6 +11,8 @@ import os
 import sys
 import time
 from collections import defaultdict
+
+FATURA = defaultdict(float)                          # timing.billable: os -> dakika (public repoda bos/0)
 
 import requests
 
@@ -48,7 +51,11 @@ def main(gun=30):
             for k in runs:
                 if k.get("status") != "completed" or not k.get("run_started_at"):
                     continue
-                dk = max(0.0, (ts(k["updated_at"]) - ts(k["run_started_at"])).total_seconds() / 60)
+                t = get(f"/repos/{REPO}/actions/runs/{k['id']}/timing")
+                tj = t.json() if t.status_code == 200 else {}
+                dk = (tj.get("run_duration_ms") or 0) / 60000
+                for osad, b in (tj.get("billable") or {}).items():
+                    FATURA[osad] += (b.get("total_ms") or 0) / 60000
                 w = wf[k.get("name") or "?"]
                 w[0] += 1; w[1] += dk; w[2] += max(1, math.ceil(dk))
                 toplam_kosu += 1
@@ -58,6 +65,7 @@ def main(gun=30):
     ham = sum(v[1] for v in wf.values()); yuk = sum(v[2] for v in wf.values())
     print(f"DONEM: son {gun} gun ({bugun - dt.timedelta(days=gun - 1)} .. {bugun}) | tamamlanan kosu {toplam_kosu}")
     print(f"TOPLAM dakika: ham {ham:.0f} | kosu basina yukari yuvarlanmis {yuk} (faturalama job bazli: bu ALT SINIR)")
+    print(f"timing.billable (public repo icin beklenen 0): {dict((k, round(v)) for k, v in FATURA.items()) or 0}")
     for ad, (n, h, y) in sorted(wf.items(), key=lambda x: -x[1][2])[:15]:
         print(f"  {ad}: {n} kosu | ham {h:.0f} dk | yuvarlanmis {y} dk")
 
