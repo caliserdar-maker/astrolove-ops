@@ -59,7 +59,6 @@ KEY_REMOTE = {"live": "gdrive:ASTROLOVE/TEMP/PRODIGI_TOKEN.json", "sandbox": "gd
 PRINT_REMOTE = "gdrive:ASTROLOVE/TEMP/POD_PRINT"
 ALLOWED = {"US", "CA", "AU", "GB"}
 KARGO_SECENEK = ["Budget", "Standard", "Express", "Overnight"]   # teklifte hepsi sorulur, EN UCUZ secilir
-EKLER_USD = 5.00        # hesap ayarindaki ekler (postcard 2.50 + 2 sticker 1.25x2); ord_14538276 olcumu
 # SKU semasi pod_sku.py: POD-<burc3>_<burc3>-<edisyon2>-<boyut>
 STAGES = ["dryrun", "bekliyor", "manual", "atlandi", "ordered", "shipped", "tracked", "error", "ISIM_BEKLIYOR"]
 TUM_BOYLAR = ["5x7", "8x10", "11x14", "12x16", "12x18", "16x20", "16x24", "18x24", "20x30",
@@ -133,9 +132,10 @@ class Prodigi:
         if not secenekler:
             return None, f"quote basarisiz: {'; '.join(hatalar)[:200]}", {}
         en_ucuz = siparis_onay.kargo_sec(secenekler)          # EN UCUZ = urun + kargo + vergi (ulke sabiti yok)
+        ekler = siparis_onay.ekstra(country)[0]
         ayrinti = {"secenekler": sorted(secenekler, key=lambda x: x["toplam"]), "secilen": en_ucuz,
-                   "ekler_tahmini": EKLER_USD}
-        return round(en_ucuz["toplam"] + EKLER_USD, 2), "", ayrinti
+                   "ekler": ekler}
+        return round(en_ucuz["toplam"] + ekler, 2), "", ayrinti
 
     def urun(self, sku):
         return self.call("GET", f"/products/{sku}")
@@ -312,6 +312,9 @@ def offsite_kesinti(api, shop, receipt):
     bagli 'offsite' kaydi. -> USD (bulunamazsa 0.0) ya da None (okunamadi / test)."""
     if api is None or not shop:
         return None
+    kapsam = str((getattr(getattr(api, "store", None), "data", None) or {}).get("scope") or "")
+    if kapsam and "billing_r" not in kapsam.split():
+        return None                                     # token'da billing_r yok (25 Eyl kontrolu): cagri yapilmaz, kota harcanmaz
     rid = str(receipt.get("receipt_id"))
     ref = {rid} | {str(t.get("transaction_id")) for t in receipt.get("transactions") or []}
     t0 = int(receipt.get("created_timestamp") or receipt.get("create_timestamp") or time.time()) - 3600
@@ -338,7 +341,7 @@ def teklif_net(prod, api, shop, receipt, items):
     except Exception as e:                              # noqa: BLE001
         err, ayr = f"{type(e).__name__}", {}
     alan, sec = siparis_onay.kar_alanlari(fiyat, (ayr or {}).get("secenekler") or [],
-                                          offsite_kesinti(api, shop, receipt), sum(i["qty"] for i in items))
+                                          offsite_kesinti(api, shop, receipt), sum(i["qty"] for i in items), country)
     if not sec and err:
         alan["KAR_UYARI"] += f": {str(err)[:120]}"
     return alan, (sec or {}).get("yontem"), ayr
@@ -861,7 +864,7 @@ def main():
             break
         margin = round((etsy_total - cost) / etsy_total, 3) if etsy_total else 0
         sec = kargo_ayrinti.get("secilen") or {}
-        kargo_metin = (f"kargo {sec.get('yontem')} {sec.get('kargo')} + ekler {EKLER_USD:.2f} "
+        kargo_metin = (f"kargo {sec.get('yontem')} {sec.get('kargo')} + ekler {kargo_ayrinti.get('ekler', 0):.2f} "
                        f"(secenekler: " + ", ".join(f"{x['yontem']} {x['toplam']:.2f}"
                                                     for x in kargo_ayrinti.get("secenekler", [])) + ")"
                        ) if sec else ""
