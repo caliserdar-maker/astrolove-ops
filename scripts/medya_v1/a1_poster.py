@@ -299,12 +299,24 @@ NCC_ESIK = 0.95                             # sayfa -> cift dogrulamasi (POD MB 
 def kapilar(b):
     return {'kalinti': b['kalinti_kapisi']['gecti'], 'temiz_zemin': b['temiz_ara_kapisi']['gecti'], 'sembol': b['sembol_kapisi']['gecti']}
 
+def liste_ac(L):
+    """Kompakt imzali liste -> {sayfa: tam URL}. {"did","job","s":[[AmzDate, Expires, Signature, HHMMSS(response-expires)], ...]} (sayfa sirasi)
+    ya da duz {"sayfa": {n: url}}. Canva'nin verdigi URL bicimi birebir kurulur."""
+    if 'sayfa' in L: return L['sayfa']
+    out = {}
+    for n, (ad, ex, sig, re_) in enumerate(L['s'], 1):
+        out[str(n)] = (f"https://export-download.canva.com/{L['did'][-5:]}/{L['did']}/-1/0/{n:04d}-{L['job']}.png"
+                       f"?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQYCGKMUH5AO7UJ26%2F{ad[:8]}%2Fus-east-1%2Fs3%2Faws4_request"
+                       f"&X-Amz-Date={ad}&X-Amz-Expires={ex}&X-Amz-Signature={sig}"
+                       f"&X-Amz-SignedHeaders=host%3Bx-amz-expected-bucket-owner&response-expires=Fri%2C%2025%20Sep%202026%20{re_[:2]}%3A{re_[2:4]}%3A{re_[4:]}%20GMT")
+    return out
+
 def uret77(parca, toplam, mod='tam'):
     """mod 'tam': EJ + IN (+ AM, metin Drive'da varsa) + kapak + kart09. mod 'am': yalniz AM, onceki kosuda PASS olan ciftler."""
     O = W / 'A1_77'; O.mkdir(exist_ok=True); R = {'parca': parca, 'toplam_is': toplam, 'mod': mod, 'cift': {}}
     tag_am = am_tagline(); R['am_tagline'] = tag_am
     assert mod == 'tam' or tag_am, 'AM tagline metni Drive\'da yok: ' + AM_TAG_YOL
-    rc('copy', LISTE77, str(W)); L = json.loads((W / 'A1_77_LISTE.json').read_text())['sayfa']
+    rc('copy', LISTE77, str(W)); L = liste_ac(json.loads((W / 'A1_77_LISTE.json').read_text()))
     ciftler = sorted(x.strip('/') for x in rc('lsf', POD, '--dirs-only').split())
     assert len(ciftler) == 78 and len(L) == 78, (len(ciftler), len(L))
     no = {c: i + 1 for i, c in enumerate(ciftler)}
