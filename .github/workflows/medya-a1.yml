@@ -46,7 +46,7 @@ jobs:
         run: |
           set -euo pipefail
           python -m pip install --quiet --upgrade pip
-          python -m pip install --quiet pillow opencv-python-headless numpy fonttools
+          python -m pip install --quiet pillow opencv-python-headless numpy fonttools scipy
 
       - name: rclone kur
         run: |
