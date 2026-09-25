@@ -51,9 +51,9 @@ def kart2():
 def kart3():
     c = M.arr('out/card06.png'); c, _ = etiket(c, 3)
     c[560:1860, 150:1240] = BG   # kucuk poster + golgesi yerine bosluk; olculen golge 176-1183 x 592-1823
-    # 4. madde (Serdar, 25 Eyl): 'Pigment giclee / Printed with pigment inks.' -> 'Giclee print / Fine art printing on cotton paper.'
-    c = txt(c, 3, (1350, 1615, 2000, 1738), 'Pigment gicl\u00e9e', 'Gicl\u00e9e print', 'ebg')
-    c = txt(c, 3, (1355, 1738, 2200, 1797), 'Printed with pigment inks.', 'Fine art printing on cotton paper.', 'mont')
+    # Serdar 25 Eyl (onceki talimati gunceller): 4. madde basligi kalir; alt satirlar Serdar'in metni
+    c = txt(c, 3, (1355, 1738, 2200, 1797), 'Printed with pigment inks.', 'Printed with pigment-based archival inks.', 'mont')
+    c = txt(c, 3, (1355, 1025, 2300, 1082), 'Natural white, softly textured paper.', 'Acid-free, natural white, softly textured paper.', 'mont')
     # sutunu sola hizala: sol murekkep kenari = GENEL_4 baslik sutunu (card10 'One unframed print' olculen x0 = 434)
     d = np.abs(c[540:1810, 1300:2600] - BG).max(2) > 60
     x_sol = int(np.where(d.any(0))[0].min()) + 1300
