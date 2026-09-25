@@ -60,39 +60,139 @@ def ncc(a, b):
     a = a - a.mean(); b = b - b.mean(); d = np.sqrt((a * a).sum() * (b * b).sum()); return float((a * b).sum() / d) if d else 0.0
 
 # ------------------------------------------------------------------ SARMALAYICI
+SEMBOL_BIRLES = 40      # px: ayni sembolun ust/alt parcalari (orn. Kova'nin iki dalgasi) arasindaki en buyuk bosluk
+GOVDE_ORAN = 0.25       # isim bandinda govde satiri: murekkep >= medyan satirin %25'i (Q kuyrugu gibi inenler haric)
+SEMBOL_KAYMA = 8        # sembol kapisi arama penceresi (px)
+SEMBOL_UST = 80         # sembol kapisi bolgesi: olculen sembol bandinin bu kadar ustunden baslar (banda bagimsiz)
+
+def murekkep(ref_norm):
+    from pilot6 import LUMA, MUREKKEP
+    return (np.asarray(ref_norm).astype(np.float32) @ LUMA) > MUREKKEP
+
+def olcum_duzelt(o, m):
+    """sayfa_olc sonucunu sayfanin kendisinden duzeltir (render kodu degismez, yalniz girdisi).
+    1) Sembol bandi: isimlere en yakin bandin ustunde, <= SEMBOL_BIRLES px bosluklu ve ayni x araliginda
+       2 kume veren bantlar ayni sembolun parcasidir; banda ve x araligina katilir.
+    2) Isim govde bandi: inen kuyruklar (Q) haric satirlar; isim_y ve punto tavani icin."""
+    import pilot11
+    from pilot6 import kumeler
+    d = dict(o); ek = []
+    sb = list(d['sembol_bant']); sx = [list(x) for x in d['sembol']]
+    for b in sorted([b for b in pilot11.bantlar(m) if b[1] <= sb[0]], key=lambda b: -b[1]):
+        if sb[0] - b[1] > SEMBOL_BIRLES: break
+        k = [c for c in kumeler(m[b[0]:b[1]], 20) if c[1] - c[0] > 30]
+        if len(k) == 2 and all(min(k[i][1], sx[i][1]) - max(k[i][0], sx[i][0]) > 0.5 * (k[i][1] - k[i][0]) for i in (0, 1)):
+            sb[0] = b[0]; sx = [[min(k[i][0], sx[i][0]), max(k[i][1], sx[i][1])] for i in (0, 1)]; ek.append(list(b))
+    d['sembol_bant'], d['sembol'] = sb, sx
+    d['sembol_merkez'] = [round((x[0] + x[1]) / 2, 1) for x in sx]
+    b0, b1 = d['isim_bant']; satir = np.zeros(b1 - b0)
+    for k in ('sol_isim', 'sag_isim'):
+        satir += m[b0:b1, d[k][0]:d[k][1]].sum(1)
+    ok = satir >= GOVDE_ORAN * np.median(satir[satir > 0]); kos, en, i = None, 0, 0
+    while i < len(ok):                                          # en uzun kesintisiz govde kosusu
+        if ok[i]:
+            j = i
+            while j < len(ok) and ok[j]: j += 1
+            if j - i > en: en, kos = j - i, (i, j)
+            i = j
+        else: i += 1
+    d['isim_govde'] = [int(b0 + kos[0]), int(b0 + kos[1])]
+    return d, {'sembol_ek_bant': ek, 'sembol_bant_ilk': o['sembol_bant'], 'isim_govde': d['isim_govde'], 'isim_bant': o['isim_bant']}
+
+def sembol_kapisi(poster, S, s, merkez, m_src, esik):
+    """YENI KAPI: kucuk sembol bolgesi kaynak sayfadakiyle birebir mi? (olcek/aynalama/parca kaymasi yok)
+    Bolge olculen banda BAGLI DEGIL: sembol x araligi (+pay) x [sembol bandi ustu - SEMBOL_UST, isim bandi ustu - 5].
+    Bolgeye tamamen sigan murekkep bilesenleri (daire yayi gibi disari tasanlar haric) sembolun tamamidir.
+    Yeni posterde ayni bilesenler TEK bir yatay kaymayla (|dx| <= 1 yuvarlama, dy = 0) aranir;
+    murekkep piksellerinde ortalama mutlak fark <= esik['fark'] ve murekkep IoU >= esik['iou'] olmali."""
+    import cv2
+    from pilot6 import LUMA, MUREKKEP
+    ref = np.asarray(S['ref']).astype(np.float32); P = np.asarray(poster.convert('RGB')).astype(np.float32)
+    Pm = (P @ LUMA) > MUREKKEP; sonuc, kirp = {}, {}
+    def ic(mk):                                                 # bolgeye tamamen sigan bilesenler
+        n, lab, st, _ = cv2.connectedComponentsWithStats(mk.astype(np.uint8), 8); h, w = mk.shape; out = np.zeros_like(mk)
+        for i in range(1, n):
+            x, y, bw, bh, a = st[i]
+            if a >= 20 and x > 0 and y > 0 and x + bw < w and y + bh < h: out |= lab == i
+        return out
+    for y in ('sol', 'sag'):
+        o = S['oge'][f'sembol_{y}']; g = o['gorsel']; pay = 14
+        x0, x1 = g[0] - pay, g[2] + pay
+        y0, y1 = s['sembol_bant'][0] - SEMBOL_UST, s['isim_bant'][0] - 5
+        src = ref[y0:y1, x0:x1]; mk = ic(m_src[y0:y1, x0:x1])
+        ex = int(round(merkez[y] - o['w'] / 2)) - (g[0] - x0) + (g[0] - o['gorsel'][0])
+        en = None
+        for dy in range(-SEMBOL_KAYMA, SEMBOL_KAYMA + 1):
+            for dx in range(-SEMBOL_KAYMA, SEMBOL_KAYMA + 1):
+                q = P[y0 + dy:y1 + dy, ex + dx:ex + dx + (x1 - x0)]
+                f = float(np.abs(q - src).max(2)[mk].mean())
+                if en is None or f < en[0]: en = (f, dx, dy)
+        f, dx, dy = en
+        q = P[y0 + dy:y1 + dy, ex + dx:ex + dx + (x1 - x0)]; qm = ic(Pm[y0 + dy:y1 + dy, ex + dx:ex + dx + (x1 - x0)])
+        iou = float((qm & mk).sum() / max((qm | mk).sum(), 1))
+        sonuc[y] = {'fark': round(f, 2), 'dx': dx, 'dy': dy, 'iou': round(iou, 4), 'kaynak_kutu': [x0, y0, x1, y1],
+                    'murekkep_px': int(mk.sum()), 'gecti': abs(dx) <= 1 and dy == 0 and f <= esik['fark'] and iou >= esik['iou']}
+        kirp[y] = (Image.fromarray(src.astype(np.uint8)), Image.fromarray(q.astype(np.uint8)))
+    return {'gecti': all(v['gecti'] for v in sonuc.values()), 'esik': esik, **sonuc}, kirp
+
+def sembol_gorseli(kirp, ad, buyut=3):
+    """'kaynak | yeni' buyutulmus gorsel (sol ve sag sembol alt alta)."""
+    satir = []
+    for y in ('sol', 'sag'):
+        a, b = [im.resize((im.width * buyut, im.height * buyut), Image.NEAREST) for im in kirp[y]]
+        c = Image.new('RGB', (a.width + b.width + 24, a.height), 'white'); c.paste(a, (0, 0)); c.paste(b, (a.width + 24, 0)); satir.append(c)
+    t = Image.new('RGB', (max(r.width for r in satir), sum(r.height for r in satir) + 24), 'white'); yy = 0
+    for r in satir: t.paste(r, (0, yy)); yy += r.height + 24
+    t.save(CIK / ad, quality=95)
+
+SEMBOL_ESIK = {'fark': 6.0, 'iou': 0.97}
+
 class Poster:
-    def __init__(self):
+    def __init__(self, yerel=False):
         import pilot11, pilot12, pilot16
         from kisisel_pilot import FOLDERS, fetch
         self.p11, self.p12, self.p16 = pilot11, pilot12, pilot16
         OUT = pilot16.OUT; self.HAM = pilot16.HAM; self.HAM.mkdir(parents=True, exist_ok=True)
         (OUT / 'hazir').mkdir(parents=True, exist_ok=True)
-        rc('copy', f'{KP}/HAZIR/bg.png', str(OUT / 'hazir'))
-        rc('copy', f'{KP}/ORANLAR/OLCUM.json', str(W))
-        for f in ('cancer_name_gold.png', 'libra_name_gold.png'):
-            fetch(FOLDERS['names'], f, OUT / 'ref' / 'names')
+        olcum_yol = OUT / 'ORANLAR' / 'OLCUM.json'
+        if not yerel:
+            rc('copy', f'{KP}/HAZIR/bg.png', str(OUT / 'hazir'))
+            rc('copy', f'{KP}/ORANLAR/OLCUM.json', str(olcum_yol.parent))
+            for f in ('cancer_name_gold.png', 'libra_name_gold.png'):
+                fetch(FOLDERS['names'], f, OUT / 'ref' / 'names')
         pilot12.profil_yukle(OUT / 'ref' / 'names')
-        self.olcum = json.loads((W / 'OLCUM.json').read_text())
+        self.olcum = json.loads(olcum_yol.read_text())
         self.bg = Image.open(OUT / 'hazir' / 'bg.png')
+        self.tavan = None                                       # Cancer-Libra referans boylari (ilk cagri)
 
-    def __call__(self, sayfa_png, sayfa_no, renk, oran, isimler, tagline):
-        """cift_sayfa (Canva sayfa PNG, bayt) + sayfa no, renk, oran, isimler, tagline -> (poster, bilgi)."""
+    def __call__(self, sayfa_png, sayfa_no, renk, oran, isimler, tagline, referans=False):
+        """cift_sayfa (Canva sayfa PNG, bayt) + sayfa no, renk, oran, isimler, tagline -> (poster, bilgi, sembol kirpimlari)."""
         import giris_dogrula as gd
         assert renk == 'blue' and oran == ORAN, 'bu adim yalniz Blue 4x5'
+        assert referans or self.tavan, 'once Cancer-Libra referansi uretilmeli (boy tavani)'
         t0 = time.time()
         yol = self.HAM / f'{oran}_p{sayfa_no}.jpg'            # render kodu bu adi okur; icerik kayipsiz PNG
         Image.open(io.BytesIO(sayfa_png)).convert('RGB').save(yol, 'PNG')
-        o = self.p11.sayfa_olc(yol)                           # o sayfanin KENDI olcumu
+        m = murekkep(self.p11.norm(Image.open(yol).convert('RGB'))[0])
+        o, duz = olcum_duzelt(self.p11.sayfa_olc(yol), m)   # o sayfanin KENDI olcumu + duzeltme
         kayit = dict(self.olcum[oran]); kayit['sayfalar'] = {str(sayfa_no): o}
         self.p16.REF_SAYFA = sayfa_no
         s, S = self.p16.oran_kur(oran, kayit, self.bg, kalibre=True)
+        g0, g1 = o['isim_govde']; s['isim_y'] = (g0 + g1) / 2  # dikey merkez: govde (inen kuyruk haric)
+        if referans:
+            self.tavan = {'cap': dict(s['cap']), 'tag_cap': s['tag_cap'], 'tag_sinir': s['tag_sinir']}
+        ilk = {'cap': dict(s['cap']), 'tag_cap': s['tag_cap']}
+        s['cap'] = {y: min(s['cap'][y], self.tavan['cap'][y]) for y in ('sol', 'sag')}   # ust sinir: Cancer-Libra; sigmazsa D kurali kucultur
+        s['tag_cap'] = min(s['tag_cap'], self.tavan['tag_cap']); s['tag_sinir'] = min(s['tag_sinir'], self.tavan['tag_sinir'])
         r = gd.siparis_dogrula(isimler[0], isimler[1], tagline, None)
         sol, sag = r['sol']['deger'], r['sag']['deger']
         p, bilgi, merkez, x, yeni = self.p16.poster_kur(s, S, {'sol': sol, 'sag': sag}, tagline)
         kapi = self.p16.blok_kapisi(p, S, s, yeni)
-        return p, {'sayfa': sayfa_no, 'olcum': {k: o.get(k) for k in ('isim_bant', 'sembol_bant', 'tag_bant')},
-                   'bg_hiza': s['bg_hiza'], 'temiz_ara_kapisi': s['temiz_ara_kapisi'], 'kalinti_kapisi': kapi,
-                   'olcek': bilgi['olcek'], 'punto': bilgi['punto'], 'poster_px': list(p.size), 'sure_sn': round(time.time() - t0, 1)}
+        sk, kirp = sembol_kapisi(p, S, s, merkez, m, SEMBOL_ESIK)
+        return p, {'sayfa': sayfa_no, 'olcum': {k: o.get(k) for k in ('isim_bant', 'isim_govde', 'sembol_bant', 'sembol', 'tag_bant')},
+                   'olcum_duzeltme': duz, 'cap_ilk': ilk, 'cap_son': {'cap': s['cap'], 'tag_cap': s['tag_cap']},
+                   'bg_hiza': s['bg_hiza'], 'temiz_ara_kapisi': s['temiz_ara_kapisi'], 'kalinti_kapisi': kapi, 'sembol_kapisi': sk,
+                   'olcek': bilgi['olcek'], 'punto': bilgi['punto'], 'poster_px': list(p.size), 'sure_sn': round(time.time() - t0, 1)}, kirp
 
 # ------------------------------------------------------------------ sahneye oturtma
 def yer_olc(sahne, poster, kaba):
@@ -205,16 +305,19 @@ if __name__ == '__main__':
         R['sahne_boyut'] = {ad: list(im.size) for ad, im in sahne.items()}
         # Cancer-Libra karsiligi: ayni sarmalayici; canli gorsele oturtma olcumu
         t0 = time.time()
-        cl, cli = P(sayfa_b[no[REF_CIFT]], no[REF_CIFT], 'blue', ORAN, ISIM, TAG)
+        cl, cli, ck = P(sayfa_b[no[REF_CIFT]], no[REF_CIFT], 'blue', ORAN, ISIM, TAG, referans=True)
+        sembol_gorseli(ck, f'SEMBOL_{REF_CIFT}_kaynak_vs_yeni.jpg')
         cl.save(CIK / f'POSTER_{REF_CIFT}_MB_4x5.png')
         yer = {}
         for ad, (_, kaba) in SAHNE.items():
-            yer[ad] = yer_olc(sahne[ad], cl, kaba)
+            yer[ad] = kapak_yer(sahne[ad], cl, aciklik_olc(sahne[ad])) if ad == 'kapak' else yer_olc(sahne[ad], cl, kaba)
             yeni = yerlestir(sahne[ad], cl, yer[ad])
             a = np.asarray(sahne[ad]).astype(np.int16); b = np.asarray(yeni).astype(np.int16)
             y = yer[ad]; d = np.abs(a - b).max(2)
             yer[ad]['cl_alan_ort_fark'] = round(float(d[y['y']:y['y'] + y['h'], y['x']:y['x'] + y['w']].mean()), 2)
-            yer[ad]['alan_disi_maks_fark'] = int(np.where(np.pad(np.zeros((y['h'], y['w']), bool), ((y['y'], d.shape[0] - y['y'] - y['h']), (y['x'], d.shape[1] - y['x'] - y['w'])), constant_values=True), d, 0).max())
+            ax0, ay0, ax1, ay1 = y.get('aciklik') or (y['x'], y['y'], y['x'] + y['w'], y['y'] + y['h'])
+            dis = np.ones(d.shape, bool); dis[ay0:ay1, ax0:ax1] = False
+            yer[ad]['alan_disi_maks_fark'] = int(d[dis].max())
             yeni.save(CIK / f'{ad.upper()}_{REF_CIFT}_yeniden.jpg', quality=95)
         R[REF_CIFT] = {**cli, 'sayfa_eslesme': None, 'toplam_sn': round(time.time() - t0, 1)}
         R['yer'] = yer; log('Cancer-Libra karsiligi', R[REF_CIFT], yer)
@@ -224,7 +327,8 @@ if __name__ == '__main__':
             rc('copy', f'{POD}/{cift}/{RENK}/8x10.jpg', str(W / 'pod' / cift))
             g = lambda im: np.asarray(im.convert('L').resize((160, 200), Image.BOX)).astype(np.float64)
             es = ncc(g(Image.open(io.BytesIO(sayfa_b[no[cift]]))), g(Image.open(W / 'pod' / cift / '8x10.jpg')))
-            p, bi = P(sayfa_b[no[cift]], no[cift], 'blue', ORAN, ISIM, TAG)
+            p, bi, kk = P(sayfa_b[no[cift]], no[cift], 'blue', ORAN, ISIM, TAG)
+            sembol_gorseli(kk, f'SEMBOL_{cift}_kaynak_vs_yeni.jpg')
             p.save(CIK / f'POSTER_{cift}_MB_4x5.png')
             for ad in SAHNE:
                 yerlestir(sahne[ad], p, yer[ad]).save(CIK / f'{ad.upper()}_{cift}.jpg', quality=95)
