@@ -1,11 +1,10 @@
-"""Kanal bekcisi testi (ag yok; Prodigi HTTP katmani + Etsy sahte). Router'in GERCEK Prodigi.iptal /
-iptal_edilebilir kodu kosar; yalniz Prodigi.call sahtedir.
-K1 kisisel + kanal siparisi iptal edilebilir -> iptal + STATE kanal_iptal
-K2 kisisel + kanal siparisi iptal edilemez -> ACIL (DIKKAT + hata + ::error)
-K3 kisisel + iptal edilebilir ama iptal basarisiz -> ACIL
-K4 kisisellestirmesiz + kanal siparisi -> dokunulmaz (iptal cagrisi yok)
-K5 kisisel + kendi etsy-* siparisimiz -> dokunulmaz
-Ikinci kosu: tekrar iptal / tekrar ACIL bildirimi yok. Kuru kosu: iptal yok.
+"""Kanal bekcisi testi (ag yok; Prodigi HTTP katmani + Etsy sahte). YALNIZ UYARI, Prodigi'ye yazma yok.
+K1 kisisel + kanal siparisi (pause, InProgress/NotStarted) -> ACIL (DIKKAT + hata + ::error)
+K2 kisisel + kanal siparisi Complete -> ACIL
+K4 kisisellestirmesiz + kanal siparisi -> uyari yok
+K5 kisisel + kendi etsy-* siparisimiz -> uyari yok
+K6 kisisel + Prodigi'de kayit yok -> yalniz ISIM_BEKLIYOR
+Hicbir kosuda Prodigi POST (iptal/siparis) ve /actions cagrisi yok. Ikinci kosu: tekrar bildirim yok.
 Calistir: python3 scripts/prodigi/test_kanal_bekci.py"""
 import sys, os, json, copy, csv, time, tempfile, io, contextlib
 from pathlib import Path
@@ -26,8 +25,8 @@ def rec(rid, sku, alanlar, ulke="US"):
 
 
 K3 = [("Name under Aries", "Mia"), ("Name under Leo", "Tom"), ("Your message", "Always")]
-REC = [rec(9101, "POD-ARI_LEO-MB-8x10", K3), rec(9102, "POD-ARI_LEO-DB-A4", K3), rec(9103, "POD-ARI_LEO-PW-8x10", K3),
-       rec(9104, "POD-ARI_LEO-MB-12x16", []), rec(9105, "POD-ARI_LEO-WP-8x10", K3)]
+REC = [rec(9101, "POD-ARI_LEO-MB-8x10", K3), rec(9102, "POD-ARI_LEO-DB-A4", K3),
+       rec(9104, "POD-ARI_LEO-MB-12x16", []), rec(9105, "POD-ARI_LEO-WP-8x10", K3), rec(9106, "POD-ARI_LEO-CI-8x10", K3)]
 
 
 def kanal_siparis(oid, rid, stage="InProgress"):
@@ -39,12 +38,10 @@ def kanal_siparis(oid, rid, stage="InProgress"):
 
 class Sahte:
     def __init__(s):
-        s.orders = {o["id"]: o for o in (kanal_siparis("ord_K1", 9101), kanal_siparis("ord_K2", 9102),
-                                           kanal_siparis("ord_K3", 9103), kanal_siparis("ord_K4", 9104))}
+        s.orders = {o["id"]: o for o in (kanal_siparis("ord_K1", 9101), kanal_siparis("ord_K2", 9102, "Complete"),
+                                           kanal_siparis("ord_K4", 9104))}
         own = kanal_siparis("ord_K5", 9105); own["merchantReference"] = "etsy-9105-8x10"; own.pop("metadata")
         s.orders["ord_K5"] = own
-        s.cancel_ok = {"ord_K1": "Yes", "ord_K2": "No", "ord_K3": "Yes", "ord_K4": "Yes", "ord_K5": "Yes"}
-        s.iptal_tutmaz = {"ord_K3"}
         s.cagri = []
 
     def call(s, method, path, body=None):
@@ -52,22 +49,9 @@ class Sahte:
         if method == "GET" and path.startswith("/orders?"):
             return 200, {"outcome": "Ok", "orders": [o for o in s.orders.values() if o["status"]["stage"] != "Cancelled"],
                          "hasMore": False}
-        if method == "GET" and path.startswith("/orders/") and path.endswith("/actions"):
-            oid = path.split("/")[2]
-            return 200, {"outcome": "Ok", "cancel": {"isAvailable": s.cancel_ok[oid]},
-                         "changeRecipientDetails": {"isAvailable": "No"}, "changeShippingMethod": {"isAvailable": "No"},
-                         "changeMetaData": {"isAvailable": "Yes"}}
         if method == "GET" and path.startswith("/orders/"):
             oid = path.split("/")[2]
             return 200, {"outcome": "Ok", "order": s.orders[oid]}
-        if method == "POST" and path.endswith("/actions/cancel"):
-            oid = path.split("/")[2]
-            if s.cancel_ok[oid] != "Yes":
-                return 400, {"outcome": "FailedToCancel"}
-            if oid in s.iptal_tutmaz:
-                return 200, {"outcome": "FailedToCancel"}
-            s.orders[oid]["status"]["stage"] = "Cancelled"
-            return 200, {"outcome": "Cancelled", "order": s.orders[oid]}
         if method == "GET" and path.startswith("/products/"):
             return 200, {"product": {"sku": path.split("/")[2]}}
         if method == "POST" and path == "/quotes":
@@ -122,44 +106,31 @@ sonuc = []
 def k(ad, kosul, d=""):
     sonuc.append(bool(kosul)); print(("PASS " if kosul else "FAIL ") + ad + (f" | {d}" if d else ""))
 
-# --- 0) kuru kosu: iptal yok
-S.cagri.clear()
-rc0, log0 = run(kuru=True, ad="kuru")
-k("kuru: hic iptal POST'u yok", not [c for c in S.cagri if c[0] == "POST" and "cancel" in c[1]], S.cagri)
-k("kuru: K1 'iptal edilebilir' raporlandi", "(kuru) KANAL BEKCISI ord_K1 iptal edilebilir" in log0)
-os.remove(W / "state.csv")
-
-# --- 1) canli (sahte) kosu
+yasak = lambda: [c for c in S.cagri if c[0] != "GET" or c[1].endswith("/actions")]
 S.cagri.clear()
 rc, log1 = run(ad="k1")
 st = {r["receipt_id"]: r for r in csv.DictReader(open(W / "state.csv", encoding="utf-8"))}
-iptal = [c[1] for c in S.cagri if c[0] == "POST" and "cancel" in c[1]]
-k("iptal edilebilirlik GET /orders/{id}/actions ile okundu", ("GET", "/orders/ord_K1/actions") in S.cagri)
-k("K1 iptal edildi + STATE kanal_iptal", "/orders/ord_K1/actions/cancel" in iptal and st["9101"]["kanal_iptal"] == "ord_K1"
-  and S.orders["ord_K1"]["status"]["stage"] == "Cancelled", st["9101"].get("kanal_iptal"))
-k("K2 iptal denenmedi (isAvailable=No) + ACIL", "/orders/ord_K2/actions/cancel" not in iptal and st["9102"]["warn"] == R.ACIL_KOD)
-k("K3 iptal tutmadi -> ACIL", st["9103"]["warn"] == R.ACIL_KOD and "iptal BASARISIZ" in st["9103"]["note"], st["9103"]["note"][:120])
-k("K4 kisisellestirmesiz: kanal siparisine dokunulmadi", "/orders/ord_K4/actions/cancel" not in iptal
-  and ("GET", "/orders/ord_K4/actions") not in S.cagri)
-k("K5 kendi siparisimize dokunulmadi", "/orders/ord_K5/actions/cancel" not in iptal and ("GET", "/orders/ord_K5/actions") not in S.cagri)
+k("Prodigi'ye hic yazma yok (POST/iptal/actions yok)", not yasak(), yasak())
+k("K1 pause'daki kanal siparisi -> ACIL", st["9101"].get("warn") == R.ACIL_KOD and st["9101"].get("kanal_oid") == "ord_K1")
+k("K2 Complete kanal siparisi -> ACIL", st["9102"].get("warn") == R.ACIL_KOD and st["9102"].get("kanal_oid") == "ord_K2")
+k("K4 kisisellestirmesiz: uyari yok", not st["9104"].get("warn"), st["9104"])
+k("K5 kendi siparisimiz: uyari yok", not st["9105"].get("warn"), st["9105"].get("warn"))
+k("K6 Prodigi kaydi yok: uyari yok, ISIM_BEKLIYOR", not st["9106"].get("warn") and st["9106"]["stage"] == "ISIM_BEKLIYOR")
 dk = (W / "k1/DIKKAT.md").read_text(encoding="utf-8")
-k("DIKKAT: ACIL metni K2 + K3 (siparis no + Prodigi id)",
-  "ACIL: kisisellestirilmis siparis Prodigi'de uretime girdi - siparis 9102, Prodigi ord_K2" in dk
-  and "siparis 9103, Prodigi ord_K3" in dk)
-k("DIKKAT: K1 iptal satiri", "KANAL IPTAL 9101" in dk)
-k("bildirim: ::error ACIL satirlari", "::error title=ACIL 9102::" in log1 and "::error title=ACIL 9103::" in log1)
+k("DIKKAT: ACIL metni (siparis no + Prodigi id)",
+  "ACIL: kisisellestirilmis Etsy siparisi Prodigi'de gorundu - siparis 9101, Prodigi ord_K1" in dk
+  and "siparis 9102, Prodigi ord_K2" in dk and "9104" not in "".join(l for l in dk.splitlines() if "ACIL" in l))
+k("bildirim: ::error ACIL satirlari (yalniz K1, K2)", "::error title=ACIL 9101::" in log1 and "::error title=ACIL 9102::" in log1
+  and log1.count("::error title=ACIL") == 2)
 k("kosu bildirim icin basarisiz", rc not in (0, None), rc)
-k("Prodigi'ye yeni siparis acilmadi", ("POST", "/orders") not in S.cagri)
-k("K1/K2/K3 kartlarinda bekci notu", "IPTAL EDILDI" in (W / "k1/SIPARIS_ISIM/9101.md").read_text(encoding="utf-8")
-  and "ACIL" in (W / "k1/SIPARIS_ISIM/9102.md").read_text(encoding="utf-8"))
-k("K1-K3,K5 ISIM_BEKLIYOR", all(st[x]["stage"] == "ISIM_BEKLIYOR" for x in ("9101", "9102", "9103", "9105")),
-  {x: st[x]["stage"] for x in st})
-
-# --- 2) ikinci kosu: tekrar yok
+k("kartta ACIL notu", "ACIL" in (W / "k1/SIPARIS_ISIM/9101.md").read_text(encoding="utf-8")
+  and "ACIL" not in (W / "k1/SIPARIS_ISIM/9106.md").read_text(encoding="utf-8"))
 S.cagri.clear()
 rc2, log2 = run(ad="k2")
-iptal2 = [c[1] for c in S.cagri if c[0] == "POST" and "cancel" in c[1]]
-k("ikinci kosu: tekrar iptal yok", not iptal2, iptal2)
-k("ikinci kosu: tekrar ACIL bildirimi yok", "::error title=ACIL" not in log2 and "zaten ACIL bildirildi" in log2)
+k("ikinci kosu: Prodigi'ye yazma yok", not yasak(), yasak())
+k("ikinci kosu: tekrar bildirim yok", "::error title=ACIL" not in log2 and log2.count("zaten bildirildi") == 2)
 k("ikinci kosu: hata yok (rc 0)", rc2 in (0, None), rc2)
+os.remove(W / "state.csv"); S.cagri.clear()
+rc3, log3 = run(kuru=True, ad="kuru")
+k("kuru kosu: uyari calisir, yazma yok", "::error title=ACIL 9101::" in log3 and not yasak())
 print(f"{sum(sonuc)}/{len(sonuc)} PASS"); sys.exit(0 if all(sonuc) else 1)

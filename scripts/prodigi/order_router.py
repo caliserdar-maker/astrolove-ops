@@ -271,12 +271,11 @@ ACIL_KOD = "KANAL_KISISEL_ACIL"
 
 
 def kanal_kisisel_bekci(a, prod, st, idx, pod, report, errors):
-    """EK GUVENCE (25 Eyl, Serdar): Prodigi'nin Etsy kanali acik olabilir. Kisisellestirme cevabi olan her POD
-    receipt icin Prodigi'de KANAL siparisi (merchantReference = receipt / kalem = transaction) aranir:
-      - iptal edilebilir (actions.cancel.isAvailable == Yes) -> iptal + STATE kanal_iptal (+ bilgi bildirimi);
-      - edilemez / iptal basarisiz -> DIKKAT + bildirim 'ACIL: kisisellestirilmis siparis Prodigi'de uretime girdi'.
-    Kendi (etsy-*) siparisimize dokunulmaz. Ayni kanal siparisi icin ikinci kez islem/bildirim yok.
-    -> {rid: not} (kart notu icin)."""
+    """EK GUVENCE (25 Eyl, Serdar): kisisellestirme cevabi olan POD receipt Prodigi'de KANAL siparisi olarak
+    gorunurse (merchantReference = receipt / kalem = transaction) YALNIZ UYARI: DIKKAT.md + bildirim (kosu
+    basarisiz + ::error). Prodigi'ye YAZMA YOK (iptal yok): Prodigi ayari 'Pause indefinitely, until manually
+    released' ve kanal 'Ignore new products' (Serdar panelden dogruladi). Kendi (etsy-*) siparisimiz sayilmaz.
+    Ayni kanal siparisi icin ikinci kez bildirim yok. -> {rid: not} (kart notu icin)."""
     notlar = {}
     for r, items, _other, _atl in pod:
         rid = str(r.get("receipt_id"))
@@ -286,36 +285,17 @@ def kanal_kisisel_bekci(a, prod, st, idx, pod, report, errors):
         if not bilgi or not bilgi.get("kanal") or not bilgi.get("id"):
             continue
         oid, row = bilgi["id"], st.get(rid) or {}
-        if row.get("kanal_iptal") == oid:
-            continue
+        mesaj = (f"ACIL: kisisellestirilmis Etsy siparisi Prodigi'de gorundu - siparis {rid}, Prodigi {oid} "
+                 f"(stage {bilgi.get('stage')}); elle serbest BIRAKILMAMALI")
+        notlar[rid] = mesaj
         if row.get("kanal_oid") == oid and row.get("warn") == ACIL_KOD:
-            report.append(f"- {rid}: KANAL BEKCISI {oid} zaten ACIL bildirildi (tekrar yok)")
-            notlar[rid] = f"ACIL: kanal siparisi {oid} uretimde (onceden bildirildi)"
+            report.append(f"- {rid}: KANAL BEKCISI {oid} zaten bildirildi (tekrar yok)")
             continue
-        olur, ham = prod.iptal_edilebilir(oid)
-        if olur and a.dry_run:
-            report.append(f"- {rid}: (kuru) KANAL BEKCISI {oid} iptal edilebilir (cancel.isAvailable={ham}); iptal edilmedi")
-            notlar[rid] = f"kanal siparisi {oid} iptal edilebilir (kuru kosu)"
-            continue
-        if olur:
-            ok_i, aciklama = prod.iptal(oid)
-            if ok_i:
-                mesaj = f"kisisellestirmeli siparisin kanal kopyasi {oid} IPTAL EDILDI ({aciklama})"
-                upd(st, a.state, rid, kanal_iptal=oid, kanal_oid=oid)
-                report.append(f"- {rid}: KANAL BEKCISI {mesaj}")
-                DIKKAT_EK.append(f"- KANAL IPTAL {rid}: {mesaj}")
-                errors.append(f"{rid}: BILGI - {mesaj} (kosu bilincli basarisiz: bildirim)")
-                notlar[rid] = mesaj
-                continue
-            ham = f"{ham}; iptal BASARISIZ: {aciklama}"
-        mesaj = (f"ACIL: kisisellestirilmis siparis Prodigi'de uretime girdi - siparis {rid}, Prodigi {oid} "
-                 f"(stage {bilgi.get('stage')}, cancel.isAvailable={ham})")
         upd(st, a.state, rid, kanal_oid=oid, warn=ACIL_KOD, note=mesaj[:300])
         report.append(f"- {rid}: {mesaj}")
         DIKKAT_EK.append(f"- {mesaj}")
         errors.append(f"{rid}: {mesaj}")
         print(f"::error title=ACIL {rid}::{mesaj}", flush=True)
-        notlar[rid] = mesaj
     return notlar
 
 
