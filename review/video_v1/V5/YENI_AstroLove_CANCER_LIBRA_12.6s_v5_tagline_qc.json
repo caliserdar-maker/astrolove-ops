@@ -1,0 +1,60 @@
+{
+ "taglinelar": {
+  "E": {
+   "x_yukseklik": 12,
+   "taban_y": 1051,
+   "ust_y": 1028,
+   "genislik": 424,
+   "merkez_x": 539.5,
+   "altin_ort": [
+    191.5,
+    152.6,
+    65.9
+   ],
+   "altin_px": 1102,
+   "buyuk_harf_yuk": 22,
+   "kare": 237
+  },
+  "N": {
+   "x_yukseklik": 12,
+   "taban_y": 1049,
+   "ust_y": 1026,
+   "genislik": 418,
+   "merkez_x": 540.5,
+   "altin_ort": [
+    193.0,
+    151.5,
+    62.9
+   ],
+   "altin_px": 944,
+   "buyuk_harf_yuk": 22,
+   "kare": 157
+  },
+  "M": {
+   "x_yukseklik": 12,
+   "taban_y": 1051,
+   "ust_y": 1028,
+   "genislik": 250,
+   "merkez_x": 540.5,
+   "altin_ort": [
+    185.1,
+    145.6,
+    63.2
+   ],
+   "altin_px": 453,
+   "buyuk_harf_yuk": 6,
+   "kare": 199
+  }
+ },
+ "fark": {
+  "buyuk_harf_yuk": 16,
+  "taban_y": 2,
+  "altin_kanal_maks": 7.9
+ },
+ "PASS": {
+  "yukseklik_<=1": false,
+  "taban_M_E_<=1": true,
+  "altin_<=6": false
+ },
+ "SONUC": "FAIL"
+}
