@@ -29,9 +29,24 @@ KISISEL_PROPERTY = {54}          # Etsy eski tek alanli model: "Personalization"
 ED_AD = {"MIDNIGHT_BLUE": "Midnight Blue", "DEEP_BLACK": "Deep Black", "WARM_PARCHMENT": "Warm Parchment",
          "CHAMPAGNE_IVORY": "Champagne Ivory", "PURE_WHITE": "Pure White"}
 
-# Sorun -> musteri mesaji sablon numarasi. ONAY BEKLIYOR: sablon dosyasi (AstroLove_Kisisel_Musteri_
-# Mesajlari_20260925.md) bu oturumda okunamadi; numaralar Serdar'in talimatindaki siraya gore varsayildi.
-SABLON_SORUN = {"UZUN_ISIM": 2, "KIRIL_ISIM": 3, "ALFABE_ISIM": 3, "KARAKTER": 3, "EMOJI": 4, "UZUN_MESAJ": 5}
+# Sorun -> musteri mesaji sablonu (Serdar 25 Eyl, Drive TEMP/SIPARIS_ISIM/MUSTERI_MESAJLARI.md):
+#   1 yazim kontrolu: HER sipariste (sorun yoksa tek basina)   2 Kiril / Latin disi harfli isim
+#   3 mesajda emoji / ♥ / fontta olmayan karakter               4 isim > 11 harf ya da mesaj > 35 karakter
+#   5 kisisellestirme eksik/bos                                 6 2 gun cevap yoksa hatirlatma (kartta tarih notu)
+# Birden cok sorun varsa ilgili sablonlarin hepsi kartta listelenir.
+SABLON_ISIM = {"KIRIL_ISIM": 2, "ALFABE_ISIM": 2, "UZUN_ISIM": 4, "BOS": 5}
+SABLON_MESAJ = {"EMOJI": 3, "KARAKTER": 3, "UZUN_MESAJ": 4, "BOS": 5}
+SABLON_AD = {1: "yazim kontrolu", 2: "Kiril / Latin disi isim", 3: "mesajda emoji / fontta olmayan karakter",
+             4: "metin cok uzun", 5: "kisisellestirme eksik", 6: "2 gun cevap yok (hatirlatma)"}
+HATIRLATMA_GUN = 2
+
+BURC_RU = {"ARIES": "Овна", "TAURUS": "Тельца", "GEMINI": "Близнецов", "CANCER": "Рака", "LEO": "Льва",
+           "VIRGO": "Девы", "LIBRA": "Весов", "SCORPIO": "Скорпиона", "SAGITTARIUS": "Стрельца",
+           "CAPRICORN": "Козерога", "AQUARIUS": "Водолея", "PISCES": "Рыб"}   # sablonlarda "под знаком X" (ilgi hali)
+KIRIL_LATIN = {"А": "A", "Б": "B", "В": "V", "Г": "G", "Д": "D", "Е": "E", "Ё": "E", "Ж": "ZH", "З": "Z", "И": "I",
+               "Й": "Y", "К": "K", "Л": "L", "М": "M", "Н": "N", "О": "O", "П": "P", "Р": "R", "С": "S", "Т": "T",
+               "У": "U", "Ф": "F", "Х": "KH", "Ц": "TS", "Ч": "CH", "Ш": "SH", "Щ": "SHCH", "Ъ": "", "Ы": "Y",
+               "Ь": "", "Э": "E", "Ю": "YU", "Я": "YA", "І": "I", "Ї": "YI", "Є": "YE", "Ў": "U", "Ґ": "G"}
 
 
 def _emoji_mi(c):
@@ -172,29 +187,51 @@ def eslestir(kalem):
 
 # ------------------------------------------------------------------ sablonlar + kart
 def sablon_oku(yol):
-    """'## ... <N> ...' basliklari -> {(N, 'EN'|'RU'): metin}. Dosya yoksa {}."""
+    """MUSTERI_MESAJLARI.md: '## N. baslik', altinda 'EN' / 'RU' satiri ve ``` blogu -> {(N, dil): metin}.
+    Dosya yoksa {}."""
     p = Path(yol) if yol else None
     if not p or not p.exists():
         return {}
-    out, anahtar, satir = {}, None, []
+    out, no, dil, blok, icerde = {}, None, None, [], False
     for ln in p.read_text(encoding="utf-8").splitlines():
-        m = re.match(r"^#{2,3}\s.*?(\d)\b(.*)$", ln)
+        if ln.strip().startswith("```"):
+            if icerde and no is not None and dil:
+                out[(no, dil)] = "\n".join(blok).strip()
+            icerde, blok = not icerde, []
+            continue
+        if icerde:
+            blok.append(ln); continue
+        m = re.match(r"^#{2,3}\s*(\d+)\b", ln)
         if m:
-            if anahtar:
-                out[anahtar] = "\n".join(satir).strip()
-            dil = "RU" if re.search(r"\bRU\b|РУС|русск", ln, re.I) else "EN"
-            anahtar, satir = (int(m.group(1)), dil), []
-        elif anahtar:
-            satir.append(ln)
-    if anahtar:
-        out[anahtar] = "\n".join(satir).strip()
+            no, dil = int(m.group(1)), None
+        elif ln.strip().upper() in ("EN", "RU"):
+            dil = ln.strip().upper()
     return out
 
 
 def sablon_doldur(metin, degerler):
+    """[Yer tutucu] -> deger (buyuk/kucuk harf AYRI: [NAME 1] basilacak isim, [Name 1] gelen isim).
+    Degeri bos olan yer tutucu oldugu gibi kalir (Serdar doldurur)."""
     for k, v in degerler.items():
-        metin = re.sub(r"\{\{?\s*" + re.escape(k) + r"\s*\}?\}", str(v), metin, flags=re.I)
+        if v not in (None, ""):
+            metin = metin.replace(f"[{k}]", str(v))
     return metin
+
+
+def latinle(s):
+    return "".join(KIRIL_LATIN.get(c, c) for c in buyut(s))
+
+
+def mesaj_temizle(s):
+    return re.sub(r"\s{2,}", " ", "".join(c for c in (s or "") if not _sembol_mi(c))).strip()
+
+
+def _sure_notu(receipt):
+    ts = receipt.get("created_timestamp") or receipt.get("create_timestamp")
+    if not ts:
+        return f"siparisten {HATIRLATMA_GUN} gun sonra"
+    import time as _t
+    return _t.strftime("%Y-%m-%d %H:%M UTC", _t.gmtime(float(ts) + HATIRLATMA_GUN * 86400))
 
 
 def kart(receipt, kalemler, sablonlar, kanal_notu=""):
@@ -208,7 +245,7 @@ def kart(receipt, kalemler, sablonlar, kanal_notu=""):
           f"- Ulke: {ulke or '?'} | mesaj dili: {dil}"]
     if kanal_notu:
         md.append(f"- **KANAL:** {kanal_notu}")
-    tum_kod = []
+    tum_kod, secilen, elle = [], {}, []          # secilen: sablon no -> degerler (ilk tetikleyen kalemden)
     for k in kalemler:
         e = eslestir(k)
         d1, b1, s1 = isim_dogrula(e["isim1"], ulke)
@@ -219,6 +256,22 @@ def kart(receipt, kalemler, sablonlar, kanal_notu=""):
             kodlar.append("EKSIK_SORU")
         tum_kod += kodlar
         a, b = k["pair"].split("_", 1)
+        kiril = [x for x, s_ in ((e["isim1"], s1), (e["isim2"], s2)) if any(c in ("KIRIL_ISIM", "ALFABE_ISIM") for c, _ in s_)]
+        ve = " и " if dil == "RU" else " and "
+        oneri = [latinle(x) for x in kiril if not any(ord(c) > 0x24F and not ("Ѐ" <= c <= "ӿ") for c in x if c.isalpha())]
+        deg = {"Buyer name": alici_ad, "Sign A": BURC_RU.get(a, a.title()) if dil == "RU" else a.title(),
+               "Sign B": BURC_RU.get(b, b.title()) if dil == "RU" else b.title(),
+               "NAME 1": b1, "NAME 2": b2, "Message": e["mesaj"], "Name 1": ve.join(kiril),
+               "Suggested spelling": ve.join(oneri) if len(oneri) == len(kiril) else "",
+               "Suggested message": mesaj_temizle(e["mesaj"]), "Suggested shorter version": ""}
+        nolar = {SABLON_ISIM[c] for c, _ in s1 + s2 if c in SABLON_ISIM} | {SABLON_MESAJ[c] for c, _ in sm if c in SABLON_MESAJ}
+        if e["eksik_soru"]:
+            nolar.add(5)
+        for c, x in s1 + s2:
+            if c not in SABLON_ISIM:
+                elle.append(f"isimde {x}: uygun sablon yok, Serdar elle yazar")
+        for n_ in sorted(nolar) + [1, 6]:
+            secilen.setdefault(n_, deg)
         md += ["", f"## Kalem {k['sku']} x{k['qty']}", "",
                f"| alan | deger |", "|---|---|",
                f"| cift | {a.title()} + {b.title()} |", f"| renk | {ED_AD.get(k['ed'], k['ed'])} |", f"| boy | {k['size']} |",
@@ -232,17 +285,26 @@ def kart(receipt, kalemler, sablonlar, kanal_notu=""):
             sorunlar.append(f"taninmayan alan: {e['eslesmeyen']}")
         md += ["**Dogrulama:** " + ("TAMAM (3 alan)" if not sorunlar else "ELLE KONTROL"), ""] + [f"- {x}" for x in sorunlar]
         md += ["", "- Font kapsami: assets/fonts (Cinzel / EB Garamond) bu dalda yok; alfabe + emoji kurali uygulandi."]
-    no = next((SABLON_SORUN[c] for c in ("UZUN_ISIM", "KIRIL_ISIM", "ALFABE_ISIM", "KARAKTER", "EMOJI", "UZUN_MESAJ")
-               if c in tum_kod), 1)
-    ilk = eslestir(kalemler[0]) if kalemler else {"isim1": "", "isim2": "", "mesaj": ""}
-    deg = {"isim1": ilk["isim1"], "isim2": ilk["isim2"], "mesaj": ilk["mesaj"], "name1": ilk["isim1"],
-           "name2": ilk["isim2"], "message": ilk["mesaj"], "ad": alici_ad, "name": alici_ad, "buyer": alici_ad,
-           "siparis": rid, "order": rid}
-    metin = sablonlar.get((no, dil)) or (sablonlar.get((no, "EN")) if dil == "RU" else None)
-    md += ["", f"## Musteri mesaji (GONDERILMEDI) — sablon {no} ({dil})", ""]
-    if metin:
-        md += ["```", sablon_doldur(metin, deg), "```"]
-    else:
-        md += [f"Sablon dosyasi yok ya da sablon {no}/{dil} bulunamadi: Drive TEMP/SIPARIS_ISIM/MUSTERI_MESAJLARI.md "
-               "(AstroLove_Kisisel_Musteri_Mesajlari_20260925.md) konmali."]
+    sorun_no = sorted(n_ for n_ in secilen if n_ not in (1, 6))
+    liste = sorun_no + [1]
+    md += ["", "## Musteri mesajlari (GONDERILMEDI, yalniz hazirlandi)", "",
+           "- Sablonlar: " + ", ".join(f"{n_} ({SABLON_AD[n_]})" for n_ in liste)
+           + ("" if sorun_no else " — sorun yok, yalniz yazim kontrolu"),
+           f"- **Sablon 6 (hatirlatma):** {_sure_notu(receipt)} tarihine kadar cevap yoksa gonderilir."]
+    md += [f"- {x}" for x in dict.fromkeys(elle)]
+    if not sablonlar:
+        md += ["", "Sablon dosyasi okunamadi: Drive TEMP/SIPARIS_ISIM/MUSTERI_MESAJLARI.md"]
+    for n_ in liste + [6]:
+        metin = sablonlar.get((n_, dil)) or sablonlar.get((n_, "EN"))
+        md += ["", f"### Sablon {n_}: {SABLON_AD[n_]} ({dil})"
+               + (" — sorunlar cozulunce son hal ile" if n_ == 1 and sorun_no else "")
+               + (f" — {_sure_notu(receipt)} sonrasi" if n_ == 6 else ""), ""]
+        if metin:
+            dolu = sablon_doldur(metin, secilen[n_])
+            md += ["```", dolu, "```"]
+            kalan = sorted(set(re.findall(r"\[[^\]\n]+\]", dolu)))
+            if kalan:
+                md.append(f"- Doldurulmadi (Serdar yazar): {', '.join(kalan)}")
+        else:
+            md.append(f"Sablon {n_}/{dil} dosyada bulunamadi.")
     return "\n".join(md) + "\n", sorted(set(tum_kod))
