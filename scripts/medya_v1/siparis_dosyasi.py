@@ -296,7 +296,7 @@ class EdisyonPoster:
             'kaynak_px': list(Image.open(yol).size), 'poster_px': list(p1.size),
             'olcek': olcek, 'olcek_kapisi': olcek_kapi, 'leke_kapisi': leke,
             'olcum': {a: o.get(a) for a in ('isim_bant', 'isim_govde', 'sembol_bant',
-                                            'sembol', 'tag_bant')},
+                                            'sembol', 'tag_bant', 'sol_isim', 'sag_isim')},
             'olcum_duzeltme': duz, 'kilit': {'bosluk': kilit['bosluk'], 'cap': kilit['cap']},
             'temiz_ara_kapisi': s0['temiz_ara_kapisi'], 'kalinti_kapisi': kapi0,
             'sembol_kapisi': sk, 'punto_2400': bi0['punto'], 'punto_hedef': bi1['punto'],
@@ -796,7 +796,16 @@ def kapi_sonucu(kapilar):
 def kontrol_paketi(cik, baski, bi, ek, ana_ad, sonek=''):
     kon = cik / 'KONTROL'; kon.mkdir(parents=True, exist_ok=True)
     o = bi['olcum']
-    isim_x = [o['sembol'][0][0] - 60, o['sembol'][1][1] + 60] if o.get('sembol') else [0, 2400]
+    # Kirpim penceresi ISIMLERIN kutusundan alinir. 25 Eyl olcumu: pencere
+    # sembollerden turetildiginde isimler sembollerden genis oldugu icin
+    # "EMILY"nin E'si ve "JAMES"in S'si disarida kaliyordu.
+    if o.get('sol_isim') and o.get('sag_isim'):
+        isim_x = [o['sol_isim'][0] - 80, o['sag_isim'][1] + 80]
+    elif o.get('sembol'):
+        isim_x = [o['sembol'][0][0] - 200, o['sembol'][1][1] + 200]
+    else:
+        isim_x = [0, 2400]
+    isim_x = [max(isim_x[0], 0), isim_x[1]]
     d = {}
     try:
         d['isim'] = bant_kirpim(baski, o['isim_bant'], isim_x, f'ISIM_BANDI_x3{sonek}.jpg', kon)
