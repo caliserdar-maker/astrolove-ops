@@ -30,6 +30,10 @@ ORTAK = ["personalized couple", "custom couple print", "zodiac couple print",
          "couple names print", "zodiac couple gift", "astrology wall art",
          "anniversary gift", "star sign print", "giclee print"]
 YASAK_KELIME = ["archival", "acid-free", "museum", "studio", "студи"]
+# Serdar onayi 25 Eyl (kaynakli iddialar): bu kelimeler YALNIZ asagidaki onayli cumlelerde serbest.
+IZINLI_CUMLE = ["- Hahnemühle Photo Rag, 308 gsm, 100% cotton, acid-free, matte finish",
+                "- Giclée print with pigment-based archival inks",
+                "Hahnemühle rates Photo Rag as museum quality (ISO 9706)."]
 UZUN_TIRE = ["—", "–"]          # em dash, en dash
 
 BASLIK = ("{A} and {B} Zodiac Wall Art, Personalized Couple Print with Names and Message, "
@@ -47,10 +51,10 @@ THE ARTWORK
 The {A} and {B} fusion symbol is original AstroLove artwork. Your names sit under the two small signs, and your message appears below them.
 
 PAPER AND PRINT
-- Hahnemühle Photo Rag, 308 gsm, 100% cotton, matte finish
-- Giclée print
+- Hahnemühle Photo Rag, 308 gsm, 100% cotton, acid-free, matte finish
+- Giclée print with pigment-based archival inks
 - Unframed, ready for the frame of your choice
-The gold look is a printed color. It is not metallic foil or raised ink. Colors may vary slightly between screens and paper.
+Hahnemühle rates Photo Rag as museum quality (ISO 9706). The gold look is a printed color. It is not metallic foil or raised ink. Colors may vary slightly between screens and paper.
 
 5 COLORS
 Midnight Blue, Deep Black, Champagne Ivory, Pure White and Warm Parchment. Choose yours in the Color menu.
@@ -80,10 +84,10 @@ RU_GOVDE = """Именной постер для пары со знаками з
 Символ объединяет знаки {A} и {B} в оригинальном рисунке AstroLove. Имена расположены под двумя небольшими знаками, а ваша надпись напечатана ниже.
 
 БУМАГА И ПЕЧАТЬ
-- Hahnemühle Photo Rag, 308 г/м², 100% хлопок, матовая поверхность
-- Печать жикле
+- Hahnemühle Photo Rag, 308 г/м², 100% хлопок, бескислотная бумага, матовая поверхность
+- Печать жикле пигментными архивными чернилами
 - Без рамы, можно оформить в раму на ваш выбор
-Золотистый эффект создается при печати. Это не металлическая фольга и не рельефная печать. Оттенки на экране и на бумаге могут немного отличаться.
+По оценке Hahnemühle, бумага Photo Rag соответствует музейному качеству (ISO 9706). Золотистый эффект создается при печати. Это не металлическая фольга и не рельефная печать. Оттенки на экране и на бумаге могут немного отличаться.
 
 5 ЦВЕТОВ
 Midnight Blue, Deep Black, Champagne Ivory, Pure White и Warm Parchment. Выберите цвет в меню Color.
@@ -206,6 +210,8 @@ def kontrol(m):
     for t in UZUN_TIRE:
         if t in metin:
             h.append(f"uzun tire var ({t!r})")
+    for c in IZINLI_CUMLE:                        # onayli cumleler disinda yasak kelime aranir
+        metin = metin.replace(c, " ")
     dusuk = metin.lower()
     for k in YASAK_KELIME:
         if k in dusuk:
