@@ -215,13 +215,12 @@ jobs:
               echo "::error title=ISIM_BEKLIYOR ${rid}::Kisisellestirmeli siparis ${rid} Prodigi'ye GONDERILMEDI. Kart: https://drive.google.com/file/d/${fid}/view"
             done < _out/ISIM_YENI.txt
           fi
+      # Artifact'ta musteri verisi YOK (kart, paket/adres, STATE/receipt yalniz Drive'da): yalniz SKU haritasi.
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:
           name: pod-order-router
-          path: |
-            _out/
-            _work/state.csv
+          path: _out/PRODIGI_SKU_HARITA.json
           if-no-files-found: ignore
           retention-days: 30
       - if: ${{ always() }}
