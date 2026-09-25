@@ -1,0 +1,119 @@
+{
+ "ozellik_yeni": {
+  "codec": "h264 (High)",
+  "pix": true,
+  "wh": "1080x1350",
+  "fps": "30"
+ },
+ "sure": "00:00:11.20",
+ "kare": 336,
+ "gecisler": [
+  {
+   "no": 1,
+   "yon": "E->N",
+   "bas_kare": 6,
+   "bas_sn": 0.2,
+   "bit_kare": 12,
+   "sure_5_95_sn": 0.233,
+   "pencere_bas_kare": 4,
+   "pencere_sn": 0.4
+  },
+  {
+   "no": 2,
+   "yon": "N->E",
+   "bas_kare": 48,
+   "bas_sn": 1.6,
+   "bit_kare": 54,
+   "sure_5_95_sn": 0.233,
+   "pencere_bas_kare": 46,
+   "pencere_sn": 0.4
+  },
+  {
+   "no": 3,
+   "yon": "E->N",
+   "bas_kare": 90,
+   "bas_sn": 3.0,
+   "bit_kare": 96,
+   "sure_5_95_sn": 0.233,
+   "pencere_bas_kare": 88,
+   "pencere_sn": 0.4
+  },
+  {
+   "no": 4,
+   "yon": "N->E",
+   "bas_kare": 132,
+   "bas_sn": 4.4,
+   "bit_kare": 138,
+   "sure_5_95_sn": 0.233,
+   "pencere_bas_kare": 130,
+   "pencere_sn": 0.4
+  },
+  {
+   "no": 5,
+   "yon": "E->N",
+   "bas_kare": 174,
+   "bas_sn": 5.8,
+   "bit_kare": 180,
+   "sure_5_95_sn": 0.233,
+   "pencere_bas_kare": 172,
+   "pencere_sn": 0.4
+  },
+  {
+   "no": 6,
+   "yon": "N->E",
+   "bas_kare": 216,
+   "bas_sn": 7.2,
+   "bit_kare": 222,
+   "sure_5_95_sn": 0.233,
+   "pencere_bas_kare": 214,
+   "pencere_sn": 0.4
+  },
+  {
+   "no": 7,
+   "yon": "E->N",
+   "bas_kare": 258,
+   "bas_sn": 8.6,
+   "bit_kare": 264,
+   "sure_5_95_sn": 0.233,
+   "pencere_bas_kare": 256,
+   "pencere_sn": 0.4
+  },
+  {
+   "no": 8,
+   "yon": "N->E",
+   "bas_kare": 300,
+   "bas_sn": 10.0,
+   "bit_kare": 306,
+   "sure_5_95_sn": 0.233,
+   "pencere_bas_kare": 298,
+   "pencere_sn": 0.4
+  }
+ ],
+ "sabit_uzunluklar": [
+  4,
+  30,
+  30,
+  30,
+  30,
+  30,
+  30,
+  30,
+  26
+ ],
+ "sabit_gurultu_maks": 0.0819,
+ "dikis_sabit_kare": 30,
+ "dongu_dikisi_fark": 0.0828,
+ "iki_durum_artik_maks": 1.699,
+ "PASS": {
+  "ozellik": true,
+  "ilk_gecis_0.20sn": true,
+  "gecis_sayisi_8": true,
+  "aralik_1.4sn": true,
+  "pencere_12kare": true,
+  "sabit_30kare": false,
+  "dongu_dikisi": true,
+  "iki_durum": true,
+  "periyot_kati": true
+ },
+ "SONUC": "FAIL"
+}
