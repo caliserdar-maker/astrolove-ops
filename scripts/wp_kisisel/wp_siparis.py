@@ -101,13 +101,18 @@ def murekkep(baski, plate, ed, hayalet="birak", isaret="uzaklik"):
         poz, neg, sifir = var & (pr > 0), var & (pr < 0), var & (pr == 0)
     fark = f if hayalet == "gecir" else f * poz[..., None]
     alfa = (np.abs(fark).max(2) > 0).astype(np.float32)
+    # OLCUM her zaman POZITIF maskeden yapilir: hayalet ayari neyin AKTARILDIGINI
+    # belirler, neyin OLCULDUGUNU degil. (Yerel olcum 25 Eyl: plate'in isim
+    # satirindaki %0,02 artik negatif tarafta; aktarima katilirsa kume olcumu
+    # 3 yerine 2 kume buluyor.)
+    alfa_olcum = poz.astype(np.float32)
     tani = {"isaret": isaret, "poz_px": int(poz.sum()), "neg_px": int(neg.sum()),
             "yonsuz_px": int(sifir.sum()),
             "neg_kutu": [int(v) for v in V2.bbox(neg)] if neg.any() else None,
             "neg_maks": round(float(np.abs(f).max(2)[neg].max()), 1) if neg.any() else 0.0}
     if zemin is not None:
         tani["zemin_bgr"] = [round(float(v), 1) for v in zemin]
-    return fark, alfa, tani
+    return fark, alfa, alfa_olcum, tani
 
 
 def halka_bandi():
@@ -260,14 +265,14 @@ def main(argv=None):
     olcum = {}
     for ed in ed_list:
         baski, plate, bn, pn = kaynak_oku(a.baski, a.plate, ed)
-        fark, alfa, tani = murekkep(baski, plate, ed, a.hayalet, a.isaret)
-        kutu, bilgi = kutular_olc(alfa, bool(a.halka))
+        fark, alfa, alfa_olcum, tani = murekkep(baski, plate, ed, a.hayalet, a.isaret)
+        kutu, bilgi = kutular_olc(alfa_olcum, bool(a.halka))
         olcum[ed] = {"baski": bn, "plate": pn, "kutular": kutu, "kume": bilgi,
-                     "tani_murekkep": tani, "murekkep_px": int((alfa > 0).sum())}
+                     "tani_murekkep": tani, "murekkep_px": int((alfa_olcum > 0).sum())}
         log(f"OLCUM {ed}: kume={json.dumps(bilgi)}")
         log(f"       tani={json.dumps(tani)}")
         log(f"       kutular={json.dumps(kutu)} murekkep_px={olcum[ed]['murekkep_px']}")
-        del baski, plate, fark, alfa
+        del baski, plate, fark, alfa, alfa_olcum
     (cikti / "WP_SIPARIS_OLCUM.json").write_text(json.dumps(olcum, indent=1))
     if len(ed_list) > 1:
         sap = {k: int(np.abs(np.asarray([olcum[e]["kutular"][k] for e in ed_list]) -
@@ -282,10 +287,10 @@ def main(argv=None):
     urun, rapor = {}, []
     for ed in ed_list:
         baski, plate, _, _ = kaynak_oku(a.baski, a.plate, ed)
-        fark, alfa, tani = murekkep(baski, plate, ed, a.hayalet, a.isaret)
+        fark, alfa, _alfa_o, tani = murekkep(baski, plate, ed, a.hayalet, a.isaret)
         uret(ed, baski, plate, fark, alfa, a.temiz, a.plakalar or a.temiz, cikti, a.cift,
              olcum[ed]["kutular"], a.aktarim, urun, rapor, a.halka, bant, tani)
-        del baski, plate, fark, alfa
+        del baski, plate, fark, alfa, _alfa_o
     (cikti / "WP_SIPARIS_URETIM.json").write_text(json.dumps(rapor, indent=1))
     return olcum, rapor, urun
 
