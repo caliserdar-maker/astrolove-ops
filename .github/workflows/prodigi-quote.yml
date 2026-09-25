@@ -23,9 +23,9 @@ on:
         required: false
         default: ""
       mode:
-        description: "pilot = pilot_skus.csv (US) | hpr_sizes = hpr_sizes.txt (US + DE) | ship_everywhere = 8 ulke Standard kargo (18x24) | inserts = branded insert fiyat/ozellik (8 tip, US + DE) | maliyet_api = 16 HPR boy x 7 ulke Budget/Standard + net (DIJITAL_78)"
+        description: "pilot = pilot_skus.csv (US) | hpr_sizes = hpr_sizes.txt (US + DE) | ship_everywhere = 8 ulke Standard kargo (18x24) | inserts = branded insert fiyat/ozellik (8 tip, US + DE) | maliyet_api = 16 HPR boy x 7 ulke Budget/Standard + net (DIJITAL_78) | ekstra_tesis = kartpostal/sticker: canli siparis tesis + fatura kalemi (yalniz GET) + ECB kuru"
         type: choice
-        options: [pilot, hpr_sizes, ship_everywhere, inserts, maliyet_api]
+        options: [pilot, hpr_sizes, ship_everywhere, inserts, maliyet_api, ekstra_tesis]
         default: pilot
 
 concurrency:
@@ -95,6 +95,15 @@ jobs:
             python scripts/prodigi/prodigi_inserts_quote.py --self-test
             python scripts/prodigi/prodigi_inserts_quote.py --out-dir out
             cat out/PRODIGI_INSERTS_QUOTE.md >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          if [ "$MODE" = "ekstra_tesis" ]; then
+            # Yalniz GET /orders (+ ECB kuru). Musteri verisi yazilmaz; cikti TEMP/PRODIGI.
+            python scripts/prodigi/prodigi_ekstra_tesis.py --self-test
+            python scripts/prodigi/prodigi_ekstra_tesis.py --out-dir out > /dev/null
+            cat out/PRODIGI_EKSTRA_TESIS.md >> "$GITHUB_STEP_SUMMARY"
+            head -40 out/PRODIGI_EKSTRA_TESIS.md
+            rclone copy out "gdrive:ASTROLOVE/TEMP/PRODIGI" --include "PRODIGI_EKSTRA_TESIS.*" -q
             exit 0
           fi
           if [ "$MODE" = "maliyet_api" ]; then
