@@ -404,10 +404,13 @@ def fark_olc(a, plate):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--parca', default='1/1', help='i/n - is listesinin i. dilimi')
+    ap.add_argument('--yenile', action='store_true',
+                    help='PLATES\'te olanlari da yeniden uret (slogan temizligi gibi '
+                         'icerik degisikliginden sonra gerekir)')
     a = ap.parse_args()
     i, n = (int(x) for x in a.parca.split('/'))
     isler, sayac = is_listesi()
-    var = mevcut_plateler()
+    var = set() if a.yenile else mevcut_plateler()
     kalan = [(r, b) for r, b in isler if f'{RENK_ED[r].upper()}_{b}.png' not in var]
     benim = [x for j, x in enumerate(kalan) if j % n == i - 1]
     log(f'toplam {len(isler)} plate, {len(var)} tanesi PLATES\'te var, '
