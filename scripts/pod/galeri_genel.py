@@ -31,6 +31,12 @@ sys.path.insert(0, str(KOK.parent / "etsy"))
 REF = "4570143815"
 PILOT = "4570110641"
 ONAY = "GALERI_GENEL"
+# Eski genel kartlar sablon sirasiyla (docs/POD_LISTING_TEMPLATE.md EK 3): 6 Paper & Quality (kagit),
+# 7 Size Guide (olcu, 5x7/15 boy), 8 Shipping & Care (teslimat). 25 Eyl oku #1: hash tek basina ayirt edemedi
+# (ayni tasarim sablonundaki kartlar/sahneler kucuk resimde benzer), 3 ornek seritte gozle dogrulandi.
+ESKI_KART_RANK = [6, 7, 8]
+BEKLENEN_SAYI = 13
+BEKLENEN_BAGLI = (9, 10, 11, 12, 13)
 GENEL = ["GENEL_1_kisisellestirme.jpg", "GENEL_2_olcu.jpg", "GENEL_3_kagit.jpg", "GENEL_4_siparis.jpg"]
 csv.field_size_limit(10 ** 8)
 
@@ -120,11 +126,16 @@ def oku(a):
         en_iyi = max(hs, key=lambda x: sum(1 for y in hs if hamming(x, y) <= 6))
         oran = sum(1 for y in hs if hamming(en_iyi, y) <= 6) / len(gecerli)
         rank_ortak[r] = round(oran, 2)
-    ortak_ranklar = [r for r, o in rank_ortak.items() if o >= 0.6]
+    ortak_ranklar = list(ESKI_KART_RANK)
 
     plan, riskler = {}, []
     for lid, v in gecerli.items():
+        bagli_r = tuple(g["rank"] for g in v["gorseller"] if g["bagli"])
+        if len(v["gorseller"]) != BEKLENEN_SAYI or bagli_r != BEKLENEN_BAGLI:
+            riskler.append(f"{lid}: yapi farkli ({len(v['gorseller'])} gorsel, bagli {bagli_r})")
         sil = [g for g in v["gorseller"] if g["rank"] in ortak_ranklar]
+        if any((g["w"] or 0) <= (g["h"] or 0) for g in sil):
+            riskler.append(f"{lid}: silinecek kartlardan biri yatay degil (kart olmayabilir)")
         if any(g["bagli"] for g in sil):
             riskler.append(f"{lid}: silinecek gorselde renk bagi var")
         kalan = len(v["gorseller"]) - len(sil) + 4
@@ -137,8 +148,9 @@ def oku(a):
                      "bagli_ids": [g["id"] for g in v["gorseller"] if g["bagli"]], "sonuc_sayi": kalan}
     if len(yapi) != 1:
         riskler.append(f"yapi farkli: {len(yapi)} desen -> " + "; ".join(f"{k}: {len(v)} ilan" for k, v in yapi.items()))
-    if len(ortak_ranklar) != 3:
-        riskler.append(f"ortak (genel) kart sayisi 3 degil: ranklar {ortak_ranklar} (oranlar {rank_ortak})")
+    zayif = [r for r in ESKI_KART_RANK if rank_ortak.get(r, 0) < 0.9]
+    if zayif:
+        riskler.append(f"eski kart ranklarinda ilanlar arasi ortaklik < %90: {zayif} ({rank_ortak})")
     eksik = [k for k, v in kayit.items() if "hata" in v]
     if eksik:
         riskler.append(f"yedegi olmayan ilan: {eksik}")
