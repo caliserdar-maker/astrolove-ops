@@ -165,9 +165,8 @@ class Poster:
         self.bg = Image.open(OUT / 'hazir' / 'bg.png')
         self.tavan = None                                       # Cancer-Libra referans boylari (ilk cagri)
 
-    def __call__(self, sayfa_png, sayfa_no, renk, oran, isimler, tagline, referans=False):
-        """cift_sayfa (Canva sayfa PNG, bayt) + sayfa no, renk, oran, isimler, tagline -> (poster, bilgi, sembol kirpimlari)."""
-        import giris_dogrula as gd
+    def sayfa_kur(self, sayfa_png, sayfa_no, renk, oran, referans=False):
+        """cift_sayfa (Canva sayfa PNG, bayt) + sayfa no, renk, oran -> sayfa baglami (olcum + temiz zemin)."""
         assert renk == 'blue' and oran == ORAN, 'bu adim yalniz Blue 4x5'
         assert referans or self.tavan, 'once Cancer-Libra referansi uretilmeli (boy tavani)'
         t0 = time.time()
@@ -184,15 +183,26 @@ class Poster:
         ilk = {'cap': dict(s['cap']), 'tag_cap': s['tag_cap']}
         s['cap'] = {y: min(s['cap'][y], self.tavan['cap'][y]) for y in ('sol', 'sag')}   # ust sinir: Cancer-Libra; sigmazsa D kurali kucultur
         s['tag_cap'] = min(s['tag_cap'], self.tavan['tag_cap']); s['tag_sinir'] = min(s['tag_sinir'], self.tavan['tag_sinir'])
+        return {'sayfa': sayfa_no, 's': s, 'S': S, 'm': m, 'o': o, 'duz': duz, 'ilk': ilk, 'sn': round(time.time() - t0, 1)}
+
+    def uret(self, B, isimler, tagline):
+        """sayfa baglami + isimler + tagline -> (poster, bilgi, sembol kirpimlari)."""
+        import giris_dogrula as gd
+        t0 = time.time(); s, S, o = B['s'], B['S'], B['o']
         r = gd.siparis_dogrula(isimler[0], isimler[1], tagline, None)
         sol, sag = r['sol']['deger'], r['sag']['deger']
         p, bilgi, merkez, x, yeni = self.p16.poster_kur(s, S, {'sol': sol, 'sag': sag}, tagline)
         kapi = self.p16.blok_kapisi(p, S, s, yeni)
-        sk, kirp = sembol_kapisi(p, S, s, merkez, m, SEMBOL_ESIK)
-        return p, {'sayfa': sayfa_no, 'olcum': {k: o.get(k) for k in ('isim_bant', 'isim_govde', 'sembol_bant', 'sembol', 'tag_bant')},
-                   'olcum_duzeltme': duz, 'cap_ilk': ilk, 'cap_son': {'cap': s['cap'], 'tag_cap': s['tag_cap']},
+        sk, kirp = sembol_kapisi(p, S, s, merkez, B['m'], SEMBOL_ESIK)
+        return p, {'sayfa': B['sayfa'], 'olcum': {k: o.get(k) for k in ('isim_bant', 'isim_govde', 'sembol_bant', 'sembol', 'tag_bant')},
+                   'olcum_duzeltme': B['duz'], 'cap_ilk': B['ilk'], 'cap_son': {'cap': s['cap'], 'tag_cap': s['tag_cap']},
                    'bg_hiza': s['bg_hiza'], 'temiz_ara_kapisi': s['temiz_ara_kapisi'], 'kalinti_kapisi': kapi, 'sembol_kapisi': sk,
-                   'olcek': bilgi['olcek'], 'punto': bilgi['punto'], 'poster_px': list(p.size), 'sure_sn': round(time.time() - t0, 1)}, kirp
+                   'olcek': bilgi['olcek'], 'punto': bilgi['punto'], 'poster_px': list(p.size),
+                   'sure_sn': round(B['sn'] + time.time() - t0, 1)}, kirp
+
+    def __call__(self, sayfa_png, sayfa_no, renk, oran, isimler, tagline, referans=False):
+        """cift_sayfa (Canva sayfa PNG, bayt) + sayfa no, renk, oran, isimler, tagline -> (poster, bilgi, sembol kirpimlari)."""
+        return self.uret(self.sayfa_kur(sayfa_png, sayfa_no, renk, oran, referans), isimler, tagline)
 
 # ------------------------------------------------------------------ sahneye oturtma
 def yer_olc(sahne, poster, kaba):
@@ -271,6 +281,134 @@ def yanyana(sol, sag, ad):
     a = sol.resize((round(sol.width * H / sol.height), H), Image.LANCZOS); b = sag.resize((round(sag.width * H / sag.height), H), Image.LANCZOS)
     c = Image.new('RGB', (a.width + b.width + 30, H), 'white'); c.paste(a, (0, 0)); c.paste(b, (a.width + 30, 0))
     c.save(CIK / ad, quality=92)
+
+# ------------------------------------------------------------------ 77 CIFT (Serdar onayi 25 Eyl: 08ceb2f kurallari)
+IN = ('ISABELLA', 'NOAH'); TAG_IN = "I'd Choose You in Every Lifetime"
+AM = ('ALEXANDER', 'MIA'); AM_TAG_YOL = f'{KP}/A1_77_AM_TAGLINE.txt'   # video oturumunun raporladigi metin (tek satir)
+
+def am_tagline():
+    try:
+        rc('copy', AM_TAG_YOL, str(W)); t = (W / 'A1_77_AM_TAGLINE.txt').read_text(encoding='utf-8').strip()
+        return t or None
+    except Exception:                                           # noqa: BLE001
+        return None
+A77 = 'gdrive:ASTROLOVE/TEMP/POD_KISISEL/A1_77'
+LISTE77 = f'{KP}/A1_77_LISTE.json'          # {"sayfa": {"1": imzali_url, ...}}; serit isi sonunda siler
+NCC_ESIK = 0.95                             # sayfa -> cift dogrulamasi (POD MB 8x10)
+
+def kapilar(b):
+    return {'kalinti': b['kalinti_kapisi']['gecti'], 'temiz_zemin': b['temiz_ara_kapisi']['gecti'], 'sembol': b['sembol_kapisi']['gecti']}
+
+def uret77(parca, toplam, mod='tam'):
+    """mod 'tam': EJ + IN (+ AM, metin Drive'da varsa) + kapak + kart09. mod 'am': yalniz AM, onceki kosuda PASS olan ciftler."""
+    O = W / 'A1_77'; O.mkdir(exist_ok=True); R = {'parca': parca, 'toplam_is': toplam, 'mod': mod, 'cift': {}}
+    tag_am = am_tagline(); R['am_tagline'] = tag_am
+    assert mod == 'tam' or tag_am, 'AM tagline metni Drive\'da yok: ' + AM_TAG_YOL
+    rc('copy', LISTE77, str(W)); L = json.loads((W / 'A1_77_LISTE.json').read_text())['sayfa']
+    ciftler = sorted(x.strip('/') for x in rc('lsf', POD, '--dirs-only').split())
+    assert len(ciftler) == 78 and len(L) == 78, (len(ciftler), len(L))
+    no = {c: i + 1 for i, c in enumerate(ciftler)}
+    benim = [c for c in ciftler if c != REF_CIFT][parca::toplam]
+    if mod == 'am':                                             # yalniz onceki kosuda uretilmis (PASS) ciftler
+        uretilmis = set(x.strip('/') for x in rc('lsf', A77, '--dirs-only').split())
+        benim = [c for c in benim if c in uretilmis]
+    sayfa_b = {}
+    for c in [REF_CIFT] + benim:
+        u = L[str(no[c])]; maskele(u)
+        try: sayfa_b[c] = indir(u)
+        except Exception as e:                                    # noqa: BLE001  cift FAIL olur, is durmaz
+            if c == REF_CIFT: raise
+            sayfa_b[c] = None; log(f'{c}: sayfa indirilemedi {repr(e)[:120]}')
+    log(f'parca {parca}/{toplam}: {len(benim)} cift, sayfalar indi')
+    kisisel_hazirla(); P = Poster()
+    B = P.sayfa_kur(sayfa_b[REF_CIFT], no[REF_CIFT], 'blue', ORAN, referans=True)
+    cl, clb, _ = P.uret(B, ISIM, TAG)
+    assert all(kapilar(clb).values()), ('Cancer-Libra referansi kapidan gecmedi', kapilar(clb))
+    rc('copy', f'{DR}/_girdi/etsy/REF_4570143815', str(W / 'ref'), '--include', '*.jpg')
+    REF = sorted((W / 'ref').glob('[01]*.jpg'))
+    sahne = {ad: Image.open(REF[i]).convert('RGB') for ad, (i, _) in SAHNE.items()}
+    yer = {'kapak': kapak_yer(sahne['kapak'], cl, aciklik_olc(sahne['kapak'])), 'kart09': yer_olc(sahne['kart09'], cl, SAHNE['kart09'][1])}
+    R['yer'] = yer; R['referans_sn'] = round(time.time() - T0, 1); log('referans + yer hazir', yer)
+    g = lambda im: np.asarray(im.convert('L').resize((160, 200), Image.BOX)).astype(np.float64)
+    t_bas = time.time()
+    for i, c in enumerate(benim):
+        ti = time.time(); r = {'sayfa': no[c]}
+        try:
+            if sayfa_b[c] is None: raise RuntimeError('Canva sayfasi indirilemedi')
+            rc('copy', f'{POD}/{c}/{RENK}/8x10.jpg', str(W / 'pod' / c))
+            r['sayfa_pod_ncc'] = round(ncc(g(Image.open(io.BytesIO(sayfa_b[c]))), g(Image.open(W / 'pod' / c / '8x10.jpg'))), 4)
+            B = P.sayfa_kur(sayfa_b[c], no[c], 'blue', ORAN)
+            isler = [('AM', AM, tag_am)] if mod == 'am' else [('EJ', ISIM, TAG), ('IN', IN, TAG_IN)] + ([('AM', AM, tag_am)] if tag_am else [])
+            cikti = {k: P.uret(B, isim, tag) for k, isim, tag in isler}
+            r['kapi'] = {k: kapilar(b) for k, (_, b, _) in cikti.items()}; r['kapi']['sayfa_eslesme'] = r['sayfa_pod_ncc'] >= NCC_ESIK
+            r['gecti'] = r['kapi']['sayfa_eslesme'] and all(all(r['kapi'][k].values()) for k in cikti)
+            r['olcum'] = {k: {x: b[x] for x in ('punto', 'olcek', 'olcum_duzeltme', 'sembol_kapisi', 'temiz_ara_kapisi', 'kalinti_kapisi')} for k, (_, b, _) in cikti.items()}
+            if r['gecti']:
+                d = O / c; d.mkdir(exist_ok=True)
+                for k, (p, _, kk) in cikti.items():
+                    p.save(d / f'POSTER_{k}.png'); sembol_gorseli(kk, f'../A1_77/{c}/SEMBOL_{k}.jpg')
+                if 'EJ' in cikti:
+                    ej = cikti['EJ'][0]
+                    yerlestir(sahne['kapak'], ej, yer['kapak']).save(d / 'KAPAK.jpg', quality=95)
+                    yerlestir(sahne['kart09'], ej, yer['kart09']).save(d / 'KART09.jpg', quality=95)
+                (d / f'RAPOR_{mod}.json').write_text(json.dumps(r, ensure_ascii=False, indent=1, default=str))
+                rc('copy', str(d), f'{A77}/{c}')
+        except Exception as e:                                    # noqa: BLE001
+            r['gecti'] = False; r['hata'] = repr(e)[:400]
+        r['sn'] = round(time.time() - ti, 1); R['cift'][c] = r
+        n = i + 1; gecen = time.time() - t_bas; kalan = gecen / n * (len(benim) - n)
+        log(f'[{n}/{len(benim)}] {c} {"PASS" if r["gecti"] else "FAIL"} {r["sn"]}s | gecen {gecen / 60:.1f} dk, kalan {kalan / 60:.1f} dk, %{100 * n / len(benim):.0f}')
+    R['toplam_sn'] = round(time.time() - T0, 1)
+    (O / f'parca_{mod}_{parca}.json').write_text(json.dumps(R, ensure_ascii=False, indent=1, default=str))
+    rc('copy', str(O / f'parca_{mod}_{parca}.json'), f'{A77}/_rapor')
+
+def serit77():
+    from PIL import ImageDraw
+    t0 = time.time(); O = W / 'serit'; O.mkdir(exist_ok=True)
+    try:
+        rc('copy', f'{A77}/_rapor', str(O / '_rapor'))
+        R = {}; parca = []
+        RA = {}
+        for f in sorted((O / '_rapor').glob('parca_tam_*.json')):
+            d = json.loads(f.read_text()); parca.append({'parca': d['parca'], 'toplam_sn': d['toplam_sn'], 'referans_sn': d.get('referans_sn')}); R.update(d['cift'])
+        for f in sorted((O / '_rapor').glob('parca_am_*.json')):
+            RA.update(json.loads(f.read_text())['cift'])
+        rc('copy', A77, str(O / 'c'), '--include', '*/KAPAK.jpg', '--include', '*/POSTER_IN.png', '--include', '*/POSTER_AM.png', '--include', '*/SEMBOL_EJ.jpg', '--transfers', '16')
+        ad = sorted(R); gec = [c for c in ad if R[c]['gecti']]; kal = [c for c in ad if not R[c]['gecti']]
+        def izgara(dosya, w, h, sut, cikti):
+            sat = -(-len(ad) // sut); E = 26; T = Image.new('RGB', (sut * (w + 8) + 8, sat * (h + E + 8) + 8), 'white'); dr = ImageDraw.Draw(T)
+            for k, c in enumerate(ad):
+                x, y = 8 + (k % sut) * (w + 8), 8 + (k // sut) * (h + E + 8); yol = O / 'c' / c / dosya
+                if R[c]['gecti'] and yol.exists():
+                    im = Image.open(yol).convert('RGB'); im.thumbnail((w, h), Image.LANCZOS); T.paste(im, (x + (w - im.width) // 2, y))
+                else:
+                    dr.rectangle([x, y, x + w, y + h], fill=(200, 200, 200)); dr.text((x + 10, y + h // 2), 'FAIL', fill=(180, 0, 0))
+                dr.text((x, y + h + 6), f'{R[c]["sayfa"]:02d} {c}', fill=(0, 0, 0))
+            T.save(O / cikti, quality=90); return cikti
+        cik = [izgara('KAPAK.jpg', 270, 338, 11, 'SERIT_a_KAPAK_77.jpg'), izgara('POSTER_IN.png', 240, 300, 11, 'SERIT_b_POSTER_IN_77.jpg'),
+               izgara('SEMBOL_EJ.jpg', 380, 432, 7, 'SERIT_c_SEMBOL_kaynak_vs_yeni_77.jpg')]
+        am_var = [c for c in ad if (O / 'c' / c / 'POSTER_AM.png').exists()]
+        if am_var: cik.append(izgara('POSTER_AM.png', 240, 300, 11, 'SERIT_d_POSTER_AM_77.jpg'))
+        sure = [R[c]['sn'] for c in gec]                         # olculmus sure: uretilen (PASS) ciftler
+        for c in RA:                                            # AM ayri kosuda uretildiyse kapisi da cift raporuna girer
+            R[c]['AM'] = {k: RA[c].get(k) for k in ('gecti', 'kapi', 'hata', 'sn')}
+        am_kal = [c for c in RA if not RA[c]['gecti']]
+        OZ = {'pass': len(gec), 'fail': len(kal), 'am_uretilen': len(am_var), 'am_fail': {c: RA[c].get('hata') or RA[c].get('kapi') for c in am_kal}, 'fail_liste': {c: R[c].get('hata') or R[c].get('kapi') for c in kal},
+              'cift_sn_ort': round(float(np.mean(sure)), 1), 'cift_sn_maks': max(sure), 'parca': parca,
+              'is_sn_maks': max(p['toplam_sn'] for p in parca), 'serit_sn': round(time.time() - t0, 1), 'seritler': cik}
+        (O / 'RAPOR_77.json').write_text(json.dumps({'ozet': OZ, 'cift': R}, ensure_ascii=False, indent=1, default=str))
+        for f in cik + ['RAPOR_77.json']: rc('copy', str(O / f), A77)
+        print(json.dumps(OZ, ensure_ascii=False, indent=1, default=str), flush=True)
+    finally:
+        try: rc('deletefile', LISTE77)
+        except Exception: pass                                    # noqa: BLE001
+
+if __name__ == '__main__' and sys.argv[1:2] == ['uret77']:
+    uret77(int(sys.argv[2]), int(sys.argv[3]), sys.argv[4] if len(sys.argv) > 4 else 'tam'); sys.exit(0)
+
+if __name__ == '__main__' and sys.argv[1:2] == ['serit77']:
+    serit77(); sys.exit(0)
+
 
 if __name__ == '__main__' and sys.argv[1:] == ['ham']:
     # yerel teshis icin: Canva sayfalarini ozel Drive klasorune kopyala (liste sonra silinir)
