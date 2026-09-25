@@ -67,6 +67,7 @@ jobs:
           ls _kis/assets/fonts/Cinzel.ttf _kis/assets/fonts/EBGaramond-Italic.ttf
 
       - name: Kaynak duvar kagitlari (salt okur)
+        if: ${{ !contains(github.event.head_commit.message, '[rapor]') }}
         env:
           MSG: ${{ github.event.head_commit.message }}
         run: |
@@ -100,12 +101,25 @@ jobs:
           du -sh _wp
 
       - name: Uretim + kapilar
+        if: ${{ !contains(github.event.head_commit.message, '[rapor]') }}
         run: |
           set -euo pipefail
           RAPOR=WP_KISISEL_RAPOR.json
           [ -f _mod ] && RAPOR=WP_KISISEL_RAPOR_EKSIK3.json
           python scripts/wp_kisisel/uret.py --girdi _wp --cikti _out \
             --kisisel _kis --isimler "$ISIMLER" --mesaj "$MESAJ" --rapor "$RAPOR"
+
+      - name: Rapor birlestir (yalniz [rapor])
+        if: ${{ contains(github.event.head_commit.message, '[rapor]') }}
+        run: |
+          set -euo pipefail
+          mkdir -p _rap
+          rclone copy "$CIKTI/WP_KISISEL_RAPOR.json" _rap -q
+          rclone copy "$CIKTI/WP_KISISEL_RAPOR_EKSIK3.json" _rap -q
+          python scripts/wp_kisisel/rapor_birlestir.py _rap
+          rclone copyto _rap/WP_KISISEL_RAPOR.json "$CIKTI/WP_KISISEL_RAPOR.json" -q
+          rclone deletefile "$CIKTI/WP_KISISEL_RAPOR_EKSIK3.json" || true
+          rclone lsf "$CIKTI" --format "psi" --separator " | " --files-only | sed 's/^/  - /'
 
       - name: Drive'a yaz
         if: ${{ always() }}
