@@ -1,0 +1,91 @@
+name: plate-uret
+
+# Medyan plate uretimi (Serdar onayi 25 Eyl 2026).
+# Her (edisyon, boy) icin 78 ciftin POD_PRINT dosyasinin piksel ortancasi
+# = yazisiz temiz zemin -> TEMP/SIPARIS_ISIM/PLATES/<EDISYON>_<BOY>.png
+#
+# Kapsam siniri: YALNIZ Drive (rclone) kimligi verilir. Etsy ve Prodigi
+# secret'lari bu workflow'a hic girmez. POD_PRINT SALT OKUNUR.
+# Tetik yalniz workflow_dispatch.
+#
+# PARALELLIK: is listesi `parca` matrisiyle bolunur; her matris isi ayri
+# runner'da koser, boylece her is 45 dk sinirinin altinda kalir. Olculen
+# maliyet (25 Eyl, kosu 36153249586): renk basina ~25 dk, 5 parca -> ~25 dk.
+# 3 parca ~42 dk verirdi; sinira fazla yakin oldugu icin 5 secildi.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Script'in okunacagi dal"
+        required: true
+        default: "siparis-baski-v1"
+      parca_sayisi:
+        description: "Kac paralel parca (matris bunu kullanmaz, yalniz script'e gecer)"
+        required: true
+        default: "5"
+
+concurrency: plate-uret
+
+jobs:
+  uret:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        parca: [1, 2, 3, 4, 5]
+
+    steps:
+      - name: Checkout (secilen dal)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+
+      - name: Python bagimliliklari
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet --upgrade pip
+          python -m pip install --quiet pillow opencv-python-headless numpy
+
+      - name: rclone kur
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          rclone version | head -1
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then
+            echo "HATA: RCLONE_CONF_B64 secret'i tanimli degil." >&2
+            exit 1
+          fi
+          mkdir -p ~/.config/rclone
+          umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+          echo "rclone.conf yazildi ($(wc -c < ~/.config/rclone/rclone.conf) bayt)."
+
+      - name: Disk durumu
+        run: df -h / | tail -1
+
+      - name: Plate uret (parca ${{ matrix.parca }})
+        env:
+          PARCA: ${{ matrix.parca }}
+          TOPLAM: ${{ inputs.parca_sayisi }}
+        run: |
+          set -euo pipefail
+          python scripts/medya_v1/plate_uret.py --parca "${PARCA}/${TOPLAM}"
