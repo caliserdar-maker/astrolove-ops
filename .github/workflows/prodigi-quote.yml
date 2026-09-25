@@ -23,9 +23,9 @@ on:
         required: false
         default: ""
       mode:
-        description: "pilot = pilot_skus.csv (US) | hpr_sizes = hpr_sizes.txt (US + DE) | ship_everywhere = 8 ulke Standard kargo (18x24) | inserts = branded insert fiyat/ozellik (8 tip, US + DE)"
+        description: "pilot = pilot_skus.csv (US) | hpr_sizes = hpr_sizes.txt (US + DE) | ship_everywhere = 8 ulke Standard kargo (18x24) | inserts = branded insert fiyat/ozellik (8 tip, US + DE) | maliyet_api = 16 HPR boy x 7 ulke Budget/Standard + net (DIJITAL_78)"
         type: choice
-        options: [pilot, hpr_sizes, ship_everywhere, inserts]
+        options: [pilot, hpr_sizes, ship_everywhere, inserts, maliyet_api]
         default: pilot
 
 concurrency:
@@ -95,6 +95,15 @@ jobs:
             python scripts/prodigi/prodigi_inserts_quote.py --self-test
             python scripts/prodigi/prodigi_inserts_quote.py --out-dir out
             cat out/PRODIGI_INSERTS_QUOTE.md >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          if [ "$MODE" = "maliyet_api" ]; then
+            # Yalniz POST /quotes (siparis yok). Cikti DIJITAL_78'e.
+            python scripts/prodigi/prodigi_maliyet_api.py --self-test
+            python scripts/prodigi/prodigi_maliyet_api.py --out-dir out
+            cat out/PRODIGI_MALIYET_API_OZET.md >> "$GITHUB_STEP_SUMMARY"
+            rclone copy out "gdrive:ASTROLOVE/TEMP/DIJITAL_78" --include "PRODIGI_MALIYET_API*" -q
+            rclone copy out/raw "gdrive:ASTROLOVE/TEMP/DIJITAL_78/PRODIGI_MALIYET_API_RAW" -q
             exit 0
           fi
           if [ "$MODE" = "ship_everywhere" ]; then
