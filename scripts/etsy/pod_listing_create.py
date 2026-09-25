@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
 POD (Prodigi poster) YENI ILAN olusturma: createDraftListing + 10 gorsel +
-Color(5) x Size(13) = 65 varyant + renk secenegine edisyon 01 karesi - 6 Eyl 2026.
+Color(5) x Size(16) = 80 varyant + renk secenegine edisyon 01 karesi - 6 Eyl 2026.
 SKU: POD-<burc3>_<burc3>-<edisyon2>-<boyut> (pod_sku.py; Etsy 32 karakter siniri).
 
 Kaynaklar:
   - baslik/tag/aciklama: docs/POD_LISTING_TEMPLATE.md (+ TITLE sablonu asagida)
-  - 13 boyut fiyati: scripts/etsy/pod_prices.csv (size,price; USD, tum edisyonlarda ayni); bos fiyat -> apply reddedilir
+  - 16 boyut fiyati: scripts/etsy/pod_prices.csv (size,price; USD, tum edisyonlarda ayni); bos fiyat -> apply reddedilir
   - gorseller: <images>/<PAIR>/<ED>/NN_*.jpg (Drive TEMP/POD_GALLERY/<PAIR>, 78 cift)
   - EK 3 (6 Eyl): <media>/<PAIR>/ teknik kartlar (WA_02 Symbol Story .png, WA_05 Crafted Detail .jpg) + V01 video
     (LISTING_MEDIA/TECHNICAL, VIDEOS; ana edisyon). Galeri 12: 1 hero, 2-3 sahne, 4 Symbol, 5 Crafted,
@@ -60,25 +60,27 @@ ED_NAME = {"MIDNIGHT_BLUE": "Midnight Blue", "DEEP_BLACK": "Deep Black", "WARM_P
            "CHAMPAGNE_IVORY": "Champagne Ivory", "PURE_WHITE": "Pure White"}
 # Mo 6 Eyl (Size etiketi v3): oran once, cm tam sayi; SIRA oran gruplari 4:5, 3:4, 2:3, 11:14, A-series.
 # Tek kaynak: SIZE_SPEC -> SIZES (sira), SIZE_LABEL (varyasyon degeri), size_block() (aciklama blogu EN/RU).
-SIZE_SPEC = [  # (anahtar, grup, inc metni, cm metni)
-    ("8x10", "4:5", "8x10 in", "20×25"), ("16x20", "4:5", "16x20 in", "41×51"),
-    ("12x16", "3:4", "12x16 in", "30×41"), ("18x24", "3:4", "18x24 in", "46×61"), ("30x40", "3:4", "30x40 in", "76×102"),
+SIZE_SPEC = [  # (anahtar, grup, inc metni, cm metni) - 16 boy (25 Eyl 2026: fiyat_b.py FIYAT ile ayni boy seti)
+    ("8x10", "4:5", "8x10 in", "20×25"), ("16x20", "4:5", "16x20 in", "41×51"), ("24x30", "4:5", "24x30 in", "61×76"),
+    ("12x16", "3:4", "12x16 in", "30×41"), ("18x24", "3:4", "18x24 in", "46×61"), ("24x32", "3:4", "24x32 in", "61×81"),
+    ("30x40", "3:4", "30x40 in", "76×102"),
     ("12x18", "2:3", "12x18 in", "30×46"), ("16x24", "2:3", "16x24 in", "41×61"), ("20x30", "2:3", "20x30 in", "51×76"),
     ("24x36", "2:3", "24x36 in", "61×91"),
     ("11x14", "11:14", "11x14 in", "28×36"),
     ("A4", "A-series", "A4", "21×30"), ("A3", "A-series", "A3", "30×42"), ("A2", "A-series", "A2", "42×59"),
+    ("A1", "A-series", "A1", "59×84"),
 ]
 SIZES = [k for k, *_ in SIZE_SPEC]
 SIZE_LABEL = {k: f"{g} · {inc} ({cm} cm)" for k, g, inc, cm in SIZE_SPEC}     # or. "4:5 · 8x10 in (20×25 cm)"
 GROUP_ORDER = ["4:5", "3:4", "2:3", "11:14", "A-series"]
-SIZE_BLOCK_TXT = {"en": {"head": "✦ 13 SIZES (choose from the Size menu)", "ratio": "Ratio {g}", "a": "A-series (ISO)", "cm": "cm",
+SIZE_BLOCK_TXT = {"en": {"head": "✦ 16 SIZES (choose from the Size menu)", "ratio": "Ratio {g}", "a": "A-series (ISO)", "cm": "cm",
                          "tail": "Not sure? See the size guide photo."},
-                  "ru": {"head": "✦ 13 РАЗМЕРОВ (выберите в меню Size)", "ratio": "Соотношение {g}", "a": "Серия A (ISO)", "cm": "см",
+                  "ru": {"head": "✦ 16 РАЗМЕРОВ (выберите в меню Size)", "ratio": "Соотношение {g}", "a": "Серия A (ISO)", "cm": "см",
                          "tail": "Не уверены? Смотрите фото с таблицей размеров."}}
 
 
 def size_block(lang="en"):
-    """Aciklamadaki '✦ 13 SIZES' blogu (EN/RU); docs/POD_LISTING_TEMPLATE.md ile birebir ayni olmali (test)."""
+    """Aciklamadaki '✦ 16 SIZES' blogu (EN/RU); docs/POD_LISTING_TEMPLATE.md ile birebir ayni olmali (test)."""
     t = SIZE_BLOCK_TXT[lang]
     out = [t["head"]]
     for g in GROUP_ORDER:
@@ -615,7 +617,7 @@ def create_pair(api, shop, pair, d, prices, img_root, primary, frames, st, state
     vids = (api.get(f"/listings/{lid}/videos", ok404=True) or {}).get("results") or []
     props = (api.get(f"/shops/{shop}/listings/{lid}/properties", ok404=True) or {}).get("results") or []
     ru_title, _, ru_desc_exp, _ = build_ru(pair, load_ru_template())
-    # 65/65: SKU + fiyat + Size etiketi (beklenen envanter govdesiyle birebir)
+    # 80/80: SKU + fiyat + Size etiketi (beklenen envanter govdesiyle birebir)
     exp_inv = {pr["sku"]: (pr["property_values"][1]["values"][0], pr["offerings"][0]["price"]) for pr in
                inventory_body(pair, prices, d["color_pid"], d["size_pid"], d["color_name"], d["size_name"], d.get("readiness_state_id"))["products"]}
     got_inv = {}

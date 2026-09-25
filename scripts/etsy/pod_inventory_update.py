@@ -4,8 +4,8 @@ POD ilani duzenlemesi (Mo 6 Eyl 2026, Aries-Leo 4570031205 yayinda):
 
   IS 1  Size etiketleri v3 + SIRA (tek updateListingInventory): SKU / fiyat / adet / is_enabled /
         readiness_state_id BIREBIR korunur; yalniz Size degeri SIZE_LABEL'a cevrilir ve urunler
-        oran gruplari sirasina (4:5, 3:4, 2:3, 11:14, A-series) dizilir. Geri okuma 65/65 + sira.
-  IS 2  Aciklama: yalniz "✦ 13 SIZES" blogu degisir (EN updateListing PATCH, RU translations/ru PUT);
+        oran gruplari sirasina (4:5, 3:4, 2:3, 11:14, A-series) dizilir. Geri okuma 80/80 + sira.
+  IS 2  Aciklama: yalniz "✦ 16 SIZES" blogu degisir (EN updateListing PATCH, RU translations/ru PUT);
         diger bolumler birebir ayni degilse YAZMA YOK (FAIL).
   IS 3  Renk -> gorsel (variation-images GET); beklenenden farkliysa POST ile duzeltilir, raporlanir.
 Dry-run: yalniz tablolar/diff. Kota < --quota-min ise yazma yok.
@@ -41,7 +41,7 @@ SIZE_IDX = {k: i for i, k in enumerate(SIZES)}
 # Mo 6 Eyl (11. kosu geri okumasi): renk -> image_id
 EXPECT_IMAGES = {"Midnight Blue": 8484286094, "Deep Black": 8532185767, "Warm Parchment": 8532185855,
                  "Champagne Ivory": 8484286904, "Pure White": 8484287028}
-SEC_EN, SEC_RU = "✦ 13 SIZES", "✦ 13 РАЗМЕРОВ"
+SEC_EN, SEC_RU = "✦ 16 SIZES", "✦ 16 РАЗМЕРОВ"
 
 
 def money(p):

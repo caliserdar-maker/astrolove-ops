@@ -1,7 +1,7 @@
 name: pod-listing-create
 
 # POD (Prodigi poster) YENI ILAN: createDraftListing + 12 gorsel (10 kare + 2 teknik kart, EK 3) + video
-# + Color(5)xSize(13) varyant + renk secenegine edisyon 01 karesi. Metin docs/POD_LISTING_TEMPLATE.md,
+# + Color(5)xSize(16) varyant + renk secenegine edisyon 01 karesi. Metin docs/POD_LISTING_TEMPLATE.md,
 # fiyat scripts/etsy/pod_prices.csv, gorseller Drive TEMP/POD_GALLERY/<PAIR>/<ED>/ (Mo onayi 6 Eyl),
 # kartlar LISTING_MEDIA/TECHNICAL/{02_SYMBOL_STORY,05_CRAFTED_DETAIL}/<ED>/, video VIDEOS/V01_FIREFLY_STORY/01_EXPORTS/<ED>/
 # (ana edisyon; dosya eksikse cift "eksik" ile raporlanir, kosu durmaz; kart OCR on kontrolu).

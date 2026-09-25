@@ -51,15 +51,17 @@ Select your edition from the Color menu.
 The same design is available as a digital edition:
 {DIGITAL_LINKS}
 
-✦ 13 SIZES (choose from the Size menu)
+✦ 16 SIZES (choose from the Size menu)
 
 Ratio 4:5
 8x10 in — 20×25 cm
 16x20 in — 41×51 cm
+24x30 in — 61×76 cm
 
 Ratio 3:4
 12x16 in — 30×41 cm
 18x24 in — 46×61 cm
+24x32 in — 61×81 cm
 30x40 in — 76×102 cm
 
 Ratio 2:3
@@ -75,6 +77,7 @@ A-series (ISO)
 A4 — 21×30 cm
 A3 — 30×42 cm
 A2 — 42×59 cm
+A1 — 59×84 cm
 
 Not sure? See the size guide photo.
 
@@ -158,15 +161,17 @@ Champagne Ivory · Pure White · Warm Parchment · Midnight Blue · Deep Black
 Тот же дизайн доступен как цифровое издание:
 {DIGITAL_LINKS}
 
-✦ 13 РАЗМЕРОВ (выберите в меню Size)
+✦ 16 РАЗМЕРОВ (выберите в меню Size)
 
 Соотношение 4:5
 8x10 in — 20×25 см
 16x20 in — 41×51 см
+24x30 in — 61×76 см
 
 Соотношение 3:4
 12x16 in — 30×41 см
 18x24 in — 46×61 см
+24x32 in — 61×81 см
 30x40 in — 76×102 см
 
 Соотношение 2:3
@@ -182,6 +187,7 @@ Champagne Ivory · Pure White · Warm Parchment · Midnight Blue · Deep Black
 A4 — 21×30 см
 A3 — 30×42 см
 A2 — 42×59 см
+A1 — 59×84 см
 
 Не уверены? Смотрите фото с таблицей размеров.
 

@@ -5,7 +5,7 @@ POD ilanlarina DIJITAL SURUM LINKLERI ekler (Mo 7 Eyl 2026; ADIM 0 tek ilan, son
 Her ilan icin:
   1. PLEASE NOTE (RU: ОБРАТИТЕ ВНИМАНИЕ) blogundaki "- Prefer an instant download? ..." satiri KALDIRILIR.
   2. Dijital surum bolumu "✦ 5 COLOR EDITIONS" / "✦ 5 ЦВЕТОВЫХ ИЗДАНИЙ" bolumunun HEMEN ARDINA,
-     "✦ 13 SIZES" / "✦ 13 РАЗМЕРОВ" oncesine konur (Mo 7 Eyl, yer degisikligi):
+     "✦ 16 SIZES" / "✦ 16 РАЗМЕРОВ" oncesine konur (Mo 7 Eyl, yer degisikligi):
        ✦ PREFER AN INSTANT DOWNLOAD? / ✦ ХОТИТЕ МГНОВЕННУЮ ЗАГРУЗКУ?
        + "<Renk> — https://www.etsy.com/listing/<id>" (5 satir, kisa URL, slug yok).
      Bolum baska bir yerdeyse (ADIM 0'daki gibi PLEASE NOTE altinda) oradan alinip yeni yere TASINIR.
