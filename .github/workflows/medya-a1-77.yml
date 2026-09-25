@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
     inputs:
       mod:
-        description: "tam (EJ+IN[+AM]+kapak+kart09) | am (yalniz AM, onceki PASS ciftler) | kart (yalniz KART09 yeniden)"
+        description: "tam (EJ+IN[+AM]+kapak+kart09) | am (yalniz AM, onceki PASS ciftler) | kart (yalniz KART09 yeniden) | tag (IN+AM taban cizgisi duzeltmesi)"
         required: true
         default: "tam"
 
@@ -75,7 +75,7 @@ jobs:
           PARCA: ${{ matrix.parca }}
         run: |
           set -euo pipefail
-          case "$MOD" in tam|am|kart) : ;; *) echo "HATA: mod tam|am|kart olmali" >&2; exit 1 ;; esac
+          case "$MOD" in tam|am|kart|tag) : ;; *) echo "HATA: mod tam|am|kart|tag olmali" >&2; exit 1 ;; esac
           python scripts/medya_v1/a1_poster.py uret77 "$PARCA" 8 "$MOD"
 
   serit:
