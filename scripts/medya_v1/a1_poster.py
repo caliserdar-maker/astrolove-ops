@@ -430,14 +430,20 @@ def liste_ac(L):
                        f"&X-Amz-SignedHeaders=host%3Bx-amz-expected-bucket-owner&response-expires=Fri%2C%2025%20Sep%202026%20{re_[:2]}%3A{re_[2:4]}%3A{re_[4:]}%20GMT")
     return out
 
-def uret77(parca, toplam, mod='tam', filtre=None):
+def uret77(parca, toplam, mod='tam', filtre=None, ham=()):
     """mod 'tam': EJ + IN (+ AM, metin Drive'da varsa) + kapak + kart09. mod 'am': yalniz AM, onceki kosuda PASS olan ciftler."""
     O = W / 'A1_77'; O.mkdir(exist_ok=True); R = {'parca': parca, 'toplam_is': toplam, 'mod': mod, 'cift': {}}
     tag_am = am_tagline(); R['am_tagline'] = tag_am
     assert mod == 'tam' or tag_am, 'AM tagline metni Drive\'da yok: ' + AM_TAG_YOL
-    rc('copy', LISTE77, str(W)); L = liste_ac(json.loads((W / 'A1_77_LISTE.json').read_text()))
+    # ham: imzali liste yerine Drive kopyalari (KP/<klasor>/blue_<n>.png), yalniz filtreli kosu
+    if ham:
+        assert filtre, 'ham klasoru yalniz filtreli kosuda'
+        for h in ham: rc('copy', f'{KP}/{h}', str(W / 'ham77'), '--include', 'blue_*.png')
+        L = {p.stem.split('_')[1]: p for p in (W / 'ham77').glob('blue_*.png')}
+    else:
+        rc('copy', LISTE77, str(W)); L = liste_ac(json.loads((W / 'A1_77_LISTE.json').read_text()))
     ciftler = sorted(x.strip('/') for x in rc('lsf', POD, '--dirs-only').split())
-    assert len(ciftler) == 78 and len(L) == 78, (len(ciftler), len(L))
+    assert len(ciftler) == 78 and (ham or len(L) == 78), (len(ciftler), len(L))
     no = {c: i + 1 for i, c in enumerate(ciftler)}
     benim = [c for c in ciftler if c != REF_CIFT][parca::toplam]
     if filtre: benim = [c for c in ciftler if c in filtre]      # ornek kosu (yalniz belirtilen ciftler)
@@ -446,7 +452,9 @@ def uret77(parca, toplam, mod='tam', filtre=None):
         benim = [c for c in benim if c in uretilmis]
     sayfa_b = {}
     for c in [REF_CIFT] + benim:
-        u = L[str(no[c])]; maskele(u)
+        u = L[str(no[c])]
+        if ham: sayfa_b[c] = u.read_bytes(); continue
+        maskele(u)
         try: sayfa_b[c] = indir(u)
         except Exception as e:                                    # noqa: BLE001  cift FAIL olur, is durmaz
             if c == REF_CIFT: raise
@@ -605,7 +613,8 @@ def serit77():
 if __name__ == '__main__' and sys.argv[1:2] == ['uret77']:
     m = sys.argv[4] if len(sys.argv) > 4 else 'tam'
     f = set(sys.argv[5].split(',')) if len(sys.argv) > 5 else None
-    (kart77(int(sys.argv[2]), int(sys.argv[3])) if m == 'kart' else uret77(int(sys.argv[2]), int(sys.argv[3]), m, f)); sys.exit(0)
+    h = sys.argv[6].split(',') if len(sys.argv) > 6 else ()
+    (kart77(int(sys.argv[2]), int(sys.argv[3])) if m == 'kart' else uret77(int(sys.argv[2]), int(sys.argv[3]), m, f, h)); sys.exit(0)
 
 if __name__ == '__main__' and sys.argv[1:2] == ['serit77']:
     serit77(); sys.exit(0)
