@@ -31,7 +31,12 @@ CIFT = sys.argv[1] if len(sys.argv) > 1 and not sys.argv[1].startswith('-') else
 YEREL = '--yerel' in sys.argv
 YALNIZ06 = '--kart06' in sys.argv                      # yalniz galeri 06 (yakin detay) + onizleme yeniden (Serdar 25 Eyl)
 SAYFA_HAM = f'{KP}/TAMSET_HAM'                      # <renk>_<sayfa>.png (Canva 4/5, ham2 ile kopyalandi)
-HEDEF = f'{DR}/REVIEW/TAM_SET_{CIFT}'
+A77MOD = '--a77' in sys.argv                          # 77 cift uretimi: A1_77/<CIFT>/TAM_SET, yalniz kapilar gecerse yuklenir
+HAM_HAZIR = '--ham-hazir' in sys.argv                  # sayfalar surucu (tam77.py) tarafindan W/ham'a kondu
+def _arg(ad):
+    return sys.argv[sys.argv.index(ad) + 1] if ad in sys.argv else None
+VIDEO_YOL, KART3_YOL = _arg('--video'), _arg('--kart3')   # Drive yolu (orn. onayli CL v5 videosu)
+HEDEF = f'{DR}/REVIEW/TAM_SET_{CIFT}' if not A77MOD else f'{A.A77}/{CIFT}/TAM_SET'
 RENKLER = ['blue', 'black', 'modern', 'pure_white', 'vintage']
 import os
 if os.environ.get('TS_RENKLER'): RENKLER = os.environ['TS_RENKLER'].split(',')   # yalniz yerel deneme
@@ -403,12 +408,15 @@ if __name__ == '__main__':
                 (E.YOL / ed / 'zemin').mkdir(parents=True, exist_ok=True)
                 rc('copy', f'{KP}/HAZIR/zemin_{ed}_4x5.png', str(E.YOL / ed / 'zemin'))
                 (E.YOL / ed / 'zemin' / f'zemin_{ed}_4x5.png').rename(E.YOL / ed / 'zemin' / '4x5.png')
-            rc('copy', SAYFA_HAM, str(W / 'ham'))
+            if not HAM_HAZIR: rc('copy', SAYFA_HAM, str(W / 'ham'))
             rc('copy', f'{DR}/_girdi/etsy/REF_4570143815', str(W / 'ref'), '--include', '*.jpg')
             rc('copy', f'{DR}/REVIEW/GENEL', str(W / 'genel'), '--include', 'GENEL_[234]_*.png')
             rc('copy', f'{A.POD}/{CIFT}/MIDNIGHT_BLUE/30x40.jpg', str(W / 'hi'))
-            try: rc('copy', f'{A.A77}/{CIFT}/KART3.jpg', str(W / 'k3'))
-            except Exception: rc('copy', f'{DR}/REVIEW/A_ORNEK/VIDEO_KART3/KART3_{CIFT}.jpg', str(W / 'k3'))
+            if KART3_YOL: rc('copyto', KART3_YOL, str(W / 'k3' / 'KART3.jpg'))
+            else:
+                try: rc('copy', f'{A.A77}/{CIFT}/KART3.jpg', str(W / 'k3'))
+                except Exception: rc('copy', f'{DR}/REVIEW/A_ORNEK/VIDEO_KART3/KART3_{CIFT}.jpg', str(W / 'k3'))
+            if not list((W / 'k3').glob('*.jpg')): raise SystemExit(f'HATA: kart 3 yok ({CIFT})')
         ciftler = sorted(x.strip('/') for x in rc('lsf', A.POD, '--dirs-only').split()) if not YEREL else json.loads((W / 'ciftler.json').read_text())
         NO = ciftler.index(CIFT) + 1; assert ciftler.index(REF_CIFT) + 1 == 28
         R['sayfa'] = NO
@@ -489,7 +497,9 @@ if __name__ == '__main__':
         R['galeri'] = []; kucuk = []
         for i, (n, ad) in enumerate(SIRA, 1):
             im = S[n]; dosya = f'{i:02d}_{ad}.jpg'
-            if n not in KORU: im.save(CIK / dosya, quality=95)
+            if n == 3 and A77MOD:                                # kart 3 onayli dosya: bayt bayt kopya (yeniden kodlanmaz)
+                import shutil; shutil.copyfile(next((W / 'k3').glob('*.jpg')), CIK / dosya)
+            elif n not in KORU: im.save(CIK / dosya, quality=95)
             bt = burc_tarama(im, beklenen)
             R['galeri'].append({'sira': i, 'dosya': dosya, 'cl_karsiligi': f'CL {n:02d} ({REF_DOSYA[n]})', 'boyut': list(im.size),
                                 'ref_boyut': list(ref[n].size), 'burc_kapisi': bt})
@@ -509,7 +519,8 @@ if __name__ == '__main__':
         TUR = {1: 'kapak', 3: 'kart', 4: 'kart', 5: 'kart', 6: 'kart', 7: 'kart', 8: 'kart', 9: 'kart', 10: 'kart',
                11: 'renk', 12: 'renk', 13: 'renk', 14: 'renk'}
         video = None
-        if not YEREL:
+        if VIDEO_YOL: video = VIDEO_YOL
+        elif not YEREL:
             try: video = next((f'{A.A77}/{CIFT}/{x}' for x in rc('lsf', f'{A.A77}/{CIFT}', '--include', '*.mp4').split() if x), None)
             except Exception: video = None
             if not video:
@@ -524,15 +535,22 @@ if __name__ == '__main__':
                'video': {'yol': video, 'durum': 'bulundu' if video else 'yok (video oturumu)'},
                'onay': 'BEKLIYOR (Serdar)'}
         (CIK / 'SET.json').write_text(json.dumps(SET, ensure_ascii=False, indent=1))
-        if not YEREL: rc('copy', str(CIK / 'SET.json'), f'{A.A77}/{CIFT}')
+        kapilar_ok = (all(R['poster'][r]['gecti'] for r in RENKLER) and all(g['burc_kapisi']['gecti'] for g in R['galeri'])
+                      and (K[9]['gecti'] if 9 in K else True) and R['mesaj_kapisi']['gecti']
+                      and all(v['gecti'] for v in R['baslik_kapisi'].values()) and R['kart07']['detay']['kapi']['gecti'])
+        R['gecti'] = bool(kapilar_ok)
+        if not YEREL and R['gecti']: rc('copy', str(CIK / 'SET.json'), f'{A.A77}/{CIFT}')
         R['ozet'] = {'foto': len(SIRA), 'poster_kapilari': {r: R['poster'][r]['gecti'] for r in RENKLER},
                      'burc_kapisi': all(g['burc_kapisi']['gecti'] for g in R['galeri']), 'kart09_kapisi': K[9]['gecti'] if 9 in K else 'korundu',
                      'mesaj_kapisi': {k: R['mesaj_kapisi'][k] for k in ('px', 'renkler_arasi_fark', 'CL_ustu_degil', 'gecti')},
                      'baslik_kapisi': R['baslik_kapisi'], 'kagit_kart_dis_fark': K[6]['aciklik_disi_maks_fark'],
-                     'kart06_buyutec_kapisi': R['kart07']['detay']['kapi']['gecti'],
+                     'kart06_buyutec_kapisi': R['kart07']['detay']['kapi']['gecti'], 'gecti': R['gecti'], 'video': video,
                      'sure_sn': round(time.time() - t_bas, 1)}
     finally:
         if not YALNIZ06:                                         # kart 06 kosusu tam set raporunu/klasorunu ezmez
             (CIK / 'RAPOR_TAM_SET.json').write_text(json.dumps(R, ensure_ascii=False, indent=1, default=str))
-            if not YEREL: rc('copy', str(CIK), HEDEF)
+            if not YEREL and not A77MOD: rc('copy', str(CIK), HEDEF)
+            elif not YEREL and R.get('gecti'):                   # 77: yalniz kapidan gecen set; buyuk ara dosyalar yuklenmez
+                rc('copy', str(CIK), HEDEF, '--include', '[01][0-9]_*.jpg', '--include', 'SET.json', '--include', 'RAPOR_TAM_SET.json',
+                   '--include', 'ONIZLEME_*.jpg', '--include', 'SEMBOL_*.jpg')
         print(json.dumps(R.get('ozet'), ensure_ascii=False, indent=1, default=str), flush=True)
