@@ -69,8 +69,7 @@ for i in range(n):
             w = agirlik[a0][i - a0]; plan.append((x, y, w)); st = 1; cur = y if i == a0 + 11 else cur
     if st is None:
         plan.append((cur, cur, 0.0))
-plan[0] = ('F0', 'F0', 0.0)       # ilk kare (kapak/dongu) referanstan aynen
-ST['F0'] = A[0].astype(np.float32)
+# kare 0 = E sabit karesi (Mo, 25 Eyl iterasyon 3): dongu basinda sicrama yok
 cmd = ['ffmpeg', '-v', 'error', '-y', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-video_size', '1080x1350', '-framerate', '30', '-i', '-',
        '-an', '-c:v', 'libx264', '-profile:v', 'high', '-preset', 'slow', '-crf', '14', '-x264-params', 'keyint=360:min-keyint=360:scenecut=0', '-pix_fmt', 'yuv420p',
        '-video_track_timescale', '15360', '-movflags', '+faststart', out]

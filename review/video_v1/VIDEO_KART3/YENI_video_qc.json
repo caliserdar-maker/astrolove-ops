@@ -1,0 +1,52 @@
+{
+ "ozellik_ref": {
+  "sure": "00:00:12.00",
+  "codec": "h264 (High)",
+  "pix": true,
+  "wh": "1080x1350",
+  "fps": "30"
+ },
+ "ozellik_yeni": {
+  "sure": "00:00:12.00",
+  "codec": "h264 (High)",
+  "pix": true,
+  "wh": "1080x1350",
+  "fps": "30"
+ },
+ "kare": [
+  360,
+  360
+ ],
+ "iki_durum_artik_maks": 1.694,
+ "kontrol_libra_solda_artik": [
+  7.81,
+  7.57
+ ],
+ "gecis_pencereleri": [
+  [
+   38,
+   44
+  ],
+  [
+   128,
+   134
+  ],
+  [
+   218,
+   225
+  ],
+  [
+   308,
+   314
+  ]
+ ],
+ "tagline_fark": 1.311,
+ "metin_esik_tabani": 1.101,
+ "PASS": {
+  "ozellik": true,
+  "iki_durum": true,
+  "gecis_4": true,
+  "tagline": true
+ },
+ "SONUC": "PASS"
+}

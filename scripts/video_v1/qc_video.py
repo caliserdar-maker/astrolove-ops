@@ -4,7 +4,7 @@
 2) Yalniz iki durum: her kare E (referans kare 150) ile N arasi en iyi karisim; sembol+isim bandinda artik < 2.0.
    Kontrol: ayni olcut referansin Libra-solda karelerinde (20, 105) olculur ve esigin cok ustunde olmalidir.
 3) Gecis sayisi: ardisik kare farki > 0.05 olan pencere sayisi = 4; baska hareket yok.
-4) Tagline bandi (kare 150): referansla fark <= 1.25 x ayni karede duvar bolgesinin yeniden kodlama farki."""
+4) Tagline bandi (kare 150): referansla fark <= 1.25 x ayni karede degismeyen metnin (EMILY & JAMES isim satiri) yeniden kodlama farki."""
 import json, re, subprocess, sys
 import numpy as np
 from PIL import Image
@@ -41,11 +41,11 @@ for i in hareket:
 ok3 = len(pencere) == 4
 tb = (slice(1020, 1060), slice(151, 927))
 tag = float(np.abs(Y[150][tb].astype(np.float32) - R[150][tb]).mean())
-duvar = (slice(1200, 1340), slice(20, 1060))
-tag_duvar = float(np.abs(Y[150][duvar].astype(np.float32) - R[150][duvar]).mean())
+metin = (slice(895, 950), slice(151, 927))   # E karesinde isim satiri: referanstan aynen, altin metin kenarli
+tag_duvar = float(np.abs(Y[150][metin].astype(np.float32) - R[150][metin]).mean())
 ok4 = tag <= 1.25 * tag_duvar
 sonuc.update({'iki_durum_artik_maks': round(max(art), 3), 'kontrol_libra_solda_artik': [round(k, 2) for k in kontrol],
-              'gecis_pencereleri': pencere, 'tagline_fark': round(tag, 3), 'duvar_fark': round(tag_duvar, 3),
+              'gecis_pencereleri': pencere, 'tagline_fark': round(tag, 3), 'metin_esik_tabani': round(tag_duvar, 3),
               'PASS': {'ozellik': ok1, 'iki_durum': ok2, 'gecis_4': ok3, 'tagline': ok4}})
 sonuc['SONUC'] = 'PASS' if all(sonuc['PASS'].values()) else 'FAIL'
 print(json.dumps(sonuc, indent=1))
