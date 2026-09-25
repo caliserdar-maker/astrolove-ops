@@ -2,7 +2,8 @@
 """video-v1 kart 3 QC (PASS/FAIL). Kullanim: qc_kart3.py REF.jpg YENI.jpg YENI_log.json
 1) Boyut referansla ayni.  2) Sol panel (144..1425 x 829..1414) degismedi: ort fark < 0.5.
 3) Sol alt yazi (400..1180 x 1735..1795) degismedi: ort fark < 0.5 (farkli burc).
-4) Sag panelde poster kalmadi: lacivert piksel (B > R+25 ve L < 90) sayisi = 0.
+4) Sag panelde poster kalmadi: lacivert piksel (B > R+25 ve L < 90) sayisi < 50. (77 cift kosusunda 'Name under Aquarius/Capricorn'
+   koyu metninin JPEG kenar pikseli 1 px yanlis pozitif verdi; gercek poster kalintisi ~700 bin px.)
 5) Eski metinler silindi: 'Cancer left'/'Libra left' etiket alanlari zemin (ort |fark-zemin| < 1).
 6) metin_kurali: log'daki tum metinler PASS.
 --cift POSTER_EJ.png: 2-3 yerine sol panel = cift posterinin panel hizasiyla izdusumu (ort fark < 1.0) ve sembol alaninda referanstan farkli (16x16 blok ortalamasi maks > 20)."""
@@ -36,7 +37,7 @@ if cift:
 s['PASS'] = {'boyut': s['boyut'],
              'sol_panel': (s['sol_panel_poster_fark'] < 1.0 and s['sol_panel_ref_blok_maks'] > 20) if cift else s['sol_panel'] < 0.5,
              'sol_alt_yazi': bool(cift) or L['ayni_burc'] or s['sol_alt_yazi'] < 0.5,
-             'sag_poster_yok': lac == 0, 'eski_etiket_yok': et < 1.0, 'metin_kurali': not s['metin_kurali']}
+             'sag_poster_yok': lac < 50, 'eski_etiket_yok': et < 1.0, 'metin_kurali': not s['metin_kurali']}
 s['SONUC'] = 'PASS' if all(s['PASS'].values()) else 'FAIL'
 print(json.dumps(s)); json.dump(s, open(y.rsplit('.', 1)[0] + '_qc.json', 'w'), indent=1)
 sys.exit(0 if s['SONUC'] == 'PASS' else 1)
