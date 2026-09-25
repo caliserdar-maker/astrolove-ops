@@ -22,7 +22,7 @@ KESME = "'’ʼ"
 ISIM_AYIRICI = " -" + KESME
 RU_ULKE = {"RU", "BY", "KZ"}
 TR_ULKE = {"TR"}
-TR_ISARET = set("çğıöşüÇĞİÖŞÜ")
+TR_ISARET = set("ıİşŞğĞ")        # Turkceye OZGU harfler (ç/ö/ü baska dillerde de var)
 SORU_RE = re.compile(r"^\s*(name under (?P<burc>[a-z]+)|(?P<yon>left|right) name|your message|personali[sz]ation)\s*$", re.I)
 KISISEL_PROPERTY = {54}          # Etsy eski tek alanli model: "Personalization" varyasyon property_id
 
@@ -72,8 +72,11 @@ def _alfabe(c):
 
 
 def buyut(s, ulke=""):
+    """Basilacak hal. Varsayilan standart buyuk harf (Ali -> ALI). Turkce buyuk harf (i -> İ) YALNIZ alici
+    ulkesi TR ise ya da isimde Turkceye ozgu harf (ı İ ş ğ) varsa (Serdar 25 Eyl). Kart basilacak hali gosterir;
+    musteri sablon 1 ile onaylar."""
     s = unicodedata.normalize("NFC", s).replace("i̇", "İ")
-    turkce = (ulke or "").upper() in TR_ULKE if ulke else bool(TR_ISARET & set(s))
+    turkce = (ulke or "").upper() in TR_ULKE or bool(TR_ISARET & set(s))
     if turkce:
         s = s.translate(str.maketrans({"i": "İ", "ı": "I"}))
     return unicodedata.normalize("NFC", s.upper())

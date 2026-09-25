@@ -70,6 +70,9 @@ k("ISIM_YENI 6 siparis", sorted(yeni) == list(KIS), yeni)
 kart = {r: (W / f"out/SIPARIS_ISIM/{r}.md").read_text(encoding="utf-8") for r in yeni}
 def liste(r):
     return [int(x.split(" (")[0]) for x in kart[r].split("- Sablonlar: ")[1].split("\n")[0].split(" — ")[0].split(", ")]
+for ham, ulke, bek in (("Ali", "US", "ALI"), ("Ali", "", "ALI"), ("Ali", "TR", "ALİ"), ("Işıl", "US", "IŞIL"),
+                       ("Şirin", "GB", "ŞİRİN"), ("Müller", "DE", "MÜLLER"), ("Çiçek", "US", "ÇIÇEK")):
+    k(f"buyuk harf {ham}/{ulke or '-'} -> {bek}", K.buyut(ham, ulke) == bek, K.buyut(ham, ulke))
 k("sablon dosyasi 6x2 okundu", sorted(K.sablon_oku(SABLON)) == [(n, d) for n in range(1, 7) for d in ("EN", "RU")])
 k("9001 Kiril isim -> sablon 2 RU + oneri ANNA", liste("9001") == [2, 1] and "Мы получили имя Анна" in kart["9001"]
   and "ANNA." in kart["9001"] and "KIRIL_ISIM" in st["9001"]["note"], liste("9001"))
