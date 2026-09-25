@@ -76,6 +76,9 @@ jobs:
           fi
           echo "rclone.conf yazildi ($(wc -c < ~/.config/rclone/rclone.conf) bayt)."
 
+      - name: tesseract (KART09 etiket kapisi, tam set burc taramasi)
+        run: sudo apt-get install -y -q tesseract-ocr >/dev/null && tesseract --version | head -1
+
       - name: Script'i kosu
         env:
           SCRIPT: ${{ inputs.script }}
