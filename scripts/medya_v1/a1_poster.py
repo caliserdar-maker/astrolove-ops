@@ -99,7 +99,7 @@ def olcum_duzelt(o, m):
     d['isim_govde'] = [int(b0 + kos[0]), int(b0 + kos[1])]
     return d, {'sembol_ek_bant': ek, 'sembol_bant_ilk': o['sembol_bant'], 'isim_govde': d['isim_govde'], 'isim_bant': o['isim_bant']}
 
-def sembol_kapisi(poster, S, s, merkez, m_src, esik):
+def sembol_kapisi(poster, S, s, merkez, m_src, esik, maske=None):
     """YENI KAPI: kucuk sembol bolgesi kaynak sayfadakiyle birebir mi? (olcek/aynalama/parca kaymasi yok)
     Bolge olculen banda BAGLI DEGIL: sembol x araligi (+pay) x [sembol bandi ustu - SEMBOL_UST, isim bandi ustu - 5].
     Bolgeye tamamen sigan murekkep bilesenleri (daire yayi gibi disari tasanlar haric) sembolun tamamidir.
@@ -108,7 +108,11 @@ def sembol_kapisi(poster, S, s, merkez, m_src, esik):
     import cv2
     from pilot6 import LUMA, MUREKKEP
     ref = np.asarray(S['ref']).astype(np.float32); P = np.asarray(poster.convert('RGB')).astype(np.float32)
-    Pm = (P @ LUMA) > MUREKKEP; sonuc, kirp = {}, {}
+    # maske: uretilen posterin murekkep maskesi. Varsayilan (Blue/koyu zemin) luma esigidir;
+    # acik zeminli edisyonlarda (Pure White, Champagne Ivory, Warm Parchment) yazi KOYU oldugu
+    # icin luma esigi ters calisir, o yuzden edisyon_uret.murekkep gecirilir. Blue yolu degismedi.
+    Pm = maske(P) if maske else (P @ LUMA) > MUREKKEP
+    sonuc, kirp = {}, {}
     def ic(mk):                                                 # bolgeye tamamen sigan bilesenler
         n, lab, st, _ = cv2.connectedComponentsWithStats(mk.astype(np.uint8), 8); h, w = mk.shape; out = np.zeros_like(mk)
         for i in range(1, n):
