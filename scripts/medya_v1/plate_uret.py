@@ -53,6 +53,16 @@ def rc(*a, timeout=2400):
     return r.stdout
 
 
+def mevcut_plateler():
+    """PLATES'te zaten olan plate'ler - kosu 45 dk sinirinda kesilirse devam
+    edilebilsin diye (kosu 36159554453 boyle kesildi)."""
+    try:
+        return {x.strip() for x in rc('lsf', PLATES, '--include', '*.png',
+                                      '--files-only', timeout=300).split()}
+    except RuntimeError:
+        return set()
+
+
 def is_listesi():
     """POD_PRINT'i tek listede tarayip gercek (renk, boy) matrisini cikarir."""
     sayac = {}
@@ -130,11 +140,16 @@ def main():
     a = ap.parse_args()
     i, n = (int(x) for x in a.parca.split('/'))
     isler, sayac = is_listesi()
-    benim = [x for j, x in enumerate(isler) if j % n == i - 1]
-    log(f'toplam {len(isler)} plate; parca {i}/{n} -> {len(benim)}: '
+    var = mevcut_plateler()
+    kalan = [(r, b) for r, b in isler if f'{RENK_ED[r].upper()}_{b}.png' not in var]
+    benim = [x for j, x in enumerate(kalan) if j % n == i - 1]
+    log(f'toplam {len(isler)} plate, {len(var)} tanesi PLATES\'te var, '
+        f'{len(kalan)} kaldi; parca {i}/{n} -> {len(benim)}: '
         + ', '.join(f'{r}/{b}' for r, b in benim))
     rapor = {'parca': a.parca, 'tarih': datetime.now(timezone.utc).isoformat(),
-             'matris': sayac, 'plateler': {}, 'hata': {}}
+             'matris': sayac, 'toplam_plate': len(isler), 'onceden_var': sorted(var),
+             'bu_kosuda_kalan': [f'{r}/{b}' for r, b in kalan],
+             'plateler': {}, 'hata': {}}
     for renk, boy in benim:
         anahtar = f'{renk}/{boy}'
         try:
@@ -168,6 +183,9 @@ def main():
                 'sure_sn': round(time.time() - t0, 1), 'ornekler': orn}
             rc('copy', str(W / ad), PLATES, timeout=2400)
             (W / ad).unlink()
+            rp = W / f'RAPOR_{i}_{n}.json'      # her plate sonrasi yaz: kesilirse kaybolmasin
+            rp.write_text(json.dumps(rapor, indent=1, ensure_ascii=False), encoding='utf-8')
+            rc('copy', str(rp), PLATES, timeout=600)
             for f in (W / f'{renk}_{boy}').glob('*.jpg'):
                 f.unlink()
             log(f'{anahtar} bitti {time.time() - t0:.0f}s ' + json.dumps(orn)[:300])
