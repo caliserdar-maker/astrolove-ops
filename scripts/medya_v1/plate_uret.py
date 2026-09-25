@@ -165,6 +165,10 @@ KAPI_MUREKKEP_TABAN = 0.0008   # komsu bant tamamen bossa mutlak taban
 TUY = 2.0                 # dolgu kenari bu sigma ile yumusatilir
 KAPI_MUREKKEP_KAT = 1.5   # temizlenen bant / komsu bos bant murekkep orani
 KAPI_DOKU_KAT = 1.6       # doku enerjisi orani (her iki yonde)
+KAPI_DOKU_TABAN = 0.30    # komsu bandin doku enerjisi bunun altindaysa zemin ZATEN
+                          # duz; oran testi anlamsiz (PURE_WHITE/A4 olcumu: komsu
+                          # 0.000, bant 0.053 -> oran 52582). O durumda bandin
+                          # kendisinin de duz kalmasi istenir.
 KAPI_TON = 4.0            # ton farki (0-255)
 KAPI_HAYALET = 1.5        # eski glif bolgesi ile bandin geri kalani arasinda
                           # DUSUK FREKANSLI ton farki (harf hayaleti)
@@ -230,6 +234,18 @@ def slogan_bandi(plate):
             en_iyi = {'y2400': [y0, y1], 'x2400': [int(nz.min()), int(nz.max())],
                       'yogunluk': round(yog, 4)}
     if en_iyi is None:
+        # Tani: neden bulunamadi? (WARM_PARCHMENT/8x10 bu yola dustu.)
+        slogan_bandi.tani = {
+            'maske_orani': round(float(m.mean()), 5), 'maske_px': int(m.sum()),
+            'tuval_2400': [int(m.shape[1]), int(m.shape[0])],
+            'aday_sayisi': len(aday),
+            'adaylar': [{'y': [int(y0), int(y1)], 'yuk': int(y1 - y0),
+                         'gen': int(np.nonzero(m[y0:y1].sum(0) > 0)[0].ptp())
+                                if (m[y0:y1].sum(0) > 0).any() else 0,
+                         'merkez': int(np.nonzero(m[y0:y1].sum(0) > 0)[0].mean())
+                                   if (m[y0:y1].sum(0) > 0).any() else -1}
+                        for y0, y1 in aday[:12]],
+            'filtre': {'yuk': [15, 200], 'gen': [300, 2000], 'merkez_pay': 200}}
         return None
     o = 1.0 / k
     en_iyi['y'] = [int(en_iyi['y2400'][0] * o), int(np.ceil(en_iyi['y2400'][1] * o))]
@@ -364,8 +380,15 @@ def temizlik_kapilari(eski, yeni, bant, bilgi):
         d['hayalet'] = None
     d['esik_hayalet'] = KAPI_HAYALET
     d['murekkep_siniri'] = round(max(o_k * KAPI_MUREKKEP_KAT, KAPI_MUREKKEP_TABAN), 6)
+    if e_k < KAPI_DOKU_TABAN:          # duz zemin: oran yerine mutlak olcut
+        d['doku_olcut'] = 'duz zemin - mutlak'
+        doku_ok = e_b <= KAPI_DOKU_TABAN * 2
+        d['doku_siniri'] = KAPI_DOKU_TABAN * 2
+    else:
+        d['doku_olcut'] = 'oran'
+        doku_ok = 1 / KAPI_DOKU_KAT <= d['doku_kat'] <= KAPI_DOKU_KAT
     d['gecti'] = bool(o_b <= max(o_k * KAPI_MUREKKEP_KAT, KAPI_MUREKKEP_TABAN)
-                      and 1 / KAPI_DOKU_KAT <= d['doku_kat'] <= KAPI_DOKU_KAT
+                      and doku_ok
                       and d['ton_fark'] <= KAPI_TON
                       and (d['hayalet'] is None or d['hayalet'] <= KAPI_HAYALET))
     return d
@@ -486,10 +509,13 @@ def main():
             ad = f'{ed.upper()}_{boy}.png'
 
             # SLOGAN TEMIZLIGI (Serdar onayi 25 Eyl, 1. madde) - zorunlu.
+            slogan_bandi.tani = None
             bant = slogan_bandi(ham_plate)
             if bant is None:
-                rapor['hata'][anahtar] = 'slogan bandi bulunamadi - plate yazilmadi'
-                log(f'{anahtar} slogan bandi bulunamadi, ATLANDI')
+                rapor['hata'][anahtar] = {'sebep': 'slogan bandi bulunamadi - plate yazilmadi',
+                                          'tani': getattr(slogan_bandi, 'tani', None)}
+                log(f'{anahtar} slogan bandi bulunamadi: '
+                    + json.dumps(getattr(slogan_bandi, 'tani', None))[:400])
                 continue
             plate, tb = slogan_temizle(ham_plate, bant)
             if plate is None:
