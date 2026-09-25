@@ -6,7 +6,7 @@ goruntusuyle dogruladi, 25 Eyl 20:09; API'de hesap ayari ucu yok - hesap_oku kos
 Siparis: Aries+Leo, Deep Black, 8x10, isimler EMILY/JAMES + mesaj (sahte, e2e ile ayni), kisiye ozel kartpostal (branding.postcard.url).
 Alici: Serdar'in kendi adresi, Drive TEMP/PRODIGI_TEST_ADRES.json ({name, line1, line2?, postalOrZipCode,
 townOrCity, stateOrCounty?, countryCode}). Dosya yoksa SIPARIS VERILMEZ. Adres loga YAZILMAZ.
-Adimlar: 1 adres  2 kart (uretim girdisi) + gercek baski uretec (siparis-baski-v1)  3 kartpostal_uret
+Adimlar: 1 adres  2 kart (uretim girdisi); baski = POD_PRINT onayli Aries+Leo DB 8x10 (GOREV 0003: uretec plate onayi bekliyor)  3 kartpostal_uret
 4 gecici Drive linkleri  5 POST /orders (merchantReference guvenli-test-<damga>, etsy- DEGIL)  6 durum/issues/branding
 7 iptal + "Cancelled" dogrulamasi  8 ucret (charges)  9 izinler kapanir, gecici dosyalar silinir.
 Cikis: 0 = iptal dogrulandi | 2 = on kosul/uretim (siparis YOK) | 3 = IPTAL BASARISIZ (Serdar'a e-posta).
@@ -66,7 +66,7 @@ def main():
         bitir(2, f"ADRES YOK/EKSIK ({ADRES_REMOTE}: {','.join(eksik)}) - siparis VERILMEDI")
     log("adres okundu (icerik loga yazilmaz)")
 
-    # 2) sahte kisisel siparis karti + gercek baski uretec
+    # 2) sahte kisisel siparis karti (kartpostal girdisi)
     # kart girdisi ulkesi US: isim buyuk harf kurali EMILY (TR kurali EMILY'yi noktali I ile basardi); alici adresi ayri
     rec = {"receipt_id": int(RID), "country_iso": "US", "is_shipped": False,
            "transactions": [{"transaction_id": int(RID) + 1, "sku": "POD-ARI_LEO-DB-8x10", "quantity": 1,
@@ -78,24 +78,12 @@ def main():
     kis = K.cevaplar(rec, parse_sku)
     md, _ = K.kart(rec, kis, K.sablon_oku(str(W / "MM.md")), "")
     (W / f"{RID}.md").write_text(md, encoding="utf-8")
-    rc("rclone", "copyto", str(W / f"{RID}.md"), f"gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/{RID}.md", check=True)
-    sb = W / "sb"; sb.mkdir(exist_ok=True)
-    rc("git", "fetch", "-q", "--depth", "1", "origin", "siparis-baski-v1", check=True)
-    arc = subprocess.run(["git", "archive", "FETCH_HEAD", "scripts/medya_v1"], capture_output=True, check=True).stdout
-    subprocess.run(["tar", "-x", "-C", str(sb)], input=arc, check=True)
-    log("baski uretec basliyor (gercek, siparis-baski-v1)")
-    with (W / "uretim.log").open("w") as fh:
-        p = subprocess.run([sys.executable, str(sb / "scripts/medya_v1/siparis_dosyasi.py"), "--kart", f"{RID}.md"],
-                           stdout=fh, stderr=subprocess.STDOUT, timeout=1800, cwd=ROOT)
-    rc("rclone", "move", f"gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/{RID}", f"{KOK}/{RID}")
-    rc("rclone", "copyto", str(W / "uretim.log"), f"{KOK}/{RID}/URETIM.log")
-    kapi = ROOT / "_siparis" / RID / "KAPI_RAPORU.json"
-    kr = json.loads(kapi.read_text()) if kapi.exists() else {}
-    RAPOR["uretim"] = {"cikis": p.returncode, "durum": kr.get("durum"), "kapilar_gecti": kr.get("kapilar_gecti")}
-    log(f"uretim: cikis {p.returncode} durum {kr.get('durum')} kapilar {kr.get('kapilar_gecti')}")
-    if kr.get("durum") not in ("URETILDI", "BEKLIYOR") or kr.get("kapilar_gecti") is False \
-            or rc("rclone", "lsf", f"{KOK}/{RID}/BASKI_8x10.jpg").returncode:
-        bitir(2, "baski dosyasi uretilemedi - siparis VERILMEDI")
+    # Baski: uretec DEGIL (plate onayi bekliyor; GOREV 0003) - POD_PRINT'teki onayli Aries+Leo Deep Black 8x10
+    # (kisisel degil; yalniz Prodigi kabul testi). Kartpostal kisiye ozel (EMILY & JAMES).
+    baski_remote = "gdrive:ASTROLOVE/TEMP/POD_PRINT/ARIES_LEO/DEEP_BLACK/8x10.jpg"
+    RAPOR["baski"] = "POD_PRINT/ARIES_LEO/DEEP_BLACK/8x10.jpg (onayli, kisisel degil)"
+    if rc("rclone", "lsf", baski_remote).returncode:
+        bitir(2, "POD_PRINT Aries+Leo DB 8x10 yok - siparis VERILMEDI")
 
     # 3) kisiye ozel kartpostal
     font = W / "Cinzel.ttf"
@@ -115,7 +103,7 @@ def main():
     dl = R.DriveLinks()
     perms = []
     try:
-        fid, pid, url = dl.open(f"{KOK}/{RID}/BASKI_8x10.jpg"); perms.append([fid, pid])
+        fid, pid, url = dl.open(baski_remote); perms.append([fid, pid])
         kfid, kpid, kurl = dl.open(kart_remote); perms.append([kfid, kpid])
         body = {"merchantReference": REF, "idempotencyKey": REF, "shippingMethod": "Budget",
                 "recipient": {"name": adres["name"], "address": {k: adres.get(k) or None for k in
@@ -176,7 +164,6 @@ def main():
             except Exception as e:                    # noqa: BLE001
                 log(f"izin kapatma hatasi {type(e).__name__}")
         RAPOR["izin_kapatildi"] = len(perms)
-        rc("rclone", "deletefile", f"gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/{RID}.md")
     bitir(0, f"iptal dogrulandi ({RAPOR['iptal']['stage']})")
 
 
