@@ -1,0 +1,106 @@
+name: wp-kisisel-ornek
+
+# Duvar kagidi kisisellestirme ORNEGI (Serdar 25 Eyl 2026).
+# ETSY ERISIMI YOK. Drive'da yalniz TEMP/DIJITAL_78/WALLPAPER_ORNEK/ altina yazar.
+# Kaynak: WALLPAPER/DELIVERY_SAAT80/<CIFT>/*.zip (salt okur). Saat dosyasina DOKUNULMAZ.
+
+on:
+  push:
+    branches: [dijital-v1]
+    paths:
+      - 'config/wp_kisisel.trigger'
+
+concurrency:
+  group: wp-kisisel
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  KAYNAK: "gdrive:ASTROLOVE/WALLPAPER/DELIVERY_SAAT80"
+  CIKTI: "gdrive:ASTROLOVE/TEMP/DIJITAL_78/WALLPAPER_ORNEK"
+  ISIMLER: "EMILY,JAMES"
+  MESAJ: "It Began With a Kiss in the Rain"
+
+jobs:
+  ornek:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Bagimliliklar
+        run: |
+          set -euo pipefail
+          python -m pip install -q --upgrade pip
+          python -m pip install -q pillow numpy opencv-python-headless
+          rclone version | head -1
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+
+      - name: kisisel-v1 render kodu (degistirilmez)
+        run: |
+          set -euo pipefail
+          git fetch --depth 1 origin kisisel-v1
+          mkdir -p _kis
+          git archive FETCH_HEAD scripts/kisisel assets | tar -x -C _kis
+          ls _kis/assets/fonts/Cinzel.ttf _kis/assets/fonts/EBGaramond-Italic.ttf
+
+      - name: Kaynak duvar kagitlari (salt okur)
+        run: |
+          set -euo pipefail
+          mkdir -p _zip _wp/ARIES_LEO _wp/AQUARIUS_AQUARIUS
+          for e in Midnight_Blue Deep_Black Champagne_Ivory Warm_Parchment; do
+            rclone copy "$KAYNAK/ARIES_LEO/AstroLove_Aries_Leo_$e.zip" _zip -q
+          done
+          rclone copy "$KAYNAK/AQUARIUS_AQUARIUS/AstroLove_Aquarius_Aquarius_Midnight_Blue.zip" _zip/aqua -q
+          for z in _zip/*.zip; do
+            unzip -o -j -q "$z" '*Phone.jpg' '*Tablet.jpg' '*Desktop.jpg' -d _wp/ARIES_LEO
+          done
+          unzip -o -j -q _zip/aqua/*.zip '*Phone.jpg' -d _wp/AQUARIUS_AQUARIUS
+          echo "ARIES_LEO: $(ls _wp/ARIES_LEO | wc -l) dosya"
+          echo "AQUARIUS_AQUARIUS: $(ls _wp/AQUARIUS_AQUARIUS | wc -l) dosya"
+          du -sh _wp
+
+      - name: Uretim + kapilar
+        run: |
+          set -euo pipefail
+          python scripts/wp_kisisel/uret.py --girdi _wp --cikti _out \
+            --kisisel _kis --isimler "$ISIMLER" --mesaj "$MESAJ"
+
+      - name: Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -d _out ] || exit 0
+          rclone copy _out "$CIKTI" -q
+          echo "WALLPAPER_ORNEK (dosya | bayt | Drive id)"
+          rclone lsf "$CIKTI" --format "psi" --separator " | " --files-only -R | sed 's/^/  - /'
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: wp-kisisel-ornek
+          path: _out/
+          if-no-files-found: ignore
+
+      - if: ${{ always() }}
+        run: rm -rf _zip _wp ~/.config/rclone
