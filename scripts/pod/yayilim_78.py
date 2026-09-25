@@ -38,6 +38,8 @@ PILOT = "4570110641"                    # Aquarius-Aries
 ONAY = "YAYILIM_78"
 NITELIK = [(148789511775, 2315, "Yes", "Can be personalized"), (46803063641, 12, "Anniversary", "Occasion")]
 HAZIRLIK_GUN = (3, 5)
+ADET = 999                              # tek adet: Etsy "quantity must be consistent" (25 Eyl, 3 ilan FAIL)
+ONCELIK = "4570110641,4570113157,4570114301,4570224058,4570160260"   # pilot + satis yapmis 4 ilan
 OAS_URL = "https://www.etsy.com/openapi/generated/oas/3.0.0.json"
 OAS_OP = ["updateListing", "updateListingPersonalization", "getListingPersonalization",
           "createShopReadinessStateDefinition", "updateListingProperty", "updateListingTranslation",
@@ -171,7 +173,7 @@ def hedef_envanter(inv, sab, ref_inv, pair, rs_id):
         if eski_spv and (eski_spv.get("values") or [None])[0] == et and eski_spv.get("value_ids"):
             d_boy["value_ids"] = list(eski_spv["value_ids"])     # ayni etiket: id korunur
         pvs = [d_renk, d_boy] if (s["pv_sira"] or ["x"])[0] in ("primary color", "color") else [d_boy, d_renk]
-        adet = ((eski.get("offerings") or [{}])[0].get("quantity") if eski else None) or s["adet"] or 999
+        adet = ADET                                               # mevcut adet KOPYALANMAZ (satista 998 kalir -> 400)
         urunler.append({"sku": make_sku(pair, ed, k), "property_values": pvs,
                         "offerings": [{"price": FIYAT[k], "quantity": adet, "is_enabled": s["acik"],
                                        "readiness_state_id": rs_id}]})
@@ -265,8 +267,17 @@ def dogrula(sn0, sn1, row, sab, rs_id, pair):
 
 
 # ------------------------------------------------------------------ yazma
-def yaz_ilan(api, shop, lid, row, sab, ref_inv, rs_id, yedek):
+def mevcut_adetler(inv):
+    say = {}
+    for pr in inv.get("products") or []:
+        q = ((pr.get("offerings") or [{}])[0]).get("quantity")
+        say[q] = say.get(q, 0) + 1
+    return ", ".join(f"{k} x{v}" for k, v in sorted(say.items(), key=lambda kv: str(kv[0])))
+
+
+def yaz_ilan(api, shop, lid, row, sab, ref_inv, rs_id, yedek, yalniz_envanter=False):
     sn0 = anlik(api, shop, lid, nitelik=False)
+    adetler = mevcut_adetler(sn0["inventory"])
     (yedek / f"{lid}_ONCE.json").write_text(json.dumps(sn0, ensure_ascii=False, indent=1), encoding="utf-8")
     st = sn0["listing"].get("state")
     if st != "active":
@@ -277,20 +288,21 @@ def yaz_ilan(api, shop, lid, row, sab, ref_inv, rs_id, yedek):
         return "FAIL", "kapi: " + "; ".join(h)[:300]
     adim = "baslik/etiket/aciklama"
     try:
-        api.patch(f"/shops/{shop}/listings/{lid}", {"title": row["yeni_baslik"], "tags": row["yeni_etiketler"].replace("|", ","),
-                                                    "description": row["yeni_aciklama_en"]})
-        adim = "RU"
-        api.put(f"/shops/{shop}/listings/{lid}/translations/ru",
-                {"title": row["yeni_ru_baslik"], "description": row["yeni_ru_aciklama"],
-                 "tags": ",".join((sn0.get("ru") or {}).get("tags") or [])})
-        adim = "kisisellestirme"
-        # OAS: supports_multiple_personalization_questions bir SORGU parametresi (govde degil); tam degistirir.
-        api._call("POST", f"/shops/{shop}/listings/{lid}/personalization",
-                  params={"supports_multiple_personalization_questions": "true"},
-                  json_body={"personalization_questions": sorular(row)})
-        adim = "nitelik"
-        for pid, vid, deg, _ in NITELIK:
-            api.put(f"/shops/{shop}/listings/{lid}/properties/{pid}", {"value_ids": str(vid), "values": deg})
+        if not yalniz_envanter:
+            api.patch(f"/shops/{shop}/listings/{lid}", {"title": row["yeni_baslik"], "tags": row["yeni_etiketler"].replace("|", ","),
+                                                        "description": row["yeni_aciklama_en"]})
+            adim = "RU"
+            api.put(f"/shops/{shop}/listings/{lid}/translations/ru",
+                    {"title": row["yeni_ru_baslik"], "description": row["yeni_ru_aciklama"],
+                     "tags": ",".join((sn0.get("ru") or {}).get("tags") or [])})
+            adim = "kisisellestirme"
+            # OAS: supports_multiple_personalization_questions bir SORGU parametresi (govde degil); tam degistirir.
+            api._call("POST", f"/shops/{shop}/listings/{lid}/personalization",
+                      params={"supports_multiple_personalization_questions": "true"},
+                      json_body={"personalization_questions": sorular(row)})
+            adim = "nitelik"
+            for pid, vid, deg, _ in NITELIK:
+                api.put(f"/shops/{shop}/listings/{lid}/properties/{pid}", {"value_ids": str(vid), "values": deg})
         adim = "envanter"
         api.put_json(f"/listings/{lid}/inventory", govde)
         adim = "renk-gorsel"
@@ -311,11 +323,12 @@ def yaz_ilan(api, shop, lid, row, sab, ref_inv, rs_id, yedek):
             api.post_json(f"/shops/{shop}/listings/{lid}/variation-images", {"variation_images": vi})
             log(f"  {lid}: renk-gorsel baglari geri yazildi ({len(vi)})")
     except SystemExit as e:
-        return "FAIL", f"{adim} adiminda hata: {str(e)[:240]}"
+        return "FAIL", f"{adim} adiminda hata: {str(e)[:240]} | onceki adet: {adetler}"
     sn1 = anlik(api, shop, lid)
     (yedek / f"{lid}_SONRA.json").write_text(json.dumps(sn1, ensure_ascii=False, indent=1), encoding="utf-8")
     h = dogrula(sn0, sn1, row, sab, rs_id, pair)
-    return ("PASS", "tam geri okuma temiz") if not h else ("FAIL", "; ".join(h)[:300])
+    ek = f" | onceki adet: {adetler} -> {ADET}"
+    return ("PASS", "tam geri okuma temiz" + ek) if not h else ("FAIL", "; ".join(h)[:300] + ek)
 
 
 # ------------------------------------------------------------------ metin2: yalniz metin + kisisellestirme (25 Eyl)
@@ -420,6 +433,8 @@ def main():
     ap.add_argument("--atla", default=PILOT)
     ap.add_argument("--confirm", default="")
     ap.add_argument("--kota-alt", type=int, default=400)
+    ap.add_argument("--yalniz-envanter", action="store_true", help="yaz: metin/kisisellestirme/nitelik atlanir")
+    ap.add_argument("--oncelik", default=ONCELIK, help="metin2 --hepsi: once bu sira (ilki pilot: FAIL ise durur)")
     a = ap.parse_args()
     out = pathlib.Path(a.out)
     yedek = out / "YEDEK"
@@ -443,6 +458,15 @@ def main():
         log(f"CSV yenilendi: kontrol PASS {78 - len(h_csv)}/78")
         if h_csv:
             sys.exit(f"HATA: CSV kapisi FAIL: {h_csv[:3]} (Etsy'ye yazilmadi)")
+    basliklar = {}
+    _ham = requests.request
+
+    def _kaydet(*x, **k):                                         # Etsy limit/remaining/reset basliklarini olc
+        r = _ham(*x, **k)
+        basliklar.update({h: v for h, v in r.headers.items()
+                          if any(t in h.lower() for t in ("limit", "remaining", "reset", "retry"))})
+        return r
+    requests.request = _kaydet
     store = TokenStore(os.environ["TOKEN_FILE"], os.environ.get("ETSY_API_KEY", ""), os.environ.get("ETSY_SHARED_SECRET", ""))
     if store.needs_refresh():
         store.refresh()
@@ -464,10 +488,10 @@ def main():
             sys.exit(f"HATA: metin2 --confirm {ONAY} ister")
         sonuc, t0 = [], time.time()
         if a.listing:
-            hedef = [a.listing]
+            hedef = [x.strip() for x in a.listing.split(",") if x.strip()]
         elif a.hepsi:
-            atla = {x.strip() for x in a.atla.split(",") if x.strip()}
-            hedef = [k for k in satirlar if k not in atla]
+            onc = [x.strip() for x in a.oncelik.split(",") if x.strip() in satirlar]
+            hedef = onc + [k for k in satirlar if k not in onc]
         else:
             sys.exit("HATA: --listing ya da --hepsi")
         for i, lid in enumerate(hedef, 1):
@@ -480,8 +504,8 @@ def main():
                 break
             d, n = metin2_ilan(api, shop, lid, satirlar[lid], yedek)
             sonuc.append((lid, d, n))
-            if a.listing and d != "PASS":
-                break
+            if i == 1 and d != "PASS":
+                break                                             # ilk ilan pilottur: FAIL ise kalanlar yazilmaz
             g = time.time() - t0
             log(f"  [{i}/{len(hedef)}] {lid} {d} | gecen {g / 60:.1f} dk | kalan {g / i * (len(hedef) - i) / 60:.1f} dk "
                 f"| %{i * 100 // len(hedef)} | kota {api.remaining} | {n[:100]}")
@@ -538,7 +562,7 @@ def main():
             if not rs_id:
                 sys.exit("HATA: hazirlik suresi tanimi olusturulamadi")
         if a.listing:
-            hedef = [a.listing]
+            hedef = [x.strip() for x in a.listing.split(",") if x.strip()]
         elif a.hepsi:
             atla = {x.strip() for x in a.atla.split(",") if x.strip()}
             hedef = [k for k in satirlar if k not in atla]
@@ -554,12 +578,12 @@ def main():
             if kalan_kota < a.kota_alt:
                 sonuc.append((lid, "DURDU", f"kota {api.remaining} < {a.kota_alt}"))
                 break
-            d, n = yaz_ilan(api, shop, lid, satirlar[lid], sab, ref_inv, rs_id, yedek)
+            d, n = yaz_ilan(api, shop, lid, satirlar[lid], sab, ref_inv, rs_id, yedek, a.yalniz_envanter)
             sonuc.append((lid, d, n))
             g = time.time() - t0
             log(f"  [{i}/{len(hedef)}] {lid} {d} | gecen {g / 60:.1f} dk | kalan {g / i * (len(hedef) - i) / 60:.1f} dk "
                 f"| %{i * 100 // len(hedef)} | kota {api.remaining} | {n[:120]}")
-            if a.listing and d != "PASS":
+            if a.listing and len(hedef) == 1 and d != "PASS":
                 break
         ok = sum(1 for s in sonuc if s[1] == "PASS")
         rapor += [f"- PASS {ok}/{len(hedef)} | FAIL {sum(1 for s in sonuc if s[1] == 'FAIL')} | "
@@ -570,6 +594,7 @@ def main():
             w = csv.writer(fh)
             w.writerow(["ilan", "cift", "sonuc", "not"])
             w.writerows([(lid, satirlar[lid]["cift"], d, n) for lid, d, n in sonuc])
+    rapor += ["", f"- Etsy kota basliklari (son cevap, {time.strftime('%H:%M:%S', time.gmtime())} UTC): {basliklar}"]
     metin = "\n".join(rapor)
     (out / f"RAPOR_{a.mod}.md").write_text(metin + "\n", encoding="utf-8")
     log(metin[:6000])

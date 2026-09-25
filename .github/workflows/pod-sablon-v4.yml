@@ -263,7 +263,8 @@ jobs:
             elif [ "$LISTING" = "hepsi" ]; then
               python scripts/pod/yayilim_78.py yaz --hepsi --csv _work/METIN_78.csv --out _out/yayilim78 --confirm "$CONFIRM" --kota-alt "$KOTA_ALT" || rc=$?
             else
-              python scripts/pod/yayilim_78.py yaz --listing "$LISTING" --csv _work/METIN_78.csv --out _out/yayilim78 --confirm "$CONFIRM" --kota-alt "$KOTA_ALT" || rc=$?
+              EK=(); [ "$ADIM" = "envanter" ] && EK=(--yalniz-envanter)
+              python scripts/pod/yayilim_78.py yaz --listing "$LISTING" "${EK[@]}" --csv _work/METIN_78.csv --out _out/yayilim78 --confirm "$CONFIRM" --kota-alt "$KOTA_ALT" || rc=$?
             fi
             rclone copy _out/yayilim78 "gdrive:ASTROLOVE/TEMP/YAYILIM_78" -q
             echo "Drive: TEMP/YAYILIM_78 ($(rclone lsf -R gdrive:ASTROLOVE/TEMP/YAYILIM_78 | wc -l) dosya)"
