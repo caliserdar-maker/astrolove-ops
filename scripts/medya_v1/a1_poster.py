@@ -412,8 +412,12 @@ def serit77():
         for f in cik + ['RAPOR_77.json']: rc('copy', str(O / f), A77)
         print(json.dumps(OZ, ensure_ascii=False, indent=1, default=str), flush=True)
     finally:
-        try: rc('deletefile', LISTE77)
-        except Exception: pass                                    # noqa: BLE001
+        am_bekliyor = am_tagline() and not list((O / '_rapor').glob('parca_am_*.json'))
+        if am_bekliyor:
+            print('AM tagline var, AM kosusu henuz yok: imzali liste AM kosusu icin korunur', flush=True)
+        else:
+            try: rc('deletefile', LISTE77)
+            except Exception: pass                                # noqa: BLE001
 
 if __name__ == '__main__' and sys.argv[1:2] == ['uret77']:
     uret77(int(sys.argv[2]), int(sys.argv[3]), sys.argv[4] if len(sys.argv) > 4 else 'tam'); sys.exit(0)
