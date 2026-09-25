@@ -11,7 +11,7 @@ Kapak / kart 09: Cancer-Libra posteri ayni sarmalayiciyla uretilir, canli ilan g
 oturtulur (olcek + konum olculur), sonra o alanin TAMAMI ciftin posteriyle degisir; sahnenin geri kalani ayni.
 Girdi: Drive KISISEL_PILOT/A1_LISTE.json {"sayfa": {"1": url, ...}} (imzali URL'ler, loga maskeli, kosu sonunda silinir)
 Cikti: Drive .../AQUARIUS_AQUARIUS_v1/REVIEW/A_ORNEK/"""
-import io, json, subprocess, sys, time, urllib.request
+import io, json, re, subprocess, sys, time, urllib.request
 from pathlib import Path
 import numpy as np
 from PIL import Image
@@ -282,6 +282,69 @@ def yanyana(sol, sag, ad):
     c = Image.new('RGB', (a.width + b.width + 30, H), 'white'); c.paste(a, (0, 0)); c.paste(b, (a.width + 30, 0))
     c.save(CIK / ad, quality=92)
 
+# ------------------------------------------------------------------ KART09 ust etiketi (Serdar 25 Eyl: "ASTROLOVE / {A} + {B}")
+BURCLAR = ['ARIES', 'TAURUS', 'GEMINI', 'CANCER', 'LEO', 'VIRGO', 'LIBRA', 'SCORPIO', 'SAGITTARIUS', 'CAPRICORN', 'AQUARIUS', 'PISCES']
+ETIKET_KAYNAK = Path(__file__).resolve().parents[1] / 'etsy' / 'seo' / 'pod_changes_v2.json'   # onayli ilan basliklari (pair)
+K9_ETIKET_KUTU = (420, 80, 760, 135)       # canli kart09'da (3000x2250) cift adi bolumu; on ek "ASTROLOVE / " x < 415
+K9_ON_EK_X = 415
+K9_BANT = (70, 145)                         # etiket satiri (kapi ve serit icin)
+K9_ETIKET_X1 = 1300                         # en uzun etiket (CAPRICORN + SAGITTARIUS) bu x'ten once biter
+
+def etiketler():
+    """cift klasor adi -> kart etiketi (ilan basligindaki burc sirasi, buyuk harf)."""
+    d = json.loads(ETIKET_KAYNAK.read_text(encoding='utf-8'))
+    return {'_'.join(sorted(x['pair'].upper().split(' + '))): x['pair'].upper() for x in d}
+
+def k9_hazirla(sahne_k9, eski=REF_CIFT.replace('_', ' + ')):
+    """Etiket parametreleri canli karttan olculur (font, agirlik, boy, izleme, renk, taban cizgisi)."""
+    sys.path.insert(0, str(Path(__file__).resolve().parent / 'uretim'))
+    import textlayer as tl
+    tl.FONTS['mont'] = str(K / 'assets' / 'fonts' / 'Montserrat.ttf') if (K / 'assets' / 'fonts' / 'Montserrat.ttf').exists() else tl.FONTS['mont']
+    c = np.asarray(sahne_k9.convert('RGB')).astype(np.float64)
+    bg = np.median(c[20:60, 100:1500].reshape(-1, 3), 0)
+    p = tl.fit(c, K9_ETIKET_KUTU, eski, 'mont', bg, sub=True)
+    return {'tl': tl, 'c': c, 'bg': bg, 'p': p, 'base': p['oy'] + p['base0'], 'eski': eski}
+
+def k9_etiket_ciz(X, etiket):
+    c = X['c'].copy(); bx0, by0, bx1, by1 = X['p']['box']; W = c.shape[1]
+    c[by0 - 6:by1 + 6, bx0 - 6:W - 60] = X['bg']
+    return X['tl'].draw_with(c, X['p'], etiket, x=X['p']['ox'], base=X['base'])
+
+def kart09_uret(X, poster, yer, etiket):
+    zemin = Image.fromarray(np.clip(k9_etiket_ciz(X, etiket), 0, 255).astype(np.uint8))
+    return yerlestir(zemin, poster, yer)
+
+def ocr(im, psm='7'):
+    r = subprocess.run(['tesseract', 'stdin', 'stdout', '--psm', psm], input=_png(im), capture_output=True)
+    return ' '.join(r.stdout.decode('utf-8', 'ignore').split())
+
+def _png(im):
+    b = io.BytesIO(); im.save(b, 'PNG'); return b.getvalue()
+
+def k9_kapisi(kart, X, beklenen, tum, yer):
+    """YENI KAPI: (1) OCR etiket satiri == 'ASTROLOVE / beklenen'; (2) sablon: 78 etiket arasinda en iyi eslesme beklenen,
+    fark payi yeterli; (3) on ek 'ASTROLOVE /' piksel ayni; (4) kartin geri kalaninda (poster haric) burc adi yok."""
+    a = np.asarray(kart.convert('RGB')).astype(np.float64); y0, y1 = K9_BANT; W = a.shape[1]
+    bant = Image.fromarray(a[y0:y1, 100:W - 60].astype(np.uint8)).convert('L')
+    okunan = ocr(bant.resize((bant.width * 2, bant.height * 2), Image.LANCZOS))
+    ocr_ok = okunan.replace(' ', '') == f'ASTROLOVE/{beklenen}'.replace(' ', '')
+    skor = {}
+    for e in tum:
+        r = k9_etiket_ciz(X, e)
+        skor[e] = float(np.abs(r[y0:y1, K9_ON_EK_X:K9_ETIKET_X1] - a[y0:y1, K9_ON_EK_X:K9_ETIKET_X1]).mean())
+    sira = sorted(skor, key=skor.get); pay = skor[sira[1]] - skor[sira[0]]
+    on_ek = float(np.abs(a[y0:y1, 100:K9_ON_EK_X] - X['c'][y0:y1, 100:K9_ON_EK_X]).max())
+    g = a.copy(); g[yer['y']:yer['y'] + yer['h'], yer['x']:yer['x'] + yer['w']] = X['bg']; g[y0:y1] = X['bg']
+    geri = ocr(Image.fromarray(g.astype(np.uint8)).convert('L'), '3').upper()
+    diger = [b for b in BURCLAR if re.search(rf'\b{b}\b', geri)]          # tam kelime ('VARIES' ARIES degil)
+    return {'gecti': ocr_ok and sira[0] == beklenen and pay >= 1.0 and on_ek <= 12 and not diger,
+            'ocr': okunan, 'ocr_ok': ocr_ok, 'sablon_en_iyi': sira[0], 'sablon_fark': round(skor[sira[0]], 2),
+            'sablon_pay': round(pay, 2), 'on_ek_maks_fark': round(on_ek, 1), 'diger_burc_metni': diger}
+
+def k9_kontrol_gorseli(kart, yol):
+    a = kart.convert('RGB'); y0, y1 = K9_BANT
+    a.crop((100, y0, a.width - 900, y1)).save(yol, quality=92)
+
 # ------------------------------------------------------------------ 77 CIFT (Serdar onayi 25 Eyl: 08ceb2f kurallari)
 IN = ('ISABELLA', 'NOAH'); TAG_IN = "I'd Choose You in Every Lifetime"
 AM = ('ALEXANDER', 'MIA'); AM_TAG_YOL = f'{KP}/A1_77_AM_TAGLINE.txt'   # video oturumunun raporladigi metin (tek satir)
@@ -341,6 +404,7 @@ def uret77(parca, toplam, mod='tam'):
     sahne = {ad: Image.open(REF[i]).convert('RGB') for ad, (i, _) in SAHNE.items()}
     yer = {'kapak': kapak_yer(sahne['kapak'], cl, aciklik_olc(sahne['kapak'])), 'kart09': yer_olc(sahne['kart09'], cl, SAHNE['kart09'][1])}
     R['yer'] = yer; R['referans_sn'] = round(time.time() - T0, 1); log('referans + yer hazir', yer)
+    X9 = k9_hazirla(sahne['kart09']); ET = etiketler()
     g = lambda im: np.asarray(im.convert('L').resize((160, 200), Image.BOX)).astype(np.float64)
     t_bas = time.time()
     for i, c in enumerate(benim):
@@ -362,7 +426,9 @@ def uret77(parca, toplam, mod='tam'):
                 if 'EJ' in cikti:
                     ej = cikti['EJ'][0]
                     yerlestir(sahne['kapak'], ej, yer['kapak']).save(d / 'KAPAK.jpg', quality=95)
-                    yerlestir(sahne['kart09'], ej, yer['kart09']).save(d / 'KART09.jpg', quality=95)
+                    kart09_uret(X9, ej, yer['kart09'], ET[c]).save(d / 'KART09.jpg', quality=95)
+                    r['kart09_kapisi'] = k9_kapisi(Image.open(d / 'KART09.jpg'), X9, ET[c], list(ET.values()), yer['kart09'])
+                    k9_kontrol_gorseli(Image.open(d / 'KART09.jpg'), d / 'ETIKET.jpg')
                 (d / f'RAPOR_{mod}.json').write_text(json.dumps(r, ensure_ascii=False, indent=1, default=str))
                 rc('copy', str(d), f'{A77}/{c}')
         except Exception as e:                                    # noqa: BLE001
@@ -373,6 +439,48 @@ def uret77(parca, toplam, mod='tam'):
     R['toplam_sn'] = round(time.time() - T0, 1)
     (O / f'parca_{mod}_{parca}.json').write_text(json.dumps(R, ensure_ascii=False, indent=1, default=str))
     rc('copy', str(O / f'parca_{mod}_{parca}.json'), f'{A77}/_rapor')
+
+def kart77(parca, toplam):
+    """Yalniz KART09 yeniden uretimi (poster/kapak render yok): onayli POSTER_EJ + dogru ust etiket + kart kapisi."""
+    O = W / 'A1_77'; O.mkdir(exist_ok=True); R = {'parca': parca, 'toplam_is': toplam, 'mod': 'kart', 'cift': {}}
+    kisisel_hazirla()                                           # Montserrat (kisisel-v1 assets) icin
+    ciftler = sorted(x.strip('/') for x in rc('lsf', POD, '--dirs-only').split())
+    uretilmis = set(x.strip('/') for x in rc('lsf', A77, '--dirs-only').split())
+    benim = [c for c in [c for c in ciftler if c != REF_CIFT][parca::toplam] if c in uretilmis]
+    rc('copy', f'{A77}/_rapor', str(O / '_rapor'), '--include', 'parca_tam_*.json')
+    yer = json.loads(sorted((O / '_rapor').glob('parca_tam_*.json'))[0].read_text())['yer']['kart09']
+    rc('copy', f'{DR}/_girdi/etsy/REF_4570143815', str(W / 'ref'), '--include', '*.jpg')
+    sahne = Image.open(sorted((W / 'ref').glob('[01]*.jpg'))[SAHNE['kart09'][0]]).convert('RGB')
+    X9 = k9_hazirla(sahne); ET = etiketler(); tum = list(ET.values())
+    R['etiket_olcum'] = {k: X9['p'][k] for k in ('w', 'size', 'track', 'box', 'ink')}
+    R['canli_kart_kapisi'] = k9_kapisi(sahne, X9, REF_CIFT.replace('_', ' + '), tum, yer)   # kalibrasyon: canli CL karti PASS olmali
+    log('etiket olcumu', R['etiket_olcum'], 'canli CL karti kapisi', R['canli_kart_kapisi'])
+    t_bas = time.time()
+    for i, c in enumerate(benim):
+        ti = time.time(); r = {'etiket': ET[c]}; d = O / c; d.mkdir(exist_ok=True)
+        try:
+            rc('copy', f'{A77}/{c}', str(d), '--include', 'POSTER_EJ.png', '--include', 'KART09.jpg')
+            eski = Image.open(d / 'KART09.jpg'); y0, y1 = K9_BANT
+            b = eski.convert('L').crop((100, y0, eski.width - 60, y1)); r['eski_ocr'] = ocr(b.resize((b.width * 2, b.height * 2), Image.LANCZOS))
+            r['eski_hatali'] = r['eski_ocr'].replace(' ', '') != f'ASTROLOVE/{ET[c]}'.replace(' ', '')
+            kart09_uret(X9, Image.open(d / 'POSTER_EJ.png'), yer, ET[c]).save(d / 'KART09.jpg', quality=95)
+            r['kapi'] = k9_kapisi(Image.open(d / 'KART09.jpg'), X9, ET[c], tum, yer); r['gecti'] = r['kapi']['gecti']
+            k9_kontrol_gorseli(Image.open(d / 'KART09.jpg'), d / 'ETIKET.jpg')
+            (d / 'POSTER_EJ.png').unlink()
+            if r['gecti']:
+                (d / 'RAPOR_kart.json').write_text(json.dumps(r, ensure_ascii=False, indent=1))
+                rc('copy', str(d), f'{A77}/{c}')
+            else:                                                # hatali kart yuklenmez; eski kart da kaldirilir
+                rc('deletefile', f'{A77}/{c}/KART09.jpg')
+        except Exception as e:                                    # noqa: BLE001
+            r['gecti'] = False; r['hata'] = repr(e)[:400]
+        r['sn'] = round(time.time() - ti, 1); R['cift'][c] = r
+        n = i + 1; gecen = time.time() - t_bas
+        log(f'[{n}/{len(benim)}] {c} {"PASS" if r["gecti"] else "FAIL"} eski: {r.get("eski_ocr")} | gecen {gecen / 60:.1f} dk, kalan {gecen / n * (len(benim) - n) / 60:.1f} dk, %{100 * n / len(benim):.0f}')
+    R['toplam_sn'] = round(time.time() - T0, 1)
+    (O / f'parca_kart_{parca}.json').write_text(json.dumps(R, ensure_ascii=False, indent=1, default=str))
+    rc('copy', str(O / f'parca_kart_{parca}.json'), f'{A77}/_rapor')
+
 
 def serit77():
     from PIL import ImageDraw
@@ -385,7 +493,10 @@ def serit77():
             d = json.loads(f.read_text()); parca.append({'parca': d['parca'], 'toplam_sn': d['toplam_sn'], 'referans_sn': d.get('referans_sn')}); R.update(d['cift'])
         for f in sorted((O / '_rapor').glob('parca_am_*.json')):
             RA.update(json.loads(f.read_text())['cift'])
-        rc('copy', A77, str(O / 'c'), '--include', '*/KAPAK.jpg', '--include', '*/POSTER_IN.png', '--include', '*/POSTER_AM.png', '--include', '*/SEMBOL_EJ.jpg', '--transfers', '16')
+        RK = {}
+        for f in sorted((O / '_rapor').glob('parca_kart_*.json')):
+            RK.update(json.loads(f.read_text())['cift'])
+        rc('copy', A77, str(O / 'c'), '--include', '*/KAPAK.jpg', '--include', '*/POSTER_IN.png', '--include', '*/POSTER_AM.png', '--include', '*/SEMBOL_EJ.jpg', '--include', '*/ETIKET.jpg', '--transfers', '16')
         ad = sorted(R); gec = [c for c in ad if R[c]['gecti']]; kal = [c for c in ad if not R[c]['gecti']]
         def izgara(dosya, w, h, sut, cikti):
             sat = -(-len(ad) // sut); E = 26; T = Image.new('RGB', (sut * (w + 8) + 8, sat * (h + E + 8) + 8), 'white'); dr = ImageDraw.Draw(T)
@@ -401,11 +512,16 @@ def serit77():
                izgara('SEMBOL_EJ.jpg', 380, 432, 7, 'SERIT_c_SEMBOL_kaynak_vs_yeni_77.jpg')]
         am_var = [c for c in ad if (O / 'c' / c / 'POSTER_AM.png').exists()]
         if am_var: cik.append(izgara('POSTER_AM.png', 240, 300, 11, 'SERIT_d_POSTER_AM_77.jpg'))
+        if any((O / 'c' / c / 'ETIKET.jpg').exists() for c in ad): cik.append(izgara('ETIKET.jpg', 1000, 36, 2, 'SERIT_e_KART09_ETIKET_77.jpg'))
         sure = [R[c]['sn'] for c in gec]                         # olculmus sure: uretilen (PASS) ciftler
+        for c in RK:
+            R.setdefault(c, {})['KART09'] = RK[c]
         for c in RA:                                            # AM ayri kosuda uretildiyse kapisi da cift raporuna girer
             R[c]['AM'] = {k: RA[c].get(k) for k in ('gecti', 'kapi', 'hata', 'sn')}
         am_kal = [c for c in RA if not RA[c]['gecti']]
-        OZ = {'pass': len(gec), 'fail': len(kal), 'am_uretilen': len(am_var), 'am_fail': {c: RA[c].get('hata') or RA[c].get('kapi') for c in am_kal}, 'fail_liste': {c: R[c].get('hata') or R[c].get('kapi') for c in kal},
+        kart = {'uretilen': len(RK), 'eski_hatali': sum(1 for c in RK if RK[c].get('eski_hatali')),
+                'pass': sum(1 for c in RK if RK[c]['gecti']), 'fail': {c: RK[c].get('hata') or RK[c].get('kapi') for c in RK if not RK[c]['gecti']}}
+        OZ = {'pass': len(gec), 'fail': len(kal), 'kart09': kart, 'am_uretilen': len(am_var), 'am_fail': {c: RA[c].get('hata') or RA[c].get('kapi') for c in am_kal}, 'fail_liste': {c: R[c].get('hata') or R[c].get('kapi') for c in kal},
               'cift_sn_ort': round(float(np.mean(sure)), 1), 'cift_sn_maks': max(sure), 'parca': parca,
               'is_sn_maks': max(p['toplam_sn'] for p in parca), 'serit_sn': round(time.time() - t0, 1), 'seritler': cik}
         (O / 'RAPOR_77.json').write_text(json.dumps({'ozet': OZ, 'cift': R}, ensure_ascii=False, indent=1, default=str))
@@ -420,7 +536,8 @@ def serit77():
             except Exception: pass                                # noqa: BLE001
 
 if __name__ == '__main__' and sys.argv[1:2] == ['uret77']:
-    uret77(int(sys.argv[2]), int(sys.argv[3]), sys.argv[4] if len(sys.argv) > 4 else 'tam'); sys.exit(0)
+    m = sys.argv[4] if len(sys.argv) > 4 else 'tam'
+    (kart77(int(sys.argv[2]), int(sys.argv[3])) if m == 'kart' else uret77(int(sys.argv[2]), int(sys.argv[3]), m)); sys.exit(0)
 
 if __name__ == '__main__' and sys.argv[1:2] == ['serit77']:
     serit77(); sys.exit(0)
