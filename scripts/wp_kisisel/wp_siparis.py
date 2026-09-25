@@ -34,7 +34,8 @@ _s = importlib.util.spec_from_file_location("wp_v2", Path(__file__).resolve().pa
 V2 = importlib.util.module_from_spec(_s); _s.loader.exec_module(V2)            # noqa: E402
 from wp_mockup_common import DEVICES, imread                                   # noqa: E402
 import wp_build_pair as WBP                                                    # noqa: E402
-from wp_plate_pilot import BOX_NAMES, REF_TAGLINE                              # noqa: E402
+from wp_plate_pilot import (BOX_NAMES, INK_RGB, REF_TAGLINE, RING_BAND,          # noqa: E402
+                            RING_ELLIPSE, RING_LINE_PX, RING_TIP_Y)
 
 Image.MAX_IMAGE_PIXELS = None
 POSTER_W, POSTER_H = V2.POSTER_W, V2.POSTER_H
@@ -70,14 +71,60 @@ def kaynak_oku(baski_kok, plate_kok, ed):
 
 
 # ------------------------------------------------------------------ murekkep
-def murekkep(baski, plate):
-    """ESIK YOK: fark = baski - plate (isaretli), alfa = fark != 0."""
-    fark = baski.astype(np.float32) - plate.astype(np.float32)
+def murekkep(baski, plate, ed, hayalet="birak"):
+    """ESIK YOK: fark = baski - plate (isaretli), murekkep YONUNE gore ayrilir.
+
+    kisisel PLATE 78 ciftin MEDYANI: halka, ∞ ve ESKI SLOGAN plate'te KALIR.
+    Bu yuzden farkta iki isaret bulunur:
+      poz (baski murekkep rengine YAKLASIYOR)  -> YENI murekkep, aktarilir
+      neg (baski murekkepten UZAKLASIYOR)      -> plate'te kalan ESKI oge
+                                                  (eski ∞, eski slogan). CLEAN
+                                                  plakada bu ogeler ZATEN YOK;
+                                                  aktarilirsa negatif hayalet
+                                                  (koyu/acik leke) olusur.
+    Yon testi: p = <fark, INK_RGB - plate>. Esik yok, isaret testi.
+    hayalet="birak" (varsayilan) negatifi aktarmaz; "gecir" eski davranis
+    (olcum/karsilastirma icin).
+    """
+    r, g, b = INK_RGB[ed]
+    f = baski.astype(np.float32) - plate.astype(np.float32)
+    yon = np.array([b, g, r], np.float32) - plate.astype(np.float32)
+    p = (f * yon).sum(2)
+    var = np.abs(f).max(2) > 0
+    poz = var & (p > 0)
+    neg = var & (p < 0)
+    sifir = var & (p == 0)                     # yon belirsiz (plate zaten murekkep rengi)
+    fark = f if hayalet == "gecir" else f * poz[..., None]
     alfa = (np.abs(fark).max(2) > 0).astype(np.float32)
-    return fark, alfa
+    tani = {"poz_px": int(poz.sum()), "neg_px": int(neg.sum()), "yonsuz_px": int(sifir.sum()),
+            "neg_kutu": [int(v) for v in V2.bbox(neg)] if neg.any() else None,
+            "neg_maks": round(float(np.abs(f).max(2)[neg].max()), 1) if neg.any() else 0.0}
+    return fark, alfa, tani
 
 
-def kutular_olc(alfa):
+def halka_bandi():
+    """Poster olceginde halka bandi (wp_v2.halka_maskesi ile ayni geometri)."""
+    bant = np.zeros((POSTER_H, POSTER_W), np.uint8)
+    cx, cy, ax, ay = RING_ELLIPSE
+    cv2.ellipse(bant, (int(cx), int(cy)), (int(ax), int(ay)), 0, 0, 360, 1,
+                int(RING_LINE_PX) + 2 * 5 * RING_BAND, cv2.LINE_8)
+    bant[RING_TIP_Y + 1:, :] = 0
+    return bant.astype(np.float32)
+
+
+def halka_katkisi(gece, clean, bant_dev):
+    """Halka = (gece plakasi - CLEAN plaka), halka bandiyla sinirli. ESIK YOK.
+
+    Ikisi de ayni cihaz tuvalinde ve CLEAN, gece plakasindan sabit ogeler
+    silinerek uretildi; aradaki fark TAM OLARAK sabit ogelerdir. Bant eski
+    slogani disarida birakir (RING_TIP_Y altinda kalir).
+    """
+    d = gece.astype(np.float32) - clean.astype(np.float32)
+    m = (np.abs(d).max(2) > 0) & (bant_dev > 0)
+    return d * m[..., None], m
+
+
+def kutular_olc(alfa, halka_ayri=False):
     """Isim satiri (sol / ∞ / sag) ve mesaj kutusu - OLCULEN maskeden, poster px.
 
     Maske tam (esiksiz) oldugu icin kume ayrimi doku gurultusune bagli degil;
@@ -101,16 +148,21 @@ def kutular_olc(alfa):
     # wallpaper CLEAN plakasinda da yoklar, aktarilmazlarsa kapi 2 duser.
     say = {ad: int((m & (V2.kutu_maske(alfa.shape, kt) > 0)).sum())
            for ad, kt in (("halka", V2.BOX_SYMBOL_RING), ("sembol", V2.BOX_SYMBOL_CORE))}
-    bos = [ad for ad, n in say.items() if n == 0]
+    bekle = ["sembol"] if halka_ayri else ["halka", "sembol"]
+    bos = [ad for ad in bekle if say[ad] == 0]
     if bos:
-        raise SystemExit(f"HATA: murekkepte {bos} yok ({say}). kisisel PLATE sabit ogeleri "
-                         f"iceriyor olabilir; CLEAN plakada da yoklar, kapi 2 duser.")
+        raise SystemExit(f"HATA: murekkepte {bos} yok ({say}). CLEAN plakada da yoklar; "
+                         f"aktarilmazsa kapi 2 duser. Halka plate'te kaliyorsa --halka ver.")
+    if halka_ayri and say["halka"] > 0:
+        bilgi["uyari"] = (f"--halka verildi ama farkta da halka mürekkebi var ({say['halka']} px); "
+                          f"halka iki kez cizilebilir - olcum: kapi 2 halka sapmasi.")
     bilgi["sabit_oge_px"] = say
     return kutu, bilgi
 
 
 # ------------------------------------------------------------------ uretim
-def uret(ed, baski, plate, fark, alfa, temiz, plakalar, cikti, cift, kutu, aktarim, urun, rapor):
+def uret(ed, baski, plate, fark, alfa, temiz, plakalar, cikti, cift, kutu, aktarim, urun, rapor,
+         halka_kok="", bant=None, tani_m=None):
     for dev in CIHAZLAR:
         yol_p = Path(temiz) / f"PLATE_{ed.upper()}_{dev.upper()}_CLEAN.png"
         clean = imread(yol_p)
@@ -124,6 +176,20 @@ def uret(ed, baski, plate, fark, alfa, temiz, plakalar, cikti, cift, kutu, aktar
             out_f = C + WBP.place(fark, dev, clean.shape, geom)
         else:
             out_f = A * WBP.place(baski.astype(np.float32), dev, clean.shape, geom) + (1 - A) * C
+        halka_px = 0
+        if halka_kok:                      # halka kisisel PLATE'te kaldi -> gece plakasindan
+            yol_g = Path(halka_kok) / f"PLATE_{ed.upper()}_{dev.upper()}.png"
+            if not yol_g.exists():
+                raise SystemExit(f"HATA: halkali gece plakasi yok: {yol_g}")
+            gece = imread(yol_g)
+            if gece.shape[:2] != clean.shape[:2]:
+                raise SystemExit(f"HATA: {yol_g.name} {gece.shape[1]}x{gece.shape[0]} != CLEAN {W}x{H}")
+            bant_dev = WBP.place(bant, dev, clean.shape, geom)
+            hk, hm = halka_katkisi(gece, clean, bant_dev)
+            out_f = out_f + hk
+            A = np.maximum(A, hm[..., None].astype(np.float32))
+            halka_px = int(hm.sum())
+            del gece, bant_dev, hk, hm
         out = np.clip(np.round(out_f), 0, 255).astype(np.uint8)
         ad = f"AstroLove_{cift}_{ed}_{dev}.jpg"
         Image.fromarray(cv2.cvtColor(out, cv2.COLOR_BGR2RGB)).save(Path(cikti) / ad, "JPEG",
@@ -150,10 +216,11 @@ def uret(ed, baski, plate, fark, alfa, temiz, plakalar, cikti, cift, kutu, aktar
             halo = {"medyan": 0.0, "p99": 0.0, "maks": 0.0, "px": 0}
         urun[(ed, dev)] = dict(yol=str(Path(cikti) / ad), plaka=str(yol_p), geom=geom, kapi1=k1, ek5=ek5)
         rapor.append({"edisyon": ed, "cihaz": dev, "dosya": ad, "aktarim": aktarim,
-                      "kapi1_maske_disi": k1, "ek5_mesaj_bandi": ek5,
-                      "tani_plate_clean_kenar_farki": halo, "kutular": kutu})
+                      "kapi1_maske_disi": k1, "ek5_mesaj_bandi": ek5, "halka_px": halka_px,
+                      "tani_murekkep": tani_m, "tani_plate_clean_kenar_farki": halo, "kutular": kutu})
         log(f"{ed} {dev}: maske disi {k1['maks_fark']} (JPEG {k1['jpeg_sonrasi']}) | "
-            f"mesaj bandi {ek5['murekkep_disi_maks_fark']} | tani hale medyan {halo['medyan']} p99 {halo['p99']}")
+            f"mesaj bandi {ek5['murekkep_disi_maks_fark']} | halka {halka_px} px | "
+            f"tani hale medyan {halo['medyan']} p99 {halo['p99']}")
 
 
 def main(argv=None):
@@ -166,21 +233,27 @@ def main(argv=None):
     ap.add_argument("--cikti", required=True)
     ap.add_argument("--cift", default="Aries_Leo")
     ap.add_argument("--aktarim", choices=("fark", "maske"), default="fark")
+    ap.add_argument("--halka", default="", help="halkali gece plakalari (PLATE_<ED>_<DEV>.png); "
+                                                "kisisel PLATE halkayi iceriyorsa zorunlu")
+    ap.add_argument("--hayalet", choices=("birak", "gecir"), default="birak",
+                    help="plate'te kalan eski ∞/slogan farki: birak=aktarma (varsayilan), gecir=aktar")
     ap.add_argument("--edisyonlar", default=",".join(EDISYONLAR))
     ap.add_argument("--sadece-olcum", action="store_true")
     a = ap.parse_args(argv)
     ed_list = [e.strip() for e in a.edisyonlar.split(",") if e.strip()]
     cikti = Path(a.cikti); cikti.mkdir(parents=True, exist_ok=True)
+    bant = halka_bandi() if a.halka else None
 
     # --- 1. ASAMA: tum edisyonlar once OLCULUR (uretim yok) --------------
     olcum = {}
     for ed in ed_list:
         baski, plate, bn, pn = kaynak_oku(a.baski, a.plate, ed)
-        fark, alfa = murekkep(baski, plate)
-        kutu, bilgi = kutular_olc(alfa)
+        fark, alfa, tani = murekkep(baski, plate, ed, a.hayalet)
+        kutu, bilgi = kutular_olc(alfa, bool(a.halka))
         olcum[ed] = {"baski": bn, "plate": pn, "kutular": kutu, "kume": bilgi,
-                     "murekkep_px": int((alfa > 0).sum())}
+                     "tani_murekkep": tani, "murekkep_px": int((alfa > 0).sum())}
         log(f"OLCUM {ed}: kume={json.dumps(bilgi)}")
+        log(f"       tani={json.dumps(tani)}")
         log(f"       kutular={json.dumps(kutu)} murekkep_px={olcum[ed]['murekkep_px']}")
         del baski, plate, fark, alfa
     (cikti / "WP_SIPARIS_OLCUM.json").write_text(json.dumps(olcum, indent=1))
@@ -197,9 +270,9 @@ def main(argv=None):
     urun, rapor = {}, []
     for ed in ed_list:
         baski, plate, _, _ = kaynak_oku(a.baski, a.plate, ed)
-        fark, alfa = murekkep(baski, plate)
+        fark, alfa, tani = murekkep(baski, plate, ed, a.hayalet)
         uret(ed, baski, plate, fark, alfa, a.temiz, a.plakalar or a.temiz, cikti, a.cift,
-             olcum[ed]["kutular"], a.aktarim, urun, rapor)
+             olcum[ed]["kutular"], a.aktarim, urun, rapor, a.halka, bant, tani)
         del baski, plate, fark, alfa
     (cikti / "WP_SIPARIS_URETIM.json").write_text(json.dumps(rapor, indent=1))
     return olcum, rapor, urun
