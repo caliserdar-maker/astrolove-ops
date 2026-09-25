@@ -3,7 +3,8 @@
 
 On kosul: Prodigi Preferences > Order edit window = "Pause indefinitely, until manually released" (Serdar ekran
 goruntusuyle dogruladi, 25 Eyl 20:09; API'de hesap ayari ucu yok - hesap_oku kosusu 36165026408, 0/13).
-Siparis: Aries+Leo, Deep Black, 8x10, isimler EMILY/JAMES + mesaj (sahte, e2e ile ayni), kisiye ozel kartpostal (branding.postcard.url).
+Siparis: Aries+Leo, Deep Black, 8x10, isimler EMILY/JAMES + mesaj (sahte, e2e ile ayni), kisiye ozel kartpostal + 2 sticker
+(branding; siparis_onay.branding_ac), kargo teklifteki EN UCUZ yontem (govde_kur).
 Alici: Serdar'in kendi adresi, Drive TEMP/PRODIGI_TEST_ADRES.json ({name, line1, line2?, postalOrZipCode,
 townOrCity, stateOrCounty?, countryCode}). Dosya yoksa SIPARIS VERILMEZ. Adres loga YAZILMAZ.
 Adimlar: 1 adres  2 kart (uretim girdisi); baski = POD_PRINT onayli Aries+Leo DB 8x10 (GOREV 0003: uretec plate onayi bekliyor)  3 kartpostal_uret
@@ -46,6 +47,21 @@ def bitir(kod, neden):
     rc("rclone", "copyto", str(W / "GUVENLI_TEST_RAPOR.json"), f"{KOK}/_GUVENLI_{DAMGA}/GUVENLI_TEST_RAPOR.json")
     print("SONUC " + json.dumps({k: v for k, v in RAPOR.items() if k != "adres"}, ensure_ascii=False), flush=True)
     sys.exit(kod)
+
+
+def govde_kur(prod, adres, sku, url, branding):
+    """Canli akisla AYNI kural: tum kargo secenekleri teklif edilir, EN UCUZ secilir (siparis_onay.kargo_sec;
+    25 Eyl testinde sabit 'Budget' 26.37 gitti, Standard 10.42 idi - GOREV 0006 BULGU 2). -> (govde, secilen)."""
+    _, err, ayr = prod.quote([{"prodigi_sku": sku, "qty": 1}], str(adres["countryCode"]).upper())
+    secilen = (ayr or {}).get("secilen") or {}
+    if not secilen.get("yontem"):
+        raise RuntimeError(f"teklif alinamadi, kargo secilemedi: {err}")
+    return {"merchantReference": REF, "idempotencyKey": REF, "shippingMethod": secilen["yontem"],
+            "recipient": {"name": adres["name"], "address": {k: adres.get(k) or None for k in
+                          ("line1", "line2", "postalOrZipCode", "countryCode", "townOrCity", "stateOrCounty")}},
+            "items": [{"merchantReference": f"{REF}-1", "sku": sku, "copies": 1,
+                       "sizing": "fillPrintArea", "assets": [{"printArea": "default", "url": url}]}],
+            "branding": branding}, secilen
 
 
 def main():
@@ -104,13 +120,10 @@ def main():
     perms = []
     try:
         fid, pid, url = dl.open(baski_remote); perms.append([fid, pid])
-        kfid, kpid, kurl = dl.open(kart_remote); perms.append([kfid, kpid])
-        body = {"merchantReference": REF, "idempotencyKey": REF, "shippingMethod": "Budget",
-                "recipient": {"name": adres["name"], "address": {k: adres.get(k) or None for k in
-                              ("line1", "line2", "postalOrZipCode", "countryCode", "townOrCity", "stateOrCounty")}},
-                "items": [{"merchantReference": f"{REF}-1", "sku": harita.get("8x10", "GLOBAL-HPR-8x10"), "copies": 1,
-                           "sizing": "fillPrintArea", "assets": [{"printArea": "default", "url": url}]}],
-                "branding": {"postcard": {"url": kurl}}}
+        branding, bizin = O.branding_ac(dl, kart_remote); perms += bizin
+        body, secilen = govde_kur(prod, adres, harita.get("8x10", "GLOBAL-HPR-8x10"), url, branding)
+        RAPOR["kargo"] = secilen
+        log(f"kargo: {secilen.get('yontem')} (en ucuz; kalem+kargo+vergi+ekstra)")
         log("CANLI siparis olusturuluyor (Pause indefinitely acik)")
         st, d = prod.create_order(body)
         o = d.get("order") or {}

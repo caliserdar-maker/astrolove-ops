@@ -563,13 +563,12 @@ def submit_package(a, prod, st, rid, report):
             fid, pid, url = links.open(it["asset_remote"])
             perms.append([fid, pid])
             body["items"][n]["assets"][0]["url"] = url
-        if pkg.get("kartpostal_remote"):                 # kisiye ozel kartpostal: gecici link (stickerlar panelden)
+        if pkg.get("kartpostal_remote"):                 # kisiye ozel kartpostal + 2 sticker: gecici linkler (GOREV 0006)
             try:
-                kfid, kpid, kurl = links.open(pkg["kartpostal_remote"])
-                kart.append([kfid, kpid])
-                body["branding"] = {"postcard": {"url": kurl}}
-            except Exception as e:                       # noqa: BLE001 - kart yoksa panel karti gider
-                report.append(f"- {rid}: kisiye ozel kartpostal ACILAMADI ({type(e).__name__}); panel karti gider")
+                body["branding"], kart = siparis_onay.branding_ac(links, pkg["kartpostal_remote"])
+            except Exception as e:                       # noqa: BLE001 - branding yoksa panel seti (dogrulanmadi)
+                body.pop("branding", None)
+                report.append(f"- {rid}: kartpostal/sticker linkleri ACILAMADI ({type(e).__name__}); branding gonderilmedi")
         stc, d = prod.create_order(body)
         outcome = (d.get("outcome") or "")
         oid = (d.get("order") or {}).get("id")
@@ -1034,7 +1033,7 @@ def main():
                               + (f" | {plan['uyari']}" if plan["uyari"] else ""))
             kart_p = json.loads(row.get("kart_perms") or "[]")
             if kart_p and (ship or str(status.get("stage") or "").lower() in ("complete", "cancelled")):
-                links = links or DriveLinks()                 # kartpostal linki: is bitti (gonderildi) -> kapanir
+                links = links or DriveLinks()                 # kartpostal + sticker linkleri: is bitti (gonderildi) -> kapanir
                 for fid, pid in kart_p:
                     links.close(fid, pid)
                 kw["kart_perms"] = []

@@ -51,6 +51,33 @@ def poster_adaylari(cift):
     canli baski dosyasi POD_PRINT/<cift>/MIDNIGHT_BLUE/8x10.jpg (ayni 2400x3000 A-M geometrisi)."""
     return [f"{A1_77}/{cift}/POSTER_AM.png", f"{POD_PRINT}/{cift}/MIDNIGHT_BLUE/8x10.jpg"]
 KART_AD = "KARTPOSTAL_A6.jpg"
+# Siparis govdesinde branding gonderilince paneldeki "AstroLoveArt" insert seti DEVREYE GIRMEZ (canli test 25 Eyl:
+# panelde yalniz postcard, sticker yok - GOREV 0006 BULGU 1). Bu yuzden 2 sticker da govdede ACIKCA gonderilir.
+# Alan adlari Prodigi branding semasi; olcu/yerlesim: Prodigi branded inserts sayfasi (65 mm round packaging =
+# exterior, 25 mm round product / tissue seal = interior). Dosyalar: B99 INSERT SETI - FINAL (Drive BRAND/INSERTS).
+STICKER_REMOTE = {
+    "sticker_exterior_round": "gdrive:ASTROLOVE/BRAND/INSERTS/ASTROLOVE_INSERT_STICKER_65MM_LACIVERT_V2.png",
+    "sticker_interior_round": "gdrive:ASTROLOVE/BRAND/INSERTS/ASTROLOVE_INSERT_TISSUE_25MM_LACIVERT_331x331_V1.png",
+}
+
+
+def branding_ac(links, kart_remote):
+    """Kisiye ozel kartpostal + 2 sticker icin gecici linkler -> (branding, izinler). Biri acilamazsa acilanlar
+    kapatilir ve hata yukselir (yarim branding gonderilmez: yalniz postcard giderse stickerlar duser)."""
+    izin, branding = [], {}
+    try:
+        for alan, remote in [("postcard", kart_remote), *STICKER_REMOTE.items()]:
+            fid, pid, url = links.open(remote)
+            izin.append([fid, pid])
+            branding[alan] = {"url": url}
+    except Exception:
+        for fid, pid in izin:
+            try:
+                links.close(fid, pid)
+            except Exception:                            # noqa: BLE001
+                pass
+        raise
+    return branding, izin
 EVET = {"TRUE", "EVET", "X", "YES", "1", "✓", "✔"}
 ETSY_SABIT, ETSY_ORAN = 0.582, 0.176     # Etsy kesintisi = 0.582 x adet + 0.176 x fiyat (Serdar, 25 Eyl 2026)
 ZARAR = "🔴 ZARAR"

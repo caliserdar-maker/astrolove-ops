@@ -239,6 +239,12 @@ govde = post[0][2] if post else {}
 k("POD: tek Prodigi siparisi, idempotencyKey etsy-<receipt>", len(post) == 1 and govde["idempotencyKey"] == f"etsy-{POD}")
 k("POD: branding.postcard.url = gecici Drive linki (kisiye ozel kart)", (govde.get("branding") or {}).get("postcard", {}).get("url", "").startswith("https://drive.google.com/uc?")
   and f"{O.DRIVE_KOK}/{POD}/KARTPOSTAL_A6.jpg" in LINK["acik"].values(), govde.get("branding"))
+BR = govde.get("branding") or {}
+k("POD: branding'de 2 sticker da acikca var (panel seti govde branding'i ile devreye girmiyor; GOREV 0006)",
+  sorted(BR) == ["postcard", "sticker_exterior_round", "sticker_interior_round"]
+  and all(BR[a]["url"].startswith("https://drive.google.com/uc?") for a in BR)
+  and set(O.STICKER_REMOTE.values()) <= set(LINK["acik"].values()), BR)
+k("POD (US): govdedeki kargo = teklifteki en ucuz (Budget 6.85 < Standard 11.85)", govde.get("shippingMethod") == "Budget", govde.get("shippingMethod"))
 k("POD: dosya linki gecici Drive linki (kisisel BASKI), dogru SKU", govde["items"][0]["assets"][0]["url"].startswith("https://drive.google.com/uc?")
   and govde["items"][0]["sku"] == "GLOBAL-HPR-8x10" and f"{O.DRIVE_KOK}/{POD}/BASKI_8x10.jpg" not in LINK["acik"].values())
 k("POD: tablo PRODIGI_GONDERILDI + order id", T[KP]["DURUM"] == O.D_PRODIGI and T[KP]["PRODIGI"] == "ord_T1", T[KP]["DURUM"])
@@ -247,7 +253,8 @@ k("bildirimler: PRODIGI GONDERILDI + CHATGPT", f"::error title=PRODIGI GONDERILD
 st = {r["receipt_id"]: r for r in csv.DictReader(open(W / "state.csv", encoding="utf-8"))}
 k("STATE: POD ordered, dijital dijital_bekliyor, Kiril ISIM_BEKLIYOR", st[str(POD)]["stage"] == "ordered"
   and st[str(DIJ)]["stage"] == "dijital_bekliyor" and st[str(KIR)]["stage"] == "ISIM_BEKLIYOR")
-k("assetler indirilince baski izni kapandi; kart linki gonderime kadar acik", list(LINK["acik"].values()) == [f"{O.DRIVE_KOK}/{POD}/KARTPOSTAL_A6.jpg"] and LINK["kapali"], LINK)
+k("assetler indirilince baski izni kapandi; kart + 2 sticker linki gonderime kadar acik",
+  sorted(LINK["acik"].values()) == sorted([f"{O.DRIVE_KOK}/{POD}/KARTPOSTAL_A6.jpg", *O.STICKER_REMOTE.values()]) and LINK["kapali"], LINK)
 for o_ in S.orders.values():
     o_["status"]["stage"] = "Complete"                   # Prodigi isi bitti -> kart linki kapanir
 
@@ -281,6 +288,31 @@ def teklif(ulke, rid=7700000001):
     return R.teklif_net(P, FE(None), "1", r, it)
 kar, y, _ = teklif("TR")
 k("TR 8x10 (NL): Standard secildi (Budget 26.41 pahali), net 12.11 - fatura ekstrasi 5.73 = 6.38, uyari yok", y == "Standard" and kar["NET_KAR"] == "6.38" and not kar["KAR_UYARI"] and "ekstra 5.73 [fatura ord_72296317183912448]" in kar["KARGO"], (y, kar))
+r_tr = dict(ADRES, receipt_id=7700000009, country_iso="TR")
+it_tr = [{"transaction_id": 1, "sku": "POD-ARI_LEO-DB-8x10", "prodigi_sku": "GLOBAL-HPR-8x10", "pair": "ARIES_LEO", "ed": "DB",
+          "size": "8x10", "qty": 1, "price": 34.99, "asset_remote": "x"}]
+k("TR: paket govdesine secilen yontem gider (Standard, Budget DEGIL)",
+  R.package_of(r_tr, it_tr, "TR", 34.99, 0, 0, "", "sandbox", shipping_method=y)["order"]["shippingMethod"] == "Standard")
+import canli_guvenli_test as CG
+_gv, _sec = CG.govde_kur(P, {"name": "x", "line1": "x", "postalOrZipCode": "x", "townOrCity": "x", "countryCode": "TR"},
+                         "GLOBAL-HPR-8x10", "https://drive.google.com/uc?export=download&id=Z", {"postcard": {"url": "u"}})
+k("canli_guvenli_test TR: en ucuz kural (Standard 10.44; eski sabit Budget 26.41 idi)", _gv["shippingMethod"] == "Standard"
+  and _sec["kargo"] == 10.44 and _gv["branding"] == {"postcard": {"url": "u"}}, (_gv["shippingMethod"], _sec))
+
+
+class FLbozuk(FL):
+    def open(self, remote):
+        if "TISSUE" in remote:
+            raise RuntimeError("drive 500")
+        return super().open(remote)
+
+
+_once = dict(LINK["acik"])
+try:
+    O.branding_ac(FLbozuk(), "gdrive:X/KARTPOSTAL_A6.jpg"); _hata = False
+except RuntimeError:
+    _hata = True
+k("branding_ac: sticker linki acilamazsa hata + acilan linkler kapanir (yarim branding yok)", _hata and LINK["acik"] == _once, LINK["acik"])
 kar, y, _ = teklif("CA")
 k("CA 8x10 (GB): Budget secildi (Standard 18.49 pahali), net 15.08 - 5.30 = 9.78, tesis dogrulanmadi notu", y == "Budget" and kar["NET_KAR"] == "9.78" and "prodigi_gb3 icin ekstra dogrulanmadi" in kar["KAR_UYARI"] and O.ZARAR not in kar["KAR_UYARI"], (y, kar))
 kar_jp, y, _ = teklif("JP")
