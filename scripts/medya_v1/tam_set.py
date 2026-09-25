@@ -87,6 +87,9 @@ class EdPoster:
         import giris_dogrula as gd
         s, S = B['s'], B['S']
         r = gd.siparis_dogrula(isimler[0], isimler[1], tagline, None)
+        if 'sembol_sag' not in S['oge'] or 'sembol_sol' not in S['oge']:
+            raise RuntimeError(f"TESHIS C ({self.ed} sayfa {B['sayfa']}): oge={sorted(S['oge'])} sembol={B['o'].get('sembol')} "
+                               f"sembol_bant={B['o'].get('sembol_bant')} isim_bant={B['o'].get('isim_bant')} duz={B['duz']}")
         p, bilgi, merkez, x, yeni = self.p16.poster_kur(s, S, {'sol': r['sol']['deger'], 'sag': r['sag']['deger']}, tagline)
         kapi = self.p16.blok_kapisi(p, S, s, yeni)
         sk, kirp = A.sembol_kapisi(p, S, s, merkez, B['m'], A.SEMBOL_ESIK, ink=lambda P: self.E.murekkep(P, kenar=0),
@@ -219,13 +222,23 @@ def _tl():
 PANEL04 = (1320, 480, 2831, 2011)
 
 def birlesik_maske(B):
-    """Sayfada birlesik sembol: sembol bandinin ustunde, halka (genis yay) haric murekkep bilesenleri."""
-    from scipy import ndimage
-    m = B['m'].copy(); m[B['o']['sembol_bant'][0] - 40:] = False
-    lab, n = ndimage.label(ndimage.binary_dilation(m, iterations=2)); ob = ndimage.find_objects(lab)
-    tut = [i + 1 for i, sl in enumerate(ob) if sl and (sl[1].stop - sl[1].start) < 1000 and (sl[0].stop - sl[0].start) < 1000
-           and (lab[sl] == i + 1).sum() > 400]
-    return np.isin(lab, tut) & m
+    """Sayfada birlesik sembol (GOREV 0002-A, video-v1 ref_sembol_wh yontemi): halka = sembol bandi ustunde en genis
+    bilesen; cember oturtulur (en kucuk kareler, halka disi noktalar 3 turda ayiklanir); birlesik sembol = halka ici
+    (r < R - 25) murekkep bilesenleri, en buyugunun %5'inden kucukler haric. Sabit kutu/esik yok."""
+    import cv2
+    m = B['m'].copy(); m[B['o']['sembol_bant'][0] - 40:] = False; m[:150] = False
+    n, lab, st, _ = cv2.connectedComponentsWithStats((cv2.dilate(m.astype(np.uint8), np.ones((5, 5), np.uint8)) > 0).astype(np.uint8))
+    h = max(range(1, n), key=lambda i: st[i, cv2.CC_STAT_WIDTH]); ys, xs = np.where((lab == h) & m)
+    for _ in range(3):
+        cx, cy, c = np.linalg.lstsq(np.c_[2 * xs, 2 * ys, np.ones(len(xs))], xs ** 2 + ys ** 2, rcond=None)[0]
+        R = np.sqrt(c + cx ** 2 + cy ** 2); d = np.abs(np.hypot(xs - cx, ys - cy) - R); k = d < np.percentile(d, 60) + 3
+        xs, ys = xs[k], ys[k]
+    yy, xx = np.mgrid[0:m.shape[0], 0:m.shape[1]]
+    ic = m & (np.hypot(xx - cx, yy - cy) < R - 25)
+    n, lab, st, _ = cv2.connectedComponentsWithStats((cv2.dilate(ic.astype(np.uint8), np.ones((7, 7), np.uint8)) > 0).astype(np.uint8))
+    if n < 2: raise RuntimeError('birlesik sembol: halka ici murekkep yok')
+    enb = max(st[i, cv2.CC_STAT_AREA] for i in range(1, n))
+    return np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] >= 0.05 * enb]) & m
 
 def glif_katman(B, kutu, maske=None):
     """Canva sayfasindan (norm 2400) glif: alfa = |sayfa - hizali zemin| / cekirdek; renk = (sayfa - zemin(1-a)) / a."""
@@ -318,9 +331,13 @@ def detay(al_mb, hi, B):
             if top(ii, x, y) / (kw * kh) < DETAY_ESIK['murekkep_oran'] or top(ih, x, y) > DETAY_ESIK['halka_px']: continue
             a = (kesen(x, y), -np.hypot(x + kw / 2 - cx, y + kh / 2 - cy), x, y)
             if en is None or a > en: en = a
-    if en is None: raise SystemExit('HATA: kart 06 buyutec kapisi: uygun birlesim kutusu yok')
-    kesis, _, bx, by = en
-    kapi = {'murekkep_oran': round(float(top(ii, bx, by) / (kw * kh)), 3), 'halka_px': int(top(ih, bx, by)), 'kesen_cizgi': kesis, 'esik': DETAY_ESIK}
+    yedek = en is None
+    if yedek:                                                   # GOREV 0002-B: kesisim adayi yok -> agirlik merkezi + ayni kapi
+        bx = int(np.clip(round(cx - kw / 2), 0, ust.shape[1] - kw)); by = int(np.clip(round(cy - kh / 2), 0, ust.shape[0] - kh))
+        kesis = kesen(bx, by)
+    else: kesis, _, bx, by = en
+    kapi = {'murekkep_oran': round(float(top(ii, bx, by) / (kw * kh)), 3), 'halka_px': int(top(ih, bx, by)), 'kesen_cizgi': kesis,
+            'yedek_merkez': yedek, 'esik': DETAY_ESIK}
     kapi['gecti'] = kapi['murekkep_oran'] >= DETAY_ESIK['murekkep_oran'] and kapi['halka_px'] <= DETAY_ESIK['halka_px']
     kutu = (bx, by, bx + kw, by + kh)
     Hk = np.asarray(hi.convert('L').resize((al_mb.width, round(hi.height / f)), Image.LANCZOS)).astype(np.uint8)
@@ -390,12 +407,16 @@ def onizleme(S, SIRA, yol, H=900, gen=4200, bosluk=30):
     T.save(yol, quality=88)
 
 def kart04_tam(ref, M, etk, A_, B_):
-    k4, flat = kart04(ref[4], M, M['blue']['Bc'])
-    k4 = etiket_yaz(k4, etk)
-    k4 = metin(k4, (130, 325, 1700, 395), 'Cancer and Libra, united in an original AstroLove design.',
+    """GOREV 0002-D: metinler (baslik + panel etiketleri) once, bozulmamis CL kartinda uydurulur; sonra semboller konur.
+    (Onceki sirada cift sembolu etiket kutusuna tasinca eski etiket bulunamiyordu: CAPRICORN ciftleri.)"""
+    a = np.asarray(ref[4].convert('RGB')).astype(np.float64); x0, y0, x1, y1 = PANEL04
+    flat = np.median(a[y0 + 5:y0 + 40, x0 + 5:x0 + 40].reshape(-1, 3), 0)
+    k4 = metin(ref[4], (130, 325, 1700, 395), 'Cancer and Libra, united in an original AstroLove design.',
                f'{A_.title()} and {B_.title()}, united in an original AstroLove design.')
     k4 = metin(k4, (1540, 860, 1790, 945), 'CANCER', A_, align='center', bg=flat)
-    return metin(k4, (2380, 860, 2580, 945), 'LIBRA', B_, align='center', bg=flat)
+    k4 = metin(k4, (2380, 860, 2580, 945), 'LIBRA', B_, align='center', bg=flat)
+    k4, _ = kart04(k4, M, M['blue']['Bc'])
+    return etiket_yaz(k4, etk)
 
 # ------------------------------------------------------------------ ana akis
 if __name__ == '__main__':
