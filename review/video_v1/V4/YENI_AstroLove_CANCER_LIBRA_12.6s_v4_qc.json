@@ -1,0 +1,116 @@
+{
+ "ozellik_yeni": {
+  "codec": "h264 (High)",
+  "pix": true,
+  "wh": "1080x1350",
+  "fps": "30"
+ },
+ "sure": "00:00:12.60",
+ "kare": 378,
+ "gecisler": [
+  {
+   "no": 1,
+   "yon": "E->N",
+   "bas_kare": 6,
+   "bas_sn": 0.2,
+   "bitis_kare_95": 12,
+   "sure_5_95_sn": 0.2
+  },
+  {
+   "no": 2,
+   "yon": "N->M",
+   "bas_kare": 48,
+   "bas_sn": 1.6,
+   "bitis_kare_95": 54,
+   "sure_5_95_sn": 0.2
+  },
+  {
+   "no": 3,
+   "yon": "M->E",
+   "bas_kare": 90,
+   "bas_sn": 3.0,
+   "bitis_kare_95": 96,
+   "sure_5_95_sn": 0.2
+  },
+  {
+   "no": 4,
+   "yon": "E->N",
+   "bas_kare": 132,
+   "bas_sn": 4.4,
+   "bitis_kare_95": 138,
+   "sure_5_95_sn": 0.2
+  },
+  {
+   "no": 5,
+   "yon": "N->M",
+   "bas_kare": 174,
+   "bas_sn": 5.8,
+   "bitis_kare_95": 180,
+   "sure_5_95_sn": 0.2
+  },
+  {
+   "no": 6,
+   "yon": "M->E",
+   "bas_kare": 216,
+   "bas_sn": 7.2,
+   "bitis_kare_95": 222,
+   "sure_5_95_sn": 0.2
+  },
+  {
+   "no": 7,
+   "yon": "E->N",
+   "bas_kare": 258,
+   "bas_sn": 8.6,
+   "bitis_kare_95": 264,
+   "sure_5_95_sn": 0.2
+  },
+  {
+   "no": 8,
+   "yon": "N->M",
+   "bas_kare": 300,
+   "bas_sn": 10.0,
+   "bitis_kare_95": 306,
+   "sure_5_95_sn": 0.2
+  },
+  {
+   "no": 9,
+   "yon": "M->E",
+   "bas_kare": 342,
+   "bas_sn": 11.4,
+   "bitis_kare_95": 348,
+   "sure_5_95_sn": 0.2
+  }
+ ],
+ "esik": {
+  "v3_olculen_gurultu": 0.0819,
+  "esik_1.25x": 0.1024
+ },
+ "sabit_uzunluk": [
+  4,
+  30,
+  30,
+  30,
+  30,
+  30,
+  30,
+  30,
+  30,
+  26
+ ],
+ "sabit_fark_maks": 0.0682,
+ "dongu_dikisi_fark": 0.4488,
+ "uc_durum_artik_maks": 1.718,
+ "M_sol_sembol_ncc": 0.9598,
+ "PASS": {
+  "ozellik": true,
+  "kare_378": true,
+  "ilk_gecis_0.20sn": true,
+  "sira_ve_sayi": true,
+  "aralik_42": true,
+  "sabit_30": true,
+  "dongu_dikisi": false,
+  "uc_durum": true,
+  "M_cancer_solda": true
+ },
+ "SONUC": "FAIL"
+}
