@@ -10,9 +10,7 @@ for d in (RV, IM, VD): d.mkdir(parents=True, exist_ok=True)
 import os
 FNT = ImageFont.truetype(os.environ.get('FONT_DIR', '/home/user/astrolove-ops/work/fonts/') + 'Montserrat[wght].ttf', 28)
 REF = sorted((R / 'etsy/REF_4570143815').glob('[01]*.jpg'))
-names = ['01_cover_midnight_blue', '02_names_message', '03_fixed_layout', '04_shared_symbol', '05_five_palettes',
-         '06_fine_art_paper', '07_close_detail', '08_size_guide', '09_artwork_names_message', '10_made_to_order',
-         '11_deep_black', '12_champagne_ivory', '13_pure_white', '14_warm_parchment']
+from review_ad import NAMES as names
 src = ['out/cover_MB.png'] + [f'out/card{n:02d}.png' for n in range(2, 11)] + ['out/cover_DB.png', 'out/cover_CI.png', 'out/cover_PW.png', 'out/cover_WP.png']
 man = []
 for i, (nm, s) in enumerate(zip(names, src)):

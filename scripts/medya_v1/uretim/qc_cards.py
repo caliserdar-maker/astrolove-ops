@@ -51,6 +51,10 @@ for n, name in C.CARDS.items():
             k4.append([float((gx.min() + gx.max()) / 2 + box[1].start - dcx), float((gy.min() + gy.max()) / 2 + box[0].start - dcy)])
         zone = ndimage.binary_dilation(cancer, iterations=3) & ~ndimage.binary_dilation(E, iterations=4)
         zone[:8] = zone[-8:] = False; zone[:, :8] = zone[:, -8:] = False   # inset cerceve cizgisi (cikti=referans, fark 0) olcum disi
+        if n == 7 and 'detail' in L:   # gosterge kutusu + baglanti cizgisi (tasarim ogesi, renk 147,118,73) olcum disi
+            b = [int(round(v - o)) for v, o in zip(L['detail']['card_box'], (x0, y0, x0, y0))]
+            ex = np.zeros((H, W), bool); ex[b[1] - 6:b[3] + 7, b[0] - 6:b[2] + 7] = True; ex[b[1] + 6:b[3] - 6, b[0] + 6:b[2] - 6] = False
+            cyl = (b[1] + b[3]) // 2; ex[cyl - 12:cyl + 13, b[2]:] = True; zone &= ~ex
         dv = dev_of(O); lab, nn = ndimage.label(zone & (dv > T)); cnt = int((np.bincount(lab.ravel())[1:] >= 6).sum()) if nn else 0
         rd = dev_of(R); ctrl = np.zeros((H, W), bool); ctrl[int(0.02 * H):int(0.12 * H), int(0.05 * W):int(0.95 * W)] = True
         lb, nb = ndimage.label(ctrl & (rd > T)); base = ((np.bincount(lb.ravel())[1:] >= 6).sum() if nb else 0) / ctrl.sum()

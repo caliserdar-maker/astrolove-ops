@@ -1,13 +1,13 @@
 {
  "personalization_questions": [
   {
-   "question_text": "First name",
+   "question_text": "Left name",
    "instructions": "Printed on the left, under the Aquarius sign. Max 11 characters. Printed in uppercase.",
    "required": true,
    "max_allowed_characters": 11
   },
   {
-   "question_text": "Second name",
+   "question_text": "Right name",
    "instructions": "Printed on the right, under the Aquarius sign. Max 11 characters. Printed in uppercase.",
    "required": true,
    "max_allowed_characters": 11

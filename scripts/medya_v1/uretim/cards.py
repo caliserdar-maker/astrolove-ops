@@ -12,6 +12,12 @@ REF = M.ROOT / 'etsy/REF_4570143815'
 CARDS = {2: '02_8567954544', 3: '03_8615800647', 4: '04_8567954548', 5: '05_8567954574', 6: '06_8567954580',
          7: '07_8615800641', 8: '08_8616354969', 9: '09_8615800661', 10: '10_8615800655'}
 BG = np.array([237., 232., 226.])
+SIGNS = ('AQUARIUS', 'AQUARIUS')   # (sol, sag) burc; 77 cift sablonu bunu degistirir
+
+def caption03(signs=SIGNS, n1='EMILY', n2='JAMES'):
+    """Kart 3 alt yazisi (Serdar, 25 Eyl): ayni burc -> Left/Right name; farkli burc -> NAME UNDER {A}/{B}."""
+    if signs[0] == signs[1]: return f'LEFT NAME = {n1}   RIGHT NAME = {n2}'
+    return f'NAME UNDER {signs[0]} = {n1}   NAME UNDER {signs[1]} = {n2}'
 HDR = (418, 80, 760, 135)
 log = {}
 
@@ -56,17 +62,19 @@ def card03(card):
     card = txt(card, 3, (560, 490, 1010, 590), 'Cancer left', 'Example', 'mont', align='center')
     # alt yazi: referans alt yazi fontu kelime bazinda (JAMES) alt piksel uyumla olculur
     pc = T.fit(card, (822, 1738, 972, 1792), 'JAMES', 'mont', BG, (500,), sub=True, sizes_fixed=list(np.arange(38.0, 40.51, 0.25)))
-    log.setdefault(3, {}).setdefault('text', []).append({'old': 'JAMES (alt yazi olcum)', 'new': 'FIRST NAME ...', **{k: pc[k] for k in ('size', 'w', 'track', 'mse', 'box')}})
+    log.setdefault(3, {}).setdefault('text', []).append({'old': 'JAMES (alt yazi olcum)', 'new': 'LEFT NAME ...', **{k: pc[k] for k in ('size', 'w', 'track', 'mse', 'box')}})
     base_c = pc['oy'] + pc['base0']
     card = card.copy()
     card[1740:1800, 400:1180] = BG           # sol alt yazi
     card[470:1830, 1440:2900] = BG           # sag sutun (2. ornek: etiket, panel, alt yazi) kaldirildi
-    card = T.draw_with(card, pc, 'FIRST NAME = EMILY    SECOND NAME = JAMES', cx=785, base=base_c)
-    # sol sutunu (etiket + panel + alt yazi) karta ortala: dx = 1500 - 785
+    # sol sutunu (etiket + panel) karta ortala: dx = 1500 - 785; alt yazi kaydirmadan sonra kart ortasina (uzun burc adlari sigsin)
     dx = 1500 - 785
     blk = card[470:1830, 100:1470].copy()
     card[470:1830, 100:1470] = BG
     card[470:1830, 100 + dx:1470 + dx] = blk
+    cap = caption03()
+    card = T.draw_with(card, pc, cap, cx=1500, base=base_c)
+    log[3]['alt_yazi'] = cap
     log[3]['tek_ornek'] = {'kaldirilan': [1440, 470, 2900, 1830], 'kaydirma_dx': dx}
     gp = log[3]['glyph_panel'][0]; x0, y0, x1, y1 = gp['rect']; gp['rect_out'] = [x0 + dx, y0, x1 + dx, y1]
     return card
@@ -140,35 +148,31 @@ def card07(card):
     Rb = M.harmonic(R, boxm); card = card.copy(); card[y0:y1, x0:x1] = Rb
     log.setdefault(7, {})['gosterge_temizlenen_px'] = int(boxm.sum())
     card, meta = poster(card, 7, ins, 'MB')
-    # yakin plan: Kova ozgun detay paneli (10_WA_05, MB) -> referans panel
-    src = Image.open(M.ROOT / 'src/MB/10_WA_05_TECH_CRAFTED_DETAIL_AQUARIUS_AQUARIUS_MIDNIGHT_BLUE.jpg').convert('RGB')
-    px0, py0, px1, py1 = 1100 + 10, 602 + 10, 2739 - 10, 1494 - 10
-    ph = py1 - py0; tw, th = 2821 - 1169, 1854 - 569
-    cw = int(round(ph * tw / th)); cx = (px0 + px1) // 2
-    crop = src.crop((cx - cw // 2, py0, cx - cw // 2 + cw, py1)).resize((tw, th), Image.LANCZOS)
+    # yakin plan (Serdar, 25 Eyl): dalgalarin ic ice gectigi kesisim. Kaynak: Kova ozgun poster 05_WA_01 (KP kirpimi),
+    # kutu kaynak koordinatinda secilir -> panel ve inset kutusu ayni geometriden (sablon eslestirme gerekmez)
+    tw, th = 2821 - 1169, 1854 - 569
+    DET = (662, 672, 962, 905)   # kaynak px, en/boy = panel en/boy (300/233 ~ 1652/1285)
+    K = S.kova_src('MB')['K']
+    crop = Image.fromarray(K.astype(np.uint8)).crop(DET).resize((tw, th), Image.LANCZOS)
     card = card.copy(); card[569:1854, 1169:2821] = np.asarray(crop).astype(np.float64)
-    # kaynak kirpimin poster uzerindeki yeri: sablon eslestirme (Kova MB poster, kaynak olcek)
+    s = meta['s']; cxr, cyr, rr = meta['ring']; ox = cxr - 767.4 * s; oy = cyr - 819.7 * s
+    bx0, by0 = ins[0] + ox + DET[0] * s, ins[1] + oy + DET[1] * s
+    bx1, by1 = ins[0] + ox + DET[2] * s, ins[1] + oy + DET[3] * s
+    # dogrulama: kutunun altindaki inset icerigi ile panelin kucultulmusu (NCC, cizimden once)
     import cv2
-    k = S.kova_src('MB')['K'].astype(np.uint8)
-    best = None
-    for sc in np.arange(3.0, 12.0, 0.1):
-        t = np.asarray(crop.resize((max(8, int(tw / sc)), max(8, int(th / sc))), Image.LANCZOS))
-        r = cv2.matchTemplate(cv2.cvtColor(k, cv2.COLOR_RGB2GRAY), cv2.cvtColor(t, cv2.COLOR_RGB2GRAY), cv2.TM_CCOEFF_NORMED)
-        _, mv, _, ml = cv2.minMaxLoc(r)
-        if best is None or mv > best[0]: best = (mv, sc, ml, t.shape[1], t.shape[0])
-    mv, sc, (lx, ly), bw, bh = best
-    s, ox, oy = meta['s'], None, None
-    cxr, cyr, rr = meta['ring']; ox = cxr - 767.4 * s; oy = cyr - 819.7 * s
-    bx0, by0 = ins[0] + lx * s + ox, ins[1] + ly * s + oy
-    bx1, by1 = bx0 + bw * s, by0 + bh * s
+    sub = card[int(round(by0)) + 6:int(round(by1)) - 6, int(round(bx0)) + 6:int(round(bx1)) - 6]
+    pan = np.asarray(crop.resize((int(round(bx1 - bx0)), int(round(by1 - by0))), Image.LANCZOS)).astype(np.float64)[6:-6, 6:-6]
+    hh, ww = min(sub.shape[0], pan.shape[0]), min(sub.shape[1], pan.shape[1])
+    a = sub[:hh, :ww].mean(2).ravel(); b = pan[:hh, :ww].mean(2).ravel()
+    ncc = float(np.corrcoef(a, b)[0, 1])
     im = Image.fromarray(np.clip(card, 0, 255).astype(np.uint8)); d = ImageDraw.Draw(im)
     lw = 4
     d.rectangle([bx0, by0, bx1, by1], outline=tuple(int(v) for v in line_col), width=lw)
     yc = (by0 + by1) / 2
     d.line([(bx1, yc), (1169, yc)], fill=tuple(int(v) for v in line_col), width=lw)
     card = np.asarray(im).astype(np.float64)
-    log.setdefault(7, {})['detail'] = {'match_score': float(mv), 'scale': float(sc), 'src_box': [int(lx), int(ly), int(bw), int(bh)],
-                                        'card_box': [float(bx0), float(by0), float(bx1), float(by1)], 'crop_src': [cx - cw // 2, py0, cx - cw // 2 + cw, py1]}
+    log.setdefault(7, {})['detail'] = {'kaynak': '05_WA_01 KP', 'src_box': list(DET), 'buyutme': round(tw / (DET[2] - DET[0]), 2),
+                                        'card_box': [float(bx0), float(by0), float(bx1), float(by1)], 'kutu_panel_ncc': round(ncc, 4)}
     return card
 
 def card08(card): return header(card, 8)
