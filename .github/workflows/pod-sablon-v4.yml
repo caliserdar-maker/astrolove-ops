@@ -269,11 +269,12 @@ jobs:
             mkdir -p _work _out/galeri_tek
             rclone copyto "gdrive:ASTROLOVE/TEMP/METIN_78/METIN_78.csv" _work/METIN_78.csv
             rclone copyto "gdrive:ASTROLOVE/TEMP/GALERI_GENEL/GALERI_PLAN.json" _work/GALERI_PLAN.json
+            rclone copyto "gdrive:ASTROLOVE/TEMP/GALERI_GENEL/SONUC_GALERI.csv" _work/SONUC_GALERI.csv || true
             rclone lsf -R "gdrive:ASTROLOVE/TEMP/POD_KISISEL/A1_77" > _work/lsf_medya.txt || true
             echo "A1_77: $(grep -c KAPAK.jpg _work/lsf_medya.txt) KAPAK, $(grep -c KART09.jpg _work/lsf_medya.txt) KART09"
             curl -sS -o _work/oas.json https://www.etsy.com/openapi/generated/oas/3.0.0.json || true
             rc=0; python scripts/pod/galeri_tek.py plan --csv _work/METIN_78.csv --plan _work/GALERI_PLAN.json \
-              --girdiler _work/lsf_medya.txt --oas _work/oas.json --out _out/galeri_tek || rc=$?
+              --sonuc _work/SONUC_GALERI.csv --girdiler _work/lsf_medya.txt --oas _work/oas.json --out _out/galeri_tek || rc=$?
             rclone copy _out/galeri_tek "gdrive:ASTROLOVE/TEMP/GALERI_TEK" -q
             echo "Drive: TEMP/GALERI_TEK"; exit $rc
           elif [ "$MOD" = "galeri_oku" ]; then
