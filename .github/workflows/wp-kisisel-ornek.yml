@@ -67,26 +67,45 @@ jobs:
           ls _kis/assets/fonts/Cinzel.ttf _kis/assets/fonts/EBGaramond-Italic.ttf
 
       - name: Kaynak duvar kagitlari (salt okur)
+        env:
+          MSG: ${{ github.event.head_commit.message }}
         run: |
           set -euo pipefail
           mkdir -p _zip _wp/ARIES_LEO _wp/AQUARIUS_AQUARIUS
-          for e in Midnight_Blue Deep_Black Champagne_Ivory Warm_Parchment; do
-            rclone copy "$KAYNAK/ARIES_LEO/AstroLove_Aries_Leo_$e.zip" _zip -q
-          done
-          rclone copy "$KAYNAK/AQUARIUS_AQUARIUS/AstroLove_Aquarius_Aquarius_Midnight_Blue.zip" _zip/aqua -q
-          for z in _zip/*.zip; do
-            unzip -o -j -q "$z" '*Phone.jpg' '*Tablet.jpg' '*Desktop.jpg' -d _wp/ARIES_LEO
-          done
-          unzip -o -j -q _zip/aqua/*.zip '*Phone.jpg' -d _wp/AQUARIUS_AQUARIUS
-          echo "ARIES_LEO: $(ls _wp/ARIES_LEO | wc -l) dosya"
-          echo "AQUARIUS_AQUARIUS: $(ls _wp/AQUARIUS_AQUARIUS | wc -l) dosya"
+          case "$MSG" in
+            *"[eksik3]"*)
+              # Serdar onayi 25 Eyl 2026: yalnizca ilk kosuda olcum hatasi veren
+              # 3 dosya yeniden uretilir; digerleri Drive'da oldugu gibi kalir.
+              echo "EKSIK3 modu"; echo "eksik3" > _mod
+              rclone copy "$KAYNAK/ARIES_LEO/AstroLove_Aries_Leo_Champagne_Ivory.zip" _zip -q
+              rclone copy "$KAYNAK/ARIES_LEO/AstroLove_Aries_Leo_Deep_Black.zip" _zip -q
+              rclone copy "$KAYNAK/ARIES_LEO/AstroLove_Aries_Leo_Warm_Parchment.zip" _zip -q
+              unzip -o -j -q _zip/AstroLove_Aries_Leo_Champagne_Ivory.zip '*Phone.jpg' -d _wp/ARIES_LEO
+              unzip -o -j -q _zip/AstroLove_Aries_Leo_Deep_Black.zip '*Desktop.jpg' -d _wp/ARIES_LEO
+              unzip -o -j -q _zip/AstroLove_Aries_Leo_Warm_Parchment.zip '*Desktop.jpg' -d _wp/ARIES_LEO
+              rmdir _wp/AQUARIUS_AQUARIUS
+              ;;
+            *)
+              for e in Midnight_Blue Deep_Black Champagne_Ivory Warm_Parchment; do
+                rclone copy "$KAYNAK/ARIES_LEO/AstroLove_Aries_Leo_$e.zip" _zip -q
+              done
+              rclone copy "$KAYNAK/AQUARIUS_AQUARIUS/AstroLove_Aquarius_Aquarius_Midnight_Blue.zip" _zip/aqua -q
+              for z in _zip/*.zip; do
+                unzip -o -j -q "$z" '*Phone.jpg' '*Tablet.jpg' '*Desktop.jpg' -d _wp/ARIES_LEO
+              done
+              unzip -o -j -q _zip/aqua/*.zip '*Phone.jpg' -d _wp/AQUARIUS_AQUARIUS
+              ;;
+          esac
+          ls _wp/ARIES_LEO | sed 's/^/  - /'
           du -sh _wp
 
       - name: Uretim + kapilar
         run: |
           set -euo pipefail
+          RAPOR=WP_KISISEL_RAPOR.json
+          [ -f _mod ] && RAPOR=WP_KISISEL_RAPOR_EKSIK3.json
           python scripts/wp_kisisel/uret.py --girdi _wp --cikti _out \
-            --kisisel _kis --isimler "$ISIMLER" --mesaj "$MESAJ"
+            --kisisel _kis --isimler "$ISIMLER" --mesaj "$MESAJ" --rapor "$RAPOR"
 
       - name: Drive'a yaz
         if: ${{ always() }}

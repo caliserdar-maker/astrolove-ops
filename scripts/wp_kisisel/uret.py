@@ -370,6 +370,7 @@ def main():
     ap.add_argument("--kisisel", required=True, help="kisisel-v1 arsiv koku")
     ap.add_argument("--isimler", default="EMILY,JAMES")
     ap.add_argument("--mesaj", default="It Began With a Kiss in the Rain")
+    ap.add_argument("--rapor", default="WP_KISISEL_RAPOR.json", help="rapor dosya adi")
     a = ap.parse_args()
     P6, P7, P12, kp = kisisel_kur(a.kisisel)
     sol, sag = a.isimler.split(",")
@@ -388,7 +389,7 @@ def main():
         sonuc.append(r)
         log(f"{i}/{len(dosyalar)} {p.name} kapi={r['kapi']['gecti']} sure={r.get('sure_sn')}")
     (cikti).mkdir(parents=True, exist_ok=True)
-    (cikti / "WP_KISISEL_RAPOR.json").write_text(json.dumps(sonuc, indent=1))
+    (cikti / a.rapor).write_text(json.dumps(sonuc, indent=1))
     gecen = sum(1 for r in sonuc if r["kapi"]["gecti"])
     log(f"TOPLAM {gecen}/{len(sonuc)} dosya kapilardan gecti")
     return 0 if gecen == len(sonuc) else 1
