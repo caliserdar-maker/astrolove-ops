@@ -62,6 +62,12 @@ CANVA = {
     'vintage':    {'4x5': 'DAHPeXwAKXA', '3x4': 'DAHPQZxUwII', '2x3': 'DAHPeU4sjRE', '11x14': 'DAHPeYBzqXU', 'A': 'DAHPeVe1sxw'},
 }
 KENAR_YUMUSAT = 2.0      # hibrit birlestirmede maske yumusatmasi (2400 uzayinda px)
+# Edisyon hatti (kilitler, bulma maskesi esikleri) Canva'nin YEREL disa aktarim boyunda
+# dogrulandi. POD baski dosyasi cok daha buyuk olabilir (30x40 = 9000x12000); 9000 -> 2400
+# kuculmesi (3.75x) parsomen dokusunda isim satirini bulunamaz yapiyor (olculdu: "16 bant").
+# Bu yuzden RENDER GIRDISI once bu genislige indirilir; BASKI TUVALI tam boyda kalir.
+OLCUM_EN = {'2x3': 4000, '3x4': 3000, '4x5': 4000, '11x14': 3300, 'A': 3508}
+OLCUM_MERDIVEN = (1.0, 0.8, 1.2)        # olcum basarisizsa denenecek genislik carpanlari
 
 
 def log(*a): print(f'[{time.time() - T0:7.1f}s]', *a, flush=True)
@@ -174,15 +180,25 @@ class EdisyonPoster:
         ham = self.eu.YOL / ed / 'ham'
         ham.mkdir(parents=True, exist_ok=True)
         yol = ham / f'{oran}_p{sayfa_no}.jpg'          # render kodu bu adi okur
-        if sayfa_png[:3] == b'\xff\xd8\xff':
-            yol.write_bytes(sayfa_png)                 # POD baski dosyasi zaten JPEG: yeniden kodlama YOK
-        else:
-            Image.open(io.BytesIO(sayfa_png)).convert('RGB').save(yol, 'PNG')   # Canva: kayipsiz
-
-        ref_norm = self.p11.norm(Image.open(yol).convert('RGB'))[0]
-        m = self.eu.murekkep(np.asarray(ref_norm).astype(np.float32))
-        o = self.p11.sayfa_olc(yol, maske=self.eu.edisyon_maske)
-        o, duz = olcum_duzelt(o, m)
+        kaynak = Image.open(io.BytesIO(sayfa_png)).convert('RGB')
+        hedef_en = OLCUM_EN.get(oran, kaynak.width)
+        o = m = duz = None; kullanilan = None; hatalar = []
+        for carpan in OLCUM_MERDIVEN:
+            en = max(int(round(hedef_en * carpan)), 1200)
+            im = (kaynak if en == kaynak.width else
+                  kaynak.resize((en, round(kaynak.height * en / kaynak.width)), Image.LANCZOS))
+            im.save(yol, 'PNG')                        # kayipsiz: JPEG artefakti eklenmez
+            try:
+                ref_norm = self.p11.norm(Image.open(yol).convert('RGB'))[0]
+                mm = self.eu.murekkep(np.asarray(ref_norm).astype(np.float32))
+                oo = self.p11.sayfa_olc(yol, maske=self.eu.edisyon_maske)
+                o, duz = olcum_duzelt(oo, mm)
+                m = mm; kullanilan = {'olcum_en': en, 'carpan': carpan}
+                break
+            except BaseException as e:                            # noqa: BLE001
+                hatalar.append(f'{en}px: {type(e).__name__}: {e}')
+        if o is None:
+            raise RuntimeError('olcum yapilamadi: ' + ' | '.join(hatalar))
         self.eu.REF_SAYFA = sayfa_no
         s, S = self.eu.oran_kur(ed, oran, kilit, o)
         g0, g1 = o['isim_govde']
@@ -196,7 +212,8 @@ class EdisyonPoster:
         sk, kirp = sembol_kapisi(p, S, s, merkez, m, SEMBOL_ESIK, maske=self.eu.murekkep)
         bilgi_ek = {
             'durum': 'URETILDI', 'edisyon': ed, 'oran': oran, 'sayfa': sayfa_no,
-            'kaynak_px': list(Image.open(yol).size), 'poster_px': list(p.size),
+            'kaynak_px': list(kaynak.size), 'olcum_girdisi': kullanilan,
+            'olcum_denemeleri': hatalar, 'poster_px': list(p.size),
             'olcum': {k: o.get(k) for k in ('isim_bant', 'isim_govde', 'sembol_bant', 'sembol', 'tag_bant')},
             'olcum_duzeltme': duz, 'kilit': {'bosluk': kilit['bosluk'], 'cap': kilit['cap']},
             'bg_hiza': s.get('bg_hiza'), 'temiz_ara_kapisi': s['temiz_ara_kapisi'],
@@ -383,19 +400,25 @@ def main():
         cik = W / s['receipt']; cik.mkdir(parents=True, exist_ok=True)
         try:
             r = uret(s, kaynak_b[s['receipt']], P_blue, P_ed, cik)
-        except Exception as e:                                    # noqa: BLE001
+        except BaseException as e:                                # noqa: BLE001
             import traceback
             r = {**s, 'durum': 'HATA', 'hata': f'{type(e).__name__}: {e}',
                  'iz': traceback.format_exc()[-1500:]}
+            log(s['receipt'], 'HATA', r['hata'])
         R['siparisler'].append(r)
         (cik / 'KAPI_RAPORU.json').write_text(json.dumps(r, ensure_ascii=False, indent=1, default=str))
         rc('copy', str(cik), f'{SIP}/{s["receipt"]}')
         log(s['receipt'], {k: r.get(k) for k in ('durum', 'baski_px', 'gorsel_dpi', 'metin_dpi',
                                                  'kapilar', 'kapilar_gecti', 'sure_sn', 'dosya_MB')})
     R['toplam_sn'] = round(time.time() - T0, 1)
+    R['ozet'] = [{k: x.get(k) for k in ('receipt', 'durum', 'baski_px', 'gorsel_dpi', 'metin_dpi',
+                                        'metin_buyutme', 'kapilar', 'kapilar_gecti', 'sure_sn',
+                                        'dosya_MB', 'olcum_girdisi')} for x in R['siparisler']]
     (W / 'SIPARIS_RAPOR.json').write_text(json.dumps(R, ensure_ascii=False, indent=1, default=str))
     rc('copy', str(W / 'SIPARIS_RAPOR.json'), f'{SIP}')
-    print(json.dumps(R, ensure_ascii=False, indent=1, default=str)[:9000], flush=True)
+    print(json.dumps(R['ozet'], ensure_ascii=False, indent=1, default=str), flush=True)
+    if not all(x.get('kapilar_gecti') for x in R['siparisler']):
+        raise SystemExit('en az bir siparis kapilari gecemedi ya da uretilemedi')
 
 
 if __name__ == '__main__':
