@@ -6,7 +6,9 @@ Yalniz POST /v4.0/quotes (CANLI api.prodigi.com; siparis OLUSTURMAZ). Order API 
 SKU: GLOBAL-HPR-<boy> (order_router.py eslemesi), 16 boy = B plani fiyat tablosu
 (scripts/pod/fiyat_b.py, pod-v4 dali, 08af145, Serdar onayi 24 Eyl 2026). Etsy API cagrisi YOK.
 Ulkeler US GB DE CA AU TR JP; kargo Budget ve Standard; para birimi USD istenir (donus farkliysa isaretlenir, cevrilmez).
-net = fiyat - (0.582 + 0.176 x fiyat) - urun - kargo;  net_offsite = net - 0.15 x fiyat. (vergi ayri sutun, net'e dahil degil)
+net_vergisiz = fiyat - (0.582 + 0.176 x fiyat) - urun - kargo;  net = net_vergisiz - vergi;  net_offsite = net - 0.15 x fiyat.
+Vergi bize fatura ediliyor mu (vergi_faturada), YALNIZ yanit alanlarindan: costSummary.totalCost == items + shipping + totalTax
+-> evet; == items + shipping -> hayir; vergi 0 -> vergi_yok; alan eksik ya da ikisi de tutmuyor -> dogrulanmadi (tahmin yok).
 Cikti: PRODIGI_MALIYET_API.csv, PRODIGI_MALIYET_API_OZET.md, raw/*.json (yalniz teklif yaniti; musteri verisi yok).
 Karsilastirma: DIJITAL_78/POD_FIYAT_KAR_TABLOSU_20260924.txt (US detay + 'Cheapest cost incl tax' tablosu).
 """
@@ -33,8 +35,8 @@ assert FIYAT["8x10"] == 34.99 and FIYAT["30x40"] == 139.99 and len(FIYAT) == 16 
 ULKELER = ["US", "GB", "DE", "CA", "AU", "TR", "JP"]
 YONTEMLER = {"budget": "Budget", "standard": "Standard"}
 ESKI = "gdrive:ASTROLOVE/TEMP/DIJITAL_78/POD_FIYAT_KAR_TABLOSU_20260924.txt"
-ALANLAR = ["boyut", "ulke", "kargo_tipi", "urun", "kargo", "vergi", "para_birimi", "uretim_yeri", "fiyat", "net", "net_offsite",
-           "sku", "not"]
+ALANLAR = ["boyut", "ulke", "kargo_tipi", "urun", "kargo", "vergi", "para_birimi", "uretim_yeri", "fiyat", "net", "net_vergisiz",
+           "net_offsite", "vergi_faturada", "toplam_yanit", "sku", "not"]
 
 
 def para(c):
@@ -64,14 +66,30 @@ def ayikla(q):
         for sh in qu.get("shipments") or []:
             fl = sh.get("fulfillmentLocation") or {}
             labs.append(f"{fl.get('countryCode', '')}/{fl.get('labCode', '')}")
-        out[m] = dict(urun=urun, kargo=kargo, vergi=vergi, para=c1 or c2 or c3,
-                      lab=" ".join(dict.fromkeys(labs)), kaynak=kaynak)
+        toplam, _ = para(cs.get("totalCost"))
+        out[m] = dict(urun=urun, kargo=kargo, vergi=vergi, para=c1 or c2 or c3, toplam=toplam,
+                      lab=" ".join(dict.fromkeys(labs)), kaynak=kaynak, faturada=faturada(urun, kargo, vergi, toplam))
     return out
 
 
-def hesap(fiyat, urun, kargo):
-    net = fiyat - (0.582 + 0.176 * fiyat) - urun - kargo
-    return round(net, 2), round(net - 0.15 * fiyat, 2)
+def faturada(urun, kargo, vergi, toplam):
+    """Vergi quote toplamina dahil mi? Yalniz yanittaki tutarlardan."""
+    if None in (urun, kargo, vergi, toplam):
+        return "dogrulanmadi"
+    if abs(vergi) < 0.005:
+        return "vergi_yok"
+    if abs(toplam - (urun + kargo + vergi)) <= 0.011:
+        return "evet"
+    if abs(toplam - (urun + kargo)) <= 0.011:
+        return "hayir"
+    return "dogrulanmadi"
+
+
+def hesap(fiyat, urun, kargo, vergi):
+    """-> (net [vergi dusulmus], net_vergisiz, net_offsite [net uzerinden])"""
+    nv = fiyat - (0.582 + 0.176 * fiyat) - urun - kargo
+    net = nv - vergi
+    return round(net, 2), round(nv, 2), round(net - 0.15 * fiyat, 2)
 
 
 def eski_oku(metin):
@@ -131,11 +149,15 @@ def main():
                 hatalar.append(f"{b} {u} {ad}: {r['not']}")
             else:
                 r.update(urun=v["urun"], kargo=v["kargo"], vergi="" if v["vergi"] is None else v["vergi"],
-                         para_birimi=v["para"], uretim_yeri=v["lab"])
+                         para_birimi=v["para"], uretim_yeri=v["lab"], vergi_faturada=v["faturada"],
+                         toplam_yanit="" if v["toplam"] is None else v["toplam"])
                 if v["para"] != "USD":
                     r["not"] = f"para birimi {v['para']} (cevrilmedi)"
+                elif v["vergi"] is None:
+                    r["net_vergisiz"] = hesap(FIYAT[b], v["urun"], v["kargo"], 0)[1]
+                    r["not"] = "vergi alani yok: net hesaplanmadi (dogrulanmadi)"
                 else:
-                    r["net"], r["net_offsite"] = hesap(FIYAT[b], v["urun"], v["kargo"])
+                    r["net"], r["net_vergisiz"], r["net_offsite"] = hesap(FIYAT[b], v["urun"], v["kargo"], v["vergi"])
                 if v["kaynak"] != "costSummary.totalTax":
                     r["not"] = (r["not"] + "; " if r["not"] else "") + f"vergi kaynagi {v['kaynak']}"
             rows.append(r)
@@ -154,22 +176,33 @@ def ozet(rows, hatalar, eski, out):
     dusuk = [r for r in tam if r["net"] < 3]
     zarar = [r for r in tam if r["net"] < 0]
     off_zarar = [r for r in tam if r["net_offsite"] < 0]
+    say = {}
+    for r in rows:
+        if r["vergi_faturada"]: say[r["vergi_faturada"]] = say.get(r["vergi_faturada"], 0) + 1
+    vergili = [r for r in rows if r["vergi_faturada"] in ("evet", "hayir", "dogrulanmadi")]
+    if vergili and all(r["vergi_faturada"] == "evet" for r in vergili):
+        hukum = "GERCEK = net (vergi dusulmus): vergili tum satirlarda costSummary.totalCost = items + shipping + totalTax, yani vergi Prodigi faturasina dahil."
+    elif vergili and all(r["vergi_faturada"] == "hayir" for r in vergili):
+        hukum = "GERCEK = net_vergisiz: vergili tum satirlarda costSummary.totalCost = items + shipping (totalTax toplama dahil degil)."
+    elif not vergili:
+        hukum = "Hicbir teklifte vergi yok (totalTax 0): net = net_vergisiz."
+    else:
+        hukum = "Satir bazinda (vergi_faturada sutunu): evet satirlarinda net, hayir satirlarinda net_vergisiz gercek; dogrulanmadi satirlari DOGRULANMADI."
     md = ["# Prodigi maliyet (Quote API, canli, salt okuma) - 16 HPR boy x 7 ulke x Budget/Standard", "",
           f"- satir: {len(rows)}; hesaplanan: {len(tam)}; eksik/hata: {len(hatalar)}",
           f"- net < $3: {len(dusuk)} satir (zarar: {len(zarar)}); offsite dahil zarar: {len(off_zarar)} satir",
           "- net = fiyat - (0.582 + 0.176 x fiyat) - urun - kargo; vergi ayri sutunda, net'e dahil degil.", "",
-          "## Net < $3 veya zarar", "", "| boyut | ulke | kargo | urun | kargo | vergi | fiyat | net | net_offsite | lab |", "|---|---|---|---|---|---|---|---|---|---|"]
-    md += [f"| {r['boyut']} | {r['ulke']} | {r['kargo_tipi']} | {r['urun']} | {r['kargo']} | {r['vergi']} | {r['fiyat']} | **{r['net']}** | {r['net_offsite']} | {r['uretim_yeri']} |"
-           for r in dusuk] or ["| - | yok | | | | | | | | |"]
+          "## Net (vergi dusulmus) < $3 veya zarar", "", "| boyut | ulke | kargo | urun | kargo | vergi | vergi_faturada | fiyat | net | net_vergisiz | net_offsite | lab |", "|---|---|---|---|---|---|---|---|---|---|---|---|"]
+    md += [f"| {r['boyut']} | {r['ulke']} | {r['kargo_tipi']} | {r['urun']} | {r['kargo']} | {r['vergi']} | {r['vergi_faturada']} | {r['fiyat']} | **{r['net']}** | {r['net_vergisiz']} | {r['net_offsite']} | {r['uretim_yeri']} |"
+           for r in dusuk] or ["| - | yok | | | | | | | | | | |"]
     md += ["", "## Eski tablo (20260924, dogrulanmamis) ile fark", "", "### US Budget: urun / kargo / B fiyatta net", "",
-           "Eski net 'maliyet+ek' ile hesaplanmis (urun + kargo + ek pay); bu formulde ek pay yok. 'fark (ek haric)' = API net - (eski net + ek pay).", "",
-           "| boyut | urun eski | urun API | kargo eski | kargo API | ek pay (eski) | net eski (B) | net API | fark | fark (ek haric) |", "|---|---|---|---|---|---|---|---|---|---|"]
+           "| boyut | urun eski | urun API | kargo eski | kargo API | net eski (B) | net API (vergi dusulmus) | fark |", "|---|---|---|---|---|---|---|---|"]
     idx = {(r["boyut"], r["ulke"], r["kargo_tipi"]): r for r in rows}
     for b in FIYAT:
         e = us_eski.get(b); n = idx.get((b, "US", "Budget"))
         if not e or not n or n["net"] == "":
-            md.append(f"| {b} | {e and e['urun']} | {n and n['urun']} | {e and e['kargo']} | {n and n['kargo']} | {e and e['ek']} | {e and e['b_net']} | {n and n['net']} | eksik | |"); continue
-        md.append(f"| {b} | {e['urun']} | {n['urun']} | {e['kargo']} | {n['kargo']} | {e['ek']} | {e['b_net']} | {n['net']} | {n['net'] - e['b_net']:+.2f} | {n['net'] - e['b_net'] - e['ek']:+.2f} |")
+            md.append(f"| {b} | {e and e['urun']} | {n and n['urun']} | {e and e['kargo']} | {n and n['kargo']} | {e and e['b_net']} | {n and n['net']} | eksik |"); continue
+        md.append(f"| {b} | {e['urun']} | {n['urun']} | {e['kargo']} | {n['kargo']} | {e['b_net']} | {n['net']} | {n['net'] - e['b_net']:+.2f} |")
     md += ["", "### En ucuz toplam (urun + kargo + vergi), Budget/Standard icinden: eski -> API (fark)", "",
            "| boyut | " + " | ".join(ULKELER) + " |", "|---" * (len(ULKELER) + 1) + "|"]
     for b in FIYAT:
@@ -200,7 +233,11 @@ def self_test():
     m = ayikla(q)
     assert m["budget"]["urun"] == 10.0 and m["budget"]["kargo"] == 6.85 and m["budget"]["vergi"] == 0.0 and m["budget"]["lab"] == "US/us1"
     assert m["standard"]["vergi"] == 2.0 and m["standard"]["kaynak"] == "items.taxUnitCost+shipments.tax"
-    assert hesap(34.99, 10.0, 6.85) == (11.4, 6.15), hesap(34.99, 10.0, 6.85)
+    assert hesap(34.99, 10.0, 6.85, 0) == (11.4, 11.4, 6.15), hesap(34.99, 10.0, 6.85, 0)
+    assert hesap(34.99, 10.0, 6.85, 2.0) == (9.4, 11.4, 4.15)
+    assert faturada(10, 6.85, 2.0, 18.85) == "evet" and faturada(10, 6.85, 2.0, 16.85) == "hayir"
+    assert faturada(10, 6.85, 0.0, 16.85) == "vergi_yok" and faturada(10, 6.85, 2.0, None) == "dogrulanmadi" and faturada(10, 6.85, 2.0, 20.0) == "dogrulanmadi"
+    assert m["budget"]["faturada"] == "dogrulanmadi"   # ornekte totalCost yok
     eski = ("US detail\n8X10   urun   10.0 kargo   6.85 (Budget) maliyet+ek  21.85 | fiyat   29.99 ucret  5.86 net   2.28 ads  -2.22 | B   34.99 net   6.40 ads   1.15\n\n"
             "Cheapest cost incl tax (Prodigi) by country (USD)\nsize       US      GB      DE      CA      AU      TR      JP     | lab\n"
             "8X10     16.85   13.39   15.69   13.14   21.07   16.08   29.42  | lab: US,GB,NL,GB,AU,NL,AU\n")
