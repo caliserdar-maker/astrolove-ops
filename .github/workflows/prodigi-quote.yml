@@ -23,9 +23,9 @@ on:
         required: false
         default: ""
       mode:
-        description: "pilot = pilot_skus.csv (US) | hpr_sizes = hpr_sizes.txt (US + DE) | ship_everywhere = 8 ulke Standard kargo (18x24) | inserts = branded insert fiyat/ozellik (8 tip, US + DE) | maliyet_api = 16 HPR boy x 7 ulke Budget/Standard + net (DIJITAL_78) | ekstra_tesis = kartpostal/sticker: canli siparis tesis + fatura kalemi (yalniz GET) + ECB kuru"
+        description: "pilot = pilot_skus.csv (US) | hpr_sizes = hpr_sizes.txt (US + DE) | ship_everywhere = 8 ulke Standard kargo (18x24) | inserts = branded insert fiyat/ozellik (8 tip, US + DE) | maliyet_api = 16 HPR boy x 7 ulke Budget/Standard + net (DIJITAL_78) | ekstra_tesis = kartpostal/sticker: canli siparis tesis + fatura kalemi (yalniz GET) + ECB kuru | hesap_oku = hesap ayari/adres ucu var mi (yalniz GET)"
         type: choice
-        options: [pilot, hpr_sizes, ship_everywhere, inserts, maliyet_api, ekstra_tesis]
+        options: [pilot, hpr_sizes, ship_everywhere, inserts, maliyet_api, ekstra_tesis, hesap_oku]
         default: pilot
 
 concurrency:
@@ -95,6 +95,10 @@ jobs:
             python scripts/prodigi/prodigi_inserts_quote.py --self-test
             python scripts/prodigi/prodigi_inserts_quote.py --out-dir out
             cat out/PRODIGI_INSERTS_QUOTE.md >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          if [ "$MODE" = "hesap_oku" ]; then
+            python scripts/prodigi/prodigi_hesap_oku.py
             exit 0
           fi
           if [ "$MODE" = "ekstra_tesis" ]; then
