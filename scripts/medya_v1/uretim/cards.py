@@ -128,7 +128,7 @@ def card05(card):
 
 def card06(card):
     card = header(card, 6); card, _ = poster(card, 6, (190, 595, 1170, 1820), 'MB')
-    # Serdar kurali 5: 'archival' iddiasi yok
+    # 24 Eyl B-5 ('archival' yok) 25 Eyl'de guncellendi (metin_kurali.py); bu kart onayli haliyle kaldi
     card = txt(card, 6, (1355, 1738, 2200, 1797), 'Printed with archival pigment inks.', 'Printed with pigment inks.', 'mont')
     return card
 
