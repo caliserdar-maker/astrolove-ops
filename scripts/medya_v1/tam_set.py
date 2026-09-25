@@ -303,7 +303,14 @@ if __name__ == '__main__':
         R['sayfa'] = NO
         sayfa = {p.stem: p.read_bytes() for p in (W / 'ham').glob('*.png')}
         log('girdiler', sorted(sayfa), 'sayfa', NO)
-        P, M = posterler(sayfa)
+        onbellek = W / 'poster_onbellek.pkl'
+        if YEREL and onbellek.exists():                          # yalniz yerel yineleme: posterler yeniden render edilmez
+            import pickle; P, M, R['poster'] = pickle.loads(onbellek.read_bytes())
+        else:
+            P, M = posterler(sayfa)
+            if YEREL:
+                import pickle; M2 = {'blue': {k: v for k, v in M['blue'].items() if k != 'X'}}
+                onbellek.write_bytes(pickle.dumps((P, M2, R['poster'])))
         ref = {n: Image.open(W / 'ref' / f'{f}.jpg').convert('RGB') for n, f in REF_DOSYA.items()}
         etk = A.etiketler()[CIFT]; A_, B_ = etk.split(' + ')
         beklenen = sorted({A_, B_})
@@ -361,6 +368,27 @@ if __name__ == '__main__':
         for j, (i, ad, t) in enumerate(kucuk):
             x, y = (j % 7) * sw, (j // 7) * 640; T.paste(t, (x + (600 - t.width) // 2, y)); d.text((x, y + 610), f'{i:02d} {ad}', fill=(0, 0, 0))
         T.save(CIK / f'SERIT_TAM_SET_{CIFT}.jpg', quality=90)
+        # SET.json (pod galeri_tek.py okur): galeri sirasi, renk baglari, video yolu
+        RENK_BAGI = {1: 'Midnight Blue', 11: 'Deep Black', 12: 'Champagne Ivory', 13: 'Pure White', 14: 'Warm Parchment'}
+        TUR = {1: 'kapak', 3: 'kart', 4: 'kart', 5: 'kart', 6: 'kart', 7: 'kart', 8: 'kart', 9: 'kart', 10: 'kart',
+               11: 'renk', 12: 'renk', 13: 'renk', 14: 'renk'}
+        video = None
+        if not YEREL:
+            try: video = next((f'{A.A77}/{CIFT}/{x}' for x in rc('lsf', f'{A.A77}/{CIFT}', '--include', '*.mp4').split() if x), None)
+            except Exception: video = None
+            if not video:
+                yedek = f'{DR}/REVIEW/A_ORNEK/VIDEO_KART3/YENI_AstroLove_{CIFT}_12.6s.mp4'
+                try: video = yedek if rc('lsf', yedek).strip() else None
+                except Exception: video = None
+        SET = {'cift': CIFT, 'etiket': etk, 'surum': 'tam_set_v1', 'referans_ilan': 4570143815,
+               'klasor': HEDEF, 'foto_sayisi': len(SIRA),
+               'galeri': [{'sira': i, 'dosya': f'{i:02d}_{ad}.jpg', 'tur': TUR[n], 'renk': RENK_BAGI.get(n),
+                           'cl_karsiligi': n, 'boyut': list(S[n].size)} for i, (n, ad) in enumerate(SIRA, 1)],
+               'renk_gorselleri': {RENK_BAGI[n]: f'{i:02d}_{ad}.jpg' for i, (n, ad) in enumerate(SIRA, 1) if n in RENK_BAGI},
+               'video': {'yol': video, 'durum': 'bulundu' if video else 'yok (video oturumu)'},
+               'onay': 'BEKLIYOR (Serdar)'}
+        (CIK / 'SET.json').write_text(json.dumps(SET, ensure_ascii=False, indent=1))
+        if not YEREL: rc('copy', str(CIK / 'SET.json'), f'{A.A77}/{CIFT}')
         R['ozet'] = {'foto': len(SIRA), 'poster_kapilari': {r: R['poster'][r]['gecti'] for r in RENKLER},
                      'burc_kapisi': all(g['burc_kapisi']['gecti'] for g in R['galeri']), 'kart09_kapisi': K[9]['gecti'],
                      'sure_sn': round(time.time() - t_bas, 1)}

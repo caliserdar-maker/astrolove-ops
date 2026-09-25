@@ -251,6 +251,8 @@ def yerlestir(sahne, poster, yer):
     a = np.asarray(sahne.convert('RGB')).copy()
     p = np.asarray(poster.convert('RGB').resize((yer['w'], yer['h']), Image.LANCZOS))
     x0, y0, x1, y1 = yer.get('aciklik') or (yer['x'], yer['y'], yer['x'] + yer['w'], yer['y'] + yer['h'])
+    x0, y0 = max(x0, yer['x'], 0), max(y0, yer['y'], 0)                                  # aciklik ile poster kesisimi
+    x1, y1 = min(x1, yer['x'] + yer['w'], a.shape[1]), min(y1, yer['y'] + yer['h'], a.shape[0])
     a[y0:y1, x0:x1] = p[y0 - yer['y']:y1 - yer['y'], x0 - yer['x']:x1 - yer['x']]   # cerceve korunur
     return Image.fromarray(a)
 
