@@ -197,18 +197,112 @@ def aktar(L, R):
         R['aktarim'] = {'hata': str(e)}
     log('aktarim', R['aktarim'])
 
+# ---------------- dogrula2 (Serdar 25 Eyl): adil kapi (ayni JPG nicelemesi), fark haritasi, 25/25 esleme --------
+RENK_KLASOR = {'blue': 'MIDNIGHT_BLUE', 'black': 'DEEP_BLACK', 'pure_white': 'PURE_WHITE',
+               'modern': 'CHAMPAGNE_IVORY', 'vintage': 'WARM_PARCHMENT'}
+ORAN_BOY = {'4x5': '8x10.jpg', '3x4': '12x16.jpg', '2x3': '12x18.jpg', '11x14': '11x14.jpg', 'A': 'A4.jpg'}
+FARK_GORSEL = ('blue/4x5', 'blue/3x4', 'black/4x5', 'pure_white/4x5')
+
+def jpg_ayni_nicelemle(yeni, ham_yol):
+    """Yeni sayfayi kilitli ham JPG'nin KENDI niceleme tablolari ve alt ornekleme ile JPG'ye kaydedip geri okur."""
+    from PIL import JpegImagePlugin
+    ham = Image.open(ham_yol)
+    q = ham.quantization; ss = JpegImagePlugin.get_sampling(ham)
+    b = io.BytesIO(); yeni.save(b, 'JPEG', qtables=q, subsampling=ss if ss != -1 else 0)
+    return Image.open(io.BytesIO(b.getvalue())).convert('RGB'), {'qtablo_sayisi': len(q), 'alt_ornekleme': ss,
+                                                                  'q0_ort': round(float(np.mean(q[0])), 2)}
+
+def kapi(a, b):
+    d = np.abs(np.asarray(a).astype(np.int16) - np.asarray(b).astype(np.int16)).max(2)
+    Hh, Ww = d.shape; bl = d[:Hh // 16 * 16, :Ww // 16 * 16].reshape(Hh // 16, 16, Ww // 16, 16).mean((1, 3))
+    m = d > 24; ys, xs = np.where(m)
+    return d, {'blok_ort_maks': round(float(bl.max()), 2), 'tek_px_maks': int(d.max()), 'blok_ort_gt2': int((bl > 2).sum()),
+               'ort_fark': round(float(d.mean()), 3), 'p99': float(np.percentile(d, 99)), 'degisen_px_24': int(m.sum()),
+               'degisen_kutu': [int(xs.min()), int(ys.min()), int(xs.max()), int(ys.max())] if len(ys) else None,
+               'kapi': 'PASS' if (bl.max() <= 2 and d.max() <= 6) else 'FAIL'}
+
+def fark_gorseli(eski, yeni, d, ad):
+    import cv2
+    Wp = 1000; Hp = round(Wp * eski.height / eski.width)
+    e = np.asarray(eski.resize((Wp, Hp), Image.LANCZOS)); y = np.asarray(yeni.resize((Wp, Hp), Image.LANCZOS))
+    dk = cv2.resize(d.astype(np.float32), (Wp, Hp), interpolation=cv2.INTER_AREA)   # ortalama (alan)
+    dm = cv2.resize(d.astype(np.float32), (Wp, Hp), interpolation=cv2.INTER_NEAREST)
+    h = np.clip(np.maximum(dk * 8, dm * 2), 0, 255).astype(np.uint8)
+    isi = cv2.cvtColor(cv2.applyColorMap(h, cv2.COLORMAP_JET), cv2.COLOR_BGR2RGB)
+    pano = np.concatenate([e, y, isi], 1).copy()
+    for i, t in enumerate(('ESKI (kilitli ham JPG)', 'YENI (ayni niceleme JPG)', 'FARK x8 (ort) / x2 (tepe)')):
+        cv2.putText(pano, f'{ad}  {t}', (10 + i * Wp, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 0), 2)
+    (RAP / 'FARK').mkdir(exist_ok=True)
+    Image.fromarray(pano).save(RAP / 'FARK' / f"FARK_p28_{ad.replace('/', '_')}.jpg", quality=90)
+
+def dogrula2(L, R):
+    # 1) tum imzali URL'ler en basta iner (kisa omur)
+    ham_b, p28_b = {}, {}
+    for ad, u in L['birlesik'].items():
+        maskele(url_ac(u)); ham_b[ad] = indir(url_ac(u))
+    for ad, u in L['p28'].items():
+        maskele(url_ac(u)); p28_b[ad] = indir(url_ac(u))
+    log(f'indirildi: {len(ham_b)} birlesik, {len(p28_b)} p28')
+    # 2) adil kapi + fark haritasi
+    R['p28_adil'] = {}
+    for anah, b in p28_b.items():
+        ed, oran = anah.split('/')
+        yeni = Image.open(io.BytesIO(b)).convert('RGB')
+        yol = f'{DEST}/ORANLAR/ham/{oran}_p28.jpg' if ed == 'blue' else f'{DEST}/EDISYONLAR/{ed}/ham/{oran}_p28.jpg'
+        h = W / 'ham' / ed; h.mkdir(parents=True, exist_ok=True); rc('copy', yol, str(h))
+        hp = h / f'{oran}_p28.jpg'; eski = Image.open(hp).convert('RGB')
+        if eski.size != yeni.size:
+            R['p28_adil'][anah] = {'hata': f'boyut: yeni {yeni.size} ham {eski.size}', 'kapi': 'FAIL'}; continue
+        yj, nic = jpg_ayni_nicelemle(yeni, hp)
+        d, k = kapi(yj, eski)
+        R['p28_adil'][anah] = {**k, 'niceleme': nic}
+        log('p28 adil', anah, k)
+        if anah in FARK_GORSEL: fark_gorseli(eski, yj, d, anah)
+    # 3) 25/25 esleme: her tasarim kendi renk + oranindaki POD_PRINT baskisiyla
+    ciftler = sorted(x.strip('/') for x in rc('lsf', POD, '--dirs-only').split())
+    satir = [{'sayfa': s} for s in range(1, 79)]
+    R['esleme25'] = {}
+    for n, (ad, b) in enumerate(sorted(ham_b.items()), 1):
+        ed, oran = ad.rsplit('_', 1) if not ad.endswith('_11x14') else (ad[:-6], '11x14')
+        ts, _ = karolar(b); tw, th = ts[0].size
+        hedef = W / 'podref'; subprocess.run(['rm', '-rf', str(hedef)])
+        rc('copy', POD, str(hedef), '--include', f'*/{RENK_KLASOR[ed]}/{ORAN_BOY[oran]}', '--transfers', '16', timeout=1800)
+        ref = {}
+        for c in ciftler:
+            p = hedef / c / RENK_KLASOR[ed] / ORAN_BOY[oran]
+            if p.exists(): ref[c] = np.asarray(Image.open(p).convert('L').resize((tw, th), Image.BOX)).astype(np.float64)
+        eslesen = []
+        for s, t in enumerate(ts):
+            g = np.asarray(t.convert('L')).astype(np.float64)
+            sk = sorted(((ncc(g, v), c) for c, v in ref.items()), reverse=True)
+            eslesen.append((sk[0][1], sk[0][0], sk[0][0] - sk[1][0]))
+            satir[s][ad] = sk[0][1]
+        R['esleme25'][ad] = {'ref_sayisi': len(ref), 'alfabetik_ile_ayni': [e[0] for e in eslesen] == ciftler[:78],
+                             'benzersiz': len({e[0] for e in eslesen}) == 78, 'min_ncc': round(min(e[1] for e in eslesen), 4),
+                             'min_fark_ikinciye': round(min(e[2] for e in eslesen), 4), 'sayfa28': eslesen[27][0],
+                             'eksik_ref': [c for c in ciftler if c not in ref]}
+        log(f'[{n}/{len(ham_b)}] %{100 * n // len(ham_b)} gecen {time.time() - T0:.0f}s esleme {ad}', R['esleme25'][ad])
+    R['esleme25_ozet'] = {'ayni_sira_tasarim': sum(v['alfabetik_ile_ayni'] for v in R['esleme25'].values()), 'toplam': len(R['esleme25'])}
+    alan = ['sayfa'] + sorted(ham_b)
+    with open(RAP / 'ESLEME.csv', 'w', newline='') as f:
+        wr = csv.DictWriter(f, fieldnames=alan); wr.writeheader(); wr.writerows(satir)
+
+
 if __name__ == '__main__':
     mod = sys.argv[1] if len(sys.argv) > 1 else 'hepsi'
     rc('copy', f'{DEST}/KAYNAK_LISTE_v1.json', str(W))
     L = json.loads((W / 'KAYNAK_LISTE_v1.json').read_text())
     R = {'mod': mod}
     try:
+        if mod == 'dogrula2':
+            dogrula2(L, R)
         if mod in ('hepsi', 'dogrula'):
             boyut_ve_p28(L, R)
             if L.get('birlesik'): esleme(L, R)
-        p28_ok = all(v.get('kapi') == 'PASS' for k, v in R.get('p28_fark', {}).items() if k.endswith('/4x5'))
+        p28_ok = mod != 'dogrula2' and all(v.get('kapi') == 'PASS' for k, v in R.get('p28_fark', {}).items() if k.endswith('/4x5'))
         R['aktarim_karari'] = 'AKTAR' if p28_ok else 'DUR: sayfa 28 kalinti kapisi tutmadi'
         if mod in ('hepsi', 'aktar') and L.get('aktar') and p28_ok: aktar(L, R)
+        if mod == 'dogrula2': R['aktarim_karari'] = 'YOK (Serdar karari: bu adimda aktarim yok)'
     finally:
         (RAP / 'RAPOR.json').write_text(json.dumps(R, ensure_ascii=False, indent=1))
         rc('copy', str(RAP), f'{DEST}/KAYNAK_RAPOR_v1')
@@ -216,3 +310,5 @@ if __name__ == '__main__':
         except Exception: pass                                   # noqa: BLE001
         print(json.dumps({k: v for k, v in R.items() if k != 'sira'}, ensure_ascii=False, indent=1)[:6000], flush=True)
         print(json.dumps(R.get('sira', {}), indent=0)[:4000], flush=True)
+
+
