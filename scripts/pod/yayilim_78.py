@@ -83,11 +83,18 @@ def ed_of(renk):
     return k if k in ED2 else None
 
 
-def anlik(api, shop, lid):
-    sn = P.anlik(api, shop, lid)
-    sn["properties"] = (api.get(f"/shops/{shop}/listings/{lid}/properties", ok404=True) or {}).get("results") or []
-    r = api.get(f"/listings/{lid}", params={"includes": "Personalization"}, ok404=True) or {}
-    sn["personalization"] = {k: v for k, v in r.items() if "personaliz" in k.lower()}
+def anlik(api, shop, lid, nitelik=True):
+    """Kota dostu anlik goruntu (ilan basina 5-6 GET): listing+kisisellestirme tek cagrida; video okunmaz."""
+    L = api.get(f"/listings/{lid}", params={"includes": "Personalization"}) or {}
+    sn = {"listing": L,
+          "personalization": {k: v for k, v in L.items() if "personaliz" in k.lower()},
+          "inventory": api.get(f"/listings/{lid}/inventory") or {},
+          "images": sorted(((api.get(f"/listings/{lid}/images", ok404=True) or {}).get("results") or []),
+                           key=lambda x: x.get("rank") or 0),
+          "variation_images": (api.get(f"/shops/{shop}/listings/{lid}/variation-images", ok404=True) or {}).get("results") or [],
+          "ru": api.get(f"/shops/{shop}/listings/{lid}/translations/ru", ok404=True) or {},
+          "zaman_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
+    sn["properties"] = ((api.get(f"/shops/{shop}/listings/{lid}/properties", ok404=True) or {}).get("results") or []) if nitelik else []
     return sn
 
 
@@ -255,7 +262,7 @@ def dogrula(sn0, sn1, row, sab, rs_id, pair):
 
 # ------------------------------------------------------------------ yazma
 def yaz_ilan(api, shop, lid, row, sab, ref_inv, rs_id, yedek):
-    sn0 = anlik(api, shop, lid)
+    sn0 = anlik(api, shop, lid, nitelik=False)
     (yedek / f"{lid}_ONCE.json").write_text(json.dumps(sn0, ensure_ascii=False, indent=1), encoding="utf-8")
     st = sn0["listing"].get("state")
     if st != "active":
@@ -273,15 +280,18 @@ def yaz_ilan(api, shop, lid, row, sab, ref_inv, rs_id, yedek):
                 {"title": row["yeni_ru_baslik"], "description": row["yeni_ru_aciklama"],
                  "tags": ",".join((sn0.get("ru") or {}).get("tags") or [])})
         adim = "kisisellestirme"
-        api.post_json(f"/shops/{shop}/listings/{lid}/personalization",
-                      {"personalization_questions": sorular(row), "supports_multiple_personalization_questions": True})
+        # OAS: supports_multiple_personalization_questions bir SORGU parametresi (govde degil); tam degistirir.
+        api._call("POST", f"/shops/{shop}/listings/{lid}/personalization",
+                  params={"supports_multiple_personalization_questions": "true"},
+                  json_body={"personalization_questions": sorular(row)})
         adim = "nitelik"
         for pid, vid, deg, _ in NITELIK:
             api.put(f"/shops/{shop}/listings/{lid}/properties/{pid}", {"value_ids": str(vid), "values": deg})
         adim = "envanter"
         api.put_json(f"/listings/{lid}/inventory", govde)
         adim = "renk-gorsel"
-        sn_ara = P.anlik(api, shop, lid)
+        sn_ara = {"inventory": api.get(f"/listings/{lid}/inventory") or {},
+                  "variation_images": (api.get(f"/shops/{shop}/listings/{lid}/variation-images", ok404=True) or {}).get("results") or []}
         v0 = P.v_renk_haritasi(sn0["inventory"], sn0["variation_images"])
         v1 = P.v_renk_haritasi(sn_ara["inventory"], sn_ara["variation_images"])
         if v0 and v1 != v0:
