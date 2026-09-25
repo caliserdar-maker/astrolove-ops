@@ -10,7 +10,9 @@ Paket ekstralari (kartpostal + 2 sticker) - tesis ve fatura dogrulamasi (SALT OK
  3) Kur: ECB gunluk referans kuru (eurofxref-daily.xml): GBP->USD = USD/EUR / GBP/EUR.
     Yayimlanan fiyat (Prodigi packaging inserts sayfasi): kartpostal 2.00 GBP + 2 x sticker 1.00 GBP = 4.00 GBP.
 
-Cikti: out/PRODIGI_EKSTRA_TESIS.md + .json (Drive TEMP/PRODIGI/). POST yok, siparis/teklif acilmaz.
+Cikti: out/PRODIGI_EKSTRA_TESIS.md + .json + EKSTRA_TESIS.json (tesis -> ilk faturadaki ekstra USD; router okur)
+(Drive TEMP/PRODIGI/). POST yok, siparis/teklif acilmaz. Fatura kalem aciklamalari bos gelir: ekstra, SKU'lu baski
+kalemleri cikarilip tutar deseniyle (kartpostal = 2 x sticker, 2 sticker) bulunur.
 Kullanim: prodigi_ekstra_tesis.py [--out-dir out] [--self-test]
 """
 import argparse
@@ -53,30 +55,68 @@ def para(c):
         return None, (c or {}).get("currency", "")
 
 
-def siparis_ozet(o):
-    """Musteri verisi YOK: yalniz id / tarih / durum / varis ulkesi / tesis / fatura kalemleri."""
+def tesisler(o):
     labs = []
     for sh in o.get("shipments") or []:
         fl = sh.get("fulfillmentLocation") or {}
         if fl:
             labs.append(f"{fl.get('countryCode', '')}/{fl.get('labCode', '')}")
-    kalemler, ekstra = [], []
-    toplam = None
+    return list(dict.fromkeys(labs))
+
+
+def fatura_kalemleri(o):
+    """charges[].items -> [{aciklama, sku, tutar, para, urun}]. sku: itemSku ya da itemId -> items[].sku.
+    urun=True: siparis kalemine (baski) bagli kalem."""
+    sku_id = {str(it.get("id")): it.get("sku") for it in o.get("items") or [] if it.get("id")}
+    out = []
     for ch in o.get("charges") or []:
-        t, cur = para(ch.get("totalCost"))
-        toplam = (toplam or 0) + (t or 0)
+        _, cur = para(ch.get("totalCost"))
         for it in ch.get("items") or []:
             tutar, c = para(it.get("cost"))
-            d = {"aciklama": str(it.get("description") or "")[:80], "sku": str(it.get("itemSku") or "")[:60],
-                 "tutar": tutar, "para": c or cur}
-            kalemler.append(d)
-            if EKSTRA_DESEN.search(f"{d['aciklama']} {d['sku']}"):
-                ekstra.append(d)
+            sku = it.get("itemSku") or sku_id.get(str(it.get("itemId") or ""), "") or ""
+            out.append({"aciklama": str(it.get("description") or "")[:80], "sku": str(sku)[:60],
+                        "tutar": tutar, "para": c or cur, "urun": bool(sku)})
+    return out
+
+
+def ekstra_faturadan(o, tolerans=0.02):
+    """Faturadan paket ekstralari (1 kartpostal + 2 sticker). Kalem aciklamalari BOS gelir (25 Eyl olcumu), bu yuzden:
+    1) aciklamada postcard/sticker/insert geciyorsa o kalemler;
+    2) yoksa SKU'lu (baski) kalemler cikarilir, kalanlarda tutar deseni aranir: kartpostal = 2 x sticker (+-0.02),
+       sticker 2 adet (fiyat tablosu: 2.00 / 1.00 GBP; fatura US 2.50/1.25, EU 2.87/1.43).
+    -> {"tesis", "usd", "kalemler", "yontem"} ya da None (tek tesis degil / USD degil / desen yok)."""
+    labs = tesisler(o)
+    if len(labs) != 1:
+        return None
+    kl = fatura_kalemleri(o)
+    if any((k["para"] or "USD") != "USD" for k in kl):
+        return None
+    adl = [k for k in kl if EKSTRA_DESEN.search(f"{k['aciklama']} {k['sku']}") and k["tutar"] is not None]
+    if adl:
+        return {"tesis": labs[0], "usd": round(sum(k["tutar"] for k in adl), 2),
+                "kalemler": [k["tutar"] for k in adl], "yontem": "aciklama"}
+    aday = [round(k["tutar"], 2) for k in kl if not k["urun"] and k["tutar"] is not None]
+    for a in sorted(set(aday), reverse=True):
+        for b in sorted(set(aday)):
+            if b != a and aday.count(b) >= 2 and 0.3 <= b <= 5 and abs(a - 2 * b) <= tolerans:
+                return {"tesis": labs[0], "usd": round(a + 2 * b, 2), "kalemler": [a, b, b], "yontem": "tutar deseni"}
+    return None
+
+
+def siparis_ozet(o):
+    """Musteri verisi YOK: yalniz id / tarih / durum / varis ulkesi / tesis / fatura kalemleri."""
+    kalemler = [{k: v for k, v in x.items() if k != "urun"} for x in fatura_kalemleri(o)]
+    toplam = None
+    for ch in o.get("charges") or []:
+        t, _ = para(ch.get("totalCost"))
+        toplam = (toplam or 0) + (t or 0)
+    ek = ekstra_faturadan(o)
     return {"id": o.get("id"), "tarih": str(o.get("created") or "")[:10],
             "durum": (o.get("status") or {}).get("stage"),
             "varis": ((o.get("recipient") or {}).get("address") or {}).get("countryCode", ""),
-            "tesis": " ".join(dict.fromkeys(labs)) or "-", "kalemler": kalemler,
-            "ekstra_kalem": ekstra, "ekstra_toplam": round(sum(x["tutar"] or 0 for x in ekstra), 2),
+            "tesis": " ".join(tesisler(o)) or "-", "kalemler": kalemler,
+            "ekstra_kalem": (ek or {}).get("kalemler", []), "ekstra_toplam": (ek or {}).get("usd", 0),
+            "ekstra_yontem": (ek or {}).get("yontem", ""),
             "fatura_toplam": round(toplam, 2) if toplam is not None else None}
 
 
@@ -131,6 +171,12 @@ def rapor(ozetler, kur, tarih, out):
            for s in ozetler]
     Path(out).mkdir(parents=True, exist_ok=True)
     (Path(out) / "PRODIGI_EKSTRA_TESIS.md").write_text("\n".join(md) + "\n", encoding="utf-8")
+    dogrulanmis = {}
+    for s_ in sorted(ozetler, key=lambda x: x["tarih"]):          # tesis basina ilk faturalanan siparis
+        if s_["ekstra_toplam"] and s_["tesis"] not in ("-",) and " " not in s_["tesis"]:
+            dogrulanmis.setdefault(s_["tesis"].split("/")[-1], {"usd": s_["ekstra_toplam"], "kaynak": f"fatura {s_['id']}",
+                                                               "tarih": s_["tarih"]})
+    (Path(out) / "EKSTRA_TESIS.json").write_text(json.dumps(dogrulanmis, indent=1), encoding="utf-8")
     (Path(out) / "PRODIGI_EKSTRA_TESIS.json").write_text(json.dumps(
         {"kur_gbp_usd": kur, "kur_tarih": tarih, "paket_gbp": PAKET_GBP, "paket_usd": paket_usd, "tesis": tesis,
          "ref": ref, "siparisler": ozetler}, indent=1, ensure_ascii=False), encoding="utf-8")
@@ -149,6 +195,20 @@ def self_test():
              {"description": "Shipping", "itemSku": "", "cost": {"amount": "6.85", "currency": "USD"}}]}]}
     s = siparis_ozet(o)
     assert s["tesis"] == "US/prodigi_us" and s["ekstra_toplam"] == 5.0 and s["varis"] == "US", s
+    # 25 Eyl canli faturalar: aciklama ve SKU BOS -> tutar deseni
+    def bos(labc, tutarlar, oid="ord_x"):
+        return {"id": oid, "shipments": [{"fulfillmentLocation": {"countryCode": labc[0], "labCode": labc[1]}}],
+                "charges": [{"totalCost": {"amount": str(sum(tutarlar)), "currency": "USD"},
+                             "items": [{"description": "", "itemSku": "", "cost": {"amount": str(t), "currency": "USD"}} for t in tutarlar]}]}
+    assert ekstra_faturadan(bos(("US", "prodigi_us"), [6.85, 10.0, 2.5, 1.25, 1.25]))["usd"] == 5.0
+    assert ekstra_faturadan(bos(("US", "prodigi_us"), [7.1, 15.0, 2.5, 1.25, 1.25]))["usd"] == 5.0
+    assert ekstra_faturadan(bos(("NL", "prodigi_eu"), [10.49, 5.73, 2.87, 1.43, 1.43]))["usd"] == 5.73
+    assert ekstra_faturadan(bos(("NL", "prodigi_eu"), [11.72])) is None                    # Nisan: ekstra yok
+    assert ekstra_faturadan(bos(("US", "prodigi_us"), [6.85, 10.0])) is None
+    o2 = bos(("US", "prodigi_us"), [5.0, 2.5, 2.5, 6.85])                                # 2.5 x2 baski kalemi SKU'lu
+    o2["items"] = [{"id": "it1", "sku": "GLOBAL-HPR-5x7"}, {"id": "it2", "sku": "GLOBAL-HPR-5x7"}]
+    o2["charges"][0]["items"][1]["itemId"], o2["charges"][0]["items"][2]["itemId"] = "it1", "it2"
+    assert ekstra_faturadan(o2) is None, "SKU'lu baski kalemi ekstra sayilmamali"
     import tempfile
     d = tempfile.mkdtemp()
     metin = rapor([dict(s, id=REF_SIPARIS)], 1.34, "2026-09-25", d) + Path(d, "PRODIGI_EKSTRA_TESIS.json").read_text()

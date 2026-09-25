@@ -103,7 +103,7 @@ jobs:
             python scripts/prodigi/prodigi_ekstra_tesis.py --out-dir out > /dev/null
             cat out/PRODIGI_EKSTRA_TESIS.md >> "$GITHUB_STEP_SUMMARY"
             head -40 out/PRODIGI_EKSTRA_TESIS.md
-            rclone copy out "gdrive:ASTROLOVE/TEMP/PRODIGI" --include "PRODIGI_EKSTRA_TESIS.*" -q
+            rclone copy out "gdrive:ASTROLOVE/TEMP/PRODIGI" --include "PRODIGI_EKSTRA_TESIS.*" --include "EKSTRA_TESIS.json" -q
             exit 0
           fi
           if [ "$MODE" = "maliyet_api" ]; then
