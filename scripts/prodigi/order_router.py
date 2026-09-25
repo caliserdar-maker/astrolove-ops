@@ -126,13 +126,16 @@ class Prodigi:
                 vergi = float((cs.get("totalTax") or {}).get("amount") or 0)
                 if not vergi and (cs.get("totalCost") or {}).get("amount") is not None:
                     vergi = max(0.0, float(cs["totalCost"]["amount"]) - kalem - kargo)
+                labs = [f"{(sh.get('fulfillmentLocation') or {}).get('countryCode', '')}/"
+                        f"{(sh.get('fulfillmentLocation') or {}).get('labCode', '')}" for sh in q.get("shipments") or []
+                        if sh.get("fulfillmentLocation")]
                 secenekler.append({"yontem": q.get("shipmentMethod") or yontem, "kalem": round(kalem, 2),
-                                   "kargo": round(kargo, 2), "vergi": round(vergi, 2),
+                                   "kargo": round(kargo, 2), "vergi": round(vergi, 2), "lab": " ".join(dict.fromkeys(labs)),
                                    "toplam": round(kalem + kargo + vergi, 2)})
         if not secenekler:
             return None, f"quote basarisiz: {'; '.join(hatalar)[:200]}", {}
         en_ucuz = siparis_onay.kargo_sec(secenekler)          # EN UCUZ = urun + kargo + vergi (ulke sabiti yok)
-        ekler = siparis_onay.ekstra(country)[0]
+        ekler = siparis_onay.ekstra(en_ucuz.get("lab"))[0]
         ayrinti = {"secenekler": sorted(secenekler, key=lambda x: x["toplam"]), "secilen": en_ucuz,
                    "ekler": ekler}
         return round(en_ucuz["toplam"] + ekler, 2), "", ayrinti
@@ -341,7 +344,7 @@ def teklif_net(prod, api, shop, receipt, items):
     except Exception as e:                              # noqa: BLE001
         err, ayr = f"{type(e).__name__}", {}
     alan, sec = siparis_onay.kar_alanlari(fiyat, (ayr or {}).get("secenekler") or [],
-                                          offsite_kesinti(api, shop, receipt), sum(i["qty"] for i in items), country)
+                                          offsite_kesinti(api, shop, receipt), sum(i["qty"] for i in items))
     if not sec and err:
         alan["KAR_UYARI"] += f": {str(err)[:120]}"
     return alan, (sec or {}).get("yontem"), ayr

@@ -44,16 +44,32 @@ EVET = {"TRUE", "EVET", "X", "YES", "1", "✓", "✔"}
 ETSY_SABIT, ETSY_ORAN = 0.582, 0.176     # Etsy kesintisi = 0.582 x adet + 0.176 x fiyat (Serdar, 25 Eyl 2026)
 ZARAR = "🔴 ZARAR"
 # Paket ekstralari (kartpostal + 2 sticker; hesap ayari, her pakette - Serdar 25 Eyl). Prodigi Quote API bunlari
-# FIYATLAMIYOR (7 Eyl kosu 34115064337: quote semasinda insert alani yok; 25 Eyl teklifleri insert'siz bazla ayni).
-# Ulke -> (USD, kaynak). Olculmemis ulke: US olcumu kullanilir ve KAR_UYARI'da TAHMINI yazar.
-EKSTRA_USD = {"US": (5.00, "ord_14538276 faturasi (postcard 2.50 + 2 sticker 1.25)")}
-EKSTRA_VARSAYILAN = 5.00
+# FIYATLAMIYOR (7 Eyl kosu 34115064337). Tutar: Prodigi fiyat tablosu (kartpostal 2.00 GBP + 2 x sticker 1.00 GBP)
+# x ECB kuru. Ekstra yalniz basildigi tesiste faturalanir: tesis teklifteki shipments[].fulfillmentLocation'dan gelir.
+EKSTRA_GBP = 4.00
+KUR_GBP_USD, KUR_TARIH = 1.3252, "2026-09-25"     # ECB referans kuru (prodigi-quote ekstra_tesis, kosu 36162621950)
+EKSTRA_KAYNAK = "Prodigi fiyat tablosu"
+# tesis (labCode) -> True: ekstra basiliyor | False: eklenmiyor. Kanit: canli siparis faturalari (kosu 36162621950):
+#   prodigi_us: ord_14538276 + ord_72470448809534464 -> 2.50 + 1.25 + 1.25 = 5.00 USD
+#   prodigi_eu: ord_72296317183912448 (17 Eyl)       -> 2.87 + 1.43 + 1.43 = 5.73 USD
+#   prodigi_gb3, au1: canli siparis yok -> DOGRULANMADI (maliyet dusulur, not yazilir). Dokuman tesis listesi vermiyor
+#   ("Availability of branded inserts is dependent on fulfilment location").
+EKSTRA_TESIS = {"prodigi_us": True, "prodigi_eu": True}
+NOT_EKSTRA_YOK = "Bu tesiste kartpostal/sticker eklenmiyor"
 
 
-def ekstra(ulke):
-    """-> (USD, kaynak, olculmus_mu)."""
-    t = EKSTRA_USD.get((ulke or "").upper())
-    return (t[0], t[1], True) if t else (EKSTRA_VARSAYILAN, "TAHMINI (US olcumu)", False)
+def ekstra_usd():
+    return round(EKSTRA_GBP * KUR_GBP_USD, 2) if KUR_GBP_USD else 5.00
+
+
+def ekstra(lab):
+    """tesis -> (USD, kaynak, not). Tesiste ekstra basilmiyorsa 0 + not; tesis bilinmiyorsa tutar dusulur + not."""
+    lab = (lab or "").split("/")[-1].strip()
+    durum = EKSTRA_TESIS.get(lab)
+    if durum is False:
+        return 0.0, f"{EKSTRA_KAYNAK}; tesis {lab}", NOT_EKSTRA_YOK
+    kaynak = f"{EKSTRA_KAYNAK} ({EKSTRA_GBP:.2f} GBP" + (f", ECB {KUR_TARIH} kuru {KUR_GBP_USD})" if KUR_GBP_USD else ")")
+    return ekstra_usd(), kaynak, ("" if durum else f"tesis {lab or '?'} icin ekstra dogrulanmadi (maliyet dusuldu)")
 
 
 def kod(rid):
@@ -266,12 +282,13 @@ def tablo_ac(spec):
 
 # ------------------------------------------------------------------ kargo secimi + net kar (Serdar, 25 Eyl 2026)
 def kargo_sec(secenekler):
-    """Prodigi teklif secenekleri [{yontem, kalem, kargo, vergi}] -> EN UCUZ (kalem + kargo + vergi).
+    """Prodigi teklif secenekleri [{yontem, kalem, kargo, vergi, lab}] -> EN UCUZ (kalem + kargo + vergi + tesisin ekstrasi).
     Ulke bazli sabit secim YOK: TR'de Budget, CA'da Standard pahali cikabilir."""
     ok = [x for x in secenekler or [] if x.get("kalem") is not None and x.get("kargo") is not None]
     if not ok:
         return None
-    return min(ok, key=lambda x: round(float(x["kalem"]) + float(x["kargo"]) + float(x.get("vergi") or 0), 2))
+    return min(ok, key=lambda x: round(float(x["kalem"]) + float(x["kargo"]) + float(x.get("vergi") or 0)
+                                       + ekstra(x.get("lab"))[0], 2))
 
 
 def net_kar(fiyat, urun, kargo, vergi, offsite=0.0, adet=1, ekstra_usd=0.0):
@@ -284,8 +301,8 @@ def net_kar(fiyat, urun, kargo, vergi, offsite=0.0, adet=1, ekstra_usd=0.0):
 def kar_alanlari(fiyat, secenekler, offsite=None, adet=1, ulke=""):
     """Tablo alanlari: FIYAT, KARGO (secilen + digerleri + ekstra), NET_KAR, KAR_UYARI. offsite None = okunamadi.
     NET_KAR ekstralar DUSULMUS haldedir."""
-    ek, ek_kaynak, ek_olcum = ekstra(ulke)
     sec = kargo_sec(secenekler)
+    ek, ek_kaynak, ek_not = ekstra((sec or {}).get("lab"))
     if not sec:
         return {"FIYAT": f"{float(fiyat):.2f}", "KARGO": "", "NET_KAR": "",
                 "KAR_UYARI": "TEKLIF ALINAMADI (net hesaplanmadi)"}, None
@@ -295,11 +312,12 @@ def kar_alanlari(fiyat, secenekler, offsite=None, adet=1, ulke=""):
     uyari = [ZARAR] if net < 0 else []
     if offsite is None:
         uyari.append("Offsite Ads okunamadi (dusulmedi)")
-    if not ek_olcum:
-        uyari.append(f"ekstra {ek:.2f} {ek_kaynak}")
+    if ek_not:
+        uyari.append(ek_not)
     return {"FIYAT": f"{float(fiyat):.2f}",
             "KARGO": f"{sec['yontem']} {float(sec['kargo']):.2f} (urun {float(sec['kalem']):.2f}, vergi "
-                     f"{float(sec.get('vergi') or 0):.2f}, ekstra {ek:.2f})" + (f" | diger: {digerleri}" if digerleri else ""),
+                     f"{float(sec.get('vergi') or 0):.2f}, ekstra {ek:.2f} [{ek_kaynak}], tesis {sec.get('lab') or '?'})"
+                     + (f" | diger: {digerleri}" if digerleri else ""),
             "NET_KAR": f"{net:.2f}" + (f" (offsite -{float(offsite):.2f})" if offsite else ""),
             "KAR_UYARI": "; ".join(uyari)}, sec
 
@@ -309,8 +327,10 @@ def kar_metni(satir):
     net = str(satir.get("NET_KAR") or "").split(" ")[0]
     if not net:
         return f"net kar: {satir.get('KAR_UYARI') or 'hesaplanmadi'}"
-    ek = f" (kartpostal+sticker dusulmus) | kargo {str(satir.get('KARGO') or '').split(' (')[0]}"
-    return (f"{ZARAR}: net {net} USD" if ZARAR in (satir.get("KAR_UYARI") or "") else f"net kar {net} USD") + ek
+    uy = satir.get("KAR_UYARI") or ""
+    ek = ((f" | {NOT_EKSTRA_YOK}" if NOT_EKSTRA_YOK in uy else " (kartpostal+sticker dusulmus)")
+          + f" | kargo {str(satir.get('KARGO') or '').split(' (')[0]}")
+    return (f"{ZARAR}: net {net} USD" if ZARAR in uy else f"net kar {net} USD") + ek
 
 
 # ------------------------------------------------------------------ bildirim (yalniz kod + link)
