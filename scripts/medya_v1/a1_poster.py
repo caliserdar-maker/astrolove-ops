@@ -172,6 +172,18 @@ def yanyana(sol, sag, ad):
     c = Image.new('RGB', (a.width + b.width + 30, H), 'white'); c.paste(a, (0, 0)); c.paste(b, (a.width + 30, 0))
     c.save(CIK / ad, quality=92)
 
+if __name__ == '__main__' and sys.argv[1:] == ['ham']:
+    # yerel teshis icin: Canva sayfalarini ozel Drive klasorune kopyala (liste sonra silinir)
+    try:
+        rc('copy', f'{KP}/A1_LISTE.json', str(W)); L = json.loads((W / 'A1_LISTE.json').read_text())
+        (W / 'ham').mkdir(exist_ok=True)
+        for n, u in L['sayfa'].items():
+            maskele(u); (W / 'ham' / f'4x5_p{n}.png').write_bytes(indir(u))
+        rc('copy', str(W / 'ham'), f'{KP}/A1_HAM'); print(sorted(p.name for p in (W / 'ham').iterdir()))
+    finally:
+        rc('deletefile', f'{KP}/A1_LISTE.json')
+    sys.exit(0)
+
 if __name__ == '__main__' and sys.argv[1:] == ['kapak']:
     kapak_modu(); sys.exit(0)
 
