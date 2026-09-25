@@ -23,9 +23,9 @@ on:
         required: false
         default: ""
       mode:
-        description: "pilot = pilot_skus.csv (US) | hpr_sizes = hpr_sizes.txt (US + DE) | ship_everywhere = 8 ulke Standard kargo (18x24) | inserts = branded insert fiyat/ozellik (8 tip, US + DE) | maliyet_api = 16 HPR boy x 7 ulke Budget/Standard + net (DIJITAL_78) | ekstra_tesis = kartpostal/sticker: canli siparis tesis + fatura kalemi (yalniz GET) + ECB kuru | hesap_oku = hesap ayari/adres ucu var mi (yalniz GET) | canli_guvenli_test = TEK canli sahte siparis + HEMEN iptal (Serdar onayi 25 Eyl; Pause indefinitely acik)"
+        description: "pilot = pilot_skus.csv (US) | hpr_sizes = hpr_sizes.txt (US + DE) | ship_everywhere = 8 ulke Standard kargo (18x24) | inserts = branded insert fiyat/ozellik (8 tip, US + DE) | maliyet_api = 16 HPR boy x 7 ulke Budget/Standard + net (DIJITAL_78) | ekstra_tesis = kartpostal/sticker: canli siparis tesis + fatura kalemi (yalniz GET) + ECB kuru | hesap_oku = hesap ayari/adres ucu var mi (yalniz GET) | canli_guvenli_test = TEK canli sahte siparis + HEMEN iptal (Serdar onayi 25 Eyl; Pause indefinitely acik) | siparis_oku = skus alanindaki 'order_id,merchantReference' siparisini yalniz GET ile bul"
         type: choice
-        options: [pilot, hpr_sizes, ship_everywhere, inserts, maliyet_api, ekstra_tesis, hesap_oku, canli_guvenli_test]
+        options: [pilot, hpr_sizes, ship_everywhere, inserts, maliyet_api, ekstra_tesis, hesap_oku, canli_guvenli_test, siparis_oku]
         default: pilot
 
 concurrency:
@@ -103,6 +103,11 @@ jobs:
             git fetch -q --depth 1 origin siparis-onay && git checkout -q FETCH_HEAD -- scripts/
             python scripts/prodigi/canli_guvenli_test.py
             exit $?
+          fi
+          if [ "$MODE" = "siparis_oku" ]; then
+            IFS=',' read -r S_OID S_REF <<< "$SKUS"
+            python scripts/prodigi/prodigi_siparis_oku.py "$S_OID" "$S_REF" 20
+            exit 0
           fi
           if [ "$MODE" = "hesap_oku" ]; then
             python scripts/prodigi/prodigi_hesap_oku.py

@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
     inputs:
       mod:
-        description: "tara | sil"
+        description: "tara | sil | dakika (Actions kullanim olcumu, salt okuma)"
         required: true
         default: "tara"
 
@@ -57,7 +57,8 @@ jobs:
           MOD: ${{ inputs.mod }}
         run: |
           set -euo pipefail
-          case "$MOD" in tara|sil) : ;; *) echo "mod tara|sil olmali"; exit 1 ;; esac
+          case "$MOD" in tara|sil|dakika) : ;; *) echo "mod tara|sil|dakika olmali"; exit 1 ;; esac
+          if [ "$MOD" = "dakika" ]; then python scripts/ops/actions_dakika.py 30; exit 0; fi
           python scripts/ops/gizlilik_temizlik.py "$MOD" --terim-kok _gizli
       - if: ${{ always() }}
         run: rm -rf _gizli ~/.config/rclone
