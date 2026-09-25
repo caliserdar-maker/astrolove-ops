@@ -71,40 +71,42 @@ def kaynak_oku(baski_kok, plate_kok, ed):
 
 
 # ------------------------------------------------------------------ murekkep
-def murekkep(baski, plate, ed, hayalet="birak"):
-    """ESIK YOK: fark = baski - plate (isaretli), murekkep YONUNE gore ayrilir.
+def murekkep(baski, plate, ed, hayalet="birak", isaret="uzaklik"):
+    """ESIK YOK: fark = baski - plate (isaretli), murekkep RENGINE UZAKLIKLA ayrilir.
 
-    kisisel PLATE 78 ciftin MEDYANI: halka, ∞ ve ESKI SLOGAN plate'te KALIR.
-    Bu yuzden farkta iki isaret bulunur:
-      poz (baski murekkep rengine YAKLASIYOR)  -> YENI murekkep, aktarilir
-      neg (baski murekkepten UZAKLASIYOR)      -> plate'te kalan ESKI oge
-                                                  (eski ∞, eski slogan). CLEAN
-                                                  plakada bu ogeler ZATEN YOK;
-                                                  aktarilirsa negatif hayalet
-                                                  (koyu/acik leke) olusur.
-    Yon testi: p = <fark, INK_RGB - plate>. Esik yok, isaret testi.
-    hayalet="birak" (varsayilan) negatifi aktarmaz; "gecir" eski davranis
-    (olcum/karsilastirma icin).
+    kisisel PLATE 78 ciftin MEDYANI (kisisel olcumu 25 Eyl): ESKI SLOGAN VAR,
+    ∞ YOK, DIS HALKA VAR, isim satiri temiz (%0,02 artik). Bu yuzden farkta:
+      poz : baski murekkep rengine plate'ten DAHA YAKIN -> YENI murekkep, aktarilir
+      neg : plate daha yakin -> plate'te kalan ESKI oge (eski slogan). CLEAN
+            plakada bu oge ZATEN YOK; aktarilirsa negatif hayalet olusur.
+
+    isaret="uzaklik" (varsayilan, Serdar onayi GOREV_0002): 3 boyutlu karsilastirma
+      |baski - INK_RGB| < |plate - INK_RGB|. Esik eklemez.
+    isaret="izdusum": eski 1 boyutlu test <fark, INK_RGB - zemin>. Yerel olcum
+      (25 Eyl): eski murekkebin ALTINDAN cikan YILDIZI altin ekseninde "murekkebe
+      yaklasiyor" sayip yeni murekkep saniyordu (53 poster px artik).
     """
     r, g, b = INK_RGB[ed]
+    ink = np.array([b, g, r], np.float32)
     f = baski.astype(np.float32) - plate.astype(np.float32)
-    # Yon vektoru PLATE'e bagli OLAMAZ: plate'te murekkep olan pikselde
-    # (eski ∞, eski slogan) INK_RGB - plate ~ 0 olur ve isaret belirsizlesir
-    # (yerel olcum 25 Eyl: 79.982 px "yonsuz"). Bunun yerine edisyonun SABIT
-    # zemin->murekkep ekseni kullanilir: zemin = plate'in medyan rengi.
-    zemin = np.median(plate[::16, ::16].reshape(-1, 3), axis=0).astype(np.float32)
-    yon = np.array([b, g, r], np.float32) - zemin
-    p = (f * yon).sum(2)
     var = np.abs(f).max(2) > 0
-    poz = var & (p > 0)
-    neg = var & (p < 0)
-    sifir = var & (p == 0)                     # yon belirsiz (plate zaten murekkep rengi)
+    if isaret == "uzaklik":
+        d_b = ((baski.astype(np.float32) - ink) ** 2).sum(2)
+        d_p = ((plate.astype(np.float32) - ink) ** 2).sum(2)
+        poz, neg, sifir = var & (d_b < d_p), var & (d_b > d_p), var & (d_b == d_p)
+        zemin = None
+    else:
+        zemin = np.median(plate[::16, ::16].reshape(-1, 3), axis=0).astype(np.float32)
+        pr = (f * (ink - zemin)).sum(2)
+        poz, neg, sifir = var & (pr > 0), var & (pr < 0), var & (pr == 0)
     fark = f if hayalet == "gecir" else f * poz[..., None]
     alfa = (np.abs(fark).max(2) > 0).astype(np.float32)
-    tani = {"zemin_bgr": [round(float(v), 1) for v in zemin],
-            "poz_px": int(poz.sum()), "neg_px": int(neg.sum()), "yonsuz_px": int(sifir.sum()),
+    tani = {"isaret": isaret, "poz_px": int(poz.sum()), "neg_px": int(neg.sum()),
+            "yonsuz_px": int(sifir.sum()),
             "neg_kutu": [int(v) for v in V2.bbox(neg)] if neg.any() else None,
             "neg_maks": round(float(np.abs(f).max(2)[neg].max()), 1) if neg.any() else 0.0}
+    if zemin is not None:
+        tani["zemin_bgr"] = [round(float(v), 1) for v in zemin]
     return fark, alfa, tani
 
 
@@ -243,6 +245,8 @@ def main(argv=None):
     ap.add_argument("--aktarim", choices=("fark", "maske"), default="fark")
     ap.add_argument("--halka", default="", help="halkali gece plakalari (PLATE_<ED>_<DEV>.png); "
                                                 "kisisel PLATE halkayi iceriyorsa zorunlu")
+    ap.add_argument("--isaret", choices=("uzaklik", "izdusum"), default="uzaklik",
+                    help="yeni/eski murekkep ayrimi: uzaklik = 3B (onayli), izdusum = eski 1B")
     ap.add_argument("--hayalet", choices=("birak", "gecir"), default="birak",
                     help="plate'te kalan eski ∞/slogan farki: birak=aktarma (varsayilan), gecir=aktar")
     ap.add_argument("--edisyonlar", default=",".join(EDISYONLAR))
@@ -256,7 +260,7 @@ def main(argv=None):
     olcum = {}
     for ed in ed_list:
         baski, plate, bn, pn = kaynak_oku(a.baski, a.plate, ed)
-        fark, alfa, tani = murekkep(baski, plate, ed, a.hayalet)
+        fark, alfa, tani = murekkep(baski, plate, ed, a.hayalet, a.isaret)
         kutu, bilgi = kutular_olc(alfa, bool(a.halka))
         olcum[ed] = {"baski": bn, "plate": pn, "kutular": kutu, "kume": bilgi,
                      "tani_murekkep": tani, "murekkep_px": int((alfa > 0).sum())}
@@ -278,7 +282,7 @@ def main(argv=None):
     urun, rapor = {}, []
     for ed in ed_list:
         baski, plate, _, _ = kaynak_oku(a.baski, a.plate, ed)
-        fark, alfa, tani = murekkep(baski, plate, ed, a.hayalet)
+        fark, alfa, tani = murekkep(baski, plate, ed, a.hayalet, a.isaret)
         uret(ed, baski, plate, fark, alfa, a.temiz, a.plakalar or a.temiz, cikti, a.cift,
              olcum[ed]["kutular"], a.aktarim, urun, rapor, a.halka, bant, tani)
         del baski, plate, fark, alfa

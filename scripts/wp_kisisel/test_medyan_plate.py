@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """kisisel PLATE = 78 ciftin MEDYANI durumunun yerel testi (Actions yok, Drive yok).
 
-Mo notu (25 Eyl): medyanda HALKA, muhtemelen ∞ ve ESKI SLOGAN plate'te KALIR.
+kisisel OLCUMU (kisisel_RAPOR_0000, GOREV_0001/0002): plate'te ESKI SLOGAN VAR,
+∞ YOK, DIS HALKA VAR, isim satiri temiz (%0,02 artik). Senaryo buna gore kurulur.
 Sonuc: "baski - plate" farkinda
   (a) HALKA YOK      -> halka halkali gece plakasindan alinmali
                         (WP_PLATES/PLATE_<ED>_<DEV>.png - ..._CLEAN.png, halka bandi)
@@ -91,19 +92,31 @@ def katman(ed, ogeler, P12=None, P6=None, P7=None, kp=None, isimler=None, mesaj=
     return out, (x_inf if "inf_yeni" in ogeler or "inf_eski" in ogeler else None)
 
 
+def isim_artigi(mk, ed, oran=0.0002, tohum=7):
+    """Medyanin isim satirinda biraktigi zayif artik (kisisel olcumu: %0,02)."""
+    a = np.asarray(mk).copy()
+    rng = np.random.default_rng(tohum)
+    x0, y0, x1, y1 = BOX_NAMES
+    n = int(oran * (x1 - x0) * (y1 - y0))
+    xs = rng.integers(x0, x1, n); ys = rng.integers(y0, y1, n)
+    a[ys, xs, 3] = np.maximum(a[ys, xs, 3], rng.integers(8, 26, n).astype(np.uint8))
+    return Image.fromarray(a, "RGBA")
+
+
 def kur(T, ed, kis):
+    """Olculen gercege gore: plate = zemin + HALKA + ESKI SLOGAN (+ isim artigi),
+    baski = zemin + halka + sembol + glifler + ∞ + isimler + YENI MESAJ."""
     P6, P7, P12, kp = V2.kisisel_kur(kis)
     isimler, mesaj = {"sol": "EMILY", "sag": "JAMES"}, "It Began With a Kiss in the Rain"
     zemin = TS.zemin_uret(ed, 100)
-    # kisisel PLATE (78 ciftin medyani): halka + ESKI ∞ + ESKI SLOGAN
-    mk_plate, _ = katman(ed, {"halka", "inf_eski", "slogan"}, P12, P6, P7, kp, isimler, mesaj)
-    # baski: halka + sembol + glifler + YENI ∞ + isimler + YENI MESAJ
+    mk_plate, _ = katman(ed, {"halka", "slogan"}, P12, P6, P7, kp, isimler, mesaj)
+    mk_plate = isim_artigi(mk_plate, ed)
     mk_baski, x_inf = katman(ed, {"halka", "sembol", "isim", "inf_yeni", "mesaj"},
                              P12, P6, P7, kp, isimler, mesaj)
-    # yalniz halka (gece plakasi icin) ve isimsiz murekkep (orijinal referans)
     mk_halka, _ = katman(ed, {"halka"}, P12, P6, P7, kp, isimler, mesaj)
     mk_ref, _ = katman(ed, {"halka", "sembol"}, P12, P6, P7, kp, isimler, mesaj)
-    for d in ("baski", "plate", "temiz", "gece", "geom", "orijinal", "out_gecir", "out_birak"):
+    for d in ("baski", "plate", "temiz", "gece", "geom", "orijinal",
+              "out_uzaklik", "out_izdusum", "out_gecir"):
         (T / d).mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(T / "plate" / f"{ed.upper()}_24X32.png"), TS.bindir(zemin, mk_plate))
     cv2.imwrite(str(T / "baski" / f"SIPARIS_ARIES_LEO_{ed.upper()}_24X32.png"), TS.bindir(zemin, mk_baski))
@@ -122,7 +135,9 @@ def kur(T, ed, kis):
             else:
                 Image.fromarray(cv2.cvtColor(o, cv2.COLOR_BGR2RGB)).save(
                     T / "orijinal" / f"AstroLove_Aries_Leo_{ed}_{dev}.jpg", "JPEG", quality=95, subsampling=0)
-    return x_inf
+    # HAYALET YER GERCEGI: plate'te murekkep VAR, baskida YOK -> aktarilirsa leke
+    hmask = ((np.asarray(mk_plate)[..., 3] > 0) & (np.asarray(mk_baski)[..., 3] == 0))
+    return x_inf, hmask.astype(np.float32)
 
 
 def hayalet_kutusu(x_inf):
@@ -137,16 +152,17 @@ def hayalet_kutusu(x_inf):
             "eski_slogan": list(SP.MESAJ_BANT)}
 
 
-def olc_hayalet(T, alt, ed, kutular):
-    """Eski ∞ kutusunda, YENI murekkebin disinda kalan bolgede cikti != CLEAN mi?"""
+def olc_hayalet(T, alt, ed, hmask):
+    """Hayalet bolgesinde (plate'te murekkep, baskida yok) cikti CLEAN'den farkli mi?"""
     sonuc = []
     for dev in SP.CIHAZLAR:
         im = cv2.imread(str(T / alt / f"AstroLove_Aries_Leo_{ed}_{dev}.jpg"))
         clean = cv2.imread(str(T / "temiz" / f"PLATE_{ed.upper()}_{dev.upper()}_CLEAN.png"))
-        kd = V2.kirp(V2.cihaz_kutusu(kutular["eski_sonsuz"], dev, None), *DEVICES[dev][::1], 0)
-        x0, y0, x1, y1 = kd
-        d = np.abs(im[y0:y1, x0:x1].astype(np.int16) - clean[y0:y1, x0:x1].astype(np.int16)).max(2)
-        sonuc.append({"cihaz": dev, "kutu": kd, "maks_fark": int(d.max()), "px_fark": int((d > 8).sum())})
+        Ah = WBP.place(hmask, dev, clean.shape, None) > 0.5
+        d = np.abs(im.astype(np.int16) - clean.astype(np.int16)).max(2)
+        sonuc.append({"cihaz": dev, "bolge_px": int(Ah.sum()),
+                      "maks_fark": int(d[Ah].max()) if Ah.any() else 0,
+                      "px_fark": int((d[Ah] > 8).sum()) if Ah.any() else 0})
     return sonuc
 
 
@@ -155,47 +171,58 @@ def main():
     kis = sys.argv[1] if len(sys.argv) > 1 else "."
     T = Path(sys.argv[2] if len(sys.argv) > 2 else "/tmp/wp_medyan_test")
     ed = "Midnight_Blue"
-    x_inf = kur(T, ed, kis)
-    kutular = hayalet_kutusu(x_inf)
-    print(f"[kur {time.time() - t0:.1f}s] eski ∞ kutusu (poster): {kutular['eski_sonsuz']}")
+    x_inf, hmask = kur(T, ed, kis)
+    print(f"[kur {time.time() - t0:.1f}s] hayalet yer gercegi: {int(hmask.sum())} poster px "
+          f"(plate'te murekkep, baskida yok)")
 
     ortak = ["--baski", str(T / "baski"), "--plate", str(T / "plate"), "--temiz", str(T / "temiz"),
              "--plakalar", str(T / "geom"), "--orijinal", str(T / "orijinal"),
              "--cift", "Aries_Leo", "--edisyonlar", ed, "--halka", str(T / "gece")]
+    kosular = [("uzaklik", "uzaklik", "birak"), ("izdusum", "izdusum", "birak"),
+               ("gecir", "uzaklik", "gecir")]
     rapor = {}
-    for mod, alt in (("gecir", "out_gecir"), ("birak", "out_birak")):
-        olcum, rap, urun = SP.main(ortak + ["--cikti", str(T / alt), "--hayalet", mod])
-        h = olc_hayalet(T, alt, ed, kutular)
-        rapor[mod] = {"tani": olcum[ed]["tani_murekkep"], "hayalet": h,
-                      "halka_px": [r["halka_px"] for r in rap],
-                      "kapi1": [r["kapi1_maske_disi"]["maks_fark"] for r in rap]}
+    for alt, isaret, hay in kosular:
+        olcum, rap, urun = SP.main(ortak + ["--cikti", str(T / f"out_{alt}"),
+                                            "--isaret", isaret, "--hayalet", hay])
         K = V2.kapilar(urun, None, {"kutular": olcum[ed]["kutular"]}, str(T / "orijinal"),
-                       "Aries_Leo", str(T / alt))
-        rapor[mod]["halka_sembol"] = K["halka_sembol"]
-        rapor[mod]["kapilar_gecti"] = K["gecti"]
+                       "Aries_Leo", str(T / f"out_{alt}"))
+        rapor[alt] = {"tani": olcum[ed]["tani_murekkep"], "kume": olcum[ed]["kume"],
+                      "kutular": olcum[ed]["kutular"],
+                      "hayalet": olc_hayalet(T, f"out_{alt}", ed, hmask),
+                      "halka_px": [r["halka_px"] for r in rap],
+                      "kapi1": [r["kapi1_maske_disi"]["maks_fark"] for r in rap],
+                      "kapilar": K}
 
-    print("\n--- TANI (baski - plate isaret ayrimi) ---")
-    print(json.dumps(rapor["birak"]["tani"], ensure_ascii=False))
-    print("\n--- ESKI ∞ KUTUSUNDA CIKTI vs CLEAN ---")
-    for mod in ("gecir", "birak"):
-        for h in rapor[mod]["hayalet"]:
-            print(f"  hayalet={mod:6s} {h['cihaz']:8s} maks_fark={h['maks_fark']:4d} "
-                  f"fark_px(>8)={h['px_fark']}")
-    print("\n--- HALKA ---")
-    for mod in ("gecir", "birak"):
-        hs = [x for x in rapor[mod]["halka_sembol"] if x["oge"] == "halka"]
-        print(f"  hayalet={mod:6s} halka_px={rapor[mod]['halka_px']} | "
-              f"kapi2 halka: {[(x['cihaz'], x['sapma_px'], x['gecti']) for x in hs]}")
-    print(f"\n  kapi1 maks fark: gecir={rapor['gecir']['kapi1']} birak={rapor['birak']['kapi1']}")
-    g = rapor["gecir"]["hayalet"]; b = rapor["birak"]["hayalet"]
-    ok_gecir = all(x["px_fark"] > 0 for x in g)          # duzeltmesiz hayalet GORUNMELI
-    ok_birak = all(x["maks_fark"] == 0 for x in b)       # duzeltmeyle hayalet YOK
-    ok_halka = all(x["gecti"] for x in rapor["birak"]["halka_sembol"] if x["oge"] == "halka")
-    print(f"\n  A) duzeltmesiz hayalet olculebiliyor: {ok_gecir}")
-    print(f"  B) duzeltmeyle hayalet yok (fark 0)  : {ok_birak}")
-    print(f"  C) halka gece plakasindan, kapi 2 ok : {ok_halka}")
+    print("\n--- TANI (baski - plate ayrimi) ---")
+    for alt in ("uzaklik", "izdusum"):
+        print(f"  {alt:8s}: {json.dumps(rapor[alt]['tani'], ensure_ascii=False)}")
+    print("\n--- HAYALET BOLGESINDE CIKTI vs CLEAN ---")
+    for alt in ("gecir", "izdusum", "uzaklik"):
+        for h in rapor[alt]["hayalet"]:
+            print(f"  {alt:8s} {h['cihaz']:8s} bolge={h['bolge_px']:6d} px | "
+                  f"maks_fark={h['maks_fark']:4d} | fark_px(>8)={h['px_fark']}")
+    print("\n--- KUME / KUTU (uzaklik) ---")
+    print("  ", json.dumps(rapor["uzaklik"]["kume"], ensure_ascii=False))
+    print("  ", json.dumps(rapor["uzaklik"]["kutular"]))
+    print("\n--- KAPILAR (uzaklik) ---")
+    K = rapor["uzaklik"]["kapilar"]
+    for ad in ("halka_sembol", "ortalama", "kenar_payi", "ek1_mesaj_renk", "ek2_yildiz",
+               "ek3_esit_bosluk", "ek4_mesaj_isimden_buyuk_degil", "ek5_mesaj_bandi"):
+        kot = [x for x in K[ad] if not x["gecti"]]
+        print(f"  {ad}: {len(K[ad]) - len(kot)}/{len(K[ad])} gecti" + (f" | KALAN {kot[:2]}" if kot else ""))
+    print(f"  kapi1 maks fark: {rapor['uzaklik']['kapi1']} | halka px: {rapor['uzaklik']['halka_px']}")
+    print(f"  KAPILAR gecti = {K['gecti']}")
+
+    ok_kontrol = all(h["px_fark"] > 0 for h in rapor["gecir"]["hayalet"])
+    ok_uz = all(h["maks_fark"] == 0 for h in rapor["uzaklik"]["hayalet"])
+    ok_iz = all(h["maks_fark"] == 0 for h in rapor["izdusum"]["hayalet"])
+    ok_halka = all(x["gecti"] for x in K["halka_sembol"] if x["oge"] == "halka")
+    print(f"\n  A) kontrol (hayalet gecirilince leke olculebiliyor): {ok_kontrol}")
+    print(f"  B) 3B uzaklik ile hayalet YOK (fark 0)             : {ok_uz}")
+    print(f"  C) eski 1B izdusum ile hayalet YOK                 : {ok_iz}")
+    print(f"  D) halka gece plakasindan, kapi 2 PASS             : {ok_halka}")
     print(f"  toplam {time.time() - t0:.1f}s")
-    return 0 if (ok_gecir and ok_birak and ok_halka) else 1
+    return 0 if (ok_kontrol and ok_uz and ok_halka) else 1
 
 
 if __name__ == "__main__":
