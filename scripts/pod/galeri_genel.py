@@ -251,13 +251,20 @@ def yaz(a):
         (out / "YEDEK" / f"{lid}_GALERI_ONCE.json").write_text(json.dumps({"images": imgs0, "var": vb0, "state": st0}, indent=1), encoding="utf-8")
         ids0 = [x.get("listing_image_id") for x in imgs0]
         once = ",".join(str(x) for x in ids0)
-        if ids0 != p["once_ids"]:
+        kalanlar = [x for x in p["once_ids"] if x not in p["sil_ids"]]
+        fazla = sorted(x for x in ids0 if x not in p["once_ids"])
+        yarim = (ids0 != p["once_ids"] and not set(p["sil_ids"]) & set(ids0)
+                 and [x for x in ids0 if x in p["once_ids"]] == kalanlar and len(fazla) == 4)
+        if ids0 != p["once_ids"] and not yarim:
             sonuc.append((lid, "ATLANDI", "gorseller plandan farkli (dokunulmadi)", once, ""))
             continue
         if st0 != "active" or set(p["sil_ids"]) & set(vb0.values()):
             sonuc.append((lid, "ATLANDI", f"kapi: state={st0} / renk bagli silinecek", once, ""))
             continue
         try:
+          if yarim:
+            yeni = fazla                      # onceki kosuda yuklenmis 4 kart; id sirasi = yukleme sirasi (G1..G4)
+          else:
             for iid in p["sil_ids"]:
                 api.delete(f"/shops/{shop}/listings/{lid}/images/{iid}")
             yeni = []
@@ -267,6 +274,9 @@ def yaz(a):
                 with open(kart / f, "rb") as fh:
                     r = api.post_file(f"/shops/{shop}/listings/{lid}/images", {"image": (f, fh, "image/jpeg")}, {"rank": str(rank)})
                 yeni.append(r.get("listing_image_id"))
+          # Etsy yuklemede rank'i kaydirmiyor (pilot: GENEL_1 3. siraya dustu) -> sira image_ids ile acikca yazilir.
+          hedef_sira = [kalanlar[0], yeni[0]] + kalanlar[1:] + yeni[1:]
+          api.patch(f"/shops/{shop}/listings/{lid}", {"image_ids": ",".join(str(x) for x in hedef_sira)})
         except SystemExit as e:
             sonuc.append((lid, "FAIL", f"yazma hatasi: {str(e)[:200]}", once, ""))
             if a.listing:
@@ -274,7 +284,6 @@ def yaz(a):
             continue
         imgs1, vb1, st1 = anlik(lid)
         ids1 = [x.get("listing_image_id") for x in imgs1]
-        kalanlar = [x for x in ids0 if x not in p["sil_ids"]]
         bek = [kalanlar[0], yeni[0]] + kalanlar[1:] + yeni[1:]
         h = []
         if ids1 != bek:
