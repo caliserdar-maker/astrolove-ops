@@ -258,7 +258,8 @@ def kart07(kart, cl_mb, al_mb, hi, B):
     a[1040:1060, 952:1169] = BG.astype(np.uint8)                   # eski baglanti cizgisi
     k = Image.fromarray(a)
     yer = sahne_yer(k, cl_mb, (INSET07[0] - 30, INSET07[1] - 30, INSET07[2] + 30, INSET07[3] + 30))
-    yer['aciklik'] = list(INSET07)                                  # inset tam poster; kutu/cizgi kalintisi da ortulur
+    iw = INSET07[2] - INSET07[0]                                    # inset tam poster: genislik insete esit, oran 4:5 (tek olcek)
+    yer.update({'x': INSET07[0], 'y': INSET07[1], 'w': iw, 'h': round(iw * 1.25), 'aciklik': list(INSET07)})
     k = A.yerlestir(k, al_mb, yer)
     crop, kutu, bilgi = detay(al_mb, hi, B)
     a = np.asarray(k).copy(); a[PANEL07[1]:PANEL07[3], PANEL07[0]:PANEL07[2]] = np.asarray(crop.convert('RGB')); k = Image.fromarray(a)
