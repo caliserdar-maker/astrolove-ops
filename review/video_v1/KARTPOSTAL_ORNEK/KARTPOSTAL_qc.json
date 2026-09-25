@@ -1,0 +1,128 @@
+{
+ "tr_orani": -0.0697,
+ "poster_sembol_px": [
+  808,
+  948
+ ],
+ "kart": {
+  "EMILY_JAMES": {
+   "metin": "EMILY & JAMES",
+   "punto": 45,
+   "olcek": 1.0,
+   "isim_en_px": 298,
+   "isim_azami_en_px": 898,
+   "isim_x": [
+    470,
+    769
+   ],
+   "isim_cap_ust_taban": [
+    380,
+    412
+   ],
+   "ust_blok_kayma_px": -75,
+   "sembol_kutu": [
+    568,
+    122,
+    670,
+    242
+   ],
+   "sembol_alan_px2": 12240,
+   "sonsuz_alan_px2": 12261,
+   "bantlar_ust5": [
+    [
+     122,
+     241
+    ],
+    [
+     286,
+     347
+    ],
+    [
+     379,
+     421
+    ],
+    [
+     456,
+     488
+    ],
+    [
+     502,
+     534
+    ]
+   ],
+   "min_bant_boslugu": 31,
+   "alt_fark_ham_max": 0.0,
+   "alt_fark_jpg_ort": 0.042,
+   "kapilar": {
+    "olcu_1240x1748_300dpi": true,
+    "isim_tek_satir_sutun_ici": true,
+    "sembol_alan_orani_%5": true,
+    "sembol_cerceve_payi>=40": true,
+    "yeni_bantlar_arasi_bosluk>=20": true,
+    "alt_bolge_ham_fark=0": true,
+    "alt_bolge_jpg_ort_fark<1": true
+   },
+   "PASS": true
+  },
+  "UZUN_ISIM": {
+   "metin": "MAXIMILIANA & CHRISTOPHER",
+   "punto": 45,
+   "olcek": 1.0,
+   "isim_en_px": 640,
+   "isim_azami_en_px": 898,
+   "isim_x": [
+    299,
+    941
+   ],
+   "isim_cap_ust_taban": [
+    380,
+    412
+   ],
+   "ust_blok_kayma_px": -75,
+   "sembol_kutu": [
+    568,
+    122,
+    670,
+    242
+   ],
+   "sembol_alan_px2": 12240,
+   "sonsuz_alan_px2": 12261,
+   "bantlar_ust5": [
+    [
+     122,
+     241
+    ],
+    [
+     286,
+     347
+    ],
+    [
+     379,
+     412
+    ],
+    [
+     456,
+     488
+    ],
+    [
+     502,
+     534
+    ]
+   ],
+   "min_bant_boslugu": 31,
+   "alt_fark_ham_max": 0.0,
+   "alt_fark_jpg_ort": 0.042,
+   "kapilar": {
+    "olcu_1240x1748_300dpi": true,
+    "isim_tek_satir_sutun_ici": true,
+    "sembol_alan_orani_%5": true,
+    "sembol_cerceve_payi>=40": true,
+    "yeni_bantlar_arasi_bosluk>=20": true,
+    "alt_bolge_ham_fark=0": true,
+    "alt_bolge_jpg_ort_fark<1": true
+   },
+   "PASS": true
+  }
+ },
+ "PASS": true
+}
