@@ -43,6 +43,13 @@ TABLO_AD = "SIPARIS_ONAY"
 # kisiye ozel kartpostal (Serdar 25 Eyl): kaynak kart + ciftin POSTER_AM'i + Cinzel; Prodigi branding.postcard.url
 KART_KAYNAK = "gdrive:ASTROLOVE/BRAND/INSERTS/ASTROLOVE_INSERT_POSTCARD_A6_EN_LACIVERT_1240x1748_V1.jpg"
 A1_77 = "gdrive:ASTROLOVE/TEMP/POD_KISISEL/A1_77"
+POD_PRINT = "gdrive:ASTROLOVE/TEMP/POD_PRINT"
+
+
+def poster_adaylari(cift):
+    """Kartpostal sembol/altin kaynagi: medya A1_77 POSTER_AM; yoksa (CANCER_LIBRA: referans cift, A1_77'de yok)
+    canli baski dosyasi POD_PRINT/<cift>/MIDNIGHT_BLUE/8x10.jpg (ayni 2400x3000 A-M geometrisi)."""
+    return [f"{A1_77}/{cift}/POSTER_AM.png", f"{POD_PRINT}/{cift}/MIDNIGHT_BLUE/8x10.jpg"]
 KART_AD = "KARTPOSTAL_A6.jpg"
 EVET = {"TRUE", "EVET", "X", "YES", "1", "✓", "✔"}
 ETSY_SABIT, ETSY_ORAN = 0.582, 0.176     # Etsy kesintisi = 0.582 x adet + 0.176 x fiyat (Serdar, 25 Eyl 2026)
@@ -575,14 +582,16 @@ def kartpostal_hazirla(rid, md, cikti_kok, font, indir):
         qc = {"PASS": False, "neden": "uretim girdisi eksik (cift/isim)"}
     else:
         poster, kaynak = hedef / "_POSTER_AM.png", hedef / "_KART_KAYNAK.jpg"
-        if not indir(f"{A1_77}/{g['cift']}/POSTER_AM.png", poster):
-            qc = {"PASS": False, "neden": f"POSTER_AM yok ({g['cift']})"}
+        poster_kaynagi = next((u for u in poster_adaylari(g["cift"]) if indir(u, poster)), None)
+        if not poster_kaynagi:
+            qc = {"PASS": False, "neden": f"poster yok ({g['cift']}: A1_77 POSTER_AM ve POD_PRINT MIDNIGHT_BLUE 8x10)"}
         elif not indir(KART_KAYNAK, kaynak):
             qc = {"PASS": False, "neden": "kaynak kart yok"}
         else:
             try:
                 qc = KP.kartpostal_uret(kaynak, poster, font, KP.kart_metni(g["isim1"], g.get("isim2")), hedef / KART_AD)
                 qc["neden"] = "" if qc["PASS"] else "QC FAIL: " + ",".join(k for k, v in qc["kapilar"].items() if not v)
+                qc["poster_kaynagi"] = poster_kaynagi.split("TEMP/", 1)[-1]
             except Exception as e:                       # noqa: BLE001 - kart yoksa siparis durmaz, bildirimde yazar
                 qc = {"PASS": False, "neden": f"uretim hatasi {type(e).__name__}"}
         for f in (poster, kaynak):

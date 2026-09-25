@@ -369,7 +369,12 @@ k("kartpostal_hazirla: ciftin POSTER_AM'i + 'EMILY & JAMES' ile uretir, gecici g
   and (W / "kp" / str(POD) / "KARTPOSTAL_A6.jpg").exists() and not (W / "kp" / str(POD) / "_POSTER_AM.png").exists())
 k("kartpostal QC raporunda isim YOK", "EMILY" not in qcm and "JAMES" not in qcm, qcm)
 qc2 = O.kartpostal_hazirla(POD, md.replace("ARIES_LEO", "CANCER_LIBRA"), W / "kp2", "Cinzel.ttf", indir_)
-k("POSTER_AM yoksa kart YOK + neden", not qc2["PASS"] and "POSTER_AM yok" in qc2["neden"], qc2)
+k("poster hic yoksa kart YOK + neden", not qc2["PASS"] and "poster yok (CANCER_LIBRA" in qc2["neden"], qc2)
+indir_cl = lambda uzak, yerel: (Path(yerel).write_bytes(b"x") or True) if "POD_PRINT/CANCER_LIBRA/MIDNIGHT_BLUE/8x10.jpg" in uzak or "INSERT_POSTCARD" in uzak else False
+KPM.kartpostal_uret = sahte_uret
+qc3 = O.kartpostal_hazirla(POD, md.replace("ARIES_LEO", "CANCER_LIBRA"), W / "kp3", "Cinzel.ttf", indir_cl)
+KPM.kartpostal_uret = gercek_uret
+k("A1_77'de POSTER_AM yok (CANCER_LIBRA) -> POD_PRINT MIDNIGHT_BLUE 8x10 kaynagi", qc3["PASS"] and qc3.get("poster_kaynagi") == "POD_PRINT/CANCER_LIBRA/MIDNIGHT_BLUE/8x10.jpg", qc3)
 KPM.kartpostal_uret = gercek_uret
 tb5 = O.YerelTablo(W / "kartyok.csv"); KY = O.kod(7700000011)
 tb5.ekle({"KOD": KY, "RECEIPT": "7700000011", "URUN": "POD", "RENK": "DEEP_BLACK", "BOY": "8x10", "DURUM": O.D_DOSYA})
@@ -377,7 +382,7 @@ buf = io.StringIO()
 with contextlib.redirect_stdout(buf):
     O.uretildi(tb5, "7700000011", {"urun": "POD", "boy": "8x10", "durum": "URETILDI", "kapilar_gecti": True, "kartpostal": qc2}, link=link)
 k("kart yok: e-posta + tablo 'KARTPOSTAL YOK ... panel karti gider', durum yine ONAY_BEKLIYOR",
-  "KARTPOSTAL YOK (POSTER_AM yok (CANCER_LIBRA))" in buf.getvalue() and "KARTPOSTAL YOK" in tb5.satirlar()[0]["NOT"]
+  "KARTPOSTAL YOK (poster yok (CANCER_LIBRA" in buf.getvalue() and "KARTPOSTAL YOK" in tb5.satirlar()[0]["NOT"]
   and not tb5.satirlar()[0]["KARTPOSTAL"] and tb5.satirlar()[0]["DURUM"] == O.D_ONAY, buf.getvalue()[:300])
 LOGLAR.append(buf.getvalue())
 

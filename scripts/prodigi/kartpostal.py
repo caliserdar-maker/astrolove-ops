@@ -31,6 +31,32 @@ def murekkep(a, z, esik=40):
     return np.abs(a - z).max(2) > esik
 
 
+def sembol_kutusu(P, pay=60):
+    """Birlesik sembolun poster kutusu (x0, y0, x1, y1), sabit kutu yerine OLCULUR (25 Eyl, video bulgusu:
+    sabit x 700-1700 genis sembollerde, or. SAGITTARIUS_SAGITTARIUS, kirpiyordu). Yontem video referans
+    olcumuyle ayni: halka (en genis bilesen) cembere oturtulur; halka ici + halka tabaninin ustundeki
+    buyuk bilesenler (>= %5) = sembol maskesi; kutu = maske sinirlari + pay."""
+    pz = np.median(P[60:260, 1100:1300].reshape(-1, 3), 0)
+    m = np.abs(P - pz).max(2) > 60
+    m[:200] = False; m[2100:] = False
+    n, lab, st, _ = cv2.connectedComponentsWithStats((cv2.dilate(m.astype(np.uint8), np.ones((5, 5), np.uint8)) > 0).astype(np.uint8))
+    h = max(range(1, n), key=lambda i: st[i, cv2.CC_STAT_WIDTH])
+    ys, xs = np.where((lab == h) & m)
+    cx, cy, c = np.linalg.lstsq(np.c_[2 * xs, 2 * ys, np.ones(len(xs))], xs ** 2 + ys ** 2, rcond=None)[0]
+    R = np.sqrt(c + cx ** 2 + cy ** 2); alt = ys.max()
+    yy, xx = np.mgrid[0:P.shape[0], 0:P.shape[1]]
+    ic = m & (np.hypot(xx - cx, yy - cy) < R - 25)
+    n, lab, st, _ = cv2.connectedComponentsWithStats((cv2.dilate(ic.astype(np.uint8), np.ones((7, 7), np.uint8)) > 0).astype(np.uint8))
+    ad = [i for i in range(1, n) if st[i, cv2.CC_STAT_TOP] < alt - 100]
+    if not ad:
+        raise RuntimeError('sembol bulunamadi (halka ici bos)')
+    enb = max(st[i, cv2.CC_STAT_AREA] for i in ad)
+    sm = np.isin(lab, [i for i in ad if st[i, cv2.CC_STAT_AREA] >= 0.05 * enb]) & m
+    ys, xs = np.where(sm)
+    H, W = P.shape[:2]
+    return (max(int(xs.min()) - pay, 0), max(int(ys.min()) - pay, 0), min(int(xs.max()) + 1 + pay, W), min(int(ys.max()) + 1 + pay, H))
+
+
 class Kartpostal:
     """Kaynak kart + poster bir kez hazirlanir; uret() her isim icin kart cizer."""
 
@@ -41,7 +67,8 @@ class Kartpostal:
         # ------------------------------------------------ poster: birlesik sembol + isim altin profili
         P = np.asarray(Image.open(poster).convert('RGB')).astype(np.float64)
         pz = np.median(P[2150:2350, 1300:1500].reshape(-1, 3), 0)
-        bx = (700, 640, 1700, 1700)
+        bx = sembol_kutusu(P)                          # sabit (700,640,1700,1700) degil: halka ici sembol maskesinden
+        self.sembol_kutu_poster = list(bx)
         kes = P[bx[1]:bx[3], bx[0]:bx[2]]
         m = murekkep(kes, pz, 60)
         lab, n = ndimage.label(ndimage.binary_dilation(m, iterations=3))
