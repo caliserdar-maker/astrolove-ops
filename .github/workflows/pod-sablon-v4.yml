@@ -105,7 +105,7 @@ jobs:
         run: |
           set -euo pipefail
           case "$MOD" in
-            kuru|maliyet|dogrula|hpr|buyuk|yetki|yetki_test|pilot15_oku|boy15_oku|durum15|fiyat_b_oku|metin78_kuru|yayilim_hazirlik|cerceve_sonda|cerceve_hazirlik|cerceve_mockup|prodigi_teklif|siparis_hazirla|siparis_onizleme|siparis_izin_kapat|eslesme_kanit|router_kuru|router_teklif)
+            kuru|maliyet|dogrula|hpr|buyuk|yetki|yetki_test|pilot15_oku|boy15_oku|durum15|fiyat_b_oku|metin78_kuru|yayilim_hazirlik|galeri_oku|cerceve_sonda|cerceve_hazirlik|cerceve_mockup|prodigi_teklif|siparis_hazirla|siparis_onizleme|siparis_izin_kapat|eslesme_kanit|router_kuru|router_teklif)
               if [ "$APPLY" = "true" ]; then
                 echo "::error::mod=$MOD ile yazma olmaz. DUR."; exit 1
               fi
@@ -130,6 +130,11 @@ jobs:
                 echo "::error::boy15_yaz icin apply=true ve confirm 'BOY_15' olmali. DUR."; exit 1
               fi
               echo "::warning::BOY 15 YAZMA (tek ilan $LISTING): menu sirasi + fiyat tablosu." ;;
+            galeri_yaz)
+              if [ "$APPLY" != "true" ] || [ "$CONFIRM" != "GALERI_GENEL" ]; then
+                echo "::error::galeri_yaz icin apply=true ve confirm 'GALERI_GENEL' olmali. DUR."; exit 1
+              fi
+              echo "::warning::GALERI YAZMA: listing=$LISTING (4 genel kart; renk bagli gorsele dokunulmaz)." ;;
             yayilim_yaz|yayilim_metin2)
               if [ "$APPLY" != "true" ] || [ "$CONFIRM" != "YAYILIM_78" ]; then
                 echo "::error::yayilim_yaz icin apply=true ve confirm 'YAYILIM_78' olmali. DUR."; exit 1
@@ -241,6 +246,24 @@ jobs:
             python scripts/pod/pod_pilot_15.py oku --listing "$LISTING" --kota-alt "$KOTA_ALT"
           elif [ "$MOD" = "pilot15_yaz" ]; then
             python scripts/pod/pod_pilot_15.py yaz --listing "$LISTING" --kota-alt "$KOTA_ALT" --confirm "$CONFIRM" --adim "$ADIM"
+          elif [ "$MOD" = "galeri_oku" ]; then
+            # SALT OKUMA, Etsy API kotasi HARCAMAZ: Drive yedekleri + Etsy CDN kucuk resimleri.
+            mkdir -p _work/yedek _out/galeri
+            rclone copyto "gdrive:ASTROLOVE/TEMP/METIN_78/METIN_78.csv" _work/METIN_78.csv
+            rclone copy "gdrive:ASTROLOVE/TEMP/YAYILIM_78/YEDEK" _work/yedek --filter "- *METIN2*" --filter "+ *_ONCE.json" --filter "- *" -q
+            echo "yedek: $(ls _work/yedek | wc -l) dosya"
+            rc=0; python scripts/pod/galeri_genel.py oku --csv _work/METIN_78.csv --yedek _work/yedek --out _out/galeri || rc=$?
+            rclone copy _out/galeri "gdrive:ASTROLOVE/TEMP/GALERI_GENEL" -q
+            echo "Drive: TEMP/GALERI_GENEL"; exit $rc
+          elif [ "$MOD" = "galeri_yaz" ]; then
+            mkdir -p _work/kartlar _out/galeri
+            rclone copy "gdrive:" _work/kartlar --drive-root-folder-id 1MxlQnLfpaYOKJQzSu_zNnbMxgnm7VTrY --include "GENEL_*.jpg" -q
+            ls -la _work/kartlar
+            rclone copyto "gdrive:ASTROLOVE/TEMP/GALERI_GENEL/GALERI_PLAN.json" _out/galeri/GALERI_PLAN.json
+            HEDEF=(); [ "$LISTING" != "hepsi" ] && HEDEF=(--listing "$LISTING")
+            rc=0; python scripts/pod/galeri_genel.py yaz "${HEDEF[@]}" --plan _out/galeri/GALERI_PLAN.json --kartlar _work/kartlar --out _out/galeri --confirm "$CONFIRM" --kota-alt "$KOTA_ALT" || rc=$?
+            rclone copy _out/galeri "gdrive:ASTROLOVE/TEMP/GALERI_GENEL" -q
+            exit $rc
           elif [ "$MOD" = "yayilim_metin2" ]; then
             # 78 ilan ikinci gecis: yalniz EN aciklama + RU + kisisellestirme sorulari (onayli), tam geri okuma.
             mkdir -p _out/yayilim78
