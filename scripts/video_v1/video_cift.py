@@ -45,8 +45,8 @@ def taban_poster(P):
     pr = m.sum(1).astype(float); return TB0 + int(np.where(pr > 0.5 * pr.max())[0][-1])
 POS = {k: np.asarray(Image.open(cdir / f'POSTER_{k}.png').convert('RGB')).astype(np.float32) for k in SIRA}
 tb_ej, tb_am = taban_poster(POS['EJ']), taban_poster(POS['AM']); dy = tb_am - tb_ej
-duzeltme = {'taban_poster_EJ': tb_ej, 'taban_poster_AM_once': tb_am, 'kaydirma_px': dy}
-if dy:
+duzeltme = {'taban_poster_EJ': tb_ej, 'taban_poster_AM_once': tb_am, 'kaydirma_px': dy if abs(dy) > 1 else 0}
+if abs(dy) > 1:   # olcume dayali: medya duzeltirse fark 0-1 px (olcum toleransi, QC esigi) -> kaydirma yok
     bant = {k: POS[k][TB0 - 40:TB1 + 40] for k in SIRA}
     rb = np.stack([bant[k][..., 0] - bant[k][..., 2] for k in SIRA]); sec = np.argmin(rb, 0)
     zemin = np.choose(sec[..., None], [bant[k] for k in SIRA])
