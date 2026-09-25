@@ -31,6 +31,7 @@ from etsy_common import Etsy, TokenStore, log  # noqa: E402
 import pod_pilot_15 as P  # noqa: E402
 from fiyat_b import FIYAT, anahtar_of  # noqa: E402
 from pod_sku import ED2, SIGN3, make_sku  # noqa: E402
+import metin_78 as M  # noqa: E402
 
 REF = "4570143815"                      # Cancer-Libra: boy etiketleri + sira kaynagi
 PILOT = "4570110641"                    # Aquarius-Aries
@@ -317,6 +318,78 @@ def yaz_ilan(api, shop, lid, row, sab, ref_inv, rs_id, yedek):
     return ("PASS", "tam geri okuma temiz") if not h else ("FAIL", "; ".join(h)[:300])
 
 
+# ------------------------------------------------------------------ metin2: yalniz metin + kisisellestirme (25 Eyl)
+def csv_yenile(satirlar):
+    """CSV'yi Etsy'yi okumadan sablondan yeniler: EN/RU aciklama, RU baslik, 3 alan. Baslik/etiket DEGISMEZ (kapi)."""
+    h_top, yeni = [], {}
+    for lid, r in satirlar.items():
+        a, b = cift(r)
+        m, al = M.metinler(a, b), M.kisisel_alanlar(a, b)
+        h = M.kontrol(m)
+        if m["baslik"] != r["yeni_baslik"] or "|".join(m["etiketler"]) != r["yeni_etiketler"]:
+            h.append("baslik/etiket sablondan farkli cikti (degismemeliydi)")
+        r2 = dict(r)
+        r2.update({"yeni_aciklama_en": m["aciklama"], "yeni_ru_baslik": m["ru_baslik"], "yeni_ru_aciklama": m["ru_aciklama"],
+                   "kontrol": "PASS" if not h else "FAIL: " + "; ".join(h)})
+        for i, x in enumerate(al, 1):
+            r2.update({f"alan{i}_ad": x["ad"], f"alan{i}_aciklama": x["aciklama"], f"alan{i}_max": x["max"]})
+        yeni[lid] = r2
+        if h:
+            h_top.append((lid, h))
+    return yeni, h_top
+
+
+def ru_of(api, shop, lid, L):
+    for t in L.get("translations") or []:
+        if (t.get("language") or "").lower().startswith("ru"):
+            return t
+    return api.get(f"/shops/{shop}/listings/{lid}/translations/ru", ok404=True) or {}
+
+
+def metin2_ilan(api, shop, lid, row, yedek):
+    inc = {"includes": "Personalization,Translations"}
+    L0 = api.get(f"/listings/{lid}", params=inc) or {}
+    ru0 = ru_of(api, shop, lid, L0)
+    (yedek / f"{lid}_METIN2_ONCE.json").write_text(json.dumps({"listing": L0, "ru": ru0}, ensure_ascii=False, indent=1), encoding="utf-8")
+    if L0.get("state") != "active":
+        return "ATLANDI", f"state={L0.get('state')}"
+    adim = "EN aciklama"
+    try:
+        api.patch(f"/shops/{shop}/listings/{lid}", {"description": row["yeni_aciklama_en"]})
+        adim = "RU"
+        api.put(f"/shops/{shop}/listings/{lid}/translations/ru",
+                {"title": row["yeni_ru_baslik"], "description": row["yeni_ru_aciklama"], "tags": ",".join(ru0.get("tags") or [])})
+        adim = "kisisellestirme"
+        api._call("POST", f"/shops/{shop}/listings/{lid}/personalization",
+                  params={"supports_multiple_personalization_questions": "true"},
+                  json_body={"personalization_questions": sorular(row)})
+    except SystemExit as e:
+        return "FAIL", f"{adim} adiminda hata: {str(e)[:240]}"
+    L1 = api.get(f"/listings/{lid}", params=inc) or {}
+    ru1 = ru_of(api, shop, lid, L1)
+    (yedek / f"{lid}_METIN2_SONRA.json").write_text(json.dumps({"listing": L1, "ru": ru1}, ensure_ascii=False, indent=1), encoding="utf-8")
+    h = []
+    if L1.get("state") != L0.get("state"):
+        h.append(f"state degisti {L0.get('state')} -> {L1.get('state')}")
+    if norm(L1.get("description")) != norm(row["yeni_aciklama_en"]):
+        h.append("EN aciklama farkli")
+    if html.unescape(ru1.get("title") or "") != row["yeni_ru_baslik"]:
+        h.append("RU baslik farkli")
+    if norm(ru1.get("description")) != norm(row["yeni_ru_aciklama"]):
+        h.append("RU aciklama farkli")
+    if [html.unescape(t).lower() for t in (L1.get("tags") or [])] != [html.unescape(t).lower() for t in (L0.get("tags") or [])]:
+        h.append("EN etiketler degisti")
+    q = soru_listesi({"personalization": {k: v for k, v in L1.items() if "personaliz" in k.lower()}})
+    bek = sorular(row)
+    if len(q) != 3:
+        h.append(f"soru sayisi {len(q)} != 3")
+    for a_, b_ in zip(q, bek):
+        if ((a_.get("question_text") or "") != b_["question_text"] or (a_.get("instructions") or "") != b_["instructions"]
+                or not a_.get("required") or int(a_.get("max_allowed_characters") or 0) != b_["max_allowed_characters"]):
+            h.append(f"soru farkli: {a_.get('question_text')}")
+    return ("PASS", "geri okuma temiz") if not h else ("FAIL", "; ".join(h)[:300])
+
+
 # ------------------------------------------------------------------ OAS kaniti
 def oas_ozet():
     try:
@@ -339,7 +412,7 @@ def oas_ozet():
 # ------------------------------------------------------------------ ana
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("mod", choices=["hazirlik", "yaz"])
+    ap.add_argument("mod", choices=["hazirlik", "yaz", "metin2"])
     ap.add_argument("--csv", required=True)
     ap.add_argument("--out", default="_out/yayilim78")
     ap.add_argument("--listing", default="")
@@ -358,6 +431,18 @@ def main():
     if kotu:
         sys.exit(f"HATA: CSV'de kontrolu PASS olmayan ilan: {kotu[:5]}")
 
+    if a.mod == "metin2":
+        satirlar, h_csv = csv_yenile(satirlar)
+        if h_csv:
+            sys.exit(f"HATA: CSV kapisi FAIL: {h_csv[:3]} (CSV ve Etsy'ye yazilmadi)")
+        with (out / "METIN_78.csv").open("w", encoding="utf-8", newline="") as fh:
+            ilk = next(iter(satirlar.values()))
+            w = csv.DictWriter(fh, fieldnames=list(ilk.keys()))
+            w.writeheader()
+            w.writerows(satirlar.values())
+        log(f"CSV yenilendi: kontrol PASS {78 - len(h_csv)}/78")
+        if h_csv:
+            sys.exit(f"HATA: CSV kapisi FAIL: {h_csv[:3]} (Etsy'ye yazilmadi)")
     store = TokenStore(os.environ["TOKEN_FILE"], os.environ.get("ETSY_API_KEY", ""), os.environ.get("ETSY_SHARED_SECRET", ""))
     if store.needs_refresh():
         store.refresh()
@@ -374,7 +459,42 @@ def main():
              f"- tum tanimlar: {[(x.get('readiness_state_id'), x.get('readiness_state'), x.get('min_processing_days'), x.get('max_processing_days')) for x in rs_liste]}",
              f"- kota basta: {api.remaining}", ""]
 
-    if a.mod == "hazirlik":
+    if a.mod == "metin2":
+        if a.confirm != ONAY:
+            sys.exit(f"HATA: metin2 --confirm {ONAY} ister")
+        sonuc, t0 = [], time.time()
+        if a.listing:
+            hedef = [a.listing]
+        elif a.hepsi:
+            atla = {x.strip() for x in a.atla.split(",") if x.strip()}
+            hedef = [k for k in satirlar if k not in atla]
+        else:
+            sys.exit("HATA: --listing ya da --hepsi")
+        for i, lid in enumerate(hedef, 1):
+            try:
+                kalan_kota = int(api.remaining or 99999)
+            except ValueError:
+                kalan_kota = 99999
+            if kalan_kota < a.kota_alt:
+                sonuc.append((lid, "DURDU", f"kota {api.remaining} < {a.kota_alt}"))
+                break
+            d, n = metin2_ilan(api, shop, lid, satirlar[lid], yedek)
+            sonuc.append((lid, d, n))
+            if a.listing and d != "PASS":
+                break
+            g = time.time() - t0
+            log(f"  [{i}/{len(hedef)}] {lid} {d} | gecen {g / 60:.1f} dk | kalan {g / i * (len(hedef) - i) / 60:.1f} dk "
+                f"| %{i * 100 // len(hedef)} | kota {api.remaining} | {n[:100]}")
+        ok = sum(1 for x in sonuc if x[1] == "PASS")
+        rapor += [f"- METIN2 PASS {ok}/{len(hedef)} | FAIL {sum(1 for x in sonuc if x[1] == 'FAIL')} | "
+                  f"islenmeyen {len(hedef) - len(sonuc)} | kota sonda {api.remaining}", "",
+                  "| ilan | cift | sonuc | not |", "|---|---|---|---|"]
+        rapor += [f"| {lid} | {satirlar[lid]['cift']} | {d} | {n} |" for lid, d, n in sonuc]
+        with (out / "SONUC_METIN2.csv").open("w", encoding="utf-8", newline="") as fh:
+            w = csv.writer(fh)
+            w.writerow(["ilan", "cift", "sonuc", "not"])
+            w.writerows([(lid, satirlar[lid]["cift"], d, n) for lid, d, n in sonuc])
+    elif a.mod == "hazirlik":
         (out / "OAS_ISTEK.json").write_text(json.dumps(oas_ozet(), ensure_ascii=False, indent=1), encoding="utf-8")
         tablo = ["| ilan | cift | state | renk | varyant | boylar (mevcut) | SKU cifti mevcut -> yeni | kisisel soru | kapi |",
                  "|---|---|---|---|---|---|---|---|---|"]
@@ -457,7 +577,7 @@ def main():
     if p:
         with open(p, "a", encoding="utf-8") as fh:
             fh.write(metin[:60000] + "\n")
-    if a.mod == "yaz" and any(s[1] not in ("PASS",) for s in sonuc):
+    if a.mod in ("yaz", "metin2") and (any(x[1] != "PASS" for x in sonuc) or (a.mod == "metin2" and len(sonuc) < len(hedef))):
         sys.exit("DUR: PASS olmayan ilan var (rapora bak)")
 
 

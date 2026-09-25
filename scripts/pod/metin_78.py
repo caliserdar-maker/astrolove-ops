@@ -45,7 +45,7 @@ HOW TO PERSONALIZE
 1. Pick a color and size.
 2. Type the two names. Each name goes under its own sign.
 3. Type your message.
-Names: up to 11 letters, printed in capitals. Message: up to 35 characters, printed as you type it. Please check your spelling. For longer names or special characters, send us a message before you order.
+Names: up to 11 letters, printed in capitals. Message: up to 35 characters, printed as you type it. No emoji. Please check your spelling. For longer names or special characters, send us a message before you order.
 
 THE ARTWORK
 The {A} and {B} fusion symbol is original AstroLove artwork. Your names sit under the two small signs, and your message appears below them.
@@ -68,7 +68,7 @@ Each print is made to order by our production partner Prodigi. It ships flat or 
 RETURNS
 Every print is personalized, so we can't accept returns or exchanges. If your print arrives damaged, send us a photo within 7 days and we'll happily reprint it at no cost.
 
-A meaningful anniversary, wedding or Valentine's gift for a {A} and {B} couple."""
+A meaningful anniversary, wedding or Valentine's gift for {A} and {B} couples."""
 
 RU_BASLIK = "Знаки зодиака {A} и {B}: именной постер для пары с вашими именами и надписью, без рамы"
 
@@ -78,7 +78,7 @@ RU_GOVDE = """Именной постер для пары со знаками з
 1. Выберите цвет и размер.
 2. Впишите два имени. Каждое имя печатается под своим знаком.
 3. Впишите свою надпись.
-Имена: до 11 букв, печатаются заглавными. Надпись: до 35 символов, печатается так, как вы её напишете. Пожалуйста, проверьте написание. Если в имени больше 11 букв или нужны особые символы, напишите нам до заказа.
+Имена: до 11 букв, пишите английскими буквами (например, ANNA), печатаются заглавными. Надпись: до 35 символов, можно на русском, печатается так, как вы её напишете. Без эмодзи. Пожалуйста, проверьте написание. Если в имени больше 11 букв или нужны особые символы, напишите нам до заказа.
 
 О РИСУНКЕ
 Символ объединяет знаки {A} и {B} в оригинальном рисунке AstroLove. Имена расположены под двумя небольшими знаками, а ваша надпись напечатана ниже.
@@ -172,7 +172,7 @@ def kisisel_alanlar(A, B):
         {"ad": ad1, "aciklama": "Up to 11 letters. Printed in capitals.", "max": 11, "zorunlu": True},
         {"ad": ad2, "aciklama": "Up to 11 letters. Printed in capitals.", "max": 11, "zorunlu": True},
         {"ad": "Your message",
-         "aciklama": "Up to 35 characters, including spaces. Printed as you type it.",
+         "aciklama": "Up to 35 characters, including spaces. Printed as you type it. No emoji.",
          "max": 35, "zorunlu": True},
     ]
 

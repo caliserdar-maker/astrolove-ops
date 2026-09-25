@@ -130,7 +130,7 @@ jobs:
                 echo "::error::boy15_yaz icin apply=true ve confirm 'BOY_15' olmali. DUR."; exit 1
               fi
               echo "::warning::BOY 15 YAZMA (tek ilan $LISTING): menu sirasi + fiyat tablosu." ;;
-            yayilim_yaz)
+            yayilim_yaz|yayilim_metin2)
               if [ "$APPLY" != "true" ] || [ "$CONFIRM" != "YAYILIM_78" ]; then
                 echo "::error::yayilim_yaz icin apply=true ve confirm 'YAYILIM_78' olmali. DUR."; exit 1
               fi
@@ -241,6 +241,18 @@ jobs:
             python scripts/pod/pod_pilot_15.py oku --listing "$LISTING" --kota-alt "$KOTA_ALT"
           elif [ "$MOD" = "pilot15_yaz" ]; then
             python scripts/pod/pod_pilot_15.py yaz --listing "$LISTING" --kota-alt "$KOTA_ALT" --confirm "$CONFIRM" --adim "$ADIM"
+          elif [ "$MOD" = "yayilim_metin2" ]; then
+            # 78 ilan ikinci gecis: yalniz EN aciklama + RU + kisisellestirme sorulari (onayli), tam geri okuma.
+            mkdir -p _out/yayilim78
+            rclone copyto "gdrive:ASTROLOVE/TEMP/METIN_78/METIN_78.csv" _work/METIN_78.csv
+            rc=0
+            if [ "$LISTING" = "hepsi" ]; then HEDEF=(--hepsi); else HEDEF=(--listing "$LISTING"); fi
+            python scripts/pod/yayilim_78.py metin2 "${HEDEF[@]}" --csv _work/METIN_78.csv --out _out/yayilim78 --confirm "$CONFIRM" --kota-alt "$KOTA_ALT" || rc=$?
+            if [ -f _out/yayilim78/METIN_78.csv ]; then
+              rclone copyto _out/yayilim78/METIN_78.csv "gdrive:ASTROLOVE/TEMP/METIN_78/METIN_78.csv" && echo "Drive METIN_78.csv guncellendi"
+            fi
+            rclone copy _out/yayilim78 "gdrive:ASTROLOVE/TEMP/YAYILIM_78" -q
+            exit $rc
           elif [ "$MOD" = "yayilim_hazirlik" ] || [ "$MOD" = "yayilim_yaz" ]; then
             # 78 ilan yayilimi. hazirlik = SALT OKUMA (yedek + plan); yaz = onayli yazma + tam geri okuma.
             mkdir -p _out/yayilim78
