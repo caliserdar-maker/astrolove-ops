@@ -555,6 +555,19 @@ if __name__ == '__main__' and sys.argv[1:] == ['ham']:
         rc('deletefile', f'{KP}/A1_LISTE.json')
     sys.exit(0)
 
+if __name__ == '__main__' and sys.argv[1:2] == ['ham2']:
+    # adli imzali liste {"u": {ad: url}} -> Drive KISISEL_PILOT/<hedef>/<ad>.png (liste sonra silinir)
+    liste, hedef = sys.argv[2], sys.argv[3]
+    try:
+        rc('copy', f'{KP}/{liste}', str(W)); L = json.loads((W / liste).read_text())['u']
+        (W / 'ham2').mkdir(exist_ok=True)
+        for ad, u in L.items():
+            maskele(u); (W / 'ham2' / f'{ad}.png').write_bytes(indir(u))
+        rc('copy', str(W / 'ham2'), f'{KP}/{hedef}'); print(sorted(p.name for p in (W / 'ham2').iterdir()), flush=True)
+    finally:
+        rc('deletefile', f'{KP}/{liste}')
+    sys.exit(0)
+
 if __name__ == '__main__' and sys.argv[1:] == ['kapak']:
     kapak_modu(); sys.exit(0)
 
