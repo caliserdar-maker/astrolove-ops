@@ -37,6 +37,8 @@ T0 = time.time()
 KP = 'gdrive:ASTROLOVE/TEMP/KISISEL_PILOT'
 POD = 'gdrive:ASTROLOVE/TEMP/POD_PRINT'
 SIP = 'gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM'
+PLATES = 'gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PLATES'   # medyan zemin (Serdar onayi 25 Eyl)
+PLATE_ESIK = 12.0      # |dosya - plate| murekkep esigi (olculen: disi p99 0-3, cekirdek > 30)
 W = Path('_siparis').resolve(); W.mkdir(exist_ok=True)
 K = W / 'kisisel'                                   # kisisel-v1 dal arsivi (degistirilmez)
 
@@ -184,26 +186,71 @@ class EdisyonPoster:
         self.p11, self.p12, self.p16, self.eu = pilot11, pilot12, pilot16, eu
         self.sab = json.loads((K / 'scripts' / 'kisisel' / 'ORAN_SABITLERI.json').read_text())
         self.kilitler = self.sab.get('edisyonlar', {})
-        self.zemin_indi = set()
+        self.plate_indi = {}
 
-    def zemin(self, ed, oran):
-        if (ed, oran) in self.zemin_indi:
-            return
+    def plate(self, ed, oran, boy):
+        """ZEMIN = MEDYAN PLATE (Serdar onayi 25 Eyl 2026).
+
+        Eski `HAZIR/zemin_<ed>_<oran>.png` yerine 78 ciftin ortancasi kullanilir.
+        Olcum (kosu 36153249586): eski zemin ile WP dosyasi arasinda murekkep disi
+        fark p50 = 8 / p90 = 25 idi; plate ile p50 = 0 / p99 = 3. Ogeler ancak bu
+        girdiyle ayrilabiliyor. Render kodu degismez: `oran_kur` zemin dosyasini
+        ayni yerden okur, yalnizca icerigi degisir.
+        Plate (edisyon, BOY) bazlidir: ayni oranin farkli boyu farkli plate'tir.
+        """
+        if not boy:
+            raise SystemExit(f'{ed}/{oran}: plate icin boy gerekli')
         hed = self.eu.YOL / ed / 'zemin'
         hed.mkdir(parents=True, exist_ok=True)
-        if (hed / f'{oran}.png').exists():        # paralel isler tekrar indirmesin
-            self.zemin_indi.add((ed, oran)); return
-        rc('copy', f'{KP}/HAZIR/zemin_{ed}_{oran}.png', str(hed))
-        (hed / f'zemin_{ed}_{oran}.png').replace(hed / f'{oran}.png')
-        self.zemin_indi.add((ed, oran))
+        hedef = hed / f'{oran}.png'
+        if self.plate_indi.get((ed, oran)) == boy and hedef.exists():
+            return hedef
+        kaynak = W / 'plates' / f'{ed.upper()}_{boy}.png'
+        kaynak.parent.mkdir(parents=True, exist_ok=True)
+        if not kaynak.exists():
+            rc('copy', f'{PLATES}/{ed.upper()}_{boy}.png', str(kaynak.parent), timeout=1800)
+        if not kaynak.exists():
+            raise SystemExit(f'PLATES eksik: {ed.upper()}_{boy}.png')
+        hedef.write_bytes(kaynak.read_bytes())
+        self.plate_indi[(ed, oran)] = boy
+        return hedef
 
-    def olc(self, yol):
+    def plate_maske(self, plate_yol):
+        """`sayfa_olc` icin murekkep maskesi ureticisi: |dosya - plate|.
+
+        Serdar 3. madde: sembol, glif ve isim yerleri DOSYANIN KENDISINDEN,
+        `dosya - plate` farkindan olculur (MB'den kopyalama yok). `sayfa_olc`
+        zaten maske parametresi aldigi icin bu bir GIRDI degisikligidir; sayfa_olc
+        kodu degismez. Esik 12: olculen murekkep disi p99 0-3, cekirdek > 30.
+        Kucuk bilesen eleme ve kenar payi onayli `edisyon_maske` ile ayni.
+        """
+        import cv2
+        from pilot6 import LUMA
+        pl = self.p11.norm(Image.open(plate_yol).convert('RGB'))[0]
+        Lp = np.asarray(pl).astype(np.float32) @ LUMA
+
+        def maske(L, acik):                                    # noqa: ARG001
+            h = min(L.shape[0], Lp.shape[0])
+            m = np.zeros(L.shape, bool)
+            m[:h] = np.abs(L[:h] - Lp[:h]) > PLATE_ESIK
+            k = self.eu.MASKE_KENAR
+            if k:
+                Wd = L.shape[1]
+                m[:, :int(Wd * k)] = False
+                m[:, int(Wd * (1 - k)):] = False
+            n, lab, st, _ = cv2.connectedComponentsWithStats(m.astype(np.uint8), 8)
+            tut = np.zeros(n, bool)
+            tut[1:] = st[1:, cv2.CC_STAT_AREA] >= self.eu.MASKE_MIN_ALAN
+            return tut[lab]
+        return maske
+
+    def olc(self, yol, plate_yol):
         """Sayfa olcumu HER ZAMAN 2400'de (sayfa_olc bu olcekte dogrulandi)."""
         from a1_poster import olcum_duzelt
         olcek_kur(2400)
         ref_norm = self.p11.norm(Image.open(yol).convert('RGB'))[0]
         m = self.eu.murekkep(np.asarray(ref_norm).astype(np.float32))
-        o = self.p11.sayfa_olc(yol, maske=self.eu.edisyon_maske)
+        o = self.p11.sayfa_olc(yol, maske=self.plate_maske(plate_yol))
         return (*olcum_duzelt(o, m), m)
 
     def render(self, ed, oran, sayfa_no, o, kilit, isimler, mesaj):
@@ -221,24 +268,21 @@ class EdisyonPoster:
         return s, S, p, (merkez, yeni), {'olcek': bilgi['olcek'], 'punto': bilgi['punto']}
 
     def __call__(self, kaynak_bayt, sayfa_no, ed, oran, isimler, mesaj,
-                 olcum_bayt=None, hedef_en=None):
+                 hedef_en=None, boy=None):
         from a1_poster import sembol_kapisi, SEMBOL_ESIK
         t0 = time.time()
         kilit = self.kilitler.get(ed, {}).get(oran)
         if not kilit:
             raise SystemExit(f'{ed} {oran} icin ORAN_SABITLERI kilidi yok')
-        self.zemin(ed, oran)
+        plate_yol = self.plate(ed, oran, boy)
         ham = self.eu.YOL / ed / 'ham'; ham.mkdir(parents=True, exist_ok=True)
         yol = ham / f'{oran}_p{sayfa_no}.jpg'
         yol.write_bytes(kaynak_bayt) if kaynak_bayt[:3] == b'\xff\xd8\xff' else \
             Image.open(io.BytesIO(kaynak_bayt)).convert('RGB').save(yol, 'PNG')
-        # Olcum kaynagi (Serdar 2. madde): dokulu renklerde bantlar ayni cift+boydaki
-        # Midnight Blue dosyasindan olculur, tuval kendi rengidir.
-        olcum_yolu = yol
-        if olcum_bayt is not None and olcum_bayt is not kaynak_bayt:
-            olcum_yolu = ham / f'{oran}_olcum_p{sayfa_no}.jpg'
-            olcum_yolu.write_bytes(olcum_bayt)
-        o, duz, m = self.olc(olcum_yolu)
+        # Olcum kaynagi (Serdar onayi 25 Eyl, 3. madde): HER DOSYA KENDISINDEN.
+        # MB'den kutu kopyalama KALDIRILDI - AQUARIUS^2 A3'te CI 29 px, WP 58 px
+        # kayik oldugu olculdu (kosu 36153249586); yerlesim her renkte ayni degil.
+        o, duz, m = self.olc(yol, plate_yol)
 
         # 1) ONAYLI 2400 render (referans, butun mevcut kapilar burada kosar)
         olcek_kur(2400)
@@ -251,8 +295,7 @@ class EdisyonPoster:
             return None, {'durum': 'SISTEM HATASI', 'edisyon': ed, 'oran': oran,
                           'hata': f'oge baglanamadi: KeyError {e}',
                           'oge_tanisi': oge_tanisi(self.eu, self.p16, ed, oran, o),
-                          'olcum_kaynagi': ('MIDNIGHT_BLUE' if olcum_yolu is not yol
-                                            else 'kendi rengi')}, None
+                          'olcum_kaynagi': 'kendi dosyasi (dosya - plate)'}, None
         if p0 is None:
             return None, bi0, None
         merkez0, yeni0 = ek0
@@ -271,10 +314,10 @@ class EdisyonPoster:
             merkez1, yeni1 = ek1
             maske1 = (S1['genis'] | yeni1)
             silinen1 = S1['genis'] & ~yeni1
-            leke = leke_kapisi(S1['temiz_a'], np.asarray(S1['ref']).astype(np.float32),
-                               silinen1, k=k, ed=ed)
+            leke = {'gecti': None, 'uygulandi': False,
+                    'sebep': 'baski dosyasi uretildikten sonra olculur'}
             kucuk = (p1 if p1.width == 2400 else
-                     p1.resize((2400, round(p1.height * 2400 / p1.width)), Image.LANCZOS))
+                     p1.resize((2400, round(p1.height * 2400 / p1.width)), Image.BOX))
             # KOK NEDEN (1. iterasyon, kosu 36135774762): kapi olcek_kur(2400)'den ONCE
             # kosuyordu, yani edisyon_uret.MASKE_YARICAP hala 117 (9000 olcegi) idi;
             # 2400'luk goruntude medianBlur 117 kumeleri eritti ("2 kume"). Once sabitler
@@ -285,14 +328,14 @@ class EdisyonPoster:
             k, s1, S1, p1 = 1.0, s0, S0, p0
             maske1, silinen1 = maske0, silinen0
             olcek = {'hedef_en': 2400, 'k': 1.0}
-            leke = leke_kapisi(S0['temiz_a'], np.asarray(S0['ref']).astype(np.float32),
-                               silinen0, k=1.0, ed=ed)
+            leke = {'gecti': None, 'uygulandi': False,
+                    'sebep': 'baski dosyasi uretildikten sonra olculur'}
             olcek_kapi = {'gecti': True, 'not': 'hedef zaten 2400'}
             bi1 = bi0
 
         bilgi = {
             'durum': 'URETILDI', 'edisyon': ed, 'oran': oran, 'sayfa': sayfa_no,
-            'olcum_kaynagi': ('MIDNIGHT_BLUE' if olcum_yolu is not yol else 'kendi rengi'),
+            'olcum_kaynagi': 'kendi dosyasi (dosya - plate)', 'plate': str(plate_yol),
             'kaynak_px': list(Image.open(yol).size), 'poster_px': list(p1.size),
             'olcek': olcek, 'olcek_kapisi': olcek_kapi, 'leke_kapisi': leke,
             'olcum': {a: o.get(a) for a in ('isim_bant', 'isim_govde', 'sembol_bant',
@@ -371,9 +414,17 @@ def oge_tanisi(eu, p16, ed, oran, o28):
     return d
 
 
+OLCEK_KONUM = 1         # Serdar 25 Eyl: konum <= 1 px
+OLCEK_KENAR = 2         # Serdar 25 Eyl: harf kenari <= 2 px
+
+
 def olcek_kapisi(kucuk, p0, s0):
-    """Serdar 1. madde kapisi: hi-res sonuc 2400'e indirilince onayli render ile
-    boy ve konum farki <= 1 px olmali."""
+    """Hi-res sonuc 2400 px olceginde onayli render ile karsilastirilir.
+
+    Iki olcut (Serdar onayi 25 Eyl, 4. madde): KONUM (satir merkezi, bosluklar,
+    taban, cap) <= 1 px; HARF KENARI (uc kutunun x kenarlari) <= 2 px.
+    Kucultme BOX (alan ortalamasi) ile yapilir: LANCZOS keskinlestirip halka
+    birakiyor ve murekkep esiginde harf ucunu yapay olarak genisletiyor."""
     import edisyon_uret as eu
     a = np.asarray(kucuk.convert('RGB')).astype(np.float32)
     b = np.asarray(p0.convert('RGB')).astype(np.float32)
@@ -391,8 +442,14 @@ def olcek_kapisi(kucuk, p0, s0):
     for ad in ('sol_isim', 'sonsuz', 'sag_isim'):
         d[f'{ad}_x0'] = int(g1[ad][0] - g0[ad][0])
         d[f'{ad}_x1'] = int(g1[ad][1] - g0[ad][1])
-    en = max(abs(v) for v in d.values())
-    return {'gecti': bool(en <= 1), 'en_buyuk_fark_px': en, 'esik_px': 1, 'fark': d,
+    konum = ('satir_merkez', 'bosluk_sol', 'bosluk_sag', 'taban_sol', 'taban_sag',
+             'cap_sol', 'cap_sag')
+    en_k = max(abs(d[a]) for a in konum)
+    en_h = max(abs(v) for a, v in d.items() if a not in konum)
+    return {'gecti': bool(en_k <= OLCEK_KONUM and en_h <= OLCEK_KENAR),
+            'konum_fark_px': en_k, 'kenar_fark_px': en_h,
+            'esik': {'konum': OLCEK_KONUM, 'harf_kenari': OLCEK_KENAR},
+            'kucultme': 'BOX (alan ortalamasi)', 'fark': d,
             'boyut': {'hi_res_2400': list(kucuk.size), 'onayli_2400': list(p0.size)}}
 
 
@@ -534,78 +591,56 @@ def kilit_olcekle(kilit, k):
 # ZEMINE karsi olcuyor; zemin zaten oraya yapistirildigi icin yamayi goremez.
 # Bu kapi DOKUYA bakar: silinen bolgenin yuksek frekans enerjisi, cevresindeki
 # DOKUNULMAMIS orijinal dokunun enerjisine oranlanir. Yama duz olur -> oran duser.
-LEKE_YARICAP = 9        # yuksek frekans olcumu icin medyan yaricapi (2400 uzayinda px)
-LEKE_HALKA = 24         # karsilastirma halkasinin kalinligi (2400 uzayinda px)
-LEKE_ORAN = 0.55        # silinen bolge enerjisi / halka enerjisi bu orandan kucukse YAMA
-LEKE_TABAN = 1.5        # halka enerjisi bunun altindaysa zemin ZATEN duz -> kapi uygulanmaz
-# Not: ton farki bilgi olarak raporlanir, kapiyi belirlemez. Zemin gradyanli oldugu
-# icin silinen bant ile ustunu/altini kapsayan halkanin ortalama tonu dogal olarak
-# farklidir (olculdu: Deep Black 30x40'ta 13.55) - bu yama demek degildir.
+LEKE_P99 = 10.0         # Serdar 25 Eyl: bant DISINDA |dosya - plate| p99 <= 10
+LEKE_PAY = 9            # bant maskesi bu kadar genisletilir (yumusak kenar payi)
 
 
-def leke_kapisi(temiz_a, ref_a, maske, k=1.0, bloklar=True, ed=None):
-    """Silinen bolgede doku kayboldu mu (yama/leke)? Oran ve ton farki ile.
+def leke_kapisi(baski, plate_yol, maske, esik_p99=LEKE_P99):
+    """BANT DISINDA BASKI DOSYASI = PLATE olmali (Serdar onayi 25 Eyl, 4. madde).
 
-    KAPSAM (Serdar 2. madde: "WP icin ... sikilastir"): kapi yalniz DOKULU
-    edisyonlarda anlamlidir. Deep Black / Pure White zemini zaten duz; 1. iterasyonda
-    (kosu 36135774762, Deep Black 30x40) olculen silinen_enerji 0.00 / halka_enerji
-    2.58 bunun kaniti - halka enerjisi yildizlardan geliyor, silinen bant ise gercekten
-    duz zemin. Orada oran her zaman ~0 cikar ve kapi YANLIS HATA verir. Bu yuzden
-    edisyon_uret.DOKU_BLOKLAMAZ listesindeki renklerde kapi UYGULANMAZ (gecti=None).
+    Eski kapi silinen bolgenin doku ENERJISINI olcuyordu; dokusuz edisyonlarda
+    yanlis hata veriyordu (Deep Black 30x40: silinen_enerji 0.00 / halka 2.58,
+    cunku o bant gercekten duz zemin). Yeni olcut dogrudan ve her edisyonda
+    ayni: degisen bandin disinda uretilen dosya ile plate arasindaki fark JPEG
+    gurultusu kadar olmali.
+    Olculen taban (kosu 36153249586, murekkep disi p99): MB 0, CI 0, WP 3.
+    Esik 10 bunun cok ustunde; gercek bir leke/yamayi ise yakalar.
+
+    Bant DISI = ogelerin degistirildigi yerler haric HER YER: burc resmi,
+    yildizlar ve cerceve de plate'teki gibi durmali.
     """
     import cv2
-    from pilot6 import LUMA
-    if ed is not None:
-        import edisyon_uret as eu
-        if ed in getattr(eu, 'DOKU_BLOKLAMAZ', ()):
-            return {'gecti': None, 'uygulandi': False, 'edisyon': ed,
-                    'sebep': 'dokusuz edisyon (edisyon_uret.DOKU_BLOKLAMAZ) - leke kapisi uygulanmaz'}
-    r = max(int(round(LEKE_YARICAP * k)), 3); r = r if r % 2 else r + 1
-    h = max(int(round(LEKE_HALKA * k)), 3)
-    L = (temiz_a @ LUMA).astype(np.float32)
-    Lr = (ref_a @ LUMA).astype(np.float32)
-    hf = np.abs(L - cv2.medianBlur(np.clip(L, 0, 255).astype(np.uint8), r).astype(np.float32))
-    hfr = np.abs(Lr - cv2.medianBlur(np.clip(Lr, 0, 255).astype(np.uint8), r).astype(np.float32))
-    ic = maske.astype(bool)
-    genis = cv2.dilate(ic.astype(np.uint8), np.ones((2 * h + 1, 2 * h + 1), np.uint8)) > 0
-    halka = genis & ~cv2.dilate(ic.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
-    if ic.sum() < 100 or halka.sum() < 100:
-        return {'gecti': None, 'uygulandi': False, 'sebep': 'olcum alani kucuk',
-                'ic_px': int(ic.sum()), 'halka_px': int(halka.sum())}
-    ic_e = float(hf[ic].mean()); hal_e = float(hfr[halka].mean())
-    oran = ic_e / hal_e if hal_e > 0 else 0.0
-    ton = abs(float(L[ic].mean()) - float(Lr[halka].mean()))
-    duz = hal_e < LEKE_TABAN
-    d = {'gecti': (None if duz else bool(oran >= LEKE_ORAN)),
-         'uygulandi': not duz, 'zemin_duz': duz, 'edisyon': ed,
-         'doku_orani': round(oran, 3), 'esik_oran': LEKE_ORAN, 'esik_taban': LEKE_TABAN,
-         'silinen_enerji': round(ic_e, 2), 'halka_enerji': round(hal_e, 2),
-         'ton_farki_bilgi': round(ton, 2),
-         'ic_px': int(ic.sum()), 'halka_px': int(halka.sum()),
-         'yaricap': r, 'halka_kalinlik': h}
-    if bloklar:                                   # en kotu 64x64 blok (yerel yama)
-        B = max(int(round(64 * k)), 16)
-        en, yer = None, None
-        H, W = ic.shape
-        for by in range(0, H - B + 1, B):
-            if not ic[by:by + B].any():
+    with Image.open(plate_yol) as im:
+        pl = np.asarray(im.convert('RGB'))
+    a = np.asarray(baski.convert('RGB'))
+    if pl.shape != a.shape:
+        return {'gecti': None, 'uygulandi': False,
+                'sebep': f'plate {pl.shape[1]}x{pl.shape[0]} != baski {a.shape[1]}x{a.shape[0]}'}
+    m = cv2.resize(maske.astype(np.uint8), (a.shape[1], a.shape[0]),
+                   interpolation=cv2.INTER_NEAREST)
+    m = cv2.dilate(m, np.ones((LEKE_PAY, LEKE_PAY), np.uint8)) > 0
+    f = np.abs(a.astype(np.int16) - pl.astype(np.int16)).max(axis=2)
+    dis = f[~m]
+    if dis.size < 10000:
+        return {'gecti': None, 'uygulandi': False, 'sebep': 'bant disi alan kucuk',
+                'bant_disi_px': int(dis.size)}
+    p50 = float(np.percentile(dis, 50)); p99 = float(np.percentile(dis, 99))
+    # Yerel yama ortalamada kaybolmasin: en kotu 256 px'lik blok ayrica olculur.
+    B = 256
+    H, Wd = f.shape
+    kotu, yer = 0.0, None
+    for by in range(0, H - B + 1, B):
+        for bx in range(0, Wd - B + 1, B):
+            bm = ~m[by:by + B, bx:bx + B]
+            if bm.sum() < B * B * 0.5:
                 continue
-            for bx in range(0, W - B + 1, B):
-                m = ic[by:by + B, bx:bx + B]
-                if m.sum() < B * B * 0.15:
-                    continue
-                hb = halka[max(by - h, 0):by + B + h, max(bx - h, 0):bx + B + h]
-                hr = hfr[max(by - h, 0):by + B + h, max(bx - h, 0):bx + B + h]
-                if hb.sum() < 50:
-                    continue
-                o = float(hf[by:by + B, bx:bx + B][m].mean()) / max(float(hr[hb].mean()), 1e-6)
-                if en is None or o < en:
-                    en, yer = o, [bx, by]
-        d['en_kotu_blok_orani'] = None if en is None else round(en, 3)
-        d['en_kotu_blok_yeri'] = yer
-        if not duz and en is not None and en < LEKE_ORAN * 0.8:
-            d['gecti'] = False
-    return d
+            v = float(np.percentile(f[by:by + B, bx:bx + B][bm], 99))
+            if v > kotu:
+                kotu, yer = v, [bx, by]
+    return {'gecti': bool(p99 <= esik_p99 and kotu <= esik_p99 * 1.5),
+            'uygulandi': True, 'p50': p50, 'p99': p99, 'esik_p99': esik_p99,
+            'en_kotu_blok_p99': round(kotu, 1), 'en_kotu_blok_yeri': yer,
+            'bant_disi_px': int(dis.size), 'bant_orani': round(float(m.mean()), 4)}
 
 
 def silinen_kirpim(baski, maske2400, ad, cik, buyut=BUYUT, azami_en=3000):
@@ -630,6 +665,21 @@ class BluePoster:
         from a1_poster import Poster
         self.P = Poster()
         self.hazir_oran = set()
+        self.plate_boy = None
+
+    def plate_kur(self, P_ed, boy, oran):
+        """Blue'nun zemini de medyan plate olur (Serdar onayi 25 Eyl).
+
+        `a1_poster.Poster.sayfa_kur` `self.bg`'yi oran_kur'a gecirir; burada o
+        GIRDI degistirilir, a1_poster kodu degismez. Boy degisince tavan
+        referansi da yeniden kurulur (plate farkli dosyadir).
+        """
+        if not boy or self.plate_boy == boy:
+            return
+        yol = P_ed.plate('blue', oran, boy)
+        self.P.bg = Image.open(yol).convert('RGB')
+        self.plate_boy = boy
+        self.hazir_oran.clear(); self.P.tavan = None
 
     def __call__(self, kaynak_bayt, sayfa_no, oran, isimler, tagline, ref_bayt=None, ref_sayfa=28):
         if oran not in self.hazir_oran:
@@ -705,7 +755,7 @@ def renk_onizleme(yollar, ad, cik, yukseklik=900):
 
 
 def render_et(ed, oran, sayfa, kaynak_bayt, isimler, mesaj, P_blue, P_ed,
-              cift=None, ref_boy=None, olcum_bayt=None, hedef_en=None):
+              cift=None, ref_boy=None, hedef_en=None, boy=None):
     """blue -> a1 (pilot16, 2400), diger dort edisyon -> edisyon_uret (hedef cozunurluk)."""
     if ed == 'blue':
         ref_bayt = None
@@ -715,7 +765,13 @@ def render_et(ed, oran, sayfa, kaynak_bayt, isimler, mesaj, P_blue, P_ed,
                 raise RuntimeError(f'Blue {oran}: Cancer-Libra referans boyu bulunamadi')
             ref_bayt = pod_kaynak('CANCER_LIBRA', 'MIDNIGHT_BLUE', boy).read_bytes()
         olcek_kur(2400)
+        # Blue de plate zeminine gecer (Serdar onayi 25 Eyl): a1 sarmalayicisinin
+        # `bg` girdisi HAZIR/bg.png yerine bu boyun plate'i olur. GIRDI degisikligi;
+        # a1_poster kodu degismez. Hiza `bg_hiza` alaninda raporlanir.
+        P_blue.plate_kur(P_ed, boy or ref_boy, oran)
         poster, bi, ek = P_blue(kaynak_bayt, sayfa, oran, isimler, mesaj, ref_bayt=ref_bayt)
+        bi['plate'] = str(P_ed.plate('blue', oran, boy or ref_boy))
+        bi['olcum_kaynagi'] = 'kendi dosyasi (a1 sarmalayicisi, zemin = plate)'
         bi['olcek_kapisi'] = {'gecti': None, 'sebep': (
             'Blue hatti (a1_poster.Poster) bu iterasyonda 2400 render ediyor; hedef '
             'cozunurluk icin sarmalayiciya hazir olcum parametresi gerekiyor. '
@@ -723,7 +779,7 @@ def render_et(ed, oran, sayfa, kaynak_bayt, isimler, mesaj, P_blue, P_ed,
         bi['leke_kapisi'] = {'gecti': None, 'sebep': 'Blue 2400 render'}
     else:
         poster, bi, ek = P_ed(kaynak_bayt, sayfa, ed, oran, isimler, mesaj,
-                              olcum_bayt=olcum_bayt, hedef_en=hedef_en)
+                              hedef_en=hedef_en, boy=boy or ref_boy)
     if poster is None:
         return None, bi, None
     if ek is None or 'maske' not in ek:
@@ -832,16 +888,15 @@ def kontrol_paketi(cik, baski, bi, ek, ana_ad, sonek=''):
 def pod_uret(sip, kaynak_bayt, P_blue, P_ed, cik):
     ed, oran = sip['edisyon'], sip['oran']
     isimler = (sip['isim1'], sip['isim2']); mesaj = sip.get('mesaj') or ''
-    olcum_bayt = None
-    if ed != 'blue':                      # Serdar 2. madde: bantlar MB dosyasindan
-        olcum_bayt = pod_kaynak(sip['cift'], 'MIDNIGHT_BLUE', sip['boy']).read_bytes()
+    # MB olcumu kaldirildi (Serdar onayi 25 Eyl, 3. madde): her dosya kendisinden.
     poster, bi, ek = render_et(ed, oran, sip['sayfa'], kaynak_bayt, isimler, mesaj,
                                P_blue, P_ed, sip['cift'], ref_boy=sip['boy'],
-                               olcum_bayt=olcum_bayt, hedef_en=sip['hedef_px'][0])
+                               hedef_en=sip['hedef_px'][0], boy=sip['boy'])
     if poster is None:
         return {**sip, **bi}
     ad = f'BASKI_{sip["boy"]}.jpg'
     baski, bpx = tek_dosya(poster, bi, ek, kaynak_bayt, sip['hedef_px'], cik / ad)
+    bi['leke_kapisi'] = leke_kapisi(baski, bi['plate'], ek['maske'])
     onizleme(baski, poster, ek, f'ONIZLEME_{sip["boy"]}.jpg', cik)
     bant = kontrol_paketi(cik, baski, bi, ek, ad)
     inc = sip['inc']
@@ -867,17 +922,16 @@ def _dijital_is(arg):
         kb = yol.read_bytes()
         with Image.open(yol) as im:
             hedef = list(im.size)
-        olcum_bayt = None if ed == 'blue' else \
-            pod_kaynak(sip['cift'], 'MIDNIGHT_BLUE', boy).read_bytes()
         P_ed = EdisyonPoster(); P_blue = BluePoster() if ed == 'blue' else None
         poster, bi, ek = render_et(ed, oran, sip['sayfa'], kb, isimler, mesaj,
                                    P_blue, P_ed, sip['cift'], ref_boy=boy,
-                                   olcum_bayt=olcum_bayt, hedef_en=hedef[0])
+                                   hedef_en=hedef[0], boy=boy)
         if poster is None:
             return renk, oran, {'durum': 'ELLE KONTROL', **bi}, None
         jpg = klas / f'{sip["cift"]}_{renk}_{oran}_{boy}.jpg'
         butce = int(ZIP_AZAMI_MB * 1e6 * 0.92 / len(DIJITAL_ORANLAR))
         baski, bpx = tek_dosya(poster, bi, ek, kb, hedef, jpg, kalite=92, azami_bayt=butce)
+        bi['leke_kapisi'] = leke_kapisi(baski, bi['plate'], ek['maske'])
         kapilar, ayrinti = kapilari_topla(bi, isimler, mesaj, bpx['baski_px'], hedef)
         kayit = {'durum': 'URETILDI', 'boy': boy, **bpx, 'kapilar': kapilar,
                  'kapi_ayrinti': ayrinti, 'kapilar_gecti': kapi_sonucu(kapilar),
@@ -964,8 +1018,14 @@ TESTLER = [
      'boy': 'A3', 'urun': 'pod', **SAHTE},
     {'receipt': 'TEST_C_CANCER_LIBRA', 'cift': 'CANCER_LIBRA', 'renk': 'WARM_PARCHMENT',
      'boy': '30x40', 'urun': 'pod', **SAHTE},
-    {'receipt': 'TEST_D_DIJITAL_ARIES_LEO', 'cift': 'ARIES_LEO', 'boy': '-',
+    {'receipt': 'TEST_D_AQUARIUS_CHAMPAGNE', 'cift': 'AQUARIUS_AQUARIUS',
+     'renk': 'CHAMPAGNE_IVORY', 'boy': 'A3', 'urun': 'pod', **SAHTE},
+    {'receipt': 'TEST_E_DIJITAL_ARIES_LEO', 'cift': 'ARIES_LEO', 'boy': '-',
      'urun': 'dijital', **SAHTE},
+    # (f) uzun isim / uzun mesaj siniri: en kucuk boyda en uzun girdi
+    {'receipt': 'TEST_F_UZUN_ISIM', 'cift': 'CANCER_LIBRA', 'renk': 'WARM_PARCHMENT',
+     'boy': '8x10', 'urun': 'pod', 'isim1': 'MAXIMILIANA', 'isim2': 'CHRISTOPHER',
+     'mesaj': 'Two Hearts One Sky Forever Entwined'},
 ]
 
 
