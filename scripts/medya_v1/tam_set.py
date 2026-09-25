@@ -29,11 +29,13 @@ from a1_poster import rc, log, W, KP, DR, REF_CIFT, ISIM, TAG
 Image.MAX_IMAGE_PIXELS = None
 CIFT = sys.argv[1] if len(sys.argv) > 1 and not sys.argv[1].startswith('-') else 'ARIES_LEO'
 YEREL = '--yerel' in sys.argv
+YALNIZ06 = '--kart06' in sys.argv                      # yalniz galeri 06 (yakin detay) + onizleme yeniden (Serdar 25 Eyl)
 SAYFA_HAM = f'{KP}/TAMSET_HAM'                      # <renk>_<sayfa>.png (Canva 4/5, ham2 ile kopyalandi)
 HEDEF = f'{DR}/REVIEW/TAM_SET_{CIFT}'
 RENKLER = ['blue', 'black', 'modern', 'pure_white', 'vintage']
 import os
 if os.environ.get('TS_RENKLER'): RENKLER = os.environ['TS_RENKLER'].split(',')   # yalniz yerel deneme
+if YALNIZ06: RENKLER = ['blue']
 DOKULU = {'vintage'}                                  # parsomen dokusu: sembol kapisi doku-dengeli (Serdar 25 Eyl)
 RENK_AD = {'blue': 'MIDNIGHT_BLUE', 'black': 'DEEP_BLACK', 'modern': 'CHAMPAGNE_IVORY', 'pure_white': 'PURE_WHITE', 'vintage': 'WARM_PARCHMENT'}
 REF_DOSYA = {1: '01_8568298334', 2: '02_8567954544', 3: '03_8615800647', 4: '04_8567954548', 5: '05_8567954574', 6: '06_8567954580',
@@ -234,18 +236,35 @@ def kart04(kart, M, sahne_cl_B):
 # ------------------------------------------------------------------ kart 07 (yakin detay)
 INSET07 = (170, 717, 952, 1692); PANEL07 = (1169, 569, 2821, 1854); CIZGI = (147, 118, 73)
 
+DETAY_ESIK = {'murekkep_oran': 0.15, 'halka_px': 0}               # Serdar 25 Eyl: buyutec = sembolun birlesim bolgesi
+
 def detay(al_mb, hi, B):
-    """Birlesik sembolden murekkep yogunlugu en yuksek kutu (panel en/boy), baski dosyasindan (buyutme <= 1.5)."""
+    """Buyutec: birlesik sembolun BIRLESIM bolgesi (Serdar 25 Eyl, CL kart 06 mantigi). Aday kutular (panel en/boy):
+    sembol murekkebi >= %15 ve dis halka pikseli 0; aralarindan kenarini en cok cizginin kestigi kutu
+    (en cok vurusun bulustugu yer), esitlikte sembol merkezine en yakin. Baski dosyasindan (buyutme <= 1.5)."""
     import cv2
+    from scipy import ndimage
     tw, th = PANEL07[2] - PANEL07[0], PANEL07[3] - PANEL07[1]
     f = hi.width / al_mb.width; kw = int(np.ceil(tw / 1.5 / f)) + 20; kh = round(kw * th / tw)
     ust = birlesik_maske(B)
-    ii = ust.astype(np.float64).cumsum(0).cumsum(1); en = None
+    tum = B['m'].copy(); tum[B['o']['sembol_bant'][0] - 40:] = False
+    halka = tum & ~ndimage.binary_dilation(ust, iterations=4)
+    ii = ust.astype(np.float64).cumsum(0).cumsum(1); ih = halka.astype(np.float64).cumsum(0).cumsum(1)
+    top = lambda I, x, y: I[y + kh - 1, x + kw - 1] - I[y, x + kw - 1] - I[y + kh - 1, x] + I[y, x]
+    def kesen(x, y):
+        c = np.concatenate([ust[y, x:x + kw], ust[y:y + kh, x + kw - 1], ust[y + kh - 1, x:x + kw][::-1], ust[y:y + kh, x][::-1]]).astype(int)
+        return int((np.diff(c) == 1).sum())
+    ys, xs = np.where(ust); cx, cy = xs.mean(), ys.mean(); en = None
     for y in range(0, ust.shape[0] - kh, 8):
         for x in range(0, ust.shape[1] - kw, 8):
-            s = ii[y + kh, x + kw] - ii[y, x + kw] - ii[y + kh, x] + ii[y, x]
-            if en is None or s > en[0]: en = (s, x, y)
-    _, bx, by = en; kutu = (bx, by, bx + kw, by + kh)
+            if top(ii, x, y) / (kw * kh) < DETAY_ESIK['murekkep_oran'] or top(ih, x, y) > DETAY_ESIK['halka_px']: continue
+            a = (kesen(x, y), -np.hypot(x + kw / 2 - cx, y + kh / 2 - cy), x, y)
+            if en is None or a > en: en = a
+    if en is None: raise SystemExit('HATA: kart 06 buyutec kapisi: uygun birlesim kutusu yok')
+    kesis, _, bx, by = en
+    kapi = {'murekkep_oran': round(float(top(ii, bx, by) / (kw * kh)), 3), 'halka_px': int(top(ih, bx, by)), 'kesen_cizgi': kesis, 'esik': DETAY_ESIK}
+    kapi['gecti'] = kapi['murekkep_oran'] >= DETAY_ESIK['murekkep_oran'] and kapi['halka_px'] <= DETAY_ESIK['halka_px']
+    kutu = (bx, by, bx + kw, by + kh)
     Hk = np.asarray(hi.convert('L').resize((al_mb.width, round(hi.height / f)), Image.LANCZOS)).astype(np.uint8)
     pad = 60; Pt = np.asarray(al_mb.convert('L')).astype(np.uint8)[by - pad:by + kh + pad, bx - pad:bx + kw + pad]
     r = cv2.matchTemplate(Hk, Pt, cv2.TM_CCOEFF_NORMED); _, sk, _, (lx, ly) = cv2.minMaxLoc(r)
@@ -253,7 +272,8 @@ def detay(al_mb, hi, B):
     hb = tuple(round((v + d) * f) for v, d in zip(kutu, (dx, dy, dx, dy))); buy = tw / (hb[2] - hb[0])
     if buy > 1.5: raise SystemExit(f'HATA: detay buyutmesi {buy:.2f} > 1.5')
     return hi.crop(hb).resize((tw, th), Image.LANCZOS), kutu, {'baski_boyut': [hi.width, hi.height], 'eslesme': round(float(sk), 4),
-                                                            'ofset': [int(dx), int(dy)], 'buyutme': round(buy, 3), 'poster_kutu': list(map(int, kutu))}
+                                                            'ofset': [int(dx), int(dy)], 'buyutme': round(buy, 3), 'poster_kutu': list(map(int, kutu)),
+                                                            'kapi': kapi}
 
 def kart07(kart, cl_mb, al_mb, hi, B):
     a = np.asarray(kart.convert('RGB')).copy()
@@ -343,6 +363,22 @@ if __name__ == '__main__':
                 onbellek.write_bytes(pickle.dumps((P, M2, R['poster'])))
         ref = {n: Image.open(W / 'ref' / f'{f}.jpg').convert('RGB') for n, f in REF_DOSYA.items()}
         etk = A.etiketler()[CIFT]; A_, B_ = etk.split(' + ')
+        if YALNIZ06:
+            SIRA6 = [(1, 'kapak_MB'), (3, 'kart3_isimler'), (4, 'ortak_sembol'), (5, 'bes_palet'), (6, 'GENEL_3_kagit'), (7, 'yakin_detay'),
+                     (8, 'GENEL_2_olcu'), (9, 'eser_isim_mesaj'), (10, 'GENEL_4_siparis'), (11, 'cerceve_DEEP_BLACK'),
+                     (12, 'cerceve_CHAMPAGNE_IVORY'), (13, 'cerceve_PURE_WHITE'), (14, 'cerceve_WARM_PARCHMENT')]
+            if not YEREL: rc('copy', HEDEF, str(CIK), '--include', '[01][0-9]_*.jpg')
+            S = {n: Image.open(CIK / f'{i:02d}_{ad}.jpg').convert('RGB') for i, (n, ad) in enumerate(SIRA6, 1) if n != 7}
+            S[7] = etiket_yaz(kart07(ref[7], P['blue']['CL'], P['blue']['AL'], Image.open(W / 'hi' / '30x40.jpg').convert('RGB'), M['blue']['B']), etk)
+            bt = burc_tarama(S[7], sorted({A_, B_}))
+            S[7].save(CIK / '06_yakin_detay.jpg', quality=95); yanyana(ref[7], S[7], CIK / 'YANYANA_06_yakin_detay_vs_CL07.jpg')
+            onizleme(S, SIRA6, CIK / f'ONIZLEME_TAM_SET_{CIFT}.jpg')
+            R['ozet'] = {'yalniz': 'kart 06', 'buyutec_kapisi': R['kart07']['detay']['kapi'], 'burc_kapisi': bt['gecti'],
+                         'poster_kapisi': R['poster']['blue']['gecti'], 'sure_sn': round(time.time() - t_bas, 1)}
+            if not YEREL:
+                for f in ('06_yakin_detay.jpg', 'YANYANA_06_yakin_detay_vs_CL07.jpg', f'ONIZLEME_TAM_SET_{CIFT}.jpg'): rc('copy', str(CIK / f), HEDEF)
+                (CIK / 'RAPOR_KART06.json').write_text(json.dumps(R, ensure_ascii=False, indent=1, default=str)); rc('copy', str(CIK / 'RAPOR_KART06.json'), HEDEF)
+            print(json.dumps(R['ozet'], ensure_ascii=False, indent=1, default=str), flush=True); sys.exit(0)
         beklenen = sorted({A_, B_})
         S = {}; K = {}
         # 01 kapak (onayli a1 kurali)
@@ -426,8 +462,10 @@ if __name__ == '__main__':
         if not YEREL: rc('copy', str(CIK / 'SET.json'), f'{A.A77}/{CIFT}')
         R['ozet'] = {'foto': len(SIRA), 'poster_kapilari': {r: R['poster'][r]['gecti'] for r in RENKLER},
                      'burc_kapisi': all(g['burc_kapisi']['gecti'] for g in R['galeri']), 'kart09_kapisi': K[9]['gecti'],
+                     'kart06_buyutec_kapisi': R['kart07']['detay']['kapi']['gecti'],
                      'sure_sn': round(time.time() - t_bas, 1)}
     finally:
-        (CIK / 'RAPOR_TAM_SET.json').write_text(json.dumps(R, ensure_ascii=False, indent=1, default=str))
-        if not YEREL: rc('copy', str(CIK), HEDEF)
+        if not YALNIZ06:                                         # kart 06 kosusu tam set raporunu/klasorunu ezmez
+            (CIK / 'RAPOR_TAM_SET.json').write_text(json.dumps(R, ensure_ascii=False, indent=1, default=str))
+            if not YEREL: rc('copy', str(CIK), HEDEF)
         print(json.dumps(R.get('ozet'), ensure_ascii=False, indent=1, default=str), flush=True)
