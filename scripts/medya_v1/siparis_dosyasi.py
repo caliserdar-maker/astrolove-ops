@@ -153,14 +153,19 @@ def kart_oku(metin):
 def normalize(d):
     cift = d['cift'].upper().replace(' ', '_').replace('+', '_').replace('-', '_')
     cift = re.sub(r'_+', '_', cift)
-    renk = d['renk'].upper().replace(' ', '_').replace('-', '_')
-    renk = RENK_TAKMA.get(renk, renk)
-    if renk not in RENK_ED:
-        raise SystemExit(f'bilinmeyen renk: {d["renk"]} (beklenen {sorted(RENK_ED)})')
     urun = URUN_ES.get(str(d.get('urun', 'pod')).strip().lower().replace(' ', '_'), 'POD')
+    ham_renk = d.get('renk') or ('MIDNIGHT_BLUE' if urun != 'POD' else '')
+    if not ham_renk:
+        raise SystemExit('POD siparisinde renk zorunlu')
+    renk = RENK_TAKMA.get(ham_renk.upper().replace(' ', '_').replace('-', '_'),
+                          ham_renk.upper().replace(' ', '_').replace('-', '_'))
+    if renk not in RENK_ED:
+        raise SystemExit(f'bilinmeyen renk: {ham_renk} (beklenen {sorted(RENK_ED)})')
     out = {**d, 'cift': cift, 'renk': renk, 'urun': urun, 'edisyon': RENK_ED[renk]}
     if urun != 'POD':
         return {**out, 'boy': d.get('boy') or '-', 'oran': None, 'hedef_px': None, 'inc': None}
+    if not d.get('boy'):
+        raise SystemExit('POD siparisinde boy zorunlu')
     boy = d['boy'].strip().upper().replace(' ', '').replace('×', 'x').replace('X', 'x')
     if boy not in BOY:
         raise SystemExit(f'bilinmeyen boy: {d["boy"]} (beklenen {sorted(BOY)})')
@@ -404,10 +409,17 @@ def render_et(ed, oran, sayfa, kaynak_bayt, isimler, mesaj, P_blue, P_ed, cift=N
     return poster, bi, ek
 
 
-def tek_dosya(poster, bi, ek, kaynak_bayt, hedef_px, yol, kalite=95):
+def tek_dosya(poster, bi, ek, kaynak_bayt, hedef_px, yol, kalite=95, azami_bayt=None):
+    """azami_bayt verilirse kalite kademeli dusurulerek dosya butcesine sigdirilir
+    (ZIP'i sonradan yeniden kodlamak kayiplari katliyor; butce kayit aninda uygulanir)."""
     baski, bpx = baski_dosyasi(poster, ek, kaynak_bayt, hedef_px)
-    baski.save(yol, 'JPEG', quality=kalite, subsampling=0, optimize=True)
-    return baski, {**bpx, 'dosya_MB': round(yol.stat().st_size / 1e6, 2)}
+    kullanilan = kalite
+    for q in ([kalite] if azami_bayt is None else [kalite, 88, 84, 80, 76, 72, 68]):
+        baski.save(yol, 'JPEG', quality=q, subsampling=(0 if q >= 90 else 1), optimize=True)
+        kullanilan = q
+        if azami_bayt is None or yol.stat().st_size <= azami_bayt:
+            break
+    return baski, {**bpx, 'dosya_MB': round(yol.stat().st_size / 1e6, 2), 'jpeg_kalite': kullanilan}
 
 
 def kapilari_topla(bi, isimler, mesaj, baski_px, beklenen_px, dosya_mb=None, azami_mb=None):
@@ -485,7 +497,8 @@ def dijital_uret(sip, P_blue, P_ed, cik):
                 if poster is None:
                     rk['oranlar'][oran] = {'durum': 'ELLE KONTROL', **bi}; continue
                 jpg = klas / f'{sip["cift"]}_{renk}_{oran}_{boy}.jpg'
-                baski, bpx = tek_dosya(poster, bi, ek, kb, hedef, jpg, kalite=90)
+                butce = int(ZIP_AZAMI_MB * 1e6 * 0.92 / len(DIJITAL_ORANLAR))
+                baski, bpx = tek_dosya(poster, bi, ek, kb, hedef, jpg, kalite=92, azami_bayt=butce)
                 bek = [round(BOY[boy][1] * DPI), round(BOY[boy][2] * DPI)]
                 kapilar, ayrinti = kapilari_topla(bi, isimler, mesaj, bpx['baski_px'], bek)
                 rk['oranlar'][oran] = {'durum': 'URETILDI', 'boy': boy, **bpx,
@@ -507,21 +520,15 @@ def dijital_uret(sip, P_blue, P_ed, cik):
             except BaseException as e:                           # noqa: BLE001
                 rk['oranlar'][oran] = {'durum': 'HATA', 'hata': f'{type(e).__name__}: {e}'}
                 rk['durum'] = 'EKSIK'
-        # ZIP: 20 MB'i asarsa kalite dusurulur
+        # ZIP: dosya butcesi kayit aninda uygulandi (tek_dosya azami_bayt)
         zp = cik / f'{sip["cift"]}_{renk}.zip'
-        kalite = 90
-        while True:
-            with zipfile.ZipFile(zp, 'w', zipfile.ZIP_DEFLATED) as z:
-                for f in sorted(klas.glob('*.jpg')):
-                    z.write(f, f.name)
-            mb = round(zp.stat().st_size / 1e6, 2)
-            if mb <= ZIP_AZAMI_MB or kalite <= 70:
-                break
-            kalite -= 6
+        with zipfile.ZipFile(zp, 'w', zipfile.ZIP_STORED) as z:   # JPEG zaten sikistirilmis
             for f in sorted(klas.glob('*.jpg')):
-                Image.open(f).convert('RGB').save(f, 'JPEG', quality=kalite,
-                                                  subsampling=1, optimize=True)
-        rk['zip_MB'] = mb; rk['zip_kalite'] = kalite
+                z.write(f, f.name)
+        mb = round(zp.stat().st_size / 1e6, 2)
+        rk['zip_MB'] = mb
+        rk['jpeg_kaliteleri'] = {o: v.get('jpeg_kalite') for o, v in rk['oranlar'].items()
+                                 if isinstance(v, dict)}
         rk['zip_kapisi'] = mb <= ZIP_AZAMI_MB
         rk['dosya_sayisi'] = len(list(klas.glob('*.jpg')))
         rk['zip_icerik'] = sorted(f.name for f in klas.glob('*.jpg'))
