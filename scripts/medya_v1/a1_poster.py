@@ -145,6 +145,48 @@ def sembol_gorseli(kirp, ad, buyut=3):
     for r in satir: t.paste(r, (0, yy)); yy += r.height + 24
     t.save(CIK / ad, quality=95)
 
+# ------------------------------------------------------------------ tagline taban cizgisi (Serdar 25 Eyl)
+TAG_TABAN_ESIK = {'taban_px': 0, 'renk': 6.0}
+
+def tag_plaka_taban(s, S, metin):
+    """kisisel-v1 tagline_plaka ile ayni plaka; plakadaki taban cizgisi (T harfinin alti) ve plaka yuksekligi."""
+    import pilot12, pilot6
+    pl, info = pilot12.tagline_plaka(s, {'prof': S['prof']}, metin)
+    cr, cu, ct = pilot6.ciz_cap(pilot12.FONT_DIR / pilot12.TAG_FONT, pilot12.TAG_W, info['punto'], metin)
+    a = np.asarray(pl)[..., 3] > 40; ust = int(np.where(a.any(1))[0][0])
+    return pl.height, ust + ct
+
+def taban_hizala(s, S, metin, ref=TAG):
+    """Render kodu plakayi kutu merkezine koyar (ty = tag_y - h/2); inen harfi olmayan slogan asagi kayar.
+    Sarmalayici tag_y'yi, metnin taban cizgisi referans sloganin (EJ) taban cizgisine denk gelecek sekilde verir."""
+    if metin == ref: return s
+    h_r, b_r = tag_plaka_taban(s, S, ref); h_m, b_m = tag_plaka_taban(s, S, metin)
+    hedef = int(round(s['tag_y'] - h_r / 2)) + b_r              # EJ taban cizgisi (poster y)
+    s2 = dict(s); s2['tag_y'] = hedef - b_m + h_m / 2
+    if int(round(s2['tag_y'] - h_m / 2)) + b_m != hedef:          # yuvarlama: yarim piksel duzelt
+        s2['tag_y'] += 0.5
+    return s2
+
+def tag_olc(poster, s, zemin_a, S=None, metin=None):
+    """Pikselden olculen taban cizgisi: ayni plaka (tagline_plaka) posterin tagline bandinda sablon eslestirmeyle bulunur
+    (metin icerigine bagli degil); taban = bulunan y + plakadaki T taban cizgisi. Altin rengi: cekirdek murekkep ortancasi."""
+    import cv2, pilot12
+    a = np.asarray(poster.convert('RGB')).astype(np.float32); y0, y1 = s['tag_bant'][0] - 80, s['tag_bant'][1] + 80
+    d = np.abs(a[y0:y1] - zemin_a[y0:y1]).max(2)
+    pl, _ = pilot12.tagline_plaka(s, {'prof': S['prof']}, metin); _, b = tag_plaka_taban(s, S, metin)
+    t = np.asarray(pl)[..., 3].astype(np.float32)
+    r = cv2.matchTemplate((d / max(d.max(), 1) * 255).astype(np.float32), t, cv2.TM_CCOEFF_NORMED); _, v, _, (lx, ly) = cv2.minMaxLoc(r)
+    cek = d > 0.8 * d.max()
+    return {'taban_y': int(y0 + ly + b), 'eslesme': round(float(v), 4), 'renk': [round(float(x), 1) for x in np.median(a[y0:y1][cek], 0)]}
+
+def tag_kapisi(olcumler, ref='EJ'):
+    r = olcumler[ref]; out = {}
+    for k, o in olcumler.items():
+        dt = o['taban_y'] - r['taban_y']; dr = max(abs(x - y) for x, y in zip(o['renk'], r['renk']))
+        out[k] = {'taban_y': o['taban_y'], 'taban_fark': dt, 'renk': o['renk'], 'renk_fark': round(dr, 1),
+                  'gecti': abs(dt) <= TAG_TABAN_ESIK['taban_px'] and dr <= TAG_TABAN_ESIK['renk']}
+    return {'gecti': all(v['gecti'] for v in out.values()), 'esik': TAG_TABAN_ESIK, **out}
+
 SEMBOL_ESIK = {'fark': 6.0, 'iou': 0.97}
 
 class Poster:
@@ -191,13 +233,14 @@ class Poster:
         t0 = time.time(); s, S, o = B['s'], B['S'], B['o']
         r = gd.siparis_dogrula(isimler[0], isimler[1], tagline, None)
         sol, sag = r['sol']['deger'], r['sag']['deger']
+        s = taban_hizala(s, S, tagline)                            # taban cizgisi EJ ile ayni (render kodu degismez)
         p, bilgi, merkez, x, yeni = self.p16.poster_kur(s, S, {'sol': sol, 'sag': sag}, tagline)
         kapi = self.p16.blok_kapisi(p, S, s, yeni)
         sk, kirp = sembol_kapisi(p, S, s, merkez, B['m'], SEMBOL_ESIK)
         return p, {'sayfa': B['sayfa'], 'olcum': {k: o.get(k) for k in ('isim_bant', 'isim_govde', 'sembol_bant', 'sembol', 'tag_bant')},
                    'olcum_duzeltme': B['duz'], 'cap_ilk': B['ilk'], 'cap_son': {'cap': s['cap'], 'tag_cap': s['tag_cap']},
                    'bg_hiza': s['bg_hiza'], 'temiz_ara_kapisi': s['temiz_ara_kapisi'], 'kalinti_kapisi': kapi, 'sembol_kapisi': sk,
-                   'olcek': bilgi['olcek'], 'punto': bilgi['punto'], 'poster_px': list(p.size),
+                   'olcek': bilgi['olcek'], 'punto': bilgi['punto'], 'poster_px': list(p.size), 'tag_olcum': tag_olc(p, s, S['zemin_a'], S, tagline),
                    'sure_sn': round(B['sn'] + time.time() - t0, 1)}, kirp
 
     def __call__(self, sayfa_png, sayfa_no, renk, oran, isimler, tagline, referans=False):
@@ -376,7 +419,7 @@ def liste_ac(L):
                        f"&X-Amz-SignedHeaders=host%3Bx-amz-expected-bucket-owner&response-expires=Fri%2C%2025%20Sep%202026%20{re_[:2]}%3A{re_[2:4]}%3A{re_[4:]}%20GMT")
     return out
 
-def uret77(parca, toplam, mod='tam'):
+def uret77(parca, toplam, mod='tam', filtre=None):
     """mod 'tam': EJ + IN (+ AM, metin Drive'da varsa) + kapak + kart09. mod 'am': yalniz AM, onceki kosuda PASS olan ciftler."""
     O = W / 'A1_77'; O.mkdir(exist_ok=True); R = {'parca': parca, 'toplam_is': toplam, 'mod': mod, 'cift': {}}
     tag_am = am_tagline(); R['am_tagline'] = tag_am
@@ -386,7 +429,8 @@ def uret77(parca, toplam, mod='tam'):
     assert len(ciftler) == 78 and len(L) == 78, (len(ciftler), len(L))
     no = {c: i + 1 for i, c in enumerate(ciftler)}
     benim = [c for c in ciftler if c != REF_CIFT][parca::toplam]
-    if mod == 'am':                                             # yalniz onceki kosuda uretilmis (PASS) ciftler
+    if filtre: benim = [c for c in ciftler if c in filtre]      # ornek kosu (yalniz belirtilen ciftler)
+    if mod in ('am', 'tag'):                                     # yalniz onceki kosuda uretilmis (PASS) ciftler
         uretilmis = set(x.strip('/') for x in rc('lsf', A77, '--dirs-only').split())
         benim = [c for c in benim if c in uretilmis]
     sayfa_b = {}
@@ -416,16 +460,20 @@ def uret77(parca, toplam, mod='tam'):
             rc('copy', f'{POD}/{c}/{RENK}/8x10.jpg', str(W / 'pod' / c))
             r['sayfa_pod_ncc'] = round(ncc(g(Image.open(io.BytesIO(sayfa_b[c]))), g(Image.open(W / 'pod' / c / '8x10.jpg'))), 4)
             B = P.sayfa_kur(sayfa_b[c], no[c], 'blue', ORAN)
-            isler = [('AM', AM, tag_am)] if mod == 'am' else [('EJ', ISIM, TAG), ('IN', IN, TAG_IN)] + ([('AM', AM, tag_am)] if tag_am else [])
+            isler = ([('AM', AM, tag_am)] if mod == 'am' else [('EJ', ISIM, TAG), ('IN', IN, TAG_IN)] + ([('AM', AM, tag_am)] if tag_am else []))
+            if mod == 'am': isler = [('EJ', ISIM, TAG)] + isler     # EJ taban cizgisi referansi (kaydedilmez)
+            if mod == 'tag': isler = [('EJ', ISIM, TAG), ('IN', IN, TAG_IN), ('AM', AM, tag_am)]
             cikti = {k: P.uret(B, isim, tag) for k, isim, tag in isler}
             r['kapi'] = {k: kapilar(b) for k, (_, b, _) in cikti.items()}; r['kapi']['sayfa_eslesme'] = r['sayfa_pod_ncc'] >= NCC_ESIK
-            r['gecti'] = r['kapi']['sayfa_eslesme'] and all(all(r['kapi'][k].values()) for k in cikti)
+            r['tag_kapisi'] = tag_kapisi({k: b['tag_olcum'] for k, (_, b, _) in cikti.items()})
+            r['gecti'] = r['kapi']['sayfa_eslesme'] and all(all(r['kapi'][k].values()) for k in cikti) and r['tag_kapisi']['gecti']
             r['olcum'] = {k: {x: b[x] for x in ('punto', 'olcek', 'olcum_duzeltme', 'sembol_kapisi', 'temiz_ara_kapisi', 'kalinti_kapisi')} for k, (_, b, _) in cikti.items()}
             if r['gecti']:
                 d = O / c; d.mkdir(exist_ok=True)
                 for k, (p, _, kk) in cikti.items():
+                    if mod in ('am', 'tag') and k == 'EJ': continue     # EJ onayli; yalniz referans
                     p.save(d / f'POSTER_{k}.png'); sembol_gorseli(kk, f'../A1_77/{c}/SEMBOL_{k}.jpg')
-                if 'EJ' in cikti:
+                if 'EJ' in cikti and mod == 'tam':
                     ej = cikti['EJ'][0]
                     yerlestir(sahne['kapak'], ej, yer['kapak']).save(d / 'KAPAK.jpg', quality=95)
                     kart09_uret(X9, ej, yer['kart09'], ET[c]).save(d / 'KART09.jpg', quality=95)
@@ -439,8 +487,9 @@ def uret77(parca, toplam, mod='tam'):
         n = i + 1; gecen = time.time() - t_bas; kalan = gecen / n * (len(benim) - n)
         log(f'[{n}/{len(benim)}] {c} {"PASS" if r["gecti"] else "FAIL"} {r["sn"]}s | gecen {gecen / 60:.1f} dk, kalan {kalan / 60:.1f} dk, %{100 * n / len(benim):.0f}')
     R['toplam_sn'] = round(time.time() - T0, 1)
-    (O / f'parca_{mod}_{parca}.json').write_text(json.dumps(R, ensure_ascii=False, indent=1, default=str))
-    rc('copy', str(O / f'parca_{mod}_{parca}.json'), f'{A77}/_rapor')
+    ek = '_ornek' if filtre else ''
+    (O / f'parca_{mod}{ek}_{parca}.json').write_text(json.dumps(R, ensure_ascii=False, indent=1, default=str))
+    rc('copy', str(O / f'parca_{mod}{ek}_{parca}.json'), f'{A77}/_rapor')
 
 def kart77(parca, toplam):
     """Yalniz KART09 yeniden uretimi (poster/kapak render yok): onayli POSTER_EJ + dogru ust etiket + kart kapisi."""
@@ -495,6 +544,9 @@ def serit77():
             d = json.loads(f.read_text()); parca.append({'parca': d['parca'], 'toplam_sn': d['toplam_sn'], 'referans_sn': d.get('referans_sn')}); R.update(d['cift'])
         for f in sorted((O / '_rapor').glob('parca_am_*.json')):
             RA.update(json.loads(f.read_text())['cift'])
+        RT = {}
+        for f in sorted((O / '_rapor').glob('parca_tag_[0-9]*.json')):
+            RT.update(json.loads(f.read_text())['cift'])
         RK = {}
         for f in sorted((O / '_rapor').glob('parca_kart_*.json')):
             RK.update(json.loads(f.read_text())['cift'])
@@ -523,7 +575,9 @@ def serit77():
         am_kal = [c for c in RA if not RA[c]['gecti']]
         kart = {'uretilen': len(RK), 'eski_hatali': sum(1 for c in RK if RK[c].get('eski_hatali')),
                 'pass': sum(1 for c in RK if RK[c]['gecti']), 'fail': {c: RK[c].get('hata') or RK[c].get('kapi') for c in RK if not RK[c]['gecti']}}
-        OZ = {'pass': len(gec), 'fail': len(kal), 'kart09': kart, 'am_uretilen': len(am_var), 'am_fail': {c: RA[c].get('hata') or RA[c].get('kapi') for c in am_kal}, 'fail_liste': {c: R[c].get('hata') or R[c].get('kapi') for c in kal},
+        tag = {'uretilen': len(RT), 'pass': sum(1 for c in RT if RT[c]['gecti']),
+               'fail': {c: RT[c].get('hata') or RT[c].get('tag_kapisi') or RT[c].get('kapi') for c in RT if not RT[c]['gecti']}}
+        OZ = {'pass': len(gec), 'fail': len(kal), 'kart09': kart, 'tag_duzeltme': tag, 'am_uretilen': len(am_var), 'am_fail': {c: RA[c].get('hata') or RA[c].get('kapi') for c in am_kal}, 'fail_liste': {c: R[c].get('hata') or R[c].get('kapi') for c in kal},
               'cift_sn_ort': round(float(np.mean(sure)), 1), 'cift_sn_maks': max(sure), 'parca': parca,
               'is_sn_maks': max(p['toplam_sn'] for p in parca), 'serit_sn': round(time.time() - t0, 1), 'seritler': cik}
         (O / 'RAPOR_77.json').write_text(json.dumps({'ozet': OZ, 'cift': R}, ensure_ascii=False, indent=1, default=str))
@@ -539,7 +593,8 @@ def serit77():
 
 if __name__ == '__main__' and sys.argv[1:2] == ['uret77']:
     m = sys.argv[4] if len(sys.argv) > 4 else 'tam'
-    (kart77(int(sys.argv[2]), int(sys.argv[3])) if m == 'kart' else uret77(int(sys.argv[2]), int(sys.argv[3]), m)); sys.exit(0)
+    f = set(sys.argv[5].split(',')) if len(sys.argv) > 5 else None
+    (kart77(int(sys.argv[2]), int(sys.argv[3])) if m == 'kart' else uret77(int(sys.argv[2]), int(sys.argv[3]), m, f)); sys.exit(0)
 
 if __name__ == '__main__' and sys.argv[1:2] == ['serit77']:
     serit77(); sys.exit(0)
