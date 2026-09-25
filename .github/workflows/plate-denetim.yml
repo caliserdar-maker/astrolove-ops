@@ -1,0 +1,90 @@
+name: plate-denetim
+
+# Plate denetimi / kiyas gibi SALT OKUR isler icin ayri kosucu.
+# kisisel-pilot esZamanlilik grubu baska oturumlarca yogun kullanildigi ve
+# bekleyen kosu iptal edildigi icin bu isler kendi grubuna alindi.
+#
+# Kapsam siniri: YALNIZ Drive (rclone) kimligi verilir. Etsy ve Prodigi
+# secret'lari bu workflow'a hic girmez. Tetik yalniz workflow_dispatch.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Script'in okunacagi dal"
+        required: true
+        default: "siparis-baski-v1"
+      script:
+        description: "Kosulacak salt-okur script (scripts/ altinda olmali)"
+        required: true
+        default: "scripts/medya_v1/plate_denetim.py"
+      args:
+        description: "Ek argumanlar"
+        required: false
+        default: ""
+
+concurrency: plate-denetim
+
+jobs:
+  kosu:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout (secilen dal)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+
+      - name: Python bagimliliklari
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet --upgrade pip
+          python -m pip install --quiet pillow opencv-python-headless numpy
+
+      - name: rclone kur
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          rclone version | head -1
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then
+            echo "HATA: RCLONE_CONF_B64 secret'i tanimli degil." >&2
+            exit 1
+          fi
+          mkdir -p ~/.config/rclone
+          umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+          echo "rclone.conf yazildi ($(wc -c < ~/.config/rclone/rclone.conf) bayt)."
+
+      - name: Script'i kosu
+        env:
+          SCRIPT: ${{ inputs.script }}
+          ARGS: ${{ inputs.args }}
+        run: |
+          set -euo pipefail
+          case "$SCRIPT" in
+            scripts/*) : ;;
+            *) echo "HATA: script yolu scripts/ altinda olmali: $SCRIPT" >&2; exit 1 ;;
+          esac
+          case "$SCRIPT" in
+            *..*) echo "HATA: script yolunda '..' olamaz." >&2; exit 1 ;;
+          esac
+          # shellcheck disable=SC2086
+          python "$SCRIPT" $ARGS
