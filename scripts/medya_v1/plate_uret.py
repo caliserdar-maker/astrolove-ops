@@ -44,6 +44,18 @@ RENK_ED = {'MIDNIGHT_BLUE': 'blue', 'DEEP_BLACK': 'black', 'PURE_WHITE': 'pure_w
 # NOT: Serdar 16 boy bildirdi ve kaynak olarak scripts/pod/fiyat_b.py'yi gosterdi;
 # o dosya hicbir dalda yok, POD_PRINT'te de 15 boy var. Fark raporlandi.
 ATLANAN = ('5x7',)
+
+# TUREV BOYLAR: canli ilan 16 boy satiyor (kaynak: pod-v4 dali scripts/pod/fiyat_b.py
+# FIYAT sozlugu). POD_PRINT'te bu ikisinin baski dosyasi YOK, o yuzden plate
+# kaynak boyun plate'inden yeniden orneklenir. Kaynak plate ZATEN slogan
+# temizliginden gecmistir, dolayisiyla turev de temizdir.
+#   24x32 (3:4)  <- 30x40 (9000x12000) KUCULTME  -> 7200x9600  = 300 dpi
+#   24x30 (4:5)  <- 16x20 (4800x6000)  BUYUTME   -> 7200x9000  ~ 200 dpi zemin
+# Zemin dpi olculup raporlanir; isim/mesaj hedef cozunurlukte render edildigi
+# icin metin dpi ayri raporlanir.
+TUREV = {'24x32': {'kaynak': '30x40', 'inc': (24, 32)},
+         '24x30': {'kaynak': '16x20', 'inc': (24, 30)}}
+DPI = 300
 YIGIN_AZAMI_GB = 6.0      # karo yigini icin tepe bellek butcesi
 ASGARI_DOSYA = 40         # bu sayidan az dosya varsa ortanca guvenilmez
 FARK_ESIK = 30            # murekkep cekirdegi (p50/p99 raporu icin)
@@ -401,6 +413,38 @@ def fark_olc(a, plate):
             'ort': round(float(dis.mean()), 3)}
 
 
+def turev_plate(ed, boy, tanim, rapor):
+    """Kaynak boyun plate'inden yeniden ornekleyerek turev plate uretir."""
+    kb = tanim['kaynak']
+    kad, tad = f'{ed}_{kb}.png', f'{ed}_{boy}.png'
+    ky = W / kad
+    if not ky.exists():
+        rc('copy', f'{PLATES}/{kad}', str(W), timeout=1800)
+    if not ky.exists():
+        return {'hata': f'kaynak plate yok: {kad}'}
+    with Image.open(ky) as im:
+        kaynak_px = im.size
+        hedef = (int(round(tanim['inc'][0] * DPI)), int(round(tanim['inc'][1] * DPI)))
+        # En-boy orani kaynakla ayni olmali; degilse kirpma degil, orani raporla.
+        o_k = kaynak_px[0] / kaynak_px[1]
+        o_h = hedef[0] / hedef[1]
+        yon = 'KUCULTME' if hedef[0] < kaynak_px[0] else 'BUYUTME'
+        yeni = im.convert('RGB').resize(hedef, Image.LANCZOS)
+    yeni.save(W / tad, 'PNG', optimize=False, compress_level=6)
+    zemin_dpi = round(kaynak_px[0] / tanim['inc'][0], 1)     # kaynagin tasidigi gercek dpi
+    d = {'edisyon': ed, 'boy': boy, 'turev': True, 'kaynak_boy': kb,
+         'kaynak_px': list(kaynak_px), 'px': list(hedef), 'yon': yon,
+         'oran_kaynak': round(o_k, 5), 'oran_hedef': round(o_h, 5),
+         'oran_uyumlu': abs(o_k - o_h) < 0.002,
+         'zemin_dpi': zemin_dpi, 'hedef_dpi': DPI,
+         'metin_dpi': DPI,   # isim/mesaj hedef cozunurlukte render edilir
+         'png_MB': round((W / tad).stat().st_size / 1e6, 1)}
+    rc('copy', str(W / tad), PLATES, timeout=2400)
+    (W / tad).unlink()
+    return d
+
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--parca', default='1/1', help='i/n - is listesinin i. dilimi')
@@ -486,10 +530,25 @@ def main():
         except BaseException as e:                                # noqa: BLE001
             rapor['hata'][anahtar] = f'{type(e).__name__}: {e}'
             log(f'{anahtar} HATA: {type(e).__name__}: {e}')
+    # TUREV BOYLAR (POD_PRINT'te dosyasi olmayan iki satilan boy). Kaynak
+    # plate'ler hazir olmali; parca 1 bunlari en sonda uretir.
+    if i == 1:
+        rapor['turevler'] = {}
+        for boy, tanim in TUREV.items():
+            for renk in sorted(RENK_ED):
+                ed = RENK_ED[renk].upper()
+                anahtar = f'{ed}/{boy}'
+                try:
+                    rapor['turevler'][anahtar] = turev_plate(ed, boy, tanim, rapor)
+                    log('turev', anahtar, json.dumps(rapor['turevler'][anahtar])[:200])
+                except BaseException as e:                        # noqa: BLE001
+                    rapor['turevler'][anahtar] = {'hata': f'{type(e).__name__}: {e}'}
+                    log('turev', anahtar, 'HATA', type(e).__name__, e)
     rp = W / f'RAPOR_{i}_{n}.json'
     rp.write_text(json.dumps(rapor, indent=1, ensure_ascii=False), encoding='utf-8')
     rc('copy', str(rp), PLATES, timeout=600)
     print(json.dumps({'parca': a.parca, 'uretilen': sorted(rapor['plateler']),
+                      'turev': sorted(rapor.get('turevler', {})),
                       'hata': rapor['hata']}, indent=1))
     if rapor['hata']:
         raise SystemExit(1)

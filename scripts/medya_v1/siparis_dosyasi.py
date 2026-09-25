@@ -802,13 +802,27 @@ def tek_dosya(poster, bi, ek, kaynak_bayt, hedef_px, yol, kalite=95, azami_bayt=
 
 
 def bant_dogrulama(cift, boy, P_ed):
-    """Serdar 2. madde: bant konumlari bes renkte ayni mi? MB referans, fark <= 2 px."""
+    """Bant konumlari bes renkte ayni mi? MB referans, fark <= 2 px.
+
+    Bu artik BILGI amaclidir: siparis ureticisi her dosyayi KENDISINDEN olcuyor
+    (Serdar 25 Eyl, 3. madde), MB'den kutu kopyalamiyor. Olculen fark yalniz
+    raporlanir, uretimi yonlendirmez.
+    NOT (pod canli testinde gorulen hata): `olc()` plate yolunu da ister; plate
+    yoluna geciste burasi guncellenmemisti ve bes renkte TypeError, ardindan
+    KeyError 'tag_bant' veriyordu. Artik her renk kendi plate'iyle olculur.
+    """
     olcek_kur(2400)
     out, temel = {}, None
     for renk in RENKLER:
         try:
             yol = pod_kaynak(cift, renk, boy)
-            o, _duz, _m = P_ed.olc(yol)
+            ed = RENK_ED[renk]
+            oran = BOY[boy][0]
+            o, _duz, _m = P_ed.olc(yol, P_ed.plate(ed, oran, boy))
+            eksik = [a for a in ('isim_bant', 'isim_govde', 'sembol_bant', 'tag_bant',
+                                 'sol_isim', 'sag_isim') if a not in o]
+            if eksik:
+                raise RuntimeError(f'olcumde eksik alan: {eksik}')
             v = {a: o[a] for a in ('isim_bant', 'isim_govde', 'sembol_bant', 'tag_bant')}
             v['sol_isim'] = o['sol_isim']; v['sag_isim'] = o['sag_isim']
             out[renk] = {'olculdu': True, 'bant': v}
