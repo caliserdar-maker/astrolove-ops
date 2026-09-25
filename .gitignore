@@ -61,3 +61,12 @@ Thumbs.db
 
 # Yerel/runner font indirmeleri (workflow her kosuda indirir)
 fonts/
+
+# --- Kosu ciktilari / calisma dizinleri (asla commit edilmez) ---
+# Actions bunlari artifact olarak yukler; yerelde de script'ler buraya yazar.
+# _siparis/ MUSTERI VERISI icerir (isim, mesaj, siparis no) - Serdar karari
+# 25 Eyl 2026: musteri verisi yalniz Drive'a gider, depoya ASLA girmez.
+out/
+_a1/
+_siparis/
+_olcum/
