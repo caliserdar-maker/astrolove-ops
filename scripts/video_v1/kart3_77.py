@@ -2,6 +2,7 @@
 """video-v1: 77 cift KART 3 (Serdar onayi 25 Eyl 2026; ornekler Aries+Leo, Aquarius+Aquarius onaylandi).
 Girdi: gdrive A1_77/<CIFT>/POSTER_EJ.png + RAPOR_tam.json (medya-v1; yalniz 'gecti' olan ciftler).
 Cikti: A1_77/<CIFT>/KART3.jpg + KART3_qc.json; A1_77/_KART3/{RAPOR_parca<n>.json, KART3_SERIT_77.jpg, KART3_RAPOR_77.json}.
+Onceki kosuda PASS olan cift atlanir (yeni gelen ciftler icin tekrar kosu).
 Kullanim: kart3_77.py uret <parca> <toplam> | kart3_77.py serit | kart3_77.py yerel <CIFT_DIZINI> <CIKTI_DIZINI>
 Yalniz Drive (rclone). Etsy/Prodigi erisimi yok."""
 import json, os, subprocess, sys, time
@@ -41,8 +42,11 @@ def uret(parca, toplam):
     for n, c in enumerate(benim, 1):
         d = W / 'in' / c; o = W / 'out' / c; d.mkdir(parents=True, exist_ok=True); t1 = time.time()
         try:
-            rc('copy', f'{A77}/{c}', str(d), '--include', 'POSTER_EJ.png', '--include', 'RAPOR_tam.json')
-            r = isle(c, d, o)
+            rc('copy', f'{A77}/{c}', str(d), '--include', 'POSTER_EJ.png', '--include', 'RAPOR_tam.json', '--include', 'KART3_qc.json')
+            if (d / 'KART3_qc.json').exists() and json.loads((d / 'KART3_qc.json').read_text()).get('SONUC') == 'PASS':
+                r = {'gecti': True, 'neden': '', 'not': 'onceki kosu'}   # tekrar kosuda yalniz yeni/FAIL ciftler islenir
+            else:
+                r = isle(c, d, o)
             if (o / 'KART3.jpg').exists():
                 rc('copy', str(o), f'{A77}/{c}', '--include', 'KART3.jpg', '--include', 'KART3_qc.json')
         except Exception as e:
