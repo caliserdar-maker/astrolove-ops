@@ -1,0 +1,126 @@
+name: tamset-qc
+
+# GOREV 0020 - 78 TAM_SET'in YUKLEMEDEN ONCE kalite denetimi (SALT OKUMA; Etsy'ye yazma YOK).
+# etsy isi: <= 5 Etsy okuma cagrisi (CL canli gorseller + kargo profili), etsy-token kilidini yalniz kisa sure tutar.
+# qc isi: Drive A1_77/*/TAM_SET, Etsy'siz; kilitsiz (siparis yonlendiricisini bekletmez).
+# Cikti: Drive ASTROLOVE/TEMP/DIJITAL_78/TAMSET_QC.csv, TAMSET_SISTEMATIK.csv, TAMSET_OZET.json, TAMSET_KARGO.json,
+#        TAMSET_QC_KIRPIM/ (x3 kirpimlar + TAMSET_SERIT.jpg)
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      sadece:
+        description: "bos = 77 cift + CL; ya da virgullu cift listesi (ornek ARIES_LEO,AQUARIUS_AQUARIUS)"
+        required: false
+        default: ""
+
+jobs:
+  etsy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    concurrency:
+      group: etsy-token
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2 numpy==2.1.3 pillow==11.0.0 scipy==1.14.1
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Etsy salt okuma (<= 5 cagri)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/YAYILIM_78/METIN_78.csv" _work/METIN_78.csv
+          python scripts/etsy/tamset_qc.py etsy cl_canli _work/METIN_78.csv
+          rclone copyto out/TAMSET_KARGO.json "gdrive:ASTROLOVE/TEMP/DIJITAL_78/TAMSET_KARGO.json" -q
+      - name: Token geri yaz
+        if: always()
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || echo "Token yenilenmedi"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cl_canli
+          path: cl_canli
+          retention-days: 1
+      - if: always()
+        run: rm -rf _work ~/.config/rclone
+
+  qc:
+    needs: etsy
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@v4
+        with:
+          name: cl_canli
+          path: cl_canli
+      - run: |
+          set -euo pipefail
+          sudo apt-get update -qq && sudo apt-get install -y -qq tesseract-ocr ffmpeg >/dev/null
+          pip install -q numpy==2.1.3 pillow==11.0.0 scipy==1.14.1 requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: TAM_SET indir
+        run: |
+          set -euo pipefail
+          rclone copy "gdrive:ASTROLOVE/TEMP/POD_KISISEL/A1_77" a77 --include "*/TAM_SET/**" --include "*/VIDEO.mp4" \
+            --transfers 16 --checkers 16 -q
+          echo "SET.json: $(ls a77/*/TAM_SET/SET.json | wc -l), dosya: $(find a77 -type f | wc -l), boyut: $(du -sh a77 | cut -f1)"
+      - name: QC (salt okuma)
+        env:
+          SADECE: ${{ inputs.sadece }}
+        run: |
+          set -euo pipefail
+          if [ -n "$SADECE" ]; then python scripts/etsy/tamset_qc.py qc a77 cl_canli "$SADECE"; else python scripts/etsy/tamset_qc.py qc a77 cl_canli; fi
+      - name: Drive'a yaz
+        if: always()
+        run: |
+          set -euo pipefail
+          H="gdrive:ASTROLOVE/TEMP/DIJITAL_78"
+          for f in TAMSET_QC.csv TAMSET_SISTEMATIK.csv TAMSET_OZET.json; do [ -f "out/$f" ] && rclone copyto "out/$f" "$H/$f" -q || true; done
+          [ -f out/TAMSET_SERIT.jpg ] && rclone copyto out/TAMSET_SERIT.jpg "$H/TAMSET_QC_KIRPIM/TAMSET_SERIT.jpg" -q || true
+          [ -d out/kirpim ] && rclone copy out/kirpim "$H/TAMSET_QC_KIRPIM" -q || true
+          echo "Drive: TEMP/DIJITAL_78/TAMSET_QC.csv + TAMSET_QC_KIRPIM/"
+      - if: always()
+        run: rm -rf a77 ~/.config/rclone
