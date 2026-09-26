@@ -31,6 +31,12 @@ POD = 'gdrive:ASTROLOVE/TEMP/POD_PRINT'
 PLATES = 'gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PLATES'
 W = Path('_plate').resolve(); W.mkdir(exist_ok=True)
 
+# Slogan maskesinin turetildigi edisyon (Serdar onayi 26 Eyl 2026). PURE_WHITE
+# secildi cunku zemini duz beyaz: doku yok (esik tabanda kalir, glif kacagi
+# yok) ve yildiz yok (bant bileseni sismiyor). Olculen: PURE_WHITE_A3 maske
+# kutusu x[830,1571] = yalniz slogan; BLUE_A3'te ayni maske x[261,2202] -
+# aradaki fark zemin yildizlari.
+REFERANS_RENK = 'PURE_WHITE'
 RENK_ED = {'MIDNIGHT_BLUE': 'blue', 'DEEP_BLACK': 'black', 'PURE_WHITE': 'pure_white',
            'CHAMPAGNE_IVORY': 'modern', 'WARM_PARCHMENT': 'vintage'}
 # SATILAN BOYLAR (Serdar karari 25 Eyl, 4. madde). Tek kaynak:
@@ -264,7 +270,7 @@ def slogan_bandi(plate):
     return en_iyi
 
 
-def slogan_temizle(plate, bant):
+def slogan_temizle(plate, bant, ref_maske=None):
     """Slogan GLIFLERINI plate'in kendi arka plan pikselleriyle degistirir.
 
     Dolgu kaynagi bandin bir bant boyu USTU ve ALTIdir; ikisi dikey capraz
@@ -297,17 +303,32 @@ def slogan_temizle(plate, bant):
     #      cok ustunde: medyan + 6 MAD, en az 18 (olculen doku p99 <= 3).
     # Ikisinin birlesimi hem ince hem kalin glifi kapsar; delikler kapatilir.
     k = plate.shape[1] / 2400.0
-    L = kes @ LUMA
-    m_yerel = yerel_maske(L, MASKE_YARICAP * k, MASKE_ESIK, MASKE_MIN_ALAN * k * k)
-    fark = np.abs(kes - dolgu).max(axis=2)
-    med = float(np.median(fark))
-    mad = float(np.median(np.abs(fark - med))) * 1.4826
-    esik = max(med + DOLGU_MAD * mad, DOLGU_ESIK)
-    m_fark = fark > esik
-    m = m_yerel | m_fark
-    kap = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,
-                                    (2 * max(int(round(4 * k)), 1) + 1,) * 2)
-    m = cv2.morphologyEx(m.astype(np.uint8), cv2.MORPH_CLOSE, kap)
+    if ref_maske is not None:
+        # REFERANS MASKE (Serdar onayi 26 Eyl): maske bu edisyondan degil,
+        # ayni boyun PURE_WHITE plate'inden gelir. Sebep olculdu: esik
+        # med+6*MAD dokulu zeminde (Champagne 41.6) sisip glif govdesinin
+        # %22.4'unu disarida birakiyor, dokusuz zeminde (taban 18) hic
+        # kacak olmuyor. Slogan 5 edisyonda ayni piksel konumunda:
+        # BLUE_A3 ile PURE_WHITE_A3 maskeleri IoU 0.883, kayma dx=0 dy=0.
+        if ref_maske.shape != kes.shape[:2]:
+            return None, {'sebep': f'referans maske boyutu {ref_maske.shape} != '
+                                   f'serit {kes.shape[:2]}'}
+        m = ref_maske.astype(np.uint8)
+        m_yerel = m_fark = np.zeros(kes.shape[:2], bool)
+        med = mad = esik = -1.0
+    else:
+        L = kes @ LUMA
+        m_yerel = yerel_maske(L, MASKE_YARICAP * k, MASKE_ESIK, MASKE_MIN_ALAN * k * k)
+        fark = np.abs(kes - dolgu).max(axis=2)
+        med = float(np.median(fark))
+        mad = float(np.median(np.abs(fark - med))) * 1.4826
+        esik = max(med + DOLGU_MAD * mad, DOLGU_ESIK)
+        m_fark = fark > esik
+        m = m_yerel | m_fark
+        kap = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,
+                                        (2 * max(int(round(4 * k)), 1) + 1,) * 2)
+        m = cv2.morphologyEx(m.astype(np.uint8), cv2.MORPH_CLOSE, kap)
+    ham = m.astype(bool).copy()          # dilate/blur ONCESI: referans olarak aktarilir
     ker = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,
                                     (2 * max(int(round(GLIF_PAY * k)), 1) + 1,) * 2)
     m = cv2.dilate(m, ker).astype(np.float32)
@@ -341,7 +362,8 @@ def slogan_temizle(plate, bant):
                   'glif_orani': round(float((m > 0.5).mean()), 4),
                   'dolgu_esik': round(esik, 2), 'fark_medyan': round(med, 2),
                   'yerel_px': int(m_yerel.sum()), 'fark_px': int(m_fark.sum()),
-                  'maske': (m[..., 0] > 0.5)}
+                  'referans_maske_kullanildi': ref_maske is not None,
+                  'maske': (m[..., 0] > 0.5), 'ham_maske': ham}
 
 
 def doku_enerji(a):
@@ -514,15 +536,29 @@ def main():
     i, n = (int(x) for x in a.parca.split('/'))
     isler, sayac = is_listesi()
     var = set() if a.yenile else mevcut_plateler()
-    kalan = [(r, b) for r, b in isler if f'{RENK_ED[r].upper()}_{b}.png' not in var]
-    benim = [x for j, x in enumerate(kalan) if j % n == i - 1]
-    log(f'toplam {len(isler)} plate, {len(var)} tanesi PLATES\'te var, '
-        f'{len(kalan)} kaldi; parca {i}/{n} -> {len(benim)}: '
-        + ', '.join(f'{r}/{b}' for r, b in benim))
+    # IS BIRIMI ARTIK BOY (Serdar onayi 26 Eyl): slogan maskesi ayni boyun
+    # PURE_WHITE plate'inden turetilip o boyun 5 edisyonuna uygulanir, bu
+    # yuzden bir boyun butun edisyonlari AYNI iste olmak zorunda. Boy atomik:
+    # kismi tamamlanmis boy bastan uretilir (referans maske bellekte tutulur,
+    # yazilan plate'ten geri cikarilamaz - o zaten temizlenmis).
+    boy_renk = {}
+    for r, b in isler:
+        boy_renk.setdefault(b, []).append(r)
+    tamam = {b for b, rs in boy_renk.items()
+             if all(f'{RENK_ED[r].upper()}_{b}.png' in var for r in rs)}
+    kalan_boy = [b for b in sorted(boy_renk) if b not in tamam]
+    benim_boylar = [b for j, b in enumerate(kalan_boy) if j % n == i - 1]
+    # Referans renk her boyda ILK islenir: maskesi digerlerine aktarilacak.
+    benim = [(r, b) for b in benim_boylar
+             for r in sorted(boy_renk[b], key=lambda x: (x != REFERANS_RENK, x))]
+    log(f'toplam {len(isler)} plate / {len(boy_renk)} boy, {len(tamam)} boy tamam; '
+        f'parca {i}/{n} -> {len(benim_boylar)} boy, {len(benim)} plate: '
+        + ', '.join(benim_boylar))
     rapor = {'parca': a.parca, 'tarih': datetime.now(timezone.utc).isoformat(),
              'matris': sayac, 'toplam_plate': len(isler), 'onceden_var': sorted(var),
-             'bu_kosuda_kalan': [f'{r}/{b}' for r, b in kalan],
+             'bu_kosuda_boylar': benim_boylar, 'referans_renk': REFERANS_RENK,
              'plateler': {}, 'hata': {}}
+    ref = {}                      # boy -> {'maske': ..., 'bant': ..., 'px': ...}
     for renk, boy in benim:
         anahtar = f'{renk}/{boy}'
         try:
@@ -544,22 +580,43 @@ def main():
             ed = RENK_ED[renk]
             ad = f'{ed.upper()}_{boy}.png'
 
-            # SLOGAN TEMIZLIGI (Serdar onayi 25 Eyl, 1. madde) - zorunlu.
-            slogan_bandi.tani = None
-            bant = slogan_bandi(ham_plate)
-            if bant is None:
-                rapor['hata'][anahtar] = {'sebep': 'slogan bandi bulunamadi - plate yazilmadi',
-                                          'tani': getattr(slogan_bandi, 'tani', None)}
-                log(f'{anahtar} slogan bandi bulunamadi: '
-                    + json.dumps(getattr(slogan_bandi, 'tani', None))[:400])
-                continue
-            plate, tb = slogan_temizle(ham_plate, bant)
+            # SLOGAN TEMIZLIGI (Serdar onayi 25 Eyl md.1; maske kaynagi 26 Eyl).
+            # Bant ve maske YALNIZ referans renkte olculur, ayni boyun diger
+            # edisyonlarina aynen aktarilir.
+            if renk == REFERANS_RENK:
+                slogan_bandi.tani = None
+                bant = slogan_bandi(ham_plate)
+                if bant is None:
+                    rapor['hata'][anahtar] = {
+                        'sebep': 'slogan bandi bulunamadi - BOYUN TAMAMI atlandi',
+                        'tani': getattr(slogan_bandi, 'tani', None)}
+                    log(f'{anahtar} slogan bandi bulunamadi (referans): '
+                        + json.dumps(getattr(slogan_bandi, 'tani', None))[:400])
+                    continue
+                plate, tb = slogan_temizle(ham_plate, bant)
+            else:
+                r = ref.get(boy)
+                if r is None:
+                    rapor['hata'][anahtar] = (f'referans ({REFERANS_RENK}) plate\'i '
+                                              f'uretilemedi - bu boy atlandi')
+                    log(f'{anahtar} referans yok, atlandi')
+                    continue
+                if ham_plate.shape[:2] != r['px']:
+                    rapor['hata'][anahtar] = (f'boyut referanstan farkli: '
+                                              f'{ham_plate.shape[:2]} != {r["px"]}')
+                    log(f'{anahtar} boyut referanstan farkli')
+                    continue
+                bant = r['bant']
+                plate, tb = slogan_temizle(ham_plate, bant, ref_maske=r['maske'])
             if plate is None:
                 rapor['hata'][anahtar] = f'slogan temizligi yapilamadi: {tb["sebep"]}'
                 log(f'{anahtar} temizlik yapilamadi: {tb["sebep"]}')
                 continue
+            if renk == REFERANS_RENK:
+                ref[boy] = {'bant': bant, 'maske': tb['ham_maske'],
+                            'px': ham_plate.shape[:2]}
             kapi = temizlik_kapilari(ham_plate, plate, bant, tb)
-            tb.pop('maske', None)                 # dizi rapora yazilmaz
+            tb.pop('maske', None); tb.pop('ham_maske', None)   # diziler rapora yazilmaz
             # KIRPIM HER DURUMDA: kapi kalinca da ONCE/SONRA goruntusu uretilir.
             # Aksi halde kapida kalan plate hicbir kanit birakmiyor ve neyin yanlis
             # oldugu sayidan baska bir seyle gorulemiyor (1. iterasyonda boyle oldu).
@@ -601,18 +658,19 @@ def main():
         except BaseException as e:                                # noqa: BLE001
             rapor['hata'][anahtar] = f'{type(e).__name__}: {e}'
             log(f'{anahtar} HATA: {type(e).__name__}: {e}')
-    # TUREV BOYLAR (POD_PRINT'te dosyasi olmayan iki satilan boy). Kaynak
-    # plate'ler hazir olmali; parca 1 bunlari en sonda uretir.
-    if i == 1:
-        rapor['turevler'] = {}
-        for boy, tanim in TUREV.items():
+    # TUREV BOYLAR (POD_PRINT'te dosyasi olmayan iki satilan boy). Is birimi
+    # boy oldugundan kaynak plate parca 1'de olmayabilir; turev KAYNAK boyu
+    # isleyen parcada, o boyun plate'leri yazildiktan sonra uretilir.
+    rapor['turevler'] = {}
+    for boy, tanim in TUREV.items():
+        if tanim['kaynak'] in benim_boylar:
             for renk in sorted(RENK_ED):
                 ed = RENK_ED[renk].upper()
                 anahtar = f'{ed}/{boy}'
                 try:
                     rapor['turevler'][anahtar] = turev_plate(ed, boy, tanim, rapor)
                     log('turev', anahtar, json.dumps(rapor['turevler'][anahtar])[:200])
-                except BaseException as e:                        # noqa: BLE001
+                except BaseException as e:                    # noqa: BLE001
                     rapor['turevler'][anahtar] = {'hata': f'{type(e).__name__}: {e}'}
                     log('turev', anahtar, 'HATA', type(e).__name__, e)
     rp = W / f'RAPOR_{i}_{n}.json'
