@@ -133,6 +133,26 @@ class TokenStore:
         Path(str(self.path) + ".updated").write_text("1")
 
 
+class APIKeyStore:
+    """Public GET endpoints need only ``x-api-key``; never reads OAuth data."""
+
+    def __init__(self, keystring, shared_secret):
+        if not keystring or not shared_secret:
+            raise SystemExit("HATA: ETSY_API_KEY/ETSY_SHARED_SECRET eksik.")
+        mask(keystring)
+        mask(shared_secret)
+        self.keystring = keystring
+        self.shared_secret = shared_secret
+        self.access_token = None
+
+    @property
+    def api_key_header(self):
+        return f"{self.keystring}:{self.shared_secret}"
+
+    def refresh(self):
+        raise SystemExit("HATA: Bu is OAuth kullanmaz; public uc 401 dondurdu.")
+
+
 # ------------------------------------------------------------------ api
 class Etsy:
     def __init__(self, store):
@@ -143,10 +163,10 @@ class Etsy:
         self.verbose_quota = False  # True: her istekten sonra x-remaining-today loglanir (C gorevi, 5 Eyl 2026)
 
     def _headers(self):
-        return {
-            "x-api-key": self.store.api_key_header,
-            "Authorization": f"Bearer {self.store.access_token}",
-        }
+        headers = {"x-api-key": self.store.api_key_header}
+        if self.store.access_token:
+            headers["Authorization"] = f"Bearer {self.store.access_token}"
+        return headers
 
     def get(self, path, params=None, ok404=False):
         return self._call("GET", path, params=params, ok404=ok404)
@@ -240,5 +260,4 @@ class Etsy:
                 raise SystemExit(f"HATA: {method} {path} -> {r.status_code}: {r.text[:300]}")
             return r.json()
         raise SystemExit(f"HATA: {method} {path} tekrarlar tukendi.")
-
 

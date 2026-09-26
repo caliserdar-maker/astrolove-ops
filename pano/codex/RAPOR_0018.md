@@ -1,0 +1,6 @@
+- Tum aktif ve taslak ilanlari sayfali okuyup batch detaylandiran salt-okur denetim eklendi.
+- Baslik, etiket, aciklama, meta, taxonomy, medya, fiyat ve urun tipi kurallari raporlaniyor.
+- Tum urunlerde kisisellestirme; dijitalde anlik teslim ifadesi ve ekli dosya yasagi denetleniyor.
+- Cikti `TEMP/MAGAZA_DENETIM.csv`; konsolda kural FAIL ve ilk 20 kotu ilan ozeti var.
+- Workflow token yenilemesini `.updated` isaretiyle geri yaziyor; canli ilan yazmasi yok.
+- Sentetik, agsiz testler PASS ve coklu FAIL senaryolarini kapsiyor; Claude son kontrolu bekleniyor.

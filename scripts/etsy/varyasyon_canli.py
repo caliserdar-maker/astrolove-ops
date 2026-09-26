@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from etsy_common import Etsy, TokenStore, mask  # noqa: E402
+from etsy_common import APIKeyStore, Etsy  # noqa: E402
 from varyasyon_denetle import denetle  # noqa: E402
 
 REF_ID = "4570143815"
@@ -73,12 +73,8 @@ def main() -> int:
     ap.add_argument("--hedefler", default="", help="istege bagli CIFT:ilan_id,...")
     args = ap.parse_args()
 
-    key, secret = os.environ.get("ETSY_API_KEY", ""), os.environ.get("ETSY_SHARED_SECRET", "")
-    mask(key); mask(secret)
-    store = TokenStore(os.environ["TOKEN_FILE"], key, secret)
-    if store.needs_refresh():
-        store.refresh()
-    api = Etsy(store)
+    api = Etsy(APIKeyStore(os.environ.get("ETSY_API_KEY", ""),
+                           os.environ.get("ETSY_SHARED_SECRET", "")))
     shop = os.environ["ETSY_SHOP_ID"]
     hedefler = _hedef_arg(args.hedefler) if args.hedefler else state_hedefleri(
         json.loads(Path(args.state).read_text(encoding="utf-8")))

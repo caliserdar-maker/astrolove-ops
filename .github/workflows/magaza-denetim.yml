@@ -1,0 +1,59 @@
+name: magaza-denetim
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  denetim:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -q requests==2.34.2
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: Rclone ve token
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p ~/.config/rclone _work
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+      - name: Tum magaza denetimi (salt okur)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: python scripts/etsy/magaza_denetim.py --output _work/MAGAZA_DENETIM.csv || echo "::warning::denetimde FAIL var"
+      - name: Token ve raporu geri yaz
+        if: always()
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" || true
+          [ -f _work/MAGAZA_DENETIM.csv ] && rclone copyto _work/MAGAZA_DENETIM.csv "gdrive:ASTROLOVE/TEMP/MAGAZA_DENETIM.csv" || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: magaza-denetim
+          path: _work/MAGAZA_DENETIM.csv
+          if-no-files-found: ignore
+      - if: always()
+        run: rm -rf _work ~/.config/rclone

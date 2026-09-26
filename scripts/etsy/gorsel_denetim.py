@@ -27,7 +27,7 @@ from scipy.fft import dctn
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from alt_metin_kontrol import BURCLAR  # noqa: E402
-from etsy_common import Etsy, TokenStore, mask  # noqa: E402
+from etsy_common import APIKeyStore, Etsy  # noqa: E402
 
 MIN_SIDE = 2000
 MIN_BYTES = 100_000
@@ -54,11 +54,8 @@ def pair_from_title(title):
 
 def fetch_live():
     """Aktif ilanlari ve gorsel URL'lerini GET ile toplar; yazma yapmaz."""
-    key, secret = os.environ.get("ETSY_API_KEY", ""), os.environ.get("ETSY_SHARED_SECRET", "")
-    mask(key); mask(secret)
-    store = TokenStore(os.environ["TOKEN_FILE"], key, secret)
-    if store.needs_refresh():
-        store.refresh()
+    store = APIKeyStore(os.environ.get("ETSY_API_KEY", ""),
+                        os.environ.get("ETSY_SHARED_SECRET", ""))
     api, shop, out, offset = Etsy(store), os.environ["ETSY_SHOP_ID"], [], 0
     while True:
         body = api.get(f"/shops/{shop}/listings/active", params={

@@ -11,10 +11,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
-
 jobs:
   denetle:
     runs-on: ubuntu-latest
@@ -45,7 +41,6 @@ jobs:
         run: |
           set -euo pipefail
           umask 077; mkdir -p _work/set
-          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
           rclone copyto "gdrive:ASTROLOVE/TEMP/POD_KISISEL/A1_77/_galeri/GALERI_TAMSET.json" _work/GALERI_TAMSET.json
           rclone copy "gdrive:ASTROLOVE/TEMP/POD_KISISEL/A1_77" _work/set --include "*/TAM_SET/SET.json" -q
       - name: Canli varyasyon denetimi
@@ -53,21 +48,25 @@ jobs:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
-          TOKEN_FILE: _work/ETSY_TOKEN.json
           HEDEFLER: ${{ inputs.hedefler }}
         run: |
           set -euo pipefail
           python scripts/etsy/varyasyon_canli.py --state _work/GALERI_TAMSET.json --setler _work/set \
-            --output _work/VARYASYON_CANLI.csv --hedefler "$HEDEFLER"
+            --output _work/VARYASYON_CANLI.csv --hedefler "$HEDEFLER" 2>&1 | tee _log
       - name: Raporu Drive TEMP'e yaz
         if: always()
         run: |
           [ -f _work/VARYASYON_CANLI.csv ] && rclone copyto _work/VARYASYON_CANLI.csv \
             "gdrive:ASTROLOVE/TEMP/VARYASYON_CANLI.csv" || true
-      - name: Token geri yaz
+      - name: Hata logu Drive'a
+        if: failure()
+        run: |
+          tail -n 150 _log > _tail.log 2>/dev/null || echo "log yok" > _tail.log
+          rclone copyto _tail.log "gdrive:ASTROLOVE/TEMP/LOGS/varyasyon-canli_${{ github.run_id }}_denetle.log" || true
+      - name: Ozet Drive'a
         if: always()
         run: |
-          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json \
-            "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" || echo "Token yenilenmedi"
+          [ ! -s "$GITHUB_STEP_SUMMARY" ] || rclone copyto "$GITHUB_STEP_SUMMARY" \
+            "gdrive:ASTROLOVE/TEMP/LOGS/varyasyon-canli_${{ github.run_id }}_OZET.md" || true
       - if: always()
         run: rm -rf _work ~/.config/rclone
