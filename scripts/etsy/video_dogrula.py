@@ -53,7 +53,8 @@ def _sure(path: Path) -> float:
 
 def _kareler(path: Path, sure: float) -> list[np.ndarray]:
     # Son zaman damgasini kapsayici sinirin hemen onunde tutar.
-    zamanlar = np.linspace(0.0, max(0.0, sure - 0.02), KARE_SAYISI)
+    # Son kare: sonun 0.1 sn (ya da surenin %5'i) oncesi; container suresi son karenin bitisini gosterir, tam sona seek bos doner.
+    zamanlar = np.linspace(0.0, max(0.0, sure - max(0.1, sure * 0.05)), KARE_SAYISI)
     kareler = []
     for zaman in zamanlar:
         komut = [
