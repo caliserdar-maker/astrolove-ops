@@ -13,6 +13,9 @@ SIGN_OF = {v: k for k, v in SIGN3.items()}
 ED_OF = {v: k for k, v in ED2.items()}
 SKU_RE = re.compile(r"^POD-([A-Z]{3})_([A-Z]{3})-([A-Z]{2})-([0-9]+x[0-9]+|A[1234])$")  # A1: 20 Eyl 2026
 MAX_LEN = 32
+# Dijital secenek (GOREV 0036): ayni ilanda Size = "Digital File", SKU POD-<S1>_<S2>-<ED2>-DIGITAL.
+# SKU_RE'ye UYMAZ (boy degil) -> parse_sku None; Prodigi'ye asla gitmez (order_router.dijital_mi ayrica yakalar).
+DIGITAL = "DIGITAL"
 
 
 def make_sku(pair, ed, size):
@@ -20,6 +23,17 @@ def make_sku(pair, ed, size):
     sku = f"POD-{SIGN3[s1]}_{SIGN3[s2]}-{ED2[ed]}-{size}"
     assert len(sku) <= MAX_LEN, sku
     return sku
+
+
+def make_digital_sku(pair, ed):
+    s1, s2 = pair.upper().split("_", 1)
+    sku = f"POD-{SIGN3[s1]}_{SIGN3[s2]}-{ED2[ed]}-{DIGITAL}"
+    assert len(sku) <= MAX_LEN, sku
+    return sku
+
+
+def is_digital_sku(sku):
+    return (sku or "").strip().upper().endswith("-" + DIGITAL)
 
 
 def parse_sku(sku):

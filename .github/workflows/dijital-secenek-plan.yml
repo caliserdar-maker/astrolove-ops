@@ -1,0 +1,57 @@
+name: dijital-secenek-plan
+
+# GOREV 0036 md.2 - "Digital File" secenegi KURU KOSU (Etsy'ye YAZMA YOK).
+# 1 Etsy okuma cagrisi (getListingsByListingIds includes=Inventory,Images) YALNIZ API anahtariyla; OAuth/token yok,
+# etsy-token kilidi yok. Cikti Drive TEMP/POD_ORDERS/DIJITAL_SECENEK_DIFF_CL.csv (+ PUT taslagi, ozet).
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      ilan:
+        description: "Etsy ilan id (varsayilan CL)"
+        default: "4570143815"
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Etsy salt okuma (1 cagri) + plan
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ILAN: ${{ inputs.ilan }}
+        run: |
+          set -euo pipefail
+          python scripts/pod/dijital_secenek_plan.py etsy "$ILAN" _ilan.json
+          rc=0; python scripts/pod/dijital_secenek_plan.py plan _ilan.json || rc=$?
+          H="gdrive:ASTROLOVE/TEMP/POD_ORDERS"
+          for f in DIJITAL_SECENEK_DIFF_CL.csv DIJITAL_SECENEK_PUT_TASLAK.json DIJITAL_SECENEK_OZET.json; do
+            [ -f "out/$f" ] && rclone copyto "out/$f" "$H/$f" -q || true
+          done
+          exit $rc
+      - if: always()
+        run: rm -rf _ilan.json out ~/.config/rclone

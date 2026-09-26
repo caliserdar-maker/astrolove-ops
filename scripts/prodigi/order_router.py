@@ -50,7 +50,7 @@ sys.path.insert(0, str(HERE.parent / "etsy"))
 sys.path.insert(0, str(HERE.parent / "pinterest"))
 sys.path.insert(0, str(HERE.parent / "ops"))
 from etsy_common import Etsy, TokenStore, log as elog, mask  # noqa: E402
-from pod_sku import parse_sku  # noqa: E402
+from pod_sku import is_digital_sku, parse_sku  # noqa: E402
 import takip  # noqa: E402
 import kisisel_siparis  # noqa: E402
 import siparis_onay  # noqa: E402
@@ -416,6 +416,15 @@ def etsy_receipts(api, shop, since_days=0, max_pages=10, quota_min=0):
     return out
 
 
+def dijital_mi(t):
+    """GOREV 0036: dijital kalem ASLA Prodigi'ye gitmez. SKU -DIGITAL ya da varyasyon degeri 'Digital'
+    (SKU yanlis/eksik olsa bile, fail-closed)."""
+    if is_digital_sku(t.get("sku")):
+        return True
+    return any("digital" in str(v.get("formatted_value") or v.get("value") or "").lower()
+               for v in t.get("variations") or [])
+
+
 def parse_items(receipt, only_size=""):
     """(gonderilecek kalemler, POD disi SKU'lar, atlanan POD kalemleri).
     only_size virgulle birden cok boy alir (or. '5x7,A1'): YALNIZ bu boylarin kalemleri
@@ -425,6 +434,8 @@ def parse_items(receipt, only_size=""):
     items, other, atlanan = [], [], []
     for t in receipt.get("transactions") or []:
         sku = (t.get("sku") or "").strip()
+        if dijital_mi(t):
+            other.append(f"DIJITAL:{sku or 'tx' + str(t.get('transaction_id'))}"); continue
         parsed = parse_sku(sku)
         if not parsed:
             other.append(sku or f"tx{t.get('transaction_id')}"); continue
@@ -714,6 +725,11 @@ def main():
     if not a.test_receipt:
         report.append(f"- Prodigi'de mevcut referans: {len(idx['ref'])} siparis, {len(idx['kalem_ref'])} kalem")
     pod = [(r, *parse_items(r, a.only_size)) for r in receipts]
+    for r, _i, other, _a in pod:
+        dij = [x.split(":", 1)[1] for x in other if x.startswith("DIJITAL:")]
+        if dij:
+            report.append(f"- DIJITAL - teslim paketi: receipt {receipt_kod(r.get('receipt_id'))} ({', '.join(dij)}); "
+                          f"Prodigi'ye GITMEZ, dijital teslim elle")
     pod = [(r, items, other, atlanan) for r, items, other, atlanan in pod if items]
     report.append(f"- POD urunlu receipt: {len(pod)}"
                   + (f" (yalniz {a.only_size} kalemleri)" if a.only_size else ""))
