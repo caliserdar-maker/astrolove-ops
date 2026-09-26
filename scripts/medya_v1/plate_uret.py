@@ -29,6 +29,11 @@ Image.MAX_IMAGE_PIXELS = None
 T0 = time.time()
 POD = 'gdrive:ASTROLOVE/TEMP/POD_PRINT'
 PLATES = 'gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PLATES'
+# HAM (temizlik ONCESI) medyan plate'ler. 26 Eyl karari: slogan temizligi
+# degisince 78 dosyayi yeniden indirip medyan almak gerekmesin diye ham plate
+# saklanir. 2. iterasyonda bu yoktu (del ham_plate) ve duzeltme 80 plate'in
+# tam yeniden uretimine mal oldu.
+HAM = PLATES + '/HAM'
 W = Path('_plate').resolve(); W.mkdir(exist_ok=True)
 
 # Slogan maskesinin turetildigi edisyon (Serdar onayi 26 Eyl 2026). PURE_WHITE
@@ -529,6 +534,9 @@ def turev_plate(ed, boy, tanim, rapor):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--parca', default='1/1', help='i/n - is listesinin i. dilimi')
+    ap.add_argument('--ham-yenile', action='store_true',
+                    help='HAM plate varsa bile medyani yeniden hesapla '
+                         '(POD_PRINT kaynaklari degistiyse)')
     ap.add_argument('--yenile', action='store_true',
                     help='PLATES\'te olanlari da yeniden uret (slogan temizligi gibi '
                          'icerik degisikliginden sonra gerekir)')
@@ -536,6 +544,11 @@ def main():
     i, n = (int(x) for x in a.parca.split('/'))
     isler, sayac = is_listesi()
     var = set() if a.yenile else mevcut_plateler()
+    try:
+        ham_var = {x.strip() for x in rc('lsf', HAM, '--include', '*.png',
+                                         '--files-only', timeout=300).split()}
+    except RuntimeError:
+        ham_var = set()
     # IS BIRIMI ARTIK BOY (Serdar onayi 26 Eyl): slogan maskesi ayni boyun
     # PURE_WHITE plate'inden turetilip o boyun 5 edisyonuna uygulanir, bu
     # yuzden bir boyun butun edisyonlari AYNI iste olmak zorunda. Boy atomik:
@@ -576,9 +589,24 @@ def main():
                 continue
             log(f'{anahtar}: {len(yollar)} dosya, {tam_px[0]}x{tam_px[1]}'
                 + (f', aykiri {aykiri}' if aykiri else ''))
-            ham_plate = karo_ortanca(yollar, tam_px, anahtar)
             ed = RENK_ED[renk]
-            ad = f'{ed.upper()}_{boy}.png'
+            ad = f'{ed.upper()}_{boy}.png'      # hem HAM hem temiz plate adi
+            ham_yol = W / f'HAM_{ad}'
+            if ad in ham_var and not a.ham_yenile:
+                # Ham plate zaten uretilmis: 78 dosyayi indirip medyani tekrar
+                # hesaplamak yerine onu kullan.
+                rc('copy', f'{HAM}/{ad}', str(W), timeout=1800)
+                (W / ad).rename(ham_yol)
+                with Image.open(ham_yol) as im:
+                    ham_plate = np.asarray(im.convert('RGB'))
+                log(f'{anahtar} ham plate indirildi (medyan atlandi)')
+            else:
+                ham_plate = karo_ortanca(yollar, tam_px, anahtar)
+                Image.fromarray(ham_plate, 'RGB').save(ham_yol, 'PNG', compress_level=6)
+                rc('copyto', str(ham_yol), f'{HAM}/{ad}', timeout=1800)
+                log(f'{anahtar} ham plate yuklendi '
+                    f'({ham_yol.stat().st_size / 1e6:.1f} MB)')
+            ham_yol.unlink(missing_ok=True)
 
             # SLOGAN TEMIZLIGI (Serdar onayi 25 Eyl md.1; maske kaynagi 26 Eyl).
             # Bant ve maske YALNIZ referans renkte olculur, ayni boyun diger
