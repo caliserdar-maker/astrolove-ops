@@ -240,7 +240,7 @@ def slogan_bandi(plate):
             'tuval_2400': [int(m.shape[1]), int(m.shape[0])],
             'aday_sayisi': len(aday),
             'adaylar': [{'y': [int(y0), int(y1)], 'yuk': int(y1 - y0),
-                         'gen': int(np.nonzero(m[y0:y1].sum(0) > 0)[0].ptp())
+                         'gen': int(int(np.ptp(np.nonzero(m[y0:y1].sum(0) > 0)[0])))
                                 if (m[y0:y1].sum(0) > 0).any() else 0,
                          'merkez': int(np.nonzero(m[y0:y1].sum(0) > 0)[0].mean())
                                    if (m[y0:y1].sum(0) > 0).any() else -1}
@@ -524,11 +524,21 @@ def main():
                 continue
             kapi = temizlik_kapilari(ham_plate, plate, bant, tb)
             tb.pop('maske', None)                 # dizi rapora yazilmaz
+            # KIRPIM HER DURUMDA: kapi kalinca da ONCE/SONRA goruntusu uretilir.
+            # Aksi halde kapida kalan plate hicbir kanit birakmiyor ve neyin yanlis
+            # oldugu sayidan baska bir seyle gorulemiyor (1. iterasyonda boyle oldu).
+            etiket = f'{ed.upper()}_{boy}' if kapi['gecti'] else f'KALDI_{ed.upper()}_{boy}'
+            kirp = slogan_kirpim(ham_plate, plate, tb, etiket)
+            if kirp:
+                try:
+                    rc('copy', str(W / kirp['dosya']), f'{PLATES}/SLOGAN_KIRPIM', timeout=900)
+                except RuntimeError as e:
+                    log(f'{anahtar} kirpim yuklenemedi: {e}')
             if not kapi['gecti']:
-                rapor['hata'][anahtar] = {'slogan_temizlik_kapisi': 'KALDI', **kapi}
+                rapor['hata'][anahtar] = {'slogan_temizlik_kapisi': 'KALDI',
+                                          'kirpim': kirp, **kapi}
                 log(f'{anahtar} TEMIZLIK KAPISI KALDI ' + json.dumps(kapi))
                 continue
-            kirp = slogan_kirpim(ham_plate, plate, tb, f'{ed.upper()}_{boy}')
             del ham_plate
             Image.fromarray(plate, 'RGB').save(W / ad, 'PNG', optimize=False,
                                                compress_level=6)
@@ -545,8 +555,7 @@ def main():
                 'sure_sn': round(time.time() - t0, 1), 'ornekler': orn}
             rc('copy', str(W / ad), PLATES, timeout=2400)
             (W / ad).unlink()
-            if kirp:
-                rc('copy', str(W / kirp['dosya']), f'{PLATES}/SLOGAN_KIRPIM', timeout=900)
+
             rp = W / f'RAPOR_{i}_{n}.json'      # her plate sonrasi yaz: kesilirse kaybolmasin
             rp.write_text(json.dumps(rapor, indent=1, ensure_ascii=False), encoding='utf-8')
             rc('copy', str(rp), PLATES, timeout=600)
