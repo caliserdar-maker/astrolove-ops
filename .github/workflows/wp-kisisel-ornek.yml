@@ -340,9 +340,14 @@ jobs:
           assert y["satir"] <= y["isim_sinir"] and y["isim_pay_px"] >= 0, "isim satiri sigmadi"
           assert y["mesaj_genislik"] <= y["mesaj_sinir"], "mesaj sinira sigmadi"
           assert r["baski_disi_fark"] == 0, "murekkep disi fark 0 degil"
+          # GOREV_0017 md.1: mesaj isimlerle ayni oranda kuculur, isimden buyuk olmaz
+          print(f"### 0017: mesaj olcek {y['mesaj_olcek']} ~ isim olcek {y['isim_olcek']} | "
+                f"govde mesaj {y['mesaj_govde_px']} <= isim {y['isim_govde_px']}")
+          assert y["mesaj_govde_px"] <= y["isim_govde_px"], "mesaj isimden buyuk (EK4)"
+          assert y["mesaj_olcek"] <= y["isim_olcek"] + 0.01, "mesaj isimlerle kuculmedi"
           PYEOF
           echo "### 7) ozet"
-          python scripts/wp_kisisel/v3_hiz_ozet.py --yeni _outh --bekle-dosya 18 \
+          python scripts/wp_kisisel/v3_hiz_ozet.py --yeni _outh --once _outA --bekle-dosya 18 \
             --once-sn "$ONCE" --sonra-sn "$SONRA"
 
       - name: V3 ORNEK_HIZ Drive'a yaz (yalniz [v3hiz])

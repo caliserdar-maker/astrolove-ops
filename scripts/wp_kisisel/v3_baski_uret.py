@@ -117,7 +117,8 @@ def baski_kur(pod18, p18, p24, ed_wp, isim1, isim2, mesaj, P6, P7, P12, kp, geo_
                  "yerlesim": {k: bilgi[k] for k in ("bosluk", "dx_sonsuz", "mesaj_punto",
                                                     "mesaj_genislik", "mesaj_sinir", "mesaj_olcek",
                                                     "satir", "isim_sinir", "isim_olcek",
-                                                    "isim_kucultme", "isim_pay_px")}}
+                                                    "isim_kucultme", "isim_pay_px",
+                                                    "isim_govde_px", "mesaj_govde_px")}}
 
 
 def main():

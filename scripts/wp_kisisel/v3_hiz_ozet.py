@@ -10,8 +10,17 @@ karsilastirilir - gecti sayilmaz.
 import argparse, json, sys
 from pathlib import Path
 
-KAPI2_TEMEL = {("BLUE", "Phone", "halka"): 13.0, ("BLUE", "Phone", "sembol"): 8.0,
-               ("BLUE", "Tablet", "halka"): 125.8}      # RAPOR_0010, kosu 36233184110
+# RAPOR_0010 (kosu 36233184110) yalniz CANCER_LIBRA'nin ilk 3 kaydini yazmisti; anahtar
+# CIFT'i de icerir (1. iterasyonda cift ayrimi yoktu -> SAGITTARIUS icin sahte "degisti").
+KAPI2_TEMEL = {("KAPI_CANCER_LIBRA", "BLUE", "Phone", "halka"): 13.0,
+               ("KAPI_CANCER_LIBRA", "BLUE", "Phone", "sembol"): 8.0,
+               ("KAPI_CANCER_LIBRA", "BLUE", "Tablet", "halka"): 125.8}
+LISTELER = ("ortalama", "kenar_payi", "ek1_mesaj_renk", "ek2_yildiz", "ek3_esit_bosluk",
+            "ek4_mesaj_isimden_buyuk_degil", "ek5_mesaj_bandi")
+
+
+def anahtar(x):
+    return (x.get("edisyon"), x.get("cihaz"), x.get("oge", ""))
 
 
 def kapi_json(kok):
@@ -24,6 +33,7 @@ def kapi_json(kok):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--yeni", required=True, help="yeni kodun cikti klasoru")
+    ap.add_argument("--once", default="", help="eski kod yolunun cikti klasoru (ayni girdi)")
     ap.add_argument("--bekle-dosya", type=int, required=True)
     ap.add_argument("--once-sn", type=float, default=0.0)
     ap.add_argument("--sonra-sn", type=float, default=0.0)
@@ -33,8 +43,10 @@ def main():
     print(f"uretilen wallpaper: {len(jpg)} (beklenen {a.bekle_dosya})")
     if len(jpg) != a.bekle_dosya:
         hata.append(f"dosya sayisi {len(jpg)} != {a.bekle_dosya}")
+    once = {p.parent.name: K for p, K in kapi_json(a.once)} if a.once else {}
     for p, K in kapi_json(a.yeni):
         ad = p.parent.name
+        Ko = once.get(ad)
         print(f"--- {ad}: gecti={K['gecti']}")
         bos = [x["kapi"] for x in K.get("bos_kapi", [])]
         if "halka_sembol" in bos and K.get("halka_sembol_atlanan"):
@@ -54,22 +66,32 @@ def main():
         print(f"    geometri_paylasim: {len(gp) - len(kot_gp)}/{len(gp)} gecti")
         if kot_gp:
             hata.append(f"{ad}: geometri paylasilmadi {kot_gp[:3]}")
-        for k in ("ortalama", "kenar_payi", "ek1_mesaj_renk", "ek2_yildiz", "ek3_esit_bosluk",
-                  "ek4_mesaj_isimden_buyuk_degil", "ek5_mesaj_bandi"):
+        for k in LISTELER:
             kot = [x for x in K.get(k, []) if not x["gecti"]]
             print(f"    {k}: {len(K.get(k, [])) - len(kot)}/{len(K.get(k, []))} gecti")
-            if kot:
-                hata.append(f"{ad}: {k} FAIL {kot[:2]}")
+            # AYNI girdide eski kod yolunda da AYNI kayit FAIL ise: onceden var olan kapi
+            # sonucu (kapi FAIL KALIR, gevsetilmez) - GOREV_0014 regresyonu DEGIL.
+            eski_kot = {anahtar(x) for x in (Ko or {}).get(k, []) if not x["gecti"]}
+            for x in kot:
+                if anahtar(x) in eski_kot:
+                    print(f"      ONCEDEN VAR (eski kod yolunda da FAIL, kapi FAIL kalir): "
+                          f"{anahtar(x)}")
+                else:
+                    hata.append(f"{ad}: {k} YENI FAIL {x}")
+            if Ko is not None:
+                yeni_gecen = eski_kot - {anahtar(x) for x in kot}
+                if yeni_gecen:
+                    print(f"      eski yolda FAIL, yeni yolda gecen: {sorted(yeni_gecen)}")
         # KAPI 2: bilinen bloker - GEVSETILMEZ, oldugu gibi yazilir ve kiyaslanir
         k2 = K.get("halka_sembol", [])
         kot2 = [x for x in k2 if not x["gecti"]]
         print(f"    KAPI 2 (halka/sembol) - BILINEN BLOKER, COZULMEDI: "
               f"{len(k2) - len(kot2)}/{len(k2)} gecti")
         for x in kot2:
-            anahtar = (x["edisyon"], x["cihaz"], x["oge"])
-            temel = KAPI2_TEMEL.get(anahtar)
+            ak = (ad, x["edisyon"], x["cihaz"], x["oge"])
+            temel = KAPI2_TEMEL.get(ak)
             dnm = "" if temel is None else f" (RAPOR_0010: {temel})"
-            print(f"      {anahtar}: sapma {x['sapma_px']} px{dnm}")
+            print(f"      {ak[1:]}: sapma {x['sapma_px']} px{dnm}")
             if temel is not None and abs(x["sapma_px"] - temel) > 0.1:
                 print(f"      NOT: sapma degisti ({temel} -> {x['sapma_px']}) - raporlanacak")
     if a.once_sn and a.sonra_sn:

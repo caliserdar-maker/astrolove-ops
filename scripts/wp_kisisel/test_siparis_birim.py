@@ -389,11 +389,37 @@ def t_sadece_olcum():
             f"poz={tn['poz_px']}")
 
 
+# --------------------------- GOREV_0017 md.1: mesaj isimlerle ayni oranda kuculur
+def t_mesaj_isimle_kuculur():
+    prof = {"sol": None, "sag": None, "tag": None}
+    g = _geo(cap=200, mesaj_cap=100)                 # mesaj punto0 140 < isim 200
+    _, _, b1 = V2.metin_katmani(_P6, _P7, _P12, _kp, g, prof, {"sol": "MIA", "sag": "LEO"}, "kisa mesaj")
+    _, _, b2 = V2.metin_katmani(_P6, _P7, _P12, _kp, g, prof,
+                                {"sol": "W" * 11, "sag": "W" * 11}, "kisa mesaj")
+    beklenen = int(b1["mesaj_punto"] * b2["isim_olcek"])
+    kontrol("mesaj isim olcegiyle AYNI oranda kuculur (0017)",
+            b1["isim_olcek"] == 1.0 and b2["isim_olcek"] < 1.0 and b2["mesaj_punto"] <= beklenen
+            and b2["mesaj_govde_px"] <= b2["isim_govde_px"],
+            f"isim olcek {b2['isim_olcek']} -> mesaj punto {b1['mesaj_punto']} -> {b2['mesaj_punto']} "
+            f"(beklenen <= {beklenen}), govde {b2['mesaj_govde_px']}/{b2['isim_govde_px']}")
+    # mesaj daha ilk olcekte isimden buyukse isim govdesine inene dek kuculur
+    _, _, b3 = V2.metin_katmani(_P6, _P7, _P12, _kp, _geo(cap=200, mesaj_cap=300), prof,
+                                {"sol": "MIA", "sag": "LEO"}, "kisa mesaj")
+    kontrol("mesaj govdesi isim govdesini ASMAZ (EK4 uretimde)",
+            b3["mesaj_govde_px"] <= b3["isim_govde_px"],
+            f"mesaj {b3['mesaj_govde_px']} <= isim {b3['isim_govde_px']} punto {b3['mesaj_punto']}")
+    # isimler cok kucuk -> mesaj taban puntonun altina inecek -> RED
+    m = durur(V2.metin_katmani, _P6, _P7, _P12, _kp, _geo(cap=6, mesaj_cap=100), prof,
+              {"sol": "MIA", "sag": "LEO"}, "kisa mesaj")
+    kontrol("mesaj alt sinirin altina inecekse REDDEDILIR (0017)",
+            "REDDEDILDI" in (m or "") and "alt sinir" in (m or ""), (m or "")[:90])
+
+
 if __name__ == "__main__":
     for t in (t_uc_grup, t_murekkep, t_murekkep_rengi, t_dosya_bul, t_olcu_kontrolu,
               t_kapilar_klasor, t_halka_guard, t_bos_cikti, t_bos_kapi, t_geometri_paylasim,
               t_isim_kirpilmaz, t_mesaj_sigar, t_girdi_dogrula, t_hizli_referans,
-              t_sadece_olcum):
+              t_sadece_olcum, t_mesaj_isimle_kuculur):
         t()
     print(f"\nTOPLAM {len(GECTI) + len(KALDI)} kontrol, {len(GECTI)} PASS, {len(KALDI)} FAIL")
     sys.exit(1 if KALDI else 0)

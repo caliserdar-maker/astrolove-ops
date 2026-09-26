@@ -275,28 +275,46 @@ def metin_katmani(P6, P7, P12, kp, geo, prof, isimler, mesaj):
     # (pay/sinir yukarida isim satiri icin de hesaplandi - ayni deger)
     fp = kp.FONT_DIR / P6.TAG_FONT
     punto0 = P6.cap_punto(fp, P6.TAG_W, geo["mesaj_cap"])
-    punto = punto0
-    cr, cu, ct = P6.ciz_cap(fp, P6.TAG_W, punto, mesaj)
-    mx0, mx1 = plaka_murekkep(cr)
+    # GOREV_0017 md.1: mesaj isimlerle AYNI ORANDA kuculur ve hicbir zaman isimden buyuk
+    # olmaz (EK4 kapisi uretimde korunur). Isim govde yuksekligi = iki ismin kucugu.
+    isim_govde_h = min(plaka_govde(pl[y])[0][1] - plaka_govde(pl[y])[0][0] for y in ("sol", "sag"))
+    punto = max(int(punto0 * olcek_isim), 1)
+    p1, _ = P7.kuyruk_duzlestir(prof["tag"])
+
+    def mesaj_ciz(pt):
+        c, u_, t_ = P6.ciz_cap(fp, P6.TAG_W, pt, mesaj)
+        g_ = P7.altin_sekil(c, p1, (u_, t_))
+        (g0, g1), _m = plaka_govde(g_)
+        return c, u_, t_, g_, plaka_murekkep(c), g1 - g0
+
+    cr, cu, ct, tg, (mx0, mx1), mesaj_govde_h = mesaj_ciz(punto)
     # TEK GECIS YETMIYORDU: punto yuvarlanmasi sonrasi genislik hala siniri asabilirdi ve
-    # kimse bakmiyordu. Dongu + sigmazsa DUR (GOREV_0014 YUKSEK2).
+    # kimse bakmiyordu. Dongu: genislik sinira VE mesaj govdesi isim govdesine sigana dek;
+    # mevcut minimum puntonun (MESAJ_PUNTO_TABAN) altina inecekse DUR (GOREV_0014 + 0017).
     for _ in range(MESAJ_OLCEK_ADIM):
-        if mx1 - mx0 <= sinir:
+        if punto < MESAJ_PUNTO_TABAN:
             break
-        yeni = max(int(punto * sinir / max(mx1 - mx0, 1)), MESAJ_PUNTO_TABAN)
+        if mx1 - mx0 <= sinir and mesaj_govde_h <= isim_govde_h:
+            break
+        oran = min(sinir / max(mx1 - mx0, 1), isim_govde_h / max(mesaj_govde_h, 1), 1.0)
+        yeni = int(punto * oran)
         if yeni >= punto:
             yeni = punto - 1
-        if yeni < MESAJ_PUNTO_TABAN:
-            break
         punto = yeni
-        cr, cu, ct = P6.ciz_cap(fp, P6.TAG_W, punto, mesaj)
-        mx0, mx1 = plaka_murekkep(cr)
+        if punto < MESAJ_PUNTO_TABAN:
+            break
+        cr, cu, ct, tg, (mx0, mx1), mesaj_govde_h = mesaj_ciz(punto)
+    if punto < MESAJ_PUNTO_TABAN:
+        raise SystemExit(f"HATA: mesaj okunabilir alt sinirin altina iniyor: punto {punto} < "
+                         f"{MESAJ_PUNTO_TABAN} (isim olcegi {round(olcek_isim, 4)}). "
+                         f"REDDEDILDI - kirpma/tasma yapilmaz.")
     if mx1 - mx0 > sinir:
         raise SystemExit(f"HATA: mesaj kenar payina sigmiyor: {mx1 - mx0} px > sinir {sinir} px, "
                          f"punto {punto} (taban {MESAJ_PUNTO_TABAN}). REDDEDILDI - kirpma yapilmaz.")
+    if mesaj_govde_h > isim_govde_h:
+        raise SystemExit(f"HATA: mesaj govdesi ({mesaj_govde_h} px) isim govdesinden "
+                         f"({isim_govde_h} px) buyuk kaliyor, punto {punto}. REDDEDILDI (EK4).")
     olcek = round(punto / punto0, 3) if punto0 else 1.0
-    p1, _ = P7.kuyruk_duzlestir(prof["tag"])
-    tg = P7.altin_sekil(cr, p1, (cu, ct))
     (tb0, tb1), tmx = plaka_govde(tg)
     tx = int(round(POSTER_W / 2 - (mx0 + mx1) / 2))          # EK KAPI 3: murekkebe gore ortali
     ty = int(round((geo["mesaj_govde"][0] + geo["mesaj_govde"][1]) / 2 - (tb0 + tb1) / 2))
@@ -306,6 +324,7 @@ def metin_katmani(P6, P7, P12, kp, geo, prof, isimler, mesaj):
              "isim_murekkep": [w_sol, w_sag, int(w_inf)],
              "isim_olcek": round(olcek_isim, 4), "isim_kucultme": kucultme,
              "isim_sinir": int(sinir), "isim_pay_px": int(min(i0, POSTER_W - (i0 + toplam))),
+             "isim_govde_px": int(isim_govde_h), "mesaj_govde_px": int(mesaj_govde_h),
              "mesaj_punto": punto, "mesaj_olcek": round(olcek, 3), "mesaj_genislik": int(mx1 - mx0),
              "mesaj_sinir": int(sinir), "mesaj_kenar_payi": int(pay), "kutular": kutular}
     return yerlesim, dx_inf, bilgi
