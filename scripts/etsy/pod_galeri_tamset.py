@@ -120,7 +120,8 @@ def video_olc(url, vpath, tvpath):
         return {"hata": type(e).__name__, "ok": False}
     de = float(np.mean([np.abs(k - e).mean() for k, e in zip(K, E)]))
     dt = float(np.mean([np.abs(k - t).mean() for k, t in zip(K, T)]))
-    return {"d_beklenen": round(de, 2), "d_tuzak": round(dt, 2), "ok": dt >= VIDEO_ORAN * max(de, 1.0)}
+    # Olcum (26 Eyl, 25 canli video): dogru video 0.30-0.31, tuzak cift 2.65-3.70 -> alt sinir 0.1 (1.0 degil)
+    return {"d_beklenen": round(de, 2), "d_tuzak": round(dt, 2), "ok": dt >= VIDEO_ORAN * max(de, 0.1)}
 
 
 def video_duzelt(api, shop, c, lid, vpath, tvpath, yeni_id=None):
