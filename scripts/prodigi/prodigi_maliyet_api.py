@@ -24,14 +24,14 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from prodigi_pilot_quote import Api, leak_check, load_key, log  # noqa: E402
 
-# B plani fiyatlari (fiyat_b.py FIYAT, 5 rengin hepsinde ayni)
+# B plani fiyatlari (fiyat_b.py FIYAT, 5 rengin hepsinde ayni; 8x10/A4 39.99, GOREV 0035)
 FIYAT = {
-    "8x10": 34.99, "A4": 37.99, "11x14": 42.99, "12x16": 46.99, "A3": 47.99,
+    "8x10": 39.99, "A4": 39.99, "11x14": 42.99, "12x16": 46.99, "A3": 47.99,
     "12x18": 49.99, "16x20": 54.99, "16x24": 57.99, "A2": 57.99, "18x24": 64.99,
     "20x30": 84.99, "24x30": 94.99, "24x32": 99.99, "A1": 99.99, "24x36": 109.99,
     "30x40": 139.99,
 }
-assert FIYAT["8x10"] == 34.99 and FIYAT["30x40"] == 139.99 and len(FIYAT) == 16   # Serdar referansi
+assert FIYAT["8x10"] == 39.99 and FIYAT["A4"] == 39.99 and FIYAT["30x40"] == 139.99 and len(FIYAT) == 16   # Serdar referansi
 ULKELER = ["US", "GB", "DE", "CA", "AU", "TR", "JP"]
 YONTEMLER = {"budget": "Budget", "standard": "Standard"}
 ESKI = "gdrive:ASTROLOVE/TEMP/DIJITAL_78/POD_FIYAT_KAR_TABLOSU_20260924.txt"

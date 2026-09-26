@@ -107,12 +107,26 @@ def denetle_ilan(listing_id: str, inventory: dict[str, Any]) -> tuple[list[dict[
     return errors, {size: next(iter(values)) for size, values in prices.items() if len(values) == 1}
 
 
-def denetle_tumu(inventories: list[tuple[str, dict[str, Any]]]) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+def beklenen_fiyatlar(path: Path = Path(__file__).resolve().parents[2] / "config" / "pod_fiyat.json") -> dict[str, float]:
+    """config/pod_fiyat.json 'sizes' (16 boy); bossa beklenen fiyat kurali calismaz."""
+    try:
+        return {k: round(float(v), 2) for k, v in (json.loads(path.read_text(encoding="utf-8")).get("sizes") or {}).items()}
+    except (OSError, ValueError):
+        return {}
+
+
+def denetle_tumu(inventories: list[tuple[str, dict[str, Any]]],
+                 beklenen: dict[str, float] | None = None) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     errors: list[dict[str, Any]] = []
     listing_prices: dict[str, dict[str, float]] = {}
     for listing_id, inventory in inventories:
         item_errors, listing_prices[listing_id] = denetle_ilan(listing_id, inventory)
         errors.extend(item_errors)
+        for size, want in (beklenen or {}).items():
+            got = listing_prices[listing_id].get(size)
+            if got is not None and got != want:
+                errors.append({"ilan_id": listing_id, "durum": "FAIL", "kural": "beklenen_fiyat", "boy": size,
+                               "renk": "", "sku": "", "fiyat": got, "ayrinti": f"beklenen {want}"})
     for size in SIZES:
         groups: dict[float | None, list[str]] = defaultdict(list)
         for listing_id, prices in listing_prices.items():
@@ -154,7 +168,9 @@ def main(argv: list[str] | None = None) -> int:
         store.refresh()
     api = Etsy(store)
     inventories = [(listing_id, api.get(f"/listings/{listing_id}/inventory")) for listing_id in _ids(args.listings)]
-    errors, summary = denetle_tumu(inventories)
+    beklenen = beklenen_fiyatlar()
+    errors, summary = denetle_tumu(inventories, beklenen)
+    summary["beklenen_fiyat_boy"] = len(beklenen)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with args.output.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=ALANLAR)
