@@ -439,12 +439,14 @@ def liste_ac(L):
     ya da duz {"sayfa": {n: url}}. Canva'nin verdigi URL bicimi birebir kurulur."""
     if 'sayfa' in L: return L['sayfa']
     out = {}
+    tarih = L.get('tarih', 'Fri%2C%2025%20Sep%202026')                     # response-expires gunu (export gunune gore)
     for n, e in enumerate(L['s'], 1):
+        if not e: continue                                                    # bu kosuda gerekmeyen sayfa
         ad, ex, sig, re_ = e[:4]; job = e[4] if len(e) > 4 else L['job']       # 5. alan: sayfaya ozgu export isi (parcali export)
         out[str(n)] = (f"https://export-download.canva.com/{L['did'][-5:]}/{L['did']}/-1/0/{n:04d}-{job}.png"
                        f"?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQYCGKMUH5AO7UJ26%2F{ad[:8]}%2Fus-east-1%2Fs3%2Faws4_request"
                        f"&X-Amz-Date={ad}&X-Amz-Expires={ex}&X-Amz-Signature={sig}"
-                       f"&X-Amz-SignedHeaders=host%3Bx-amz-expected-bucket-owner&response-expires=Fri%2C%2025%20Sep%202026%20{re_[:2]}%3A{re_[2:4]}%3A{re_[4:]}%20GMT")
+                       f"&X-Amz-SignedHeaders=host%3Bx-amz-expected-bucket-owner&response-expires={tarih}%20{re_[:2]}%3A{re_[2:4]}%3A{re_[4:]}%20GMT")
     return out
 
 def uret77(parca, toplam, mod='tam', filtre=None, ham=()):
