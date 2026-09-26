@@ -1,0 +1,6 @@
+- Yontem: Baglayici karardaki ONAYLI baslik, etiket ve EN aciklamalar birebir uygulandi.
+- Kapsam: 78 burc cifti x 2 dijital urun icin 156 salt-okur kayit uretiliyor.
+- Kisisellestirme: Uc soru degistirilmeden kanonik POD fonksiyonundan aliniyor.
+- Denetim engeli: Telefon basligini `kisisel_uyum` tanimiyor; ayni burclar `baslik_tekrar` veriyor.
+- Etiket engeli: Uzun cift atlama, `sagittarius wallpaper` ve ayni burclar etiket FAIL uretiyor.
+- Uzak yazma: Etsy, Prodigi, Drive veya baska bir canli servise yazma yapilmadi.
