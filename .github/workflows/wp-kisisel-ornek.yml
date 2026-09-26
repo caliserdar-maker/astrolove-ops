@@ -36,6 +36,19 @@ jobs:
           python-version: "3.12"
           cache: pip
 
+      - name: Mod (isaretciler YALNIZ konu satirindan)
+        # 26 Eyl bulgusu: contains(head_commit.message, '[eski]') GOVDEDE gecen
+        # metni de yakaliyor. Commit govdesinde "[eski] kapisi..." yazdigim icin
+        # eski hat istemeden kostu (kosu 36230639918). Artik yalniz ILK SATIR.
+        id: mod
+        env:
+          MSG: ${{ github.event.head_commit.message }}
+        run: |
+          set -euo pipefail
+          KONU="$(printf '%s' "$MSG" | head -1)"
+          echo "konu=$KONU"
+          echo "konu=$KONU" >> "$GITHUB_OUTPUT"
+
       - name: Bagimliliklar
         run: |
           set -euo pipefail
@@ -70,9 +83,9 @@ jobs:
         # ESKI hat (sil-yeniden yaz) 25 Eyl'de IPTAL edildi. Artik yalniz acikca
         # [eski] denirse kosar; aksi halde her tetik push'u gecersiz dosyalari
         # yeniden uretip Drive'a yaziyordu (26 dosya, kosu 36229382139).
-        if: ${{ contains(github.event.head_commit.message, '[eski]') }}
+        if: ${{ contains(steps.mod.outputs.konu, '[eski]') }}
         env:
-          MSG: ${{ github.event.head_commit.message }}
+          MSG: ${{ steps.mod.outputs.konu }}
         run: |
           set -euo pipefail
           mkdir -p _zip _wp/ARIES_LEO _wp/AQUARIUS_AQUARIUS
@@ -109,7 +122,7 @@ jobs:
           du -sh _wp
 
       - name: Uretim + kapilar (ESKI hat - yalniz [eski])
-        if: ${{ contains(github.event.head_commit.message, '[eski]') }}
+        if: ${{ contains(steps.mod.outputs.konu, '[eski]') }}
         run: |
           set -euo pipefail
           RAPOR=WP_KISISEL_RAPOR.json
@@ -120,9 +133,9 @@ jobs:
             --kisisel _kis --isimler "$ISIMLER" --mesaj "$MESAJ" --rapor "$RAPOR" $ESKI
 
       - name: V2 - temiz plaka + poster murekkebi ([v2] uretim / [olcum] yalniz 1. asama)
-        if: ${{ contains(github.event.head_commit.message, '[v2]') || contains(github.event.head_commit.message, '[olcum]') }}
+        if: ${{ contains(steps.mod.outputs.konu, '[v2]') || contains(steps.mod.outputs.konu, '[olcum]') }}
         env:
-          MSG: ${{ github.event.head_commit.message }}
+          MSG: ${{ steps.mod.outputs.konu }}
         run: |
           set -euo pipefail
           mkdir -p _v2/posterler _v2/plakalar _v2/temiz _v2/orijinal
@@ -142,7 +155,7 @@ jobs:
             --cift Aries_Leo --isimler "$ISIMLER" --mesaj "$MESAJ" $EK
 
       - name: V2 Drive'a yaz (yalniz [v2]; [olcum] Drive'a yazmaz)
-        if: ${{ always() && contains(github.event.head_commit.message, '[v2]') }}
+        if: ${{ always() && contains(steps.mod.outputs.konu, '[v2]') }}
         run: |
           set -euo pipefail
           [ -d _out2 ] || exit 0
@@ -153,9 +166,9 @@ jobs:
       - name: V3 - kisisel siparis murekkebi + CLEAN plaka (yalniz [v3])
         # Murekkep kaynagi kisisel'in SIPARIS URETICISI: maske = baski - kisisel PLATE.
         # Esik yok. [v3olcum] ile yalniz 1. asama (olcum) kosar, Drive'a yazilmaz.
-        if: ${{ contains(github.event.head_commit.message, '[v3]') || contains(github.event.head_commit.message, '[v3olcum]') }}
+        if: ${{ contains(steps.mod.outputs.konu, '[v3]') || contains(steps.mod.outputs.konu, '[v3olcum]') }}
         env:
-          MSG: ${{ github.event.head_commit.message }}
+          MSG: ${{ steps.mod.outputs.konu }}
           V3_BASKI: ${{ vars.V3_BASKI || 'gdrive:ASTROLOVE/TEMP/DIJITAL_78/V3_BASKI' }}
           V3_EDISYONLAR: ${{ vars.V3_EDISYONLAR || 'PURE_WHITE,BLACK,BLUE' }}
           V3_CIFTLER: ${{ vars.V3_CIFTLER || 'CANCER_LIBRA,SAGITTARIUS_SAGITTARIUS' }}
@@ -186,7 +199,7 @@ jobs:
             --edisyonlar "$V3_EDISYONLAR" --ciftler "$V3_CIFTLER" $ES $EK
 
       - name: V3 Drive'a yaz (yalniz [v3])
-        if: ${{ always() && contains(github.event.head_commit.message, '[v3]') }}
+        if: ${{ always() && contains(steps.mod.outputs.konu, '[v3]') }}
         run: |
           set -euo pipefail
           [ -d _out3 ] || exit 0
@@ -198,9 +211,9 @@ jobs:
         # GOREV_0012 md.3-4. Baski dosyalari bu adimda kurulur (onayli kaynaklar:
         # POD_PRINT 18x24 sanati + PLATES 24x32 plate + kisisel-v1 render), sonra
         # V3 ornek kosusu yapilir. Kapilar gevsetilmez.
-        if: ${{ contains(github.event.head_commit.message, '[v3uret]') }}
+        if: ${{ contains(steps.mod.outputs.konu, '[v3uret]') }}
         env:
-          MSG: ${{ github.event.head_commit.message }}
+          MSG: ${{ steps.mod.outputs.konu }}
           V3_ESLESME: BLUE=MIDNIGHT_BLUE,BLACK=DEEP_BLACK
         run: |
           set -euo pipefail
@@ -243,7 +256,7 @@ jobs:
           [ "${KAPI:-0}" = "0" ]
 
       - name: V3 ORNEK Drive'a yaz (yalniz [v3uret])
-        if: ${{ always() && contains(github.event.head_commit.message, '[v3uret]') }}
+        if: ${{ always() && contains(steps.mod.outputs.konu, '[v3uret]') }}
         run: |
           set -euo pipefail
           [ -d _out3 ] || exit 0
@@ -256,7 +269,7 @@ jobs:
         # (a) kisisel PLATE'lerin gercek px olcusu (24x32 -> 7200x9600 mu?),
         # (b) POD_PRINT'te 3 cift icin hangi renk/boy kaynaklari var,
         # (c) uretici dalindaki boy tablosu ne diyor.
-        if: ${{ contains(github.event.head_commit.message, '[v3hazir]') }}
+        if: ${{ contains(steps.mod.outputs.konu, '[v3hazir]') }}
         run: |
           set -euo pipefail
           mkdir -p _h/plate
@@ -296,7 +309,7 @@ jobs:
           echo "                        MODERN->CHAMPAGNE_IVORY, VINTAGE->WARM_PARCHMENT, PURE_WHITE yok"
 
       - name: Rapor birlestir (yalniz [rapor])
-        if: ${{ contains(github.event.head_commit.message, '[rapor]') }}
+        if: ${{ contains(steps.mod.outputs.konu, '[rapor]') }}
         run: |
           set -euo pipefail
           mkdir -p _rap
@@ -308,7 +321,7 @@ jobs:
           rclone lsf "$CIKTI" --format "psi" --separator " | " --files-only | sed 's/^/  - /'
 
       - name: Drive'a yaz (ESKI cikti - yalniz [eski])
-        if: ${{ always() && contains(github.event.head_commit.message, '[eski]') }}
+        if: ${{ always() && contains(steps.mod.outputs.konu, '[eski]') }}
         run: |
           set -euo pipefail
           [ -d _out ] || exit 0
