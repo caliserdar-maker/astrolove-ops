@@ -32,6 +32,10 @@ def main():
                     help="yalniz bu desene uyan raporlar (orn. 'RAPOR_*_14.json')")
     ap.add_argument('--kisa', action='store_true',
                     help='yalniz sayilar + eksik liste (uzun ciktida bas kesiliyor)')
+    ap.add_argument('--anahtar', default='',
+                    help='YALNIZ bu anahtarlarin kaydini bas (virgulle; orn. '
+                         'CHAMPAGNE_IVORY/8x10). Uzun listeler log tail\'inde '
+                         'kesildigi icin tek tek sorgulamak gerekiyor.')
     a = ap.parse_args()
     var = set()
     for satir in rc('lsf', PLATES, '--include', '*.png').splitlines():
@@ -59,6 +63,15 @@ def main():
         'rapora_yazilan': len(yazildi), 'kapida_KALDI_sayi': len(kaldi),
         'kapida_KALDI': sorted(kaldi), 'bant_bulunamadi_sayi': len(bant_yok),
         'diger_hata_sayi': len(diger)}
+    if a.anahtar:
+        iste = [x.strip() for x in a.anahtar.split(',') if x.strip()]
+        cik = {}
+        for k in iste:
+            cik[k] = {'plate': yazildi.get(k), 'kapida_KALDI': kaldi.get(k),
+                      'bant_bulunamadi': k in bant_yok, 'diger': diger.get(k)}
+        print(json.dumps({'okunan_rapor': len(okunan), 'sorgu': cik},
+                         indent=1, ensure_ascii=False))
+        return
     if a.kisa:
         print(json.dumps(ozet, indent=1, ensure_ascii=False))
         return
