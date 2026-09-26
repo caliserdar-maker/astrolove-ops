@@ -242,10 +242,18 @@ def alt_yenile(api, shop, c, lid, n, yol, alt, eski_id):
     if not h:
         raise SystemExit(f"HATA: {c} sira {n} yeniden kodlama farki esigi asti")
     with open(h, "rb") as fh:
-        api.post_file(f"/shops/{shop}/listings/{lid}/images", files={"image": (yol.name, fh, "image/jpeg")},
-                      data={"rank": str(n), "alt_text": alt})
+        y = api.post_file(f"/shops/{shop}/listings/{lid}/images", files={"image": (yol.name, fh, "image/jpeg")},
+                          data={"rank": str(n), "alt_text": alt})
+    yeni_id = (y or {}).get("listing_image_id")
+    if not yeni_id or yeni_id == eski_id:            # Etsy tekillestirdi: eski SILINMEZ (sira bos kalmasin) - GOREV 0017
+        raise SystemExit(f"HATA: {c} sira {n} yeni id yok/eskiyle ayni ({yeni_id}); eski {eski_id} silinmedi")
+    x = next((z for z in galeri(api, lid) if z.get("listing_image_id") == yeni_id), None)
+    f = fark(x.get("url_fullxfull"), yol) if x else None
+    if not x or x.get("rank") != n or not esit(f):
+        raise SystemExit(f"HATA: {c} yeni foto {yeni_id} sira {x and x.get('rank')} (beklenen {n}) fark {f}; "
+                         f"eski {eski_id} silinmedi")
     api.delete(f"/shops/{shop}/listings/{lid}/images/{eski_id}")
-    log(f"{c} alt metin: sira {n} yeni foto olarak yuklendi, eski {eski_id} silindi")
+    log(f"{c} alt metin: sira {n} yeni foto {yeni_id} (fark {f}) dogrulandi, eski {eski_id} silindi")
 
 
 def baglan(api, shop, lid, SET, g):
@@ -304,6 +312,8 @@ def onar(api, shop, a, c, lid, r, ref_alt, tfoto):
     if alt_fark:
         log(f"{c} alt metin farki: {json.dumps(alt_fark, ensure_ascii=False)}")
     r.update(kontrol=kontrol, icerik_fark=fk2, cift=ck2, alt_fark=alt_fark, sonuc="PASS" if all(kontrol.values()) else "FAIL")
+    if r["sonuc"] == "PASS":
+        r.pop("onar_gerek", None); r.pop("hata", None)
     log(f"{c} onar {r['sonuc']} | {json.dumps(kontrol)} | fark {fk2} | cift {json.dumps(ck2)}")
     return r["sonuc"] == "PASS"
 
@@ -353,7 +363,8 @@ def main():
     ilan = {cift_anahtar(r.get("cift")): str(r["ilan_id"]) for r in satir if cift_anahtar(r.get("cift"))}
     setli = sorted(p.name for p in Path(a.setler).iterdir() if (p / "TAM_SET" / "SET.json").exists())
     ref_anahtar = cift_anahtar(" ".join(REF_CIFT))
-    hedef = [c for c in setli if c in ilan and ilan[c] != REF_ID]
+    acik = {x for x in a.ciftler.split(",") if x}
+    hedef = [c for c in setli if c in ilan and (ilan[c] != REF_ID or c in acik)]   # CL yalniz acikca --ciftler ile (GOREV 0017)
     eslesmeyen = [c for c in setli if c not in ilan]
     onceki = json.loads(Path(a.durum).read_text()) if a.durum and Path(a.durum).exists() else {}
     bitti = {c for c, r in (onceki.get("ilan") or {}).items() if r.get("sonuc") == "PASS"}
@@ -445,15 +456,16 @@ def main():
         yeniden = x.get("sonuc") == "PASS" and (len(fk0) < 13 or not all(esit(v) for v in fk0.values())
                                                  or "cift" not in k)          # cift olcutu yokken PASS olanlar
         onarilir = x.get("sonuc") == "FAIL" and all(k.get(n2) for n2 in ("foto_13", "video_1", "state_degismedi"))
-        onarilir = onarilir or c in zorla
+        onarilir = onarilir or c in zorla or bool(x.get("onar_gerek"))
         if c in hedef and (yeniden or onarilir):
             bitti.discard(c)
             try:
                 tamam = onar(api, shop, a, c, ilan[c], rapor["ilan"][c], ref_alt, tuzak_foto(c))
-            except SystemExit as e:
+            except (SystemExit, Exception) as e:                     # GOREV 0017: HTTP/I-O/Pillow hatalari da ilan FAIL
                 if "429" in str(e):
                     raise
-                rapor["ilan"][c].update(sonuc="FAIL", hata=str(e)[:300]); tamam = False
+                rapor["ilan"][c].update(sonuc="FAIL", hata=f"{type(e).__name__}: {str(e)[:300]}", onar_gerek=True)
+                tamam = False
             if not tamam:
                 log(f"{c} onarim tutmadi -> FAIL listesine")         # Serdar 26 Eyl: tek ilan FAIL hepsini durdurmaz
             bitti.add(c)                                             # bu kosuda tekrar yuklenmez
@@ -554,13 +566,17 @@ def main():
                     log("DUR: art arda 3 ilan FAIL - sistematik hata olabilir"); break
             else:
                 ardisik = 0
-        except SystemExit as e:                                  # tek ilanin API hatasi kosuyu durdurmaz (429 haric)
+        except (SystemExit, Exception) as e:                     # tek ilanin hatasi kosuyu durdurmaz (429 haric; GOREV 0017)
             if "429" in str(e):
                 raise
             r0 = rapor["ilan"].setdefault(c, {"ilan_id": ilan[c]})
-            r0.update(sonuc="FAIL", hata=str(e)[:300])
-            log(f"[{sira}/{len(secim)}] {c} API hatasi -> FAIL listesine: {str(e)[:200]}")
+            r0.update(sonuc="FAIL", hata=f"{type(e).__name__}: {str(e)[:300]}", onar_gerek=True)
+            log(f"[{sira}/{len(secim)}] {c} hata -> FAIL listesine: {type(e).__name__}: {str(e)[:200]}")
             (OUT / "GALERI_TAMSET.json").write_text(json.dumps(rapor, ensure_ascii=False, indent=1))
+            try:
+                rc("copy", str(OUT / "GALERI_TAMSET.json"), f"{A77}/_galeri")   # durum kaydi (sonraki kosu onarir)
+            except subprocess.CalledProcessError:
+                log("durum Drive'a yazilamadi")
             ardisik += 1
             if ardisik >= 3:
                 log("DUR: art arda 3 ilan FAIL - sistematik hata olabilir"); break
