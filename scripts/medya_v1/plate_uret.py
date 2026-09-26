@@ -275,6 +275,60 @@ def slogan_bandi(plate):
     return en_iyi
 
 
+HIZA_AZAMI = 70           # referans maskenin arananacagi +-piksel (2400 olceginde)
+
+
+def _profil(a, eksen):
+    """Zeminden sapma enerjisinin satir (eksen=1) ya da sutun (eksen=0) profili.
+
+    Dokulu edisyonlarda 2D korelasyon ise yaramiyor (WP'de NCC 0.107, doku
+    sinyali boguyor); 1D profil dokuyu satir/sutun boyunca ortalayarak
+    sonumledigi icin slogan tepesi orada hala secilebiliyor (WP satir tepesi
+    126, PURE_WHITE 99 - 27 satirlik kayma boyle olculdu).
+    """
+    zem = np.median(a, axis=1, keepdims=True)
+    e = np.abs(a - zem).mean(axis=eksen)
+    return e - e.mean()
+
+
+def hiza_bul(ref_serit, plate, a0, a1, azami=HIZA_AZAMI):
+    """Referans seridin bu plate'teki KAYMASINI (dx, dy) olcer.
+
+    26 Eyl olcumu: WARM_PARCHMENT'in slogani diger edisyonlerden ~27 satir
+    (2400 olceginde) ASAGIDA; CHAMPAGNE'de yatayda +6. Referans maskeyi
+    oldugu yere uygulamak bu yuzden hem slogani birakiyor hem saglam zemini
+    bozuyordu (VINTAGE hayalet 5.1 -> 26.7). Maske buyutulmez, esik
+    gevsetilmez; yalniz DOGRU YERE tasinir.
+    """
+    h = a1 - a0
+    g0, g1 = max(a0 - azami, 0), min(a1 + azami, plate.shape[0])
+    genis = plate[g0:g1].astype(np.float32) @ LUMA
+    ref = ref_serit.astype(np.float32) @ LUMA
+    pr = _profil(ref, 1)
+    en, dy = -2.0, 0
+    for y in range(g0, g1 - h + 1):
+        ph = _profil(genis[y - g0:y - g0 + h], 1)
+        na, nb = float(np.linalg.norm(pr)), float(np.linalg.norm(ph))
+        if na < 1e-6 or nb < 1e-6:
+            continue
+        r = float(pr @ ph) / (na * nb)
+        if r > en:
+            en, dy = r, y - a0
+    ph_serit = plate[a0 + dy:a0 + dy + h].astype(np.float32) @ LUMA
+    pc_r, pc_h = _profil(ref, 0), _profil(ph_serit, 0)
+    en_x, dx = -2.0, 0
+    for k in range(-azami, azami + 1):
+        pk = np.roll(pc_h, k)
+        na, nb = float(np.linalg.norm(pc_r)), float(np.linalg.norm(pk))
+        if na < 1e-6 or nb < 1e-6:
+            continue
+        r = float(pc_r @ pk) / (na * nb)
+        if r > en_x:
+            en_x, dx = r, k
+    return {'dy': int(dy), 'dx': int(dx),
+            'dikey_r': round(en, 3), 'yatay_r': round(en_x, 3)}
+
+
 def slogan_temizle(plate, bant, ref_maske=None):
     """Slogan GLIFLERINI plate'in kendi arka plan pikselleriyle degistirir.
 
@@ -534,6 +588,11 @@ def turev_plate(ed, boy, tanim, rapor):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--parca', default='1/1', help='i/n - is listesinin i. dilimi')
+    ap.add_argument('--sadece', default='',
+                    help='YALNIZ bu edisyonlarin plate\'i yazilir (orn. '
+                         'VINTAGE,MODERN). Referans renk maske icin yine '
+                         'islenir ama plate\'i UZERINE YAZILMAZ; listede '
+                         'olmayan edisyonlar hic indirilmez.')
     ap.add_argument('--ham-yenile', action='store_true',
                     help='HAM plate varsa bile medyani yeniden hesapla '
                          '(POD_PRINT kaynaklari degistiyse)')
@@ -562,8 +621,13 @@ def main():
     kalan_boy = [b for b in sorted(boy_renk) if b not in tamam]
     benim_boylar = [b for j, b in enumerate(kalan_boy) if j % n == i - 1]
     # Referans renk her boyda ILK islenir: maskesi digerlerine aktarilacak.
+    sadece = {x.strip().upper() for x in a.sadece.split(',') if x.strip()}
+    # ED_RENK: edisyon adindan POD_PRINT renk klasorune
+    ed_renk = {v.upper(): k for k, v in RENK_ED.items()}
+    sadece_renk = {ed_renk.get(x, x) for x in sadece}
     benim = [(r, b) for b in benim_boylar
-             for r in sorted(boy_renk[b], key=lambda x: (x != REFERANS_RENK, x))]
+             for r in sorted(boy_renk[b], key=lambda x: (x != REFERANS_RENK, x))
+             if not sadece_renk or r == REFERANS_RENK or r in sadece_renk]
     log(f'toplam {len(isler)} plate / {len(boy_renk)} boy, {len(tamam)} boy tamam; '
         f'parca {i}/{n} -> {len(benim_boylar)} boy, {len(benim)} plate: '
         + ', '.join(benim_boylar))
@@ -634,17 +698,33 @@ def main():
                                               f'{ham_plate.shape[:2]} != {r["px"]}')
                     log(f'{anahtar} boyut referanstan farkli')
                     continue
-                bant = r['bant']
-                plate, tb = slogan_temizle(ham_plate, bant, ref_maske=r['maske'])
+                # HIZALAMA (GOREV_0010 md.2): slogan her edisyonda ayni yerde
+                # DEGIL - WARM_PARCHMENT'inki ~27 satir asagida (2400 olcegi).
+                # Maskeyi oldugu yerde uygulamak hem slogani birakiyor hem
+                # saglam zemini bozuyordu. Maske buyutulmez, esik gevsetilmez.
+                k_ol = ham_plate.shape[1] / 2400.0
+                hz = hiza_bul(r['serit_gor'], ham_plate, r['serit'][0],
+                              r['serit'][1], azami=int(round(HIZA_AZAMI * k_ol)))
+                bant = dict(r['bant'])
+                bant['y'] = [r['bant']['y'][0] + hz['dy'],
+                             r['bant']['y'][1] + hz['dy']]
+                maske = r['maske'] if hz['dx'] == 0 else np.roll(r['maske'], hz['dx'], axis=1)
+                plate, tb = slogan_temizle(ham_plate, bant, ref_maske=maske)
+                if tb is not None:
+                    tb['hizalama'] = hz
             if plate is None:
                 rapor['hata'][anahtar] = f'slogan temizligi yapilamadi: {tb["sebep"]}'
                 log(f'{anahtar} temizlik yapilamadi: {tb["sebep"]}')
                 continue
             if renk == REFERANS_RENK:
+                a0, a1 = tb['serit']
                 ref[boy] = {'bant': bant, 'maske': tb['ham_maske'],
-                            'px': ham_plate.shape[:2]}
+                            'px': ham_plate.shape[:2], 'serit': [a0, a1],
+                            'serit_gor': ham_plate[a0:a1].copy()}
             kapi = temizlik_kapilari(ham_plate, plate, bant, tb)
             tb.pop('maske', None); tb.pop('ham_maske', None)   # diziler rapora yazilmaz
+            if renk != REFERANS_RENK:
+                log(f'{anahtar} hizalama {json.dumps(tb.get("hizalama"))}')
             # KIRPIM HER DURUMDA: kapi kalinca da ONCE/SONRA goruntusu uretilir.
             # Aksi halde kapida kalan plate hicbir kanit birakmiyor ve neyin yanlis
             # oldugu sayidan baska bir seyle gorulemiyor (1. iterasyonda boyle oldu).
@@ -670,6 +750,13 @@ def main():
                 log(f'{anahtar} TEMIZLIK KAPISI KALDI ' + json.dumps(kapi))
                 continue
             del ham_plate
+            if sadece_renk and renk not in sadece_renk:
+                # Referans renk yalniz maske icin islendi (GOREV_0010: onayli
+                # edisyonlarin plate'ine dokunulmaz).
+                rapor['plateler'][anahtar] = {'edisyon': ed, 'boy': boy,
+                                              'not': 'yalniz referans maske; plate yazilmadi'}
+                log(f'{anahtar} referans olarak islendi, plate YAZILMADI')
+                continue
             Image.fromarray(plate, 'RGB').save(W / ad, 'PNG', optimize=False,
                                                compress_level=6)
             orn = {}
