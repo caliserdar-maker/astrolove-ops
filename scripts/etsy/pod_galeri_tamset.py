@@ -196,7 +196,7 @@ def onar(api, shop, a, c, lid, r, ref_alt, tfoto):
     ck = cift_denetle(g, foto, tfoto)
     altk = {x.get("rank"): (x.get("alt_text") or "") == alt.get(x.get("rank")) for x in g}
     farkli = sorted(n for n in range(1, 14)
-                    if not esit(fk.get(n)) or not (ck.get(n) or {}).get("ok") or not altk.get(n))
+                    if not esit(fk.get(n)) or not (ck.get(n) or {}).get("ok"))   # alt: asagida id ile duzeltilir
     log(f"{c} onar: icerik farki {fk} | cift {json.dumps(ck)} | alt {altk} | yeniden yuklenecek sira {farkli}")
     r["icerik_fark_once"], r["cift_once"] = fk, ck
     r["onar_sira"] = farkli
@@ -210,6 +210,16 @@ def onar(api, shop, a, c, lid, r, ref_alt, tfoto):
             if eski.get(n):
                 api.delete(f"/shops/{shop}/listings/{lid}/images/{eski[n]}")
     g2 = kararli(lambda: galeri(api, lid), lambda x: len(x) == 13)
+    alt_yanlis = [x for x in g2 or [] if (x.get("alt_text") or "") != alt.get(x.get("rank"))]
+    for x in alt_yanlis:     # Etsy tekillestirmesi eski kaydi/alt metni tutabiliyor: mevcut id ile yeniden iliskilendir + alt_text
+        n = x.get("rank")
+        api.post_file(f"/shops/{shop}/listings/{lid}/images",
+                      files={"listing_image_id": (None, str(x.get("listing_image_id"))), "rank": (None, str(n)),
+                             "alt_text": (None, alt[n])})
+        log(f"{c} alt metin duzeltildi: sira {n} id {x.get('listing_image_id')}")
+    r["alt_duzeltilen"] = [x.get("rank") for x in alt_yanlis]
+    if alt_yanlis:
+        g2 = kararli(lambda: galeri(api, lid), lambda x: len(x) == 13)
     rid = {x.get("rank"): x.get("listing_image_id") for x in g2 or []}
     renk_dosya = SET.get("renk_gorselleri") or {}
     dosya_sira = {x["dosya"]: x["sira"] for x in SET["galeri"]}
@@ -370,9 +380,8 @@ def main():
         if c in hedef and (yeniden or onarilir):
             bitti.discard(c)
             if not onar(api, shop, a, c, ilan[c], rapor["ilan"][c], ref_alt, tuzak_foto(c)):
-                (OUT / "GALERI_TAMSET.json").write_text(json.dumps(rapor, ensure_ascii=False, indent=1))
-                raise SystemExit(f"DUR: {c} onarim tutmadi")
-            bitti.add(c)
+                log(f"{c} onarim tutmadi -> FAIL listesine")         # Serdar 26 Eyl: tek ilan FAIL hepsini durdurmaz
+            bitti.add(c)                                             # bu kosuda tekrar yuklenmez
             (OUT / "GALERI_TAMSET.json").write_text(json.dumps(rapor, ensure_ascii=False, indent=1))
             try:
                 rc("copy", str(OUT / "GALERI_TAMSET.json"), f"{A77}/_galeri")
@@ -380,103 +389,133 @@ def main():
                 log("durum Drive'a yazilamadi")
     secim = [c for c in secim if c in hedef and c not in bitti]
     log(f"yuklenecek {len(secim)} ilan (seti olan {len(setli)}, onceden PASS {len(bitti)}) | kota {kota(api)}")
+    ardisik = 0                                                  # art arda FAIL; 3 olursa sistematik hata: DUR
     for sira, c in enumerate(secim, 1):
-        lid = ilan[c]; X = L.get(lid) or {}
-        eski = sorted(X.get("images") or [], key=lambda x: x.get("rank") or 0)
-        eski_vid = X.get("videos") or []
-        gerek = tahmin(len(eski), bool(eski_vid))
-        if api.calls - harcanan0 + gerek > a.butce:
-            rapor["butce_bitti"] = {"kalan": secim[sira - 1:], "harcanan": api.calls - harcanan0}
-            log(f"DUR: butce {a.butce} (harcanan {api.calls - harcanan0}, bu ilan ~{gerek})"); break
-        q = kota(api)
-        if q is not None and q < KOTA_TABAN + gerek:
-            rapor["butce_bitti"] = {"kalan": secim[sira - 1:], "sebep": f"kota {q}"}
-            log(f"DUR: kota {q}"); break
-        SET, d, foto = set_indir(a.setler, c)
-        A_, B_ = burclar(c)
-        eksik = [str(p) for _, p, _ in foto if not p.exists()]
-        vpath = d / "VIDEO.mp4"
-        r = {"ilan_id": lid, "state_once": X.get("state"), "foto_once": len(eski), "video_once": len(eski_vid)}
-        rapor["ilan"][c] = r
-        if eksik or len(foto) != 13 or not vpath.exists():
-            r.update(sonuc="FAIL", hata=f"set eksik: {eksik[:3]} foto {len(foto)} video {vpath.exists()}")
-            log(f"[{sira}/{len(secim)}] {c} set eksik - DUR"); break
-        t0 = time.time(); c0 = api.calls
-        vimg_once = var_img(api, shop, lid)
-        eski_ids = [im.get("listing_image_id") for im in eski]
-        bagli = {v.get("image_id") for v in vimg_once}
-        yeni = {}                                            # sira -> image_id
-        mevcut = len(eski)
-        silinecek = [i for i in eski_ids if i not in bagli] + [i for i in eski_ids if i in bagli]
-        for srn, p, cl in foto:                              # once yukle; sinir doluysa once bagsiz eski sil
-            while mevcut >= IMG_LIMIT and silinecek and silinecek[0] not in bagli:
-                api.delete(f"/shops/{shop}/listings/{lid}/images/{silinecek.pop(0)}"); mevcut -= 1
-            if mevcut >= IMG_LIMIT:
-                r.update(sonuc="FAIL", hata="gorsel siniri: bagli eski gorseller yer birakmiyor"); break
-            with open(p, "rb") as fh:
-                y = api.post_file(f"/shops/{shop}/listings/{lid}/images", files={"image": (p.name, fh, "image/jpeg")},
-                                  data={"rank": str(srn), "alt_text": alt_uyarla(ref_alt.get(cl, ""), A_, B_)[:250]})
-            yeni[srn] = y.get("listing_image_id"); mevcut += 1
-        if r.get("sonuc") == "FAIL":
-            log(f"[{sira}/{len(secim)}] {c} {r['hata']} - DUR"); break
-        # varyasyon baglantisi: renk adi -> SET renk gorseli -> yeni id
-        renk_dosya = SET.get("renk_gorselleri") or {}
-        dosya_sira = {g["dosya"]: g["sira"] for g in SET["galeri"]}
-        vi, eksik_renk = [], []
-        for v in vimg_once:
-            dosya = renk_dosya.get(v.get("value"))
-            if not dosya or dosya_sira.get(dosya) not in yeni:
-                eksik_renk.append(v.get("value")); continue
-            vi.append({"property_id": v.get("property_id"), "value_id": v.get("value_id"), "image_id": yeni[dosya_sira[dosya]]})
-        if eksik_renk:
-            r.update(sonuc="FAIL", hata=f"varyasyon rengi eslesmedi: {eksik_renk} (eski gorseller silinmedi)")
-            log(f"[{sira}/{len(secim)}] {c} {r['hata']} - DUR"); break
-        if vi:
-            api.post_json(f"/shops/{shop}/listings/{lid}/variation-images", {"variation_images": vi})
-        for i in silinecek:
-            api.delete(f"/shops/{shop}/listings/{lid}/images/{i}")
-        for v in eski_vid:
-            api.delete(f"/shops/{shop}/listings/{lid}/videos/{v.get('video_id')}")
-        with open(vpath, "rb") as fh:
-            rv = api.post_file(f"/shops/{shop}/listings/{lid}/videos", files={"video": (f"{c}.mp4", fh, "video/mp4")},
-                               data={"name": f"{c}.mp4"})
-        # geri okuma
-        g2 = kararli(lambda: galeri(api, lid), lambda g: len(g) == 13) or []
-        rid = {x.get("rank"): x.get("listing_image_id") for x in g2}
-        idfarkli = [n for n in sorted(yeni) if rid.get(n) != yeni[n]]     # Etsy tekillestirmesi: icerikle dogrula
-        fk = icerik(g2, foto)                                             # 13 foto olculur, rapora yazilir
-        tfoto = tuzak_foto(c)
-        ck = cift_denetle(g2, foto, tfoto)
-        v2 = kararli(lambda: [x.get("video_id") for x in videolar(api, lid)], lambda v: len(v) == 1)
-        vm2 = {x.get("value"): x.get("image_id") for x in var_img(api, shop, lid)}
-        L2 = api.get(f"/listings/{lid}") or {}
-        kontrol = {
-            "foto_13": len(g2 or []) == 13,
-            "sira": sorted(rid) == list(range(1, 14)) and all(esit(fk.get(n)) for n in idfarkli),
-            "cift": len(ck) == 13 and all(v.get("ok") for v in ck.values()),
-            "alt_metin": all((x.get("alt_text") or "") == alt_uyarla(ref_alt.get(foto[x.get("rank") - 1][2], ""), A_, B_)[:250]
-                             for x in g2),
-            "video_1": len(v2 or []) == 1,
-            "varyasyon": all(vm2.get(v.get("value")) == rid.get(dosya_sira[renk_dosya[v.get("value")]]) for v in vimg_once),
-            "state_degismedi": L2.get("state") == X.get("state"),
-        }
-        r.update(icerik_fark=fk, id_farkli=idfarkli, cift=ck)
-        if not all(kontrol.values()) and all(kontrol[n2] for n2 in ("foto_13", "video_1", "state_degismedi")):
-            log(f"{c}: tutmayan kontrol {[k2 for k2, v in kontrol.items() if not v]} -> onarim (yeniden yukleme)")
-            r["kontrol"] = kontrol
-            onar(api, shop, a, c, lid, r, ref_alt, tfoto)
-            kontrol = r["kontrol"]
-        r.update(sonuc="PASS" if all(kontrol.values()) else "FAIL", kontrol=kontrol, state_sonra=L2.get("state"),
-                 yeni_video=rv.get("video_id"), cagri=api.calls - c0, sn=round(time.time() - t0, 1))
-        log(f"[{sira}/{len(secim)}] {c} {r['sonuc']} cagri {r['cagri']} | toplam {api.calls - harcanan0}/{a.butce} "
-            f"| kota {kota(api)} | {json.dumps(kontrol)}")
-        (OUT / "GALERI_TAMSET.json").write_text(json.dumps(rapor, ensure_ascii=False, indent=1))
         try:
-            rc("copy", str(OUT / "GALERI_TAMSET.json"), f"{A77}/_galeri")   # ilan basi durum (devam icin)
-        except subprocess.CalledProcessError:
-            log("durum Drive'a yazilamadi")
-        if r["sonuc"] != "PASS":
-            log("DUR: geri okuma tutmadi"); break
+            lid = ilan[c]; X = L.get(lid) or {}
+            eski = sorted(X.get("images") or [], key=lambda x: x.get("rank") or 0)
+            eski_vid = X.get("videos") or []
+            gerek = tahmin(len(eski), bool(eski_vid))
+            if api.calls - harcanan0 + gerek + 25 > a.butce:                # +25: olasi tek onarim
+                rapor["butce_bitti"] = {"kalan": secim[sira - 1:], "harcanan": api.calls - harcanan0}
+                log(f"DUR: butce {a.butce} (harcanan {api.calls - harcanan0}, bu ilan ~{gerek})"); break
+            q = kota(api)
+            if q is not None and q < KOTA_TABAN + gerek:
+                rapor["butce_bitti"] = {"kalan": secim[sira - 1:], "sebep": f"kota {q}"}
+                log(f"DUR: kota {q}"); break
+            SET, d, foto = set_indir(a.setler, c)
+            A_, B_ = burclar(c)
+            eksik = [str(p) for _, p, _ in foto if not p.exists()]
+            vpath = d / "VIDEO.mp4"
+            r = {"ilan_id": lid, "state_once": X.get("state"), "foto_once": len(eski), "video_once": len(eski_vid)}
+            rapor["ilan"][c] = r
+            if eksik or len(foto) != 13 or not vpath.exists():
+                r.update(sonuc="FAIL", hata=f"set eksik: {eksik[:3]} foto {len(foto)} video {vpath.exists()}")
+                log(f"[{sira}/{len(secim)}] {c} set eksik -> FAIL listesine")
+                ardisik += 1
+                if ardisik >= 3:
+                    log("DUR: art arda 3 ilan FAIL - sistematik hata olabilir"); break
+                continue
+            t0 = time.time(); c0 = api.calls
+            vimg_once = var_img(api, shop, lid)
+            eski_ids = [im.get("listing_image_id") for im in eski]
+            bagli = {v.get("image_id") for v in vimg_once}
+            yeni = {}                                            # sira -> image_id
+            mevcut = len(eski)
+            silinecek = [i for i in eski_ids if i not in bagli] + [i for i in eski_ids if i in bagli]
+            for srn, p, cl in foto:                              # once yukle; sinir doluysa once bagsiz eski sil
+                while mevcut >= IMG_LIMIT and silinecek and silinecek[0] not in bagli:
+                    api.delete(f"/shops/{shop}/listings/{lid}/images/{silinecek.pop(0)}"); mevcut -= 1
+                if mevcut >= IMG_LIMIT:
+                    r.update(sonuc="FAIL", hata="gorsel siniri: bagli eski gorseller yer birakmiyor"); break
+                with open(p, "rb") as fh:
+                    y = api.post_file(f"/shops/{shop}/listings/{lid}/images", files={"image": (p.name, fh, "image/jpeg")},
+                                      data={"rank": str(srn), "alt_text": alt_uyarla(ref_alt.get(cl, ""), A_, B_)[:250]})
+                yeni[srn] = y.get("listing_image_id"); mevcut += 1
+            if r.get("sonuc") == "FAIL":
+                log(f"[{sira}/{len(secim)}] {c} {r['hata']} -> FAIL listesine")
+                ardisik += 1
+                if ardisik >= 3:
+                    log("DUR: art arda 3 ilan FAIL - sistematik hata olabilir"); break
+                continue
+            # varyasyon baglantisi: renk adi -> SET renk gorseli -> yeni id
+            renk_dosya = SET.get("renk_gorselleri") or {}
+            dosya_sira = {g["dosya"]: g["sira"] for g in SET["galeri"]}
+            vi, eksik_renk = [], []
+            for v in vimg_once:
+                dosya = renk_dosya.get(v.get("value"))
+                if not dosya or dosya_sira.get(dosya) not in yeni:
+                    eksik_renk.append(v.get("value")); continue
+                vi.append({"property_id": v.get("property_id"), "value_id": v.get("value_id"), "image_id": yeni[dosya_sira[dosya]]})
+            if eksik_renk:
+                r.update(sonuc="FAIL", hata=f"varyasyon rengi eslesmedi: {eksik_renk} (eski gorseller silinmedi)")
+                log(f"[{sira}/{len(secim)}] {c} {r['hata']} -> FAIL listesine")
+                ardisik += 1
+                if ardisik >= 3:
+                    log("DUR: art arda 3 ilan FAIL - sistematik hata olabilir"); break
+                continue
+            if vi:
+                api.post_json(f"/shops/{shop}/listings/{lid}/variation-images", {"variation_images": vi})
+            for i in silinecek:
+                api.delete(f"/shops/{shop}/listings/{lid}/images/{i}")
+            for v in eski_vid:
+                api.delete(f"/shops/{shop}/listings/{lid}/videos/{v.get('video_id')}")
+            with open(vpath, "rb") as fh:
+                rv = api.post_file(f"/shops/{shop}/listings/{lid}/videos", files={"video": (f"{c}.mp4", fh, "video/mp4")},
+                                   data={"name": f"{c}.mp4"})
+            # geri okuma
+            g2 = kararli(lambda: galeri(api, lid), lambda g: len(g) == 13) or []
+            rid = {x.get("rank"): x.get("listing_image_id") for x in g2}
+            idfarkli = [n for n in sorted(yeni) if rid.get(n) != yeni[n]]     # Etsy tekillestirmesi: icerikle dogrula
+            fk = icerik(g2, foto)                                             # 13 foto olculur, rapora yazilir
+            tfoto = tuzak_foto(c)
+            ck = cift_denetle(g2, foto, tfoto)
+            v2 = kararli(lambda: [x.get("video_id") for x in videolar(api, lid)], lambda v: len(v) == 1)
+            vm2 = {x.get("value"): x.get("image_id") for x in var_img(api, shop, lid)}
+            L2 = api.get(f"/listings/{lid}") or {}
+            kontrol = {
+                "foto_13": len(g2 or []) == 13,
+                "sira": sorted(rid) == list(range(1, 14)) and all(esit(fk.get(n)) for n in idfarkli),
+                "cift": len(ck) == 13 and all(v.get("ok") for v in ck.values()),
+                "alt_metin": all((x.get("alt_text") or "") == alt_uyarla(ref_alt.get(foto[x.get("rank") - 1][2], ""), A_, B_)[:250]
+                                 for x in g2),
+                "video_1": len(v2 or []) == 1,
+                "varyasyon": all(vm2.get(v.get("value")) == rid.get(dosya_sira[renk_dosya[v.get("value")]]) for v in vimg_once),
+                "state_degismedi": L2.get("state") == X.get("state"),
+            }
+            r.update(icerik_fark=fk, id_farkli=idfarkli, cift=ck)
+            if not all(kontrol.values()) and all(kontrol[n2] for n2 in ("foto_13", "video_1", "state_degismedi")):
+                log(f"{c}: tutmayan kontrol {[k2 for k2, v in kontrol.items() if not v]} -> onarim (yeniden yukleme)")
+                r["kontrol"] = kontrol
+                onar(api, shop, a, c, lid, r, ref_alt, tfoto)
+                kontrol = r["kontrol"]
+            r.update(sonuc="PASS" if all(kontrol.values()) else "FAIL", kontrol=kontrol, state_sonra=L2.get("state"),
+                     yeni_video=rv.get("video_id"), cagri=api.calls - c0, sn=round(time.time() - t0, 1))
+            log(f"[{sira}/{len(secim)}] {c} {r['sonuc']} cagri {r['cagri']} | toplam {api.calls - harcanan0}/{a.butce} "
+                f"| kota {kota(api)} | {json.dumps(kontrol)}")
+            (OUT / "GALERI_TAMSET.json").write_text(json.dumps(rapor, ensure_ascii=False, indent=1))
+            try:
+                rc("copy", str(OUT / "GALERI_TAMSET.json"), f"{A77}/_galeri")   # ilan basi durum (devam icin)
+            except subprocess.CalledProcessError:
+                log("durum Drive'a yazilamadi")
+            if r["sonuc"] != "PASS":
+                ardisik += 1
+                log(f"{c} FAIL (1 onarim denendi) -> FAIL listesine, siradaki")
+                if ardisik >= 3:
+                    log("DUR: art arda 3 ilan FAIL - sistematik hata olabilir"); break
+            else:
+                ardisik = 0
+        except SystemExit as e:                                  # tek ilanin API hatasi kosuyu durdurmaz (429 haric)
+            if "429" in str(e):
+                raise
+            r0 = rapor["ilan"].setdefault(c, {"ilan_id": ilan[c]})
+            r0.update(sonuc="FAIL", hata=str(e)[:300])
+            log(f"[{sira}/{len(secim)}] {c} API hatasi -> FAIL listesine: {str(e)[:200]}")
+            (OUT / "GALERI_TAMSET.json").write_text(json.dumps(rapor, ensure_ascii=False, indent=1))
+            ardisik += 1
+            if ardisik >= 3:
+                log("DUR: art arda 3 ilan FAIL - sistematik hata olabilir"); break
+
     rapor["kota_son"], rapor["cagri"] = kota(api), api.calls
     rapor["ozet"] = {"pass": sorted(c for c, x in rapor["ilan"].items() if x.get("sonuc") == "PASS"),
                      "fail": {c: x.get("hata") or x.get("kontrol") for c, x in rapor["ilan"].items() if x.get("sonuc") == "FAIL"}}
