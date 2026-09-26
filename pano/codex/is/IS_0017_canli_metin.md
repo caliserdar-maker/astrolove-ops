@@ -1,0 +1,6 @@
+# Codex IS 0017 - 78 canli POD ilaninin metin taramasi (salt okur, yalniz API anahtari)
+AGENTS.md kurallari. Etsy'ye YAZMA YOK. OAuth token KULLANMA; yalniz x-api-key ile getListingsByListingIds (en fazla 100 id/cagri). Ornek: scripts/etsy/canli_video_kapak.py + .github/workflows/canli-video-qc.yml (anahtar kullanimi, token/kilit yok).
+Yeni: scripts/etsy/canli_metin_tara.py + .github/workflows/canli-metin-tara.yml (workflow_dispatch, girdi: ilan id listesi dosyasi yolu; varsayilan: canli-video-qc'nin kullandigi liste kaynagi).
+Kontroller (ilan basina PASS/FAIL + neden): baslik = scripts/etsy/pod_listing_create.py onayli baslik semasi; aciklamada yasakli ifade yok (CLAUDE.md Urun metni: OBA-free, bright white, omur yili, 12-colour) ve uzun/orta tire yok (SHIPPING profili adi haric); 'Hahnemuhle' yanlis yazimi yok; 13 etiket, hepsi Ingilizce, <=20 karakter; kisisellestirme talimati MESSAGE_INSTRUCTION ile birebir; ayni burc ciftinde Left/Right, digerlerinde 'Name under {A}/{B}'.
+Cikti: CANLI_METIN.csv + ozet (X/78 PASS, kural bazinda FAIL sayilari). Test: scripts/etsy/test_canli_metin_tara.py sentetik ilan JSON ile (en az 6 senaryo).
+Teslim: yanit yorumunun sonuna TAM unified diff (tek ```diff blogu). pano/codex/RAPOR_0017.md 5 satir.
