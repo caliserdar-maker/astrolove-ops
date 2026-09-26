@@ -652,6 +652,15 @@ def main():
             kirp = slogan_kirpim(ham_plate, plate, tb, etiket)
             if kirp:
                 try:
+                    # Karsit ad birikmesin: ayni plate onceki kosuda GECMIS
+                    # (SLOGAN_...) ya da KALMIS (SLOGAN_KALDI_...) olabilir;
+                    # eski dosya durursa denetim yanlis kosuyu olcer.
+                    karsit = (f'SLOGAN_{ed.upper()}_{boy}_x3.jpg' if not kapi['gecti']
+                              else f'SLOGAN_KALDI_{ed.upper()}_{boy}_x3.jpg')
+                    try:
+                        rc('deletefile', f'{PLATES}/SLOGAN_KIRPIM/{karsit}', timeout=300)
+                    except RuntimeError:
+                        pass                      # yoksa sorun degil
                     rc('copy', str(W / kirp['dosya']), f'{PLATES}/SLOGAN_KIRPIM', timeout=900)
                 except RuntimeError as e:
                     log(f'{anahtar} kirpim yuklenemedi: {e}')

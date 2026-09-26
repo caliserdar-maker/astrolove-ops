@@ -104,15 +104,22 @@ def main():
     a = ap.parse_args()
     boylar = [x.strip() for x in a.boylar.split(',') if x.strip()]
     rc('copy', KIRPIM, str(W), '--include', '*.jpg')
+    # ONEMLI: bir plate once GECER (SLOGAN_<ed>_<boy>) sonraki kosuda KALIR
+    # (SLOGAN_KALDI_<ed>_<boy>) - ya da tersi. Iki ad da Drive'da kalir ve
+    # yanlisini secmek ESKI kosunun sonucunu yeni sanmaya yol acar (26 Eyl'de
+    # tam bunu yasadik). Her zaman DAHA YENI dosya secilir.
+    def yeni_olan(ed, boy):
+        adlar = [W / f'SLOGAN_{ed}_{boy}_x3.jpg', W / f'SLOGAN_KALDI_{ed}_{boy}_x3.jpg']
+        varlar = [f for f in adlar if f.exists()]
+        if not varlar:
+            return None, False
+        f = max(varlar, key=lambda x: x.stat().st_mtime)
+        return f, f.name.startswith('SLOGAN_KALDI_')
     satirlar, eksik, olcumler = [], [], {}
     for boy in boylar:
         for ed in EDISYONLAR:
-            f = W / f'SLOGAN_{ed}_{boy}_x3.jpg'
-            kaldi = False
-            if not f.exists():
-                f = W / f'SLOGAN_KALDI_{ed}_{boy}_x3.jpg'
-                kaldi = f.exists()
-            if not f.exists():
+            f, kaldi = yeni_olan(ed, boy)
+            if f is None:
                 eksik.append(f'{ed}_{boy}')
                 continue
             o = kalinti_olc(f)
