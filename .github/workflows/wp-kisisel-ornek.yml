@@ -71,7 +71,6 @@ jobs:
         # [eski] denirse kosar; aksi halde her tetik push'u gecersiz dosyalari
         # yeniden uretip Drive'a yaziyordu (26 dosya, kosu 36229382139).
         if: ${{ contains(github.event.head_commit.message, '[eski]') }}
-        if: ${{ !contains(github.event.head_commit.message, '[rapor]') && !contains(github.event.head_commit.message, '[v2]') }}
         env:
           MSG: ${{ github.event.head_commit.message }}
         run: |
@@ -111,7 +110,6 @@ jobs:
 
       - name: Uretim + kapilar (ESKI hat - yalniz [eski])
         if: ${{ contains(github.event.head_commit.message, '[eski]') }}
-        if: ${{ !contains(github.event.head_commit.message, '[rapor]') && !contains(github.event.head_commit.message, '[v2]') }}
         run: |
           set -euo pipefail
           RAPOR=WP_KISISEL_RAPOR.json
@@ -319,7 +317,6 @@ jobs:
           rclone lsf "$CIKTI" --format "psi" --separator " | " --files-only -R | sed 's/^/  - /'
 
       - uses: actions/upload-artifact@v4
-        if: ${{ always() }}
         with:
           name: wp-kisisel-ornek
           path: |
