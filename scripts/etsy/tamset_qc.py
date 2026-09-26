@@ -50,6 +50,7 @@ REF = "CANCER_LIBRA"
 ESIK_DE, VIDEO_SN, ALAN_MIN, SIKLIK, SISTEM = 3.0, 12.6, 40, 0.30, 0.30
 YATAY = int(W4 * 0.15) | 1   # bolgenin yatay genisletmesi (px, 500 genislikte)
 YASAK = [r"OBA[\s-]*FREE", r"BRIGHT WHITE", r"\d+\s*-\s*\d+\s*YEARS", r"12[\s-]*COLOU?R"]
+ESKI_SLOGAN = [r"TWO\s*SOULS", r"ONE\s*BOND"]   # GOREV 0028: eski slogan ACIK YASAK (her kart, her kare, sistematik olsa da)
 OUT = Path("out")
 os.environ["OMP_THREAD_LIMIT"] = "1"   # paralel iscilerde tesseract'in kendi OpenMP'si CPU'yu asiri yukler
 BURC_UP = {b.upper() for b in BURC}
@@ -211,7 +212,7 @@ def yazi_denetle(im, ref, a, b):
                 ok = True
         baslik = "PASS" if ok else "FAIL"
     tire = ["—"] if len(tum) == 3 and all(tire_var(p[1]) for p in tum) else []
-    yasak = [y for y in YASAK if re.search(y, norm(p1[0]))]
+    yasak = sorted({y for y in YASAK + ESKI_SLOGAN for p in tum if re.search(y, norm(p[0]))})
     return {"eksik": sorted(eksik), "fazla": sorted(fazla), "yanlis_burc": yanlis, "eksik_burc": eksik_burc,
             "baslik": baslik, "tire": tire, "yasak": yasak, "gecis2": p2 is not None}
 
@@ -233,6 +234,9 @@ def isle(arg):
             r["lab"][n] = orta_lab(im).tolist()
         if g.get("tur") in ("kapak", "kart") and n in ref_ocr and c != REF:
             r["yazi"][n] = yazi_denetle(im, ref_ocr[n], a, b)
+        elif g.get("renk"):                                   # renk kareleri: yalniz eski slogan
+            t = norm(ocr(im, 1)[0])
+            r.setdefault("slogan_renk", {})[n] = [y for y in ESKI_SLOGAN if re.search(y, t)]
     v = d.parent / "VIDEO.mp4"
     if v.exists():
         p = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries",
@@ -240,6 +244,12 @@ def isle(arg):
         j = json.loads(p.stdout or "{}")
         s = (j.get("streams") or [{}])[0]
         r["video"] = [float((j.get("format") or {}).get("duration") or 0), s.get("width"), s.get("height")]
+        try:                                                  # GOREV 0028 md.2: 8 kare + eski slogan OCR
+            from canli_video_kapak import kareler, slogan_var
+            _, gri, tam = kareler(v)
+            r["vkare"], r["vslogan"] = gri.astype(np.float32), slogan_var(tam)
+        except Exception as e:  # noqa: BLE001
+            r["vhata"] = f"{type(e).__name__} {str(e)[:80]}"
     return r
 
 
@@ -424,11 +434,29 @@ def qc(a77, cl_canli, sadece=None):
                 for al, sl in sup[:3]:
                     kotu.append((al, c, n, tur, sl))
 
-    # --- VIDEO
+    # --- VIDEO (sure + 8 kare: kopya/karisma en yakin komsu, eski slogan) + renk karelerinde eski slogan
+    vk = {c: R[c]["vkare"] for c in ciftler_x if R[c].get("vkare") is not None}
+    yakin = {}
+    for c, g in vk.items():
+        dist = {x: float(np.abs(g - h).mean() / 255 * 100) for x, h in vk.items() if x != c and h.shape == g.shape}
+        if dist:
+            x = min(dist, key=dist.get)
+            yakin[c] = (x, round(dist[x], 3))
+    # kopya esigi olculerek: en yakin komsu uzakliklarinin medyaninin %10'u (ayni dosya ~0; farkli cift burc bolgesi kadar)
+    vesik = round(0.1 * float(np.median([d for _, d in yakin.values()])), 3) if yakin else None
     for c in ciftler_x:
         v = R[c]["video"]
         ekle(c, "", "VIDEO", f"{v[0]:.2f} sn {v[1]}x{v[2]}" if v else "YOK", f"{VIDEO_SN} +- 0.3 sn",
              bool(v) and abs(v[0] - VIDEO_SN) <= 0.3)
+        if v:
+            ekle(c, "", "VIDEO_SLOGAN", f"eski slogan {'VAR' if R[c].get('vslogan') else 'yok'}" + (f" ({R[c]['vhata']})" if R[c].get("vhata") else ""),
+                 "TWO SOULS / ONE BOND yok", R[c].get("vslogan") is False)
+        if c in yakin:
+            x, dd = yakin[c]
+            ortak = bool({R[c]["a"], R[c]["b"]} & {R[x]["a"], R[x]["b"]})
+            ekle(c, "", "VIDEO_CIFT", f"en yakin {x} {dd} (ortak burc {'var' if ortak else 'YOK'})", f"> {vesik}", dd > vesik)
+        for n, bul in sorted((R[c].get("slogan_renk") or {}).items()):
+            ekle(c, n, "ESKI_SLOGAN", f"{bul}", "yok", not bul)
 
     # --- kirpimlar (FAIL) + serit (en kotu 12)
     kotu.sort(key=lambda k: -k[0])
@@ -463,7 +491,7 @@ def qc(a77, cl_canli, sadece=None):
         oz[k] = {"kare_PASS": f"{sum(s['sonuc'] == 'PASS' for s in ss)}/{len(ss)}", "FAIL_cift": len(fc), "cift": fc[:20]}
     tum_fail = sorted({s["cift"] for s in satir if s["sonuc"] == "FAIL"})
     ozet = {"cift": len(ciftler_x), "temiz_cift": len(ciftler_x) - len(tum_fail), "kontrol": oz,
-            "esik": {"fark": esik, "sobel": ts, "cift": cift_esik, "gurultu_kaynagi": kaynak, "ayni_icerik": ayni},
+            "esik": {"fark": esik, "sobel": ts, "cift": cift_esik, "video_kopya": vesik, "gurultu_kaynagi": kaynak, "ayni_icerik": ayni},
             "sistematik": len(sist), "kirpim": len(kirpimlar), "sure_dk": round((time.time() - t0) / 60, 1)}
     (OUT / "TAMSET_OZET.json").write_text(json.dumps(ozet, ensure_ascii=False, indent=1))
     log("OZET " + json.dumps(ozet, ensure_ascii=False))
