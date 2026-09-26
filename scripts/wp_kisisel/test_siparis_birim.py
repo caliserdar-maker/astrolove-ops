@@ -102,10 +102,19 @@ def t_dosya_bul():
         kontrol("dosya_bul: iki goruntu -> DUR", "2 goruntu eslesmesi" in (m or ""), (m or "")[:70])
         m = durur(SP.dosya_bul, d, ["WARM_PARCHMENT", "24x32"], "baski")
         kontrol("dosya_bul: eslesme yok -> DUR", "0 goruntu eslesmesi" in (m or ""))
-        # cift adi da parca olarak suzulur
+        # cift adi TAM BOLUT olarak suzulur: CANCER_LIBRA, CANCER_LIBRA_UZUN'u
+        # yakalamamali (kosu 36230639918 bu yuzden dustu) - regresyon testi.
         (d / "SIPARIS_CANCER_LIBRA_BLACK_24x32.png").write_bytes(b"x")
-        f = SP.dosya_bul(d, ["BLACK", "24x32", "CANCER_LIBRA"], "baski")
-        kontrol("dosya_bul: cift adiyla suzme", f.name == "SIPARIS_CANCER_LIBRA_BLACK_24x32.png", f.name)
+        (d / "SIPARIS_CANCER_LIBRA_UZUN_BLACK_24x32.png").write_bytes(b"x")
+        f = SP.baski_bul(d, "BLACK", "CANCER_LIBRA")
+        kontrol("baski_bul: cift+edisyon siniri (UZUN varyanti karismaz)",
+                f.name == "SIPARIS_CANCER_LIBRA_BLACK_24x32.png", f.name)
+        f = SP.baski_bul(d, "BLACK", "CANCER_LIBRA_UZUN")
+        kontrol("baski_bul: UZUN varyanti dogru secilir",
+                f.name == "SIPARIS_CANCER_LIBRA_UZUN_BLACK_24x32.png", f.name)
+        m = durur(SP.baski_bul, d, "BLACK", "YOK_OLAN")
+        kontrol("baski_bul: bulunamazsa denenen kaliplari yazar",
+                "Denenen kaliplar" in (m or ""), (m or "")[:60])
 
 
 def t_olcu_kontrolu():

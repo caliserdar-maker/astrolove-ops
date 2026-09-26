@@ -245,8 +245,11 @@ jobs:
           rclone copy "gdrive:ASTROLOVE/TEMP/WP_PLATES" _v3/gece -q --max-depth 1 \
             --include "PLATE_MIDNIGHT_BLUE_*.png" --include "PLATE_DEEP_BLACK_*.png"
           echo "gece plakasi $(ls _v3/gece | wc -l) | temiz $(ls _v3/temiz | wc -l) | orijinal $(find _v3/orijinal -name '*.jpg' | wc -l)"
-          rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2" _v3/orijinal -q --include "*/AstroLove_*.jpg" || true
-          find _v3/orijinal -name "AstroLove_*.jpg" -exec cp {} _v3/orijinal/ \; 2>/dev/null || true
+          # Kapi 2 referansi: onceki kosuda 0 dosya geldi. Cift klasorleri dogrudan denenir;
+          # yoksa kapi 2 atlanir ve SEBEBI raporlanir (sessiz atlama yok).
+          for C in CANCER_LIBRA SAGITTARIUS_SAGITTARIUS; do
+            rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/$C" _v3/orijinal -q --include "AstroLove_*.jpg" || true
+          done
           python scripts/wp_kisisel/wp_siparis.py --baski _u/baski --plate _u/plate \
             --temiz _v3/temiz --plakalar _v3/geom --orijinal _v3/orijinal --cikti _out3 \
             --edisyonlar BLUE,BLACK \

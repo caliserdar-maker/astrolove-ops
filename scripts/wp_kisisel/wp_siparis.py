@@ -72,8 +72,26 @@ def dosya_bul(kok, parcalar, ne):
     return d[0]
 
 
+def baski_bul(kok, ed, cift):
+    """Baski dosyasi: cift ile edisyon YAN YANA olacak sekilde aranir.
+
+    `_{cift}_` yetmez: `_CANCER_LIBRA_` , `_CANCER_LIBRA_UZUN_...` icinde de
+    geciyor ve iki eslesme cikiyordu (kosu 36230639918). Cift+edisyon ikilisi
+    sinir olarak kullanilir; uretici adlandirmayi ters sirada yaparsa ikinci
+    aday denenir.
+    """
+    hata = []
+    for aday in (f"_{cift}_{ed}_", f"_{ed}_{cift}_"):
+        try:
+            return dosya_bul(kok, ["24x32", aday], f"{ed}/{cift} baski")
+        except SystemExit as e:
+            hata.append(str(e))
+    raise SystemExit("HATA: baski dosyasi bulunamadi. Denenen kaliplar: "
+                     f"_{cift}_{ed}_ ve _{ed}_{cift}_ | " + " || ".join(hata))
+
+
 def kaynak_oku(baski_kok, plate_kok, ed, cift=""):
-    b = dosya_bul(baski_kok, [ed, "24x32"] + ([cift] if cift else []), f"{ed} baski")
+    b = baski_bul(baski_kok, ed, cift) if cift else dosya_bul(baski_kok, [ed, "24x32"], f"{ed} baski")
     p = dosya_bul(plate_kok, [ed, "24x32"], f"{ed} plate")
     baski, plate = imread(b), imread(p)
     for ad, im in ((b.name, baski), (p.name, plate)):

@@ -61,7 +61,7 @@ def sanat_buyut(pod18, p18, ed_wp):
     return fu, np.clip(au, 0, 1), tani
 
 
-def baski_kur(pod18, p18, p24, ed_wp, isim1, isim2, mesaj, P6, P7, P12, kp):
+def baski_kur(pod18, p18, p24, ed_wp, isim1, isim2, mesaj, P6, P7, P12, kp, geo_ref=None):
     """24x32 isimli baski dosyasi: plate + buyutulmus sanat + yeni isim/mesaj."""
     fu, au, tani = sanat_buyut(pod18, p18, ed_wp)
     poster = np.clip(np.round(p24.astype(np.float32) + fu), 0, 255).astype(np.uint8)
@@ -69,9 +69,15 @@ def baski_kur(pod18, p18, p24, ed_wp, isim1, isim2, mesaj, P6, P7, P12, kp):
     k0 = int(np.abs(poster.astype(np.int16) - p24.astype(np.int16)).max(2)[dis].max()) if dis.any() else 0
     log(f"  buyutme sonrasi murekkep disi fark: {k0} (0 beklenir; zemin gercek 24x32 plate)")
 
-    geo, isim_m, inf_m = V2.metin_olcumu(poster, p24, ed_wp)
-    log(f"  olcum: sol={geo['sol']} ∞={geo['sonsuz']} sag={geo['sag']} "
-        f"cap={geo['cap']} mesaj_cap={geo['mesaj_cap']} kume={geo['kume']['grup']}")
+    geo_olc, isim_m, inf_m = V2.metin_olcumu(poster, p24, ed_wp)
+    log(f"  olcum: sol={geo_olc['sol']} ∞={geo_olc['sonsuz']} sag={geo_olc['sag']} "
+        f"cap={geo_olc['cap']} mesaj_cap={geo_olc['mesaj_cap']} kume={geo_olc['kume']['grup']}")
+    geo = geo_ref or geo_olc          # ayni ciftte TEK geometri (edisyonlar paylasir)
+    if geo_ref:
+        sap = {k: int(np.abs(np.asarray(geo_olc[k]) - np.asarray(geo_ref[k])).max())
+               for k in ("sol", "sag", "sonsuz")}
+        log(f"  geometri referanstan sapma: {json.dumps(sap)} | mesaj_cap olculen "
+            f"{geo_olc['mesaj_cap']} vs referans {geo_ref['mesaj_cap']} (referans kullanildi)")
     ix = np.arange(W24)
     prof = {"sol": V2.profil(poster, isim_m & (ix < geo["sonsuz"][0]),
                              (geo["sol"][0], geo["isim_govde"][0], geo["sol"][1], geo["isim_govde"][1])),
@@ -103,7 +109,7 @@ def baski_kur(pod18, p18, p24, ed_wp, isim1, isim2, mesaj, P6, P7, P12, kp):
     d = np.abs(out.astype(np.int16) - p24.astype(np.int16)).max(2)
     k1 = int(d[alfa <= 0].max()) if (alfa <= 0).any() else 0
     log(f"  baski: murekkep disi fark {k1} (0 beklenir), murekkep {int((alfa > 0).sum())} px")
-    return out, {"buyutme_disi_fark": k0, "baski_disi_fark": k1, "tani": tani,
+    return out, {"_geo": geo, "buyutme_disi_fark": k0, "baski_disi_fark": k1, "tani": tani,
                  "olcum": {k: geo[k] for k in ("sol", "sag", "sonsuz", "cap", "mesaj_cap")},
                  "yerlesim": {k: bilgi[k] for k in ("bosluk", "dx_sonsuz", "mesaj_punto",
                                                     "mesaj_genislik", "mesaj_sinir")}}
@@ -123,7 +129,7 @@ def main():
     es = dict(x.split("=", 1) for x in a.eslesme.split(",") if "=" in x)
     P6, P7, P12, kp = V2.kisisel_kur(a.kisisel)
     cik = Path(a.cikti); cik.mkdir(parents=True, exist_ok=True)
-    rapor = []
+    rapor, geo_cift = [], {}
     for kayit in a.kayit:
         parca = [x.strip() for x in kayit.split("|")]
         if len(parca) not in (4, 5):
@@ -140,7 +146,9 @@ def main():
             p18 = imread(SP.dosya_bul(a.plate, [ed, "18x24"], f"{ed} plate 18x24"))
             p24 = imread(SP.dosya_bul(a.plate, [ed, "24x32"], f"{ed} plate 24x32"))
             olcu_kontrol(p18, f"{ed}_18x24", (W18, H18)); olcu_kontrol(p24, f"{ed}_24x32", (W24, H24))
-            out, bilgi = baski_kur(pod18, p18, p24, ed_wp, i1, i2, msj, P6, P7, P12, kp)
+            out, bilgi = baski_kur(pod18, p18, p24, ed_wp, i1, i2, msj, P6, P7, P12, kp,
+                                   geo_cift.get(cift))
+            geo_cift.setdefault(cift, bilgi.pop("_geo"))
             ad = f"SIPARIS_{etiket}_{ed}_24x32.png"
             cv2.imwrite(str(cik / ad), out)
             rapor.append({"cift": cift, "etiket": etiket, "edisyon": ed, "plaka_edisyonu": ed_wp_ust,
