@@ -116,14 +116,16 @@ def canli(denetle_json, a77, hedef):
 
 # ---------------------------------------------------------------- OCR
 def ocr(im, gecis):
-    """gecis 1: gri 3x, psm 3 | gecis 2: autocontrast 3x, psm 11 (bagimsiz ikinci okuma). -> (metin, [(kelime, conf)])"""
+    """gecis 1: gri 3x, psm 3 | 2: autocontrast 3x, psm 11 | 3: gri 2x, psm 6 (uc bagimsiz okuma).
+    -> (metin, [(kelime, conf)])"""
     k = im.convert("L")
-    k = k.resize((k.width * 3, k.height * 3), Image.LANCZOS)
+    olc = 2 if gecis == 3 else 3
+    k = k.resize((k.width * olc, k.height * olc), Image.LANCZOS)
     if gecis == 2:
         k = ImageOps.autocontrast(k, cutoff=1)
     with tempfile.NamedTemporaryFile(suffix=".png") as f:
         k.save(f.name)
-        out = subprocess.run(["tesseract", f.name, "-", "--psm", "3" if gecis == 1 else "11", "-l", "eng", "tsv"],
+        out = subprocess.run(["tesseract", f.name, "-", "--psm", {1: "3", 2: "11", 3: "6"}[gecis], "-l", "eng", "tsv"],
                              capture_output=True, text=True).stdout
     kel = []
     for sat in out.splitlines()[1:]:
@@ -164,26 +166,35 @@ def norm(t):
     return " ".join(re.sub(r"[^A-Z0-9&+/ ]", " ", t.upper()).split())
 
 
+def tire_var(kel):
+    """tek basina (kelime parcasi olmayan) uzun/orta tire, conf >= KONF"""
+    return any(re.fullmatch("[—–]+", w) and c >= KONF for w, c in kel)
+
+
 def yazi_denetle(im, ref, a, b):
-    """ref: {1: (metin, kel), 2: (...)} CL karesi. -> dict (fark listeleri + kural kontrolleri)."""
+    """ref: {1,2,3: (metin, kel)} CL karesi. Fark ancak UC bagimsiz okumada da suruyorsa kesin:
+    eksik = CL'de guvenle okunan kelime ciftin 3 okumasinin hicbirinde yok; fazla = 3 okumanin hepsinde var, CL'nin
+    hicbir okumasinda yok ve beklenen bir kelimenin parcasi degil (ITH < WITH gibi OCR kirpintisi). -> dict"""
     p1 = ocr(im, 1)
     rk1 = ref[1][1]
+    ref_tum = kelime(rk1) | kelime(ref[2][1]) | kelime(ref[3][1])
     eksik = kelime(rk1, KONF) - kelime(p1[1])
-    fazla = kelime(p1[1], KONF) - kelime(rk1)
-    p2 = None
-    if eksik or fazla:                                   # ikinci bagimsiz gecisle dogrula
-        p2 = ocr(im, 2)
-        rk2 = ref[2][1]
-        eksik = {w for w in eksik if w not in kelime(p2[1])}
-        fazla = {w for w in fazla if w in kelime(p2[1]) and w not in kelime(rk2)}
-    tum = [p1] + ([p2] if p2 else [])
+    fazla = kelime(p1[1], KONF) - ref_tum
+    tum = [p1]
+    if eksik or fazla or tire_var(p1[1]):                # iki bagimsiz okumayla dogrula
+        tum += [ocr(im, 2), ocr(im, 3)]
+        okunan = set().union(*(kelime(p[1]) for p in tum))
+        eksik = {w for w in eksik if not any(w in x for x in okunan)}   # CL kirpintisi (STROLOVE < ASTROLOVE)
+        fazla = {w for w in fazla if all(w in kelime(p[1]) for p in tum[1:])
+                 and not any(w in r for r in ref_tum)}
+    p2 = tum[1] if len(tum) > 1 else None
     ab = {a.upper(), b.upper()}
     ref_burc = kelime(rk1, burc=True) | kelime(ref[2][1], burc=True)
     izinli = ab | (ref_burc - {"CANCER", "LIBRA"})
     yanlis = sorted(kelime(p1[1], KONF, burc=True) - izinli)
     if yanlis and p2 is None:
-        p2 = ocr(im, 2)
-        tum.append(p2)
+        tum += [ocr(im, 2), ocr(im, 3)]
+        p2 = tum[1]
     yanlis = [w for w in yanlis if all(w in kelime(p[1], burc=True) for p in tum)]
     gerekli = set()
     if "CANCER" in ref_burc:
@@ -192,14 +203,14 @@ def yazi_denetle(im, ref, a, b):
         gerekli.add(b.upper())
     eksik_burc = sorted(w for w in gerekli if not any(w in kelime(p[1], burc=True) for p in tum))
     baslik = None
-    if "ASTROLOVE /" in norm(ref[1][0]):
+    if re.search(r"A?STROLOVE /", norm(ref[1][0])):
         ok = False
         for p in tum:
-            m = re.search(r"ASTROLOVE\s*/\s*([A-Z]+)\s*\+\s*([A-Z]+)", norm(p[0]))
+            m = re.search(r"A?STROLOVE\s*/\s*([A-Z]+)\s*\+\s*([A-Z]+)", norm(p[0]))
             if m and sorted(m.groups()) == sorted([a.upper(), b.upper()]):
                 ok = True
         baslik = "PASS" if ok else "FAIL"
-    tire = [w for w, c in p1[1] if ("—" in w or "–" in w) and c >= KONF]
+    tire = ["—"] if len(tum) == 3 and all(tire_var(p[1]) for p in tum) else []
     yasak = [y for y in YASAK if re.search(y, norm(p1[0]))]
     return {"eksik": sorted(eksik), "fazla": sorted(fazla), "yanlis_burc": yanlis, "eksik_burc": eksik_burc,
             "baslik": baslik, "tire": tire, "yasak": yasak, "gecis2": p2 is not None}
@@ -299,7 +310,7 @@ def qc(a77, cl_canli, sadece=None):
         sys.exit("DUR: canli ile ayni-icerik kare yok, esik olculemedi")
 
     # CL OCR (iki gecis), bir kez
-    ref_ocr = {n: {1: ocr(CLT[n], 1), 2: ocr(CLT[n], 2)} for n, g in clg.items() if g.get("tur") in ("kapak", "kart")}
+    ref_ocr = {n: {i: ocr(CLT[n], i) for i in (1, 2, 3)} for n, g in clg.items() if g.get("tur") in ("kapak", "kart")}
     log(f"CL OCR bitti ({time.time() - t0:.0f} sn)")
 
     # paralel cift isleme + ETA
@@ -338,7 +349,7 @@ def qc(a77, cl_canli, sadece=None):
         for n, y in sorted(R[c]["yazi"].items()):
             e = [w for w in y["eksik"] if (n, grup, "eksik", w) not in sis]
             z = [w for w in y["fazla"] if (n, grup, "fazla", w) not in sis]
-            ekle(c, n, "YAZI_KELIME", f"eksik {e} fazla {z}" + (" (2 gecis)" if y["gecis2"] else ""), "0 kelime", not e and not z)
+            ekle(c, n, "YAZI_KELIME", f"eksik {e} fazla {z}" + (" (3 okuma)" if y["gecis2"] else ""), "0 kelime", not e and not z)
             ekle(c, n, "YAZI_BURC", f"yanlis {y['yanlis_burc']} eksik {y['eksik_burc']}", "yanlis/eksik yok",
                  not y["yanlis_burc"] and not y["eksik_burc"])
             if y["baslik"]:
