@@ -156,7 +156,9 @@ def main():
             n, v = len(X.get("images") or []), len(X.get("videos") or [])
             t = tahmin(n, v > 0); top += t
             rapor["ilan"][c] = {"ilan_id": ilan[c], "state": X.get("state"), "foto": n, "video": v,
-                                "video_ad": [x.get("name") for x in X.get("videos") or []], "tahmini_cagri": t}
+                                "video_ad": [x.get("name") for x in X.get("videos") or []], "tahmini_cagri": t,
+                                "galeri": [[x.get("listing_image_id"), x.get("rank")]
+                                           for x in sorted(X.get("images") or [], key=lambda x: x.get("rank") or 0)]}
         rapor["tahmini_toplam_cagri"] = top
         rapor["kota_son"], rapor["cagri"] = kota(api), api.calls
         (OUT / "GALERI_TAMSET.json").write_text(json.dumps(rapor, ensure_ascii=False, indent=1))
@@ -251,6 +253,8 @@ def main():
             "varyasyon": all(vm2.get(v.get("value")) == yeni[dosya_sira[renk_dosya[v.get("value")]]] for v in vimg_once),
             "state_degismedi": L2.get("state") == X.get("state"),
         }
+        if not kontrol["sira"]:
+            r.update(sira_gercek=[[x[0], x[1]] for x in g2 or []], sira_beklenen=[list(b) for b in beklenen])
         r.update(sonuc="PASS" if all(kontrol.values()) else "FAIL", kontrol=kontrol, state_sonra=L2.get("state"),
                  yeni_video=rv.get("video_id"), cagri=api.calls - c0, sn=round(time.time() - t0, 1))
         log(f"[{sira}/{len(secim)}] {c} {r['sonuc']} cagri {r['cagri']} | toplam {api.calls - harcanan0}/{a.butce} "
