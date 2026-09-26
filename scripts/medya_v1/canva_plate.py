@@ -16,6 +16,7 @@ Export URL'leri imzali ve gecici oldugu icin Drive'daki bir JSON'dan okunur:
 import argparse, json, subprocess, urllib.request
 from pathlib import Path
 
+import cv2
 import numpy as np
 from PIL import Image
 
@@ -46,6 +47,30 @@ def indir(url, hedef):
     return hedef
 
 
+def odaklar(d, disi, k, esik=40, en_az=200):
+    """Bant disindaki buyuk farkin NEREDE oldugu: 3000x4000 kutulari.
+
+    Ortanca plate'te sabit ogeler (sonsuz, glif yuvasi) kalir; Canva kopyasinda
+    silindigi icin fark ORADA birikir. 'Tepe yuksek ama onemsiz' demek yerine
+    kutusu olculur.
+    """
+    m = ((d > esik) & disi).astype(np.uint8)
+    kucuk = cv2.resize(m, (m.shape[1] // 8, m.shape[0] // 8),
+                       interpolation=cv2.INTER_AREA)
+    kucuk = (kucuk > 0).astype(np.uint8)
+    n, _, st, _ = cv2.connectedComponentsWithStats(kucuk, 8)
+    kutu = []
+    for i in range(1, n):
+        x, y, w, h, alan = st[i]
+        if alan * 64 < en_az:
+            continue
+        kutu.append({'kutu3000': [round(x * 8 / k), round(y * 8 / k),
+                                  round((x + w) * 8 / k), round((y + h) * 8 / k)],
+                     'px': int(alan * 64)})
+    kutu.sort(key=lambda z: -z['px'])
+    return kutu[:6]
+
+
 def kiyas(yeni, eski):
     """Slogan bandi DISINDA fark ~0 mi? (ayni kaynak, ayni olcek beklenir)"""
     a = np.asarray(Image.open(yeni).convert('RGB')).astype(np.float32)
@@ -61,7 +86,8 @@ def kiyas(yeni, eski):
     dis, ic = d[m], d[~m]
     return {'bant_DISI': {'ort': round(float(dis.mean()), 3),
                           'p99': round(float(np.percentile(dis, 99)), 1),
-                          'tepe': round(float(dis.max()), 1)},
+                          'tepe': round(float(dis.max()), 1),
+                          'odak': odaklar(d, m, k)},
             'bant_ICI': {'ort': round(float(ic.mean()), 2),
                          'p99': round(float(np.percentile(ic, 99)), 1)},
             'px': list(a.shape[:2])}
