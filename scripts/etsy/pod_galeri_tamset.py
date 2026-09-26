@@ -404,7 +404,7 @@ def tahmin(n_eski, video_var):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--mod", choices=["oku", "denetle", "yukle"], required=True)
+    ap.add_argument("--mod", choices=["oku", "denetle", "video", "yukle"], required=True)
     ap.add_argument("--metin", required=True, help="METIN_78.csv (ilan_id, cift)")
     ap.add_argument("--setler", required=True, help="yerel dizin: <CIFT>/SET.json (oku) ya da tam set (yukle)")
     ap.add_argument("--ciftler", default="", help="yukle: virgullu CIFT listesi (bos = seti olan hepsi, referans haric)")
@@ -468,6 +468,25 @@ def main():
     def tuzak_video(c):
         t = tuzak_sec(c, setli)
         return set_indir(a.setler, t, video=True)[1] / "VIDEO.mp4"
+
+    if a.mod == "video":                                 # SALT OKUMA (GOREV 0019): ilan basina 1 cagri + CDN video
+        secv = [x for x in a.ciftler.split(",") if x] or sorted(c for c, x in (onceki.get("ilan") or {}).items()
+                                                               if x.get("sonuc") == "PASS")
+        rapor["video"] = {}
+        for c in secv:
+            SET, d, _ = set_indir(a.setler, c, video=True)
+            v = videolar(api, ilan[c])
+            olc = video_olc(v[0].get("video_url"), d / "VIDEO.mp4", tuzak_video(c)) if len(v) == 1 and v[0].get("video_url") \
+                else {"ok": False, "not": f"video sayisi {len(v)}"}
+            rapor["video"][c] = {"id": [x.get("video_id") for x in v], "olcum": olc,
+                                 "kayitli_yeni_id": ((onceki.get("ilan") or {}).get(c) or {}).get("yeni_video")}
+            log(f"{c} video {rapor['video'][c]}")
+        eski = sorted(c for c, x in rapor["video"].items() if not x["olcum"].get("ok"))
+        rapor["video_ozet"] = {"denetlenen": len(secv), "tutmayan": eski}
+        rapor["kota_son"], rapor["cagri"] = kota(api), api.calls
+        log(f"VIDEO OZET {json.dumps(rapor['video_ozet'])} | cagri {api.calls}")
+        (OUT / "GALERI_TAMSET.json").write_text(json.dumps(rapor, ensure_ascii=False, indent=1))
+        return
 
     if a.mod == "denetle":                               # SALT OKUMA: galeri + varyasyon okunur, CDN ile karsilastirilir
         rapor["denetle"] = {}
