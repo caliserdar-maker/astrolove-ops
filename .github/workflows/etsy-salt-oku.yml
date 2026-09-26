@@ -11,11 +11,11 @@ on:
   workflow_dispatch:
     inputs:
       mod:
-        description: "tarama = tek ilan + 78 POD uretim/kargo | kiyas = 77 POD ilani referansla (GOREV 0017)"
+        description: "tarama = tek ilan + 78 POD uretim/kargo | kiyas = 77 POD ilani referansla (GOREV 0017) | canli_qc = galerisi yuklenen ilanlarin canli gorsel/video QC (GOREV 0019)"
         required: true
         default: "tarama"
         type: choice
-        options: [tarama, kiyas]
+        options: [tarama, kiyas, canli_qc]
       tek_ilan:
         description: "tarama: tek okunacak ilan id | kiyas: referans ilan id (canli Cancer-Libra 4570143815)"
         required: true
@@ -28,7 +28,7 @@ concurrency:
 jobs:
   oku:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -66,6 +66,20 @@ jobs:
           MOD: ${{ inputs.mod }}
         run: |
           set -euo pipefail
+          if [ "$MOD" = "canli_qc" ]; then
+            sudo apt-get update -qq && sudo apt-get install -y -qq tesseract-ocr ffmpeg >/dev/null
+            pip install -q numpy==2.1.3 pillow==11.0.0 scipy==1.14.1
+            G="gdrive:ASTROLOVE/TEMP/POD_KISISEL/A1_77/_galeri"
+            rclone copyto "$G/GALERI_TAMSET.json" _work/g1.json 2>/dev/null || true
+            rclone copyto "$G/GALERI_TAMSET_yukle.json" _work/g2.json 2>/dev/null || true
+            python scripts/etsy/canli_qc.py _work/g1.json,_work/g2.json _work/METIN_78.csv _work/is
+            H="gdrive:ASTROLOVE/TEMP/DIJITAL_78"
+            rclone copyto out/CANLI_QC.csv "$H/CANLI_QC.csv" -q
+            [ -f out/CANLI_SERIT.jpg ] && rclone copyto out/CANLI_SERIT.jpg "$H/CANLI_QC_KIRPIM/CANLI_SERIT.jpg" -q || true
+            rclone copy out/kirpim "$H/CANLI_QC_KIRPIM" -q || true
+            echo "Drive: TEMP/DIJITAL_78/CANLI_QC.csv + CANLI_QC_KIRPIM/"
+            exit 0
+          fi
           if [ "$MOD" = "kiyas" ]; then
             python scripts/etsy/pod_referans_kiyas.py "$TEK" _work/METIN_78.csv
             rclone copy out "gdrive:ASTROLOVE/TEMP/DIJITAL_78" --include "POD_REFERANS_KIYAS.csv" -q
