@@ -187,6 +187,50 @@ jobs:
           echo "WALLPAPER_ORNEK_V2 (dosya | bayt | Drive id)"
           rclone lsf "gdrive:ASTROLOVE/TEMP/DIJITAL_78/V3_BASKI/ORNEK" --format "psi" --separator " | " --files-only -R | sed 's/^/  - /'
 
+      - name: V3 HAZIRLIK OLCUMU (yalniz [v3hazir]) - uretim yok, Drive'a yazmaz
+        # GOREV_0012: baski dosyalarini bu oturum uretecek. Once OLCULUR:
+        # (a) kisisel PLATE'lerin gercek px olcusu (24x32 -> 7200x9600 mu?),
+        # (b) POD_PRINT'te 3 cift icin hangi renk/boy kaynaklari var,
+        # (c) uretici dalindaki boy tablosu ne diyor.
+        if: ${{ contains(github.event.head_commit.message, '[v3hazir]') }}
+        run: |
+          set -euo pipefail
+          mkdir -p _h/plate
+          echo "### 1) kisisel PLATE olculeri"
+          rclone copy "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PLATES" _h/plate -q \
+            --include "BLUE_*" --include "BLACK_*" || true
+          ls -l _h/plate || true
+          python - <<'PYEOF'
+          from pathlib import Path
+          from PIL import Image
+          Image.MAX_IMAGE_PIXELS = None
+          for f in sorted(Path('_h/plate').glob('*')):
+              try:
+                  with Image.open(f) as im:
+                      w, h = im.size
+                  print(f"  {f.name}: {w}x{h} | 3:4 mi = {abs(w/h - 0.75) < 0.002} | "
+                        f"V3 (7200x9600) uyumlu = {(w, h) == (7200, 9600)} | "
+                        f"inc@300dpi = {w/300:.1f}x{h/300:.1f}")
+              except Exception as e:
+                  print(f"  {f.name}: OKUNAMADI {type(e).__name__}: {e}")
+          PYEOF
+          echo "### 2) POD_PRINT kaynaklari (3 cift, MIDNIGHT_BLUE + DEEP_BLACK)"
+          for C in CANCER_LIBRA SAGITTARIUS_SAGITTARIUS; do
+            for R in MIDNIGHT_BLUE DEEP_BLACK; do
+              echo "  -- $C / $R"
+              rclone lsf "gdrive:ASTROLOVE/TEMP/POD_PRINT/$C/$R" 2>/dev/null | sed 's/^/     /' || echo "     (yok)"
+            done
+          done
+          echo "### 3) uretici dalindaki boy tablosu"
+          git fetch --depth 1 origin siparis-baski-v1 -q
+          git show FETCH_HEAD:scripts/medya_v1/siparis_dosyasi.py > _h/uretici.py
+          grep -nE "^BOY = |^DIJITAL_BOY = |^RENKLER = " _h/uretici.py | sed 's/^/  /'
+          echo "### 4) V3 girdi beklentisi"
+          echo "  wp_siparis.py POSTER_W x POSTER_H = 7200 x 9600 (24x32 inc @ 300 dpi)"
+          echo "  CLEAN plakalar: yalniz MIDNIGHT_BLUE / DEEP_BLACK / CHAMPAGNE_IVORY / WARM_PARCHMENT"
+          echo "  eslesme (GOREV_0012): BLUE->MIDNIGHT_BLUE, BLACK->DEEP_BLACK,"
+          echo "                        MODERN->CHAMPAGNE_IVORY, VINTAGE->WARM_PARCHMENT, PURE_WHITE yok"
+
       - name: Rapor birlestir (yalniz [rapor])
         if: ${{ contains(github.event.head_commit.message, '[rapor]') }}
         run: |
