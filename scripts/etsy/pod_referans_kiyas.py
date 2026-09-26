@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""SALT OKUMA (Etsy'ye yazma YOK) - GOREV 0017: 77 POD ilani referansla (canli Cancer-Libra POD) ayni mi?
-Karsilastirma, burc adlari {A}/{B} yer tutucusuyla sablonlanarak yapilir (EN; RU'da hal ekleri nedeniyle burc kokleri).
+"""SALT OKUMA (Etsy'ye yazma YOK): POD ilanlarini sabit onayli semayla karsilastir.
+Canli bir ilan kanon olarak kullanilmaz; referans ilan argumani yalniz medya ve
+envanter gibi bu gorevin degistirmedigi alanlarin operasyonel kiyasina yarar.
  1 METIN: baslik sablonu, 13 tag (ortak 8 + cifte ozel 5), EN aciklama, RU aciklama (+ 2. gecis isaretleri).
  2 KISISEL: personalization sorulari (sayi, zorunlu, metin sablonu).
  3 ENVANTER: urun sayisi (16 boy x 5 renk = 80), boy/renk basina fiyat referansla ayni, stok 999, isleme suresi.
@@ -17,6 +18,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from etsy_common import Etsy, TokenStore, mask  # noqa: E402
+from pod_listing_create import build_listing, build_ru, load_ru_template, personalization_questions  # noqa: E402
+from pod_listing_update import load_template  # noqa: E402
 
 KOTA_TABAN = 230
 OUT = Path("out")
@@ -26,6 +29,18 @@ BURC_RU = {"Aries": "Овн|Овен", "Taurus": "Тел[её]ц|Тельц", "G
            "Virgo": "Дев", "Libra": "Вес", "Scorpio": "Скорпион", "Sagittarius": "Стрел[её]ц|Стрельц",
            "Capricorn": "Козерог", "Aquarius": "Водоле", "Pisces": "Рыб"}
 ISARET = {"en_no_emoji": ("en", "No emoji"), "en_couples": ("en", "couples"), "ru_ingilizce": ("ru", "английскими буквами")}
+
+
+def canonical_schema(a, b):
+    """Canli ilandan bagimsiz, kodda kilitli onayli baslik/tag/soru semasi."""
+    pair = f"{a.upper()}_{b.upper()}"
+    title, tags, description, _ = build_listing(pair, load_template())
+    ru_title, ru_tags, ru_description, _ = build_ru(pair, load_ru_template())
+    return {
+        "title": title, "tags": tags, "description": description,
+        "ru_title": ru_title, "ru_tags": ru_tags, "ru_description": ru_description,
+        "questions": personalization_questions(pair),
+    }
 
 
 def kota(api):
@@ -72,7 +87,7 @@ def sorular(api, shop, lid):
 
 def soru_imza(qs, a, b):
     return [f"{sablon(q.get('question_text'), a, b)}|{q.get('question_type')}|zorunlu={bool(q.get('required'))}"
-            f"|max={q.get('max_allowed_characters')}" for q in qs if isinstance(q, dict)]
+            f"|max={q.get('max_allowed_characters')}|talimat={q.get('instruction')}" for q in qs if isinstance(q, dict)]
 
 
 def envanter(L):
@@ -128,14 +143,15 @@ def main():
 
     R = L[ref_id]
     ra, rb = cift_burclari(cift.get(ref_id) or "Cancer + Libra")
+    canon = canonical_schema(ra, rb)
     ref = {
-        "baslik": sablon(R.get("title"), ra, rb), "aciklama": sablon(R.get("description"), ra, rb),
-        "ru": sablon(ru[ref_id].get("description"), ra, rb, ru=True), "ru_baslik": sablon(ru[ref_id].get("title"), ra, rb, ru=True),
-        "soru": soru_imza(soru[ref_id], ra, rb), "env": envanter(R),
+        "baslik": sablon(canon["title"], ra, rb), "aciklama": sablon(canon["description"], ra, rb),
+        "ru": sablon(canon["ru_description"], ra, rb, ru=True), "ru_baslik": sablon(canon["ru_title"], ra, rb, ru=True),
+        "soru": soru_imza(canon["questions"], ra, rb), "env": envanter(R),
         "alt": [sablon(im.get("alt_text"), ra, rb) for im in R.get("images") or []],
         "video": len(R.get("videos") or []),
     }
-    ref_etiket = R.get("tags") or []
+    ref_etiket = canon["tags"]
     ortak = [t for t in ref_etiket if not re.search("|".join(filter(None, [ra, rb])), t, re.I)]
     print("REFERANS " + json.dumps({"ilan": ref_id, "etiket": len(ref_etiket), "ortak_etiket": len(ortak),
                                     "soru": len(ref["soru"]), "urun": ref["env"][0], "stok": sorted(map(str, ref["env"][2])),
@@ -174,6 +190,8 @@ def main():
                 f1.append("RU " + fark(e(ref["ru"]), xru))
             if sablon(ru[lid].get("title"), a, b, ru=True) != e(ref["ru_baslik"]):
                 f1.append("RU baslik " + fark(e(ref["ru_baslik"]), sablon(ru[lid].get("title"), a, b, ru=True)))
+            if (ru[lid].get("tags") or []) != canonical_schema(a, b)["ru_tags"]:
+                f1.append("RU etiketler kanonik Ingilizce etiketlerle ayni degil")
             isaret_eksik = [k2 for k2, v in ISARET.items()
                             if v[1] not in ((X.get("description") or "") if v[0] == "en" else (ru[lid].get("description") or ""))]
             if isaret_eksik:

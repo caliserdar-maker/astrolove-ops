@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""POD SEO v2 verisi: 78 POD ilani icin title, description, 13 tag (15 Eyl 2026).
-Beklenen SHA-256 tutmazsa DURUR. Kullanim: pod_seo_v2_build.py --out <json>
-"""
+"""ESKI - kullanma: onayli kisisellestirilmis POD sablonundan onceki SEO araci."""
 import argparse
 import hashlib
 import json
 import pathlib
 import sys
+
+raise SystemExit("ESKI - kullanma: scripts/etsy/pod_listing_create.py kanonik ureticidir")
 
 EXPECTED_SHA256 = "d72bf6b31b8b964c962bebdd758f7a7d141e6e79ee0213291a07bcc81b258065"
 
