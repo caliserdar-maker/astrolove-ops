@@ -1,6 +1,6 @@
 # Codex is kuyrugu (Claude yonetir, denetler, sorumludur)
 
-KALICI KURAL (Serdar, 26 Eyl): Agir isin tamami Codex'e. Codex hicbir an bos kalmaz: en az 5 is calisir.
+KALICI KURAL (Serdar, 26 Eyl): Agir isin tamami Codex'e. KOTA (26 Eyl 15:40): ChatGPT haftalik limiti %17 kaldi (Codex+Calisma ortak, 30 Eyl sifirlanir). En fazla 3 is, yalniz kritik. 0027 (log) ve 0037 (SSS) beklemede.
 Claude: gorev yazar, her teslimi okur, diff'i uygular, test eder, gerekirse duzeltir, main'e alir, kosuyu baslatir,
 sonucu denetler, bulgudan yeni Codex isi uretir. Hedef: Etsy magazasinda HER SEY hatasiz, eksiksiz, Etsy kurallarina ve SEO'ya uygun.
 Teslim: PR yorumunun sonunda TAM unified diff. Etsy'ye yazan her adim Serdar kararlari dahilinde, pano "CLAUDE ONAYI" ile.
