@@ -645,6 +645,7 @@ def kapilar(urun, geo_ref, duzen, orijinal, cift, cikti, edisyonlar=None, orij_e
                       and all(v["gecti"] for dv in K["metin_4renk"].values() for v in dv.values())
                       and all(v["gecti"] for v in K["ek4_harf_yuksekligi"].values())
                       and all(u["kapi1"]["gecti"] for u in urun.values()))
+    Path(cikti).mkdir(parents=True, exist_ok=True)   # cift basina alt klasor olabilir
     (Path(cikti) / "WP_V2_KAPILAR.json").write_text(json.dumps(K, indent=1))
     return K
 

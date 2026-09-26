@@ -143,6 +143,17 @@ def t_murekkep_rengi():
             f"poz={int((alfa_o > 0).sum())} kaynak={tani['murekkep_kaynagi']}")
 
 
+def t_kapilar_klasor():
+    """kapilar cikti klasorunu OLUSTURMADAN json yaziyordu: 18 wallpaper uretilmis
+    ama kapilar ve seritler yazilamamisti (kosu 36232634310, FileNotFoundError)."""
+    import tempfile as _t
+    with _t.TemporaryDirectory() as td:
+        yol = Path(td) / "KAPI_CANCER_LIBRA"          # YOK
+        K = V2.kapilar({}, None, {"kutular": {}}, "", "CANCER_LIBRA", yol, ["BLUE"])
+        kontrol("kapilar: olmayan cikti klasorunu olusturur",
+                (yol / "WP_V2_KAPILAR.json").exists() and isinstance(K, dict))
+
+
 def t_halka_guard():
     from wp_plate_pilot import BOX_NAMES
     alfa = np.zeros((SP.POSTER_H, SP.POSTER_W), np.float32)
@@ -161,7 +172,8 @@ def t_halka_guard():
 
 
 if __name__ == "__main__":
-    for t in (t_uc_grup, t_murekkep, t_murekkep_rengi, t_dosya_bul, t_olcu_kontrolu, t_halka_guard):
+    for t in (t_uc_grup, t_murekkep, t_murekkep_rengi, t_dosya_bul, t_olcu_kontrolu,
+              t_kapilar_klasor, t_halka_guard):
         t()
     print(f"\nTOPLAM {len(GECTI) + len(KALDI)} kontrol, {len(GECTI)} PASS, {len(KALDI)} FAIL")
     sys.exit(1 if KALDI else 0)
