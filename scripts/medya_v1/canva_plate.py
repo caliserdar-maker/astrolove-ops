@@ -47,6 +47,18 @@ def indir(url, hedef):
     return hedef
 
 
+def uzak_px(yol):
+    """PLATES'teki PNG'nin px olcusu - 33 bayt basliktan (dosyayi indirmeden)."""
+    ham = subprocess.run(['rclone', '--timeout', '120s', '--retries', '3',
+                          'cat', '--count', '33', f'{PLATES}/{yol}'],
+                         capture_output=True, timeout=300)
+    if ham.returncode or len(ham.stdout) < 33 or ham.stdout[:8] != b'\x89PNG\r\n\x1a\n':
+        raise RuntimeError(f'PNG basligi okunamadi: {yol}')
+    en = int.from_bytes(ham.stdout[16:20], 'big')
+    boy = int.from_bytes(ham.stdout[20:24], 'big')
+    return en, boy
+
+
 def odaklar(d, disi, k, esik=40, en_az=200):
     """Bant disindaki buyuk farkin NEREDE oldugu: 3000x4000 kutulari.
 
@@ -121,7 +133,29 @@ def main():
                 rc('copyto', f'{PLATES}/{d["kiyas"]}', str(W / d['kiyas']))
                 r['kiyas'] = kiyas(f, W / d['kiyas'])
                 (W / d['kiyas']).unlink(missing_ok=True)
-            if a.yukle:
+            if d.get('boylar'):
+                # Ayni orandaki her satilan boy TEK export'tan yeniden
+                # orneklenir (plate hattinin TUREV mantigi). Hedef px, mevcut
+                # plate'in PNG basligindan okunur - tahmin yok.
+                r['boylar'] = {}
+                with Image.open(f) as im:
+                    kaynak = im.convert('RGB')
+                    kaynak.load()
+                for boy, ref in d['boylar'].items():
+                    try:
+                        en, yuk = uzak_px(ref)
+                        cik = W / f'{d["ad"]}_{boy}.png'
+                        (kaynak if (en, yuk) == kaynak.size
+                         else kaynak.resize((en, yuk), Image.LANCZOS)).save(cik, 'PNG')
+                        if a.yukle:
+                            rc('copyto', str(cik), f'{PLATES}/{d["ad"]}_{boy}.png')
+                        r['boylar'][boy] = {'px': [en, yuk], 'MB': round(cik.stat().st_size / 1e6, 1),
+                                            'yuklendi': a.yukle}
+                        cik.unlink(missing_ok=True)
+                    except BaseException as e:                        # noqa: BLE001
+                        r['boylar'][boy] = {'hata': f'{type(e).__name__}: {e}'}
+                kaynak.close()
+            elif a.yukle:
                 rc('copyto', str(f), f'{PLATES}/{ad}.png')
                 r['yuklendi'] = f'{ad}.png'
             f.unlink(missing_ok=True)
