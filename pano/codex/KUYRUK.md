@@ -5,22 +5,21 @@ Claude: gorev yazar, her teslimi okur, diff'i uygular, test eder, gerekirse duze
 sonucu denetler, bulgudan yeni Codex isi uretir. Hedef: Etsy magazasinda HER SEY hatasiz, eksiksiz, Etsy kurallarina ve SEO'ya uygun.
 Teslim: PR yorumunun sonunda TAM unified diff. Etsy'ye yazan her adim Serdar kararlari dahilinde, pano "CLAUDE ONAYI" ile.
 
-## Calisan (13:00)
+## Calisan (14:30)
 - IS_0019 PR #32 POD fiyat/SKU/envanter
-- IS_0026 PR #39 onay akisi workflow baglantisi
 - IS_0027 PR #40 tum workflow hata logu Drive
-- IS_0028 PR #41 magaza metinleri + profil duzeltme taslaklari
-- IS_0029 PR #42 dijital 390->78 donusum kuru kosu plani
-- IS_0030 PR #43 gunluk magaza saglik raporu
+- IS_0031 PR #44 gorsel-denetim cikti + kisisel_uyum POD soru kurali
+- IS_0032 PR #45 kisisel dijital teslim modeli (Etsy kurallari, kaynakli)
+- IS_0033 PR #46 kisisel dijital ilan sablonu (78+78)
 
-## Kosuda / sonuclar
-- varyasyon-canli 12:33: 42/43 PASS (CL FAIL -> medya_GOREV_0027)
-- magaza-ayar: kargo profili processing null, about metni -> IS_0028
-- tamset-77: KeyError 'blue' (TS77 listeleri yok) -> video_GOREV_0018
-- gorsel-denetim, kisisel-uyum, magaza-denetim: dispatch 12:58
+## Bulgular (14:30)
+- varyasyon-canli: 42/43 PASS (CL -> medya_GOREV_0027)
+- kisisel_uyum: 545 ilan; 467 dijital hala anlik indirme + kisisellestirme kapali (donusum bekliyor); POD soru kurali hatali olabilir -> 0031
+- magaza-ayar: kargo profili processing null; about metni -> MAGAZA_METINLERI.md taslak (Serdar onayi)
+- tamset-77: TS77 listeleri yok -> video_GOREV_0018
 
 ## Biten
-- 0002-0011, 0013-0018, 0020-0025 main'de; 0012 siparis-baski-v1; 0015 medya-v1
+- 0002-0018, 0020-0026, 0028-0030 main'de; 0012 siparis-baski-v1; 0015 medya-v1
 - 0001 PR #13: pod kuru kosu bekleniyor
 
 ## Siradaki (bulgulara gore genisler)
