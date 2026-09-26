@@ -56,7 +56,7 @@ CARDS_AFTER = 3          # kartlar ana edisyonun ilk 3 karesinden sonra (rank 4-
 
 TITLE = "{S1} and {S2} Zodiac Wall Art, Personalized Couple Print with Names and Message, Unframed"
 NAME_INSTRUCTION = "Up to 11 letters. Printed in capitals."
-MESSAGE_INSTRUCTION = "Up to 35 characters, including spaces. Printed as you type it."
+MESSAGE_INSTRUCTION = "Up to 35 characters, including spaces. Printed as you type it. No emoji."  # canli 78 ilandaki metinle ayni (26 Eyl)
 EDITIONS = ["MIDNIGHT_BLUE", "DEEP_BLACK", "WARM_PARCHMENT", "CHAMPAGNE_IVORY", "PURE_WHITE"]
 ED_NAME = {"MIDNIGHT_BLUE": "Midnight Blue", "DEEP_BLACK": "Deep Black", "WARM_PARCHMENT": "Warm Parchment",
            "CHAMPAGNE_IVORY": "Champagne Ivory", "PURE_WHITE": "Pure White"}
