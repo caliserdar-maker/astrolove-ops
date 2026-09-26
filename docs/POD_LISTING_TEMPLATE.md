@@ -36,11 +36,15 @@ One original emblem merges the {S1} and {S2} symbols: fine lines on a calm, soli
 
 ✦ MUSEUM-QUALITY MATERIALS
 - Hahnemühle Photo Rag 308 gsm, 100% cotton fine art paper
+<!-- IZINLI LISTE DISI: lignin-free ve ISO 9706 conform ifadesi yayin oncesi ayrica dogrulanmali. -->
 - Acid- and lignin-free, ISO 9706 conform
+<!-- IZINLI LISTE DISI: 300 dpi iddiasi yayin oncesi ayrica dogrulanmali. -->
 - Archival pigment giclée printing at 300 dpi
 - Matte, non-reflective surface
 - Gold tones are printed as flat golden ink, not metallic foil
+<!-- IZINLI LISTE DISI: vegan-certified iddiasi yayin oncesi ayrica dogrulanmali. -->
 - Vegan-certified paper, natural white tone
+<!-- IZINLI LISTE DISI: sustainably sourced, plastic-free ve nearest lab iddialari yayin oncesi ayrica dogrulanmali. -->
 - Sustainably sourced fibres, plastic-free packaging, printed at the lab nearest you
 
 ✦ 5 COLOR EDITIONS
@@ -54,30 +58,30 @@ The same design is available as a digital edition:
 ✦ 16 SIZES (choose from the Size menu)
 
 Ratio 4:5
-8x10 in — 20×25 cm
-16x20 in — 41×51 cm
-24x30 in — 61×76 cm
+8x10 in - 20×25 cm
+16x20 in - 41×51 cm
+24x30 in - 61×76 cm
 
 Ratio 3:4
-12x16 in — 30×41 cm
-18x24 in — 46×61 cm
-24x32 in — 61×81 cm
-30x40 in — 76×102 cm
+12x16 in - 30×41 cm
+18x24 in - 46×61 cm
+24x32 in - 61×81 cm
+30x40 in - 76×102 cm
 
 Ratio 2:3
-12x18 in — 30×46 cm
-16x24 in — 41×61 cm
-20x30 in — 51×76 cm
-24x36 in — 61×91 cm
+12x18 in - 30×46 cm
+16x24 in - 41×61 cm
+20x30 in - 51×76 cm
+24x36 in - 61×91 cm
 
 Ratio 11:14
-11x14 in — 28×36 cm
+11x14 in - 28×36 cm
 
 A-series (ISO)
-A4 — 21×30 cm
-A3 — 30×42 cm
-A2 — 42×59 cm
-A1 — 59×84 cm
+A4 - 21×30 cm
+A3 - 30×42 cm
+A2 - 42×59 cm
+A1 - 59×84 cm
 
 Not sure? See the size guide photo.
 
@@ -85,12 +89,12 @@ Not sure? See the size guide photo.
 Each print is made to order by our production partner, Prodigi. Processing time is shown in the shipping details above. 8x10 and A4 ship flat; all other sizes ship rolled in a sturdy tube. US orders are printed in the US; EU and UK orders at our UK/EU lab; orders elsewhere at the nearest available lab.
 
 ✦ CARE
-Handle by the edges. If a rolled print curls, lay it flat under a weight for 24–48 hours before framing. Frame behind glass, away from direct sunlight.
+Handle by the edges. If a rolled print curls, lay it flat under a weight for 24-48 hours before framing. Frame behind glass, away from direct sunlight.
 
 ✦ PLEASE NOTE
 - Frame not included: prints are sold unframed; frames in photos are for display only.
 - Colors may vary slightly between your screen and the printed piece.
-- On matte cotton paper, deep blacks print as a rich charcoal rather than screen black — this is the natural character of fine art paper.
+- On matte cotton paper, deep blacks print as a rich charcoal rather than screen black - this is the natural character of fine art paper.
 
 ✦ RETURNS & REPRINTS
 Every print is made just for you, so we can't accept returns or exchanges. If your print arrives damaged or with a defect, please send us a photo within 7 days and we'll happily reprint it at no cost.
@@ -139,18 +143,22 @@ Tag seti (RU, 13, <= 20 karakter):
 Aciklama (RU):
 
 <!-- RU_DESCRIPTION_BEGIN -->
-{PAIR_RU} — зодиакальный постер: минималистичный арт-принт, объединяющий оба знака в одном чистом линейном символе совместимости. Музейное качество жикле, печать на заказ, доставка без рамы.
+{PAIR_RU} - зодиакальный постер: минималистичный арт-принт, объединяющий оба знака в одном чистом линейном символе совместимости. Музейное качество жикле, печать на заказ, доставка без рамы.
 
 ✦ АРТ
 Одна оригинальная эмблема объединяет символы {S1RU} и {S2RU}: тонкие линии на спокойном однотонном фоне. Разработано студией AstroLove для пар, которые любят астрологию. Тихий современный акцент для спальни, гостиной или галерейной стены.
 
 ✦ МАТЕРИАЛЫ МУЗЕЙНОГО КАЧЕСТВА
 - Hahnemühle Photo Rag 308 г/м², 100% хлопковая художественная бумага
+<!-- IZINLI LISTE DISI: lignin-free ve ISO 9706 conform cevirisi yayin oncesi ayrica dogrulanmali. -->
 - Без кислоты и лигнина, соответствует ISO 9706
+<!-- IZINLI LISTE DISI: 300 dpi iddiasinin cevirisi yayin oncesi ayrica dogrulanmali. -->
 - Архивная пигментная печать жикле, 300 dpi
 - Матовая, неотражающая поверхность
 - Золотые тона печатаются плоской золотистой краской, не металлической фольгой
+<!-- IZINLI LISTE DISI: vegan-certified cevirisi yayin oncesi ayrica dogrulanmali. -->
 - Веганская сертифицированная бумага, натуральный белый тон
+<!-- IZINLI LISTE DISI: sustainable, plastic-free ve nearest lab cevirileri yayin oncesi ayrica dogrulanmali. -->
 - Сырьё из устойчивых источников, упаковка без пластика, печать в ближайшей к вам лаборатории
 
 ✦ 5 ЦВЕТОВЫХ ИЗДАНИЙ
@@ -164,56 +172,56 @@ Champagne Ivory · Pure White · Warm Parchment · Midnight Blue · Deep Black
 ✦ 16 РАЗМЕРОВ (выберите в меню Size)
 
 Соотношение 4:5
-8x10 in — 20×25 см
-16x20 in — 41×51 см
-24x30 in — 61×76 см
+8x10 in - 20×25 см
+16x20 in - 41×51 см
+24x30 in - 61×76 см
 
 Соотношение 3:4
-12x16 in — 30×41 см
-18x24 in — 46×61 см
-24x32 in — 61×81 см
-30x40 in — 76×102 см
+12x16 in - 30×41 см
+18x24 in - 46×61 см
+24x32 in - 61×81 см
+30x40 in - 76×102 см
 
 Соотношение 2:3
-12x18 in — 30×46 см
-16x24 in — 41×61 см
-20x30 in — 51×76 см
-24x36 in — 61×91 см
+12x18 in - 30×46 см
+16x24 in - 41×61 см
+20x30 in - 51×76 см
+24x36 in - 61×91 см
 
 Соотношение 11:14
-11x14 in — 28×36 см
+11x14 in - 28×36 см
 
 Серия A (ISO)
-A4 — 21×30 см
-A3 — 30×42 см
-A2 — 42×59 см
-A1 — 59×84 см
+A4 - 21×30 см
+A3 - 30×42 см
+A2 - 42×59 см
+A1 - 59×84 см
 
 Не уверены? Смотрите фото с таблицей размеров.
 
 ✦ ПЕЧАТЬ НА ЗАКАЗ И ДОСТАВКА
-Каждый постер печатается на заказ нашим производственным партнёром Prodigi. Срок изготовления указан в деталях доставки выше. 8x10 и A4 отправляются плоскими; остальные размеры — в прочном тубусе. Заказы из США печатаются в США; заказы из ЕС и Великобритании — в нашей лаборатории в Великобритании/ЕС; остальные заказы — в ближайшей доступной лаборатории.
+Каждый постер печатается на заказ нашим производственным партнёром Prodigi. Срок изготовления указан в деталях доставки выше. 8x10 и A4 отправляются плоскими; остальные размеры - в прочном тубусе. Заказы из США печатаются в США; заказы из ЕС и Великобритании - в нашей лаборатории в Великобритании/ЕС; остальные заказы - в ближайшей доступной лаборатории.
 
 ✦ УХОД
-Держите за края. Если свёрнутый постер скручивается, положите его под груз на 24–48 часов перед оформлением в раму. Оформляйте под стекло, вдали от прямых солнечных лучей.
+Держите за края. Если свёрнутый постер скручивается, положите его под груз на 24-48 часов перед оформлением в раму. Оформляйте под стекло, вдали от прямых солнечных лучей.
 
 ✦ ОБРАТИТЕ ВНИМАНИЕ
-- Рама не входит в комплект: постеры продаются без рамы; рамы на фотографиях — только для демонстрации.
+- Рама не входит в комплект: постеры продаются без рамы; рамы на фотографиях - только для демонстрации.
 - Цвета могут немного отличаться между экраном и печатью.
-- На матовой хлопковой бумаге глубокий чёрный печатается как насыщенный угольный, а не как чёрный на экране — это естественное свойство художественной бумаги.
+- На матовой хлопковой бумаге глубокий чёрный печатается как ��асыщенный угольный, а не как чёрный на экране - это естественное свойство художественной бумаги.
 
 ✦ ВОЗВРАТ И ПЕРЕПЕЧАТКА
-Каждый постер печатается специально для вас, поэтому мы не принимаем возвраты и обмены. Если постер пришёл повреждённым или с дефектом, пришлите фото в течение 7 дней — мы бесплатно напечатаем его заново.
+Каждый постер печатается специально для вас, поэтому мы не принимаем возвраты и обмены. Если постер пришёл повреждённым или с дефектом, пришлите фото в течение 7 дней - мы бесплатно напечатаем его заново.
 
 ✦ ПОДАРОК СО СМЫСЛОМ
 Продуманный подарок на годовщину, свадьбу, помолвку или День святого Валентина для пары, которая любит астрологию.
 
-Все дизайны AstroLove — оригинальные работы нашей студии.
+Все дизайны AstroLove - оригинальные работы нашей студии.
 <!-- RU_DESCRIPTION_END -->
 
 ## Magaza nesneleri (pod-listing-create apply, 6 Eyl 2026 kosulari)
 
-- Kargo profili "POD Prints – Free Shipping" 314711751541: cikis US 28216 (Prodigi Charlotte);
+- Kargo profili "POD Prints - Free Shipping" 314711751541: cikis US 28216 (Prodigi Charlotte);
   US 3-8, CA/AU/GB 5-10, EU 5-12 is gunu 0 USD; Everywhere else 10.99 USD 7-21 gun (Prodigi 8 ulke
   Standard ortalamasi 17.91 - Budget US 7.10, TEMP/PRODIGI/PRODIGI_SHIP_EVERYWHERE.md).
 - Bolum "Zodiac Fine Art Prints" 60204164; iade politikasi 1513990287785 (iade/degisim yok).
@@ -228,7 +236,7 @@ A1 — 59×84 см
 - SKU: `POD-<burc3>_<burc3>-<edisyon2>-<boyut>` (or. POD-ARI_LEO-MB-30x40; Etsy 32 karakter siniri; `scripts/etsy/pod_sku.py`).
 - Ilan alanlari (Mo 6 Eyl): who_made=i_did (production partner Prodigi), should_auto_renew=true,
   ozellikler Orientation=Vertical (Etsy "Portrait" karsiligi), Framing=Unframed, Number of pieces included=1, Material=Paper
-  (taxonomy 121 possible_values'tan id), gumruk tarife 491191 (HS 4911.91) — API'de alan yok, panelden.
+  (taxonomy 121 possible_values'tan id), gumruk tarife 491191 (HS 4911.91) - API'de alan yok, panelden.
 - Uretim yontemi / arac ("how it's made", "tools") alanlari (EK 2, 6 Eyl): Etsy Open API v3'te yok
   (OAS taramasi etsy-oas-probe 34036607282 ve 34040431691; updateListing govdesinde alan yok) -> bos birakilir,
   AI uretici ISARETLENMEZ. Tarife ve GPSR alanlarina dokunulmaz.

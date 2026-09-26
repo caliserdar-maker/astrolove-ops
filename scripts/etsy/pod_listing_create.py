@@ -54,7 +54,9 @@ MAX_IMAGES = 12          # EK 3 (6 Eyl): 10 kare + 2 teknik kart
 PIX_MAX = 6.0            # geri okuma piksel esigi (gri 48x48 ortalama fark; ayni gorsel yeniden kodlanmis <= 0.09 olculdu)
 CARDS_AFTER = 3          # kartlar ana edisyonun ilk 3 karesinden sonra (rank 4-5)
 
-TITLE = "{S1} and {S2} Zodiac Wall Art, Couple Compatibility Giclée Print, Unframed Fine Art Poster, Gift for Couples"
+TITLE = "{S1} and {S2} Zodiac Wall Art, Personalized Couple Print with Names and Message, Unframed"
+NAME_INSTRUCTION = "Up to 11 letters. Printed in capitals."
+MESSAGE_INSTRUCTION = "Up to 35 characters, including spaces. Printed as you type it."
 EDITIONS = ["MIDNIGHT_BLUE", "DEEP_BLACK", "WARM_PARCHMENT", "CHAMPAGNE_IVORY", "PURE_WHITE"]
 ED_NAME = {"MIDNIGHT_BLUE": "Midnight Blue", "DEEP_BLACK": "Deep Black", "WARM_PARCHMENT": "Warm Parchment",
            "CHAMPAGNE_IVORY": "Champagne Ivory", "PURE_WHITE": "Pure White"}
@@ -120,8 +122,6 @@ AUTO_RENEW = True
 ATTRS = {"Orientation": "Vertical", "Framing": "Unframed", "Number of pieces included": "1", "Material multi": "Paper"}
 # RU katmani (docs/POD_LISTING_TEMPLATE.md ile ayni)
 TITLE_RU = "{S1RU} и {S2RU} зодиак постер, совместимость пары, жикле принт без рамы, подарок паре"
-TAGS_RU = ["зодиак постер", "{pair}", "совместимость пары", "астрология декор", "подарок паре зодиак", "подарок на годовщину",
-           "постер знак зодиака", "декор для пары", "подарок астрологу", "минимализм постер", "арт принт", "свадебный подарок", "небесный декор"]
 MAX_TAG_RU = 20                   # Etsy etiket siniri (wp_listing_update.MAX_TAG ile ayni)
 SIGN_RU = {"Aquarius": "Водолей", "Aries": "Овен", "Taurus": "Телец", "Gemini": "Близнецы", "Cancer": "Рак", "Leo": "Лев",
            "Virgo": "Дева", "Libra": "Весы", "Scorpio": "Скорпион", "Sagittarius": "Стрелец", "Capricorn": "Козерог", "Pisces": "Рыбы"}
@@ -225,6 +225,36 @@ def build_listing(pair, desc_tpl, links=None):
     return title, tags, desc, note
 
 
+def personalization_questions(pair):
+    """Onayli uc zorunlu metin alanini uret; burc sirasi secenegi yoktur."""
+    s1, s2 = (part.capitalize() for part in pair.split("_", 1))
+    labels = ("Left name", "Right name") if s1 == s2 else (f"Name under {s1}", f"Name under {s2}")
+    return [
+        {"question_text": labels[0], "instruction": NAME_INSTRUCTION, "question_type": "text", "required": True,
+         "max_allowed_characters": 11},
+        {"question_text": labels[1], "instruction": NAME_INSTRUCTION, "question_type": "text", "required": True,
+         "max_allowed_characters": 11},
+        {"question_text": "Your message", "instruction": MESSAGE_INSTRUCTION, "question_type": "text", "required": True,
+         "max_allowed_characters": 35},
+    ]
+
+
+def validate_personalization(questions):
+    expected_lengths = [11, 11, 35]
+    expected_instructions = [NAME_INSTRUCTION, NAME_INSTRUCTION, MESSAGE_INSTRUCTION]
+    if len(questions) != 3 or any(
+            q.get("question_type") != "text" or q.get("required") is not True
+            or q.get("max_allowed_characters") != expected_lengths[i]
+            or q.get("instruction") != expected_instructions[i]
+            for i, q in enumerate(questions)):
+        raise SystemExit("HATA: onayli 3 zorunlu kisisellestirme alani eksik; ilan olusturulmadi")
+    names = [q.get("question_text") for q in questions]
+    distinct_names = all(isinstance(name, str) and name.startswith("Name under ") for name in names[:2])
+    if names[2] != "Your message" or not (distinct_names or names[:2] == ["Left name", "Right name"]):
+        raise SystemExit("HATA: onayli kisisellestirme soru metinleri eksik; ilan olusturulmadi")
+    return questions
+
+
 def load_ru_template():
     return load_block(TEMPLATE_MD.read_text(encoding="utf-8"), "RU_DESCRIPTION")
 
@@ -243,7 +273,8 @@ def build_ru(pair, ru_tpl, links=None):
         if len(short) > MAX_TAG_RU:
             note += " [SIGMIYOR: elle karar gerekir]"
         ptag = short
-    tags = [t.format(pair=ptag) for t in TAGS_RU]
+    # Etsy RU ceviri payload'inda etiketler de magazanin kanonik Ingilizce etiketleridir.
+    tags = build_text(pair, fill_digital(load_template(), None, "en"))[0]
     title = TITLE_RU.format(S1RU=R1, S2RU=R2)
     desc = ru_tpl.replace("{PAIR_RU}", f"{R1} и {R2}").replace("{S1RU}", R1).replace("{S2RU}", R2)
     left = re.findall(r"\{[A-Za-z0-9_]+\}", desc)
@@ -527,6 +558,7 @@ def listing_body(title, desc, tags, d, base_price):
 
 def create_pair(api, shop, pair, d, prices, img_root, primary, frames, st, state_path, out_dir, media_root=None):
     title, tags, desc, note = build_listing(pair, load_template())
+    questions = validate_personalization(personalization_questions(pair))
     media = media_plan(media_root, pair, primary)
     eksik = media_missing(media)                      # kart/video eksik: kosu durmaz, raporlanir
     plan = image_plan(img_root, pair, primary, frames, media)
@@ -581,6 +613,7 @@ def create_pair(api, shop, pair, d, prices, img_root, primary, frames, st, state
         cur = api.get(tpath, ok404=True)
         tbody = {"title": ru_title, "description": ru_desc, "tags": ",".join(ru_tags)}
         (api.put if cur is not None else api.post)(tpath, tbody)
+        api.put_json(f"/shops/{shop}/listings/{lid}/personalization", {"personalization_questions": questions})
         set_stage(st, state_path, pair, lid, "fields", ("RU tag notu: " + ru_note) if ru_note else "")
         stage = "fields"
 
@@ -750,7 +783,8 @@ def main():
             (out_dir / f"{pair}_payload.json").write_text(json.dumps(
                 {"listing": body, "images": [(rk, ed, str(p) if p else None, c, k) for rk, ed, p, c, k in plan], "inventory": inv,
                  "video": str(media["VIDEO"]) if media.get("VIDEO") else None, "eksik": eksik,
-                 "attrs": d.get("attr_plan"), "ru": {"title": ru_title, "tags": ru_tags, "description": ru_desc, "note": ru_note}},
+                 "attrs": d.get("attr_plan"), "personalization": {"personalization_questions": validate_personalization(personalization_questions(pair))},
+                 "ru": {"title": ru_title, "tags": ru_tags, "description": ru_desc, "note": ru_note}},
                 indent=1, ensure_ascii=False))
             status = "HAZIR" if not (missing or miss_img or iss) else "EKSIK: " + "; ".join(
                 ([f"fiyat {missing}"] if missing else []) + ([f"gorsel {miss_img}"] if miss_img else []) + iss)
