@@ -103,11 +103,52 @@ def kenar_olc(once, sonra, m):
     return d
 
 
+SAYFA_EN = 2200
+SAYFA_BOYLAR = ('30x40', '16x20', '24x36', '11x14', 'A3')   # oran basina bir temsilci
+
+
+def gerilmis(a, pay=18.0):
+    """Yerel zemin etrafinda +-pay seviyeye gerer; 15-20 seviyelik iz goze gorunur."""
+    z = float(np.median(a))
+    return np.clip((a - (z - pay)) * (255.0 / (2 * pay)), 0, 255)
+
+
+def sayfa_yap(bloklar, cik):
+    """ONAY SAYFASI: her blok = etiket + ONCE (HAM) + SONRA (Canva) + SONRA gerilmis.
+
+    Serdar gozle onaylar; olcutler etikette yazili (GOREV_0014: iki olcut)."""
+    from PIL import ImageDraw
+    parcalar = []
+    for etiket, once, sonra in bloklar:
+        seritler = []
+        for a in (once, sonra, gerilmis(sonra)):
+            im = Image.fromarray(np.clip(a, 0, 255).astype(np.uint8))
+            h = max(int(im.height * SAYFA_EN / im.width), 1)
+            seritler.append(im.resize((SAYFA_EN, h), Image.LANCZOS))
+        yuk = 30 + sum(s.height + 8 for s in seritler)
+        blok = Image.new('L', (SAYFA_EN, yuk), 255)
+        ImageDraw.Draw(blok).text((8, 8), etiket, fill=0)
+        y = 30
+        for s_ in seritler:
+            blok.paste(s_, (0, y)); y += s_.height + 8
+        parcalar.append(blok)
+    toplam = sum(b.height + 20 for b in parcalar)
+    sayfa = Image.new('L', (SAYFA_EN, toplam), 200)
+    y = 0
+    for b in parcalar:
+        sayfa.paste(b, (0, y)); y += b.height + 20
+    sayfa.convert('RGB').save(cik, 'JPEG', quality=90)
+    return sayfa.size
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--boy', default='30x40', help='virgulle; "hepsi" = tum satilan boylar')
     ap.add_argument('--edisyon', default='')
+    ap.add_argument('--sayfa', action='store_true',
+                    help='onay sayfasi uret ve PLATES/SLOGAN_ONAY_CANVA.jpg olarak yukle')
     a = ap.parse_args()
+    bloklar = []
     eds = [e for e in EDISYONLAR if not a.edisyon or e in a.edisyon.split(',')]
     boylar = list(ORAN) if a.boy == 'hepsi' else a.boy.split(',')
     rapor, say = {}, {'TEMIZ': 0, 'IZ/OLCULEMEDI': 0, 'hata': 0}
@@ -143,6 +184,11 @@ def main():
                 say['TEMIZ' if temiz else 'IZ/OLCULEMEDI'] += 1
                 rapor[anahtar] = {'maske_px': int(m.sum()), 'sapma': s, 'kenar': k,
                                   'SONUC': 'TEMIZ' if temiz else f"{s['sonuc']} / {k['sonuc']}"}
+                if a.sayfa and boy in SAYFA_BOYLAR:
+                    bloklar.append((f"{anahtar}  ust: ONCE (HAM, slogan var)  orta: SONRA (Canva)  "
+                                    f"alt: SONRA gerilmis +-18  |  sapma FARK {s['FARK']} ({s['sonuc']})  "
+                                    f"kenar oran {k['oran']} ({k['sonuc']})  =>  {rapor[anahtar]['SONUC']}",
+                                    once, sonra))
             except BaseException as e:                                # noqa: BLE001
                 rapor[anahtar] = {'hata': f'{type(e).__name__}: {e}'}
                 say['hata'] += 1
@@ -154,6 +200,11 @@ def main():
     print('OZET', json.dumps(say))
     Path('out').mkdir(exist_ok=True)
     Path('out/canva_denetim.json').write_text(json.dumps(rapor, indent=1, ensure_ascii=False))
+    if a.sayfa and bloklar:
+        cik = Path('out/SLOGAN_ONAY_CANVA.jpg')
+        olcu = sayfa_yap(bloklar, cik)
+        rc('copyto', str(cik), f'{PLATES}/SLOGAN_ONAY_CANVA.jpg')
+        print(f'SAYFA PLATES/SLOGAN_ONAY_CANVA.jpg {olcu[0]}x{olcu[1]} blok {len(bloklar)}')
 
 
 if __name__ == '__main__':
