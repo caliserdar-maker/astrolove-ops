@@ -1,0 +1,5 @@
+- Salt-okur, cevrimdisi varyasyon-gorsel denetcisi eklendi.
+- Envanterdeki bes Primary color degeri temel alindi.
+- Eksik, fazla, yinelenen, silinmis ve yanlis sira baglantilari FAIL olur.
+- `hedef_liste()` dogru Etsy POST govdesini ag cagrisi yapmadan uretir.
+- Istenen alti senaryo birim testleriyle kapsandi; gorsel sonucu insan onayina tabidir.

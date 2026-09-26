@@ -12,7 +12,7 @@ referans: canli Cancer-Libra 4570143815 (foto rank n = CL n).
  K4 IZ/LEKE    : onayli CL TAM_SET ayni karesiyle fark haritasi; esik = CL TAM_SET ile CL canlinin ICERIGI AYNI
                  (256px fark <= 0.001) karelerinde p99.9 x1.5, [8, 60] araliginda (Etsy yeniden sikistirma gurultusu); cifte ozel bolgeler = ilanlarin >= %30'unda farkli
                  pikseller (sembol, burc adlari). Kalan bilesen >= ALAN_MIN -> supheli, 3x kirpim. n < 5 ise OLCULEMEDI.
- K5 VIDEO      : video 1; sure 12.6 +- 0.3 sn; cozunurluk; A1_77 onayli video ile ilk/orta/son kare 256px gri fark <= 0.02.
+ K5 VIDEO      : video 1; A1_77 cift videosu, baska cift tuzagi ve poster ile video_dogrula 10 kare denetimi.
 Cikti: out/CANLI_QC.csv, out/kirpim/*.jpg, out/CANLI_SERIT.jpg. Kota tabani 230; cagri siniri 300.
 Kullanim: canli_qc.py <galeri_json[,galeri_json2]> <metin78_csv> <isdir>"""
 import csv
@@ -32,11 +32,12 @@ from scipy import ndimage
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from etsy_common import Etsy, TokenStore, mask  # noqa: E402
+import video_dogrula  # noqa: E402
 
 REF_ID, REF_A, REF_B = "4570143815", "Cancer", "Libra"
 A77 = "gdrive:ASTROLOVE/TEMP/POD_KISISEL/A1_77"
 KOTA_TABAN, CAGRI_SINIR = 230, 300
-ESIK_FOTO, ESIK_DE, ESIK_VIDEO, VIDEO_SN = 0.001, 3.0, 0.02, 12.6
+ESIK_FOTO, ESIK_DE = 0.001, 3.0
 W4, ALAN_MIN, SIKLIK, N_MIN = 500, 40, 0.30, 5
 BURC = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn",
         "Aquarius", "Pisces"]
@@ -127,18 +128,31 @@ def kucuk(im, w=W4):
     return ndimage.gaussian_filter(np.asarray(g, dtype=float), 1.5)
 
 
-def kare(yol, t):
-    with tempfile.NamedTemporaryFile(suffix=".png") as f:
-        subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", f"{t:.2f}", "-i", str(yol), "-frames:v", "1", f.name], check=True)
-        return Image.open(f.name).copy()
+def ort_kare_farki(kare_fark_list):
+    """video_dogrula sonucundaki genel/burc farklarinin tek ortalamasini verir."""
+    if not kare_fark_list:
+        return None
+    return round(float(np.mean([(x["genel"] + x["burc"]) / 2 for x in kare_fark_list])), 4)
 
 
-def video_bilgi(yol):
-    p = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height:format=duration",
-                        "-of", "json", str(yol)], capture_output=True, text=True)
-    d = json.loads(p.stdout or "{}")
-    s = (d.get("streams") or [{}])[0]
-    return float((d.get("format") or {}).get("duration") or 0), s.get("width"), s.get("height")
+def k5_dogrula(vids, cift, tuzak_cift, dizin, poster):
+    """Canli/referans/tuzak videolarini indirip ortak dogrulayiciyi calistirir."""
+    bos = {
+        "pass": False, "sure_fark": None, "kare_fark_list": [],
+        "tuzak_orani": None, "eski_slogan": False, "neden": "",
+    }
+    if len(vids) != 1:
+        return {**bos, "neden": f"video sayisi {len(vids)}"}
+    if not tuzak_cift:
+        return {**bos, "neden": "tuzak video icin baska cift yok"}
+    try:
+        canli, beklenen, tuzak = dizin / "CANLI.mp4", dizin / "BEKLENEN.mp4", dizin / "TUZAK.mp4"
+        canli.write_bytes(indir(vids[0].get("video_url")))
+        rc("copyto", f"{A77}/{cift}/VIDEO.mp4", str(beklenen))
+        rc("copyto", f"{A77}/{tuzak_cift}/VIDEO.mp4", str(tuzak))
+        return video_dogrula.dogrula(canli, beklenen, tuzak_mp4=tuzak, poster_png=poster)
+    except Exception as e:  # noqa: BLE001
+        return {**bos, "neden": f"video olculemedi {type(e).__name__}"}
 
 
 def cift_anahtar(metin):
@@ -206,6 +220,8 @@ def main():
     ref_ocr = {n: ocr_tsv(im) for n, im in REF.items()}
 
     satir, fark4, serit = {}, {}, []
+    ciftler = sorted(hedef)
+    tuzak = {c: ciftler[(i + 1) % len(ciftler)] for i, c in enumerate(ciftler)} if len(ciftler) > 1 else {}
     for c, lid in sorted(hedef.items()):
         a, b = (re.findall(r"[A-Za-z]+", cift_ad.get(lid, "")) + c.split("_"))[:2]
         a, b = a.capitalize(), b.capitalize()
@@ -256,27 +272,17 @@ def main():
                     can4 = kucuk(L[i].resize(REF[g["cl_karsiligi"]].size, Image.BILINEAR))
                     fark4[(c, i)] = (np.abs(can4 - ref4) > esik)
         # K5
-        v = []
-        if len(vids) != 1:
-            v.append(f"video sayisi {len(vids)}")
-        if vids and (SET.get("video") or {}).get("yol"):
-            try:
-                cv, sv = d / "CANLI.mp4", d / "ONAYLI.mp4"
-                cv.write_bytes(indir(vids[0].get("video_url")))
-                rc("copyto", SET["video"]["yol"], str(sv))
-                sn, w, h = video_bilgi(cv)
-                sn2, _, _ = video_bilgi(sv)
-                fk = [fark256(kare(cv, t * sn), kare(sv, t * sn2)) for t in (0.05, 0.5, 0.95)]
-                if abs(sn - VIDEO_SN) > 0.3:
-                    v.append(f"sure {sn:.2f}")
-                if max(fk) > ESIK_VIDEO:
-                    v.append(f"kare fark {fk}")
-                r["K5_bilgi"] = f"{sn:.2f} sn {w}x{h}; kare fark {fk}"
-            except Exception as e:  # noqa: BLE001
-                v.append(f"video olculemedi {type(e).__name__}")
-        elif vids:
-            v.append("onayli video yolu yok (SET.json)")
-        r.update(K5_video="PASS" if not v else "FAIL", K5_deger="; ".join(v) or r.get("K5_bilgi", ""))
+        poster = d / gal[min(gal)]["dosya"]
+        sonuc = k5_dogrula(vids, c, tuzak.get(c), d, poster)
+        r.update(
+            K5_video="PASS" if sonuc["pass"] else "FAIL",
+            K5_deger=sonuc["neden"],
+            sure_fark=sonuc["sure_fark"],
+            ort_kare_farki=ort_kare_farki(sonuc["kare_fark_list"]),
+            tuzak_orani=sonuc["tuzak_orani"],
+            eski_slogan=sonuc["eski_slogan"],
+            neden=sonuc["neden"],
+        )
         # serit: 1. foto + 5 renk
         kutu = [L[i].copy() for i in [1] + [i for i, g in gal.items() if g.get("renk") and i != 1] if i in L][:6]
         for im in kutu:
@@ -320,7 +326,7 @@ def main():
             satir[c]["K4_deger"] = f"n={len(ilanlar)} < {N_MIN}: cifte ozel bolge sikligi olculemez"
 
     alan = ["ilan_id", "cift", "K1_foto", "K1_deger", "K2_yazi", "K2_deger", "K3_renk", "K3_deger", "K4_leke", "K4_deger",
-            "K5_video", "K5_deger", "hata"]
+            "K5_video", "K5_deger", "sure_fark", "ort_kare_farki", "tuzak_orani", "eski_slogan", "neden", "hata"]
     with open(OUT / "CANLI_QC.csv", "w", newline="", encoding="utf-8") as fh:
         w = csv.DictWriter(fh, fieldnames=alan, extrasaction="ignore")
         w.writeheader()

@@ -1,0 +1,5 @@
+- `durum_ozet.py`, yerel galeri ve QC kayitlarini tek CSV'de birlestirir.
+- Girdi bulunmayan alanlar tahmin edilmeden `?` olarak birakilir.
+- Liste verilmezse ayni burclar dahil kanonik 78 cift uretilir.
+- Terminal ozeti tam 6 satirda sayisal durum verir.
+- Sentetik girdilerle 5 senaryo test edildi; gorsel/video onayi verilmedi.
