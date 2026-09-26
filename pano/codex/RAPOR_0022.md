@@ -1,0 +1,6 @@
+- Magaza ayarlari icin salt okunur Etsy denetimi eklendi.
+- Kargo profili, hedef, ucret ve upgrade ayrintilari raporlaniyor.
+- Bolum, iade politikasi ve Prodigi atamasi kurallari eklendi.
+- Magaza metinleri tire ve yasakli ifade kurallariyla taraniyor.
+- CSV ile ayri duzeltme onerileri TEMP'e yaziliyor.
+- Sentetik, agsiz testler PASS ve kural FAIL senaryolarini kapsiyor.

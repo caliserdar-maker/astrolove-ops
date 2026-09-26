@@ -1,0 +1,50 @@
+name: etsy-gorsel-denetim
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  denetle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12", cache: pip}
+      - run: pip install -q -r requirements.txt
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq tesseract-ocr && curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: Salt okunur tokeni al
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail; umask 077
+          mkdir -p ~/.config/rclone _work/TEMP
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          [ -z "${GOOGLE_CLIENT_SECRET:-}" ] || echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+      - name: Gorselleri denetle
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: python scripts/etsy/gorsel_denetim.py --output _work/TEMP/GORSEL_DENETIM.csv --contact _work/TEMP/GORSEL_DENETIM_FAIL.jpg
+      - name: TEMP raporlarini yaz
+        if: always()
+        run: |
+          [ ! -f _work/TEMP/GORSEL_DENETIM.csv ] || rclone copyto _work/TEMP/GORSEL_DENETIM.csv "gdrive:ASTROLOVE/TEMP/GORSEL_DENETIM.csv"
+          [ ! -f _work/TEMP/GORSEL_DENETIM_FAIL.jpg ] || rclone copyto _work/TEMP/GORSEL_DENETIM_FAIL.jpg "gdrive:ASTROLOVE/TEMP/GORSEL_DENETIM_FAIL.jpg"
+          [ ! -f _work/ETSY_TOKEN.json.updated ] || rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: gorsel-denetim, path: _work/TEMP, if-no-files-found: ignore}
+      - if: always()
+        run: rm -rf _work ~/.config/rclone

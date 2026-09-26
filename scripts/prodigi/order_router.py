@@ -48,10 +48,12 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent / "etsy"))
 sys.path.insert(0, str(HERE.parent / "pinterest"))
+sys.path.insert(0, str(HERE.parent / "ops"))
 from etsy_common import Etsy, TokenStore, log as elog, mask  # noqa: E402
 from pod_sku import parse_sku  # noqa: E402
 import takip  # noqa: E402
 import kisisel_siparis  # noqa: E402
+import siparis_onay  # noqa: E402
 
 PRODIGI = {"live": "https://api.prodigi.com/v4.0", "sandbox": "https://api.sandbox.prodigi.com/v4.0"}
 KEY_REMOTE = {"live": "gdrive:ASTROLOVE/TEMP/PRODIGI_TOKEN.json", "sandbox": "gdrive:ASTROLOVE/TEMP/PRODIGI_SANDBOX_TOKEN.json"}
@@ -494,6 +496,13 @@ def submit_package(a, prod, st, rid, report):
     body = pkg["order"]
     if len(body.get("items") or []) != len(pkg.get("items") or []):
         return False, f"{rid}: paket bozuk (kalem sayisi uyusmuyor)"
+    # Drive TEMP/SIPARIS_ONAY yerel/senkron kopyasindaki tam cozunurluk
+    # dosyalarinin guncel ozeti, API yazmasindan once zorunlu olarak denetlenir.
+    onay_dosyalari = [Path(a.onay_dizin) / rid / Path(i["asset_remote"]).name for i in pkg["items"]]
+    try:
+        siparis_onay.onay_kapisi(rid, onay_dosyalari, a.onaylar)
+    except siparis_onay.OnayHatasi as exc:
+        return False, f"{rid}: {exc}"
     links, perms = DriveLinks(), []
     try:
         for n, it in enumerate(pkg["items"]):
@@ -613,6 +622,10 @@ def main():
                     help="on (varsayilan): yalniz paket hazirla, Prodigi'ye siparis GONDERME")
     ap.add_argument("--submit", default="", help="yalniz bu receipt'in hazir paketini Prodigi'ye gonder (--apply ile)")
     ap.add_argument("--packages", default="", help="hazir paket dizini (varsayilan --out)")
+    ap.add_argument("--onay-dizin", default="_work/SIPARIS_ONAY",
+                    help="Drive TEMP/SIPARIS_ONAY dizininin yerel/senkron kopyasi")
+    ap.add_argument("--onaylar", default="_work/SIPARIS_ONAY/ONAYLAR.json",
+                    help="Claude'un Serdar onayindan sonra yazdigi ONAYLAR.json kopyasi")
     ap.add_argument("--since-days", type=int, default=0, help="yalniz son N gunun receipt'leri (0 = hepsi)")
     ap.add_argument("--quota-min", type=int, default=400, help="Etsy kota tabani; altinda receipt okumasi durur")
     ap.add_argument("--max-pages", type=int, default=10, help="receipt okumasinda en fazla N cagri")
