@@ -20,7 +20,7 @@ kalinti + temiz zemin + sembol. Etsy'ye erisim YOK."""
 import io, json, re, sys, time
 from pathlib import Path
 import numpy as np
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import a1_poster as A
@@ -56,6 +56,51 @@ R = {'cift': CIFT, 'renk_kaynagi': {r: RENK_AD[r] for r in RENKLER}}
 
 def gri(im): return np.asarray(im.convert('L')).astype(np.float32)
 
+def _profil_kaymasi(gozlenen, sablon, en_fazla=48):
+    """Iki 1B satir profilini korelasyonla hizala; pozitif sonuc sablonu asagi tasir."""
+    a = np.asarray(gozlenen, dtype=np.float64); b = np.asarray(sablon, dtype=np.float64)
+    a -= a.mean(); b -= b.mean(); en = (float('-inf'), 0)
+    for dy in range(-en_fazla, en_fazla + 1):
+        if dy < 0: aa, bb = a[:dy], b[-dy:]
+        elif dy > 0: aa, bb = a[dy:], b[:-dy]
+        else: aa, bb = a, b
+        payda = np.linalg.norm(aa) * np.linalg.norm(bb)
+        puan = float(np.dot(aa, bb) / payda) if payda else -1.0
+        if puan > en[0]: en = (puan, dy)
+    return en[1], en[0]
+
+def slogan_maske(ref, mevcut, tag_bant, metin=TAG, font_yolu=None, en_fazla=48):
+    """Eski slogani piksel tonundan degil bilinen metin/font/konumdan render eder.
+
+    Vintage dokusu esik maskesini delik biraktigi icin yalniz dikey konum, render
+    profilinin mevcut murekkep profiline 1B korelasyonuyla oturtulmasindan gelir.
+    Maske buyutulmez; fontun gercek alfa pikselleri aynen kullanilir.
+    """
+    H, Wd = mevcut.shape; y0, y1 = map(int, tag_bant)
+    yol = font_yolu or str(A.K / 'assets' / 'fonts' / 'Montserrat.ttf')
+    if not Path(yol).exists():
+        raise FileNotFoundError(f'slogan fontu yok: {yol}')
+    hedef_h = max(1, y1 - y0); boy = max(6, hedef_h)
+    for aday in range(max(6, hedef_h // 2), hedef_h * 3 + 1):
+        f = ImageFont.truetype(yol, aday)
+        bb = f.getbbox(metin, anchor='ls'); h = bb[3] - bb[1]
+        if h <= hedef_h: boy = aday
+        else: break
+    f = ImageFont.truetype(yol, boy); bb = f.getbbox(metin, anchor='ls')
+    tw, th = bb[2] - bb[0], bb[3] - bb[1]
+    x = int(round((Wd - tw) / 2 - bb[0])); ust = int(round((y0 + y1 - th) / 2))
+    taban = ust - bb[1]
+    ham = Image.new('L', (Wd, H), 0)
+    ImageDraw.Draw(ham).text((x, taban), metin, font=f, fill=255, anchor='ls')
+    r = np.asarray(ham) > 0
+    lo, hi = max(0, y0 - en_fazla), min(H, y1 + en_fazla)
+    dy, puan = _profil_kaymasi(mevcut[lo:hi].sum(1), r[lo:hi].sum(1), en_fazla)
+    out = np.zeros_like(r)
+    if dy >= 0: out[dy:] = r[:H - dy]
+    else: out[:dy] = r[-dy:]
+    return out, {'dy': int(dy), 'korelasyon': round(float(puan), 4), 'font_px': boy,
+                 'kutu': [x + bb[0], ust + dy, x + bb[2], ust + dy + th]}
+
 # ------------------------------------------------------------------ renk posterleri
 class EdPoster:
     """Blue disi renkler: kisisel-v1 edisyon kodu degismeden (oran_kur + poster_kur + blok_kapisi)."""
@@ -73,7 +118,15 @@ class EdPoster:
         Image.open(io.BytesIO(sayfa_png)).convert('RGB').save(yol, 'PNG')
         ref, _ = self.p11.norm(Image.open(yol).convert('RGB'))
         m = E.murekkep(np.asarray(ref).astype(np.float32))
-        o, duz = A.olcum_duzelt(self.p11.sayfa_olc(yol, maske=E.edisyon_maske), m)
+        o0 = self.p11.sayfa_olc(yol, maske=E.edisyon_maske)
+        render_bilgi = None
+        if self.ed in DOKULU:
+            # Dokuya dayali maske slogan glifinin icini bosaltiyordu. Bilinen
+            # slogan/font ile uretilen maske, olcum duzeltmesine eksiksiz girer.
+            rm, render_bilgi = slogan_maske(ref, m, o0['tag_bant'])
+            m = m | rm
+        o, duz = A.olcum_duzelt(o0, m)
+        if render_bilgi: duz = {**duz, 'slogan_render': render_bilgi}
         if ust and ust.get('sembol'):                 # GOREV 0002-C: iki sembol sayfa ortasinin iki yaninda olmali; degilse
             orta, sx = m.shape[1] / 2, o['sembol']    # (doku: bir sembol kacti, digeri ikiye bolundu) ayni sayfanin Blue olcumu
             if not (len(sx) == 2 and sum(sx[0]) / 2 < orta < sum(sx[1]) / 2):
