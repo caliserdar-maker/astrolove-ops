@@ -1,0 +1,91 @@
+name: pod-galeri-tamset
+
+# GOREV 0008 (Serdar onayi 26 Eyl 2026, oturumda teyit): onayli TAM SET galerileri POD ilanlarina.
+# oku   = SALT OKUMA (referans + hedef ilanlar, cagri tahmini).
+# yukle = ETSY'YE YAZAR (galeri 13 foto + video + renk varyasyon gorselleri). updateListing/state YOK.
+# Referans Cancer-Libra ilani (4570143815) HARIC. Kaynak: Drive A1_77/<CIFT>/TAM_SET;
+# durum A1_77/_galeri/GALERI_TAMSET.json (PASS olanlar atlanir).
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      mod:
+        description: "oku (salt okuma) | yukle (Etsy'ye yazar)"
+        required: true
+        default: "oku"
+        type: choice
+        options: [oku, yukle]
+      ciftler:
+        description: "yukle: virgullu CIFT listesi (bos = seti olan hepsi, referans CL haric)"
+        required: false
+        default: ""
+      butce:
+        description: "Etsy cagri butcesi (bu kosu)"
+        required: false
+        default: "1300"
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  galeri:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Token + ilan listesi + SET.json'lar + onceki durum
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work/set out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/YAYILIM_78/METIN_78.csv" _work/METIN_78.csv
+          rclone copy "gdrive:ASTROLOVE/TEMP/POD_KISISEL/A1_77" _work/set --include "*/TAM_SET/SET.json" -q
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_KISISEL/A1_77/_galeri/GALERI_TAMSET.json" _work/onceki.json 2>/dev/null || echo "onceki durum yok"
+          echo "SET.json: $(find _work/set -name SET.json | wc -l)"
+      - name: Galeri (${{ inputs.mod }})
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          MOD: ${{ inputs.mod }}
+          CIFTLER: ${{ inputs.ciftler }}
+          BUTCE: ${{ inputs.butce }}
+        run: |
+          set -euo pipefail
+          python scripts/etsy/pod_galeri_tamset.py --mod "$MOD" --metin _work/METIN_78.csv --setler _work/set \
+            --ciftler "$CIFTLER" --butce "$BUTCE" --durum _work/onceki.json
+      - name: Rapor Drive'a
+        if: always()
+        run: |
+          [ -f out/GALERI_TAMSET.json ] && rclone copyto out/GALERI_TAMSET.json "gdrive:ASTROLOVE/TEMP/POD_KISISEL/A1_77/_galeri/GALERI_TAMSET_${{ inputs.mod }}.json" && echo "Drive: A1_77/_galeri/GALERI_TAMSET_${{ inputs.mod }}.json" || true
+      - name: Token geri yaz
+        if: always()
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || echo "Token yenilenmedi"
+      - if: always()
+        run: rm -rf _work ~/.config/rclone
