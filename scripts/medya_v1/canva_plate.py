@@ -72,7 +72,8 @@ def main():
     ap.add_argument('--liste', default='CANVA_EXPORT.json')
     ap.add_argument('--yukle', action='store_true', help='PLATES\'e yeni adla yukle')
     a = ap.parse_args()
-    rc('copy', f'{KOK}/{a.liste}', str(W))
+    # tek dosya: copyto (copy kaynagi DIZIN sanip 'directory not found' veriyor)
+    rc('copyto', f'{PLATES}/{a.liste}', str(W / a.liste))
     isler = json.loads((W / a.liste).read_text())
     rapor = {}
     for ad, d in isler.items():
@@ -80,7 +81,7 @@ def main():
             f = indir(d['url'], W / f'{ad}.png')
             r = {'MB': round(f.stat().st_size / 1e6, 1)}
             if d.get('kiyas'):
-                rc('copy', f'{PLATES}/{d["kiyas"]}', str(W))
+                rc('copyto', f'{PLATES}/{d["kiyas"]}', str(W / d['kiyas']))
                 r['kiyas'] = kiyas(f, W / d['kiyas'])
                 (W / d['kiyas']).unlink(missing_ok=True)
             if a.yukle:
