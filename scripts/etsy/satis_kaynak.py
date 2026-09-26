@@ -85,11 +85,16 @@ def main():
                 return str(adj["receipt_id"])
         return None
 
-    turler = {}
+    turler, toplamlar, ham = {}, {}, []
     per_fis = {str(f["receipt_id"]): [] for f in fisler}
     for e in kayit:
         tur = str(e.get("ledger_type") or "")
         turler[tur] = turler.get(tur, 0) + 1
+        tutar = round(int(e.get("amount") or 0) / 100, 2)
+        toplamlar[tur] = round(toplamlar.get(tur, 0) + tutar, 2)
+        ham.append({"tur": tur, "ref_tur": e.get("reference_type"), "tutar": tutar,
+                    "para": e.get("currency"), "tarih": tarih(e.get("created_timestamp") or 0),
+                    "fis_bagli": son4(bagli_fis(e)) if bagli_fis(e) else ""})
         rid = bagli_fis(e)
         if rid:
             per_fis[rid].append({"tur": tur, "ref_tur": e.get("reference_type"),
@@ -121,7 +126,8 @@ def main():
           "Defterdeki tum kayit turleri (donem): " + ", ".join(f"{k}={v}" for k, v in sorted(turler.items())),
           "", "Not: Etsy API site ici Etsy Ads atfini vermez; 'Etsy ici' = organik ya da Etsy Ads."]
     (OUT / "SATIS_KAYNAK.md").write_text("\n".join(md) + "\n", encoding="utf-8")
-    (OUT / "SATIS_KAYNAK.json").write_text(json.dumps({"satislar": js, "defter_turleri": turler},
+    (OUT / "SATIS_KAYNAK.json").write_text(json.dumps({"satislar": js, "defter_turleri": turler,
+                                                       "defter_toplam": toplamlar, "defter_ham": ham},
                                                       ensure_ascii=False, indent=1), encoding="utf-8")
     # Depo herkese acik olabilir: siparis satirlari loga YAZILMAZ, yalniz Drive'a.
     log(f"{len(js)} satis yazildi; OFFSITE ADS: {sum(1 for x in js if x['kaynak'] == 'OFFSITE ADS')}")
