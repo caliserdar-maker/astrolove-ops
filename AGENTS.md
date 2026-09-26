@@ -30,7 +30,7 @@ belirsizligi rapora yaz.
    Codex Google Drive'a erisemez; Drive gerekiyorsa isi yapma, raporla.
    Rapor: ayni PR'da `pano/codex/RAPOR_NNNN.md` (gorevle ayni numara), kisa,
    madde madde. Repo herkese acik: gorev ve raporlara sir, anahtar, musteri
-   verisi, fiyat/maliyet disi ic bilgi yazma.
+   verisi, maliyet/kar/siparis bilgisi yazma.
 2. Yalniz `codex/` ile baslayan kendi dallarinda calis, PR ac. `main`'e ve diger
    oturumlarin dallarina (siparis-*, pod-*, medya-v1, kisisel-*, dijital-v1,
    video-v1) push YOK. Force-push, gecmis yeniden yazma, dal silme YOK.
