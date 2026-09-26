@@ -116,6 +116,44 @@ def kalinti_olc2(yol):
     return d
 
 
+def kenar_olc(yol):
+    """SOBEL kenar enerjisi olcutu (GOREV_0014: Codex'in bagimsiz yontemi).
+
+    Sapma tabanli olcut (kalinti_olc2) ile ayni sonucu vermiyor: Codex 08:11
+    sayfasinda 10 blogun 9'unda iz gordu, benim olcutum BLUE/PURE_WHITE'i
+    temiz sayiyordu. Iki olcut farkli seye duyarli:
+      - sapma: kalintinin PARLAKLIK farki (dokuya karisir)
+      - kenar : kalintinin KENAR enerjisi (harf konturu dokudan keskindir)
+    Kural (GOREV_0014): iki olcut de temiz demeden TEMIZ yazilmaz.
+    """
+    import cv2
+    once, sonra = _bloklar(yol)
+    if once is None:
+        return {'hata': 'blok ayrilamadi'}
+    m = cv2.dilate((np.abs(once - sonra) > 10).astype(np.uint8),
+                   np.ones((5, 5), np.uint8)) > 0
+    if m.sum() < 200 or (~m).sum() < 200:
+        return {'hata': 'temizlenen alan bulunamadi'}
+    def enerji(a):
+        gx = cv2.Sobel(a, cv2.CV_32F, 1, 0, ksize=3)
+        gy = cv2.Sobel(a, cv2.CV_32F, 0, 1, ksize=3)
+        return np.abs(gx) + np.abs(gy)
+    e_s, e_o = enerji(sonra), enerji(once)
+    ic, dis = float(e_s[m].mean()), float(e_s[~m].mean())
+    o_ic = float(e_o[m].mean())
+    # Duz zeminde (PURE_WHITE, DEEP_BLACK) cevre kenar enerjisi ~0 oldugu icin
+    # oran patliyor (olculdu: PURE_WHITE 42.8, BLACK 146.7 - ikisi de anlamsiz).
+    # O yuzden iki olcut: oran YALNIZ dokulu zeminde, duz zeminde MUTLAK fark.
+    duz = dis < 1.0
+    oran = ic / max(dis, 1e-6)
+    d = {'SONRA_ic_kenar': round(ic, 2), 'SONRA_dis_kenar': round(dis, 2),
+         'ONCE_ic_kenar': round(o_ic, 2), 'oran': round(oran, 3),
+         'SONRA/ONCE': round(ic / max(o_ic, 1e-6), 3), 'zemin': 'duz' if duz else 'dokulu'}
+    d['sonuc'] = ('TEMIZ' if ic <= dis + KENAR_MUTLAK else 'IZ VAR') if duz else \
+                 ('TEMIZ' if oran <= KENAR_ESIK else 'IZ VAR')
+    return d
+
+
 def kontrast_ger(yol, cik, pay=18.0):
     """Kirpimi yerel zemin etrafinda +-pay seviyeye gerer: goz kalintiyi boyle gorur.
 
@@ -130,6 +168,8 @@ def kontrast_ger(yol, cik, pay=18.0):
 
 
 ESIK_P99 = 10.0          # leke kapisiyla ayni esik: bant disi p99 <= 10
+KENAR_ESIK = 1.25        # Sobel, DOKULU zemin: ic kenar enerjisi / cevre
+KENAR_MUTLAK = 2.0       # Sobel, DUZ zemin: ic <= dis + bu (oran patliyor)
 
 
 def main():
@@ -164,9 +204,17 @@ def main():
                 sonuc = 'TEMIZ' if o['SONRA_sapma_p99'] <= ESIK_P99 else 'KONTUR KALDI'
                 o2 = kalinti_olc2(f)
                 olcumler[f'{ed}_{boy}_DOKU_BAGISIK'] = o2
+                o3 = kenar_olc(f)
+                olcumler[f'{ed}_{boy}_KENAR'] = o3
                 ek = ('' if 'hata' in o2 else
-                      f'   || doku-bagisik: ic p99 {o2["ic_p99"]} / dis {o2["dis_p99"]}'
-                      f' = FARK {o2["FARK"]:+} -> {o2["sonuc"]}')
+                      f'   || sapma: FARK {o2["FARK"]:+} -> {o2["sonuc"]}')
+                ek += ('' if 'hata' in o3 else
+                       f'   || kenar: oran {o3["oran"]} (esik {KENAR_ESIK})'
+                       f' -> {o3["sonuc"]}')
+                if 'hata' not in o2 and 'hata' not in o3:
+                    ek += ('   ==> TEMIZ' if (o2['sonuc'] == 'TEMIZ'
+                                              and o3['sonuc'] == 'TEMIZ')
+                           else '   ==> TEMIZ DEGIL')
                 et = (f'{ed}  {boy}   |  {sonuc}   temizlenen %{o["temizlenen_oran"] * 100:.1f}'
                       f'   sapma {o["ONCE_sapma_ort"]} -> {o["SONRA_sapma_ort"]}'
                       f'   p99 {o["SONRA_sapma_p99"]} (esik {ESIK_P99:.0f}){ek}')
@@ -206,15 +254,21 @@ def main():
     import json
     # _DOKU_BAGISIK kayitlari ayri bir olcut; onlarda SONRA_sapma_p99 yok.
     gecen = [k for k, v in olcumler.items()
-             if not k.endswith('_DOKU_BAGISIK') and 'hata' not in v
+             if not k.endswith(('_DOKU_BAGISIK', '_KENAR')) and 'hata' not in v
              and v['SONRA_sapma_p99'] <= ESIK_P99]
+    ek_k = {k for k in olcumler if k.endswith(('_DOKU_BAGISIK', '_KENAR'))}
     db = {k: v for k, v in olcumler.items() if k.endswith('_DOKU_BAGISIK')}
     db_temiz = [k for k, v in db.items() if v.get('sonuc') == 'TEMIZ']
+    kn = {k: v for k, v in olcumler.items() if k.endswith('_KENAR')}
+    kn_temiz = [k for k, v in kn.items() if v.get('sonuc') == 'TEMIZ']
+    # GOREV_0014: iki olcut de temiz demeden TEMIZ sayilmaz.
+    ikisi = sorted({k[:-14] for k in db_temiz} & {k[:-6] for k in kn_temiz})
     print(json.dumps({'dosya': ad, 'px': list(t.size), 'blok': len(parcalar),
                       'esik_p99': ESIK_P99, 'temiz': gecen,
-                      'temiz_sayi': f'{len(gecen)}/{len(olcumler) - len(db)}',
+                      'temiz_sayi': f'{len(gecen)}/{len(olcumler) - len(ek_k)}',
                       'doku_bagisik_temiz': f'{len(db_temiz)}/{len(db)}',
-                      'doku_bagisik_temiz_liste': db_temiz,
+                      'kenar_temiz': f'{len(kn_temiz)}/{len(kn)}',
+                      'IKI_OLCUT_DE_TEMIZ': ikisi,
                       'eksik': eksik, 'olcumler': olcumler}, indent=1))
 
 
