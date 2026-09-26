@@ -1,0 +1,50 @@
+name: canli-metin-tarama
+
+# GOREV 0023 - 78 canli POD ilaninin metin taramasi (SALT OKUMA; Etsy'ye yazma YOK).
+# 1 Etsy okuma cagrisi YALNIZ API anahtariyla (OAuth token yok -> etsy-token kilidi yok).
+# Cikti: Drive ASTROLOVE/TEMP/DIJITAL_78/CANLI_METIN_TARAMA.csv + CANLI_METIN_TARAMA_OZET.json
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+
+jobs:
+  tara:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Tara (salt okuma, 1 cagri)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+        run: |
+          set -euo pipefail
+          rclone copyto "gdrive:ASTROLOVE/TEMP/YAYILIM_78/METIN_78.csv" METIN_78.csv
+          python scripts/etsy/canli_metin_tarama.py METIN_78.csv
+          H="gdrive:ASTROLOVE/TEMP/DIJITAL_78"
+          rclone copyto out/CANLI_METIN_TARAMA.csv "$H/CANLI_METIN_TARAMA.csv" -q
+          rclone copyto out/CANLI_METIN_TARAMA_OZET.json "$H/CANLI_METIN_TARAMA_OZET.json" -q
+      - if: always()
+        run: rm -rf ~/.config/rclone
