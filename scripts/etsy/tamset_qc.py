@@ -19,9 +19,13 @@ Kaynak: Drive A1_77/<CIFT>/TAM_SET (77 cift + CANCER_LIBRA). Referans: onayli CL
  VIDEO: VIDEO.mp4 var, sure 12.6 +- 0.3 sn, cozunurluk (bilgi).
 Cikti: out/TAMSET_QC.csv (cift x kare x kontrol, deger, esik, PASS/FAIL), out/TAMSET_SISTEMATIK.csv, out/kirpim/*.jpg (x3),
        out/TAMSET_SERIT.jpg (en kotu 12 kare), out/TAMSET_OZET.json.
+Gurultu kaynagi (esikler): galerisi yuklu bir ilanin canli (Etsy'nin yeniden sikistirdigi) kareleri ile ayni ciftin
+TAM_SET dosyalari; yalniz icerigi ayni (256px fark <= 0.001) kareler. Canli URL'ler medya'nin GALERI_TAMSET_denetle.json
+kaydindan herkese acik i.etsystatic.com adresleriyle indirilir (Etsy API / token yok).
 Kullanim:
-  tamset_qc.py etsy <cl_canli_dir> <metin78_csv>         (Etsy salt okuma, <= 5 cagri; CL canli gorseller + kargo profili)
-  tamset_qc.py qc <a77_dir> <cl_canli_dir> [cift,cift]   (Etsy'siz; ikinci arguman verilirse yalniz o ciftler + CL)"""
+  tamset_qc.py canli <denetle_json> <a77_dir> <canli_dir>  (gurultu kaynagi kareleri; Etsy API yok)
+  tamset_qc.py etsy <cl_canli_dir> <metin78_csv>           (Etsy salt okuma, <= 3 cagri; kargo profili)
+  tamset_qc.py qc <a77_dir> <canli_dir> [cift,cift]        (Etsy'siz; ikinci arguman verilirse yalniz o ciftler + CL)"""
 import csv
 import difflib
 import io
@@ -57,7 +61,6 @@ def log(m):
 
 # ---------------------------------------------------------------- Etsy (salt okuma)
 def etsy(cl_dir, metin78):
-    import requests
     from etsy_common import Etsy, TokenStore, mask
     k_, s_ = os.environ.get("ETSY_API_KEY", ""), os.environ.get("ETSY_SHARED_SECRET", "")
     mask(k_); mask(s_)
@@ -66,15 +69,10 @@ def etsy(cl_dir, metin78):
         store.refresh()
     api = Etsy(store)
     shop = os.environ["ETSY_SHOP_ID"]
-    Path(cl_dir).mkdir(parents=True, exist_ok=True)
-    for x in api.get("/listings/4570143815/images").get("results") or []:           # cagri 1
-        r = requests.get(x["url_fullxfull"], timeout=120)
-        r.raise_for_status()
-        (Path(cl_dir) / f"{x['rank']:02d}.jpg").write_bytes(r.content)
     ilk = next(r["ilan_id"] for r in csv.DictReader(open(metin78, encoding="utf-8")) if r.get("ilan_id"))
-    L = api.get(f"/listings/{ilk}", ok404=True) or {}                                 # cagri 2
+    L = api.get(f"/listings/{ilk}", ok404=True) or {}                                 # cagri 1
     pid = L.get("shipping_profile_id")
-    P = api.get(f"/shops/{shop}/shipping-profiles/{pid}", ok404=True) or {} if pid else {}   # cagri 3
+    P = api.get(f"/shops/{shop}/shipping-profiles/{pid}", ok404=True) or {} if pid else {}   # cagri 2
     kargo = {"ornek_ilan": ilk, "shipping_profile_id": pid, "profil_adi": P.get("title"),
              "profil_min_processing_days": P.get("min_processing_days"),
              "profil_max_processing_days": P.get("max_processing_days"),
@@ -85,6 +83,35 @@ def etsy(cl_dir, metin78):
     OUT.mkdir(exist_ok=True)
     (OUT / "TAMSET_KARGO.json").write_text(json.dumps(kargo, ensure_ascii=False, indent=1))
     log("KARGO " + json.dumps(kargo, ensure_ascii=False))
+
+
+def canli(denetle_json, a77, hedef):
+    """denetle kaydinda, TAM_SET ile canli farki <= 0.001 olan en cok kareye sahip cifti secer; o karelerin canli
+    halini i.etsystatic.com'dan indirir (<cl_karsiligi>.jpg) ve KAYNAK.txt'ye cifti yazar."""
+    import requests
+    D = json.loads(Path(denetle_json).read_text()).get("denetle") or {}
+    aday = {}
+    for c, x in D.items():
+        f = [y for y in x.get("foto") or [] if y.get("url") and y.get("beklenen") and y.get("fark") is not None
+             and y["fark"] <= 0.001]
+        if (Path(a77) / c / "TAM_SET" / "SET.json").exists():
+            aday[c] = f
+    if not aday or max(len(v) for v in aday.values()) < 3:
+        sys.exit("DUR: denetle kaydinda icerigi ayni >= 3 canli kare yok; gurultu esigi olculemez")
+    c = max(aday, key=lambda k: len(aday[k]))
+    S = json.loads((Path(a77) / c / "TAM_SET" / "SET.json").read_text())
+    cl = {g["dosya"]: g["cl_karsiligi"] for g in S["galeri"]}
+    Path(hedef).mkdir(parents=True, exist_ok=True)
+    n = 0
+    for y in aday[c]:
+        d = y["beklenen"].rsplit("/", 1)[-1]
+        if d in cl:
+            r = requests.get(y["url"], timeout=120)
+            r.raise_for_status()
+            (Path(hedef) / f"{cl[d]:02d}.jpg").write_bytes(r.content)
+            n += 1
+    (Path(hedef) / "KAYNAK.txt").write_text(c)
+    log(f"gurultu kaynagi: {c}, {n} canli kare indirildi (Etsy API yok)")
 
 
 # ---------------------------------------------------------------- OCR
@@ -249,10 +276,15 @@ def qc(a77, cl_canli, sadece=None):
     CLT = {n: Image.open(cl_d / g["dosya"]).convert("RGB") for n, g in clg.items()}
     log(f"TAM_SET: {len(ciftler)} (CL dahil); CL kare {len(CLT)}")
 
-    # esikler: CL TAM_SET / CL canli ayni-icerik kareleri (Etsy yeniden sikistirma gurultusu)
+    # esikler: gurultu kaynagi ciftin TAM_SET / canli ayni-icerik kareleri (Etsy yeniden sikistirma gurultusu)
     canli = {int(p.stem): Image.open(p).convert("RGB") for p in cl_canli.glob("*.jpg")}
+    kaynak = (cl_canli / "KAYNAK.txt").read_text().strip() if (cl_canli / "KAYNAK.txt").exists() else REF
+    kd = a77 / kaynak / "TAM_SET"
+    KT = {g["cl_karsiligi"]: Image.open(kd / g["dosya"]).convert("RGB")
+          for g in json.loads((kd / "SET.json").read_text())["galeri"] if (kd / g["dosya"]).exists()}
+    log(f"gurultu kaynagi: {kaynak} ({len(canli)} canli kare)")
     ayni, gur_p, gur_s = [], [], []
-    for n, im in CLT.items():
+    for n, im in KT.items():
         if n in canli:
             f = fark256(im, canli[n])
             if f <= 0.001:
@@ -262,9 +294,9 @@ def qc(a77, cl_canli, sadece=None):
                 gur_s.append(float(np.percentile(np.abs(sobel(A) - sobel(B)), 99.9)))
     esik = min(60.0, max(8.0, max(gur_p) * 1.5)) if gur_p else None
     ts = min(40.0, max(4.0, max(gur_s) * 1.5)) if gur_s else None
-    log(f"ayni-icerik CL kareleri {ayni}; fark esigi {esik}; Sobel esigi {ts}")
+    log(f"ayni-icerik kareler ({kaynak}) {ayni}; fark esigi {esik}; Sobel esigi {ts}")
     if esik is None:
-        sys.exit("DUR: CL canli ile ayni-icerik kare yok, esik olculemedi")
+        sys.exit("DUR: canli ile ayni-icerik kare yok, esik olculemedi")
 
     # CL OCR (iki gecis), bir kez
     ref_ocr = {n: {1: ocr(CLT[n], 1), 2: ocr(CLT[n], 2)} for n, g in clg.items() if g.get("tur") in ("kapak", "kart")}
@@ -337,9 +369,9 @@ def qc(a77, cl_canli, sadece=None):
         if M.mean() >= 0.002:
             gm = []
             for m in ayni:
-                if m in canli and ref4.get(m) is not None:
-                    A = ref4[m].astype(float)
-                    B = kucuk(canli[m].resize(CLT[m].size, Image.BILINEAR))
+                if m in canli and m in KT:
+                    A = kucuk(KT[m])
+                    B = kucuk(canli[m].resize(KT[m].size, Image.BILINEAR))
                     if A.shape == M.shape:
                         gm.append(float(np.abs(A - B)[M].mean()))
             ce = round(max(gm) * 1.5, 2) if gm else None
@@ -420,7 +452,7 @@ def qc(a77, cl_canli, sadece=None):
         oz[k] = {"kare_PASS": f"{sum(s['sonuc'] == 'PASS' for s in ss)}/{len(ss)}", "FAIL_cift": len(fc), "cift": fc[:20]}
     tum_fail = sorted({s["cift"] for s in satir if s["sonuc"] == "FAIL"})
     ozet = {"cift": len(ciftler_x), "temiz_cift": len(ciftler_x) - len(tum_fail), "kontrol": oz,
-            "esik": {"fark": esik, "sobel": ts, "cift": cift_esik, "ayni_icerik_CL": ayni},
+            "esik": {"fark": esik, "sobel": ts, "cift": cift_esik, "gurultu_kaynagi": kaynak, "ayni_icerik": ayni},
             "sistematik": len(sist), "kirpim": len(kirpimlar), "sure_dk": round((time.time() - t0) / 60, 1)}
     (OUT / "TAMSET_OZET.json").write_text(json.dumps(ozet, ensure_ascii=False, indent=1))
     log("OZET " + json.dumps(ozet, ensure_ascii=False))
@@ -430,5 +462,7 @@ def qc(a77, cl_canli, sadece=None):
 if __name__ == "__main__":
     if sys.argv[1] == "etsy":
         etsy(sys.argv[2], sys.argv[3])
+    elif sys.argv[1] == "canli":
+        canli(sys.argv[2], sys.argv[3], sys.argv[4])
     else:
         qc(sys.argv[2], sys.argv[3], sys.argv[4].split(",") if len(sys.argv) > 4 else None)
