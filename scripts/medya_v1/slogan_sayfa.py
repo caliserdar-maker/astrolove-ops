@@ -106,6 +106,9 @@ def kontrast_ger(yol, cik, pay=18.0):
     return cik
 
 
+ESIK_P99 = 10.0          # leke kapisiyla ayni esik: bant disi p99 <= 10
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--boylar', default='30x40,A3')
@@ -116,42 +119,61 @@ def main():
     for boy in boylar:
         for ed in EDISYONLAR:
             f = W / f'SLOGAN_{ed}_{boy}_x3.jpg'
-            if f.exists():
-                o = kalinti_olc(f)
-                olcumler[f'{ed}_{boy}'] = o
-                et = (f'{ed}  {boy}   |  slogan %{o["slogan_orani_ONCE"] * 100:.2f}'
-                      f'  ->  kalinti {o["FARK_seviye"]} seviye (255 uzerinden)'
-                      f',  dusuk frekans {o["dusuk_frekans_farki"]}'
-                      if 'hata' not in o else f'{ed}  {boy}   |  OLCULEMEDI: {o["hata"]}')
-                satirlar.append((et, Image.open(f).convert('RGB')))
-            else:
+            kaldi = False
+            if not f.exists():
+                f = W / f'SLOGAN_KALDI_{ed}_{boy}_x3.jpg'
+                kaldi = f.exists()
+            if not f.exists():
                 eksik.append(f'{ed}_{boy}')
+                continue
+            o = kalinti_olc(f)
+            olcumler[f'{ed}_{boy}'] = o
+            if 'hata' in o:
+                et = f'{ed}  {boy}   |  OLCULEMEDI: {o["hata"]}'
+            else:
+                sonuc = 'TEMIZ' if o['SONRA_sapma_p99'] <= ESIK_P99 else 'KONTUR KALDI'
+                et = (f'{ed}  {boy}   |  {sonuc}   temizlenen %{o["temizlenen_oran"] * 100:.1f}'
+                      f'   sapma {o["ONCE_sapma_ort"]} -> {o["SONRA_sapma_ort"]}'
+                      f'   p99 {o["SONRA_sapma_p99"]} (esik {ESIK_P99:.0f})')
+            if kaldi:
+                et += '   [plate KAPIDA KALDI]'
+            ger = kontrast_ger(f, W / (f.stem + '_ger.png'))
+            satirlar.append((et, Image.open(f).convert('RGB'),
+                             Image.open(ger).convert('RGB')))
     if not satirlar:
         raise SystemExit(f'hic kirpim yok (eksik: {eksik})')
     parcalar = []
-    for ad, im in satirlar:
+    for ad, im, gi in satirlar:
         if im.width != GENISLIK:
             im = im.resize((GENISLIK, round(im.height * GENISLIK / im.width)), Image.LANCZOS)
-        parcalar.append((ad, im))
-    bas = 86
-    yuk = bas + sum(i.height + 38 for _, i in parcalar) + 20
+            gi = gi.resize((GENISLIK, round(gi.height * GENISLIK / gi.width)), Image.LANCZOS)
+        parcalar.append((ad, im, gi))
+    bas = 100
+    yuk = bas + sum(i.height + g.height + 58 for _, i, g in parcalar) + 20
     t = Image.new('RGB', (GENISLIK + 40, yuk), 'white')
     d = ImageDraw.Draw(t)
-    d.text((20, 16), 'SLOGAN TEMIZLIGI - ONAY SAYFASI  (her blokta ustte ONCE, altta SONRA, x3)',
+    d.text((20, 14), 'SLOGAN TEMIZLIGI - ONAY SAYFASI   (her blokta ustte ONCE, altta SONRA, x3)',
            fill='black')
-    d.text((20, 50), 'KALINTI = eski slogan pikselleri ile bandin geri kalani arasindaki '
-                     'ortalama fark (0-255). Kucuk = temiz.', fill='black')
-    d.text((20, 36), f'{datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")} UTC'
+    d.text((20, 32), f'{datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")} UTC'
                      + (f'   EKSIK: {", ".join(eksik)}' if eksik else ''), fill='black')
+    d.text((20, 54), 'SAPMA = temizlenen piksellerin yerel zeminden farki (0-255). '
+                     'Kucuk = temiz. Olcum yalniz DEGISEN piksellerde.', fill='black')
+    d.text((20, 72), 'Alttaki soluk kopya KONTRAST GERILMIS (+-18 seviye): '
+                     'ciplak gozle secilmeyen kontur burada gorunur.', fill='black')
     y = bas
-    for ad, im in parcalar:
+    for ad, im, gi in parcalar:
         d.text((20, y), ad, fill='black')
-        t.paste(im, (20, y + 16)); y += im.height + 38
+        t.paste(im, (20, y + 16))
+        t.paste(gi, (20, y + 16 + im.height + 4)); y += im.height + gi.height + 58
     ad = 'SLOGAN_ONAY_SAYFASI.jpg'
     t.save(W / ad, quality=94)
     rc('copy', str(W / ad), CIK, timeout=900)
     import json
+    gecen = [k for k, v in olcumler.items()
+             if 'hata' not in v and v['SONRA_sapma_p99'] <= ESIK_P99]
     print(json.dumps({'dosya': ad, 'px': list(t.size), 'blok': len(parcalar),
+                      'esik_p99': ESIK_P99, 'temiz': gecen,
+                      'temiz_sayi': f'{len(gecen)}/{len(olcumler)}',
                       'eksik': eksik, 'olcumler': olcumler}, indent=1))
 
 
