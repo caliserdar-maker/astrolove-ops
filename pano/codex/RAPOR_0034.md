@@ -1,0 +1,6 @@
+- IS_0034 icin salt okunur dijital donusum plan workflow'u eklendi.
+- Magaza denetimi, planin kullandigi ham ilan JSON'unu Drive TEMP'e yaziyor.
+- Plan CSV yaninda eylem, eslesme ve 78 cift kapsami ozeti uretiyor.
+- Dijital teslim araci yalniz SHA-256 onay kapisi aciksa paket hazirliyor.
+- Etsy'nin 5 dosya, dosya basina 20 MB ve JPG/PNG kontrolleri uygulandi.
+- Sentetik testlerde onaysiz, degismis, limit ve basarili paket senaryolari kapsandi.

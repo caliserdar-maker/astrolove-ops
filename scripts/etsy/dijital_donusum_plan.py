@@ -158,6 +158,7 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("input", type=Path, help="magaza_denetim veya getListingsByListingIds ham JSON")
     ap.add_argument("--output", type=Path, default=Path("PLAN.csv"))
+    ap.add_argument("--summary", type=Path, help="Turkce Markdown ozet yolu")
     args = ap.parse_args(argv)
     try:
         ilanlar = _sonuclar(json.loads(args.input.read_text(encoding="utf-8")))
@@ -170,6 +171,19 @@ def main(argv: list[str] | None = None) -> int:
         yazici = csv.DictWriter(dosya, fieldnames=ALANLAR)
         yazici.writeheader()
         yazici.writerows(satirlar)
+    if args.summary:
+        eylemler = ozet["eylemler"]
+        args.summary.parent.mkdir(parents=True, exist_ok=True)
+        args.summary.write_text(
+            "# Dijital Donusum Plani Ozeti\n\n"
+            f"- TUT_VE_DONUSTUR: {eylemler.get('TUT_VE_DONUSTUR', 0)}\n"
+            f"- TASLAGA_AL: {eylemler.get('TASLAGA_AL', 0)}\n"
+            f"- ARSIV: {eylemler.get('ARSIV', 0)}\n"
+            f"- Eslesmeyen: {len(ozet['eslesmeyenler'])}\n"
+            f"- Cakisan: {len(ozet['cakismalar'])}\n"
+            f"- 78 cift kapsami: {ozet['eslesen_cift']}/78 (eksik: {ozet['eksik_cift_sayisi']})\n",
+            encoding="utf-8",
+        )
     print(json.dumps(ozet, ensure_ascii=False, sort_keys=True))
     return 0
 

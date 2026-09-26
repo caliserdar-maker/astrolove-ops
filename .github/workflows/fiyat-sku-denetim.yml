@@ -1,0 +1,64 @@
+name: fiyat-sku-denetim
+
+# 78 POD ilaninin envanterini salt okur; Etsy/Prodigi'ye yazmaz.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  denetle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12", cache: pip}
+      - run: pip install -q -r requirements.txt
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          [ -z "${GOOGLE_CLIENT_SECRET:-}" ] || echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+      - name: Salt okunur girdileri al
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/METIN_78.csv" _work/METIN_78.csv
+      - name: Fiyat, SKU ve envanter denetimi
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          python scripts/etsy/fiyat_sku_denetim.py --listings _work/METIN_78.csv \
+            --output _work/FIYAT_SKU.csv --summary _work/FIYAT_SKU_OZET.json
+      - name: Token ve raporu TEMP'e yaz
+        if: always()
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" || true
+          [ -f _work/FIYAT_SKU.csv ] && rclone copyto _work/FIYAT_SKU.csv "gdrive:ASTROLOVE/TEMP/FIYAT_SKU.csv" || true
+          [ -f _work/FIYAT_SKU_OZET.json ] && rclone copyto _work/FIYAT_SKU_OZET.json "gdrive:ASTROLOVE/TEMP/FIYAT_SKU_OZET.json" || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fiyat-sku-denetim
+          path: |
+            _work/FIYAT_SKU.csv
+            _work/FIYAT_SKU_OZET.json
+          if-no-files-found: ignore
+      - if: always()
+        run: rm -rf _work ~/.config/rclone

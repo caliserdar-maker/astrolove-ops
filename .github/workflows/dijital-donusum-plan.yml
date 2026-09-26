@@ -1,0 +1,50 @@
+name: dijital-donusum-plan
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: Rclone ayari
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p ~/.config/rclone _work
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Magaza denetimi ham ciktisini indir
+        run: rclone copyto "gdrive:ASTROLOVE/TEMP/MAGAZA_DENETIM_HAM.json" _work/MAGAZA_DENETIM_HAM.json
+      - name: Salt okunur donusum planini olustur
+        run: |
+          python scripts/etsy/dijital_donusum_plan.py _work/MAGAZA_DENETIM_HAM.json \
+            --output _work/DIJITAL_DONUSUM_PLAN.csv --summary _work/OZET.md
+          cat _work/OZET.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Plani Drive TEMP'e yaz
+        run: |
+          rclone copyto _work/DIJITAL_DONUSUM_PLAN.csv "gdrive:ASTROLOVE/TEMP/DIJITAL_DONUSUM_PLAN.csv"
+          rclone copyto _work/OZET.md "gdrive:ASTROLOVE/TEMP/OZET.md"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dijital-donusum-plan
+          path: |
+            _work/DIJITAL_DONUSUM_PLAN.csv
+            _work/OZET.md
+      - if: always()
+        run: rm -rf _work ~/.config/rclone

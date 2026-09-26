@@ -226,6 +226,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, help="Agsiz sentetik Etsy JSON")
     parser.add_argument("--output", type=Path, default=Path("TEMP/MAGAZA_DENETIM.csv"))
+    parser.add_argument("--raw-output", type=Path, help="Donusum planinda kullanilacak ham ilan JSON'u")
     args = parser.parse_args(argv)
     if args.input:
         listings = _sonuclar(json.loads(args.input.read_text(encoding="utf-8")))
@@ -237,6 +238,12 @@ def main(argv: list[str] | None = None) -> int:
         if store.needs_refresh():
             store.refresh()
         listings = getir(Etsy(store), shop)
+    if args.raw_output:
+        args.raw_output.parent.mkdir(parents=True, exist_ok=True)
+        args.raw_output.write_text(
+            json.dumps({"results": listings}, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
     rows = denetle(listings)
     yaz(rows, args.output)
     return 1 if any(row["durum"] == "FAIL" for row in rows) else 0
