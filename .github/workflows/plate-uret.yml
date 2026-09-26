@@ -9,6 +9,9 @@ name: plate-uret
 # Tetik yalniz workflow_dispatch.
 #
 # PARALELLIK: is listesi `parca` matrisiyle bolunur; her matris isi ayri
+# NOT (26 Eyl): is birimi artik BOY (bir boyun 5 edisyonu ayni iste, cunku
+# slogan maskesi o boyun PURE_WHITE plate'inden turetilip digerlerine
+# aktariliyor). 14 boy var -> 14 parca, her parca 1 boy = 5 plate.
 # runner'da koser, boylece her is 45 dk sinirinin altinda kalir. Olculen
 # maliyet (25 Eyl, kosu 36153249586): renk basina ~25 dk, 5 parca -> ~25 dk.
 # 3 parca ~42 dk verirdi; sinira fazla yakin oldugu icin 5 secildi.
@@ -41,7 +44,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        parca: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        parca: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
 
     steps:
       - name: Checkout (secilen dal)
