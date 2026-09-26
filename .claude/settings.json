@@ -13,7 +13,13 @@
       "mcp__claude-code-remote",
       "mcp__Canva",
       "mcp__Gmail",
-      "mcp__memory"
+      "mcp__memory",
+      "mcp__claude_ai_Canva",
+      "mcp__claude_ai_Google_Drive",
+      "mcp__claude_ai_Gmail",
+      "mcp__Canva__edit-design",
+      "mcp__Canva__export-design",
+      "mcp__Canva__copy-design"
     ]
   }
 }
