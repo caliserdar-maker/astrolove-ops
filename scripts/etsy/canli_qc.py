@@ -3,11 +3,14 @@
 Galeri yuklemesi PASS olan POD ilanlari (A1_77/_galeri/GALERI_TAMSET*.json) canli halinden olculur;
 referans: canli Cancer-Libra 4570143815 (foto rank n = CL n).
  K1 DOGRU FOTO : 13 foto; rank i canli foto ile A1_77/<CIFT>/TAM_SET/SET.json sira i dosyasi 256px gri ort. fark <= 0.001.
- K2 YAZI       : kapak/kart fotolarinda tesseract OCR; referansin ayni CL karesi (Cancer/Libra -> ciftin burclari) ile
-                 normalize metin ayni mi; "ASTROLOVE / A + B" satiri ciftin burclari mi; uzun/orta tire yok mu.
+ K2 YAZI       : kapak/kart fotolarinda tesseract OCR (TSV, kelime guveni); referans = onayli CL TAM_SET ayni karesi
+                 (Cancer/Libra -> ciftin burclari). Kelime farki: bir tarafta guvenle (conf >= 80) okunan >= 3 harfli
+                 kelime diger tarafin HAM okumasinda hic yok -> FAIL (sembol/suslemenin OCR copu bu yuzden sayilmaz);
+                 "ASTROLOVE / A + B" satiri ciftin burclari mi; uzun/orta tire yok mu. CL canli ile CL TAM_SET arasi
+                 kelime farki ayrica raporlanir (sablon farki, bilgi).
  K3 RENK       : 5 renk gorseli (+kapak MB) orta bolge medyan Lab, referansin ayni renk gorseline delta E76 <= 3.
- K4 IZ/LEKE    : referansin ayni CL karesiyle fark haritasi; esik referans CL ilaninin kendi TAM_SET'iyle olculur
-                 (Etsy yeniden sikistirma gurultusu, gevsetme yok); cifte ozel bolgeler = ilanlarin >= %30'unda farkli
+ K4 IZ/LEKE    : onayli CL TAM_SET ayni karesiyle fark haritasi; esik = CL TAM_SET ile CL canlinin ICERIGI AYNI
+                 (256px fark <= 0.001) karelerinde p99.9 x1.5, [8, 60] araliginda (Etsy yeniden sikistirma gurultusu); cifte ozel bolgeler = ilanlarin >= %30'unda farkli
                  pikseller (sembol, burc adlari). Kalan bilesen >= ALAN_MIN -> supheli, 3x kirpim. n < 5 ise OLCULEMEDI.
  K5 VIDEO      : video 1; sure 12.6 +- 0.3 sn; cozunurluk; A1_77 onayli video ile ilk/orta/son kare 256px gri fark <= 0.02.
 Cikti: out/CANLI_QC.csv, out/kirpim/*.jpg, out/CANLI_SERIT.jpg. Kota tabani 230; cagri siniri 300.
@@ -58,24 +61,50 @@ def fark256(a, b):
     return round(float(np.abs(gri256(a) - gri256(b)).mean() / 255), 4)
 
 
-def ocr(im):
+KONF = 80
+
+
+def ocr_tsv(im):
+    """(ham metin, [(KELIME, conf)])"""
     with tempfile.NamedTemporaryFile(suffix=".png") as f:
         k = im.convert("L")
         if k.width < 2000:
             k = k.resize((2000, round(k.height * 2000 / k.width)), Image.LANCZOS)
         k.save(f.name)
-        return subprocess.run(["tesseract", f.name, "-", "--psm", "3", "-l", "eng"], capture_output=True, text=True).stdout
+        out = subprocess.run(["tesseract", f.name, "-", "--psm", "3", "-l", "eng", "tsv"], capture_output=True, text=True).stdout
+    kel = []
+    for sat in out.splitlines()[1:]:
+        p = sat.split("\t")
+        if len(p) == 12 and p[11].strip():
+            try:
+                kel.append((p[11].strip(), float(p[10])))
+            except ValueError:
+                pass
+    return " ".join(w for w, _ in kel), kel
+
+
+def kelimeler(kel, konf=0.0):
+    """>= 3 harfli, burc adi olmayan kelimeler (burc satiri ayrica 'baslik' ile denetlenir)."""
+    burc = {x.upper() for x in BURC}
+    s = set()
+    for w, c in kel:
+        if c < konf:
+            continue
+        for t in re.findall(r"[A-Z]{3,}", w.upper()):
+            if t not in burc:
+                s.add(t)
+    return s
+
+
+def kel_fark(ref, can):
+    eksik = kelimeler(ref, KONF) - kelimeler(can)
+    fazla = kelimeler(can, KONF) - kelimeler(ref)
+    return sorted(eksik), sorted(fazla)
 
 
 def norm(t):
     t = t.upper().replace("—", " <UZUNTIRE> ").replace("–", " <ORTATIRE> ")
     return " ".join(re.sub(r"[^A-Z0-9&+/<> ]", " ", t).split())
-
-
-def burc_degis(t, a, b):
-    t = re.sub(r"\bCANCER\b", "\x00A", t)
-    t = re.sub(r"\bLIBRA\b", "\x00B", t)
-    return t.replace("\x00A", a.upper()).replace("\x00B", b.upper())
 
 
 def lab(rgb):
@@ -147,18 +176,34 @@ def main():
     # referans (canli CL) + CL TAM_SET (gurultu esigi)
     R = {x["rank"]: Image.open(io.BytesIO(indir(x["url_fullxfull"]))).convert("RGB")
          for x in (get(f"/listings/{REF_ID}/images").get("results") or [])}
-    ref_ocr = {n: norm(ocr(im)) for n, im in R.items()}
     cl_dir = isdir / "CANCER_LIBRA"
-    esik = None
+    esik, CLT, sablon = None, {}, {}
     try:
         rc("copy", f"{A77}/CANCER_LIBRA/TAM_SET", str(cl_dir), "--include", "[01][0-9]_*.jpg", "--include", "SET.json")
         CL = json.loads((cl_dir / "SET.json").read_text())
-        gur = [np.percentile(np.abs(kucuk(Image.open(cl_dir / g["dosya"]).convert("RGB")) - kucuk(R[g["cl_karsiligi"]])), 99.9)
-               for g in CL["galeri"] if g["cl_karsiligi"] in R]
-        esik = max(8.0, float(max(gur)) * 1.5) if gur else None
+        CLT = {g["cl_karsiligi"]: Image.open(cl_dir / g["dosya"]).convert("RGB") for g in CL["galeri"]}
+        gur = {}
+        for n, im in CLT.items():
+            if n not in R:
+                continue
+            f = fark256(im, R[n])
+            p = round(float(np.percentile(np.abs(kucuk(im) - kucuk(R[n])), 99.9)), 1)
+            print(f"  CL #{n}: TAM_SET/canli fark {f}, p99.9 {p}" + ("" if f <= ESIK_FOTO else " (icerik farkli, esige girmez)"), flush=True)
+            if f <= ESIK_FOTO:
+                gur[n] = p
+        esik = min(60.0, max(8.0, max(gur.values()) * 1.5)) if gur else None
+        for g in CL["galeri"]:
+            n = g["cl_karsiligi"]
+            if g.get("tur") in ("kapak", "kart") and n in R:
+                e, z = kel_fark(ocr_tsv(R[n])[1], ocr_tsv(CLT[n])[1])
+                if e or z:
+                    sablon[n] = {"canli_CL_de_var": e, "TAM_SET_te_var": z}
     except Exception as e:  # noqa: BLE001
-        print(f"CL TAM_SET gurultu olculemedi: {type(e).__name__}", flush=True)
-    print(f"K4 piksel esigi (CL kendi gurultusu p99.9 x1.5): {esik}", flush=True)
+        print(f"CL TAM_SET olculemedi: {type(e).__name__} {str(e)[:120]}", flush=True)
+    print(f"K4 piksel esigi (CL ayni-icerik karelerinde p99.9 x1.5, [8,60]): {esik}", flush=True)
+    print(f"CL canli ile CL TAM_SET sablon kelime farki: {json.dumps(sablon, ensure_ascii=False)}", flush=True)
+    REF = {n: CLT.get(n, im) for n, im in R.items()}
+    ref_ocr = {n: ocr_tsv(im) for n, im in REF.items()}
 
     satir, fark4, serit = {}, {}, []
     for c, lid in sorted(hedef.items()):
@@ -185,19 +230,17 @@ def main():
         for i, g in gal.items():
             if g.get("tur") not in ("kapak", "kart") or i not in L or g["cl_karsiligi"] not in ref_ocr:
                 continue
-            t = norm(ocr(L[i]))
-            bek = burc_degis(ref_ocr[g["cl_karsiligi"]], a, b)
-            bek2 = burc_degis(ref_ocr[g["cl_karsiligi"]], b, a)
-            if "<UZUNTIRE>" in t or "<ORTATIRE>" in t:
+            ham, kel = ocr_tsv(L[i])
+            rham, rkel = ref_ocr[g["cl_karsiligi"]]
+            t = norm(ham)
+            if any(("—" in w or "–" in w) and c >= KONF for w, c in kel):
                 hat.append(f"#{i} tire")
             m = re.search(r"ASTROLOVE\s*/\s*([A-Z]+)\s*\+\s*([A-Z]+)", t)
-            if "ASTROLOVE /" in ref_ocr[g["cl_karsiligi"]] and (not m or sorted(m.groups()) != sorted([a.upper(), b.upper()])):
+            if "ASTROLOVE /" in norm(rham) and (not m or sorted(m.groups()) != sorted([a.upper(), b.upper()])):
                 hat.append(f"#{i} baslik {m.groups() if m else 'OKUNAMADI'}")
-            if t not in (bek, bek2):
-                import difflib
-                sm = difflib.SequenceMatcher(None, bek, t)
-                op = next((o for o in sm.get_opcodes() if o[0] != "equal"), None)
-                hat.append(f"#{i} metin oran {sm.ratio():.3f}" + (f" ref '{bek[op[1]:op[2]][:30]}' / canli '{t[op[3]:op[4]][:30]}'" if op else ""))
+            e, z = kel_fark(rkel, kel)
+            if e or z:
+                hat.append(f"#{i} eksik {e[:6]} fazla {z[:6]}")
         r.update(K2_yazi="PASS" if not hat else "FAIL", K2_deger=" | ".join(hat)[:700])
         # K3
         de = {}
@@ -208,9 +251,9 @@ def main():
         # K4 (fark haritalari; karar tum ilanlar okununca)
         if esik is not None:
             for i, g in gal.items():
-                if i in L and g["cl_karsiligi"] in R:
-                    ref4 = kucuk(R[g["cl_karsiligi"]])
-                    can4 = kucuk(L[i].resize(R[g["cl_karsiligi"]].size, Image.BILINEAR))
+                if i in L and g["cl_karsiligi"] in REF:
+                    ref4 = kucuk(REF[g["cl_karsiligi"]])
+                    can4 = kucuk(L[i].resize(REF[g["cl_karsiligi"]].size, Image.BILINEAR))
                     fark4[(c, i)] = (np.abs(can4 - ref4) > esik)
         # K5
         v = []
@@ -293,7 +336,8 @@ def main():
         T.save(OUT / "CANLI_SERIT.jpg", quality=88)
     oz = {k: f"{sum(1 for r in satir.values() if r.get(k) == 'PASS')}/{len(satir)}" for k in ("K1_foto", "K2_yazi", "K3_renk", "K4_leke", "K5_video")}
     oz["fail"] = {k: [c for c, r in satir.items() if r.get(k) == "FAIL"] for k in ("K1_foto", "K2_yazi", "K3_renk", "K4_leke", "K5_video")}
-    print("OZET " + json.dumps({**oz, "cagri": api.calls, "kota_son": api.remaining, "k4_esik": esik}, ensure_ascii=False), flush=True)
+    print("OZET " + json.dumps({**oz, "cagri": api.calls, "kota_son": api.remaining, "k4_esik": esik,
+                                "cl_sablon_fark": sablon}, ensure_ascii=False), flush=True)
 
 
 if __name__ == "__main__":
