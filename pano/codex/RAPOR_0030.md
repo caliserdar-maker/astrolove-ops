@@ -1,0 +1,6 @@
+- Gunluk magaza saglik raporu betigi eklendi.
+- Yedi TEMP CSV kaynagi destekleniyor; eksik kaynaklar `?` gosteriliyor.
+- Kural ve ilan baglantilari ile onceki rapor farki uretiliyor.
+- Gunluk 05:17 UTC ve elle calisan workflow eklendi.
+- Workflow kilitsiz denetimleri salt okur calistirir; Etsy'ye yazmaz.
+- Agsiz birim testleri ve workflow dogrulamasi calistirildi.

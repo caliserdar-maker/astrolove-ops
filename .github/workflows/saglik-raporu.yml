@@ -1,0 +1,87 @@
+name: saglik-raporu
+
+on:
+  schedule:
+    - cron: "17 5 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rapor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12", cache: pip}
+      - name: Araclari kur
+        run: |
+          set -euo pipefail
+          pip install -q -r requirements.txt
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq tesseract-ocr
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: Drive salt okunur girdilerini al
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail; umask 077
+          mkdir -p ~/.config/rclone TEMP _work/set
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          [ -z "${GOOGLE_CLIENT_SECRET:-}" ] || echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+          for ad in MAGAZA_DENETIM FIYAT_SKU GORSEL_DENETIM KISISEL_UYUM VARYASYON_CANLI CANLI_METIN MAGAZA_AYAR; do
+            rclone copyto "gdrive:ASTROLOVE/TEMP/$ad.csv" "TEMP/$ad.csv" 2>/dev/null || true
+          done
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_KISISEL/A1_77/_galeri/GALERI_TAMSET.json" _work/GALERI_TAMSET.json 2>/dev/null || true
+          rclone copy "gdrive:ASTROLOVE/TEMP/POD_KISISEL/A1_77" _work/set --include "*/TAM_SET/SET.json" -q 2>/dev/null || true
+          rclone copyto "gdrive:ASTROLOVE/TEMP/YAYILIM_78/METIN_78.csv" _work/METIN_78.csv 2>/dev/null || true
+          ONCEKI=$(rclone lsf "gdrive:ASTROLOVE/TEMP" --files-only --include 'SAGLIK_*.md' 2>/dev/null | sort | tail -1 || true)
+          if [ -n "$ONCEKI" ]; then
+            rclone copyto "gdrive:ASTROLOVE/TEMP/$ONCEKI" _work/ONCEKI_SAGLIK.md
+          fi
+      - name: Kilitsiz salt okur denetimleri sirayla kos
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+        run: |
+          set -o pipefail
+          python scripts/etsy/gorsel_denetim.py --output TEMP/GORSEL_DENETIM.csv \
+            --contact _work/GORSEL_DENETIM_FAIL.jpg || echo "::warning::gorsel denetiminde sorun var"
+          if [ -s _work/GALERI_TAMSET.json ] && find _work/set -name SET.json -print -quit | grep -q .; then
+            python scripts/etsy/varyasyon_canli.py --state _work/GALERI_TAMSET.json --setler _work/set \
+              --output TEMP/VARYASYON_CANLI.csv || echo "::warning::varyasyon denetiminde sorun var"
+          fi
+          if [ -s _work/METIN_78.csv ]; then
+            python scripts/etsy/canli_metin_tara.py etsy _work/METIN_78.csv _work/canli_metin.json
+            python scripts/etsy/canli_metin_tara.py denetle _work/canli_metin.json \
+              TEMP/CANLI_METIN.csv _work/CANLI_METIN_OZET.json || echo "::warning::metin denetiminde sorun var"
+          fi
+      - name: Saglik raporunu uret
+        run: |
+          set -euo pipefail
+          TARIH=$(date -u +%F)
+          ONCEKI_ARG=()
+          [ ! -s _work/ONCEKI_SAGLIK.md ] || ONCEKI_ARG=(--onceki _work/ONCEKI_SAGLIK.md)
+          python scripts/ops/saglik_raporu.py --girdi TEMP --cikti "TEMP/SAGLIK_${TARIH}.md" \
+            --tarih "$TARIH" "${ONCEKI_ARG[@]}"
+          echo "RAPOR=TEMP/SAGLIK_${TARIH}.md" >> "$GITHUB_ENV"
+      - name: Denetimleri ve raporu Drive TEMP'e yaz
+        run: |
+          set -euo pipefail
+          for ad in GORSEL_DENETIM VARYASYON_CANLI CANLI_METIN; do
+            [ ! -s "TEMP/$ad.csv" ] || rclone copyto "TEMP/$ad.csv" "gdrive:ASTROLOVE/TEMP/$ad.csv"
+          done
+          rclone copyto "$RAPOR" "gdrive:ASTROLOVE/TEMP/$(basename "$RAPOR")"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: saglik-raporu
+          path: TEMP/SAGLIK_*.md
+          if-no-files-found: error
+      - if: always()
+        run: rm -rf TEMP _work ~/.config/rclone

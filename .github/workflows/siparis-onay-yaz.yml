@@ -1,0 +1,59 @@
+name: siparis-onay-yaz
+
+# Claude bu isi yalniz Serdar'in ilgili pakete acik onayindan sonra tetikler.
+# Workflow paketin Drive'daki tam cozunurluk dosyalarini yeniden ozetler.
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      kimlik:
+        description: "Onaylanacak paket kimligi"
+        required: true
+        type: string
+
+concurrency:
+  group: siparis-onay-defteri
+  cancel-in-progress: false
+
+jobs:
+  onay-yaz:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: rclone kur ve yapilandir
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          mkdir -p ~/.config/rclone _work/SIPARIS_ONAY; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf \
+             && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+          fi
+      - name: Paketi dogrula ve onayi yaz
+        env:
+          KIMLIK: ${{ inputs.kimlik }}
+        run: |
+          set -euo pipefail
+          python3 -c 'import sys; from pathlib import Path; k=sys.argv[1]; sys.exit(0 if k and k not in (".", "..") and Path(k).name == k else 2)' "$KIMLIK"
+          rclone copy "gdrive:ASTROLOVE/TEMP/SIPARIS_ONAY/${KIMLIK}" "_work/SIPARIS_ONAY/${KIMLIK}" -q
+          rclone copyto "gdrive:ASTROLOVE/TEMP/SIPARIS_ONAY/ONAYLAR.json" \
+            _work/SIPARIS_ONAY/ONAYLAR.json -q 2>/dev/null || printf '{}\n' > _work/SIPARIS_ONAY/ONAYLAR.json
+          python scripts/ops/siparis_onay.py onayla --kimlik "$KIMLIK" \
+            --paket-dizini "_work/SIPARIS_ONAY/${KIMLIK}" \
+            --onaylar _work/SIPARIS_ONAY/ONAYLAR.json
+          rclone copyto _work/SIPARIS_ONAY/ONAYLAR.json \
+            "gdrive:ASTROLOVE/TEMP/SIPARIS_ONAY/ONAYLAR.json" -q
+          echo "Onay kaydi SHA256 dogrulamasiyla yazildi"
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone

@@ -135,13 +135,18 @@ jobs:
       - name: Token, STATE, hazir paketler
         run: |
           set -euo pipefail
-          umask 077; mkdir -p _work _out _work/packages
+          umask 077; mkdir -p _work _out _work/packages _work/SIPARIS_ONAY
           if [ "${{ inputs.sadece_test }}" != "true" ]; then
             rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
           fi
           rclone copyto "gdrive:ASTROLOVE/TEMP/POD_ORDERS_STATE.csv" _work/state.csv 2>/dev/null || echo "STATE yok; yeni baslar"
           rclone copy "gdrive:ASTROLOVE/TEMP/POD_ORDERS" _work/packages --include "*.json" -q 2>/dev/null || true
           echo "hazir paket: $(ls _work/packages/*.json 2>/dev/null | wc -l)"
+          if [ -n "${R_SUBMIT:-}" ]; then
+            # Submit kapisi fail-closed: hem paketin tam cozunurluk kopyasi hem defter zorunlu.
+            rclone copy "gdrive:ASTROLOVE/TEMP/SIPARIS_ONAY/${R_SUBMIT}" "_work/SIPARIS_ONAY/${R_SUBMIT}" -q
+            rclone copyto "gdrive:ASTROLOVE/TEMP/SIPARIS_ONAY/ONAYLAR.json" _work/SIPARIS_ONAY/ONAYLAR.json -q
+          fi
           # kisisellestirme musteri mesaji sablonlari (yoksa kartta "sablon eksik" yazar)
           rclone copyto "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/MUSTERI_MESAJLARI.md" _work/MUSTERI_MESAJLARI.md 2>/dev/null \
             && echo "musteri mesaj sablonlari alindi" || echo "musteri mesaj sablonlari YOK (TEMP/SIPARIS_ISIM/MUSTERI_MESAJLARI.md)"
@@ -195,6 +200,27 @@ jobs:
             [ -n "${R_EW:-}" ] && args+=("$R_EW") || true
           fi
           python scripts/prodigi/order_router.py "${args[@]}"        # sahte receipt ayri adimda kosar
+      - name: Yeni paketleri onaya hazirla
+        if: ${{ inputs.sadece_test != true }}
+        run: |
+          set -euo pipefail
+          [ "$R_APPROVE" = "on" ] || exit 0
+          shopt -s nullglob
+          for paket in _out/*.json; do
+            [ "$(basename "$paket")" = "PRODIGI_SKU_HARITA.json" ] && continue
+            kimlik=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["receipt_id"])' "$paket")
+            kaynaklar=()
+            while IFS= read -r -d '' uzak; do
+              hedef="_work/onay-kaynak/${kimlik}/$(basename "$uzak")"
+              mkdir -p "$(dirname "$hedef")"
+              rclone copyto "$uzak" "$hedef" -q
+              kaynaklar+=(--dosya "$hedef")
+            done < <(python3 -c 'import json,sys; [sys.stdout.buffer.write(i["asset_remote"].encode()+b"\0") for i in json.load(open(sys.argv[1]))["items"]]' "$paket")
+            python scripts/ops/siparis_onay.py hazirla --kimlik "$kimlik" \
+              --kok _work/SIPARIS_ONAY "${kaynaklar[@]}"
+            rclone copy "_work/SIPARIS_ONAY/${kimlik}" \
+              "gdrive:ASTROLOVE/TEMP/SIPARIS_ONAY/${kimlik}" -q
+          done
       - name: Token/STATE/paket/rapor Drive'a
         if: ${{ always() }}
         env:

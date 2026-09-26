@@ -25,6 +25,17 @@
    (+ `prodigi_order_id`). Ayni receipt IKINCI KEZ GONDERILEMEZ: STATE stage `ordered/shipped/
    tracked` ya da `.result.json` varsa atlanir (ustune Prodigi `idempotencyKey = etsy-<rid>`).
 
+Her yeni paket icin tam cozunurluk dosyalari, `onay.html` ve `kayit.json` Drive
+`TEMP/SIPARIS_ONAY/<kimlik>/` altina yazilir. `siparis-onay-yaz` yalniz acik insan onayindan sonra
+paket SHA256 degerini `TEMP/SIPARIS_ONAY/ONAYLAR.json` defterine ekler. `submit` once bu dizini ve
+defteri indirir; eksik defter, eksik dosya veya onaydan sonraki herhangi bir degisiklik gonderimi
+fail-closed durdurur.
+
+Kisisel dijital teslimler de ayni semayi kullanir: teslim dosyalari
+`TEMP/SIPARIS_ONAY/<kimlik>/` altinda `onay.html` ve `kayit.json` ile hazirlanir; Etsy yuklemesinden
+once `dijital_teslim_kapisi` ayni `ONAYLAR.json` kaydini denetler. Musteri bilgisi loga veya repoya
+yazilmaz.
+
 Kargo takibi bu asamada Etsy'ye YAZILMAZ, yalnizca raporda loglanir (ayri adim, sonra acilir).
 Etsy okumasi `--since-days 7` + en fazla `--max-pages 10` cagri, kota 400 altina inince durur
 (cron basina ~1-2 cagri, ~48/gun). Yerel dogrulama: sahte receipt ile paket/idempotens testi

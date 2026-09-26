@@ -37,6 +37,12 @@ def main() -> int:
         assert "2>&1 | tee _log" in text and "pipefail" in text, f"{name}: ana log eksik"
         assert "if: failure()" in text and "tail -n 150" in text, f"{name}: hata logu eksik"
         assert "_OZET.md" in text and "$GITHUB_STEP_SUMMARY" in text, f"{name}: ozet logu eksik"
+    router = (WORKFLOWS / "pod-order-router.yml").read_text(encoding="utf-8")
+    assert "TEMP/SIPARIS_ONAY/${R_SUBMIT}" in router and "ONAYLAR.json" in router, "submit onay indirmiyor"
+    assert "siparis_onay.py hazirla" in router and "rclone copyto \"$uzak\"" in router, "paket onaya hazirlanmiyor"
+    onay = (WORKFLOWS / "siparis-onay-yaz.yml").read_text(encoding="utf-8")
+    assert "workflow_dispatch" in onay and "siparis_onay.py onayla" in onay, "onay workflow sozlesmesi eksik"
+    assert "group: siparis-onay-defteri" in onay and "cancel-in-progress: false" in onay, "defter yarisi korunmuyor"
     print(f"PASS: {len(files)} workflow YAML, {len(PUBLIC_AUDITS)} public denetim sozlesmesi")
     return 0
 
