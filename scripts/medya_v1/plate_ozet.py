@@ -30,6 +30,8 @@ def main():
     # "bant bulunamadi" listesini aynen gosterdi.
     ap.add_argument('--desen', default='RAPOR_*.json',
                     help="yalniz bu desene uyan raporlar (orn. 'RAPOR_*_14.json')")
+    ap.add_argument('--kisa', action='store_true',
+                    help='yalniz sayilar + eksik liste (uzun ciktida bas kesiliyor)')
     a = ap.parse_args()
     var = set()
     for satir in rc('lsf', PLATES, '--include', '*.png').splitlines():
@@ -50,6 +52,16 @@ def main():
                 diger[k] = v
     # 16 boy x 5 edisyon matrisi: hangi plate dosyasi Drive'da GERCEKTEN var
     eksik = [f'{e}_{b}' for b in BOYLAR for e in EDISYONLAR if f'{e}_{b}' not in var]
+    ozet = {
+        'okunan_rapor': len(okunan),
+        'PLATES_de_png': len(var), 'hedef': len(BOYLAR) * len(EDISYONLAR),
+        'eksik_sayi': len(eksik), 'eksik': eksik,
+        'rapora_yazilan': len(yazildi), 'kapida_KALDI_sayi': len(kaldi),
+        'kapida_KALDI': sorted(kaldi), 'bant_bulunamadi_sayi': len(bant_yok),
+        'diger_hata_sayi': len(diger)}
+    if a.kisa:
+        print(json.dumps(ozet, indent=1, ensure_ascii=False))
+        return
     print(json.dumps({
         'okunan_rapor': [f.name for f in okunan],
         'PLATES_de_png': len(var),
