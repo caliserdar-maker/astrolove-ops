@@ -42,7 +42,7 @@ jobs:
           python-version: "3.12"
       - run: |
           set -euo pipefail
-          pip install -q requests==2.34.2
+          pip install -q requests==2.34.2 pillow numpy
           curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
       - name: rclone.conf olustur
         env:
