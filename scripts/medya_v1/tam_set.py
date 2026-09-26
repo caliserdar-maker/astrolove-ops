@@ -73,6 +73,12 @@ class EdPoster:
         ref, _ = self.p11.norm(Image.open(yol).convert('RGB'))
         m = E.murekkep(np.asarray(ref).astype(np.float32))
         o, duz = A.olcum_duzelt(self.p11.sayfa_olc(yol, maske=E.edisyon_maske), m)
+        if ust and ust.get('sembol'):                 # GOREV 0002-C: iki sembol sayfa ortasinin iki yaninda olmali; degilse
+            orta, sx = m.shape[1] / 2, o['sembol']    # (doku: bir sembol kacti, digeri ikiye bolundu) ayni sayfanin Blue olcumu
+            if not (len(sx) == 2 and sum(sx[0]) / 2 < orta < sum(sx[1]) / 2):
+                o = dict(o); o['sembol'] = [list(x) for x in ust['sembol']]
+                o['sembol_merkez'] = [round((x[0] + x[1]) / 2, 1) for x in o['sembol']]
+                duz = dict(duz); duz['sembol_blue'] = {'olculen': sx, 'blue': o['sembol']}
         E.REF_SAYFA = n
         s, S = E.oran_kur(self.ed, '4x5', self.kilit, o)
         g0, g1 = o['isim_govde']; s['isim_y'] = (g0 + g1) / 2
@@ -97,6 +103,24 @@ class EdPoster:
         return p, {'kalinti_kapisi': kapi, 'temiz_ara_kapisi': s['temiz_ara_kapisi'], 'sembol_kapisi': sk,
                    'punto': bilgi['punto'], 'olcek': bilgi['olcek'], 'olcum_duzeltme': B['duz']}, kirp
 
+def temiz_ozet(b):
+    t = b['temiz_ara_kapisi']; return {k: t.get(k) for k in ('gecti', 'en_ort', 'en_tepe', 'kotu_blok', 'blok', 'alan_px', 'ornek')}
+
+def temiz_kirp(renk, B, b, poster):
+    """GOREV 0002-E teshis: temiz ara kapisinin kotu bloklari (ilk 6), x3: Canva sayfasi | tahmini zemin | uretilen poster."""
+    import pilot16
+    ref = np.asarray(B['S']['ref'])[..., :3].astype(np.uint8); z = np.clip(B['S']['zemin_a'], 0, 255).astype(np.uint8)
+    po = np.asarray(poster.convert('RGB').resize((ref.shape[1], ref.shape[0]))) if poster.size != (ref.shape[1], ref.shape[0]) else np.asarray(poster.convert('RGB'))
+    bl = pilot16.BLOK
+    if 'zemin_a' not in B['S']: return
+    for i, k in enumerate(b['temiz_ara_kapisi'].get('ornek', [])[:6]):
+        x0, y0 = max(k['x'] - bl, 0), max(k['y'] - bl, 0); x1, y1 = k['x'] + 2 * bl, k['y'] + 2 * bl
+        parca = [Image.fromarray(a[y0:y1, x0:x1]).resize(((x1 - x0) * 3, (y1 - y0) * 3), Image.NEAREST) for a in (ref, z, po)]
+        T = Image.new('RGB', (sum(p.width for p in parca) + 20, parca[0].height + 30), 'white'); x = 0
+        for p in parca: T.paste(p, (x, 30)); x += p.width + 10
+        ImageDraw.Draw(T).text((5, 8), f"{renk} blok x{k['x']} y{k['y']} ort {k['ort']} tepe {k['tepe']} | sayfa | zemin | poster", fill=(0, 0, 0))
+        T.save(CIK / f'WP_TEMIZ_{renk}_{i}.jpg', quality=90)
+
 def posterler(sayfa):
     """Her renk: CL (28) ve cift (no) isimli EJ posteri + kapilar."""
     P, K, M = {}, {}, {}
@@ -109,7 +133,8 @@ def posterler(sayfa):
             M['blue'] = {'B': Ba, 'X': PB, 'Bc': Bc}
         else:
             EP = EdPoster(renk)
-            ust = {k: M['blue']['B']['s'][k] for k in ('tag_cap', 'tag_sinir')} if 'blue' in M else None
+            ust = ({**{k: M['blue']['B']['s'][k] for k in ('tag_cap', 'tag_sinir')}, 'sembol': M['blue']['B']['o']['sembol']}
+                   if 'blue' in M else None)
             Bc = EP.sayfa_kur(sayfa[f'{renk}_28'], 28, referans=True); cl, clb, _ = EP.uret(Bc, ISIM, TAG)
             Ba = EP.sayfa_kur(sayfa[f'{renk}_{NO}'], NO, ust=ust); al, alb, kk = EP.uret(Ba, ISIM, TAG)
             M[renk] = {'o': {k: Ba['s'].get(k) for k in ('sembol_bant', 'isim_bant')}, 'tag_bant': Ba['s'].get('tag_bant'),
@@ -119,8 +144,11 @@ def posterler(sayfa):
         M[renk]['mesaj_px'] = {'AL': mesaj_boy(al, M[renk]['B']), 'CL': mesaj_boy(cl, M[renk]['Bc'])}
         R.setdefault('poster', {})[renk] = {'kapi': kap, 'gecti': all(kap.values()), 'punto': alb['punto'], 'olcek': alb['olcek'],
                                             'sembol': {y: alb['sembol_kapisi'][y] for y in ('sol', 'sag')},
-                                            'CL_kapi': {'kalinti': clb['kalinti_kapisi']['gecti'], 'sembol': clb['sembol_kapisi']['gecti']},
+                                            'CL_kapi': {'kalinti': clb['kalinti_kapisi']['gecti'], 'sembol': clb['sembol_kapisi']['gecti'],
+                                                        'temiz_zemin': clb['temiz_ara_kapisi']['gecti']},
+                                            'temiz_ara': temiz_ozet(alb), 'CL_temiz_ara': temiz_ozet(clb), 'olcum_duzeltme': alb['olcum_duzeltme'],
                                             'sn': round(time.time() - t0, 1)}
+        if not kap['temiz_zemin']: temiz_kirp(renk, M[renk]['B'], alb, al)
         al.save(CIK / f'POSTER_{RENK_AD[renk]}_EJ.png'); A.sembol_gorseli(kk, f'../TAM_SET/SEMBOL_{RENK_AD[renk]}.jpg')
         log(renk, R['poster'][renk])
     return P, M
@@ -298,6 +326,7 @@ def kart04(kart, M, sahne_cl_B):
         Fi = np.asarray(Image.fromarray(F.astype(np.uint8)).resize((nw, nh), Image.LANCZOS)).astype(np.float64)
         ai = np.asarray(Image.fromarray((al * 255).astype(np.uint8)).resize((nw, nh), Image.LANCZOS)).astype(np.float64)[..., None] / 255
         cx, cy = (hk[0] + hk[2]) / 2, (hk[1] + hk[3]) / 2; px, py = int(round(cx - nw / 2)), int(round(cy - nh / 2))
+        px, py = min(max(px, 0), Wd - nw), min(max(py, 0), H - nh)   # panel disina tasma (2 px): kirpma yok, iceri kaydir
         P[py:py + nh, px:px + nw] = P[py:py + nh, px:px + nw] * (1 - ai) + Fi * ai
     a[y0:y1, x0:x1] = P
     R['kart04'] = {'olcek': [round(v, 4) for v in olc], 'kucuk_kutu': [list(map(int, k)) for k in kutular], 'birlesik_kutu': list(map(int, fk))}

@@ -23,7 +23,7 @@ def liste():
     rc('copy', KP, str(W / 'ts77l'), '--include', 'TS77_*.json')
     return {r: A.liste_ac(json.loads((W / 'ts77l' / f'TS77_{r}.json').read_text())) for r in RENKLER}
 
-TUR = 'r2'                                            # GOREV 0002: yalniz seti olmayan (FAIL) ciftler yeniden
+TUR = 'r3'                                            # GOREV 0002 iterasyon 2: yalniz seti olmayan (FAIL) ciftler
 
 def yapildi():
     """Kapidan gecmis seti olan ciftler (A1_77/<CIFT>/TAM_SET/SET.json)."""
@@ -41,7 +41,7 @@ def parca(p, n):
     ciftler = sorted(x.strip('/') for x in rc('lsf', A.POD, '--dirs-only').split()); assert len(ciftler) == 78
     no = {c: i + 1 for i, c in enumerate(ciftler)}; assert no[REF_CIFT] == 28
     bitti = yapildi()
-    benim = [c for c in ciftler if c != REF_CIFT and c not in bitti][p::n]
+    benim = [c for c in [c for c in ciftler if c != REF_CIFT][p::n] if c not in bitti]   # dilim sabit listeden (gec baslayan is kaymaz)
     H = W / 'ham77'; H.mkdir(exist_ok=True); R = {'parca': p, 'toplam_is': n, 'cift': {}}
     for sayfa in sorted({28, *[no[c] for c in benim]}):                 # imzali URL'ler: once hepsi indirilir
         for r in RENKLER:
@@ -67,7 +67,7 @@ def parca(p, n):
                 r['poster'] = d.get('poster'); r['kart06'] = (d.get('kart07') or {}).get('detay', {}).get('kapi')
                 r['galeri_burc'] = [g['dosya'] for g in d.get('galeri', []) if not g['burc_kapisi']['gecti']]
                 if not ((d.get('poster') or {}).get('vintage') or {}).get('gecti', True):   # E: WP x3 + sembol kaynak|yeni
-                    for f in list((W / 'TAM_SET').glob('WP_x3_*.jpg')) + list((W / 'TAM_SET').glob('SEMBOL_WARM_PARCHMENT.jpg')):
+                    for f in list((W / 'TAM_SET').glob('WP_x3_*.jpg')) + list((W / 'TAM_SET').glob('WP_TEMIZ_*.jpg')) + list((W / 'TAM_SET').glob('SEMBOL_WARM_PARCHMENT.jpg')):
                         rc('copy', str(f), f'{RAPOR}/E/{c}')
             if q.returncode and not r['gecti']: r['hata'] = (q.stdout + q.stderr)[-600:]
             if r['gecti']: kucuk(c).save(K / f'{c}.jpg', quality=88)
@@ -87,7 +87,7 @@ def serit():
     try:
         rc('copy', RAPOR, str(O), '--include', 'parca_*.json')
         C = {}
-        for f in sorted(O.glob('parca_[0-9]*.json')) + sorted(O.glob(f'parca_{TUR}_*.json')): C.update(json.loads(f.read_text())['cift'])
+        for f in sorted(O.glob('parca_[0-9]*.json')) + sorted(O.glob('parca_r2_*.json')) + sorted(O.glob('parca_r3_*.json')): C.update(json.loads(f.read_text())['cift'])
         bitti = yapildi()
         for c in bitti:                                               # seti olan cift PASS (ilk kosuda raporu kayip olanlar dahil)
             C.setdefault(c, {'gecti': True})
