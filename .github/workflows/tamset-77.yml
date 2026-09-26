@@ -10,6 +10,13 @@ permissions:
 
 on:
   workflow_dispatch:
+    inputs:
+      mod:
+        description: 'tam = seti olmayan ciftler; k04 = yalniz kart 04 (ilk 20 PASS cift)'
+        required: false
+        default: 'tam'
+        type: choice
+        options: [tam, k04]
 
 concurrency: tamset-77
 
@@ -68,7 +75,8 @@ jobs:
       - name: Tam set (parca ${{ matrix.parca }}/16)
         env:
           PARCA: ${{ matrix.parca }}
-        run: python scripts/medya_v1/tam77.py "$PARCA" 16
+          MOD: ${{ inputs.mod || 'tam' }}
+        run: python scripts/medya_v1/tam77.py "$PARCA" 16 "$MOD"
 
   serit:
     needs: uret
