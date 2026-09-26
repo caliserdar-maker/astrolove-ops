@@ -38,6 +38,10 @@ KP = 'gdrive:ASTROLOVE/TEMP/KISISEL_PILOT'
 POD = 'gdrive:ASTROLOVE/TEMP/POD_PRINT'
 SIP = 'gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM'
 PLATES = 'gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PLATES'   # medyan zemin (Serdar onayi 25 Eyl)
+# Plate kumesi: '' = medyan plate (<ED>_<boy>.png), '_CANVA' = Canva katman
+# kaynakli plate (<ED>_CANVA_<boy>.png, GOREV_0015/0017). Varsayilan medyan;
+# Canva kumesi onay sayfasi onaylanana kadar yalniz --plate canva ile kullanilir.
+PLATE_EK = ''
 PLATE_ESIK = 12.0      # |dosya - plate| murekkep esigi (olculen: disi p99 0-3, cekirdek > 30)
 W = Path('_siparis').resolve(); W.mkdir(exist_ok=True)
 K = W / 'kisisel'                                   # kisisel-v1 dal arsivi (degistirilmez)
@@ -205,12 +209,13 @@ class EdisyonPoster:
         hedef = hed / f'{oran}.png'
         if self.plate_indi.get((ed, oran)) == boy and hedef.exists():
             return hedef
-        kaynak = W / 'plates' / f'{ed.upper()}_{boy}.png'
+        ad = f'{ed.upper()}{PLATE_EK}_{boy}.png'
+        kaynak = W / 'plates' / ad
         kaynak.parent.mkdir(parents=True, exist_ok=True)
         if not kaynak.exists():
-            rc('copy', f'{PLATES}/{ed.upper()}_{boy}.png', str(kaynak.parent), timeout=1800)
+            rc('copy', f'{PLATES}/{ad}', str(kaynak.parent), timeout=1800)
         if not kaynak.exists():
-            raise SystemExit(f'PLATES eksik: {ed.upper()}_{boy}.png')
+            raise SystemExit(f'PLATES eksik: {ad}')
         hedef.write_bytes(kaynak.read_bytes())
         self.plate_indi[(ed, oran)] = boy
         return hedef
@@ -1057,7 +1062,12 @@ def main():
                          "canva: imzali URL listesinden tek sayfa")
     ap.add_argument('--liste', default='SIPARIS_URL.json',
                     help='--kaynak canva icin Drive KISISEL_PILOT altindaki imzali URL listesi')
+    ap.add_argument('--plate', default='medyan', choices=('medyan', 'canva'),
+                    help='zemin plate kumesi: medyan (<ED>_<boy>.png) ya da canva (<ED>_CANVA_<boy>.png)')
     a = ap.parse_args()
+    global PLATE_EK
+    PLATE_EK = '_CANVA' if a.plate == 'canva' else ''
+    log('plate kumesi', a.plate)
 
     if a.test:
         siparisler = [dict(t) for t in TESTLER]
