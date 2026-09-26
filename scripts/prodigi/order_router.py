@@ -718,6 +718,17 @@ def main():
     report.append(f"- POD urunlu receipt: {len(pod)}"
                   + (f" (yalniz {a.only_size} kalemleri)" if a.only_size else ""))
     kanal_bekci = kanal_kisisel_bekci(a, prod, st, idx, pod, report, errors) if not a.test_receipt else {}
+    # GOREV 0032: Prodigi 'Pause indefinitely' ayarinda kanal siparisleri de bekletilir; API bekletmedeki siparisi
+    # listelemez/GET'te dondurmez. POD receipt Prodigi listesinde yoksa ve router gondermediyse kanalda bekliyor olabilir:
+    # Serdar'in onay sayfasi gostersin (ONAYLAR.json kaydi olmadan panelden serbest birakilmaz).
+    if not a.test_receipt:
+        for r, items, _o, _a in pod:
+            rid = str(r.get("receipt_id"))
+            if kanal_durumu(idx, rid, items)[0] == "" and (st.get(rid) or {}).get("stage") not in ("ordered", "shipped", "tracked"):
+                satir = (f"- PRODIGI BEKLEYEN (paused, API gostermez) kanal siparisi olasi: receipt {rid} "
+                         f"({', '.join(i['sku'] for i in items)}) - ONAYLAR.json onayi olmadan panelden serbest birakma")
+                report.append(satir)
+                DIKKAT_EK.append(satir)
     links = None
     new_orders = 0
 
