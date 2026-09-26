@@ -12,7 +12,8 @@ except ModuleNotFoundError:  # Yerel/yalin konteynerlerde Ruby stdlib YAML kulla
 
 ROOT = Path(__file__).resolve().parents[2]
 WORKFLOWS = ROOT / ".github" / "workflows"
-PUBLIC_AUDITS = ("varyasyon-canli.yml", "gorsel-denetim.yml")
+# 26 Eyl: getListingVariationImages canli olcumde x-api-key ile 401 verdi -> varyasyon-canli OAuth + etsy-token kilidinde kalir.
+PUBLIC_AUDITS = ("gorsel-denetim.yml",)
 
 
 def main() -> int:
