@@ -169,6 +169,7 @@ def karo_ortanca(yollar, tam_px, satir):
 MASKE_YARICAP = 31        # yerel kontrast medyan yaricapi (2400 uzayi, onayli)
 MASKE_ESIK = 26           # yerel kontrast esigi (onayli)
 MASKE_MIN_ALAN = 40
+ARAMA_PAY = 8             # referans maskenin komsulugu: glif burada ARANIR
 GLIF_PAY = 3              # glif maskesi bu kadar genisletilir (kenar yumusamasi)
 DOLGU_ESIK = 18.0         # |serit - dolgu| bu esigin ustunde ise glif (olculen doku p99 <= 3)
 DOLGU_MAD = 6.0           # ... ya da medyan + bu kadar MAD (hangisi buyukse)
@@ -363,6 +364,15 @@ def slogan_temizle(plate, bant, ref_maske=None):
     # Ikisinin birlesimi hem ince hem kalin glifi kapsar; delikler kapatilir.
     k = plate.shape[1] / 2400.0
     if ref_maske is not None:
+        # 6. ITERASYON (Serdar onayi 26 Eyl): referans maske SILME maskesi
+        # degil ARAMA BOLGESI. Glif hedefin KENDI pikselinden bulunur, ama
+        # yalniz referans maskenin +-ARAMA_PAY komsulugunda.
+        # Neden: (a) referans maskeyi dogrudan uygulamak dokulu edisyonlarda
+        # hedef glifin ancak %39'unu kapsiyordu (BLUE'da %88) - glif SEKLI
+        # edisyonlar arasi ayni degil; (b) hedefin kendi esigini TUM seritte
+        # hesaplamak dokuyu maskeye sokuyordu (Champagne esik 41.6, WP 82.2).
+        # Dar arama bolgesi + cevreden olculen esik ikisini birden cozer.
+        pass
         # REFERANS MASKE (Serdar onayi 26 Eyl): maske bu edisyondan degil,
         # ayni boyun PURE_WHITE plate'inden gelir. Sebep olculdu: esik
         # med+6*MAD dokulu zeminde (Champagne 41.6) sisip glif govdesinin
@@ -372,9 +382,25 @@ def slogan_temizle(plate, bant, ref_maske=None):
         if ref_maske.shape != kes.shape[:2]:
             return None, {'sebep': f'referans maske boyutu {ref_maske.shape} != '
                                    f'serit {kes.shape[:2]}'}
-        m = ref_maske.astype(np.uint8)
-        m_yerel = m_fark = np.zeros(kes.shape[:2], bool)
-        med = mad = esik = -1.0
+        pay = max(int(round(ARAMA_PAY * k)), 2)
+        ar = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * pay + 1,) * 2)
+        arama = cv2.dilate(ref_maske.astype(np.uint8), ar) > 0
+        # ESIK cevreden olculur: arama bolgesinin hemen disi glif icermez,
+        # yalniz zemin dokusu vardir - dokunun GERCEK seviyesi orada.
+        cg = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,
+                                       (2 * max(int(round(12 * k)), 3) + 1,) * 2)
+        cevre = (cv2.dilate(arama.astype(np.uint8), cg) > 0) & ~arama
+        fark = np.abs(kes - dolgu).max(axis=2)
+        ref_px = fark[cevre] if cevre.sum() > 200 else fark
+        med = float(np.median(ref_px))
+        mad = float(np.median(np.abs(ref_px - med))) * 1.4826
+        esik = max(med + DOLGU_MAD * mad, DOLGU_ESIK)
+        m_fark = (fark > esik) & arama
+        m_yerel = np.zeros(kes.shape[:2], bool)
+        m = m_fark.astype(np.uint8)
+        kap = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,
+                                        (2 * max(int(round(4 * k)), 1) + 1,) * 2)
+        m = cv2.morphologyEx(m, cv2.MORPH_CLOSE, kap)
     else:
         L = kes @ LUMA
         m_yerel = yerel_maske(L, MASKE_YARICAP * k, MASKE_ESIK, MASKE_MIN_ALAN * k * k)

@@ -82,6 +82,40 @@ def kalinti_olc(yol):
             'iyilesme_orani': round(float(sap_s.mean() / max(sap_o.mean(), 1e-6)), 3)}
 
 
+def kalinti_olc2(yol):
+    """DOKU-BAGISIK kalinti olcumu (26 Eyl, Serdar onayli yeni olcut).
+
+    Eski olcut zemini SATIR MEDYANI aliyordu; dokulu edisyonda doku da
+    "kalinti" sayiliyordu. Burada zemin dokuyu IZLEYEN medyandir (yaricap 41,
+    glif kalinligindan buyuk), ve olcum maske ICI ile DISI arasinda yapilir:
+    maskenin disina hic dokunulmadigi icin orasi zeminin kendi dokusudur.
+      fark = ic_p99 - dis_p99   -> zeminin kendi dokusunun USTUNDE kalan iz.
+    Olculen (26 Eyl): PURE_WHITE +4, BLUE +16, MODERN +143. WP'de zemin
+    dokusu p99 81'e ciktigi icin bu olcut de WP'yi ayirt EDEMEZ - orada
+    sonuc 'olculemedi' olarak dondurulur, temiz sayilmaz.
+    """
+    import cv2
+    once, sonra = _bloklar(yol)
+    if once is None:
+        return {'hata': 'blok ayrilamadi'}
+    m = cv2.dilate((np.abs(once - sonra) > 10).astype(np.uint8),
+                   np.ones((5, 5), np.uint8)) > 0
+    if m.sum() < 200 or (~m).sum() < 200:
+        return {'hata': 'temizlenen alan bulunamadi'}
+    z = cv2.medianBlur(np.clip(sonra, 0, 255).astype(np.uint8), 41).astype(np.float32)
+    ic, dis = np.abs(sonra - z)[m], np.abs(sonra - z)[~m]
+    o_ic = np.abs(once - z)[m]
+    ic99, dis99 = float(np.percentile(ic, 99)), float(np.percentile(dis, 99))
+    d = {'ONCE_ic_ort': round(float(o_ic.mean()), 2),
+         'SONRA_ic_ort': round(float(ic.mean()), 2),
+         'ic_p99': round(ic99, 1), 'dis_p99': round(dis99, 1),
+         'FARK': round(ic99 - dis99, 1)}
+    # Zemin dokusu glif sinyaliyle ayni buyuklukteyse olcut ayirt edemez.
+    d['sonuc'] = ('olculemedi (zemin dokusu cok guclu)' if dis99 > 40
+                  else 'TEMIZ' if d['FARK'] <= 4 else 'IZ VAR')
+    return d
+
+
 def kontrast_ger(yol, cik, pay=18.0):
     """Kirpimi yerel zemin etrafinda +-pay seviyeye gerer: goz kalintiyi boyle gorur.
 
@@ -128,9 +162,14 @@ def main():
                 et = f'{ed}  {boy}   |  OLCULEMEDI: {o["hata"]}'
             else:
                 sonuc = 'TEMIZ' if o['SONRA_sapma_p99'] <= ESIK_P99 else 'KONTUR KALDI'
+                o2 = kalinti_olc2(f)
+                olcumler[f'{ed}_{boy}_DOKU_BAGISIK'] = o2
+                ek = ('' if 'hata' in o2 else
+                      f'   || doku-bagisik: ic p99 {o2["ic_p99"]} / dis {o2["dis_p99"]}'
+                      f' = FARK {o2["FARK"]:+} -> {o2["sonuc"]}')
                 et = (f'{ed}  {boy}   |  {sonuc}   temizlenen %{o["temizlenen_oran"] * 100:.1f}'
                       f'   sapma {o["ONCE_sapma_ort"]} -> {o["SONRA_sapma_ort"]}'
-                      f'   p99 {o["SONRA_sapma_p99"]} (esik {ESIK_P99:.0f})')
+                      f'   p99 {o["SONRA_sapma_p99"]} (esik {ESIK_P99:.0f}){ek}')
             if kaldi:
                 et += '   [plate KAPIDA KALDI]'
             ger = kontrast_ger(f, W / (f.stem + '_ger.png'))
