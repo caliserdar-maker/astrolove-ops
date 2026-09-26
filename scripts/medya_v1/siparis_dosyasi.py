@@ -773,6 +773,9 @@ def render_et(ed, oran, sayfa, kaynak_bayt, isimler, mesaj, P_blue, P_ed,
     """blue -> a1 (pilot16, 2400), diger dort edisyon -> edisyon_uret (hedef cozunurluk)."""
     if ed == 'blue':
         ref_bayt = None
+        # plate_kur boy degisince hazir_oran'i temizler: referans karari ONDAN SONRA
+        # verilmeli (GOREV_0020 tablo kosusu: ayni surecte 2. boyda RuntimeError).
+        P_blue.plate_kur(P_ed, boy or ref_boy, oran)
         if oran not in P_blue.hazir_oran:
             boy = ref_boy or DIJITAL_BOY.get(oran)
             if not boy:
@@ -782,7 +785,6 @@ def render_et(ed, oran, sayfa, kaynak_bayt, isimler, mesaj, P_blue, P_ed,
         # Blue de plate zeminine gecer (Serdar onayi 25 Eyl): a1 sarmalayicisinin
         # `bg` girdisi HAZIR/bg.png yerine bu boyun plate'i olur. GIRDI degisikligi;
         # a1_poster kodu degismez. Hiza `bg_hiza` alaninda raporlanir.
-        P_blue.plate_kur(P_ed, boy or ref_boy, oran)
         poster, bi, ek = P_blue(kaynak_bayt, sayfa, oran, isimler, mesaj, ref_bayt=ref_bayt)
         bi['plate'] = str(P_ed.plate('blue', oran, boy or ref_boy))
         bi['olcum_kaynagi'] = 'kendi dosyasi (a1 sarmalayicisi, zemin = plate)'

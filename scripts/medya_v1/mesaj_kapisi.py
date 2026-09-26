@@ -23,7 +23,7 @@ from PIL import Image
 
 LUMA = np.array([0.299, 0.587, 0.114], np.float32)
 KOYU_L = 128.0                      # altin murekkep L ~190, CI ~70, WP ~97
-DE_ESIK, KONTRAST_ESIK = 8.0, 0.75  # gecici (yerel onayli kirpimlar); --kalibre olcer
+DE_ESIK, KONTRAST_ESIK = 9.2, 0.76  # kosu 36255489602: 51 dogru ornek dE<=7.4 x1.25, oran>=0.95 x0.8
 if os.environ.get('MESAJ_ESIK'):
     DE_ESIK, KONTRAST_ESIK = map(float, os.environ['MESAJ_ESIK'].split(','))
 
