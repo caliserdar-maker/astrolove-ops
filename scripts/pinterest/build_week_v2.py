@@ -53,8 +53,8 @@ DATE_FMT = "%Y-%m-%d %H:%M"
 PAIR_OFFSET = 16
 
 # ---- Sablon (docs/PIN_TEXT_TEMPLATE_V2.md ile birebir) ----
-TITLE_TPL = "{S1} & {S2} Zodiac Wall Art — Couple Compatibility Print, {Edition}"
-DESC_TPL = ("{S1} & {S2} united in one original zodiac pair symbol — AstroLove couple wall art in the "
+TITLE_TPL = "{S1} & {S2} Zodiac Wall Art: Couple Compatibility Print, {Edition}"
+DESC_TPL = ("{S1} & {S2} united in one original zodiac pair symbol. AstroLove couple wall art in the "
             "{Edition} Edition. A meaningful anniversary or Valentine's gift for astrology lovers, and a quiet "
             "statement piece for a shared bedroom or living room. Instant digital download, printable in 5 sizes. "
             "Explore all 78 zodiac pairs in 5 editions in the AstroLove shop.")

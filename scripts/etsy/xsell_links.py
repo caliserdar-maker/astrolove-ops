@@ -45,7 +45,7 @@ RU_ONLY = {
     "note_head": "ОБРАТИТЕ ВНИМАНИЕ:",
     "note_bullets": 3,
     "head": "ХОТИТЕ ЕГО НА СТЕНЕ?",
-    "body": "Тот же дизайн доступен как жикле принт музейного качества на бумаге Hahnemühle Photo Rag 308 г/м² — "
+    "body": "Тот же дизайн доступен как жикле принт музейного качества на бумаге Hahnemühle Photo Rag 308 г/м², "
             "печать на заказ, доставка без рамы, 13 размеров:",
     "ai_rx": re.compile(r"^[•\-]\s*Дизайн создан с применением инструментов искусственного интеллекта[^\n]*\n?", re.M),
 }
@@ -60,7 +60,7 @@ SPEC = {
     },
     "digital": {
         "en": {"after": "WHAT YOU WILL RECEIVE", "before": "HOW TO DOWNLOAD", "head": "PREFER IT READY TO HANG?",
-               "body": "The same design is also available as a museum-quality giclée print on Hahnemühle Photo Rag 308 gsm — "
+               "body": "The same design is also available as a museum-quality giclée print on Hahnemühle Photo Rag 308 gsm, "
                        "made to order, shipped unframed, in 13 sizes:"},
         "ru": {"after": "ЧТО ВЫ ПОЛУЧИТЕ", "before": "КАК СКАЧАТЬ", "head": "ХОТИТЕ ГОТОВЫЙ ПОСТЕР?",
                "body": "Тот же дизайн доступен как жикле принт музейного качества на бумаге Hahnemühle Photo Rag 308 г/м²: "
