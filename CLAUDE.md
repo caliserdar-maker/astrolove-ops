@@ -25,6 +25,14 @@ bolumu okunmadan baslanmaz.
   Toplu guncellemede "ilan taslak kalir" varsayimi YAPILMAZ: yazmadan once state
   okunur, taslak kalmasi gerekiyorsa o ilan guncellenmez ve Mo'ya sorulur.
 
+## MUSTERIYE DOKUNAN HER EYLEM (26 Eyl 2026, Serdar kesin talimati)
+
+- Musteriye bildirim/mesaj/e-posta dogurabilecek HICBIR eylem Serdar'in o eyleme ozel acik onayi olmadan yapilmaz.
+  Kapsam: Etsy mesaji, createReceiptShipment / takip yazma veya duzeltme (Etsy aliciya bildirim gonderebilir),
+  siparis durumu degistirme, iade/iptal, yorum yaniti, dijital dosya teslimi, Prodigi'ye siparis gonderimi.
+- "Koordinator onayi" / pano "CLAUDE ONAYI" bu eylemler icin GECERSIZDIR. Yalniz Serdar onaylar.
+- Musteri mesajlari yalniz TASLAK olarak Drive'a yazilir; gonderimi Serdar yapar ya da ayri acik onay verir.
+
 ## Urun metni (25 Eyl 2026 karari; 24 Eyl B-5'i gunceller)
 
 - Birincil kaynak: Hahnemuhle Photo Rag datasheet + urun sayfasi, Prodigi HPR urun foyu.
