@@ -184,10 +184,14 @@ def main():
     for alt, isaret, hay in kosular:
         olcum, rap, urun = SP.main(ortak + ["--cikti", str(T / f"out_{alt}"),
                                             "--isaret", isaret, "--hayalet", hay])
-        K = V2.kapilar(urun, None, {"kutular": olcum[ed]["kutular"]}, str(T / "orijinal"),
-                       "Aries_Leo", str(T / f"out_{alt}"))
-        rapor[alt] = {"tani": olcum[ed]["tani_murekkep"], "kume": olcum[ed]["kume"],
-                      "kutular": olcum[ed]["kutular"],
+        # olcum anahtari "<CIFT>|<EDISYON>", urun ise cift bazli (--ciftler ile geldi,
+        # commit 1a6bda2); bu test o degisiklikten beri KeyError veriyordu.
+        ak = f"Aries_Leo|{ed}"
+        u = urun["Aries_Leo"] if "Aries_Leo" in urun else urun
+        K = V2.kapilar(u, None, {"kutular": olcum[ak]["kutular"]}, str(T / "orijinal"),
+                       "Aries_Leo", str(T / f"out_{alt}"), [ed])
+        rapor[alt] = {"tani": olcum[ak]["tani_murekkep"], "kume": olcum[ak]["kume"],
+                      "kutular": olcum[ak]["kutular"],
                       "hayalet": olc_hayalet(T, f"out_{alt}", ed, hmask),
                       "halka_px": [r["halka_px"] for r in rap],
                       "kapi1": [r["kapi1_maske_disi"]["maks_fark"] for r in rap],

@@ -21,6 +21,7 @@ Aktarim iki bicimde olculebilir (--aktarim):
 Iki bicimin farki ve hale olcusu raporlanir; secim olcumle yapilir.
 """
 import argparse, json, sys, time
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import cv2
@@ -90,10 +91,27 @@ def baski_bul(kok, ed, cift):
                      f"_{cift}_{ed}_ ve _{ed}_{cift}_ | " + " || ".join(hata))
 
 
+_PLATE_ONBELLEK, PLATE_ONBELLEK_SINIR = {}, 6
+
+
+def plate_oku(p):
+    """kisisel PLATE edisyon basina AYNI dosyadir; her cift icin yeniden okunuyordu
+    (7200x9600 PNG ~1,4 s). Onbellek: en fazla PLATE_ONBELLEK_SINIR edisyon.
+    Diziler salt okunur isaretlenir - paylasilan diziye yazma aninda hata verir."""
+    k = str(p)
+    if k not in _PLATE_ONBELLEK:
+        if len(_PLATE_ONBELLEK) >= PLATE_ONBELLEK_SINIR:
+            _PLATE_ONBELLEK.pop(next(iter(_PLATE_ONBELLEK)))
+        im = imread(p)
+        im.flags.writeable = False
+        _PLATE_ONBELLEK[k] = im
+    return _PLATE_ONBELLEK[k]
+
+
 def kaynak_oku(baski_kok, plate_kok, ed, cift=""):
     b = baski_bul(baski_kok, ed, cift) if cift else dosya_bul(baski_kok, [ed, "24x32"], f"{ed} baski")
     p = dosya_bul(plate_kok, [ed, "24x32"], f"{ed} plate")
-    baski, plate = imread(b), imread(p)
+    baski, plate = imread(b), plate_oku(p)
     for ad, im in ((b.name, baski), (p.name, plate)):
         if (im.shape[1], im.shape[0]) != (POSTER_W, POSTER_H):
             raise SystemExit(f"HATA: {ad} {im.shape[1]}x{im.shape[0]}, beklenen {POSTER_W}x{POSTER_H}")
@@ -121,7 +139,8 @@ def murekkep_rengi(baski, plate, f, ed):
     return np.median(baski[sec].astype(np.float32), axis=0)
 
 
-def murekkep(baski, plate, ed, hayalet="birak", isaret="uzaklik"):
+def murekkep(baski, plate, ed, hayalet="birak", isaret="uzaklik", sadece_olcum=False,
+             yol="hizli"):
     """ESIK YOK: fark = baski - plate (isaretli), murekkep RENGINE UZAKLIKLA ayrilir.
 
     kisisel PLATE 78 ciftin MEDYANI (kisisel olcumu 25 Eyl): ESKI SLOGAN VAR,
@@ -138,18 +157,20 @@ def murekkep(baski, plate, ed, hayalet="birak", isaret="uzaklik"):
     """
     f = baski.astype(np.float32) - plate.astype(np.float32)
     ink = murekkep_rengi(baski, plate, f, ed)
-    var = np.abs(f).max(2) > 0
+    # yol="referans": GOREV_0014 oncesi kod (denetim ve esitlik testi icin korunur).
+    # yol="hizli": ayni karar, daha az tam boyutlu ara dizi. Olculen (7200x9600,
+    # sentetik, 4 cekirdek): referans 23,1s -> hizli 9,5s. Esitlik birim testiyle kilitli.
+    var = np.abs(f).max(2) > 0 if yol == "referans" else (baski != plate).any(2)
     if isaret == "uzaklik":
         d_b = ((baski.astype(np.float32) - ink) ** 2).sum(2)
         d_p = ((plate.astype(np.float32) - ink) ** 2).sum(2)
         poz, neg, sifir = var & (d_b < d_p), var & (d_b > d_p), var & (d_b == d_p)
+        del d_b, d_p
         zemin = None
     else:
         zemin = np.median(plate[::16, ::16].reshape(-1, 3), axis=0).astype(np.float32)
         pr = (f * (ink - zemin)).sum(2)
         poz, neg, sifir = var & (pr > 0), var & (pr < 0), var & (pr == 0)
-    fark = f if hayalet == "gecir" else f * poz[..., None]
-    alfa = (np.abs(fark).max(2) > 0).astype(np.float32)
     # OLCUM her zaman POZITIF maskeden yapilir: hayalet ayari neyin AKTARILDIGINI
     # belirler, neyin OLCULDUGUNU degil. (Yerel olcum 25 Eyl: plate'in isim
     # satirindaki %0,02 artik negatif tarafta; aktarima katilirsa kume olcumu
@@ -163,6 +184,22 @@ def murekkep(baski, plate, ed, hayalet="birak", isaret="uzaklik"):
             "neg_maks": round(float(np.abs(f).max(2)[neg].max()), 1) if neg.any() else 0.0}
     if zemin is not None:
         tani["zemin_bgr"] = [round(float(v), 1) for v in zemin]
+    # DIKKAT: fark maskesi f'yi YERINDE degistirir; tani ondan ONCE olculur
+    # (neg_maks f'nin negatif tarafini okur - birim testiyle kilitli).
+    # sadece_olcum: 1. asama yalniz POZITIF maskeyi ve taniyi kullanir; fark/alfa
+    # (iki tam boyutlu float32 dizi) bosa uretiliyordu (HIZ, GOREV_0014).
+    if sadece_olcum:
+        fark = alfa = None
+    elif yol == "referans":
+        fark = f if hayalet == "gecir" else f * poz[..., None]
+        alfa = (np.abs(fark).max(2) > 0).astype(np.float32)
+    elif hayalet == "gecir":
+        fark = f
+        alfa = var.astype(np.float32)         # |f|>0 ile ayni maske (var tanimi)
+    else:
+        fark = f                              # f * poz[...,None] yerine yerinde maskeleme
+        fark[~poz] = 0
+        alfa = poz.astype(np.float32)         # alfa == (|fark|>0) : poz ile ayni maske
     return fark, alfa, alfa_olcum, tani
 
 
@@ -228,12 +265,12 @@ def kutular_olc(alfa, halka_ayri=False):
 
 # ------------------------------------------------------------------ uretim
 def uret(ed, baski, plate, fark, alfa, temiz, plakalar, cikti, cift, kutu, aktarim, urun, rapor,
-         halka_kok="", bant=None, tani_m=None, plaka_ed=None):
+         halka_kok="", bant=None, tani_m=None, plaka_ed=None, tani_hale=False, cihazlar=None):
     """plaka_ed: CLEAN/GEOM/gece plakasinin edisyon adi. kisisel edisyonlari
     (PURE_WHITE/BLACK/BLUE) wallpaper edisyonlarindan (MIDNIGHT_BLUE...) FARKLI;
     eslesme --eslesme ile ACIKCA verilir, TAHMIN EDILMEZ."""
     pe = (plaka_ed or ed).upper()
-    for dev in CIHAZLAR:
+    for dev in (cihazlar or CIHAZLAR):
         yol_p = Path(temiz) / f"PLATE_{pe}_{dev.upper()}_CLEAN.png"
         if not yol_p.exists():
             var = sorted(x.name for x in Path(temiz).glob("PLATE_*_CLEAN.png"))
@@ -281,23 +318,29 @@ def uret(ed, baski, plate, fark, alfa, temiz, plakalar, cikti, cift, kutu, aktar
         bd = d_out[b0:b1][dis[b0:b1]]
         ek5 = {"bant": [int(b0), int(b1)], "murekkep_disi_maks_fark": int(bd.max()) if bd.size else 0,
                "piksel": int(bd.size), "gecti": bool((bd.max() if bd.size else 0) == 0)}
-        # TANI (kapi degil): kisisel PLATE ile CLEAN plaka ne kadar ayri -> hale riski
-        PL = WBP.place(plate.astype(np.float32), dev, clean.shape, geom)
-        ring = (A[..., 0] > 0) & (A[..., 0] < 1)
-        if ring.any():
-            hv = np.abs(PL - C).max(2)[ring]
-            halo = {"medyan": round(float(np.median(hv)), 1), "p99": round(float(np.percentile(hv, 99)), 1),
-                    "maks": round(float(hv.max()), 1), "px": int(hv.size)}
-        else:
-            halo = {"medyan": 0.0, "p99": 0.0, "maks": 0.0, "px": 0}
-        urun[(ed, dev)] = dict(yol=str(Path(cikti) / ad), plaka=str(yol_p), geom=geom, kapi1=k1, ek5=ek5)
+        # TANI (kapi degil): kisisel PLATE ile CLEAN plaka ne kadar ayri -> hale riski.
+        # Tam cozunurluklu fazladan bir place() maliyeti; varsayilan KAPALI (HIZ, GOREV_0014).
+        halo = {"olculmedi": True}
+        if tani_hale:
+            PL = WBP.place(plate.astype(np.float32), dev, clean.shape, geom)
+            ring = (A[..., 0] > 0) & (A[..., 0] < 1)
+            if ring.any():
+                hv = np.abs(PL - C).max(2)[ring]
+                halo = {"medyan": round(float(np.median(hv)), 1),
+                        "p99": round(float(np.percentile(hv, 99)), 1),
+                        "maks": round(float(hv.max()), 1), "px": int(hv.size)}
+            else:
+                halo = {"medyan": 0.0, "p99": 0.0, "maks": 0.0, "px": 0}
+            del PL
+        urun[(ed, dev)] = dict(yol=str(Path(cikti) / ad), plaka=str(yol_p), geom=geom, kapi1=k1,
+                               ek5=ek5, kutu_duzen=kutu)
         rapor.append({"edisyon": ed, "plaka_edisyonu": pe, "cift": cift, "cihaz": dev,
                       "dosya": ad, "aktarim": aktarim,
                       "kapi1_maske_disi": k1, "ek5_mesaj_bandi": ek5, "halka_px": halka_px,
                       "tani_murekkep": tani_m, "tani_plate_clean_kenar_farki": halo, "kutular": kutu})
         log(f"{ed} {dev}: maske disi {k1['maks_fark']} (JPEG {k1['jpeg_sonrasi']}) | "
             f"mesaj bandi {ek5['murekkep_disi_maks_fark']} | halka {halka_px} px | "
-            f"tani hale medyan {halo['medyan']} p99 {halo['p99']}")
+            f"tani hale {'kapali' if halo.get('olculmedi') else halo['medyan']}")
 
 
 def main(argv=None):
@@ -323,9 +366,26 @@ def main(argv=None):
                     help="plate'te kalan eski ∞/slogan farki: birak=aktarma (varsayilan), gecir=aktar")
     ap.add_argument("--edisyonlar", default=",".join(EDISYONLAR))
     ap.add_argument("--sadece-olcum", action="store_true")
+    ap.add_argument("--murekkep-yol", choices=("hizli", "referans"), default="hizli",
+                    help="murekkep ayrimi kod yolu: hizli (varsayilan) ya da referans "
+                         "(GOREV_0014 oncesi kod; ayni sonuc, olculen 23,1s vs 9,5s)")
+    ap.add_argument("--cihaz-isci", type=int, default=1,
+                    help="cihaz basina paralellik (olculdu: 3 isci uretim adimini "
+                         "4,7s -> 2,3s indirdi; varsayilan 1 = sirali, deterministik)")
+    ap.add_argument("--tani-hale", action="store_true",
+                    help="plate/CLEAN kenar farki tanisi (cihaz basina fazladan bir tam "
+                         "cozunurluklu place; varsayilan kapali - HIZ)")
     a = ap.parse_args(argv)
     ed_list = [e.strip() for e in a.edisyonlar.split(",") if e.strip()]
     cift_list = [c.strip() for c in (a.ciftler or a.cift).split(",") if c.strip()]
+    # GOREV_0014 YUKSEK1: bos liste eskiden sessizce 0 dosya + bos rapor + exit 0 uretiyordu.
+    if not ed_list:
+        raise SystemExit(f"HATA: --edisyonlar bos ({a.edisyonlar!r}) - uretilecek edisyon yok. DUR.")
+    if not cift_list:
+        raise SystemExit(f"HATA: cift listesi bos ({(a.ciftler or a.cift)!r}). DUR.")
+    yinelenen = sorted({x for x in ed_list if ed_list.count(x) > 1})
+    if yinelenen:
+        raise SystemExit(f"HATA: --edisyonlar yinelenen deger iceriyor: {yinelenen}. DUR.")
     eslesme = {}
     for par in (x for x in a.eslesme.split(",") if x.strip()):
         if "=" not in par:
@@ -341,7 +401,8 @@ def main(argv=None):
     for cift in cift_list:
         for ed in ed_list:
             baski, plate, bn, pn = kaynak_oku(a.baski, a.plate, ed, cift)
-            fark, alfa, alfa_olcum, tani = murekkep(baski, plate, ed, a.hayalet, a.isaret)
+            _f, _a, alfa_olcum, tani = murekkep(baski, plate, ed, a.hayalet, a.isaret,
+                                                sadece_olcum=True, yol=a.murekkep_yol)
             kutu, bilgi = kutular_olc(alfa_olcum, bool(a.halka))
             olcum[f"{cift}|{ed}"] = {"cift": cift, "edisyon": ed, "baski": bn, "plate": pn,
                                      "kutular": kutu, "kume": bilgi, "tani_murekkep": tani,
@@ -349,7 +410,7 @@ def main(argv=None):
             log(f"OLCUM {cift} {ed}: kume={json.dumps(bilgi)}")
             log(f"       tani={json.dumps(tani)}")
             log(f"       kutular={json.dumps(kutu)}")
-            del baski, plate, fark, alfa, alfa_olcum
+            del baski, plate, _f, _a, alfa_olcum
     (cikti / "WP_SIPARIS_OLCUM.json").write_text(json.dumps(olcum, indent=1))
     for cift in cift_list:                      # ayni ciftte edisyonlar arasi sapma
         an = [f"{cift}|{e}" for e in ed_list if f"{cift}|{e}" in olcum]
@@ -363,24 +424,53 @@ def main(argv=None):
         return olcum, [], {}
 
     # --- 2. ASAMA: URETIM ------------------------------------------------
+    # ORTA (GOREV_0014): edisyonlar AYNI yerlesimi paylasir. Eskiden her edisyon KENDI
+    # olctugu kutulari kullaniyordu (BLUE mesaj_cap 117 / BLACK 228 -> punto 172 / 337).
+    # Referans: ciftin ILK edisyonu; sapma raporlanir, paylasim kapisi wp_v2'de.
     urun, rapor = {}, []
     for cift in cift_list:
         urun[cift] = {}                 # (ed, dev) anahtari ciftler arasinda cakisirdi
+        paylasim = olcum[f"{cift}|{ed_list[0]}"]["kutular"]
         for ed in ed_list:
             baski, plate, _, _ = kaynak_oku(a.baski, a.plate, ed, cift)
-            fark, alfa, _alfa_o, tani = murekkep(baski, plate, ed, a.hayalet, a.isaret)
-            uret(ed, baski, plate, fark, alfa, a.temiz, a.plakalar or a.temiz, cikti, cift,
-                 olcum[f"{cift}|{ed}"]["kutular"], a.aktarim, urun[cift], rapor, a.halka, bant, tani,
-                 eslesme.get(ed, ed))
+            fark, alfa, _alfa_o, tani = murekkep(baski, plate, ed, a.hayalet, a.isaret,
+                                                 yol=a.murekkep_yol)
+            ortak = (ed, baski, plate, fark, alfa, a.temiz, a.plakalar or a.temiz, cikti, cift,
+                     paylasim, a.aktarim)
+            if a.cihaz_isci > 1:
+                def tek(dev, _o=ortak):
+                    u, r = {}, []
+                    uret(*_o, u, r, a.halka, bant, tani, eslesme.get(ed, ed), a.tani_hale, [dev])
+                    return dev, u, r
+                with ThreadPoolExecutor(max_workers=a.cihaz_isci) as ex:
+                    sonuc = list(ex.map(tek, list(CIHAZLAR)))
+                for dev in CIHAZLAR:                 # sira deterministik kalir
+                    for d, u, r in sonuc:
+                        if d == dev:
+                            urun[cift].update(u); rapor += r
+            else:
+                uret(*ortak, urun[cift], rapor, a.halka, bant, tani,
+                     eslesme.get(ed, ed), a.tani_hale)
             del baski, plate, fark, alfa, _alfa_o
     (cikti / "WP_SIPARIS_URETIM.json").write_text(json.dumps(rapor, indent=1))
+    # YUKSEK1: beklenen dosya sayisi tutmazsa DUR (eksik cikti "basarili" sayilmaz)
+    bekle = len(cift_list) * len(ed_list) * len(CIHAZLAR)
+    var = sum(1 for c in urun.values() for u in c.values() if Path(u["yol"]).is_file())
+    if len(rapor) != bekle or var != bekle:
+        raise SystemExit(f"HATA: beklenen {bekle} dosya ({len(cift_list)} cift x {len(ed_list)} "
+                         f"edisyon x {len(CIHAZLAR)} cihaz), rapor {len(rapor)}, diskte {var}. DUR.")
+    log(f"dosya sayisi: {var}/{bekle} TAMAM")
     return olcum, rapor, urun
 
 
 if __name__ == "__main__":
     olcum, rapor, urun = main()
     if not rapor:
-        sys.exit(0)
+        # YUKSEK1: eskiden exit 0 idi. --sadece-olcum disinda bos cikti BASARISIZLIKTIR.
+        if "--sadece-olcum" in sys.argv:
+            log("SADECE OLCUM: kapi/sayfa yok")
+            sys.exit(0)
+        raise SystemExit("HATA: hic dosya uretilmedi (bos rapor). DUR.")
     import sys as _s
     _a = _s.argv
     cikti = _a[_a.index("--cikti") + 1]

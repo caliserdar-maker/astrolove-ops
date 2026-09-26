@@ -33,6 +33,9 @@ _s = importlib.util.spec_from_file_location("wp_siparis", Path(__file__).resolve
 SP = importlib.util.module_from_spec(_s); _s.loader.exec_module(SP)             # noqa: E402
 V2 = SP.V2
 from wp_mockup_common import imread                                            # noqa: E402
+_g = importlib.util.spec_from_file_location("girdi_dogrula",
+                                            Path(__file__).resolve().parent / "girdi_dogrula.py")
+GD = importlib.util.module_from_spec(_g); _g.loader.exec_module(GD)             # noqa: E402
 from wp_plate_pilot import BOX_NAMES                                           # noqa: E402
 
 Image.MAX_IMAGE_PIXELS = None
@@ -112,7 +115,9 @@ def baski_kur(pod18, p18, p24, ed_wp, isim1, isim2, mesaj, P6, P7, P12, kp, geo_
     return out, {"_geo": geo, "buyutme_disi_fark": k0, "baski_disi_fark": k1, "tani": tani,
                  "olcum": {k: geo[k] for k in ("sol", "sag", "sonsuz", "cap", "mesaj_cap")},
                  "yerlesim": {k: bilgi[k] for k in ("bosluk", "dx_sonsuz", "mesaj_punto",
-                                                    "mesaj_genislik", "mesaj_sinir")}}
+                                                    "mesaj_genislik", "mesaj_sinir", "mesaj_olcek",
+                                                    "satir", "isim_sinir", "isim_olcek",
+                                                    "isim_kucultme", "isim_pay_px")}}
 
 
 def main():
@@ -122,6 +127,8 @@ def main():
     ap.add_argument("--kisisel", required=True)
     ap.add_argument("--cikti", required=True)
     ap.add_argument("--eslesme", required=True, help="BLUE=MIDNIGHT_BLUE,BLACK=DEEP_BLACK")
+    ap.add_argument("--mesaj-sinir", type=int, default=GD.MESAJ_SINIR,
+                    help=f"mesaj karakter siniri (varsayilan {GD.MESAJ_SINIR}); asan REDDEDILIR")
     ap.add_argument("--kayit", action="append", default=[],
                     help="CIFT|isim1|isim2|mesaj[|ETIKET] (birden cok kez). ETIKET verilirse "
                          "cikti adinda CIFT yerine o kullanilir (ayni cifte ikinci deneme icin).")
@@ -136,6 +143,12 @@ def main():
             raise SystemExit(f"HATA: --kayit 'CIFT|isim1|isim2|mesaj[|ETIKET]' olmali: {kayit!r}")
         cift, i1, i2, msj = parca[:4]
         etiket = parca[4] if len(parca) == 5 and parca[4] else cift
+        # GOREV_0014: isim/mesaj uzunlugu + font glif kapsami URETIMDEN ONCE dogrulanir;
+        # uymayan girdi REDDEDILIR (sessiz kirpma / .notdef kutusu yok).
+        i1, i2, msj = GD.kayit_dogrula(i1, i2, msj, kp.FONT_DIR / P12.ISIM_FONT,
+                                       kp.FONT_DIR / P6.TAG_FONT, a.mesaj_sinir)
+        log(f"girdi dogrulandi: isim {len(i1)}/{len(i2)} karakter, mesaj {len(msj)} "
+            f"(sinir {a.mesaj_sinir}), font glifleri tam")
         for ed, ed_wp_ust in es.items():
             ed_wp = "_".join(w.capitalize() for w in ed_wp_ust.split("_"))   # MIDNIGHT_BLUE -> Midnight_Blue
             log(f"{cift} {ed} (plaka {ed_wp})")
@@ -143,8 +156,9 @@ def main():
             if not pod.exists():
                 raise SystemExit(f"HATA: POD_PRINT kaynagi yok: {pod}")
             pod18 = imread(pod); olcu_kontrol(pod18, pod.name, (W18, H18))
-            p18 = imread(SP.dosya_bul(a.plate, [ed, "18x24"], f"{ed} plate 18x24"))
-            p24 = imread(SP.dosya_bul(a.plate, [ed, "24x32"], f"{ed} plate 24x32"))
+            # plate edisyon basina AYNI dosya: her kayitta yeniden okunuyordu (HIZ)
+            p18 = SP.plate_oku(SP.dosya_bul(a.plate, [ed, "18x24"], f"{ed} plate 18x24"))
+            p24 = SP.plate_oku(SP.dosya_bul(a.plate, [ed, "24x32"], f"{ed} plate 24x32"))
             olcu_kontrol(p18, f"{ed}_18x24", (W18, H18)); olcu_kontrol(p24, f"{ed}_24x32", (W24, H24))
             out, bilgi = baski_kur(pod18, p18, p24, ed_wp, i1, i2, msj, P6, P7, P12, kp,
                                    geo_cift.get(cift))
@@ -153,9 +167,14 @@ def main():
             cv2.imwrite(str(cik / ad), out)
             rapor.append({"cift": cift, "etiket": etiket, "edisyon": ed, "plaka_edisyonu": ed_wp_ust,
                           "isimler": [i1, i2], "mesaj": msj, "dosya": ad, **bilgi})
-            del pod18, p18, p24, out
+            del pod18, out
     (cik / "V3_BASKI_URETIM.json").write_text(json.dumps(rapor, indent=1))
     log(f"{len(rapor)} baski dosyasi uretildi -> {cik}")
+    bekle = len(a.kayit) * len(es)          # YUKSEK1: eksik cikti basarili sayilmaz
+    diskte = sum(1 for r in rapor if (cik / r["dosya"]).is_file())
+    if not a.kayit or len(rapor) != bekle or diskte != bekle:
+        raise SystemExit(f"HATA: beklenen {bekle} baski dosyasi ({len(a.kayit)} kayit x "
+                         f"{len(es)} edisyon), rapor {len(rapor)}, diskte {diskte}. DUR.")
     kot = [r for r in rapor if r["baski_disi_fark"] != 0]
     if kot:
         raise SystemExit(f"HATA: {len(kot)} dosyada murekkep disi fark 0 degil: "

@@ -43,6 +43,9 @@ T0 = time.time()
 POSTER_W, POSTER_H = 7200, 9600
 GOVDE_ORAN = 0.25        # govde satiri: murekkep >= medyan satirin %25'i (a1_poster kurali)
 KENAR_ORAN = 0.08        # mesaj kenar payi: tuval genisliginin %8'i (Serdar kapisi)
+
+ISIM_OLCEK_ADIM, ISIM_OLCEK_TABAN = 10, 0.30   # isim satiri kuculme denemesi / taban olcek
+MESAJ_OLCEK_ADIM, MESAJ_PUNTO_TABAN = 10, 8      # mesaj punto dusurme denemesi / taban punto
 # Kapi 2 olcum kutulari (poster px, WP_LAYOUT_SPEC 7.1 / wp_plate_pilot):
 BOX_SYMBOL_RING = (900, 1100, 6300, 5696)     # halka yayi + ici (glif satirinin ustunde biter)
 BOX_SYMBOL_CORE = (1900, 1900, 5300, 5100)    # fuzyon sembolu (3 parca birlesimi)
@@ -222,15 +225,40 @@ def metin_katmani(P6, P7, P12, kp, geo, prof, isimler, mesaj):
     bunun icin ∞ tam sayi piksel kadar yatayda kayar (dx doner).
     """
     cap = geo["cap"]
-    pl = {y: P12.plaka(isimler[y], prof[y], cap, 1.0)[0] for y in ("sol", "sag")}
-    mrk = {y: plaka_murekkep(pl[y]) for y in ("sol", "sag")}   # yan bosluk haric murekkep
     g_sol = geo["sonsuz"][0] - geo["sol"][1]
     g_sag = geo["sag"][0] - geo["sonsuz"][2]
     g = int(round((g_sol + g_sag) / 2))                     # esit bosluk (tasarim kurali)
     w_inf = geo["sonsuz"][2] - geo["sonsuz"][0]
-    w_sol, w_sag = (mrk["sol"][1] - mrk["sol"][0]), (mrk["sag"][1] - mrk["sag"][0])
+    # mesaj ile AYNI kenar payi: isim satiri da tuvalin %8 payina girmez
+    pay = max(int(round(KENAR_ORAN * DEVICES[d][0] / placement(d)[0])) for d in ("Phone", "Tablet"))
+    sinir = POSTER_W - 2 * pay
+    # KIRPMA YOK (GOREV_0014 YUKSEK2): uzun isimler SESSIZCE tasiyordu (olcek sabit 1.0,
+    # katman_ekle tuval disini kirpiyordu). Iki isim BIRLIKTE kuculur; ISIM_OLCEK_TABAN'a
+    # inildigi halde sigmiyorsa URETIM DURUR - kirpilmis dosya yazilmaz.
+    olcek_isim, kucultme = 1.0, []
+    for _ in range(ISIM_OLCEK_ADIM):
+        pl = {y: P12.plaka(isimler[y], prof[y], cap, olcek_isim)[0] for y in ("sol", "sag")}
+        mrk = {y: plaka_murekkep(pl[y]) for y in ("sol", "sag")}  # yan bosluk haric murekkep
+        w_sol, w_sag = (mrk["sol"][1] - mrk["sol"][0]), (mrk["sag"][1] - mrk["sag"][0])
+        toplam = w_sol + g + w_inf + g + w_sag
+        if toplam <= sinir:
+            break
+        hedef = sinir - 2 * g - w_inf
+        if hedef <= 0:
+            raise SystemExit(f"HATA: isim satirina yer yok - sonsuz + bosluklar "
+                             f"({2 * g + w_inf} px) kenar payi sonrasi genisligi ({sinir} px) "
+                             f"dolduruyor. Kirpma yapilmaz.")
+        yeni = olcek_isim * max(hedef / max(w_sol + w_sag, 1), 0.5)
+        if yeni < ISIM_OLCEK_TABAN:
+            break
+        olcek_isim = yeni
+        kucultme.append(round(olcek_isim, 4))
+    if toplam > sinir:
+        raise SystemExit(f"HATA: isimler {isimler['sol']!r} + {isimler['sag']!r} kenar payina "
+                         f"sigmiyor: satir {toplam} px > sinir {sinir} px, son olcek "
+                         f"{round(olcek_isim, 4)} (taban {ISIM_OLCEK_TABAN}). "
+                         f"REDDEDILDI - kirpma yapilmaz.")
     # EK KAPI 3: sol/sag bosluk ESIT -> satir MUREKKEP sinirlarina gore ortalanir
-    toplam = w_sol + g + w_inf + g + w_sag
     i0 = int(round(POSTER_W / 2 - toplam / 2))              # satirin murekkep sol kenari
     yer = {"sol": i0 - mrk["sol"][0], "inf": i0 + w_sol + g,
            "sag": i0 + w_sol + g + w_inf + g - mrk["sag"][0]}
@@ -244,18 +272,29 @@ def metin_katmani(P6, P7, P12, kp, geo, prof, isimler, mesaj):
         kutular[y] = [yer[y] + mrk[y][0], py, yer[y] + mrk[y][1], py + pl[y].height]
 
     # mesaj: kenar payi tuval genisliginin %8'i (cihazda) -> poster olceginde en dar cihaz belirler
-    pay = max(int(round(KENAR_ORAN * DEVICES[d][0] / placement(d)[0])) for d in ("Phone", "Tablet"))
-    sinir = POSTER_W - 2 * pay
+    # (pay/sinir yukarida isim satiri icin de hesaplandi - ayni deger)
     fp = kp.FONT_DIR / P6.TAG_FONT
-    punto = P6.cap_punto(fp, P6.TAG_W, geo["mesaj_cap"])
+    punto0 = P6.cap_punto(fp, P6.TAG_W, geo["mesaj_cap"])
+    punto = punto0
     cr, cu, ct = P6.ciz_cap(fp, P6.TAG_W, punto, mesaj)
-    olcek = 1.0
     mx0, mx1 = plaka_murekkep(cr)
-    if mx1 - mx0 > sinir:
-        olcek = sinir / (mx1 - mx0)
-        punto = max(int(round(punto * olcek)), 4)
+    # TEK GECIS YETMIYORDU: punto yuvarlanmasi sonrasi genislik hala siniri asabilirdi ve
+    # kimse bakmiyordu. Dongu + sigmazsa DUR (GOREV_0014 YUKSEK2).
+    for _ in range(MESAJ_OLCEK_ADIM):
+        if mx1 - mx0 <= sinir:
+            break
+        yeni = max(int(punto * sinir / max(mx1 - mx0, 1)), MESAJ_PUNTO_TABAN)
+        if yeni >= punto:
+            yeni = punto - 1
+        if yeni < MESAJ_PUNTO_TABAN:
+            break
+        punto = yeni
         cr, cu, ct = P6.ciz_cap(fp, P6.TAG_W, punto, mesaj)
         mx0, mx1 = plaka_murekkep(cr)
+    if mx1 - mx0 > sinir:
+        raise SystemExit(f"HATA: mesaj kenar payina sigmiyor: {mx1 - mx0} px > sinir {sinir} px, "
+                         f"punto {punto} (taban {MESAJ_PUNTO_TABAN}). REDDEDILDI - kirpma yapilmaz.")
+    olcek = round(punto / punto0, 3) if punto0 else 1.0
     p1, _ = P7.kuyruk_duzlestir(prof["tag"])
     tg = P7.altin_sekil(cr, p1, (cu, ct))
     (tb0, tb1), tmx = plaka_govde(tg)
@@ -265,6 +304,8 @@ def metin_katmani(P6, P7, P12, kp, geo, prof, isimler, mesaj):
     kutular["mesaj"] = [tx + mx0, ty, tx + mx1, ty + tg.height]
     bilgi = {"bosluk": [int(g_sol), int(g_sag), g], "satir": int(toplam), "dx_sonsuz": int(dx_inf),
              "isim_murekkep": [w_sol, w_sag, int(w_inf)],
+             "isim_olcek": round(olcek_isim, 4), "isim_kucultme": kucultme,
+             "isim_sinir": int(sinir), "isim_pay_px": int(min(i0, POSTER_W - (i0 + toplam))),
              "mesaj_punto": punto, "mesaj_olcek": round(olcek, 3), "mesaj_genislik": int(mx1 - mx0),
              "mesaj_sinir": int(sinir), "mesaj_kenar_payi": int(pay), "kutular": kutular}
     return yerlesim, dx_inf, bilgi
@@ -513,7 +554,7 @@ def main():
                   "jpeg_sonrasi": int(np.abs(geri.astype(np.int16) - plaka.astype(np.int16)).max(2)[dis].max()),
                   "piksel": int(dis.sum())}
             urun[(ed, dev)] = dict(yol=str(cikti / ad), plaka=str(Path(a.temiz) / f"PLATE_{ed.upper()}_{dev.upper()}_CLEAN.png"),
-                                   geom=geom, kapi1=k1, ek5=ek5)
+                                   geom=geom, kapi1=k1, ek5=ek5, kutu_duzen=bilgi["kutular"])
             rapor.append({"edisyon": ed, "cihaz": dev, "dosya": ad, "kapi1_maske_disi": k1,
                           "ek5_mesaj_bandi": ek5,
                           "duzen": bilgi, "olcum": geo_ref, "sure_sn": round(time.time() - t0, 1)})
@@ -550,8 +591,41 @@ def kapilar(urun, geo_ref, duzen, orijinal, cift, cikti, edisyonlar=None, orij_e
     EDS = list(edisyonlar) if edisyonlar else EDISYONLAR
     K = {"halka_sembol": [], "metin_4renk": {}, "ortalama": [], "kenar_payi": [],
          "ek1_mesaj_renk": [], "ek2_yildiz": [], "ek3_esit_bosluk": [], "ek4_harf_yuksekligi": {},
-         "ek4_mesaj_isimden_buyuk_degil": [], "ek5_mesaj_bandi": []}
+         "ek4_mesaj_isimden_buyuk_degil": [], "ek5_mesaj_bandi": [],
+         "geometri_paylasim": [], "bos_kapi": [], "eksik_dosya": []}
     olculen, ek4_olcu = {}, {}
+    # GOREV_0014 YUKSEK1/ORTA: beklenen dosya kumesi tutmuyorsa kapi FAIL olur;
+    # eskiden urun eksik/bos gelince butun kapilar BOS kalip "gecti" sayiliyordu.
+    bekle = [(ed, dev) for ed in EDS for dev in CIHAZLAR]
+    for anahtar in bekle:
+        if anahtar not in urun:
+            K["eksik_dosya"].append({"edisyon": anahtar[0], "cihaz": anahtar[1],
+                                     "sebep": "urun sozlugunde yok", "gecti": False})
+    for anahtar in urun:
+        if anahtar not in bekle:
+            K["eksik_dosya"].append({"edisyon": anahtar[0], "cihaz": anahtar[1],
+                                     "sebep": "beklenmeyen dosya (edisyon/cihaz listesinde yok)",
+                                     "gecti": False})
+    # ORTA: edisyonlar AYNI yerlesimi paylasmali - paylasim artik KAPI (0 px), varsayim degil
+    duz = {ed: [u.get("kutu_duzen") for (e, d), u in sorted(urun.items()) if e == ed]
+           for ed in EDS if any(e == ed for e, _ in urun)}
+    ref_ed = next(iter(duz), None)
+    for ed, kutular_l in duz.items():
+        for kd in kutular_l:
+            if kd is None or duz[ref_ed][0] is None:
+                K["geometri_paylasim"].append({"edisyon": ed, "sebep": "kutu_duzen kaydedilmemis",
+                                               "gecti": False})
+                continue
+            ortak = [k for k in ("sol", "sonsuz", "sag", "mesaj")
+                     if k in kd and k in duz[ref_ed][0]]          # V2 yolunda "sonsuz" yok
+            if not ortak or set(kd) != set(duz[ref_ed][0]):
+                K["geometri_paylasim"].append({"edisyon": ed, "sebep": "kutu anahtarlari farkli",
+                                               "gecti": False})
+                continue
+            sap = max(int(np.abs(np.asarray(kd[k]) - np.asarray(duz[ref_ed][0][k])).max())
+                      for k in ortak)
+            K["geometri_paylasim"].append({"edisyon": ed, "referans": ref_ed, "sapma_px": sap,
+                                           "gecti": bool(sap == 0)})
     for (ed, dev), u in urun.items():
         im = imread(u["yol"]); plaka = imread(u["plaka"]); geom = u["geom"]
         W, H = DEVICES[dev]
@@ -632,6 +706,9 @@ def kapilar(urun, geo_ref, duzen, orijinal, cift, cikti, edisyonlar=None, orij_e
             if len(kut) == len(EDS):
                 k = np.asarray(kut)
                 d[ad] = {"maks_sapma_px": int(np.abs(k - k[0]).max()), "gecti": bool(np.abs(k - k[0]).max() <= 1)}
+            else:                      # eskiden SESSIZCE atlaniyordu -> kapi 3 kacirilirdi
+                d[ad] = {"olculen_edisyon": len(kut), "beklenen": len(EDS), "eksik": True,
+                         "gecti": False}
         K["metin_4renk"][dev] = d
     # EK4: ayni cihazda 4 renkte isim harf yuksekligi (+-1 px)
     for dev in CIHAZLAR:
@@ -639,12 +716,30 @@ def kapilar(urun, geo_ref, duzen, orijinal, cift, cikti, edisyonlar=None, orij_e
         if len(h) == len(EDS):
             K["ek4_harf_yuksekligi"][dev] = {"px": h, "yayilim_px": int(max(h) - min(h)),
                                              "gecti": bool(max(h) - min(h) <= 1)}
+        else:
+            K["ek4_harf_yuksekligi"][dev] = {"px": h, "beklenen": len(EDS), "eksik": True,
+                                             "gecti": False}
     liste = ("halka_sembol", "ortalama", "kenar_payi", "ek1_mesaj_renk", "ek2_yildiz",
-             "ek3_esit_bosluk", "ek4_mesaj_isimden_buyuk_degil", "ek5_mesaj_bandi")
+             "ek3_esit_bosluk", "ek4_mesaj_isimden_buyuk_degil", "ek5_mesaj_bandi",
+             "geometri_paylasim", "eksik_dosya")
+    # BOS KAPI "GECTI" SAYILMAZ (GOREV_0014 ORTA): all([]) == True idi.
+    # kapi 2 (halka_sembol) yalniz ilgili orijinal bulunamadigi icin bos kalabilir;
+    # o durum halka_sembol_atlanan'da kayitli ve kapi yine FAIL olur.
+    bos_muaf = {"eksik_dosya"}         # bos olmasi BEKLENEN tek liste: eksik dosya yok demek
+    for ad in liste:
+        if not K[ad] and ad not in bos_muaf:
+            K["bos_kapi"].append({"kapi": ad, "sebep": "hic olcum yok - bos liste gecti sayilmaz"})
+    if not urun:
+        K["bos_kapi"].append({"kapi": "urun", "sebep": "hic dosya uretilmedi"})
+    if not K["metin_4renk"] or not any(K["metin_4renk"].values()):
+        K["bos_kapi"].append({"kapi": "metin_4renk", "sebep": "hic olcum yok"})
+    if not K["ek4_harf_yuksekligi"]:
+        K["bos_kapi"].append({"kapi": "ek4_harf_yuksekligi", "sebep": "hic olcum yok"})
     K["gecti"] = bool(all(x["gecti"] for ad in liste for x in K[ad])
                       and all(v["gecti"] for dv in K["metin_4renk"].values() for v in dv.values())
                       and all(v["gecti"] for v in K["ek4_harf_yuksekligi"].values())
-                      and all(u["kapi1"]["gecti"] for u in urun.values()))
+                      and all(u["kapi1"]["gecti"] for u in urun.values())
+                      and not K["bos_kapi"])
     Path(cikti).mkdir(parents=True, exist_ok=True)   # cift basina alt klasor olabilir
     (Path(cikti) / "WP_V2_KAPILAR.json").write_text(json.dumps(K, indent=1))
     return K

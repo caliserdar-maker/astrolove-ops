@@ -135,8 +135,10 @@ def main():
     olcum, rapor, urun = SP.main(argv)
     if not rapor:
         return 0
-    duzen = {"kutular": olcum[eds[0]]["kutular"]}
-    K = V2.kapilar(urun, None, duzen, str(T / "orijinal"), "Aries_Leo", str(T / "out"))
+    # olcum anahtari "<CIFT>|<EDISYON>", urun cift bazli (commit 1a6bda2)
+    duzen = {"kutular": olcum[f"Aries_Leo|{eds[0]}"]["kutular"]}
+    u = urun["Aries_Leo"] if "Aries_Leo" in urun else urun
+    K = V2.kapilar(u, None, duzen, str(T / "orijinal"), "Aries_Leo", str(T / "out"), eds)
     for ad in ("halka_sembol", "ortalama", "kenar_payi", "ek1_mesaj_renk", "ek2_yildiz",
                "ek3_esit_bosluk", "ek4_mesaj_isimden_buyuk_degil", "ek5_mesaj_bandi"):
         kot = [x for x in K[ad] if not x["gecti"]]
