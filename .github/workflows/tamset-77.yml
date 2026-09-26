@@ -76,7 +76,17 @@ jobs:
         env:
           PARCA: ${{ matrix.parca }}
           MOD: ${{ inputs.mod || 'tam' }}
-        run: python scripts/medya_v1/tam77.py "$PARCA" 16 "$MOD"
+        run: |
+          set -o pipefail
+          python scripts/medya_v1/tam77.py "$PARCA" 16 "$MOD" 2>&1 | tee "_tam77_$PARCA.log"
+
+      - name: Hata logu Drive'a (Claude okuyabilsin)
+        if: failure()
+        env:
+          PARCA: ${{ matrix.parca }}
+        run: |
+          tail -n 150 "_tam77_$PARCA.log" > "_tail_$PARCA.log" 2>/dev/null || echo "log yok" > "_tail_$PARCA.log"
+          rclone copyto "_tail_$PARCA.log" "gdrive:ASTROLOVE/TEMP/LOGS/tamset77_${{ github.run_id }}_$PARCA.log" || true
 
   serit:
     needs: uret
