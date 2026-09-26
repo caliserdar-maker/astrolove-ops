@@ -20,7 +20,7 @@ on:
   # 21 Eyl 2026 (Serdar onayi): transactions_r + transactions_w alindi, cron CANLI otomatik moda acildi.
   # NOT: schedule yalniz VARSAYILAN DALDAKI (main) surumden tetiklenir.
   schedule:
-    - cron: "*/15 * * * *"        # canli otomatik mod: kosu basina en fazla 1 siparis + takip yazma
+    - cron: "*/15 * * * *"        # onayli mod: paket hazirla, GONDERME (26 Eyl, Serdar onayi sart)
   workflow_dispatch:
     inputs:
       submit:
@@ -113,8 +113,10 @@ jobs:
         run: |
           set -euo pipefail
           if [ "$EV" = "schedule" ]; then
-            { echo "R_ENV=live"; echo "R_APPROVE=off"; echo "R_SUBMIT="; echo "R_DAYS=7"; echo "R_TR=";
-              echo "R_EW=--etsy-writes"; echo "R_ONLY="; echo "R_OTO=true"; echo "R_MAX=1"; } >> "$GITHUB_ENV"
+            # 26 Eyl 2026 (Serdar): HICBIR dosya onun onayi olmadan gonderilmez. Cron yalniz paket hazirlar (onayli mod);
+            # Prodigi'ye gonderim yalniz elle --submit <receipt> ile, Serdar onayindan sonra.
+            { echo "R_ENV=live"; echo "R_APPROVE=on"; echo "R_SUBMIT="; echo "R_DAYS=7"; echo "R_TR=";
+              echo "R_EW=--etsy-writes"; echo "R_ONLY="; echo "R_OTO=false"; echo "R_MAX=1"; } >> "$GITHUB_ENV"
           else
             echo "R_ENV=${IN_ENV:-live}" >> "$GITHUB_ENV"
             echo "R_SUBMIT=${IN_SUBMIT}" >> "$GITHUB_ENV"
