@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """GOREV 0036 md.2 - POD ilanina "Digital File" secenegi: KURU KOSU (Etsy'ye YAZMA YOK).
-etsy <ilan_id> <cikti.json> : getListingsByListingIds includes=Inventory,Images - YALNIZ API anahtari (OAuth yok, kilit yok).
+etsy <ilan_id> <cikti.json> : getListing + getListingInventory - YALNIZ API anahtari (OAuth yok, kilit yok).
 plan <cikti.json>           : Size listesine ILK deger ETIKET, 5 rengin hepsinde FIYAT; SKU pod_sku.make_digital_sku
                               (POD-<S1>_<S2>-<ED2>-DIGITAL). Diger boy/fiyat/SKU/adet/gorunurluk AYNEN.
   Cikti: out/DIJITAL_SECENEK_DIFF_CL.csv (renk, boy, sku, eski_fiyat, yeni_fiyat, durum)
@@ -93,11 +93,15 @@ def main():
         k_, s_ = os.environ.get("ETSY_API_KEY", ""), os.environ.get("ETSY_SHARED_SECRET", "")
         for v in (k_, s_):
             print(f"::add-mask::{v}")
-        r = requests.get("https://openapi.etsy.com/v3/application/listings/batch", headers={"x-api-key": f"{k_}:{s_}"}, timeout=60,
-                         params={"listing_ids": sys.argv[2], "includes": "Inventory,Images"})
-        r.raise_for_status()
-        Path(sys.argv[3]).write_text(json.dumps((r.json().get("results") or [{}])[0], ensure_ascii=False))
-        print(f"etsy: 1 cagri, kota {r.headers.get('x-remaining-today')}")
+        H, API = {"x-api-key": f"{k_}:{s_}"}, "https://openapi.etsy.com/v3/application"
+        L = requests.get(f"{API}/listings/{sys.argv[2]}", headers=H, timeout=60)
+        inv = requests.get(f"{API}/listings/{sys.argv[2]}/inventory", headers=H, timeout=60)
+        for r in (L, inv):
+            if r.status_code != 200:
+                raise SystemExit(f"HATA: {r.request.path_url.split('?')[0]} HTTP {r.status_code}: {r.text[:300]}")
+        d = L.json(); d["inventory"] = inv.json()
+        Path(sys.argv[3]).write_text(json.dumps(d, ensure_ascii=False))
+        print(f"etsy: 2 okuma cagrisi (getListing + getListingInventory), kota {inv.headers.get('x-remaining-today')}")
         return
     L = json.loads(Path(sys.argv[2]).read_text())
     inv = L.get("inventory") or L

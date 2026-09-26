@@ -1,7 +1,7 @@
 name: dijital-secenek-plan
 
 # GOREV 0036 md.2 - "Digital File" secenegi KURU KOSU (Etsy'ye YAZMA YOK).
-# 1 Etsy okuma cagrisi (getListingsByListingIds includes=Inventory,Images) YALNIZ API anahtariyla; OAuth/token yok,
+# 2 Etsy okuma cagrisi (getListing + getListingInventory) YALNIZ API anahtariyla; OAuth/token yok,
 # etsy-token kilidi yok. Cikti Drive TEMP/POD_ORDERS/DIJITAL_SECENEK_DIFF_CL.csv (+ PUT taslagi, ozet).
 
 permissions:
