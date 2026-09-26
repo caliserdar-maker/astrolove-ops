@@ -39,6 +39,15 @@ assert p4["carrier_name"]=="usps" and p4["tracking_code"]=="92612903123456789012
 assert b4["son_ayak_numara"]=="9261290312345678901234"
 print("4 420 onek ->", p4["tracking_code"], "|", p4["gerekce"][-30:])
 
+# 4b) GOREV 0033: Prodigi yalniz "UPS" (hizmet bos) + 26 haneli USPS IMpb -> usps (UPS'te bulunamiyordu)
+p4b = T.etsy_plani(T.takip_bilgi({"carrier": {"name": "UPS", "service": ""},
+                                  "tracking": {"number": "92419903104126543475578595"}}))
+assert p4b["carrier_name"] == "usps" and p4b["tracking_code"] == "92419903104126543475578595", p4b
+assert "tools.usps.com" in p4b["takip_url"], p4b
+# 1Z numarali duz UPS degismez
+assert T.etsy_plani(T.takip_bilgi({"carrier": {"name": "UPS"}, "tracking": {"number": "1Z999AA10123456784"}}))["carrier_name"] == "ups"
+print("4b UPS + IMpb ->", p4b["carrier_name"], p4b["takip_url"][:50])
+
 # 5) Bilinmeyen tasiyici -> other + uyari
 p5 = T.etsy_plani(T.takip_bilgi({"carrier":{"name":"Evri"},"tracking":{"number":"H00123456789"}}))
 assert p5["carrier_name"]=="other" and "tabloda yok" in p5["uyari"]

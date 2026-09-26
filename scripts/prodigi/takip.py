@@ -93,6 +93,11 @@ def etsy_plani(bilgi):
 
     usps_num, not_420 = usps_numarasi(numara)
     hizmet_usps = son_ayak_hizmeti(ad, hizmet)
+    # GOREV 0033 (26 Eyl): Prodigi bazen yalniz "UPS" (hizmet adi bos) verir ama numara USPS IMpb'dir
+    # (UPS Mail Innovations / SurePost: son ayagi USPS teslim eder). UPS'in kendi numaralari 1Z ile baslar;
+    # UPS/FedEx adi + IMpb bicimi birlikte son ayak USPS kanitidir. Etsy'de "ups" secilirse numara bulunamaz.
+    if usps_num and ad.lower().strip() in ("ups", "ups mail innovations", "fedex", "fedex smartpost"):
+        hizmet_usps = True
     if hizmet_usps and usps_num:
         kod, kullanilan = "usps", usps_num
         gerekce.append(f"hizmet adi son-ayak USPS ('{ad} / {hizmet}') + numara USPS IMpb bicimi"
