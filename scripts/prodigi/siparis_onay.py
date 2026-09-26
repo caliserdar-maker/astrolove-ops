@@ -61,23 +61,21 @@ STICKER_REMOTE = {
 }
 
 
+# Sticker gorselleri musteri verisi icermez: Serdar karariyla (26 Eyl) main'de assets/branding/ altinda, sabit
+# raw link (GOREV 0016). Siparis basi gecici Drive linki YALNIZ kisiye ozel kartpostal icindir.
+STICKER_URL = {
+    "sticker_exterior_round": "https://raw.githubusercontent.com/caliserdar-maker/astrolove-ops/main/assets/branding/ASTROLOVE_INSERT_STICKER_65MM_LACIVERT_V2.png",
+    "sticker_interior_round": "https://raw.githubusercontent.com/caliserdar-maker/astrolove-ops/main/assets/branding/ASTROLOVE_INSERT_TISSUE_25MM_LACIVERT_331x331_V1.png",
+}
+
+
 def branding_ac(links, kart_remote):
-    """Kisiye ozel kartpostal + 2 sticker icin gecici linkler -> (branding, izinler). Biri acilamazsa acilanlar
-    kapatilir ve hata yukselir (yarim branding gonderilmez: yalniz postcard giderse stickerlar duser)."""
-    izin, branding = [], {}
-    try:
-        for alan, remote in [("postcard", kart_remote), *STICKER_REMOTE.items()]:
-            fid, pid, url = links.open(remote)
-            izin.append([fid, pid])
-            branding[alan] = {"url": url}
-    except Exception:
-        for fid, pid in izin:
-            try:
-                links.close(fid, pid)
-            except Exception:                            # noqa: BLE001
-                pass
-        raise
-    return branding, izin
+    """Kisiye ozel kartpostal (gecici link) + 2 sticker (sabit link) -> (branding, izinler). Kartpostal linki
+    acilamazsa hata yukselir (yarim branding gonderilmez: yalniz sticker gitmez)."""
+    fid, pid, url = links.open(kart_remote)
+    branding = {"postcard": {"url": url}}
+    branding.update({alan: {"url": u} for alan, u in STICKER_URL.items()})
+    return branding, [[fid, pid]]
 EVET = {"TRUE", "EVET", "X", "YES", "1", "✓", "✔"}
 ETSY_SABIT, ETSY_ORAN = 0.582, 0.176     # Etsy kesintisi = 0.582 x adet + 0.176 x fiyat (Serdar, 25 Eyl 2026)
 ZARAR = "🔴 ZARAR"

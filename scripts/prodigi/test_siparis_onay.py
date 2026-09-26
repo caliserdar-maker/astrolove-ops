@@ -242,10 +242,11 @@ k("POD: tek Prodigi siparisi, idempotencyKey etsy-<receipt>", len(post) == 1 and
 k("POD: branding.postcard.url = gecici Drive linki (kisiye ozel kart)", (govde.get("branding") or {}).get("postcard", {}).get("url", "").startswith("https://drive.google.com/uc?")
   and f"{O.DRIVE_KOK}/{POD}/KARTPOSTAL_A6.jpg" in LINK["acik"].values(), govde.get("branding"))
 BR = govde.get("branding") or {}
-k("POD: branding'de 2 sticker da acikca var (panel seti govde branding'i ile devreye girmiyor; GOREV 0006)",
+k("POD: branding'de 2 sticker SABIT raw linkle var (panel seti devreye girmiyor; gecici izin yalniz kartpostala)",
   sorted(BR) == ["postcard", "sticker_exterior_round", "sticker_interior_round"]
-  and all(BR[a]["url"].startswith("https://drive.google.com/uc?") for a in BR)
-  and set(O.STICKER_REMOTE.values()) <= set(LINK["acik"].values()), BR)
+  and BR["postcard"]["url"].startswith("https://drive.google.com/uc?")
+  and all(BR[a] == {"url": O.STICKER_URL[a]} for a in O.STICKER_URL)
+  and not set(O.STICKER_REMOTE.values()) & set(LINK["acik"].values()), BR)
 k("POD (US): govdedeki kargo = teklifteki en ucuz (Budget 6.85 < Standard 11.85)", govde.get("shippingMethod") == "Budget", govde.get("shippingMethod"))
 k("POD: dosya linki gecici Drive linki (kisisel BASKI), dogru SKU", govde["items"][0]["assets"][0]["url"].startswith("https://drive.google.com/uc?")
   and govde["items"][0]["sku"] == "GLOBAL-HPR-8x10" and f"{O.DRIVE_KOK}/{POD}/BASKI_8x10.jpg" not in LINK["acik"].values())
@@ -255,8 +256,8 @@ k("bildirimler: PRODIGI GONDERILDI + CHATGPT", f"::error title=PRODIGI GONDERILD
 st = {r["receipt_id"]: r for r in csv.DictReader(open(W / "state.csv", encoding="utf-8"))}
 k("STATE: POD ordered, dijital dijital_bekliyor, Kiril ISIM_BEKLIYOR", st[str(POD)]["stage"] == "ordered"
   and st[str(DIJ)]["stage"] == "dijital_bekliyor" and st[str(KIR)]["stage"] == "ISIM_BEKLIYOR")
-k("assetler indirilince baski izni kapandi; kart + 2 sticker linki gonderime kadar acik",
-  sorted(LINK["acik"].values()) == sorted([f"{O.DRIVE_KOK}/{POD}/KARTPOSTAL_A6.jpg", *O.STICKER_REMOTE.values()]) and LINK["kapali"], LINK)
+k("assetler indirilince baski izni kapandi; kart linki gonderime kadar acik (sticker sabit, izin acilmaz)",
+  list(LINK["acik"].values()) == [f"{O.DRIVE_KOK}/{POD}/KARTPOSTAL_A6.jpg"] and LINK["kapali"], LINK)
 # ---- 4b) Prodigi pause penceresi: olusturma OnHold, GET 404 -> hata DEGIL, linkler acik kalir
 _st_yol = W / "state.csv"
 _rows = list(csv.DictReader(open(_st_yol, encoding="utf-8"))); _alan = list(_rows[0].keys())
@@ -318,9 +319,7 @@ k("canli_guvenli_test TR: en ucuz kural (Standard 10.44; eski sabit Budget 26.41
 
 class FLbozuk(FL):
     def open(self, remote):
-        if "TISSUE" in remote:
-            raise RuntimeError("drive 500")
-        return super().open(remote)
+        raise RuntimeError("drive 500")
 
 
 _once = dict(LINK["acik"])
@@ -328,7 +327,10 @@ try:
     O.branding_ac(FLbozuk(), "gdrive:X/KARTPOSTAL_A6.jpg"); _hata = False
 except RuntimeError:
     _hata = True
-k("branding_ac: sticker linki acilamazsa hata + acilan linkler kapanir (yarim branding yok)", _hata and LINK["acik"] == _once, LINK["acik"])
+k("branding_ac: kartpostal linki acilamazsa hata, acik izin kalmaz (yalniz sticker gitmez)", _hata and LINK["acik"] == _once, LINK["acik"])
+k("sticker sabit linkleri: 2 alan, main assets/branding raw, dosya adlari STICKER_REMOTE ile ayni", sorted(O.STICKER_URL) == sorted(O.STICKER_REMOTE)
+  and all(u.startswith("https://raw.githubusercontent.com/caliserdar-maker/astrolove-ops/main/assets/branding/")
+          and u.rsplit("/", 1)[1] == O.STICKER_REMOTE[a].rsplit("/", 1)[1] for a, u in O.STICKER_URL.items()))
 kar, y, _ = teklif("CA")
 k("CA 8x10 (GB): Budget secildi (Standard 18.49 pahali), net 15.08 - 5.30 = 9.78, tesis dogrulanmadi notu", y == "Budget" and kar["NET_KAR"] == "9.78" and "prodigi_gb3 icin ekstra dogrulanmadi" in kar["KAR_UYARI"] and O.ZARAR not in kar["KAR_UYARI"], (y, kar))
 kar_jp, y, _ = teklif("JP")
