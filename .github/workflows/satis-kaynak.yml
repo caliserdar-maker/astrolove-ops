@@ -1,0 +1,68 @@
+name: satis-kaynak
+
+# Serdar 26 Eyl 2026: son satislar nereden geldi (Offsite Ads mi, Etsy ici mi). SALT OKUMA.
+# getShopReceipts + getShopPaymentAccountLedgerEntries. Musteri adi/adres yok. Cikti Drive TEMP/SATIS_KAYNAK.md
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      adet:
+        description: "Son kac satis"
+        default: "4"
+
+jobs:
+  oku:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: etsy-token
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Oku
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          ADET: ${{ inputs.adet }}
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          python scripts/etsy/satis_kaynak.py 2>&1 | tee _satis.log
+          rclone copyto out/SATIS_KAYNAK.md "gdrive:ASTROLOVE/TEMP/SATIS_KAYNAK.md" -q
+          rclone copyto out/SATIS_KAYNAK.json "gdrive:ASTROLOVE/TEMP/SATIS_KAYNAK.json" -q
+      - name: Hata logu
+        if: failure()
+        run: |
+          [ -f _satis.log ] && tail -40 _satis.log > _t.log && rclone copyto _t.log "gdrive:ASTROLOVE/TEMP/LOGS/satis_kaynak_${{ github.run_id }}.log" -q || true
+      - name: Token geri yaz
+        if: always()
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || echo "Token yenilenmedi"
+      - if: always()
+        run: rm -rf _work ~/.config/rclone
