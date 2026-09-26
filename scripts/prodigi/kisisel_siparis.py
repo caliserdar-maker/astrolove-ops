@@ -114,6 +114,10 @@ def mesaj_dogrula(ham):
     alf = {_alfabe(c) for c in s if c.isalpha()}
     if alf - {"LATIN", "CYRILLIC"}:
         sorun.append(("KARAKTER", "desteklenmeyen alfabe: " + ", ".join(sorted(alf - {"LATIN", "CYRILLIC"}))))
+    desteklenmeyen = {c for c in s if not (c.isalpha() or c.isdigit() or c.isspace())
+                      and c not in ".,!?;:'\"-()" and not _sembol_mi(c)}
+    if desteklenmeyen:
+        sorun.append(("KARAKTER", "desteklenmeyen karakter: " + " ".join(sorted(desteklenmeyen))))
     if len(s) > MESAJ_AZAMI:
         sorun.append(("UZUN_MESAJ", f"{len(s)} karakter (azami {MESAJ_AZAMI})"))
     return ("ELLE KONTROL" if sorun else "TAMAM"), s, sorun

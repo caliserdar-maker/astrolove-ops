@@ -82,7 +82,7 @@ jobs:
           cache: pip
       - run: |
           set -euo pipefail
-          pip install -q requests==2.34.2
+          pip install -q requests==2.34.2 pillow==11.0.0   # order_router paket_dogrula: baski dosyasi piksel/DPI
           curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
       - name: rclone.conf olustur
         env:

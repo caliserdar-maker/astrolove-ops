@@ -39,10 +39,12 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
 import requests
+from PIL import Image
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
@@ -61,8 +63,20 @@ KARGO_SECENEK = ["Budget", "Standard", "Express", "Overnight"]   # teklifte heps
 EKLER_USD = 5.00        # hesap ayarindaki ekler (postcard 2.50 + 2 sticker 1.25x2); ord_14538276 olcumu
 # SKU semasi pod_sku.py: POD-<burc3>_<burc3>-<edisyon2>-<boyut>
 STAGES = ["dryrun", "bekliyor", "manual", "atlandi", "ordered", "shipped", "tracked", "error", "ISIM_BEKLIYOR"]
-TUM_BOYLAR = ["5x7", "8x10", "11x14", "12x16", "12x18", "16x20", "16x24", "18x24", "20x30",
-              "24x36", "30x40", "A4", "A3", "A2", "A1"]      # 13 mevcut + 5x7 + A1
+# Siparis yolundaki tek yetkili boy/SKU/piksel kaynagi. A-serisi degerleri
+# ISO 216 olculerinin 300 DPI'da en yakin tam piksele yuvarlanmis halidir.
+ONAYLI_BOYLAR = {
+    "8x10": ("GLOBAL-HPR-8x10", (2400, 3000)), "A4": ("GLOBAL-HPR-A4", (2480, 3508)),
+    "11x14": ("GLOBAL-HPR-11x14", (3300, 4200)), "12x16": ("GLOBAL-HPR-12x16", (3600, 4800)),
+    "A3": ("GLOBAL-HPR-A3", (3508, 4961)), "12x18": ("GLOBAL-HPR-12x18", (3600, 5400)),
+    "16x20": ("GLOBAL-HPR-16x20", (4800, 6000)), "16x24": ("GLOBAL-HPR-16x24", (4800, 7200)),
+    "A2": ("GLOBAL-HPR-A2", (4961, 7016)), "18x24": ("GLOBAL-HPR-18x24", (5400, 7200)),
+    "20x30": ("GLOBAL-HPR-20x30", (6000, 9000)), "24x30": ("GLOBAL-HPR-24x30", (7200, 9000)),
+    "24x32": ("GLOBAL-HPR-24x32", (7200, 9600)), "A1": ("GLOBAL-HPR-A1", (7016, 9933)),
+    "24x36": ("GLOBAL-HPR-24x36", (7200, 10800)), "30x40": ("GLOBAL-HPR-30x40", (9000, 12000)),
+}
+TUM_BOYLAR = list(ONAYLI_BOYLAR)
+PLATE_ONAY = HERE.parent.parent / "config" / "plate_onay.json"
 COLS = ["receipt_id", "stage", "country", "items", "etsy_total", "prodigi_cost", "margin", "warn", "prodigi_order_id",
         "prodigi_status", "asset_perms", "tracking", "carrier", "carrier_service", "tracking_url", "tracking_son_ayak",
         "carrier_etsy", "sent_tx", "kanal_iptal", "kanal_oid", "alarm_kosu", "ts_utc", "note"]
@@ -187,6 +201,65 @@ class DriveLinks:
         except RuntimeError as e:
             if "404" not in str(e):
                 raise
+
+
+def plate_onayli_mi(edisyon, boy, path=PLATE_ONAY):
+    """Edisyon+boy plate'i elle onay defterinde mi? Belirsizlikte kapali kalir."""
+    try:
+        kayitlar = json.loads(Path(path).read_text(encoding="utf-8")).get("onayli", [])
+    except (OSError, ValueError, AttributeError):
+        return False
+    anahtarlar = {f"{edisyon}/{boy}", f"{edisyon}:{boy}", f"{edisyon}-{boy}"}
+    for kayit in kayitlar:
+        if isinstance(kayit, str) and kayit in anahtarlar:
+            return True
+        if isinstance(kayit, dict) and kayit.get("edisyon") == edisyon and kayit.get("boy") == boy:
+            return True
+    return False
+
+
+def baski_dosyasi_dogrula(remote_path, boy, kopyala=subprocess.run):
+    """Drive dosyasini gecici dizine salt-okuma kopyalayip piksel ve DPI'yi dogrular."""
+    if boy not in ONAYLI_BOYLAR:
+        return False, f"onaysiz boy: {boy}"
+    with tempfile.TemporaryDirectory(prefix="plate-kontrol-") as gecici:
+        sonuc = kopyala(["rclone", "copyto", remote_path, str(Path(gecici) / "plate.jpg")],
+                        capture_output=True, text=True)
+        if sonuc.returncode != 0:
+            return False, "baski dosyasi okunamadi"
+        try:
+            with Image.open(Path(gecici) / "plate.jpg") as im:
+                piksel = im.size
+                dpi = im.info.get("dpi", (0, 0))
+        except (OSError, ValueError):
+            return False, "baski dosyasi gecersiz"
+    beklenen = ONAYLI_BOYLAR[boy][1]
+    if piksel != beklenen:
+        return False, f"piksel {piksel[0]}x{piksel[1]}, beklenen {beklenen[0]}x{beklenen[1]}"
+    if len(dpi) < 2 or any(abs(float(x) - 300) > 1 for x in dpi[:2]):
+        return False, f"DPI {dpi}, beklenen 300x300"
+    return True, ""
+
+
+def paket_dogrula(pkg, plate_path=PLATE_ONAY, dosya_dogrula=baski_dosyasi_dogrula):
+    """Gonderimden hemen once tum fail-closed kurallarini yeniden uygular."""
+    for item in pkg.get("items") or []:
+        boy = item.get("size")
+        if boy not in ONAYLI_BOYLAR or item.get("prodigi_sku") != ONAYLI_BOYLAR[boy][0]:
+            return False, f"onaysiz boy/SKU: {boy}"
+        if not plate_onayli_mi(item.get("ed"), boy, plate_path):
+            return False, f"plate onaysiz: {item.get('ed')}/{boy}"
+        ok, neden = dosya_dogrula(item.get("asset_remote"), boy)
+        if not ok:
+            return False, neden
+    return True, ""
+
+
+def siparis_beklemede_mi(outcome):
+    """Bekletmenin tek API kaniti: hesap 'Pause indefinitely' iken POST /orders outcome=onHold doner (Prodigi v4
+    dokumani: paused siparis ilk yanitta yalniz id + 'on hold'; GET bekletme bitene kadar siparisi dondurmez -> 404,
+    25 Eyl olcumu). Istekte 'status/Draft' alani YOK; API'de pause eylemi de yok (yalniz dashboard ayari)."""
+    return str(outcome or "").strip().lower() == "onhold"
 
 
 def sku_haritasi(prod, boylar):
@@ -427,12 +500,14 @@ def parse_items(receipt, only_size=""):
         if not parsed:
             other.append(sku or f"tx{t.get('transaction_id')}"); continue
         pair, ed, size = parsed
+        if size not in ONAYLI_BOYLAR:
+            atlanan.append(f"{sku}x{int(t.get('quantity') or 1)} (GONDERME: onaysiz boy)"); continue
         if boylar and size not in boylar:
             atlanan.append(f"{sku}x{int(t.get('quantity') or 1)}"); continue
         pr = t.get("price") or {}
         price = float(pr.get("amount") or 0) / float(pr.get("divisor") or 100)
         items.append(dict(transaction_id=t.get("transaction_id"), sku=sku, pair=pair, ed=ed, size=size,
-                          prodigi_sku=f"GLOBAL-HPR-{size}", qty=int(t.get("quantity") or 1), price=price,
+                          prodigi_sku=ONAYLI_BOYLAR[size][0], qty=int(t.get("quantity") or 1), price=price,
                           asset_remote=f"{PRINT_REMOTE}/{pair}/{ed}/{size}.jpg"))
     return items, other, atlanan
 
@@ -494,6 +569,11 @@ def submit_package(a, prod, st, rid, report):
     body = pkg["order"]
     if len(body.get("items") or []) != len(pkg.get("items") or []):
         return False, f"{rid}: paket bozuk (kalem sayisi uyusmuyor)"
+    guvenli, neden = paket_dogrula(pkg)
+    if not guvenli:
+        upd(st, a.state, rid, stage="error", warn="GONDERME", note=neden[:280])
+        report.append(f"- ***{rid[-4:]}: GONDERME ({neden})")
+        return False, f"***{rid[-4:]}: GONDERME - {neden}"
     links, perms = DriveLinks(), []
     try:
         for n, it in enumerate(pkg["items"]):
@@ -505,6 +585,9 @@ def submit_package(a, prod, st, rid, report):
         oid = (d.get("order") or {}).get("id")
         if stc != 200 or not oid or outcome.lower() not in ("created", "createdwithissues", "onhold"):
             raise RuntimeError(f"order HTTP {stc} outcome={outcome}: {json.dumps(d)[:300]}")
+        if not siparis_beklemede_mi(outcome):
+            raise RuntimeError(f"ALARM: siparis bekletmede DEGIL ({oid}, outcome {outcome}); "
+                               "otomatik iptal YAPILMADI, Prodigi dashboard'dan elle durdur")
     except Exception as e:                       # noqa: BLE001 - hata da STATE'e yazilir
         upd(st, a.state, rid, stage="error", asset_perms=perms, note=f"submit: {str(e)[:280]}")
         return False, f"{rid}: {type(e).__name__} {str(e)[:300]}"
@@ -828,6 +911,9 @@ def main():
             report.append(f"- {rid}: kosu siniri ({a.max_orders}); sonraki kosuda")
             continue
         try:
+            guvenli, neden = paket_dogrula({"items": items})
+            if not guvenli:
+                raise RuntimeError(f"GONDERME: {neden}")
             links = links or DriveLinks()
             perms, urls = [], {}
             for i in items:
@@ -839,6 +925,9 @@ def main():
             oid = (d.get("order") or {}).get("id")
             if stc != 200 or not oid or outcome.lower() not in ("created", "createdwithissues", "onhold"):
                 raise RuntimeError(f"order HTTP {stc} outcome={outcome}: {json.dumps(d)[:300]}")
+            if not siparis_beklemede_mi(outcome):
+                raise RuntimeError(f"ALARM: siparis bekletmede DEGIL ({oid}, outcome {outcome}); "
+                                   "otomatik iptal YAPILMADI, Prodigi dashboard'dan elle durdur")
             new_orders += 1
             upd(st, a.state, rid, stage="ordered", country=country, items=desc, etsy_total=etsy_total, prodigi_cost=cost,
                 margin=margin, warn="; ".join(warn), prodigi_order_id=oid, prodigi_status=outcome, asset_perms=perms,
