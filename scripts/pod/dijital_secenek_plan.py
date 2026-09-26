@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """GOREV 0036 md.2 - POD ilanina "Digital File" secenegi: KURU KOSU (Etsy'ye YAZMA YOK).
-etsy <ilan_id> <cikti.json> : getListing + getListingInventory - YALNIZ API anahtari (OAuth yok, kilit yok).
+etsy <ilan_id> <cikti.json> : getListing + getListingInventory (OAuth token, listings_r; SALT OKUMA, etsy-token kilidi).
 plan <cikti.json>           : Size listesine ILK deger ETIKET, 5 rengin hepsinde FIYAT; SKU pod_sku.make_digital_sku
                               (POD-<S1>_<S2>-<ED2>-DIGITAL). Diger boy/fiyat/SKU/adet/gorunurluk AYNEN.
   Cikti: out/DIJITAL_SECENEK_DIFF_CL.csv (renk, boy, sku, eski_fiyat, yeni_fiyat, durum)
@@ -12,13 +12,12 @@ import os
 import sys
 from pathlib import Path
 
-import requests
 
 KOK = Path(__file__).resolve().parent
 sys.path.insert(0, str(KOK)); sys.path.insert(0, str(KOK.parent / "etsy"))
 from pod_sku import MAX_LEN, make_digital_sku, parse_sku  # noqa: E402
 
-ETIKET = "Digital File, 5 colors + 5 ratios"
+ETIKET = os.environ.get("DIJITAL_ETIKET") or "Digital File, 5 colors + 5 ratios"   # sinir asilirsa "Digital File (5 colors)"
 FIYAT = 14.99
 OUT = Path("out")
 
@@ -91,17 +90,16 @@ def main():
     OUT.mkdir(exist_ok=True)
     if sys.argv[1] == "etsy":
         k_, s_ = os.environ.get("ETSY_API_KEY", ""), os.environ.get("ETSY_SHARED_SECRET", "")
-        for v in (k_, s_):
-            print(f"::add-mask::{v}")
-        H, API = {"x-api-key": f"{k_}:{s_}"}, "https://openapi.etsy.com/v3/application"
-        L = requests.get(f"{API}/listings/{sys.argv[2]}", headers=H, timeout=60)
-        inv = requests.get(f"{API}/listings/{sys.argv[2]}/inventory", headers=H, timeout=60)
-        for r in (L, inv):
-            if r.status_code != 200:
-                raise SystemExit(f"HATA: {r.request.path_url.split('?')[0]} HTTP {r.status_code}: {r.text[:300]}")
-        d = L.json(); d["inventory"] = inv.json()
+        from etsy_common import Etsy, TokenStore, mask
+        mask(k_); mask(s_)
+        store = TokenStore(os.environ["TOKEN_FILE"], k_, s_)
+        if store.needs_refresh():
+            store.refresh()
+        api = Etsy(store)
+        d = api.get(f"/listings/{sys.argv[2]}") or {}
+        d["inventory"] = api.get(f"/listings/{sys.argv[2]}/inventory") or {}
         Path(sys.argv[3]).write_text(json.dumps(d, ensure_ascii=False))
-        print(f"etsy: 2 okuma cagrisi (getListing + getListingInventory), kota {inv.headers.get('x-remaining-today')}")
+        print(f"etsy: 2 okuma cagrisi (getListing + getListingInventory, OAuth salt okuma), kota {api.remaining}")
         return
     L = json.loads(Path(sys.argv[2]).read_text())
     inv = L.get("inventory") or L

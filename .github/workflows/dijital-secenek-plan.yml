@@ -1,8 +1,8 @@
 name: dijital-secenek-plan
 
 # GOREV 0036 md.2 - "Digital File" secenegi KURU KOSU (Etsy'ye YAZMA YOK).
-# 2 Etsy okuma cagrisi (getListing + getListingInventory) YALNIZ API anahtariyla; OAuth/token yok,
-# etsy-token kilidi yok. Cikti Drive TEMP/POD_ORDERS/DIJITAL_SECENEK_DIFF_CL.csv (+ PUT taslagi, ozet).
+# 2 Etsy okuma cagrisi (getListing + getListingInventory); envanter OAuth (listings_r) ister -> ETSY_TOKEN +
+# etsy-token kilidi + token geri yazimi (GOREV 0037). SALT OKUMA. Cikti Drive TEMP/POD_ORDERS/DIJITAL_SECENEK_DIFF_CL.csv (+ PUT taslagi, ozet).
 
 permissions:
   contents: read
@@ -13,11 +13,17 @@ on:
       ilan:
         description: "Etsy ilan id (varsayilan CL)"
         default: "4570143815"
+      etiket:
+        description: "Digital File deger etiketi (bos = varsayilan uzun etiket)"
+        default: ""
 
 jobs:
   plan:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    concurrency:
+      group: etsy-token
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -43,9 +49,14 @@ jobs:
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
           ILAN: ${{ inputs.ilan }}
+          DIJITAL_ETIKET: ${{ inputs.etiket }}
         run: |
           set -euo pipefail
+          umask 077; mkdir -p _work
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
           python scripts/pod/dijital_secenek_plan.py etsy "$ILAN" _ilan.json
           rc=0; python scripts/pod/dijital_secenek_plan.py plan _ilan.json || rc=$?
           H="gdrive:ASTROLOVE/TEMP/POD_ORDERS"
@@ -53,5 +64,10 @@ jobs:
             [ -f "out/$f" ] && rclone copyto "out/$f" "$H/$f" -q || true
           done
           exit $rc
+      - name: Token geri yaz
+        if: always()
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || echo "Token yenilenmedi"
       - if: always()
-        run: rm -rf _ilan.json out ~/.config/rclone
+        run: rm -rf _ilan.json _work out ~/.config/rclone
