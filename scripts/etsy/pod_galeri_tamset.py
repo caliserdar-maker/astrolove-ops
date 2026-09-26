@@ -40,7 +40,7 @@ IMG_LIMIT = 20                 # Etsy ilan basina gorsel siniri (referans 14 fot
 KOTA_TABAN = 300
 OKUMA_TEKRAR, OKUMA_BEKLE = 8, 4
 OUT = Path("out")
-ESIK = 0.004                   # icerik farki: 256px gri ortalama mutlak fark (0-1). Etsy ayni dosyayi tekillestirip eski id'yi
+ESIK = 0.001                   # icerik farki: 256px gri ortalama mutlak fark (0-1). Etsy ayni dosyayi tekillestirip eski id'yi
                                # tutabiliyor (ARIES_LEO pilotu); sira bu yuzden id'ye degil icerige gore dogrulanir.
 BURC = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn",
         "Aquarius", "Pisces"]
@@ -256,11 +256,19 @@ def main():
     harcanan0 = api.calls
     for c, x in list((onceki.get("ilan") or {}).items()):   # yalniz 'sira' tutmayan onceki ilanlar: icerik + onarim
         k = x.get("kontrol") or {}
-        if x.get("sonuc") == "FAIL" and c in hedef and [n for n, v in k.items() if not v] == ["sira"]:
+        fk0 = x.get("icerik_fark") or {}
+        yeniden = x.get("sonuc") == "PASS" and (len(fk0) < 13 or not all(esit(v) for v in fk0.values()))
+        if c in hedef and (yeniden or (x.get("sonuc") == "FAIL" and [n for n, v in k.items() if not v] == ["sira"])):
+            bitti.discard(c)
             if not onar(api, shop, a, c, ilan[c], rapor["ilan"][c], ref_alt):
                 (OUT / "GALERI_TAMSET.json").write_text(json.dumps(rapor, ensure_ascii=False, indent=1))
                 raise SystemExit(f"DUR: {c} onarim tutmadi")
             bitti.add(c)
+            (OUT / "GALERI_TAMSET.json").write_text(json.dumps(rapor, ensure_ascii=False, indent=1))
+            try:
+                rc("copy", str(OUT / "GALERI_TAMSET.json"), f"{A77}/_galeri")
+            except subprocess.CalledProcessError:
+                log("durum Drive'a yazilamadi")
     secim = [c for c in secim if c in hedef and c not in bitti]
     log(f"yuklenecek {len(secim)} ilan (seti olan {len(setli)}, onceden PASS {len(bitti)}) | kota {kota(api)}")
     for sira, c in enumerate(secim, 1):
@@ -327,7 +335,7 @@ def main():
         g2 = kararli(lambda: galeri(api, lid), lambda g: len(g) == 13) or []
         rid = {x.get("rank"): x.get("listing_image_id") for x in g2}
         idfarkli = [n for n in sorted(yeni) if rid.get(n) != yeni[n]]     # Etsy tekillestirmesi: icerikle dogrula
-        fk = icerik(g2, foto, sadece=set(idfarkli) | {1})
+        fk = icerik(g2, foto)                                             # 13 foto olculur, rapora yazilir
         v2 = kararli(lambda: [x.get("video_id") for x in videolar(api, lid)], lambda v: len(v) == 1)
         vm2 = {x.get("value"): x.get("image_id") for x in var_img(api, shop, lid)}
         L2 = api.get(f"/listings/{lid}") or {}
@@ -341,6 +349,11 @@ def main():
             "state_degismedi": L2.get("state") == X.get("state"),
         }
         r.update(icerik_fark=fk, id_farkli=idfarkli)
+        if not kontrol["sira"] and sorted(rid) == list(range(1, 14)) and all(v for k2, v in kontrol.items() if k2 != "sira"):
+            log(f"{c}: icerik esigi asan sira var -> onarim (yeniden yukleme)")
+            r["kontrol"] = kontrol
+            onar(api, shop, a, c, lid, r, ref_alt)
+            kontrol = r["kontrol"]
         r.update(sonuc="PASS" if all(kontrol.values()) else "FAIL", kontrol=kontrol, state_sonra=L2.get("state"),
                  yeni_video=rv.get("video_id"), cagri=api.calls - c0, sn=round(time.time() - t0, 1))
         log(f"[{sira}/{len(secim)}] {c} {r['sonuc']} cagri {r['cagri']} | toplam {api.calls - harcanan0}/{a.butce} "
