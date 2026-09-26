@@ -1,0 +1,5 @@
+- Canli POD metin tarayicisi eklendi; Etsy erisimi salt okur ve yalniz API anahtariyladir.
+- Baslik, aciklama, tire, Hahnemuhle, 13 Ingilizce etiket ve kisisellestirme kurallari denetlenir.
+- Ilan basina PASS/FAIL nedenleri `CANLI_METIN.csv` dosyasina yazilir.
+- Toplam PASS ve kural bazli FAIL sayilari `CANLI_METIN_OZET.json` dosyasina yazilir.
+- Sekiz sentetik senaryo ile yerel test kapsami eklendi; canli workflow calistirilmadi.

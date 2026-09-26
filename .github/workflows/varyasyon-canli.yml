@@ -1,0 +1,73 @@
+name: varyasyon-canli
+
+on:
+  workflow_dispatch:
+    inputs:
+      hedefler:
+        description: "Istege bagli CIFT:ilan_id,... (bos = GALERI_TAMSET PASS + CL)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  denetle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Araclari kur
+        run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Salt okunur girdileri al
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work/set
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_KISISEL/A1_77/_galeri/GALERI_TAMSET.json" _work/GALERI_TAMSET.json
+          rclone copy "gdrive:ASTROLOVE/TEMP/POD_KISISEL/A1_77" _work/set --include "*/TAM_SET/SET.json" -q
+      - name: Canli varyasyon denetimi
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          HEDEFLER: ${{ inputs.hedefler }}
+        run: |
+          set -euo pipefail
+          python scripts/etsy/varyasyon_canli.py --state _work/GALERI_TAMSET.json --setler _work/set \
+            --output _work/VARYASYON_CANLI.csv --hedefler "$HEDEFLER"
+      - name: Raporu Drive TEMP'e yaz
+        if: always()
+        run: |
+          [ -f _work/VARYASYON_CANLI.csv ] && rclone copyto _work/VARYASYON_CANLI.csv \
+            "gdrive:ASTROLOVE/TEMP/VARYASYON_CANLI.csv" || true
+      - name: Token geri yaz
+        if: always()
+        run: |
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json \
+            "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" || echo "Token yenilenmedi"
+      - if: always()
+        run: rm -rf _work ~/.config/rclone

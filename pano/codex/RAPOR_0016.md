@@ -1,0 +1,5 @@
+- Salt-okur canli varyasyon workflow'u ve denetim komutu eklendi.
+- Varsayilan hedefler GALERI_TAMSET PASS ilanlari ile Cancer-Libra referansidir.
+- Her ilan envanter, varyasyon-gorsel ve galeri olmak uzere tam 3 GET kullanir.
+- CSV Drive TEMP'e yazilir; yenilenen OAuth token'i tek kaynaga geri konur.
+- Uc ilan-dongusu senaryosu sentetik verilerle, agsiz test edildi.

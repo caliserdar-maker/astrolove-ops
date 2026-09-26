@@ -1,0 +1,57 @@
+name: canli-metin-tara
+
+# 78 canli POD ilaninin metin denetimi. Etsy'ye yazmaz; OAuth token kullanmaz.
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      ilan_listesi_yolu:
+        description: "gdrive: altindaki ilan ID listesi CSV yolu"
+        required: true
+        default: "ASTROLOVE/TEMP/YAYILIM_78/METIN_78.csv"
+
+jobs:
+  tara:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Listeyi oku ve Etsy'den salt oku
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          LIST_PATH: ${{ inputs.ilan_listesi_yolu }}
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work out
+          rclone copyto "gdrive:$LIST_PATH" _work/METIN_78.csv
+          python scripts/etsy/canli_metin_tara.py etsy _work/METIN_78.csv _work/canli_metin.json
+          python scripts/etsy/canli_metin_tara.py denetle _work/canli_metin.json out/CANLI_METIN.csv out/CANLI_METIN_OZET.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: canli-metin
+          path: out/
+          retention-days: 7
+      - if: always()
+        run: rm -rf _work ~/.config/rclone
