@@ -49,9 +49,12 @@ class FailClosedTest(unittest.TestCase):
 
     def test_pause_govdesi_ve_geri_okuma(self):
         body = order_router.order_body({"receipt_id": "1234"}, [], {})
-        self.assertEqual(body["status"], "Draft")
-        self.assertTrue(order_router.siparis_beklemede_mi({"status": {"stage": "Draft"}}))
-        self.assertFalse(order_router.siparis_beklemede_mi({"status": {"stage": "InProgress"}}))
+        self.assertNotIn("status", body)                  # Prodigi v4 istek alani degil
+        self.assertTrue(order_router.siparis_beklemede_mi("OnHold"))
+        self.assertTrue(order_router.siparis_beklemede_mi("onHold"))
+        self.assertFalse(order_router.siparis_beklemede_mi("Created"))
+        self.assertFalse(order_router.siparis_beklemede_mi("CreatedWithIssues"))
+        self.assertFalse(order_router.siparis_beklemede_mi(None))
 
     def test_turkce_buyuk_harf(self):
         self.assertEqual(kisisel_siparis.buyut("inci ışık", "TR"), "İNCİ IŞIK")

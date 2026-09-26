@@ -255,9 +255,11 @@ def paket_dogrula(pkg, plate_path=PLATE_ONAY, dosya_dogrula=baski_dosyasi_dogrul
     return True, ""
 
 
-def siparis_beklemede_mi(order):
-    stage = str(((order.get("status") or {}).get("stage") or "")).lower()
-    return stage in {"draft", "onhold", "paused"}
+def siparis_beklemede_mi(outcome):
+    """Bekletmenin tek API kaniti: hesap 'Pause indefinitely' iken POST /orders outcome=onHold doner (Prodigi v4
+    dokumani: paused siparis ilk yanitta yalniz id + 'on hold'; GET bekletme bitene kadar siparisi dondurmez -> 404,
+    25 Eyl olcumu). Istekte 'status/Draft' alani YOK; API'de pause eylemi de yok (yalniz dashboard ayari)."""
+    return str(outcome or "").strip().lower() == "onhold"
 
 
 def sku_haritasi(prod, boylar):
@@ -519,7 +521,6 @@ def order_body(receipt, items, urls, only_size="", shipping_method="Budget"):
     # Kargo yontemi TEK KAYNAK: teklifte secilen (kargo_ayrinti["secilen"]["yontem"]) buraya gelir;
     # maliyet hesabi ile siparis govdesi ayni yontemi kullanir (23 Eyl bulgusu 1).
     return {"merchantReference": ref, "shippingMethod": shipping_method or "Budget", "idempotencyKey": ref,
-            "status": "Draft",
             "recipient": {"name": receipt.get("name") or "", "email": receipt.get("buyer_email") or None,
                           "address": {"line1": receipt.get("first_line") or "", "line2": receipt.get("second_line") or None,
                                       "postalOrZipCode": receipt.get("zip") or "", "countryCode": receipt.get("country_iso") or "",
@@ -584,11 +585,9 @@ def submit_package(a, prod, st, rid, report):
         oid = (d.get("order") or {}).get("id")
         if stc != 200 or not oid or outcome.lower() not in ("created", "createdwithissues", "onhold"):
             raise RuntimeError(f"order HTTP {stc} outcome={outcome}: {json.dumps(d)[:300]}")
-        geri_st, geri = prod.get_order(oid)
-        if geri_st != 200 or not siparis_beklemede_mi(geri.get("order") or {}):
-            stage = (((geri.get("order") or {}).get("status") or {}).get("stage") or "?")
-            raise RuntimeError(f"ALARM: siparis bekletmede dogrulanamadi (HTTP {geri_st}, stage {stage}); "
-                               "otomatik iptal/durdurma YAPILMADI")
+        if not siparis_beklemede_mi(outcome):
+            raise RuntimeError(f"ALARM: siparis bekletmede DEGIL ({oid}, outcome {outcome}); "
+                               "otomatik iptal YAPILMADI, Prodigi dashboard'dan elle durdur")
     except Exception as e:                       # noqa: BLE001 - hata da STATE'e yazilir
         upd(st, a.state, rid, stage="error", asset_perms=perms, note=f"submit: {str(e)[:280]}")
         return False, f"{rid}: {type(e).__name__} {str(e)[:300]}"
@@ -912,6 +911,9 @@ def main():
             report.append(f"- {rid}: kosu siniri ({a.max_orders}); sonraki kosuda")
             continue
         try:
+            guvenli, neden = paket_dogrula({"items": items})
+            if not guvenli:
+                raise RuntimeError(f"GONDERME: {neden}")
             links = links or DriveLinks()
             perms, urls = [], {}
             for i in items:
@@ -923,6 +925,9 @@ def main():
             oid = (d.get("order") or {}).get("id")
             if stc != 200 or not oid or outcome.lower() not in ("created", "createdwithissues", "onhold"):
                 raise RuntimeError(f"order HTTP {stc} outcome={outcome}: {json.dumps(d)[:300]}")
+            if not siparis_beklemede_mi(outcome):
+                raise RuntimeError(f"ALARM: siparis bekletmede DEGIL ({oid}, outcome {outcome}); "
+                                   "otomatik iptal YAPILMADI, Prodigi dashboard'dan elle durdur")
             new_orders += 1
             upd(st, a.state, rid, stage="ordered", country=country, items=desc, etsy_total=etsy_total, prodigi_cost=cost,
                 margin=margin, warn="; ".join(warn), prodigi_order_id=oid, prodigi_status=outcome, asset_perms=perms,
