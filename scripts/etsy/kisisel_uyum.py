@@ -13,7 +13,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from etsy_common import Etsy, TokenStore, mask  # noqa: E402
-from pod_listing_create import personalization_questions  # noqa: E402
+from pod_listing_create import SIGNS, personalization_questions  # noqa: E402
 
 INSTANT_RX = re.compile(r"\b(?:instant(?:ly)?\s+download|instant\s+digital\s+download|download\s+immediately|immediate\s+download)\b", re.I)
 DELIVERY_RX = re.compile(r"\b(?:within|in)\s+\d+(?:\s*[-–]\s*\d+)?\s+(?:hours?|business\s+days?|days?)\b", re.I)
@@ -23,25 +23,36 @@ CSV_FIELDS = ["ilan_id", "baslik", "tur", "durum", "neden", "dosya_adlari",
 
 def _questions(listing):
     questions = listing.get("personalization_questions")
-    if not isinstance(questions, list) and isinstance(listing.get("personalization"), dict):
-        questions = listing["personalization"].get("personalization_questions")
+    personalization = listing.get("personalization")
+    if not isinstance(questions, list) and isinstance(personalization, dict):
+        questions = personalization.get("personalization_questions")
+    if not isinstance(questions, list) and isinstance(personalization, list):
+        questions = personalization
     return questions if isinstance(questions, list) else []
 
 
+def _pair_from_title(title):
+    signs = "|".join(re.escape(sign) for sign in SIGNS)
+    match = re.search(rf"\b({signs})\s+and\s+({signs})\s+Zodiac Wall Art\b", str(title or ""), re.I)
+    if not match:
+        return None
+    return f"{match.group(1).upper()}_{match.group(2).upper()}"
+
+
 def _question_issues(listing):
-    expected = personalization_questions("ARIES_LEO")
     questions = _questions(listing)
-    issues = []
-    if len(questions) != 3:
+    pair = _pair_from_title(listing.get("title"))
+    expected = personalization_questions(pair) if pair else None
+    if expected is None or len(questions) != len(expected):
         return ["kisisellestirme_soru_sayisi"]
+    issues = []
     if any(q.get("required") is not True for q in questions):
         issues.append("kisisellestirme_zorunlu")
-    if [q.get("max_allowed_characters") for q in questions] != [11, 11, 35]:
+    if [q.get("max_allowed_characters") for q in questions] != [q["max_allowed_characters"] for q in expected]:
         issues.append("kisisellestirme_karakter_siniri")
     if [q.get("instruction") for q in questions] != [q["instruction"] for q in expected]:
         issues.append("kisisellestirme_talimati")
-    labels = [str(q.get("question_text") or "").casefold() for q in questions]
-    if not (all("name" in label for label in labels[:2]) and "message" in labels[2]):
+    if [q.get("question_text") for q in questions] != [q["question_text"] for q in expected]:
         issues.append("kisisellestirme_soru_metni")
     return issues
 

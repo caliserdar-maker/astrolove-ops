@@ -36,8 +36,11 @@ def main() -> int:
         assert "group: etsy-token" not in text, f"{name}: salt-okur is token kilidinde"
         assert "ETSY_TOKEN.json" not in text, f"{name}: salt-okur is OAuth token okuyor"
         assert "2>&1 | tee _log" in text and "pipefail" in text, f"{name}: ana log eksik"
-        assert "if: failure()" in text and "tail -n 150" in text, f"{name}: hata logu eksik"
-        assert "_OZET.md" in text and "$GITHUB_STEP_SUMMARY" in text, f"{name}: ozet logu eksik"
+        assert "tail -n 150" in text and "TEMP/LOGS" in text, f"{name}: hata logu eksik"
+        assert "_OZET.md" in text, f"{name}: ozet logu eksik"
+    visual = (WORKFLOWS / "gorsel-denetim.yml").read_text(encoding="utf-8")
+    assert "CSV: $([ -f" in visual and "FAIL gorseli: $([ -f" in visual, "gorsel-denetim: eksik dosya ozeti yok"
+    assert "2>> \"$log\"" in visual and "YUKLEME HATASI" in visual, "gorsel-denetim: yukleme hata logu yok"
     router = (WORKFLOWS / "pod-order-router.yml").read_text(encoding="utf-8")
     assert "TEMP/SIPARIS_ONAY/${R_SUBMIT}" in router and "ONAYLAR.json" in router, "submit onay indirmiyor"
     assert "siparis_onay.py hazirla" in router and "rclone copyto \"$uzak\"" in router, "paket onaya hazirlanmiyor"

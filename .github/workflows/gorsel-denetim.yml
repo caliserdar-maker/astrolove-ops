@@ -36,18 +36,21 @@ jobs:
       - name: TEMP raporlarini yaz
         if: always()
         run: |
-          [ ! -f _work/TEMP/GORSEL_DENETIM.csv ] || rclone copyto _work/TEMP/GORSEL_DENETIM.csv "gdrive:ASTROLOVE/TEMP/GORSEL_DENETIM.csv"
-          [ ! -f _work/TEMP/GORSEL_DENETIM_FAIL.jpg ] || rclone copyto _work/TEMP/GORSEL_DENETIM_FAIL.jpg "gdrive:ASTROLOVE/TEMP/GORSEL_DENETIM_FAIL.jpg"
-      - name: Hata logu Drive'a
-        if: failure()
-        run: |
-          tail -n 150 _log > _tail.log 2>/dev/null || echo "log yok" > _tail.log
-          rclone copyto _tail.log "gdrive:ASTROLOVE/TEMP/LOGS/gorsel-denetim_${{ github.run_id }}_denetle.log" || true
-      - name: Ozet Drive'a
-        if: always()
-        run: |
-          [ ! -s "$GITHUB_STEP_SUMMARY" ] || rclone copyto "$GITHUB_STEP_SUMMARY" \
-            "gdrive:ASTROLOVE/TEMP/LOGS/gorsel-denetim_${{ github.run_id }}_OZET.md" || true
+          mkdir -p _work/TEMP/LOGS
+          log="_work/TEMP/LOGS/gorsel-denetim_${{ github.run_id }}_denetle.log"
+          summary="_work/TEMP/LOGS/gorsel-denetim_${{ github.run_id }}_OZET.md"
+          tail -n 150 _log > "$log" 2>/dev/null || echo "log yok" > "$log"
+          {
+            echo "# Gorsel denetim ozeti"
+            echo
+            echo "- CSV: $([ -f _work/TEMP/GORSEL_DENETIM.csv ] && echo VAR || echo YOK)"
+            echo "- FAIL gorseli: $([ -f _work/TEMP/GORSEL_DENETIM_FAIL.jpg ] && echo VAR || echo YOK)"
+          } > "$summary"
+          copy() { rclone copyto "$1" "$2" 2>> "$log" || echo "YUKLEME HATASI: $1" >> "$log"; }
+          [ ! -f _work/TEMP/GORSEL_DENETIM.csv ] || copy _work/TEMP/GORSEL_DENETIM.csv "gdrive:ASTROLOVE/TEMP/GORSEL_DENETIM.csv"
+          [ ! -f _work/TEMP/GORSEL_DENETIM_FAIL.jpg ] || copy _work/TEMP/GORSEL_DENETIM_FAIL.jpg "gdrive:ASTROLOVE/TEMP/GORSEL_DENETIM_FAIL.jpg"
+          copy "$summary" "gdrive:ASTROLOVE/TEMP/LOGS/gorsel-denetim_${{ github.run_id }}_OZET.md"
+          rclone copyto "$log" "gdrive:ASTROLOVE/TEMP/LOGS/gorsel-denetim_${{ github.run_id }}_denetle.log" || true
       - uses: actions/upload-artifact@v4
         if: always()
         with: {name: gorsel-denetim, path: _work/TEMP, if-no-files-found: ignore}
