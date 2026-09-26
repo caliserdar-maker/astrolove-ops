@@ -1,13 +1,18 @@
 name: takip-denetim
 
 # GOREV 0033 - yoldaki gonderilerin takip denetimi. Varsayilan SALT OKUMA (Prodigi GET + Etsy getShopReceipt).
-# yaz=true: yalniz tasiyici uyusmazligi kanitlanan receipt'e createReceiptShipment (Claude onayi, GOREV 0033 md.4).
+# yaz=true: yalniz tasiyici uyusmazligi kanitlanan receipt'e createReceiptShipment. Etsy aliciya bildirim
+#   gonderebilir: YALNIZ Serdar'in o siparise ozel acik onayiyla (CLAUDE.md MUSTERIYE DOKUNAN HER EYLEM).
+# gunluk (cron, GOREV 0035 md.2): SALT OKUMA; Etsy secret'i/token'i yok, yazma yolu cron'dan erisilemez.
+#   Cikti Drive TEMP/POD_ORDERS/TAKIP_GUNLUK.md; 48 saat+ taramasiz gonderi varsa kosu bilincli FAIL.
 # Musteri adi/adresi okunmaz/yazilmaz. Cikti Drive TEMP/POD_ORDERS/TAKIP_DENETIM.json
 
 permissions:
   contents: read
 
 on:
+  schedule:
+    - cron: "44 6 * * *"
   workflow_dispatch:
     inputs:
       siparisler:
@@ -15,7 +20,7 @@ on:
         required: true
         default: "ord_14538276,ord_72296317183912448,ord_72470448809534464,ord_13964600"
       yaz:
-        description: "true = uyusmazligi kanitlanan receipt'e dogru tasiyiciyi yaz (Claude onayi)"
+        description: "true = uyusmazligi kanitlanan receipt'e dogru tasiyiciyi yaz (YALNIZ Serdar'in o siparise ozel onayiyla)"
         type: boolean
         default: false
       tam:
@@ -24,7 +29,45 @@ on:
         default: false
 
 jobs:
+  gunluk:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Gunluk takip (salt okuma, Etsy yok)
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_ORDERS_STATE.csv" _work/state.csv
+          rc=0; python scripts/prodigi/takip_denetim.py _work/state.csv --gunluk || rc=$?
+          [ -f out/TAKIP_GUNLUK.md ] && rclone copyto out/TAKIP_GUNLUK.md "gdrive:ASTROLOVE/TEMP/POD_ORDERS/TAKIP_GUNLUK.md" -q
+          [ -f out/TAKIP_GUNLUK.md ] && cat out/TAKIP_GUNLUK.md >> "$GITHUB_STEP_SUMMARY"
+          exit $rc
+      - if: always()
+        run: rm -rf _work ~/.config/rclone
+
   denetle:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     concurrency:

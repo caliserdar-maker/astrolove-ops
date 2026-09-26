@@ -4,12 +4,17 @@ Prodigi GET /orders/{id} -> shipments (carrier.name/service, tracking.number/url
 Receipt: siparisin merchantReference'i (etsy-<rid>-... ya da <rid>) ya da STATE (prodigi_order_id/kanal_oid) - repoya yazilmaz.
 Etsy getShopReceipt -> shipments (carrier_name, tracking_code), is_shipped. Takip linkleri HTTP durumu.
 Musteri adi/adresi OKUNMAZ/YAZILMAZ. Receipt raporda son 4 hane ile gosterilir.
---yaz (GOREV 0033 md.4, Claude onayi): tasiyici uyusmazligi KANITLANAN receipt'e createReceiptShipment ile
-takip.etsy_plani'nin carrier_name'i + Prodigi'nin numarasi yazilir (yeni numara uydurulmaz; send_bcc yok).
+--yaz: tasiyici uyusmazligi KANITLANAN receipt'e createReceiptShipment ile takip.etsy_plani'nin carrier_name'i +
+Prodigi'nin numarasi yazilir (yeni numara uydurulmaz; send_bcc yok). Etsy aliciya bildirim gonderebilir: YALNIZ
+Serdar'in o siparise ozel acik onayiyla (CLAUDE.md "MUSTERIYE DOKUNAN HER EYLEM"); koordinator/pano onayi gecersiz.
+--gunluk (GOREV 0035 md.2, SALT OKUMA, Etsy'ye hic baglanmaz): Prodigi'de son 45 gunde acilip son 21 gunde
+dispatch edilen tum siparisler; out/TAKIP_GUNLUK.md (fis son 4, lab, servis, dispatch, son tarama, gun).
+Dispatch'ten 48 saat sonra takip sayfasinda tarama/tarih okunamiyorsa UYARI ve cikis 1 (bilincli FAIL).
 --tam (GOREV 0034, SALT OKUMA; --yaz'i iptal eder): shipments tam alanlari + fulfillmentLocation, takip sayfasi
 durum ifadeleri (ham metin YAZILMAZ: adres parcasi icerebilir), Prodigi quote (tum kargo yontemleri), Etsy
 shipment tam alanlari (bildirim zamani). Cikti out/TAKIP_TAM.json {ozet, detay}.
-Kullanim: takip_denetim.py <state_csv> <ord_id,ord_id,...> [--yaz | --tam]"""
+Kullanim: takip_denetim.py <state_csv> <ord_id,ord_id,...> [--yaz | --tam]
+          takip_denetim.py <state_csv> --gunluk"""
 import csv
 import json
 import os
@@ -96,10 +101,62 @@ def receipt_bul(o, state):
     return ""
 
 
+def yoldakiler(prod, simdi, gun_ac=45, gun_dispatch=21):
+    """Prodigi GET /orders (sayfali): son gun_ac gunde acilan, son gun_dispatch gunde dispatch edilmis siparisler."""
+    from datetime import timedelta
+    bas = (simdi - timedelta(days=gun_ac)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    out, skip = [], 0
+    while True:
+        r = prod._call("GET", f"/orders?top=100&skip={skip}&createdFrom={bas}")
+        d = r.json() if r.status_code == 200 else {}
+        sayfa = d.get("orders") or []
+        for o in sayfa:
+            for sh in o.get("shipments") or []:
+                dt = zaman(sh.get("dispatchDate"))
+                if dt and (simdi - dt).days <= gun_dispatch:
+                    out.append((o, sh, dt))
+        if not d.get("hasMore") or not sayfa:
+            return out, r.status_code
+        skip += len(sayfa)
+
+
+def zaman(t):
+    from datetime import datetime
+    try:
+        return datetime.fromisoformat(str(t).replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+
+def gunluk(prod, state):
+    from datetime import datetime, timezone
+    simdi = datetime.now(timezone.utc)
+    liste, http_ = yoldakiler(prod, simdi)
+    satir, uyari = [], 0
+    for o, sh, dt in sorted(liste, key=lambda x: x[2]):
+        c, lab = sh.get("carrier") or {}, sh.get("fulfillmentLocation") or {}
+        sd = sayfa_durum((sh.get("tracking") or {}).get("url")) or {}
+        son = sd.get("tarih")[-1] if sd.get("tarih") else ("OKUNAMADI" if sd.get("http") != 200 or not sd.get("ifade") else "YOK")
+        saat = (simdi - dt).total_seconds() / 3600
+        u = saat > 48 and not sd.get("tarih")
+        uyari += u
+        satir.append(f"| {kod(receipt_bul(o, state))} | {lab.get('countryCode', '')}/{lab.get('labCode', '')} | {c.get('name', '')} {c.get('service', '')} "
+                     f"| {dt:%Y-%m-%d %H:%M} | {son} (http {sd.get('http')}) | {saat / 24:.1f} | {'UYARI' if u else 'ok'} |")
+    md = [f"# TAKIP_GUNLUK {simdi:%Y-%m-%d %H:%M} UTC (salt okuma; Prodigi liste http {http_})", "",
+          f"- yoldaki gonderi: {len(satir)} | UYARI (48 saat+ tarama yok/okunamadi): {uyari}", "",
+          "| fis | lab | servis | dispatch | son tarama | gun | durum |", "|---|---|---|---|---|---|---|"] + satir
+    Path("out").mkdir(exist_ok=True)
+    Path("out/TAKIP_GUNLUK.md").write_text("\n".join(md) + "\n", encoding="utf-8")
+    print("\n".join(md[:3]), flush=True)
+    return 1 if uyari or http_ != 200 else 0
+
+
 def main():
     from prodigi_pilot_quote import Api, load_key
-    from etsy_common import Etsy, TokenStore, mask
     state = list(csv.DictReader(open(sys.argv[1], encoding="utf-8"))) if Path(sys.argv[1]).exists() else []
+    if "--gunluk" in sys.argv:
+        sys.exit(gunluk(Api(load_key()), state))
+    from etsy_common import Etsy, TokenStore, mask
     oids = [x.strip() for x in sys.argv[2].split(",") if x.strip()]
     tam = "--tam" in sys.argv
     yaz = "--yaz" in sys.argv and not tam
