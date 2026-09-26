@@ -99,7 +99,13 @@ def main():
     ozet = {"ilan": len(ilanlar), "ihlalli_ilan": len({s["ilan"] for s in satir}),
             "ihlal": {k: {"satir": sum(1 for s in satir if s["ihlal"] == k), "ilan": len({s["ilan"] for s in satir if s["ihlal"] == k})}
                       for k in sorted({s["ihlal"] for s in satir})},
-            "alan": {k: sum(1 for s in satir if s["alan"].split("#")[0] == k) for k in sorted({s["alan"].split("#")[0] for s in satir})}}
+            "alan": {k: sum(1 for s in satir if s["alan"].split("#")[0] == k) for k in sorted({s["alan"].split("#")[0] for s in satir})},
+            "kanit": {"dolu_baslik": sum(1 for x in ilanlar if x.get("title")),
+                      "dolu_aciklama": sum(1 for x in ilanlar if x.get("description")),
+                      "aciklama_karakter": sum(len(x.get("description") or "") for x in ilanlar),
+                      "dogru_Hahnemuhle_ilan": sum(1 for x in ilanlar if "Hahnem\u00fchle" in (x.get("description") or "")),
+                      "dolu_alt_metin": sum(1 for x in ilanlar for im in x.get("images") or [] if im.get("alt_text")),
+                      "kisisellestirme_dolu": sum(1 for x in ilanlar if dict(alanlar(x)).get("kisisellestirme"))}}
     (OUT / "CANLI_METIN_TARAMA_OZET.json").write_text(json.dumps(ozet, ensure_ascii=False, indent=1))
     print("OZET " + json.dumps(ozet, ensure_ascii=False), flush=True)
 
