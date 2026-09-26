@@ -33,6 +33,18 @@ class AuditTest(unittest.TestCase):
         data = inventory(); data["products"][0]["sku"] = "WRONG"
         self.assert_rule(data, "sku")
 
+    def test_beklenen_fiyat(self):
+        data = inventory()
+        want = {size: 30 + index for index, size in enumerate(D.SIZES)}
+        errors, _ = D.denetle_tumu([("100", data)], want)
+        self.assertNotIn("beklenen_fiyat", {row["kural"] for row in errors})
+        want["8x10"] = 39.99
+        errors, _ = D.denetle_tumu([("100", data)], want)
+        self.assertIn("beklenen_fiyat", {row["kural"] for row in errors})
+        cfg = D.beklenen_fiyatlar()
+        self.assertEqual(len(cfg), 16)
+        self.assertEqual((cfg["8x10"], cfg["A4"]), (39.99, 39.99))
+
     def test_color_price(self):
         data = inventory(); data["products"][0]["offerings"][0]["price"]["amount"] += 1
         self.assert_rule(data, "renk_fiyat_farki")

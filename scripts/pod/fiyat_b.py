@@ -30,9 +30,9 @@ sys.path.insert(0, str(KOK.parent / "etsy"))
 from etsy_common import Etsy, TokenStore, log  # noqa: E402
 import pod_pilot_15 as P  # noqa: E402
 
-# B plani fiyatlari (5 rengin hepsinde ayni) — Serdar, 24 Eyl 2026.
+# B plani fiyatlari (5 rengin hepsinde ayni) — Serdar, 24 Eyl 2026; 8x10 ve A4 39.99 (Serdar, 26 Eyl, GOREV 0035).
 FIYAT = {
-    "8x10": 34.99, "A4": 37.99, "11x14": 42.99, "12x16": 46.99, "A3": 47.99,
+    "8x10": 39.99, "A4": 39.99, "11x14": 42.99, "12x16": 46.99, "A3": 47.99,
     "12x18": 49.99, "16x20": 54.99, "16x24": 57.99, "A2": 57.99, "18x24": 64.99,
     "20x30": 84.99, "24x30": 94.99, "24x32": 99.99, "A1": 99.99, "24x36": 109.99,
     "30x40": 139.99,
@@ -159,6 +159,8 @@ def main():
     ap.add_argument("--beklenen-urun", type=int, default=80)
     ap.add_argument("--kota-alt", type=int, default=200)
     ap.add_argument("--confirm", default="")
+    ap.add_argument("--izinli-boy", default="", help="virgullu; yalniz bu boylar (5 renk) degisebilir, fazlasi/eksigi KAPI")
+    ap.add_argument("--yalniz-active", action="store_true", help="ilan state active degilse yazma (cikis 3)")
     a = ap.parse_args()
 
     out = pathlib.Path(a.out)
@@ -187,6 +189,11 @@ def main():
     rows, bilinmeyen = satirlar(inv)
     hata = kapilar(inv, rows, bilinmeyen, a.beklenen_urun)
     degisen = [r for r in rows if r[5] is not None and abs(r[5] - r[4]) >= 0.005]
+    if a.izinli_boy:
+        izinli = set(a.izinli_boy.split(","))
+        disari = sorted({r[2] for r in degisen} - izinli)
+        if disari or len(degisen) != len(izinli) * 5:
+            hata.append(f"izinli disi degisim: {len(degisen)} hucre (beklenen {len(izinli) * 5}), boy {disari}")
 
     md = [f"# B plani fiyat — ilan {lid} ({a.mod.upper()})", "",
           f"- urun: {len(rows)} (beklenen {a.beklenen_urun}) | boy {len({r[2] for r in rows if r[2]})} | "
@@ -207,6 +214,9 @@ def main():
     else:
         if a.confirm != "FIYAT_B":
             raise SystemExit("HATA: yaz icin --confirm FIYAT_B gerekir. DUR.")
+        if a.yalniz_active and L.get("state") != "active":
+            log(f"ATLANDI: ilan {lid} state={L.get('state')} (active degil, dokunulmadi)")
+            sys.exit(3)
         if hata:
             raise SystemExit("HATA: kapi tutmadi, yazma yok: " + "; ".join(hata))
         try:
