@@ -5,18 +5,19 @@ Claude: gorev yazar, her teslimi okur, diff'i uygular, test eder, gerekirse duze
 sonucu denetler, bulgudan yeni Codex isi uretir. Hedef: Etsy magazasinda HER SEY hatasiz, eksiksiz, Etsy kurallarina ve SEO'ya uygun.
 Teslim: PR yorumunun sonunda TAM unified diff. Etsy'ye yazan her adim Serdar kararlari dahilinde, pano "CLAUDE ONAYI" ile.
 
-## Calisan (14:30)
-- IS_0019 PR #32 POD fiyat/SKU/envanter
-- IS_0027 PR #40 tum workflow hata logu Drive
-- IS_0031 PR #44 gorsel-denetim cikti + kisisel_uyum POD soru kurali
-- IS_0032 PR #45 kisisel dijital teslim modeli (Etsy kurallari, kaynakli)
-- IS_0033 PR #46 kisisel dijital ilan sablonu (78+78)
+## Calisan (15:25)
+- IS_0027 PR #40 tum workflow hata logu (parca 1/3)
+- IS_0033 PR #46 dijital sablon (2. red; onayli kararlar docs/kararlar'da)
+- IS_0035 PR #48 teslim paketi ZIP/PDF
+- IS_0036 PR #49 dijital donusum uygulama araci (kuru kosu varsayilan)
+- IS_0037 PR #50 SSS, iptal politikasi, siparis mesajlari
 
-## Bulgular (14:30)
-- varyasyon-canli: 42/43 PASS (CL -> medya_GOREV_0027)
-- kisisel_uyum: 545 ilan; 467 dijital hala anlik indirme + kisisellestirme kapali (donusum bekliyor); POD soru kurali hatali olabilir -> 0031
-- magaza-ayar: kargo profili processing null; about metni -> MAGAZA_METINLERI.md taslak (Serdar onayi)
-- tamset-77: TS77 listeleri yok -> video_GOREV_0018
+## Bulgular (15:25)
+- varyasyon-canli 14:47: 43/43 PASS
+- canli video/kapak: 43 yeni, 35 eski (35 cift seti yok -> video_GOREV_0018)
+- canli metin (78 POD): 0 ihlal
+- kisisel_uyum: 467 dijital donusum bekliyor
+- ChatGPT: gorsel DNA brifi verildi (docs/chatgpt), arastirma raporu bekleniyor
 
 ## Biten
 - 0002-0018, 0020-0026, 0028-0030 main'de; 0012 siparis-baski-v1; 0015 medya-v1
