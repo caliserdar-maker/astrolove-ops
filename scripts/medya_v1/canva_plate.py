@@ -60,7 +60,7 @@ def uzak_px(yol):
 
 
 def odaklar(d, disi, k, esik=40, en_az=200):
-    """Bant disindaki buyuk farkin NEREDE oldugu: 3000x4000 kutulari.
+    """Bant disindaki buyuk farkin NEREDE oldugu: Canva sayfa koordinatinda kutular.
 
     Ortanca plate'te sabit ogeler (sonsuz, glif yuvasi) kalir; Canva kopyasinda
     silindigi icin fark ORADA birikir. 'Tepe yuksek ama onemsiz' demek yerine
@@ -76,22 +76,26 @@ def odaklar(d, disi, k, esik=40, en_az=200):
         x, y, w, h, alan = st[i]
         if alan * 64 < en_az:
             continue
-        kutu.append({'kutu3000': [round(x * 8 / k), round(y * 8 / k),
+        kutu.append({'kutu_sayfa': [round(x * 8 / k), round(y * 8 / k),
                                   round((x + w) * 8 / k), round((y + h) * 8 / k)],
                      'px': int(alan * 64)})
     kutu.sort(key=lambda z: -z['px'])
     return kutu[:6]
 
 
-def kiyas(yeni, eski):
-    """Slogan bandi DISINDA fark ~0 mi? (ayni kaynak, ayni olcek beklenir)"""
+def kiyas(yeni, eski, kutu=SLOGAN_KUTU_3000, sayfa_en=3000.0):
+    """Slogan bandi DISINDA fark ~0 mi? (ayni kaynak, ayni olcek beklenir)
+
+    kutu: slogan katmaninin Canva SAYFA koordinati (read-design ciktisi);
+    sayfa_en: o sayfanin genisligi. Oran basina farkli oldugu icin girdi.
+    """
     a = np.asarray(Image.open(yeni).convert('RGB')).astype(np.float32)
     b = np.asarray(Image.open(eski).convert('RGB')).astype(np.float32)
     if a.shape != b.shape:
         return {'hata': f'boyut farkli: yeni {a.shape[:2]} eski {b.shape[:2]}'}
-    k = a.shape[1] / 3000.0
-    x0, y0, x1, y1 = (int(round(v * k)) for v in SLOGAN_KUTU_3000)
-    pay = int(round(60 * k))
+    k = a.shape[1] / float(sayfa_en)
+    x0, y0, x1, y1 = (int(round(v * k)) for v in kutu)
+    pay = int(round(60 * sayfa_en / 3000.0 * k))
     m = np.ones(a.shape[:2], bool)
     m[max(y0 - pay, 0):y1 + pay, max(x0 - pay, 0):x1 + pay] = False   # bant DISI
     d = np.abs(a - b).max(axis=2)
@@ -147,10 +151,16 @@ def main():
                         cik = W / f'{d["ad"]}_{boy}.png'
                         (kaynak if (en, yuk) == kaynak.size
                          else kaynak.resize((en, yuk), Image.LANCZOS)).save(cik, 'PNG')
+                        kv = {}
+                        if d.get('kutu'):
+                            rf = W / Path(ref).name
+                            rc('copyto', f'{PLATES}/{ref}', str(rf))
+                            kv = kiyas(cik, rf, d['kutu'], d.get('sayfa_en', 3000.0))
+                            rf.unlink(missing_ok=True)
                         if a.yukle:
                             rc('copyto', str(cik), f'{PLATES}/{d["ad"]}_{boy}.png')
                         r['boylar'][boy] = {'px': [en, yuk], 'MB': round(cik.stat().st_size / 1e6, 1),
-                                            'yuklendi': a.yukle}
+                                            'ref': ref, 'kiyas': kv, 'yuklendi': a.yukle}
                         cik.unlink(missing_ok=True)
                     except BaseException as e:                        # noqa: BLE001
                         r['boylar'][boy] = {'hata': f'{type(e).__name__}: {e}'}
