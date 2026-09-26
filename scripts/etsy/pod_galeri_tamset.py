@@ -22,6 +22,7 @@ import os
 import re
 import subprocess
 import sys
+import hashlib
 import io
 import time
 from pathlib import Path
@@ -92,12 +93,31 @@ def var_img(api, shop, lid):
     return (api.get(f"/shops/{shop}/listings/{lid}/variation-images", ok404=True) or {}).get("results") or []
 
 
+_CDN = {}
+
+
+def cdn(url):
+    """Etsy CDN gorseli (API cagrisi DEGIL); kosu icinde url basina bir kez indirilir."""
+    if url not in _CDN:
+        if len(_CDN) > 60:
+            _CDN.clear()
+        r = requests.get(url, timeout=60)
+        r.raise_for_status()
+        _CDN[url] = r.content
+    return _CDN[url]
+
+
+def gri(kaynak, boyut=None):
+    im = Image.open(io.BytesIO(kaynak) if isinstance(kaynak, bytes) else kaynak).convert("L")
+    return np.asarray(im.resize(boyut, Image.BILINEAR) if boyut else im, dtype=float)
+
+
 def fark(url, yol):
-    """Etsy CDN gorseli (API cagrisi DEGIL) ile set dosyasi arasindaki icerik farki; hata -> None."""
+    """Etsy CDN gorseli ile set dosyasi arasindaki tum-goruntu icerik farki; hata -> None.
+    NOT: cift karisikligini YAKALAYAMAZ (yalniz burc yazisi farkli iki kart ~0.00003, Codex RAPOR_0004);
+    cift icin cift_olc kullanilir."""
     try:
-        b = requests.get(url, timeout=60).content
-        g = [np.asarray(Image.open(f).convert("L").resize((256, 256), Image.BILINEAR), dtype=float)
-             for f in (io.BytesIO(b), yol)]
+        g = [gri(k, (256, 256)) for k in (cdn(url), yol)]
         return round(float(np.abs(g[0] - g[1]).mean() / 255), 4)
     except Exception as e:  # noqa: BLE001
         log(f"      fark hata: {type(e).__name__}")
@@ -115,29 +135,70 @@ def esit(v):
     return v is not None and v <= ESIK
 
 
-def set_indir(setler, c):
+CIFT_PIKSEL = 25   # beklenen vs tuzak (baska cift, ayni kart) piksel farki esigi (0-255) -> cifte ozel bolge maskesi
+CIFT_MIN = 200     # maske bundan az pikselse kart ortak (cifte ozel degil)
+CIFT_ORAN = 3.0    # maskede: canli-tuzak farki >= 3 x canli-beklenen farki (en az 1 gri seviye) olmali
+
+
+def cift_olc(url, yol, tuzak):
+    """Cifte ozel bolgede (burc adi/sembol: beklenen ile tuzak dosyanin farkli oldugu pikseller) bolge bazli fark.
+    Canli gorsel beklenen dosyaya, tuzak ciftin dosyasindan belirgin daha yakin olmali."""
+    try:
+        canli = gri(cdn(url))
+        H, W = canli.shape
+        e, t = gri(yol, (W, H)), gri(tuzak, (W, H))
+    except Exception as ex:  # noqa: BLE001
+        return {"hata": type(ex).__name__, "ok": False}
+    m = np.abs(e - t) > CIFT_PIKSEL
+    n = int(m.sum())
+    if n < CIFT_MIN:
+        return {"ortak": True, "maske": n, "ok": True}
+    ys, xs = np.where(m)
+    de, dt = float(np.abs(canli - e)[m].mean()), float(np.abs(canli - t)[m].mean())
+    return {"maske": n, "bolge": [int(xs.min()), int(ys.min()), int(xs.max()), int(ys.max())],
+            "d_beklenen": round(de, 2), "d_tuzak": round(dt, 2), "ok": dt >= CIFT_ORAN * max(de, 1.0)}
+
+
+def cift_denetle(g, foto, tfoto):
+    """rank -> cift_olc (tfoto: tuzak ciftin ayni sira dosyalari)."""
+    yol, tyol = {n: p for n, p, _ in foto}, {n: p for n, p, _ in tfoto}
+    return {x.get("rank"): cift_olc(x.get("url_fullxfull"), yol[x.get("rank")], tyol[x.get("rank")])
+            for x in g if x.get("rank") in yol and x.get("rank") in tyol}
+
+
+def tuzak_sec(c, setli):
+    """Iki burcu da c'den farkli ilk cift (yoksa herhangi baska cift)."""
+    b = set(c.split("_"))
+    return next((x for x in setli if x != c and not b & set(x.split("_"))), next(x for x in setli if x != c))
+
+
+def set_indir(setler, c, video=True):
     d = Path(setler) / c / "TAM_SET"
     SET = json.loads((d / "SET.json").read_text())
     try:                                                 # set dosyalari + onayli video (Drive) bu ilan icin indirilir
         rc("copy", f"{A77}/{c}/TAM_SET", str(d), "--include", "[01][0-9]_*.jpg")
-        if (SET.get("video") or {}).get("yol"):
+        if video and (SET.get("video") or {}).get("yol"):
             rc("copyto", SET["video"]["yol"], str(d / "VIDEO.mp4"))
     except subprocess.CalledProcessError as e:
         log(f"{c}: Drive indirme hatasi {e.stderr[-200:] if e.stderr else e}")
     return SET, d, [(g["sira"], d / g["dosya"], g["cl_karsiligi"]) for g in SET["galeri"]]
 
 
-def onar(api, shop, a, c, lid, r, ref_alt):
-    """Onceki kosuda yalniz 'sira' tutmayan ilan: sira icerige gore olculur; farkli siralar yeniden yuklenir
-    (eski o siradaki gorsel silinir), renk varyasyonlari siraya gore yeniden baglanir, geri okunur."""
+def onar(api, shop, a, c, lid, r, ref_alt, tfoto):
+    """Galerisi 13 foto olup sira/alt/varyasyon/cift tutmayan ilan: her sira icerik (tum goruntu) ve cift (bolge)
+    olcutuyle, alt metinle denetlenir; tutmayan siralar yeniden yuklenir (eski o siradaki gorsel silinir),
+    renk varyasyonlari siraya gore yeniden baglanir, geri okunur."""
     SET, d, foto = set_indir(a.setler, c)
     A_, B_ = burclar(c)
     alt = {n: alt_uyarla(ref_alt.get(cl, ""), A_, B_)[:250] for n, _, cl in foto}
     g = galeri(api, lid)
     fk = icerik(g, foto)
-    farkli = sorted(n for n, v in fk.items() if not esit(v))
-    log(f"{c} onar: icerik farki {fk} | farkli sira {farkli}")
-    r["icerik_fark_once"] = fk
+    ck = cift_denetle(g, foto, tfoto)
+    altk = {x.get("rank"): (x.get("alt_text") or "") == alt.get(x.get("rank")) for x in g}
+    farkli = sorted(n for n in range(1, 14)
+                    if not esit(fk.get(n)) or not (ck.get(n) or {}).get("ok") or not altk.get(n))
+    log(f"{c} onar: icerik farki {fk} | cift {json.dumps(ck)} | alt {altk} | yeniden yuklenecek sira {farkli}")
+    r["icerik_fark_once"], r["cift_once"] = fk, ck
     r["onar_sira"] = farkli
     if farkli:
         eski = {x.get("rank"): x.get("listing_image_id") for x in g}
@@ -159,15 +220,17 @@ def onar(api, shop, a, c, lid, r, ref_alt):
         api.post_json(f"/shops/{shop}/listings/{lid}/variation-images", {"variation_images": vi})
         vimg = var_img(api, shop, lid)
     fk2 = icerik(g2 or [], foto)
+    ck2 = cift_denetle(g2 or [], foto, tfoto)
     kontrol = dict(r.get("kontrol") or {})
     kontrol.update(foto_13=len(g2 or []) == 13,
                    sira=sorted(rid) == list(range(1, 14)) and len(fk2) == 13 and all(esit(v) for v in fk2.values()),
+                   cift=len(ck2) == 13 and all(v.get("ok") for v in ck2.values()),
                    alt_metin=all((x.get("alt_text") or "") == alt.get(x.get("rank")) for x in g2 or []),
                    varyasyon=all(v.get("image_id") == rid.get(dosya_sira.get(renk_dosya.get(v.get("value"))))
                                  for v in vimg))
-    r.update(kontrol=kontrol, icerik_fark=fk2, sonuc="PASS" if all(kontrol.values()) else "FAIL")
+    r.update(kontrol=kontrol, icerik_fark=fk2, cift=ck2, sonuc="PASS" if all(kontrol.values()) else "FAIL")
     r.pop("sira_gercek", None); r.pop("sira_beklenen", None)
-    log(f"{c} onar {r['sonuc']} | {json.dumps(kontrol)} | fark {fk2}")
+    log(f"{c} onar {r['sonuc']} | {json.dumps(kontrol)} | fark {fk2} | cift {json.dumps(ck2)}")
     return r["sonuc"] == "PASS"
 
 
@@ -195,7 +258,7 @@ def tahmin(n_eski, video_var):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--mod", choices=["oku", "yukle"], required=True)
+    ap.add_argument("--mod", choices=["oku", "denetle", "yukle"], required=True)
     ap.add_argument("--metin", required=True, help="METIN_78.csv (ilan_id, cift)")
     ap.add_argument("--setler", required=True, help="yerel dizin: <CIFT>/SET.json (oku) ya da tam set (yukle)")
     ap.add_argument("--ciftler", default="", help="yukle: virgullu CIFT listesi (bos = seti olan hepsi, referans haric)")
@@ -251,16 +314,62 @@ def main():
         log(json.dumps({k2: v2 for k2, v2 in rapor.items() if k2 != "ilan"}, ensure_ascii=False, indent=1))
         return
 
+    def tuzak_foto(c):
+        return set_indir(a.setler, tuzak_sec(c, setli), video=False)[2]
+
+    if a.mod == "denetle":                               # SALT OKUMA: galeri + varyasyon okunur, CDN ile karsilastirilir
+        rapor["denetle"] = {}
+        for c in [x for x in a.ciftler.split(",") if x]:
+            lid, t = ilan[c], tuzak_sec(c, setli)
+            SET, d, foto = set_indir(a.setler, c, video=False)
+            tfoto = set_indir(a.setler, t, video=False)[2]
+            yol, tyol = {n: p for n, p, _ in foto}, {n: p for n, p, _ in tfoto}
+            A_, B_ = burclar(c)
+            alt = {n: alt_uyarla(ref_alt.get(cl, ""), A_, B_)[:250] for n, _, cl in foto}
+            g = galeri(api, lid)
+            fk, ck = icerik(g, foto), cift_denetle(g, foto, tfoto)
+            satir = []
+            for x in g:
+                n = x.get("rank")
+                s_ = {"sira": n, "id": x.get("listing_image_id"), "url": x.get("url_fullxfull"),
+                      "beklenen": f"{A77}/{c}/TAM_SET/{yol[n].name}" if n in yol else None,
+                      "beklenen_md5": hashlib.md5(yol[n].read_bytes()).hexdigest() if n in yol else None,
+                      "tuzak": f"{A77}/{t}/TAM_SET/{tyol[n].name}" if n in tyol else None,
+                      "tuzak_md5": hashlib.md5(tyol[n].read_bytes()).hexdigest() if n in tyol else None,
+                      "fark": fk.get(n), "cift": ck.get(n), "alt_ok": (x.get("alt_text") or "") == alt.get(n)}
+                satir.append(s_)
+                log(f"{c} #{n} id {s_['id']} | {s_['beklenen']} | {s_['url']} | fark {s_['fark']} | cift {json.dumps(s_['cift'])}"
+                    f" | alt {s_['alt_ok']}")
+            dosya_sira = {x["dosya"]: x["sira"] for x in SET["galeri"]}
+            rid = {x.get("rank"): x.get("listing_image_id") for x in g}
+            renk = {v.get("value"): {"sira": dosya_sira.get((SET.get("renk_gorselleri") or {}).get(v.get("value"))),
+                                     "image_id": v.get("image_id")} for v in var_img(api, shop, lid)}
+            for v in renk.values():
+                v["dogru"] = v["image_id"] == rid.get(v["sira"]) and bool((ck.get(v["sira"]) or {}).get("ok"))
+            ozet = {"tuzak": t, "foto": len(g), "fark_esik_ustu": [n for n in range(1, 14) if not esit(fk.get(n))],
+                    "cift_tutmayan": [n for n in range(1, 14) if not (ck.get(n) or {}).get("ok")],
+                    "cifte_ozel_sira": [n for n, v in ck.items() if not v.get("ortak")],
+                    "ayni_dosya_tuzakla": [x["sira"] for x in satir if x["beklenen_md5"] and x["beklenen_md5"] == x["tuzak_md5"]],
+                    "alt_tutmayan": [x["sira"] for x in satir if not x["alt_ok"]],
+                    "renk_tutmayan": [k2 for k2, v in renk.items() if not v["dogru"]]}
+            rapor["denetle"][c] = {"ozet": ozet, "renk": renk, "foto": satir}
+            log(f"{c} OZET {json.dumps(ozet)}")
+        rapor["kota_son"], rapor["cagri"] = kota(api), api.calls
+        (OUT / "GALERI_TAMSET.json").write_text(json.dumps(rapor, ensure_ascii=False, indent=1))
+        return
+
     # ------------------------------------------------------------------ YUKLE
     secim = [x for x in a.ciftler.split(",") if x] or hedef
     harcanan0 = api.calls
     for c, x in list((onceki.get("ilan") or {}).items()):   # yalniz 'sira' tutmayan onceki ilanlar: icerik + onarim
         k = x.get("kontrol") or {}
         fk0 = x.get("icerik_fark") or {}
-        yeniden = x.get("sonuc") == "PASS" and (len(fk0) < 13 or not all(esit(v) for v in fk0.values()))
-        if c in hedef and (yeniden or (x.get("sonuc") == "FAIL" and [n for n, v in k.items() if not v] == ["sira"])):
+        yeniden = x.get("sonuc") == "PASS" and (len(fk0) < 13 or not all(esit(v) for v in fk0.values())
+                                                 or "cift" not in k)          # cift olcutu yokken PASS olanlar
+        onarilir = x.get("sonuc") == "FAIL" and all(k.get(n2) for n2 in ("foto_13", "video_1", "state_degismedi"))
+        if c in hedef and (yeniden or onarilir):
             bitti.discard(c)
-            if not onar(api, shop, a, c, ilan[c], rapor["ilan"][c], ref_alt):
+            if not onar(api, shop, a, c, ilan[c], rapor["ilan"][c], ref_alt, tuzak_foto(c)):
                 (OUT / "GALERI_TAMSET.json").write_text(json.dumps(rapor, ensure_ascii=False, indent=1))
                 raise SystemExit(f"DUR: {c} onarim tutmadi")
             bitti.add(c)
@@ -336,23 +445,26 @@ def main():
         rid = {x.get("rank"): x.get("listing_image_id") for x in g2}
         idfarkli = [n for n in sorted(yeni) if rid.get(n) != yeni[n]]     # Etsy tekillestirmesi: icerikle dogrula
         fk = icerik(g2, foto)                                             # 13 foto olculur, rapora yazilir
+        tfoto = tuzak_foto(c)
+        ck = cift_denetle(g2, foto, tfoto)
         v2 = kararli(lambda: [x.get("video_id") for x in videolar(api, lid)], lambda v: len(v) == 1)
         vm2 = {x.get("value"): x.get("image_id") for x in var_img(api, shop, lid)}
         L2 = api.get(f"/listings/{lid}") or {}
         kontrol = {
             "foto_13": len(g2 or []) == 13,
             "sira": sorted(rid) == list(range(1, 14)) and all(esit(fk.get(n)) for n in idfarkli),
+            "cift": len(ck) == 13 and all(v.get("ok") for v in ck.values()),
             "alt_metin": all((x.get("alt_text") or "") == alt_uyarla(ref_alt.get(foto[x.get("rank") - 1][2], ""), A_, B_)[:250]
                              for x in g2),
             "video_1": len(v2 or []) == 1,
             "varyasyon": all(vm2.get(v.get("value")) == rid.get(dosya_sira[renk_dosya[v.get("value")]]) for v in vimg_once),
             "state_degismedi": L2.get("state") == X.get("state"),
         }
-        r.update(icerik_fark=fk, id_farkli=idfarkli)
-        if not kontrol["sira"] and sorted(rid) == list(range(1, 14)) and all(v for k2, v in kontrol.items() if k2 != "sira"):
-            log(f"{c}: icerik esigi asan sira var -> onarim (yeniden yukleme)")
+        r.update(icerik_fark=fk, id_farkli=idfarkli, cift=ck)
+        if not all(kontrol.values()) and all(kontrol[n2] for n2 in ("foto_13", "video_1", "state_degismedi")):
+            log(f"{c}: tutmayan kontrol {[k2 for k2, v in kontrol.items() if not v]} -> onarim (yeniden yukleme)")
             r["kontrol"] = kontrol
-            onar(api, shop, a, c, lid, r, ref_alt)
+            onar(api, shop, a, c, lid, r, ref_alt, tfoto)
             kontrol = r["kontrol"]
         r.update(sonuc="PASS" if all(kontrol.values()) else "FAIL", kontrol=kontrol, state_sonra=L2.get("state"),
                  yeni_video=rv.get("video_id"), cagri=api.calls - c0, sn=round(time.time() - t0, 1))

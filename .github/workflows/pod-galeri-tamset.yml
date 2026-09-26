@@ -13,11 +13,11 @@ on:
   workflow_dispatch:
     inputs:
       mod:
-        description: "oku (salt okuma) | yukle (Etsy'ye yazar)"
+        description: "oku (salt okuma) | denetle (salt okuma: galeri CDN + cift bolge kontrolu, --ciftler) | yukle (Etsy'ye yazar)"
         required: true
         default: "oku"
         type: choice
-        options: [oku, yukle]
+        options: [oku, denetle, yukle]
       ciftler:
         description: "yukle: virgullu CIFT listesi (bos = seti olan hepsi, referans CL haric)"
         required: false
