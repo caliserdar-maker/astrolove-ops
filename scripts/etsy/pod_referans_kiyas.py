@@ -5,6 +5,7 @@ Karsilastirma, burc adlari {A}/{B} yer tutucusuyla sablonlanarak yapilir (EN; RU
  2 KISISEL: personalization sorulari (sayi, zorunlu, metin sablonu).
  3 ENVANTER: urun sayisi (16 boy x 5 renk = 80), boy/renk basina fiyat referansla ayni, stok 999, isleme suresi.
  4 GORSEL: foto sayisi, alt_text sirasi (sablonlu), video sayisi.
+Toplu okuma includes=images,videos,translations,personalization; envanter ilan basina GET /listings/{id}/inventory.
 Cikti: out/POD_REFERANS_KIYAS.csv. Kota tabani 230.
 Kullanim: pod_referans_kiyas.py <referans_ilan_id> <metin78_csv>"""
 import csv
@@ -105,17 +106,25 @@ def main():
         ids.append(ref_id)
     L = {}
     for i in range(0, len(ids), 100):
+        # batch includes: images, videos, translations, personalization (inventory DESTEKLENMEZ, 26 Eyl 400 olcumu)
         d = api.get("/listings/batch", params={"listing_ids": ",".join(ids[i:i + 100]),
-                                               "includes": "Images,Videos,Inventory"}) or {}
+                                               "includes": "images,videos,translations,personalization"}) or {}
         for x in d.get("results") or []:
             L[str(x.get("listing_id"))] = x
     print(f"okunan ilan {len(L)}/{len(ids)} | kota {kota(api)}", flush=True)
     ru, soru = {}, {}
     for n, lid in enumerate(ids, 1):
-        ru[lid] = api.get(f"/shops/{shop}/listings/{lid}/translations/ru", ok404=True) or {}
-        soru[lid] = sorular(api, shop, lid)
+        X = L.get(lid) or {}
+        tr = [t for t in X.get("translations") or [] if isinstance(t, dict) and t.get("language") == "ru"]
+        ru[lid] = tr[0] if tr else (api.get(f"/shops/{shop}/listings/{lid}/translations/ru", ok404=True) or {})
+        q = X.get("personalization_questions")
+        if not isinstance(q, list) and isinstance(X.get("personalization"), dict):
+            q = X["personalization"].get("personalization_questions")
+        soru[lid] = q if isinstance(q, list) else sorular(api, shop, lid)
+        if X:
+            X["inventory"] = api.get(f"/listings/{lid}/inventory", ok404=True) or {}
         if n % 20 == 0:
-            print(f"[{n}/{len(ids)}] ceviri+soru | kota {kota(api)}", flush=True)
+            print(f"[{n}/{len(ids)}] envanter (+eksik ceviri/soru) | kota {kota(api)}", flush=True)
 
     R = L[ref_id]
     ra, rb = cift_burclari(cift.get(ref_id) or "Cancer + Libra")
