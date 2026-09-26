@@ -4,7 +4,7 @@
 SALT OKUR. PLATES klasorunu listeler, RAPOR_*.json'lari ozetler, ardindan
 slogan onay sayfasini uretir. Tek kosuda tam durum.
 """
-import json, subprocess, sys
+import argparse, json, subprocess, sys
 from pathlib import Path
 
 PLATES = 'gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PLATES'
@@ -23,12 +23,21 @@ def rc(*a, timeout=900):
 
 
 def main():
+    ap = argparse.ArgumentParser()
+    # ONEMLI: PLATES'te her kosunun raporu birikiyor (RAPOR_<i>_<n>.json).
+    # Desen verilmezse ESKI kosularin hatalari da sayilir - 26 Eyl'de tam
+    # bunu yasadik: 14 parcalik kosunun ozeti 10 parcalik eski kosunun
+    # "bant bulunamadi" listesini aynen gosterdi.
+    ap.add_argument('--desen', default='RAPOR_*.json',
+                    help="yalniz bu desene uyan raporlar (orn. 'RAPOR_*_14.json')")
+    a = ap.parse_args()
     var = set()
     for satir in rc('lsf', PLATES, '--include', '*.png').splitlines():
         var.add(satir.strip().replace('.png', ''))
-    rc('copy', PLATES, str(W), '--include', 'RAPOR_*.json')
+    rc('copy', PLATES, str(W), '--include', a.desen)
     yazildi, kaldi, bant_yok, diger = {}, {}, {}, {}
-    for f in sorted(W.glob('RAPOR_*.json')):
+    okunan = sorted(W.glob(a.desen))
+    for f in okunan:
         d = json.loads(f.read_text())
         yazildi.update(d.get('plateler', {}))
         for k, v in (d.get('hata') or {}).items():
@@ -42,6 +51,7 @@ def main():
     # 16 boy x 5 edisyon matrisi: hangi plate dosyasi Drive'da GERCEKTEN var
     eksik = [f'{e}_{b}' for b in BOYLAR for e in EDISYONLAR if f'{e}_{b}' not in var]
     print(json.dumps({
+        'okunan_rapor': [f.name for f in okunan],
         'PLATES_de_png': len(var),
         'hedef': len(BOYLAR) * len(EDISYONLAR),
         'eksik_sayi': len(eksik),
