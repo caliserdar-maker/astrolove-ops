@@ -30,31 +30,20 @@ def rc(*a, timeout=900):
 
 
 def _bloklar(yol):
-    """Kirpimi ONCE/SONRA bloklarina ayirir (aralarindaki beyaz etiket seridinden)."""
+    """Kirpimi ONCE/SONRA bloklarina ayirir.
+
+    Piksel tahminiyle DEGIL, plate_uret.slogan_kirpim'in kendi yerlesiminden:
+    y=4'te etiket, +18'de goruntu, blok bitince +26 pay, sonra ayni sey.
+    Iki blok ayni serit ve ayni buyutmeden geldigi icin esit yuksekliktedir:
+        H = 2h + 78  ->  h = (H - 78) / 2
+    Parlakliga bakan eski ayirma PURE_WHITE'ta cokuyordu (zemin 255, etiket
+    seridinden ayirt edilemiyor); bu yerlesim tum edisyonlarda ayni.
+    """
     a = np.asarray(Image.open(yol).convert('L')).astype(np.float32)
-    H = a.shape[0]
-    # Etiket seridi TAM beyaz ve tekduze; acik zeminli edisyonlarda (Champagne
-    # 209, Parchment ~205) sadece parlaklik esigi yetmez, std de gerekir.
-    beyaz = np.array([(r.mean() > 250 and r.std() < 12) for r in a])
-    gruplar, cur = [], None
-    for y, v in enumerate(beyaz):
-        if v:
-            cur = [y, y + 1] if cur is None else [cur[0], y + 1]
-        elif cur is not None:
-            gruplar.append(cur); cur = None
-    if cur:
-        gruplar.append(cur)
-    bloklar, prev = [], 0
-    for g in gruplar:
-        if g[0] - prev > 40:
-            bloklar.append([prev, g[0]])
-        prev = g[1]
-    if H - prev > 40:
-        bloklar.append([prev, H])
-    if len(bloklar) < 2:
+    h = (a.shape[0] - 78) // 2
+    if h < 20:
         return None, None
-    once = a[bloklar[0][0] + 2:bloklar[0][1] - 2]
-    sonra = a[bloklar[1][0] + 2:bloklar[1][1] - 2]
+    once, sonra = a[22:22 + h], a[h + 48:h + 48 + h]
     n = min(once.shape[0], sonra.shape[0])
     return once[:n], sonra[:n]
 
