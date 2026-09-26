@@ -1,3 +1,9 @@
+> **KARAR (Serdar, 26 Eyl 2026): ONAYLANDI.** Dijital ilan + made-to-order; dosya Serdar onayindan sonra
+> Etsy Orders & Shipping sayfasindan siparise yuklenir (yalniz web surumu; tablette Chrome ile etsy.com).
+> Claude dogrulamasi: Etsy duyurusu "We've improved our made-to-order digital listing experience"
+> (https://community.etsy.com/forum/announcements-290/topic/weve-improved-our-made-to-order-digital-listing-experience-22506/):
+> dosya siparis sonrasi yuklenir, siparis otomatik tamamlanmaz, aliciya e-posta gider, yalniz web.
+
 # Kisisellestirilmis dijital urun: Etsy teslim modeli
 
 **Kapsam:** 78 dijital duvar sanati ve 78 telefon duvar kagidi ilani.
