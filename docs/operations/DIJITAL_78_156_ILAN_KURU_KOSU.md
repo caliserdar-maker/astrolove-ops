@@ -1,61 +1,58 @@
-# 156 ilan donusumu - KURU KOSU plani (GOREV_0010 md.5)
+# 390 -> 78 dijital donusumu: KURU KOSU (GOREV_0013 md.2, 26 Eyl 2026)
 
-26 Eyl 2026. **Etsy'ye YAZMA YOK.** Bu dosya plan + eksik listesidir; sayilar
-Etsy salt-okuma turu yapilmadan DOLDURULAMAZ (asagida "gerekli veri").
+**Etsy'ye HICBIR cagri yapilmadi.** Uretici: `scripts/etsy/dijital78_donusum_kuru.py`.
+QC: **PASS** (esikler asagida). Cikti: Drive `TEMP/DIJITAL_78/DONUSUM_*.csv`.
 
-## Kapsam
+## Sayilar cozuldu (eski plandaki 156/312 celiskisi kapandi)
 
-- 78 dijital ilan + 78 wallpaper ilani = **156 ilan**, made-to-order'a donusecek.
-- Her cift icin bugun 4 edisyon x (dijital / wallpaper) varyanti var; donusumde
-  cift basina **1 ilan korunur**, kalanlar pasife alinir.
-- Pasife alinacak sayi: 156 - (korunan) = **312** (gorevde verilen sayi).
-  DIKKAT: 156 ilan icinden 312 pasif cikmaz. Bu sayi ancak toplam ilan havuzu
-  156'dan buyukse tutar (78 cift x 4 edisyon x 2 tur = 624 varyant gibi).
-  **Bu celiski Claude'a soruldu** - kesin sayi, ilan envanteri okunmadan
-  dogrulanamaz. Asagidaki kural sayidan bagimsiz calisir.
+Havuz **390 dijital poster ilani = 78 cift x 5 edisyon**. Korunan 78, pasife
+alinacak 312. "156 ilan" adlandirmasi 78 dijital + 78 wallpaper ilanina aitti;
+wallpaper 78 ilani bu havuzda DEGIL (bkz. EKSIK E03). Ziyaret verisi gerekmedi:
+korunan ilan zaten `DIJITAL_78_KALAN_ILANLAR.csv` (25 Eyl) icinde secilmis.
 
-## Secim kurali (gorevde verilen sira, aynen)
+Olculen (kod ciktisi, tahmin yok):
 
-Her cift + tur (dijital / wallpaper) icin korunacak tek ilan:
-1. **Siparis** almis ilan varsa o (coktan aza; esitlikte 2'ye gec).
-2. Yoksa **favori** sayisi en yuksek olan (esitlikte 3'e gec).
-3. Yoksa **ziyaret** (views) en yuksek olan (esitlikte 4'e gec).
-4. Hala esitse **Midnight Blue** edisyonu.
-
-Kural deterministik: her adim bir onceki esitligi kirar, son adim tek bir
-edisyon secer. Cikti tablosu: `cift, tur, korunan_listing_id, korunma_sebebi
-(siparis/favori/ziyaret/midnight_blue), pasife_alinacak_listing_id listesi`.
-
-## Gerekli veri (bende YOK, Etsy salt-okuma turu gerekir)
-
-| veri | kaynak | not |
+| esik | olculen | sonuc |
 |---|---|---|
-| ilan envanteri (id, baslik, edisyon, tur, state) | `getShopListings` (draft+active) | ~1 cagri/100 ilan |
-| siparis sayisi / ilan | `getShopReceipts` -> transactions | tarih araligi gerekir |
-| favori sayisi / ilan | `getListing` (num_favorers) | ilan basina 1 cagri |
-| ziyaret (views) | Etsy API'de YOK | yalniz Shop Manager arayuzu / CSV indirimi. **Karar gerekli:** views olmadan kural 3 atlanir mi, yoksa Serdar CSV'yi Drive'a mi koyar? |
-| galeri kartlari 10/6 hazir mi | Drive `A1_77/<CIFT>/SET.json` | medya uretiyor |
+| korunan satir | 78 | PASS |
+| pasif satir | 312 | PASS |
+| havuz toplam / tekil id | 390 / 390 (mukerrer 0) | PASS |
+| baslik en uzun | 97 karakter (sinir 140) | PASS |
+| 20 karakteri asan etiket | 0 cift | PASS |
+| korunma sebebi belirsiz | 0 | PASS |
+| korumali 3 ilan korundu | 3/3 | PASS |
 
-Tahmini cagri: envanter ~7 + favori 156 + receipts ~10 = **~175 salt-okuma
-cagrisi**. Kota tabani 230'un altina inmemesi icin ayri turda kosulmali.
+Korunan edisyon dagilimi (25 Eyl listesi): Midnight Blue 35, Champagne Ivory 24,
+Deep Black 8, Pure White 7, Warm Parchment 4. **20 Eyl KALACAK.csv'den farkli**
+(CI 35 / MB 23 / WP 10 / PW 5 / DB 5) - bkz. EKSIK E01.
 
-## Eksikler (kim uretecek)
+## Donusum eslemesi (her korunan ilan)
 
-1. **views verisi** - Etsy API vermiyor. Serdar/koordinator karari.
-2. **312 sayisinin dogrulanmasi** - envanter okunmadan teyit edilemez.
-3. **Galeri kartlari** - 10 kart (dijital) / 6 kart (wallpaper) her korunan ilan
-   icin gerekli. medya oturumu uretiyor; 77 cift seti hazir mi kontrol edilmeli.
-4. **made-to-order alanlari** - `is_made_to_order`, `when_made`, processing
-   suresi ve kargo profili her korunan ilanda guncellenecek. Bu YAZMA islemidir;
-   ayri onay gerekir (CLAUDE.md: Etsy'ye yazan her adim onay bekler).
-5. **updateListing taslagi yayina alir** kurali: donusumde her ilanin state'i
-   YAZMADAN ONCE okunacak; taslak kalmasi gerekenler guncellenmeyecek.
+- baslik: `{A} and {B} Personalized Zodiac Couple Wall Art, Names and Message, Digital Files`
+- 13 etiket (SEO_DIJITAL_WALLPAPER bolum A); cifte bagli olan yalniz ilk ikisi.
+- fiyat 9.99 -> **14.99 USD**; `when_made=made_to_order`, `type=download`.
+- teslim: 5 renk = 5 ZIP (`AstroLove_<S1>_<S2>_<EDISYON>_ALL_SIZES.zip`), her ZIP
+  5 JPG (2:3 7200x10800, 3:4 7200x9600, 4:5 7200x9000, 11:14 6600x8400,
+  A 9934x14044) + Print and Care Guide PDF.
+- kisisellestirme: 3 text_input - First name (30), Second name (30), Short message (80).
 
-## Kuru kosu cikti dosyalari (uretilecek, yazma yok)
+## Cikti dosyalari
 
-- `DIJITAL_78/DONUSUM_KURU_KOSU.csv` - yukaridaki secim tablosu.
-- `DIJITAL_78/DONUSUM_PASIF_LISTE.csv` - pasife alinacak ilan id'leri.
-- `DIJITAL_78/DONUSUM_EKSIK.csv` - ilan basina eksik olan sey (kart, alan, veri).
+- `DONUSUM_KURU_KOSU.csv` - 78 satir, 25 kolon (yukaridaki esleme + sebep + pasif id'ler).
+- `DONUSUM_PASIF_LISTE.csv` - 312 satir (cift, pasif id, sira, korunan id, islem, pin).
+- `DONUSUM_EKSIK.csv` - 11 madde (E01-E11), her biri: etki, ayrinti, kim, kaynak.
+- `DONUSUM_QC.json` - olculen esikler + 20 Eyl listesiyle fark ornekleri.
 
-Bu uc dosya, veri turu kosulunca tek script ile uretilir; script henuz
-yazilmadi (veri sozlesmesi netlesmeden yazmak bos is olur).
+## Acik maddeler (ozet; tamami DONUSUM_EKSIK.csv'de)
+
+E01 iki kalan-ilan listesi **27 ciftte** celisiyor (hangisi baglayici?).
+E02 `digital-desc-batch.yml` AKTIF (4 saatte bir, APPLY=true); olculen son iki
+kosuda Etsy'ye 0 yazma (yapacak ilan kalmamis) ama cron duruyor ve uyguladigi
+metin eski instant-download aciklamasi -> donusumden once kapatilmali (ayri onay).
+E03 wallpaper 78 ilani (6.65 -> 6.99) bu havuzda yok. E04 wallpaper Watch cihazi
+uretilmiyor (ilan metni 4 cihaz / 16 JPG vaat ediyor). E05 isimli uretim yalniz
+24x32; teslimat 5 boy istiyor. E06 kisisellestirilmis ZIP ad kurali yok.
+E07 MTO siniri 5 dosya x 20 MB - 5 ZIP sinira tam oturuyor, en buyuk ZIP 18.48 MB.
+E08 mesaj siniri 80 (MTO kurallari) vs 35 (GOREV_0014) celisiyor. E09 galeri
+kartlari dogrulanmadi. E10 `updateListing` taslagi yayina alir. E11 dusen 312
+ilanin olcut degerleri yok; sebep tutarlilikla turetildi.
