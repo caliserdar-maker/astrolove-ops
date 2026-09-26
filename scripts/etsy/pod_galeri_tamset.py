@@ -269,7 +269,7 @@ def onar(api, shop, a, c, lid, r, ref_alt, tfoto):
     sona ekleyerek yeniden kurulur; alt metni tutmayan sira alt_yenile(); varyasyonlar baglan(); geri okunur."""
     SET, d, foto = set_indir(a.setler, c)
     A_, B_ = burclar(c)
-    alt = {n: alt_uyarla(ref_alt.get(cl, ""), A_, B_)[:250] for n, _, cl in foto}
+    alt = {n: alt_uyarla(ref_alt.get(cl, ""), A_, B_)[:250].rstrip() for n, _, cl in foto}
     yol = {n: p for n, p, _ in foto}
     g = galeri(api, lid)
     fk = icerik(g, foto)
@@ -400,7 +400,7 @@ def main():
             tfoto = set_indir(a.setler, t, video=False)[2]
             yol, tyol = {n: p for n, p, _ in foto}, {n: p for n, p, _ in tfoto}
             A_, B_ = burclar(c)
-            alt = {n: alt_uyarla(ref_alt.get(cl, ""), A_, B_)[:250] for n, _, cl in foto}
+            alt = {n: alt_uyarla(ref_alt.get(cl, ""), A_, B_)[:250].rstrip() for n, _, cl in foto}
             g = galeri(api, lid)
             fk, ck = icerik(g, foto), cift_denetle(g, foto, tfoto)
             satir = []
@@ -503,7 +503,7 @@ def main():
                 if ardisik >= 3:
                     log("DUR: art arda 3 ilan FAIL - sistematik hata olabilir"); break
                 continue
-            alt = {n: alt_uyarla(ref_alt.get(cl, ""), A_, B_)[:250] for n, _, cl in foto}
+            alt = {n: alt_uyarla(ref_alt.get(cl, ""), A_, B_)[:250].rstrip() for n, _, cl in foto}
             g3 = kur(api, shop, c, lid, foto, alt, galeri(api, lid), 0)   # guvenli akis: yalniz sona ekleme
             baglan(api, shop, lid, SET, g3)
             for v in eski_vid:
@@ -513,6 +513,8 @@ def main():
                                    data={"name": f"{c}.mp4"})
             # geri okuma
             g2 = sirali(api, lid)
+            if [x.get("rank") for x in g2] == list(range(1, 14)):
+                baglan(api, shop, lid, SET, g2)      # video sonrasi varyasyon bagini dogrula (tutmuyorsa bir kez daha yaz)
             rid = {x.get("rank"): x.get("listing_image_id") for x in g2}
             fk = icerik(g2, foto)                                             # 13 foto olculur, rapora yazilir
             tfoto = tuzak_foto(c)
@@ -524,7 +526,7 @@ def main():
                 "foto_13": len(g2 or []) == 13,
                 "sira": sorted(rid) == list(range(1, 14)) and len(fk) == 13 and all(esit(v) for v in fk.values()),
                 "cift": len(ck) == 13 and all(v.get("ok") for v in ck.values()),
-                "alt_metin": all((x.get("alt_text") or "") == alt_uyarla(ref_alt.get(foto[x.get("rank") - 1][2], ""), A_, B_)[:250]
+                "alt_metin": all((x.get("alt_text") or "") == alt_uyarla(ref_alt.get(foto[x.get("rank") - 1][2], ""), A_, B_)[:250].rstrip()
                                  for x in g2),
                 "video_1": len(v2 or []) == 1,
                 "varyasyon": all(vm2.get(v.get("value")) == rid.get(dosya_sira[renk_dosya[v.get("value")]]) for v in vimg_once),
