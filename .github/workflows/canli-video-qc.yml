@@ -1,0 +1,104 @@
+name: canli-video-qc
+
+# GOREV 0025 (+0028 md.3) - 78 canli POD ilaninin video + kapak denetimi (SALT OKUMA; Etsy'ye yazma YOK).
+# etsy isi: 1 Etsy okuma cagrisi (toplu ilan + images,videos) YALNIZ API ANAHTARIYLA; OAuth token okunmaz/yenilenmez,
+#   bu yuzden etsy-token kilidi YOK (siparis yonlendiricisini bekletmez/iptal ettirmez).
+# denetle isi: kilitsiz; canli dosyalar i/v.etsystatic'ten, beklenenler Drive A1_77'den.
+# Cikti: Drive ASTROLOVE/TEMP/DIJITAL_78/CANLI_VIDEO_KAPAK.csv + CANLI_VIDEO_KAPAK_OZET.json
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+
+jobs:
+  etsy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2 numpy==2.1.3 pillow==11.0.0 scipy==1.14.1
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Etsy salt okuma (1 cagri)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work
+          rclone copyto "gdrive:ASTROLOVE/TEMP/YAYILIM_78/METIN_78.csv" _work/METIN_78.csv
+          python scripts/etsy/canli_video_kapak.py etsy _work/METIN_78.csv canli.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: canli
+          path: canli.json
+          retention-days: 1
+      - if: always()
+        run: rm -rf _work ~/.config/rclone
+
+  denetle:
+    needs: etsy
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@v4
+        with:
+          name: canli
+      - run: |
+          set -euo pipefail
+          sudo apt-get update -qq && sudo apt-get install -y -qq tesseract-ocr ffmpeg >/dev/null
+          pip install -q numpy==2.1.3 pillow==11.0.0 scipy==1.14.1 requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Beklenen video + kapak indir
+        run: |
+          set -euo pipefail
+          rclone copy "gdrive:ASTROLOVE/TEMP/POD_KISISEL/A1_77" a77 --include "*/VIDEO.mp4" --include "*/TAM_SET/01_kapak_MB.jpg" \
+            --transfers 16 --checkers 16 -q
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_KISISEL/AQUARIUS_AQUARIUS_v1/REVIEW/A_ORNEK/VIDEO_KART3/YENI_AstroLove_CANCER_LIBRA_12.6s_v5.mp4" cl_v5.mp4 || true
+          echo "VIDEO.mp4: $(ls a77/*/VIDEO.mp4 2>/dev/null | wc -l), kapak: $(ls a77/*/TAM_SET/01_kapak_MB.jpg 2>/dev/null | wc -l), CL v5: $([ -f cl_v5.mp4 ] && echo var || echo YOK)"
+      - name: Denetle (salt okuma)
+        run: python scripts/etsy/canli_video_kapak.py denetle canli.json a77 cl_v5.mp4
+      - name: Drive'a yaz
+        if: always()
+        run: |
+          set -euo pipefail
+          H="gdrive:ASTROLOVE/TEMP/DIJITAL_78"
+          for f in CANLI_VIDEO_KAPAK.csv CANLI_VIDEO_KAPAK_OZET.json; do [ -f "out/$f" ] && rclone copyto "out/$f" "$H/$f" -q || true; done
+          echo "Drive: TEMP/DIJITAL_78/CANLI_VIDEO_KAPAK.csv"
+      - if: always()
+        run: rm -rf a77 _canli ~/.config/rclone
