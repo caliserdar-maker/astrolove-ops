@@ -78,8 +78,19 @@ def main():
     rapor = {}
     for ad, d in isler.items():
         try:
-            f = indir(d['url'], W / f'{ad}.png')
+            f = indir(d['url'], W / f'{ad}.ham')
             r = {'MB': round(f.stat().st_size / 1e6, 1)}
+            # Canva 9000x12000 PNG'yi agir dokulu sayfalarda zaman asimina
+            # ugratiyor; o durumda JPG q100 alinip burada PNG'ye cevriliyor.
+            with Image.open(f) as im:
+                r['kaynak_bicim'] = im.format
+                png = W / f'{ad}.png'
+                if im.format == 'PNG':
+                    f.rename(png)
+                else:
+                    im.convert('RGB').save(png, 'PNG', optimize=False)
+                    f.unlink(missing_ok=True)
+            f = png
             if d.get('kiyas'):
                 rc('copyto', f'{PLATES}/{d["kiyas"]}', str(W / d['kiyas']))
                 r['kiyas'] = kiyas(f, W / d['kiyas'])
