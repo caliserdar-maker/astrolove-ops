@@ -85,7 +85,7 @@ def size_block(lang="en"):
     out = [t["head"]]
     for g in GROUP_ORDER:
         out += ["", t["a"] if g == "A-series" else t["ratio"].format(g=g)]
-        out += [f"{inc} — {cm} {t['cm']}" for k, gg, inc, cm in SIZE_SPEC if gg == g]
+        out += [f"{inc} ({cm} {t['cm']})" for k, gg, inc, cm in SIZE_SPEC if gg == g]
     out += ["", t["tail"]]
     return "\n".join(out)
 
@@ -101,7 +101,7 @@ DIGITAL_PH = "{DIGITAL_LINKS}"
 
 def digital_lines(links):
     """{renk: url} -> '<Renk> — <url>' satirlari (renk adlari iki dilde de Ingilizce)."""
-    return "\n".join(f"{c} — {links[c]}" for c in DIGITAL_ORDER)
+    return "\n".join(f"{c}: {links[c]}" for c in DIGITAL_ORDER)
 
 
 def fill_digital(tpl, links, lang="en"):
@@ -112,7 +112,7 @@ def fill_digital(tpl, links, lang="en"):
     return re.sub(rf"{re.escape(DIGITAL_HEAD[lang])}\n[^\n]*\n{re.escape(DIGITAL_PH)}\n\n", "", tpl, count=1)
 
 
-MATERIALS = ["Hahnemuhle Photo Rag 308 gsm cotton paper", "archival pigment ink"]
+MATERIALS = ["Hahnemühle Photo Rag 308 gsm cotton paper", "archival pigment ink"]
 WHO_MADE = "i_did"                # Mo 6 Eyl: tasarim bize ait; uretim partneri Prodigi (production_partner_ids)
 AUTO_RENEW = True
 # Ilan ozellikleri (taxonomy 121 property adi -> deger adi); id'ler API possible_values'tan eslenir, tahmin yok
@@ -129,7 +129,7 @@ SIGN_RU = {"Aquarius": "Водолей", "Aries": "Овен", "Taurus": "Тел�
 # minimalistichnyi/neotrazhayushchaya turetilmis sifatlar, print odunc sozcuk
 RU_SPELL_OK = {"ес", "дизайны", "жикле", "минималистичный", "неотражающая", "принт"}
 
-SHIPPING_TITLE = "POD Prints – Free Shipping"
+SHIPPING_TITLE = "POD Prints – Free Shipping"  # Etsy'deki mevcut profil adi (satici ic adi, musteriye gorunmez); degisirse lookup kacar ve yeni profil acilir
 SECTION_TITLE = "Zodiac Fine Art Prints"
 PARTNER_NAME = "prodigi"
 TAXONOMY_PATH = ["prints", "giclée"]           # ust dugum adi 'Prints', yaprak 'Giclée' (giclee de kabul)
