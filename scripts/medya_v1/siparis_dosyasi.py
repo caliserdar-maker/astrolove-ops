@@ -1088,7 +1088,7 @@ def main():
         d = kart_oku((W / a.kart).read_text(encoding='utf-8'))
         siparisler = [{**d, 'receipt': Path(a.kart).stem}]
     elif a.cift:
-        siparisler = [{'receipt': f'{a.cift}_{a.boy}', 'cift': a.cift, 'renk': a.renk, 'boy': a.boy,
+        siparisler = [{'receipt': f'{a.cift}_{a.renk}_{a.boy}', 'cift': a.cift, 'renk': a.renk, 'boy': a.boy,
                        'isim1': a.isim1, 'isim2': a.isim2, 'mesaj': a.mesaj}]
     else:
         raise SystemExit('--kart, --test ya da elle parametre gerekir')
