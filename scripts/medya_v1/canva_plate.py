@@ -147,12 +147,17 @@ def main():
                     kaynak.load()
                 for boy, ref in d['boylar'].items():
                     try:
-                        en, yuk = uzak_px(ref)
+                        if ref.startswith('px:'):
+                            # Karsilastirilacak eski plate yok (turev boy / HAM'da yok):
+                            # hedef px elle verilir, kiyas yapilmaz.
+                            en, yuk = (int(v) for v in ref[3:].split('x'))
+                        else:
+                            en, yuk = uzak_px(ref)
                         cik = W / f'{d["ad"]}_{boy}.png'
                         (kaynak if (en, yuk) == kaynak.size
                          else kaynak.resize((en, yuk), Image.LANCZOS)).save(cik, 'PNG')
                         kv = {}
-                        if d.get('kutu'):
+                        if d.get('kutu') and not ref.startswith('px:'):
                             rf = W / Path(ref).name
                             rc('copyto', f'{PLATES}/{ref}', str(rf))
                             kv = kiyas(cik, rf, d['kutu'], d.get('sayfa_en', 3000.0))
