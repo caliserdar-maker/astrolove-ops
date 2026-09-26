@@ -9,7 +9,7 @@ Teslim: PR yorumunun sonunda TAM unified diff. Etsy'ye yazan her adim Serdar kar
 - IS_0018 PR #31 tum magaza ilan denetimi
 - IS_0019 PR #32 POD fiyat/SKU/envanter tutarliligi
 - IS_0020 PR #33 tum gorsel kalitesi + yinelenen gorsel + kapak OCR
-- IS_0021 PR #34 dijital dosya denetimi
+- IS_0021 PR #34 kisisellestirme uyumu (tum ilan kisisel, anlik indirme yok) - 26 Eyl duzeltildi
 - IS_0022 PR #35 magaza ayarlari (kargo, iade, section, partner)
 - IS_0023 PR #36 SEO puani ve oneriler (cevrimdisi)
 
