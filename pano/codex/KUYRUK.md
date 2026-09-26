@@ -13,6 +13,8 @@ Teslim: PR yorumunun sonunda TAM unified diff. Etsy'ye yazan her adim Serdar kar
 - IS_0022 PR #35 magaza ayarlari (kargo, iade, section, partner)
 - IS_0023 PR #36 SEO puani ve oneriler (cevrimdisi)
 
+- IS_0024 PR #37 SIPARIS ONAY KAPISI (fiziksel+dijital, Serdar onayi sart) - EN YUKSEK ONCELIK
+
 ## Kosuda (sonuc denetlenecek)
 - varyasyon-canli, canli-metin-tara, tamset-77 mod tam (35 cift, medya-v1 98b085c)
 
