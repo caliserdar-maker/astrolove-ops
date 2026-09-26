@@ -67,6 +67,10 @@ jobs:
           ls _kis/assets/fonts/Cinzel.ttf _kis/assets/fonts/EBGaramond-Italic.ttf
 
       - name: Kaynak duvar kagitlari (salt okur)
+        # ESKI hat (sil-yeniden yaz) 25 Eyl'de IPTAL edildi. Artik yalniz acikca
+        # [eski] denirse kosar; aksi halde her tetik push'u gecersiz dosyalari
+        # yeniden uretip Drive'a yaziyordu (26 dosya, kosu 36229382139).
+        if: ${{ contains(github.event.head_commit.message, '[eski]') }}
         if: ${{ !contains(github.event.head_commit.message, '[rapor]') && !contains(github.event.head_commit.message, '[v2]') }}
         env:
           MSG: ${{ github.event.head_commit.message }}
@@ -105,7 +109,8 @@ jobs:
           ls _wp/ARIES_LEO | sed 's/^/  - /'
           du -sh _wp
 
-      - name: Uretim + kapilar
+      - name: Uretim + kapilar (ESKI hat - yalniz [eski])
+        if: ${{ contains(github.event.head_commit.message, '[eski]') }}
         if: ${{ !contains(github.event.head_commit.message, '[rapor]') && !contains(github.event.head_commit.message, '[v2]') }}
         run: |
           set -euo pipefail
@@ -164,6 +169,10 @@ jobs:
           rclone copy "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PLATES" _v3/plate -q --include "*24x32*" --include "*24X32*"
           rclone copy "gdrive:ASTROLOVE/TEMP/WP_PLATES/CLEAN" _v3/temiz -q --include "PLATE_*_CLEAN.png"
           rclone copy "gdrive:ASTROLOVE/TEMP/WP_PLATES" _v3/geom -q --include "GEOM_*.json" --max-depth 1
+          # kisisel plate halkayi ICERIYOR -> halka halkali gece plakasindan alinir
+          rclone copy "gdrive:ASTROLOVE/TEMP/WP_PLATES" _v3/gece -q --max-depth 1 \
+            --include "PLATE_MIDNIGHT_BLUE_*.png" --include "PLATE_DEEP_BLACK_*.png"
+          echo "gece plakasi $(ls _v3/gece | wc -l) | temiz $(ls _v3/temiz | wc -l) | orijinal $(find _v3/orijinal -name '*.jpg' | wc -l)"
           rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/ARIES_LEO" _v3/orijinal -q --include "AstroLove_*.jpg"
           echo "baski $(ls _v3/baski | wc -l) | plate $(ls _v3/plate | wc -l) | temiz $(ls _v3/temiz | wc -l) | orijinal $(ls _v3/orijinal | wc -l)"
           free -g | head -2; df -h / | tail -1
@@ -185,6 +194,63 @@ jobs:
           [ -d _out3 ] || exit 0
           rclone copy _out3 "gdrive:ASTROLOVE/TEMP/DIJITAL_78/V3_BASKI/ORNEK" -q
           echo "WALLPAPER_ORNEK_V2 (dosya | bayt | Drive id)"
+          rclone lsf "gdrive:ASTROLOVE/TEMP/DIJITAL_78/V3_BASKI/ORNEK" --format "psi" --separator " | " --files-only -R | sed 's/^/  - /'
+
+      - name: V3 BASKI URET + ORNEK KOSU (yalniz [v3uret])
+        # GOREV_0012 md.3-4. Baski dosyalari bu adimda kurulur (onayli kaynaklar:
+        # POD_PRINT 18x24 sanati + PLATES 24x32 plate + kisisel-v1 render), sonra
+        # V3 ornek kosusu yapilir. Kapilar gevsetilmez.
+        if: ${{ contains(github.event.head_commit.message, '[v3uret]') }}
+        env:
+          MSG: ${{ github.event.head_commit.message }}
+          V3_ESLESME: BLUE=MIDNIGHT_BLUE,BLACK=DEEP_BLACK
+        run: |
+          set -euo pipefail
+          mkdir -p _u/pod/CANCER_LIBRA/MIDNIGHT_BLUE _u/pod/CANCER_LIBRA/DEEP_BLACK \
+                   _u/pod/SAGITTARIUS_SAGITTARIUS/MIDNIGHT_BLUE _u/pod/SAGITTARIUS_SAGITTARIUS/DEEP_BLACK \
+                   _u/plate _u/baski _v3/temiz _v3/geom _v3/gece _v3/orijinal _out3
+          for C in CANCER_LIBRA SAGITTARIUS_SAGITTARIUS; do
+            for R in MIDNIGHT_BLUE DEEP_BLACK; do
+              rclone copy "gdrive:ASTROLOVE/TEMP/POD_PRINT/$C/$R/18x24.jpg" "_u/pod/$C/$R" -q
+            done
+          done
+          rclone copy "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PLATES" _u/plate -q \
+            --include "BLUE_18x24.png" --include "BLUE_24x32.png" \
+            --include "BLACK_18x24.png" --include "BLACK_24x32.png"
+          echo "pod $(find _u/pod -name '*.jpg' | wc -l) | plate $(ls _u/plate | wc -l)"
+          free -g | head -2
+          python scripts/wp_kisisel/v3_baski_uret.py --pod _u/pod --plate _u/plate \
+            --kisisel _kis --cikti _u/baski --eslesme "$V3_ESLESME" \
+            --kayit "CANCER_LIBRA|EMILY|JAMES|It Began With a Kiss in the Rain" \
+            --kayit "SAGITTARIUS_SAGITTARIUS|EMILY|JAMES|It Began With a Kiss in the Rain" \
+            --kayit "CANCER_LIBRA|MAXIMILIANA|CHRISTOPHER|It Began With a Kiss in the Rain|CANCER_LIBRA_UZUN"
+          ls -l _u/baski
+          rclone copy _u/baski "gdrive:ASTROLOVE/TEMP/DIJITAL_78/V3_BASKI" -q
+          echo "V3_BASKI yazildi"
+          # --- V3 ornek kosu ---
+          rclone copy "gdrive:ASTROLOVE/TEMP/WP_PLATES/CLEAN" _v3/temiz -q --include "PLATE_*_CLEAN.png"
+          rclone copy "gdrive:ASTROLOVE/TEMP/WP_PLATES" _v3/geom -q --include "GEOM_*.json" --max-depth 1
+          # kisisel plate halkayi ICERIYOR -> halka halkali gece plakasindan alinir
+          rclone copy "gdrive:ASTROLOVE/TEMP/WP_PLATES" _v3/gece -q --max-depth 1 \
+            --include "PLATE_MIDNIGHT_BLUE_*.png" --include "PLATE_DEEP_BLACK_*.png"
+          echo "gece plakasi $(ls _v3/gece | wc -l) | temiz $(ls _v3/temiz | wc -l) | orijinal $(find _v3/orijinal -name '*.jpg' | wc -l)"
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2" _v3/orijinal -q --include "*/AstroLove_*.jpg" || true
+          find _v3/orijinal -name "AstroLove_*.jpg" -exec cp {} _v3/orijinal/ \; 2>/dev/null || true
+          python scripts/wp_kisisel/wp_siparis.py --baski _u/baski --plate _u/plate \
+            --temiz _v3/temiz --plakalar _v3/geom --orijinal _v3/orijinal --cikti _out3 \
+            --edisyonlar BLUE,BLACK \
+            --ciftler CANCER_LIBRA,SAGITTARIUS_SAGITTARIUS,CANCER_LIBRA_UZUN \
+            --eslesme "$V3_ESLESME" --halka _v3/gece || KAPI=1
+          ls -R _out3 | head -40
+          [ "${KAPI:-0}" = "0" ]
+
+      - name: V3 ORNEK Drive'a yaz (yalniz [v3uret])
+        if: ${{ always() && contains(github.event.head_commit.message, '[v3uret]') }}
+        run: |
+          set -euo pipefail
+          [ -d _out3 ] || exit 0
+          rclone copy _out3 "gdrive:ASTROLOVE/TEMP/DIJITAL_78/V3_BASKI/ORNEK" -q
+          echo "V3_BASKI/ORNEK (dosya | bayt | Drive id)"
           rclone lsf "gdrive:ASTROLOVE/TEMP/DIJITAL_78/V3_BASKI/ORNEK" --format "psi" --separator " | " --files-only -R | sed 's/^/  - /'
 
       - name: V3 HAZIRLIK OLCUMU (yalniz [v3hazir]) - uretim yok, Drive'a yazmaz
@@ -243,8 +309,8 @@ jobs:
           rclone deletefile "$CIKTI/WP_KISISEL_RAPOR_EKSIK3.json" || true
           rclone lsf "$CIKTI" --format "psi" --separator " | " --files-only | sed 's/^/  - /'
 
-      - name: Drive'a yaz
-        if: ${{ always() }}
+      - name: Drive'a yaz (ESKI cikti - yalniz [eski])
+        if: ${{ always() && contains(github.event.head_commit.message, '[eski]') }}
         run: |
           set -euo pipefail
           [ -d _out ] || exit 0

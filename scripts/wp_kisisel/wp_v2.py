@@ -523,7 +523,24 @@ def main():
     return rapor, urun, geo_ref
 
 
-def kapilar(urun, geo_ref, duzen, orijinal, cift, cikti, edisyonlar=None):
+def orijinal_bul(kok, cift, ed, dev):
+    """Kapi 2 referansi: adinda cift + edisyon + cihaz parcalarini gecen TEK dosya.
+
+    Sabit ad kalibi KULLANILMAZ: orijinaller `AstroLove_Cancer_Libra_Midnight_Blue_
+    Phone.jpg` gibi Baslik yazimli, kosunun edisyonu ise kisisel adi (BLUE) olabilir.
+    Eslesme bulunmazsa (0 veya >1) None ve SEBEP doner - kapi sessizce atlanmaz.
+    """
+    if not kok or not Path(kok).is_dir():
+        return None, "orijinal klasoru yok"
+    parca = [x for x in cift.split("_") if x] + [x for x in ed.split("_") if x] + [dev]
+    ad = [x for x in sorted(Path(kok).iterdir()) if x.is_file() and x.suffix.lower() in (".jpg", ".jpeg", ".png")]
+    d = [x for x in ad if all(pz.lower() in x.stem.lower() for pz in parca)]
+    if len(d) == 1:
+        return d[0], ""
+    return None, f"{len(d)} eslesme ({parca})"
+
+
+def kapilar(urun, geo_ref, duzen, orijinal, cift, cikti, edisyonlar=None, orij_eslesme=None):
     """Kapi 2-5: halka/sembol yeri, renkler arasi metin birebirligi, ortalama, kenar payi.
 
     edisyonlar: bu kosunun edisyon listesi. Verilmezse modulun EDISYONLAR'i.
@@ -549,8 +566,12 @@ def kapilar(urun, geo_ref, duzen, orijinal, cift, cikti, edisyonlar=None):
         olculen[(ed, dev)] = {k: murekkep_kutusu(im, plaka, v, ESIK_OGE if k in ("halka", "sembol") else ESIK_METIN)
                               for k, v in kutular.items()}
         # kapi 2: orijinal wallpaper ile halka + sembol yeri
-        o = Path(orijinal) / f"AstroLove_{cift}_{ed}_{dev}.jpg" if orijinal else None
-        if o and o.exists():
+        o_ed = (orij_eslesme or {}).get(ed, ed)
+        o, sebep = orijinal_bul(orijinal, cift, o_ed, dev)
+        if o is None:
+            K["halka_sembol_atlanan"] = K.get("halka_sembol_atlanan", [])
+            K["halka_sembol_atlanan"].append({"edisyon": ed, "cihaz": dev, "sebep": sebep})
+        if o is not None:
             oi = imread(o)
             for ad in ("halka", "sembol"):
                 y = olculen[(ed, dev)][ad]; x = murekkep_kutusu(oi, plaka, kutular[ad], ESIK_OGE)

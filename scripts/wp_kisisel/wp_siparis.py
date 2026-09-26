@@ -372,7 +372,10 @@ if __name__ == "__main__":
     hepsi_gecti = True
     for cift, u in urun.items():
         duzen = {"kutular": olcum[f"{cift}|{ed_list[0]}"]["kutular"]}
-        K = V2.kapilar(u, None, duzen, orij, cift, Path(cikti) / f"KAPI_{cift}", ed_list)
+        es = {}
+        if "--eslesme" in _a:
+            es = dict(x.split("=", 1) for x in _a[_a.index("--eslesme") + 1].split(",") if "=" in x)
+        K = V2.kapilar(u, None, duzen, orij, cift, Path(cikti) / f"KAPI_{cift}", ed_list, es)
         log(f"KAPILAR {cift} gecti={K['gecti']}")
         for ad in ("halka_sembol", "ortalama", "kenar_payi", "ek1_mesaj_renk", "ek2_yildiz",
                    "ek3_esit_bosluk", "ek4_mesaj_isimden_buyuk_degil", "ek5_mesaj_bandi"):
@@ -380,6 +383,8 @@ if __name__ == "__main__":
             log(f"  {ad}: {len(K[ad]) - len(kot)}/{len(K[ad])} gecti" + (f" | KALAN {kot[:3]}" if kot else ""))
         log(f"  metin_renkler: {json.dumps(K['metin_4renk'])}")
         log(f"  ek4_harf_yuksekligi: {json.dumps(K['ek4_harf_yuksekligi'])}")
+        if K.get("halka_sembol_atlanan"):
+            log(f"  kapi 2 ATLANAN (orijinal bulunamadi): {json.dumps(K['halka_sembol_atlanan'])}")
         sy = V2.sayfalar(u, orij, cift, cikti)
         log(f"  sayfa: {len(sy)} dosya")
         hepsi_gecti = hepsi_gecti and K["gecti"]
