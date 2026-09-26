@@ -1,0 +1,6 @@
+- Dijital 78 donusum araci ve varsayilan kuru kosu eklendi.
+- Plan ile kalan 78 listesi celisirse islem fail-closed durur.
+- Taslak ilanlar korunur; silme yoktur, diger fazlaliklar inactive olur.
+- Canli mod isleme ozel onay kimligi, cagri butcesi ve etsy-token kilidi ister.
+- Made-to-order API alani yoksa Etsy panelinde elle tamamlanmalidir.
+- Drive girdilerine erisilmedi; mock Etsy ile 10 senaryo sinandi.

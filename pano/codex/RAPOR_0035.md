@@ -1,0 +1,6 @@
+- ZIP ve PDF teslim dosyasi destegi eklendi.
+- Duvar sanati icin bes renk ZIP kurali uygulandi.
+- Wallpaper icin dort renk ZIP ve bir rehber PDF kurali uygulandi.
+- ZIP butunlugu, icerik renk/oranlari ve PDF basligi dogrulandi.
+- Bes dosya, 20 MB ve SHA onay kapilari korundu.
+- Etsy, Drive veya baska bir canli sisteme yazilmadi.

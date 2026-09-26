@@ -1,0 +1,86 @@
+name: dijital-donusum-uygula
+
+on:
+  workflow_dispatch:
+    inputs:
+      mod:
+        type: choice
+        options: [kuru, uygula]
+        default: kuru
+        required: true
+      ilanlar:
+        description: "Virgulle ayrilmis ilan ID; bos tum plan"
+        required: false
+        default: ""
+      butce:
+        description: "Azami Etsy API cagrisi"
+        required: true
+        default: "500"
+      onay_kimligi:
+        description: "Uygula icin Claude'un Serdar onayindan sonra yazdigi kimlik"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  donusum:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: Girdi ve yetki kapisi
+        env:
+          MOD: ${{ inputs.mod }}
+          ONAY: ${{ inputs.onay_kimligi }}
+          BUTCE: ${{ inputs.butce }}
+        run: |
+          set -euo pipefail
+          [[ "$BUTCE" =~ ^[1-9][0-9]*$ ]] || { echo "DUR: butce pozitif tamsayi olmali"; exit 2; }
+          [[ "$MOD" != uygula || -n "$ONAY" ]] || { echo "DUR: uygula icin onay_kimligi zorunlu"; exit 2; }
+      - name: Rclone ayari ve girdiler
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail; umask 077; mkdir -p ~/.config/rclone _work
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          [ -z "${GOOGLE_CLIENT_SECRET:-}" ] || echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+          rclone copyto "gdrive:ASTROLOVE/TEMP/DIJITAL_DONUSUM_PLAN.csv" _work/plan.csv
+          rclone copyto "gdrive:ASTROLOVE/DIJITAL_78/DIJITAL_78_KALAN_ILANLAR.csv" _work/keepers.csv
+          rclone copyto "gdrive:ASTROLOVE/ETSY_TOKEN.json" _work/token.json
+      - name: Donusumu calistir
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/token.json
+          MOD: ${{ inputs.mod }}
+          ILANLAR: ${{ inputs.ilanlar }}
+          BUTCE: ${{ inputs.butce }}
+          ONAY_KIMLIGI: ${{ inputs.onay_kimligi }}
+        run: |
+          python scripts/etsy/dijital_donusum_uygula.py --plan _work/plan.csv --keepers _work/keepers.csv \
+            --mode "$MOD" --listings "$ILANLAR" --budget "$BUTCE" \
+            --approval-id "$ONAY_KIMLIGI" --output _work/DIJITAL_DONUSUM_FARK.csv
+      - name: Yenilenen tokeni geri yaz
+        if: always()
+        run: test ! -f _work/token.json.updated || rclone copyto _work/token.json "gdrive:ASTROLOVE/ETSY_TOKEN.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dijital-donusum-fark-${{ inputs.mod }}
+          path: _work/DIJITAL_DONUSUM_FARK.csv
+      - if: always()
+        run: rm -rf _work ~/.config/rclone
