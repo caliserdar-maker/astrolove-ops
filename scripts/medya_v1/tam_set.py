@@ -40,7 +40,8 @@ HEDEF = f'{DR}/REVIEW/TAM_SET_{CIFT}' if not A77MOD else f'{A.A77}/{CIFT}/TAM_SE
 RENKLER = ['blue', 'black', 'modern', 'pure_white', 'vintage']
 import os
 if os.environ.get('TS_RENKLER'): RENKLER = os.environ['TS_RENKLER'].split(',')   # yalniz yerel deneme
-if YALNIZ06: RENKLER = ['blue']
+YALNIZ04 = '--kart04' in sys.argv                      # GOREV 0007-2c: yalniz kart 04 (ortak sembol) dogru CL genisligiyle yeniden
+if YALNIZ06 or YALNIZ04: RENKLER = ['blue']
 DUZELT = '--duzelt' in sys.argv                         # Serdar 25 Eyl duzeltmeleri: yalniz etkilenen kartlar
 KORU = {1, 3, 4, 9} if DUZELT else set()               # CL no: kapak, kart 3 (Serdar onayli, DOKUNMA), ortak sembol, KART09
 DOKULU = {'vintage'}                                  # parsomen dokusu: sembol kapisi doku-dengeli (Serdar 25 Eyl)
@@ -498,6 +499,17 @@ if __name__ == '__main__':
                 for f in ('06_yakin_detay.jpg', 'YANYANA_06_yakin_detay_vs_CL07.jpg', f'ONIZLEME_TAM_SET_{CIFT}.jpg'): rc('copy', str(CIK / f), HEDEF)
                 (CIK / 'RAPOR_KART06.json').write_text(json.dumps(R, ensure_ascii=False, indent=1, default=str)); rc('copy', str(CIK / 'RAPOR_KART06.json'), HEDEF)
             print(json.dumps(R['ozet'], ensure_ascii=False, indent=1, default=str), flush=True); sys.exit(0)
+        if YALNIZ04:                                             # yalniz 03_ortak_sembol.jpg (+ yanyana) yenilenir; diger kartlar/SET.json dokunulmaz
+            k4 = kart04_tam(ref, M, etk, A_, B_); bt = burc_tarama(k4, sorted({A_, B_}))
+            k4.save(CIK / '03_ortak_sembol.jpg', quality=95); yanyana(ref[4], k4, CIK / 'YANYANA_03_ortak_sembol_vs_CL04.jpg')
+            R['gecti'] = bool(bt['gecti'])
+            R['ozet'] = {'yalniz': 'kart 04', 'burc_kapisi': bt, 'kart04': R.get('kart04'), 'gecti': R['gecti'],
+                         'sure_sn': round(time.time() - t_bas, 1)}
+            if not YEREL and R['gecti']:
+                for f in ('03_ortak_sembol.jpg', 'YANYANA_03_ortak_sembol_vs_CL04.jpg'): rc('copy', str(CIK / f), HEDEF)
+            (CIK / 'RAPOR_KART04.json').write_text(json.dumps(R, ensure_ascii=False, indent=1, default=str))
+            if not YEREL: rc('copy', str(CIK / 'RAPOR_KART04.json'), HEDEF)
+            print(json.dumps(R['ozet'], ensure_ascii=False, indent=1, default=str), flush=True); sys.exit(0 if R['gecti'] else 1)
         beklenen = sorted({A_, B_})
         S = {}; K = {}
         if DUZELT:                                               # korunan kartlar Drive'daki dosyalarindan (yeniden kodlanmaz)
@@ -597,7 +609,7 @@ if __name__ == '__main__':
                      'kart06_buyutec_kapisi': R['kart07']['detay']['kapi']['gecti'], 'gecti': R['gecti'], 'video': video,
                      'sure_sn': round(time.time() - t_bas, 1)}
     finally:
-        if not YALNIZ06:                                         # kart 06 kosusu tam set raporunu/klasorunu ezmez
+        if not (YALNIZ06 or YALNIZ04):                           # kart 06/04 kosusu tam set raporunu/klasorunu ezmez
             (CIK / 'RAPOR_TAM_SET.json').write_text(json.dumps(R, ensure_ascii=False, indent=1, default=str))
             if not YEREL and not A77MOD: rc('copy', str(CIK), HEDEF)
             elif not YEREL and R.get('gecti'):                   # 77: yalniz kapidan gecen set; buyuk ara dosyalar yuklenmez

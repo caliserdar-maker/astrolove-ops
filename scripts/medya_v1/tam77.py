@@ -21,7 +21,7 @@ TS = Path(__file__).resolve().parent / 'tam_set.py'
 
 def liste():
     rc('copy', KP, str(W / 'ts77l'), '--include', 'TS77_*.json')
-    return {r: A.liste_ac(json.loads((W / 'ts77l' / f'TS77_{r}.json').read_text())) for r in RENKLER}
+    return {r: A.liste_ac(json.loads((W / 'ts77l' / f'TS77_{r}.json').read_text())) for r in RENKLER if (W / 'ts77l' / f'TS77_{r}.json').exists()}
 
 TUR = 'r3'                                            # GOREV 0002 iterasyon 2: yalniz seti olmayan (FAIL) ciftler
 
@@ -29,8 +29,14 @@ def yapildi():
     """Kapidan gecmis seti olan ciftler (A1_77/<CIFT>/TAM_SET/SET.json)."""
     return {x.split('/')[0] for x in rc('lsf', A.A77, '-R', '--files-only', '--include', '*/TAM_SET/SET.json').split() if x}
 
+SERIT_DOSYA = ('03_ortak_sembol.jpg', '06_yakin_detay.jpg', '13_cerceve_WARM_PARCHMENT.jpg')   # kart 04 + kart 06 + Warm Parchment (GOREV 0007)
+# GOREV 0007-2c: eski (kismi) CL genisligiyle uretilmis ilk 20 PASS ciftin kart 04'u dogru genislikle yeniden (yalniz 03_ortak_sembol.jpg)
+K04_CIFTLER = ['AQUARIUS_ARIES', 'AQUARIUS_CANCER', 'AQUARIUS_CAPRICORN', 'AQUARIUS_GEMINI', 'AQUARIUS_PISCES', 'AQUARIUS_TAURUS',
+               'AQUARIUS_VIRGO', 'ARIES_ARIES', 'ARIES_CANCER', 'ARIES_GEMINI', 'ARIES_LEO', 'ARIES_LIBRA', 'ARIES_SAGITTARIUS',
+               'CANCER_CAPRICORN', 'CANCER_GEMINI', 'CANCER_LEO', 'CANCER_TAURUS', 'CANCER_VIRGO', 'GEMINI_GEMINI', 'GEMINI_LEO']
+
 def kucuk(c, d=None):
-    d = d or W / 'TAM_SET'; ims = [Image.open(d / f) for f in ('04_bes_palet.jpg', '06_yakin_detay.jpg')]
+    d = d or W / 'TAM_SET'; ims = [Image.open(d / f) for f in SERIT_DOSYA]
     ims = [i.resize((round(i.width * 420 / i.height), 420), Image.LANCZOS) for i in ims]
     t = Image.new('RGB', (sum(i.width for i in ims) + 10, 450), 'white'); x = 0
     for i in ims: t.paste(i, (x, 30)); x += i.width + 10
@@ -80,6 +86,34 @@ def parca(p, n):
     (W / f'parca_{TUR}_{p}.json').write_text(json.dumps(R, ensure_ascii=False, indent=1, default=str))
     rc('copy', str(W / f'parca_{TUR}_{p}.json'), RAPOR); rc('copy', str(K), f'{RAPOR}/k')
 
+def k04(p, n):
+    """Yalniz kart 04: K04_CIFTLER'in bu parcasi; Blue 28 + cift sayfasi; tam_set --kart04 (kapi: burc taramasi)."""
+    T0 = time.time(); L = liste()
+    ciftler = sorted(x.strip('/') for x in rc('lsf', A.POD, '--dirs-only').split()); no = {c: i + 1 for i, c in enumerate(ciftler)}
+    benim = K04_CIFTLER[p::n]; H = W / 'ham77'; H.mkdir(exist_ok=True); R = {'parca': p, 'mod': 'k04', 'cift': {}}
+    for s in sorted({28, *[no[c] for c in benim]}):
+        u = L['blue'][str(s)]; A.maskele(u)
+        try: (H / f'blue_{s}.png').write_bytes(A.indir(u))
+        except Exception as e: log(f'blue_{s} indirilemedi {repr(e)[:120]}')  # noqa: BLE001
+    t_bas = time.time()
+    for i, c in enumerate(benim):
+        ti = time.time(); r = {'sayfa': no[c]}
+        for d in ('ham', 'TAM_SET', 'k3', 'hi'): shutil.rmtree(W / d, ignore_errors=True)
+        (W / 'ham').mkdir()
+        try:
+            for s in (28, no[c]): shutil.copyfile(H / f'blue_{s}.png', W / 'ham' / f'blue_{s}.png')
+            q = subprocess.run([sys.executable, str(TS), c, '--a77', '--ham-hazir', '--kart04'], capture_output=True, text=True, timeout=1500)
+            rap = W / 'TAM_SET' / 'RAPOR_KART04.json'
+            if not rap.exists(): raise RuntimeError('kart 04 raporu yok: ' + (q.stdout + q.stderr)[-600:])
+            d = json.loads(rap.read_text()); r['gecti'] = bool(d.get('gecti')); r['ozet'] = d.get('ozet')
+        except Exception as e:                                        # noqa: BLE001
+            r['gecti'] = False; r['hata'] = repr(e)[:600]
+        r['sn'] = round(time.time() - ti, 1); R['cift'][c] = r
+        k = i + 1; g = time.time() - t_bas
+        log(f'[{k}/{len(benim)}] {c} kart04 {"PASS" if r["gecti"] else "FAIL"} {r["sn"]}s | gecen {g / 60:.1f} dk, kalan {g / k * (len(benim) - k) / 60:.1f} dk, %{100 * k / len(benim):.0f}')
+    R['toplam_sn'] = round(time.time() - T0, 1)
+    (W / f'parca_k04_{p}.json').write_text(json.dumps(R, ensure_ascii=False, indent=1, default=str)); rc('copy', str(W / f'parca_k04_{p}.json'), RAPOR)
+
 def serit():
     """Iki kosunun raporlari birlesir (sonraki kosu ayni cifti ezer); serit 78 cift: seti olan her ciftin kart 04 + 06'si
     Drive'daki TAM_SET dosyalarindan."""
@@ -98,7 +132,7 @@ def serit():
         for c in sorted(bitti):
             d = O / 'set' / c
             try:
-                rc('copy', f'{A.A77}/{c}/TAM_SET', str(d), '--include', '04_bes_palet.jpg', '--include', '06_yakin_detay.jpg')
+                rc('copy', f'{A.A77}/{c}/TAM_SET', str(d), *[x for f in SERIT_DOSYA for x in ('--include', f)])
                 ims.append(kucuk(c, d))
             except Exception as e: log(f'{c}: serit gorseli alinamadi {repr(e)[:100]}')  # noqa: BLE001
         if ims:
@@ -107,10 +141,15 @@ def serit():
                 parca_ims = ims[b:b + 40]; s = -(-len(parca_ims) // kol)
                 T = Image.new('RGB', (w * kol, 450 * s), 'white')
                 for j, im in enumerate(parca_ims): T.paste(im, ((j % kol) * w, (j // kol) * 450))
-                T.save(O / f'SERIT_TAMSET_78_k04_k06_{b // 40 + 1}.jpg', quality=85)
+                T.save(O / f'SERIT_TAMSET_78_k04_k06_WP_{b // 40 + 1}.jpg', quality=85)
         ozet = {'seti_olan': len(bitti), 'pass_77': len([c for c in gec if c != REF_CIFT]), 'fail': len(fail),
                 'fail_liste': {c: {k: r.get(k) for k in ('hata', 'poster', 'kart06', 'galeri_burc') if r.get(k)} for c, r in fail.items()},
                 'video_yok': video_yok, 'serit_cift': len(ims)}
+        (O / 'RAPOR_TAMSET_78.json').write_text(json.dumps(ozet, ensure_ascii=False, indent=1, default=str))
+        K4 = {}
+        for f in sorted(O.glob('parca_k04_*.json')): K4.update(json.loads(f.read_text())['cift'])
+        ozet['kart04_yeniden'] = {'toplam': len(K4), 'pass': sum(1 for r in K4.values() if r['gecti']),
+                                  'fail': {c: r.get('hata') or 'burc kapisi' for c, r in K4.items() if not r['gecti']}}
         (O / 'RAPOR_TAMSET_78.json').write_text(json.dumps(ozet, ensure_ascii=False, indent=1, default=str))
         for f in list(O.glob('SERIT_TAMSET_78_*.jpg')) + [O / 'RAPOR_TAMSET_78.json']: rc('copy', str(f), RAPOR)
         print(json.dumps({k: v for k, v in ozet.items() if k != 'fail_liste'}, ensure_ascii=False, indent=1), flush=True)
@@ -121,4 +160,5 @@ def serit():
 
 if __name__ == '__main__':
     if sys.argv[1:2] == ['serit']: serit()
+    elif sys.argv[3:4] == ['k04']: A.kisisel_hazirla(); k04(int(sys.argv[1]), int(sys.argv[2]))
     else: A.kisisel_hazirla(); parca(int(sys.argv[1]), int(sys.argv[2]))
