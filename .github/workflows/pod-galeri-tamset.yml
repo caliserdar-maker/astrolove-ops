@@ -47,6 +47,7 @@ jobs:
       - run: |
           set -euo pipefail
           pip install -q requests==2.34.2 pillow numpy
+          command -v ffmpeg >/dev/null || { sudo apt-get update -q && sudo apt-get install -y -q ffmpeg >/dev/null; }
           curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
       - name: rclone.conf olustur
         env:

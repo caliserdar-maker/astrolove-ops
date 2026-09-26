@@ -89,6 +89,65 @@ def videolar(api, lid):
     return (api.get(f"/listings/{lid}/videos", ok404=True) or {}).get("results") or []
 
 
+VIDEO_ORAN = 3.0   # canli video: tuzak cift videosuna uzaklik >= 3 x beklenen videoya uzaklik (GOREV 0019)
+
+
+def kareler(src, n=3):
+    """Videodan goreli konumlarda (1/4, 2/4, 3/4) n kare; 128x128 gri. ffmpeg gerekir."""
+    bilgi = subprocess.run(["ffmpeg", "-i", str(src)], capture_output=True, text=True).stderr   # ffprobe'suz sure
+    m_ = re.search(r"Duration: (\d+):(\d+):([\d.]+)", bilgi)
+    if not m_:
+        raise ValueError("video suresi okunamadi")
+    sure = int(m_.group(1)) * 3600 + int(m_.group(2)) * 60 + float(m_.group(3))
+    out = []
+    for i in range(n):
+        b = subprocess.run(["ffmpeg", "-v", "error", "-ss", f"{sure * (i + 1) / (n + 1):.2f}", "-i", str(src),
+                            "-frames:v", "1", "-vf", "scale=128:128,format=gray", "-f", "rawvideo", "-"],
+                           check=True, capture_output=True).stdout
+        out.append(np.frombuffer(b[:128 * 128], dtype=np.uint8).astype(float))
+    return out
+
+
+def video_olc(url, vpath, tvpath):
+    """Canli video (CDN, API cagrisi degil) beklenen VIDEO.mp4'e, tuzak ciftin videosundan belirgin yakin olmali."""
+    try:
+        tmp = Path(vpath).with_name("_canli.mp4")
+        r = requests.get(url, timeout=120)
+        r.raise_for_status()
+        tmp.write_bytes(r.content)
+        K, E, T = kareler(tmp), kareler(vpath), kareler(tvpath)
+    except Exception as e:  # noqa: BLE001
+        return {"hata": type(e).__name__, "ok": False}
+    de = float(np.mean([np.abs(k - e).mean() for k, e in zip(K, E)]))
+    dt = float(np.mean([np.abs(k - t).mean() for k, t in zip(K, T)]))
+    return {"d_beklenen": round(de, 2), "d_tuzak": round(dt, 2), "ok": dt >= VIDEO_ORAN * max(de, 1.0)}
+
+
+def video_duzelt(api, shop, c, lid, vpath, tvpath, yeni_id=None):
+    """Video: tek video, (varsa) bu kosuda yuklenen id ve icerik beklenen videoya yakin olmali. Tutmazsa eski(ler)
+    silinir, onayli VIDEO.mp4 yuklenir, id ve (islenmisse) icerik yeniden olculur. Doner: (ok, rapor)."""
+    v = videolar(api, lid)
+    olc = video_olc(v[0].get("video_url"), vpath, tvpath) if len(v) == 1 and v[0].get("video_url") else {"ok": False}
+    ok = len(v) == 1 and olc.get("ok") and (yeni_id is None or v[0].get("video_id") == yeni_id)
+    rap = {"once": {"sayi": len(v), "id": [x.get("video_id") for x in v], "olcum": olc}}
+    if ok:
+        rap["sonuc"] = "dogru"
+        return True, rap
+    for x in v:
+        api.delete(f"/shops/{shop}/listings/{lid}/videos/{x.get('video_id')}")
+    with open(vpath, "rb") as fh:
+        rv = api.post_file(f"/shops/{shop}/listings/{lid}/videos", files={"video": (f"{c}.mp4", fh, "video/mp4")},
+                           data={"name": f"{c}.mp4"})
+    yid = (rv or {}).get("video_id")
+    v2 = kararli(lambda: [(x.get("video_id"), x.get("video_url")) for x in videolar(api, lid)],
+                 lambda z: len(z) == 1 and z[0][0] == yid) or []
+    olc2 = video_olc(v2[0][1], vpath, tvpath) if len(v2) == 1 and v2[0][1] else {"ok": None, "not": "isleniyor"}
+    ok2 = len(v2) == 1 and v2[0][0] == yid and olc2.get("ok") is not False
+    rap.update(sonuc="yenilendi", yeni_id=yid, sonra={"id": [x[0] for x in v2], "olcum": olc2})
+    log(f"{c} video yenilendi: eski {rap['once']['id']} -> yeni {yid} | olcum {olc2}")
+    return ok2, rap
+
+
 def var_img(api, shop, lid):
     return (api.get(f"/shops/{shop}/listings/{lid}/variation-images", ok404=True) or {}).get("results") or []
 
@@ -272,7 +331,7 @@ def baglan(api, shop, lid, SET, g):
     return all(v.get("image_id") == rid.get(dosya_sira.get(renk_dosya.get(v.get("value")))) for v in vimg)
 
 
-def onar(api, shop, a, c, lid, r, ref_alt, tfoto):
+def onar(api, shop, a, c, lid, r, ref_alt, tfoto, tvpath=None, yeni_video=None):
     """Onarim (GOREV 0015): dogru on-ek (sira 1..k: icerik <= ESIK ve cift PASS) korunur, gerisi kur() ile
     sona ekleyerek yeniden kurulur; alt metni tutmayan sira alt_yenile(); varyasyonlar baglan(); geri okunur."""
     SET, d, foto = set_indir(a.setler, c)
@@ -298,6 +357,9 @@ def onar(api, shop, a, c, lid, r, ref_alt, tfoto):
     if alt_yanlis:
         g = sirali(api, lid)
     var_ok = baglan(api, shop, lid, SET, g)
+    if tvpath:                                            # GOREV 0019: video icerik + id denetimi, gerekirse yenileme
+        vok, r["video"] = video_duzelt(api, shop, c, lid, d / "VIDEO.mp4", tvpath, yeni_video)
+        r.setdefault("kontrol", {})["video_1"] = bool(vok)
     rid = {x.get("rank"): x.get("listing_image_id") for x in g}
     fk2 = icerik(g, foto)
     ck2 = cift_denetle(g, foto, tfoto)
@@ -403,6 +465,10 @@ def main():
     def tuzak_foto(c):
         return set_indir(a.setler, tuzak_sec(c, setli), video=False)[2]
 
+    def tuzak_video(c):
+        t = tuzak_sec(c, setli)
+        return set_indir(a.setler, t, video=True)[1] / "VIDEO.mp4"
+
     if a.mod == "denetle":                               # SALT OKUMA: galeri + varyasyon okunur, CDN ile karsilastirilir
         rapor["denetle"] = {}
         for c in [x for x in a.ciftler.split(",") if x]:
@@ -460,7 +526,7 @@ def main():
         if c in hedef and (yeniden or onarilir):
             bitti.discard(c)
             try:
-                tamam = onar(api, shop, a, c, ilan[c], rapor["ilan"][c], ref_alt, tuzak_foto(c))
+                tamam = onar(api, shop, a, c, ilan[c], rapor["ilan"][c], ref_alt, tuzak_foto(c), tuzak_video(c))
             except (SystemExit, Exception) as e:                     # GOREV 0017: HTTP/I-O/Pillow hatalari da ilan FAIL
                 if "429" in str(e):
                     raise
@@ -531,7 +597,12 @@ def main():
             fk = icerik(g2, foto)                                             # 13 foto olculur, rapora yazilir
             tfoto = tuzak_foto(c)
             ck = cift_denetle(g2, foto, tfoto)
-            v2 = kararli(lambda: [x.get("video_id") for x in videolar(api, lid)], lambda v: len(v) == 1)
+            yvid = (rv or {}).get("video_id")
+            v2 = kararli(lambda: [(x.get("video_id"), x.get("video_url")) for x in videolar(api, lid)],
+                         lambda v: len(v) == 1 and v[0][0] == yvid) or []
+            tvpath = tuzak_video(c)
+            volc = video_olc(v2[0][1], vpath, tvpath) if len(v2) == 1 and v2[0][1] else {"ok": None, "not": "isleniyor"}
+            r["video"] = {"yeni_id": yvid, "canli_id": [x[0] for x in v2], "olcum": volc}
             vm2 = {x.get("value"): x.get("image_id") for x in var_img(api, shop, lid)}
             L2 = api.get(f"/listings/{lid}") or {}
             kontrol = {
@@ -540,15 +611,15 @@ def main():
                 "cift": len(ck) == 13 and all(v.get("ok") for v in ck.values()),
                 "alt_metin": all((x.get("alt_text") or "") == alt_uyarla(ref_alt.get(foto[x.get("rank") - 1][2], ""), A_, B_)[:250].rstrip()
                                  for x in g2),
-                "video_1": len(v2 or []) == 1,
+                "video_1": len(v2) == 1 and v2[0][0] == yvid and volc.get("ok") is not False,   # GOREV 0019
                 "varyasyon": all(vm2.get(v.get("value")) == rid.get(dosya_sira[renk_dosya[v.get("value")]]) for v in vimg_once),
                 "state_degismedi": L2.get("state") == X.get("state"),
             }
             r.update(icerik_fark=fk, cift=ck)
-            if not all(kontrol.values()) and all(kontrol[n2] for n2 in ("foto_13", "video_1", "state_degismedi")):
+            if not all(kontrol.values()) and all(kontrol[n2] for n2 in ("foto_13", "state_degismedi")):
                 log(f"{c}: tutmayan kontrol {[k2 for k2, v in kontrol.items() if not v]} -> onarim (yeniden yukleme)")
                 r["kontrol"] = kontrol
-                onar(api, shop, a, c, lid, r, ref_alt, tfoto)
+                onar(api, shop, a, c, lid, r, ref_alt, tfoto, tvpath, yvid)
                 kontrol = r["kontrol"]
             r.update(sonuc="PASS" if all(kontrol.values()) else "FAIL", kontrol=kontrol, state_sonra=L2.get("state"),
                      yeni_video=rv.get("video_id"), cagri=api.calls - c0, sn=round(time.time() - t0, 1))
