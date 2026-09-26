@@ -170,8 +170,19 @@ KAPI_DOKU_TABAN = 0.30    # komsu bandin doku enerjisi bunun altindaysa zemin ZA
                           # 0.000, bant 0.053 -> oran 52582). O durumda bandin
                           # kendisinin de duz kalmasi istenir.
 KAPI_TON = 4.0            # ton farki (0-255)
-KAPI_HAYALET = 1.5        # eski glif bolgesi ile bandin geri kalani arasinda
-                          # DUSUK FREKANSLI ton farki (harf hayaleti)
+# HAYALET KAPISI, OLCULEN TABANA GORE (2. iterasyon duzeltmesi).
+# Onceki hali "maske-ici vs disi LF farki <= 1.5" idi ve YAPISAL OLARAK HATALIYDI:
+# bu buyukluk zeminin KENDI dalgalanmasini da olcer. Sloganin HIC OLMADIGI temiz
+# seritlerde ayni maskeyle olculen degerler (sentetik dokulu, 4 oteleme):
+#   1.61, 9.72, 2.68, 2.27  -> taban 1.6-9.7
+# Temizlenmis bant 2.77 (tabanin ICINDE), orijinal 17.16 (cok disinda).
+# Yani sabit 1.5 esigi temiz plate'leri de reddediyordu.
+# Yeni olcut kendi kendini kalibre eder: her plate icin taban, sloganin olmadigi
+# seritlerden OLCULUR; temizlenmis bant hem o tabanin icinde kalmali hem de
+# orijinale gore belirgin iyilesmeli.
+KAPI_HAYALET = 1.5        # mutlak alt sinir: taban bundan kucukse bu kullanilir
+KAPI_HAYALET_PAY = 1.25   # olculen tabanin bu kati kadarina izin verilir
+KAPI_IYILESME = 0.35      # temizlenmis deger, orijinalin en fazla bu kati olmali
 TON_SIGMA = 18.0          # ton eslemesi ve hayalet olcumu icin bulanikligin sigmasi
 LUMA = np.array([0.299, 0.587, 0.114], np.float32)
 
@@ -368,17 +379,42 @@ def temizlik_kapilari(eski, yeni, bant, bilgi):
          'doku_kat': round(e_b / max(e_k, 1e-6), 3), 'esik_doku': KAPI_DOKU_KAT,
          'ton_bant': round(t_b, 2), 'ton_komsu': round(t_k, 2),
          'ton_fark': round(abs(t_b - t_k), 2), 'esik_ton': KAPI_TON}
-    # HAYALET: eski glif bolgesi, bandin geri kalanina gore sistematik olarak
-    # acik/koyu kalmis mi? Dusuk frekansta olculur; yerel kontrast maskesi bunu
-    # goremez. (Sentetik dogrulamada ham capraz karisim burada 2.4 veriyordu.)
+    # HAYALET, OLCULEN TABANA GORE. Ayni olcu sloganin HIC OLMADIGI seritlerde
+    # de alinir; zeminin kendi dalgalanmasi boylece hayaletten ayrilir.
     gm = bilgi.get('maske')
     if gm is not None and gm.any() and (~gm).any():
         sg = max(TON_SIGMA * k, 3.0)
-        lf = cv2.GaussianBlur((bant_y.astype(np.float32) @ LUMA), (0, 0), sg)
-        d['hayalet'] = round(abs(float(lf[gm].mean()) - float(lf[~gm].mean())), 3)
+
+        def lf_fark(blok):
+            lf = cv2.GaussianBlur(blok.astype(np.float32) @ LUMA, (0, 0), sg)
+            return abs(float(lf[gm].mean()) - float(lf[~gm].mean()))
+
+        d['hayalet'] = round(lf_fark(bant_y), 3)
+        d['hayalet_ONCE'] = round(lf_fark(eski[a0:a1]), 3)
+        taban = []
+        for ot in (-3 * yuk, -2 * yuk, 2 * yuk, 3 * yuk):
+            y = a0 + ot
+            if y < 0 or y + yuk > yeni.shape[0]:
+                continue
+            serit = yeni[y:y + yuk]
+            # serit temiz olmali: yerel kontrast maskesi yogunsa oge vardir, atla
+            if yerel_maske(serit.astype(np.float32) @ LUMA, MASKE_YARICAP * k,
+                           MASKE_ESIK, MASKE_MIN_ALAN * k * k).mean() > 0.02:
+                continue
+            taban.append(round(lf_fark(serit), 3))
+        d['hayalet_taban'] = taban
+        sinir = max(max(taban) * KAPI_HAYALET_PAY, KAPI_HAYALET) if taban else KAPI_HAYALET
+        d['hayalet_siniri'] = round(sinir, 3)
+        d['iyilesme_orani'] = (round(d['hayalet'] / d['hayalet_ONCE'], 3)
+                               if d['hayalet_ONCE'] > 1e-6 else None)
+        hayalet_ok = (d['hayalet'] <= sinir
+                      and (d['iyilesme_orani'] is None
+                           or d['iyilesme_orani'] <= KAPI_IYILESME))
     else:
-        d['hayalet'] = None
-    d['esik_hayalet'] = KAPI_HAYALET
+        d['hayalet'] = d['hayalet_ONCE'] = d['hayalet_taban'] = None
+        d['hayalet_siniri'] = d['iyilesme_orani'] = None
+        hayalet_ok = True
+    d['esik_iyilesme'] = KAPI_IYILESME
     d['murekkep_siniri'] = round(max(o_k * KAPI_MUREKKEP_KAT, KAPI_MUREKKEP_TABAN), 6)
     if e_k < KAPI_DOKU_TABAN:          # duz zemin: oran yerine mutlak olcut
         d['doku_olcut'] = 'duz zemin - mutlak'
@@ -390,7 +426,7 @@ def temizlik_kapilari(eski, yeni, bant, bilgi):
     d['gecti'] = bool(o_b <= max(o_k * KAPI_MUREKKEP_KAT, KAPI_MUREKKEP_TABAN)
                       and doku_ok
                       and d['ton_fark'] <= KAPI_TON
-                      and (d['hayalet'] is None or d['hayalet'] <= KAPI_HAYALET))
+                      and hayalet_ok)
     return d
 
 

@@ -39,7 +39,9 @@ def kalinti_olc(yol):
     import cv2
     a = np.asarray(Image.open(yol).convert('L')).astype(np.float32)
     H = a.shape[0]
-    beyaz = a.mean(1) > 200
+    # Etiket seridi TAM beyaz ve tekduze; acik zeminli edisyonlarda (Champagne
+    # 209, Parchment ~205) sadece parlaklik esigi yetmez, std de gerekir.
+    beyaz = np.array([(r.mean() > 250 and r.std() < 12) for r in a])
     gruplar, cur = [], None
     for y, v in enumerate(beyaz):
         if v:
