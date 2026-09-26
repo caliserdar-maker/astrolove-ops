@@ -316,20 +316,44 @@ def alt_yenile(api, shop, c, lid, n, yol, alt, eski_id):
     log(f"{c} alt metin: sira {n} yeni foto {yeni_id} (fark {f}) dogrulandi, eski {eski_id} silindi")
 
 
-def baglan(api, shop, lid, SET, g):
-    """Renk varyasyonlari: renk -> SET renk dosyasi -> o siradaki gorsel id. Tutmayan varsa yazar; son durumu doner."""
+def renk_degerleri(api, lid, renkler):
+    """Envanterden renk ozelligi (Primary color): {renk adi: (property_id, value_id)}. var_img'e GUVENILMEZ: Etsy
+    gorsel silinince ona bagli variation-image kaydini da siliyor (GOREV 0024 kok neden)."""
+    inv = api.get(f"/listings/{lid}/inventory") or {}
+    out = {}
+    for pr in inv.get("products") or []:
+        for pv in pr.get("property_values") or []:
+            for vid, val in zip(pv.get("value_ids") or [], pv.get("values") or []):
+                if val in renkler:
+                    out.setdefault(val, (pv.get("property_id"), vid))
+    return out
+
+
+def baglan(api, shop, lid, SET, g, rv=None, yaz=True):
+    """Renk varyasyonlari (GOREV 0024): hedef liste ENVANTERDEN kurulur (renk -> property/value id), renk -> SET renk
+    dosyasi -> o siradaki gorsel id. Canli var_img tam 5 kayit ve her renk dogru gorselde olmali; bos/eksik = FAIL.
+    Tutmuyorsa POST edilir, geri okunur. Doner: (ok, ayrinti)."""
     rid = {x.get("rank"): x.get("listing_image_id") for x in g}
     renk_dosya = SET.get("renk_gorselleri") or {}
     dosya_sira = {x["dosya"]: x["sira"] for x in SET["galeri"]}
-    vimg = var_img(api, shop, lid)
-    vi = [{"property_id": v.get("property_id"), "value_id": v.get("value_id"),
-           "image_id": rid.get(dosya_sira.get(renk_dosya.get(v.get("value"))))} for v in vimg]
-    if any(v.get("image_id") != x["image_id"] for v, x in zip(vimg, vi)):
-        if not all(x["image_id"] for x in vi):
-            raise SystemExit(f"HATA: varyasyon rengi eslesmedi: {[v.get('value') for v, x in zip(vimg, vi) if not x['image_id']]}")
+    rv = rv if rv is not None else renk_degerleri(api, lid, set(renk_dosya))
+    hedef = {r: rid.get(dosya_sira.get(f)) for r, f in renk_dosya.items()}
+    if len(rv) != len(renk_dosya) or not all(hedef.values()):
+        raise SystemExit(f"HATA: renk eslesmesi eksik: envanter {sorted(rv)} | gorsel {hedef}")
+
+    def durum():
+        vm = {v.get("value"): v.get("image_id") for v in var_img(api, shop, lid)}
+        return vm, len(vm) == len(hedef) and all(vm.get(r) == hedef[r] for r in hedef)
+
+    vm, ok = durum()
+    ayr = {"once": len(vm), "yazildi": False}
+    if not ok and yaz:
+        vi = [{"property_id": rv[r][0], "value_id": rv[r][1], "image_id": hedef[r]} for r in hedef]
         api.post_json(f"/shops/{shop}/listings/{lid}/variation-images", {"variation_images": vi})
-        vimg = var_img(api, shop, lid)
-    return all(v.get("image_id") == rid.get(dosya_sira.get(renk_dosya.get(v.get("value")))) for v in vimg)
+        vm, ok = durum()
+        ayr["yazildi"] = True
+    ayr.update(sonra=len(vm), ok=ok)
+    return ok, ayr
 
 
 def onar(api, shop, a, c, lid, r, ref_alt, tfoto, tvpath=None, yeni_video=None):
@@ -357,7 +381,7 @@ def onar(api, shop, a, c, lid, r, ref_alt, tfoto, tvpath=None, yeni_video=None):
     r["alt_duzeltilen"] = [x.get("rank") for x in alt_yanlis]
     if alt_yanlis:
         g = sirali(api, lid)
-    var_ok = baglan(api, shop, lid, SET, g)
+    var_ok, r["varyasyon_ayrinti"] = baglan(api, shop, lid, SET, g)
     if tvpath:                                            # GOREV 0019: video icerik + id denetimi, gerekirse yenileme
         vok, r["video"] = video_duzelt(api, shop, c, lid, d / "VIDEO.mp4", tvpath, yeni_video)
         r.setdefault("kontrol", {})["video_1"] = bool(vok)
@@ -405,7 +429,7 @@ def tahmin(n_eski, video_var):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--mod", choices=["oku", "denetle", "video", "yukle"], required=True)
+    ap.add_argument("--mod", choices=["oku", "denetle", "video", "varyasyon", "yukle"], required=True)
     ap.add_argument("--metin", required=True, help="METIN_78.csv (ilan_id, cift)")
     ap.add_argument("--setler", required=True, help="yerel dizin: <CIFT>/SET.json (oku) ya da tam set (yukle)")
     ap.add_argument("--ciftler", default="", help="yukle: virgullu CIFT listesi (bos = seti olan hepsi, referans haric)")
@@ -486,6 +510,34 @@ def main():
         rapor["video_ozet"] = {"denetlenen": len(secv), "tutmayan": eski}
         rapor["kota_son"], rapor["cagri"] = kota(api), api.calls
         log(f"VIDEO OZET {json.dumps(rapor['video_ozet'])} | cagri {api.calls}")
+        (OUT / "GALERI_TAMSET.json").write_text(json.dumps(rapor, ensure_ascii=False, indent=1))
+        return
+
+    if a.mod == "varyasyon":                             # GOREV 0024: tarama + yalniz bozuk ilanlara baglan (5 renk)
+        secv = [x for x in a.ciftler.split(",") if x] or sorted(c for c, x in (onceki.get("ilan") or {}).items()
+                                                               if x.get("sonuc") == "PASS")
+        rc_ = cift_anahtar(" ".join(REF_CIFT))
+        if rc_ in ilan and rc_ not in secv:
+            secv.append(rc_)                              # CL her zaman taranir (salt okuma)
+        rapor["varyasyon"] = {}
+        for c in secv:
+            try:
+                SET = json.loads((Path(a.setler) / c / "TAM_SET" / "SET.json").read_text())
+                ok, ayr = baglan(api, shop, ilan[c], SET, galeri(api, ilan[c]), yaz=ilan[c] != REF_ID)  # CL: salt okuma
+                rapor["varyasyon"][c] = dict(ayr, ilan_id=ilan[c])
+            except (SystemExit, Exception) as e:          # 429 haric ilan FAIL, siradakine gec
+                if "429" in str(e):
+                    raise
+                rapor["varyasyon"][c] = {"ok": False, "hata": f"{type(e).__name__}: {str(e)[:200]}"}
+            log(f"{c} varyasyon {rapor['varyasyon'][c]}")
+            if api.calls > a.butce:
+                log(f"DUR: butce {a.butce}"); break
+        vv = rapor["varyasyon"]
+        rapor["varyasyon_ozet"] = {"taranan": len(vv), "bozuktu": sorted(c for c, x in vv.items() if x.get("yazildi") or not x.get("ok")),
+                                   "duzeltildi": sorted(c for c, x in vv.items() if x.get("yazildi") and x.get("ok")),
+                                   "hala_fail": sorted(c for c, x in vv.items() if not x.get("ok"))}
+        rapor["kota_son"], rapor["cagri"] = kota(api), api.calls
+        log(f"VARYASYON OZET {json.dumps(rapor['varyasyon_ozet'])} | cagri {api.calls}")
         (OUT / "GALERI_TAMSET.json").write_text(json.dumps(rapor, ensure_ascii=False, indent=1))
         return
 
@@ -603,7 +655,7 @@ def main():
                 continue
             alt = {n: alt_uyarla(ref_alt.get(cl, ""), A_, B_)[:250].rstrip() for n, _, cl in foto}
             g3 = kur(api, shop, c, lid, foto, alt, galeri(api, lid), 0)   # guvenli akis: yalniz sona ekleme
-            baglan(api, shop, lid, SET, g3)
+            baglan(api, shop, lid, SET, g3)[0]
             for v in eski_vid:
                 api.delete(f"/shops/{shop}/listings/{lid}/videos/{v.get('video_id')}")
             with open(vpath, "rb") as fh:
@@ -611,8 +663,9 @@ def main():
                                    data={"name": f"{c}.mp4"})
             # geri okuma
             g2 = sirali(api, lid)
+            var_ok = False
             if [x.get("rank") for x in g2] == list(range(1, 14)):
-                baglan(api, shop, lid, SET, g2)      # video sonrasi varyasyon bagini dogrula (tutmuyorsa bir kez daha yaz)
+                var_ok, r["varyasyon_ayrinti"] = baglan(api, shop, lid, SET, g2)   # video sonrasi dogrula/yaz
             rid = {x.get("rank"): x.get("listing_image_id") for x in g2}
             fk = icerik(g2, foto)                                             # 13 foto olculur, rapora yazilir
             tfoto = tuzak_foto(c)
@@ -623,7 +676,6 @@ def main():
             tvpath = tuzak_video(c)
             volc = video_olc(v2[0][1], vpath, tvpath) if len(v2) == 1 and v2[0][1] else {"ok": None, "not": "isleniyor"}
             r["video"] = {"yeni_id": yvid, "canli_id": [x[0] for x in v2], "olcum": volc}
-            vm2 = {x.get("value"): x.get("image_id") for x in var_img(api, shop, lid)}
             L2 = api.get(f"/listings/{lid}") or {}
             kontrol = {
                 "foto_13": len(g2 or []) == 13,
@@ -632,7 +684,7 @@ def main():
                 "alt_metin": all((x.get("alt_text") or "") == alt_uyarla(ref_alt.get(foto[x.get("rank") - 1][2], ""), A_, B_)[:250].rstrip()
                                  for x in g2),
                 "video_1": len(v2) == 1 and v2[0][0] == yvid and volc.get("ok") is not False,   # GOREV 0019
-                "varyasyon": all(vm2.get(v.get("value")) == rid.get(dosya_sira[renk_dosya[v.get("value")]]) for v in vimg_once),
+                "varyasyon": bool(var_ok),                                     # GOREV 0024: envantere gore 5/5
                 "state_degismedi": L2.get("state") == X.get("state"),
             }
             r.update(icerik_fark=fk, cift=ck)
