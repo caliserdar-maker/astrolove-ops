@@ -22,9 +22,25 @@ Image.MAX_IMAGE_PIXELS = None
 PLATES = 'gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PLATES'
 W = Path('_cdenetim').resolve(); W.mkdir(exist_ok=True)
 EDISYONLAR = ['BLUE', 'BLACK', 'PURE_WHITE', 'MODERN', 'VINTAGE']
-# Canva sayfasi 3000x4000; slogan katmani top 3427, left 1035, 930x96.
-SLOGAN_KUTU_3000 = (1035, 3427, 1035 + 930, 3427 + 96)
-PAY_3000 = 60          # bandin disindan referans doku icin pay
+# Slogan katmaninin Canva SAYFA koordinati ve sayfa genisligi, oran basina
+# (read-design ciktisindan olculdu, 26 Eyl). Modern/Vintage 4/5 ve A'da
+# yerlesim Blue/Black'ten farkli oldugu icin edisyon istisnasi var.
+ORAN = {'30x40': '3_4', '24x32': '3_4', '18x24': '3_4', '12x16': '3_4',
+        '24x30': '4_5', '16x20': '4_5', '8x10': '4_5',
+        '24x36': '2_3', '20x30': '2_3', '16x24': '2_3', '12x18': '2_3',
+        '11x14': '11_14', 'A1': 'A', 'A2': 'A', 'A3': 'A', 'A4': 'A'}
+KUTU = {'3_4': ((1035, 3427, 1965, 3523), 3000),
+        '4_5': ((1419.84, 4280.58, 2580.16, 4400.0), 4000),
+        '2_3': ((1343.50, 5014.87, 2656.50, 5150.0), 4000),
+        '11_14': ((1161.75, 3598.50, 2138.25, 3699.0), 3300),
+        'A': ((1210.26, 4149.31, 2297.74, 4261.23), 3508)}
+KUTU_ISTISNA = {('MODERN', '4_5'): ((1418.75, 4283.93, 2581.25, 4403.57), 4000),
+                ('VINTAGE', '4_5'): ((1418.75, 4283.93, 2581.25, 4403.57), 4000),
+                ('MODERN', 'A'): ((1189.11, 4214.23, 2318.89, 4330.50), 3508),
+                ('VINTAGE', 'A'): ((1189.11, 4214.23, 2318.89, 4330.50), 3508),
+                ('MODERN', '11_14'): ((1161.44, 3599.44, 2138.56, 3700.0), 3300),
+                ('VINTAGE', '11_14'): ((1161.44, 3599.44, 2138.56, 3700.0), 3300)}
+PAY_3000 = 60          # bandin disindan referans doku icin pay (3000 genislik olcegi)
 SAPMA_ESIK = 4.0       # ic_p99 - dis_p99 (kalinti_olc2 ile ayni esik)
 
 
@@ -36,12 +52,12 @@ def rc(*a, timeout=1800):
     return r.stdout
 
 
-def serit(yol):
-    """Plate'ten slogan bandini (paylı) gri olarak keser."""
+def serit(yol, kutu, sayfa_en):
+    """Plate'ten slogan bandini (payli) gri olarak keser."""
     with Image.open(yol) as im:
-        k = im.width / 3000.0
-        x0, y0, x1, y1 = SLOGAN_KUTU_3000
-        p = PAY_3000 * k
+        k = im.width / float(sayfa_en)
+        x0, y0, x1, y1 = kutu
+        p = PAY_3000 * sayfa_en / 3000.0 * k
         kutu = (max(int(x0 * k - p), 0), max(int(y0 * k - p), 0),
                 min(int(x1 * k + p), im.width), min(int(y1 * k + p), im.height))
         return np.asarray(im.crop(kutu).convert('L')).astype(np.float32)
@@ -89,32 +105,55 @@ def kenar_olc(once, sonra, m):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--boy', default='30x40')
+    ap.add_argument('--boy', default='30x40', help='virgulle; "hepsi" = tum satilan boylar')
     ap.add_argument('--edisyon', default='')
     a = ap.parse_args()
     eds = [e for e in EDISYONLAR if not a.edisyon or e in a.edisyon.split(',')]
-    rapor = {}
+    boylar = list(ORAN) if a.boy == 'hepsi' else a.boy.split(',')
+    rapor, say = {}, {'TEMIZ': 0, 'IZ/OLCULEMEDI': 0, 'hata': 0}
     for ed in eds:
-        try:
-            ham, yeni = W / f'HAM_{ed}.png', W / f'CANVA_{ed}.png'
-            rc('copyto', f'{PLATES}/HAM/{ed}_{a.boy}.png', str(ham))
-            rc('copyto', f'{PLATES}/{ed}_CANVA_{a.boy}.png', str(yeni))
-            once, sonra = serit(ham), serit(yeni)
-            ham.unlink(missing_ok=True); yeni.unlink(missing_ok=True)
-            if once.shape != sonra.shape:
-                rapor[ed] = {'hata': f'serit olcusu farkli {once.shape} {sonra.shape}'}
-                continue
-            m = maske(once, sonra)
-            if m.sum() < 200 or (~m).sum() < 200:
-                rapor[ed] = {'hata': f'maske kucuk ({int(m.sum())} px)'}
-                continue
-            s, k = sapma_olc(once, sonra, m), kenar_olc(once, sonra, m)
-            rapor[ed] = {'maske_px': int(m.sum()), 'sapma': s, 'kenar': k,
-                         'SONUC': ('TEMIZ' if s['sonuc'] == 'TEMIZ' and k['sonuc'] == 'TEMIZ'
-                                   else f"{s['sonuc']} / {k['sonuc']}")}
-        except BaseException as e:                                    # noqa: BLE001
-            rapor[ed] = {'hata': f'{type(e).__name__}: {e}'}
-    print(json.dumps(rapor, indent=1, ensure_ascii=False))
+        for boy in boylar:
+            anahtar = f'{ed}_{boy}'
+            try:
+                oran = ORAN[boy]
+                kutu, sayfa_en = KUTU_ISTISNA.get((ed, oran), KUTU[oran])
+                ham, yeni = W / f'HAM_{anahtar}.png', W / f'CANVA_{anahtar}.png'
+                try:
+                    rc('copyto', f'{PLATES}/HAM/{ed}_{boy}.png', str(ham))
+                except RuntimeError:
+                    # HAM yalniz POD_PRINT boylarini tutar; turev boyda once
+                    # (slogan duran) plate yok -> maske kurulamaz.
+                    rapor[anahtar] = {'hata': 'HAM plate yok (turev boy)'}
+                    say['hata'] += 1
+                    continue
+                rc('copyto', f'{PLATES}/{ed}_CANVA_{boy}.png', str(yeni))
+                once, sonra = serit(ham, kutu, sayfa_en), serit(yeni, kutu, sayfa_en)
+                ham.unlink(missing_ok=True); yeni.unlink(missing_ok=True)
+                if once.shape != sonra.shape:
+                    rapor[anahtar] = {'hata': f'serit olcusu farkli {once.shape} {sonra.shape}'}
+                    say['hata'] += 1
+                    continue
+                m = maske(once, sonra)
+                if m.sum() < 200 or (~m).sum() < 200:
+                    rapor[anahtar] = {'hata': f'maske kucuk ({int(m.sum())} px)'}
+                    say['hata'] += 1
+                    continue
+                s, k = sapma_olc(once, sonra, m), kenar_olc(once, sonra, m)
+                temiz = s['sonuc'] == 'TEMIZ' and k['sonuc'] == 'TEMIZ'
+                say['TEMIZ' if temiz else 'IZ/OLCULEMEDI'] += 1
+                rapor[anahtar] = {'maske_px': int(m.sum()), 'sapma': s, 'kenar': k,
+                                  'SONUC': 'TEMIZ' if temiz else f"{s['sonuc']} / {k['sonuc']}"}
+            except BaseException as e:                                # noqa: BLE001
+                rapor[anahtar] = {'hata': f'{type(e).__name__}: {e}'}
+                say['hata'] += 1
+    # Ozet once: uzun JSON log kuyrugunda kesiliyor (plate_ozet dersi).
+    for anahtar, d in rapor.items():
+        print(f"{anahtar:24s} {d.get('SONUC') or d.get('hata')}"
+              + (f"  sapma FARK {d['sapma']['FARK']}  kenar oran {d['kenar']['oran']}"
+                 if 'sapma' in d else ''))
+    print('OZET', json.dumps(say))
+    Path('out').mkdir(exist_ok=True)
+    Path('out/canva_denetim.json').write_text(json.dumps(rapor, indent=1, ensure_ascii=False))
 
 
 if __name__ == '__main__':
