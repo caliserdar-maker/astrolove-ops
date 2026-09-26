@@ -204,11 +204,17 @@ def main():
     t.save(W / ad, quality=94)
     rc('copy', str(W / ad), CIK, timeout=900)
     import json
+    # _DOKU_BAGISIK kayitlari ayri bir olcut; onlarda SONRA_sapma_p99 yok.
     gecen = [k for k, v in olcumler.items()
-             if 'hata' not in v and v['SONRA_sapma_p99'] <= ESIK_P99]
+             if not k.endswith('_DOKU_BAGISIK') and 'hata' not in v
+             and v['SONRA_sapma_p99'] <= ESIK_P99]
+    db = {k: v for k, v in olcumler.items() if k.endswith('_DOKU_BAGISIK')}
+    db_temiz = [k for k, v in db.items() if v.get('sonuc') == 'TEMIZ']
     print(json.dumps({'dosya': ad, 'px': list(t.size), 'blok': len(parcalar),
                       'esik_p99': ESIK_P99, 'temiz': gecen,
-                      'temiz_sayi': f'{len(gecen)}/{len(olcumler)}',
+                      'temiz_sayi': f'{len(gecen)}/{len(olcumler) - len(db)}',
+                      'doku_bagisik_temiz': f'{len(db_temiz)}/{len(db)}',
+                      'doku_bagisik_temiz_liste': db_temiz,
                       'eksik': eksik, 'olcumler': olcumler}, indent=1))
 
 
