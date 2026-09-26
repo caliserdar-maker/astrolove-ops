@@ -192,7 +192,7 @@ def main():
     if a.izinli_boy:
         izinli = set(a.izinli_boy.split(","))
         disari = sorted({r[2] for r in degisen} - izinli)
-        if disari or len(degisen) != len(izinli) * 5:
+        if degisen and (disari or len(degisen) != len(izinli) * 5):     # 0 degisim = zaten hedefte, kapi degil
             hata.append(f"izinli disi degisim: {len(degisen)} hucre (beklenen {len(izinli) * 5}), boy {disari}")
 
     md = [f"# B plani fiyat — ilan {lid} ({a.mod.upper()})", "",
@@ -214,6 +214,9 @@ def main():
     else:
         if a.confirm != "FIYAT_B":
             raise SystemExit("HATA: yaz icin --confirm FIYAT_B gerekir. DUR.")
+        if a.izinli_boy and not degisen and not bilinmeyen:
+            log(f"ZATEN HEDEFTE: ilan {lid} (degisecek hucre yok, yazma yok)")
+            sys.exit(4)
         if a.yalniz_active and L.get("state") != "active":
             log(f"ATLANDI: ilan {lid} state={L.get('state')} (active degil, dokunulmadi)")
             sys.exit(3)

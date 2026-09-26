@@ -1,0 +1,75 @@
+name: fiyat-3999
+
+# GOREV 0035 md.1 - Serdar DOGRUDAN onayi (26 Eyl 2026): 78 POD ilaninda 8x10 ve A4 -> 39.99 USD (5 renk).
+# Sira: kuru (yazma yok, diff) -> tek (1 ilan canli + geri okuma) -> hepsi. Ilan basina tek updateListingInventory
+# (fiyat_b.py); updateListing yok; aktif olmayan ilana dokunulmaz; izinli 10 hucre disi degisim = KAPI.
+# Cikti: Drive TEMP/POD_ORDERS/FIYAT_3999_* (+ ilan basina ONCE/SONRA yedegi FIYAT_3999_YEDEK_<mod>.tgz).
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      mod:
+        description: "kuru | tek | hepsi"
+        required: true
+        default: "kuru"
+      ilan:
+        description: "tek mod icin ilan id"
+        default: "4570143815"
+
+jobs:
+  fiyat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    concurrency:
+      group: etsy-token
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Fiyat (${{ inputs.mod }})
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          MOD: ${{ inputs.mod }}
+          ILAN: ${{ inputs.ilan }}
+        run: |
+          set -euo pipefail
+          case "$MOD" in kuru|tek|hepsi) ;; *) echo "HATA: mod $MOD"; exit 1;; esac
+          umask 077; mkdir -p _work
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/METIN_78.csv" _work/METIN_78.csv
+          rc=0; python scripts/pod/fiyat_3999.py "$MOD" _work/METIN_78.csv --ilan "$ILAN" || rc=$?
+          H="gdrive:ASTROLOVE/TEMP/POD_ORDERS"
+          [ -d out/fb ] && tar czf "out/FIYAT_3999_YEDEK_${MOD}.tgz" -C out fb || true
+          for f in out/FIYAT_3999_*; do [ -f "$f" ] && rclone copyto "$f" "$H/$(basename "$f")" -q || true; done
+          exit $rc
+      - name: Token geri yaz
+        if: always()
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || echo "Token yenilenmedi"
+      - if: always()
+        run: rm -rf _work out ~/.config/rclone
