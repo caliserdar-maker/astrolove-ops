@@ -8,7 +8,8 @@
            baska cift ise YANLIS_CIFT. Esik kalibrasyonu: bilinen ESKI (AQUARIUS_SCORPIO canli) ile bilinen YENI
            (ARIES_LEO canli) d_beklenen degerlerinin ortasi; ESKI <= YENI ise DUR. Eski slogan ("TWO SOULS" /
            "ONE BOND") karelerde OCR ile aranir -> varsa ESKI.
-           Sonuc: YENI / ESKI / YANLIS_CIFT / YOK (video yok) / BEKLENEN_YOK (A1_77'de VIDEO.mp4 yok).
+           Sonuc: YENI (d <= esik ve 12.6 +- 0.3 sn) / ESKI (eski slogan ya da d > 10 x esik) / FARKLI (arada) /
+           YANLIS_CIFT / YOK (video yok) / BEKLENEN_YOK (A1_77'de VIDEO.mp4 yok).
    KAPAK : canli rank 1 ile TAM_SET/01_kapak_MB.jpg 256px gri fark <= 0.001 -> YENI, degilse ESKI; TAM_SET yoksa
            BEKLENEN_YOK (slogan OCR bilgisiyle).
 Cikti: out/CANLI_VIDEO_KAPAK.csv, out/CANLI_VIDEO_KAPAK_OZET.json
@@ -154,6 +155,24 @@ def beklenen_isle(arg):
         return c, None, None, None
 
 
+def esik_bul(kal, dler):
+    """Esik: bilinen eski/yeni ciftin ortasi - ANCAK ikisi olculerek ayrisiyorsa (eski >= 2 x yeni). 26 Eyl olcumu:
+    'bilinen eski' AQUARIUS_SCORPIO bu arada yenilenmis (0.146 ~ ARIES_LEO 0.144) -> kalibrasyon gecersiz; o zaman
+    esik, olculen d dagiliminda alttan ilk >= 3 kat boslugun geometrik ortasi (yeni kume ust siniri; 26 Eyl:
+    0.147 -> 0.636, esik ~0.31; medya olcumu 'dogru 0.30' ile tutarli)."""
+    e, y = kal.get(KAL_ESKI), kal.get(KAL_YENI)
+    if e is not None and y is not None and e >= 2 * max(y, 1e-6):
+        return round((e + y) / 2, 3)
+    d = sorted(x for x in dler if x is not None and x > 0)
+    if len(d) < 2:
+        sys.exit(f"DUR: esik kurulamadi {kal}")
+    i = next((k for k in range(len(d) - 1) if d[k + 1] >= 3 * d[k]), None)
+    if i is None:
+        sys.exit(f"DUR: d dagiliminda >= 3 kat bosluk yok, esik kurulamadi {kal}")
+    log(f"kalibrasyon ayrismiyor {kal}; en buyuk bosluk {d[i]} -> {d[i + 1]}")
+    return round((d[i] * d[i + 1]) ** 0.5, 3)
+
+
 def denetle(canli_json, a77, cl_v5):
     t0 = time.time()
     OUT.mkdir(exist_ok=True)
@@ -190,10 +209,8 @@ def denetle(canli_json, a77, cl_v5):
     # kalibrasyon (0028 md.3)
     kal = {k: next((r.get("d_beklenen") for r in R.values() if r["cift"] == k), None) for k in (KAL_ESKI, KAL_YENI)}
     log(f"kalibrasyon: {KAL_ESKI} (eski) d={kal[KAL_ESKI]}, {KAL_YENI} (yeni) d={kal[KAL_YENI]}")
-    if kal[KAL_ESKI] is None or kal[KAL_YENI] is None or kal[KAL_ESKI] <= kal[KAL_YENI]:
-        sys.exit(f"DUR: kalibrasyon kurulamadi {kal}")
-    esik = round((kal[KAL_ESKI] + kal[KAL_YENI]) / 2, 3)
-    log(f"video esigi (eski/yeni ortasi): {esik}")
+    esik = esik_bul(kal, [r["d_beklenen"] for r in R.values() if r.get("d_beklenen") is not None])
+    log(f"video esigi: {esik}")
 
     satir = []
     for lid, r in sorted(R.items(), key=lambda kv: kv[1]["cift"]):
@@ -208,10 +225,12 @@ def denetle(canli_json, a77, cl_v5):
             v = "BEKLENEN_YOK"
         elif r.get("en_yakin") and r["en_yakin"] != c and r["d_en_yakin"] < r["d_beklenen"]:
             v = "YANLIS_CIFT"
-        elif r["d_beklenen"] is not None and r["d_beklenen"] <= esik:
+        elif r["d_beklenen"] is not None and r["d_beklenen"] <= esik and abs((r.get("sure") or 0) - 12.6) <= 0.3:
             v = "YENI"
-        else:
+        elif r["d_beklenen"] is not None and r["d_beklenen"] > 10 * esik:
             v = "ESKI"
+        else:
+            v = "FARKLI"                                  # ne beklenen ne eski slogan (or. CL canli 12.0 sn surum)
         kb = a77 / c / "TAM_SET" / "01_kapak_MB.jpg"
         if not r.get("kapak_yol"):
             k, kf = "YOK", None
