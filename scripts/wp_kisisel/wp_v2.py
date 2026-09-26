@@ -523,8 +523,14 @@ def main():
     return rapor, urun, geo_ref
 
 
-def kapilar(urun, geo_ref, duzen, orijinal, cift, cikti):
-    """Kapi 2-5: halka/sembol yeri, 4 renkte metin birebirligi, ortalama, kenar payi."""
+def kapilar(urun, geo_ref, duzen, orijinal, cift, cikti, edisyonlar=None):
+    """Kapi 2-5: halka/sembol yeri, renkler arasi metin birebirligi, ortalama, kenar payi.
+
+    edisyonlar: bu kosunun edisyon listesi. Verilmezse modulun EDISYONLAR'i.
+    Kisisel edisyonlari (PURE_WHITE/BLACK/BLUE...) farkli oldugu icin ZORUNLU:
+    liste tutmazsa renkler arasi kapilar SESSIZCE atlanirdi.
+    """
+    EDS = list(edisyonlar) if edisyonlar else EDISYONLAR
     K = {"halka_sembol": [], "metin_4renk": {}, "ortalama": [], "kenar_payi": [],
          "ek1_mesaj_renk": [], "ek2_yildiz": [], "ek3_esit_bosluk": [], "ek4_harf_yuksekligi": {},
          "ek4_mesaj_isimden_buyuk_degil": [], "ek5_mesaj_bandi": []}
@@ -601,15 +607,15 @@ def kapilar(urun, geo_ref, duzen, orijinal, cift, cikti):
     for dev in CIHAZLAR:
         d = {}
         for ad in ("sol", "sag", "mesaj"):
-            kut = [olculen[(ed, dev)][ad]["kutu"] for ed in EDISYONLAR if olculen.get((ed, dev), {}).get(ad)]
-            if len(kut) == len(EDISYONLAR):
+            kut = [olculen[(ed, dev)][ad]["kutu"] for ed in EDS if olculen.get((ed, dev), {}).get(ad)]
+            if len(kut) == len(EDS):
                 k = np.asarray(kut)
                 d[ad] = {"maks_sapma_px": int(np.abs(k - k[0]).max()), "gecti": bool(np.abs(k - k[0]).max() <= 1)}
         K["metin_4renk"][dev] = d
     # EK4: ayni cihazda 4 renkte isim harf yuksekligi (+-1 px)
     for dev in CIHAZLAR:
-        h = [ek4_olcu[(ed, dev)] for ed in EDISYONLAR if (ed, dev) in ek4_olcu]
-        if len(h) == len(EDISYONLAR):
+        h = [ek4_olcu[(ed, dev)] for ed in EDS if (ed, dev) in ek4_olcu]
+        if len(h) == len(EDS):
             K["ek4_harf_yuksekligi"][dev] = {"px": h, "yayilim_px": int(max(h) - min(h)),
                                              "gecti": bool(max(h) - min(h) <= 1)}
     liste = ("halka_sembol", "ortalama", "kenar_payi", "ek1_mesaj_renk", "ek2_yildiz",

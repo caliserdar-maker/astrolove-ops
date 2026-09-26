@@ -145,7 +145,7 @@ jobs:
           [ -d _out2 ] || exit 0
           rclone copy _out2 "gdrive:ASTROLOVE/TEMP/DIJITAL_78/WALLPAPER_ORNEK_V2" -q
           echo "WALLPAPER_ORNEK_V2 (dosya | bayt | Drive id)"
-          rclone lsf "gdrive:ASTROLOVE/TEMP/DIJITAL_78/WALLPAPER_ORNEK_V2" --format "psi" --separator " | " --files-only | sed 's/^/  - /'
+          rclone lsf "gdrive:ASTROLOVE/TEMP/DIJITAL_78/V3_BASKI/ORNEK" --format "psi" --separator " | " --files-only -R | sed 's/^/  - /'
 
       - name: V3 - kisisel siparis murekkebi + CLEAN plaka (yalniz [v3])
         # Murekkep kaynagi kisisel'in SIPARIS URETICISI: maske = baski - kisisel PLATE.
@@ -153,12 +153,15 @@ jobs:
         if: ${{ contains(github.event.head_commit.message, '[v3]') || contains(github.event.head_commit.message, '[v3olcum]') }}
         env:
           MSG: ${{ github.event.head_commit.message }}
-          V3_BASKI: ${{ vars.V3_BASKI || 'gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/ORNEK_ARIES_LEO' }}
+          V3_BASKI: ${{ vars.V3_BASKI || 'gdrive:ASTROLOVE/TEMP/DIJITAL_78/V3_BASKI' }}
+          V3_EDISYONLAR: ${{ vars.V3_EDISYONLAR || 'PURE_WHITE,BLACK,BLUE' }}
+          V3_CIFTLER: ${{ vars.V3_CIFTLER || 'CANCER_LIBRA,SAGITTARIUS_SAGITTARIUS' }}
+          V3_ESLESME: ${{ vars.V3_ESLESME }}
         run: |
           set -euo pipefail
           mkdir -p _v3/baski _v3/plate _v3/temiz _v3/geom _v3/orijinal _out3
-          rclone copy "$V3_BASKI" _v3/baski -q --include "*24X32*"
-          rclone copy "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PLATES" _v3/plate -q --include "*_24X32.png"
+          rclone copy "$V3_BASKI" _v3/baski -q --include "*24x32*" --include "*24X32*"
+          rclone copy "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PLATES" _v3/plate -q --include "*24x32*" --include "*24X32*"
           rclone copy "gdrive:ASTROLOVE/TEMP/WP_PLATES/CLEAN" _v3/temiz -q --include "PLATE_*_CLEAN.png"
           rclone copy "gdrive:ASTROLOVE/TEMP/WP_PLATES" _v3/geom -q --include "GEOM_*.json" --max-depth 1
           rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/ARIES_LEO" _v3/orijinal -q --include "AstroLove_*.jpg"
@@ -166,18 +169,23 @@ jobs:
           free -g | head -2; df -h / | tail -1
           EK=""
           case "$MSG" in *"[v3olcum]"*) EK="--sadece-olcum";; *) cp docs/operations/WP_V2_HATA_27_DURUM.md _out3/;; esac
+          if [ -z "$(ls -A _v3/baski 2>/dev/null)" ]; then
+            echo "DUR: $V3_BASKI bos veya yok - kisisel'in isimli 24x32 baski dosyalari gerekli."
+            exit 1
+          fi
+          ES=""; [ -n "${V3_ESLESME:-}" ] && ES="--eslesme $V3_ESLESME"
           python scripts/wp_kisisel/wp_siparis.py --baski _v3/baski --plate _v3/plate \
             --temiz _v3/temiz --plakalar _v3/geom --orijinal _v3/orijinal --cikti _out3 \
-            --cift Aries_Leo $EK
+            --edisyonlar "$V3_EDISYONLAR" --ciftler "$V3_CIFTLER" $ES $EK
 
       - name: V3 Drive'a yaz (yalniz [v3])
         if: ${{ always() && contains(github.event.head_commit.message, '[v3]') }}
         run: |
           set -euo pipefail
           [ -d _out3 ] || exit 0
-          rclone copy _out3 "gdrive:ASTROLOVE/TEMP/DIJITAL_78/WALLPAPER_ORNEK_V2" -q
+          rclone copy _out3 "gdrive:ASTROLOVE/TEMP/DIJITAL_78/V3_BASKI/ORNEK" -q
           echo "WALLPAPER_ORNEK_V2 (dosya | bayt | Drive id)"
-          rclone lsf "gdrive:ASTROLOVE/TEMP/DIJITAL_78/WALLPAPER_ORNEK_V2" --format "psi" --separator " | " --files-only | sed 's/^/  - /'
+          rclone lsf "gdrive:ASTROLOVE/TEMP/DIJITAL_78/V3_BASKI/ORNEK" --format "psi" --separator " | " --files-only -R | sed 's/^/  - /'
 
       - name: Rapor birlestir (yalniz [rapor])
         if: ${{ contains(github.event.head_commit.message, '[rapor]') }}

@@ -89,13 +89,23 @@ def t_dosya_bul():
         d = Path(td)
         (d / "SIPARIS_ARIES_LEO_MIDNIGHT_BLUE_24X32.png").write_bytes(b"x")
         (d / "SIPARIS_ARIES_LEO_MIDNIGHT_BLUE_24X32.json").write_text("{}")   # yan dosya
-        f = SP.dosya_bul(d, "*MIDNIGHT_BLUE*24X32*", "baski")
+        f = SP.dosya_bul(d, ["MIDNIGHT_BLUE", "24x32"], "baski")
         kontrol("dosya_bul: yan dosya (json) eslesmeyi bozmuyor", f.suffix == ".png", f.name)
+        # GERCEK dosya adi kucuk x ile: PURE_WHITE_24x32.png (26 Eyl olcumu).
+        # Eski buyuk harfli glob bunu KACIRIYORDU - regresyon testi.
+        (d / "PURE_WHITE_24x32.png").write_bytes(b"x")
+        f = SP.dosya_bul(d, ["PURE_WHITE", "24X32"], "plate")
+        kontrol("dosya_bul: buyuk/kucuk harf duyarsiz (PURE_WHITE_24x32.png)",
+                f.name == "PURE_WHITE_24x32.png", f.name)
         (d / "SIPARIS_ARIES_LEO_MIDNIGHT_BLUE_24X32_v2.png").write_bytes(b"x")
-        m = durur(SP.dosya_bul, d, "*MIDNIGHT_BLUE*24X32*", "baski")
+        m = durur(SP.dosya_bul, d, ["MIDNIGHT_BLUE", "24x32"], "baski")
         kontrol("dosya_bul: iki goruntu -> DUR", "2 goruntu eslesmesi" in (m or ""), (m or "")[:70])
-        m = durur(SP.dosya_bul, d, "*WARM_PARCHMENT*24X32*", "baski")
+        m = durur(SP.dosya_bul, d, ["WARM_PARCHMENT", "24x32"], "baski")
         kontrol("dosya_bul: eslesme yok -> DUR", "0 goruntu eslesmesi" in (m or ""))
+        # cift adi da parca olarak suzulur
+        (d / "SIPARIS_CANCER_LIBRA_BLACK_24x32.png").write_bytes(b"x")
+        f = SP.dosya_bul(d, ["BLACK", "24x32", "CANCER_LIBRA"], "baski")
+        kontrol("dosya_bul: cift adiyla suzme", f.name == "SIPARIS_CANCER_LIBRA_BLACK_24x32.png", f.name)
 
 
 def t_olcu_kontrolu():
@@ -108,6 +118,22 @@ def t_olcu_kontrolu():
 
 
 # ---------------------------------------------------------------- halka guard
+def t_murekkep_rengi():
+    """INK_RGB'de olmayan edisyonda (PURE_WHITE/BLACK/BLUE) renk OLCULUR, tahmin edilmez."""
+    ed = "BLUE"
+    zemin, ink = (48, 22, 12), (63, 184, 244)          # BGR
+    plate = np.full((1, 100, 3), zemin, np.uint8)
+    baski = plate.copy(); baski[0, :5] = ink            # %5 murekkep
+    f = baski.astype(np.float32) - plate.astype(np.float32)
+    olculen = SP.murekkep_rengi(baski, plate, f, ed)
+    kontrol("murekkep_rengi: bilinmeyen edisyonda olculuyor",
+            np.allclose(olculen, np.array(ink, np.float32)), f"olculen={olculen.tolist()}")
+    _, _, alfa_o, tani = SP.murekkep(baski, plate, ed, "birak", "uzaklik")
+    kontrol("murekkep: bilinmeyen edisyonda KeyError yok, poz dogru",
+            int((alfa_o > 0).sum()) == 5 and tani["murekkep_kaynagi"] == "olculdu",
+            f"poz={int((alfa_o > 0).sum())} kaynak={tani['murekkep_kaynagi']}")
+
+
 def t_halka_guard():
     from wp_plate_pilot import BOX_NAMES
     alfa = np.zeros((SP.POSTER_H, SP.POSTER_W), np.float32)
@@ -126,7 +152,7 @@ def t_halka_guard():
 
 
 if __name__ == "__main__":
-    for t in (t_uc_grup, t_murekkep, t_dosya_bul, t_olcu_kontrolu, t_halka_guard):
+    for t in (t_uc_grup, t_murekkep, t_murekkep_rengi, t_dosya_bul, t_olcu_kontrolu, t_halka_guard):
         t()
     print(f"\nTOPLAM {len(GECTI) + len(KALDI)} kontrol, {len(GECTI)} PASS, {len(KALDI)} FAIL")
     sys.exit(1 if KALDI else 0)

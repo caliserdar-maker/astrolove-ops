@@ -55,22 +55,26 @@ def log(*a):
 UZANTI = {".png", ".jpg", ".jpeg", ".tif", ".tiff", ".webp"}
 
 
-def dosya_bul(kok, desen, ne):
-    """Tek eslesme bekler; 0 veya >1 eslesmede DURur (tahmin yok).
+def dosya_bul(kok, parcalar, ne):
+    """Adinda verilen tum parcalari (BUYUK/kucuk harf duyarsiz) gecen TEK goruntu.
 
-    Yalniz goruntu uzantilari sayilir: kisisel'in cikti klasorunde yan dosya
-    (json, kucuk onizleme, kontrol raporu) olabilir, bunlar eslesmeyi bozmasin.
+    Glob yerine parca esleme: gercek plate dosyalari `PURE_WHITE_24x32.png`
+    (kucuk x) - 25 Eyl olcumu. Buyuk harfli glob bunu kaciriyordu.
+    Yalniz goruntu uzantilari sayilir; kisisel'in cikti klasorundeki yan dosya
+    (json, onizleme, kontrol raporu) eslesmeyi bozmasin.
     """
-    d = sorted(x for x in Path(kok).glob(desen) if x.suffix.lower() in UZANTI)
+    ad = [x for x in sorted(Path(kok).iterdir()) if x.is_file() and x.suffix.lower() in UZANTI]
+    d = [x for x in ad if all(pz.lower() in x.name.lower() for pz in parcalar)]
     if len(d) != 1:
-        raise SystemExit(f"HATA: {ne} icin '{desen}' -> {len(d)} goruntu eslesmesi: "
-                         f"{[x.name for x in d]}. Tek dosya bekleniyor.")
+        raise SystemExit(f"HATA: {ne} icin {parcalar} -> {len(d)} goruntu eslesmesi: "
+                         f"{[x.name for x in d]}. Tek dosya bekleniyor. "
+                         f"Klasorde {len(ad)} goruntu var.")
     return d[0]
 
 
-def kaynak_oku(baski_kok, plate_kok, ed):
-    b = dosya_bul(baski_kok, f"*{ed.upper()}*24X32*", f"{ed} baski")
-    p = dosya_bul(plate_kok, f"{ed.upper()}_24X32.*", f"{ed} plate")
+def kaynak_oku(baski_kok, plate_kok, ed, cift=""):
+    b = dosya_bul(baski_kok, [ed, "24x32"] + ([cift] if cift else []), f"{ed} baski")
+    p = dosya_bul(plate_kok, [ed, "24x32"], f"{ed} plate")
     baski, plate = imread(b), imread(p)
     for ad, im in ((b.name, baski), (p.name, plate)):
         if (im.shape[1], im.shape[0]) != (POSTER_W, POSTER_H):
@@ -79,6 +83,26 @@ def kaynak_oku(baski_kok, plate_kok, ed):
 
 
 # ------------------------------------------------------------------ murekkep
+def murekkep_rengi(baski, plate, f, ed):
+    """Edisyonun murekkep rengi (BGR). Bilinen edisyonda INK_RGB, degilse OLCULUR.
+
+    kisisel edisyonlari (PURE_WHITE, BLACK, BLUE, MODERN, VINTAGE) gece hattinin
+    INK_RGB tablosunda YOK - 26 Eyl olcumu. Bu durumda renk tahmin edilmez:
+    farkin en guclu %1'indeki baski pikselinin medyani alinir, yani murekkebin
+    kendi olculen rengi. Yeni esik getirmez (nicelik dilimi).
+    """
+    if ed in INK_RGB:
+        r, g, b = INK_RGB[ed]
+        return np.array([b, g, r], np.float32)
+    buy = np.abs(f).max(2)
+    var = buy > 0
+    if not var.any():
+        raise SystemExit(f"HATA: {ed} icin baski - plate farki bos; murekkep rengi olculemez")
+    esik = float(np.quantile(buy[var], 0.99))
+    sec = buy >= esik
+    return np.median(baski[sec].astype(np.float32), axis=0)
+
+
 def murekkep(baski, plate, ed, hayalet="birak", isaret="uzaklik"):
     """ESIK YOK: fark = baski - plate (isaretli), murekkep RENGINE UZAKLIKLA ayrilir.
 
@@ -94,9 +118,8 @@ def murekkep(baski, plate, ed, hayalet="birak", isaret="uzaklik"):
       (25 Eyl): eski murekkebin ALTINDAN cikan YILDIZI altin ekseninde "murekkebe
       yaklasiyor" sayip yeni murekkep saniyordu (53 poster px artik).
     """
-    r, g, b = INK_RGB[ed]
-    ink = np.array([b, g, r], np.float32)
     f = baski.astype(np.float32) - plate.astype(np.float32)
+    ink = murekkep_rengi(baski, plate, f, ed)
     var = np.abs(f).max(2) > 0
     if isaret == "uzaklik":
         d_b = ((baski.astype(np.float32) - ink) ** 2).sum(2)
@@ -114,7 +137,9 @@ def murekkep(baski, plate, ed, hayalet="birak", isaret="uzaklik"):
     # satirindaki %0,02 artik negatif tarafta; aktarima katilirsa kume olcumu
     # 3 yerine 2 kume buluyor.)
     alfa_olcum = poz.astype(np.float32)
-    tani = {"isaret": isaret, "poz_px": int(poz.sum()), "neg_px": int(neg.sum()),
+    tani = {"isaret": isaret, "murekkep_bgr": [round(float(v), 1) for v in ink],
+            "murekkep_kaynagi": "INK_RGB" if ed in INK_RGB else "olculdu",
+            "poz_px": int(poz.sum()), "neg_px": int(neg.sum()),
             "yonsuz_px": int(sifir.sum()),
             "neg_kutu": [int(v) for v in V2.bbox(neg)] if neg.any() else None,
             "neg_maks": round(float(np.abs(f).max(2)[neg].max()), 1) if neg.any() else 0.0}
@@ -185,14 +210,24 @@ def kutular_olc(alfa, halka_ayri=False):
 
 # ------------------------------------------------------------------ uretim
 def uret(ed, baski, plate, fark, alfa, temiz, plakalar, cikti, cift, kutu, aktarim, urun, rapor,
-         halka_kok="", bant=None, tani_m=None):
+         halka_kok="", bant=None, tani_m=None, plaka_ed=None):
+    """plaka_ed: CLEAN/GEOM/gece plakasinin edisyon adi. kisisel edisyonlari
+    (PURE_WHITE/BLACK/BLUE) wallpaper edisyonlarindan (MIDNIGHT_BLUE...) FARKLI;
+    eslesme --eslesme ile ACIKCA verilir, TAHMIN EDILMEZ."""
+    pe = (plaka_ed or ed).upper()
     for dev in CIHAZLAR:
-        yol_p = Path(temiz) / f"PLATE_{ed.upper()}_{dev.upper()}_CLEAN.png"
+        yol_p = Path(temiz) / f"PLATE_{pe}_{dev.upper()}_CLEAN.png"
+        if not yol_p.exists():
+            var = sorted(x.name for x in Path(temiz).glob("PLATE_*_CLEAN.png"))
+            raise SystemExit(f"HATA: CLEAN plaka yok: {yol_p.name} (edisyon {ed} -> plaka {pe}). "
+                             f"Klasorde: {var[:8]}{'...' if len(var) > 8 else ''}. "
+                             f"kisisel edisyonu icin wallpaper plakasi --eslesme ile verilmeli "
+                             f"(ornek: --eslesme BLUE=MIDNIGHT_BLUE); tahmin edilmez.")
         clean = imread(yol_p)
         W, H = DEVICES[dev]
         if (clean.shape[1], clean.shape[0]) != (W, H):
             raise SystemExit(f"HATA: CLEAN plaka {yol_p.name} {clean.shape[1]}x{clean.shape[0]}, beklenen {W}x{H}")
-        geom = WBP.load_geom(plakalar, ed, dev)
+        geom = WBP.load_geom(plakalar, pe, dev)
         A = WBP.place(alfa, dev, clean.shape, geom)[..., None]
         C = clean.astype(np.float32)
         if aktarim == "fark":
@@ -201,7 +236,7 @@ def uret(ed, baski, plate, fark, alfa, temiz, plakalar, cikti, cift, kutu, aktar
             out_f = A * WBP.place(baski.astype(np.float32), dev, clean.shape, geom) + (1 - A) * C
         halka_px = 0
         if halka_kok:                      # halka kisisel PLATE'te kaldi -> gece plakasindan
-            yol_g = Path(halka_kok) / f"PLATE_{ed.upper()}_{dev.upper()}.png"
+            yol_g = Path(halka_kok) / f"PLATE_{pe}_{dev.upper()}.png"
             if not yol_g.exists():
                 raise SystemExit(f"HATA: halkali gece plakasi yok: {yol_g}")
             gece = imread(yol_g)
@@ -238,7 +273,8 @@ def uret(ed, baski, plate, fark, alfa, temiz, plakalar, cikti, cift, kutu, aktar
         else:
             halo = {"medyan": 0.0, "p99": 0.0, "maks": 0.0, "px": 0}
         urun[(ed, dev)] = dict(yol=str(Path(cikti) / ad), plaka=str(yol_p), geom=geom, kapi1=k1, ek5=ek5)
-        rapor.append({"edisyon": ed, "cihaz": dev, "dosya": ad, "aktarim": aktarim,
+        rapor.append({"edisyon": ed, "plaka_edisyonu": pe, "cift": cift, "cihaz": dev,
+                      "dosya": ad, "aktarim": aktarim,
                       "kapi1_maske_disi": k1, "ek5_mesaj_bandi": ek5, "halka_px": halka_px,
                       "tani_murekkep": tani_m, "tani_plate_clean_kenar_farki": halo, "kutular": kutu})
         log(f"{ed} {dev}: maske disi {k1['maks_fark']} (JPEG {k1['jpeg_sonrasi']}) | "
@@ -254,7 +290,12 @@ def main(argv=None):
     ap.add_argument("--plakalar", default="", help="GEOM_<ED>_<DEV>.json (yoksa birim)")
     ap.add_argument("--orijinal", default="", help="kapi 2 icin canli wallpaper'lar")
     ap.add_argument("--cikti", required=True)
-    ap.add_argument("--cift", default="Aries_Leo")
+    ap.add_argument("--cift", default="Aries_Leo", help="tek cift (geriye uyum)")
+    ap.add_argument("--ciftler", default="", help="virgulle birden cok cift: CANCER_LIBRA,SAGITTARIUS_SAGITTARIUS,...")
+    ap.add_argument("--eslesme", default="", help="kisisel edisyonu -> wallpaper plaka edisyonu, "
+                                                 "ornek: BLUE=MIDNIGHT_BLUE,BLACK=DEEP_BLACK. "
+                                                 "Verilmezse edisyon adi aynen kullanilir; "
+                                                 "plaka bulunamazsa DURur (tahmin yok).")
     ap.add_argument("--aktarim", choices=("fark", "maske"), default="fark")
     ap.add_argument("--halka", default="", help="halkali gece plakalari (PLATE_<ED>_<DEV>.png); "
                                                 "kisisel PLATE halkayi iceriyorsa zorunlu")
@@ -266,39 +307,54 @@ def main(argv=None):
     ap.add_argument("--sadece-olcum", action="store_true")
     a = ap.parse_args(argv)
     ed_list = [e.strip() for e in a.edisyonlar.split(",") if e.strip()]
+    cift_list = [c.strip() for c in (a.ciftler or a.cift).split(",") if c.strip()]
+    eslesme = {}
+    for par in (x for x in a.eslesme.split(",") if x.strip()):
+        if "=" not in par:
+            raise SystemExit(f"HATA: --eslesme parcasi 'EDISYON=PLAKA' olmali: {par!r}")
+        k, v = par.split("=", 1)
+        eslesme[k.strip()] = v.strip()
     cikti = Path(a.cikti); cikti.mkdir(parents=True, exist_ok=True)
     bant = halka_bandi() if a.halka else None
+    log(f"edisyonlar={ed_list} ciftler={cift_list} eslesme={eslesme or 'yok (ad aynen)'}")
 
     # --- 1. ASAMA: tum edisyonlar once OLCULUR (uretim yok) --------------
     olcum = {}
-    for ed in ed_list:
-        baski, plate, bn, pn = kaynak_oku(a.baski, a.plate, ed)
-        fark, alfa, alfa_olcum, tani = murekkep(baski, plate, ed, a.hayalet, a.isaret)
-        kutu, bilgi = kutular_olc(alfa_olcum, bool(a.halka))
-        olcum[ed] = {"baski": bn, "plate": pn, "kutular": kutu, "kume": bilgi,
-                     "tani_murekkep": tani, "murekkep_px": int((alfa_olcum > 0).sum())}
-        log(f"OLCUM {ed}: kume={json.dumps(bilgi)}")
-        log(f"       tani={json.dumps(tani)}")
-        log(f"       kutular={json.dumps(kutu)} murekkep_px={olcum[ed]['murekkep_px']}")
-        del baski, plate, fark, alfa, alfa_olcum
+    for cift in cift_list:
+        for ed in ed_list:
+            baski, plate, bn, pn = kaynak_oku(a.baski, a.plate, ed, cift)
+            fark, alfa, alfa_olcum, tani = murekkep(baski, plate, ed, a.hayalet, a.isaret)
+            kutu, bilgi = kutular_olc(alfa_olcum, bool(a.halka))
+            olcum[f"{cift}|{ed}"] = {"cift": cift, "edisyon": ed, "baski": bn, "plate": pn,
+                                     "kutular": kutu, "kume": bilgi, "tani_murekkep": tani,
+                                     "murekkep_px": int((alfa_olcum > 0).sum())}
+            log(f"OLCUM {cift} {ed}: kume={json.dumps(bilgi)}")
+            log(f"       tani={json.dumps(tani)}")
+            log(f"       kutular={json.dumps(kutu)}")
+            del baski, plate, fark, alfa, alfa_olcum
     (cikti / "WP_SIPARIS_OLCUM.json").write_text(json.dumps(olcum, indent=1))
-    if len(ed_list) > 1:
-        sap = {k: int(np.abs(np.asarray([olcum[e]["kutular"][k] for e in ed_list]) -
-                             np.asarray(olcum[ed_list[0]]["kutular"][k])).max())
-               for k in ("sol", "sonsuz", "sag", "mesaj")}
-        log(f"edisyonlar arasi kutu sapmasi (px): {json.dumps(sap)}")
+    for cift in cift_list:                      # ayni ciftte edisyonlar arasi sapma
+        an = [f"{cift}|{e}" for e in ed_list if f"{cift}|{e}" in olcum]
+        if len(an) > 1:
+            sap = {k: int(np.abs(np.asarray([olcum[x]["kutular"][k] for x in an]) -
+                                 np.asarray(olcum[an[0]]["kutular"][k])).max())
+                   for k in ("sol", "sonsuz", "sag", "mesaj")}
+            log(f"{cift}: edisyonlar arasi kutu sapmasi (px): {json.dumps(sap)}")
     if a.sadece_olcum:
         log("SADECE OLCUM: uretim yapilmadi")
         return olcum, [], {}
 
     # --- 2. ASAMA: URETIM ------------------------------------------------
     urun, rapor = {}, []
-    for ed in ed_list:
-        baski, plate, _, _ = kaynak_oku(a.baski, a.plate, ed)
-        fark, alfa, _alfa_o, tani = murekkep(baski, plate, ed, a.hayalet, a.isaret)
-        uret(ed, baski, plate, fark, alfa, a.temiz, a.plakalar or a.temiz, cikti, a.cift,
-             olcum[ed]["kutular"], a.aktarim, urun, rapor, a.halka, bant, tani)
-        del baski, plate, fark, alfa, _alfa_o
+    for cift in cift_list:
+        urun[cift] = {}                 # (ed, dev) anahtari ciftler arasinda cakisirdi
+        for ed in ed_list:
+            baski, plate, _, _ = kaynak_oku(a.baski, a.plate, ed, cift)
+            fark, alfa, _alfa_o, tani = murekkep(baski, plate, ed, a.hayalet, a.isaret)
+            uret(ed, baski, plate, fark, alfa, a.temiz, a.plakalar or a.temiz, cikti, cift,
+                 olcum[f"{cift}|{ed}"]["kutular"], a.aktarim, urun[cift], rapor, a.halka, bant, tani,
+                 eslesme.get(ed, ed))
+            del baski, plate, fark, alfa, _alfa_o
     (cikti / "WP_SIPARIS_URETIM.json").write_text(json.dumps(rapor, indent=1))
     return olcum, rapor, urun
 
@@ -311,16 +367,20 @@ if __name__ == "__main__":
     _a = _s.argv
     cikti = _a[_a.index("--cikti") + 1]
     orij = _a[_a.index("--orijinal") + 1] if "--orijinal" in _a else ""
-    cift = _a[_a.index("--cift") + 1] if "--cift" in _a else "Aries_Leo"
-    duzen = {"kutular": olcum[list(olcum)[0]]["kutular"]}
-    K = V2.kapilar(urun, None, duzen, orij, cift, cikti)
-    log(f"KAPILAR gecti={K['gecti']}")
-    for ad in ("halka_sembol", "ortalama", "kenar_payi", "ek1_mesaj_renk", "ek2_yildiz",
-               "ek3_esit_bosluk", "ek4_mesaj_isimden_buyuk_degil", "ek5_mesaj_bandi"):
-        kot = [x for x in K[ad] if not x["gecti"]]
-        log(f"  {ad}: {len(K[ad]) - len(kot)}/{len(K[ad])} gecti" + (f" | KALAN {kot[:3]}" if kot else ""))
-    log(f"  metin_4renk: {json.dumps(K['metin_4renk'])}")
-    log(f"  ek4_harf_yuksekligi: {json.dumps(K['ek4_harf_yuksekligi'])}")
-    s = V2.sayfalar(urun, orij, cift, cikti)
-    log(f"sayfa: {len(s)} dosya")
-    _s.exit(0 if K["gecti"] else 1)
+    ed_list = sorted({v["edisyon"] for v in olcum.values()},
+                     key=lambda e: [v["edisyon"] for v in olcum.values()].index(e))
+    hepsi_gecti = True
+    for cift, u in urun.items():
+        duzen = {"kutular": olcum[f"{cift}|{ed_list[0]}"]["kutular"]}
+        K = V2.kapilar(u, None, duzen, orij, cift, Path(cikti) / f"KAPI_{cift}", ed_list)
+        log(f"KAPILAR {cift} gecti={K['gecti']}")
+        for ad in ("halka_sembol", "ortalama", "kenar_payi", "ek1_mesaj_renk", "ek2_yildiz",
+                   "ek3_esit_bosluk", "ek4_mesaj_isimden_buyuk_degil", "ek5_mesaj_bandi"):
+            kot = [x for x in K[ad] if not x["gecti"]]
+            log(f"  {ad}: {len(K[ad]) - len(kot)}/{len(K[ad])} gecti" + (f" | KALAN {kot[:3]}" if kot else ""))
+        log(f"  metin_renkler: {json.dumps(K['metin_4renk'])}")
+        log(f"  ek4_harf_yuksekligi: {json.dumps(K['ek4_harf_yuksekligi'])}")
+        sy = V2.sayfalar(u, orij, cift, cikti)
+        log(f"  sayfa: {len(sy)} dosya")
+        hepsi_gecti = hepsi_gecti and K["gecti"]
+    _s.exit(0 if hepsi_gecti else 1)
