@@ -18,6 +18,10 @@ on:
         description: "true = uyusmazligi kanitlanan receipt'e dogru tasiyiciyi yaz (Claude onayi)"
         type: boolean
         default: false
+      tam:
+        description: "true = GOREV 0034 tam salt okuma (lab, takip sayfasi durumu, quote, Etsy shipment alanlari); yaz'i iptal eder"
+        type: boolean
+        default: false
 
 jobs:
   denetle:
@@ -55,14 +59,16 @@ jobs:
           TOKEN_FILE: _work/ETSY_TOKEN.json
           SIP: ${{ inputs.siparisler }}
           YAZ: ${{ inputs.yaz }}
+          TAM: ${{ inputs.tam }}
         run: |
           set -euo pipefail
           umask 077; mkdir -p _work
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
           rclone copyto "gdrive:ASTROLOVE/TEMP/POD_ORDERS_STATE.csv" _work/state.csv
-          args=(_work/state.csv "$SIP"); [ "$YAZ" = "true" ] && args+=(--yaz)
+          args=(_work/state.csv "$SIP"); [ "$YAZ" = "true" ] && args+=(--yaz); [ "$TAM" = "true" ] && args+=(--tam)
           python scripts/prodigi/takip_denetim.py "${args[@]}"
           rclone copyto out/TAKIP_DENETIM.json "gdrive:ASTROLOVE/TEMP/POD_ORDERS/TAKIP_DENETIM.json" -q
+          [ -f out/TAKIP_TAM.json ] && rclone copyto out/TAKIP_TAM.json "gdrive:ASTROLOVE/TEMP/POD_ORDERS/TAKIP_TAM.json" -q || true
       - name: Token geri yaz
         if: always()
         run: |
