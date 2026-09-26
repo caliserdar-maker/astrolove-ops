@@ -650,11 +650,19 @@ def kapilar(urun, geo_ref, duzen, orijinal, cift, cikti, edisyonlar=None, orij_e
     return K
 
 
-def sayfalar(urun, orijinal, cift, cikti):
-    """Cihaz basina 4 renk yan yana + her dosya icin orijinal/yeni kiyas."""
+def sayfalar(urun, orijinal, cift, cikti, edisyonlar=None):
+    """Cihaz basina renkler yan yana + her dosya icin orijinal/yeni kiyas.
+
+    edisyonlar ZORUNLU gibi dusunulmeli: modulun EDISYONLAR'i 4 wallpaper adidir;
+    kisisel edisyonlarinda (BLUE/BLACK) liste BOS kalip yanyana() negatif genislikle
+    cokuyordu (kosu 36233184110: ValueError Width and height must be >= 0).
+    """
+    EDS = list(edisyonlar) if edisyonlar else EDISYONLAR
     ciktilar = []
     for dev in CIHAZLAR:
-        ims = [Image.open(urun[(ed, dev)]["yol"]) for ed in EDISYONLAR if (ed, dev) in urun]
+        ims = [Image.open(urun[(ed, dev)]["yol"]) for ed in EDS if (ed, dev) in urun]
+        if not ims:
+            continue
         yol = Path(cikti) / f"KARSILASTIRMA_4RENK_{dev.upper()}.jpg"
         yanyana(ims, yol); ciktilar.append(str(yol))
     if orijinal:

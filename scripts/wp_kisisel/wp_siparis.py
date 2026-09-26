@@ -403,7 +403,7 @@ if __name__ == "__main__":
         log(f"  ek4_harf_yuksekligi: {json.dumps(K['ek4_harf_yuksekligi'])}")
         if K.get("halka_sembol_atlanan"):
             log(f"  kapi 2 ATLANAN (orijinal bulunamadi): {json.dumps(K['halka_sembol_atlanan'])}")
-        sy = V2.sayfalar(u, orij, cift, cikti)
+        sy = V2.sayfalar(u, orij, cift, cikti, ed_list)
         log(f"  sayfa: {len(sy)} dosya")
         hepsi_gecti = hepsi_gecti and K["gecti"]
     _s.exit(0 if hepsi_gecti else 1)
