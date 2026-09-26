@@ -10,8 +10,14 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
+      mod:
+        description: "tarama = tek ilan + 78 POD uretim/kargo | kiyas = 77 POD ilani referansla (GOREV 0017)"
+        required: true
+        default: "tarama"
+        type: choice
+        options: [tarama, kiyas]
       tek_ilan:
-        description: "Tek okunacak ilan id"
+        description: "tarama: tek okunacak ilan id | kiyas: referans ilan id (canli Cancer-Libra 4570143815)"
         required: true
         default: "4556456145"
 
@@ -22,7 +28,7 @@ concurrency:
 jobs:
   oku:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -57,8 +63,15 @@ jobs:
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
           TOKEN_FILE: _work/ETSY_TOKEN.json
           TEK: ${{ inputs.tek_ilan }}
+          MOD: ${{ inputs.mod }}
         run: |
           set -euo pipefail
+          if [ "$MOD" = "kiyas" ]; then
+            python scripts/etsy/pod_referans_kiyas.py "$TEK" _work/METIN_78.csv
+            rclone copy out "gdrive:ASTROLOVE/TEMP/DIJITAL_78" --include "POD_REFERANS_KIYAS.csv" -q
+            echo "Drive: TEMP/DIJITAL_78/POD_REFERANS_KIYAS.csv"
+            exit 0
+          fi
           python scripts/etsy/pod_uretim_kargo_oku.py "$TEK" _work/METIN_78.csv
           rclone copy out "gdrive:ASTROLOVE/TEMP/DIJITAL_78" --include "POD_URETIM_KARGO_API.csv" --include "POD_KARGO_ULKELER.csv" -q
           echo "Drive: TEMP/DIJITAL_78/POD_URETIM_KARGO_API.csv + POD_KARGO_ULKELER.csv"
