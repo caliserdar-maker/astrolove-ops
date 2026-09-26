@@ -36,7 +36,7 @@ jobs:
           set -euo pipefail
           umask 077; mkdir -p _work
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
-          rclone copyto "gdrive:ASTROLOVE/TEMP/METIN_78.csv" _work/METIN_78.csv
+          rclone copyto "gdrive:ASTROLOVE/TEMP/YAYILIM_78/METIN_78.csv" _work/METIN_78.csv
       - name: Fiyat, SKU ve envanter denetimi
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
