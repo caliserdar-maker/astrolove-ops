@@ -188,6 +188,8 @@ class EdisyonPoster:
         import pilot11, pilot12, pilot16
         import edisyon_uret as eu
         self.p11, self.p12, self.p16, self.eu = pilot11, pilot12, pilot16, eu
+        import mesaj_kapisi                       # GOREV_0020: koyu murekkep tagline duzeltmesi
+        mesaj_kapisi.duzeltme_uygula(pilot12)
         self.sab = json.loads((K / 'scripts' / 'kisisel' / 'ORAN_SABITLERI.json').read_text())
         self.kilitler = self.sab.get('edisyonlar', {})
         self.plate_indi = {}
@@ -797,6 +799,13 @@ def render_et(ed, oran, sayfa, kaynak_bayt, isimler, mesaj, P_blue, P_ed,
     if ek is None or 'maske' not in ek:
         ek = dict(ek or {}); ek['maske'] = degisim_maskesi(poster, kaynak_bayt)
         ek.setdefault('maske_2400', ek['maske'])
+    try:                                          # GOREV_0020 mesaj murekkebi kapisi
+        import mesaj_kapisi
+        o = bi['olcum']
+        bi['mesaj_kapisi'] = mesaj_kapisi.kapi(poster, o['isim_bant'], o['tag_bant'],
+                                               poster.width / 2400.0)
+    except Exception as e:                                        # noqa: BLE001
+        bi['mesaj_kapisi'] = {'gecti': False, 'hata': f'{type(e).__name__}: {e}'}
     return poster, bi, ek
 
 
@@ -866,8 +875,9 @@ def kapilari_topla(bi, isimler, mesaj, baski_px, uretim_px, dosya_mb=None, azami
          'sembol': bi['sembol_kapisi']['gecti'],
          'olcek': bi.get('olcek_kapisi', {}).get('gecti'),
          'leke': bi.get('leke_kapisi', {}).get('gecti'),
-         'boy_siniri': bk['gecti'], 'font_kapsami': fk['gecti']}
-    return k, {'boy_siniri': bk, 'font_kapsami': fk}
+         'boy_siniri': bk['gecti'], 'font_kapsami': fk['gecti'],
+         'mesaj_murekkep': bi.get('mesaj_kapisi', {}).get('gecti')}
+    return k, {'boy_siniri': bk, 'font_kapsami': fk, 'mesaj_murekkep': bi.get('mesaj_kapisi')}
 
 
 def kapi_sonucu(kapilar):

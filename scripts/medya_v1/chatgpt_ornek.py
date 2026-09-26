@@ -29,8 +29,9 @@ def rc(*a):
 def main():
     srgb = ImageCms.ImageCmsProfile(ImageCms.createProfile('sRGB')).tobytes()
     ozet = []
-    for i, (renk, boy, ad) in enumerate(ISLER, 1):
-        print(f'[{i}/{len(ISLER)}] {renk} {boy}', flush=True)
+    isler = [x for x in ISLER if not sys.argv[1:] or x[0] in sys.argv[1:]]
+    for i, (renk, boy, ad) in enumerate(isler, 1):
+        print(f'[{i}/{len(isler)}] {renk} {boy}', flush=True)
         p = subprocess.run([sys.executable, 'scripts/medya_v1/siparis_dosyasi.py',
                             '--cift', CIFT, '--renk', renk, '--boy', boy, '--isim1', ISIM1,
                             '--isim2', ISIM2, '--mesaj', MESAJ, '--plate', 'canva'],
@@ -40,6 +41,7 @@ def main():
         d = json.loads(rap.read_text()) if rap.exists() else {}
         kap = d.get('kapilar') or {}
         satir = {'dosya': ad, 'durum': d.get('durum'), 'kapilar_gecti': d.get('kapilar_gecti'),
+                 'mesaj_kapisi': (d.get('kapi_ayrinti') or {}).get('mesaj_murekkep'),
                  'FAIL': [k for k, v in kap.items() if v is False], 'yazildi': False}
         if d.get('kapilar_gecti') is True:
             jpg = max(cik.glob('*.jpg'), key=lambda f: f.stat().st_size)
