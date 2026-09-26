@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash",
+      "Read",
+      "Edit",
+      "Write",
+      "Glob",
+      "Grep",
+      "WebFetch",
+      "WebSearch",
+      "mcp__Google_Drive",
+      "mcp__claude-code-remote",
+      "mcp__Canva",
+      "mcp__Gmail",
+      "mcp__memory"
+    ]
+  }
+}
