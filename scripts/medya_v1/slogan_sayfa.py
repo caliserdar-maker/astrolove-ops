@@ -29,14 +29,8 @@ def rc(*a, timeout=900):
     return r.stdout
 
 
-def kalinti_olc(yol):
-    """Kirpimdaki ONCE/SONRA bloklarini ayirip kalan slogan izini OLCER.
-
-    Kirpim: ustte ONCE, altta SONRA; aralarinda beyaz etiket seritleri var.
-    ONCE'deki slogan maskesi cikarilir, ayni maske SONRA'da olculur. Boylece
-    "slogan ne kadar kaldi" gozle degil SAYIYLA gorulur.
-    """
-    import cv2
+def _bloklar(yol):
+    """Kirpimi ONCE/SONRA bloklarina ayirir (aralarindaki beyaz etiket seridinden)."""
     a = np.asarray(Image.open(yol).convert('L')).astype(np.float32)
     H = a.shape[0]
     # Etiket seridi TAM beyaz ve tekduze; acik zeminli edisyonlarda (Champagne
@@ -58,24 +52,58 @@ def kalinti_olc(yol):
     if H - prev > 40:
         bloklar.append([prev, H])
     if len(bloklar) < 2:
-        return {'hata': f'blok ayrilamadi ({len(bloklar)})'}
+        return None, None
     once = a[bloklar[0][0] + 2:bloklar[0][1] - 2]
     sonra = a[bloklar[1][0] + 2:bloklar[1][1] - 2]
     n = min(once.shape[0], sonra.shape[0])
-    once, sonra = once[:n], sonra[:n]
-    z = float(np.median(once))
-    acik = z > 128
-    m = (once < z - 25) if acik else (once > z + 25)
-    m = cv2.dilate(m.astype(np.uint8), np.ones((5, 5), np.uint8)) > 0
+    return once[:n], sonra[:n]
+
+
+def kalinti_olc(yol):
+    """SONRA blogunda kalan slogan izini OLCER.
+
+    ONEMLI (26 Eyl olcumu): maskeyi "ONCE'de koyu olan piksel" diye kurmak
+    YANLIS sonuc verir - bandin icinde slogan DISI, temizlenMEmesi gereken
+    ogeler de koyudur (Champagne 30x40'ta kirpimin ust/alt satirlarinda
+    ONCE=SONRA=177). O maske ile olculen fark (15.2) slogan kalintisi degil,
+    o ogelerin kendisidir. Dogru maske DEGISEN pikseldir: |ONCE - SONRA|.
+    Kalinti = SONRA'nin o maskede yerel zeminden sapmasi; yerel zemin satir
+    bazli medyandir, cunku bantta dusey gradyan var (209.5 -> 204.5).
+    """
+    import cv2
+    once, sonra = _bloklar(yol)
+    if once is None:
+        return {'hata': 'blok ayrilamadi'}
+    degisim = np.abs(once - sonra)
+    m = cv2.dilate((degisim > 8).astype(np.uint8), np.ones((5, 5), np.uint8)) > 0
     if m.sum() < 200 or (~m).sum() < 200:
-        return {'hata': 'slogan maskesi kucuk'}
-    ic, dis = sonra[m], sonra[~m]
-    lf = cv2.GaussianBlur(sonra, (0, 0), 9)
-    return {'slogan_orani_ONCE': round(float(m.mean()), 4),
-            'SONRA_glif_ort': round(float(ic.mean()), 3),
-            'SONRA_disi_ort': round(float(dis.mean()), 3),
-            'FARK_seviye': round(abs(float(ic.mean()) - float(dis.mean())), 3),
-            'dusuk_frekans_farki': round(abs(float(lf[m].mean()) - float(lf[~m].mean())), 3)}
+        return {'hata': 'temizlenen alan bulunamadi'}
+    # Yerel zemin: her satirda maske DISI piksellerin medyani (gradyani izler).
+    zemin = np.zeros_like(sonra)
+    for y in range(sonra.shape[0]):
+        d = sonra[y][~m[y]]
+        zemin[y] = np.median(d) if d.size >= 20 else np.median(sonra[y])
+    sap_s = np.abs(sonra - zemin)[m]
+    sap_o = np.abs(once - zemin)[m]
+    return {'temizlenen_oran': round(float(m.mean()), 4),
+            'ONCE_sapma_ort': round(float(sap_o.mean()), 2),
+            'SONRA_sapma_ort': round(float(sap_s.mean()), 2),
+            'SONRA_sapma_p99': round(float(np.percentile(sap_s, 99)), 2),
+            'SONRA_sapma_tepe': round(float(sap_s.max()), 2),
+            'iyilesme_orani': round(float(sap_s.mean() / max(sap_o.mean(), 1e-6)), 3)}
+
+
+def kontrast_ger(yol, cik, pay=18.0):
+    """Kirpimi yerel zemin etrafinda +-pay seviyeye gerer: goz kalintiyi boyle gorur.
+
+    Kontrast germeden 15-20 seviyelik bir kontur acik zeminde zor secilir;
+    onay sayfasinda "gormedim" ile "yok" karismasin diye gerilmis kopya da konur.
+    """
+    a = np.asarray(Image.open(yol).convert('L')).astype(np.float32)
+    z = float(np.median(a[a > np.percentile(a, 20)])) if a.mean() > 128 else float(np.median(a))
+    g = np.clip((a - (z - pay)) / (2 * pay) * 255, 0, 255).astype(np.uint8)
+    Image.fromarray(g).save(cik)
+    return cik
 
 
 def main():
