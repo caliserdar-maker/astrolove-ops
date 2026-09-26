@@ -26,10 +26,11 @@ Codex, Claude'un koordine ettigi ek calisandir. Isi Claude verir, son kontrolu
 Claude yapar. Serdar yalniz claude.ai sohbetinde konusur; ona soru sorma,
 belirsizligi rapora yaz.
 
-1. Gorevler: Google Drive `ASTROLOVE/TEMP/GOREV_PANOSU` klasorunde
-   `codex_GOREV_NNNN.md` (en yuksek numara gecerli). Rapor: ayni klasore
-   `codex_RAPOR_NNNN.md` (gorevle ayni numara). Drive'a erisemiyorsan raporu
-   PR aciklamasina yaz ve "Drive erisimi yok" diye belirt.
+1. Gorevler repoda: `pano/codex/GOREV_NNNN.md` (en yuksek numara gecerli).
+   Codex Google Drive'a erisemez; Drive gerekiyorsa isi yapma, raporla.
+   Rapor: ayni PR'da `pano/codex/RAPOR_NNNN.md` (gorevle ayni numara), kisa,
+   madde madde. Repo herkese acik: gorev ve raporlara sir, anahtar, musteri
+   verisi, fiyat/maliyet disi ic bilgi yazma.
 2. Yalniz `codex/` ile baslayan kendi dallarinda calis, PR ac. `main`'e ve diger
    oturumlarin dallarina (siparis-*, pod-*, medya-v1, kisisel-*, dijital-v1,
    video-v1) push YOK. Force-push, gecmis yeniden yazma, dal silme YOK.
