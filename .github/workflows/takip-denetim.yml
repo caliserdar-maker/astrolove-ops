@@ -1,0 +1,72 @@
+name: takip-denetim
+
+# GOREV 0033 - yoldaki gonderilerin takip denetimi. Varsayilan SALT OKUMA (Prodigi GET + Etsy getShopReceipt).
+# yaz=true: yalniz tasiyici uyusmazligi kanitlanan receipt'e createReceiptShipment (Claude onayi, GOREV 0033 md.4).
+# Musteri adi/adresi okunmaz/yazilmaz. Cikti Drive TEMP/POD_ORDERS/TAKIP_DENETIM.json
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      siparisler:
+        description: "Prodigi siparis id'leri, virgullu"
+        required: true
+        default: "ord_14538276,ord_72296317183912448,ord_72470448809534464,ord_13964600"
+      yaz:
+        description: "true = uyusmazligi kanitlanan receipt'e dogru tasiyiciyi yaz (Claude onayi)"
+        type: boolean
+        default: false
+
+jobs:
+  denetle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: etsy-token
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Denetle
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          SIP: ${{ inputs.siparisler }}
+          YAZ: ${{ inputs.yaz }}
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_ORDERS_STATE.csv" _work/state.csv
+          args=(_work/state.csv "$SIP"); [ "$YAZ" = "true" ] && args+=(--yaz)
+          python scripts/prodigi/takip_denetim.py "${args[@]}"
+          rclone copyto out/TAKIP_DENETIM.json "gdrive:ASTROLOVE/TEMP/POD_ORDERS/TAKIP_DENETIM.json" -q
+      - name: Token geri yaz
+        if: always()
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || echo "Token yenilenmedi"
+      - if: always()
+        run: rm -rf _work ~/.config/rclone
