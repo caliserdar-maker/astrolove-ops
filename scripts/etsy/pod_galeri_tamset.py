@@ -214,9 +214,18 @@ def kur(api, shop, c, lid, foto, alt, g, k):
         raise SystemExit(f"HATA: {c} ekleme sonrasi galeri {len(g2)} != {len(g1) + 13 - k}")
     if tut:
         api.delete(f"/shops/{shop}/listings/{lid}/images/{tut}")
-    g3 = kararli(lambda: galeri(api, lid), lambda x: len(x) == 13) or []
+    g3 = sirali(api, lid)
     log(f"{c} kur faz3 | galeri {len(g3)} sira {[x.get('rank') for x in g3]}")
+    if [x.get("rank") for x in g3] != list(range(1, 14)):
+        raise SystemExit(f"HATA: {c} galeri sirasi 1..13'e oturmadi: {[x.get('rank') for x in g3]}")
     return g3
+
+
+def sirali(api, lid):
+    """Silmeden sonra Etsy sirayi gecikmeli sikistiriyor (AQUARIUS_CAPRICORN pilotu: 1,3..14). 13 foto ve sira
+    1..13 olana kadar (en fazla OKUMA_TEKRAR) okunur; varyasyonlar ancak ondan sonra siraya gore baglanir."""
+    return kararli(lambda: galeri(api, lid),
+                   lambda x: len(x) == 13 and [y.get("rank") for y in x] == list(range(1, 14))) or []
 
 
 def yeniden_kodla(yol, hedef):
@@ -279,7 +288,7 @@ def onar(api, shop, a, c, lid, r, ref_alt, tfoto):
         alt_yenile(api, shop, c, lid, x.get("rank"), yol[x.get("rank")], alt[x.get("rank")], x.get("listing_image_id"))
     r["alt_duzeltilen"] = [x.get("rank") for x in alt_yanlis]
     if alt_yanlis:
-        g = kararli(lambda: galeri(api, lid), lambda x: len(x) == 13) or []
+        g = sirali(api, lid)
     var_ok = baglan(api, shop, lid, SET, g)
     rid = {x.get("rank"): x.get("listing_image_id") for x in g}
     fk2 = icerik(g, foto)
@@ -290,7 +299,11 @@ def onar(api, shop, a, c, lid, r, ref_alt, tfoto):
                    cift=len(ck2) == 13 and all(v.get("ok") for v in ck2.values()),
                    alt_metin=all((x.get("alt_text") or "") == alt.get(x.get("rank")) for x in g),
                    varyasyon=var_ok)
-    r.update(kontrol=kontrol, icerik_fark=fk2, cift=ck2, sonuc="PASS" if all(kontrol.values()) else "FAIL")
+    alt_fark = {x.get("rank"): {"canli": x.get("alt_text"), "beklenen": alt.get(x.get("rank"))} for x in g
+                if (x.get("alt_text") or "") != alt.get(x.get("rank"))}
+    if alt_fark:
+        log(f"{c} alt metin farki: {json.dumps(alt_fark, ensure_ascii=False)}")
+    r.update(kontrol=kontrol, icerik_fark=fk2, cift=ck2, alt_fark=alt_fark, sonuc="PASS" if all(kontrol.values()) else "FAIL")
     log(f"{c} onar {r['sonuc']} | {json.dumps(kontrol)} | fark {fk2} | cift {json.dumps(ck2)}")
     return r["sonuc"] == "PASS"
 
@@ -499,7 +512,7 @@ def main():
                 rv = api.post_file(f"/shops/{shop}/listings/{lid}/videos", files={"video": (f"{c}.mp4", fh, "video/mp4")},
                                    data={"name": f"{c}.mp4"})
             # geri okuma
-            g2 = kararli(lambda: galeri(api, lid), lambda g: len(g) == 13) or []
+            g2 = sirali(api, lid)
             rid = {x.get("rank"): x.get("listing_image_id") for x in g2}
             fk = icerik(g2, foto)                                             # 13 foto olculur, rapora yazilir
             tfoto = tuzak_foto(c)
