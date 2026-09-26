@@ -184,62 +184,113 @@ def set_indir(setler, c, video=True):
     return SET, d, [(g["sira"], d / g["dosya"], g["cl_karsiligi"]) for g in SET["galeri"]]
 
 
-def onar(api, shop, a, c, lid, r, ref_alt, tfoto):
-    """Galerisi 13 foto olup sira/alt/varyasyon/cift tutmayan ilan: her sira icerik (tum goruntu) ve cift (bolge)
-    olcutuyle, alt metinle denetlenir; tutmayan siralar yeniden yuklenir (eski o siradaki gorsel silinir),
-    renk varyasyonlari siraya gore yeniden baglanir, geri okunur."""
-    SET, d, foto = set_indir(a.setler, c)
-    A_, B_ = burclar(c)
-    alt = {n: alt_uyarla(ref_alt.get(cl, ""), A_, B_)[:250] for n, _, cl in foto}
-    g = galeri(api, lid)
-    fk = icerik(g, foto)
-    ck = cift_denetle(g, foto, tfoto)
-    altk = {x.get("rank"): (x.get("alt_text") or "") == alt.get(x.get("rank")) for x in g}
-    farkli = sorted(n for n in range(1, 14)
-                    if not esit(fk.get(n)) or not (ck.get(n) or {}).get("ok"))   # alt: asagida id ile duzeltilir
-    log(f"{c} onar: icerik farki {fk} | cift {json.dumps(ck)} | alt {altk} | yeniden yuklenecek sira {farkli}")
-    r["icerik_fark_once"], r["cift_once"] = fk, ck
-    r["onar_sira"] = farkli
-    if farkli:
-        eski = {x.get("rank"): x.get("listing_image_id") for x in g}
-        yol = {n: p for n, p, _ in foto}
-        for n in farkli:
-            with open(yol[n], "rb") as fh:
-                api.post_file(f"/shops/{shop}/listings/{lid}/images", files={"image": (yol[n].name, fh, "image/jpeg")},
-                              data={"rank": str(n), "alt_text": alt[n]})
-            if eski.get(n):
-                api.delete(f"/shops/{shop}/listings/{lid}/images/{eski[n]}")
-    g2 = kararli(lambda: galeri(api, lid), lambda x: len(x) == 13)
-    alt_yanlis = [x for x in g2 or [] if (x.get("alt_text") or "") != alt.get(x.get("rank"))]
-    for x in alt_yanlis:     # Etsy tekillestirmesi eski kaydi/alt metni tutabiliyor: mevcut id ile yeniden iliskilendir + alt_text
-        n = x.get("rank")
-        api.post_file(f"/shops/{shop}/listings/{lid}/images",
-                      files={"listing_image_id": (None, str(x.get("listing_image_id"))), "rank": (None, str(n)),
-                             "alt_text": (None, alt[n])})
-        log(f"{c} alt metin duzeltildi: sira {n} id {x.get('listing_image_id')}")
-    r["alt_duzeltilen"] = [x.get("rank") for x in alt_yanlis]
-    if alt_yanlis:
-        g2 = kararli(lambda: galeri(api, lid), lambda x: len(x) == 13)
-    rid = {x.get("rank"): x.get("listing_image_id") for x in g2 or []}
+def kur(api, shop, c, lid, foto, alt, g, k):
+    """GUVENLI GALERI KURULUMU (GOREV 0015). Rank'a EKLEME yapilmaz (Etsy'nin dolu siraya ekleme davranisi
+    5-12 sira kaymasina yol aciyordu); yalniz SONA eklenir:
+      1) dogru on-ek (ilk k sira) korunur, gerisi silinir; k == 0 ise bir eski gorsel sona kadar tutulur
+         (aktif ilan hicbir an 0 fotoda kalmaz),
+      2) eksik dosyalar k+1..13 SIRAYLA sona eklenir (rank = mevcut sayi + 1; 20 siniri asilmaz),
+      3) tutulan eski silinir -> yeni fotolar 1..13'e kayar.
+    Her fazdan sonra getListingImages okunur; beklenmeyen sayi -> SystemExit (ilan FAIL)."""
+    yol = {n: p for n, p, _ in foto}
+    sil = [x.get("listing_image_id") for x in g[k:]]
+    tut = sil.pop(0) if k == 0 and sil else None
+    for i in sil:
+        api.delete(f"/shops/{shop}/listings/{lid}/images/{i}")
+    g1 = galeri(api, lid)
+    beklenen = k + (1 if tut else 0)
+    log(f"{c} kur faz1 sil {len(sil)} | galeri {len(g1)} (beklenen {beklenen}) sira {[x.get('rank') for x in g1]}")
+    if len(g1) != beklenen:
+        raise SystemExit(f"HATA: {c} silme sonrasi galeri {len(g1)} != {beklenen}")
+    if len(g1) + (13 - k) > IMG_LIMIT:
+        raise SystemExit(f"HATA: {c} 20 foto siniri asilir ({len(g1)} + {13 - k})")
+    for n in range(k + 1, 14):
+        with open(yol[n], "rb") as fh:
+            api.post_file(f"/shops/{shop}/listings/{lid}/images", files={"image": (yol[n].name, fh, "image/jpeg")},
+                          data={"rank": str(len(g1) + n - k), "alt_text": alt[n]})
+    g2 = galeri(api, lid)
+    log(f"{c} kur faz2 eklendi {13 - k} | galeri {len(g2)} sira {[x.get('rank') for x in g2]}")
+    if len(g2) != len(g1) + 13 - k:
+        raise SystemExit(f"HATA: {c} ekleme sonrasi galeri {len(g2)} != {len(g1) + 13 - k}")
+    if tut:
+        api.delete(f"/shops/{shop}/listings/{lid}/images/{tut}")
+    g3 = kararli(lambda: galeri(api, lid), lambda x: len(x) == 13) or []
+    log(f"{c} kur faz3 | galeri {len(g3)} sira {[x.get('rank') for x in g3]}")
+    return g3
+
+
+def yeniden_kodla(yol, hedef):
+    """Ayni gorsel, farkli bayt (JPEG q95 yeniden kodlama; Etsy tekillestirmesini asmak icin). Fark > ESIK ise None."""
+    Image.open(yol).convert("RGB").save(hedef, "JPEG", quality=95)
+    f = float(np.abs(gri(yol, (256, 256)) - gri(hedef, (256, 256))).mean() / 255)
+    return hedef if f <= ESIK else None
+
+
+def alt_yenile(api, shop, c, lid, n, yol, alt, eski_id):
+    """Alt metni tutmayan sira: ayni gorsel yeniden kodlanip dogru alt metinle AYNI siraya yeni foto olarak yuklenir,
+    eski kayit silinir (GOREV 0015 md. 3)."""
+    h = yeniden_kodla(yol, yol.with_name(f"_alt_{n:02d}.jpg"))
+    if not h:
+        raise SystemExit(f"HATA: {c} sira {n} yeniden kodlama farki esigi asti")
+    with open(h, "rb") as fh:
+        api.post_file(f"/shops/{shop}/listings/{lid}/images", files={"image": (yol.name, fh, "image/jpeg")},
+                      data={"rank": str(n), "alt_text": alt})
+    api.delete(f"/shops/{shop}/listings/{lid}/images/{eski_id}")
+    log(f"{c} alt metin: sira {n} yeni foto olarak yuklendi, eski {eski_id} silindi")
+
+
+def baglan(api, shop, lid, SET, g):
+    """Renk varyasyonlari: renk -> SET renk dosyasi -> o siradaki gorsel id. Tutmayan varsa yazar; son durumu doner."""
+    rid = {x.get("rank"): x.get("listing_image_id") for x in g}
     renk_dosya = SET.get("renk_gorselleri") or {}
     dosya_sira = {x["dosya"]: x["sira"] for x in SET["galeri"]}
     vimg = var_img(api, shop, lid)
     vi = [{"property_id": v.get("property_id"), "value_id": v.get("value_id"),
-           "image_id": rid.get(dosya_sira.get(renk_dosya.get(v.get("value")))) } for v in vimg]
-    if farkli and all(x["image_id"] for x in vi):
+           "image_id": rid.get(dosya_sira.get(renk_dosya.get(v.get("value"))))} for v in vimg]
+    if any(v.get("image_id") != x["image_id"] for v, x in zip(vimg, vi)):
+        if not all(x["image_id"] for x in vi):
+            raise SystemExit(f"HATA: varyasyon rengi eslesmedi: {[v.get('value') for v, x in zip(vimg, vi) if not x['image_id']]}")
         api.post_json(f"/shops/{shop}/listings/{lid}/variation-images", {"variation_images": vi})
         vimg = var_img(api, shop, lid)
-    fk2 = icerik(g2 or [], foto)
-    ck2 = cift_denetle(g2 or [], foto, tfoto)
+    return all(v.get("image_id") == rid.get(dosya_sira.get(renk_dosya.get(v.get("value")))) for v in vimg)
+
+
+def onar(api, shop, a, c, lid, r, ref_alt, tfoto):
+    """Onarim (GOREV 0015): dogru on-ek (sira 1..k: icerik <= ESIK ve cift PASS) korunur, gerisi kur() ile
+    sona ekleyerek yeniden kurulur; alt metni tutmayan sira alt_yenile(); varyasyonlar baglan(); geri okunur."""
+    SET, d, foto = set_indir(a.setler, c)
+    A_, B_ = burclar(c)
+    alt = {n: alt_uyarla(ref_alt.get(cl, ""), A_, B_)[:250] for n, _, cl in foto}
+    yol = {n: p for n, p, _ in foto}
+    g = galeri(api, lid)
+    fk = icerik(g, foto)
+    ck = cift_denetle(g, foto, tfoto)
+    k = 0
+    while (k < len(g) and k < 13 and g[k].get("rank") == k + 1 and esit(fk.get(k + 1))
+           and (ck.get(k + 1) or {}).get("ok")):
+        k += 1
+    log(f"{c} onar: galeri {len(g)} sira {[x.get('rank') for x in g]} | dogru on-ek {k} | icerik {fk} | "
+        f"cift {json.dumps(ck)}")
+    r["icerik_fark_once"], r["cift_once"], r["dogru_onek"] = fk, ck, k
+    if k < 13 or len(g) != 13:
+        g = kur(api, shop, c, lid, foto, alt, g, k)
+    alt_yanlis = [x for x in g if x.get("rank") in alt and (x.get("alt_text") or "") != alt[x.get("rank")]]
+    for x in alt_yanlis:
+        alt_yenile(api, shop, c, lid, x.get("rank"), yol[x.get("rank")], alt[x.get("rank")], x.get("listing_image_id"))
+    r["alt_duzeltilen"] = [x.get("rank") for x in alt_yanlis]
+    if alt_yanlis:
+        g = kararli(lambda: galeri(api, lid), lambda x: len(x) == 13) or []
+    var_ok = baglan(api, shop, lid, SET, g)
+    rid = {x.get("rank"): x.get("listing_image_id") for x in g}
+    fk2 = icerik(g, foto)
+    ck2 = cift_denetle(g, foto, tfoto)
     kontrol = dict(r.get("kontrol") or {})
-    kontrol.update(foto_13=len(g2 or []) == 13,
+    kontrol.update(foto_13=len(g) == 13,
                    sira=sorted(rid) == list(range(1, 14)) and len(fk2) == 13 and all(esit(v) for v in fk2.values()),
                    cift=len(ck2) == 13 and all(v.get("ok") for v in ck2.values()),
-                   alt_metin=all((x.get("alt_text") or "") == alt.get(x.get("rank")) for x in g2 or []),
-                   varyasyon=all(v.get("image_id") == rid.get(dosya_sira.get(renk_dosya.get(v.get("value"))))
-                                 for v in vimg))
+                   alt_metin=all((x.get("alt_text") or "") == alt.get(x.get("rank")) for x in g),
+                   varyasyon=var_ok)
     r.update(kontrol=kontrol, icerik_fark=fk2, cift=ck2, sonuc="PASS" if all(kontrol.values()) else "FAIL")
-    r.pop("sira_gercek", None); r.pop("sira_beklenen", None)
     log(f"{c} onar {r['sonuc']} | {json.dumps(kontrol)} | fark {fk2} | cift {json.dumps(ck2)}")
     return r["sonuc"] == "PASS"
 
@@ -273,6 +324,7 @@ def main():
     ap.add_argument("--setler", required=True, help="yerel dizin: <CIFT>/SET.json (oku) ya da tam set (yukle)")
     ap.add_argument("--ciftler", default="", help="yukle: virgullu CIFT listesi (bos = seti olan hepsi, referans haric)")
     ap.add_argument("--butce", type=int, default=1300)
+    ap.add_argument("--onar", default="", help="yukle: once hedefli onarim yapilacak virgullu CIFT listesi (GOREV 0015)")
     ap.add_argument("--durum", default="", help="onceki GALERI_TAMSET.json (PASS olanlar atlanir)")
     a = ap.parse_args()
     k, s = os.environ.get("ETSY_API_KEY", ""), os.environ.get("ETSY_SHARED_SECRET", "")
@@ -371,15 +423,25 @@ def main():
     # ------------------------------------------------------------------ YUKLE
     secim = [x for x in a.ciftler.split(",") if x] or hedef
     harcanan0 = api.calls
-    for c, x in list((onceki.get("ilan") or {}).items()):   # yalniz 'sira' tutmayan onceki ilanlar: icerik + onarim
+    zorla = [x for x in a.onar.split(",") if x]
+    for c in zorla:                                              # durumda kaydi olmayan (kosu cokmesi) ilan da onarilir
+        rapor["ilan"].setdefault(c, {"ilan_id": ilan.get(c), "sonuc": "FAIL", "kontrol": {"video_1": True, "state_degismedi": True}})
+    for c, x in list(rapor["ilan"].items()):   # yalniz 'sira' tutmayan onceki ilanlar: icerik + onarim
         k = x.get("kontrol") or {}
         fk0 = x.get("icerik_fark") or {}
         yeniden = x.get("sonuc") == "PASS" and (len(fk0) < 13 or not all(esit(v) for v in fk0.values())
                                                  or "cift" not in k)          # cift olcutu yokken PASS olanlar
         onarilir = x.get("sonuc") == "FAIL" and all(k.get(n2) for n2 in ("foto_13", "video_1", "state_degismedi"))
+        onarilir = onarilir or c in zorla
         if c in hedef and (yeniden or onarilir):
             bitti.discard(c)
-            if not onar(api, shop, a, c, ilan[c], rapor["ilan"][c], ref_alt, tuzak_foto(c)):
+            try:
+                tamam = onar(api, shop, a, c, ilan[c], rapor["ilan"][c], ref_alt, tuzak_foto(c))
+            except SystemExit as e:
+                if "429" in str(e):
+                    raise
+                rapor["ilan"][c].update(sonuc="FAIL", hata=str(e)[:300]); tamam = False
+            if not tamam:
                 log(f"{c} onarim tutmadi -> FAIL listesine")         # Serdar 26 Eyl: tek ilan FAIL hepsini durdurmaz
             bitti.add(c)                                             # bu kosuda tekrar yuklenmez
             (OUT / "GALERI_TAMSET.json").write_text(json.dumps(rapor, ensure_ascii=False, indent=1))
@@ -418,46 +480,19 @@ def main():
                 continue
             t0 = time.time(); c0 = api.calls
             vimg_once = var_img(api, shop, lid)
-            eski_ids = [im.get("listing_image_id") for im in eski]
-            bagli = {v.get("image_id") for v in vimg_once}
-            yeni = {}                                            # sira -> image_id
-            mevcut = len(eski)
-            silinecek = [i for i in eski_ids if i not in bagli] + [i for i in eski_ids if i in bagli]
-            for srn, p, cl in foto:                              # once yukle; sinir doluysa once bagsiz eski sil
-                while mevcut >= IMG_LIMIT and silinecek and silinecek[0] not in bagli:
-                    api.delete(f"/shops/{shop}/listings/{lid}/images/{silinecek.pop(0)}"); mevcut -= 1
-                if mevcut >= IMG_LIMIT:
-                    r.update(sonuc="FAIL", hata="gorsel siniri: bagli eski gorseller yer birakmiyor"); break
-                with open(p, "rb") as fh:
-                    y = api.post_file(f"/shops/{shop}/listings/{lid}/images", files={"image": (p.name, fh, "image/jpeg")},
-                                      data={"rank": str(srn), "alt_text": alt_uyarla(ref_alt.get(cl, ""), A_, B_)[:250]})
-                yeni[srn] = y.get("listing_image_id"); mevcut += 1
-            if r.get("sonuc") == "FAIL":
-                log(f"[{sira}/{len(secim)}] {c} {r['hata']} -> FAIL listesine")
-                ardisik += 1
-                if ardisik >= 3:
-                    log("DUR: art arda 3 ilan FAIL - sistematik hata olabilir"); break
-                continue
-            # varyasyon baglantisi: renk adi -> SET renk gorseli -> yeni id
             renk_dosya = SET.get("renk_gorselleri") or {}
             dosya_sira = {g["dosya"]: g["sira"] for g in SET["galeri"]}
-            vi, eksik_renk = [], []
-            for v in vimg_once:
-                dosya = renk_dosya.get(v.get("value"))
-                if not dosya or dosya_sira.get(dosya) not in yeni:
-                    eksik_renk.append(v.get("value")); continue
-                vi.append({"property_id": v.get("property_id"), "value_id": v.get("value_id"), "image_id": yeni[dosya_sira[dosya]]})
-            if eksik_renk:
-                r.update(sonuc="FAIL", hata=f"varyasyon rengi eslesmedi: {eksik_renk} (eski gorseller silinmedi)")
+            eksik_renk = [v.get("value") for v in vimg_once if dosya_sira.get(renk_dosya.get(v.get("value"))) is None]
+            if eksik_renk:                                       # yazmadan once: renk eslesmesi yoksa ilana dokunma
+                r.update(sonuc="FAIL", hata=f"varyasyon rengi eslesmedi: {eksik_renk} (ilana dokunulmadi)")
                 log(f"[{sira}/{len(secim)}] {c} {r['hata']} -> FAIL listesine")
                 ardisik += 1
                 if ardisik >= 3:
                     log("DUR: art arda 3 ilan FAIL - sistematik hata olabilir"); break
                 continue
-            if vi:
-                api.post_json(f"/shops/{shop}/listings/{lid}/variation-images", {"variation_images": vi})
-            for i in silinecek:
-                api.delete(f"/shops/{shop}/listings/{lid}/images/{i}")
+            alt = {n: alt_uyarla(ref_alt.get(cl, ""), A_, B_)[:250] for n, _, cl in foto}
+            g3 = kur(api, shop, c, lid, foto, alt, galeri(api, lid), 0)   # guvenli akis: yalniz sona ekleme
+            baglan(api, shop, lid, SET, g3)
             for v in eski_vid:
                 api.delete(f"/shops/{shop}/listings/{lid}/videos/{v.get('video_id')}")
             with open(vpath, "rb") as fh:
@@ -466,7 +501,6 @@ def main():
             # geri okuma
             g2 = kararli(lambda: galeri(api, lid), lambda g: len(g) == 13) or []
             rid = {x.get("rank"): x.get("listing_image_id") for x in g2}
-            idfarkli = [n for n in sorted(yeni) if rid.get(n) != yeni[n]]     # Etsy tekillestirmesi: icerikle dogrula
             fk = icerik(g2, foto)                                             # 13 foto olculur, rapora yazilir
             tfoto = tuzak_foto(c)
             ck = cift_denetle(g2, foto, tfoto)
@@ -475,7 +509,7 @@ def main():
             L2 = api.get(f"/listings/{lid}") or {}
             kontrol = {
                 "foto_13": len(g2 or []) == 13,
-                "sira": sorted(rid) == list(range(1, 14)) and all(esit(fk.get(n)) for n in idfarkli),
+                "sira": sorted(rid) == list(range(1, 14)) and len(fk) == 13 and all(esit(v) for v in fk.values()),
                 "cift": len(ck) == 13 and all(v.get("ok") for v in ck.values()),
                 "alt_metin": all((x.get("alt_text") or "") == alt_uyarla(ref_alt.get(foto[x.get("rank") - 1][2], ""), A_, B_)[:250]
                                  for x in g2),
@@ -483,7 +517,7 @@ def main():
                 "varyasyon": all(vm2.get(v.get("value")) == rid.get(dosya_sira[renk_dosya[v.get("value")]]) for v in vimg_once),
                 "state_degismedi": L2.get("state") == X.get("state"),
             }
-            r.update(icerik_fark=fk, id_farkli=idfarkli, cift=ck)
+            r.update(icerik_fark=fk, cift=ck)
             if not all(kontrol.values()) and all(kontrol[n2] for n2 in ("foto_13", "video_1", "state_degismedi")):
                 log(f"{c}: tutmayan kontrol {[k2 for k2, v in kontrol.items() if not v]} -> onarim (yeniden yukleme)")
                 r["kontrol"] = kontrol

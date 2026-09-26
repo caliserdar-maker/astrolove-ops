@@ -26,6 +26,10 @@ on:
         description: "Etsy cagri butcesi (bu kosu)"
         required: false
         default: "1300"
+      onar:
+        description: "yukle: once hedefli onarim yapilacak virgullu CIFT listesi"
+        required: false
+        default: ""
 
 concurrency:
   group: etsy-token
@@ -74,10 +78,11 @@ jobs:
           MOD: ${{ inputs.mod }}
           CIFTLER: ${{ inputs.ciftler }}
           BUTCE: ${{ inputs.butce }}
+          ONAR: ${{ inputs.onar }}
         run: |
           set -euo pipefail
           python scripts/etsy/pod_galeri_tamset.py --mod "$MOD" --metin _work/METIN_78.csv --setler _work/set \
-            --ciftler "$CIFTLER" --butce "$BUTCE" --durum _work/onceki.json
+            --ciftler "$CIFTLER" --butce "$BUTCE" --onar "$ONAR" --durum _work/onceki.json
       - name: Rapor Drive'a
         if: always()
         run: |
