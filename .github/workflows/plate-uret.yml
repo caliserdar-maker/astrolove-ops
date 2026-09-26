@@ -34,6 +34,10 @@ on:
         description: "PLATES'te olanlari da yeniden uret (true/false)"
         required: false
         default: "false"
+      ek_args:
+        description: "plate_uret.py'ye ek argumanlar (orn. --sadece VINTAGE,MODERN)"
+        required: false
+        default: ""
 
 concurrency: plate-uret
 
@@ -94,9 +98,10 @@ jobs:
           PARCA: ${{ matrix.parca }}
           TOPLAM: ${{ inputs.parca_sayisi }}
           YENILE: ${{ inputs.yenile }}
+          EK_ARGS: ${{ inputs.ek_args }}
         run: |
           set -euo pipefail
           EK=""
           [ "${YENILE:-false}" = "true" ] && EK="--yenile"
           # shellcheck disable=SC2086
-          python scripts/medya_v1/plate_uret.py --parca "${PARCA}/${TOPLAM}" $EK
+          python scripts/medya_v1/plate_uret.py --parca "${PARCA}/${TOPLAM}" $EK ${EK_ARGS}
