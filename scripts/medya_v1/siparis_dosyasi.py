@@ -321,14 +321,15 @@ class EdisyonPoster:
             silinen1 = S1['genis'] & ~yeni1
             leke = {'gecti': None, 'uygulandi': False,
                     'sebep': 'baski dosyasi uretildikten sonra olculur'}
-            kucuk = (p1 if p1.width == 2400 else
-                     p1.resize((2400, round(p1.height * 2400 / p1.width)), Image.BOX))
-            # KOK NEDEN (1. iterasyon, kosu 36135774762): kapi olcek_kur(2400)'den ONCE
-            # kosuyordu, yani edisyon_uret.MASKE_YARICAP hala 117 (9000 olcegi) idi;
-            # 2400'luk goruntude medianBlur 117 kumeleri eritti ("2 kume"). Once sabitler
-            # 2400'e geri alinir, sonra olculur - iki taraf ayni olcutle olculsun diye.
+            # Hi-res geometriyi kendi piksel uzayinda olc. Render'i 2400'e BOX ile
+            # kucultup tekrar esiklemek harf kenarlarini degistiriyor ve dogru ciktiyi
+            # reddediyordu. Farklar asagida 2400 birimine normalize edilir.
+            g1 = self.eu.satir_olc(
+                np.asarray(p1.convert('RGB')).astype(np.float32), s1['isim_bant'])
             olcek_kur(2400)
-            olcek_kapi = olcek_kapisi(kucuk, p0, s0)
+            g0 = self.eu.satir_olc(
+                np.asarray(p0.convert('RGB')).astype(np.float32), s0['isim_bant'])
+            olcek_kapi = olcek_kapisi(g1, g0, k, p1.size, p0.size)
         else:
             k, s1, S1, p1 = 1.0, s0, S0, p0
             maske1, silinen1 = maske0, silinen0
@@ -423,30 +424,28 @@ OLCEK_KONUM = 1         # Serdar 25 Eyl: konum <= 1 px
 OLCEK_KENAR = 2         # Serdar 25 Eyl: harf kenari <= 2 px
 
 
-def olcek_kapisi(kucuk, p0, s0):
-    """Hi-res sonuc 2400 px olceginde onayli render ile karsilastirilir.
+def olcek_kapisi(g1, g0, k=1.0, hi_res_boyut=None, referans_boyut=None):
+    """Hi-res olcumu 2400 biriminde onayli render olcumuyle karsilastirir.
 
     Iki olcut (Serdar onayi 25 Eyl, 4. madde): KONUM (satir merkezi, bosluklar,
     taban, cap) <= 1 px; HARF KENARI (uc kutunun x kenarlari) <= 2 px.
-    Kucultme BOX (alan ortalamasi) ile yapilir: LANCZOS keskinlestirip halka
-    birakiyor ve murekkep esiginde harf ucunu yapay olarak genisletiyor."""
-    import edisyon_uret as eu
-    a = np.asarray(kucuk.convert('RGB')).astype(np.float32)
-    b = np.asarray(p0.convert('RGB')).astype(np.float32)
-    n = min(a.shape[0], b.shape[0])
-    g1 = eu.satir_olc(a[:n], s0['isim_bant'])
-    g0 = eu.satir_olc(b[:n], s0['isim_bant'])
+    Raster kucultulmez: iki render kendi dogal olceginde olculur, hi-res
+    koordinatlari k ile bolunur. Boylece yeniden ornekleme kenari kapiya girmez."""
     if 'hata' in g1 or 'hata' in g0:
         return {'gecti': False, 'sebep': f"olculemedi {g1.get('hata')} / {g0.get('hata')}"}
+    def norm(v):
+        if isinstance(v, (list, tuple)):
+            return [x / k for x in v]
+        return v / k
     d = {}
     for alan in ('cap_sol', 'cap_sag', 'taban_sol', 'taban_sag'):
-        d[alan] = int(g1[alan] - g0[alan])
-    d['satir_merkez'] = round(g1['satir_merkez'] - g0['satir_merkez'], 1)
-    d['bosluk_sol'] = int(g1['bosluk'][0] - g0['bosluk'][0])
-    d['bosluk_sag'] = int(g1['bosluk'][1] - g0['bosluk'][1])
+        d[alan] = round(norm(g1[alan]) - g0[alan], 2)
+    d['satir_merkez'] = round(norm(g1['satir_merkez']) - g0['satir_merkez'], 2)
+    d['bosluk_sol'] = round(norm(g1['bosluk'])[0] - g0['bosluk'][0], 2)
+    d['bosluk_sag'] = round(norm(g1['bosluk'])[1] - g0['bosluk'][1], 2)
     for ad in ('sol_isim', 'sonsuz', 'sag_isim'):
-        d[f'{ad}_x0'] = int(g1[ad][0] - g0[ad][0])
-        d[f'{ad}_x1'] = int(g1[ad][1] - g0[ad][1])
+        d[f'{ad}_x0'] = round(norm(g1[ad])[0] - g0[ad][0], 2)
+        d[f'{ad}_x1'] = round(norm(g1[ad])[1] - g0[ad][1], 2)
     konum = ('satir_merkez', 'bosluk_sol', 'bosluk_sag', 'taban_sol', 'taban_sag',
              'cap_sol', 'cap_sag')
     en_k = max(abs(d[a]) for a in konum)
@@ -454,8 +453,9 @@ def olcek_kapisi(kucuk, p0, s0):
     return {'gecti': bool(en_k <= OLCEK_KONUM and en_h <= OLCEK_KENAR),
             'konum_fark_px': en_k, 'kenar_fark_px': en_h,
             'esik': {'konum': OLCEK_KONUM, 'harf_kenari': OLCEK_KENAR},
-            'kucultme': 'BOX (alan ortalamasi)', 'fark': d,
-            'boyut': {'hi_res_2400': list(kucuk.size), 'onayli_2400': list(p0.size)}}
+            'olcum': 'dogal olcek; farklar 2400 px birimine normalize', 'fark': d,
+            'boyut': {'hi_res': list(hi_res_boyut or []),
+                      'onayli_2400': list(referans_boyut or [])}}
 
 
 # ------------------------------------------------------------------ hibrit baski dosyasi
@@ -596,31 +596,38 @@ def kilit_olcekle(kilit, k):
 # ZEMINE karsi olcuyor; zemin zaten oraya yapistirildigi icin yamayi goremez.
 # Bu kapi DOKUYA bakar: silinen bolgenin yuksek frekans enerjisi, cevresindeki
 # DOKUNULMAMIS orijinal dokunun enerjisine oranlanir. Yama duz olur -> oran duser.
-LEKE_P99 = 10.0         # Serdar 25 Eyl: bant DISINDA |dosya - plate| p99 <= 10
+LEKE_P99 = 10.0         # Serdar 25 Eyl: bant DISINDA |baski - kaynak| p99 <= 10
 LEKE_PAY = 9            # bant maskesi bu kadar genisletilir (yumusak kenar payi)
 
 
-def leke_kapisi(baski, plate_yol, maske, esik_p99=LEKE_P99):
-    """BANT DISINDA BASKI DOSYASI = PLATE olmali (Serdar onayi 25 Eyl, 4. madde).
+def leke_kapisi(baski, kaynak, maske, esik_p99=LEKE_P99):
+    """BANT DISINDA baski, birlestirmenin kaynak tuvaliyle ayni olmali.
 
     Eski kapi silinen bolgenin doku ENERJISINI olcuyordu; dokusuz edisyonlarda
     yanlis hata veriyordu (Deep Black 30x40: silinen_enerji 0.00 / halka 2.58,
     cunku o bant gercekten duz zemin). Yeni olcut dogrudan ve her edisyonda
-    ayni: degisen bandin disinda uretilen dosya ile plate arasindaki fark JPEG
-    gurultusu kadar olmali.
+    ayni: degisen bandin disinda uretilen dosya ile kaynak arasindaki fark JPEG
+    gurultusu kadar olmali. Plate yalniz oge ayirmak icindir; kaynak burc resmini
+    plate ile karsilastirmak gercek tasarimi leke sayar.
     Olculen taban (kosu 36153249586, murekkep disi p99): MB 0, CI 0, WP 3.
     Esik 10 bunun cok ustunde; gercek bir leke/yamayi ise yakalar.
 
     Bant DISI = ogelerin degistirildigi yerler haric HER YER: burc resmi,
-    yildizlar ve cerceve de plate'teki gibi durmali.
+    yildizlar ve cerceve kaynak tuvaldeki gibi durmali.
     """
     import cv2
-    with Image.open(plate_yol) as im:
-        pl = np.asarray(im.convert('RGB'))
+    if isinstance(kaynak, Image.Image):
+        kaynak_im = kaynak.convert('RGB')
+    else:
+        with Image.open(io.BytesIO(kaynak) if isinstance(kaynak, bytes) else kaynak) as im:
+            kaynak_im = im.convert('RGB')
+    if kaynak_im.size != baski.size:
+        kaynak_im = kaynak_im.resize(baski.size, Image.LANCZOS)
+    pl = np.asarray(kaynak_im)
     a = np.asarray(baski.convert('RGB'))
     if pl.shape != a.shape:
         return {'gecti': None, 'uygulandi': False,
-                'sebep': f'plate {pl.shape[1]}x{pl.shape[0]} != baski {a.shape[1]}x{a.shape[0]}'}
+                'sebep': f'kaynak {pl.shape[1]}x{pl.shape[0]} != baski {a.shape[1]}x{a.shape[0]}'}
     m = cv2.resize(maske.astype(np.uint8), (a.shape[1], a.shape[0]),
                    interpolation=cv2.INTER_NEAREST)
     m = cv2.dilate(m, np.ones((LEKE_PAY, LEKE_PAY), np.uint8)) > 0
@@ -915,7 +922,7 @@ def pod_uret(sip, kaynak_bayt, P_blue, P_ed, cik):
         return {**sip, **bi}
     ad = f'BASKI_{sip["boy"]}.jpg'
     baski, bpx = tek_dosya(poster, bi, ek, kaynak_bayt, sip['hedef_px'], cik / ad)
-    bi['leke_kapisi'] = leke_kapisi(baski, bi['plate'], ek['maske'])
+    bi['leke_kapisi'] = leke_kapisi(baski, kaynak_bayt, ek['maske'])
     onizleme(baski, poster, ek, f'ONIZLEME_{sip["boy"]}.jpg', cik)
     bant = kontrol_paketi(cik, baski, bi, ek, ad)
     inc = sip['inc']
