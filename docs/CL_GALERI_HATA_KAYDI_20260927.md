@@ -49,5 +49,5 @@ Doğru olanlar: 01 kapak (renk hariç), 03, 09, ölçü 3000x2250, yasak kelime/
 | 09 Yakın | onaylı (Serdar, 27 Eyl) | ChatGPT panel yapay 3B altın + yeniden çizilmiş poster → gerçek CL BASKI_11x14 (3307x4200) kırpımı 1.44x; kutu gerçek kırpım yerinde; scripts/pod/kart09_duzelt.py |
 | 10 Boyut | onaylı (Serdar, 27 Eyl) | İçerik doğru (16 boy = canlı SKU, cm doğru, tek ölçek); sütunlar eşit aralık (sağ kenar taşması), bant 80 px yukarı, Lato → Montserrat/kart 03; scripts/pod/kart10_duzelt.py |
 | 11 Süreç | onaylı (Serdar, 27 Eyl) | ChatGPT Lato + eski tip rakam + DNA dışı başlık yeri → canlı 03 liste stiliyle 3000x2250 yeniden kurulum; metin açıklama v3 ile aynı; scripts/pod/kart11_kur.py |
-| 12 Hediye | v2 teslim (Claude) | ChatGPT sahnesi (Serdar 'güzel') 2.01x; yapay çerçeve+poster → Prodigi AG gerçek profil + gerçek CL 11x14, sahne ışığına uyum; alternatif sahne reddedildi (markalı kutu/mum/kitap = pakette olmayan ürün, perspektifli çerçeve, DNA dışı); scripts/pod/kart12_kur.py |
+| 12 Hediye | onaylı (Serdar, 27 Eyl) | ChatGPT sahnesi (Serdar 'güzel') 2.01x; yapay çerçeve+poster → Prodigi AG gerçek profil + gerçek CL 11x14, sahne ışığına uyum; alternatif sahne reddedildi (markalı kutu/mum/kitap = pakette olmayan ürün, perspektifli çerçeve, DNA dışı); scripts/pod/kart12_kur.py |
 | 13-16 | tek tek üretiliyor | |
