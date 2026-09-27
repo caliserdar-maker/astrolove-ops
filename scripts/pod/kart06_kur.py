@@ -42,7 +42,7 @@ FT = font(GAR, 120, 450); FS = font(MON, 49, 500)
 b = FT.getbbox('Two signs. One shared symbol.', anchor='ls')
 d.text((143 - b[0], 201 - b[1]), 'Your digital file. All five colors.', font=FT, fill=NAVY_T, anchor='ls')
 b = FS.getbbox('Cancer and Libra, united in an original AstroLove design.', anchor='ls')
-d.text((147 - b[0], 336 - b[1]), 'Choose Digital File and "All 5 colors, Digital".', font=FS, fill=SANS_T, anchor='ls')
+d.text((147 - b[0], 336 - b[1]), 'Choose Digital File and any color. You receive all five.', font=FS, fill=SANS_T, anchor='ls')
 
 # posterler
 KAYNAK = {'MB': (269, 499, 791, 1150), 'DB': (1240, 500, 1760, 1150), 'CI': (2208, 499, 2733, 1152),

@@ -106,7 +106,7 @@ def orta(y, t, f, renk):
     b = f.getbbox(t, anchor='ls'); d.text((1500 - (b[0] + b[2]) / 2, y - b[1]), t, font=f, fill=renk, anchor='ls'); satir.append(t)
 def fit(yol, w, t, hedef):
     return font(yol, min(range(24, 90), key=lambda z: abs((lambda bb: bb[2] - bb[0])(font(yol, z, w).getbbox(t, anchor='ls')) - hedef)), w)
-t1 = 'Shown in Champagne Ivory with an Antique Gold frame.'; t2 = 'Five colors, sixteen sizes, four frame finishes.'
+t1 = 'Shown in Champagne Ivory with an Antique Gold frame.'; t2 = 'Five colors, thirteen sizes, four frame finishes.'
 orta(SY + sahne.height + 45, t1, fit(GAR, 450, t1, 1150), NAVY_T)
 orta(SY + sahne.height + 132, t2, fit(MON, 400, t2, 760), SANS_T)
 out.save(CIK, quality=95, subsampling=0)
