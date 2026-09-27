@@ -25,7 +25,7 @@ on:
       mode:
         description: "pilot = pilot_skus.csv (US) | hpr_sizes = hpr_sizes.txt (US + DE) | ship_everywhere = 8 ulke Standard kargo (18x24) | inserts = branded insert fiyat/ozellik (8 tip, US + DE) | maliyet_api = 16 HPR boy x 7 ulke Budget/Standard + net (DIJITAL_78) | ekstra_tesis = kartpostal/sticker: canli siparis tesis + fatura kalemi (yalniz GET) + ECB kuru | hesap_oku = hesap ayari/adres ucu var mi (yalniz GET) | canli_guvenli_test = TEK canli sahte siparis + HEMEN iptal (Serdar onayi 25 Eyl; Pause indefinitely acik) | siparis_oku = skus alanindaki 'order_id,merchantReference' siparisini yalniz GET ile bul | arastir_0006 = dokuman alintisi + siparis GET + insert link bicimi kontrolu (salt okuma)"
         type: choice
-        options: [pilot, cerceve_katalog, cerceve_renk, hpr_sizes, ship_everywhere, inserts, maliyet_api, ekstra_tesis, hesap_oku, canli_guvenli_test, siparis_oku, arastir_0006]
+        options: [pilot, cerceve_katalog, cerceve_renk, cerceve_alu, hpr_sizes, ship_everywhere, inserts, maliyet_api, ekstra_tesis, hesap_oku, canli_guvenli_test, siparis_oku, arastir_0006]
         default: pilot
 
 concurrency:
@@ -129,8 +129,11 @@ jobs:
             rclone copy out "gdrive:ASTROLOVE/TEMP/PRODIGI" --include "PRODIGI_EKSTRA_TESIS.*" --include "EKSTRA_TESIS.json" -q
             exit 0
           fi
-          if [ "$MODE" = "cerceve_katalog" ] || [ "$MODE" = "cerceve_renk" ]; then
+          if [ "$MODE" = "cerceve_katalog" ] || [ "$MODE" = "cerceve_renk" ] || [ "$MODE" = "cerceve_alu" ]; then
             # Yalniz GET /products + POST /quotes (siparis yok). Cikti TEMP/PRODIGI/KATALOG.
+            if [ "$MODE" = "cerceve_alu" ]; then
+              export CK_URUNLER=FRA-ALU CK_ETIKET=_ALU CK_RENKLER=gold,black,silver
+            fi
             if [ "$MODE" = "cerceve_renk" ]; then
               export CK_URUNLER=CFP,BOX CK_BOYLAR=8x10,12x16,16x20,18x24,24x36 CK_ETIKET=_RENK
               export CK_RENKLER=black,white,natural,brown,dark_grey,light_grey,gold,silver

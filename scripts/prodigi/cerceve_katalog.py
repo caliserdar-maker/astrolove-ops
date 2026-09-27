@@ -108,7 +108,7 @@ def main():
             r["not"] = r.pop("not_", "")
             if r.get("urun_maliyet") is not None and r.get("kargo") is not None:
                 m = round(r["urun_maliyet"] + r["kargo"] + (r.get("vergi") or 0) + EK, 2)
-                f = oneri(m, HEDEF[r["urun"]])
+                f = oneri(m, HEDEF.get(r["urun"], 10.0))
                 r.update(maliyet_ekli=m, onerilen_fiyat=f, net=round(f - kesinti(f) - m, 2))
             rows.append({k: r.get(k, "") for k in ALANLAR})
     with open(out / f"CERCEVE_KATALOG{ETIKET}.csv", "w", newline="", encoding="utf-8") as fh:
