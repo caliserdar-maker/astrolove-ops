@@ -75,7 +75,7 @@ KENAR_YUMUSAT = 2.0      # hibrit birlestirmede maske yumusatmasi (2400 uzayinda
 OLCUM_EN = {'2x3': 4000, '3x4': 3000, '4x5': 4000, '11x14': 3300, 'A': 3508}
 OLCUM_MERDIVEN = (1.0, 0.8, 1.2)        # olcum basarisizsa denenecek genislik carpanlari
 
-# Urun turu (router kartindan). POD: tek renk+boy baski dosyasi. DIJITAL: 5 renk x 5 oran ZIP.
+# Urun turu (router kartindan). POD: tek renk+boy baski dosyasi. DIJITAL: 5 renk x 5 oran, renk basina 1 PDF.
 # DUVAR_KAGIDI: dijital-78 oturumunun wallpaper kodu (henuz onaylanmadi) -> BEKLIYOR.
 URUN_ES = {'pod': 'POD', 'print': 'POD', 'baski': 'POD', 'poster': 'POD',
            'dijital': 'DIJITAL', 'digital': 'DIJITAL', 'dijital_duvar_sanati': 'DIJITAL',
@@ -84,7 +84,15 @@ URUN_ES = {'pod': 'POD', 'print': 'POD', 'baski': 'POD', 'poster': 'POD',
 DIJITAL_BOY = {'4x5': '16x20', '3x4': '18x24', '2x3': '24x36', '11x14': '11x14',
                'a_series': 'A2'}
 DIJITAL_ORANLAR = ('4x5', '3x4', '2x3', '11x14', 'a_series')
-ZIP_AZAMI_MB = 20.0
+# Teslim: Etsy Messages yalniz jpg/gif/pdf/png kabul eder (ZIP yok), mesaj basina en fazla 3 dosya,
+# gorsel en fazla 10000x10000 px / 100 MB; 24x36 JPG (7200x10800) siniri asar. Bu yuzden DIJITAL cikti
+# renk basina TEK PDF: 5 sayfa (DIJITAL_ORANLAR sirasi), sayfa = fiziksel boy, gomulu JPEG 300 dpi,
+# yeniden sikistirilmadan (img2pdf) gomulur (Serdar, 27 Eyl 2026).
+PDF_AZAMI_MB = 100.0
+PDF_HEDEF_MB = 40.0
+DIJITAL_KALITE = 95
+SAYFA_TOL_MM = 0.5                      # sayfa olcusu toleransi
+DPI_TOL = 0.01                          # gomulu gorsel dpi toleransi (oran)
 RENKLER = ('MIDNIGHT_BLUE', 'DEEP_BLACK', 'PURE_WHITE', 'CHAMPAGNE_IVORY', 'WARM_PARCHMENT')
 BUYUT = 3                               # kontrol paketinde bant buyutme
 
@@ -979,8 +987,8 @@ def _dijital_is(arg):
         if poster is None:
             return renk, oran, {'durum': 'ELLE KONTROL', **bi}, None
         jpg = klas / f'{sip["cift"]}_{renk}_{oran}_{boy}.jpg'
-        butce = int(ZIP_AZAMI_MB * 1e6 * 0.92 / len(DIJITAL_ORANLAR))
-        baski, bpx = tek_dosya(poster, bi, ek, kb, hedef, jpg, kalite=92, azami_bayt=butce)
+        butce = int(PDF_AZAMI_MB * 1e6 * 0.92 / len(DIJITAL_ORANLAR))
+        baski, bpx = tek_dosya(poster, bi, ek, kb, hedef, jpg, kalite=DIJITAL_KALITE, azami_bayt=butce)
         bi['leke_kapisi'] = leke_kapisi(baski, bi['plate'], ek['maske'])
         kapilar, ayrinti = kapilari_topla(bi, isimler, mesaj, bpx['baski_px'], hedef)
         kayit = {'durum': 'URETILDI', 'boy': boy, **bpx, 'kapilar': kapilar,
@@ -998,12 +1006,76 @@ def _dijital_is(arg):
         return renk, oran, {'durum': 'HATA', 'hata': f'{type(e).__name__}: {e}'}, None
 
 
+def pdf_adi(cift, renk):
+    a, b = (x.title() for x in cift.split('_', 1))
+    return f'AstroLove_{a}_{b}_{renk.title()}.pdf'
+
+
+def pdf_yap(sayfalar, yol):
+    """sayfalar: [(jpg_yolu, boy)]. Sayfa = fiziksel boy (BOY inc), JPEG yeniden sikistirilmadan gomulur."""
+    import img2pdf
+    olcu = [(BOY[b][1] * 72.0, BOY[b][2] * 72.0) for _, b in sayfalar]
+    sira = iter(olcu)
+
+    def yerlesim(_w, _h, _dpi):                     # img2pdf sayfa basina sirayla cagirir
+        pw, ph = next(sira)
+        return pw, ph, pw, ph
+    with open(yol, 'wb') as f:
+        f.write(img2pdf.convert([str(j) for j, _ in sayfalar], layout_fun=yerlesim))
+    return yol
+
+
+def _ncc_kucuk(a_bayt, b_yol, en=600):
+    def ac(v):
+        with Image.open(io.BytesIO(v) if isinstance(v, bytes) else v) as im:
+            im.draft('L', (en, en * im.size[1] // im.size[0]))
+            return np.asarray(im.convert('L').resize((en, round(en * im.size[1] / im.size[0])),
+                                                      Image.BOX)).astype(np.float64)
+    a, b = ac(a_bayt), ac(b_yol)
+    h = min(a.shape[0], b.shape[0]); a, b = a[:h].ravel(), b[:h].ravel()
+    if np.array_equal(a, b):
+        return 1.0
+    a -= a.mean(); b -= b.mean()
+    return float((a * b).sum() / (np.sqrt((a * a).sum() * (b * b).sum()) + 1e-9))
+
+
+def pdf_kapisi(yol, sayfalar, dpi=None):
+    """PASS/FAIL: sayfa sayisi, sayfa olcusu, gomulu gorsel dpi, JPEG ayni bayt, NCC>=0.99, boyut."""
+    import pikepdf
+    dpi = dpi or DPI
+    r = {'dosya': yol.name, 'MB': round(yol.stat().st_size / 1e6, 2), 'sayfalar': []}
+    r['boyut_gecti'] = r['MB'] <= PDF_AZAMI_MB
+    r['hedef_40MB'] = r['MB'] <= PDF_HEDEF_MB
+    with pikepdf.open(yol) as pdf:
+        r['sayfa_sayisi'] = len(pdf.pages)
+        for sayfa, (jpg, boy) in zip(pdf.pages, sayfalar):
+            mb = [float(x) for x in sayfa.mediabox]
+            w_mm, h_mm = (mb[2] - mb[0]) / 72 * 25.4, (mb[3] - mb[1]) / 72 * 25.4
+            bek = (BOY[boy][1] * 25.4, BOY[boy][2] * 25.4)
+            gorsel = next(iter(sayfa.images.values()))
+            ham = gorsel.read_raw_bytes()
+            px = (int(gorsel.Width), int(gorsel.Height))
+            gdpi = (px[0] / (w_mm / 25.4), px[1] / (h_mm / 25.4))
+            s = {'boy': boy, 'sayfa_mm': [round(w_mm, 2), round(h_mm, 2)],
+                 'beklenen_mm': [round(bek[0], 2), round(bek[1], 2)], 'px': list(px),
+                 'dpi': [round(gdpi[0], 1), round(gdpi[1], 1)],
+                 'filtre': str(gorsel.get('/Filter')), 'ayni_bayt': ham == Path(jpg).read_bytes(),
+                 'ncc': round(_ncc_kucuk(ham, jpg), 5)}
+            s['olcu_gecti'] = abs(w_mm - bek[0]) <= SAYFA_TOL_MM and abs(h_mm - bek[1]) <= SAYFA_TOL_MM
+            s['dpi_gecti'] = all(abs(d - dpi) <= dpi * DPI_TOL for d in gdpi)
+            s['gecti'] = bool(s['olcu_gecti'] and s['dpi_gecti'] and s['ncc'] >= 0.99
+                              and s['filtre'] == '/DCTDecode')
+            r['sayfalar'].append(s)
+    r['gecti'] = bool(r['sayfa_sayisi'] == len(DIJITAL_ORANLAR) == len(r['sayfalar'])
+                      and r['boyut_gecti'] and all(s['gecti'] for s in r['sayfalar']))
+    return r
+
+
 def dijital_uret(sip, P_blue, P_ed, cik, paralel=3):
-    """Bes renk x bes oran; oranlar PARALEL (Serdar 4. madde, hedef < 10 dk)."""
-    import zipfile
+    """Bes renk x bes oran; oranlar PARALEL (Serdar 4. madde, hedef < 10 dk). Teslim: renk basina 1 PDF."""
     from multiprocessing import get_context
     kon = cik / 'KONTROL'; kon.mkdir(parents=True, exist_ok=True)
-    R = {'urun': 'DIJITAL', 'renkler': {}, 'zip_azami_MB': ZIP_AZAMI_MB, 'paralel': paralel}
+    R = {'urun': 'DIJITAL', 'renkler': {}, 'pdf_azami_MB': PDF_AZAMI_MB, 'paralel': paralel}
     R['bant_dogrulama'] = bant_dogrulama(sip['cift'], DIJITAL_BOY['3x4'], P_ed)
     onizleme_yollari = []
     isler = []
@@ -1028,27 +1100,30 @@ def dijital_uret(sip, P_blue, P_ed, cik, paralel=3):
         klas = cik / renk
         rk = R['renkler'][renk]
         rk['dosya_sayisi'] = len(list(klas.glob('*.jpg')))
-        rk['zip_icerik'] = sorted(f.name for f in klas.glob('*.jpg'))
-        if rk['dosya_sayisi'] != len(DIJITAL_ORANLAR):
+        sayfalar = []
+        for oran in DIJITAL_ORANLAR:                                  # PDF sayfa sirasi
+            bul = sorted(klas.glob(f'*{renk}_{oran}*.jpg'))
+            if len(bul) == 1:
+                sayfalar.append((bul[0], DIJITAL_BOY[oran]))
+        rk['pdf_icerik'] = [f'{j.name} -> {b}' for j, b in sayfalar]
+        if rk['dosya_sayisi'] != len(DIJITAL_ORANLAR) or len(sayfalar) != len(DIJITAL_ORANLAR):
             rk['durum'] = 'EKSIK'
         if rk['durum'] == 'URETILDI':
-            zp = klas / f'{renk}.zip'
-            with zipfile.ZipFile(zp, 'w', zipfile.ZIP_STORED) as z:
-                for f in sorted(klas.glob('*.jpg')):
-                    z.write(f, f.name)
-            rk['zip_MB'] = round(zp.stat().st_size / 1e6, 2)
-            rk['zip_kapisi'] = rk['zip_MB'] < ZIP_AZAMI_MB
-            if not rk['zip_kapisi']:
+            pdf = pdf_yap(sayfalar, klas / pdf_adi(sip['cift'], renk))
+            rk['pdf'] = pdf.name
+            rk['pdf_kapisi'] = pdf_kapisi(pdf, sayfalar)
+            rk['pdf_MB'] = rk['pdf_kapisi']['MB']
+            if not rk['pdf_kapisi']['gecti']:
                 rk['durum'] = 'EKSIK'
         if rk['durum'] != 'URETILDI':
             import shutil
             shutil.rmtree(klas)
-        log('dijital', renk, {a: rk.get(a) for a in ('durum', 'zip_MB', 'dosya_sayisi')})
+        log('dijital', renk, {a: rk.get(a) for a in ('durum', 'pdf', 'pdf_MB', 'dosya_sayisi')})
     if onizleme_yollari:
         sirali = [(r, y) for r in renkler for rr, y in onizleme_yollari if rr == r]
         R['renk_onizleme'] = renk_onizleme(sirali, 'BES_RENK_ONIZLEME.jpg', kon)
-    R['toplam_zip'] = len(R['renkler'])
-    R['durum'] = ('URETILDI' if all(v.get('durum') == 'URETILDI' and v.get('zip_kapisi')
+    R['toplam_pdf'] = sum(1 for v in R['renkler'].values() if v.get('pdf'))
+    R['durum'] = ('URETILDI' if all(v.get('durum') == 'URETILDI' and v.get('pdf_kapisi', {}).get('gecti')
                                     for v in R['renkler'].values()) else 'EKSIK')
     R['kapilar_gecti'] = R['durum'] == 'URETILDI' and all(
         o.get('kapilar_gecti') for v in R['renkler'].values() for o in v['oranlar'].values()
@@ -1102,7 +1177,12 @@ def main():
                     help='--kaynak canva icin Drive KISISEL_PILOT altindaki imzali URL listesi')
     ap.add_argument('--plate', default='medyan', choices=('medyan', 'canva'),
                     help='zemin plate kumesi: medyan (<ED>_<boy>.png) ya da canva (<ED>_CANVA_<boy>.png)')
+    ap.add_argument('--sip-kok', default='',
+                    help='cikti koku (varsayilan TEMP/SIPARIS_ISIM); test icin orn. .../SIPARIS_ISIM/TEST_PDF')
     a = ap.parse_args()
+    global SIP
+    if a.sip_kok:
+        SIP = a.sip_kok
     if a.mesaj_b64:
         import base64
         a.mesaj = base64.b64decode(a.mesaj_b64).decode('utf-8')
@@ -1122,7 +1202,8 @@ def main():
         d = kart_oku((W / a.kart).read_text(encoding='utf-8'))
         siparisler = [{**d, 'receipt': Path(a.kart).stem}]
     elif a.cift:
-        siparisler = [{'receipt': f'{a.cift}_{a.renk}_{a.boy}', 'cift': a.cift, 'renk': a.renk, 'boy': a.boy,
+        rec = '_'.join(x for x in (a.cift, a.renk, a.boy) if x) + ('_DIJITAL' if a.urun == 'dijital' else '')
+        siparisler = [{'receipt': rec, 'cift': a.cift, 'renk': a.renk, 'boy': a.boy,
                        'urun': a.urun, 'yalniz_renk': a.renk is not None,
                        'isim1': a.isim1, 'isim2': a.isim2, 'mesaj': a.mesaj}]
     else:
@@ -1202,11 +1283,11 @@ def main():
         rc('copy', str(cik), f'{SIP}/{x["receipt"]}', timeout=1800)
         log(x['receipt'], {k: r.get(k) for k in ('urun', 'durum', 'baski_px', 'gorsel_dpi',
                                                  'metin_dpi', 'kapilar', 'kapilar_gecti',
-                                                 'toplam_sn', 'dosya_MB', 'toplam_zip')})
+                                                 'toplam_sn', 'dosya_MB', 'toplam_pdf')})
     R['toplam_sn'] = round(time.time() - T0, 1)
     R['ozet'] = [{k: x.get(k) for k in ('receipt', 'urun', 'durum', 'baski_px', 'gorsel_dpi',
                                         'metin_dpi', 'metin_buyutme', 'kapilar', 'kapilar_gecti',
-                                        'toplam_sn', 'dosya_MB', 'toplam_zip', 'sebep',
+                                        'toplam_sn', 'dosya_MB', 'toplam_pdf', 'sebep',
                                         'metin_render_px')} for x in R['siparisler']]
     R['bant_dogrulama'] = {f'{a}/{b}': v for (a, b), v in bant_kontrol.items()}
     (W / 'SIPARIS_RAPOR.json').write_text(json.dumps(R, ensure_ascii=False, indent=1, default=str))
