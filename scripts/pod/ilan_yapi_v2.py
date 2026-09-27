@@ -115,8 +115,8 @@ def sku_for(base_sku, row):
 
 
 def build_plan_v3(inventory, rows):
-    """Yapi v3 (Serdar 27 Eyl, secenek A): Format x Primary color (5 canli renk + DIJITAL_RENK) x Size, tam kartezyen.
-    Digital File yalniz DIJITAL_RENK ile, fiziksel formatlar yalniz 5 renkle acik (is_enabled). SKU RENK ICERMEZ
+    """Yapi v3 (Serdar 27 Eyl son karar): Format (6) x Primary color (5) x Size (13) = 390, tam kartezyen, hepsi acik.
+    Digital File her renkte 9.99 ve acik (renk ne olursa olsun 5 renk teslim edilir). SKU RENK ICERMEZ
     (renk siparis varyasyonundan okunur, pod_sku.parse_tx). sku/price_on_property = [format, renk, boy] (a2, Serdar 27 Eyl)."""
     products = inventory["products"]
     colors = list(dict.fromkeys(value(p, COLORS) for p in products if value(p, COLORS) != DIJITAL_RENK))
@@ -131,7 +131,8 @@ def build_plan_v3(inventory, rows):
     format_prop = next((property_value(p, "format") for p in products if property_value(p, "format")), None) \
         or {"property_id": 514, "property_name": FORMAT_ADI, "values": []}
     offering0 = sample["offerings"][0]
-    renkler = colors + [DIJITAL_RENK]
+    # Serdar 27 Eyl (son karar): 5 renk, dijital renk degeri YOK; Digital File her renkte acik (5 renk teslim edilir)
+    renkler = [c for c in RENK_SIRA if c in colors] + [c for c in colors if c not in RENK_SIRA]
     color_prop_id = color_props[colors[0]]["property_id"]
     planned = []
     for row in rows:
@@ -142,7 +143,7 @@ def build_plan_v3(inventory, rows):
         for renk in renkler:
             cprop = copy_property(color_props[renk]) if renk in color_props else \
                 {"property_id": color_props[colors[0]]["property_id"], "property_name": "Primary color", "values": [renk]}
-            acik = bool(row["aktif"]) and (dijital == (renk == DIJITAL_RENK))
+            acik = bool(row["aktif"])
             planned.append({"sku": sku,
                             "property_values": [copy_property(format_prop, row["format"]), cprop,
                                                 copy_property(size_prop, row["etiket"] or row["boy"])],
@@ -359,8 +360,8 @@ def referans_kontrol(plan, tablo, dijital_fiyat=9.99):
             hatalar.append(f"fiyat {sku} {fmt}: {fiyat} != {bek}")
         if (fmt == "Digital File") != (ek == "-DIGITAL") or (ek.startswith("-F") != fmt.endswith("Frame")):
             hatalar.append(f"format/SKU uyusmaz: {fmt} {sku}")
-        if p["offerings"][0]["is_enabled"] and ((fmt == "Digital File") != (renk == DIJITAL_RENK)):
-            hatalar.append(f"acik kurali: {fmt} {renk}")
+        if not p["offerings"][0]["is_enabled"]:
+            hatalar.append(f"kapali urun: {fmt} {renk} {sku}")
     return hatalar
 
 
@@ -434,7 +435,8 @@ def parser():
     p.add_argument("--aciklama", action="store_true",
                    help="aciklama PATCH'ini ac (varsayilan KAPALI; v3 aciklama pod-seo-v3 ile yazilir)")
     p.add_argument("--referans", default="docs/REFERANS_ILAN_CL.md")
-    p.add_argument("--yapi", default="d", choices=("d", "v3"), help="d: 2 menu (Format & Color x Size); v3: 3 menu")
+    p.add_argument("--yapi", default="v3", choices=("v3", "d"),
+                   help="v3: 3 menu, 5 renk, 13 boy, 390 urun (Serdar 27 Eyl son karar); d: iptal edilen 2 menu")
     return p
 
 

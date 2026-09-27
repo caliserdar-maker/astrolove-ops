@@ -39,21 +39,25 @@ def rows(mode):
 
 
 def test_v3_repo_csv_six_colors_colorless_sku():
-    """Serdar 27 Eyl secenek A: 5 renk + 'All 5 colors, Digital'; SKU renksiz; dijital yalniz dijital renkte acik."""
+    """Serdar 27 Eyl son karar: 6 format x 5 renk x 13 boy = 390, hepsi acik; SKU renksiz; dijital her renkte 9.99."""
     live = inventory()
     plan = y2.build_plan(live, y2.load_config("data/pod/yapi_v2.csv"))
     p = plan["products"]
     cfg = y2.load_config("data/pod/yapi_v2.csv")
     n_dij = sum(1 for r in cfg if r["tur"] == "digital"); n_fiz = len(cfg) - n_dij
-    assert len(p) == len(cfg) * 6
+    assert len(cfg) == 78 and len(p) == len(cfg) * 5 == 390
+    assert len({x["property_values"][2]["values"][0] for x in p}) == 13
+    assert not {"30x40", "24x32", "A1"} & {r["boy"] for r in cfg}
     assert plan["sku_on_property"] == plan["price_on_property"]
     assert plan["price_on_property"] == [100, 200, 300]  # Etsy: 3 varyasyonda 0, 1 ya da 3 id
     acik = [x for x in p if x["offerings"][0]["is_enabled"]]
     for x in acik:
         fmt, renk = x["property_values"][0]["values"][0], x["property_values"][1]["values"][0]
-        assert (fmt == "Digital File") == (renk == y2.DIJITAL_RENK)
+        assert renk != y2.DIJITAL_RENK and renk in y2.RENK_SIRA
         assert "-MB-" not in x["sku"] and "-DB-" not in x["sku"]
-    assert len(acik) == n_dij + n_fiz * 5
+        if fmt == "Digital File":
+            assert x["offerings"][0]["price"] == 9.99
+    assert len(acik) == len(p) == (n_dij + n_fiz) * 5
     fiyat = {}
     for x in p:
         k = (x["property_values"][0]["values"][0], x["property_values"][2]["values"][0])
@@ -87,7 +91,7 @@ def test_csv_header_and_mode_validation(tmp_path):
 def test_plan_referans_ile_birebir():
     """REFERANS_ILAN_CL fiyat tablosu + SKU v3: repo CSV'sinden kurulan plan hatasiz."""
     tablo = y2.referans_tablosu()
-    assert len(tablo) == 16 and tablo["8x10"] == (47.99, 95.99) and tablo["24x36"] == (109.99, 164.99)
+    assert len(tablo) == 13 and tablo["8x10"] == (47.99, 95.99) and tablo["24x36"] == (109.99, 164.99)
     plan = y2.build_plan(inventory(), y2.load_config("data/pod/yapi_v2.csv"))
     assert y2.referans_kontrol(plan, tablo) == []
     plan["products"][0]["offerings"][0]["price"] = 1.0
@@ -98,9 +102,9 @@ def test_ozet_menu_ve_ornek():
     live = inventory()
     plan = y2.build_plan(live, y2.load_config("data/pod/yapi_v2.csv"))
     oz = y2.ozet(live, plan, "active")
-    assert oz["urun"] == [len(live["products"]), 576] and oz["acik"][1] == 16 + 80 * 5
+    assert oz["urun"] == [len(live["products"]), 390] and oz["acik"][1] == 390
     assert oz["menu"][1] == ["Digital File", "Print", "Antique Gold Frame", "Black Frame", "White Frame", "Natural Frame"]
-    assert oz["menu"][2][-1] == y2.DIJITAL_RENK and len(oz["menu"][2]) == 6
+    assert oz["menu"][2] == y2.RENK_SIRA and len(oz["menu"][3]) == 13
     assert oz["ornek"]["8x10 | Digital File"] == "9.99 POD-ARI_LEO-8x10-DIGITAL"
 
 
@@ -173,11 +177,11 @@ BEKLENEN_MENU1 = ["Digital File, All 5 Colors"] + [f"{f}, {c}" for f in
 def test_menu_d_416_urun_sira_ve_referans():
     plan = y2.build_plan_d(inventory_d(), y2.load_config("data/pod/yapi_v2.csv"))
     p = plan["products"]
-    assert len(p) == 416 and all(x["offerings"][0]["is_enabled"] for x in p)
+    assert len(p) == 26 * 13 and all(x["offerings"][0]["is_enabled"] for x in p)   # menu D (iptal), CSV 13 boy
     assert plan["price_on_property"] == plan["sku_on_property"] == [514, 513]
     assert y2.varyasyon_sayisi(plan) == 2
     oz = y2.ozet(inventory_d(), plan, "active")
-    assert oz["menu"][1] == BEKLENEN_MENU1 and len(oz["menu"][2]) == 16
+    assert oz["menu"][1] == BEKLENEN_MENU1 and len(oz["menu"][2]) == 13
     assert all("(" not in v for v in BEKLENEN_MENU1)
     assert y2.referans_kontrol(plan, y2.referans_tablosu()) == []
     assert oz["ornek"]["8x10 | Digital File"] == "9.99 POD-CAN_LIB-8x10-DIGITAL"
@@ -212,7 +216,7 @@ def test_yaz_menu_d_renk_gorselleri(tmp_path, monkeypatch):
     monkeypatch.setenv("ETSY_SHOP_ID", "1"); monkeypatch.chdir(Path(__file__).resolve().parents[2])
     monkeypatch.setattr(y2, "OUT", tmp_path)
     api = FakeApiD()
-    assert y2.main(["yaz", "4570143815", "--confirm", "YAPI_V2"], api=api) == 0
+    assert y2.main(["yaz", "4570143815", "--confirm", "YAPI_V2", "--yapi", "d"], api=api) == 0
     assert ("put", "/listings/4570143815/inventory") in api.calls          # 2 menu: parametre yok
     assert not [c for c in api.calls if c[0] == "patch"]                    # aciklama yazilmaz
     assert len(api.posted) == 25

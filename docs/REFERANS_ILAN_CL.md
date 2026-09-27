@@ -6,8 +6,8 @@ Amaç: CL eksiksiz bitince aynı yöntem ve kodla kalan 77 POD ilanına geçmek.
 | Konu | Karar |
 |---|---|
 | Mağaza | 78 ilan; 390 dijital ilan pasif (Serdar elle), 78 wallpaper pasif, wallpaper ürünü bırakıldı |
-| Menü (3 varyasyon) | 1 "Digital File, Print or Framed?" (özel property 514): Digital File / Print / Antique Gold Frame / Black Frame / White Frame / Natural Frame (Prodigi Classic; 8 rengin hepsi ayni fiyat, US) · 2 "Primary color" (200): 5 renk + "All 5 colors, Digital" · 3 "Size" (513): 16 boy, canlı etiketler |
-| Dijital | 9.99, her boyda; yalnız "All 5 colors, Digital" ile açık; 5 PDF (renk başına, her biri 5 oran) Etsy Messages ile, 24 saat içinde, her gönderim Serdar onayıyla |
+| Menü (3 varyasyon) | 1 "Digital File, Print or Framed?" (özel property 514): Digital File / Print / Antique Gold Frame / Black Frame / White Frame / Natural Frame (Prodigi Classic; 8 rengin hepsi ayni fiyat, US) · 2 "Primary color" (200): 5 renk (Midnight Blue, Deep Black, Pure White, Champagne Ivory, Warm Parchment; "All 5 colors" değeri YOK) · 3 "Size" (513): 13 boy, canlı etiketler (30x40, 24x32, A1 çıkarıldı). 6×5×13 = 390 ürün, hepsi açık (Serdar 27 Eyl son karar; Menü D iptal) |
+| Dijital | 9.99, her boy ve her renkte açık; seçilen renk yok sayılır, 5 renk teslim edilir (router Digital File satırında rengi yok sayar); 5 PDF (renk başına, her biri 5 oran) Etsy Messages ile, 24 saat içinde, her gönderim Serdar onayıyla |
 | Baskı | Hahnemühle Photo Rag 308 gsm (GLOBAL-HPR-<boy>); fiyat = max(mevcut, Standard kargoda net 10 $) |
 | Çerçeveli | Prodigi Classic Frame GLOBAL-CFP-<boy>, EMA 200 gsm, Perspex, paspartusuz; Antique Gold/Black/White/Natural aynı fiyat; net 10 $. Aluminium Gold ABD'de yalnız 8x10, 18x24, 24x36 (kullanılmıyor) |
 | Kargo | Standard (US lab); çerçevelide Budget = Standard |
@@ -38,10 +38,7 @@ Amaç: CL eksiksiz bitince aynı yöntem ve kodla kalan 77 POD ilanına geçmek.
 | 18x24 | 66.99 | 121.99 |
 | 20x30 | 84.99 | 142.99 |
 | 24x30 | 94.99 | 148.99 |
-| A1 | 99.99 | 157.99 |
-| 24x32 | 99.99 | 148.99 |
 | 24x36 | 109.99 | 164.99 |
-| 30x40 | 139.99 | 197.99 |
 
 Maliyet kaynağı: Drive `TEMP/PRODIGI/KATALOG/CERCEVE_KATALOG.csv` (27 Eyl, US, Standard). Etsy kesintisi (KDV dahil) ≈ 0.698 + 0.2062 × fiyat; Offsite Ads hariç.
 
@@ -49,12 +46,12 @@ Maliyet kaynağı: Drive `TEMP/PRODIGI/KATALOG/CERCEVE_KATALOG.csv` (27 Eyl, US,
 - Renk SKU'da YOK. `POD-<S1>_<S2>-<BOY>` (baskı), `...-<BOY>-F<GO|BK|WH|NA>` (çerçeve; GO = Antique Gold, b235826), `...-<BOY>-DIGITAL`.
 - Renk siparişteki "Primary color" varyasyonundan okunur: `scripts/etsy/pod_sku.py::parse_tx`. Renk yoksa/bilinmiyorsa kalem gönderilmez (fail-closed).
 - Eski renkli SKU'lar (`POD-CAN_LIB-MB-8x10`) aynen çalışır (77 ilan geçene kadar).
-- `sku_on_property = price_on_property = [format, size]` → Etsy ürün sınırı 2500 (CL: 576 ürün, 416 açık; 6 format × 6 renk × 16 boy).
+- `sku_on_property = price_on_property = [format, renk, boy]` (Etsy: 3 menüde 0, 1 ya da 3 id) → "tüm menülere göre değişen" ilan sınırı 400 ürün; CL: 390 ürün, hepsi açık. PUT `?max_variations_supported=3`. Ölçülen retler (27 Eyl): 409 "maximum 2 variations" (parametresiz), 400 "price_on_property ... zero, one, or all 3", 400 "Total products 576 exceeds maximum allowed 400".
 
 ## Kod ve iş akışları
 | Parça | Dosya / workflow |
 |---|---|
-| Menü + fiyat verisi | `data/pod/yapi_v2.csv` (mod 3, 96 satır) |
+| Menü + fiyat verisi | `data/pod/yapi_v2.csv` (mod 3, 78 satır = 6 format × 13 boy) |
 | İlan yazıcı | `scripts/pod/ilan_yapi_v2.py` (`kuru` / `yaz --confirm YAPI_V2`), `.github/workflows/ilan-yapi-v2.yml`; canlı okuma → plan → REFERANS kontrolü (fiyat tablosu + SKU v3; değilse DUR) → PUT → tam geri okuma → renk-görsel onarımı + geri okuma → açıklama PATCH yalnız `--aciklama` ile (varsayılan KAPALI; v3 açıklama pod-seo-v3) → geri okuma (başlık/etiket/açıklama/görsel/video değişmedi); ilk hatada DUR; active değilse dokunmaz |
 | Çerçeve eşlemesi | `data/pod/prodigi_cerceve_esleme.csv` (16 boy × BK/WH/NA → GLOBAL-CFP-<boy>) |
 | Sipariş yönlendirme | `scripts/prodigi/order_router.py` (parse_tx, Standard varsayılan, dijital asla Prodigi'ye gitmez) |
@@ -70,11 +67,11 @@ Maliyet kaynağı: Drive `TEMP/PRODIGI/KATALOG/CERCEVE_KATALOG.csv` (27 Eyl, US,
 2. [x] Yapı v3 + SKU v3 + router + testler
 3. [x] CL kuru koşu PASS (85 eski → 480 yeni)
 4. [ ] ChatGPT paketi (kartlar + metinler) → `TEMP/CHATGPT_CL/` → QC PASS → Serdar onayı
-5. [ ] CL yazım: envanter (ilan-yapi-v2 yaz), görseller, açıklama/etiket, "All 5 colors" varyasyon görseli
+5. [ ] CL yazım: envanter (ilan-yapi-v2 yaz, 390 ürün), görseller, açıklama/etiket
 6. [ ] Canlı kontrol + Serdar onayı
 7. [ ] 77 ilan: 03:00 TR (00:00 UTC kota yenilenince) otomatik, ilk hatada DUR, sabah rapor
 
 ## Açık konular
 - Sipariş hattı (siparis_dosyasi.py) yapılacaklar (27 Eyl): AQUARIUS_LIBRA MB 11x14 sembol kapısı FAIL (77 kapak üretimi durdu); CAPRICORN_SAGITTARIUS 5 renk bant doğrulaması FAIL (8 px). Şimdi düzeltme yok.
 - Warm Parchment kişisel dosya: kağıt dokusu sembolün üstüne biniyor (Codex IS_0047, PR #60). Düzelene kadar dijital paket 4 renk + WP elle.
-- Etsy "Primary color" (200) için özel değer "All 5 colors, Digital" ilk gerçek yazımda doğrulanacak (PUT atomik; red gelirse ilan değişmez). OAS: değerlerde parantez yasak; 3 menü için PUT `?max_variations_supported=3` (varsayılan 2, 27 Eyl 409).
+- OAS: varyasyon değerlerinde parantez yasak; canlı boy etiketleri parantezli (ör. "8×10″ (20×25cm)"). Etsy reddederse yazılmaz, parantezsiz öneri listelenir.

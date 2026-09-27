@@ -79,6 +79,13 @@ check("cerceveli -> CFP + natural", by["c"]["prodigi_sku"] == "GLOBAL-CFP-16x20"
       and not by["c"]["mapping_error"])
 check("dijital Prodigi'ye gitmez", "d" not in by and any(o.startswith("DIJITAL:") for o in other))
 check("renksiz fiziksel kalem gonderilmez", "e" not in by and "POD-CAN_LIB-12x16" in other)
+# Son karar (27 Eyl): 'All 5 colors' degeri yok; Digital File satirinda renk (or. Deep Black) YOK SAYILIR, 5 renk teslim
+rec_d = {"receipt_id": "sahte-10", "transactions": [tx("h", "POD-CAN_LIB-16x20-DIGITAL", "Deep Black", "Digital File"),
+                                                    tx("i", "POD-CAN_LIB-A3-DIGITAL", "Warm Parchment", "Digital File")]}
+items_d, other_d, _ = R.parse_items(rec_d)
+check("renkli dijital kalem Prodigi'ye gitmez (renk yok sayilir)", not items_d
+      and sum(1 for o in other_d if o.startswith("DIJITAL:")) == 2)
+check("renkli dijital SKU parse_tx ile fiziksel sayilmaz", parse_tx(tx("h", "POD-CAN_LIB-16x20-DIGITAL", "Deep Black", "Digital File")) is None)
 body = R.order_body(rec, items, {i["sku"]: "u" for i in items})
 check("siparis govdesi 4 kalem, Standard", len(body["items"]) == 4 and body["shippingMethod"] == "Standard")
 
