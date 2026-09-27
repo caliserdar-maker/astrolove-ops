@@ -1,0 +1,75 @@
+name: cerceve-kart-ornek
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      cift:
+        description: "Cift kodu"
+        default: "CANCER_LIBRA"
+      ed:
+        description: "Edisyon"
+        default: "MIDNIGHT_BLUE"
+      kaynak:
+        description: "Opsiyonel Drive yolu (ASTROLOVE/... dosya ya da klasor). Bos ise POD_PRINT/<cift>/<ed>/8x10.jpg"
+        default: ""
+      paspartu:
+        description: "0 ya da 1"
+        default: "0"
+
+jobs:
+  uret:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q pillow==11.0.0 numpy==2.1.3
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          mkdir -p fonts
+          curl -fsSL 'https://raw.githubusercontent.com/google/fonts/main/ofl/montserrat/Montserrat%5Bwght%5D.ttf' -o 'fonts/Montserrat[wght].ttf'
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Cerceve kartlarini uret ve yukle
+        env:
+          CIFT: ${{ inputs.cift }}
+          ED: ${{ inputs.ed }}
+          KAYNAK: ${{ inputs.kaynak }}
+          PASPARTU: ${{ inputs.paspartu }}
+        run: |
+          set -euo pipefail
+          mkdir -p _work/out
+          if [ -z "$KAYNAK" ]; then
+            rclone copyto "gdrive:ASTROLOVE/TEMP/POD_PRINT/${CIFT}/${ED}/8x10.jpg" _work/8x10.jpg; ETIKET="${CIFT}_${ED}"
+          else
+            if rclone lsf "gdrive:${KAYNAK}" --files-only --include "*.{jpg,jpeg,png}" >_ls.txt 2>/dev/null && [ "$(wc -l <_ls.txt)" -gt 1 -o "${KAYNAK: -1}" = "/" ]; then
+              cat _ls.txt; F=$(grep -iE '8x10|4x5|4_5' _ls.txt | head -1); F=${F:-$(head -1 _ls.txt)}
+              rclone copyto "gdrive:${KAYNAK%/}/$F" "_work/src.${F##*.}"; SRC=$(ls _work/src.*)
+            else
+              rclone copyto "gdrive:${KAYNAK}" "_work/src.${KAYNAK##*.}"; SRC=$(ls _work/src.*)
+            fi
+            python3 -c "from PIL import Image;import sys;Image.open(sys.argv[1]).convert('RGB').save('_work/8x10.jpg',quality=95)" "$SRC"
+            ETIKET=$(basename "${KAYNAK%/}")
+          fi
+          python3 -c "from PIL import Image;print('kaynak boyut', Image.open('_work/8x10.jpg').size)"
+          python scripts/pod/cerceve_kart.py _work/8x10.jpg _work/out --cerceve BK,WH,NA --paspartu "$PASPARTU"
+          rclone copy _work/out "gdrive:ASTROLOVE/TEMP/CERCEVE_KART/ORNEK/${ETIKET}_p${PASPARTU}/" -q
+          ls -la _work/out
+      - if: always()
+        run: rm -rf _work ~/.config/rclone
