@@ -11,7 +11,7 @@ SIGN3 = {"AQUARIUS": "AQU", "ARIES": "ARI", "TAURUS": "TAU", "GEMINI": "GEM", "C
 ED2 = {"MIDNIGHT_BLUE": "MB", "DEEP_BLACK": "DB", "WARM_PARCHMENT": "WP", "CHAMPAGNE_IVORY": "CI", "PURE_WHITE": "PW"}
 SIGN_OF = {v: k for k, v in SIGN3.items()}
 ED_OF = {v: k for k, v in ED2.items()}
-SKU_RE = re.compile(r"^POD-([A-Z]{3})_([A-Z]{3})-([A-Z]{2})-([0-9]+x[0-9]+|A[1234])(?:-F(BK|WH|NA))?$")
+SKU_RE = re.compile(r"^POD-([A-Z]{3})_([A-Z]{3})-([A-Z]{2})-([0-9]+x[0-9]+|A[1234])(?:-F(BK|WH|NA|GO))?$")
 MAX_LEN = 32
 # Dijital secenek (GOREV 0036): ayni ilanda Size = "Digital File", SKU POD-<S1>_<S2>-<ED2>-DIGITAL.
 # SKU_RE'ye UYMAZ (boy degil) -> parse_sku None; Prodigi'ye asla gitmez (order_router.dijital_mi ayrica yakalar).
@@ -47,7 +47,7 @@ def parse_sku(sku):
 # Yapi v2 (Serdar 27 Eyl 2026, 3 menu: Format / Primary color / Size): SKU RENK ICERMEZ
 #   POD-<S1_3>_<S2_3>-<SIZE>[-F<BK|WH|NA>]  ya da  POD-<S1_3>_<S2_3>-<SIZE>-DIGITAL
 # Renk (edisyon) siparis kalemindeki "Primary color" varyasyonundan okunur (parse_tx). Etsy urun siniri 400 -> 2500.
-SKU2_RE = re.compile(r"^POD-([A-Z]{3})_([A-Z]{3})-([0-9]+x[0-9]+|A[1234])(?:-F(BK|WH|NA))?$")
+SKU2_RE = re.compile(r"^POD-([A-Z]{3})_([A-Z]{3})-([0-9]+x[0-9]+|A[1234])(?:-F(BK|WH|NA|GO))?$")
 RENK_ADI = {"MIDNIGHT BLUE": "MIDNIGHT_BLUE", "DEEP BLACK": "DEEP_BLACK", "WARM PARCHMENT": "WARM_PARCHMENT",
             "CHAMPAGNE IVORY": "CHAMPAGNE_IVORY", "PURE WHITE": "PURE_WHITE"}
 

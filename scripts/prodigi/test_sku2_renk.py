@@ -46,11 +46,14 @@ rec = {"receipt_id": "sahte-9", "transactions": [
     tx("b", "POD-CAN_LIB-8x10", "Pure White", "Print"),
     tx("c", "POD-CAN_LIB-16x20-FNA", "Champagne Ivory", "Natural Frame"),
     tx("d", "POD-CAN_LIB-8x10-DIGITAL", "All 5 colors (Digital)", "Digital File"),
+    tx("g", "POD-CAN_LIB-24x36-FGO", "Midnight Blue", "Antique Gold Frame"),
     tx("e", "POD-CAN_LIB-12x16", None, "Print"),
 ]}
 items, other, atl = R.parse_items(rec)
 by = {i["transaction_id"]: i for i in items}
-check("iki renk ayni SKU: iki kalem, ayri anahtar", by["a"]["sku"] != by["b"]["sku"] and len(items) == 3)
+check("iki renk ayni SKU: iki kalem, ayri anahtar", by["a"]["sku"] != by["b"]["sku"] and len(items) == 4)
+check("antique gold -> CFP + gold", by["g"]["prodigi_sku"] == "GLOBAL-CFP-24x36"
+      and by["g"]["attributes"].get("color") == "gold" and not by["g"]["mapping_error"])
 check("renk dosyasi dogru (DB)", by["a"]["asset_remote"].endswith("/CANCER_LIBRA/DEEP_BLACK/8x10.jpg"))
 check("renk dosyasi dogru (PW)", by["b"]["asset_remote"].endswith("/CANCER_LIBRA/PURE_WHITE/8x10.jpg"))
 check("baski -> HPR", by["a"]["prodigi_sku"] == "GLOBAL-HPR-8x10" and not by["a"]["cerceve"])
@@ -60,7 +63,7 @@ check("cerceveli -> CFP + natural", by["c"]["prodigi_sku"] == "GLOBAL-CFP-16x20"
 check("dijital Prodigi'ye gitmez", "d" not in by and any(o.startswith("DIJITAL:") for o in other))
 check("renksiz fiziksel kalem gonderilmez", "e" not in by and "POD-CAN_LIB-12x16" in other)
 body = R.order_body(rec, items, {i["sku"]: "u" for i in items})
-check("siparis govdesi 3 kalem, Standard", len(body["items"]) == 3 and body["shippingMethod"] == "Standard")
+check("siparis govdesi 4 kalem, Standard", len(body["items"]) == 4 and body["shippingMethod"] == "Standard")
 
 # kisisellestirme karti yeni SKU'yu da gorur
 rk = {"receipt_id": "sahte-10", "transactions": [

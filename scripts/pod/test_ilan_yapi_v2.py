@@ -43,14 +43,16 @@ def test_v3_repo_csv_six_colors_colorless_sku():
     live = inventory()
     plan = y2.build_plan(live, y2.load_config("data/pod/yapi_v2.csv"))
     p = plan["products"]
-    assert len(p) == 80 * 6
+    cfg = y2.load_config("data/pod/yapi_v2.csv")
+    n_dij = sum(1 for r in cfg if r["tur"] == "digital"); n_fiz = len(cfg) - n_dij
+    assert len(p) == len(cfg) * 6
     assert plan["sku_on_property"] == plan["price_on_property"]
     acik = [x for x in p if x["offerings"][0]["is_enabled"]]
     for x in acik:
         fmt, renk = x["property_values"][0]["values"][0], x["property_values"][1]["values"][0]
         assert (fmt == "Digital File") == (renk == y2.DIJITAL_RENK)
         assert "-MB-" not in x["sku"] and "-DB-" not in x["sku"]
-    assert len(acik) == 16 + 64 * 5
+    assert len(acik) == n_dij + n_fiz * 5
     fiyat = {}
     for x in p:
         k = (x["property_values"][0]["values"][0], x["property_values"][2]["values"][0])

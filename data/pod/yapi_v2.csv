@@ -31,51 +31,67 @@ mod,sira,etiket,format,tur,boy,cerceve,fiyat,sku_ek,aktif
 3,30,24×32″ (61×81cm),Print,print,24x32,,99.99,24x32,1
 3,31,24×36″ (61×91cm),Print,print,24x36,,109.99,24x36,1
 3,32,30×40″ (76×102cm),Print,print,30x40,,139.99,30x40,1
-3,33,8×10″ (20×25cm),Black Frame,framed,8x10,BK,95.99,8x10-FBK,1
-3,34,A4 (21×29.7cm),Black Frame,framed,A4,BK,97.99,A4-FBK,1
-3,35,11×14″ (28×36cm),Black Frame,framed,11x14,BK,98.99,11x14-FBK,1
-3,36,12×16″ (30×41cm),Black Frame,framed,12x16,BK,101.99,12x16-FBK,1
-3,37,A3 (29.7×42cm),Black Frame,framed,A3,BK,107.99,A3-FBK,1
-3,38,12×18″ (30×46cm),Black Frame,framed,12x18,BK,107.99,12x18-FBK,1
-3,39,16×20″ (41×51cm),Black Frame,framed,16x20,BK,112.99,16x20-FBK,1
-3,40,16×24″ (41×61cm),Black Frame,framed,16x24,BK,115.99,16x24-FBK,1
-3,41,A2 (42×59.4cm),Black Frame,framed,A2,BK,117.99,A2-FBK,1
-3,42,18×24″ (46×61cm),Black Frame,framed,18x24,BK,121.99,18x24-FBK,1
-3,43,20×30″ (51×76cm),Black Frame,framed,20x30,BK,142.99,20x30-FBK,1
-3,44,24×30″ (61×76cm),Black Frame,framed,24x30,BK,148.99,24x30-FBK,1
-3,45,A1 (59.4×84.1cm),Black Frame,framed,A1,BK,157.99,A1-FBK,1
-3,46,24×32″ (61×81cm),Black Frame,framed,24x32,BK,148.99,24x32-FBK,1
-3,47,24×36″ (61×91cm),Black Frame,framed,24x36,BK,164.99,24x36-FBK,1
-3,48,30×40″ (76×102cm),Black Frame,framed,30x40,BK,197.99,30x40-FBK,1
-3,49,8×10″ (20×25cm),White Frame,framed,8x10,WH,95.99,8x10-FWH,1
-3,50,A4 (21×29.7cm),White Frame,framed,A4,WH,97.99,A4-FWH,1
-3,51,11×14″ (28×36cm),White Frame,framed,11x14,WH,98.99,11x14-FWH,1
-3,52,12×16″ (30×41cm),White Frame,framed,12x16,WH,101.99,12x16-FWH,1
-3,53,A3 (29.7×42cm),White Frame,framed,A3,WH,107.99,A3-FWH,1
-3,54,12×18″ (30×46cm),White Frame,framed,12x18,WH,107.99,12x18-FWH,1
-3,55,16×20″ (41×51cm),White Frame,framed,16x20,WH,112.99,16x20-FWH,1
-3,56,16×24″ (41×61cm),White Frame,framed,16x24,WH,115.99,16x24-FWH,1
-3,57,A2 (42×59.4cm),White Frame,framed,A2,WH,117.99,A2-FWH,1
-3,58,18×24″ (46×61cm),White Frame,framed,18x24,WH,121.99,18x24-FWH,1
-3,59,20×30″ (51×76cm),White Frame,framed,20x30,WH,142.99,20x30-FWH,1
-3,60,24×30″ (61×76cm),White Frame,framed,24x30,WH,148.99,24x30-FWH,1
-3,61,A1 (59.4×84.1cm),White Frame,framed,A1,WH,157.99,A1-FWH,1
-3,62,24×32″ (61×81cm),White Frame,framed,24x32,WH,148.99,24x32-FWH,1
-3,63,24×36″ (61×91cm),White Frame,framed,24x36,WH,164.99,24x36-FWH,1
-3,64,30×40″ (76×102cm),White Frame,framed,30x40,WH,197.99,30x40-FWH,1
-3,65,8×10″ (20×25cm),Natural Frame,framed,8x10,NA,95.99,8x10-FNA,1
-3,66,A4 (21×29.7cm),Natural Frame,framed,A4,NA,97.99,A4-FNA,1
-3,67,11×14″ (28×36cm),Natural Frame,framed,11x14,NA,98.99,11x14-FNA,1
-3,68,12×16″ (30×41cm),Natural Frame,framed,12x16,NA,101.99,12x16-FNA,1
-3,69,A3 (29.7×42cm),Natural Frame,framed,A3,NA,107.99,A3-FNA,1
-3,70,12×18″ (30×46cm),Natural Frame,framed,12x18,NA,107.99,12x18-FNA,1
-3,71,16×20″ (41×51cm),Natural Frame,framed,16x20,NA,112.99,16x20-FNA,1
-3,72,16×24″ (41×61cm),Natural Frame,framed,16x24,NA,115.99,16x24-FNA,1
-3,73,A2 (42×59.4cm),Natural Frame,framed,A2,NA,117.99,A2-FNA,1
-3,74,18×24″ (46×61cm),Natural Frame,framed,18x24,NA,121.99,18x24-FNA,1
-3,75,20×30″ (51×76cm),Natural Frame,framed,20x30,NA,142.99,20x30-FNA,1
-3,76,24×30″ (61×76cm),Natural Frame,framed,24x30,NA,148.99,24x30-FNA,1
-3,77,A1 (59.4×84.1cm),Natural Frame,framed,A1,NA,157.99,A1-FNA,1
-3,78,24×32″ (61×81cm),Natural Frame,framed,24x32,NA,148.99,24x32-FNA,1
-3,79,24×36″ (61×91cm),Natural Frame,framed,24x36,NA,164.99,24x36-FNA,1
-3,80,30×40″ (76×102cm),Natural Frame,framed,30x40,NA,197.99,30x40-FNA,1
+3,33,8×10″ (20×25cm),Antique Gold Frame,framed,8x10,GO,95.99,8x10-FGO,1
+3,34,A4 (21×29.7cm),Antique Gold Frame,framed,A4,GO,97.99,A4-FGO,1
+3,35,11×14″ (28×36cm),Antique Gold Frame,framed,11x14,GO,98.99,11x14-FGO,1
+3,36,12×16″ (30×41cm),Antique Gold Frame,framed,12x16,GO,101.99,12x16-FGO,1
+3,37,A3 (29.7×42cm),Antique Gold Frame,framed,A3,GO,107.99,A3-FGO,1
+3,38,12×18″ (30×46cm),Antique Gold Frame,framed,12x18,GO,107.99,12x18-FGO,1
+3,39,16×20″ (41×51cm),Antique Gold Frame,framed,16x20,GO,112.99,16x20-FGO,1
+3,40,16×24″ (41×61cm),Antique Gold Frame,framed,16x24,GO,115.99,16x24-FGO,1
+3,41,A2 (42×59.4cm),Antique Gold Frame,framed,A2,GO,117.99,A2-FGO,1
+3,42,18×24″ (46×61cm),Antique Gold Frame,framed,18x24,GO,121.99,18x24-FGO,1
+3,43,20×30″ (51×76cm),Antique Gold Frame,framed,20x30,GO,142.99,20x30-FGO,1
+3,44,24×30″ (61×76cm),Antique Gold Frame,framed,24x30,GO,148.99,24x30-FGO,1
+3,45,A1 (59.4×84.1cm),Antique Gold Frame,framed,A1,GO,157.99,A1-FGO,1
+3,46,24×32″ (61×81cm),Antique Gold Frame,framed,24x32,GO,148.99,24x32-FGO,1
+3,47,24×36″ (61×91cm),Antique Gold Frame,framed,24x36,GO,164.99,24x36-FGO,1
+3,48,30×40″ (76×102cm),Antique Gold Frame,framed,30x40,GO,197.99,30x40-FGO,1
+3,49,8×10″ (20×25cm),Black Frame,framed,8x10,BK,95.99,8x10-FBK,1
+3,50,A4 (21×29.7cm),Black Frame,framed,A4,BK,97.99,A4-FBK,1
+3,51,11×14″ (28×36cm),Black Frame,framed,11x14,BK,98.99,11x14-FBK,1
+3,52,12×16″ (30×41cm),Black Frame,framed,12x16,BK,101.99,12x16-FBK,1
+3,53,A3 (29.7×42cm),Black Frame,framed,A3,BK,107.99,A3-FBK,1
+3,54,12×18″ (30×46cm),Black Frame,framed,12x18,BK,107.99,12x18-FBK,1
+3,55,16×20″ (41×51cm),Black Frame,framed,16x20,BK,112.99,16x20-FBK,1
+3,56,16×24″ (41×61cm),Black Frame,framed,16x24,BK,115.99,16x24-FBK,1
+3,57,A2 (42×59.4cm),Black Frame,framed,A2,BK,117.99,A2-FBK,1
+3,58,18×24″ (46×61cm),Black Frame,framed,18x24,BK,121.99,18x24-FBK,1
+3,59,20×30″ (51×76cm),Black Frame,framed,20x30,BK,142.99,20x30-FBK,1
+3,60,24×30″ (61×76cm),Black Frame,framed,24x30,BK,148.99,24x30-FBK,1
+3,61,A1 (59.4×84.1cm),Black Frame,framed,A1,BK,157.99,A1-FBK,1
+3,62,24×32″ (61×81cm),Black Frame,framed,24x32,BK,148.99,24x32-FBK,1
+3,63,24×36″ (61×91cm),Black Frame,framed,24x36,BK,164.99,24x36-FBK,1
+3,64,30×40″ (76×102cm),Black Frame,framed,30x40,BK,197.99,30x40-FBK,1
+3,65,8×10″ (20×25cm),White Frame,framed,8x10,WH,95.99,8x10-FWH,1
+3,66,A4 (21×29.7cm),White Frame,framed,A4,WH,97.99,A4-FWH,1
+3,67,11×14″ (28×36cm),White Frame,framed,11x14,WH,98.99,11x14-FWH,1
+3,68,12×16″ (30×41cm),White Frame,framed,12x16,WH,101.99,12x16-FWH,1
+3,69,A3 (29.7×42cm),White Frame,framed,A3,WH,107.99,A3-FWH,1
+3,70,12×18″ (30×46cm),White Frame,framed,12x18,WH,107.99,12x18-FWH,1
+3,71,16×20″ (41×51cm),White Frame,framed,16x20,WH,112.99,16x20-FWH,1
+3,72,16×24″ (41×61cm),White Frame,framed,16x24,WH,115.99,16x24-FWH,1
+3,73,A2 (42×59.4cm),White Frame,framed,A2,WH,117.99,A2-FWH,1
+3,74,18×24″ (46×61cm),White Frame,framed,18x24,WH,121.99,18x24-FWH,1
+3,75,20×30″ (51×76cm),White Frame,framed,20x30,WH,142.99,20x30-FWH,1
+3,76,24×30″ (61×76cm),White Frame,framed,24x30,WH,148.99,24x30-FWH,1
+3,77,A1 (59.4×84.1cm),White Frame,framed,A1,WH,157.99,A1-FWH,1
+3,78,24×32″ (61×81cm),White Frame,framed,24x32,WH,148.99,24x32-FWH,1
+3,79,24×36″ (61×91cm),White Frame,framed,24x36,WH,164.99,24x36-FWH,1
+3,80,30×40″ (76×102cm),White Frame,framed,30x40,WH,197.99,30x40-FWH,1
+3,81,8×10″ (20×25cm),Natural Frame,framed,8x10,NA,95.99,8x10-FNA,1
+3,82,A4 (21×29.7cm),Natural Frame,framed,A4,NA,97.99,A4-FNA,1
+3,83,11×14″ (28×36cm),Natural Frame,framed,11x14,NA,98.99,11x14-FNA,1
+3,84,12×16″ (30×41cm),Natural Frame,framed,12x16,NA,101.99,12x16-FNA,1
+3,85,A3 (29.7×42cm),Natural Frame,framed,A3,NA,107.99,A3-FNA,1
+3,86,12×18″ (30×46cm),Natural Frame,framed,12x18,NA,107.99,12x18-FNA,1
+3,87,16×20″ (41×51cm),Natural Frame,framed,16x20,NA,112.99,16x20-FNA,1
+3,88,16×24″ (41×61cm),Natural Frame,framed,16x24,NA,115.99,16x24-FNA,1
+3,89,A2 (42×59.4cm),Natural Frame,framed,A2,NA,117.99,A2-FNA,1
+3,90,18×24″ (46×61cm),Natural Frame,framed,18x24,NA,121.99,18x24-FNA,1
+3,91,20×30″ (51×76cm),Natural Frame,framed,20x30,NA,142.99,20x30-FNA,1
+3,92,24×30″ (61×76cm),Natural Frame,framed,24x30,NA,148.99,24x30-FNA,1
+3,93,A1 (59.4×84.1cm),Natural Frame,framed,A1,NA,157.99,A1-FNA,1
+3,94,24×32″ (61×81cm),Natural Frame,framed,24x32,NA,148.99,24x32-FNA,1
+3,95,24×36″ (61×91cm),Natural Frame,framed,24x36,NA,164.99,24x36-FNA,1
+3,96,30×40″ (76×102cm),Natural Frame,framed,30x40,NA,197.99,30x40-FNA,1
