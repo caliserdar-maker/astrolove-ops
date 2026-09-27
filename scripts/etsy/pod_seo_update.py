@@ -201,6 +201,7 @@ def main():
     ap.add_argument("--pod-state", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--ids", default="", help="yalniz bu ilanlar (virgullu id); bos = hepsi. --limit'ten once uygulanir")
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--confirm", default="")
     ap.add_argument("--quota-min", type=int, default=60)
@@ -225,6 +226,13 @@ def main():
     log(f"   yazilacak alanlar: {', '.join(YAZ_ALAN)}")
     (out / pathlib.Path(a.changes).name).write_text(
         pathlib.Path(a.changes).read_text(encoding="utf-8"), encoding="utf-8")
+    if a.ids.strip():
+        secili = {x.strip() for x in a.ids.split(",") if x.strip()}
+        bilinmeyen = secili - {str(r["id"]) for r in recs}
+        if bilinmeyen:
+            raise SystemExit(f"HATA: --ids 78 ilan listesinde yok: {sorted(bilinmeyen)}. DUR.")
+        recs = [r for r in recs if str(r["id"]) in secili]
+        log(f"   --ids suzgeci: {len(recs)} ilan ({', '.join(str(r['id']) for r in recs)})")
     if a.limit:
         recs = recs[:a.limit]
 

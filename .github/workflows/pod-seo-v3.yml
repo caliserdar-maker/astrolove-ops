@@ -25,6 +25,10 @@ on:
         description: "Yazilacak alanlar: title,tags ya da title,description,tags"
         required: false
         default: "title,tags"
+      ids:
+        description: "Yalniz bu ilanlar (virgullu id); bos = 78'in hepsi"
+        required: false
+        default: ""
 
 concurrency:
   group: etsy-token
@@ -41,6 +45,7 @@ jobs:
       APPLY: ${{ inputs.apply }}
       CONFIRM: ${{ inputs.confirm }}
       LIMIT: ${{ inputs.limit || '0' }}
+      IDS: ${{ inputs.ids || '' }}
       ALANLAR: ${{ inputs.alanlar || 'title,tags' }}
     steps:
       - name: Onay kapisi
@@ -95,7 +100,7 @@ jobs:
         run: |
           set -euo pipefail
           args=(--changes _work/pod_changes_v3.json --pod-state _work/pod_state.csv \
-                --out _out --limit "$LIMIT" --alanlar "$ALANLAR")
+                --out _out --limit "$LIMIT" --alanlar "$ALANLAR" --ids "$IDS")
           if [ "$APPLY" = "true" ]; then args+=(--apply --confirm "$CONFIRM"); fi
           python scripts/etsy/pod_seo_update.py "${args[@]}"
       - name: Token + cikti Drive'a
