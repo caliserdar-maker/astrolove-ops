@@ -47,4 +47,5 @@ Doğru olanlar: 01 kapak (renk hariç), 03, 09, ölçü 3000x2250, yasak kelime/
 | 07 Çerçeve | onaylı v3 (Serdar, 27 Eyl) | Prodigi'nin kendi Classic frame köşe fotoğrafları (prodigi-sayfa-gorsel → Drive TEMP/PRODIGI/CLASSIC_GORSEL/); gerçek profil şeridi + 45° gönye; yüz 20 mm 16x20 ölçeğinde (v3), rebate 5 mm, paspartu yok; scripts/pod/kart07_kur.py |
 | 08 Kağıt | onaylı (Serdar, 27 Eyl) | ChatGPT posteri yeniden çizilmiş (NCC 0.74) → kapaktaki gerçek poster; 'softly textured' (izinsiz) → 'Natural white and acid-free.'; Lato alt not/satır → Montserrat/kart 03; scripts/pod/kart08_duzelt.py |
 | 09 Yakın | onaylı (Serdar, 27 Eyl) | ChatGPT panel yapay 3B altın + yeniden çizilmiş poster → gerçek CL BASKI_11x14 (3307x4200) kırpımı 1.44x; kutu gerçek kırpım yerinde; scripts/pod/kart09_duzelt.py |
-| 10-16 | tek tek üretiliyor | |
+| 10 Boyut | v2 teslim (Claude) | İçerik doğru (16 boy = canlı SKU, cm doğru, tek ölçek); sütunlar eşit aralık (sağ kenar taşması), bant 80 px yukarı, Lato → Montserrat/kart 03; scripts/pod/kart10_duzelt.py |
+| 11-16 | tek tek üretiliyor | |
