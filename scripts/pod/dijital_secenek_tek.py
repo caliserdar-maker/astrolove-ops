@@ -9,6 +9,7 @@
                  3) aciklama: BLOK, "16 SIZES" satirinin hemen ustune eklenir (yalniz description PATCH).
                  Her adimdan sonra geri okuma; ilk hatada DUR. ONCE/SONRA yedek out/ altina.
 Ilan active degilse DOKUNULMAZ (updateListing taslagi yayina alir, CLAUDE.md). Sirlar loga yazilmaz."""
+import html
 import json
 import os
 import sys
@@ -88,7 +89,7 @@ def main():
         sonuc["durum"] = f"ATLANDI state={L.get('state')}"
         return bitir(sonuc, 3)
     zaten_inv = any(D.anahtar(p)[1] == ETIKET for p in inv.get("products") or [])
-    desc2 = yeni_aciklama(L.get("description") or "")
+    desc2 = yeni_aciklama(html.unescape(L.get("description") or ""))
     if zaten_inv and desc2 is None:
         sonuc["durum"] = "ZATEN"
         return bitir(sonuc, 4)
@@ -142,7 +143,8 @@ def main():
     L2 = api.get(f"/listings/{lid}") or {}
     (OUT / f"DIJ_{lid}_SONRA.json").write_text(json.dumps({"listing": L2, "inventory": inv2}, ensure_ascii=False))
     hata = []
-    if (L2.get("description") or "").strip() != desc2.strip():
+    norm = lambda t: html.unescape(t or "").replace("\r\n", "\n").strip()     # Etsy &quot; / &#39; dondurur
+    if norm(L2.get("description")) != norm(desc2):
         hata.append("aciklama geri okuma farkli")
     if L2.get("state") != "active":
         hata.append(f"state {L2.get('state')}")
