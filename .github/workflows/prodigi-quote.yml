@@ -25,7 +25,7 @@ on:
       mode:
         description: "pilot = pilot_skus.csv (US) | hpr_sizes = hpr_sizes.txt (US + DE) | ship_everywhere = 8 ulke Standard kargo (18x24) | inserts = branded insert fiyat/ozellik (8 tip, US + DE) | maliyet_api = 16 HPR boy x 7 ulke Budget/Standard + net (DIJITAL_78) | ekstra_tesis = kartpostal/sticker: canli siparis tesis + fatura kalemi (yalniz GET) + ECB kuru | hesap_oku = hesap ayari/adres ucu var mi (yalniz GET) | canli_guvenli_test = TEK canli sahte siparis + HEMEN iptal (Serdar onayi 25 Eyl; Pause indefinitely acik) | siparis_oku = skus alanindaki 'order_id,merchantReference' siparisini yalniz GET ile bul | arastir_0006 = dokuman alintisi + siparis GET + insert link bicimi kontrolu (salt okuma)"
         type: choice
-        options: [pilot, hpr_sizes, ship_everywhere, inserts, maliyet_api, ekstra_tesis, hesap_oku, canli_guvenli_test, siparis_oku, arastir_0006]
+        options: [pilot, cerceve_katalog, hpr_sizes, ship_everywhere, inserts, maliyet_api, ekstra_tesis, hesap_oku, canli_guvenli_test, siparis_oku, arastir_0006]
         default: pilot
 
 concurrency:
@@ -127,6 +127,14 @@ jobs:
             cat out/PRODIGI_EKSTRA_TESIS.md >> "$GITHUB_STEP_SUMMARY"
             head -40 out/PRODIGI_EKSTRA_TESIS.md
             rclone copy out "gdrive:ASTROLOVE/TEMP/PRODIGI" --include "PRODIGI_EKSTRA_TESIS.*" --include "EKSTRA_TESIS.json" -q
+            exit 0
+          fi
+          if [ "$MODE" = "cerceve_katalog" ]; then
+            # Yalniz GET /products + POST /quotes (siparis yok). Cikti TEMP/PRODIGI/KATALOG.
+            python scripts/prodigi/cerceve_katalog.py --out-dir out
+            cat out/CERCEVE_KATALOG.md >> "$GITHUB_STEP_SUMMARY"
+            rclone copy out "gdrive:ASTROLOVE/TEMP/PRODIGI/KATALOG" --include "CERCEVE_KATALOG.*" -q
+            rclone copy out/urun "gdrive:ASTROLOVE/TEMP/PRODIGI/KATALOG/urun" -q
             exit 0
           fi
           if [ "$MODE" = "maliyet_api" ]; then
