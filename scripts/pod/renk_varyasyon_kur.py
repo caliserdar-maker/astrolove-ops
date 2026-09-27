@@ -1,73 +1,60 @@
 #!/usr/bin/env python3
-"""CL renk varyasyon gorseli (Etsy renk secimi onizlemesi) 3000x2250 kurulum.
-Serdar 27 Eyl: musteri Menu 2'de renk secince bu gorsel cikacak; ChatGPT mockuplari
-(AI cizim poster + AI cerceve + alt kenarda lacivert serit artefakti) reddedildi,
-ayni konsept gercek dosyalardan kurulur.
-  - Poster: gercek baski dosyasi (11x14, EMILY/JAMES), 5 mm rebate kirpilir. Yeniden cizim yok.
-  - Cerceve: Prodigi Classic Antique Gold bos cerceve fotografi (059) 9 parca (kart12'deki cerceve_blank).
-  - Yuz kalinligi: onayli ince olcek R_YUZ = 20/599.6 (kart 12/13 v4 ile ayni).
-  - Zemin: sade sicak gri duvar (Serdar mockup rengi ~(216,209,202)), hafif dikey isik egimi.
-  - Golge: DNA (dx 15, dy 18, sigma 26, koyuluk 59/232).
-QC: 3000x2250, poster ic bolge NCC >= 0.99, zemin rengi koselerde dogru, yazi yok (tire yok).
-Kullanim: renk_varyasyon_kur.py BASKI_11x14.jpg AG_BLANK_059.jpg CIKIS.jpg
+"""CL renk varyasyon gorseli v2 (cercevesiz, format-notr) 3000x2250.
+ChatGPT galeri karari (27 Eyl, Serdar onayli surec): varyasyon fotograflari cercevesiz ve
+format acisindan tarafsiz; ayni zemin, ayni oran, ayni koordinat; poster yukseklik ~%78;
+altta iki kucuk satir (RENK ADI / "Poster color. Format selected separately.");
+5 gorselde ayni cok ince notr kontur; oda isigi/golge/metalik parilti yok.
+Tek sapma: oran 2:3 degil 11:14 (5 rengin de GERCEK dosyasi bu oranda; WP icin 2:3 render yok, IS_0047).
+Poster kaynaklari gercek dosyalar, yeniden cizim yok. Renk adi Menu 2 yazimiyla birebir.
+QC: 3000x2250, poster ic NCC >= 0.99, oran 11:14 (+-1 px), zemin koseler, kontur var, tire yok.
+Kullanim: renk_varyasyon_kur.py POSTER.jpg "RENK ADI" MONTSERRAT.ttf CIKIS.jpg
 """
+import re
 import sys
 import numpy as np
-from PIL import Image, ImageFilter
+from PIL import Image, ImageDraw, ImageFont
 
-BASKI, AGCH, CIK = sys.argv[1:4]
-DUVAR = (216, 209, 202)
-
-def cerceve_blank(yol, poster, F):
-    src = Image.open(yol).convert('RGB'); X0, Y0, X1, Y1, f = 455, 282, 1544, 1673, 46
-    PW, PH = poster.size; OW, OH = PW + 2 * F, PH + 2 * F
-    fr = Image.new('RGB', (OW, OH))
-    pa = np.asarray(poster).astype(np.float32); yy = np.arange(PH)[:, None]; xx = np.arange(PW)[None, :]
-    g = 1 - 0.22 * np.exp(-yy / 10.0) - 0.16 * np.exp(-xx / 10.0) - 0.06 * np.exp(-(PH - 1 - yy) / 5.0) - 0.06 * np.exp(-(PW - 1 - xx) / 5.0)
-    fr.paste(Image.fromarray(np.clip(pa * g[..., None], 0, 255).astype(np.uint8)), (F, F))
-    r = lambda b, w, h: src.crop(b).resize((w, h), Image.LANCZOS)
-    fr.paste(r((X0 + f, Y0, X1 - f, Y0 + f), OW - 2 * F, F), (F, 0))
-    fr.paste(r((X0 + f, Y1 - f, X1 - f, Y1), OW - 2 * F, F), (F, OH - F))
-    fr.paste(r((X0, Y0 + f, X0 + f, Y1 - f), F, OH - 2 * F), (0, F))
-    fr.paste(r((X1 - f, Y0 + f, X1, Y1 - f), F, OH - 2 * F), (OW - F, F))
-    fr.paste(r((X0, Y0, X0 + f, Y0 + f), F, F), (0, 0)); fr.paste(r((X1 - f, Y0, X1, Y0 + f), F, F), (OW - F, 0))
-    fr.paste(r((X0, Y1 - f, X0 + f, Y1), F, F), (0, OH - F)); fr.paste(r((X1 - f, Y1 - f, X1, Y1), F, F), (OW - F, OH - F))
-    return fr
-
-# zemin: sade duvar + hafif dikey isik egimi (ustte %2 acik, altta %2 koyu)
+POSTER, RENK, MON, CIK = sys.argv[1:5]
+DUVAR = (216, 209, 202)          # notr sicak gri, 5 gorselde ayni
+KONTUR = (168, 162, 155)         # cok ince notr kontur, 5 gorselde ayni
+SANS_T = (23, 25, 30)
 W, H = 3000, 2250
-y = np.linspace(0.02, -0.02, H)[:, None, None]
-zemin = np.clip(np.array(DUVAR, np.float32) * (1 + y), 0, 255)
-out = Image.fromarray(np.tile(zemin.astype(np.uint8), (1, W, 1)))
+PH = 1755                        # gorsel yuksekliginin %78'i
+PW = round(PH * 11 / 14)
+PY = 150                         # poster ust kenari; alt 1905, yazilar 1905-2130 bandinda
+K = 3                            # kontur kalinligi
 
-# cerceve + poster (dis yukseklik 2110, 11:14 oran; onayli ince yuz)
-R_YUZ = 20 / 599.6
-DH = 2110
-B = Image.open(BASKI).convert('RGB')
-kx, ky = round(B.width * 5 / 279.4), round(B.height * 5 / 355.6)
-Bk = B.crop((kx, ky, B.width - kx, B.height - ky))
-PH = round(DH / (1 + 2 * R_YUZ * B.width / B.height))   # yuz F = PW * R_YUZ
-PW = round(PH * Bk.width / Bk.height)
-F = round(PW * R_YUZ)
-PH = DH - 2 * F
-poster = Bk.resize((PW, PH), Image.LANCZOS)
-fr = cerceve_blank(AGCH, poster, F)
-FX, FY = (W - fr.width) // 2, (H - fr.height) // 2
+def font(yol, boy, w):
+    f = ImageFont.truetype(yol, boy); f.set_variation_by_axes([w]); return f
 
-# DNA golgesi
-sil = Image.new('L', (W, H), 0); sil.paste(255, (FX + 15, FY + 18, FX + 15 + fr.width, FY + 18 + fr.height))
-alfa = np.asarray(sil.filter(ImageFilter.GaussianBlur(26))).astype(np.float32) / 255
-o = np.asarray(out).astype(np.float32) * (1 - (59 / 232) * alfa)[..., None]
-out = Image.fromarray(np.clip(o, 0, 255).astype(np.uint8))
-out.paste(fr, (FX, FY))
+B = Image.open(POSTER).convert('RGB')
+# kaynagi 11:14'e getir: genisse yanlardan, uzunsa alt-ustten esit kirp (zemin dokusu, icerik kaybi yok)
+hedef = 11 / 14
+if B.width / B.height > hedef:
+    yw = round(B.height * hedef); x0 = (B.width - yw) // 2; B = B.crop((x0, 0, x0 + yw, B.height))
+else:
+    yh = round(B.width / hedef); y0 = (B.height - yh) // 2; B = B.crop((0, y0, B.width, y0 + yh))
+poster = B.resize((PW, PH), Image.LANCZOS)
+
+out = Image.new('RGB', (W, H), DUVAR); d = ImageDraw.Draw(out)
+PX = (W - PW) // 2
+d.rectangle((PX - K, PY - K, PX + PW + K - 1, PY + PH + K - 1), fill=KONTUR)
+out.paste(poster, (PX, PY))
+
+FA = font(MON, 56, 600); FB = font(MON, 40, 400)
+satir = [RENK, 'Poster color. Format selected separately.']
+for t, f, y in [(satir[0], FA, 1985), (satir[1], FB, 2075)]:
+    b = f.getbbox(t, anchor='ls'); d.text((1500 - (b[0] + b[2]) / 2, y - b[1]), t, font=f, fill=SANS_T, anchor='ls')
 out.save(CIK, quality=95, subsampling=0)
 
 # QC
 R = np.asarray(Image.open(CIK).convert('RGB')).astype(np.float32)
 def ncc(a, b):
     a = a - a.mean(); b = b - b.mean(); return float((a * b).sum() / np.sqrt((a * a).sum() * (b * b).sum()))
-px0, py0 = FX + F + 40, FY + F + 40
-n = ncc(R[py0:py0 + PH - 80, px0:px0 + PW - 80].mean(2), np.asarray(poster).astype(np.float32)[40:-40, 40:-40].mean(2))
-kose = all(max(abs(int(a) - b) for a, b in zip(R[y_, x_], DUVAR)) <= 8 for x_, y_ in [(60, 60), (2940, 60), (60, 2190), (2940, 2190)])
-print(f'cerceve dis {fr.width}x{fr.height} yuz {F} | poster {PW}x{PH} NCC {n:.4f} | zemin {kose}')
-print('PASS' if R.shape[:2] == (2250, 3000) and n >= 0.99 and kose else 'FAIL')
+n = ncc(R[PY + 20:PY + PH - 20, PX + 20:PX + PW - 20].mean(2), np.asarray(poster).astype(np.float32)[20:-20, 20:-20].mean(2))
+kose = all(max(abs(int(a) - b) for a, b in zip(R[y_, x_], DUVAR)) <= 3 for x_, y_ in [(60, 60), (2940, 60), (60, 2190), (2940, 2190)])
+kontur = max(abs(int(a) - b) for a, b in zip(R[PY + PH + 1, 1500], KONTUR)) <= 25
+tire = bool(re.search(r'[‒–—―−]', ' '.join(satir)))
+oran = abs(PW / PH - 11 / 14) < 0.002
+print(f'poster {PW}x{PH} (%{PH / H * 100:.0f}) NCC {n:.4f} | oran11:14 {oran} | zemin {kose} | kontur {kontur} | tire {tire}')
+print('PASS' if R.shape[:2] == (H, W) and n >= 0.99 and kose and kontur and oran and not tire else 'FAIL')
