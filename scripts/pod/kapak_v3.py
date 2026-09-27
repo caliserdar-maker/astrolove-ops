@@ -185,6 +185,7 @@ def main():
     ap.add_argument('--mod', default='ornek', choices=('ornek', '77', 'onizleme77'))
     ap.add_argument('--sb', default='', help='siparis-baski-v1 checkout dizini (ornek/77)')
     ap.add_argument('--parca', type=int, default=0); ap.add_argument('--toplam', type=int, default=1)
+    ap.add_argument('--ciftler', default='', help='77: yalniz bu ciftler (virgullu; ek kosu), OLCUM_p<parca>_ek.json')
     a = ap.parse_args()
     if a.mod == 'onizleme77':
         return onizleme77()
@@ -205,9 +206,16 @@ def main():
         with open(LISTE, newline='') as f:
             ciftler = [r['cift'] for r in csv.DictReader(f) if r['cift'] != REF]
         assert len(ciftler) == 77, len(ciftler)
-        ciftler = ciftler[a.parca::a.toplam]
-        log(f'parca {a.parca}/{a.toplam}: {len(ciftler)} cift')
-    olcum = cik / ('OLCUM.json' if a.mod == 'ornek' else f'OLCUM_p{a.parca}.json')
+        if a.ciftler.strip():
+            secili = [x.strip() for x in a.ciftler.split(',') if x.strip()]
+            if set(secili) - set(ciftler):
+                raise SystemExit(f'HATA: 77 listesinde yok: {sorted(set(secili) - set(ciftler))}. DUR.')
+            ciftler = secili
+        else:
+            ciftler = ciftler[a.parca::a.toplam]
+        log(f'parca {a.parca}/{a.toplam}: {len(ciftler)} cift {"(ek kosu)" if a.ciftler.strip() else ""}')
+    olcum = cik / ('OLCUM.json' if a.mod == 'ornek' else
+                   f'OLCUM_p{a.parca}{"_ek" if a.ciftler.strip() else ""}.json')
 
     R['ciftler'] = []; yollar = []
     for i, c in enumerate(ciftler):

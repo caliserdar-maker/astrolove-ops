@@ -75,5 +75,6 @@ Maliyet kaynağı: Drive `TEMP/PRODIGI/KATALOG/CERCEVE_KATALOG.csv` (27 Eyl, US,
 7. [ ] 77 ilan: 03:00 TR (00:00 UTC kota yenilenince) otomatik, ilk hatada DUR, sabah rapor
 
 ## Açık konular
+- Sipariş hattı (siparis_dosyasi.py) yapılacaklar (27 Eyl): AQUARIUS_LIBRA MB 11x14 sembol kapısı FAIL (77 kapak üretimi durdu); CAPRICORN_SAGITTARIUS 5 renk bant doğrulaması FAIL (8 px). Şimdi düzeltme yok.
 - Warm Parchment kişisel dosya: kağıt dokusu sembolün üstüne biniyor (Codex IS_0047, PR #60). Düzelene kadar dijital paket 4 renk + WP elle.
 - Etsy "Primary color" (200) için özel değer "All 5 colors, Digital" ilk gerçek yazımda doğrulanacak (PUT atomik; red gelirse ilan değişmez). OAS: değerlerde parantez yasak; 3 menü için PUT `?max_variations_supported=3` (varsayılan 2, 27 Eyl 409).

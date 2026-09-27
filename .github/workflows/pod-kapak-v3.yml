@@ -17,6 +17,14 @@ on:
         description: "ornek (CL + 3 ornek) | 77 (8 parca + onizleme)"
         required: true
         default: "ornek"
+      ciftler:
+        description: "77 ek kosu: yalniz bu ciftler (virgullu); bos = 8 parca"
+        required: false
+        default: ""
+      parca_adi:
+        description: "ek kosu OLCUM dosyasi parca no (or. 6)"
+        required: false
+        default: "0"
 
 concurrency: pod-kapak-v3
 
@@ -28,7 +36,7 @@ jobs:
       fail-fast: false
       max-parallel: 8
       matrix:
-        parca: ${{ fromJSON(inputs.mod == '77' && '[0,1,2,3,4,5,6,7]' || '[0]') }}
+        parca: ${{ fromJSON(inputs.mod == '77' && inputs.ciftler == '' && '[0,1,2,3,4,5,6,7]' || '[0]') }}
     steps:
       - uses: actions/checkout@v4
       - name: Checkout (siparis-baski-v1, hat kodu)
@@ -68,11 +76,18 @@ jobs:
       - name: Kapak uret
         env:
           MOD: ${{ inputs.mod }}
+          CIFTLER: ${{ inputs.ciftler }}
+          PARCA_ADI: ${{ inputs.parca_adi }}
         run: |
           set -euo pipefail
           case "$MOD" in ornek|77) : ;; *) echo "HATA: mod ornek|77" >&2; exit 1 ;; esac
-          toplam=1; [ "$MOD" = "77" ] && toplam=8
-          python scripts/pod/kapak_v3.py --mod "$MOD" --sb "$PWD/_sb" --parca "${{ matrix.parca }}" --toplam "$toplam"
+          case "$CIFTLER" in *[!A-Z_,]*) echo "HATA: ciftler A-Z_ ve virgul" >&2; exit 1 ;; esac
+          if [ -n "$CIFTLER" ]; then
+            python scripts/pod/kapak_v3.py --mod "$MOD" --sb "$PWD/_sb" --parca "$PARCA_ADI" --ciftler "$CIFTLER"
+          else
+            toplam=1; [ "$MOD" = "77" ] && toplam=8
+            python scripts/pod/kapak_v3.py --mod "$MOD" --sb "$PWD/_sb" --parca "${{ matrix.parca }}" --toplam "$toplam"
+          fi
       - if: ${{ always() }}
         run: rm -rf ~/.config/rclone
 

@@ -47,6 +47,7 @@ def test_v3_repo_csv_six_colors_colorless_sku():
     n_dij = sum(1 for r in cfg if r["tur"] == "digital"); n_fiz = len(cfg) - n_dij
     assert len(p) == len(cfg) * 6
     assert plan["sku_on_property"] == plan["price_on_property"]
+    assert plan["price_on_property"] == [100, 200, 300]  # Etsy: 3 varyasyonda 0, 1 ya da 3 id
     acik = [x for x in p if x["offerings"][0]["is_enabled"]]
     for x in acik:
         fmt, renk = x["property_values"][0]["values"][0], x["property_values"][1]["values"][0]

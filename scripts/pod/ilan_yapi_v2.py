@@ -113,7 +113,7 @@ def sku_for(base_sku, row):
 def build_plan_v3(inventory, rows):
     """Yapi v3 (Serdar 27 Eyl, secenek A): Format x Primary color (5 canli renk + DIJITAL_RENK) x Size, tam kartezyen.
     Digital File yalniz DIJITAL_RENK ile, fiziksel formatlar yalniz 5 renkle acik (is_enabled). SKU RENK ICERMEZ
-    (renk siparis varyasyonundan okunur, pod_sku.parse_tx) -> sku/price_on_property = [format, size], Etsy siniri 2500."""
+    (renk siparis varyasyonundan okunur, pod_sku.parse_tx). sku/price_on_property = [format, renk, boy] (a2, Serdar 27 Eyl)."""
     products = inventory["products"]
     colors = list(dict.fromkeys(value(p, COLORS) for p in products if value(p, COLORS) != DIJITAL_RENK))
     if len(colors) != 5 or not all(colors):
@@ -128,6 +128,7 @@ def build_plan_v3(inventory, rows):
         or {"property_id": 514, "property_name": FORMAT_ADI, "values": []}
     offering0 = sample["offerings"][0]
     renkler = colors + [DIJITAL_RENK]
+    color_prop_id = color_props[colors[0]]["property_id"]
     planned = []
     for row in rows:
         dijital = row["tur"] == "digital"
@@ -143,8 +144,9 @@ def build_plan_v3(inventory, rows):
                                                 copy_property(size_prop, row["etiket"] or row["boy"])],
                             "offerings": [copy_offering(offering0, row["fiyat"], acik)]})
     result = {"products": planned,
-              "price_on_property": [format_prop["property_id"], size_prop["property_id"]],
-              "sku_on_property": [format_prop["property_id"], size_prop["property_id"]]}
+              # Etsy (27 Eyl 400): 3 varyasyonda on_property yalniz 0, 1 ya da 3 id olabilir -> a2: uc menu birden
+              "price_on_property": [format_prop["property_id"], color_prop_id, size_prop["property_id"]],
+              "sku_on_property": [format_prop["property_id"], color_prop_id, size_prop["property_id"]]}
     for key in ("quantity_on_property", "readiness_state_on_property"):
         if inventory.get(key) is not None:
             result[key] = list(inventory[key])

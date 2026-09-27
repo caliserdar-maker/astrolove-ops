@@ -8,15 +8,17 @@ name: pod-gorsel-sira
 on:
   workflow_dispatch:
     inputs:
+      islem: {description: "sira (yeniden sirala + alt) | sil (yalniz image_id, yedekli)", required: true, default: "sira"}
       listing_id: {description: "Ilan id", required: true, default: "4570143815"}
       image_id: {description: "Mevcut listing_image_id", required: true, default: "8634239409"}
       rank: {description: "Hedef sira", required: true, default: "1"}
+      rank1_id: {description: "sil: silme sonrasi 1. sirada beklenen gorsel", required: false, default: "8634239409"}
       alt_text:
         description: "Alt metin"
         required: true
         default: "Cancer and Libra personalized zodiac couple wall art print in a gold frame, Midnight Blue with names Emily and James"
       apply: {description: "true = Etsy'ye YAZ (confirm=SIRA_ATA gerekir)", type: boolean, default: false}
-      confirm: {description: "Yazma icin tam olarak: SIRA_ATA", required: false, default: ""}
+      confirm: {description: "Yazma icin: sira -> SIRA_ATA, sil -> GORSEL_SIL", required: false, default: ""}
 
 concurrency:
   group: etsy-token
@@ -34,14 +36,17 @@ jobs:
       CONFIRM: ${{ inputs.confirm }}
       LID: ${{ inputs.listing_id }}
       IID: ${{ inputs.image_id }}
+      ISLEM: ${{ inputs.islem }}
+      R1: ${{ inputs.rank1_id }}
       RANK: ${{ inputs.rank }}
       ALT: ${{ inputs.alt_text }}
     steps:
       - name: Onay kapisi
         run: |
           set -euo pipefail
-          if [ "$APPLY" = "true" ] && [ "$CONFIRM" != "SIRA_ATA" ]; then
-            echo "::error::apply=true icin confirm tam olarak 'SIRA_ATA' olmali. DUR."; exit 1
+          case "$ISLEM" in sira) BEK=SIRA_ATA ;; sil) BEK=GORSEL_SIL ;; *) echo "::error::islem sira|sil"; exit 1 ;; esac
+          if [ "$APPLY" = "true" ] && [ "$CONFIRM" != "$BEK" ]; then
+            echo "::error::apply=true icin confirm tam olarak '$BEK' olmali. DUR."; exit 1
           fi
           [ "$APPLY" = "true" ] && echo "MOD=APPLY" >> "$GITHUB_ENV" || echo "MOD=DRY" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
@@ -78,7 +83,11 @@ jobs:
           TOKEN_FILE: _work/ETSY_TOKEN.json
         run: |
           set -euo pipefail
-          args=(--listing-id "$LID" --image-id "$IID" --rank "$RANK" --alt "$ALT" --out _out)
+          if [ "$ISLEM" = "sil" ]; then
+            args=(--listing-id "$LID" --sil-image-id "$IID" --rank1-id "$R1" --out _out)
+          else
+            args=(--listing-id "$LID" --image-id "$IID" --rank "$RANK" --alt "$ALT" --out _out)
+          fi
           if [ "$APPLY" = "true" ]; then args+=(--apply --confirm "$CONFIRM"); fi
           python scripts/etsy/pod_gorsel_sira.py "${args[@]}"
       - name: Token + cikti Drive'a
@@ -90,8 +99,8 @@ jobs:
           if grep -rqE 'x-api-key|refresh_token|"access_token"' _out/ 2>/dev/null; then
             echo "::error::ciktida sir benzeri anahtar bulundu, Drive'a yazilmadi"; exit 1
           fi
-          hedef="gdrive:ASTROLOVE/TEMP/POD_KAPAK_V3/SIRA_${LID}_${MOD:-DRY}_${stamp}"
-          [ -d _out ] && rclone copy _out "$hedef" -q && echo "Cikti: TEMP/POD_KAPAK_V3/SIRA_${LID}_${MOD:-DRY}_${stamp}/"
+          hedef="gdrive:ASTROLOVE/TEMP/POD_KAPAK_V3/${ISLEM^^}_${LID}_${MOD:-DRY}_${stamp}"
+          [ -d _out ] && rclone copy _out "$hedef" -q && echo "Cikti: TEMP/POD_KAPAK_V3/${ISLEM^^}_${LID}_${MOD:-DRY}_${stamp}/"
           [ -f _out/report.md ] && cat _out/report.md >> "$GITHUB_STEP_SUMMARY" || true
       - if: ${{ always() }}
         run: rm -rf _work ~/.config/rclone
