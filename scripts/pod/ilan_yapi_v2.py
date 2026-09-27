@@ -16,11 +16,12 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path[:0] = [str(HERE), str(HERE.parent / "etsy")]
 import pod_pilot_15 as pilot  # noqa: E402
-from pod_sku import MAX_LEN, parse_sku  # noqa: E402
+from pod_sku import MAX_LEN, make_sku2, parse_sku  # noqa: E402
 
 OUT = Path("out")
 COLORS = "primary color"
 FORMAT_ADI = "Digital File, Print or Framed?"
+DIJITAL_RENK = "All 5 colors (Digital)"  # Serdar 27 Eyl: dijitalde renk secimi yok, 5 renk pakette
 PERSONALIZATION = ("is_personalizable", "personalization_is_required",
                    "personalization_char_count_max", "personalization_instructions")
 CSV_FIELDS = {"mod", "sira", "etiket", "format", "tur", "boy", "cerceve",
@@ -105,6 +106,49 @@ def sku_for(base_sku, row):
     return sku
 
 
+def build_plan_v3(inventory, rows):
+    """Yapi v3 (Serdar 27 Eyl, secenek A): Format x Primary color (5 canli renk + DIJITAL_RENK) x Size, tam kartezyen.
+    Digital File yalniz DIJITAL_RENK ile, fiziksel formatlar yalniz 5 renkle acik (is_enabled). SKU RENK ICERMEZ
+    (renk siparis varyasyonundan okunur, pod_sku.parse_tx) -> sku/price_on_property = [format, size], Etsy siniri 2500."""
+    products = inventory["products"]
+    colors = list(dict.fromkeys(value(p, COLORS) for p in products if value(p, COLORS) != DIJITAL_RENK))
+    if len(colors) != 5 or not all(colors):
+        raise ValueError(f"5 canli renk bekleniyordu: {colors}")
+    sample = next((p for p in products if parse_sku(p.get("sku"))), None)
+    if not sample:
+        raise ValueError("canli standart SKU bulunamadi")
+    pair = parse_sku(sample["sku"])[0]
+    color_props = {value(p, COLORS): property_value(p, COLORS) for p in products if value(p, COLORS) in colors}
+    size_prop = property_value(sample, "size")
+    format_prop = next((property_value(p, "format") for p in products if property_value(p, "format")), None) \
+        or {"property_id": 514, "property_name": FORMAT_ADI, "values": []}
+    offering0 = sample["offerings"][0]
+    renkler = colors + [DIJITAL_RENK]
+    planned = []
+    for row in rows:
+        dijital = row["tur"] == "digital"
+        sku = (make_sku2(pair, row["boy"]) + "-DIGITAL") if dijital else make_sku2(pair, row["boy"], row["cerceve"] or None)
+        if len(sku) > MAX_LEN:
+            raise ValueError(f"SKU cok uzun: {sku}")
+        for renk in renkler:
+            cprop = copy_property(color_props[renk]) if renk in color_props else \
+                {"property_id": color_props[colors[0]]["property_id"], "property_name": "Primary color", "values": [renk]}
+            acik = bool(row["aktif"]) and (dijital == (renk == DIJITAL_RENK))
+            planned.append({"sku": sku,
+                            "property_values": [copy_property(format_prop, row["format"]), cprop,
+                                                copy_property(size_prop, row["etiket"] or row["boy"])],
+                            "offerings": [copy_offering(offering0, row["fiyat"], acik)]})
+    result = {"products": planned,
+              "price_on_property": [format_prop["property_id"], size_prop["property_id"]],
+              "sku_on_property": [format_prop["property_id"], size_prop["property_id"]]}
+    for key in ("quantity_on_property", "readiness_state_on_property"):
+        if inventory.get(key) is not None:
+            result[key] = list(inventory[key])
+    if len(planned) > 2500:
+        raise ValueError(f"Etsy urun siniri 2500 asildi: {len(planned)}")
+    return result
+
+
 def build_plan(inventory, config):
     """Build solely from a freshly supplied live inventory snapshot."""
     products = inventory.get("products") or []
@@ -116,6 +160,8 @@ def build_plan(inventory, config):
     mode = modes.pop()
     rows = sorted(config, key=lambda r: int(r["sira"]))
     if mode == "3":
+        return build_plan_v3(inventory, rows)
+    if mode == "3x":  # eski 3 varyasyon yolu (renk SKU icinde, 400 siniri); kullanilmiyor
         # Etsy expects the full Cartesian product.  CSV-listed combinations
         # carry their configured state; absent combinations are explicit,
         # disabled products rather than silently disappearing.

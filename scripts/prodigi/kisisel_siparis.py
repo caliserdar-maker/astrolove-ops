@@ -147,16 +147,31 @@ def _kisisel_alanlar(t):
     return tekil
 
 
+def _cozumle(t, parse_sku):
+    """-> (pair, ed, size, kanonik_sku) | None. Eski renkli SKU (parse_sku) ya da yeni renksiz SKU +
+    Primary color varyasyonu (pod_sku.parse_tx, 27 Eyl). Renk bilinmiyorsa None (fail-closed)."""
+    sku = (t.get("sku") or "").strip()
+    p = parse_sku(sku)
+    if p:
+        return p[0], p[1], p[2], sku
+    try:
+        from pod_sku import parse_tx
+    except ImportError:
+        return None
+    q = parse_tx(t)
+    return (q[0], q[1], q[2], q[4]) if q else None
+
+
 def cevaplar(receipt, parse_sku):
     """POD kalemleri icin [{transaction_id, sku, pair, ed, size, alanlar:[(soru, cevap)]}] (cevabi olanlar)."""
     out = []
     for t in receipt.get("transactions") or []:
-        p = parse_sku((t.get("sku") or "").strip())
+        p = _cozumle(t, parse_sku)
         if not p:
             continue
         alan = _kisisel_alanlar(t)
         if alan:
-            out.append({"transaction_id": t.get("transaction_id"), "sku": t.get("sku"), "pair": p[0], "ed": p[1],
+            out.append({"transaction_id": t.get("transaction_id"), "sku": p[3], "pair": p[0], "ed": p[1],
                         "size": p[2], "qty": int(t.get("quantity") or 1), "alanlar": alan})
     return out
 

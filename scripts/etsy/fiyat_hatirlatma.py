@@ -23,7 +23,7 @@ KOK = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(KOK))
 sys.path.insert(0, str(KOK.parent / "prodigi"))
 from etsy_common import Etsy, TokenStore  # noqa: E402
-from pod_sku import parse_sku  # noqa: E402
+from pod_sku import parse_sku, parse_tx  # noqa: E402
 
 DRV = "gdrive:ASTROLOVE/TEMP/POD_ORDERS"
 DURUM_DRV = f"{DRV}/FIYAT_HATIRLATMA.json"
@@ -95,10 +95,10 @@ def rapor_uret(api, shop, prod, gun):
     for rc in receipts:
         rid = str(rc.get("receipt_id"))
         for t in rc.get("transactions") or []:
-            p = parse_sku((t.get("sku") or "").strip())
+            p = parse_tx(t)
             if not p:
                 continue
-            _pair, _ed, boy = p
+            _pair, _ed, boy = p[:3]
             adet = int(t.get("quantity") or 1)
             pr = t.get("price") or {}
             fiyat = float(pr.get("amount") or 0) / float(pr.get("divisor") or 100)

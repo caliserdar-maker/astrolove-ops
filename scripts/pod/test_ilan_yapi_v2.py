@@ -38,27 +38,23 @@ def rows(mode):
                  tur="framed", cerceve="BK", sku_ek="8x10-FBK", aktif=False)]
 
 
-def test_three_variations_matrix_preserves_live_fields_and_disables_missing():
+def test_v3_repo_csv_six_colors_colorless_sku():
+    """Serdar 27 Eyl secenek A: 5 renk + 'All 5 colors (Digital)'; SKU renksiz; dijital yalniz dijital renkte acik."""
     live = inventory()
-    plan = y2.build_plan(live, rows(3))
-    assert len(plan["products"]) == 10
-    assert plan["price_on_property"] == [100, 300]
-    existing = plan["products"][0]
-    assert existing["sku"] == "POD-ARI_LEO-MB-8x10"
-    assert existing["offerings"][0] == {"price": 19.99, "quantity": 7, "is_enabled": True,
-                                        "readiness_state_id": 4}
-    assert plan["products"][1]["offerings"][0]["is_enabled"] is False
-    assert len({p["sku"] for p in plan["products"]}) == 10
-
-
-def test_three_variations_creates_disabled_cartesian_gaps():
-    config = rows(3) + [dict(rows(3)[0], sira="3", boy="11x14", sku_ek="11x14")]
-    plan = y2.build_plan(inventory(), config)
-    assert len(plan["products"]) == 5 * 2 * 2
-    gaps = [p for p in plan["products"] if y2.value(p, "format") == "Black Frame"
-            and y2.value(p, "size") == "11x14"]
-    assert len(gaps) == 5
-    assert all(not p["offerings"][0]["is_enabled"] for p in gaps)
+    plan = y2.build_plan(live, y2.load_config("data/pod/yapi_v2.csv"))
+    p = plan["products"]
+    assert len(p) == 80 * 6
+    assert plan["sku_on_property"] == plan["price_on_property"]
+    acik = [x for x in p if x["offerings"][0]["is_enabled"]]
+    for x in acik:
+        fmt, renk = x["property_values"][0]["values"][0], x["property_values"][1]["values"][0]
+        assert (fmt == "Digital File") == (renk == y2.DIJITAL_RENK)
+        assert "-MB-" not in x["sku"] and "-DB-" not in x["sku"]
+    assert len(acik) == 16 + 64 * 5
+    fiyat = {}
+    for x in p:
+        k = (x["property_values"][0]["values"][0], x["property_values"][2]["values"][0])
+        assert fiyat.setdefault(k, x["offerings"][0]["price"]) == x["offerings"][0]["price"]
 
 
 def test_two_variations_combines_format_and_size():

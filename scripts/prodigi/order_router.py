@@ -50,7 +50,7 @@ sys.path.insert(0, str(HERE.parent / "etsy"))
 sys.path.insert(0, str(HERE.parent / "pinterest"))
 sys.path.insert(0, str(HERE.parent / "ops"))
 from etsy_common import Etsy, TokenStore, log as elog, mask  # noqa: E402
-from pod_sku import frame_code, is_digital_sku, parse_sku  # noqa: E402
+from pod_sku import frame_code, is_digital_sku, parse_sku, parse_tx  # noqa: E402
 import takip  # noqa: E402
 import kisisel_siparis  # noqa: E402
 import siparis_onay  # noqa: E402
@@ -463,11 +463,10 @@ def parse_items(receipt, only_size=""):
         sku = (t.get("sku") or "").strip()
         if dijital_mi(t):
             other.append(f"DIJITAL:{sku or 'tx' + str(t.get('transaction_id'))}"); continue
-        parsed = parse_sku(sku)
+        parsed = parse_tx(t)          # eski renkli SKU ya da yeni SKU + "Primary color" varyasyonu (27 Eyl)
         if not parsed:
             other.append(sku or f"tx{t.get('transaction_id')}"); continue
-        pair, ed, size = parsed
-        cerceve = frame_code(sku)
+        pair, ed, size, cerceve, sku = parsed      # sku = kanonik (renkli) anahtar
         if boylar and size not in boylar:
             atlanan.append(f"{sku}x{int(t.get('quantity') or 1)}"); continue
         pr = t.get("price") or {}
