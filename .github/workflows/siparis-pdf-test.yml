@@ -1,0 +1,84 @@
+name: siparis-pdf-test
+
+# DIJITAL teslim PDF testi (Serdar onayi 27 Eyl 2026): siparis-baski-v1 dalindaki siparis_dosyasi.py
+# --urun dijital, yalniz CANCER_LIBRA EMILY/JAMES. 5 renk x 5 sayfa PDF + pdf_kapisi (PASS/FAIL).
+# Kapsam: YALNIZ Drive (rclone). Etsy/Prodigi secret'i yok; musteriye teslim, Etsy yazma, Prodigi YOK.
+# Cikti: Drive ASTROLOVE/TEMP/SIPARIS_ISIM/TEST_PDF/<receipt>/
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      cift:
+        description: "Cift (test)"
+        required: true
+        default: "CANCER_LIBRA"
+
+concurrency: siparis-pdf-test
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Checkout (siparis-baski-v1)
+        uses: actions/checkout@v4
+        with:
+          ref: siparis-baski-v1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Python bagimliliklari
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet --upgrade pip
+          python -m pip install --quiet pillow opencv-python-headless numpy fonttools img2pdf pikepdf
+      - name: Birim testi
+        run: python -m unittest scripts.medya_v1.test_siparis_dosyasi_dijital
+      - name: rclone kur
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          rclone version | head -1
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then echo "HATA: RCLONE_CONF_B64 yok" >&2; exit 1; fi
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Dijital PDF uret + kapi
+        env:
+          CIFT: ${{ inputs.cift }}
+        run: |
+          set -euo pipefail
+          case "$CIFT" in *[!A-Z_]*|"") echo "HATA: cift A-Z_ olmali" >&2; exit 1 ;; esac
+          mesaj=$(printf '%s' 'It Began With a Kiss in the Rain' | base64 -w0)
+          rc=0
+          python scripts/medya_v1/siparis_dosyasi.py --cift "$CIFT" --urun dijital \
+            --isim1 EMILY --isim2 JAMES --mesaj-b64 "$mesaj" \
+            --sip-kok gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/TEST_PDF || rc=$?
+          python - <<'EOF'
+          import json
+          R = json.load(open('_siparis/SIPARIS_RAPOR.json'))
+          for x in R['siparisler']:
+              for renk, v in x.get('renkler', {}).items():
+                  k = v.get('pdf_kapisi') or {}
+                  print(renk, v.get('durum'), v.get('pdf'), k.get('MB'), 'MB', k.get('sayfa_sayisi'), 'sayfa',
+                        'PASS' if k.get('gecti') else 'FAIL',
+                        [(s['boy'], s['sayfa_mm'], s['dpi'], s['ayni_bayt'], s['ncc']) for s in k.get('sayfalar', [])])
+          EOF
+          exit $rc
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
