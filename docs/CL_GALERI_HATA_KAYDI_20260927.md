@@ -54,3 +54,6 @@ Doğru olanlar: 01 kapak (renk hariç), 03, 09, ölçü 3000x2250, yasak kelime/
 | 14 Yatak odası | onaylı (Serdar, 27 Eyl) | 3 ChatGPT kartı reddedildi (başlık tekrarı, paspartu, Kinfolk, ASTROLOVE mum); yazısız sahne istendi; gerçek CI poster + Prodigi AG; başlık 'Made for the room you share.'; scripts/pod/kart14_kur.py |
 | 15 Siyah | onaylı v2 (Serdar, 27 Eyl) | v2: yazısız çalışma köşesi sahnesi (kart15_kur.py ... calisma); v1 oturma odası yedek; gerçek Deep Black + Prodigi Black profil; scripts/pod/kart15_kur.py |
 | 16 Beyaz | onaylı a (Serdar, 27 Eyl) | Yazısız yemek odası sahnesi a (kapılı; b yedek); gerçek Pure White + Prodigi Natural profil; scripts/pod/kart16_kur.py |
+
+## Yedek
+- data/pod/cl_referans/sahne_yedek_giris.png: yazısız giriş/konsol sahnesi (altın çerçeve, parşömen ton). Warm Parchment dosya hatası (Codex PR #60) düzelince 17. kart: Warm Parchment + Antique Gold.
