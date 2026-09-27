@@ -14,7 +14,7 @@ FRAME_NAMES = {"BK": "Black Frame", "WH": "White Frame", "NA": "Natural Frame"}
 FRAME_COLORS = {
     "BK": ((31, 30, 29), (70, 67, 63)),
     "WH": ((235, 233, 226), (199, 197, 190)),
-    "NA": ((177, 128, 78), (116, 78, 45)),
+    "NA": ((201, 166, 118), (158, 121, 80)),
 }
 RESAMPLE = Image.Resampling.LANCZOS
 
@@ -101,22 +101,44 @@ def brand_font(size: int) -> ImageFont.FreeTypeFont:
 def single_card(design: Image.Image, code: str, paspartu: bool) -> tuple[Image.Image, list[tuple[int, int, int, int]]]:
     global canvas
     canvas = wall().convert("RGBA")
-    result, area = render_frame(design, code, paspartu, (360, 280, 1640, 2020))
+    result, area = render_frame(design, code, paspartu, (360, 300, 1640, 1865))  # profil 70 px: acilis 1140x1425 = tam 4:5
     return result.convert("RGB"), [area]
 
 
+def _unframed(design: Image.Image, size: tuple[int, int], center: tuple[int, int]) -> tuple[int, int, int, int]:
+    """Cercevesiz baski: yalniz ince golge; tasarim olceklenir, kirpilmaz."""
+    w, h = size
+    x0, y0 = center[0] - w // 2, center[1] - h // 2
+    shadow = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    ImageDraw.Draw(shadow).rectangle((x0 + 10, y0 + 16, x0 + w + 14, y0 + h + 22), fill=(25, 20, 15, 70))
+    canvas.alpha_composite(shadow.filter(ImageFilter.GaussianBlur(18)))
+    canvas.paste(design.resize((w, h), RESAMPLE), (x0, y0))
+    return (x0, y0, x0 + w, y0 + h)
+
+
 def options_card(design: Image.Image, paspartu: bool) -> tuple[Image.Image, list[tuple[int, int, int, int]]]:
+    """2x2: Print only, Black, White, Natural. Tum tasarim alanlari ayni boyutta."""
     global canvas
     canvas = wall().convert("RGBA")
     draw = ImageDraw.Draw(canvas)
-    title_font, label_font = brand_font(82), brand_font(44)
-    draw.text((W // 2, 115), "Framed options", font=title_font, fill=(45, 40, 35), anchor="ma")
+    title_font, label_font, note_font = brand_font(84), brand_font(50), brand_font(40)
+    draw.text((W // 2, 95), "Choose your format", font=title_font, fill=(45, 40, 35), anchor="ma")
+    fw, fh = 746, 912  # profil 41 px: acilis 664x830 = tam 4:5 (bosluk seridi yok)
+    cells = [(505, 285), (1495, 285), (505, 1340), (1495, 1340)]  # ust-orta x, ust y
     boxes: list[tuple[int, int, int, int]] = []
-    for code, x in zip(("BK", "WH", "NA"), (90, 730, 1370)):
-        _, area = render_frame(design, code, paspartu, (x, 450, x + 540, 1110))
-        boxes.append(area)
-        draw = ImageDraw.Draw(canvas)
-        draw.text((x + 270, 1390), FRAME_NAMES[code], font=label_font, fill=(52, 47, 42), anchor="ma")
+    frame_boxes = {}
+    for code, (cx, top) in zip(("BK", "WH", "NA"), cells[1:]):
+        _, area = render_frame(design, code, paspartu, (cx - fw // 2, top, cx - fw // 2 + fw, top + fh))
+        frame_boxes[code] = area
+    a = frame_boxes["BK"]
+    size = (a[2] - a[0], a[3] - a[1])
+    cx, top = cells[0]
+    boxes.append(_unframed(design, size, (cx, top + fh // 2)))
+    boxes += [frame_boxes[c] for c in ("BK", "WH", "NA")]
+    draw = ImageDraw.Draw(canvas)
+    for label, (cx, top) in zip(("Print only", "Black Frame", "White Frame", "Natural Frame"), cells):
+        draw.text((cx, top + fh + 30), label, font=label_font, fill=(52, 47, 42), anchor="ma")
+    draw.text((W // 2, 2400), "Also available as a Digital File", font=note_font, fill=(95, 88, 80), anchor="ma")
     return canvas.convert("RGB"), boxes
 
 
