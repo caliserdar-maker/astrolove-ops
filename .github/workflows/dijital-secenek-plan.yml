@@ -14,8 +14,11 @@ on:
         description: "Etsy ilan id (varsayilan CL)"
         default: "4570143815"
       etiket:
-        description: "Digital File deger etiketi (bos = varsayilan uzun etiket)"
+        description: "Digital File deger etiketi (bos = varsayilan 'Digital File (5 colors)')"
         default: ""
+      mod:
+        description: "etsy = canli okuma + plan | yenile = Etsy YOK, Drive'daki PUT_TASLAK'tan yeniden kur (GOREV 0039)"
+        default: "etsy"
 
 jobs:
   plan:
@@ -53,13 +56,19 @@ jobs:
           TOKEN_FILE: _work/ETSY_TOKEN.json
           ILAN: ${{ inputs.ilan }}
           DIJITAL_ETIKET: ${{ inputs.etiket }}
+          MOD: ${{ inputs.mod }}
         run: |
           set -euo pipefail
           umask 077; mkdir -p _work
-          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
-          python scripts/pod/dijital_secenek_plan.py etsy "$ILAN" _ilan.json
-          rc=0; python scripts/pod/dijital_secenek_plan.py plan _ilan.json || rc=$?
           H="gdrive:ASTROLOVE/TEMP/POD_ORDERS"
+          if [ "$MOD" = "yenile" ]; then
+            rclone copyto "$H/DIJITAL_SECENEK_PUT_TASLAK.json" _work/put_eski.json
+            rc=0; python scripts/pod/dijital_secenek_plan.py yenile _work/put_eski.json || rc=$?
+          else
+            rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+            python scripts/pod/dijital_secenek_plan.py etsy "$ILAN" _ilan.json
+            rc=0; python scripts/pod/dijital_secenek_plan.py plan _ilan.json || rc=$?
+          fi
           for f in DIJITAL_SECENEK_DIFF_CL.csv DIJITAL_SECENEK_PUT_TASLAK.json DIJITAL_SECENEK_OZET.json; do
             [ -f "out/$f" ] && rclone copyto "out/$f" "$H/$f" -q || true
           done

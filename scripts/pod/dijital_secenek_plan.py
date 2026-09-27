@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """GOREV 0036 md.2 - POD ilanina "Digital File" secenegi: KURU KOSU (Etsy'ye YAZMA YOK).
 etsy <ilan_id> <cikti.json> : getListing + getListingInventory (OAuth token, listings_r; SALT OKUMA, etsy-token kilidi).
+yenile <PUT_TASLAK.json>    : Etsy cagrisi YOK; mevcut taslaktaki -DIGITAL urunleri cikarilir, kalan 80 urun envanter
+                              kabul edilip plan yeniden kurulur (fiyat/etiket degisikliginde; GOREV 0039).
 plan <cikti.json>           : Size listesine ILK deger ETIKET, 5 rengin hepsinde FIYAT; SKU pod_sku.make_digital_sku
                               (POD-<S1>_<S2>-<ED2>-DIGITAL). Diger boy/fiyat/SKU/adet/gorunurluk AYNEN.
   Cikti: out/DIJITAL_SECENEK_DIFF_CL.csv (renk, boy, sku, eski_fiyat, yeni_fiyat, durum)
@@ -17,8 +19,8 @@ KOK = Path(__file__).resolve().parent
 sys.path.insert(0, str(KOK)); sys.path.insert(0, str(KOK.parent / "etsy"))
 from pod_sku import MAX_LEN, make_digital_sku, parse_sku  # noqa: E402
 
-ETIKET = os.environ.get("DIJITAL_ETIKET") or "Digital File, 5 colors + 5 ratios"   # sinir asilirsa "Digital File (5 colors)"
-FIYAT = 14.99
+ETIKET = os.environ.get("DIJITAL_ETIKET") or "Digital File (5 colors)"   # GOREV 0037: kisa etiket
+FIYAT = 9.99                                                             # GOREV 0039 (Serdar, 27 Eyl): 14.99 degil 9.99
 OUT = Path("out")
 
 
@@ -103,6 +105,9 @@ def main():
         return
     L = json.loads(Path(sys.argv[2]).read_text())
     inv = L.get("inventory") or L
+    if sys.argv[1] == "yenile":
+        inv = dict(inv, products=[p for p in inv.get("products") or [] if not str(p.get("sku", "")).upper().endswith("-DIGITAL")])
+        L = {"state": "(taslaktan; Etsy okunmadi)", "inventory": inv}
     body = plan(inv)
     rows = diff(inv, body)
     with open(OUT / "DIJITAL_SECENEK_DIFF_CL.csv", "w", newline="", encoding="utf-8") as fh:
