@@ -5,7 +5,8 @@ yazilar scripts/pod/sahne_yazi_sil.py ile silinir (temiz.png).
 Sahnedeki cerceve yerine (on cephe; dis (598,131)-(849,447)): Prodigi Classic BLACK chevron fotografinin gercek
 profil seridi, 45 derece gonye (kart 07 yontemi; siyah icin on cephe bos fotograf yok); yuz 24x36 olcegi.
 Poster: canli kart 04'teki GERCEK Deep Black (EMILY/JAMES).
-Kullanim: kart15_kur.py SAHNE_TEMIZ.png CANLI_04.jpg BK_CHEVRON.jpg CANLI_03.jpg KART03_V2.jpg GARAMOND.ttf MONTSERRAT.ttf CIKIS.jpg
+Kullanim: kart15_kur.py SAHNE.png CANLI_04.jpg BK_CHEVRON.jpg CANLI_03.jpg KART03_V2.jpg GARAMOND.ttf MONTSERRAT.ttf CIKIS.jpg [oda|calisma]
+v2 (calisma): ChatGPT'nin gec gelen calisma kosesi sahnesi (yazisiz, siyah cerceve, dis (637,96)-(1098,660)).
 """
 import re
 import sys
@@ -14,6 +15,10 @@ from PIL import Image, ImageDraw, ImageFilter, ImageFont
 from scipy import ndimage
 
 G15, C04, BKCH, C03, K03V2, GAR, MON, CIK = sys.argv[1:9]
+# sahne secimi: 'oda' (v1, oturma odasi 1448x1086) | 'calisma' (v2, calisma kosesi 1729x910)
+SAHNE = sys.argv[9] if len(sys.argv) > 9 else 'oda'
+SAHNE_KIRP, CER = {'oda': ((0, 100, 1448, 862), (598, 131, 850, 448)),
+                   'calisma': ((0, 0, 1729, 910), (637, 96, 1098, 660))}[SAHNE]
 BG = (237, 232, 226); NAVY_T = (25, 34, 49); SANS_T = (23, 25, 30)
 
 def _maske(im):
@@ -86,9 +91,9 @@ b = FS.getbbox('Cancer and Libra, united in an original AstroLove design.', anch
 d.text((147 - b[0], 336 - b[1]), 'A modern look for a living room, hallway or office.', font=FS, fill=SANS_T, anchor='ls')
 
 G = Image.open(G15).convert('RGB')
-SC = (0, 100, G.width, 862); SX, SY = 145, 420; s = 2710 / (SC[2] - SC[0])
+SC = SAHNE_KIRP; SX, SY = 145, 420; s = 2710 / (SC[2] - SC[0])
 sahne = G.crop(SC).resize((2710, round((SC[3] - SC[1]) * s)), Image.LANCZOS).filter(ImageFilter.UnsharpMask(2, 60, 2))
-DX0, DY0, DX1, DY1 = [round(v) for v in ((598 - SC[0]) * s, (131 - SC[1]) * s, (850 - SC[0]) * s, (448 - SC[1]) * s)]
+DX0, DY0, DX1, DY1 = [round(v) for v in ((CER[0] - SC[0]) * s, (CER[1] - SC[1]) * s, (CER[2] - SC[0]) * s, (CER[3] - SC[1]) * s)]
 # Serdar 27 Eyl: cerceve ince. Yuz = Prodigi 20 mm, 24x36 olceginde (gorunen 599.6 mm); dis olcu sahnedeki gibi kalir.
 R_YUZ = 20 / 599.6
 F = round((DX1 - DX0) * R_YUZ / (1 + 2 * R_YUZ))
