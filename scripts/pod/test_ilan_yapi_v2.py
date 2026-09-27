@@ -39,7 +39,7 @@ def rows(mode):
 
 
 def test_v3_repo_csv_six_colors_colorless_sku():
-    """Serdar 27 Eyl secenek A: 5 renk + 'All 5 colors (Digital)'; SKU renksiz; dijital yalniz dijital renkte acik."""
+    """Serdar 27 Eyl secenek A: 5 renk + 'All 5 colors, Digital'; SKU renksiz; dijital yalniz dijital renkte acik."""
     live = inventory()
     plan = y2.build_plan(live, y2.load_config("data/pod/yapi_v2.csv"))
     p = plan["products"]
@@ -133,7 +133,16 @@ def test_yaz_aciklama_varsayilan_kapali(tmp_path, monkeypatch):
     monkeypatch.setattr(y2, "OUT", tmp_path)
     api = FakeApi()
     assert y2.main(["yaz", "4570143815", "--confirm", "YAPI_V2"], api=api) == 0
-    assert ("put", "/listings/4570143815/inventory") in api.calls
+    assert ("put", "/listings/4570143815/inventory?max_variations_supported=3") in api.calls
     assert not [c for c in api.calls if c[0] == "patch"]
     assert api.listing["description"] == "eski aciklama"
     assert y2.parser().parse_args(["kuru", "1"]).aciklama is False
+
+
+def test_dijital_renk_parantezsiz_ve_oneri():
+    assert "(" not in y2.DIJITAL_RENK
+    plan = y2.build_plan(inventory(), y2.load_config("data/pod/yapi_v2.csv"))
+    assert y2.varyasyon_sayisi(plan) == 3
+    oneri = y2.parantezsiz_oneri(plan)
+    assert oneri.get("8×10″ (20×25cm)") == "8×10″ / 20×25cm"
+    assert all("(" not in v for v in oneri.values())

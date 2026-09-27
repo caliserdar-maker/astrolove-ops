@@ -39,13 +39,13 @@ check("yeni baski SKU renk varyasyondan", p == ("CANCER_LIBRA", "DEEP_BLACK", "8
 check("yeni SKU parse_sku ile cozulmez (eski kod yanlis renge gitmez)", parse_sku("POD-CAN_LIB-8x10") is None)
 # 3 renk yok / bilinmeyen renk -> None (fail-closed)
 check("renk yok -> None", parse_tx(tx(3, "POD-CAN_LIB-8x10", None, "Print")) is None)
-check("dijital renk degeri -> None", parse_tx(tx(4, "POD-CAN_LIB-8x10", "All 5 colors (Digital)", "Print")) is None)
+check("dijital renk degeri -> None", parse_tx(tx(4, "POD-CAN_LIB-8x10", "All 5 colors, Digital", "Print")) is None)
 
 rec = {"receipt_id": "sahte-9", "transactions": [
     tx("a", "POD-CAN_LIB-8x10", "Deep Black", "Print"),
     tx("b", "POD-CAN_LIB-8x10", "Pure White", "Print"),
     tx("c", "POD-CAN_LIB-16x20-FNA", "Champagne Ivory", "Natural Frame"),
-    tx("d", "POD-CAN_LIB-8x10-DIGITAL", "All 5 colors (Digital)", "Digital File"),
+    tx("d", "POD-CAN_LIB-8x10-DIGITAL", "All 5 colors, Digital", "Digital File"),
     tx("g", "POD-CAN_LIB-24x36-FGO", "Midnight Blue", "Antique Gold Frame"),
     tx("e", "POD-CAN_LIB-12x16", None, "Print"),
 ]}

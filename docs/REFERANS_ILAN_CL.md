@@ -6,8 +6,8 @@ Amaç: CL eksiksiz bitince aynı yöntem ve kodla kalan 77 POD ilanına geçmek.
 | Konu | Karar |
 |---|---|
 | Mağaza | 78 ilan; 390 dijital ilan pasif (Serdar elle), 78 wallpaper pasif, wallpaper ürünü bırakıldı |
-| Menü (3 varyasyon) | 1 "Digital File, Print or Framed?" (özel property 514): Digital File / Print / Antique Gold Frame / Black Frame / White Frame / Natural Frame (Prodigi Classic; 8 rengin hepsi ayni fiyat, US) · 2 "Primary color" (200): 5 renk + "All 5 colors (Digital)" · 3 "Size" (513): 16 boy, canlı etiketler |
-| Dijital | 9.99, her boyda; yalnız "All 5 colors (Digital)" ile açık; 5 PDF (renk başına, her biri 5 oran) Etsy Messages ile, 24 saat içinde, her gönderim Serdar onayıyla |
+| Menü (3 varyasyon) | 1 "Digital File, Print or Framed?" (özel property 514): Digital File / Print / Antique Gold Frame / Black Frame / White Frame / Natural Frame (Prodigi Classic; 8 rengin hepsi ayni fiyat, US) · 2 "Primary color" (200): 5 renk + "All 5 colors, Digital" · 3 "Size" (513): 16 boy, canlı etiketler |
+| Dijital | 9.99, her boyda; yalnız "All 5 colors, Digital" ile açık; 5 PDF (renk başına, her biri 5 oran) Etsy Messages ile, 24 saat içinde, her gönderim Serdar onayıyla |
 | Baskı | Hahnemühle Photo Rag 308 gsm (GLOBAL-HPR-<boy>); fiyat = max(mevcut, Standard kargoda net 10 $) |
 | Çerçeveli | Prodigi Classic Frame GLOBAL-CFP-<boy>, EMA 200 gsm, Perspex, paspartusuz; Antique Gold/Black/White/Natural aynı fiyat; net 10 $. Aluminium Gold ABD'de yalnız 8x10, 18x24, 24x36 (kullanılmıyor) |
 | Kargo | Standard (US lab); çerçevelide Budget = Standard |
@@ -76,4 +76,4 @@ Maliyet kaynağı: Drive `TEMP/PRODIGI/KATALOG/CERCEVE_KATALOG.csv` (27 Eyl, US,
 
 ## Açık konular
 - Warm Parchment kişisel dosya: kağıt dokusu sembolün üstüne biniyor (Codex IS_0047, PR #60). Düzelene kadar dijital paket 4 renk + WP elle.
-- Etsy "Primary color" (200) için özel değer "All 5 colors (Digital)" ilk gerçek yazımda doğrulanacak (PUT atomik; red gelirse ilan değişmez).
+- Etsy "Primary color" (200) için özel değer "All 5 colors, Digital" ilk gerçek yazımda doğrulanacak (PUT atomik; red gelirse ilan değişmez). OAS: değerlerde parantez yasak; 3 menü için PUT `?max_variations_supported=3` (varsayılan 2, 27 Eyl 409).

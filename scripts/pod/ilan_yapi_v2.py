@@ -25,7 +25,7 @@ from pod_sku import MAX_LEN, make_sku2, parse_sku  # noqa: E402
 OUT = Path("out")
 COLORS = "primary color"
 FORMAT_ADI = "Digital File, Print or Framed?"
-DIJITAL_RENK = "All 5 colors (Digital)"  # Serdar 27 Eyl: dijitalde renk secimi yok, 5 renk pakette
+DIJITAL_RENK = "All 5 colors, Digital"  # Serdar 27 Eyl: dijitalde renk secimi yok; OAS: degerlerde parantez yasak
 PERSONALIZATION = ("is_personalizable", "personalization_is_required",
                    "personalization_char_count_max", "personalization_instructions")
 CSV_FIELDS = {"mod", "sira", "etiket", "format", "tur", "boy", "cerceve",
@@ -317,6 +317,16 @@ def ozet(inventory, plan, state):
             "acik": [ac(inventory), ac(plan)], "menu": menu, "ornek": dict(sorted(ornek.items()))}
 
 
+def varyasyon_sayisi(plan):
+    return len({pv["property_id"] for p in plan["products"] for pv in p["property_values"]})
+
+
+def parantezsiz_oneri(plan):
+    """Etsy parantezli degeri reddederse: yazmadan listelenecek oneri (Serdar karari bekler)."""
+    return {v: re.sub(r"\s*\((.*?)\)", r" / \1", v).strip()
+            for p in plan["products"] for pv in p["property_values"] for v in pv.get("values") or [] if "(" in v}
+
+
 def galeri(api, listing_id):
     r = api.get(f"/listings/{listing_id}/images") or {}
     return [(int(x["listing_image_id"]), int(x.get("rank") or 0)) for x in r.get("results", [])]
@@ -407,7 +417,16 @@ def main(argv=None, api=None):
             if not args.aciklama:
                 sabit["description"] = normalize(listing.get("description"))
             galeri0, video0 = galeri(api, listing_id), videolar(api, listing_id)
-            api.put_json(f"/listings/{listing_id}/inventory", plan)
+            yol = f"/listings/{listing_id}/inventory"
+            if varyasyon_sayisi(plan) == 3:
+                yol += "?max_variations_supported=3"   # OAS: varsayilan 2; 3 menu icin acikca istenir
+            try:
+                api.put_json(yol, plan)
+            except SystemExit as hata:
+                oneri = parantezsiz_oneri(plan)
+                if "(" in str(hata) or "parenthes" in str(hata).lower():
+                    print("PARANTEZ ONERISI (yazilmadi): " + json.dumps(oneri, ensure_ascii=False))
+                raise SystemExit(f"HATA: envanter PUT reddedildi, ilan degismedi: {hata}. DUR.")
             readback = api.get(f"/listings/{listing_id}/inventory") or {}
             if signature(readback) != signature(plan): raise SystemExit("HATA: envanter geri okuma farkli")
             images2 = (api.get(f"/shops/{shop}/listings/{listing_id}/variation-images", ok404=True) or {}).get("results", [])
