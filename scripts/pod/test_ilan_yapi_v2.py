@@ -82,4 +82,4 @@ def test_description_normalization_replacement_and_idempotence():
 def test_csv_header_and_mode_validation(tmp_path):
     path = tmp_path / "bad.csv"; path.write_text("mod,format\n3,Print\n")
     with pytest.raises(ValueError): y2.load_config(path)
-    assert {r["mod"] for r in y2.load_config("data/pod/yapi_v2.csv")} == {"2"}  # Serdar 27 Eyl: yapi B
+    assert {r["mod"] for r in y2.load_config("data/pod/yapi_v2.csv")} == {"3"}  # Serdar 27 Eyl: rakip yapi, 3 menu

@@ -20,6 +20,7 @@ from pod_sku import MAX_LEN, parse_sku  # noqa: E402
 
 OUT = Path("out")
 COLORS = "primary color"
+FORMAT_ADI = "Digital File, Print or Framed?"
 PERSONALIZATION = ("is_personalizable", "personalization_is_required",
                    "personalization_char_count_max", "personalization_instructions")
 CSV_FIELDS = {"mod", "sira", "etiket", "format", "tur", "boy", "cerceve",
@@ -37,8 +38,9 @@ def normalize(text):
 
 
 def property_value(product, name):
+    adlar = {name, FORMAT_ADI.lower()} if name == "format" else {name}
     return next((p for p in product.get("property_values", [])
-                 if (p.get("property_name") or "").lower() == name), None)
+                 if (p.get("property_name") or "").lower() in adlar), None)
 
 
 def value(product, name):
@@ -155,7 +157,7 @@ def build_plan(inventory, config):
             raise ValueError("Size property bulunamadi")
         format_prop = property_value(sample, "format")
         for row in rows:
-            size = row["etiket"] if mode == "2" else row["boy"]
+            size = row["etiket"] if mode == "2" else (row["etiket"] or row["boy"])  # mod 3: canli boy etiketi korunur
             fmt = "" if mode == "2" else row["format"]
             matched = existing.get((color, size, fmt))
             old = matched or sample
@@ -167,7 +169,8 @@ def build_plan(inventory, config):
                     format_prop = next((property_value(p, "format") for p in products
                                         if property_value(p, "format")), None)
                 if not format_prop:
-                    raise ValueError("mod=3 icin canli Format property bulunamadi")
+                    # Canli ilanda Format yok: ikinci ozel property (514) yeni menu olarak acilir (Serdar 27 Eyl, rakip yapi).
+                    format_prop = {"property_id": 514, "property_name": FORMAT_ADI, "values": []}
                 props.insert(0, copy_property(format_prop, fmt))
             planned.append({"sku": old.get("sku") if matched else sku_for(sample.get("sku"), row),
                             "property_values": props,
@@ -179,6 +182,11 @@ def build_plan(inventory, config):
             result[key] = list(inventory[key])
     result["price_on_property"] = ([format_prop["property_id"], size_prop["property_id"]]
                                    if mode == "3" else [size_prop["property_id"]])
+    if mode == "3":
+        # SKU format x renk x boy'a gore degisir; Etsy bu durumda urun sinirini 400 yapar (325-400 arasi guvenli).
+        result["sku_on_property"] = [format_prop["property_id"], color_prop["property_id"], size_prop["property_id"]]
+        if len(planned) > 400:
+            raise ValueError(f"Etsy urun siniri 400 asildi: {len(planned)}")
     return result
 
 
