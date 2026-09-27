@@ -1,0 +1,71 @@
+name: pod-kapak-v3
+
+# POD kapak v3 uretimi (Serdar onayi 27 Eyl 2026, ADIM 2): scripts/pod/kapak_v3.py.
+# Poster = siparis-baski-v1 dalindaki siparis_dosyasi.py (degistirilmeden) ciktisi; onayli CL
+# kapaginin cerceve acikligina yapistirilir. mod=ornek: yer olcumu + CL NCC kapisi (>=0.97) + 3 ornek.
+# mod=77: kalan 77 cift (yalniz ornek onayindan sonra).
+# Kapsam: YALNIZ Drive (rclone). Etsy/Prodigi secret'i yok; Etsy'ye yazan adim yok. Tetik yalniz workflow_dispatch.
+# Cikti: Drive ASTROLOVE/TEMP/POD_KAPAK_V3/<ORNEK|77>/
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      mod:
+        description: "ornek (CL kapisi + 3 ornek) | 77 (yalniz onaydan sonra)"
+        required: true
+        default: "ornek"
+
+concurrency: pod-kapak-v3
+
+jobs:
+  uret:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout (siparis-baski-v1, hat kodu)
+        uses: actions/checkout@v4
+        with:
+          ref: siparis-baski-v1
+          path: _sb
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Python bagimliliklari
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet --upgrade pip
+          python -m pip install --quiet pillow opencv-python-headless numpy fonttools
+      - name: rclone kur
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          rclone version | head -1
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then echo "HATA: RCLONE_CONF_B64 yok" >&2; exit 1; fi
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Kapak uret
+        env:
+          MOD: ${{ inputs.mod }}
+        run: |
+          set -euo pipefail
+          case "$MOD" in ornek|77) : ;; *) echo "HATA: mod ornek|77" >&2; exit 1 ;; esac
+          python scripts/pod/kapak_v3.py --mod "$MOD" --sb "$PWD/_sb"
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
