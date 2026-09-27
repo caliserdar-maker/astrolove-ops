@@ -94,7 +94,9 @@ jobs:
         if: inputs.mod == 'kos'
         run: |
           set -euo pipefail
-          python scripts/etsy/sembol_kart03.py kapi v/canli v/a77 v/poster out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_KISISEL/AQUARIUS_AQUARIUS_v1/_girdi/etsy/REF_4570143815/04_8567954548.jpg" v/cl04.jpg -q || echo "CL04 referans yok"
+          python scripts/etsy/sembol_kart03.py kapi v/canli v/a77 v/poster out v/cl04.jpg
+          rclone copyto out/SEMBOL_KART03_OZET.json "gdrive:ASTROLOVE/TEMP/DIJITAL_78/SEMBOL_KART03_OZET.json" -q
           rclone copyto out/SEMBOL_KART03.csv "gdrive:ASTROLOVE/TEMP/DIJITAL_78/SEMBOL_KART03.csv" -q
           [ -d out/kirpim ] && rclone copy out/kirpim "gdrive:ASTROLOVE/TEMP/DIJITAL_78/SEMBOL_KART03_KIRPIM" -q || true
           [ -d out/duzeltme ] && rclone copy out/duzeltme "gdrive:ASTROLOVE/TEMP/DIJITAL_78/KART03_DUZELTME" -q || true
