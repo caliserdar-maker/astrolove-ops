@@ -84,7 +84,7 @@ jobs:
           done
           find "$GITHUB_WORKSPACE/v/a77" -name 'YANYANA_03*' | while read -r f; do
             c=$(echo "$f" | sed "s#$GITHUB_WORKSPACE/v/a77/##; s#/.*##"); cp "$f" "a77/YANYANA_${c}.jpg"; done
-          ls "$GITHUB_WORKSPACE/v/canli/" | head -8 | while read -r f; do cp "$GITHUB_WORKSPACE/v/canli/$f" canli/; done
+          cp "$GITHUB_WORKSPACE/v/canli/"*.jpg canli/
           cp "$GITHUB_WORKSPACE/v/canli/"*4570143815* canli/ 2>/dev/null || true
           mkdir -p poster && cp "$GITHUB_WORKSPACE/v/poster/"*.jpg poster/ 2>/dev/null || true
           git add -A && git -c user.name=teshis -c user.email=teshis@users.noreply.github.com commit -qm "teshis 0028 (gecici)"
