@@ -98,8 +98,8 @@ jobs:
           python scripts/etsy/sembol_kart03.py kapi v/canli v/a77 v/poster out v/cl04.jpg
           rclone copyto out/SEMBOL_KART03_OZET.json "gdrive:ASTROLOVE/TEMP/DIJITAL_78/SEMBOL_KART03_OZET.json" -q
           rclone copyto out/SEMBOL_KART03.csv "gdrive:ASTROLOVE/TEMP/DIJITAL_78/SEMBOL_KART03.csv" -q
-          [ -d out/kirpim ] && rclone copy out/kirpim "gdrive:ASTROLOVE/TEMP/DIJITAL_78/SEMBOL_KART03_KIRPIM" -q || true
-          [ -d out/duzeltme ] && rclone copy out/duzeltme "gdrive:ASTROLOVE/TEMP/DIJITAL_78/KART03_DUZELTME" -q || true
+          rclone sync out/kirpim "gdrive:ASTROLOVE/TEMP/DIJITAL_78/SEMBOL_KART03_KIRPIM" -q     # sync: onceki kosunun gecersiz dosyalari silinir
+          rclone sync out/duzeltme "gdrive:ASTROLOVE/TEMP/DIJITAL_78/KART03_DUZELTME" -q
           tail -3 out/SEMBOL_KART03.csv
       - if: always()
         run: rm -rf v ~/.config/rclone

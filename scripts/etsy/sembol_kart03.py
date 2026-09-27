@@ -122,7 +122,20 @@ def karar(oran, boy):
     return "PASS" if oran >= IOU_ESIK and abs(1 - boy) <= BOY_ESIK else "FAIL"
 
 
+ZEMIN, PANEL_RENK, DUZEN_ESIK = (237, 232, 226), (6, 17, 37), 12   # kart 03 duzeni: 43 kart 0.0, 35 eski rank 3 (oda sahnesi) >= 213
+
+
+def kart03_mu(im):
+    """Gorsel kart 03 duzeninde mi: 4 kose zemini ve panel koseleri olculur (eski galerilerde rank 3 oda sahnesi)."""
+    a = np.asarray(im.convert("RGB").resize(KART, Image.LANCZOS)).astype(np.float32)
+    pan = np.abs(np.median(a[485:520, 1325:1360].reshape(-1, 3), 0) - PANEL_RENK).max()
+    zem = max(np.abs(np.median(a[y:y + 40, x:x + 40].reshape(-1, 3), 0) - ZEMIN).max() for x, y in ((40, 40), (2900, 40), (40, 2150), (2900, 2150)))
+    return pan < DUZEN_ESIK and zem < DUZEN_ESIK
+
+
 def denetle(im, pm):
+    if not kart03_mu(im):
+        return "KART03_DEGIL", "", ""
     m, _ = kart_sembol(im)
     if m.sum() < 500:
         return "FAIL", 0.0, 0.0
@@ -189,16 +202,19 @@ def kapi(canli_d, a77, poster_d, out, cl_ref=None):
             if r["tamset"] == "FAIL": kirpim(Image.open(tf), poster, out / "kirpim" / f"{c}_tamset.jpg")
         else:
             r["tamset"] = "TAMSET_YOK"
-        if "FAIL" in (r["canli"], r["tamset"]):
+        if r["canli"] != "PASS" or r["tamset"] == "FAIL":
+            taban = next((x for x, k in ((tf, r["tamset"]), (cf, r["canli"])) if x and k in ("PASS", "FAIL")), None)
             if c == "CANCER_LIBRA" and cl_ref and Path(cl_ref).exists():
                 d, yontem = Image.open(cl_ref).convert("RGB"), "CL04 orijinal (Serdar onayli referans kart)"
+            elif taban:
+                d, yontem = duzelt(Image.open(taban), poster), "kod: poster birlesik sembolu CL kutusuna"
             else:
-                taban = Image.open(tf if tf and r["tamset"] == "PASS" else (tf or cf))
-                d, yontem = duzelt(taban, poster), "kod: poster birlesik sembolu CL kutusuna"
-            r["duzeltme"], r["duzeltme_oran"], r["duzeltme_boy"] = denetle(d, pm)
+                d, yontem = None, "kart 03 tabani yok: TAM_SET gerekli (GOREV 0021)"
             r["duzeltme_yontem"] = yontem
-            if r["duzeltme"] == "PASS":
-                d.save(out / "duzeltme" / f"{c}_03_ortak_sembol.jpg", quality=95)
+            if d is not None:
+                r["duzeltme"], r["duzeltme_oran"], r["duzeltme_boy"] = denetle(d, pm)
+                if r["duzeltme"] == "PASS":
+                    d.save(out / "duzeltme" / f"{c}_03_ortak_sembol.jpg", quality=95)
         satir.append(r)
         g = time.time() - t0
         print(f"[{i}/{len(sira)}] %{100 * i // len(sira)} gecen {g:.0f}s kalan {g / i * (len(sira) - i):.0f}s {c} canli {r['canli']} "
@@ -207,8 +223,9 @@ def kapi(canli_d, a77, poster_d, out, cl_ref=None):
             "duzeltme", "duzeltme_oran", "duzeltme_boy", "duzeltme_yontem"]
     with open(out / "SEMBOL_KART03.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=alan); w.writeheader(); w.writerows(satir)
-    bozuk = [x for x in satir if x["canli"] != "PASS"]
-    ozet = {"canli_bozuk": len(bozuk), "toplam": len(satir), "tamset_fail": sum(x["tamset"] == "FAIL" for x in satir),
+    bozuk = [x for x in satir if x["canli"] == "FAIL"]
+    ozet = {"canli_bozuk": len(bozuk), "toplam": len(satir), "canli_kart03_degil": [x["cift"] for x in satir if x["canli"] == "KART03_DEGIL"],
+            "tamset_fail": sum(x["tamset"] == "FAIL" for x in satir),
             "tamset_yok": sum(x["tamset"] == "TAMSET_YOK" for x in satir), "bozuk": [x["cift"] for x in bozuk],
             "duzeltme_pass": sum(x.get("duzeltme") == "PASS" for x in satir), "esik": {"iou": IOU_ESIK, "boy": BOY_ESIK}}
     (out / "SEMBOL_KART03_OZET.json").write_text(json.dumps(ozet, indent=1))
