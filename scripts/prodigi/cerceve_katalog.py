@@ -20,8 +20,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from prodigi_pilot_quote import Api, leak_check, load_key, log  # noqa: E402
 
-BOYLAR = ["8x10", "11x14", "12x16", "12x18", "16x20", "18x24", "24x36", "A4", "A3"]
-RENKLER = ["black", "white", "natural"]
+BOYLAR = ["8x10", "A4", "11x14", "12x16", "A3", "12x18", "16x20", "16x24", "A2", "18x24", "20x30", "A1", "24x30", "24x32", "24x36", "30x40"]
+RENKLER = ["black"]  # renkler ayni fiyat (27 Eyl olcumu: black=white=natural)
 EK = 5.00
 HEDEF = {"HPR": 10.0, "CFP": 20.0, "CFPM": 20.0}
 ALANLAR = ["urun", "boy", "renk", "sku", "yontem", "urun_maliyet", "kargo", "vergi", "toplam", "lab",
@@ -82,7 +82,7 @@ def main():
     (out / "urun").mkdir(parents=True, exist_ok=True)
     api = Api(load_key())
     cache, isler, eksik = {}, [], []
-    for on in ("HPR", "CFP", "CFPM"):
+    for on in ("HPR", "CFP"):
         for boy in BOYLAR:
             sku, p = sku_bul(api, on, boy, cache)
             if not sku:
