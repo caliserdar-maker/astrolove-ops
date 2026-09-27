@@ -59,10 +59,16 @@ jobs:
           store = TokenStore(os.environ["TOKEN_FILE"], k, s)
           if store.needs_refresh():
               store.refresh()
-          api = Etsy(store)
-          r = api.get(f"/shops/{os.environ['ETSY_SHOP_ID']}") or {}
-          print(f"getShop OK (shop_name={r.get('shop_name')}) | x-remaining-today: {api.remaining}")
-          open("_kota.txt", "w").write(f"{api.remaining}\n")
+          import datetime
+          zaman = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+          try:
+              api = Etsy(store)
+              r = api.get(f"/shops/{os.environ['ETSY_SHOP_ID']}") or {}
+              satir = f"{zaman} | getShop OK | x-remaining-today: {api.remaining}"
+          except BaseException as e:  # SystemExit dahil: sonucu yine de yaz
+              satir = f"{zaman} | HATA: {str(e)[:200]}"
+          print(satir)
+          open("_kota.txt", "w").write(satir + "\n")
           PY
           rclone copyto _kota.txt "gdrive:ASTROLOVE/TEMP/ETSY_KOTA.txt" -q
       - name: Token geri yaz
