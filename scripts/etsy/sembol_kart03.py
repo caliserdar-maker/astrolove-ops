@@ -49,5 +49,10 @@ if __name__ == "__main__":
     m = sys.argv[1]
     if m == "canli":
         canli(sys.argv[2], sys.argv[3])
+    elif m == "kucult":                     # POD poster (9000 px) -> 2400 px en (Canva sayfa normu)
+        from PIL import Image
+        Image.MAX_IMAGE_PIXELS = None
+        im = Image.open(sys.argv[2]).convert("RGB")
+        im.resize((2400, round(im.height * 2400 / im.width)), Image.LANCZOS).save(sys.argv[3], quality=92)
     else:
         raise SystemExit(f"bilinmeyen mod {m}")

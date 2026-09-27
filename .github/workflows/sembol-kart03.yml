@@ -13,6 +13,9 @@ on:
       mod:
         description: "teshis | kos"
         default: "teshis"
+      poster:
+        description: "teshis: poster indirilecek virgullu CIFT listesi (kos: hepsi)"
+        default: ""
 
 concurrency:
   group: sembol-kart03
@@ -60,6 +63,13 @@ jobs:
           rclone lsf "$A" --dirs-only > v/liste/A1_77_dirs.txt || true
           rclone lsl "gdrive:ASTROLOVE/TEMP/POD_KISISEL/A1_77/_galeri" > v/liste/_galeri.txt || true
           python scripts/etsy/sembol_kart03.py canli v/METIN_78.csv v/canli
+          if [ "${{ inputs.mod }}" = "kos" ]; then L=$(python -c "import json;print(','.join(sorted({v['cift'] for v in json.load(open('v/canli/_canli.json')).values()})))"); else L="${{ inputs.poster }}"; fi
+          mkdir -p v/poster_ham v/poster
+          for c in ${L//,/ }; do
+            rclone copyto "gdrive:ASTROLOVE/TEMP/POD_PRINT/$c/MIDNIGHT_BLUE/30x40.jpg" "v/poster_ham/$c.jpg" -q || echo "poster yok: $c"
+            [ -f "v/poster_ham/$c.jpg" ] && python scripts/etsy/sembol_kart03.py kucult "v/poster_ham/$c.jpg" "v/poster/$c.jpg" && rm -f "v/poster_ham/$c.jpg"
+          done
+          echo "poster: $(ls v/poster | wc -l)"
           echo "03: $(ls v/a77/*/TAM_SET/03_* 2>/dev/null | wc -l)  YANYANA: $(find v/a77 -name 'YANYANA_03*' | wc -l)  canli: $(ls v/canli | wc -l)"
       - name: Teshis dalina koy
         if: inputs.mod == 'teshis'
@@ -76,6 +86,7 @@ jobs:
             c=$(echo "$f" | sed "s#$GITHUB_WORKSPACE/v/a77/##; s#/.*##"); cp "$f" "a77/YANYANA_${c}.jpg"; done
           ls "$GITHUB_WORKSPACE/v/canli/" | head -8 | while read -r f; do cp "$GITHUB_WORKSPACE/v/canli/$f" canli/; done
           cp "$GITHUB_WORKSPACE/v/canli/"*4570143815* canli/ 2>/dev/null || true
+          mkdir -p poster && cp "$GITHUB_WORKSPACE/v/poster/"*.jpg poster/ 2>/dev/null || true
           git add -A && git -c user.name=teshis -c user.email=teshis@users.noreply.github.com commit -qm "teshis 0028 (gecici)"
           git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" teshis-0028
           du -sh .
@@ -83,7 +94,7 @@ jobs:
         if: inputs.mod == 'kos'
         run: |
           set -euo pipefail
-          python scripts/etsy/sembol_kart03.py kapi v/METIN_78.csv v/canli v/a77 out
+          python scripts/etsy/sembol_kart03.py kapi v/canli v/a77 v/poster out
           rclone copyto out/SEMBOL_KART03.csv "gdrive:ASTROLOVE/TEMP/DIJITAL_78/SEMBOL_KART03.csv" -q
           [ -d out/kirpim ] && rclone copy out/kirpim "gdrive:ASTROLOVE/TEMP/DIJITAL_78/SEMBOL_KART03_KIRPIM" -q || true
           [ -d out/duzeltme ] && rclone copy out/duzeltme "gdrive:ASTROLOVE/TEMP/DIJITAL_78/KART03_DUZELTME" -q || true
