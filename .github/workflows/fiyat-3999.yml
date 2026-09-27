@@ -18,6 +18,12 @@ on:
       ilan:
         description: "tek mod icin ilan id"
         default: "4570143815"
+      yalniz:
+        description: "hepsi modunda yalniz bu ilanlar (virgullu, bos = 78)"
+        default: ""
+      kota_alt:
+        description: "Etsy gunluk kota tabani (altinda dur)"
+        default: "400"
 
 jobs:
   fiyat:
@@ -55,6 +61,8 @@ jobs:
           TOKEN_FILE: _work/ETSY_TOKEN.json
           MOD: ${{ inputs.mod }}
           ILAN: ${{ inputs.ilan }}
+          YALNIZ: ${{ inputs.yalniz }}
+          KOTA_ALT: ${{ inputs.kota_alt }}
         run: |
           set -euo pipefail
           case "$MOD" in kuru|tek|hepsi) ;; *) echo "HATA: mod $MOD"; exit 1;; esac

@@ -77,7 +77,7 @@ def kuru(ids):
 def yaz(ids):
     sonuc, t0 = {}, time.time()
     for i, lid in enumerate(ids, 1):
-        rc, _, son = fb("yaz", lid, "--confirm", "FIYAT_B", "--kota-alt", "400")
+        rc, _, son = fb("yaz", lid, "--confirm", "FIYAT_B", "--kota-alt", os.environ.get("KOTA_ALT", "400"))
         sonuc[lid] = {0: "PASS", 3: "ATLANDI_STATE", 4: "ZATEN"}.get(rc, f"FAIL rc={rc}: {son[:200]}")
         eta(i, len(ids), t0, f"ilan {lid} {sonuc[lid]}")
         if sonuc[lid].startswith("FAIL"):
@@ -98,6 +98,12 @@ def main():
             raise SystemExit(f"HATA: {lid} 78 listede yok. DUR.")
         ozet = yaz([lid])
     elif mod == "hepsi":
+        yalniz = [x.strip() for x in os.environ.get("YALNIZ", "").split(",") if x.strip()]
+        if yalniz:
+            dis = [x for x in yalniz if x not in ids]
+            if dis:
+                raise SystemExit(f"HATA: 78 listede olmayan ilan: {dis[:5]}. DUR.")
+            ids = [x for x in ids if x in yalniz]
         ozet = yaz(ids)
     else:
         raise SystemExit(f"HATA: bilinmeyen mod {mod}")
