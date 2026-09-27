@@ -14,6 +14,9 @@ on:
       varlik_azami:
         description: "prodigi.com sayfa sayisi siniri (0 = varlik adimini atla)"
         default: "40"
+      adim:
+        description: "hepsi = tarama + varlik | 0041 = yalniz varlik: cerceve GORSEL + kagit KAGIT (GOREV 0041)"
+        default: "hepsi"
 
 concurrency:
   group: prodigi-quote
@@ -45,10 +48,20 @@ jobs:
             [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
           fi
       - name: Katalog + teklif + fiyat taslagi
+        if: inputs.adim != '0041'
         run: python scripts/prodigi/katalog_tarama.py
       - name: Site varliklari
-        if: always() && inputs.varlik_azami != '0'
-        run: python scripts/prodigi/katalog_varlik.py "${{ inputs.varlik_azami }}" || echo "varlik adimi hata verdi (rapora)"
+        if: always() && inputs.varlik_azami != '0' && inputs.adim != '0041'
+        run: python scripts/prodigi/katalog_varlik.py --azami "${{ inputs.varlik_azami }}" || echo "varlik adimi hata verdi (rapora)"
+      - name: GOREV 0041 cerceve gorselleri + kagit olgulari
+        if: inputs.adim == '0041'
+        run: |
+          python scripts/prodigi/katalog_varlik.py --kok GORSEL --desen "classic-frame|classic_frame|framed-print|framed-art|box-frame" \
+            --azami "${{ inputs.varlik_azami }}" --gorsel-azami 40 \
+            --pdf "https://www.prodigi.com/download/product-range/Prodigi%20Classic%20frames.pdf" || echo "GORSEL hata (rapora)"
+          python scripts/prodigi/katalog_varlik.py --kok KAGIT \
+            --desen "fine-art|art-print|photo-print|photo-rag|etching|pearl|lustre|glossy|baryta|watercolour|smooth|museum|matte-art|budget|c-type|poster" \
+            --azami "${{ inputs.varlik_azami }}" --gorsel-azami 6 || echo "KAGIT hata (rapora)"
       - name: Drive'a yaz
         if: always()
         run: |
@@ -58,6 +71,8 @@ jobs:
             [ -f "out/$f" ] && rclone copyto "out/$f" "$H/$f" -q || true
           done
           [ -d out/KATALOG ] && rclone copy out/KATALOG "$H" -q || true
+          [ -d out/GORSEL ] && rclone copy out/GORSEL "$H/GORSEL" -q || true
+          [ -d out/KAGIT ] && rclone copy out/KAGIT "$H/KAGIT" -q || true
           echo "Drive: TEMP/PRODIGI/KATALOG/"
       - if: always()
         run: rm -rf out ~/.config/rclone
