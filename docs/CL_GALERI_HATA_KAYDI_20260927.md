@@ -48,4 +48,5 @@ Doğru olanlar: 01 kapak (renk hariç), 03, 09, ölçü 3000x2250, yasak kelime/
 | 08 Kağıt | onaylı (Serdar, 27 Eyl) | ChatGPT posteri yeniden çizilmiş (NCC 0.74) → kapaktaki gerçek poster; 'softly textured' (izinsiz) → 'Natural white and acid-free.'; Lato alt not/satır → Montserrat/kart 03; scripts/pod/kart08_duzelt.py |
 | 09 Yakın | onaylı (Serdar, 27 Eyl) | ChatGPT panel yapay 3B altın + yeniden çizilmiş poster → gerçek CL BASKI_11x14 (3307x4200) kırpımı 1.44x; kutu gerçek kırpım yerinde; scripts/pod/kart09_duzelt.py |
 | 10 Boyut | onaylı (Serdar, 27 Eyl) | İçerik doğru (16 boy = canlı SKU, cm doğru, tek ölçek); sütunlar eşit aralık (sağ kenar taşması), bant 80 px yukarı, Lato → Montserrat/kart 03; scripts/pod/kart10_duzelt.py |
-| 11-16 | tek tek üretiliyor | |
+| 11 Süreç | v2 teslim (Claude) | ChatGPT Lato + eski tip rakam + DNA dışı başlık yeri → canlı 03 liste stiliyle 3000x2250 yeniden kurulum; metin açıklama v3 ile aynı; scripts/pod/kart11_kur.py |
+| 12-16 | tek tek üretiliyor | |
