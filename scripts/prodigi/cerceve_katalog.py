@@ -23,7 +23,15 @@ from prodigi_pilot_quote import Api, leak_check, load_key, log  # noqa: E402
 BOYLAR = ["8x10", "A4", "11x14", "12x16", "A3", "12x18", "16x20", "16x24", "A2", "18x24", "20x30", "A1", "24x30", "24x32", "24x36", "30x40"]
 RENKLER = ["black"]  # renkler ayni fiyat (27 Eyl olcumu: black=white=natural)
 EK = 5.00
-HEDEF = {"HPR": 10.0, "CFP": 20.0, "CFPM": 20.0}
+HEDEF = {"HPR": 10.0, "CFP": 10.0, "CFPM": 10.0, "BOX": 10.0, "BOXM": 10.0}  # Serdar 27 Eyl: cerceveli net 10
+import os  # noqa: E402
+# Ortam ile daraltma/genisletme (salt okuma arastirmalari icin): CK_BOYLAR, CK_RENKLER, CK_URUNLER, CK_ETIKET
+if os.environ.get("CK_BOYLAR"):
+    BOYLAR = os.environ["CK_BOYLAR"].split(",")
+if os.environ.get("CK_RENKLER"):
+    RENKLER = [r.replace("_", " ") for r in os.environ["CK_RENKLER"].split(",")]
+URUNLER = os.environ.get("CK_URUNLER", "HPR,CFP").split(",")
+ETIKET = os.environ.get("CK_ETIKET", "")
 ALANLAR = ["urun", "boy", "renk", "sku", "yontem", "urun_maliyet", "kargo", "vergi", "toplam", "lab",
            "teslim_gun", "maliyet_ekli", "onerilen_fiyat", "net", "not"]
 
@@ -82,7 +90,7 @@ def main():
     (out / "urun").mkdir(parents=True, exist_ok=True)
     api = Api(load_key())
     cache, isler, eksik = {}, [], []
-    for on in ("HPR", "CFP"):
+    for on in URUNLER:
         for boy in BOYLAR:
             sku, p = sku_bul(api, on, boy, cache)
             if not sku:
@@ -103,7 +111,7 @@ def main():
                 f = oneri(m, HEDEF[r["urun"]])
                 r.update(maliyet_ekli=m, onerilen_fiyat=f, net=round(f - kesinti(f) - m, 2))
             rows.append({k: r.get(k, "") for k in ALANLAR})
-    with open(out / "CERCEVE_KATALOG.csv", "w", newline="", encoding="utf-8") as fh:
+    with open(out / f"CERCEVE_KATALOG{ETIKET}.csv", "w", newline="", encoding="utf-8") as fh:
         w = csv.DictWriter(fh, fieldnames=ALANLAR); w.writeheader(); w.writerows(rows)
     # Ozet: Standard, US
     md = ["# Prodigi katalog (salt okuma) - US, Standard", "",
@@ -122,7 +130,7 @@ def main():
     hatali = [r for r in rows if r["not"]]
     if hatali:
         md += ["", "Hatalar:"] + [f"- {r['urun']} {r['boy']} {r['renk']}: {r['not']}" for r in hatali]
-    (out / "CERCEVE_KATALOG.md").write_text("\n".join(md) + "\n", encoding="utf-8")
+    (out / f"CERCEVE_KATALOG{ETIKET}.md").write_text("\n".join(md) + "\n", encoding="utf-8")
     leak_check(out)
     log(f"satir {len(rows)}, hata {len(hatali)}")
 
