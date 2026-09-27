@@ -11,6 +11,10 @@ on:
       ilan:
         description: "ilan id"
         default: "4570143815"
+      yedek_adi:
+        description: "Doluysa galeri.json Drive TEMP/POD_KAPAK_V3/<yedek_adi>.json olarak da yazilir (or. CL_ONCE)"
+        required: false
+        default: ""
 
 jobs:
   indir:
@@ -42,9 +46,14 @@ jobs:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
           ILAN: ${{ inputs.ilan }}
+          YEDEK: ${{ inputs.yedek_adi }}
         run: |
           set -euo pipefail
           python scripts/etsy/ilan_gorsel_indir.py "$ILAN" "out/$ILAN"
           rclone copy "out/$ILAN" "gdrive:ASTROLOVE/TEMP/CANLI_GORSEL/$ILAN" -q
+          if [ -n "${YEDEK:-}" ]; then
+            rclone copyto "out/$ILAN/galeri.json" "gdrive:ASTROLOVE/TEMP/POD_KAPAK_V3/${YEDEK}.json" -q
+            echo "yedek: TEMP/POD_KAPAK_V3/${YEDEK}.json"
+          fi
       - if: always()
         run: rm -rf ~/.config/rclone
