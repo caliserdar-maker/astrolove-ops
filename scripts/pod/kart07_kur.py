@@ -5,7 +5,7 @@ TEMP/PRODIGI/CLASSIC_GORSEL/): 037 black, 039 white, 041 natural, 045 antique go
 sol kolun duz profil seridi birebir kirpilir (kol tam dikey olacak sekilde dondurulur), 4 kenara
 uygulanir, koselerde 45 derece gonye birlesimi.
 Olcu (Prodigi foyu): yuz 20 mm, rebate 5 mm (baskinin 5 mm'si cerceve altinda), paspartu yok.
-8x10'da gorunen baski 193.2 mm -> yuz = gorunen genislik x 20/193.2.
+Olcek 16x20: gorunen baski 396.4 mm -> yuz = gorunen genislik x 20/396.4.
 Poster: canli kart 04'teki gercek Midnight Blue poster (4:5).
 Yazilar: EB Garamond + Montserrat (canli 03 kalibrasyonu); ust etiket canli 03'ten, alt cizgi+satir kart 03 v2'den.
 QC: boyut, 4 cerceve ayni olcu ve alt cizgi, poster NCC >= 0.99 (ic bolge), zemin, tire yok.
@@ -24,8 +24,9 @@ BG = (237, 232, 226); NAVY_T = (25, 34, 49); SANS_T = (23, 25, 30); GOLD_T = (12
 CHEVRON = {'AG': '045_Classic_20antique_20gold_20frame_20chevron.jpg', 'BK': '037_Classic_20black_20frame_20chevron.jpg',
            'WH': '039_Classic_20white_20frame_20chevron.jpg', 'NA': '041_Classic_20natural_20frame_20chevron.jpg'}
 AD = {'AG': 'Antique Gold', 'BK': 'Black', 'WH': 'White', 'NA': 'Natural (oak effect)'}
-PV_W, PV_H = 470, 588                      # gorunen baski
-F = round(PV_W * 20 / 193.2)               # cerceve yuzu (px)
+PV_W, PV_H = 540, 675                      # gorunen baski
+# Olcek 16x20 (Serdar 27 Eyl: cerceve ince, gorsel buyuk): gorunen baski 406.4-10 = 396.4 mm
+F = round(PV_W * 20 / 396.4)               # cerceve yuzu (px)
 OW, OH = PV_W + 2 * F, PV_H + 2 * F
 
 
@@ -99,7 +100,7 @@ b = FS.getbbox('Cancer and Libra, united in an original AstroLove design.', anch
 
 # poster: canli 04 MB (520x650), rebate 5 mm / 203.2 mm her kenardan
 mb = C4.crop((269, 499, 791, 1150)).resize((520, 650), Image.LANCZOS)
-kx, ky = round(520 * 5 / 203.2), round(650 * 5 / 254)
+kx, ky = round(520 * 5 / 406.4), round(650 * 5 / 508)
 poster = mb.crop((kx, ky, 520 - kx, 650 - ky)).resize((PV_W, PV_H), Image.LANCZOS)
 
 SIRA = ['AG', 'BK', 'WH', 'NA']
