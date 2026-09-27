@@ -64,7 +64,9 @@ jobs:
         run: |
           set -euo pipefail
           umask 077; mkdir -p _work
-          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_YETKI_LINK.txt" _work/ESKI_LINK.txt
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_YETKI_LINK.txt" _work/ESKI_LINK.txt 2>/dev/null \
+            || rclone copyto "gdrive:ASTROLOVE/TEMP/POD_5X7/ETSY_YETKI_LINK.txt" _work/ESKI_LINK.txt
+          test -s _work/ESKI_LINK.txt
           python - <<'PY2'
           import base64, hashlib, json, os, secrets
           from urllib.parse import parse_qs, urlencode, urlsplit
