@@ -1,0 +1,73 @@
+name: dijital-secenek-tek
+
+# Serdar onayi 27 Eyl 2026: tek POD ilanina "Digital File (5 colors)" 9.99 + aciklama blogu.
+# mod oku = salt okuma; mod yaz = --confirm DIJITAL_TEK. Cikti Drive TEMP/POD_ORDERS/DIJITAL_TEK_*.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      mod:
+        description: "oku | yaz"
+        default: "oku"
+      ilan:
+        description: "ilan id"
+        default: "4570143815"
+
+jobs:
+  fiyat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    concurrency:
+      group: etsy-token
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2 numpy==2.1.3 pillow==11.0.0
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Dijital secenek (${{ inputs.mod }})
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          MOD: ${{ inputs.mod }}
+          ILAN: ${{ inputs.ilan }}
+        run: |
+          set -euo pipefail
+          case "$MOD" in oku|yaz) ;; *) echo "HATA: mod $MOD"; exit 1;; esac
+          umask 077; mkdir -p _work
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rc=0
+          if [ "$MOD" = "yaz" ]; then python scripts/pod/dijital_secenek_tek.py yaz "$ILAN" --confirm DIJITAL_TEK || rc=$?; else python scripts/pod/dijital_secenek_tek.py oku "$ILAN" || rc=$?; fi
+          H="gdrive:ASTROLOVE/TEMP/POD_ORDERS"
+          tar czf "out/DIJITAL_TEK_YEDEK_${ILAN}_${MOD}.tgz" -C out $(cd out && ls DIJ_* 2>/dev/null) || true
+          for f in out/DIJITAL_TEK_*; do [ -f "$f" ] && rclone copyto "$f" "$H/$(basename "$f")" -q || true; done
+          for f in out/DIJ_*_ACIKLAMA_YENI.txt; do [ -f "$f" ] && rclone copyto "$f" "$H/$(basename "$f")" -q || true; done
+          exit $rc
+      - name: Token geri yaz
+        if: always()
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || echo "Token yenilenmedi"
+      - if: always()
+        run: rm -rf _work out ~/.config/rclone
