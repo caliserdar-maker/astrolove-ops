@@ -1,7 +1,66 @@
 mod,sira,etiket,format,tur,boy,cerceve,fiyat,sku_ek,aktif
-3,1,,Digital File,digital,Digital File,,9.99,DIGITAL,1
-3,2,,Print,print,8x10,,19.99,8x10,1
-3,3,,Black Frame,framed,8x10,BK,39.99,8x10-FBK,1
-3,4,,White Frame,framed,8x10,WH,39.99,8x10-FWH,1
-3,5,,Natural Frame,framed,8x10,NA,39.99,8x10-FNA,1
-3,6,,Print,print,11x14,,24.99,11x14,0
+2,1,Digital File (5 colors),Digital File,digital,,,9.99,DIGITAL,1
+2,2,8x10 Print,Print,print,8x10,,47.99,8x10,1
+2,3,8x10 Black Frame,Black Frame,framed,8x10,BK,95.99,8x10-FBK,1
+2,4,8x10 White Frame,White Frame,framed,8x10,WH,95.99,8x10-FWH,1
+2,5,8x10 Natural Frame,Natural Frame,framed,8x10,NA,95.99,8x10-FNA,1
+2,6,A4 Print,Print,print,A4,,48.99,A4,1
+2,7,A4 Black Frame,Black Frame,framed,A4,BK,97.99,A4-FBK,1
+2,8,A4 White Frame,White Frame,framed,A4,WH,97.99,A4-FWH,1
+2,9,A4 Natural Frame,Natural Frame,framed,A4,NA,97.99,A4-FNA,1
+2,10,11x14 Print,Print,print,11x14,,51.99,11x14,1
+2,11,11x14 Black Frame,Black Frame,framed,11x14,BK,98.99,11x14-FBK,1
+2,12,11x14 White Frame,White Frame,framed,11x14,WH,98.99,11x14-FWH,1
+2,13,11x14 Natural Frame,Natural Frame,framed,11x14,NA,98.99,11x14-FNA,1
+2,14,12x16 Print,Print,print,12x16,,53.99,12x16,1
+2,15,12x16 Black Frame,Black Frame,framed,12x16,BK,101.99,12x16-FBK,1
+2,16,12x16 White Frame,White Frame,framed,12x16,WH,101.99,12x16-FWH,1
+2,17,12x16 Natural Frame,Natural Frame,framed,12x16,NA,101.99,12x16-FNA,1
+2,18,A3 Print,Print,print,A3,,56.99,A3,1
+2,19,A3 Black Frame,Black Frame,framed,A3,BK,107.99,A3-FBK,1
+2,20,A3 White Frame,White Frame,framed,A3,WH,107.99,A3-FWH,1
+2,21,A3 Natural Frame,Natural Frame,framed,A3,NA,107.99,A3-FNA,1
+2,22,12x18 Print,Print,print,12x18,,57.99,12x18,1
+2,23,12x18 Black Frame,Black Frame,framed,12x18,BK,107.99,12x18-FBK,1
+2,24,12x18 White Frame,White Frame,framed,12x18,WH,107.99,12x18-FWH,1
+2,25,12x18 Natural Frame,Natural Frame,framed,12x18,NA,107.99,12x18-FNA,1
+2,26,16x20 Print,Print,print,16x20,,60.99,16x20,1
+2,27,16x20 Black Frame,Black Frame,framed,16x20,BK,112.99,16x20-FBK,1
+2,28,16x20 White Frame,White Frame,framed,16x20,WH,112.99,16x20-FWH,1
+2,29,16x20 Natural Frame,Natural Frame,framed,16x20,NA,112.99,16x20-FNA,1
+2,30,16x24 Print,Print,print,16x24,,61.99,16x24,1
+2,31,16x24 Black Frame,Black Frame,framed,16x24,BK,115.99,16x24-FBK,1
+2,32,16x24 White Frame,White Frame,framed,16x24,WH,115.99,16x24-FWH,1
+2,33,16x24 Natural Frame,Natural Frame,framed,16x24,NA,115.99,16x24-FNA,1
+2,34,A2 Print,Print,print,A2,,62.99,A2,1
+2,35,A2 Black Frame,Black Frame,framed,A2,BK,117.99,A2-FBK,1
+2,36,A2 White Frame,White Frame,framed,A2,WH,117.99,A2-FWH,1
+2,37,A2 Natural Frame,Natural Frame,framed,A2,NA,117.99,A2-FNA,1
+2,38,18x24 Print,Print,print,18x24,,66.99,18x24,1
+2,39,18x24 Black Frame,Black Frame,framed,18x24,BK,121.99,18x24-FBK,1
+2,40,18x24 White Frame,White Frame,framed,18x24,WH,121.99,18x24-FWH,1
+2,41,18x24 Natural Frame,Natural Frame,framed,18x24,NA,121.99,18x24-FNA,1
+2,42,20x30 Print,Print,print,20x30,,84.99,20x30,1
+2,43,20x30 Black Frame,Black Frame,framed,20x30,BK,142.99,20x30-FBK,1
+2,44,20x30 White Frame,White Frame,framed,20x30,WH,142.99,20x30-FWH,1
+2,45,20x30 Natural Frame,Natural Frame,framed,20x30,NA,142.99,20x30-FNA,1
+2,46,24x30 Print,Print,print,24x30,,94.99,24x30,1
+2,47,24x30 Black Frame,Black Frame,framed,24x30,BK,148.99,24x30-FBK,1
+2,48,24x30 White Frame,White Frame,framed,24x30,WH,148.99,24x30-FWH,1
+2,49,24x30 Natural Frame,Natural Frame,framed,24x30,NA,148.99,24x30-FNA,1
+2,50,A1 Print,Print,print,A1,,99.99,A1,1
+2,51,A1 Black Frame,Black Frame,framed,A1,BK,157.99,A1-FBK,1
+2,52,A1 White Frame,White Frame,framed,A1,WH,157.99,A1-FWH,1
+2,53,A1 Natural Frame,Natural Frame,framed,A1,NA,157.99,A1-FNA,1
+2,54,24x32 Print,Print,print,24x32,,99.99,24x32,1
+2,55,24x32 Black Frame,Black Frame,framed,24x32,BK,148.99,24x32-FBK,1
+2,56,24x32 White Frame,White Frame,framed,24x32,WH,148.99,24x32-FWH,1
+2,57,24x32 Natural Frame,Natural Frame,framed,24x32,NA,148.99,24x32-FNA,1
+2,58,24x36 Print,Print,print,24x36,,109.99,24x36,1
+2,59,24x36 Black Frame,Black Frame,framed,24x36,BK,164.99,24x36-FBK,1
+2,60,24x36 White Frame,White Frame,framed,24x36,WH,164.99,24x36-FWH,1
+2,61,24x36 Natural Frame,Natural Frame,framed,24x36,NA,164.99,24x36-FNA,1
+2,62,30x40 Print,Print,print,30x40,,139.99,30x40,1
+2,63,30x40 Black Frame,Black Frame,framed,30x40,BK,197.99,30x40-FBK,1
+2,64,30x40 White Frame,White Frame,framed,30x40,WH,197.99,30x40-FWH,1
+2,65,30x40 Natural Frame,Natural Frame,framed,30x40,NA,197.99,30x40-FNA,1

@@ -96,7 +96,7 @@ def sku_for(base_sku, row):
         from pod_sku import ED2, SIGN3
         a, b = pair.split("_", 1)
         prefix = f"POD-{SIGN3[a]}_{SIGN3[b]}-{ED2[edition]}"
-    suffix = row["sku_ek"].strip().upper()
+    suffix = row["sku_ek"].strip()  # boy yazimi canli SKU ile ayni kalir (8x10, A4)
     sku = f"{prefix}-{suffix}"
     if len(sku) > MAX_LEN:
         raise ValueError(f"SKU cok uzun: {sku}")
