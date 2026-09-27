@@ -50,7 +50,9 @@ jobs:
           [ ! -f _work/TEMP/GORSEL_DENETIM.csv ] || copy _work/TEMP/GORSEL_DENETIM.csv "gdrive:ASTROLOVE/TEMP/GORSEL_DENETIM.csv"
           [ ! -f _work/TEMP/GORSEL_DENETIM_FAIL.jpg ] || copy _work/TEMP/GORSEL_DENETIM_FAIL.jpg "gdrive:ASTROLOVE/TEMP/GORSEL_DENETIM_FAIL.jpg"
           copy "$summary" "gdrive:ASTROLOVE/TEMP/LOGS/gorsel-denetim_${{ github.run_id }}_OZET.md"
-          rclone copyto "$log" "gdrive:ASTROLOVE/TEMP/LOGS/gorsel-denetim_${{ github.run_id }}_denetle.log" || true
+          python3 scripts/guvenlik/log_suz.py < "$log" > "$log.suz"   # ::add-mask:: ve token desenleri Drive'a gitmez
+          if python3 scripts/guvenlik/log_suz.py --say < "$log.suz" > /dev/null; then rclone copyto "$log.suz" "gdrive:ASTROLOVE/TEMP/LOGS/gorsel-denetim_${{ github.run_id }}_denetle.log" || true
+          else echo "::warning::log suzgecten gecmedi, Drive'a yazilmadi"; fi
       - uses: actions/upload-artifact@v4
         if: always()
         with: {name: gorsel-denetim, path: _work/TEMP, if-no-files-found: ignore}

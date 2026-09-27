@@ -1,0 +1,77 @@
+name: drive-log-temizle
+
+# Guvenlik (Serdar onayi, 27 Eyl 2026): Drive ASTROLOVE/TEMP altindaki *.log dosyalarini tarar;
+# '::add-mask::' satiri ya da token/anahtar deseni iceren dosyalari siler (apply=true ile).
+# Loga yalniz dosya yolu ve sayilar yazilir; dosya icerigi ASLA yazilmaz. Etsy'ye erisim yok.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "true = sir iceren loglari SIL (false = yalniz say)"
+        type: boolean
+        default: false
+
+concurrency: drive-log-temizle
+
+jobs:
+  tara:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      APPLY: ${{ inputs.apply }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: rclone
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Tara (+ sil)
+        run: |
+          set -uo pipefail
+          # suzgec oz-testi: sir satiri yakalanmali, temiz satir gecmeli
+          if printf 'x\n::add-mask::ORNEKDEGER123\n' | python3 scripts/guvenlik/log_suz.py --say > /dev/null; then echo "HATA: suzgec oz-testi"; exit 1; fi
+          printf 'temiz satir\n' | python3 scripts/guvenlik/log_suz.py --say > /dev/null || { echo "HATA: suzgec oz-testi 2"; exit 1; }
+          rclone lsf -R --files-only --include "*.log" "gdrive:ASTROLOVE/TEMP" > _liste.txt
+          n=0; sir=0; silindi=0; hata=0
+          while IFS= read -r f; do
+            n=$((n+1))
+            rm -f _l.tmp
+            if ! rclone copyto "gdrive:ASTROLOVE/TEMP/$f" _l.tmp 2>/dev/null || [ ! -f _l.tmp ]; then
+              hata=$((hata+1)); echo "OKUNAMADI (silinmedi): TEMP/$f"; continue
+            fi
+            if ! python3 scripts/guvenlik/log_suz.py --say < _l.tmp > /dev/null; then
+              sir=$((sir+1)); echo "SIR IcERIYOR: TEMP/$f"
+              if [ "$APPLY" = "true" ]; then
+                if rclone deletefile "gdrive:ASTROLOVE/TEMP/$f"; then silindi=$((silindi+1)); else hata=$((hata+1)); echo "SILINEMEDI: TEMP/$f"; fi
+              fi
+            fi
+          done < _liste.txt
+          # dogrulama: silinenler gercekten yok mu
+          kalan=0
+          if [ "$APPLY" = "true" ]; then
+            rclone lsf -R --files-only --include "*.log" "gdrive:ASTROLOVE/TEMP" > _liste2.txt
+            while IFS= read -r f; do
+              rm -f _l.tmp; rclone copyto "gdrive:ASTROLOVE/TEMP/$f" _l.tmp 2>/dev/null || { kalan=$((kalan+1)); continue; }
+              python3 scripts/guvenlik/log_suz.py --say < _l.tmp > /dev/null || kalan=$((kalan+1))
+            done < _liste2.txt
+          fi
+          ozet="taranan $n | sir iceren $sir | silinen $silindi | okunamayan/silinemeyen $hata | yeniden taramada kalan $kalan"
+          echo "$ozet"; echo "$ozet" >> "$GITHUB_STEP_SUMMARY"
+          [ "$hata" = "0" ] && [ "$kalan" = "0" ]
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone _liste*.txt _l.tmp

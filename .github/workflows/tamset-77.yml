@@ -85,7 +85,9 @@ jobs:
         env:
           PARCA: ${{ matrix.parca }}
         run: |
-          tail -n 150 "_tam77_$PARCA.log" > "_tail_$PARCA.log" 2>/dev/null || echo "log yok" > "_tail_$PARCA.log"
+          # medya-v1 checkout: suzgec satir ici (::add-mask:: atilir, token/anahtar degerleri *** olur)
+          { tail -n 150 "_tam77_$PARCA.log" 2>/dev/null || echo "log yok"; } | grep -v -- '::add-mask::' \
+            | sed -E 's/((access_token|refresh_token|client_secret|shared_secret|api[_-]?key|authorization)["]?[[:space:]]*[:=][[:space:]]*"?)[^[:space:]",}]+/\1***/Ig; s/(bearer[[:space:]]+)[^[:space:]",}]+/\1***/Ig' > "_tail_$PARCA.log"
           rclone copyto "_tail_$PARCA.log" "gdrive:ASTROLOVE/TEMP/LOGS/tamset77_${{ github.run_id }}_$PARCA.log" || true
 
   serit:

@@ -58,7 +58,11 @@ jobs:
       - name: Hata logu
         if: failure()
         run: |
-          [ -f _satis.log ] && tail -40 _satis.log > _t.log && rclone copyto _t.log "gdrive:ASTROLOVE/TEMP/LOGS/satis_kaynak_${{ github.run_id }}.log" -q || true
+          if [ -f _satis.log ]; then
+            tail -40 _satis.log | python3 scripts/guvenlik/log_suz.py > _t.log   # ::add-mask:: ve token desenleri Drive'a gitmez
+            if python3 scripts/guvenlik/log_suz.py --say < _t.log > /dev/null; then rclone copyto _t.log "gdrive:ASTROLOVE/TEMP/LOGS/satis_kaynak_${{ github.run_id }}.log" -q || true
+            else echo "::warning::log suzgecten gecmedi, Drive'a yazilmadi"; fi
+          fi
       - name: Token geri yaz
         if: always()
         run: |

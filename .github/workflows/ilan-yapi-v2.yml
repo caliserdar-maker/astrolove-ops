@@ -52,7 +52,11 @@ jobs:
         if: always()
         run: |
           rclone copy out/ gdrive:ASTROLOVE/TEMP/YAPI_V2/ -q || true
-          [ -f _yapi_v2.log ] && tail -80 _yapi_v2.log > _failure.log && rclone copyto _failure.log "gdrive:ASTROLOVE/TEMP/YAPI_V2/run_${{ github.run_id }}.log" -q || true
+          if [ -f _yapi_v2.log ]; then
+            tail -80 _yapi_v2.log | python3 scripts/guvenlik/log_suz.py > _failure.log   # ::add-mask:: ve token desenleri Drive'a gitmez
+            if python3 scripts/guvenlik/log_suz.py --say < _failure.log > /dev/null; then rclone copyto _failure.log "gdrive:ASTROLOVE/TEMP/YAPI_V2/run_${{ github.run_id }}.log" -q || true
+            else echo "::warning::log suzgecten gecmedi, Drive'a yazilmadi"; fi
+          fi
           [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json || true
       - if: always()
         run: rm -rf _work ~/.config/rclone
