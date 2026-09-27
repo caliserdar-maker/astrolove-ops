@@ -67,3 +67,14 @@ WP gecici olarak canli kart 04 kirpigi (525x654, 3x buyutme, yumusak; IS_0047 / 
 duzelince gercek renderla yenilenecek). 5'i de QC PASS (NCC >= 0.9995), MB onaylandi,
 digerleri Serdar onayinda. Etsy'ye yukleme ve renk baglari ayri onayla diger oturumda.
 
+## Master cerceve sistemi + 19'lu galeri (27 Eyl aksam, ChatGPT karari + Serdar set kurali)
+
+Karar: galeri 19 foto + video (ChatGPT listesi); atmosfer cerceveye uyar, cerceve rengi SABIT.
+Ortak modul: scripts/pod/cerceve_master.py (gercek miter koseler, set_grade, temas+yumusak golge,
+sahne_isik, renk kilidi QC <=14). Yeni surumler (hepsi QC PASS):
+- kapak v4 (kapak_v4_kur.py) ONAYLI; 05 v2 birlesik renk+dijital (kart05v2_kur.py) ONAYLI
+- renk fotograflari v2 cercevesiz 5/5 ONAYLI (RENKv2_*)
+- kart 07 v5 ONAYLI; 12 v5 (24 saat satiri cikti), 14 v3, 15 v3, 16 v2 Serdar onayinda
+- Cikanlar: 05 paleti, 06 dijital (05v2'ye tasindi), 13 salon. Kalan is: kart 02 cerceve yenileme,
+  04 alt metin ("before we finalize your order"), 08 not satiri, cift QC scripti, galeri paketi guncelleme.
+
