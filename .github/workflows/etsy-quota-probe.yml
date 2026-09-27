@@ -62,7 +62,9 @@ jobs:
           api = Etsy(store)
           r = api.get(f"/shops/{os.environ['ETSY_SHOP_ID']}") or {}
           print(f"getShop OK (shop_name={r.get('shop_name')}) | x-remaining-today: {api.remaining}")
+          open("_kota.txt", "w").write(f"{api.remaining}\n")
           PY
+          rclone copyto _kota.txt "gdrive:ASTROLOVE/TEMP/ETSY_KOTA.txt" -q
       - name: Token geri yaz
         if: ${{ always() }}
         run: |
