@@ -1,18 +1,22 @@
 #!/usr/bin/env python3
 """CL kart 02 (Choose your format): uc posteri AYNI boya getirir. Yazilar ve zemin degismez.
-Kaynak poster ve cerceve: onayli kapak (data/pod/cl_referans/CL_kapak_onayli_3000x2250.jpg), yeniden cizim yok.
+Kaynak poster: onayli kapak (data/pod/cl_referans/CL_kapak_onayli_3000x2250.jpg), yeniden cizim yok.
   Poster  : kapak (734,130)-(2268,2118)  1534x1988  -> 586x760
-  Cerceve : kapak (676,75)-(2323,2175)   ayni olcekle
+  Cerceve : master sistem (cerceve_master.cerceve_blank, Prodigi 059), yuz F = 586 x 20/599.6 (27 Eyl)
   Dijital yigin: karttaki arka sayfalar ayni sira ve kaydirmayla olceklenir, on yuze gercek poster.
 Golge: karttaki mevcut golgeden olculdu (dx 15, dy 18, sigma 26, koyuluk 59/232).
 QC: 3 poster boyu esit, NCC(poster, kapak posteri) >= 0.97, yazi bantlari piksel ayni, alt cizgi hizali.
-Kullanim: kart02_poster_esitle.py GIRIS.jpg KAPAK.jpg CIKIS.jpg
+Kullanim: kart02_poster_esitle.py GIRIS.jpg KAPAK.jpg AG_BLANK.jpg CIKIS.jpg
 """
+import os
 import sys
 import numpy as np
 from PIL import Image, ImageFilter
 
-GIR, KAPAK, CIK = sys.argv[1:4]
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from cerceve_master import cerceve_blank
+
+GIR, KAPAK, AGCH, CIK = sys.argv[1:5]
 K = Image.open(GIR).convert('RGB'); C = Image.open(KAPAK).convert('RGB')
 BG = (237, 232, 226)
 PW, PH = 586, 760                      # ortak poster boyu
@@ -21,7 +25,8 @@ BANT = (430, 1408)                     # nesne + golge bandi; yazilar 1416'dan b
 s = PH / 1988
 
 poster = C.crop((734, 130, 2268, 2118)).resize((PW, PH), Image.LANCZOS)
-cerceve = C.crop((676, 75, 2323, 2175)).resize((round(1647 * s), round(2100 * s)), Image.LANCZOS)
+FC = round(PW * 20 / 599.6)                      # master cerceve yuzu (24x36 olcegi, diger kartlarla ayni)
+cerceve = cerceve_blank(AGCH, poster, FC)
 
 # dijital yigin: eski koordinatlar (olculdu). sayfa k: sol 244-18k, ust 520-6k, 565x775
 E_ON = (244, 520, 809, 1295)
@@ -67,8 +72,8 @@ def ncc(a, b):
     return float((a * b).sum() / np.sqrt((a * a).sum() * (b * b).sum()))
 ref = np.asarray(poster).astype(np.float32)
 bx, by = yer['baski'][2]; dx, dy = yer['dijital'][2]; cx, cy = yer['cerceve'][2]
-pc = (cx + round(58 * s), cy + round(55 * s))
-boy = {'dijital': (PW, PH), 'baski': (PW, PH), 'cerceve_ic': (round(1534 * s), round(1988 * s))}
+pc = (cx + FC, cy + FC)
+boy = {'dijital': (PW, PH), 'baski': (PW, PH), 'cerceve_ic': (PW, PH)}
 n = {'dijital': ncc(R[dy + on_y:dy + on_y + PH, dx + on_x:dx + on_x + PW], ref),
      'baski': ncc(R[by:by + PH, bx:bx + PW], ref),
      # cerceve ici: yeniden orneklemede +-2 px kayma olabilir, en iyi konum alinir

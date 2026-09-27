@@ -74,9 +74,9 @@ yaz(435, 1750, 'EMILY = CANCER    JAMES = LIBRA', FE, SANS_T)
 FN = font(GAR, boy_bul(GAR, 450, 'Names print in capitals. Your message prints as you type it.', 1193), 450)
 b = FN.getbbox('Names print in capitals. Your message prints as you type it.', anchor='ls')
 d.text((1500 - (b[2] + b[0]) / 2, 1900 - b[1]), 'Names print in capitals. Your message prints as you type it.', font=FN, fill=NAVY_T, anchor='ls')
-FP = font(MON, boy_bul(MON, 400, 'We send you a preview before printing.', 615), 400)
-b = FP.getbbox('We send you a preview before printing.', anchor='ls')
-d.text((1500 - (b[2] + b[0]) / 2, 2008 - b[1]), 'We send you a preview before printing.', font=FP, fill=SANS_T, anchor='ls')
+FP = font(MON, boy_bul(MON, 400, 'We send you a preview before we finalize your order.', 615), 400)
+b = FP.getbbox('We send you a preview before we finalize your order.', anchor='ls')
+d.text((1500 - (b[2] + b[0]) / 2, 2008 - b[1]), 'We send you a preview before we finalize your order.', font=FP, fill=SANS_T, anchor='ls')
 out.save(CIK, quality=95, subsampling=0)
 
 # QC
@@ -87,7 +87,7 @@ n_sol = ncc(R[SOL[1]:SOL[3], SOL[0]:SOL[2]].mean(2), np.asarray(band).astype(np.
 zemin = [tuple(int(v) for v in R[y, x]) for (x, y) in [(60, 600), (2900, 600), (1500, 1550), (2900, 1700), (60, 2100)]]
 zemin_ok = all(max(abs(a - b) for a, b in zip(z, BG)) <= 2 for z in zemin)
 tasma = [k for k, sag in kutular if sag > k[2] - 40]
-metin = 'Each name goes under its own sign. Type each name in the field for its sign. Names print in capitals. Your message prints as you type it. We send you a preview before printing.'
+metin = 'Each name goes under its own sign. Type each name in the field for its sign. Names print in capitals. Your message prints as you type it. We send you a preview before we finalize your order.'
 tire = bool(re.search(r'[‒-―−]', metin))
 print(f'boyut {R.shape[1]}x{R.shape[0]} | sol gorsel NCC {n_sol:.4f} | zemin {zemin_ok} | kutu tasmasi {len(tasma)} | tire {tire}')
 print(f'font boylari: etiket {FL.size} kutu {FK.size} esit satiri {FE.size} serif {FN.size} onizleme {FP.size}')
