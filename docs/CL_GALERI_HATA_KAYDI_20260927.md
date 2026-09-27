@@ -57,3 +57,13 @@ Doğru olanlar: 01 kapak (renk hariç), 03, 09, ölçü 3000x2250, yasak kelime/
 
 ## Yedek
 - data/pod/cl_referans/sahne_yedek_giris.png: yazısız giriş/konsol sahnesi (altın çerçeve, parşömen ton). Warm Parchment dosya hatası (Codex PR #60) düzelince 17. kart: Warm Parchment + Antique Gold.
+
+## Renk varyasyon gorselleri (27 Eyl)
+
+Etsy Menu 2 renk secimi onizlemeleri; scripts/pod/renk_varyasyon_kur.py.
+ChatGPT mockuplari reddedildi (AI cizim poster/cerceve, alt kenarda lacivert serit artefakti).
+Kaynaklar: MB/DB/PW/CI bugunku gercek 11x14 renderlari (Drive CANCER_LIBRA_<RENK>_11x14),
+WP gecici olarak canli kart 04 kirpigi (525x654, 3x buyutme, yumusak; IS_0047 / PR #60
+duzelince gercek renderla yenilenecek). 5'i de QC PASS (NCC >= 0.9995), MB onaylandi,
+digerleri Serdar onayinda. Etsy'ye yukleme ve renk baglari ayri onayla diger oturumda.
+
