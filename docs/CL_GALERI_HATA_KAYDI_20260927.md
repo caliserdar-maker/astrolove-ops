@@ -42,4 +42,5 @@ Doğru olanlar: 01 kapak (renk hariç), 03, 09, ölçü 3000x2250, yasak kelime/
 | 02 Format | v4 teslim (Claude) | scripts/pod/kart02_hale_sil.py + kart02_poster_esitle.py; posterler kapaktan (%1.7 dar), gerçek dosyalı kapak onayı sonrası yeniden basılacak |
 | 03 Sembol | onaylı (Serdar, 27 Eyl) | v2: canlı 03 taban, gerçek birleşik sembol, alt satır COUPLE WALL ART; scripts/pod/kart03_duzelt.py |
 | 04 İsimler | onaylı (Serdar, 27 Eyl) | ChatGPT 1200x900 yalnız yerleşim; 3000x2250 yeniden kurulum, sol görsel gerçek poster bandı; scripts/pod/kart04_kur.py |
-| 05-16 | tek tek üretiliyor | |
+| 05 Palet | v2 teslim (Claude) | ChatGPT posterleri yeniden çizilmiş (canlıya NCC 0.07-0.71); canlı 04'teki gerçek posterler, sıra MB DB PW / CI WP; scripts/pod/kart05_kur.py |
+| 06-16 | tek tek üretiliyor | |
