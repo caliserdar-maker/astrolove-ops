@@ -131,13 +131,20 @@ def main():
     cer = bolum(md, "FRAMED") or ""
     iddia = re.findall(r"hahnem|cotton|photo rag", cer, re.I)
     kayit("M2 cerceveli kagit iddiasi", not iddia, ", ".join(iddia) or "yok")
-    baslik = (bolum(md, "title") or "").splitlines()[0:1]
-    kayit("M3 baslik <= 140", bool(baslik) and len(baslik[0]) <= 140, f"{len(baslik[0]) if baslik else 'yok'} karakter")
-    et = [t.strip(" -*`\t") for t in re.split(r"[,\n]", bolum(md, "tag") or "") if t.strip(" -*`\t")]
-    kayit("M3 13 etiket <= 20", len(et) == 13 and all(len(t) <= 20 for t in et),
-          f"{len(et)} etiket; uzun: {[t for t in et if len(t) > 20]}")
-    kis = bolum(md, "personali") or ""
-    kayit("M3 kisisellestirme <= 256", 0 < len(kis) <= 256, f"{len(kis)} karakter")
+    # 27 Eyl: baslik/etiket/aciklama Claude'da onaylandi; paket yalniz gorsel metinlerini tasir.
+    # M3 yalniz ilgili bolum pakette varsa denetlenir.
+    if bolum(md, "title") is not None:
+        baslik = (bolum(md, "title") or "").splitlines()[0:1]
+        kayit("M3 baslik <= 140", bool(baslik) and len(baslik[0]) <= 140, f"{len(baslik[0]) if baslik else 'yok'} karakter")
+    if bolum(md, "tag") is not None:
+        et = [t.strip(" -*`\t") for t in re.split(r"[,\n]", bolum(md, "tag") or "") if t.strip(" -*`\t")]
+        kayit("M3 13 etiket <= 20", len(et) == 13 and all(len(t) <= 20 for t in et),
+              f"{len(et)} etiket; uzun: {[t for t in et if len(t) > 20]}")
+    if bolum(md, "personali") is not None:
+        kis = bolum(md, "personali") or ""
+        kayit("M3 kisisellestirme <= 256", 0 < len(kis) <= 256, f"{len(kis)} karakter")
+    uzun_alt = [r.get("dosya") for r in man if len(r.get("alt_metin") or "") > 500]
+    kayit("M3 alt metin <= 500", not uzun_alt, ", ".join(uzun_alt) or "yok")
     if kucukler:
         satirlar = [kucukler[i:i + 5] for i in range(0, len(kucukler), 5)]
         tuval = np.full((len(satirlar) * 440, 5 * 330, 3), 255, np.uint8)
