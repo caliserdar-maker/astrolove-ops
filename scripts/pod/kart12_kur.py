@@ -93,7 +93,9 @@ sahne = G.crop(SC).resize((2710, round((SC[3] - SC[1]) * s)), Image.LANCZOS).fil
 # gercek cerceve + poster
 DX0, DY0, DX1, DY1 = [round(v) for v in ((443 - SC[0]) * s, (226 - SC[1]) * s, (893 - SC[0]) * s, (788 - SC[1]) * s)]
 IX0, IX1 = (466 - SC[0]) * s, (869 - SC[0]) * s
-F = round(((DX1 - DX0) - (IX1 - IX0)) / 2)
+# Serdar 27 Eyl: cerceve ince. Yuz = Prodigi 20 mm, 24x36 olceginde (gorunen 599.6 mm); dis olcu sahnedeki gibi kalir.
+R_YUZ = 20 / 599.6
+F = round((DX1 - DX0) * R_YUZ / (1 + 2 * R_YUZ))
 B = Image.open(BASKI).convert('RGB')
 kx, ky = round(B.width * 5 / 279.4), round(B.height * 5 / 355.6)
 poster = B.crop((kx, ky, B.width - kx, B.height - ky)).resize((DX1 - DX0 - 2 * F, DY1 - DY0 - 2 * F), Image.LANCZOS)
