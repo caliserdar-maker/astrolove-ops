@@ -316,7 +316,8 @@ class EdisyonPoster:
             return None, bi0, None
         merkez0, yeni0 = ek0
         kapi0 = self.p16.blok_kapisi(p0, S0, s0, yeni0)
-        sk, kirp = sembol_kapisi(p0, S0, s0, merkez0, m, SEMBOL_ESIK, maske=self.eu.murekkep)
+        sk, kirp = sembol_kapisi(p0, S0, s0, merkez0, m, SEMBOL_ESIK,
+                                 maske=self.eu.murekkep, doku=(ed == 'vintage'))
         maske0 = (S0['genis'] | yeni0)
         silinen0 = S0['genis'] & ~yeni0
 
