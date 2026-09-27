@@ -81,14 +81,23 @@ URUN_ES = {'pod': 'POD', 'print': 'POD', 'baski': 'POD', 'poster': 'POD',
            'dijital': 'DIJITAL', 'digital': 'DIJITAL', 'dijital_duvar_sanati': 'DIJITAL',
            'duvar_kagidi': 'DUVAR_KAGIDI', 'wallpaper': 'DUVAR_KAGIDI'}
 # Dijital pakette her oran icin kullanilan onayli baski dosyasi (hepsi 300 dpi)
-DIJITAL_BOY = {'4x5': '16x20', '3x4': '18x24', '2x3': '24x36', '11x14': '11x14', 'A': 'A2'}
-DIJITAL_ORANLAR = ('4x5', '3x4', '2x3', '11x14', 'A')
+DIJITAL_BOY = {'4x5': '16x20', '3x4': '18x24', '2x3': '24x36', '11x14': '11x14',
+               'a_series': 'A2'}
+DIJITAL_ORANLAR = ('4x5', '3x4', '2x3', '11x14', 'a_series')
 ZIP_AZAMI_MB = 20.0
 RENKLER = ('MIDNIGHT_BLUE', 'DEEP_BLACK', 'PURE_WHITE', 'CHAMPAGNE_IVORY', 'WARM_PARCHMENT')
 BUYUT = 3                               # kontrol paketinde bant buyutme
 
 
 def log(*a): print(f'[{time.time() - T0:7.1f}s]', *a, flush=True)
+
+
+def dijital_oran(oran):
+    """Eski A anahtarini kabul et, disariya kanonik a_series yaz."""
+    if oran == 'A':
+        log('UYARI: dijital oran A eskidi; a_series kullaniliyor')
+        return 'a_series'
+    return oran
 
 
 def rc(*a, timeout=900):
@@ -953,6 +962,7 @@ def pod_uret(sip, kaynak_bayt, P_blue, P_ed, cik):
 def _dijital_is(arg):
     """Tek (renk, oran) isi - paralel havuzda kosar (Serdar 4. madde)."""
     renk, oran, sip, klas, kon = arg
+    oran = dijital_oran(oran)
     ed = RENK_ED[renk]; boy = DIJITAL_BOY[oran]
     isimler = (sip['isim1'], sip['isim2']); mesaj = sip.get('mesaj') or ''
     try:
@@ -961,7 +971,8 @@ def _dijital_is(arg):
         with Image.open(yol) as im:
             hedef = list(im.size)
         P_ed = EdisyonPoster(); P_blue = BluePoster() if ed == 'blue' else None
-        poster, bi, ek = render_et(ed, oran, sip['sayfa'], kb, isimler, mesaj,
+        render_oran = 'A' if oran == 'a_series' else oran
+        poster, bi, ek = render_et(ed, render_oran, sip['sayfa'], kb, isimler, mesaj,
                                    P_blue, P_ed, sip['cift'], ref_boy=boy,
                                    hedef_en=hedef[0], boy=boy)
         if poster is None:
@@ -995,7 +1006,8 @@ def dijital_uret(sip, P_blue, P_ed, cik, paralel=3):
     R['bant_dogrulama'] = bant_dogrulama(sip['cift'], DIJITAL_BOY['3x4'], P_ed)
     onizleme_yollari = []
     isler = []
-    for renk in RENKLER:
+    renkler = (sip['renk'],) if sip.get('yalniz_renk') else RENKLER
+    for renk in renkler:
         klas = cik / renk; klas.mkdir(parents=True, exist_ok=True)
         # buyukten kucuge: uzun isler once baslasin
         for oran in sorted(DIJITAL_ORANLAR, key=lambda o: -BOY[DIJITAL_BOY[o]][1]):
@@ -1011,25 +1023,28 @@ def dijital_uret(sip, P_blue, P_ed, cik, paralel=3):
             rk['durum'] = 'EKSIK'
         if ornek:
             onizleme_yollari.append((renk, Path(ornek)))
-    for renk in RENKLER:
+    for renk in renkler:
         klas = cik / renk
         rk = R['renkler'][renk]
-        zp = cik / f'{sip["cift"]}_{renk}.zip'
-        with zipfile.ZipFile(zp, 'w', zipfile.ZIP_STORED) as z:
-            for f in sorted(klas.glob('*.jpg')):
-                z.write(f, f.name)
-        rk['zip_MB'] = round(zp.stat().st_size / 1e6, 2)
-        rk['zip_kapisi'] = rk['zip_MB'] <= ZIP_AZAMI_MB
         rk['dosya_sayisi'] = len(list(klas.glob('*.jpg')))
         rk['zip_icerik'] = sorted(f.name for f in klas.glob('*.jpg'))
         if rk['dosya_sayisi'] != len(DIJITAL_ORANLAR):
             rk['durum'] = 'EKSIK'
-        for f in klas.glob('*.jpg'):
-            f.unlink()
-        klas.rmdir()
+        if rk['durum'] == 'URETILDI':
+            zp = klas / f'{renk}.zip'
+            with zipfile.ZipFile(zp, 'w', zipfile.ZIP_STORED) as z:
+                for f in sorted(klas.glob('*.jpg')):
+                    z.write(f, f.name)
+            rk['zip_MB'] = round(zp.stat().st_size / 1e6, 2)
+            rk['zip_kapisi'] = rk['zip_MB'] < ZIP_AZAMI_MB
+            if not rk['zip_kapisi']:
+                rk['durum'] = 'EKSIK'
+        if rk['durum'] != 'URETILDI':
+            import shutil
+            shutil.rmtree(klas)
         log('dijital', renk, {a: rk.get(a) for a in ('durum', 'zip_MB', 'dosya_sayisi')})
     if onizleme_yollari:
-        sirali = [(r, y) for r in RENKLER for rr, y in onizleme_yollari if rr == r]
+        sirali = [(r, y) for r in renkler for rr, y in onizleme_yollari if rr == r]
         R['renk_onizleme'] = renk_onizleme(sirali, 'BES_RENK_ONIZLEME.jpg', kon)
     R['toplam_zip'] = len(R['renkler'])
     R['durum'] = ('URETILDI' if all(v.get('durum') == 'URETILDI' and v.get('zip_kapisi')
@@ -1071,7 +1086,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--kart')
     ap.add_argument('--cift'); ap.add_argument('--renk'); ap.add_argument('--boy')
+    ap.add_argument('--urun', default='pod', choices=('pod', 'dijital'))
     ap.add_argument('--isim1'); ap.add_argument('--isim2'); ap.add_argument('--mesaj', default='')
+    ap.add_argument('--mesaj-b64', default='',
+                    help='mesaj base64 (bosluklu mesaj workflow ARGS ile bolunmesin diye)')
     ap.add_argument('--test', action='store_true', help='ornek siparisler (canli siparis yok)')
     ap.add_argument('--yalniz', default='',
                     help='--test ile: virgulle ayrilmis receipt parcasi. Dijital paket POD'
@@ -1084,6 +1102,9 @@ def main():
     ap.add_argument('--plate', default='medyan', choices=('medyan', 'canva'),
                     help='zemin plate kumesi: medyan (<ED>_<boy>.png) ya da canva (<ED>_CANVA_<boy>.png)')
     a = ap.parse_args()
+    if a.mesaj_b64:
+        import base64
+        a.mesaj = base64.b64decode(a.mesaj_b64).decode('utf-8')
     global PLATE_EK
     PLATE_EK = '_CANVA' if a.plate == 'canva' else ''
     log('plate kumesi', a.plate)
@@ -1101,6 +1122,7 @@ def main():
         siparisler = [{**d, 'receipt': Path(a.kart).stem}]
     elif a.cift:
         siparisler = [{'receipt': f'{a.cift}_{a.renk}_{a.boy}', 'cift': a.cift, 'renk': a.renk, 'boy': a.boy,
+                       'urun': a.urun, 'yalniz_renk': a.renk is not None,
                        'isim1': a.isim1, 'isim2': a.isim2, 'mesaj': a.mesaj}]
     else:
         raise SystemExit('--kart, --test ya da elle parametre gerekir')
