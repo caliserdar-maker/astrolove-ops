@@ -5,7 +5,7 @@ v2 stili korunur ve olculerek kullanilir: en buyuk kutu dolgu (218,210,199), ic 
 lacivert cizgi (33,33,43) 3 px, kutular tek olcekte (px/inc), ic ice ve alt kenardan hizali.
 Yazilar DNA: baslik Garamond 120, alt baslik Montserrat 49 (canli 03 konumu); ust etiket canli 03'ten,
 alt cizgi+satir kart 03 v2'den. cm donusumleri v2 ile ayni (dogrulanmisti).
-QC: 13 boy, olcek tutarli (kutu yuksekligi = inc x olcek, +-1 px), sutunlar esit aralik, kenarlar esit, gruplar buyukten kucuge, tire yok.
+QC: 13 boy, olcek tutarli (kutu yuksekligi = inc x olcek, +-1 px), 5 dis kutu arasi bosluk esit, kenarlar esit, gruplar buyukten kucuge, tire yok.
 Kullanim: kart10_kur.py CANLI_03.jpg KART03_V2.jpg GARAMOND.ttf MONTSERRAT.ttf CIKIS.jpg
 """
 import re
@@ -41,22 +41,28 @@ FK = font(MON, 34, 500); FG = font(MON, 50, 500); FL = font(MON, 42, 400); SAT =
 
 def gen(f, t):
     bb = f.getbbox(t, anchor='ls'); return bb[2] - bb[0]
-sut_w = [max(max(w for _, w, h, _ in g) * OLCEK, max(gen(FL, s[3]) for s in g)) for _, g in GRUP]
-ara = (2710 - sum(sut_w)) / (len(GRUP) - 1)
-x = 145.0; kutular = []; satirlar = []
-for (ad, g), sw in zip(GRUP, sut_w):
-    cx = x + sw / 2
+# Serdar 27 Eyl: 5 buyuk kutunun DIS kenarlari arasindaki bosluk esit olacak.
+# Kutu genislikleri sabit; ilk/son sutunun murekkep kenari 145'e oturacak sekilde g cozulur.
+KW = [max(w for _, w, h, _ in g) * OLCEK for _, g in GRUP]                     # buyuk kutu genislikleri
+HW = [max(kw, max(gen(FL, s[3]) for s in g), gen(FG, ad)) / 2 for (ad, g), kw in zip(GRUP, KW)]
+cx0 = 145 + HW[0]; cx4 = 2855 - HW[-1]
+ara = (cx4 - cx0 - (KW[0] / 2 + KW[1] + KW[2] + KW[3] + KW[-1] / 2)) / 4       # kutu kenarlari arasi bosluk
+cx = cx0; kutular = []; satirlar = []; dis = []
+for gi, ((ad, g), kw) in enumerate(zip(GRUP, KW)):
     for i, (et, w, h, _) in enumerate(sorted(g, key=lambda s: -s[2])):
         W, H = w * OLCEK, h * OLCEK
         box = (round(cx - W / 2), round(ALT - H), round(cx + W / 2), ALT)
         d.rectangle(box, fill=DOLGU if i == 0 else BG, outline=CIZ, width=3)
         bb = FK.getbbox(et, anchor='ls'); d.text((cx - (bb[0] + bb[2]) / 2, box[1] + 22 - bb[1]), et, font=FK, fill=CIZ, anchor='ls')
         kutular.append((et, h, box[3] - box[1]))
+        if i == 0:
+            dis.append((box[0], box[2]))
     bb = FG.getbbox(ad, anchor='ls'); d.text((cx - (bb[0] + bb[2]) / 2, ALT + 45 - bb[1]), ad, font=FG, fill=SANS_T, anchor='ls')
     for j, (_, _, _, s) in enumerate(g):
         bb = FL.getbbox(s, anchor='ls'); d.text((cx - (bb[0] + bb[2]) / 2, ALT + 135 + j * SAT - FL.getbbox('A', anchor='ls')[1]), s, font=FL, fill=SANS_T, anchor='ls')
         satirlar.append(s)
-    x += sw + ara
+    if gi < len(GRUP) - 1:
+        cx += kw / 2 + ara + KW[gi + 1] / 2
 t = 'Every size is available as a print and in all 4 frame colors.'
 FN = font(MON, 33, 400); bb = FN.getbbox(t, anchor='ls'); d.text((1500 - (bb[0] + bb[2]) / 2, 1959 - bb[1]), t, font=FN, fill=SANS_T, anchor='ls')
 out.save(CIK, quality=95, subsampling=0)
@@ -67,5 +73,7 @@ m = np.abs(R[560:1900] - np.array(BG)).max(2) > 25; xs = np.where(m.any(0))[0]
 tire = bool(re.search(r'[‒-―−]', ' '.join(satirlar) + t))
 sira = [max(h for _, _, h, _ in g) for _, g in GRUP]
 azalan = all(a >= b for a, b in zip(sira, sira[1:]))
-print(f'boy {len(kutular)} | olcek {OLCEK:.2f} px/in tutarli {olcek_ok} | aralik {ara:.0f} | sol {xs.min()} sag {2999 - xs.max()} | azalan {azalan} | tire {tire}')
-print('PASS' if len(kutular) == 13 and olcek_ok and abs(xs.min() - (2999 - xs.max())) <= 5 and azalan and not tire else 'FAIL')
+bosluk = [b[0] - a[1] for a, b in zip(dis, dis[1:])]                            # dis kenarlar arasi
+bosluk_ok = max(bosluk) - min(bosluk) <= 2
+print(f'boy {len(kutular)} | olcek {OLCEK:.2f} px/in tutarli {olcek_ok} | bosluk {bosluk} esit {bosluk_ok} | sol {xs.min()} sag {2999 - xs.max()} | azalan {azalan} | tire {tire}')
+print('PASS' if len(kutular) == 13 and olcek_ok and abs(xs.min() - (2999 - xs.max())) <= 5 and bosluk_ok and azalan and not tire else 'FAIL')
