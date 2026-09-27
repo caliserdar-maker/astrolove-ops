@@ -46,16 +46,16 @@ Amaç: CL eksiksiz bitince aynı yöntem ve kodla kalan 77 POD ilanına geçmek.
 Maliyet kaynağı: Drive `TEMP/PRODIGI/KATALOG/CERCEVE_KATALOG.csv` (27 Eyl, US, Standard). Etsy kesintisi (KDV dahil) ≈ 0.698 + 0.2062 × fiyat; Offsite Ads hariç.
 
 ## SKU şeması v3
-- Renk SKU'da YOK. `POD-<S1>_<S2>-<BOY>` (baskı), `...-<BOY>-F<BK|WH|NA>` (çerçeve), `...-<BOY>-DIGITAL`.
+- Renk SKU'da YOK. `POD-<S1>_<S2>-<BOY>` (baskı), `...-<BOY>-F<GO|BK|WH|NA>` (çerçeve; GO = Antique Gold, b235826), `...-<BOY>-DIGITAL`.
 - Renk siparişteki "Primary color" varyasyonundan okunur: `scripts/etsy/pod_sku.py::parse_tx`. Renk yoksa/bilinmiyorsa kalem gönderilmez (fail-closed).
 - Eski renkli SKU'lar (`POD-CAN_LIB-MB-8x10`) aynen çalışır (77 ilan geçene kadar).
-- `sku_on_property = price_on_property = [format, size]` → Etsy ürün sınırı 2500 (CL: 480 ürün, 336 açık).
+- `sku_on_property = price_on_property = [format, size]` → Etsy ürün sınırı 2500 (CL: 576 ürün, 416 açık; 6 format × 6 renk × 16 boy).
 
 ## Kod ve iş akışları
 | Parça | Dosya / workflow |
 |---|---|
-| Menü + fiyat verisi | `data/pod/yapi_v2.csv` (mod 3, 80 satır) |
-| İlan yazıcı | `scripts/pod/ilan_yapi_v2.py` (`kuru` / `yaz --confirm YAPI_V2`), `.github/workflows/ilan-yapi-v2.yml`; canlı okuma → plan → PUT → tam geri okuma → renk-görsel onarımı + geri okuma → açıklama PATCH → geri okuma; ilk hatada DUR; active değilse dokunmaz |
+| Menü + fiyat verisi | `data/pod/yapi_v2.csv` (mod 3, 96 satır) |
+| İlan yazıcı | `scripts/pod/ilan_yapi_v2.py` (`kuru` / `yaz --confirm YAPI_V2`), `.github/workflows/ilan-yapi-v2.yml`; canlı okuma → plan → REFERANS kontrolü (fiyat tablosu + SKU v3; değilse DUR) → PUT → tam geri okuma → renk-görsel onarımı + geri okuma → açıklama PATCH yalnız `--aciklama` ile (varsayılan KAPALI; v3 açıklama pod-seo-v3) → geri okuma (başlık/etiket/açıklama/görsel/video değişmedi); ilk hatada DUR; active değilse dokunmaz |
 | Çerçeve eşlemesi | `data/pod/prodigi_cerceve_esleme.csv` (16 boy × BK/WH/NA → GLOBAL-CFP-<boy>) |
 | Sipariş yönlendirme | `scripts/prodigi/order_router.py` (parse_tx, Standard varsayılan, dijital asla Prodigi'ye gitmez) |
 | Kişisel sipariş kartı | `scripts/prodigi/kisisel_siparis.py` (yeni SKU + renk varyasyonu) |
