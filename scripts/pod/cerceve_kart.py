@@ -13,7 +13,7 @@ W, H = 2000, 2500
 FRAME_NAMES = {"BK": "Black Frame", "WH": "White Frame", "NA": "Natural Frame"}
 FRAME_COLORS = {
     "BK": ((31, 30, 29), (70, 67, 63)),
-    "WH": ((235, 233, 226), (199, 197, 190)),
+    "WH": ((243, 242, 238), (205, 203, 197)),
     "NA": ((201, 166, 118), (158, 121, 80)),
 }
 RESAMPLE = Image.Resampling.LANCZOS
@@ -36,45 +36,68 @@ def wall() -> Image.Image:
     return Image.fromarray(np.uint8(np.rint(a)), "RGB")
 
 
-def _frame_layer(size: tuple[int, int], code: str, paspartu: bool) -> tuple[Image.Image, tuple[int, int, int, int]]:
-    fw, fh = size
-    layer = Image.new("RGBA", size, (0, 0, 0, 0))
-    d = ImageDraw.Draw(layer)
-    outer, inner = FRAME_COLORS[code]
-    profile = max(12, round(fw * 0.055))
-    mat = round(fw * 0.075) if paspartu else 0
-    d.rectangle((0, 0, fw - 1, fh - 1), fill=outer)
-    d.rectangle((profile // 3, profile // 3, fw - profile // 3 - 1, fh - profile // 3 - 1), outline=inner, width=max(3, profile // 5))
-    opening = (profile, profile, fw - profile, fh - profile)
-    d.rectangle(opening, fill=(247, 245, 239, 255))
-    if paspartu:
-        opening = tuple(v + (mat if i < 2 else -mat) for i, v in enumerate(opening))
-    d.rectangle(opening, fill=(0, 0, 0, 0))
-    d.rectangle(opening, outline=inner, width=max(3, profile // 9))
-    return layer, opening
+# Prodigi Classic frame (urun foyu, 27 Eyl 2026): yuz genisligi 20 mm, duvardan derinlik 22 mm,
+# natural = mese efektli laminat. Olcek: 8x10 baski genisligi 203.2 mm.
+YUZ_ORAN = 20.0 / 203.2
+
+
+def _grain(w: int, h: int, base: tuple[int, int, int], seed: int = 7) -> Image.Image:
+    """Mese efektli laminat: prosedurel ince damar (yalniz cerceve yuzeyi)."""
+    rng = np.random.default_rng(seed)
+    x = np.arange(w, dtype=np.float32)[None, :]
+    y = np.arange(h, dtype=np.float32)[:, None]
+    noise = rng.normal(0, 1, (h, 1)).astype(np.float32)
+    noise = np.convolve(noise[:, 0], np.ones(9) / 9, mode="same")[:, None]
+    wave = np.sin(y / 3.1 + 6 * noise + x / 400.0) * 7 + np.sin(y / 11.0 + x / 170.0) * 4
+    arr = np.clip(np.array(base, dtype=np.float32)[None, None, :] + wave[..., None], 0, 255)
+    return Image.fromarray(np.uint8(arr), "RGB")
+
+
+def _face(w: int, h: int, code: str, horizontal: bool) -> Image.Image:
+    outer, _ = FRAME_COLORS[code]
+    if code == "NA":
+        return _grain(w, h, outer) if horizontal else _grain(h, w, outer).rotate(90, expand=True)
+    return Image.new("RGB", (w, h), outer)
 
 
 def render_frame(design: Image.Image, code: str, paspartu: bool, box: tuple[int, int, int, int]) -> tuple[Image.Image, tuple[int, int, int, int]]:
-    """Bir cerceveyi verilen dis kutuya cizer; tasarim kutusunu da dondurur."""
+    """box = tasarimin (baskinin) yerlesecegi 4:5 alan. Cerceve bu alanin DISINA olcekli yuz genisligiyle cizilir."""
     if code not in FRAME_NAMES:
         raise ValueError(f"bilinmeyen cerceve: {code}")
     x0, y0, x1, y1 = box
-    layer, local = _frame_layer((x1 - x0, y1 - y0), code, paspartu)
-    design_box = (x0 + local[0], y0 + local[1], x0 + local[2], y0 + local[3])
-    dw, dh = design_box[2] - design_box[0], design_box[3] - design_box[1]
+    dw, dh = x1 - x0, y1 - y0
     if dw * 5 != dh * 4:
-        # Kutuyu merkezden tam 4:5'e daralt; hicbir zaman girdi kirpilmaz.
-        target_w = min(dw, dh * 4 // 5)
-        target_h = target_w * 5 // 4
-        cx, cy = (design_box[0] + design_box[2]) // 2, (design_box[1] + design_box[3]) // 2
-        design_box = (cx - target_w // 2, cy - target_h // 2, cx - target_w // 2 + target_w, cy - target_h // 2 + target_h)
+        raise ValueError(f"tasarim alani 4:5 degil: {dw}x{dh}")
+    mat = round(dw * 0.12) if paspartu else 0
+    f = max(8, round((dw + 2 * mat) * YUZ_ORAN))
+    ox0, oy0, ox1, oy1 = x0 - mat - f, y0 - mat - f, x1 + mat + f, y1 + mat + f
+    ow, oh = ox1 - ox0, oy1 - oy0
     shadow = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    ImageDraw.Draw(shadow).rounded_rectangle((x0 + 20, y0 + 28, x1 + 30, y1 + 40), 12, fill=(25, 20, 15, 95))
-    canvas.alpha_composite(shadow.filter(ImageFilter.GaussianBlur(30)))
-    canvas.alpha_composite(layer, (x0, y0))
-    resized = design.resize((design_box[2] - design_box[0], design_box[3] - design_box[1]), RESAMPLE)
-    canvas.paste(resized, design_box[:2])
-    return canvas, design_box
+    depth = max(6, round(f * 22 / 20 * 0.45))
+    ImageDraw.Draw(shadow).rectangle((ox0 + depth // 2, oy0 + depth, ox1 + depth, oy1 + depth * 2), fill=(25, 20, 15, 105))
+    canvas.alpha_composite(shadow.filter(ImageFilter.GaussianBlur(depth * 1.6)))
+    frame = Image.new("RGB", (ow, oh))
+    top = _face(ow, f, code, True)
+    side = _face(f, oh, code, False)
+    frame.paste(side, (0, 0)); frame.paste(side.transpose(Image.Transpose.FLIP_LEFT_RIGHT), (ow - f, 0))
+    frame.paste(top, (0, 0)); frame.paste(top.transpose(Image.Transpose.FLIP_TOP_BOTTOM), (0, oh - f))
+    d = ImageDraw.Draw(frame)
+    # Gonye birlesimleri + isik: ust/sol acik, alt/sag koyu (tek isik kaynagi, sol ust)
+    shade = Image.new("RGBA", (ow, oh), (0, 0, 0, 0)); sd = ImageDraw.Draw(shade)
+    sd.polygon([(0, 0), (ow, 0), (ow - f, f), (f, f)], fill=(255, 255, 255, 26))
+    sd.polygon([(0, 0), (f, f), (f, oh - f), (0, oh)], fill=(255, 255, 255, 12))
+    sd.polygon([(0, oh), (f, oh - f), (ow - f, oh - f), (ow, oh)], fill=(0, 0, 0, 34))
+    sd.polygon([(ow, 0), (ow, oh), (ow - f, oh - f), (ow - f, f)], fill=(0, 0, 0, 22))
+    for pts in ([(0, 0), (f, f)], [(ow, 0), (ow - f, f)], [(0, oh), (f, oh - f)], [(ow, oh), (ow - f, oh - f)]):
+        sd.line(pts, fill=(0, 0, 0, 40), width=2)
+    sd.rectangle((0, 0, ow - 1, oh - 1), outline=(0, 0, 0, 60), width=2)
+    sd.rectangle((f - 2, f - 2, ow - f + 1, oh - f + 1), outline=(0, 0, 0, 70), width=3)
+    frame = Image.alpha_composite(frame.convert("RGBA"), shade)
+    if paspartu:
+        ImageDraw.Draw(frame).rectangle((f, f, ow - f - 1, oh - f - 1), fill=(246, 245, 241, 255))
+    canvas.alpha_composite(frame, (ox0, oy0))
+    canvas.paste(design.resize((dw, dh), RESAMPLE), (x0, y0))
+    return canvas, (x0, y0, x1, y1)
 
 
 def mean_absolute_difference(design: Image.Image, rendered: Image.Image, box: tuple[int, int, int, int]) -> float:
@@ -101,7 +124,7 @@ def brand_font(size: int) -> ImageFont.FreeTypeFont:
 def single_card(design: Image.Image, code: str, paspartu: bool) -> tuple[Image.Image, list[tuple[int, int, int, int]]]:
     global canvas
     canvas = wall().convert("RGBA")
-    result, area = render_frame(design, code, paspartu, (360, 300, 1640, 1865))  # profil 70 px: acilis 1140x1425 = tam 4:5
+    result, area = render_frame(design, code, paspartu, (480, 420, 1520, 1720))  # tasarim 1040x1300 (4:5)
     return result.convert("RGB"), [area]
 
 
@@ -123,18 +146,14 @@ def options_card(design: Image.Image, paspartu: bool) -> tuple[Image.Image, list
     draw = ImageDraw.Draw(canvas)
     title_font, label_font, note_font = brand_font(84), brand_font(50), brand_font(40)
     draw.text((W // 2, 95), "Choose your format", font=title_font, fill=(45, 40, 35), anchor="ma")
-    fw, fh = 746, 912  # profil 41 px: acilis 664x830 = tam 4:5 (bosluk seridi yok)
-    cells = [(505, 285), (1495, 285), (505, 1340), (1495, 1340)]  # ust-orta x, ust y
+    dw, dh = 600, 750
+    cells = [(505, 330), (1495, 330), (505, 1360), (1495, 1360)]  # tasarim alani ust-orta
     boxes: list[tuple[int, int, int, int]] = []
-    frame_boxes = {}
+    boxes.append(_unframed(design, (dw, dh), (cells[0][0], cells[0][1] + dh // 2)))
     for code, (cx, top) in zip(("BK", "WH", "NA"), cells[1:]):
-        _, area = render_frame(design, code, paspartu, (cx - fw // 2, top, cx - fw // 2 + fw, top + fh))
-        frame_boxes[code] = area
-    a = frame_boxes["BK"]
-    size = (a[2] - a[0], a[3] - a[1])
-    cx, top = cells[0]
-    boxes.append(_unframed(design, size, (cx, top + fh // 2)))
-    boxes += [frame_boxes[c] for c in ("BK", "WH", "NA")]
+        _, area = render_frame(design, code, paspartu, (cx - dw // 2, top, cx + dw // 2, top + dh))
+        boxes.append(area)
+    fh = dh + round(dw * YUZ_ORAN) + 25  # etiket cerceve altindan 55 px asagida
     draw = ImageDraw.Draw(canvas)
     for label, (cx, top) in zip(("Print only", "Black Frame", "White Frame", "Natural Frame"), cells):
         draw.text((cx, top + fh + 30), label, font=label_font, fill=(52, 47, 42), anchor="ma")
