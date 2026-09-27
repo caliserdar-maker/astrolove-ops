@@ -72,3 +72,11 @@ Occasion (Anniversary / Engagement / Wedding / Valentine's), Holiday (Valentine'
 - Ağustos verisi 7 hafta eski; Q4 hediye sezonu hacimleri değiştirir. 13 etiket + 7 yedek Marketplace Insights'ta yayından önce yeniden ölçülmeli (Etsy girişi gerekir).
 - Gösterilen arama sayıları satış değil; dönüşüm verisi yok.
 - Yayından sonra 2-4 hafta Etsy Stats arama terimleri ve reklam anahtar kelimeleri ile ölçülür; aynı anda tek alan değiştirilir.
+
+## 9. Canli ilan istatistikleri (27 Eyl 2026, API 9 istek + Ads CSV 17 Agu-16 Eyl)
+- 78 POD ilan (omur boyu): 704 goruntulenme, 14 favori, 3 satis (hepsi Midnight Blue; AQUARIUS_LIBRA 8x10, AQUARIUS_SCORPIO 12x16, SCORPIO_TAURUS 8x10). CL: 49 goruntulenme, 0 favori, 0 satis.
+- Etsy Ads (30 gun): POD 981 gosterim, 9 tiklama, 0 reklam siparisi, 4.38 $ harcama. Tiklama alan 7 ilan: AQUARIUS_LIBRA 3, ARIES_LIBRA, LEO_LIBRA, LIBRA_LIBRA, CANCER_TAURUS, LEO_SCORPIO, PISCES_VIRGO (1'er).
+- Magaza trafigi (25 Agu-23 Eyl): 263 ziyaret; Etsy aramasi yalniz 10. Organik arama etiketlerin olculmesine yetecek veri uretmiyor.
+- Mevcut etiket yapisi: 8 ortak etiket 78 ilanin hepsinde (personalized couple, custom couple print, zodiac couple print, couple names print, zodiac couple gift, astrology wall art, anniversary gift, star sign print) + 5 cifte ozel (cift adi + tek burc etiketleri). Ortak etiketler her ilanda ayni oldugu icin etkileri birbirinden ayrilamaz.
+- Etiket basina istatistik Etsy'de yoktur; API'de reklam/arama terimi ucu yoktur (OAS taramasi). Arama terimi ve reklam kelimesi yalniz Shop Manager'da.
+- Sonuc: canli veri onayli etiket listesini curutmuyor; tek burc etiketlerinin (reklamda gosterim, 0 siparis) cikarilmasini ve cift adi etiketinin korunmasini destekliyor. Istatistiksel etiket karsilastirmasi icin veri yetersiz; yayindan 2-4 hafta sonra olculecek.
