@@ -137,7 +137,7 @@ jobs:
             fi
             python scripts/prodigi/cerceve_katalog.py --out-dir out
             cat out/CERCEVE_KATALOG*.md >> "$GITHUB_STEP_SUMMARY"
-            rclone copy out "gdrive:ASTROLOVE/TEMP/PRODIGI/KATALOG" --include "CERCEVE_KATALOG.*" -q
+            rclone copy out "gdrive:ASTROLOVE/TEMP/PRODIGI/KATALOG" --include "CERCEVE_KATALOG*" -q
             rclone copy out/urun "gdrive:ASTROLOVE/TEMP/PRODIGI/KATALOG/urun" -q
             exit 0
           fi
