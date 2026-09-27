@@ -87,7 +87,7 @@ items = [{"transaction_id": 9, "sku":"POD-CAN_LIB-MB-8x10", "prodigi_sku":"GLOBA
           "size":"8x10", "pair":"CAN_LIB", "ed":"MB", "price":34.99, "asset_remote":"gdrive:x/8x10.jpg"}]
 b_std = R.order_body(receipt, items, {"POD-CAN_LIB-MB-8x10":"u"}, "", "Standard")
 b_var = R.order_body(receipt, items, {"POD-CAN_LIB-MB-8x10":"u"}, "")
-assert b_std["shippingMethod"]=="Standard" and b_var["shippingMethod"]=="Budget"
+assert b_std["shippingMethod"]=="Standard" and b_var["shippingMethod"]=="Standard"
 pkg = R.package_of(receipt, items, "US", 34.99, 20.0, 0.4, "", "live", "", "Express")
 assert pkg["order"]["shippingMethod"]=="Express", pkg["order"]["shippingMethod"]
 print("11 order_body/package_of shippingMethod ->", b_std["shippingMethod"], pkg["order"]["shippingMethod"])

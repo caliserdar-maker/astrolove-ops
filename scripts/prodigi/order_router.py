@@ -50,7 +50,7 @@ sys.path.insert(0, str(HERE.parent / "etsy"))
 sys.path.insert(0, str(HERE.parent / "pinterest"))
 sys.path.insert(0, str(HERE.parent / "ops"))
 from etsy_common import Etsy, TokenStore, log as elog, mask  # noqa: E402
-from pod_sku import is_digital_sku, parse_sku  # noqa: E402
+from pod_sku import frame_code, is_digital_sku, parse_sku  # noqa: E402
 import takip  # noqa: E402
 import kisisel_siparis  # noqa: E402
 import siparis_onay  # noqa: E402
@@ -59,7 +59,8 @@ PRODIGI = {"live": "https://api.prodigi.com/v4.0", "sandbox": "https://api.sandb
 KEY_REMOTE = {"live": "gdrive:ASTROLOVE/TEMP/PRODIGI_TOKEN.json", "sandbox": "gdrive:ASTROLOVE/TEMP/PRODIGI_SANDBOX_TOKEN.json"}
 PRINT_REMOTE = "gdrive:ASTROLOVE/TEMP/POD_PRINT"
 ALLOWED = {"US", "CA", "AU", "GB"}
-KARGO_SECENEK = ["Budget", "Standard", "Express", "Overnight"]   # teklifte hepsi sorulur, EN UCUZ secilir
+DEFAULT_SHIPPING_METHOD = "Standard"
+CERCEVE_ESLEME = Path(__file__).resolve().parents[2] / "data/pod/prodigi_cerceve_esleme.csv"
 EKLER_USD = 5.00        # hesap ayarindaki ekler (postcard 2.50 + 2 sticker 1.25x2); ord_14538276 olcumu
 # SKU semasi pod_sku.py: POD-<burc3>_<burc3>-<edisyon2>-<boyut>
 STAGES = ["dryrun", "bekliyor", "manual", "atlandi", "ordered", "shipped", "tracked", "error", "ISIM_BEKLIYOR"]
@@ -110,28 +111,22 @@ class Prodigi:
             d = {"raw": r.text[:300]}
         return r.status_code, d
 
-    def quote(self, items, country):
-        """Tum kargo secenekleri sorulur, EN UCUZ olan secilir. -> (maliyet, hata, ayrinti)."""
-        govde = [{"sku": i["prodigi_sku"], "copies": i["qty"], "assets": [{"printArea": "default"}]} for i in items]
-        secenekler, hatalar = [], []
-        for yontem in KARGO_SECENEK:
-            st, d = self.call("POST", "/quotes", {"shippingMethod": yontem, "destinationCountryCode": country,
-                                                  "currencyCode": "USD", "items": govde})
-            if st != 200 or not d.get("quotes"):
-                hatalar.append(f"{yontem}: HTTP {st}")
-                continue
-            for q in d["quotes"]:
-                cs = q.get("costSummary") or {}
-                kalem = float((cs.get("items") or {}).get("amount") or 0)
-                kargo = float((cs.get("shipping") or {}).get("amount") or 0)
-                secenekler.append({"yontem": q.get("shipmentMethod") or yontem, "kalem": round(kalem, 2),
-                                   "kargo": round(kargo, 2), "toplam": round(kalem + kargo, 2)})
-        if not secenekler:
-            return None, f"quote basarisiz: {'; '.join(hatalar)[:200]}", {}
-        en_ucuz = min(secenekler, key=lambda x: x["toplam"])
-        ayrinti = {"secenekler": sorted(secenekler, key=lambda x: x["toplam"]), "secilen": en_ucuz,
-                   "ekler_tahmini": EKLER_USD}
-        return round(en_ucuz["toplam"] + EKLER_USD, 2), "", ayrinti
+    def quote(self, items, country, shipping_method=None):
+        shipping_method = shipping_method or getattr(self, "shipping_method", DEFAULT_SHIPPING_METHOD)
+        govde = [prodigi_item(i) for i in items]
+        st, d = self.call("POST", "/quotes", {"shippingMethod": shipping_method,
+                                              "destinationCountryCode": country,
+                                              "currencyCode": "USD", "items": govde})
+        if st != 200 or not d.get("quotes"):
+            return None, f"quote basarisiz: {shipping_method}: HTTP {st}", {}
+        q = d["quotes"][0]
+        cs = q.get("costSummary") or {}
+        kalem = float((cs.get("items") or {}).get("amount") or 0)
+        kargo = float((cs.get("shipping") or {}).get("amount") or 0)
+        secilen = {"yontem": q.get("shipmentMethod") or shipping_method, "kalem": round(kalem, 2),
+                   "kargo": round(kargo, 2), "toplam": round(kalem + kargo, 2)}
+        return round(secilen["toplam"] + EKLER_USD, 2), "", {
+            "secenekler": [secilen], "secilen": secilen, "ekler_tahmini": EKLER_USD}
 
     def urun(self, sku):
         return self.call("GET", f"/products/{sku}")
@@ -425,6 +420,37 @@ def dijital_mi(t):
                for v in t.get("variations") or [])
 
 
+def cerceve_haritasi(path=None):
+    """(boy, cerceve) -> Prodigi SKU/attributes; bos SKU kullanilabilir esleme sayilmaz."""
+    p = Path(path or CERCEVE_ESLEME)
+    if not p.exists():
+        return {}
+    with p.open(newline="", encoding="utf-8") as fh:
+        rows = csv.DictReader(fh)
+        sonuc = {}
+        for row in rows:
+            try:
+                ek = json.loads(row.get("attr_ek_json") or "{}")
+            except (TypeError, ValueError):
+                ek = {}
+            attrs = {"color": row.get("attr_color", "").strip(), **ek}
+            if row.get("prodigi_sku", "").strip():
+                sonuc[(row.get("boy", "").strip(), row.get("cerceve", "").strip().upper())] = {
+                    "prodigi_sku": row["prodigi_sku"].strip(),
+                    "attributes": {k: v for k, v in attrs.items() if v not in (None, "")}}
+        return sonuc
+
+
+def prodigi_item(item, url=None, merchant_reference=None):
+    body = {"sku": item["prodigi_sku"], "copies": item["qty"], "sizing": "fillPrintArea",
+            "assets": [{"printArea": "default", **({"url": url} if url is not None else {})}]}
+    if item.get("attributes"):
+        body["attributes"] = item["attributes"]
+    if merchant_reference:
+        body["merchantReference"] = merchant_reference
+    return body
+
+
 def parse_items(receipt, only_size=""):
     """(gonderilecek kalemler, POD disi SKU'lar, atlanan POD kalemleri).
     only_size virgulle birden cok boy alir (or. '5x7,A1'): YALNIZ bu boylarin kalemleri
@@ -432,6 +458,7 @@ def parse_items(receipt, only_size=""):
     Secilen boylar TEK Prodigi siparisinde birlesir (kargo tek sefer)."""
     boylar = {b.strip() for b in (only_size or "").split(",") if b.strip()}
     items, other, atlanan = [], [], []
+    cerceveler = cerceve_haritasi()
     for t in receipt.get("transactions") or []:
         sku = (t.get("sku") or "").strip()
         if dijital_mi(t):
@@ -440,17 +467,22 @@ def parse_items(receipt, only_size=""):
         if not parsed:
             other.append(sku or f"tx{t.get('transaction_id')}"); continue
         pair, ed, size = parsed
+        cerceve = frame_code(sku)
         if boylar and size not in boylar:
             atlanan.append(f"{sku}x{int(t.get('quantity') or 1)}"); continue
         pr = t.get("price") or {}
         price = float(pr.get("amount") or 0) / float(pr.get("divisor") or 100)
+        esleme = cerceveler.get((size, cerceve)) if cerceve else None
         items.append(dict(transaction_id=t.get("transaction_id"), sku=sku, pair=pair, ed=ed, size=size,
-                          prodigi_sku=f"GLOBAL-HPR-{size}", qty=int(t.get("quantity") or 1), price=price,
-                          asset_remote=f"{PRINT_REMOTE}/{pair}/{ed}/{size}.jpg"))
+                          prodigi_sku=(esleme or {}).get("prodigi_sku", f"GLOBAL-HPR-{size}"),
+                          qty=int(t.get("quantity") or 1), price=price,
+                          asset_remote=f"{PRINT_REMOTE}/{pair}/{ed}/{size}.jpg",
+                          cerceve=cerceve, attributes=(esleme or {}).get("attributes", {}),
+                          mapping_error=bool(cerceve and not esleme)))
     return items, other, atlanan
 
 
-def order_body(receipt, items, urls, only_size="", shipping_method="Budget"):
+def order_body(receipt, items, urls, only_size="", shipping_method=DEFAULT_SHIPPING_METHOD):
     rid = receipt["receipt_id"]
     # Anahtar SIPARISTEKI boylardan turetilir (or. etsy-123-5x7, etsy-123-5x7+A1): tam sepet
     # siparisiyle de, tek boyluk bir siparisle de carpismaz. Kalemler TEK siparistedir.
@@ -458,23 +490,22 @@ def order_body(receipt, items, urls, only_size="", shipping_method="Budget"):
     ref = f"etsy-{rid}" + (f"-{ek}" if ek else "")
     # Kargo yontemi TEK KAYNAK: teklifte secilen (kargo_ayrinti["secilen"]["yontem"]) buraya gelir;
     # maliyet hesabi ile siparis govdesi ayni yontemi kullanir (23 Eyl bulgusu 1).
-    return {"merchantReference": ref, "shippingMethod": shipping_method or "Budget", "idempotencyKey": ref,
+    return {"merchantReference": ref, "shippingMethod": shipping_method or DEFAULT_SHIPPING_METHOD, "idempotencyKey": ref,
             "recipient": {"name": receipt.get("name") or "", "email": receipt.get("buyer_email") or None,
                           "address": {"line1": receipt.get("first_line") or "", "line2": receipt.get("second_line") or None,
                                       "postalOrZipCode": receipt.get("zip") or "", "countryCode": receipt.get("country_iso") or "",
                                       "townOrCity": receipt.get("city") or "", "stateOrCounty": receipt.get("state") or None}},
-            "items": [{"merchantReference": f"etsy-{rid}-{i['transaction_id']}", "sku": i["prodigi_sku"], "copies": i["qty"],
-                       "sizing": "fillPrintArea", "assets": [{"printArea": "default", "url": urls[i["sku"]]}]} for i in items]}
+            "items": [prodigi_item(i, urls[i["sku"]], f"etsy-{rid}-{i['transaction_id']}") for i in items]}
 
 
 # ------------------------------------------------------------------ onayli mod: paket + gonderim
-def package_of(receipt, items, country, etsy_total, cost, margin, warn, env, only_size="", shipping_method="Budget"):
+def package_of(receipt, items, country, etsy_total, cost, margin, warn, env, only_size="", shipping_method=DEFAULT_SHIPPING_METHOD):
     """Prodigi'ye gonderilmeye HAZIR paket (asset url'leri gonderim aninda doldurulur)."""
     rid = str(receipt["receipt_id"])
     return {"receipt_id": rid, "env": env, "created_utc": now(), "country": country, "only_size": only_size,
             "etsy_total": etsy_total, "prodigi_cost": cost, "margin": margin, "warn": warn,
             "recipient_name": receipt.get("name") or "",
-            "items": [{k: i[k] for k in ("transaction_id", "sku", "prodigi_sku", "pair", "ed", "size", "qty", "price", "asset_remote")}
+            "items": [{k: i.get(k) for k in ("transaction_id", "sku", "prodigi_sku", "pair", "ed", "size", "qty", "price", "asset_remote", "cerceve", "attributes")}
                       for i in items],
             "order": order_body(receipt, items, {i["sku"]: "" for i in items}, only_size, shipping_method)}
 
@@ -627,6 +658,8 @@ def main():
     ap.add_argument("--test-receipt", default="", help="Etsy receipt JSON (sandbox uctan uca test; Etsy okunmaz/yazilmaz)")
     ap.add_argument("--etsy-writes", action="store_true", help="tracking'i Etsy'ye yaz (yalniz live + onay)")
     ap.add_argument("--margin-min", type=float, default=0.20)
+    ap.add_argument("--shipping-method", default=DEFAULT_SHIPPING_METHOD,
+                    help="teklif ve siparis kargo yontemi (varsayilan: Standard)")
     ap.add_argument("--max-orders", type=int, default=5, help="kosu basina en fazla yeni siparis")
     ap.add_argument("--asset-wait", type=int, default=6, help="asset indirme icin bekleme turu (x20 sn)")
     ap.add_argument("--approve-mode", choices=["on", "off"], default="on",
@@ -678,6 +711,7 @@ def main():
         report.append("- KANAL KOPUK: kanal siparisi aranmaz, 60 dk bekleme uygulanmaz")
 
     prod = Prodigi(load_prodigi_key(a.env), a.env)
+    prod.shipping_method = a.shipping_method
     api = shop = None
     # --- tum POD boylari canli katalogla dogrulanir (buyuk/kucuk harf dahil)
     harita, eksik = sku_haritasi(prod, TUM_BOYLAR)
@@ -759,12 +793,19 @@ def main():
             continue
         el = time.time() - t0
         log(f"[{n}/{len(pod)}] receipt {rid} | gecen {el:.0f}s kalan~{el / n * (len(pod) - n):.0f}s %{100 * n // len(pod)}")
-        for i in items:                       # katalogdaki tam SKU yazimi
-            i["prodigi_sku"] = harita.get(i["size"], i["prodigi_sku"])
+        for i in items:                       # katalogdaki tam SKU yazimi (cercevesiz)
+            if not i.get("cerceve"):
+                i["prodigi_sku"] = harita.get(i["size"], i["prodigi_sku"])
         if r.get("is_shipped"):
             report.append(f"- {rid}: ATLA (Etsy'de gonderilmis)")
             continue
         desc0 = ", ".join(f"{i['sku']}x{i['qty']}" for i in items)
+        eslemesiz = [i["sku"] for i in items if i.get("mapping_error")]
+        if eslemesiz:
+            mesaj = f"CERCEVE_ESLEME_YOK: {', '.join(eslemesiz)}"
+            upd(st, a.state, rid, stage="manual", items=desc0, warn="CERCEVE_ESLEME_YOK", note=mesaj)
+            report.append(f"- {rid}: MANUAL ({mesaj}); siparis GONDERILMEDI")
+            continue
         # ---- KISISELLESTIRME KORUMASI (25 Eyl, Serdar): cevabi olan POD siparisi Prodigi'ye GONDERILMEZ.
         # Kanal/bekleme/teklif/siparis adimlarinin HEPSINDEN once: isimsiz baski yolu yok.
         kis = kisisel_siparis.cevaplar(r, parse_sku)
@@ -847,7 +888,7 @@ def main():
         if margin < a.margin_min:
             warn.append(f"MARJ_DUSUK {margin:.0%} (< {a.margin_min:.0%}): Etsy {etsy_total} / Prodigi {cost}")
         if approve:
-            secilen_yontem = (kargo_ayrinti.get("secilen") or {}).get("yontem") or "Budget"
+            secilen_yontem = (kargo_ayrinti.get("secilen") or {}).get("yontem") or a.shipping_method
             pkg = package_of(r, items, country, etsy_total, cost, margin, "; ".join(warn), a.env, a.only_size,
                              secilen_yontem)
             pkg["kargo"] = kargo_ayrinti
@@ -873,7 +914,7 @@ def main():
             for i in items:
                 fid, pid, url = links.open(i["asset_remote"])
                 perms.append([fid, pid]); urls[i["sku"]] = url
-            secilen_yontem = (kargo_ayrinti.get("secilen") or {}).get("yontem") or "Budget"
+            secilen_yontem = (kargo_ayrinti.get("secilen") or {}).get("yontem") or a.shipping_method
             stc, d = prod.create_order(order_body(r, items, urls, a.only_size, secilen_yontem))
             outcome = (d.get("outcome") or "")
             oid = (d.get("order") or {}).get("id")

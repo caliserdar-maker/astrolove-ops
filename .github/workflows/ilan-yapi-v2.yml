@@ -1,0 +1,58 @@
+name: ilan-yapi-v2
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      mod: {description: "kuru veya yaz", required: true, default: "kuru"}
+      ilan: {description: "ilan id veya hepsi", required: true, default: "hepsi"}
+      yalniz: {description: "virgullu ilan id filtresi", required: false, default: ""}
+      kota_alt: {description: "minimum kalan kota", required: true, default: "400"}
+      confirm: {description: "yaz icin YAPI_V2", required: false, default: ""}
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    concurrency:
+      group: etsy-token
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: |
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: Drive yapilandirmasi
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail; mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^\s*client_id\s*=\s*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Canli envanterden planla ve calistir
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail; umask 077; mkdir -p _work out
+          rclone copyto gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json "$TOKEN_FILE"
+          rclone copyto "gdrive:ASTROLOVE/TEMP/YAYILIM_78/METIN_78.csv" _work/METIN_78.csv
+          python scripts/pod/ilan_yapi_v2.py '${{ inputs.mod }}' '${{ inputs.ilan }}' \
+            --yalniz '${{ inputs.yalniz }}' --kota-alt '${{ inputs.kota_alt }}' --confirm '${{ inputs.confirm }}' --ilan-csv _work/METIN_78.csv 2>&1 | tee _yapi_v2.log
+      - name: Ciktilari yukle
+        if: always()
+        run: |
+          rclone copy out/ gdrive:ASTROLOVE/TEMP/YAPI_V2/ -q || true
+          [ -f _yapi_v2.log ] && tail -80 _yapi_v2.log > _failure.log && rclone copyto _failure.log "gdrive:ASTROLOVE/TEMP/YAPI_V2/run_${{ github.run_id }}.log" -q || true
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json || true
+      - if: always()
+        run: rm -rf _work ~/.config/rclone

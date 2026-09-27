@@ -11,7 +11,7 @@ SIGN3 = {"AQUARIUS": "AQU", "ARIES": "ARI", "TAURUS": "TAU", "GEMINI": "GEM", "C
 ED2 = {"MIDNIGHT_BLUE": "MB", "DEEP_BLACK": "DB", "WARM_PARCHMENT": "WP", "CHAMPAGNE_IVORY": "CI", "PURE_WHITE": "PW"}
 SIGN_OF = {v: k for k, v in SIGN3.items()}
 ED_OF = {v: k for k, v in ED2.items()}
-SKU_RE = re.compile(r"^POD-([A-Z]{3})_([A-Z]{3})-([A-Z]{2})-([0-9]+x[0-9]+|A[1234])$")  # A1: 20 Eyl 2026
+SKU_RE = re.compile(r"^POD-([A-Z]{3})_([A-Z]{3})-([A-Z]{2})-([0-9]+x[0-9]+|A[1234])(?:-F(BK|WH|NA))?$")
 MAX_LEN = 32
 # Dijital secenek (GOREV 0036): ayni ilanda Size = "Digital File", SKU POD-<S1>_<S2>-<ED2>-DIGITAL.
 # SKU_RE'ye UYMAZ (boy degil) -> parse_sku None; Prodigi'ye asla gitmez (order_router.dijital_mi ayrica yakalar).
@@ -42,3 +42,9 @@ def parse_sku(sku):
     if not m or m.group(1) not in SIGN_OF or m.group(2) not in SIGN_OF or m.group(3) not in ED_OF:
         return None
     return f"{SIGN_OF[m.group(1)]}_{SIGN_OF[m.group(2)]}", ED_OF[m.group(3)], m.group(4)
+
+
+def frame_code(sku):
+    """Cerceveli POD SKU'su icin BK/WH/NA, diger SKU'lar icin None."""
+    m = SKU_RE.match((sku or "").strip())
+    return m.group(5) if m else None

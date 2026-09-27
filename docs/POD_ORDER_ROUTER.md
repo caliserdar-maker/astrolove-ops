@@ -43,6 +43,15 @@ Etsy okumasi `--since-days 7` + en fazla `--max-pages 10` cagri, kota 400 altina
 
 ## Akis (her kosu, 30 dk)
 
+### Cerceveli + dijital (27 Eyl)
+
+- Cerceveli SKU son eki `-FBK`, `-FWH` veya `-FNA` olur.
+- Prodigi SKU ve cerceve attributes degerleri `data/pod/prodigi_cerceve_esleme.csv` dosyasindan okunur.
+- Bos/eksik esleme `CERCEVE_ESLEME_YOK` ile `manual` olur; siparis gonderilmez.
+- Cerceveli urun, cercevesiz urunle ayni baski assetini ve `fillPrintArea` sizing kullanir.
+- Teklif ve siparis kargosu varsayilan olarak `Standard`; `--shipping-method` ile degistirilebilir.
+- `-DIGITAL` kalemler Prodigi'ye hic gitmez; karma sepette yalniz fiziksel kalemler gonderilir.
+
 1. Etsy `getShopReceipts` (was_paid=true, was_shipped=false). SKU `POD-<burc3>_<burc3>-<ed2>-<SIZE>` (`scripts/etsy/pod_sku.py`, or. POD-ARI_LEO-MB-18x24) olan islemler.
 2. Yeni receipt:
    - ulke `US/CA/AU/GB` degilse `manual` (elle islenir; dokunulmaz).
