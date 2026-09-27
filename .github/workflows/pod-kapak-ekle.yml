@@ -13,7 +13,7 @@ on:
         required: true
         default: "4570143815"
       image:
-        description: "Repodaki kapak dosyasi"
+        description: "Repodaki kapak dosyasi ya da gdrive:ASTROLOVE/TEMP/POD_KAPAK_V3/<...>.jpg"
         required: true
         default: "data/pod/cl_referans/CL_kapak_onayli_3000x2250.jpg"
       alt_text:
@@ -80,6 +80,18 @@ jobs:
           set -euo pipefail
           umask 077; mkdir -p _work _out
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+      - name: Kapak dosyasi (repo yolu ya da Drive TEMP/POD_KAPAK_V3/)
+        run: |
+          set -euo pipefail
+          case "$IMG" in
+            gdrive:ASTROLOVE/TEMP/POD_KAPAK_V3/*.jpg)
+              case "$IMG" in *..*) echo "::error::yolda '..' olamaz"; exit 1 ;; esac
+              rclone copyto "$IMG" _work/kapak.jpg
+              echo "KAPAK_YOL=_work/kapak.jpg" >> "$GITHUB_ENV"
+              echo "Drive'dan: $IMG ($(stat -c %s _work/kapak.jpg) bayt, sha256 $(sha256sum _work/kapak.jpg | cut -c1-16))" ;;
+            gdrive:*) echo "::error::Drive kapagi yalniz ASTROLOVE/TEMP/POD_KAPAK_V3/ altindan (.jpg)"; exit 1 ;;
+            *) [ -f "$IMG" ] || { echo "::error::repoda yok: $IMG"; exit 1; } ;;
+          esac
       - name: Kapak ekle (kuru deneme / apply)
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
@@ -88,7 +100,7 @@ jobs:
           TOKEN_FILE: _work/ETSY_TOKEN.json
         run: |
           set -euo pipefail
-          args=(--listing-id "$LID" --image "$IMG" --alt "$ALT" --out _out)
+          args=(--listing-id "$LID" --image "${KAPAK_YOL:-$IMG}" --alt "$ALT" --out _out)
           if [ "$APPLY" = "true" ]; then args+=(--apply --confirm "$CONFIRM"); fi
           python scripts/etsy/pod_kapak_ekle.py "${args[@]}"
       - name: Token + cikti Drive'a

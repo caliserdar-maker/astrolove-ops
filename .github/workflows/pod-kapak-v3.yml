@@ -3,7 +3,7 @@ name: pod-kapak-v3
 # POD kapak v3 uretimi (Serdar onayi 27 Eyl 2026, ADIM 2): scripts/pod/kapak_v3.py.
 # Poster = siparis-baski-v1 dalindaki siparis_dosyasi.py (degistirilmeden) ciktisi; onayli CL
 # kapaginin cerceve acikligina yapistirilir. mod=ornek: yer olcumu + CL NCC kapisi (>=0.97) + 3 ornek.
-# mod=77: kalan 77 cift (yalniz ornek onayindan sonra).
+# mod=77: kalan 77 cift, 8 paralel parca + tek onizleme/ozet isi (Serdar 4 ornegi onayladi, 27 Eyl).
 # Kapsam: YALNIZ Drive (rclone). Etsy/Prodigi secret'i yok; Etsy'ye yazan adim yok. Tetik yalniz workflow_dispatch.
 # Cikti: Drive ASTROLOVE/TEMP/POD_KAPAK_V3/<ORNEK|77>/
 
@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
     inputs:
       mod:
-        description: "ornek (CL kapisi + 3 ornek) | 77 (yalniz onaydan sonra)"
+        description: "ornek (CL + 3 ornek) | 77 (8 parca + onizleme)"
         required: true
         default: "ornek"
 
@@ -24,6 +24,11 @@ jobs:
   uret:
     runs-on: ubuntu-latest
     timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        parca: ${{ fromJSON(inputs.mod == '77' && '[0,1,2,3,4,5,6,7]' || '[0]') }}
     steps:
       - uses: actions/checkout@v4
       - name: Checkout (siparis-baski-v1, hat kodu)
@@ -66,6 +71,38 @@ jobs:
         run: |
           set -euo pipefail
           case "$MOD" in ornek|77) : ;; *) echo "HATA: mod ornek|77" >&2; exit 1 ;; esac
-          python scripts/pod/kapak_v3.py --mod "$MOD" --sb "$PWD/_sb"
+          toplam=1; [ "$MOD" = "77" ] && toplam=8
+          python scripts/pod/kapak_v3.py --mod "$MOD" --sb "$PWD/_sb" --parca "${{ matrix.parca }}" --toplam "$toplam"
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
+
+  onizleme:
+    needs: uret
+    if: ${{ always() && inputs.mod == '77' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --quiet pillow opencv-python-headless numpy
+      - name: rclone
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: 77 onizleme + ozet kapisi
+        run: python scripts/pod/kapak_v3.py --mod onizleme77
       - if: ${{ always() }}
         run: rm -rf ~/.config/rclone

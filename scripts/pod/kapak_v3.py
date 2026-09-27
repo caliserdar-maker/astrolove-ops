@@ -16,7 +16,9 @@ Kapilar (PASS/FAIL):
 Onayli kapakla NCC yalniz bilgi olarak raporlanir (esik degil).
 --mod ornek: CANCER_LIBRA + ARIES_LEO, CAPRICORN_SAGITTARIUS, LEO_LEO -> TEMP/POD_KAPAK_V3/ORNEK/
              + yan yana (onayli | yeni CL) + onizleme.
---mod 77:    kalan 77 cift -> TEMP/POD_KAPAK_V3/77/ + tek sayfa onizleme (yalniz gorsel onaydan sonra).
+--mod 77:    kalan 77 cift -> TEMP/POD_KAPAK_V3/77/ (Serdar 4 ornegi onayladi, 27 Eyl). --parca i --toplam n ile
+             n paralel isin i'ncisi (cift listesi [i::n]); her parca OLCUM_p<i>.json yazar.
+--mod onizleme77: Drive 77/'yi okur; 77 dosya 3000x2250 + tum parcalar PASS kapisi, ONIZLEME.jpg + OZET_77.json.
 Hat ciktisi Drive'da (TEMP/POD_KAPAK_V3/SIPARIS/<cift>_MIDNIGHT_BLUE_11x14/) varsa yeniden uretilmez.
 """
 import argparse, base64, csv, json, subprocess, sys, time
@@ -152,11 +154,42 @@ def onizleme(yollar, yol, sut=4, w=600):
     t.save(yol, quality=88)
 
 
+def onizleme77():
+    cik = W / '77'; cik.mkdir(exist_ok=True)
+    rc('copy', f'{HEDEF}/77', str(cik), '--include', '*.jpg', '--include', 'OLCUM_p*.json', '--transfers', '16')
+    with open(LISTE, newline='') as f:
+        ciftler = [r['cift'] for r in csv.DictReader(f) if r['cift'] != REF]
+    parcalar = [json.loads(p.read_text()) for p in sorted(cik.glob('OLCUM_p*.json'))]
+    kayit = {x['cift']: x for P in parcalar for x in P.get('ciftler', [])}
+    eksik = [c for c in ciftler if not (cik / f'{c}.jpg').exists()]
+    boyut = [c for c in ciftler if c not in eksik and list(Image.open(cik / f'{c}.jpg').size) != [3000, 2250]]
+    kapi = [c for c in ciftler if not kayit.get(c, {}).get('gecti')]
+    Z = {'toplam': len(ciftler), 'dosya': len(ciftler) - len(eksik), 'eksik': eksik, 'boyut_hata': boyut,
+         'kapi_fail': kapi, 'parca': len(parcalar),
+         'ncc_dosya_min': min((kayit[c]['ncc_dosya'] for c in kayit if 'ncc_dosya' in kayit[c]), default=None),
+         'serit_en_buyuk': max((kayit[c]['serit']['en_buyuk_bilesen'] for c in kayit if 'serit' in kayit[c]), default=None)}
+    Z['gecti'] = not (eksik or boyut or kapi)
+    var = [cik / f'{c}.jpg' for c in ciftler if c not in eksik]
+    if var:
+        onizleme(var, cik / 'ONIZLEME.jpg', sut=11, w=300)
+    (cik / 'OZET_77.json').write_text(json.dumps(Z, ensure_ascii=False, indent=1))
+    for f in ('ONIZLEME.jpg', 'OZET_77.json'):
+        if (cik / f).exists(): rc('copyto', str(cik / f), f'{HEDEF}/77/{f}')
+    log('OZET_77', {k: (v if not isinstance(v, list) else len(v)) for k, v in Z.items()})
+    if not Z['gecti']:
+        raise SystemExit(f'FAIL: eksik {eksik[:5]} boyut {boyut[:5]} kapi {kapi[:5]}')
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--mod', default='ornek', choices=('ornek', '77'))
-    ap.add_argument('--sb', required=True, help='siparis-baski-v1 checkout dizini')
+    ap.add_argument('--mod', default='ornek', choices=('ornek', '77', 'onizleme77'))
+    ap.add_argument('--sb', default='', help='siparis-baski-v1 checkout dizini (ornek/77)')
+    ap.add_argument('--parca', type=int, default=0); ap.add_argument('--toplam', type=int, default=1)
     a = ap.parse_args()
+    if a.mod == 'onizleme77':
+        return onizleme77()
+    if not a.sb:
+        raise SystemExit('HATA: --sb gerekir')
     S = np.asarray(Image.open(SABLON).convert('RGB'))
     assert S.shape[:2] == (2250, 3000), S.shape
     X0, Y0, X1, Y1 = ACIKLIK
@@ -172,6 +205,9 @@ def main():
         with open(LISTE, newline='') as f:
             ciftler = [r['cift'] for r in csv.DictReader(f) if r['cift'] != REF]
         assert len(ciftler) == 77, len(ciftler)
+        ciftler = ciftler[a.parca::a.toplam]
+        log(f'parca {a.parca}/{a.toplam}: {len(ciftler)} cift')
+    olcum = cik / ('OLCUM.json' if a.mod == 'ornek' else f'OLCUM_p{a.parca}.json')
 
     R['ciftler'] = []; yollar = []
     for i, c in enumerate(ciftler):
@@ -183,7 +219,7 @@ def main():
         except BaseException as e:                               # noqa: BLE001
             r = {'cift': c, 'gecti': False, 'hata': f'{type(e).__name__}: {e}'[:300]}
         R['ciftler'].append(r); log(c, r)
-        (cik / 'OLCUM.json').write_text(json.dumps(R, ensure_ascii=False, indent=1))
+        olcum.write_text(json.dumps(R, ensure_ascii=False, indent=1))
         if not r['gecti']:
             log(f'FAIL {c}: DUR (ilk hatada dur)')
             break
@@ -191,9 +227,9 @@ def main():
     eta(len(R['ciftler']), len(ciftler), 'bitti')
     if a.mod == 'ornek' and (cik / f'{REF}.jpg').exists():
         yan_yana(SABLON, cik / f'{REF}.jpg', cik / 'YAN_YANA_onayli_vs_yeni_CL.jpg')
-    if yollar:
+    if yollar and a.mod == 'ornek':
         onizleme(yollar, cik / 'ONIZLEME.jpg')
-    rc('copy', str(cik), f'{HEDEF}/{cik.name}')
+    rc('copy', str(cik), f'{HEDEF}/{cik.name}', '--exclude', '*.png')
     kotu = [x['cift'] for x in R['ciftler'] if not x['gecti']]
     eksik = len(ciftler) - len(R['ciftler'])
     log('Cikti', f'TEMP/POD_KAPAK_V3/{cik.name}/', f'PASS {len(yollar)}/{len(ciftler)}',
