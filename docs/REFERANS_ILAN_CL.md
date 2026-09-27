@@ -15,6 +15,12 @@ Amaç: CL eksiksiz bitince aynı yöntem ve kodla kalan 77 POD ilanına geçmek.
 | Görseller | Kapak, video, kart DNA'sı kalır; yalnız dijital/çerçeve geçiş kartları (ChatGPT üretir, Claude denetler) |
 | Hediye vurgusu | Tüm kart ve metinlerde |
 | Metin kuralı | Uzun/orta tire yok; yasak: OBA-free, bright white, ömür yılı, 12-colour, instant download; çerçevelide Hahnemühle/cotton yok |
+| Başlık | `{A} and {B} Personalized Zodiac Couple Wall Art` (CL: Cancer and Libra ...) |
+| Açıklama | `data/pod/aciklama_v3_sablon.txt` + `data/pod/burc_tarih.csv` ({A},{B},{A_TARIH},{B_TARIH}); Prodigi adı yazılmaz; ABOUT US yok; COLORS/SIZES yalnız görsele yönlendirir |
+| Önizleme | Her baskı/çerçeveli siparişte: sipariş + en geç 24 saat içinde Etsy Messages ile önizleme (gönderen Serdar); onay gelince hemen baskı; önizlemeden 24 saat sonra cevap yoksa olduğu gibi baskı. Dijitalde ayrı önizleme yok (dosya 24 saatte gider, hata ücretsiz düzeltilir) |
+| Süre (Prodigi kaynaklı + pay) | Üretim ABD baskı 24-72 sa, çerçeveli ≤96 sa → "5 iş günü içinde"; ABD Standard 4-6 iş günü → "5-8 iş günü"; takip: ABD içi ve tüm çerçeveliler. Etsy hazırlık süresi önerisi 4-7 iş günü (Etsy yazımı, onay bekliyor) |
+| Paketleme (Prodigi) | Baskı: ipek kâğıt + kalın karton tüp (Avrupa'ya A4 ve altı sert zarf); çerçeveli: köşe koruma + ön karton + ağır hizmet kutusu |
+| Çözünürlük | Dijital 5 oran 300 dpi: 16x20, 18x24, 24x36, 11x14, A2 (üretim kodu); yayından önce gerçek PDF'te ölçülecek |
 
 ## Fiyat tablosu (USD)
 | Boy | Print | Frame (4 renk) |
