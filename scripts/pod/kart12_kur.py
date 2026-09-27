@@ -2,12 +2,12 @@
 """CL kart 12 (A gift for your story.) 3000x2250 kurulum.
 Taban: ChatGPT hediye sahnesi (1448x1086; Serdar 'guzel, cerceve degismis'). Sahne 2.01x buyutulur.
 Sahnedeki yapay cerceve+poster yerine (on cephe, dikdortgen; dis (443,226)-(893,788), ic (466,248)-(869,762)):
-  - cerceve: Prodigi Antique Gold Classic chevron fotografinin gercek profil seridi, 45 derece gonye (kart 07 yontemi)
+  - cerceve: Prodigi Classic Antique Gold bos cerceve fotografi (059, on cephe) 9 parca (Serdar: chevron seridi Prodigi gibi gorunmedi)
   - poster: gercek CL baski dosyasi BASKI_11x14 (EMILY/JAMES), rebate 5 mm kirpilir
   - sahne isigina uyum: soldan saga %3 -> %-7 parlaklik egimi, hafif sicak ton (yalniz cerceveli nesneye)
 Yazilar DNA (Garamond + Montserrat, canli 03 olculeri); ust etiket canli 03'ten, alt cizgi+satir kart 03 v2'den.
 QC: boyut, poster NCC >= 0.99, cerceve yuzu 4 kenarda esit, zemin, tire yok.
-Kullanim: kart12_kur.py CHATGPT_12.png BASKI_11x14.jpg AG_CHEVRON.jpg CANLI_03.jpg KART03_V2.jpg GARAMOND.ttf MONTSERRAT.ttf CIKIS.jpg
+Kullanim: kart12_kur.py CHATGPT_12.png BASKI_11x14.jpg AG_BLANK_059.jpg CANLI_03.jpg KART03_V2.jpg GARAMOND.ttf MONTSERRAT.ttf CIKIS.jpg
 """
 import re
 import sys
@@ -55,6 +55,26 @@ def cerceve(s, poster, F):
             a[y, x] *= 0.86
     return Image.fromarray(np.clip(a, 0, 255).astype(np.uint8))
 
+def cerceve_blank(yol, poster, F):
+    """Prodigi'nin on cepheden cekilmis Classic Antique Gold bos cerceve fotografi (059, 2000x2000) 9 parcaya
+    bolunur: koseler olduklari gibi, kenarlar boyuna uzatilir, hepsi hedef yuze (F) olceklenir. Yeniden cizim yok.
+    Olculen: dis (455,282)-(1543,1672), yuz 46-49 px; kirpim 46 px (ic beyaz alan girmesin)."""
+    src = Image.open(yol).convert('RGB'); X0, Y0, X1, Y1, f = 455, 282, 1544, 1673, 46
+    PW, PH = poster.size; OW, OH = PW + 2 * F, PH + 2 * F
+    fr = Image.new('RGB', (OW, OH))
+    pa = np.asarray(poster).astype(np.float32); yy = np.arange(PH)[:, None]; xx = np.arange(PW)[None, :]
+    g = 1 - 0.22 * np.exp(-yy / 10.0) - 0.16 * np.exp(-xx / 10.0) - 0.06 * np.exp(-(PH - 1 - yy) / 5.0) - 0.06 * np.exp(-(PW - 1 - xx) / 5.0)
+    fr.paste(Image.fromarray(np.clip(pa * g[..., None], 0, 255).astype(np.uint8)), (F, F))
+    r = lambda b, w, h: src.crop(b).resize((w, h), Image.LANCZOS)
+    fr.paste(r((X0 + f, Y0, X1 - f, Y0 + f), OW - 2 * F, F), (F, 0))
+    fr.paste(r((X0 + f, Y1 - f, X1 - f, Y1), OW - 2 * F, F), (F, OH - F))
+    fr.paste(r((X0, Y0 + f, X0 + f, Y1 - f), F, OH - 2 * F), (0, F))
+    fr.paste(r((X1 - f, Y0 + f, X1, Y1 - f), F, OH - 2 * F), (OW - F, F))
+    fr.paste(r((X0, Y0, X0 + f, Y0 + f), F, F), (0, 0)); fr.paste(r((X1 - f, Y0, X1, Y0 + f), F, F), (OW - F, 0))
+    fr.paste(r((X0, Y1 - f, X0 + f, Y1), F, F), (0, OH - F)); fr.paste(r((X1 - f, Y1 - f, X1, Y1), F, F), (OW - F, OH - F))
+    return fr
+
+
 def font(yol, boy, w):
     f = ImageFont.truetype(yol, boy); f.set_variation_by_axes([w]); return f
 
@@ -77,9 +97,9 @@ F = round(((DX1 - DX0) - (IX1 - IX0)) / 2)
 B = Image.open(BASKI).convert('RGB')
 kx, ky = round(B.width * 5 / 279.4), round(B.height * 5 / 355.6)
 poster = B.crop((kx, ky, B.width - kx, B.height - ky)).resize((DX1 - DX0 - 2 * F, DY1 - DY0 - 2 * F), Image.LANCZOS)
-fr = cerceve(serit(AGCH), poster, F)
+fr = cerceve_blank(AGCH, poster, F)
 fa = np.asarray(fr).astype(np.float32); x = np.linspace(0, 1, fr.width)[None, :, None]
-fa = fa * (1.03 - 0.10 * x) * np.array([1.0, 0.985, 0.95])[None, None, :]
+fa = fa * (1.02 - 0.05 * x)
 fr_isik = Image.fromarray(np.clip(fa, 0, 255).astype(np.uint8))
 sahne.paste(fr_isik, (DX0, DY0))
 mask = Image.new('L', sahne.size, 0); ImageDraw.Draw(mask).rounded_rectangle((0, 0, sahne.width - 1, sahne.height - 1), radius=30, fill=255)
