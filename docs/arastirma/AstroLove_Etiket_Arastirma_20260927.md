@@ -80,3 +80,11 @@ Occasion (Anniversary / Engagement / Wedding / Valentine's), Holiday (Valentine'
 - Mevcut etiket yapisi: 8 ortak etiket 78 ilanin hepsinde (personalized couple, custom couple print, zodiac couple print, couple names print, zodiac couple gift, astrology wall art, anniversary gift, star sign print) + 5 cifte ozel (cift adi + tek burc etiketleri). Ortak etiketler her ilanda ayni oldugu icin etkileri birbirinden ayrilamaz.
 - Etiket basina istatistik Etsy'de yoktur; API'de reklam/arama terimi ucu yoktur (OAS taramasi). Arama terimi ve reklam kelimesi yalniz Shop Manager'da.
 - Sonuc: canli veri onayli etiket listesini curutmuyor; tek burc etiketlerinin (reklamda gosterim, 0 siparis) cikarilmasini ve cift adi etiketinin korunmasini destekliyor. Istatistiksel etiket karsilastirmasi icin veri yetersiz; yayindan 2-4 hafta sonra olculecek.
+
+## 10. Guncel panel verisi (Serdar ekran goruntuleri, 1-27 Eyl 2026)
+- Shop Stats: 267 ziyaret, 4 siparis, donusum %1.5, 107.96 $.
+- Trafik kaynagi: Etsy marketing & SEO 104, Etsy app & pages 46, Etsy Ads 45, direct/referral 42, Etsy Search 12, social 8. Etsy aramasi ziyaretlerin yaklasik %4.5'i.
+- Etsy Ads (10-27 Eyl): 6.812 gosterim, 99 tiklama (%1.45), 3 siparis, 76.97 $ gelir, 31.44 $ harcama, ROAS 2.45. Tiklamalar 22 Eyl 14 -> 23 Eyl 1 -> 24 Eyl 0 (gosterim ayni seviyede).
+- Siparisler: 10 Eyl Aries-Scorpio dijital DB 5.99 $ (kupon, reklam); 17 Eyl Scorpio-Taurus POD MB 8x10 (organik); 20 Eyl Aquarius-Libra POD MB 8x10 29.99 $ (reklam); 20 Eyl Aquarius-Scorpio POD MB 12x16 (reklam, 40.99 $).
+- Reklam anahtar kelimeleri (8 ilan, 1.291 gosterim, 31 tiklama): Etsy'nin gosterdigi kelimelerin hepsi tek burc aramasi (libra, taurus, scorpio, aquarius, leo; "libra gifts" 20/1, "cancer zodiac" 5/1). Gorunen kelimeler 206 gosterim, 2 tiklama, 0 siparis. Siparis getiren tiklamalar gorunen kelimelerde yok. Cift adi ya da "couple" iceren kelime tabloda yok (esik alti).
+- Sonuc: tek burc etiketlerinin cikarilmasi destekleniyor; onayli etiket listesi degismiyor.
