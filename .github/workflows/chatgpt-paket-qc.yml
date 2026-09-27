@@ -1,0 +1,61 @@
+name: chatgpt-paket-qc
+
+# Serdar 27 Eyl 2026: ChatGPT'nin CL referans paketi (Drive TEMP/CHATGPT_CL/*.zip) icin tek kalite kapisi.
+# Etsy/Prodigi cagrisi YOK. Referans = gercek baski dosyalari (SIPARIS_ISIM/CANCER_LIBRA_None_DIJITAL/*/ *4x5*).
+# Cikti: Drive TEMP/CHATGPT_CL/QC_RAPOR.md + QC_TEMAS.jpg
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      zip:
+        description: "Drive TEMP/CHATGPT_CL altindaki zip adi (bos = en yeni)"
+        default: ""
+
+jobs:
+  qc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q opencv-python-headless==4.10.0.84 numpy==2.1.3
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: QC
+        env:
+          ZIP: ${{ inputs.zip }}
+        run: |
+          set -euo pipefail
+          mkdir -p _w/ref out
+          D="gdrive:ASTROLOVE/TEMP/CHATGPT_CL"
+          if [ -z "$ZIP" ]; then ZIP=$(rclone lsjson "$D" --files-only --include "*.zip" | python3 -c "import json,sys;d=json.load(sys.stdin);d.sort(key=lambda x:x['ModTime']);print(d[-1]['Name'] if d else '')"); fi
+          [ -n "$ZIP" ] || { echo "HATA: zip yok"; exit 1; }
+          echo "paket: $ZIP"
+          rclone copyto "$D/$ZIP" _w/paket.zip
+          rclone copy "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/CANCER_LIBRA_None_DIJITAL" _w/ref --include "*4x5*.jpg" -q
+          ls -R _w/ref | head -20
+          rc=0; python scripts/pod/chatgpt_paket_qc.py _w/paket.zip _w/ref --out out || rc=$?
+          cat out/QC_RAPOR.md >> "$GITHUB_STEP_SUMMARY"
+          rclone copyto out/QC_RAPOR.md "$D/QC_RAPOR.md" -q
+          [ -f out/QC_TEMAS.jpg ] && rclone copyto out/QC_TEMAS.jpg "$D/QC_TEMAS.jpg" -q || true
+          exit $rc
+      - if: always()
+        run: rm -rf _w ~/.config/rclone
