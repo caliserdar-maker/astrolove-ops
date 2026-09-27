@@ -1,0 +1,92 @@
+name: sembol-kart03
+
+# GOREV 0028 - SALT OKUMA (Etsy'ye yazma YOK; yalniz API anahtari, 1 batch cagrisi).
+# teshis: ornek dosyalari (CL canli/TAM_SET kart 03, 26 Eyl YANYANA, klasor listeleri) teshis-0028 dalina koyar.
+# kos: sembol butunluk kapisi -> 78 canli kart 03 + A1_77/*/TAM_SET/03_* ; cikti Drive TEMP/DIJITAL_78/SEMBOL_KART03.csv
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+    inputs:
+      mod:
+        description: "teshis | kos"
+        default: "teshis"
+
+concurrency:
+  group: sembol-kart03
+  cancel-in-progress: false
+
+jobs:
+  is:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q numpy==2.1.3 pillow==11.0.0 scipy==1.14.1 requests==2.34.2 opencv-python-headless==4.10.0.84
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Veri indir
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+        run: |
+          set -euo pipefail
+          echo "::add-mask::$ETSY_API_KEY"
+          A="gdrive:ASTROLOVE/TEMP/POD_KISISEL/A1_77"
+          mkdir -p v/liste
+          rclone copyto "gdrive:ASTROLOVE/TEMP/YAYILIM_78/METIN_78.csv" v/METIN_78.csv
+          rclone copy "$A" v/a77 --include "*/TAM_SET/03_*" --include "*/TAM_SET/SET.json" --include "*/TAM_SET/SEMBOL_*" \
+            --include "**/YANYANA_03*" --transfers 16 --checkers 16 -q
+          rclone lsl "$A/CANCER_LIBRA" > v/liste/CANCER_LIBRA.txt || true
+          rclone lsl "$A/ARIES_LEO" > v/liste/ARIES_LEO.txt || true
+          rclone lsf "$A" --dirs-only > v/liste/A1_77_dirs.txt || true
+          rclone lsl "gdrive:ASTROLOVE/TEMP/POD_KISISEL/A1_77/_galeri" > v/liste/_galeri.txt || true
+          python scripts/etsy/sembol_kart03.py canli v/METIN_78.csv v/canli
+          echo "03: $(ls v/a77/*/TAM_SET/03_* 2>/dev/null | wc -l)  YANYANA: $(find v/a77 -name 'YANYANA_03*' | wc -l)  canli: $(ls v/canli | wc -l)"
+      - name: Teshis dalina koy
+        if: inputs.mod == 'teshis'
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/t && cd /tmp/t && git init -q && git checkout -q -b teshis-0028
+          mkdir -p a77 canli liste
+          cp -r "$GITHUB_WORKSPACE/v/liste/." liste/
+          cp "$GITHUB_WORKSPACE/v/canli/"*.json canli/ 2>/dev/null || true
+          for c in CANCER_LIBRA ARIES_LEO AQUARIUS_CANCER GEMINI_VIRGO; do
+            [ -d "$GITHUB_WORKSPACE/v/a77/$c" ] && cp -r "$GITHUB_WORKSPACE/v/a77/$c" a77/ || true
+          done
+          find "$GITHUB_WORKSPACE/v/a77" -name 'YANYANA_03*' | while read -r f; do
+            c=$(echo "$f" | sed "s#$GITHUB_WORKSPACE/v/a77/##; s#/.*##"); cp "$f" "a77/YANYANA_${c}.jpg"; done
+          ls "$GITHUB_WORKSPACE/v/canli/" | head -8 | while read -r f; do cp "$GITHUB_WORKSPACE/v/canli/$f" canli/; done
+          cp "$GITHUB_WORKSPACE/v/canli/"*4570143815* canli/ 2>/dev/null || true
+          git add -A && git -c user.name=teshis -c user.email=teshis@users.noreply.github.com commit -qm "teshis 0028 (gecici)"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" teshis-0028
+          du -sh .
+      - name: Kapi (kos)
+        if: inputs.mod == 'kos'
+        run: |
+          set -euo pipefail
+          python scripts/etsy/sembol_kart03.py kapi v/METIN_78.csv v/canli v/a77 out
+          rclone copyto out/SEMBOL_KART03.csv "gdrive:ASTROLOVE/TEMP/DIJITAL_78/SEMBOL_KART03.csv" -q
+          [ -d out/kirpim ] && rclone copy out/kirpim "gdrive:ASTROLOVE/TEMP/DIJITAL_78/SEMBOL_KART03_KIRPIM" -q || true
+          [ -d out/duzeltme ] && rclone copy out/duzeltme "gdrive:ASTROLOVE/TEMP/DIJITAL_78/KART03_DUZELTME" -q || true
+          tail -3 out/SEMBOL_KART03.csv
+      - if: always()
+        run: rm -rf v ~/.config/rclone
