@@ -50,7 +50,9 @@ jobs:
           [ -n "$ZIP" ] || { echo "HATA: zip yok"; exit 1; }
           echo "paket: $ZIP"
           rclone copyto "$D/$ZIP" _w/paket.zip
-          rclone copy "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/CANCER_LIBRA_None_DIJITAL" _w/ref --include "*4x5*.jpg" -q
+          # Referans = canli galerideki EMILY & JAMES poster gorselleri (01 kapak MB + 10-13 diger renkler) + duz baski dosyalari
+          rclone copy "gdrive:ASTROLOVE/TEMP/CANLI_GORSEL/4570143815" _w/ref --include "01_*.jpg" --include "1[0-3]_*.jpg" -q
+          rclone copy "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/CANCER_LIBRA_None_DIJITAL" _w/ref/duz --include "*4x5*.jpg" -q
           ls -R _w/ref | head -20
           rc=0; python scripts/pod/chatgpt_paket_qc.py _w/paket.zip _w/ref --out out || rc=$?
           cat out/QC_RAPOR.md >> "$GITHUB_STEP_SUMMARY"

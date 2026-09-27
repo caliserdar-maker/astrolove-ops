@@ -5,7 +5,7 @@ Kullanim: chatgpt_paket_qc.py <paket.zip|klasor> <referans_klasoru> [--out out]
   paket    : /images/*.jpg, MANIFEST.csv (sira,dosya,tur,alt_metin), TEXTS.md, CHECKLIST.md
   referans : gercek baski dosyalari (renk basina 4x5 JPEG; ad icinde renk adi)
 Kapilar:
-  G1 gorsel: JPEG, 2000x2500, RGB; galeri <= 20 (MANIFEST satiri)
+  G1 gorsel: JPEG; yeni/guncel kart 3000x2250 (canli kart DNA, yatay 4:3); galeri <= 20 (MANIFEST satiri)
   G2 tasarim birebir: yeni/guncel gorselde referans tasarim aranir (cok olcekli NCC, gri, 500 px).
      NCC >= 0.90 -> birebir (PASS); 0.55-0.90 -> tasarim var ama birebir degil (FAIL, yeniden cizim suphesi);
      < 0.55 -> tasarim yok (BILGI). Esikler: yapistirilan tasarim olcekte ~0.97+, AI yeniden cizim 0.6-0.85 bandi.
@@ -95,7 +95,11 @@ def main():
 
     man = list(csv.DictReader(open(kok / "MANIFEST.csv", encoding="utf-8-sig")))
     kayit("G1 galeri <= 20", len(man) <= 20, f"{len(man)} satir")
-    refs = {p.stem: (gri(p, 300), gri(p, 1000)) for p in sorted(refdir.rglob("*.jpg"))}
+    def merkez(a):
+        # Referansin ORTA bolgesi (birlesik sembol + isimler): duz baski ya da poster gorseli fark etmez.
+        h, w = a.shape
+        return a[int(h * 0.22):int(h * 0.78), int(w * 0.18):int(w * 0.82)]
+    refs = {p.stem: (merkez(gri(p, 300)), merkez(gri(p, 1000))) for p in sorted(refdir.rglob("*.jpg"))}
     kucukler = []
     for r in man:
         f = kok / "images" / Path(r["dosya"]).name
@@ -104,7 +108,10 @@ def main():
         if not f.exists():
             kayit(f"G1 {r['dosya']}", False, "dosya yok"); continue
         im = cv2.imread(str(f))
-        ok = im is not None and im.shape[1] == 2000 and im.shape[0] == 2500 and f.suffix.lower() in (".jpg", ".jpeg")
+        # 27 Eyl: canli kart DNA'si yatay 4:3 = 3000x2250 (yeni/guncel kart); mevcut gorseller oldugu gibi kalir.
+        tur_on = (r.get("tur") or "").strip().lower()
+        boyut_ok = im is not None and ((im.shape[1], im.shape[0]) == (3000, 2250) if tur_on in ("yeni", "guncel") else True)
+        ok = im is not None and boyut_ok and f.suffix.lower() in (".jpg", ".jpeg")
         kayit(f"G1 {f.name}", ok, f"{None if im is None else (im.shape[1], im.shape[0])}")
         tur = (r.get("tur") or "").strip().lower()
         if tur in ("yeni", "guncel") and refs and im is not None:
