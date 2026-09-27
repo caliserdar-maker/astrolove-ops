@@ -1,0 +1,63 @@
+name: katalog-0040
+
+# GOREV 0040 - Prodigi katalog taramasi (SALT OKUMA: GET /products + POST /quotes; siparis YOK, Etsy YOK).
+# 1) katalog_tarama.py: kagit + cerceve onekleri, 16 boy, US teklif (Standard karar), FIYAT_TASLAK
+# 2) katalog_varlik.py: prodigi.com urun sayfasi gorsel/foy (erisilebilirse)
+# Cikti: Drive TEMP/PRODIGI/KATALOG/
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      varlik_azami:
+        description: "prodigi.com sayfa sayisi siniri (0 = varlik adimini atla)"
+        default: "40"
+
+concurrency:
+  group: prodigi-quote
+  cancel-in-progress: false
+
+jobs:
+  katalog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Katalog + teklif + fiyat taslagi
+        run: python scripts/prodigi/katalog_tarama.py
+      - name: Site varliklari
+        if: always() && inputs.varlik_azami != '0'
+        run: python scripts/prodigi/katalog_varlik.py "${{ inputs.varlik_azami }}" || echo "varlik adimi hata verdi (rapora)"
+      - name: Drive'a yaz
+        if: always()
+        run: |
+          set -euo pipefail
+          H="gdrive:ASTROLOVE/TEMP/PRODIGI/KATALOG"
+          for f in KATALOG_URUN.csv KATALOG_TEKLIF_US.csv FIYAT_TASLAK.csv KATALOG_OZET.md; do
+            [ -f "out/$f" ] && rclone copyto "out/$f" "$H/$f" -q || true
+          done
+          [ -d out/KATALOG ] && rclone copy out/KATALOG "$H" -q || true
+          echo "Drive: TEMP/PRODIGI/KATALOG/"
+      - if: always()
+        run: rm -rf out ~/.config/rclone
