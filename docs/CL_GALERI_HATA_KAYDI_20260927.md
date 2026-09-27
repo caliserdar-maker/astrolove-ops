@@ -53,4 +53,4 @@ Doğru olanlar: 01 kapak (renk hariç), 03, 09, ölçü 3000x2250, yasak kelime/
 | 13 Oda | onaylı v4 (Serdar, 27 Eyl): çerçeve Prodigi AG boş çerçeve fotoğrafı (059) 9 parça, yüz 24x36 ölçeğinde (ince) | Seçenek 1 sahnesi; duvar yazısı, 'The Kinfolk Home' (gerçek marka), 'AT HOME', mum 'ASTROLOVE' silindi (scripts/pod/sahne_yazi_sil.py, OpenCV inpaint); gerçek AG çerçeve + gerçek poster; seçenek 2 reddedildi (paspartu, markalı mum/kitap, DNA dışı); scripts/pod/kart13_kur.py |
 | 14 Yatak odası | onaylı (Serdar, 27 Eyl) | 3 ChatGPT kartı reddedildi (başlık tekrarı, paspartu, Kinfolk, ASTROLOVE mum); yazısız sahne istendi; gerçek CI poster + Prodigi AG; başlık 'Made for the room you share.'; scripts/pod/kart14_kur.py |
 | 15 Siyah | onaylı v2 (Serdar, 27 Eyl) | v2: yazısız çalışma köşesi sahnesi (kart15_kur.py ... calisma); v1 oturma odası yedek; gerçek Deep Black + Prodigi Black profil; scripts/pod/kart15_kur.py |
-| 16 | tek tek üretiliyor | |
+| 16 Beyaz | a/b teslim (Claude) | Yazısız yemek odası sahnesi (2 seçenek); gerçek Pure White + Prodigi Natural profil; scripts/pod/kart16_kur.py |
