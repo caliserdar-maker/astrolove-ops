@@ -53,12 +53,26 @@ RENK_ADI = {"MIDNIGHT BLUE": "MIDNIGHT_BLUE", "DEEP BLACK": "DEEP_BLACK", "WARM 
 
 
 def renk_of(t):
-    """Siparis kalemi -> edisyon (MIDNIGHT_BLUE ...) | None. Yalniz 'color' adli varyasyon; bilinmeyen deger None."""
+    """Siparis kalemi -> edisyon (MIDNIGHT_BLUE ...) | None. Yalniz 'color' adli varyasyon; bilinmeyen deger None.
+    Menu D (27 Eyl): 'Format & Color' degeri '<format>, <renk>' -> renk virgulden sonrasi
+    ('Digital File, All 5 Colors' -> None; dijital Prodigi'ye gitmez)."""
     for v in (t or {}).get("variations") or []:
         ad = str(v.get("formatted_name") or v.get("property_name") or "").lower()
         if "color" in ad:
             deger = " ".join(str(v.get("formatted_value") or v.get("value") or "").upper().split())
+            if "&" in ad and "," in deger:
+                deger = deger.rpartition(",")[2].strip()
             return RENK_ADI.get(deger)
+    return None
+
+
+def format_of(t):
+    """Menu D: 'Format & Color' degerinin format kismi (buyuk harf) | None."""
+    for v in (t or {}).get("variations") or []:
+        ad = str(v.get("formatted_name") or v.get("property_name") or "").lower()
+        if "color" in ad and "&" in ad:
+            deger = " ".join(str(v.get("formatted_value") or v.get("value") or "").upper().split())
+            return deger.rpartition(",")[0].strip() or None
     return None
 
 
@@ -83,6 +97,9 @@ def parse_tx(t):
         return None
     ed = renk_of(t)
     if not ed:
+        return None
+    fmt = format_of(t)                     # menu D: format ile SKU cercevesi celisirse fail-closed
+    if fmt is not None and (("FRAME" in fmt) != bool(m.group(4)) or fmt.startswith("DIGITAL")):
         return None
     pair = f"{SIGN_OF[m.group(1)]}_{SIGN_OF[m.group(2)]}"
     kanon = make_sku(pair, ed, m.group(3)) + (f"-F{m.group(4)}" if m.group(4) else "")

@@ -41,6 +41,23 @@ check("yeni SKU parse_sku ile cozulmez (eski kod yanlis renge gitmez)", parse_sk
 check("renk yok -> None", parse_tx(tx(3, "POD-CAN_LIB-8x10", None, "Print")) is None)
 check("dijital renk degeri -> None", parse_tx(tx(4, "POD-CAN_LIB-8x10", "All 5 colors, Digital", "Print")) is None)
 
+
+# 3b Menu D (27 Eyl): renk 'Format & Color' degerinden; format/SKU celisirse None
+def txd(tid, sku, deger):
+    return {"transaction_id": tid, "sku": sku, "quantity": 1, "price": {"amount": 4799, "divisor": 100},
+            "variations": [{"formatted_name": "Format & Color", "formatted_value": deger},
+                           {"formatted_name": "Size", "formatted_value": "8×10″ (20×25cm)"}]}
+
+
+check("D: Print, Warm Parchment -> WP", parse_tx(txd(40, "POD-CAN_LIB-8x10", "Print, Warm Parchment"))
+      == ("CANCER_LIBRA", "WARM_PARCHMENT", "8x10", None, "POD-CAN_LIB-WP-8x10"))
+check("D: Antique Gold Frame, Pure White -> PW + GO", parse_tx(txd(41, "POD-CAN_LIB-8x10-FGO", "Antique Gold Frame, Pure White"))
+      == ("CANCER_LIBRA", "PURE_WHITE", "8x10", "GO", "POD-CAN_LIB-PW-8x10-FGO"))
+check("D: dijital deger -> None", parse_tx(txd(42, "POD-CAN_LIB-8x10-DIGITAL", "Digital File, All 5 Colors")) is None)
+check("D: cerceve menude, SKU'da yok -> None", parse_tx(txd(43, "POD-CAN_LIB-8x10", "Black Frame, Deep Black")) is None)
+check("D: baski menude, SKU cerceveli -> None", parse_tx(txd(44, "POD-CAN_LIB-8x10-FBK", "Print, Deep Black")) is None)
+check("D: bilinmeyen renk -> None", parse_tx(txd(45, "POD-CAN_LIB-8x10", "Print, Rose Gold")) is None)
+
 rec = {"receipt_id": "sahte-9", "transactions": [
     tx("a", "POD-CAN_LIB-8x10", "Deep Black", "Print"),
     tx("b", "POD-CAN_LIB-8x10", "Pure White", "Print"),

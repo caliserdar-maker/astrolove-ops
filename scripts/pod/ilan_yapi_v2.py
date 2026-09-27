@@ -26,6 +26,10 @@ OUT = Path("out")
 COLORS = "primary color"
 FORMAT_ADI = "Digital File, Print or Framed?"
 DIJITAL_RENK = "All 5 colors, Digital"  # Serdar 27 Eyl: dijitalde renk secimi yok; OAS: degerlerde parantez yasak
+# Menu D (Serdar 27 Eyl): 2 menu; Menu 1 "Format & Color" (ozel property) 26 deger, Menu 2 Size.
+MENU1_ADI = "Format & Color"
+DIJITAL_D = "Digital File, All 5 Colors"
+RENK_SIRA = ["Midnight Blue", "Deep Black", "Pure White", "Champagne Ivory", "Warm Parchment"]
 PERSONALIZATION = ("is_personalizable", "personalization_is_required",
                    "personalization_char_count_max", "personalization_instructions")
 CSV_FIELDS = {"mod", "sira", "etiket", "format", "tur", "boy", "cerceve",
@@ -155,6 +159,61 @@ def build_plan_v3(inventory, rows):
     return result
 
 
+def menu1_degerleri(rows):
+    formatlar = list(dict.fromkeys(r["format"] for r in sorted(rows, key=lambda r: int(r["sira"]))))
+    return {f: ([DIJITAL_D] if f == "Digital File" else [f"{f}, {c}" for c in RENK_SIRA]) for f in formatlar}
+
+
+def fmt_renk(p):
+    """(format, renk): menu D'de 'Format & Color' degerinden, v3'te ayri menulerden. Dijital renk = DIJITAL_RENK."""
+    pv = next((x for x in p.get("property_values", []) if (x.get("property_name") or "").lower() == MENU1_ADI.lower()), None)
+    if pv:
+        v = (pv.get("values") or [""])[0]
+        if v == DIJITAL_D:
+            return "Digital File", DIJITAL_RENK
+        f, _, r = v.rpartition(", ")
+        return f, r
+    return value(p, "format"), value(p, COLORS)
+
+
+def build_plan_d(inventory, rows):
+    """Menu D: Format & Color (26) x Size (16) = 416 urun, hepsi acik. price/sku_on_property = [menu1, size].
+    SKU renksiz (mevcut sema); ayni format+boyun 5 rengi ayni SKU'yu tasir, renk menu 1 degerinden okunur."""
+    products = inventory.get("products") or []
+    if not products:
+        raise ValueError("canli envanter bos")
+    canli = {value(p, COLORS) for p in products} - {""}
+    if canli - set(RENK_SIRA) or len(canli) != 5:
+        raise ValueError(f"canli renkler beklenen 5 renk degil: {sorted(canli)}")
+    sample = next((p for p in products if parse_sku(p.get("sku"))), None)
+    if not sample:
+        raise ValueError("canli standart SKU bulunamadi")
+    pair = parse_sku(sample["sku"])[0]
+    size_prop = property_value(sample, "size")
+    if not size_prop:
+        raise ValueError("Size property bulunamadi")
+    m1_id = 514 if size_prop["property_id"] != 514 else 513
+    offering0 = sample["offerings"][0]
+    rows = sorted(rows, key=lambda r: int(r["sira"]))
+    planned = []
+    for fmt, degerler in menu1_degerleri(rows).items():
+        satirlar = [r for r in rows if r["format"] == fmt]
+        for deger in degerler:
+            for row in satirlar:
+                dijital = row["tur"] == "digital"
+                sku = (make_sku2(pair, row["boy"]) + "-DIGITAL") if dijital else make_sku2(pair, row["boy"], row["cerceve"] or None)
+                planned.append({"sku": sku,
+                                "property_values": [{"property_id": m1_id, "property_name": MENU1_ADI, "values": [deger]},
+                                                    copy_property(size_prop, row["etiket"] or row["boy"])],
+                                "offerings": [copy_offering(offering0, row["fiyat"], bool(row["aktif"]))]})
+    ids = [m1_id, size_prop["property_id"]]
+    result = {"products": planned, "price_on_property": ids, "sku_on_property": list(ids)}
+    for key in ("quantity_on_property", "readiness_state_on_property"):
+        kalan = [x for x in (inventory.get(key) or []) if x in ids]
+        result[key] = kalan
+    return result
+
+
 def build_plan(inventory, config):
     """Build solely from a freshly supplied live inventory snapshot."""
     products = inventory.get("products") or []
@@ -243,7 +302,7 @@ def build_plan(inventory, config):
 
 
 def signature(inventory):
-    return sorted((value(p, "format"), value(p, COLORS), value(p, "size"), p.get("sku") or "",
+    return sorted((*fmt_renk(p), value(p, "size"), p.get("sku") or "",
                    money(p["offerings"][0]["price"]), p["offerings"][0].get("quantity"),
                    bool(p["offerings"][0].get("is_enabled")),
                    p["offerings"][0].get("readiness_state_id"))
@@ -288,7 +347,7 @@ def referans_kontrol(plan, tablo, dijital_fiyat=9.99):
     hatalar = []
     for p in plan["products"]:
         sku, fiyat = p.get("sku") or "", money(p["offerings"][0]["price"])
-        fmt, renk = value(p, "format"), value(p, COLORS)
+        fmt, renk = fmt_renk(p)
         m = SKU3.match(sku)
         if not m:
             hatalar.append(f"SKU v3 degil: {sku}"); continue
@@ -308,13 +367,15 @@ def referans_kontrol(plan, tablo, dijital_fiyat=9.99):
 def ozet(inventory, plan, state):
     def ac(inv): return sum(1 for p in inv.get("products") or [] if p["offerings"][0].get("is_enabled"))
     menu = {}
-    for i, ad in ((1, "format"), (2, COLORS), (3, "size")):
-        menu[i] = list(dict.fromkeys(value(p, ad) for p in plan["products"]))
+    idler = list(dict.fromkeys(pv["property_id"] for p in plan["products"] for pv in p["property_values"]))
+    for i, pid in enumerate(idler, 1):
+        menu[i] = list(dict.fromkeys(pv["values"][0] for p in plan["products"] for pv in p["property_values"]
+                                     if pv["property_id"] == pid))
     ornek = {}
     for p in plan["products"]:
         m = SKU3.match(p.get("sku") or "")
         if m and m.group(1) in ("8x10", "16x20", "24x36") and p["offerings"][0]["is_enabled"]:
-            ornek.setdefault(f'{m.group(1)} | {value(p, "format")}', f'{money(p["offerings"][0]["price"])} {p["sku"]}')
+            ornek.setdefault(f'{m.group(1)} | {fmt_renk(p)[0]}', f'{money(p["offerings"][0]["price"])} {p["sku"]}')
     return {"state": state, "urun": [len(inventory.get("products") or []), len(plan["products"])],
             "acik": [ac(inventory), ac(plan)], "menu": menu, "ornek": dict(sorted(ornek.items()))}
 
@@ -327,6 +388,23 @@ def parantezsiz_oneri(plan):
     """Etsy parantezli degeri reddederse: yazmadan listelenecek oneri (Serdar karari bekler)."""
     return {v: re.sub(r"\s*\((.*?)\)", r" / \1", v).strip()
             for p in plan["products"] for pv in p["property_values"] for v in pv.get("values") or [] if "(" in v}
+
+
+def d_varyasyon_gorselleri(readback, before_map):
+    """Menu D: her '<format>, <renk>' degeri o rengin canli gorseline; dijital deger baglanmaz."""
+    istek, gorulen = [], set()
+    for p in readback.get("products") or []:
+        pv = next((x for x in p["property_values"] if (x.get("property_name") or "").lower() == MENU1_ADI.lower()), None)
+        if not pv or not pv.get("value_ids"):
+            continue
+        deger, vid = pv["values"][0], int(pv["value_ids"][0])
+        renk = fmt_renk(p)[1]
+        if renk in before_map and vid not in gorulen:
+            gorulen.add(vid)
+            istek.append({"property_id": pv["property_id"], "value_id": vid, "image_id": int(before_map[renk])})
+    if len(istek) != 25:
+        raise SystemExit(f"HATA: menu 1'de 25 renkli deger bekleniyordu, {len(istek)} bulundu. DUR.")
+    return istek
 
 
 def galeri(api, listing_id):
@@ -356,6 +434,7 @@ def parser():
     p.add_argument("--aciklama", action="store_true",
                    help="aciklama PATCH'ini ac (varsayilan KAPALI; v3 aciklama pod-seo-v3 ile yazilir)")
     p.add_argument("--referans", default="docs/REFERANS_ILAN_CL.md")
+    p.add_argument("--yapi", default="d", choices=("d", "v3"), help="d: 2 menu (Format & Color x Size); v3: 3 menu")
     return p
 
 
@@ -396,7 +475,7 @@ def main(argv=None, api=None):
         (OUT / f"Y2_{listing_id}_ONCE.json").write_text(json.dumps(backup, ensure_ascii=False, indent=2))
         if listing.get("state") != "active":
             print(f"{listing_id}: state={listing.get('state')} (active degil) -> dokunulmadi"); continue
-        plan = build_plan(inventory, config)
+        plan = build_plan_d(inventory, config) if args.yapi == "d" else build_plan(inventory, config)
         description = (replace_description(listing.get("description", ""), size_block, digital_block)
                        if args.aciklama else listing.get("description", ""))
         write_diff(OUT / f"Y2_{listing_id}_DIFF.csv", inventory, plan)
@@ -413,6 +492,8 @@ def main(argv=None, api=None):
         if args.command == "yaz":
             if api.remaining is not None and int(api.remaining) < args.kota_alt: raise SystemExit("HATA: kota kapisi")
             before_map = pilot.v_renk_haritasi(inventory, images)
+            if args.yapi == "d" and set(before_map) != set(RENK_SIRA):
+                raise SystemExit(f"HATA: canli renk->gorsel eslemesi 5 renk degil: {sorted(before_map)}; yazilmadi. DUR.")
             personal = {k: listing.get(k) for k in PERSONALIZATION}
             sabit = {"title": listing.get("title"), "tags": list(listing.get("tags") or []),
                      "state": listing.get("state")}
@@ -420,7 +501,7 @@ def main(argv=None, api=None):
                 sabit["description"] = normalize(listing.get("description"))
             galeri0, video0 = galeri(api, listing_id), videolar(api, listing_id)
             yol = f"/listings/{listing_id}/inventory"
-            if varyasyon_sayisi(plan) == 3:
+            if varyasyon_sayisi(plan) == 3:  # menu D'de 2 menu: parametre gerekmez
                 yol += "?max_variations_supported=3"   # OAS: varsayilan 2; 3 menu icin acikca istenir
             try:
                 api.put_json(yol, plan)
@@ -432,7 +513,16 @@ def main(argv=None, api=None):
             readback = api.get(f"/listings/{listing_id}/inventory") or {}
             if signature(readback) != signature(plan): raise SystemExit("HATA: envanter geri okuma farkli")
             images2 = (api.get(f"/shops/{shop}/listings/{listing_id}/variation-images", ok404=True) or {}).get("results", [])
-            if pilot.v_renk_haritasi(readback, images2) != before_map:
+            if args.yapi == "d":
+                istek = d_varyasyon_gorselleri(readback, before_map)
+                api.post_json(f"/shops/{shop}/listings/{listing_id}/variation-images", {"variation_images": istek})
+                images3 = (api.get(f"/shops/{shop}/listings/{listing_id}/variation-images", ok404=True) or {}).get("results", [])
+                var = {(int(r["value_id"]), int(r["image_id"])) for r in images3}
+                eksik = [x for x in istek if (int(x["value_id"]), int(x["image_id"])) not in var]
+                if eksik:
+                    raise SystemExit(f"HATA: menu 1 -> renk gorseli eslemesi eksik ({len(eksik)}/{len(istek)}). DUR.")
+                print(f"varyasyon gorselleri: {len(istek)} menu 1 degeri -> 5 renk gorseli (dijital baglanmadi)")
+            elif pilot.v_renk_haritasi(readback, images2) != before_map:
                 by_color = {value(p, COLORS): property_value(p, COLORS) for p in readback["products"]}
                 payload = [{"property_id": p["property_id"], "value_id": p["value_ids"][0], "image_id": int(image)}
                            for color, image in before_map.items() for p in [by_color[color]]]
