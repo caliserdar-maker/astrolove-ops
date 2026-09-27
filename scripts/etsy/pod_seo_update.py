@@ -41,6 +41,7 @@ from etsy_common import Etsy, TokenStore, log, mask  # noqa: E402
 import pod_desc_set as DS  # noqa: E402
 
 ALAN = ("title", "description", "tags")
+YAZ_ALAN = list(ALAN)  # --alanlar ile daraltilir (27 Eyl 2026: v3, once title+tags olabilir)
 # Yazmadan once/sonra AYNI kalmasi gereken alanlar (alan varsa karsilastirilir).
 # quantity, url ve zaman damgalari haric.
 KORUNAN = ["price", "state", "shop_section_id", "taxonomy_id", "shipping_profile_id",
@@ -140,11 +141,11 @@ def toplu_oku(api, ids):
 def fark_alanlari(L, rec):
     """Farkli olan alan adlari (title/description/tags)."""
     fark = []
-    if DS.esit(L.get("title") or "", rec["title"]) == "farkli":
+    if "title" in YAZ_ALAN and DS.esit(L.get("title") or "", rec["title"]) == "farkli":
         fark.append("title")
-    if DS.esit(L.get("description") or "", rec["description"]) == "farkli":
+    if "description" in YAZ_ALAN and DS.esit(L.get("description") or "", rec["description"]) == "farkli":
         fark.append("description")
-    if [html.unescape(t) for t in (L.get("tags") or [])] != rec["tags"]:
+    if "tags" in YAZ_ALAN and [html.unescape(t) for t in (L.get("tags") or [])] != rec["tags"]:
         fark.append("tags")
     return fark
 
@@ -167,8 +168,7 @@ def yaz_ve_dogrula(api, shop, lid, rec, once, out, ilk_ilan):
     if once.get("state") != "active":
         raise SystemExit(f"{lid}: state={once.get('state')} (active degil) - DUR")
     ilk_medya = medya_ozet(api, shop, lid) if ilk_ilan else None
-    govde = {"title": rec["title"], "description": rec["description"],
-             "tags": ",".join(rec["tags"])}
+    govde = {k: (",".join(rec["tags"]) if k == "tags" else rec[k]) for k in YAZ_ALAN}
     api.patch(f"/shops/{shop}/listings/{lid}", govde)
     sonra = None
     for deneme in range(3):
@@ -204,7 +204,13 @@ def main():
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--confirm", default="")
     ap.add_argument("--quota-min", type=int, default=60)
+    ap.add_argument("--alanlar", default="title,description,tags",
+                    help="yazilacak alanlar, virgulle (title,description,tags alt kumesi)")
     a = ap.parse_args()
+    global YAZ_ALAN
+    YAZ_ALAN = [x.strip() for x in a.alanlar.split(",") if x.strip()]
+    if not YAZ_ALAN or set(YAZ_ALAN) - set(ALAN):
+        raise SystemExit(f"HATA: --alanlar gecersiz: {a.alanlar}. DUR.")
     yaz = bool(a.apply)
     if yaz and a.confirm != "CANLI":
         raise SystemExit("HATA: --apply icin --confirm CANLI gerekli. DUR.")
@@ -216,7 +222,8 @@ def main():
     pod = pod_state_oku(a.pod_state)
     n = eslesme_dogrula(recs, pod)
     log(f"   {n} id ve cift adi POD_LISTINGS_STATE ile birebir eslesti")
-    (out / "pod_changes_v2.json").write_text(
+    log(f"   yazilacak alanlar: {', '.join(YAZ_ALAN)}")
+    (out / pathlib.Path(a.changes).name).write_text(
         pathlib.Path(a.changes).read_text(encoding="utf-8"), encoding="utf-8")
     if a.limit:
         recs = recs[:a.limit]
@@ -325,7 +332,8 @@ def main():
         for s in satirlar:
             w.writerow(s)
     alan_dagilim = {k: sum(1 for s in satirlar if k in (s["alanlar"] or "")) for k in ALAN}
-    md = [f"# POD SEO v2 - {'APPLY' if yaz else 'KURU DENEME (dry-run)'} ({simdi()} UTC)", "",
+    md = [f"# POD SEO - {'APPLY' if yaz else 'KURU DENEME (dry-run)'} ({simdi()} UTC)", "",
+          f"- Degisiklik dosyasi: `{pathlib.Path(a.changes).name}` | yazilacak alanlar: **{', '.join(YAZ_ALAN)}**",
           f"- OAuth: **{oauth}** | token scope'ta `listings_w`: **{'VAR' if listings_w else 'YOK'}**",
           f"- 78 id + cift adi POD_LISTINGS_STATE eslemesi: **OK** ({n} ilan)",
           f"- Okuma: batch {'calisti' if batch_ok else 'CALISMADI'}, tekli GET {len(eksik)} ilan",
