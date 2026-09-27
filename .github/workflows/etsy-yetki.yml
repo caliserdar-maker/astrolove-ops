@@ -1,15 +1,32 @@
 name: etsy-yetki
 
-# Etsy OAuth yeniden yetkilendirme (Serdar'in sifre degisikligi token'i iptal ettiginde).
-# Girdi YOK: PKCE verifier/state ve Serdar'in verdigi code Drive TEMP/ETSY_YETKI_PKCE.json'dan okunur.
-# Is: code -> access + refresh token; ETSY_TOKEN.json'a yazilir (eskisi yedeklenir);
-# getShop ile dogrulanir; PKCE dosyasi silinir. Sonuc TEMP/ETSY_KOTA.txt'ye yazilir. Hicbir sir loga yazilmaz.
+# Etsy OAuth yeniden yetkilendirme (Serdar tum yetkileri iptal ettiginde; anahtarlar ayni).
+# adim=link: PKCE verifier/state uretir, yetki URL'sini YALNIZ Drive'a yazar
+#   (TEMP/ETSY_YETKI_LINK.txt + TEMP/ETSY_YETKI_PKCE.json); redirect_uri ve scope
+#   ayni uygulamanin onceki link dosyasindan okunur. Loga yalniz dosya yollari yazilir.
+# adim=token: Serdar'in verdigi code (girdi) PKCE dosyasiyla birlestirilir, state karsilastirilir;
+#   code -> access + refresh token; ETSY_TOKEN.json'a yazilir (eskisi tarihli yedeklenir);
+#   getShop ile dogrulanir; PKCE dosyasi silinir. Sonuc TEMP/ETSY_KOTA.txt'ye yazilir. Hicbir sir loga yazilmaz.
 
 permissions:
   contents: read
 
 on:
   workflow_dispatch:
+    inputs:
+      adim:
+        description: "link = yetki linki uret (Etsy'ye yazma yok) | token = code'u token'a cevir"
+        type: choice
+        options: [link, token]
+        default: link
+      code:
+        description: "adim=token: Etsy'nin redirect URL'sindeki code degeri"
+        required: false
+        default: ""
+      state:
+        description: "adim=token: redirect URL'sindeki state degeri (dosyadakiyle karsilastirilir)"
+        required: false
+        default: ""
 
 concurrency:
   group: etsy-token
@@ -40,14 +57,52 @@ jobs:
           if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
             [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
           fi
+      - name: Yetki linki uret (adim=link)
+        if: ${{ inputs.adim == 'link' }}
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_YETKI_LINK.txt" _work/ESKI_LINK.txt
+          python - <<'PY2'
+          import base64, hashlib, json, os, secrets
+          from urllib.parse import parse_qs, urlencode, urlsplit
+          k = os.environ["ETSY_API_KEY"]
+          print(f"::add-mask::{k}", flush=True)
+          eski = open("_work/ESKI_LINK.txt", encoding="utf-8").read().strip().split()[-1]
+          q = parse_qs(urlsplit(eski).query)
+          redirect_uri, scope = q["redirect_uri"][0], q["scope"][0]
+          if not redirect_uri or not scope:
+              raise SystemExit("HATA: eski link dosyasindan redirect_uri/scope okunamadi. DUR.")
+          ver = base64.urlsafe_b64encode(secrets.token_bytes(48)).rstrip(b"=").decode()
+          chal = base64.urlsafe_b64encode(hashlib.sha256(ver.encode()).digest()).rstrip(b"=").decode()
+          state = base64.urlsafe_b64encode(secrets.token_bytes(12)).rstrip(b"=").decode()
+          for v in (ver, chal, state):
+              print(f"::add-mask::{v}", flush=True)
+          url = "https://www.etsy.com/oauth/connect?" + urlencode({
+              "response_type": "code", "redirect_uri": redirect_uri, "scope": scope,
+              "client_id": k, "state": state, "code_challenge": chal, "code_challenge_method": "S256"})
+          json.dump({"code_verifier": ver, "state": state, "redirect_uri": redirect_uri,
+                     "scope": scope, "code": ""}, open("_work/PKCE_YENI.json", "w"), indent=1)
+          open("_work/LINK_YENI.txt", "w").write(url + "\n")
+          print(f"link uretildi | scope parca sayisi {len(scope.split())} | redirect_uri ayni uygulamadan")
+          PY2
+          rclone copyto _work/PKCE_YENI.json "gdrive:ASTROLOVE/TEMP/ETSY_YETKI_PKCE.json" -q
+          rclone copyto _work/LINK_YENI.txt "gdrive:ASTROLOVE/TEMP/ETSY_YETKI_LINK.txt" -q
+          echo "Drive'a yazildi: TEMP/ETSY_YETKI_LINK.txt + TEMP/ETSY_YETKI_PKCE.json"
       - name: Dosyalari al
+        if: ${{ inputs.adim == 'token' }}
         run: |
           set -euo pipefail
           umask 077; mkdir -p _work
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_YETKI_PKCE.json" _work/PKCE.json
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
       - name: Code -> token, dogrula
+        if: ${{ inputs.adim == 'token' }}
         env:
+          CODE_IN: ${{ inputs.code }}
+          STATE_IN: ${{ inputs.state }}
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
@@ -61,10 +116,15 @@ jobs:
           k, s = os.environ["ETSY_API_KEY"], os.environ["ETSY_SHARED_SECRET"]
           mask(k); mask(s)
           p = json.load(open("_work/PKCE.json"))
+          ci, si = os.environ.get("CODE_IN", "").strip(), os.environ.get("STATE_IN", "").strip()
+          if ci:
+              p["code"] = ci
+          if si and si != p.get("state"):
+              raise SystemExit("HATA: state girdisi PKCE dosyasindakiyle uyusmuyor. DUR.")
           for f in ("code_verifier", "code", "state"):
               mask(p.get(f))
           if not p.get("code"):
-              raise SystemExit("HATA: PKCE dosyasinda code yok.")
+              raise SystemExit("HATA: code yok (girdi ya da PKCE dosyasi). DUR.")
           r = requests.post(TOKEN_URL, data={
               "grant_type": "authorization_code", "client_id": k,
               "redirect_uri": p["redirect_uri"], "code": p["code"], "code_verifier": p["code_verifier"],
@@ -93,16 +153,18 @@ jobs:
           print(satir); open("_kota.txt", "w").write(satir + "\n")
           PY
       - name: Geri yaz ve temizle
-        if: ${{ always() }}
+        if: ${{ always() && inputs.adim == 'token' }}
         run: |
           set -euo pipefail
           [ -f _kota.txt ] && rclone copyto _kota.txt "gdrive:ASTROLOVE/TEMP/ETSY_KOTA.txt" -q || true
           if [ -f _work/ETSY_TOKEN.json.updated ]; then
-            rclone copyto _work/ETSY_TOKEN_ONCEKI.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN_IPTAL_20260927.json" -q
+            rclone copyto _work/ETSY_TOKEN_ONCEKI.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN_ONCEKI_$(date -u +%Y%m%d_%H%M).json" -q
             rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" -q
             rclone deletefile "gdrive:ASTROLOVE/TEMP/ETSY_YETKI_PKCE.json" -q || true
             echo "Token yazildi, PKCE silindi"
           else
             echo "Token degismedi"
           fi
-          rm -rf _work ~/.config/rclone
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
