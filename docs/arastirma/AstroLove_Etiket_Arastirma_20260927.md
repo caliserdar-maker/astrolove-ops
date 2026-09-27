@@ -88,3 +88,9 @@ Occasion (Anniversary / Engagement / Wedding / Valentine's), Holiday (Valentine'
 - Siparisler: 10 Eyl Aries-Scorpio dijital DB 5.99 $ (kupon, reklam); 17 Eyl Scorpio-Taurus POD MB 8x10 (organik); 20 Eyl Aquarius-Libra POD MB 8x10 29.99 $ (reklam); 20 Eyl Aquarius-Scorpio POD MB 12x16 (reklam, 40.99 $).
 - Reklam anahtar kelimeleri (8 ilan, 1.291 gosterim, 31 tiklama): Etsy'nin gosterdigi kelimelerin hepsi tek burc aramasi (libra, taurus, scorpio, aquarius, leo; "libra gifts" 20/1, "cancer zodiac" 5/1). Gorunen kelimeler 206 gosterim, 2 tiklama, 0 siparis. Siparis getiren tiklamalar gorunen kelimelerde yok. Cift adi ya da "couple" iceren kelime tabloda yok (esik alti).
 - Sonuc: tek burc etiketlerinin cikarilmasi destekleniyor; onayli etiket listesi degismiyor.
+
+## 11. Organik Etsy arama terimleri (Stats > Etsy Search, 1-27 Eyl 2026, 12 ziyaret, her biri 1)
+Cift adi iceren (8/12): aquarius and libra art; scorpio and taurus painting; scorpio and taurus couple print; libra and cancer; sagittarius and pisces wall art; gemini aquarius; wedding frame with cancer & pisces; sternzeichen wassermann und krebs (Almanca).
+Tek burc (3/12): pisces wall art; sagittarius wallpaper; 天秤座 (Libra).
+Genel (1/12): poster.
+Sonuc: organik aramanin 2/3'u cift adiyla geliyor (ters sira da var: "libra and cancer"); cift adi etiketi + basliktaki cift adi dogru. "wedding frame" aramasi cerceveli secenegi ve dugun etiketini destekliyor. Onayli 13 etiket degismiyor (Serdar onayi 27 Eyl).
