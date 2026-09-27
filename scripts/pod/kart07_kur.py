@@ -62,6 +62,19 @@ def serit(yol):
     return s, {'aci': round(aci, 2), 'profil_px': int(x_ic - x_dis), 'kenar_sapma_px': int(max(dis) - min(dis))}
 
 
+BLANK = {'AG': '059_Classic_20Antique_20Gold_20Frame_blank.jpg'}   # Serdar 27 Eyl: AG, Prodigi on cephe fotografindan
+
+
+def blank_kenarlar(yol):
+    """Prodigi Classic Antique Gold bos cerceve fotografi (059): 9 parca; olculen dis (455,282)-(1543,1672), kirpim 46 px."""
+    src = Image.open(yol).convert('RGB'); X0, Y0, X1, Y1, f = 455, 282, 1544, 1673, 46
+    r = lambda b, w, h: src.crop(b).resize((w, h), Image.LANCZOS)
+    return {'ust': r((X0 + f, Y0, X1 - f, Y0 + f), OW - 2 * F, F), 'alt': r((X0 + f, Y1 - f, X1 - f, Y1), OW - 2 * F, F),
+            'sol': r((X0, Y0 + f, X0 + f, Y1 - f), F, OH - 2 * F), 'sag': r((X1 - f, Y0 + f, X1, Y1 - f), F, OH - 2 * F),
+            'k1': r((X0, Y0, X0 + f, Y0 + f), F, F), 'k2': r((X1 - f, Y0, X1, Y0 + f), F, F),
+            'k3': r((X0, Y1 - f, X0 + f, Y1), F, F), 'k4': r((X1 - f, Y1 - f, X1, Y1), F, F)}
+
+
 def cerceve(kod, poster):
     s, bilgi = serit(KAY / CHEVRON[kod])
     V = s.resize((F, OH), Image.LANCZOS)                      # sol: dis kenar solda
@@ -71,6 +84,11 @@ def cerceve(kod, poster):
     yy = np.arange(PV_H)[:, None]; xx = np.arange(PV_W)[None, :]
     g = 1 - 0.28 * np.exp(-yy / 9.0) - 0.22 * np.exp(-xx / 9.0) - 0.08 * np.exp(-(PV_H - 1 - yy) / 5.0) - 0.08 * np.exp(-(PV_W - 1 - xx) / 5.0)
     fr.paste(Image.fromarray(np.clip(pa * g[..., None], 0, 255).astype(np.uint8)), (F, F))
+    if kod in BLANK:
+        k = blank_kenarlar(KAY / BLANK[kod])
+        fr.paste(k['ust'], (F, 0)); fr.paste(k['alt'], (F, OH - F)); fr.paste(k['sol'], (0, F)); fr.paste(k['sag'], (OW - F, F))
+        fr.paste(k['k1'], (0, 0)); fr.paste(k['k2'], (OW - F, 0)); fr.paste(k['k3'], (0, OH - F)); fr.paste(k['k4'], (OW - F, OH - F))
+        return fr, {**bilgi, 'kaynak': BLANK[kod]}
     fr.paste(Hs, (0, 0)); fr.paste(Hs.transpose(Image.FLIP_TOP_BOTTOM), (0, OH - F))
     # gonye (miter): kose karelerinde kosegenin alt/ust ucgeni dikey seride ait
     yv = np.arange(OH)[:, None]; xv = np.arange(F)[None, :]
