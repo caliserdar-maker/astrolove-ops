@@ -51,4 +51,5 @@ Doğru olanlar: 01 kapak (renk hariç), 03, 09, ölçü 3000x2250, yasak kelime/
 | 11 Süreç | onaylı (Serdar, 27 Eyl) | ChatGPT Lato + eski tip rakam + DNA dışı başlık yeri → canlı 03 liste stiliyle 3000x2250 yeniden kurulum; metin açıklama v3 ile aynı; scripts/pod/kart11_kur.py |
 | 12 Hediye | onaylı v4 (Serdar, 27 Eyl): çerçeve Prodigi AG boş çerçeve fotoğrafı (059) 9 parça, yüz 24x36 ölçeğinde (ince) | ChatGPT sahnesi (Serdar 'güzel') 2.01x; yapay çerçeve+poster → Prodigi AG gerçek profil + gerçek CL 11x14, sahne ışığına uyum; alternatif sahne reddedildi (markalı kutu/mum/kitap = pakette olmayan ürün, perspektifli çerçeve, DNA dışı); scripts/pod/kart12_kur.py |
 | 13 Oda | onaylı v4 (Serdar, 27 Eyl): çerçeve Prodigi AG boş çerçeve fotoğrafı (059) 9 parça, yüz 24x36 ölçeğinde (ince) | Seçenek 1 sahnesi; duvar yazısı, 'The Kinfolk Home' (gerçek marka), 'AT HOME', mum 'ASTROLOVE' silindi (scripts/pod/sahne_yazi_sil.py, OpenCV inpaint); gerçek AG çerçeve + gerçek poster; seçenek 2 reddedildi (paspartu, markalı mum/kitap, DNA dışı); scripts/pod/kart13_kur.py |
-| 14-16 | tek tek üretiliyor | |
+| 14 Yatak odası | v1 teslim (Claude) | 3 ChatGPT kartı reddedildi (başlık tekrarı, paspartu, Kinfolk, ASTROLOVE mum); yazısız sahne istendi; gerçek CI poster + Prodigi AG; başlık 'Made for the room you share.'; scripts/pod/kart14_kur.py |
+| 15-16 | tek tek üretiliyor | |
