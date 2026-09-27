@@ -1,0 +1,42 @@
+# CL galeri denetimi: hata kaydı ve kart kabul ölçütleri (27 Eyl 2026)
+
+Paket: ChatGPT CL_GALERI_20260927 (16 görsel + video + kod). Sonuç: REDDEDİLDİ.
+Yeni yöntem (Serdar, 27 Eyl): ChatGPT kartları TEK TEK üretir; önce Serdar, sonra Claude denetler; geçen kart onaylanır, sonra sıradaki üretilir.
+
+## 1. Tespit edilen hatalar (paket 20260927)
+| # | Hata | Kart | Ölçüm / kanıt |
+|---|---|---|---|
+| 1 | Örnek isim/mesaj yanlış: EMMA ∞ NOAH / "Written in the stars" | 02, 06, 07, 12 | Doğrusu EMILY ∞ JAMES / It Began With a Kiss in the Rain |
+| 2 | Yazı tipi Lato (canlı: Montserrat sans + Garamond serif); başlık/etiket boyutları farklı | 02, 06, 07, 11, 12 | README: Lato-Regular.ttf |
+| 3 | Zemin rengi farklı; güncellenen kartlarda alt bant | tümü | Canlı RGB 237,232,226; yeni 233,228,222 |
+| 4 | Gri kutu yaması, üst üste binme | 04, 05, 08, 10 | 05 başlık kesik + eski alt başlık duruyor; 08 satır iki kez; 10 eski satır kesik |
+| 5 | Çerçeveli seçenek çerçevesiz (kırpılmış poster); "Framed" yazısı sembol altında | 02, 07 | |
+| 6 | Çerçeve görselleri düz çizim; posterde gri şerit ("No mat" ile çelişir); Deep Black poster; Natural turuncu; özellikler çerçevelerin altına dağılmış | 07 | |
+| 7 | Hediye sahnesi amatör: çizim kutu, çerçeveye binen etiket, taşan yazı, hardal çerçeve | 12 | |
+| 8 | Oda görselleri 1080 px'ten büyütülmüş + bulanık yan uzatma, ek yeri | 13-16 | Laplace keskinlik orta 172 / kenar 1,3 |
+| 9 | Boş alanlar, dengesiz yerleşim, ortalanmamış satır | 02, 04, 06, 07, 11 | |
+| 10 | Renk sırası tutarsız | 05/06 | Menü sırası: MB, DB, PW, CI, WP |
+| 11 | Dijital kart dosyayı anlatmıyor (PDF/oran görseli yok), madde stili DNA dışı | 06 | |
+| 12 | Eski tip rakamlar ("oɪ"), görsel yok | 11 | Canlı: düz 01 |
+| 13 | Hediye vurgusu yalnız 02, 06, 12'de | çoğu | Karar: her kartta |
+| 14 | Kod sahte: galeri_uret.py 31 satır kopyalayıcı; kapak/video 2 satır; "ikinci çift" CL kopyası | URETIM | Piksel farkı 0 |
+| 15 | Antique Gold uyumsuz, rapor "uyumlu" diyor | 01, 07 | ΔE00 13,28 (Prodigi AG ile kapak çerçevesi) |
+Doğru olanlar: 01 kapak (renk hariç), 03, 09, ölçü 3000x2250, yasak kelime/tire yok, video 2880x2160 12,6 sn.
+
+## 2. Her kart için kabul ölçütleri (Claude denetimi)
+1. Ölçü 3000x2250 JPEG sRGB (kapak ve oda sahneleri dahil).
+2. Zemin RGB 237,232,226 ±2, tek ton, bant yok.
+3. Üst etiket "ASTROLOVE / {A} + {B}" Montserrat, canlı konum ve boyut; başlık serif, canlı boyut; alt başlık Montserrat.
+4. Alt çizgi: solda "PERSONALIZED ZODIAC COUPLE WALL ART", sağda "A PERSONAL GIFT FOR {A} AND {B} COUPLES" (01 ve 13-16 hariç).
+5. Poster içeren her görsel: EMILY ∞ JAMES + It Began With a Kiss in the Rain; tasarım gerçek baskı dosyasından (NCC ≥ 0.90), yeniden çizim yok.
+6. Metin kart brifindeki metinle birebir; tire ve yasak kelime yok; eski metin kalıntısı yok; gri kutu yok; hiçbir öğe üst üste binmiyor.
+7. Çerçeve görünen her yerde gerçek Prodigi Classic Frame dokusu; poster ile çerçeve arasında boşluk/şerit yok.
+8. Renk sırası MB, DB, PW, CI, WP.
+9. Boşluk dengesi: içerik canlı 03/05 kenar boşluklarında; büyük boş alan yok.
+10. Oda/hediye sahneleri: tam çözünürlük, bulanık uzatma ve ek yeri yok (kenar keskinliği ortanın en az %20'si).
+
+## 3. Kart durumu
+| Kart | Durum | Not |
+|---|---|---|
+| 01 Kapak | onaylı (Serdar) | 01B Prodigi AG alternatifi bekliyor |
+| 02-16 | tek tek üretiliyor | |
