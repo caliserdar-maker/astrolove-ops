@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""78 ilan icin baslik + 13 etiket + aciklama uretimi.
-Kaynak karar: claude/AstroLove_Baslik_Aciklama_Etiket_Arastirma_20260927.md (oneri A basligi + 13 etiket).
-Aciklama: data/pod/aciklama_v3_sablon.txt ({A},{B},{A_TARIH},{B_TARIH}).
-QC (her ilan): etiket 13 adet, hepsi <=20 karakter, benzersiz; baslik <=140 karakter; hicbir metinde
-uzun/orta tire yok; sablon yer tutucusu kalmadi. Herhangi FAIL -> cikis 1.
+"""78 ilan icin YALNIZ ACIKLAMA uretimi (28 Eyl duzeltme).
+BASLIK ve 13 ETIKET uretilmez: karar Serdar'da verildi ve 78/78 ilanda CANLI
+(onayli baslik kalibi: "{A} and {B} Personalized Zodiac Couple Wall Art"); dokunulmaz.
+Aciklama: data/pod/aciklama_v3_sablon.txt (canli CL v3) + burc tarihleri.
+QC: tire yok, yer tutucu kalmadi. Herhangi FAIL -> cikis 1.
 Kullanim: metin_78_uret.py CIKTI_KLASORU CIFT [CIFT ...]   (CIFT: CANCER_LIBRA gibi)
 """
 import json
@@ -76,12 +76,10 @@ def main():
     hata_toplam = 0
     kayit = {}
     for c in ciftler:
-        baslik, etiketler, aciklama = uret(c)
-        h = qc(c, baslik, etiketler, aciklama)
-        kayit[c] = {'baslik': baslik, 'etiketler': etiketler, 'aciklama': aciklama, 'qc': h or 'PASS'}
-        (cik / f'{c}.txt').write_text(
-            f'BASLIK ({len(baslik)} kr)\n{baslik}\n\nETIKETLER (13)\n' +
-            '\n'.join(f'- {e} ({len(e)})' for e in etiketler) + f'\n\nACIKLAMA\n{aciklama}')
+        aciklama = uret(c)
+        h = qc(c, aciklama)
+        kayit[c] = {'aciklama': aciklama, 'qc': h or 'PASS'}
+        (cik / f'{c}.txt').write_text(aciklama)
         if h:
             hata_toplam += 1
             print(f'FAIL {c}: {h}')
