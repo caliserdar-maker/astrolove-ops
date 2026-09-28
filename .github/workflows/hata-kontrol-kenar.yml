@@ -1,0 +1,55 @@
+name: hata-kontrol-kenar
+
+# HATA KONTROL 28 Eyl (SALT OKUMA; Etsy YOK): POD_PRINT kaynaklarinda (78 cift x PURE_WHITE, CHAMPAGNE_IVORY,
+# WARM_PARCHMENT x 11x14) ana + kucuk sembol cevresindeki koyu/noktali dis kenar orani. scripts/pod/kaynak_kenar_tara.py
+# Cikti: Drive ASTROLOVE/TEMP/HATA_KONTROL_20260928/KENAR/ (KENAR.csv, KENAR.md, TEMAS_EN_KOTU12_EN_IYI3.jpg)
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch: {}
+
+concurrency: hata-kontrol-kenar
+
+jobs:
+  tara:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q pillow numpy scipy
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Kaynaklari al (yalniz okuma)
+        run: |
+          set -euo pipefail
+          for R in PURE_WHITE CHAMPAGNE_IVORY WARM_PARCHMENT; do
+            rclone copy "gdrive:ASTROLOVE/TEMP/POD_PRINT" _src --include "*/$R/11x14.jpg" --transfers 8 -q
+          done
+          echo "dosya: $(find _src -name 11x14.jpg | wc -l)"
+      - name: Tara
+        run: python scripts/pod/kaynak_kenar_tara.py _src _out
+      - name: Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -d _out ] && rclone copy _out "gdrive:ASTROLOVE/TEMP/HATA_KONTROL_20260928/KENAR" -q || true
+          echo "Drive: TEMP/HATA_KONTROL_20260928/KENAR"
+          rm -rf ~/.config/rclone
