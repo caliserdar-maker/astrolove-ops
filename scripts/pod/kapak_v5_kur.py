@@ -42,11 +42,14 @@ mask = np.zeros(ga.shape[:2], np.uint8)
 mask[max(BY0 - 3, 0):TABAN + 3, BX0 - 3:BX1 + 3] = 255   # tum bos alan; delik yok (parlak icten beslenmesin)
 ga = cv2.inpaint(ga, mask, 12, cv2.INPAINT_TELEA)
 # inpaint duz kalir; gercek duvardan yuksek frekans doku eklenir (Serdar 28 Eyl: bulanik bant)
-doku_k = np.asarray(G.crop((1290, 260, 1420, 820))).astype(np.float32)
-hp = doku_k - cv2.GaussianBlur(doku_k, (0, 0), 6)
 H_, W_ = ga.shape[:2]
-ny, nx = H_ // hp.shape[0] + 1, W_ // hp.shape[1] + 1
-hpt = np.tile(hp, (ny, nx, 1))[:H_, :W_]
+def hp_doku(kutu):
+    d = np.asarray(G.crop(kutu)).astype(np.float32)
+    h = d - cv2.GaussianBlur(d, (0, 0), 6)
+    return np.tile(h, (H_ // h.shape[0] + 1, W_ // h.shape[1] + 1, 1))[:H_, :W_]
+hp_sol, hp_sag = hp_doku((330, 560, 470, 850)), hp_doku((1290, 260, 1420, 820))   # her yan kendi duvarindan
+mx = np.zeros((H_, W_, 1), np.float32); mx[:, :CX] = 1.0
+hpt = hp_sol * mx + hp_sag * (1 - mx)
 ga = np.clip(ga.astype(np.float32) + hpt * (mask[..., None] / 255.0), 0, 255).astype(np.uint8)
 G = Image.fromarray(ga)
 
