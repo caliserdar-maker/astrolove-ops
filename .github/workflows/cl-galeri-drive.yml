@@ -1,8 +1,8 @@
 name: cl-galeri-drive
 
 # CL galeri inceleme paketini Drive'a kopyalar (salt Drive yazma; Etsy YOK).
-# Kaynak: data/pod/cl_galeri_20260927 (16 kart + 5 renk varyasyon gorseli)
-# Cikti: Drive ASTROLOVE/TEMP/CL_GALERI_INCELEME_20260927 + paylasim linki
+# Kaynak: data/pod/cl_galeri_final19 (siralanmis 19 gorsel: 14 kart + 5 renk)
+# Cikti: Drive ASTROLOVE/TEMP/CL_GALERI_FINAL19 + paylasim linki
 
 permissions:
   contents: read
@@ -32,8 +32,8 @@ jobs:
       - name: Drive'a yaz ve linki al
         run: |
           set -euo pipefail
-          HEDEF="gdrive:ASTROLOVE/TEMP/CL_GALERI_INCELEME_20260927"
-          rclone copy data/pod/cl_galeri_20260927 "$HEDEF" -q
+          HEDEF="gdrive:ASTROLOVE/TEMP/CL_GALERI_FINAL19"
+          rclone copy data/pod/cl_galeri_final19 "$HEDEF" -q
           echo "Dosya sayisi: $(rclone lsf "$HEDEF" | wc -l)"
           echo "Paylasim linki: $(rclone link "$HEDEF")"
           rm -rf ~/.config/rclone
