@@ -26,45 +26,17 @@ def bas(s):
     return s.capitalize()
 
 
-def etiket1(a, b):
-    for aday in (f'{a} and {b}', f'{a} {b}', f'{min(a, b, key=len)} couple'):
-        if len(aday) <= 20:
-            return aday
-    return f'{min(a, b, key=len)} love'
-
-
-def etiket2(a, b):
-    k = min(a, b, key=len)
-    for aday in (f'{a} {b} gift', f'{k} couple gift', f'{k} zodiac gift', f'{k} gift'):
-        if len(aday) <= 20:
-            return aday
-    return f'{k} gift'
-
-
 def uret(cift):
     A, B = cift.split('_')
-    a, b = A.lower(), B.lower()
-    Ab, Bb = bas(a), bas(b)
-    baslik = f'{Ab} and {Bb} Zodiac Couple Print with Names, Personalized Wall Art, Framed or Digital'
-    etiketler = [etiket1(a, b), etiket2(a, b), 'zodiac couple print', 'zodiac couple gift',
-                 'personalized couple', 'couple names print', 'zodiac wall art', 'astrology wall art',
-                 'anniversary gift', 'wedding gift couple', 'engagement gift', 'framed zodiac art',
-                 'zodiac digital file']
-    aciklama = SABLON.replace('{A_TARIH}', TARIH[A]).replace('{B_TARIH}', TARIH[B]) \
-                     .replace('{A}', Ab).replace('{B}', Bb)
-    return baslik, etiketler, aciklama
+    Ab, Bb = bas(A.lower()), bas(B.lower())
+    return SABLON.replace('{A_TARIH}', TARIH[A]).replace('{B_TARIH}', TARIH[B]) \
+                 .replace('{A}', Ab).replace('{B}', Bb)
 
 
-def qc(cift, baslik, etiketler, aciklama):
+def qc(cift, aciklama):
     h = []
-    if len(etiketler) != 13 or len(set(etiketler)) != 13:
-        h.append('etiket sayisi/benzersizlik')
-    h += [f'etiket uzun: {e}' for e in etiketler if len(e) > 20]
-    if len(baslik) > 140:
-        h.append('baslik uzun')
-    for ad, m in (('baslik', baslik), ('etiket', ' '.join(etiketler)), ('aciklama', aciklama)):
-        if re.search(r'[‒-―−]', m):
-            h.append(f'{ad} tire')
+    if re.search(r'[\u2012-\u2015\u2212]', aciklama):
+        h.append('tire')
     if re.search(r'\{[A-Z_]+\}', aciklama):
         h.append('yer tutucu kaldi')
     return h
