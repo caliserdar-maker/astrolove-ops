@@ -1,0 +1,44 @@
+name: dal-sil-0928
+
+# TEK SEFERLIK (28 Eyl 2026, Serdar genel onayi, guvenlik oturumu): public depoda satilan urun ZIP'leri /
+# baski master'lari / teshis gorselleri tasiyan 3 dal silinir. Dal adlari ve uc SHA'lari SABIT; uzak uc SHA
+# beklenenle birebir ayni degilse o dal SILINMEZ ve kosu FAIL olur. Gerekli is main'e tasindi (29967aa);
+# ZIP ve master'lar Drive'da dogrulandi. Kosu sonrasi bu dosya main'den kaldirilir.
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+    inputs:
+      onay:
+        description: "DAL_SIL yazilmadikca hicbir sey silinmez"
+        required: true
+        default: ""
+
+jobs:
+  sil:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Dogrula ve sil
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ONAY: ${{ inputs.onay }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          [ "$ONAY" = "DAL_SIL" ] || { echo "::error::onay DAL_SIL degil; hicbir sey silinmedi"; exit 1; }
+          hata=0; silinen=0
+          while read -r dal beklenen; do
+            uzak=$(gh api "repos/$REPO/git/ref/heads/$dal" --jq .object.sha 2>/dev/null || echo YOK)
+            if [ "$uzak" = "YOK" ]; then echo "$dal: zaten yok"; continue; fi
+            if [ "$uzak" != "$beklenen" ]; then echo "::error::$dal uc $uzak != beklenen $beklenen; SILINMEDI"; hata=1; continue; fi
+            gh api -X DELETE "repos/$REPO/git/refs/heads/$dal"
+            echo "$dal ($beklenen) SILINDI"; silinen=$((silinen+1))
+          done <<'LISTE'
+          pod-v4 c715d1490b64653c842c00566fe895bfd3ac1407
+          pod-takip 7a571f2ddefef6430385c864c76c2e81f306f78a
+          teshis-0028 5af30ea5d4ca32df1c31473e6544aec5ed1dac28
+          LISTE
+          echo "silinen: $silinen"; exit $hata
