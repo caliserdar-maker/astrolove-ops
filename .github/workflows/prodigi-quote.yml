@@ -108,7 +108,8 @@ jobs:
             # GOREV 0006/0007: yalniz GET; DriveLinks siparis-onay dalindan (marka dosyalari, musteri verisi yok).
             pip install -q pillow
             git fetch -q --depth 1 origin siparis-onay && git checkout -q FETCH_HEAD -- scripts/
-            python scripts/prodigi/prodigi_arastir_0006.py "${SKUS:-ord_72692295730813440}"
+            [ -n "${SKUS:-}" ] || { echo "HATA: arastir_0006 icin skus girdisine Prodigi siparis id verilmeli"; exit 1; }   # 28 Eyl: kimlik depoda tutulmaz
+            python scripts/prodigi/prodigi_arastir_0006.py "$SKUS"
             exit 0
           fi
           if [ "$MODE" = "siparis_oku" ]; then
@@ -123,7 +124,7 @@ jobs:
           if [ "$MODE" = "ekstra_tesis" ]; then
             # Yalniz GET /orders (+ ECB kuru). Musteri verisi yazilmaz; cikti TEMP/PRODIGI.
             python scripts/prodigi/prodigi_ekstra_tesis.py --self-test
-            python scripts/prodigi/prodigi_ekstra_tesis.py --out-dir out > /dev/null
+            REF_SIPARIS="${SKUS:-}" python scripts/prodigi/prodigi_ekstra_tesis.py --out-dir out > /dev/null   # skus = referans ord id (depoda tutulmaz)
             cat out/PRODIGI_EKSTRA_TESIS.md >> "$GITHUB_STEP_SUMMARY"
             head -40 out/PRODIGI_EKSTRA_TESIS.md
             rclone copy out "gdrive:ASTROLOVE/TEMP/PRODIGI" --include "PRODIGI_EKSTRA_TESIS.*" --include "EKSTRA_TESIS.json" -q

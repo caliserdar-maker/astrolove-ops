@@ -63,7 +63,7 @@ PRINT_REMOTE = "gdrive:ASTROLOVE/TEMP/POD_PRINT"
 ALLOWED = {"US", "CA", "AU", "GB"}
 DEFAULT_SHIPPING_METHOD = "Standard"
 CERCEVE_ESLEME = Path(__file__).resolve().parents[2] / "data/pod/prodigi_cerceve_esleme.csv"
-EKLER_USD = 5.00        # hesap ayarindaki ekler (postcard 2.50 + 2 sticker 1.25x2); ord_14538276 olcumu
+EKLER_USD = 5.00        # hesap ayarindaki ekler (postcard 2.50 + 2 sticker 1.25x2); referans siparis olcumu (25 Eyl)
 # SKU semasi pod_sku.py: POD-<burc3>_<burc3>-<edisyon2>-<boyut>
 STAGES = ["dryrun", "bekliyor", "manual", "atlandi", "ordered", "shipped", "tracked", "error", "ISIM_BEKLIYOR"]
 TUM_BOYLAR = ["5x7", "8x10", "11x14", "12x16", "12x18", "16x20", "16x24", "18x24", "20x30",

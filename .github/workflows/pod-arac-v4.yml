@@ -1,0 +1,438 @@
+name: pod-arac-v4
+
+# 28 Eyl 2026 (Serdar): pod-v4 + pod-takip dallarindaki POD arac kutusu (fiyat, galeri, metin, cerceve,
+# siparis okuma modlari) dallar silinmeden once main'e tasindi. main'deki pod-sablon-v4.yml ayri (ornek sablon).
+
+# mod=kuru : 78 ilan salt okuma denetimi -> FIYAT_PLANI.csv (Drive POD_FIYAT_2999).
+# mod=pilot: tek ilan yazma (confirm=FIYAT_2999). mod=toplu: kalan ilanlar.
+
+permissions:
+  actions: read
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      mod:
+        description: "kuru | pilot | toplu | maliyet | dogrula | hpr | buyuk | yetki | yetki_test | yetki_degistir"
+        default: "kuru"
+      listing:
+        description: "pilot icin ilan id"
+        default: "4570110641"
+      apply:
+        description: "true = Etsy'ye yaz (pilot/toplu)"
+        type: boolean
+        default: false
+      confirm:
+        description: "apply=true icin tam olarak FIYAT_2999"
+        default: ""
+      limit:
+        description: "kac ilan (0 = hepsi)"
+        default: "0"
+      kota_alt:
+        description: "kota tabani (varsayilan 400)"
+        default: "400"
+      redirect:
+        description: "yetki modlari icin kayitli redirect URI"
+        default: "https://astrolove.art/oauth/callback"
+      kod:
+        description: "yetki_degistir: BOS BIRAK (kod Drive'daki ETSY_YETKI_KOD.txt'den okunur, loga girmez)"
+        default: ""
+      state:
+        description: "yetki_degistir icin callback adresindeki state (PKCE ile karsilastirilir)"
+        default: ""
+      siparis_ref:
+        description: "siparis_* : merchantReference = idempotencyKey"
+        default: "etsy-1000000001-8x10"
+      siparis_sku:
+        description: "siparis_* : Prodigi SKU"
+        default: "GLOBAL-HPR-8x10"
+      siparis_adet:
+        description: "siparis_* : adet"
+        default: "1"
+      siparis_dosya_id:
+        description: "siparis_* : Drive baski dosyasi id"
+        default: "1oEkU6eYEFxqd1tcS6DMcEnu43XFW38vp"
+      siparis_remote:
+        description: "siparis_* : Drive yolu (cift/edisyon/boy kaniti)"
+        default: "gdrive:ASTROLOVE/TEMP/POD_PRINT/AQUARIUS_LIBRA/MIDNIGHT_BLUE/8x10.jpg"
+      siparis_alici:
+        description: "BOS BIRAK (musteri verisi loga girmez): alici Drive TEMP/SIPARIS_ALICI.txt'den okunur (ad|adres1|sehir|eyalet|posta|ulke)"
+        default: ""
+      siparis_master:
+        description: "siparis_* : (istege bagli) icerik karsilastirmasi icin master yolu; bos = karsilastirma yok"
+        default: ""
+      siparis_kontrol:
+        description: "siparis_* : (istege bagli) ayirt edicilik icin BASKA cift master; bos = yok"
+        default: ""
+      test_receipt:
+        description: "router_kuru | router_teklif : sahte receipt dosyasi (Etsy okunmaz, canli siparis yok)"
+        default: "scripts/prodigi/test_receipt_kisisel_taban.json"
+      adim:
+        description: "pilot15_yaz : yazilacak adimlar (1=envanter, 2=Size Guide, 3=aciklama)"
+        default: "1,2,3"
+      atla:
+        description: "boy15_toplu : atlanacak ilan id'leri (virgullu, or. pilot)"
+        default: "4570110641"
+
+jobs:
+  fiyat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      MOD: ${{ inputs.mod || 'kuru' }}
+      APPLY: ${{ inputs.apply && 'true' || 'false' }}
+      CONFIRM: ${{ inputs.confirm || '' }}
+      LISTING: ${{ inputs.listing || '4570110641' }}
+      LIMIT: ${{ inputs.limit || '0' }}
+      KOTA_ALT: ${{ inputs.kota_alt || '400' }}
+      REDIRECT: ${{ inputs.redirect || 'https://astrolove.art/oauth/callback' }}
+      KOD: ${{ inputs.kod || '' }}
+      STATE: ${{ inputs.state || '' }}
+      SIPARIS_REF: ${{ inputs.siparis_ref || 'etsy-1000000001-8x10' }}
+      SIPARIS_SKU: ${{ inputs.siparis_sku || 'GLOBAL-HPR-8x10' }}
+      SIPARIS_ADET: ${{ inputs.siparis_adet || '1' }}
+      SIPARIS_DOSYA_ID: ${{ inputs.siparis_dosya_id || '' }}
+      SIPARIS_REMOTE: ${{ inputs.siparis_remote || '' }}
+      SIPARIS_ALICI: ${{ inputs.siparis_alici || '' }}
+      SIPARIS_MASTER: ${{ inputs.siparis_master }}
+      SIPARIS_KONTROL: ${{ inputs.siparis_kontrol }}
+      TEST_RECEIPT: ${{ inputs.test_receipt || 'scripts/prodigi/test_receipt_kisisel_taban.json' }}
+      ADIM: ${{ inputs.adim || '1,2,3' }}
+      ATLA: ${{ inputs.atla }}
+    steps:
+      - name: Onay kapisi
+        run: |
+          set -euo pipefail
+          case "$MOD" in
+            kuru|maliyet|dogrula|hpr|buyuk|yetki|yetki_test|pilot15_oku|boy15_oku|durum15|fiyat_b_oku|metin78_kuru|yayilim_hazirlik|galeri_oku|kota_oku|oas_kisisel|kanal_oku|iptal_dok|galeri_tek_plan|cerceve_sonda|cerceve_hazirlik|cerceve_mockup|prodigi_teklif|siparis_hazirla|siparis_onizleme|siparis_izin_kapat|eslesme_kanit|router_kuru|router_teklif|takip_kuru|siparis_kiyas)
+              if [ "$APPLY" = "true" ]; then
+                echo "::error::mod=$MOD ile yazma olmaz. DUR."; exit 1
+              fi
+              echo "SALT OKUMA: Etsy'ye yazma yok ($MOD)." ;;
+            siparis_gonder)
+              if [ "$APPLY" != "true" ] || [ "$CONFIRM" != "$SIPARIS_REF" ]; then
+                echo "::error::siparis_gonder icin apply=true ve confirm '$SIPARIS_REF' olmali. DUR."; exit 1
+              fi
+              echo "::warning::CANLI PRODIGI SIPARISI: $SIPARIS_SKU x$SIPARIS_ADET, ref $SIPARIS_REF." ;;
+            pilot15_yaz)
+              if [ "$APPLY" != "true" ] || [ "$CONFIRM" != "PILOT_15" ]; then
+                echo "::error::pilot15_yaz icin apply=true ve confirm 'PILOT_15' olmali. DUR."; exit 1
+              fi
+              echo "::warning::PILOT YAZMA: yalniz ilan $LISTING (envanter + Size Guide + aciklama)." ;;
+            fiyat_b_yaz)
+              if [ "$APPLY" != "true" ] || [ "$CONFIRM" != "FIYAT_B" ]; then
+                echo "::error::fiyat_b_yaz icin apply=true ve confirm 'FIYAT_B' olmali. DUR."; exit 1
+              fi
+              echo "::warning::B PLANI FIYAT YAZMA: yalniz ilan $LISTING envanteri; fiyat disinda alan degismez." ;;
+            boy15_yaz)
+              if [ "$APPLY" != "true" ] || [ "$CONFIRM" != "BOY_15" ]; then
+                echo "::error::boy15_yaz icin apply=true ve confirm 'BOY_15' olmali. DUR."; exit 1
+              fi
+              echo "::warning::BOY 15 YAZMA (tek ilan $LISTING): menu sirasi + fiyat tablosu." ;;
+            galeri_yaz)
+              if [ "$APPLY" != "true" ] || [ "$CONFIRM" != "GALERI_GENEL" ]; then
+                echo "::error::galeri_yaz icin apply=true ve confirm 'GALERI_GENEL' olmali. DUR."; exit 1
+              fi
+              echo "::warning::GALERI YAZMA: listing=$LISTING (4 genel kart; renk bagli gorsele dokunulmaz)." ;;
+            yayilim_yaz|yayilim_metin2)
+              if [ "$APPLY" != "true" ] || [ "$CONFIRM" != "YAYILIM_78" ]; then
+                echo "::error::yayilim_yaz icin apply=true ve confirm 'YAYILIM_78' olmali. DUR."; exit 1
+              fi
+              echo "::warning::YAYILIM 78 YAZMA: listing=$LISTING (metin+kisisellestirme+nitelik+envanter; gorsel YOK)." ;;
+            boy15_toplu)
+              if [ "$APPLY" != "true" ] || [ "$CONFIRM" != "BOY_15" ]; then
+                echo "::error::boy15_toplu icin apply=true ve confirm 'BOY_15' olmali. DUR."; exit 1
+              fi
+              echo "::warning::BOY 15 TOPLU YAZMA: katalogdaki ilanlar (atlanan: $ATLA)." ;;
+            yetki_degistir)
+              if [ "$CONFIRM" != "YETKI_DEGISTIR" ]; then
+                echo "::error::yetki_degistir icin confirm 'YETKI_DEGISTIR' gerekir. DUR."; exit 1
+              fi
+              echo "::warning::YETKI DEGISIMI: ETSY_TOKEN.json yenilenir, eski zincir kapanir." ;;
+            pilot|toplu)
+              if [ "$APPLY" != "true" ] || [ "$CONFIRM" != "FIYAT_2999" ]; then
+                echo "::error::pilot/toplu icin apply=true ve confirm 'FIYAT_2999' olmali. DUR."; exit 1
+              fi
+              echo "::warning::APPLY: 30.99 USD secenekler 29.99 olacak ($MOD)." ;;
+            *) echo "::error::bilinmeyen mod: $MOD. DUR."; exit 1 ;;
+          esac
+      - uses: actions/checkout@v4
+        with:
+          # Kod, workflow'un tetiklendigi dalla AYNI daldan alinir (once sabit pod-v4 idi; baska bir
+          # dalda calisirken o dalin kodu hic kosmuyordu). main'e dokunulmaz.
+          ref: ${{ github.ref_name }}
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2 pillow==11.0.0 numpy==2.4.6
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Token
+        if: ${{ inputs.mod != 'hpr' && inputs.mod != 'maliyet' && inputs.mod != 'buyuk' }}
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+      - name: 'Fiyat 30.99 -> 29.99'
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          if [ "$MOD" = "router_kuru" ]; then
+            mkdir -p _out/kuru
+            echo "== 1) son 60 gun Etsy receipt'leri: karar tablosu (canli siparis YOK)"
+            python scripts/prodigi/order_router.py --env live --state _out/kuru/state_kuru.csv \
+              --out _out/kuru --dry-run --approve-mode off --since-days 60 --max-pages 3 || true   # 28 Eyl: --devral (gercek ord id) cikarildi
+            echo "== 2) sahte POD receipt teklifi (Etsy okunmaz)"
+            python scripts/prodigi/order_router.py --env live --state _out/kuru/state_test.csv \
+              --out _out/kuru/test --dry-run --approve-mode off \
+              --test-receipt "$TEST_RECEIPT" || true
+            rclone copy _out/kuru "gdrive:ASTROLOVE/TEMP/POD_5X7/ROUTER_KURU" --include "*.md" --include "*.json" --include "*.csv" -q
+            echo "ciktilar: gdrive:ASTROLOVE/TEMP/POD_5X7/ROUTER_KURU"
+          elif [ "$MOD" = "router_teklif" ]; then
+            # Yalniz sahte receipt uzerinden kuru teklif: Etsy okunmaz, canli siparis yok.
+            # TEST_RECEIPT virgulle birden cok dosya alir; her biri ayri teklif olarak kosar.
+            mkdir -p _out/teklif
+            i=0
+            for rcp in ${TEST_RECEIPT//,/ }; do
+              i=$((i+1))
+              echo "== teklif $i: $rcp"
+              python scripts/prodigi/order_router.py --env live --state "_out/teklif/state_$i.csv" \
+                --out "_out/teklif/$i" --dry-run --approve-mode off --test-receipt "$rcp"
+            done
+            rclone copy _out/teklif "gdrive:ASTROLOVE/TEMP/POD_5X7/ROUTER_KURU/teklif" --include "*.md" --include "*.json" --include "*.csv" -q
+            echo "ciktilar: gdrive:ASTROLOVE/TEMP/POD_5X7/ROUTER_KURU/teklif"
+          elif [ "$MOD" = "eslesme_kanit" ]; then
+            python scripts/prodigi/eslesme_kanit.py --limit "$LIMIT" --kota-alt 150
+          elif [ "$MOD" = "siparis_izin_kapat" ]; then
+            python scripts/prodigi/manuel_siparis.py izin_kapat --file-id "$SIPARIS_DOSYA_ID" \
+              --remote "$SIPARIS_REMOTE" --sku "$SIPARIS_SKU" --ref "$SIPARIS_REF" \
+              --alici x --adres1 x --sehir x --posta x
+          elif [ "$MOD" = "siparis_onizleme" ]; then
+            python scripts/prodigi/manuel_siparis.py onizleme --file-id "$SIPARIS_DOSYA_ID" \
+              --remote "$SIPARIS_REMOTE" --sku "$SIPARIS_SKU" --ref "$SIPARIS_REF" \
+              --alici x --adres1 x --sehir x --posta x
+          elif [ "$MOD" = "siparis_hazirla" ] || [ "$MOD" = "siparis_gonder" ]; then
+            # alici yalniz Drive'dan (dispatch girdisi / env loga yazilir; 25 Eyl gizlilik duzeltmesi)
+            ALICI="$(rclone cat gdrive:ASTROLOVE/TEMP/SIPARIS_ALICI.txt 2>/dev/null || true)"
+            [ -n "$ALICI" ] || { echo "::error::Drive TEMP/SIPARIS_ALICI.txt yok. DUR."; exit 1; }
+            while IFS= read -r p_; do [ -n "$p_" ] && echo "::add-mask::$p_"; done < <(tr '|' '\n' <<< "$ALICI")
+            IFS='|' read -r S_AD S_ADR S_SEHIR S_EYALET S_POSTA S_ULKE <<< "$ALICI"
+            args=(--file-id "$SIPARIS_DOSYA_ID" --remote "$SIPARIS_REMOTE" --sku "$SIPARIS_SKU"
+                  --adet "$SIPARIS_ADET" --ref "$SIPARIS_REF" --alici "$S_AD" --adres1 "$S_ADR"
+                  --sehir "$S_SEHIR" --eyalet "$S_EYALET" --posta "$S_POSTA" --ulke "$S_ULKE"
+                  --master "$SIPARIS_MASTER" --kontrol "$SIPARIS_KONTROL")
+            if [ "$MOD" = "siparis_gonder" ]; then
+              python scripts/prodigi/manuel_siparis.py gonder "${args[@]}" --confirm "$CONFIRM"
+            else
+              python scripts/prodigi/manuel_siparis.py hazirla "${args[@]}"
+            fi
+          elif [ "$MOD" = "pilot15_oku" ]; then
+            python scripts/pod/pod_pilot_15.py oku --listing "$LISTING" --kota-alt "$KOTA_ALT"
+          elif [ "$MOD" = "pilot15_yaz" ]; then
+            python scripts/pod/pod_pilot_15.py yaz --listing "$LISTING" --kota-alt "$KOTA_ALT" --confirm "$CONFIRM" --adim "$ADIM"
+          elif [ "$MOD" = "oas_kisisel" ]; then
+            # SALT OKUMA: statik Etsy OAS dosyasi (API kotasi harcamaz) -> kisisellestirme alanlari + dosya uclari.
+            python scripts/etsy/oas_kisisel.py _out/oas_kisisel
+            rclone copy _out/oas_kisisel "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM" -q
+          elif [ "$MOD" = "iptal_dok" ]; then
+            # SALT OKUMA: Prodigi dokumani + tamamlanmis kanal siparisinde GET /orders/{id} ve /actions. Iptal YOK.
+            OID=$(jq -r '.inputs.listing // ""' "$GITHUB_EVENT_PATH")      # 28 Eyl: ord id depoda tutulmaz
+            python scripts/prodigi/iptal_dok.py _out/dok "$OID" 2>&1 | python3 scripts/guvenlik/kargo_maske.py
+            rclone copy _out/dok "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM" -q
+          elif [ "$MOD" = "kanal_oku" ]; then
+            # SALT OKUMA: yalniz Prodigi GET /orders (+ son 15 kanal siparisinin GET /orders/{id}); Etsy cagrisi yok.
+            python scripts/prodigi/kanal_oku.py _out/kanal
+            rclone copy _out/kanal "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM" -q
+          elif [ "$MOD" = "kota_oku" ]; then
+            # SALT OKUMA: tek hafif GET ile kalan Etsy kotasi; olcum Drive KOTA_LOG.csv'ye eklenir.
+            mkdir -p _out
+            rclone copyto "gdrive:ASTROLOVE/TEMP/YAYILIM_78/KOTA_LOG.csv" _out/KOTA_LOG.csv 2>/dev/null || true
+            python scripts/etsy/kota_oku.py _out/KOTA_LOG.csv
+            rclone copyto _out/KOTA_LOG.csv "gdrive:ASTROLOVE/TEMP/YAYILIM_78/KOTA_LOG.csv"
+          elif [ "$MOD" = "galeri_tek_plan" ]; then
+            # SALT OKUMA, Etsy API kotasi HARCAMAZ: METIN_78 + GALERI_PLAN + REFERANS_SIRA (varsa) + A1_77/<CIFT>/SET.json.
+            mkdir -p _work/tek _out/galeri_tek
+            rclone copyto "gdrive:ASTROLOVE/TEMP/METIN_78/METIN_78.csv" _work/METIN_78.csv
+            rclone copyto "gdrive:ASTROLOVE/TEMP/GALERI_GENEL/GALERI_PLAN.json" _work/GALERI_PLAN.json
+            rclone copyto "gdrive:ASTROLOVE/TEMP/GALERI_TEK/REFERANS_SIRA.json" _work/REFERANS_SIRA.json 2>/dev/null || echo "REFERANS_SIRA yok"
+            rclone copy "gdrive:ASTROLOVE/TEMP/POD_KISISEL/A1_77" _work/tek --include "*/SET.json" -q || true
+            echo "SET.json: $(find _work/tek -name SET.json | wc -l)"
+            rc=0; python scripts/pod/galeri_tek.py plan --csv _work/METIN_78.csv --plan _work/GALERI_PLAN.json \
+              --referans _work/REFERANS_SIRA.json --yerel _work/tek --out _out/galeri_tek || rc=$?
+            rclone copy _out/galeri_tek "gdrive:ASTROLOVE/TEMP/GALERI_TEK" -q
+            echo "Drive: TEMP/GALERI_TEK"; exit $rc
+          elif [ "$MOD" = "galeri_oku" ]; then
+            # SALT OKUMA, Etsy API kotasi HARCAMAZ: Drive yedekleri + Etsy CDN kucuk resimleri.
+            mkdir -p _work/yedek _out/galeri
+            rclone copyto "gdrive:ASTROLOVE/TEMP/METIN_78/METIN_78.csv" _work/METIN_78.csv
+            rclone copy "gdrive:ASTROLOVE/TEMP/YAYILIM_78/YEDEK" _work/yedek --filter "- *METIN2*" --filter "+ *_ONCE.json" --filter "- *" -q
+            echo "yedek: $(ls _work/yedek | wc -l) dosya"
+            rc=0; python scripts/pod/galeri_genel.py oku --csv _work/METIN_78.csv --yedek _work/yedek --out _out/galeri || rc=$?
+            rclone copy _out/galeri "gdrive:ASTROLOVE/TEMP/GALERI_GENEL" -q
+            echo "Drive: TEMP/GALERI_GENEL"; exit $rc
+          elif [ "$MOD" = "galeri_yaz" ]; then
+            mkdir -p _work/kartlar _out/galeri
+            rclone copy "gdrive:" _work/kartlar --drive-root-folder-id 1MxlQnLfpaYOKJQzSu_zNnbMxgnm7VTrY --include "GENEL_*.jpg" -q
+            ls -la _work/kartlar
+            rclone copyto "gdrive:ASTROLOVE/TEMP/GALERI_GENEL/GALERI_PLAN.json" _out/galeri/GALERI_PLAN.json
+            HEDEF=(); [ "$LISTING" != "hepsi" ] && HEDEF=(--listing "$LISTING")
+            rc=0; python scripts/pod/galeri_genel.py yaz "${HEDEF[@]}" --plan _out/galeri/GALERI_PLAN.json --kartlar _work/kartlar --out _out/galeri --confirm "$CONFIRM" --kota-alt "$KOTA_ALT" || rc=$?
+            rclone copy _out/galeri "gdrive:ASTROLOVE/TEMP/GALERI_GENEL" -q
+            exit $rc
+          elif [ "$MOD" = "yayilim_metin2" ]; then
+            echo "::error::yayilim_metin2 ESKIDI: 28 Eyl ayar77-yaz 77 ilana v3 aciklamayi yazdi; bu mod v3'u ezer. DUR."; exit 1
+            # 78 ilan ikinci gecis: yalniz EN aciklama + RU + kisisellestirme sorulari (onayli), tam geri okuma.
+            mkdir -p _out/yayilim78
+            rclone copyto "gdrive:ASTROLOVE/TEMP/METIN_78/METIN_78.csv" _work/METIN_78.csv
+            rc=0
+            if [ "$LISTING" = "hepsi" ]; then HEDEF=(--hepsi); else HEDEF=(--listing "$LISTING"); fi
+            python scripts/pod/yayilim_78.py metin2 "${HEDEF[@]}" --csv _work/METIN_78.csv --out _out/yayilim78 --confirm "$CONFIRM" --kota-alt "$KOTA_ALT" || rc=$?
+            if [ -f _out/yayilim78/METIN_78.csv ]; then
+              rclone copyto _out/yayilim78/METIN_78.csv "gdrive:ASTROLOVE/TEMP/METIN_78/METIN_78.csv" && echo "Drive METIN_78.csv guncellendi"
+            fi
+            rclone copy _out/yayilim78 "gdrive:ASTROLOVE/TEMP/YAYILIM_78" -q
+            exit $rc
+          elif [ "$MOD" = "yayilim_hazirlik" ] || [ "$MOD" = "yayilim_yaz" ]; then
+            # 78 ilan yayilimi. hazirlik = SALT OKUMA (yedek + plan); yaz = onayli yazma + tam geri okuma.
+            mkdir -p _out/yayilim78
+            rclone copyto "gdrive:ASTROLOVE/TEMP/METIN_78/METIN_78.csv" _work/METIN_78.csv
+            rc=0
+            if [ "$MOD" = "yayilim_hazirlik" ]; then
+              python scripts/pod/yayilim_78.py hazirlik --csv _work/METIN_78.csv --out _out/yayilim78 --kota-alt "$KOTA_ALT" || rc=$?
+            elif [ "$LISTING" = "hepsi" ]; then
+              python scripts/pod/yayilim_78.py yaz --hepsi --csv _work/METIN_78.csv --out _out/yayilim78 --confirm "$CONFIRM" --kota-alt "$KOTA_ALT" || rc=$?
+            else
+              EK=(); [ "$ADIM" = "envanter" ] && EK=(--yalniz-envanter)
+              python scripts/pod/yayilim_78.py yaz --listing "$LISTING" "${EK[@]}" --csv _work/METIN_78.csv --out _out/yayilim78 --confirm "$CONFIRM" --kota-alt "$KOTA_ALT" || rc=$?
+            fi
+            rclone copy _out/yayilim78 "gdrive:ASTROLOVE/TEMP/YAYILIM_78" -q
+            echo "Drive: TEMP/YAYILIM_78 ($(rclone lsf -R gdrive:ASTROLOVE/TEMP/YAYILIM_78 | wc -l) dosya)"
+            exit $rc
+          elif [ "$MOD" = "takip_kuru" ]; then
+            # SALT OKUMA: Prodigi gonderileri okunur, yeni takip kodunun Etsy'ye ne yazacagi tablolanir.
+            # Etsy'ye POST YOK, Prodigi'ye yazma YOK, canli siparislere dokunulmaz.
+            python scripts/prodigi/takip_kuru.py --env live --out _out/takip --top 50 2>&1 | python3 scripts/guvenlik/kargo_maske.py
+            rclone copy _out/takip "gdrive:ASTROLOVE/TEMP/TAKIP_DUZELT" -q
+            rclone lsf "gdrive:ASTROLOVE/TEMP/TAKIP_DUZELT"
+          elif [ "$MOD" = "siparis_kiyas" ]; then
+            # SALT OKUMA: iki Prodigi siparisi yalniz GET ile okunur ve karsilastirilir. Etsy/Prodigi'ye yazma yok.
+            # 28 Eyl: siparis kimlikleri depoda/env basliginda tutulmaz; listing girdisi "ord_a,ord_b" olay dosyasindan
+            # okunur; cikti kargo_maske'den gecer (ord id / takip no yalniz son 4 hane).
+            IFS=',' read -r S1 S2 <<< "$(jq -r '.inputs.listing // ""' "$GITHUB_EVENT_PATH")"
+            [ -n "${S1:-}" ] && [ -n "${S2:-}" ] || { echo "HATA: listing = ord_a,ord_b"; exit 1; }
+            python scripts/prodigi/siparis_kiyas.py --env live --siparis "$S1" --kiyas "$S2" --top 50 2>&1 | python3 scripts/guvenlik/kargo_maske.py
+          elif [ "$MOD" = "metin78_kuru" ]; then
+            # SALT OKUMA: 78 ilanin metinleri okunur, yeni metinler URETILIR (Etsy'ye yazma yok).
+            python scripts/pod/metin_78.py --out _out/metin78 --kota-alt "$KOTA_ALT" --limit "$LIMIT"
+            rclone copy _out/metin78 "gdrive:ASTROLOVE/TEMP/METIN_78" -q
+            rclone lsf "gdrive:ASTROLOVE/TEMP/METIN_78"
+            echo "YEDEK dosya sayisi: $(rclone lsf 'gdrive:ASTROLOVE/TEMP/METIN_78/YEDEK' | wc -l)"
+          elif [ "$MOD" = "fiyat_b_oku" ]; then
+            # SALT OKUMA: yedek + 80 varyantlik kuru fiyat tablosu. Etsy'ye yazma yok.
+            python scripts/pod/fiyat_b.py oku --listing "$LISTING" --out _out/fiyat_b --kota-alt "$KOTA_ALT"
+            rclone copy _out/fiyat_b "gdrive:ASTROLOVE/TEMP/FIYAT_B" -q
+            rclone lsf -R "gdrive:ASTROLOVE/TEMP/FIYAT_B"
+          elif [ "$MOD" = "fiyat_b_yaz" ]; then
+            # YAZMA: yalniz $LISTING envanterindeki fiyatlar (confirm FIYAT_B). Diger ilanlara dokunulmaz.
+            python scripts/pod/fiyat_b.py yaz --listing "$LISTING" --out _out/fiyat_b \
+              --kota-alt "$KOTA_ALT" --confirm "$CONFIRM"
+            rclone copy _out/fiyat_b "gdrive:ASTROLOVE/TEMP/FIYAT_B" -q
+            rclone lsf -R "gdrive:ASTROLOVE/TEMP/FIYAT_B"
+          elif [ "$MOD" = "prodigi_teklif" ]; then
+            # SALT OKUMA: Prodigi fiyat sorgusu (quote). Siparis YOK, Etsy'ye dokunulmaz.
+            python scripts/prodigi/canli_teklif.py --env live --out _out/fiyat
+            rclone copy _out/fiyat "gdrive:ASTROLOVE/TEMP/FIYAT_ANALIZ" -q
+            rclone lsf "gdrive:ASTROLOVE/TEMP/FIYAT_ANALIZ"
+          elif [ "$MOD" = "cerceve_mockup" ]; then
+            # ORNEK mockup (toplu uretim YOK). Kaynaklar Drive'dan okunur, Etsy'ye yukleme yok.
+            set -euo pipefail
+            mkdir -p _work/mk/poster _work/mk/oda _out/mockup
+            rclone copy "gdrive:ASTROLOVE/WALL_ART/POSTERS/ORIGINAL_HIGH_RES/MIDNIGHT_BLUE" \
+              _work/mk/poster --include "**/AQUARIUS_ARIES.jpg" -q
+            rclone copy "gdrive:ASTROLOVE/WALL_ART/LISTING_MEDIA/ETSY_UPLOAD_SETS/MIDNIGHT_BLUE/AQUARIUS_ARIES" \
+              _work/mk/oda --include "*_WA_*" -q || true
+            echo "poster dosyalari:"; find _work/mk/poster -name '*.jpg' | head -20
+            echo "oda kareleri:"; find _work/mk/oda -type f | head -20
+            python scripts/pod/cerceve_kaynak_sec.py --poster-kok _work/mk/poster \
+              --oda-kok _work/mk/oda --out _work/mk/secim.txt
+            P=$(sed -n '1p' _work/mk/secim.txt); O=$(sed -n '2p' _work/mk/secim.txt)
+            echo "secilen poster: $P"; echo "secilen oda: $O"
+            python scripts/pod/cerceve_mockup.py --poster "$P" --oda "$O" --out _out/mockup
+            rclone copy _out/mockup "gdrive:ASTROLOVE/TEMP/POD_5X7/CERCEVE_MOCKUP" -q
+            rclone lsf "gdrive:ASTROLOVE/TEMP/POD_5X7/CERCEVE_MOCKUP"
+          elif [ "$MOD" = "cerceve_hazirlik" ]; then
+            # SALT OKUMA: urun kayitlari + fiyat teklifleri. Siparis YOK, Etsy'ye dokunulmaz.
+            python scripts/prodigi/cerceve_hazirlik.py --env live --out _out/cerceve2
+            rclone copy _out/cerceve2 "gdrive:ASTROLOVE/TEMP/POD_5X7" --include "CERCEVE_FIYAT.csv" -q
+            rclone copy _out/cerceve2 "gdrive:ASTROLOVE/TEMP/POD_5X7/CERCEVE" -q
+            echo "cikti: TEMP/POD_5X7/CERCEVE_FIYAT.csv + TEMP/POD_5X7/CERCEVE/"
+          elif [ "$MOD" = "cerceve_sonda" ]; then
+            # SALT OKUMA: katalog sorgusu + maliyet teklifi. Siparis YOK, Etsy'ye dokunulmaz.
+            python scripts/prodigi/cerceve_sonda.py --env live --out _out/cerceve
+            rclone copy _out/cerceve "gdrive:ASTROLOVE/TEMP/POD_5X7/CERCEVE" -q
+            echo "cikti: gdrive:ASTROLOVE/TEMP/POD_5X7/CERCEVE"
+          elif [ "$MOD" = "durum15" ]; then
+            python scripts/pod/pod_durum_15.py --kota-alt "$KOTA_ALT" --limit "$LIMIT"
+          elif [ "$MOD" = "boy15_oku" ]; then
+            python scripts/pod/pod_boy_15.py oku --listing "$LISTING" --kota-alt "$KOTA_ALT"
+          elif [ "$MOD" = "boy15_yaz" ]; then
+            python scripts/pod/pod_boy_15.py yaz --listing "$LISTING" --kota-alt "$KOTA_ALT" --confirm "$CONFIRM"
+          elif [ "$MOD" = "boy15_toplu" ]; then
+            python scripts/pod/pod_boy_15.py toplu --atla "$ATLA" --limit "$LIMIT" \
+              --kota-alt "$KOTA_ALT" --confirm "$CONFIRM"
+          elif [ "$MOD" = "yetki" ]; then
+            python scripts/etsy/etsy_yetki.py link --redirect "$REDIRECT"
+          elif [ "$MOD" = "yetki_test" ]; then
+            python scripts/etsy/etsy_yetki.py test
+          elif [ "$MOD" = "yetki_degistir" ]; then
+            python scripts/etsy/etsy_yetki.py degistir --redirect "$REDIRECT" --code "$KOD" --state "$STATE"
+          elif [ "$MOD" = "buyuk" ]; then
+            python scripts/prodigi/pod_hpr_buyuk_boy.py --is-dizin _work/buyuk
+          elif [ "$MOD" = "hpr" ]; then
+            python scripts/prodigi/pod_hpr_kucuk_boy.py --is-dizin _work/hpr
+          elif [ "$MOD" = "dogrula" ]; then
+            python scripts/pod/pod_fiyat_2999.py dogrula --limit "$LIMIT"
+          elif [ "$MOD" = "maliyet" ]; then
+            python scripts/prodigi/pod_maliyet_2999.py --out-dir _work/maliyet
+          elif [ "$MOD" = "pilot" ]; then
+            python scripts/pod/pod_fiyat_2999.py pilot --listing "$LISTING" --apply --confirm "$CONFIRM"
+          elif [ "$MOD" = "toplu" ]; then
+            python scripts/pod/pod_fiyat_2999.py toplu --apply --confirm "$CONFIRM" --limit "$LIMIT" --kota-alt "$KOTA_ALT"
+          else
+            python scripts/pod/pod_fiyat_2999.py kuru --limit "$LIMIT"
+          fi
+      - name: Token geri yazma
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          if [ -f _work/ETSY_TOKEN.json.updated ]; then
+            rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json"
+            echo "Token geri yazildi"
+          fi
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone

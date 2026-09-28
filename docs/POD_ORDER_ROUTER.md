@@ -1,5 +1,14 @@
 # POD siparis yonlendirici (Etsy -> Prodigi -> Etsy), 6 Eyl 2026
 
+> **KURAL (20 Eyl 2026, Serdar): 5x7 ve A1 Prodigi panelinde ASLA eslenmez.**
+> Bu iki boy Prodigi sales-channel entegrasyonuna kapali kalir; siparislerini yalniz
+> `order_router.py --only-size 5x7,A1` isler. Eslenirlerse hem Prodigi entegrasyonu hem
+> yonlendirici ayni kalemi uretir (CIFT SIPARIS). Panelde eslenmeleri gerekirse once
+> `POD_ROUTER_ENABLED` kapatilir. Yonlendirici secilen boylarin kalemlerini TEK Prodigi
+> siparisinde birlestirir (kargo tek sefer); idempotency anahtari siparisteki boylardan
+> turetilir (`etsy-<receipt>-5x7`, `etsy-<receipt>-A1`, `etsy-<receipt>-5x7+A1`) ve STATE'te
+> gonderilen Etsy kalem id'leri (`sent_tx`) tutulur.
+
 > **KULLANILMIYOR — Prodigi sales-channel entegrasyonu devrede (7 Eyl 2026).**
 > 78 ilanin 65/65 varyanti Prodigi panelinde "Fulfilled by Prodigi" olarak acildi;
 > siparisleri Prodigi kendi entegrasyonuyla cekiyor. Yonlendirici cron'u KAPALI,
