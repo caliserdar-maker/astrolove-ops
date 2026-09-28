@@ -24,7 +24,7 @@ CX = (BX0 + BX1) // 2
 
 # cerceve olculeri: yukseklik taban-2, oran 11:14, yuz F = PW x 20/599.6
 R_YUZ = 20 / 599.6
-OH = TABAN - 2
+OH = TABAN - BY0
 PH = round(OH / (1 + 2 * R_YUZ * (11 / 14)))
 PW = round(PH * 11 / 14)
 F = round(PW * R_YUZ)
@@ -38,11 +38,8 @@ FX, FY = CX - fr.width // 2, TABAN - fr.height
 # bos alanin cerceve disinda kalan seritleri OpenCV Telea inpaint ile duvara tamamlanir
 # (sahne_yazi_sil yontemi; ayna/kaydirma yamalari dikis birakiyordu, Serdar 28 Eyl)
 import cv2
-if TEMIZ:
-    ga = np.asarray(G).copy()
-    mask = np.zeros(ga.shape[:2], np.uint8)
-else:
-    ga = np.asarray(G).copy()
+ga = np.asarray(G).copy()
+mask = np.zeros(ga.shape[:2], np.uint8)
 if not TEMIZ:
     mask[max(BY0 - 3, 0):TABAN + 3, BX0 - 3:BX1 + 3] = 255   # tum bos alan; delik yok
     ga = cv2.inpaint(ga, mask, 12, cv2.INPAINT_TELEA)
