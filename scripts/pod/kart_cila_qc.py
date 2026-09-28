@@ -12,7 +12,8 @@
  - poster renk sinifi (kaynak dosya/kirpim kutusu dogru mu): NCC kaynagin kendisine olculdugu icin yanlis
    kaynak NCC'yi dusurmez (28 Eyl 1. kosu: sembol karti palet sanildi); MB koyu mavi, DB koyu notr, PW/CI acik
  - acik serit yok (Serdar 28 Eyl): gorunen poster kenarinin 1-5 px disindaki halkada hicbir piksel, 3 px iceride
-   poster kenar tonundan VE cerceve tonundan +12'den fazla parlak degil (4 kenar, orta %90; ayrinti serit())
+   poster kenar tonundan VE cerceve tonundan +12'den fazla parlak degil (4 kenar, orta %90); halka ilk cerceve
+   pikselinde kesilir (kalici olcut, Serdar 28 Eyl; ayrinti serit())
 Kullanim: kart_cila_qc.py CIKIS_KLASORU KONTROL_KLASORU SAHNE_KLASORU BASKI_11x14.jpg CANLI_04.jpg [ONAYLI=06,10,11]
   ONAYLI: v2 geometrisiyle (genisletmesiz) kurulmus onayli kartlar; ayni kurallarla olculur
 """
@@ -44,12 +45,12 @@ RENK = {  # kart: (ad, kosul(ortalama parlaklik, R, G, B))
 }
 
 
-def serit(R, V, SY, ham=False):
+def serit(R, V, SY):
     """Gorunen poster dikdortgeni V (panel) etrafinda acik serit: {kenar: (ihlal px, en buyuk asim)}.
-    Her satir/sutunda halka = poster kenarinin 1-5 px disi, ILK CERCEVE PIKSELINDE (kart_cila_kur.cerceve) kesilir
-    (serit poster ile cerceve ARASINDADIR; cercevenin kendi pahi/parlak cizgisi serit degildir). Ihlal: halka pikseli
-    > max(3 px iceride poster tonu, cercevenin 3 px icindeki ton) + 12. ham=True: halka kesilmez, cerceve tonu halkanin
-    3 px disindan (talimatin harfiyen hali; koyu posterde cerceve profilini de olcer, bilgi icin)."""
+    KALICI OLCUT (Serdar 28 Eyl kabul): her satir/sutunda halka = poster kenarinin 1-5 px disi, ILK CERCEVE
+    PIKSELINDE (kart_cila_kur.cerceve) kesilir; serit poster ile cerceve ARASINDADIR, cercevenin kendi pahi/parlak
+    cizgisi serit degildir. Ihlal: halka pikseli > max(3 px iceride poster tonu, cercevenin 3 px icindeki ton) + 12.
+    (Kesilmeyen sabit 1-5 px halka koyu posterlerde cerceve profilini olcup onayli 06/10'u da FAIL veriyordu.)"""
     L = R.astype(np.float32).mean(2); C = cerceve(R)
     x0, y0, x1, y1 = V[0] + SX, V[1] + SY, V[2] + SX, V[3] + SY      # [x0,x1) x [y0,y1)
     iy = range(y0 + (y1 - y0) // 20, y1 - (y1 - y0) // 20); ix = range(x0 + (x1 - x0) // 20, x1 - (x1 - x0) // 20)
@@ -64,11 +65,8 @@ def serit(R, V, SY, ham=False):
         ihlal, asim = 0, -999.0
         for i in (iy if ad in ('sol', 'sag') else ix):
             dizi, cer, p = f(i)
-            if ham:
-                halka, c = dizi[:5], dizi[7]
-            else:
-                j = np.flatnonzero(cer); j = int(j[0]) if len(j) else 5
-                halka, c = dizi[:min(j, 5)], dizi[min(j + 2, 14)]
+            j = np.flatnonzero(cer); j = int(j[0]) if len(j) else 5
+            halka, c = dizi[:min(j, 5)], dizi[min(j + 2, 14)]
             if len(halka):
                 a_ = halka - (max(p, c) + 12)
                 ihlal += int((a_ > 0).sum()); asim = max(asim, float(a_.max()))
@@ -111,7 +109,7 @@ for kart, K in KARTLAR.items():
     # gorunen posterin 3 px disindaki halkada beyaz (bilgi)
     halka = np.zeros(R.shape[:2], bool); halka[SY + Y0 - 3:SY + Y1 + 3, SX + X0 - 3:SX + X1 + 3] = True
     halka[SY + Y0:SY + Y1, SX + X0:SX + X1] = False
-    sr = serit(R, V, SY); sr_ham = serit(R, V, SY, ham=True)
+    sr = serit(R, V, SY)
     serit_ok = all(v[0] == 0 for v in sr.values())
     halka_beyaz = int((beyaz(R) & halka).sum())
 
@@ -139,6 +137,6 @@ for kart, K in KARTLAR.items():
     print(f"{K['ad']}{' (onayli v2)' if kart in ONAYLI else ''}: boyut {R.shape[1]}x{R.shape[0]} | aciklik girdi {kutu} dolu {dolu:.4f} kenar sapma {sapma} px oran "
           f"{(kutu[2] - kutu[0] + 1) / (kutu[3] - kutu[1] + 1):.4f} -> panel {X1 - X0}x{Y1 - Y0} | kirpim eksen %{kirp_eks * 100:.2f} "
           f"| poster {RENK[kart][0]} RGB {pr:.0f},{pg:.0f},{pb:.0f} {'ok' if renk_ok else 'YANLIS'} | NCC {n:.4f} | kalinti {kalinti} px (ham beyaz {ham_beyaz}, halka {halka_beyaz}) | disari fark {birebir} "
-          f"(jpg ort {jpg_fark:.2f}) | zemin {zemin} | tire {tire} | yazi alt ~{alt} satir {len(bas)} bosluk {bosluk} px | serit {' '.join(f'{k} {v[0]}/{v[1]}' for k, v in sr.items())} | harfiyen {' '.join(f'{k} {v[0]}' for k, v in sr_ham.items())} | uzanti {uzanti} | {'PASS' if ok else 'FAIL'}")
+          f"(jpg ort {jpg_fark:.2f}) | zemin {zemin} | tire {tire} | yazi alt ~{alt} satir {len(bas)} bosluk {bosluk} px | serit {' '.join(f'{k} {v[0]}/{v[1]}' for k, v in sr.items())} | uzanti {uzanti} | {'PASS' if ok else 'FAIL'}")
 print('GENEL', 'PASS' if hepsi else 'FAIL')
 sys.exit(0 if hepsi else 1)
