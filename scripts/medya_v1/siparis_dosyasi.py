@@ -276,36 +276,7 @@ class EdisyonPoster:
         ref_norm = self.p11.norm(Image.open(yol).convert('RGB'))[0]
         m = self.eu.murekkep(np.asarray(ref_norm).astype(np.float32))
         o = self.p11.sayfa_olc(yol, maske=self.plate_maske(plate_yol))
-        if 'tag_bant' not in o:
-            o = self.tag_yedek(yol, o)
         return (*olcum_duzelt(o, m), m)
-
-    def tag_yedek(self, yol, o):
-        """Plate farki slogan bandini vermezse bant AYNI dosyadan yerel kontrastla olculur.
-
-        28 Eyl hata kontrolu: WP (3 cift) ve CI 12x16'da `dosya - plate` maskesi slogani
-        bulamiyor (KeyError 'tag_bant' -> SISTEM HATASI). Isim ve sembol bantlari plate
-        maskesinden gelir; yalniz tag_* alanlari onayli edisyon maskesiyle (edisyon_maske,
-        plate oncesi olcum yolu) ayni dosyadan alinir. Isim bandi iki olcumde +-2 px
-        uyusmazsa yedek kullanilmaz (sessiz yanlis olcum yerine SISTEM HATASI kalir).
-        """
-        try:
-            o2 = self.p11.sayfa_olc(yol, maske=lambda L, acik: self.eu.edisyon_maske(L, acik))
-        except SystemExit as e:
-            o['tag_yedek'] = {'kullanildi': False, 'sebep': f'yerel kontrast olcumu: {e}'}
-            return o
-        fark = max(abs(a - b) for a, b in zip(o['isim_bant'], o2.get('isim_bant', [1e9, 1e9])))
-        if 'tag_bant' not in o2 or fark > 2:
-            o['tag_yedek'] = {'kullanildi': False, 'isim_bant_farki': fark,
-                              'sebep': 'yerel kontrast da slogan bulamadi' if 'tag_bant' not in o2
-                              else 'isim bandi uyusmuyor'}
-            return o
-        for a in ('tag_bant', 'tag_x', 'tag_genislik', 'tag_yuksekligi', 'tag_merkez',
-                  'tag_kumeleri'):
-            o[a] = o2[a]
-        o['tag_yedek'] = {'kullanildi': True, 'kaynak': 'edisyon_maske (ayni dosya)',
-                          'isim_bant_farki': fark}
-        return o
 
     def render(self, ed, oran, sayfa_no, o, kilit, isimler, mesaj):
         """Tek olcekte render (NORM_W o an ne ise). Render kodu degismez."""
@@ -396,7 +367,7 @@ class EdisyonPoster:
             'olcek': olcek, 'olcek_kapisi': olcek_kapi, 'leke_kapisi': leke,
             'olcum': {a: o.get(a) for a in ('isim_bant', 'isim_govde', 'sembol_bant',
                                             'sembol', 'tag_bant', 'sol_isim', 'sag_isim')},
-            'olcum_duzeltme': duz, 'tag_yedek': o.get('tag_yedek'),
+            'olcum_duzeltme': duz,
             'kilit': {'bosluk': kilit['bosluk'], 'cap': kilit['cap']},
             'temiz_ara_kapisi': s0['temiz_ara_kapisi'], 'kalinti_kapisi': kapi0,
             'sembol_kapisi': sk, 'punto_2400': bi0['punto'], 'punto_hedef': bi1['punto'],
