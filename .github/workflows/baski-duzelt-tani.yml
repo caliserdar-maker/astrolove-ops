@@ -1,0 +1,120 @@
+name: baski-duzelt-tani
+
+# baski-duzelt (28 Eyl 2026): siparis_dosyasi.py 'olcek' FAIL (DB/CI/PW), MB olcek kapisi None,
+# WP / CI 12x16 KeyError 'tag_bant'. TEST baski dosyalari YALNIZ Drive TEMP/BASKI_DUZELT_<damga>/.
+# Etsy/Prodigi secret'i YOK; musteriye teslim, Etsy yazma, Prodigi siparisi YOK. Siparis hattina merge YOK.
+# Tetik: bu daldaki config/baski_duzelt_tani.trigger degisikligi (workflow_dispatch yalniz main'de calisir).
+# Ayni anda en fazla 2 is (max-parallel: 2).
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [claude/gracious-meitner-i72rkr]
+    paths:
+      - config/baski_duzelt_tani.trigger
+
+concurrency: baski-duzelt-tani
+
+jobs:
+  damga:
+    runs-on: ubuntu-latest
+    outputs:
+      kok: ${{ steps.d.outputs.kok }}
+    steps:
+      - id: d
+        run: echo "kok=gdrive:ASTROLOVE/TEMP/BASKI_DUZELT_$(date -u +%Y%m%d_%H%M)" >> "$GITHUB_OUTPUT"
+
+  uret:
+    needs: damga
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        cift: [AQUARIUS_GEMINI, CANCER_LIBRA, ARIES_LIBRA]
+    env:
+      KOK: ${{ needs.damga.outputs.kok }}
+      ONCEKI: gdrive:ASTROLOVE/TEMP/HATA_KONTROL_20260928/BASKI_TEST
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Python bagimliliklari
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet --upgrade pip
+          python -m pip install --quiet pillow opencv-python-headless numpy fonttools img2pdf pikepdf pytest
+      - name: rclone kur
+        run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then echo "HATA: RCLONE_CONF_B64 yok" >&2; exit 1; fi
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Birim testleri (kisisel-v1 ile)
+        run: |
+          set -euo pipefail
+          python -c "import sys; sys.path.insert(0,'scripts/medya_v1'); import siparis_dosyasi as s; s.kisisel_hazirla()"
+          export KISISEL_YOL="$PWD/_siparis/kisisel/scripts/kisisel"
+          PYTHONPATH="$KISISEL_YOL:scripts/medya_v1:." python -m pytest -q scripts/medya_v1
+      - name: Tani (11x14 x 5 renk + 12x16 CI/WP)
+        env:
+          CIFT: ${{ matrix.cift }}
+        run: |
+          set -euo pipefail
+          python scripts/medya_v1/baski_tani.py --cift "$CIFT" --kok "$KOK" --onceki "$ONCEKI" \
+            --isler "11x14:MIDNIGHT_BLUE,DEEP_BLACK,CHAMPAGNE_IVORY,PURE_WHITE,WARM_PARCHMENT;12x16:CHAMPAGNE_IVORY,WARM_PARCHMENT"
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
+
+  ozet:
+    needs: [damga, uret]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      KOK: ${{ needs.damga.outputs.kok }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Tablo
+        run: |
+          set -euo pipefail
+          rclone copy "$KOK/_TANI" _tani --include "TANI_*.json" -q
+          python scripts/medya_v1/baski_tani_ozet.py _tani
+          rclone copy _tani "$KOK/_TANI" --include "TABLO.*" -q
+          echo "Drive: ${KOK#gdrive:}/_TANI"
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone

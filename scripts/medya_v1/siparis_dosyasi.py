@@ -95,6 +95,7 @@ SAYFA_TOL_MM = 0.5                      # sayfa olcusu toleransi
 DPI_TOL = 0.01                          # gomulu gorsel dpi toleransi (oran)
 RENKLER = ('MIDNIGHT_BLUE', 'DEEP_BLACK', 'PURE_WHITE', 'CHAMPAGNE_IVORY', 'WARM_PARCHMENT')
 BUYUT = 3                               # kontrol paketinde bant buyutme
+_TANI = None                            # baski_tani.py bir dict atarsa pod_uret goruntuleri buraya koyar
 
 
 def log(*a): print(f'[{time.time() - T0:7.1f}s]', *a, flush=True)
@@ -275,7 +276,36 @@ class EdisyonPoster:
         ref_norm = self.p11.norm(Image.open(yol).convert('RGB'))[0]
         m = self.eu.murekkep(np.asarray(ref_norm).astype(np.float32))
         o = self.p11.sayfa_olc(yol, maske=self.plate_maske(plate_yol))
+        if 'tag_bant' not in o:
+            o = self.tag_yedek(yol, o)
         return (*olcum_duzelt(o, m), m)
+
+    def tag_yedek(self, yol, o):
+        """Plate farki slogan bandini vermezse bant AYNI dosyadan yerel kontrastla olculur.
+
+        28 Eyl hata kontrolu: WP (3 cift) ve CI 12x16'da `dosya - plate` maskesi slogani
+        bulamiyor (KeyError 'tag_bant' -> SISTEM HATASI). Isim ve sembol bantlari plate
+        maskesinden gelir; yalniz tag_* alanlari onayli edisyon maskesiyle (edisyon_maske,
+        plate oncesi olcum yolu) ayni dosyadan alinir. Isim bandi iki olcumde +-2 px
+        uyusmazsa yedek kullanilmaz (sessiz yanlis olcum yerine SISTEM HATASI kalir).
+        """
+        try:
+            o2 = self.p11.sayfa_olc(yol, maske=lambda L, acik: self.eu.edisyon_maske(L, acik))
+        except SystemExit as e:
+            o['tag_yedek'] = {'kullanildi': False, 'sebep': f'yerel kontrast olcumu: {e}'}
+            return o
+        fark = max(abs(a - b) for a, b in zip(o['isim_bant'], o2.get('isim_bant', [1e9, 1e9])))
+        if 'tag_bant' not in o2 or fark > 2:
+            o['tag_yedek'] = {'kullanildi': False, 'isim_bant_farki': fark,
+                              'sebep': 'yerel kontrast da slogan bulamadi' if 'tag_bant' not in o2
+                              else 'isim bandi uyusmuyor'}
+            return o
+        for a in ('tag_bant', 'tag_x', 'tag_genislik', 'tag_yuksekligi', 'tag_merkez',
+                  'tag_kumeleri'):
+            o[a] = o2[a]
+        o['tag_yedek'] = {'kullanildi': True, 'kaynak': 'edisyon_maske (ayni dosya)',
+                          'isim_bant_farki': fark}
+        return o
 
     def render(self, ed, oran, sayfa_no, o, kilit, isimler, mesaj):
         """Tek olcekte render (NORM_W o an ne ise). Render kodu degismez."""
@@ -366,13 +396,15 @@ class EdisyonPoster:
             'olcek': olcek, 'olcek_kapisi': olcek_kapi, 'leke_kapisi': leke,
             'olcum': {a: o.get(a) for a in ('isim_bant', 'isim_govde', 'sembol_bant',
                                             'sembol', 'tag_bant', 'sol_isim', 'sag_isim')},
-            'olcum_duzeltme': duz, 'kilit': {'bosluk': kilit['bosluk'], 'cap': kilit['cap']},
+            'olcum_duzeltme': duz, 'tag_yedek': o.get('tag_yedek'),
+            'kilit': {'bosluk': kilit['bosluk'], 'cap': kilit['cap']},
             'temiz_ara_kapisi': s0['temiz_ara_kapisi'], 'kalinti_kapisi': kapi0,
             'sembol_kapisi': sk, 'punto_2400': bi0['punto'], 'punto_hedef': bi1['punto'],
             'sure_sn': round(time.time() - t0, 1),
         }
+        bilgi['olcek_kapisi_eski'] = bilgi.pop('olcek_kapisi')    # asil kapi BASKI uzerinde
         return p1, bilgi, {'maske': maske1, 'silinen': silinen1, 'kirp': kirp,
-                           'maske_2400': maske0, 'silinen_2400': silinen0}
+                           'maske_2400': maske0, 'silinen_2400': silinen0, 'p0': p0}
 
 
 def oge_tanisi(eu, p16, ed, oran, o28):
@@ -476,6 +508,108 @@ def olcek_kapisi(g1, g0, k=1.0, hi_res_boyut=None, referans_boyut=None):
             'olcum': 'dogal olcek; farklar 2400 px birimine normalize', 'fark': d,
             'boyut': {'hi_res': list(hi_res_boyut or []),
                       'onayli_2400': list(referans_boyut or [])}}
+
+
+OLCEK_PAY = 10          # satir_olc ile ayni pencere payi (2400 px birimi)
+OLCEK_UC = 0.002        # kenar = murekkep kutlesinin %0.2 / %99.8 noktasi
+
+
+def _uc(profil, q=OLCEK_UC):
+    """Kutle profilinin q ve 1-q noktalari (piksel i = [i, i+1), dogrusal ara deger)."""
+    cum = np.cumsum(profil)
+    T = float(cum[-1])
+
+    def nokta(h):
+        i = min(int(np.searchsorted(cum, h)), len(cum) - 1)
+        once = float(cum[i - 1]) if i else 0.0
+        return i + (h - once) / max(float(profil[i]), 1e-9)
+    return nokta(q * T), nokta((1 - q) * T)
+
+
+def satir_olc_alt(im, bant, k=1.0, pay=OLCEK_PAY):
+    """Isim satiri geometrisi 2400 px biriminde, ALT PIKSEL (olcek kapisi icin).
+
+    28 Eyl hata kontrolu (DB/CI/PW 'olcek' FAIL): eski olcum hi-res'te `satir_olc(.., pay=10)`
+    kullaniyordu; pay olceklenmedigi icin pencere 2400 biriminde her kenarda 2.7 px dar
+    kaliyor, sinirdaki murekkep (yildiz, J kuyrugu) iki olcekte farkli kirpiliyordu. Ayrica
+    iki farkli izgaranin TAM SAYI satir/sutun indeksleri karsilastiriliyordu (niceleme
+    +-0.86 px, taban icin +0.27 px sistematik). Burada: pencere fiziksel olarak AYNI (sinir
+    satirlari kesirli agirlikla), murekkep kapsami 0..1 (murekkep ile zemin medyani
+    arasinda), kenarlar kutle dagiliminin uc noktalarindan. Kumeler onayli edisyon maskesiyle
+    bulunur; bosluk ve genislik esikleri k ile olceklenir. Kapi esikleri DEGISMEZ.
+    `im` PIL goruntu; yalniz pencere satirlari diziye cevrilir (30x40 = 9000 px).
+    """
+    import cv2
+    from pilot6 import LUMA
+    eu = _mod('edisyon_uret')
+    Y0, Y1 = (bant[0] - pay) * k, (bant[1] + pay) * k
+    y0, y1 = max(int(np.floor(Y0)), 0), min(int(np.ceil(Y1)), im.height)
+    kes = np.asarray(im.convert('RGB').crop((0, y0, im.width, y1))).astype(np.float32)
+    m = eu.murekkep(kes)
+    km = [c for c in eu._kumeler(m, max(int(round(20 * k)), 1)) if c[1] - c[0] > 40 * k]
+    if len(km) != 3:
+        return {'hata': f'{len(km)} kume'}
+    L = kes @ LUMA
+    mu = m.astype(np.uint8)
+    r = max(int(round(3 * k)), 1)
+    yakin = cv2.dilate(mu, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * r + 1,) * 2)) > 0
+    uzak = ~(cv2.dilate(mu, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (4 * r + 1,) * 2)) > 0)
+    cekirdek = cv2.erode(mu, np.ones((3, 3), np.uint8)) > 0
+    if cekirdek.sum() < 50:
+        cekirdek = m
+    Li, Lz = float(np.median(L[cekirdek])), float(np.median(L[uzak] if uzak.any() else L))
+    if abs(Li - Lz) < 5:
+        return {'hata': f'kontrast yok (murekkep {Li:.0f}, zemin {Lz:.0f})'}
+    c = np.clip((L - Lz) / (Li - Lz), 0, 1) * yakin
+    satir = np.arange(y0, y1)
+    c *= np.clip(np.minimum(satir + 1, Y1) - np.maximum(satir, Y0), 0, 1)[:, None]
+    Wd = c.shape[1]
+    M = max(int(round(eu.UZAT_AZAMI * k)), 1)
+    sinir = [0, (km[0][1] + km[1][0]) // 2, (km[1][1] + km[2][0]) // 2, Wd]
+    out = {}
+    for i, ad in enumerate(('sol_isim', 'sonsuz', 'sag_isim')):
+        xa = max(km[i][0] - M, sinir[i]); xb = min(km[i][1] + M, sinir[i + 1])
+        C = c[:, xa:xb]
+        if C.sum() <= 0:
+            return {'hata': f'{ad}: murekkep kutlesi yok'}
+        x0, x1 = _uc(C.sum(axis=0))
+        out[ad] = [round((xa + x0) / k, 2), round((xa + x1) / k, 2)]
+        if ad != 'sonsuz':
+            u, t = _uc(C.sum(axis=1))
+            y = ad.split('_')[0]
+            out[f'ust_{y}'] = round((y0 + u) / k, 2)
+            out[f'taban_{y}'] = round((y0 + t) / k, 2)
+            out[f'cap_{y}'] = round((t - u) / k, 2)
+    out['bosluk'] = [round(out['sonsuz'][0] - out['sol_isim'][1], 2),
+                     round(out['sag_isim'][0] - out['sonsuz'][1], 2)]
+    out['satir_merkez'] = round((out['sol_isim'][0] + out['sag_isim'][1]) / 2, 2)
+    out['kontrast'] = {'murekkep_L': round(Li, 1), 'zemin_L': round(Lz, 1)}
+    return out
+
+
+def olcek_kapisi_baski(baski, p2400, bant):
+    """OLCEK KAPISI, uretilen BASKI dosyasi uzerinde: isim satiri onayli 2400 render ile ayni mi.
+
+    Eski kapi hi-res render'i (p1) olcuyordu ve Blue'da hic kosmuyordu (Blue 2400 render
+    edip baski_dosyasi'nda buyutuluyor; kapi None). Burada her edisyonda teslim edilen
+    dosyanin kendisi olculur: Blue'da buyutme + yerlestirme, digerlerinde hi-res render +
+    hibrit birlestirme kapinin icindedir. Esikler ayni (konum <= 1, harf kenari <= 2).
+    """
+    k = baski.width / float(p2400.width)
+    try:
+        olcek_kur(baski.width)
+        g1 = satir_olc_alt(baski, bant, k)
+        olcek_kur(2400)
+        g0 = satir_olc_alt(p2400, bant, 1.0)
+    except Exception as e:                                        # noqa: BLE001
+        return {'gecti': False, 'sebep': f'olculemedi: {type(e).__name__}: {e}'}
+    finally:
+        olcek_kur(2400)
+    r = olcek_kapisi(g1, g0, 1.0, baski.size, p2400.size)
+    r['olcum'] = ('BASKI dosyasi vs onayli 2400 render; pencere fiziksel ayni, alt piksel '
+                  '(murekkep kutlesi %0.2/%99.8), farklar 2400 px biriminde')
+    r['k'] = round(k, 4)
+    return r
 
 
 # ------------------------------------------------------------------ hibrit baski dosyasi
@@ -806,10 +940,9 @@ def render_et(ed, oran, sayfa, kaynak_bayt, isimler, mesaj, P_blue, P_ed,
         poster, bi, ek = P_blue(kaynak_bayt, sayfa, oran, isimler, mesaj, ref_bayt=ref_bayt)
         bi['plate'] = str(P_ed.plate('blue', oran, boy or ref_boy))
         bi['olcum_kaynagi'] = 'kendi dosyasi (a1 sarmalayicisi, zemin = plate)'
-        bi['olcek_kapisi'] = {'gecti': None, 'sebep': (
-            'Blue hatti (a1_poster.Poster) bu iterasyonda 2400 render ediyor; hedef '
-            'cozunurluk icin sarmalayiciya hazir olcum parametresi gerekiyor. '
-            'Metin dpi = 2400/inc.')}
+        # Olcek kapisi baski dosyasi uretildikten sonra (olcek_kapisi_baski) kosar:
+        # Blue 2400 render edilir, kapi buyutulmus bandi onayli 2400 render ile olcer.
+        bi['olcek_kapisi'] = {'gecti': None, 'sebep': 'baski dosyasi uretildikten sonra olculur'}
         bi['leke_kapisi'] = {'gecti': None, 'sebep': 'Blue 2400 render'}
     else:
         poster, bi, ek = P_ed(kaynak_bayt, sayfa, ed, oran, isimler, mesaj,
@@ -953,6 +1086,9 @@ def pod_uret(sip, kaynak_bayt, P_blue, P_ed, cik):
     ad = f'BASKI_{sip["boy"]}.jpg'
     baski, bpx = tek_dosya(poster, bi, ek, kaynak_bayt, sip['hedef_px'], cik / ad)
     bi['leke_kapisi'] = leke_kapisi(baski, kaynak_bayt, ek['maske'])
+    bi['olcek_kapisi'] = olcek_kapisi_baski(baski, ek.get('p0', poster), bi['olcum']['isim_bant'])
+    if _TANI is not None:                         # baski_tani.py: goruntuler (kapiya etkisi yok)
+        _TANI.update({'baski': baski, 'p0': ek.get('p0', poster), 'poster': poster})
     onizleme(baski, poster, ek, f'ONIZLEME_{sip["boy"]}.jpg', cik)
     bant = kontrol_paketi(cik, baski, bi, ek, ad)
     inc = sip['inc']
@@ -990,6 +1126,8 @@ def _dijital_is(arg):
         butce = int(PDF_AZAMI_MB * 1e6 * 0.92 / len(DIJITAL_ORANLAR))
         baski, bpx = tek_dosya(poster, bi, ek, kb, hedef, jpg, kalite=DIJITAL_KALITE, azami_bayt=butce)
         bi['leke_kapisi'] = leke_kapisi(baski, bi['plate'], ek['maske'])
+        bi['olcek_kapisi'] = olcek_kapisi_baski(baski, ek.get('p0', poster),
+                                                bi['olcum']['isim_bant'])
         kapilar, ayrinti = kapilari_topla(bi, isimler, mesaj, bpx['baski_px'], hedef)
         kayit = {'durum': 'URETILDI', 'boy': boy, **bpx, 'kapilar': kapilar,
                  'kapi_ayrinti': ayrinti, 'kapilar_gecti': kapi_sonucu(kapilar),
