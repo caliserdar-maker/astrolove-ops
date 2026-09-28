@@ -1,0 +1,79 @@
+name: hazirlik-yaz
+
+# Hazirlik suresi UYGULAMA (Serdar genel onayi 28 Eyl 2026, Yol A). scripts/etsy/hazirlik_yaz.py
+# readiness 1517641240112 -> 4-7 + 78 aciklamada "within 5 business days" -> "within 7 business days".
+# mod=yaz + confirm=HAZIRLIK Etsy'ye YAZAR. Ilerleme Drive TEMP/HAZIRLIK_YAZ/ILERLEME.json (kota bitince ertesi kosu devam).
+# Ilan yedekleri (yazmadan once alinir) TEMP/HAZIRLIK_YAZ/<damga>/YEDEK. Ilk FAIL'de DUR.
+
+permissions:
+  actions: read
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      mod: {description: "yedek (salt okuma) | yaz", default: "yedek"}
+      confirm: {description: "yaz icin tam olarak: HAZIRLIK", default: ""}
+      kota_taban: {description: "bu kotanin altinda temiz dur", default: "150"}
+
+jobs:
+  hazirlik:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          echo "DAMGA=$(date -u +%Y%m%d_%H%M)" >> "$GITHUB_ENV"
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Token + ilerleme
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/HAZIRLIK_YAZ/ILERLEME.json" _work/ILERLEME.json 2>/dev/null && echo "ilerleme: devam" || echo "ilerleme: yok (ilk kosu)"
+      - name: Oz-test (sahte API)
+        run: python scripts/etsy/hazirlik_yaz_selftest.py > /dev/null && echo "selftest PASS"
+      - name: Uygula
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          MOD: ${{ inputs.mod }}
+          CONFIRM: ${{ inputs.confirm }}
+          TABAN: ${{ inputs.kota_taban }}
+        run: python scripts/etsy/hazirlik_yaz.py --mod "$MOD" --confirm "$CONFIRM" --out _out --ilerleme _work/ILERLEME.json --kota-taban "$TABAN"
+      - name: Token + yedek + ilerleme Drive'a
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
+          if grep -rqE 'x-api-key|refresh_token|"access_token"' _out/ 2>/dev/null; then echo "::error::ciktida sir benzeri anahtar"; exit 1; fi
+          H="gdrive:ASTROLOVE/TEMP/HAZIRLIK_YAZ"
+          [ -d _out ] && rclone copy _out "$H/$DAMGA" -q || true
+          [ "${{ inputs.mod }}" = "yaz" ] && [ -f _out/ILERLEME.json ] && rclone copyto _out/ILERLEME.json "$H/ILERLEME.json" -q || true
+          [ -f _out/RAPOR.md ] && cat _out/RAPOR.md >> "$GITHUB_STEP_SUMMARY" || true
+          echo "Cikti: TEMP/HAZIRLIK_YAZ/$DAMGA/"
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
