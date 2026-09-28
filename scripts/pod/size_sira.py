@@ -46,7 +46,7 @@ def boy_kodu(deger):
     m = re.search(r"\b(A[2-4])\b", t)
     if m:
         return m.group(1)
-    m = re.search(r"(\d+)\s*x\s*(\d+)", t)
+    m = re.search(r"(\d+)[\s\"'″]*x[\s\"'″]*(\d+)", t)
     return f"{m.group(1)}x{m.group(2)}" if m else None
 
 

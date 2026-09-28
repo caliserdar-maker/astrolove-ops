@@ -30,7 +30,7 @@ SIZE_HEDEF = ["8x10", "11x14", "12x16", "12x18", "16x20", "16x24", "18x24", "20x
 
 def boy_kodu(t):
     t = str(t or "").replace("×", "x").replace("X", "x")
-    m = re.search(r"\b(A[2-4])\b", t) or re.search(r"(\d+)\s*x\s*(\d+)", t)
+    m = re.search(r"\b(A[2-4])\b", t) or re.search(r"(\d+)[\s\"'″]*x[\s\"'″]*(\d+)", t)
     return (m.group(1) if m.lastindex == 1 else f"{m.group(1)}x{m.group(2)}") if m else None
 
 
