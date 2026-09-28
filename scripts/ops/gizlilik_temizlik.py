@@ -89,6 +89,8 @@ def terimler(kok):
             d = json.load(open(f, encoding="utf-8"))
         except Exception:                                  # noqa: BLE001
             continue
+        if not isinstance(d, dict):                        # PRODIGI_SKU_HARITA vb. liste bicimli dosyalar
+            continue
         o = d.get("order") or {}
         rc = o.get("recipient") or {}
         ad = rc.get("address") or {}
