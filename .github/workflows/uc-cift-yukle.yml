@@ -7,31 +7,56 @@ name: uc-cift-yukle
 # Kapaklar: TEMP/POD_KAPAK_78/<en son damga> (78) uzerine TEMP/POD_KAPAK_78_DUZELTME/<kapak_damga>/KAPAK_<3 cift>.jpg
 # (RAPOR.md SONUC PASS). Videolar: TEMP/POD_VIDEO_V2/<video_damga>/ (3 cift QC PASS).
 # updateListing CAGRILMAZ; musteriye bildirim yok. Cikti: TEMP/UC_CIFT_YUKLE/<damga>/report.md (YUKLENDI/ATLANDI/FAIL).
+# TEK SEFERLIK ZAMANLAMA (Serdar karari 28 Eyl aksam): 29 Eyl 2026 03:00 UTC, apply=true (kapak 00:05 ve video 01:30
+#   kosularindan sonra; kilit sirayi tutar). Damga bos -> otomatik: kapak = EN_AZ ve sonrasi, RAPOR SONUC PASS olan en
+#   yeni DUZELTME damgasi; video = cift basina EN_AZ ve sonrasi, QC pass + yenile=true olan en yeni damga.
+#   Kapi isi yalniz 20260929 tarihinde calisir.
 
 on:
   workflow_dispatch:
     inputs:
-      kapak_damga: {description: "TEMP/POD_KAPAK_78_DUZELTME damgasi", required: true}
-      video_damga: {description: "TEMP/POD_VIDEO_V2 damgalari (bosluklu; cift basina QC PASS olan ilk damga)", required: true}
+      kapak_damga: {description: "TEMP/POD_KAPAK_78_DUZELTME damgasi (bos = otomatik)", required: false, default: ""}
+      video_damga: {description: "TEMP/POD_VIDEO_V2 damgalari (bosluklu; bos = otomatik)", required: false, default: ""}
       apply: {description: "true = kuru PASS ise uygula", type: boolean, default: false}
+  schedule:
+    - cron: "0 3 29 9 *"   # tek seferlik: 2026-09-29 03:00 UTC (kapi isi tarihi dogrular)
 
 permissions:
   actions: read
   contents: read
 
 jobs:
+  kapi:
+    runs-on: ubuntu-latest
+    outputs:
+      calis: ${{ steps.k.outputs.calis }}
+    steps:
+      - id: k
+        env:
+          OLAY: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          if [ "$OLAY" != "schedule" ]; then echo "calis=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+          gun=$(date -u +%Y%m%d)
+          if [ "$gun" = "20260929" ]; then echo "tek seferlik zamanlama: $gun"; echo "calis=true" >> "$GITHUB_OUTPUT"
+          else echo "tek seferlik zamanlama yalniz 20260929; bugun $gun -> hicbir sey yapilmaz"; echo "calis=false" >> "$GITHUB_OUTPUT"; fi
+
   yukle:
+    needs: kapi
+    if: needs.kapi.outputs.calis == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 300
     env:
       KDAMGA: ${{ inputs.kapak_damga }}
       VDAMGA: ${{ inputs.video_damga }}
-      APPLY: ${{ inputs.apply }}
+      APPLY: ${{ github.event_name == 'schedule' && 'true' || inputs.apply }}
+      EN_AZ: "20260928_1609"
     steps:
       - name: Girdi kapisi
         run: |
           set -euo pipefail
-          [[ "$KDAMGA" =~ ^[0-9]{8}_[0-9]{4}$ && "$VDAMGA" =~ ^[0-9]{8}_[0-9]{4}( [0-9]{8}_[0-9]{4})*$ ]] || { echo "::error::damga bicimi. DUR."; exit 1; }
+          [[ -z "$KDAMGA" || "$KDAMGA" =~ ^[0-9]{8}_[0-9]{4}$ ]] && [[ -z "$VDAMGA" || "$VDAMGA" =~ ^[0-9]{8}_[0-9]{4}( [0-9]{8}_[0-9]{4})*$ ]] \
+            || { echo "::error::damga bicimi. DUR."; exit 1; }
           echo "STAMP=$(date -u +%Y%m%d_%H%M)" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - name: Etsy kilidi (sira bekle, iptal yok)
@@ -65,6 +90,18 @@ jobs:
           set -euo pipefail
           umask 077; mkdir -p _work/kapak _work/video _out
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          if [ -z "$KDAMGA" ]; then
+            for d in $(rclone lsf --dirs-only "gdrive:ASTROLOVE/TEMP/POD_KAPAK_78_DUZELTME/" | tr -d '/' | grep -E '^[0-9]{8}_[0-9]{4}$' | sort -r); do
+              [[ "$d" < "$EN_AZ" ]] && break
+              if rclone cat "gdrive:ASTROLOVE/TEMP/POD_KAPAK_78_DUZELTME/$d/RAPOR.md" 2>/dev/null | grep -q '^SONUC PASS'; then KDAMGA=$d; break; fi
+            done
+            [ -n "$KDAMGA" ] || { echo "::error::$EN_AZ sonrasi SONUC PASS kapak damgasi yok. DUR."; exit 1; }
+            echo "kapak damgasi (otomatik): $KDAMGA"
+          fi
+          if [ -z "$VDAMGA" ]; then
+            VDAMGA=$(rclone lsf --dirs-only "gdrive:ASTROLOVE/TEMP/POD_VIDEO_V2/" | tr -d '/' | grep -E '^[0-9]{8}_[0-9]{4}$' | sort -r | awk -v m="$EN_AZ" '$0 >= m' | tr '\n' ' ' | sed 's/ $//')
+            echo "video damgalari (otomatik, >= $EN_AZ): $VDAMGA"
+          fi
           KD=$(rclone lsf --dirs-only "gdrive:ASTROLOVE/TEMP/POD_KAPAK_78/" | tr -d '/' | grep -E '^[0-9]{8}_[0-9]{4}$' | sort | tail -1)
           rclone copy "gdrive:ASTROLOVE/TEMP/POD_KAPAK_78/$KD" _work/kapak --include "KAPAK_*.jpg" -q
           H="gdrive:ASTROLOVE/TEMP/POD_KAPAK_78_DUZELTME/$KDAMGA"
@@ -76,13 +113,14 @@ jobs:
           for c in AQUARIUS_LIBRA ARIES_LIBRA CAPRICORN_LIBRA; do
             for d in $VDAMGA; do
               V="gdrive:ASTROLOVE/TEMP/POD_VIDEO_V2/$d"
-              if rclone cat "$V/QC_$c.json" 2>/dev/null | python3 -c "import json,sys; sys.exit(0 if json.load(sys.stdin).get('pass') else 1)"; then
+              if rclone cat "$V/QC_$c.json" 2>/dev/null | python3 -c "import json,sys; q=json.load(sys.stdin); sys.exit(0 if q.get('pass') and q.get('yenile') else 1)"; then
                 rclone copyto "$V/VIDEO_$c.mp4" "_work/video/VIDEO_$c.mp4"; rclone copyto "$V/QC_$c.json" "_work/video/QC_$c.json"
                 KAYNAKLAR="$KAYNAKLAR $c=$d"; break
               fi
             done
           done
           echo "video kaynaklari:$KAYNAKLAR"
+          [ "$(echo $KAYNAKLAR | wc -w)" -eq 3 ] || { echo "::error::3 cift icin yenile + QC PASS video yok ($KAYNAKLAR). DUR."; exit 1; }
           python -c 'import json,sys;json.dump({"klasor":"TEMP/POD_VIDEO_V2:"+sys.argv[1],"ozet":"uc cift","plan":"UC_CIFT_YUKLE/"+sys.argv[2]+"/video_kuru/PLAN.json"},open("_work/video_kaynak.json","w"))' "$KAYNAKLAR" "$STAMP"
       - name: Kapak kuru -> karar -> apply
         env:
