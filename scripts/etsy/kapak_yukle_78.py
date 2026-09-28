@@ -60,6 +60,7 @@ BEKLENEN = 78
 KAPAK_BOYUT = (3000, 2250)
 CAGRI_ILAN = 14  # apply'da ilan basina tahmini Etsy cagrisi (okuma + yukleme + silme + geri okuma)
 OKUMA_BEKLE = 3
+SIRA_DENEME, SIRA_BEKLE = 5, 5  # siralar tekillesene kadar en fazla 5 x 5 sn (Serdar 28 Eyl)
 
 
 def simdi():
@@ -272,20 +273,64 @@ def kuru(a, api, shop, out, satirlar, kapak, sorun, fazla):
 
 
 # ------------------------------------------------------------------ apply
-def ilan_uygula(a, api, shop, out, p, kapak_yol, drive_var):
-    """Tek ilan. Donus: (sonuc_dict, hata_metni). hata_metni bos degilse DUR."""
-    lid, eski = p["listing_id"], int(p["eski_rank1_id"])
-    r = {"listing_id": lid, "cift": p["cift"], "eski_id": eski, "yeni_id": None, "adimlar": {}}
+def sira_tekil(g):
+    return sorted(int(x.get("rank") or 0) for x in g) == list(range(1, len(g) + 1))
 
-    # 0. canli durum = plan
+
+def img(g, iid):
+    return next((x for x in g if int(x["listing_image_id"]) == int(iid)), None)
+
+
+def sira_bekle(api, lid):
+    """Siralar 1..n tekil olana kadar en fazla SIRA_DENEME x SIRA_BEKLE sn (Serdar 28 Eyl)."""
+    return eventually(lambda: gallery(api, lid), sira_tekil, attempts=SIRA_DENEME, pause=SIRA_BEKLE)
+
+
+def zaten_mi(p, once, base):
+    """Ilan onceki kosuda tamamlanmis mi: eski yok, sayi ayni, 1. sira plandaki yeni alt + boyut, bag yeni kapakta."""
+    g, eski = once["galeri"], int(p["eski_rank1_id"])
+    if not g or eski in ids_of(g) or len(g) != len(base) or not sira_tekil(g):
+        return False
+    r1 = g[0]
+    if int(r1["listing_image_id"]) in base or r1.get("alt_text") != p["yeni_alt"] \
+            or [r1.get("full_width"), r1.get("full_height")] != list(p["yeni_boyut"]):
+        return False
+    if ids_of(g)[1:] != base[1:]:
+        return False
+    bag = {(b["property_id"], b["value_id"]) for b in p.get("bag_tasi") or []}
+    return all(str(v[3]) == str(r1["listing_image_id"]) for v in once["varyasyon"] if (v[0], v[1]) in bag)
+
+
+def ilan_uygula(a, api, shop, out, p, kapak_yol, drive_var):
+    """Tek ilan. Donus: (sonuc_dict, hata_metni). hata_metni bos degilse DUR.
+    Eski kapak = plandaki image_id, yeni kapak = yukleme yanitindaki (ya da --devam ile verilen) image_id;
+    Etsy siralamasindan tahmin edilmez."""
+    lid, eski = p["listing_id"], int(p["eski_rank1_id"])
+    base = [int(x) for x in p["galeri_ids"]]
+    devam = a.devam.get(str(lid))
+    r = {"listing_id": lid, "cift": p["cift"], "eski_id": eski, "yeni_id": devam, "adimlar": {}}
+
+    # 0. canli durum = plan (ya da onceki kosuda tamamlanmis / --devam ile verilen yarim durum)
     once = durum(api, shop, lid)
     oids = ids_of(once["galeri"])
     (out / "ilan" / f"{lid}_ONCE.json").write_text(json.dumps(once, ensure_ascii=False, indent=1, default=str))
+    if not devam and zaten_mi(p, once, base):
+        r["zaten"] = True
+        r["yeni_id"] = oids[0]
+        return r, ""
     k0 = {"state active": once["state"] == "active",
-          f"1. sira = plandaki {eski}": bool(oids) and oids[0] == eski,
-          "galeri id sirasi plandaki ile ayni": oids == [int(x) for x in p["galeri_ids"]],
           "varyasyon baglari plandaki ile ayni": [list(v) for v in once["varyasyon"]] == p.get("varyasyon_once"),
-          f"galeri {len(oids)} + 1 <= {ETSY_MAX}": len(oids) + 1 <= ETSY_MAX}
+          f"galeri {len(base)} + 1 <= {ETSY_MAX}": len(base) + 1 <= ETSY_MAX,
+          f"plandaki eski {eski} galeride": eski in oids}
+    if devam:
+        k0[f"--devam eski = plandaki {eski}"] = getattr(a, "devam_eski", {}).get(str(lid), eski) == eski
+        k0[f"galeri = plan + yalniz {devam}"] = sorted(oids) == sorted(base + [devam]) and devam not in base
+        dv = img(once["galeri"], devam) or {}
+        k0[f"{devam} boyutu {p['yeni_boyut']}"] = [dv.get("full_width"), dv.get("full_height")] == list(p["yeni_boyut"])
+    else:
+        k0["siralar tekil"] = sira_tekil(once["galeri"])
+        k0[f"1. sira = plandaki {eski}"] = oids[:1] == [eski]
+        k0["galeri id sirasi plandaki ile ayni"] = oids == base
     r["adimlar"]["0_on_kontrol"] = k0
     if not all(k0.values()):
         return r, "on kontrol FAIL: " + ", ".join(k for k, v in k0.items() if not v)
@@ -296,7 +341,7 @@ def ilan_uygula(a, api, shop, out, p, kapak_yol, drive_var):
         r["yedek"] = f"{a.yedek_drive}/{ad}"
         r["adimlar"]["1_yedek"] = {f"yedek Drive'da ({drive_var[ad]} bayt = kuru kosu)": True}
     else:
-        r1 = once["galeri"][0]
+        r1 = img(once["galeri"], eski)
         yol = out / "yedek" / ad
         try:
             indir(r1["url_fullxfull"], yol)
@@ -314,29 +359,47 @@ def ilan_uygula(a, api, shop, out, p, kapak_yol, drive_var):
         if not esit:
             return r, f"yedek FAIL: hedef boyutu {ub} != {yb}"
 
-    # 2. yeni kapak rank 1 + geri okuma
+    # 2. yeni kapak rank 1 (ya da --devam: verilen id'ye alt metin + rank 1) + geri okuma
     if api.remaining is not None and int(api.remaining) < a.quota_min:
         return r, f"kota {api.remaining} < {a.quota_min}"
-    with open(kapak_yol, "rb") as fh:
-        up = api.post_file(f"/shops/{shop}/listings/{lid}/images",
-                           files={"image": (kapak_yol.name, fh, "image/jpeg")},
-                           data={"rank": "1", "alt_text": p["yeni_alt"]})
-    yeni = int(up.get("listing_image_id") or 0)
-    r["yeni_id"] = yeni
-    if not yeni:
-        return r, "yukleme: yeni listing_image_id donmedi"
-    g = eventually(lambda: gallery(api, lid), lambda rows: yeni in ids_of(rows), attempts=10, pause=OKUMA_BEKLE)
-    if ids_of(g)[:1] != [yeni]:
-        log(f"  {lid}: yeni gorsel 1. sirada degil; sira tek cagriyla 1'e aliniyor")
+
+    def rank1_alt(iid):
+        """Rank duzeltme HER ZAMAN alt metinle birlikte gonderilir."""
         api.post_file(f"/shops/{shop}/listings/{lid}/images",
-                      files={"listing_image_id": (None, str(yeni)), "rank": (None, "1")})
-        g = eventually(lambda: gallery(api, lid), lambda rows: ids_of(rows)[:1] == [yeni],
-                       attempts=10, pause=OKUMA_BEKLE)
+                      files={"listing_image_id": (None, str(iid)), "rank": (None, "1"),
+                             "alt_text": (None, p["yeni_alt"])})
+
+    if devam:
+        yeni = int(devam)
+        log(f"  {lid}: devam - {yeni} alt metin + rank 1")
+        rank1_alt(yeni)
+    else:
+        with open(kapak_yol, "rb") as fh:
+            up = api.post_file(f"/shops/{shop}/listings/{lid}/images",
+                               files={"image": (kapak_yol.name, fh, "image/jpeg")},
+                               data={"rank": "1", "alt_text": p["yeni_alt"]})
+        yeni = int(up.get("listing_image_id") or 0)
+    r["yeni_id"] = yeni
+    if not yeni or yeni in base:
+        return r, f"yukleme: yeni listing_image_id gecersiz ({yeni})"
+    g = sira_bekle(api, lid)
+    if not sira_tekil(g):
+        return r, "siralar 5 x 5 sn icinde tekillesmedi (eski kapak SILINMEDI)"
+    yg = img(g, yeni) or {}
+    if int(yg.get("rank") or 0) != 1 or yg.get("alt_text") != p["yeni_alt"]:
+        log(f"  {lid}: {yeni} rank {yg.get('rank')} alt {'dolu' if yg.get('alt_text') else 'BOS'}; "
+            f"alt metin + rank 1 tek cagriyla yaziliyor")
+        rank1_alt(yeni)
+        g = sira_bekle(api, lid)
+        if not sira_tekil(g):
+            return r, "siralar 5 x 5 sn icinde tekillesmedi (eski kapak SILINMEDI)"
+        yg = img(g, yeni) or {}
     gi = ids_of(g)
-    k2 = {"1. sira yeni kapak": gi[:1] == [yeni],
-          "yeni kapak alt metni": bool(g) and g[0].get("alt_text") == p["yeni_alt"],
-          f"gorsel sayisi {len(oids)} + 1": len(gi) == len(oids) + 1,
-          "eski gorseller ayni id + sira (2..n+1)": gi[1:] == oids}
+    k2 = {"siralar tekil": sira_tekil(g),
+          f"{yeni} rank 1": int(yg.get("rank") or 0) == 1,
+          "yeni kapak alt metni dolu + plandaki": bool(yg.get("alt_text")) and yg.get("alt_text") == p["yeni_alt"],
+          f"gorsel sayisi {len(base)} + 1": len(gi) == len(base) + 1,
+          "plandaki gorseller ayni id + sira (2..n+1)": gi[1:] == base}
     r["adimlar"]["2_yukle_geri_oku"] = k2
     (out / "ilan" / f"{lid}_YUKLEME_SONRASI.json").write_text(json.dumps(g, ensure_ascii=False, indent=1, default=str))
     if not all(k2.values()):
@@ -380,12 +443,15 @@ def ilan_uygula(a, api, shop, out, p, kapak_yol, drive_var):
     api.delete(f"/shops/{shop}/listings/{lid}/images/{eski}")
 
     # 4. geri okuma
-    beklenen = [yeni] + oids[1:]
+    beklenen = [yeni] + base[1:]
 
     def k4_of(st):
         s = ids_of(st["galeri"])
-        return {f"gorsel sayisi = onceki ({len(oids)})": len(s) == len(oids),
-                "1. sira = yeni kapak": s[:1] == [yeni],
+        yg4 = img(st["galeri"], yeni) or {}
+        return {f"gorsel sayisi = onceki ({len(base)})": len(s) == len(base),
+                "siralar tekil": sira_tekil(st["galeri"]),
+                f"{yeni} rank 1": int(yg4.get("rank") or 0) == 1,
+                "yeni kapak alt metni dolu + plandaki": bool(yg4.get("alt_text")) and yg4.get("alt_text") == p["yeni_alt"],
                 f"{eski} silindi": eski not in s,
                 "kalan gorseller ayni id + sira": s == beklenen,
                 "varyasyon gorsel baglari beklenen": st["varyasyon"] == bek_var,
@@ -393,7 +459,7 @@ def ilan_uygula(a, api, shop, out, p, kapak_yol, drive_var):
                 "ilan active": st["state"] == "active"}
 
     sonra = eventually(lambda: durum(api, shop, lid), lambda st: all(k4_of(st).values()),
-                       attempts=10, pause=OKUMA_BEKLE * 2)
+                       attempts=SIRA_DENEME, pause=SIRA_BEKLE)
     (out / "ilan" / f"{lid}_SONRA.json").write_text(json.dumps(sonra, ensure_ascii=False, indent=1, default=str))
     k4 = k4_of(sonra)
     r["adimlar"]["4_son_geri_oku"] = k4
@@ -423,7 +489,7 @@ def apply(a, api, shop, out, kapak):
         if getattr(api, "store", None) is not None and api.store.needs_refresh():
             api.store.refresh()
         r, hata = ilan_uygula(a, api, shop, out, p, pathlib.Path(a.kapak_dir) / p["yeni_kapak"], drive_var)
-        r["sonuc"] = "FAIL" if hata else "PASS"
+        r["sonuc"] = "FAIL" if hata else ("ZATEN" if r.get("zaten") else "PASS")
         r["hata"] = hata
         sonuc.append(r)
         (out / "SONUC.json").write_text(json.dumps(sonuc, ensure_ascii=False, indent=1, default=str))
@@ -434,9 +500,12 @@ def apply(a, api, shop, out, kapak):
         if hata:
             break
     pas = sum(r["sonuc"] == "PASS" for r in sonuc)
-    ok = not hata and pas == len(is_)
+    zat = sum(r["sonuc"] == "ZATEN" for r in sonuc)
+    bag = sum(1 for r in sonuc if r["sonuc"] == "PASS" and r.get("bag_tasi"))
+    ok = not hata and pas + zat == len(is_)
     sat = [f"# KAPAK78 yukle + eski kapak sil: APPLY ({simdi()})", "",
-           f"- PASS {pas} / {len(is_)} (ZATEN atlanan {len(rows) - len(is_)}) | kota {api.remaining}",
+           f"- PASS {pas} (bag tasinan {bag}) | ZATEN {zat} | FAIL {sum(r['sonuc'] == 'FAIL' for r in sonuc)} | "
+           f"islenmeyen {len(is_) - len(sonuc)} | toplam {len(is_)} | kota {api.remaining}",
            f"- Yedek: {a.yedek_drive}/<listing_id>_<image_id>.jpg ({sum(1 for r in sonuc if r.get('yedek'))} dosya)",
            f"- SONUC: {'PASS' if ok else 'FAIL - DURDU: ' + (sonuc[-1]['listing_id'] + ' ' + hata if hata else 'eksik')}", "",
            "| listing_id | cift | silinen eski | yeni kapak | tasinan bag | sonuc |", "|---|---|---|---|---|---|"]
@@ -459,7 +528,13 @@ def main():
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--confirm", default="")
     ap.add_argument("--quota-min", type=int, default=60)
+    ap.add_argument("--devam", default="",
+                    help="LISTING_ID:YENI_IMAGE_ID:ESKI_IMAGE_ID[,..] yarim kalmis ilan, kesin id ile")
     a = ap.parse_args()
+    devam_str, a.devam, a.devam_eski = a.devam, {}, {}
+    for t in [t.strip() for t in devam_str.split(",") if t.strip()]:
+        lid, yeni, eski = t.split(":")
+        a.devam[lid], a.devam_eski[lid] = int(yeni), int(eski)
     if a.apply and (a.confirm != ONAY or not a.plan or not a.yedek_drive):
         raise SystemExit(f"HATA: --apply icin --confirm {ONAY} + --plan + --yedek-drive gerekli. DUR.")
     a.kaynak = json.loads(pathlib.Path(a.kaynak_bilgi).read_text()) if a.kaynak_bilgi else {}

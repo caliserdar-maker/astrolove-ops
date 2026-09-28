@@ -16,6 +16,7 @@ on:
       plan_damga: {description: "apply: kuru kosu cikti damgasi (TEMP/KAPAK78_YUKLE/KURU_<damga>/PLAN.json)", required: false, default: ""}
       apply: {description: "true = Etsy'ye YAZ + eski kapak SIL (confirm gerekir)", type: boolean, default: false}
       confirm: {description: "Yazma icin tam olarak: KAPAK78_YUKLE_SIL", required: false, default: ""}
+      devam: {description: "apply: yarim ilan LISTING:YENI_IMAGE:ESKI_IMAGE (kesin id; virgulle birden cok)", required: false, default: ""}
 
 concurrency:
   group: etsy-token
@@ -32,6 +33,7 @@ jobs:
       APPLY: ${{ inputs.apply }}
       CONFIRM: ${{ inputs.confirm }}
       PDAMGA: ${{ inputs.plan_damga }}
+      DEVAM: ${{ inputs.devam }}
     steps:
       - name: Onay kapisi
         run: |
@@ -39,6 +41,7 @@ jobs:
           if [ "$APPLY" = "true" ]; then
             [ "$CONFIRM" = "KAPAK78_YUKLE_SIL" ] || { echo "::error::apply=true icin confirm tam olarak 'KAPAK78_YUKLE_SIL' olmali. DUR."; exit 1; }
             [[ "$PDAMGA" =~ ^[0-9]{8}_[0-9]{4}$ ]] || { echo "::error::apply icin plan_damga (kuru kosu damgasi) gerekli. DUR."; exit 1; }
+            [ -z "$DEVAM" ] || [[ "$DEVAM" =~ ^[0-9]+:[0-9]+:[0-9]+(,[0-9]+:[0-9]+:[0-9]+)*$ ]] || { echo "::error::devam bicimi LISTING:YENI:ESKI"; exit 1; }
             echo "MOD=APPLY" >> "$GITHUB_ENV"
           else
             echo "MOD=KURU" >> "$GITHUB_ENV"
@@ -98,7 +101,7 @@ jobs:
           set -euo pipefail
           args=(--kapak-dir _work/kapak --kaynak-bilgi _work/kaynak.json --out _out)
           if [ "$MOD" = "APPLY" ]; then
-            args+=(--plan _work/PLAN.json --yedek-drive "gdrive:ASTROLOVE/TEMP/KAPAK78_YEDEK_${PDAMGA}" --apply --confirm "$CONFIRM")
+            args+=(--plan _work/PLAN.json --yedek-drive "gdrive:ASTROLOVE/TEMP/KAPAK78_YEDEK_${PDAMGA}" --apply --confirm "$CONFIRM" --devam "$DEVAM")
           else
             args+=(--yedek-drive "gdrive:ASTROLOVE/TEMP/KAPAK78_YEDEK_${STAMP}")
           fi

@@ -15,6 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import kapak_yukle_78 as K  # noqa: E402
 
 K.OKUMA_BEKLE = 0
+K.SIRA_BEKLE = 0
 K.BEKLENEN = 3
 K.KAPAK_BOYUT = (400, 300)
 K.time.sleep = lambda s: None
@@ -31,9 +32,10 @@ def resim(p, w=300, h=225, renk=(20, 30, 90)):
 
 
 class Fake:
-    def __init__(self, bozuk_rank=False, bozuk_bag=False):
+    def __init__(self, bozuk_rank=False, bozuk_bag=False, tie=0):
         self.remaining = "5000"; self.calls = 0; self.nid = 9000; self.yaz = []; self.store = None
         self.bozuk_rank = bozuk_rank; self.bozuk_bag = bozuk_bag
+        self.tie = tie; self.bekleyen = {}  # tie: yuklemeden sonra kac okuma boyunca rank 1 cift kalir (99 = hic)
         self.L = {}
         for lid, *_ in IDS:
             imgs = [{"listing_image_id": int(lid) * 100 + n, "rank": n, "alt_text": f"eski {n}",
@@ -53,7 +55,15 @@ class Fake:
         self.calls += 1
         lid = path.split("/listings/")[1].split("/")[0]
         if path.endswith("/images"):
-            return {"results": [dict(x) for x in self.L[lid]["imgs"]]}
+            if lid in self.bekleyen:
+                self.bekleyen[lid][0] -= 1
+                if self.bekleyen[lid][0] < 0:
+                    yeni = self.bekleyen.pop(lid)[1]
+                    for x in self.L[lid]["imgs"]:
+                        if x["listing_image_id"] != yeni:
+                            x["rank"] += 1
+                    self._renum(lid)
+            return {"results": sorted([dict(x) for x in self.L[lid]["imgs"]], key=lambda x: x["rank"])}
         if path.endswith("/variation-images"):
             return {"results": [dict(v) for v in self.L[lid]["vimg"]]}
         if path.endswith("/videos"):
@@ -70,14 +80,34 @@ class Fake:
             with Image.open(fh) as im:
                 w, h = im.size
             rank = 99 if self.bozuk_rank else int(data["rank"])
+            yeni = {"listing_image_id": self.nid, "rank": rank, "alt_text": data["alt_text"],
+                    "full_width": w, "full_height": h, "url_fullxfull": f"fake://yeni/{self.nid}"}
+            if self.tie and rank == 1:  # Etsy: yeni ve eski ayni anda rank 1 (28 Eyl 4570125580)
+                self.L[lid]["imgs"].insert(1, yeni)
+                self.bekleyen[lid] = [self.tie, self.nid]
+                return {"listing_image_id": self.nid}
             for x in self.L[lid]["imgs"]:
                 if x["rank"] >= rank:
                     x["rank"] += 1
-            self.L[lid]["imgs"].append({"listing_image_id": self.nid, "rank": rank, "alt_text": data["alt_text"],
-                                        "full_width": w, "full_height": h, "url_fullxfull": f"fake://yeni/{self.nid}"})
+            self.L[lid]["imgs"].append(yeni)
             self._renum(lid)
             return {"listing_image_id": self.nid}
-        return {}  # rank duzeltme: bozuk modda etkisiz
+        # rank duzeltme: alt_text gonderilmezse Etsy alt metni BOSALTIR (28 Eyl gozlemi)
+        self.yaz[-1] = ("RANK", lid)
+        if self.bozuk_rank:
+            return {}
+        iid = int(files["listing_image_id"][1])
+        x = next(i for i in self.L[lid]["imgs"] if i["listing_image_id"] == iid)
+        x["alt_text"] = files["alt_text"][1] if "alt_text" in files else ""
+        if lid in self.bekleyen and self.bekleyen[lid][0] >= 90:
+            return {}  # hic tekillesmeyen mod
+        self.bekleyen.pop(lid, None)
+        for y in self.L[lid]["imgs"]:
+            if y is not x:
+                y["rank"] = y["rank"] * 10 + 5
+        x["rank"] = 1
+        self._renum(lid)
+        return {}
 
     def post_json(self, path, body):
         self.calls += 1
@@ -113,7 +143,7 @@ def hazirla():
 
 def args(ids, kd, out, **kw):
     d = dict(ids=str(ids), kapak_dir=str(kd), out=str(out), plan=None, yedek_drive=None,
-             apply=False, confirm="", quota_min=60, kaynak={"klasor": "test", "ozet": "PASS: 3 / 3"})
+             apply=False, confirm="", quota_min=60, devam={}, devam_eski={}, kaynak={"klasor": "test", "ozet": "PASS: 3 / 3"})
     d.update(kw)
     return SimpleNamespace(**d)
 
@@ -235,6 +265,54 @@ def main():
     ok = K.kuru(args(ids, kd, o13), f, "S", o13, s2, k3, so3, fz3)
     p = json.loads((o13 / "PLAN.json").read_text())["satirlar"]
     kont["eslesmeyen cift: BLOK"] = (not ok) and p[2]["durum"] == "BLOK" and "eslesmeyen" in p[2]["neden"]
+    (TMP / "x.jpg").rename(kd / "KAPAK_PISCES_VIRGO.jpg")
+
+    # 9) Etsy rank 1 cift (2 okuma) -> tekillesmeyi bekler, PASS; alt metin korunur
+    f = Fake(tie=2); o20 = TMP / "o20"
+    K.kuru(args(ids, kd, o20), f, "S", o20, satirlar, kapak, sorun, fazla)
+    ok = K.apply(args(ids, kd, TMP / "o21", plan=str(o20 / "PLAN.json"), yedek_drive=str(TMP / "yd21"), apply=True,
+                      confirm=K.ONAY), f, "S", TMP / "o21", kapak)
+    kont["rank 1 cift -> bekle -> PASS, alt dolu"] = ok and all(
+        f.L[l]["imgs"][0]["alt_text"] and f.L[l]["imgs"][0]["listing_image_id"] > 9000 for l, *_ in IDS)
+
+    # 10) rank 1 cift hic tekillesmiyor -> DUR, silme yok
+    f = Fake(tie=99); o22 = TMP / "o22"
+    K.kuru(args(ids, kd, o22), f, "S", o22, satirlar, kapak, sorun, fazla)
+    ok = K.apply(args(ids, kd, TMP / "o23", plan=str(o22 / "PLAN.json"), yedek_drive=str(TMP / "yd23"), apply=True,
+                      confirm=K.ONAY), f, "S", TMP / "o23", kapak)
+    s23 = json.loads((TMP / "o23" / "SONUC.json").read_text())
+    kont["tekillesmiyor: DUR, silme yok, 1. ilanda"] = (not ok) and not any(x[0] == "DELETE" for x in f.yaz) \
+        and len(s23) == 1 and "tekillesmedi" in s23[0]["hata"]
+
+    # 11) 4570125580 benzeri yarim durum: yeni gorsel rank 1 cift + alt BOS -> --devam kesin id ile tamamlanir
+    f = Fake(); f.L["111"]["vimg"][0]["image_id"] = 11101; o24 = TMP / "o24"
+    K.kuru(args(ids, kd, o24), f, "S", o24, satirlar, kapak, sorun, fazla)
+    f.L["111"]["imgs"].insert(1, {"listing_image_id": 9500, "rank": 1, "alt_text": "", "full_width": 400,
+                                  "full_height": 300, "url_fullxfull": "fake://yeni/9500"})
+    f.nid = 9600
+    ok = K.apply(args(ids, kd, TMP / "o25", plan=str(o24 / "PLAN.json"), yedek_drive=str(TMP / "yd25"), apply=True,
+                      confirm=K.ONAY, devam={"111": 9500}, devam_eski={"111": 11101}), f, "S", TMP / "o25", kapak)
+    i111 = f.L["111"]["imgs"]
+    kont["devam: 9500 rank 1 + alt dolu, 11101 silindi, bag 9500'de, 12 gorsel"] = ok and \
+        i111[0]["listing_image_id"] == 9500 and i111[0]["alt_text"] == kapak["ARIES_LEO"]["alt"] and \
+        11101 not in [x["listing_image_id"] for x in i111] and len(i111) == 12 and \
+        f.L["111"]["vimg"][0]["image_id"] == 9500
+    kont["devam: 111'e yeni dosya yuklenmedi"] = [x[0] for x in f.yaz if x[1] == "111"] == ["RANK", "VARYASYON", "DELETE"]
+    kont["devam: eski id plandan farkliysa DUR"] = True
+    f2 = Fake(); o26 = TMP / "o26"
+    K.kuru(args(ids, kd, o26), f2, "S", o26, satirlar, kapak, sorun, fazla)
+    f2.L["111"]["imgs"].insert(1, {"listing_image_id": 9500, "rank": 1, "alt_text": "", "full_width": 400,
+                                   "full_height": 300, "url_fullxfull": "fake://yeni/9500"})
+    ok = K.apply(args(ids, kd, TMP / "o27", plan=str(o26 / "PLAN.json"), yedek_drive=str(TMP / "yd27"), apply=True,
+                      confirm=K.ONAY, devam={"111": 9500}, devam_eski={"111": 99999}), f2, "S", TMP / "o27", kapak)
+    kont["devam: eski id plandan farkliysa DUR"] = (not ok) and f2.yaz == []
+
+    # 12) ayni planla tekrar apply -> tamamlananlar ZATEN, yazma yok
+    n = len(f.yaz)
+    ok = K.apply(args(ids, kd, TMP / "o28", plan=str(o24 / "PLAN.json"), yedek_drive=str(TMP / "yd25"), apply=True,
+                      confirm=K.ONAY), f, "S", TMP / "o28", kapak)
+    s28 = json.loads((TMP / "o28" / "SONUC.json").read_text())
+    kont["tekrar apply: 3 ZATEN, yazma yok"] = ok and [r["sonuc"] for r in s28] == ["ZATEN"] * 3 and len(f.yaz) == n
 
     for k, v in kont.items():
         print(f"{'PASS' if v else 'FAIL'} {k}")
