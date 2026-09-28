@@ -206,6 +206,30 @@ def yerel_qc(H, yeni, serit, maske):
                                           'iyilesme_orani', 'murekkep_kat', 'doku_kat', 'ton_fark')}
 
 
+def hiza_incelt(H, ref, r0, r1, dy0, dx0, k, ara=12):
+    """PW referans maskesini HAM'in kendi murekkep maskesine (onayli yerel kontrast) 2B oturtur.
+
+    28 Eyl (WP A4): hiza_bul yatay profil korelasyonu 0.05 -> dx guvenilmez; kayik maske slogan
+    kenarini birakiyor (murekkep 4.37 kat). Aday (dy, dx): hiza_bul sonucu ve (0, 0) cevresinde
+    +-ara px; olcut: ortusen murekkep pikseli (ref & HAM maskesi) en cok olan."""
+    a = max(int(round(ara * k)), 2)
+    lo = max(min(dy0, 0) - a, -r0)
+    hi = min(max(dy0, 0) + a, H.shape[0] - r1)
+    L = H[r0 + lo:r1 + hi].astype(np.float32) @ pu.LUMA
+    E = pu.yerel_maske(L, pu.MASKE_YARICAP * k, pu.MASKE_ESIK, pu.MASKE_MIN_ALAN * k * k)
+    h = r1 - r0
+    en, sec = -1, (dy0, dx0)
+    dxs = sorted(set(range(-a, a + 1)) | set(range(dx0 - a, dx0 + a + 1)))
+    for dy in range(lo, hi + 1):
+        e = E[dy - lo:dy - lo + h]
+        for dx in dxs:
+            s_ = int((np.roll(ref, dx, axis=1) & e).sum())
+            if s_ > en:
+                en, sec = s_, (dy, dx)
+    return {'dy': int(sec[0]), 'dx': int(sec[1]), 'hiza_bul': [int(dy0), int(dx0)],
+            'ortusme': round(en / max(int(ref.sum()), 1), 3)}
+
+
 def pw_referans_plate(H, ed, boy, cik):
     """B yolu: plate_uret'in onayli yontemi (PURE_WHITE HAM'dan referans glif maskesi + hiza +
     bandin kendi ust/alt seritlerinden dolgu). Canva disa aktarimi HAM'dan farkliysa (WP 11x14 / A4:
@@ -225,6 +249,7 @@ def pw_referans_plate(H, ed, boy, cik):
     ref, gor = tb['ham_maske'], Pw[r0:r1].copy()
     del Pw
     hz = pu.hiza_bul(gor, H, r0, r1, azami=int(round(pu.HIZA_AZAMI * k)))
+    hz.update(hiza_incelt(H, ref, r0, r1, hz['dy'], hz['dx'], k))
     b2 = dict(bant)
     b2['y'] = [bant['y'][0] + hz['dy'], bant['y'][1] + hz['dy']]
     maske = ref if hz['dx'] == 0 else np.roll(ref, hz['dx'], axis=1)

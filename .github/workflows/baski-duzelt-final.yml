@@ -69,12 +69,13 @@ jobs:
           python -c "import sys; sys.path.insert(0,'scripts/medya_v1'); import siparis_dosyasi as s; s.kisisel_hazirla()"
           export KISISEL_YOL="$PWD/_siparis/kisisel/scripts/kisisel"
           PYTHONPATH="$KISISEL_YOL:scripts/medya_v1:." python -m pytest -q scripts/medya_v1
-      - name: Plate yenile (19 plate)
+      - name: Plate yenile (config/baski_duzelt_plate_isler.txt; bos ise atlanir)
         run: |
           set -euo pipefail
+          ISLER="$(tr -d '[:space:]' < config/baski_duzelt_plate_isler.txt || true)"
+          if [ -z "$ISLER" ]; then echo "plate listesi bos: yenileme atlandi"; exit 0; fi
           export KISISEL_YOL="$PWD/_siparis/kisisel/scripts/kisisel"
-          PYTHONPATH="$KISISEL_YOL:scripts/medya_v1:." python scripts/medya_v1/plate_yenile.py --kok "$KOK" \
-            --isler "VINTAGE:8x10,11x14,12x16,12x18,16x20,16x24,18x24,20x30,24x36,30x40,A4,A3,A2;MODERN:8x10,12x16;BLUE:12x18,24x36,16x24,20x30"
+          PYTHONPATH="$KISISEL_YOL:scripts/medya_v1:." python scripts/medya_v1/plate_yenile.py --kok "$KOK" --isler "$ISLER"
       - name: Plate durumu (5 renk x 13 boy)
         if: ${{ always() }}
         run: |
