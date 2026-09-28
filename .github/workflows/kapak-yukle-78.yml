@@ -3,7 +3,9 @@ name: kapak-yukle-78
 # 78 POD ilaninda v9 kapak yukleme + eski 1. sira kapagi yedekleyip silme (Serdar acik onayi 28 Eyl):
 # scripts/etsy/kapak_yukle_78.py. Kapak kaynagi TEK: TEMP/POD_KAPAK_78/<EN SON damga>/ (OZET 78/78 PASS).
 # Varsayilan KURU KOSU (Etsy salt okur): on kontrol + yedek (GALERI_ONCE.json + eski rank 1 dosyalari)
-# Drive TEMP/KAPAK78_YEDEK_<damga>/ + PLAN.json + silinecek 78 image_id. updateListing CAGRILMAZ.
+# Drive TEMP/KAPAK78_YEDEK_<damga>/ + PLAN.json + silinecek 78 image_id + bag tasinacak ilanlar.
+# Renk bagli ilanda (Serdar 28 Eyl): yukle -> geri oku -> baglari yedekle -> updateVariationImages (yalniz
+# eski kapaga bagli deger yeni kapaga) -> geri oku -> sil -> geri oku. updateListing CAGRILMAZ.
 # Yazma yalniz apply=true VE confirm=KAPAK78_YUKLE_SIL VE plan_damga (kuru kosunun damgasi) ile; apply
 # plana kilitlidir (kapak sha256 + canli galeri), ilk hatada DURUR. Yedek: KAPAK78_YEDEK_<plan_damga>/
 # Cikti: Drive TEMP/KAPAK78_YUKLE/<KURU|APPLY>_<damga>/

@@ -6,7 +6,7 @@ updateListing CAGRILMAZ.
 
 KURU (varsayilan, Etsy'ye yazma yok):
   1. on kontrol: 78 ilan state, gorsel sayisi, rank 1 image_id; eslesmeyen cift, 20 gorseli dolu,
-     active disi, varyasyona bagli eski kapak -> BLOK
+     active disi -> BLOK. Eski kapaga bagli varyasyon (renk) degerleri "bag tasi" olarak planlanir.
   2. yedek: tum galeri listesi GALERI_ONCE.json + eski rank 1 dosyalarinin KENDISI
      --out/yedek/<listing_id>_<image_id>.jpg (workflow Drive TEMP/KAPAK78_YEDEK_<damga>/'ya yazar)
   3. PLAN.json (apply bu dosyaya kilitli) + PLAN.csv + report.md (silinecek image_id listesi)
@@ -18,9 +18,12 @@ kapak sha256/alt metni plandan farkliysa hicbir yazma yapilmaz. Ilan basina (ilk
   1. eski rank 1 dosyasi HEDEF/<listing_id>_<image_id>.jpg olarak Drive'da mi (boyut = plandaki);
      yoksa indirilir, dogrulanir, yazilir ve hedefte boyutu geri okunur
   2. yeni kapak rank=1 yuklenir; geri okuma: 1. sira yeni, sayi +1, eski gorseller 2..n+1
-  3. yalniz 2. adim PASS ise plandaki eski image_id deleteListingImage ile silinir (baska gorsel silinmez)
+  2b. (yalniz bagli ilanlar; Serdar karari 28 Eyl) varyasyon baglarinin TAMAMI okunur, Drive'a yedeklenir
+     (<listing_id>_VARYASYON_ONCE.json); updateVariationImages ile yalniz eski kapaga bagli deger(ler)
+     yeni kapaga tasinir, tam liste geri gonderilir; geri okuma: bag yeni kapakta, diger baglar ayni
+  3. yalniz onceki adimlar PASS ise plandaki eski image_id deleteListingImage ile silinir
   4. geri okuma: sayi = onceki, 1. sira = yeni, eski id yok, kalanlar ayni sira, varyasyon baglari,
-     videolar, state active
+     videolar, state active (bagli ilanda varyasyon = tasinmis beklenen liste)
 Her ilandan sonra SONUC.json yazilir. ETA sayaci: islenen/toplam, gecen, kalan, yuzde.
 
 Ortam: ETSY_API_KEY, ETSY_SHARED_SECRET, ETSY_SHOP_ID, TOKEN_FILE.
@@ -55,7 +58,7 @@ ONAY = "KAPAK78_YUKLE_SIL"
 ETSY_MAX = 20
 BEKLENEN = 78
 KAPAK_BOYUT = (3000, 2250)
-CAGRI_ILAN = 12  # apply'da ilan basina tahmini Etsy cagrisi (okuma + yukleme + silme + geri okuma)
+CAGRI_ILAN = 14  # apply'da ilan basina tahmini Etsy cagrisi (okuma + yukleme + silme + geri okuma)
 OKUMA_BEKLE = 3
 
 
@@ -164,7 +167,8 @@ def kuru(a, api, shop, out, satirlar, kapak, sorun, fazla):
         k = kapak.get(c) or {}
         st = (api.get(f"/listings/{lid}", ok404=True) or {}).get("state")
         g = gallery(api, lid)
-        vmap = variation_map(variation_images(api, shop, lid))
+        vham = variation_images(api, shop, lid)
+        vmap = variation_map(vham)
         galeri_once[lid] = {"cift": c, "state": st, "galeri": g, "varyasyon": vmap}
         r1 = g[0] if g else {}
         eski_id = int(r1["listing_image_id"]) if r1 else None
@@ -187,10 +191,9 @@ def kuru(a, api, shop, out, satirlar, kapak, sorun, fazla):
         else:
             if int(r1.get("rank") or 0) != 1:
                 neden.append(f"ilk gorsel rank {r1.get('rank')}")
-            bagli = [str(v[2]) for v in vmap if str(eski_id) == str(v[3])]
-            if bagli:
-                row["eski_bagli_degerler"] = bagli
-                neden.append(f"{eski_id} varyasyon gorseline bagli ({len(bagli)} deger: {', '.join(bagli)})")
+            row["varyasyon_once"] = [list(v) for v in vmap]
+            row["bag_tasi"] = [{"property_id": v.get("property_id"), "value_id": v.get("value_id"),
+                                "value": v.get("value")} for v in vham if str(v.get("image_id")) == str(eski_id)]
             if len(g) + 1 > ETSY_MAX:
                 neden.append(f"galeri {len(g)} dolu (+1 > {ETSY_MAX})")
             yol = yedek_dir / f"{lid}_{eski_id}.jpg"
@@ -248,13 +251,11 @@ def kuru(a, api, shop, out, satirlar, kapak, sorun, fazla):
         sat += ["## BLOK / ZATEN / eslesmeyen", ""]
         sat += [f"- {r['listing_id']} {r['cift']}: {r['durum']} {r['neden']}" for r in engel]
         sat += [f"- ilanda olmayan kapak dosyasi: {f}" for f in fazla] + [""]
-    bagli_say = {}
-    for r in plan:
-        for d in r.get("eski_bagli_degerler") or []:
-            bagli_say[d] = bagli_say.get(d, 0) + 1
-    if bagli_say:
-        sat += ["## Eski rank 1'e bagli varyasyon degerleri (deger: ilan sayisi)", ""]
-        sat += [f"- {d}: {n}" for d, n in sorted(bagli_say.items(), key=lambda x: -x[1])] + [""]
+    tasi = [r for r in silinecek if r.get("bag_tasi")]
+    sat += [f"## Bag tasinacak {len(tasi)} ilan (updateVariationImages; eski -> yeni, yeni id yuklemede belli olur)", "",
+            "| # | listing_id | cift | renk degeri | eski image_id -> yeni |", "|---|---|---|---|---|"]
+    sat += [f"| {j} | {r['listing_id']} | {r['cift']} | {', '.join(str(b['value']) for b in r['bag_tasi'])} | "
+            f"{r['eski_rank1_id']} -> YENI KAPAK |" for j, r in enumerate(tasi, 1)] + [""]
     sat += [f"## Silinecek {len(silinecek)} image_id (eski rank 1)", "",
             "| # | listing_id | cift | state | galeri | silinecek image_id | boyut | yedek |",
             "|---|---|---|---|---|---|---|---|"]
@@ -266,8 +267,7 @@ def kuru(a, api, shop, out, satirlar, kapak, sorun, fazla):
         "".join(f"{r['listing_id']},{r['eski_rank1_id']}\n" for r in silinecek), encoding="utf-8")
     for x in sat[2:8]:
         log(x)
-    for d, n in sorted(bagli_say.items(), key=lambda x: -x[1]):
-        log(f"- bagli deger {d}: {n} ilan")
+    log(f"- bag tasinacak {len(tasi)} ilan | bagsiz {len(silinecek) - len(tasi)} ilan")
     return ok
 
 
@@ -284,7 +284,7 @@ def ilan_uygula(a, api, shop, out, p, kapak_yol, drive_var):
     k0 = {"state active": once["state"] == "active",
           f"1. sira = plandaki {eski}": bool(oids) and oids[0] == eski,
           "galeri id sirasi plandaki ile ayni": oids == [int(x) for x in p["galeri_ids"]],
-          "eski id varyasyona bagli degil": not any(str(eski) == str(v[3]) for v in once["varyasyon"]),
+          "varyasyon baglari plandaki ile ayni": [list(v) for v in once["varyasyon"]] == p.get("varyasyon_once"),
           f"galeri {len(oids)} + 1 <= {ETSY_MAX}": len(oids) + 1 <= ETSY_MAX}
     r["adimlar"]["0_on_kontrol"] = k0
     if not all(k0.values()):
@@ -342,6 +342,40 @@ def ilan_uygula(a, api, shop, out, p, kapak_yol, drive_var):
     if not all(k2.values()):
         return r, "yukleme geri okuma FAIL (eski kapak SILINMEDI): " + ", ".join(k for k, v in k2.items() if not v)
 
+    # 2b. bagli ilan: tum baglar yedeklenir, yalniz eski kapaga bagli deger(ler) yeni kapaga tasinir
+    bek_var = once["varyasyon"]
+    if p.get("bag_tasi"):
+        ham = variation_images(api, shop, lid)
+        if variation_map(ham) != once["varyasyon"]:
+            return r, "bag tasima: varyasyon baglari yuklemeden sonra degismis (eski kapak SILINMEDI)"
+        vad = f"{lid}_VARYASYON_ONCE.json"
+        vyol = out / "yedek" / vad
+        vyol.write_text(json.dumps({"listing_id": lid, "eski_kapak": eski, "yeni_kapak": yeni,
+                                    "variation_images": ham}, ensure_ascii=False, indent=1, default=str))
+        try:
+            _, esit, yb, ub = drive_yaz(vyol, a.yedek_drive, vad)
+        except Exception as e:  # noqa: BLE001
+            return r, f"varyasyon yedegi Drive'a yazilamadi: {e}"
+        if not esit:
+            return r, f"varyasyon yedegi FAIL: hedef boyutu {ub} != {yb}"
+        yeni_liste = [{"property_id": v.get("property_id"), "value_id": v.get("value_id"),
+                       "image_id": yeni if str(v.get("image_id")) == str(eski) else v.get("image_id")} for v in ham]
+        bek_var = sorted((v[0], v[1], v[2], yeni if str(v[3]) == str(eski) else v[3]) for v in once["varyasyon"])
+        tasinan = [v for v in ham if str(v.get("image_id")) == str(eski)]
+        r["bag_tasi"] = [{"value": v.get("value"), "eski": eski, "yeni": yeni} for v in tasinan]
+        api.post_json(f"/shops/{shop}/listings/{lid}/variation-images", {"variation_images": yeni_liste})
+        vs = eventually(lambda: variation_map(variation_images(api, shop, lid)), lambda m: m == bek_var,
+                        attempts=10, pause=OKUMA_BEKLE)
+        k2b = {f"varyasyon yedegi Drive'da ({yb} bayt)": esit,
+               f"{len(tasinan)} bag yeni kapakta": all(any(x[1] == v.get("value_id") and str(x[3]) == str(yeni)
+                                                          for x in vs) for v in tasinan),
+               "diger baglar ayni": [x for x in vs if str(x[3]) != str(yeni)]
+               == [x for x in once["varyasyon"] if str(x[3]) != str(eski)],
+               "eski kapaga bag kalmadi": not any(str(x[3]) == str(eski) for x in vs)}
+        r["adimlar"]["2b_bag_tasi"] = k2b
+        if not all(k2b.values()):
+            return r, "bag tasima geri okuma FAIL (eski kapak SILINMEDI): " + ", ".join(k for k, v in k2b.items() if not v)
+
     # 3. yalniz plandaki eski image_id silinir
     api.delete(f"/shops/{shop}/listings/{lid}/images/{eski}")
 
@@ -354,7 +388,7 @@ def ilan_uygula(a, api, shop, out, p, kapak_yol, drive_var):
                 "1. sira = yeni kapak": s[:1] == [yeni],
                 f"{eski} silindi": eski not in s,
                 "kalan gorseller ayni id + sira": s == beklenen,
-                "varyasyon gorsel baglari ayni": st["varyasyon"] == once["varyasyon"],
+                "varyasyon gorsel baglari beklenen": st["varyasyon"] == bek_var,
                 "videolar ayni": st["video"] == once["video"],
                 "ilan active": st["state"] == "active"}
 
@@ -405,8 +439,9 @@ def apply(a, api, shop, out, kapak):
            f"- PASS {pas} / {len(is_)} (ZATEN atlanan {len(rows) - len(is_)}) | kota {api.remaining}",
            f"- Yedek: {a.yedek_drive}/<listing_id>_<image_id>.jpg ({sum(1 for r in sonuc if r.get('yedek'))} dosya)",
            f"- SONUC: {'PASS' if ok else 'FAIL - DURDU: ' + (sonuc[-1]['listing_id'] + ' ' + hata if hata else 'eksik')}", "",
-           "| listing_id | cift | silinen eski | yeni kapak | sonuc |", "|---|---|---|---|---|"]
-    sat += [f"| {r['listing_id']} | {r['cift']} | {r['eski_id']} | {r['yeni_id']} | {r['sonuc']} |" for r in sonuc]
+           "| listing_id | cift | silinen eski | yeni kapak | tasinan bag | sonuc |", "|---|---|---|---|---|---|"]
+    sat += [f"| {r['listing_id']} | {r['cift']} | {r['eski_id']} | {r['yeni_id']} | "
+            f"{', '.join(str(b['value']) for b in r.get('bag_tasi') or []) or '-'} | {r['sonuc']} |" for r in sonuc]
     (out / "report.md").write_text("\n".join(sat) + "\n", encoding="utf-8")
     for x in sat[2:5]:
         log(x)
