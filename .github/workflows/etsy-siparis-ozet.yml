@@ -5,6 +5,7 @@ name: etsy-siparis-ozet
 # Loga musteri bilgisi yazilmaz; id ve takip numaralari maskeli.
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -15,16 +16,17 @@ on:
         required: true
         default: "3"
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 jobs:
   oku:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 130
     steps:
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

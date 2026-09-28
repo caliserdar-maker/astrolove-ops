@@ -1,6 +1,7 @@
 name: pod-cover-gold-b
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -19,14 +20,11 @@ on:
         required: true
         default: "8542130896"
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 jobs:
   replace-cover:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 145
     env:
       LISTING_ID: "4570112095"
       APPLY: ${{ inputs.apply || 'false' }}
@@ -36,6 +34,10 @@ jobs:
       CANDIDATE_PIXEL_SHA256: "aaa73ce32c0ea0327baa925600afa7977618bfd0278b639cedf51054c03f78e8"
     steps:
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - name: Tetikleyici ayarları
         if: ${{ github.event_name == 'push' }}
         run: |

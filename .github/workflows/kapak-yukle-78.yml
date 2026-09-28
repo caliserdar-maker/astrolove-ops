@@ -18,17 +18,15 @@ on:
       confirm: {description: "Yazma icin tam olarak: KAPAK78_YUKLE_SIL", required: false, default: ""}
       devam: {description: "apply: yarim ilan LISTING:YENI_IMAGE:ESKI_IMAGE (kesin id; virgulle birden cok)", required: false, default: ""}
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 permissions:
+  actions: read
   contents: read
 
 jobs:
   yukle:
     runs-on: ubuntu-latest
-    timeout-minutes: 150
+    timeout-minutes: 270
     env:
       APPLY: ${{ inputs.apply }}
       CONFIRM: ${{ inputs.confirm }}
@@ -48,6 +46,10 @@ jobs:
           fi
           echo "STAMP=$(date -u +%Y%m%d_%H%M)" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

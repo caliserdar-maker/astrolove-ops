@@ -9,6 +9,7 @@ name: pod-hero-batch
 # Metin alanlari (baslik/etiket/fiyat/aciklama/bolum) DEGISMEZ; updateListing cagrilmaz.
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -31,20 +32,21 @@ on:
         required: false
         default: "400"
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 jobs:
   uret:
     runs-on: ubuntu-latest
-    timeout-minutes: 330
+    timeout-minutes: 360
     strategy:
       fail-fast: false
       matrix:
         shard: [0, 1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -94,12 +96,13 @@ jobs:
     needs: uret
     if: ${{ always() }}
     runs-on: ubuntu-latest
-    timeout-minutes: 330
-    concurrency:
-      group: etsy-token
-      cancel-in-progress: false
+    timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

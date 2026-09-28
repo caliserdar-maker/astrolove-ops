@@ -12,6 +12,7 @@ name: pod-night2
 # guncellendi + 78 RU govdesi bos atlandi) ve kaldirildi; workflow artik yalniz elle tetiklenir.
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -26,19 +27,20 @@ on:
         required: false
         default: "400"
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 jobs:
   night:
     runs-on: ubuntu-latest
-    timeout-minutes: 240
+    timeout-minutes: 360
     env:
       DRY_RUN: ${{ inputs.dry_run || 'false' }}      # schedule ile calisirsa APPLY
       QMIN: ${{ inputs.quota_min || '400' }}
     steps:
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

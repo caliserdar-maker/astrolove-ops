@@ -6,6 +6,7 @@ name: pod-desc-update
 # Kota quota_min altina inince durur, kalan ilanlar raporlanir (ayni workflow tekrar kosulur).
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -32,16 +33,17 @@ on:
         required: false
         default: "400"
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 jobs:
   desc:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 240
     steps:
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

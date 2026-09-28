@@ -4,6 +4,7 @@ name: seo-live-snapshot
 # SALT OKUR: Etsy API'ye yalniz GET cagrisi yapar; ilan ve Ads ayari degistirmez.
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -12,17 +13,18 @@ on:
     paths:
       - config/seo_live_snapshot.trigger
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 jobs:
   snapshot:
     if: github.event_name == 'workflow_dispatch' || github.event.head_commit.message == 'Run SEO live snapshot'
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 165
     steps:
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

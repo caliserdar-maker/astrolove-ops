@@ -5,6 +5,7 @@ name: ayar77-yaz
 # (TEMP/AYAR77_YEDEK_<damga>, sayi dogrulanir), sonra yazma; her ilanda state kontrolu, ilk hatada DUR.
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -19,14 +20,11 @@ on:
         required: true
         default: ""
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 jobs:
   yaz:
     runs-on: ubuntu-latest
-    timeout-minutes: 150
+    timeout-minutes: 270
     env:
       YALNIZ: ${{ inputs.yalniz }}
       CONFIRM: ${{ inputs.confirm }}
@@ -35,6 +33,10 @@ jobs:
         run: |
           [ "$CONFIRM" = "AYAR77" ] || { echo "::error::confirm tam olarak AYAR77 olmali. DUR."; exit 1; }
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - uses: actions/setup-python@v5
         with: { python-version: "3.12", cache: pip }
       - run: |

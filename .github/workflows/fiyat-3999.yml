@@ -6,6 +6,7 @@ name: fiyat-3999
 # Cikti: Drive TEMP/POD_ORDERS/FIYAT_3999_* (+ ilan basina ONCE/SONRA yedegi FIYAT_3999_YEDEK_<mod>.tgz).
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -28,12 +29,13 @@ on:
 jobs:
   fiyat:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
-    concurrency:
-      group: etsy-token
-      cancel-in-progress: false
+    timeout-minutes: 210
     steps:
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

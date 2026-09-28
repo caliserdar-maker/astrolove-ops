@@ -4,6 +4,7 @@ name: pod-cover-from-video
 # Video, diger 12 gorsel ve variation-images baglantilari korunur.
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -22,14 +23,11 @@ on:
         type: boolean
         default: false
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 jobs:
   frame0-cover:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 145
     env:
       LISTING_ID: "4570112095"
       APPLY: ${{ inputs.apply || 'false' }}
@@ -37,6 +35,10 @@ jobs:
       MOBILE_DISPLAY_COMPENSATION: ${{ inputs.mobile_display_compensation || 'false' }}
     steps:
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - name: Tetikleyici ayarlari
         if: ${{ github.event_name == 'push' }}
         run: |

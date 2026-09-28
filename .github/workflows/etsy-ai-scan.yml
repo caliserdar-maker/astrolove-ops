@@ -5,6 +5,7 @@ name: etsy-ai-scan
 # Hicbir yazma yapmaz; OAS herkese acik, ilan taramasi getShopListings ile ~6 cagri.
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -19,16 +20,17 @@ on:
         required: false
         default: "\\bai[ _-]?generat|artificial intelligence|machine[ _-]?learning|how[ _-]?it'?s[ _-]?made|is_?supply|who_?made"
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 jobs:
   scan:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 135
     steps:
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

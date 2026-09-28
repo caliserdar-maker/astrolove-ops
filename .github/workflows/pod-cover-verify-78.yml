@@ -6,6 +6,7 @@ name: pod-cover-verify-78
 # Cikti: ASTROLOVE/TEMP/POD_COVER_GOLD_B_77/ altina VERIFY_<tarih>.csv
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -16,18 +17,19 @@ on:
         type: boolean
         default: false
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 180
     env:
       SKIP_LIVE: ${{ inputs.skip_live }}
     steps:
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

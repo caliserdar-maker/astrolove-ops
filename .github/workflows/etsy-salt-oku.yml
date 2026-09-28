@@ -5,6 +5,7 @@ name: etsy-salt-oku
 # Cikti: Drive ASTROLOVE/TEMP/DIJITAL_78/POD_URETIM_KARGO_API.csv + POD_KARGO_ULKELER.csv
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -21,16 +22,17 @@ on:
         required: true
         default: "4556456145"
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 jobs:
   oku:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

@@ -8,6 +8,7 @@ name: takip-denetim
 # Musteri adi/adresi okunmaz/yazilmaz. Cikti Drive TEMP/POD_ORDERS/TAKIP_DENETIM.json
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -69,12 +70,13 @@ jobs:
   denetle:
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    concurrency:
-      group: etsy-token
-      cancel-in-progress: false
+    timeout-minutes: 130
     steps:
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

@@ -30,17 +30,15 @@ on:
         required: false
         default: ""
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 permissions:
+  actions: read
   contents: read
 
 jobs:
   seo:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 240
     env:
       APPLY: ${{ inputs.apply }}
       CONFIRM: ${{ inputs.confirm }}
@@ -63,6 +61,10 @@ jobs:
             echo "MOD=DRY" >> "$GITHUB_ENV"
           fi
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

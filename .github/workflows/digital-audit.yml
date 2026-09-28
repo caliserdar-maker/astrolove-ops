@@ -22,23 +22,25 @@ on:
         required: false
         default: "300"
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 permissions:
+  actions: read
   contents: read
 
 jobs:
   audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 210
     env:
       LISTING: ${{ inputs.listing || '4552211376' }}
       ALL_LIMIT: ${{ inputs.all_limit || '0' }}
       QMIN: ${{ inputs.quota_min || '300' }}
     steps:
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

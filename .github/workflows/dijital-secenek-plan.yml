@@ -5,6 +5,7 @@ name: dijital-secenek-plan
 # etsy-token kilidi + token geri yazimi (GOREV 0037). SALT OKUMA. Cikti Drive TEMP/POD_ORDERS/DIJITAL_SECENEK_DIFF_CL.csv (+ PUT taslagi, ozet).
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -23,12 +24,13 @@ on:
 jobs:
   plan:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    concurrency:
-      group: etsy-token
-      cancel-in-progress: false
+    timeout-minutes: 130
     steps:
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

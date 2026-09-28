@@ -8,6 +8,7 @@ name: digital-desc-batch
 # sonraki kosu kaldigi yerden devam eder.
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -45,14 +46,11 @@ on:
         required: false
         default: ""
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 jobs:
   desc:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 300
     env:
       APPLY: ${{ github.event_name == 'schedule' && 'true' || inputs.apply }}
       SKIP: ${{ inputs.skip || '4552211376' }}
@@ -82,6 +80,10 @@ jobs:
             echo "KURU DENEME: Etsy yazma yok."
           fi
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

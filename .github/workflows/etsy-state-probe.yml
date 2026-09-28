@@ -4,6 +4,7 @@ name: etsy-state-probe
 # tek ilanin state'i. Dogrulama amacli, 4-5 GET. Hicbir yazma yapmaz.
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -30,16 +31,17 @@ on:
         type: boolean
         default: true
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 130
     steps:
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

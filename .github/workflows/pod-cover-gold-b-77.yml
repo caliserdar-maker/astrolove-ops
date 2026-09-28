@@ -6,6 +6,7 @@ name: pod-cover-gold-b-77
 # bagimsiz kapagi eksik 12-gorselli ilanlara yeni kapak eklenir.
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -32,14 +33,11 @@ on:
         required: false
         default: "300"
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 jobs:
   gold-b-77:
     runs-on: ubuntu-latest
-    timeout-minutes: 240
+    timeout-minutes: 360
     env:
       APPLY: ${{ inputs.apply || 'false' }}
       CONFIRM: ${{ inputs.confirm || '' }}
@@ -49,6 +47,10 @@ jobs:
       STATE_REMOTE: ASTROLOVE/TEMP/POD_COVER_GOLD_B_77/state.json
     steps:
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - name: Tetikleyici ayarlari
         if: ${{ github.event_name == 'push' }}
         run: |

@@ -7,6 +7,7 @@ name: pod-video-match
 # video_match.json) + ETSY_VIDEO_<stamp>/ (yedek + sonuc).
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -37,14 +38,11 @@ on:
         required: false
         default: ""
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 jobs:
   match:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 165
     env:
       LISTING: ${{ inputs.listing_id }}
       PAIR: ${{ inputs.pair }}
@@ -68,6 +66,10 @@ jobs:
             echo "KURU DENEME: Etsy yazma yok."
           fi
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

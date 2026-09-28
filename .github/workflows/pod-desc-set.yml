@@ -6,6 +6,7 @@ name: pod-desc-set
 # degismez. Yazmadan once tum alanlar JSON olarak Drive'a yedeklenir.
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -32,14 +33,11 @@ on:
         required: false
         default: ""
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 jobs:
   desc:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 140
     env:
       LISTING: ${{ inputs.listing_id }}
       DESCFILE: ${{ inputs.desc_file || 'scripts/etsy/desc/AQUARIUS_AQUARIUS_4570110121.txt' }}
@@ -62,6 +60,10 @@ jobs:
             echo "KURU DENEME: Etsy yazma yok."
           fi
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

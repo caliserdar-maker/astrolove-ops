@@ -5,6 +5,7 @@ name: wp-media
 # Tek Etsy kosusu: concurrency etsy-token. Resume: TEMP/WP_UPLOAD_STATE.csv.
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -31,16 +32,17 @@ on:
         required: true
         default: "300"
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 jobs:
   upload:
     runs-on: ubuntu-latest
-    timeout-minutes: 350
+    timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

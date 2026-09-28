@@ -6,6 +6,7 @@ name: pod-ru-tags
 # aciklama Etsy'den okundugu gibi geri gonderilir, yalniz tags degisir). Kota quota_min altinda durur.
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -28,14 +29,11 @@ on:
         required: false
         default: "400"
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 jobs:
   ru-tags:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 180
     env:
       LIMIT: ${{ inputs.limit || '0' }}
       QMIN: ${{ inputs.quota_min || '400' }}
@@ -56,6 +54,10 @@ jobs:
             echo "KURU DENEME: Etsy yazma yok."
           fi
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

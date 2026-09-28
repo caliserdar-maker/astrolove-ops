@@ -5,6 +5,7 @@ name: pod-referans-duzen-v2
 # Cikti: ASTROLOVE/TEMP/POD_REFERANS_ORNEK_V2/
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -15,18 +16,19 @@ on:
         required: false
         default: "4570112095,4570126104,4570125580,4570031205,4570224058"
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 jobs:
   duzen:
     runs-on: ubuntu-latest
-    timeout-minutes: 75
+    timeout-minutes: 195
     env:
       ONLY_IDS: ${{ inputs.only_ids }}
     steps:
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

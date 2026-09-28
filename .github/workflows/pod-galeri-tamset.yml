@@ -7,6 +7,7 @@ name: pod-galeri-tamset
 # durum A1_77/_galeri/GALERI_TAMSET.json (PASS olanlar atlanir).
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -31,16 +32,17 @@ on:
         required: false
         default: ""
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 jobs:
   galeri:
     runs-on: ubuntu-latest
-    timeout-minutes: 300
+    timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

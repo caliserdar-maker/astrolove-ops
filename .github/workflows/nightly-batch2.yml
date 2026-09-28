@@ -7,6 +7,7 @@ name: nightly-batch2
 # Cikti: ASTROLOVE/TEMP/NIGHTLY_BATCH_2/<UTC damga>/
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -21,19 +22,20 @@ on:
         required: false
         default: "1500"
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 jobs:
   batch2:
     runs-on: ubuntu-latest
-    timeout-minutes: 240
+    timeout-minutes: 360
     env:
       ORNEK: ${{ inputs.ornek || '60' }}
       ORNEK_MB: ${{ inputs.ornek_mb || '1500' }}
     steps:
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

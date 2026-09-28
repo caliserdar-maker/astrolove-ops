@@ -10,6 +10,7 @@ name: pod-listing-create
 # STATE: Drive TEMP/POD_LISTING/POD_LISTINGS_STATE.csv (resume).
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -49,18 +50,19 @@ on:
         required: false
         default: "returns=0,exchanges=0"
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 jobs:
   create:
     runs-on: ubuntu-latest
-    timeout-minutes: 300
+    timeout-minutes: 360
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
 
       - name: Python kur
         uses: actions/setup-python@v5

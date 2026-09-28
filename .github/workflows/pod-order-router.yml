@@ -9,6 +9,7 @@ name: pod-order-router
 # Cron 30 dk: env=live, onayli mod (Etsy ~48 cagri/gun). STATE Drive TEMP/POD_ORDERS_STATE.csv.
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -65,13 +66,32 @@ on:
         type: boolean
         default: false
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
-
 jobs:
-  route:
+  # Etsy kilidi (Serdar 28 Eyl): cron turu kilit kumesinde baska aktif kosu varsa BASARIYLA atlanir
+  # (beklemez, kimseyi iptal etmez); elle baslatilan router (or. submit) atlamaz, sirasini bekler.
+  kilit:
     if: ${{ github.event_name == 'workflow_dispatch' || vars.POD_ROUTER_ENABLED != 'false' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 125
+    outputs:
+      atla: ${{ steps.k.outputs.atla }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            scripts/etsy/kilit_bekle.py
+            .github/workflows
+      - id: k
+        name: Etsy kilidi (cron mesgulse atla, elle sira bekle)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EV: ${{ github.event_name }}
+        run: |
+          if [ "$EV" = "schedule" ]; then python3 scripts/etsy/kilit_bekle.py --mod atla
+          else python3 scripts/etsy/kilit_bekle.py; fi
+  route:
+    needs: kilit
+    if: ${{ (github.event_name == 'workflow_dispatch' || vars.POD_ROUTER_ENABLED != 'false') && needs.kilit.outputs.atla != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:

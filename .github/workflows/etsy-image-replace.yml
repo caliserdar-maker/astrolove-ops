@@ -5,6 +5,7 @@ name: etsy-image-replace
 # dry_run=false ETSY'YE YAZAR (yukle -> kararlilik -> eski sil) - onay gerekir.
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -31,18 +32,19 @@ on:
         type: boolean
         default: true
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 jobs:
   replace:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 140
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
 
       - name: Python kur
         uses: actions/setup-python@v5

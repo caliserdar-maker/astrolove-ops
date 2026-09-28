@@ -6,6 +6,7 @@ name: pod-fiyat-hatirlatma
 # Tekrar etmez: durum TEMP/POD_ORDERS/FIYAT_HATIRLATMA.json. Etsy'ye YAZMA YOK.
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -27,16 +28,17 @@ on:
         description: "baslangictan itibaren gun esigi"
         default: "60"
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 jobs:
   hatirlat:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 135
     steps:
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

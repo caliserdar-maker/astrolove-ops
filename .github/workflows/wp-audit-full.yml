@@ -6,6 +6,7 @@ name: wp-audit-full
 # Etsy'ye tek yazma: OAuth token yenilemesi (Drive'a geri yazilir).
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -20,16 +21,17 @@ on:
         required: true
         default: "0"
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 jobs:
   audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 350
+    timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - uses: actions/setup-python@v5
         with: { python-version: "3.12", cache: pip }
       - run: pip install -q -r requirements.txt

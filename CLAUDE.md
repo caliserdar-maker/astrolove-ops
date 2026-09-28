@@ -18,7 +18,13 @@ bolumu okunmadan baslanmaz.
   yukleme veya silme, yayinlama, fiyat/etiket/aciklama degisikligi.
 - Token sahibi: Drive `ASTROLOVE/TEMP/ETSY_TOKEN.json` tek kaynaktir; yenilenen
   refresh token her kosuda geri yazilir (bkz. docs/SECRETS.md). Ayni anda tek
-  Etsy kosusu (`concurrency: etsy-token`).
+  Etsy kosusu: `scripts/etsy/kilit_bekle.py` (28 Eyl 2026, Serdar onayi; GitHub
+  `concurrency: etsy-token` KULLANILMAZ, bekleyen kosuyu iptal ediyordu). Yeni Etsy
+  workflow'u: `permissions: actions: read` + checkout'tan hemen sonra, token indirmeden
+  ONCE `GH_TOKEN: ${{ github.token }}` ile `python3 scripts/etsy/kilit_bekle.py` adimi.
+  Zamanlanmis router mesgulse turu atlar (`--mod atla`).
+- KURAL (tum oturumlar): Etsy kosusunu istedigin an baslat; kilit sirayi kendisi tutar,
+  hicbir kosu iptal edilmez (bekleme en fazla 120 dk, asilirsa is yapmadan FAIL).
 - Hicbir sir loga yazilmaz; token degerleri `::add-mask::` ile maskelenir.
 - **updateListing bir TASLAGI otomatik yayina alir** (7 Eyl 2026 olcumu: gece
   aciklama guncellemesi 72 taslagi `active` yapti; `state_timestamp` = PATCH ani).

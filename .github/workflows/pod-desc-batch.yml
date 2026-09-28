@@ -10,6 +10,7 @@ name: pod-desc-batch
 # ETA sayaci, kota izleme (taban altinda DURUR), durum CSV'si her ilanda Drive'a.
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -40,14 +41,11 @@ on:
         required: false
         default: "scripts/etsy/desc/AQUARIUS_AQUARIUS_4570110121.txt"
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 jobs:
   desc:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 240
     env:
       APPLY: ${{ inputs.apply }}
       SKIP: ${{ inputs.skip }}
@@ -71,6 +69,10 @@ jobs:
             echo "KURU DENEME: Etsy yazma yok."
           fi
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

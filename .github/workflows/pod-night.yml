@@ -9,6 +9,7 @@ name: pod-night
 # NOT: cron TEK SEFERLIK idi; 7 Eyl 2026 kosusu (run 34070091952) basarili bitti, schedule kaldirildi.
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -31,14 +32,11 @@ on:
         required: false
         default: "400"
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 jobs:
   night:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 300
     env:
       DRY_RUN: ${{ inputs.dry_run || 'false' }}          # schedule ile calisirsa APPLY
       PUB_LIMIT: ${{ inputs.publish_limit || '5' }}
@@ -46,6 +44,10 @@ jobs:
       DESC_LIMIT: ${{ inputs.desc_limit || '0' }}
     steps:
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

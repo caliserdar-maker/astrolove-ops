@@ -5,6 +5,7 @@ name: pod-video-cover-match
 # baglantilari, baslik, fiyat ve envanter degismez.
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -19,20 +20,21 @@ on:
         required: false
         default: ""
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 jobs:
   cover-match:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 145
     env:
       LISTING_ID: "4570112095"
       APPLY: ${{ inputs.apply || 'false' }}
       CONFIRM: ${{ inputs.confirm || '' }}
     steps:
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - name: Tetikleyici ayarlari
         if: ${{ github.event_name == 'push' }}
         run: |

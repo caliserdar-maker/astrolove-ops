@@ -9,6 +9,7 @@ name: medya-v1-oku
 # TEMP/ETSY_TOKEN.json'a geri yazilir (docs/SECRETS.md). Sir loga yazilmaz.
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -31,15 +32,24 @@ on:
         required: false
         default: "1WpPbP86Em0WNMTj9muUyvADbOa3Axxd4"
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 jobs:
   oku:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 150
     steps:
+      - name: Etsy kilidi icin main (seyrek)
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: _kilit
+          sparse-checkout: |
+            scripts/etsy/kilit_bekle.py
+            .github/workflows
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 _kilit/scripts/etsy/kilit_bekle.py --kok _kilit
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.branch }}

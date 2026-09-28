@@ -11,21 +11,23 @@ on:
     inputs:
       video_damga: {description: "TEMP/POD_VIDEO_V2 damgasi (bos = OZET.md'si olan en son)", required: false, default: ""}
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 permissions:
+  actions: read
   contents: read
 
 jobs:
   kuru:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 180
     env:
       VDAMGA_IN: ${{ inputs.video_damga }}
     steps:
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

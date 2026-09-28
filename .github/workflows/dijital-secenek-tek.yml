@@ -4,6 +4,7 @@ name: dijital-secenek-tek
 # mod oku = salt okuma; mod yaz = --confirm DIJITAL_TEK. Cikti Drive TEMP/POD_ORDERS/DIJITAL_TEK_*.
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -19,12 +20,13 @@ on:
 jobs:
   fiyat:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
-    concurrency:
-      group: etsy-token
-      cancel-in-progress: false
+    timeout-minutes: 210
     steps:
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

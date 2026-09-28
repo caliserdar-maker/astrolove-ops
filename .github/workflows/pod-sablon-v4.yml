@@ -7,6 +7,7 @@ name: pod-sablon-v4
 # Cikti: ASTROLOVE/TEMP/POD_REFERANS_ORNEK_V4/
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -17,18 +18,19 @@ on:
         required: false
         default: "4570031205,4570125580,4570110641,4570224058,4570126104"
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 jobs:
   sablon:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 210
     env:
       ORNEK_IDS: ${{ inputs.ornek_ids }}
     steps:
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

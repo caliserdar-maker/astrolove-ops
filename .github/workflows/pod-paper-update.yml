@@ -7,6 +7,7 @@ name: pod-paper-update
 # dry_limit: dry-run kapisini kucuk tutar (kota tasarrufu); apply yine limit kadar ilan isler.
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -33,14 +34,11 @@ on:
         required: false
         default: "400"
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 jobs:
   paper:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 210
     env:
       APPLY: ${{ inputs.apply }}
       LIMIT: ${{ inputs.limit || '0' }}
@@ -63,6 +61,10 @@ jobs:
             echo "KURU DENEME: Etsy yazma yok."
           fi
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

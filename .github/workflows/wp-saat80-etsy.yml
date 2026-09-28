@@ -11,6 +11,7 @@ name: wp-saat80-etsy
 # MOCKUP_V2_YEDEK_SAAT100'den geri koyar, yeni render'i _CANDIDATE'e alir (idempotent).
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -33,14 +34,11 @@ on:
         type: boolean
         default: true
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 jobs:
   etsy:
     runs-on: ubuntu-latest
-    timeout-minutes: 340
+    timeout-minutes: 360
     steps:
       - name: Onay kapisi
         env:
@@ -58,6 +56,10 @@ jobs:
             echo "KURU DENEME: yazma yok."
           fi
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - uses: actions/setup-python@v5
         with: { python-version: "3.12", cache: pip }
       - run: pip install -q -r requirements.txt

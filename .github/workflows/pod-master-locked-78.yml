@@ -5,6 +5,7 @@ name: pod-master-locked-78
 # Yalniz eski video silinip yeni master-locked video yuklenir.
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -27,14 +28,11 @@ on:
         required: false
         default: "900"
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 jobs:
   master-locked:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 240
     env:
       APPLY: ${{ inputs.apply || 'false' }}
       CONFIRM: ${{ inputs.confirm || '' }}
@@ -43,6 +41,10 @@ jobs:
       STATE_REMOTE: ASTROLOVE/TEMP/POD_MASTER_LOCKED_78/state.json
     steps:
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - name: Harici tetikleyici ayarlari
         if: ${{ github.event_name == 'push' }}
         run: |

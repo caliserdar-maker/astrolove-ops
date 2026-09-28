@@ -7,6 +7,7 @@ name: pod-listing-update
 # dry_run=false ETSY'YE YAZAR - yalnizca Mo onayindan sonra. Basliga dokunmaz.
 
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -29,18 +30,19 @@ on:
         required: false
         default: "TEMP/WA_WP_DRAFTS_STATE.csv"
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 130
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
 
       - name: Python kur
         uses: actions/setup-python@v5

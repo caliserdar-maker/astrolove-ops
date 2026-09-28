@@ -4,21 +4,23 @@ name: router-sku-test
 # Siparis OLUSTURULMAZ, Prodigi'ye cagri YOK. Prodigi SKU'lari Drive katalog CSV'sinde aranir.
 
 permissions:
+  actions: read
   contents: read
 
 on:
   workflow_dispatch: {}
 
-concurrency:
-  group: etsy-token
-  cancel-in-progress: false
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 135
     steps:
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - uses: actions/setup-python@v5
         with: { python-version: "3.12", cache: pip }
       - run: |
