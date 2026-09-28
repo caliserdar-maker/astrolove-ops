@@ -1,9 +1,13 @@
 name: kapak-duzeltme
 
-# POD_KAPAK_78 duzeltme: AQUARIUS_LIBRA + CAPRICORN_LIBRA (Serdar onayi 28 Eyl). Salt Drive; Etsy YOK.
-# AQUARIUS_LIBRA ve CAPRICORN_LIBRA EJ baskisi hat yamasiyla (scripts/pod/hat_yama, yalniz bu kosunun _sb kopyasi;
-# siparis hatti degismez) yeniden basilir; scripts/pod/kapak_duzeltme.py: CAPRICORN Terazi CANCER_LIBRA olcusune,
-# kapak_v8_kur (v9 sahnesi), QC + karsilastirma. Cikti: TEMP/POD_KAPAK_78_DUZELTME/<damga>/
+# POD_KAPAK_78 duzeltme: AQUARIUS_LIBRA + CAPRICORN_LIBRA (Serdar onayi 28 Eyl; CAPRICORN karari A). Etsy YOK.
+# POD_PRINT'E YAZMAZ: yeni CAPRICORN_LIBRA kaynaklari hazirlik alanina (<cikti>/KAYNAK/) yazilir; POD_PRINT'e yazma
+# (once yedek) Serdar karsilastirmayi onaylayinca ayri adimdir.
+# 1) scripts/pod/kaynak_terazi.py tara: 78 POD_PRINT MB 11x14 kucuk sembol olcusu (salt okur) -> SEMBOL_OLCU_78.md
+# 2) kaynak_terazi.py duzelt: CAPRICORN_LIBRA 5 renk x tum boy, Terazi CANCER_LIBRA olcusune (QC PASS/FAIL)
+# 3) EJ baskisi hat yamasiyla (yalniz bu kosunun _sb kopyasi): AQUARIUS_LIBRA POD_PRINT'ten, CAPRICORN_LIBRA hazirlanan
+#    yeni kaynaktan (pod_kaynak yalniz bu surecte yonlendirilir); kapak_duzeltme.py: kapak_v8_kur (v9), QC + karsilastirma.
+# Cikti: TEMP/POD_KAPAK_78_DUZELTME/<damga>/
 
 permissions:
   contents: read
@@ -45,6 +49,26 @@ jobs:
               echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
             fi
           fi
+      - name: 78 kaynak sembol taramasi + CAPRICORN_LIBRA yeni kaynak (hazirlik alani; POD_PRINT'e yazilmaz)
+        run: |
+          set -euo pipefail
+          H="gdrive:ASTROLOVE/TEMP/POD_KAPAK_78_DUZELTME/$DAMGA"
+          POD="gdrive:ASTROLOVE/TEMP/POD_PRINT"
+          mkdir -p _kaynak
+          rclone copy "$POD" _pod78 --include "*/MIDNIGHT_BLUE/11x14.jpg" -q
+          echo "tarama: $(ls _pod78 | wc -l) cift"
+          python scripts/pod/kaynak_terazi.py tara _pod78 _kaynak
+          rclone copy "$POD/CAPRICORN_LIBRA" _cap -q
+          rclone copy "$POD/CANCER_LIBRA" _cl -q
+          echo "CAPRICORN_LIBRA dosya: $(find _cap -name '*.jpg' | wc -l) | CANCER_LIBRA: $(find _cl -name '*.jpg' | wc -l)"
+          set +e
+          python scripts/pod/kaynak_terazi.py duzelt _cap _cl _kaynak _pod78/CANCER_LIBRA/MIDNIGHT_BLUE/11x14.jpg
+          KOD=$?
+          set -e
+          rclone copy _kaynak "$H/KAYNAK" -q
+          echo "Hazirlik: TEMP/POD_KAPAK_78_DUZELTME/$DAMGA/KAYNAK/ ($(find _kaynak -name '*.jpg' -path '*/*/*' | wc -l) dosya)"
+          [ "$KOD" -eq 0 ] || { echo "::error::kaynak QC FAIL. DUR."; exit 1; }
+          rm -rf _pod78 _cap _cl
       - name: Hat yamasi (yalniz bu kosunun kopyasi)
         run: patch -p1 -s -d _sb < scripts/pod/hat_yama/sembol_alt_bant.patch && git -C _sb diff --stat
       - name: Girdiler + yamali EJ baskilari
@@ -60,7 +84,7 @@ jobs:
           done
           MB64=$(printf '%s' "It Began With a Kiss in the Rain" | base64 -w0)
           for c in AQUARIUS_LIBRA CAPRICORN_LIBRA; do
-            (cd _sb && python -c "import sys; sys.path.insert(0, 'scripts/medya_v1'); import siparis_dosyasi as s; s.SIP = '$H/SIPARIS'; sys.argv = ['siparis_dosyasi.py', '--cift', '$c', '--renk', 'MIDNIGHT_BLUE', '--boy', '11x14', '--isim1', 'EMILY', '--isim2', 'JAMES', '--mesaj-b64', '$MB64']; s.main()" > "../_log_$c.txt" 2>&1) \
+            (cd _sb && python -c "import sys; from pathlib import Path; sys.path.insert(0, 'scripts/medya_v1'); import siparis_dosyasi as s; s.SIP = '$H/SIPARIS'; _pk = s.pod_kaynak; s.pod_kaynak = lambda c, r, b: Path('../_kaynak') / r / f'{b}.jpg' if c == 'CAPRICORN_LIBRA' else _pk(c, r, b); sys.argv = ['siparis_dosyasi.py', '--cift', '$c', '--renk', 'MIDNIGHT_BLUE', '--boy', '11x14', '--isim1', 'EMILY', '--isim2', 'JAMES', '--mesaj-b64', '$MB64']; s.main()" > "../_log_$c.txt" 2>&1) \
               || { tail -40 "_log_$c.txt" | python3 scripts/guvenlik/log_suz.py; echo "::error::$c hat FAIL"; exit 1; }
             cp "_sb/_siparis/${c}_MIDNIGHT_BLUE_11x14/BASKI_11x14.jpg" "_in/EJ_$c.jpg"
             tail -3 "_log_$c.txt" | python3 scripts/guvenlik/log_suz.py
@@ -73,8 +97,9 @@ jobs:
           python scripts/pod/kapak_duzeltme.py _in _out
           KOD=$?
           set -e
+          cp _kaynak/KAYNAK_KARSILASTIRMA.jpg _kaynak/SEMBOL_OLCU_78.md _out/ 2>/dev/null || true
           rclone copy _out "$H" -q
-          cat _out/RAPOR.md >> "$GITHUB_STEP_SUMMARY" || true
+          cat _out/RAPOR.md _kaynak/SEMBOL_OLCU_78.md >> "$GITHUB_STEP_SUMMARY" || true
           echo "Drive: TEMP/POD_KAPAK_78_DUZELTME/$DAMGA"
           exit "$KOD"
       - if: ${{ always() }}
