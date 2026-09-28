@@ -178,7 +178,8 @@ def main():
     kont["bag tasima apply PASS"] = ok
     kont["MB bagi yeni kapakta, DB bagi ayni"] = [(v["value"], v["image_id"]) for v in f.L["222"]["vimg"]] == \
         [("MB", yeni222), ("DB", 22206)]
-    kont["sira: yukle -> bag -> sil (222)"] = [x[0] for x in f.yaz if x[1] == "222"] == ["POST", "VARYASYON", "DELETE"]
+    kont["sira: yukle -> rank1+alt -> bag -> sil (222)"] = [x[0] for x in f.yaz if x[1] == "222"] == \
+        ["POST", "RANK", "VARYASYON", "DELETE"]
     kont["bagsiz ilanda varyasyon cagrisi yok"] = not any(x[0] == "VARYASYON" and x[1] != "222" for x in f.yaz)
     kont["varyasyon yedegi Drive'da"] = (yd1 / "222_VARYASYON_ONCE.json").is_file()
 
@@ -276,6 +277,15 @@ def main():
                       confirm=K.ONAY), f, "S", TMP / "o21", kapak)
     kont["rank 1 cift -> bekle -> PASS, alt dolu"] = ok and all(
         f.L[l]["imgs"][0]["alt_text"] and f.L[l]["imgs"][0]["listing_image_id"] > 9000 for l, *_ in IDS)
+
+    # 9b) Etsy rank 1 ciftini kendiliginden hic cozmuyor (4570126104) -> hemen rank1+alt cagrisi cozer -> PASS
+    f = Fake(tie=50); o40 = TMP / "o40"
+    K.kuru(args(ids, kd, o40), f, "S", o40, satirlar, kapak, sorun, fazla)
+    ok = K.apply(args(ids, kd, TMP / "o41", plan=str(o40 / "PLAN.json"), yedek_drive=str(TMP / "yd41"), apply=True,
+                      confirm=K.ONAY), f, "S", TMP / "o41", kapak)
+    kont["rank 1 cift kendiliginden cozulmuyor -> rank1+alt cagrisi -> PASS"] = ok and all(
+        f.L[l]["imgs"][0]["alt_text"] == kapak[c]["alt"] and len(f.L[l]["imgs"]) == 12 for l, c, *_ in IDS) \
+        and all([x[0] for x in f.yaz if x[1] == l] == ["POST", "RANK", "DELETE"] for l, *_ in IDS)
 
     # 10) rank 1 cift hic tekillesmiyor -> DUR, silme yok
     f = Fake(tie=99); o22 = TMP / "o22"

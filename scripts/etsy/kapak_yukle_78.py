@@ -374,8 +374,6 @@ def ilan_uygula(a, api, shop, out, p, kapak_yol, drive_var):
 
     if devam:
         yeni = int(devam)
-        log(f"  {lid}: devam - {yeni} alt metin + rank 1")
-        rank1_alt(yeni)
     else:
         with open(kapak_yol, "rb") as fh:
             up = api.post_file(f"/shops/{shop}/listings/{lid}/images",
@@ -385,18 +383,14 @@ def ilan_uygula(a, api, shop, out, p, kapak_yol, drive_var):
     r["yeni_id"] = yeni
     if not yeni or yeni in base:
         return r, f"yukleme: yeni listing_image_id gecersiz ({yeni})"
+    # Serdar 28 Eyl: her yuklemeden sonra (tekil olsun olmasin) HEMEN alt metinli rank 1 cagrisi;
+    # Etsy rank 1 ciftini kendiliginden cozmuyor (4570125580, 4570126104). Sonra en fazla 5 x 5 sn tekillik.
+    log(f"  {lid}: {yeni} alt metin + rank 1{' (devam)' if devam else ''}")
+    rank1_alt(yeni)
     g = sira_bekle(api, lid)
     if not sira_tekil(g):
         return r, "siralar 5 x 5 sn icinde tekillesmedi (eski kapak SILINMEDI)"
     yg = img(g, yeni) or {}
-    if int(yg.get("rank") or 0) != 1 or yg.get("alt_text") != p["yeni_alt"]:
-        log(f"  {lid}: {yeni} rank {yg.get('rank')} alt {'dolu' if yg.get('alt_text') else 'BOS'}; "
-            f"alt metin + rank 1 tek cagriyla yaziliyor")
-        rank1_alt(yeni)
-        g = sira_bekle(api, lid)
-        if not sira_tekil(g):
-            return r, "siralar 5 x 5 sn icinde tekillesmedi (eski kapak SILINMEDI)"
-        yg = img(g, yeni) or {}
     gi = ids_of(g)
     k2 = {"siralar tekil": sira_tekil(g),
           f"{yeni} rank 1": int(yg.get("rank") or 0) == 1,
