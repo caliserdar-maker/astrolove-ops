@@ -1,0 +1,36 @@
+name: dal-sil-g77
+
+# TEK SEFERLIK (28 Eyl 2026, Serdar genel onayi, guvenlik oturumu): galeri-77'nin eski surumunun (veri_dali=evet)
+# public depoda actigi galeri77-veri dali silinir. Icerik (3 KAPAK + 3 BASKI_MIDNIGHT_BLUE) Drive
+# TEMP/GALERI_77/_KAYNAK'ta bayt boyutuyla dogrulandi. Uc SHA sabit; uyusmazsa SILINMEZ. Kosudan sonra dosya kaldirilir.
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+    inputs:
+      onay:
+        description: "DAL_SIL yazilmadikca hicbir sey silinmez"
+        required: true
+        default: ""
+
+jobs:
+  sil:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Dogrula ve sil
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ONAY: ${{ inputs.onay }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          [ "$ONAY" = "DAL_SIL" ] || { echo "::error::onay DAL_SIL degil; hicbir sey silinmedi"; exit 1; }
+          dal=galeri77-veri; beklenen=f1d78f3596562a1428d9d2086b4974d2e340fcd7
+          uzak=$(gh api "repos/$REPO/git/ref/heads/$dal" --jq .object.sha 2>/dev/null || echo YOK)
+          if [ "$uzak" = "YOK" ]; then echo "$dal: zaten yok"; exit 0; fi
+          [ "$uzak" = "$beklenen" ] || { echo "::error::$dal uc $uzak != beklenen $beklenen; SILINMEDI"; exit 1; }
+          gh api -X DELETE "repos/$REPO/git/refs/heads/$dal"
+          echo "$dal ($beklenen) SILINDI"
