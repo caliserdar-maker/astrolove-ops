@@ -199,6 +199,35 @@ def onizlemeler(son, cik_dir, rap):
         yk.save(cik_dir / 'ONIZLEME_poster_1e1.jpg', quality=95)
 
 
+def sayfa(bannerlar, etiketler, cik):
+    """A ve B alt alta, gercek oranda (1680x420) + her birinin telefon orta kirpimi (2:1)."""
+    try:
+        fnt = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 22)
+    except OSError:
+        fnt = ImageFont.load_default()
+    tw = 1680; x0 = (W - tw) // 2
+    satirlar = []
+    for yol, et in zip(bannerlar, etiketler):
+        b = Image.open(yol).convert('RGB')
+        k = b.resize((1680, 420), Image.LANCZOS)
+        d = ImageDraw.Draw(k)
+        d.rectangle([x0 // 2, 0, (x0 + tw) // 2 - 1, 419], outline=(0, 150, 255), width=2)
+        tel = b.crop((x0, 0, x0 + tw, H)).resize((840, 420), Image.LANCZOS)
+        bas = Image.new('RGB', (1680 + 20 + 840, 40), 'white')
+        ImageDraw.Draw(bas).text((6, 8), f'{et}: 3360x840 gercek oran (mavi = telefon orta kirpimi, varsayim 2:1)',
+                                 fill='black', font=fnt)
+        ImageDraw.Draw(bas).text((1700 + 6, 8), f'{et}: telefon orta kirpim', fill='black', font=fnt)
+        sat = Image.new('RGB', (1680 + 20 + 840, 420), 'white')
+        sat.paste(k, (0, 0)); sat.paste(tel, (1700, 0))
+        satirlar += [bas, sat, Image.new('RGB', (sat.size[0], 30), 'white')]
+    gh = sum(s.size[1] for s in satirlar)
+    out = Image.new('RGB', (satirlar[0].size[0], gh), 'white'); y = 0
+    for s in satirlar:
+        out.paste(s, (0, y)); y += s.size[1]
+    out.save(cik, quality=90)
+    print('sayfa', out.size, '->', cik)
+
+
 def main():
     ap = argparse.ArgumentParser()
     sp = ap.add_subparsers(dest='k', required=True)
@@ -209,8 +238,12 @@ def main():
                    help='aciklik basina bir poster, soldan saga sirayla')
     y.add_argument('--cik', required=True); y.add_argument('--damga', required=True)
     y.add_argument('--isik', default='sol_ust', choices=sorted(ISIK))
+    p = sp.add_parser('sayfa'); p.add_argument('--banner', action='append', required=True)
+    p.add_argument('--etiket', action='append', required=True); p.add_argument('--cik', required=True)
     a = ap.parse_args()
-    if a.k == 'buyut':
+    if a.k == 'sayfa':
+        sayfa(a.banner, a.etiket, a.cik)
+    elif a.k == 'buyut':
         buyut(a.kaynak, a.model, a.cik)
     else:
         r = yerlestir(a.taban, a.poster, a.cik, a.damga, a.isik)
