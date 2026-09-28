@@ -1,0 +1,121 @@
+name: cl-galeri-degistir
+
+# CL (4570143815) galerisi 19'luk final setle degistirilir (Serdar onayi 28 Eyl 2026).
+# Varsayilan KURU DENEME (salt okuma). apply=true + confirm=CANLI: once YEDEK Drive'a
+# (TEMP/POD_CL_GALERI_YEDEK_<damga>), sonra degisim; ilk hatada DUR. Sir loga yazilmaz.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "true = Etsy'ye YAZ (ayrica confirm=CANLI gerekir)"
+        type: boolean
+        default: false
+      confirm:
+        description: "Yazma icin tam olarak: CANLI"
+        required: false
+        default: ""
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  degistir:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      APPLY: ${{ inputs.apply }}
+      CONFIRM: ${{ inputs.confirm }}
+    steps:
+      - name: Onay kapisi
+        run: |
+          set -euo pipefail
+          if [ "$APPLY" = "true" ] && [ "$CONFIRM" != "CANLI" ]; then
+            echo "::error::apply=true icin confirm tam olarak 'CANLI' olmali. DUR."; exit 1
+          fi
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Token + kaynak (CL_GALERI_FINAL19)
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copy "gdrive:ASTROLOVE/TEMP/CL_GALERI_FINAL19" _kaynak --include "*.jpg" -q
+          n=$(ls _kaynak/*.jpg | wc -l); echo "kaynak: $n dosya"
+          [ "$n" = "19" ] || { echo "::error::kaynak 19 degil ($n). DUR."; exit 1; }
+      - name: Yerel oz-test (sahte API)
+        run: python scripts/etsy/cl_galeri_degistir_selftest.py
+      - name: Yedek (salt okuma + CDN indirme)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          mod=$([ "$APPLY" = "true" ] && echo yedek || echo dry-run)
+          python scripts/etsy/cl_galeri_degistir.py --kaynak _kaynak --out _out --mod "$mod"
+      - name: Yedegi Drive'a yaz (silmeden ONCE)
+        if: ${{ inputs.apply }}
+        run: |
+          set -euo pipefail
+          stamp=$(date -u +%Y%m%d_%H%M)
+          hedef="gdrive:ASTROLOVE/TEMP/POD_CL_GALERI_YEDEK_${stamp}"
+          rclone copy _out/yedek "$hedef" -q
+          yerel=$(ls _out/yedek | wc -l); uzak=$(rclone lsf "$hedef" | wc -l)
+          echo "yedek: yerel $yerel, Drive $uzak dosya -> TEMP/POD_CL_GALERI_YEDEK_${stamp}"
+          [ "$yerel" = "$uzak" ] || { echo "::error::yedek Drive dogrulamasi tutmadi. DUR."; exit 1; }
+          echo "YEDEK_DIZIN=$hedef" >> "$GITHUB_ENV"
+      - name: Uygula (Etsy'ye YAZAR)
+        if: ${{ inputs.apply }}
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          echo "::warning::APPLY: CL galerisi degistirilecek (yedek: ${YEDEK_DIZIN})"
+          python scripts/etsy/cl_galeri_degistir.py --kaynak _kaynak --out _out --mod uygula
+      - name: Token + cikti geri yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
+          if grep -rqE 'x-api-key|refresh_token|"access_token"' _out/ 2>/dev/null; then
+            echo "::error::ciktida sir benzeri anahtar; Drive'a yazilmadi"; exit 1
+          fi
+          [ -f _out/rapor.json ] && [ -n "${YEDEK_DIZIN:-}" ] && rclone copyto _out/rapor.json "${YEDEK_DIZIN}/rapor.json" -q || true
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        continue-on-error: true
+        with:
+          name: cl-galeri-degistir
+          path: |
+            _out/rapor.json
+            _out/yedek/manifest.json
+          if-no-files-found: ignore
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work _kaynak ~/.config/rclone
