@@ -1,5 +1,7 @@
 name: pw-kucuk-yeniden
 
+# IPTAL (Serdar karari 28 Eyl): PW duzeltmesi iptal, POD_PRINT PW ozgun kalir. KOSTURMA. Acik is: Canva seffaf disa aktarim.
+
 # PURE_WHITE POD_PRINT: kucuk sembol kenari DB alfasi ile beyaza yeniden birlestirilir (Serdar karari 28 Eyl, secenek b).
 # scripts/pod/pw_yeniden_uret.py. Ana sembol DOKUNULMAZ (Canva seffaf disa aktarim: acik is). Etsy YOK.
 # mod=kuru: 78 cift x 15 boy uret + QC; PASS dosyalar Drive TEMP/PW_KUCUK_<run_id>/yeni, rapor/ (URET_*.csv, OZET.md,
