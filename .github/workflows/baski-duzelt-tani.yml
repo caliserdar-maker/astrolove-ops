@@ -1,6 +1,6 @@
 name: baski-duzelt-tani
 
-# baski-duzelt (28 Eyl 2026): siparis_dosyasi.py 'olcek' FAIL (DB/CI/PW), MB olcek kapisi None,
+# baski-duzelt (28 Eyl 2026; 2. iterasyon: plate slogan kapisi, isim merkezi yuvarlamasiz, PLATE_DURUM): siparis_dosyasi.py 'olcek' FAIL (DB/CI/PW), MB olcek kapisi None,
 # WP / CI 12x16 KeyError 'tag_bant'. TEST baski dosyalari YALNIZ Drive TEMP/BASKI_DUZELT_<damga>/.
 # Etsy/Prodigi secret'i YOK; musteriye teslim, Etsy yazma, Prodigi siparisi YOK. Siparis hattina merge YOK.
 # Tetik: bu daldaki config/baski_duzelt_tani.trigger degisikligi (workflow_dispatch yalniz main'de calisir).
@@ -34,7 +34,16 @@ jobs:
       fail-fast: false
       max-parallel: 2
       matrix:
-        cift: [AQUARIUS_GEMINI, CANCER_LIBRA, ARIES_LIBRA]
+        include:
+          # AQUARIUS_GEMINI: ayrica WP 11x14 + CI/WP 12x16 = kirli/eksik plate'te fail-closed kaniti
+          - cift: AQUARIUS_GEMINI
+            isler: "11x14:MIDNIGHT_BLUE,DEEP_BLACK,CHAMPAGNE_IVORY,PURE_WHITE,WARM_PARCHMENT;12x16:CHAMPAGNE_IVORY,WARM_PARCHMENT"
+          - cift: PLATE_DURUM
+            isler: ""
+          - cift: CANCER_LIBRA
+            isler: "11x14:MIDNIGHT_BLUE,DEEP_BLACK,CHAMPAGNE_IVORY,PURE_WHITE"
+          - cift: ARIES_LIBRA
+            isler: "11x14:MIDNIGHT_BLUE,DEEP_BLACK,CHAMPAGNE_IVORY,PURE_WHITE"
     env:
       KOK: ${{ needs.damga.outputs.kok }}
       ONCEKI: gdrive:ASTROLOVE/TEMP/HATA_KONTROL_20260928/BASKI_TEST
@@ -74,13 +83,19 @@ jobs:
           python -c "import sys; sys.path.insert(0,'scripts/medya_v1'); import siparis_dosyasi as s; s.kisisel_hazirla()"
           export KISISEL_YOL="$PWD/_siparis/kisisel/scripts/kisisel"
           PYTHONPATH="$KISISEL_YOL:scripts/medya_v1:." python -m pytest -q scripts/medya_v1
-      - name: Tani (11x14 x 5 renk + 12x16 CI/WP)
+      - name: Tani (3 cift x MB/DB/CI/PW 11x14; AQUARIUS_GEMINI + WP 11x14, CI/WP 12x16)
+        if: ${{ matrix.cift != 'PLATE_DURUM' }}
         env:
           CIFT: ${{ matrix.cift }}
+          ISLER: ${{ matrix.isler }}
         run: |
           set -euo pipefail
-          python scripts/medya_v1/baski_tani.py --cift "$CIFT" --kok "$KOK" --onceki "$ONCEKI" \
-            --isler "11x14:MIDNIGHT_BLUE,DEEP_BLACK,CHAMPAGNE_IVORY,PURE_WHITE,WARM_PARCHMENT;12x16:CHAMPAGNE_IVORY,WARM_PARCHMENT"
+          python scripts/medya_v1/baski_tani.py --cift "$CIFT" --kok "$KOK" --onceki "$ONCEKI" --isler "$ISLER"
+      - name: Plate durumu (5 renk x 13 boy, salt okur)
+        if: ${{ matrix.cift == 'PLATE_DURUM' }}
+        run: |
+          set -euo pipefail
+          python scripts/medya_v1/plate_durum.py --kok "$KOK"
       - if: ${{ always() }}
         run: rm -rf ~/.config/rclone
 
@@ -115,6 +130,7 @@ jobs:
           rclone copy "$KOK/_TANI" _tani --include "TANI_*.json" -q
           python scripts/medya_v1/baski_tani_ozet.py _tani
           rclone copy _tani "$KOK/_TANI" --include "TABLO.*" -q
+          rclone copy "$KOK" _pd --include "PLATE_DURUM.md" -q && cat _pd/PLATE_DURUM.md | head -12 || true
           echo "Drive: ${KOK#gdrive:}/_TANI"
       - if: ${{ always() }}
         run: rm -rf ~/.config/rclone

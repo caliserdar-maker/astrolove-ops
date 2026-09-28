@@ -198,6 +198,74 @@ def normalize(d):
             'inc': [BOY[boy][1], BOY[boy][2]]}
 
 
+class PlateHatasi(RuntimeError):
+    """Plate yok ya da kirli: siparis dosyasi URETILMEZ (fail-closed)."""
+
+    def __init__(self, mesaj, ayrinti=None):
+        super().__init__(mesaj)
+        self.ayrinti = ayrinti or {}
+
+
+# ------------------------------------------------------------------ PLATE SLOGAN KAPISI
+# 28 Eyl hata kontrolu (baski-duzelt): 25 Eyl medyan plate'lerinin bir kismi eski slogani
+# ICERIYOR (slogan temizlik kapisi o boylarda KALDI, temizlenmis plate yuklenmedi). Boyle bir
+# plate'le eski slogan "zemin" sayilir ve silinmez: CI 12x16 BASKI'da eski slogan yeni
+# mesajin altinda kaldi, kalinti / temiz ara zemin kapilari goremedi (o bantta temiz_a ile
+# plate zaten esit). Kapi: siparisin KENDI dosyasinda slogan bandi plate'ten BAGIMSIZ olculur
+# (Blue: a1 esigi, digerleri edisyon_maske); slogan GLIF piksellerinde |dosya - plate| >
+# PLATE_ESIK olan pay olculur. Temiz plate'te glif plate'te yoktur (pay yuksek), kirli
+# plate'te glif plate'te de vardir (pay ~0). Olculen (tani kosusu 36425530758, slogan kutusu,
+# 3 cift): temiz DB/CI/PW 11x14 esik ustu pay 0.28-0.29 (kutu; glif ~%9), kirli WP 11x14 /
+# CI 12x16 0.0 (p99 fark 0-1.6).
+PLATE_SLOGAN_ESIK = 0.25
+
+
+def plate_slogan_kapisi(kaynak, plate_yol, ed):
+    """Plate'te eski slogan kaldi mi? gecti=False ise siparis durur (SISTEM HATASI)."""
+    import pilot11
+    from pilot6 import LUMA
+    eu = _mod('edisyon_uret')
+    olcek_kur(2400)
+    yol = kaynak
+    if isinstance(kaynak, (bytes, bytearray)):
+        yol = W / '_plate_kapisi_kaynak.jpg'
+        yol.write_bytes(kaynak) if kaynak[:3] == b'\xff\xd8\xff' else \
+            Image.open(io.BytesIO(kaynak)).convert('RGB').save(yol, 'PNG')
+    yol = Path(yol)
+    d = {'plate': Path(plate_yol).name, 'esik': PLATE_SLOGAN_ESIK,
+         'olcut': 'slogan glif piksellerinde |dosya - plate| > PLATE_ESIK payi'}
+    maske = None if ed == 'blue' else (lambda L, acik: eu.edisyon_maske(L, acik))
+    try:
+        o = pilot11.sayfa_olc(yol, maske=maske)
+    except SystemExit as e:
+        return {**d, 'gecti': False, 'sebep': f'dosya olculemedi: {e}'}
+    if 'tag_bant' not in o:
+        return {**d, 'gecti': False, 'sebep': 'dosyada slogan bandi olculemedi'}
+    (y0, y1), (x0, x1) = o['tag_bant'], o['tag_x']
+    A = np.asarray(pilot11.norm(Image.open(yol).convert('RGB'))[0]).astype(np.float32) @ LUMA
+    pl = pilot11.norm(Image.open(plate_yol).convert('RGB'))[0]
+    if pl.size != (A.shape[1], A.shape[0]):
+        pl = pl.resize((A.shape[1], A.shape[0]), Image.LANCZOS)
+    P = np.asarray(pl).astype(np.float32) @ LUMA
+    g = eu.edisyon_maske(A, float(np.median(A)) > 128)[y0:y1, x0:x1]
+    if g.sum() < 200:
+        return {**d, 'gecti': False, 'sebep': f'slogan glifi yok ({int(g.sum())} px)',
+                'tag_bant': [y0, y1], 'tag_x': [x0, x1]}
+    fark = np.abs(A[y0:y1, x0:x1] - P[y0:y1, x0:x1])[g]
+    pay = float((fark > PLATE_ESIK).mean())
+    return {**d, 'gecti': bool(pay >= PLATE_SLOGAN_ESIK), 'glif_farkli_payi': round(pay, 4),
+            'glif_px': int(g.sum()), 'fark_p50': round(float(np.percentile(fark, 50)), 1),
+            'tag_bant': [y0, y1], 'tag_x': [x0, x1]}
+
+
+def plate_bildir(bi, receipt=''):
+    """Fail-closed bildirim: Actions ::error notu + rapor alani (musteriye hicbir sey gitmez)."""
+    msj = f"{receipt} {bi.get('hata')}".strip()
+    print(f'::error title=PLATE HATASI::{msj}', flush=True)
+    bi['bildirim'] = {'kanal': 'GitHub Actions ::error + kosu FAIL', 'mesaj': msj}
+    return bi
+
+
 # ------------------------------------------------------------------ edisyon sarmalayicisi
 class EdisyonPoster:
     """Blue disi dort edisyon: edisyon_uret yolu. Girdi degisir, render kodu degismez."""
@@ -233,9 +301,12 @@ class EdisyonPoster:
         kaynak = W / 'plates' / ad
         kaynak.parent.mkdir(parents=True, exist_ok=True)
         if not kaynak.exists():
-            rc('copy', f'{PLATES}/{ad}', str(kaynak.parent), timeout=1800)
+            try:
+                rc('copy', f'{PLATES}/{ad}', str(kaynak.parent), timeout=1800)
+            except RuntimeError:
+                pass
         if not kaynak.exists():
-            raise SystemExit(f'PLATES eksik: {ad}')
+            raise PlateHatasi(f'PLATE YOK: {ad} (PLATES klasorunde yok)', {'plate': ad, 'durum': 'YOK'})
         hedef.write_bytes(kaynak.read_bytes())
         self.plate_indi[(ed, oran)] = boy
         return hedef
@@ -693,23 +764,33 @@ def olcek_kur(hedef_en):
             'sabitler': {f'{a}.{s}': getattr(_mod(a), s) for a, s, _ in OLCEKLI}}
 
 
+# Yalniz KONUM hesabina giren (dilimlemede kullanilmayan) alanlar olceklenirken yuvarlanmaz.
+# 28 Eyl olcumu (baski-duzelt tani kosusu): hi-res'te isim_govde tam sayiya yuvarlanip cizimde
+# konum bir kez daha yuvarlaniyordu; iki yuvarlamanin en kotusu 2400 biriminde 1.23 px ediyor
+# (olculen en buyuk olcek farki 1.23). Karar (Serdar adina, 28 Eyl): (a) yuvarlama kaldirilir,
+# cizim yalniz bir kez (pilot16 icinde) yuvarlar; degisim <= 1 px.
+HASSAS_ALAN = ('isim_govde',)
+
+
 def olcekle(d, k):
     """Olculen sayfa kaydini (sayfa_olc + olcum_duzelt) k ile olcekler."""
-    def sc(v):
+    def sc(v, hassas=False):
         if isinstance(v, bool) or v is None:
             return v
         if isinstance(v, (int, float)):
+            if hassas:
+                return v * k
             return int(round(v * k)) if isinstance(v, int) else round(v * k, 1)
         if isinstance(v, (list, tuple)):
-            return [sc(x) for x in v]
+            return [sc(x, hassas) for x in v]
         return v
-    return {a: (sc(b) if a in PX_ALAN else b) for a, b in d.items()}
+    return {a: (sc(b, a in HASSAS_ALAN) if a in PX_ALAN else b) for a, b in d.items()}
 
 
 def kilit_olcekle(kilit, k):
     out = dict(kilit)
-    out['bosluk'] = int(round(kilit['bosluk'] * k))
-    out['cap'] = {y: int(round(kilit['cap'][y] * k)) for y in kilit['cap']}
+    out['bosluk'] = kilit['bosluk'] * k                 # HASSAS_ALAN ile ayni gerekce
+    out['cap'] = {y: kilit['cap'][y] * k for y in kilit['cap']}
     for a in ('isim_bant', 'sembol_bant', 'tag_bant'):
         if isinstance(kilit.get(a), list):
             out[a] = [int(round(v * k)) for v in kilit[a]]
@@ -894,6 +975,18 @@ def renk_onizleme(yollar, ad, cik, yukseklik=900):
 def render_et(ed, oran, sayfa, kaynak_bayt, isimler, mesaj, P_blue, P_ed,
               cift=None, ref_boy=None, hedef_en=None, boy=None):
     """blue -> a1 (pilot16, 2400), diger dort edisyon -> edisyon_uret (hedef cozunurluk)."""
+    # PLATE KAPISI (fail-closed): plate yoksa ya da eski slogani iceriyorsa uretim yok.
+    try:
+        plate_yol = P_ed.plate(ed, oran, boy or ref_boy)
+        pk = plate_slogan_kapisi(kaynak_bayt, plate_yol, ed)
+    except PlateHatasi as e:
+        return None, plate_bildir({'durum': 'SISTEM HATASI', 'edisyon': ed, 'oran': oran,
+                                   'hata': str(e), 'plate_slogan_kapisi': e.ayrinti}, cift), None
+    if not pk['gecti']:
+        return None, plate_bildir({'durum': 'SISTEM HATASI', 'edisyon': ed, 'oran': oran,
+                                   'hata': f"PLATE KIRLI: {pk['plate']} eski slogani iceriyor "
+                                           f"({pk.get('sebep') or 'glif farkli payi ' + str(pk.get('glif_farkli_payi'))})",
+                                   'plate_slogan_kapisi': pk}, cift), None
     if ed == 'blue':
         ref_bayt = None
         # plate_kur boy degisince hazir_oran'i temizler: referans karari ONDAN SONRA
@@ -920,6 +1013,7 @@ def render_et(ed, oran, sayfa, kaynak_bayt, isimler, mesaj, P_blue, P_ed,
                               hedef_en=hedef_en, boy=boy or ref_boy)
     if poster is None:
         return None, bi, None
+    bi['plate_slogan_kapisi'] = pk
     if ek is None or 'maske' not in ek:
         ek = dict(ek or {}); ek['maske'] = degisim_maskesi(poster, kaynak_bayt)
         ek.setdefault('maske_2400', ek['maske'])
@@ -997,6 +1091,7 @@ def kapilari_topla(bi, isimler, mesaj, baski_px, uretim_px, dosya_mb=None, azami
     k = {'kalinti': bi['kalinti_kapisi']['gecti'],
          'temiz_ara_zemin': bi.get('temiz_ara_kapisi', {}).get('gecti'),
          'sembol': bi['sembol_kapisi']['gecti'],
+         'plate_slogan': bi.get('plate_slogan_kapisi', {}).get('gecti'),
          'olcek': bi.get('olcek_kapisi', {}).get('gecti'),
          'leke': bi.get('leke_kapisi', {}).get('gecti'),
          'boy_siniri': bk['gecti'], 'font_kapsami': fk['gecti'],

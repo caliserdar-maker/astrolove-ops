@@ -3,7 +3,7 @@
 import json, sys
 from pathlib import Path
 
-KAPILAR = ('kalinti', 'temiz_ara_zemin', 'sembol', 'olcek', 'leke', 'boy_siniri',
+KAPILAR = ('plate_slogan', 'kalinti', 'temiz_ara_zemin', 'sembol', 'olcek', 'leke', 'boy_siniri',
            'font_kapsami', 'mesaj_murekkep')
 KISA = {'MIDNIGHT_BLUE': 'MB', 'DEEP_BLACK': 'DB', 'PURE_WHITE': 'PW',
         'CHAMPAGNE_IVORY': 'CI', 'WARM_PARCHMENT': 'WP'}
@@ -19,15 +19,15 @@ def main(dizin):
     for f in sorted(d.glob('TANI_*.json')):
         satirlar += json.loads(f.read_text())
     bas = ['cift', 'renk', 'boy', 'durum', *KAPILAR, 'olcek eski (konum/kenar)',
-           'olcek yeni (konum/kenar)', 'tag', 'onceki BASKI']
+           'olcek yeni (konum/kenar)', 'plate glif payi / hata', 'onceki BASKI']
     out = ['| ' + ' | '.join(bas) + ' |', '|' + '---|' * len(bas)]
     for s in satirlar:
         k = s.get('kapilar') or {}
         e, y = s.get('olcek_eski') or {}, s.get('olcek_yeni') or {}
         durum = 'SISTEM HATASI' if s.get('durum') in ('SISTEM HATASI', 'HATA') else \
             ('PASS' if s.get('kapilar_gecti') else 'FAIL')
-        ty = s.get('tag_yedek') or {}
-        tag = 'yedek' if ty.get('kullanildi') else ('plate' if s.get('durum') == 'URETILDI' else '?')
+        pk = s.get('plate_slogan_kapisi') or {}
+        tag = (s.get('hata') or '')[:60] if s.get('durum') != 'URETILDI' else pk.get('glif_farkli_payi')
         o = s.get('onceki') or {}
         onc = ('ayni' if o.get('bayt_ayni') else ('piksel ayni' if o.get('piksel_ayni') else
                (f"{o.get('fark_px')} px farkli" if 'fark_px' in o else ('yok' if o.get('yok') or not o else 'hata'))))

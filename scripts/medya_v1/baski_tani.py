@@ -160,7 +160,8 @@ def main():
                                          for q in ('gecti', 'konum_fark_px', 'kenar_fark_px', 'fark', 'sebep')},
                           'olcek_eski': {q: (r.get('olcek_kapisi_eski') or {}).get(q)
                                          for q in ('gecti', 'konum_fark_px', 'kenar_fark_px', 'fark', 'sebep')},
-                          'tag_yedek': r.get('tag_yedek'),
+                          'plate_slogan_kapisi': r.get('plate_slogan_kapisi'),
+                          'bildirim': r.get('bildirim'),
                           'sembol_kapisi': r.get('sembol_kapisi'), 'leke_kapisi': r.get('leke_kapisi'),
                           'kalinti_kapisi': r.get('kalinti_kapisi'),
                           'temiz_ara_kapisi': r.get('temiz_ara_kapisi'),
