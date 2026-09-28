@@ -45,11 +45,18 @@ def murekkep(a, s=1.0):
     d = r - b
     L = a[..., :3].astype(np.float32).mean(2)
     if np.median(d) > 25 and np.median(L) > 150:
+        # 5. deneme: zemin = buyuk pencere MEDYANI (gri kapanis WP dokusunun en acik tonunu zemin sayiyordu; koyu doku
+        # lekeleri murekkep gorunup yaya yapisiyordu: WP yay_boy +3-9%). Ince murekkep pencerenin cok altinda kalir.
         k = max(9, int(round(71 * s)) | 1)
-        zem = cv2.dilate(L, cv2.getStructuringElement(cv2.MORPH_RECT, (k, k)))
-        zem = cv2.blur(zem, (k, k))
-        return np.clip((zem - L - 18) / 45, 0, 1)
+        zem = cv2.medianBlur(np.clip(L, 0, 255).astype(np.uint8), k).astype(np.float32)
+        return np.clip((zem - L - 25) / 45, 0, 1)
     return np.clip((d - np.median(d) - 12) / 50, 0, 1)
+
+
+def tek(x):
+    """Olcekli pencere boyu (tek sayi, >= 3). 5. deneme: maske genisletmeleri boyla olceklenir (5x7/A1 = 3.3x;
+    sabit 9 px genisletme buyuk boyda eski murekkebin yumusak kenarini disarida birakip iz birakiyordu)."""
+    return max(3, int(round(x)) | 1)
 
 
 def bilesenler(m, en_az_oran=0.05, kenar=True):
@@ -142,9 +149,9 @@ def duzelt_dosya(cap_yol, cl_yol, sablon, cikis):
     px0, py0 = X0 - ex0, Y0 - ey0
     parca = A[py0:py0 + (Y1 - Y0), px0:px0 + (X1 - X0)].copy(); alfa = murekkep(parca, sc)
     # zemin: eski Terazi + CL Terazi alanlari, CL dosyasindan; CL murekkebi inpaint
-    cl_m = cv2.dilate((murekkep(B, sc) > 0.02).astype(np.uint8), np.ones((7, 7), np.uint8))
-    zem = cv2.inpaint(np.clip(B, 0, 255).astype(np.uint8), cl_m, 9, cv2.INPAINT_TELEA).astype(np.float32)
-    eski_m = cv2.dilate((murekkep(A, sc) > 0.02).astype(np.uint8), np.ones((9, 9), np.uint8)).astype(bool)
+    cl_m = cv2.dilate((murekkep(B, sc) > 0.02).astype(np.uint8), np.ones((tek(7 * sc), tek(7 * sc)), np.uint8))
+    zem = cv2.inpaint(np.clip(B, 0, 255).astype(np.uint8), cl_m, tek(9 * sc), cv2.INPAINT_TELEA).astype(np.float32)
+    eski_m = cv2.dilate((murekkep(A, sc) > 0.02).astype(np.uint8), np.ones((tek(9 * sc), tek(9 * sc)), np.uint8)).astype(bool)
     O = A.copy(); O[eski_m] = zem[eski_m]
     yw, yh = round(parca.shape[1] * k), round(parca.shape[0] * k)
     p2 = cv2.resize(parca, (yw, yh), interpolation=cv2.INTER_AREA)
@@ -172,9 +179,9 @@ def duzelt_dosya(cap_yol, cl_yol, sablon, cikis):
         top += np.nansum(d); n += np.count_nonzero(~np.isnan(d))
     dis_fark = top / max(n, 1)
     C = c[ey0:ey1, ex0:ex1].astype(np.float32)
-    yeni_m = cv2.dilate((murekkep(C, sc) > 0.02).astype(np.uint8), np.ones((9, 9), np.uint8)).astype(bool)
+    yeni_m = cv2.dilate((murekkep(C, sc) > 0.02).astype(np.uint8), np.ones((tek(9 * sc), tek(9 * sc)), np.uint8)).astype(bool)
     halka = eski_m & ~yeni_m
-    cevre = cv2.dilate(eski_m.astype(np.uint8), np.ones((41, 41), np.uint8)).astype(bool) & ~eski_m & ~yeni_m
+    cevre = cv2.dilate(eski_m.astype(np.uint8), np.ones((tek(41 * sc), tek(41 * sc)), np.uint8)).astype(bool) & ~eski_m & ~yeni_m
     cc = C                         # halka zemini cevredeki gercek zeminle ayni tonda mi (kanal basina)
     iz_fark = float(np.abs(cc[halka].mean(0) - cc[cevre].mean(0)).max()) if halka.any() and cevre.any() else 0.0
     kalinti = float((murekkep(C, sc)[halka] > 0.5).mean()) if halka.any() else 0.0
