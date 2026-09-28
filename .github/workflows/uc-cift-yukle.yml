@@ -1,0 +1,138 @@
+name: uc-cift-yukle
+
+# AQUARIUS_LIBRA, ARIES_LIBRA, CAPRICORN_LIBRA: yeni kapak (kapak_yukle_78) + yeni video (video_yukle_78) yukleme.
+# Serdar genel onayi 28 Eyl aksam: "kuru kosu PASS ise otomatik uygula, kilit sirayi tutar".
+# Sira (tek is, Etsy kilidi tum is boyunca): kapak KURU -> karar (uc_cift_karar.py) -> kapak APPLY (yalniz 3 ilan,
+# digerleri --haric) -> video KURU (yalniz 3 cift) -> karar -> eski video yedegi Drive + rclone check -> video APPLY.
+# Kapaklar: TEMP/POD_KAPAK_78/<en son damga> (78) uzerine TEMP/POD_KAPAK_78_DUZELTME/<kapak_damga>/KAPAK_<3 cift>.jpg
+# (RAPOR.md SONUC PASS). Videolar: TEMP/POD_VIDEO_V2/<video_damga>/ (3 cift QC PASS).
+# updateListing CAGRILMAZ; musteriye bildirim yok. Cikti: TEMP/UC_CIFT_YUKLE/<damga>/report.md (YUKLENDI/ATLANDI/FAIL).
+
+on:
+  workflow_dispatch:
+    inputs:
+      kapak_damga: {description: "TEMP/POD_KAPAK_78_DUZELTME damgasi", required: true}
+      video_damga: {description: "TEMP/POD_VIDEO_V2 damgasi (3 cift)", required: true}
+      apply: {description: "true = kuru PASS ise uygula", type: boolean, default: false}
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  yukle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      KDAMGA: ${{ inputs.kapak_damga }}
+      VDAMGA: ${{ inputs.video_damga }}
+      APPLY: ${{ inputs.apply }}
+    steps:
+      - name: Girdi kapisi
+        run: |
+          set -euo pipefail
+          [[ "$KDAMGA" =~ ^[0-9]{8}_[0-9]{4}$ && "$VDAMGA" =~ ^[0-9]{8}_[0-9]{4}$ ]] || { echo "::error::damga bicimi. DUR."; exit 1; }
+          echo "STAMP=$(date -u +%Y%m%d_%H%M)" >> "$GITHUB_ENV"
+      - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests opencv-python-headless numpy pillow
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Token + girdiler
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work/kapak _work/video _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          KD=$(rclone lsf --dirs-only "gdrive:ASTROLOVE/TEMP/POD_KAPAK_78/" | tr -d '/' | grep -E '^[0-9]{8}_[0-9]{4}$' | sort | tail -1)
+          rclone copy "gdrive:ASTROLOVE/TEMP/POD_KAPAK_78/$KD" _work/kapak --include "KAPAK_*.jpg" -q
+          H="gdrive:ASTROLOVE/TEMP/POD_KAPAK_78_DUZELTME/$KDAMGA"
+          rclone cat "$H/RAPOR.md" | grep -q '^SONUC PASS' || { echo "::error::$KDAMGA RAPOR.md SONUC PASS degil. DUR."; exit 1; }
+          for c in AQUARIUS_LIBRA ARIES_LIBRA CAPRICORN_LIBRA; do rclone copyto "$H/KAPAK_$c.jpg" "_work/kapak/KAPAK_$c.jpg"; done
+          echo "kapak: $(ls _work/kapak/KAPAK_*.jpg | wc -l) (POD_KAPAK_78/$KD + 3 yeni $KDAMGA)"
+          python -c 'import json,sys;json.dump({"klasor":"TEMP/POD_KAPAK_78/"+sys.argv[1]+"/ + POD_KAPAK_78_DUZELTME/"+sys.argv[2]+"/ (3 cift)","ozet":"uc cift"},open("_work/kapak_kaynak.json","w"))' "$KD" "$KDAMGA"
+          V="gdrive:ASTROLOVE/TEMP/POD_VIDEO_V2/$VDAMGA"
+          for c in AQUARIUS_LIBRA ARIES_LIBRA CAPRICORN_LIBRA; do
+            rclone copyto "$V/VIDEO_$c.mp4" "_work/video/VIDEO_$c.mp4"; rclone copyto "$V/QC_$c.json" "_work/video/QC_$c.json"
+          done
+          python -c 'import json,sys;json.dump({"klasor":"TEMP/POD_VIDEO_V2/"+sys.argv[1]+"/","ozet":"uc cift","plan":"UC_CIFT_YUKLE/"+sys.argv[2]+"/video_kuru/PLAN.json"},open("_work/video_kaynak.json","w"))' "$VDAMGA" "$STAMP"
+      - name: Kapak kuru -> karar -> apply
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -uo pipefail
+          Y="gdrive:ASTROLOVE/TEMP/KAPAK78_YEDEK_UC_${STAMP}"
+          python scripts/etsy/kapak_yukle_78.py --kapak-dir _work/kapak --kaynak-bilgi _work/kapak_kaynak.json --out _out/kapak_kuru --yedek-drive "$Y"
+          echo "kapak kuru cikis $? (78 ilan; karar yalniz 3 hedef satira bakar)"
+          K=$(python scripts/etsy/uc_cift_karar.py kapak _out/kapak_kuru/PLAN.json); echo "$K" > _out/kapak_karar.txt
+          echo "kapak karari: ${K:0:200}"
+          if [ "$APPLY" = "true" ] && [ "${K%% *}" = "APPLY" ]; then
+            python scripts/etsy/kapak_yukle_78.py --kapak-dir _work/kapak --out _out/kapak_apply --plan _out/kapak_kuru/PLAN.json \
+              --yedek-drive "$Y" --apply --confirm KAPAK78_YUKLE_SIL --haric "${K#APPLY }"
+            echo "kapak apply cikis $?"
+          fi
+          exit 0
+      - name: Video kuru -> karar -> yedek -> apply
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -uo pipefail
+          HARIC=$(python scripts/etsy/uc_cift_karar.py haric-cift)
+          python scripts/etsy/video_yukle_78.py --video-dir _work/video --kaynak-bilgi _work/video_kaynak.json --out _out/video_kuru --haric "$HARIC"
+          echo "video kuru cikis $?"
+          K=$(python scripts/etsy/uc_cift_karar.py video _out/video_kuru/PLAN.json); echo "$K" > _out/video_karar.txt
+          echo "video karari: $K"
+          if [ "$APPLY" = "true" ] && [ "$K" = "APPLY" ]; then
+            Y="gdrive:ASTROLOVE/TEMP/VIDEO78_YEDEK_UC_${STAMP}"
+            if [ -n "$(ls -A _out/video_kuru/yedek 2>/dev/null)" ]; then
+              rclone copy _out/video_kuru/yedek "$Y" -q && rclone check _out/video_kuru/yedek "$Y" --one-way -q \
+                || { echo "::error::video yedegi rclone check FARK; apply yok"; echo "FAIL yedek" > _out/video_karar.txt; exit 0; }
+            fi
+            rclone lsf "$Y/" --files-only > _work/video_yedek.txt 2>/dev/null || : > _work/video_yedek.txt
+            python scripts/etsy/video_yukle_78.py --video-dir _work/video --kaynak-bilgi _work/video_kaynak.json --out _out/video_apply \
+              --haric "$HARIC" --plan _out/video_kuru/PLAN.json --yedek-liste _work/video_yedek.txt --apply --confirm VIDEO78_YUKLE
+            echo "video apply cikis $?"
+          fi
+          exit 0
+      - name: Rapor + token + cikti Drive'a
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
+          python scripts/etsy/uc_cift_karar.py rapor _out || true
+          if grep -rIqE 'x-api-key|refresh_token|"access_token"' _out/ 2>/dev/null; then
+            echo "::error::ciktida sir benzeri anahtar bulundu, Drive'a yazilmadi"; exit 1
+          fi
+          rclone copy _out "gdrive:ASTROLOVE/TEMP/UC_CIFT_YUKLE/${STAMP}" --exclude "*/yedek/*.jpg" --exclude "*/yedek/*.mp4" -q
+          echo "Cikti: TEMP/UC_CIFT_YUKLE/${STAMP}/"
+          cat _out/report.md >> "$GITHUB_STEP_SUMMARY" || true
+          grep -q '| FAIL' _out/report.md && exit 1 || exit 0
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
