@@ -52,7 +52,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--baski", required=True); ap.add_argument("--receipt", required=True); ap.add_argument("--sku", required=True)
     ap.add_argument("--prodigi-oid", default=""); ap.add_argument("--out", required=True)
-    ap.add_argument("--slogan", default="TWO SOULS"); ap.add_argument("--adlar", default="AQUARIUS,SCORPIO")
+    ap.add_argument("--slogan", default="SOULS|ONE BOND"); ap.add_argument("--adlar", default="AQUARIUS,SCORPIO")
     a = ap.parse_args()
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
     son4 = a.receipt[-4:]
@@ -87,16 +87,25 @@ def main():
     if tx:
         t = tx[0]
         sonuc["etsy"].update(sku=t.get("sku"), varyasyon=[f"{v.get('formatted_name')}: {v.get('formatted_value')}" for v in t.get("variations") or []])
+        sonuc["etsy"].update(listing_id=t.get("listing_id"), listing_image_id=t.get("listing_image_id"))
         img = api.get(f"/listings/{t.get('listing_id')}/images/{t.get('listing_image_id')}", ok404=True) if t.get("listing_image_id") else None
         if img and img.get("url_fullxfull"):
             E = indir(img["url_fullxfull"]); goruntu.append(("Siparisteki ilan gorseli", E))
             sonuc["etsy"]["gorsel"] = list(E.size)
         else:
-            sonuc["etsy"]["gorsel"] = "silinmis/yok"
+            # Etsy'den silinmis: kapak/galeri yedeklerinde (<listing>_<image>.jpg) ara
+            yd = out.parent / "_yedek_ara"
+            subprocess.run(["rclone", "copy", "gdrive:ASTROLOVE/TEMP", str(yd), "--include", f"*YEDEK*/**{t.get('listing_image_id')}*.jpg", "-q"])
+            bul = sorted(yd.rglob(f"*{t.get('listing_image_id')}*.jpg"))
+            if bul:
+                E = Image.open(bul[0]); goruntu.append(("Siparisteki ilan gorseli (Drive yedegi)", E))
+                sonuc["etsy"]["gorsel"] = f"yedekten: {bul[0].relative_to(yd)} {list(E.size)}"
+            else:
+                sonuc["etsy"]["gorsel"] = "Etsy'de silinmis, yedekte yok"
     # OCR
     for ad, im in goruntu:
         t = ocr(im)
-        sonuc.setdefault("ocr", {})[ad] = {"slogan": a.slogan.upper() in t, **{x: x in t for x in a.adlar.split(",")},
+        sonuc.setdefault("ocr", {})[ad] = {"slogan": all(w in t for w in a.slogan.upper().split("|")), **{x: x in t for x in a.adlar.split(",")},
                                            "metin": t[:300]}
     # karar
     pn = (sonuc.get("prodigi") or {}).get("ncc")

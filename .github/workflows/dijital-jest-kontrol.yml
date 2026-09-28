@@ -64,8 +64,10 @@ jobs:
           assert len(r) == 1, f"STATE'te ...{os.environ['SON4']} icin {len(r)} satir"
           print(f"::add-mask::{r[0]['receipt_id']}", flush=True)
           with open(os.environ["GITHUB_ENV"], "a") as fh:
-              fh.write(f"RID={r[0]['receipt_id']}\nOID={r[0].get('kanal_oid') or r[0].get('prodigi_order_id') or ''}\n")
-          print("receipt ...", os.environ["SON4"], "| prodigi", r[0].get("kanal_oid") or r[0].get("prodigi_order_id"))
+              import re
+              oid = r[0].get("kanal_oid") or r[0].get("prodigi_order_id") or (re.findall(r"ord_\d+", r[0].get("note") or "") or [""])[0]
+              fh.write(f"RID={r[0]['receipt_id']}\nOID={oid}\n")
+          print("receipt ...", os.environ["SON4"], "| prodigi", oid)
           PY
       - name: Kontrol
         env:
