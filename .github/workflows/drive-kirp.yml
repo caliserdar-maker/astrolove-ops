@@ -1,7 +1,7 @@
 name: drive-kirp
 
 # Tani: Drive'daki buyuk gorsellerden kucuk kirpim (yerel iterasyon icin; salt okur, kaynaga yazmaz).
-# girdi: "yol|x0,y0,x1,y1;yol|..." (yol ASTROLOVE/ altina gore). Cikti: TEMP/KIRP/<damga>/<n>_<ad>.png
+# girdi: "yol|x0,y0,x1,y1;yol|..." (yol ASTROLOVE/ altina gore). Cikti: TEMP/KIRP/<damga>/<n>_<ad>.jpg (q90)
 
 on:
   workflow_dispatch:
@@ -52,7 +52,7 @@ jobs:
               subprocess.run(['rclone', 'copyto', f'gdrive:ASTROLOVE/{yol}', yerel], check=True)
               im = Image.open(yerel); x0, y0, x1, y1 = map(int, kutu.split(','))
               ad = yol.replace('/', '_')[-60:]
-              im.crop((x0, y0, x1, y1)).save(f'_o/{n}_{ad}.png')
+              im.crop((x0, y0, x1, y1)).save(f'_o/{n}_{ad}.jpg', quality=90)
               print(n, yol, im.size, (x0, y0, x1, y1))
           EOF
           rclone copy _o "gdrive:ASTROLOVE/TEMP/KIRP/$D" -q
