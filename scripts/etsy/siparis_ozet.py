@@ -12,12 +12,12 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from etsy_common import EtsyClient, TokenStore, log
+from etsy_common import Etsy, TokenStore, log
 
 N = int(sys.argv[1]) if len(sys.argv) > 1 else 3
 SHOP = os.environ["ETSY_SHOP_ID"]
 store = TokenStore(os.environ["TOKEN_FILE"], os.environ["ETSY_API_KEY"], os.environ["ETSY_SHARED_SECRET"])
-c = EtsyClient(store)
+c = Etsy(store)
 
 os.makedirs("_out", exist_ok=True)
 
