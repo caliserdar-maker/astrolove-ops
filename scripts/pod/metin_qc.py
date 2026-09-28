@@ -10,7 +10,8 @@ import sys
 from spellchecker import SpellChecker
 
 ALAN = {'astrolove', 'hahnemühle', 'giclée', 'gsm', 'dpi', 'pdf', 'pdfs', 'etsy', 'emily', 'james', 'a2', 'a3', 'a4',
-        'mm', 'cm', 'in', 'rag', 'libra', 'cancer', 'zodiac', 'personalized', 'finalize', 'color', 'colors'}
+        'mm', 'cm', 'in', 'rag', 'libra', 'cancer', 'zodiac', 'personalized', 'finalize', 'color', 'colors',
+        'aries', 'taurus', 'gemini', 'leo', 'virgo', 'scorpio', 'sagittarius', 'capricorn', 'aquarius', 'pisces'}
 YASAK = [r'\bOBA[- ]free\b', r'\bbright white\b', r'\b\d+\s*(?:-|to)?\s*\d*\s*years?\b', r'\b12[- ]colou?r\b']
 TIRE_ONERI = [(r'\bprint ready (?=PDF)', 'print-ready'), (r'\bHigh resolution (?=\d)', 'High-resolution')]
 sp = SpellChecker(); sp.word_frequency.load_words(ALAN)

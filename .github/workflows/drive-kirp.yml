@@ -1,0 +1,61 @@
+name: drive-kirp
+
+# Tani: Drive'daki buyuk gorsellerden kucuk kirpim (yerel iterasyon icin; salt okur, kaynaga yazmaz).
+# girdi: "yol|x0,y0,x1,y1;yol|..." (yol ASTROLOVE/ altina gore). Cikti: TEMP/KIRP/<damga>/<n>_<ad>.jpg (q90)
+
+on:
+  workflow_dispatch:
+    inputs:
+      liste: {description: "yol|x0,y0,x1,y1;... (ASTROLOVE/ altina gore)", required: true}
+
+permissions:
+  contents: read
+
+jobs:
+  kirp:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          set -euo pipefail
+          pip install -q pillow
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Kirp
+        env:
+          LISTE: ${{ inputs.liste }}
+        run: |
+          set -euo pipefail
+          D=$(date -u +%Y%m%d_%H%M); mkdir -p _k _o
+          python3 - <<'EOF'
+          import os, subprocess
+          from PIL import Image
+          Image.MAX_IMAGE_PIXELS = None
+          for n, s in enumerate(os.environ['LISTE'].split(';')):
+              yol, kutu = s.split('|')
+              yerel = f'_k/{n}.jpg'
+              subprocess.run(['rclone', 'copyto', f'gdrive:ASTROLOVE/{yol}', yerel], check=True)
+              im = Image.open(yerel); x0, y0, x1, y1 = map(int, kutu.split(','))
+              ad = yol.replace('/', '_')[-60:]
+              im.crop((x0, y0, x1, y1)).save(f'_o/{n}_{ad}.jpg', quality=90)
+              print(n, yol, im.size, (x0, y0, x1, y1))
+          EOF
+          rclone copy _o "gdrive:ASTROLOVE/TEMP/KIRP/$D" -q
+          echo "Drive: TEMP/KIRP/$D"
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone

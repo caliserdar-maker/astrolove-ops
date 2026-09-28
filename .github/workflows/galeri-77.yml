@@ -6,7 +6,8 @@ name: galeri-77
 #   BASKI_MIDNIGHT_BLUE.jpg = TEMP/POD_KAPAK_V3/SIPARIS/<CIFT>_MIDNIGHT_BLUE_11x14/BASKI_11x14.jpg (kapagin posteri)
 #   BASKI_<RENK>.jpg (diger 4 renk) = siparis-baski-v1 siparis_dosyasi.py --urun pod 11x14 EMILY/JAMES (degistirilmeden)
 # mod kaynak: yalniz kaynak; mod tam: kaynak + 19 kart (galeri77_kur.py) + QC + Drive TEMP/GALERI_77/<CIFT>/ + HAZIR.csv
-# veri_dali=evet: kaynaklar yerel gelistirme icin galeri77-veri dalina (orphan) yazilir.
+# Cikti: TEMP/GALERI_77/<CIFT>/ (19 jpg + ALT_METIN.csv + SET.json), _QC/<CIFT>/ (QC.txt, TEMAS), _HAZIR/<CIFT>.csv ->
+#   her biten cift sonrasi TEMP/GALERI_77/HAZIR.csv yeniden yazilir (etsy oturumu buradan yukler). QC FAIL cift atlanir.
 # Es zamanli en fazla 4 is (max-parallel 4).
 
 permissions:
@@ -22,8 +23,8 @@ on:
         description: "kaynak | tam"
         required: true
         default: tam
-      veri_dali:
-        description: "evet: kaynaklari galeri77-veri dalina yaz"
+      yeniden:
+        description: "evet: Drive'da hazir (HAZIR satiri olan) ciftleri de yeniden uret"
         required: false
         default: hayir
 
@@ -53,6 +54,8 @@ jobs:
       - run: |
           set -euo pipefail
           pip install -q numpy==2.1.3 pillow==11.0.0 scipy==1.14.1 opencv-python-headless==4.10.0.84 pyspellchecker==0.9.0 fonttools img2pdf pikepdf
+          # siparis_dosyasi (hat kodu) kendi ortaminda, hata-kontrol-baski ile ayni (surum sabitlenmez)
+          python -m venv _sbenv && _sbenv/bin/pip install -q pillow opencv-python-headless numpy fonttools img2pdf pikepdf
           curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
           mkdir -p fonts; base=https://raw.githubusercontent.com/google/fonts/main/ofl
           curl -fsSL "$base/ebgaramond/EBGaramond%5Bwght%5D.ttf" -o 'fonts/EBGaramond[wght].ttf'
@@ -77,6 +80,7 @@ jobs:
         env:
           CIFTLER: ${{ inputs.ciftler }}
           MOD: ${{ inputs.mod }}
+          YENIDEN: ${{ inputs.yeniden }}
           PARCA: ${{ matrix.parca }}
         run: |
           set +e -uo pipefail
@@ -92,33 +96,68 @@ jobs:
           KDAMGA=$(rclone lsf --dirs-only gdrive:ASTROLOVE/TEMP/POD_KAPAK_78/ | tr -d '/' | grep -E '^[0-9]{8}_[0-9]{4}$' | sort | tail -1)
           echo "kapak klasoru: POD_KAPAK_78/$KDAMGA | parca $PARCA: ${#BEN[@]} cift"
           MB64=$(printf '%s' 'It Began With a Kiss in the Rain' | base64 -w0)
-          N=${#BEN[@]}; n=0; t0=$(date +%s); FAIL=()
+          N=${#BEN[@]}; n=0; t0=$(date +%s); FAIL=(); TAMAM=0
+          mkdir -p _work/kaynak/CANCER_LIBRA
+          rclone copyto "$G/_KAYNAK/CANCER_LIBRA/BASKI_MIDNIGHT_BLUE.jpg" _work/kaynak/CANCER_LIBRA/BASKI_MIDNIGHT_BLUE.jpg -q \
+            || rclone copyto "gdrive:ASTROLOVE/TEMP/POD_KAPAK_V3/SIPARIS/CANCER_LIBRA_MIDNIGHT_BLUE_11x14/BASKI_11x14.jpg" _work/kaynak/CANCER_LIBRA/BASKI_MIDNIGHT_BLUE.jpg -q
           for C in "${BEN[@]}"; do
             n=$((n+1)); Y=_work/kaynak/$C; mkdir -p $Y; hata=""
+            if [ "$MOD" = "tam" ] && [ "$YENIDEN" != "evet" ] && rclone lsf "$G/_HAZIR/$C.csv" >/dev/null 2>&1 \
+               && [ -n "$(rclone lsf "$G/_HAZIR/$C.csv" 2>/dev/null)" ]; then
+              echo "[$n/$N] $C zaten hazir (HAZIR satiri var), atlandi"; continue
+            fi
             rclone copy "$G/_KAYNAK/$C" $Y -q 2>/dev/null
             if [ ! -f $Y/KAPAK.jpg ]; then
               rclone copyto "gdrive:ASTROLOVE/TEMP/POD_KAPAK_78/$KDAMGA/KAPAK_$C.jpg" $Y/KAPAK.jpg -q || hata="kapak yok"
             fi
             if [ ! -f $Y/BASKI_MIDNIGHT_BLUE.jpg ]; then
               rclone copyto "gdrive:ASTROLOVE/TEMP/POD_KAPAK_V3/SIPARIS/${C}_MIDNIGHT_BLUE_11x14/BASKI_11x14.jpg" $Y/BASKI_MIDNIGHT_BLUE.jpg -q || hata="$hata MB baski yok"
+              rclone copyto "gdrive:ASTROLOVE/TEMP/POD_KAPAK_V3/SIPARIS/${C}_MIDNIGHT_BLUE_11x14/KAPI_RAPORU.json" $Y/KAPI_MIDNIGHT_BLUE.json -q 2>/dev/null
             fi
             for R in DEEP_BLACK PURE_WHITE CHAMPAGNE_IVORY WARM_PARCHMENT; do
               [ -f $Y/BASKI_$R.jpg ] && continue
-              (cd _sb && python scripts/medya_v1/siparis_dosyasi.py --cift "$C" --renk "$R" --boy 11x14 --urun pod \
-                --isim1 EMILY --isim2 JAMES --mesaj-b64 "$MB64" --sip-kok "$G/_KAYNAK/SIPARIS" > "../_work/log_${C}_$R.txt" 2>&1) \
-                && cp "_sb/_siparis/${C}_${R}_11x14/BASKI_11x14.jpg" $Y/BASKI_$R.jpg \
-                || { hata="$hata $R baski FAIL"; tail -5 "_work/log_${C}_$R.txt"; }
-              grep -h -E "bant dogrulama|_11x14 \{'urun'" "_work/log_${C}_$R.txt" | cut -c1-700
+              (cd _sb && ../_sbenv/bin/python scripts/medya_v1/siparis_dosyasi.py --cift "$C" --renk "$R" --boy 11x14 --urun pod \
+                --isim1 EMILY --isim2 JAMES --mesaj-b64 "$MB64" --sip-kok "$G/_KAYNAK/SIPARIS" > "../_work/log_${C}_$R.txt" 2>&1)
+              D="_sb/_siparis/${C}_${R}_11x14"
+              if [ -f "$D/KAPI_RAPORU.json" ] && python3 scripts/pod/galeri77_kapi.py "$D/KAPI_RAPORU.json" && [ -f "$D/BASKI_11x14.jpg" ]; then
+                cp "$D/BASKI_11x14.jpg" $Y/BASKI_$R.jpg; cp "$D/KAPI_RAPORU.json" $Y/KAPI_$R.json
+              elif [ "$R" = "WARM_PARCHMENT" ]; then
+                # WP hat yolu SISTEM HATASI (sembol_sol): yedek = onayli POD_PRINT WP kaynagi, isim+mesaj bandi EJ ise
+                rclone copyto "gdrive:ASTROLOVE/TEMP/POD_PRINT/$C/WARM_PARCHMENT/11x14.jpg" _work/wp_$C.jpg -q \
+                  && python3 scripts/pod/galeri77_wp.py _work/wp_$C.jpg $Y/BASKI_MIDNIGHT_BLUE.jpg | tee $Y/WP_YEDEK.txt \
+                  && [ "${PIPESTATUS[0]}" = "0" ] && cp _work/wp_$C.jpg $Y/BASKI_$R.jpg \
+                  || { hata="$hata WP baski+yedek FAIL"; grep -h -E "_11x14 \{'urun'" "_work/log_${C}_$R.txt" | cut -c1-400; }
+              else
+                hata="$hata $R baski FAIL"; grep -h -E "_11x14 \{'urun'" "_work/log_${C}_$R.txt" | cut -c1-600; tail -3 "_work/log_${C}_$R.txt"
+              fi
             done
+            [ -f $Y/PW_KAYNAK.json ] || rclone lsjson "gdrive:ASTROLOVE/TEMP/POD_PRINT/$C/PURE_WHITE/11x14.jpg" > $Y/PW_KAYNAK.json 2>/dev/null
             rclone copy $Y "$G/_KAYNAK/$C" -q
             if [ -z "$hata" ] && [ "$MOD" = "tam" ]; then
-              bash scripts/pod/galeri77_cift.sh "$C" $Y "_work/out/$C" || hata="galeri QC FAIL"
+              O=_work/out/$C
+              if bash scripts/pod/galeri77_cift.sh "$C" $Y $O > _work/cift_$C.txt 2>&1; then
+                rclone sync $O/paket "$G/$C" -q
+                rclone copy $O/QC.txt "$G/_QC/$C" -q; rclone copy $O/TEMAS_$C.jpg "$G/_QC/$C" -q; rclone copy $O/KUR.txt "$G/_QC/$C" -q
+                LID=$(awk -F, -v c="$C" '$2==c{print $1}' data/pod/pod78_ids.csv)
+                WPK=hat; [ -f $Y/WP_YEDEK.txt ] && WPK=pod_print_yedek
+                PWT=$(python3 -c "import json;l=json.load(open('$Y/PW_KAYNAK.json'));print(l[0]['ModTime'][:19] if l else '')" 2>/dev/null)
+                ADET=$(rclone lsf "$G/$C" --include "*.jpg" | wc -l)
+                [ "$ADET" = 19 ] || hata="Drive'da $ADET gorsel"
+                if [ -z "$hata" ]; then
+                  printf '%s,%s,TEMP/GALERI_77/%s/,19,PASS,%s,%s,%s\n' "$C" "$LID" "$C" "$(date -u +%Y%m%d_%H%M)" "$WPK" "$PWT" | rclone rcat "$G/_HAZIR/$C.csv"
+                  bash scripts/pod/galeri77_hazir.sh; TAMAM=$((TAMAM+1))
+                fi
+              else
+                hata="galeri QC FAIL"; tail -4 _work/cift_$C.txt; grep -h "FAIL" $O/QC.txt 2>/dev/null | cut -c1-300 | head -8
+                [ -f $O/QC.txt ] && rclone copy $O/QC.txt "$G/_QC/$C" -q
+                rclone deletefile "$G/_HAZIR/$C.csv" -q 2>/dev/null
+              fi
             fi
             if [ -n "$hata" ]; then FAIL+=("$C: $hata"); echo "::warning::$C atlandi: $hata"; fi
             g=$(( $(date +%s) - t0 ))
             echo "[$n/$N] $C ${hata:-OK} | gecen ${g}s | kalan ~$(( g * (N - n) / n ))s | %$(( n * 100 / N ))"
           done
-          echo "== parca $PARCA: FAIL ${#FAIL[@]}"; printf '%s\n' "${FAIL[@]}"
+          echo "== parca $PARCA: hazir $TAMAM | FAIL ${#FAIL[@]}"; printf '%s\n' "${FAIL[@]}"
           exit 0
       - if: always()
         run: rm -rf ~/.config/rclone
@@ -146,22 +185,12 @@ jobs:
               echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
             fi
           fi
-      - name: HAZIR.csv + ozet (+ veri dali)
-        env:
-          CIFTLER: ${{ inputs.ciftler }}
-          VERI: ${{ inputs.veri_dali }}
+      - name: HAZIR.csv + ozet
         run: |
           set -euo pipefail
+          bash scripts/pod/galeri77_hazir.sh
           G=gdrive:ASTROLOVE/TEMP/GALERI_77
-          bash scripts/pod/galeri77_hazir.sh || true
-          if [ "$VERI" = "evet" ]; then
-            case "$CIFTLER" in *[!A-Z_0-9,]*) exit 1 ;; esac
-            mkdir -p _veri; IFS=, read -ra HEP <<< "$CIFTLER"
-            for C in "${HEP[@]}"; do rclone copy "$G/_KAYNAK/$C" "_veri/$C" --exclude "SIPARIS/**" -q; done
-            cd _veri   # 28 Eyl (guvenlik, Serdar): public galeri77-veri dalina push YOK; veri Drive'a yazilir
-            rclone copy . "gdrive:ASTROLOVE/TEMP/GALERI_77_VERI" -q
-            echo "Drive: TEMP/GALERI_77_VERI ($(find . -type f | wc -l) dosya: $CIFTLER)"
-            ls -R | head -40
-          fi
+          echo "GALERI_77 linki: $(rclone link "$G" 2>/dev/null || echo -)"
+          echo "QC linki: $(rclone link "$G/_QC" 2>/dev/null || echo -)"
       - if: always()
         run: rm -rf ~/.config/rclone

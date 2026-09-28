@@ -16,12 +16,14 @@ FIY = {"8x10": 42, "11x14": 49, "12x16": 55, "12x18": 57, "16x20": 69, "16x24": 
 IDS = [r["listing_id"] for r in csv.DictReader(open(KOK / "data/pod/pod78_ids.csv"))]
 
 
-def inv(bozuk=False):
+def inv(bozuk=False, c99=False):
     I = T.cl_inv()
     for p in I["products"]:
         f = p["property_values"][0]["values"][0]; b = p["property_values"][2]["values"][0]
         if f == "Print":
-            p["offerings"][0]["price"] = {"amount": (FIY[b] - (20 if bozuk and b == "12x18" else 0)) * 100, "divisor": 100}
+            p["offerings"][0]["price"] = {"amount": (FIY[b] - (20 if bozuk and b == "12x18" else 0)) * 100 - (1 if c99 else 0), "divisor": 100}
+        elif c99 and f == "Black Frame" and b == "8x10":
+            p["offerings"][0]["price"]["amount"] = 4800                       # .99 olmayan: dokunulmamali
         for v in p["property_values"]:
             if v["property_id"] == 200:
                 v["value_ids"] = [7000 + T.RENK.index(v["values"][0])]
@@ -29,9 +31,9 @@ def inv(bozuk=False):
 
 
 class Fake(T.Fake if False else object):
-    def __init__(s, bozuk_id=None, fiyat_bozan=False):
+    def __init__(s, bozuk_id=None, fiyat_bozan=False, c99=False):
         s.remaining, s.calls, s.yaz, s.fb = "5000", 0, [], fiyat_bozan
-        s.I = {i: {"inv": inv(i == bozuk_id), "L": {"listing_id": i, "state": "active", "title": "t", "tags": ["x"]},
+        s.I = {i: {"inv": inv(i == bozuk_id, c99), "L": {"listing_id": i, "state": "active", "title": "t", "tags": ["x"]},
                    "vimg": [{"property_id": 200, "value_id": 7000 + k, "value": r, "image_id": 900 + k} for k, r in enumerate(T.RENK)],
                    "imgs": [{"listing_image_id": 1, "rank": 1}], "q": [{"question_text": "a"}], "props": []} for i in IDS}
         s.I[IDS[5]]["L"]["state"] = "draft"
@@ -40,7 +42,13 @@ class Fake(T.Fake if False else object):
         return next(p.split("?")[0] for p in path.split("/") if p.split("?")[0].isdigit() and len(p.split("?")[0]) == 10)
 
     def get(s, path, params=None, ok404=False):
-        s.calls += 1; I = s.I[s._lid(path)]
+        s.calls += 1
+        if path == "/listings/batch":
+            return {"results": [{"listing_id": i, "description": "Printed within 7 business days." + (" Only $39 today" if i == IDS[2] else "")}
+                                for i in params["listing_ids"].split(",")]}
+        if path.startswith("/shops/") and path.count("/") == 2:
+            return {"announcement": "Welcome", "sale_message": "Thanks"}
+        I = s.I[s._lid(path)]
         for suf, key in (("/inventory", "inv"), ("/variation-images", "vimg"), ("/images", "imgs")):
             if path.endswith(suf):
                 return copy.deepcopy(I[key]) if key == "inv" else {"results": copy.deepcopy(I[key])}
@@ -112,4 +120,24 @@ R = json.loads((W / "z/ILERLEME.json").read_text())["ilanlar"]
 k("ikinci kosu: ZATEN, yazma yok", len(A.yaz) == n0 and sum(v["durum"] == "ZATEN" for v in R.values()) == 77)
 A = Fake(fiyat_bozan=True); rc = kos(A, ["--mod", "yaz", "--confirm", "SIZESIRA", "--out", str(W / "f")])
 k("PUT fiyati degistirirse FAIL + ilk ilanda DUR", "DUR" in str(rc) and len([y for y in A.yaz if y[0] == "PUT"]) == 1, rc)
+# ---- .99 fiyat (ayni yazim) + kar kapisi (sahte maliyet)
+MAL = {"PRINT": 20.0, "FGO": 25.0, "FBK": 25.0, "FWH": 25.0, "FNA": 25.0, "DIGITAL": 0.0}
+S.MALIYET = lambda tur, boy, ulke: MAL[tur] + (60.0 if (tur == "PRINT" and boy == "8x10" and ulke == "AU" and PAHALI[0]) else 0)
+PAHALI = [False]
+A = Fake(c99=True); rc = kos(A, ["--mod", "kuru", "--fiyat99", "--out", str(W / "k99")])
+rap = (W / "k99/RAPOR.md").read_text()
+k("kuru .99: kar tablosu + .99 olmayan listesi + metin taramasi, yazma yok", not A.yaz and "net US eski/yeni" in rap
+  and "8x10-FBK 48.0" in rap and "$39" in rap and "PLAN" in (W / "k99/ILERLEME.json").read_text(), rc)
+A = Fake(c99=True); inv0 = copy.deepcopy(A.I[S.CL_ID]["inv"])
+rc = kos(A, ["--mod", "yaz", "--fiyat99", "--confirm", "SIZESIRA", "--out", str(W / "y99"), "--yalniz", S.CL_ID])
+inv1 = A.I[S.CL_ID]["inv"]
+f0 = {p["sku"]: S.K.money(p["offerings"][0]["price"]) for p in inv0["products"]}
+f1 = {p["sku"]: S.K.money(p["offerings"][0]["price"]) for p in inv1["products"]}
+k("yaz .99: .99 -> asagi tam, digerleri ayni, SKU kumesi ayni", set(f0) == set(f1) and all(
+  f1[x] == (float(int(f0[x])) if round(f0[x] * 100) % 100 == 99 else f0[x]) for x in f0) and any(round(v * 100) % 100 != 99 for v in f0.values()), rc)
+k("yaz .99: Size sirasi da ayni yazimda (tek PUT)", S.ilk_sira(inv1, S.ozellik_adlari(inv1)["size"]) == S.HEDEF
+  and [y[0] for y in A.yaz].count("PUT") == 1)
+PAHALI[0] = True
+A = Fake(c99=True); rc = kos(A, ["--mod", "yaz", "--fiyat99", "--confirm", "SIZESIRA", "--out", str(W / "p99")])
+k("kar kapisi: AU 8x10 net <= 0 -> FAIL, hic PUT yok, DUR", not A.yaz and "DUR" in str(rc) and "kar kapisi" in str(rc), str(rc)[:120])
 print(f"{sum(sonuc)}/{len(sonuc)} PASS"); sys.exit(0 if all(sonuc) else 1)

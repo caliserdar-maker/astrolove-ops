@@ -10,7 +10,8 @@ Zemin: duvar_zemin.duvar(kapak_sahne_v9.png). Krem renk anahtariyla silinmez; ka
   - Serdar 28 Eyl duzeltmeleri: 'print ready' -> 'print-ready' (satir eski merkezinde kalir); hediye satiri aciklama
     alti (1610) ile ayirici cizgi (2100) arasina ortalanir (taban 1955 -> 1865).
 Cikti: CIKIS.jpg + CIKIS.json (yazi satirlari, poster kutulari; duvar_qc.py icin).
-Kullanim: kart02_duvar_kur.py ESKI_02.jpg KAPAK_SAHNE_V9.png FONT_KLASORU CIKIS.jpg
+Kullanim: kart02_duvar_kur.py ESKI_02.jpg KAPAK_SAHNE_V9.png FONT_KLASORU CIKIS.jpg [BURC_A BURC_B]
+  (77 cift galerisi: BURC_A/B verilirse ust etiket ve hediye satiri o ciftle yazilir; varsayilan Cancer/Libra)
 """
 import json
 import os
@@ -22,6 +23,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from duvar_zemin import KREM, duvar, duvar_lum, kontrast, lum, yazi_rengi
 
 ESKI, SAHNE, FD, CIK = sys.argv[1:5]
+BA, BB = sys.argv[5:7] if len(sys.argv) > 6 else ('Cancer', 'Libra')
 K = Image.open(ESKI).convert('RGB')
 D = duvar(SAHNE)
 
@@ -59,7 +61,7 @@ d.rectangle((140, 2100, 2860, 2101), fill=(205, 191, 169))
 
 # --- yazilar (olculdu: metin, font, wght, punto, x, taban y, onayli renk) ---
 YAZI = [
-    ('ASTROLOVE / CANCER + LIBRA', 'Lato-Regular.ttf', None, 40, 140, 130, (174, 143, 83)),
+    (f'ASTROLOVE / {BA.upper()} + {BB.upper()}', 'Lato-Regular.ttf', None, 40, 140, 130, (174, 143, 83)),
     ('Choose your format.', 'EBGaramond[wght].ttf', 430, 102, 140, 246, (22, 38, 65)),
     ('One design, three ways to enjoy it.', 'Lato-Regular.ttf', None, 52, 145, 367, (37, 45, 57)),
     ('Digital File', 'EBGaramond[wght].ttf', 400, 64, 355, 1456, (22, 38, 65)),
@@ -71,7 +73,7 @@ YAZI = [
     ('within 24 hours via Etsy Messages.', 'Lato-Regular.ttf', None, 38, 200, 1603, (37, 45, 56)),
     ('Unframed, ready for your frame.', 'Lato-Regular.ttf', None, 38, 1233, 1603, (37, 45, 57)),
     ('White or Natural. Arrives ready to hang.', 'Lato-Regular.ttf', None, 38, 2179, 1603, (37, 44, 56)),
-    ('A personal gift for Cancer and Libra couples.', 'EBGaramond[wght].ttf', 430, 43, 1128, 1865, (23, 39, 66)),
+    (f'A personal gift for {BA} and {BB} couples.', 'EBGaramond[wght].ttf', 430, 43, None, 1865, (23, 39, 66)),
     ('PERSONALIZED ZODIAC COUPLE WALL ART', 'Lato-Regular.ttf', None, 30, 140, 2172, (174, 143, 83)),
 ]
 # metni degisen satir onayli metnin merkezinde kalir (onayli metin -> olculen x)
@@ -82,6 +84,9 @@ for t, fy, w, s, x, y, renk in YAZI:
     if w:
         f.set_variation_by_axes([w])
     b = f.getbbox(t, anchor='ls')
+    if x is None:   # hediye satiri: onayli CL satirinin (x 1128) murekkep merkezinde ortalanir
+        e = f.getbbox('A personal gift for Cancer and Libra couples.', anchor='ls')
+        x = round(1128 + (e[0] + e[2]) / 2 - (b[0] + b[2]) / 2)
     if t in ESKI_METIN:
         e = f.getbbox(ESKI_METIN[t], anchor='ls'); x = round(x + (e[0] + e[2]) / 2 - (b[0] + b[2]) / 2)
     kutu = (x + b[0], y + b[1], x + b[2], y + b[3])
