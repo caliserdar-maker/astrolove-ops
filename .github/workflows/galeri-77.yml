@@ -79,7 +79,7 @@ jobs:
           MOD: ${{ inputs.mod }}
           PARCA: ${{ matrix.parca }}
         run: |
-          set -uo pipefail
+          set +e -uo pipefail
           case "$MOD" in kaynak|tam) : ;; *) echo "HATA: mod kaynak|tam"; exit 1 ;; esac
           case "$CIFTLER" in *[!A-Z_0-9,]*) echo "HATA: ciftler A-Z_ ve virgul"; exit 1 ;; esac
           if [ "$CIFTLER" = "HEPSI74" ]; then
