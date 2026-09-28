@@ -260,7 +260,7 @@ def cift_uret(c, hedef):
                for f in (f'VIDEO_{c}.mp4', f'IN_{c}.jpg', f'QC_{c}.json')):
             return True, 'atlandi (onceki PASS)'
     cw = W / c; (cw / 'baski').mkdir(parents=True, exist_ok=True)
-    kayit = {'cift': c, 'pass': False}
+    kayit = {'cift': c, 'pass': False, 'hat_yama': os.environ.get('HAT_YAMA') == 'true'}
     try:
         baskilar = {k: baski_al(c, *VARYANT[k], v1=(k == 'EJ')) for k in SIRA}
         baskilar['AM'], kayit['am_tagline'] = am_tagline(baskilar, cw / 'BASKI_AM_kaydirilmis.png')
@@ -272,7 +272,8 @@ def cift_uret(c, hedef):
         ok, olcum, ayrinti, in_kare = qc(cikis, kapaklar, baskilar)
         tag = kayit['am_tagline']
         kayit.update({'pass': ok, 'qc': ayrinti,
-                      'olcum': f'{olcum} | AM tagline fark {tag["fark_px"]} px, kaydirma {tag["kaydirma_px"]} px'})
+                      'olcum': f'{olcum} | AM tagline fark {tag["fark_px"]} px, kaydirma {tag["kaydirma_px"]} px'
+                               + (' | hat yamasi' if kayit['hat_yama'] else '')})
         Image.fromarray(in_kare).resize((720, 540), Image.LANCZOS).save(OUT / f'IN_{c}.jpg', quality=90)
     except (Exception, SystemExit) as e:                        # cift FAIL, parca devam eder
         kayit['olcum'] = f'HATA: {type(e).__name__}: {str(e).strip()[-300:]}'

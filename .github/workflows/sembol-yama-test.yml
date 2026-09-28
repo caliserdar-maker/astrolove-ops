@@ -1,28 +1,16 @@
-name: video-v2
+name: sembol-yama-test
 
-# Isim + tagline dongulu kapak videolari, v5 sablonu (EJ/IN/AM, 378 kare). Salt Drive; Etsy YOK.
-# Hat baskilari: siparis-baski-v1 dali (degistirilmeden), IN/AM onbellek TEMP/POD_VIDEO_V2/SIPARIS (tekrar uretilmez).
-# video-77 duzeni: hazirla (damga) -> 8 paralel parca ([parca::8]) -> tek birlestirme (OZET.md + ONIZLEME.jpg).
-# hat_yama=true: scripts/pod/hat_yama/sembol_alt_bant.patch yalniz bu kosunun _sb kopyasina (siparis hatti degismez).
-# Durum TEMP/POD_VIDEO_V2/SON_V5: onceki kosuda PASS olan cift atlanir (dosyalari damgaya kopyalanir).
-# Cikti: TEMP/POD_VIDEO_V2/<damga>/ (VIDEO_*.mp4, QC_*.json, IN_*.jpg, OZET.md, ONIZLEME.jpg)
+# Hat yamasi TESTI (scripts/pod/hat_yama/sembol_alt_bant.patch): siparis hattina UYGULANMAZ, merge Serdar onayiyla.
+# scripts/pod/sembol_yama_test.py: 78 cift x 3 isim seti x Midnight Blue 11x14; once/sonra olcum + render, kapilar,
+# temas sayfalari. Salt Drive (Etsy YOK). Cikti: TEMP/SEMBOL_YAMA_TEST/<damga>/ (RAPOR.md, TEMAS_*.jpg, ONCE_SONRA.jpg)
 
 permissions:
   contents: read
 
 on:
   workflow_dispatch:
-    inputs:
-      ciftler:
-        description: "bosluklu cift listesi ya da 'HEPSI' (SIPARIS onbellegindeki 78)"
-        required: true
-        default: "HEPSI"
-      hat_yama:
-        description: "true = hat sembol alt bandi yamasi (scripts/pod/hat_yama) YALNIZ bu kosuda; siparis hatti degismez"
-        type: boolean
-        default: false
 
-concurrency: video-v2-${{ inputs.ciftler }}
+concurrency: sembol-yama-test
 
 jobs:
   hazirla:
@@ -33,18 +21,18 @@ jobs:
       - id: d
         run: echo "damga=$(date -u +%Y%m%d_%H%M)" >> "$GITHUB_OUTPUT"
 
-  uret:
+  test:
     needs: hazirla
     runs-on: ubuntu-latest
-    timeout-minutes: 240
+    timeout-minutes: 180
     strategy:
       fail-fast: false
-      max-parallel: 8
+      max-parallel: 10
       matrix:
-        parca: [0, 1, 2, 3, 4, 5, 6, 7]
+        parca: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     steps:
       - uses: actions/checkout@v4
-      - name: Checkout (siparis-baski-v1, hat kodu)
+      - name: Checkout (siparis-baski-v1, hat kodu; degistirilmez)
         uses: actions/checkout@v4
         with:
           ref: siparis-baski-v1
@@ -54,8 +42,7 @@ jobs:
           python-version: "3.12"
       - run: |
           set -euo pipefail
-          pip install -q pillow numpy opencv-python-headless scipy requests fonttools   # hat (kisisel-v1) fontTools ister
-          sudo apt-get -qq update && sudo apt-get -qq install -y ffmpeg
+          pip install -q pillow numpy opencv-python-headless scipy requests fonttools
           curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
       - name: rclone.conf olustur
         env:
@@ -72,39 +59,32 @@ jobs:
               echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
             fi
           fi
-      - name: Hat yamasi (yalniz hat_yama=true, bu kosu icin)
-        if: ${{ inputs.hat_yama }}
-        run: |
-          set -euo pipefail
-          patch -p1 -s -d _sb < scripts/pod/hat_yama/sembol_alt_bant.patch
-          git -C _sb diff --stat
-      - name: Uret (parca ${{ matrix.parca }}/8)
+      - name: Test (parca ${{ matrix.parca }}/10)
         env:
-          HAT_YAMA: ${{ inputs.hat_yama }}
           DAMGA: ${{ needs.hazirla.outputs.damga }}
           PARCA: ${{ matrix.parca }}
-          CIFTLER: ${{ inputs.ciftler }}
         run: |
           set -euo pipefail
-          # cikti hem ekrana hem dosyaya; hata olursa son 60 satir susgecten gecip Drive'a gider
+          cp _sb/scripts/medya_v1/a1_poster.py _a1_yama.py
+          patch -s _a1_yama.py scripts/pod/hat_yama/sembol_alt_bant.patch
+          git -C _sb diff --quiet   # hat checkout'u degismedi
           set +e
-          python scripts/pod/video_v2_toplu.py uret _sb "$DAMGA" "$PARCA" 8 $CIFTLER 2>&1 | tee _work_log.txt
+          (cd _sb && python ../scripts/pod/sembol_yama_test.py uret "$PARCA" 10 ../_a1_yama.py ../_ham) 2>&1 | tee _log.txt
           KOD=${PIPESTATUS[0]}
           set -e
           if [ "$KOD" -ne 0 ]; then
-            tail -60 _work_log.txt | python3 scripts/guvenlik/log_suz.py > "HATA_SON60_p$PARCA.txt" || true
-            rclone copyto "HATA_SON60_p$PARCA.txt" "gdrive:ASTROLOVE/TEMP/POD_VIDEO_V2/$DAMGA/HATA_SON60_p$PARCA.txt" -q || true
+            mkdir -p _ham; tail -60 _log.txt | python3 scripts/guvenlik/log_suz.py > "_ham/HATA_SON60_p$PARCA.txt" || true
           fi
-          rm -f _work_log.txt
+          [ -d _ham ] && rclone copy _ham "gdrive:ASTROLOVE/TEMP/SEMBOL_YAMA_TEST/$DAMGA/ham" -q
           exit "$KOD"
       - if: ${{ always() }}
         run: rm -rf ~/.config/rclone
 
   birlestir:
-    needs: [hazirla, uret]
+    needs: [hazirla, test]
     if: ${{ always() }}
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -112,7 +92,7 @@ jobs:
           python-version: "3.12"
       - run: |
           set -euo pipefail
-          pip install -q pillow numpy opencv-python-headless scipy
+          pip install -q pillow numpy
           curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
       - name: rclone.conf olustur
         env:
@@ -129,12 +109,20 @@ jobs:
               echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
             fi
           fi
-      - name: OZET.md + ONIZLEME.jpg
+      - name: RAPOR + temas sayfalari
         env:
           DAMGA: ${{ needs.hazirla.outputs.damga }}
-          CIFTLER: ${{ inputs.ciftler }}
         run: |
-          python scripts/pod/video_v2_toplu.py birlestir "$DAMGA" $CIFTLER
-          echo "Drive: TEMP/POD_VIDEO_V2/$DAMGA"
+          set -euo pipefail
+          H="gdrive:ASTROLOVE/TEMP/SEMBOL_YAMA_TEST/$DAMGA"
+          rclone copy "$H/ham" _ham -q
+          set +e
+          python scripts/pod/sembol_yama_test.py birlestir _ham _out
+          KOD=$?
+          set -e
+          rclone copy _out "$H" -q
+          cat _out/RAPOR.md >> "$GITHUB_STEP_SUMMARY" || true
+          echo "Drive: TEMP/SEMBOL_YAMA_TEST/$DAMGA"
+          exit "$KOD"
       - if: ${{ always() }}
         run: rm -rf ~/.config/rclone
