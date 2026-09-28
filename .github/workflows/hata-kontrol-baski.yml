@@ -1,0 +1,111 @@
+name: hata-kontrol-baski
+
+# HATA KONTROL 28 Eyl (Serdar): E02 yolu (pilot16 delta_koy) gercek musteri baskisinda sorun cikariyor mu?
+# siparis-baski-v1 dalindaki siparis_dosyasi.py --urun pod ile 3 cift x 5 renk, 11x14, EMILY/JAMES TEST baski dosyasi.
+# Kapsam: YALNIZ Drive (rclone). Etsy/Prodigi secret'i YOK; musteriye teslim, Etsy yazma, Prodigi siparisi YOK.
+# Cikti: Drive ASTROLOVE/TEMP/HATA_KONTROL_20260928/BASKI_TEST/<CIFT>_<RENK>_11x14/ + BASKI_SEMBOL_TEMAS.jpg
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch: {}
+
+concurrency: hata-kontrol-baski
+
+env:
+  HEDEF: gdrive:ASTROLOVE/TEMP/HATA_KONTROL_20260928/BASKI_TEST
+
+jobs:
+  uret:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        cift: [CANCER_LIBRA, AQUARIUS_GEMINI, ARIES_LIBRA]
+    steps:
+      - name: Checkout (siparis-baski-v1)
+        uses: actions/checkout@v4
+        with:
+          ref: siparis-baski-v1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Python bagimliliklari
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet --upgrade pip
+          python -m pip install --quiet pillow opencv-python-headless numpy fonttools img2pdf pikepdf
+      - name: rclone kur
+        run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then echo "HATA: RCLONE_CONF_B64 yok" >&2; exit 1; fi
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: 5 renk test baski dosyasi
+        env:
+          CIFT: ${{ matrix.cift }}
+        run: |
+          set -uo pipefail
+          mesaj=$(printf '%s' 'It Began With a Kiss in the Rain' | base64 -w0)
+          renkler="MIDNIGHT_BLUE DEEP_BLACK WARM_PARCHMENT CHAMPAGNE_IVORY PURE_WHITE"
+          n=0; t0=$(date +%s); hata=0
+          for R in $renkler; do
+            n=$((n+1))
+            python scripts/medya_v1/siparis_dosyasi.py --cift "$CIFT" --renk "$R" --boy 11x14 --urun pod \
+              --isim1 EMILY --isim2 JAMES --mesaj-b64 "$mesaj" --sip-kok "$HEDEF" || { echo "FAIL $CIFT $R"; hata=$((hata+1)); }
+            g=$(( $(date +%s) - t0 ))
+            echo "[$n/5] $CIFT $R | gecen ${g}s | kalan ~$(( g / n * (5 - n) ))s | %$(( n * 20 ))"
+          done
+          echo "hatali renk: $hata"
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
+
+  temas:
+    needs: uret
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          python -m pip install --quiet pillow
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Sembol bandi temas sayfasi
+        run: |
+          set -euo pipefail
+          rclone copy "$HEDEF" _baski --include "*_11x14/BASKI_11x14.jpg" --include "*_11x14/KAPI_RAPORU.json" -q
+          python scripts/pod/baski_sembol_temas.py _baski _temas
+          rclone copy _temas "$HEDEF/_TEMAS" -q
+          echo "Drive: TEMP/HATA_KONTROL_20260928/BASKI_TEST/_TEMAS"
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
