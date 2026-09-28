@@ -3,7 +3,7 @@ name: kart-cila-ornek
 # CL sahne kartlari 06/09/10/11: ChatGPT cilali cerceveli bos sahneler + gercek posterler (salt Drive; Etsy YOK).
 # Girdi: data/pod/gpt_sahne_cila (sahne), data/pod/cl_galeri_final19 (ust etiket + alt serit pikselleri),
 #        Drive TEMP/POD_KAPAK_V3/SIPARIS/CANCER_LIBRA_MIDNIGHT_BLUE_11x14/BASKI_11x14.jpg (MB),
-#        Drive TEMP/CANLI_GORSEL/4570143815/04_8629360573.jpg (canli kart 04: CI, DB, PW)
+#        Drive TEMP/CANLI_GORSEL/4570143815/05_8581517848.jpg (canli palet karti 'Five palettes'; kart14/15/16'daki canli 04: CI, DB, PW)
 # Cikti: Drive ASTROLOVE/TEMP/KART_CILA_ORNEK_<damga>/ (4 JPEG) + KONTROL/ (kayipsiz PNG + QC.txt) + paylasim linki
 
 permissions:
@@ -45,7 +45,7 @@ jobs:
           set -euo pipefail
           mkdir -p _work/out _work/out/KONTROL
           rclone copyto "gdrive:ASTROLOVE/TEMP/POD_KAPAK_V3/SIPARIS/CANCER_LIBRA_MIDNIGHT_BLUE_11x14/BASKI_11x14.jpg" _work/BASKI_11x14.jpg
-          rclone copyto "gdrive:ASTROLOVE/TEMP/CANLI_GORSEL/4570143815/04_8629360573.jpg" _work/CANLI_04.jpg
+          rclone copyto "gdrive:ASTROLOVE/TEMP/CANLI_GORSEL/4570143815/05_8581517848.jpg" _work/CANLI_04.jpg
           python3 - <<'EOF'
           from PIL import Image
           import numpy as np
