@@ -32,7 +32,8 @@ def resim(p, w=300, h=225, renk=(20, 30, 90)):
 
 
 class Fake:
-    def __init__(self, bozuk_rank=False, bozuk_bag=False, tie=0):
+    def __init__(self, bozuk_rank=False, bozuk_bag=False, tie=0, bosluk=False):
+        self.bosluk = bosluk  # Etsy silmeden sonra siralari sikistirmaz (28 Eyl 4570110641)
         self.remaining = "5000"; self.calls = 0; self.nid = 9000; self.yaz = []; self.store = None
         self.bozuk_rank = bozuk_rank; self.bozuk_bag = bozuk_bag
         self.tie = tie; self.bekleyen = {}  # tie: yuklemeden sonra kac okuma boyunca rank 1 cift kalir (99 = hic)
@@ -124,7 +125,8 @@ class Fake:
         iid = int(path.rsplit("/", 1)[1])
         self.yaz.append(("DELETE", lid, iid))
         self.L[lid]["imgs"] = [x for x in self.L[lid]["imgs"] if x["listing_image_id"] != iid]
-        self._renum(lid)
+        if not self.bosluk:
+            self._renum(lid)
         return {}
 
 
@@ -313,6 +315,22 @@ def main():
                       confirm=K.ONAY), f, "S", TMP / "o28", kapak)
     s28 = json.loads((TMP / "o28" / "SONUC.json").read_text())
     kont["tekrar apply: 3 ZATEN, yazma yok"] = ok and [r["sonuc"] for r in s28] == ["ZATEN"] * 3 and len(f.yaz) == n
+
+    # 13) Etsy silmeden sonra siralari sikistirmiyor (1, 3, 4..) -> PASS; tekrar apply -> ZATEN
+    f = Fake(bosluk=True); f.L["222"]["vimg"][0]["image_id"] = 22201; o30 = TMP / "o30"
+    K.kuru(args(ids, kd, o30), f, "S", o30, satirlar, kapak, sorun, fazla)
+    ok = K.apply(args(ids, kd, TMP / "o31", plan=str(o30 / "PLAN.json"), yedek_drive=str(TMP / "yd31"), apply=True,
+                      confirm=K.ONAY), f, "S", TMP / "o31", kapak)
+    rk = [x["rank"] for x in f.L["222"]["imgs"]]
+    kont["bosluklu sira (1,3,4..): apply PASS"] = ok and rk[:3] == [1, 3, 4] and len(rk) == 12
+    n = len(f.yaz)
+    ok = K.apply(args(ids, kd, TMP / "o32", plan=str(o30 / "PLAN.json"), yedek_drive=str(TMP / "yd31"), apply=True,
+                      confirm=K.ONAY), f, "S", TMP / "o32", kapak)
+    s32 = json.loads((TMP / "o32" / "SONUC.json").read_text())
+    kont["bosluklu sira: tekrar apply 3 ZATEN, yazma yok"] = ok and [r["sonuc"] for r in s32] == ["ZATEN"] * 3 \
+        and len(f.yaz) == n
+    kont["sira_tekil: cift rank FAIL, bosluk PASS"] = (not K.sira_tekil([{"rank": 1}, {"rank": 1}, {"rank": 2}])) \
+        and K.sira_tekil([{"rank": 1}, {"rank": 3}, {"rank": 4}])
 
     for k, v in kont.items():
         print(f"{'PASS' if v else 'FAIL'} {k}")

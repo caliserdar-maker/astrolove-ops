@@ -274,7 +274,10 @@ def kuru(a, api, shop, out, satirlar, kapak, sorun, fazla):
 
 # ------------------------------------------------------------------ apply
 def sira_tekil(g):
-    return sorted(int(x.get("rank") or 0) for x in g) == list(range(1, len(g) + 1))
+    """Siralar tekil (ayni rank'ta iki gorsel yok). Ardisiklik aranmaz: Etsy silmeden sonra
+    siralari sikistirmayabilir (28 Eyl 4570110641: 1, 3, 4..14)."""
+    r = [int(x.get("rank") or 0) for x in g]
+    return len(set(r)) == len(r) and all(v >= 1 for v in r)
 
 
 def img(g, iid):
@@ -282,7 +285,7 @@ def img(g, iid):
 
 
 def sira_bekle(api, lid):
-    """Siralar 1..n tekil olana kadar en fazla SIRA_DENEME x SIRA_BEKLE sn (Serdar 28 Eyl)."""
+    """Siralar tekil olana kadar en fazla SIRA_DENEME x SIRA_BEKLE sn (Serdar 28 Eyl)."""
     return eventually(lambda: gallery(api, lid), sira_tekil, attempts=SIRA_DENEME, pause=SIRA_BEKLE)
 
 
