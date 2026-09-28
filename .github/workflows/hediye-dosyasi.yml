@@ -1,0 +1,59 @@
+name: hediye-dosyasi
+
+# Kisisellestirilmis dijital HEDIYE dosyasi (satis degil). Kod adi config/hediye.trigger icinde
+# (ilk satir). Isim / mesaj yalniz Drive kartinda (TEMP/SIPARIS_ISIM/<KOD>.md); repoda ve logda
+# yok (hediye_uret.py ::add-mask:: basar). Etsy/Prodigi secret'i YOK; musteriye gonderim YOK.
+# Cikti: Drive ASTROLOVE/MUSTERI/<KOD>/ (yalniz tum kapilar PASS ise). Tek is.
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [claude/gracious-meitner-i72rkr]
+    paths:
+      - config/hediye.trigger
+
+concurrency: hediye-dosyasi
+
+jobs:
+  uret:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Python bagimliliklari
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet --upgrade pip
+          python -m pip install --quiet pillow opencv-python-headless numpy fonttools img2pdf pikepdf
+      - name: rclone kur
+        run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then echo "HATA: RCLONE_CONF_B64 yok" >&2; exit 1; fi
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Hediye dosyalari
+        run: |
+          set -euo pipefail
+          KOD="$(head -n1 config/hediye.trigger | tr -cd 'A-Z0-9_')"
+          python scripts/medya_v1/hediye_uret.py --kod "$KOD" --hedef "gdrive:ASTROLOVE/MUSTERI/$KOD"
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
