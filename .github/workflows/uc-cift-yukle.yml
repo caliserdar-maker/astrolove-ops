@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
     inputs:
       kapak_damga: {description: "TEMP/POD_KAPAK_78_DUZELTME damgasi", required: true}
-      video_damga: {description: "TEMP/POD_VIDEO_V2 damgasi (3 cift)", required: true}
+      video_damga: {description: "TEMP/POD_VIDEO_V2 damgalari (bosluklu; cift basina QC PASS olan ilk damga)", required: true}
       apply: {description: "true = kuru PASS ise uygula", type: boolean, default: false}
 
 permissions:
@@ -31,7 +31,7 @@ jobs:
       - name: Girdi kapisi
         run: |
           set -euo pipefail
-          [[ "$KDAMGA" =~ ^[0-9]{8}_[0-9]{4}$ && "$VDAMGA" =~ ^[0-9]{8}_[0-9]{4}$ ]] || { echo "::error::damga bicimi. DUR."; exit 1; }
+          [[ "$KDAMGA" =~ ^[0-9]{8}_[0-9]{4}$ && "$VDAMGA" =~ ^[0-9]{8}_[0-9]{4}( [0-9]{8}_[0-9]{4})*$ ]] || { echo "::error::damga bicimi. DUR."; exit 1; }
           echo "STAMP=$(date -u +%Y%m%d_%H%M)" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - name: Etsy kilidi (sira bekle, iptal yok)
@@ -72,11 +72,18 @@ jobs:
           for c in AQUARIUS_LIBRA ARIES_LIBRA CAPRICORN_LIBRA; do rclone copyto "$H/KAPAK_$c.jpg" "_work/kapak/KAPAK_$c.jpg"; done
           echo "kapak: $(ls _work/kapak/KAPAK_*.jpg | wc -l) (POD_KAPAK_78/$KD + 3 yeni $KDAMGA)"
           python -c 'import json,sys;json.dump({"klasor":"TEMP/POD_KAPAK_78/"+sys.argv[1]+"/ + POD_KAPAK_78_DUZELTME/"+sys.argv[2]+"/ (3 cift)","ozet":"uc cift"},open("_work/kapak_kaynak.json","w"))' "$KD" "$KDAMGA"
-          V="gdrive:ASTROLOVE/TEMP/POD_VIDEO_V2/$VDAMGA"
+          KAYNAKLAR=""
           for c in AQUARIUS_LIBRA ARIES_LIBRA CAPRICORN_LIBRA; do
-            rclone copyto "$V/VIDEO_$c.mp4" "_work/video/VIDEO_$c.mp4"; rclone copyto "$V/QC_$c.json" "_work/video/QC_$c.json"
+            for d in $VDAMGA; do
+              V="gdrive:ASTROLOVE/TEMP/POD_VIDEO_V2/$d"
+              if rclone cat "$V/QC_$c.json" 2>/dev/null | python3 -c "import json,sys; sys.exit(0 if json.load(sys.stdin).get('pass') else 1)"; then
+                rclone copyto "$V/VIDEO_$c.mp4" "_work/video/VIDEO_$c.mp4"; rclone copyto "$V/QC_$c.json" "_work/video/QC_$c.json"
+                KAYNAKLAR="$KAYNAKLAR $c=$d"; break
+              fi
+            done
           done
-          python -c 'import json,sys;json.dump({"klasor":"TEMP/POD_VIDEO_V2/"+sys.argv[1]+"/","ozet":"uc cift","plan":"UC_CIFT_YUKLE/"+sys.argv[2]+"/video_kuru/PLAN.json"},open("_work/video_kaynak.json","w"))' "$VDAMGA" "$STAMP"
+          echo "video kaynaklari:$KAYNAKLAR"
+          python -c 'import json,sys;json.dump({"klasor":"TEMP/POD_VIDEO_V2:"+sys.argv[1],"ozet":"uc cift","plan":"UC_CIFT_YUKLE/"+sys.argv[2]+"/video_kuru/PLAN.json"},open("_work/video_kaynak.json","w"))' "$KAYNAKLAR" "$STAMP"
       - name: Kapak kuru -> karar -> apply
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
