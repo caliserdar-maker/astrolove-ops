@@ -103,11 +103,16 @@ jobs:
           mkdir -p _work/kaynak/CANCER_LIBRA
           rclone copyto "$G/_KAYNAK/CANCER_LIBRA/BASKI_MIDNIGHT_BLUE.jpg" _work/kaynak/CANCER_LIBRA/BASKI_MIDNIGHT_BLUE.jpg -q \
             || rclone copyto "gdrive:ASTROLOVE/TEMP/POD_KAPAK_V3/SIPARIS/CANCER_LIBRA_MIDNIGHT_BLUE_11x14/BASKI_11x14.jpg" _work/kaynak/CANCER_LIBRA/BASKI_MIDNIGHT_BLUE.jpg -q
+          # WP plate'i (baski-duzelt oturumu yeniliyor): WP baskisi hangi plate ile uretildiyse WP_PLATE.txt'de; plate
+          # degisirse o ciftin WP baskisi ve galerisi yeniden (HAZIR satiri olsa bile)
+          PLATE_T=$(rclone lsjson "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PLATES/VINTAGE_11x14.png" 2>/dev/null | python3 -c "import json,sys;l=json.load(sys.stdin);print(l[0]['ModTime'] if l else '')" 2>/dev/null)
+          echo "WP plate VINTAGE_11x14: $PLATE_T"
           for C in "${BEN[@]}"; do
             n=$((n+1)); Y=_work/kaynak/$C; mkdir -p $Y; hata=""
-            if [ "$MOD" = "tam" ] && [ "$YENIDEN" != "evet" ] && rclone lsf "$G/_HAZIR/$C.csv" >/dev/null 2>&1 \
-               && [ -n "$(rclone lsf "$G/_HAZIR/$C.csv" 2>/dev/null)" ]; then
-              echo "[$n/$N] $C zaten hazir (HAZIR satiri var), atlandi"; continue
+            WPP=$(rclone cat "$G/_KAYNAK/$C/WP_PLATE.txt" 2>/dev/null)
+            if [ "$MOD" = "tam" ] && [ "$YENIDEN" != "evet" ] && [ -n "$(rclone lsf "$G/_HAZIR/$C.csv" 2>/dev/null)" ] \
+               && [ "$WPP" = "$PLATE_T" ]; then
+              echo "[$n/$N] $C zaten hazir (HAZIR satiri var, WP plate ayni), atlandi"; continue
             fi
             rclone copy "$G/_KAYNAK/$C" $Y -q 2>/dev/null
             if [ ! -f $Y/KAPAK.jpg ]; then
@@ -122,6 +127,10 @@ jobs:
               rm -f $Y/WP_YEDEK.txt $Y/BASKI_WARM_PARCHMENT.jpg
               rclone deletefile "$G/_KAYNAK/$C/WP_YEDEK.txt" -q 2>/dev/null; rclone deletefile "$G/_KAYNAK/$C/BASKI_WARM_PARCHMENT.jpg" -q 2>/dev/null
             fi
+            if [ -f $Y/BASKI_WARM_PARCHMENT.jpg ] && [ "$(cat $Y/WP_PLATE.txt 2>/dev/null)" != "$PLATE_T" ]; then
+              echo "$C: WP plate degisti -> WP baskisi yeniden"; rm -f $Y/BASKI_WARM_PARCHMENT.jpg $Y/KAPI_WARM_PARCHMENT.json
+              rclone deletefile "$G/_KAYNAK/$C/BASKI_WARM_PARCHMENT.jpg" -q 2>/dev/null
+            fi
             for R in DEEP_BLACK PURE_WHITE CHAMPAGNE_IVORY WARM_PARCHMENT; do
               [ -f $Y/BASKI_$R.jpg ] && continue
               (cd _sb && ../_sbenv/bin/python scripts/medya_v1/siparis_dosyasi.py --cift "$C" --renk "$R" --boy 11x14 --urun pod \
@@ -129,6 +138,7 @@ jobs:
               D="_sb/_siparis/${C}_${R}_11x14"
               if [ -f "$D/KAPI_RAPORU.json" ] && python3 scripts/pod/galeri77_kapi.py "$D/KAPI_RAPORU.json" && [ -f "$D/BASKI_11x14.jpg" ]; then
                 cp "$D/BASKI_11x14.jpg" $Y/BASKI_$R.jpg; cp "$D/KAPI_RAPORU.json" $Y/KAPI_$R.json
+                [ "$R" = "WARM_PARCHMENT" ] && printf '%s' "$PLATE_T" > $Y/WP_PLATE.txt
               elif [ "$R" != "WARM_PARCHMENT" ]; then
                 hata="$hata $R baski FAIL"; grep -h -E "_11x14 \{'urun'" "_work/log_${C}_$R.txt" | cut -c1-600; tail -3 "_work/log_${C}_$R.txt"
               fi
