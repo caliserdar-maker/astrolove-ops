@@ -116,13 +116,28 @@ for k in ['03_konsept', '04_kisisellestirme'] + (['05_renk_ve_dijital'] if WP_VA
     if n_y < 0.90 or n_e >= 0.90:
         kotu.append(f'{k} yeni {n_y:.2f} eski {n_e:.2f}')
 satir = [(k, s) for k, v in J['satirlar'].items() for s in v]
+
+
+def cizim(t, fnt, x, taban):
+    """Metnin krem zemine siyah taze cizimi (tam kart boyu)."""
+    f = ImageFont.truetype(fnt[0], fnt[1])
+    if fnt[2] is not None:
+        f.set_variation_by_axes([fnt[2]])
+    im = Image.new('RGB', (3000, 2250), G.BG); ImageDraw.Draw(im).text((x, taban), t, font=f, fill=(0, 0, 0), anchor='ls')
+    return im
+
+
 for k, s in satir:
-    if s['eski'] != s['yeni'] and not CL:
+    if s['eski'] != s['yeni']:
+        # karttaki satir yeni metnin taze cizimine eskisinden daha yakin olmali (tek kelime degisen satirlar dahil)
         ad = {'03': '03_konsept', '04': '04_kisisellestirme'}[k]
-        n_e = ncc(murekkep(Image.open(os.path.join(KR, ad + '.jpg')), s['kutu']),
-                  murekkep(Image.open(os.path.join(G.KREM_CL, ad + '.jpg')), s['kutu']))
-        if n_e >= 0.90:
-            kotu.append(f'{ad} "{s["eski"][:24]}" degismedi ({n_e:.2f})')
+        kx = [min(s['kutu'][0], s['kutu_eski'][0]), min(s['kutu'][1], s['kutu_eski'][1]),
+              max(s['kutu'][2], s['kutu_eski'][2]), max(s['kutu'][3], s['kutu_eski'][3])]
+        kart = murekkep(Image.open(os.path.join(KR, ad + '.jpg')), kx)
+        n_y = ncc(kart, murekkep(cizim(s['yeni'], s['font'], s['xn'], s['taban']), kx))
+        n_e = ncc(kart, murekkep(cizim(s['eski'], s['font'], s['xe'], s['taban']), kx))
+        if not (n_y >= 0.90 and n_y > n_e + 0.02):
+            kotu.append(f'{ad} "{s["yeni"][:24]}" yeni {n_y:.3f} / eski {n_e:.3f}')
 j02 = json.load(open(os.path.join(P, '02_format.json')))
 m02 = ' '.join(s['metin'] for s in j02['satirlar'])
 if f'{A.upper()} + {B.upper()}' not in m02 or f'{A} and {B} couples' not in m02:

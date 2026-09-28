@@ -61,6 +61,7 @@ def font(yol, boy, w=None):
     f = ImageFont.truetype(yol, boy)
     if w is not None:
         f.set_variation_by_axes([w])
+    f._w = w                                            # QC yeniden cizim icin (galeri77_qc eski metin denetimi)
     return f
 
 
@@ -100,7 +101,8 @@ class Satir:
         ke = murekkep_kutu(f, eski, xe, taban)
         self.d.rectangle((ke[0] - pay, ke[1] - pay, ke[2] + pay, ke[3] + pay), fill=zemin)
         self.d.text((xn, taban), yeni, font=f, fill=renk, anchor='ls')
-        self.log.append(dict(eski=eski, yeni=yeni, kutu=murekkep_kutu(f, yeni, xn, taban)))
+        self.log.append(dict(eski=eski, yeni=yeni, kutu=murekkep_kutu(f, yeni, xn, taban), kutu_eski=ke,
+                             font=[f.path, f.size, getattr(f, '_w', None)], xe=xe, xn=xn, taban=taban))
 
 
 def ust_etiket(im, FD, A, B):
