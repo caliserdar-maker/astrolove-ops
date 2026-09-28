@@ -2,24 +2,24 @@
 """CL kart 12 (A gift for your story.) 3000x2250 kurulum.
 Taban: ChatGPT hediye sahnesi (1448x1086; Serdar 'guzel, cerceve degismis'). Sahne 2.01x buyutulur.
 Sahnedeki yapay cerceve+poster yerine (on cephe, dikdortgen; dis (443,226)-(893,788), ic (466,248)-(869,762)):
-  - cerceve: Prodigi Classic Antique Gold bos cerceve fotografi (059, on cephe) 9 parca (Serdar: chevron seridi Prodigi gibi gorunmedi)
+  - cerceve: cilali altin cerceve (cila_blank; Serdar 28 Eyl karari, kapak v9 ile ayni)
   - poster: gercek CL baski dosyasi BASKI_11x14 (EMILY/JAMES), rebate 5 mm kirpilir
   - sahne isigina uyum: soldan saga %3 -> %-7 parlaklik egimi, hafif sicak ton (yalniz cerceveli nesneye)
 Yazilar DNA (Garamond + Montserrat, canli 03 olculeri); ust etiket canli 03'ten, alt cizgi+satir kart 03 v2'den.
 QC: boyut, poster NCC >= 0.99, cerceve yuzu 4 kenarda esit, zemin, tire yok.
-Kullanim: kart12_kur.py CHATGPT_12.png BASKI_11x14.jpg AG_BLANK_059.jpg CANLI_03.jpg KART03_V2.jpg GARAMOND.ttf MONTSERRAT.ttf CIKIS.jpg
+Kullanim: kart12_kur.py CHATGPT_12.png BASKI_11x14.jpg CILA_KAYNAK.png CANLI_03.jpg KART03_V2.jpg GARAMOND.ttf MONTSERRAT.ttf CIKIS.jpg
 """
 import re
 import sys
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
-G12, BASKI, AGCH, C03, K03V2, GAR, MON, CIK = sys.argv[1:9]
+G12, BASKI, CILA, C03, K03V2, GAR, MON, CIK = sys.argv[1:9]
 BG = (237, 232, 226); NAVY_T = (25, 34, 49); SANS_T = (23, 25, 30)
 
 import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from cerceve_master import cerceve_blank, sahne_isik, set_grade, temas_golge
+from cerceve_master import cila_blank, sahne_isik, set_grade, temas_golge
 
 def font(yol, boy, w):
     f = ImageFont.truetype(yol, boy); f.set_variation_by_axes([w]); return f
@@ -39,19 +39,22 @@ sahne = G.crop(SC).resize((2710, round((SC[3] - SC[1]) * s)), Image.LANCZOS).fil
 # gercek cerceve + poster
 DX0, DY0, DX1, DY1 = [round(v) for v in ((443 - SC[0]) * s, (226 - SC[1]) * s, (893 - SC[0]) * s, (788 - SC[1]) * s)]
 IX0, IX1 = (466 - SC[0]) * s, (869 - SC[0]) * s
-# Serdar 27 Eyl: cerceve ince. Yuz = Prodigi 20 mm, 24x36 olceginde (gorunen 599.6 mm); dis olcu sahnedeki gibi kalir.
-R_YUZ = 20 / 599.6
-F = round((DX1 - DX0) * R_YUZ / (1 + 2 * R_YUZ))
+# cilali cerceve (kapak v9 ile ayni): dis yukseklik sahnedeki kutuya oturur, yatayda ortalanir
+PW = round((DX1 - DX0) * 777 / 821); PH = round(PW * 14 / 11)   # dis genislik kutuya esit; boy biraz tasar, eski cerceveyi orter
 B = Image.open(BASKI).convert('RGB')
 kx, ky = round(B.width * 5 / 279.4), round(B.height * 5 / 355.6)
-poster = B.crop((kx, ky, B.width - kx, B.height - ky)).resize((DX1 - DX0 - 2 * F, DY1 - DY0 - 2 * F), Image.LANCZOS)
+poster = B.crop((kx, ky, B.width - kx, B.height - ky)).resize((PW, PH), Image.LANCZOS)
 sahne, kazanc = set_grade(sahne)                       # set kurali: atmosfer koridora
-fr = cerceve_blank(AGCH, poster, F)                    # master AG (gercek koseler)
+fr, ix, iy, F = cila_blank(CILA, poster)
+DX = DX0 + ((DX1 - DX0) - fr.width) // 2
+DY = DY1 - fr.height                                   # alt kenar hizasi korunur, tasma yukari
 yuz_ref = np.asarray(fr).astype(np.float32)[2:F - 2, fr.width // 2 - 100:fr.width // 2 + 100].reshape(-1, 3).mean(0)
-KUTU = (DX0, DY0, DX0 + fr.width, DY0 + fr.height)
+KUTU = (DX, DY, DX + fr.width, DY + fr.height)
 sahne = temas_golge(sahne, KUTU)
 fr = sahne_isik(fr, sahne, KUTU)
-sahne.paste(fr, (DX0, DY0))
+_mk = Image.new('L', fr.size, 0)
+ImageDraw.Draw(_mk).rectangle((2, 2, fr.width - 3, fr.height - 3), fill=255)
+sahne.paste(fr, (DX, DY), _mk)
 mask = Image.new('L', sahne.size, 0); ImageDraw.Draw(mask).rounded_rectangle((0, 0, sahne.width - 1, sahne.height - 1), radius=30, fill=255)
 out.paste(sahne, (SX, SY), mask)
 
@@ -67,11 +70,15 @@ out.save(CIK, quality=95, subsampling=0)
 R = np.asarray(Image.open(CIK).convert('RGB')).astype(np.float32)
 def ncc(a, b):
     a = a - a.mean(); b = b - b.mean(); return float((a * b).sum() / np.sqrt((a * a).sum() * (b * b).sum()))
-px0, py0 = SX + DX0 + F + 40, SY + DY0 + F + 40
-n = ncc(R[py0:py0 + poster.height - 80, px0:px0 + poster.width - 80].mean(2), np.asarray(poster).astype(np.float32)[40:-40, 40:-40].mean(2))
+P = np.asarray(poster).astype(np.float32)[40:-40, 40:-40].mean(2)
+n = -1.0
+for dy in range(-3, 4):
+    for dx in range(-3, 4):
+        px0, py0 = SX + DX + ix + 40 + dx, SY + DY + iy + 40 + dy
+        n = max(n, ncc(R[py0:py0 + P.shape[0], px0:px0 + P.shape[1]].mean(2), P))
 zemin = all(max(abs(int(a) - b) for a, b in zip(R[y, x], BG)) <= 2 for x, y in [(60, 1000), (2950, 1000), (60, 2050)])
 tire = bool(re.search(r'[‒-―−]', ' '.join(satir)))
-yuz_cik = R[SY + DY0 + 2:SY + DY0 + F - 2, SX + DX0 + fr.width // 2 - 100:SX + DX0 + fr.width // 2 + 100].reshape(-1, 3).mean(0)
+yuz_cik = R[SY + DY + 3:SY + DY + F - 2, SX + DX + fr.width // 2 - 100:SX + DX + fr.width // 2 + 100].reshape(-1, 3).mean(0)
 sapma = float(np.abs(yuz_cik - yuz_ref).max())
 print(f'sahne {sahne.size} olcek {s:.3f} | cerceve dis {DX1 - DX0}x{DY1 - DY0} yuz {F} | poster {poster.size} NCC {n:.4f} | zemin {zemin} | tire {tire}')
 print(f'set kazanc {kazanc} | cerceve renk sapmasi {sapma:.1f} (<=14)')
