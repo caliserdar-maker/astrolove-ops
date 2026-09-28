@@ -1,12 +1,15 @@
 name: kapak-duzeltme
 
-# POD_KAPAK_78 duzeltme: AQUARIUS_LIBRA + CAPRICORN_LIBRA (Serdar onayi 28 Eyl; CAPRICORN karari A). Etsy YOK.
-# POD_PRINT'E YAZMAZ: yeni CAPRICORN_LIBRA kaynaklari hazirlik alanina (<cikti>/KAYNAK/) yazilir; POD_PRINT'e yazma
-# (once yedek) Serdar karsilastirmayi onaylayinca ayri adimdir.
+# POD_KAPAK_78 duzeltme: AQUARIUS_LIBRA + ARIES_LIBRA + CAPRICORN_LIBRA (Serdar onayi 28 Eyl; CAPRICORN karari A). Etsy YOK.
+# 4. deneme (Serdar genel onayi 28 Eyl aksam): kaynak QC 75/75 PASS ise POD_PRINT/CAPRICORN_LIBRA'ya YAZILIR:
+#   once TEMP/POD_PRINT_YEDEK_<damga>/CAPRICORN_LIBRA yedegi + rclone check (0 fark), sonra yeni 75 dosya + rclone check.
+#   QC 75/75 degilse POD_PRINT'e dokunulmaz (hazirlik alani <cikti>/KAYNAK/).
+# Kapak QC PASS ise yeni EJ baskilari (KAPI_RAPORU ile) TEMP/POD_KAPAK_V3/SIPARIS onbellegine yazilir (once
+#   TEMP/POD_KAPAK_V3_YEDEK_<damga>/ yedegi + rclone check).
 # 1) scripts/pod/kaynak_terazi.py tara: 78 POD_PRINT MB 11x14 kucuk sembol olcusu (salt okur) -> SEMBOL_OLCU_78.md
 # 2) kaynak_terazi.py duzelt: CAPRICORN_LIBRA 5 renk x tum boy, Terazi CANCER_LIBRA olcusune (QC PASS/FAIL)
-# 3) EJ baskisi hat yamasiyla (yalniz bu kosunun _sb kopyasi): AQUARIUS_LIBRA POD_PRINT'ten, CAPRICORN_LIBRA hazirlanan
-#    yeni kaynaktan (pod_kaynak yalniz bu surecte yonlendirilir); kapak_duzeltme.py: kapak_v8_kur (v9), QC + karsilastirma.
+# 3) EJ baskisi yamali hatla (siparis-baski-v1 54363ee), uc cift POD_PRINT'ten (CAPRICORN yeni kaynak);
+#    kapak_duzeltme.py: kapak_v8_kur (v9), QC + karsilastirma.
 # Cikti: TEMP/POD_KAPAK_78_DUZELTME/<damga>/
 
 permissions:
@@ -18,7 +21,7 @@ on:
 jobs:
   duzelt:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
       - name: Checkout (siparis-baski-v1, hat kodu)
@@ -67,8 +70,25 @@ jobs:
           set -e
           rclone copy _kaynak "$H/KAYNAK" -q
           echo "Hazirlik: TEMP/POD_KAPAK_78_DUZELTME/$DAMGA/KAYNAK/ ($(find _kaynak -name '*.jpg' -path '*/*/*' | wc -l) dosya)"
-          [ "$KOD" -eq 0 ] || { echo "::error::kaynak QC FAIL. DUR."; exit 1; }
+          [ "$KOD" -eq 0 ] || { echo "::error::kaynak QC FAIL. POD_PRINT'e yazilmadi. DUR."; exit 1; }
+          (cd _cap && find . -mindepth 2 -name '*.jpg' | sort) > _liste_eski.txt
+          (cd _kaynak && find . -mindepth 2 -name '*.jpg' | sort) > _liste_yeni.txt
+          [ "$(wc -l < _liste_yeni.txt)" -eq 75 ] && cmp -s _liste_eski.txt _liste_yeni.txt \
+            || { echo "::error::yeni kaynak listesi 75 degil ya da eski liste ile ayni degil. POD_PRINT'e yazilmadi. DUR."; exit 1; }
+          python3 -c "import json,sys; R=json.load(open('_kaynak/KAYNAK_QC.json')); sys.exit(0 if len(R)==75 and all(r['pass'] for r in R) else 1)" \
+            || { echo "::error::KAYNAK_QC 75/75 PASS degil. DUR."; exit 1; }
           rm -rf _pod78 _cap _cl
+      - name: POD_PRINT/CAPRICORN_LIBRA yaz (once yedek + rclone check)
+        run: |
+          set -euo pipefail
+          POD="gdrive:ASTROLOVE/TEMP/POD_PRINT/CAPRICORN_LIBRA"
+          Y="gdrive:ASTROLOVE/TEMP/POD_PRINT_YEDEK_$DAMGA/CAPRICORN_LIBRA"
+          rclone copy "$POD" "$Y" -q
+          rclone check "$POD" "$Y" -q || { echo "::error::yedek rclone check FARK. POD_PRINT'e yazilmadi. DUR."; exit 1; }
+          echo "Yedek: TEMP/POD_PRINT_YEDEK_$DAMGA/CAPRICORN_LIBRA ($(rclone lsf -R --files-only "$Y" | wc -l) dosya, rclone check 0 fark)"
+          rclone copy _kaynak "$POD" --include "*/*.jpg" -q
+          rclone check _kaynak "$POD" --include "*/*.jpg" --one-way -q || { echo "::error::POD_PRINT yazma rclone check FARK (yedek: $Y). DUR."; exit 1; }
+          echo "POD_PRINT/CAPRICORN_LIBRA: 75 dosya yazildi, rclone check 0 fark"
       - name: Hat yamasi (yalniz bu kosunun kopyasi)
         run: grep -q 'Sembol bandinin ALTINDA' _sb/scripts/medya_v1/a1_poster.py && echo 'yama hatta zaten var' || { patch -p1 -s -d _sb < scripts/pod/hat_yama/sembol_alt_bant.patch && git -C _sb diff --stat; }
       - name: Girdiler + yamali EJ baskilari
@@ -79,12 +99,12 @@ jobs:
           rclone copyto "gdrive:ASTROLOVE/TEMP/POD_KAPAK_V3/SIPARIS/CANCER_LIBRA_MIDNIGHT_BLUE_11x14/BASKI_11x14.jpg" _in/EJ_CANCER_LIBRA.jpg
           KD=$(rclone lsf --dirs-only "gdrive:ASTROLOVE/TEMP/POD_KAPAK_78/" | tr -d '/' | grep -E '^[0-9]{8}_[0-9]{4}$' | sort | tail -1)
           echo "eski kapak kaynagi: TEMP/POD_KAPAK_78/$KD"
-          for c in CANCER_LIBRA AQUARIUS_LIBRA CAPRICORN_LIBRA; do
+          for c in CANCER_LIBRA AQUARIUS_LIBRA ARIES_LIBRA CAPRICORN_LIBRA; do
             rclone copyto "gdrive:ASTROLOVE/TEMP/POD_KAPAK_78/$KD/KAPAK_$c.jpg" "_in/ESKI_KAPAK_$c.jpg"
           done
           MB64=$(printf '%s' "It Began With a Kiss in the Rain" | base64 -w0)
-          for c in AQUARIUS_LIBRA CAPRICORN_LIBRA; do
-            (cd _sb && python -c "import sys; from pathlib import Path; sys.path.insert(0, 'scripts/medya_v1'); import siparis_dosyasi as s; s.SIP = '$H/SIPARIS'; _pk = s.pod_kaynak; s.pod_kaynak = lambda c, r, b: Path('../_kaynak') / r / f'{b}.jpg' if c == 'CAPRICORN_LIBRA' else _pk(c, r, b); sys.argv = ['siparis_dosyasi.py', '--cift', '$c', '--renk', 'MIDNIGHT_BLUE', '--boy', '11x14', '--isim1', 'EMILY', '--isim2', 'JAMES', '--mesaj-b64', '$MB64']; s.main()" > "../_log_$c.txt" 2>&1) \
+          for c in AQUARIUS_LIBRA ARIES_LIBRA CAPRICORN_LIBRA; do
+            (cd _sb && python -c "import sys; sys.path.insert(0, 'scripts/medya_v1'); import siparis_dosyasi as s; s.SIP = '$H/SIPARIS'; sys.argv = ['siparis_dosyasi.py', '--cift', '$c', '--renk', 'MIDNIGHT_BLUE', '--boy', '11x14', '--isim1', 'EMILY', '--isim2', 'JAMES', '--mesaj-b64', '$MB64']; s.main()" > "../_log_$c.txt" 2>&1) \
               || { tail -40 "_log_$c.txt" | python3 scripts/guvenlik/log_suz.py; echo "::error::$c hat FAIL"; exit 1; }
             cp "_sb/_siparis/${c}_MIDNIGHT_BLUE_11x14/BASKI_11x14.jpg" "_in/EJ_$c.jpg"
             tail -3 "_log_$c.txt" | python3 scripts/guvenlik/log_suz.py
@@ -102,5 +122,19 @@ jobs:
           cat _out/RAPOR.md _kaynak/SEMBOL_OLCU_78.md >> "$GITHUB_STEP_SUMMARY" || true
           echo "Drive: TEMP/POD_KAPAK_78_DUZELTME/$DAMGA"
           exit "$KOD"
+      - name: EJ onbellegi (TEMP/POD_KAPAK_V3/SIPARIS) yeni baskilarla (once yedek)
+        run: |
+          set -euo pipefail
+          H="gdrive:ASTROLOVE/TEMP/POD_KAPAK_78_DUZELTME/$DAMGA"
+          V1="gdrive:ASTROLOVE/TEMP/POD_KAPAK_V3/SIPARIS"
+          for c in AQUARIUS_LIBRA ARIES_LIBRA CAPRICORN_LIBRA; do
+            r="${c}_MIDNIGHT_BLUE_11x14"
+            rclone cat "$H/SIPARIS/$r/KAPI_RAPORU.json" | python3 -c "import json,sys; sys.exit(0 if json.load(sys.stdin).get('kapilar_gecti') else 1)" \
+              || { echo "::error::$c yeni baski kapi raporu PASS degil. DUR."; exit 1; }
+            Y="gdrive:ASTROLOVE/TEMP/POD_KAPAK_V3_YEDEK_$DAMGA/$r"
+            rclone copy "$V1/$r" "$Y" -q && rclone check "$V1/$r" "$Y" -q || { echo "::error::$c onbellek yedegi FARK. DUR."; exit 1; }
+            rclone sync "$H/SIPARIS/$r" "$V1/$r" -q && rclone check "$H/SIPARIS/$r" "$V1/$r" -q || { echo "::error::$c onbellek yazma FARK. DUR."; exit 1; }
+            echo "$c: onbellek guncellendi (yedek TEMP/POD_KAPAK_V3_YEDEK_$DAMGA/$r)"
+          done
       - if: ${{ always() }}
         run: rm -rf ~/.config/rclone

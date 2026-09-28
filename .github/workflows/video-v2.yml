@@ -21,6 +21,10 @@ on:
         description: "true = hat sembol alt bandi yamasi (scripts/pod/hat_yama) YALNIZ bu kosuda; siparis hatti degismez"
         type: boolean
         default: false
+      yenile:
+        description: "true = SON_V5 atlamasi ve baski onbellekleri kullanilmaz, hepsi hattan yeniden (kaynak degisti)"
+        type: boolean
+        default: false
 
 concurrency: video-v2-${{ inputs.ciftler }}
 
@@ -81,6 +85,7 @@ jobs:
       - name: Uret (parca ${{ matrix.parca }}/8)
         env:
           HAT_YAMA: ${{ inputs.hat_yama }}
+          YENILE: ${{ inputs.yenile }}
           DAMGA: ${{ needs.hazirla.outputs.damga }}
           PARCA: ${{ matrix.parca }}
           CIFTLER: ${{ inputs.ciftler }}
