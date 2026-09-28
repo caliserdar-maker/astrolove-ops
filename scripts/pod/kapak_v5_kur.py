@@ -34,12 +34,22 @@ poster = B.crop((kx, ky, B.width - kx, B.height - ky)).resize((PW, PH), Image.LA
 fr = cerceve_blank(AGCH, poster, F)
 FX, FY = CX - fr.width // 2, TABAN - fr.height
 
-# yan seritleri komsu duvarin aynasiyla kapat (sol: 420-470 -> 470-520 ...)
+# yan seritleri komsu duvardan KAYDIRMALI yama ile kapat (ayna yok: isik gradyani bozulmasin),
+# dis kenarda 14 px yumusak gecis; ic kenar cerceve ve temas golgesi altinda kalir.
+def yama(hedef_x0, hedef_x1, kaynak_x0):
+    gen = hedef_x1 - hedef_x0
+    par = G.crop((kaynak_x0, 0, kaynak_x0 + gen, TABAN))
+    m = Image.new('L', par.size, 255)
+    mp = np.tile(np.linspace(0, 255, 14), (TABAN, 1)).astype(np.uint8)
+    if kaynak_x0 < hedef_x0:   # sol yama: dis kenar solda
+        m.paste(Image.fromarray(mp), (0, 0))
+    else:                       # sag yama: dis kenar sagda
+        m.paste(Image.fromarray(mp[:, ::-1]), (gen - 14, 0))
+    G.paste(par, (hedef_x0, 0), m)
 gen_sol = FX - BX0 + 4
 gen_sag = BX1 - (FX + fr.width) + 4
-sol = G.crop((BX0 - gen_sol, 0, BX0, TABAN)).transpose(Image.FLIP_LEFT_RIGHT)
-sag = G.crop((BX1, 0, BX1 + gen_sag, TABAN)).transpose(Image.FLIP_LEFT_RIGHT)
-G.paste(sol, (BX0 - 2, 0)); G.paste(sag, (BX1 - gen_sag + 2, 0))
+yama(BX0 - 2, BX0 - 2 + gen_sol, BX0 - 2 - gen_sol)
+yama(BX1 + 2 - gen_sag, BX1 + 2, BX1 + 2)
 
 # golge (cerceveden once): temas + yumusak, alt-sag
 a = np.asarray(G).astype(np.float32)
