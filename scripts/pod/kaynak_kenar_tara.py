@@ -57,6 +57,63 @@ def kirp(im, bolge):
     return im.crop((round(W * x0), round(H * y0), round(W * x1), round(H * y1)))
 
 
+def pencere_ana(a, koyu, w=420, h=280):
+    """Koyu kenar pikselinin en yogun oldugu w x h pencere (yoksa murekkep merkezi)."""
+    if koyu.any():
+        yog = ndi.uniform_filter(koyu.astype(np.float32), size=(h, w))
+        y, x = np.unravel_index(np.argmax(yog), yog.shape)
+    else:
+        y, x = a.shape[0] // 2, a.shape[1] // 2
+    y0 = int(np.clip(y - h // 2, 0, a.shape[0] - h)); x0 = int(np.clip(x - w // 2, 0, a.shape[1] - w))
+    return x0, y0, x0 + w, y0 + h
+
+
+def kutu_kucuk(a, pay=25):
+    """KUCUK bolgesinde sol yarinin murekkep kutusu (sol kucuk sembol)."""
+    L = a @ LUMA
+    zem = np.median(L)
+    ink = np.abs(zem - L) > 25
+    ink[:, a.shape[1] // 2:] = False
+    ink = ndi.binary_opening(ink, iterations=1)
+    lab, n = ndi.label(ink)
+    if not n:
+        return 0, 0, a.shape[1] // 2, a.shape[0]
+    alan = ndi.sum(ink, lab, range(1, n + 1))
+    m = np.isin(lab, [i + 1 for i in range(n) if alan[i] >= 200])
+    ys, xs = np.where(m)
+    return (max(xs.min() - pay, 0), max(ys.min() - pay, 0), min(xs.max() + pay, a.shape[1]), min(ys.max() + pay, a.shape[0]))
+
+
+def temas(kok, yol, sec):
+    try:
+        F = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 30)
+    except OSError:
+        F = ImageFont.load_default()
+    parcalar = []
+    for et, d in sec:
+        im = Image.open(kok / d['cift'] / d['renk'] / '11x14.jpg').convert('RGB')
+        A = kirp(im, BOLGE['ANA']); aA = np.asarray(A).astype(np.float32)
+        _, _, _, koyu = olc(aA)
+        a = A.crop(pencere_ana(aA, koyu))
+        K = kirp(im, BOLGE['KUCUK']); aK = np.asarray(K).astype(np.float32)
+        k = K.crop(kutu_kucuk(aK))
+        if k.height > 330:
+            k = k.resize((round(k.width * 330 / k.height), 330), Image.LANCZOS)
+        a = a.resize((a.width * 3, a.height * 3), Image.LANCZOS)
+        k = k.resize((k.width * 3, k.height * 3), Image.LANCZOS)
+        parcalar.append((et, d, a, k))
+    rw = max(p[2].width + p[3].width for p in parcalar) + 60
+    rh = max(max(p[2].height, p[3].height) for p in parcalar) + 60
+    T = Image.new('RGB', (rw, rh * len(parcalar)), (128, 128, 128))
+    dr = ImageDraw.Draw(T)
+    for j, (et, d, a, k) in enumerate(parcalar):
+        y = j * rh
+        dr.text((10, y + 8), f"{et} {d['cift']} {d['renk']}  oran {d['oran']} (ANA {d['ANA_goreli']}, KUCUK {d['KUCUK_goreli']})",
+                fill=(255, 255, 255) if et == 'IYI' else (255, 230, 0), font=F)
+        T.paste(a, (10, y + 50)); T.paste(k, (30 + a.width, y + 50))
+    T.save(yol, quality=85)
+
+
 def main():
     kok, cik = Path(sys.argv[1]), Path(sys.argv[2])
     cik.mkdir(parents=True, exist_ok=True)
@@ -92,31 +149,16 @@ def main():
             md.insert(2, f'- {r}: n {len(v)}, medyan {np.median(v):.2f}, p90 {np.percentile(v, 90):.2f}, en cok {v.max():.2f}')
     (cik / 'KENAR.md').write_text('\n'.join(md) + '\n')
 
-    # temas: en kotu 12 + en iyi 3; her satir ana sembol ust yayi + sol kucuk sembol, 3x (LANCZOS)
-    sec = [('KOTU', d) for d in sat[:12]] + [('IYI', d) for d in sat[-3:]]
-    try:
-        F = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 30)
-    except OSError:
-        F = ImageFont.load_default()
-    parcalar = []
-    for et, d in sec:
-        im = Image.open(kok / d['cift'] / d['renk'] / '11x14.jpg').convert('RGB')
-        W, H = im.size
-        a = im.crop((round(W * .44), round(H * .205), round(W * .58), round(H * .275)))    # ana sembol ust yay
-        k = im.crop((round(W * .28), round(H * .630), round(W * .38), round(H * .700)))    # sol kucuk sembol
-        a = a.resize((a.width * 3, a.height * 3), Image.LANCZOS)
-        k = k.resize((k.width * 3, k.height * 3), Image.LANCZOS)
-        parcalar.append((et, d, a, k))
-    rw = max(p[2].width + p[3].width for p in parcalar) + 60
-    rh = max(max(p[2].height, p[3].height) for p in parcalar) + 60
-    T = Image.new('RGB', (rw, rh * len(parcalar)), (128, 128, 128))
-    dr = ImageDraw.Draw(T)
-    for j, (et, d, a, k) in enumerate(parcalar):
-        y = j * rh
-        dr.text((10, y + 8), f"{et} {d['cift']} {d['renk']}  oran {d['oran']} (ANA {d['ANA_goreli']}, KUCUK {d['KUCUK_goreli']})",
-                fill=(255, 255, 255) if et == 'IYI' else (255, 230, 0), font=F)
-        T.paste(a, (10, y + 50)); T.paste(k, (30 + a.width, y + 50))
-    T.save(cik / 'TEMAS_EN_KOTU12_EN_IYI3.jpg', quality=88)
+    # temas: en kotu 12 + en iyi 3 (istenen) ve esik ornekleri (renk basina oran yuzdelikleri).
+    # Kirpim yeri otomatik: KUCUK = sol kucuk sembolun murekkep kutusu; ANA = koyu kenarin en yogun oldugu pencere.
+    temas(kok, cik / 'TEMAS_EN_KOTU12_EN_IYI3.jpg', [('KOTU', d) for d in sat[:12]] + [('IYI', d) for d in sat[-3:]])
+    orn = []
+    for r in RENKLER:
+        rs = sorted((d for d in sat if d['renk'] == r), key=lambda d: d['oran'])
+        for q in (0.95, 0.75, 0.5, 0.25, 0.05):
+            if rs:
+                orn.append((f'{r[:2]} p{int(q * 100)}', rs[min(int(q * len(rs)), len(rs) - 1)]))
+    temas(kok, cik / 'ESIK_ORNEKLERI.jpg', orn)
     print('\n'.join(md[:8]))
     print(f'toplam {time.time() - t0:.0f}s')
 
