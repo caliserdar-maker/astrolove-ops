@@ -218,6 +218,44 @@ def uygula(api, shop, lid, kaynak, altcsv, out, qmin):
     return rapor
 
 
+def kuru_rapor(api, shop, lid, man, yol, alt, out):
+    """SALT OKUMA plan raporu: canli galeri, baglar, silinecekler/capa, yuklenecekler, sinir ve kota."""
+    import hashlib
+    g = man["galeri"]
+    bagli = {v.get("image_id") for v in man["variation_images"]}
+    eski = [x["listing_image_id"] for x in g]
+    capa = next((i for i in eski if i not in bagli), eski[0] if eski else None)
+    rv = renk_degerleri(api, lid)
+    kor = man["korunan"]
+    sorun = []
+    if kor["state"] != "active":
+        sorun.append(f"state {kor['state']} (active degil)")
+    if sorted(rv) != sorted(RENK_SIRA):
+        sorun.append(f"envanterde 5 renk yok: {sorted(rv)}")
+    if len(g) < 1:
+        sorun.append("galeri bos")
+    if 1 + 19 > IMG_LIMIT:
+        sorun.append("capa + 19 > 20")
+    tahmin = (len(eski) - 1) + 19 + 1 + 1 + 25       # sil + yukle + bag + capa sil + geri okumalar
+    md = [f"# CL GALERI DEGISIMI - KURU KOSU ({time.strftime('%Y-%m-%d %H:%M UTC', time.gmtime())}) - Etsy'ye yazma YOK", "",
+          f"- Ilan {lid}: state **{kor['state']}**, video {len(kor['video_ids'])}, envanter {kor['n_urun']} urun",
+          f"- Canli galeri: **{len(g)}** gorsel, {len(man['variation_images'])} renk bagi; kota {api.remaining}",
+          f"- Plan: {len(eski) - 1} eski sil (capa {capa} kalir) -> 19 yeni yukle (sira 2-20) -> 5 renk bagi 15-19 -> capayi sil -> 1-19",
+          f"- Tahmini Etsy cagrisi: ~{tahmin} | 20 gorsel siniri: capa + 19 = 20 (sinirda, asilmiyor)",
+          f"- Kontrol: {'PASS' if not sorun else 'FAIL ' + '; '.join(sorun)}", "",
+          "## Canli galeri (silinecek)", "", "| sira | image_id | renk bagi | alt metin |", "|---|---|---|---|"]
+    renk_of = {v.get("image_id"): v.get("value") for v in man["variation_images"]}
+    md += [f"| {x['rank']} | {x['listing_image_id']}{' (CAPA)' if x['listing_image_id'] == capa else ''} | "
+           f"{renk_of.get(x['listing_image_id'], '')} | {(x.get('alt_text') or '')[:70]} |" for x in g]
+    md += ["", "## Yuklenecek 19 gorsel", "", "| sira | dosya | md5 | renk bagi | alt metin |", "|---|---|---|---|---|"]
+    ters = {v: k for k, v in RENK_SIRA.items()}
+    md += [f"| {n} | {yol[n].name} | {hashlib.md5(yol[n].read_bytes()).hexdigest()[:10]} | {ters.get(n, '')} | {alt[n]} |"
+           for n in range(1, 20)]
+    Path(out, "KURU_RAPOR.md").write_text("\n".join(md) + "\n", encoding="utf-8")
+    log("\n".join(md[:8]))
+    return not sorun
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--listing-id", default="4570143815")
@@ -239,10 +277,7 @@ def main():
     if a.mod == "dry-run":
         yol, alt = kaynak_dosyalar(a.kaynak), alt_metinler(a.alt_csv)
         man = yedek_al(api, shop, a.listing_id, a.out, cdn_indir=False)
-        log(f"dry-run: kaynak 19 dosya OK, alt 19 OK; mevcut {len(man['galeri'])} gorsel, "
-            f"{len(man['variation_images'])} bag; plan: {len(man['galeri']) - 1} sil + capa, 19 yukle, 5 bagla, capa sil")
-        for x in man["galeri"]:
-            log(f"  canli sira {x['rank']}: image_id {x['listing_image_id']}")
+        kuru_rapor(api, shop, a.listing_id, man, yol, alt, a.out)
     elif a.mod == "yedek":
         kaynak_dosyalar(a.kaynak); alt_metinler(a.alt_csv)
         yedek_al(api, shop, a.listing_id, a.out)
