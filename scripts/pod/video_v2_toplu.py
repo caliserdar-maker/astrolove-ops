@@ -13,7 +13,11 @@ ilk gorunur gecis 0.20 sn, 378 kare = 12.6 sn. 2880x2160, sessiz, < 100 MB.
 QC: 378 kare / 12.6 sn / 30 fps / 2880x2160 / ses yok / < 100 MB; ilk kare = EJ kapagi NCC >= 0.99; her varyantin sabit
 karesinde poster NCC >= 0.99 (o varyantin baskisiyla, sigma1); gecis anlari (gorunur baslangiclar) plan ile +-1 kare. FAIL -> cikis 1.
 ETA sayaci: islenen/toplam, gecen, kalan, yuzde.
-Kullanim: video_v2_toplu.py SB_DIZIN CIFT [CIFT ...]
+Toplu kosu (video-77 duzeni): 8 paralel parca, her biri ciftlerin [parca::8]'i; her cift biter bitmez Drive'a yazilir.
+Durum TEMP/POD_VIDEO_V2/SON_V5: PASS olan cift sonraki kosuda yeniden uretilmez (video + QC + IN karesi damgaya kopyalanir).
+Birlestirme: damgadaki QC_*.json -> OZET.md (cift basina 1 satir) + ONIZLEME.jpg (her ciftten IN karesi).
+Kullanim: video_v2_toplu.py uret SB_DIZIN DAMGA PARCA TOPLAM (HEPSI | CIFT [CIFT ...])
+          video_v2_toplu.py birlestir DAMGA (HEPSI | CIFT [CIFT ...])
 """
 import base64
 import json
@@ -29,16 +33,15 @@ from PIL import Image
 from scipy import ndimage
 
 KOK = Path(__file__).resolve().parents[2]
-if __name__ == '__main__':
-    SB = Path(sys.argv[1])
-    CIFTLER = sys.argv[2:]
-    OUT = Path('_out'); OUT.mkdir(exist_ok=True)
-    W = Path('_work'); (W / 'baski').mkdir(parents=True, exist_ok=True)
-    SAHNE = W / 'sahne_1213.png'
-    Image.open(KOK / 'data/pod/kapak_sahne_v9.png').convert('RGB').resize((1213, 910), Image.LANCZOS).save(SAHNE)
+OUT = Path('_out')
+W = Path('_work')
+SAHNE = W / 'sahne_1213.png'
+SB = None
 
 V1_SIP = 'gdrive:ASTROLOVE/TEMP/POD_KAPAK_V3/SIPARIS'
 V23_SIP = 'gdrive:ASTROLOVE/TEMP/POD_VIDEO_V2/SIPARIS'
+KOK_D = 'gdrive:ASTROLOVE/TEMP/POD_VIDEO_V2'
+SON = f'{KOK_D}/SON_V5'
 VARYANT = {'EJ': ('EMILY', 'JAMES', 'It Began With a Kiss in the Rain'),
            'IN': ('ISABELLA', 'NOAH', "I'd Choose You in Every Lifetime"),
            'AM': ('ALEXANDER', 'MIA', 'You Feel Like Home')}
@@ -205,7 +208,7 @@ def qc(cikis, kapaklar, baskilar):
         if x == y and x not in sabit_i and i >= BAS and plan[i - 1][:2] != (x, x):
             sabit_i[x] = i + SABIT // 2
     sabit_i.setdefault('EJ', BAS // 2)
-    olc_d, onceki, n, ilk, pncc = [], None, 0, None, {}
+    olc_d, onceki, n, ilk, pncc, in_kare = [], None, 0, None, {}, None
     while True:
         ok, kare = v.read()
         if not ok:
@@ -216,6 +219,8 @@ def qc(cikis, kapaklar, baskilar):
         for k, i in sabit_i.items():
             if n == i:
                 pncc[k] = round(poster_ncc(rgb, baskilar[k]), 4)
+                if k == 'IN':
+                    in_kare = rgb
         g = kucuk(rgb)
         olc_d.append(0.0 if onceki is None else float(np.abs(g - onceki)[maske].mean()))
         onceki = g; n += 1
@@ -237,33 +242,104 @@ def qc(cikis, kapaklar, baskilar):
              f'poster NCC {pncc} | gecis {len(o_olc)}/{len(o_bek)} ilk {o_olc[:1]} ({o_olc[0] / FPS if o_olc else -1:.2f} sn) '
              f'{"+-1 OK" if gecis_ok else "FARKLI"}')
     return ok, olcum, {'onset_olculen': o_olc, 'onset_plan': o_bek, 'poster_ncc': pncc, 'ilk_kare_ncc': round(ncc_ilk, 4),
-                       'kare': n, 'mb': round(mb, 2)}
+                       'kare': n, 'mb': round(mb, 2)}, in_kare
 
 
-if __name__ == '__main__':
-    N = len(CIFTLER); fail = 0; t0 = time.time()
-    sat = ['# VIDEO V2 (v5 sablonu) ' + time.strftime('%Y-%m-%d %H:%M UTC', time.gmtime()), f'Toplam: {N}', '']
-    for i, c in enumerate(CIFTLER, 1):
+def ciftler_coz(arg):
+    if arg != ['HEPSI']:
+        return sorted(arg)
+    r = rc('lsf', V1_SIP, '--dirs-only')
+    return sorted(d.rstrip('/').removesuffix(f'_{RENK}_{BOY}') for d in r.stdout.split() if d.rstrip('/').endswith(f'_{RENK}_{BOY}'))
+
+
+def cift_uret(c, hedef):
+    """tek cift: onceki PASS varsa kopyala; yoksa uret + QC, dosyalari damgaya (PASS ise SON'a da) yaz. -> (ok, satir)"""
+    onceki = rc('cat', f'{SON}/QC_{c}.json', kontrol=False)
+    if onceki.returncode == 0 and json.loads(onceki.stdout or '{}').get('pass'):
+        if all(rc('copyto', f'{SON}/{f}', f'{hedef}/{f}', kontrol=False).returncode == 0
+               for f in (f'VIDEO_{c}.mp4', f'IN_{c}.jpg', f'QC_{c}.json')):
+            return True, 'atlandi (onceki PASS)'
+    cw = W / c; (cw / 'baski').mkdir(parents=True, exist_ok=True)
+    kayit = {'cift': c, 'pass': False}
+    try:
         baskilar = {k: baski_al(c, *VARYANT[k], v1=(k == 'EJ')) for k in SIRA}
-        baskilar['AM'], tag = am_tagline(baskilar, W / f'BASKI_AM_{c}_kaydirilmis.png')
-        kapaklar = {}
+        baskilar['AM'], kayit['am_tagline'] = am_tagline(baskilar, cw / 'BASKI_AM_kaydirilmis.png')
+        kapaklar = {k: cw / f'KAP_{k}.jpg' for k in SIRA}
         for k in SIRA:
-            kapaklar[k] = W / f'KAP_{c}_{k}.jpg'
             kapak(baskilar[k], kapaklar[k])
         cikis = OUT / f'VIDEO_{c}.mp4'
         video(kapaklar, cikis)
-        ok, olcum, ayrinti = qc(cikis, kapaklar, baskilar)
-        json.dump({'cift': c, 'am_tagline': tag, 'qc': ayrinti, 'pass': ok}, open(OUT / f'QC_{c}.json', 'w'), indent=1)
-        if N == 1:                                               # ornek kosu: kapaklar incelemeye
-            for k in SIRA:
-                Image.open(kapaklar[k]).save(OUT / f'KAP_{c}_{k}.jpg', quality=92)
-        sat.append(f'- {c}: {"PASS" if ok else "FAIL"} | {olcum} | AM tagline fark {tag["fark_px"]} px, kaydirma {tag["kaydirma_px"]} px')
-        if not ok:
-            fail += 1
-        g = time.time() - t0
-        print(f'[{i}/{N}] {c} {"PASS" if ok else "FAIL"} | {olcum} | gecen {g:.0f}s | kalan ~{g / i * (N - i):.0f}s | %{i / N * 100:.0f}', flush=True)
+        ok, olcum, ayrinti, in_kare = qc(cikis, kapaklar, baskilar)
+        tag = kayit['am_tagline']
+        kayit.update({'pass': ok, 'qc': ayrinti,
+                      'olcum': f'{olcum} | AM tagline fark {tag["fark_px"]} px, kaydirma {tag["kaydirma_px"]} px'})
+        Image.fromarray(in_kare).resize((720, 540), Image.LANCZOS).save(OUT / f'IN_{c}.jpg', quality=90)
+    except (Exception, SystemExit) as e:                        # cift FAIL, parca devam eder
+        kayit['olcum'] = f'HATA: {type(e).__name__}: {str(e).strip()[-300:]}'
+    (OUT / f'QC_{c}.json').write_text(json.dumps(kayit, indent=1))
+    dosyalar = [f for f in (f'VIDEO_{c}.mp4', f'QC_{c}.json', f'IN_{c}.jpg') if (OUT / f).exists()]
+    for f in dosyalar:
+        rc('copyto', str(OUT / f), f'{hedef}/{f}', kontrol=False)
+    if kayit['pass']:                                           # QC en son: yarim kopya PASS sayilmaz
+        for f in sorted(dosyalar, key=lambda f: f.startswith('QC_')):
+            rc('copyto', str(OUT / f), f'{SON}/{f}', kontrol=False)
+    return kayit['pass'], kayit['olcum']
 
-    sat += ['', f'PASS: {N - fail} / {N}', 'SONUC ' + ('PASS' if fail == 0 else 'FAIL')]
-    (OUT / 'OZET.md').write_text('\n'.join(sat) + '\n')
-    print('SONUC ' + ('PASS' if fail == 0 else 'FAIL'))
-    sys.exit(1 if fail else 0)
+
+def uret(sb, damga, parca, toplam, arg):
+    global SB
+    SB = Path(sb); OUT.mkdir(exist_ok=True); W.mkdir(exist_ok=True)
+    Image.open(KOK / 'data/pod/kapak_sahne_v9.png').convert('RGB').resize((1213, 910), Image.LANCZOS).save(SAHNE)
+    hepsi = ciftler_coz(arg)
+    benim = hepsi[parca::toplam]
+    hedef = f'{KOK_D}/{damga}'
+    N = len(benim); fail = 0; t0 = time.time()
+    print(f'parca {parca}/{toplam}: {N} / {len(hepsi)} cift: {" ".join(benim)}', flush=True)
+    for i, c in enumerate(benim, 1):
+        ok, satir = cift_uret(c, hedef)
+        fail += not ok
+        g = time.time() - t0
+        print(f'[{i}/{N}] {c} {"PASS" if ok else "FAIL"} | {satir} | gecen {g:.0f}s | kalan ~{g / i * (N - i):.0f}s | %{i / N * 100:.0f}', flush=True)
+    print(f'parca {parca}: PASS {N - fail} / {N}')
+    return 1 if fail else 0
+
+
+def birlestir(damga, arg):
+    from PIL import ImageDraw
+    hepsi = ciftler_coz(arg)
+    hedef = f'{KOK_D}/{damga}'
+    yer = Path('_birlestir'); yer.mkdir(exist_ok=True)
+    rc('copy', hedef, str(yer), '--include', 'QC_*.json', '--include', 'IN_*.jpg', kontrol=False)
+    sat, npass, fail = [], 0, []
+    TW, TH, SUT = 480, 360, 8
+    sat_n = (len(hepsi) + SUT - 1) // SUT
+    serit = Image.new('RGB', (SUT * TW, sat_n * (TH + 40)), (255, 255, 255)); d = ImageDraw.Draw(serit)
+    for j, c in enumerate(hepsi):
+        q = yer / f'QC_{c}.json'
+        k = json.loads(q.read_text()) if q.exists() else {'pass': False, 'olcum': 'YOK: uretilmedi (parca dustu?)'}
+        npass += bool(k['pass'])
+        if not k['pass']:
+            fail.append(c)
+        sat.append(f'- {c}: {"PASS" if k["pass"] else "FAIL"} | {k.get("olcum", "")}')
+        x, y = (j % SUT) * TW, (j // SUT) * (TH + 40)
+        if (yer / f'IN_{c}.jpg').exists():
+            serit.paste(Image.open(yer / f'IN_{c}.jpg').convert('RGB').resize((TW, TH), Image.LANCZOS), (x, y))
+        d.text((x + 8, y + TH + 10), f'{c} {"PASS" if k["pass"] else "FAIL"}', fill=(0, 110, 0) if k['pass'] else (200, 0, 0))
+    bas = ['# VIDEO V2 (v5 sablonu) ' + damga, f'Toplam: {len(hepsi)}', '']
+    son = ['', f'PASS: {npass} / {len(hepsi)}', f'FAIL: {" ".join(fail) if fail else "-"}',
+           'SONUC ' + ('PASS' if not fail else 'FAIL')]
+    Path('_out').mkdir(exist_ok=True)
+    Path('_out/OZET.md').write_text('\n'.join(bas + sat + son) + '\n')
+    serit.save('_out/ONIZLEME.jpg', quality=85)
+    for f in ('OZET.md', 'ONIZLEME.jpg'):
+        rc('copyto', f'_out/{f}', f'{hedef}/{f}')
+    print('\n'.join(son), flush=True)
+    return 1 if fail else 0
+
+
+if __name__ == '__main__':
+    if sys.argv[1] == 'uret':
+        sys.exit(uret(sys.argv[2], sys.argv[3], int(sys.argv[4]), int(sys.argv[5]), sys.argv[6:]))
+    if sys.argv[1] == 'birlestir':
+        sys.exit(birlestir(sys.argv[2], sys.argv[3:]))
+    raise SystemExit(__doc__)

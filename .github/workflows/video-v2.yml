@@ -1,8 +1,10 @@
 name: video-v2
 
-# Isim + tagline dongulu kapak videolari (salt Drive; Etsy YOK).
-# v5 sablonu (EJ/IN/AM, 378 kare). Hat baskilari: siparis-baski-v1 dali (degistirilmeden), IN/AM onbellek TEMP/POD_VIDEO_V2/SIPARIS.
-# Cikti: TEMP/POD_VIDEO_V2/<damga>/ (VIDEO_*.mp4 + QC_*.json + OZET.md; tek cift ise kapaklar)
+# Isim + tagline dongulu kapak videolari, v5 sablonu (EJ/IN/AM, 378 kare). Salt Drive; Etsy YOK.
+# Hat baskilari: siparis-baski-v1 dali (degistirilmeden), IN/AM onbellek TEMP/POD_VIDEO_V2/SIPARIS (tekrar uretilmez).
+# video-77 duzeni: hazirla (damga) -> 8 paralel parca ([parca::8]) -> tek birlestirme (OZET.md + ONIZLEME.jpg).
+# Durum TEMP/POD_VIDEO_V2/SON_V5: onceki kosuda PASS olan cift atlanir (dosyalari damgaya kopyalanir).
+# Cikti: TEMP/POD_VIDEO_V2/<damga>/ (VIDEO_*.mp4, QC_*.json, IN_*.jpg, OZET.md, ONIZLEME.jpg)
 
 permissions:
   contents: read
@@ -13,12 +15,28 @@ on:
       ciftler:
         description: "bosluklu cift listesi ya da 'HEPSI' (SIPARIS onbellegindeki 78)"
         required: true
-        default: "CANCER_LIBRA"
+        default: "HEPSI"
+
+concurrency: video-v2
 
 jobs:
-  uret:
+  hazirla:
     runs-on: ubuntu-latest
-    timeout-minutes: 300
+    outputs:
+      damga: ${{ steps.d.outputs.damga }}
+    steps:
+      - id: d
+        run: echo "damga=$(date -u +%Y%m%d_%H%M)" >> "$GITHUB_OUTPUT"
+
+  uret:
+    needs: hazirla
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        parca: [0, 1, 2, 3, 4, 5, 6, 7]
     steps:
       - uses: actions/checkout@v4
       - name: Checkout (siparis-baski-v1, hat kodu)
@@ -43,33 +61,68 @@ jobs:
           mkdir -p ~/.config/rclone; umask 077
           printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
           chmod 600 ~/.config/rclone/rclone.conf
-          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
-            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
           fi
-      - name: Uret
+      - name: Uret (parca ${{ matrix.parca }}/8)
+        env:
+          DAMGA: ${{ needs.hazirla.outputs.damga }}
+          PARCA: ${{ matrix.parca }}
+          CIFTLER: ${{ inputs.ciftler }}
         run: |
           set -euo pipefail
-          CIFTLER="${{ inputs.ciftler }}"
-          if [ "$CIFTLER" = "HEPSI" ]; then
-            CIFTLER=$(rclone lsf "gdrive:ASTROLOVE/TEMP/POD_KAPAK_V3/SIPARIS" --dirs-only | sed 's#/$##; s#_MIDNIGHT_BLUE_11x14$##' | sort | tr '\n' ' ')
-          fi
-          echo "ciftler: $CIFTLER"
-          mkdir -p _out
           # cikti hem ekrana hem dosyaya; hata olursa son 60 satir susgecten gecip Drive'a gider
           set +e
-          python scripts/pod/video_v2_toplu.py _sb $CIFTLER 2>&1 | tee _work_log.txt
+          python scripts/pod/video_v2_toplu.py uret _sb "$DAMGA" "$PARCA" 8 $CIFTLER 2>&1 | tee _work_log.txt
           KOD=${PIPESTATUS[0]}
           set -e
           if [ "$KOD" -ne 0 ]; then
-            tail -60 _work_log.txt | python3 scripts/guvenlik/log_suz.py > _out/HATA_SON60.txt || true
+            tail -60 _work_log.txt | python3 scripts/guvenlik/log_suz.py > "HATA_SON60_p$PARCA.txt" || true
+            rclone copyto "HATA_SON60_p$PARCA.txt" "gdrive:ASTROLOVE/TEMP/POD_VIDEO_V2/$DAMGA/HATA_SON60_p$PARCA.txt" -q || true
           fi
           rm -f _work_log.txt
           exit "$KOD"
-      - name: Drive'a yaz
-        if: ${{ always() }}
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
+
+  birlestir:
+    needs: [hazirla, uret]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q pillow numpy opencv-python-headless scipy
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
         run: |
           set -euo pipefail
-          STAMP=$(date -u +%Y%m%d_%H%M)
-          [ -d _out ] && rclone copy _out "gdrive:ASTROLOVE/TEMP/POD_VIDEO_V2/$STAMP" -q || true
-          echo "Drive: TEMP/POD_VIDEO_V2/$STAMP"
-          rm -rf ~/.config/rclone
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: OZET.md + ONIZLEME.jpg
+        env:
+          DAMGA: ${{ needs.hazirla.outputs.damga }}
+          CIFTLER: ${{ inputs.ciftler }}
+        run: |
+          python scripts/pod/video_v2_toplu.py birlestir "$DAMGA" $CIFTLER
+          echo "Drive: TEMP/POD_VIDEO_V2/$DAMGA"
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
