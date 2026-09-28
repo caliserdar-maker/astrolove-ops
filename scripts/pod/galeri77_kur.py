@@ -396,7 +396,13 @@ def main():
     A, B = satir['a'], satir['b']
     ayni = A == B
     GAR = os.path.join(FD, 'EBGaramond[wght].ttf'); MON = os.path.join(FD, 'Montserrat[wght].ttf')
-    bas = {r: Image.open(os.path.join(KAY, f'BASKI_{r}.jpg')).convert('RGB') for r in RENKLER}
+    # WP kisisellestirilmis baskisi henuz yoksa (WP plate'leri yeniden uretiliyor, Serdar 28 Eyl) 05 kurulmaz;
+    # diger 17 gorsel hazir durur, WP gelince tam kosu 05 ve 19'u tamamlar. Isimsiz WP KULLANILMAZ.
+    bas = {r: Image.open(os.path.join(KAY, f'BASKI_{r}.jpg')).convert('RGB') for r in RENKLER
+           if os.path.exists(os.path.join(KAY, f'BASKI_{r}.jpg'))}
+    if set(RENKLER) - set(bas) - {'WARM_PARCHMENT'}:
+        raise SystemExit(f'DUR: baski eksik {sorted(set(RENKLER) - set(bas))}')
+    wp_var = 'WARM_PARCHMENT' in bas
     cl_mb = Image.open(CL_MB).convert('RGB')
     bilgi = dict(cift=CIFT, a=A, b=B, ayni_burc=ayni, poster={})
     V, n_v = sanal_kapak(bas['MIDNIGHT_BLUE'], cl_mb)
@@ -413,10 +419,12 @@ def main():
     im = k('04_kisisellestirme'); ust_etiket(im, FD, A, B); loglar['04'], _ = kart04(im, V, FD, A, B, ayni)
     bilgi['poster']['04_kisisellestirme'] = [(145, 830, 1280, 583)]; kay('04_kisisellestirme', im)
     # 05: CL akisindaki satir duzeltmesi (kart05_satir) once, sonra cift
-    subprocess.run([sys.executable, os.path.join(HERE, 'kart05_satir.py'), os.path.join(KREM_CL, '05_renk_ve_dijital.jpg'),
-                    MON, os.path.join(OUT, '_k05.png')], check=True, stdout=subprocess.DEVNULL)
-    im = Image.open(os.path.join(OUT, '_k05.png')).convert('RGB'); ust_etiket(im, FD, A, B)
-    bilgi['poster']['05_renk_ve_dijital'] = list(kart05(im, bas).values()); kay('05_renk_ve_dijital', im)
+    if wp_var:
+        subprocess.run([sys.executable, os.path.join(HERE, 'kart05_satir.py'), os.path.join(KREM_CL, '05_renk_ve_dijital.jpg'),
+                        MON, os.path.join(OUT, '_k05.png')], check=True, stdout=subprocess.DEVNULL)
+        im = Image.open(os.path.join(OUT, '_k05.png')).convert('RGB'); ust_etiket(im, FD, A, B)
+        bilgi['poster']['05_renk_ve_dijital'] = list(kart05(im, bas).values()); kay('05_renk_ve_dijital', im)
+    bilgi['wp_var'] = wp_var
     # sahne kartlari: ESKI = CL krem kart + ciftin ust etiketi (kart_cila_kur ust etiketi ESKI'den alir)
     for kart, ad, renk in (('06', '06_hediye_sahne', 'MIDNIGHT_BLUE'), ('09', '09_yatak_sahne', 'CHAMPAGNE_IVORY'),
                            ('10', '10_calisma_sahne', 'DEEP_BLACK'), ('11', '11_yemek_sahne', 'PURE_WHITE')):

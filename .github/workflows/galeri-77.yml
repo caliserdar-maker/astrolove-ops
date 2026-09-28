@@ -8,6 +8,9 @@ name: galeri-77
 # mod kaynak: yalniz kaynak; mod tam: kaynak + 19 kart (galeri77_kur.py) + QC + Drive TEMP/GALERI_77/<CIFT>/ + HAZIR.csv
 # Cikti: TEMP/GALERI_77/<CIFT>/ (19 jpg + ALT_METIN.csv + SET.json), _QC/<CIFT>/ (QC.txt, TEMAS), _HAZIR/<CIFT>.csv ->
 #   her biten cift sonrasi TEMP/GALERI_77/HAZIR.csv yeniden yazilir (etsy oturumu buradan yukler). QC FAIL cift atlanir.
+# WP (Warm Parchment) EMILY/JAMES baskisi hattan KAPI gecmezse: isimsiz WP KULLANILMAZ (Serdar 28 Eyl); 05 ve 19 haric
+#   17 gorsel QC'lenip <CIFT>/ klasorune yazilir, _WPBEKLE/<CIFT>.txt, HAZIR satiri yok. WP plate'leri yenilenince ayni
+#   'tam' kosusu WP'yi uretir, 19 gorseli tamamlar, HAZIR satirini yazar. PW kaynagi degismez, PW yeniden uretilmez.
 # Es zamanli en fazla 4 is (max-parallel 4).
 
 permissions:
@@ -20,7 +23,7 @@ on:
         description: "virgullu cift listesi ya da HEPSI74"
         required: true
       mod:
-        description: "kaynak | tam | ornek (WP yoksa POD_PRINT WP denetimsiz, cikti _ORNEK/, HAZIR yok)"
+        description: "kaynak | tam"
         required: true
         default: tam
       yeniden:
@@ -84,7 +87,7 @@ jobs:
           PARCA: ${{ matrix.parca }}
         run: |
           set +e -uo pipefail
-          case "$MOD" in kaynak|tam|ornek) : ;; *) echo "HATA: mod kaynak|tam|ornek"; exit 1 ;; esac
+          case "$MOD" in kaynak|tam) : ;; *) echo "HATA: mod kaynak|tam"; exit 1 ;; esac
           case "$CIFTLER" in *[!A-Z_0-9,]*) echo "HATA: ciftler A-Z_ ve virgul"; exit 1 ;; esac
           if [ "$CIFTLER" = "HEPSI74" ]; then
             CIFTLER=$(tail -n +2 data/pod/pod78_ids.csv | cut -d, -f2 | grep -v -x -E 'CANCER_LIBRA|ARIES_LIBRA|AQUARIUS_LIBRA|CAPRICORN_LIBRA' | paste -sd,)
@@ -96,7 +99,7 @@ jobs:
           KDAMGA=$(rclone lsf --dirs-only gdrive:ASTROLOVE/TEMP/POD_KAPAK_78/ | tr -d '/' | grep -E '^[0-9]{8}_[0-9]{4}$' | sort | tail -1)
           echo "kapak klasoru: POD_KAPAK_78/$KDAMGA | parca $PARCA: ${#BEN[@]} cift"
           MB64=$(printf '%s' 'It Began With a Kiss in the Rain' | base64 -w0)
-          N=${#BEN[@]}; n=0; t0=$(date +%s); FAIL=(); TAMAM=0
+          N=${#BEN[@]}; n=0; t0=$(date +%s); FAIL=(); TAMAM=0; BEKLE=0
           mkdir -p _work/kaynak/CANCER_LIBRA
           rclone copyto "$G/_KAYNAK/CANCER_LIBRA/BASKI_MIDNIGHT_BLUE.jpg" _work/kaynak/CANCER_LIBRA/BASKI_MIDNIGHT_BLUE.jpg -q \
             || rclone copyto "gdrive:ASTROLOVE/TEMP/POD_KAPAK_V3/SIPARIS/CANCER_LIBRA_MIDNIGHT_BLUE_11x14/BASKI_11x14.jpg" _work/kaynak/CANCER_LIBRA/BASKI_MIDNIGHT_BLUE.jpg -q
@@ -114,13 +117,10 @@ jobs:
               rclone copyto "gdrive:ASTROLOVE/TEMP/POD_KAPAK_V3/SIPARIS/${C}_MIDNIGHT_BLUE_11x14/BASKI_11x14.jpg" $Y/BASKI_MIDNIGHT_BLUE.jpg -q || hata="$hata MB baski yok"
               rclone copyto "gdrive:ASTROLOVE/TEMP/POD_KAPAK_V3/SIPARIS/${C}_MIDNIGHT_BLUE_11x14/KAPI_RAPORU.json" $Y/KAPI_MIDNIGHT_BLUE.json -q 2>/dev/null
             fi
-            # PW kaynagi (POD_PRINT) degistiyse (pw-kucuk-yeniden yazimi) onbellekteki PW baskisi yeniden uretilir
-            PWS=$(rclone lsjson "gdrive:ASTROLOVE/TEMP/POD_PRINT/$C/PURE_WHITE/11x14.jpg" 2>/dev/null | python3 -c "import json,sys;l=json.load(sys.stdin);print(l[0]['ModTime'] if l else '')" 2>/dev/null)
-            PWE=$([ -f $Y/PW_KAYNAK.json ] && python3 -c "import json;l=json.load(open('$Y/PW_KAYNAK.json'));print(l[0]['ModTime'] if l else '')" 2>/dev/null)
-            if [ -n "$PWS" ] && [ "$PWS" != "$PWE" ]; then
-              [ -f $Y/BASKI_PURE_WHITE.jpg ] && echo "$C: PW kaynagi degisti ($PWE -> $PWS), PW baskisi yeniden"
-              rm -f $Y/BASKI_PURE_WHITE.jpg $Y/KAPI_PURE_WHITE.json; rclone deletefile "$G/_KAYNAK/$C/BASKI_PURE_WHITE.jpg" -q 2>/dev/null
-              rclone lsjson "gdrive:ASTROLOVE/TEMP/POD_PRINT/$C/PURE_WHITE/11x14.jpg" > $Y/PW_KAYNAK.json 2>/dev/null
+            # isimsiz WP KULLANILMAZ (Serdar 28 Eyl): eski onbellekte POD_PRINT WP yedegi kaldiysa silinir
+            if [ -f $Y/WP_YEDEK.txt ]; then
+              rm -f $Y/WP_YEDEK.txt $Y/BASKI_WARM_PARCHMENT.jpg
+              rclone deletefile "$G/_KAYNAK/$C/WP_YEDEK.txt" -q 2>/dev/null; rclone deletefile "$G/_KAYNAK/$C/BASKI_WARM_PARCHMENT.jpg" -q 2>/dev/null
             fi
             for R in DEEP_BLACK PURE_WHITE CHAMPAGNE_IVORY WARM_PARCHMENT; do
               [ -f $Y/BASKI_$R.jpg ] && continue
@@ -129,43 +129,37 @@ jobs:
               D="_sb/_siparis/${C}_${R}_11x14"
               if [ -f "$D/KAPI_RAPORU.json" ] && python3 scripts/pod/galeri77_kapi.py "$D/KAPI_RAPORU.json" && [ -f "$D/BASKI_11x14.jpg" ]; then
                 cp "$D/BASKI_11x14.jpg" $Y/BASKI_$R.jpg; cp "$D/KAPI_RAPORU.json" $Y/KAPI_$R.json
-              elif [ "$R" = "WARM_PARCHMENT" ]; then
-                # WP hat yolu SISTEM HATASI (sembol_sol): yedek = onayli POD_PRINT WP kaynagi, isim+mesaj bandi EJ ise
-                rclone copyto "gdrive:ASTROLOVE/TEMP/POD_PRINT/$C/WARM_PARCHMENT/11x14.jpg" _work/wp_$C.jpg -q \
-                  && python3 scripts/pod/galeri77_wp.py _work/wp_$C.jpg $Y/BASKI_MIDNIGHT_BLUE.jpg | tee $Y/WP_YEDEK.txt \
-                  && [ "${PIPESTATUS[0]}" = "0" ] && cp _work/wp_$C.jpg $Y/BASKI_$R.jpg \
-                  || { hata="$hata WP baski+yedek FAIL"; grep -h -E "_11x14 \{'urun'" "_work/log_${C}_$R.txt" | cut -c1-400; }
-              else
+              elif [ "$R" != "WARM_PARCHMENT" ]; then
                 hata="$hata $R baski FAIL"; grep -h -E "_11x14 \{'urun'" "_work/log_${C}_$R.txt" | cut -c1-600; tail -3 "_work/log_${C}_$R.txt"
               fi
             done
+            [ -f $Y/PW_KAYNAK.json ] || rclone lsjson "gdrive:ASTROLOVE/TEMP/POD_PRINT/$C/PURE_WHITE/11x14.jpg" > $Y/PW_KAYNAK.json 2>/dev/null
             rclone copy $Y "$G/_KAYNAK/$C" -q
-            if [ "$MOD" = "ornek" ] && [ ! -f $Y/BASKI_WARM_PARCHMENT.jpg ]; then
-              # yalniz bilgi ornegi: WP kisisellestirilmis baski yok -> onayli POD_PRINT WP (isim denetimi YOK), _ORNEK'e
-              rclone copyto "gdrive:ASTROLOVE/TEMP/POD_PRINT/$C/WARM_PARCHMENT/11x14.jpg" $Y/BASKI_WARM_PARCHMENT.jpg -q
-              hata=$(echo "$hata" | sed 's/ WP baski+yedek FAIL//'); echo "$C: ORNEK, WP = POD_PRINT kaynagi (kisisellestirilmemis)"
-            fi
-            if [ -z "$hata" ] && [ "$MOD" = "ornek" ]; then
-              O=_work/out/$C
-              bash scripts/pod/galeri77_cift.sh "$C" $Y $O > _work/cift_$C.txt 2>&1; echo "ornek QC: $(tail -1 _work/cift_$C.txt)"
-              grep -h "FAIL" $O/QC.txt 2>/dev/null | cut -c1-300 | head -8
-              rclone sync $O/paket "$G/_ORNEK/$C" -q; rclone copy $O/QC.txt "$G/_ORNEK/$C/_qc" -q
-              rclone copyto $O/TEMAS_$C.jpg "$G/_ORNEK/TEMAS_$C.jpg" -q
-              echo "ORNEK temas: TEMP/GALERI_77/_ORNEK/TEMAS_$C.jpg | $(rclone link "$G/_ORNEK/TEMAS_$C.jpg" 2>/dev/null)"
+            WPV=0; [ -f $Y/BASKI_WARM_PARCHMENT.jpg ] && WPV=1
+            if [ -z "$hata" ] && [ "$MOD" = "tam" ] && [ $WPV = 0 ] && [ "$YENIDEN" != "evet" ] \
+               && [ -n "$(rclone lsf "$G/_WPBEKLE/$C.txt" 2>/dev/null)" ]; then
+              echo "[$n/$N] $C: 17 gorsel hazir, WP baskisi hala yok (bekliyor)"; BEKLE=$((BEKLE+1)); continue
             fi
             if [ -z "$hata" ] && [ "$MOD" = "tam" ]; then
               O=_work/out/$C
               if bash scripts/pod/galeri77_cift.sh "$C" $Y $O > _work/cift_$C.txt 2>&1; then
                 rclone sync $O/paket "$G/$C" -q
                 rclone copy $O/QC.txt "$G/_QC/$C" -q; rclone copy $O/TEMAS_$C.jpg "$G/_QC/$C" -q; rclone copy $O/KUR.txt "$G/_QC/$C" -q
-                LID=$(awk -F, -v c="$C" '$2==c{print $1}' data/pod/pod78_ids.csv)
-                WPK=hat; [ -f $Y/WP_YEDEK.txt ] && WPK=pod_print_yedek
-                PWT=$(python3 -c "import json;l=json.load(open('$Y/PW_KAYNAK.json'));print(l[0]['ModTime'][:19] if l else '')" 2>/dev/null)
                 ADET=$(rclone lsf "$G/$C" --include "*.jpg" | wc -l)
-                [ "$ADET" = 19 ] || hata="Drive'da $ADET gorsel"
-                if [ -z "$hata" ]; then
-                  printf '%s,%s,TEMP/GALERI_77/%s/,19,PASS,%s,%s,%s\n' "$C" "$LID" "$C" "$(date -u +%Y%m%d_%H%M)" "$WPK" "$PWT" | rclone rcat "$G/_HAZIR/$C.csv"
-                  bash scripts/pod/galeri77_hazir.sh; TAMAM=$((TAMAM+1))
+                if [ $WPV = 0 ]; then
+                  # WP bekliyor: 17 gorsel Drive'da, HAZIR satiri YOK (etsy yuklemez)
+                  [ "$ADET" = 17 ] || hata="Drive'da $ADET gorsel (17 bekleniyor)"
+                  [ -z "$hata" ] && echo "17 gorsel QC PASS $(date -u +%Y%m%d_%H%M)" | rclone rcat "$G/_WPBEKLE/$C.txt" && BEKLE=$((BEKLE+1))
+                  rclone deletefile "$G/_HAZIR/$C.csv" -q 2>/dev/null
+                else
+                  LID=$(awk -F, -v c="$C" '$2==c{print $1}' data/pod/pod78_ids.csv)
+                  PWT=$(python3 -c "import json;l=json.load(open('$Y/PW_KAYNAK.json'));print(l[0]['ModTime'][:19] if l else '')" 2>/dev/null)
+                  [ "$ADET" = 19 ] || hata="Drive'da $ADET gorsel"
+                  if [ -z "$hata" ]; then
+                    printf '%s,%s,TEMP/GALERI_77/%s/,19,PASS,%s,hat,%s\n' "$C" "$LID" "$C" "$(date -u +%Y%m%d_%H%M)" "$PWT" | rclone rcat "$G/_HAZIR/$C.csv"
+                    rclone deletefile "$G/_WPBEKLE/$C.txt" -q 2>/dev/null
+                    bash scripts/pod/galeri77_hazir.sh; TAMAM=$((TAMAM+1))
+                  fi
                 fi
               else
                 hata="galeri QC FAIL"; tail -4 _work/cift_$C.txt; grep -h "FAIL" $O/QC.txt 2>/dev/null | cut -c1-300 | head -8
@@ -177,7 +171,7 @@ jobs:
             g=$(( $(date +%s) - t0 ))
             echo "[$n/$N] $C ${hata:-OK} | gecen ${g}s | kalan ~$(( g * (N - n) / n ))s | %$(( n * 100 / N ))"
           done
-          echo "== parca $PARCA: hazir $TAMAM | FAIL ${#FAIL[@]}"; printf '%s\n' "${FAIL[@]}"
+          echo "== parca $PARCA: hazir(19) $TAMAM | WP bekleyen(17 hazir) $BEKLE | FAIL ${#FAIL[@]}"; printf '%s\n' "${FAIL[@]}"
           exit 0
       - if: always()
         run: rm -rf ~/.config/rclone

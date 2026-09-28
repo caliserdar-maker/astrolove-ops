@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """77 cift galerisi: cifte ozgu QC (sembol, kapak, eski metin, dosya seti). duvar_qc.py (zemin/poster/kontrast/tire)
 ve metin_qc.py (yazim/tire/yasak ifade) ile birlikte kosar. Her satir PASS/FAIL; cikis 0 = hepsi PASS.
-  dosya    : 19 gorsel, adlar CL kesin paketiyle birebir, hepsi 3000x2250
+  dosya    : 19 gorsel (WP baskisi yoksa 05 ve 19 haric 17), adlar CL kesin paketiyle birebir, hepsi 3000x2250
   kapak    : 01 kapaktaki poster ciftin MB baskisi (cok olcekli sablon NCC >= 0.80; CL disi ciftte CL MB'den
              en az 0.02 yuksek -> baska ciftin kapagi degil)
   sembol   : 5 renk baskinin sembol + kucuk sembol bolgesi murekkep maskesi ciftin MB'sine CL MB'den daha yakin
@@ -42,7 +42,9 @@ def ncc(a, b):
 
 
 # --- dosya seti
-beklenen = sorted(os.listdir(os.path.join(ROOT, 'data/pod/cl_galeri_final19')))
+WP_VAR = os.path.exists(os.path.join(KAY, 'BASKI_WARM_PARCHMENT.jpg'))
+beklenen = sorted(f for f in os.listdir(os.path.join(ROOT, 'data/pod/cl_galeri_final19'))
+                  if WP_VAR or f not in ('05_renk_ve_dijital.jpg', '19_renk_warm_parchment.jpg'))
 var = sorted(f for f in os.listdir(P) if f.endswith('.jpg'))
 boy = {f: Image.open(os.path.join(P, f)).size for f in var}
 sonuc('dosya', var == beklenen and all(v == (3000, 2250) for v in boy.values()),
@@ -79,6 +81,8 @@ BOLGE = (slice(140, 990), slice(150, 950))                          # halka + bi
 mb = maske(os.path.join(KAY, 'BASKI_MIDNIGHT_BLUE.jpg'))[BOLGE]
 clm = maske(CL_MB)[BOLGE]
 for r in G.RENKLER[1:]:
+    if not os.path.exists(os.path.join(KAY, f'BASKI_{r}.jpg')):
+        print(f'sembol {r}: baski yok (WP bekliyor) | ATLANDI'); continue
     m = maske(os.path.join(KAY, f'BASKI_{r}.jpg'))[BOLGE]
     n_p, n_c = ncc(m, mb), ncc(m, clm)
     sonuc(f'sembol {r}', n_p >= 0.60 and (CL or n_p - n_c >= 0.05), f'cift MB NCC {n_p:.3f} | CL MB NCC {n_c:.3f}')
@@ -104,7 +108,7 @@ def render(t, f, x, taban, boyut):
 
 ref_yeni = murekkep(render(yeni_e, fe, G.ETIKET['x'], G.ETIKET['taban'], (3000, 300)), kutu_e)
 kotu = []
-for k in ['03_konsept', '04_kisisellestirme', '05_renk_ve_dijital', '06_hediye_sahne', '07_cerceveler', '08_boylar',
+for k in ['03_konsept', '04_kisisellestirme'] + (['05_renk_ve_dijital'] if WP_VAR else []) + ['06_hediye_sahne', '07_cerceveler', '08_boylar',
           '09_yatak_sahne', '10_calisma_sahne', '11_yemek_sahne', '12_zoom', '13_kagit', '14_surec']:
     im = Image.open(os.path.join(KR, k + '.jpg'))
     n_y = ncc(murekkep(im, kutu_e), ref_yeni)
