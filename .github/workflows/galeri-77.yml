@@ -26,6 +26,10 @@ on:
         description: "kaynak | tam"
         required: true
         default: tam
+      wp_dal:
+        description: "WP baskisi icin siparis_dosyasi dali (bos = siparis-baski-v1); WP bu dalda TUM kapilardan (olcek dahil) gecmeli"
+        required: false
+        default: ""
       yeniden:
         description: "evet: Drive'da hazir (HAZIR satiri olan) ciftleri de yeniden uret"
         required: false
@@ -51,6 +55,12 @@ jobs:
         with:
           ref: siparis-baski-v1
           path: _sb
+      - name: Checkout (WP dali)
+        if: ${{ inputs.wp_dal != '' }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.wp_dal }}
+          path: _sbwp
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -84,6 +94,7 @@ jobs:
           CIFTLER: ${{ inputs.ciftler }}
           MOD: ${{ inputs.mod }}
           YENIDEN: ${{ inputs.yeniden }}
+          WP_DAL: ${{ inputs.wp_dal }}
           PARCA: ${{ matrix.parca }}
         run: |
           set +e -uo pipefail
@@ -133,12 +144,15 @@ jobs:
             fi
             for R in DEEP_BLACK PURE_WHITE CHAMPAGNE_IVORY WARM_PARCHMENT; do
               [ -f $Y/BASKI_$R.jpg ] && continue
-              (cd _sb && ../_sbenv/bin/python scripts/medya_v1/siparis_dosyasi.py --cift "$C" --renk "$R" --boy 11x14 --urun pod \
+              SB=_sb; KT=""
+              if [ "$R" = "WARM_PARCHMENT" ] && [ -n "$WP_DAL" ]; then SB=_sbwp; KT="--tam"; fi   # WP: baski-duzelt dali, tum kapilar
+              (cd $SB && ../_sbenv/bin/python scripts/medya_v1/siparis_dosyasi.py --cift "$C" --renk "$R" --boy 11x14 --urun pod \
                 --isim1 EMILY --isim2 JAMES --mesaj-b64 "$MB64" --sip-kok "$G/_KAYNAK/SIPARIS" > "../_work/log_${C}_$R.txt" 2>&1)
-              D="_sb/_siparis/${C}_${R}_11x14"
-              if [ -f "$D/KAPI_RAPORU.json" ] && python3 scripts/pod/galeri77_kapi.py "$D/KAPI_RAPORU.json" && [ -f "$D/BASKI_11x14.jpg" ]; then
+              D="$SB/_siparis/${C}_${R}_11x14"
+              [ -f "$D/KAPI_RAPORU.json" ] || { echo "$C $R: KAPI_RAPORU yok"; tail -4 "_work/log_${C}_$R.txt"; }
+              if [ -f "$D/KAPI_RAPORU.json" ] && python3 scripts/pod/galeri77_kapi.py "$D/KAPI_RAPORU.json" $KT && [ -f "$D/BASKI_11x14.jpg" ]; then
                 cp "$D/BASKI_11x14.jpg" $Y/BASKI_$R.jpg; cp "$D/KAPI_RAPORU.json" $Y/KAPI_$R.json
-                [ "$R" = "WARM_PARCHMENT" ] && printf '%s' "$PLATE_T" > $Y/WP_PLATE.txt
+                [ "$R" = "WARM_PARCHMENT" ] && printf '%s' "$PLATE_T" > $Y/WP_PLATE.txt && printf '%s' "${WP_DAL:-siparis-baski-v1}@$(git -C $SB rev-parse --short HEAD)" > $Y/WP_KOD.txt
               elif [ "$R" != "WARM_PARCHMENT" ]; then
                 hata="$hata $R baski FAIL"; grep -h -E "_11x14 \{'urun'" "_work/log_${C}_$R.txt" | cut -c1-600; tail -3 "_work/log_${C}_$R.txt"
               fi
@@ -166,7 +180,8 @@ jobs:
                   PWT=$(python3 -c "import json;l=json.load(open('$Y/PW_KAYNAK.json'));print(l[0]['ModTime'][:19] if l else '')" 2>/dev/null)
                   [ "$ADET" = 19 ] || hata="Drive'da $ADET gorsel"
                   if [ -z "$hata" ]; then
-                    printf '%s,%s,TEMP/GALERI_77/%s/,19,PASS,%s,hat,%s\n' "$C" "$LID" "$C" "$(date -u +%Y%m%d_%H%M)" "$PWT" | rclone rcat "$G/_HAZIR/$C.csv"
+                    WPK=$(cat $Y/WP_KOD.txt 2>/dev/null || echo hat)
+                    printf '%s,%s,TEMP/GALERI_77/%s/,19,PASS,%s,%s,%s\n' "$C" "$LID" "$C" "$(date -u +%Y%m%d_%H%M)" "$WPK" "$PWT" | rclone rcat "$G/_HAZIR/$C.csv"
                     rclone deletefile "$G/_WPBEKLE/$C.txt" -q 2>/dev/null
                     bash scripts/pod/galeri77_hazir.sh; TAMAM=$((TAMAM+1))
                   fi

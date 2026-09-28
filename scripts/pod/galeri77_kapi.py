@@ -3,7 +3,8 @@
 Kabul: durum URETILDI ve 'olcek' disindaki tum kapilar gecti (None = uygulanmadi). 'olcek' kapisi isim satirinin
 2400 onayli render'a <= 1-2 px (3307 px baskida) konum/kenar uyumudur; galeri gorselinde (poster <= 1379 px) gorunmez.
 Sembol, kalinti, leke, temiz ara zemin, mesaj murekkebi kapilari MUTLAKA gecmeli.
-Kullanim: galeri77_kapi.py KAPI_RAPORU.json  -> tek satir, cikis 0 = kabul
+--tam: hicbir kapi tolere edilmez (olcek dahil; WP baski-duzelt dal kodu icin, Serdar 28 Eyl).
+Kullanim: galeri77_kapi.py KAPI_RAPORU.json [--tam]  -> tek satir, cikis 0 = kabul
 """
 import json
 import sys
@@ -11,7 +12,8 @@ import sys
 r = json.load(open(sys.argv[1]))
 k = r.get('kapilar') or {}
 kalan = [a for a, v in k.items() if v is False]
-ok = r.get('durum') == 'URETILDI' and bool(k) and set(kalan) <= {'olcek'}
+tol = set() if '--tam' in sys.argv else {'olcek'}
+ok = r.get('durum') == 'URETILDI' and bool(k) and set(kalan) <= tol
 print(f"{r.get('receipt')}: durum {r.get('durum')} | kalan kapi {kalan or '-'} | {'KABUL' if ok else 'RED'}"
       + (f" | hata {r.get('hata')}" if r.get('hata') else ''))
 sys.exit(0 if ok else 1)
