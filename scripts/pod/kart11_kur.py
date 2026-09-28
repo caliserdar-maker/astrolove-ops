@@ -4,7 +4,7 @@ ChatGPT taslagi yalniz METIN kaynagi: Lato yazi, eski tip rakam (oɪ), DNA disi 
 Yazi stili canli kart 03 listesinden olculdu: rakam Garamond duz (lnum) altin, yukseklik 58 px, x 174;
 baslik Garamond 78 wght 450, x 342; govde Montserrat 45 wght 500, basliktan 97 px asagi.
 2x2 izgara (ince cizgili), icerik dikeyde dengeli. Ust etiket canli 03'ten, alt cizgi+satir kart 03 v2'den.
-Metin (aciklama v3 ile ayni): 24 saatte onizleme; onay/24 saat kurali; 7 is gunu (28 Eyl: hazirlik 4-7 is gunu); paketleme (Prodigi: boya gore duz ya da rulo, 28 Eyl); ABD takipli.
+Metin (aciklama v3 ile ayni): 24 saatte onizleme; onay/24 saat kurali; 7 is gunu (28 Eyl: hazirlik 4-7 is gunu); paketleme (boya gore duz ya da rulo; son satirda tek kelime kalmaz, 28 Eyl); ABD takipli.
 QC: boyut, zemin, tire yok, satir tasmasi/cakisma yok.
 Kullanim: kart11_kur.py CANLI_03.jpg KART03_V2.jpg GARAMOND.ttf MONTSERRAT.ttf CIKIS.jpg
 """
@@ -31,7 +31,7 @@ LN = ['lnum']
 FNUM = font(GAR, min(range(60, 130), key=lambda s: abs((lambda bb: bb[3] - bb[1])(font(GAR, s, 450).getbbox('01', anchor='ls', features=LN)) - 58)), 450)
 FH = font(GAR, 78, 450); FB = font(MON, 45, 500); SAT = 66
 
-def sar(txt, genislik):
+def _sar(txt, genislik):
     satir, cur = [], ''
     for w in txt.split():
         t = (cur + ' ' + w).strip()
@@ -41,10 +41,24 @@ def sar(txt, genislik):
             satir.append(cur); cur = w
     return satir + [cur]
 
+
+def sar(txt, genislik):
+    """Satir kirma; son satirda tek kelime kalirsa (Serdar 28 Eyl) satir sayisi korunarak genislik daraltilip
+    kirilim dengelenir (metin degismez)."""
+    s = _sar(txt, genislik)
+    g = genislik
+    while len(s) > 1 and len(s[-1].split()) < 2 and g > genislik * 0.6:
+        g -= 10
+        t = _sar(txt, g)
+        if len(t) != len(s):
+            break
+        s = t
+    return s
+
 HUC = [('01', 'Your preview', 'We send a preview via Etsy Messages within 24 hours of your order.'),
        ('02', 'Your approval', 'We print as soon as you approve. No reply in 24 hours? We print as shown.'),
        ('03', 'Made to order', 'Printed and shipped within 7 business days after approval.'),
-       ('04', 'Delivered with care', 'Prints are carefully packed flat or rolled, depending on size. Framed prints come boxed with corner guards. US orders ship tracked.')]
+       ('04', 'Delivered with care', 'Prints are packed flat or rolled, depending on size. Framed prints come boxed with corner guards. US orders are tracked.')]
 CX = [145, 1600]; CW = 1255; RY = [650, 1230]
 kutular = []
 for i, (n, t, s) in enumerate(HUC):
