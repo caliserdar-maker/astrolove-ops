@@ -10,7 +10,7 @@ name: galeri-77
 # Es zamanli en fazla 4 is (max-parallel 4).
 
 permissions:
-  contents: write
+  contents: read
 
 on:
   workflow_dispatch:
@@ -157,10 +157,9 @@ jobs:
             case "$CIFTLER" in *[!A-Z_0-9,]*) exit 1 ;; esac
             mkdir -p _veri; IFS=, read -ra HEP <<< "$CIFTLER"
             for C in "${HEP[@]}"; do rclone copy "$G/_KAYNAK/$C" "_veri/$C" --exclude "SIPARIS/**" -q; done
-            cd _veri; git init -q; git checkout -q -b galeri77-veri
-            git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add -A; git commit -q -m "galeri77 yerel gelistirme verisi: $CIFTLER"
-            git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" HEAD:galeri77-veri
+            cd _veri   # 28 Eyl (guvenlik, Serdar): public galeri77-veri dalina push YOK; veri Drive'a yazilir
+            rclone copy . "gdrive:ASTROLOVE/TEMP/GALERI_77_VERI" -q
+            echo "Drive: TEMP/GALERI_77_VERI ($(find . -type f | wc -l) dosya: $CIFTLER)"
             ls -R | head -40
           fi
       - if: always()
