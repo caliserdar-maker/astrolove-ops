@@ -1,0 +1,77 @@
+name: kart-cila-ornek
+
+# CL sahne kartlari 06/09/10/11: ChatGPT cilali cerceveli bos sahneler + gercek posterler (salt Drive; Etsy YOK).
+# Girdi: data/pod/gpt_sahne_cila (sahne), data/pod/cl_galeri_final19 (ust etiket + alt serit pikselleri),
+#        Drive TEMP/POD_KAPAK_V3/SIPARIS/CANCER_LIBRA_MIDNIGHT_BLUE_11x14/BASKI_11x14.jpg (MB),
+#        Drive TEMP/CANLI_GORSEL/4570143815/04_8629360573.jpg (canli kart 04: CI, DB, PW)
+# Cikti: Drive ASTROLOVE/TEMP/KART_CILA_ORNEK_<damga>/ (4 JPEG) + KONTROL/ (kayipsiz PNG + QC.txt) + paylasim linki
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  kur:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q numpy==2.1.3 pillow==11.0.0 scipy==1.14.1 opencv-python-headless==4.10.0.84
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          mkdir -p fonts
+          curl -fsSL 'https://raw.githubusercontent.com/google/fonts/main/ofl/ebgaramond/EBGaramond%5Bwght%5D.ttf' -o 'fonts/EBGaramond[wght].ttf'
+          curl -fsSL 'https://raw.githubusercontent.com/google/fonts/main/ofl/montserrat/Montserrat%5Bwght%5D.ttf' -o 'fonts/Montserrat[wght].ttf'
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Kur, QC, Drive'a yaz
+        run: |
+          set -euo pipefail
+          mkdir -p _work/out _work/out/KONTROL
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_KAPAK_V3/SIPARIS/CANCER_LIBRA_MIDNIGHT_BLUE_11x14/BASKI_11x14.jpg" _work/BASKI_11x14.jpg
+          rclone copyto "gdrive:ASTROLOVE/TEMP/CANLI_GORSEL/4570143815/04_8629360573.jpg" _work/CANLI_04.jpg
+          python3 - <<'EOF'
+          from PIL import Image
+          import numpy as np
+          B = Image.open('_work/BASKI_11x14.jpg'); C = Image.open('_work/CANLI_04.jpg').convert('RGB')
+          print('BASKI', B.size, '| CANLI_04', C.size)
+          assert C.width >= 2733 and C.height >= 1960, 'canli 04 boyutu kirpim kutularina uymuyor'
+          for ad, k in [('CI', (2208, 499, 2733, 1152)), ('DB', (1240, 500, 1760, 1150)), ('PW', (755, 1310, 1275, 1960))]:
+              print(ad, 'ort parlaklik', round(float(np.asarray(C.crop(k)).mean()), 1))
+          EOF
+          for k in 06:06_hediye_sahne:SAHNE_HEDIYE:BASKI_11x14 09:09_yatak_sahne:SAHNE_YATAK:CANLI_04 \
+                   10:10_calisma_sahne:SAHNE_CALISMA:CANLI_04 11:11_yemek_sahne:SAHNE_YEMEK:CANLI_04; do
+            IFS=: read -r n ad sh src <<<"$k"
+            python3 scripts/pod/kart_cila_kur.py "$n" "data/pod/gpt_sahne_cila/$sh.png" "_work/$src.jpg" \
+              "data/pod/cl_galeri_final19/$ad.jpg" "fonts/EBGaramond[wght].ttf" "fonts/Montserrat[wght].ttf" \
+              "_work/out/$ad.jpg" "_work/out/KONTROL/$ad.png"
+          done
+          set +e
+          python3 scripts/pod/kart_cila_qc.py _work/out _work/out/KONTROL data/pod/gpt_sahne_cila \
+            _work/BASKI_11x14.jpg _work/CANLI_04.jpg | tee _work/out/KONTROL/QC.txt
+          QC=${PIPESTATUS[0]}
+          set -e
+          DAMGA=$(date -u +%Y%m%d_%H%M)
+          HEDEF="gdrive:ASTROLOVE/TEMP/KART_CILA_ORNEK_${DAMGA}"
+          rclone copy _work/out "$HEDEF" -q
+          echo "Dosyalar:"; rclone lsf -R "$HEDEF"
+          echo "Paylasim linki: $(rclone link "$HEDEF")"
+          exit "$QC"
+      - if: always()
+        run: rm -rf _work ~/.config/rclone
