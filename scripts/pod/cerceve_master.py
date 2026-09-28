@@ -133,3 +133,19 @@ def renk_kilidi(cikti_arr, kutu, F, referans_ort):
     x0, y0, x1, y1 = kutu
     bant = cikti_arr[y0 + 2:y0 + F - 2, (x0 + x1) // 2 - 100:(x0 + x1) // 2 + 100].reshape(-1, 3).mean(0)
     return float(np.abs(bant - np.asarray(referans_ort, np.float32)).max())
+
+
+def cila_blank(kaynak, poster):
+    """Cilali altin cerceve (eski ilan kapaklarindaki; Serdar 28 Eyl karari: kapak+sahne kartlari bu cerceveyle).
+    Kaynak: data/pod/cila_cerceve_kaynak.png = 01_Cover.png crop (129,147)-(950,1200), 1080x1350 kapaktan.
+    Kaynak ic dikdortgeni (o crop icinde): (19,21)-(796,1028). Halka postere gore iki eksende olceklenir
+    (oran farki ~%2, kose acilari bozulmaz); poster ic alana birebir oturur, yeniden cizim yok.
+    Doner: (fr, ix, iy, yuz_ust) - ix,iy poster sol-ust ofseti, yuz_ust ust yuz kalinligi (QC bandi icin)."""
+    ring = Image.open(kaynak).convert('RGB')
+    IC = (19, 21, 796, 1028)
+    icw, ich = IC[2] - IC[0], IC[3] - IC[1]
+    sx, sy = poster.width / icw, poster.height / ich
+    fr = ring.resize((round(ring.width * sx), round(ring.height * sy)), Image.LANCZOS)
+    ix, iy = round(IC[0] * sx), round(IC[1] * sy)
+    fr.paste(poster, (ix, iy))
+    return fr, ix, iy, iy
