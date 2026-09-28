@@ -31,7 +31,7 @@ from etsy_common import Etsy, TokenStore, log, mask  # noqa: E402
 RENK_SIRA = {"Midnight Blue": 15, "Deep Black": 16, "Pure White": 17, "Champagne Ivory": 18, "Warm Parchment": 19}
 IMG_LIMIT = 20
 OKUMA_TEKRAR, OKUMA_BEKLE = 8, 4
-QUOTA_MIN = 400
+QUOTA_MIN = 150  # router rezervi (Serdar 28 Eyl)
 
 
 def kararli(fn, kosul, tekrar=OKUMA_TEKRAR, bekle=OKUMA_BEKLE):

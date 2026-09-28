@@ -35,6 +35,37 @@ def boy_kodu(t):
     return (m.group(1) if m.lastindex == 1 else f"{m.group(1)}x{m.group(2)}") if m else None
 
 
+def kota_bolumu(yol, saat=36):
+    """ETSY_KOTA.csv (saatlik ping) -> markdown: son olcumler, saatlik degisim, 24 saat sonra geri donecek harcama."""
+    import email.utils
+    if not yol or not Path(yol).exists():
+        return []
+    R = []
+    for r in csv.DictReader(open(yol, encoding="utf-8")):
+        try:
+            t = email.utils.parsedate_to_datetime(r["utc"])
+            R.append((t, int(r["x-remaining-today"]), r.get("x-limit-per-day") or ""))
+        except (ValueError, TypeError, KeyError):
+            continue
+    R = R[-saat:]
+    if not R:
+        return []
+    md = ["", f"## Etsy kota (limit {R[-1][2]}/gun, kayan 24 saat; saatlik olcum TEMP/ETSY_KOTA.csv)", "",
+          f"- Son olcum {R[-1][0]:%Y-%m-%d %H:%M} UTC: kalan **{R[-1][1]}**", "",
+          "| saat (UTC) | kalan | degisim | geri donus (+24 s) |", "|---|---|---|---|"]
+    harcama = []
+    for (t0, k0, _), (t1, k1, _) in zip([R[0]] + R[:-1], R):
+        d = k1 - k0
+        donus = (t1.replace(microsecond=0) + __import__("datetime").timedelta(hours=24))
+        md.append(f"| {t1:%m-%d %H:%M} | {k1} | {d:+d} | {f'~{-d} cagri {donus:%m-%d %H:%M}' if d < -20 else ''} |")
+        if d < -20:
+            harcama.append((donus, -d))
+    if harcama:
+        md += ["", "- Beklenen buyuk donusler (net harcamanin 24 saat sonrasi, alt sinir): "
+               + ", ".join(f"{t:%m-%d %H:%M} +{n}" for t, n in sorted(harcama)[:12])]
+    return md
+
+
 def kayitlar(dizin):
     """dizin altindaki tum SONUC.json: {lid: [(ts, kayit)]} (dosya mtime sirasina gore)."""
     K = {}
@@ -98,6 +129,7 @@ def main():
     ap.add_argument("--kapak", default=""); ap.add_argument("--video", default="")
     ap.add_argument("--galeri", action="append", default=[]); ap.add_argument("--onceki", default="")
     ap.add_argument("--envanter", default="")
+    ap.add_argument("--kota", default="")
     ap.add_argument("--out", required=True); ap.add_argument("--ids", default=str(KOK / "data/pod/pod78_ids.csv"))
     a = ap.parse_args()
     from etsy_common import Etsy, TokenStore, mask
@@ -130,7 +162,8 @@ def main():
         t = Path(a.onceki).read_text().split("\n## Guncel durum")[0]
         eski = [x for x in t.splitlines() if x.startswith("- 20")]
     md = ["# YAYIN DURUMU (78 POD) - gunluk ozet", "", *eski, ozet, "", f"## Guncel durum ({gun})", "",
-          "| listing_id | cift | " + " | ".join(ALANLAR) + " |", "|---|---|" + "---|" * len(ALANLAR), *tablo]
+          "| listing_id | cift | " + " | ".join(ALANLAR) + " |", "|---|---|" + "---|" * len(ALANLAR), *tablo,
+          *kota_bolumu(a.kota)]
     Path(a.out).write_text("\n".join(md) + "\n")
     print(ozet, f"| kota {api.remaining} | cagri {api.calls}", flush=True)
 

@@ -62,7 +62,7 @@ CAGRI_ILAN = 14  # apply'da ilan basina tahmini Etsy cagrisi (okuma + yukleme + 
 OKUMA_BEKLE = 3
 SIRA_DENEME, SIRA_BEKLE = 5, 5  # siralar tekillesene kadar en fazla 5 x 5 sn (Serdar 28 Eyl)
 YUKLEME_BEKLE = 5  # yuklemeden sonra rank cagrisina kadar (Serdar 28 Eyl)
-KOTA_TABAN = 400  # altina dusunce yeni ilana baslanmaz (etsy oturumu ayni kotayi kullaniyor)
+KOTA_TABAN = 150  # altina dusunce yeni ilana baslanmaz (router rezervi 150, Serdar 28 Eyl)
 
 
 def simdi():
@@ -564,7 +564,7 @@ def main():
     ap.add_argument("--yedek-drive")
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--confirm", default="")
-    ap.add_argument("--quota-min", type=int, default=60)
+    ap.add_argument("--quota-min", type=int, default=150)
     ap.add_argument("--devam", default="",
                     help="LISTING_ID:YENI_IMAGE_ID:ESKI_IMAGE_ID[,..] yarim kalmis ilan, kesin id ile")
     ap.add_argument("--haric", default="", help="LISTING_ID[,..] bu kosuda dokunulmayacak ilanlar")

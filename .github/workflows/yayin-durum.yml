@@ -53,6 +53,7 @@ jobs:
           rclone copyto "$T/GALERI_YAYIN/ILERLEME.json" _g/galeri77.json 2>/dev/null || true
           rclone copyto "$T/YAYIN_DURUM.md" _work/onceki.md 2>/dev/null || true
           rclone copyto "$T/SIZE_SIRA/ILERLEME.json" _g/envanter.json 2>/dev/null || true
+          rclone copyto "$T/ETSY_KOTA.csv" _g/kota.csv 2>/dev/null || true
           echo "kapak kayit: $(find _k -name SONUC.json | wc -l) | video kayit: $(find _v -name SONUC.json | wc -l) | galeri: $(ls _g | tr '\n' ' ')"
       - name: Durum
         env:
@@ -63,7 +64,7 @@ jobs:
         run: |
           set -euo pipefail
           python scripts/etsy/yayin_durum.py --kapak _k --video _v --galeri _g/cl_rapor.json --galeri _g/galeri77.json \
-            --envanter _g/envanter.json --onceki _work/onceki.md --out _work/YAYIN_DURUM.md
+            --envanter _g/envanter.json --kota _g/kota.csv --onceki _work/onceki.md --out _work/YAYIN_DURUM.md
           rclone copyto _work/YAYIN_DURUM.md "gdrive:ASTROLOVE/TEMP/YAYIN_DURUM.md" -q
           head -40 _work/YAYIN_DURUM.md >> "$GITHUB_STEP_SUMMARY"
       - name: Token geri yaz

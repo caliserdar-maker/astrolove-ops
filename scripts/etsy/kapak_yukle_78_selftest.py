@@ -319,14 +319,14 @@ def main():
     kont["rapor: PASS 3, YARIM 0, 2. turda 1"] = "PASS 3" in (TMP / "o51" / "report.md").read_text() and \
         "YARIM 0" in (TMP / "o51" / "report.md").read_text() and "2. turda 1" in (TMP / "o51" / "report.md").read_text()
 
-    # 10c) kota tabani: kalan < 400 -> yeni ilana baslanmaz, yazma yok
+    # 10c) kota tabani: kalan < KOTA_TABAN (150, router rezervi) -> yeni ilana baslanmaz, yazma yok
     f = Fake(); o52 = TMP / "o52"
     K.kuru(args(ids, kd, o52), f, "S", o52, satirlar, kapak, sorun, fazla)
-    f.remaining = "350"
+    f.remaining = str(K.KOTA_TABAN - 10)
     ok = K.apply(args(ids, kd, TMP / "o53", plan=str(o52 / "PLAN.json"), yedek_drive=str(TMP / "yd53"), apply=True,
                       confirm=K.ONAY), f, "S", TMP / "o53", kapak)
-    kont["kota < 400: yeni ilana baslanmadi, yazma yok"] = (not ok) and f.yaz == [] and \
-        "KOTA < 400 DURDU" in (TMP / "o53" / "report.md").read_text()
+    kont[f"kota < {K.KOTA_TABAN}: yeni ilana baslanmadi, yazma yok"] = (not ok) and f.yaz == [] and \
+        f"KOTA < {K.KOTA_TABAN} DURDU" in (TMP / "o53" / "report.md").read_text()
 
     # 11) 4570125580 benzeri yarim durum: yeni gorsel rank 1 cift + alt BOS -> --devam kesin id ile tamamlanir
     f = Fake(); f.L["111"]["vimg"][0]["image_id"] = 11101; o24 = TMP / "o24"

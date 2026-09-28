@@ -29,7 +29,7 @@ import metin_78_uret as M  # noqa: E402
 
 CL_ID = K.CL_ID
 RENK_PID = 200
-KOTA_TABAN = 400
+KOTA_TABAN = 150  # router rezervi (Serdar 28 Eyl)
 BEKLE, TEKRAR = 5, 4
 
 

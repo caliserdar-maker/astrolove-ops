@@ -288,7 +288,7 @@ def main():
     ap.add_argument("--video-dir", required=True)
     ap.add_argument("--kaynak-bilgi", help="JSON: klasor, ozet")
     ap.add_argument("--out", required=True)
-    ap.add_argument("--quota-min", type=int, default=60)
+    ap.add_argument("--quota-min", type=int, default=150)  # router rezervi (Serdar 28 Eyl)
     ap.add_argument("--haric", default="", help="virgullu cift listesi (plana alinmaz / apply'da dokunulmaz)")
     ap.add_argument("--plan", help="apply: kuru kosunun PLAN.json'u")
     ap.add_argument("--yedek-liste", help="apply: Drive VIDEO78_YEDEK_<plan> dosya adlari (satir basi bir)")
