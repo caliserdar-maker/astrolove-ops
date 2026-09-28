@@ -6,9 +6,11 @@ name: kart-cila-ornek
 #        Drive TEMP/CANLI_GORSEL/4570143815/05_8581517848.jpg (canli palet karti 'Five palettes'; kart14/15/16'daki canli 04: CI, DB, PW)
 # Cikti: Drive ASTROLOVE/TEMP/KART_CILA_ORNEK_<damga>/ (kurulan JPEG'ler) + KONTROL/ (kayipsiz PNG + QC.txt) + link
 # kartlar: kurulup yuklenecekler. onayli: onayli_klasor'den indirilip v2 geometrisiyle yalniz QC'lenir (yuklenmez).
+# pakete_yaz=evet: QC PASS ise 06/09/10/11 (onayli ya da yeni) data/pod/cl_galeri_final19'a yazilir ve main'e
+# commit edilir; diger 15 dosyaya dokunulmaz (Serdar 28 Eyl onayi).
 
 permissions:
-  contents: read
+  contents: write   # yalniz pakete_yaz=evet iken data/pod/cl_galeri_final19'a 4 sahne karti commit edilir
 
 on:
   workflow_dispatch:
@@ -22,6 +24,9 @@ on:
       onayli_klasor:
         description: "Onayli kartlarin Drive klasoru (TEMP altinda)"
         default: "KART_CILA_ORNEK_20260928_1038"
+      pakete_yaz:
+        description: "evet: QC PASS ise 4 sahne kartini cl_galeri_final19'a commit et"
+        default: "hayir"
 
 jobs:
   kur:
@@ -29,6 +34,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -56,6 +63,7 @@ jobs:
           KARTLAR: ${{ inputs.kartlar }}
           ONAYLI: ${{ inputs.onayli }}
           ONAYLI_KLASOR: ${{ inputs.onayli_klasor }}
+          PAKETE_YAZ: ${{ inputs.pakete_yaz }}
         run: |
           set -euo pipefail
           mkdir -p _work/out/KONTROL _work/qc/KONTROL
@@ -94,6 +102,25 @@ jobs:
           rclone copy _work/out "$HEDEF" -q
           echo "Dosyalar:"; rclone lsf -R "$HEDEF"
           echo "Paylasim linki: $(rclone link "$HEDEF")"
+          if [ "$PAKETE_YAZ" = "evet" ]; then
+            [ "$QC" = "0" ] || { echo "QC FAIL: pakete yazilmadi"; exit "$QC"; }
+            for ad in 06_hediye_sahne 09_yatak_sahne 10_calisma_sahne 11_yemek_sahne; do
+              cp "_work/qc/$ad.jpg" "data/pod/cl_galeri_final19/$ad.jpg"
+            done
+            DEGISEN=$(git status --porcelain --untracked-files=no | awk '{print $2}' | sort | tr '\n' ' ')
+            echo "Degisen: $DEGISEN"
+            BEKLENEN="data/pod/cl_galeri_final19/06_hediye_sahne.jpg data/pod/cl_galeri_final19/09_yatak_sahne.jpg data/pod/cl_galeri_final19/10_calisma_sahne.jpg data/pod/cl_galeri_final19/11_yemek_sahne.jpg "
+            # yalniz bu 4 dosya degisebilir (degismeyen biri varsa listede olmaz, o da kabul)
+            for f in $DEGISEN; do [[ " $BEKLENEN" == *" $f "* ]] || { echo "BEKLENMEYEN degisiklik: $f"; exit 1; }; done
+            echo "Paket dosya sayisi: $(ls data/pod/cl_galeri_final19 | wc -l)"
+            sha256sum data/pod/cl_galeri_final19/{06,09,10,11}_*.jpg
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add data/pod/cl_galeri_final19/{06,09,10,11}_*.jpg
+            git commit -q -m "cl_galeri_final19: 06/09/10/11 cilali sahne kartlari (Serdar 28 Eyl onayi; 06 $ONAYLI_KLASOR, 09/10/11 yeni kurulum; QC 4/4 PASS)"
+            for i in 1 2 3 4; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep $((2**i)); done
+            git log --oneline -1
+          fi
           exit "$QC"
       - if: always()
         run: rm -rf _work ~/.config/rclone
