@@ -1,0 +1,65 @@
+name: video-v2
+
+# Isim + tagline dongulu kapak videolari (salt Drive; Etsy YOK).
+# Hat baskilari: siparis-baski-v1 dali (degistirilmeden), V2-V3 onbellek TEMP/POD_VIDEO_V2/SIPARIS.
+# Cikti: TEMP/POD_VIDEO_V2/<damga>/ (VIDEO_*.mp4 + OZET.md)
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      ciftler:
+        description: "bosluklu cift listesi ya da 'HEPSI' (SIPARIS onbellegindeki 78)"
+        required: true
+        default: "CANCER_LIBRA"
+
+jobs:
+  uret:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout (siparis-baski-v1, hat kodu)
+        uses: actions/checkout@v4
+        with:
+          ref: siparis-baski-v1
+          path: _sb
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q pillow numpy opencv-python-headless scipy requests
+          sudo apt-get -qq update && sudo apt-get -qq install -y ffmpeg
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Uret
+        run: |
+          set -euo pipefail
+          CIFTLER="${{ inputs.ciftler }}"
+          if [ "$CIFTLER" = "HEPSI" ]; then
+            CIFTLER=$(rclone lsf "gdrive:ASTROLOVE/TEMP/POD_KAPAK_V3/SIPARIS" --dirs-only | sed 's#/$##; s#_MIDNIGHT_BLUE_11x14$##' | sort | tr '\n' ' ')
+          fi
+          echo "ciftler: $CIFTLER"
+          python scripts/pod/video_v2_toplu.py _sb $CIFTLER
+      - name: Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          STAMP=$(date -u +%Y%m%d_%H%M)
+          [ -d _out ] && rclone copy _out "gdrive:ASTROLOVE/TEMP/POD_VIDEO_V2/$STAMP" -q || true
+          echo "Drive: TEMP/POD_VIDEO_V2/$STAMP"
+          rm -rf ~/.config/rclone
