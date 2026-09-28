@@ -66,7 +66,11 @@ G = Image.fromarray(np.clip(a, 0, 255).astype(np.uint8))
 
 yuz_ref = np.asarray(fr).astype(np.float32)[2:F - 2, fr.width // 2 - 100:fr.width // 2 + 100].reshape(-1, 3).mean(0)
 fr = sahne_isik(fr, G, (FX, FY, FX + fr.width, FY + fr.height), guc=0.12)
-G.paste(fr, (FX, FY))
+# 059 fotografinin dis kenar artigi (beyaz serit) maskeyle atilir: dis 2 px paste edilmez
+_mk = Image.new('L', fr.size, 0)
+from PIL import ImageDraw as _ID
+_ID.Draw(_mk).rectangle((2, 2, fr.width - 3, fr.height - 3), fill=255)
+G.paste(fr, (FX, FY), _mk)
 
 # 4:3 pencere ve 3000x2250
 PENC_W = round(G.height * 4 / 3)
@@ -92,7 +96,7 @@ for xa, xb in [((BX0 - x0) * s, fx - 1), (fx + fr.width * s + 1, (BX1 - x0) * s)
         from scipy import ndimage as _nd
         mm = (b.min(2) > 238) & ((b.max(2) - b.min(2)) < 12)
         kalinti += int(_nd.binary_opening(mm, iterations=3).sum())   # tek parlak dokular degil, YEKPARE beyaz alan
-yuz_cik = R[round(fy) + 2:round(fy + F * s) - 2, round(fx + fr.width * s / 2) - 100:round(fx + fr.width * s / 2) + 100].reshape(-1, 3).mean(0)
+yuz_cik = R[round(fy + 3 * s):round(fy + F * s) - 2, round(fx + fr.width * s / 2) - 100:round(fx + fr.width * s / 2) + 100].reshape(-1, 3).mean(0)
 sapma = float(np.abs(yuz_cik - yuz_ref).max())
 print(f'cerceve {fr.width}x{fr.height} yuz {F} (sahnede) | poster NCC {n:.4f} | beyaz kalinti {kalinti} px (=0) | cerceve renk sapmasi {sapma:.1f} (<=16)')
 print('PASS' if R.shape[:2] == (2250, 3000) and n >= 0.99 and kalinti == 0 and sapma <= 16 else 'FAIL')
