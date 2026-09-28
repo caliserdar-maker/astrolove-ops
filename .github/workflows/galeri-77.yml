@@ -108,6 +108,7 @@ jobs:
                 --isim1 EMILY --isim2 JAMES --mesaj-b64 "$MB64" --sip-kok "$G/_KAYNAK/SIPARIS" > "../_work/log_${C}_$R.txt" 2>&1) \
                 && cp "_sb/_siparis/${C}_${R}_11x14/BASKI_11x14.jpg" $Y/BASKI_$R.jpg \
                 || { hata="$hata $R baski FAIL"; tail -5 "_work/log_${C}_$R.txt"; }
+              grep -h -E "bant dogrulama|_11x14 \{'urun'" "_work/log_${C}_$R.txt" | cut -c1-700
             done
             rclone copy $Y "$G/_KAYNAK/$C" -q
             if [ -z "$hata" ] && [ "$MOD" = "tam" ]; then
