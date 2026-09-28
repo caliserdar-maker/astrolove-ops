@@ -6,6 +6,7 @@
    binary_opening 3x3 (Pure White posterin kendi kagit beyazi kalinti sayilmaz)
  - sahnenin aciklik disi pikselleri girdiyle birebir: kayipsiz kontrol PNG'sinde, panel maskesi ici, fark 0
    (JPEG kodlama farki ayrica raporlanir)
+ - aciklik dikdortgen: doluluk >= 0.99, kenar sapmasi <= 1 px (homografi gerekmez)
  - zemin RGB 237,232,226 +-2 (3 nokta); metinlerde uzun/orta tire yok; poster kirpimi <= %3
  - alt yazi: satir sayisi = metin sayisi, satirlar arasi bosluk >= 20 px (koyu piksel bantlari)
  - poster renk sinifi (kaynak dosya/kirpim kutusu dogru mu): NCC kaynagin kendisine olculdugu icin yanlis
@@ -48,7 +49,7 @@ for kart, K in KARTLAR.items():
     R = np.asarray(Image.open(os.path.join(CIK, K['ad'] + '.jpg')).convert('RGB')).astype(np.int16)
     Q = np.asarray(Image.open(os.path.join(KON, K['ad'] + '.png')).convert('RGB')).astype(np.int16)
     G = Image.open(os.path.join(SAH, SAHNE_DOSYA[kart])).convert('RGB')
-    kutu, dolu = aciklik(G)
+    kutu, dolu, sapma = aciklik(G)
     sahne, s = sahne_isle(G)
     X0, Y0, X1, Y1 = panel_aciklik(kutu, s)
     poster, kirp, kirp_eks = poster_hazirla(kart, BASKI if K['poster'] == 'baski' else C04, X1 - X0, Y1 - Y0)
@@ -93,9 +94,9 @@ for kart, K in KARTLAR.items():
     yazi_ok = len(bas) == len(K['satirlar']) and bosluk >= 20
 
     ok = (R.shape[:2] == (2250, 3000) and n >= 0.99 and kalinti == 0 and birebir == 0 and zemin and not tire
-          and kirp_eks <= 0.03 and dolu == 1.0 and alt < 2130 and renk_ok and yazi_ok)
+          and kirp_eks <= 0.03 and dolu >= 0.99 and sapma <= 1 and alt < 2130 and renk_ok and yazi_ok)
     hepsi &= ok
-    print(f"{K['ad']}: boyut {R.shape[1]}x{R.shape[0]} | aciklik girdi {kutu} dolu {dolu:.3f} oran "
+    print(f"{K['ad']}: boyut {R.shape[1]}x{R.shape[0]} | aciklik girdi {kutu} dolu {dolu:.4f} kenar sapma {sapma} px oran "
           f"{(kutu[2] - kutu[0] + 1) / (kutu[3] - kutu[1] + 1):.4f} -> panel {X1 - X0}x{Y1 - Y0} | kirpim eksen %{kirp_eks * 100:.2f} "
           f"| poster {RENK[kart][0]} RGB {pr:.0f},{pg:.0f},{pb:.0f} {'ok' if renk_ok else 'YANLIS'} | NCC {n:.4f} | kalinti {kalinti} px (ham beyaz {ham_beyaz}, halka {halka_beyaz}) | disari fark {birebir} "
           f"(jpg ort {jpg_fark:.2f}) | zemin {zemin} | tire {tire} | yazi alt ~{alt} satir {len(bas)} bosluk {bosluk} px | {'PASS' if ok else 'FAIL'}")

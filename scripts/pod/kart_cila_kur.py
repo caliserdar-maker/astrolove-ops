@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """CL sahne kartlari 06/09/10/11: ChatGPT cilali cerceveli bos sahneler (data/pod/gpt_sahne_cila, 1729x910).
 Serdar 28 Eyl: atmosfer + cerceve + isik ChatGPT'den AYNEN; cerceve eklenmez, set_grade/sahne_isik uygulanmaz.
-Yalniz cercevenin beyaz acikligi olculur (min>238 & chroma<12, en buyuk bilesen) ve gercek poster oraya oturur.
+Yalniz cercevenin acikligi olculur (aciklik(): koyu ic dudagin ici) ve gercek poster oraya oturur.
 Oran 11:14'ten farkli ise poster germe yok: kaplayacak sekilde olceklenir, merkezden kirpilir (<= %3, fazlasi DUR).
 Poster kenarinda cok ince ic golge (cerceve dudaginin golgesi; isik sol-ustten).
 Kart iskeleti ve metinler kart12/14/15/16_kur.py ile ayni (Garamond + Montserrat, ayni olcu/konum);
@@ -48,15 +48,27 @@ SAHNE_DOSYA = {'06': 'SAHNE_HEDIYE.png', '09': 'SAHNE_YATAK.png', '10': 'SAHNE_C
 
 
 def aciklik(G):
-    """Girdi sahnede beyaz aciklik: min>238 & chroma<12, en buyuk bilesen, delik doldurulur. (x0,y0,x1,y1) dahil."""
+    """Girdi sahnede cercevenin acikligi (x0,y0,x1,y1) dahil, doluluk, kenar sapmasi (px).
+    v2 sahneler (28 Eyl): ChatGPT beyazin kenarina ince gri gecis (237-249) + koyu ic dudak cizdi; min>238
+    esigi gecis seridini disarida birakiyordu. Aciklik = koyu dudagin ici: acik-notr (min>200 & chroma<14)
+    en buyuk bilesen, delik doldurulur; kenar = orta %80 satir/sutun uclarinin medyani (kose pahi sizintisina dayanikli).
+    Sapma = orta %90'da kenar ucunun medyandan en buyuk uzakligi (<=1 ise eksene paralel, homografi gerekmez)."""
     A = np.asarray(G.convert('RGB')).astype(np.int16)
-    m = (A.min(2) > 238) & ((A.max(2) - A.min(2)) < 12)
+    m = (A.min(2) > 200) & ((A.max(2) - A.min(2)) < 14)
     lab, n = ndi.label(m)
     M = ndi.binary_fill_holes(lab == (np.argmax(ndi.sum(m, lab, range(1, n + 1))) + 1))
     ys, xs = np.nonzero(M)
-    x0, y0, x1, y1 = xs.min(), ys.min(), xs.max(), ys.max()
-    dolu = M.sum() / ((x1 - x0 + 1) * (y1 - y0 + 1))
-    return (int(x0), int(y0), int(x1), int(y1)), float(dolu)
+    by0, by1, bx0, bx1 = ys.min(), ys.max(), xs.min(), xs.max()
+    def uclar(eks, a0, a1, pay):
+        ic = range(a0 + (a1 - a0) * pay // 100, a1 - (a1 - a0) * pay // 100 + 1)
+        dizi = [np.flatnonzero(M[i] if eks == 0 else M[:, i]) for i in ic]
+        return np.array([d.min() for d in dizi]), np.array([d.max() for d in dizi])
+    L, R = uclar(0, by0, by1, 10); T, B = uclar(1, bx0, bx1, 10)
+    x0, x1, y0, y1 = (int(np.median(v)) for v in (L, R, T, B))
+    L5, R5 = uclar(0, by0, by1, 5); T5, B5 = uclar(1, bx0, bx1, 5)
+    sapma = int(max(np.abs(L5 - x0).max(), np.abs(R5 - x1).max(), np.abs(T5 - y0).max(), np.abs(B5 - y1).max()))
+    dolu = float(M[y0:y1 + 1, x0:x1 + 1].mean())
+    return (x0, y0, x1, y1), dolu, sapma
 
 
 def sahne_isle(G):
@@ -124,7 +136,7 @@ def kur(kart, sahne_yol, poster_yol, eski_yol, GAR, MON):
     d.text((147 - b[0], 336 - b[1]), K['alt'], font=FS, fill=SANS_T, anchor='ls')
 
     G = Image.open(sahne_yol).convert('RGB')
-    kutu, dolu = aciklik(G)
+    kutu, dolu, sapma = aciklik(G)
     sahne, s = sahne_isle(G)
     X0, Y0, X1, Y1 = panel_aciklik(kutu, s)
     poster, kirp, kirp_eks = poster_hazirla(kart, poster_yol, X1 - X0, Y1 - Y0)
@@ -143,7 +155,7 @@ def kur(kart, sahne_yol, poster_yol, eski_yol, GAR, MON):
         yol, w = yollar[fnt]
         f = font(yol, boy[0], w) if boy else fit(yol, w, t, hedef)
         orta(SY + sahne.height + dy, t, f, NAVY_T if fnt == 'GAR' else SANS_T)
-    bilgi = dict(kutu=kutu, dolu=dolu, s=s, acik=(X0, Y0, X1, Y1), SY=SY, panel=sahne.size,
+    bilgi = dict(kutu=kutu, dolu=dolu, sapma=sapma, s=s, acik=(X0, Y0, X1, Y1), SY=SY, panel=sahne.size,
                  poster=poster.size, kirp=kirp, kirp_eks=kirp_eks)
     return out, bilgi
 
