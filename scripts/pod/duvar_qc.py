@@ -6,7 +6,8 @@
    kenardan 20 px ic, +-3 px hiza taramasi (kapak_v8_kur.py yontemi)
  - yazi kontrasti >= 4.5: her satirin rengi, kutusunun arkasindaki duvarin en koyu %5'ine karsi (WCAG)
  - tire yok (uzun/orta tire, eksi)
- - kose zemini KAPAK duvariyla ayni (+-6, 4 kose; leke seviyeli zeminde de orijinal kapak duvarina karsi)
+ - kose zemini secilen ZEMIN ile ayni (+-6, 4 kose); kapakla parlaklik farki bilgi olarak: yan seritlerde (x<500,
+   x>2500) ortalama L* farki (kapakta orta alan poster oldugu icin yan seritler)
 Kullanim: duvar_qc.py ZEMIN.png KAPAK_SAHNE_V9.png CIKIS1.jpg ESKI1.jpg [CIKIS2.jpg ESKI2.jpg ...]
   ZEMIN: kartlarin kuruldugu duvar (leke seviyeli 3000x2250 ya da kapak_sahne_v9.png)
 """
@@ -22,7 +23,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from duvar_zemin import KREM, duvar, duvar_lum, kontrast, lum
 
 D = duvar(sys.argv[1]); Dz = np.asarray(D).astype(np.int16)
-Kz = np.asarray(duvar(sys.argv[2])).astype(np.int16)          # kapak duvari (orijinal)
+Kz = np.asarray(duvar(sys.argv[2], 'yok')).astype(np.int16)   # kapak duvari (orijinal, leke azaltmasiz)
 ciftler = list(zip(sys.argv[3::2], sys.argv[4::2]))
 
 
@@ -34,6 +35,11 @@ def krem(a):
     return (np.abs(a - np.array(KREM)) <= 3).all(2)
 
 
+import cv2 as _c
+_yan = np.zeros((2250, 3000), bool); _yan[:, :500] = True; _yan[:, 2500:] = True
+_L = lambda a: _c.cvtColor(a.astype(np.float32) / 255, _c.COLOR_RGB2Lab)[..., 0][_yan].mean()
+dL_kapak = _L(Dz) - _L(Kz)
+print(f'zemin: yan seritler L* {_L(Dz):.1f} | kapak duvari L* {_L(Kz):.1f} | kapakla parlaklik farki dL* {dL_kapak:+.1f}')
 hepsi = True
 for cik, eski in ciftler:
     R = np.asarray(Image.open(cik).convert('RGB')).astype(np.int16)
@@ -49,7 +55,7 @@ for cik, eski in ciftler:
     kon = [(s['metin'], kontrast(float(lum(np.array(s['renk']))), duvar_lum(D, s['kutu']))) for s in J['satirlar']]
     kmin = min(k for _, k in kon)
     tire = bool(re.search(r'[‒-―−]', ' '.join(s['metin'] for s in J['satirlar'])))
-    kose = max(int(np.abs(R[y, x] - Kz[y, x]).max()) for x, y in [(60, 60), (2940, 60), (60, 2190), (2940, 2190)])
+    kose = max(int(np.abs(R[y, x] - Dz[y, x]).max()) for x, y in [(60, 60), (2940, 60), (60, 2190), (2940, 2190)])
     renk_deg = [f"{s['metin'][:22]} {tuple(s['onayli_renk'])}->{tuple(s['renk'])}" for s in J['satirlar'] if list(s['renk']) != s['onayli_renk']]
     ok = R.shape[:2] == (2250, 3000) and hale <= 50 and min(nler) >= 0.99 and kmin >= 4.5 and not tire and kose <= 6
     hepsi &= ok

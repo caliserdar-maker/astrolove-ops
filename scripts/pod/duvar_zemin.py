@@ -14,12 +14,34 @@ KREM = (237, 232, 226)
 LEKE = {'yok': 0.0, 'hafif': 0.35, 'orta': 0.60, 'guclu': 0.85}
 
 
-def duvar(yol):
-    """Kapak duvari 3000x2250. yol zaten 3000x2250 ise (leke seviyeli hazir duvar) aynen kullanilir."""
+VARSAYILAN = 'guclu'   # Serdar 28 Eyl: GUCLU (%56 leke azalmasi) onaylandi
+# Serdar 28 Eyl: GUCLU sonrasi daha acik/aydinlik secenekler: L* sabit artar (huzme-duvar farki ve doku aynen),
+# ton acisi sabit, kroma hafif artar (soluk/gri olmaz). Deger: (L* artisi, kroma carpani)
+AYDINLIK = {'acik1': (5.0, 1.00), 'acik2': (10.0, 1.04), 'acik3': (15.0, 1.08)}
+
+
+def aydinlat(D, dL, kroma=1.0):
+    """Duvari acar: Lab'de L* + dL (L* 85 ustunde 100'e yumusak tavan), a/b ayni oranla (ton acisi sabit).
+    Artis sabit oldugu icin huzme-duvar farki, ince doku ve azaltilmis leke seviyesi degismez."""
+    import cv2
+    x = np.asarray(D).astype(np.float32) / 255
+    L = cv2.cvtColor(x, cv2.COLOR_RGB2Lab)
+    l = L[..., 0] + dL
+    tavan = 85.0
+    L[..., 0] = np.where(l > tavan, tavan + (100 - tavan) * np.tanh((l - tavan) / (100 - tavan)), l)
+    L[..., 1:] *= kroma
+    y = cv2.cvtColor(L, cv2.COLOR_Lab2RGB)
+    return Image.fromarray(np.clip(np.rint(y * 255), 0, 255).astype(np.uint8))
+
+
+def duvar(yol, seviye=VARSAYILAN, aydinlik=None):
+    """Kapak duvari 3000x2250, leke seviyesi uygulanmis (varsayilan GUCLU; 'yok' = kapaktaki ham duvar).
+    yol zaten 3000x2250 ise (hazir duvar) aynen kullanilir."""
     im = Image.open(yol).convert('RGB')
     if im.size == (3000, 2250):
         return im
-    return im.resize((1213, 910), Image.LANCZOS).resize((3000, 2250), Image.LANCZOS)
+    D = leke_azalt(im.resize((1213, 910), Image.LANCZOS).resize((3000, 2250), Image.LANCZOS), LEKE[seviye])
+    return aydinlat(D, *AYDINLIK[aydinlik]) if aydinlik else D
 
 
 def _g(a, s):
@@ -53,9 +75,9 @@ def leke_azalt(D, k):
 
 
 if __name__ == '__main__':
-    # Kullanim: duvar_zemin.py KAPAK_SAHNE_V9.png SEVIYE CIKIS.png   (SEVIYE: yok|hafif|orta|guclu)
+    # Kullanim: duvar_zemin.py KAPAK_SAHNE_V9.png SEVIYE CIKIS.png [AYDINLIK]  (yok|hafif|orta|guclu; acik1|acik2|acik3)
     import sys
-    leke_azalt(duvar(sys.argv[1]), LEKE[sys.argv[2]]).save(sys.argv[3])
+    duvar(sys.argv[1], sys.argv[2], sys.argv[4] if len(sys.argv) > 4 else None).save(sys.argv[3])
 
 
 def _lin(c):
