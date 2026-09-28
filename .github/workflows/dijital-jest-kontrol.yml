@@ -1,0 +1,85 @@
+name: dijital-jest-kontrol
+
+# Musteri jesti oncesi SALT OKUMA (28 Eyl): POD_PRINT baski dosyasi siparisteki tasarimla ayni mi? Etsy/Prodigi'ye YAZMA YOK.
+# receipt yalniz son 4 hane girdi; tam no Drive TEMP/POD_ORDERS_STATE.csv'den (loga yazilmaz). Alici bilgisi okunmaz.
+# Cikti: TEMP/DIJITAL_<son4>_KONTROL/ (KARSILASTIRMA.jpg, KONTROL.json). scripts/pod/dijital_jest_kontrol.py
+
+permissions:
+  actions: read
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      son4: {description: "receipt son 4 hane", default: "2561"}
+      cift: {default: "AQUARIUS_SCORPIO"}
+      renk: {default: "MIDNIGHT_BLUE"}
+      boy: {default: "12x16"}
+      sku: {default: "POD-AQU_SCO-MB-12x16"}
+
+jobs:
+  kontrol:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: |
+          set -euo pipefail
+          sudo apt-get install -y -qq tesseract-ocr >/dev/null
+          pip install -q requests==2.34.2 pillow numpy
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Girdiler (receipt ve kanal siparisi STATE'ten; loga yazilmaz)
+        env:
+          SON4: ${{ inputs.son4 }}
+          CIFT: ${{ inputs.cift }}
+          RENK: ${{ inputs.renk }}
+          BOY: ${{ inputs.boy }}
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_ORDERS_STATE.csv" _work/state.csv
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_PRINT/$CIFT/$RENK/$BOY.jpg" _work/baski.jpg
+          python - <<'PY'
+          import csv, os
+          r = [x for x in csv.DictReader(open("_work/state.csv", encoding="utf-8")) if x["receipt_id"].endswith(os.environ["SON4"])]
+          assert len(r) == 1, f"STATE'te ...{os.environ['SON4']} icin {len(r)} satir"
+          print(f"::add-mask::{r[0]['receipt_id']}", flush=True)
+          with open(os.environ["GITHUB_ENV"], "a") as fh:
+              fh.write(f"RID={r[0]['receipt_id']}\nOID={r[0].get('kanal_oid') or r[0].get('prodigi_order_id') or ''}\n")
+          print("receipt ...", os.environ["SON4"], "| prodigi", r[0].get("kanal_oid") or r[0].get("prodigi_order_id"))
+          PY
+      - name: Kontrol
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          SKU: ${{ inputs.sku }}
+        run: python scripts/pod/dijital_jest_kontrol.py --baski _work/baski.jpg --receipt "$RID" --sku "$SKU" --prodigi-oid "$OID" --out _out
+      - name: Drive'a yaz + token
+        if: ${{ always() }}
+        env:
+          SON4: ${{ inputs.son4 }}
+        run: |
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
+          [ -d _out ] && rclone copy _out "gdrive:ASTROLOVE/TEMP/DIJITAL_${SON4}_KONTROL" -q && echo "Cikti: TEMP/DIJITAL_${SON4}_KONTROL/" || true
+          rm -rf _work ~/.config/rclone
