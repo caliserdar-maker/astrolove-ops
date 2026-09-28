@@ -148,7 +148,7 @@ def hazirla():
 
 def args(ids, kd, out, **kw):
     d = dict(ids=str(ids), kapak_dir=str(kd), out=str(out), plan=None, yedek_drive=None,
-             apply=False, confirm="", quota_min=60, devam={}, devam_eski={}, kaynak={"klasor": "test", "ozet": "PASS: 3 / 3"})
+             apply=False, confirm="", quota_min=60, devam={}, devam_eski={}, haric=set(), kaynak={"klasor": "test", "ozet": "PASS: 3 / 3"})
     d.update(kw)
     return SimpleNamespace(**d)
 
@@ -373,6 +373,17 @@ def main():
         and len(f.yaz) == n
     kont["sira_tekil: cift rank FAIL, bosluk PASS"] = (not K.sira_tekil([{"rank": 1}, {"rank": 1}, {"rank": 2}])) \
         and K.sira_tekil([{"rank": 1}, {"rank": 3}, {"rank": 4}])
+
+    # 14) --haric: 222 bu kosuda hic islenmez (yazma yok), 111/333 PASS; raporda HARIC satiri
+    f = Fake(); o60 = TMP / "o60"
+    K.kuru(args(ids, kd, o60), f, "S", o60, satirlar, kapak, sorun, fazla)
+    ok = K.apply(args(ids, kd, TMP / "o61", plan=str(o60 / "PLAN.json"), yedek_drive=str(TMP / "yd61"), apply=True,
+                      confirm=K.ONAY, haric={"222"}), f, "S", TMP / "o61", kapak)
+    s61 = json.loads((TMP / "o61" / "SONUC.json").read_text())
+    kont["haric 222: yazma yok, 111/333 PASS, rapor HARIC"] = ok and \
+        not any(x[1] == "222" for x in f.yaz) and [r["listing_id"] for r in s61] == ["111", "333"] and \
+        len(f.L["222"]["imgs"]) == 12 and f.L["222"]["imgs"][0]["listing_image_id"] == 22201 and \
+        "HARIC (dokunulmadi): 222" in (TMP / "o61" / "report.md").read_text()
 
     for k, v in kont.items():
         print(f"{'PASS' if v else 'FAIL'} {k}")

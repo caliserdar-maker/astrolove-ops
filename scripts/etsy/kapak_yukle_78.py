@@ -485,7 +485,10 @@ def apply(a, api, shop, out, kapak):
         k = kapak.get(r["cift"])
         if not k or k["sha256"] != r["yeni_sha256"] or k["alt"] != r["yeni_alt"]:
             raise SystemExit(f"HATA: {r['cift']} kapak dosyasi/alt metni plandakiyle ayni degil; yazma yok. DUR.")
-    is_ = [r for r in rows if r["durum"] == "PLAN"]
+    haric = set(getattr(a, "haric", set()))
+    is_ = [r for r in rows if r["durum"] == "PLAN" and str(r["listing_id"]) not in haric]
+    if haric:
+        log(f"HARIC (bu kosuda dokunulmaz): {', '.join(sorted(haric))}")
     (out / "yedek").mkdir(parents=True, exist_ok=True)
     (out / "ilan").mkdir(parents=True, exist_ok=True)
     drive_var = drive_liste(a.yedek_drive)
@@ -538,6 +541,7 @@ def apply(a, api, shop, out, kapak):
            f"toplam {len(is_)} | kota {api.remaining}" + (f" | KOTA < {KOTA_TABAN} DURDU" if kota_dur else ""),
            f"- Yedek: {a.yedek_drive}/<listing_id>_<image_id>.jpg ({sum(1 for r in sonuc if r.get('yedek'))} dosya)",
            f"- SONUC: {'PASS' if ok else 'FAIL - DURDU: ' + (sonuc[-1]['listing_id'] + ' ' + hata if hata else 'eksik (YARIM/kota)')}",
+           f"- HARIC (dokunulmadi): {', '.join(sorted(haric)) or '-'}",
            f"- YARIM (yeni kapak var, eski kapak + bag yerinde): "
            f"{', '.join(str(r['listing_id']) + ':' + str(r['yeni_id']) + ':' + str(r['eski_id']) for r in sonuc_son if r['sonuc'] == 'YARIM') or '-'}", "",
            "| listing_id | cift | eski | yeni kapak | tasinan bag | tur | sonuc |", "|---|---|---|---|---|---|---|"]
@@ -563,7 +567,9 @@ def main():
     ap.add_argument("--quota-min", type=int, default=60)
     ap.add_argument("--devam", default="",
                     help="LISTING_ID:YENI_IMAGE_ID:ESKI_IMAGE_ID[,..] yarim kalmis ilan, kesin id ile")
+    ap.add_argument("--haric", default="", help="LISTING_ID[,..] bu kosuda dokunulmayacak ilanlar")
     a = ap.parse_args()
+    a.haric = {t.strip() for t in a.haric.split(",") if t.strip()}
     devam_str, a.devam, a.devam_eski = a.devam, {}, {}
     for t in [t.strip() for t in devam_str.split(",") if t.strip()]:
         lid, yeni, eski = t.split(":")
