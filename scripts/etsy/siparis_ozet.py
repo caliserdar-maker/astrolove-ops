@@ -36,7 +36,7 @@ def ts(t):
     return dt.datetime.fromtimestamp(int(t), dt.timezone.utc).strftime("%Y-%m-%d %H:%M UTC") if t else "-"
 
 
-r = c.get(f"/application/shops/{SHOP}/receipts", params={"limit": N, "sort_on": "created", "sort_order": "desc"})
+r = c.get(f"/shops/{SHOP}/receipts", params={"limit": N, "sort_on": "created", "sort_order": "desc"})
 receipts = r.get("results", [])
 json.dump(receipts, open("_out/receipts_ham.json", "w"), indent=1)   # Drive'a gider; repoya/loga girmez
 
@@ -57,14 +57,14 @@ for rc in receipts:
         if esd:
             sat.append(f"  Beklenen kargolama (Etsy): {ts(esd)}")
         if lid and lid not in ilanlar:
-            il = c.get(f"/application/listings/{lid}")
+            il = c.get(f"/listings/{lid}")
             ilanlar[lid] = il
             pmin, pmax = il.get("processing_min"), il.get("processing_max")
             spid = il.get("shipping_profile_id")
             sat.append(f"  Ilan taahhudu: hazirlik {pmin}-{pmax} gun | kargo profili {spid}")
             if spid and spid not in profiller:
                 try:
-                    profiller[spid] = c.get(f"/application/shops/{SHOP}/shipping-profiles/{spid}")
+                    profiller[spid] = c.get(f"/shops/{SHOP}/shipping-profiles/{spid}")
                 except Exception as e:
                     profiller[spid] = {"hata": str(e)[:80]}
     for sh in rc.get("shipments", []):
