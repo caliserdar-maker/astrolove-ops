@@ -121,7 +121,7 @@ def main():
         if "Name under Aries" not in s1["kisisel_fark"]: kotu.append("soru etiketi Aries")
         s2 = S["4570200002"]
         if "Left name" in s2["kisisel_fark"] or s2["kisisel"] != "AYNI": kotu.append(f"ayni burc sorular {s2['kisisel_fark']}")
-        if "tarih satiri iki kez" not in s2["aciklama_not"]: kotu.append("ayni burc tarih bayragi")
+        if s2["aciklama_not"]: kotu.append(f"ayni burc aciklama notu (tek tarih satiri beklenir): {s2['aciklama_not']}")
         if S["4570200003"]["yazilabilir"] != "HAYIR (active degil)": kotu.append("draft")
         s4 = S["4570200004"]
         if (s4["envanter"], s4["aciklama"], s4["kisisel"], s4["ayar"], s4["nitelik"]) != ("AYNI", "AYNI", "AYNI", "AYNI", "AYNI"):

@@ -344,7 +344,8 @@ def calis(api, shop, ids_csv, out, oas_yol=""):
         not_ = []
         if M.qc(cift, yeni):
             not_.append(f"QC {M.qc(cift, yeni)}")
-        ref_tpl = cl_tpl.replace("{B_TARIH}", "{A_TARIH}").replace("{B}", "{A}") if a == b else cl_tpl
+        ref_tpl = cl_tpl.replace("{B_TARIH}", "{A_TARIH}").replace("{B}", "{A}") \
+            .replace("{A}: {A_TARIH}. {A}: {A_TARIH}.", "{A}: {A_TARIH}.") if a == b else cl_tpl   # Serdar 28 Eyl: tek satir
         if yer_tutucu(yeni, a, b) != ref_tpl:
             not_.append("CL'den ad/tarih disi fark " + ilk_fark(ref_tpl, yer_tutucu(yeni, a, b)))
         if a == b and yeni.count(f"{a}: {M.TARIH[a.upper()]}.") > 1:
