@@ -24,10 +24,10 @@ def rec(rid, txs):
     return r
 
 
-DSKU = make_digital_sku("CANCER_LIBRA", "MIDNIGHT_BLUE")
+DSKU = make_digital_sku("CANCER_SCORPIO", "MIDNIGHT_BLUE")
 A = rec(9201, [tx(1, DSKU, DV)])
-B = rec(9202, [tx(2, "POD-CAN_LIB-MB-8x10", DV)])
-C = rec(9203, [tx(3, "POD-CAN_LIB-DB-8x10"), tx(4, make_digital_sku("CANCER_LIBRA", "DEEP_BLACK"), DV)])
+B = rec(9202, [tx(2, "POD-CAN_SCO-MB-8x10", DV)])
+C = rec(9203, [tx(3, "POD-CAN_SCO-DB-8x10"), tx(4, make_digital_sku("CANCER_SCORPIO", "DEEP_BLACK"), DV)])
 cagri = []
 
 
@@ -101,7 +101,7 @@ pk = sorted(x.name for x in (W / "d2").glob("*.json"))
 k("D2 POST /orders yok", not [c for c in cagri if c[0] == "POST" and c[1] == "/orders"])
 k("D2 A/B icin paket yok", not [x for x in pk if x.startswith(("9201", "9202"))], pk)
 cp = json.loads((W / "d2" / "9203.json").read_text()) if (W / "d2" / "9203.json").exists() else {}
-k("D2 C paketi yalniz 8x10", [i["sku"] for i in cp.get("items", [])] == ["POD-CAN_LIB-DB-8x10"], cp.get("items"))
+k("D2 C paketi yalniz 8x10", [i["sku"] for i in cp.get("items", [])] == ["POD-CAN_SCO-DB-8x10"], cp.get("items"))
 k("D2 dijital SKU hicbir Prodigi govdesinde yok", not [c for c in cagri if "DIGITAL" in c[2] or "DIGITAL" in c[1]])
 k("D2 rapor: 3 dijital satiri", out2.count("DIJITAL - teslim paketi") == 3, out2.count("DIJITAL - teslim paketi"))
 print(f"SONUC: {sum(sonuc)}/{len(sonuc)} PASS")

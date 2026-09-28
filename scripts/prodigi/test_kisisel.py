@@ -22,7 +22,7 @@ def rec(rid, sku, alanlar, ulke="US", yol="var"):
     r["transactions"] = [t]; return r
 REC = [
  rec(9001, "POD-AQU_ARI-MB-8x10", [("Name under Aquarius", "Анна"), ("Name under Aries", "Ivan"), ("Your message", "Навсегда вместе")], "RU"),
- rec(9002, "POD-CAN_LIB-DB-A4", [("Name under Cancer", "Mia"), ("Name under Libra", "Leo"), ("Your message", "Forever ♥ 😍")], "US", yol="liste"),
+ rec(9002, "POD-CAN_SCO-DB-A4", [("Name under Cancer", "Mia"), ("Name under Scorpio", "Leo"), ("Your message", "Forever ♥ 😍")], "US", yol="liste"),
  rec(9003, "POD-SCO_TAU-PW-12x16", [("Name under Scorpio", "Christopher"), ("Name under Taurus", "Emma"), ("Your message", "Two souls, one bond, today and every day after")], "GB"),
  rec(9004, "POD-LEO_LEO-WP-16x20", [("Left name", "Ali"), ("Right name", "Zeynep"), ("Your message", "Seninle her gün")], "TR"),
  rec(9005, "POD-ARI_LEO-MB-8x10", [], "US"),        # kontrol: kisisellestirmesiz
