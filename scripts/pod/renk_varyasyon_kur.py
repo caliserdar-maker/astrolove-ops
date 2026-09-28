@@ -3,7 +3,7 @@
 ChatGPT galeri karari (27 Eyl, Serdar onayli surec): varyasyon fotograflari cercevesiz ve
 format acisindan tarafsiz; ayni zemin, ayni oran, ayni koordinat; poster yukseklik ~%78;
 altta iki kucuk satir (RENK ADI / "Poster color. Format selected separately.");
-5 gorselde ayni cok ince notr kontur; oda isigi/golge/metalik parilti yok.
+5 gorselde ayni cok ince notr kontur; oda isigi/metalik parilti yok (duvar zemininde hafif duvar golgesi, 28 Eyl).
 Tek sapma: oran 2:3 degil 11:14 (5 rengin de GERCEK dosyasi bu oranda; WP icin 2:3 render yok, IS_0047).
 Poster kaynaklari gercek dosyalar, yeniden cizim yok. Renk adi Menu 2 yazimiyla birebir.
 QC: 3000x2250, poster ic NCC >= 0.99, oran 11:14 (+-1 px), zemin koseler, kontur var, tire yok.
@@ -46,6 +46,13 @@ poster = B.resize((PW, PH), Image.LANCZOS)
 D = duvar(ZEMIN) if ZEMIN else Image.new('RGB', (W, H), DUVAR)
 out = D.copy(); d = ImageDraw.Draw(out)
 PX = (W - PW) // 2
+if ZEMIN:  # Serdar 28 Eyl: poster duvardan cok az ayrik dursun; isik iki yandan simetrik -> golge duz asagi
+    from PIL import ImageFilter
+    a_ = np.asarray(out).astype(np.float32)
+    for gx, gy, sg, guc in [(0, 16, 28, 0.16), (0, 4, 6, 0.22)]:   # yumusak + temas
+        sil = Image.new('L', (W, H), 0); sil.paste(255, (PX - K + gx, PY - K + gy, PX + PW + K + gx, PY + PH + K + gy))
+        a_ *= (1 - guc * np.asarray(sil.filter(ImageFilter.GaussianBlur(sg))).astype(np.float32) / 255)[..., None]
+    out = Image.fromarray(np.clip(np.rint(a_), 0, 255).astype(np.uint8)); d = ImageDraw.Draw(out)
 d.rectangle((PX - K, PY - K, PX + PW + K - 1, PY + PH + K - 1), fill=KONTUR)
 out.paste(poster, (PX, PY))
 

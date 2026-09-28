@@ -7,6 +7,8 @@ Zemin: duvar_zemin.duvar(kapak_sahne_v9.png). Krem renk anahtariyla silinmez; ka
   - yazilar duvarin ustune dogrudan basilir: font/punto/konum/renk onayli 02'den olculdu (krem uzerinde alfa farki
     Lato 0.003-0.03, EB Garamond 0.02-0.06). Kontrast < 4.5 ise renk ayni tonda koyulastirilir.
   - ayirici cizgi: y 2100-2101, x 140-2860, (205,191,169), olculdu.
+  - Serdar 28 Eyl duzeltmeleri: 'print ready' -> 'print-ready' (satir eski merkezinde kalir); hediye satiri aciklama
+    alti (1610) ile ayirici cizgi (2100) arasina ortalanir (taban 1955 -> 1865).
 Cikti: CIKIS.jpg + CIKIS.json (yazi satirlari, poster kutulari; duvar_qc.py icin).
 Kullanim: kart02_duvar_kur.py ESKI_02.jpg KAPAK_SAHNE_V9.png FONT_KLASORU CIKIS.jpg
 """
@@ -63,21 +65,26 @@ YAZI = [
     ('Digital File', 'EBGaramond[wght].ttf', 400, 64, 355, 1456, (22, 38, 65)),
     ('Print', 'EBGaramond[wght].ttf', 400, 64, 1437, 1456, (22, 38, 65)),
     ('Framed', 'EBGaramond[wght].ttf', 400, 64, 2416, 1456, (22, 38, 65)),
-    ('All 5 colors as print ready PDFs. 300 dpi. Sent', 'Lato-Regular.ttf', None, 38, 110, 1558, (37, 44, 57)),
+    ('All 5 colors as print-ready PDFs. 300 dpi. Sent', 'Lato-Regular.ttf', None, 38, 110, 1558, (37, 44, 57)),
     ('Hahnemühle Photo Rag fine art paper.', 'Lato-Regular.ttf', None, 38, 1182, 1558, (37, 44, 56)),
     ('Classic wood frame in Antique Gold, Black,', 'Lato-Regular.ttf', None, 38, 2155, 1558, (37, 45, 57)),
     ('within 24 hours via Etsy Messages.', 'Lato-Regular.ttf', None, 38, 200, 1603, (37, 45, 56)),
     ('Unframed, ready for your frame.', 'Lato-Regular.ttf', None, 38, 1233, 1603, (37, 45, 57)),
     ('White or Natural. Arrives ready to hang.', 'Lato-Regular.ttf', None, 38, 2179, 1603, (37, 44, 56)),
-    ('A personal gift for Cancer and Libra couples.', 'EBGaramond[wght].ttf', 430, 43, 1128, 1955, (23, 39, 66)),
+    ('A personal gift for Cancer and Libra couples.', 'EBGaramond[wght].ttf', 430, 43, 1128, 1865, (23, 39, 66)),
     ('PERSONALIZED ZODIAC COUPLE WALL ART', 'Lato-Regular.ttf', None, 30, 140, 2172, (174, 143, 83)),
 ]
+# metni degisen satir onayli metnin merkezinde kalir (onayli metin -> olculen x)
+ESKI_METIN = {'All 5 colors as print-ready PDFs. 300 dpi. Sent': 'All 5 colors as print ready PDFs. 300 dpi. Sent'}
 satirlar = []
 for t, fy, w, s, x, y, renk in YAZI:
     f = ImageFont.truetype(os.path.join(FD, fy), s)
     if w:
         f.set_variation_by_axes([w])
-    b = f.getbbox(t, anchor='ls'); kutu = (x + b[0], y + b[1], x + b[2], y + b[3])
+    b = f.getbbox(t, anchor='ls')
+    if t in ESKI_METIN:
+        e = f.getbbox(ESKI_METIN[t], anchor='ls'); x = round(x + (e[0] + e[2]) / 2 - (b[0] + b[2]) / 2)
+    kutu = (x + b[0], y + b[1], x + b[2], y + b[3])
     lw = duvar_lum(D, kutu)
     r = yazi_rengi(renk, lw)
     d.text((x, y), t, font=f, fill=r, anchor='ls')

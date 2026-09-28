@@ -6,8 +6,9 @@
    kenardan 20 px ic, +-3 px hiza taramasi (kapak_v8_kur.py yontemi)
  - yazi kontrasti >= 4.5: her satirin rengi, kutusunun arkasindaki duvarin en koyu %5'ine karsi (WCAG)
  - tire yok (uzun/orta tire, eksi)
- - kose zemini kapak duvariyla ayni (+-6, 4 kose)
-Kullanim: duvar_qc.py KAPAK_SAHNE_V9.png CIKIS1.jpg ESKI1.jpg [CIKIS2.jpg ESKI2.jpg ...]
+ - kose zemini KAPAK duvariyla ayni (+-6, 4 kose; leke seviyeli zeminde de orijinal kapak duvarina karsi)
+Kullanim: duvar_qc.py ZEMIN.png KAPAK_SAHNE_V9.png CIKIS1.jpg ESKI1.jpg [CIKIS2.jpg ESKI2.jpg ...]
+  ZEMIN: kartlarin kuruldugu duvar (leke seviyeli 3000x2250 ya da kapak_sahne_v9.png)
 """
 import json
 import os
@@ -21,7 +22,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from duvar_zemin import KREM, duvar, duvar_lum, kontrast, lum
 
 D = duvar(sys.argv[1]); Dz = np.asarray(D).astype(np.int16)
-ciftler = list(zip(sys.argv[2::2], sys.argv[3::2]))
+Kz = np.asarray(duvar(sys.argv[2])).astype(np.int16)          # kapak duvari (orijinal)
+ciftler = list(zip(sys.argv[3::2], sys.argv[4::2]))
 
 
 def ncc(p, q):
@@ -47,7 +49,7 @@ for cik, eski in ciftler:
     kon = [(s['metin'], kontrast(float(lum(np.array(s['renk']))), duvar_lum(D, s['kutu']))) for s in J['satirlar']]
     kmin = min(k for _, k in kon)
     tire = bool(re.search(r'[‒-―−]', ' '.join(s['metin'] for s in J['satirlar'])))
-    kose = max(int(np.abs(R[y, x] - Dz[y, x]).max()) for x, y in [(60, 60), (2940, 60), (60, 2190), (2940, 2190)])
+    kose = max(int(np.abs(R[y, x] - Kz[y, x]).max()) for x, y in [(60, 60), (2940, 60), (60, 2190), (2940, 2190)])
     renk_deg = [f"{s['metin'][:22]} {tuple(s['onayli_renk'])}->{tuple(s['renk'])}" for s in J['satirlar'] if list(s['renk']) != s['onayli_renk']]
     ok = R.shape[:2] == (2250, 3000) and hale <= 50 and min(nler) >= 0.99 and kmin >= 4.5 and not tire and kose <= 6
     hepsi &= ok
