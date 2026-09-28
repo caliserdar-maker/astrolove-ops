@@ -1,12 +1,13 @@
 name: galeri-duvar-paket
 
-# CL galeri: 14 kart kapak duvari zemininde (GUCLU + ACIK-3, Serdar 28 Eyl) kurulur, QC, pakete commit, Drive guncelleme.
-# Etsy YOK. Degismeyen: 01 kapak, 06/09/10/11 sahne kartlari.
+# CL galeri: 18 kart kapak duvari zemininde (GUCLU + ACIK-3, Serdar 28 Eyl) kurulur, QC, pakete commit, Drive guncelleme.
+# Etsy YOK. Degismeyen: 01 kapak. 06/09/10/11: yalniz kartin dis zemini (sahne paneli zorunlu nesne, piksel aynen).
 # Kaynak: data/pod/cl_galeri_krem_kaynak (onayli krem kartlar, sabit), data/pod/kapak_sahne_v9.png (duvar)
-# Kurulum: 02 kart02_duvar_kur.py | 03 04 05 07 08 12 13 kart_duvar_genel.py | 14 kart11_kur.py (7 business days)
-#          + kart_duvar_genel.py | 15-19 renk_varyasyon_kur.py (poster onayli karttan birebir)
+# Kurulum: 02 kart02_duvar_kur.py | 03 04 07 08 12 13 kart_duvar_genel.py | 05 kart05_satir.py (print-ready) + genel
+#          | 06 09 10 11 genel + sahne paneli | 14 kart11_kur.py (7 business days, paketleme metni) + genel
+#          | 15-19 renk_varyasyon_kur.py (poster onayli karttan birebir)
 # QC: duvar_qc.py (boyut, krem hale, poster NCC, kontrast, kose) + metin_qc.py (yazim, tire, urun metni)
-# PASS ise: data/pod/cl_galeri_final19'da yalniz bu 14 dosya degisir -> commit/push main;
+# PASS ise: data/pod/cl_galeri_final19'da yalniz bu 18 dosya degisir (01 haric) -> commit/push main;
 #   Drive TEMP/CL_GALERI_FINAL19 -> TEMP/CL_GALERI_FINAL19_YEDEK_<damga> yedek, sonra 19 dosya yazilir (sayi 19 kalir);
 #   temas sayfasi + QC Drive TEMP/CL_GALERI_DUVAR_<damga>/
 
@@ -56,12 +57,18 @@ jobs:
           set -euo pipefail
           K=data/pod/cl_galeri_krem_kaynak; P=data/pod/cl_galeri_final19; O=_work/out; mkdir -p $O _work/p
           python3 scripts/pod/duvar_zemin.py data/pod/kapak_sahne_v9.png guclu _work/duvar.png acik3
-          Z=_work/duvar.png; N=14; i=0; t0=$(date +%s)
+          Z=_work/duvar.png; N=18; i=0; t0=$(date +%s)
           eta() { i=$((i+1)); g=$(( $(date +%s) - t0 )); echo "[$i/$N] $1 | gecen ${g}s | kalan ~$(( g * (N - i) / i ))s | %$(( i * 100 / N ))"; }
           python3 scripts/pod/kart02_duvar_kur.py $K/02_format.jpg $Z fonts $O/02_format.jpg >/dev/null; eta 02_format
-          for k in 03_konsept 04_kisisellestirme 05_renk_ve_dijital 07_cerceveler 08_boylar 12_zoom 13_kagit; do
+          for k in 03_konsept 04_kisisellestirme 07_cerceveler 08_boylar 12_zoom 13_kagit; do
             A=""; [ $k = 07_cerceveler ] && A="1556,540,2150,1269"
             python3 scripts/pod/kart_duvar_genel.py $K/$k.jpg $Z $O/$k.jpg "$A"; eta $k
+          done
+          python3 scripts/pod/kart05_satir.py $K/05_renk_ve_dijital.jpg "fonts/Montserrat[wght].ttf" _work/k05_krem.png
+          python3 scripts/pod/kart_duvar_genel.py _work/k05_krem.png $Z $O/05_renk_ve_dijital.jpg; eta 05_renk_ve_dijital
+          for kv in "06_hediye_sahne:145,440,2855,1866,30" "09_yatak_sahne:145,420,2855,1846,30" \
+                    "10_calisma_sahne:145,420,2855,1846,30" "11_yemek_sahne:145,420,2855,1846,30"; do
+            k=${kv%%:*}; python3 scripts/pod/kart_duvar_genel.py $K/$k.jpg $Z $O/$k.jpg "${kv#*:}"; eta $k
           done
           python3 scripts/pod/kart11_kur.py $K/14_surec.jpg $K/14_surec.jpg "fonts/EBGaramond[wght].ttf" "fonts/Montserrat[wght].ttf" _work/k14_krem.jpg
           python3 scripts/pod/kart_duvar_genel.py _work/k14_krem.jpg $Z $O/14_surec.jpg; eta 14_surec
@@ -72,13 +79,14 @@ jobs:
             python3 scripts/pod/renk_varyasyon_kur.py _work/p/$k.png "$ad" "fonts/Montserrat[wght].ttf" $O/$k.jpg $Z | tail -1; eta $k
           done
           ARGS=""
-          for f in $O/*.jpg; do k=$(basename $f .jpg); E=$K/$k.jpg; [ $k = 14_surec ] && E=_work/k14_krem.jpg; ARGS="$ARGS $f $E"; done
+          for f in $O/*.jpg; do k=$(basename $f .jpg); E=$K/$k.jpg; [ $k = 14_surec ] && E=_work/k14_krem.jpg
+            [ $k = 05_renk_ve_dijital ] && E=_work/k05_krem.png; ARGS="$ARGS $f $E"; done
           set +e
           python3 scripts/pod/duvar_qc.py $Z data/pod/kapak_sahne_v9.png $ARGS | tee _work/QC.txt; Q1=${PIPESTATUS[0]}
           python3 scripts/pod/metin_qc.py data/pod/cl_galeri_final19_metin.json | tee -a _work/QC.txt; Q2=${PIPESTATUS[0]}
           set -e
           [ "$Q1" = "0" ] && [ "$Q2" = "0" ] || { echo "QC FAIL: pakete yazilmadi"; exit 1; }
-          # paket: yalniz 14 dosya
+          # paket: yalniz 18 dosya (01 kapak haric)
           for f in $O/*.jpg; do cp $f $P/; done
           DEGISEN=$(git status --porcelain --untracked-files=no | awk '{print $2}' | sort)
           echo "Degisen:"; echo "$DEGISEN"
@@ -87,7 +95,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add $P/*.jpg
-          git commit -q -m "cl_galeri_final19: 14 kart kapak duvari zemininde (GUCLU + ACIK-3; Serdar 28 Eyl). 01/06/09/10/11 degismedi. QC PASS"
+          git commit -q -m "cl_galeri_final19: 18 kart kapak duvari zemininde (GUCLU + ACIK-3); 06/09/10/11 dis zemin, 05 print-ready, 14 paketleme metni (Serdar 28 Eyl). 01 degismedi. QC PASS"
           for i in 1 2 3 4; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep $((2**i)); done
           echo "COMMIT $(git log --oneline -1)"
           # Drive: yedek, sonra guncelle

@@ -15,8 +15,9 @@ Sinif (onayli karttan olculur):
   - kutu ici krem (nesne tarafindan cevrili, >= 2000 px): B = duvar + 0.6*(KREM - duvar) (yari saydam acik ton)
 Cikti: CIKIS.jpg + CIKIS.json (yazi satirlari: kutu, renk, kontrast; nesne kutulari: duvar_qc.py NCC icin).
 Kullanim: kart_duvar_genel.py ESKI.jpg KAPAK_SAHNE_V9.png CIKIS.jpg ["x0,y0,x1,y1;..."]
-  4. arguman: zorunlu nesne dikdortgenleri (olculdu): rengi ve egimi golgeden ayirt edilemeyen nesneler icin
-  (07 White Frame: krem tonlu beyaz cerceve 1556,540,2150,1269; diger uc cerceveyle ayni 594x729).
+  4. arguman: zorunlu nesne dikdortgenleri "x0,y0,x1,y1[,r]" (olculdu): rengi golgeden/kremden ayirt edilemeyen
+  nesneler (07 White Frame 1556,540,2150,1269) ve sahne panelleri (06: 145,440,2855,1866,30; 09-11: 145,420,2855,1846,30;
+  fotograf pikseli aynen kalir, yalniz kartin dis zemini duvar olur).
 """
 import json
 import os
@@ -66,8 +67,13 @@ for i, sl in enumerate(ndi.find_objects(lab), 1):
         if ndi.binary_fill_holes(m).mean() >= 0.9:     # dikdortgen nesne (poster, cerceve, panel): kutunun tamami
             dikdortgen.append(sl)
 nesne = (ndi.binary_fill_holes(nesne) & ~zemin & ~golgemsi) | nesne  # nesne ici krem/golge olmayan her sey nesne
-for x0, y0, x1, y1 in ZORUNLU:
-    nesne[y0:y1, x0:x1] = True; golgemsi[y0:y1, x0:x1] = False
+for z in ZORUNLU:
+    x0, y0, x1, y1 = z[:4]
+    zm = Image.new('L', (x1 - x0, y1 - y0), 0)       # r verilirse yuvarlak kose (sahne paneli, kart_cila_kur ile ayni)
+    from PIL import ImageDraw as _D
+    _D.Draw(zm).rounded_rectangle((0, 0, x1 - x0 - 1, y1 - y0 - 1), radius=z[4] if len(z) > 4 else 0, fill=255)
+    zm = np.asarray(zm) > 0
+    nesne[y0:y1, x0:x1] |= zm; golgemsi[y0:y1, x0:x1] &= ~zm
     nesne_kutu.append((x0, y0, x1 - x0, y1 - y0))
 # dikdortgen nesnenin kutusu tamamen nesnedir (kreme cok yakin beyaz cerceve kenari zemin sayilip yirtilmaz)
 for sl in dikdortgen:
@@ -86,7 +92,8 @@ for i, sl in enumerate(ndi.find_objects(zl), 1):
         # yalniz cizgi/dolgu ile cevrili krem (kutu ici); golge icinde kalan krem cepleri kutu ici degildir
         mm = np.zeros_like(zemin); mm[sl] = m
         halka = ndi.binary_dilation(mm, iterations=3) & ~mm
-        if (halka & golgemsi).sum() < 0.4 * halka.sum():
+        # ... ve cevresi cogunlukla nesne (kutu cizgisi/dolgusu) olmali: buyuk harf ici bosluk (orn. baslikta 'D') kutu degil
+        if (halka & golgemsi).sum() < 0.4 * halka.sum() and (halka & nesne).sum() >= 0.5 * halka.sum():
             ic[sl] |= m
 ic &= ~nesne                                    # nesnenin kendi kreme yakin pikselleri (beyaz cerceve) kutu ici degildir
 ic = ndi.binary_dilation(ic, iterations=3) & ~nesne & ~cekirdek | (ic)
