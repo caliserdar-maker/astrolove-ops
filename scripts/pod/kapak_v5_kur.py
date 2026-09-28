@@ -34,22 +34,21 @@ poster = B.crop((kx, ky, B.width - kx, B.height - ky)).resize((PW, PH), Image.LA
 fr = cerceve_blank(AGCH, poster, F)
 FX, FY = CX - fr.width // 2, TABAN - fr.height
 
-# yan seritleri komsu duvardan KAYDIRMALI yama ile kapat (ayna yok: isik gradyani bozulmasin),
-# dis kenarda 14 px yumusak gecis; ic kenar cerceve ve temas golgesi altinda kalir.
-def yama(hedef_x0, hedef_x1, kaynak_x0):
-    gen = hedef_x1 - hedef_x0
-    par = G.crop((kaynak_x0, 0, kaynak_x0 + gen, TABAN))
-    m = Image.new('L', par.size, 255)
-    mp = np.tile(np.linspace(0, 255, 14), (TABAN, 1)).astype(np.uint8)
-    if kaynak_x0 < hedef_x0:   # sol yama: dis kenar solda
-        m.paste(Image.fromarray(mp), (0, 0))
-    else:                       # sag yama: dis kenar sagda
-        m.paste(Image.fromarray(mp[:, ::-1]), (gen - 14, 0))
-    G.paste(par, (hedef_x0, 0), m)
-gen_sol = FX - BX0 + 4
-gen_sag = BX1 - (FX + fr.width) + 4
-yama(BX0 - 2, BX0 - 2 + gen_sol, BX0 - 2 - gen_sol)
-yama(BX1 + 2 - gen_sag, BX1 + 2, BX1 + 2)
+# bos alanin cerceve disinda kalan seritleri OpenCV Telea inpaint ile duvara tamamlanir
+# (sahne_yazi_sil yontemi; ayna/kaydirma yamalari dikis birakiyordu, Serdar 28 Eyl)
+import cv2
+ga = np.asarray(G).copy()
+mask = np.zeros(ga.shape[:2], np.uint8)
+mask[max(BY0 - 3, 0):TABAN + 3, BX0 - 3:BX1 + 3] = 255   # tum bos alan; delik yok (parlak icten beslenmesin)
+ga = cv2.inpaint(ga, mask, 12, cv2.INPAINT_TELEA)
+# inpaint duz kalir; gercek duvardan yuksek frekans doku eklenir (Serdar 28 Eyl: bulanik bant)
+doku_k = np.asarray(G.crop((1290, 260, 1420, 820))).astype(np.float32)
+hp = doku_k - cv2.GaussianBlur(doku_k, (0, 0), 6)
+H_, W_ = ga.shape[:2]
+ny, nx = H_ // hp.shape[0] + 1, W_ // hp.shape[1] + 1
+hpt = np.tile(hp, (ny, nx, 1))[:H_, :W_]
+ga = np.clip(ga.astype(np.float32) + hpt * (mask[..., None] / 255.0), 0, 255).astype(np.uint8)
+G = Image.fromarray(ga)
 
 # golge (cerceveden once): temas + yumusak, alt-sag
 a = np.asarray(G).astype(np.float32)
@@ -84,7 +83,10 @@ Ri = np.asarray(out).astype(int)
 kalinti = 0
 for xa, xb in [((BX0 - x0) * s, fx - 1), (fx + fr.width * s + 1, (BX1 - x0) * s)]:
     b = Ri[round(20 * s):round((TABAN - 20) * s), round(xa):round(xb)]
-    if b.size: kalinti += int(((b.min(2) > 236) & ((b.max(2) - b.min(2)) < 15)).sum())
+    if b.size:
+        from scipy import ndimage as _nd
+        mm = (b.min(2) > 238) & ((b.max(2) - b.min(2)) < 12)
+        kalinti += int(_nd.binary_opening(mm, iterations=3).sum())   # tek parlak dokular degil, YEKPARE beyaz alan
 yuz_cik = R[round(fy) + 2:round(fy + F * s) - 2, round(fx + fr.width * s / 2) - 100:round(fx + fr.width * s / 2) + 100].reshape(-1, 3).mean(0)
 sapma = float(np.abs(yuz_cik - yuz_ref).max())
 print(f'cerceve {fr.width}x{fr.height} yuz {F} (sahnede) | poster NCC {n:.4f} | beyaz kalinti {kalinti} px (=0) | cerceve renk sapmasi {sapma:.1f} (<=16)')
