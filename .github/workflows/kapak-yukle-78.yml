@@ -1,15 +1,16 @@
 name: kapak-yukle-78
 
 # 78 POD ilaninda v9 kapak yukleme + eski 1. sira kapagi yedekleyip silme (Serdar acik onayi 28 Eyl):
-# scripts/etsy/kapak_yukle_78.py. Varsayilan KURU KOSU (salt okur): PLAN.json + silinecek 78 image_id.
+# scripts/etsy/kapak_yukle_78.py. Kapak kaynagi TEK: TEMP/POD_KAPAK_78/<EN SON damga>/ (OZET 78/78 PASS).
+# Varsayilan KURU KOSU (Etsy salt okur): on kontrol + yedek (GALERI_ONCE.json + eski rank 1 dosyalari)
+# Drive TEMP/KAPAK78_YEDEK_<damga>/ + PLAN.json + silinecek 78 image_id. updateListing CAGRILMAZ.
 # Yazma yalniz apply=true VE confirm=KAPAK78_YUKLE_SIL VE plan_damga (kuru kosunun damgasi) ile; apply
-# plana kilitlidir, ilk hatada DURUR. Yedek: Drive TEMP/KAPAK78_YEDEK_<damga>/<listing_id>_<image_id>.jpg
+# plana kilitlidir (kapak sha256 + canli galeri), ilk hatada DURUR. Yedek: KAPAK78_YEDEK_<plan_damga>/
 # Cikti: Drive TEMP/KAPAK78_YUKLE/<KURU|APPLY>_<damga>/
 
 on:
   workflow_dispatch:
     inputs:
-      kapak_damga: {description: "TEMP/POD_KAPAK_78/<damga> (78/78 PASS olan uretim)", required: true, default: "20260928_0911"}
       plan_damga: {description: "apply: kuru kosu cikti damgasi (TEMP/KAPAK78_YUKLE/KURU_<damga>/PLAN.json)", required: false, default: ""}
       apply: {description: "true = Etsy'ye YAZ + eski kapak SIL (confirm gerekir)", type: boolean, default: false}
       confirm: {description: "Yazma icin tam olarak: KAPAK78_YUKLE_SIL", required: false, default: ""}
@@ -28,13 +29,11 @@ jobs:
     env:
       APPLY: ${{ inputs.apply }}
       CONFIRM: ${{ inputs.confirm }}
-      KDAMGA: ${{ inputs.kapak_damga }}
       PDAMGA: ${{ inputs.plan_damga }}
     steps:
       - name: Onay kapisi
         run: |
           set -euo pipefail
-          [[ "$KDAMGA" =~ ^[0-9]{8}_[0-9]{4}$ ]] || { echo "::error::kapak_damga bicimi YYYYMMDD_HHMM"; exit 1; }
           if [ "$APPLY" = "true" ]; then
             [ "$CONFIRM" = "KAPAK78_YUKLE_SIL" ] || { echo "::error::apply=true icin confirm tam olarak 'KAPAK78_YUKLE_SIL' olmali. DUR."; exit 1; }
             [[ "$PDAMGA" =~ ^[0-9]{8}_[0-9]{4}$ ]] || { echo "::error::apply icin plan_damga (kuru kosu damgasi) gerekli. DUR."; exit 1; }
@@ -69,18 +68,20 @@ jobs:
           set -euo pipefail
           umask 077; mkdir -p _work _out
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
-      - name: Kapaklar + isimler (+ plan)
+      - name: Kapaklar (TEMP/POD_KAPAK_78 en son damga) (+ plan)
         run: |
           set -euo pipefail
-          rclone copy "gdrive:ASTROLOVE/TEMP/POD_KAPAK_78/$KDAMGA" _work/kapak --include "KAPAK_*.jpg" --include "OZET.md" -q
+          KDAMGA=$(rclone lsf --dirs-only "gdrive:ASTROLOVE/TEMP/POD_KAPAK_78/" | tr -d '/' | grep -E '^[0-9]{8}_[0-9]{4}$' | sort | tail -1)
+          [ -n "$KDAMGA" ] || { echo "::error::POD_KAPAK_78 altinda damgali klasor yok. DUR."; exit 1; }
+          K="gdrive:ASTROLOVE/TEMP/POD_KAPAK_78/$KDAMGA"
+          echo "kaynak: $K"
+          rclone copy "$K" _work/kapak --include "KAPAK_*.jpg" --include "OZET.md" -q
           grep -q "^SONUC PASS" _work/kapak/OZET.md || { echo "::error::OZET.md SONUC PASS degil. DUR."; exit 1; }
-          echo "kapak: $(ls _work/kapak/KAPAK_*.jpg | wc -l) | $(grep '^PASS:' _work/kapak/OZET.md)"
-          rclone copy "gdrive:ASTROLOVE/TEMP/POD_KAPAK_V3/SIPARIS" _work/siparis --include "*_MIDNIGHT_BLUE_11x14/KAPI_RAPORU.json" -q
-          mkdir -p _work/isim
-          for d in _work/siparis/*_MIDNIGHT_BLUE_11x14; do
-            c=$(basename "$d"); cp "$d/KAPI_RAPORU.json" "_work/isim/${c%_MIDNIGHT_BLUE_11x14}.json"
-          done
-          echo "isim: $(ls _work/isim | wc -l)"
+          OZET=$(grep '^PASS:' _work/kapak/OZET.md)
+          echo "kapak: $(ls _work/kapak/KAPAK_*.jpg | wc -l) | $OZET"
+          CL=$(rclone lsjson "$K/KAPAK_CANCER_LIBRA.jpg" | python -c 'import json,sys;l=json.load(sys.stdin);print(json.dumps(l[0] if l else {}))')
+          python -c 'import json,sys;json.dump({"klasor":"TEMP/POD_KAPAK_78/"+sys.argv[1]+"/","ozet":sys.argv[2],"cancer_libra":json.loads(sys.argv[3])},open("_work/kaynak.json","w"))' "$KDAMGA" "$OZET" "$CL"
+          cat _work/kaynak.json; echo
           if [ "$MOD" = "APPLY" ]; then
             rclone copyto "gdrive:ASTROLOVE/TEMP/KAPAK78_YUKLE/KURU_${PDAMGA}/PLAN.json" _work/PLAN.json
             echo "plan: KURU_${PDAMGA}/PLAN.json ($(stat -c %s _work/PLAN.json) bayt)"
@@ -93,9 +94,11 @@ jobs:
           TOKEN_FILE: _work/ETSY_TOKEN.json
         run: |
           set -euo pipefail
-          args=(--kapak-dir _work/kapak --isim-dir _work/isim --out _out)
+          args=(--kapak-dir _work/kapak --kaynak-bilgi _work/kaynak.json --out _out)
           if [ "$MOD" = "APPLY" ]; then
-            args+=(--plan _work/PLAN.json --yedek-drive "gdrive:ASTROLOVE/TEMP/KAPAK78_YEDEK_${STAMP}" --apply --confirm "$CONFIRM")
+            args+=(--plan _work/PLAN.json --yedek-drive "gdrive:ASTROLOVE/TEMP/KAPAK78_YEDEK_${PDAMGA}" --apply --confirm "$CONFIRM")
+          else
+            args+=(--yedek-drive "gdrive:ASTROLOVE/TEMP/KAPAK78_YEDEK_${STAMP}")
           fi
           python scripts/etsy/kapak_yukle_78.py "${args[@]}"
       - name: Token + cikti Drive'a
@@ -106,9 +109,17 @@ jobs:
           if grep -rIqE 'x-api-key|refresh_token|"access_token"' _out/ 2>/dev/null; then
             echo "::error::ciktida sir benzeri anahtar bulundu, Drive'a yazilmadi"; exit 1
           fi
-          rm -rf _out/eski_kapak_kuru
+          if [ "${MOD:-KURU}" = "KURU" ] && [ -d _out/yedek ]; then
+            y="gdrive:ASTROLOVE/TEMP/KAPAK78_YEDEK_${STAMP}"
+            rclone copy _out/yedek "$y" -q
+            if rclone check _out/yedek "$y" --one-way -q; then
+              echo "Yedek: TEMP/KAPAK78_YEDEK_${STAMP}/ ($(ls _out/yedek | wc -l) dosya, rclone check 0 fark)"
+            else
+              echo "::error::yedek rclone check FARK var"; exit 1
+            fi
+          fi
           hedef="gdrive:ASTROLOVE/TEMP/KAPAK78_YUKLE/${MOD:-KURU}_${STAMP}"
-          [ -d _out ] && rclone copy _out "$hedef" -q && echo "Cikti: TEMP/KAPAK78_YUKLE/${MOD:-KURU}_${STAMP}/"
+          [ -d _out ] && rclone copy _out "$hedef" --exclude "yedek/*.jpg" -q && echo "Cikti: TEMP/KAPAK78_YUKLE/${MOD:-KURU}_${STAMP}/"
           [ -f _out/report.md ] && cat _out/report.md >> "$GITHUB_STEP_SUMMARY" || true
       - if: ${{ always() }}
         run: rm -rf _work ~/.config/rclone

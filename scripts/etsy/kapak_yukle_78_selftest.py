@@ -16,6 +16,7 @@ import kapak_yukle_78 as K  # noqa: E402
 
 K.OKUMA_BEKLE = 0
 K.BEKLENEN = 3
+K.KAPAK_BOYUT = (400, 300)
 K.time.sleep = lambda s: None
 import pod_cover_from_video  # noqa: E402
 pod_cover_from_video.time.sleep = lambda s: None
@@ -92,17 +93,16 @@ def hazirla():
         w = csv.writer(fh); w.writerow(["listing_id", "cift", "a", "b"])
         for r in IDS:
             w.writerow(r)
-    kd, idir = TMP / "kapak", TMP / "isim"
-    kd.mkdir(exist_ok=True); idir.mkdir(exist_ok=True)
+    kd = TMP / "kapak"
+    kd.mkdir(exist_ok=True)
     for _, c, *_ in IDS:
         resim(kd / f"KAPAK_{c}.jpg", 400, 300)
-        (idir / f"{c}.json").write_text(json.dumps({"isim1": "EMILY", "isim2": "JAMES"}))
-    return ids, kd, idir
+    return ids, kd
 
 
-def args(ids, kd, idir, out, **kw):
-    d = dict(ids=str(ids), kapak_dir=str(kd), isim_dir=str(idir), out=str(out), plan=None, yedek_drive=None,
-             apply=False, confirm="", quota_min=60)
+def args(ids, kd, out, **kw):
+    d = dict(ids=str(ids), kapak_dir=str(kd), out=str(out), plan=None, yedek_drive=None,
+             apply=False, confirm="", quota_min=60, kaynak={"klasor": "test", "ozet": "PASS: 3 / 3"})
     d.update(kw)
     return SimpleNamespace(**d)
 
@@ -113,28 +113,28 @@ def indir_fake(url, yol):
 
 def main():
     K.indir = indir_fake
-    ids, kd, idir = hazirla()
-    satirlar, kapak, hata = K.kapaklar_oku(ids, kd, idir)
+    ids, kd = hazirla()
+    satirlar, kapak, sorun, fazla = K.kapaklar_oku(ids, kd)
     kont = {}
-    kont["kapak/isim okuma"] = not hata and len(kapak) == 3 and "Emily and James" in kapak["ARIES_LEO"]["alt"]
+    kont["kapak okuma"] = not sorun and not fazla and len(kapak) == 3 and kapak["ARIES_LEO"]["alt"].startswith("Aries and Leo")
     kont["alt metinde uzun/orta tire yok"] = all("–" not in k["alt"] and "—" not in k["alt"] for k in kapak.values())
 
     # 1) varyasyon bagli eski kapak -> BLOK
     f = Fake(); f.L["222"]["vimg"][0]["image_id"] = 22201
     o1 = TMP / "o1"
-    ok = K.kuru(args(ids, kd, idir, o1), f, "S", o1, satirlar, kapak)
+    ok = K.kuru(args(ids, kd, o1), f, "S", o1, satirlar, kapak, sorun, fazla)
     p = json.loads((o1 / "PLAN.json").read_text())["satirlar"]
     kont["BLOK: varyasyona bagli eski kapak"] = (not ok) and [r["durum"] for r in p] == ["PLAN", "BLOK", "PLAN"]
     kont["kuru: yazma yok"] = f.yaz == []
 
     # 2) temiz kuru + apply
     f = Fake(); o2 = TMP / "o2"
-    ok = K.kuru(args(ids, kd, idir, o2), f, "S", o2, satirlar, kapak)
+    ok = K.kuru(args(ids, kd, o2), f, "S", o2, satirlar, kapak, sorun, fazla)
     kont["kuru PASS 3/3 PLAN"] = ok and (o2 / "SILINECEK_IMAGE_ID.txt").read_text().splitlines() == \
         ["111,11101", "222,22201", "333,33301"]
     kont["rapor silinecek listesi"] = "Silinecek 3 image_id" in (o2 / "report.md").read_text()
     o3 = TMP / "o3"; yd = TMP / "drive_yedek"
-    ok = K.apply(args(ids, kd, idir, o3, plan=str(o2 / "PLAN.json"), yedek_drive=str(yd), apply=True,
+    ok = K.apply(args(ids, kd, o3, plan=str(o2 / "PLAN.json"), yedek_drive=str(yd), apply=True,
                       confirm=K.ONAY), f, "S", o3, kapak)
     kont["apply PASS 3/3"] = ok
     kont["her ilan: sayi 12, rank1 yeni, eski yok"] = all(
@@ -149,40 +149,60 @@ def main():
 
     # 3) tekrar kuru -> ZATEN (ikinci silme plani cikmaz)
     o4 = TMP / "o4"
-    K.kuru(args(ids, kd, idir, o4), f, "S", o4, satirlar, kapak)
+    K.kuru(args(ids, kd, o4), f, "S", o4, satirlar, kapak, sorun, fazla)
     p = json.loads((o4 / "PLAN.json").read_text())["satirlar"]
     kont["tekrar kuru: 3 ZATEN, silinecek 0"] = [r["durum"] for r in p] == ["ZATEN"] * 3 and \
         (o4 / "SILINECEK_IMAGE_ID.txt").read_text() == ""
 
     # 4) plan sonrasi canli degisti -> DUR, yazma yok
     f = Fake(); o5 = TMP / "o5"
-    K.kuru(args(ids, kd, idir, o5), f, "S", o5, satirlar, kapak)
+    K.kuru(args(ids, kd, o5), f, "S", o5, satirlar, kapak, sorun, fazla)
     f.L["111"]["imgs"][0]["rank"], f.L["111"]["imgs"][1]["rank"] = 2, 1; f._renum("111")
     o6 = TMP / "o6"
-    ok = K.apply(args(ids, kd, idir, o6, plan=str(o5 / "PLAN.json"), yedek_drive=str(TMP / "yd6"), apply=True,
+    ok = K.apply(args(ids, kd, o6, plan=str(o5 / "PLAN.json"), yedek_drive=str(TMP / "yd6"), apply=True,
                       confirm=K.ONAY), f, "S", o6, kapak)
     s = json.loads((o6 / "SONUC.json").read_text())
     kont["plan-canli uyusmazligi: DUR, yazma yok"] = (not ok) and f.yaz == [] and len(s) == 1 and "on kontrol" in s[0]["hata"]
 
     # 5) yukleme 1. siraya oturmuyor -> silme YOK, ilk ilanda DUR
     f = Fake(bozuk_rank=True); o7 = TMP / "o7"
-    K.kuru(args(ids, kd, idir, o7), f, "S", o7, satirlar, kapak)
+    K.kuru(args(ids, kd, o7), f, "S", o7, satirlar, kapak, sorun, fazla)
     o8 = TMP / "o8"
-    ok = K.apply(args(ids, kd, idir, o8, plan=str(o7 / "PLAN.json"), yedek_drive=str(TMP / "yd8"), apply=True,
+    ok = K.apply(args(ids, kd, o8, plan=str(o7 / "PLAN.json"), yedek_drive=str(TMP / "yd8"), apply=True,
                       confirm=K.ONAY), f, "S", o8, kapak)
     kont["yukleme FAIL: silme yok, 2. ilana gecilmedi"] = (not ok) and not any(x[0] == "DELETE" for x in f.yaz) \
         and {x[1] for x in f.yaz} == {"111"} and len(f.L["111"]["imgs"]) == 13
 
     # 6) kapak dosyasi plandan sonra degisti -> DUR
     f = Fake(); o9 = TMP / "o9"
-    K.kuru(args(ids, kd, idir, o9), f, "S", o9, satirlar, kapak)
+    K.kuru(args(ids, kd, o9), f, "S", o9, satirlar, kapak, sorun, fazla)
     k2 = json.loads(json.dumps(kapak)); k2["ARIES_LEO"]["sha256"] = "x"
     try:
-        K.apply(args(ids, kd, idir, TMP / "o10", plan=str(o9 / "PLAN.json"), yedek_drive=str(TMP / "yd10"),
+        K.apply(args(ids, kd, TMP / "o10", plan=str(o9 / "PLAN.json"), yedek_drive=str(TMP / "yd10"),
                      apply=True, confirm=K.ONAY), f, "S", TMP / "o10", k2)
         kont["kapak sha degisti: DUR"] = False
     except SystemExit:
         kont["kapak sha degisti: DUR"] = f.yaz == []
+
+    # 7) kuru yedegi Drive'da (boyut = plan) -> apply yeniden indirmez; kuru yedek + galeri JSON yazar
+    f = Fake(); o11 = TMP / "o11"
+    K.kuru(args(ids, kd, o11), f, "S", o11, satirlar, kapak, sorun, fazla)
+    kont["kuru yedek: 3 eski kapak + GALERI_ONCE.json"] = sorted(p.name for p in (o11 / "yedek").iterdir()) == \
+        ["111_11101.jpg", "222_22201.jpg", "333_33301.jpg", "GALERI_ONCE.json"]
+    sayac = []
+    K.indir = lambda url, yol: (sayac.append(url), indir_fake(url, yol))
+    ok = K.apply(args(ids, kd, TMP / "o12", plan=str(o11 / "PLAN.json"), yedek_drive=str(o11 / "yedek"),
+                      apply=True, confirm=K.ONAY), f, "S", TMP / "o12", kapak)
+    kont["yedek Drive'da: apply PASS, yeniden indirme yok"] = ok and sayac == []
+    K.indir = indir_fake
+
+    # 8) eslesmeyen cift (kapak yok) -> BLOK
+    (kd / "KAPAK_PISCES_VIRGO.jpg").rename(TMP / "x.jpg")
+    s2, k3, so3, fz3 = K.kapaklar_oku(ids, kd)
+    f = Fake(); o13 = TMP / "o13"
+    ok = K.kuru(args(ids, kd, o13), f, "S", o13, s2, k3, so3, fz3)
+    p = json.loads((o13 / "PLAN.json").read_text())["satirlar"]
+    kont["eslesmeyen cift: BLOK"] = (not ok) and p[2]["durum"] == "BLOK" and "eslesmeyen" in p[2]["neden"]
 
     for k, v in kont.items():
         print(f"{'PASS' if v else 'FAIL'} {k}")
