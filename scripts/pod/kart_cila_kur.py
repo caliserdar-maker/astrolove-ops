@@ -102,17 +102,59 @@ def poster_hazirla(kart, kaynak, W, H):
     return P.crop((L, T, L + W, T + H)), kirp, kirp_eks
 
 
-def ic_golge(P):
-    """Cok ince ic golge: ust/sol (isik sol-ust) ~%18 -> 0 (tau 2.2 px), alt/sag ~%7 (tau 1.2 px)."""
+def ic_golge(P, pay=0):
+    """Cok ince ic golge: ust/sol (isik sol-ust) ~%18 -> 0 (tau 2.2 px), alt/sag ~%7 (tau 1.2 px).
+    pay: posterin cerceve altina giren (gorunmeyen) kenar payi; golge gorunen kenardan olculur."""
     W, H = P.size
-    x = np.arange(W, dtype=np.float32); y = np.arange(H, dtype=np.float32)
+    x = np.maximum(np.arange(W, dtype=np.float32) - pay, 0); y = np.maximum(np.arange(H, dtype=np.float32) - pay, 0)
+    xr = np.maximum(W - 1 - pay - np.arange(W, dtype=np.float32), 0); yr = np.maximum(H - 1 - pay - np.arange(H, dtype=np.float32), 0)
     g = np.ones((H, W), np.float32)
     g *= (1 - 0.18 * np.exp(-y / 2.2))[:, None]
     g *= (1 - 0.18 * np.exp(-x / 2.2))[None, :]
-    g *= (1 - 0.07 * np.exp(-(H - 1 - y) / 1.2))[:, None]
-    g *= (1 - 0.07 * np.exp(-(W - 1 - x) / 1.2))[None, :]
+    g *= (1 - 0.07 * np.exp(-yr / 1.2))[:, None]
+    g *= (1 - 0.07 * np.exp(-xr / 1.2))[None, :]
     a = np.asarray(P).astype(np.float32) * g[..., None]
     return Image.fromarray(np.clip(np.rint(a), 0, 255).astype(np.uint8))
+
+
+def cerceve(A):
+    """Panelde cerceve pikseli: koyu dudak (parlaklik < 120) ya da altin (chroma > 40). Notr acik/gri gecis
+    seridi (orn. 169,178,180 ve 208,201,196) cerceve DEGILDIR; cercevenin parlak pahi dudaktan sonra gelir."""
+    A = np.asarray(A).astype(np.int16)
+    return (A.mean(2) < 120) | ((A.max(2) - A.min(2)) > 40)
+
+
+ALTINA = 2          # poster cercevenin altina girer (px); cerceve pikselleri ustte kalir
+
+
+def yerlesim(sahne, kutu, s, genislet=True):
+    """Posterin paneldeki yeri. genislet=False: v2 (onayli 06/10/11; poster = olculen aciklik).
+    genislet=True (Serdar 28 Eyl, 09 duzeltmesi): her satir/sutunda aciklik kenarindan disa taranir, ilk cerceve
+    pikseline kadar olan acik gecis seridi (en cok medyan+ALTINA) poster olur; cerceve pikselleri degismez.
+    Donus: (px, py, W, H, pay, maske[panel bool], (Xv0, Yv0, Xv1, Yv1) gorunen poster dikdortgeni, uzanti)"""
+    X0, Y0, X1, Y1 = panel_aciklik(kutu, s)
+    Hs, Ws = sahne.size[1], sahne.size[0]
+    M = np.zeros((Hs, Ws), bool); M[Y0:Y1, X0:X1] = True
+    if not genislet:
+        return X0, Y0, X1 - X0, Y1 - Y0, 0, M, (X0, Y0, X1, Y1), (0, 0, 0, 0)
+    C = cerceve(sahne)
+    def k_ilk(dizi):                                     # disa dogru ilk cerceve pikseline kadar kac piksel
+        i = np.flatnonzero(dizi[:12]); return int(i[0]) if len(i) else 12
+    ic_y = range(Y0 + (Y1 - Y0) // 10, Y1 - (Y1 - Y0) // 10); ic_x = range(X0 + (X1 - X0) // 10, X1 - (X1 - X0) // 10)
+    kl = {y: k_ilk(C[y, X0 - 1::-1]) for y in range(Y0, Y1)}; kr = {y: k_ilk(C[y, X1:]) for y in range(Y0, Y1)}
+    kt = {x: k_ilk(C[Y0 - 1::-1, x]) for x in range(X0, X1)}; kb = {x: k_ilk(C[Y1:, x]) for x in range(X0, X1)}
+    dl, dr = int(np.median([kl[y] for y in ic_y])), int(np.median([kr[y] for y in ic_y]))
+    dt, db = int(np.median([kt[x] for x in ic_x])), int(np.median([kb[x] for x in ic_x]))
+    for y in range(Y0, Y1):
+        M[y, X0 - min(kl[y], dl + ALTINA):X0] = True; M[y, X1:X1 + min(kr[y], dr + ALTINA)] = True
+    for x in range(X0, X1):
+        M[Y0 - min(kt[x], dt + ALTINA):Y0, x] = True; M[Y1:Y1 + min(kb[x], db + ALTINA), x] = True
+    # koseler: gorunen dikdortgenin kose karelerinde cerceve olmayan pikseller
+    V = (X0 - dl, Y0 - dt, X1 + dr, Y1 + db)
+    kose = np.zeros_like(M); kose[V[1]:V[3], V[0]:V[2]] = True
+    M |= kose & ~C
+    U = (V[0] - ALTINA, V[1] - ALTINA, V[2] + ALTINA, V[3] + ALTINA)   # poster boyu; maske hep U icinde kalir
+    return U[0], U[1], U[2] - U[0], U[3] - U[1], ALTINA, M, V, (dl, dt, dr, db)
 
 
 def font(yol, boy, w):
@@ -125,7 +167,7 @@ def panel_maske(boyut):
     return m
 
 
-def kur(kart, sahne_yol, poster_yol, eski_yol, GAR, MON):
+def kur(kart, sahne_yol, poster_yol, eski_yol, GAR, MON, genislet=True):
     K = KARTLAR[kart]
     out = Image.new('RGB', (3000, 2250), BG); d = ImageDraw.Draw(out)
     E = Image.open(eski_yol).convert('RGB')
@@ -138,11 +180,12 @@ def kur(kart, sahne_yol, poster_yol, eski_yol, GAR, MON):
     G = Image.open(sahne_yol).convert('RGB')
     kutu, dolu, sapma = aciklik(G)
     sahne, s = sahne_isle(G)
-    X0, Y0, X1, Y1 = panel_aciklik(kutu, s)
-    poster, kirp, kirp_eks = poster_hazirla(kart, poster_yol, X1 - X0, Y1 - Y0)
+    px, py, W, H, pay, M, V, uzanti = yerlesim(sahne, kutu, s, genislet)
+    poster, kirp, kirp_eks = poster_hazirla(kart, poster_yol, W, H)
     if kirp_eks > 0.03:
-        raise SystemExit(f'DUR: {kart} poster kirpimi %{kirp_eks * 100:.2f} > %3 (acıklik oran {(X1 - X0) / (Y1 - Y0):.4f})')
-    sahne.paste(ic_golge(poster), (X0, Y0))
+        raise SystemExit(f'DUR: {kart} poster kirpimi %{kirp_eks * 100:.2f} > %3 (aciklik oran {W / H:.4f})')
+    kat = Image.new('RGB', sahne.size); kat.paste(ic_golge(poster, pay), (px, py))
+    sahne = Image.composite(kat, sahne, Image.fromarray((M * 255).astype(np.uint8)))
     SY = K['SY']
     out.paste(sahne, (SX, SY), panel_maske(sahne.size))
 
@@ -155,7 +198,7 @@ def kur(kart, sahne_yol, poster_yol, eski_yol, GAR, MON):
         yol, w = yollar[fnt]
         f = font(yol, boy[0], w) if boy else fit(yol, w, t, hedef)
         orta(SY + sahne.height + dy, t, f, NAVY_T if fnt == 'GAR' else SANS_T)
-    bilgi = dict(kutu=kutu, dolu=dolu, sapma=sapma, s=s, acik=(X0, Y0, X1, Y1), SY=SY, panel=sahne.size,
+    bilgi = dict(kutu=kutu, dolu=dolu, sapma=sapma, s=s, gorunen=V, uzanti=uzanti, SY=SY, panel=sahne.size,
                  poster=poster.size, kirp=kirp, kirp_eks=kirp_eks)
     return out, bilgi
 

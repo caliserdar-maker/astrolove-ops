@@ -4,13 +4,24 @@ name: kart-cila-ornek
 # Girdi: data/pod/gpt_sahne_cila (sahne), data/pod/cl_galeri_final19 (ust etiket + alt serit pikselleri),
 #        Drive TEMP/POD_KAPAK_V3/SIPARIS/CANCER_LIBRA_MIDNIGHT_BLUE_11x14/BASKI_11x14.jpg (MB),
 #        Drive TEMP/CANLI_GORSEL/4570143815/05_8581517848.jpg (canli palet karti 'Five palettes'; kart14/15/16'daki canli 04: CI, DB, PW)
-# Cikti: Drive ASTROLOVE/TEMP/KART_CILA_ORNEK_<damga>/ (4 JPEG) + KONTROL/ (kayipsiz PNG + QC.txt) + paylasim linki
+# Cikti: Drive ASTROLOVE/TEMP/KART_CILA_ORNEK_<damga>/ (kurulan JPEG'ler) + KONTROL/ (kayipsiz PNG + QC.txt) + link
+# kartlar: kurulup yuklenecekler. onayli: onayli_klasor'den indirilip v2 geometrisiyle yalniz QC'lenir (yuklenmez).
 
 permissions:
   contents: read
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      kartlar:
+        description: "Kurulup yuklenecek kartlar"
+        default: "06,09,10,11"
+      onayli:
+        description: "Yalniz QC'lenecek onayli kartlar (virgullu, bos olabilir)"
+        default: ""
+      onayli_klasor:
+        description: "Onayli kartlarin Drive klasoru (TEMP altinda)"
+        default: "KART_CILA_ORNEK_20260928_1038"
 
 jobs:
   kur:
@@ -41,9 +52,13 @@ jobs:
             [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
           fi
       - name: Kur, QC, Drive'a yaz
+        env:
+          KARTLAR: ${{ inputs.kartlar }}
+          ONAYLI: ${{ inputs.onayli }}
+          ONAYLI_KLASOR: ${{ inputs.onayli_klasor }}
         run: |
           set -euo pipefail
-          mkdir -p _work/out _work/out/KONTROL
+          mkdir -p _work/out/KONTROL _work/qc/KONTROL
           rclone copyto "gdrive:ASTROLOVE/TEMP/POD_KAPAK_V3/SIPARIS/CANCER_LIBRA_MIDNIGHT_BLUE_11x14/BASKI_11x14.jpg" _work/BASKI_11x14.jpg
           rclone copyto "gdrive:ASTROLOVE/TEMP/CANLI_GORSEL/4570143815/05_8581517848.jpg" _work/CANLI_04.jpg
           python3 - <<'EOF'
@@ -58,13 +73,20 @@ jobs:
           for k in 06:06_hediye_sahne:SAHNE_HEDIYE:BASKI_11x14 09:09_yatak_sahne:SAHNE_YATAK:CANLI_04 \
                    10:10_calisma_sahne:SAHNE_CALISMA:CANLI_04 11:11_yemek_sahne:SAHNE_YEMEK:CANLI_04; do
             IFS=: read -r n ad sh src <<<"$k"
+            if [[ ",$ONAYLI," == *",$n,"* ]]; then
+              rclone copyto "gdrive:ASTROLOVE/TEMP/$ONAYLI_KLASOR/$ad.jpg" "_work/qc/$ad.jpg"
+              rclone copyto "gdrive:ASTROLOVE/TEMP/$ONAYLI_KLASOR/KONTROL/$ad.png" "_work/qc/KONTROL/$ad.png"
+              echo "$n onayli: $ONAYLI_KLASOR/$ad.jpg (yalniz QC)"; continue
+            fi
+            [[ ",$KARTLAR," == *",$n,"* ]] || continue
             python3 scripts/pod/kart_cila_kur.py "$n" "data/pod/gpt_sahne_cila/$sh.png" "_work/$src.jpg" \
               "data/pod/cl_galeri_final19/$ad.jpg" "fonts/EBGaramond[wght].ttf" "fonts/Montserrat[wght].ttf" \
               "_work/out/$ad.jpg" "_work/out/KONTROL/$ad.png"
+            cp "_work/out/$ad.jpg" _work/qc/; cp "_work/out/KONTROL/$ad.png" _work/qc/KONTROL/
           done
           set +e
-          python3 scripts/pod/kart_cila_qc.py _work/out _work/out/KONTROL data/pod/gpt_sahne_cila \
-            _work/BASKI_11x14.jpg _work/CANLI_04.jpg | tee _work/out/KONTROL/QC.txt
+          python3 scripts/pod/kart_cila_qc.py _work/qc _work/qc/KONTROL data/pod/gpt_sahne_cila \
+            _work/BASKI_11x14.jpg _work/CANLI_04.jpg "$ONAYLI" | tee _work/out/KONTROL/QC.txt
           QC=${PIPESTATUS[0]}
           set -e
           DAMGA=$(date -u +%Y%m%d_%H%M)
