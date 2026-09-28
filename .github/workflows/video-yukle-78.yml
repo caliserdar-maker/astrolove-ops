@@ -1,16 +1,26 @@
 name: video-yukle-78
 
-# 78 POD ilanina v5 kapak videosu: YALNIZ KURU KOSU (Etsy salt okur; yukleme/silme YOK).
-# scripts/etsy/video_yukle_78.py. Video kaynagi: TEMP/POD_VIDEO_V2/<damga>/ (bos = OZET.md'si olan en son damga).
-# Uygulama (uploadListingVideo) ayri adim, Serdar acik onayiyla yazilir.
-# Cikti: Drive TEMP/VIDEO78_YUKLE/KURU_<damga>/ (PLAN.json, PLAN.csv, report.md) + eski video yedegi
-# TEMP/VIDEO78_YEDEK_<damga>/.
+# 78 POD ilanina v5 kapak videosu. scripts/etsy/video_yukle_78.py.
+# KURU (varsayilan, Etsy salt okur): video kaynagi TEMP/POD_VIDEO_V2/<damga>/ (bos = OZET.md'si olan en son damga).
+#   Cikti: Drive TEMP/VIDEO78_YUKLE/KURU_<damga>/ (PLAN.json, PLAN.csv, report.md) + eski video yedegi
+#   TEMP/VIDEO78_YEDEK_<damga>/.
+# APPLY (yazma): yalniz apply=true VE confirm=VIDEO78_YUKLE VE plan_damga (kuru kosu damgasi). Plana kilitli
+#   (video sha256, canli eski video id, yedek Drive'da); ilan basinda kota kontrolu, yetmezse ilana baslanmaz
+#   (ATLANDI); ilk FAIL'de durur. Cikti: TEMP/VIDEO78_YUKLE/APPLY_<damga>/report.md (YUKLENDI / ATLANDI / FAIL).
+# TEK SEFERLIK ZAMANLAMA (Serdar onayi 28 Eyl): 29 Eyl 2026 01:30 UTC (kapak-yukle-78 00:05'ten sonra; Etsy
+#   kilidi sirayi tutar). Plan KURU_20260928_1359 (75 ilan, PASS), haric ARIES_LIBRA, AQUARIUS_LIBRA, CAPRICORN_LIBRA.
+#   Kapi isi yalniz 20260929 tarihinde calisir; baska gunlerdeki cron tetiklemeleri hicbir sey yapmaz.
 
 on:
   workflow_dispatch:
     inputs:
       video_damga: {description: "TEMP/POD_VIDEO_V2 damgasi (bos = OZET.md'si olan en son)", required: false, default: ""}
-      haric: {description: "virgullu cift listesi (plana alinmaz)", required: false, default: ""}
+      haric: {description: "virgullu cift listesi (plana alinmaz / apply'da dokunulmaz)", required: false, default: ""}
+      apply: {description: "true = Etsy'ye YAZ (Serdar onayi gerekir)", type: boolean, default: false}
+      confirm: {description: "Yazma icin tam olarak: VIDEO78_YUKLE", required: false, default: ""}
+      plan_damga: {description: "apply: kuru kosunun damgasi (TEMP/VIDEO78_YUKLE/KURU_<damga>)", required: false, default: ""}
+  schedule:
+    - cron: "30 1 29 9 *"   # tek seferlik: 2026-09-29 01:30 UTC (kapi isi tarihi dogrular)
 
 
 permissions:
@@ -18,13 +28,48 @@ permissions:
   contents: read
 
 jobs:
-  kuru:
+  kapi:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    outputs:
+      calis: ${{ steps.k.outputs.calis }}
+    steps:
+      - id: k
+        env:
+          OLAY: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          if [ "$OLAY" != "schedule" ]; then echo "calis=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+          gun=$(date -u +%Y%m%d)
+          if [ "$gun" = "20260929" ]; then
+            echo "tek seferlik zamanlama: $gun, 75 video (plan 20260928_1359)"
+            echo "calis=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "tek seferlik zamanlama yalniz 20260929; bugun $gun -> hicbir sey yapilmaz"
+            echo "calis=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  kuru:
+    needs: kapi
+    if: needs.kapi.outputs.calis == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
     env:
       VDAMGA_IN: ${{ inputs.video_damga }}
-      HARIC: ${{ inputs.haric }}
+      APPLY: ${{ github.event_name == 'schedule' && 'true' || inputs.apply }}
+      CONFIRM: ${{ github.event_name == 'schedule' && 'VIDEO78_YUKLE' || inputs.confirm }}
+      PDAMGA: ${{ github.event_name == 'schedule' && '20260928_1359' || inputs.plan_damga }}
+      HARIC: ${{ github.event_name == 'schedule' && 'AQUARIUS_LIBRA,ARIES_LIBRA,CAPRICORN_LIBRA' || inputs.haric }}
     steps:
+      - name: Onay kapisi
+        run: |
+          set -euo pipefail
+          if [ "$APPLY" = "true" ]; then
+            [ "$CONFIRM" = "VIDEO78_YUKLE" ] || { echo "::error::apply=true icin confirm tam olarak 'VIDEO78_YUKLE' olmali. DUR."; exit 1; }
+            [[ "$PDAMGA" =~ ^[0-9]{8}_[0-9]{4}$ ]] || { echo "::error::apply icin plan_damga (kuru kosu damgasi) gerekli. DUR."; exit 1; }
+            echo "MOD=APPLY" >> "$GITHUB_ENV"
+          else
+            echo "MOD=KURU" >> "$GITHUB_ENV"
+          fi
       - uses: actions/checkout@v4
       - name: Etsy kilidi (sira bekle, iptal yok)
         env:
@@ -58,11 +103,21 @@ jobs:
           set -euo pipefail
           umask 077; mkdir -p _work _out
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+      - name: Plan + yedek listesi (yalniz apply)
+        if: env.MOD == 'APPLY'
+        run: |
+          set -euo pipefail
+          rclone copyto "gdrive:ASTROLOVE/TEMP/VIDEO78_YUKLE/KURU_${PDAMGA}/PLAN.json" _work/PLAN.json
+          rclone lsf "gdrive:ASTROLOVE/TEMP/VIDEO78_YEDEK_${PDAMGA}/" --files-only > _work/yedek.txt
+          VD=$(python -c 'import json;print(json.load(open("_work/PLAN.json"))["kaynak"]["klasor"])' | sed -E 's#^TEMP/POD_VIDEO_V2/([0-9]{8}_[0-9]{4})/$#\1#')
+          [[ "$VD" =~ ^[0-9]{8}_[0-9]{4}$ ]] || { echo "::error::plan video kaynagi okunamadi. DUR."; exit 1; }
+          echo "VDAMGA_PLAN=$VD" >> "$GITHUB_ENV"
+          echo "plan: KURU_${PDAMGA}/PLAN.json | video kaynagi (plandan): $VD | yedek: $(wc -l < _work/yedek.txt) dosya"
       - name: Videolar (TEMP/POD_VIDEO_V2)
         run: |
           set -euo pipefail
           K0="gdrive:ASTROLOVE/TEMP/POD_VIDEO_V2"
-          VDAMGA="$VDAMGA_IN"
+          VDAMGA="${VDAMGA_PLAN:-$VDAMGA_IN}"
           if [ -z "$VDAMGA" ]; then
             for d in $(rclone lsf --dirs-only "$K0/" | tr -d '/' | grep -E '^[0-9]{8}_[0-9]{4}$' | sort -r); do
               if rclone lsf "$K0/$d/OZET.md" >/dev/null 2>&1 && [ -n "$(rclone lsf "$K0/$d/OZET.md")" ]; then VDAMGA=$d; break; fi
@@ -72,14 +127,20 @@ jobs:
           rclone copy "$K0/$VDAMGA" _work/video --include "VIDEO_*.mp4" --include "QC_*.json" --include "OZET.md" -q
           OZET=$(grep '^PASS:' _work/video/OZET.md || echo '?')
           echo "kaynak: TEMP/POD_VIDEO_V2/$VDAMGA | video $(ls _work/video/VIDEO_*.mp4 | wc -l) | $OZET"
-          python -c 'import json,sys;json.dump({"klasor":"TEMP/POD_VIDEO_V2/"+sys.argv[1]+"/","ozet":sys.argv[2]},open("_work/kaynak.json","w"))' "$VDAMGA" "$OZET"
-      - name: Kuru kosu (Etsy salt okur)
+          python -c 'import json,sys;json.dump({"klasor":"TEMP/POD_VIDEO_V2/"+sys.argv[1]+"/","ozet":sys.argv[2],"plan":sys.argv[3]},open("_work/kaynak.json","w"))' "$VDAMGA" "$OZET" "TEMP/VIDEO78_YUKLE/KURU_${PDAMGA:-}/PLAN.json"
+      - name: Video yukleme (kuru / apply)
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
           TOKEN_FILE: _work/ETSY_TOKEN.json
-        run: python scripts/etsy/video_yukle_78.py --video-dir _work/video --kaynak-bilgi _work/kaynak.json --out _out --haric "$HARIC"
+        run: |
+          set -euo pipefail
+          args=(--video-dir _work/video --kaynak-bilgi _work/kaynak.json --out _out --haric "$HARIC")
+          if [ "$MOD" = "APPLY" ]; then
+            args+=(--plan _work/PLAN.json --yedek-liste _work/yedek.txt --apply --confirm "$CONFIRM")
+          fi
+          python scripts/etsy/video_yukle_78.py "${args[@]}"
       - name: Token + cikti Drive'a
         if: ${{ always() }}
         run: |
@@ -88,11 +149,11 @@ jobs:
           if grep -rIqE 'x-api-key|refresh_token|"access_token"' _out/ 2>/dev/null; then
             echo "::error::ciktida sir benzeri anahtar bulundu, Drive'a yazilmadi"; exit 1
           fi
-          if [ -d _out/yedek ] && [ -n "$(ls -A _out/yedek)" ]; then
+          if [ "${MOD:-KURU}" = "KURU" ] && [ -d _out/yedek ] && [ -n "$(ls -A _out/yedek)" ]; then
             rclone copy _out/yedek "gdrive:ASTROLOVE/TEMP/VIDEO78_YEDEK_${STAMP}" -q
             rclone check _out/yedek "gdrive:ASTROLOVE/TEMP/VIDEO78_YEDEK_${STAMP}" --one-way -q && echo "Yedek: TEMP/VIDEO78_YEDEK_${STAMP}/ ($(ls _out/yedek | wc -l) dosya)"
           fi
-          [ -d _out ] && rclone copy _out "gdrive:ASTROLOVE/TEMP/VIDEO78_YUKLE/KURU_${STAMP}" --exclude "yedek/**" -q && echo "Cikti: TEMP/VIDEO78_YUKLE/KURU_${STAMP}/"
+          [ -d _out ] && rclone copy _out "gdrive:ASTROLOVE/TEMP/VIDEO78_YUKLE/${MOD:-KURU}_${STAMP}" --exclude "yedek/**" -q && echo "Cikti: TEMP/VIDEO78_YUKLE/${MOD:-KURU}_${STAMP}/"
           [ -f _out/report.md ] && cat _out/report.md >> "$GITHUB_STEP_SUMMARY" || true
       - if: ${{ always() }}
         run: rm -rf _work ~/.config/rclone
