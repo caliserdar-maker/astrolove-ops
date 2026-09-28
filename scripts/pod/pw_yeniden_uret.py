@@ -38,8 +38,12 @@ def en_yakin(a, maske):
     return a[iy, ix]
 
 
-def yeniden(pw, db):
-    """pw, db: HxWx3 float (ayni KUCUK kutusu). Donus: yeni pw, degisen maske, gercek sekil (DB alfa >= 0.5)."""
+def yeniden(pw, db, renk='pw'):
+    """pw, db: HxWx3 float (ayni KUCUK kutusu). Donus: yeni pw, degisen maske, gercek sekil (DB alfa >= 0.5).
+    renk='pw' (1. yontem): PW' = a x G + (1 - a) x 255, G = en yakin PW ic pikseli; serit PW murekkebi etrafinda.
+    renk='db' (Serdar onayi 28 Eyl, FAIL ciftler icin): PW' = k (.) C_db + (1 - a) x 255, k = PW/DB ic ton orani
+      (kanal basina medyan). 16x20-20x30'da PW ic pikseli koyu bevel oldugu icin 1. yontem kenari koyu birakiyordu
+      (AQUARIUS_SCORPIO 16x20: 1. yontem binde 27.9, db binde 1.6)."""
     Lp = pw @ LUMA
     ink_p = Lp < 245
     ink_d = (db @ LUMA) > 6
@@ -49,11 +53,19 @@ def yeniden(pw, db):
     if ic_p.sum() < 50 or ic_d.sum() < 50:
         raise ValueError('ic murekkep yok')
     Gd = en_yakin(db, ic_d)
-    Gp = en_yakin(pw, ic_p)
     a = np.clip((db * Gd).sum(-1) / np.maximum((Gd * Gd).sum(-1), 1), 0, 1)
-    serit = ndi.binary_dilation(ink_p, iterations=2) & (d < 4)
     yeni = pw.copy()
-    yeni[serit] = (a[..., None] * Gp + (1 - a[..., None]) * 255.0)[serit]
+    if renk == 'db':
+        ortak = ic_p & ic_d
+        if ortak.sum() < 50:
+            raise ValueError('ortak ic murekkep yok')
+        k = np.median(pw[ortak], 0) / np.maximum(np.median(db[ortak], 0), 1)
+        serit = ndi.binary_dilation(ink_p, iterations=2) & (d < 4)            # yalniz PW murekkebi yani (DB-yalniz toz/yildiz boyanmaz)
+        yeni[serit] = (k * db + (1 - a[..., None]) * 255.0)[serit]
+    else:
+        Gp = en_yakin(pw, ic_p)
+        serit = ndi.binary_dilation(ink_p, iterations=2) & (d < 4)
+        yeni[serit] = (a[..., None] * Gp + (1 - a[..., None]) * 255.0)[serit]
     return yeni, serit, a >= 0.5
 
 
@@ -81,7 +93,7 @@ def dis_fark(A, B, kutu, adim=512):
     return m
 
 
-def isle(pw_yol, db_yol, cik_yol):
+def isle(pw_yol, db_yol, cik_yol, renk='pw'):
     im0 = Image.open(pw_yol)
     qt, dpi = im0.quantization, im0.info.get('dpi', (300, 300))
     if JpegImagePlugin.get_sampling(im0) != 0:
@@ -92,7 +104,7 @@ def isle(pw_yol, db_yol, cik_yol):
         raise ValueError(f'DB boyut {dbi.size} != PW {im.size}')
     k = bolgeler(im)['KUCUK']
     a0 = np.asarray(im.crop(k)).astype(np.float32)
-    y, m, g = yeniden(a0, np.asarray(dbi.crop(k)).astype(np.float32))
+    y, m, g = yeniden(a0, np.asarray(dbi.crop(k)).astype(np.float32), renk)
     del dbi
     jpeg_drop(pw_yol, cik_yol, [(k[0], k[1], Image.fromarray(np.clip(np.rint(y), 0, 255).astype(np.uint8)))], qt, dpi)
     im2 = Image.open(cik_yol).convert('RGB')
@@ -101,7 +113,7 @@ def isle(pw_yol, db_yol, cik_yol):
     a2 = np.asarray(im2.crop(k)).astype(np.float32)
     s0, s2 = sekil(a0), sekil(a2)
     uzak = ndi.distance_transform_edt(~((a0 @ LUMA) < 245)) > 12
-    r = {'kutu': 'x'.join(map(str, k)), 'once': olc(a0)[0], 'sonra': olc(a2)[0],
+    r = {'yontem': renk, 'kutu': 'x'.join(map(str, k)), 'once': olc(a0)[0], 'sonra': olc(a2)[0],
          'iou': round(float((s2 & g).sum() / max((s2 | g).sum(), 1)), 4),              # yeni vs gercek (DB alfa>=0.5)
          'iou_eski_gercek': round(float((s0 & g).sum() / max((s0 | g).sum(), 1)), 4),  # eski vs gercek (bilgi)
          'uzak_fark': int(np.abs(a2 - a0).max(-1)[uzak].max()) if uzak.any() else 0,
@@ -178,6 +190,7 @@ def main():
     ap.add_argument('kok', nargs='?'); ap.add_argument('cikis', nargs='?')
     ap.add_argument('--ciftler', default=''); ap.add_argument('--boylar', default='')
     ap.add_argument('--parca', default='1/1')
+    ap.add_argument('--renk', default='pw', choices=['pw', 'db', 'db+pw'])
     ap.add_argument('--ozet', default=''); ap.add_argument('--boy-sayisi', type=int, default=15)
     a = ap.parse_args()
     if a.ozet:
@@ -199,10 +212,19 @@ def main():
         hedef = cik / 'yeni' / cift / 'PURE_WHITE' / p.name
         hedef.parent.mkdir(parents=True, exist_ok=True)
         try:
-            gecti, s, os_ = isle(p, p.parents[1] / 'DEEP_BLACK' / p.name, hedef)
+            yontemler = a.renk.split('+')                               # db+pw: once db, FAIL/hata ise pw
+            for j, renk in enumerate(yontemler):
+                try:
+                    gecti, s, os_ = isle(p, p.parents[1] / 'DEEP_BLACK' / p.name, hedef, renk)
+                except Exception:                                        # noqa: BLE001
+                    if j == len(yontemler) - 1:
+                        raise
+                    continue
+                if gecti:
+                    break
             r = {'cift': cift, 'boy': boy, 'sonuc': 'PASS' if gecti else 'FAIL', **s}
-            if boy == '11x14':
-                temas(cift, os_, cik / f'ONCE_SONRA_{cift}.jpg')
+            if boy == '11x14' or (a.renk != 'pw' and boy == '16x20'):
+                temas(cift, os_, cik / f'ONCE_SONRA_{cift}_{boy}.jpg')
             if not gecti:
                 hedef.unlink()
         except Exception as e:                                           # noqa: BLE001

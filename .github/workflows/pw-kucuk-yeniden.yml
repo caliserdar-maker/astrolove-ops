@@ -6,6 +6,9 @@ name: pw-kucuk-yeniden
 #           YAZ.txt = 15 boyu da PASS ciftler, ONCE_SONRA_<cift>.jpg). POD_PRINT'e YAZMAZ.
 # mod=yaz (confirm=PW_KUCUK_YAZ, kaynak_run=<kuru run_id>): once TEMP/POD_PRINT_PW_YEDEK_<damga> (tum PW) + rclone check,
 #           sonra yalniz YAZ.txt ciftlerinin 15 PW dosyasi POD_PRINT'e + rclone check. FAIL ciftler atlanir.
+# mod=db_yaz (confirm=PW_KUCUK_YAZ, kaynak_run=<kuru run_id>; Serdar onayi 28 Eyl): kaynak YAZ.txt DISINDAKI ciftler
+#           --renk db+pw ile yeniden uretilir (dosya basina once DB renk, FAIL ise 1. yontem; QC ayni), ayni kosuda
+#           ozet + yedek + rclone check + yalniz 15/15 PASS ciftler POD_PRINT'e. FAIL ciftlerin eski dosyasi kalir.
 
 permissions:
   contents: read
@@ -14,7 +17,7 @@ on:
   workflow_dispatch:
     inputs:
       mod:
-        description: kuru | yaz
+        description: kuru | yaz | db_yaz
         default: kuru
       kaynak_run:
         description: "yaz icin: kuru kosunun run_id'si"
@@ -30,7 +33,7 @@ env:
 
 jobs:
   uret:
-    if: ${{ inputs.mod == 'kuru' }}
+    if: ${{ inputs.mod == 'kuru' || inputs.mod == 'db_yaz' }}
     runs-on: ubuntu-latest
     timeout-minutes: 90
     strategy:
@@ -65,6 +68,12 @@ jobs:
           set -euo pipefail
           rclone lsf "$G/POD_PRINT" --dirs-only | sed 's:/$::' | grep -E '^[A-Z]+_[A-Z]+$' | sort > _tum.txt
           echo "cift: $(wc -l < _tum.txt)"
+          if [ "${{ inputs.mod }}" = "db_yaz" ]; then
+            [ "${{ inputs.confirm }}" = "PW_KUCUK_YAZ" ] && [ -n "${{ inputs.kaynak_run }}" ] || { echo "confirm/kaynak_run eksik"; exit 1; }
+            rclone copy "$G/PW_KUCUK_${{ inputs.kaynak_run }}/rapor/YAZ.txt" _k -q
+            grep -vxF -f _k/YAZ.txt _tum.txt > _t2.txt; mv _t2.txt _tum.txt
+            echo "db_yaz: kaynak YAZ $(wc -l < _k/YAZ.txt) cift haric, kalan $(wc -l < _tum.txt)"
+          fi
           awk -v p=${{ matrix.parca }} '(NR - 1) % 6 == p - 1' _tum.txt > _benim.txt
           : > _filtre.txt
           while read -r c; do
@@ -75,7 +84,7 @@ jobs:
       - name: Uret + QC
         run: |
           set -euo pipefail
-          python scripts/pod/pw_yeniden_uret.py _src _out
+          python scripts/pod/pw_yeniden_uret.py _src _out --renk ${{ inputs.mod == 'db_yaz' && 'db+pw' || 'pw' }}
           mv _out/URET_1of1.csv _out/URET_p${{ matrix.parca }}.csv
       - name: Drive'a yaz (TEMP)
         if: ${{ always() }}
@@ -129,8 +138,11 @@ jobs:
           rm -rf ~/.config/rclone
 
   yaz:
-    if: ${{ inputs.mod == 'yaz' }}
+    needs: uret
+    if: ${{ always() && (inputs.mod == 'yaz' || (inputs.mod == 'db_yaz' && needs.uret.result == 'success')) }}
     runs-on: ubuntu-latest
+    env:
+      KAYNAK: ${{ inputs.mod == 'db_yaz' && github.run_id || inputs.kaynak_run }}
     timeout-minutes: 60
     steps:
       - name: Onay
@@ -160,7 +172,7 @@ jobs:
       - name: YAZ listesi (guncel ozet + kutu konum kapisi)
         run: |
           set -euo pipefail
-          D="$G/PW_KUCUK_${{ inputs.kaynak_run }}"
+          D="$G/PW_KUCUK_$KAYNAK"
           rclone copy "$D/rapor" _r --include "URET_*.csv" -q
           python scripts/pod/pw_yeniden_uret.py --ozet _r --boy-sayisi 15
           cp _r/YAZ.txt YAZ.txt
@@ -178,7 +190,7 @@ jobs:
       - name: POD_PRINT'e yaz (yalniz YAZ.txt ciftleri) + rclone check
         run: |
           set -euo pipefail
-          D="$G/PW_KUCUK_${{ inputs.kaynak_run }}"
+          D="$G/PW_KUCUK_$KAYNAK"
           [ -s YAZ.txt ] || { echo "YAZ.txt bos"; exit 1; }
           sed 's:.*:/&/PURE_WHITE/*.jpg:' YAZ.txt > _filtre.txt
           n=$(rclone lsf -R "$D/yeni" --files-only --include-from _filtre.txt | wc -l)
@@ -187,7 +199,7 @@ jobs:
           [ "$n" -eq "$b" ] || { echo "dosya sayisi tutmuyor, yazilmadi"; exit 1; }
           rclone copy "$D/yeni" "$G/POD_PRINT" --include-from _filtre.txt --checksum --transfers 8 -q
           rclone check "$D/yeni" "$G/POD_PRINT" --include-from _filtre.txt --one-way
-          { echo "yaz $(date -u +%FT%TZ): kaynak PW_KUCUK_${{ inputs.kaynak_run }}, $(wc -l < YAZ.txt) cift x 15 = $n dosya POD_PRINT'e yazildi, rclone check 0 fark"
+          { echo "yaz $(date -u +%FT%TZ): kaynak PW_KUCUK_$KAYNAK, $(wc -l < YAZ.txt) cift x 15 = $n dosya POD_PRINT'e yazildi, rclone check 0 fark"
             echo "yedek: TEMP/POD_PRINT_PW_YEDEK_$DAMGA"; } | tee YAZ_SONUC.txt
           rclone copy YAZ_SONUC.txt "$D/rapor" -q
       - name: temizle
