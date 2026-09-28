@@ -1,0 +1,105 @@
+name: galeri-duvar-paket
+
+# CL galeri: 14 kart kapak duvari zemininde (GUCLU + ACIK-3, Serdar 28 Eyl) kurulur, QC, pakete commit, Drive guncelleme.
+# Etsy YOK. Degismeyen: 01 kapak, 06/09/10/11 sahne kartlari.
+# Kaynak: data/pod/cl_galeri_krem_kaynak (onayli krem kartlar, sabit), data/pod/kapak_sahne_v9.png (duvar)
+# Kurulum: 02 kart02_duvar_kur.py | 03 04 05 07 08 12 13 kart_duvar_genel.py | 14 kart11_kur.py (7 business days)
+#          + kart_duvar_genel.py | 15-19 renk_varyasyon_kur.py (poster onayli karttan birebir)
+# QC: duvar_qc.py (boyut, krem hale, poster NCC, kontrast, kose) + metin_qc.py (yazim, tire, urun metni)
+# PASS ise: data/pod/cl_galeri_final19'da yalniz bu 14 dosya degisir -> commit/push main;
+#   Drive TEMP/CL_GALERI_FINAL19 -> TEMP/CL_GALERI_FINAL19_YEDEK_<damga> yedek, sonra 19 dosya yazilir (sayi 19 kalir);
+#   temas sayfasi + QC Drive TEMP/CL_GALERI_DUVAR_<damga>/
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch: {}
+
+concurrency:
+  group: galeri-duvar-paket
+  cancel-in-progress: false
+
+jobs:
+  kur:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q numpy==2.1.3 pillow==11.0.0 scipy==1.14.1 opencv-python-headless==4.10.0.84 pyspellchecker==0.9.0
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          mkdir -p fonts; base=https://raw.githubusercontent.com/google/fonts/main/ofl
+          curl -fsSL "$base/ebgaramond/EBGaramond%5Bwght%5D.ttf" -o 'fonts/EBGaramond[wght].ttf'
+          curl -fsSL "$base/montserrat/Montserrat%5Bwght%5D.ttf" -o 'fonts/Montserrat[wght].ttf'
+          curl -fsSL "$base/lato/Lato-Regular.ttf" -o fonts/Lato-Regular.ttf
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Kur, QC, paket, Drive
+        run: |
+          set -euo pipefail
+          K=data/pod/cl_galeri_krem_kaynak; P=data/pod/cl_galeri_final19; O=_work/out; mkdir -p $O _work/p
+          python3 scripts/pod/duvar_zemin.py data/pod/kapak_sahne_v9.png guclu _work/duvar.png acik3
+          Z=_work/duvar.png; N=14; i=0; t0=$(date +%s)
+          eta() { i=$((i+1)); g=$(( $(date +%s) - t0 )); echo "[$i/$N] $1 | gecen ${g}s | kalan ~$(( g * (N - i) / i ))s | %$(( i * 100 / N ))"; }
+          python3 scripts/pod/kart02_duvar_kur.py $K/02_format.jpg $Z fonts $O/02_format.jpg >/dev/null; eta 02_format
+          for k in 03_konsept 04_kisisellestirme 05_renk_ve_dijital 07_cerceveler 08_boylar 12_zoom 13_kagit; do
+            A=""; [ $k = 07_cerceveler ] && A="1556,540,2150,1269"
+            python3 scripts/pod/kart_duvar_genel.py $K/$k.jpg $Z $O/$k.jpg "$A"; eta $k
+          done
+          python3 scripts/pod/kart11_kur.py $K/14_surec.jpg $K/14_surec.jpg "fonts/EBGaramond[wght].ttf" "fonts/Montserrat[wght].ttf" _work/k14_krem.jpg
+          python3 scripts/pod/kart_duvar_genel.py _work/k14_krem.jpg $Z $O/14_surec.jpg; eta 14_surec
+          for kv in "15_renk_midnight_blue:Midnight Blue" "16_renk_deep_black:Deep Black" "17_renk_pure_white:Pure White" \
+                    "18_renk_champagne_ivory:Champagne Ivory" "19_renk_warm_parchment:Warm Parchment"; do
+            k=${kv%%:*}; ad=${kv#*:}
+            python3 -c "from PIL import Image; Image.open('$K/$k.jpg').crop((810, 150, 2189, 1905)).save('_work/p/$k.png')"
+            python3 scripts/pod/renk_varyasyon_kur.py _work/p/$k.png "$ad" "fonts/Montserrat[wght].ttf" $O/$k.jpg $Z | tail -1; eta $k
+          done
+          ARGS=""
+          for f in $O/*.jpg; do k=$(basename $f .jpg); E=$K/$k.jpg; [ $k = 14_surec ] && E=_work/k14_krem.jpg; ARGS="$ARGS $f $E"; done
+          set +e
+          python3 scripts/pod/duvar_qc.py $Z data/pod/kapak_sahne_v9.png $ARGS | tee _work/QC.txt; Q1=${PIPESTATUS[0]}
+          python3 scripts/pod/metin_qc.py data/pod/cl_galeri_final19_metin.json | tee -a _work/QC.txt; Q2=${PIPESTATUS[0]}
+          set -e
+          [ "$Q1" = "0" ] && [ "$Q2" = "0" ] || { echo "QC FAIL: pakete yazilmadi"; exit 1; }
+          # paket: yalniz 14 dosya
+          for f in $O/*.jpg; do cp $f $P/; done
+          DEGISEN=$(git status --porcelain --untracked-files=no | awk '{print $2}' | sort)
+          echo "Degisen:"; echo "$DEGISEN"
+          for f in $DEGISEN; do [ -f "$O/$(basename $f)" ] && [[ $f == $P/* ]] || { echo "BEKLENMEYEN degisiklik: $f"; exit 1; }; done
+          [ "$(ls $P | wc -l)" = "19" ] || { echo "paket dosya sayisi 19 degil"; exit 1; }
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add $P/*.jpg
+          git commit -q -m "cl_galeri_final19: 14 kart kapak duvari zemininde (GUCLU + ACIK-3; Serdar 28 Eyl). 01/06/09/10/11 degismedi. QC PASS"
+          for i in 1 2 3 4; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep $((2**i)); done
+          echo "COMMIT $(git log --oneline -1)"
+          # Drive: yedek, sonra guncelle
+          DAMGA=$(date -u +%Y%m%d_%H%M)
+          rclone copy gdrive:ASTROLOVE/TEMP/CL_GALERI_FINAL19 "gdrive:ASTROLOVE/TEMP/CL_GALERI_FINAL19_YEDEK_${DAMGA}" -q
+          echo "Yedek: TEMP/CL_GALERI_FINAL19_YEDEK_${DAMGA} ($(rclone lsf gdrive:ASTROLOVE/TEMP/CL_GALERI_FINAL19_YEDEK_${DAMGA} | wc -l) dosya)"
+          rclone copy $P gdrive:ASTROLOVE/TEMP/CL_GALERI_FINAL19 -q
+          echo "CL_GALERI_FINAL19 dosya sayisi: $(rclone lsf gdrive:ASTROLOVE/TEMP/CL_GALERI_FINAL19 | wc -l)"
+          echo "CL_GALERI_FINAL19 linki: $(rclone link gdrive:ASTROLOVE/TEMP/CL_GALERI_FINAL19)"
+          python3 scripts/pod/galeri_temas.py $P _work/TEMAS_CL_GALERI_19.jpg "fonts/Montserrat[wght].ttf"
+          H="gdrive:ASTROLOVE/TEMP/CL_GALERI_DUVAR_${DAMGA}"
+          rclone copyto _work/TEMAS_CL_GALERI_19.jpg "$H/TEMAS_CL_GALERI_19.jpg" -q; rclone copyto _work/QC.txt "$H/QC.txt" -q
+          echo "Temas + QC linki: $(rclone link "$H")"
+      - if: always()
+        run: rm -rf _work ~/.config/rclone

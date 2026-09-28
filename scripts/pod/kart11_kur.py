@@ -4,7 +4,7 @@ ChatGPT taslagi yalniz METIN kaynagi: Lato yazi, eski tip rakam (oɪ), DNA disi 
 Yazi stili canli kart 03 listesinden olculdu: rakam Garamond duz (lnum) altin, yukseklik 58 px, x 174;
 baslik Garamond 78 wght 450, x 342; govde Montserrat 45 wght 500, basliktan 97 px asagi.
 2x2 izgara (ince cizgili), icerik dikeyde dengeli. Ust etiket canli 03'ten, alt cizgi+satir kart 03 v2'den.
-Metin (aciklama v3 ile ayni): 24 saatte onizleme; onay/24 saat kurali; 5 is gunu; paketleme (Prodigi); ABD takipli.
+Metin (aciklama v3 ile ayni): 24 saatte onizleme; onay/24 saat kurali; 7 is gunu (28 Eyl: hazirlik 4-7 is gunu); paketleme (Prodigi); ABD takipli.
 QC: boyut, zemin, tire yok, satir tasmasi/cakisma yok.
 Kullanim: kart11_kur.py CANLI_03.jpg KART03_V2.jpg GARAMOND.ttf MONTSERRAT.ttf CIKIS.jpg
 """
@@ -43,7 +43,7 @@ def sar(txt, genislik):
 
 HUC = [('01', 'Your preview', 'We send a preview via Etsy Messages within 24 hours of your order.'),
        ('02', 'Your approval', 'We print as soon as you approve. No reply in 24 hours? We print as shown.'),
-       ('03', 'Made to order', 'Printed and shipped within 5 business days after approval.'),
+       ('03', 'Made to order', 'Printed and shipped within 7 business days after approval.'),
        ('04', 'Delivered with care', 'Prints are rolled in tissue inside a sturdy tube. Framed prints come boxed with corner guards. US orders ship tracked.')]
 CX = [145, 1600]; CW = 1255; RY = [650, 1230]
 kutular = []

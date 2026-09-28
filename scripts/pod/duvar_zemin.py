@@ -15,6 +15,7 @@ LEKE = {'yok': 0.0, 'hafif': 0.35, 'orta': 0.60, 'guclu': 0.85}
 
 
 VARSAYILAN = 'guclu'   # Serdar 28 Eyl: GUCLU (%56 leke azalmasi) onaylandi
+VARSAYILAN_AYDINLIK = 'acik3'   # Serdar 28 Eyl: GUCLU + ACIK-3 (L* +15) nihai zemin
 # Serdar 28 Eyl: GUCLU sonrasi daha acik/aydinlik secenekler: L* sabit artar (huzme-duvar farki ve doku aynen),
 # ton acisi sabit, kroma hafif artar (soluk/gri olmaz). Deger: (L* artisi, kroma carpani)
 AYDINLIK = {'acik1': (5.0, 1.00), 'acik2': (10.0, 1.04), 'acik3': (15.0, 1.08)}
@@ -34,8 +35,8 @@ def aydinlat(D, dL, kroma=1.0):
     return Image.fromarray(np.clip(np.rint(y * 255), 0, 255).astype(np.uint8))
 
 
-def duvar(yol, seviye=VARSAYILAN, aydinlik=None):
-    """Kapak duvari 3000x2250, leke seviyesi uygulanmis (varsayilan GUCLU; 'yok' = kapaktaki ham duvar).
+def duvar(yol, seviye=VARSAYILAN, aydinlik=VARSAYILAN_AYDINLIK):
+    """Kapak duvari 3000x2250; varsayilan nihai zemin GUCLU + ACIK-3. Kapaktaki ham duvar: duvar(yol, 'yok', None).
     yol zaten 3000x2250 ise (hazir duvar) aynen kullanilir."""
     im = Image.open(yol).convert('RGB')
     if im.size == (3000, 2250):
@@ -77,7 +78,7 @@ def leke_azalt(D, k):
 if __name__ == '__main__':
     # Kullanim: duvar_zemin.py KAPAK_SAHNE_V9.png SEVIYE CIKIS.png [AYDINLIK]  (yok|hafif|orta|guclu; acik1|acik2|acik3)
     import sys
-    duvar(sys.argv[1], sys.argv[2], sys.argv[4] if len(sys.argv) > 4 else None).save(sys.argv[3])
+    duvar(sys.argv[1], sys.argv[2], (None if sys.argv[4] == 'yok' else sys.argv[4]) if len(sys.argv) > 4 else VARSAYILAN_AYDINLIK).save(sys.argv[3])
 
 
 def _lin(c):
