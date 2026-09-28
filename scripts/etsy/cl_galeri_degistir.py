@@ -2,8 +2,8 @@
 """CL (4570143815) galerisini 19'luk final setle degistirir (Serdar onayi 28 Eyl 2026).
 
 Kaynak: <kaynak>/NN_*.jpg (NN = hedef sira 1-19); alt metin data/pod/cl_galeri_alt_metin.csv.
-Etsy siniri ilan basina 20 gorsel (14 eski + 19 yeni sigmaz), bu yuzden sira:
-  yedek -> baglantisiz 13 eski silinir (1 eski CAPA olarak kalir, ilan bos kalmaz)
+Etsy siniri ilan basina 20 gorsel (N eski + 19 yeni sigmaz), bu yuzden sira (Serdar onayi 28 Eyl):
+  yedek -> N-1 eski silinir (1 eski CAPA olarak kalir, ilan bos kalmaz)
   -> 19 yeni sira 2-20'ye alt metinle yuklenir -> 5 renk bagi yeni 15-19'a POST edilir
   -> capa silinir (siralar 1-19'a oturur) -> tam geri okuma.
 Modlar (ilk hatada DUR, her yazma tek deneme):
@@ -11,6 +11,7 @@ Modlar (ilk hatada DUR, her yazma tek deneme):
   --mod yedek   : SALT OKUMA + CDN indirme; galeri/baglar/video/korunanlar <out>/yedek/ altina
                   (workflow bunu Drive'a kopyalar, sonra uygula kosulur).
   --mod uygula  : ETSY'YE YAZAR. Once yedek manifestiyle canli galeri karsilastirilir; uyusmazsa DUR.
+N ve image_id'ler her kosuda CANLI okunur (kapak-yukle ayni ilanda kapak degistirir; sabit sayi yok).
 Video ve active AYNEN kalir; updateListing cagrisi YOK (taslagi yayina alma riski, 7 Eyl olcumu).
 """
 import argparse
@@ -239,7 +240,9 @@ def main():
         yol, alt = kaynak_dosyalar(a.kaynak), alt_metinler(a.alt_csv)
         man = yedek_al(api, shop, a.listing_id, a.out, cdn_indir=False)
         log(f"dry-run: kaynak 19 dosya OK, alt 19 OK; mevcut {len(man['galeri'])} gorsel, "
-            f"{len(man['variation_images'])} bag; plan: 13 sil + capa, 19 yukle, 5 bagla, capa sil")
+            f"{len(man['variation_images'])} bag; plan: {len(man['galeri']) - 1} sil + capa, 19 yukle, 5 bagla, capa sil")
+        for x in man["galeri"]:
+            log(f"  canli sira {x['rank']}: image_id {x['listing_image_id']}")
     elif a.mod == "yedek":
         kaynak_dosyalar(a.kaynak); alt_metinler(a.alt_csv)
         yedek_al(api, shop, a.listing_id, a.out)

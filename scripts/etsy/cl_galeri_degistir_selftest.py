@@ -15,10 +15,10 @@ LID = "4570143815"
 
 
 class Fake:
-    def __init__(self):
+    def __init__(self, n_eski=14):
         self.remaining = "3000"; self.calls = 0; self.nid = 9000
         self.imgs = [{"listing_image_id": 100 + n, "rank": n, "alt_text": f"eski {n}",
-                      "url_fullxfull": f"fake://{100 + n}"} for n in range(1, 15)]
+                      "url_fullxfull": f"fake://{100 + n}"} for n in range(1, n_eski + 1)]
         self.vimg = [{"property_id": 200, "value_id": 1000 + i, "value": r, "image_id": 100 + 10 + i}
                      for i, r in enumerate(["Midnight Blue", "Deep Black", "Pure White", "Champagne Ivory", "Warm Parchment"])]
         self.vids = [{"video_id": 777}]
@@ -127,6 +127,15 @@ def main():
             G.uygula(api3, "39729443", LID, kd, csvyol, out3, 400); kotu.append("draft yakalanmadi")
         except SystemExit as e:
             if "active degil" not in str(e): kotu.append(f"draft mesaji: {e}")
+        # senaryo: kapak-yukle sonrasi farkli eski sayilari (13 / 15) - akis canli sayiyla calismali
+        for n_eski in (13, 15):
+            api4 = Fake(n_eski); out4 = td / f"out_{n_eski}"; out4.mkdir()
+            G.yedek_al(api4, "39729443", LID, out4)
+            r4 = G.uygula(api4, "39729443", LID, kd, csvyol, out4, 400)
+            son4 = api4.get(f"/listings/{LID}/images")["results"]
+            if r4["sonuc"] != "PASS" or [x["rank"] for x in son4] != list(range(1, 20)) \
+                    or len(r4["silinen_eski"]) != n_eski:
+                kotu.append(f"{n_eski} eski senaryosu")
     print("SELFTEST:", "PASS" if not kotu else "FAIL " + "; ".join(kotu))
     if kotu:
         raise SystemExit(2)
