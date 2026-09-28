@@ -1,0 +1,179 @@
+name: pw-kucuk-yeniden
+
+# PURE_WHITE POD_PRINT: kucuk sembol kenari DB alfasi ile beyaza yeniden birlestirilir (Serdar karari 28 Eyl, secenek b).
+# scripts/pod/pw_yeniden_uret.py. Ana sembol DOKUNULMAZ (Canva seffaf disa aktarim: acik is). Etsy YOK.
+# mod=kuru: 78 cift x 15 boy uret + QC; PASS dosyalar Drive TEMP/PW_KUCUK_<run_id>/yeni, rapor/ (URET_*.csv, OZET.md,
+#           YAZ.txt = 15 boyu da PASS ciftler, ONCE_SONRA_<cift>.jpg). POD_PRINT'e YAZMAZ.
+# mod=yaz (confirm=PW_KUCUK_YAZ, kaynak_run=<kuru run_id>): once TEMP/POD_PRINT_PW_YEDEK_<damga> (tum PW) + rclone check,
+#           sonra yalniz YAZ.txt ciftlerinin 15 PW dosyasi POD_PRINT'e + rclone check. FAIL ciftler atlanir.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      mod:
+        description: kuru | yaz
+        default: kuru
+      kaynak_run:
+        description: "yaz icin: kuru kosunun run_id'si"
+        default: ""
+      confirm:
+        description: "yaz icin: PW_KUCUK_YAZ"
+        default: ""
+
+concurrency: pw-kucuk-yeniden
+
+env:
+  G: gdrive:ASTROLOVE/TEMP
+
+jobs:
+  uret:
+    if: ${{ inputs.mod == 'kuru' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        parca: [1, 2, 3, 4, 5, 6]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q pillow==12.3.0 numpy==2.4.6 scipy==1.17.1
+          sudo apt-get install -y -q libjpeg-turbo-progs >/dev/null
+          jpegtran -version 2>&1 | head -1
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Kaynaklari al (PW + DB, bu parcanin ciftleri)
+        run: |
+          set -euo pipefail
+          rclone lsf "$G/POD_PRINT" --dirs-only | sed 's:/$::' | grep -E '^[A-Z]+_[A-Z]+$' | sort > _tum.txt
+          echo "cift: $(wc -l < _tum.txt)"
+          awk -v p=${{ matrix.parca }} '(NR - 1) % 6 == p - 1' _tum.txt > _benim.txt
+          : > _filtre.txt
+          while read -r c; do
+            echo "/$c/PURE_WHITE/*.jpg" >> _filtre.txt; echo "/$c/DEEP_BLACK/*.jpg" >> _filtre.txt
+          done < _benim.txt
+          rclone copy "$G/POD_PRINT" _src --include-from _filtre.txt --transfers 8 -q
+          echo "parca ${{ matrix.parca }}: $(wc -l < _benim.txt) cift, PW $(find _src -path '*/PURE_WHITE/*.jpg' | wc -l), DB $(find _src -path '*/DEEP_BLACK/*.jpg' | wc -l)"
+      - name: Uret + QC
+        run: |
+          set -euo pipefail
+          python scripts/pod/pw_yeniden_uret.py _src _out
+          mv _out/URET_1of1.csv _out/URET_p${{ matrix.parca }}.csv
+      - name: Drive'a yaz (TEMP)
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          D="$G/PW_KUCUK_${{ github.run_id }}"
+          if [ -d _out ]; then
+            [ -d _out/yeni ] && rclone copy _out/yeni "$D/yeni" --transfers 8 -q
+            rclone copy _out "$D/rapor" --exclude "yeni/**" -q
+          fi
+          echo "Drive: TEMP/PW_KUCUK_${{ github.run_id }}"
+          rm -rf ~/.config/rclone
+
+  ozet:
+    if: ${{ inputs.mod == 'kuru' && always() }}
+    needs: uret
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q pillow==12.3.0 numpy==2.4.6 scipy==1.17.1
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Ozet
+        run: |
+          set -euo pipefail
+          D="$G/PW_KUCUK_${{ github.run_id }}"
+          rclone copy "$D/rapor" _r --include "URET_*.csv" -q
+          ls _r
+          python scripts/pod/pw_yeniden_uret.py --ozet _r --boy-sayisi 15
+          # YAZ.txt ciftlerinin 15 dosyasi TEMP/yeni'de gercekten var mi
+          n=0; while read -r c; do n=$((n + $(rclone lsf "$D/yeni/$c/PURE_WHITE" --include "*.jpg" | wc -l))); done < _r/YAZ.txt
+          echo "YAZ cift: $(wc -l < _r/YAZ.txt), TEMP/yeni dosya: $n (beklenen $(( $(wc -l < _r/YAZ.txt) * 15 )))" | tee -a _r/OZET.md
+          rclone copy _r "$D/rapor" --include "OZET.md" --include "YAZ.txt" -q
+          rm -rf ~/.config/rclone
+
+  yaz:
+    if: ${{ inputs.mod == 'yaz' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Onay
+        run: |
+          [ "${{ inputs.confirm }}" = "PW_KUCUK_YAZ" ] || { echo "confirm != PW_KUCUK_YAZ"; exit 1; }
+          [ -n "${{ inputs.kaynak_run }}" ] || { echo "kaynak_run bos"; exit 1; }
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Yedek (tum PW) + rclone check
+        run: |
+          set -euo pipefail
+          DAMGA=$(date -u +%Y%m%d_%H%M); echo "DAMGA=$DAMGA" >> "$GITHUB_ENV"
+          Y="$G/POD_PRINT_PW_YEDEK_$DAMGA"
+          rclone copy "$G/POD_PRINT" "$Y" --include "/*/PURE_WHITE/*.jpg" --transfers 8 -q
+          rclone check "$G/POD_PRINT" "$Y" --include "/*/PURE_WHITE/*.jpg" --one-way
+          echo "yedek: TEMP/POD_PRINT_PW_YEDEK_$DAMGA, dosya $(rclone lsf -R "$Y" --files-only | wc -l)"
+      - name: POD_PRINT'e yaz (yalniz YAZ.txt ciftleri) + rclone check
+        run: |
+          set -euo pipefail
+          D="$G/PW_KUCUK_${{ inputs.kaynak_run }}"
+          rclone copy "$D/rapor/YAZ.txt" . -q
+          [ -s YAZ.txt ] || { echo "YAZ.txt bos"; exit 1; }
+          sed 's:.*:/&/PURE_WHITE/*.jpg:' YAZ.txt > _filtre.txt
+          n=$(rclone lsf -R "$D/yeni" --files-only --include-from _filtre.txt | wc -l)
+          b=$(( $(wc -l < YAZ.txt) * 15 ))
+          echo "cift $(wc -l < YAZ.txt), dosya $n (beklenen $b)"
+          [ "$n" -eq "$b" ] || { echo "dosya sayisi tutmuyor, yazilmadi"; exit 1; }
+          rclone copy "$D/yeni" "$G/POD_PRINT" --include-from _filtre.txt --checksum --transfers 8 -q
+          rclone check "$D/yeni" "$G/POD_PRINT" --include-from _filtre.txt --one-way
+          { echo "yaz $(date -u +%FT%TZ): kaynak PW_KUCUK_${{ inputs.kaynak_run }}, $(wc -l < YAZ.txt) cift x 15 = $n dosya POD_PRINT'e yazildi, rclone check 0 fark"
+            echo "yedek: TEMP/POD_PRINT_PW_YEDEK_$DAMGA"; } | tee YAZ_SONUC.txt
+          rclone copy YAZ_SONUC.txt "$D/rapor" -q
+      - name: temizle
+        if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
