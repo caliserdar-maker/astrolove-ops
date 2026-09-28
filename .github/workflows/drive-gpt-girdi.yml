@@ -1,0 +1,43 @@
+name: drive-gpt-girdi
+
+# ChatGPT girdi gorsellerini Drive'a kopyalar ve paylasim linklerini
+# TEMP/GPT_GIRDI/LINKLER.txt icine yazar (salt Drive yazma; Etsy YOK).
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  kopyala:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Drive'a yaz ve linkleri topla
+        run: |
+          set -euo pipefail
+          HEDEF="gdrive:ASTROLOVE/TEMP/GPT_GIRDI"
+          rclone copy data/pod/gpt_girdi "$HEDEF" -q
+          : > linkler.txt
+          for f in data/pod/gpt_girdi/*.jpg; do
+            ad=$(basename "$f")
+            echo "$ad: $(rclone link "$HEDEF/$ad")" >> linkler.txt
+          done
+          echo "KLASOR: $(rclone link "$HEDEF")" >> linkler.txt
+          rclone copyto linkler.txt "$HEDEF/LINKLER.txt"
+          rm -rf ~/.config/rclone
