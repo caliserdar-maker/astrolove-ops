@@ -31,7 +31,7 @@ jobs:
           python-version: "3.12"
       - run: |
           set -euo pipefail
-          pip install -q pillow numpy opencv-python-headless scipy requests
+          pip install -q pillow numpy opencv-python-headless scipy requests fonttools   # hat (kisisel-v1) fontTools ister
           sudo apt-get -qq update && sudo apt-get -qq install -y ffmpeg
           curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
       - name: rclone.conf olustur
@@ -54,7 +54,17 @@ jobs:
             CIFTLER=$(rclone lsf "gdrive:ASTROLOVE/TEMP/POD_KAPAK_V3/SIPARIS" --dirs-only | sed 's#/$##; s#_MIDNIGHT_BLUE_11x14$##' | sort | tr '\n' ' ')
           fi
           echo "ciftler: $CIFTLER"
-          python scripts/pod/video_v2_toplu.py _sb $CIFTLER
+          mkdir -p _out
+          # cikti hem ekrana hem dosyaya; hata olursa son 60 satir susgecten gecip Drive'a gider
+          set +e
+          python scripts/pod/video_v2_toplu.py _sb $CIFTLER 2>&1 | tee _work_log.txt
+          KOD=${PIPESTATUS[0]}
+          set -e
+          if [ "$KOD" -ne 0 ]; then
+            tail -60 _work_log.txt | python3 scripts/guvenlik/log_suz.py > _out/HATA_SON60.txt || true
+          fi
+          rm -f _work_log.txt
+          exit "$KOD"
       - name: Drive'a yaz
         if: ${{ always() }}
         run: |
