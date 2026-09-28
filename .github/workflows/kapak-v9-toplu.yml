@@ -1,0 +1,57 @@
+name: kapak-v9-toplu
+
+# 78 cift icin kapak v9 uretimi (salt Drive; Etsy YOK).
+# Girdi: TEMP/POD_KAPAK_V3/SIPARIS/<CIFT>_MIDNIGHT_BLUE_11x14/BASKI_11x14.jpg
+# Cikti: TEMP/POD_KAPAK_78/<damga>/ (KAPAK_*.jpg + OZET.md + ONIZLEME.jpg)
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  uret:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q pillow numpy opencv-python-headless scipy
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Baski dosyalarini al
+        run: |
+          set -euo pipefail
+          mkdir -p _work/baski
+          rclone copy "gdrive:ASTROLOVE/TEMP/POD_KAPAK_V3/SIPARIS" _work/baski \
+            --include "*_MIDNIGHT_BLUE_11x14/BASKI_11x14.jpg" -q
+          # klasor adlarindan _MIDNIGHT_BLUE_11x14 ekini kaldir
+          cd _work/baski
+          for d in *_MIDNIGHT_BLUE_11x14; do mv "$d" "${d%_MIDNIGHT_BLUE_11x14}"; done
+          echo "cift klasoru: $(ls | wc -l)"
+      - name: Uret
+        run: python scripts/pod/kapak_v9_toplu.py
+      - name: Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          STAMP=$(date -u +%Y%m%d_%H%M)
+          [ -d _out ] && rclone copy _out "gdrive:ASTROLOVE/TEMP/POD_KAPAK_78/$STAMP" -q || true
+          echo "Drive: TEMP/POD_KAPAK_78/$STAMP"
+          rm -rf ~/.config/rclone
