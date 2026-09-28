@@ -16,6 +16,7 @@ import kapak_yukle_78 as K  # noqa: E402
 
 K.OKUMA_BEKLE = 0
 K.SIRA_BEKLE = 0
+K.YUKLEME_BEKLE = 0
 K.BEKLENEN = 3
 K.KAPAK_BOYUT = (400, 300)
 K.time.sleep = lambda s: None
@@ -34,6 +35,7 @@ def resim(p, w=300, h=225, renk=(20, 30, 90)):
 class Fake:
     def __init__(self, bozuk_rank=False, bozuk_bag=False, tie=0, bosluk=False):
         self.bosluk = bosluk  # Etsy silmeden sonra siralari sikistirmaz (28 Eyl 4570110641)
+        self.rank_say, self.cozum, self.hic = {}, {}, set()  # cozum[lid]: kacinci rank cagrisi cozer; hic: asla
         self.remaining = "5000"; self.calls = 0; self.nid = 9000; self.yaz = []; self.store = None
         self.bozuk_rank = bozuk_rank; self.bozuk_bag = bozuk_bag
         self.tie = tie; self.bekleyen = {}  # tie: yuklemeden sonra kac okuma boyunca rank 1 cift kalir (99 = hic)
@@ -100,8 +102,9 @@ class Fake:
         iid = int(files["listing_image_id"][1])
         x = next(i for i in self.L[lid]["imgs"] if i["listing_image_id"] == iid)
         x["alt_text"] = files["alt_text"][1] if "alt_text" in files else ""
-        if lid in self.bekleyen and self.bekleyen[lid][0] >= 90:
-            return {}  # hic tekillesmeyen mod
+        self.rank_say[lid] = self.rank_say.get(lid, 0) + 1
+        if lid in self.hic or (lid in self.cozum and self.rank_say[lid] < self.cozum[lid]):
+            return {}
         self.bekleyen.pop(lid, None)
         for y in self.L[lid]["imgs"]:
             if y is not x:
@@ -287,14 +290,43 @@ def main():
         f.L[l]["imgs"][0]["alt_text"] == kapak[c]["alt"] and len(f.L[l]["imgs"]) == 12 for l, c, *_ in IDS) \
         and all([x[0] for x in f.yaz if x[1] == l] == ["POST", "RANK", "DELETE"] for l, *_ in IDS)
 
-    # 10) rank 1 cift hic tekillesmiyor -> DUR, silme yok
-    f = Fake(tie=99); o22 = TMP / "o22"
+    # 10) rank 1 cift hic tekillesmiyor -> her ilan YARIM (DUR yok), 2. turda da YARIM, silme yok
+    f = Fake(tie=10 ** 6); f.hic = {"111", "222", "333"}; o22 = TMP / "o22"
     K.kuru(args(ids, kd, o22), f, "S", o22, satirlar, kapak, sorun, fazla)
     ok = K.apply(args(ids, kd, TMP / "o23", plan=str(o22 / "PLAN.json"), yedek_drive=str(TMP / "yd23"), apply=True,
                       confirm=K.ONAY), f, "S", TMP / "o23", kapak)
     s23 = json.loads((TMP / "o23" / "SONUC.json").read_text())
-    kont["tekillesmiyor: DUR, silme yok, 1. ilanda"] = (not ok) and not any(x[0] == "DELETE" for x in f.yaz) \
-        and len(s23) == 1 and "tekillesmedi" in s23[0]["hata"]
+    kont["tekillesmiyor: 3 ilan YARIM (DUR yok), 2. tur da YARIM, silme yok"] = (not ok) and \
+        not any(x[0] == "DELETE" for x in f.yaz) and [r["sonuc"] for r in s23] == ["YARIM"] * 6 and \
+        [r["tur"] for r in s23] == ["1. tur"] * 3 + ["2. tur"] * 3 and \
+        all([x[0] for x in f.yaz if x[1] == l] == ["POST", "RANK", "RANK", "RANK", "RANK"] for l, *_ in IDS) and \
+        "YARIM 3" in (TMP / "o23" / "report.md").read_text()
+
+    # 10b) 111 1. turda YARIM (2 rank cagrisi yetmez), 222/333 PASS; 2. turda 111 kesin id ile tamamlanir (bag dahil)
+    f = Fake(tie=10 ** 6); f.cozum = {"111": 3, "222": 1, "333": 1}; f.L["111"]["vimg"][0]["image_id"] = 11101
+    o50 = TMP / "o50"
+    K.kuru(args(ids, kd, o50), f, "S", o50, satirlar, kapak, sorun, fazla)
+    ok = K.apply(args(ids, kd, TMP / "o51", plan=str(o50 / "PLAN.json"), yedek_drive=str(TMP / "yd51"), apply=True,
+                      confirm=K.ONAY), f, "S", TMP / "o51", kapak)
+    s51 = json.loads((TMP / "o51" / "SONUC.json").read_text())
+    kont["YARIM -> 2. tur PASS (111), 222/333 1. turda PASS"] = ok and \
+        [(r["listing_id"], r["tur"], r["sonuc"]) for r in s51] == [("111", "1. tur", "YARIM"), ("222", "1. tur", "PASS"),
+                                                                   ("333", "1. tur", "PASS"), ("111", "2. tur", "PASS")]
+    kont["2. tur: 111 yeni dosya yuklenmedi, bag tasindi, eski silindi"] = \
+        [x[0] for x in f.yaz if x[1] == "111"] == ["POST", "RANK", "RANK", "RANK", "VARYASYON", "DELETE"] and \
+        f.L["111"]["vimg"][0]["image_id"] == f.L["111"]["imgs"][0]["listing_image_id"] and \
+        11101 not in [x["listing_image_id"] for x in f.L["111"]["imgs"]] and len(f.L["111"]["imgs"]) == 12
+    kont["rapor: PASS 3, YARIM 0, 2. turda 1"] = "PASS 3" in (TMP / "o51" / "report.md").read_text() and \
+        "YARIM 0" in (TMP / "o51" / "report.md").read_text() and "2. turda 1" in (TMP / "o51" / "report.md").read_text()
+
+    # 10c) kota tabani: kalan < 400 -> yeni ilana baslanmaz, yazma yok
+    f = Fake(); o52 = TMP / "o52"
+    K.kuru(args(ids, kd, o52), f, "S", o52, satirlar, kapak, sorun, fazla)
+    f.remaining = "350"
+    ok = K.apply(args(ids, kd, TMP / "o53", plan=str(o52 / "PLAN.json"), yedek_drive=str(TMP / "yd53"), apply=True,
+                      confirm=K.ONAY), f, "S", TMP / "o53", kapak)
+    kont["kota < 400: yeni ilana baslanmadi, yazma yok"] = (not ok) and f.yaz == [] and \
+        "KOTA < 400 DURDU" in (TMP / "o53" / "report.md").read_text()
 
     # 11) 4570125580 benzeri yarim durum: yeni gorsel rank 1 cift + alt BOS -> --devam kesin id ile tamamlanir
     f = Fake(); f.L["111"]["vimg"][0]["image_id"] = 11101; o24 = TMP / "o24"

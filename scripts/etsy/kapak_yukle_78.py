@@ -61,6 +61,8 @@ KAPAK_BOYUT = (3000, 2250)
 CAGRI_ILAN = 14  # apply'da ilan basina tahmini Etsy cagrisi (okuma + yukleme + silme + geri okuma)
 OKUMA_BEKLE = 3
 SIRA_DENEME, SIRA_BEKLE = 5, 5  # siralar tekillesene kadar en fazla 5 x 5 sn (Serdar 28 Eyl)
+YUKLEME_BEKLE = 5  # yuklemeden sonra rank cagrisina kadar (Serdar 28 Eyl)
+KOTA_TABAN = 400  # altina dusunce yeni ilana baslanmaz (etsy oturumu ayni kotayi kullaniyor)
 
 
 def simdi():
@@ -383,13 +385,21 @@ def ilan_uygula(a, api, shop, out, p, kapak_yol, drive_var):
     r["yeni_id"] = yeni
     if not yeni or yeni in base:
         return r, f"yukleme: yeni listing_image_id gecersiz ({yeni})"
-    # Serdar 28 Eyl: her yuklemeden sonra (tekil olsun olmasin) HEMEN alt metinli rank 1 cagrisi;
-    # Etsy rank 1 ciftini kendiliginden cozmuyor (4570125580, 4570126104). Sonra en fazla 5 x 5 sn tekillik.
-    log(f"  {lid}: {yeni} alt metin + rank 1{' (devam)' if devam else ''}")
-    rank1_alt(yeni)
-    g = sira_bekle(api, lid)
+    # Serdar 28 Eyl: yuklemeden 5 sn sonra alt metinli rank 1 cagrisi -> 5 x 5 sn tekillik; tekil degilse
+    # cagri 1 kez daha -> 5 x 5 sn. Hala tekil degilse ilan YARIM (yeni kapak var; eski kapak + bag yerinde).
+    if not devam:
+        time.sleep(YUKLEME_BEKLE)
+    g = []
+    for deneme in (1, 2):
+        log(f"  {lid}: {yeni} alt metin + rank 1 ({deneme}. cagri{', devam' if devam else ''})")
+        rank1_alt(yeni)
+        g = sira_bekle(api, lid)
+        if sira_tekil(g):
+            break
     if not sira_tekil(g):
-        return r, "siralar 5 x 5 sn icinde tekillesmedi (eski kapak SILINMEDI)"
+        r["yarim"] = True
+        (out / "ilan" / f"{lid}_YARIM.json").write_text(json.dumps(g, ensure_ascii=False, indent=1, default=str))
+        return r, ""
     yg = img(g, yeni) or {}
     gi = ids_of(g)
     k2 = {"siralar tekil": sira_tekil(g),
@@ -480,36 +490,62 @@ def apply(a, api, shop, out, kapak):
     (out / "ilan").mkdir(parents=True, exist_ok=True)
     drive_var = drive_liste(a.yedek_drive)
     log(f"yedek klasoru {a.yedek_drive}: {len(drive_var)} dosya | islenecek {len(is_)} ilan | kota {api.remaining}")
-    sonuc, hata = [], ""
+    sonuc, hata, kota_dur = [], "", False
     t0 = time.time()
-    for i, p in enumerate(is_, 1):
-        if getattr(api, "store", None) is not None and api.store.needs_refresh():
-            api.store.refresh()
-        r, hata = ilan_uygula(a, api, shop, out, p, pathlib.Path(a.kapak_dir) / p["yeni_kapak"], drive_var)
-        r["sonuc"] = "FAIL" if hata else ("ZATEN" if r.get("zaten") else "PASS")
-        r["hata"] = hata
-        sonuc.append(r)
-        (out / "SONUC.json").write_text(json.dumps(sonuc, ensure_ascii=False, indent=1, default=str))
-        gec = time.time() - t0
-        log(f"[{i}/{len(is_)}] {p['listing_id']} {p['cift']} {r['sonuc']} | eski {r['eski_id']} -> yeni {r['yeni_id']} | "
-            f"gecen {gec:.0f}s | kalan ~{gec / i * (len(is_) - i):.0f}s | %{i * 100 // len(is_)} | kota {api.remaining}"
-            + (f" | {hata}" if hata else ""))
-        if hata:
-            break
-    pas = sum(r["sonuc"] == "PASS" for r in sonuc)
-    zat = sum(r["sonuc"] == "ZATEN" for r in sonuc)
-    bag = sum(1 for r in sonuc if r["sonuc"] == "PASS" and r.get("bag_tasi"))
-    ok = not hata and pas + zat == len(is_)
+
+    def tur(liste, ad):
+        nonlocal hata, kota_dur
+        for i, p in enumerate(liste, 1):
+            if api.remaining is not None and int(api.remaining) < KOTA_TABAN:
+                kota_dur = True
+                log(f"KOTA {api.remaining} < {KOTA_TABAN}: yeni ilana baslanmadi ({ad}, {len(liste) - i + 1} ilan kaldi)")
+                return
+            if getattr(api, "store", None) is not None and api.store.needs_refresh():
+                api.store.refresh()
+            r, hata = ilan_uygula(a, api, shop, out, p, pathlib.Path(a.kapak_dir) / p["yeni_kapak"], drive_var)
+            r["sonuc"] = "FAIL" if hata else ("ZATEN" if r.get("zaten") else ("YARIM" if r.get("yarim") else "PASS"))
+            r["hata"], r["tur"] = hata, ad
+            sonuc.append(r)
+            (out / "SONUC.json").write_text(json.dumps(sonuc, ensure_ascii=False, indent=1, default=str))
+            gec = time.time() - t0
+            log(f"[{ad} {i}/{len(liste)}] {p['listing_id']} {p['cift']} {r['sonuc']} | eski {r['eski_id']} -> yeni "
+                f"{r['yeni_id']} | gecen {gec:.0f}s | kalan ~{gec / i * (len(liste) - i):.0f}s | %{i * 100 // len(liste)} | "
+                f"kota {api.remaining}" + (f" | {hata}" if hata else ""))
+            if hata:
+                return
+
+    tur(is_, "1. tur")
+    yarim = [r for r in sonuc if r["sonuc"] == "YARIM"]
+    if yarim and not hata and not kota_dur:
+        # 2. tur: YARIM ilanlar kesin image_id'lerle (devam mantigi) tamamlanir
+        for r in yarim:
+            a.devam[str(r["listing_id"])], a.devam_eski[str(r["listing_id"])] = int(r["yeni_id"]), int(r["eski_id"])
+        ids2 = {str(r["listing_id"]) for r in yarim}
+        log(f"2. tur: {len(ids2)} YARIM ilan kesin id ile: " + ", ".join(f"{r['listing_id']}:{r['yeni_id']}:{r['eski_id']}"
+                                                                         for r in yarim))
+        tur([p for p in is_ if str(p["listing_id"]) in ids2], "2. tur")
+    # ilan basina son durum (2. turda tamamlanan YARIM -> PASS)
+    son = {}
+    for r in sonuc:
+        son[str(r["listing_id"])] = r
+    sonuc_son = list(son.values())
+    say = {d: sum(r["sonuc"] == d for r in sonuc_son) for d in ("PASS", "ZATEN", "YARIM", "FAIL")}
+    bag = sum(1 for r in sonuc_son if r["sonuc"] == "PASS" and r.get("bag_tasi"))
+    ok = not hata and not kota_dur and say["PASS"] + say["ZATEN"] == len(is_)
     sat = [f"# KAPAK78 yukle + eski kapak sil: APPLY ({simdi()})", "",
-           f"- PASS {pas} (bag tasinan {bag}) | ZATEN {zat} | FAIL {sum(r['sonuc'] == 'FAIL' for r in sonuc)} | "
-           f"islenmeyen {len(is_) - len(sonuc)} | toplam {len(is_)} | kota {api.remaining}",
+           f"- PASS {say['PASS']} (bag tasinan {bag}, 2. turda {sum(1 for r in sonuc_son if r['tur'] == '2. tur' and r['sonuc'] == 'PASS')}) | "
+           f"ZATEN {say['ZATEN']} | YARIM {say['YARIM']} | FAIL {say['FAIL']} | islenmeyen {len(is_) - len(sonuc_son)} | "
+           f"toplam {len(is_)} | kota {api.remaining}" + (f" | KOTA < {KOTA_TABAN} DURDU" if kota_dur else ""),
            f"- Yedek: {a.yedek_drive}/<listing_id>_<image_id>.jpg ({sum(1 for r in sonuc if r.get('yedek'))} dosya)",
-           f"- SONUC: {'PASS' if ok else 'FAIL - DURDU: ' + (sonuc[-1]['listing_id'] + ' ' + hata if hata else 'eksik')}", "",
-           "| listing_id | cift | silinen eski | yeni kapak | tasinan bag | sonuc |", "|---|---|---|---|---|---|"]
+           f"- SONUC: {'PASS' if ok else 'FAIL - DURDU: ' + (sonuc[-1]['listing_id'] + ' ' + hata if hata else 'eksik (YARIM/kota)')}",
+           f"- YARIM (yeni kapak var, eski kapak + bag yerinde): "
+           f"{', '.join(str(r['listing_id']) + ':' + str(r['yeni_id']) + ':' + str(r['eski_id']) for r in sonuc_son if r['sonuc'] == 'YARIM') or '-'}", "",
+           "| listing_id | cift | eski | yeni kapak | tasinan bag | tur | sonuc |", "|---|---|---|---|---|---|---|"]
     sat += [f"| {r['listing_id']} | {r['cift']} | {r['eski_id']} | {r['yeni_id']} | "
-            f"{', '.join(str(b['value']) for b in r.get('bag_tasi') or []) or '-'} | {r['sonuc']} |" for r in sonuc]
+            f"{', '.join(str(b['value']) for b in r.get('bag_tasi') or []) or '-'} | {r['tur']} | {r['sonuc']} |"
+            for r in sonuc_son]
     (out / "report.md").write_text("\n".join(sat) + "\n", encoding="utf-8")
-    for x in sat[2:5]:
+    for x in sat[2:6]:
         log(x)
     return ok
 
