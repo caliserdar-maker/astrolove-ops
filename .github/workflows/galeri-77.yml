@@ -20,7 +20,7 @@ on:
         description: "virgullu cift listesi ya da HEPSI74"
         required: true
       mod:
-        description: "kaynak | tam"
+        description: "kaynak | tam | ornek (WP yoksa POD_PRINT WP denetimsiz, cikti _ORNEK/, HAZIR yok)"
         required: true
         default: tam
       yeniden:
@@ -84,7 +84,7 @@ jobs:
           PARCA: ${{ matrix.parca }}
         run: |
           set +e -uo pipefail
-          case "$MOD" in kaynak|tam) : ;; *) echo "HATA: mod kaynak|tam"; exit 1 ;; esac
+          case "$MOD" in kaynak|tam|ornek) : ;; *) echo "HATA: mod kaynak|tam|ornek"; exit 1 ;; esac
           case "$CIFTLER" in *[!A-Z_0-9,]*) echo "HATA: ciftler A-Z_ ve virgul"; exit 1 ;; esac
           if [ "$CIFTLER" = "HEPSI74" ]; then
             CIFTLER=$(tail -n +2 data/pod/pod78_ids.csv | cut -d, -f2 | grep -v -x -E 'CANCER_LIBRA|ARIES_LIBRA|AQUARIUS_LIBRA|CAPRICORN_LIBRA' | paste -sd,)
@@ -140,6 +140,19 @@ jobs:
               fi
             done
             rclone copy $Y "$G/_KAYNAK/$C" -q
+            if [ "$MOD" = "ornek" ] && [ ! -f $Y/BASKI_WARM_PARCHMENT.jpg ]; then
+              # yalniz bilgi ornegi: WP kisisellestirilmis baski yok -> onayli POD_PRINT WP (isim denetimi YOK), _ORNEK'e
+              rclone copyto "gdrive:ASTROLOVE/TEMP/POD_PRINT/$C/WARM_PARCHMENT/11x14.jpg" $Y/BASKI_WARM_PARCHMENT.jpg -q
+              hata=$(echo "$hata" | sed 's/ WP baski+yedek FAIL//'); echo "$C: ORNEK, WP = POD_PRINT kaynagi (kisisellestirilmemis)"
+            fi
+            if [ -z "$hata" ] && [ "$MOD" = "ornek" ]; then
+              O=_work/out/$C
+              bash scripts/pod/galeri77_cift.sh "$C" $Y $O > _work/cift_$C.txt 2>&1; echo "ornek QC: $(tail -1 _work/cift_$C.txt)"
+              grep -h "FAIL" $O/QC.txt 2>/dev/null | cut -c1-300 | head -8
+              rclone sync $O/paket "$G/_ORNEK/$C" -q; rclone copy $O/QC.txt "$G/_ORNEK/$C/_qc" -q
+              rclone copyto $O/TEMAS_$C.jpg "$G/_ORNEK/TEMAS_$C.jpg" -q
+              echo "ORNEK temas: TEMP/GALERI_77/_ORNEK/TEMAS_$C.jpg | $(rclone link "$G/_ORNEK/TEMAS_$C.jpg" 2>/dev/null)"
+            fi
             if [ -z "$hata" ] && [ "$MOD" = "tam" ]; then
               O=_work/out/$C
               if bash scripts/pod/galeri77_cift.sh "$C" $Y $O > _work/cift_$C.txt 2>&1; then
