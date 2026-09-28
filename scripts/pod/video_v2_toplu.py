@@ -58,7 +58,20 @@ def rc(*a, kontrol=True):
                           capture_output=True, text=True, check=kontrol)
 
 
+def v1_kapi_gecti(rec):
+    """V1 onbellegindeki baskinin hat kapilari (KAPI_RAPORU.json): kapi FAIL baski kullanilmaz (28 Eyl: AQUARIUS_LIBRA
+    EJ baskisi sembol kapisi FAIL iken onbellege alinmisti)."""
+    r = rc('cat', f'{V1_SIP}/{rec}/KAPI_RAPORU.json', kontrol=False)
+    try:
+        return r.returncode == 0 and bool(json.loads(r.stdout).get('kapilar_gecti'))
+    except ValueError:
+        return False
+
+
 def baski_al(cift, i1, i2, mesaj, v1):
+    if v1 and not v1_kapi_gecti(f'{cift}_{RENK}_{BOY}'):
+        print(f'{cift}: V1 onbellek baskisi kapi FAIL/raporsuz -> hattan yeniden', flush=True)
+        v1 = False                                            # V23 onbellegi / hat (kapilar gecmezse hat cikis 1)
     rec = f'{cift}_{RENK}_{BOY}' if v1 else f'{cift}_{i1}_{i2}'
     yer = W / 'baski' / rec / f'BASKI_{BOY}.jpg'
     yer.parent.mkdir(parents=True, exist_ok=True)
