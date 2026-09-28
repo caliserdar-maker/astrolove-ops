@@ -47,7 +47,7 @@ G.paste(fr, (FX, FY), _mk)
 
 # 4:3 pencere ve 3000x2250
 PENC_W = round(G.height * 4 / 3)
-x0 = min(max(CX - PENC_W // 2 - 60, 0), G.width - PENC_W)
+x0 = min(max(CX - PENC_W // 2, 0), G.width - PENC_W)   # cerceve pencerede ortalanir (Serdar 28 Eyl)
 out = G.crop((x0, 0, x0 + PENC_W, G.height)).resize((3000, 2250), Image.LANCZOS)
 out.save(CIK, quality=95, subsampling=0)
 
