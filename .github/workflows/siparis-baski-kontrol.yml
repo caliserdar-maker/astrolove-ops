@@ -1,0 +1,77 @@
+name: siparis-baski-kontrol
+
+# SALT OKUMA (28 Eyl, ACIL ...2285): Prodigi'ye giden baski dosyasinda Terazi cubugu kaymis mi + Prodigi siparis durumu.
+# Etsy YOK. Prodigi yalniz GET (siparis/iptal/guncelleme YOK). Musteriye hicbir sey gitmez. Alici/adres yazilmaz.
+# 1) scripts/pod/siparis_baski_kontrol.py: POD_PRINT/<cift>/<renk>/<boy>.jpg vs CANCER_LIBRA ayni renk/boy (md5 = paket kaydi)
+# 2) scripts/prodigi/siparis_oku.py: siparis + ayni receipt'in yeniden basimi (asama, asset, eylemler)
+# Cikti: gdrive:ASTROLOVE/TEMP/<klasor>/ (KARSILASTIRMA.png, KONTROL.json, PRODIGI_DURUM.json)
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      cift: {description: "POD cifti", default: "AQUARIUS_LIBRA"}
+      renk: {description: "renk", default: "MIDNIGHT_BLUE"}
+      boy: {description: "boy", default: "8x10"}
+      md5: {description: "paket kaydindaki md5 (bos = denetleme)", default: "550ab8fc8d983ccdcee93294764047a9"}
+      oid: {description: "Prodigi siparis id (bos = Prodigi okunmaz)", default: "ord_14538276"}
+      klasor: {description: "TEMP altindaki cikti klasoru", default: "SIPARIS_2285_DUZELTME"}
+
+jobs:
+  kontrol:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q pillow numpy opencv-python-headless scipy requests
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Baski dosyasi Terazi kontrolu (salt okur)
+        env:
+          CIFT: ${{ inputs.cift }}
+          RENK: ${{ inputs.renk }}
+          BOY: ${{ inputs.boy }}
+          MD5: ${{ inputs.md5 }}
+        run: |
+          set -euo pipefail
+          POD="gdrive:ASTROLOVE/TEMP/POD_PRINT"
+          mkdir -p _in _out
+          rclone copyto "$POD/$CIFT/$RENK/$BOY.jpg" _in/baski.jpg
+          rclone copyto "$POD/CANCER_LIBRA/$RENK/$BOY.jpg" _in/cl.jpg
+          rclone copyto "$POD/CANCER_LIBRA/MIDNIGHT_BLUE/11x14.jpg" _in/cl_mb_11x14.jpg
+          python scripts/pod/siparis_baski_kontrol.py _in/baski.jpg _in/cl.jpg _in/cl_mb_11x14.jpg _out \
+            --md5 "$MD5" --etiket "$CIFT $RENK $BOY (Prodigi'ye giden POD_PRINT dosyasi)"
+      - name: Prodigi siparis durumu (yalniz GET)
+        if: ${{ inputs.oid != '' }}
+        env:
+          OID: ${{ inputs.oid }}
+        run: python scripts/prodigi/siparis_oku.py --oid "$OID" --out _out/PRODIGI_DURUM.json
+      - name: Drive'a yaz
+        if: always()
+        env:
+          KLASOR: ${{ inputs.klasor }}
+        run: |
+          set -euo pipefail
+          rclone copy _out "gdrive:ASTROLOVE/TEMP/$KLASOR" -q
+          echo "Cikti: TEMP/$KLASOR/ ($(ls _out | tr '\n' ' '))"
