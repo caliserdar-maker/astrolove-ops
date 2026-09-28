@@ -64,6 +64,8 @@ SEMBOL_BIRLES = 40      # px: ayni sembolun ust/alt parcalari (orn. Kova'nin iki
 GOVDE_ORAN = 0.25       # isim bandinda govde satiri: murekkep >= medyan satirin %25'i (Q kuyrugu gibi inenler haric)
 SEMBOL_KAYMA = 8        # sembol kapisi arama penceresi (px)
 SEMBOL_UST = 80         # sembol kapisi bolgesi: olculen sembol bandinin bu kadar ustunden baslar (banda bagimsiz)
+SEMBOL_YAN = 0.5        # sembol kapisi: bolgenin iki yanina (bolge eni x oran) pencere; bolgeyle kesisen ve pencereye
+                        # sigan bilesen de sayilir (28 Eyl: bolge sinirina degen kayik parca sayilmiyordu)
 
 def murekkep(ref_norm):
     from pilot6 import LUMA, MUREKKEP
@@ -83,6 +85,17 @@ def olcum_duzelt(o, m):
         k = [c for c in kumeler(m[b[0]:b[1]], 20) if c[1] - c[0] > 30]
         if len(k) == 2 and all(min(k[i][1], sx[i][1]) - max(k[i][0], sx[i][0]) > 0.5 * (k[i][1] - k[i][0]) for i in (0, 1)):
             sb[0] = b[0]; sx = [[min(k[i][0], sx[i][0]), max(k[i][1], sx[i][1])] for i in (0, 1)]; ek.append(list(b))
+    # 3) Sembol bandinin ALTINDA, isim bandindan once kalan parcalar (orn. Terazi'nin alt cubugu): <= SEMBOL_BIRLES
+    #    px bosluklu ve her kumesi bir sembolun x araligiyla ortusen bant sembole katilir (yoksa sembol yeni isme
+    #    ortalanirken parca yerinde kalir; ARIES_LIBRA IN 28 Eyl: bant 1941-2109, gercek 2127, sag iou 0.719).
+    for b in sorted([b for b in pilot11.bantlar(m) if b[0] >= sb[1] and b[1] <= d['isim_bant'][0]], key=lambda b: b[0]):
+        if b[0] - sb[1] > SEMBOL_BIRLES: break
+        k = [c for c in kumeler(m[b[0]:b[1]], 20) if c[1] - c[0] > 30]
+        es = [next((i for i in (0, 1) if min(c[1], sx[i][1]) - max(c[0], sx[i][0]) > 0.5 * (c[1] - c[0])), None) for c in k]
+        if not k or None in es: break
+        sb[1] = b[1]; ek.append(list(b))
+        for c, i in zip(k, es):
+            sx[i] = [min(c[0], sx[i][0]), max(c[1], sx[i][1])]
     d['sembol_bant'], d['sembol'] = sb, sx
     d['sembol_merkez'] = [round((x[0] + x[1]) / 2, 1) for x in sx]
     b0, b1 = d['isim_bant']; satir = np.zeros(b1 - b0)
@@ -116,7 +129,8 @@ def _sembol_gecti(fark, dx, dy, iou, esik):
 def sembol_kapisi(poster, S, s, merkez, m_src, esik, maske=None, doku=False):
     """YENI KAPI: kucuk sembol bolgesi kaynak sayfadakiyle birebir mi? (olcek/aynalama/parca kaymasi yok)
     Bolge olculen banda BAGLI DEGIL: sembol x araligi (+pay) x [sembol bandi ustu - SEMBOL_UST, isim bandi ustu - 5].
-    Bolgeye tamamen sigan murekkep bilesenleri (daire yayi gibi disari tasanlar haric) sembolun tamamidir.
+    Bolgeyle kesisen ve iki yana SEMBOL_YAN payli pencereye tamamen sigan murekkep bilesenleri (daire yayi gibi pencereden
+    de tasanlar haric) sembolun tamamidir; kutudan yana tasan/kayan parca (orn. Terazi alt cubugu) da sayilir.
     Yeni posterde ayni bilesenler TEK bir yatay kaymayla (|dx| <= 1 yuvarlama, dy = 0) aranir;
     murekkep piksellerinde ortalama mutlak fark <= esik['fark'] ve murekkep IoU >= esik['iou'] olmali."""
     import cv2
@@ -127,23 +141,27 @@ def sembol_kapisi(poster, S, s, merkez, m_src, esik, maske=None, doku=False):
     # icin luma esigi ters calisir, o yuzden edisyon_uret.murekkep gecirilir. Blue yolu degismedi.
     Pm = maske(P) if maske else (P @ LUMA) > MUREKKEP
     sonuc, kirp = {}, {}
-    def ic(mk):                                                 # bolgeye tamamen sigan bilesenler
+    def ic(mk, c0=None, c1=None):
+        """pencereye tamamen sigan ve cekirdek sutunlarla [c0, c1) kesisen bilesenler (c0 None: tum pencere)."""
         n, lab, st, _ = cv2.connectedComponentsWithStats(mk.astype(np.uint8), 8); h, w = mk.shape; out = np.zeros_like(mk)
+        c0, c1 = (0, w) if c0 is None else (c0, c1)
         for i in range(1, n):
             x, y, bw, bh, a = st[i]
-            if a >= 20 and x > 0 and y > 0 and x + bw < w and y + bh < h: out |= lab == i
+            if a >= 20 and x > 0 and y > 0 and x + bw < w and y + bh < h and x < c1 and x + bw > c0: out |= lab == i
         return out
     for y in ('sol', 'sag'):
         o = S['oge'][f'sembol_{y}']; g = o['gorsel']; pay = 14
-        x0, x1 = g[0] - pay, g[2] + pay
+        yan = int(round(SEMBOL_YAN * (g[2] - g[0] + 2 * pay)))     # cekirdek (g +- pay) iki yana pencere payi
+        x0, x1 = g[0] - pay - yan, g[2] + pay + yan
+        c0, c1 = yan, x1 - x0 - yan                                # pencere icinde cekirdek sutunlari
         y0, y1 = s['sembol_bant'][0] - SEMBOL_UST, s['isim_bant'][0] - 5
-        src = ref[y0:y1, x0:x1]; mk = ic(m_src[y0:y1, x0:x1])
+        src = ref[y0:y1, x0:x1]; mk = ic(m_src[y0:y1, x0:x1], c0, c1)
         ex = int(round(merkez[y] - o['w'] / 2)) - (g[0] - x0) + (g[0] - o['gorsel'][0])
         en = None
         for dy in range(-SEMBOL_KAYMA, SEMBOL_KAYMA + 1):
             for dx in range(-SEMBOL_KAYMA, SEMBOL_KAYMA + 1):
                 q = P[y0 + dy:y1 + dy, ex + dx:ex + dx + (x1 - x0)]
-                qm = ic(Pm[y0 + dy:y1 + dy, ex + dx:ex + dx + (x1 - x0)])
+                qm = ic(Pm[y0 + dy:y1 + dy, ex + dx:ex + dx + (x1 - x0)], c0, c1)
                 if doku:
                     # WP kagit lifi piksel-piksel ayni degildir. Murekkebin kendi
                     # komsuluguna gore karsitligini ve geometrisini olceriz.
@@ -156,7 +174,7 @@ def sembol_kapisi(poster, S, s, merkez, m_src, esik, maske=None, doku=False):
                     puan = f
                 if en is None or puan < en[0]: en = (puan, f, dx, dy)
         _, f, dx, dy = en
-        q = P[y0 + dy:y1 + dy, ex + dx:ex + dx + (x1 - x0)]; qm = ic(Pm[y0 + dy:y1 + dy, ex + dx:ex + dx + (x1 - x0)])
+        q = P[y0 + dy:y1 + dy, ex + dx:ex + dx + (x1 - x0)]; qm = ic(Pm[y0 + dy:y1 + dy, ex + dx:ex + dx + (x1 - x0)], c0, c1)
         iou = float((qm & mk).sum() / max((qm | mk).sum(), 1))
         sonuc[y] = {'fark': round(f, 2), 'olcut': 'komsuluk_karsitlik' if doku else 'piksel_farki',
                     'dx': dx, 'dy': dy, 'iou': round(iou, 4), 'kaynak_kutu': [x0, y0, x1, y1],
