@@ -75,8 +75,8 @@ def kapak(baski, cikis):
 def video(kapaklar, cikis):
     KL, GECIS, FPS = 4.4, 0.8, 30
     girdiler = []
-    for k in kapaklar:
-        girdiler += ['-loop', '1', '-t', str(KL), '-i', str(k)]
+    for k in kapaklar:   # tek kare girdi: zoompan d=KL*FPS kareyi kendisi uretir (-loop ile her girdi karesi d kat cogalir)
+        girdiler += ['-i', str(k)]
     fil = []
     for j in range(3):
         fil.append(f"[{j}:v]scale=5760:4320,zoompan=z='1+0.03*on/{round(KL*FPS)}':"
