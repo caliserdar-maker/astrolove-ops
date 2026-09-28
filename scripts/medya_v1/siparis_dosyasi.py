@@ -266,6 +266,67 @@ def plate_bildir(bi, receipt=''):
     return bi
 
 
+# ------------------------------------------------------------------ ISIM PLAKASI (olcek tutarliligi)
+# 28 Eyl olcumu (uretim cizim yolu, 2400 vs 3307, 5 isim seti x 3 zemin): hi-res'te punto cap
+# hedefinden YENIDEN aranirsa onayli 2400 puntosuyla orantili cikmiyor (MAXIMILIANA 118 -> 164,
+# orantili 162.6: harf kenari 4.4 px); ayrica FreeType hinting glif yuksekligini her puntoda ayri
+# piksele oturttugu icin cap/taban 1.7 px'e kadar sapiyor. Cozum (cizim kodu degismez, girdi):
+# Blue disi edisyonlarda isim glifi SS kat buyuk cizilip alan ortalamasiyla indirilir (hinting
+# izgarasi 1/SS px'e iner) ve hi-res punto = onayli 2400 punto x k (yeniden arama yok).
+# Simulasyon: en kotu konum 1.71 -> 1.09, harf kenari 4.4 -> 0.55.
+ISIM_SS = 4
+
+
+def plaka_ss(metin, prof, hedef_cap, olcek=1.0, tam=None, orijinal=None):
+    """pilot12.plaka ile ayni sozlesme; glif SS kat cizilip indirilir, boyut ondalikli olabilir."""
+    p12 = _mod('pilot12')
+    from kisisel_pilot import font_yukle, ciz_metin, cap_icin_boyut
+    from pilot6 import ISIM_FONT, ISIM_W
+    fp = p12.FONT_DIR / ISIM_FONT
+    tam = tam or cap_icin_boyut(fp, p12.govde(metin, fp, ISIM_W), hedef_cap, ISIM_W)
+    boy = max(tam * olcek, 4.0)
+    s4 = max(int(round(boy * ISIM_SS)), 4 * ISIM_SS)
+    cr, _ = ciz_metin(font_yukle(fp, s4, ISIM_W), metin, s4 * -0.0388)   # onayli harf araligi
+    a = np.asarray(cr).astype(np.float32)
+    h, w = a.shape
+    H, Wd = -(-h // ISIM_SS) * ISIM_SS, -(-w // ISIM_SS) * ISIM_SS
+    b = np.zeros((H, Wd), np.float32)
+    b[:h, :w] = a
+    m = b.reshape(H // ISIM_SS, ISIM_SS, Wd // ISIM_SS, ISIM_SS).mean(axis=(1, 3))
+    ys, xs = np.nonzero(m > 40)                     # ciz_metin ile ayni kirpim olcutu
+    m = m[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
+    return (p12.altin_isim(Image.fromarray(np.clip(m, 0, 255).astype(np.uint8)), prof),
+            int(round(boy)), tam)
+
+
+class IsimPlakasi:
+    """Render suresince pilot12/pilot16 `plaka` adini plaka_ss'e baglar (kod degismez).
+
+    kayit: 2400 render'da (metin, cap) -> son kullanilan boy. sabit: hi-res'te
+    {(metin, cap_hi): boy_2400 * k}; varsa d_olcek dahil her cagri bu boyu kullanir."""
+
+    def __init__(self, kayit=None, sabit=None):
+        self.kayit, self.sabit = kayit, sabit
+
+    def __call__(self, metin, prof, hedef_cap, olcek=1.0, tam=None):
+        if self.sabit is not None and (metin, hedef_cap) in self.sabit:
+            return plaka_ss(metin, prof, hedef_cap, 1.0, tam=self.sabit[(metin, hedef_cap)])
+        r = plaka_ss(metin, prof, hedef_cap, olcek, tam)
+        if self.kayit is not None:
+            self.kayit[(metin, hedef_cap)] = r[2] * olcek
+        return r
+
+    def __enter__(self):
+        self._eski = (_mod('pilot12').plaka, _mod('pilot16').plaka)
+        _mod('pilot12').plaka = self
+        _mod('pilot16').plaka = self
+        return self
+
+    def __exit__(self, *a):
+        _mod('pilot12').plaka, _mod('pilot16').plaka = self._eski
+        return False
+
+
 # ------------------------------------------------------------------ edisyon sarmalayicisi
 class EdisyonPoster:
     """Blue disi dort edisyon: edisyon_uret yolu. Girdi degisir, render kodu degismez."""
@@ -383,7 +444,9 @@ class EdisyonPoster:
         # 1) ONAYLI 2400 render (referans, butun mevcut kapilar burada kosar)
         olcek_kur(2400)
         try:
-            s0, S0, p0, ek0, bi0 = self.render(ed, oran, sayfa_no, o, kilit, isimler, mesaj)
+            boy0 = {}
+            with IsimPlakasi(kayit=boy0):
+                s0, S0, p0, ek0, bi0 = self.render(ed, oran, sayfa_no, o, kilit, isimler, mesaj)
         except KeyError as e:
             # Eski oge ayristirilamadi (WP 1. iterasyon: KeyError 'sembol_sol').
             # Yigin izi yerine OLCUM raporlanir; siparis durur ama kosu devam eder.
@@ -406,8 +469,12 @@ class EdisyonPoster:
         if hedef_en != 2400:
             k = hedef_en / 2400.0
             olcek = olcek_kur(hedef_en)
-            s1, S1, p1, ek1, bi1 = self.render(ed, oran, sayfa_no, olcekle(o, k),
-                                               kilit_olcekle(kilit, k), isimler, mesaj)
+            kilit1 = kilit_olcekle(kilit, k)
+            capmap = {kilit['cap'][y]: kilit1['cap'][y] for y in kilit['cap']}
+            sabit = {(mt, capmap.get(c, c)): b * k for (mt, c), b in boy0.items()}
+            with IsimPlakasi(sabit=sabit):
+                s1, S1, p1, ek1, bi1 = self.render(ed, oran, sayfa_no, olcekle(o, k),
+                                                   kilit1, isimler, mesaj)
             merkez1, yeni1 = ek1
             maske1 = (S1['genis'] | yeni1)
             silinen1 = S1['genis'] & ~yeni1
@@ -790,7 +857,7 @@ def olcekle(d, k):
 def kilit_olcekle(kilit, k):
     out = dict(kilit)
     out['bosluk'] = kilit['bosluk'] * k                 # HASSAS_ALAN ile ayni gerekce
-    out['cap'] = {y: kilit['cap'][y] * k for y in kilit['cap']}
+    out['cap'] = {y: int(round(kilit['cap'][y] * k)) for y in kilit['cap']}
     for a in ('isim_bant', 'sembol_bant', 'tag_bant'):
         if isinstance(kilit.get(a), list):
             out[a] = [int(round(v * k)) for v in kilit[a]]
