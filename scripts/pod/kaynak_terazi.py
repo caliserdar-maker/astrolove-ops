@@ -59,6 +59,18 @@ def tek(x):
     return max(3, int(round(x)) | 1)
 
 
+def yakin(m, kutu, sc):
+    """Sembol yakini (bool): kutu (yerel x0,y0,x1,y1) icindeki cekirdek (m > 0.5) bilesenleri, tek(7*sc) genisletilmis.
+    5. deneme: WP dokusundaki koyu lekeler alfa/maske'ye girip kucultulerek yapistiriliyordu (dikdortgen yama)."""
+    x0, y0, x1, y1 = [int(round(v)) for v in kutu]
+    lab, n = ndi.label(m > 0.5)
+    tut = np.zeros(m.shape, bool)
+    for i, sl in enumerate(ndi.find_objects(lab), 1):
+        if sl and sl[1].start >= x0 - 2 and sl[1].stop - 1 <= x1 + 2 and sl[0].start >= y0 - 2 and sl[0].stop - 1 <= y1 + 2:
+            tut[sl] |= lab[sl] == i
+    return cv2.dilate(tut.astype(np.uint8), np.ones((tek(7 * sc), tek(7 * sc)), np.uint8)).astype(bool)
+
+
 def bilesenler(m, en_az_oran=0.05, kenar=True):
     lab, n = ndi.label(m)
     if not n:
@@ -147,11 +159,15 @@ def duzelt_dosya(cap_yol, cl_yol, sablon, cikis):
     ex1, ey1 = max(X1, tr['kutu'][2] + 1 + P), max(Y1, tr['kutu'][3] + 1 + P)
     A = a[ey0:ey1, ex0:ex1].astype(np.float32); B = b[ey0:ey1, ex0:ex1].astype(np.float32)
     px0, py0 = X0 - ex0, Y0 - ey0
-    parca = A[py0:py0 + (Y1 - Y0), px0:px0 + (X1 - X0)].copy(); alfa = murekkep(parca, sc)
+    parca = A[py0:py0 + (Y1 - Y0), px0:px0 + (X1 - X0)].copy(); mp = murekkep(parca, sc)
+    alfa = mp * yakin(mp, (P, P, x1 - x0 + P, y1 - y0 + P), sc)
+    yer = lambda k_: (k_[0] - ex0, k_[1] - ey0, k_[2] - ex0, k_[3] - ey0)       # tam goruntu kutusu -> bolge
     # zemin: eski Terazi + CL Terazi alanlari, CL dosyasindan; CL murekkebi inpaint
-    cl_m = cv2.dilate((murekkep(B, sc) > 0.02).astype(np.uint8), np.ones((tek(7 * sc), tek(7 * sc)), np.uint8))
+    mB = murekkep(B, sc)
+    cl_m = cv2.dilate(((mB > 0.02) & yakin(mB, yer(tr['kutu']), sc)).astype(np.uint8), np.ones((tek(7 * sc), tek(7 * sc)), np.uint8))
     zem = cv2.inpaint(np.clip(B, 0, 255).astype(np.uint8), cl_m, tek(9 * sc), cv2.INPAINT_TELEA).astype(np.float32)
-    eski_m = cv2.dilate((murekkep(A, sc) > 0.02).astype(np.uint8), np.ones((tek(9 * sc), tek(9 * sc)), np.uint8)).astype(bool)
+    mA = murekkep(A, sc)
+    eski_m = cv2.dilate(((mA > 0.02) & yakin(mA, yer(tc['kutu']), sc)).astype(np.uint8), np.ones((tek(9 * sc), tek(9 * sc)), np.uint8)).astype(bool)
     O = A.copy(); O[eski_m] = zem[eski_m]
     yw, yh = round(parca.shape[1] * k), round(parca.shape[0] * k)
     p2 = cv2.resize(parca, (yw, yh), interpolation=cv2.INTER_AREA)
@@ -179,12 +195,13 @@ def duzelt_dosya(cap_yol, cl_yol, sablon, cikis):
         top += np.nansum(d); n += np.count_nonzero(~np.isnan(d))
     dis_fark = top / max(n, 1)
     C = c[ey0:ey1, ex0:ex1].astype(np.float32)
-    yeni_m = cv2.dilate((murekkep(C, sc) > 0.02).astype(np.uint8), np.ones((tek(9 * sc), tek(9 * sc)), np.uint8)).astype(bool)
+    mC = murekkep(C, sc)
+    yeni_m = cv2.dilate(((mC > 0.02) & (yakin(mC, yer(t2['kutu']), sc) if t2 else True)).astype(np.uint8), np.ones((tek(9 * sc), tek(9 * sc)), np.uint8)).astype(bool)
     halka = eski_m & ~yeni_m
     cevre = cv2.dilate(eski_m.astype(np.uint8), np.ones((tek(41 * sc), tek(41 * sc)), np.uint8)).astype(bool) & ~eski_m & ~yeni_m
     cc = C                         # halka zemini cevredeki gercek zeminle ayni tonda mi (kanal basina)
     iz_fark = float(np.abs(cc[halka].mean(0) - cc[cevre].mean(0)).max()) if halka.any() and cevre.any() else 0.0
-    kalinti = float((murekkep(C, sc)[halka] > 0.5).mean()) if halka.any() else 0.0
+    kalinti = float((mC[halka] > 0.5).mean()) if halka.any() else 0.0
     r.update({'sonra': t2, 'kutu_disi_fark': round(dis_fark, 3), 'iz_fark': round(iz_fark, 2), 'kalinti_orani': round(kalinti, 4),
               'bolge': [int(ex0), int(ey0), int(ex1), int(ey1)]})
     ok = bool(t2 and abs(t2['yay_en'] / tr['yay_en'] - 1) <= 0.01 and abs(t2['yay_boy'] / tr['yay_boy'] - 1) <= 0.01
