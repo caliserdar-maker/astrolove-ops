@@ -7,6 +7,7 @@ Etsy: tek /listings/batch (includes Images,Videos) + readiness tanimi (2-3 cagri
   galeri   : galeri ilerleme kaydi (CL rapor.json + TEMP/GALERI_YAYIN/ILERLEME.json) PASS + canli 19 gorsel -> OK
   aciklama : canli aciklamada "within 7 business days" -> OK ("within 5" -> BEKLIYOR)
   hazirlik : ilan processing 4-7 -> OK
+  size     : envanter Size ilk gorulme sirasi = 8x10..24x36, A4, A3, A2 -> OK
 Cikti: onceki YAYIN_DURUM.md'nin gunluk ozet satirlari korunur + bugunun satiri + guncel tablo.
 Kullanim: yayin_durum.py --kapak DIR --video DIR --galeri ILERLEME.json [--galeri ...] --onceki ESKI.md --out YENI.md
 """
@@ -15,6 +16,7 @@ import csv
 import html
 import json
 import os
+import re
 import sys
 import time
 from pathlib import Path
@@ -22,7 +24,14 @@ from pathlib import Path
 KOK = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(KOK / "scripts/etsy"))
 BASARI = {"OK", "PASS", "ZATEN", "YAZILDI", "YUKLENDI", "TAMAM", "DONE"}
-ALANLAR = ["kapak", "video", "galeri", "aciklama", "hazirlik"]
+ALANLAR = ["kapak", "video", "galeri", "aciklama", "hazirlik", "size"]
+SIZE_HEDEF = ["8x10", "11x14", "12x16", "12x18", "16x20", "16x24", "18x24", "20x30", "24x30", "24x36", "A4", "A3", "A2"]
+
+
+def boy_kodu(t):
+    t = str(t or "").replace("×", "x").replace("X", "x")
+    m = re.search(r"\b(A[2-4])\b", t) or re.search(r"(\d+)[\s\"'″]*x[\s\"'″]*(\d+)", t)
+    return (m.group(1) if m.lastindex == 1 else f"{m.group(1)}x{m.group(2)}") if m else None
 
 
 def kayitlar(dizin):
@@ -78,6 +87,13 @@ def durumlar(L, kapak, video, galeri):
     t = html.unescape(L.get("description") or "")
     d["aciklama"] = "OK" if "within 7 business days" in t else ("BEKLIYOR" if "within 5 business days" in t else "FAIL")
     d["hazirlik"] = "OK" if (L.get("processing_min"), L.get("processing_max")) == (4, 7) else "BEKLIYOR"
+    sz = []
+    for p in (L.get("inventory") or {}).get("products") or []:
+        for v in p.get("property_values") or []:
+            k = boy_kodu((v.get("values") or [""])[0]) if "size" in (v.get("property_name") or "").lower() else None
+            if k and k not in sz:
+                sz.append(k)
+    d["size"] = "OK" if sz == SIZE_HEDEF else "BEKLIYOR"
     return d
 
 
@@ -98,7 +114,7 @@ def main():
     L = {}
     ids = [r["listing_id"] for r in rows]
     for i in range(0, len(ids), 100):
-        for x in (api.get("/listings/batch", params={"listing_ids": ",".join(ids[i:i + 100]), "includes": "Images,Videos"}) or {}).get("results") or []:
+        for x in (api.get("/listings/batch", params={"listing_ids": ",".join(ids[i:i + 100]), "includes": "Images,Videos,Inventory"}) or {}).get("results") or []:
             L[str(x["listing_id"])] = x
     kapak, video, galeri = kayitlar(a.kapak), kayitlar(a.video), galeri_kaydi(a.galeri)
     tablo, say = [], {f: {} for f in ALANLAR}
