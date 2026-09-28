@@ -1,0 +1,55 @@
+name: hata-kontrol-kapak
+
+# HATA KONTROL 28 Eyl (SALT OKUMA; Etsy YOK): TEMP/POD_KAPAK_78/<damga> kapaklarinda kucuk sembol on kontrolu.
+# scripts/pod/kapak_sembol_qc.py -> SEMBOL_QC.csv/.md + TEMAS_SAYFASI.jpg (78 kare, 1:1, cift adi yazili).
+# Cikti: Drive ASTROLOVE/TEMP/HATA_KONTROL_20260928/KAPAK_<damga>/
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      damga:
+        description: "TEMP/POD_KAPAK_78 alt klasoru"
+        required: true
+        default: "20260928_0911"
+
+jobs:
+  qc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q pillow numpy scipy
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Kapak sembol QC
+        env:
+          DAMGA: ${{ inputs.damga }}
+        run: |
+          set -uo pipefail
+          case "$DAMGA" in *[!0-9_]*|"") echo "HATA: damga rakam/_ olmali" >&2; exit 1 ;; esac
+          rclone copy "gdrive:ASTROLOVE/TEMP/POD_KAPAK_78/$DAMGA" _kapak --include "KAPAK_*.jpg" -q
+          echo "kapak: $(ls _kapak | wc -l)"
+          python scripts/pod/kapak_sembol_qc.py _kapak _qc; rc=$?
+          rclone copy _qc "gdrive:ASTROLOVE/TEMP/HATA_KONTROL_20260928/KAPAK_$DAMGA" -q
+          echo "Drive: TEMP/HATA_KONTROL_20260928/KAPAK_$DAMGA (QC cikis $rc; FAIL = isaretli kapak var)"
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
