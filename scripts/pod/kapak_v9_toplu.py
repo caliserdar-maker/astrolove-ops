@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """78 cift icin kapak v9 toplu uretim (Serdar 28 Eyl onayi: 3 ornek PASS).
-Girdi: _work/baski/<CIFT>/BASKI_11x14.jpg (TEMP/POD_KAPAK_V3/SIPARIS onbelleginden rclone ile).
+Girdi: _work/baski/<CIFT>/BASKI_11x14.jpg + KAPI_RAPORU.json (TEMP/POD_KAPAK_V3/SIPARIS onbelleginden rclone ile).
+Hat kapisi (28 Eyl): KAPI_RAPORU.json yoksa ya da kapilar_gecti degilse o baskidan kapak URETILMEZ (FAIL; AQUARIUS_LIBRA
+EJ baskisi sembol kapisi FAIL iken kapaga girmisti).
 Sahne: data/pod/kapak_sahne_v9.png 1213x910'a sikistirilir (iki huzme 4:3 pencerede), cerceve ortada.
 Her cift: kapak_v8_kur.py cagrisi; PASS/FAIL toplanir; _out/KAPAK_<CIFT>.jpg + OZET.md + ONIZLEME.jpg.
 ETA sayaci: islenen/toplam, gecen, kalan, yuzde. Herhangi bir FAIL -> cikis kodu 1.
 Kullanim: kapak_v9_toplu.py
 """
+import json
 import subprocess
 import sys
 import time
@@ -25,7 +28,19 @@ print(f'cift sayisi: {N}')
 sat = ['# KAPAK V9 TOPLU ' + time.strftime('%Y-%m-%d %H:%M UTC', time.gmtime()), f'Toplam: {N}', '']
 fail = 0
 t0 = time.time()
+def kapi_gecti(d):
+    try:
+        return bool(json.loads((d / 'KAPI_RAPORU.json').read_text()).get('kapilar_gecti'))
+    except (OSError, ValueError):
+        return False
+
+
 for i, c in enumerate(ciftler, 1):
+    if not kapi_gecti(BASKI / c):
+        fail += 1
+        sat.append(f'- {c}: FAIL | hat kapisi FAIL ya da KAPI_RAPORU yok: kapak uretilmedi')
+        print(f'[{i}/{N}] {c} FAIL (hat kapisi) | %{i / N * 100:.0f}', flush=True)
+        continue
     r = subprocess.run([sys.executable, str(KOK / 'scripts/pod/kapak_v8_kur.py'), str(SAHNE),
                         str(BASKI / c / 'BASKI_11x14.jpg'), str(KOK / 'data/pod/cila_cerceve_kaynak.png'),
                         str(OUT / f'KAPAK_{c}.jpg'), '295', '30', '919', '880'],

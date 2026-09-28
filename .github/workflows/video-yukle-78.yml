@@ -10,6 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       video_damga: {description: "TEMP/POD_VIDEO_V2 damgasi (bos = OZET.md'si olan en son)", required: false, default: ""}
+      haric: {description: "virgullu cift listesi (plana alinmaz)", required: false, default: ""}
 
 
 permissions:
@@ -22,6 +23,7 @@ jobs:
     timeout-minutes: 180
     env:
       VDAMGA_IN: ${{ inputs.video_damga }}
+      HARIC: ${{ inputs.haric }}
     steps:
       - uses: actions/checkout@v4
       - name: Etsy kilidi (sira bekle, iptal yok)
@@ -77,7 +79,7 @@ jobs:
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
           TOKEN_FILE: _work/ETSY_TOKEN.json
-        run: python scripts/etsy/video_yukle_78.py --video-dir _work/video --kaynak-bilgi _work/kaynak.json --out _out
+        run: python scripts/etsy/video_yukle_78.py --video-dir _work/video --kaynak-bilgi _work/kaynak.json --out _out --haric "$HARIC"
       - name: Token + cikti Drive'a
         if: ${{ always() }}
         run: |

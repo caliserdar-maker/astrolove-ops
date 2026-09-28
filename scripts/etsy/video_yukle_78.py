@@ -11,7 +11,8 @@ Durum: YUKLE (videosu yok) | DEGISTIR (eski video var) | BLOK (neden yazilir).
 Cikti: PLAN.json (sha256 kilitli) + PLAN.csv + report.md. ETA sayaci: islenen/toplam, gecen, kalan, yuzde.
 
 Ortam: ETSY_API_KEY, ETSY_SHARED_SECRET, ETSY_SHOP_ID, TOKEN_FILE.
-Kullanim: video_yukle_78.py --video-dir V --kaynak-bilgi K.json --out OUT
+Kotasi: kuru kosu ilan basina 2 GET (listing + videos); rapor bas/son kota ve apply tahmini cagriyi yazar.
+Kullanim: video_yukle_78.py --video-dir V --kaynak-bilgi K.json --out OUT [--haric CIFT,CIFT]
 """
 import argparse
 import csv
@@ -35,6 +36,7 @@ VIDEO_BOYUT = (2880, 2160)
 SURE_MIN, SURE_MAX = 5.0, 15.0     # Etsy ilan videosu
 MB_MAX = 100.0
 CAGRI_ILAN = 6                      # apply tahmini: state + video oku, yukle, geri oku, (eski sil + geri oku)
+KURU_CAGRI_ILAN = 2                 # kuru: listing + videos (GET)
 
 
 def simdi():
@@ -78,11 +80,13 @@ def kuru(a, api, out, satirlar):
     vdir = pathlib.Path(a.video_dir)
     yedek = out / "yedek"
     yedek.mkdir(parents=True, exist_ok=True)
-    plan, t0 = [], time.time()
+    plan, t0, kota_bas = [], time.time(), None
     for i, s in enumerate(satirlar, 1):
         lid, c = str(s["listing_id"]), s["cift"]
         b, neden = yerel_kontrol(vdir, c)
         st = (api.get(f"/listings/{lid}", ok404=True) or {}).get("state")
+        if kota_bas is None and api.remaining is not None:
+            kota_bas = int(api.remaining) + 1
         vid = videos(api, lid)
         row = {"listing_id": lid, "cift": c, "state": st, "video": b, "eski_video": [
             {"video_id": v.get("video_id"), "state": v.get("video_state"), "url": video_url(v)} for v in vid],
@@ -111,7 +115,7 @@ def kuru(a, api, out, satirlar):
             f"gecen {gec:.0f}s | kalan ~{gec / i * (len(satirlar) - i):.0f}s | %{i * 100 // len(satirlar)} | kota {api.remaining}")
 
     say = {d: sum(r["durum"] == d for r in plan) for d in ("YUKLE", "DEGISTIR", "BLOK")}
-    ok = say["BLOK"] == 0 and len(plan) == BEKLENEN
+    ok = say["BLOK"] == 0 and len(plan) == BEKLENEN - len(a.haric)
     (out / "PLAN.json").write_text(json.dumps({"olusturma": simdi(), "kaynak": a.kaynak, "satirlar": plan},
                                               ensure_ascii=False, indent=1), encoding="utf-8")
     with open(out / "PLAN.csv", "w", newline="", encoding="utf-8") as fh:
@@ -129,9 +133,10 @@ def kuru(a, api, out, satirlar):
     sat = [f"# VIDEO78 yukleme: KURU KOSU ({simdi()}) - Etsy'ye yazma YOK", "",
            f"- YUKLE {say['YUKLE']} | DEGISTIR {say['DEGISTIR']} | BLOK {say['BLOK']} | toplam {len(plan)} | "
            f"SONUC: {'PASS' if ok else 'FAIL'}",
-           f"- Kaynak: {kb.get('klasor')} | {kb.get('ozet')} | video {len(mbs)} dosya, "
+           f"- Haric (Serdar): {', '.join(a.haric) or '-'} | Kaynak: {kb.get('klasor')} | {kb.get('ozet')} | video {len(mbs)} dosya, "
            f"{min(mbs, default=0)}-{max(mbs, default=0)} MB",
-           f"- Etsy kota kalan {kota} | apply tahmini ~{gerek} cagri ({CAGRI_ILAN}/ilan) | "
+           f"- Etsy kota: kuru kosu basinda ~{kota_bas}, sonunda {kota} (kuru ~{KURU_CAGRI_ILAN * len(plan)} cagri, "
+           f"{KURU_CAGRI_ILAN}/ilan) | apply tahmini ~{gerek} cagri ({CAGRI_ILAN}/ilan) | "
            f"{'yeterli' if kota is None or kota - gerek >= a.quota_min else 'YETERSIZ'}",
            f"- Eski video yedegi: {sum(1 for r in plan for v in r['eski_video'] if v.get('yedek'))} dosya (out/yedek)",
            "- Apply (ayri adim, Serdar onayi): uploadListingVideo (name=VIDEO_<CIFT>.mp4); DEGISTIR'de yeni yuklenip "
@@ -157,13 +162,19 @@ def main():
     ap.add_argument("--kaynak-bilgi", help="JSON: klasor, ozet")
     ap.add_argument("--out", required=True)
     ap.add_argument("--quota-min", type=int, default=60)
+    ap.add_argument("--haric", default="", help="virgullu cift listesi (plana alinmaz)")
     a = ap.parse_args()
+    a.haric = sorted({x.strip() for x in a.haric.split(",") if x.strip()})
     a.kaynak = json.loads(pathlib.Path(a.kaynak_bilgi).read_text()) if a.kaynak_bilgi else {}
     out = pathlib.Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
     satirlar = list(csv.DictReader(open(a.ids, encoding="utf-8")))
     if len(satirlar) != BEKLENEN:
         raise SystemExit(f"HATA: ilan listesi {len(satirlar)} != {BEKLENEN}. DUR.")
+    bilinmeyen = set(a.haric) - {s["cift"] for s in satirlar}
+    if bilinmeyen:
+        raise SystemExit(f"HATA: haric listesinde bilinmeyen cift: {sorted(bilinmeyen)}. DUR.")
+    satirlar = [s for s in satirlar if s["cift"] not in a.haric]
     k, s = os.environ.get("ETSY_API_KEY", ""), os.environ.get("ETSY_SHARED_SECRET", "")
     mask(k); mask(s)
     store = TokenStore(os.environ["TOKEN_FILE"], k, s)

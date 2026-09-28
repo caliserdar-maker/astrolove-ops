@@ -1,7 +1,7 @@
 name: kapak-v9-toplu
 
 # 78 cift icin kapak v9 uretimi (salt Drive; Etsy YOK).
-# Girdi: TEMP/POD_KAPAK_V3/SIPARIS/<CIFT>_MIDNIGHT_BLUE_11x14/BASKI_11x14.jpg
+# Girdi: TEMP/POD_KAPAK_V3/SIPARIS/<CIFT>_MIDNIGHT_BLUE_11x14/BASKI_11x14.jpg + KAPI_RAPORU.json (kapi FAIL -> kapak yok)
 # Cikti: TEMP/POD_KAPAK_78/<damga>/ (KAPAK_*.jpg + OZET.md + ONIZLEME.jpg)
 
 permissions:
@@ -40,7 +40,7 @@ jobs:
           set -euo pipefail
           mkdir -p _work/baski
           rclone copy "gdrive:ASTROLOVE/TEMP/POD_KAPAK_V3/SIPARIS" _work/baski \
-            --include "*_MIDNIGHT_BLUE_11x14/BASKI_11x14.jpg" -q
+            --include "*_MIDNIGHT_BLUE_11x14/BASKI_11x14.jpg" --include "*_MIDNIGHT_BLUE_11x14/KAPI_RAPORU.json" -q
           # klasor adlarindan _MIDNIGHT_BLUE_11x14 ekini kaldir
           cd _work/baski
           for d in *_MIDNIGHT_BLUE_11x14; do mv "$d" "${d%_MIDNIGHT_BLUE_11x14}"; done
