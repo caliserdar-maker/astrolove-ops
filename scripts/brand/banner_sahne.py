@@ -6,7 +6,7 @@ Adimlar (28 Eyl 2026, Serdar karari "A ile devam"):
              x2plus ile 4000x1000'e buyutulur, Lanczos ile 3360x840'a indirilir.
   yerlestir  3360x840 taban uzerinde beyaz cerceve acikliklari OLCULUR, posterler
              (siparis-baski-v1 BASKI_12x16.jpg, 3:4) esnetmeden acikliga oturtulur,
-             sol-ust isik yonune gore hafif ic golge verilir. Golge yalniz kenar
+             sahnenin isik yonune gore (--isik) hafif ic golge verilir. Golge yalniz kenar
              bandindadir; merkez bolgede poster pikselleri birebir korunur.
 QC (PASS/FAIL): taban 3360x840; poster oran farki < %1.5 (AI cizimi aciklik, pervaz dahil
 0.752-0.758; 3:4'ten sapma); kirpilan poster kenari toplam <= 8 px (kenar basina ~4 px); merkez bolge dE76 maks < 1; aciklik cevresinde beyaz dikis pikseli = 0.
@@ -104,7 +104,13 @@ def lab(rgb):
                      200 * (f[..., 1] - f[..., 2])], -1)
 
 
-def yerlestir(taban, posterler, cik_dir, damga):
+ISIK = {  # ic golge kenar siddetleri (ust, sol, sag, alt)
+    'sol_ust': (0.16, 0.11, 0.035, 0.045),   # A: pencere isigi soldan, golgeler saga dusuyor
+    'ust': (0.16, 0.06, 0.06, 0.04),         # B: iki yanda simetrik aplik, isik yukaridan
+}
+
+
+def yerlestir(taban, posterler, cik_dir, damga, isik='sol_ust'):
     cik_dir = Path(cik_dir); cik_dir.mkdir(parents=True, exist_ok=True)
     B = Image.open(taban).convert('RGB')
     a = np.asarray(B)
@@ -112,7 +118,7 @@ def yerlestir(taban, posterler, cik_dir, damga):
     kapi = rap['kapilar']
     kapi['taban_3360x840'] = B.size == (W, H)
     kutular = acikliklar(a)
-    kapi['iki_aciklik'] = len(kutular) == 2
+    kapi['aciklik_sayisi_dogru'] = len(kutular) == len(posterler)
     out = a.astype(np.float32).copy()
     dE_maks, kirp_maks, oran_maks = 0.0, 0, 0.0
     for (x0, y0, x1, y1), pyol in zip(kutular, posterler):
@@ -128,7 +134,8 @@ def yerlestir(taban, posterler, cik_dir, damga):
         kx, ky = (rw - aw) // 2, (rh - ah) // 2
         R = R.crop((kx, ky, kx + aw, ky + ah))
         r = np.asarray(R, np.float32)
-        g = ic_golge(aw, ah)[..., None]
+        u, l, r_, al = ISIK[isik]
+        g = ic_golge(aw, ah, ust=u, sol=l, sag=r_, alt=al)[..., None]
         out[y0:y1, x0:x1] = r * g
         # merkez (golge bandi disi) birebir mi?
         m = 40
@@ -198,13 +205,15 @@ def main():
     b = sp.add_parser('buyut'); b.add_argument('--kaynak', required=True)
     b.add_argument('--model', required=True); b.add_argument('--cik', required=True)
     y = sp.add_parser('yerlestir'); y.add_argument('--taban', required=True)
-    y.add_argument('--sol', required=True); y.add_argument('--sag', required=True)
+    y.add_argument('--poster', action='append', required=True,
+                   help='aciklik basina bir poster, soldan saga sirayla')
     y.add_argument('--cik', required=True); y.add_argument('--damga', required=True)
+    y.add_argument('--isik', default='sol_ust', choices=sorted(ISIK))
     a = ap.parse_args()
     if a.k == 'buyut':
         buyut(a.kaynak, a.model, a.cik)
     else:
-        r = yerlestir(a.taban, [a.sol, a.sag], a.cik, a.damga)
+        r = yerlestir(a.taban, a.poster, a.cik, a.damga, a.isik)
         sys.exit(0 if r['SONUC'] == 'PASS' else 1)
 
 
