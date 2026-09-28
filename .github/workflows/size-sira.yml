@@ -1,6 +1,7 @@
 name: size-sira
 
-# 78 POD ilaninda Size menusu sirasi (Serdar genel onayi 28 Eyl 2026). scripts/pod/size_sira.py
+# 78 POD ilaninda Size menusu sirasi + .99 -> asagi tam fiyat, TEK envanter yazimi (Serdar genel onayi 28 Eyl 2026).
+# scripts/pod/size_sira.py (+ fiyat_kar.py: net kar kapisi, Prodigi canli teklif; net <= 0 varsa yazma yok).
 # Hedef: 8x10, 11x14, 12x16, 12x18, 16x20, 16x24, 18x24, 20x30, 24x30, 24x36, A4, A3, A2. Yalniz products sirasi degisir.
 # mod=kuru salt okuma (boy kumesi + Print fiyat sirasi). mod=yaz + confirm=SIZESIRA Etsy'ye YAZAR: ilan basina yedek
 # (Drive TEMP/SIZE_SIRA/YEDEK_<damga>/, dogrulanir) -> PUT -> birebir geri okuma; ilk FAIL'de DUR. Once CL (yalniz=4570143815).
@@ -18,6 +19,7 @@ on:
       yalniz: {description: "yalniz bu listing_id'ler (virgul)", default: ""}
       haric: {description: "dokunulmayacak listing_id'ler (virgul)", default: ""}
       kota_taban: {description: "bu kotanin altinda temiz dur", default: "150"}
+      fiyat99: {description: "true = ayni yazimda .99 fiyatlari asagi yuvarla (kar kapisi, Prodigi teklif)", type: boolean, default: true}
 
 jobs:
   sira:
@@ -67,8 +69,10 @@ jobs:
           YALNIZ: ${{ inputs.yalniz }}
           HARIC: ${{ inputs.haric }}
           TABAN: ${{ inputs.kota_taban }}
+          F99: ${{ inputs.fiyat99 }}
         run: |
-          python scripts/pod/size_sira.py --mod "$MOD" --confirm "$CONFIRM" --out _out --yalniz "$YALNIZ" --haric "$HARIC" \
+          ek=(); [ "$F99" = "true" ] && ek=(--fiyat99)
+          python scripts/pod/size_sira.py "${ek[@]}" --mod "$MOD" --confirm "$CONFIRM" --out _out --yalniz "$YALNIZ" --haric "$HARIC" \
             --ilerleme _work/ILERLEME.json --kota-taban "$TABAN" --yedek-drive "gdrive:ASTROLOVE/TEMP/SIZE_SIRA/YEDEK_${DAMGA}"
       - name: Token + rapor + ilerleme Drive'a
         if: ${{ always() }}
