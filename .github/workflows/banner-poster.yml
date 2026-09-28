@@ -1,0 +1,92 @@
+name: banner-poster
+
+# Etsy magaza banner'i icin GERCEK hattan poster: siparis-baski-v1 siparis_dosyasi.py --urun pod.
+# Cift/isim/mesaj sabit ornek (EMILY/JAMES, musteri verisi yok). Boy 3:4 (12x16), renkler girdiden.
+# Kapsam: YALNIZ Drive (rclone). Etsy/Prodigi secret'i YOK; Etsy yazma, musteri eylemi YOK.
+# Cikti: Drive <hedef>/<CIFT>_<RENK>_<BOY>/BASKI_<BOY>.jpg + ONIZLEME + KAPI_RAPORU.json
+#        + ayni dosyalar Actions artifact'i (banner birlestirme icin).
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      cift:
+        default: "CANCER_LIBRA"
+      renkler:
+        description: "Bosluklu renk listesi"
+        default: "MIDNIGHT_BLUE CHAMPAGNE_IVORY"
+      boy:
+        default: "12x16"
+      hedef:
+        description: "Drive hedefi (ASTROLOVE altinda)"
+        default: "TEMP/BANNER_20260928/POSTER"
+
+concurrency: banner-poster
+
+jobs:
+  uret:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout (siparis-baski-v1)
+        uses: actions/checkout@v4
+        with:
+          ref: siparis-baski-v1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Python bagimliliklari
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet --upgrade pip
+          python -m pip install --quiet pillow opencv-python-headless numpy fonttools img2pdf pikepdf
+      - name: rclone kur
+        run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then echo "HATA: RCLONE_CONF_B64 yok" >&2; exit 1; fi
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Poster baski dosyalari
+        env:
+          CIFT: ${{ inputs.cift }}
+          RENKLER: ${{ inputs.renkler }}
+          BOY: ${{ inputs.boy }}
+          HEDEF: gdrive:ASTROLOVE/${{ inputs.hedef }}
+        run: |
+          set -uo pipefail
+          mesaj=$(printf '%s' 'It Began With a Kiss in the Rain' | base64 -w0)
+          top=$(echo $RENKLER | wc -w); n=0; t0=$(date +%s); hata=0
+          for R in $RENKLER; do
+            n=$((n+1))
+            python scripts/medya_v1/siparis_dosyasi.py --cift "$CIFT" --renk "$R" --boy "$BOY" --urun pod \
+              --isim1 EMILY --isim2 JAMES --mesaj-b64 "$mesaj" --sip-kok "$HEDEF" || { echo "FAIL $CIFT $R"; hata=$((hata+1)); }
+            g=$(( $(date +%s) - t0 ))
+            echo "[$n/$top] $CIFT $R | gecen ${g}s | kalan ~$(( g / n * (top - n) ))s | %$(( n * 100 / top ))"
+          done
+          mkdir -p _art
+          rclone copy "$HEDEF" _art --include "*/BASKI_*.jpg" --include "*/ONIZLEME_*.jpg" --include "*/KAPI_RAPORU.json" --include "*/SEMBOL_*.jpg" -q
+          find _art -type f | sort
+          echo "hatali renk: $hata"
+          [ "$hata" = 0 ]
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: banner-poster
+          path: _art
+          retention-days: 7
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
