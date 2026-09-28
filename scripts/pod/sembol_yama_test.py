@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Hat yamasi testi (sembol alt bandi; scripts/pod/hat_yama/sembol_alt_bant.patch). SIPARIS HATTINA UYGULANMAZ:
-yama yalniz bu surecte a1_poster.olcum_duzelt uzerine konur; siparis-baski-v1 / kisisel-v1 degismez (merge Serdar onayiyla).
+"""Hat yamasi regresyonu: ONCE = checkout edilen siparis-baski-v1 a1_poster (olcum_duzelt + sembol_kapisi), SONRA = aday dosya
+(scripts/pod/hat_yama/a1_poster_aday.py: sembol alt bandi yamasi + kapi sertlestirmesi). Aday yalniz bu surecte kullanilir.
+Negatif test: olcumu degisen ciftlerde EJ isimleriyle eski (kayik) cikti yeni kapida KALMALI, yeni cikti GECMELI.
 
 Kok neden (28 Eyl, ARIES_LIBRA / AQUARIUS_LIBRA IN): olcum_duzelt sembol bandini yalniz YUKARI genisletir. Terazi'nin alt
 cubugu bandin altinda kalir; pilot16.poster_kur sembolu yeni ismin murekkep merkezine ortalarken cubuk yerinde kalir.
@@ -28,6 +29,7 @@ SETLER = {'KISA': ('MIA', 'NOAH', 'Since 2019'),
           'ORTA': ('SOPHIE', 'OLIVER', 'Where Our Story Began'),
           'UZUN': ('ALEXANDERRR', 'MAXIMILIANO', "I'd Choose You in Every Lifetime")}
 REF_CIFT = 'CANCER_LIBRA'
+EJ = ('EMILY', 'JAMES', 'It Began With a Kiss in the Rain')
 HATA = {'sembol': False, 'kalinti': False, 'temiz_ara': False, 'sol': {'iou': None}, 'sag': {'iou': None}}
 
 
@@ -51,11 +53,11 @@ def uret(parca, toplam, yamali, out):
     out = Path(out); out.mkdir(parents=True, exist_ok=True)
     sd.kisisel_hazirla()
     import a1_poster
-    ns = dict(vars(a1_poster))
-    for n in ast.parse(Path(yamali).read_text()).body:
-        if isinstance(n, ast.FunctionDef) and n.name == 'olcum_duzelt':
-            exec(compile(ast.Module([n], []), 'yama', 'exec'), ns)
-    HAT, YAMA = a1_poster.olcum_duzelt, ns['olcum_duzelt']
+    import importlib.util
+    sp = importlib.util.spec_from_file_location('a1_yeni', yamali)   # aday a1_poster (yama + kapi sertlestirmesi)
+    yeni = importlib.util.module_from_spec(sp); sp.loader.exec_module(yeni)
+    HAT, YAMA = a1_poster.olcum_duzelt, yeni.olcum_duzelt
+    HAT_K, YENI_K = a1_poster.sembol_kapisi, yeni.sembol_kapisi
     no, ciftler = sd.sayfa_no_tablosu()
     benim = ciftler[parca::toplam]
     P_ed = sd.EdisyonPoster(); PB = sd.BluePoster()
@@ -77,10 +79,12 @@ def uret(parca, toplam, yamali, out):
              'ek_bant_sonra': B1['duz']['sembol_ek_bant'], 'setler': {}}
         for s, (a, b, m) in SETLER.items():
             try:
+                a1_poster.sembol_kapisi = YENI_K
                 p1, bi1, _ = PB.P.uret(B1, (a, b), m)
                 kirpim(p1, B1['o'], out / f'K_{c}_{s}_SONRA.png')
                 d = {'sonra': kapi_ozet(bi1)}
                 if degisti or s == 'KISA':
+                    a1_poster.sembol_kapisi = HAT_K
                     p0, bi0, _ = PB.P.uret(B0, (a, b), m)
                     d['once'] = kapi_ozet(bi0)
                     fark = np.abs(np.asarray(p0.convert('RGB')).astype(np.int16) - np.asarray(p1.convert('RGB')).astype(np.int16))
@@ -90,6 +94,12 @@ def uret(parca, toplam, yamali, out):
             except Exception as e:                                    # noqa: BLE001 - set HATA, parca devam
                 d = {'sonra': {**HATA, 'hata': f'{type(e).__name__}: {e}'[:300]}}
             r['setler'][s] = d
+        if degisti:                                               # negatif test: eski (kayik) EJ ciktisi yeni kapida da KALMALI
+            a, b, m = EJ
+            a1_poster.sembol_kapisi = HAT_K; _, e0, _ = PB.P.uret(B0, (a, b), m)
+            a1_poster.sembol_kapisi = YENI_K; _, e1, _ = PB.P.uret(B0, (a, b), m)
+            _, e2, _ = PB.P.uret(B1, (a, b), m)
+            r['negatif_EJ'] = {'eski_cikti_eski_kapi': kapi_ozet(e0), 'eski_cikti_yeni_kapi': kapi_ozet(e1), 'yeni_cikti_yeni_kapi': kapi_ozet(e2)}
         (out / f'SONUC_{c}.json').write_text(json.dumps(r, indent=1, default=str))
         g = time.time() - t0
         ozet = ' '.join(f'{s}:{"PASS" if all(r["setler"][s]["sonra"][k] for k in ("sembol", "kalinti", "temiz_ara")) else "FAIL"}'
@@ -118,6 +128,12 @@ def birlestir(girdi, out):
     birebir = [r['cift'] for r in ayni if r['setler']['KISA'].get('piksel_fark', {}).get('max') == 0]
     sat.append(f'- Olcumu degismeyen {len(ayni)} cift: KISA set ONCE/SONRA birebir ayni {len(birebir)}/{len(ayni)}'
                f'{"" if len(birebir) == len(ayni) else " | FARKLI: " + " ".join(r["cift"] for r in ayni if r["cift"] not in birebir)}')
+    for r in R:
+        if 'negatif_EJ' in r:
+            n = r['negatif_EJ']
+            sat.append(f'- NEGATIF (EJ) {r["cift"]}: eski cikti eski kapi {"PASS" if gecti(n["eski_cikti_eski_kapi"]) else "FAIL"}, '
+                       f'eski cikti YENI kapi {"PASS" if gecti(n["eski_cikti_yeni_kapi"]) else "FAIL"} (beklenen FAIL, sag iou {n["eski_cikti_yeni_kapi"]["sag"]["iou"]}), '
+                       f'yeni cikti yeni kapi {"PASS" if gecti(n["yeni_cikti_yeni_kapi"]) else "FAIL"} (beklenen PASS)')
     sat += ['', '| cift | olcum | sembol_bant once -> sonra | ' + ' | '.join(SETLER) + ' |', '|---|---|---|' + '---|' * len(SETLER)]
     for r in R:
         h = []
@@ -158,7 +174,8 @@ def birlestir(girdi, out):
                     oncesonra.append((girdi / f'K_{r["cift"]}_{s}_ONCE.png', f'{r["cift"]} {s} ONCE {"PASS" if gecti(d["once"]) else "FAIL"}', gecti(d['once'])))
                 oncesonra.append((girdi / f'K_{r["cift"]}_{s}_SONRA.png', f'{r["cift"]} {s} SONRA {"PASS" if gecti(d["sonra"]) else "FAIL"}', gecti(d['sonra'])))
     sayfa(oncesonra, 'ONCE_SONRA.jpg', sut=2)
-    tum = all(gecti(r['setler'][s]['sonra']) for r in R for s in SETLER) and len(birebir) == len(ayni)
+    neg = all(not gecti(r['negatif_EJ']['eski_cikti_yeni_kapi']) and gecti(r['negatif_EJ']['yeni_cikti_yeni_kapi']) for r in R if 'negatif_EJ' in r)
+    tum = all(gecti(r['setler'][s]['sonra']) for r in R for s in SETLER) and len(birebir) == len(ayni) and neg
     return 0 if tum else 1
 
 
