@@ -1,8 +1,8 @@
 name: video-v2
 
 # Isim + tagline dongulu kapak videolari (salt Drive; Etsy YOK).
-# Hat baskilari: siparis-baski-v1 dali (degistirilmeden), V2-V3 onbellek TEMP/POD_VIDEO_V2/SIPARIS.
-# Cikti: TEMP/POD_VIDEO_V2/<damga>/ (VIDEO_*.mp4 + OZET.md)
+# v5 sablonu (EJ/IN/AM, 378 kare). Hat baskilari: siparis-baski-v1 dali (degistirilmeden), IN/AM onbellek TEMP/POD_VIDEO_V2/SIPARIS.
+# Cikti: TEMP/POD_VIDEO_V2/<damga>/ (VIDEO_*.mp4 + QC_*.json + OZET.md; tek cift ise kapaklar)
 
 permissions:
   contents: read
