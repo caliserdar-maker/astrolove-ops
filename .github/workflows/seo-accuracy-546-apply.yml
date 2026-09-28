@@ -99,6 +99,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:
+          retention-days: 1
           name: seo-accuracy-546-apply
           path: _out/
           if-no-files-found: ignore

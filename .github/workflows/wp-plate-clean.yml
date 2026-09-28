@@ -122,12 +122,12 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:
+          retention-days: 1
           name: wp-plate-clean
           path: |
             _clean/qc/*.png
             _clean/clean_report.json
           if-no-files-found: ignore
-          retention-days: 30
 
       - name: Sonuc
         if: ${{ always() }}

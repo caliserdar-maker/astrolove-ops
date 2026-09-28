@@ -116,6 +116,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:
+          retention-days: 1
           name: wp-quad-uygula
           path: _work/rapor.txt
           if-no-files-found: ignore

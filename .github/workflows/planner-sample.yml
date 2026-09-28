@@ -168,6 +168,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
+          retention-days: 1
           name: planner-sample
           path: |
             out/SYMBOLS/_preview_*.png

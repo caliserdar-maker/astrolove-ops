@@ -55,6 +55,6 @@ jobs:
           else echo "::warning::log suzgecten gecmedi, Drive'a yazilmadi"; fi
       - uses: actions/upload-artifact@v4
         if: always()
-        with: {name: gorsel-denetim, path: _work/TEMP, if-no-files-found: ignore}
+        with: {retention-days: 1, name: gorsel-denetim, path: _work/TEMP, if-no-files-found: ignore}
       - if: always()
         run: rm -rf _work ~/.config/rclone

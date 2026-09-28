@@ -120,6 +120,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
+          retention-days: 1
           name: wp-build-${{ inputs.step }}-${{ inputs.pair }}
           path: |
             _out/build/CONTACT_*.jpg
@@ -127,7 +128,6 @@ jobs:
             _out/build/report.json
             _out/tpl/templates.json
           if-no-files-found: ignore
-          retention-days: 30
 
       - name: Temizlik
         if: ${{ always() }}

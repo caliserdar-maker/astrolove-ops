@@ -85,8 +85,8 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:
+          retention-days: 1
           name: banner-poster
           path: _art
-          retention-days: 7
       - if: ${{ always() }}
         run: rm -rf ~/.config/rclone

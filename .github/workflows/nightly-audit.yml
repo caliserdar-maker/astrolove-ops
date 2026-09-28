@@ -132,6 +132,7 @@ jobs:
         if: ${{ always() }}
         continue-on-error: true
         with:
+          retention-days: 1
           name: nightly-audit
           path: _out/
           if-no-files-found: ignore

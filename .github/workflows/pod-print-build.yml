@@ -131,6 +131,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:
+          retention-days: 1
           name: pod-print-shard-${{ matrix.shard }}
           path: _work/state.csv
           if-no-files-found: ignore
@@ -189,6 +190,7 @@ jobs:
           head -1 _st/POD_PRINT_REPORT.md
       - uses: actions/upload-artifact@v4
         with:
+          retention-days: 1
           name: pod-print-state
           path: _st/
       - if: ${{ always() }}

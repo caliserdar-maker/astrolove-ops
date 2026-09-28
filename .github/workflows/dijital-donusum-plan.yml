@@ -42,6 +42,7 @@ jobs:
           rclone copyto _work/OZET.md "gdrive:ASTROLOVE/TEMP/OZET.md"
       - uses: actions/upload-artifact@v4
         with:
+          retention-days: 1
           name: dijital-donusum-plan
           path: |
             _work/DIJITAL_DONUSUM_PLAN.csv

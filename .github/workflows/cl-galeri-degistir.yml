@@ -122,6 +122,7 @@ jobs:
         if: ${{ always() }}
         continue-on-error: true
         with:
+          retention-days: 1
           name: cl-galeri-degistir
           path: |
             _out/rapor.json

@@ -72,6 +72,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:
+          retention-days: 1
           name: wp-zip-verify
           path: |
             _work/WP_ZIP_VERIFY.csv

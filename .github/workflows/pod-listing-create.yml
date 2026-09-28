@@ -196,12 +196,12 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
+          retention-days: 1
           name: pod-listing-create
           path: |
             _out/
             _work/state.csv
           if-no-files-found: ignore
-          retention-days: 30
 
       - name: Temizlik
         if: ${{ always() }}

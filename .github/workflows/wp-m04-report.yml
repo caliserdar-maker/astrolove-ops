@@ -115,6 +115,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:
+          retention-days: 1
           name: wp-m04-report
           path: |
             _work/WP_AUDIT_M04_GEO.csv

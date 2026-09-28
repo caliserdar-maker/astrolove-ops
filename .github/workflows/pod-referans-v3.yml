@@ -87,6 +87,7 @@ jobs:
         if: ${{ always() }}
         continue-on-error: true
         with:
+          retention-days: 1
           name: pod-referans-v3
           path: _out/
           if-no-files-found: ignore

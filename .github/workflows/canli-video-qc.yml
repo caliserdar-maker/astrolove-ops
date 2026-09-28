@@ -49,9 +49,9 @@ jobs:
           python scripts/etsy/canli_video_kapak.py etsy _work/METIN_78.csv canli.json
       - uses: actions/upload-artifact@v4
         with:
+          retention-days: 1
           name: canli
           path: canli.json
-          retention-days: 1
       - if: always()
         run: rm -rf _work ~/.config/rclone
 

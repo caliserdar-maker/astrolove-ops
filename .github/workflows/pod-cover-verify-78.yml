@@ -82,6 +82,7 @@ jobs:
         if: ${{ always() }}
         continue-on-error: true
         with:
+          retention-days: 1
           name: pod-cover-verify-78
           path: _out/
           if-no-files-found: ignore

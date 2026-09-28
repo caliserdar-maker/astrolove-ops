@@ -71,9 +71,9 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:
+          retention-days: 1
           name: duplicate-archive-522-apply
           path: _out/
           if-no-files-found: error
-          retention-days: 30
       - if: ${{ always() }}
         run: rm -rf _work ~/.config/rclone

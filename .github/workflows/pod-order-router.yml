@@ -269,9 +269,9 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:
+          retention-days: 1
           name: pod-order-router
           path: _out/PRODIGI_SKU_HARITA.json
           if-no-files-found: ignore
-          retention-days: 30
       - if: ${{ always() }}
         run: rm -rf _work ~/.config/rclone

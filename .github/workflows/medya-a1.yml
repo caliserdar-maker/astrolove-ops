@@ -103,7 +103,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
+          retention-days: 1
           name: kisisel-pilot-out
           path: out/
           if-no-files-found: ignore
-          retention-days: 7

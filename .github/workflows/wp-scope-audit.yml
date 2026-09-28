@@ -95,6 +95,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:
+          retention-days: 1
           name: wp-scope-audit
           path: _work/WP_SCOPE.csv
           if-no-files-found: ignore

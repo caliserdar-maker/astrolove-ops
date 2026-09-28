@@ -131,6 +131,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:
+          retention-days: 1
           name: pod-cover-gold-b-77
           path: |
             _work/state.json
@@ -138,6 +139,5 @@ jobs:
             _out/evidence/
             _out/backups/
           if-no-files-found: ignore
-          retention-days: 14
       - if: ${{ always() }}
         run: rm -rf _work _out ~/.config/rclone

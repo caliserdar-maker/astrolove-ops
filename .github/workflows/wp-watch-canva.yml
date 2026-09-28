@@ -136,6 +136,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:
+          retention-days: 1
           name: wp-watch-canva-${{ inputs.edition }}
           path: |
             _work/WP_WATCH_CANVA.csv
