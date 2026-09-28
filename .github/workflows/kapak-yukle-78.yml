@@ -9,6 +9,9 @@ name: kapak-yukle-78
 # Yazma yalniz apply=true VE confirm=KAPAK78_YUKLE_SIL VE plan_damga (kuru kosunun damgasi) ile; apply
 # plana kilitlidir (kapak sha256 + canli galeri), ilk hatada DURUR. Yedek: KAPAK78_YEDEK_<plan_damga>/
 # Cikti: Drive TEMP/KAPAK78_YUKLE/<KURU|APPLY>_<damga>/
+# TEK SEFERLIK ZAMANLAMA (Serdar onayi 28 Eyl): 29 Eyl 2026 00:05 UTC, Etsy kotasi yenilenince kalan 28 ilan;
+# plan 20260928_1006, haric 4570113157 (AQUARIUS_LIBRA) + 4570163164 (CAPRICORN_LIBRA; Terazi QC bekliyor).
+# Kapi isi yalniz 20260929 tarihinde calisir; baska gunlerdeki cron tetiklemeleri hicbir sey yapmaz.
 
 on:
   workflow_dispatch:
@@ -18,6 +21,8 @@ on:
       confirm: {description: "Yazma icin tam olarak: KAPAK78_YUKLE_SIL", required: false, default: ""}
       devam: {description: "apply: yarim ilan LISTING:YENI_IMAGE:ESKI_IMAGE (kesin id; virgulle birden cok)", required: false, default: ""}
       haric: {description: "apply: bu kosuda dokunulmayacak LISTING_ID'ler (virgulle)", required: false, default: ""}
+  schedule:
+    - cron: "5 0 29 9 *"   # tek seferlik: 2026-09-29 00:05 UTC (kapi isi tarihi dogrular)
 
 
 permissions:
@@ -25,15 +30,37 @@ permissions:
   contents: read
 
 jobs:
+  kapi:
+    runs-on: ubuntu-latest
+    outputs:
+      calis: ${{ steps.k.outputs.calis }}
+    steps:
+      - id: k
+        env:
+          OLAY: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          if [ "$OLAY" != "schedule" ]; then echo "calis=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+          gun=$(date -u +%Y%m%d)
+          if [ "$gun" = "20260929" ]; then
+            echo "tek seferlik zamanlama: $gun, kalan ilanlar (plan 20260928_1006, haric 4570113157,4570163164)"
+            echo "calis=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "tek seferlik zamanlama yalniz 20260929; bugun $gun -> hicbir sey yapilmaz"
+            echo "calis=false" >> "$GITHUB_OUTPUT"
+          fi
+
   yukle:
+    needs: kapi
+    if: needs.kapi.outputs.calis == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 270
     env:
-      APPLY: ${{ inputs.apply }}
-      CONFIRM: ${{ inputs.confirm }}
-      PDAMGA: ${{ inputs.plan_damga }}
+      APPLY: ${{ github.event_name == 'schedule' && 'true' || inputs.apply }}
+      CONFIRM: ${{ github.event_name == 'schedule' && 'KAPAK78_YUKLE_SIL' || inputs.confirm }}
+      PDAMGA: ${{ github.event_name == 'schedule' && '20260928_1006' || inputs.plan_damga }}
       DEVAM: ${{ inputs.devam }}
-      HARIC: ${{ inputs.haric }}
+      HARIC: ${{ github.event_name == 'schedule' && '4570113157,4570163164' || inputs.haric }}
     steps:
       - name: Onay kapisi
         run: |
