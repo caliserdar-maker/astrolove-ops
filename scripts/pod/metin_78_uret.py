@@ -3,7 +3,8 @@
 BASLIK ve 13 ETIKET uretilmez: karar Serdar'da verildi ve 78/78 ilanda CANLI
 (onayli baslik kalibi: "{A} and {B} Personalized Zodiac Couple Wall Art"); dokunulmaz.
 Aciklama: data/pod/aciklama_v3_sablon.txt (canli CL v3) + burc tarihleri.
-QC: tire yok, yer tutucu kalmadi. Herhangi FAIL -> cikis 1.
+Ayni burc cifti (Serdar 28 Eyl): burc tarih satiri TEK yazilir ("Leo: July 23 to August 22.").
+QC: tire yok, yer tutucu kalmadi, ayni cumle iki kez yok. Herhangi FAIL -> cikis 1.
 Kullanim: metin_78_uret.py CIKTI_KLASORU CIFT [CIFT ...]   (CIFT: CANCER_LIBRA gibi)
 """
 import json
@@ -29,8 +30,21 @@ def bas(s):
 def uret(cift):
     A, B = cift.split('_')
     Ab, Bb = bas(A.lower()), bas(B.lower())
-    return SABLON.replace('{A_TARIH}', TARIH[A]).replace('{B_TARIH}', TARIH[B]) \
-                 .replace('{A}', Ab).replace('{B}', Bb)
+    metin = SABLON
+    if A == B:
+        metin = metin.replace('{A}: {A_TARIH}. {B}: {B_TARIH}.', '{A}: {A_TARIH}.')
+    return metin.replace('{A_TARIH}', TARIH[A]).replace('{B_TARIH}', TARIH[B]) \
+                .replace('{A}', Ab).replace('{B}', Bb)
+
+
+def tekrar_eden_cumleler(metin):
+    """Ayni cumle (>= 12 karakter) metinde iki kez geciyorsa listeler."""
+    cumleler = [c.strip() for satir in metin.splitlines() for c in re.split(r'(?<=[.!?])\s+', satir)]
+    say = {}
+    for c in cumleler:
+        if len(c) >= 12:
+            say[c] = say.get(c, 0) + 1
+    return sorted(c for c, n in say.items() if n > 1)
 
 
 def qc(cift, aciklama):
@@ -39,6 +53,9 @@ def qc(cift, aciklama):
         h.append('tire')
     if re.search(r'\{[A-Z_]+\}', aciklama):
         h.append('yer tutucu kaldi')
+    tekrar = tekrar_eden_cumleler(aciklama)
+    if tekrar:
+        h.append(f'ayni cumle iki kez: {tekrar[:2]}')
     return h
 
 
