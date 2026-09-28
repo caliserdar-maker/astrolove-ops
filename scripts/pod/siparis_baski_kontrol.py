@@ -24,19 +24,26 @@ ESIK_KAYMA = 3.0
 ESIK_BOSLUK = 3.0
 
 
-def terazi(yol, sablon):
+def terazi(yol, sablon, ham=None):
     a = np.asarray(Image.open(yol).convert('RGB')).astype(np.float32)
     kutu, skor = KT.bul(a, sablon)
     x0, y0, x1, y1 = kutu; w, h = x1 - x0, y1 - y0
-    X0, Y0 = max(int(x0 - 0.25 * w), 0), max(int(y0 - 0.25 * h), 0)
-    X1, Y1 = min(int(x1 + 0.25 * w), a.shape[1]), min(int(y1 + 0.25 * h), a.shape[0])
-    P = KT.bilesenler(KT.murekkep(a[Y0:Y1, X0:X1]) > 0.5)
+    X0, Y0 = max(int(x0 - 0.5 * w), 0), max(int(y0 - 0.5 * h), 0)
+    X1, Y1 = min(int(x1 + 0.5 * w), a.shape[1]), min(int(y1 + 0.5 * h), a.shape[0])
+    m = KT.murekkep(a[Y0:Y1, X0:X1]) > 0.5
+    if ham:                                   # ham bolge + murekkep maskesi (tani icin)
+        g = Image.fromarray(a[Y0:Y1, X0:X1].astype(np.uint8)); mk = Image.fromarray((m * 255).astype(np.uint8)).convert('RGB')
+        T = Image.new('RGB', (g.width * 2 + 10, g.height), (255, 255, 255)); T.paste(g, (0, 0)); T.paste(mk, (g.width + 10, 0))
+        T.thumbnail((1200, 1200)); T.save(ham)
+    cx0, cy0, cx1, cy1 = x0 - X0 - 0.1 * w, y0 - Y0 - 0.1 * h, x1 - X0 + 0.1 * w, y1 - Y0 + 0.1 * h
+    P = [p for p in KT.bilesenler(m, en_az_oran=0.02, kenar=False)
+         if cx0 <= p['orta_x'] <= cx1 and cy0 <= (p['y'][0] + p['y'][1]) / 2 <= cy1]
     if not P:
-        return {'skor': skor, 'hata': 'murekkep yok'}
+        return {'skor': skor, 'hata': 'murekkep yok', 'kutu': [round(v) for v in kutu]}
     yay = max(P, key=lambda p: p['alan'])
-    P = [p for p in P if p['x'][0] >= yay['x'][0] - 0.2 * w and p['x'][1] <= yay['x'][1] + 0.2 * w]
+    P = [p for p in P if min(p['x'][1], yay['x'][1]) - max(p['x'][0], yay['x'][0]) > 0.3 * (p['x'][1] - p['x'][0])]
     alt = max(P, key=lambda p: p['y'][1])
-    return {'skor': skor, 'bilesen': len(P), 'cubuk_ayri': alt['lab'] != yay['lab'],
+    return {'skor': skor, 'bilesen': len(P), 'cubuk_ayri': alt['lab'] != yay['lab'], 'kutu': [round(v) for v in kutu],
             'yay': {'x': [X0 + v for v in yay['x']], 'y': [Y0 + v for v in yay['y']]},
             'cubuk': {'x': [X0 + v for v in alt['x']], 'y': [Y0 + v for v in alt['y']]},
             'yay_orta_x': X0 + yay['orta_x'], 'cubuk_orta_x': X0 + alt['orta_x'],
@@ -68,7 +75,7 @@ def main():
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
     md5 = hashlib.md5(Path(a.baski).read_bytes()).hexdigest()
     sablon = KT.sablon_kur(a.sablon)
-    B, R = terazi(a.baski, sablon), terazi(a.ref, sablon)
+    B, R = terazi(a.baski, sablon, out / 'HAM_BASKI.png'), terazi(a.ref, sablon, out / 'HAM_CL.png')
     if 'hata' in B or 'hata' in R:
         sonuc = {'karar': 'OLCULEMEDI', 'baski': B, 'ref': R}
     else:
