@@ -1,0 +1,108 @@
+name: ayar77-yaz
+
+# AYAR77 YAZMA (Serdar onayi 28 Eyl 2026): 77 POD ilanina CL canli envanteri + v3 aciklama.
+# Yalniz envanter PUT + description PATCH (+ gerekirse ayni gorsellere renk bagi). Once TAM YEDEK Drive'a
+# (TEMP/AYAR77_YEDEK_<damga>, sayi dogrulanir), sonra yazma; her ilanda state kontrolu, ilk hatada DUR.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      yalniz:
+        description: "Yalniz bu ilanlar (virgullu id); bos = 77'nin hepsi"
+        required: false
+        default: ""
+      confirm:
+        description: "Yazma icin tam olarak: AYAR77"
+        required: true
+        default: ""
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  yaz:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    env:
+      YALNIZ: ${{ inputs.yalniz }}
+      CONFIRM: ${{ inputs.confirm }}
+    steps:
+      - name: Onay kapisi
+        run: |
+          [ "$CONFIRM" = "AYAR77" ] || { echo "::error::confirm tam olarak AYAR77 olmali. DUR."; exit 1; }
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Oz-testler (sahte API)
+        run: |
+          set -euo pipefail
+          python scripts/pod/test_ayar77_kuru.py
+          python scripts/pod/test_ayar77_yaz.py
+      - name: Token
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+      - name: Tam yedek (salt okuma)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: python scripts/pod/ayar77_yaz.py --mod yedek --out _out --yalniz "$YALNIZ"
+      - name: Yedegi Drive'a yaz ve dogrula (yazmadan ONCE)
+        run: |
+          set -euo pipefail
+          if grep -rqE 'x-api-key|refresh_token|"access_token"|::add-mask::' _out/ 2>/dev/null; then
+            echo "::error::yedekte sir benzeri icerik. DUR."; exit 1
+          fi
+          stamp=$(date -u +%Y%m%d_%H%M)
+          hedef="gdrive:ASTROLOVE/TEMP/AYAR77_YEDEK_${stamp}"
+          rclone copy _out/YEDEK "$hedef/YEDEK" -q
+          yerel=$(ls _out/YEDEK | wc -l); uzak=$(rclone lsf "$hedef/YEDEK" | wc -l)
+          echo "yedek: yerel $yerel / Drive $uzak -> TEMP/AYAR77_YEDEK_${stamp}"
+          [ "$yerel" = "$uzak" ] || { echo "::error::yedek Drive dogrulamasi tutmadi. DUR."; exit 1; }
+          echo "HEDEF=$hedef" >> "$GITHUB_ENV"
+      - name: Yaz (ETSY'YE YAZAR)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          echo "::warning::AYAR77 yazma: ${YALNIZ:-77 ilan}"
+          python scripts/pod/ayar77_yaz.py --mod yaz --out _out --yalniz "$YALNIZ" --confirm "$CONFIRM"
+      - name: Token + sonuc Drive'a
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
+          if [ -n "${HEDEF:-}" ]; then
+            [ -f _out/SONUC.csv ] && rclone copyto _out/SONUC.csv "$HEDEF/SONUC.csv" -q || true
+            [ -d _out/SONRA ] && rclone copy _out/SONRA "$HEDEF/SONRA" -q || true
+            echo "Cikti: ${HEDEF#gdrive:ASTROLOVE/}/"
+          fi
+          [ -f _out/SONUC.csv ] && { echo '```'; cat _out/SONUC.csv; echo '```'; } >> "$GITHUB_STEP_SUMMARY" || true
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
