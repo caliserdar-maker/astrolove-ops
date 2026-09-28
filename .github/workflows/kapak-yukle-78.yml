@@ -1,0 +1,114 @@
+name: kapak-yukle-78
+
+# 78 POD ilaninda v9 kapak yukleme + eski 1. sira kapagi yedekleyip silme (Serdar acik onayi 28 Eyl):
+# scripts/etsy/kapak_yukle_78.py. Varsayilan KURU KOSU (salt okur): PLAN.json + silinecek 78 image_id.
+# Yazma yalniz apply=true VE confirm=KAPAK78_YUKLE_SIL VE plan_damga (kuru kosunun damgasi) ile; apply
+# plana kilitlidir, ilk hatada DURUR. Yedek: Drive TEMP/KAPAK78_YEDEK_<damga>/<listing_id>_<image_id>.jpg
+# Cikti: Drive TEMP/KAPAK78_YUKLE/<KURU|APPLY>_<damga>/
+
+on:
+  workflow_dispatch:
+    inputs:
+      kapak_damga: {description: "TEMP/POD_KAPAK_78/<damga> (78/78 PASS olan uretim)", required: true, default: "20260928_0911"}
+      plan_damga: {description: "apply: kuru kosu cikti damgasi (TEMP/KAPAK78_YUKLE/KURU_<damga>/PLAN.json)", required: false, default: ""}
+      apply: {description: "true = Etsy'ye YAZ + eski kapak SIL (confirm gerekir)", type: boolean, default: false}
+      confirm: {description: "Yazma icin tam olarak: KAPAK78_YUKLE_SIL", required: false, default: ""}
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  yukle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    env:
+      APPLY: ${{ inputs.apply }}
+      CONFIRM: ${{ inputs.confirm }}
+      KDAMGA: ${{ inputs.kapak_damga }}
+      PDAMGA: ${{ inputs.plan_damga }}
+    steps:
+      - name: Onay kapisi
+        run: |
+          set -euo pipefail
+          [[ "$KDAMGA" =~ ^[0-9]{8}_[0-9]{4}$ ]] || { echo "::error::kapak_damga bicimi YYYYMMDD_HHMM"; exit 1; }
+          if [ "$APPLY" = "true" ]; then
+            [ "$CONFIRM" = "KAPAK78_YUKLE_SIL" ] || { echo "::error::apply=true icin confirm tam olarak 'KAPAK78_YUKLE_SIL' olmali. DUR."; exit 1; }
+            [[ "$PDAMGA" =~ ^[0-9]{8}_[0-9]{4}$ ]] || { echo "::error::apply icin plan_damga (kuru kosu damgasi) gerekli. DUR."; exit 1; }
+            echo "MOD=APPLY" >> "$GITHUB_ENV"
+          else
+            echo "MOD=KURU" >> "$GITHUB_ENV"
+          fi
+          echo "STAMP=$(date -u +%Y%m%d_%H%M)" >> "$GITHUB_ENV"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2 pillow==12.3.0 numpy==2.4.6
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Token
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+      - name: Kapaklar + isimler (+ plan)
+        run: |
+          set -euo pipefail
+          rclone copy "gdrive:ASTROLOVE/TEMP/POD_KAPAK_78/$KDAMGA" _work/kapak --include "KAPAK_*.jpg" --include "OZET.md" -q
+          grep -q "^SONUC PASS" _work/kapak/OZET.md || { echo "::error::OZET.md SONUC PASS degil. DUR."; exit 1; }
+          echo "kapak: $(ls _work/kapak/KAPAK_*.jpg | wc -l) | $(grep '^PASS:' _work/kapak/OZET.md)"
+          rclone copy "gdrive:ASTROLOVE/TEMP/POD_KAPAK_V3/SIPARIS" _work/siparis --include "*_MIDNIGHT_BLUE_11x14/KAPI_RAPORU.json" -q
+          mkdir -p _work/isim
+          for d in _work/siparis/*_MIDNIGHT_BLUE_11x14; do
+            c=$(basename "$d"); cp "$d/KAPI_RAPORU.json" "_work/isim/${c%_MIDNIGHT_BLUE_11x14}.json"
+          done
+          echo "isim: $(ls _work/isim | wc -l)"
+          if [ "$MOD" = "APPLY" ]; then
+            rclone copyto "gdrive:ASTROLOVE/TEMP/KAPAK78_YUKLE/KURU_${PDAMGA}/PLAN.json" _work/PLAN.json
+            echo "plan: KURU_${PDAMGA}/PLAN.json ($(stat -c %s _work/PLAN.json) bayt)"
+          fi
+      - name: Kapak yukle + eski kapak sil (kuru / apply)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          args=(--kapak-dir _work/kapak --isim-dir _work/isim --out _out)
+          if [ "$MOD" = "APPLY" ]; then
+            args+=(--plan _work/PLAN.json --yedek-drive "gdrive:ASTROLOVE/TEMP/KAPAK78_YEDEK_${STAMP}" --apply --confirm "$CONFIRM")
+          fi
+          python scripts/etsy/kapak_yukle_78.py "${args[@]}"
+      - name: Token + cikti Drive'a
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
+          if grep -rIqE 'x-api-key|refresh_token|"access_token"' _out/ 2>/dev/null; then
+            echo "::error::ciktida sir benzeri anahtar bulundu, Drive'a yazilmadi"; exit 1
+          fi
+          rm -rf _out/eski_kapak_kuru
+          hedef="gdrive:ASTROLOVE/TEMP/KAPAK78_YUKLE/${MOD:-KURU}_${STAMP}"
+          [ -d _out ] && rclone copy _out "$hedef" -q && echo "Cikti: TEMP/KAPAK78_YUKLE/${MOD:-KURU}_${STAMP}/"
+          [ -f _out/report.md ] && cat _out/report.md >> "$GITHUB_STEP_SUMMARY" || true
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
