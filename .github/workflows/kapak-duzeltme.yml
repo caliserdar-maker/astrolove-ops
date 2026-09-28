@@ -70,7 +70,7 @@ jobs:
           [ "$KOD" -eq 0 ] || { echo "::error::kaynak QC FAIL. DUR."; exit 1; }
           rm -rf _pod78 _cap _cl
       - name: Hat yamasi (yalniz bu kosunun kopyasi)
-        run: patch -p1 -s -d _sb < scripts/pod/hat_yama/sembol_alt_bant.patch && git -C _sb diff --stat
+        run: grep -q 'Sembol bandinin ALTINDA' _sb/scripts/medya_v1/a1_poster.py && echo 'yama hatta zaten var' || { patch -p1 -s -d _sb < scripts/pod/hat_yama/sembol_alt_bant.patch && git -C _sb diff --stat; }
       - name: Girdiler + yamali EJ baskilari
         run: |
           set -euo pipefail

@@ -29,7 +29,6 @@ from scipy import ndimage as ndi
 
 Image.MAX_IMAGE_PIXELS = None
 REF_W = 3307                                 # 11x14 genislik
-REF_KUTU = (2046, 2675, 2377, 2929)          # CANCER_LIBRA 11x14 MB Terazi (x0, y0, x1, y1), olculdu
 BANT = (2550, 3075)                          # 11x14 kucuk sembol bandi (tara)
 ESIK = 0.05
 
@@ -96,9 +95,16 @@ def bul(a, sablon):
 
 
 def sablon_kur(cl_mb_11x14):
-    a = np.asarray(Image.open(cl_mb_11x14).convert('RGB')).astype(np.float32)
-    x0, y0, x1, y1 = REF_KUTU
-    return murekkep(a[y0:y1 + 1, x0:x1 + 1]).astype(np.float32)
+    """Terazi sablonu CANCER_LIBRA MB 11x14 KAYNAGINDAN olculur (sag yari, kucuk sembol bandi; tara ile ayni olcum).
+    (3. iterasyon: sabit REF_KUTU EJ baskisindan olculmustu; baskida sembol isme ortalandigi icin kaynakta yeri farkli.)"""
+    a = np.asarray(Image.open(cl_mb_11x14).convert('RGB'))
+    y0, y1 = BANT; x0 = a.shape[1] // 2
+    P = bilesenler(murekkep(a[y0:y1, x0:]) > 0.5)
+    ana = max(P, key=lambda q: q['alan']); w = ana['x'][1] - ana['x'][0]
+    P = [q for q in P if q['x'][1] >= ana['x'][0] - 0.6 * w and q['x'][0] <= ana['x'][1] + 0.6 * w]
+    k = (x0 + min(q['x'][0] for q in P), y0 + min(q['y'][0] for q in P), x0 + max(q['x'][1] for q in P), y0 + max(q['y'][1] for q in P))
+    print(f'sablon kutusu (CL MB 11x14 kaynak): {k} = {k[2] - k[0] + 1}x{k[3] - k[1] + 1}', flush=True)
+    return murekkep(a[k[1]:k[3] + 1, k[0]:k[2] + 1]).astype(np.float32)
 
 
 def duzelt_dosya(cap_yol, cl_yol, sablon, cikis):
