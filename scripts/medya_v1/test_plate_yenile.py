@@ -26,9 +26,13 @@ except Exception:                                                 # noqa: BLE001
 W, H = 2400, 3048
 
 
-def zemin(koyu, tohum=3):
+def zemin(koyu, tohum=3, vinyet=0.0):
     rng = np.random.default_rng(tohum)
     a = np.zeros((H, W, 3), np.float32) + ((4, 8, 30) if koyu else (222, 193, 138))
+    if vinyet:                                        # parsomen vinyeti: kenarlar koyu
+        yy, xx = np.mgrid[0:H, 0:W].astype(np.float32)
+        r = np.hypot((xx - W / 2) / (W / 2), (yy - H / 2) / (H / 2))
+        a -= (vinyet * r ** 2)[..., None]
     dus = rng.normal(0, 1, (H // 40, W // 40)).astype(np.float32)
     dus = np.asarray(Image.fromarray(dus).resize((W, H), Image.BICUBIC))
     a += (dus * (2 if koyu else 9))[..., None]
@@ -41,10 +45,10 @@ def zemin(koyu, tohum=3):
     return np.clip(a, 0, 255).astype(np.uint8)
 
 
-def slogan_ekle(a, renk, font):
+def slogan_ekle(a, renk, font, punto=64):
     im = Image.fromarray(a)
     ImageDraw.Draw(im).text((1200, 2650), 'Two Souls  One Bond', anchor='mm', fill=renk,
-                            font=ImageFont.truetype(font, 64))
+                            font=ImageFont.truetype(font, punto))
     return np.asarray(im.filter(ImageFilter.GaussianBlur(0.5)) if False else im)
 
 
@@ -52,9 +56,9 @@ def slogan_ekle(a, renk, font):
 class PlateYenileTesti(unittest.TestCase):
     font = str(Path(KY).parents[1] / 'assets' / 'fonts' / 'Cinzel.ttf') if KY else ''
 
-    def kos(self, koyu, renk):
-        z = zemin(koyu)
-        ham = slogan_ekle(z, renk, self.font)
+    def kos(self, koyu, renk, vinyet=0.0, punto=64):
+        z = zemin(koyu, vinyet=vinyet)
+        ham = slogan_ekle(z, renk, self.font, punto)
         canva = np.roll(z, (2, -2), axis=(0, 1)).astype(np.int16) + 3      # ayri disa aktarim
         canva = np.clip(canva, 0, 255).astype(np.uint8)
         yeni, rap = py.melez_plate(ham, canva)
@@ -70,6 +74,12 @@ class PlateYenileTesti(unittest.TestCase):
 
     def test_parsomen(self):
         self.kos(False, (120, 70, 25))
+
+    def test_parsomen_vinyetli(self):
+        # 28 Eyl: tam en hayalet olcumu vinyeti hayalet sayiyordu (WP taban 26-28); yerel olcum
+        # punto 96 = gercek slogan (8x10 glif yuksekligi 73 px @2400)
+        rap = self.kos(False, (120, 70, 25), vinyet=60.0, punto=96)
+        self.assertFalse(rap['temizlik_kapisi_tam_en']['gecti'], rap['temizlik_kapisi_tam_en'])
 
     def test_koyu_yildizli(self):
         self.kos(True, (231, 167, 48))

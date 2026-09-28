@@ -221,6 +221,31 @@ class PlateHatasi(RuntimeError):
 PLATE_SLOGAN_ESIK = 0.25
 
 
+def plate_fark_maskesi(plate_yol):
+    """`sayfa_olc` maske ureticisi: |dosya - plate| > PLATE_ESIK (siparis render'inin olcumu)."""
+    import cv2
+    import pilot11
+    from pilot6 import LUMA
+    eu = _mod('edisyon_uret')
+    pl = pilot11.norm(Image.open(plate_yol).convert('RGB'))[0]
+    Lp = np.asarray(pl).astype(np.float32) @ LUMA
+
+    def maske(L, acik):                                        # noqa: ARG001
+        h = min(L.shape[0], Lp.shape[0])
+        m = np.zeros(L.shape, bool)
+        m[:h] = np.abs(L[:h] - Lp[:h]) > PLATE_ESIK
+        k = eu.MASKE_KENAR
+        if k:
+            Wd = L.shape[1]
+            m[:, :int(Wd * k)] = False
+            m[:, int(Wd * (1 - k)):] = False
+        n, lab, st, _ = cv2.connectedComponentsWithStats(m.astype(np.uint8), 8)
+        tut = np.zeros(n, bool)
+        tut[1:] = st[1:, cv2.CC_STAT_AREA] >= eu.MASKE_MIN_ALAN
+        return tut[lab]
+    return maske
+
+
 def plate_slogan_kapisi(kaynak, plate_yol, ed):
     """Plate'te eski slogan kaldi mi? gecti=False ise siparis durur (SISTEM HATASI)."""
     import pilot11
@@ -239,9 +264,22 @@ def plate_slogan_kapisi(kaynak, plate_yol, ed):
     try:
         o = pilot11.sayfa_olc(yol, maske=maske)
     except SystemExit as e:
-        return {**d, 'gecti': False, 'sebep': f'dosya olculemedi: {e}'}
+        o = {'hata': str(e)}
     if 'tag_bant' not in o:
-        return {**d, 'gecti': False, 'sebep': 'dosyada slogan bandi olculemedi'}
+        # Yerel kontrast maskesi dokulu zeminde isim satirini bulamayabilir (28 Eyl: WP 18x24,
+        # 30x40, AQ 12x16 'isim satiri bulunamadi'). Siparis render'i bantlari ZATEN
+        # |dosya - plate| maskesiyle olcer; ayni olcum burada da denenir. Kirli plate'te slogan
+        # farkta gorunmez -> bant yok -> FAIL (fail-closed korunur). Glif pikselleri asagida
+        # yine bagimsiz yerel kontrast maskesinden alinir.
+        try:
+            o2 = pilot11.sayfa_olc(yol, maske=plate_fark_maskesi(plate_yol))
+        except SystemExit as e:
+            o2 = {'hata': str(e)}
+        if 'tag_bant' not in o2:
+            return {**d, 'gecti': False,
+                    'sebep': f"dosya olculemedi: {o.get('hata') or 'slogan bandi yok'}; "
+                             f"plate farkiyla: {o2.get('hata') or 'slogan bandi yok'}"}
+        o, d['olcum'] = o2, 'plate farki maskesi'
     (y0, y1), (x0, x1) = o['tag_bant'], o['tag_x']
     A = np.asarray(pilot11.norm(Image.open(yol).convert('RGB'))[0]).astype(np.float32) @ LUMA
     pl = pilot11.norm(Image.open(plate_yol).convert('RGB'))[0]
@@ -382,25 +420,7 @@ class EdisyonPoster:
         kodu degismez. Esik 12: olculen murekkep disi p99 0-3, cekirdek > 30.
         Kucuk bilesen eleme ve kenar payi onayli `edisyon_maske` ile ayni.
         """
-        import cv2
-        from pilot6 import LUMA
-        pl = self.p11.norm(Image.open(plate_yol).convert('RGB'))[0]
-        Lp = np.asarray(pl).astype(np.float32) @ LUMA
-
-        def maske(L, acik):                                    # noqa: ARG001
-            h = min(L.shape[0], Lp.shape[0])
-            m = np.zeros(L.shape, bool)
-            m[:h] = np.abs(L[:h] - Lp[:h]) > PLATE_ESIK
-            k = self.eu.MASKE_KENAR
-            if k:
-                Wd = L.shape[1]
-                m[:, :int(Wd * k)] = False
-                m[:, int(Wd * (1 - k)):] = False
-            n, lab, st, _ = cv2.connectedComponentsWithStats(m.astype(np.uint8), 8)
-            tut = np.zeros(n, bool)
-            tut[1:] = st[1:, cv2.CC_STAT_AREA] >= self.eu.MASKE_MIN_ALAN
-            return tut[lab]
-        return maske
+        return plate_fark_maskesi(plate_yol)
 
     def olc(self, yol, plate_yol):
         """Sayfa olcumu HER ZAMAN 2400'de (sayfa_olc bu olcekte dogrulandi)."""

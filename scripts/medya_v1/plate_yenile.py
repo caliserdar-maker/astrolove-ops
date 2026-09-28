@@ -113,6 +113,13 @@ def yenile(ed, boy, kok, cik):
         rap['canva_yeniden_ornek'] = [list(Ci.size), [H.shape[1], H.shape[0]]]
         Ci = Ci.resize((H.shape[1], H.shape[0]), Image.LANCZOS)
     yeni, r = melez_plate(H, np.asarray(Ci))
+    del Ci
+    rap['A'] = {q: v for q, v in r.items()}
+    if yeni is None or not r['temizlik_kapisi']['gecti']:
+        yb, rb = pw_referans_plate(H, ed, boy, cik)
+        rap['B'] = rb
+        if yb is not None and (yeni is None or rb['temizlik_kapisi']['gecti']):
+            yeni, r = yb, rb
     rap.update(r)
     if yeni is None:
         return {**rap, 'durum': 'KALDI'}
@@ -166,12 +173,69 @@ def melez_plate(H, C):
     dolgu = Cs + lf
     yeni = H.copy()
     yeni[a0:a1] = np.clip(Hs * (1 - alfa[..., None]) + dolgu * alfa[..., None], 0, 255).astype(np.uint8)
-    # QC 1: onayli temizlik kapilari (plate_uret)
-    bilgi = {'serit': [a0, a1], 'maske': genis.astype(bool)}
-    kapi = pu.temizlik_kapilari(H, yeni, {'y': [y0, y1]}, bilgi)
-    rap['temizlik_kapisi'] = kapi
+    # QC 1: onayli temizlik kapilari (plate_uret), sloganin kendi sutunlarinda
+    rap['temizlik_kapisi'], rap['temizlik_kapisi_tam_en'] = yerel_qc(H, yeni, [a0, a1], genis.astype(bool))
     rap['serit'] = [a0, a1]
+    rap['yol'] = 'A: HAM + Canva glif dolgusu'
     return yeni, rap
+
+
+def yerel_qc(H, yeni, serit, maske):
+    """maske: seridin (a0:a1) glif maskesi.
+    plate_uret.temizlik_kapilari, sloganin SUTUNLARINDA (x0-pay .. x1+pay, pay = serit yuksekligi).
+
+    28 Eyl olcumu (kosu 36445106079): tam en olcumde ~gm bandin kenarlarini (parsomen vinyeti,
+    cerceve) da kapsiyor; slogansiz seritlerde bile 'hayalet' 26-28 (WP), 11.7-12.1 (CI) cikiyor.
+    O seviyede temizlenmis plate zemine esit oldugu halde iyilesme orani > 0.35 kaliyor (WP ONCE
+    7.7 -> 28.5: koyu slogan murekkebi vinyet farkini bastiriyordu). Esikler AYNI; yalniz olcum
+    penceresi sloganin kendi sutunlarina iner ve hayalet, zeminin 2. derece yuzeyinden (vinyet)
+    sapma olarak olculur (ayni olcu ONCE ve taban seritlerine de uygulanir). Tam en sonucu da
+    rapora yazilir.
+    """
+    a0, a1 = serit
+    k = H.shape[1] / 2400.0
+    xs = np.nonzero(maske.any(axis=0))[0]
+    pay = a1 - a0
+    c0, c1 = max(int(xs.min()) - pay, 0), min(int(xs.max()) + 1 + pay, H.shape[1])
+    tam = pu.temizlik_kapilari(H, yeni, None, {'serit': [a0, a1], 'maske': maske})
+    yer = pu.temizlik_kapilari(H[:, c0:c1], yeni[:, c0:c1], None,
+                               {'serit': [a0, a1], 'maske': maske[:, c0:c1], 'k': k,
+                                'hayalet_trend': True})
+    yer['sutun'] = [c0, c1]
+    return yer, {q: tam.get(q) for q in ('gecti', 'hayalet', 'hayalet_ONCE', 'hayalet_siniri',
+                                          'iyilesme_orani', 'murekkep_kat', 'doku_kat', 'ton_fark')}
+
+
+def pw_referans_plate(H, ed, boy, cik):
+    """B yolu: plate_uret'in onayli yontemi (PURE_WHITE HAM'dan referans glif maskesi + hiza +
+    bandin kendi ust/alt seritlerinden dolgu). Canva disa aktarimi HAM'dan farkliysa (WP 11x14 / A4:
+    glif esigi 53-63, hiza r 0.53) ya da A yolu kapidan gecmezse denenir."""
+    k = H.shape[1] / 2400.0
+    Pw = np.asarray(Image.open(al(f'HAM/PURE_WHITE_{boy}.png', cik / 'pw.png')).convert('RGB'))
+    (cik / 'pw.png').unlink(missing_ok=True)
+    if Pw.shape != H.shape:
+        return None, {'sebep': f'PW HAM boyutu {Pw.shape} != {H.shape}'}
+    bant = pu.slogan_bandi(Pw)
+    if bant is None:
+        return None, {'sebep': 'PW HAM slogan bandi bulunamadi'}
+    _, tb = pu.slogan_temizle(Pw, bant)
+    if tb is None or 'ham_maske' not in tb:
+        return None, {'sebep': f"PW temizligi: {(tb or {}).get('sebep')}"}
+    r0, r1 = tb['serit']
+    ref, gor = tb['ham_maske'], Pw[r0:r1].copy()
+    del Pw
+    hz = pu.hiza_bul(gor, H, r0, r1, azami=int(round(pu.HIZA_AZAMI * k)))
+    b2 = dict(bant)
+    b2['y'] = [bant['y'][0] + hz['dy'], bant['y'][1] + hz['dy']]
+    maske = ref if hz['dx'] == 0 else np.roll(ref, hz['dx'], axis=1)
+    yeni, t2 = pu.slogan_temizle(H, b2, ref_maske=maske)
+    if yeni is None:
+        return None, {'sebep': f"slogan_temizle: {t2.get('sebep')}", 'hiza': hz}
+    a0, a1 = t2['serit']
+    kapi, kapi_tam = yerel_qc(H, yeni, [a0, a1], t2['maske'])      # maske: serit (a0:a1) boyutu
+    return yeni, {'yol': 'B: plate_uret PW referans maskesi', 'hiza': hz, 'serit': [a0, a1],
+                  'glif_px': t2.get('glif_px'), 'dolgu_esik': t2.get('dolgu_esik'),
+                  'temizlik_kapisi': kapi, 'temizlik_kapisi_tam_en': kapi_tam}
 
 
 def yaz_qc(ed, boy, yol, kapi, rap, cik, t0):
@@ -221,7 +285,7 @@ def main():
         rapor[f'{ed}_{boy}'] = r
         k = r.get('temizlik_kapisi') or {}
         g = time.time() - T0
-        print(f"[{n}/{len(isler)}] {ed}_{boy}: {r['durum']} {r.get('sebep') or r.get('hata') or ''} "
+        print(f"[{n}/{len(isler)}] {ed}_{boy}: {r['durum']} [{r.get('yol')}] {r.get('sebep') or r.get('hata') or ''} "
               f"hayalet {k.get('hayalet')}/{k.get('hayalet_siniri')} iyilesme {k.get('iyilesme_orani')} "
               f"murekkep {k.get('murekkep_bant')}/{k.get('murekkep_siniri')} doku {k.get('doku_kat')} "
               f"ton {k.get('ton_fark')} slogan {[v.get('glif_farkli_payi') for v in (r.get('plate_slogan_kapisi') or {}).values()]} "
@@ -230,6 +294,26 @@ def main():
     sd.rc('copy', str(cik), f'{a.kok}/PLATE_YENILE', timeout=2400)
     kalan = [k for k, v in rapor.items() if v['durum'] != 'PASS']
     print('KALAN:', kalan)
+    wp = [k.split('_', 1)[1] for k, v in rapor.items() if k.startswith('VINTAGE_') and v.get('yazildi')]
+    if wp:
+        damga = a.kok.rstrip('/').split('/')[-1].replace('BASKI_DUZELT_', '')
+        yayin_durum(f"WP hazır: {damga}, {', '.join(wp)} (PLATES/VINTAGE_<boy>.png)", cik)
+
+
+YAYIN_DURUM = 'gdrive:ASTROLOVE/TEMP/YAYIN_DURUM.md'
+
+
+def yayin_durum(satir, cik):
+    """TEMP/YAYIN_DURUM.md'ye tek satir ekler (gorsel oturumu WP plate'lerini bekliyor)."""
+    try:
+        eski = sd.rc('cat', YAYIN_DURUM)
+    except RuntimeError:
+        eski = ''
+    f = cik / 'YAYIN_DURUM.md'
+    f.write_text(eski + ('' if not eski or eski.endswith('\n') else '\n') + satir + '\n')
+    sd.rc('copyto', str(f), YAYIN_DURUM)
+    f.unlink(missing_ok=True)
+    print('YAYIN_DURUM:', satir, flush=True)
 
 
 if __name__ == '__main__':

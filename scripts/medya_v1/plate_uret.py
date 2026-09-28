@@ -459,12 +459,32 @@ def doku_enerji(a):
     return float(np.abs(L - b).mean())
 
 
+def _trend2(z, w):
+    """z'nin w pikselleri uzerinden 2. derece yuzey uydurmasi (zeminin vinyet/aydinlanma egimi).
+
+    Yerel hayalet olcumu (bilgi['hayalet_trend']) icin: parsomen vinyeti gm ile ~gm arasinda
+    glif olmadan da LF farki uretir; hayalet = yuzeyden sapma. Esikler degismez.
+    """
+    h, w_ = z.shape
+    yy, xx = np.mgrid[0:h, 0:w_].astype(np.float32)
+    yy /= max(h, 1); xx /= max(w_, 1)
+    X = np.stack([np.ones_like(xx), xx, yy, xx * xx, xx * yy, yy * yy], -1)
+    sec = w.copy()
+    adim = max(int(np.sqrt(sec.sum() / 20000.0)), 1)
+    alt = np.zeros_like(sec)
+    alt[::adim, ::adim] = sec[::adim, ::adim]
+    c, *_ = np.linalg.lstsq(X[alt], z[alt], rcond=None)
+    return X @ c
+
+
 def temizlik_kapilari(eski, yeni, bant, bilgi):
     """Serdar'in zorunlu kildigi kapilar + harf hayaleti kapisi."""
     import cv2
     a0, a1 = bilgi['serit']
     yuk = a1 - a0
-    k = yeni.shape[1] / 2400.0
+    # k: plate olcegi. Yerel (sutun kirpimli) olcumde kirpim eni plate eni degildir;
+    # cagiran tam plate'in k'sini bilgi['k'] ile verir (esikler degismez).
+    k = bilgi.get('k') or yeni.shape[1] / 2400.0
     bant_y = yeni[a0:a1]
     ust = yeni[max(a0 - yuk, 0):a0]
     alt = yeni[a1:min(a1 + yuk, yeni.shape[0])]
@@ -494,6 +514,8 @@ def temizlik_kapilari(eski, yeni, bant, bilgi):
 
         def lf_fark(blok):
             lf = cv2.GaussianBlur(blok.astype(np.float32) @ LUMA, (0, 0), sg)
+            if bilgi.get('hayalet_trend'):
+                lf = lf - _trend2(lf, ~gm)
             return abs(float(lf[gm].mean()) - float(lf[~gm].mean()))
 
         d['hayalet'] = round(lf_fark(bant_y), 3)
