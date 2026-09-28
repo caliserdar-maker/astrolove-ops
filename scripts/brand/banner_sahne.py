@@ -2,7 +2,7 @@
 """Etsy magaza banner'i (3360x840): ChatGPT sahnesi A + GERCEK hattan posterler.
 
 Adimlar (28 Eyl 2026, Serdar karari "A ile devam"):
-  buyut      A (2000x667, 3:1) ortadan 4:1 kirpilir (ust 83, alt 84 px), Real-ESRGAN
+  buyut      A (2000x667, 3:1) ortadan 4:1 kirpilir (ust 83, alt 84 px; B 4:1 gelir, kirpilmaz), Real-ESRGAN
              x2plus ile 4000x1000'e buyutulur, Lanczos ile 3360x840'a indirilir.
   yerlestir  3360x840 taban uzerinde beyaz cerceve acikliklari OLCULUR, posterler
              (siparis-baski-v1 BASKI_12x16.jpg, 3:4) esnetmeden acikliga oturtulur,
@@ -29,8 +29,9 @@ def buyut(kaynak, model_yol, cik):
     from spandrel import ModelLoader
     im = Image.open(kaynak).convert('RGB')
     w, h = im.size
-    kir = im.crop((0, UST, w, h - ALT))
-    assert kir.size[0] / kir.size[1] == 4.0, kir.size
+    # A (3:1) ortadan 4:1 kirpilir; B zaten 4:1 gelir, kirpilmaz
+    kir = im if w == 4 * h else im.crop((0, UST, w, h - ALT))
+    assert kir.size[0] == 4 * kir.size[1], kir.size
     m = ModelLoader().load_from_file(model_yol).eval()
     x = torch.from_numpy(np.asarray(kir, np.float32) / 255).permute(2, 0, 1)[None]
     parca, bindir, satirlar = 256, 16, []
