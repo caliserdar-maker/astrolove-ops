@@ -15,8 +15,8 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 POSTER, RENK, MON, CIK = sys.argv[1:5]
-DUVAR = (216, 209, 202)          # notr sicak gri, 5 gorselde ayni
-KONTUR = (168, 162, 155)         # cok ince notr kontur, 5 gorselde ayni
+DUVAR = (224, 214, 200)          # sicak krem-gri (kapak v5 atmosferine uyum, 28 Eyl), 5 gorselde ayni
+KONTUR = (175, 166, 152)         # cok ince notr kontur, 5 gorselde ayni
 SANS_T = (23, 25, 30)
 W, H = 3000, 2250
 PH = 1755                        # gorsel yuksekliginin %78'i
