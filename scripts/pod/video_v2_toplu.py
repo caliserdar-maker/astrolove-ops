@@ -15,6 +15,7 @@ karesinde poster NCC >= 0.99 (o varyantin baskisiyla, sigma1); gecis anlari (gor
 ETA sayaci: islenen/toplam, gecen, kalan, yuzde.
 Toplu kosu (video-77 duzeni): 8 paralel parca, her biri ciftlerin [parca::8]'i; her cift biter bitmez Drive'a yazilir.
 Durum TEMP/POD_VIDEO_V2/SON_V5: PASS olan cift sonraki kosuda yeniden uretilmez (video + QC + IN karesi damgaya kopyalanir).
+YENILE=true (28 Eyl, kaynak/hat degisti): SON_V5 atlamasi ve baski onbellekleri kullanilmaz; hepsi hattan yeniden.
 Birlestirme: damgadaki QC_*.json -> OZET.md (cift basina 1 satir) + ONIZLEME.jpg (her ciftten IN karesi).
 Kullanim: video_v2_toplu.py uret SB_DIZIN DAMGA PARCA TOPLAM (HEPSI | CIFT [CIFT ...])
           video_v2_toplu.py birlestir DAMGA (HEPSI | CIFT [CIFT ...])
@@ -69,6 +70,9 @@ def v1_kapi_gecti(rec):
 
 
 def baski_al(cift, i1, i2, mesaj, v1):
+    yenile = os.environ.get('YENILE') == 'true'        # 28 Eyl: kaynak/hat degisti -> onbellek okunmaz, hattan yeniden
+    if yenile:
+        v1 = False
     if v1 and not v1_kapi_gecti(f'{cift}_{RENK}_{BOY}'):
         print(f'{cift}: V1 onbellek baskisi kapi FAIL/raporsuz -> hattan yeniden', flush=True)
         v1 = False                                            # V23 onbellegi / hat (kapilar gecmezse hat cikis 1)
@@ -76,7 +80,7 @@ def baski_al(cift, i1, i2, mesaj, v1):
     yer = W / 'baski' / rec / f'BASKI_{BOY}.jpg'
     yer.parent.mkdir(parents=True, exist_ok=True)
     kaynak = V1_SIP if v1 else V23_SIP
-    if rc('copyto', f'{kaynak}/{rec}/BASKI_{BOY}.jpg', str(yer), kontrol=False).returncode == 0 and yer.exists():
+    if not yenile and rc('copyto', f'{kaynak}/{rec}/BASKI_{BOY}.jpg', str(yer), kontrol=False).returncode == 0 and yer.exists():
         return yer
     if v1:
         raise SystemExit(f'HATA: V1 onbellekte yok: {rec}. DUR.')
@@ -268,12 +272,12 @@ def ciftler_coz(arg):
 def cift_uret(c, hedef):
     """tek cift: onceki PASS varsa kopyala; yoksa uret + QC, dosyalari damgaya (PASS ise SON'a da) yaz. -> (ok, satir)"""
     onceki = rc('cat', f'{SON}/QC_{c}.json', kontrol=False)
-    if onceki.returncode == 0 and json.loads(onceki.stdout or '{}').get('pass'):
+    if os.environ.get('YENILE') != 'true' and onceki.returncode == 0 and json.loads(onceki.stdout or '{}').get('pass'):
         if all(rc('copyto', f'{SON}/{f}', f'{hedef}/{f}', kontrol=False).returncode == 0
                for f in (f'VIDEO_{c}.mp4', f'IN_{c}.jpg', f'QC_{c}.json')):
             return True, 'atlandi (onceki PASS)'
     cw = W / c; (cw / 'baski').mkdir(parents=True, exist_ok=True)
-    kayit = {'cift': c, 'pass': False, 'hat_yama': os.environ.get('HAT_YAMA') == 'true'}
+    kayit = {'cift': c, 'pass': False, 'hat_yama': os.environ.get('HAT_YAMA') == 'true', 'yenile': os.environ.get('YENILE') == 'true'}
     try:
         baskilar = {k: baski_al(c, *VARYANT[k], v1=(k == 'EJ')) for k in SIRA}
         baskilar['AM'], kayit['am_tagline'] = am_tagline(baskilar, cw / 'BASKI_AM_kaydirilmis.png')

@@ -10,6 +10,9 @@ Kok nedenler (olculdu, 11x14 baski pikseli):
     bileseni CANCER_LIBRA kutusuna olceklenir (orta x korunur, ust/alt CANCER_LIBRA ile ayni), zemin cevreden doldurulur.
 Kapak: scripts/pod/kapak_v8_kur.py (v9 sahnesi, 295 30 919 880); sahneye dokunulmaz.
 QC (PASS/FAIL): Terazi kutusu CANCER_LIBRA ile +-2 px (baski), cubuk orta x - yay orta x <= 2 px, kapak_v8 PASS.
+4. deneme (Serdar onayi 28 Eyl aksam): CAPRICORN_LIBRA POD_PRINT kaynagi duzeltildi (kaynak_terazi.py), ARIES_LIBRA eklendi;
+  uc cift de YAMALI hattan (siparis-baski-v1 54363ee) EJ baskisi. Baskida olcekleme artik YAPILMAZ: gerekirse FAIL
+  (kaynak dogru olmali; qc 'olcekleme_gerekmedi').
 Kullanim: kapak_duzeltme.py GIRDI OUT
   GIRDI: EJ_CANCER_LIBRA.jpg, EJ_AQUARIUS_LIBRA.jpg (yamali), EJ_CAPRICORN_LIBRA.jpg (yamali),
          ESKI_KAPAK_<CIFT>.jpg (mevcut POD_KAPAK_78 kapaklari, karsilastirma icin)
@@ -19,7 +22,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-import cv2
 import numpy as np
 from PIL import Image, ImageDraw
 from scipy import ndimage as ndi
@@ -28,6 +30,7 @@ KOK = Path(__file__).resolve().parents[2]
 BOLGE = (2550, 3075, 1800, 2800)          # 11x14 baskida sag kucuk sembol bolgesi (y0, y1, x0, x1), isim bandi ustu
 KAP_BOLGE = (1330, 1580, 1510, 1990)      # 3000x2250 kapakta sag kucuk sembol (kapak_sembol_qc KUTU'nun sag yarisi)
 TOL = 2
+CIFTLER = ('AQUARIUS_LIBRA', 'ARIES_LIBRA', 'CAPRICORN_LIBRA')
 
 
 def terazi(a, bolge):
@@ -52,29 +55,6 @@ def terazi(a, bolge):
             'alt_cubuk_orta_x': alt['orta_x'], 'cubuk_kayma': round(alt['orta_x'] - yay['orta_x'], 1), 'parca': P}
 
 
-def olcekle(a, ref):
-    """Terazi'yi (mevcut kutu) ref kutusuna olcekler; murekkep yumusak alfa ile, zemin cevreden (inpaint) doldurulur."""
-    t = terazi(a, BOLGE)
-    x0, y0, x1, y1 = t['kutu']; P = 14
-    X0, Y0, X1, Y1 = x0 - P, y0 - P, x1 + 1 + P, y1 + 1 + P
-    parca = a[Y0:Y1, X0:X1]
-    alfa = np.clip((parca[..., 0] - parca[..., 2] - 15) / 60, 0, 1)
-    maske = cv2.dilate((alfa > 0).astype(np.uint8), np.ones((9, 9), np.uint8))
-    zemin = cv2.inpaint(np.clip(a[Y0:Y1, X0:X1], 0, 255).astype(np.uint8), maske, 7, cv2.INPAINT_TELEA).astype(np.float32)
-    zemin = cv2.GaussianBlur(zemin, (0, 0), 2) * (maske[..., None] > 0) + a[Y0:Y1, X0:X1] * (maske[..., None] == 0)
-    out = a.copy(); out[Y0:Y1, X0:X1] = zemin
-    k = ref['en'] / t['en'], ref['boy'] / t['boy']
-    yw, yh = round(parca.shape[1] * k[0]), round(parca.shape[0] * k[1])
-    p2 = cv2.resize(parca, (yw, yh), interpolation=cv2.INTER_AREA)
-    a2 = cv2.resize(alfa, (yw, yh), interpolation=cv2.INTER_AREA)[..., None]
-    cx = t['yay_orta_x']                                  # orta x korunur
-    nx0 = round(cx - (t['yay_orta_x'] - X0) * k[0])
-    ny0 = round(ref['kutu'][1] - P * k[1])                # ust = CANCER_LIBRA ustu
-    bolge = out[ny0:ny0 + yh, nx0:nx0 + yw]
-    out[ny0:ny0 + yh, nx0:nx0 + yw] = bolge * (1 - a2) + p2 * a2
-    return out, {'once': {k_: t[k_] for k_ in ('kutu', 'en', 'boy')}, 'olcek': [round(k[0], 4), round(k[1], 4)]}
-
-
 def kapak(baski, cikis, sahne):
     r = subprocess.run([sys.executable, str(KOK / 'scripts/pod/kapak_v8_kur.py'), str(sahne), str(baski),
                         str(KOK / 'data/pod/cila_cerceve_kaynak.png'), str(cikis), '295', '30', '919', '880'],
@@ -91,10 +71,9 @@ def main(girdi, out):
     ref = terazi(rgb(girdi / 'EJ_CANCER_LIBRA.jpg'), BOLGE)
     R = {'referans_CANCER_LIBRA': {k: ref[k] for k in ('kutu', 'en', 'boy', 'yay_orta_x', 'alt_cubuk_orta_x')}, 'ciftler': {}}
     ok_hepsi = True
-    for c in ('AQUARIUS_LIBRA', 'CAPRICORN_LIBRA'):
+    for c in CIFTLER:
         a = rgb(girdi / f'EJ_{c}.jpg'); r = {'baski_once': {k: v for k, v in terazi(a, BOLGE).items() if k != 'parca'}}
-        if abs(r['baski_once']['yay_en'] - ref['yay_en']) > TOL or abs(r['baski_once']['yay_boy'] - ref['yay_boy']) > TOL:   # olcek yaydan (kayik cubuk kutuyu buyutur)
-            a, r['olcekleme'] = olcekle(a, ref)
+        olcek_gerek = abs(r['baski_once']['yay_en'] - ref['yay_en']) > TOL or abs(r['baski_once']['yay_boy'] - ref['yay_boy']) > TOL
         baski = out / f'BASKI_{c}.png'
         Image.fromarray(np.clip(np.rint(a), 0, 255).astype(np.uint8)).save(baski)
         t = terazi(a, BOLGE); r['baski_sonra'] = {k: v for k, v in t.items() if k != 'parca'}
@@ -103,7 +82,8 @@ def main(girdi, out):
         kk = terazi(rgb(out / f'KAPAK_{c}.jpg'), KAP_BOLGE)
         r['kapak_terazi'] = {k: kk[k] for k in ('en', 'boy', 'cubuk_kayma')}
         r['qc'] = {'boyut': bool(abs(t['en'] - ref['en']) <= TOL and abs(t['boy'] - ref['boy']) <= TOL),
-                   'cubuk_ortada': bool(abs(t['cubuk_kayma']) <= TOL), 'kapak_v8': bool(kp)}
+                   'cubuk_ortada': bool(abs(t['cubuk_kayma']) <= TOL), 'kapak_v8': bool(kp),
+                   'olcekleme_gerekmedi': not olcek_gerek}
         r['pass'] = all(r['qc'].values()); ok_hepsi &= r['pass']
         R['ciftler'][c] = r
         print(c, 'PASS' if r['pass'] else 'FAIL', json.dumps(r['qc']), 'baski', t['en'], 'x', t['boy'], 'kayma', t['cubuk_kayma'],
@@ -111,7 +91,7 @@ def main(girdi, out):
     kr = terazi(rgb(girdi / 'ESKI_KAPAK_CANCER_LIBRA.jpg'), KAP_BOLGE) if (girdi / 'ESKI_KAPAK_CANCER_LIBRA.jpg').exists() else None
     if kr:
         R['referans_CANCER_LIBRA']['kapak'] = {k: kr[k] for k in ('en', 'boy', 'cubuk_kayma')}
-    for c in ('AQUARIUS_LIBRA', 'CAPRICORN_LIBRA'):
+    for c in CIFTLER:
         e = girdi / f'ESKI_KAPAK_{c}.jpg'
         if e.exists():
             ke = terazi(rgb(e), KAP_BOLGE); R['ciftler'][c]['eski_kapak_terazi'] = {k: ke[k] for k in ('en', 'boy', 'cubuk_kayma')}
@@ -135,7 +115,7 @@ def karsilastirma(girdi, out, R):
     """Satir basina: kapak kucuk (900) + sag sembol 4x buyutulmus kirpim. CANCER_LIBRA referans, eski ve yeni."""
     y0, y1, x0, x1 = KAP_BOLGE
     satirlar = [('CANCER_LIBRA (referans)', girdi / 'ESKI_KAPAK_CANCER_LIBRA.jpg')]
-    for c in ('AQUARIUS_LIBRA', 'CAPRICORN_LIBRA'):
+    for c in CIFTLER:
         satirlar += [(f'{c} ESKI', girdi / f'ESKI_KAPAK_{c}.jpg'), (f'{c} YENI', out / f'KAPAK_{c}.jpg')]
     tiles = []
     for ad, p in satirlar:

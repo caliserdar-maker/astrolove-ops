@@ -179,7 +179,9 @@ def linkler():
 
 
 def main():
-    oid, _, mod = (sys.argv[1] if len(sys.argv) > 1 else "ord_72692295730813440").partition(",")
+    if len(sys.argv) < 2:                           # 28 Eyl: siparis kimligi depoda tutulmaz
+        sys.exit("kullanim: prodigi_arastir_0006.py <ord_id>[,siparis]")
+    oid, _, mod = sys.argv[1].partition(",")
     if mod == "siparis":                             # GOREV 0009: yalniz siparis okuma
         siparis(oid)
         return

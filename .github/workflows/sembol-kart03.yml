@@ -1,11 +1,12 @@
 name: sembol-kart03
 
 # GOREV 0028 - SALT OKUMA (Etsy'ye yazma YOK; yalniz API anahtari, 1 batch cagrisi).
-# teshis: ornek dosyalari (CL canli/TAM_SET kart 03, 26 Eyl YANYANA, klasor listeleri) teshis-0028 dalina koyar.
+# teshis: ornek dosyalari (CL canli/TAM_SET kart 03, 26 Eyl YANYANA, klasor listeleri) Drive TEMP/TESHIS_0028'e yazar.
+#   28 Eyl (Serdar, guvenlik): public depoda teshis-0028 dali ACILMAZ (tasarim gorselleri herkese aciliyordu).
 # kos: sembol butunluk kapisi -> 78 canli kart 03 + A1_77/*/TAM_SET/03_* ; cikti Drive TEMP/DIJITAL_78/SEMBOL_KART03.csv
 
 permissions:
-  contents: write
+  contents: read
 
 on:
   workflow_dispatch:
@@ -71,11 +72,11 @@ jobs:
           done
           echo "poster: $(ls v/poster | wc -l)"
           echo "03: $(ls v/a77/*/TAM_SET/03_* 2>/dev/null | wc -l)  YANYANA: $(find v/a77 -name 'YANYANA_03*' | wc -l)  canli: $(ls v/canli | wc -l)"
-      - name: Teshis dalina koy
+      - name: Teshis Drive'a koy (dal ACILMAZ)
         if: inputs.mod == 'teshis'
         run: |
           set -euo pipefail
-          mkdir -p /tmp/t && cd /tmp/t && git init -q && git checkout -q -b teshis-0028
+          rm -rf /tmp/t && mkdir -p /tmp/t && cd /tmp/t
           mkdir -p a77 canli liste
           cp -r "$GITHUB_WORKSPACE/v/liste/." liste/
           cp "$GITHUB_WORKSPACE/v/canli/"*.json canli/ 2>/dev/null || true
@@ -87,9 +88,8 @@ jobs:
           cp "$GITHUB_WORKSPACE/v/canli/"*.jpg canli/
           cp "$GITHUB_WORKSPACE/v/canli/"*4570143815* canli/ 2>/dev/null || true
           mkdir -p poster && cp "$GITHUB_WORKSPACE/v/poster/"*.jpg poster/ 2>/dev/null || true
-          git add -A && git -c user.name=teshis -c user.email=teshis@users.noreply.github.com commit -qm "teshis 0028 (gecici)"
-          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" teshis-0028
-          du -sh .
+          rclone sync . "gdrive:ASTROLOVE/TEMP/TESHIS_0028" -q     # sync: onceki teshisin eski dosyalari silinir
+          echo "Drive: TEMP/TESHIS_0028 ($(find . -type f | wc -l) dosya, $(du -sh . | cut -f1))"
       - name: Kapi (kos)
         if: inputs.mod == 'kos'
         run: |

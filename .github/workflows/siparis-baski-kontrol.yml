@@ -16,7 +16,7 @@ on:
       renk: {description: "renk", default: "MIDNIGHT_BLUE"}
       boy: {description: "boy", default: "8x10"}
       md5: {description: "paket kaydindaki md5 (bos = denetleme)", default: "550ab8fc8d983ccdcee93294764047a9"}
-      oid: {description: "Prodigi siparis id (bos = Prodigi okunmaz)", default: "ord_14538276"}
+      oid: {description: "Prodigi siparis id (bos = Prodigi okunmaz)", default: ""}
       klasor: {description: "TEMP altindaki cikti klasoru", default: "SIPARIS_2285_DUZELTME"}
 
 jobs:

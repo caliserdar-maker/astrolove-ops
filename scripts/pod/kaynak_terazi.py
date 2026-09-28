@@ -29,14 +29,26 @@ from scipy import ndimage as ndi
 
 Image.MAX_IMAGE_PIXELS = None
 REF_W = 3307                                 # 11x14 genislik
-REF_KUTU = (2046, 2675, 2377, 2929)          # CANCER_LIBRA 11x14 MB Terazi (x0, y0, x1, y1), olculdu
 BANT = (2550, 3075)                          # 11x14 kucuk sembol bandi (tara)
 ESIK = 0.05
 
 
-def murekkep(a):
-    """Altin murekkep derecesi 0-1: (R-B) - zemin(R-B medyani); lacivert, siyah, beyaz, fildisi, parsomen zeminde calisir."""
-    d = a[..., 0].astype(np.float32) - a[..., 2].astype(np.float32)
+def murekkep(a, s=1.0):
+    """Murekkep derecesi 0-1. Iki zemin turu (dosyanin kendi zemininden secilir):
+    - koyu/beyaz zemin + altin (MB, DB, PW): (R-B) - zemin(R-B medyani).
+    - sicak acik zemin + kahverengi (CI, WP; zemin R-B > 25 ve parlak): yerel zemin parlakligi - piksel parlakligi.
+      Yerel zemin = parlaklikta gri kapanis (murekkepten genis pencere) + bulaniklik; CI/WP kenar gunes yanigi
+      (vinyet) ve WP dokusu zemine dahil kalir. (4. deneme: R-B kahverengide zeminden ayrismiyordu.)
+    s: 11x14 (3307 px genislik) olcegine gore piksel olcegi (pencere boyu)."""
+    a = np.asarray(a)
+    r, b = a[..., 0].astype(np.float32), a[..., 2].astype(np.float32)
+    d = r - b
+    L = a[..., :3].astype(np.float32).mean(2)
+    if np.median(d) > 25 and np.median(L) > 150:
+        k = max(9, int(round(71 * s)) | 1)
+        zem = cv2.dilate(L, cv2.getStructuringElement(cv2.MORPH_RECT, (k, k)))
+        zem = cv2.blur(zem, (k, k))
+        return np.clip((zem - L - 18) / 45, 0, 1)
     return np.clip((d - np.median(d) - 12) / 50, 0, 1)
 
 
@@ -61,7 +73,7 @@ def olc(a, kutu, pay=0.25):
     x0, y0, x1, y1 = kutu; w, h = x1 - x0, y1 - y0
     X0, Y0 = max(int(x0 - pay * w), 0), max(int(y0 - pay * h), 0)
     X1, Y1 = min(int(x1 + pay * w), a.shape[1]), min(int(y1 + pay * h * 0.6), a.shape[0])
-    m = murekkep(a[Y0:Y1, X0:X1]) > 0.5
+    m = murekkep(a[Y0:Y1, X0:X1], a.shape[1] / REF_W) > 0.5
     P = bilesenler(m)
     if not P:
         return None
@@ -77,7 +89,7 @@ def olc(a, kutu, pay=0.25):
 def bul(a, sablon):
     """sag yarida cok olcekli sablon (Terazi murekkebi) -> yaklasik kutu (tam cozunurluk)."""
     H, W = a.shape[:2]; f = 1200 / W
-    g = murekkep(cv2.resize(np.ascontiguousarray(a), (1200, round(H * f)), interpolation=cv2.INTER_AREA)).astype(np.float32)
+    g = murekkep(cv2.resize(np.ascontiguousarray(a), (1200, round(H * f)), interpolation=cv2.INTER_AREA), 1200 / REF_W).astype(np.float32)
     g[:, :600] = 0
     en = None
     for s in np.geomspace(0.55, 1.8, 40):
@@ -96,16 +108,23 @@ def bul(a, sablon):
 
 
 def sablon_kur(cl_mb_11x14):
-    a = np.asarray(Image.open(cl_mb_11x14).convert('RGB')).astype(np.float32)
-    x0, y0, x1, y1 = REF_KUTU
-    return murekkep(a[y0:y1 + 1, x0:x1 + 1]).astype(np.float32)
+    """Terazi sablonu CANCER_LIBRA MB 11x14 KAYNAGINDAN olculur (sag yari, kucuk sembol bandi; tara ile ayni olcum).
+    (3. iterasyon: sabit REF_KUTU EJ baskisindan olculmustu; baskida sembol isme ortalandigi icin kaynakta yeri farkli.)"""
+    a = np.asarray(Image.open(cl_mb_11x14).convert('RGB'))
+    y0, y1 = BANT; x0 = a.shape[1] // 2
+    P = bilesenler(murekkep(a[y0:y1, x0:]) > 0.5)
+    ana = max(P, key=lambda q: q['alan']); w = ana['x'][1] - ana['x'][0]
+    P = [q for q in P if q['x'][1] >= ana['x'][0] - 0.6 * w and q['x'][0] <= ana['x'][1] + 0.6 * w]
+    k = (x0 + min(q['x'][0] for q in P), y0 + min(q['y'][0] for q in P), x0 + max(q['x'][1] for q in P), y0 + max(q['y'][1] for q in P))
+    print(f'sablon kutusu (CL MB 11x14 kaynak): {k} = {k[2] - k[0] + 1}x{k[3] - k[1] + 1}', flush=True)
+    return murekkep(a[k[1]:k[3] + 1, k[0]:k[2] + 1]).astype(np.float32)
 
 
 def duzelt_dosya(cap_yol, cl_yol, sablon, cikis):
     """Tam goruntu uint8 (5x7 = 10962x15175 bellege sigsin), hesap yalniz Terazi bolgesinde float."""
     im = Image.open(cap_yol); a = np.asarray(im.convert('RGB'))
     b = np.asarray(Image.open(cl_yol).convert('RGB'))
-    r = {'dosya': str(cap_yol), 'px': [a.shape[1], a.shape[0]]}
+    r = {'dosya': str(cap_yol), 'px': [a.shape[1], a.shape[0]]}; sc = a.shape[1] / REF_W
     if a.shape != b.shape:
         r.update({'pass': False, 'sebep': f'boyut farkli CL {b.shape[1]}x{b.shape[0]}'}); return r
     kc, vc = bul(a, sablon); kr, vr = bul(b, sablon)
@@ -121,15 +140,17 @@ def duzelt_dosya(cap_yol, cl_yol, sablon, cikis):
     ex1, ey1 = max(X1, tr['kutu'][2] + 1 + P), max(Y1, tr['kutu'][3] + 1 + P)
     A = a[ey0:ey1, ex0:ex1].astype(np.float32); B = b[ey0:ey1, ex0:ex1].astype(np.float32)
     px0, py0 = X0 - ex0, Y0 - ey0
-    parca = A[py0:py0 + (Y1 - Y0), px0:px0 + (X1 - X0)].copy(); alfa = murekkep(parca)
+    parca = A[py0:py0 + (Y1 - Y0), px0:px0 + (X1 - X0)].copy(); alfa = murekkep(parca, sc)
     # zemin: eski Terazi + CL Terazi alanlari, CL dosyasindan; CL murekkebi inpaint
-    cl_m = cv2.dilate((murekkep(B) > 0.02).astype(np.uint8), np.ones((7, 7), np.uint8))
+    cl_m = cv2.dilate((murekkep(B, sc) > 0.02).astype(np.uint8), np.ones((7, 7), np.uint8))
     zem = cv2.inpaint(np.clip(B, 0, 255).astype(np.uint8), cl_m, 9, cv2.INPAINT_TELEA).astype(np.float32)
-    eski_m = cv2.dilate((murekkep(A) > 0.02).astype(np.uint8), np.ones((9, 9), np.uint8)).astype(bool)
+    eski_m = cv2.dilate((murekkep(A, sc) > 0.02).astype(np.uint8), np.ones((9, 9), np.uint8)).astype(bool)
     O = A.copy(); O[eski_m] = zem[eski_m]
     yw, yh = round(parca.shape[1] * k), round(parca.shape[0] * k)
     p2 = cv2.resize(parca, (yw, yh), interpolation=cv2.INTER_AREA)
-    a2 = cv2.resize(alfa, (yw, yh), interpolation=cv2.INTER_AREA)[..., None]
+    # parca pikselleri murekkep + ayni sablon zemini karisimi; alfa yeniden carpilirsa kenar iki kez incelir
+    # (DB 11x14 yay -1.5%). Kenar gecisi tam kopyalanir: alfa 3x (zeminler ayni sablon).
+    a2 = np.clip(3 * cv2.resize(alfa, (yw, yh), interpolation=cv2.INTER_AREA), 0, 1)[..., None]
     nx0 = round(tc['yay_orta_x'] - (tc['yay_orta_x'] - X0) * k) - ex0
     ny0 = round(tr['kutu'][1] - (tc['kutu'][1] - Y0) * k) - ey0          # ust = CANCER_LIBRA Terazi ustu
     z = O[ny0:ny0 + yh, nx0:nx0 + yw]
@@ -151,12 +172,12 @@ def duzelt_dosya(cap_yol, cl_yol, sablon, cikis):
         top += np.nansum(d); n += np.count_nonzero(~np.isnan(d))
     dis_fark = top / max(n, 1)
     C = c[ey0:ey1, ex0:ex1].astype(np.float32)
-    yeni_m = cv2.dilate((murekkep(C) > 0.02).astype(np.uint8), np.ones((9, 9), np.uint8)).astype(bool)
+    yeni_m = cv2.dilate((murekkep(C, sc) > 0.02).astype(np.uint8), np.ones((9, 9), np.uint8)).astype(bool)
     halka = eski_m & ~yeni_m
     cevre = cv2.dilate(eski_m.astype(np.uint8), np.ones((41, 41), np.uint8)).astype(bool) & ~eski_m & ~yeni_m
     cc = C                         # halka zemini cevredeki gercek zeminle ayni tonda mi (kanal basina)
     iz_fark = float(np.abs(cc[halka].mean(0) - cc[cevre].mean(0)).max()) if halka.any() and cevre.any() else 0.0
-    kalinti = float((murekkep(C)[halka] > 0.5).mean()) if halka.any() else 0.0
+    kalinti = float((murekkep(C, sc)[halka] > 0.5).mean()) if halka.any() else 0.0
     r.update({'sonra': t2, 'kutu_disi_fark': round(dis_fark, 3), 'iz_fark': round(iz_fark, 2), 'kalinti_orani': round(kalinti, 4),
               'bolge': [int(ex0), int(ey0), int(ex1), int(ey1)]})
     ok = bool(t2 and abs(t2['yay_en'] / tr['yay_en'] - 1) <= 0.01 and abs(t2['yay_boy'] / tr['yay_boy'] - 1) <= 0.01

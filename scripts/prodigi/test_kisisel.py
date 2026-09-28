@@ -21,8 +21,8 @@ def rec(rid, sku, alanlar, ulke="US", yol="var"):
         t["personalization"] = [{"question_text": q, "answer": a} for q, a in alanlar]
     r["transactions"] = [t]; return r
 REC = [
- rec(9001, "POD-AQU_ARI-MB-8x10", [("Name under Aquarius", "Анна"), ("Name under Aries", "Ivan"), ("Your message", "Навсегда вместе")], "RU"),
- rec(9002, "POD-CAN_SCO-DB-A4", [("Name under Cancer", "Mia"), ("Name under Scorpio", "Leo"), ("Your message", "Forever ♥ 😍")], "US", yol="liste"),
+ rec(9001, "POD-AQU_ARI-MB-8x10", [("Name under Aquarius", "Нина"), ("Name under Aries", "Oleg"), ("Your message", "Навсегда вместе")], "RU"),
+ rec(9002, "POD-CAN_LIB-DB-A4", [("Name under Cancer", "Mia"), ("Name under Libra", "Leo"), ("Your message", "Forever ♥ 😍")], "US", yol="liste"),
  rec(9003, "POD-SCO_TAU-PW-12x16", [("Name under Scorpio", "Christopher"), ("Name under Taurus", "Emma"), ("Your message", "Two souls, one bond, today and every day after")], "GB"),
  rec(9004, "POD-LEO_LEO-WP-16x20", [("Left name", "Ali"), ("Right name", "Zeynep"), ("Your message", "Seninle her gün")], "TR"),
  rec(9005, "POD-ARI_LEO-MB-8x10", [], "US"),        # kontrol: kisisellestirmesiz
@@ -74,9 +74,9 @@ for ham, ulke, bek in (("Ali", "US", "ALI"), ("Ali", "", "ALI"), ("Ali", "TR", "
                        ("Şirin", "GB", "ŞİRİN"), ("Müller", "DE", "MÜLLER"), ("Çiçek", "US", "ÇIÇEK")):
     k(f"buyuk harf {ham}/{ulke or '-'} -> {bek}", K.buyut(ham, ulke) == bek, K.buyut(ham, ulke))
 k("sablon dosyasi 6x2 okundu", sorted(K.sablon_oku(SABLON)) == [(n, d) for n in range(1, 7) for d in ("EN", "RU")])
-k("9001 Kiril isim -> sablon 2 RU + oneri ANNA", liste("9001") == [2, 1] and "Мы получили имя Анна" in kart["9001"]
-  and "ANNA." in kart["9001"] and "KIRIL_ISIM" in st["9001"]["note"], liste("9001"))
-k("9001 RU sablon 1: burc ilgi hali + basilacak isim", "Под знаком Водолея: АННА" in kart["9001"] and "Под знаком Овна: IVAN" in kart["9001"])
+k("9001 Kiril isim -> sablon 2 RU + oneri NINA", liste("9001") == [2, 1] and "Мы получили имя Нина" in kart["9001"]
+  and "NINA." in kart["9001"] and "KIRIL_ISIM" in st["9001"]["note"], liste("9001"))
+k("9001 RU sablon 1: burc ilgi hali + basilacak isim", "Под знаком Водолея: НИНА" in kart["9001"] and "Под знаком Овна: OLEG" in kart["9001"])
 k("9001 RU mesaj (Kiril) mesajda serbest", "mesaj | `Навсегда вместе` (15 kar.) — TAMAM" in kart["9001"])
 k("9002 emoji/♥ (liste bicimi) -> sablon 3 + temiz oneri", liste("9002") == [3, 1] and "\nForever\n" in kart["9002"]
   and "EMOJI" in st["9002"]["note"], liste("9002"))

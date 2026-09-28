@@ -19,6 +19,10 @@ on:
         description: "Yazma icin tam olarak: CANLI"
         required: false
         default: ""
+      paket_commit:
+        description: "bos = Drive TEMP/CL_GALERI_FINAL19; tam SHA = depodaki data/pod/cl_galeri_final19 o committen (kesin paket)"
+        required: false
+        default: ""
 
 
 jobs:
@@ -59,11 +63,22 @@ jobs:
             [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
           fi
       - name: Token + kaynak (CL_GALERI_FINAL19)
+        env:
+          PAKET: ${{ inputs.paket_commit }}
         run: |
           set -euo pipefail
           umask 077; mkdir -p _work _out
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
-          rclone copy "gdrive:ASTROLOVE/TEMP/CL_GALERI_FINAL19" _kaynak --include "*.jpg" -q
+          if [ -n "$PAKET" ]; then
+            git fetch -q --depth=1 origin "$PAKET"
+            mkdir -p _kaynak
+            for f in $(git ls-tree --name-only "$PAKET" data/pod/cl_galeri_final19/ | grep '\.jpg$'); do
+              git show "$PAKET:$f" > "_kaynak/$(basename "$f")"
+            done
+            echo "kaynak: depo paketi $PAKET"
+          else
+            rclone copy "gdrive:ASTROLOVE/TEMP/CL_GALERI_FINAL19" _kaynak --include "*.jpg" -q
+          fi
           n=$(ls _kaynak/*.jpg | wc -l); echo "kaynak: $n dosya"
           [ "$n" = "19" ] || { echo "::error::kaynak 19 degil ($n). DUR."; exit 1; }
       - name: Yerel oz-test (sahte API)

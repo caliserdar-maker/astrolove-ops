@@ -2,7 +2,7 @@
 """
 Paket ekstralari (kartpostal + 2 sticker) - tesis ve fatura dogrulamasi (SALT OKUMA, 25 Eyl 2026, Serdar B + A).
 
- 1) Canli Prodigi siparisleri: GET /orders (liste) + GET /orders/ord_14538276. Her siparis icin YALNIZ
+ 1) Canli Prodigi siparisleri: GET /orders (liste) + GET /orders/<REF_SIPARIS>. Her siparis icin YALNIZ
     siparis id, tarih, durum, varis ulkesi, uretim tesisi (shipments[].fulfillmentLocation) ve fatura kalemleri
     (charges[].items: description / itemSku / cost). Alici adi, adres, e-posta, merchantReference YAZILMAZ.
  2) Ekstra fatura kalemi: aciklamasi/SKU'su kartpostal / sticker / insert / packaging gecen kalem.
@@ -17,6 +17,7 @@ Kullanim: prodigi_ekstra_tesis.py [--out-dir out] [--self-test]
 """
 import argparse
 import json
+import os
 import re
 import sys
 import time
@@ -32,7 +33,7 @@ ECB = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"
 EKSTRA_GBP = {"kartpostal": 2.00, "sticker": 1.00}      # Prodigi fiyat tablosu (standart); pakette 1 kartpostal + 2 sticker
 PAKET_GBP = EKSTRA_GBP["kartpostal"] + 2 * EKSTRA_GBP["sticker"]
 EKSTRA_DESEN = re.compile(r"post\s*card|sticker|insert|packag|branded", re.I)
-REF_SIPARIS = "ord_14538276"
+REF_SIPARIS = os.environ.get("REF_SIPARIS", "")   # 28 Eyl: siparis kimligi depoda tutulmaz (env ile verilir)
 
 
 def kur_gbp_usd(get=requests.get):
@@ -132,7 +133,7 @@ def siparisler(api, en_fazla=300):
             break
         skip += 50
         time.sleep(0.3)
-    if not any(o.get("id") == REF_SIPARIS for o in out):
+    if REF_SIPARIS and not any(o.get("id") == REF_SIPARIS for o in out):
         r = api._call("GET", f"/orders/{REF_SIPARIS}")
         if r.status_code == 200 and (r.json() or {}).get("order"):
             out.append(r.json()["order"])

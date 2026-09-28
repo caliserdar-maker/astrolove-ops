@@ -61,3 +61,6 @@ Thumbs.db
 
 # Yerel/runner font indirmeleri (workflow her kosuda indirir)
 fonts/
+
+# V8 gecici ham medya ve ciktilari (depoda tutulmaz)
+_veri/

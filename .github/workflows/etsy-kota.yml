@@ -1,0 +1,50 @@
+name: etsy-kota
+
+# Etsy kota olcumu (salt okuma; OAuth/token kullanmaz, bu yuzden Etsy kilidine girmez). Saatlik:
+# /openapi-ping basliklari (x-limit-per-day, x-remaining-today, ...) Drive TEMP/ETSY_KOTA.csv'ye eklenir.
+# Amac: gunluk sifirlama mi kayan 24 saat mi (28 Eyl gozlemi: 13:54 293 -> 14:02 527) + isleri kotaya gore zamanlamak.
+
+permissions:
+  contents: read
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  olc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Olc + Drive'a ekle
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+        run: |
+          set -euo pipefail
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_KOTA.csv" ETSY_KOTA.csv 2>/dev/null || true
+          python scripts/etsy/kota_olc.py --csv ETSY_KOTA.csv
+          rclone copyto ETSY_KOTA.csv "gdrive:ASTROLOVE/TEMP/ETSY_KOTA.csv" -q
+          tail -3 ETSY_KOTA.csv
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone

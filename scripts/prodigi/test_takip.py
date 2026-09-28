@@ -153,8 +153,8 @@ class FakeStore:
     def __init__(self, *a, **k): pass
     def needs_refresh(self): return False
 class FakeProdigi:
-    def siparisler(self, top=50):      # STATE disi gecmis siparisler (Ivan kanal siparisi + numune paketi)
-        return [{"id": "ord_IVAN", "merchantReference": "4175473435", "status": {"stage": "Complete"}, "items": []},
+    def siparisler(self, top=50):      # STATE disi gecmis siparisler (kanal siparisi + numune paketi; sahte kimlik)
+        return [{"id": "ord_KANAL", "merchantReference": "4099999901", "status": {"stage": "Complete"}, "items": []},
                 {"id": "ord_NUMUNE", "merchantReference": "", "status": {"stage": "Complete"},
                  "items": [{"merchantReference": "0"}]}]
     def get_order(self, oid): return 200, {"order": {}}
@@ -206,7 +206,7 @@ rc3 = run(["--takip-baslangic", "dun"])
 kontrol("I9 bozuk --takip-baslangic: kosu baslamadan durur, POST yok", POSTS == [] and "HATA" in str(rc3), rc3)
 rapor = (OUT / "REPORT.md").read_text(encoding="utf-8")
 kontrol("I10 koruma logu: STATE disi siparisler YAZMAZ olarak listelenir",
-        "TAKIP KORUMASI ord_IVAN" in rapor and "TAKIP KORUMASI ord_NUMUNE" in rapor, "")
+        "TAKIP KORUMASI ord_KANAL" in rapor and "TAKIP KORUMASI ord_NUMUNE" in rapor, "")
 kontrol("I11 koruma logu: STATE satirlari listelenir", all(f"TAKIP KORUMASI {r}:" in rapor for r in ("101", "102")), "")
 
 # ================= link erisim engeli (403/429) = uyari; 404/bozuk = gercek hata
