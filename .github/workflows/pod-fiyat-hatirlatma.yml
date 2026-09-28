@@ -30,15 +30,34 @@ on:
 
 
 jobs:
-  hatirlat:
+  # Etsy kilidi (Serdar 28 Eyl): zamanlanmis tur kilit kumesinde baska aktif kosu varsa BASARIYLA atlanir;
+  # elle baslatilan kosu atlamaz, sirasini bekler.
+  kilit:
     runs-on: ubuntu-latest
-    timeout-minutes: 135
+    timeout-minutes: 125
+    outputs:
+      atla: ${{ steps.k.outputs.atla }}
     steps:
       - uses: actions/checkout@v4
-      - name: Etsy kilidi (sira bekle, iptal yok)
+        with:
+          sparse-checkout: |
+            scripts/etsy/kilit_bekle.py
+            .github/workflows
+      - id: k
+        name: Etsy kilidi (zamanlanmis tur mesgulse atla, elle sira bekle)
         env:
           GH_TOKEN: ${{ github.token }}
-        run: python3 scripts/etsy/kilit_bekle.py
+          EV: ${{ github.event_name }}
+        run: |
+          if [ "$EV" = "schedule" ]; then python3 scripts/etsy/kilit_bekle.py --mod atla
+          else python3 scripts/etsy/kilit_bekle.py; fi
+  hatirlat:
+    needs: kilit
+    if: ${{ needs.kilit.outputs.atla != 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

@@ -6,8 +6,10 @@
    kenardan 20 px ic, +-3 px hiza taramasi (kapak_v8_kur.py yontemi)
  - yazi kontrasti >= 4.5: her satirin rengi, kutusunun arkasindaki duvarin en koyu %5'ine karsi (WCAG)
  - tire yok (uzun/orta tire, eksi)
- - kose zemini kapak duvariyla ayni (+-6, 4 kose)
-Kullanim: duvar_qc.py KAPAK_SAHNE_V9.png CIKIS1.jpg ESKI1.jpg [CIKIS2.jpg ESKI2.jpg ...]
+ - kose zemini secilen ZEMIN ile ayni (+-6, 4 kose); kapakla parlaklik farki bilgi olarak: yan seritlerde (x<500,
+   x>2500) ortalama L* farki (kapakta orta alan poster oldugu icin yan seritler)
+Kullanim: duvar_qc.py ZEMIN.png KAPAK_SAHNE_V9.png CIKIS1.jpg ESKI1.jpg [CIKIS2.jpg ESKI2.jpg ...]
+  ZEMIN: kartlarin kuruldugu duvar (leke seviyeli 3000x2250 ya da kapak_sahne_v9.png)
 """
 import json
 import os
@@ -21,7 +23,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from duvar_zemin import KREM, duvar, duvar_lum, kontrast, lum
 
 D = duvar(sys.argv[1]); Dz = np.asarray(D).astype(np.int16)
-ciftler = list(zip(sys.argv[2::2], sys.argv[3::2]))
+Kz = np.asarray(duvar(sys.argv[2], 'yok')).astype(np.int16)   # kapak duvari (orijinal, leke azaltmasiz)
+ciftler = list(zip(sys.argv[3::2], sys.argv[4::2]))
 
 
 def ncc(p, q):
@@ -32,6 +35,11 @@ def krem(a):
     return (np.abs(a - np.array(KREM)) <= 3).all(2)
 
 
+import cv2 as _c
+_yan = np.zeros((2250, 3000), bool); _yan[:, :500] = True; _yan[:, 2500:] = True
+_L = lambda a: _c.cvtColor(a.astype(np.float32) / 255, _c.COLOR_RGB2Lab)[..., 0][_yan].mean()
+dL_kapak = _L(Dz) - _L(Kz)
+print(f'zemin: yan seritler L* {_L(Dz):.1f} | kapak duvari L* {_L(Kz):.1f} | kapakla parlaklik farki dL* {dL_kapak:+.1f}')
 hepsi = True
 for cik, eski in ciftler:
     R = np.asarray(Image.open(cik).convert('RGB')).astype(np.int16)

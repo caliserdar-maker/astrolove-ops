@@ -1,0 +1,61 @@
+name: hata-kontrol-etsy
+
+# HATA KONTROL 28 Eyl (SALT OKUMA; Etsy'ye yazma YOK): 77 ilan canli galeri (eski 24 Eyl kartlari hala yayinda mi),
+# alt metin E08, 04_77_CIFT_LINK_DIZINI cift -> ilan eslemesi, 77 x 5 renk kaynak klasoru erisimi.
+# Etsy: yalniz API anahtari ile GET (OAuth token kullanilmaz, token yenilenmez). Kilit: kilit_bekle.py (iptal yok).
+# Cikti: Drive ASTROLOVE/TEMP/HATA_KONTROL_20260928/ETSY/
+
+permissions:
+  actions: read
+  contents: read
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  oku:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2 pillow numpy
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: 04 dosyasini al (Drive id)
+        run: |
+          set -euo pipefail
+          mkdir -p _work
+          rclone backend copyid gdrive: 1Ms0GLSC_xxjNOXsCKxOXoE8a0QvfEjrr _work/04.csv
+          wc -l _work/04.csv
+      - name: Galeri + alt metin + esleme + klasor (salt okuma)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+        run: python scripts/etsy/hata_kontrol_galeri.py _work/04.csv _out
+      - name: Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -d _out ] && rclone copy _out "gdrive:ASTROLOVE/TEMP/HATA_KONTROL_20260928/ETSY" -q || true
+          echo "Drive: TEMP/HATA_KONTROL_20260928/ETSY"
+          rm -rf ~/.config/rclone
