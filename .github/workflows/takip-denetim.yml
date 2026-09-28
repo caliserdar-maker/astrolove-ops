@@ -19,7 +19,8 @@ on:
       siparisler:
         description: "Prodigi siparis id'leri, virgullu"
         required: true
-        default: "ord_14538276,ord_72296317183912448,ord_72470448809534464,ord_13964600"
+        # 28 Eyl (Serdar): siparis kimlikleri depoda ve log env basliginda tutulmaz; olay dosyasindan okunur
+        default: ""
       yaz:
         description: "true = uyusmazligi kanitlanan receipt'e dogru tasiyiciyi yaz (YALNIZ Serdar'in o siparise ozel onayiyla)"
         type: boolean
@@ -125,7 +126,6 @@ jobs:
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
           TOKEN_FILE: _work/ETSY_TOKEN.json
-          SIP: ${{ inputs.siparisler }}
           YAZ: ${{ inputs.yaz }}
           TAM: ${{ inputs.tam }}
         run: |
@@ -133,6 +133,7 @@ jobs:
           umask 077; mkdir -p _work
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
           rclone copyto "gdrive:ASTROLOVE/TEMP/POD_ORDERS_STATE.csv" _work/state.csv
+          SIP=$(jq -r '.inputs.siparisler // ""' "$GITHUB_EVENT_PATH")
           args=(_work/state.csv "$SIP"); [ "$YAZ" = "true" ] && args+=(--yaz); [ "$TAM" = "true" ] && args+=(--tam)
           python scripts/prodigi/takip_denetim.py "${args[@]}"
           rclone copyto out/TAKIP_DENETIM.json "gdrive:ASTROLOVE/TEMP/POD_ORDERS/TAKIP_DENETIM.json" -q

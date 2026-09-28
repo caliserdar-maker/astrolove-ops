@@ -49,11 +49,13 @@ sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent / "etsy"))
 sys.path.insert(0, str(HERE.parent / "pinterest"))
 sys.path.insert(0, str(HERE.parent / "ops"))
+sys.path.insert(0, str(HERE.parent / "guvenlik"))
 from etsy_common import Etsy, TokenStore, log as elog, mask  # noqa: E402
 from pod_sku import frame_code, is_digital_sku, parse_sku, parse_tx  # noqa: E402
 import takip  # noqa: E402
 import kisisel_siparis  # noqa: E402
 import siparis_onay  # noqa: E402
+import kargo_maske  # noqa: E402
 
 PRODIGI = {"live": "https://api.prodigi.com/v4.0", "sandbox": "https://api.sandbox.prodigi.com/v4.0"}
 KEY_REMOTE = {"live": "gdrive:ASTROLOVE/TEMP/PRODIGI_TOKEN.json", "sandbox": "gdrive:ASTROLOVE/TEMP/PRODIGI_SANDBOX_TOKEN.json"}
@@ -642,13 +644,14 @@ def maskele_metin(t):
 
 
 class _MaskeliCikti:
-    """ACIL 25 Eyl: musteri verisi loga yazilmaz. stdout'a giden her satirda receipt -> opak kod.
+    """ACIL 25 Eyl: musteri verisi loga yazilmaz. stdout'a giden her satirda receipt -> opak kod;
+    28 Eyl: kargo takip no ve Prodigi siparis kimligi son 4 hane (scripts/guvenlik/kargo_maske.py).
     Drive'daki REPORT.md / DIKKAT.md / STATE tam kalir."""
     def __init__(self, akis):
         self._a = akis
 
     def write(self, t):
-        return self._a.write(maskele_metin(t))
+        return self._a.write(kargo_maske.maskele(maskele_metin(t)))
 
     def flush(self):
         return self._a.flush()
@@ -660,6 +663,8 @@ class _MaskeliCikti:
 def main():
     if not isinstance(sys.stdout, _MaskeliCikti):
         sys.stdout = _MaskeliCikti(sys.stdout)
+    if not isinstance(sys.stderr, _MaskeliCikti):
+        sys.stderr = _MaskeliCikti(sys.stderr)
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--env", choices=["sandbox", "live"], default="sandbox")
     ap.add_argument("--state", required=True)

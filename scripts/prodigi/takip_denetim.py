@@ -26,7 +26,9 @@ import requests
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "etsy"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "guvenlik"))
 import takip  # noqa: E402
+import kargo_maske  # noqa: E402
 
 UA = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126 Safari/537.36"}
 
@@ -152,6 +154,9 @@ def gunluk(prod, state):
 
 
 def main():
+    # 28 Eyl (Serdar): loga takip no / Prodigi siparis kimligi yalniz son 4 hane; Drive JSON'lari tam kalir
+    sys.stdout = kargo_maske.MaskeliAkis(sys.stdout)
+    sys.stderr = kargo_maske.MaskeliAkis(sys.stderr)
     from prodigi_pilot_quote import Api, load_key
     state = list(csv.DictReader(open(sys.argv[1], encoding="utf-8"))) if Path(sys.argv[1]).exists() else []
     if "--gunluk" in sys.argv:
