@@ -46,7 +46,10 @@ jobs:
       - name: Arama terimleri (Drive; loga yazilmaz)
         run: |
           set -euo pipefail
-          umask 077; mkdir -p _gizli/paket _gizli/kart
+          umask 077; mkdir -p _gizli/paket _gizli/kart _gizli/takip
+          for f in TAKIP_DENETIM.json TAKIP_TAM.json; do
+            rclone copyto "gdrive:ASTROLOVE/TEMP/POD_ORDERS/$f" "_gizli/takip/$f" -q 2>/dev/null || true
+          done
           rclone copyto "gdrive:ASTROLOVE/TEMP/POD_ORDERS_STATE.csv" _gizli/state.csv -q || true
           rclone copy "gdrive:ASTROLOVE/TEMP/POD_ORDERS" _gizli/paket --include "*.json" --max-depth 1 -q || true
           rclone lsf "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM" --include "*.md" --max-depth 1 2>/dev/null | while read -r f; do : > "_gizli/kart/$f"; done || true
