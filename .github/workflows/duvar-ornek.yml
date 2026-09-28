@@ -1,0 +1,66 @@
+name: duvar-ornek
+
+# Galeri gorsellerinin kapak duvari zeminli ornegi (Serdar 28 Eyl; salt Drive, Etsy YOK).
+# 02_format: kart02_duvar_kur.py; 15_renk_midnight_blue: renk_varyasyon_kur.py (poster onayli karttan birebir kirpim).
+# QC: duvar_qc.py. Cikti: Drive ASTROLOVE/TEMP/DUVAR_ORNEK_<damga>/ (JPEG + ONIZLEME.jpg + QC.txt) + paylasim linki.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  kur:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q numpy==2.1.3 pillow==11.0.0 scipy==1.14.1 opencv-python-headless==4.10.0.84
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          mkdir -p fonts; base=https://raw.githubusercontent.com/google/fonts/main/ofl
+          curl -fsSL "$base/ebgaramond/EBGaramond%5Bwght%5D.ttf" -o 'fonts/EBGaramond[wght].ttf'
+          curl -fsSL "$base/montserrat/Montserrat%5Bwght%5D.ttf" -o 'fonts/Montserrat[wght].ttf'
+          curl -fsSL "$base/lato/Lato-Regular.ttf" -o fonts/Lato-Regular.ttf
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Kur, QC, Drive'a yaz
+        run: |
+          set -euo pipefail
+          F=data/pod/cl_galeri_final19; Z=data/pod/kapak_sahne_v9.png; mkdir -p _work/out
+          python3 scripts/pod/kart02_duvar_kur.py $F/02_format.jpg $Z fonts _work/out/02_format.jpg
+          python3 -c "from PIL import Image; Image.open('$F/15_renk_midnight_blue.jpg').crop((810, 150, 2189, 1905)).save('_work/p15.png')"
+          python3 scripts/pod/renk_varyasyon_kur.py _work/p15.png "Midnight Blue" "fonts/Montserrat[wght].ttf" _work/out/15_renk_midnight_blue.jpg $Z
+          set +e
+          python3 scripts/pod/duvar_qc.py $Z _work/out/02_format.jpg $F/02_format.jpg \
+            _work/out/15_renk_midnight_blue.jpg $F/15_renk_midnight_blue.jpg | tee _work/out/QC.txt
+          QC=${PIPESTATUS[0]}
+          set -e
+          python3 -c "
+          from PIL import Image
+          W = Image.new('RGB', (6000, 2250))
+          W.paste(Image.open('_work/out/02_format.jpg'), (0, 0)); W.paste(Image.open('_work/out/15_renk_midnight_blue.jpg'), (3000, 0))
+          W.resize((2400, 900), Image.LANCZOS).save('_work/out/ONIZLEME.jpg', quality=90)"
+          rm -f _work/out/*.json
+          DAMGA=$(date -u +%Y%m%d_%H%M); HEDEF="gdrive:ASTROLOVE/TEMP/DUVAR_ORNEK_${DAMGA}"
+          rclone copy _work/out "$HEDEF" -q
+          echo "Dosyalar:"; rclone lsf "$HEDEF"
+          echo "Paylasim linki: $(rclone link "$HEDEF")"
+          exit "$QC"
+      - if: always()
+        run: rm -rf _work ~/.config/rclone
