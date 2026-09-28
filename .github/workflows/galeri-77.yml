@@ -114,6 +114,14 @@ jobs:
               rclone copyto "gdrive:ASTROLOVE/TEMP/POD_KAPAK_V3/SIPARIS/${C}_MIDNIGHT_BLUE_11x14/BASKI_11x14.jpg" $Y/BASKI_MIDNIGHT_BLUE.jpg -q || hata="$hata MB baski yok"
               rclone copyto "gdrive:ASTROLOVE/TEMP/POD_KAPAK_V3/SIPARIS/${C}_MIDNIGHT_BLUE_11x14/KAPI_RAPORU.json" $Y/KAPI_MIDNIGHT_BLUE.json -q 2>/dev/null
             fi
+            # PW kaynagi (POD_PRINT) degistiyse (pw-kucuk-yeniden yazimi) onbellekteki PW baskisi yeniden uretilir
+            PWS=$(rclone lsjson "gdrive:ASTROLOVE/TEMP/POD_PRINT/$C/PURE_WHITE/11x14.jpg" 2>/dev/null | python3 -c "import json,sys;l=json.load(sys.stdin);print(l[0]['ModTime'] if l else '')" 2>/dev/null)
+            PWE=$([ -f $Y/PW_KAYNAK.json ] && python3 -c "import json;l=json.load(open('$Y/PW_KAYNAK.json'));print(l[0]['ModTime'] if l else '')" 2>/dev/null)
+            if [ -n "$PWS" ] && [ "$PWS" != "$PWE" ]; then
+              [ -f $Y/BASKI_PURE_WHITE.jpg ] && echo "$C: PW kaynagi degisti ($PWE -> $PWS), PW baskisi yeniden"
+              rm -f $Y/BASKI_PURE_WHITE.jpg $Y/KAPI_PURE_WHITE.json; rclone deletefile "$G/_KAYNAK/$C/BASKI_PURE_WHITE.jpg" -q 2>/dev/null
+              rclone lsjson "gdrive:ASTROLOVE/TEMP/POD_PRINT/$C/PURE_WHITE/11x14.jpg" > $Y/PW_KAYNAK.json 2>/dev/null
+            fi
             for R in DEEP_BLACK PURE_WHITE CHAMPAGNE_IVORY WARM_PARCHMENT; do
               [ -f $Y/BASKI_$R.jpg ] && continue
               (cd _sb && ../_sbenv/bin/python scripts/medya_v1/siparis_dosyasi.py --cift "$C" --renk "$R" --boy 11x14 --urun pod \
@@ -131,7 +139,6 @@ jobs:
                 hata="$hata $R baski FAIL"; grep -h -E "_11x14 \{'urun'" "_work/log_${C}_$R.txt" | cut -c1-600; tail -3 "_work/log_${C}_$R.txt"
               fi
             done
-            [ -f $Y/PW_KAYNAK.json ] || rclone lsjson "gdrive:ASTROLOVE/TEMP/POD_PRINT/$C/PURE_WHITE/11x14.jpg" > $Y/PW_KAYNAK.json 2>/dev/null
             rclone copy $Y "$G/_KAYNAK/$C" -q
             if [ -z "$hata" ] && [ "$MOD" = "tam" ]; then
               O=_work/out/$C
