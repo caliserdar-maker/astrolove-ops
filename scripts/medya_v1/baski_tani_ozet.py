@@ -35,11 +35,39 @@ def main(dizin):
             s['cift'], KISA.get(s['renk'], s['renk']), s['boy'], durum, *[pf(k.get(a)) for a in KAPILAR],
             f"{pf(e.get('gecti'))} {e.get('konum_fark_px')}/{e.get('kenar_fark_px')}",
             f"{pf(y.get('gecti'))} {y.get('konum_fark_px')}/{y.get('kenar_fark_px')}", tag, onc]) + ' |')
+    # renk x boy matrisi (cift basina): PASS / FAIL:<kapilar> / SH (SISTEM HATASI)
+    boylar = []
+    for x in satirlar:
+        if x['boy'] not in boylar:
+            boylar.append(x['boy'])
+    mat = ['', '## Matris (renk x boy)', '']
+    for cift in sorted({x['cift'] for x in satirlar}):
+        mat += [f'### {cift}', '', '| renk | ' + ' | '.join(boylar) + ' |', '|---|' + '---|' * len(boylar)]
+        for renk in KISA:
+            h = []
+            for b in boylar:
+                x = next((z for z in satirlar if z['cift'] == cift and z['renk'] == renk and z['boy'] == b), None)
+                if x is None:
+                    h.append('')
+                elif x.get('durum') not in ('URETILDI',):
+                    h.append('SH')
+                elif x.get('kapilar_gecti'):
+                    h.append('PASS')
+                else:
+                    h.append('FAIL:' + ','.join(a for a, v in (x.get('kapilar') or {}).items() if v is False))
+            mat.append(f'| {KISA[renk]} | ' + ' | '.join(h) + ' |')
+        mat.append('')
+    say = {'PASS': 0, 'FAIL': 0, 'SH': 0}
+    for x in satirlar:
+        say['SH' if x.get('durum') != 'URETILDI' else ('PASS' if x.get('kapilar_gecti') else 'FAIL')] += 1
+    mat.insert(1, f"Toplam {len(satirlar)}: PASS {say['PASS']}, FAIL {say['FAIL']}, SISTEM HATASI {say['SH']}")
+    out += mat
     (d / 'TABLO.md').write_text('\n'.join(out) + '\n')
+    print('\n'.join(mat))
     (d / 'TABLO.json').write_text(json.dumps(satirlar, ensure_ascii=False, indent=1, default=str))
     print('\n'.join(out))
     wp = [(s['cift'], s['renk'], s['boy'], (s.get('tag_tanisi') or {}))
-          for s in satirlar if s['renk'] != 'MIDNIGHT_BLUE']
+          for s in satirlar if s['renk'] != 'MIDNIGHT_BLUE' and s.get('durum') != 'URETILDI']
     for c, r, b, t in wp:
         print(f"TAG {c} {KISA[r]} {b}: plate_tag_var={t.get('plate_olcum_tag_var')} "
               f"alt_bant={[(x['bant'], x['yukseklik'], x['uzanim'], x['kabul']) for x in t.get('alt_bantlar', [])][:4]} "
