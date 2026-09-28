@@ -219,6 +219,32 @@ def ru_of(L, api, shop, lid):
     return api.get(f"/shops/{shop}/listings/{lid}/translations/ru", ok404=True) or {}
 
 
+def ru_sablon(metin, a, b):
+    """RU metinde burc adlarini (her cekimiyle) {A}/{B} yapar; ayni burcta ikisi de {A}."""
+    t = normalize(metin)
+    t = re.sub(rf"(?:{RU_KOK[a]})[а-яё]*", "{A}", t, flags=re.I)
+    if b != a:
+        t = re.sub(rf"(?:{RU_KOK[b]})[а-яё]*", "{B}", t, flags=re.I)
+    return t
+
+
+def ru_kiyas(cl_ru, xru, a, b):
+    """CL RU (Cancer/Libra) ile ilan RU'su: aciklama/baslik/etiket ayri ayri; fark yoksa AYNI."""
+    fark = []
+    for alan in ("description", "title"):
+        ref = ru_sablon(cl_ru.get(alan), CL_A, CL_B)
+        if a == b:
+            ref = ref.replace("{B}", "{A}")
+        if ru_sablon(xru.get(alan), a, b) != ref:
+            fark.append(f"{alan} " + ilk_fark(ref, ru_sablon(xru.get(alan), a, b)))
+    rt = [ru_sablon(t, CL_A, CL_B) for t in cl_ru.get("tags") or []]
+    if a == b:
+        rt = [t.replace("{B}", "{A}") for t in rt]
+    if [ru_sablon(t, a, b) for t in xru.get("tags") or []] != rt:
+        fark.append("tags")
+    return fark
+
+
 def ru_cekim(metin, a, b):
     """CL RU metninde burc adlarinin yalin disi (cekimli) formlarini say."""
     bulgu = {}
@@ -348,8 +374,13 @@ def calis(api, shop, ids_csv, out, oas_yol=""):
         xru = E["ru"] or {}
         if ru_durum == "CL'de yok":
             ru = "CL'de yok" + (" (ilanda var, dokunulmaz)" if xru.get("description") else "")
+        elif not xru.get("description"):
+            ru = "ilanda YOK"
         else:
-            ru = "ilanda var" if xru.get("description") else "ilanda YOK"
+            rf = ru_kiyas(cl_ru, xru, a, b)
+            ru = "AYNI (ad disi)" if not rf else "FARKLI: " + " | ".join(rf)[:300]
+            if rf:
+                sayac["ru"] += 1
         kalan = ["baslik/etiket/gorsel/video/state (kapsam disi)"]
         if bil:
             kalan.append("bilinmeyen alan farki: " + ", ".join(sorted(bil)))
@@ -378,7 +409,7 @@ def calis(api, shop, ids_csv, out, oas_yol=""):
           f"- CL {CL_ID}: {ref['urun']} urun, menu {ref['menu']}, {len(cl_q)} soru, {len(cle['properties'])} nitelik, RU: {ru_durum}",
           f"- CL bulgulari: {cl_bulgu or 'yok'}",
           f"- 77 ilan: envanter degisecek {sayac['envanter']} | aciklama {sayac['aciklama']} | kisisel {sayac['kisisel']} | "
-          f"ayar {sayac['ayar']} | nitelik {sayac['nitelik']} | active degil {sayac['pasif']}",
+          f"ayar {sayac['ayar']} | nitelik {sayac['nitelik']} | RU farkli {sayac['ru']} | active degil {sayac['pasif']}",
           f"- Ayni burc cifti tarih satiri iki kez: {sayac['ayni_burc_tarih']} (metin_78_uret; pod_seo_v3_build tek satira indirir)",
           f"- Tahmini yazma cagrisi: {sum(s['tahmini_yazma'] for s in satirlar)} | kota son {api.remaining} | gecen {time.time() - t0:.0f}s",
           "", "| id | cift | state | envanter | aciklama | kisisel | ayar | nitelik | RU |", "|---|---|---|---|---|---|---|---|---|"]
