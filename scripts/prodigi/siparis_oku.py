@@ -25,7 +25,7 @@ def asset_ozet(url):
 
 def ozet(o, eylem, rid):
     s = o.get("status") or {}
-    maske = lambda t: str(t or "").replace(rid, "..." + rid[-4:]) if rid else str(t or "")
+    maske = lambda t: re.sub(r"\d{8,}", lambda m: "..." + m.group(0)[-4:], str(t or ""))   # tum receipt'ler son 4
     return {"id": o.get("id"), "created": o.get("created"), "lastUpdated": o.get("lastUpdated"),
             "merchantReference": maske(o.get("merchantReference")), "stage": s.get("stage"), "details": s.get("details"),
             "issues": [{"kod": i.get("errorCode"), "aciklama": str(i.get("description") or "")[:160]} for i in s.get("issues") or []],
