@@ -58,13 +58,17 @@ fx, fy = (FX - x0) * s, FY * s
 def ncc(p, q):
     p = p - p.mean(); q = q - q.mean(); return float((p * q).sum() / np.sqrt((p * p).sum() * (q * q).sum()))
 pr = poster.resize((round(PW * s), round(PH * s)), Image.LANCZOS)
-P = np.asarray(pr).astype(np.float32)[30:-30, 30:-30].mean(2)
+# iki taraf da sigma1 Gauss: yeniden ornekleme gurultusune dayanikli, icerik hatasini yakalar
+# (dogrulama 28 Eyl: dogru poster 0.9934, yanlis cift posteri 0.42)
+import cv2 as _cv2
+P = _cv2.GaussianBlur(np.asarray(pr).astype(np.float32)[30:-30, 30:-30].mean(2), (0, 0), 1.0)
+Rg = _cv2.GaussianBlur(R.mean(2), (0, 0), 1.0)
 # olcekleme yuvarlamasi +-1 px kaydirabilir; NCC en iyi hizada olculur (icerik sadakati, hiza degil)
 n = -1.0
 for dy in range(-3, 4):
     for dx in range(-3, 4):
         px0, py0 = round(fx + ix * s) + 30 + dx, round(fy + iy * s) + 30 + dy
-        n = max(n, ncc(R[py0:py0 + P.shape[0], px0:px0 + P.shape[1]].mean(2), P))
+        n = max(n, ncc(Rg[py0:py0 + P.shape[0], px0:px0 + P.shape[1]], P))
 yuz_cik = R[round(fy + 3 * s):round(fy + YUZ * s) - 2, round(fx + fr.width * s / 2) - 100:round(fx + fr.width * s / 2) + 100].reshape(-1, 3).mean(0)
 sapma = float(np.abs(yuz_cik - yuz_ref).max())
 print(f'cerceve {fr.width}x{fr.height} yuz {YUZ} (sahnede) | poster NCC {n:.4f} | cerceve renk sapmasi {sapma:.1f} (<=16)')
