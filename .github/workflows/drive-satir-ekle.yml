@@ -1,0 +1,64 @@
+name: drive-satir-ekle
+
+# Drive'daki bir .md dosyasina satir ekler (oturumlar arasi durum notu; ornek TEMP/YAYIN_DURUM.md).
+# Satir, dosyadaki "## " ile baslayan ilk basliktan ONCE (gunluk bolumunun sonu) eklenir; baslik yoksa sona.
+# Yalniz TEMP/ altindaki .md dosyalari. Etsy YOK.
+
+on:
+  workflow_dispatch:
+    inputs:
+      dosya: {description: "ASTROLOVE/ altina gore yol (TEMP/....md)", required: true, default: "TEMP/YAYIN_DURUM.md"}
+      satir: {description: "eklenecek satir (tek satir)", required: true}
+
+permissions:
+  contents: read
+
+concurrency: drive-satir-ekle
+
+jobs:
+  ekle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Satir ekle
+        env:
+          DOSYA: ${{ inputs.dosya }}
+          SATIR: ${{ inputs.satir }}
+        run: |
+          set -euo pipefail
+          [[ "$DOSYA" =~ ^TEMP/[A-Za-z0-9_./-]+\.md$ && "$DOSYA" != *..* ]] || { echo "::error::yalniz TEMP/*.md"; exit 1; }
+          rclone copyto "gdrive:ASTROLOVE/$DOSYA" _d.md 2>/dev/null || : > _d.md
+          python3 - <<'EOF'
+          import os
+          s = open('_d.md', encoding='utf-8').read().split('\n')
+          satir = os.environ['SATIR'].replace('\n', ' ').strip()
+          i = next((k for k, x in enumerate(s) if x.startswith('## ')), None)
+          if i is None:
+              s = [x for x in s] + [satir]
+          else:
+              j = i
+              while j > 0 and not s[j - 1].strip():
+                  j -= 1
+              s = s[:j] + [satir] + s[j:]
+          open('_d.md', 'w', encoding='utf-8').write('\n'.join(s).rstrip('\n') + '\n')
+          EOF
+          rclone copyto _d.md "gdrive:ASTROLOVE/$DOSYA"
+          grep -c '' _d.md | xargs echo "satir sayisi:"
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone _d.md
