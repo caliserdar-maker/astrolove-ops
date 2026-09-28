@@ -1,0 +1,98 @@
+name: banner-birlestir
+
+# Etsy magaza banner'i: 3360x840 sahne tabanlari (Real-ESRGAN, dalda) + Drive'daki GERCEK hat
+# posterleri (banner-poster) -> scripts/brand/banner_sahne.py yerlestir (PASS/FAIL QC).
+# Kapsam: YALNIZ Drive (rclone). Etsy/Prodigi secret'i YOK; Etsy'ye yukleme YOK.
+# Cikti: Drive ASTROLOVE/TEMP/BANNER_<damga>/ (A/B PNG+JPG, rapor, onizlemeler, A_B sayfasi)
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Script + taban dali"
+        default: "claude/vibrant-dirac-gem7tl"
+      damga:
+        default: "20260928"
+      a_sol:
+        description: "A sol poster (POSTER altinda yol)"
+        default: "CANCER_LIBRA_MIDNIGHT_BLUE_12x16/BASKI_12x16.jpg"
+      a_sag:
+        description: "A sag poster"
+        default: "CANCER_LIBRA_CHAMPAGNE_IVORY_18x24/BASKI_18x24.jpg"
+      b_poster:
+        description: "B poster"
+        default: "CANCER_LIBRA_MIDNIGHT_BLUE_16x20/BASKI_16x20.jpg"
+
+concurrency: banner-birlestir
+
+jobs:
+  birlestir:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      KOK: gdrive:ASTROLOVE/TEMP/BANNER_${{ inputs.damga }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --quiet pillow numpy scipy
+      - name: rclone kur
+        run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then echo "HATA: RCLONE_CONF_B64 yok" >&2; exit 1; fi
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Posterleri al
+        env:
+          A_SOL: ${{ inputs.a_sol }}
+          A_SAG: ${{ inputs.a_sag }}
+          B_P: ${{ inputs.b_poster }}
+        run: |
+          set -euo pipefail
+          for p in "$A_SOL" "$A_SAG" "$B_P"; do
+            mkdir -p "_p/$(dirname "$p")"
+            rclone copyto "$KOK/POSTER/$p" "_p/$p"
+            rclone copyto "$KOK/POSTER/$(dirname "$p")/KAPI_RAPORU.json" "_p/$(dirname "$p")/KAPI_RAPORU.json"
+            python -c "import json,sys;d=json.load(open(sys.argv[1]));print(sys.argv[1],d.get('durum'),'kapilar_gecti=',d.get('kapilar_gecti'),d.get('kapilar'))" "_p/$(dirname "$p")/KAPI_RAPORU.json" | tee -a "$GITHUB_STEP_SUMMARY"
+          done
+      - name: Yerlestir (A, B) + sayfa
+        env:
+          A_SOL: ${{ inputs.a_sol }}
+          A_SAG: ${{ inputs.a_sag }}
+          B_P: ${{ inputs.b_poster }}
+          D: ${{ inputs.damga }}
+        run: |
+          set -uo pipefail
+          t0=$(date +%s); hata=0
+          python scripts/brand/banner_sahne.py yerlestir --taban data/banner/taban_20260928/A_taban_3360x840.png \
+            --poster "_p/$A_SOL" --poster "_p/$A_SAG" --isik sol_ust --damga "A_$D" --cik _c/A || hata=$((hata+1))
+          echo "[1/2] A | gecen $(( $(date +%s) - t0 ))s | %50"
+          python scripts/brand/banner_sahne.py yerlestir --taban data/banner/taban_20260928/B_taban_3360x840.png \
+            --poster "_p/$B_P" --isik ust --damga "B_$D" --cik _c/B || hata=$((hata+1))
+          echo "[2/2] B | gecen $(( $(date +%s) - t0 ))s | %100"
+          python scripts/brand/banner_sahne.py sayfa --banner "_c/A/ASTROLOVE_BANNER_ETSY_3360x840_A_$D.png" --etiket A \
+            --banner "_c/B/ASTROLOVE_BANNER_ETSY_3360x840_B_$D.png" --etiket B --cik _c/BANNER_A_B_ONIZLEME.jpg
+          for x in A B; do python -c "import json,sys;d=json.load(open(sys.argv[1]));print(sys.argv[2],d['SONUC'],d['kapilar'])" "_c/$x/BANNER_RAPOR.json" $x | tee -a "$GITHUB_STEP_SUMMARY"; done
+          rclone copy _c "$KOK" -q
+          rclone lsf -R "$KOK" --files-only | grep -v '^POSTER/' | tee -a "$GITHUB_STEP_SUMMARY"
+          [ "$hata" = 0 ]
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
