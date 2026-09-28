@@ -19,6 +19,7 @@ SAHNE, BASKI, AGCH, CIK = sys.argv[1:5]
 G = Image.open(SAHNE).convert('RGB')
 # bos alan kutusu (ince altin cizgi dahil) argumanla; varsayilan 2. sahne olcumu
 BX0, BY0, BX1, TABAN = (int(v) for v in sys.argv[5:9]) if len(sys.argv) > 8 else (470, 2, 1262, 878)
+TEMIZ = len(sys.argv) > 9 and sys.argv[9] == 'temiz'   # sahnede bos beyaz alan yok, dolgu atlanir
 CX = (BX0 + BX1) // 2
 
 # cerceve olculeri: yukseklik taban-2, oran 11:14, yuz F = PW x 20/599.6
@@ -37,10 +38,14 @@ FX, FY = CX - fr.width // 2, TABAN - fr.height
 # bos alanin cerceve disinda kalan seritleri OpenCV Telea inpaint ile duvara tamamlanir
 # (sahne_yazi_sil yontemi; ayna/kaydirma yamalari dikis birakiyordu, Serdar 28 Eyl)
 import cv2
-ga = np.asarray(G).copy()
-mask = np.zeros(ga.shape[:2], np.uint8)
-mask[max(BY0 - 3, 0):TABAN + 3, BX0 - 3:BX1 + 3] = 255   # tum bos alan; delik yok (parlak icten beslenmesin)
-ga = cv2.inpaint(ga, mask, 12, cv2.INPAINT_TELEA)
+if TEMIZ:
+    ga = np.asarray(G).copy()
+    mask = np.zeros(ga.shape[:2], np.uint8)
+else:
+    ga = np.asarray(G).copy()
+if not TEMIZ:
+    mask[max(BY0 - 3, 0):TABAN + 3, BX0 - 3:BX1 + 3] = 255   # tum bos alan; delik yok
+    ga = cv2.inpaint(ga, mask, 12, cv2.INPAINT_TELEA)
 # inpaint duz kalir; gercek duvardan yuksek frekans doku eklenir (Serdar 28 Eyl: bulanik bant)
 H_, W_ = ga.shape[:2]
 def hp_doku(kutu):
