@@ -17,8 +17,11 @@ from scipy import ndimage as ndi
 
 BG = (237, 232, 226); NAVY_T = (25, 34, 49); SANS_T = (23, 25, 30)
 PANEL_W, SX = 2710, 145
+GAR_BOY = 51
 
-# baslik, alt baslik, SY, alt satirlar [(metin, font, hedef genislik, y ofseti)]; poster kirpimi
+# baslik, alt baslik, SY, alt satirlar [(metin, font, hedef genislik, y ofseti[, sabit punto])]; poster kirpimi
+# 'Shown in ...' satiri: metin kisalinca hedef genislik puntoyu 89'a sisiriyordu (Serdar 28 Eyl) -> sabit 51
+# (onayli kart14 v2 'Shown in Champagne Ivory with an Antique Gold frame.' puntosu; hediye satiri 50)
 # 'baski' = BASKI_11x14 (rebate 5 mm / 279.4 x 355.6 mm); kutu = canli kart 04 kirpimi (rebate 5 / 406.4 x 508)
 KARTLAR = {
     '06': dict(ad='06_hediye_sahne', baslik='A gift for your story.',
@@ -27,17 +30,17 @@ KARTLAR = {
                poster='baski'),
     '09': dict(ad='09_yatak_sahne', baslik='Made for the room you share.',
                alt='A calm, personal piece for your bedroom or living room.', SY=420,
-               satirlar=[('Shown in Champagne Ivory.', 'GAR', 1150, 45),
+               satirlar=[('Shown in Champagne Ivory.', 'GAR', None, 45, GAR_BOY),
                          ('Five colors, thirteen sizes, four frame finishes.', 'MON', 760, 132)],
                poster=(2208, 499, 2733, 1152)),
     '10': dict(ad='10_calisma_sahne', baslik='Deep Black, bold and modern.',
                alt='A modern look for a living room, hallway or office.', SY=420,
-               satirlar=[('Shown in Deep Black.', 'GAR', 1050, 45),
+               satirlar=[('Shown in Deep Black.', 'GAR', None, 45, GAR_BOY),
                          ('Every color comes in all four frame finishes.', 'MON', 740, 132)],
                poster=(1240, 500, 1760, 1150)),
     '11': dict(ad='11_yemek_sahne', baslik='Pure White, calm and airy.',
                alt='Light and calm, for a dining room or entryway.', SY=420,
-               satirlar=[('Shown in Pure White.', 'GAR', 1180, 45),
+               satirlar=[('Shown in Pure White.', 'GAR', None, 45, GAR_BOY),
                          ('Framed prints arrive ready to hang.', 'MON', 640, 132)],
                poster=(755, 1310, 1275, 1960)),
 }
@@ -136,9 +139,10 @@ def kur(kart, sahne_yol, poster_yol, eski_yol, GAR, MON):
         b = f.getbbox(t, anchor='ls'); d.text((1500 - (b[0] + b[2]) / 2, y - b[1]), t, font=f, fill=renk, anchor='ls')
     def fit(yol, w, t, hedef):
         return font(yol, min(range(24, 90), key=lambda z: abs((lambda bb: bb[2] - bb[0])(font(yol, z, w).getbbox(t, anchor='ls')) - hedef)), w)
-    for t, fnt, hedef, dy in K['satirlar']:
+    for t, fnt, hedef, dy, *boy in K['satirlar']:
         yol, w = yollar[fnt]
-        orta(SY + sahne.height + dy, t, fit(yol, w, t, hedef), NAVY_T if fnt == 'GAR' else SANS_T)
+        f = font(yol, boy[0], w) if boy else fit(yol, w, t, hedef)
+        orta(SY + sahne.height + dy, t, f, NAVY_T if fnt == 'GAR' else SANS_T)
     bilgi = dict(kutu=kutu, dolu=dolu, s=s, acik=(X0, Y0, X1, Y1), SY=SY, panel=sahne.size,
                  poster=poster.size, kirp=kirp, kirp_eks=kirp_eks)
     return out, bilgi
