@@ -139,6 +139,17 @@ def temas(cift, os_, yol):
 def ozet(cik, boy_sayisi):
     """URET_*.csv -> YAZ.txt (tum boylari PASS ciftler) + OZET.md. Cift duzeyinde: tek boy FAIL ise cift atlanir."""
     sat = [r for f in sorted(cik.glob('URET_*.csv')) for r in csv.DictReader(open(f))]
+    # Kutu konum kapisi: KUCUK kutusu ayni boydaki ciftlerin medyan konumundan kutu yuksekliginin yarisindan fazla
+    # saparsa yanlis bant secilmistir (28 Eyl kuru: LIBRA_LIBRA ana sembolun alt cubugunu 'kucuk' sandi) -> FAIL.
+    for bo in {r['boy'] for r in sat}:
+        rs = [r for r in sat if r['boy'] == bo and r.get('kutu')]
+        if not rs:
+            continue
+        k = np.array([[int(v) for v in r['kutu'].split('x')] for r in rs])
+        m0, m1 = np.median(k[:, 1]), np.median(k[:, 3])
+        for r, (_, y0, _, y1) in zip(rs, k):
+            if abs(y0 - m0) > 0.5 * (m1 - m0) or abs(y1 - m1) > 0.5 * (m1 - m0):
+                r['sonuc'] = 'FAIL'; r['hata'] = f'kutu konumu y {y0}-{y1}, medyan {m0:.0f}-{m1:.0f} (yanlis bant)'
     ciftler = sorted({r['cift'] for r in sat})
     yaz, fail = [], []
     for c in ciftler:

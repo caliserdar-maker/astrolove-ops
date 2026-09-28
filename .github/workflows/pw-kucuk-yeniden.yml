@@ -137,7 +137,14 @@ jobs:
         run: |
           [ "${{ inputs.confirm }}" = "PW_KUCUK_YAZ" ] || { echo "confirm != PW_KUCUK_YAZ"; exit 1; }
           [ -n "${{ inputs.kaynak_run }}" ] || { echo "kaynak_run bos"; exit 1; }
-      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q pillow==12.3.0 numpy==2.4.6 scipy==1.17.1
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
       - name: rclone.conf olustur
         env:
           RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
@@ -150,6 +157,16 @@ jobs:
           if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
             [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
           fi
+      - name: YAZ listesi (guncel ozet + kutu konum kapisi)
+        run: |
+          set -euo pipefail
+          D="$G/PW_KUCUK_${{ inputs.kaynak_run }}"
+          rclone copy "$D/rapor" _r --include "URET_*.csv" -q
+          python scripts/pod/pw_yeniden_uret.py --ozet _r --boy-sayisi 15
+          cp _r/YAZ.txt YAZ.txt
+          cp _r/OZET.md OZET_YAZ.md
+          rclone copy OZET_YAZ.md "$D/rapor" -q
+          rclone copy YAZ.txt "$D/rapor" -q
       - name: Yedek (tum PW) + rclone check
         run: |
           set -euo pipefail
@@ -162,7 +179,6 @@ jobs:
         run: |
           set -euo pipefail
           D="$G/PW_KUCUK_${{ inputs.kaynak_run }}"
-          rclone copy "$D/rapor/YAZ.txt" . -q
           [ -s YAZ.txt ] || { echo "YAZ.txt bos"; exit 1; }
           sed 's:.*:/&/PURE_WHITE/*.jpg:' YAZ.txt > _filtre.txt
           n=$(rclone lsf -R "$D/yeni" --files-only --include-from _filtre.txt | wc -l)
