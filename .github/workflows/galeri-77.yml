@@ -27,7 +27,7 @@ on:
         required: true
         default: tam
       wp_dal:
-        description: "WP baskisi icin siparis_dosyasi dali (bos = siparis-baski-v1); WP bu dalda TUM kapilardan (olcek dahil) gecmeli"
+        description: "WP: ATLA = WP denenmez (17 gorsel); dal adi = o daldaki siparis_dosyasi, TUM kapilar (olcek dahil), RED ise WP_TANI.md; bos = eski tolerans"
         required: false
         default: ""
       yeniden:
@@ -56,7 +56,7 @@ jobs:
           ref: siparis-baski-v1
           path: _sb
       - name: Checkout (WP dali)
-        if: ${{ inputs.wp_dal != '' }}
+        if: ${{ inputs.wp_dal != '' && inputs.wp_dal != 'ATLA' }}
         uses: actions/checkout@v4
         with:
           ref: ${{ inputs.wp_dal }}
@@ -144,6 +144,7 @@ jobs:
             fi
             for R in DEEP_BLACK PURE_WHITE CHAMPAGNE_IVORY WARM_PARCHMENT; do
               [ -f $Y/BASKI_$R.jpg ] && continue
+              [ "$R" = "WARM_PARCHMENT" ] && [ "$WP_DAL" = "ATLA" ] && continue      # WP denemesi yok (Serdar 28 Eyl: merge beklenir)
               SB=_sb; KT=""
               if [ "$R" = "WARM_PARCHMENT" ] && [ -n "$WP_DAL" ]; then SB=_sbwp; KT="--tam"; fi   # WP: baski-duzelt dali, tum kapilar
               (cd $SB && ../_sbenv/bin/python scripts/medya_v1/siparis_dosyasi.py --cift "$C" --renk "$R" --boy 11x14 --urun pod \
@@ -153,6 +154,13 @@ jobs:
               if [ -f "$D/KAPI_RAPORU.json" ] && python3 scripts/pod/galeri77_kapi.py "$D/KAPI_RAPORU.json" $KT && [ -f "$D/BASKI_11x14.jpg" ]; then
                 cp "$D/BASKI_11x14.jpg" $Y/BASKI_$R.jpg; cp "$D/KAPI_RAPORU.json" $Y/KAPI_$R.json
                 [ "$R" = "WARM_PARCHMENT" ] && printf '%s' "$PLATE_T" > $Y/WP_PLATE.txt && printf '%s' "${WP_DAL:-siparis-baski-v1}@$(git -C $SB rev-parse --short HEAD)" > $Y/WP_KOD.txt
+              elif [ "$R" = "WARM_PARCHMENT" ] && [ -n "$KT" ] && [ -f "$D/KAPI_RAPORU.json" ] && [ -f "$D/BASKI_11x14.jpg" ]; then
+                # tum kapilar gecmedi: tani (WP_TANI.md + karsilastirma) Drive'a; yeni iterasyon yok
+                FD=fonts python3 scripts/pod/galeri77_wptani.py "$C" "$D/KAPI_RAPORU.json" "$D/BASKI_11x14.jpg" $Y/BASKI_MIDNIGHT_BLUE.jpg \
+                  "${WP_DAL}@$(git -C $SB rev-parse --short HEAD)" _work/wptani_$C
+                cp "$D/KAPI_RAPORU.json" _work/wptani_$C/KAPI_RAPORU.json
+                rclone copy _work/wptani_$C "$G/_WPTANI/$C" -q && rclone copyto _work/wptani_$C/WP_TANI.md "$G/WP_TANI.md" -q
+                echo "WP_TANI: TEMP/GALERI_77/WP_TANI.md + _WPTANI/$C/ | $(rclone link "$G/_WPTANI/$C" 2>/dev/null)"
               elif [ "$R" != "WARM_PARCHMENT" ]; then
                 hata="$hata $R baski FAIL"; grep -h -E "_11x14 \{'urun'" "_work/log_${C}_$R.txt" | cut -c1-600; tail -3 "_work/log_${C}_$R.txt"
               fi
