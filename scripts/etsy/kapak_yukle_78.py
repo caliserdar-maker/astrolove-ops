@@ -187,8 +187,10 @@ def kuru(a, api, shop, out, satirlar, kapak, sorun, fazla):
         else:
             if int(r1.get("rank") or 0) != 1:
                 neden.append(f"ilk gorsel rank {r1.get('rank')}")
-            if any(str(eski_id) == str(v[3]) for v in vmap):
-                neden.append(f"{eski_id} varyasyon gorseline bagli")
+            bagli = [str(v[2]) for v in vmap if str(eski_id) == str(v[3])]
+            if bagli:
+                row["eski_bagli_degerler"] = bagli
+                neden.append(f"{eski_id} varyasyon gorseline bagli ({len(bagli)} deger: {', '.join(bagli)})")
             if len(g) + 1 > ETSY_MAX:
                 neden.append(f"galeri {len(g)} dolu (+1 > {ETSY_MAX})")
             yol = yedek_dir / f"{lid}_{eski_id}.jpg"
@@ -246,6 +248,13 @@ def kuru(a, api, shop, out, satirlar, kapak, sorun, fazla):
         sat += ["## BLOK / ZATEN / eslesmeyen", ""]
         sat += [f"- {r['listing_id']} {r['cift']}: {r['durum']} {r['neden']}" for r in engel]
         sat += [f"- ilanda olmayan kapak dosyasi: {f}" for f in fazla] + [""]
+    bagli_say = {}
+    for r in plan:
+        for d in r.get("eski_bagli_degerler") or []:
+            bagli_say[d] = bagli_say.get(d, 0) + 1
+    if bagli_say:
+        sat += ["## Eski rank 1'e bagli varyasyon degerleri (deger: ilan sayisi)", ""]
+        sat += [f"- {d}: {n}" for d, n in sorted(bagli_say.items(), key=lambda x: -x[1])] + [""]
     sat += [f"## Silinecek {len(silinecek)} image_id (eski rank 1)", "",
             "| # | listing_id | cift | state | galeri | silinecek image_id | boyut | yedek |",
             "|---|---|---|---|---|---|---|---|"]
@@ -257,6 +266,8 @@ def kuru(a, api, shop, out, satirlar, kapak, sorun, fazla):
         "".join(f"{r['listing_id']},{r['eski_rank1_id']}\n" for r in silinecek), encoding="utf-8")
     for x in sat[2:8]:
         log(x)
+    for d, n in sorted(bagli_say.items(), key=lambda x: -x[1]):
+        log(f"- bagli deger {d}: {n} ilan")
     return ok
 
 
