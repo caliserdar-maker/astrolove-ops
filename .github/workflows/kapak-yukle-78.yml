@@ -23,6 +23,7 @@ on:
       haric: {description: "apply: bu kosuda dokunulmayacak LISTING_ID'ler (virgulle)", required: false, default: ""}
       kapak_ek: {description: "TEMP altinda duzeltilmis kapak klasoru (KAPAK_*.jpg son damganin USTUNE; RAPOR.md SONUC PASS sart). kuru+apply AYNI deger", required: false, default: ""}
       yenile: {description: "kuru: ayni alt+boyutta olsa da degistirilecek CIFT'ler (virgulle)", required: false, default: ""}
+      sadece: {description: "kuru: yalniz bu CIFT'ler okunur ve planlanir (tamamlananlar Etsy'den okunmaz; virgulle)", required: false, default: ""}
   schedule:
     - cron: "5 0 29 9 *"   # tek seferlik: 2026-09-29 00:05 UTC (kapi isi tarihi dogrular)
 
@@ -65,6 +66,7 @@ jobs:
       HARIC: ${{ github.event_name == 'schedule' && '4570113157,4570163164' || inputs.haric }}
       KAPAK_EK: ${{ inputs.kapak_ek }}
       YENILE: ${{ inputs.yenile }}
+      SADECE: ${{ inputs.sadece }}
     steps:
       - name: Onay kapisi
         run: |
@@ -118,6 +120,7 @@ jobs:
           echo "kaynak: $K"
           rclone copy "$K" _work/kapak --include "KAPAK_*.jpg" --include "OZET.md" -q
           grep -q "^SONUC PASS" _work/kapak/OZET.md || { echo "::error::OZET.md SONUC PASS degil. DUR."; exit 1; }
+          OZET=$(grep '^PASS:' _work/kapak/OZET.md)
           if [ -n "${KAPAK_EK:-}" ]; then
             [[ "$KAPAK_EK" =~ ^[A-Za-z0-9_/.-]+$ ]] && [[ "$KAPAK_EK" != *..* ]] || { echo "::error::kapak_ek bicimi. DUR."; exit 1; }
             rclone copyto "gdrive:ASTROLOVE/TEMP/$KAPAK_EK/RAPOR.md" _work/ek_rapor.md
@@ -126,7 +129,6 @@ jobs:
             echo "kapak_ek (ustune): TEMP/$KAPAK_EK -> $(rclone lsf "gdrive:ASTROLOVE/TEMP/$KAPAK_EK" --include 'KAPAK_*.jpg' | tr '\n' ' ')"
             OZET="$OZET | ek: TEMP/$KAPAK_EK (SONUC PASS)"
           fi
-          OZET=$(grep '^PASS:' _work/kapak/OZET.md)
           echo "kapak: $(ls _work/kapak/KAPAK_*.jpg | wc -l) | $OZET"
           CL=$(rclone lsjson "$K/KAPAK_CANCER_LIBRA.jpg" | python -c 'import json,sys;l=json.load(sys.stdin);print(json.dumps(l[0] if l else {}))')
           python -c 'import json,sys;json.dump({"klasor":"TEMP/POD_KAPAK_78/"+sys.argv[1]+"/","ozet":sys.argv[2],"cancer_libra":json.loads(sys.argv[3])},open("_work/kaynak.json","w"))' "$KDAMGA" "$OZET" "$CL"
@@ -147,7 +149,7 @@ jobs:
           if [ "$MOD" = "APPLY" ]; then
             args+=(--plan _work/PLAN.json --yedek-drive "gdrive:ASTROLOVE/TEMP/KAPAK78_YEDEK_${PDAMGA}" --apply --confirm "$CONFIRM" --devam "$DEVAM" --haric "$HARIC")
           else
-            args+=(--yedek-drive "gdrive:ASTROLOVE/TEMP/KAPAK78_YEDEK_${STAMP}" --yenile "$YENILE")
+            args+=(--yedek-drive "gdrive:ASTROLOVE/TEMP/KAPAK78_YEDEK_${STAMP}" --yenile "$YENILE" --sadece "$SADECE")
           fi
           python scripts/etsy/kapak_yukle_78.py "${args[@]}"
       - name: Token + cikti Drive'a

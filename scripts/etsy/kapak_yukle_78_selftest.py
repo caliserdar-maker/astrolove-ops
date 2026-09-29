@@ -399,6 +399,35 @@ def main():
         len(f.L["222"]["imgs"]) == 12 and f.L["222"]["imgs"][0]["listing_image_id"] == 22201 and \
         "HARIC (dokunulmadi): 222" in (TMP / "o61" / "report.md").read_text()
 
+    # 15) --sadece: yalniz ARIES_LEO + PISCES_VIRGO okunur/planlanir; 222 (CANCER_LIBRA) Etsy'den hic okunmaz;
+    #     kismi plan (beklenen 2) ile apply PASS; bilinmeyen cift DUR
+    f = Fake(); o70 = TMP / "o70"
+    s70, so70 = K.sadece_suz({"ARIES_LEO", "PISCES_VIRGO"}, satirlar, sorun)
+    okunan = []
+    _get = f.get
+    f.get = lambda path, params=None, ok404=False: (okunan.append(path.split("/listings/")[1].split("/")[0]),
+                                                     _get(path, params, ok404))[1]
+    ok70 = K.kuru(args(ids, kd, o70, sadece={"ARIES_LEO", "PISCES_VIRGO"}), f, "S", o70, s70, kapak, so70, fazla)
+    pl70 = json.loads((o70 / "PLAN.json").read_text())
+    ok71 = K.apply(args(ids, kd, TMP / "o71", plan=str(o70 / "PLAN.json"), yedek_drive=str(TMP / "yd71"), apply=True,
+                        confirm=K.ONAY), f, "S", TMP / "o71", kapak)
+    kont["sadece: 2 ilan planlandi, 222 hic okunmadi, kismi plan apply PASS"] = ok70 and ok71 and \
+        pl70["beklenen"] == 2 and [r["listing_id"] for r in pl70["satirlar"]] == ["111", "333"] and \
+        "222" not in okunan and not any(x[1] == "222" for x in f.yaz) and len(f.L["222"]["imgs"]) == 12
+    try:
+        K.sadece_suz({"YOK_BOYLE"}, satirlar, sorun)
+        kont["sadece: bilinmeyen cift DUR"] = False
+    except SystemExit:
+        kont["sadece: bilinmeyen cift DUR"] = True
+
+    # 16) kuru kosu kota tabani: kalan < KOTA_TABAN -> DUR, plan yazilmaz
+    f = Fake(); f.remaining = str(K.KOTA_TABAN - 1); o80 = TMP / "o80"
+    try:
+        K.kuru(args(ids, kd, o80), f, "S", o80, satirlar, kapak, sorun, fazla)
+        kont["kuru kota < taban: DUR, plan yok"] = False
+    except SystemExit:
+        kont["kuru kota < taban: DUR, plan yok"] = not (o80 / "PLAN.json").exists()
+
     for k, v in kont.items():
         print(f"{'PASS' if v else 'FAIL'} {k}")
     ok = all(kont.values())

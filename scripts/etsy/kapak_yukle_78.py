@@ -148,6 +148,17 @@ def kapaklar_oku(ids_csv, kapak_dir):
     return satirlar, kapak, sorun, fazla
 
 
+def sadece_suz(sadece, satirlar, sorun):
+    """--sadece: yalniz bu ciftler (tamamlanan ilanlar Etsy'den OKUNMAZ; Serdar 29 Eyl)."""
+    if not sadece:
+        return satirlar, sorun
+    bilinmeyen = set(sadece) - {s_["cift"] for s_ in satirlar}
+    if bilinmeyen:
+        raise SystemExit(f"HATA: --sadece bilinmeyen cift: {sorted(bilinmeyen)}. DUR.")
+    log(f"--sadece: {len(sadece)} ilan islenecek, digerleri okunmaz")
+    return [s_ for s_ in satirlar if s_["cift"] in sadece], {c: v for c, v in sorun.items() if c in sadece}
+
+
 def durum(api, shop, lid):
     return {"state": (api.get(f"/listings/{lid}") or {}).get("state"),
             "galeri": gallery(api, lid),
@@ -166,6 +177,9 @@ def kuru(a, api, shop, out, satirlar, kapak, sorun, fazla):
     yedek_dir = out / "yedek"
     yedek_dir.mkdir(parents=True, exist_ok=True)
     for i, s in enumerate(satirlar, 1):
+        if api.remaining is not None and int(api.remaining) < KOTA_TABAN:
+            raise SystemExit(f"HATA: kota {api.remaining} < {KOTA_TABAN} (router rezervi); kuru kosu {i - 1}/"
+                             f"{len(satirlar)} ilanda durdu, plan yazilmadi. DUR.")
         lid, c = str(s["listing_id"]), s["cift"]
         k = kapak.get(c) or {}
         st = (api.get(f"/listings/{lid}", ok404=True) or {}).get("state")
@@ -225,8 +239,9 @@ def kuru(a, api, shop, out, satirlar, kapak, sorun, fazla):
         json.dumps({"olusturma": simdi(), "ilanlar": galeri_once}, ensure_ascii=False, indent=1, default=str),
         encoding="utf-8")
     say = {d: sum(r["durum"] == d for r in plan) for d in ("PLAN", "ZATEN", "BLOK")}
-    ok = say["PLAN"] + say["ZATEN"] == BEKLENEN and say["BLOK"] == 0 and not fazla
+    ok = say["PLAN"] + say["ZATEN"] == len(satirlar) and say["BLOK"] == 0 and not fazla
     (out / "PLAN.json").write_text(json.dumps({"olusturma": simdi(), "onay": ONAY, "kaynak": a.kaynak,
+                                               "beklenen": len(satirlar), "sadece": sorted(getattr(a, "sadece", set())),
                                                "satirlar": plan}, ensure_ascii=False, indent=1), encoding="utf-8")
     with open(out / "PLAN.csv", "w", newline="", encoding="utf-8") as fh:
         wr = csv.writer(fh)
@@ -481,7 +496,7 @@ def apply(a, api, shop, out, kapak):
     plan = json.loads(pathlib.Path(a.plan).read_text(encoding="utf-8"))
     rows = plan["satirlar"]
     blok = [r for r in rows if r["durum"] == "BLOK"]
-    if blok or len(rows) != BEKLENEN:
+    if blok or len(rows) != plan.get("beklenen", BEKLENEN):
         raise SystemExit(f"HATA: plan {len(rows)} satir, BLOK {len(blok)}; yazma yok. DUR.")
     for r in rows:
         k = kapak.get(r["cift"])
@@ -570,9 +585,11 @@ def main():
     ap.add_argument("--devam", default="",
                     help="LISTING_ID:YENI_IMAGE_ID:ESKI_IMAGE_ID[,..] yarim kalmis ilan, kesin id ile")
     ap.add_argument("--haric", default="", help="LISTING_ID[,..] bu kosuda dokunulmayacak ilanlar")
+    ap.add_argument("--sadece", default="", help="CIFT[,..] kuru: yalniz bu ciftler okunur ve planlanir")
     ap.add_argument("--yenile", default="", help="CIFT[,..] kuru: 1. sirada ayni alt+boyutta kapak olsa da PLAN (duzeltilmis kapak)")
     a = ap.parse_args()
     a.yenile = {t.strip().upper() for t in a.yenile.split(",") if t.strip()}
+    a.sadece = {t.strip().upper() for t in a.sadece.split(",") if t.strip()}
     a.haric = {t.strip() for t in a.haric.split(",") if t.strip()}
     devam_str, a.devam, a.devam_eski = a.devam, {}, {}
     for t in [t.strip() for t in devam_str.split(",") if t.strip()]:
@@ -588,6 +605,7 @@ def main():
     log(f"ilan {len(satirlar)} | kapak {len(kapak)} | eslesmeyen {len(sorun)} | ilanda olmayan kapak {len(fazla)}")
     if len(satirlar) != BEKLENEN:
         raise SystemExit(f"HATA: ilan listesi {len(satirlar)} != {BEKLENEN}. DUR.")
+    satirlar, sorun = sadece_suz(a.sadece, satirlar, sorun)
 
     k, s = os.environ.get("ETSY_API_KEY", ""), os.environ.get("ETSY_SHARED_SECRET", "")
     mask(k); mask(s)
