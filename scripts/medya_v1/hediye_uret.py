@@ -24,7 +24,7 @@ import siparis_dosyasi as sd                                     # noqa: E402
 Image.MAX_IMAGE_PIXELS = None
 ImageFile.MAXBLOCK = 1 << 26       # optimize=True buyuk dosyada 'Suspension not allowed' vermesin
 ZORUNLU = ('olcek', 'plate_slogan', 'sembol', 'kalinti', 'mesaj_murekkep', 'font_kapsami', 'boy_siniri',
-           'isim_kalinti')
+           'isim_kalinti', 'isim_kenar')
 KALITE = 92
 SRGB = ImageCms.ImageCmsProfile(ImageCms.createProfile('sRGB')).tobytes()
 
@@ -56,6 +56,10 @@ def kirp(baski, bant, x2400, pay_kat=0.6):
 
 
 ESKI_FAIL_BEKLENIR = True          # onceki dosyalar lekeli (Serdar reddi); kapi onlarda FAIL vermeli
+# 4. iterasyon: izler yalniz MB 11x14'te bildirildi; eski-dosya-FAIL beklentisi yalniz orada aranir
+KOR_KONTROL = {('MIDNIGHT_BLUE', '11x14')}
+# Serdar'in bildirdigi soluk izler (MB 11x14 ISIM kirpimi, kirpim px): (ad, x0, y0, x1, y1)
+BILDIRILEN_KUTU = (('L_ic_kose', 844, 172, 860, 181), ('I_sag_alt', 911, 168, 924, 184))
 AZAMI_BAYT = 8 * 1024 * 1024      # dosya basina ust sinir: asilirsa kalite duser, cozunurluk DEGISMEZ
 
 
@@ -131,13 +135,15 @@ def main():
                  'baski_px': r.get('baski_px'), 'gorsel_dpi': r.get('gorsel_dpi'), 'metin_dpi': r.get('metin_dpi'),
                  'isim_kalinti': {q: (r.get('isim_kalinti_kapisi') or {}).get(q)
                                   for q in ('gecti', 'kalinti_sayisi', 'kalintilar', 'hata')},
-                 'isim_bandi_temizligi': r.get('isim_bandi_temizligi')}
+                 'isim_bandi_temizligi': {q: v for q, v in (r.get('isim_bandi_temizligi') or {}).items()},
+                 'isim_kenar': r.get('isim_kenar_kapisi')}
             T = sd._TANI or {}
+            Yk, ham = T.get('koruma') or (T.get('yeni'), False)
             eski = eski_dir / ad
             if eski.exists() and r.get('plate') and r.get('olcum'):
                 with Image.open(eski) as ei:             # ayni kapi, onceki (onaylanmayan) dosyada
                     eski_im = ei.convert('RGB')
-                ek_ = sd.isim_kalinti_kapisi(eski_im, T.get('yeni'), r['olcum'])
+                ek_ = sd.isim_kalinti_kapisi(eski_im, Yk, r['olcum'], ham=ham)
                 s['eski_dosya_isim_kalinti'] = {q: ek_.get(q) for q in ('gecti', 'kalinti_sayisi',
                                                                         'kalintilar', 'hata')}
                 # kontrol noktalari: eski dosyanin her kalinti bileseni yeni dosyada ayni yerde olculur
@@ -157,6 +163,11 @@ def main():
                             {'kirpim': [px, py], 'eski': sd.nokta_olc(eski_im, px + kx, py + ky, yeni=T.get('yeni')),
                              'yeni': sd.nokta_olc(T['baski'], px + kx, py + ky, yeni=T.get('yeni'))}
                             for px, py in ((730, 174), (2113, 80), (2121, 175))]
+                        s['bildirilen_izler'] = [
+                            {'ad': ad_, 'kirpim': [x0, y0, x1, y1],
+                             'eski': sd.iz_olc(eski_im, (x0 + kx, y0 + ky, x1 + kx, y1 + ky), Yk, ham),
+                             'yeni': sd.iz_olc(T['baski'], (x0 + kx, y0 + ky, x1 + kx, y1 + ky), Yk, ham)}
+                            for ad_, x0, y0, x1, y1 in BILDIRILEN_KUTU]
             if gecti and T.get('baski') is not None:
                 baski = T['baski']
                 s['jpeg_kalite'] = kaydet(baski, cik / ad)
@@ -179,6 +190,7 @@ def main():
             g = time.time() - T0
             ik, ek2 = s['isim_kalinti'], s.get('eski_dosya_isim_kalinti') or {}
             print(f"    sol_leke={s.get('sol_leke')} bildirilen={s.get('bildirilen_noktalar')}", flush=True)
+            print(f"    izler={s.get('bildirilen_izler')} kenar={s.get('isim_kenar')}", flush=True)
             print(f"[{n}/{toplam}] {renk} {boy}: {'PASS' if gecti else 'FAIL'} kalan={s['kalan_kapilar']} "
                   f"olcek={s['olcek']} plate={s['plate_slogan_payi']} "
                   f"isim_kalinti yeni={'PASS' if ik.get('gecti') else 'FAIL'}({ik.get('kalinti_sayisi')}) "
@@ -189,7 +201,19 @@ def main():
     # Kapi dogrulamasi (GIFT_9518, 29 Eyl): onaylanmayan onceki dosyalarda isim_kalinti FAIL
     # vermeli; PASS verirse kapi lekeyi goremiyor demektir -> hicbir sey yazilmaz.
     kor = [s['dosya'] for s in rapor['dosyalar']
-           if (s.get('eski_dosya_isim_kalinti') or {}).get('gecti') is True]
+           if (s['renk'], s['boy']) in KOR_KONTROL
+           and (s.get('eski_dosya_isim_kalinti') or {}).get('gecti') is True]
+    # bildirilen izler: eski dosyada gorulmeli (olcut kor degil), yeni dosyada 0 px
+    iz_kor = [(s['dosya'], q['ad']) for s in rapor['dosyalar'] for q in s.get('bildirilen_izler') or []
+              if q['eski']['iz_px'] == 0]
+    iz_kalan = [(s['dosya'], q['ad'], q['yeni']) for s in rapor['dosyalar'] for q in s.get('bildirilen_izler') or []
+                if q['yeni']['iz_px'] != 0]
+    iz_kor += [(s['dosya'], 'olculmedi') for s in rapor['dosyalar']
+               if (s['renk'], s['boy']) in KOR_KONTROL and not s.get('bildirilen_izler')]
+    rapor['bildirilen_iz_eskide_gorulmedi'] = iz_kor
+    rapor['bildirilen_iz_kalan'] = iz_kalan
+    if iz_kor or iz_kalan:
+        hepsi = False
     rapor['kapi_eski_dosyada_kor'] = kor
     if kor and ESKI_FAIL_BEKLENIR:
         hepsi = False

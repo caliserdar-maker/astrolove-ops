@@ -93,6 +93,46 @@ class IsimKalintiTesti(unittest.TestCase):
         # sembol altin murekkebi banda kopyalanmadi: bantta yeni disi altin yok (kapi zaten PASS)
         return k_eski, k_yeni
 
+    def kos_ham(self, koyu):
+        """4. iterasyon: koruma = HAM harf maskesi; harfe 2-3 px bitisik SOLUK iz (MB olcumu:
+        37,22,27 / zemin 0,6,32) temizlenir, harf kenari kesilmez."""
+        f = ImageFont.truetype(self.font, 88)
+        pl = zemin(koyu).copy()
+        yeni = [(820, 'LIZ'), (1200, '~'), (1580, 'ZACH')]
+        yk = yaz(np.zeros_like(pl), yeni, f).max(axis=2) > 8
+        ys, xs = np.nonzero(yk[:, :900])
+        # L ic kosesi: ayak ustunde, harften 2 px yukarida; I sag alti: govdenin 2 px sagi
+        ic = [(int(xs.min()) + 20, int(ys.max()) - 16, 8, 2), (int(xs.min()) + 60, int(ys.max()) - 6, 3, 3)]
+        soluk = np.array((37, 22, 27) if koyu else (236, 226, 200), np.uint8)
+        for x, y, w, h in ic:
+            bolge = pl[y:y + h, x:x + w]
+            bolge[~yk[y:y + h, x:x + w]] = soluk
+        baski = yaz(pl, yeni, f).astype(np.float32)
+        Y = yk.copy()
+        b_eski = Image.fromarray(np.clip(baski, 0, 255).astype(np.uint8))
+        k_eski = sd.isim_kalinti_kapisi(b_eski, Y, OLCUM, ham=True)
+        out, bilgi = sd.isim_bandi_temizle(baski, Y, OLCUM, ham=True)
+        b_yeni = Image.fromarray(np.clip(out, 0, 255).astype(np.uint8))
+        k_yeni = sd.isim_kalinti_kapisi(b_yeni, Y, OLCUM, ham=True)
+        self.assertFalse(k_eski['gecti'], k_eski)
+        self.assertTrue(k_yeni['gecti'], k_yeni)
+        self.assertTrue(bilgi['kenar']['gecti'], bilgi['kenar'])
+        self.assertTrue((np.asarray(b_yeni)[Y] == np.asarray(b_eski)[Y]).all())
+        for x, y, w, h in ic:
+            kutu = (x - 2, y - 2, x + w + 2, y + h + 2)
+            self.assertGreater(sd.iz_olc(b_eski, kutu, Y)['iz_px'], 0)
+            self.assertEqual(sd.iz_olc(b_yeni, kutu, Y)['iz_px'], 0, sd.iz_olc(b_yeni, kutu, Y))
+        # kenar kapisi kesilen harfi yakalar: korumayi 2 px daralt -> harf kenari dolguyla kesilir
+        dar = cv2.erode(Y.astype(np.uint8), np.ones((5, 5), np.uint8)) > 0
+        _o, b2 = sd.isim_bandi_temizle(baski, dar, OLCUM, ham=True)
+        self.assertFalse(b2['kenar']['gecti'], b2['kenar'])
+
+    def test_ham_koyu(self):
+        self.kos_ham(True)
+
+    def test_ham_acik(self):
+        self.kos_ham(False)
+
     def test_koyu(self):
         self.kos(True)
 
