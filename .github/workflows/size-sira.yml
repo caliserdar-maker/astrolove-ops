@@ -58,9 +58,6 @@ jobs:
           rclone copyto "gdrive:ASTROLOVE/TEMP/SIZE_SIRA/ILERLEME.json" _work/ILERLEME.json 2>/dev/null && echo "ilerleme: devam" || echo "ilerleme: yok"
       - name: Oz-test (sahte API)
         run: python scripts/pod/test_size_sira.py > /dev/null && echo "selftest PASS"
-      - name: Router test teklifi (yalniz /quotes, siparis yok)
-        if: ${{ inputs.fiyat99 }}
-        run: python scripts/prodigi/quote_test.py
       - name: Size sirasi
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
