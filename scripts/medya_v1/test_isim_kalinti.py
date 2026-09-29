@@ -127,6 +127,29 @@ class IsimKalintiTesti(unittest.TestCase):
         _o, b2 = sd.isim_bandi_temizle(baski, dar, OLCUM, ham=True)
         self.assertFalse(b2['kenar']['gecti'], b2['kenar'])
 
+    def test_ham_acik_sik_harf(self):
+        """29 Eyl CI bulgusu: acik sicak zemin (R-B 35) + koyu kahve sik harfler (M, N ici dar zemin).
+        Temiz baskida iki kapi da PASS olmali (yerel zemin harfe cekilmemeli); leke yine yakalanmali."""
+        f = ImageFont.truetype(self.font, 150)             # 150: eski (harf dahil medyan) olcut 25 bilesen FAIL
+        pl = np.zeros((H, W, 3), np.float32) + (241, 224, 206)
+        pl += np.random.default_rng(3).normal(0, 1.0, (H, W, 1))
+        pl = np.clip(pl, 0, 255).astype(np.uint8)
+        yeni = [(800, 'EMMNWY'), (1200, '~'), (1650, 'MMWNM')]
+        im = Image.fromarray(pl.copy()); d = ImageDraw.Draw(im)
+        for x, t in yeni:
+            d.text((x, 2245), t, anchor='mm', fill=(92, 58, 28), font=f)
+        baski = np.asarray(im).astype(np.float32)
+        Y = yaz(np.zeros_like(pl), yeni, f).max(axis=2) > 8
+        out, bilgi = sd.isim_bandi_temizle(baski, Y, OLCUM, ham=True)
+        b = Image.fromarray(np.clip(out, 0, 255).astype(np.uint8))
+        self.assertTrue(bilgi['kenar']['gecti'], bilgi['kenar'])
+        k = sd.isim_kalinti_kapisi(b, Y, OLCUM, ham=True)
+        self.assertTrue(k['gecti'], k)
+        # leke hala yakalanir (acik zeminde soluk kahve)
+        lek = baski.copy(); lek[2280:2283, 1000:1008] = (205, 180, 150)
+        k2 = sd.isim_kalinti_kapisi(Image.fromarray(lek.astype(np.uint8)), Y, OLCUM, ham=True)
+        self.assertFalse(k2['gecti'], k2)
+
     def test_ham_koyu(self):
         self.kos_ham(True)
 

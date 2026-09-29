@@ -39,7 +39,7 @@ def main():
     d = sd.W / '_isim_kenar_tani'; d.mkdir(parents=True, exist_ok=True)
     rapor = {}
     asil = sd.isim_bandi_temizle
-    for renk in ('CHAMPAGNE_IVORY', 'DEEP_BLACK'):
+    for renk in ('MIDNIGHT_BLUE', 'DEEP_BLACK', 'PURE_WHITE', 'CHAMPAGNE_IVORY'):
         kay = {}
 
         def sar(out, yeni, olcum, ham=False):

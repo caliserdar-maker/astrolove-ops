@@ -819,11 +819,25 @@ def _isim_sutunlari(olcum, Yb, k, Wd):
     return max(int(min(xs) - p), int(Wd * 0.03)), min(int(max(xs) + p), int(Wd * 0.97))
 
 
-def _yerel_zemin(L, k):
+def _yerel_zemin(L, k, haric=None, kaydir=0.0):
+    """Yerel medyan zemin. `haric` (korunan harf pikselleri) verilirse medyana GIRMEZ: once bant
+    medyaniyla, sonra ilk tahminle doldurulup iki gecisle olculur. 29 Eyl CI bulgusu: sik harflerin
+    arasinda (M, N ici) 31 px medyan koyu murekkebe cekiliyor, acik zemin 'murekkep' okunuyordu."""
     import cv2
     r = max(int(round(ZEMIN_YARICAP * k)) | 1, 3)
     r = min(r, 255)
-    return cv2.medianBlur(np.clip(L, 0, 255).astype(np.uint8), r).astype(np.float32)
+
+    def mb(x):
+        return cv2.medianBlur(np.clip(x + kaydir, 0, 255).astype(np.uint8), r).astype(np.float32) - kaydir
+    if haric is None or not haric.any() or haric.all():
+        return mb(L)
+    h = cv2.dilate(haric.astype(np.uint8), np.ones((5, 5), np.uint8)) > 0
+    if h.all():
+        return mb(L)
+    X = L.copy(); X[h] = float(np.median(L[~h]))
+    Z = mb(X)
+    X[h] = Z[h]
+    return mb(X)
 
 
 def _serit_murekkebi(S, k):
@@ -835,14 +849,13 @@ def _serit_murekkebi(S, k):
     return cv2.dilate(m, np.ones((2 * d + 1,) * 2, np.uint8)) > 0
 
 
-def _iz_haritasi(Bb, k):
-    """Isim bandi parcasinda iz olcutleri: (altin murekkep, soluk iz, dL, R-B kaymasi)."""
-    import cv2
+def _iz_haritasi(Bb, k, haric=None):
+    """Isim bandi parcasinda iz olcutleri: (altin murekkep, soluk iz, dL, R-B kaymasi).
+    haric: korunan (yeni oge) pikseller; yerel zemin tahminine girmez."""
     L = Bb @ np.array([0.299, 0.587, 0.114], np.float32)
-    dL = L - _yerel_zemin(L, k)
+    dL = L - _yerel_zemin(L, k, haric)
     rb = Bb[..., 0] - Bb[..., 2]
-    r = min(max(int(round(ZEMIN_YARICAP * k)) | 1, 3), 255)
-    ws = rb - (cv2.medianBlur(np.clip(rb + 128, 0, 255).astype(np.uint8), r).astype(np.float32) - 128)
+    ws = rb - _yerel_zemin(rb, k, haric, kaydir=128.0)
     altin = (np.abs(dL) > ISIM_KALINTI_ESIK) & (rb > 20)
     soluk = (ws > ISIM_IZ_RB) & (np.abs(dL) > ISIM_IZ_L)
     return altin, soluk, dL, ws
@@ -858,7 +871,10 @@ def isim_kenar_kapisi(once, sonra, koruma, satir, sutun, k):
     A = once[r0:r1, c0:c1]; B = sonra[r0:r1, c0:c1]; P = koruma[r0:r1, c0:c1]
     deg = np.abs(B - A).max(axis=2) > 0.5
     L = A @ np.array([0.299, 0.587, 0.114], np.float32)
-    dL = np.abs(L - _yerel_zemin(L, k))
+    dLs = L - _yerel_zemin(L, k, P)
+    # harfin yonu: acik zeminde koyu harf (CI, PW) negatif, koyu zeminde acik harf pozitif
+    yon = -1.0 if (P.any() and float(np.median(dLs[P])) < 0) else 1.0
+    dL = yon * dLs
     kon = float(np.median(dL[P])) if P.any() else 0.0
     esik = max(0.5 * kon, 40.0)
     rb = A[..., 0] - A[..., 2]
@@ -945,7 +961,7 @@ def isim_kalinti_kapisi(baski, yeni, olcum, ham=False):
         r0, r1 = _isim_satirlari(olcum, k, H)
         Yt = _yeni_tam(yeni, (Wd, H), 0 if ham else 1, ham=ham)
         c0, c1 = _isim_sutunlari(olcum, Yt[r0:r1], k, Wd)
-        altin, soluk, _dL, _ws = _iz_haritasi(B[r0:r1, c0:c1], k)
+        altin, soluk, _dL, _ws = _iz_haritasi(B[r0:r1, c0:c1], k, Yt[r0:r1, c0:c1] if ham else None)
         if ham:
             d['olcut'] = ('isim bandi, altin murekkep (|dL| > esik ve R-B > 20) VEYA soluk iz (R-B kaymasi > '
                           f'{ISIM_IZ_RB} ve |dL| > {ISIM_IZ_L}), HAM yeni oge maskesi (harfin kendi siniri) disi')
@@ -972,10 +988,11 @@ def iz_olc(baski, kutu, yeni, ham=True):
     x0, y0, x1, y1 = kutu
     r = int(ZEMIN_YARICAP * k) + 8
     a0, a1, b0, b1 = max(y0 - r, 0), min(y1 + r, H), max(x0 - r, 0), min(x1 + r, Wd)
-    altin, soluk, dL, ws = _iz_haritasi(B[a0:a1, b0:b1], k)
+    Pk = None if yeni is None else _yeni_tam(yeni, (Wd, H), 0 if ham else 1, ham=ham)[a0:a1, b0:b1]
+    altin, soluk, dL, ws = _iz_haritasi(B[a0:a1, b0:b1], k, Pk if ham else None)
     ic = np.zeros(altin.shape, bool); ic[y0 - a0:y1 - a0, x0 - b0:x1 - b0] = True
-    if yeni is not None:
-        ic &= ~_yeni_tam(yeni, (Wd, H), 0 if ham else 1, ham=ham)[a0:a1, b0:b1]
+    if Pk is not None:
+        ic &= ~Pk
     iz = (altin | soluk) & ic
     return {'iz_px': int(iz.sum()), 'rb_kayma_max': round(float(ws[ic].max()) if ic.any() else 0.0, 1),
             'dL_max': round(float(np.abs(dL[ic]).max()) if ic.any() else 0.0, 1)}
