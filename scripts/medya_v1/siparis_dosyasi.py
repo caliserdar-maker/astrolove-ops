@@ -895,8 +895,10 @@ def isim_kalinti_kapisi(baski, yeni, olcum):
         return {**d, 'gecti': False, 'hata': f'{type(e).__name__}: {e}'}
 
 
-def nokta_olc(baski, x, y, yaricap=(6, 4)):
-    """Bir noktada yerel zemine gore en guclu altin murekkep (kontrol noktasi dogrulamasi)."""
+def nokta_olc(baski, x, y, yaricap=(6, 4), yeni=None):
+    """Bir noktada yerel zemine gore en guclu altin murekkep (kontrol noktasi dogrulamasi).
+    `yeni` verilirse yeni oge kaydi (+1 px, kapiyla ayni) olcumden cikarilir: pencere yeni harfin
+    kendisine tasarsa harf leke sayilmasin (29 Eyl: 8x10 'L' ayak serifi 165-172 olculdu)."""
     B = np.asarray(baski.convert('RGB')).astype(np.float32)
     k = B.shape[1] / 2400.0
     r = int(ZEMIN_YARICAP * k) + 8
@@ -904,6 +906,8 @@ def nokta_olc(baski, x, y, yaricap=(6, 4)):
     Bb = B[y0:y1, x0:x1]
     L = Bb @ np.array([0.299, 0.587, 0.114], np.float32)
     f = np.abs(L - _yerel_zemin(L, k)) * (((Bb[..., 0] - Bb[..., 2]) > 20))
+    if yeni is not None:
+        f[_yeni_tam(yeni, (B.shape[1], B.shape[0]), 1)[y0:y1, x0:x1]] = 0.0
     yy, xx = y - y0, x - x0
     w = f[max(yy - yaricap[1], 0):yy + yaricap[1] + 1, max(xx - yaricap[0], 0):xx + yaricap[0] + 1]
     return round(float(w.max()) if w.size else 0.0, 1)

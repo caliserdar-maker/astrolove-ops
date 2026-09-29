@@ -145,8 +145,8 @@ def main():
                     nokta = []
                     for z in ek_.get('kalintilar') or []:
                         x, y = z['x'] + z['w'] // 2, z['y'] + z['h'] // 2
-                        nokta.append({'x': x, 'y': y, 'eski': sd.nokta_olc(eski_im, x, y),
-                                      'yeni': sd.nokta_olc(T['baski'], x, y)})
+                        nokta.append({'x': x, 'y': y, 'eski': sd.nokta_olc(eski_im, x, y, yeni=T.get('yeni')),
+                                      'yeni': sd.nokta_olc(T['baski'], x, y, yeni=T.get('yeni'))})
                     s['kalinti_noktalari'] = nokta
                     if nokta:                            # isimlerin solundaki leke (en soldaki)
                         s['sol_leke'] = min(nokta, key=lambda q: q['x'])
@@ -154,8 +154,8 @@ def main():
                     if renk == 'MIDNIGHT_BLUE' and boy == '11x14':
                         kx, ky = 206, 3022
                         s['bildirilen_noktalar'] = [
-                            {'kirpim': [px, py], 'eski': sd.nokta_olc(eski_im, px + kx, py + ky),
-                             'yeni': sd.nokta_olc(T['baski'], px + kx, py + ky)}
+                            {'kirpim': [px, py], 'eski': sd.nokta_olc(eski_im, px + kx, py + ky, yeni=T.get('yeni')),
+                             'yeni': sd.nokta_olc(T['baski'], px + kx, py + ky, yeni=T.get('yeni'))}
                             for px, py in ((730, 174), (2113, 80), (2121, 175))]
             if gecti and T.get('baski') is not None:
                 baski = T['baski']

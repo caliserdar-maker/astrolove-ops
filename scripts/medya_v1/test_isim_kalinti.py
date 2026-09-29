@@ -85,8 +85,11 @@ class IsimKalintiTesti(unittest.TestCase):
         dis = np.ones((H, W), bool); dis[r0:r1, c0:c1] = False
         self.assertTrue((Bn[dis] == Be[dis]).all())                     # bolge disi aynen
         for x, y, w, h in LEKELER:                                      # lekeler gitti
-            self.assertLess(sd.nokta_olc(b_yeni, x + w // 2, y + h // 2), sd.ISIM_KALINTI_ESIK)
-            self.assertGreater(sd.nokta_olc(b_eski, x + w // 2, y + h // 2), sd.ISIM_KALINTI_ESIK)
+            self.assertLess(sd.nokta_olc(b_yeni, x + w // 2, y + h // 2, yeni=Y), sd.ISIM_KALINTI_ESIK)
+            self.assertGreater(sd.nokta_olc(b_eski, x + w // 2, y + h // 2, yeni=Y), sd.ISIM_KALINTI_ESIK)
+        # yeni harfe bitisik nokta: harf olcumden cikar (pencere harfe tasiyor)
+        ys, xs = np.nonzero(yk)
+        self.assertLess(sd.nokta_olc(b_yeni, int(xs.min()) - 4, int(ys.max()) - 2, yeni=Y), sd.ISIM_KALINTI_ESIK)
         # sembol altin murekkebi banda kopyalanmadi: bantta yeni disi altin yok (kapi zaten PASS)
         return k_eski, k_yeni
 
