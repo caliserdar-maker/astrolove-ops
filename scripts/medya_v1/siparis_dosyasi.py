@@ -512,7 +512,7 @@ class EdisyonPoster:
             olcek_kapi = olcek_kapisi(g1, g0, k, p1.size, p0.size)
         else:
             k, s1, S1, p1 = 1.0, s0, S0, p0
-            maske1, silinen1 = maske0, silinen0
+            maske1, silinen1, yeni1 = maske0, silinen0, yeni0
             olcek = {'hedef_en': 2400, 'k': 1.0}
             leke = {'gecti': None, 'uygulandi': False,
                     'sebep': 'baski dosyasi uretildikten sonra olculur'}
