@@ -55,6 +55,7 @@ def kirp(baski, bant, x2400, pay_kat=0.6):
     return baski.crop(kutu), kutu
 
 
+ESKI_FAIL_BEKLENIR = True          # onceki dosyalar lekeli (Serdar reddi); kapi onlarda FAIL vermeli
 AZAMI_BAYT = 8 * 1024 * 1024      # dosya basina ust sinir: asilirsa kalite duser, cozunurluk DEGISMEZ
 
 
@@ -166,6 +167,13 @@ def main():
                   f"hata={s['hata'] or ''} "
                   f"| gecen {g:.0f}s | kalan ~{g / n * (toplam - n):.0f}s | %{100 * n // toplam}", flush=True)
     hepsi = all(s['gecti'] for s in rapor['dosyalar']) and len(rapor['dosyalar']) == toplam
+    # Kapi dogrulamasi (GIFT_9518, 29 Eyl): onaylanmayan onceki dosyalarda isim_kalinti FAIL
+    # vermeli; PASS verirse kapi lekeyi goremiyor demektir -> hicbir sey yazilmaz.
+    kor = [s['dosya'] for s in rapor['dosyalar']
+           if (s.get('eski_dosya_isim_kalinti') or {}).get('gecti') is True]
+    rapor['kapi_eski_dosyada_kor'] = kor
+    if kor and ESKI_FAIL_BEKLENIR:
+        hepsi = False
     rapor['hepsi_gecti'] = hepsi
     if hepsi:                                    # onizleme: 4 dosya yan yana, ayni yukseklik
         H = 1500
