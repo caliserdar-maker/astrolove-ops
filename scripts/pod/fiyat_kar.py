@@ -64,6 +64,20 @@ class Maliyet:
             self.skular[k] = bul
         return self.skular[k]
 
+    def teklif(self, item, ulke):
+        """Kendi POST /quotes istegi (yalniz fiyat teklifi; siparis ACILMAZ). Kalemde 'sizing' YOK (29 Eyl: /quotes
+        UnknownField). Router'a dokunulmaz; maliyet = urun + kargo (router'in kargo yontemi) + router EKLER_USD."""
+        kalem = {"sku": item["prodigi_sku"], "copies": 1, "assets": [{"printArea": "default"}]}
+        if item.get("attributes"):
+            kalem["attributes"] = item["attributes"]
+        st, d = self.prod.call("POST", "/quotes", {"shippingMethod": self.prod.shipping_method, "destinationCountryCode": ulke,
+                                                  "currencyCode": "USD", "items": [kalem]})
+        if st != 200 or not d.get("quotes"):
+            return None, f"HTTP {st}: {str(d)[:300]}"
+        cs = d["quotes"][0].get("costSummary") or {}
+        toplam = float((cs.get("items") or {}).get("amount") or 0) + float((cs.get("shipping") or {}).get("amount") or 0)
+        return round(toplam + self.R.EKLER_USD, 2), ""
+
     def __call__(self, tur, boy, ulke):
         if tur == "DIGITAL":
             return 0.0
@@ -76,11 +90,9 @@ class Maliyet:
                 if not e:
                     raise SystemExit(f"HATA: cerceve eslemesi yok ({boy}, {tur}). DUR.")
                 item = {"prodigi_sku": self.sku("CFP", boy), "qty": 1, "attributes": e["attributes"]}
-            maliyet, hata, _ = self.prod.quote([item], ulke)
+            maliyet, hata = self.teklif(item, ulke)
             if maliyet is None:
-                st, d = self.prod.call("POST", "/quotes", {"shippingMethod": self.prod.shipping_method, "destinationCountryCode": ulke,
-                                                          "currencyCode": "USD", "items": [self.R.prodigi_item(item)]})
-                raise SystemExit(f"HATA: Prodigi teklifi alinamadi {k} ({item['prodigi_sku']}): {hata} | {str(d)[:300]}. DUR.")
+                raise SystemExit(f"HATA: Prodigi teklifi alinamadi {k} ({item['prodigi_sku']}): {hata}. DUR.")
             self.c[k] = float(maliyet)            # quote() EKLER_USD dahil doner
         return self.c[k]
 
