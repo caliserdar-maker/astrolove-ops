@@ -1,0 +1,57 @@
+name: isim-kenar-tani
+
+# SALT OKUR tani (29 Eyl 2026): CI test siparisi isim_kalinti / isim_kenar FAIL. Sahte isim, PLATES'e
+# ve musteri klasorune yazma YOK. Cikti: Drive TEMP/ISIM_KENAR_TANI_<damga>/.
+# Tetik: config/isim_kenar_tani.trigger degisikligi (bu dal).
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [claude/gracious-meitner-i72rkr]
+    paths:
+      - config/isim_kenar_tani.trigger
+
+concurrency: siparis-plates
+
+jobs:
+  olc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Python bagimliliklari
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet --upgrade pip
+          python -m pip install --quiet pillow opencv-python-headless numpy fonttools img2pdf pikepdf
+      - name: rclone kur
+        run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then echo "HATA: RCLONE_CONF_B64 yok" >&2; exit 1; fi
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Isim kenar tanisi (CI + DB, sahte isim)
+        run: |
+          set -euo pipefail
+          python scripts/medya_v1/isim_kenar_tani.py --kok "gdrive:ASTROLOVE/TEMP/ISIM_KENAR_TANI_$(date -u +%Y%m%d_%H%M)"
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
