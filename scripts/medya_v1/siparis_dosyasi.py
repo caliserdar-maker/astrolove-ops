@@ -744,18 +744,23 @@ def olcek_kapisi_baski(baski, p2400, bant):
 
 
 # ------------------------------------------------------------------ isim bandi kalintisi (GIFT_9518, 29 Eyl)
-# Bulgu (Serdar onayi reddedildi, %100 kirpim): isim satirinda eski burc yazisinin (ARIES /
-# SCORPIO, yeni isimlerden genis) ince uclari kaldi. Kaynak: plate DEGIL (plate slogan kapisi
-# 1.0, isim bandi medyan zemin) - hibrit birlestirmenin silme maskesi (render'in S['genis'])
-# eski harflerin ince uclarini kapsamiyor; maske disinda piksel KAYNAK dosyadan geldigi icin
-# uclar baskida kaliyor. Mevcut kalinti kapisi 2400 render'a bakiyordu (render plate uzerine
-# kurulu, temiz) - BASKI'ya bakmadigi icin kacirdi.
-# Duzeltme: isim bandinda |kaynak - plate| murekkebi (eski oge) render'in yeni murekkebi
-# (yeni isimler + sonsuzluk) disinda kaliyorsa o pikseller PLATE'ten alinir.
-# Kapi: BASKI'da isim bandinda, render'in yeni murekkep kutulari disinda altin murekkep = FAIL.
-ISIM_KALINTI_ESIK = 24.0   # |baski - plate| (kapi); dosya-plate murekkep disi p99 0-3 olculdu
-ISIM_KALINTI_ALAN = 2      # bilesen alani (2400 uzayinda px^2), k^2 ile olceklenir (olculen leke 3-6 px)
+# Bulgu (Serdar reddi, %100 kirpim): isim satirinda eski burc yazisinin (ARIES / SCORPIO) ince
+# uclari. KAYNAK (3. iterasyonda olculdu): MEDYAN PLATE'IN ISIM BANDI TEMIZ DEGIL -
+# PLATES/BLUE_11x14.png'de ayni noktada altin var (plate 164,126,32 / baski 166,128,31); plate
+# temizligi yalniz slogan bandini kapsiyordu. Plate'i "temiz zemin" sayan her duzeltme ve kapi
+# bu yuzden kordu (1. ve 2. iterasyon).
+# Duzeltme (Serdar onayi 29 Eyl): isim bandinda render'in YENI OGE kaydi (poster_kur yeni_genis:
+# yeni isimler + tasinan sonsuzluk/semboller + tagline, 3 px) DISINDAKI her yer, bandin hemen
+# ustundeki ve altindaki temiz seritlerin capraz karisimiyla (onayli slogan temizleme yontemi,
+# plate_uret.slogan_temizle) kurulan zeminle degistirilir. PLATE KULLANILMAZ.
+# Kapi (plate'ten bagimsiz): ayni bolgede, yeni oge kaydi (+1 px) disinda YEREL ZEMINE (medyan)
+# gore altin murekkep varsa FAIL.
+ISIM_KALINTI_ESIK = 24.0   # |L - yerel medyan zemin| (kapi)
+ISIM_KALINTI_ALAN = 1      # bilesen alani (2400 uzayinda px^2) x k^2, en az 2 px (olculen leke 3-30 px)
 ISIM_BANT_PAY = 0.25       # isim bandi dikey payi (bant yuksekligi orani)
+ISIM_YAN_PAY = 60          # sutun araligi: eski/yeni isimlerin disina pay (2400 px)
+ZEMIN_YARICAP = 31         # yerel zemin medyani (2400 px)
+DOLGU_MUREKKEP = 16.0      # kaynak seritte bu kontrasttan fazlasi murekkep sayilir (dolguya girmez)
 
 
 def _isim_satirlari(olcum, k, H):
@@ -771,56 +776,100 @@ def _isim_satirlari(olcum, k, H):
     return max(int(a0), 0), min(int(np.ceil(a1)), H)
 
 
-def _plate_dizi(plate_yol, boyut):
-    with Image.open(plate_yol) as im:
-        pl = im.convert('RGB')
-        if pl.size != tuple(boyut):
-            pl = pl.resize(tuple(boyut), Image.LANCZOS)
-        return np.asarray(pl).astype(np.float32)
-
-
-def _yeni_bolge(yeni, boyut, r0, r1, pay_2400=0):
-    """poster_kur'un yeni_genis maskesi (yeni isimler + tasinan sonsuzluk/semboller + tagline, 3 px
-    payli) baski boyuna olceklenir, bant satirlari kesilir; istenirse ek pay ile genisletilir."""
+def _yeni_tam(yeni, boyut, pay_2400=0):
+    """poster_kur yeni_genis maskesi baski boyunda (tam sayfa), istenirse ek pay."""
     import cv2
     Wd, H = boyut
     k = Wd / 2400.0
-    m = cv2.resize(np.asarray(yeni, np.uint8), (Wd, H), interpolation=cv2.INTER_NEAREST)[r0:r1]
+    m = cv2.resize(np.asarray(yeni, np.uint8), (Wd, H), interpolation=cv2.INTER_NEAREST)
     p = int(round(pay_2400 * k))
     if p > 0:
         m = cv2.dilate(m, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * p + 1,) * 2))
     return m > 0
 
 
-def isim_bandi_temizle(out, A, yeni, plate_yol, olcum):
-    """out/A: baski boyunda (float32). Isim bandinda yeni oge maskesi DISINDA kalan murekkep
-    (kaynak - plate > PLATE_ESIK; render tabani temiz_a'dan ya da kaynaktan gelen eski uclar) plate'ten."""
+def _isim_sutunlari(olcum, Yb, k, Wd):
+    """Eski isimlerin (kaynak olcumu) ve yeni ogelerin yatay uzanimi + pay; cerceveye dokunulmaz."""
+    xs = []
+    for a in ('sol_isim', 'sag_isim'):
+        if olcum.get(a):
+            xs += [olcum[a][0] * k, olcum[a][1] * k]
+    c = np.nonzero(Yb.any(axis=0))[0]
+    if len(c):
+        xs += [float(c.min()), float(c.max())]
+    if not xs:
+        return int(Wd * 0.05), int(Wd * 0.95)
+    p = ISIM_YAN_PAY * k
+    return max(int(min(xs) - p), int(Wd * 0.03)), min(int(max(xs) + p), int(Wd * 0.97))
+
+
+def _yerel_zemin(L, k):
+    import cv2
+    r = max(int(round(ZEMIN_YARICAP * k)) | 1, 3)
+    r = min(r, 255)
+    return cv2.medianBlur(np.clip(L, 0, 255).astype(np.uint8), r).astype(np.float32)
+
+
+def _serit_murekkebi(S, k):
+    """Kaynak seritte murekkep (sembol, yazi, eski ic): yerel kontrast > DOLGU_MUREKKEP, genisletilmis."""
+    import cv2
+    L = S @ np.array([0.299, 0.587, 0.114], np.float32)
+    m = (np.abs(L - _yerel_zemin(L, k)) > DOLGU_MUREKKEP).astype(np.uint8)
+    d = max(int(round(3 * k)), 1)
+    return cv2.dilate(m, np.ones((2 * d + 1,) * 2, np.uint8)) > 0
+
+
+def isim_bandi_temizle(out, yeni, olcum):
+    """out: baski boyunda (float32, birlestirilmis). Isim bandinda yeni oge kaydi DISI, bandin ustu ve
+    alti seritlerinin capraz karisimi + bandin kendi (murekkepsiz) dusuk frekans tonuyla doldurulur."""
     import cv2
     H, Wd = out.shape[:2]
     k = Wd / 2400.0
     r0, r1 = _isim_satirlari(olcum, k, H)
-    if r1 - r0 < 4:
+    h = r1 - r0
+    if h < 4:
         return out, {'uygulandi': False, 'sebep': 'isim bandi yok'}
-    Plb = _plate_dizi(plate_yol, (Wd, H))[r0:r1]
-    Y = _yeni_bolge(yeni, (Wd, H), r0, r1)
-    eski = (np.abs(A[r0:r1] - Plb).max(axis=2) > PLATE_ESIK) | (np.abs(out[r0:r1] - Plb).max(axis=2) > PLATE_ESIK)
-    d = max(int(round(2 * k)), 1)
-    E = cv2.dilate((eski & ~Y).astype(np.uint8), np.ones((2 * d + 1,) * 2, np.uint8)) > 0
-    E &= ~Y
-    Ef = np.clip(cv2.GaussianBlur(E.astype(np.float32), (0, 0), max(k, 0.8)), 0, 1)
-    Ef[E] = 1.0                                        # cekirdek tam plate, yumusak kenar disa
-    Ef[Y] = 0.0
+    Yt = _yeni_tam(yeni, (Wd, H))
+    c0, c1 = _isim_sutunlari(olcum, Yt[r0:r1], k, Wd)
+    D = h + max(int(0.3 * h), 4)                        # kaynak otelemesi (plate_uret ile ayni mantik)
+    kes = out[r0:r1, c0:c1]
+    Yb = Yt[r0:r1, c0:c1]
+    w = np.linspace(0.0, 1.0, h, dtype=np.float32)[:, None]
+    toplam = np.zeros(kes.shape, np.float32); agir = np.zeros(kes.shape[:2], np.float32)
+    kaynak = {}
+    for ad, y, ag in (('ust', r0 - D, 1.0 - w), ('alt', r0 + D, w)):
+        if y < 0 or y + h > H:
+            continue
+        S = out[y:y + h, c0:c1]
+        temiz = ~(_serit_murekkebi(S, k) | Yt[y:y + h, c0:c1])
+        a_ = np.broadcast_to(ag, temiz.shape) * temiz
+        toplam += S * a_[..., None]; agir += a_
+        kaynak[ad] = round(float(temiz.mean()), 3)
+    sg = max(18.0 * k, 3.0)
+    dolgu = np.where(agir[..., None] > 1e-3, toplam / np.maximum(agir, 1e-3)[..., None], 0)
+    hf = np.where(agir[..., None] > 1e-3, dolgu - cv2.GaussianBlur(dolgu, (0, 0), sg), 0)
+    # dusuk frekans ton: bandin KENDI murekkepsiz, yeni-disi pikselleri (normalize bulaniklik)
+    tw = (~(_serit_murekkebi(kes, k) | Yb)).astype(np.float32)
+    den = cv2.GaussianBlur(tw, (0, 0), sg) + 1e-6
+    lf = np.dstack([cv2.GaussianBlur(kes[..., c] * tw, (0, 0), sg) / den for c in range(3)])
+    dolgu = lf + hf
+    R = ~Yb
+    Ef = np.clip(cv2.GaussianBlur(R.astype(np.float32), (0, 0), max(k, 0.8)), 0, 1)
+    Ef[R & ~(cv2.dilate(Yb.astype(np.uint8), np.ones((3, 3), np.uint8)) > 0)] = 1.0
+    Ef[Yb] = 0.0
     out = out.copy()
-    out[r0:r1] = out[r0:r1] * (1 - Ef[..., None]) + Plb * Ef[..., None]
-    return out, {'uygulandi': True, 'satir': [r0, r1], 'temizlenen_px': int(E.sum())}
+    out[r0:r1, c0:c1] = kes * (1 - Ef[..., None]) + dolgu * Ef[..., None]
+    return out, {'uygulandi': True, 'satir': [r0, r1], 'sutun': [c0, c1], 'kaynak_temiz_payi': kaynak,
+                 'degisen_px': int((Ef > 0.5).sum())}
 
 
-def isim_kalinti_kapisi(baski, plate_yol, yeni, olcum):
-    """Isim bandinda yeni oge maskesi (+1 px) DISINDA altin murekkep kalmis mi? (BASKI uzerinde)"""
+def isim_kalinti_kapisi(baski, yeni, olcum):
+    """Plate'ten BAGIMSIZ: isim bandinda yeni oge kaydi (+1 px) disinda, yerel zemine gore altin
+    murekkep (|L - medyan| > esik ve R-B > 20) varsa FAIL. (BASKI uzerinde)"""
     import cv2
     d = {'esik': ISIM_KALINTI_ESIK, 'alan_2400': ISIM_KALINTI_ALAN,
-         'olcut': 'isim bandi, |baski - plate| > esik ve altin (R-B > 20), yeni oge maskesi (poster_kur '
-                  'yeni_genis, 3+1 px) disi'}
+         'olcut': 'isim bandi, |L - yerel medyan zemin| > esik ve altin (R-B > 20), yeni oge kaydi '
+                  '(poster_kur yeni_genis 3 px + 1) disi'}
     try:
         if yeni is None:
             return {**d, 'gecti': False, 'hata': 'yeni oge maskesi yok'}
@@ -828,23 +877,36 @@ def isim_kalinti_kapisi(baski, plate_yol, yeni, olcum):
         H, Wd = B.shape[:2]
         k = Wd / 2400.0
         r0, r1 = _isim_satirlari(olcum, k, H)
-        Plb = _plate_dizi(plate_yol, (Wd, H))[r0:r1]
-        Y = _yeni_bolge(yeni, (Wd, H), r0, r1, 1)
-        Bb = B[r0:r1]
-        altin = (np.abs(Bb - Plb).max(axis=2) > ISIM_KALINTI_ESIK) & ((Bb[..., 0] - Bb[..., 2]) > 20)
-        kenar = int(Wd * 0.03)
-        altin[:, :kenar] = False; altin[:, Wd - kenar:] = False
-        kal = (altin & ~Y).astype(np.uint8)
+        Yt = _yeni_tam(yeni, (Wd, H), 1)
+        c0, c1 = _isim_sutunlari(olcum, Yt[r0:r1], k, Wd)
+        Bb = B[r0:r1, c0:c1]
+        L = Bb @ np.array([0.299, 0.587, 0.114], np.float32)
+        altin = (np.abs(L - _yerel_zemin(L, k)) > ISIM_KALINTI_ESIK) & ((Bb[..., 0] - Bb[..., 2]) > 20)
+        kal = (altin & ~Yt[r0:r1, c0:c1]).astype(np.uint8)
         n, lab, st, _ = cv2.connectedComponentsWithStats(kal, 8)
         en_az = max(int(round(ISIM_KALINTI_ALAN * k * k)), 2)
-        parca = [{'x_2400': round(float(st[i][0] / k), 1), 'y_2400': round(float((st[i][1] + r0) / k), 1),
-                  'w': int(st[i][2]), 'h': int(st[i][3]), 'alan': int(st[i][4])}
+        parca = [{'x': int(st[i][0] + c0), 'y': int(st[i][1] + r0), 'w': int(st[i][2]), 'h': int(st[i][3]),
+                  'alan': int(st[i][4]), 'x_2400': round(float((st[i][0] + c0) / k), 1)}
                  for i in range(1, n) if st[i][4] >= en_az]
         parca.sort(key=lambda z: -z['alan'])
         return {**d, 'gecti': not parca, 'kalinti_sayisi': len(parca), 'kalintilar': parca[:12],
-                'satir': [r0, r1]}
+                'satir': [r0, r1], 'sutun': [c0, c1]}
     except Exception as e:                                        # noqa: BLE001
         return {**d, 'gecti': False, 'hata': f'{type(e).__name__}: {e}'}
+
+
+def nokta_olc(baski, x, y, yaricap=(6, 4)):
+    """Bir noktada yerel zemine gore en guclu altin murekkep (kontrol noktasi dogrulamasi)."""
+    B = np.asarray(baski.convert('RGB')).astype(np.float32)
+    k = B.shape[1] / 2400.0
+    r = int(ZEMIN_YARICAP * k) + 8
+    y0, y1 = max(y - r, 0), min(y + r, B.shape[0]); x0, x1 = max(x - r, 0), min(x + r, B.shape[1])
+    Bb = B[y0:y1, x0:x1]
+    L = Bb @ np.array([0.299, 0.587, 0.114], np.float32)
+    f = np.abs(L - _yerel_zemin(L, k)) * (((Bb[..., 0] - Bb[..., 2]) > 20))
+    yy, xx = y - y0, x - x0
+    w = f[max(yy - yaricap[1], 0):yy + yaricap[1] + 1, max(xx - yaricap[0], 0):xx + yaricap[0] + 1]
+    return round(float(w.max()) if w.size else 0.0, 1)
 
 
 # ------------------------------------------------------------------ hibrit baski dosyasi
@@ -863,8 +925,8 @@ def baski_dosyasi(poster, ek, tam_sayfa_png, hedef_px):
     M = np.clip(M, 0.0, 1.0)[..., None]
     out = A * (1 - M) + P * M
     temiz = {'uygulandi': False, 'sebep': 'plate / olcum yok'}
-    if ek.get('plate_yol') and (ek.get('olcum') or {}).get('isim_bant') and ek.get('yeni') is not None:
-        out, temiz = isim_bandi_temizle(out, A, ek['yeni'], ek['plate_yol'], ek['olcum'])
+    if (ek.get('olcum') or {}).get('isim_bant') and ek.get('yeni') is not None:
+        out, temiz = isim_bandi_temizle(out, ek['yeni'], ek['olcum'])
     out = np.clip(out, 0, 255).astype(np.uint8)
     return Image.fromarray(out, 'RGB'), {
         'kaynak_px': kaynak_px, 'baski_px': list(hedef_px),
@@ -1368,7 +1430,7 @@ def pod_uret(sip, kaynak_bayt, P_blue, P_ed, cik):
     baski, bpx = tek_dosya(poster, bi, ek, kaynak_bayt, sip['hedef_px'], cik / ad)
     bi['leke_kapisi'] = leke_kapisi(baski, kaynak_bayt, ek['maske'])
     bi['olcek_kapisi'] = olcek_kapisi_baski(baski, ek.get('p0', poster), bi['olcum']['isim_bant'])
-    bi['isim_kalinti_kapisi'] = isim_kalinti_kapisi(baski, ek['plate_yol'], ek.get('yeni'), bi['olcum'])
+    bi['isim_kalinti_kapisi'] = isim_kalinti_kapisi(baski, ek.get('yeni'), bi['olcum'])
     if _TANI is not None:                         # baski_tani.py: goruntuler (kapiya etkisi yok)
         _TANI.update({'baski': baski, 'p0': ek.get('p0', poster), 'poster': poster, 'yeni': ek.get('yeni')})
     onizleme(baski, poster, ek, f'ONIZLEME_{sip["boy"]}.jpg', cik)
@@ -1410,7 +1472,7 @@ def _dijital_is(arg):
         bi['leke_kapisi'] = leke_kapisi(baski, bi['plate'], ek['maske'])
         bi['olcek_kapisi'] = olcek_kapisi_baski(baski, ek.get('p0', poster),
                                                 bi['olcum']['isim_bant'])
-        bi['isim_kalinti_kapisi'] = isim_kalinti_kapisi(baski, ek['plate_yol'], ek.get('yeni'), bi['olcum'])
+        bi['isim_kalinti_kapisi'] = isim_kalinti_kapisi(baski, ek.get('yeni'), bi['olcum'])
         kapilar, ayrinti = kapilari_topla(bi, isimler, mesaj, bpx['baski_px'], hedef)
         kayit = {'durum': 'URETILDI', 'boy': boy, **bpx, 'kapilar': kapilar,
                  'kapi_ayrinti': ayrinti, 'kapilar_gecti': kapi_sonucu(kapilar),

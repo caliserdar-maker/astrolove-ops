@@ -136,9 +136,27 @@ def main():
             eski = eski_dir / ad
             if eski.exists() and r.get('plate') and r.get('olcum'):
                 with Image.open(eski) as ei:             # ayni kapi, onceki (onaylanmayan) dosyada
-                    ek_ = sd.isim_kalinti_kapisi(ei.convert('RGB'), r['plate'], T.get('yeni'), r['olcum'])
+                    eski_im = ei.convert('RGB')
+                ek_ = sd.isim_kalinti_kapisi(eski_im, T.get('yeni'), r['olcum'])
                 s['eski_dosya_isim_kalinti'] = {q: ek_.get(q) for q in ('gecti', 'kalinti_sayisi',
                                                                         'kalintilar', 'hata')}
+                # kontrol noktalari: eski dosyanin her kalinti bileseni yeni dosyada ayni yerde olculur
+                if T.get('baski') is not None:
+                    nokta = []
+                    for z in ek_.get('kalintilar') or []:
+                        x, y = z['x'] + z['w'] // 2, z['y'] + z['h'] // 2
+                        nokta.append({'x': x, 'y': y, 'eski': sd.nokta_olc(eski_im, x, y),
+                                      'yeni': sd.nokta_olc(T['baski'], x, y)})
+                    s['kalinti_noktalari'] = nokta
+                    if nokta:                            # isimlerin solundaki leke (en soldaki)
+                        s['sol_leke'] = min(nokta, key=lambda q: q['x'])
+                    # Serdar'in bildirdigi noktalar (MB 11x14 ISIM kirpimi koordinatlari)
+                    if renk == 'MIDNIGHT_BLUE' and boy == '11x14':
+                        kx, ky = 206, 3022
+                        s['bildirilen_noktalar'] = [
+                            {'kirpim': [px, py], 'eski': sd.nokta_olc(eski_im, px + kx, py + ky),
+                             'yeni': sd.nokta_olc(T['baski'], px + kx, py + ky)}
+                            for px, py in ((730, 174), (2113, 80), (2121, 175))]
             if gecti and T.get('baski') is not None:
                 baski = T['baski']
                 s['jpeg_kalite'] = kaydet(baski, cik / ad)
@@ -160,6 +178,7 @@ def main():
             rapor['dosyalar'].append(s)
             g = time.time() - T0
             ik, ek2 = s['isim_kalinti'], s.get('eski_dosya_isim_kalinti') or {}
+            print(f"    sol_leke={s.get('sol_leke')} bildirilen={s.get('bildirilen_noktalar')}", flush=True)
             print(f"[{n}/{toplam}] {renk} {boy}: {'PASS' if gecti else 'FAIL'} kalan={s['kalan_kapilar']} "
                   f"olcek={s['olcek']} plate={s['plate_slogan_payi']} "
                   f"isim_kalinti yeni={'PASS' if ik.get('gecti') else 'FAIL'}({ik.get('kalinti_sayisi')}) "
@@ -173,6 +192,13 @@ def main():
            if (s.get('eski_dosya_isim_kalinti') or {}).get('gecti') is True]
     rapor['kapi_eski_dosyada_kor'] = kor
     if kor and ESKI_FAIL_BEKLENIR:
+        hepsi = False
+    # kontrol noktalari: yeni dosyada hicbiri esigi asmamali
+    kalan_nokta = [(s['dosya'], q) for s in rapor['dosyalar']
+                   for q in (s.get('kalinti_noktalari') or []) + (s.get('bildirilen_noktalar') or [])
+                   if q['yeni'] >= sd.ISIM_KALINTI_ESIK]
+    rapor['kalan_noktalar'] = kalan_nokta
+    if kalan_nokta:
         hepsi = False
     rapor['hepsi_gecti'] = hepsi
     if hepsi:                                    # onizleme: 4 dosya yan yana, ayni yukseklik
