@@ -16,12 +16,13 @@ Cikti: <hedef>/AstroLoveArt_<Cift>_<Renk>_<Boy>.jpg (sRGB ICC, JPEG kalite 92, 3
 import argparse, json, sys, time, traceback
 from pathlib import Path
 
-from PIL import Image, ImageCms, ImageDraw
+from PIL import Image, ImageCms, ImageDraw, ImageFile
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import siparis_dosyasi as sd                                     # noqa: E402
 
 Image.MAX_IMAGE_PIXELS = None
+ImageFile.MAXBLOCK = 1 << 26       # optimize=True buyuk dosyada 'Suspension not allowed' vermesin
 ZORUNLU = ('olcek', 'plate_slogan', 'sembol', 'kalinti', 'mesaj_murekkep', 'font_kapsami', 'boy_siniri')
 KALITE = 92
 SRGB = ImageCms.ImageCmsProfile(ImageCms.createProfile('sRGB')).tobytes()
@@ -53,9 +54,18 @@ def kirp(baski, bant, x2400, pay_kat=0.6):
     return baski.crop(kutu), kutu
 
 
+AZAMI_BAYT = 8 * 1024 * 1024      # dosya basina ust sinir: asilirsa kalite duser, cozunurluk DEGISMEZ
+
+
 def kaydet(im, yol):
-    im.convert('RGB').save(yol, 'JPEG', quality=KALITE, subsampling=0, optimize=True,
-                           dpi=(sd.DPI, sd.DPI), icc_profile=SRGB)
+    """sRGB JPEG, 300 dpi. Kalite 92'den baslar; 8 MB asilirsa 2'ser dusurulur (en az 80)."""
+    rgb = im.convert('RGB')
+    for q in range(KALITE, 79, -2):
+        rgb.save(yol, 'JPEG', quality=q, subsampling=0, optimize=True,
+                 dpi=(sd.DPI, sd.DPI), icc_profile=SRGB)
+        if Path(yol).stat().st_size <= AZAMI_BAYT:
+            return q
+    raise SystemExit(f'{Path(yol).name}: kalite 80 ile de 8 MB ustu')
 
 
 def main():
@@ -114,7 +124,7 @@ def main():
             T = sd._TANI or {}
             if gecti and T.get('baski') is not None:
                 baski = T['baski']
-                kaydet(baski, cik / ad)
+                s['jpeg_kalite'] = kaydet(baski, cik / ad)
                 with Image.open(cik / ad) as chk:
                     s['dogrulama'] = {'px': list(chk.size), 'dpi': [round(v) for v in chk.info.get('dpi', (0, 0))],
                                       'icc_srgb': chk.info.get('icc_profile') == SRGB,
