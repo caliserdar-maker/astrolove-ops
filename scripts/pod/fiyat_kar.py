@@ -47,7 +47,22 @@ class Maliyet:
         self.prod = prod or R.Prodigi(R.load_prodigi_key(env), env)
         self.prod.shipping_method = getattr(self.prod, "shipping_method", R.DEFAULT_SHIPPING_METHOD)
         self.cer = R.cerceve_haritasi()
-        self.c = {}
+        self.c, self.skular = {}, {}
+
+    def sku(self, on, boy):
+        """Katalogdaki kesin SKU yazimi (GET /products; order_router.sku_haritasi ile ayni aday sirasi)."""
+        k = (on, boy)
+        if k not in self.skular:
+            bul = ""
+            for aday in dict.fromkeys([f"GLOBAL-{on}-{boy}", f"GLOBAL-{on}-{boy.upper()}", f"GLOBAL-{on}-{boy.lower()}"]):
+                st, d = self.prod.urun(aday)
+                if st == 200:
+                    bul = ((d.get("product") or {}).get("sku")) or aday
+                    break
+            if not bul:
+                raise SystemExit(f"HATA: Prodigi katalogda SKU yok: GLOBAL-{on}-{boy}. DUR.")
+            self.skular[k] = bul
+        return self.skular[k]
 
     def __call__(self, tur, boy, ulke):
         if tur == "DIGITAL":
@@ -55,15 +70,17 @@ class Maliyet:
         k = (tur, boy, ulke)
         if k not in self.c:
             if tur == "PRINT":
-                item = {"prodigi_sku": f"GLOBAL-HPR-{boy}", "qty": 1, "attributes": {}}
+                item = {"prodigi_sku": self.sku("HPR", boy), "qty": 1, "attributes": {}}
             else:
                 e = self.cer.get((boy, tur[1:]))
                 if not e:
                     raise SystemExit(f"HATA: cerceve eslemesi yok ({boy}, {tur}). DUR.")
-                item = {"prodigi_sku": e["prodigi_sku"], "qty": 1, "attributes": e["attributes"]}
+                item = {"prodigi_sku": self.sku("CFP", boy), "qty": 1, "attributes": e["attributes"]}
             maliyet, hata, _ = self.prod.quote([item], ulke)
             if maliyet is None:
-                raise SystemExit(f"HATA: Prodigi teklifi alinamadi {k}: {hata}. DUR.")
+                st, d = self.prod.call("POST", "/quotes", {"shippingMethod": self.prod.shipping_method, "destinationCountryCode": ulke,
+                                                          "currencyCode": "USD", "items": [self.R.prodigi_item(item)]})
+                raise SystemExit(f"HATA: Prodigi teklifi alinamadi {k} ({item['prodigi_sku']}): {hata} | {str(d)[:300]}. DUR.")
             self.c[k] = float(maliyet)            # quote() EKLER_USD dahil doner
         return self.c[k]
 
