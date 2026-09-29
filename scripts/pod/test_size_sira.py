@@ -137,6 +137,15 @@ k("yaz .99: .99 -> asagi tam, digerleri ayni, SKU kumesi ayni", set(f0) == set(f
   f1[x] == (float(int(f0[x])) if round(f0[x] * 100) % 100 == 99 else f0[x]) for x in f0) and any(round(v * 100) % 100 != 99 for v in f0.values()), rc)
 k("yaz .99: Size sirasi da ayni yazimda (tek PUT)", S.ilk_sira(inv1, S.ozellik_adlari(inv1)["size"]) == S.HEDEF
   and [y[0] for y in A.yaz].count("PUT") == 1)
+# kapi muafiyeti: yalniz CA + cerceveli
+S.MALIYET = lambda tur, boy, ulke: MAL[tur] + (200.0 if (tur in S.F.CERCEVE and ulke == "CA") else 0) \
+    + (60.0 if (tur == "PRINT" and boy == "8x10" and ulke == "AU" and PAHALI[0]) else 0)
+A = Fake(c99=True); rc = kos(A, ["--mod", "yaz", "--fiyat99", "--confirm", "SIZESIRA", "--out", str(W / "m99"), "--yalniz", S.CL_ID])
+k("muafiyet: CA+cerceveli net<0 yazimi durdurmaz", [y[0] for y in A.yaz].count("PUT") == 1 and rc in (0, None), rc)
+S.MALIYET = lambda tur, boy, ulke: MAL[tur] + (200.0 if (tur == "PRINT" and ulke == "CA") else 0)
+A = Fake(c99=True); rc = kos(A, ["--mod", "yaz", "--fiyat99", "--confirm", "SIZESIRA", "--out", str(W / "n99"), "--yalniz", S.CL_ID])
+k("muafiyet yalniz cerceve: CA+PRINT net<0 -> FAIL, yazma yok", not A.yaz and "kar kapisi" in str(rc), str(rc)[:80])
+S.MALIYET = lambda tur, boy, ulke: MAL[tur] + (60.0 if (tur == "PRINT" and boy == "8x10" and ulke == "AU" and PAHALI[0]) else 0)
 PAHALI[0] = True
 A = Fake(c99=True); rc = kos(A, ["--mod", "yaz", "--fiyat99", "--confirm", "SIZESIRA", "--out", str(W / "p99")])
 k("kar kapisi: AU 8x10 net <= 0 -> FAIL, hic PUT yok, DUR", not A.yaz and "DUR" in str(rc) and "kar kapisi" in str(rc), str(rc)[:120])

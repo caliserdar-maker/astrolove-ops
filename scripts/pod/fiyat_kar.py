@@ -6,7 +6,7 @@ Kar: net = fiyat - Etsy kesintisi - Prodigi maliyeti.
   Etsy kesintisi = 0.698 + 0.2062 x fiyat (KDV dahil; docs/REFERANS_ILAN_CL.md 27 Eyl; Offsite Ads haric).
   Prodigi maliyeti = canli /quotes toplam (urun + kargo, router'in kargo yontemi) + router EKLER_USD; ulke basina
   (router'in otomatik ulkeleri US, CA, AU, GB). Dijital: maliyet 0.
-Kapi: yeni fiyatta herhangi bir ulkede net <= 0 olan kalem varsa FAIL (yazma yok).
+Kapi: yeni fiyatta herhangi bir ulkede net <= 0 olan kalem varsa FAIL (yazma yok). Muaf: yalniz Kanada + cerceveli (29 Eyl).
 Kalem turu SKU v3 sonekinden: -DIGITAL | (yok)=PRINT | -FGO/-FBK/-FWH/-FNA.
 """
 import math
@@ -97,6 +97,14 @@ class Maliyet:
         return self.c[k]
 
 
+CERCEVE = {"FGO", "FBK", "FWH", "FNA"}
+MUAF_ULKE_CERCEVE = {"CA"}   # Serdar 29 Eyl: Kanada + cerceveli zarari .99'dan bagimsiz (zaten var) -> kapidan muaf, raporda kalir
+
+
+def muaf(tur, ulke):
+    return tur in CERCEVE and ulke in MUAF_ULKE_CERCEVE
+
+
 def kalem_kar(tur, boy, eski, yeni, maliyet):
     """-> {ulke: (net_eski, net_yeni)}"""
     return {u: (round(eski - ucret(eski) - maliyet(tur, boy, u), 2), round(yeni - ucret(yeni) - maliyet(tur, boy, u), 2))
@@ -122,7 +130,7 @@ def envanter_kar(inv, maliyet):
         k = kalem_kar(tur, boy, eski, yeni, maliyet)
         kalem.append((tur, boy, eski, yeni, k))
         for u, (_, ny) in k.items():
-            if ny <= 0:
+            if ny <= 0 and not muaf(tur, u):
                 sorun.append(f"net <= 0: {tur} {boy} {eski} -> {yeni} {u} net {ny}")
     return kalem, dok, sorun
 
