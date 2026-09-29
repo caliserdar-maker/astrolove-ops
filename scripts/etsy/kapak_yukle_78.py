@@ -188,10 +188,12 @@ def kuru(a, api, shop, out, satirlar, kapak, sorun, fazla):
             neden.append(f"state {st}")
         if not g:
             neden.append("galeri bos")
-        elif k and (r1.get("alt_text") == k["alt"]
-                    and (r1.get("full_width"), r1.get("full_height")) == (k["w"], k["h"])):
+        elif k and c not in getattr(a, "yenile", set()) and (r1.get("alt_text") == k["alt"]
+                                          and (r1.get("full_width"), r1.get("full_height")) == (k["w"], k["h"])):
             row["durum"] = "ZATEN"
         else:
+            if c in getattr(a, "yenile", set()):
+                row["yenile"] = True           # ayni alt+boyutta DUZELTILMIS kapak (28 Eyl Terazi): yine de degistir
             if int(r1.get("rank") or 0) != 1:
                 neden.append(f"ilk gorsel rank {r1.get('rank')}")
             row["varyasyon_once"] = [list(v) for v in vmap]
@@ -568,7 +570,9 @@ def main():
     ap.add_argument("--devam", default="",
                     help="LISTING_ID:YENI_IMAGE_ID:ESKI_IMAGE_ID[,..] yarim kalmis ilan, kesin id ile")
     ap.add_argument("--haric", default="", help="LISTING_ID[,..] bu kosuda dokunulmayacak ilanlar")
+    ap.add_argument("--yenile", default="", help="CIFT[,..] kuru: 1. sirada ayni alt+boyutta kapak olsa da PLAN (duzeltilmis kapak)")
     a = ap.parse_args()
+    a.yenile = {t.strip().upper() for t in a.yenile.split(",") if t.strip()}
     a.haric = {t.strip() for t in a.haric.split(",") if t.strip()}
     devam_str, a.devam, a.devam_eski = a.devam, {}, {}
     for t in [t.strip() for t in devam_str.split(",") if t.strip()]:

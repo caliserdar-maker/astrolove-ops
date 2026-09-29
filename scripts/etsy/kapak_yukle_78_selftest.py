@@ -222,6 +222,20 @@ def main():
     kont["tekrar kuru: 3 ZATEN, silinecek 0"] = [r["durum"] for r in p] == ["ZATEN"] * 3 and \
         (o4 / "SILINECEK_IMAGE_ID.txt").read_text() == ""
 
+    # 3b) --yenile: ayni alt+boyutta (yuklu) kapak yine PLAN olur; apply eski kapagi degistirir, digerleri ZATEN
+    c111 = next(r["cift"] for r in p if r["listing_id"] == "111")
+    o4b = TMP / "o4b"
+    K.indir = lambda url, yol: resim(yol, 400, 300)      # yuklu yeni kapagin CDN kopyasi (Etsy boyutu)
+    K.kuru(args(ids, kd, o4b, yenile={c111}), f, "S", o4b, satirlar, kapak, sorun, fazla)
+    pb = json.loads((o4b / "PLAN.json").read_text())["satirlar"]
+    eski111 = next(r["eski_rank1_id"] for r in pb if r["listing_id"] == "111")
+    n0 = len(f.yaz)
+    ok = K.apply(args(ids, kd, TMP / "o4c", plan=str(o4b / "PLAN.json"), yedek_drive=str(TMP / "yd4c"), apply=True,
+                      confirm=K.ONAY), f, "S", TMP / "o4c", kapak)
+    K.indir = indir_fake
+    kont["yenile: yalniz o cift PLAN, apply eski yuklu kapagi degistirdi"] = [r["durum"] for r in pb] == ["PLAN", "ZATEN", "ZATEN"] \
+        and ok and ("DELETE", "111", eski111) in f.yaz[n0:] and f.L["111"]["imgs"][0]["listing_image_id"] != eski111
+
     # 4) plan sonrasi canli degisti -> DUR, yazma yok
     f = Fake(); o5 = TMP / "o5"
     K.kuru(args(ids, kd, o5), f, "S", o5, satirlar, kapak, sorun, fazla)
