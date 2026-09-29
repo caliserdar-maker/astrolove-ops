@@ -10,6 +10,7 @@ Kapi: yeni fiyatta herhangi bir ulkede net <= 0 olan kalem varsa FAIL (yazma yok
 Kalem turu SKU v3 sonekinden: -DIGITAL | (yok)=PRINT | -FGO/-FBK/-FWH/-FNA.
 """
 import math
+import time
 import re
 import sys
 from pathlib import Path
@@ -70,8 +71,15 @@ class Maliyet:
         kalem = {"sku": item["prodigi_sku"], "copies": 1, "assets": [{"printArea": "default"}]}
         if item.get("attributes"):
             kalem["attributes"] = item["attributes"]
-        st, d = self.prod.call("POST", "/quotes", {"shippingMethod": self.prod.shipping_method, "destinationCountryCode": ulke,
-                                                  "currencyCode": "USD", "items": [kalem]})
+        govde = {"shippingMethod": self.prod.shipping_method, "destinationCountryCode": ulke, "currencyCode": "USD", "items": [kalem]}
+        for deneme in range(3):                 # ag zaman asimi (29 Eyl: ReadTimeout 60 s) -> 3 deneme; yalniz teklif, yan etkisiz
+            try:
+                st, d = self.prod.call("POST", "/quotes", govde)
+                break
+            except Exception as e:  # noqa: BLE001 - requests.Timeout/ConnectionError
+                if deneme == 2:
+                    return None, f"ag hatasi 3 denemede: {type(e).__name__}"
+                time.sleep(10 * (deneme + 1))
         if st != 200 or not d.get("quotes"):
             return None, f"HTTP {st}: {str(d)[:300]}"
         cs = d["quotes"][0].get("costSummary") or {}
