@@ -7,8 +7,8 @@ name: video-yukle-78
 # APPLY (yazma): yalniz apply=true VE confirm=VIDEO78_YUKLE VE plan_damga (kuru kosu damgasi). Plana kilitli
 #   (video sha256, canli eski video id, yedek Drive'da); ilan basinda kota kontrolu, yetmezse ilana baslanmaz
 #   (ATLANDI); ilk FAIL'de durur. Cikti: TEMP/VIDEO78_YUKLE/APPLY_<damga>/report.md (YUKLENDI / ATLANDI / FAIL).
-# TEK SEFERLIK ZAMANLAMA (Serdar onayi 28 Eyl): 29 Eyl 2026 01:30 UTC (kapak-yukle-78 00:05'ten sonra; Etsy
-#   kilidi sirayi tutar). Plan KURU_20260928_1359 (75 ilan, PASS), haric ARIES_LIBRA, AQUARIUS_LIBRA, CAPRICORN_LIBRA.
+# TEK SEFERLIK ZAMANLAMA (Serdar onayi 28 Eyl): 29 Eyl 2026 07:00 UTC (01:30 kosusu Etsy kotasi 133 < esik 170 ile
+#   hicbir ilana baslamadi; 429 retry-after ~06:00 UTC; Etsy kilidi sirayi tutar). Plan KURU_20260928_1359 (75 ilan, PASS), haric ARIES_LIBRA, AQUARIUS_LIBRA, CAPRICORN_LIBRA.
 #   Kapi isi yalniz 20260929 tarihinde calisir; baska gunlerdeki cron tetiklemeleri hicbir sey yapmaz.
 
 on:
@@ -20,7 +20,7 @@ on:
       confirm: {description: "Yazma icin tam olarak: VIDEO78_YUKLE", required: false, default: ""}
       plan_damga: {description: "apply: kuru kosunun damgasi (TEMP/VIDEO78_YUKLE/KURU_<damga>)", required: false, default: ""}
   schedule:
-    - cron: "30 1 29 9 *"   # tek seferlik: 2026-09-29 01:30 UTC (kapi isi tarihi dogrular)
+    - cron: "0 7 29 9 *"    # tek seferlik: 2026-09-29 07:00 UTC (01:30 kosusu kota 133 < 170 ile 75/75 ATLANDI, yazma yok)
 
 
 permissions:

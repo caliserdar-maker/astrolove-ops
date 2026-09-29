@@ -7,7 +7,8 @@ name: uc-cift-yukle
 # Kapaklar: TEMP/POD_KAPAK_78/<en son damga> (78) uzerine TEMP/POD_KAPAK_78_DUZELTME/<kapak_damga>/KAPAK_<3 cift>.jpg
 # (RAPOR.md SONUC PASS). Videolar: TEMP/POD_VIDEO_V2/<video_damga>/ (3 cift QC PASS).
 # updateListing CAGRILMAZ; musteriye bildirim yok. Cikti: TEMP/UC_CIFT_YUKLE/<damga>/report.md (YUKLENDI/ATLANDI/FAIL).
-# TEK SEFERLIK ZAMANLAMA (Serdar karari 28 Eyl aksam): 29 Eyl 2026 03:00 UTC, apply=true (kapak 00:05 ve video 01:30
+# 29 Eyl: 3 Terazi kapagi kapak oturumunda (kapak-yukle-78 kapak_ek + --yenile); burada kapak adimi yalniz kapak=true.
+# TEK SEFERLIK ZAMANLAMA (Serdar karari 28 Eyl aksam): 29 Eyl 2026 07:05 UTC (ilk 03:00 kosusu 429 kota), apply=true (kapak 00:05 ve video 01:30
 #   kosularindan sonra; kilit sirayi tutar). Damga bos -> otomatik: kapak = EN_AZ ve sonrasi, RAPOR SONUC PASS olan en
 #   yeni DUZELTME damgasi; video = cift basina EN_AZ ve sonrasi, QC pass + yenile=true olan en yeni damga.
 #   Kapi isi yalniz 20260929 tarihinde calisir.
@@ -18,8 +19,9 @@ on:
       kapak_damga: {description: "TEMP/POD_KAPAK_78_DUZELTME damgasi (bos = otomatik)", required: false, default: ""}
       video_damga: {description: "TEMP/POD_VIDEO_V2 damgalari (bosluklu; bos = otomatik)", required: false, default: ""}
       apply: {description: "true = kuru PASS ise uygula", type: boolean, default: false}
+      kapak: {description: "true = kapak adimi da (varsayilan: yalniz video; 3 Terazi kapagi kapak-yukle-78 kapak_ek ile)", type: boolean, default: false}
   schedule:
-    - cron: "0 3 29 9 *"   # tek seferlik: 2026-09-29 03:00 UTC (kapi isi tarihi dogrular)
+    - cron: "5 7 29 9 *"   # tek seferlik: 2026-09-29 07:05 UTC, yalniz video (03:00 kosusu kuru okumada 429 kota; yazma yok)
 
 permissions:
   actions: read
@@ -123,13 +125,14 @@ jobs:
           [ "$(echo $KAYNAKLAR | wc -w)" -eq 3 ] || { echo "::error::3 cift icin yenile + QC PASS video yok ($KAYNAKLAR). DUR."; exit 1; }
           python -c 'import json,sys;json.dump({"klasor":"TEMP/POD_VIDEO_V2:"+sys.argv[1],"ozet":"uc cift","plan":"UC_CIFT_YUKLE/"+sys.argv[2]+"/video_kuru/PLAN.json"},open("_work/video_kaynak.json","w"))' "$KAYNAKLAR" "$STAMP"
       - name: Kapak kuru -> karar -> apply
+        if: ${{ inputs.kapak == true }}
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
           TOKEN_FILE: _work/ETSY_TOKEN.json
         run: |
-          set -uo pipefail
+          set +e -uo pipefail
           Y="gdrive:ASTROLOVE/TEMP/KAPAK78_YEDEK_UC_${STAMP}"
           python scripts/etsy/kapak_yukle_78.py --kapak-dir _work/kapak --kaynak-bilgi _work/kapak_kaynak.json --out _out/kapak_kuru --yedek-drive "$Y"
           echo "kapak kuru cikis $? (78 ilan; karar yalniz 3 hedef satira bakar)"
@@ -148,7 +151,7 @@ jobs:
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
           TOKEN_FILE: _work/ETSY_TOKEN.json
         run: |
-          set -uo pipefail
+          set +e -uo pipefail
           HARIC=$(python scripts/etsy/uc_cift_karar.py haric-cift)
           python scripts/etsy/video_yukle_78.py --video-dir _work/video --kaynak-bilgi _work/video_kaynak.json --out _out/video_kuru --haric "$HARIC"
           echo "video kuru cikis $?"
