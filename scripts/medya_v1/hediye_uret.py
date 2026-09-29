@@ -133,9 +133,9 @@ def main():
                  'isim_bandi_temizligi': r.get('isim_bandi_temizligi')}
             T = sd._TANI or {}
             eski = eski_dir / ad
-            if eski.exists() and T.get('poster') is not None and r.get('plate') and r.get('olcum'):
+            if eski.exists() and r.get('plate') and r.get('olcum'):
                 with Image.open(eski) as ei:             # ayni kapi, onceki (onaylanmayan) dosyada
-                    ek_ = sd.isim_kalinti_kapisi(ei.convert('RGB'), r['plate'], T['poster'], r['olcum'])
+                    ek_ = sd.isim_kalinti_kapisi(ei.convert('RGB'), r['plate'], T.get('yeni'), r['olcum'])
                 s['eski_dosya_isim_kalinti'] = {q: ek_.get(q) for q in ('gecti', 'kalinti_sayisi',
                                                                         'kalintilar', 'hata')}
             if gecti and T.get('baski') is not None:
