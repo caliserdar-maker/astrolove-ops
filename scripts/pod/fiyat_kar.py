@@ -79,7 +79,7 @@ class Maliyet:
             maliyet, hata, _ = self.prod.quote([item], ulke)
             if maliyet is None:
                 st, d = self.prod.call("POST", "/quotes", {"shippingMethod": self.prod.shipping_method, "destinationCountryCode": ulke,
-                                                          "currencyCode": "USD", "items": [self.R.prodigi_item(item)]})
+                                                          "currencyCode": "USD", "items": [{k: v for k, v in self.R.prodigi_item(item).items() if k != "sizing"}]})
                 raise SystemExit(f"HATA: Prodigi teklifi alinamadi {k} ({item['prodigi_sku']}): {hata} | {str(d)[:300]}. DUR.")
             self.c[k] = float(maliyet)            # quote() EKLER_USD dahil doner
         return self.c[k]

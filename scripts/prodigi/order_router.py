@@ -116,6 +116,8 @@ class Prodigi:
     def quote(self, items, country, shipping_method=None):
         shipping_method = shipping_method or getattr(self, "shipping_method", DEFAULT_SHIPPING_METHOD)
         govde = [prodigi_item(i) for i in items]
+        for g in govde:                  # /quotes 'sizing' kabul etmiyor (29 Eyl: ModelBindingFailed UnknownField);
+            g.pop("sizing", None)        # siparis govdesinde (order_body/create_order) sizing AYNEN kalir
         st, d = self.call("POST", "/quotes", {"shippingMethod": shipping_method,
                                               "destinationCountryCode": country,
                                               "currencyCode": "USD", "items": govde})
