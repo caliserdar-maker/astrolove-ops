@@ -23,7 +23,8 @@ import siparis_dosyasi as sd                                     # noqa: E402
 
 Image.MAX_IMAGE_PIXELS = None
 ImageFile.MAXBLOCK = 1 << 26       # optimize=True buyuk dosyada 'Suspension not allowed' vermesin
-ZORUNLU = ('olcek', 'plate_slogan', 'sembol', 'kalinti', 'mesaj_murekkep', 'font_kapsami', 'boy_siniri')
+ZORUNLU = ('olcek', 'plate_slogan', 'sembol', 'kalinti', 'mesaj_murekkep', 'font_kapsami', 'boy_siniri',
+           'isim_kalinti')
 KALITE = 92
 SRGB = ImageCms.ImageCmsProfile(ImageCms.createProfile('sRGB')).tobytes()
 
@@ -94,6 +95,12 @@ def main():
              'mesaj_karakter': len(d['mesaj']), 'dosyalar': []}
     goruntuler, T0, n = [], time.time(), 0
     toplam = len(renkler) * len(boylar)
+    eski_dir = sd.W / f'{a.kod}_ESKI'; eski_dir.mkdir(parents=True, exist_ok=True)
+    try:                                         # onceki teslim adaylari: ayni kapi olculur
+        sd.rc('copy', a.hedef, str(eski_dir), '--max-depth', '1', '--include', 'AstroLoveArt_*.jpg',
+              timeout=1800)
+    except RuntimeError:
+        pass
     for renk in renkler:
         for boy in boylar:
             n += 1
@@ -120,8 +127,17 @@ def main():
                  'gecti': gecti, 'kalan_kapilar': sorted(set(eksik) | set(yanlis)), 'kapilar': k,
                  'olcek': {q: (r.get('olcek_kapisi') or {}).get(q) for q in ('konum_fark_px', 'kenar_fark_px')},
                  'plate_slogan_payi': (r.get('plate_slogan_kapisi') or {}).get('glif_farkli_payi'),
-                 'baski_px': r.get('baski_px'), 'gorsel_dpi': r.get('gorsel_dpi'), 'metin_dpi': r.get('metin_dpi')}
+                 'baski_px': r.get('baski_px'), 'gorsel_dpi': r.get('gorsel_dpi'), 'metin_dpi': r.get('metin_dpi'),
+                 'isim_kalinti': {q: (r.get('isim_kalinti_kapisi') or {}).get(q)
+                                  for q in ('gecti', 'kalinti_sayisi', 'kalintilar', 'hata')},
+                 'isim_bandi_temizligi': r.get('isim_bandi_temizligi')}
             T = sd._TANI or {}
+            eski = eski_dir / ad
+            if eski.exists() and T.get('poster') is not None and r.get('plate') and r.get('olcum'):
+                with Image.open(eski) as ei:             # ayni kapi, onceki (onaylanmayan) dosyada
+                    ek_ = sd.isim_kalinti_kapisi(ei.convert('RGB'), r['plate'], T['poster'], r['olcum'])
+                s['eski_dosya_isim_kalinti'] = {q: ek_.get(q) for q in ('gecti', 'kalinti_sayisi',
+                                                                        'kalintilar', 'hata')}
             if gecti and T.get('baski') is not None:
                 baski = T['baski']
                 s['jpeg_kalite'] = kaydet(baski, cik / ad)
@@ -142,8 +158,12 @@ def main():
                 goruntuler.append((f'{gorunen(renk)} {boy}', baski))
             rapor['dosyalar'].append(s)
             g = time.time() - T0
+            ik, ek2 = s['isim_kalinti'], s.get('eski_dosya_isim_kalinti') or {}
             print(f"[{n}/{toplam}] {renk} {boy}: {'PASS' if gecti else 'FAIL'} kalan={s['kalan_kapilar']} "
-                  f"olcek={s['olcek']} plate={s['plate_slogan_payi']} hata={s['hata'] or ''} "
+                  f"olcek={s['olcek']} plate={s['plate_slogan_payi']} "
+                  f"isim_kalinti yeni={'PASS' if ik.get('gecti') else 'FAIL'}({ik.get('kalinti_sayisi')}) "
+                  f"eski={'-' if not ek2 else ('PASS' if ek2.get('gecti') else 'FAIL')}({ek2.get('kalinti_sayisi')}) "
+                  f"hata={s['hata'] or ''} "
                   f"| gecen {g:.0f}s | kalan ~{g / n * (toplam - n):.0f}s | %{100 * n // toplam}", flush=True)
     hepsi = all(s['gecti'] for s in rapor['dosyalar']) and len(rapor['dosyalar']) == toplam
     rapor['hepsi_gecti'] = hepsi
@@ -161,6 +181,11 @@ def main():
         sd.rc('copy', str(cik), f'{sd.SIP}/{a.kod}_TANI', '--include', '*.json', timeout=1800)
         print(json.dumps(rapor['dosyalar'], ensure_ascii=False, indent=1, default=str))
         raise SystemExit(f'{a.kod}: kapi FAIL - musteri klasorune yazilmadi')
+    yedek = f"{a.hedef}/YEDEK_{time.strftime('%Y%m%d_%H%M', time.gmtime())}"
+    for z in json.loads(sd.rc('lsjson', a.hedef, '--files-only')):   # eskiler YEDEK_ alt klasorune
+        sd.rc('moveto', f"{a.hedef}/{z['Name']}", f"{yedek}/{z['Name']}", timeout=1800)
+    rapor['yedek'] = yedek.split(':', 1)[1]
+    (cik / f'{a.kod}_KAPI_RAPORU.json').write_text(json.dumps(rapor, ensure_ascii=False, indent=1, default=str))
     sd.rc('copy', str(cik), a.hedef, timeout=1800)
     ust, ad_k = a.hedef.rsplit('/', 1)
     klasor = [z for z in json.loads(sd.rc('lsjson', ust, '--dirs-only')) if z['Name'] == ad_k]
