@@ -1453,6 +1453,11 @@ class BluePoster:
     def __init__(self):
         from a1_poster import Poster
         self.P = Poster()
+        # Onayli altin isim profili (Cancer / Libra name gold; Poster.__init__ -> pilot12.profil_yukle).
+        # 30 Eyl: edisyon_uret.oran_kur her edisyon render'inda pilot12.PROFIL global'ini o dosyanin
+        # profiliyle eziyor; Blue (pilot16.oran_kur) sonra onu okuyordu -> MB isim rengi onceki renderdan
+        # geliyordu (ARIES_SCORPIO MB: tek basina 253,193,61 / CI sonrasi 115,73,35, mesaj dE 9.8).
+        self.profil = {y: np.array(v, copy=True) for y, v in self.P.p12.PROFIL.items()}
         self.hazir_oran = set()
         self.plate_boy = None
 
@@ -1471,6 +1476,7 @@ class BluePoster:
         self.hazir_oran.clear(); self.P.tavan = None
 
     def __call__(self, kaynak_bayt, sayfa_no, oran, isimler, tagline, ref_bayt=None, ref_sayfa=28):
+        self.P.p12.PROFIL = {y: v.copy() for y, v in self.profil.items()}   # onayli profil (sira bagimsiz)
         if oran not in self.hazir_oran:
             if ref_bayt is None:
                 raise RuntimeError(f'Blue {oran}: Cancer-Libra referansi verilmedi (boy tavani)')
