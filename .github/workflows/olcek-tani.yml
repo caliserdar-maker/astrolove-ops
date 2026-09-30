@@ -50,6 +50,6 @@ jobs:
             fi
           fi
       - name: Olcek tanisi (salt okur, yalniz log)
-        run: python scripts/medya_v1/kalinti_tani.py
+        run: python scripts/medya_v1/olcek_gorsel_tani.py --kok gdrive:ASTROLOVE/TEMP/OLCEK_TANI --isler 'ARIES_ARIES:DEEP_BLACK:11x14;GEMINI_LIBRA:DEEP_BLACK:11x14;GEMINI_TAURUS:DEEP_BLACK:11x14;CAPRICORN_LEO:PURE_WHITE:11x14;LEO_LEO:PURE_WHITE:11x14;CAPRICORN_LEO:DEEP_BLACK:24x36'
       - if: ${{ always() }}
         run: rm -rf ~/.config/rclone
