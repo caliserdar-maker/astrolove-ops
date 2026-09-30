@@ -164,18 +164,23 @@ def cift_boy(cift, boy, P_ed, P_blue, no, cik):
     k = Wd / 2400.0
     et = etiketle(hiz, uret['kimlik'][0].get('olcum'), k, H)
     R['bantlar'] = et
-    # ---- 2) plate: temizlik olcumu -> onarim (kaynagin kendi dokusu) -> yeniden olcum
+    # ---- 2) plate: iz olcumu (CI glif maskesi) -> onarim -> yeniden olcum
+    # 1 Eki tanisi (36777921388): eski olcut (WP kaynaginda yerel kontrast > 26) parsomen beneklerini glif
+    # sayiyor; yazisiz kontrol seridinde bile 7.2-9.7 veriyor -> yanli. Glif maskesi dokusuz CI'dan tasinir.
+    Dw_src = wk.katman_tasi(S_c - P_c, hiz, (Wd, H))
+    G = wk.glif_maskesi(Dw_src)
+    ink = G | wk.murekkep_maskesi(D_wp, kenar=0)
     pt_bant = {a: et[a] for a in ('isim', 'mesaj') if a in et}
     onar_bant = {a: et[a] for a in ('kucuk_sembol', 'isim', 'mesaj') if a in et}
-    once = wk.plate_temizlik(P_wp0, S_wp, pt_bant)
-    P_wp, onarim = wk.plate_onar(P_wp0, S_wp, onar_bant)
-    sonra = wk.plate_temizlik(P_wp, S_wp, pt_bant)
+    once = wk.plate_iz(P_wp0, G, pt_bant)
+    P_wp, onarim = wk.plate_onar_glif(P_wp0, G, ink, onar_bant)
+    sonra = wk.plate_iz(P_wp, G, pt_bant)
     mk0 = wk.murekkep_maskesi(D_wp, kenar=0)
     zt = wk.ozet(wk.dE(P_wp0, S_wp), ~mk0)
     R['plate'] = {'ad': ad, 'temizlik_once': once, 'onarim': onarim, 'temizlik': sonra,
+                  'eski_olcut_once': wk.plate_temizlik(P_wp0, S_wp, pt_bant),
                   'zemin_uyumu': {**zt, 'esik_ort': 0.5, 'gecti': zt.get('ort', 99) <= 0.5}}
     R['plate_gecti'] = bool(sonra['gecti'] and R['plate']['zemin_uyumu']['gecti'])
-    Dw_src = wk.katman_tasi(S_c - P_c, hiz, (Wd, H))
     model = wk.renk_ogren(Dw_src, P_wp0, S_wp)
     R['renk_modeli'] = {a: model[a] for a in ('derece', 'egitim_px', 'murekkep_px', 'egitim_rmse')}
 
@@ -247,7 +252,7 @@ def tablo(hedef):
     sat = ['# WP katman yontemi: kimlik testi (30 Eyl 2026)', '',
            'dE = CIE76 (Lab), ort/p99; parantezde murekkep maskesi IoU. KATMAN = onayli CI kaynagi katmanla WP\'ye '
            'tasindi (yontemin kendisi). CI HAT = mevcut hattin kimlik baskisi (kaynagin burc adlari + slogani) vs onayli '
-           'CI. UCTAN UCA = CI hat baskisi -> katman -> WP vs onayli WP. Plate: medyan, eski glif izi kaynagin kendi '
+           'CI. UCTAN UCA = CI hat baskisi -> katman -> WP vs onayli WP. Plate: medyan, iz CI glif maskesiyle olculur; eski glif izi kaynagin kendi '
            'dokusuyla onarildi; iz orani once -> sonra (esik 1.25).', '',
            '| cift | boy | plate iz (mesaj) once->sonra | zemin ort | KATMAN isim | KATMAN mesaj | KATMAN sembol (buyuk/kucuk) | '
            'CI HAT isim | CI HAT mesaj | UCTAN UCA isim | UCTAN UCA mesaj | kapilar (CI siparis) |',

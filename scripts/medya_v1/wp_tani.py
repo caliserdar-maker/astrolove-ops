@@ -135,6 +135,67 @@ def bant_tanisi(S_c, B, P_c, y0, y1, k, ad, cik, etiket):
     return r
 
 
+def _metin_ciz(fp, metin, boy, iz, agirlik=None):
+    """Metni harf harf (izleme = iz * boy px) ciz; murekkep maskesi (bool)."""
+    from PIL import ImageDraw, ImageFont
+    f = ImageFont.truetype(str(fp), boy)
+    if agirlik:
+        try:
+            f.set_variation_by_axes([agirlik])
+        except Exception:                                        # noqa: BLE001
+            pass
+    en = int(sum(f.getlength(c) for c in metin) + abs(iz) * boy * len(metin) + boy * 2)
+    im = Image.new('L', (en, int(boy * 2)), 0)
+    d = ImageDraw.Draw(im)
+    x = boy * 0.5
+    for c in metin:
+        d.text((x, boy * 0.4), c, font=f, fill=255)
+        x += f.getlength(c) + iz * boy
+    a = np.asarray(im) > 110
+    b = kutu(a)
+    return a[b[1]:b[3], b[0]:b[2]] if b else a
+
+
+def font_tanisi(ms, metin, fontlar):
+    """Kaynak glif maskesine (ms, kirpilmis) her fontu en iyi punto + izleme ile uydur; hizali IoU."""
+    b = kutu(ms)
+    ms = ms[b[1]:b[3], b[0]:b[2]]
+    h, w = ms.shape
+    sonuc = []
+    for fp, ag in fontlar:
+        try:
+            r0 = _metin_ciz(fp, metin, 200, 0.0, ag)
+            boy = max(int(round(200 * h / r0.shape[0])), 8)
+            en_iyi = None
+            for iz in np.linspace(-0.12, 0.2, 17):
+                r = _metin_ciz(fp, metin, boy, float(iz), ag)
+                if abs(r.shape[1] - w) > 0.25 * w:
+                    continue
+                pad = np.zeros((max(h, r.shape[0]) + 20, max(w, r.shape[1]) + 20), bool)
+                A = pad.copy(); A[10:10 + h, 10:10 + w] = ms
+                B = pad.copy(); B[10:10 + r.shape[0], 10:10 + r.shape[1]] = r
+                v = hizali_iou(A, B)
+                if en_iyi is None or (v['iou'] or 0) > en_iyi['iou']:
+                    en_iyi = {**v, 'punto_px': boy, 'izleme_em': round(float(iz), 3),
+                              'en_oran': round(r.shape[1] / w, 3)}
+            if en_iyi:
+                sonuc.append({'font': Path(fp).name + (f'@{ag}' if ag else ''), **en_iyi})
+        except Exception as e:                                   # noqa: BLE001
+            sonuc.append({'font': Path(fp).name, 'hata': str(e)[:80]})
+    sonuc.sort(key=lambda z: -(z.get('iou') or 0))
+    return sonuc[:4]
+
+
+def fontlar():
+    kok = sd.K / 'assets' / 'fonts'
+    out = []
+    for f in sorted(kok.glob('*.ttf')):
+        out.append((f, None))
+        if f.name == 'Cinzel.ttf':
+            out += [(f, 400), (f, 500), (f, 600), (f, 700)]
+    return out
+
+
 def bos_kayma(ink, y0, y1, H):
     h = y1 - y0
     for d in (h + 40, -(h + 40), 2 * h + 40, -(2 * h + 40), 3 * h + 40, -(3 * h + 40)):
@@ -173,6 +234,25 @@ def cift_boy(cift, boy, P_ed, P_blue, no, cik):
     for ad, alan in (('isim', 'isim_bant'), ('mesaj', 'tag_bant')):
         if o.get(alan):
             R[ad] = bant_tanisi(S_c, B, P_c, int(o[alan][0] * k), int(o[alan][1] * k), k, ad, cik, etiket)
+
+    # ---- font tanisi: kaynak isim / slogan hangi fonta, puntoya, izlemeye uyuyor (hat: Cinzel 500 / EBGaramond-Italic)
+    try:
+        F = fontlar()
+        ft = {}
+        if R.get('isim') and len(R['isim'].get('kumeler', [])) >= 3:
+            for i, mt in ((0, s1), (2, s2)):
+                kk = R['isim']['kumeler'][i]['kaynak_kutu']
+                m = wk.murekkep_maskesi((S_c - P_c)[kk[1]:kk[3], kk[0]:kk[2]], kenar=0)
+                ft[f'isim_{mt}'] = font_tanisi(m, mt, F)
+        if o.get('tag_bant'):
+            a0, a1 = int(o['tag_bant'][0] * k) - 10, int(o['tag_bant'][1] * k) + 30
+            m = wk.murekkep_maskesi((S_c - P_c)[a0:a1, int(Wd * 0.2):int(Wd * 0.8)], kenar=0)
+            n_, lab, st, _ = cv2.connectedComponentsWithStats(m.astype(np.uint8), 8)
+            m = np.isin(lab, [i for i in range(1, n_) if st[i, 4] >= 30])
+            ft['mesaj'] = font_tanisi(m, wo.SLOGAN, F)
+        R['font_tanisi'] = ft
+    except Exception as e:                                        # noqa: BLE001
+        R['font_tanisi'] = {'hata': f'{type(e).__name__}: {e}'}
 
     # ---- plate: eski olcut vs CI glif olcutu, kontrol seridi, glif maskeli onarim
     y = wo.plate_indir(f'VINTAGE_{boy}.png')
