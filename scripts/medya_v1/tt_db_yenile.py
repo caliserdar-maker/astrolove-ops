@@ -89,7 +89,7 @@ def test(a):
     k = s.get('kapilar') or {}
     r['siparis'] = {'durum': s.get('durum'), 'hata': s.get('hata'), 'kapilar': k,
                     'kalan': sorted(g for g, v in k.items() if v is False)}
-    r['gecti'] = (r['yeni_pod_px'] == [w, h] and (r['zemin_p50']['yeni'] or 99) <= sd.ZEMIN_UYUM_ESIK
+    r['gecti'] = (r['yeni_pod_px'] == [w, h] and r['zemin_p50']['yeni'] is not None and r['zemin_p50']['yeni'] <= sd.ZEMIN_UYUM_ESIK
                   and s.get('durum') == 'URETILDI' and bool(k) and sd.kapi_sonucu(k))
     return r
 
