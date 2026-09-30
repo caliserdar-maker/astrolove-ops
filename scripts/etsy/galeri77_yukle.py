@@ -23,7 +23,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import cl_galeri_degistir as G  # noqa: E402
 
 CL_ID = "4570143815"
-ILAN_UST = 70           # ilan basi ust sinir cagri (13 sil + 17-19 yukle + bag + capa + geri okumalar)
+ILAN_UST = 90           # ilan basi ust sinir cagri (13 sil + 17-19 yukle + bag + capa + geri okumalar)
 
 
 def log(m):
@@ -88,7 +88,9 @@ def main():
             o = out / lid; o.mkdir(parents=True, exist_ok=True)
             G.yedek_al(api, shop, lid, o)
             if a.yedek_drive:
-                drive_kopya(o / "yedek", f"{a.yedek_drive}/{lid}_{cift}")
+                # onceki kosu FAIL ise ilk (asil) yedek korunur; yeni yedek ayri klasore (30 Eyl)
+                ek = f"_devam_{time.strftime('%Y%m%d_%H%M', time.gmtime())}" if (R["ilanlar"].get(lid) or {}).get("durum") == "FAIL" else ""
+                drive_kopya(o / "yedek", f"{a.yedek_drive}/{lid}_{cift}{ek}")
             try:
                 rap = G.uygula(api, shop, lid, kaynak, kaynak / "ALT_METIN.csv", o, a.kota_taban)
                 R["ilanlar"][lid] = {"cift": cift, "set": st_, "durum": rap["sonuc"], "ts": time.strftime("%Y-%m-%d %H:%M", time.gmtime())}
