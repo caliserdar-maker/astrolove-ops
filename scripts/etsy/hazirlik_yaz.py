@@ -58,8 +58,19 @@ def tanim_oku(api, shop):
     return api.get(f"/shops/{shop}/readiness-state-definitions/{READINESS_ID}") or {}
 
 
+def mn(t):
+    # Canli Etsy yaniti min_processing_days/max_processing_days doner (30 Eyl geri okuma); eski ad da kabul.
+    v = t.get("min_processing_days", t.get("min_processing_time"))
+    return int(v) if v is not None else None
+
+
+def mx(t):
+    v = t.get("max_processing_days", t.get("max_processing_time"))
+    return int(v) if v is not None else None
+
+
 def tanim_ok(t):
-    return int(t.get("min_processing_time") or -1) == HEDEF_MIN and int(t.get("max_processing_time") or -1) == HEDEF_MAX
+    return mn(t) == HEDEF_MIN and mx(t) == HEDEF_MAX
 
 
 def readiness_yaz(api, shop, out, R):
@@ -76,13 +87,13 @@ def readiness_yaz(api, shop, out, R):
     t1 = kararli(lambda: tanim_oku(api, shop), tanim_ok)
     (out / "SONRA").mkdir(parents=True, exist_ok=True)
     (out / "SONRA" / f"readiness_{READINESS_ID}.json").write_text(json.dumps(t1, indent=1))
-    sorun = [] if tanim_ok(t1) else [f"min/max {t1.get('min_processing_time')}-{t1.get('max_processing_time')}"]
+    sorun = [] if tanim_ok(t1) else [f"min/max {mn(t1)}-{mx(t1)}"]
     sorun += [f"degisti:{k}" for k in ("readiness_state", "processing_time_unit") if t1.get(k) != t0.get(k)]
     if sorun:
         R["readiness"] = f"FAIL {sorun}"
         raise SystemExit(f"HATA: readiness geri okuma FAIL: {sorun}. DUR.")
     R["readiness"] = "YAZILDI"
-    log(f"readiness {READINESS_ID}: {t0.get('min_processing_time')}-{t0.get('max_processing_time')} -> {HEDEF_MIN}-{HEDEF_MAX} (geri okuma PASS)")
+    log(f"readiness {READINESS_ID}: {mn(t0)}-{mx(t0)} -> {HEDEF_MIN}-{HEDEF_MAX} (geri okuma PASS)")
 
 
 def imza(L):
@@ -157,7 +168,7 @@ def main():
             t = tanim_oku(api, shop)
             (out / "YEDEK").mkdir(parents=True, exist_ok=True)
             (out / "YEDEK" / f"readiness_{READINESS_ID}.json").write_text(json.dumps(t, indent=1))
-            R["readiness_plan"] = f"{t.get('min_processing_time')}-{t.get('max_processing_time')} -> {HEDEF_MIN}-{HEDEF_MAX}"
+            R["readiness_plan"] = f"{mn(t)}-{mx(t)} -> {HEDEF_MIN}-{HEDEF_MAX}"
         for n, r in enumerate(kalan, 1):
             q = kota(api)
             if q is not None and q < a.kota_taban:
