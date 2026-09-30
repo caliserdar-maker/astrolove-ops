@@ -472,8 +472,8 @@ class EdisyonPoster:
         # 1) ONAYLI 2400 render (referans, butun mevcut kapilar burada kosar)
         olcek_kur(2400)
         try:
-            boy0 = {}
-            with IsimPlakasi(kayit=boy0):
+            boy0, yer0 = {}, {}
+            with IsimPlakasi(kayit=boy0), _SatirYerlesim(self.p16, yer0):
                 s0, S0, p0, ek0, bi0 = self.render(ed, oran, sayfa_no, o, kilit, isimler, mesaj)
         except KeyError as e:
             # Eski oge ayristirilamadi (WP 1. iterasyon: KeyError 'sembol_sol').
@@ -500,7 +500,7 @@ class EdisyonPoster:
             kilit1 = kilit_olcekle(kilit, k)
             capmap = {kilit['cap'][y]: kilit1['cap'][y] for y in kilit['cap']}
             sabit = {(mt, capmap.get(c, c)): b * k for (mt, c), b in boy0.items()}
-            with IsimPlakasi(sabit=sabit):
+            with IsimPlakasi(sabit=sabit), _SatirYerlesim(self.p16, yer0, k):
                 s1, S1, p1, ek1, bi1 = self.render(ed, oran, sayfa_no, olcekle(o, k),
                                                    kilit1, isimler, mesaj)
             merkez1, yeni1 = ek1
@@ -1134,6 +1134,89 @@ class _HamKayit:
 
     def maske(self):
         return None if self.ham is None else (np.asarray(self.ham) > 0)
+
+
+class _SatirYerlesim:
+    """Isim satiri yerlesimi: hi-res render 2400 yerlesimini OLCEKLER (30 Eyl, GEMINI_LEO DB olcek konum 1.18).
+
+    Kok neden (olcek_tani 36749680993): pilot16.poster_kur satiri her olcekte TAM SAYI kutu genisliklerinden
+    yeniden kurar (isim plakasi genisligi, sonsuz kesit kutusu w / pay). Hi-res'te bu genislikler 2400*k'dan
+    0.3-1.1 birim sapar ve satir boyunca birikir: GEMINI_LEO 11x14'te sonsuz kutusu 1.13 birim dar, sag isim
+    1.37 birim kayik (kontrol ciftlerinde 0.37-0.65). Duzeltme: 2400 cagrisinda murekkep konumlari kaydedilir;
+    hi-res cagrisinda isimler murekkep merkezinden, sonsuz kaynak konumuna gore ayni kaydirma * k ile konur.
+    poster_kur'un geri kalani (plaka, tagline, semboller, maskeler) birebir aynidir; yalniz `x` hesabi degisir."""
+
+    def __init__(self, p16, kayit, k=None):
+        self.p16, self.kayit, self.k = p16, kayit, k
+
+    def __enter__(self):
+        self.asil = self.p16.poster_kur
+        self.p16.poster_kur = self._kaydet if self.k is None else self._olcekli
+        return self
+
+    def __exit__(self, *a):
+        self.p16.poster_kur = self.asil
+        return False
+
+    def _kaydet(self, s, S, isimler, tagline):
+        out = self.asil(s, S, isimler, tagline)
+        _, _, merkez, x, _ = out
+        self.kayit.update({'x': dict(x), 'mm': {y: merkez[y] - x[y] for y in ('sol', 'sag')},
+                           'inf_g0': float(S['oge']['sonsuz']['gorsel'][0])})
+        return out
+
+    def _olcekli(self, s, S, isimler, tagline):
+        if not self.kayit.get('x'):
+            return self.asil(s, S, isimler, tagline)
+        import cv2
+        p16, k, r = self.p16, self.k, self.kayit
+        olcek = p16.d_olcek(isimler, s, S)
+        pl = {y: p16.plaka(isimler[y], S["prof"][y], s["cap"][y], olcek) for y in ("sol", "sag")}
+        w = {y: pl[y][0].width for y in pl}
+        inf = S["oge"]["sonsuz"]
+        mm = {y: p16.murekkep_merkezi(pl[y][0]) for y in ("sol", "sag")}
+        x = {y: (r['x'][y] + r['mm'][y]) * k - mm[y] for y in ("sol", "sag")}
+        x["inf"] = float(inf["gorsel"][0]) + (r['x']['inf'] - r['inf_g0']) * k
+        toplam = x["sag"] + w["sag"] - x["sol"]
+        x0 = x["sol"]
+        a = S["temiz_a"].copy()
+        merkez = {y: x[y] + mm[y] for y in ("sol", "sag")}
+        yer = {"sonsuz": (x["inf"], S["oge"]["sonsuz"]["gorsel"][1])}
+        for y in ("sol", "sag"):
+            o = S["oge"][f"sembol_{y}"]
+            yer[f"sembol_{y}"] = (merkez[y] - o["w"] / 2, o["gorsel"][1])
+        for ad, (px, py) in yer.items():
+            o = S["oge"][ad]
+            p16.delta_koy(a, o["delta"], o["maske"], px - o["pay"][0], py - o["pay"][1])
+        t = Image.fromarray(np.clip(a, 0, 255).astype(np.uint8), "RGB").convert("RGBA")
+        yeni_maske = np.zeros(a.shape[:2], np.uint8)
+        isim_geometri, isim_kutu = {}, {}
+        for y in ("sol", "sag"):
+            p = pl[y][0]
+            px, py = int(round(x[y])), int(round(s["isim_y"] - p.height / 2))
+            t.alpha_composite(p, (px, py))
+            isim_kutu[y] = [px, py, px + p.width, py + p.height]
+            alfa = np.asarray(p)[..., 3]
+            pm = alfa > 40
+            p16.isaretle(yeni_maske, alfa > 8, px, py)
+            ys = np.nonzero(pm.any(axis=1))[0]
+            isim_geometri[y] = {"cap": int(ys[-1] - ys[0] + 1),
+                                "dikey_merkez": round(py + (int(ys[0]) + int(ys[-1])) / 2, 1)}
+        tg, tbilgi = p16.tagline_plaka(s, {"prof": S["prof"]}, tagline)
+        tx, ty = (int(round(p16.NORM_W / 2 - tg.width / 2)), int(round(s["tag_y"] - tg.height / 2)))
+        t.alpha_composite(tg, (tx, ty))
+        p16.isaretle(yeni_maske, np.asarray(tg)[..., 3] > 8, tx, ty)
+        for ad, (px, py) in yer.items():
+            o = S["oge"][ad]
+            p16.isaretle(yeni_maske, o["maske"] > 0.02, int(round(px - o["pay"][0])), int(round(py - o["pay"][1])))
+        ker = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * p16.KAPI_PAY + 1,) * 2)
+        yeni_genis = cv2.dilate(yeni_maske, ker).astype(bool)
+        bilgi = {"olcek": round(olcek, 3), "punto": [pl["sol"][1], pl["sag"][1]],
+                 "genislik": [w["sol"], w["sag"]], "satir": round(toplam, 1),
+                 "kenar": [x0, p16.NORM_W - x0 - toplam], "satir_merkez": round(x0 + toplam / 2, 1),
+                 "isim_geometri": isim_geometri, "isim_kutu": isim_kutu, "tagline": tbilgi,
+                 "yerlesim": 'olcekli (2400 x k)'}
+        return t.convert("RGB"), bilgi, merkez, x, yeni_genis
 
 
 # ------------------------------------------------------------------ hibrit baski dosyasi
