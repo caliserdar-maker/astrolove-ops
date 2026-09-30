@@ -50,6 +50,6 @@ jobs:
             fi
           fi
       - name: Olcek tanisi (salt okur, yalniz log)
-        run: python scripts/medya_v1/olcek_tani.py
+        run: python scripts/medya_v1/kalinti_tani.py
       - if: ${{ always() }}
         run: rm -rf ~/.config/rclone
