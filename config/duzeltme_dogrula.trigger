@@ -1,0 +1,1 @@
+# duzeltme dogrulama 2026-09-30T10:29:38Z
