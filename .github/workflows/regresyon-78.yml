@@ -1,0 +1,128 @@
+name: regresyon-78
+
+# REGRESYON (Serdar 30 Eyl): 78 cift x 4 renk (MB, DB, PW, CI; WP haric) x 11x14, EMILY / JAMES siparisi.
+# eski = merge ONCESI siparis-baski-v1 (2fbdf57), yeni = merge SONRASI siparis-baski-v1. Ayni hucreler, ayni
+# girdiler; kural: eskide PASS olan hicbir hucre yenide FAIL olmamali (regresyon_karsilastir.py).
+# Salt okur: yalniz rapor Drive TEMP/REGRESYON_78x4_<damga>/REGRESYON.md. Etsy / Prodigi / musteri YOK.
+# Tetik: config/regresyon_78.trigger degisikligi (bu dal).
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [claude/gracious-meitner-i72rkr]
+    paths:
+      - config/regresyon_78.trigger
+
+concurrency: regresyon-78
+
+env:
+  ESKI_REF: 2fbdf57798d67f51756994cbac691b95ed7ddc46
+  YENI_REF: siparis-baski-v1
+  TUM: "MIDNIGHT_BLUE,DEEP_BLACK,PURE_WHITE,CHAMPAGNE_IVORY:11x14"
+  PARCA_N: "6"
+
+jobs:
+  olc:
+    strategy:
+      fail-fast: false
+      max-parallel: 12
+      matrix:
+        kod: [eski, yeni]
+        parca: [0, 1, 2, 3, 4, 5]
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Kod (${{ matrix.kod }})
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.kod == 'eski' && env.ESKI_REF || env.YENI_REF }}
+          path: _kod
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Python bagimliliklari
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet --upgrade pip
+          python -m pip install --quiet pillow opencv-python-headless numpy fonttools img2pdf pikepdf
+      - name: rclone kur
+        run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then echo "HATA: RCLONE_CONF_B64 yok" >&2; exit 1; fi
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Olcum (salt okur)
+        run: |
+          set -euo pipefail
+          cp scripts/medya_v1/kapi_olc.py _kod/scripts/medya_v1/kapi_olc.py
+          cd _kod
+          git -C . log --oneline -1
+          python scripts/medya_v1/kapi_olc.py --etiket "${{ matrix.kod }}" --tum "$TUM" \
+            --parca "${{ matrix.parca }}/$PARCA_N" --cikti "$GITHUB_WORKSPACE/sonuc_${{ matrix.kod }}_${{ matrix.parca }}.jsonl" \
+            | grep -v '^OLC '
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: sonuc_${{ matrix.kod }}_${{ matrix.parca }}
+          path: sonuc_${{ matrix.kod }}_${{ matrix.parca }}.jsonl
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
+
+  karsilastir:
+    needs: olc
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/download-artifact@v4
+        with:
+          path: sonuc
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Karsilastir + rapor (Drive TEMP)
+        run: |
+          set -uo pipefail
+          mkdir -p e y
+          cp sonuc/sonuc_eski_*/*.jsonl e/ 2>/dev/null || true
+          cp sonuc/sonuc_yeni_*/*.jsonl y/ 2>/dev/null || true
+          python3 scripts/medya_v1/regresyon_karsilastir.py --eski e --yeni y --md REGRESYON.md; rc=$?
+          D=$(date -u +%Y%m%d_%H%M)
+          mkdir -p rapor && cp REGRESYON.md rapor/ && cat e/*.jsonl > rapor/eski.jsonl && cat y/*.jsonl > rapor/yeni.jsonl
+          rclone copy rapor "gdrive:ASTROLOVE/TEMP/REGRESYON_78x4_$D"
+          echo "rapor: TEMP/REGRESYON_78x4_$D/REGRESYON.md"
+          exit $rc
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone

@@ -27,13 +27,23 @@ def al(d, *ks):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--isler', required=True)
+    ap.add_argument('--isler', default='')
+    ap.add_argument('--tum', default='', help='RENK1,RENK2,..:BOY -> POD_PRINT\'teki tum ciftler (regresyon)')
+    ap.add_argument('--parca', default='0/1', help='i/n: tum listenin i::n dilimi')
+    ap.add_argument('--cikti', default='', help='sonuc JSONL dosyasi')
     ap.add_argument('--etiket', default='')
     a = ap.parse_args()
     sd.kisisel_hazirla()
     P_ed, P_blue = sd.EdisyonPoster(), sd.BluePoster()
-    no, _ = sd.sayfa_no_tablosu()
-    isler = [x.strip() for x in a.isler.split(';') if x.strip()]
+    no, ciftler = sd.sayfa_no_tablosu()
+    if a.tum:
+        renkler, boy_ = a.tum.split(':')
+        i, n_ = (int(v) for v in a.parca.split('/'))
+        tum = [f'{c}:{r}:{boy_}' for c in ciftler for r in renkler.split(',')]
+        isler = tum[i::n_]
+    else:
+        isler = [x.strip() for x in a.isler.split(';') if x.strip()]
+    fo = open(a.cikti, 'w') if a.cikti else None
     T0 = time.time()
     for n, is_ in enumerate(isler, 1):
         p = is_.split(':')
@@ -76,6 +86,8 @@ def main():
             r['durum'] = 'HATA'; r['hata'] = f'{type(e).__name__}: {str(e)[:200]}'
         g = time.time() - T0
         print('OLC', json.dumps(r, ensure_ascii=False, default=str), flush=True)
+        if fo:
+            fo.write(json.dumps(r, ensure_ascii=False, default=str) + '\n'); fo.flush()
         print(f"[{n}/{len(isler)}] {a.etiket} {cift} {renk} {boy} {r['tur']}: "
               f"{'PASS' if r.get('gecti') else 'FAIL'} kalan={r.get('kalan')} {r.get('hata') or ''} "
               f"| gecen {g:.0f}s | kalan ~{g / n * (len(isler) - n):.0f}s | %{100 * n // len(isler)}", flush=True)
