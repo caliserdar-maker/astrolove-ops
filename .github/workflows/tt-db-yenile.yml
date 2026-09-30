@@ -1,0 +1,102 @@
+name: tt-db-yenile
+
+# TAURUS_TAURUS Deep Black 11x14 yenileme (Serdar onayi 30 Eyl 2026). Kaynak: Drive
+# TEMP/TT_DB_ONAY/CANVA_EXPORT/TAURUS_TAURUS_DB_11x14_s76.jpg (Canva DAHPcxEOzDc s.76, duz siyah zemin).
+# Sira: 1) dogrula (3300x4200, s.76 onizlemesi, oge konumlari) FAIL -> DUR, hicbir yere yazilmaz
+#       2) yedek TEMP/POD_PRINT_YEDEK_<damga>/ (POD TT/DEEP_BLACK 13 dosya + ORIGINAL_HIGH_RES DB/11X14/TT) + rclone check
+#       3) test: POD 11x14 uretimi, zemin p50 <= 4, EMILY/JAMES siparis tum kapilar (FAIL -> yazilmaz)
+#       4) yaz: yalniz ORIGINAL_HIGH_RES/DEEP_BLACK/11X14/TAURUS_TAURUS.jpg + POD_PRINT/TAURUS_TAURUS/DEEP_BLACK/11x14.jpg,
+#          geri okuma (rclone check) + diger 12 boy yedekle birebir (rclone check).
+# Etsy'ye dokunmaz. Imzali URL yok.
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [claude/gracious-meitner-i72rkr]
+    paths:
+      - config/tt_db_yenile.trigger
+
+concurrency: siparis-plates
+
+jobs:
+  is:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Python bagimliliklari
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet --upgrade pip
+          python -m pip install --quiet pillow opencv-python-headless numpy fonttools img2pdf pikepdf
+      - name: rclone kur
+        run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then echo "HATA: RCLONE_CONF_B64 yok" >&2; exit 1; fi
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Indir (salt okur)
+        run: |
+          set -euo pipefail
+          G=gdrive:ASTROLOVE
+          mkdir -p tt
+          rclone copyto "$G/TEMP/TT_DB_ONAY/CANVA_EXPORT/TAURUS_TAURUS_DB_11x14_s76.jpg" tt/export.jpg
+          rclone copyto "$G/WALL_ART/POSTERS/ORIGINAL_HIGH_RES/DEEP_BLACK/11X14/TAURUS_TAURUS.jpg" tt/eski_orj.jpg
+          rclone copyto "$G/TEMP/POD_PRINT/TAURUS_TAURUS/DEEP_BLACK/11x14.jpg" tt/eski_pod.jpg
+          rclone copyto "$G/TEMP/POD_PRINT/SCORPIO_VIRGO/DEEP_BLACK/11x14.jpg" tt/komsu_pod.jpg
+          rclone copyto "$G/TEMP/PRODIGI/PRODIGI_HPR_PRINT_AREAS.json" tt/sizes.json
+          ls -l tt
+          echo "galeri kaynak onbellegi (TT):"; rclone lsl "$G/TEMP/GALERI_77/_KAYNAK/TAURUS_TAURUS" 2>/dev/null || echo "  (yok)"
+          echo "HAZIR.csv TT satiri:"; rclone cat "$G/TEMP/GALERI_77/HAZIR.csv" 2>/dev/null | grep -i TAURUS_TAURUS || echo "  (yok)"
+      - name: 1) Dogrula (FAIL -> DUR)
+        run: |
+          python scripts/medya_v1/tt_db_yenile.py --asama dogrula --export tt/export.jpg --eski-orj tt/eski_orj.jpg \
+            --onizleme config/tt_db/onay/2_SONRA_TT_s76_CANVA_RENDER.png
+      - name: 2) Yedek + rclone check
+        run: |
+          set -euo pipefail
+          G=gdrive:ASTROLOVE; D=$(date -u +%Y%m%dT%H%M%SZ); Y="$G/TEMP/POD_PRINT_YEDEK_$D"
+          echo "YEDEK=$Y" >> "$GITHUB_ENV"
+          rclone copy "$G/TEMP/POD_PRINT/TAURUS_TAURUS/DEEP_BLACK" "$Y/TAURUS_TAURUS/DEEP_BLACK"
+          rclone check "$G/TEMP/POD_PRINT/TAURUS_TAURUS/DEEP_BLACK" "$Y/TAURUS_TAURUS/DEEP_BLACK"
+          rclone copyto "$G/WALL_ART/POSTERS/ORIGINAL_HIGH_RES/DEEP_BLACK/11X14/TAURUS_TAURUS.jpg" "$Y/ORIGINAL_HIGH_RES/DEEP_BLACK/11X14/TAURUS_TAURUS.jpg"
+          rclone check "$G/WALL_ART/POSTERS/ORIGINAL_HIGH_RES/DEEP_BLACK/11X14" "$Y/ORIGINAL_HIGH_RES/DEEP_BLACK/11X14" --include TAURUS_TAURUS.jpg
+          rclone lsl "$Y"
+          echo "yedek: TEMP/POD_PRINT_YEDEK_$D"
+      - name: 3) Test (POD 11x14 + zemin p50 + EMILY/JAMES tum kapilar)
+        run: |
+          python scripts/medya_v1/tt_db_yenile.py --asama test --export tt/export.jpg --eski-orj tt/eski_orj.jpg \
+            --eski-pod tt/eski_pod.jpg --komsu-pod tt/komsu_pod.jpg --sizes tt/sizes.json --yeni-pod tt/yeni/11x14.jpg
+      - name: 4) Yaz (yalniz 11x14) + geri okuma + diger 12 boy birebir
+        run: |
+          set -euo pipefail
+          G=gdrive:ASTROLOVE
+          mkdir -p tt/orj && cp tt/export.jpg tt/orj/TAURUS_TAURUS.jpg
+          rclone copyto tt/orj/TAURUS_TAURUS.jpg "$G/WALL_ART/POSTERS/ORIGINAL_HIGH_RES/DEEP_BLACK/11X14/TAURUS_TAURUS.jpg"
+          rclone copyto tt/yeni/11x14.jpg "$G/TEMP/POD_PRINT/TAURUS_TAURUS/DEEP_BLACK/11x14.jpg"
+          rclone check tt/orj "$G/WALL_ART/POSTERS/ORIGINAL_HIGH_RES/DEEP_BLACK/11X14" --one-way --download
+          rclone check tt/yeni "$G/TEMP/POD_PRINT/TAURUS_TAURUS/DEEP_BLACK" --one-way --download
+          rclone check "$YEDEK/TAURUS_TAURUS/DEEP_BLACK" "$G/TEMP/POD_PRINT/TAURUS_TAURUS/DEEP_BLACK" --exclude 11x14.jpg
+          rclone lsl "$G/TEMP/POD_PRINT/TAURUS_TAURUS/DEEP_BLACK"
+          echo "YAZILDI: ORIGINAL_HIGH_RES/DEEP_BLACK/11X14/TAURUS_TAURUS.jpg + POD_PRINT/TAURUS_TAURUS/DEEP_BLACK/11x14.jpg"
+      - if: ${{ always() }}
+        run: rm -rf tt _siparis ~/.config/rclone
