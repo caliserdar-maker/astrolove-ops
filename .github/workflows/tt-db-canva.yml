@@ -4,7 +4,8 @@ name: tt-db-canva
 # ONCE = POD_PRINT/TAURUS_TAURUS/DEEP_BLACK/11x14.jpg (dokulu), KOMSU = POD_PRINT/SCORPIO_VIRGO/DEEP_BLACK/11x14.jpg,
 # YENI_ZEMIN = config/tt_db/TT_DB_zemin_3300x4200.png (BLACK_11x14 medyan plate, cember yayi silinmis; Canva'ya
 # yuklenecek zemin), SONRA_SIMULASYON = ONCE'nin ogeleri YENI_ZEMIN uzerinde (Canva ciktisi DEGIL, yaklasik).
-# Salt okur POD_PRINT; yazma yalniz TEMP/TT_DB_ONAY. Etsy'ye dokunmaz.
+# 30 Eyl: Canva DAHPcxEOzDc s.76 zemini MAHWsBpuP5A ile degisti; CANVA_GERCEK_RENDER = Canva'nin kendi sayfa
+# renderlari (once s.76 / sonra s.76 / komsu s.75, 396x504, gercek oran 3300:4200). POD_PRINT'e YAZMAZ. Etsy'ye dokunmaz.
 
 permissions:
   contents: read
@@ -43,45 +44,16 @@ jobs:
               echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
             fi
           fi
-      - name: Onay paketi -> Drive TEMP/TT_DB_ONAY
+      - name: Gercek Canva render -> Drive TEMP/TT_DB_ONAY/CANVA_GERCEK_RENDER
         run: |
           set -euo pipefail
-          mkdir -p dl
-          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_PRINT/TAURUS_TAURUS/DEEP_BLACK/11x14.jpg" dl/1_ONCE_TAURUS_TAURUS_DB_11x14.jpg
-          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_PRINT/SCORPIO_VIRGO/DEEP_BLACK/11x14.jpg" dl/3_KOMSU_SCORPIO_VIRGO_DB_11x14.jpg
-          cp config/tt_db/TT_DB_zemin_3300x4200.png dl/TT_DB_YENI_ZEMIN_3300x4200.png
-          python3 - <<'PY'
-          import numpy as np
-          from PIL import Image, ImageDraw, ImageFilter
-          once = Image.open('dl/1_ONCE_TAURUS_TAURUS_DB_11x14.jpg').convert('RGB')
-          zem = Image.open('dl/TT_DB_YENI_ZEMIN_3300x4200.png').convert('RGB')
-          # POD boyuna (pod_print_build ile ayni: 4191'e merkez kirp + olcek)
-          z = np.asarray(zem)[4:4195]
-          zem = Image.fromarray(z).resize(once.size, Image.LANCZOS)
-          A = np.asarray(once).astype(np.float32); Z = np.asarray(zem).astype(np.float32)
-          L = A @ np.array([0.299, 0.587, 0.114], np.float32)
-          bg = np.asarray(Image.fromarray(np.clip(L, 0, 255).astype(np.uint8)).filter(ImageFilter.MedianFilter(31))).astype(np.float32)
-          # oge alfasi: dokulu zemine gore parlaklik farki (altin ogeler); doku (fark < 12) -> 0, oge cekirdegi -> 1
-          a = np.clip((L - bg - 12) / 40.0, 0, 1)[..., None]
-          S = A * a + Z * (1 - a)
-          Image.fromarray(np.clip(S, 0, 255).astype(np.uint8)).save('dl/2_SONRA_SIMULASYON_TAURUS_TAURUS_DB_11x14.jpg', quality=95)
-          yol = ['dl/1_ONCE_TAURUS_TAURUS_DB_11x14.jpg', 'dl/2_SONRA_SIMULASYON_TAURUS_TAURUS_DB_11x14.jpg',
-                 'dl/3_KOMSU_SCORPIO_VIRGO_DB_11x14.jpg']
-          ims = [Image.open(p).convert('RGB') for p in yol]
-          H = 1600
-          pr = [im.resize((round(im.width * H / im.height), H), Image.LANCZOS) for im in ims]
-          W = sum(p.width for p in pr) + 40 * (len(pr) + 1)
-          t = Image.new('RGB', (W, H + 90), (236, 236, 236)); d = ImageDraw.Draw(t); x = 40
-          for p, y in zip(pr, yol):
-              t.paste(p, (x, 40)); d.text((x, H + 55), y.split('/')[-1], fill=(20, 20, 20)); x += p.width + 40
-          t.save('dl/UCLU_KARSILASTIRMA.jpg', quality=92)
-          def p50(x, y):
-              return float(np.median(np.abs(np.asarray(x).astype(float) - np.asarray(y).astype(float)).mean(2)))
-          print('zemin farki p50 (dosya vs yeni zemin): ONCE', round(p50(once, zem), 1),
-                'SONRA_SIM', round(p50(Image.open(yol[1]), zem), 1), 'KOMSU', round(p50(ims[2], zem), 1))
-          PY
-          rclone copy dl "gdrive:ASTROLOVE/TEMP/TT_DB_ONAY" --transfers 4
-          rclone check dl "gdrive:ASTROLOVE/TEMP/TT_DB_ONAY" --one-way
-          rclone lsl "gdrive:ASTROLOVE/TEMP/TT_DB_ONAY"
+          K="gdrive:ASTROLOVE/TEMP/TT_DB_ONAY"
+          # onceki simulasyon (Canva ciktisi degil) karismasin: _ESKI_SIMULASYON altina tasinir
+          for f in 2_SONRA_SIMULASYON_TAURUS_TAURUS_DB_11x14.jpg UCLU_KARSILASTIRMA.jpg; do
+            rclone moveto "$K/$f" "$K/_ESKI_SIMULASYON/$f" 2>/dev/null || true
+          done
+          rclone copy config/tt_db/onay "$K/CANVA_GERCEK_RENDER"
+          rclone check config/tt_db/onay "$K/CANVA_GERCEK_RENDER" --one-way
+          rclone lsl "$K"
       - if: ${{ always() }}
         run: rm -rf dl ~/.config/rclone
