@@ -28,7 +28,8 @@ if os.environ.get('MESAJ_ESIK'):
     DE_ESIK, KONTRAST_ESIK = map(float, os.environ['MESAJ_ESIK'].split(','))
 
 
-KENAR_SATIR = 0.06    # altin profilin en alt %6'si: kabartma parlak kenari (son "iyi" satir sayilmaz)
+ETKIN = {'edisyon': False}     # tagline ton eslemesi yalniz edisyon (Blue disi) render'inda (siparis_dosyasi)
+TON_SINIR = (0.6, 1.7)
 
 
 def ortak_profil(p1, p2):
@@ -41,13 +42,26 @@ def ortak_profil(p1, p2):
     return ((ra + rb) / 2).astype(np.float32)
 
 
+def ton_esle(img, hedef):
+    """RGBA tagline plakasinin murekkep cekirdegi medyanini hedef renge kanal kazanciyla esler; golge / doku
+    deseni (altin_sekil) korunur, yalniz ton kayar."""
+    a = np.asarray(img).astype(np.float32)
+    cek = a[..., 3] > 200
+    if cek.sum() < 100:
+        return img, None
+    med = np.median(a[cek][:, :3], 0)
+    kaz = np.clip(np.asarray(hedef, np.float32) / np.maximum(med, 1.0), *TON_SINIR)
+    a[..., :3] = np.clip(a[..., :3] * kaz, 0, 255)
+    return Image.fromarray(a.astype(np.uint8), 'RGBA'), [round(float(v), 3) for v in kaz]
+
+
 def duzeltme_uygula(pilot12, pilot16=None):
-    """30 Eyl (Leo / Libra DB mesaj_murekkep, ARIES_LEO PW; tani kosusu 36695282686):
-    1) Altin profilde son "iyi" satir (L >= 0.8 Lmax) aranirken en alttaki KENAR_SATIR payi sayilmaz.
-       LEO / LIBRA profilinin en alt satirlari parlak kabartma kenari; kesim en alta (108-113 / 111-114)
-       dusuyor, alttaki koyu golge bandi tagline'a geciyordu (LEO_LEO mesaj 243,189,66 / isim 253,211,99).
-    2) Tagline profili = iki ismin ortak profili (yalniz sol degil). Sag isim profili soldan cok farkliyken
-       (ARIES_LEO: sag 253,209,96 / sol 244,176,42) isim rengi iki ismin karisimi, mesaj yalniz sol idi."""
+    """30 Eyl (Leo / Libra DB mesaj_murekkep, ARIES_LEO PW; tani 36695282686, dogrulama 36702761868):
+    isimler kendi eski-isim profilleriyle, tagline yalniz SOL profilin kuyruk-duzlestirilmis haliyle ve
+    altin_sekil golgesiyle boyaniyordu; LEO profili acik-sari (253,210,96), ARIES / LIBRA koyu-turuncu.
+    Kapi isim ile mesaj rengini karsilastirir. Duzeltme: tagline plakasi uretildikten sonra murekkep
+    cekirdegi medyani, iki ismin ORTAK profilinin medyanina kanal kazanciyla eslenir (desen korunur).
+    Yalniz edisyon render'inda (ETKIN), Blue yolu degismez (dogrulamada MB gerilemesi olculdu)."""
     eski = getattr(pilot12.kuyruk_duzlestir, 'eski', pilot12.kuyruk_duzlestir)
 
     def kuyruk_duzlestir(prof, oran=0.80):
@@ -55,13 +69,7 @@ def duzeltme_uygula(pilot12, pilot16=None):
         L = p @ LUMA
         med = float(np.median(L))
         if med >= KOYU_L:
-            n = len(L)
-            sin = n - max(int(round(KENAR_SATIR * n)), 1) if n > 10 else n
-            ok = np.nonzero(L[:sin] >= L.max() * oran)[0]
-            if not len(ok):
-                return eski(prof, oran)
-            p[ok[-1] + 1:] = p[ok[-1]]
-            return p, int(ok[-1])
+            return eski(prof, oran)
         ok = np.nonzero(L <= med / oran)[0]
         p[ok[-1] + 1:] = p[ok[-1]]
         return p, int(ok[-1])
@@ -70,10 +78,13 @@ def duzeltme_uygula(pilot12, pilot16=None):
     tp = getattr(pilot12.tagline_plaka, 'eski', pilot12.tagline_plaka)
 
     def tagline_plaka(s, S, metin):
-        pr = S.get('prof') or {}
-        if 'sol' in pr and 'sag' in pr:
-            S = {**S, 'prof': {**pr, 'sol': ortak_profil(pr['sol'], pr['sag'])}}
-        return tp(s, S, metin)
+        img, bilgi = tp(s, S, metin)
+        pr = (S or {}).get('prof') or {}
+        if ETKIN['edisyon'] and 'sol' in pr and 'sag' in pr:
+            hedef = np.median(ortak_profil(pr['sol'], pr['sag']), 0)
+            img, kaz = ton_esle(img, hedef)
+            bilgi = {**bilgi, 'ton_kazanci': kaz}
+        return img, bilgi
     tagline_plaka.eski = tp
     pilot12.tagline_plaka = tagline_plaka
     if pilot16 is not None and hasattr(pilot16, 'tagline_plaka'):

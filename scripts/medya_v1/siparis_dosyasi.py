@@ -441,9 +441,14 @@ class EdisyonPoster:
         r = gd.siparis_dogrula(isimler[0], isimler[1], mesaj, None)
         if r['durum'] != 'TAMAM':
             return None, None, None, None, {'durum': 'ELLE KONTROL', 'dogrulama': r}
-        with _HamKayit(self.p16) as hk:
-            p, bilgi, merkez, x, yeni = self.p16.poster_kur(
-                s, S, {'sol': r['sol']['deger'], 'sag': r['sag']['deger']}, mesaj)
+        import mesaj_kapisi
+        mesaj_kapisi.ETKIN['edisyon'] = True       # tagline ton eslemesi yalniz edisyon render'inda
+        try:
+            with _HamKayit(self.p16) as hk:
+                p, bilgi, merkez, x, yeni = self.p16.poster_kur(
+                    s, S, {'sol': r['sol']['deger'], 'sag': r['sag']['deger']}, mesaj)
+        finally:
+            mesaj_kapisi.ETKIN['edisyon'] = False
         return s, S, p, (merkez, yeni), {'olcek': bilgi['olcek'], 'punto': bilgi['punto'],
                                          'yeni_ham': hk.maske()}
 
@@ -932,7 +937,23 @@ def isim_kenar_kapisi(once, sonra, koruma, satir, sutun, k):
             'halka_px': d, 'olcut': 'korunan (ham maske) 0 degisim; halkada guclu harf murekkebi 0 degisim'}
 
 
-def isim_bandi_temizle(out, yeni, olcum, ham=False):
+ALAN_PAY = 6               # render bolgesi (degisim maskesi) genisletmesi, 2400 px
+
+
+def _alan_tam(alan, boyut):
+    """Render bolgesi (ek['maske'], degisim maskesi) baski boyunda + ALAN_PAY. 30 Eyl WP AQUARIUS_CANCER:
+    bu bolgenin DISI kaynak dosyanin kendisidir (eski isim kalintisi orada olamaz); dokulu zeminde temizlik
+    ve kapi orada kaynak dokusunu iz sayip leke / isim_kenar kapilarini dusuruyordu."""
+    if alan is None:
+        return None
+    import cv2
+    Wd, H = boyut
+    m = _yeni_tam(np.asarray(alan, np.float32), (Wd, H), ham=True)
+    p = max(int(round(ALAN_PAY * Wd / 2400.0)), 1)
+    return cv2.dilate(m.astype(np.uint8), np.ones((2 * p + 1,) * 2, np.uint8)) > 0
+
+
+def isim_bandi_temizle(out, yeni, olcum, ham=False, alan=None):
     """out: baski boyunda (float32, birlestirilmis). Isim bandinda yeni oge kaydi DISI, bandin ustu ve
     alti seritlerinin capraz karisimi + bandin kendi (murekkepsiz) dusuk frekans tonuyla doldurulur."""
     import cv2
@@ -974,7 +995,11 @@ def isim_bandi_temizle(out, yeni, olcum, ham=False):
     # zemin dokusundan; bilesen >= 2 px; ISIM_KALINTI_PAY px genisletilir. Doku ve harf kenari korunur.
     esik = _iz_esikleri(out, r0, r1, c0, c1, k, Yt)
     altin, soluk, _dL, _ws = _iz_haritasi(kes, k, Yb, esik)
-    iz = ((altin | soluk) & ~Yb).astype(np.uint8)
+    iz = (altin | soluk) & ~Yb
+    Ab = _alan_tam(alan, (Wd, H))
+    if Ab is not None:                                  # 30 Eyl: yalniz render bolgesi (disi kaynagin kendisi)
+        iz &= Ab[r0:r1, c0:c1]
+    iz = iz.astype(np.uint8)
     n_, lab_, st_, _ = cv2.connectedComponentsWithStats(iz, 8)
     iz = np.isin(lab_, [i for i in range(1, n_) if st_[i][4] >= 2])
     pay = max(int(round(ISIM_KALINTI_PAY * k)), 2)
@@ -1001,7 +1026,7 @@ def isim_bandi_temizle(out, yeni, olcum, ham=False):
                  'kalinti_bileseni': int(n_ - 1), 'degisen_px': int((Ef > 0.5).sum()), 'kenar': kenar}
 
 
-def isim_kalinti_kapisi(baski, yeni, olcum, ham=False):
+def isim_kalinti_kapisi(baski, yeni, olcum, ham=False, alan=None):
     """Plate'ten BAGIMSIZ: isim bandinda yeni oge kaydi (+1 px) disinda, yerel zemine gore altin
     murekkep (|L - medyan| > esik ve R-B > 20) varsa FAIL. (BASKI uzerinde)"""
     import cv2
@@ -1024,7 +1049,12 @@ def isim_kalinti_kapisi(baski, yeni, olcum, ham=False):
             d['olcut'] = ('isim bandi, altin murekkep (|dL| > esik ve R-B > 20) VEYA soluk iz (R-B kaymasi > '
                           f'{ISIM_IZ_RB} ve |dL| > {ISIM_IZ_L}), HAM yeni oge maskesi (harfin kendi siniri) disi')
             altin = altin | soluk
-        kal = (altin & ~Yt[r0:r1, c0:c1]).astype(np.uint8)
+        kal = altin & ~Yt[r0:r1, c0:c1]
+        Ab = _alan_tam(alan, (Wd, H))
+        if Ab is not None:
+            kal &= Ab[r0:r1, c0:c1]
+            d['alan'] = 'render bolgesi (degisim maskesi) + %d px' % ALAN_PAY
+        kal = kal.astype(np.uint8)
         n, lab, st, _ = cv2.connectedComponentsWithStats(kal, 8)
         en_az = max(int(round(ISIM_KALINTI_ALAN * k * k)), 2)
         parca = [{'x': int(st[i][0] + c0), 'y': int(st[i][1] + r0), 'w': int(st[i][2]), 'h': int(st[i][3]),
@@ -1124,7 +1154,7 @@ def baski_dosyasi(poster, ek, tam_sayfa_png, hedef_px):
     temiz = {'uygulandi': False, 'sebep': 'plate / olcum yok'}
     if (ek.get('olcum') or {}).get('isim_bant') and ek.get('yeni') is not None:
         Y, ham = koruma(ek)
-        out, temiz = isim_bandi_temizle(out, Y, ek['olcum'], ham=ham)
+        out, temiz = isim_bandi_temizle(out, Y, ek['olcum'], ham=ham, alan=ek.get('maske'))
     out = np.clip(out, 0, 255).astype(np.uint8)
     return Image.fromarray(out, 'RGB'), {
         'kaynak_px': kaynak_px, 'baski_px': list(hedef_px),
@@ -1656,7 +1686,8 @@ def pod_uret(sip, kaynak_bayt, P_blue, P_ed, cik):
     baski, bpx = tek_dosya(poster, bi, ek, kaynak_bayt, sip['hedef_px'], cik / ad)
     bi['leke_kapisi'] = leke_kapisi(baski, kaynak_bayt, ek['maske'])
     bi['olcek_kapisi'] = olcek_kapisi_baski(baski, ek.get('p0', poster), bi['olcum']['isim_bant'])
-    bi['isim_kalinti_kapisi'] = isim_kalinti_kapisi(baski, *koruma(ek)[:1], bi['olcum'], ham=koruma(ek)[1])
+    bi['isim_kalinti_kapisi'] = isim_kalinti_kapisi(baski, *koruma(ek)[:1], bi['olcum'], ham=koruma(ek)[1],
+                                                    alan=ek.get('maske'))
     bi['isim_kenar_kapisi'] = (bpx.get('isim_bandi_temizligi') or {}).get('kenar')
     if _TANI is not None:                         # baski_tani.py: goruntuler (kapiya etkisi yok)
         _TANI.update({'baski': baski, 'p0': ek.get('p0', poster), 'poster': poster, 'yeni': ek.get('yeni'),
@@ -1701,7 +1732,7 @@ def _dijital_is(arg):
         bi['olcek_kapisi'] = olcek_kapisi_baski(baski, ek.get('p0', poster),
                                                 bi['olcum']['isim_bant'])
         bi['isim_kalinti_kapisi'] = isim_kalinti_kapisi(baski, *koruma(ek)[:1], bi['olcum'],
-                                                        ham=koruma(ek)[1])
+                                                        ham=koruma(ek)[1], alan=ek.get('maske'))
         bi['isim_kenar_kapisi'] = (bpx.get('isim_bandi_temizligi') or {}).get('kenar')
         kapilar, ayrinti = kapilari_topla(bi, isimler, mesaj, bpx['baski_px'], hedef)
         kayit = {'durum': 'URETILDI', 'boy': boy, **bpx, 'kapilar': kapilar,
