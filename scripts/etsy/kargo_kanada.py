@@ -6,7 +6,9 @@
   --mod yaz  : ETSY'YE YAZAR (--confirm KANADA). Profil basina: tam profil YEDEK (yerel + --yedek-drive, dogrulanir) ->
                yalniz CA hedefi DELETE -> geri okuma: CA yok, diger hedefler (ulke/bolge, ucret, gun) birebir ayni.
                Ilk FAIL'de DUR. Ilan, dijital ilan ve diger profil alanlarina dokunulmaz.
-Kullanim: kargo_kanada.py --mod kuru|yaz --out OUT [--confirm KANADA] [--yedek-drive gdrive:...]
+  --confirm KANADA_VE_DIGER (Serdar onayi 30 Eyl): CA ile birlikte "everywhere else" hedefi de silinir (BLOK kalkar);
+               kalan hedefler (US, GB, eu, AU...) birebir ayni kalmali, US hedefi zorunlu.
+Kullanim: kargo_kanada.py --mod kuru|yaz --out OUT [--confirm KANADA|KANADA_VE_DIGER] [--yedek-drive gdrive:...]
 """
 import argparse
 import csv
@@ -51,8 +53,9 @@ def main():
     ap.add_argument("--ids", default=str(KOK / "data/pod/pod78_ids.csv"))
     a = ap.parse_args()
     yaz = a.mod == "yaz"
-    if yaz and a.confirm != "KANADA":
-        raise SystemExit("HATA: --mod yaz icin --confirm KANADA gerekir.")
+    ew_sil = a.confirm == "KANADA_VE_DIGER"
+    if yaz and a.confirm not in ("KANADA", "KANADA_VE_DIGER"):
+        raise SystemExit("HATA: --mod yaz icin --confirm KANADA veya KANADA_VE_DIGER gerekir.")
     from etsy_common import Etsy, TokenStore, mask
     k, s = os.environ.get("ETSY_API_KEY", ""), os.environ.get("ETSY_SHARED_SECRET", "")
     mask(k); mask(s)
@@ -95,18 +98,21 @@ def main():
         md.append(f"- Profil {pid} '{P0.get('title')}': {len(lids)} POD ilan, POD disi {diger[pid]} ilan | hedefler: "
                   + ", ".join(sorted((x.get('destination_country_iso') or x.get('destination_region') or 'none') for x in hedefler(P0)))
                   + f" | CA hedefi {len(c)} | everywhere-else {len(e)}")
-        if e:
+        if e and not ew_sil:
             blok.append(f"profil {pid}: 'everywhere else' hedefi var; CA silinirse Kanada o hedefe duser (kapanmaz)")
-        if not c:
+        if not c and not (e and ew_sil):
             sonuc[pid] = "ZATEN (CA hedefi yok)" if not e else "BLOK"
             continue
-        sonuc[pid] = "PLAN"
+        sonuc[pid] = "PLAN" + (" (CA + everywhere else silinecek)" if ew_sil else "")
     # yazma: ONCE tum profiller kontrol edildi; BLOK varsa hicbir profile yazilmaz
-    for pid in [p for p, v in sonuc.items() if v == "PLAN"] if (yaz and not blok) else []:
+    for pid in [p for p, v in sonuc.items() if v.startswith("PLAN")] if (yaz and not blok) else []:
         P0 = api.get(f"/shops/{shop}/shipping-profiles/{pid}") or {}
-        c = ca(P0)
-        if everywhere(P0) or not c:
+        c = ca(P0) + (everywhere(P0) if ew_sil else [])
+        if (everywhere(P0) and not ew_sil) or not c:
             sonuc[pid] = "FAIL canli profil kontrolden sonra degisti"; break
+        kalan0 = [x for x in hedefler(P0) if x not in c]
+        if not any((x.get("destination_country_iso") or "").upper() == "US" for x in kalan0):
+            sonuc[pid] = "FAIL silme sonrasi US hedefi kalmiyor"; break
         # yedek
         yd = out / "YEDEK"; yd.mkdir(parents=True, exist_ok=True)
         f = yd / f"profil_{pid}.json"
@@ -123,11 +129,13 @@ def main():
         for _ in range(TEKRAR):
             time.sleep(BEKLE)
             P1 = api.get(f"/shops/{shop}/shipping-profiles/{pid}") or {}
-            if not ca(P1):
+            if not ca(P1) and not (ew_sil and everywhere(P1)):
                 break
         sorun = []
         if ca(P1):
             sorun.append("CA hedefi hala var")
+        if ew_sil and everywhere(P1):
+            sorun.append("everywhere else hedefi hala var")
         if sorted(hedef_imza(x) for x in hedefler(P1)) != digerleri0:
             sorun.append("diger hedefler degisti")
         for alan in ("title", "origin_country_iso", "origin_postal_code", "min_processing_days", "max_processing_days"):
@@ -138,7 +146,7 @@ def main():
             sonuc[pid] = f"FAIL {sorun}"
             md.append(f"- Profil {pid}: FAIL {sorun}")
             break
-        sonuc[pid] = "YAZILDI (CA silindi, diger hedefler birebir ayni)"
+        sonuc[pid] = "YAZILDI (CA" + (" + everywhere else" if ew_sil else "") + " silindi, diger hedefler birebir ayni)"
     md += ["", f"- Sonuc: {sonuc}", f"- BLOK: {blok or 'yok'}", f"- Etsy cagrisi {api.calls} | kota son {api.remaining}"]
     (out / "RAPOR.md").write_text("\n".join(md) + "\n")
     log("\n".join(md))
