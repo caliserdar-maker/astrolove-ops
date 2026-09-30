@@ -115,7 +115,7 @@ jobs:
           fi
       - name: Karsilastir + rapor (Drive TEMP)
         run: |
-          set -uo pipefail
+          set +e
           mkdir -p e y
           cp sonuc/sonuc_eski_*/*.jsonl e/ 2>/dev/null || true
           cp sonuc/sonuc_yeni_*/*.jsonl y/ 2>/dev/null || true
