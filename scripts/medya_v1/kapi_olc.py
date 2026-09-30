@@ -74,7 +74,7 @@ def main():
                            for y in ('sol', 'sag')},
                 'temiz_ara': {q: al(s, 'temiz_ara_kapisi', q) for q in ('en_ort', 'en_tepe', 'kotu_blok', 'blok', 'ornek')},
                 'kalinti': {q: al(s, 'kalinti_kapisi', q) for q in ('en_ort', 'en_tepe', 'kotu_blok')},
-                'olcek': {q: al(s, 'olcek_kapisi', q) for q in ('konum_fark_px', 'kenar_fark_px', 'esik', 'fark', 'sebep')},
+                'olcek': {q: al(s, 'olcek_kapisi', q) for q in ('konum_fark_px', 'kenar_fark_px', 'esik', 'fark', 'sebep', 'olcekli_deneme', 'yerlesim', 'ilk_yerlesim', 'k')},
                 'leke': {q: al(s, 'leke_kapisi', q) for q in ('p99', 'en_kotu_blok_p99', 'en_kotu_blok_yeri')},
                 'isim_kalinti': {q: al(s, 'isim_kalinti_kapisi', q) for q in ('kalinti_sayisi', 'kalintilar', 'esikler')},
                 'isim_kenar': {q: al(s, 'isim_kenar_kapisi', q) for q in ('kesilen_harf_px', 'harf_murekkebi_koruma_icinde', 'guclu_esik')},
