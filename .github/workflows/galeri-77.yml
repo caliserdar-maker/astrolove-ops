@@ -9,8 +9,9 @@ name: galeri-77
 # Cikti: TEMP/GALERI_77/<CIFT>/ (19 jpg + ALT_METIN.csv + SET.json), _QC/<CIFT>/ (QC.txt, TEMAS), _HAZIR/<CIFT>.csv ->
 #   her biten cift sonrasi TEMP/GALERI_77/HAZIR.csv yeniden yazilir (etsy oturumu buradan yukler). QC FAIL cift atlanir.
 # WP (Warm Parchment) EMILY/JAMES baskisi hattan KAPI gecmezse: isimsiz WP KULLANILMAZ (Serdar 28 Eyl); 05 ve 19 haric
-#   17 gorsel QC'lenip <CIFT>/ klasorune yazilir, _WPBEKLE/<CIFT>.txt, HAZIR satiri yok. WP plate'leri yenilenince ayni
-#   'tam' kosusu WP'yi uretir, 19 gorseli tamamlar, HAZIR satirini yazar. PW kaynagi degismez, PW yeniden uretilmez.
+#   17 gorsel QC'lenip <CIFT>/ klasorune yazilir, _WPBEKLE/<CIFT>.txt + HAZIR satiri set=17 (Serdar 30 Eyl: galeri WP'yi
+#   beklemez; 05/19 yerine baska gorsel konmaz). WP PASS olunca ayni 'tam' kosusu (wp_dal) WP'yi uretir, 19 gorseli
+#   tamamlar, HAZIR satiri set=19 olur. PW kaynagi degismez, PW yeniden uretilmez.
 # Es zamanli en fazla 4 is (max-parallel 4).
 
 permissions:
@@ -118,6 +119,13 @@ jobs:
           # degisirse o ciftin WP baskisi ve galerisi yeniden (HAZIR satiri olsa bile)
           PLATE_T=$(rclone lsjson "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PLATES/VINTAGE_11x14.png" 2>/dev/null | python3 -c "import json,sys;l=json.load(sys.stdin);print(l[0]['ModTime'] if l else '')" 2>/dev/null)
           echo "WP plate VINTAGE_11x14: $PLATE_T"
+          satir17() {   # HAZIR satiri, set=17 (05 ve 19 yok; isimsiz WP KULLANILMAZ, yerine baska gorsel konmaz)
+            local LID PWT
+            LID=$(awk -F, -v c="$C" '$2==c{print $1}' data/pod/pod78_ids.csv)
+            PWT=$(python3 -c "import json;l=json.load(open('$Y/PW_KAYNAK.json'));print(l[0]['ModTime'][:19] if l else '')" 2>/dev/null)
+            printf '%s,%s,TEMP/GALERI_77/%s/,17,PASS,%s,-,%s,17\n' "$C" "$LID" "$C" "$(date -u +%Y%m%d_%H%M)" "$PWT" | rclone rcat "$G/_HAZIR/$C.csv"
+            bash scripts/pod/galeri77_hazir.sh
+          }
           for C in "${BEN[@]}"; do
             n=$((n+1)); Y=_work/kaynak/$C; mkdir -p $Y; hata=""
             WPP=$(rclone cat "$G/_KAYNAK/$C/WP_PLATE.txt" 2>/dev/null)
@@ -170,7 +178,13 @@ jobs:
             WPV=0; [ -f $Y/BASKI_WARM_PARCHMENT.jpg ] && WPV=1
             if [ -z "$hata" ] && [ "$MOD" = "tam" ] && [ $WPV = 0 ] && [ "$YENIDEN" != "evet" ] \
                && [ -n "$(rclone lsf "$G/_WPBEKLE/$C.txt" 2>/dev/null)" ]; then
-              echo "[$n/$N] $C: 17 gorsel hazir, WP baskisi hala yok (bekliyor)"; BEKLE=$((BEKLE+1)); continue
+              # Serdar 30 Eyl: galeri WP'yi beklemez; 17 gorsel QC PASS cift HAZIR'a set=17 ile girer (yeniden uretmeden)
+              ADET=$(rclone lsf "$G/$C" --include "*.jpg" | wc -l)
+              QSON=$(rclone cat "$G/_QC/$C/QC.txt" 2>/dev/null | tail -1)
+              if [ "$ADET" = 17 ] && [[ "$QSON" == *"17 gorsel"*"| PASS" ]]; then
+                satir17; echo "[$n/$N] $C: 17 gorsel QC PASS, HAZIR set=17 (WP bekliyor)"; BEKLE=$((BEKLE+1)); continue
+              fi
+              echo "$C: _WPBEKLE var ama Drive'da $ADET gorsel / QC '$QSON' -> yeniden uretilir"
             fi
             if [ -z "$hata" ] && [ "$MOD" = "tam" ]; then
               O=_work/out/$C
@@ -181,15 +195,19 @@ jobs:
                 if [ $WPV = 0 ]; then
                   # WP bekliyor: 17 gorsel Drive'da, HAZIR satiri YOK (etsy yuklemez)
                   [ "$ADET" = 17 ] || hata="Drive'da $ADET gorsel (17 bekleniyor)"
-                  [ -z "$hata" ] && echo "17 gorsel QC PASS $(date -u +%Y%m%d_%H%M)" | rclone rcat "$G/_WPBEKLE/$C.txt" && BEKLE=$((BEKLE+1))
-                  rclone deletefile "$G/_HAZIR/$C.csv" -q 2>/dev/null
+                  if [ -z "$hata" ]; then
+                    echo "17 gorsel QC PASS $(date -u +%Y%m%d_%H%M)" | rclone rcat "$G/_WPBEKLE/$C.txt"
+                    satir17; BEKLE=$((BEKLE+1))      # Serdar 30 Eyl: set=17 HAZIR satiri; WP PASS gelince set=19
+                  else
+                    rclone deletefile "$G/_HAZIR/$C.csv" -q 2>/dev/null
+                  fi
                 else
                   LID=$(awk -F, -v c="$C" '$2==c{print $1}' data/pod/pod78_ids.csv)
                   PWT=$(python3 -c "import json;l=json.load(open('$Y/PW_KAYNAK.json'));print(l[0]['ModTime'][:19] if l else '')" 2>/dev/null)
                   [ "$ADET" = 19 ] || hata="Drive'da $ADET gorsel"
                   if [ -z "$hata" ]; then
                     WPK=$(cat $Y/WP_KOD.txt 2>/dev/null || echo hat)
-                    printf '%s,%s,TEMP/GALERI_77/%s/,19,PASS,%s,%s,%s\n' "$C" "$LID" "$C" "$(date -u +%Y%m%d_%H%M)" "$WPK" "$PWT" | rclone rcat "$G/_HAZIR/$C.csv"
+                    printf '%s,%s,TEMP/GALERI_77/%s/,19,PASS,%s,%s,%s,19\n' "$C" "$LID" "$C" "$(date -u +%Y%m%d_%H%M)" "$WPK" "$PWT" | rclone rcat "$G/_HAZIR/$C.csv"
                     rclone deletefile "$G/_WPBEKLE/$C.txt" -q 2>/dev/null
                     bash scripts/pod/galeri77_hazir.sh; TAMAM=$((TAMAM+1))
                   fi
@@ -204,7 +222,7 @@ jobs:
             g=$(( $(date +%s) - t0 ))
             echo "[$n/$N] $C ${hata:-OK} | gecen ${g}s | kalan ~$(( g * (N - n) / n ))s | %$(( n * 100 / N ))"
           done
-          echo "== parca $PARCA: hazir(19) $TAMAM | WP bekleyen(17 hazir) $BEKLE | FAIL ${#FAIL[@]}"; printf '%s\n' "${FAIL[@]}"
+          echo "== parca $PARCA: set=19 $TAMAM | set=17 (WP bekliyor) $BEKLE | FAIL ${#FAIL[@]}"; printf '%s\n' "${FAIL[@]}"
           exit 0
       - if: always()
         run: rm -rf ~/.config/rclone
