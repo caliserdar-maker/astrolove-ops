@@ -46,6 +46,7 @@ class Fake:
 
     def delete(self, path):
         self.calls += 1
+        assert path.startswith("/shops/"), f"yanlis silme ucu (shop yok): {path}"
         iid = int(path.rsplit("/", 1)[1])
         assert any(x["listing_image_id"] == iid for x in self.imgs), f"silinecek {iid} yok"
         self.imgs = [x for x in self.imgs if x["listing_image_id"] != iid]

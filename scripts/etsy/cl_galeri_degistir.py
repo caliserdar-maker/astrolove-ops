@@ -36,15 +36,10 @@ OKUMA_TEKRAR, OKUMA_BEKLE = 8, 4
 QUOTA_MIN = 150  # router rezervi (Serdar 28 Eyl)
 
 
-def gorsel_sil(api, lid, iid):
-    """Silme idempotent (30 Eyl, 4570110121: DELETE -> 404, onceki deneme silmis olabilir). 404 hata sayilmaz;
-    sonuc her zaman sonraki galeri geri okumasiyla (faz1 / faz4) dogrulanir, silinmediyse orada DUR."""
-    try:
-        api.delete(f"/listings/{lid}/images/{iid}")
-    except SystemExit as e:
-        if "-> 404" not in str(e):
-            raise
-        log(f"  gorsel {iid}: DELETE 404 (zaten silinmis), geri okuma dogrulayacak")
+def gorsel_sil(api, shop, lid, iid):
+    """deleteListingImage: DOGRU uc /shops/{shop}/listings/{lid}/images/{iid} (30 Eyl: shop'suz yol 404 donuyordu,
+    gorsel silinmiyordu; faz1 geri okumasi yakaladi, ilana zarar yok). Hata toleransi YOK; sonuc faz1/faz4 okumasiyla dogrulanir."""
+    api.delete(f"/shops/{shop}/listings/{lid}/images/{iid}")
 
 
 def kararli(fn, kosul, tekrar=OKUMA_TEKRAR, bekle=OKUMA_BEKLE):
@@ -173,7 +168,7 @@ def uygula(api, shop, lid, kaynak, altcsv, out, qmin):
     sil1 = [i for i in eski if i != capa]
     log(f"faz1: {len(sil1)} eski silinecek, capa {capa} kalacak (bagli {len(bagli & set(sil1))} tanesi gecici cozulur)")
     for i in sil1:
-        gorsel_sil(api, lid, i)
+        gorsel_sil(api, shop, lid, i)
     g1 = kararli(lambda: galeri(api, lid), lambda g: len(g) == 1)
     if len(g1) != 1 or g1[0].get("listing_image_id") != capa:
         raise SystemExit(f"HATA: faz1 sonrasi galeri {[(x.get('rank'), x.get('listing_image_id')) for x in g1]}. DUR.")
@@ -205,7 +200,7 @@ def uygula(api, shop, lid, kaynak, altcsv, out, qmin):
         raise SystemExit(f"HATA: faz3 renk baglari dogrulanamadi: {v3}. DUR.")
     log(f"faz3: {len(hedef)} renk bagi yeni gorsellerde dogrulandi")
 
-    gorsel_sil(api, lid, capa)
+    gorsel_sil(api, shop, lid, capa)
     beklenen = [yeni[n] for n in siralar]
     g4 = kararli(lambda: galeri(api, lid),
                  lambda g: [x.get("listing_image_id") for x in g] == beklenen and [x.get("rank") for x in g] == list(range(1, N + 1)))
