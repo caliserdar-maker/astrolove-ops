@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        is: [eski, yeni, wp1, wp2]
+        is: [s1, s2, s3, s4]
     runs-on: ubuntu-latest
     timeout-minutes: 150
     steps:
