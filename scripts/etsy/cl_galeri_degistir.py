@@ -28,6 +28,8 @@ import requests
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from etsy_common import Etsy, TokenStore, log, mask  # noqa: E402
 
+TAM19 = list(range(1, 20))
+SET17 = [n for n in TAM19 if n not in (5, 19)]          # 30 Eyl: WP bekleyen ciftler; 05 ve 19 yok, sira CL sirasi
 RENK_SIRA = {"Midnight Blue": 15, "Deep Black": 16, "Pure White": 17, "Champagne Ivory": 18, "Warm Parchment": 19}
 IMG_LIMIT = 20
 OKUMA_TEKRAR, OKUMA_BEKLE = 8, 4
@@ -92,16 +94,17 @@ def kaynak_dosyalar(kaynak):
         if n in yol:
             raise SystemExit(f"HATA: kaynak sira {n} iki dosyada. DUR.")
         yol[n] = p
-    if sorted(yol) != list(range(1, 20)):
-        raise SystemExit(f"HATA: kaynak 1-19 degil: {sorted(yol)}. DUR.")
+    if sorted(yol) not in (TAM19, SET17):
+        raise SystemExit(f"HATA: kaynak 1-19 (set 19) ya da 05 ve 19 haric 17 (set 17) degil: {sorted(yol)}. DUR.")
     return yol
 
 
-def alt_metinler(csv_yol):
+def alt_metinler(csv_yol, siralar=None):
     rows = {int(r["sira"]): r["metin"].strip() for r in csv.DictReader(open(csv_yol, encoding="utf-8"))}
-    if sorted(rows) != list(range(1, 20)) or not all(0 < len(v) <= 250 for v in rows.values()):
-        raise SystemExit("HATA: alt metin CSV 19 satir/250 sinirina uymuyor. DUR.")
-    return rows
+    siralar = list(siralar or TAM19)
+    if not set(siralar) <= set(rows) or not all(0 < len(rows[n]) <= 250 for n in siralar):
+        raise SystemExit(f"HATA: alt metin CSV {len(siralar)} sira/250 sinirina uymuyor. DUR.")
+    return {n: rows[n] for n in siralar}
 
 
 def indir(url, hedef):
@@ -132,7 +135,10 @@ def yedek_al(api, shop, lid, out, cdn_indir=True):
 
 def uygula(api, shop, lid, kaynak, altcsv, out, qmin):
     out = Path(out)
-    yol, alt = kaynak_dosyalar(kaynak), alt_metinler(altcsv)
+    yol = kaynak_dosyalar(kaynak)
+    siralar = sorted(yol); N = len(siralar)
+    alt = alt_metinler(altcsv, siralar)
+    renkler = {r: n for r, n in RENK_SIRA.items() if n in yol}      # set 17: 19 (Warm Parchment) karti yok -> bag yok
     man = json.loads((out / "yedek" / "manifest.json").read_text())
     if man.get("listing_id") != lid:
         raise SystemExit("HATA: yedek manifesti baska ilana ait. DUR.")
@@ -162,43 +168,41 @@ def uygula(api, shop, lid, kaynak, altcsv, out, qmin):
         raise SystemExit(f"HATA: faz1 sonrasi galeri {[(x.get('rank'), x.get('listing_image_id')) for x in g1]}. DUR.")
 
     yeni = {}
-    for n in range(1, 20):
+    for i, n in enumerate(siralar, 1):
         with open(yol[n], "rb") as fh:
             r = api.post_file(f"/shops/{shop}/listings/{lid}/images",
                               files={"image": (yol[n].name, fh, "image/jpeg")},
-                              data={"rank": str(n + 1), "alt_text": alt[n]})
+                              data={"rank": str(i + 1), "alt_text": alt[n]})
         yeni[n] = r.get("listing_image_id")
         if not yeni[n] or yeni[n] in eski:
             raise SystemExit(f"HATA: faz2 sira {n} yukleme id {yeni[n]} (eski id'yle catisti mi?). DUR.")
-        log(f"faz2 [{n}/19] {yol[n].name} -> {yeni[n]} | kota {api.remaining}")
-    g2 = kararli(lambda: galeri(api, lid), lambda g: len(g) == 20)
+        log(f"faz2 [{i}/{N}] {yol[n].name} -> {yeni[n]} | kota {api.remaining}")
+    g2 = kararli(lambda: galeri(api, lid), lambda g: len(g) == N + 1)
     sira2 = [x.get("listing_image_id") for x in g2]
-    if len(g2) != 20 or sira2[0] != capa or sira2[1:] != [yeni[n] for n in range(1, 20)]:
+    if len(g2) != N + 1 or sira2[0] != capa or sira2[1:] != [yeni[n] for n in siralar]:
         raise SystemExit(f"HATA: faz2 sonrasi sira beklenen degil: {sira2}. DUR.")
 
-    vi = [{"property_id": rv[r][0], "value_id": rv[r][1], "image_id": yeni[RENK_SIRA[r]]} for r in RENK_SIRA]
+    vi = [{"property_id": rv[r][0], "value_id": rv[r][1], "image_id": yeni[renkler[r]]} for r in renkler]
     api.post_json(f"/shops/{shop}/listings/{lid}/variation-images", {"variation_images": vi})
-    hedef = {r: yeni[RENK_SIRA[r]] for r in RENK_SIRA}
+    hedef = {r: yeni[renkler[r]] for r in renkler}
 
     def bag_ok(vm):
         vm = {v.get("value"): v.get("image_id") for v in vm}
-        return len(vm) == 5 and all(vm.get(r) == hedef[r] for r in hedef)
+        return len(vm) == len(hedef) and all(vm.get(r) == hedef[r] for r in hedef)
     v3 = kararli(lambda: var_img(api, shop, lid), bag_ok)
     if not bag_ok(v3):
         raise SystemExit(f"HATA: faz3 renk baglari dogrulanamadi: {v3}. DUR.")
-    log("faz3: 5 renk bagi yeni gorsellerde dogrulandi")
+    log(f"faz3: {len(hedef)} renk bagi yeni gorsellerde dogrulandi")
 
     api.delete(f"/listings/{lid}/images/{capa}")
+    beklenen = [yeni[n] for n in siralar]
     g4 = kararli(lambda: galeri(api, lid),
-                 lambda g: [x.get("listing_image_id") for x in g] == [yeni[n] for n in range(1, 20)]
-                 and [x.get("rank") for x in g] == list(range(1, 20)))
-    if [x.get("listing_image_id") for x in g4] != [yeni[n] for n in range(1, 20)] \
-            or [x.get("rank") for x in g4] != list(range(1, 20)):
-        raise SystemExit(f"HATA: faz4 son galeri 1-19'a oturmadi: {[(x.get('rank'), x.get('listing_image_id')) for x in g4]}. DUR.")
+                 lambda g: [x.get("listing_image_id") for x in g] == beklenen and [x.get("rank") for x in g] == list(range(1, N + 1)))
+    if [x.get("listing_image_id") for x in g4] != beklenen or [x.get("rank") for x in g4] != list(range(1, N + 1)):
+        raise SystemExit(f"HATA: faz4 son galeri 1-{N}'e oturmadi: {[(x.get('rank'), x.get('listing_image_id')) for x in g4]}. DUR.")
 
     sorun = []
-    for x in g4:
-        n = x.get("rank")
+    for x, n in zip(g4, siralar):
         if (x.get("alt_text") or "").strip() != alt[n]:
             sorun.append(f"alt {n}")
     kor = korunanlar(api, shop, lid)
@@ -208,7 +212,7 @@ def uygula(api, shop, lid, kaynak, altcsv, out, qmin):
             sorun.append(f"korunan {k}")
     if not bag_ok(var_img(api, shop, lid)):
         sorun.append("renk baglari (son okuma)")
-    rapor = {"sonuc": "PASS" if not sorun else "FAIL", "sorun": sorun, "yeni_idler": yeni,
+    rapor = {"sonuc": "PASS" if not sorun else "FAIL", "sorun": sorun, "listing_id": lid, "set": N, "yeni_idler": yeni,
              "renk_baglari": hedef, "silinen_eski": sil1 + [capa], "kota_son": api.remaining,
              "korunan_once": ref, "korunan_sonra": kor}
     (out / "rapor.json").write_text(json.dumps(rapor, indent=1, ensure_ascii=False))
@@ -234,14 +238,14 @@ def kuru_rapor(api, shop, lid, man, yol, alt, out):
         sorun.append(f"envanterde 5 renk yok: {sorted(rv)}")
     if len(g) < 1:
         sorun.append("galeri bos")
-    if 1 + 19 > IMG_LIMIT:
-        sorun.append("capa + 19 > 20")
-    tahmin = (len(eski) - 1) + 19 + 1 + 1 + 25       # sil + yukle + bag + capa sil + geri okumalar
+    if 1 + len(yol) > IMG_LIMIT:
+        sorun.append(f"capa + {len(yol)} > 20")
+    tahmin = (len(eski) - 1) + len(yol) + 1 + 1 + 25       # sil + yukle + bag + capa sil + geri okumalar
     md = [f"# CL GALERI DEGISIMI - KURU KOSU ({time.strftime('%Y-%m-%d %H:%M UTC', time.gmtime())}) - Etsy'ye yazma YOK", "",
           f"- Ilan {lid}: state **{kor['state']}**, video {len(kor['video_ids'])}, envanter {kor['n_urun']} urun",
           f"- Canli galeri: **{len(g)}** gorsel, {len(man['variation_images'])} renk bagi; kota {api.remaining}",
-          f"- Plan: {len(eski) - 1} eski sil (capa {capa} kalir) -> 19 yeni yukle (sira 2-20) -> 5 renk bagi 15-19 -> capayi sil -> 1-19",
-          f"- Tahmini Etsy cagrisi: ~{tahmin} | 20 gorsel siniri: capa + 19 = 20 (sinirda, asilmiyor)",
+          f"- Plan: {len(eski) - 1} eski sil (capa {capa} kalir) -> {len(yol)} yeni yukle (sira 2-{len(yol) + 1}) -> {sum(1 for n in RENK_SIRA.values() if n in yol)} renk bagi -> capayi sil -> 1-{len(yol)}",
+          f"- Tahmini Etsy cagrisi: ~{tahmin} | 20 gorsel siniri: capa + {len(yol)} = {len(yol) + 1}",
           f"- Kontrol: {'PASS' if not sorun else 'FAIL ' + '; '.join(sorun)}", "",
           "## Canli galeri (silinecek)", "", "| sira | image_id | renk bagi | alt metin |", "|---|---|---|---|"]
     renk_of = {v.get("image_id"): v.get("value") for v in man["variation_images"]}
@@ -250,7 +254,7 @@ def kuru_rapor(api, shop, lid, man, yol, alt, out):
     md += ["", "## Yuklenecek 19 gorsel", "", "| sira | dosya | md5 | renk bagi | alt metin |", "|---|---|---|---|---|"]
     ters = {v: k for k, v in RENK_SIRA.items()}
     md += [f"| {n} | {yol[n].name} | {hashlib.md5(yol[n].read_bytes()).hexdigest()[:10]} | {ters.get(n, '')} | {alt[n]} |"
-           for n in range(1, 20)]
+           for n in sorted(yol)]
     Path(out, "KURU_RAPOR.md").write_text("\n".join(md) + "\n", encoding="utf-8")
     log("\n".join(md[:8]))
     return not sorun
@@ -275,11 +279,12 @@ def main():
     api = Etsy(store)
     api.verbose_quota = True
     if a.mod == "dry-run":
-        yol, alt = kaynak_dosyalar(a.kaynak), alt_metinler(a.alt_csv)
+        yol = kaynak_dosyalar(a.kaynak)
+        alt = alt_metinler(a.alt_csv, sorted(yol))
         man = yedek_al(api, shop, a.listing_id, a.out, cdn_indir=False)
         kuru_rapor(api, shop, a.listing_id, man, yol, alt, a.out)
     elif a.mod == "yedek":
-        kaynak_dosyalar(a.kaynak); alt_metinler(a.alt_csv)
+        alt_metinler(a.alt_csv, sorted(kaynak_dosyalar(a.kaynak)))
         yedek_al(api, shop, a.listing_id, a.out)
     else:
         uygula(api, shop, a.listing_id, a.kaynak, a.alt_csv, a.out, a.quota_min)

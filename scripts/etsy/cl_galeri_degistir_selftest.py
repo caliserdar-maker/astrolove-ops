@@ -136,6 +136,29 @@ def main():
             if r4["sonuc"] != "PASS" or [x["rank"] for x in son4] != list(range(1, 20)) \
                     or len(r4["silinen_eski"]) != n_eski:
                 kotu.append(f"{n_eski} eski senaryosu")
+        # senaryo: set 17 (05 ve 19 yok, WP bekliyor; 30 Eyl) -> 17 gorsel CL sirasiyla, 4 renk bagi, WP bagi yok
+        kd17 = td / "k17"; kd17.mkdir()
+        for f in kd.glob("*.jpg"):
+            if int(f.name[:2]) not in (5, 19):
+                (kd17 / f.name).write_bytes(f.read_bytes())
+        api5 = Fake(); out5 = td / "out17"; out5.mkdir()
+        G.yedek_al(api5, "39729443", LID, out5)
+        r5 = G.uygula(api5, "39729443", LID, kd17, csvyol, out5, 400)
+        son5 = api5.get(f"/listings/{LID}/images")["results"]
+        alt5 = G.alt_metinler(csvyol, G.SET17)
+        vm5 = {v["value"]: v["image_id"] for v in api5.vimg}
+        if r5["sonuc"] != "PASS" or len(son5) != 17 or [x["rank"] for x in son5] != list(range(1, 18)):
+            kotu.append("set17 galeri")
+        if [x["alt_text"] for x in son5] != [alt5[n] for n in G.SET17]:
+            kotu.append("set17 alt/sira")
+        if sorted(vm5) != sorted(r for r in G.RENK_SIRA if r != "Warm Parchment") or any(x["listing_image_id"] <= 114 for x in son5):
+            kotu.append(f"set17 renk baglari {sorted(vm5)}")
+        # senaryo: 05 var 19 yok gibi gecersiz set -> DUR
+        (kd17 / "05_renk_ve_dijital.jpg").write_bytes(b"x")
+        try:
+            G.kaynak_dosyalar(kd17); kotu.append("gecersiz set yakalanmadi")
+        except SystemExit:
+            pass
     print("SELFTEST:", "PASS" if not kotu else "FAIL " + "; ".join(kotu))
     if kotu:
         raise SystemExit(2)
