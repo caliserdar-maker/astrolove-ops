@@ -348,16 +348,8 @@ class IsimPlakasi:
         self.kayit, self.sabit = kayit, sabit
 
     def __call__(self, metin, prof, hedef_cap, olcek=1.0, tam=None):
-        if self.sabit is not None:
-            anahtar = (metin, hedef_cap)
-            if anahtar not in self.sabit and SATIR_OLCEKLI['etkin']:
-                # 1 Eki (CAPRICORN_LEO DB 24x36 cap_sol -1.09): hi-res cap anahtari 2400 kaydiyla eslesmezse
-                # boy yeniden hesaplaniyordu; ikinci denemede ayni metnin 2400 boyu kullanilir.
-                es = [q for q in self.sabit if q[0] == metin]
-                if len(es) == 1:
-                    anahtar = es[0]
-            if anahtar in self.sabit:
-                return plaka_ss(metin, prof, hedef_cap, 1.0, tam=self.sabit[anahtar])
+        if self.sabit is not None and (metin, hedef_cap) in self.sabit:
+            return plaka_ss(metin, prof, hedef_cap, 1.0, tam=self.sabit[(metin, hedef_cap)])
         r = plaka_ss(metin, prof, hedef_cap, olcek, tam)
         if self.kayit is not None:
             self.kayit[(metin, hedef_cap)] = r[2] * olcek
@@ -1188,11 +1180,9 @@ class _SatirYerlesim:
         kay = {'x': dict(x), 'mm': {y: merkez[y] - x[y] for y in ('sol', 'sag')}}
         for y in ('sol', 'sag'):
             pl = p16.plaka(isimler[y], S["prof"][y], s["cap"][y], olcek)[0]
-            al = np.asarray(pl)[..., 3].astype(np.float32)
-            x0_, x1_ = _uc(al.sum(axis=0)); top, _b = _uc(al.sum(axis=1))
+            cx, top = self._kutle(np.asarray(pl)[..., 3])
             px, py = bilgi['isim_kutu'][y][:2]
-            # sayfada: bosluga bakan kenar (sol ismin sagi, sag ismin solu) ve ust kenar
-            kay[f'murekkep_{y}'] = (px + (x1_ if y == 'sol' else x0_), py + top)
+            kay[f'murekkep_{y}'] = (px + cx, py + top)          # sayfada: yatay kutle merkezi, ust kenar
         o = S['oge']['sonsuz']
         mcx, _t = self._kutle(o['maske'])
         kay['sonsuz_murekkep'] = int(round(x['inf'] - o['pay'][0])) + mcx
@@ -1213,12 +1203,9 @@ class _SatirYerlesim:
         # surum uc piksellerden (alfa > 8) hizaliyordu, J / Y kuyruklu isimlerde kapiyla ayrisiyordu.
         x, pyy = {}, {}
         for y in ("sol", "sag"):
-            # 1 Eki iter. 2: isimler bosluga bakan kenarindan hizalanir; iki olcekteki murekkep genisligi farki
-            # (<= 0.9 birim) bosluga degil dis kenara biner (GEMINI_LIBRA DB: merkezden hizada bosluk 1.05).
-            al = np.asarray(pl[y][0])[..., 3].astype(np.float32)
-            x0_, x1_ = _uc(al.sum(axis=0)); top, _b = _uc(al.sum(axis=1))
+            cx, top = self._kutle(np.asarray(pl[y][0])[..., 3])
             mx, my = r[f'murekkep_{y}']
-            x[y] = mx * k - (x1_ if y == 'sol' else x0_)
+            x[y] = mx * k - cx
             pyy[y] = my * k - top
         mcx, _t = self._kutle(inf['maske'])
         x["inf"] = r['sonsuz_murekkep'] * k - mcx + inf['pay'][0]
