@@ -202,11 +202,14 @@ def uygula(api, shop, lid, kaynak, altcsv, out, qmin):
 
     gorsel_sil(api, shop, lid, capa)
     beklenen = [yeni[n] for n in siralar]
-    g4 = kararli(lambda: galeri(api, lid),
-                 lambda g: [x.get("listing_image_id") for x in g] == beklenen and [x.get("rank") for x in g] == list(range(1, N + 1)),
-                 tekrar=OKUMA_TEKRAR * 3)
-    ids4, rk4 = [x.get("listing_image_id") for x in g4], [x.get("rank") for x in g4]
-    if ids4 != beklenen or rk4 != list(range(1, N + 1)):
+    # 30 Eyl olcumu (4570110121, FAZ4_TANI): 17 gorsel dogru sirada ama Etsy rank degerleri bosluklu (1,2,4..18).
+    # Alicinin gordugu SIRADIR; kosul: id sirasi birebir + rank kesin artan (rank numarasinin 1..N olmasi sart degil).
+    def sira_ok(g):
+        r = [x.get("rank") for x in g]
+        return [x.get("listing_image_id") for x in g] == beklenen and all(b > a for a, b in zip(r, r[1:]))
+    g4 = kararli(lambda: galeri(api, lid), sira_ok, tekrar=OKUMA_TEKRAR * 3)
+    ids4 = [x.get("listing_image_id") for x in g4]
+    if not sira_ok(g4):
         # 30 Eyl tani: tam durum dosyaya (ILERLEME notu 300 karakterde kesiliyordu)
         (out / "FAZ4_TANI.json").write_text(json.dumps({
             "beklenen": beklenen, "canli": [(x.get("rank"), x.get("listing_image_id")) for x in g4], "capa": capa,
