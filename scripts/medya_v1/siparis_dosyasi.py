@@ -500,7 +500,7 @@ class EdisyonPoster:
             kilit1 = kilit_olcekle(kilit, k)
             capmap = {kilit['cap'][y]: kilit1['cap'][y] for y in kilit['cap']}
             sabit = {(mt, capmap.get(c, c)): b * k for (mt, c), b in boy0.items()}
-            with IsimPlakasi(sabit=sabit), _SatirYerlesim(self.p16, yer0, k):
+            with IsimPlakasi(sabit=sabit), (_SatirYerlesim(self.p16, yer0, k) if SATIR_OLCEKLI['etkin'] else _SatirYerlesim(self.p16, {})):
                 s1, S1, p1, ek1, bi1 = self.render(ed, oran, sayfa_no, olcekle(o, k),
                                                    kilit1, isimler, mesaj)
             merkez1, yeni1 = ek1
@@ -1137,6 +1137,9 @@ class _HamKayit:
 
     def maske(self):
         return None if self.ham is None else (np.asarray(self.ham) > 0)
+
+
+SATIR_OLCEKLI = {'etkin': False}   # pod_uret: yalniz olcek kapisi FAIL olunca ikinci render (regresyon 36756875368)
 
 
 class _SatirYerlesim:
@@ -1778,6 +1781,29 @@ def pod_uret(sip, kaynak_bayt, P_blue, P_ed, cik):
     baski, bpx = tek_dosya(poster, bi, ek, kaynak_bayt, sip['hedef_px'], cik / ad)
     bi['leke_kapisi'] = leke_kapisi(baski, kaynak_bayt, ek['maske'])
     bi['olcek_kapisi'] = olcek_kapisi_baski(baski, ek.get('p0', poster), bi['olcum']['isim_bant'])
+    # 30 Eyl (GEMINI_LEO DB konum 1.18): olcek FAIL ise isim satiri 2400 yerlesiminden OLCEKLENEREK yeniden
+    # render edilir (_SatirYerlesim); yalniz olcek kapisi o zaman PASS olursa kullanilir. Varsayilan yol
+    # degismez: regresyon 36756875368'de olcekli yerlesim her hucrede kullanilinca 4 DB hucresi PASS->FAIL oldu.
+    if ed != 'blue' and not bi['olcek_kapisi'].get('gecti') and sip['hedef_px'][0] != 2400:
+        SATIR_OLCEKLI['etkin'] = True
+        try:
+            p2, bi2, ek2 = render_et(ed, oran, sip['sayfa'], kaynak_bayt, isimler, mesaj, P_blue, P_ed,
+                                     sip['cift'], ref_boy=sip['boy'], hedef_en=sip['hedef_px'][0], boy=sip['boy'])
+        finally:
+            SATIR_OLCEKLI['etkin'] = False
+        if p2 is not None:
+            gecici = cik / f'_olcekli_{ad}'
+            b2, bpx2 = tek_dosya(p2, bi2, ek2, kaynak_bayt, sip['hedef_px'], gecici)
+            ok2 = olcek_kapisi_baski(b2, ek2.get('p0', p2), bi2['olcum']['isim_bant'])
+            ilk = {q: bi['olcek_kapisi'].get(q) for q in ('konum_fark_px', 'kenar_fark_px')}
+            if ok2.get('gecti'):
+                gecici.replace(cik / ad)
+                poster, bi, ek, baski, bpx = p2, bi2, ek2, b2, bpx2
+                bi['leke_kapisi'] = leke_kapisi(baski, kaynak_bayt, ek['maske'])
+                bi['olcek_kapisi'] = {**ok2, 'yerlesim': 'olcekli (2400 x k)', 'ilk_yerlesim': ilk}
+            else:
+                gecici.unlink(missing_ok=True)
+                bi['olcek_kapisi']['olcekli_deneme'] = {q: ok2.get(q) for q in ('konum_fark_px', 'kenar_fark_px')}
     bi['isim_kalinti_kapisi'] = isim_kalinti_kapisi(baski, *koruma(ek)[:1], bi['olcum'], ham=koruma(ek)[1],
                                                     alan=ek.get('maske'))
     bi['isim_kenar_kapisi'] = (bpx.get('isim_bandi_temizligi') or {}).get('kenar')

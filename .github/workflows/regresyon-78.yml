@@ -1,7 +1,8 @@
 name: regresyon-78
 
 # REGRESYON (Serdar 30 Eyl): 78 cift x 4 renk (MB, DB, PW, CI; WP haric) x 11x14, EMILY / JAMES siparisi.
-# eski = merge ONCESI siparis-baski-v1 (2fbdf57), yeni = merge SONRASI siparis-baski-v1. Ayni hucreler, ayni
+# eski = merge ONCESI siparis-baski-v1 (2fbdf57), yeni = bu dal (2. kosu: olcekli yerlesim yalniz olcek FAIL'de;
+# MB yolu degismedi, 1. kosuda 36756875368 MB 0 PASS->FAIL). Ayni hucreler, ayni
 # girdiler; kural: eskide PASS olan hicbir hucre yenide FAIL olmamali (regresyon_karsilastir.py).
 # Salt okur: yalniz rapor Drive TEMP/REGRESYON_78x4_<damga>/REGRESYON.md. Etsy / Prodigi / musteri YOK.
 # Tetik: config/regresyon_78.trigger degisikligi (bu dal).
@@ -19,8 +20,8 @@ concurrency: regresyon-78
 
 env:
   ESKI_REF: 2fbdf57798d67f51756994cbac691b95ed7ddc46
-  YENI_REF: siparis-baski-v1
-  TUM: "MIDNIGHT_BLUE,DEEP_BLACK,PURE_WHITE,CHAMPAGNE_IVORY:11x14"
+  YENI_REF: claude/gracious-meitner-i72rkr
+  TUM: "DEEP_BLACK,PURE_WHITE,CHAMPAGNE_IVORY:11x14"
   PARCA_N: "6"
 
 jobs:
