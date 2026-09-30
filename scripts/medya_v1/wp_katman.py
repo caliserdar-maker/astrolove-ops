@@ -323,6 +323,90 @@ def plate_onar(P_wp, S_wp, bant_listesi, genislet=21, sigma=12.0, pay=40):
     return np.clip(out, 0, 255), rapor
 
 
+def glif_maskesi(D_ci_tasinmis, esik=ESIK):
+    """Plate'ten BAGIMSIZ glif maskesi: duz CI zemininde (doku yok) murekkep, WP geometrisine tasinmis.
+    Parsomen dokusunda yerel kontrast (> 26) doku beneklerini de glif sayar; CI zemininde bu yok."""
+    return murekkep_maskesi(D_ci_tasinmis, esik=esik, kenar=0)
+
+
+def _halka(g, ic=7, dis=31):
+    import cv2
+    gd = cv2.dilate(g.astype(np.uint8), np.ones((dis, dis), np.uint8)).astype(bool)
+    gi = cv2.dilate(g.astype(np.uint8), np.ones((ic, ic), np.uint8)).astype(bool)
+    return gd & ~gi
+
+
+def plate_iz(P_wp, glif, bant_listesi, kontrol_kayma=None, esik_oran=1.25):
+    """Plate'te eski glif izi: glif pikselleri (CI'dan, dokusuz) vs cevre halkasi.
+    - iz_orani: plate yerel kontrasti glifte / halkada (temiz ~1, iz > 1).
+    - koyulasma: halka L ortalamasi - glif L ortalamasi (iz kahverengi -> pozitif).
+    - kontrol: ayni glif maskesi `kontrol_kayma` satir kaydirilmis (yazisiz yer): olcumun kendi tabani."""
+    import cv2
+    Lp = P_wp @ LUMA
+    zp = cv2.medianBlur(np.clip(Lp, 0, 255).astype(np.uint8), 31).astype(np.float32)
+    lc = np.abs(Lp - zp)
+    H = Lp.shape[0]
+
+    def olc(g, y0, y1):
+        if g.sum() < 200:
+            return None
+        h = _halka(g)
+        return {'iz_orani': round(float(lc[y0:y1][g].mean() / max(lc[y0:y1][h].mean(), 1e-3)), 3),
+                'koyulasma': round(float(Lp[y0:y1][h].mean() - Lp[y0:y1][g].mean()), 2), 'glif_px': int(g.sum())}
+    out = {}
+    for ad, (y0, y1) in bant_listesi.items():
+        g = glif[y0:y1]
+        r = olc(g, y0, y1)
+        if r is None:
+            out[ad] = {'gecti': False, 'sebep': 'glif yok'}
+            continue
+        if kontrol_kayma is not None:
+            ky = kontrol_kayma.get(ad) if isinstance(kontrol_kayma, dict) else kontrol_kayma
+            if ky is not None and 0 <= y0 + ky and y1 + ky <= H:
+                r['kontrol'] = olc(g, y0 + ky, y1 + ky)
+        r['gecti'] = bool(r['iz_orani'] <= esik_oran)
+        out[ad] = r
+    out['gecti'] = all(v.get('gecti') for v in out.values() if isinstance(v, dict))
+    out['esik'] = {'iz_orani_max': esik_oran}
+    return out
+
+
+def plate_onar_glif(P_wp, glif, murekkep, bant_listesi, genislet=21, sigma=12.0, pay=40):
+    """plate_onar ile ayni onarim; R = CI'dan gelen glif maskesi (doku benegi yok), bagis seridi
+    kontrolu = tum sayfanin gercek murekkebi (CI'dan) -> doku yuzunden 'bagis yok' olmaz."""
+    import cv2
+    H = P_wp.shape[0]
+    ink_tum = cv2.dilate(murekkep.astype(np.uint8), np.ones((9, 9), np.uint8)).astype(bool)
+    out = P_wp.copy()
+    rapor = {}
+    for ad, (y0, y1) in bant_listesi.items():
+        g = np.zeros_like(glif); g[y0:y1] = glif[y0:y1]
+        R = cv2.dilate(g.astype(np.uint8), np.ones((genislet, genislet), np.uint8)).astype(bool)
+        if not R.any():
+            rapor[ad] = {'onarildi': False, 'sebep': 'glif yok'}
+            continue
+        ys = np.nonzero(R.any(1))[0]; a, b = int(ys[0]), int(ys[-1]) + 1
+        d = None
+        for aday in ((b - a) + pay, -((b - a) + pay), 2 * (b - a) + pay, -(2 * (b - a) + pay),
+                     3 * (b - a) + pay, -(3 * (b - a) + pay)):
+            if 0 <= a + aday and b + aday <= H and not ink_tum[a + aday:b + aday][R[a:b]].any():
+                d = aday; break
+        if d is None:
+            rapor[ad] = {'onarildi': False, 'sebep': 'murekkepsiz bagis seridi yok'}
+            continue
+        m = 3 * int(sigma)
+        s0, s1 = max(0, a - m, -d), min(H, b + m, H - d)
+        Pseg = out[s0:s1]; Rseg = R[s0:s1]
+        dus = _nc_bulanik(Pseg, ~Rseg, sigma)
+        Dn = P_wp[s0 + d:s1 + d]
+        yuksek = Dn - _nc_bulanik(Dn, np.ones(Dn.shape[:2], bool), sigma)
+        f = cv2.GaussianBlur(Rseg.astype(np.float32), (0, 0), 4.0)[..., None]
+        f = np.maximum(f, Rseg[..., None].astype(np.float32))
+        out[s0:s1] = Pseg * (1 - f) + (dus + yuksek) * f
+        rapor[ad] = {'onarildi': True, 'satir': [a, b], 'bagis_kayma': int(d), 'px': int(R.sum())}
+    return np.clip(out, 0, 255), rapor
+
+
 def eski_iz(D_ci_eski, D_ci_yeni, yeni, maske_bolge):
     """CI baskisinda silinen eski yazidan kalan: kaynakta murekkep olup yeni yazi maskesinde
     (render'in kendi ham maskesi, 3 px genisletilmis) OLMAYAN piksellerde |dL| > ESIK kalan bilesenler.

@@ -139,5 +139,25 @@ def test_plate_onar():
     assert np.abs(onar - kirli)[:700].max() < 1e-3
 
 
+def test_plate_onar_glif():
+    """CI glif maskesiyle: temiz plate ~1, kirli FAIL, onarim sonrasi PASS; bant disi degismez."""
+    P_wp, S_ci, S_wp = kur()
+    bl = {'isim': (760, 840), 'mesaj': (925, 975)}
+    D = S_ci - CI_Z
+    hiz = wk.hizala(D, S_wp - P_wp, wk.bantlar(wk.murekkep_maskesi(S_wp - P_wp)))
+    G = wk.glif_maskesi(wk.katman_tasi(D, hiz, (W, H)))
+    temiz = wk.plate_iz(P_wp, G, bl)
+    assert temiz['gecti'] and abs(temiz['mesaj']['iz_orani'] - 1) < 0.15, temiz
+    kirli = bas(P_wp, alfa(MESAJ, KAYMA_WP) * 0.35, WP_M)
+    k = wk.plate_iz(kirli, G, bl)
+    assert not k['mesaj']['gecti'] and k['mesaj']['koyulasma'] > 5, k
+    onar, r = wk.plate_onar_glif(kirli, G, G, bl)
+    assert r['mesaj']['onarildi'], r
+    s = wk.plate_iz(onar, G, bl)
+    assert s['gecti'], s
+    assert np.abs(onar - kirli)[:700].max() < 1e-3
+
+
 if __name__ == '__main__':
     test_plate_onar(); print('PASS test_plate_onar')
+    test_plate_onar_glif(); print('PASS test_plate_onar_glif')
