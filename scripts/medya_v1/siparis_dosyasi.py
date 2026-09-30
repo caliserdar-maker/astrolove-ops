@@ -1164,15 +1164,33 @@ class _SatirYerlesim:
         self.p16.poster_kur = self.asil
         return False
 
+    @staticmethod
+    def _kutle(a):
+        """Alfa / maske kutlesinin yatay merkezi ve ust kenari (_uc: %0.2 / %99.8, olcek kapisiyla ayni tanim)."""
+        a = np.asarray(a, np.float32)
+        x0, x1 = _uc(a.sum(axis=0))
+        t, _b = _uc(a.sum(axis=1))
+        return (x0 + x1) / 2.0, t
+
     def _kaydet(self, s, S, isimler, tagline):
         out = self.asil(s, S, isimler, tagline)
-        _, _, merkez, x, _ = out
-        self.kayit.update({'x': dict(x), 'mm': {y: merkez[y] - x[y] for y in ('sol', 'sag')},
-                           'inf_g0': float(S['oge']['sonsuz']['gorsel'][0])})
+        _, bilgi, merkez, x, _ = out
+        p16 = self.p16
+        olcek = p16.d_olcek(isimler, s, S)
+        kay = {'x': dict(x), 'mm': {y: merkez[y] - x[y] for y in ('sol', 'sag')}}
+        for y in ('sol', 'sag'):
+            pl = p16.plaka(isimler[y], S["prof"][y], s["cap"][y], olcek)[0]
+            cx, top = self._kutle(np.asarray(pl)[..., 3])
+            px, py = bilgi['isim_kutu'][y][:2]
+            kay[f'murekkep_{y}'] = (px + cx, py + top)          # sayfada: yatay kutle merkezi, ust kenar
+        o = S['oge']['sonsuz']
+        mcx, _t = self._kutle(o['maske'])
+        kay['sonsuz_murekkep'] = int(round(x['inf'] - o['pay'][0])) + mcx
+        self.kayit.update(kay)
         return out
 
     def _olcekli(self, s, S, isimler, tagline):
-        if not self.kayit.get('x'):
+        if not self.kayit.get('murekkep_sol'):
             return self.asil(s, S, isimler, tagline)
         import cv2
         p16, k, r = self.p16, self.k, self.kayit
@@ -1181,8 +1199,16 @@ class _SatirYerlesim:
         w = {y: pl[y][0].width for y in pl}
         inf = S["oge"]["sonsuz"]
         mm = {y: p16.murekkep_merkezi(pl[y][0]) for y in ("sol", "sag")}
-        x = {y: (r['x'][y] + r['mm'][y]) * k - mm[y] for y in ("sol", "sag")}
-        x["inf"] = float(inf["gorsel"][0]) + (r['x']['inf'] - r['inf_g0']) * k
+        # 1 Eki: yatay KUTLE merkezi ve dikey ust kenar 2400 x k'ya hizalanir (kapi ile ayni tanim); onceki
+        # surum uc piksellerden (alfa > 8) hizaliyordu, J / Y kuyruklu isimlerde kapiyla ayrisiyordu.
+        x, pyy = {}, {}
+        for y in ("sol", "sag"):
+            cx, top = self._kutle(np.asarray(pl[y][0])[..., 3])
+            mx, my = r[f'murekkep_{y}']
+            x[y] = mx * k - cx
+            pyy[y] = my * k - top
+        mcx, _t = self._kutle(inf['maske'])
+        x["inf"] = r['sonsuz_murekkep'] * k - mcx + inf['pay'][0]
         toplam = x["sag"] + w["sag"] - x["sol"]
         x0 = x["sol"]
         a = S["temiz_a"].copy()
@@ -1199,15 +1225,15 @@ class _SatirYerlesim:
         isim_geometri, isim_kutu = {}, {}
         for y in ("sol", "sag"):
             p = pl[y][0]
-            px, py = int(round(x[y])), int(round(s["isim_y"] - p.height / 2))
-            t.alpha_composite(p, (px, py))
-            isim_kutu[y] = [px, py, px + p.width, py + p.height]
+            px, py_ = int(round(x[y])), int(round(pyy[y]))
+            t.alpha_composite(p, (px, py_))
+            isim_kutu[y] = [px, py_, px + p.width, py_ + p.height]
             alfa = np.asarray(p)[..., 3]
             pm = alfa > 40
-            p16.isaretle(yeni_maske, alfa > 8, px, py)
+            p16.isaretle(yeni_maske, alfa > 8, px, py_)
             ys = np.nonzero(pm.any(axis=1))[0]
             isim_geometri[y] = {"cap": int(ys[-1] - ys[0] + 1),
-                                "dikey_merkez": round(py + (int(ys[0]) + int(ys[-1])) / 2, 1)}
+                                "dikey_merkez": round(py_ + (int(ys[0]) + int(ys[-1])) / 2, 1)}
         tg, tbilgi = p16.tagline_plaka(s, {"prof": S["prof"]}, tagline)
         tx, ty = (int(round(p16.NORM_W / 2 - tg.width / 2)), int(round(s["tag_y"] - tg.height / 2)))
         t.alpha_composite(tg, (tx, ty))
