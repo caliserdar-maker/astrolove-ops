@@ -80,11 +80,16 @@ def olcum_duzelt(o, m):
     from pilot6 import kumeler
     d = dict(o); ek = []
     sb = list(d['sembol_bant']); sx = [list(x) for x in d['sembol']]
+    # 30 Eyl (LIBRA_LIBRA CI): Terazi ust parcasi iki banda bolunur (yay + 4 kumeli ayak satiri); bant 2 kume
+    # vermek zorunda degil: HER kume bir sembolun x araligiyla > %50 ortusmeli ve iki sembol de temsil edilmeli.
     for b in sorted([b for b in pilot11.bantlar(m) if b[1] <= sb[0]], key=lambda b: -b[1]):
         if sb[0] - b[1] > SEMBOL_BIRLES: break
         k = [c for c in kumeler(m[b[0]:b[1]], 20) if c[1] - c[0] > 30]
-        if len(k) == 2 and all(min(k[i][1], sx[i][1]) - max(k[i][0], sx[i][0]) > 0.5 * (k[i][1] - k[i][0]) for i in (0, 1)):
-            sb[0] = b[0]; sx = [[min(k[i][0], sx[i][0]), max(k[i][1], sx[i][1])] for i in (0, 1)]; ek.append(list(b))
+        es = [next((i for i in (0, 1) if min(c[1], sx[i][1]) - max(c[0], sx[i][0]) > 0.5 * (c[1] - c[0])), None) for c in k]
+        if k and None not in es and set(es) == {0, 1}:
+            sb[0] = b[0]; ek.append(list(b))
+            for c, i in zip(k, es):
+                sx[i] = [min(c[0], sx[i][0]), max(c[1], sx[i][1])]
     # 3) Sembol bandinin ALTINDA, isim bandindan once kalan parcalar (orn. Terazi'nin alt cubugu): <= SEMBOL_BIRLES
     #    px bosluklu ve her kumesi bir sembolun x araligiyla ortusen bant sembole katilir (yoksa sembol yeni isme
     #    ortalanirken parca yerinde kalir; ARIES_LIBRA IN 28 Eyl: bant 1941-2109, gercek 2127, sag iou 0.719).

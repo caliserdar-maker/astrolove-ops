@@ -150,6 +150,40 @@ class IsimKalintiTesti(unittest.TestCase):
         k2 = sd.isim_kalinti_kapisi(Image.fromarray(lek.astype(np.uint8)), Y, OLCUM, ham=True)
         self.assertFalse(k2['gecti'], k2)
 
+    def test_parsomen_doku(self):
+        """30 Eyl WP AQUARIUS_CANCER: dokulu parsomende (1) temiz baskida kapi PASS (doku iz sayilmaz),
+        (2) temizlik dokuyu bozmaz (kalinti yoksa degisen ~0, parlak leke yok), (3) gercek leke yakalanir
+        ve temizlenir."""
+        import cv2
+        rng = np.random.default_rng(11)
+        doku = np.zeros((H, W), np.float32)
+        for s_, a_ in ((3, 10), (9, 9), (25, 8), (70, 7)):
+            g = rng.normal(0, 1, (H // s_ + 2, W // s_ + 2)).astype(np.float32)
+            doku += a_ * cv2.resize(g, (W, H), interpolation=cv2.INTER_CUBIC)
+        pl = np.clip(np.dstack([222 + doku, 193 + 0.9 * doku, 138 + 0.8 * doku]), 0, 255).astype(np.uint8)
+        f = ImageFont.truetype(self.font, 110)
+        yeni = [(800, 'EMILY'), (1200, '~'), (1650, 'JAMES')]
+        im = Image.fromarray(pl.copy()); d = ImageDraw.Draw(im)
+        for x, t in yeni:
+            d.text((x, 2245), t, anchor='mm', fill=(150, 88, 30), font=f)
+        baski = np.asarray(im).astype(np.float32)
+        Y = yaz(np.zeros_like(pl), yeni, f).max(axis=2) > 8
+        k0 = sd.isim_kalinti_kapisi(Image.fromarray(baski.astype(np.uint8)), Y, OLCUM, ham=True)
+        self.assertTrue(k0['gecti'], {q: k0.get(q) for q in ('kalinti_sayisi', 'esikler')})
+        out, bilgi = sd.isim_bandi_temizle(baski, Y, OLCUM, ham=True)
+        self.assertTrue(bilgi['kenar']['gecti'], bilgi['kenar'])
+        fark = np.abs(out - baski).max(axis=2)
+        self.assertLess(int((fark > 3).sum()), 200, bilgi)                  # doku yerinde
+        self.assertLess(float(out.max()), 256)
+        # gercek leke: koyu kahve eski yazi ucu (14x6)
+        lek = baski.copy(); lek[2270:2276, 1000:1014] = (120, 70, 25)
+        k1 = sd.isim_kalinti_kapisi(Image.fromarray(lek.astype(np.uint8)), Y, OLCUM, ham=True)
+        self.assertFalse(k1['gecti'], k1)
+        o2, b2 = sd.isim_bandi_temizle(lek, Y, OLCUM, ham=True)
+        k2 = sd.isim_kalinti_kapisi(Image.fromarray(np.clip(o2, 0, 255).astype(np.uint8)), Y, OLCUM, ham=True)
+        self.assertTrue(k2['gecti'], {q: k2.get(q) for q in ('kalinti_sayisi', 'kalintilar', 'esikler')})
+        self.assertLess(int((np.abs(o2 - lek).max(axis=2) > 3).sum()), 2500, b2)
+
     def test_ham_koyu(self):
         self.kos_ham(True)
 

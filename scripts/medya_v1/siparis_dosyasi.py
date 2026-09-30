@@ -375,7 +375,7 @@ class EdisyonPoster:
         import edisyon_uret as eu
         self.p11, self.p12, self.p16, self.eu = pilot11, pilot12, pilot16, eu
         import mesaj_kapisi                       # GOREV_0020: koyu murekkep tagline duzeltmesi
-        mesaj_kapisi.duzeltme_uygula(pilot12)
+        mesaj_kapisi.duzeltme_uygula(pilot12, pilot16)
         self.sab = json.loads((K / 'scripts' / 'kisisel' / 'ORAN_SABITLERI.json').read_text())
         self.kilitler = self.sab.get('edisyonlar', {})
         self.plate_indi = {}
@@ -771,6 +771,7 @@ DOLGU_MUREKKEP = 16.0      # kaynak seritte bu kontrasttan fazlasi murekkep sayi
 ISIM_IZ_RB = 14.0
 ISIM_IZ_L = 5.0
 KENAR_HALKA = 3            # kenar kapisi: korumanin disinda bakilan halka (baski px)
+ISIM_KALINTI_PAY = 4       # temizlik: kalinti bileseninin cevresine pay (2400 px)
 
 
 def _isim_satirlari(olcum, k, H):
@@ -849,16 +850,52 @@ def _serit_murekkebi(S, k):
     return cv2.dilate(m, np.ones((2 * d + 1,) * 2, np.uint8)) > 0
 
 
-def _iz_haritasi(Bb, k, haric=None):
+def _iz_haritasi(Bb, k, haric=None, esik=None):
     """Isim bandi parcasinda iz olcutleri: (altin murekkep, soluk iz, dL, R-B kaymasi).
-    haric: korunan (yeni oge) pikseller; yerel zemin tahminine girmez."""
+    haric: korunan (yeni oge) pikseller; yerel zemin tahminine girmez.
+    esik: _iz_esikleri (zemin dokusuna gore); verilmezse sabit esikler."""
+    e = esik or {'altin_L': ISIM_KALINTI_ESIK, 'soluk_L': ISIM_IZ_L, 'soluk_rb': ISIM_IZ_RB}
     L = Bb @ np.array([0.299, 0.587, 0.114], np.float32)
     dL = L - _yerel_zemin(L, k, haric)
     rb = Bb[..., 0] - Bb[..., 2]
     ws = rb - _yerel_zemin(rb, k, haric, kaydir=128.0)
-    altin = (np.abs(dL) > ISIM_KALINTI_ESIK) & (rb > 20)
-    soluk = (ws > ISIM_IZ_RB) & (np.abs(dL) > ISIM_IZ_L)
+    altin = (np.abs(dL) > e['altin_L']) & (rb > 20)
+    soluk = (ws > e['soluk_rb']) & (np.abs(dL) > e['soluk_L'])
     return altin, soluk, dL, ws
+
+
+# 30 Eyl (WP AQUARIUS_CANCER): parsomen dokusunda sabit esikler dokunun kendisini iz sayiyordu (920 bilesen)
+# ve tum banda uygulanan dolgu dokuyu bozuyordu. Esikler bandin hemen ustu / alti SERITLERINDEKI zemin
+# gurultusunden olculur (plate'ten bagimsiz, her dosya kendisinden): p99.99 x IZ_GURULTU_KAT, sabit esikler
+# alt sinir. Seritte guclu murekkep (|dL| > 60, sembol / tagline) olcume girmez.
+IZ_GURULTU_KAT = 1.25
+IZ_YUZDELIK = 99.99
+IZ_SERIT_MUREKKEP = 60.0
+
+
+def _iz_esikleri(B, r0, r1, c0, c1, k, koruma=None):
+    import cv2
+    H = B.shape[0]; h = r1 - r0
+    dls, wss = [], []
+    for y0, y1 in ((max(r0 - h, 0), r0), (r1, min(r1 + h, H))):
+        if y1 - y0 < 4:
+            continue
+        S = B[y0:y1, c0:c1]
+        hr = None if koruma is None else koruma[y0:y1, c0:c1]
+        _a, _s, dL, ws = _iz_haritasi(S, k, hr)
+        m = np.abs(dL) > IZ_SERIT_MUREKKEP
+        m = cv2.dilate(m.astype(np.uint8), np.ones((7, 7), np.uint8)) > 0
+        if hr is not None:
+            m |= hr
+        dls.append(np.abs(dL)[~m]); wss.append(ws[~m])
+    if not dls or not sum(x.size for x in dls):
+        return {'altin_L': ISIM_KALINTI_ESIK, 'soluk_L': ISIM_IZ_L, 'soluk_rb': ISIM_IZ_RB, 'kaynak': 'sabit'}
+    dl = np.concatenate(dls); ws = np.concatenate(wss)
+    qL = float(np.percentile(dl, IZ_YUZDELIK)) * IZ_GURULTU_KAT
+    qW = float(np.percentile(ws, IZ_YUZDELIK)) * IZ_GURULTU_KAT
+    return {'altin_L': round(max(ISIM_KALINTI_ESIK, qL), 1), 'soluk_L': round(max(ISIM_IZ_L, qL), 1),
+            'soluk_rb': round(max(ISIM_IZ_RB, qW), 1), 'kaynak': 'serit',
+            'serit_p999': [round(qL / IZ_GURULTU_KAT, 1), round(qW / IZ_GURULTU_KAT, 1)]}
 
 
 def isim_kenar_kapisi(once, sonra, koruma, satir, sutun, k):
@@ -922,27 +959,46 @@ def isim_bandi_temizle(out, yeni, olcum, ham=False):
         toplam += S * a_[..., None]; agir += a_
         kaynak[ad] = round(float(temiz.mean()), 3)
     sg = max(18.0 * k, 3.0)
-    dolgu = np.where(agir[..., None] > 1e-3, toplam / np.maximum(agir, 1e-3)[..., None], 0)
-    hf = np.where(agir[..., None] > 1e-3, dolgu - cv2.GaussianBlur(dolgu, (0, 0), sg), 0)
-    # dusuk frekans ton: bandin KENDI murekkepsiz, yeni-disi pikselleri (normalize bulaniklik)
-    tw = (~(_serit_murekkebi(kes, k) | Yb)).astype(np.float32)
-    den = cv2.GaussianBlur(tw, (0, 0), sg) + 1e-6
-    lf = np.dstack([cv2.GaussianBlur(kes[..., c] * tw, (0, 0), sg) / den for c in range(3)])
+    gecerli = agir > 0.05
+    dolgu = np.where(gecerli[..., None], toplam / np.maximum(agir, 1e-3)[..., None], 0)
+    # yuksek frekans: NORMALIZE bulaniklik (30 Eyl: gecersiz 0 pikseller bulaniga karisip hf'i 255 ustune
+    # tasiyordu -> WP'de parlak lekeler). Seritteki dokunun kendi genligiyle sinirlanir.
+    vw = gecerli.astype(np.float32)
+    vden = np.maximum(cv2.GaussianBlur(vw, (0, 0), sg), 1e-3)
+    bd = np.dstack([cv2.GaussianBlur(dolgu[..., c] * vw, (0, 0), sg) / vden for c in range(3)])
+    hf = np.where(gecerli[..., None] & (vden[..., None] > 0.2), dolgu - bd, 0)
+    if gecerli.any():
+        sin = float(np.percentile(np.abs(hf[gecerli]), 99.5)) + 1.0
+        hf = np.clip(hf, -sin, sin)
+    # 30 Eyl: dolgu yalniz KALINTININ cevresine uygulanir (tum bant degil). Kalinti = iz olcutu, esikler
+    # zemin dokusundan; bilesen >= 2 px; ISIM_KALINTI_PAY px genisletilir. Doku ve harf kenari korunur.
+    esik = _iz_esikleri(out, r0, r1, c0, c1, k, Yt)
+    altin, soluk, _dL, _ws = _iz_haritasi(kes, k, Yb, esik)
+    iz = ((altin | soluk) & ~Yb).astype(np.uint8)
+    n_, lab_, st_, _ = cv2.connectedComponentsWithStats(iz, 8)
+    iz = np.isin(lab_, [i for i in range(1, n_) if st_[i][4] >= 2])
+    pay = max(int(round(ISIM_KALINTI_PAY * k)), 2)
+    R = (cv2.dilate(iz.astype(np.uint8), cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * pay + 1,) * 2)) > 0) & ~Yb
+    # dusuk frekans ton: bandin KENDI murekkepsiz, yeni-disi pikselleri (normalize bulaniklik).
+    # 30 Eyl: dokulu zeminde (WP) agirlik ~0'a dusuyor, 1e-6'ya bolme parlak leke uretiyordu -> korunur.
+    tw = (~(_serit_murekkebi(kes, k) | Yb | R)).astype(np.float32)
+    if tw.mean() < 0.05:                                # dokulu zemin: kalinti ve harf disi her piksel
+        tw = (~(Yb | R)).astype(np.float32)
+    den = cv2.GaussianBlur(tw, (0, 0), sg)
+    zem = np.median(kes[tw > 0], 0) if (tw > 0).any() else np.median(kes.reshape(-1, 3), 0)
+    lf = np.dstack([np.where(den > 0.02, cv2.GaussianBlur(kes[..., c] * tw, (0, 0), sg) / np.maximum(den, 0.02),
+                             zem[c]) for c in range(3)])
     dolgu = lf + hf
-    R = ~Yb
-    if ham:                                             # koruma harfin kendi siniri: bitisik piksel dahil
-        Ef = R.astype(np.float32)
-    else:
-        Ef = np.clip(cv2.GaussianBlur(R.astype(np.float32), (0, 0), max(k, 0.8)), 0, 1)
-        Ef[R & ~(cv2.dilate(Yb.astype(np.uint8), np.ones((3, 3), np.uint8)) > 0)] = 1.0
-        Ef[Yb] = 0.0
+    Ef = np.clip(cv2.GaussianBlur(R.astype(np.float32), (0, 0), max(k, 0.8)) * 2.0, 0, 1)
+    Ef[R] = 1.0
+    Ef[Yb] = 0.0
     once = out
     out = out.copy()
     out[r0:r1, c0:c1] = kes * (1 - Ef[..., None]) + dolgu * Ef[..., None]
     kenar = isim_kenar_kapisi(once, out, Yt, (r0, r1), (c0, c1), k)
     return out, {'uygulandi': True, 'koruma': 'ham' if ham else 'genis', 'satir': [r0, r1],
-                 'sutun': [c0, c1], 'kaynak_temiz_payi': kaynak,
-                 'degisen_px': int((Ef > 0.5).sum()), 'kenar': kenar}
+                 'sutun': [c0, c1], 'kaynak_temiz_payi': kaynak, 'esik': esik,
+                 'kalinti_bileseni': int(n_ - 1), 'degisen_px': int((Ef > 0.5).sum()), 'kenar': kenar}
 
 
 def isim_kalinti_kapisi(baski, yeni, olcum, ham=False):
@@ -961,7 +1017,9 @@ def isim_kalinti_kapisi(baski, yeni, olcum, ham=False):
         r0, r1 = _isim_satirlari(olcum, k, H)
         Yt = _yeni_tam(yeni, (Wd, H), 0 if ham else 1, ham=ham)
         c0, c1 = _isim_sutunlari(olcum, Yt[r0:r1], k, Wd)
-        altin, soluk, _dL, _ws = _iz_haritasi(B[r0:r1, c0:c1], k, Yt[r0:r1, c0:c1] if ham else None)
+        esik = _iz_esikleri(B, r0, r1, c0, c1, k, Yt)
+        d['esikler'] = esik
+        altin, soluk, _dL, _ws = _iz_haritasi(B[r0:r1, c0:c1], k, Yt[r0:r1, c0:c1] if ham else None, esik)
         if ham:
             d['olcut'] = ('isim bandi, altin murekkep (|dL| > esik ve R-B > 20) VEYA soluk iz (R-B kaymasi > '
                           f'{ISIM_IZ_RB} ve |dL| > {ISIM_IZ_L}), HAM yeni oge maskesi (harfin kendi siniri) disi')
@@ -1387,6 +1445,24 @@ def renk_onizleme(yollar, ad, cik, yukseklik=900):
     return {'renkler': [r for r, _ in ims], 'px': list(t.size)}
 
 
+ZEMIN_UYUM_ESIK = 4.0      # |kaynak - plate| medyani (sayfa geneli); 30 Eyl olcum: TAURUS_TAURUS DB 10.3, diger DB 0
+
+
+def zemin_uyumu(kaynak_bayt, plate_yol):
+    """Kaynak dosyanin zemini medyan plate ile ayni mi? (30 Eyl, TAURUS_TAURUS DB 'isim satiri bulunamadi':
+    kaynak zemini dokulu / acik, fark maskesi 39-2922 satirini tek bant yapiyordu.) Olcum 1/4 olcekte."""
+    try:
+        A = Image.open(io.BytesIO(kaynak_bayt)).convert('RGB')
+        P = Image.open(plate_yol).convert('RGB')
+        boy = (max(A.width // 4, 1), max(A.height // 4, 1))
+        a = np.asarray(A.resize(boy, Image.BILINEAR)).astype(np.float32)
+        p = np.asarray(P.resize(boy, Image.BILINEAR)).astype(np.float32)
+        p50 = float(np.median(np.abs(a - p).mean(2)))
+        return {'gecti': p50 <= ZEMIN_UYUM_ESIK, 'p50': round(p50, 1), 'esik': ZEMIN_UYUM_ESIK}
+    except Exception as e:                                        # noqa: BLE001
+        return {'gecti': True, 'hata': f'{type(e).__name__}: {e}', 'esik': ZEMIN_UYUM_ESIK}
+
+
 def render_et(ed, oran, sayfa, kaynak_bayt, isimler, mesaj, P_blue, P_ed,
               cift=None, ref_boy=None, hedef_en=None, boy=None):
     """blue -> a1 (pilot16, 2400), diger dort edisyon -> edisyon_uret (hedef cozunurluk)."""
@@ -1402,6 +1478,14 @@ def render_et(ed, oran, sayfa, kaynak_bayt, isimler, mesaj, P_blue, P_ed,
                                    'hata': f"PLATE KIRLI: {pk['plate']} eski slogani iceriyor "
                                            f"({pk.get('sebep') or 'glif farkli payi ' + str(pk.get('glif_farkli_payi'))})",
                                    'plate_slogan_kapisi': pk}, cift), None
+    zu = zemin_uyumu(kaynak_bayt, plate_yol)
+    if not zu['gecti']:
+        return None, plate_bildir({'durum': 'SISTEM HATASI', 'edisyon': ed, 'oran': oran,
+                                   'hata': f"ZEMIN PLATE ILE UYUMSUZ: kaynak zemini medyan plate'ten farkli "
+                                           f"(fark p50 {zu['p50']} > {zu['esik']}); dosya-plate farki tum sayfayi "
+                                           f"murekkep sayar, isim satiri ayrilamaz. Kaynak yeniden disa "
+                                           f"aktarilmali ya da cifte ozel plate gerekir.",
+                                   'plate_slogan_kapisi': pk, 'zemin_uyumu': zu}, cift), None
     if ed == 'blue':
         ref_bayt = None
         # plate_kur boy degisince hazir_oran'i temizler: referans karari ONDAN SONRA

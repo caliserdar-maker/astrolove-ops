@@ -28,7 +28,26 @@ if os.environ.get('MESAJ_ESIK'):
     DE_ESIK, KONTRAST_ESIK = map(float, os.environ['MESAJ_ESIK'].split(','))
 
 
-def duzeltme_uygula(pilot12):
+KENAR_SATIR = 0.06    # altin profilin en alt %6'si: kabartma parlak kenari (son "iyi" satir sayilmaz)
+
+
+def ortak_profil(p1, p2):
+    """Iki isim profilinin (farkli uzunluk) ortak boya yeniden orneklenmis ortalamasi."""
+    a, b = np.asarray(p1, np.float32), np.asarray(p2, np.float32)
+    n = max(len(a), len(b))
+    ia = np.linspace(0, len(a) - 1, n); ib = np.linspace(0, len(b) - 1, n)
+    ra = np.stack([np.interp(ia, np.arange(len(a)), a[:, c]) for c in range(3)], 1)
+    rb = np.stack([np.interp(ib, np.arange(len(b)), b[:, c]) for c in range(3)], 1)
+    return ((ra + rb) / 2).astype(np.float32)
+
+
+def duzeltme_uygula(pilot12, pilot16=None):
+    """30 Eyl (Leo / Libra DB mesaj_murekkep, ARIES_LEO PW; tani kosusu 36695282686):
+    1) Altin profilde son "iyi" satir (L >= 0.8 Lmax) aranirken en alttaki KENAR_SATIR payi sayilmaz.
+       LEO / LIBRA profilinin en alt satirlari parlak kabartma kenari; kesim en alta (108-113 / 111-114)
+       dusuyor, alttaki koyu golge bandi tagline'a geciyordu (LEO_LEO mesaj 243,189,66 / isim 253,211,99).
+    2) Tagline profili = iki ismin ortak profili (yalniz sol degil). Sag isim profili soldan cok farkliyken
+       (ARIES_LEO: sag 253,209,96 / sol 244,176,42) isim rengi iki ismin karisimi, mesaj yalniz sol idi."""
     eski = getattr(pilot12.kuyruk_duzlestir, 'eski', pilot12.kuyruk_duzlestir)
 
     def kuyruk_duzlestir(prof, oran=0.80):
@@ -36,12 +55,29 @@ def duzeltme_uygula(pilot12):
         L = p @ LUMA
         med = float(np.median(L))
         if med >= KOYU_L:
-            return eski(prof, oran)
+            n = len(L)
+            sin = n - max(int(round(KENAR_SATIR * n)), 1) if n > 10 else n
+            ok = np.nonzero(L[:sin] >= L.max() * oran)[0]
+            if not len(ok):
+                return eski(prof, oran)
+            p[ok[-1] + 1:] = p[ok[-1]]
+            return p, int(ok[-1])
         ok = np.nonzero(L <= med / oran)[0]
         p[ok[-1] + 1:] = p[ok[-1]]
         return p, int(ok[-1])
     kuyruk_duzlestir.eski = eski
     pilot12.kuyruk_duzlestir = kuyruk_duzlestir
+    tp = getattr(pilot12.tagline_plaka, 'eski', pilot12.tagline_plaka)
+
+    def tagline_plaka(s, S, metin):
+        pr = S.get('prof') or {}
+        if 'sol' in pr and 'sag' in pr:
+            S = {**S, 'prof': {**pr, 'sol': ortak_profil(pr['sol'], pr['sag'])}}
+        return tp(s, S, metin)
+    tagline_plaka.eski = tp
+    pilot12.tagline_plaka = tagline_plaka
+    if pilot16 is not None and hasattr(pilot16, 'tagline_plaka'):
+        pilot16.tagline_plaka = tagline_plaka
     return eski
 
 
