@@ -203,9 +203,17 @@ def uygula(api, shop, lid, kaynak, altcsv, out, qmin):
     gorsel_sil(api, shop, lid, capa)
     beklenen = [yeni[n] for n in siralar]
     g4 = kararli(lambda: galeri(api, lid),
-                 lambda g: [x.get("listing_image_id") for x in g] == beklenen and [x.get("rank") for x in g] == list(range(1, N + 1)))
-    if [x.get("listing_image_id") for x in g4] != beklenen or [x.get("rank") for x in g4] != list(range(1, N + 1)):
-        raise SystemExit(f"HATA: faz4 son galeri 1-{N}'e oturmadi: {[(x.get('rank'), x.get('listing_image_id')) for x in g4]}. DUR.")
+                 lambda g: [x.get("listing_image_id") for x in g] == beklenen and [x.get("rank") for x in g] == list(range(1, N + 1)),
+                 tekrar=OKUMA_TEKRAR * 3)
+    ids4, rk4 = [x.get("listing_image_id") for x in g4], [x.get("rank") for x in g4]
+    if ids4 != beklenen or rk4 != list(range(1, N + 1)):
+        # 30 Eyl tani: tam durum dosyaya (ILERLEME notu 300 karakterde kesiliyordu)
+        (out / "FAZ4_TANI.json").write_text(json.dumps({
+            "beklenen": beklenen, "canli": [(x.get("rank"), x.get("listing_image_id")) for x in g4], "capa": capa,
+            "capa_hala_var": capa in ids4, "eksik": [i for i in beklenen if i not in ids4],
+            "fazla": [i for i in ids4 if i not in beklenen], "sira_dogru": ids4 == beklenen}, indent=1))
+        raise SystemExit(f"HATA: faz4 son galeri 1-{N}'e oturmadi (capa_hala_var={capa in ids4}, sira_dogru={ids4 == beklenen}, "
+                         f"adet {len(ids4)}/{N}; FAZ4_TANI.json). DUR.")
 
     sorun = []
     for x, n in zip(g4, siralar):

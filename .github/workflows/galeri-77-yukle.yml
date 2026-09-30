@@ -79,7 +79,8 @@ jobs:
               if lid and lid != "4570143815" and not (o.get("durum") == "PASS" and int(o.get("set") or 0) >= 17):
                   print(r["cift"].strip())
           PY
-          n=$(grep -c . _work/yeni.txt || true); echo "yeni cift: $n"; echo "n=$n" >> "$GITHUB_OUTPUT"
+          L="${{ inputs.limit || '0' }}"; if [ "$L" != "0" ]; then head -n "$L" _work/yeni.txt > _work/y2 && mv _work/y2 _work/yeni.txt; fi
+          n=$(grep -c . _work/yeni.txt || true); echo "yeni cift: $n (limit $L)"; echo "n=$n" >> "$GITHUB_OUTPUT"
           while read -r c; do [ -n "$c" ] && rclone copy "$T/GALERI_77/$c" "_paket/$c" --include "*.jpg" --include "ALT_METIN.csv" -q; done < _work/yeni.txt
       - name: Yukle
         if: ${{ steps.g.outputs.n != '0' }}
