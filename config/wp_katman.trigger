@@ -1,1 +1,1 @@
-# wp katman ornek 1. kosu 2026-09-30T17:44:20Z
+# wp katman ornek 2. kosu (plate onarimi + bant bazli CI hat kimligi) 2026-09-30T18:00:35Z

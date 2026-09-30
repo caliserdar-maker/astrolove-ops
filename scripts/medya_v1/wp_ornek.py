@@ -151,48 +151,53 @@ def cift_boy(cift, boy, P_ed, P_blue, no, cik):
     R['duz_renk'] = renk
 
     # ---- 1) ogrenme: ayni ciftin onayli kaynaklari
-    def wp_plate(ek):
-        y = plate_indir(f'VINTAGE{ek}_{boy}.png')
-        return None if y is None else wk.boyutla(wk.dizi(y), (Wd, H))
-    P_wp = wp_plate('')
-    D_wp = S_wp - P_wp
+    ad = f'VINTAGE_{boy}.png'
+    y = plate_indir(ad)
+    if y is None:                        # 1. kosu: VINTAGE_CANVA 11x14 dokusu kaynakla hizasiz (zemin dE 2.98)
+        R['durum'] = f'FAIL: {ad} yok'
+        return R, None
+    P_wp0 = wk.boyutla(wk.dizi(y), (Wd, H))          # medyan plate: ogrenme + maske (doku kaynakla ayni)
+    D_wp = S_wp - P_wp0
     bl = wk.bantlar(wk.murekkep_maskesi(D_wp))
     hiz = wk.hizala(S_c - P_c, D_wp, bl)
     R['hizalama'] = hiz
     k = Wd / 2400.0
     et = etiketle(hiz, uret['kimlik'][0].get('olcum'), k, H)
     R['bantlar'] = et
-    # ---- 2) plate temizligi (isim + mesaj bandi)
+    # ---- 2) plate: temizlik olcumu -> onarim (kaynagin kendi dokusu) -> yeniden olcum
     pt_bant = {a: et[a] for a in ('isim', 'mesaj') if a in et}
-    pt = wk.plate_temizlik(P_wp, S_wp, pt_bant)
-    R['plate'] = {'ad': f'VINTAGE_{boy}.png', 'temizlik': pt}
-    if not pt['gecti']:
-        P2 = wp_plate('_CANVA')
-        if P2 is not None:
-            pt2 = wk.plate_temizlik(P2, S_wp, pt_bant)
-            R['plate_canva'] = {'ad': f'VINTAGE_CANVA_{boy}.png', 'temizlik': pt2}
-            if pt2['gecti']:
-                P_wp, R['plate'] = P2, R.pop('plate_canva')
-                D_wp = S_wp - P_wp
-                hiz = wk.hizala(S_c - P_c, D_wp, wk.bantlar(wk.murekkep_maskesi(D_wp)))
-                R['hizalama'] = hiz
-    R['plate_gecti'] = R['plate']['temizlik']['gecti']
+    onar_bant = {a: et[a] for a in ('kucuk_sembol', 'isim', 'mesaj') if a in et}
+    once = wk.plate_temizlik(P_wp0, S_wp, pt_bant)
+    P_wp, onarim = wk.plate_onar(P_wp0, S_wp, onar_bant)
+    sonra = wk.plate_temizlik(P_wp, S_wp, pt_bant)
+    mk0 = wk.murekkep_maskesi(D_wp, kenar=0)
+    zt = wk.ozet(wk.dE(P_wp0, S_wp), ~mk0)
+    R['plate'] = {'ad': ad, 'temizlik_once': once, 'onarim': onarim, 'temizlik': sonra,
+                  'zemin_uyumu': {**zt, 'esik_ort': 0.5, 'gecti': zt.get('ort', 99) <= 0.5}}
+    R['plate_gecti'] = bool(sonra['gecti'] and R['plate']['zemin_uyumu']['gecti'])
     Dw_src = wk.katman_tasi(S_c - P_c, hiz, (Wd, H))
-    model = wk.renk_ogren(Dw_src, P_wp, S_wp)
+    model = wk.renk_ogren(Dw_src, P_wp0, S_wp)
     R['renk_modeli'] = {a: model[a] for a in ('derece', 'egitim_px', 'murekkep_px', 'egitim_rmse')}
 
     # ---- 5) kimlik farklari
+    # (a) KATMAN kimligi: onayli CI kaynagi -> katman -> onarilmis WP plate  vs  onayli WP
     taban = wk.renk_uygula(Dw_src, P_wp, model)
     del Dw_src
-    R['kimlik_kaynak_tabani'] = wk.fark_tablosu(taban, S_wp, P_wp, et)       # hat yok, yalniz katman
+    R['kimlik_kaynak_tabani'] = wk.fark_tablosu(taban, S_wp, P_wp0, et, P_wp)
+    # (b) CI hattinin kendi kimligi: hat baskisi (kaynagin yazisi) vs onayli CI (bant bazinda)
     B_id = wk.boyutla(wk.dizi(uret['kimlik'][1]['baski']), (Wd, H))
-    R['kimlik_duz_renk'] = {'ozet': wk.ozet(wk.dE(B_id, S_c))}                # hattin kendi farki
+    R['kimlik_duz_renk'] = wk.fark_tablosu(B_id, S_c, P_c, et)
+    R['kimlik_duz_renk']['ozet'] = R['kimlik_duz_renk']['tum']
+    # (c) UCTAN UCA: CI hat baskisi -> katman -> WP  vs  onayli WP
     WP_id, _ = wk.katman_bas(B_id, P_c, P_wp, hiz, model)
-    R['kimlik'] = wk.fark_tablosu(WP_id, S_wp, P_wp, et)
+    R['kimlik'] = wk.fark_tablosu(WP_id, S_wp, P_wp0, et, P_wp)
     kaydet_jpg(WP_id, cik / f'KIMLIK_{boy}_WP.jpg', 90)
     yanyana(WP_id, S_wp, cik / f'KIMLIK_{boy}_YANYANA.jpg', H=1400,
             bant=[min(v[0] for v in et.values() if v) - 40, max(v[1] for v in et.values() if v) + 40]
-            if et else None, etiket=('KIMLIK (katman, kaynagin kendi yazisi)', 'ONAYLI WP'))
+            if et else None, etiket=('KIMLIK (hat + katman)', 'ONAYLI WP'))
+    yanyana(taban, S_wp, cik / f'KIMLIK_KATMAN_{boy}_YANYANA.jpg', H=1400,
+            bant=[min(v[0] for v in et.values() if v) - 40, max(v[1] for v in et.values() if v) + 40]
+            if et else None, etiket=('KIMLIK (onayli CI -> katman)', 'ONAYLI WP'))
     del B_id, taban
 
     # ---- 4) siparis (EMILY / JAMES)
@@ -218,7 +223,7 @@ def cift_boy(cift, boy, P_ed, P_blue, no, cik):
     R['eski_iz'] = wk.eski_iz(S_c - P_c, B_cu - P_c, Yt, bolge)
     # buyuk sembol siparis baskisinda onayli WP ile ayni mi (sembol kaymasi)
     if 'buyuk_sembol' in et:
-        R['siparis_buyuk_sembol'] = wk.fark_tablosu(WP_cu, S_wp, P_wp, {'buyuk_sembol': et['buyuk_sembol']})['buyuk_sembol']
+        R['siparis_buyuk_sembol'] = wk.fark_tablosu(WP_cu, S_wp, P_wp0, {'buyuk_sembol': et['buyuk_sembol']}, P_wp)['buyuk_sembol']
     kaydet_jpg(WP_cu, cik / f'WP_{cift}_{boy}_BASKI.jpg', 95)
     if et:
         y0 = min(v[0] for a, v in et.items() if a != 'buyuk_sembol') - 60
@@ -240,22 +245,23 @@ def tablo(hedef):
     def f(d, a='ort'):
         return '-' if not d or d.get(a) is None else d[a]
     sat = ['# WP katman yontemi: kimlik testi (30 Eyl 2026)', '',
-           'Kimlik: kaynagin kendi burc adlari + slogani duz renkte (CI) mevcut hatla basildi, katmanla WP\'ye '
-           'tasindi, ONAYLI WP kaynagiyla karsilastirildi. dE = CIE76 (Lab). "taban" = hat olmadan, onayli CI '
-           'kaynaginin kendisi katmanla tasininca kalan fark (yontemin alt siniri).', '',
-           '| cift | boy | duz renk | plate | murekkep dE ort/p95/p99 | isim ort/p99 (IoU) | mesaj ort/p99 (IoU) | '
-           'buyuk sembol ort/p99 (IoU) | taban murekkep ort/p99 | zemin tabani ort | CI hat dE ort | kapilar (duz renk) |',
+           'dE = CIE76 (Lab), ort/p99; parantezde murekkep maskesi IoU. KATMAN = onayli CI kaynagi katmanla WP\'ye '
+           'tasindi (yontemin kendisi). CI HAT = mevcut hattin kimlik baskisi (kaynagin burc adlari + slogani) vs onayli '
+           'CI. UCTAN UCA = CI hat baskisi -> katman -> WP vs onayli WP. Plate: medyan, eski glif izi kaynagin kendi '
+           'dokusuyla onarildi; iz orani once -> sonra (esik 1.25).', '',
+           '| cift | boy | plate iz (mesaj) once->sonra | zemin ort | KATMAN isim | KATMAN mesaj | KATMAN sembol (buyuk/kucuk) | '
+           'CI HAT isim | CI HAT mesaj | UCTAN UCA isim | UCTAN UCA mesaj | kapilar (CI siparis) |',
            '|---|---|---|---|---|---|---|---|---|---|---|---|']
+    def h(d):
+        return '-' if not d else f"{f(d)}/{f(d, 'p99')} ({f(d, 'iou')})"
     for R in rs:
-        k = R.get('kimlik') or {}
-        m, i, ms, b = k.get('murekkep'), k.get('isim'), k.get('mesaj'), k.get('buyuk_sembol')
-        t = (R.get('kimlik_kaynak_tabani') or {}).get('murekkep')
-        sat.append(f"| {R['cift']} | {R['boy']} | {R.get('duz_renk', '-')} | "
-                   f"{(R.get('plate') or {}).get('ad', '-')} {'TEMIZ' if R.get('plate_gecti') else 'KIRLI/YOK'} | "
-                   f"{f(m)}/{f(m, 'p95')}/{f(m, 'p99')} | {f(i)}/{f(i, 'p99')} ({f(i, 'iou')}) | "
-                   f"{f(ms)}/{f(ms, 'p99')} ({f(ms, 'iou')}) | {f(b)}/{f(b, 'p99')} ({f(b, 'iou')}) | "
-                   f"{f(t)}/{f(t, 'p99')} | {f(k.get('zemin_tabani'))} | "
-                   f"{f((R.get('kimlik_duz_renk') or {}).get('ozet'))} | "
+        k = R.get('kimlik') or {}; t = R.get('kimlik_kaynak_tabani') or {}; c = R.get('kimlik_duz_renk') or {}
+        pl = R.get('plate') or {}
+        io = lambda x: ((x or {}).get('mesaj') or {}).get('iz_orani', '-')
+        sat.append(f"| {R['cift']} | {R['boy']} | {io(pl.get('temizlik_once'))} -> {io(pl.get('temizlik'))} "
+                   f"{'TEMIZ' if R.get('plate_gecti') else 'KIRLI'} | {f(pl.get('zemin_uyumu'))} | "
+                   f"{h(t.get('isim'))} | {h(t.get('mesaj'))} | {h(t.get('buyuk_sembol'))} / {h(t.get('kucuk_sembol'))} | "
+                   f"{h(c.get('isim'))} | {h(c.get('mesaj'))} | {h(k.get('isim'))} | {h(k.get('mesaj'))} | "
                    f"{'PASS' if (R.get('siparis_duz_renk_kapilar') or {}).get('kapilar_gecti') else 'FAIL ' + str((R.get('siparis_duz_renk_kapilar') or {}).get('kalan') or R.get('durum'))} |")
     (yer / 'KIMLIK_TABLOSU.md').write_text('\n'.join(sat) + '\n')
     (yer / 'KIMLIK_TABLOSU.json').write_text(json.dumps(rs, ensure_ascii=False, indent=1, default=str))

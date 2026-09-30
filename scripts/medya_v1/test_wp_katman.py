@@ -125,3 +125,19 @@ if __name__ == '__main__':
     t = time.time()
     for f in (test_kimlik, test_siparis_zemin_birebir, test_eski_iz_yakalanir, test_plate_temizlik):
         f(); print('PASS', f.__name__, f'{time.time() - t:.1f}s')
+
+
+def test_plate_onar():
+    """Kirli plate onarilinca iz kapisindan gecer; bant disi plate degismez."""
+    P_wp, S_ci, S_wp = kur()
+    bl = {'isim': (760, 840), 'mesaj': (925, 975)}
+    kirli = bas(P_wp, alfa(MESAJ, KAYMA_WP) * 0.35, WP_M)
+    onar, r = wk.plate_onar(kirli, S_wp, bl)
+    assert r['mesaj']['onarildi'], r
+    k = wk.plate_temizlik(onar, S_wp, bl)
+    assert k['gecti'], k
+    assert np.abs(onar - kirli)[:700].max() < 1e-3
+
+
+if __name__ == '__main__':
+    test_plate_onar(); print('PASS test_plate_onar')

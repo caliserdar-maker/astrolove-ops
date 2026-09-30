@@ -217,13 +217,13 @@ def ozet(d, m=None):
             'max': round(float(v.max()), 1), 'pay_gt10': round(float((v > 10).mean()), 4)}
 
 
-def fark_tablosu(uretilen, onayli, P_wp, etiketli_bantlar):
+def fark_tablosu(uretilen, onayli, P_wp, etiketli_bantlar, P_uretilen=None):
     """Kimlik farki: tum sayfa, murekkep bolgesi (her iki tarafin murekkebi, 3 px genisletilmis),
     bant bazinda. Ayrica zemin tabani: |P_wp - onayli| murekkep disi (plate'in kendi hatasi)."""
     import cv2
     d = dE(uretilen, onayli)
     ma = murekkep_maskesi(onayli - P_wp, kenar=0)
-    mb = murekkep_maskesi(uretilen - P_wp, kenar=0)
+    mb = murekkep_maskesi(uretilen - (P_wp if P_uretilen is None else P_uretilen), kenar=0)
     mk = cv2.dilate((ma | mb).astype(np.uint8), np.ones((7, 7), np.uint8)).astype(bool)
     r = {'tum': ozet(d), 'murekkep': ozet(d, mk),
          'zemin_tabani': ozet(dE(P_wp, onayli), ~mk)}
@@ -267,6 +267,60 @@ def plate_temizlik(P_wp, S_wp, bant_listesi, esik_oran=1.25, esik_pay=0.25):
     out['gecti'] = all(v.get('gecti') for v in out.values() if isinstance(v, dict))
     out['esik'] = {'pay_min': esik_pay, 'iz_orani_max': esik_oran}
     return out
+
+
+def _nc_bulanik(a, gecerli, sigma):
+    """Normalize konvolusyon: yalniz gecerli piksellerden bulanik ortalama (maske ici doldurulur)."""
+    import cv2
+    w = gecerli.astype(np.float32)
+    pay = cv2.GaussianBlur(a * w[..., None], (0, 0), sigma)
+    payda = cv2.GaussianBlur(w, (0, 0), sigma)[..., None]
+    return pay / np.maximum(payda, 1e-4)
+
+
+def plate_onar(P_wp, S_wp, bant_listesi, genislet=21, sigma=12.0, pay=40):
+    """Plate'teki eski glif izini (medyan plate'e sizan slogan / isim) KAYNAGIN KENDI DOKUSUYLA onarir.
+
+    R = onayli WP kaynaginin bu bantlardaki glifleri (yerel kontrast, plate'ten bagimsiz), `genislet` px.
+    R icinde: dusuk frekans = R disindan normalize bulanik (leke/ton korunur), yuksek frekans = ayni
+    sutunlarda murekkepsiz bir bagis seridinden (bant yuksekligi + pay kadar asagi ya da yukari).
+    Kenar 4 px yumusatilir. Silme yok: yalniz zemin plate'i duzeltilir; musteri baskisinda yazi yine katmandir."""
+    import cv2
+    H = P_wp.shape[0]
+    Ls = S_wp @ LUMA
+    zs = cv2.medianBlur(np.clip(Ls, 0, 255).astype(np.uint8), 31).astype(np.float32)
+    lc = np.abs(Ls - zs) > 26
+    lc[:, :int(lc.shape[1] * KENAR)] = False; lc[:, int(lc.shape[1] * (1 - KENAR)):] = False
+    ink_tum = cv2.dilate(lc.astype(np.uint8), np.ones((9, 9), np.uint8)).astype(bool)
+    out = P_wp.copy()
+    rapor = {}
+    for ad, (y0, y1) in bant_listesi.items():
+        g = np.zeros_like(lc); g[y0:y1] = lc[y0:y1]
+        R = cv2.dilate(g.astype(np.uint8), np.ones((genislet, genislet), np.uint8)).astype(bool)
+        if not R.any():
+            continue
+        ys = np.nonzero(R.any(1))[0]; a, b = int(ys[0]), int(ys[-1]) + 1
+        d = None
+        for aday in ((b - a) + pay, -((b - a) + pay), 2 * (b - a) + pay, -(2 * (b - a) + pay)):
+            if 0 <= a + aday and b + aday <= H and not ink_tum[a + aday:b + aday][R[a:b]].any():
+                d = aday; break
+        if d is None:
+            rapor[ad] = {'onarildi': False, 'sebep': 'murekkepsiz bagis seridi yok'}
+            continue
+        seg = slice(max(0, a - 3 * int(sigma)), min(H, b + 3 * int(sigma)))
+        Pseg = out[seg]; Rseg = R[seg]
+        dus = _nc_bulanik(Pseg, ~Rseg, sigma)
+        dseg = slice(seg.start + d, seg.stop + d)
+        if dseg.start < 0 or dseg.stop > H:
+            dseg = slice(a + d, b + d); seg = slice(a, b)
+            Pseg = out[seg]; Rseg = R[seg]; dus = _nc_bulanik(Pseg, ~Rseg, sigma)
+        Dn = P_wp[dseg]
+        yuksek = Dn - _nc_bulanik(Dn, np.ones(Dn.shape[:2], bool), sigma)
+        f = cv2.GaussianBlur(Rseg.astype(np.float32), (0, 0), 4.0)[..., None]
+        f = np.maximum(f, Rseg[..., None].astype(np.float32))
+        out[seg] = Pseg * (1 - f) + (dus + yuksek) * f
+        rapor[ad] = {'onarildi': True, 'satir': [a, b], 'bagis_kayma': int(d), 'px': int(R.sum())}
+    return np.clip(out, 0, 255), rapor
 
 
 def eski_iz(D_ci_eski, D_ci_yeni, yeni, maske_bolge):
