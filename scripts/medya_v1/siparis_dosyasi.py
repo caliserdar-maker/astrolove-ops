@@ -1768,53 +1768,81 @@ def kontrol_paketi(cik, baski, bi, ek, ana_ad, sonek=''):
     return d
 
 
-def pod_uret(sip, kaynak_bayt, P_blue, P_ed, cik):
+IKINCI_DENEME_KAPILARI = {'olcek', 'mesaj_murekkep'}
+
+
+def _pod_tur(sip, kaynak_bayt, P_blue, P_ed, yol):
+    """Tek render + baski dosyasi + kapilar (pod_uret'in bir turu)."""
     ed, oran = sip['edisyon'], sip['oran']
     isimler = (sip['isim1'], sip['isim2']); mesaj = sip.get('mesaj') or ''
-    # MB olcumu kaldirildi (Serdar onayi 25 Eyl, 3. madde): her dosya kendisinden.
     poster, bi, ek = render_et(ed, oran, sip['sayfa'], kaynak_bayt, isimler, mesaj,
                                P_blue, P_ed, sip['cift'], ref_boy=sip['boy'],
                                hedef_en=sip['hedef_px'][0], boy=sip['boy'])
     if poster is None:
-        return {**sip, **bi}
-    ad = f'BASKI_{sip["boy"]}.jpg'
-    baski, bpx = tek_dosya(poster, bi, ek, kaynak_bayt, sip['hedef_px'], cik / ad)
+        return {'poster': None, 'bi': bi}
+    baski, bpx = tek_dosya(poster, bi, ek, kaynak_bayt, sip['hedef_px'], yol)
     bi['leke_kapisi'] = leke_kapisi(baski, kaynak_bayt, ek['maske'])
     bi['olcek_kapisi'] = olcek_kapisi_baski(baski, ek.get('p0', poster), bi['olcum']['isim_bant'])
-    # 30 Eyl (GEMINI_LEO DB konum 1.18): olcek FAIL ise isim satiri 2400 yerlesiminden OLCEKLENEREK yeniden
-    # render edilir (_SatirYerlesim); yalniz olcek kapisi o zaman PASS olursa kullanilir. Varsayilan yol
-    # degismez: regresyon 36756875368'de olcekli yerlesim her hucrede kullanilinca 4 DB hucresi PASS->FAIL oldu.
-    if ed != 'blue' and not bi['olcek_kapisi'].get('gecti') and sip['hedef_px'][0] != 2400:
-        SATIR_OLCEKLI['etkin'] = True
-        try:
-            p2, bi2, ek2 = render_et(ed, oran, sip['sayfa'], kaynak_bayt, isimler, mesaj, P_blue, P_ed,
-                                     sip['cift'], ref_boy=sip['boy'], hedef_en=sip['hedef_px'][0], boy=sip['boy'])
-        finally:
-            SATIR_OLCEKLI['etkin'] = False
-        if p2 is not None:
-            gecici = cik / f'_olcekli_{ad}'
-            b2, bpx2 = tek_dosya(p2, bi2, ek2, kaynak_bayt, sip['hedef_px'], gecici)
-            ok2 = olcek_kapisi_baski(b2, ek2.get('p0', p2), bi2['olcum']['isim_bant'])
-            ilk = {q: bi['olcek_kapisi'].get(q) for q in ('konum_fark_px', 'kenar_fark_px')}
-            if ok2.get('gecti'):
-                gecici.replace(cik / ad)
-                poster, bi, ek, baski, bpx = p2, bi2, ek2, b2, bpx2
-                bi['leke_kapisi'] = leke_kapisi(baski, kaynak_bayt, ek['maske'])
-                bi['olcek_kapisi'] = {**ok2, 'yerlesim': 'olcekli (2400 x k)', 'ilk_yerlesim': ilk}
-            else:
-                gecici.unlink(missing_ok=True)
-                bi['olcek_kapisi']['olcekli_deneme'] = {q: ok2.get(q) for q in ('konum_fark_px', 'kenar_fark_px', 'fark')}
     bi['isim_kalinti_kapisi'] = isim_kalinti_kapisi(baski, *koruma(ek)[:1], bi['olcum'], ham=koruma(ek)[1],
                                                     alan=ek.get('maske'))
     bi['isim_kenar_kapisi'] = (bpx.get('isim_bandi_temizligi') or {}).get('kenar')
+    kapilar, ayrinti = kapilari_topla(bi, isimler, mesaj, bpx['baski_px'], sip['hedef_px'])
+    return {'poster': poster, 'bi': bi, 'ek': ek, 'baski': baski, 'bpx': bpx,
+            'kapilar': kapilar, 'ayrinti': ayrinti}
+
+
+def pod_uret(sip, kaynak_bayt, P_blue, P_ed, cik):
+    ed = sip['edisyon']
+    isimler = (sip['isim1'], sip['isim2']); mesaj = sip.get('mesaj') or ''
+    # MB olcumu kaldirildi (Serdar onayi 25 Eyl, 3. madde): her dosya kendisinden.
+    ad = f'BASKI_{sip["boy"]}.jpg'
+    r = _pod_tur(sip, kaynak_bayt, P_blue, P_ed, cik / ad)
+    if r['poster'] is None:
+        return {**sip, **r['bi']}
+    # IKINCI DENEME (30 Eyl / 1 Eki): varsayilan yol DEGISMEZ. Yalniz FAIL kapilari {olcek, mesaj_murekkep}
+    # icindeyse (Blue disi) ikinci render: olcek -> isim satiri 2400 yerlesiminden olceklenir (_SatirYerlesim),
+    # mesaj -> tagline tonu olculen isim / mesaj orani ile duzeltilir (mesaj_kapisi.DUZELTME). Ikinci deneme
+    # yalniz TUM kapilar PASS ise kullanilir; boylece onceden PASS olan hicbir hucrenin ciktisi degismez
+    # (regresyon 36756875368: olcekli yerlesim her hucrede kullanilinca 4 DB hucresi PASS->FAIL oldu).
+    kal = {g for g, v in r['kapilar'].items() if v is False}
+    if ed != 'blue' and kal and kal <= IKINCI_DENEME_KAPILARI:
+        import mesaj_kapisi
+        SATIR_OLCEKLI['etkin'] = 'olcek' in kal and sip['hedef_px'][0] != 2400
+        mk0 = r['bi'].get('mesaj_kapisi') or {}
+        if 'mesaj_murekkep' in kal and mk0.get('isim_rgb') and mk0.get('mesaj_rgb'):
+            mesaj_kapisi.DUZELTME['kazanc'] = [float(np.clip(max(i, 1) / max(m, 1), 0.7, 1.4))
+                                               for i, m in zip(mk0['isim_rgb'], mk0['mesaj_rgb'])]
+        try:
+            gecici = cik / f'_ikinci_{ad}'
+            r2 = _pod_tur(sip, kaynak_bayt, P_blue, P_ed, gecici)
+        finally:
+            SATIR_OLCEKLI['etkin'] = False
+            kz = mesaj_kapisi.DUZELTME['kazanc']; mesaj_kapisi.DUZELTME['kazanc'] = None
+        ozet = {'kalan_ilk': sorted(kal), 'olcekli': 'olcek' in kal, 'mesaj_kazanc': kz}
+        if r2['poster'] is not None and kapi_sonucu(r2['kapilar']):
+            gecici.replace(cik / ad)
+            ozet['kullanildi'] = True
+            ozet['ilk'] = {'olcek': {q: r['bi']['olcek_kapisi'].get(q) for q in ('konum_fark_px', 'kenar_fark_px')},
+                           'mesaj_dE': mk0.get('dE')}
+            r = r2
+        else:
+            gecici.unlink(missing_ok=True)
+            ozet['kullanildi'] = False
+            if r2['poster'] is not None:
+                ozet['kalan_ikinci'] = sorted(g for g, v in r2['kapilar'].items() if v is False)
+                ozet['ikinci'] = {'olcek': {q: r2['bi']['olcek_kapisi'].get(q)
+                                            for q in ('konum_fark_px', 'kenar_fark_px', 'fark')},
+                                  'mesaj': {q: (r2['bi'].get('mesaj_kapisi') or {}).get(q)
+                                            for q in ('dE', 'isim_rgb', 'mesaj_rgb')}}
+        r['bi']['ikinci_deneme'] = ozet
+    poster, bi, ek, baski, bpx = r['poster'], r['bi'], r['ek'], r['baski'], r['bpx']
+    kapilar, ayrinti = r['kapilar'], r['ayrinti']
     if _TANI is not None:                         # baski_tani.py: goruntuler (kapiya etkisi yok)
         _TANI.update({'baski': baski, 'p0': ek.get('p0', poster), 'poster': poster, 'yeni': ek.get('yeni'),
                       'koruma': koruma(ek)})
     onizleme(baski, poster, ek, f'ONIZLEME_{sip["boy"]}.jpg', cik)
     bant = kontrol_paketi(cik, baski, bi, ek, ad)
     inc = sip['inc']
-    # Serdar 3. madde: beklenen boy URETIM dosyasinin kendi pikselinden
-    kapilar, ayrinti = kapilari_topla(bi, isimler, mesaj, bpx['baski_px'], sip['hedef_px'])
     metin_en = bi.get('poster_px', [2400])[0]
     bi.update({**bpx, 'bant_kirpimlari': bant, 'kapi_ayrinti': ayrinti,
                'gorsel_dpi': [round(bpx['baski_px'][0] / inc[0], 1),

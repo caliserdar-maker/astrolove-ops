@@ -30,6 +30,7 @@ if os.environ.get('MESAJ_ESIK'):
 
 ETKIN = {'edisyon': False}     # tagline ton eslemesi yalniz edisyon (Blue disi) render'inda (siparis_dosyasi)
 TON_SINIR = (0.6, 1.7)
+DUZELTME = {'kazanc': None}    # siparis_dosyasi.pod_uret ikinci deneme: olculen isim / mesaj orani
 
 
 def ortak_profil(p1, p2):
@@ -84,6 +85,11 @@ def duzeltme_uygula(pilot12, pilot16=None):
             hedef = np.median(ortak_profil(pr['sol'], pr['sag']), 0)
             img, kaz = ton_esle(img, hedef)
             bilgi = {**bilgi, 'ton_kazanci': kaz}
+        if DUZELTME['kazanc'] is not None:
+            b = np.asarray(img).astype(np.float32)
+            b[..., :3] = np.clip(b[..., :3] * np.asarray(DUZELTME['kazanc'], np.float32), 0, 255)
+            img = Image.fromarray(b.astype(np.uint8), 'RGBA')
+            bilgi = {**bilgi, 'duzeltme_kazanci': DUZELTME['kazanc']}
         return img, bilgi
     tagline_plaka.eski = tp
     pilot12.tagline_plaka = tagline_plaka

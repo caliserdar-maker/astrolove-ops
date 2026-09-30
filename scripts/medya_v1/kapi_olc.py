@@ -80,6 +80,7 @@ def main():
                 'isim_kenar': {q: al(s, 'isim_kenar_kapisi', q) for q in ('kesilen_harf_px', 'harf_murekkebi_koruma_icinde', 'guclu_esik')},
                 'isim_bandi': {q: al(s, 'isim_bandi_temizligi', q) for q in ('kalinti_bileseni', 'degisen_px', 'satir', 'sutun')},
                 'plate_slogan': al(s, 'plate_slogan_kapisi', 'glif_farkli_payi'),
+                'ikinci_deneme': s.get('ikinci_deneme'),
             })
             yol.unlink(missing_ok=True)
         except BaseException as e:                                # noqa: BLE001
