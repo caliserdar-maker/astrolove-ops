@@ -196,6 +196,17 @@ class IsimKalintiTesti(unittest.TestCase):
     def test_acik(self):
         self.kos(False)
 
+    def test_soluk_iz_yonlu(self):
+        # 30 Eyl ARIES_SCORPIO MB: zeminden KOYU mavi satir iz degildir; soluk ALTIN iz (acik) yakalanir.
+        rng = np.random.default_rng(0)
+        a = np.clip(np.array([1, 5, 29], np.float32) + rng.normal(0, 0.8, (200, 400, 3)), 0, 255).astype(np.float32)
+        koyu = a.copy(); koyu[100, 100:140] = (3, 0, 0)          # |dL| 5.6, R-B kaymasi 31: eski olcut iz sayardi
+        _al, so, _dl, _ws = sd._iz_haritasi(koyu, 1.0)
+        self.assertFalse(so[100, 100:140].any())
+        acik = a.copy(); acik[100, 100:140] = (22, 14, 20)
+        _al, so, _dl, _ws = sd._iz_haritasi(acik, 1.0)
+        self.assertTrue(so[100, 100:140].any())
+
 
 if __name__ == '__main__':
     unittest.main()

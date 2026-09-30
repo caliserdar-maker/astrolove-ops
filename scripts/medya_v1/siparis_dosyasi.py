@@ -865,7 +865,10 @@ def _iz_haritasi(Bb, k, haric=None, esik=None):
     rb = Bb[..., 0] - Bb[..., 2]
     ws = rb - _yerel_zemin(rb, k, haric, kaydir=128.0)
     altin = (np.abs(dL) > e['altin_L']) & (rb > 20)
-    soluk = (ws > e['soluk_rb']) & (np.abs(dL) > e['soluk_L'])
+    # 30 Eyl (ARIES_SCORPIO MB 11x14): soluk iz YONLU. Altin iz koyu zeminde zeminden ACIK, acik zeminde KOYU;
+    # |dL| zeminden koyu mavi bir satiri (0,0,17 / zemin 1,5,29, dL -5.7) JPEG gurultusuyle iz sayiyordu.
+    yon = 1.0 if float(np.median(L)) < 128.0 else -1.0
+    soluk = (ws > e['soluk_rb']) & (yon * dL > e['soluk_L'])
     return altin, soluk, dL, ws
 
 
