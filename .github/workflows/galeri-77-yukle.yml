@@ -1,0 +1,107 @@
+name: galeri-77-yukle
+
+# 77 cift galerisi Etsy yuklemesi (Serdar karari 30 Eyl). scripts/etsy/galeri77_yukle.py (CL yontemi, cl_galeri_degistir).
+# Saatlik: TEMP/GALERI_77/HAZIR.csv'deki yeni satirlar yuklenir (set=17: 05/19 yok; set=19: tam). Ilan basina yedek
+# (TEMP/GALERI_YAYIN/YEDEK/<listing>_<cift>, dogrulanir) -> uygula -> geri okuma; ilk FAIL'de DUR. Kota tabani 150.
+# Ilerleme TEMP/GALERI_YAYIN/ILERLEME.json. Etsy kilidi: cron turu mesgulse atlanir; elle baslatilan sira bekler.
+
+permissions:
+  actions: read
+  contents: read
+
+on:
+  schedule:
+    - cron: "37 * * * *"
+  workflow_dispatch:
+    inputs:
+      limit: {description: "bu kosuda en fazla N ilan (0 = kota izin verdigince)", default: "0"}
+
+jobs:
+  kilit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 125
+    outputs:
+      atla: ${{ steps.k.outputs.atla }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            scripts/etsy/kilit_bekle.py
+            .github/workflows
+      - id: k
+        name: Etsy kilidi (cron mesgulse atla, elle sira bekle)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EV: ${{ github.event_name }}
+        run: |
+          if [ "$EV" = "schedule" ]; then python3 scripts/etsy/kilit_bekle.py --mod atla
+          else python3 scripts/etsy/kilit_bekle.py; fi
+  yukle:
+    needs: kilit
+    if: ${{ needs.kilit.outputs.atla != 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          echo "DAMGA=$(date -u +%Y%m%d_%H%M)" >> "$GITHUB_ENV"
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: HAZIR + ilerleme + yeni ciftlerin paketi
+        id: g
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _paket _out
+          T="gdrive:ASTROLOVE/TEMP"
+          rclone copyto "$T/GALERI_77/HAZIR.csv" _work/HAZIR.csv
+          rclone copyto "$T/GALERI_YAYIN/ILERLEME.json" _work/ILERLEME.json 2>/dev/null || echo '{"ilanlar": {}}' > _work/ILERLEME.json
+          python3 - > _work/yeni.txt <<'PY'
+          import csv, json
+          R = json.load(open("_work/ILERLEME.json")).get("ilanlar", {})
+          for r in csv.DictReader(open("_work/HAZIR.csv", encoding="utf-8")):
+              lid, st = (r.get("listing_id") or "").strip(), int(r.get("set") or 19)
+              o = R.get(lid) or {}
+              if lid and lid != "4570143815" and not (o.get("durum") == "PASS" and int(o.get("set") or 0) >= 17):
+                  print(r["cift"].strip())
+          PY
+          n=$(grep -c . _work/yeni.txt || true); echo "yeni cift: $n"; echo "n=$n" >> "$GITHUB_OUTPUT"
+          while read -r c; do [ -n "$c" ] && rclone copy "$T/GALERI_77/$c" "_paket/$c" --include "*.jpg" --include "ALT_METIN.csv" -q; done < _work/yeni.txt
+      - name: Yukle
+        if: ${{ steps.g.outputs.n != '0' }}
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          LIMIT: ${{ inputs.limit || '0' }}
+        run: |
+          set -euo pipefail
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          python scripts/etsy/cl_galeri_degistir_selftest.py > /dev/null && echo "selftest PASS"
+          python scripts/etsy/galeri77_yukle.py --hazir _work/HAZIR.csv --paket _paket --out _out --ilerleme _work/ILERLEME.json \
+            --confirm GALERI77 --yedek-drive "gdrive:ASTROLOVE/TEMP/GALERI_YAYIN/YEDEK" --kota-taban 150 --limit "$LIMIT"
+      - name: Token + ilerleme + rapor Drive'a
+        if: ${{ always() && steps.g.outputs.n != '0' }}
+        run: |
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
+          if grep -rqE 'x-api-key|refresh_token|"access_token"' _out/ 2>/dev/null; then echo "::error::ciktida sir benzeri anahtar"; exit 1; fi
+          rclone copyto _work/ILERLEME.json "gdrive:ASTROLOVE/TEMP/GALERI_YAYIN/ILERLEME.json" -q
+          [ -d _out ] && rclone copy _out "gdrive:ASTROLOVE/TEMP/GALERI_YAYIN/KOSU_${DAMGA}" --exclude "*/yedek/*.jpg" -q || true
+          [ -f _out/RAPOR.md ] && cat _out/RAPOR.md >> "$GITHUB_STEP_SUMMARY" || true
+      - if: ${{ always() }}
+        run: rm -rf _work _paket ~/.config/rclone
