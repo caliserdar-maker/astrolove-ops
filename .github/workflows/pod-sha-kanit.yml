@@ -84,15 +84,16 @@ jobs:
           RENKLER: ${{ inputs.renkler }}
           BOY: ${{ inputs.boy }}
         run: |
-          set -uo pipefail
+          set +e -uo pipefail
           case "$CIFT$BOY" in *[!A-Z0-9_x]*) echo "HATA: girdi" >&2; exit 1 ;; esac
           m=$(printf '%s' 'It Began With a Kiss in the Rain' | base64 -w0)
           mkdir -p "$GITHUB_WORKSPACE/sip"
           : > "$GITHUB_WORKSPACE/sha.txt"
           for renk in ${RENKLER//,/ }; do
             for k in eski yeni; do
+              # 1 Eki: kapisi FAIL olan siparis (orn. v1 WP) cikis 1 verir; adim bash -e ile durmasin, dosya olculsun
               ( cd "$k" && python scripts/medya_v1/siparis_dosyasi.py --cift "$CIFT" --renk "$renk" --boy "$BOY" \
-                  --isim1 EMILY --isim2 JAMES --mesaj-b64 "$m" --sip-kok "$GITHUB_WORKSPACE/sip/$k" > "../log_${k}_$renk.txt" 2>&1 )
+                  --isim1 EMILY --isim2 JAMES --mesaj-b64 "$m" --sip-kok "$GITHUB_WORKSPACE/sip/$k" > "../log_${k}_$renk.txt" 2>&1 ) || echo "uyari: $k $renk cikis $?"
               f="$k/_siparis/${CIFT}_${renk}_${BOY}/BASKI_${BOY}.jpg"
               h=$( [ -f "$f" ] && sha1sum "$f" | cut -c1-40 || echo YOK )
               echo "$CIFT $renk $BOY $k $h" | tee -a "$GITHUB_WORKSPACE/sha.txt"
