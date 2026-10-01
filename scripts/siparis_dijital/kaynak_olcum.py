@@ -67,6 +67,17 @@ def olc_tek(f):
             r['gecti'] = bool(pk.get('gecti')) and not r['eksik']
             r['tag'] = {k: pk.get(k) for k in ('tag_bant', 'tag_x')}
             r['slogan'] = {k: pk.get(k) for k in ('gecti', 'sebep', 'glif_farkli_payi', 'olcum')}
+            if not r['gecti']:                    # AYRINTI: iki maskede alt yari bantlari + kumeler (yalniz sayi)
+                from pilot6 import kumeler, LUMA
+                im, _k = pilot11.norm(Image.open(f).convert('RGB'))
+                L = np.asarray(im).astype(np.float32) @ LUMA
+                eu = sd._mod('edisyon_uret')
+                acik = float(np.median(L)) > 128
+                H = im.height
+                for ad, mm in (('edisyon', eu.edisyon_maske(L, acik)), ('plate_fark', _plate_maske(sd, str(pl))(L, acik))):
+                    r[f'bantlar_{ad}'] = [{'b': [int(b0), int(b1)], 'oran': round((b0 + b1) / 2 / H, 3),
+                                           'kume20': [[int(c0), int(c1)] for c0, c1 in kumeler(mm[b0:b1], 20) if c1 - c0 > 40][:10]}
+                                          for b0, b1 in pilot11.bantlar(mm) if b1 > 0.55 * H]
             return r
         if ED_PLATE.get(renk) is None:
             o, yedek = a1_poster.sayfa_olc_guvenli(pilot11, f)
