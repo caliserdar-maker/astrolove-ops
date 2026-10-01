@@ -148,6 +148,64 @@ def renk_asamasi(a, g):
     return 0 if oz['durum'] == 'URETILDI' and (oz['pdf_kapisi'] or {}).get('gecti') and sayfa_ok else 1
 
 
+def sayfa_asamasi(a, g):
+    """TEK SAYFA (renk x oran) - HIZ (Serdar 1 Eki: MB seri 25 dk). renk_asamasi ile AYNI _dijital_is, yalniz bir oran;
+    PDF paket asamasinda birlestir() ile kurulur. Cikti: <cikti>/<RENK>/<jpg>, SAYFA_<RENK>_<oran>.json."""
+    sd = kod_yukle(a.kod)
+    no, _ = sd.sayfa_no_tablosu()
+    x = sd.normalize({'receipt': g['receipt'], 'cift': g['cift'], 'renk': a.renk, 'boy': None, 'urun': 'dijital',
+                      'yalniz_renk': True, 'isim1': g['isim1'], 'isim2': g['isim2'], 'mesaj': g['mesaj']})
+    x['sayfa'] = no[x['cift']]
+    sd.kisisel_hazirla()
+    cik = Path(a.cikti).resolve(); klas = cik / a.renk; kon = cik / 'KONTROL'
+    klas.mkdir(parents=True, exist_ok=True); kon.mkdir(parents=True, exist_ok=True)
+    renk, oran, kayit, _ = sd._dijital_is((a.renk, a.oran, x, klas, kon))
+    (cik / f'SAYFA_{a.renk}_{oran}.json').write_text(json.dumps(kayit, ensure_ascii=False, indent=1, default=str))
+    if oran == '11x14':
+        inc = cik / 'inceleme'; inc.mkdir(exist_ok=True)
+        j = sorted(klas.glob(f'*_{a.renk}_11x14_*.jpg'))
+        if j:
+            kesit(j[0], inc / f'KESIT_{a.renk}_11x14.jpg', inc / f'ONIZLEME_{a.renk}_11x14.jpg')
+    kalan = sorted(k for k, d in (kayit.get('kapilar') or {}).items() if d is False)
+    print('SAYFA', a.renk, oran, kayit.get('durum'), 'PASS' if kayit.get('kapilar_gecti') else 'FAIL', kalan,
+          kayit.get('hata') or '', 'sure_sn', kayit.get('sure_sn'), flush=True)
+    if (kayit.get('kapilar') or {}).get('olcek') is False:
+        ok = kayit.get('olcek_kapisi') or {}
+        print('OLCEK_AYRINTI', a.renk, oran, json.dumps({q: ok.get(q) for q in (
+            'konum_fark_px', 'kenar_fark_px', 'fark', 'k', 'yerlesim', 'denemeler')}, default=str), flush=True)
+    return 0 if kayit.get('durum') == 'URETILDI' and kayit.get('kapilar_gecti') else 1
+
+
+def birlestir(sd, d, renk, cift):
+    """sayfa_asamasi parcalarindan renk PDF'i + OZET_<renk>.json + KAPI_RAPORU_<renk>.json (renk_asamasi bicimi)."""
+    S = {f.stem[len(f'SAYFA_{renk}_'):]: json.loads(f.read_text()) for f in d.glob(f'SAYFA_{renk}_*.json')}
+    if not S:
+        return None
+    klas = d / renk
+    sayfalar = []
+    for o in sd.DIJITAL_ORANLAR:
+        b = sd.DIJITAL_BOY[o]
+        bul = sorted(klas.glob(f'*_{renk}_{o}_{b}.jpg'))
+        if o in S and len(bul) == 1:
+            sayfalar.append((bul[0], b))
+    oz = {'renk': renk, 'durum': 'EKSIK', 'pdf': None, 'pdf_kapisi': None, 'yontem': 'sayfa matrisi',
+          'sayfa_kapilar': {o: {'durum': v.get('durum'), 'kapilar_gecti': v.get('kapilar_gecti'),
+                                'kalan': sorted(k for k, q in (v.get('kapilar') or {}).items() if q is False),
+                                'baski_px': v.get('baski_px'), 'hata': v.get('hata')} for o, v in S.items()}}
+    if len(sayfalar) == len(sd.DIJITAL_ORANLAR) and all(v.get('durum') == 'URETILDI' for v in S.values()):
+        pdf = sd.pdf_yap(sayfalar, klas / sd.pdf_adi(cift, renk))
+        oz.update({'durum': 'URETILDI', 'pdf': pdf.name, 'pdf_kapisi': sd.pdf_kapisi(pdf, sayfalar)})
+    oz['kapilar_gecti'] = bool(oz['durum'] == 'URETILDI' and (oz['pdf_kapisi'] or {}).get('gecti')
+                               and len(S) == 5 and all(v.get('kapilar_gecti') for v in S.values()))
+    (d / f'OZET_{renk}.json').write_text(json.dumps(oz, ensure_ascii=False, indent=1, default=str))
+    (d / f'KAPI_RAPORU_{renk}.json').write_text(json.dumps(
+        {'cift': cift, 'renk': renk, 'urun': 'DIJITAL', 'yontem': 'sayfa matrisi',
+         'renkler': {renk: {'oranlar': S, 'pdf': oz['pdf'], 'pdf_kapisi': oz['pdf_kapisi'], 'durum': oz['durum']}}},
+        ensure_ascii=False, indent=1, default=str))
+    print('BIRLESTIR', renk, oz['durum'], oz['pdf'], 'PASS' if oz['kapilar_gecti'] else 'FAIL', flush=True)
+    return oz
+
+
 WP_KAPILAR = ('a_renk', 'b_tasma', 'c_iz', 'e_kagit', 'f_kabartma', 'g_kontrast')
 
 
@@ -399,6 +457,8 @@ def pdf_asamasi(a, g):
     for renk in RENK4:
         d = kok / 'renk' / renk
         f = d / f'OZET_{renk}.json'
+        if not f.exists() and d.exists():                  # sayfa matrisi (renk x oran) parcalari
+            birlestir(sd, d, renk, g['cift'])
         if not f.exists():
             OZ['renkler'][renk] = {'durum': 'EKSIK'}
             continue
@@ -452,16 +512,16 @@ def pdf_asamasi(a, g):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--asama', required=True, choices=('renk', 'wp', 'pdf'))
+    ap.add_argument('--asama', required=True, choices=('renk', 'sayfa', 'wp', 'pdf'))
     ap.add_argument('--kod', required=True)
     ap.add_argument('--kod-ref', default='')
-    ap.add_argument('--renk'); ap.add_argument('--boy')
+    ap.add_argument('--renk'); ap.add_argument('--boy'); ap.add_argument('--oran')
     ap.add_argument('--cikti', required=True)
     a = ap.parse_args()
     a.cikti = str(Path(a.cikti).resolve()); a.kod = str(Path(a.kod).resolve())
     g = girdi()
     os.chdir(Path(a.kod).resolve())               # siparis_dosyasi: _siparis / kisisel yollari cwd'ye gore
-    f = {'renk': renk_asamasi, 'wp': wp_asamasi, 'pdf': pdf_asamasi}[a.asama]
+    f = {'renk': renk_asamasi, 'sayfa': sayfa_asamasi, 'wp': wp_asamasi, 'pdf': pdf_asamasi}[a.asama]
     sys.exit(f(a, g))
 
 
