@@ -446,8 +446,13 @@ class EdisyonPoster:
         olcek_kur(2400)
         ref_norm = self.p11.norm(Image.open(yol).convert('RGB'))[0]
         m = self.eu.murekkep(np.asarray(ref_norm).astype(np.float32))
-        o = self.p11.sayfa_olc(yol, maske=self.plate_maske(plate_yol))
-        return (*olcum_duzelt(o, m), m)
+        # 1 Eki (Test 4 kapisi): MB ile ayni guvenli olcum (gecersizse genis kume boslugu, yine gecersizse hata)
+        from a1_poster import sayfa_olc_guvenli
+        o, yedek = sayfa_olc_guvenli(self.p11, yol, maske=self.plate_maske(plate_yol))
+        o2, duz = olcum_duzelt(o, m)
+        if yedek:
+            duz = {**duz, 'olcum_yedek': yedek}
+        return o2, duz, m
 
     def render(self, ed, oran, sayfa_no, o, kilit, isimler, mesaj):
         """Tek olcekte render (NORM_W o an ne ise). Render kodu degismez."""
