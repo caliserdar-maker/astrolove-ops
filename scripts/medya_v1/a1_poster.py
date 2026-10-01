@@ -75,6 +75,12 @@ SEMBOL_YAN = 0.5        # sembol kapisi: bolgenin iki yanina (bolge eni x oran) 
 OLCUM_GEREK = ('isim_bant', 'sol_isim', 'sonsuz', 'sag_isim', 'sembol_bant', 'sembol', 'tag_bant', 'tag_x')
 ISIM_ORAN = (0.66, 0.80)      # isim bandi merkezi / sayfa yuksekligi (sablon olcumu 0.735-0.751, 5 oran)
 KUME_BOSLUK_YEDEK = 60
+# 1 Eki (Test 4 kapisi, LEO_SAGITTARIUS / LEO_VIRGO WP 18x24 slogan kapisi): parsomen dokusu isim bandinda sag kenarda
+# 41 px genis, 123 px murekkepli bir leke kumesi verir (glif kumeleri >= 3564 px) -> 4 kume, isim satiri bulunamaz; genis
+# bosluk da birlestirmez (160 px uzakta). Ucuncu olcum: bantta en buyuk kumenin murekkebinin KUME_MUREKKEP_YEDEK
+# payindan az murekkepli kumeler (doku lekesi) yok sayilir. Yalniz ilk iki olcum gecersizse denenir; sonuc ayni
+# dogrulamadan gecer, gecmezse FAIL-CLOSED.
+KUME_MUREKKEP_YEDEK = 0.05
 
 
 class KaynakOlcumHatasi(RuntimeError):
@@ -109,19 +115,29 @@ def sayfa_olc_guvenli(p11, yol, gerek=OLCUM_GEREK, **kw):
     if not s1:
         return o, None
     asil = p11.kumeler
-    p11.kumeler = lambda m, bosluk, _a=asil: _a(m, max(bosluk, KUME_BOSLUK_YEDEK))
-    try:
-        o2 = p11.sayfa_olc(yol, **kw)
-    except SystemExit as e:
-        o2 = {'hata': f'sayfa_olc: {e}'}
-    finally:
-        p11.kumeler = asil
-    s2 = olcum_sorunu(o2, gerek)
-    if s2:
-        raise KaynakOlcumHatasi(f'KAYNAK OLCUM HATASI {Path(yol).name}: {s1}; yedek olcum (kume boslugu '
-                                f'{KUME_BOSLUK_YEDEK}): {s2}. Kaynak dosya incelenmeli; uretim durduruldu.')
-    return o2, {'ilk_sorun': s1, 'yedek': f'kume boslugu {KUME_BOSLUK_YEDEK}',
-                'isim_bant': o2['isim_bant'], 'tag_bant': o2['tag_bant']}
+
+    def _dokusuz(m, bosluk, _a=asil):
+        km = _a(m, bosluk)
+        if len(km) < 2:
+            return km
+        mur = [int(m[:, x0:x1].sum()) for x0, x1 in km]
+        return [k for k, n in zip(km, mur) if n >= KUME_MUREKKEP_YEDEK * max(mur)]
+    sorun = [s1]
+    for ad, yama in ((f'kume boslugu {KUME_BOSLUK_YEDEK}', lambda m, bosluk, _a=asil: _a(m, max(bosluk, KUME_BOSLUK_YEDEK))),
+                     (f'doku kumesi < {KUME_MUREKKEP_YEDEK:.0%} murekkep yok sayilir', _dokusuz)):
+        p11.kumeler = yama
+        try:
+            o2 = p11.sayfa_olc(yol, **kw)
+        except SystemExit as e:
+            o2 = {'hata': f'sayfa_olc: {e}'}
+        finally:
+            p11.kumeler = asil
+        s2 = olcum_sorunu(o2, gerek)
+        if not s2:
+            return o2, {'ilk_sorun': s1, 'yedek': ad, 'isim_bant': o2['isim_bant'], 'tag_bant': o2['tag_bant']}
+        sorun.append(f'yedek ({ad}): {s2}')
+    raise KaynakOlcumHatasi(f'KAYNAK OLCUM HATASI {Path(yol).name}: ' + '; '.join(sorun)
+                            + '. Kaynak dosya incelenmeli; uretim durduruldu.')
 
 
 def murekkep(ref_norm):

@@ -3,7 +3,8 @@
 
 Sentetik 2400x3600 Blue sayfa, kaynak_olcum ayrintisindaki (run 36918874524) bant duzeniyle: isim satirinda ilk isim
 25 px harf boslugu ile iki kumeye bolunur, 3 kumeli tagline. Dogrudan sayfa_olc tagline'i isim satiri secer
-(tag_bant yok); sayfa_olc_guvenli dogru bantlari bulur. Sablona uymayan sayfa FAIL-CLOSED hata verir.
+(tag_bant yok); sayfa_olc_guvenli dogru bantlari bulur. Doku lekesi (LEO_SAGITTARIUS WP 18x24: isim bandinda sag kenarda
+41 px, 123 px murekkep) 4. kume yapar; ucuncu olcum dusuk murekkepli kumeyi yok sayar. Sablona uymayan sayfa FAIL-CLOSED hata verir.
 KISISEL_YOL=<kisisel-v1>/scripts/kisisel gerekir (yoksa atlanir).
 """
 import os, sys, tempfile, unittest
@@ -24,7 +25,7 @@ except Exception:                                                 # noqa: BLE001
 ALTIN = (231, 167, 48)
 
 
-def sayfa(yol, isim_bolunmus=True, tagline=True, isim_y=(2600, 2696)):
+def sayfa(yol, isim_bolunmus=True, tagline=True, isim_y=(2600, 2696), leke=False):
     im = Image.new('RGB', (2400, 3600), (4, 10, 40)); d = ImageDraw.Draw(im)
     d.ellipse([254, 511, 2146, 1964], outline=ALTIN, width=8)                       # buyuk daire + sembol
     d.rectangle([900, 800, 1500, 1500], fill=ALTIN)
@@ -34,6 +35,8 @@ def sayfa(yol, isim_bolunmus=True, tagline=True, isim_y=(2600, 2696)):
     isim = [(519, 735), (761, 906)] if isim_bolunmus else [(519, 906)]
     for x0, x1 in isim + [(1059, 1270), (1423, 1881)]:                              # ARIE S | sonsuz | VIRGO
         d.rectangle([x0, y0, x1, y1], fill=ALTIN)
+    if leke:                                                                        # doku lekesi: 41 px, ~150 px murekkep
+        d.line([(2089, 2615), (2130, 2680)], fill=ALTIN, width=2)
     if tagline:
         for x0, x1 in ((807, 957), (982, 1175), (1267, 1594)):                      # Two | Souls | One Bond
             d.rectangle([x0, 3009, x1, 3090], fill=ALTIN)
@@ -88,6 +91,29 @@ class KaynakOlcumGuvenliTesti(unittest.TestCase):
         Image.new('RGB', (2400, 3600), (4, 10, 40)).save(plate)
         r = sd.plate_slogan_kapisi(y, plate, 'black')
         self.assertEqual(r.get('tag_bant'), [3009, 3091], r)
+
+    def test_doku_lekesi_ucuncu_olcum(self):
+        y = sayfa(self.k / 'e.png', isim_bolunmus=False, leke=True)
+        o0 = self._olc(y)
+        self.assertTrue('hata' in o0 or a1_poster.olcum_sorunu(o0))     # dogrudan olcum gecersiz
+        o, yedek = a1_poster.sayfa_olc_guvenli(pilot11, y)
+        self.assertIn('doku', yedek['yedek'])
+        self.assertEqual(o['isim_bant'], [2600, 2697])
+        self.assertEqual(o['sag_isim'], [1423, 1882])
+        self.assertEqual(o['tag_bant'][0], 3009)
+        self.assertIsNone(a1_poster.olcum_sorunu(o))
+
+    def test_doku_lekesi_tagline_yoksa_fail_closed(self):
+        with self.assertRaises(a1_poster.KaynakOlcumHatasi) as h:
+            a1_poster.sayfa_olc_guvenli(pilot11, sayfa(self.k / 'f.png', isim_bolunmus=False, tagline=False, leke=True))
+        self.assertIn('doku kumesi', str(h.exception))
+
+    @staticmethod
+    def _olc(y):
+        try:
+            return pilot11.sayfa_olc(y)
+        except SystemExit as e:
+            return {'hata': str(e)}
 
 
 if __name__ == '__main__':
