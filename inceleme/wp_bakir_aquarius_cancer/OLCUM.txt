@@ -1,0 +1,12 @@
+# Bakir WP ornegi AQUARIUS_CANCER: olcum (KAPI_MIDNIGHT_BLUE olcum; bantlar 2400 birim {'sembol': [1948, 2126], 'isim': [2249, 2354], 'mesaj': [2614, 2687]})
+hedef bakir RGB (129, 72, 32); kontrast = WCAG (murekkep ort. vs zemin ort.); murekkep = zeminden >= 25 koyu luma
+boyut: 19 kart (3000, 2250), WP baski (3307, 4200), REF baski (3307, 4200)
+sha1: WP_BASKI aabb96f109c1 | REF_WP_BASKI aabb96f109c1 | ayni dosya: True
+
+bolge | 19 kart: murekkep RGB / zemin RGB / kontrast / hedefe fark | WP baski 1:1 | REF 1:1 | 19-REF kontrast farki
+isim | [184.5, 131.6, 66.4] / [225.6, 201.2, 153.5] / 2.04 / 49.8 | [183.1, 129.2, 63.4] / [225.7, 201.2, 153.7] / 2.09 / 47.6 | [183.1, 129.2, 63.4] / [225.7, 201.2, 153.7] / 2.09 / 47.6 | -0.05
+mesaj | [174.3, 114.8, 50.6] / [220.6, 187.8, 127.9] / 2.18 / 35.6 | [173.1, 112.5, 47.8] / [220.8, 187.9, 128.3] / 2.24 / 33.5 | [173.1, 112.5, 47.8] / [220.8, 187.9, 128.3] / 2.24 / 33.5 | -0.06
+sembol | [191.2, 140.5, 72.3] / [226.9, 203.4, 157.6] / 1.88 / 57.0 | [190.7, 139.5, 71.1] / [227.0, 203.4, 157.8] / 1.9 / 56.1 | [190.7, 139.5, 71.1] / [227.0, 203.4, 157.8] / 1.9 / 56.1 | -0.02
+
+WP kapilar: {'duz_renk_siparis': True, 'a_renk': True, 'b_tasma': True, 'c_iz': True, 'e_kagit': True, 'f_kabartma': True, 'g_kontrast': True, 'plate': True, 'zemin_birebir': True, 'eski_iz': True, 'boy': True} | kapilar_gecti True | yontem WP_BAKIR
+d) dikis (bilgi, kabul kosulu degil): {"yeni": [{"yon": "dikey", "tur": "koyu", "x": 47, "y": [2663, 2762], "boy": 100, "kontrast": 10.5}, {"yon": "dikey", "tur": "koyu", "x": 505, "y": [3125, 3234], "boy": 110, "kontrast": 7.2}, {"yon": "dikey", "tur": "koyu", "x": 1530, "y": [3547, 3720], "boy": 174, "kontrast": 0.8}, {"yon": "dikey", "tur": "koyu", "x": 3011, "y": [2845, 2957], "boy": 113, "kontrast": 13.4}, {"yon": "dikey", "tur": "koyu", "x": 3030, "y": [2927, 3026], "boy": 100, "kontrast": 13.0}, {"yon": "dikey", "tur": "koyu", "x": 3164, "y": [2794, 2904], "boy": 111, "kontrast": 12.9}, {"yon": "dikey", "tur": "koyu", "x": 
