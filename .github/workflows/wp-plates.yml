@@ -48,6 +48,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:
+      max-parallel: 4   # siparis-dijital icin is yeri (Serdar 1 Eki: en az 8 bos)
       fail-fast: false
       matrix:
         edition: ${{ fromJson(needs.plan.outputs.matrix) }}

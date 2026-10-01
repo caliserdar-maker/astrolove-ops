@@ -21,6 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 150
     strategy:
+      max-parallel: 4   # siparis-dijital icin is yeri (Serdar 1 Eki: en az 8 bos)
       fail-fast: false
       matrix:
         cift: [CANCER_LIBRA, AQUARIUS_GEMINI, ARIES_LIBRA]

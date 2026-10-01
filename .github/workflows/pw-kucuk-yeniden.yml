@@ -39,6 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     strategy:
+      max-parallel: 4   # siparis-dijital icin is yeri (Serdar 1 Eki: en az 8 bos)
       fail-fast: false
       matrix:
         parca: [1, 2, 3, 4, 5, 6]

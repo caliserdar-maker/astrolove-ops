@@ -43,7 +43,7 @@ jobs:
     timeout-minutes: 240
     strategy:
       fail-fast: false
-      max-parallel: 6   # toplam 8 is siniri: kapak-duzeltme vb. icin yer
+      max-parallel: 4   # toplam 8 is siniri: kapak-duzeltme vb. icin yer
       matrix:
         parca: [0, 1, 2, 3, 4, 5, 6, 7]
     steps:

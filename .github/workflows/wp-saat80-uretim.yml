@@ -127,6 +127,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 300
     strategy:
+      max-parallel: 4   # siparis-dijital icin is yeri (Serdar 1 Eki: en az 8 bos)
       fail-fast: false
       matrix:
         shard: ${{ fromJson(needs.plan.outputs.shards) }}
