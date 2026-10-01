@@ -164,3 +164,10 @@ Gece (20:00-21:10)
 - [ ] Cift alfabetik, isim1/isim2 burclarla eslesiyor.
 - [ ] Saat dispatch aninda baslar; 2 dk'da bir rapor.
 - [ ] Bitti tanimi: 5 PDF Drive'da + OZET PASS + onizleme kontrolu.
+
+## DURUM 1 Eki 21:40 UTC (Serdar: Test 4 yarin)
+
+- Kaynak on testi v1 6e02ffe (5 kosu 3692660x): MB/DB/PW/CI 390/390; WP 388/390 - acik: LEO_SAGITTARIUS ve LEO_VIRGO
+  WARM_PARCHMENT 18x24 (tag_bant yok). baski-duzelt inceliyor (kaynak-olcum 36929585913).
+- Isim on testi prova 36926624004 (6e02ffe, 54 is): 21:35'te 13 success, FAIL yok, devam ediyor.
+- Test 4 kapisi: kalan = 2 WP 18x24 dosyasi + isim on testinin bitmesi. Test 4 icin cift secimi bu 2 ciftin disindan.
