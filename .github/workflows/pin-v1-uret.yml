@@ -20,6 +20,14 @@ on:
         description: "true: yalniz uret + Drive'a onizleme/QC yaz; Pages push, prob ve CSV yok"
         type: boolean
         default: true
+      yalniz_csv:
+        description: "true: gorsel uretme/yukleme YOK; Drive V1_PINLER.csv ayni sirayla yeniden zamanlanir, CSV'ler yazilir"
+        type: boolean
+        default: false
+      onek:
+        description: "CSV oneki (yalniz_csv), or. PIN_V1B; eski PIN_V1_*.csv _ESKI_KULLANMA olur"
+        required: false
+        default: PIN_V1B
 
 concurrency:
   group: pin-media-sync
@@ -37,7 +45,33 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Yalniz CSV (yeniden zamanla)
+        if: ${{ inputs.yalniz_csv == true }}
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          ONEK: ${{ inputs.onek }}
+        run: |
+          set -euo pipefail
+          git show origin/medya-v1:scripts/medya_v1/uretim/metin_kurali.py > /tmp/metin_kurali.py
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            export RCLONE_CONFIG_GDRIVE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET"; fi
+          pip install -q pillow numpy
+          rclone copyto "$D/V1_PINLER.csv" _eski_pinler.csv
+          python3 scripts/sosyal/yeniden_zamanla.py _eski_pinler.csv _yeni_pinler.csv --dk 35 | tee -a "$GITHUB_STEP_SUMMARY"
+          python3 scripts/sosyal/metricool_csv.py _yeni_pinler.csv _csv --onek "$ONEK" --min-dk 30 --metin-kurali /tmp/metin_kurali.py | tee -a "$GITHUB_STEP_SUMMARY"
+          python3 /tmp/metin_kurali.py _csv
+          for f in $(rclone lsf "$D" --include "PIN_V1_[0-9]*.csv"); do rclone moveto "$D/$f" "$D/${f%.csv}_ESKI_KULLANMA.csv"; done
+          rclone copy _csv "$D" --include "${ONEK}_*.csv"
+          rclone copyto _yeni_pinler.csv "$D/${ONEK}_PINLER.csv"
+          rclone lsl "$D" --include "PIN_V1*.csv" | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "YALNIZ_CSV_TAMAM" >> "$GITHUB_ENV"
+
       - name: On kosul (AI sahne + metin_kurali)
+        if: ${{ inputs.yalniz_csv != true }}
         run: |
           set -euo pipefail
           [ -f "$PAKET/assets/scene_empty_master.png" ] || { echo "DUR: $PAKET/assets/scene_empty_master.png yok (ChatGPT paketi assets/)" >&2; exit 1; }
@@ -50,6 +84,7 @@ jobs:
           sha256sum /tmp/fontlar/*.otf
 
       - name: rclone kur + conf
+        if: ${{ inputs.yalniz_csv != true }}
         env:
           RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
@@ -64,6 +99,7 @@ jobs:
           fi
 
       - name: Kapaklar (Etsy 1. gorsel)
+        if: ${{ inputs.yalniz_csv != true }}
         run: |
           set -euo pipefail
           rclone copy gdrive:ASTROLOVE/TEMP/GALERI_77 _kapak --include "*/01_kapak.jpg" --stats-one-line -v 2>&1 | tail -2
@@ -71,6 +107,7 @@ jobs:
           echo "kapak: $(find _kapak -name 01_kapak.jpg | wc -l)"
 
       - name: Uret + QC
+        if: ${{ inputs.yalniz_csv != true }}
         env:
           CIFTLER: ${{ inputs.ciftler }}
         run: |
@@ -81,6 +118,7 @@ jobs:
           grep -c ',PASS,' _out/QC.csv || true
 
       - name: Drive (onizleme, QC, medya)
+        if: ${{ inputs.yalniz_csv != true }}
         run: |
           set -euo pipefail
           rclone copyto _out/ONIZLEME_2CIFT.jpg "$D/ONIZLEME_2CIFT.jpg"
@@ -89,7 +127,7 @@ jobs:
           rclone copy _out/v1 "$D/MEDYA/v1" --stats-one-line -v 2>&1 | tail -2
 
       - name: Medya reposunu al
-        if: ${{ inputs.dry_run != true }}
+        if: ${{ inputs.dry_run != true && inputs.yalniz_csv != true }}
         uses: actions/checkout@v4
         with:
           repository: caliserdar-maker/astrolove-media
@@ -97,7 +135,7 @@ jobs:
           path: media
 
       - name: Pages push (pinterest/v1)
-        if: ${{ inputs.dry_run != true }}
+        if: ${{ inputs.dry_run != true && inputs.yalniz_csv != true }}
         working-directory: media
         run: |
           set -euo pipefail
@@ -110,7 +148,7 @@ jobs:
           fi
 
       - name: Pages bekle + tum URL probu
-        if: ${{ inputs.dry_run != true }}
+        if: ${{ inputs.dry_run != true && inputs.yalniz_csv != true }}
         run: |
           set -euo pipefail
           son=$(python3 -c "import csv;print([r['url'] for r in csv.DictReader(open('_out/PINLER.csv')) if '/v1/' in r['url']][-1])")
@@ -132,7 +170,7 @@ jobs:
           echo "PROB GENEL PASS" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Metricool CSV
-        if: ${{ inputs.dry_run != true }}
+        if: ${{ inputs.dry_run != true && inputs.yalniz_csv != true }}
         run: |
           set -euo pipefail
           python3 scripts/sosyal/metricool_csv.py _out/PINLER.csv _csv --onek PIN_V1 --metin-kurali /tmp/metin_kurali.py | tee -a "$GITHUB_STEP_SUMMARY"

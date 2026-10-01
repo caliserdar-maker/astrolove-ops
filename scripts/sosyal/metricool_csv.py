@@ -15,6 +15,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('pinler'); ap.add_argument('cikti')
     ap.add_argument('--onek', default='PIN_V1'); ap.add_argument('--metin-kurali', default=None)
+    ap.add_argument('--min-dk', type=int, default=120, help='ilk satir simdiden en az kac dakika sonra')
     a = ap.parse_args()
     rows = list(csv.DictReader(open(a.pinler, encoding='utf-8')))
     hata = []
@@ -39,8 +40,8 @@ def main():
                     'Pinterest Pin Title': r['title'], 'Pinterest Pin Link': r['link'], 'Pinterest Pin New Format': 'FALSE'})
     ilk = datetime.fromisoformat(f"{rows[0]['Date']}T{rows[0]['Time']}")
     simdi_ist = datetime.utcnow() + timedelta(hours=3)
-    if ilk < simdi_ist + timedelta(hours=2):
-        hata.append(f'ilk yayin {ilk} simdiden (Istanbul {simdi_ist:%Y-%m-%d %H:%M}) 2 saatten yakin')
+    if ilk < simdi_ist + timedelta(minutes=a.min_dk):
+        hata.append(f'ilk yayin {ilk} simdiden (Istanbul {simdi_ist:%Y-%m-%d %H:%M}) {a.min_dk} dk ten yakin')
     if hata:
         sys.exit('DUR: ' + '; '.join(hata[:20]))
     Path(a.cikti).mkdir(parents=True, exist_ok=True)
