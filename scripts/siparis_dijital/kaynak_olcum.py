@@ -17,43 +17,57 @@ from pathlib import Path
 GEREK = ('isim_bant', 'sol_isim', 'sonsuz', 'sag_isim', 'sembol_bant', 'sembol', 'tag_bant', 'tag_x', 'isim_govde')
 
 
+_YOL = {}
+
+
+def _hazirla(kisisel, medya):
+    sys.path.insert(0, kisisel)
+    sys.path.insert(0, medya)
+
+
+def olc_tek(f):
+    import pilot11
+    from PIL import Image
+    import a1_poster
+    f = Path(f)
+    cift, renk, boy = f.parent.parent.name, f.parent.name, f.stem
+    r = {'cift': cift, 'renk': renk, 'boy': boy, 'gecti': False, 'eksik': [], 'hata': None}
+    try:
+        o = pilot11.sayfa_olc(f)
+        m = a1_poster.murekkep(pilot11.norm(Image.open(f).convert('RGB'))[0])
+        o2, duz = a1_poster.olcum_duzelt(dict(o), m)
+        r['eksik_ham'] = [k for k in GEREK if k not in o]
+        r['eksik'] = [k for k in GEREK if k not in o2]
+        r['gecti'] = not r['eksik']
+        r['tag'] = {k: o2.get(k) for k in ('tag_bant', 'tag_x', 'tag_kumeleri')}
+        r['isim_bant'] = o2.get('isim_bant')
+        r['norm_boyut'] = o2.get('norm_boyut')
+    except SystemExit as e:
+        r['hata'] = f'SystemExit: {e}'
+    except Exception as e:                                        # noqa: BLE001
+        r['hata'] = f'{type(e).__name__}: {e}'
+    return r
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--kaynak', required=True)
     ap.add_argument('--kisisel', required=True)
     ap.add_argument('--medya', required=True)
     ap.add_argument('--cikti', required=True)
+    ap.add_argument('--is', type=int, default=4, help='paralel surec')
     a = ap.parse_args()
-    sys.path.insert(0, a.kisisel)
-    sys.path.insert(0, a.medya)
-    import pilot11
-    from PIL import Image
-    import a1_poster
+    from concurrent.futures import ProcessPoolExecutor
     t0 = time.time()
+    dosyalar = [str(x) for x in sorted(Path(a.kaynak).glob('*/*/*.jpg'))]
     sonuc = []
-    dosyalar = sorted(Path(a.kaynak).glob('*/*/*.jpg'))
-    for i, f in enumerate(dosyalar, 1):
-        cift, renk, boy = f.parent.parent.name, f.parent.name, f.stem
-        r = {'cift': cift, 'renk': renk, 'boy': boy, 'gecti': False, 'eksik': [], 'hata': None}
-        try:
-            o = pilot11.sayfa_olc(f)
-            m = a1_poster.murekkep(pilot11.norm(Image.open(f).convert('RGB'))[0])
-            o2, duz = a1_poster.olcum_duzelt(dict(o), m)
-            r['eksik_ham'] = [k for k in GEREK if k not in o]
-            r['eksik'] = [k for k in GEREK if k not in o2]
-            r['gecti'] = not r['eksik']
-            r['tag'] = {k: o2.get(k) for k in ('tag_bant', 'tag_x', 'tag_kumeleri')}
-            r['isim_bant'] = o2.get('isim_bant')
-            r['norm_boyut'] = o2.get('norm_boyut')
-        except SystemExit as e:
-            r['hata'] = f'SystemExit: {e}'
-        except Exception as e:                                    # noqa: BLE001
-            r['hata'] = f'{type(e).__name__}: {e}'
-        sonuc.append(r)
-        gecen = time.time() - t0
-        print(f'[{i}/{len(dosyalar)}] {cift} {renk} {boy}: {"PASS" if r["gecti"] else "FAIL"} '
-              f'{r["eksik"] or r["hata"] or ""} | {gecen:.0f} sn, kalan ~{gecen / i * (len(dosyalar) - i):.0f} sn',
-              flush=True)
+    with ProcessPoolExecutor(a.is, initializer=_hazirla, initargs=(a.kisisel, a.medya)) as ex:
+        for i, r in enumerate(ex.map(olc_tek, dosyalar, chunksize=4), 1):
+            sonuc.append(r)
+            gecen = time.time() - t0
+            print(f'[{i}/{len(dosyalar)} %{100 * i // max(len(dosyalar), 1)}] {r["cift"]} {r["renk"]} {r["boy"]}: '
+                  f'{"PASS" if r["gecti"] else "FAIL"} {r["eksik"] or r["hata"] or ""} | {gecen:.0f} sn, '
+                  f'kalan ~{gecen / i * (len(dosyalar) - i):.0f} sn', flush=True)
     fail = [x for x in sonuc if not x['gecti']]
     oz = {'toplam': len(sonuc), 'pass': len(sonuc) - len(fail), 'fail': len(fail),
           'fail_liste': [f"{x['cift']}/{x['renk']}/{x['boy']}" for x in fail], 'sure_sn': round(time.time() - t0, 1)}

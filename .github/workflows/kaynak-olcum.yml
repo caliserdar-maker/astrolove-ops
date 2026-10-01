@@ -13,6 +13,7 @@ on:
       ciftler: {description: "virgullu cift listesi (orn. ARIES_VIRGO) ya da HEPSI", required: true, default: "ARIES_VIRGO"}
       renkler: {description: "virgullu renkler", required: false, default: "MIDNIGHT_BLUE"}
       renk_ref: {description: "siparis-baski-v1 commit", required: false, default: "siparis-baski-v1"}
+      boylar: {description: "virgullu boylar (bos = hepsi)", required: false, default: "16x20,18x24,24x36,11x14,A2"}
 
 jobs:
   olc:
@@ -24,6 +25,7 @@ jobs:
           set -euo pipefail
           jq -re '.inputs.ciftler | test("^[A-Z_,]+$")' "$GITHUB_EVENT_PATH" >/dev/null
           jq -re '.inputs.renkler | test("^[A-Z_,]+$")' "$GITHUB_EVENT_PATH" >/dev/null
+          jq -re '.inputs.boylar | test("^[0-9A-Za-z_,]*$")' "$GITHUB_EVENT_PATH" >/dev/null
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
@@ -55,10 +57,11 @@ jobs:
               echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
             fi
           fi
-      - name: Kaynaklari indir (salt okur)
+      - name: Kaynaklari indir (salt okur, paralel)
         env:
           CIFTLER: ${{ inputs.ciftler }}
           RENKLER: ${{ inputs.renkler }}
+          BOYLAR: ${{ inputs.boylar }}
         run: |
           set -euo pipefail
           P=gdrive:ASTROLOVE/TEMP/POD_PRINT
@@ -66,17 +69,15 @@ jobs:
             CIFTLER=$(rclone lsf --dirs-only "$P" | tr -d '/' | grep -E '^[A-Z]+_[A-Z]+$' | paste -sd, -)
           fi
           echo "cift sayisi: $(echo "$CIFTLER" | tr ',' '\n' | grep -c .)"
-          for c in ${CIFTLER//,/ }; do
-            for r in ${RENKLER//,/ }; do
-              mkdir -p "_src/$c/$r"
-              rclone copy "$P/$c/$r" "_src/$c/$r" --include "*.jpg" --transfers 8 || echo "EKSIK: $c/$r"
-            done
-          done
+          INC=(); if [ -n "$BOYLAR" ]; then for b in ${BOYLAR//,/ }; do INC+=(--include "$b.jpg"); done; else INC=(--include "*.jpg"); fi
+          printf '%s\n' "${INC[@]}" > _inc.txt
+          for c in ${CIFTLER//,/ }; do for r in ${RENKLER//,/ }; do echo "$c/$r"; done; done | \
+            xargs -P 12 -I{} bash -c 'mkdir -p "_src/{}"; mapfile -t I < _inc.txt; rclone copy "'"$P"'/{}" "_src/{}" "${I[@]}" --transfers 4 || echo "EKSIK: {}"'
           find _src -name '*.jpg' | wc -l
       - name: Olc
         run: |
           python scripts/siparis_dijital/kaynak_olcum.py --kaynak _src --kisisel _kis/scripts/kisisel \
-            --medya _kod/scripts/medya_v1 --cikti out/kaynak_olcum.json
+            --medya _kod/scripts/medya_v1 --cikti out/kaynak_olcum.json --is 4
       - name: Sonucu inceleme dalina yaz
         if: ${{ always() }}
         env:
