@@ -48,7 +48,7 @@ jobs:
         run: |
           set -euo pipefail
           REC=$(jq -r '.inputs.receipt' "$GITHUB_EVENT_PATH")
-          rclone copy "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL/$REC" d --include 'AstroLove_*.pdf' --include 'KAPI_RAPORU_*.json'
+          rclone copy "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL/$REC" d --include '/AstroLove*.pdf' --include 'KAPI_RAPORU_*.json'
           find d -type f -printf '%TY-%Tm-%Td %TH:%TM %s %p\n' | sort
       - name: Kesitler
         run: |
@@ -83,7 +83,7 @@ jobs:
                       if not bant[(r, b)].get(q):
                           bant[(r, b)][q] = bant[('CHAMPAGNE_IVORY', b)][q]; print('bant', r, b, q, '<- CI', flush=True)
           sayi = 0
-          for pdf in sorted(glob.glob('d/**/AstroLove_*.pdf', recursive=True)):
+          for pdf in sorted(glob.glob('d/**/AstroLove*_*.pdf', recursive=True)):
               ad = os.path.basename(pdf)
               r = next(v for k, v in RENK.items() if k in ad)
               with pikepdf.open(pdf) as p:

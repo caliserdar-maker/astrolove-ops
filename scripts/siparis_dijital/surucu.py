@@ -54,9 +54,43 @@ def sure_olc(sd):
         setattr(sd, ad, sar())
 
 
+MARKA = 'AstroLoveArt'          # CLAUDE.md MARKA ADI (Serdar 1 Eki): musterinin gordugu her yerde
+
+
+def marka(sd):
+    """Musteriye giden PDF adi ve PDF metadata'si (Title / Author / Creator / Producer) marka adiyla.
+    Hem renk (siparis-baski-v1) hem WP (wp-katman) kodunun pdf_adi / pdf_yap'i ayni sekilde sarilir; sayfa
+    goruntuleri degismez (pikepdf yalniz docinfo yazar, akislar aynen)."""
+    if getattr(sd, '_marka', False):
+        return
+    asil_yap = sd.pdf_yap
+
+    def pdf_adi(cift, renk):
+        a, b = (x.title() for x in cift.split('_', 1))
+        return f'{MARKA}_{a}_{b}_{renk.title()}.pdf'
+
+    def pdf_yap(sayfalar, yol):
+        yol = asil_yap(sayfalar, yol)
+        import pikepdf
+        baslik = Path(yol).stem.replace('_', ' ')
+        with pikepdf.open(yol, allow_overwriting_input=True) as p:
+            p.docinfo['/Title'] = baslik
+            for a in ('/Author', '/Creator', '/Producer'):
+                p.docinfo[a] = MARKA
+            with p.open_metadata(set_pikepdf_as_editor=False) as m:
+                m['dc:title'] = baslik
+                m['dc:creator'] = [MARKA]
+                m['pdf:Producer'] = MARKA
+                m['xmp:CreatorTool'] = MARKA
+            p.save(yol)
+        return yol
+    sd.pdf_adi, sd.pdf_yap, sd._marka = pdf_adi, pdf_yap, True
+
+
 def kod_yukle(kod):
     sys.path.insert(0, str(Path(kod).resolve() / 'scripts' / 'medya_v1'))
     import siparis_dosyasi as sd
+    marka(sd)
     sure_olc(sd)
     return sd
 

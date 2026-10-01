@@ -338,6 +338,10 @@ jobs:
         run: |
           set -euo pipefail
           H="gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL/$REC"
+          # MARKA ADI (1 Eki): yeni paket AstroLoveArt_*.pdf ise eski adli PDF'ler silinmez, _ESKI_AD/ altina tasinir
+          if ls out/paket/AstroLoveArt_*.pdf >/dev/null 2>&1; then
+            rclone move "$H" "$H/_ESKI_AD" --include '/AstroLove_*.pdf' || true
+          fi
           rclone copy out/paket "$H"
           for r in out/renk/*; do
             n=$(basename "$r")
