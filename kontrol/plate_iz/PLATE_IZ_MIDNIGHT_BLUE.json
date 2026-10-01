@@ -1,0 +1,57 @@
+[
+ {
+  "renk": "MIDNIGHT_BLUE",
+  "boy": "24x36",
+  "plate": "BLUE_24x36.png",
+  "bant_satir": [
+   8691,
+   9606
+  ],
+  "maske_px": 310878,
+  "bantlar_2400": [
+   [
+    2997,
+    3102,
+    767,
+    1634
+   ],
+   [
+    2997,
+    3102,
+    767,
+    1634
+   ],
+   [
+    2997,
+    3102,
+    767,
+    1634
+   ]
+  ],
+  "kayma_2400": [
+   47,
+   -60
+  ],
+  "qc": {
+   "iz_once": [
+    0.09,
+    0.09,
+    0.09
+   ],
+   "iz_sonra": [
+    -0.01,
+    -0.01,
+    -0.01
+   ],
+   "slogan": [
+    true,
+    true,
+    true
+   ],
+   "maske_disi_degisen_px": 0,
+   "gecti": true
+  },
+  "yazildi": true,
+  "yedek": "PLATES_YEDEK_IZ_20261001_1447/BLUE_24x36.png"
+ }
+]
