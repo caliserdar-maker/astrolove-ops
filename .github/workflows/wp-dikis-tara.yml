@@ -50,6 +50,13 @@ jobs:
           fi
       - name: Kapi testleri
         run: python scripts/medya_v1/test_wp_dikis_kapisi.py && python scripts/medya_v1/test_wp_kilit.py && python scripts/medya_v1/test_wp_siparis.py && python scripts/medya_v1/test_wp_plate_serit.py
+      - name: Swap (24x36 bakir ~16 GB'i asiyor; 1 Eki kosu 36892263222 runner bellek yetmezligiyle kapandi)
+        run: |
+          set -euo pipefail
+          sudo swapoff -a || true
+          sudo fallocate -l 32G /mnt/wp_swap && sudo chmod 600 /mnt/wp_swap
+          sudo mkswap /mnt/wp_swap >/dev/null && sudo swapon /mnt/wp_swap
+          free -g
       - name: WP 24x36 CANCER_LIBRA baski (plate seridi, Serdar 1 Eki ~15:50; yalniz dogrulama, duz renk CI)
         run: python scripts/medya_v1/wp_dogrula_24x36.py
       - name: Dikis taramasi (e4f65cd 6 hucre + CL 24x36 cikti + 24x36 plate)
