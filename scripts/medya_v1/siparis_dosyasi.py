@@ -755,6 +755,18 @@ def esit_bant(baski, en=2400):
     return Image.fromarray(cv2.resize(a, (en, h), interpolation=cv2.INTER_AREA))
 
 
+ESIT_SIGMA = 1.0      # ortak yumusatma (2400 px); iki rastere AYNI uygulanir
+
+
+def yumusat(im, sigma=ESIT_SIGMA):
+    """Ortak Gauss yumusatmasi (1 Eki, Test 3 LIAM MB 11x14): esit bantta 2400 referansinin duz kenarlari piksel
+    sinirina oturur, indirilmis BASKI'nin kenarlari kesirli fazdadir; %0.2 kutle kenari faza gore 0.5 px'e kadar
+    kayiyordu (cap_sol 1.09, dogal olcum 0.59). Ayni sigma iki rastere uygulaninca faz farki kaybolur, oteleme korunur:
+    yerel benzetim 84/84 PASS (en kotu 0.78), 1.2 px yatay / dikey kayma FAIL (1.32 / 1.10)."""
+    import cv2
+    return Image.fromarray(cv2.GaussianBlur(np.asarray(im.convert('RGB')), (0, 0), sigma))
+
+
 def olcek_kapisi_baski(baski, p2400, bant, esit=False):
     """OLCEK KAPISI, uretilen BASKI dosyasi uzerinde: isim satiri onayli 2400 render ile ayni mi.
 
@@ -776,8 +788,8 @@ def olcek_kapisi_baski(baski, p2400, bant, esit=False):
         g1 = satir_olc_alt(baski, bant, k) if not esit else None
         olcek_kur(2400)
         if esit:
-            g1 = satir_olc_alt(esit_bant(baski, p2400.width), bant, 1.0)
-        g0 = satir_olc_alt(p2400, bant, 1.0)
+            g1 = satir_olc_alt(yumusat(esit_bant(baski, p2400.width)), bant, 1.0)
+        g0 = satir_olc_alt(yumusat(p2400) if esit else p2400, bant, 1.0)
     except Exception as e:                                        # noqa: BLE001
         return {'gecti': False, 'sebep': f'olculemedi: {type(e).__name__}: {e}'}
     finally:
@@ -787,7 +799,7 @@ def olcek_kapisi_baski(baski, p2400, bant, esit=False):
                   '(murekkep kutlesi %0.2/%99.8), farklar 2400 px biriminde')
     r['k'] = round(k, 4)
     if esit:
-        r['olcum'] = 'esit bant (BASKI 2400 izgarasina INTER_AREA) ' + r['olcum']
+        r['olcum'] = f'esit bant (BASKI 2400 izgarasina INTER_AREA) + ortak yumusatma sigma {ESIT_SIGMA}; ' + r['olcum']
         r['esit_bant'] = True
     return r
 
