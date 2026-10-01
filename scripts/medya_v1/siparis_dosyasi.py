@@ -744,19 +744,39 @@ def satir_olc_alt(im, bant, k=1.0, pay=OLCEK_PAY):
     return out
 
 
-def olcek_kapisi_baski(baski, p2400, bant):
+def esit_bant(baski, en=2400):
+    """BASKI'yi 2400 izgarasina ALAN ortalamasiyla (cv2.INTER_AREA) indirir: iki raster ayni bant genisliginde.
+
+    Kutle korunur ve oteleme ile degisir (k px kayma -> 2400'de k/k = ayni kayma); yalniz piksel ici bulanikligin
+    genisligi esitlenir. Ayni grid: cikti satir/sutun i = baski [i*k, (i+1)*k)."""
+    import cv2
+    a = np.asarray(baski.convert('RGB'))
+    h = int(round(baski.height * en / float(baski.width)))
+    return Image.fromarray(cv2.resize(a, (en, h), interpolation=cv2.INTER_AREA))
+
+
+def olcek_kapisi_baski(baski, p2400, bant, esit=False):
     """OLCEK KAPISI, uretilen BASKI dosyasi uzerinde: isim satiri onayli 2400 render ile ayni mi.
 
     Eski kapi hi-res render'i (p1) olcuyordu ve Blue'da hic kosmuyordu (Blue 2400 render
     edip baski_dosyasi'nda buyutuluyor; kapi None). Burada her edisyonda teslim edilen
     dosyanin kendisi olculur: Blue'da buyutme + yerlestirme, digerlerinde hi-res render +
     hibrit birlestirme kapinin icindedir. Esikler ayni (konum <= 1, harf kenari <= 2).
-    """
+
+    esit=True (1 Eki, isim bagimli FAIL kok nedeni; dijital + WP duz renk): BASKI 2400'e ALAN ortalamasiyla
+    indirilip olculur. Olcum (yerel, gercek font, plaka_ss): 2400 plakasi SS=4 kutu ortalamasiyla 1 px bulanik,
+    hi-res 1/k px; %0.2 kutle kenari bulanikliga gore disari kayar ve kayma harf bicimine bagli (tepe / serif
+    sayisi): MAXIMILIAN cap 2400'de 81.51, 3x'te 80.47 (font rasteri s4'te yalniz 0.25 farkli). Kapi bu farki
+    yer farki sanip isme gore FAIL veriyordu (TARA DB 18x24, SERDAR MB 11x14 cap -1.07, CAGLAYANGUL DB 24x36
+    cap -1.38). Esit bantta gercek kayma korunur (test_olcek_esit_bant: 1.2 px kayma FAIL kalir).
+    Esikler DEGISMEZ. POD yolu esit=False (cikti bayt bayt ayni)."""
     k = baski.width / float(p2400.width)
     try:
         olcek_kur(baski.width)
-        g1 = satir_olc_alt(baski, bant, k)
+        g1 = satir_olc_alt(baski, bant, k) if not esit else None
         olcek_kur(2400)
+        if esit:
+            g1 = satir_olc_alt(esit_bant(baski, p2400.width), bant, 1.0)
         g0 = satir_olc_alt(p2400, bant, 1.0)
     except Exception as e:                                        # noqa: BLE001
         return {'gecti': False, 'sebep': f'olculemedi: {type(e).__name__}: {e}'}
@@ -766,6 +786,9 @@ def olcek_kapisi_baski(baski, p2400, bant):
     r['olcum'] = ('BASKI dosyasi vs onayli 2400 render; pencere fiziksel ayni, alt piksel '
                   '(murekkep kutlesi %0.2/%99.8), farklar 2400 px biriminde')
     r['k'] = round(k, 4)
+    if esit:
+        r['olcum'] = 'esit bant (BASKI 2400 izgarasina INTER_AREA) ' + r['olcum']
+        r['esit_bant'] = True
     return r
 
 
@@ -1187,11 +1210,13 @@ class _SatirYerlesim:
 
     @staticmethod
     def _kutle(a):
-        """Alfa / maske kutlesinin yatay merkezi ve ust kenari (_uc %0.2 / %99.8, olcek kapisiyla ayni tanim)."""
+        """Alfa / maske kutlesinin yatay ve dikey merkezi (_uc %0.2 / %99.8 kenarlarinin ortasi, olcek kapisiyla ayni
+        tanim). 1 Eki: dikey ust kenar yerine ust / taban ortasi - iki rasterin cap farki ust ve tabana esit bolunur
+        (ust kenar eslenince tum fark tabana biniyordu: MAXIMILIAN 24x36 taban 0.92 -> 0.31, yerel olcum)."""
         a = np.asarray(a, np.float32)
         x0, x1 = _uc(a.sum(axis=0))
-        t, _b = _uc(a.sum(axis=1))
-        return (x0 + x1) / 2.0, t
+        t, b = _uc(a.sum(axis=1))
+        return (x0 + x1) / 2.0, (t + b) / 2.0
 
     def _kaydet(self, s, S, isimler, tagline):
         out = self.asil(s, S, isimler, tagline)
@@ -1203,9 +1228,9 @@ class _SatirYerlesim:
             olcek = p16.d_olcek(isimler, s, S)
             for y in ('sol', 'sag'):
                 pl = p16.plaka(isimler[y], S["prof"][y], s["cap"][y], olcek)[0]
-                cx, top = self._kutle(np.asarray(pl)[..., 3])
+                cx, cy = self._kutle(np.asarray(pl)[..., 3])
                 px, py = bilgi['isim_kutu'][y][:2]
-                self.kayit[f'murekkep_{y}'] = (px + cx, py + top)
+                self.kayit[f'murekkep_{y}'] = (px + cx, py + cy)
             o = S['oge']['sonsuz']
             mcx, _t = self._kutle(o['maske'])
             self.kayit['sonsuz_murekkep'] = int(round(x['inf'] - o['pay'][0])) + mcx
@@ -1226,13 +1251,13 @@ class _SatirYerlesim:
         mm = {y: p16.murekkep_merkezi(pl[y][0]) for y in ("sol", "sag")}
         pyy = {y: s["isim_y"] - pl[y][0].height / 2 for y in ("sol", "sag")}
         if SATIR_OLCEKLI.get('kutle') and r.get('murekkep_sol'):
-            # dijital 2. yerlesim denemesi: yatay KUTLE merkezi, dikey ust kenar 2400 x k (kapi ile ayni tanim)
+            # dijital 2. yerlesim denemesi: KUTLE merkezi (yatay + dikey ust/taban ortasi) 2400 x k (kapi ile ayni tanim)
             x = {}
             for y in ("sol", "sag"):
-                cx, top = self._kutle(np.asarray(pl[y][0])[..., 3])
+                cx, cy = self._kutle(np.asarray(pl[y][0])[..., 3])
                 mx, my = r[f'murekkep_{y}']
                 x[y] = mx * k - cx
-                pyy[y] = my * k - top
+                pyy[y] = my * k - cy
             mcx, _t = self._kutle(inf['maske'])
             x["inf"] = r['sonsuz_murekkep'] * k - mcx + inf['pay'][0]
         else:
@@ -1630,7 +1655,11 @@ class BluePoster:
             return r_
         p16.tagline_plaka = tag_kaydet
         try:
-            with _PlakaKayit(boy0), _SatirYerlesim(p16, yer0), _HamKayit(p16) as hk0:
+            # 1 Eki (isim on testi): 2400 referansi da plaka_ss ile (hi-res ile AYNI rasterlayici). Eski _PlakaKayit
+            # pilot12.plaka'yi (dogrudan, hinting'li raster) kullaniyordu: cap 2400 izgarasina oturuyor, hi-res plaka_ss
+            # ile fark punto ve harfe gore +-1.3 px (yerel olcum, 9 isim x 2 punto x 4 k) -> SERDAR MB 11x14 cap -1.07.
+            # Ayni rasterlayicida fark <= 0.65. Yalniz dijital MB (hedef_render); POD Blue yolu degismez.
+            with IsimPlakasi(kayit=boy0), _SatirYerlesim(p16, yer0), _HamKayit(p16) as hk0:
                 p0, bi0, kirp = self.P.uret(B, isimler, tagline)
         finally:
             p16.tagline_plaka = asil_tag
@@ -2031,7 +2060,8 @@ def pod_uret(sip, kaynak_bayt, P_blue, P_ed, cik):
     ad = f'BASKI_{sip["boy"]}.jpg'
     baski, bpx = tek_dosya(poster, bi, ek, kaynak_bayt, sip['hedef_px'], cik / ad)
     bi['leke_kapisi'] = leke_kapisi(baski, kaynak_bayt, ek['maske'])
-    bi['olcek_kapisi'] = olcek_kapisi_baski(baski, ek.get('p0', poster), bi['olcum']['isim_bant'])
+    bi['olcek_kapisi'] = olcek_kapisi_baski(baski, ek.get('p0', poster), bi['olcum']['isim_bant'],
+                                            esit=POD_EK_DENEME['etkin'])
     # 30 Eyl (GEMINI_LEO DB konum 1.18): olcek FAIL ise isim satiri 2400 yerlesiminden OLCEKLENEREK yeniden
     # render edilir (_SatirYerlesim); yalniz olcek kapisi o zaman PASS olursa kullanilir. Varsayilan yol
     # degismez: regresyon 36756875368'de olcekli yerlesim her hucrede kullanilinca 4 DB hucresi PASS->FAIL oldu.
@@ -2045,7 +2075,7 @@ def pod_uret(sip, kaynak_bayt, P_blue, P_ed, cik):
         if p2 is not None:
             gecici = cik / f'_olcekli_{ad}'
             b2, bpx2 = tek_dosya(p2, bi2, ek2, kaynak_bayt, sip['hedef_px'], gecici)
-            ok2 = olcek_kapisi_baski(b2, ek2.get('p0', p2), bi2['olcum']['isim_bant'])
+            ok2 = olcek_kapisi_baski(b2, ek2.get('p0', p2), bi2['olcum']['isim_bant'], esit=POD_EK_DENEME['etkin'])
             ilk = {q: bi['olcek_kapisi'].get(q) for q in ('konum_fark_px', 'kenar_fark_px')}
             if ok2.get('gecti'):
                 gecici.replace(cik / ad)
@@ -2077,7 +2107,7 @@ def pod_uret(sip, kaynak_bayt, P_blue, P_ed, cik):
                 continue
             gecici = cik / f'_ek_{ad}'
             b3, bpx3 = tek_dosya(p3, bi3, ek3, kaynak_bayt, sip['hedef_px'], gecici)
-            ok3 = olcek_kapisi_baski(b3, ek3.get('p0', p3), bi3['olcum']['isim_bant'])
+            ok3 = olcek_kapisi_baski(b3, ek3.get('p0', p3), bi3['olcum']['isim_bant'], esit=True)
             ek_denemeler[ad3] = {q: ok3.get(q) for q in ('konum_fark_px', 'kenar_fark_px')}
             if ok3.get('gecti'):
                 gecici.replace(cik / ad)
@@ -2204,7 +2234,7 @@ def _dijital_is(arg):
         baski, bpx = tek_dosya(poster, bi, ek, kb, hedef, jpg, kalite=DIJITAL_KALITE, azami_bayt=butce)
         bi['leke_kapisi'] = dijital_leke(baski, kb, ek)
         bi['olcek_kapisi'] = olcek_kapisi_baski(baski, ek.get('p0', poster),
-                                                bi['olcum']['isim_bant'])
+                                                bi['olcum']['isim_bant'], esit=True)
 
         def yeniden():                            # ikinci deneme: ayni render + ayni baski butcesi
             p2, bi2, ek2 = render_et(ed, render_oran, sip['sayfa'], kb, isimler, mesaj, P_blue, P_ed,
@@ -2216,7 +2246,7 @@ def _dijital_is(arg):
             return p2, bi2, ek2, b2, bpx2, gecici
         poster, bi, ek, baski, bpx = olcek_ikinci_deneme(
             ed, hedef[0], (poster, bi, ek, baski, bpx), yeniden,
-            lambda b, e, p, i: olcek_kapisi_baski(b, e.get('p0', p), i['olcum']['isim_bant']),
+            lambda b, e, p, i: olcek_kapisi_baski(b, e.get('p0', p), i['olcum']['isim_bant'], esit=True),
             lambda b, e: dijital_leke(b, kb, e), jpg)
         bi['isim_kalinti_kapisi'] = isim_kalinti_kapisi(baski, *koruma(ek)[:1], bi['olcum'],
                                                         ham=koruma(ek)[1], alan=ek.get('maske'))
