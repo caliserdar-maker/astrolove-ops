@@ -1,0 +1,141 @@
+name: pin-v1-uret
+
+# Pinterest V1 tek kosu (Serdar 1 Eki 2026): 78 cift x pin 01/02/04 (ChatGPT build_pins.py, birebir) + CL pin 03 (pilot).
+# 1) uret + QC (scripts/sosyal/pin_v1_uret.py)  2) Drive: MEDYA/v1, ONIZLEME_2CIFT.jpg, V1_QC.csv
+# 3) astrolove-media pinterest/v1/ push (OPS_ADMIN_TOKEN, pin-media-sync kalibi)  4) Pages bekle + tum URL probu
+# 5) Metricool CSV (PIN_V1_NN.csv, 50 satir) -> Drive TEMP/SOSYAL/PINTEREST/. Etsy YOK, Metricool'a yukleme YOK.
+# AI sahne (assets/scene_empty_master.png) depoda yoksa ilk adimda DUR.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      ciftler:
+        description: "HEPSI ya da virgullu cift listesi"
+        required: true
+        default: HEPSI
+      dry_run:
+        description: "true: yalniz uret + Drive'a onizleme/QC yaz; Pages push, prob ve CSV yok"
+        type: boolean
+        default: true
+
+concurrency:
+  group: pin-media-sync
+  cancel-in-progress: false
+
+jobs:
+  uret:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      PAKET: data/sosyal/pinterest/chatgpt_pilot_cl_20261001
+      D: gdrive:ASTROLOVE/TEMP/SOSYAL/PINTEREST
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: On kosul (AI sahne + metin_kurali)
+        run: |
+          set -euo pipefail
+          [ -f "$PAKET/assets/scene_empty_master.png" ] || { echo "DUR: $PAKET/assets/scene_empty_master.png yok (ChatGPT paketi assets/)" >&2; exit 1; }
+          git show origin/medya-v1:scripts/medya_v1/uretim/metin_kurali.py > /tmp/metin_kurali.py
+          pip install -q pillow numpy
+          mkdir -p /tmp/fontlar
+          for f in P052-Roman.otf NimbusSans-Regular.otf; do
+            curl -fsSL -o "/tmp/fontlar/$f" "https://raw.githubusercontent.com/ArtifexSoftware/urw-base35-fonts/master/fonts/$f"
+          done
+          sha256sum /tmp/fontlar/*.otf
+
+      - name: rclone kur + conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+          fi
+
+      - name: Kapaklar (Etsy 1. gorsel)
+        run: |
+          set -euo pipefail
+          rclone copy gdrive:ASTROLOVE/TEMP/GALERI_77 _kapak --include "*/01_kapak.jpg" --stats-one-line -v 2>&1 | tail -2
+          mkdir -p _kapak/CANCER_LIBRA && cp data/pod/cl_galeri_final19/01_kapak.jpg _kapak/CANCER_LIBRA/
+          echo "kapak: $(find _kapak -name 01_kapak.jpg | wc -l)"
+
+      - name: Uret + QC
+        env:
+          CIFTLER: ${{ inputs.ciftler }}
+        run: |
+          set -euo pipefail
+          python3 scripts/sosyal/pin_v1_uret.py --paket "$PAKET" --sahne "$PAKET/assets/scene_empty_master.png" \
+            --fontlar /tmp/fontlar --kapak _kapak --cikti _out --metin-kurali /tmp/metin_kurali.py --ciftler "$CIFTLER" | tee _uret.log
+          tail -1 _uret.log >> "$GITHUB_STEP_SUMMARY"
+          grep -c ',PASS,' _out/QC.csv || true
+
+      - name: Drive (onizleme, QC, medya)
+        run: |
+          set -euo pipefail
+          rclone copyto _out/ONIZLEME_2CIFT.jpg "$D/ONIZLEME_2CIFT.jpg"
+          rclone copyto _out/QC.csv "$D/V1_QC.csv"
+          rclone copyto _out/PINLER.csv "$D/V1_PINLER.csv"
+          rclone copy _out/v1 "$D/MEDYA/v1" --stats-one-line -v 2>&1 | tail -2
+
+      - name: Medya reposunu al
+        if: ${{ inputs.dry_run != true }}
+        uses: actions/checkout@v4
+        with:
+          repository: caliserdar-maker/astrolove-media
+          token: ${{ secrets.OPS_ADMIN_TOKEN }}
+          path: media
+
+      - name: Pages push (pinterest/v1)
+        if: ${{ inputs.dry_run != true }}
+        working-directory: media
+        run: |
+          set -euo pipefail
+          mkdir -p pinterest/v1 && cp -r ../_out/v1/. pinterest/v1/
+          git add -A pinterest/v1
+          n=$(git diff --cached --name-only | wc -l); echo "degisen: $n"
+          if [ "$n" != "0" ]; then
+            git config user.name "astrolove-ops"; git config user.email "actions@users.noreply.github.com"
+            git commit -qm "pinterest/v1: pin V1 ($(date -u +%Y-%m-%d))"; git push
+          fi
+
+      - name: Pages bekle + tum URL probu
+        if: ${{ inputs.dry_run != true }}
+        run: |
+          set -euo pipefail
+          son=$(python3 -c "import csv;print([r['url'] for r in csv.DictReader(open('_out/PINLER.csv')) if '/v1/' in r['url']][-1])")
+          for i in $(seq 1 60); do
+            k=$(curl -s -o /dev/null -w '%{http_code}' "$son?v=$i"); [ "$k" = "200" ] && break; sleep 15
+          done
+          python3 - <<'EOF'
+          import csv, subprocess, sys
+          r = list(csv.DictReader(open('_out/PINLER.csv')))
+          urls = sorted({x['url'] for x in r}); hata = []
+          for u in urls:
+              o = subprocess.run(['curl', '-s', '-o', '/dev/null', '-m', '30', '-w', '%{http_code}|%{content_type}|%{redirect_url}', u], capture_output=True, text=True).stdout
+              k, t, y = (o.split('|') + ['', '', ''])[:3]
+              if k != '200' or t != 'image/jpeg' or y: hata.append(f'{u} -> {o}')
+          print(f'PROB {len(urls) - len(hata)}/{len(urls)} PASS')
+          open('_prob.txt', 'w').write('\n'.join(hata))
+          sys.exit(1 if hata else 0)
+          EOF
+          echo "PROB GENEL PASS" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Metricool CSV
+        if: ${{ inputs.dry_run != true }}
+        run: |
+          set -euo pipefail
+          python3 scripts/sosyal/metricool_csv.py _out/PINLER.csv _csv --onek PIN_V1 --metin-kurali /tmp/metin_kurali.py | tee -a "$GITHUB_STEP_SUMMARY"
+          python3 /tmp/metin_kurali.py _csv
+          rclone copy _csv "$D" --include "PIN_V1_*.csv" -v 2>&1 | tail -2
+          rclone lsl "$D" --include "PIN_V1_*.csv" | tee -a "$GITHUB_STEP_SUMMARY"
