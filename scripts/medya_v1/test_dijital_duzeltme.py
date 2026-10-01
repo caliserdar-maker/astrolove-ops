@@ -116,34 +116,46 @@ class OlcekIkinciDeneme(unittest.TestCase):
         import inspect
         self.assertNotIn("'kutle'", inspect.getsource(sd.pod_uret))
 
-    def test_genislik_ucuncu_deneme(self):
+    def test_profil_ucuncu_deneme(self):
         d = Path(tempfile.mkdtemp()); hedef = d / 's.jpg'; hedef.write_bytes(b'ilk')
         gorulen = []
 
         def yeniden():
-            gorulen.append((sd.SATIR_OLCEKLI.get('kutle'), sd.SATIR_OLCEKLI.get('genislik')))
+            gorulen.append((sd.SATIR_OLCEKLI.get('kutle'), sd.SATIR_OLCEKLI.get('profil_2400')))
             g = d / f'_g{len(gorulen)}.jpg'; g.write_bytes(b'k%d' % len(gorulen))
             return 'p%d' % (len(gorulen) + 1), {}, {}, 'b', {}, g
         olc = lambda b, e, p, i: {'gecti': p == 'p4', 'konum_fark_px': 0.5 if p == 'p4' else 1.5, 'kenar_fark_px': 0.4}
         r = sd.olcek_ikinci_deneme('black', 5400, self._ilk(False), yeniden, olc, lambda b, e: {'gecti': True}, hedef)
         self.assertEqual(gorulen, [(False, False), (True, False), (False, True)])
         self.assertEqual(r[0], 'p4'); self.assertEqual(hedef.read_bytes(), b'k3')
-        self.assertEqual(r[1]['olcek_kapisi']['yerlesim'], 'olcekli genislik (2400 x k)')
-        self.assertFalse(sd.SATIR_OLCEKLI.get('genislik'))
+        self.assertEqual(r[1]['olcek_kapisi']['yerlesim'], 'olcekli profil 2400 (2400 x k)')
+        self.assertFalse(sd.SATIR_OLCEKLI.get('profil_2400'))
         import inspect
-        self.assertNotIn("'genislik'", inspect.getsource(sd.pod_uret))
+        self.assertNotIn("'profil_2400'", inspect.getsource(sd.pod_uret))
 
-    def test_genislik_esle(self):
-        from PIL import Image
-        a = np.zeros((40, 200, 4), np.uint8); a[5:35, 20:180, 3] = 255; a[5:35, 20:180, :3] = 200
-        pl = (Image.fromarray(a, 'RGBA'), 30, 30.0)
-        Y = sd._SatirYerlesim(None, {})
-        w0 = Y._genislik(a[..., 3])
-        yeni, bil = Y._genislik_esle(pl, w0 * 1.01)
-        self.assertTrue(bil['uygulandi']); self.assertEqual(yeni[0].height, 40); self.assertEqual(yeni[1:], (30, 30.0))
-        self.assertAlmostEqual(Y._genislik(np.asarray(yeni[0])[..., 3]), w0 * 1.01, delta=1.0)
-        ayni, bil = Y._genislik_esle(pl, w0 * 1.05)                    # %2 siniri: degismez
-        self.assertFalse(bil['uygulandi']); self.assertIs(ayni[0], pl[0])
+    def test_profil_kaydi_ve_kullanimi(self):
+        """_kaydet profil_2400 iken 2400 profilini kopyalar; _olcekli o profille plaka ister."""
+        istenen = []
+
+        class P16:
+            NORM_W = 2400
+            def d_olcek(self, *a): return 1.0
+            def plaka(self, metin, prof, cap, olcek):
+                istenen.append(prof)
+                from PIL import Image
+                return Image.new('RGBA', (10, 10)), 30, 30.0
+        Y = sd._SatirYerlesim(P16(), {})
+        S = {'prof': {'sol': np.array([1.0, 2.0]), 'sag': np.array([3.0])}}
+        Y.asil = lambda s, S_, i, t: (None, {}, {'sol': 5, 'sag': 6}, {'sol': 1, 'sag': 2, 'inf': 3}, None)
+        S['oge'] = {'sonsuz': {'gorsel': (0, 0)}}
+        sd.SATIR_OLCEKLI['profil_2400'] = True
+        try:
+            Y._kaydet({}, S, {'sol': 'A', 'sag': 'B'}, '')
+        finally:
+            sd.SATIR_OLCEKLI['profil_2400'] = False
+        self.assertEqual(list(Y.kayit['prof']['sol']), [1.0, 2.0])
+        S['prof']['sol'][0] = 9.0                                    # kopya: sonradan degisim etkilemez
+        self.assertEqual(Y.kayit['prof']['sol'][0], 1.0)
 
     def test_hata_bayragi_geri_alir(self):
         r, _, _, _ = self._calis(hata=True)

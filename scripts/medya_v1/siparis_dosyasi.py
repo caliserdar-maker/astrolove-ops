@@ -468,7 +468,7 @@ class EdisyonPoster:
         finally:
             mesaj_kapisi.ETKIN['edisyon'] = False
         return s, S, p, (merkez, yeni), {'olcek': bilgi['olcek'], 'punto': bilgi['punto'],
-                                         'yeni_ham': hk.maske(), 'genislik_esle': bilgi.get('genislik_esle')}
+                                         'yeni_ham': hk.maske(), 'profil': bilgi.get('profil')}
 
     def __call__(self, kaynak_bayt, sayfa_no, ed, oran, isimler, mesaj,
                  hedef_en=None, boy=None):
@@ -553,7 +553,7 @@ class EdisyonPoster:
                                             'sembol', 'tag_bant', 'sol_isim', 'sag_isim')},
             'olcum_duzeltme': duz,
             'kilit': {'bosluk': kilit['bosluk'], 'cap': kilit['cap']},
-            'genislik_esle': (bi1 or {}).get('genislik_esle'),
+            'profil': (bi1 or {}).get('profil'),
             'temiz_ara_kapisi': s0['temiz_ara_kapisi'], 'kalinti_kapisi': kapi0,
             'sembol_kapisi': sk, 'punto_2400': bi0['punto'], 'punto_hedef': bi1['punto'],
             'sure_sn': round(time.time() - t0, 1),
@@ -1159,7 +1159,6 @@ class _HamKayit:
 
 
 MB_HEDEF = {'etkin': False}        # dijital MB: isim / mesaj bandi hedef cozunurlukte (BluePoster.hedef_render)
-GENISLIK_AZAMI = 0.02     # 3. dijital deneme: isim plakasi yatay yeniden ornekleme siniri (1 Eki)
 SATIR_OLCEKLI = {'etkin': False}   # pod_uret: yalniz olcek kapisi FAIL olunca ikinci render (regresyon 36756875368)
 
 
@@ -1193,21 +1192,6 @@ class _SatirYerlesim:
         t, _b = _uc(a.sum(axis=1))
         return (x0 + x1) / 2.0, t
 
-    @staticmethod
-    def _genislik(a):
-        x0, x1 = _uc(np.asarray(a, np.float32).sum(axis=0))
-        return x1 - x0
-
-    def _genislik_esle(self, pl, hedef):
-        """Isim plakasini (RGBA) yatayda murekkep genisligi `hedef` olacak sekilde yeniden orneklendirir (<= %2)."""
-        im = pl[0]
-        w = self._genislik(np.asarray(im)[..., 3])
-        f = hedef / max(w, 1e-6)
-        if abs(f - 1) > GENISLIK_AZAMI:
-            return pl, {'oran': round(f, 4), 'uygulandi': False}
-        yeni = im.resize((max(int(round(im.width * f)), 1), im.height), Image.LANCZOS)
-        return (yeni, *pl[1:]), {'oran': round(f, 4), 'uygulandi': True}
-
     def _kaydet(self, s, S, isimler, tagline):
         out = self.asil(s, S, isimler, tagline)
         _, bilgi, merkez, x, _ = out
@@ -1224,12 +1208,8 @@ class _SatirYerlesim:
             o = S['oge']['sonsuz']
             mcx, _t = self._kutle(o['maske'])
             self.kayit['sonsuz_murekkep'] = int(round(x['inf'] - o['pay'][0])) + mcx
-        if SATIR_OLCEKLI.get('genislik'):                # 3. deneme: murekkep genisligi (kapi ile ayni tanim)
-            p16 = self.p16
-            olcek = p16.d_olcek(isimler, s, S)
-            for y in ('sol', 'sag'):
-                pl = p16.plaka(isimler[y], S["prof"][y], s["cap"][y], olcek)[0]
-                self.kayit[f'genislik_{y}'] = self._genislik(np.asarray(pl)[..., 3])
+        if SATIR_OLCEKLI.get('profil_2400'):             # 3. deneme: onayli 2400 altin profili (isimler)
+            self.kayit['prof'] = {y: np.array(S['prof'][y], copy=True) for y in ('sol', 'sag')}
         return out
 
     def _olcekli(self, s, S, isimler, tagline):
@@ -1238,18 +1218,12 @@ class _SatirYerlesim:
         import cv2
         p16, k, r = self.p16, self.k, self.kayit
         olcek = p16.d_olcek(isimler, s, S)
-        pl = {y: p16.plaka(isimler[y], S["prof"][y], s["cap"][y], olcek) for y in ("sol", "sag")}
+        prof = r['prof'] if SATIR_OLCEKLI.get('profil_2400') and r.get('prof') else S["prof"]
+        pl = {y: p16.plaka(isimler[y], prof[y], s["cap"][y], olcek) for y in ("sol", "sag")}
         w = {y: pl[y][0].width for y in pl}
         inf = S["oge"]["sonsuz"]
         mm = {y: p16.murekkep_merkezi(pl[y][0]) for y in ("sol", "sag")}
         pyy = {y: s["isim_y"] - pl[y][0].height / 2 for y in ("sol", "sag")}
-        genislik_esle = {}
-        if SATIR_OLCEKLI.get('genislik') and r.get('genislik_sol'):
-            for y in ("sol", "sag"):
-                pl[y], genislik_esle[y] = self._genislik_esle(pl[y], r[f'genislik_{y}'] * k)
-            w = {y: pl[y][0].width for y in pl}
-            mm = {y: p16.murekkep_merkezi(pl[y][0]) for y in ("sol", "sag")}
-            pyy = {y: s["isim_y"] - pl[y][0].height / 2 for y in ("sol", "sag")}
         if SATIR_OLCEKLI.get('kutle') and r.get('murekkep_sol'):
             # dijital 2. yerlesim denemesi: yatay KUTLE merkezi, dikey ust kenar 2400 x k (kapi ile ayni tanim)
             x = {}
@@ -1302,8 +1276,8 @@ class _SatirYerlesim:
                  "kenar": [x0, p16.NORM_W - x0 - toplam], "satir_merkez": round(x0 + toplam / 2, 1),
                  "isim_geometri": isim_geometri, "isim_kutu": isim_kutu, "tagline": tbilgi,
                  "yerlesim": 'olcekli (2400 x k)'}
-        if genislik_esle:
-            bilgi['genislik_esle'] = genislik_esle
+        if prof is not S['prof']:
+            bilgi['profil'] = 'onayli 2400'
         return t.convert("RGB"), bilgi, merkez, x, yeni_genis
 
 
@@ -2100,27 +2074,26 @@ def olcek_ikinci_deneme(ed, hedef_en, ilk, yeniden, olcek_olc, leke_olc, hedef_y
         return ilk
     ilk_o = {q: bi['olcek_kapisi'].get(q) for q in ('konum_fark_px', 'kenar_fark_px')}
     denemeler = {}
-    # 1 Eki (siparis 4188621967 DB 18x24 konum 1.52; olcekli 1.97, kutle 1.97): ucuncu deneme GENISLIK. Fark yer
-    # degil isim GENISLIGI (sol isim x0 +0.42 / x1 -1.65 -> 2.07 birim dar): sabit punto hi-res'te farkli
-    # yuvarlanir, hicbir kaydirma ikisini birden 1'in altina indiremez. Hi-res isim plakasi yatayda 2400 x k
-    # murekkep genisligine (en fazla %2) esitlenir; yerlesim 1. denemeyle ayni (murekkep merkezi; merkez farki
-    # -0.6 idi, kutle yerlesimi 1.97'ye cikariyordu). Render hi-res kalir (2400'den buyutme yok).
-    for ad, kutle, gen in (('olcekli (2400 x k)', False, False), ('olcekli kutle (2400 x k)', True, False),
-                           ('olcekli genislik (2400 x k)', False, True)):
+    # 3. deneme PROFIL (olcek-tani-siparis 36894061221): DB 18x24'te hi-res isim plakasi 2400 x k ile ayni genislikte
+    # (oran 1.0003) ama son harfin ince ayagi (x 970-977) hi-res'te parlaklik 102, onayli 2400'de 192: altin satir
+    # profili her cozunurlukte kaynaktan AYRI cikariliyor, hi-res profilin alt ucu koyu. Isimler onayli 2400 render'in
+    # PROFILIYLE boyanir (glif hi-res cizilir; yalniz renk profili onayli olan).
+    for ad, kutle, prof in (('olcekli (2400 x k)', False, False), ('olcekli kutle (2400 x k)', True, False),
+                            ('olcekli profil 2400 (2400 x k)', False, True)):
         if kutle and not kutle_dene:
             break
-        SATIR_OLCEKLI['etkin'] = True; SATIR_OLCEKLI['kutle'] = kutle; SATIR_OLCEKLI['genislik'] = gen
+        SATIR_OLCEKLI['etkin'] = True; SATIR_OLCEKLI['kutle'] = kutle; SATIR_OLCEKLI['profil_2400'] = prof
         try:
             r2 = yeniden()
         finally:
-            SATIR_OLCEKLI['etkin'] = False; SATIR_OLCEKLI['kutle'] = False; SATIR_OLCEKLI['genislik'] = False
+            SATIR_OLCEKLI['etkin'] = False; SATIR_OLCEKLI['kutle'] = False; SATIR_OLCEKLI['profil_2400'] = False
         if r2 is None:
             continue
         p2, bi2, ek2, b2, bpx2, gecici = r2
         ok2 = olcek_olc(b2, ek2, p2, bi2)
         denemeler[ad] = {q: ok2.get(q) for q in ('konum_fark_px', 'kenar_fark_px', 'fark')}
-        if bi2.get('genislik_esle'):
-            denemeler[ad]['genislik_esle'] = bi2['genislik_esle']
+        if bi2.get('profil'):
+            denemeler[ad]['profil'] = bi2['profil']
         if ok2.get('gecti'):
             Path(gecici).replace(hedef_yol)
             bi2['leke_kapisi'] = leke_olc(b2, ek2)
