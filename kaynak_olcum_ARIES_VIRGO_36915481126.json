@@ -1,0 +1,517 @@
+{
+ "ozet": {
+  "toplam": 15,
+  "pass": 11,
+  "fail": 4,
+  "fail_liste": [
+   "ARIES_VIRGO/MIDNIGHT_BLUE/12x18",
+   "ARIES_VIRGO/MIDNIGHT_BLUE/16x24",
+   "ARIES_VIRGO/MIDNIGHT_BLUE/20x30",
+   "ARIES_VIRGO/MIDNIGHT_BLUE/24x36"
+  ],
+  "sure_sn": 28.6
+ },
+ "sonuc": [
+  {
+   "cift": "ARIES_VIRGO",
+   "renk": "MIDNIGHT_BLUE",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "eksik_ham": [
+    "isim_govde"
+   ],
+   "tag": {
+    "tag_bant": [
+     2614,
+     2687
+    ],
+    "tag_x": [
+     845,
+     1555
+    ],
+    "tag_kumeleri": [
+     [
+      845,
+      1555
+     ]
+    ]
+   },
+   "isim_bant": [
+    2245,
+    2331
+   ],
+   "norm_boyut": [
+    2400,
+    3048
+   ]
+  },
+  {
+   "cift": "ARIES_VIRGO",
+   "renk": "MIDNIGHT_BLUE",
+   "boy": "12x16",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "eksik_ham": [
+    "isim_govde"
+   ],
+   "tag": {
+    "tag_bant": [
+     2742,
+     2818
+    ],
+    "tag_x": [
+     829,
+     1572
+    ],
+    "tag_kumeleri": [
+     [
+      829,
+      1572
+     ]
+    ]
+   },
+   "isim_bant": [
+    2356,
+    2446
+   ],
+   "norm_boyut": [
+    2400,
+    3200
+   ]
+  },
+  {
+   "cift": "ARIES_VIRGO",
+   "renk": "MIDNIGHT_BLUE",
+   "boy": "12x18",
+   "gecti": false,
+   "eksik": [
+    "tag_bant",
+    "tag_x"
+   ],
+   "hata": null,
+   "eksik_ham": [
+    "tag_bant",
+    "tag_x",
+    "isim_govde"
+   ],
+   "tag": {
+    "tag_bant": null,
+    "tag_x": null,
+    "tag_kumeleri": null
+   },
+   "isim_bant": [
+    3009,
+    3090
+   ],
+   "norm_boyut": [
+    2400,
+    3600
+   ]
+  },
+  {
+   "cift": "ARIES_VIRGO",
+   "renk": "MIDNIGHT_BLUE",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "eksik_ham": [
+    "isim_govde"
+   ],
+   "tag": {
+    "tag_bant": [
+     2569,
+     2640
+    ],
+    "tag_x": [
+     853,
+     1548
+    ],
+    "tag_kumeleri": [
+     [
+      853,
+      1548
+     ]
+    ]
+   },
+   "isim_bant": [
+    2207,
+    2292
+   ],
+   "norm_boyut": [
+    2400,
+    3000
+   ]
+  },
+  {
+   "cift": "ARIES_VIRGO",
+   "renk": "MIDNIGHT_BLUE",
+   "boy": "16x24",
+   "gecti": false,
+   "eksik": [
+    "tag_bant",
+    "tag_x"
+   ],
+   "hata": null,
+   "eksik_ham": [
+    "tag_bant",
+    "tag_x",
+    "isim_govde"
+   ],
+   "tag": {
+    "tag_bant": null,
+    "tag_x": null,
+    "tag_kumeleri": null
+   },
+   "isim_bant": [
+    3009,
+    3090
+   ],
+   "norm_boyut": [
+    2400,
+    3600
+   ]
+  },
+  {
+   "cift": "ARIES_VIRGO",
+   "renk": "MIDNIGHT_BLUE",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "eksik_ham": [
+    "isim_govde"
+   ],
+   "tag": {
+    "tag_bant": [
+     2742,
+     2818
+    ],
+    "tag_x": [
+     829,
+     1572
+    ],
+    "tag_kumeleri": [
+     [
+      829,
+      1572
+     ]
+    ]
+   },
+   "isim_bant": [
+    2356,
+    2446
+   ],
+   "norm_boyut": [
+    2400,
+    3200
+   ]
+  },
+  {
+   "cift": "ARIES_VIRGO",
+   "renk": "MIDNIGHT_BLUE",
+   "boy": "20x30",
+   "gecti": false,
+   "eksik": [
+    "tag_bant",
+    "tag_x"
+   ],
+   "hata": null,
+   "eksik_ham": [
+    "tag_bant",
+    "tag_x",
+    "isim_govde"
+   ],
+   "tag": {
+    "tag_bant": null,
+    "tag_x": null,
+    "tag_kumeleri": null
+   },
+   "isim_bant": [
+    3009,
+    3090
+   ],
+   "norm_boyut": [
+    2400,
+    3600
+   ]
+  },
+  {
+   "cift": "ARIES_VIRGO",
+   "renk": "MIDNIGHT_BLUE",
+   "boy": "24x36",
+   "gecti": false,
+   "eksik": [
+    "tag_bant",
+    "tag_x"
+   ],
+   "hata": null,
+   "eksik_ham": [
+    "tag_bant",
+    "tag_x",
+    "isim_govde"
+   ],
+   "tag": {
+    "tag_bant": null,
+    "tag_x": null,
+    "tag_kumeleri": null
+   },
+   "isim_bant": [
+    3009,
+    3090
+   ],
+   "norm_boyut": [
+    2400,
+    3600
+   ]
+  },
+  {
+   "cift": "ARIES_VIRGO",
+   "renk": "MIDNIGHT_BLUE",
+   "boy": "30x40",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "eksik_ham": [
+    "isim_govde"
+   ],
+   "tag": {
+    "tag_bant": [
+     2742,
+     2818
+    ],
+    "tag_x": [
+     829,
+     1572
+    ],
+    "tag_kumeleri": [
+     [
+      829,
+      1572
+     ]
+    ]
+   },
+   "isim_bant": [
+    2356,
+    2446
+   ],
+   "norm_boyut": [
+    2400,
+    3200
+   ]
+  },
+  {
+   "cift": "ARIES_VIRGO",
+   "renk": "MIDNIGHT_BLUE",
+   "boy": "5x7",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "eksik_ham": [
+    "isim_govde"
+   ],
+   "tag": {
+    "tag_bant": [
+     2803,
+     2879
+    ],
+    "tag_x": [
+     829,
+     1572
+    ],
+    "tag_kumeleri": [
+     [
+      829,
+      1572
+     ]
+    ]
+   },
+   "isim_bant": [
+    2417,
+    2507
+   ],
+   "norm_boyut": [
+    2400,
+    3322
+   ]
+  },
+  {
+   "cift": "ARIES_VIRGO",
+   "renk": "MIDNIGHT_BLUE",
+   "boy": "8x10",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "eksik_ham": [
+    "isim_govde"
+   ],
+   "tag": {
+    "tag_bant": [
+     2569,
+     2640
+    ],
+    "tag_x": [
+     853,
+     1548
+    ],
+    "tag_kumeleri": [
+     [
+      853,
+      1548
+     ]
+    ]
+   },
+   "isim_bant": [
+    2207,
+    2292
+   ],
+   "norm_boyut": [
+    2400,
+    3000
+   ]
+  },
+  {
+   "cift": "ARIES_VIRGO",
+   "renk": "MIDNIGHT_BLUE",
+   "boy": "A1",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "eksik_ham": [
+    "isim_govde"
+   ],
+   "tag": {
+    "tag_bant": [
+     2839,
+     2915
+    ],
+    "tag_x": [
+     829,
+     1572
+    ],
+    "tag_kumeleri": [
+     [
+      829,
+      1572
+     ]
+    ]
+   },
+   "isim_bant": [
+    2453,
+    2543
+   ],
+   "norm_boyut": [
+    2400,
+    3394
+   ]
+  },
+  {
+   "cift": "ARIES_VIRGO",
+   "renk": "MIDNIGHT_BLUE",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "eksik_ham": [
+    "isim_govde"
+   ],
+   "tag": {
+    "tag_bant": [
+     2839,
+     2915
+    ],
+    "tag_x": [
+     829,
+     1572
+    ],
+    "tag_kumeleri": [
+     [
+      829,
+      1572
+     ]
+    ]
+   },
+   "isim_bant": [
+    2453,
+    2543
+   ],
+   "norm_boyut": [
+    2400,
+    3394
+   ]
+  },
+  {
+   "cift": "ARIES_VIRGO",
+   "renk": "MIDNIGHT_BLUE",
+   "boy": "A3",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "eksik_ham": [
+    "isim_govde"
+   ],
+   "tag": {
+    "tag_bant": [
+     2839,
+     2915
+    ],
+    "tag_x": [
+     829,
+     1572
+    ],
+    "tag_kumeleri": [
+     [
+      829,
+      1572
+     ]
+    ]
+   },
+   "isim_bant": [
+    2453,
+    2543
+   ],
+   "norm_boyut": [
+    2400,
+    3394
+   ]
+  },
+  {
+   "cift": "ARIES_VIRGO",
+   "renk": "MIDNIGHT_BLUE",
+   "boy": "A4",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "eksik_ham": [
+    "isim_govde"
+   ],
+   "tag": {
+    "tag_bant": [
+     2834,
+     2910
+    ],
+    "tag_x": [
+     828,
+     1571
+    ],
+    "tag_kumeleri": [
+     [
+      828,
+      1571
+     ]
+    ]
+   },
+   "isim_bant": [
+    2447,
+    2537
+   ],
+   "norm_boyut": [
+    2400,
+    3383
+   ]
+  }
+ ]
+}
