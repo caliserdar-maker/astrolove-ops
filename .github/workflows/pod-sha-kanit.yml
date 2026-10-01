@@ -1,0 +1,122 @@
+name: pod-sha-kanit
+
+# POD BAYT KANITI (1 Eki 2026, siparis 4188621967 karari): dijital yol duzeltmesi POD baski yolunu DEGISTIRMEMELI.
+# Ayni girdiyle (EMILY / JAMES test siparisi) iki kod surumunde POD BASKI dosyasi uretilir, sha1 karsilastirilir.
+# Salt okur: cikti yalniz log + artifact. Etsy / Prodigi / musteri YOK.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      eski_ref:
+        description: "eski siparis-baski-v1 commit"
+        required: true
+        default: "8a8b370edb74cb52402b4939d38ba14d2d2105fd"
+      yeni_ref:
+        description: "yeni commit"
+        required: true
+      ciftler:
+        description: "virgullu"
+        required: true
+        default: "CANCER_LIBRA,CANCER_LEO"
+      renkler:
+        description: "virgullu"
+        required: true
+        default: "MIDNIGHT_BLUE,DEEP_BLACK,PURE_WHITE,CHAMPAGNE_IVORY,WARM_PARCHMENT"
+      boy:
+        description: "POD boyu"
+        required: true
+        default: "11x14"
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      ciftler: ${{ steps.p.outputs.ciftler }}
+    steps:
+      - id: p
+        env:
+          C: ${{ inputs.ciftler }}
+        run: echo "ciftler=$(python3 -c 'import json,os; print(json.dumps([x.strip() for x in os.environ["C"].split(",") if x.strip()]))')" >> "$GITHUB_OUTPUT"
+
+  sha:
+    needs: plan
+    strategy:
+      fail-fast: false
+      matrix:
+        cift: ${{ fromJSON(needs.plan.outputs.ciftler) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.eski_ref }}
+          path: eski
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.yeni_ref }}
+          path: yeni
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --quiet pillow opencv-python-headless numpy fonttools img2pdf pikepdf
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: POD uret (eski / yeni) + sha1
+        env:
+          CIFT: ${{ matrix.cift }}
+          RENKLER: ${{ inputs.renkler }}
+          BOY: ${{ inputs.boy }}
+        run: |
+          set -uo pipefail
+          case "$CIFT$BOY" in *[!A-Z0-9_x]*) echo "HATA: girdi" >&2; exit 1 ;; esac
+          m=$(printf '%s' 'It Began With a Kiss in the Rain' | base64 -w0)
+          mkdir -p "$GITHUB_WORKSPACE/sip"
+          : > "$GITHUB_WORKSPACE/sha.txt"
+          for renk in ${RENKLER//,/ }; do
+            for k in eski yeni; do
+              ( cd "$k" && python scripts/medya_v1/siparis_dosyasi.py --cift "$CIFT" --renk "$renk" --boy "$BOY" \
+                  --isim1 EMILY --isim2 JAMES --mesaj-b64 "$m" --sip-kok "$GITHUB_WORKSPACE/sip/$k" > "../log_${k}_$renk.txt" 2>&1 )
+              f="$k/_siparis/${CIFT}_${renk}_${BOY}/BASKI_${BOY}.jpg"
+              h=$( [ -f "$f" ] && sha1sum "$f" | cut -c1-40 || echo YOK )
+              echo "$CIFT $renk $BOY $k $h" | tee -a "$GITHUB_WORKSPACE/sha.txt"
+            done
+          done
+          python3 - <<'EOF'
+          import collections, sys
+          d = collections.defaultdict(dict)
+          for s in open('sha.txt'):
+              c, r, b, k, h = s.split()
+              d[(c, r, b)][k] = h
+          kotu = [k for k, v in d.items() if v.get('eski') != v.get('yeni') or 'YOK' in v.values()]
+          for k, v in sorted(d.items()):
+              print('SHA', *k, 'AYNI' if v.get('eski') == v.get('yeni') and v.get('eski') != 'YOK' else 'FARKLI', v)
+          print('SONUC', 'PASS' if not kotu else f'FAIL {kotu}')
+          sys.exit(1 if kotu else 0)
+          EOF
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: sha_${{ matrix.cift }}
+          path: |
+            sha.txt
+            log_*.txt
+          retention-days: 3
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone

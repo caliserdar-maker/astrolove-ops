@@ -28,19 +28,54 @@ on:
       mesaj_b64:
         description: "mesaj, base64 (UTF-8)"
         required: true
+      isler:
+        description: "yalniz bu isler (orn. renk:DEEP_BLACK,wp:24x36); bos = hepsi"
+        required: false
+        default: ""
+      onceki_kosu:
+        description: "PASS isleri bu kosunun artifact'lerinden al (run id); bos = yok"
+        required: false
+        default: ""
+      renk_ref:
+        description: "MB/DB/PW/CI kodu (siparis-baski-v1 commit)"
+        required: false
+        default: "8a8b370edb74cb52402b4939d38ba14d2d2105fd"
 
 concurrency: siparis-dijital-${{ github.event.inputs.receipt }}
 
 env:
-  RENK_REF: 8a8b370edb74cb52402b4939d38ba14d2d2105fd
+  RENK_REF: ${{ github.event.inputs.renk_ref || '8a8b370edb74cb52402b4939d38ba14d2d2105fd' }}
   WP_REF: adfb2b99489798296936669575309b777c7e1ca7
 
 jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      renk: ${{ steps.p.outputs.renk }}
+      wp: ${{ steps.p.outputs.wp }}
+    steps:
+      - id: p
+        run: |
+          set -euo pipefail
+          python3 - <<'EOF' >> "$GITHUB_OUTPUT"
+          import json, os
+          e = json.load(open(os.environ['GITHUB_EVENT_PATH']))['inputs']
+          R = ['MIDNIGHT_BLUE', 'DEEP_BLACK', 'PURE_WHITE', 'CHAMPAGNE_IVORY']; B = ['16x20', '18x24', '24x36', '11x14', 'A2']
+          i = [x.strip() for x in (e.get('isler') or '').split(',') if x.strip()]
+          r = [x for x in R if not i or f'renk:{x}' in i]; w = [x for x in B if not i or f'wp:{x}' in i]
+          bil = [x for x in i if x not in [f'renk:{y}' for y in R] + [f'wp:{y}' for y in B]]
+          assert not bil, f'bilinmeyen is: {bil}'
+          print('renk=' + json.dumps(r)); print('wp=' + json.dumps(w))
+          EOF
+          cat "$GITHUB_OUTPUT"
+
   renk:
+    needs: plan
+    if: ${{ needs.plan.outputs.renk != '[]' }}
     strategy:
       fail-fast: false
       matrix:
-        renk: [MIDNIGHT_BLUE, DEEP_BLACK, PURE_WHITE, CHAMPAGNE_IVORY]
+        renk: ${{ fromJSON(needs.plan.outputs.renk) }}
     runs-on: ubuntu-latest
     timeout-minutes: 150
     steps:
@@ -100,10 +135,12 @@ jobs:
         run: rm -rf ~/.config/rclone
 
   wp:
+    needs: plan
+    if: ${{ needs.plan.outputs.wp != '[]' }}
     strategy:
       fail-fast: false
       matrix:
-        boy: ["16x20", "18x24", "24x36", "11x14", "A2"]
+        boy: ${{ fromJSON(needs.plan.outputs.wp) }}
     runs-on: ubuntu-latest
     timeout-minutes: 180
     steps:
@@ -150,6 +187,13 @@ jobs:
               echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
             fi
           fi
+      - name: Takas alani (buyuk boy bellek; cikti degismez)
+        if: ${{ matrix.boy == '24x36' || matrix.boy == 'A2' }}
+        run: |
+          set -euo pipefail
+          free -g; df -h /mnt | tail -1
+          sudo fallocate -l 28G /mnt/takas2 && sudo chmod 600 /mnt/takas2 && sudo mkswap /mnt/takas2 >/dev/null && sudo swapon /mnt/takas2
+          free -g
       - name: WP BAKIR sayfa (${{ matrix.boy }})
         run: |
           python scripts/siparis_dijital/surucu.py --asama wp --boy "${{ matrix.boy }}" --kod _wp \
@@ -166,12 +210,13 @@ jobs:
         run: rm -rf ~/.config/rclone
 
   paket:
-    needs: [renk, wp]
+    needs: [plan, renk, wp]
     if: ${{ always() }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:
       contents: write
+      actions: read
     steps:
       - name: Girdi + maske
         run: |
@@ -192,16 +237,24 @@ jobs:
         with:
           python-version: "3.12"
       - run: python -m pip install --quiet pillow opencv-python-headless numpy fonttools img2pdf pikepdf
+      - name: Onceki kosunun artifact'leri (PASS isler)
+        if: ${{ github.event.inputs.onceki_kosu != '' }}
+        uses: actions/download-artifact@v4
+        with:
+          path: out/a0
+          run-id: ${{ github.event.inputs.onceki_kosu }}
+          github-token: ${{ github.token }}
       - uses: actions/download-artifact@v4
         with:
-          path: out/a
-      - name: Artifact yerlesimi
+          path: out/a1
+      - name: Artifact yerlesimi (bu kosu oncekinin ustune)
         run: |
           set -euo pipefail
-          mkdir -p out/renk out/wp
-          for d in out/a/renk_*; do [ -d "$d" ] && mv "$d" "out/renk/${d#out/a/renk_}"; done
-          for d in out/a/wp_*; do [ -d "$d" ] && mv "$d" "out/wp/${d#out/a/wp_}"; done
-          ls out/renk out/wp
+          mkdir -p out/renk out/wp out/a0 out/a1
+          for k in a0 a1; do
+            for d in out/$k/renk_*; do [ -d "$d" ] || continue; n=${d#out/$k/renk_}; rm -rf "out/renk/$n"; mv "$d" "out/renk/$n"; echo "renk $n <- $k"; done
+            for d in out/$k/wp_*; do [ -d "$d" ] || continue; n=${d#out/$k/wp_}; rm -rf "out/wp/$n"; mv "$d" "out/wp/$n"; echo "wp $n <- $k"; done
+          done
       - name: WP PDF + ozet + kesitler
         id: pdf
         run: |
