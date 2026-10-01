@@ -1,0 +1,126 @@
+name: siparis-kesit-son
+
+# Teslim oncesi 1:1 kontrol (Serdar 1 Eki): Drive'daki 5 PDF'in 25 sayfasindan isim + mesaj bandi kesitleri, 1:1
+# (olcekleme yok, JPEG q95) + her renk 18x24 tam sayfa 1200 px onizleme -> inceleme/siparis-<receipt> dali,
+# klasor inceleme/siparis_<receipt>_son/. Bant satirlari KAPI_RAPORU_<renk>.json'dan (isim bandi temizligi satiri,
+# eski metin izi bandi); WP ayni boyun CI bantlarini kullanir (bant_dogrulama: WP = diger renkler +-1 px).
+# Salt okur (Drive); Etsy / musteri YOK.
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+    inputs:
+      receipt:
+        description: "receipt"
+        required: true
+        default: "4188621967"
+
+jobs:
+  kesit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Girdi
+        run: jq -re '.inputs.receipt | test("^[0-9]+$")' "$GITHUB_EVENT_PATH" >/dev/null
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --quiet pillow pikepdf
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Drive (PDF + KAPI_RAPORU)
+        run: |
+          set -euo pipefail
+          REC=$(jq -r '.inputs.receipt' "$GITHUB_EVENT_PATH")
+          rclone copy "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL/$REC" d --include 'AstroLove_*.pdf' --include 'KAPI_RAPORU_*.json'
+          find d -type f -printf '%TY-%Tm-%Td %TH:%TM %s %p\n' | sort
+      - name: Kesitler
+        run: |
+          set -euo pipefail
+          REC=$(jq -r '.inputs.receipt' "$GITHUB_EVENT_PATH")
+          python3 - "$REC" <<'EOF'
+          import glob, io, json, os, sys
+          import pikepdf
+          from PIL import Image
+          Image.MAX_IMAGE_PIXELS = None
+          rec = sys.argv[1]
+          cik = f'out/inceleme/siparis_{rec}_son'; os.makedirs(cik, exist_ok=True)
+          BOY = {(4800, 6000): '16x20', (5400, 7200): '18x24', (7200, 10800): '24x36', (3307, 4200): '11x14', (4960, 7015): 'A2'}
+          ORAN = {'4x5': '16x20', '3x4': '18x24', '2x3': '24x36', '11x14': '11x14', 'a_series': 'A2'}
+          RENK = {'Midnight_Blue': 'MIDNIGHT_BLUE', 'Deep_Black': 'DEEP_BLACK', 'Pure_White': 'PURE_WHITE',
+                  'Champagne_Ivory': 'CHAMPAGNE_IVORY', 'Warm_Parchment': 'WARM_PARCHMENT'}
+          def en_yeni(desen):
+              f = sorted(glob.glob(desen, recursive=True), key=os.path.getmtime)
+              return f[-1] if f else None
+          bant = {}
+          for r in ('MIDNIGHT_BLUE', 'DEEP_BLACK', 'PURE_WHITE', 'CHAMPAGNE_IVORY'):
+              f = en_yeni(f'd/**/KAPI_RAPORU_{r}.json')
+              d = json.load(open(f))
+              for o, v in d['renkler'][r]['oranlar'].items():
+                  isim = (v.get('isim_bandi_temizligi') or {}).get('satir')
+                  tag = (v.get('eski_metin_izi_kapisi') or {}).get('bant')
+                  bant[(r, ORAN[o])] = {'isim': isim, 'tag': tag, 'px': v.get('baski_px')}
+          for b in ORAN.values():
+              bant[('WARM_PARCHMENT', b)] = bant[('CHAMPAGNE_IVORY', b)]
+          sayi = 0
+          for pdf in sorted(glob.glob('d/**/AstroLove_*.pdf', recursive=True)):
+              ad = os.path.basename(pdf)
+              r = next(v for k, v in RENK.items() if k in ad)
+              with pikepdf.open(pdf) as p:
+                  for pg in p.pages:
+                      for _, x in pg.images.items():
+                          raw = x.read_raw_bytes()
+                          im = Image.open(io.BytesIO(raw)); im.load()
+                          b = BOY[im.size]; W, H = im.size; k = W / 2400.0
+                          bb = bant[(r, b)]
+                          i0, i1 = bb['isim']; ih = i1 - i0
+                          isim = im.crop((0, max(i0 - ih, 0), W, min(i1 + ih, H)))
+                          t0, t1 = int(bb['tag'][0] * k), int(bb['tag'][1] * k); th = t1 - t0
+                          mesaj = im.crop((0, max(t0 - th // 2, 0), W, min(t1 + th // 2, H)))
+                          isim.convert('RGB').save(f'{cik}/{r}_{b}_isim.jpg', 'JPEG', quality=95, subsampling=0)
+                          mesaj.convert('RGB').save(f'{cik}/{r}_{b}_mesaj.jpg', 'JPEG', quality=95, subsampling=0)
+                          sayi += 2
+                          if b == '18x24':
+                              im.convert('RGB').resize((1200, round(H * 1200 / W)), Image.LANCZOS).save(
+                                  f'{cik}/{r}_18x24_onizleme.jpg', 'JPEG', quality=92)
+                          print(r, b, im.size, 'isim satir', [max(i0 - ih, 0), min(i1 + ih, H)], 'mesaj satir', [max(t0 - th // 2, 0), min(t1 + th // 2, H)], flush=True)
+          print('KESIT', sayi, 'dosya')
+          assert sayi == 50, sayi
+          EOF
+          ls out/inceleme/siparis_${REC}_son | wc -l
+      - name: Inceleme dali
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          REC=$(jq -r '.inputs.receipt' "$GITHUB_EVENT_PATH")
+          B="inceleme/siparis-$REC"; U="https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          G=(-c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com")
+          for i in 1 2 3 4 5 6; do
+            rm -rf _inc
+            git clone -q --depth 1 --branch "$B" "$U" _inc
+            mkdir -p "_inc/inceleme" && rm -rf "_inc/inceleme/siparis_${REC}_son" && cp -r "out/inceleme/siparis_${REC}_son" "_inc/inceleme/"
+            git -C _inc "${G[@]}" add inceleme
+            git -C _inc "${G[@]}" commit -qm "siparis $REC: teslim oncesi 1:1 isim + mesaj bandi kesitleri (25 sayfa) + 18x24 onizleme" || { echo "degisiklik yok"; exit 0; }
+            if git -C _inc push -q origin "HEAD:refs/heads/$B"; then echo "COMMIT $(git -C _inc rev-parse HEAD)"; exit 0; fi
+            sleep $((RANDOM % 8 + 3))
+          done
+          exit 1
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
