@@ -4,6 +4,7 @@ Kolonlar METRICOOL.md (v4) ve Serdar'in onizlemede kabul edilen PILOT_4PIN bicim
 Draft=FALSE, Pinterest=TRUE, Facebook/Instagram=FALSE, Shortener=FALSE, Pinterest Pin New Format=FALSE.
 Kullanim: metricool_csv.py PINLER.csv CIKTI_DIR [--onek PIN_V1] [--metin-kurali yol]"""
 import argparse, csv, importlib.util, re, sys
+from datetime import datetime, timedelta
 from pathlib import Path
 
 KOL = ['Text', 'Date', 'Time', 'Draft', 'Facebook', 'Instagram', 'Pinterest', 'Picture Url 1', 'Alt text picture 1',
@@ -36,6 +37,10 @@ def main():
                     'Facebook': 'FALSE', 'Instagram': 'FALSE', 'Pinterest': 'TRUE', 'Picture Url 1': r['url'],
                     'Alt text picture 1': r['alt_text'], 'Shortener': 'FALSE', 'Pinterest Board': r['board'],
                     'Pinterest Pin Title': r['title'], 'Pinterest Pin Link': r['link'], 'Pinterest Pin New Format': 'FALSE'})
+    ilk = datetime.fromisoformat(f"{rows[0]['Date']}T{rows[0]['Time']}")
+    simdi_ist = datetime.utcnow() + timedelta(hours=3)
+    if ilk < simdi_ist + timedelta(hours=2):
+        hata.append(f'ilk yayin {ilk} simdiden (Istanbul {simdi_ist:%Y-%m-%d %H:%M}) 2 saatten yakin')
     if hata:
         sys.exit('DUR: ' + '; '.join(hata[:20]))
     Path(a.cikti).mkdir(parents=True, exist_ok=True)

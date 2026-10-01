@@ -36,7 +36,7 @@ DALGA = ['01', '04', '02']                       # Serdar: 01 -> 04 -> 02
 SAATLER = [('14:00:00', 0), ('15:30:00', 0), ('17:00:00', 0), ('18:30:00', 0), ('20:00:00', 0), ('21:30:00', 0),
            ('23:00:00', 0), ('00:30:00', 1), ('02:00:00', 1), ('03:30:00', 1)]
 ARA_GUN = 7                                       # ayni ciftin iki pini arasi en az 7 x 24 saat
-BASLANGIC = date(2026, 10, 2)
+BASLANGIC = date(2026, 10, 2)                     # en erken gun; gercek baslangic --esik ile kayar
 PAGES = 'https://caliserdar-maker.github.io/astrolove-media/pinterest'
 
 
@@ -49,19 +49,28 @@ def metin_uyarla(t, A, B):
     return t.replace('Cancer and Libra', f'{A} and {B}')
 
 
-def zamanla(akis):
+def slotlar(esik):
+    """esik'ten (Istanbul, naive) sonraki tum slotlar, kronolojik. 00:30 ile 03:30 ertesi takvim gunu."""
+    esik = max(esik, datetime.fromisoformat(f'{BASLANGIC.isoformat()}T{SAATLER[0][0]}'))
+    d = esik.date() - timedelta(days=1)
+    while True:
+        for saat, kay in SAATLER:
+            an = datetime.fromisoformat(f'{(d + timedelta(days=kay)).isoformat()}T{saat}')
+            if an >= esik:
+                yield an
+        d += timedelta(days=1)
+
+
+def zamanla(akis, esik):
     """Slotlari sirayla doldurur; her slota kuyruktaki ILK uygun pin (ayni ciftin son pininden en az ARA_GUN
     x 24 saat sonra) konur, uygun pin yoksa slot bos kalir. Sira (dalga 01 -> 04 -> 02, SIRA_78) korunur."""
-    kuyruk, son, plan, slot = list(akis), {}, [], 0
-    while kuyruk:
-        gun, s = divmod(slot, len(SAATLER)); saat, kay = SAATLER[s]
-        d = BASLANGIC + timedelta(days=gun + kay)
-        an = datetime.fromisoformat(f'{d.isoformat()}T{saat}')
+    kuyruk, son, plan = list(akis), {}, []
+    for n, an in enumerate(slotlar(esik)):
+        if not kuyruk: break
         for j, r in enumerate(kuyruk):
             if r['cift'] not in son or an - son[r['cift']] >= timedelta(days=ARA_GUN):
-                plan.append((d, saat, r)); son[r['cift']] = an; kuyruk.pop(j); break
-        slot += 1
-        if slot > 100000: sys.exit('DUR: zamanlama kilitlendi')
+                plan.append((an.date(), an.strftime('%H:%M:%S'), r)); son[r['cift']] = an; kuyruk.pop(j); break
+        if n > 100000: sys.exit('DUR: zamanlama kilitlendi')
     return plan
 
 
@@ -70,6 +79,7 @@ def main():
     for a in ('--paket', '--sahne', '--fontlar', '--kapak', '--cikti', '--metin-kurali'):
         ap.add_argument(a, required=True)
     ap.add_argument('--ciftler', default='HEPSI')
+    ap.add_argument('--esik', default='', help="ilk yayin en erken (Istanbul, YYYY-MM-DDTHH:MM); bos = simdi + 3 saat")
     a = ap.parse_args()
     t0 = time.time()
     paket, cikti = Path(a.paket), Path(a.cikti)
@@ -173,7 +183,11 @@ def main():
         akis.append({'cift': 'CANCER_LIBRA', 'tip': '03', 'url': f'{PAGES}/pilot_cl/03_Five_Colors_1000x1500.jpg',
                      'title': r['title'], 'description': r['description'], 'alt_text': r['alt_text'],
                      'board': PANO['03'], 'link': f"https://www.etsy.com/listing/{ids['CANCER_LIBRA']['listing_id']}"})
-    plan = zamanla(akis)
+    # Istanbul UTC+3 sabit (yaz saati yok). Esik: kosu sonu + en az 2 saat (CSV adimina kadar ~1 saat pay)
+    esik = (datetime.fromisoformat(a.esik) if a.esik else
+            (datetime.utcnow() + timedelta(hours=3 + 3)).replace(second=0, microsecond=0))
+    print(f'yayin esigi (Istanbul): {esik.isoformat()}', flush=True)
+    plan = zamanla(akis, esik)
     with open(cikti / 'PINLER.csv', 'w', newline='', encoding='utf-8') as f:
         w = csv.writer(f, lineterminator='\n')
         w.writerow(['no', 'Date', 'Time', 'cift', 'tip', 'url', 'board', 'title', 'description', 'alt_text', 'link'])
