@@ -17,6 +17,10 @@ on:
         description: "siparis-baski-v1 commit (yalniz A2 duz renk baskisi)"
         required: false
         default: "6409eb2536b1df7b081610c60cbabb0d3e47fc7e"
+      v1_boylar:
+        description: "duz renk baskisi v1 POD koduyla yapilacak WP boylari (siparis-dijital wp_pod_kod=v1 ile ayni)"
+        required: false
+        default: "A2,16x20"
 
 env:
   WP_REF: adfb2b99489798296936669575309b777c7e1ca7
@@ -37,7 +41,7 @@ jobs:
         with:
           ref: ${{ env.WP_REF }}
           path: _wp
-      - if: ${{ matrix.boy == 'A2' }}
+      - if: ${{ contains(format(',{0},', inputs.v1_boylar), format(',{0},', matrix.boy)) }}
         uses: actions/checkout@v4
         with:
           ref: ${{ inputs.v1_ref }}
@@ -47,7 +51,7 @@ jobs:
           python-version: "3.12"
       - run: python -m pip install --quiet pillow opencv-python-headless numpy fonttools img2pdf pikepdf
       - run: cd _wp && python scripts/medya_v1/test_wp_kilit.py
-      - if: ${{ matrix.boy == 'A2' }}
+      - if: ${{ contains(format(',{0},', inputs.v1_boylar), format(',{0},', matrix.boy)) }}
         run: |
           set -euo pipefail
           for f in wp_bakir.py wp_katman.py wp_ornek.py wp_kilit.py wp_kilit.json wp_tani.py test_wp_kilit.py; do
@@ -76,7 +80,7 @@ jobs:
         run: |
           set +e
           python3 -c "import base64,json; json.dump({'receipt':'CHATGPT','cift':'CANCER_LEO','isim1':'CANCER','isim2':'LEO','mesaj_b64':base64.b64encode('Two Souls · One Bond'.encode()).decode()}, open('girdi.json','w'))"
-          if [ "${{ matrix.boy }}" = A2 ]; then KOD=_v1; else KOD=_wp; fi
+          if [ -d _v1 ]; then KOD=_v1; else KOD=_wp; fi
           SIPARIS_GIRDI_JSON="$PWD/girdi.json" python scripts/siparis_dijital/surucu.py --asama wp --boy "${{ matrix.boy }}" --kod "$KOD" \
             --kod-ref "wp-katman $WP_REF" --cikti "$PWD/out/wp/${{ matrix.boy }}" 2>&1 | grep -v '^SURE '
           ls -la out/wp/${{ matrix.boy }}/
@@ -129,6 +133,7 @@ jobs:
             done
           done
           for b in 16x20 18x24 24x36 11x14 A2; do
+            python3 -c "import json,sys; d=json.load(open('wp/OZET_WP_$b.json')); sys.exit(0 if d.get('kapilar_gecti') and (d.get('wp_bakir') or {}).get('duz_renk') == 'CHAMPAGNE_IVORY' else 1)" || { echo "HATA: WP $b onayli bakir degil (kapi / duz renk)" >&2; exit 1; }
             [ -f "wp/WP_$b.jpg" ] && cp "wp/WP_$b.jpg" "z/WARM_PARCHMENT_${b}.jpg" || echo "EKSIK WP $b"
             [ -f "wp/OZET_WP_$b.json" ] && python3 -c "import json; d=json.load(open('wp/OZET_WP_$b.json')); print('WP $b', d.get('durum'), 'kapilar_gecti', d.get('kapilar_gecti'), (d.get('wp_bakir') or {}).get('duz_renk'))"
           done
