@@ -42,9 +42,17 @@ def main():
                                for y in ('sol', 'sag')}})
         return out
     p16.poster_kur = sar
+    olc = []
+    asil_olc = sd.satir_olc_alt
+
+    def olc_sar(im, bant, k=1.0, **kw):                           # kapinin ham olcumleri (ust / taban / cap / x)
+        g = asil_olc(im, bant, k, **kw)
+        olc.append({'W': im.width, 'k': round(k, 4), 'g': g})
+        return g
+    sd.satir_olc_alt = olc_sar
     for is_ in [x for x in a.isler.split(';') if x]:
         cift, renk, boy = is_.split(':')
-        kay.clear()
+        kay.clear(); olc.clear()
         x = sd.normalize({'cift': cift, 'renk': renk, 'boy': boy, 'urun': 'pod',
                           'isim1': 'EMILY', 'isim2': 'JAMES', 'mesaj': 'It Began With a Kiss in the Rain'})
         x['receipt'] = f'OLCEKTANI_{cift}_{renk}_{boy}'; x['sayfa'] = no[cift]
@@ -55,7 +63,7 @@ def main():
         s = sd.pod_uret(x, yol.read_bytes(), P_blue, P_ed, is_dir)
         r = {'cift': cift, 'renk': renk, 'boy': boy, 'kalan': sorted(g for g, v in (s.get('kapilar') or {}).items() if v is False),
              'olcek_kapisi': {q: (s.get('olcek_kapisi') or {}).get(q) for q in ('konum_fark_px', 'kenar_fark_px', 'fark', 'k')},
-             'cagri': kay[:]}
+             'cagri': kay[:], 'olcum': olc[:], 'ikinci_deneme': s.get('ikinci_deneme')}
         if len(kay) >= 2:
             k = kay[-1]['W'] / kay[0]['W']
             a0, a1 = kay[0], kay[-1]
