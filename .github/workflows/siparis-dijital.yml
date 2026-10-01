@@ -474,8 +474,8 @@ jobs:
           if ls out/paket/AstroLoveArt_*.pdf >/dev/null 2>&1; then
             rclone move "$H" "$H/_ESKI_AD" --include '/AstroLove_*.pdf' || true
           fi
-          rclone copy out/paket "$H" --transfers 8
-          rclone lsl "$H" --max-depth 1
+          # 64M parca: WP PDF (~77 MB) 8M parcalarla ~10 sirali istek; olculen yukleme 7-113 sn oynuyordu (Test 2 dersi 3)
+          rclone copy out/paket "$H" --transfers 8 --drive-chunk-size 64M --stats 10s --stats-one-line -v 2>&1 | grep -v NOTICE
           echo "drive: TEMP/SIPARIS_ISIM/DIJITAL/$REC"
       - name: Inceleme parcalari (ayri isin girdisi; Drive'a 'inceleme' isi yukler)
         if: ${{ always() }}

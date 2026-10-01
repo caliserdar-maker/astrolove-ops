@@ -305,6 +305,8 @@ jobs:
         run: |
           set -euo pipefail
           D="gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PROVA/${{ github.run_id }}"
-          rclone copy PROVA.md "$D/" && rclone copy prova "$D/json/" && echo "drive: TEMP/SIPARIS_ISIM/PROVA/${{ github.run_id }}/PROVA.md"
+          rclone copy PROVA.md "$D/"
+          if [ -d prova ]; then rclone copy prova "$D/json/"; fi
+          echo "drive: TEMP/SIPARIS_ISIM/PROVA/${{ github.run_id }}/PROVA.md"
       - if: ${{ always() }}
         run: rm -rf ~/.config/rclone
