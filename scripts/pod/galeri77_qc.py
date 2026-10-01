@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """77 cift galerisi: cifte ozgu QC (sembol, kapak, eski metin, dosya seti). duvar_qc.py (zemin/poster/kontrast/tire)
 ve metin_qc.py (yazim/tire/yasak ifade) ile birlikte kosar. Her satir PASS/FAIL; cikis 0 = hepsi PASS.
+  serit 05 : 05 kartinda her kucuk resmin disindaki 12 px seritte acik piksel (R+G+B > 700) yok (5 edisyon)
   dosya    : 19 gorsel (WP baskisi yoksa 05 ve 19 haric 17), adlar CL kesin paketiyle birebir, hepsi 3000x2250
   kapak    : 01 kapaktaki poster ciftin MB baskisi (cok olcekli sablon NCC >= 0.80; CL disi ciftte CL MB'den
              en az 0.02 yuksek -> baska ciftin kapagi degil)
@@ -49,6 +50,13 @@ var = sorted(f for f in os.listdir(P) if f.endswith('.jpg'))
 boy = {f: Image.open(os.path.join(P, f)).size for f in var}
 sonuc('dosya', var == beklenen and all(v == (3000, 2250) for v in boy.values()),
       f'{len(var)} gorsel, ad seti {"ayni" if var == beklenen else "FARKLI"}, boyut {set(boy.values())}')
+
+
+# --- serit 05 (Serdar 1 Eki): her kucuk resmin disindaki 12 px seritte acik piksel (R+G+B > 700) sayisi 0
+if WP_VAR and os.path.exists(os.path.join(P, '05_renk_ve_dijital.jpg')):
+    import galeri77_serit as GS
+    sr = GS.serit(os.path.join(P, '05_renk_ve_dijital.jpg'), GS.K05)
+    sonuc('serit 05', not any(sr), f'MB/DB/PW/CI/WP acik px {sr} (esik R+G+B > {GS.ESIK}, {GS.SERIT} px serit)')
 
 
 # --- kapak: MB baski sablonu kapakta (1/4 olcek, cok olcekli)

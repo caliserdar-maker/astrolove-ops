@@ -22,6 +22,8 @@ for k in 03_konsept 04_kisisellestirme 05_renk_ve_dijital 07_cerceveler 08_boyla
   R=""; [ $k = 07_cerceveler ] && R="1556,540,2150,1269"
   $PY scripts/pod/kart_duvar_genel.py "$KR/$k.jpg" "$Z" "$P/$k.jpg" "$R" > /dev/null
 done
+# 05: kucuk resim halkasindaki krem/acik JPEG halesi duvar zeminine (Serdar 1 Eki; QC 'serit 05' = 0)
+[ $WP = 1 ] && $PY scripts/pod/galeri77_halka.py "$P/05_renk_ve_dijital.jpg" "$Z"
 for kv in "06_hediye_sahne:145,440,2855,1866,30" "09_yatak_sahne:145,420,2855,1846,30" \
           "10_calisma_sahne:145,420,2855,1846,30" "11_yemek_sahne:145,420,2855,1846,30"; do
   k=${kv%%:*}; $PY scripts/pod/kart_duvar_genel.py "$KR/$k.jpg" "$Z" "$P/$k.jpg" "${kv#*:}" > /dev/null

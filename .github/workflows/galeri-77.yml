@@ -196,6 +196,7 @@ jobs:
                   rclone copy $O/QC.txt "$ORN" -q; rclone copy $O/TEMAS_$C.jpg "$ORN" -q
                   for f in BASKI_WARM_PARCHMENT.jpg KAPI_WARM_PARCHMENT.json WP_KOD.txt; do rclone copy $Y/$f "$ORN" -q; done
                   python3 -c "from PIL import Image;[print(f, Image.open('$O/paket/'+f).size) for f in ('05_renk_ve_dijital.jpg','19_renk_warm_parchment.jpg')]"
+                  python3 scripts/pod/galeri77_serit.py $O/paket                 # kenar tasmasi olcumu (01, 05, 15-19)
                   echo "ORNEK: TEMP/$ORNEK/$C/ | $(tail -1 $O/QC.txt) | $(rclone link "$ORN" 2>/dev/null)"
                   [ -z "$hata" ] && TAMAM=$((TAMAM+1))
                 else
