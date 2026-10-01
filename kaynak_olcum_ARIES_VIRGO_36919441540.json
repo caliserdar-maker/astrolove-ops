@@ -1,0 +1,202 @@
+{
+ "ozet": {
+  "toplam": 5,
+  "pass": 5,
+  "fail": 0,
+  "fail_liste": [],
+  "sure_sn": 8.1
+ },
+ "sonuc": [
+  {
+   "cift": "ARIES_VIRGO",
+   "renk": "MIDNIGHT_BLUE",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "olcum_yedek": null,
+   "eksik_ham": [
+    "isim_govde"
+   ],
+   "tag": {
+    "tag_bant": [
+     2614,
+     2687
+    ],
+    "tag_x": [
+     845,
+     1555
+    ],
+    "tag_kumeleri": [
+     [
+      845,
+      1555
+     ]
+    ]
+   },
+   "isim_bant": [
+    2245,
+    2331
+   ],
+   "norm_boyut": [
+    2400,
+    3048
+   ]
+  },
+  {
+   "cift": "ARIES_VIRGO",
+   "renk": "MIDNIGHT_BLUE",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "olcum_yedek": null,
+   "eksik_ham": [
+    "isim_govde"
+   ],
+   "tag": {
+    "tag_bant": [
+     2569,
+     2640
+    ],
+    "tag_x": [
+     853,
+     1548
+    ],
+    "tag_kumeleri": [
+     [
+      853,
+      1548
+     ]
+    ]
+   },
+   "isim_bant": [
+    2207,
+    2292
+   ],
+   "norm_boyut": [
+    2400,
+    3000
+   ]
+  },
+  {
+   "cift": "ARIES_VIRGO",
+   "renk": "MIDNIGHT_BLUE",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "olcum_yedek": null,
+   "eksik_ham": [
+    "isim_govde"
+   ],
+   "tag": {
+    "tag_bant": [
+     2742,
+     2818
+    ],
+    "tag_x": [
+     829,
+     1572
+    ],
+    "tag_kumeleri": [
+     [
+      829,
+      1572
+     ]
+    ]
+   },
+   "isim_bant": [
+    2356,
+    2446
+   ],
+   "norm_boyut": [
+    2400,
+    3200
+   ]
+  },
+  {
+   "cift": "ARIES_VIRGO",
+   "renk": "MIDNIGHT_BLUE",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "olcum_yedek": {
+    "ilk_sorun": "eksik ['tag_bant', 'tag_x']",
+    "yedek": "kume boslugu 60",
+    "isim_bant": [
+     2600,
+     2696
+    ],
+    "tag_bant": [
+     3009,
+     3090
+    ]
+   },
+   "eksik_ham": [
+    "isim_govde"
+   ],
+   "tag": {
+    "tag_bant": [
+     3009,
+     3090
+    ],
+    "tag_x": [
+     807,
+     1594
+    ],
+    "tag_kumeleri": [
+     [
+      807,
+      1594
+     ]
+    ]
+   },
+   "isim_bant": [
+    2600,
+    2696
+   ],
+   "norm_boyut": [
+    2400,
+    3600
+   ]
+  },
+  {
+   "cift": "ARIES_VIRGO",
+   "renk": "MIDNIGHT_BLUE",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "olcum_yedek": null,
+   "eksik_ham": [
+    "isim_govde"
+   ],
+   "tag": {
+    "tag_bant": [
+     2839,
+     2915
+    ],
+    "tag_x": [
+     829,
+     1572
+    ],
+    "tag_kumeleri": [
+     [
+      829,
+      1572
+     ]
+    ]
+   },
+   "isim_bant": [
+    2453,
+    2543
+   ],
+   "norm_boyut": [
+    2400,
+    3394
+   ]
+  }
+ ]
+}
