@@ -6,6 +6,6 @@
 | DEEP_BLACK | AstroLoveArt_Cancer_Libra_Deep_Black.pdf | 8.49 | 5 | [300.0, 300.6] | PASS | PASS |
 | PURE_WHITE | AstroLoveArt_Cancer_Libra_Pure_White.pdf | 8.4 | 5 | [300.0, 300.6] | PASS | PASS |
 | CHAMPAGNE_IVORY | AstroLoveArt_Cancer_Libra_Champagne_Ivory.pdf | 22.82 | 5 | [300.0, 300.6] | PASS | PASS |
-| WARM_PARCHMENT | AstroLoveArt_Cancer_Libra_Warm_Parchment.pdf | 67.71 | 5 | [300.0, 300.6] | PASS | FAIL {'4x5': True, '3x4': True, '2x3': False, '11x14': True, 'a_series': True} |
+| WARM_PARCHMENT | AstroLoveArt_Cancer_Libra_Warm_Parchment.pdf | 76.66 | 5 | [300.0, 300.6] | PASS | PASS |
 
 SONUC: FAIL
