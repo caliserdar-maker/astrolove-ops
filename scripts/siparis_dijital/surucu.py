@@ -231,6 +231,19 @@ def mb_olcu_tablosu(eski_dizin, yeni_dizin):
     return '\n'.join(sat) + '\n' if var else None
 
 
+def mesaj_bandi_x8(jpg, hedef_1e1, hedef_x8, y=(0.815, 0.88)):
+    """Mesaj bandi tam genislik 1:1 + kontrast x8 (|L - bant medyani| * 8 + 128): eski motto izi icin (Serdar 1 Eki)."""
+    import numpy as np
+    from PIL import Image
+    Image.MAX_IMAGE_PIXELS = None
+    with Image.open(jpg) as im:
+        w, h = im.size
+        kes = im.convert('RGB').crop((0, int(h * y[0]), w, int(h * y[1])))
+    kes.save(hedef_1e1, 'JPEG', quality=95, subsampling=0)
+    L = np.asarray(kes.convert('L')).astype(np.float32)
+    Image.fromarray(np.clip((L - np.median(L)) * 8 + 128, 0, 255).astype(np.uint8)).save(hedef_x8, 'JPEG', quality=92)
+
+
 def mb_karsilastir(eski, yeni, hedef, y=(0.69, 0.86), x=(0.12, 0.88)):
     """Ayni sayfanin isim + mesaj bandi 1:1: ust = eski (2400 cizim, buyutulmus), alt = yeni (hedef cozunurluk)."""
     import numpy as np
@@ -302,6 +315,14 @@ def pdf_asamasi(a, g):
         j = sorted((d / renk).glob(f'*_{renk}_11x14_*.jpg'))
         if j:
             kesit(j[0], inc / f'KESIT_{renk}_11x14.jpg', inc / f'ONIZLEME_{renk}_11x14.jpg')
+    # 24x36 mesaj bandi 1:1 + x8 (5 renk; Serdar 1 Eki, MB 24x36 iz kontrolu)
+    for renk in ('MIDNIGHT_BLUE', 'DEEP_BLACK', 'PURE_WHITE', 'CHAMPAGNE_IVORY'):
+        j = sorted((kok / 'renk' / renk / renk).glob(f'*_{renk}_2x3_24x36.jpg'))
+        if j:
+            mesaj_bandi_x8(j[0], inc / f'MESAJ_24x36_{renk}_1e1.jpg', inc / f'MESAJ_24x36_{renk}_x8.jpg')
+    if (kok / 'wp' / '24x36' / 'WP_24x36.jpg').exists():
+        mesaj_bandi_x8(kok / 'wp' / '24x36' / 'WP_24x36.jpg', inc / 'MESAJ_24x36_WARM_PARCHMENT_1e1.jpg',
+                       inc / 'MESAJ_24x36_WARM_PARCHMENT_x8.jpg')
     # MB eski / yeni olcu tablosu (isimler + mesaj: genislik, yukseklik, merkez; % fark) - Serdar 1 Eki: <= %1
     tab = mb_olcu_tablosu(kok / 'eski' / 'MIDNIGHT_BLUE' / 'MIDNIGHT_BLUE', kok / 'renk' / 'MIDNIGHT_BLUE' / 'MIDNIGHT_BLUE')
     if tab:
