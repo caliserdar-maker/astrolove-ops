@@ -72,3 +72,16 @@ onceki_kosu : PASS isleri bu koşulardan al (tek is yeniden kosuda)
 - Isim on testi (prova 36907530617) kalan 13 is; prova en fazla 4 paralel is.
 - CAGLAYANGUL 11x14 soluk serif ucu.
 - Harf bankasi: olcum basladi (b81d79f), karar verilmedi; olcek hatasi icin artik gerekli degil, hiz icin olculecek.
+
+## Test 3 (9000000003, ARIES_VIRGO, LIAM / CATHERINE, "The World is Ours") - 1 Eki 19:14
+
+- Basla 19:14:24. DB, PW, CI, WP PASS ve PDF'ler Drive'da ~19:22 (~8 dk). Paket 51 sn (yeni paket calisti).
+- MB 24x36 (2x3): HATA `KeyError: 'tag_bant'`. Iz: siparis_dosyasi.render_et -> P_blue.hedef_render -> a1_poster.sayfa_kur
+  -> pilot16.oran_kur (o28["tag_bant"]). Kok neden KAYNAK DOSYADA: kaynak-olcum (run 36915481126) ARIES_VIRGO MB
+  2:3 boylarinda (12x18, 16x24, 20x30, 24x36) pilot11.sayfa_olc tagline bandi bulamiyor; isim_bant 3009-3090 / 3600
+  (diger oranlarda ~%74, burada %84). Diger 11 boy PASS. Kaynak gorseli henuz incelenmedi (tagline eksik/kesik olabilir).
+  Kod tarafi: a1_poster.sayfa_kur'da tag_bant yoksa fail-closed net hata ya da guvenli yedek gerekli.
+- MB 11x14: olcek kapisi FAIL, cap_sol +1.09 (esik 1.0) tum denemelerde (baski-duzelt teshisi).
+- Ders: yalniz 3 cift denenmisti; her cift x renk x boy kaynagi siparisten ONCE olculmeli (kaynak-olcum workflow,
+  scripts/siparis_dijital/kaynak_olcum.py; sonuclar inceleme/kaynak-olcum dali).
+- Ders: bilinen acik (MB 11x14) kapanmadan Test 3 baslatildi; kural yine cignendi.
