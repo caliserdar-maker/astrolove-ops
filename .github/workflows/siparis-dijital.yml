@@ -63,7 +63,7 @@ jobs:
           R = ['MIDNIGHT_BLUE', 'DEEP_BLACK', 'PURE_WHITE', 'CHAMPAGNE_IVORY']; B = ['16x20', '18x24', '24x36', '11x14', 'A2']
           i = [x.strip() for x in (e.get('isler') or '').split(',') if x.strip()]
           r = [x for x in R if not i or f'renk:{x}' in i]; w = [x for x in B if not i or f'wp:{x}' in i]
-          bil = [x for x in i if x not in [f'renk:{y}' for y in R] + [f'wp:{y}' for y in B]]
+          bil = [x for x in i if x not in [f'renk:{y}' for y in R] + [f'wp:{y}' for y in B] + ['paket']]   # 'paket': yalniz paketleme
           assert not bil, f'bilinmeyen is: {bil}'
           print('renk=' + json.dumps(r)); print('wp=' + json.dumps(w))
           EOF
