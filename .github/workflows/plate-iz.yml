@@ -60,7 +60,13 @@ jobs:
       - name: Plate iz temizligi (QC + yedek + geri okuma)
         run: |
           set +e
-          python scripts/medya_v1/plate_iz_temizle.py --yaz --renkler "${{ matrix.renk }}" --atla_yazilmis "$ATLA" --cikti plate_iz; rc=$?
+          if [ "${{ matrix.renk }}" = "MIDNIGHT_BLUE" ]; then
+            # 1 Eki: BLUE_24x36 ilk kosuda hizasiz maskeyle islendi (iz_once -0.06): yedekten geri al, hiza aramali kodla yeniden
+            rclone copyto "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/$ATLA/BLUE_24x36.png" "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PLATES/BLUE_24x36.png"
+            python scripts/medya_v1/plate_iz_temizle.py --yaz --renkler MIDNIGHT_BLUE --boylar 24x36 --cikti plate_iz; rc=$?
+          else
+            python scripts/medya_v1/plate_iz_temizle.py --yaz --renkler "${{ matrix.renk }}" --atla_yazilmis "$ATLA" --cikti plate_iz; rc=$?
+          fi
           D=$(date -u +%Y%m%d_%H%M)
           rclone copy plate_iz "gdrive:ASTROLOVE/TEMP/PLATE_IZ/$D/${{ matrix.renk }}" --include '*.json' --include 'KESIT_*' && echo "drive: TEMP/PLATE_IZ/$D"
           echo "rc=$rc" >> "$GITHUB_ENV"
