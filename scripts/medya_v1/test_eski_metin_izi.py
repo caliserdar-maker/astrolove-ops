@@ -50,6 +50,25 @@ class EskiMetinIzi(unittest.TestCase):
         print('acik', {a: (r.get('fazla'), r['gecti']) for a, r in olc.items()})
         self.assertTrue(olc[0]['gecti']); self.assertFalse(olc[3]['gecti']); self.assertFalse(olc[6]['gecti'])
 
+    def test_plate_iz_temizligi(self):
+        import plate_iz_temizle as pit
+        for koyu, doku, ed in ((True, False, 'black'), (False, True, 'vintage')):
+            kaynak, renk = tps.sayfa(koyu, doku, self.font)
+            z = np.asarray(tps.zemin(koyu, doku)).astype(np.float32)
+            m = Image.new('L', (tps.W, tps.H), 0)
+            ImageDraw.Draw(m).text((1200, 2650), 'Two Souls  One Bond', font=ImageFont.truetype(self.font, 62),
+                                   fill=255, anchor='mm')
+            m = np.asarray(m.filter(ImageFilter.GaussianBlur(0.6))).astype(np.float32)[..., None] / 255
+            plate = np.clip(z + (1 if koyu else -1) * 5 * m, 0, 255).astype(np.uint8)
+            b = io.BytesIO(); kaynak.save(b, 'PNG'); kb = b.getvalue()
+            yeni, M, _ = pit.temizle(plate, [kb], ed)
+            bos = np.zeros(plate.shape[:2], bool)
+            once = sd.eski_metin_izi_kapisi(Image.fromarray(plate), kb, [2610, 2690], [780, 1620], bos)
+            sonra = sd.eski_metin_izi_kapisi(Image.fromarray(yeni), kb, [2610, 2690], [780, 1620], bos)
+            self.assertFalse(once['gecti']); self.assertTrue(sonra['gecti'], sonra)
+            fark = np.abs(yeni.astype(int) - plate.astype(int)).max(2) > 0
+            self.assertEqual(int((fark & ~M).sum()), 0)
+
 
 if __name__ == '__main__':
     unittest.main()
