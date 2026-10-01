@@ -29,6 +29,16 @@ def _hazirla(kisisel, medya, plates=''):
     _YOL['plates'] = plates
 
 
+_MASKE = {}
+
+
+def _plate_maske(sd, yol):
+    """Plate fark maskesi ureticisi surec basina BIR KEZ (20 plate; VINTAGE_A2 ~50 MB her dosyada yeniden aciliyordu)."""
+    if yol not in _MASKE:
+        _MASKE[yol] = sd.plate_fark_maskesi(yol)
+    return _MASKE[yol]
+
+
 def olc_tek(f):
     """URETIMLE AYNI OLCUM YOLU (Test 4 kapisi): MB -> a1_poster.Poster.sayfa_kur (sayfa_olc_guvenli, duz esik);
     diger renkler -> siparis_dosyasi.EdisyonPoster.olc (plate fark maskesi + sayfa_olc_guvenli, edisyon murekkebi)."""
@@ -53,7 +63,7 @@ def olc_tek(f):
                 return r
             sd.olcek_kur(2400)
             m = sd._mod('edisyon_uret').murekkep(np.asarray(ref_norm).astype(np.float32))
-            o, yedek = a1_poster.sayfa_olc_guvenli(pilot11, f, maske=sd.plate_fark_maskesi(pl))
+            o, yedek = a1_poster.sayfa_olc_guvenli(pilot11, f, maske=_plate_maske(sd, str(pl)))
             r['yol'] = f'EdisyonPoster.olc (plate {pl.name})'
         r['olcum_yedek'] = yedek
         o2, duz = a1_poster.olcum_duzelt(dict(o), m)
