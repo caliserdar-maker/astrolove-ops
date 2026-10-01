@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""wp_bakir sentetik testi: bakir daireli dokulu plate, kabartmali duz renk baskisi (+ hibrit bant dikisi ve
-kenar gurultusu). Beklenen: tum ogeler hedef bakir, dikis/hale kagida tasinmaz; dedektor kasitli dikisi yakalar."""
+"""wp_bakir sentetik testi (1 Eki, 2. iterasyon). Kurgu: bakir daireli dokulu plate (onayli kagitta OLMAYAN
+dikey dikis var), onayli WP yazisi gri-kahve + kabartmali (ust kenar isik, alt kenar golge), duz renk baskisi
+kabartmasiz isim/mesaj + golgeli sembol. Beklenen: a-g PASS; dikis dedektoru onarimsiz ciktida dikisi yakalar."""
 import sys
 from pathlib import Path
 
-import cv2
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -12,7 +12,10 @@ import test_wp_katman as T                                       # noqa: E402
 import wp_bakir as wb                                            # noqa: E402
 
 W, H = T.W, T.H
-BAKIR = np.array([169, 109, 47], np.float32)
+BAKIR_ESKI = np.array([164, 98, 34], np.float32)
+ET = {'buyuk_sembol': (262, 414), 'isim': (776, 838), 'mesaj': (934, 976)}
+DIKIS = (slice(850, 1110), slice(600, 602))
+SAT = np.isin(np.arange(H), np.r_[766:848, 924:986])
 
 
 def daire_alfa():
@@ -22,87 +25,64 @@ def daire_alfa():
     return np.asarray(im.resize((W, H), Image.LANCZOS)).astype(np.float32)[..., None] / 255.0
 
 
+def kabartmali(zemin, a, renk, k=0.9, sigma=1.5):
+    gy, _ = wb._yukseklik_egim(a[..., 0], sigma)
+    return zemin * (1 - a) + (renk[None, None] * np.clip(1 + k * gy, 0.5, 1.6)[..., None]) * a
+
+
 def kur(dikisli=True):
     a_d = daire_alfa()
     doku = T.doku()
-    P_wp = T.bas(doku, a_d, BAKIR)
-    P_c = T.bas(T.CI_Z, a_d, T.CI_M)
-    og = T.SEMBOL + T.YENI_ISIM + T.YENI_MESAJ
-    a = T.alfa(og, {})
-    golge = 1.0 + 0.25 * np.sin(np.arange(W)[None, :] / 9.0)[..., None]       # kabartma isigi/golgesi
-    B = T.bas(P_c, a, np.clip(T.CI_M * golge, 0, 255))
-    rng = np.random.default_rng(3)
-    B = B + rng.normal(0, 1.2, B.shape)                                          # JPEG / plate gurultusu
+    S_kagit = T.bas(doku, a_d, BAKIR_ESKI)
+    P_wp = S_kagit.copy()                                                        # plate: daire bakir
     if dikisli:
-        B[860:1120, 600:602] -= 4.0                                              # hibrit bant dikisi (D = 4)
-    S_wp = T.bas(P_wp, T.alfa(T.SEMBOL + T.ISIM + T.MESAJ, {}), T.WP_M)          # onayli: gri-kahve
-    et = {'buyuk_sembol': (262, 414), 'isim': (776, 838), 'mesaj': (934, 976)}
-    return P_wp, P_c, B, S_wp, et, a_d[..., 0] > 0.5
+        P_wp[DIKIS] -= 12.0                                                      # plate dikisi (onaylida yok)
+    a_eski = T.alfa(T.SEMBOL + T.ISIM + T.MESAJ, {})
+    S_wp = kabartmali(S_kagit, a_eski, T.WP_M)                                  # onayli: gri-kahve, kabartmali
+    P_c = T.bas(T.CI_Z, a_d, T.CI_M)
+    S_c = T.bas(P_c, a_eski, T.CI_M)
+    a_yeni = T.alfa(T.SEMBOL + T.YENI_ISIM + T.YENI_MESAJ, {})
+    golge = np.ones((H, W, 1), np.float32)
+    golge[:ET['isim'][0] - 20] = 1.0 + 0.25 * np.sin(np.arange(W)[None, :] / 9.0)[..., None]   # sembol golgeli
+    B = T.bas(P_c, a_yeni, np.clip(T.CI_M * golge, 0, 255))                     # isim/mesaj duz (hat)
+    B = B + np.random.default_rng(3).normal(0, 1.2, B.shape)
+    daire_c = wb.daire_maskesi(P_c)
+    P_ck, _ = wb.kagit_tabani(P_c, daire_c)
+    return P_wp, S_wp, B - P_ck, S_c - P_ck, daire_c, float(np.median(P_c @ wb.LUMA))
 
 
-def test_bakir_qc():
-    P_wp, P_c, B, S_wp, et, _ = kur()
-    daire = wb.daire_maskesi(P_c)
-    assert daire.sum() > 1000, daire.sum()
-    hedef = wb.bakir_hedef(P_wp, daire)
-    assert wb._dE(hedef['rgb'], BAKIR) < 3, hedef
-    haric = cv2.dilate(daire.astype(np.uint8), np.ones((11, 11), np.uint8)).astype(bool)
-    out, b = wb.bakir_bas(B - P_c, P_wp, hedef['rgb'], float(np.median(P_c @ wb.LUMA)), et, haric)
-    q = wb.qc(out, P_wp, S_wp, b, et, daire, hedef, {'gecti': True})
-    for k in ('a_renk', 'b_tasma', 'd_dikis', 'e_kagit'):
-        assert q[k]['gecti'], (k, q[k])
-    # maske disi birebir plate (dikis ve gurultu tasinmadi)
-    assert np.abs(out - P_wp)[~b['M']].max() < 1e-3
-    return out, P_wp, S_wp, b, et, daire, hedef
+def test_bakir_hatti():
+    P_wp, S_wp, D_cu, D_src, daire, Lp = kur()
+    out, P_k, r = wb.bakir_hatti(D_cu, D_src, P_wp, S_wp, daire, ET, Lp, 1.0, plate_iz={'gecti': True})
+    q = r['qc']
+    for k_ in ('a_renk', 'b_tasma', 'd_dikis', 'e_kagit', 'f_kabartma', 'g_kontrast'):
+        assert q[k_]['gecti'], (k_, q[k_])
+    assert r['plate_dikis']['onarildi'] and r['onarimsiz_d'], r['plate_dikis']   # dedektor gercek dikisi yakalar
+    assert any(abs(c['x'] - 600) <= 2 for c in r['onarimsiz_d']), r['onarimsiz_d']
+    assert abs(r['kabartma_onayli']['a'] - 0.9) < 0.3, r['kabartma_onayli']
+    return out, S_wp, r
 
 
-def test_dikis_dedektoru():
-    out, P_wp, S_wp, b, et, daire, hedef = test_bakir_qc()
-    kotu = out.copy()
-    kotu[860:1120, 600:602] -= 12.0                                              # Serdar'in gordugu: 196 -> 184
-    q = wb.qc(kotu, P_wp, S_wp, b, et, daire, hedef, {'gecti': True})
-    assert not q['d_dikis']['gecti'] and q['d_dikis']['yeni'][0]['x'] in (600, 601), q['d_dikis']
+def test_kabartmasiz_kalir():
+    """Kabartma uygulanmazsa f) FAIL."""
+    P_wp, S_wp, D_cu, D_src, daire, Lp = kur(False)
+    kb = wb.kabartma_olc(wb.alfa(D_src), S_wp, P_wp, SAT, 1.0)
+    P_k, _ = wb.kagit_tabani(P_wp, daire)
+    out, bb = wb.bakir_bas(D_cu, P_k, wb.BAKIR_KOYU, Lp, ET)                      # kabartmasiz
+    f = wb.kabartma_kontrol(out, bb['te'], SAT, kb['sigma'], kb)
+    assert not f['gecti'], f
 
 
-def test_guclu_dikis_maskede():
-    """Duz renk baskisinda guclu dikis (D = 20) cizgi maskesine girer: QC d) yakalar."""
-    P_wp, P_c, B, S_wp, et, _ = kur()
-    B[860:1120, 600:602] -= 20.0
-    daire = wb.daire_maskesi(P_c); hedef = wb.bakir_hedef(P_wp, daire)
-    out, b = wb.bakir_bas(B - P_c, P_wp, hedef['rgb'], float(np.median(P_c @ wb.LUMA)))
-    q = wb.qc(out, P_wp, S_wp, b, et, daire, hedef, {'gecti': True})
-    assert not q['d_dikis']['gecti'] and q['d_dikis']['maskede_ince_bilesen'], q['d_dikis']
-
-
-def test_daire_kenari_haric():
-    """Baskidaki daire plate'tekinden 1 px kayik: kenar farki cizgi maskesine girer; daire haric tutulunca
-    ince cizgi yok, daire plate'teki bakir olarak kalir."""
-    P_wp, P_c, B, S_wp, et, _ = kur(dikisli=False)
-    a_d = daire_alfa()
-    B = T.bas(B, np.roll(a_d, 1, axis=1), T.CI_M)                                # 1 px kayik daire baskida
-    daire = wb.daire_maskesi(P_c); hedef = wb.bakir_hedef(P_wp, daire)
-    Lp = float(np.median(P_c @ wb.LUMA))
-    _, b0 = wb.bakir_bas(B - P_c, P_wp, hedef['rgb'], Lp, et)
-    haric = cv2.dilate(daire.astype(np.uint8), np.ones((11, 11), np.uint8)).astype(bool)
-    out, b = wb.bakir_bas(B - P_c, P_wp, hedef['rgb'], Lp, et, haric)
-    assert (b0['core'] & daire).sum() > 50                                     # haric olmadan sizinti var
-    q = wb.qc(out, P_wp, S_wp, b, et, daire, hedef, {'gecti': True})
-    assert q['d_dikis']['gecti'] and not q['d_dikis']['maskede_ince_bilesen'], q['d_dikis']
-    assert np.abs(out - P_wp)[daire].max() < 1e-3
-
-
-def test_kahverengi_yakalanir():
-    out, P_wp, S_wp, b, et, daire, hedef = test_bakir_qc()
-    kotu = out.copy()
-    m = np.zeros(out.shape[:2], bool); y0, y1 = et['buyuk_sembol']; m[y0:y1] = b['dolu'][y0:y1]
-    kotu[m] = T.WP_M                                                             # buyuk sembol gri-kahve kalmis
-    q = wb.qc(kotu, P_wp, S_wp, b, et, daire, hedef, {'gecti': True})
-    assert not q['a_renk']['gecti'], q['a_renk']
+def test_kontrast_dusuk_yakalanir():
+    """Silik bakir onayli kontrastin altinda: g) yakalar."""
+    P_wp, S_wp, D_cu, D_src, daire, Lp = kur(False)
+    out, P_k, r = wb.bakir_hatti(D_cu, D_src, P_wp, S_wp, daire, ET, Lp, 1.0, {'gecti': True},
+                                 hedef0=(200, 150, 90), tur=1)
+    assert not r['qc']['g_kontrast']['gecti'], r['qc']['g_kontrast']['yeni']
 
 
 if __name__ == '__main__':
     import time
     t = time.time()
-    for f in (test_bakir_qc, test_dikis_dedektoru, test_guclu_dikis_maskede, test_daire_kenari_haric,
-              test_kahverengi_yakalanir):
+    for f in (test_bakir_hatti, test_kabartmasiz_kalir, test_kontrast_dusuk_yakalanir):
         f(); print('PASS', f.__name__, f'{time.time() - t:.1f}s')

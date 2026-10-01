@@ -226,21 +226,15 @@ def cift_boy(cift, boy, P_ed, P_blue, no, cik):
                   'eski_olcut_once': wk.plate_temizlik(P_wp0, S_wp, pt_bant),
                   'zemin_uyumu': {**zt, 'esik_ort': 0.5, 'gecti': zt.get('ort', 99) <= 0.5}}
     R['plate_gecti'] = bool(sonra['gecti'] and R['plate']['zemin_uyumu']['gecti'])
-    # ---- 3) BAKIR (Serdar 1 Eki, kesin): tum ogeler bakir, kagit/plate degismez. Hedef = plate'teki daire.
+    # ---- 3) BAKIR (Serdar 1 Eki, 2. karar): tum ogeler (daire dahil) bakir 140/72/28 ve onayli kontrastindan
+    # dusuk degil, isim/mesaj onayli kabartmasiyla; kagit = plate (yalniz daire cizgisi altinda inpaint, onayli
+    # kagitta olmayan plate dikisleri onayli kagittan onarilir)
+    del Dw_src
     daire_c = wb.daire_maskesi(P_c)
     daire = wk.katman_tasi(np.repeat(daire_c[..., None].astype(np.float32), 3, 2), hiz, (Wd, H))[..., 0] > 0.5
-    hedef = wb.bakir_hedef(P_wp, daire)
-    R['bakir_hedef'] = hedef
     Lp = float(np.median(P_c @ wk.LUMA))
-    # daire plate'te zaten bakir: cizgi katmanindan cikar (1. bakir kosusu: AQUARIUS 11x14 x=485'te daire kenari
-    # alt piksel farki 106 px ince cizgi olarak boyandi)
-    daire_haric = cv2.dilate(daire.astype(np.uint8), np.ones((11, 11), np.uint8)).astype(bool)
-    bb_bant = {a: et[a] for a in ('buyuk_sembol', 'kucuk_sembol', 'isim', 'mesaj') if a in et}
-    # geometri kimligi (onayli CI -> katman -> bakir): murekkep maskesi IoU (renk bilerek onaylidan farkli)
-    taban, _ = wb.bakir_bas(Dw_src, P_wp, hedef['rgb'], Lp, bb_bant, daire_haric)
-    del Dw_src
-    R['kimlik_kaynak_tabani'] = wk.fark_tablosu(taban, S_wp, P_wp0, et, P_wp)
-    del taban
+    P_ck, _ = wb.kagit_tabani(P_c, daire_c)
+    D_src = wk.katman_tasi(S_c - P_ck, hiz, (Wd, H))
     B_id = wk.boyutla(wk.dizi(uret['kimlik'][1]['baski']), (Wd, H))
     o_id = uret['kimlik'][0].get('olcum') or {}
     if o_id.get('isim_bant'):
@@ -250,13 +244,26 @@ def cift_boy(cift, boy, P_ed, P_blue, no, cik):
     # ---- 4) siparis (EMILY / JAMES) -> bakir
     r_cu, t_cu = uret['siparis']
     B_cu = wk.boyutla(wk.dizi(t_cu['baski']), (Wd, H))
-    D_cu = wk.katman_tasi(B_cu - P_c, hiz, (Wd, H))
-    WP_cu, bb = wb.bakir_bas(D_cu, P_wp, hedef['rgb'], Lp, bb_bant, daire_haric)
-    R['bakir'] = {a: v for a, v in bb.items() if a not in ('core', 'ce', 'M', 'dolu')}
-    # cizgi maskesi disi birebir plate
-    R['zemin_birebir'] = {'fark_max': round(float(np.abs(WP_cu - P_wp)[~bb['M']].max()), 3),
-                          'gecti': bool(np.abs(WP_cu - P_wp)[~bb['M']].max() < 0.5)}
-    R['qc'] = wb.qc(WP_cu, P_wp, S_wp, bb, et, daire, hedef, sonra)
+    D_cu = wk.katman_tasi(B_cu - P_ck, hiz, (Wd, H))
+    WP_cu, P_k, rb = wb.bakir_hatti(D_cu, D_src, P_wp, S_wp, daire, et, Lp, k, plate_iz=sonra)
+    del D_src
+    R['bakir'] = {a: rb[a] for a in ('bakir', 'hedef', 'hedef_gecmis', 'kabartma_onayli', 'plate_dikis',
+                                     'onarimsiz_d') if a in rb}
+    R['qc'] = rb['qc']
+    R['zemin_birebir'] = {'fark_max': round(float(np.abs(WP_cu - P_k)[np.abs(D_cu).max(-1) < 1].max()), 3)}
+    R['zemin_birebir']['gecti'] = R['zemin_birebir']['fark_max'] < 0.5
+    # dikis kaniti: her plate dikisinde ve Serdar'in isaretledigi yerde (CANCER_LIBRA 11x14, x~1563, y 3482-3590)
+    # plate / onayli / duz renk baskisi / yeni cikti luma profili (cizgi boyunca ortalama, x-6..x+6)
+    yerler = [(c['x'], c['y'][0], c['y'][1]) for c in rb['plate_dikis']['onaylida_olmayan'] if c['yon'] == 'dikey']
+    if cift == 'CANCER_LIBRA' and boy == '11x14':
+        yerler.append((1563, 3482, 3590))
+    R['dikis_kanit'] = []
+    for x, y0_, y1_ in yerler[:4]:
+        x0_, x1_ = max(0, x - 6), min(Wd, x + 7)
+        pr = {ad: [round(float(v), 1) for v in (A_[y0_:y1_, x0_:x1_] @ wk.LUMA).mean(0)]
+              for ad, A_ in (('plate', P_wp0), ('onayli', S_wp), ('duz_renk', B_cu), ('yeni', WP_cu))}
+        R['dikis_kanit'].append({'x': x, 'y': [y0_, y1_], **pr})
+        print('DIKIS_KANIT', cift, boy, json.dumps({'x': x, 'y': [y0_, y1_], **pr}), flush=True)
     # eski iz (CI baskisinda silinen eski yazidan kalan; bilgi)
     Y, ham = t_cu['koruma']
     Wc, Hc = t_cu['baski'].size
@@ -278,6 +285,8 @@ def cift_boy(cift, boy, P_ed, P_blue, no, cik):
         kaydet_jpg(WP_cu[max(0, y0):y1, x0:x1], cik / f'WP_{cift}_{boy}_ISIM_BANDI.jpg', 95)
         yanyana(S_wp, WP_cu, cik / f'WP_{cift}_{boy}_YANYANA.jpg', bant=[max(0, y0), y1],
                 etiket=('ONAYLI WP (gri-kahve)', f'YENI BAKIR ({ISIM[0]} / {ISIM[1]})'))
+        kaydet_jpg(np.concatenate([S_wp[max(0, y0):y1, x0:x1], WP_cu[max(0, y0):y1, x0:x1]], 0),
+                   cik / f'WP_{cift}_{boy}_BANT_1e1.jpg', 95)
     o_cu = r_cu.get('olcum') or {}
     if o_cu.get('isim_bant'):
         R['sonsuz_siparis'] = sonsuz_olc(S_c, B_cu, P_c, o_cu['isim_bant'], k)['hat']
@@ -294,28 +303,32 @@ def tablo(hedef):
     rs = [json.loads(p.read_text()) for p in sorted(yer.glob('*/RAPOR_*.json'))]
     def f(d, a='ort'):
         return '-' if not d or d.get(a) is None else d[a]
-    sat = ['# WP BAKIR QC (1 Eki 2026, Serdar karari: tum ogeler bakir, kagit/plate degismez)', '',
-           'Hedef bakir = plate\'teki dairenin olculen ortalamasi. a) oge ortalamalarinin hedefe ve birbirine dE (esik = '
-           'max(4, 2 x daire yay dilimi yayilimi)), kahverengi/gri piksel orani; b) cizgi maskesinin 3-8 px disi vs plate '
-           '(p99 <= 1); c) plate eski glif izi (iz orani <= 1.25); d) bantlarda >= 100 px ince duz cizgi sayisi (yeni <= '
-           'plate); e) cizgi disi kagit vs onayli (ort <= 0.5, p99 <= 3). Geometri: onayli CI -> katman murekkep IoU.', '',
-           '| cift | boy | hedef (daire) | a) hedefe max dE / ogeler arasi / kahve % (esik) | b) tasma p99 | c) iz isim/mesaj | '
-           'd) dikis yeni/plate/onayli | e) kagit ort/p99 | IoU isim/mesaj | sonsuz bosluk siparis | QC |',
+    sat = ['# WP BAKIR QC (1 Eki 2026, Serdar 2. karar: koyu bakir 140/72/28, onayli kontrast, kabartma, dikis)', '',
+           'a) oge ortalamalari hedefe ve birbirine dE <= 5, ton onayli gri-kahveye yakin piksel <= %2; b) cizgi maskesinin '
+           '3-8 px disi = kagit (p99 <= 1); c) eski glif izi (iz orani <= 1.25); d) bantlarda >= 100 px ince duz cizgi: onayli '
+           'kagitta olmayan yok + maskede ince cizgi yok; e) cizgi disi kagit vs onayli (ort <= 0.5, p99 <= 3); f) isim/mesaj '
+           'kenar isik-golge kontrasti yeni/onayli 0.7-1.43; g) her oge WCAG murekkep/kagit kontrasti >= onayli.', '',
+           '| cift | boy | bakir | a) max dE / ara / kahve% | b | c iz | d plate dikisi (onarildi) / yeni | e kagit | f kabartma orani | '
+           'g kontrast yeni (onayli): isim / mesaj / buyuk / kucuk / sonsuz | QC |',
            '|---|---|---|---|---|---|---|---|---|---|---|']
     for R in rs:
         q = R.get('qc') or {}
-        a_, b_, c_, d_, e_ = (q.get(x) or {} for x in ('a_renk', 'b_tasma', 'c_iz', 'd_dikis', 'e_kagit'))
-        t = R.get('kimlik_kaynak_tabani') or {}
-        hd = (R.get('bakir_hedef') or {}).get('rgb')
+        a_, b_, c_, d_, e_, f_, g_ = (q.get(x) or {} for x in ('a_renk', 'b_tasma', 'c_iz', 'd_dikis', 'e_kagit',
+                                                               'f_kabartma', 'g_kontrast'))
+        bk = R.get('bakir') or {}
+        hd = (bk.get('hedef') or {}).get('rgb')
         hm = max((a_.get('hedefe_dE') or {'-': 0}).values())
         gk = lambda x: 'PASS' if x.get('gecti') else 'FAIL'
+        pd = bk.get('plate_dikis') or {}
+        gy, go = g_.get('yeni') or {}, g_.get('onayli') or {}
+        gs = ' / '.join(f"{gy.get(e, '-')} ({go.get(e, '-')})" for e in ('isim', 'mesaj', 'buyuk_sembol', 'kucuk_sembol', 'sonsuz'))
         sat.append(f"| {R['cift']} | {R['boy']} | {hd} | {hm} / {a_.get('ogeler_arasi_max_dE')} / "
-                   f"{round(100 * (a_.get('kahve_orani') or 0), 2)} (esik {a_.get('esik_dE')} / {round(100 * (a_.get('esik_kahve') or 0), 1)}) {gk(a_)} | "
-                   f"{b_.get('p99')} {gk(b_)} | {(c_.get('isim') or {}).get('iz_orani')}/{(c_.get('mesaj') or {}).get('iz_orani')} {gk(c_)} | "
-                   f"{d_.get('yeni_sayi')}/{d_.get('plate_sayi')}/{d_.get('onayli_sayi')} {gk(d_)} | "
-                   f"{e_.get('ort')}/{e_.get('p99')} {gk(e_)} | {(t.get('isim') or {}).get('iou')}/{(t.get('mesaj') or {}).get('iou')} | "
-                   f"{'/'.join(str(x) for x in (R.get('sonsuz_siparis') or {}).get('bosluk', ['-']))} | "
-                   f"{'PASS' if q.get('gecti') else 'FAIL ' + str(R.get('durum') if not q else '')} |")
+                   f"{round(100 * (a_.get('kahve_orani') or 0), 2)} {gk(a_)} | {b_.get('p99')} {gk(b_)} | "
+                   f"{(c_.get('isim') or {}).get('iz_orani')}/{(c_.get('mesaj') or {}).get('iz_orani')} {gk(c_)} | "
+                   f"{len(pd.get('onaylida_olmayan') or [])} ({'evet' if pd.get('onarildi') else '-'}) / "
+                   f"{len(d_.get('onaylida_olmayan') or [])}+{len(d_.get('maskede_ince_bilesen') or [])} {gk(d_)} | "
+                   f"{e_.get('ort')}/{e_.get('p99')} {gk(e_)} | {f_.get('oran')} {gk(f_)} | {gs} {gk(g_)} | "
+                   f"{'PASS' if q.get('gecti') else 'FAIL'} |")
     (yer / 'BAKIR_QC.md').write_text('\n'.join(sat) + '\n')
     (yer / 'BAKIR_QC.json').write_text(json.dumps(rs, ensure_ascii=False, indent=1, default=str))
     print('\n'.join(sat), flush=True)
