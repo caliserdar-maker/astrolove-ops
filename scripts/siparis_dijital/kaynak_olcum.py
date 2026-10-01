@@ -30,6 +30,8 @@ def _hazirla(kisisel, medya, plates=''):
 
 
 _MASKE = {}
+SLOGAN_PLATE = {'MIDNIGHT_BLUE': 'BLUE', 'DEEP_BLACK': 'BLACK', 'PURE_WHITE': 'PURE_WHITE',
+                'CHAMPAGNE_IVORY': 'MODERN', 'WARM_PARCHMENT': 'VINTAGE'}
 
 
 def _plate_maske(sd, yol):
@@ -51,6 +53,21 @@ def olc_tek(f):
     r = {'cift': cift, 'renk': renk, 'boy': boy, 'gecti': False, 'eksik': [], 'hata': None}
     try:
         ref_norm = pilot11.norm(Image.open(f).convert('RGB'))[0]
+        if renk == 'WARM_PARCHMENT':
+            # WP uretim yolu (surucu.wp_asamasi): kaynak yalniz plate_slogan_kapisi ile olculur (edisyon yerel kontrast
+            # maskesi, tagline yoksa plate fark maskesi); isim/sembol bantlari BAKIR hattinda CI'dan hizalanir.
+            import siparis_dosyasi as sd
+            pl = Path(_YOL.get('plates') or '_plates') / f'VINTAGE_{boy}.png'
+            if not pl.exists():
+                r['hata'] = f'PLATE YOK: {pl.name}'
+                return r
+            pk = sd.plate_slogan_kapisi(f, str(pl), 'vintage')
+            r['yol'] = f'plate_slogan_kapisi (WP, plate {pl.name})'
+            r['eksik'] = [k for k in ('tag_bant', 'tag_x') if not pk.get(k)]
+            r['gecti'] = bool(pk.get('gecti')) and not r['eksik']
+            r['tag'] = {k: pk.get(k) for k in ('tag_bant', 'tag_x')}
+            r['slogan'] = {k: pk.get(k) for k in ('gecti', 'sebep', 'glif_farkli_payi', 'olcum')}
+            return r
         if ED_PLATE.get(renk) is None:
             o, yedek = a1_poster.sayfa_olc_guvenli(pilot11, f)
             m = a1_poster.murekkep(ref_norm)
@@ -67,9 +84,17 @@ def olc_tek(f):
             r['yol'] = f'EdisyonPoster.olc (plate {pl.name})'
         r['olcum_yedek'] = yedek
         o2, duz = a1_poster.olcum_duzelt(dict(o), m)
+        # uretim render_et PLATE KAPISI: her renkte plate_slogan_kapisi (MB dahil, BLUE plate)
+        import siparis_dosyasi as sd
+        sp = Path(_YOL.get('plates') or '_plates') / f'{SLOGAN_PLATE[renk]}_{boy}.png'
+        if sp.exists():
+            pk = sd.plate_slogan_kapisi(f, str(sp), sd.RENK_ED[renk])
+            r['slogan'] = {k: pk.get(k) for k in ('gecti', 'sebep', 'glif_farkli_payi', 'olcum')}
+        else:
+            r['slogan'] = {'gecti': False, 'sebep': f'PLATE YOK: {sp.name}'}
         r['eksik_ham'] = [k for k in GEREK if k not in o]
         r['eksik'] = [k for k in GEREK if k not in o2]
-        r['gecti'] = not r['eksik']
+        r['gecti'] = not r['eksik'] and bool(r['slogan'].get('gecti'))
         r['tag'] = {k: o2.get(k) for k in ('tag_bant', 'tag_x', 'tag_kumeleri')}
         r['isim_bant'] = o2.get('isim_bant')
         r['norm_boyut'] = o2.get('norm_boyut')
@@ -108,7 +133,7 @@ def main():
             sonuc.append(r)
             gecen = time.time() - t0
             print(f'[{i}/{len(dosyalar)} %{100 * i // max(len(dosyalar), 1)}] {r["cift"]} {r["renk"]} {r["boy"]}: '
-                  f'{"PASS" if r["gecti"] else "FAIL"} {r["eksik"] or r["hata"] or ""} | {gecen:.0f} sn, '
+                  f'{"PASS" if r["gecti"] else "FAIL"} {r["eksik"] or r["hata"] or ((r.get("slogan") or {}).get("sebep") or "")} | {gecen:.0f} sn, '
                   f'kalan ~{gecen / i * (len(dosyalar) - i):.0f} sn', flush=True)
     fail = [x for x in sonuc if not x['gecti']]
     oz = {'toplam': len(sonuc), 'pass': len(sonuc) - len(fail), 'fail': len(fail),

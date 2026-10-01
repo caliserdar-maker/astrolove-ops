@@ -75,7 +75,7 @@ jobs:
             xargs -P 12 -I{} bash -c 'mkdir -p "_src/{}"; mapfile -t I < _inc.txt; rclone copy "'"$P"'/{}" "_src/{}" "${I[@]}" --transfers 4 || echo "EKSIK: {}"'
           find _src -name '*.jpg' | wc -l
           # uretim olcum yolu: MB disi renkler plate fark maskesiyle olculur (PLATES ust seviye, <ED>_<boy>.png)
-          declare -A ED=([DEEP_BLACK]=BLACK [PURE_WHITE]=PURE_WHITE [CHAMPAGNE_IVORY]=MODERN [WARM_PARCHMENT]=VINTAGE)
+          declare -A ED=([MIDNIGHT_BLUE]=BLUE [DEEP_BLACK]=BLACK [PURE_WHITE]=PURE_WHITE [CHAMPAGNE_IVORY]=MODERN [WARM_PARCHMENT]=VINTAGE)
           PI=(); for r in ${RENKLER//,/ }; do [ -n "${ED[$r]:-}" ] && PI+=(--include "${ED[$r]}_*.png"); done
           mkdir -p _plates
           if [ ${#PI[@]} -gt 0 ]; then rclone copy gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PLATES _plates --max-depth 1 "${PI[@]}" --transfers 8; fi
