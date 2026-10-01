@@ -21,7 +21,7 @@ on:
   workflow_dispatch:
     inputs:
       ciftler:
-        description: "virgullu cift listesi ya da HEPSI74"
+        description: "virgullu cift listesi ya da HEPSI74 | HEPSI78"
         required: true
       mod:
         description: "kaynak | tam"
@@ -109,6 +109,9 @@ jobs:
           case "$ORNEK" in *[!A-Z_0-9]*) echo "HATA: ornek A-Z_0-9"; exit 1 ;; esac
           # ornek modu (Serdar 1 Eki): WP onay ornegi; uretim galerisi, HAZIR, _WPBEKLE ve _KAYNAK degismez
           SK="gdrive:ASTROLOVE/TEMP/GALERI_77/_KAYNAK/SIPARIS"; [ -n "$ORNEK" ] && SK="gdrive:ASTROLOVE/TEMP/$ORNEK/_SIPARIS"
+          if [ "$CIFTLER" = "HEPSI78" ]; then
+            CIFTLER=$(tail -n +2 data/pod/pod78_ids.csv | cut -d, -f2 | paste -sd,)
+          fi
           if [ "$CIFTLER" = "HEPSI74" ]; then
             CIFTLER=$(tail -n +2 data/pod/pod78_ids.csv | cut -d, -f2 | grep -v -x -E 'CANCER_LIBRA|ARIES_LIBRA|AQUARIUS_LIBRA|CAPRICORN_LIBRA' | paste -sd,)
           fi
@@ -176,9 +179,12 @@ jobs:
                 FD=fonts python3 scripts/pod/galeri77_wptani.py "$C" "$D/KAPI_RAPORU.json" "$D/BASKI_11x14.jpg" $Y/BASKI_MIDNIGHT_BLUE.jpg \
                   "${WP_DAL}@$(git -C $SB rev-parse --short HEAD)" _work/wptani_$C
                 cp "$D/KAPI_RAPORU.json" _work/wptani_$C/KAPI_RAPORU.json
-                rclone copy _work/wptani_$C "$G/_WPTANI/$C" -q && rclone copyto _work/wptani_$C/WP_TANI.md "$G/WP_TANI.md" -q
-                [ -n "$ORNEK" ] && rclone copy _work/wptani_$C "gdrive:ASTROLOVE/TEMP/$ORNEK/$C" -q
-                echo "WP_TANI: TEMP/GALERI_77/WP_TANI.md + _WPTANI/$C/ | $(rclone link "$G/_WPTANI/$C" 2>/dev/null)"
+                if [ -n "$ORNEK" ]; then   # ornek: tani yalniz TEMP/$ORNEK/<CIFT>/ (GALERI_77'ye yazilmaz)
+                  rclone copy _work/wptani_$C "gdrive:ASTROLOVE/TEMP/$ORNEK/$C" -q; echo "WP_TANI: TEMP/$ORNEK/$C/WP_TANI.md"
+                else
+                  rclone copy _work/wptani_$C "$G/_WPTANI/$C" -q && rclone copyto _work/wptani_$C/WP_TANI.md "$G/WP_TANI.md" -q
+                  echo "WP_TANI: TEMP/GALERI_77/WP_TANI.md + _WPTANI/$C/ | $(rclone link "$G/_WPTANI/$C" 2>/dev/null)"
+                fi
               elif [ "$R" != "WARM_PARCHMENT" ]; then
                 hata="$hata $R baski FAIL"; grep -h -E "_11x14 \{'urun'" "_work/log_${C}_$R.txt" | cut -c1-600; tail -3 "_work/log_${C}_$R.txt"
               fi
@@ -196,7 +202,7 @@ jobs:
                   rclone copy $O/QC.txt "$ORN" -q; rclone copy $O/TEMAS_$C.jpg "$ORN" -q
                   for f in BASKI_WARM_PARCHMENT.jpg KAPI_WARM_PARCHMENT.json WP_KOD.txt; do rclone copy $Y/$f "$ORN" -q; done
                   python3 -c "from PIL import Image;[print(f, Image.open('$O/paket/'+f).size) for f in ('05_renk_ve_dijital.jpg','19_renk_warm_parchment.jpg')]"
-                  python3 scripts/pod/galeri77_serit.py $O/paket                 # kenar tasmasi olcumu (01, 05, 15-19)
+                  python3 scripts/pod/galeri77_serit.py $O/paket | tee _work/serit_$C.txt   # kenar tasmasi olcumu (01, 05, 15-19)
                   echo "ORNEK: TEMP/$ORNEK/$C/ | $(tail -1 $O/QC.txt) | $(rclone link "$ORN" 2>/dev/null)"
                   [ -z "$hata" ] && TAMAM=$((TAMAM+1))
                 else
@@ -205,7 +211,15 @@ jobs:
                 fi
               fi
               if [ -n "$hata" ]; then FAIL+=("$C: $hata"); echo "::warning::$C ornek: $hata"; fi
-              echo "[$n/$N] $C ornek ${hata:-OK}"; continue
+              # QC tablosu satiri (son job TEMP/$ORNEK/QC_TABLO.csv'de birlestirir)
+              S05=$(sed -n 's/^serit 05_renk_ve_dijital: \[\(.*\)\]$/\1/p' _work/serit_$C.txt 2>/dev/null | tr -d ' ' | tr , /)
+              S19=$(sed -n 's/^serit 19_renk_warm_parchment: \[\(.*\)\]$/\1/p' _work/serit_$C.txt 2>/dev/null | tr -d ' ')
+              QS=$(tail -1 _work/out/$C/QC.txt 2>/dev/null | tr ',' ';')
+              printf '%s,%s,%s,%s,%s,%s,%s,%s\n' "$C" "$([ -z "$hata" ] && echo PASS || echo FAIL)" "${S05:--}" "${S19:--}" \
+                "${QS:--}" "$(cat $Y/WP_KOD.txt 2>/dev/null || echo -)" "$(date -u +%Y%m%d_%H%M)" "$(echo "${hata:--}" | tr ',' ';')" \
+                | rclone rcat "gdrive:ASTROLOVE/TEMP/$ORNEK/_TABLO/$C.csv"
+              g=$(( $(date +%s) - t0 ))
+              echo "[$n/$N] $C ornek ${hata:-OK} | gecen ${g}s | kalan ~$(( g * (N - n) / n ))s | %$(( n * 100 / N ))"; continue
             fi
             if [ -z "$hata" ] && [ "$MOD" = "tam" ] && [ $WPV = 0 ] && [ "$YENIDEN" != "evet" ] \
                && [ -n "$(rclone lsf "$G/_WPBEKLE/$C.txt" 2>/dev/null)" ]; then
@@ -253,6 +267,7 @@ jobs:
             g=$(( $(date +%s) - t0 ))
             echo "[$n/$N] $C ${hata:-OK} | gecen ${g}s | kalan ~$(( g * (N - n) / n ))s | %$(( n * 100 / N ))"
           done
+          [ -n "$ORNEK" ] && echo "== parca $PARCA (ornek $ORNEK): PASS $TAMAM / $N | FAIL ${#FAIL[@]}"
           echo "== parca $PARCA: set=19 $TAMAM | set=17 (WP bekliyor) $BEKLE | FAIL ${#FAIL[@]}"; printf '%s\n' "${FAIL[@]}"
           exit 0
       - if: always()
@@ -281,7 +296,21 @@ jobs:
               echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
             fi
           fi
+      - name: QC tablosu (ornek modu; HAZIR'a dokunulmaz)
+        if: ${{ inputs.ornek != '' }}
+        env:
+          ORNEK: ${{ inputs.ornek }}
+        run: |
+          set -euo pipefail
+          T=gdrive:ASTROLOVE/TEMP/$ORNEK; d=$(mktemp -d)
+          rclone copy "$T/_TABLO" "$d" --include "*.csv" -q 2>/dev/null || true
+          { echo "cift,sonuc,serit05_MB/DB/PW/CI/WP,serit19,qc_son,wp_kod,damga,hata"; cat "$d"/*.csv 2>/dev/null | sort; } > "$d/QC_TABLO.out"
+          rclone copyto "$d/QC_TABLO.out" "$T/QC_TABLO.csv" -q
+          echo "QC_TABLO: $(( $(wc -l < "$d/QC_TABLO.out") - 1 )) cift | PASS $(grep -c ',PASS,' "$d/QC_TABLO.out" || true) | FAIL $(grep -c ',FAIL,' "$d/QC_TABLO.out" || true)"
+          grep ',FAIL,' "$d/QC_TABLO.out" || true
+          echo "TEMP/$ORNEK linki: $(rclone link "$T" 2>/dev/null || echo -)"
       - name: HAZIR.csv + ozet
+        if: ${{ inputs.ornek == '' }}
         run: |
           set -euo pipefail
           bash scripts/pod/galeri77_hazir.sh
