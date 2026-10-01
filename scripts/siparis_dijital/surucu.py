@@ -134,6 +134,20 @@ def kesit(jpg, hedef_kesit, hedef_onizleme):
     return [w, h]
 
 
+def mb_karsilastir(eski, yeni, hedef, y=(0.69, 0.86), x=(0.12, 0.88)):
+    """Ayni sayfanin isim + mesaj bandi 1:1: ust = eski (2400 cizim, buyutulmus), alt = yeni (hedef cozunurluk)."""
+    import numpy as np
+    from PIL import Image
+    Image.MAX_IMAGE_PIXELS = None
+    parca = []
+    for yol in (eski, yeni):
+        with Image.open(yol) as im:
+            w, h = im.size
+            parca.append(np.asarray(im.convert('RGB').crop((int(w * x[0]), int(h * y[0]), int(w * x[1]), int(h * y[1])))))
+    ara = np.full((12, parca[0].shape[1], 3), 255, np.uint8)
+    Image.fromarray(np.concatenate([parca[0], ara, parca[1]], 0)).save(hedef, 'JPEG', quality=95, subsampling=0)
+
+
 def plate_kesit(src, plate, hedef, tag_bant=None):
     """Plate kapisinda duran sayfa: kaynak / plate / |kaynak - plate| x4, slogan + isim bolgesi 1:1 (alt alta)."""
     import numpy as np
@@ -191,6 +205,12 @@ def pdf_asamasi(a, g):
         j = sorted((d / renk).glob(f'*_{renk}_11x14_*.jpg'))
         if j:
             kesit(j[0], inc / f'KESIT_{renk}_11x14.jpg', inc / f'ONIZLEME_{renk}_11x14.jpg')
+    # MB eski (2400 buyutme) / yeni (hedef cozunurluk) isim bandi 1:1 kesiti (Serdar 1 Eki)
+    for boy in ('24x36', '16x20'):
+        e = sorted((kok / 'eski' / 'MIDNIGHT_BLUE' / 'MIDNIGHT_BLUE').glob(f'*_MIDNIGHT_BLUE_*_{boy}.jpg'))
+        y = sorted((kok / 'renk' / 'MIDNIGHT_BLUE' / 'MIDNIGHT_BLUE').glob(f'*_MIDNIGHT_BLUE_*_{boy}.jpg'))
+        if e and y:
+            mb_karsilastir(e[0], y[0], inc / f'MB_ESKI_YENI_{boy}_ISIM_BANDI.jpg')
     sat = [f"# DIJITAL {g['receipt']} {g['cift']}", '', '| renk | PDF | MB | sayfa | dpi | pdf_kapisi | sayfa kapilari |',
            '|---|---|---|---|---|---|---|']
     hepsi = True

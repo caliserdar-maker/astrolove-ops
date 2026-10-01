@@ -33,7 +33,7 @@ on:
         required: false
         default: ""
       onceki_kosu:
-        description: "PASS isleri bu kosunun artifact'lerinden al (run id); bos = yok"
+        description: "PASS isleri bu kosularin artifact'lerinden al (run id'ler, bosluklu; sonraki oncekinin ustune)"
         required: false
         default: ""
       renk_ref:
@@ -41,7 +41,7 @@ on:
         required: false
         default: "8a8b370edb74cb52402b4939d38ba14d2d2105fd"
 
-concurrency: siparis-dijital-${{ github.event.inputs.receipt }}
+concurrency: siparis-dijital-${{ github.event.inputs.receipt }}-${{ github.event.inputs.isler }}
 
 env:
   RENK_REF: ${{ github.event.inputs.renk_ref || '8a8b370edb74cb52402b4939d38ba14d2d2105fd' }}
@@ -261,22 +261,29 @@ jobs:
         with:
           python-version: "3.12"
       - run: python -m pip install --quiet pillow opencv-python-headless numpy fonttools img2pdf pikepdf
-      - name: Onceki kosunun artifact'leri (PASS isler)
+      - name: Onceki kosularin artifact'leri (PASS isler)
         if: ${{ github.event.inputs.onceki_kosu != '' }}
-        uses: actions/download-artifact@v4
-        with:
-          path: out/a0
-          run-id: ${{ github.event.inputs.onceki_kosu }}
-          github-token: ${{ github.token }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          K=$(jq -r '.inputs.onceki_kosu' "$GITHUB_EVENT_PATH")
+          i=0
+          for r in $K; do
+            [[ "$r" =~ ^[0-9]+$ ]] || { echo "HATA: run id" >&2; exit 1; }
+            i=$((i+1)); gh run download "$r" -R "$GITHUB_REPOSITORY" -D "out/a0_$i" || echo "uyari: $r artifact yok"
+          done
       - uses: actions/download-artifact@v4
         with:
           path: out/a1
       - name: Artifact yerlesimi (bu kosu oncekinin ustune)
         run: |
           set -euo pipefail
-          mkdir -p out/renk out/wp out/a0 out/a1
-          for k in a0 a1; do
-            for d in out/$k/renk_*; do [ -d "$d" ] || continue; n=${d#out/$k/renk_}; rm -rf "out/renk/$n"; mv "$d" "out/renk/$n"; echo "renk $n <- $k"; done
+          mkdir -p out/renk out/wp out/eski out/a1
+          for k in $(ls -d out/a0_* 2>/dev/null | sort -t_ -k2 -n | xargs -r -n1 basename) a1; do
+            for d in out/$k/renk_*; do [ -d "$d" ] || continue; n=${d#out/$k/renk_}
+              if [ -d "out/renk/$n" ]; then rm -rf "out/eski/$n"; mv "out/renk/$n" "out/eski/$n"; fi
+              mv "$d" "out/renk/$n"; echo "renk $n <- $k"; done
             for d in out/$k/wp_*; do [ -d "$d" ] || continue; n=${d#out/$k/wp_}; rm -rf "out/wp/$n"; mv "$d" "out/wp/$n"; echo "wp $n <- $k"; done
           done
       - name: WP PDF + ozet + kesitler
