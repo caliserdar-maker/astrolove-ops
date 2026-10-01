@@ -10,7 +10,7 @@ Cift x boy basina:
   4) Katman: baski - plate -> WP geometrisi -> WP murekkebi -> WP plate uzerine.
   5) Kimlik farki (dE) tabloya; ornek dosyalar Drive TEMP/WP_ORNEK/<CIFT>/.
 """
-import argparse, json, sys, time
+import argparse, io, json, sys, time
 from pathlib import Path
 
 import cv2
@@ -96,6 +96,9 @@ def yanyana(sol, sag, yol, H=1800, bant=None, etiket=('YENI (katman)', 'ONAYLI W
             ca = ca.resize((en, round(ca.height * en / ca.width)), Image.LANCZOS)
             cb = cb.resize(ca.size, Image.LANCZOS)
         parca = [ca, cb]
+    geo = {'x0': int(sol.shape[1] * 0.08) if bant else 0, 'y0': bant[0] if bant else 0,
+           'olcek': (parca[0].width / (int(sol.shape[1] * 0.92) - int(sol.shape[1] * 0.08))) if parca else 1.0,
+           'panel_y': []}
     tH = H + 60 + sum(p.height + 50 for p in parca)
     t = Image.new('RGB', (A.width + B.width + 30, tH), 'white')
     d = ImageDraw.Draw(t)
@@ -103,8 +106,30 @@ def yanyana(sol, sag, yol, H=1800, bant=None, etiket=('YENI (katman)', 'ONAYLI W
     d.text((10, 15), etiket[0], fill='black'); d.text((A.width + 40, 15), etiket[1], fill='black')
     y = H + 60
     for p, e in zip(parca, (etiket[0] + ' isim bandi 1:1', etiket[1] + ' isim bandi 1:1')):
-        d.text((10, y), e, fill='black'); t.paste(p, (0, y + 20)); y += p.height + 50
-    t.save(yol, 'JPEG', quality=90)
+        d.text((10, y), e, fill='black'); t.paste(p, (0, y + 20)); geo['panel_y'].append(y + 20); y += p.height + 50
+    if yol is not None:
+        t.save(yol, 'JPEG', quality=90)
+    return t, geo
+
+
+def yanyana_baski(geo, x, y, panel=1):
+    """Yanyana gorsel koordinati -> baski dosyasi koordinati (alt panel = 1, yeni baski)."""
+    return (geo['x0'] + x / geo['olcek'], geo['y0'] + (y - geo['panel_y'][panel]) / geo['olcek'])
+
+
+def sutun_profili(img_u8, x0, x1, y0, y1):
+    L = np.asarray(img_u8.convert('L') if hasattr(img_u8, 'convert') else img_u8, np.float32)
+    return [round(float(v), 1) for v in L[y0:y1 + 1, x0:x1 + 1].mean(0)]
+
+
+def koyu_sutun(pr):
+    """Her sutun: cevresi (+-2 sutun disindaki profil ortancasi) - kendisi. En buyugu (gri seviye)."""
+    pr = np.asarray(pr, np.float32)
+    en = 0.0
+    for i in range(len(pr)):
+        cev = np.r_[pr[:max(0, i - 2)], pr[i + 3:]]
+        en = max(en, float(np.median(cev) - pr[i]))
+    return round(en, 1)
 
 
 def _kume(m, bosluk):
@@ -145,6 +170,79 @@ def sonsuz_olc(S_c, B, P_c, isim_bant, k):
         r['bosluk_farki'] = [b['bosluk'][0] - a['bosluk'][0], b['bosluk'][1] - a['bosluk'][1]]
         r['satir_merkez_farki'] = round(b['satir_merkez'] - a['satir_merkez'], 1)
     return r
+
+
+SERDAR_YAN = (1290, 1311, 3975, 4234)      # v2 YANYANA (2864x4286) olcum penceresi; cizgi x 1298-1301
+V2_YANYANA = sd.W / 'v2_yanyana.jpg'
+
+
+def _yazi_maskesi(rgb):
+    L = rgb @ wk.LUMA
+    z = cv2.medianBlur(np.clip(L, 0, 255).astype(np.uint8), 31).astype(np.float32)
+    return cv2.dilate(((z - L) > 25).astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
+
+
+def yanyana_dedektor(img, geo, h):
+    """wb.dikis'i yanyana gorselinin alt panelinde calistirir; Serdar penceresiyle kesisen cizgiler."""
+    A = np.asarray(img.convert('RGB')).astype(np.float32)
+    sm = np.zeros(A.shape[0], bool)
+    p0 = geo['panel_y'][1]; sm[p0:p0 + h] = True
+    x0, x1, y0, y1 = SERDAR_YAN
+    c = wb.dikis(A, sm, murekkep=_yazi_maskesi(A))
+    hit = [d for d in c if d['yon'] == 'dikey' and x0 + 4 <= d['x'] <= x1 - 6 and d['y'][1] >= y0 and d['y'][0] <= y1]
+    return {'cizgi': hit[:5], 'sonuc': 'FAIL (cizgi var)' if hit else 'PASS (cizgi yok)'}
+
+
+def serdar_dikis(cift, boy, S_wp, P_wp0, B_cu, WP_cu, P_k, w, geo, h):
+    """Serdar'in v2 YANYANA'da isaretledigi dikey cizgi: esleme, katman profilleri, yalniz o katmani yalniz o
+    seritte onaylı kagittan onarma. Donus: (yeni cikti, yeni kagit, rapor)."""
+    x0y, x1y, y0y, y1y = SERDAR_YAN
+    bx0, by0 = yanyana_baski(geo, x0y, y0y); bx1, by1 = yanyana_baski(geo, x1y, y1y)
+    xc = yanyana_baski(geo, 1299.5, y0y)[0]
+    bx0, bx1, by0, by1 = int(round(bx0)), int(round(bx1)), int(round(by0)), int(round(by1))
+    r = {'esleme': f'yanyana ({x0y}-{x1y}, {y0y}-{y1y}) -> baski ({bx0}-{bx1}, {by0}-{by1}), cizgi x {xc:.1f}'}
+    print('ESLEME', cift, boy, r['esleme'], flush=True)
+    # katman profilleri (Serdar penceresi, satir ortalamasi)
+    pr = {ad: sutun_profili(np.clip(A_ @ wk.LUMA, 0, 255), bx0, bx1, by0, by1)
+          for ad, A_ in (('baski', WP_cu), ('plate', P_wp0), ('kagit_kullanilan', P_k), ('onayli', S_wp),
+                         ('duz_renk', B_cu))}
+    r['profil'] = pr
+    r['koyu_sutun'] = {ad: koyu_sutun(v) for ad, v in pr.items()}
+    print('KATMAN_PROFIL', cift, boy, json.dumps({'x': [bx0, bx1], 'y': [by0, by1], **pr, 'koyu': r['koyu_sutun']}),
+          flush=True)
+    kk = r['koyu_sutun']
+    if kk['kagit_kullanilan'] > 4 and kk['onayli'] <= 4:
+        r['katman'] = 'plate (kagit)'
+    elif kk['duz_renk'] > 4:
+        r['katman'] = 'duz renk baskisi'
+    elif kk['baski'] > 4:
+        r['katman'] = 'bakir render'
+    else:
+        r['katman'] = 'yok (bu boyda cizgi olculmedi)'
+    if r['katman'] != 'plate (kagit)':
+        return WP_cu, P_k, r
+    # cizgi sutunu: kullanilan kagitta en koyu sutun
+    p_ = np.asarray(pr['kagit_kullanilan'])
+    koyuluk = [np.median(np.r_[p_[:max(0, i - 2)], p_[i + 3:]]) - p_[i] for i in range(len(p_))]
+    xl = bx0 + int(np.argmax(koyuluk))
+    r['cizgi_x'] = xl
+    sx0, sx1 = xl - 4, xl + 5
+    sy0, sy1 = max(0, by0 - 15), min(S_wp.shape[0], by1 + 16)
+    yazi = _yazi_maskesi(S_wp[sy0:sy1, sx0 - 8:sx1 + 8])[:, 8:-8]
+    P_new = P_k.copy()
+    ser = P_k[sy0:sy1, sx0:sx1]
+    sol = P_k[sy0:sy1, sx0 - 3:sx0 - 1].mean(1, keepdims=True); sag = P_k[sy0:sy1, sx1 + 1:sx1 + 3].mean(1, keepdims=True)
+    t_ = (np.arange(sx1 - sx0, dtype=np.float32) + 1) / (sx1 - sx0 + 1)
+    ara = sol * (1 - t_[None, :, None]) + sag * t_[None, :, None]
+    P_new[sy0:sy1, sx0:sx1] = np.where(yazi[..., None], ara, S_wp[sy0:sy1, sx0:sx1])
+    out = WP_cu.copy()
+    out[sy0:sy1, sx0:sx1] = WP_cu[sy0:sy1, sx0:sx1] + (1 - w[sy0:sy1, sx0:sx1, None]) * (P_new[sy0:sy1, sx0:sx1] - ser)
+    degisen = np.abs(out - WP_cu).max(-1) > 0.5
+    disari = degisen.copy(); disari[sy0:sy1, sx0:sx1] = False
+    r['onarim'] = {'serit': {'x': [sx0, sx1], 'y': [sy0, sy1]}, 'onayli_kagit_px': int((~yazi).sum()),
+                   'ara_deger_px': int(yazi.sum()), 'degisen_px': int(degisen.sum()),
+                   'serit_disi_degisen_px': int(disari.sum())}
+    return np.clip(out, 0, 255), P_new, r
 
 
 def kapi_ozet(r):
@@ -247,6 +345,37 @@ def cift_boy(cift, boy, P_ed, P_blue, no, cik):
     D_cu = wk.katman_tasi(B_cu - P_ck, hiz, (Wd, H))
     WP_cu, P_k, rb = wb.bakir_hatti(D_cu, D_src, P_wp, S_wp, daire, et, Lp, k, plate_iz=sonra)
     del D_src
+    w_te = rb.pop('_te')
+    # Serdar 1 Eki (3): v2 YANYANA'daki dikey cizgi -> baski koordinati, katman, yalniz o seritte onarim
+    if boy == '11x14' and et:
+        yb0 = max(0, min(v[0] for a, v in et.items() if a != 'buyuk_sembol') - 60)
+        yb1 = max(v[1] for a, v in et.items() if a != 'buyuk_sembol') + 60
+        img0, geo = yanyana(S_wp, WP_cu, None, bant=[yb0, yb1],
+                            etiket=('ONAYLI WP (gri-kahve)', f'YENI BAKIR ({ISIM[0]} / {ISIM[1]})'))
+        hpan = yb1 - yb0
+        sdk = {'geo': geo}
+        if cift == 'CANCER_LIBRA' and V2_YANYANA.exists():
+            v2 = Image.open(V2_YANYANA)
+            sdk['v2_boyut'] = list(v2.size)
+            sdk['v2_profil'] = sutun_profili(v2, *SERDAR_YAN)
+            sdk['v2_koyu'] = koyu_sutun(sdk['v2_profil'])
+            sdk['v2_dedektor'] = yanyana_dedektor(v2, geo, hpan)
+        rt = io.BytesIO(); img0.save(rt, 'JPEG', quality=90); img0j = Image.open(io.BytesIO(rt.getvalue()))
+        sdk['once_profil'] = sutun_profili(img0j, *SERDAR_YAN)
+        sdk['once_koyu'] = koyu_sutun(sdk['once_profil'])
+        sdk['once_dedektor'] = yanyana_dedektor(img0j, geo, hpan)
+        WP_cu, P_k, sr = serdar_dikis(cift, boy, S_wp, P_wp, B_cu, WP_cu, P_k, w_te, geo, hpan)
+        sdk.update(sr)
+        img1, _ = yanyana(S_wp, WP_cu, None, bant=[yb0, yb1],
+                          etiket=('ONAYLI WP (gri-kahve)', f'YENI BAKIR ({ISIM[0]} / {ISIM[1]})'))
+        rt = io.BytesIO(); img1.save(rt, 'JPEG', quality=90); img1j = Image.open(io.BytesIO(rt.getvalue()))
+        sdk['sonra_profil'] = sutun_profili(img1j, *SERDAR_YAN)
+        sdk['sonra_koyu'] = koyu_sutun(sdk['sonra_profil'])
+        sdk['sonra_dedektor'] = yanyana_dedektor(img1j, geo, hpan)
+        sdk['bitti'] = bool(sdk['sonra_koyu'] <= 4)
+        R['serdar_dikis'] = sdk
+        print('SERDAR_DIKIS', cift, boy, json.dumps({a: v for a, v in sdk.items() if a not in ('profil',)},
+                                                     default=str), flush=True)
     R['bakir'] = {a: rb[a] for a in ('bakir', 'hedef', 'hedef_gecmis', 'kabartma_onayli', 'plate_dikis',
                                      'onarimsiz_d') if a in rb}
     R['qc'] = rb['qc']
@@ -349,6 +478,11 @@ def main():
     P_ed, P_blue = sd.EdisyonPoster(), sd.BluePoster()
     no, _ = sd.sayfa_no_tablosu()
     cik = sd.W / 'WP_ORNEK' / a.cift; cik.mkdir(parents=True, exist_ok=True)
+    if a.cift == 'CANCER_LIBRA':                    # Serdar'in olctugu v2 dosyasi (bu kosu uzerine yazmadan once)
+        try:
+            sd.rc('copyto', f'{a.hedef}/CANCER_LIBRA/WP_CANCER_LIBRA_11x14_YANYANA.jpg', str(V2_YANYANA), timeout=600)
+        except RuntimeError as e:
+            log('v2 yanyana indirilemedi', e)
     boylar = [b.strip() for b in a.boylar.split(',') if b.strip()]
     tum = []
     for n, boy in enumerate(boylar, 1):

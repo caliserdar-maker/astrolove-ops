@@ -562,5 +562,6 @@ def bakir_hatti(D_cu, D_src, P_wp0, S_wp, daire, et, Lp, k, plate_iz=None, hedef
         o0 = out.copy(); o0[~bb['M']] = P_k0[~bb['M']]
         rap['onarimsiz_d'] = [c for c in dikis(o0, sm, murekkep=bb['core'] | dd) if not ayni_cizgi(c, cs)][:10]
     rap['qc'] = q
+    rap['_te'] = np.clip(bb['te'], 0, 1)
     rap['hedef'] = hedef_d
     return out, P_k, rap
