@@ -2266,7 +2266,9 @@ def _dijital_is(arg):
             return renk, oran, kayit, str(ornek)
         return renk, oran, kayit, None
     except BaseException as e:                                    # noqa: BLE001
-        return renk, oran, {'durum': 'HATA', 'hata': f'{type(e).__name__}: {e}'}, None
+        import traceback
+        return renk, oran, {'durum': 'HATA', 'hata': f'{type(e).__name__}: {e}',
+                            'iz': traceback.format_exc()[-2000:]}, None
     finally:
         MB_HEDEF['etkin'] = False
 
