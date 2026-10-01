@@ -258,6 +258,58 @@ def serdar_dikis(cift, boy, S_wp, P_wp0, B_cu, WP_cu, P_k, w, geo, h, zorla=Fals
     return np.clip(out, 0, 255), P_new, r
 
 
+# Serdar 1 Eki ~15:50: 24x36 WP plate'indeki acik dikey cizgi (x 1937, y 4376-4440, sapma 12.2) onarilir; yontem 11x14
+# ile ayni (serit, serit disi temiz komsu sutun ortalamasi, yazi haric). Serit cizgiyi (x 1936-1940 acik) ve +-6 satir
+# ucu kapsar. Koordinat: baski pikseli (plate baski boyuna olcekli; tarama ile ayni).
+PLATE_SERITLER = {'24x36': [(1935, 1941, 4370, 4447)]}
+SERIT_KESIT = {'24x36': (1837, 2037, 4276, 4540)}       # inceleme/wp_dikis_24x36 ile ayni 1:1 kesit
+
+
+def serit_uygula(WP_cu, P_k, w, serit, pay=100):
+    """Kagit seridi onarimi, yalniz serit cevresi penceresinde (buyuk boyda tam kopya yok). out = WP + (1-w)(P_yeni - P);
+    serit disi degismez (pencerede olculur, pencere disina yazilmaz). WP_cu ve P_k yerinde guncellenir."""
+    x0, x1, y0, y1 = serit
+    H, W = P_k.shape[:2]
+    wx0, wx1, wy0, wy1 = max(0, x0 - pay), min(W, x1 + pay), max(0, y0 - pay), min(H, y1 + pay)
+    Pw = P_k[wy0:wy1, wx0:wx1]
+    Pn, so = wb.serit_onar(Pw, x0 - wx0, x1 - wx0, y0 - wy0, y1 - wy0)
+    once = WP_cu[wy0:wy1, wx0:wx1].copy()
+    sonra = np.clip(once + (1 - w[wy0:wy1, wx0:wx1, None]) * (Pn - Pw), 0, 255)
+    degisen = np.abs(sonra - once).max(-1) > 0
+    disari = degisen.copy(); disari[y0 - wy0:y1 - wy0, x0 - wx0:x1 - wx0] = False
+    WP_cu[wy0:wy1, wx0:wx1] = sonra
+    P_k[wy0:wy1, wx0:wx1] = Pn
+    return {**so, 'serit': {'x': [x0, x1 - 1], 'y': [y0, y1 - 1]}, 'degisen_px': int(degisen.sum()),
+            'serit_disi_degisen_px': int(disari.sum())}
+
+
+def plate_serit_onar(cift, boy, S_wp, WP_cu, P_k, w, og_k, hn_k, cik):
+    """PLATE_SERITLER[boy] seritlerini onarir; once/sonra: kapi sapmasi (onayliya gore), seritteki sutun profili,
+    kontrast (g ile ayni olcum), 1:1 kesit PNG (Drive TEMP/WP_ORNEK/<CIFT>/)."""
+    import wp_dikis_kapisi as dk
+    r = {'kontrast_once': {a: v['kontrast'] for a, v in wb.kontrast_olc(WP_cu, P_k, og_k, hn_k).items()}, 'seritler': []}
+    k = SERIT_KESIT.get(boy)
+    if k:
+        Image.fromarray(np.clip(WP_cu[k[2]:k[3], k[0]:k[1]], 0, 255).astype(np.uint8)).save(
+            cik / f'WP_{cift}_{boy}_SERIT_ONCE_1e1.png')
+    for x0, x1, y0, y1 in PLATE_SERITLER[boy]:
+        wx0, wx1, wy0, wy1 = x0 - 100, x1 + 100, y0 - 100, y1 + 100
+        sat = np.ones(wy1 - wy0, bool)
+        pr = lambda A: [round(float(v), 1) for v in (A[y0:y1, x0 - 12:x1 + 12] @ wk.LUMA).mean(0)]
+        o = {'profil_once': pr(WP_cu), 'kapi_once': dk.kapi(WP_cu[wy0:wy1, wx0:wx1], S_wp[wy0:wy1, wx0:wx1], sat)}
+        o.update(serit_uygula(WP_cu, P_k, w, (x0, x1, y0, y1)))
+        o['profil_sonra'] = pr(WP_cu)
+        o['kapi_sonra'] = dk.kapi(WP_cu[wy0:wy1, wx0:wx1], S_wp[wy0:wy1, wx0:wx1], sat)
+        r['seritler'].append(o)
+    if k:
+        Image.fromarray(np.clip(WP_cu[k[2]:k[3], k[0]:k[1]], 0, 255).astype(np.uint8)).save(
+            cik / f'WP_{cift}_{boy}_SERIT_SONRA_1e1.png')
+    r['kontrast_sonra'] = {a: v['kontrast'] for a, v in wb.kontrast_olc(WP_cu, P_k, og_k, hn_k).items()}
+    r['gecti'] = bool(all(s['kapi_sonra']['gecti'] and s['serit_disi_degisen_px'] == 0 for s in r['seritler'])
+                      and all(abs(r['kontrast_sonra'].get(a, 0) - v) <= 0.02 for a, v in r['kontrast_once'].items()))
+    return WP_cu, P_k, r
+
+
 def kapi_ozet(r):
     k = r.get('kapilar') or {}
     return {'durum': r.get('durum'), 'hata': r.get('hata'), 'kapilar_gecti': r.get('kapilar_gecti'),
@@ -394,6 +446,10 @@ def cift_boy(cift, boy, P_ed, P_blue, no, cik, isim=ISIM, mesaj=MESAJ, siparis=F
         R['serdar_dikis'] = sdk
         print('SERDAR_DIKIS', cift, boy, json.dumps({a: v for a, v in sdk.items() if a not in ('profil',)},
                                                      default=str), flush=True)
+    if boy in PLATE_SERITLER:                      # Serdar 1 Eki ~15:50 (24x36 plate seridi)
+        WP_cu, P_k, ps = plate_serit_onar(cift, boy, S_wp, WP_cu, P_k, w_te, og_k, hn_k, cik)
+        R['plate_serit'] = ps
+        print('PLATE_SERIT', cift, boy, json.dumps(ps, default=str), flush=True)
     R['bakir'] = {a: rb[a] for a in ('bakir', 'hedef', 'hedef_gecmis', 'kabartma_onayli', 'plate_dikis',
                                      'onarimsiz_d') if a in rb}
     R['qc'] = rb['qc']

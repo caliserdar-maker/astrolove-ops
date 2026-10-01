@@ -117,8 +117,9 @@ def main():
     a = ap.parse_args()
     if a.kesit:
         return kesitler(sd.W / 'kesit')
-    isler = [('cikti', c, b) for c in a.ciftler.split(',') for b in a.boylar.split(',')] + \
-            [('plate', 'CANCER_LIBRA', b) for b in a.plateler.split(',')]
+    ay = lambda t: [x for x in t.split(',') if x]
+    isler = [('cikti', c, b) for c in ay(a.ciftler) for b in ay(a.boylar)] + \
+            [('plate', 'CANCER_LIBRA', b) for b in ay(a.plateler)]
     for i, (tur, c, b) in enumerate(isler, 1):
         try:
             r = cikti(c, b) if tur == 'cikti' else plate(b, c)

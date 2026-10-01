@@ -12,8 +12,10 @@ KOK = Path(__file__).resolve().parent
 JSON = KOK / 'wp_kilit.json'
 DOSYALAR = ('wp_bakir.py', 'wp_katman.py')
 ORNEK_FONK = ('etiketle', 'yanyana', 'yanyana_baski', 'sutun_profili', 'koyu_sutun', '_yazi_maskesi',
-              'yanyana_dedektor', 'serdar_dikis', 'cift_boy')
-ORNEK_SABIT = ('DUZ_RENK', 'SERDAR_YAN', 'SERDAR_SERIT')
+              'yanyana_dedektor', 'serdar_dikis', 'cift_boy', 'serit_uygula', 'plate_serit_onar')
+ORNEK_SABIT = ('DUZ_RENK', 'SERDAR_YAN', 'SERDAR_SERIT', 'PLATE_SERITLER')
+EK_KARARLAR = ['Serdar 1 Eki ~15:50: 24x36 plate acik dikey cizgi (x 1937, y 4376-4440) onarimi; serit x 1935-1940, '
+               'y 4370-4446 (PLATE_SERITLER), yontem 11x14 ile ayni']
 BAKIR_SABIT = ('BAKIR_KOYU', 'T0', 'KENAR_PX', 'KOYU_ALT', 'KOYU_SIKISTIR', 'ESIK_DE', 'MIN_ALAN_BAKIR', 'DOLU',
                'DIKIS_DUZLE', 'KABARTMA_SIGMA', 'KABARTMA_ESIK', 'DIKIS_BOY', 'DIKIS_T', 'DIKIS_KOMSU')
 
@@ -44,5 +46,5 @@ if __name__ == '__main__':
         JSON.write_text(json.dumps({'karar': 'Serdar 1 Eki 2026: BAKIR Warm Parchment ONAYLANDI (WP PASS)',
                                     'referans': {'commit': 'e4f65cd', 'kosu': 36848215749,
                                                  'cikti': 'TEMP/WP_ORNEK/CANCER_LIBRA/WP_CANCER_LIBRA_11x14_YANYANA.jpg'},
-                                    'ozet': olc()}, ensure_ascii=False, indent=1) + '\n')
+                                    'ek_kararlar': EK_KARARLAR, 'ozet': olc()}, ensure_ascii=False, indent=1) + '\n')
     print('KILIT', 'BOZUK: ' + ', '.join(fark()) if fark() else 'TAMAM')

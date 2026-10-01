@@ -49,10 +49,12 @@ jobs:
             fi
           fi
       - name: Kapi testleri
-        run: python scripts/medya_v1/test_wp_dikis_kapisi.py && python scripts/medya_v1/test_wp_kilit.py && python scripts/medya_v1/test_wp_siparis.py
-      - name: 24x36 aday kesitleri (Drive TEMP/WP_ORNEK/DIKIS_24x36)
-        run: python scripts/medya_v1/wp_dikis_tara.py --kesit
-      - name: Dikis taramasi (salt okur)
-        run: python scripts/medya_v1/wp_dikis_tara.py --plateler 24x36
+        run: python scripts/medya_v1/test_wp_dikis_kapisi.py && python scripts/medya_v1/test_wp_kilit.py && python scripts/medya_v1/test_wp_siparis.py && python scripts/medya_v1/test_wp_plate_serit.py
+      - name: WP 24x36 CANCER_LIBRA baski (plate seridi, Serdar 1 Eki ~15:50)
+        run: python scripts/medya_v1/wp_ornek.py --cift CANCER_LIBRA --boylar 24x36
+      - name: Dikis taramasi (e4f65cd 6 hucre + CL 24x36 cikti + 24x36 plate)
+        run: |
+          python scripts/medya_v1/wp_dikis_tara.py --plateler 24x36
+          python scripts/medya_v1/wp_dikis_tara.py --ciftler CANCER_LIBRA --boylar 24x36 --plateler ''
       - if: always()
         run: rm -rf ~/.config/rclone
