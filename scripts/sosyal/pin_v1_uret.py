@@ -15,7 +15,7 @@ cift adi katmani beklenen metin; metin_kurali PASS; baslik <= 100, aciklama <= 5
 FAIL olan ciftin hicbir pini yayin listesine girmez.
 """
 import argparse, csv, hashlib, importlib.util, json, re, shutil, sys, time
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 import numpy as np
 from PIL import Image
@@ -35,7 +35,7 @@ DALGA = ['01', '04', '02']                       # Serdar: 01 -> 04 -> 02
 # Serdar 1 Eki: gunde 10 pin, Istanbul saati (ABD Dogu 07:00-20:30, 1.5 saatte bir); 00:30-03:30 ertesi takvim gunu
 SAATLER = [('14:00:00', 0), ('15:30:00', 0), ('17:00:00', 0), ('18:30:00', 0), ('20:00:00', 0), ('21:30:00', 0),
            ('23:00:00', 0), ('00:30:00', 1), ('02:00:00', 1), ('03:30:00', 1)]
-ARA_GUN = 7                                       # ayni ciftin iki pini arasi en az 7 takvim gunu
+ARA_GUN = 7                                       # ayni ciftin iki pini arasi en az 7 x 24 saat
 BASLANGIC = date(2026, 10, 2)
 PAGES = 'https://caliserdar-maker.github.io/astrolove-media/pinterest'
 
@@ -51,14 +51,15 @@ def metin_uyarla(t, A, B):
 
 def zamanla(akis):
     """Slotlari sirayla doldurur; her slota kuyruktaki ILK uygun pin (ayni ciftin son pininden en az ARA_GUN
-    takvim gunu sonra) konur, uygun pin yoksa slot bos kalir. Sira (dalga 01 -> 04 -> 02, SIRA_78) korunur."""
+    x 24 saat sonra) konur, uygun pin yoksa slot bos kalir. Sira (dalga 01 -> 04 -> 02, SIRA_78) korunur."""
     kuyruk, son, plan, slot = list(akis), {}, [], 0
     while kuyruk:
         gun, s = divmod(slot, len(SAATLER)); saat, kay = SAATLER[s]
         d = BASLANGIC + timedelta(days=gun + kay)
+        an = datetime.fromisoformat(f'{d.isoformat()}T{saat}')
         for j, r in enumerate(kuyruk):
-            if r['cift'] not in son or (d - son[r['cift']]).days >= ARA_GUN:
-                plan.append((d, saat, r)); son[r['cift']] = d; kuyruk.pop(j); break
+            if r['cift'] not in son or an - son[r['cift']] >= timedelta(days=ARA_GUN):
+                plan.append((d, saat, r)); son[r['cift']] = an; kuyruk.pop(j); break
         slot += 1
         if slot > 100000: sys.exit('DUR: zamanlama kilitlendi')
     return plan
