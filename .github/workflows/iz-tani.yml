@@ -1,0 +1,74 @@
+name: iz-tani
+
+# SALT OKUR tani (1 Eki 2026, siparis 4188621967): eski_metin_izi kapisi ic ayrintisi, kucuk vs buyuk boy.
+# Test isimleri; PLATES / Etsy / musteri YOK. Cikti: bu dala kontrol/iz_tani/ (PNG + JSON). Tetik: config/iz_tani.trigger
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches: [claude/gracious-meitner-i72rkr]
+    paths:
+      - config/iz_tani.trigger
+
+concurrency: iz-tani
+
+jobs:
+  tani:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        renk: [DEEP_BLACK, MIDNIGHT_BLUE]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: dal
+      - uses: actions/checkout@v4
+        with:
+          ref: 980e45e22d3e0b611638d01398403bb8394efb98
+          path: v1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --quiet pillow opencv-python-headless numpy fonttools img2pdf pikepdf
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: tani
+        env:
+          RENK: ${{ matrix.renk }}
+          ORANLAR: "11x14,2x3"
+          CIK: ${{ github.workspace }}/iz_tani
+        working-directory: v1
+        run: |
+          set +e
+          python ../dal/scripts/tani/iz_tani.py
+          exit 0
+      - name: dala yaz
+        working-directory: dal
+        env:
+          RENK: ${{ matrix.renk }}
+        run: |
+          set -e
+          mkdir -p kontrol/iz_tani && cp ../iz_tani/IZ_TANI_* kontrol/iz_tani/ 2>/dev/null || true
+          git config user.name "github-actions[bot]"; git config user.email "41898333+github-actions[bot]@users.noreply.github.com"
+          git add kontrol/iz_tani && git commit -qm "iz tani: $RENK" || exit 0
+          for i in 1 2 3 4; do git pull -q --rebase origin "$GITHUB_REF_NAME" && git push -q origin "HEAD:$GITHUB_REF_NAME" && break; sleep $((i*3)); done
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
