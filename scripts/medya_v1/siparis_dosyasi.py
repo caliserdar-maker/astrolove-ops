@@ -1708,7 +1708,8 @@ def pod_uret(sip, kaynak_bayt, P_blue, P_ed, cik):
 
 
 # WP siparisi (Serdar 1 Eki: BAKIR Warm Parchment WP PASS, referans e4f65cd / kosu 36848215749): kilitli bakir kod
-# (wp_ornek.cift_boy siparis=True). d) dikis bilgi: onayli referans ciktida da FAIL (kenar dokusu, kontrast <= 0.8).
+# (wp_ornek.cift_boy siparis=True). Kilitli d) kapisi referans ciktida yanlis alarm verir (harf kenari / kagit dokusu);
+# DURDURUCU dikis kapisi wp_dikis_kapisi.siparis_kapisi (olculen sapma, onayliya gore; esik v2 orneginden).
 WP_KAPILAR = ('a_renk', 'b_tasma', 'c_iz', 'e_kagit', 'f_kabartma', 'g_kontrast')
 
 
@@ -1728,9 +1729,13 @@ def wp_bakir_uret(sip, P_blue, P_ed, cik):
                **{a: bool(q[a]['gecti']) for a in WP_KAPILAR},
                'plate': bool(R['plate_gecti']), 'zemin_birebir': bool(R['zemin_birebir']['gecti']),
                'eski_iz': bool(R['eski_iz']['gecti']), 'boy': bpx == list(sip['hedef_px'])}
+    import wp_dikis_kapisi as dk
+    dikis = dk.siparis_kapisi(WP, sip['cift'], sip['boy'], R.get('bantlar'))
+    kapilar['dikis'] = bool(dikis['gecti'])
     return {**sip, 'durum': 'URETILDI', 'yontem': 'WP_BAKIR', 'baski_px': bpx,
             'dosya_MB': round((cik / ad).stat().st_size / 1e6, 2), 'kapilar': kapilar,
-            'kapilar_gecti': all(kapilar.values()), 'bilgi_d_dikis': q['d_dikis'], 'wp_bakir': ozet}
+            'kapilar_gecti': all(kapilar.values()), 'dikis_kapisi': dikis, 'bilgi_d_dikis': q['d_dikis'],
+            'wp_bakir': ozet}
 
 
 def _dijital_is(arg):
