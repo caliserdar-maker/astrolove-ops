@@ -32,7 +32,10 @@ TIPLER = [('01', '01_Discovery_1000x1500', "    c=Composition('01_Discovery", " 
 PANO = {'01': 'Zodiac Couple Wall Art', '02': 'Personalized Couple Gifts', '03': 'Zodiac Couple Wall Art',
         '04': 'Anniversary Gifts for Couples'}
 DALGA = ['01', '04', '02']                       # Serdar: 01 -> 04 -> 02
-SAATLER = [('16:00:00', 0), ('21:00:00', 0), ('03:00:00', 1)]   # Istanbul; 03:00 ertesi takvim gunu
+# Serdar 1 Eki: gunde 10 pin, Istanbul saati (ABD Dogu 07:00-20:30, 1.5 saatte bir); 00:30-03:30 ertesi takvim gunu
+SAATLER = [('14:00:00', 0), ('15:30:00', 0), ('17:00:00', 0), ('18:30:00', 0), ('20:00:00', 0), ('21:30:00', 0),
+           ('23:00:00', 0), ('00:30:00', 1), ('02:00:00', 1), ('03:30:00', 1)]
+ARA_GUN = 7                                       # ayni ciftin iki pini arasi en az 7 takvim gunu
 BASLANGIC = date(2026, 10, 2)
 PAGES = 'https://caliserdar-maker.github.io/astrolove-media/pinterest'
 
@@ -44,6 +47,21 @@ def sha(p):
 def metin_uyarla(t, A, B):
     t = re.sub(r'\b([Aa]) (?=Cancer and Libra)', lambda m: m.group(1) + ('n' if A[0] in 'AEIOU' else '') + ' ', t)
     return t.replace('Cancer and Libra', f'{A} and {B}')
+
+
+def zamanla(akis):
+    """Slotlari sirayla doldurur; her slota kuyruktaki ILK uygun pin (ayni ciftin son pininden en az ARA_GUN
+    takvim gunu sonra) konur, uygun pin yoksa slot bos kalir. Sira (dalga 01 -> 04 -> 02, SIRA_78) korunur."""
+    kuyruk, son, plan, slot = list(akis), {}, [], 0
+    while kuyruk:
+        gun, s = divmod(slot, len(SAATLER)); saat, kay = SAATLER[s]
+        d = BASLANGIC + timedelta(days=gun + kay)
+        for j, r in enumerate(kuyruk):
+            if r['cift'] not in son or (d - son[r['cift']]).days >= ARA_GUN:
+                plan.append((d, saat, r)); son[r['cift']] = d; kuyruk.pop(j); break
+        slot += 1
+        if slot > 100000: sys.exit('DUR: zamanlama kilitlendi')
+    return plan
 
 
 def main():
@@ -154,17 +172,11 @@ def main():
         akis.append({'cift': 'CANCER_LIBRA', 'tip': '03', 'url': f'{PAGES}/pilot_cl/03_Five_Colors_1000x1500.jpg',
                      'title': r['title'], 'description': r['description'], 'alt_text': r['alt_text'],
                      'board': PANO['03'], 'link': f"https://www.etsy.com/listing/{ids['CANCER_LIBRA']['listing_id']}"})
-    son = {}
+    plan = zamanla(akis)
     with open(cikti / 'PINLER.csv', 'w', newline='', encoding='utf-8') as f:
         w = csv.writer(f, lineterminator='\n')
         w.writerow(['no', 'Date', 'Time', 'cift', 'tip', 'url', 'board', 'title', 'description', 'alt_text', 'link'])
-        for i, r in enumerate(akis):
-            gun, slot = divmod(i, 3)
-            saat, kay = SAATLER[slot]
-            d = BASLANGIC + timedelta(days=gun + kay)
-            if r['cift'] in son and (d - son[r['cift']]).days < 1:
-                sys.exit(f"DUR: ayni cift ayni gun: {r['cift']} {d}")
-            son[r['cift']] = d
+        for i, (d, saat, r) in enumerate(plan):
             w.writerow([i + 1, d.isoformat(), saat, r['cift'], r['tip'], r['url'], r['board'], r['title'],
                         r['description'], r['alt_text'], r['link']])
 
