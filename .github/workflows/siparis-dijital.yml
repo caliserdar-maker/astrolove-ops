@@ -1,0 +1,257 @@
+name: siparis-dijital
+
+# DIJITAL musteri siparisi (Serdar 1 Eki 2026): 5 renk x 1 PDF (5 sayfa: 4x5, 3x4, 2x3, 11x14, A serisi), 300 dpi.
+# MB / DB / PW / CI: siparis-baski-v1 (8a8b370) `dijital_uret` + pdf_kapisi.
+# WARM PARCHMENT: ONAYLI BAKIR (Serdar 1 Eki WP PASS) - claude/wp-katman-baski-60sk0s adfb2b9, wp_kilit TAMAM
+# olmadan uretilmez; eski gri-kahve WP teslim edilmez. Sayfalar ayni pdf_yap / pdf_kapisi ile PDF olur.
+# Isim / mesaj loga yazilmaz (GITHUB_EVENT_PATH'ten okunur, ::add-mask::). Etsy'ye yazma / musteriye gonderim YOK.
+# Cikti: Drive ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL/<receipt>/ ; 11x14 kesit + onizleme: inceleme/siparis-<receipt> dali.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      receipt:
+        description: "Etsy receipt (yalniz rakam)"
+        required: true
+      cift:
+        description: "Cift (orn. CANCER_LEO)"
+        required: true
+      isim1:
+        description: "isim1 (sol burc alti)"
+        required: true
+      isim2:
+        description: "isim2 (sag burc alti)"
+        required: true
+      mesaj_b64:
+        description: "mesaj, base64 (UTF-8)"
+        required: true
+
+concurrency: siparis-dijital-${{ github.event.inputs.receipt }}
+
+env:
+  RENK_REF: 8a8b370edb74cb52402b4939d38ba14d2d2105fd
+  WP_REF: adfb2b99489798296936669575309b777c7e1ca7
+
+jobs:
+  renk:
+    strategy:
+      fail-fast: false
+      matrix:
+        renk: [MIDNIGHT_BLUE, DEEP_BLACK, PURE_WHITE, CHAMPAGNE_IVORY]
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - name: Girdi denetimi + maske
+        run: |
+          set -euo pipefail
+          for k in isim1 isim2; do v=$(jq -r ".inputs.$k" "$GITHUB_EVENT_PATH"); echo "::add-mask::$v"; echo "::add-mask::${v^^}"; done
+          m=$(jq -r '.inputs.mesaj_b64' "$GITHUB_EVENT_PATH" | base64 -d); echo "::add-mask::$m"
+          jq -re '.inputs.receipt | test("^[0-9]+$")' "$GITHUB_EVENT_PATH" >/dev/null || { echo "HATA: receipt rakam olmali" >&2; exit 1; }
+          jq -re '.inputs.cift | test("^[A-Z]+_[A-Z]+$")' "$GITHUB_EVENT_PATH" >/dev/null || { echo "HATA: cift" >&2; exit 1; }
+          for k in isim1 isim2; do jq -re --arg k "$k" '.inputs[$k] | test("^[A-Za-z][A-Za-z -]{0,19}$")' "$GITHUB_EVENT_PATH" >/dev/null || { echo "HATA: $k bicimi" >&2; exit 1; }; done
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Kod (siparis-baski-v1)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RENK_REF }}
+          path: _kod
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Python bagimliliklari
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet --upgrade pip
+          python -m pip install --quiet pillow opencv-python-headless numpy fonttools img2pdf pikepdf
+      - name: rclone kur
+        run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then echo "HATA: RCLONE_CONF_B64 yok" >&2; exit 1; fi
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Dijital uret (${{ matrix.renk }})
+        run: |
+          python scripts/siparis_dijital/surucu.py --asama renk --renk "${{ matrix.renk }}" --kod _kod \
+            --kod-ref "siparis-baski-v1 $RENK_REF" --cikti "out/renk/${{ matrix.renk }}"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: renk_${{ matrix.renk }}
+          path: out/renk/${{ matrix.renk }}
+          retention-days: 2
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
+
+  wp:
+    strategy:
+      fail-fast: false
+      matrix:
+        boy: ["16x20", "18x24", "24x36", "11x14", "A2"]
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: Girdi denetimi + maske
+        run: |
+          set -euo pipefail
+          for k in isim1 isim2; do v=$(jq -r ".inputs.$k" "$GITHUB_EVENT_PATH"); echo "::add-mask::$v"; echo "::add-mask::${v^^}"; done
+          m=$(jq -r '.inputs.mesaj_b64' "$GITHUB_EVENT_PATH" | base64 -d); echo "::add-mask::$m"
+          jq -re '.inputs.receipt | test("^[0-9]+$")' "$GITHUB_EVENT_PATH" >/dev/null || { echo "HATA: receipt rakam olmali" >&2; exit 1; }
+          jq -re '.inputs.cift | test("^[A-Z]+_[A-Z]+$")' "$GITHUB_EVENT_PATH" >/dev/null || { echo "HATA: cift" >&2; exit 1; }
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Kod (wp-katman BAKIR)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.WP_REF }}
+          path: _wp
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Python bagimliliklari
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet --upgrade pip
+          python -m pip install --quiet pillow opencv-python-headless numpy fonttools img2pdf pikepdf
+      - name: WP kilidi (wp_kilit testi)
+        run: cd _wp && python scripts/medya_v1/test_wp_kilit.py
+      - name: rclone kur
+        run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then echo "HATA: RCLONE_CONF_B64 yok" >&2; exit 1; fi
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: WP BAKIR sayfa (${{ matrix.boy }})
+        run: |
+          python scripts/siparis_dijital/surucu.py --asama wp --boy "${{ matrix.boy }}" --kod _wp \
+            --kod-ref "claude/wp-katman-baski-60sk0s $WP_REF" --cikti "out/wp/${{ matrix.boy }}"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: wp_${{ matrix.boy }}
+          path: |
+            out/wp/${{ matrix.boy }}/WP_${{ matrix.boy }}.jpg
+            out/wp/${{ matrix.boy }}/OZET_WP_${{ matrix.boy }}.json
+          retention-days: 2
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
+
+  paket:
+    needs: [renk, wp]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    steps:
+      - name: Girdi + maske
+        run: |
+          set -euo pipefail
+          for k in isim1 isim2; do v=$(jq -r ".inputs.$k" "$GITHUB_EVENT_PATH"); echo "::add-mask::$v"; echo "::add-mask::${v^^}"; done
+          m=$(jq -r '.inputs.mesaj_b64' "$GITHUB_EVENT_PATH" | base64 -d); echo "::add-mask::$m"
+          r=$(jq -r '.inputs.receipt' "$GITHUB_EVENT_PATH"); [[ "$r" =~ ^[0-9]+$ ]] || exit 1
+          echo "REC=$r" >> "$GITHUB_ENV"
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: "Kod (wp-katman: pdf_yap / pdf_kapisi)"
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.WP_REF }}
+          path: _wp
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --quiet pillow opencv-python-headless numpy fonttools img2pdf pikepdf
+      - uses: actions/download-artifact@v4
+        with:
+          path: out/a
+      - name: Artifact yerlesimi
+        run: |
+          set -euo pipefail
+          mkdir -p out/renk out/wp
+          for d in out/a/renk_*; do [ -d "$d" ] && mv "$d" "out/renk/${d#out/a/renk_}"; done
+          for d in out/a/wp_*; do [ -d "$d" ] && mv "$d" "out/wp/${d#out/a/wp_}"; done
+          ls out/renk out/wp
+      - name: WP PDF + ozet + kesitler
+        id: pdf
+        run: |
+          set +e
+          python scripts/siparis_dijital/surucu.py --asama pdf --kod _wp --cikti out; rc=$?
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+          ls -la out/paket out/inceleme
+          exit 0
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Drive (TEMP/SIPARIS_ISIM/DIJITAL/<receipt>)
+        run: |
+          set -euo pipefail
+          H="gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL/$REC"
+          rclone copy out/paket "$H"
+          for r in out/renk/*; do
+            n=$(basename "$r")
+            rclone copy "$r" "$H/KONTROL/$n" --include 'KONTROL/**' --include 'OZET_*.json' --include 'KAPI_RAPORU_*.json'
+          done
+          for w in out/wp/*; do rclone copy "$w" "$H/KONTROL/WARM_PARCHMENT" --include 'OZET_WP_*.json'; done
+          rclone copy out/inceleme "$H/KONTROL/INCELEME_11x14"
+          rclone lsl "$H" --max-depth 1
+          echo "drive: TEMP/SIPARIS_ISIM/DIJITAL/$REC"
+      - name: inceleme dali (11x14 kesit + onizleme; main'e merge YOK)
+        run: |
+          set -euo pipefail
+          B="inceleme/siparis-$REC"
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -q --orphan "$B"
+          git rm -rq --cached . ; find . -mindepth 1 -maxdepth 1 ! -name .git ! -name out -exec rm -rf {} +
+          mkdir -p kontrol && cp out/inceleme/* kontrol/
+          git add kontrol
+          git commit -qm "siparis $REC: 11x14 isim + mesaj bandi 1:1 kesit ve tam sayfa onizleme (5 renk), OZET"
+          git push -f origin "HEAD:refs/heads/$B"
+          echo "dal: $B $(git rev-parse --short HEAD)"
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
+      - name: Sonuc
+        run: test "${{ steps.pdf.outputs.rc }}" = "0"
