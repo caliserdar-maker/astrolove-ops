@@ -1,0 +1,1144 @@
+{
+  "01_Discovery_1000x1500": {
+    "canvas": {
+      "width": 1000,
+      "height": 1500,
+      "dpi": 96
+    },
+    "layer_order": "bottom to top",
+    "layers": [
+      {
+        "id": "00_background",
+        "full_canvas_asset": "layers/01_Discovery_1000x1500/00_background.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "background",
+        "asset": "assets/scene_empty_1000x1500.png",
+        "bbox_xywh": [
+          0,
+          0,
+          1000,
+          1500
+        ]
+      },
+      {
+        "id": "01_brand",
+        "full_canvas_asset": "layers/01_Discovery_1000x1500/01_brand.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "text",
+        "text": "ASTROLOVEART",
+        "x": 80,
+        "y": 74,
+        "anchor": "lt",
+        "font_family": "Nimbus Sans",
+        "font_asset": "fonts/NimbusSans-Regular.otf",
+        "font_px": 23,
+        "font_pt_at_96dpi": 17.25,
+        "color": "#947748",
+        "line_step_px": 25,
+        "bbox_xywh": [
+          80,
+          74,
+          182,
+          17
+        ]
+      },
+      {
+        "id": "02_pair",
+        "full_canvas_asset": "layers/01_Discovery_1000x1500/02_pair.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "text",
+        "text": "Cancer & Libra",
+        "x": 80,
+        "y": 132,
+        "anchor": "lt",
+        "font_family": "P052",
+        "font_asset": "fonts/P052-Roman.otf",
+        "font_px": 68,
+        "font_pt_at_96dpi": 51.0,
+        "color": "#111D31",
+        "line_step_px": 75,
+        "bbox_xywh": [
+          81,
+          132,
+          453,
+          50
+        ]
+      },
+      {
+        "id": "03_hook",
+        "full_canvas_asset": "layers/01_Discovery_1000x1500/03_hook.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "text",
+        "text": "One symbol. Your love story.",
+        "x": 80,
+        "y": 221,
+        "anchor": "lt",
+        "font_family": "Nimbus Sans",
+        "font_asset": "fonts/NimbusSans-Regular.otf",
+        "font_px": 29,
+        "font_pt_at_96dpi": 21.75,
+        "color": "#111D31",
+        "line_step_px": 32,
+        "bbox_xywh": [
+          81,
+          221,
+          363,
+          28
+        ]
+      },
+      {
+        "id": "04_framed_poster_shadow",
+        "full_canvas_asset": "layers/01_Discovery_1000x1500/04_framed_poster_shadow.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "shadow",
+        "bbox_xywh": [
+          179,
+          328,
+          656,
+          826
+        ],
+        "blur_px": 13,
+        "color": "#201912",
+        "alpha": 0.20392156862745098
+      },
+      {
+        "id": "04_framed_poster",
+        "full_canvas_asset": "layers/01_Discovery_1000x1500/04_framed_poster.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "artwork",
+        "asset": "assets/real_framed_cancer_libra_reference.png",
+        "source_sha256": "a6abde1edc15b4abe01f5bbce960c4747effeddee6b48e18aeaf45cb4c8e1034",
+        "slot_xywh": [
+          172,
+          314,
+          656,
+          835
+        ],
+        "bbox_xywh": [
+          172,
+          318,
+          656,
+          826
+        ],
+        "uniform_scale": 0.7437641723356009,
+        "rotation": 0,
+        "crop": null,
+        "color_adjustment": null,
+        "overlay_on_artwork": false
+      },
+      {
+        "id": "05_personalization",
+        "full_canvas_asset": "layers/01_Discovery_1000x1500/05_personalization.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "text",
+        "text": "Your two names. Your own message.",
+        "x": 500,
+        "y": 1222,
+        "anchor": "mt",
+        "font_family": "Nimbus Sans",
+        "font_asset": "fonts/NimbusSans-Regular.otf",
+        "font_px": 30,
+        "font_pt_at_96dpi": 22.5,
+        "color": "#111D31",
+        "line_step_px": 33,
+        "bbox_xywh": [
+          254,
+          1222,
+          490,
+          28
+        ]
+      },
+      {
+        "id": "06_formats",
+        "full_canvas_asset": "layers/01_Discovery_1000x1500/06_formats.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "text",
+        "text": "FINE ART PRINT  /  FRAMED PRINT  /  DIGITAL FILE",
+        "x": 500,
+        "y": 1290,
+        "anchor": "mt",
+        "font_family": "Nimbus Sans",
+        "font_asset": "fonts/NimbusSans-Regular.otf",
+        "font_px": 19,
+        "font_pt_at_96dpi": 14.25,
+        "color": "#111D31",
+        "line_step_px": 21,
+        "bbox_xywh": [
+          272,
+          1290,
+          457,
+          14
+        ]
+      }
+    ]
+  },
+  "02_Personalization_1000x1500": {
+    "canvas": {
+      "width": 1000,
+      "height": 1500,
+      "dpi": 96
+    },
+    "layer_order": "bottom to top",
+    "layers": [
+      {
+        "id": "00_background",
+        "full_canvas_asset": "layers/02_Personalization_1000x1500/00_background.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "background",
+        "asset": "assets/bg_cream_1000x1500.png",
+        "bbox_xywh": [
+          0,
+          0,
+          1000,
+          1500
+        ]
+      },
+      {
+        "id": "01_brand",
+        "full_canvas_asset": "layers/02_Personalization_1000x1500/01_brand.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "text",
+        "text": "ASTROLOVEART  /  CANCER & LIBRA",
+        "x": 80,
+        "y": 66,
+        "anchor": "lt",
+        "font_family": "Nimbus Sans",
+        "font_asset": "fonts/NimbusSans-Regular.otf",
+        "font_px": 22,
+        "font_pt_at_96dpi": 16.5,
+        "color": "#947748",
+        "line_step_px": 24,
+        "bbox_xywh": [
+          80,
+          66,
+          387,
+          16
+        ]
+      },
+      {
+        "id": "02_headline",
+        "full_canvas_asset": "layers/02_Personalization_1000x1500/02_headline.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "text",
+        "text": "Your names.\nYour words.",
+        "x": 80,
+        "y": 123,
+        "anchor": "lt",
+        "font_family": "P052",
+        "font_asset": "fonts/P052-Roman.otf",
+        "font_px": 76,
+        "font_pt_at_96dpi": 57.0,
+        "color": "#111D31",
+        "line_step_px": 84,
+        "bbox_xywh": [
+          80,
+          124,
+          411,
+          141
+        ]
+      },
+      {
+        "id": "03_subtitle",
+        "full_canvas_asset": "layers/02_Personalization_1000x1500/03_subtitle.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "text",
+        "text": "A personal story, written by you.",
+        "x": 80,
+        "y": 305,
+        "anchor": "lt",
+        "font_family": "Nimbus Sans",
+        "font_asset": "fonts/NimbusSans-Regular.otf",
+        "font_px": 28,
+        "font_pt_at_96dpi": 21.0,
+        "color": "#111D31",
+        "line_step_px": 31,
+        "bbox_xywh": [
+          80,
+          305,
+          394,
+          27
+        ]
+      },
+      {
+        "id": "04_complete_poster_shadow",
+        "full_canvas_asset": "layers/02_Personalization_1000x1500/04_complete_poster_shadow.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "shadow",
+        "bbox_xywh": [
+          181,
+          399,
+          652,
+          821
+        ],
+        "blur_px": 13,
+        "color": "#201912",
+        "alpha": 0.20392156862745098
+      },
+      {
+        "id": "04_complete_poster",
+        "full_canvas_asset": "layers/02_Personalization_1000x1500/04_complete_poster.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "artwork",
+        "asset": "assets/real_framed_cancer_libra_reference.png",
+        "source_sha256": "a6abde1edc15b4abe01f5bbce960c4747effeddee6b48e18aeaf45cb4c8e1034",
+        "slot_xywh": [
+          174,
+          384,
+          652,
+          831
+        ],
+        "bbox_xywh": [
+          174,
+          389,
+          652,
+          821
+        ],
+        "uniform_scale": 0.7392290249433107,
+        "rotation": 0,
+        "crop": null,
+        "color_adjustment": null,
+        "overlay_on_artwork": false
+      },
+      {
+        "id": "05_instruction",
+        "full_canvas_asset": "layers/02_Personalization_1000x1500/05_instruction.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "text",
+        "text": "Add two names and a short message.",
+        "x": 500,
+        "y": 1276,
+        "anchor": "mt",
+        "font_family": "Nimbus Sans",
+        "font_asset": "fonts/NimbusSans-Regular.otf",
+        "font_px": 30,
+        "font_pt_at_96dpi": 22.5,
+        "color": "#111D31",
+        "line_step_px": 33,
+        "bbox_xywh": [
+          248,
+          1276,
+          501,
+          28
+        ]
+      },
+      {
+        "id": "06_rule",
+        "full_canvas_asset": "layers/02_Personalization_1000x1500/06_rule.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "rule",
+        "points": [
+          [
+            80,
+            1352
+          ],
+          [
+            920,
+            1352
+          ]
+        ],
+        "width_px": 1,
+        "color": "#947748"
+      },
+      {
+        "id": "07_footer",
+        "full_canvas_asset": "layers/02_Personalization_1000x1500/07_footer.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "text",
+        "text": "PERSONALIZED ZODIAC COUPLE ART",
+        "x": 500,
+        "y": 1380,
+        "anchor": "mt",
+        "font_family": "Nimbus Sans",
+        "font_asset": "fonts/NimbusSans-Regular.otf",
+        "font_px": 21,
+        "font_pt_at_96dpi": 15.75,
+        "color": "#947748",
+        "line_step_px": 23,
+        "bbox_xywh": [
+          310,
+          1380,
+          381,
+          16
+        ]
+      }
+    ]
+  },
+  "03_Five_Colors_1000x1500": {
+    "canvas": {
+      "width": 1000,
+      "height": 1500,
+      "dpi": 96
+    },
+    "layer_order": "bottom to top",
+    "layers": [
+      {
+        "id": "00_background",
+        "full_canvas_asset": "layers/03_Five_Colors_1000x1500/00_background.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "background",
+        "asset": "assets/bg_cream_1000x1500.png",
+        "bbox_xywh": [
+          0,
+          0,
+          1000,
+          1500
+        ]
+      },
+      {
+        "id": "01_brand",
+        "full_canvas_asset": "layers/03_Five_Colors_1000x1500/01_brand.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "text",
+        "text": "ASTROLOVEART  /  CANCER & LIBRA",
+        "x": 80,
+        "y": 66,
+        "anchor": "lt",
+        "font_family": "Nimbus Sans",
+        "font_asset": "fonts/NimbusSans-Regular.otf",
+        "font_px": 22,
+        "font_pt_at_96dpi": 16.5,
+        "color": "#947748",
+        "line_step_px": 24,
+        "bbox_xywh": [
+          80,
+          66,
+          387,
+          16
+        ]
+      },
+      {
+        "id": "02_headline",
+        "full_canvas_asset": "layers/03_Five_Colors_1000x1500/02_headline.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "text",
+        "text": "Five colors.\nOne personal story.",
+        "x": 80,
+        "y": 123,
+        "anchor": "lt",
+        "font_family": "P052",
+        "font_asset": "fonts/P052-Roman.otf",
+        "font_px": 65,
+        "font_pt_at_96dpi": 48.75,
+        "color": "#111D31",
+        "line_step_px": 72,
+        "bbox_xywh": [
+          81,
+          123,
+          551,
+          139
+        ]
+      },
+      {
+        "id": "03_subtitle",
+        "full_canvas_asset": "layers/03_Five_Colors_1000x1500/03_subtitle.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "text",
+        "text": "Find the palette that feels like you.",
+        "x": 80,
+        "y": 286,
+        "anchor": "lt",
+        "font_family": "Nimbus Sans",
+        "font_asset": "fonts/NimbusSans-Regular.otf",
+        "font_px": 28,
+        "font_pt_at_96dpi": 21.0,
+        "color": "#111D31",
+        "line_step_px": 31,
+        "bbox_xywh": [
+          82,
+          286,
+          418,
+          27
+        ]
+      },
+      {
+        "id": "04_color_1",
+        "full_canvas_asset": "layers/03_Five_Colors_1000x1500/04_color_1.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "artwork",
+        "asset": "assets/real_midnight_blue.png",
+        "source_sha256": "cade728733345d70df49768fce02fa226141b52fc09e80d8d1f4386b6c40bee1",
+        "slot_xywh": [
+          80,
+          405,
+          240,
+          300
+        ],
+        "bbox_xywh": [
+          80,
+          405,
+          240,
+          300
+        ],
+        "uniform_scale": 0.46153846153846156,
+        "rotation": 0,
+        "crop": null,
+        "color_adjustment": null,
+        "overlay_on_artwork": false
+      },
+      {
+        "id": "05_label_1",
+        "full_canvas_asset": "layers/03_Five_Colors_1000x1500/05_label_1.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "text",
+        "text": "Midnight\nBlue",
+        "x": 200,
+        "y": 734,
+        "anchor": "mt",
+        "font_family": "Nimbus Sans",
+        "font_asset": "fonts/NimbusSans-Regular.otf",
+        "font_px": 26,
+        "font_pt_at_96dpi": 19.5,
+        "color": "#111D31",
+        "line_step_px": 29,
+        "bbox_xywh": [
+          152,
+          734,
+          97,
+          49
+        ]
+      },
+      {
+        "id": "04_color_2",
+        "full_canvas_asset": "layers/03_Five_Colors_1000x1500/04_color_2.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "artwork",
+        "asset": "assets/real_deep_black.png",
+        "source_sha256": "ba61296d4b1a945b4cb1ba4cd67ab035bbee9bdaab2085f59e7e95a308c458c8",
+        "slot_xywh": [
+          380,
+          405,
+          240,
+          300
+        ],
+        "bbox_xywh": [
+          380,
+          405,
+          240,
+          300
+        ],
+        "uniform_scale": 0.46153846153846156,
+        "rotation": 0,
+        "crop": null,
+        "color_adjustment": null,
+        "overlay_on_artwork": false
+      },
+      {
+        "id": "05_label_2",
+        "full_canvas_asset": "layers/03_Five_Colors_1000x1500/05_label_2.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "text",
+        "text": "Deep\nBlack",
+        "x": 500,
+        "y": 734,
+        "anchor": "mt",
+        "font_family": "Nimbus Sans",
+        "font_asset": "fonts/NimbusSans-Regular.otf",
+        "font_px": 26,
+        "font_pt_at_96dpi": 19.5,
+        "color": "#111D31",
+        "line_step_px": 29,
+        "bbox_xywh": [
+          470,
+          734,
+          62,
+          48
+        ]
+      },
+      {
+        "id": "04_color_3",
+        "full_canvas_asset": "layers/03_Five_Colors_1000x1500/04_color_3.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "artwork",
+        "asset": "assets/real_pure_white.png",
+        "source_sha256": "d78fc4f385c9f1cfbcdc3b292caacc0714ee1509a9e65343d04f25413350b647",
+        "slot_xywh": [
+          680,
+          405,
+          240,
+          300
+        ],
+        "bbox_xywh": [
+          680,
+          405,
+          240,
+          300
+        ],
+        "uniform_scale": 0.46153846153846156,
+        "rotation": 0,
+        "crop": null,
+        "color_adjustment": null,
+        "overlay_on_artwork": false
+      },
+      {
+        "id": "05_label_3",
+        "full_canvas_asset": "layers/03_Five_Colors_1000x1500/05_label_3.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "text",
+        "text": "Pure\nWhite",
+        "x": 800,
+        "y": 734,
+        "anchor": "mt",
+        "font_family": "Nimbus Sans",
+        "font_asset": "fonts/NimbusSans-Regular.otf",
+        "font_px": 26,
+        "font_pt_at_96dpi": 19.5,
+        "color": "#111D31",
+        "line_step_px": 29,
+        "bbox_xywh": [
+          767,
+          734,
+          66,
+          48
+        ]
+      },
+      {
+        "id": "04_color_4",
+        "full_canvas_asset": "layers/03_Five_Colors_1000x1500/04_color_4.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "artwork",
+        "asset": "assets/real_champagne_ivory.png",
+        "source_sha256": "31c2f058e9af1eb79a85cfb6dad017d816dbdd9962e2b1cc31da1b40ddebc859",
+        "slot_xywh": [
+          230,
+          875,
+          240,
+          300
+        ],
+        "bbox_xywh": [
+          230,
+          875,
+          240,
+          300
+        ],
+        "uniform_scale": 0.46153846153846156,
+        "rotation": 0,
+        "crop": null,
+        "color_adjustment": null,
+        "overlay_on_artwork": false
+      },
+      {
+        "id": "05_label_4",
+        "full_canvas_asset": "layers/03_Five_Colors_1000x1500/05_label_4.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "text",
+        "text": "Champagne\nIvory",
+        "x": 350,
+        "y": 1204,
+        "anchor": "mt",
+        "font_family": "Nimbus Sans",
+        "font_asset": "fonts/NimbusSans-Regular.otf",
+        "font_px": 26,
+        "font_pt_at_96dpi": 19.5,
+        "color": "#111D31",
+        "line_step_px": 29,
+        "bbox_xywh": [
+          280,
+          1204,
+          140,
+          54
+        ]
+      },
+      {
+        "id": "04_color_5",
+        "full_canvas_asset": "layers/03_Five_Colors_1000x1500/04_color_5.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "artwork",
+        "asset": "assets/real_warm_parchment.png",
+        "source_sha256": "7abc4e2c217c815667a2f53e03c3cec697db3748737bfa21f6dc62cc5d6bfe45",
+        "slot_xywh": [
+          530,
+          875,
+          240,
+          300
+        ],
+        "bbox_xywh": [
+          530,
+          875,
+          240,
+          300
+        ],
+        "uniform_scale": 0.46153846153846156,
+        "rotation": 0,
+        "crop": null,
+        "color_adjustment": null,
+        "overlay_on_artwork": false
+      },
+      {
+        "id": "05_label_5",
+        "full_canvas_asset": "layers/03_Five_Colors_1000x1500/05_label_5.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "text",
+        "text": "Warm\nParchment",
+        "x": 650,
+        "y": 1204,
+        "anchor": "mt",
+        "font_family": "Nimbus Sans",
+        "font_asset": "fonts/NimbusSans-Regular.otf",
+        "font_px": 26,
+        "font_pt_at_96dpi": 19.5,
+        "color": "#111D31",
+        "line_step_px": 29,
+        "bbox_xywh": [
+          590,
+          1204,
+          123,
+          48
+        ]
+      },
+      {
+        "id": "06_rule",
+        "full_canvas_asset": "layers/03_Five_Colors_1000x1500/06_rule.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "rule",
+        "points": [
+          [
+            80,
+            1325
+          ],
+          [
+            920,
+            1325
+          ]
+        ],
+        "width_px": 1,
+        "color": "#947748"
+      },
+      {
+        "id": "07_footer",
+        "full_canvas_asset": "layers/03_Five_Colors_1000x1500/07_footer.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "text",
+        "text": "The same original symbol in every edition.",
+        "x": 500,
+        "y": 1360,
+        "anchor": "mt",
+        "font_family": "Nimbus Sans",
+        "font_asset": "fonts/NimbusSans-Regular.otf",
+        "font_px": 28,
+        "font_pt_at_96dpi": 21.0,
+        "color": "#111D31",
+        "line_step_px": 31,
+        "bbox_xywh": [
+          239,
+          1360,
+          520,
+          27
+        ]
+      }
+    ]
+  },
+  "04_Anniversary_Gift_1000x1500": {
+    "canvas": {
+      "width": 1000,
+      "height": 1500,
+      "dpi": 96
+    },
+    "layer_order": "bottom to top",
+    "layers": [
+      {
+        "id": "00_background",
+        "full_canvas_asset": "layers/04_Anniversary_Gift_1000x1500/00_background.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "background",
+        "asset": "assets/bg_gift_1000x1500.png",
+        "bbox_xywh": [
+          0,
+          0,
+          1000,
+          1500
+        ]
+      },
+      {
+        "id": "01_brand",
+        "full_canvas_asset": "layers/04_Anniversary_Gift_1000x1500/01_brand.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "text",
+        "text": "ASTROLOVEART",
+        "x": 80,
+        "y": 66,
+        "anchor": "lt",
+        "font_family": "Nimbus Sans",
+        "font_asset": "fonts/NimbusSans-Regular.otf",
+        "font_px": 23,
+        "font_pt_at_96dpi": 17.25,
+        "color": "#947748",
+        "line_step_px": 25,
+        "bbox_xywh": [
+          80,
+          66,
+          182,
+          17
+        ]
+      },
+      {
+        "id": "02_headline",
+        "full_canvas_asset": "layers/04_Anniversary_Gift_1000x1500/02_headline.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "text",
+        "text": "An anniversary gift\nwritten in the stars.",
+        "x": 80,
+        "y": 124,
+        "anchor": "lt",
+        "font_family": "P052",
+        "font_asset": "fonts/P052-Roman.otf",
+        "font_px": 64,
+        "font_pt_at_96dpi": 48.0,
+        "color": "#111D31",
+        "line_step_px": 70,
+        "bbox_xywh": [
+          80,
+          124,
+          550,
+          118
+        ]
+      },
+      {
+        "id": "03_pair",
+        "full_canvas_asset": "layers/04_Anniversary_Gift_1000x1500/03_pair.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "text",
+        "text": "Cancer & Libra  /  PERSONALIZED COUPLE ART",
+        "x": 80,
+        "y": 280,
+        "anchor": "lt",
+        "font_family": "Nimbus Sans",
+        "font_asset": "fonts/NimbusSans-Regular.otf",
+        "font_px": 22,
+        "font_pt_at_96dpi": 16.5,
+        "color": "#111D31",
+        "line_step_px": 24,
+        "bbox_xywh": [
+          81,
+          280,
+          489,
+          16
+        ]
+      },
+      {
+        "id": "04_real_framed_poster_shadow",
+        "full_canvas_asset": "layers/04_Anniversary_Gift_1000x1500/04_real_framed_poster_shadow.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "shadow",
+        "bbox_xywh": [
+          179,
+          428,
+          656,
+          826
+        ],
+        "blur_px": 13,
+        "color": "#201912",
+        "alpha": 0.20392156862745098
+      },
+      {
+        "id": "04_real_framed_poster",
+        "full_canvas_asset": "layers/04_Anniversary_Gift_1000x1500/04_real_framed_poster.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "artwork",
+        "asset": "assets/real_framed_cancer_libra_reference.png",
+        "source_sha256": "a6abde1edc15b4abe01f5bbce960c4747effeddee6b48e18aeaf45cb4c8e1034",
+        "slot_xywh": [
+          172,
+          414,
+          656,
+          835
+        ],
+        "bbox_xywh": [
+          172,
+          418,
+          656,
+          826
+        ],
+        "uniform_scale": 0.7437641723356009,
+        "rotation": 0,
+        "crop": null,
+        "color_adjustment": null,
+        "overlay_on_artwork": false
+      },
+      {
+        "id": "05_footer",
+        "full_canvas_asset": "layers/04_Anniversary_Gift_1000x1500/05_footer.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "text",
+        "text": "Made personal with your names and message.",
+        "x": 500,
+        "y": 1430,
+        "anchor": "mt",
+        "font_family": "Nimbus Sans",
+        "font_asset": "fonts/NimbusSans-Regular.otf",
+        "font_px": 23,
+        "font_pt_at_96dpi": 17.25,
+        "color": "#111D31",
+        "line_step_px": 25,
+        "bbox_xywh": [
+          263,
+          1430,
+          473,
+          22
+        ]
+      }
+    ]
+  },
+  "Profile_Cover_1600x900": {
+    "canvas": {
+      "width": 1600,
+      "height": 900,
+      "dpi": 96
+    },
+    "layer_order": "bottom to top",
+    "layers": [
+      {
+        "id": "00_background",
+        "full_canvas_asset": "layers/Profile_Cover_1600x900/00_background.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "background",
+        "asset": "assets/bg_cream_1600x900.png",
+        "bbox_xywh": [
+          0,
+          0,
+          1600,
+          900
+        ]
+      },
+      {
+        "id": "01_brand",
+        "full_canvas_asset": "layers/Profile_Cover_1600x900/01_brand.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "text",
+        "text": "ASTROLOVEART",
+        "x": 120,
+        "y": 137,
+        "anchor": "lt",
+        "font_family": "Nimbus Sans",
+        "font_asset": "fonts/NimbusSans-Regular.otf",
+        "font_px": 27,
+        "font_pt_at_96dpi": 20.25,
+        "color": "#947748",
+        "line_step_px": 30,
+        "bbox_xywh": [
+          120,
+          137,
+          213,
+          20
+        ]
+      },
+      {
+        "id": "02_headline",
+        "full_canvas_asset": "layers/Profile_Cover_1600x900/02_headline.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "text",
+        "text": "Two signs.\nOne love story.",
+        "x": 120,
+        "y": 235,
+        "anchor": "lt",
+        "font_family": "P052",
+        "font_asset": "fonts/P052-Roman.otf",
+        "font_px": 94,
+        "font_pt_at_96dpi": 70.5,
+        "color": "#111D31",
+        "line_step_px": 103,
+        "bbox_xywh": [
+          121,
+          235,
+          610,
+          199
+        ]
+      },
+      {
+        "id": "03_subtitle",
+        "full_canvas_asset": "layers/Profile_Cover_1600x900/03_subtitle.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "text",
+        "text": "Personalized zodiac couple art",
+        "x": 120,
+        "y": 474,
+        "anchor": "lt",
+        "font_family": "Nimbus Sans",
+        "font_asset": "fonts/NimbusSans-Regular.otf",
+        "font_px": 31,
+        "font_pt_at_96dpi": 23.25,
+        "color": "#111D31",
+        "line_step_px": 34,
+        "bbox_xywh": [
+          122,
+          474,
+          418,
+          30
+        ]
+      },
+      {
+        "id": "04_rule",
+        "full_canvas_asset": "layers/Profile_Cover_1600x900/04_rule.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "rule",
+        "points": [
+          [
+            120,
+            548
+          ],
+          [
+            785,
+            548
+          ]
+        ],
+        "width_px": 1,
+        "color": "#947748"
+      },
+      {
+        "id": "05_range",
+        "full_canvas_asset": "layers/Profile_Cover_1600x900/05_range.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "text",
+        "text": "78 original zodiac pair designs",
+        "x": 120,
+        "y": 587,
+        "anchor": "lt",
+        "font_family": "Nimbus Sans",
+        "font_asset": "fonts/NimbusSans-Regular.otf",
+        "font_px": 27,
+        "font_pt_at_96dpi": 20.25,
+        "color": "#111D31",
+        "line_step_px": 30,
+        "bbox_xywh": [
+          121,
+          587,
+          361,
+          26
+        ]
+      },
+      {
+        "id": "06_formats",
+        "full_canvas_asset": "layers/Profile_Cover_1600x900/06_formats.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "text",
+        "text": "Fine art prints, framed prints and digital files",
+        "x": 120,
+        "y": 638,
+        "anchor": "lt",
+        "font_family": "Nimbus Sans",
+        "font_asset": "fonts/NimbusSans-Regular.otf",
+        "font_px": 24,
+        "font_pt_at_96dpi": 18.0,
+        "color": "#111D31",
+        "line_step_px": 26,
+        "bbox_xywh": [
+          122,
+          638,
+          462,
+          23
+        ]
+      },
+      {
+        "id": "07_signature",
+        "full_canvas_asset": "layers/Profile_Cover_1600x900/07_signature.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "text",
+        "text": "Your two names. Your own message.",
+        "x": 120,
+        "y": 704,
+        "anchor": "lt",
+        "font_family": "Nimbus Sans",
+        "font_asset": "fonts/NimbusSans-Regular.otf",
+        "font_px": 26,
+        "font_pt_at_96dpi": 19.5,
+        "color": "#665E53",
+        "line_step_px": 29,
+        "bbox_xywh": [
+          120,
+          704,
+          424,
+          24
+        ]
+      },
+      {
+        "id": "08_real_framed_poster_shadow",
+        "full_canvas_asset": "layers/Profile_Cover_1600x900/08_real_framed_poster_shadow.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "shadow",
+        "bbox_xywh": [
+          998,
+          152,
+          489,
+          616
+        ],
+        "blur_px": 13,
+        "color": "#201912",
+        "alpha": 0.20392156862745098
+      },
+      {
+        "id": "08_real_framed_poster",
+        "full_canvas_asset": "layers/Profile_Cover_1600x900/08_real_framed_poster.png",
+        "opacity": 1,
+        "blend": "normal",
+        "type": "artwork",
+        "asset": "assets/real_framed_cancer_libra_reference.png",
+        "source_sha256": "a6abde1edc15b4abe01f5bbce960c4747effeddee6b48e18aeaf45cb4c8e1034",
+        "slot_xywh": [
+          991,
+          120,
+          489,
+          660
+        ],
+        "bbox_xywh": [
+          991,
+          142,
+          489,
+          616
+        ],
+        "uniform_scale": 0.5544217687074829,
+        "rotation": 0,
+        "crop": null,
+        "color_adjustment": null,
+        "overlay_on_artwork": false
+      }
+    ]
+  }
+}

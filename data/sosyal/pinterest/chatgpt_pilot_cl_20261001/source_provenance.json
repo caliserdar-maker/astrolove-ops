@@ -1,0 +1,69 @@
+{
+  "source_date_utc": "2026-09-27T15:21:57+00:00",
+  "attachment_status": "Framed artwork uses the genuine user-uploaded reference, received October 1, 2026. Unframed color artworks retain the real September 27 Drive gallery source.",
+  "source_folder": "https://drive.google.com/drive/folders/1pwfZRttUCE2wvaS5VL2iMhd8bzbe_5kn",
+  "files": [
+    {
+      "file": "sources/color_card.jpg",
+      "sha256": "12a5c86b92ec38272f8cc30ea109e43a2bea5707d68aee6cda2bc61f17e77974",
+      "size": [
+        3000,
+        2250
+      ]
+    },
+    {
+      "file": "sources/frame_reference.jpg",
+      "original_filename": "il_1588xN.8638743279_cxv6.jpg",
+      "sha256": "d4fd5875a96b15973448d22890d3b17ac7c7fb47e9d3dc4f134d6b702318a18c",
+      "size": [
+        1588,
+        1191
+      ],
+      "received_date": "2026-10-01",
+      "openai_file_id": "file_00000000bf708210841b6ce3f887a9ae"
+    }
+  ],
+  "framed_crop_ltrb": [
+    354,
+    40,
+    1236,
+    1151
+  ],
+  "color_crop_ltrb": {
+    "Midnight Blue": [
+      270,
+      500,
+      790,
+      1150
+    ],
+    "Deep Black": [
+      1240,
+      500,
+      1760,
+      1150
+    ],
+    "Pure White": [
+      755,
+      1310,
+      1275,
+      1960
+    ],
+    "Champagne Ivory": [
+      2210,
+      500,
+      2730,
+      1150
+    ],
+    "Warm Parchment": [
+      1725,
+      1310,
+      2245,
+      1960
+    ]
+  },
+  "operations": "Exact rectangular extraction of whole framed artwork, uniform LANCZOS resampling, paste. No redraw, recolor, retouch, stretch, perspective or text replacement.",
+  "background_ai_generated": true,
+  "revision": "v2: all framed compositions use the user-supplied October 1 reference.",
+  "framed_asset": "assets/real_framed_cancer_libra_reference.png",
+  "framed_crop_notes": "Half-open source coordinates. Full genuine outer frame and all poster content retained, including 1 to 2 px JPEG edge fringe. Only source wall outside the frame is removed."
+}
