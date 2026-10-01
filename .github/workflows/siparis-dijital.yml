@@ -72,6 +72,8 @@ jobs:
   renk:
     needs: plan
     if: ${{ needs.plan.outputs.renk != '[]' }}
+    permissions:
+      contents: write
     strategy:
       fail-fast: false
       matrix:
@@ -125,6 +127,28 @@ jobs:
         run: |
           python scripts/siparis_dijital/surucu.py --asama renk --renk "${{ matrix.renk }}" --kod _kod \
             --kod-ref "siparis-baski-v1 $RENK_REF" --cikti "out/renk/${{ matrix.renk }}"
+      - name: Inceleme dalina ekle (bu isin kesitleri)
+        if: ${{ always() }}
+        env:
+          TOKEN: ${{ github.token }}
+          PARCA: out/renk/${{ matrix.renk }}/inceleme
+        run: |
+          set -uo pipefail
+          REC=$(jq -r '.inputs.receipt' "$GITHUB_EVENT_PATH"); [[ "$REC" =~ ^[0-9]+$ ]] || exit 1
+          ls "$PARCA" 2>/dev/null | grep -q . || { echo "kesit yok"; exit 0; }
+          B="inceleme/siparis-$REC"; U="https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          G=(-c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com")
+          for i in 1 2 3 4 5 6; do
+            rm -rf _inc
+            if git clone -q --depth 1 --branch "$B" "$U" _inc 2>/dev/null; then :; else
+              git init -q _inc && git -C _inc checkout -q --orphan "$B" && git -C _inc remote add origin "$U"; fi
+            mkdir -p _inc/kontrol && cp "$PARCA"/* _inc/kontrol/
+            git -C _inc "${G[@]}" add kontrol
+            git -C _inc "${G[@]}" commit -qm "siparis $REC: ${{ github.job }} kesitleri" || { echo "degisiklik yok"; exit 0; }
+            if git -C _inc push -q origin "HEAD:refs/heads/$B"; then echo "dal: $B $(git -C _inc rev-parse --short HEAD)"; exit 0; fi
+            sleep $((RANDOM % 8 + 3))
+          done
+          echo "HATA: dala push edilemedi" >&2; exit 1
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:
@@ -292,18 +316,28 @@ jobs:
           rclone copy out/inceleme "$H/KONTROL/INCELEME_11x14"
           rclone lsl "$H" --max-depth 1
           echo "drive: TEMP/SIPARIS_ISIM/DIJITAL/$REC"
-      - name: inceleme dali (11x14 kesit + onizleme; main'e merge YOK)
+      - name: Inceleme dalina ekle (bu isin kesitleri)
+        if: ${{ always() }}
+        env:
+          TOKEN: ${{ github.token }}
+          PARCA: out/inceleme
         run: |
-          set -euo pipefail
-          B="inceleme/siparis-$REC"
-          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git checkout -q --orphan "$B"
-          git rm -rq --cached . ; find . -mindepth 1 -maxdepth 1 ! -name .git ! -name out -exec rm -rf {} +
-          mkdir -p kontrol && cp out/inceleme/* kontrol/
-          git add kontrol
-          git commit -qm "siparis $REC: 11x14 isim + mesaj bandi 1:1 kesit ve tam sayfa onizleme (5 renk), OZET"
-          git push -f origin "HEAD:refs/heads/$B"
-          echo "dal: $B $(git rev-parse --short HEAD)"
+          set -uo pipefail
+          REC=$(jq -r '.inputs.receipt' "$GITHUB_EVENT_PATH"); [[ "$REC" =~ ^[0-9]+$ ]] || exit 1
+          ls "$PARCA" 2>/dev/null | grep -q . || { echo "kesit yok"; exit 0; }
+          B="inceleme/siparis-$REC"; U="https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          G=(-c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com")
+          for i in 1 2 3 4 5 6; do
+            rm -rf _inc
+            if git clone -q --depth 1 --branch "$B" "$U" _inc 2>/dev/null; then :; else
+              git init -q _inc && git -C _inc checkout -q --orphan "$B" && git -C _inc remote add origin "$U"; fi
+            mkdir -p _inc/kontrol && cp "$PARCA"/* _inc/kontrol/
+            git -C _inc "${G[@]}" add kontrol
+            git -C _inc "${G[@]}" commit -qm "siparis $REC: ${{ github.job }} kesitleri" || { echo "degisiklik yok"; exit 0; }
+            if git -C _inc push -q origin "HEAD:refs/heads/$B"; then echo "dal: $B $(git -C _inc rev-parse --short HEAD)"; exit 0; fi
+            sleep $((RANDOM % 8 + 3))
+          done
+          echo "HATA: dala push edilemedi" >&2; exit 1
       - if: ${{ always() }}
         run: rm -rf ~/.config/rclone
       - name: Sonuc

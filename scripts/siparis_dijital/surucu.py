@@ -41,8 +41,28 @@ def renk_asamasi(a, g):
     sd.kisisel_hazirla()
     P_ed, P_blue = sd.EdisyonPoster(), sd.BluePoster()
     cik = Path(a.cikti).resolve(); cik.mkdir(parents=True, exist_ok=True)
-    r = sd.dijital_uret(x, P_blue, P_ed, cik)
+    import shutil
+    asil_rm = shutil.rmtree
+    shutil.rmtree = lambda *q, **k: None              # EKSIK renkte sayfalar silinmesin (inceleme kesiti icin)
+    try:
+        r = sd.dijital_uret(x, P_blue, P_ed, cik)
+    finally:
+        shutil.rmtree = asil_rm
     rk = r['renkler'][a.renk]
+    inc = cik / 'inceleme'; inc.mkdir(exist_ok=True)
+    j = sorted((cik / a.renk).glob(f'*_{a.renk}_11x14_*.jpg'))
+    if j:
+        kesit(j[0], inc / f'KESIT_{a.renk}_11x14.jpg', inc / f'ONIZLEME_{a.renk}_11x14.jpg')
+    for o, v in rk['oranlar'].items():                # plate kapisinda duran sayfa: kaynak / plate / fark 1:1
+        if 'PLATE' in str(v.get('hata') or ''):
+            try:
+                boy = sd.DIJITAL_BOY[o]; ed = sd.RENK_ED[a.renk]
+                src = sd.pod_kaynak(x['cift'], a.renk, boy)
+                pl = P_ed.plate(ed, 'A' if o == 'a_series' else o, boy)
+                pk = v.get('plate_slogan_kapisi') or {}
+                plate_kesit(src, pl, inc / f'PLATE_KESIT_{a.renk}_{o}.jpg', pk.get('tag_bant'))
+            except Exception as e:                    # noqa: BLE001
+                print('PLATE_KESIT hata', type(e).__name__, str(e)[:120], flush=True)
     oz = {'renk': a.renk, 'durum': rk.get('durum'), 'pdf': rk.get('pdf'), 'pdf_kapisi': rk.get('pdf_kapisi'),
           'sayfa_kapilar': {o: {'durum': v.get('durum'), 'kapilar_gecti': v.get('kapilar_gecti'),
                                 'kalan': sorted(k for k, d in (v.get('kapilar') or {}).items() if d is False),
@@ -112,6 +132,24 @@ def kesit(jpg, hedef_kesit, hedef_onizleme):
         im.crop((0, int(h * KESIT_Y[0]), w, int(h * KESIT_Y[1]))).save(hedef_kesit, 'JPEG', quality=95, subsampling=0)
         im.convert('RGB').resize((1100, round(1100 * h / w)), Image.LANCZOS).save(hedef_onizleme, 'JPEG', quality=90)
     return [w, h]
+
+
+def plate_kesit(src, plate, hedef, tag_bant=None):
+    """Plate kapisinda duran sayfa: kaynak / plate / |kaynak - plate| x4, slogan + isim bolgesi 1:1 (alt alta)."""
+    import numpy as np
+    from PIL import Image
+    Image.MAX_IMAGE_PIXELS = None
+    A = Image.open(src).convert('RGB'); P = Image.open(plate).convert('RGB')
+    if P.size != A.size:
+        P = P.resize(A.size, Image.LANCZOS)
+    k = A.width / 2400.0
+    y0, y1 = (int((tag_bant[0] - 260) * k), int((tag_bant[1] + 80) * k)) if tag_bant else \
+        (int(A.height * KESIT_Y[0]), int(A.height * KESIT_Y[1]))
+    y0, y1 = max(0, y0), min(A.height, y1)
+    a = np.asarray(A.crop((0, y0, A.width, y1))).astype(np.int16)
+    p = np.asarray(P.crop((0, y0, A.width, y1))).astype(np.int16)
+    f = np.clip(np.abs(a - p) * 4, 0, 255)
+    Image.fromarray(np.concatenate([a, p, f], 0).astype(np.uint8)).save(hedef, 'JPEG', quality=95, subsampling=0)
 
 
 def pdf_asamasi(a, g):
