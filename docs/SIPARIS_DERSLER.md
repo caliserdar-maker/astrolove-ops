@@ -106,7 +106,7 @@ onceki_kosu : PASS isleri bu koşulardan al (tek is yeniden kosuda)
   bolunme zayifligini tasiyor. Duzeltme: slogan kapisina guvenli olcum (gerek = isim + tagline), 5 renk yeniden on test.
 - Test 3 MB yeniden kosu + paket, sonra Test 4 (yeni cift).
 
-## TUM DERSLER (Tara + Test 1-3, 1 Eki 20:10; Serdar: Test 4'te hepsi uygulanacak)
+## TUM DERSLER (Tara + Test 1-3 + gece, 1 Eki; Serdar: Test 4'te hepsi uygulanacak)
 
 Tara (4188621967)
 1. Tek sayfaya yama yapildi (DB 18x24 altin profili), kok neden cozulmedi; isim degisince hata baska sayfada cikti.
@@ -145,6 +145,14 @@ Koordinator
 30. Baska oturumun izledigi kosu haber vermeden iptal edildi; once bildir.
 31. Yeni arac yavas tasarlandi (seri, 15 boy); baştan hizli (paralel, yalniz gereken boylar).
 32. Yazilan kurallar uygulanmadi; Test 4 oncesi kontrol listesi madde madde isaretlenip Serdar'a gosterilir.
+
+Gece (20:00-21:10)
+33. Test araci uretimi yeniden yazarak olctu (kaynak_olcum): MB'de duz esik, WP'de eksik maske -> sahte FAIL.
+    Test araci uretimin KENDI fonksiyonlarini cagirir, kopyasini yazmaz.
+34. Hipotez bulgu gibi iletildi ("Virgo kuyrugu"; gercek neden ARIES harf boslugu). Dogrulanmamis neden "olasi" diye yazilir.
+35. "ARIES duzeldi" denildi, ayni zayiflik plate_slogan_kapisi'nda kaldi. Bir duzeltmeden sonra ayni olcumu kullanan
+    tum yerler aranir.
+36. Uretim kodu degisince calisan isim on testi gecersiz olur; kapi icin yeni head ile yeniden kosulur.
 
 ## TEST 4 BASLANGIC KAPISI (hepsi EVET olmadan dispatch yok; Serdar'a madde madde gosterilir)
 
