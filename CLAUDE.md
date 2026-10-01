@@ -82,3 +82,8 @@ bolumu okunmadan baslanmaz.
 - Baslatilan her koşu ARALIKSIZ izlenir: GitHub API ile jobs her 30-60 sn okunur (tek komut icinde dongu), bir is biter bitmez sonucu okunur.
 - FAIL olan is icin koşunun tamamini bekleme: ayni dakikada rapor oku, duzelt, yerelde dogrula, o is icin yeni koşu baslat.
 - Kosu bitince ayni dakikada 6 satir rapor. Bekleme gereken tek durum: Serdar'in acik onayi gereken eylem (Etsy yazma, musteriye dokunan eylem).
+
+## MARKA ADI (1 Eki 2026, Serdar kesin talimati)
+
+- Marka adi **AstroLoveArt**. Musterinin gorebilecegi her seyde (PDF/dosya/klasor adi, mesaj, metin) yalniz "AstroLove" YAZILMAZ.
+- Siparis dosyalari: AstroLoveArt_<Burc1>_<Burc2>_<Renk>.pdf (orn. AstroLoveArt_Cancer_Leo_Deep_Black.pdf).
