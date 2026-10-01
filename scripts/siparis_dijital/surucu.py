@@ -26,9 +26,38 @@ def girdi():
             'isim2': g['isim2'].strip().upper(), 'mesaj': mesaj}
 
 
+SURE_FONK = ('rc', 'pod_kaynak', 'kisisel_hazirla', 'bant_dogrulama', 'render_et', 'tek_dosya', 'dijital_leke',
+             'olcek_kapisi_baski', 'olcek_ikinci_deneme', 'isim_kalinti_kapisi', '_iz_kapisi', 'kontrol_paketi',
+             'pdf_yap', 'pdf_kapisi', 'renk_onizleme', 'plate_slogan_kapisi', 'zemin_uyumu', 'pod_uret')
+
+
+def sure_olc(sd):
+    """Hiz olcumu (Serdar 1 Eki: siparis 12 dk alti): agir fonksiyonlarin her cagrisi 'SURE ad sn pid' satiri.
+    Cikti / kapi degismez; yalniz sarmalayici. rc (rclone) icin ilk arguman (copy / lsf ...) de yazilir."""
+    import functools, os, time
+    for ad in SURE_FONK:
+        f = getattr(sd, ad, None)
+        if f is None or getattr(f, '_sure', False):
+            continue
+
+        def sar(f=f, ad=ad):
+            @functools.wraps(f)
+            def g(*q, **k):
+                t0 = time.time()
+                try:
+                    return f(*q, **k)
+                finally:
+                    ek = f' {q[0]}' if ad == 'rc' and q else ''
+                    print(f'SURE {ad}{ek} {time.time() - t0:.1f} pid{os.getpid()}', flush=True)
+            g._sure = True
+            return g
+        setattr(sd, ad, sar())
+
+
 def kod_yukle(kod):
     sys.path.insert(0, str(Path(kod).resolve() / 'scripts' / 'medya_v1'))
     import siparis_dosyasi as sd
+    sure_olc(sd)
     return sd
 
 
