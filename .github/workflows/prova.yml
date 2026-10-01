@@ -38,6 +38,14 @@ on:
         description: "isim on testi setleri (orn. TARA,SERDAR,MAXI,ANNE); doluysa ciftler/set yok sayilir, set basina kendi cifti"
         required: false
         default: ""
+      on_test_isler:
+        description: "yalniz bu on test hucreleri (SET:tur:anahtar, virgullu; orn. MAXI:renk:MIDNIGHT_BLUE,ANNE:wp:A2); bos = hepsi"
+        required: false
+        default: ""
+      onceki_kosu:
+        description: "rapor bu prova kosu(lari)nin sonuclariyla birlesir (run id, bosluklu; yeni sonuc eskisinin ustune)"
+        required: false
+        default: ""
 
 concurrency: prova
 
@@ -80,6 +88,7 @@ jobs:
         env:
           CIFTLER: ${{ inputs.ciftler }}
           ON_TEST: ${{ inputs.on_test }}
+          ON_TEST_ISLER: ${{ inputs.on_test_isler }}
           ISLER: ${{ inputs.isler }}
           PR: ${{ inputs.parca_renk }}
           PW: ${{ inputs.parca_wp }}
@@ -117,6 +126,10 @@ jobs:
               for b in ('24x36', 'A2', '18x24', '16x20', '11x14'):
                   for i, p in enumerate(parcala(os.environ['PW'])):
                       m.append({'tur': 'wp', 'anahtar': b, 'parca': i, 'ciftler': ','.join(p), 'set': ''})
+          sec_is = [x.strip() for x in os.environ.get('ON_TEST_ISLER', '').split(',') if x.strip()]
+          if sec_is:                                # iptal edilen kosunun kalan hucreleri (Serdar 1 Eki, Test 2 dersi)
+              m = [x for x in m if f"{x['set']}:{x['tur']}:{x['anahtar']}" in sec_is]
+              assert len(m) == len(sec_is), f'bilinmeyen hucre: {sec_is}'
           print('matris=' + json.dumps({'include': m}))
           print('tum=' + ','.join(tum))
           print(f'{len(sec)} cift, {len(m)} is', file=sys.stderr)
@@ -128,7 +141,7 @@ jobs:
     needs: plan
     strategy:
       fail-fast: false
-      max-parallel: 8
+      max-parallel: 4             # Serdar 1 Eki: siparis kosusu varken prova runner'lari doldurmasin (en fazla 4)
       matrix: ${{ fromJSON(needs.plan.outputs.matris) }}
     runs-on: ubuntu-latest
     timeout-minutes: 340
@@ -205,23 +218,45 @@ jobs:
     needs: [plan, is]
     if: ${{ always() && needs.plan.result == 'success' }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
     steps:
       - uses: actions/download-artifact@v4
         with:
           pattern: prova_*
           path: prova
           merge-multiple: true
+      - name: Onceki prova kosularinin sonuclari (birlestirme)
+        if: ${{ inputs.onceki_kosu != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          K: ${{ inputs.onceki_kosu }}
+        run: |
+          set -euo pipefail
+          i=0
+          for r in $K; do
+            [[ "$r" =~ ^[0-9]+$ ]] || { echo "HATA: run id" >&2; exit 1; }
+            i=$((i+1)); gh run download "$r" -R "$GITHUB_REPOSITORY" -p 'prova_*' -D "prova_eski/$i" || echo "uyari: $r artifact yok"
+          done
+          find prova_eski -name 'PROVA_*.json' | wc -l
       - name: PROVA.md
+        env:
+          ONCEKI: ${{ inputs.onceki_kosu }}
         run: |
           set -euo pipefail
           python3 - <<'EOF'
-          import glob, json, collections
+          import glob, json, collections, os
           R = collections.defaultdict(dict); sure = collections.defaultdict(float)
-          for f in glob.glob('prova/PROVA_*.json'):
+          # onceki kosular once (sirayla), bu kosu en son: ayni hucrede yeni sonuc eskisinin ustune yazar
+          dosyalar = sorted(glob.glob('prova_eski/*/**/PROVA_*.json', recursive=True)) + sorted(glob.glob('prova/PROVA_*.json'))
+          for f in dosyalar:
               d = json.load(open(f))
               for c, v in d['ciftler'].items():
                   R[c][(d['tur'], d['anahtar'])] = v
-                  sure[(d['tur'], d['anahtar'])] += v.get('sn', 0)
+          for c in R:
+              for k, v in R[c].items():
+                  sure[k] += v.get('sn', 0)
           kol = [('renk', r) for r in ('MIDNIGHT_BLUE', 'DEEP_BLACK', 'PURE_WHITE', 'CHAMPAGNE_IVORY')] + \
                 [('wp', b) for b in ('16x20', '18x24', '24x36', '11x14', 'A2')]
           kol = [k for k in kol if any(k in v for v in R.values())]
@@ -234,7 +269,9 @@ jobs:
                                              for o, s in v['sayfa'].items() if not s.get('gecti'))
               return 'FAIL ' + ','.join(v.get('kalan') or [])
           tam = [c for c in sorted(R) if all((R[c].get(k) or {}).get('gecti') for k in kol)]
-          sat = ['# SIPARIS PROVASI', '', f'cift: {len(R)}, tam PASS: {len(tam)}/{len(R)}', '',
+          hucre_n = sum(len(v) for v in R.values()); hucre_ok = sum(1 for v in R.values() for x in v.values() if x.get('gecti'))
+          sat = ['# SIPARIS PROVASI', '', f'cift: {len(R)}, tam PASS: {len(tam)}/{len(R)}',
+                 f'hucre (is): {hucre_ok}/{hucre_n} PASS' + (f" (onceki kosu: {os.environ['ONCEKI']})" if os.environ.get('ONCEKI') else ''), '',
                  '| cift | set | ' + ' | '.join(f'{t} {a}' for t, a in kol) + ' |', '|' + '---|' * (len(kol) + 2)]
           for c in sorted(R):
               s = next((v.get('set') for v in R[c].values()), '')

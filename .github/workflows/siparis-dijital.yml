@@ -53,33 +53,58 @@ env:
 
 jobs:
   plan:
+    # Test 2 dersleri (Serdar 1 Eki): cift alfabetik normalize (isimler yer degistirir) + HIZLI KAYNAK DENETIMI
+    # (POD_PRINT / PLATES iki rclone listesiyle; eksikse plan FAIL, hicbir is acilmaz). Kod: scripts/siparis_dijital/plan.py
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       renk: ${{ steps.p.outputs.renk }}
       sayfa: ${{ steps.p.outputs.sayfa }}
       sayfa_var: ${{ steps.p.outputs.sayfa_var }}
       wp: ${{ steps.p.outputs.wp }}
+      cift: ${{ steps.p.outputs.cift }}
+      normalize: ${{ steps.p.outputs.normalize }}
     steps:
-      - id: p
+      - name: Girdi denetimi + maske
         run: |
           set -euo pipefail
-          python3 - <<'EOF' >> "$GITHUB_OUTPUT"
-          import json, os
-          e = json.load(open(os.environ['GITHUB_EVENT_PATH']))['inputs']
-          R = ['MIDNIGHT_BLUE', 'DEEP_BLACK', 'PURE_WHITE', 'CHAMPAGNE_IVORY']; B = ['16x20', '18x24', '24x36', '11x14', 'A2']
-          i = [x.strip() for x in (e.get('isler') or '').split(',') if x.strip()]
-          r = [x for x in R if not i or f'renk:{x}' in i]; w = [x for x in B if not i or f'wp:{x}' in i]
-          bil = [x for x in i if x not in [f'renk:{y}' for y in R] + [f'wp:{y}' for y in B] + ['paket']]   # 'paket': yalniz paketleme
-          assert not bil, f'bilinmeyen is: {bil}'
-          # HIZ (Serdar 1 Eki): MB seri ~25 dk -> renk x oran matrisi (5 paralel sayfa isi, PDF pakette birlesir)
-          SAYFA_RENK = ['MIDNIGHT_BLUE']
-          sy = [{'renk': x, 'oran': o} for x in r if x in SAYFA_RENK for o in ('2x3', '3x4', 'a_series', '4x5', '11x14')]
-          r = [x for x in r if x not in SAYFA_RENK]
-          print('renk=' + json.dumps(r)); print('sayfa=' + json.dumps({'include': sy} if sy else {'include': [{'renk': '', 'oran': ''}]}))
-          print('sayfa_var=' + ('1' if sy else '0'))
-          print('wp=' + json.dumps(w))
-          EOF
+          for k in isim1 isim2; do v=$(jq -r ".inputs.$k" "$GITHUB_EVENT_PATH"); echo "::add-mask::$v"; echo "::add-mask::${v^^}"; done
+          m=$(jq -r '.inputs.mesaj_b64' "$GITHUB_EVENT_PATH" | base64 -d); echo "::add-mask::$m"
+          jq -re '.inputs.receipt | test("^[0-9]+$")' "$GITHUB_EVENT_PATH" >/dev/null || { echo "HATA: receipt rakam olmali" >&2; exit 1; }
+          jq -re '.inputs.cift | test("^[A-Z]+_[A-Z]+$")' "$GITHUB_EVENT_PATH" >/dev/null || { echo "HATA: cift" >&2; exit 1; }
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          sparse-checkout: scripts/siparis_dijital
+      - name: rclone (dogrudan ikili; kurulum betigi + man sayfalari yok)
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /tmp/rc.zip https://downloads.rclone.org/rclone-current-linux-amd64.zip
+          unzip -q -j /tmp/rc.zip '*/rclone' -d /tmp/rcb && sudo install -m 755 /tmp/rcb/rclone /usr/local/bin/rclone
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then echo "HATA: RCLONE_CONF_B64 yok" >&2; exit 1; fi
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - id: p
+        name: Cift normalize + kaynak denetimi + is matrisi
+        run: |
+          set -euo pipefail
+          python3 scripts/siparis_dijital/plan.py >> "$GITHUB_OUTPUT"
           cat "$GITHUB_OUTPUT"
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
 
   renk:
     needs: plan
@@ -354,8 +379,10 @@ jobs:
         run: rm -rf ~/.config/rclone
 
   paket:
+    # Test 2 dersi (Serdar 1 Eki): paket = musteri PDF'leri + OZET Drive'a, bitti (hedef <= 1 dk). KONTROL / kesit /
+    # onizleme 'inceleme' isinde (paket'ten sonra). Plan FAIL (eksik kaynak) ise paket de kosmaz.
     needs: [plan, renk, sayfa, wp]
-    if: ${{ always() }}
+    if: ${{ always() && needs.plan.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:
@@ -419,7 +446,11 @@ jobs:
           echo "rc=$rc" >> "$GITHUB_OUTPUT"
           ls -la out/paket out/inceleme
           exit 0
-      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone (dogrudan ikili)
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /tmp/rc.zip https://downloads.rclone.org/rclone-current-linux-amd64.zip
+          unzip -q -j /tmp/rc.zip '*/rclone' -d /tmp/rcb && sudo install -m 755 /tmp/rcb/rclone /usr/local/bin/rclone
       - name: rclone.conf olustur
         env:
           RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
@@ -435,7 +466,7 @@ jobs:
               echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
             fi
           fi
-      - name: Drive (TEMP/SIPARIS_ISIM/DIJITAL/<receipt>)
+      - name: Drive (TEMP/SIPARIS_ISIM/DIJITAL/<receipt>) - musteri PDF'leri + OZET
         run: |
           set -euo pipefail
           H="gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL/$REC"
@@ -443,23 +474,95 @@ jobs:
           if ls out/paket/AstroLoveArt_*.pdf >/dev/null 2>&1; then
             rclone move "$H" "$H/_ESKI_AD" --include '/AstroLove_*.pdf' || true
           fi
-          rclone copy out/paket "$H"
-          for r in out/renk/*; do
-            n=$(basename "$r")
-            rclone copy "$r" "$H/KONTROL/$n" --include 'KONTROL/**' --include 'OZET_*.json' --include 'KAPI_RAPORU_*.json'
-          done
-          for w in out/wp/*; do rclone copy "$w" "$H/KONTROL/WARM_PARCHMENT" --include 'OZET_WP_*.json'; done
-          rclone copy out/inceleme "$H/KONTROL/INCELEME_11x14"
+          rclone copy out/paket "$H" --transfers 8
           rclone lsl "$H" --max-depth 1
           echo "drive: TEMP/SIPARIS_ISIM/DIJITAL/$REC"
-      - name: Inceleme dalina ekle (bu isin kesitleri)
+      - name: Inceleme parcalari (ayri isin girdisi; Drive'a 'inceleme' isi yukler)
         if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          # yalniz kucuk parcalar (kesitler + ozet / kapi json); buyuk KONTROL klasorleri renk / sayfa / wp
+          # artifact'lerinden 'inceleme' isinde dogrudan alinir (paket yeniden yuklemez)
+          mkdir -p out/inc_paket/renk out/inc_paket/wp
+          [ -d out/inceleme ] && cp -r out/inceleme out/inc_paket/inceleme || true
+          for r in out/renk/*; do [ -d "$r" ] || continue; n=$(basename "$r"); mkdir -p "out/inc_paket/renk/$n"
+            cp "$r"/OZET_*.json "$r"/KAPI_RAPORU_*.json "out/inc_paket/renk/$n/" 2>/dev/null || true; done
+          for w in out/wp/*; do [ -d "$w" ] || continue; cp "$w"/OZET_WP_*.json out/inc_paket/wp/ 2>/dev/null || true; done
+          du -sh out/inc_paket
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: inceleme_paket
+          path: out/inc_paket
+          retention-days: 2
+          compression-level: 0
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
+      - name: Sonuc
+        run: test "${{ steps.pdf.outputs.rc }}" = "0"
+
+  inceleme:
+    # Test 2 dersi: inceleme kesitleri / onizlemeler / KONTROL paketten AYRI (musteri PDF'lerini bekletmez)
+    needs: [plan, paket]
+    if: ${{ always() && needs.paket.result != 'skipped' && needs.paket.result != 'cancelled' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - name: Girdi + maske
+        run: |
+          set -euo pipefail
+          for k in isim1 isim2; do v=$(jq -r ".inputs.$k" "$GITHUB_EVENT_PATH"); echo "::add-mask::$v"; echo "::add-mask::${v^^}"; done
+          m=$(jq -r '.inputs.mesaj_b64' "$GITHUB_EVENT_PATH" | base64 -d); echo "::add-mask::$m"
+          r=$(jq -r '.inputs.receipt' "$GITHUB_EVENT_PATH"); [[ "$r" =~ ^[0-9]+$ ]] || exit 1
+          echo "REC=$r" >> "$GITHUB_ENV"
+      - uses: actions/download-artifact@v4
+        with:
+          name: inceleme_paket
+          path: out
+      - name: KONTROL klasorleri (renk / sayfa / wp artifact'leri)
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "{renk,sayfa}_*"
+          path: out/a
+      - name: rclone (dogrudan ikili)
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /tmp/rc.zip https://downloads.rclone.org/rclone-current-linux-amd64.zip
+          unzip -q -j /tmp/rc.zip '*/rclone' -d /tmp/rcb && sudo install -m 755 /tmp/rcb/rclone /usr/local/bin/rclone
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Drive KONTROL (kesit / onizleme / kapi raporlari)
+        run: |
+          set -euo pipefail
+          H="gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL/$REC/KONTROL"
+          for r in out/renk/*; do [ -d "$r" ] || continue; rclone copy "$r" "$H/$(basename "$r")" --transfers 8; done
+          for d in out/a/renk_* out/a/sayfa_*; do [ -d "$d/KONTROL" ] || continue
+            n=$(basename "$d"); n=${n#renk_}; n=${n#sayfa_}; n=${n%%__*}
+            rclone copy "$d/KONTROL" "$H/$n/KONTROL" --transfers 8; done
+          [ -d out/wp ] && rclone copy out/wp "$H/WARM_PARCHMENT" --transfers 8 || true
+          [ -d out/inceleme ] && rclone copy out/inceleme "$H/INCELEME_11x14" --transfers 8 || true
+          echo "drive: TEMP/SIPARIS_ISIM/DIJITAL/$REC/KONTROL"
+      - name: Inceleme dalina ekle (paket kesitleri)
         env:
           TOKEN: ${{ github.token }}
           PARCA: out/inceleme
         run: |
           set -uo pipefail
-          REC=$(jq -r '.inputs.receipt' "$GITHUB_EVENT_PATH"); [[ "$REC" =~ ^[0-9]+$ ]] || exit 1
           ls "$PARCA" 2>/dev/null | grep -q . || { echo "kesit yok"; exit 0; }
           B="inceleme/siparis-$REC"; U="https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           G=(-c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com")
@@ -469,12 +572,10 @@ jobs:
               git init -q _inc && git -C _inc checkout -q --orphan "$B" && git -C _inc remote add origin "$U"; fi
             mkdir -p _inc/kontrol && cp "$PARCA"/* _inc/kontrol/
             git -C _inc "${G[@]}" add kontrol
-            git -C _inc "${G[@]}" commit -qm "siparis $REC: ${{ github.job }} kesitleri" || { echo "degisiklik yok"; exit 0; }
+            git -C _inc "${G[@]}" commit -qm "siparis $REC: paket kesitleri" || { echo "degisiklik yok"; exit 0; }
             if git -C _inc push -q origin "HEAD:refs/heads/$B"; then echo "dal: $B $(git -C _inc rev-parse --short HEAD)"; exit 0; fi
             sleep $((RANDOM % 8 + 3))
           done
           echo "HATA: dala push edilemedi" >&2; exit 1
       - if: ${{ always() }}
         run: rm -rf ~/.config/rclone
-      - name: Sonuc
-        run: test "${{ steps.pdf.outputs.rc }}" = "0"

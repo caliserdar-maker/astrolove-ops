@@ -16,14 +16,57 @@ RENK4 = ('MIDNIGHT_BLUE', 'DEEP_BLACK', 'PURE_WHITE', 'CHAMPAGNE_IVORY')
 KESIT_Y = (0.66, 0.93)          # 11x14 sayfasinda isim + mesaj bandi (sayfa yuksekligi orani), 1:1
 
 
+def cift_normalize(cift, isim1, isim2):
+    """CIFT SIRASI (Serdar 1 Eki, Test 2 dersi): POD_PRINT klasorleri alfabetik (CAPRICORN_SAGITTARIUS); girdi ters
+    gelirse (SAGITTARIUS_CAPRICORN) cift alfabetik siraya cevrilir ve isimler de yer degistirir (her isim kendi
+    burcunun altinda kalir). Doner: (cift, isim1, isim2, normalize_edildi)."""
+    a, b = cift.split('_', 1)
+    if a <= b:
+        return cift, isim1, isim2, False
+    return f'{b}_{a}', isim2, isim1, True
+
+
 def girdi():
-    """workflow_dispatch girdileri (yerel deneme: SIPARIS_GIRDI_JSON)."""
+    """workflow_dispatch girdileri (yerel deneme: SIPARIS_GIRDI_JSON). Cift alfabetik normalize edilir (her isde ayni)."""
     yol = os.environ.get('SIPARIS_GIRDI_JSON') or os.environ['GITHUB_EVENT_PATH']
     g = json.loads(Path(yol).read_text())
     g = g.get('inputs', g)
     mesaj = base64.b64decode(g['mesaj_b64']).decode('utf-8')
-    return {'receipt': g['receipt'], 'cift': g['cift'], 'isim1': g['isim1'].strip().upper(),
-            'isim2': g['isim2'].strip().upper(), 'mesaj': mesaj}
+    cift, i1, i2, norm = cift_normalize(g['cift'].strip().upper(), g['isim1'].strip().upper(), g['isim2'].strip().upper())
+    return {'receipt': g['receipt'], 'cift': cift, 'isim1': i1, 'isim2': i2, 'mesaj': mesaj,
+            'normalize': norm, 'cift_girdi': g['cift'].strip().upper()}
+
+
+# KAYNAK DENETIMI (Serdar 1 Eki, Test 2 dersi: eksik kaynakta 13 is bosuna acilmasin). siparis_dosyasi ile ayni yollar:
+# pod_kaynak -> POD_PRINT/<cift>/<renk>/<boy>.jpg ; EdisyonPoster.plate -> PLATES/<EDISYON>_<boy>.png ;
+# MB oran referansi -> POD_PRINT/CANCER_LIBRA/MIDNIGHT_BLUE/<boy>.jpg ; WP duz renk -> CHAMPAGNE_IVORY + MODERN plate.
+POD_YOL = 'gdrive:ASTROLOVE/TEMP/POD_PRINT'
+PLATES_YOL = 'gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PLATES'
+DIJ_BOYLAR = ('16x20', '18x24', '24x36', '11x14', 'A2')
+ED_PLATE = {'MIDNIGHT_BLUE': 'BLUE', 'DEEP_BLACK': 'BLACK', 'PURE_WHITE': 'PURE_WHITE',
+            'CHAMPAGNE_IVORY': 'MODERN', 'WARM_PARCHMENT': 'VINTAGE'}
+
+
+def kaynak_listesi(cift, renkler, wp_boylar):
+    """Gerekli kaynaklar: {'pod': ['<cift>/<renk>/<boy>.jpg', ...], 'plates': ['<ED>_<boy>.png', ...]}."""
+    pod, pl = [], []
+    for r in renkler:
+        pod += [f'{cift}/{r}/{b}.jpg' for b in DIJ_BOYLAR]
+        pl += [f'{ED_PLATE[r]}_{b}.png' for b in DIJ_BOYLAR]
+        if r == 'MIDNIGHT_BLUE':
+            pod += [f'CANCER_LIBRA/MIDNIGHT_BLUE/{b}.jpg' for b in DIJ_BOYLAR]
+    for b in wp_boylar:
+        pod += [f'{cift}/WARM_PARCHMENT/{b}.jpg', f'{cift}/CHAMPAGNE_IVORY/{b}.jpg']
+        pl += [f'VINTAGE_{b}.png', f'MODERN_{b}.png']
+    tekil = lambda x: sorted(set(x))
+    return {'pod': tekil(pod), 'plates': tekil(pl)}
+
+
+def kaynak_eksik(gerek, pod_var, plates_var):
+    """gerek: kaynak_listesi; *_var: mevcut dosyalarin goreli yollari (rclone lsf -R). Doner: eksik tam yol listesi."""
+    pv, plv = set(pod_var), set(plates_var)
+    return ([f'POD_PRINT/{x}' for x in gerek['pod'] if x not in pv] +
+            [f'PLATES/{x}' for x in gerek['plates'] if x not in plv])
 
 
 SURE_FONK = ('rc', 'pod_kaynak', 'kisisel_hazirla', 'bant_dogrulama', 'render_et', 'tek_dosya', 'dijital_leke',
@@ -514,7 +557,10 @@ def pdf_asamasi(a, g):
         sat.append(f"| {renk} | {z.get('pdf')} | {k.get('MB')} | {k.get('sayfa_sayisi')} | {dpi} | "
                    f"{'PASS' if k.get('gecti') else 'FAIL'} | {'PASS' if ok else 'FAIL ' + str(skg)} |")
     OZ['gecti'] = hepsi
-    sat += ['', f"SONUC: {'PASS' if hepsi else 'FAIL'}"]
+    OZ['normalize'] = {'yapildi': bool(g.get('normalize')), 'girdi': g.get('cift_girdi', g['cift']), 'cift': g['cift']}
+    sat += ['', f"normalize: {'evet' if g.get('normalize') else 'hayir'}"
+                + (f" ({g.get('cift_girdi')} -> {g['cift']}, isimler yer degistirdi)" if g.get('normalize') else ''),
+            '', f"SONUC: {'PASS' if hepsi else 'FAIL'}"]
     (paket / 'OZET.md').write_text('\n'.join(sat) + '\n')
     (paket / 'OZET.json').write_text(json.dumps(OZ, ensure_ascii=False, indent=1, default=str))
     (inc / 'OZET.md').write_text('\n'.join(sat) + '\n')
