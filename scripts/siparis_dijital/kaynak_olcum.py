@@ -55,13 +55,13 @@ def main():
     ap.add_argument('--kisisel', required=True)
     ap.add_argument('--medya', required=True)
     ap.add_argument('--cikti', required=True)
-    ap.add_argument('--is', type=int, default=4, help='paralel surec')
+    ap.add_argument('--is', dest='surec', type=int, default=4, help='paralel surec')
     a = ap.parse_args()
     from concurrent.futures import ProcessPoolExecutor
     t0 = time.time()
     dosyalar = [str(x) for x in sorted(Path(a.kaynak).glob('*/*/*.jpg'))]
     sonuc = []
-    with ProcessPoolExecutor(a.is, initializer=_hazirla, initargs=(a.kisisel, a.medya)) as ex:
+    with ProcessPoolExecutor(a.surec, initializer=_hazirla, initargs=(a.kisisel, a.medya)) as ex:
         for i, r in enumerate(ex.map(olc_tek, dosyalar, chunksize=4), 1):
             sonuc.append(r)
             gecen = time.time() - t0
