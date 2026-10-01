@@ -468,7 +468,7 @@ class EdisyonPoster:
         finally:
             mesaj_kapisi.ETKIN['edisyon'] = False
         return s, S, p, (merkez, yeni), {'olcek': bilgi['olcek'], 'punto': bilgi['punto'],
-                                         'yeni_ham': hk.maske()}
+                                         'yeni_ham': hk.maske(), 'genislik_esle': bilgi.get('genislik_esle')}
 
     def __call__(self, kaynak_bayt, sayfa_no, ed, oran, isimler, mesaj,
                  hedef_en=None, boy=None):
@@ -553,6 +553,7 @@ class EdisyonPoster:
                                             'sembol', 'tag_bant', 'sol_isim', 'sag_isim')},
             'olcum_duzeltme': duz,
             'kilit': {'bosluk': kilit['bosluk'], 'cap': kilit['cap']},
+            'genislik_esle': (bi1 or {}).get('genislik_esle'),
             'temiz_ara_kapisi': s0['temiz_ara_kapisi'], 'kalinti_kapisi': kapi0,
             'sembol_kapisi': sk, 'punto_2400': bi0['punto'], 'punto_hedef': bi1['punto'],
             'sure_sn': round(time.time() - t0, 1),
@@ -2117,7 +2118,9 @@ def olcek_ikinci_deneme(ed, hedef_en, ilk, yeniden, olcek_olc, leke_olc, hedef_y
             continue
         p2, bi2, ek2, b2, bpx2, gecici = r2
         ok2 = olcek_olc(b2, ek2, p2, bi2)
-        denemeler[ad] = {q: ok2.get(q) for q in ('konum_fark_px', 'kenar_fark_px')}
+        denemeler[ad] = {q: ok2.get(q) for q in ('konum_fark_px', 'kenar_fark_px', 'fark')}
+        if bi2.get('genislik_esle'):
+            denemeler[ad]['genislik_esle'] = bi2['genislik_esle']
         if ok2.get('gecti'):
             Path(gecici).replace(hedef_yol)
             bi2['leke_kapisi'] = leke_olc(b2, ek2)
