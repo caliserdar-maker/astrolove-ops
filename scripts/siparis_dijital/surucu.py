@@ -216,12 +216,20 @@ def wp_bakir_uret_v1(sd, sip, P_blue, P_ed, cik):
     ek = getattr(sd, 'POD_EK_DENEME', None)         # duz renk baskisinda 3. olcek denemesi (yalniz WP hatti)
     if ek is not None:
         ek['etkin'] = True
+    # Serdar 1 Eki (TEST 9000000001 WP 24x36 MB'ye dustu): duz renk boydan bagimsiz CHAMPAGNE_IVORY; MB yedegi yok
+    # (CI kapilari gecmezse WP FAIL olur ve nedeni raporlanir; 15 dk'lik MB denemesi kosmaz).
+    asil_duz = wo.DUZ_RENK
+    wo.DUZ_RENK = ('CHAMPAGNE_IVORY',)
     try:
         R, WP = wo.cift_boy(sip['cift'], sip['boy'], P_ed, P_blue, {sip['cift']: sip['sayfa']}, cik,
                             isim=(sip['isim1'], sip['isim2']), mesaj=sip.get('mesaj') or '', siparis=True)
     finally:
+        wo.DUZ_RENK = asil_duz
         if ek is not None:
             ek['etkin'] = False
+    for d in R.get('duz_renk_denemeleri') or []:     # CI kapi ayrintisi (isim yok)
+        print('WP_DUZ_RENK', sip['boy'], d.get('renk'), 'kimlik', (d.get('kimlik') or {}).get('kalan'),
+              'siparis', (d.get('siparis') or {}).get('kalan'), flush=True)
     ozet = {a: R.get(a) for a in ('durum', 'duz_renk', 'plate_gecti', 'zemin_birebir', 'eski_iz', 'serdar_dikis')}
     if WP is None:
         return {**sip, 'durum': R.get('durum'), 'wp_bakir': ozet, 'kapilar_gecti': False}
@@ -252,12 +260,9 @@ def wp_asamasi(a, g):
     asil = wo.kaydet_jpg
     kalite = {}
 
-    def kaydet(arr, yol, q=95):                     # tam sayfa JPEG: butceyi asarsa kalite 95 -> 80
-        asil(arr, yol, q)
-        while Path(yol).stat().st_size > butce and q > 80:
-            q -= 3
-            asil(arr, yol, q)
-        kalite[Path(yol).name] = q
+    def kaydet(arr, yol, q=95):                     # Serdar 1 Eki: kalite 95 SABIT (boyut icin dusurme yok; PDF 40 MB esnek)
+        asil(arr, yol, 95)
+        kalite[Path(yol).name] = 95
     wo.kaydet_jpg = kaydet
     no, _ = sd.sayfa_no_tablosu()
     x = sd.normalize({'receipt': g['receipt'], 'cift': g['cift'], 'renk': 'WARM_PARCHMENT', 'boy': a.boy,
