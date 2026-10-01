@@ -25,11 +25,13 @@ def main():
     E, Y = oku(a.eski), oku(a.yeni)
     anahtar = sorted(set(E) | set(Y))
     ok = lambda x: bool(x and x.get('gecti'))
-    geri = [k for k in anahtar if ok(E.get(k)) and not ok(Y.get(k))]
-    duzelen = [k for k in anahtar if not ok(E.get(k)) and ok(Y.get(k))]
+    # eksik hucre (bir tarafta olculmemis: zaman asimi) PASS->FAIL sayilmaz; ayrica listelenir ve cikis 1 olur
+    geri = [k for k in anahtar if k in E and k in Y and ok(E[k]) and not ok(Y[k])]
+    duzelen = [k for k in anahtar if k in E and k in Y and not ok(E[k]) and ok(Y[k])]
     eksik = [k for k in anahtar if k not in E or k not in Y]
     renkler = sorted({k[1] for k in anahtar})
-    satir = ['# REGRESYON 78 cift x 4 renk (WP haric) x 11x14', '',
+    boylar = ', '.join(sorted({k[2] for k in anahtar}))
+    satir = [f'# REGRESYON 78 cift x 4 renk (WP haric) x {boylar}', '',
              f'Hucre: eski {len(E)}, yeni {len(Y)}. PASS: eski {sum(ok(v) for v in E.values())}, '
              f'yeni {sum(ok(v) for v in Y.values())}. PASS->FAIL: {len(geri)}. FAIL->PASS: {len(duzelen)}. '
              f'Eksik: {len(eksik)}.', '', '| renk | eski PASS | yeni PASS | PASS->FAIL |', '|---|---|---|---|']

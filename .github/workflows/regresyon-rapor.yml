@@ -15,7 +15,7 @@ on:
       - config/regresyon_rapor.trigger
 
 env:
-  RUN_ID: "36767836869"
+  RUN_IDS: "36828199342"          # bosluklu liste; sonraki kosu ayni hucrede oncekinin yerine gecer
 
 jobs:
   rapor:
@@ -24,11 +24,15 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
-      - uses: actions/download-artifact@v4
-        with:
-          path: sonuc
-          run-id: ${{ env.RUN_ID }}
-          github-token: ${{ github.token }}
+      - name: Artifact'ler (her kosu ayri klasor, sirali)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          i=0
+          for r in $RUN_IDS; do
+            i=$((i+1)); gh run download "$r" -R "$GITHUB_REPOSITORY" -D "sonuc/${i}_$r"
+          done
       - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
       - name: rclone.conf olustur
         env:
@@ -49,7 +53,8 @@ jobs:
         run: |
           set +e
           mkdir -p e y rapor
-          cp sonuc/sonuc_eski_*/*.jsonl e/; cp sonuc/sonuc_yeni_*/*.jsonl y/
+          for f in sonuc/*/sonuc_eski_*/*.jsonl; do k=$(basename "$(dirname "$(dirname "$f")")"); cp "$f" "e/${k}_$(basename "$f")"; done
+          for f in sonuc/*/sonuc_yeni_*/*.jsonl; do k=$(basename "$(dirname "$(dirname "$f")")"); cp "$f" "y/${k}_$(basename "$f")"; done
           python3 scripts/medya_v1/regresyon_karsilastir.py --eski e --yeni y --md rapor/REGRESYON.md > /dev/null
           python3 scripts/medya_v1/regresyon_fail_tablo.py y
           cp FAIL_TABLO.md rapor/ && cat e/*.jsonl > rapor/eski.jsonl && cat y/*.jsonl > rapor/yeni.jsonl

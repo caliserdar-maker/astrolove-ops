@@ -22,7 +22,9 @@ concurrency: regresyon-78
 env:
   ESKI_REF: 2fbdf57798d67f51756994cbac691b95ed7ddc46
   YENI_REF: ${{ github.sha }}
-  TUM: "MIDNIGHT_BLUE,DEEP_BLACK,PURE_WHITE,CHAMPAGNE_IVORY:11x14,24x36"
+  # EK KOSU (1 Eki): 36828199342 ana kosusunda yalniz MB olan 0/4/8 parcalari 240 dk sinirina takildi (MB 24x36 ~8 dk/hucre);
+  # MB 24x36 78 hucre 12 parcaya yayilarak yeniden olculur, rapor iki kosuyu birlestirir (regresyon-rapor RUN_IDS).
+  TUM: "MIDNIGHT_BLUE:24x36"
   PARCA_N: "12"
 
 jobs:
