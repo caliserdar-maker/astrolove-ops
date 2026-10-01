@@ -32,7 +32,7 @@ def bayt_png(a):
     b = io.BytesIO(); Image.fromarray(a).save(b, 'PNG'); return b.getvalue()
 
 
-def temizle(plate_a, kaynaklar, ed):
+def temizle(plate_a, kaynaklar, ed, kayma=None):
     """plate_a: HxWx3 uint8 (tam cozunurluk). kaynaklar: [bayt]. Doner: yeni plate, maske, bilgi."""
     from pilot6 import LUMA
     eu = sd._mod('edisyon_uret')
@@ -63,7 +63,7 @@ def temizle(plate_a, kaynaklar, ed):
     Lp = np.asarray(Image.fromarray(plate_a).resize((2400, round(H * 2400 / Wd)), Image.LANCZOS)).astype(np.float32) @ LUMA
     ys = np.nonzero(M24.any(1))[0]; xs = np.nonzero(M24.any(0))[0]
     ty0, ty1, tx0, tx1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
-    K = KAYMA
+    K = KAYMA if kayma is None else kayma
     r0, r1 = max(ty0 - K, 0), min(ty1 + K, Lp.shape[0]); c0, c1 = max(tx0 - K, 0), min(tx1 + K, 2400)
     reg = Lp[r0:r1, c0:c1]
     D = np.abs(reg - cv2.medianBlur(np.clip(reg, 0, 255).astype(np.uint8), 21).astype(np.float32))
@@ -108,6 +108,8 @@ def main():
     ap.add_argument('--renkler', default='MIDNIGHT_BLUE,DEEP_BLACK,PURE_WHITE,CHAMPAGNE_IVORY')
     ap.add_argument('--boylar', default='16x20,18x24,24x36,11x14,A2')
     ap.add_argument('--yaz', action='store_true', help='QC PASS ise PLATES\'e yaz (yedekli)')
+    ap.add_argument('--kayma', type=int, default=KAYMA, help='hiza arama penceresi (2400 px)')
+    ap.add_argument('--plate_klasor', default='', help='plate bu klasorden okunur (orn. yedek; salt okur olcum)')
     ap.add_argument('--atla_yazilmis', default='', help='bu yedek klasorunde yedegi olan plate atlanir (yazilmis)')
     ap.add_argument('--cikti', default='plate_iz')
     a = ap.parse_args()
@@ -121,8 +123,14 @@ def main():
             ed = sd.RENK_ED[renk]; oran = sd.BOY[boy][0]
             r = {'renk': renk, 'boy': boy}
             try:
-                yol = Path(P_ed.plate(ed, oran, boy))
                 ad = f'{ed.upper()}{sd.PLATE_EK}_{boy}.png'
+                if a.plate_klasor:
+                    if a.yaz:
+                        raise SystemExit('--plate_klasor yalniz olcum icindir (--yaz ile kullanilmaz)')
+                    yol = cik / f'_kaynak_{ad}'
+                    sd.rc('copyto', f'{sd.PLATES.rsplit("/", 1)[0]}/{a.plate_klasor}/{ad}', str(yol), timeout=1800)
+                else:
+                    yol = Path(P_ed.plate(ed, oran, boy))
                 r['plate'] = ad
                 yd = f'{sd.PLATES.rsplit("/", 1)[0]}/{a.atla_yazilmis}'
                 if a.atla_yazilmis and sd.rc('lsf', yd, '--include', ad).strip() and \
@@ -131,7 +139,7 @@ def main():
                     R.append(r); print('PLATE_IZ', json.dumps(r), flush=True); continue
                 once = np.asarray(Image.open(yol).convert('RGB'))
                 kb = [sd.pod_kaynak(c, renk, boy).read_bytes() for c in CIFTLER]
-                sonra, M, bil = temizle(once, kb, ed)
+                sonra, M, bil = temizle(once, kb, ed, a.kayma)
                 r.update(bil)
                 if sonra is None:
                     raise RuntimeError(bil.get('sebep'))
