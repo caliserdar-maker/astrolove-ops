@@ -63,11 +63,20 @@ def test_acik_cizgi_yakalanir():
     assert not r['gecti'] and any(c['tur'] == 'acik' and abs(c['x'] - 61) <= 2 for c in r['cizgi']), r
 
 
+def test_24x36_aday():
+    """24x36 plate adayi (x 1937, y 4376-4440, acik, sapma ~12): parsomen benekleri hale almaz, aday gorunur kalir."""
+    a = np.asarray(Image.open(V / 'plate24x36_aday_kesit.png').convert('RGB')).astype(np.float32)
+    b = np.asarray(Image.open(V / 'onayli24x36_aday_kesit.png').convert('RGB')).astype(np.float32)
+    r = dk.kapi(a, b, np.ones(a.shape[0], bool))
+    assert not r['gecti'] and any(c['tur'] == 'acik' and abs(c['x'] - 100) <= 2 for c in r['cizgi']), r
+
+
 def test_onayli_pass():
     _, b, sat = _yukle()
     assert dk.kapi(b, b, sat)['gecti']
 
 
 if __name__ == '__main__':
-    for f in (test_v2_fail, test_onarim_pass, test_onayli_pass, test_as_hale, test_acik_cizgi_yakalanir):
+    for f in (test_v2_fail, test_onarim_pass, test_onayli_pass, test_as_hale, test_acik_cizgi_yakalanir,
+              test_24x36_aday):
         f(); print('PASS', f.__name__)

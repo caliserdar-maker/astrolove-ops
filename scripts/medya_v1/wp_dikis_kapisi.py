@@ -22,6 +22,7 @@ ARA = 10
 KENAR = 40
 HALE_KOYU = 4     # yazi maskesi genisletme (px)
 HALE_ACIK = 12    # acik kabartma halesi yaricapi (px)
+HALE_ALAN = 150   # hale alan yazi bileseni alt siniri (px); parsomen benegi ~25 px
 
 
 def hale_maskesi(rgb):
@@ -38,10 +39,16 @@ def hale_maskesi(rgb):
     cizgi[1:] = (st[1:, cv2.CC_STAT_WIDTH] <= 8) & (st[1:, cv2.CC_STAT_HEIGHT] >= 50)
     kalin[cizgi[lab]] = 0
     yazi = (wo._yazi_maskesi(rgb, ince=True) | cv2.dilate(kalin, np.ones((5, 5), np.uint8)).astype(bool)).astype(np.uint8)
-    koyu_hale = cv2.dilate(yazi, np.ones((2 * HALE_KOYU + 1,) * 2, np.uint8)).astype(bool)
-    yakin = cv2.dilate(yazi, np.ones((2 * HALE_ACIK + 1,) * 2, np.uint8)).astype(bool)
+    # hale yalniz gercek yazi bilesenlerine (alan >= HALE_ALAN): parsomen benekleri (~25 px) hale almaz (24x36 plate
+    # adayinin yanindaki benekler acik cizgiyi hale sayip gizliyordu)
+    n, lab, st, _ = cv2.connectedComponentsWithStats(yazi, 8)
+    buyuk = np.zeros(n, bool)
+    buyuk[1:] = st[1:, cv2.CC_STAT_AREA] >= HALE_ALAN
+    taban = buyuk[lab].astype(np.uint8)
+    koyu_hale = cv2.dilate(taban, np.ones((2 * HALE_KOYU + 1,) * 2, np.uint8)).astype(bool)
+    yakin = cv2.dilate(taban, np.ones((2 * HALE_ACIK + 1,) * 2, np.uint8)).astype(bool)
     acik = (L - cv2.medianBlur(u8, 31).astype(np.float32)) > 6
-    return koyu_hale | (yakin & acik)
+    return yazi.astype(bool) | koyu_hale | (yakin & acik)
 
 
 def _seri(L, yazi, c, isaret, dd):
