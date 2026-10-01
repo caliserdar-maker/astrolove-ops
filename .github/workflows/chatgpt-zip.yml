@@ -1,0 +1,155 @@
+name: chatgpt-zip
+
+# ChatGPT paralel denemesi (Serdar 1 Eki): CANCER_LEO 5 renk x 5 boy ISIMSIZ (burc adli) yuksek cozunurluk poster
+# + siparis fontlari, tek ZIP -> Drive TEMP/SIPARIS_FONTLAR/CHATGPT_CANCER_LEO.zip (<= 512 MB).
+# MB/DB/PW/CI: POD_PRINT kaynaklari (siparis hattinin girdisi, bayt aynen; yalniz JFIF dpi 300).
+# WARM_PARCHMENT: onayli BAKIR (adfb2b9, wp_kilit) kimlik metniyle (CANCER / LEO / Two Souls · One Bond);
+# A2'de duz renk baskisi siparis-dijital wp_pod_kod=v1 ile ayni (v1 POD kodu + kilitli WP dosyalari).
+# Etsy / musteri YOK.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      v1_ref:
+        description: "siparis-baski-v1 commit (yalniz A2 duz renk baskisi)"
+        required: false
+        default: "6409eb2536b1df7b081610c60cbabb0d3e47fc7e"
+
+env:
+  WP_REF: adfb2b99489798296936669575309b777c7e1ca7
+
+jobs:
+  wp:
+    strategy:
+      fail-fast: false
+      matrix:
+        boy: ["24x36", "A2", "18x24", "16x20", "11x14"]
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.WP_REF }}
+          path: _wp
+      - if: ${{ matrix.boy == 'A2' }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.v1_ref }}
+          path: _v1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --quiet pillow opencv-python-headless numpy fonttools img2pdf pikepdf
+      - run: cd _wp && python scripts/medya_v1/test_wp_kilit.py
+      - if: ${{ matrix.boy == 'A2' }}
+        run: |
+          set -euo pipefail
+          for f in wp_bakir.py wp_katman.py wp_ornek.py wp_kilit.py wp_kilit.json wp_tani.py test_wp_kilit.py; do
+            cp "_wp/scripts/medya_v1/$f" "_v1/scripts/medya_v1/$f"
+          done
+          (cd _v1 && python scripts/medya_v1/test_wp_kilit.py)
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - if: ${{ matrix.boy == '24x36' || matrix.boy == 'A2' }}
+        run: sudo fallocate -l 28G /mnt/takas2 && sudo chmod 600 /mnt/takas2 && sudo mkswap /mnt/takas2 >/dev/null && sudo swapon /mnt/takas2
+      - name: WP BAKIR (kimlik metni)
+        run: |
+          set +e
+          python3 -c "import base64,json; json.dump({'receipt':'CHATGPT','cift':'CANCER_LEO','isim1':'CANCER','isim2':'LEO','mesaj_b64':base64.b64encode('Two Souls · One Bond'.encode()).decode()}, open('girdi.json','w'))"
+          if [ "${{ matrix.boy }}" = A2 ]; then KOD=_v1; else KOD=_wp; fi
+          SIPARIS_GIRDI_JSON="$PWD/girdi.json" python scripts/siparis_dijital/surucu.py --asama wp --boy "${{ matrix.boy }}" --kod "$KOD" \
+            --kod-ref "wp-katman $WP_REF" --cikti "$PWD/out/wp/${{ matrix.boy }}" 2>&1 | grep -v '^SURE '
+          ls -la out/wp/${{ matrix.boy }}/
+          exit 0
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wp_${{ matrix.boy }}
+          path: |
+            out/wp/${{ matrix.boy }}/WP_${{ matrix.boy }}.jpg
+            out/wp/${{ matrix.boy }}/OZET_WP_${{ matrix.boy }}.json
+          retention-days: 2
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
+
+  zip:
+    needs: wp
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wp_*
+          path: wp
+          merge-multiple: true
+      - run: python -m pip install --quiet pillow
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: ZIP
+        run: |
+          set -euo pipefail
+          mkdir -p z
+          for r in MIDNIGHT_BLUE DEEP_BLACK PURE_WHITE CHAMPAGNE_IVORY; do
+            for b in 16x20 18x24 24x36 11x14 A2; do
+              rclone copyto "gdrive:ASTROLOVE/TEMP/POD_PRINT/CANCER_LEO/$r/$b.jpg" "z/${r}_${b}.jpg"
+            done
+          done
+          for b in 16x20 18x24 24x36 11x14 A2; do
+            [ -f "wp/WP_$b.jpg" ] && cp "wp/WP_$b.jpg" "z/WARM_PARCHMENT_${b}.jpg" || echo "EKSIK WP $b"
+            [ -f "wp/OZET_WP_$b.json" ] && python3 -c "import json; d=json.load(open('wp/OZET_WP_$b.json')); print('WP $b', d.get('durum'), 'kapilar_gecti', d.get('kapilar_gecti'), (d.get('wp_bakir') or {}).get('duz_renk'))"
+          done
+          rclone copy gdrive:ASTROLOVE/TEMP/SIPARIS_FONTLAR z/ --include 'Cinzel.ttf' --include 'EBGaramond-Italic.ttf' --include 'FONTLAR.md'
+          python3 - <<'EOF'
+          # 300 dpi: JFIF yogunlugu yerinde yazilir (yeniden sikistirma YOK); JFIF yoksa dokunulmaz, raporlanir
+          import glob, struct
+          from PIL import Image
+          Image.MAX_IMAGE_PIXELS = None
+          for f in sorted(glob.glob('z/*.jpg')):
+              b = bytearray(open(f, 'rb').read())
+              if b[2:4] == b'\xff\xe0' and b[6:11] == b'JFIF\x00':
+                  b[13] = 1; b[14:16] = struct.pack('>H', 300); b[16:18] = struct.pack('>H', 300)
+                  open(f, 'wb').write(b)
+              with Image.open(f) as im:
+                  print(f, im.size, im.info.get('dpi'), round(len(b) / 1e6, 1), 'MB')
+          EOF
+          ls z | wc -l
+          (cd z && zip -q -0 ../CHATGPT_CANCER_LEO.zip *)
+          S=$(stat -c %s CHATGPT_CANCER_LEO.zip); echo "ZIP $((S/1000000)) MB"; [ "$S" -le 536870912 ] || { echo "HATA: 512 MB ustu" >&2; exit 1; }
+          rclone copyto CHATGPT_CANCER_LEO.zip gdrive:ASTROLOVE/TEMP/SIPARIS_FONTLAR/CHATGPT_CANCER_LEO.zip
+          rclone lsl gdrive:ASTROLOVE/TEMP/SIPARIS_FONTLAR/ --include 'CHATGPT_CANCER_LEO.zip'
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
