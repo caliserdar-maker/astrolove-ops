@@ -1,0 +1,72 @@
+name: inceleme-wp-bakir
+
+# Yalniz inceleme/wp-bakir-aq-cancer dalinda (main'e merge YOK). Bakir WP ornegi (AQUARIUS_CANCER) inceleme paketi:
+# Drive'dan 05/19 (birebir), WP baskisi + onayli referans (e4f65cd, run 36848215749) indirir, olcum.py ile kesit +
+# OLCUM.txt uretir, ayni dala commit eder. Etsy YOK, HAZIR YOK, uretim dosyalarina yazma YOK (Drive salt okunur).
+
+on:
+  push:
+    branches: [inceleme/wp-bakir-aq-cancer]
+    paths: [inceleme/wp_bakir_aquarius_cancer/olcum.py]
+
+permissions:
+  contents: write
+
+jobs:
+  paket:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q numpy pillow
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Drive'dan indir (salt okuma)
+        run: |
+          set -euo pipefail
+          O=inceleme/wp_bakir_aquarius_cancer; T=gdrive:ASTROLOVE/TEMP
+          rclone copyto "$T/ORNEK_WP_BAKIR/AQUARIUS_CANCER/05_renk_ve_dijital.jpg" $O/05_renk_ve_dijital.jpg
+          rclone copyto "$T/ORNEK_WP_BAKIR/AQUARIUS_CANCER/19_renk_warm_parchment.jpg" $O/19_renk_warm_parchment.jpg
+          rclone copyto "$T/ORNEK_WP_BAKIR/AQUARIUS_CANCER/BASKI_WARM_PARCHMENT.jpg" $O/WP_BASKI.jpg
+          rclone copyto "$T/ORNEK_WP_BAKIR/AQUARIUS_CANCER/KAPI_WARM_PARCHMENT.json" $O/KAPI_WARM_PARCHMENT.json
+          rclone copyto "$T/GALERI_77/_KAYNAK/AQUARIUS_CANCER/KAPI_MIDNIGHT_BLUE.json" $O/KAPI_MIDNIGHT_BLUE.json || echo "MB kapi raporu yok (varsayilan bantlar)"
+          rclone lsl "$T/WP_ORNEK/AQUARIUS_CANCER/" --include "WP_AQUARIUS_CANCER_11x14_*" || true
+          rclone copyto "$T/WP_ORNEK/AQUARIUS_CANCER/WP_AQUARIUS_CANCER_11x14_BASKI.jpg" $O/REF_WP_BASKI.jpg
+          # Drive birebir: boyut kontrolu
+          for f in 05_renk_ve_dijital.jpg 19_renk_warm_parchment.jpg; do
+            a=$(stat -c %s $O/$f); b=$(rclone lsjson "$T/ORNEK_WP_BAKIR/AQUARIUS_CANCER/$f" | python3 -c "import json,sys;print(json.load(sys.stdin)[0]['Size'])")
+            echo "$f yerel $a / Drive $b"; [ "$a" = "$b" ]
+          done
+      - name: Olcum + kesit
+        run: python3 inceleme/wp_bakir_aquarius_cancer/olcum.py
+      - name: Commit (yalniz bu dal)
+        run: |
+          set -euo pipefail
+          O=inceleme/wp_bakir_aquarius_cancer
+          rm -f $O/KAPI_MIDNIGHT_BLUE.json
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add $O
+          git commit -q -m "inceleme: bakir WP ornegi AQUARIUS_CANCER paketi (05, 19, REF kesit, OLCUM.txt)"
+          git push origin HEAD:inceleme/wp-bakir-aq-cancer
+          git log -1 --format='%H'
+      - if: always()
+        run: rm -rf ~/.config/rclone
