@@ -25,10 +25,21 @@ def al(d, *ks):
     return d
 
 
+def kaynak(cift, renk, boy, deneme=3):
+    """POD_PRINT indirme: Drive kota / ag hatasinda 20 s, 40 s bekleyip tekrar (yalniz indirme; olcum degismez)."""
+    for i in range(deneme):
+        try:
+            return sd.pod_kaynak(cift, renk, boy)
+        except Exception:                                         # noqa: BLE001
+            if i == deneme - 1:
+                raise
+            time.sleep(20 * (i + 1))
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--isler', default='')
-    ap.add_argument('--tum', default='', help='RENK1,RENK2,..:BOY -> POD_PRINT\'teki tum ciftler (regresyon)')
+    ap.add_argument('--tum', default='', help='RENK1,RENK2,..:BOY1,BOY2 -> POD_PRINT\'teki tum ciftler (regresyon)')
     ap.add_argument('--parca', default='0/1', help='i/n: tum listenin i::n dilimi')
     ap.add_argument('--cikti', default='', help='sonuc JSONL dosyasi')
     ap.add_argument('--etiket', default='')
@@ -37,9 +48,9 @@ def main():
     P_ed, P_blue = sd.EdisyonPoster(), sd.BluePoster()
     no, ciftler = sd.sayfa_no_tablosu()
     if a.tum:
-        renkler, boy_ = a.tum.split(':')
+        renkler, boylar = a.tum.split(':')
         i, n_ = (int(v) for v in a.parca.split('/'))
-        tum = [f'{c}:{r}:{boy_}' for c in ciftler for r in renkler.split(',')]
+        tum = [f'{c}:{r}:{b}' for b in boylar.split(',') for c in ciftler for r in renkler.split(',')]
         isler = tum[i::n_]
     else:
         isler = [x.strip() for x in a.isler.split(';') if x.strip()]
@@ -59,7 +70,7 @@ def main():
                               'isim1': isim[0], 'isim2': isim[1], 'mesaj': mesaj})
             x['receipt'] = f'OLC_{cift}_{renk}_{boy}_{tur}'
             x['sayfa'] = no[cift]
-            yol = sd.pod_kaynak(cift, renk, boy)
+            yol = kaynak(cift, renk, boy)
             with Image.open(yol) as im:
                 x['hedef_px'] = list(im.size)
             is_dir = sd.W / x['receipt']; is_dir.mkdir(parents=True, exist_ok=True)

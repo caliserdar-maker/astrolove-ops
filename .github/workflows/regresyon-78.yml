@@ -1,6 +1,7 @@
 name: regresyon-78
 
-# REGRESYON (Serdar 30 Eyl): 78 cift x 4 renk (MB, DB, PW, CI; WP haric) x 11x14, EMILY / JAMES siparisi.
+# REGRESYON (Serdar 30 Eyl; 1 Eki: + 24x36): 78 cift x 4 renk (MB, DB, PW, CI; WP haric) x {11x14, 24x36}, EMILY / JAMES siparisi.
+# yeni = tetikleyen commit (github.sha; kosu sirasinda dala yeni push gelse de olculen kod sabit).
 # eski = merge ONCESI siparis-baski-v1 (2fbdf57), yeni = bu dal (2. kosu: olcekli yerlesim yalniz olcek FAIL'de;
 # MB yolu degismedi, 1. kosuda 36756875368 MB 0 PASS->FAIL). Ayni hucreler, ayni
 # girdiler; kural: eskide PASS olan hicbir hucre yenide FAIL olmamali (regresyon_karsilastir.py).
@@ -20,18 +21,18 @@ concurrency: regresyon-78
 
 env:
   ESKI_REF: 2fbdf57798d67f51756994cbac691b95ed7ddc46
-  YENI_REF: claude/gracious-meitner-i72rkr
-  TUM: "DEEP_BLACK,PURE_WHITE,CHAMPAGNE_IVORY:11x14"
-  PARCA_N: "6"
+  YENI_REF: ${{ github.sha }}
+  TUM: "MIDNIGHT_BLUE,DEEP_BLACK,PURE_WHITE,CHAMPAGNE_IVORY:11x14,24x36"
+  PARCA_N: "12"
 
 jobs:
   olc:
     strategy:
       fail-fast: false
-      max-parallel: 12
+      max-parallel: 24
       matrix:
         kod: [eski, yeni]
-        parca: [0, 1, 2, 3, 4, 5]
+        parca: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
     runs-on: ubuntu-latest
     timeout-minutes: 240
     steps:
