@@ -18,14 +18,21 @@ GEREK = ('isim_bant', 'sol_isim', 'sonsuz', 'sag_isim', 'sembol_bant', 'sembol',
 
 
 _YOL = {}
+# uretimdeki edisyon -> plate adi (siparis_dosyasi.EdisyonPoster.plate); MB plate maskesi kullanmaz (a1_poster yolu)
+ED_PLATE = {'MIDNIGHT_BLUE': None, 'DEEP_BLACK': 'BLACK', 'PURE_WHITE': 'PURE_WHITE',
+            'CHAMPAGNE_IVORY': 'MODERN', 'WARM_PARCHMENT': 'VINTAGE'}
 
 
-def _hazirla(kisisel, medya):
+def _hazirla(kisisel, medya, plates=''):
     sys.path.insert(0, kisisel)
     sys.path.insert(0, medya)
+    _YOL['plates'] = plates
 
 
 def olc_tek(f):
+    """URETIMLE AYNI OLCUM YOLU (Test 4 kapisi): MB -> a1_poster.Poster.sayfa_kur (sayfa_olc_guvenli, duz esik);
+    diger renkler -> siparis_dosyasi.EdisyonPoster.olc (plate fark maskesi + sayfa_olc_guvenli, edisyon murekkebi)."""
+    import numpy as np
     import pilot11
     from PIL import Image
     import a1_poster
@@ -33,13 +40,22 @@ def olc_tek(f):
     cift, renk, boy = f.parent.parent.name, f.parent.name, f.stem
     r = {'cift': cift, 'renk': renk, 'boy': boy, 'gecti': False, 'eksik': [], 'hata': None}
     try:
-        # uretimle ayni olcum (siparis-baski-v1 a1_poster.sayfa_olc_guvenli: gecersizse yedek, yine gecersizse hata)
-        if hasattr(a1_poster, 'sayfa_olc_guvenli'):
+        ref_norm = pilot11.norm(Image.open(f).convert('RGB'))[0]
+        if ED_PLATE.get(renk) is None:
             o, yedek = a1_poster.sayfa_olc_guvenli(pilot11, f)
-            r['olcum_yedek'] = yedek
+            m = a1_poster.murekkep(ref_norm)
+            r['yol'] = 'a1_poster (MB)'
         else:
-            o = pilot11.sayfa_olc(f)
-        m = a1_poster.murekkep(pilot11.norm(Image.open(f).convert('RGB'))[0])
+            import siparis_dosyasi as sd
+            pl = Path(_YOL.get('plates') or '_plates') / f'{ED_PLATE[renk]}_{boy}.png'
+            if not pl.exists():
+                r['hata'] = f'PLATE YOK: {pl.name}'
+                return r
+            sd.olcek_kur(2400)
+            m = sd._mod('edisyon_uret').murekkep(np.asarray(ref_norm).astype(np.float32))
+            o, yedek = a1_poster.sayfa_olc_guvenli(pilot11, f, maske=sd.plate_fark_maskesi(pl))
+            r['yol'] = f'EdisyonPoster.olc (plate {pl.name})'
+        r['olcum_yedek'] = yedek
         o2, duz = a1_poster.olcum_duzelt(dict(o), m)
         r['eksik_ham'] = [k for k in GEREK if k not in o]
         r['eksik'] = [k for k in GEREK if k not in o2]
@@ -71,12 +87,13 @@ def main():
     ap.add_argument('--medya', required=True)
     ap.add_argument('--cikti', required=True)
     ap.add_argument('--is', dest='surec', type=int, default=4, help='paralel surec')
+    ap.add_argument('--plates', default='_plates', help='PLATES kopyasi (<ED>_<boy>.png)')
     a = ap.parse_args()
     from concurrent.futures import ProcessPoolExecutor
     t0 = time.time()
     dosyalar = [str(x) for x in sorted(Path(a.kaynak).glob('*/*/*.jpg'))]
     sonuc = []
-    with ProcessPoolExecutor(a.surec, initializer=_hazirla, initargs=(a.kisisel, a.medya)) as ex:
+    with ProcessPoolExecutor(a.surec, initializer=_hazirla, initargs=(a.kisisel, a.medya, str(Path(a.plates).resolve()))) as ex:
         for i, r in enumerate(ex.map(olc_tek, dosyalar, chunksize=4), 1):
             sonuc.append(r)
             gecen = time.time() - t0
