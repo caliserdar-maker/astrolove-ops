@@ -42,6 +42,16 @@ def olc_tek(f):
         r['tag'] = {k: o2.get(k) for k in ('tag_bant', 'tag_x', 'tag_kumeleri')}
         r['isim_bant'] = o2.get('isim_bant')
         r['norm_boyut'] = o2.get('norm_boyut')
+        if not r['gecti']:                        # AYRINTI (Test 3): alt yari bantlari + kume araliklari (yalniz sayi)
+            import numpy as np
+            from pilot6 import kumeler, LUMA, MUREKKEP
+            im, _k = pilot11.norm(Image.open(f).convert('RGB'))
+            mm = (np.asarray(im).astype(np.float32) @ LUMA) > MUREKKEP
+            H = im.height
+            r['bantlar'] = [{'b': [int(b0), int(b1)], 'oran': round((b0 + b1) / 2 / H, 3),
+                             'kume20': [[int(c0), int(c1)] for c0, c1 in kumeler(mm[b0:b1], 20)][:14]}
+                            for b0, b1 in pilot11.bantlar(mm) if b1 > 0.5 * H]
+            print('AYRINTI', cift, renk, boy, json.dumps(r['bantlar']), flush=True)
     except SystemExit as e:
         r['hata'] = f'SystemExit: {e}'
     except Exception as e:                                        # noqa: BLE001
