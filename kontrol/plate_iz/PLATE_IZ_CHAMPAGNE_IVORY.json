@@ -1,0 +1,277 @@
+[
+ {
+  "renk": "CHAMPAGNE_IVORY",
+  "boy": "16x20",
+  "plate": "MODERN_16x20.png",
+  "bant_satir": [
+   4916,
+   5510
+  ],
+  "maske_px": 117552,
+  "bantlar_2400": [
+   [
+    2558,
+    2655,
+    811,
+    1589
+   ],
+   [
+    2558,
+    2655,
+    811,
+    1589
+   ],
+   [
+    2558,
+    2655,
+    811,
+    1589
+   ]
+  ],
+  "kayma_2400": [
+   0,
+   0
+  ],
+  "qc": {
+   "iz_once": [
+    1.37,
+    1.37,
+    1.37
+   ],
+   "iz_sonra": [
+    -0.11,
+    -0.11,
+    -0.11
+   ],
+   "slogan": [
+    true,
+    true,
+    true
+   ],
+   "maske_disi_degisen_px": 0,
+   "gecti": true
+  },
+  "yazildi": true,
+  "yedek": "PLATES_YEDEK_IZ_20261001_1436/MODERN_16x20.png"
+ },
+ {
+  "renk": "CHAMPAGNE_IVORY",
+  "boy": "18x24",
+  "plate": "MODERN_18x24.png",
+  "bant_satir": [
+   5917,
+   6594
+  ],
+  "maske_px": 163755,
+  "bantlar_2400": [
+   [
+    2730,
+    2831,
+    788,
+    1612
+   ],
+   [
+    2730,
+    2831,
+    788,
+    1612
+   ],
+   [
+    2730,
+    2831,
+    788,
+    1612
+   ]
+  ],
+  "kayma_2400": [
+   0,
+   0
+  ],
+  "qc": {
+   "iz_once": [
+    1.28,
+    1.28,
+    1.28
+   ],
+   "iz_sonra": [
+    -0.04,
+    -0.04,
+    -0.04
+   ],
+   "slogan": [
+    true,
+    true,
+    true
+   ],
+   "maske_disi_degisen_px": 0,
+   "gecti": true
+  },
+  "yazildi": true,
+  "yedek": "PLATES_YEDEK_IZ_20261001_1436/MODERN_18x24.png"
+ },
+ {
+  "renk": "CHAMPAGNE_IVORY",
+  "boy": "24x36",
+  "plate": "MODERN_24x36.png",
+  "bant_satir": [
+   8691,
+   9609
+  ],
+  "maske_px": 317196,
+  "bantlar_2400": [
+   [
+    2997,
+    3103,
+    766,
+    1634
+   ],
+   [
+    2997,
+    3103,
+    766,
+    1634
+   ],
+   [
+    2997,
+    3103,
+    766,
+    1634
+   ]
+  ],
+  "kayma_2400": [
+   0,
+   0
+  ],
+  "qc": {
+   "iz_once": [
+    1.44,
+    1.44,
+    1.44
+   ],
+   "iz_sonra": [
+    -0.12,
+    -0.12,
+    -0.12
+   ],
+   "slogan": [
+    true,
+    true,
+    true
+   ],
+   "maske_disi_degisen_px": 0,
+   "gecti": true
+  },
+  "yazildi": true,
+  "yedek": "PLATES_YEDEK_IZ_20261001_1436/MODERN_24x36.png"
+ },
+ {
+  "renk": "CHAMPAGNE_IVORY",
+  "boy": "11x14",
+  "plate": "MODERN_11x14.png",
+  "bant_satir": [
+   3447,
+   3858
+  ],
+  "maske_px": 57403,
+  "bantlar_2400": [
+   [
+    2602,
+    2700,
+    805,
+    1595
+   ],
+   [
+    2602,
+    2700,
+    805,
+    1595
+   ],
+   [
+    2602,
+    2700,
+    805,
+    1595
+   ]
+  ],
+  "kayma_2400": [
+   0,
+   0
+  ],
+  "qc": {
+   "iz_once": [
+    1.21,
+    1.21,
+    1.21
+   ],
+   "iz_sonra": [
+    -0.15,
+    -0.15,
+    -0.15
+   ],
+   "slogan": [
+    true,
+    true,
+    true
+   ],
+   "maske_disi_degisen_px": 0,
+   "gecti": true
+  },
+  "yazildi": true,
+  "yedek": "PLATES_YEDEK_IZ_20261001_1436/MODERN_11x14.png"
+ },
+ {
+  "renk": "CHAMPAGNE_IVORY",
+  "boy": "A2",
+  "plate": "MODERN_A2.png",
+  "bant_satir": [
+   5727,
+   6354
+  ],
+  "maske_px": 146605,
+  "bantlar_2400": [
+   [
+    2871,
+    2975,
+    773,
+    1627
+   ],
+   [
+    2871,
+    2975,
+    773,
+    1627
+   ],
+   [
+    2871,
+    2975,
+    773,
+    1627
+   ]
+  ],
+  "kayma_2400": [
+   0,
+   0
+  ],
+  "qc": {
+   "iz_once": [
+    1.54,
+    1.54,
+    1.54
+   ],
+   "iz_sonra": [
+    -0.12,
+    -0.12,
+    -0.12
+   ],
+   "slogan": [
+    true,
+    true,
+    true
+   ],
+   "maske_disi_degisen_px": 0,
+   "gecti": true
+  },
+  "yazildi": true,
+  "yedek": "PLATES_YEDEK_IZ_20261001_1436/MODERN_A2.png"
+ }
+]
