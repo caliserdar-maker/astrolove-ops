@@ -1,0 +1,101 @@
+name: kaynak-olcum
+
+# KAYNAK ON TESTI (1 Eki 2026, Test 3 dersi): siparis gelmeden cift x renk x boy POD_PRINT kaynaklarinin
+# olculebildigini (isim / sembol / tagline bantlari) denetler. Isim / mesaj / musteri verisi YOK.
+# Sonuc: inceleme/kaynak-olcum dalina kaynak_olcum_<etiket>.json. Etsy / Drive yazimi YOK (Drive yalniz okunur).
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+    inputs:
+      ciftler: {description: "virgullu cift listesi (orn. ARIES_VIRGO) ya da HEPSI", required: true, default: "ARIES_VIRGO"}
+      renkler: {description: "virgullu renkler", required: false, default: "MIDNIGHT_BLUE"}
+      renk_ref: {description: "siparis-baski-v1 commit", required: false, default: "siparis-baski-v1"}
+
+jobs:
+  olc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Girdi denetimi
+        run: |
+          set -euo pipefail
+          jq -re '.inputs.ciftler | test("^[A-Z_,]+$")' "$GITHUB_EVENT_PATH" >/dev/null
+          jq -re '.inputs.renkler | test("^[A-Z_,]+$")' "$GITHUB_EVENT_PATH" >/dev/null
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.renk_ref }}
+          path: _kod
+      - uses: actions/checkout@v4
+        with:
+          ref: kisisel-v1
+          path: _kis
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --quiet pillow numpy opencv-python-headless
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Kaynaklari indir (salt okur)
+        env:
+          CIFTLER: ${{ inputs.ciftler }}
+          RENKLER: ${{ inputs.renkler }}
+        run: |
+          set -euo pipefail
+          P=gdrive:ASTROLOVE/TEMP/POD_PRINT
+          if [ "$CIFTLER" = "HEPSI" ]; then
+            CIFTLER=$(rclone lsf --dirs-only "$P" | tr -d '/' | grep -E '^[A-Z]+_[A-Z]+$' | paste -sd, -)
+          fi
+          echo "cift sayisi: $(echo "$CIFTLER" | tr ',' '\n' | grep -c .)"
+          for c in ${CIFTLER//,/ }; do
+            for r in ${RENKLER//,/ }; do
+              mkdir -p "_src/$c/$r"
+              rclone copy "$P/$c/$r" "_src/$c/$r" --include "*.jpg" --transfers 8 || echo "EKSIK: $c/$r"
+            done
+          done
+          find _src -name '*.jpg' | wc -l
+      - name: Olc
+        run: |
+          python scripts/siparis_dijital/kaynak_olcum.py --kaynak _src --kisisel _kis/scripts/kisisel \
+            --medya _kod/scripts/medya_v1 --cikti out/kaynak_olcum.json
+      - name: Sonucu inceleme dalina yaz
+        if: ${{ always() }}
+        env:
+          TOKEN: ${{ github.token }}
+          CIFTLER: ${{ inputs.ciftler }}
+        run: |
+          set -uo pipefail
+          [ -f out/kaynak_olcum.json ] || { echo "sonuc yok"; exit 1; }
+          B="inceleme/kaynak-olcum"; U="https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          G=(-c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com")
+          E=$(echo "$CIFTLER" | tr ',' '_' | cut -c1-60)
+          for i in 1 2 3 4 5; do
+            rm -rf _inc
+            if git clone -q --depth 1 --branch "$B" "$U" _inc 2>/dev/null; then :; else
+              git init -q _inc && git -C _inc checkout -q --orphan "$B" && git -C _inc remote add origin "$U"; fi
+            cp out/kaynak_olcum.json "_inc/kaynak_olcum_${E}_${GITHUB_RUN_ID}.json"
+            git -C _inc "${G[@]}" add -A
+            git -C _inc "${G[@]}" commit -qm "kaynak olcum ${E} ${GITHUB_RUN_ID}" || exit 0
+            git -C _inc push -q origin "HEAD:refs/heads/$B" && { echo "dal: $B"; exit 0; }
+            sleep $((RANDOM % 6 + 3))
+          done
+          exit 1
