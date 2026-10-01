@@ -109,3 +109,16 @@ Hedef: Serdar isim + burc yeri + tagline verir, 15 dk icinde 5 PDF Drive'da (Tes
   uzun/aksanli isimler orn. MAXIMILIAN, CAGLAYANGUL) ile dogrulanir.
 - MB sayfalari paralel (5 is) kosar: 33 dk -> 6 dk. WP duz renk yalniz CHAMPAGNE_IVORY, JPEG 95 (5cf010a).
 - Bilinen darbogaz kapatilmadan test/siparis baslatilmaz; once olc, sonra kos.
+
+### Test 3 dersleri (1 Eki 19:14, ARIES_VIRGO; 4 renk ~8 dk PASS, MB 2 sayfa FAIL)
+
+- KAYNAK ON TESTI ZORUNLU: yalniz 3 cift denenmisti; ARIES_VIRGO MB 2:3 kaynaginda tagline bandi olculemedi
+  (KeyError 'tag_bant'). Gercek siparis kabulunden ONCE kaynak-olcum workflow'u (tum ciftler x renkler x boylar)
+  PASS olmali; kaynak dosya degisince yeniden kosulur. Sonuc: inceleme/kaynak-olcum dali.
+- ACIK IS KAPISI: docs/SIPARIS_DERSLER.md "Acik isler" listesinde siparis boyunu etkileyen madde varken test/siparis
+  baslatilmaz (Test 1 ve Test 3'te iki kez cignendi: MB yavasligi, MB 11x14).
+- Test, birkac dakika once main'e giren DOGRULANMAMIS kodla baslatilmaz (Test 3, 4fb7a35 ile 1 dk sonra kostu).
+- Ayni koda ayni anda tek oturum dokunur: duzeltmeyi kim yapiyorsa o; koordinator o sirada kod degistirmez.
+- Koordinator sessiz kalmaz: hata ayiklarken de en gec 2 dk'da bir Serdar'a tek satir durum.
+- Teshis icin OZET sayfa kaydinda `iz` (traceback) ve `olcek` (olcek kapisi ayrintisi) alanlari var (030f767, 1fa8f68);
+  job loglari okunamadiginda once bunlara bakilir.

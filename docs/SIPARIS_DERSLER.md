@@ -85,3 +85,14 @@ onceki_kosu : PASS isleri bu koşulardan al (tek is yeniden kosuda)
 - Ders: yalniz 3 cift denenmisti; her cift x renk x boy kaynagi siparisten ONCE olculmeli (kaynak-olcum workflow,
   scripts/siparis_dijital/kaynak_olcum.py; sonuclar inceleme/kaynak-olcum dali).
 - Ders: bilinen acik (MB 11x14) kapanmadan Test 3 baslatildi; kural yine cignendi.
+- Ders: Test 3, 1 dk once main'e giren dogrulanmamis kodla (4fb7a35) kostu.
+- Ders: iki oturum (koordinator + baski-duzelt) ayni anda ayni koda dokundu; tek sahip kurali konuldu.
+- Ders: koordinator hata ayiklarken Serdar'a yazmayi birakti; en gec 2 dk'da bir durum kurali konuldu.
+- Iyi giden: cift normalize, hizli kaynak denetimi (plan 6 sn), runner kuyrugu yok, paket 51 sn.
+
+## Acik isler (Test 3 sonrasi, 1 Eki 19:45)
+
+- MB 24x36 (ve 2:3 boylar) ARIES_VIRGO: kaynak gorseli incelenecek; tag_bant yoksa fail-closed / guvenli yedek (baski-duzelt).
+- MB 11x14 olcek cap_sol +1.09 (baski-duzelt).
+- Kaynak on testi HEPSI (run 36915485075) sonucu: etkilenen ciftler listelenecek.
+- Test 3 MB yeniden kosu + paket, sonra Test 4 (yeni cift).
