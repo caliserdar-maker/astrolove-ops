@@ -1,1 +1,1 @@
-# wp dikis tara 4 (24x36 serit) 2026-10-01T15:51:54Z
+# wp dikis tara 5 (24x36 serit, CI dogrulama) 2026-10-01T16:28:25Z
