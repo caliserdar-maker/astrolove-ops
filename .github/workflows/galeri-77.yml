@@ -40,8 +40,8 @@ on:
         required: false
         default: ""
 
-concurrency:
-  group: galeri-77
+concurrency:   # ornek kosulari (HAZIR'a yazmaz) cift listesine gore ayri grupta: FAIL cift ana kosuyu beklemeden yeniden
+  group: galeri-77${{ inputs.ornek != '' && format('-{0}-{1}', inputs.ornek, inputs.ciftler) || '' }}
   cancel-in-progress: false
 
 jobs:
