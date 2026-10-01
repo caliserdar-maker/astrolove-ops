@@ -128,7 +128,7 @@ Test 2 (9000000002)
 19. renk_ref her zaman acik tam sha (varsayilan eski).
 20. Teslim oncesi onizlemede isim-burc ve tagline kontrol.
 Test 3 (9000000003)
-21. Yalniz 3 cift denenmisti; ARIES_VIRGO MB 2:3 bant olcumu kaydi (Virgo kuyrugu isme degiyor). Tum ciftler x renkler x boylar kaynak on testi.
+21. Yalniz 3 cift denenmisti; ARIES_VIRGO MB 2:3 bant olcumu kaydi (kok neden, baski-duzelt 20:10: "ARIES" harfleri arasindaki 20 px bosluk ismi 4 kumeye boluyor; isim satiri 3 kume beklendigi icin taninmiyor, tagline isim sanilyor; duzeltme: gecersiz olcumde 60 px kume boslugu ile yeniden olc, yine gecersizse acik hata). Tum ciftler x renkler x boylar kaynak on testi.
 22. Acik is (MB 11x14) kapatilmadan test (ikinci kez).
 23. 1 dk once main'e giren dogrulanmamis kodla test.
 24. Esit bant olcumu duz kenarli harflerde (LIAM) yeni sapma; olcum oncesi bulanik sigma 1.0 (en kotu 0.78, gercek 1.1 px kayma FAIL).
