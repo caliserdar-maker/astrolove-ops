@@ -34,6 +34,10 @@ on:
         description: "A | B | bos = donusumlu"
         required: false
         default: ""
+      on_test:
+        description: "isim on testi setleri (orn. TARA,SERDAR,MAXI,ANNE); doluysa ciftler/set yok sayilir, set basina kendi cifti"
+        required: false
+        default: ""
 
 concurrency: prova
 
@@ -75,6 +79,7 @@ jobs:
       - id: p
         env:
           CIFTLER: ${{ inputs.ciftler }}
+          ON_TEST: ${{ inputs.on_test }}
           ISLER: ${{ inputs.isler }}
           PR: ${{ inputs.parca_renk }}
           PW: ${{ inputs.parca_wp }}
@@ -92,14 +97,26 @@ jobs:
           def parcala(n):
               n = max(1, min(int(n), len(sec)))
               return [sec[i::n] for i in range(n)]
-          if 'renk' in isler:
+          ON_CIFT = {'TARA': 'CANCER_LEO', 'SERDAR': 'CANCER_LIBRA', 'MAXI': 'CANCER_LIBRA', 'ANNE': 'CANCER_LEO'}
+          ont = [x.strip() for x in os.environ.get('ON_TEST', '').split(',') if x.strip()]
+          if ont:                                   # isim on testi: set x (4 renk + 5 WP boyu), set basina tek cift
+              assert all(x in ON_CIFT for x in ont), 'bilinmeyen set'
+              for st in ont:
+                  if 'renk' in isler:
+                      for r in ('MIDNIGHT_BLUE', 'DEEP_BLACK', 'PURE_WHITE', 'CHAMPAGNE_IVORY'):
+                          m.append({'tur': 'renk', 'anahtar': r, 'parca': st, 'ciftler': ON_CIFT[st], 'set': st})
+                  if 'wp' in isler:
+                      for b in ('24x36', 'A2', '18x24', '16x20', '11x14'):
+                          m.append({'tur': 'wp', 'anahtar': b, 'parca': st, 'ciftler': ON_CIFT[st], 'set': st})
+          else:
+            if 'renk' in isler:
               for r in ('MIDNIGHT_BLUE', 'DEEP_BLACK', 'PURE_WHITE', 'CHAMPAGNE_IVORY'):
                   for i, p in enumerate(parcala(os.environ['PR'])):
-                      m.append({'tur': 'renk', 'anahtar': r, 'parca': i, 'ciftler': ','.join(p)})
-          if 'wp' in isler:
+                      m.append({'tur': 'renk', 'anahtar': r, 'parca': i, 'ciftler': ','.join(p), 'set': ''})
+            if 'wp' in isler:
               for b in ('24x36', 'A2', '18x24', '16x20', '11x14'):
                   for i, p in enumerate(parcala(os.environ['PW'])):
-                      m.append({'tur': 'wp', 'anahtar': b, 'parca': i, 'ciftler': ','.join(p)})
+                      m.append({'tur': 'wp', 'anahtar': b, 'parca': i, 'ciftler': ','.join(p), 'set': ''})
           print('matris=' + json.dumps({'include': m}))
           print('tum=' + ','.join(tum))
           print(f'{len(sec)} cift, {len(m)} is', file=sys.stderr)
@@ -167,7 +184,7 @@ jobs:
         env:
           CIFTLER: ${{ matrix.ciftler }}
           TUM: ${{ needs.plan.outputs.tum }}
-          SET: ${{ inputs.set }}
+          SET: ${{ matrix.set || inputs.set }}
         run: |
           set +e
           if [ "${{ matrix.tur }}" = renk ]; then A=(--renk "${{ matrix.anahtar }}"); else A=(--boy "${{ matrix.anahtar }}"); fi

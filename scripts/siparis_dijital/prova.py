@@ -19,7 +19,13 @@ from types import SimpleNamespace
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import surucu                                                     # noqa: E402
 
+ON_TEST_CIFT = {'TARA': 'CANCER_LEO', 'SERDAR': 'CANCER_LIBRA', 'MAXI': 'CANCER_LIBRA', 'ANNE': 'CANCER_LEO'}
 SETLER = {
+    # ISIM ON TESTI (Serdar 1 Eki): olcek kapisi isim bagimli mi - 4 set x 5 renk x 5 boy
+    'TARA': {'isim1': 'TARA', 'isim2': 'ROSS', 'mesaj': 'A King and his Crab'},
+    'SERDAR': {'isim1': 'SERDAR', 'isim2': 'LENA', 'mesaj': 'To My Adorable Angel'},
+    'MAXI': {'isim1': 'MAXIMILIAN', 'isim2': 'JO', 'mesaj': 'Two Souls, One Bond: Forever Ours!!'},
+    'ANNE': {'isim1': 'ANNE-MARIE', 'isim2': 'LUCAS', 'mesaj': 'Love You to the Moon and Back'},
     'A': {'isim1': 'ÇAĞLAYANGÜL', 'isim2': 'AL', 'mesaj': 'Yağmurda Başlayan Aşkımız Sonsuzdur'},
     'B': {'isim1': 'JO', 'isim2': 'MAXIMILLIAN', 'mesaj': 'Two Souls, One Bond: Forever Ours!!'},
 }
@@ -75,7 +81,7 @@ def main():
         except BaseException as e:                                # noqa: BLE001
             r = {'gecti': False, 'hata': f'{type(e).__name__}: {str(e)[:300]}'}
         r.update({'set': s, 'sn': round(time.time() - t0, 1)})
-        R['ciftler'][cift] = r
+        R['ciftler'][f'{cift}:{s}' if a.set else cift] = r
         gecen = time.time() - t_tum
         print(f'PROVA {a.tur} {anahtar} {cift} set {s} {"PASS" if r["gecti"] else "FAIL"} {r["sn"]} sn | '
               f'{i + 1}/{len(ciftler)} gecen {gecen / 60:.1f} dk kalan ~{gecen / (i + 1) * (len(ciftler) - i - 1) / 60:.1f} dk',
