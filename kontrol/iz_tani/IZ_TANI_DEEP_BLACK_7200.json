@@ -1,0 +1,39 @@
+{
+ "yeni_shape": [
+  10800,
+  7200
+ ],
+ "cikti_px": [
+  7200,
+  10800
+ ],
+ "bant": [
+  2997,
+  3103
+ ],
+ "x": [
+  260,
+  2140
+ ],
+ "R_px": 6692,
+ "fazla": -0.0,
+ "parlak_px": 0,
+ "parlak_katki": 0.0,
+ "silik_ort": 0.0,
+ "parlak_yeni_murekkep_icinde": 0,
+ "yeni_maske_disi_murekkep_px": 0,
+ "R_ciktinin_murekkebi_haric_px": 6692,
+ "fazla_cikti_murekkebi_haric": -0.0,
+ "kapi": {
+  "fazla": -0.0,
+  "iz_ort": 0.0,
+  "taban_ort": 0.0,
+  "eski_glif_px": 6692,
+  "gecti": true
+ },
+ "tag_bant": [
+  3009,
+  3091
+ ],
+ "tag_x": null
+}
