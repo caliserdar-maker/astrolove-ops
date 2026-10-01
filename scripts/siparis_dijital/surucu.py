@@ -172,7 +172,7 @@ def renk_asamasi(a, g):
     oz = {'renk': a.renk, 'durum': rk.get('durum'), 'pdf': rk.get('pdf'), 'pdf_kapisi': rk.get('pdf_kapisi'),
           'sayfa_kapilar': {o: {'durum': v.get('durum'), 'kapilar_gecti': v.get('kapilar_gecti'),
                                 'kalan': sorted(k for k, d in (v.get('kapilar') or {}).items() if d is False),
-                                'baski_px': v.get('baski_px'), 'hata': v.get('hata'), 'iz': v.get('iz')}
+                                'baski_px': v.get('baski_px'), 'hata': v.get('hata'), 'iz': v.get('iz'), 'olcek': v.get('olcek_kapisi')}
                             for o, v in rk['oranlar'].items()},
           'kapilar_gecti': r.get('kapilar_gecti'), 'kod': a.kod_ref}
     (cik / f'OZET_{a.renk}.json').write_text(json.dumps(oz, ensure_ascii=False, indent=1, default=str))
@@ -234,7 +234,7 @@ def birlestir(sd, d, renk, cift):
     oz = {'renk': renk, 'durum': 'EKSIK', 'pdf': None, 'pdf_kapisi': None, 'yontem': 'sayfa matrisi',
           'sayfa_kapilar': {o: {'durum': v.get('durum'), 'kapilar_gecti': v.get('kapilar_gecti'),
                                 'kalan': sorted(k for k, q in (v.get('kapilar') or {}).items() if q is False),
-                                'baski_px': v.get('baski_px'), 'hata': v.get('hata'), 'iz': v.get('iz')} for o, v in S.items()}}
+                                'baski_px': v.get('baski_px'), 'hata': v.get('hata'), 'iz': v.get('iz'), 'olcek': v.get('olcek_kapisi')} for o, v in S.items()}}
     if len(sayfalar) == len(sd.DIJITAL_ORANLAR) and all(v.get('durum') == 'URETILDI' for v in S.values()):
         pdf = sd.pdf_yap(sayfalar, klas / sd.pdf_adi(cift, renk))
         oz.update({'durum': 'URETILDI', 'pdf': pdf.name, 'pdf_kapisi': sd.pdf_kapisi(pdf, sayfalar)})
