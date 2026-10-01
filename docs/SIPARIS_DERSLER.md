@@ -99,7 +99,7 @@ onceki_kosu : PASS isleri bu koşulardan al (tek is yeniden kosuda)
 
 - MB 24x36 (ve 2:3 boylar) ARIES_VIRGO: kaynak gorseli incelenecek; tag_bant yoksa fail-closed / guvenli yedek (baski-duzelt).
 - MB 11x14 olcek cap_sol +1.09 (baski-duzelt).
-- Kaynak on testi HEPSI (run 36915485075) sonucu: etkilenen ciftler listelenecek.
+- Kaynak on testi MB (run 36918326986, 78 cift x 5 siparis boyu, 250 sn): 388/390 PASS; FAIL: ARIES_GEMINI 24x36, ARIES_VIRGO 24x36 (ikisi de ARIES harf boslugu). Diger renkler (DB/PW/CI/WP) icin kaynak on testi henuz yok (farkli olcum yolu).
 - Test 3 MB yeniden kosu + paket, sonra Test 4 (yeni cift).
 
 ## TUM DERSLER (Tara + Test 1-3, 1 Eki 20:10; Serdar: Test 4'te hepsi uygulanacak)
