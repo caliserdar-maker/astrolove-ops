@@ -1250,6 +1250,15 @@ class _SatirYerlesim:
             w = {y: pl[y][0].width for y in pl}
             mm = {y: p16.murekkep_merkezi(pl[y][0]) for y in ("sol", "sag")}
             pyy = {y: s["isim_y"] - pl[y][0].height / 2 for y in ("sol", "sag")}
+        geri = SATIR_OLCEKLI.get('geri')
+        if geri:                   # 4. deneme: kapinin OLCTUGU isim kenar farki (2400 birimi) -> genislik + merkez
+            for y in ("sol", "sag"):
+                fx0, fx1 = geri[y]
+                w0 = self._genislik(np.asarray(pl[y][0])[..., 3])
+                pl[y], genislik_esle[y] = self._genislik_esle(pl[y], w0 - (fx1 - fx0) * k)
+            w = {y: pl[y][0].width for y in pl}
+            mm = {y: p16.murekkep_merkezi(pl[y][0]) for y in ("sol", "sag")}
+            pyy = {y: s["isim_y"] - pl[y][0].height / 2 for y in ("sol", "sag")}
         if SATIR_OLCEKLI.get('kutle') and r.get('murekkep_sol'):
             # dijital 2. yerlesim denemesi: yatay KUTLE merkezi, dikey ust kenar 2400 x k (kapi ile ayni tanim)
             x = {}
@@ -1263,6 +1272,9 @@ class _SatirYerlesim:
         else:
             x = {y: (r['x'][y] + r['mm'][y]) * k - mm[y] for y in ("sol", "sag")}
             x["inf"] = float(inf["gorsel"][0]) + (r['x']['inf'] - r['inf_g0']) * k
+            if geri:                                              # merkez: kenar farklarinin ortalamasi
+                for y in ("sol", "sag"):
+                    x[y] -= (geri[y][0] + geri[y][1]) / 2.0 * k
         toplam = x["sag"] + w["sag"] - x["sol"]
         x0 = x["sol"]
         a = S["temiz_a"].copy()
@@ -2127,6 +2139,30 @@ def olcek_ikinci_deneme(ed, hedef_en, ilk, yeniden, olcek_olc, leke_olc, hedef_y
             bi2['olcek_kapisi'] = {**ok2, 'yerlesim': ad, 'ilk_yerlesim': ilk_o, 'denemeler': denemeler}
             return p2, bi2, ek2, b2, bpx2
         Path(gecici).unlink(missing_ok=True)
+    # 4. deneme GERI BESLEME (1 Eki, siparis 4188621967 DB 18x24): plaka murekkep genisligi 2400 x k ile ayni
+    # (oran 1.0003) ama kapi sol ismin sag kenarini her yerlesimde 2.1 birim kisa olcuyor (fark bileskede / olcumde).
+    # 'olcekli' denemesinin kapi farklari (isim x0 / x1) ayni yerlesime geri beslenir: isim genisligi (<= %2 yatay
+    # yeniden ornekleme, render hi-res) ve merkezi duzeltilir. Yalniz kapi o zaman PASS olursa kullanilir.
+    f2 = (denemeler.get('olcekli (2400 x k)') or {}).get('fark') or {}
+    if kutle_dene and all(f'{y}_isim_{u}' in f2 for y in ('sol', 'sag') for u in ('x0', 'x1')):
+        ad = 'olcekli geri besleme (2400 x k)'
+        SATIR_OLCEKLI.update({'etkin': True, 'geri': {y: (f2[f'{y}_isim_x0'], f2[f'{y}_isim_x1']) for y in ('sol', 'sag')}})
+        try:
+            r2 = yeniden()
+        finally:
+            SATIR_OLCEKLI.clear(); SATIR_OLCEKLI['etkin'] = False
+        if r2 is not None:
+            p2, bi2, ek2, b2, bpx2, gecici = r2
+            ok2 = olcek_olc(b2, ek2, p2, bi2)
+            denemeler[ad] = {q: ok2.get(q) for q in ('konum_fark_px', 'kenar_fark_px', 'fark')}
+            if bi2.get('genislik_esle'):
+                denemeler[ad]['genislik_esle'] = bi2['genislik_esle']
+            if ok2.get('gecti'):
+                Path(gecici).replace(hedef_yol)
+                bi2['leke_kapisi'] = leke_olc(b2, ek2)
+                bi2['olcek_kapisi'] = {**ok2, 'yerlesim': ad, 'ilk_yerlesim': ilk_o, 'denemeler': denemeler}
+                return p2, bi2, ek2, b2, bpx2
+            Path(gecici).unlink(missing_ok=True)
     if denemeler:
         bi['olcek_kapisi']['olcekli_deneme'] = denemeler.get('olcekli (2400 x k)')
         bi['olcek_kapisi']['denemeler'] = denemeler
