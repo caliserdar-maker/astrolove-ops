@@ -4,6 +4,8 @@ name: pin-media-sync
 # (GitHub Pages) pinterest/ altina AYNI goreli yolla tasir. Metricool medyayi yalniz herkese acik
 # dogrudan URL'den ceker: https://caliserdar-maker.github.io/astrolove-media/pinterest/<goreli yol>
 # Yalniz .jpg .jpeg .png .mp4. Silme yapmaz. Etsy YOK. Kalip: ig-media-sync.yml.
+# '_' ya da '.' ile baslayan klasor/dosya adlari REDDEDILIR: astrolove-media Jekyll ile derleniyor (.nojekyll yok),
+# bu adlar yayina girmez (1 Eki olcumu: pinterest/_test/TEST_PIN.jpg repoda var, Pages 404).
 
 permissions:
   contents: read
@@ -46,6 +48,7 @@ jobs:
           for p in ${DOSYALAR//,/ } $KLASOR; do
             case "$p" in
               /*|*..*|*\\*) echo "DUR: gecersiz yol: $p" >&2; exit 1 ;;
+              _*|*/_*|.*|*/.*) echo "DUR: '_' ya da '.' ile baslayan yol bileseni Pages'te yayinlanmaz (Jekyll): $p" >&2; exit 1 ;;
             esac
           done
           for p in ${DOSYALAR//,/ }; do
