@@ -62,7 +62,7 @@ jobs:
         run: |
           set -euo pipefail
           O=inceleme/wp_bakir_aquarius_cancer
-          rm -f $O/KAPI_MIDNIGHT_BLUE.json
+          rm -f $O/KAPI_MIDNIGHT_BLUE.json $O/WP_BASKI.jpg $O/REF_WP_BASKI.jpg   # tam baskilar (7 MB) depoya girmez; 1:1 kesitler yeter
           git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add $O
           git commit -q -m "inceleme: bakir WP ornegi AQUARIUS_CANCER paketi (05, 19, REF kesit, OLCUM.txt)"
