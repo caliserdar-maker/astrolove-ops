@@ -75,7 +75,8 @@ def renk_asamasi(a, g):
     print('RENK', a.renk, json.dumps({q: oz[q] for q in ('durum', 'pdf', 'kapilar_gecti')}),
           'PDF', (oz['pdf_kapisi'] or {}).get('MB'), 'MB', 'PASS' if (oz['pdf_kapisi'] or {}).get('gecti') else 'FAIL',
           {o: (v['kapilar_gecti'], v['kalan']) for o, v in oz['sayfa_kapilar'].items()}, flush=True)
-    return 0 if oz['durum'] == 'URETILDI' and (oz['pdf_kapisi'] or {}).get('gecti') else 1
+    sayfa_ok = len(oz['sayfa_kapilar']) == 5 and all(v['kapilar_gecti'] for v in oz['sayfa_kapilar'].values())
+    return 0 if oz['durum'] == 'URETILDI' and (oz['pdf_kapisi'] or {}).get('gecti') and sayfa_ok else 1
 
 
 def wp_asamasi(a, g):
