@@ -112,6 +112,13 @@ def main():
         sd.olcek_kur(baski.width); g1 = sd.satir_olc_alt(baski, bant, k); a1 = ayrinti(sd, baski, bant, k)
         sd.olcek_kur(2400); g0 = sd.satir_olc_alt(p0, bant, 1.0); a0 = ayrinti(sd, p0, bant, 1.0)
         kap = sd.olcek_kapisi(g1, g0, 1.0)
+        # ESIT BANT GENISLIGI denemesi: baski 2400 izgarasina ALAN ortalamasiyla (cv2.INTER_AREA) indirilip olculur
+        import cv2
+        B24 = Image.fromarray(cv2.resize(np.asarray(baski.convert('RGB')), (2400, round(baski.height * 2400 / baski.width)),
+                                         interpolation=cv2.INTER_AREA))
+        sd.olcek_kur(2400); g1a = sd.satir_olc_alt(B24, bant, 1.0)
+        kap_alan = sd.olcek_kapisi(g1a, g0, 1.0)
+        print('OLCEK_TANI_ALAN', renk, boy, json.dumps({q: kap_alan.get(q) for q in ('gecti', 'konum_fark_px', 'kenar_fark_px', 'fark')}), flush=True)
         tem = lambda d: {q: d.get(q) for q in ('sol_isim', 'sonsuz', 'sag_isim', 'bosluk', 'satir_merkez',
                                                  'taban_sol', 'taban_sag', 'cap_sol', 'cap_sag', 'kontrast', 'hata')}
         print('OLCEK_TANI', renk, boy, json.dumps({'k': round(k, 4), 'isim_bant': bant, 'p0_px': list(p0.size),
