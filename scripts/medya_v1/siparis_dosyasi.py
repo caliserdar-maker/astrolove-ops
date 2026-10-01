@@ -1183,11 +1183,30 @@ class _SatirYerlesim:
         self.p16.poster_kur = self.asil
         return False
 
+    @staticmethod
+    def _kutle(a):
+        """Alfa / maske kutlesinin yatay merkezi ve ust kenari (_uc %0.2 / %99.8, olcek kapisiyla ayni tanim)."""
+        a = np.asarray(a, np.float32)
+        x0, x1 = _uc(a.sum(axis=0))
+        t, _b = _uc(a.sum(axis=1))
+        return (x0 + x1) / 2.0, t
+
     def _kaydet(self, s, S, isimler, tagline):
         out = self.asil(s, S, isimler, tagline)
-        _, _, merkez, x, _ = out
+        _, bilgi, merkez, x, _ = out
         self.kayit.update({'x': dict(x), 'mm': {y: merkez[y] - x[y] for y in ('sol', 'sag')},
                            'inf_g0': float(S['oge']['sonsuz']['gorsel'][0])})
+        if SATIR_OLCEKLI.get('kutle'):                # yalniz dijital 2. yerlesim denemesi (kutle merkezi; 1 Eki)
+            p16 = self.p16
+            olcek = p16.d_olcek(isimler, s, S)
+            for y in ('sol', 'sag'):
+                pl = p16.plaka(isimler[y], S["prof"][y], s["cap"][y], olcek)[0]
+                cx, top = self._kutle(np.asarray(pl)[..., 3])
+                px, py = bilgi['isim_kutu'][y][:2]
+                self.kayit[f'murekkep_{y}'] = (px + cx, py + top)
+            o = S['oge']['sonsuz']
+            mcx, _t = self._kutle(o['maske'])
+            self.kayit['sonsuz_murekkep'] = int(round(x['inf'] - o['pay'][0])) + mcx
         return out
 
     def _olcekli(self, s, S, isimler, tagline):
@@ -1200,8 +1219,20 @@ class _SatirYerlesim:
         w = {y: pl[y][0].width for y in pl}
         inf = S["oge"]["sonsuz"]
         mm = {y: p16.murekkep_merkezi(pl[y][0]) for y in ("sol", "sag")}
-        x = {y: (r['x'][y] + r['mm'][y]) * k - mm[y] for y in ("sol", "sag")}
-        x["inf"] = float(inf["gorsel"][0]) + (r['x']['inf'] - r['inf_g0']) * k
+        pyy = {y: s["isim_y"] - pl[y][0].height / 2 for y in ("sol", "sag")}
+        if SATIR_OLCEKLI.get('kutle') and r.get('murekkep_sol'):
+            # dijital 2. yerlesim denemesi: yatay KUTLE merkezi, dikey ust kenar 2400 x k (kapi ile ayni tanim)
+            x = {}
+            for y in ("sol", "sag"):
+                cx, top = self._kutle(np.asarray(pl[y][0])[..., 3])
+                mx, my = r[f'murekkep_{y}']
+                x[y] = mx * k - cx
+                pyy[y] = my * k - top
+            mcx, _t = self._kutle(inf['maske'])
+            x["inf"] = r['sonsuz_murekkep'] * k - mcx + inf['pay'][0]
+        else:
+            x = {y: (r['x'][y] + r['mm'][y]) * k - mm[y] for y in ("sol", "sag")}
+            x["inf"] = float(inf["gorsel"][0]) + (r['x']['inf'] - r['inf_g0']) * k
         toplam = x["sag"] + w["sag"] - x["sol"]
         x0 = x["sol"]
         a = S["temiz_a"].copy()
@@ -1218,7 +1249,7 @@ class _SatirYerlesim:
         isim_geometri, isim_kutu = {}, {}
         for y in ("sol", "sag"):
             p = pl[y][0]
-            px, py = int(round(x[y])), int(round(s["isim_y"] - p.height / 2))
+            px, py = int(round(x[y])), int(round(pyy[y]))
             t.alpha_composite(p, (px, py))
             isim_kutu[y] = [px, py, px + p.width, py + p.height]
             alfa = np.asarray(p)[..., 3]
@@ -1933,7 +1964,7 @@ def dijital_leke(baski, kaynak_bayt, ek):
     return leke_kapisi(baski, kaynak_bayt, ek['maske'])
 
 
-def olcek_ikinci_deneme(ed, hedef_en, ilk, yeniden, olcek_olc, leke_olc, hedef_yol):
+def olcek_ikinci_deneme(ed, hedef_en, ilk, yeniden, olcek_olc, leke_olc, hedef_yol, kutle_dene=True):
     """POD'daki (siparis-baski-v1 pod_uret) olcek ikinci denemesinin AYNISI, dijital yol icin.
 
     olcek FAIL (Blue disi, hedef != 2400) -> isim satiri 2400 yerlesiminden olceklenerek yeniden render
@@ -1943,23 +1974,30 @@ def olcek_ikinci_deneme(ed, hedef_en, ilk, yeniden, olcek_olc, leke_olc, hedef_y
     poster, bi, ek, baski, bpx = ilk
     if (ed == 'blue' and not MB_HEDEF['etkin']) or bi['olcek_kapisi'].get('gecti') or hedef_en == 2400:
         return ilk
-    SATIR_OLCEKLI['etkin'] = True
-    try:
-        r2 = yeniden()
-    finally:
-        SATIR_OLCEKLI['etkin'] = False
-    if r2 is None:
-        return ilk
-    p2, bi2, ek2, b2, bpx2, gecici = r2
-    ok2 = olcek_olc(b2, ek2, p2, bi2)
     ilk_o = {q: bi['olcek_kapisi'].get(q) for q in ('konum_fark_px', 'kenar_fark_px')}
-    if ok2.get('gecti'):
-        Path(gecici).replace(hedef_yol)
-        bi2['leke_kapisi'] = leke_olc(b2, ek2)
-        bi2['olcek_kapisi'] = {**ok2, 'yerlesim': 'olcekli (2400 x k)', 'ilk_yerlesim': ilk_o}
-        return p2, bi2, ek2, b2, bpx2
-    Path(gecici).unlink(missing_ok=True)
-    bi['olcek_kapisi']['olcekli_deneme'] = {q: ok2.get(q) for q in ('konum_fark_px', 'kenar_fark_px')}
+    denemeler = {}
+    for ad, kutle in (('olcekli (2400 x k)', False), ('olcekli kutle (2400 x k)', True)):
+        if kutle and not kutle_dene:
+            break
+        SATIR_OLCEKLI['etkin'] = True; SATIR_OLCEKLI['kutle'] = kutle
+        try:
+            r2 = yeniden()
+        finally:
+            SATIR_OLCEKLI['etkin'] = False; SATIR_OLCEKLI['kutle'] = False
+        if r2 is None:
+            continue
+        p2, bi2, ek2, b2, bpx2, gecici = r2
+        ok2 = olcek_olc(b2, ek2, p2, bi2)
+        denemeler[ad] = {q: ok2.get(q) for q in ('konum_fark_px', 'kenar_fark_px')}
+        if ok2.get('gecti'):
+            Path(gecici).replace(hedef_yol)
+            bi2['leke_kapisi'] = leke_olc(b2, ek2)
+            bi2['olcek_kapisi'] = {**ok2, 'yerlesim': ad, 'ilk_yerlesim': ilk_o, 'denemeler': denemeler}
+            return p2, bi2, ek2, b2, bpx2
+        Path(gecici).unlink(missing_ok=True)
+    if denemeler:
+        bi['olcek_kapisi']['olcekli_deneme'] = denemeler.get('olcekli (2400 x k)')
+        bi['olcek_kapisi']['denemeler'] = denemeler
     return ilk
 
 

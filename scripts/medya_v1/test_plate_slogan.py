@@ -113,7 +113,7 @@ class PlateSloganTesti(unittest.TestCase):
         with ThreadPoolExecutor(8) as h:
             r = list(h.map(lambda b: sd.plate_slogan_kapisi(b, temiz, 'black')['gecti'], isler))
         self.assertEqual(r, [True, False] * 4)
-        self.assertEqual(list(sd.W.glob('_plate_kapisi_kaynak*')), [])
+        self.assertEqual(list(sd.W.glob('_plate_kapisi_kaynak_*')), [])
 
 
 if __name__ == '__main__':

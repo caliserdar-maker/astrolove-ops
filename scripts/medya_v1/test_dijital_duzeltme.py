@@ -98,6 +98,24 @@ class OlcekIkinciDeneme(unittest.TestCase):
         self.assertEqual(r[0], 'p1'); self.assertEqual(h.read_bytes(), b'ilk'); self.assertFalse(g.exists())
         self.assertEqual(r[1]['olcek_kapisi']['olcekli_deneme']['konum_fark_px'], 0.4)
 
+    def test_kutle_yerlesimi_ikinci_sans(self):
+        d = Path(tempfile.mkdtemp()); hedef = d / 's.jpg'; hedef.write_bytes(b'ilk')
+        gorulen = []
+
+        def yeniden():
+            gorulen.append(sd.SATIR_OLCEKLI.get('kutle'))
+            g = d / f'_g{len(gorulen)}.jpg'; g.write_bytes(b'k%d' % len(gorulen))
+            return 'p%d' % (len(gorulen) + 1), {}, {}, 'b', {}, g
+        olc = lambda b, e, p, i: {'gecti': p == 'p3', 'konum_fark_px': 0.5 if p == 'p3' else 1.2, 'kenar_fark_px': 0.4}
+        r = sd.olcek_ikinci_deneme('black', 7200, self._ilk(False), yeniden, olc, lambda b, e: {'gecti': True}, hedef)
+        self.assertEqual(gorulen, [False, True])
+        self.assertEqual(r[0], 'p3'); self.assertEqual(hedef.read_bytes(), b'k2')
+        self.assertEqual(r[1]['olcek_kapisi']['yerlesim'], 'olcekli kutle (2400 x k)')
+        self.assertFalse(sd.SATIR_OLCEKLI.get('kutle')); self.assertFalse(sd.SATIR_OLCEKLI['etkin'])
+        # POD'un kendi ikinci denemesi bu bayragi hic acmaz
+        import inspect
+        self.assertNotIn("'kutle'", inspect.getsource(sd.pod_uret))
+
     def test_hata_bayragi_geri_alir(self):
         r, _, _, _ = self._calis(hata=True)
         self.assertEqual(r, 'HATA'); self.assertFalse(sd.SATIR_OLCEKLI['etkin'])
