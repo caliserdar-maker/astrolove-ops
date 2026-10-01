@@ -16,10 +16,15 @@ on:
 concurrency: plate-iz
 
 env:
-  KOD_REF: a59d5595e6c26a41c5715032fb3657017946f28d
+  KOD_REF: 1053600e6aa6f99f0fa851e7a6f23b4dd0c0c2b8
+  ATLA: PLATES_YEDEK_IZ_20261001_1412
 
 jobs:
   olc:
+    strategy:
+      fail-fast: false
+      matrix:
+        renk: [MIDNIGHT_BLUE, DEEP_BLACK, PURE_WHITE, CHAMPAGNE_IVORY]
     runs-on: ubuntu-latest
     timeout-minutes: 150
     steps:
@@ -55,9 +60,9 @@ jobs:
       - name: Plate iz temizligi (QC + yedek + geri okuma)
         run: |
           set +e
-          python scripts/medya_v1/plate_iz_temizle.py --yaz --cikti plate_iz; rc=$?
+          python scripts/medya_v1/plate_iz_temizle.py --yaz --renkler "${{ matrix.renk }}" --atla_yazilmis "$ATLA" --cikti plate_iz; rc=$?
           D=$(date -u +%Y%m%d_%H%M)
-          rclone copy plate_iz "gdrive:ASTROLOVE/TEMP/PLATE_IZ/$D" --include '*.json' --include 'KESIT_*' && echo "drive: TEMP/PLATE_IZ/$D"
+          rclone copy plate_iz "gdrive:ASTROLOVE/TEMP/PLATE_IZ/$D/${{ matrix.renk }}" --include '*.json' --include 'KESIT_*' && echo "drive: TEMP/PLATE_IZ/$D"
           echo "rc=$rc" >> "$GITHUB_ENV"
       - name: Kesitler inceleme dalina
         env:
@@ -68,7 +73,7 @@ jobs:
           G=(-c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com")
           for i in 1 2 3 4 5; do
             rm -rf _inc; git clone -q --depth 1 --branch "$B" "$U" _inc || exit 1
-            mkdir -p _inc/kontrol/plate_iz && cp plate_iz/KESIT_* plate_iz/PLATE_IZ.json _inc/kontrol/plate_iz/ 2>/dev/null
+            mkdir -p _inc/kontrol/plate_iz && cp plate_iz/KESIT_* _inc/kontrol/plate_iz/ 2>/dev/null; cp plate_iz/PLATE_IZ.json "_inc/kontrol/plate_iz/PLATE_IZ_${{ matrix.renk }}.json"
             git -C _inc "${G[@]}" add kontrol && git -C _inc "${G[@]}" commit -qm "plate mesaj bandi iz temizligi: once / sonra / kontrast kesitleri" || exit 0
             git -C _inc push -q origin "HEAD:refs/heads/$B" && { echo "dal: $B $(git -C _inc rev-parse --short HEAD)"; break; }
             sleep 5
