@@ -55,6 +55,16 @@ def ayrinti(sd, im, bant, k):
     for i in range(max(int(x1 - 12 * k), 0), len(C)):
         b = round((xa + i) / k)
         kuy[b] = kuy.get(b, 0.0) + float(C[i]) / T * 1000
+    # dikey: sol ismin satir kutle profili (ust / alt kuyruk, binde) - cap / taban farki icin
+    Cr = c[:, xa:xb].sum(axis=1)
+    u, t = sd._uc(Cr)
+    Tr = float(Cr.sum())
+    dik = {}
+    for i in list(range(max(int(u - 6 * k), 0), int(u + 8 * k))) + list(range(max(int(t - 8 * k), 0), min(int(t + 6 * k), len(Cr)))):
+        b_ = round((y0 + i) / k)
+        dik[b_] = dik.get(b_, 0.0) + float(Cr[i]) / Tr * 1000
+    r.update({'sol_ust_taban': [round((y0 + u) / k, 2), round((y0 + t) / k, 2)],
+              'sol_dikey_binde': {str(a_): round(v_, 2) for a_, v_ in sorted(dik.items()) if v_ > 0.005}})
     r.update({'pencere_sol': [round(xa / k, 2), round(xb / k, 2)], 'M': round(M / k, 2),
               'sol_x0x1': [round((xa + x0) / k, 2), round((xa + x1) / k, 2)],
               'sol_kuyruk_binde': {str(a): round(v, 2) for a, v in sorted(kuy.items()) if v > 0.005},
@@ -124,6 +134,16 @@ def main():
             col = A.max(axis=0)                          # sutun basina en parlak (2400 birimine toplanir)
             sat[ad] = {str(940 + int(i / kk)): round(float(v), 1) for i, v in enumerate(col) if int(i / kk) % 2 == 0}
         print('OLCEK_TANI_SUTUN_MAKS', renk, boy, json.dumps(sat), flush=True)
+        sat2 = {}
+        for ad, im in (('p0', p0), ('baski', baski), ('kaynak', Image.open(yol))):
+            kk = im.width / 2400.0
+            x0_, x1_ = (g0.get('sol_isim') or [600, 1000])
+            A = np.asarray(im.convert('RGB').crop((int(x0_ * kk), int((bant[0] - 15) * kk), int(x1_ * kk),
+                                                   int((bant[1] + 15) * kk)))).astype(np.float32) @ LUMA
+            row = A.max(axis=1)
+            sat2[ad] = {str(round(bant[0] - 15 + i / kk)): round(float(v), 1) for i, v in enumerate(row)
+                        if round(i / kk) % 2 == 0}
+        print('OLCEK_TANI_SATIR_MAKS', renk, boy, json.dumps(sat2), flush=True)
     return 0
 
 
