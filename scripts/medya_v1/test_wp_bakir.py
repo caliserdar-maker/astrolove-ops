@@ -46,7 +46,8 @@ def test_bakir_qc():
     assert daire.sum() > 1000, daire.sum()
     hedef = wb.bakir_hedef(P_wp, daire)
     assert wb._dE(hedef['rgb'], BAKIR) < 3, hedef
-    out, b = wb.bakir_bas(B - P_c, P_wp, hedef['rgb'], float(np.median(P_c @ wb.LUMA)))
+    haric = cv2.dilate(daire.astype(np.uint8), np.ones((11, 11), np.uint8)).astype(bool)
+    out, b = wb.bakir_bas(B - P_c, P_wp, hedef['rgb'], float(np.median(P_c @ wb.LUMA)), et, haric)
     q = wb.qc(out, P_wp, S_wp, b, et, daire, hedef, {'gecti': True})
     for k in ('a_renk', 'b_tasma', 'd_dikis', 'e_kagit'):
         assert q[k]['gecti'], (k, q[k])
@@ -73,10 +74,27 @@ def test_guclu_dikis_maskede():
     assert not q['d_dikis']['gecti'] and q['d_dikis']['maskede_ince_bilesen'], q['d_dikis']
 
 
+def test_daire_kenari_haric():
+    """Baskidaki daire plate'tekinden 1 px kayik: kenar farki cizgi maskesine girer; daire haric tutulunca
+    ince cizgi yok, daire plate'teki bakir olarak kalir."""
+    P_wp, P_c, B, S_wp, et, _ = kur(dikisli=False)
+    a_d = daire_alfa()
+    B = T.bas(B, np.roll(a_d, 1, axis=1), T.CI_M)                                # 1 px kayik daire baskida
+    daire = wb.daire_maskesi(P_c); hedef = wb.bakir_hedef(P_wp, daire)
+    Lp = float(np.median(P_c @ wb.LUMA))
+    _, b0 = wb.bakir_bas(B - P_c, P_wp, hedef['rgb'], Lp, et)
+    haric = cv2.dilate(daire.astype(np.uint8), np.ones((11, 11), np.uint8)).astype(bool)
+    out, b = wb.bakir_bas(B - P_c, P_wp, hedef['rgb'], Lp, et, haric)
+    assert (b0['core'] & daire).sum() > 50                                     # haric olmadan sizinti var
+    q = wb.qc(out, P_wp, S_wp, b, et, daire, hedef, {'gecti': True})
+    assert q['d_dikis']['gecti'] and not q['d_dikis']['maskede_ince_bilesen'], q['d_dikis']
+    assert np.abs(out - P_wp)[daire].max() < 1e-3
+
+
 def test_kahverengi_yakalanir():
     out, P_wp, S_wp, b, et, daire, hedef = test_bakir_qc()
     kotu = out.copy()
-    m = np.zeros(out.shape[:2], bool); y0, y1 = et['buyuk_sembol']; m[y0:y1] = b['ce'][y0:y1]
+    m = np.zeros(out.shape[:2], bool); y0, y1 = et['buyuk_sembol']; m[y0:y1] = b['dolu'][y0:y1]
     kotu[m] = T.WP_M                                                             # buyuk sembol gri-kahve kalmis
     q = wb.qc(kotu, P_wp, S_wp, b, et, daire, hedef, {'gecti': True})
     assert not q['a_renk']['gecti'], q['a_renk']
@@ -85,5 +103,6 @@ def test_kahverengi_yakalanir():
 if __name__ == '__main__':
     import time
     t = time.time()
-    for f in (test_bakir_qc, test_dikis_dedektoru, test_guclu_dikis_maskede, test_kahverengi_yakalanir):
+    for f in (test_bakir_qc, test_dikis_dedektoru, test_guclu_dikis_maskede, test_daire_kenari_haric,
+              test_kahverengi_yakalanir):
         f(); print('PASS', f.__name__, f'{time.time() - t:.1f}s')

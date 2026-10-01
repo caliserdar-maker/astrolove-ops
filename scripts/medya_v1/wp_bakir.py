@@ -26,7 +26,10 @@ from wp_katman import LUMA
 BAKIR_VARSAYILAN = np.array([169, 109, 47], np.float32)   # Serdar 1 Eki (yaklasik); kosuda daireden olculur
 T0 = 4.0            # murekkep gucu gurultu tabani (luma)
 KENAR_PX = 2        # cizgi maskesi genisletme (kenar yumusamasi)
-KOYU_ALT = 0.15     # en koyu golge carpani alt siniri
+KOYU_ALT = 0.55     # en koyu golge carpani alt siniri (1. kosu 0.15: derin golge koyu kahve gibi gorunuyordu)
+KOYU_SIKISTIR = 0.6 # golge derinligi carpani (kabartma korunur, bakir ailesinde kalir)
+ESIK_DE = 5.0       # oge-hedef ve ogeler arasi dE (sabit; daire yay dilimi yayilimi 16.9 -> esik turetilemedi)
+DOLU = 0.9          # tam murekkep pikseli: te >= 0.9 (kenar yumusamasi haric renk olcumu)
 DIKIS_BOY = 100     # Serdar: en az 100 px
 DIKIS_T = (3.0, 30.0)   # ince cizgi kontrasti (luma): seritteki dikis 12; murekkep vurusu >> 30
 DIKIS_KOMSU = 3
@@ -69,50 +72,71 @@ def bakir_hedef(P_wp, daire, sektor=8):
     ort = [P_wp[ys[b == i], xs[b == i]].mean(0) for i in range(sektor) if (b == i).sum() >= 200]
     yay = max((_dE(p, q) for i, p in enumerate(ort) for q in ort[i + 1:]), default=0.0)
     return {'rgb': [round(float(v), 1) for v in rgb], 'kaynak': 'daire (plate)', 'px': int(core.sum()),
-            'sektor_yayilim': round(yay, 2), 'sektor_sayisi': len(ort),
-            'kahve_orani': round(kahve_orani(P_wp[core], rgb), 4)}
+            'sektor_yayilim': round(yay, 2), 'sektor_sayisi': len(ort)}
 
 
-def kahve_orani(px, hedef):
-    """Bakir tonundan > KAHVE_DH derece ya da kromasi < KAHVE_C x bakir olan piksel orani."""
+def _ton(rgb_px):
+    L = wk.lab(np.asarray(rgb_px, np.float32).reshape(-1, 1, 3))[:, 0]
+    return np.degrees(np.arctan2(L[:, 2], L[:, 1]))
+
+
+def kahve_orani(px, hedef, kahve_ref):
+    """Tonu (Lab hue) olculen onayli gri-kahveye bakirdan daha yakin piksel orani. Koyu bakir (golge) tonunu
+    korur (bakir 64.4, x0.7 65.2, x0.5 65.4 derece); gri-kahve ~72-74, kagit ~76 (1 Eki olcumu)."""
     if not len(px):
         return 0.0
-    L = wk.lab(px.reshape(-1, 1, 3))[:, 0]
-    h0 = _lab1(hedef)
-    hh = np.degrees(np.arctan2(L[:, 2], L[:, 1])); h0h = np.degrees(np.arctan2(h0[2], h0[1]))
-    dh = np.abs((hh - h0h + 180) % 360 - 180)
-    C = np.hypot(L[:, 1], L[:, 2]); C0 = np.hypot(h0[1], h0[2])
-    return float(((dh > KAHVE_DH) | (C < KAHVE_C * C0)).mean())
+    h = _ton(px)
+    hc = float(_ton(hedef)[0]); hb = float(_ton(kahve_ref)[0])
+    def fark(a, b):
+        return np.abs((a - b + 180) % 360 - 180)
+    return float((fark(h, hb) < fark(h, hc)).mean())
 
 
-def bakir_bas(Dw, P_wp, hedef_rgb, Lp, kalibre=3):
-    """Tek bakir modeli (modul aciklamasi). Donus: (cikti, bilgi{maskeler, Lk, C})."""
+def bakir_bas(Dw, P_wp, hedef_rgb, Lp, bantlar=None, haric=None, kalibre=3):
+    """Tek bakir modeli (modul aciklamasi). bantlar: {ad: (y0, y1)} satirlari icin murekkep gucu ortancasi (Lk)
+    ayri olculur (ince oge kenar yumusamasi ortalamayi kaydirmasin); model ve renk ayni. haric: cizgi katmanindan
+    cikarilacak maske (plate'te zaten olan daire; alt piksel farki kenarda ince cizgi uretiyordu)."""
     H, W = Dw.shape[:2]
     m = np.clip(-(Dw @ LUMA), 0, None)
     core = wk.murekkep_maskesi(Dw, kenar=0) & (m > wk.ESIK)
+    if haric is not None:
+        core &= ~haric
     M = cv2.dilate(core.astype(np.uint8), np.ones((2 * KENAR_PX + 1,) * 2, np.uint8)).astype(bool)
+    if haric is not None:
+        M &= ~haric
     ce = cv2.erode(core.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
     if ce.sum() < 1000:
         ce = core
-    Lk = float(np.median(m[ce])) if ce.any() else 60.0
-    t = m / max(Lk, 1.0)
-    t0 = T0 / max(Lk, 1.0)
+    Lk0 = float(np.median(m[ce])) if ce.any() else 60.0
+    Lk = np.full(H, Lk0, np.float32)
+    lk_bant = {}
+    for ad, (y0, y1) in (bantlar or {}).items():
+        sec = ce[y0:y1]
+        if sec.sum() >= 2000:
+            Lk[y0:y1] = float(np.median(m[y0:y1][sec])); lk_bant[ad] = round(float(Lk[y0]), 1)
+    Lk = Lk[:, None]
+    t = m / np.maximum(Lk, 1.0)
+    t0 = T0 / np.maximum(Lk, 1.0)
     te = np.clip((t - t0) / (1 - t0), 0, None)
     te[~M] = 0.0
-    f = np.clip((Lp - m) / max(Lp - Lk, 1.0), KOYU_ALT, 1.0)
+    fr = (Lp - m) / np.maximum(Lp - Lk, 1.0)
+    f = np.clip(1 - KOYU_SIKISTIR * (1 - fr), KOYU_ALT, 1.0)
     hedef = np.asarray(hedef_rgb, np.float32)
     C = hedef.copy()
     acik = M & (te <= 1); koyu = M & (te > 1)
+    dolu = core & (te >= DOLU)
     for i in range(kalibre + 1):
         out = P_wp.copy()
         out[acik] = P_wp[acik] + te[acik, None] * (C - P_wp[acik])
         out[koyu] = C[None] * f[koyu, None]
-        ort = out[ce].mean(0) if ce.any() else hedef
+        ort = out[dolu].mean(0) if dolu.any() else hedef
         if i < kalibre:
             C = np.clip(C + (hedef - ort), 0, 255)
-    return np.clip(out, 0, 255), {'Lk': round(Lk, 2), 'Lp': round(float(Lp), 1), 'C': [round(float(v), 1) for v in C],
-                                  'cekirdek_ort': [round(float(v), 1) for v in ort], 'core': core, 'ce': ce, 'M': M,
-                                  'maske_px': int(M.sum()), 'acik_px': int(acik.sum()), 'koyu_px': int(koyu.sum())}
+    return np.clip(out, 0, 255), {'Lk': round(Lk0, 2), 'Lk_bant': lk_bant, 'Lp': round(float(Lp), 1),
+                                  'C': [round(float(v), 1) for v in C],
+                                  'dolu_ort': [round(float(v), 1) for v in ort], 'core': core, 'ce': ce, 'M': M,
+                                  'dolu': dolu, 'maske_px': int(M.sum()), 'acik_px': int(acik.sum()),
+                                  'koyu_px': int(koyu.sum()), 'dolu_px': int(dolu.sum())}
 
 
 def _en_uzun_kosu(hit):
@@ -209,10 +233,13 @@ def ogeler(ce, et, W):
 def qc(out, P_wp, S_wp, bilgi, et, daire, hedef, plate_iz=None):
     """Tek QC, PASS/FAIL. Esikler olculerek: daire (tekdüze bakir oge) yayilimi ve plate/onayli kontrolleri."""
     H, W = out.shape[:2]
-    ce, core = bilgi['ce'], bilgi['core']
+    ce, core = bilgi.get('dolu', bilgi['ce']), bilgi['core']
     hrgb = hedef['rgb']
-    yay = hedef.get('sektor_yayilim') or 2.0
-    esik_dE = round(max(4.0, 2 * yay), 2)
+    esik_dE = ESIK_DE
+    # gri-kahve referansi: onayli WP'nin kendi cizgi cekirdegi (olculur)
+    ink_s0 = wk.murekkep_maskesi(S_wp - P_wp, kenar=0)
+    ks = cv2.erode(ink_s0.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
+    kahve_ref = S_wp[ks].mean(0) if ks.sum() >= 500 else np.array([120, 84, 36], np.float32)
     r = {}
     # a) renk birligi
     og = ogeler(ce, et, W)
@@ -222,15 +249,15 @@ def qc(out, P_wp, S_wp, bilgi, et, daire, hedef, plate_iz=None):
         ort['daire'] = out[dc].mean(0)
     hed = {a: round(_dE(v, hrgb), 2) for a, v in ort.items()}
     ara = max((_dE(ort[a], ort[b]) for i, a in enumerate(ort) for b in list(ort)[i + 1:]), default=0.0)
-    kah_taban = hedef.get('kahve_orani') or 0.0
-    esik_k = round(max(0.02, 2 * kah_taban), 4)
+    esik_k = 0.02
     tum = np.zeros_like(ce)
     for m in og.values():
         tum |= m
-    kah = kahve_orani(out[tum], hrgb)
+    kah = kahve_orani(out[tum], hrgb, kahve_ref)
     r['a_renk'] = {'oge_ort_rgb': {a: [round(float(x), 1) for x in v] for a, v in ort.items()},
                    'hedefe_dE': hed, 'ogeler_arasi_max_dE': round(ara, 2), 'esik_dE': esik_dE,
                    'kahve_orani': round(kah, 4), 'esik_kahve': esik_k,
+                   'kahve_ref_rgb': [round(float(x), 1) for x in kahve_ref], 'daire_yayilim': hedef.get('sektor_yayilim'),
                    'gecti': bool(hed and max(hed.values()) <= esik_dE and ara <= esik_dE and kah <= esik_k)}
     # b) tasma / hale: cizgi maskesinin 3-8 px disi = plate
     d8 = cv2.dilate(core.astype(np.uint8), np.ones((17, 17), np.uint8)).astype(bool)

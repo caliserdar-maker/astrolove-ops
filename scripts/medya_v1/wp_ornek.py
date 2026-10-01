@@ -13,6 +13,7 @@ Cift x boy basina:
 import argparse, json, sys, time
 from pathlib import Path
 
+import cv2
 import numpy as np
 from PIL import Image
 
@@ -231,8 +232,12 @@ def cift_boy(cift, boy, P_ed, P_blue, no, cik):
     hedef = wb.bakir_hedef(P_wp, daire)
     R['bakir_hedef'] = hedef
     Lp = float(np.median(P_c @ wk.LUMA))
+    # daire plate'te zaten bakir: cizgi katmanindan cikar (1. bakir kosusu: AQUARIUS 11x14 x=485'te daire kenari
+    # alt piksel farki 106 px ince cizgi olarak boyandi)
+    daire_haric = cv2.dilate(daire.astype(np.uint8), np.ones((11, 11), np.uint8)).astype(bool)
+    bb_bant = {a: et[a] for a in ('buyuk_sembol', 'kucuk_sembol', 'isim', 'mesaj') if a in et}
     # geometri kimligi (onayli CI -> katman -> bakir): murekkep maskesi IoU (renk bilerek onaylidan farkli)
-    taban, _ = wb.bakir_bas(Dw_src, P_wp, hedef['rgb'], Lp)
+    taban, _ = wb.bakir_bas(Dw_src, P_wp, hedef['rgb'], Lp, bb_bant, daire_haric)
     del Dw_src
     R['kimlik_kaynak_tabani'] = wk.fark_tablosu(taban, S_wp, P_wp0, et, P_wp)
     del taban
@@ -246,8 +251,8 @@ def cift_boy(cift, boy, P_ed, P_blue, no, cik):
     r_cu, t_cu = uret['siparis']
     B_cu = wk.boyutla(wk.dizi(t_cu['baski']), (Wd, H))
     D_cu = wk.katman_tasi(B_cu - P_c, hiz, (Wd, H))
-    WP_cu, bb = wb.bakir_bas(D_cu, P_wp, hedef['rgb'], Lp)
-    R['bakir'] = {a: v for a, v in bb.items() if a not in ('core', 'ce', 'M')}
+    WP_cu, bb = wb.bakir_bas(D_cu, P_wp, hedef['rgb'], Lp, bb_bant, daire_haric)
+    R['bakir'] = {a: v for a, v in bb.items() if a not in ('core', 'ce', 'M', 'dolu')}
     # cizgi maskesi disi birebir plate
     R['zemin_birebir'] = {'fark_max': round(float(np.abs(WP_cu - P_wp)[~bb['M']].max()), 3),
                           'gecti': bool(np.abs(WP_cu - P_wp)[~bb['M']].max() < 0.5)}
