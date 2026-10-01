@@ -204,5 +204,30 @@ class MbHedefBayragi(unittest.TestCase):
         self.assertNotIn('MB_HEDEF', inspect.getsource(sd.pod_uret))
 
 
+
+class HizaOnbellek(unittest.TestCase):
+    """_HizaBG: ince_hiza'nin tekrar eden plate resize'i bir kez; sonuc piksel piksel ayni (1 Eki hiz)."""
+
+    def test_resize_ayni_ve_tekrar_yok(self):
+        from PIL import Image
+        rng = np.random.default_rng(1)
+        im = Image.fromarray(rng.integers(0, 255, (300, 200, 3), dtype=np.uint8))
+        bg = sd._HizaBG(im)
+        self.assertIs(bg.convert('RGB'), bg); self.assertEqual((bg.width, bg.height), im.size)
+        a = bg.convert('RGB').resize((120, 180), Image.LANCZOS)
+        b = bg.convert('RGB').resize((120, 180), Image.LANCZOS)
+        self.assertIs(a, b)                                           # ikinci cagri onbellekten
+        self.assertEqual(np.asarray(a).tobytes(), np.asarray(im.convert('RGB').resize((120, 180), Image.LANCZOS)).tobytes())
+        c = bg.convert('RGB').resize((121, 181), Image.LANCZOS)
+        self.assertIsNot(a, c)
+
+    def test_sarma_bir_kez(self):
+        import types
+        m = types.SimpleNamespace(ince_hiza=lambda ref, bg, kaba, alt=4: (type(bg).__name__, alt))
+        sd._hiza_onbellek_kur(m); f = m.ince_hiza; sd._hiza_onbellek_kur(m)
+        self.assertIs(m.ince_hiza, f)
+        self.assertEqual(m.ince_hiza(None, __import__('PIL.Image').Image.new('RGB', (4, 4)), {}), ('_HizaBG', 4))
+
+
 if __name__ == '__main__':
     unittest.main()

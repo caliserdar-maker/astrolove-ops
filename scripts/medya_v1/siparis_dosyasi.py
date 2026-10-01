@@ -1510,12 +1510,52 @@ def silinen_kirpim(baski, maske2400, ad, cik, buyut=BUYUT, azami_en=3000):
     return {'kutu': [x0, y0, x1, y1], 'gorsel_px': list(kirp.size), 'buyutme': buyut}
 
 # ------------------------------------------------------------------ Blue sarmalayicisi (a1, onayli)
+class _HizaBG:
+    """HIZ (1 Eki, profil 36901677396: MB 24x36 914 sn'nin 812'si pilot12.ince_hiza): ince_hiza her (olcek, dx, dy)
+    adayinda TUM plate'i yeniden boyutlandiriyor (480 resize, 7200x10800). Yeniden boyutlandirma yalniz olcege bagli:
+    bu sarmalayici ayni (boyut, yontem) icin sonucu bir kez hesaplar. Ayni girdi, ayni PIL cagrisi -> piksel piksel ayni
+    sonuc (POD dahil cikti bayt bayt ayni); yalniz tekrar yok. Yalniz ince_hiza cagrisi suresince yasar."""
+
+    def __init__(self, im):
+        self._im = im.convert('RGB')
+        self.width, self.height = self._im.size
+        self._onb = {}
+
+    def convert(self, mode):
+        if mode != 'RGB':
+            return self._im.convert(mode)
+        return self
+
+    def resize(self, size, resample=None, *a, **kw):
+        anahtar = (tuple(size), resample, a, tuple(sorted(kw.items())))
+        if anahtar not in self._onb:
+            self._onb[anahtar] = self._im.resize(size, resample, *a, **kw)
+        return self._onb[anahtar]
+
+
+def _hiza_onbellek_kur(*moduller):
+    """pilot12 / pilot16 modullerindeki ince_hiza adini _HizaBG ile saran surumle degistirir (kod degismez)."""
+    for m in moduller:
+        f = getattr(m, 'ince_hiza', None)
+        if f is None or getattr(f, '_onbellek', False):
+            continue
+
+        def sar(f=f):
+            def ince_hiza(ref, bg_im, kaba, *a, **kw):
+                return f(ref, _HizaBG(bg_im), kaba, *a, **kw)
+            ince_hiza._onbellek = True
+            ince_hiza._asil = f
+            return ince_hiza
+        m.ince_hiza = sar()
+
+
 class BluePoster:
     """Blue hatti: a1_poster.Poster (pilot16). Boy tavani her oran icin Cancer-Libra'dan alinir."""
 
     def __init__(self):
         from a1_poster import Poster
         self.P = Poster()
+        _hiza_onbellek_kur(self.P.p12, self.P.p16)
         # Onayli altin isim profili (Cancer / Libra name gold; Poster.__init__ -> pilot12.profil_yukle).
         # 30 Eyl: edisyon_uret.oran_kur her edisyon render'inda pilot12.PROFIL global'ini o dosyanin
         # profiliyle eziyor; Blue (pilot16.oran_kur) sonra onu okuyordu -> MB isim rengi onceki renderdan
