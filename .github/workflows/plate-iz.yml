@@ -1,0 +1,79 @@
+name: plate-iz
+
+# PLATE MESAJ BANDI IZ TEMIZLIGI (Serdar 1 Eki 2026, siparis 4188621967): plate_iz_temizle.py --yaz (QC PASS olmadan
+# yazmaz; yedek PLATES_YEDEK_IZ_<damga>, geri okuma sha256). Yalniz PLATES; POD_PRINT / Etsy / musteri YOK.
+# Once / sonra (+ kontrast) kesitleri inceleme/siparis-4188621967 dalina (kontrol/plate_iz/). Tetik: config/plate_iz.trigger.
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches: [claude/gracious-meitner-i72rkr]
+    paths:
+      - config/plate_iz.trigger
+
+concurrency: plate-iz
+
+env:
+  KOD_REF: a59d5595e6c26a41c5715032fb3657017946f28d
+
+jobs:
+  olc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.KOD_REF }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Python bagimliliklari
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet --upgrade pip
+          python -m pip install --quiet pillow opencv-python-headless numpy fonttools img2pdf pikepdf
+      - name: rclone kur
+        run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then echo "HATA: RCLONE_CONF_B64 yok" >&2; exit 1; fi
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Plate iz temizligi (QC + yedek + geri okuma)
+        run: |
+          set +e
+          python scripts/medya_v1/plate_iz_temizle.py --yaz --cikti plate_iz; rc=$?
+          D=$(date -u +%Y%m%d_%H%M)
+          rclone copy plate_iz "gdrive:ASTROLOVE/TEMP/PLATE_IZ/$D" --include '*.json' --include 'KESIT_*' && echo "drive: TEMP/PLATE_IZ/$D"
+          echo "rc=$rc" >> "$GITHUB_ENV"
+      - name: Kesitler inceleme dalina
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          set -uo pipefail
+          B="inceleme/siparis-4188621967"; U="https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          G=(-c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com")
+          for i in 1 2 3 4 5; do
+            rm -rf _inc; git clone -q --depth 1 --branch "$B" "$U" _inc || exit 1
+            mkdir -p _inc/kontrol/plate_iz && cp plate_iz/KESIT_* plate_iz/PLATE_IZ.json _inc/kontrol/plate_iz/ 2>/dev/null
+            git -C _inc "${G[@]}" add kontrol && git -C _inc "${G[@]}" commit -qm "plate mesaj bandi iz temizligi: once / sonra / kontrast kesitleri" || exit 0
+            git -C _inc push -q origin "HEAD:refs/heads/$B" && { echo "dal: $B $(git -C _inc rev-parse --short HEAD)"; break; }
+            sleep 5
+          done
+      - name: Sonuc
+        run: test "$rc" = "0"
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
