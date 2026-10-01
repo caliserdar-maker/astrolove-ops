@@ -68,7 +68,7 @@ jobs:
           rclone copy _csv "$D" --include "${ONEK}_*.csv"
           rclone copyto _yeni_pinler.csv "$D/${ONEK}_PINLER.csv"
           rclone lsl "$D" --include "PIN_V1*.csv" | tee -a "$GITHUB_STEP_SUMMARY"
-          echo "YALNIZ_CSV_TAMAM" >> "$GITHUB_ENV"
+          echo "YALNIZ_CSV_TAMAM=1" >> "$GITHUB_ENV"
 
       - name: On kosul (AI sahne + metin_kurali)
         if: ${{ inputs.yalniz_csv != true }}
