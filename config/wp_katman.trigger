@@ -1,1 +1,1 @@
-# wp serdar dikis 2026-10-01T09:33:38Z
+# wp serdar serit onarimi 2026-10-01T10:17:32Z

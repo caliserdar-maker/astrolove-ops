@@ -221,6 +221,35 @@ def dikis_onar(P_wp, S_wp, cizgiler, glif, yari=4):
     return out
 
 
+def serit_onar(P, x0, x1, y0, y1, komsu=4, atla=1, yazi_esik=20.0):
+    """Serdar 1 Eki: P[y0:y1, x0:x1] seridinde her satir, serit DISINDAKI temiz komsu sutunlarin (sol
+    x0-atla-komsu..x0-atla, sag x1+atla..x1+atla+komsu) ortalamasindan dogrusal doldurulur. Yazi/leke pikselleri
+    (komsu ortancasindan yazi_esik luma koyu) ortalamaya girmez; satirda gecerli komsu yoksa en yakin satirdan
+    doldurulur. Serit disi degismez."""
+    out = P.copy()
+    ys = np.arange(y0, y1)
+
+    def taraf(a, b):
+        B = P[y0:y1, a:b].astype(np.float32)
+        Lb = B @ LUMA
+        ok = Lb >= np.median(Lb) - yazi_esik
+        n = ok.sum(1)
+        m = (B * ok[..., None]).sum(1) / np.maximum(n, 1)[:, None]
+        if (n == 0).any() and (n > 0).any():
+            for c in range(3):
+                m[:, c] = np.interp(ys, ys[n > 0], m[n > 0, c])
+        return m, int((~ok).sum())
+
+    sol, hs = taraf(x0 - atla - komsu, x0 - atla)
+    sag, hg = taraf(x1 + atla, x1 + atla + komsu)
+    xs_sol = x0 - atla - (komsu + 1) / 2.0
+    xs_sag = x1 + atla + (komsu - 1) / 2.0
+    t = (np.arange(x0, x1) - xs_sol) / (xs_sag - xs_sol)
+    out[y0:y1, x0:x1] = sol[:, None, :] * (1 - t[None, :, None]) + sag[:, None, :] * t[None, :, None]
+    return out, {'serit': {'x': [x0, x1 - 1], 'y': [y0, y1 - 1]}, 'komsu_sol': [x0 - atla - komsu, x0 - atla - 1],
+                 'komsu_sag': [x1 + atla, x1 + atla + komsu - 1], 'haric_yazi_px': hs + hg}
+
+
 def ayni_cizgi(c, liste, tol=4):
     for d in liste:
         if d['yon'] != c['yon']:
@@ -303,14 +332,15 @@ def _en_uzun_kosu(hit):
     return best, son
 
 
-def dikis(A, satir_maskesi, boy=DIKIS_BOY, T=DIKIS_T, d=DIKIS_KOMSU, duzle=DIKIS_DUZLE, murekkep=None):
+def dikis(A, satir_maskesi, boy=DIKIS_BOY, T=DIKIS_T, d=DIKIS_KOMSU, duzle=DIKIS_DUZLE, murekkep=None, bosluk=2, temsil='kosu'):
     """Ince, uzun, duz dikey/yatay cizgi dedektoru (bantlarda). Goruntu once cizgi YONUNDE `duzle` px kutu
     ortalamasiyla duzlenir (parsomen dokusu tek sutunluk kosuyu bolmesin; 1. bakir kosusunda plate'teki 260 px
     dikis bu yuzden kacti). Cizgi pikseli iki yanindaki (+-d ve +-d+1 px) komsulardan T[0]..T[1] luma koyu ya da
     acik; komsu 1 sutun tolerans, 2 satira kadar bosluk kapatilir. Murekkep vuruslari (kontrast >> 30) ve vurus
     kenarlari (tek yan koyu) sayilmaz. murekkep: yazi maskesi; cevresi (duzleme + komsu kadar) NOTR sayilir:
     kosuyu bolmez ama isabet sayilmaz (yazi satirlari yatay duzlemede cizgi gibi gorunur); kosudaki gercek
-    isabet en az %60 x boy olmali. Donus: [{yon, tur, x|y, y|x araligi, boy, kontrast}]."""
+    isabet en az %60 x boy olmali. bosluk: cizgi boyunca kapatilan en uzun bosluk (satir).
+    temsil: komsu sutun grubunu temsil eden sutun ('kosu' en uzun kosu, 'isabet' en cok gercek isabet). Donus: [{yon, tur, x|y, y|x araligi, boy, kontrast}]."""
     L = (A @ LUMA).astype(np.float32)
     H, W = L.shape
     out = []
@@ -339,7 +369,7 @@ def dikis(A, satir_maskesi, boy=DIKIS_BOY, T=DIKIS_T, d=DIKIS_KOMSU, duzle=DIKIS
                 hit &= satir_maskesi[:, None]
             hit &= ~notr
             hit = cv2.dilate(hit.astype(np.uint8), np.ones((1, 3), np.uint8))          # +-1 sutun
-            hit = cv2.morphologyEx(hit, cv2.MORPH_CLOSE, np.ones((5, 1), np.uint8)).astype(bool)  # 2 satir bosluk
+            hit = cv2.morphologyEx(hit, cv2.MORPH_CLOSE, np.ones((2 * bosluk + 1, 1), np.uint8)).astype(bool)
             kos = hit | (notr if yon == 'yatay' else (notr & satir_maskesi[:, None]))
             best, son = _en_uzun_kosu(kos)
             ks = [k for k in np.nonzero(best >= boy)[0]
@@ -351,7 +381,10 @@ def dikis(A, satir_maskesi, boy=DIKIS_BOY, T=DIKIS_T, d=DIKIS_KOMSU, duzle=DIKIS
                 else:
                     grup.append([k])
             for g_ in grup:
-                k = max(g_, key=lambda z: best[z])
+                if temsil == 'isabet':
+                    k = max(g_, key=lambda z: int(hit[son[z] - best[z] + 1:son[z] + 1, z].sum()))
+                else:
+                    k = max(g_, key=lambda z: best[z])
                 s1 = int(son[k]); s0 = s1 - int(best[k]) + 1
                 kon = float(V[s0:s1 + 1, max(0, k - 1):k + 2].max(1).mean())
                 if yon == 'dikey':
@@ -563,5 +596,6 @@ def bakir_hatti(D_cu, D_src, P_wp0, S_wp, daire, et, Lp, k, plate_iz=None, hedef
         rap['onarimsiz_d'] = [c for c in dikis(o0, sm, murekkep=bb['core'] | dd) if not ayni_cizgi(c, cs)][:10]
     rap['qc'] = q
     rap['_te'] = np.clip(bb['te'], 0, 1)
+    rap['_kontrast_olc'] = (_grupla(ogeler(bb['dolu'] & ~dd, et, W)), hn)    # onarim sonrasi ayni olcum icin
     rap['hedef'] = hedef_d
     return out, P_k, rap

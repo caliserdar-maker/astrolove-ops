@@ -176,26 +176,49 @@ SERDAR_YAN = (1290, 1311, 3975, 4234)      # v2 YANYANA (2864x4286) olcum pencer
 V2_YANYANA = sd.W / 'v2_yanyana.jpg'
 
 
-def _yazi_maskesi(rgb):
+SERDAR_SERIT = (1561, 1567, 3490, 3750)   # Serdar 1 Eki onayi: plate'te YALNIZ x 1561-1566 / y 3490-3749
+
+
+def _yazi_maskesi(rgb, ince=False):
+    """Yazi maskesi (yerel ortancadan 25 luma koyu, 5x5 genisletme). ince=True: genisligi <= 8 px ve boyu >= 50 px
+    olan bilesenler (dikey kil cizgi; v2 YANYANA 'With'/'a' arasi, 1 Eki) yazi SAYILMAZ."""
     L = rgb @ wk.LUMA
     z = cv2.medianBlur(np.clip(L, 0, 255).astype(np.uint8), 31).astype(np.float32)
-    return cv2.dilate(((z - L) > 25).astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
+    m = ((z - L) > 25).astype(np.uint8)
+    if ince:                                   # parcali cizgi: once dikeyde 15 px kapat, sonra bilesen olc
+        mk = cv2.morphologyEx(m, cv2.MORPH_CLOSE, np.ones((15, 1), np.uint8))
+        n, lab, st, _ = cv2.connectedComponentsWithStats(mk, 8)
+        cizgi = np.zeros(n, bool)
+        cizgi[1:] = (st[1:, cv2.CC_STAT_WIDTH] <= 8) & (st[1:, cv2.CC_STAT_HEIGHT] >= 50)
+        m[cizgi[lab] & (m > 0)] = 0
+    return cv2.dilate(m, np.ones((5, 5), np.uint8)).astype(bool)
 
 
-def yanyana_dedektor(img, geo, h):
-    """wb.dikis'i yanyana gorselinin alt panelinde calistirir; Serdar penceresiyle kesisen cizgiler."""
-    A = np.asarray(img.convert('RGB')).astype(np.float32)
-    sm = np.zeros(A.shape[0], bool)
-    p0 = geo['panel_y'][1]; sm[p0:p0 + h] = True
+def yanyana_dedektor(img, geo, h, ofset=(0, 0)):
+    """wb.dikis'i yanyana gorselinin alt panelinde calistirir; Serdar penceresiyle kesisen dikey cizgiler.
+    Yazi maskesi ince-uzun bilesenleri yazi saymaz ve kontrast ust siniri 120 (v2 cizgisi 35-45 luma; 30 ust
+    sinir ve yazi maskesi onu yaziya sayiyordu -> v2'de yanlis PASS). Cizgi kesikli (v2: ~85 px + 22 px bosluk
+    + 15 px): ayni sutunda 30 satira kadar bosluk kapatilir. ofset: img bir kesitse sol-ust koordinati."""
     x0, x1, y0, y1 = SERDAR_YAN
-    c = wb.dikis(A, sm, murekkep=_yazi_maskesi(A))
-    hit = [d for d in c if d['yon'] == 'dikey' and x0 + 4 <= d['x'] <= x1 - 6 and d['y'][1] >= y0 and d['y'][0] <= y1]
+    # yerel pencere (x +-60, y0-75..panel sonu): tam gorsel ve kesit ayni sonucu verir, uzak sutunlar gruplanmaz
+    kx0, ky0 = x0 - 60 - ofset[0], y0 - 75 - ofset[1]
+    A = np.asarray(img.convert('RGB')).astype(np.float32)[ky0:, kx0:x1 + 61 - ofset[0]]
+    ox, oy = x0 - 60, y0 - 75
+    sm = np.zeros(A.shape[0], bool)
+    p0 = geo['panel_y'][1] - oy; sm[max(0, p0):max(0, p0 + h)] = True
+    c = wb.dikis(A, sm, T=(3.0, 120.0), murekkep=_yazi_maskesi(A, ince=True), bosluk=30,
+                 temsil='isabet')
+    hit = [{**d, 'x': d['x'] + ox, 'y': [d['y'][0] + oy, d['y'][1] + oy]} for d in c if d['yon'] == 'dikey']
+    # Serdar olcutu koyu cizgi: tur koyu ve kosu boyunca ortalama kontrast >= 3 (tek tek isabet esigi kadar)
+    hit = [d for d in hit if d['tur'] == 'koyu' and d['kontrast'] >= 3.0
+           and x0 + 4 <= d['x'] <= x1 - 6 and d['y'][1] >= y0 and d['y'][0] <= y1]
     return {'cizgi': hit[:5], 'sonuc': 'FAIL (cizgi var)' if hit else 'PASS (cizgi yok)'}
 
 
 def serdar_dikis(cift, boy, S_wp, P_wp0, B_cu, WP_cu, P_k, w, geo, h):
     """Serdar'in v2 YANYANA'da isaretledigi dikey cizgi: esleme, katman profilleri, yalniz o katmani yalniz o
-    seritte onaylı kagittan onarma. Donus: (yeni cikti, yeni kagit, rapor)."""
+    seritte (SERDAR_SERIT) plate sutunlarini serit disi temiz komsularin ortalamasina cekme.
+    Donus: (yeni cikti, yeni kagit, rapor)."""
     x0y, x1y, y0y, y1y = SERDAR_YAN
     bx0, by0 = yanyana_baski(geo, x0y, y0y); bx1, by1 = yanyana_baski(geo, x1y, y1y)
     xc = yanyana_baski(geo, 1299.5, y0y)[0]
@@ -211,7 +234,9 @@ def serdar_dikis(cift, boy, S_wp, P_wp0, B_cu, WP_cu, P_k, w, geo, h):
     print('KATMAN_PROFIL', cift, boy, json.dumps({'x': [bx0, bx1], 'y': [by0, by1], **pr, 'koyu': r['koyu_sutun']}),
           flush=True)
     kk = r['koyu_sutun']
-    if kk['kagit_kullanilan'] > 4 and kk['onayli'] <= 4:
+    # 1 Eki olcumu: baski = plate = kullanilan kagit (13.8), duz renk 0.3 -> cizgi kagit katmaninda. Onayli WP o yerde
+    # eski sloganin harfini tasir (6.9), karar onayliya bakmaz.
+    if kk['kagit_kullanilan'] > 4 and kk['duz_renk'] <= 4:
         r['katman'] = 'plate (kagit)'
     elif kk['duz_renk'] > 4:
         r['katman'] = 'duz renk baskisi'
@@ -219,29 +244,15 @@ def serdar_dikis(cift, boy, S_wp, P_wp0, B_cu, WP_cu, P_k, w, geo, h):
         r['katman'] = 'bakir render'
     else:
         r['katman'] = 'yok (bu boyda cizgi olculmedi)'
-    if r['katman'] != 'plate (kagit)':
+    sx0, sx1, sy0, sy1 = SERDAR_SERIT
+    if r['katman'] != 'plate (kagit)' or not (sx0 <= xc < sx1):
         return WP_cu, P_k, r
-    # cizgi sutunu: kullanilan kagitta en koyu sutun
-    p_ = np.asarray(pr['kagit_kullanilan'])
-    koyuluk = [np.median(np.r_[p_[:max(0, i - 2)], p_[i + 3:]]) - p_[i] for i in range(len(p_))]
-    xl = bx0 + int(np.argmax(koyuluk))
-    r['cizgi_x'] = xl
-    sx0, sx1 = xl - 4, xl + 5
-    sy0, sy1 = max(0, by0 - 15), min(S_wp.shape[0], by1 + 16)
-    yazi = _yazi_maskesi(S_wp[sy0:sy1, sx0 - 8:sx1 + 8])[:, 8:-8]
-    P_new = P_k.copy()
-    ser = P_k[sy0:sy1, sx0:sx1]
-    sol = P_k[sy0:sy1, sx0 - 3:sx0 - 1].mean(1, keepdims=True); sag = P_k[sy0:sy1, sx1 + 1:sx1 + 3].mean(1, keepdims=True)
-    t_ = (np.arange(sx1 - sx0, dtype=np.float32) + 1) / (sx1 - sx0 + 1)
-    ara = sol * (1 - t_[None, :, None]) + sag * t_[None, :, None]
-    P_new[sy0:sy1, sx0:sx1] = np.where(yazi[..., None], ara, S_wp[sy0:sy1, sx0:sx1])
-    out = WP_cu.copy()
-    out[sy0:sy1, sx0:sx1] = WP_cu[sy0:sy1, sx0:sx1] + (1 - w[sy0:sy1, sx0:sx1, None]) * (P_new[sy0:sy1, sx0:sx1] - ser)
-    degisen = np.abs(out - WP_cu).max(-1) > 0.5
+    # Serdar onayi: yalniz bu seritte, plate sutunlari serit disindaki temiz komsu sutunlarin ortalamasi
+    P_new, so = wb.serit_onar(P_k, sx0, sx1, sy0, sy1)
+    out = WP_cu + (1 - w[..., None]) * (P_new - P_k)
+    degisen = np.abs(out - WP_cu).max(-1) > 0
     disari = degisen.copy(); disari[sy0:sy1, sx0:sx1] = False
-    r['onarim'] = {'serit': {'x': [sx0, sx1], 'y': [sy0, sy1]}, 'onayli_kagit_px': int((~yazi).sum()),
-                   'ara_deger_px': int(yazi.sum()), 'degisen_px': int(degisen.sum()),
-                   'serit_disi_degisen_px': int(disari.sum())}
+    r['onarim'] = {**so, 'degisen_px': int(degisen.sum()), 'serit_disi_degisen_px': int(disari.sum())}
     return np.clip(out, 0, 255), P_new, r
 
 
@@ -346,6 +357,7 @@ def cift_boy(cift, boy, P_ed, P_blue, no, cik):
     WP_cu, P_k, rb = wb.bakir_hatti(D_cu, D_src, P_wp, S_wp, daire, et, Lp, k, plate_iz=sonra)
     del D_src
     w_te = rb.pop('_te')
+    og_k, hn_k = rb.pop('_kontrast_olc')
     # Serdar 1 Eki (3): v2 YANYANA'daki dikey cizgi -> baski koordinati, katman, yalniz o seritte onarim
     if boy == '11x14' and et:
         yb0 = max(0, min(v[0] for a, v in et.items() if a != 'buyuk_sembol') - 60)
@@ -372,7 +384,11 @@ def cift_boy(cift, boy, P_ed, P_blue, no, cik):
         sdk['sonra_profil'] = sutun_profili(img1j, *SERDAR_YAN)
         sdk['sonra_koyu'] = koyu_sutun(sdk['sonra_profil'])
         sdk['sonra_dedektor'] = yanyana_dedektor(img1j, geo, hpan)
-        sdk['bitti'] = bool(sdk['sonra_koyu'] <= 4)
+        c_son = wb.kontrast_olc(WP_cu, P_k, og_k, hn_k)            # g ile ayni olcum, onarim sonrasi
+        sdk['kontrast_sonra'] = {a: v['kontrast'] for a, v in c_son.items()}
+        sdk['kontrast_once'] = rb['qc']['g_kontrast']['yeni']
+        sdk['bitti'] = bool(sdk['sonra_koyu'] <= 4 and sdk['sonra_dedektor']['sonuc'].startswith('PASS')
+                            and sdk.get('onarim', {}).get('serit_disi_degisen_px', 1) == 0)
         R['serdar_dikis'] = sdk
         print('SERDAR_DIKIS', cift, boy, json.dumps({a: v for a, v in sdk.items() if a not in ('profil',)},
                                                      default=str), flush=True)
