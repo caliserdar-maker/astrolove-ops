@@ -101,3 +101,54 @@ onceki_kosu : PASS isleri bu koşulardan al (tek is yeniden kosuda)
 - MB 11x14 olcek cap_sol +1.09 (baski-duzelt).
 - Kaynak on testi HEPSI (run 36915485075) sonucu: etkilenen ciftler listelenecek.
 - Test 3 MB yeniden kosu + paket, sonra Test 4 (yeni cift).
+
+## TUM DERSLER (Tara + Test 1-3, 1 Eki 20:10; Serdar: Test 4'te hepsi uygulanacak)
+
+Tara (4188621967)
+1. Tek sayfaya yama yapildi (DB 18x24 altin profili), kok neden cozulmedi; isim degisince hata baska sayfada cikti.
+2. Dosya/klasor adi AstroLove_ yazildi; marka her yerde AstroLoveArt.
+3. Musteri metninde olculmemis cozunurluk iddiasi (11x14 -> 22x28); boy/dpi iddiasi yalniz olcumle.
+4. Yalniz GitHub'a bakip oturum "bos" denildi; oturum yerelde calisiyor olabilir.
+5. Beklenerek ilerlendi; siparis isi kesintisiz, zamanlayici yok.
+6. MB yavasligi (25 dk) olculdu ama giderilmedi.
+Test 1 (9000000001)
+7. Dispatch hatalari (Content-Type yok 415, `mesaj` yerine `mesaj_b64` 422); sablon kullan.
+8. Bilinen MB yavasligi kapatilmadan test basladi (MB 33 dk).
+9. WP 24x36 yanlis taban renk (MB) + 23 dk'da cokme; duz renk yalniz CHAMPAGNE_IVORY, JPEG 95.
+10. Olcek kapisi FAIL olcum hatasiydi (kutu kucultme + farkli rasterlayici); esit bant olcumu.
+11. MB sayfalari sirayla; paralel 5 is (33 -> 6 dk).
+12. FAIL nedeni Drive OZET/KAPI raporundan okunur (loglar kapali).
+13. Tek sayfa FAIL'de yalniz o is yeniden (isler + onceki_kosu).
+Test 2 (9000000002)
+14. Cift sirasi ters girildi; cift alfabetik, isim1 = ilk burc (sol). Artik otomatik normalize.
+15. Yanlis giriste 13 is 1 dk bosa; plan adiminda hizli kaynak denetimi (sn'ler).
+16. Prova siparis sirasinda runner doldurdu (CI 2 dk gec); siparis sirasinda prova/tani yok.
+17. Paket 5 dk inceleme kesitine gitti; paket yalniz PDF + OZET (~51 sn).
+18. "Hazir" = 5 PDF Drive'da (createdTime), job bitisi degil.
+19. renk_ref her zaman acik tam sha (varsayilan eski).
+20. Teslim oncesi onizlemede isim-burc ve tagline kontrol.
+Test 3 (9000000003)
+21. Yalniz 3 cift denenmisti; ARIES_VIRGO MB 2:3 bant olcumu kaydi (Virgo kuyrugu isme degiyor). Tum ciftler x renkler x boylar kaynak on testi.
+22. Acik is (MB 11x14) kapatilmadan test (ikinci kez).
+23. 1 dk once main'e giren dogrulanmamis kodla test.
+24. Esit bant olcumu duz kenarli harflerde (LIAM) yeni sapma; olcum oncesi bulanik sigma 1.0 (en kotu 0.78, gercek 1.1 px kayma FAIL).
+25. Hata izi / olcek ayrintisi OZET'te yoktu; eklendi.
+26. Ayni koda iki oturum dokundu; tek sahip.
+Koordinator
+27. Hata ayiklarken Serdar'a yazilmadi; en gec 2 dk'da bir durum.
+28. Uzun bloklayan izleme donguleri; kisa kontrol + rapor.
+29. Test ciktisi maskelendi, hatali kod push edildi; once test + cikis kodu, sonra push.
+30. Baska oturumun izledigi kosu haber vermeden iptal edildi; once bildir.
+31. Yeni arac yavas tasarlandi (seri, 15 boy); baştan hizli (paralel, yalniz gereken boylar).
+32. Yazilan kurallar uygulanmadi; Test 4 oncesi kontrol listesi madde madde isaretlenip Serdar'a gosterilir.
+
+## TEST 4 BASLANGIC KAPISI (hepsi EVET olmadan dispatch yok; Serdar'a madde madde gosterilir)
+
+- [ ] Acik is listesi bos: Test 3 MB 11x14 + 24x36 duzeldi, Test 3 OZET 5/5 PASS.
+- [ ] Kaynak on testi: tum ciftler x 5 renk x 5 siparis boyu PASS (yalniz MB degil).
+- [ ] Isim on testi yeni kodla PASS (11x14 dahil, uzun/aksanli isimler dahil).
+- [ ] Kod sabit: renk_ref tam sha + main sha not edildi; son degisiklik testlerden gecti.
+- [ ] Calisan prova / tani / toplu kosu yok.
+- [ ] Cift alfabetik, isim1/isim2 burclarla eslesiyor.
+- [ ] Saat dispatch aninda baslar; 2 dk'da bir rapor.
+- [ ] Bitti tanimi: 5 PDF Drive'da + OZET PASS + onizleme kontrolu.
