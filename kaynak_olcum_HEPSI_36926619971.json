@@ -1,0 +1,9758 @@
+{
+ "ozet": {
+  "toplam": 390,
+  "pass": 388,
+  "fail": 2,
+  "fail_liste": [
+   "LEO_SAGITTARIUS/WARM_PARCHMENT/18x24",
+   "LEO_VIRGO/WARM_PARCHMENT/18x24"
+  ],
+  "sure_sn": 750.2
+ },
+ "sonuc": [
+  {
+   "cift": "AQUARIUS_AQUARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9396,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_AQUARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9582,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_AQUARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     828,
+     1572
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9967,
+    "olcum": "plate farki maskesi"
+   }
+  },
+  {
+   "cift": "AQUARIUS_AQUARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3090
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9922,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_AQUARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9591,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_ARIES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9394,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_ARIES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9584,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_ARIES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     828,
+     1572
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9966,
+    "olcum": "plate farki maskesi"
+   }
+  },
+  {
+   "cift": "AQUARIUS_ARIES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9923,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_ARIES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9592,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_CANCER",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9395,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_CANCER",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9583,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_CANCER",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     828,
+     1572
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9967,
+    "olcum": "plate farki maskesi"
+   }
+  },
+  {
+   "cift": "AQUARIUS_CANCER",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9924,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_CANCER",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9591,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_CAPRICORN",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9395,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_CAPRICORN",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9584,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_CAPRICORN",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     277,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9508,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_CAPRICORN",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9924,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_CAPRICORN",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9591,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_GEMINI",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9395,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_GEMINI",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9583,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_GEMINI",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     828,
+     1572
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9967,
+    "olcum": "plate farki maskesi"
+   }
+  },
+  {
+   "cift": "AQUARIUS_GEMINI",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9923,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_GEMINI",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9591,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_LEO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9395,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_LEO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9584,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_LEO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     828,
+     1572
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9966,
+    "olcum": "plate farki maskesi"
+   }
+  },
+  {
+   "cift": "AQUARIUS_LEO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9923,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_LEO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9591,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_LIBRA",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9395,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_LIBRA",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9587,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_LIBRA",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     828,
+     1572
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9967,
+    "olcum": "plate farki maskesi"
+   }
+  },
+  {
+   "cift": "AQUARIUS_LIBRA",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9925,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_LIBRA",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9591,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9399,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9584,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2359,
+     2467
+    ],
+    "tag_x": [
+     244,
+     1955
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9925,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9923,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9596,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9399,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9586,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     277,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9509,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9925,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9597,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9399,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9588,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     828,
+     1572
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9969,
+    "olcum": "plate farki maskesi"
+   }
+  },
+  {
+   "cift": "AQUARIUS_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9925,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9596,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9399,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9587,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     828,
+     1572
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9967,
+    "olcum": "plate farki maskesi"
+   }
+  },
+  {
+   "cift": "AQUARIUS_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9925,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9591,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9395,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9584,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     828,
+     1572
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9966,
+    "olcum": "plate farki maskesi"
+   }
+  },
+  {
+   "cift": "AQUARIUS_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9923,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "AQUARIUS_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9591,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_ARIES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9395,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_ARIES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9583,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_ARIES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     828,
+     1572
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9967,
+    "olcum": "plate farki maskesi"
+   }
+  },
+  {
+   "cift": "ARIES_ARIES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9923,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_ARIES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9591,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_CANCER",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9395,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_CANCER",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9584,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_CANCER",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     277,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9508,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_CANCER",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9923,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_CANCER",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9596,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_CAPRICORN",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9399,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_CAPRICORN",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9587,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_CAPRICORN",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     277,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9509,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_CAPRICORN",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9923,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_CAPRICORN",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9591,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_GEMINI",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9395,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_GEMINI",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9584,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_GEMINI",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     277,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9508,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_GEMINI",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9923,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_GEMINI",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9591,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_LEO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9399,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_LEO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9583,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_LEO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     277,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9513,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_LEO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9923,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_LEO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9591,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_LIBRA",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9395,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_LIBRA",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9584,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_LIBRA",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     828,
+     1572
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9966,
+    "olcum": "plate farki maskesi"
+   }
+  },
+  {
+   "cift": "ARIES_LIBRA",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9923,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_LIBRA",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9591,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9395,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9583,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     277,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9509,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9923,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9591,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9399,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9584,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     277,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9509,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9923,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9591,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9399,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9586,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     277,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9509,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9925,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9591,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9395,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9588,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     277,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9508,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9925,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9596,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9395,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9583,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     277,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9509,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9923,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "ARIES_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9597,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_CANCER",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9395,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_CANCER",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9584,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_CANCER",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     277,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9509,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_CANCER",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9923,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_CANCER",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9591,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_CAPRICORN",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9399,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_CAPRICORN",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9583,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_CAPRICORN",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     277,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9509,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_CAPRICORN",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9924,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_CAPRICORN",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9591,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_GEMINI",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9395,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_GEMINI",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9584,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_GEMINI",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     277,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9508,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_GEMINI",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9924,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_GEMINI",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9591,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_LEO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9395,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_LEO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9583,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_LEO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     277,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9513,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_LEO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9925,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_LEO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9591,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_LIBRA",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9399,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_LIBRA",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9584,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_LIBRA",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     828,
+     1572
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9966,
+    "olcum": "plate farki maskesi"
+   }
+  },
+  {
+   "cift": "CANCER_LIBRA",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9923,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_LIBRA",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9591,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9395,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9586,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     828,
+     1572
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9967,
+    "olcum": "plate farki maskesi"
+   }
+  },
+  {
+   "cift": "CANCER_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9923,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9597,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9395,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9588,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     277,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9508,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9925,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9591,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9395,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9586,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     277,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9509,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9923,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9591,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9395,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9584,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     277,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9508,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9925,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9591,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9395,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9583,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     277,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9509,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9923,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CANCER_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9591,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_CAPRICORN",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9395,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_CAPRICORN",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9584,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_CAPRICORN",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     277,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9508,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_CAPRICORN",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9923,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_CAPRICORN",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9591,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_GEMINI",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9395,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_GEMINI",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9586,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_GEMINI",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     277,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9509,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_GEMINI",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9923,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_GEMINI",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9592,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_LEO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9395,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_LEO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9584,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_LEO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     277,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9508,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_LEO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9923,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_LEO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.959,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_LIBRA",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9394,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_LIBRA",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9584,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_LIBRA",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     277,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9511,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_LIBRA",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9924,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_LIBRA",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9596,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9395,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9584,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     277,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9508,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9923,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9596,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9395,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9586,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     277,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9509,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9923,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9591,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9399,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9584,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     277,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9513,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9925,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9591,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9399,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9583,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     277,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9509,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9923,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9591,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9399,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9584,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     277,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9508,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9923,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "CAPRICORN_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9591,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_GEMINI",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9395,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_GEMINI",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9586,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_GEMINI",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     277,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9509,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_GEMINI",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9923,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_GEMINI",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9591,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_LEO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2614,
+     2738
+    ],
+    "tag_x": [
+     277,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9395,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_LEO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2560,
+     2644
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9584,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_LEO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     277,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9508,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_LEO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     353,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9923,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_LEO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2875,
+     2972
+    ],
+    "tag_x": [
+     245,
+     2151
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9591,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_LIBRA",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2615,
+     2726
+    ],
+    "tag_x": [
+     298,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9716,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_LIBRA",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2556,
+     2643
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9803,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_LIBRA",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     299,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9845,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_LIBRA",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     352,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9944,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_LIBRA",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2876,
+     2972
+    ],
+    "tag_x": [
+     243,
+     1587
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9865,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2615,
+     2726
+    ],
+    "tag_x": [
+     298,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9717,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2556,
+     2643
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9801,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     299,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9845,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     352,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9943,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2876,
+     2972
+    ],
+    "tag_x": [
+     243,
+     1587
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9868,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2615,
+     2726
+    ],
+    "tag_x": [
+     298,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9716,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2556,
+     2643
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.98,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     299,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9848,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     352,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9945,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2876,
+     2972
+    ],
+    "tag_x": [
+     243,
+     1587
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9868,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2615,
+     2726
+    ],
+    "tag_x": [
+     298,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9717,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2556,
+     2643
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9798,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     299,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9845,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     352,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9945,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2876,
+     2972
+    ],
+    "tag_x": [
+     243,
+     1587
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9864,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2615,
+     2726
+    ],
+    "tag_x": [
+     298,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9716,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2556,
+     2643
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.98,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     299,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9845,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     352,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9945,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2876,
+     2972
+    ],
+    "tag_x": [
+     243,
+     1587
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9865,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2615,
+     2726
+    ],
+    "tag_x": [
+     298,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9719,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2556,
+     2643
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9798,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     299,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9848,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     352,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9945,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "GEMINI_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2876,
+     2972
+    ],
+    "tag_x": [
+     243,
+     1587
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9864,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LEO_LEO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2615,
+     2726
+    ],
+    "tag_x": [
+     298,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9719,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LEO_LEO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2556,
+     2643
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.98,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LEO_LEO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     299,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9844,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LEO_LEO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     352,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9945,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LEO_LEO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2876,
+     2972
+    ],
+    "tag_x": [
+     243,
+     1587
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9865,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LEO_LIBRA",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2615,
+     2726
+    ],
+    "tag_x": [
+     298,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9717,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LEO_LIBRA",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2556,
+     2643
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9798,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LEO_LIBRA",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     299,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9844,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LEO_LIBRA",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     352,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9945,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LEO_LIBRA",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2876,
+     2972
+    ],
+    "tag_x": [
+     243,
+     1587
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9864,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LEO_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2615,
+     2726
+    ],
+    "tag_x": [
+     298,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9716,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LEO_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2556,
+     2643
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9803,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LEO_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     299,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9845,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LEO_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     352,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9945,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LEO_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2876,
+     2972
+    ],
+    "tag_x": [
+     243,
+     1587
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9865,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LEO_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2615,
+     2726
+    ],
+    "tag_x": [
+     298,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9717,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LEO_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2556,
+     2643
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9798,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LEO_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": false,
+   "eksik": [
+    "tag_bant",
+    "tag_x"
+   ],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": null,
+    "tag_x": null
+   },
+   "slogan": {
+    "gecti": false,
+    "sebep": "dosya olculemedi: KAYNAK OLCUM HATASI 18x24.jpg: sayfa_olc: 18x24.jpg: isim satiri bulunamadi (19 bant); yedek olcum (kume boslugu 60): isim bandi 0.889 H (sablon (0.66, 0.8)). Kaynak dosya incelenmeli; uretim durduruldu.; plate farkiyla: KAYNAK OLCUM HATASI 18x24.jpg: sayfa_olc: 18x24.jpg: isim satiri bulunamadi (5 bant); yedek olcum (kume boslugu 60): sayfa_olc: 18x24.jpg: isim satiri bulunamadi (5 bant). Kaynak dosya incelenmeli; uretim durduruldu.",
+    "glif_farkli_payi": null,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LEO_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     352,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9945,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LEO_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2876,
+     2972
+    ],
+    "tag_x": [
+     243,
+     1587
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9868,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LEO_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2615,
+     2726
+    ],
+    "tag_x": [
+     298,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9716,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LEO_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2556,
+     2643
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.98,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LEO_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     299,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9845,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LEO_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     352,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9945,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LEO_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2876,
+     2972
+    ],
+    "tag_x": [
+     243,
+     1587
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9864,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LEO_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2615,
+     2726
+    ],
+    "tag_x": [
+     298,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9717,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LEO_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2556,
+     2643
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9798,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LEO_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     299,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9845,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LEO_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     352,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9945,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LEO_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2876,
+     2972
+    ],
+    "tag_x": [
+     243,
+     1587
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9864,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LEO_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2615,
+     2726
+    ],
+    "tag_x": [
+     298,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9716,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LEO_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2556,
+     2643
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.98,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LEO_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": false,
+   "eksik": [
+    "tag_bant",
+    "tag_x"
+   ],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": null,
+    "tag_x": null
+   },
+   "slogan": {
+    "gecti": false,
+    "sebep": "dosya olculemedi: KAYNAK OLCUM HATASI 18x24.jpg: sayfa_olc: 18x24.jpg: isim satiri bulunamadi (19 bant); yedek olcum (kume boslugu 60): isim bandi 0.889 H (sablon (0.66, 0.8)). Kaynak dosya incelenmeli; uretim durduruldu.; plate farkiyla: KAYNAK OLCUM HATASI 18x24.jpg: sayfa_olc: 18x24.jpg: isim satiri bulunamadi (5 bant); yedek olcum (kume boslugu 60): sayfa_olc: 18x24.jpg: isim satiri bulunamadi (5 bant). Kaynak dosya incelenmeli; uretim durduruldu.",
+    "glif_farkli_payi": null,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LEO_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     352,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9944,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LEO_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2876,
+     2972
+    ],
+    "tag_x": [
+     243,
+     1587
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9865,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LIBRA_LIBRA",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2615,
+     2726
+    ],
+    "tag_x": [
+     298,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9717,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LIBRA_LIBRA",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2556,
+     2643
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9798,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LIBRA_LIBRA",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     299,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9845,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LIBRA_LIBRA",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     352,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9943,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LIBRA_LIBRA",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2876,
+     2972
+    ],
+    "tag_x": [
+     243,
+     1587
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9864,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LIBRA_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2615,
+     2726
+    ],
+    "tag_x": [
+     298,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9716,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LIBRA_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2556,
+     2643
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.98,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LIBRA_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     299,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9845,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LIBRA_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     352,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9944,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LIBRA_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2876,
+     2972
+    ],
+    "tag_x": [
+     243,
+     1587
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9868,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LIBRA_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2615,
+     2726
+    ],
+    "tag_x": [
+     298,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9717,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LIBRA_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2556,
+     2643
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9801,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LIBRA_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     299,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9845,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LIBRA_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     352,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9945,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LIBRA_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2876,
+     2972
+    ],
+    "tag_x": [
+     243,
+     1587
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9864,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LIBRA_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2615,
+     2726
+    ],
+    "tag_x": [
+     298,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9716,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LIBRA_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2556,
+     2643
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.98,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LIBRA_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     299,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9845,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LIBRA_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     352,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9945,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LIBRA_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2876,
+     2972
+    ],
+    "tag_x": [
+     243,
+     1587
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9865,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LIBRA_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2615,
+     2726
+    ],
+    "tag_x": [
+     298,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9717,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LIBRA_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2556,
+     2643
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9798,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LIBRA_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     299,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9845,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LIBRA_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     352,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9945,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LIBRA_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2876,
+     2972
+    ],
+    "tag_x": [
+     243,
+     1587
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9864,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LIBRA_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2615,
+     2726
+    ],
+    "tag_x": [
+     298,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9716,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LIBRA_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2556,
+     2643
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.98,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LIBRA_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     299,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9845,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LIBRA_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     352,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9945,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "LIBRA_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2876,
+     2972
+    ],
+    "tag_x": [
+     243,
+     1587
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9868,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "PISCES_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2615,
+     2726
+    ],
+    "tag_x": [
+     298,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9717,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "PISCES_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2556,
+     2643
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9798,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "PISCES_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     299,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9845,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "PISCES_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     352,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9945,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "PISCES_PISCES",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2876,
+     2972
+    ],
+    "tag_x": [
+     243,
+     1587
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9864,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "PISCES_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2615,
+     2726
+    ],
+    "tag_x": [
+     298,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9716,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "PISCES_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2556,
+     2643
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.98,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "PISCES_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     299,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9845,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "PISCES_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     352,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9944,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "PISCES_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2876,
+     2972
+    ],
+    "tag_x": [
+     243,
+     1587
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9868,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "PISCES_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2615,
+     2726
+    ],
+    "tag_x": [
+     298,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9719,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "PISCES_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2556,
+     2643
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9798,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "PISCES_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     299,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9845,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "PISCES_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     352,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9943,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "PISCES_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2876,
+     2972
+    ],
+    "tag_x": [
+     243,
+     1587
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9864,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "PISCES_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2615,
+     2726
+    ],
+    "tag_x": [
+     298,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9719,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "PISCES_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2556,
+     2643
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.98,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "PISCES_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     299,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9845,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "PISCES_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     352,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9945,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "PISCES_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2876,
+     2972
+    ],
+    "tag_x": [
+     243,
+     1587
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9865,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "PISCES_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2615,
+     2726
+    ],
+    "tag_x": [
+     298,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9717,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "PISCES_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2556,
+     2643
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9798,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "PISCES_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     299,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9845,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "PISCES_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     352,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9945,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "PISCES_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2876,
+     2972
+    ],
+    "tag_x": [
+     243,
+     1587
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9864,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "SAGITTARIUS_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2615,
+     2726
+    ],
+    "tag_x": [
+     298,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9716,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "SAGITTARIUS_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2556,
+     2643
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.98,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "SAGITTARIUS_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     299,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9845,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "SAGITTARIUS_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     352,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9945,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "SAGITTARIUS_SAGITTARIUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2876,
+     2972
+    ],
+    "tag_x": [
+     243,
+     1587
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9864,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "SAGITTARIUS_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2615,
+     2726
+    ],
+    "tag_x": [
+     298,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9717,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "SAGITTARIUS_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2556,
+     2643
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9798,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "SAGITTARIUS_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     299,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9845,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "SAGITTARIUS_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     352,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9945,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "SAGITTARIUS_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2876,
+     2972
+    ],
+    "tag_x": [
+     243,
+     1587
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9864,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "SAGITTARIUS_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2615,
+     2726
+    ],
+    "tag_x": [
+     298,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9719,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "SAGITTARIUS_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2556,
+     2643
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.98,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "SAGITTARIUS_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     299,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9844,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "SAGITTARIUS_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     352,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9945,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "SAGITTARIUS_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2876,
+     2972
+    ],
+    "tag_x": [
+     243,
+     1587
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9867,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "SAGITTARIUS_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2615,
+     2726
+    ],
+    "tag_x": [
+     298,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9719,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "SAGITTARIUS_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2556,
+     2643
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9798,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "SAGITTARIUS_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     299,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9844,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "SAGITTARIUS_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     352,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9945,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "SAGITTARIUS_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2876,
+     2972
+    ],
+    "tag_x": [
+     243,
+     1587
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9864,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "SCORPIO_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2615,
+     2726
+    ],
+    "tag_x": [
+     298,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9716,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "SCORPIO_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2556,
+     2643
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9803,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "SCORPIO_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     299,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9845,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "SCORPIO_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     352,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9944,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "SCORPIO_SCORPIO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2876,
+     2972
+    ],
+    "tag_x": [
+     243,
+     1587
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9868,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "SCORPIO_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2615,
+     2726
+    ],
+    "tag_x": [
+     298,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9719,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "SCORPIO_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2556,
+     2643
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9801,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "SCORPIO_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     299,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9845,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "SCORPIO_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     352,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9945,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "SCORPIO_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2876,
+     2972
+    ],
+    "tag_x": [
+     243,
+     1587
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9864,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "SCORPIO_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2615,
+     2726
+    ],
+    "tag_x": [
+     298,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9719,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "SCORPIO_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2556,
+     2643
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9803,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "SCORPIO_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     299,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9844,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "SCORPIO_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     352,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9945,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "SCORPIO_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2876,
+     2972
+    ],
+    "tag_x": [
+     243,
+     1587
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9868,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "TAURUS_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2615,
+     2726
+    ],
+    "tag_x": [
+     298,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9719,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "TAURUS_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2556,
+     2643
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9801,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "TAURUS_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     299,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9844,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "TAURUS_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     352,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9945,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "TAURUS_TAURUS",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2876,
+     2972
+    ],
+    "tag_x": [
+     243,
+     1587
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9868,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "TAURUS_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2615,
+     2726
+    ],
+    "tag_x": [
+     298,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9716,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "TAURUS_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2556,
+     2643
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9803,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "TAURUS_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     299,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9845,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "TAURUS_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     352,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9945,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "TAURUS_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2876,
+     2972
+    ],
+    "tag_x": [
+     243,
+     1587
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9867,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "VIRGO_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "11x14",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_11x14.png)",
+   "tag": {
+    "tag_bant": [
+     2615,
+     2726
+    ],
+    "tag_x": [
+     298,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9717,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "VIRGO_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "16x20",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_16x20.png)",
+   "tag": {
+    "tag_bant": [
+     2556,
+     2643
+    ],
+    "tag_x": [
+     243,
+     2160
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9798,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "VIRGO_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "18x24",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_18x24.png)",
+   "tag": {
+    "tag_bant": [
+     2742,
+     2819
+    ],
+    "tag_x": [
+     299,
+     2123
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9845,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "VIRGO_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "24x36",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_24x36.png)",
+   "tag": {
+    "tag_bant": [
+     3009,
+     3091
+    ],
+    "tag_x": [
+     352,
+     1594
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9945,
+    "olcum": null
+   }
+  },
+  {
+   "cift": "VIRGO_VIRGO",
+   "renk": "WARM_PARCHMENT",
+   "boy": "A2",
+   "gecti": true,
+   "eksik": [],
+   "hata": null,
+   "yol": "plate_slogan_kapisi (WP, plate VINTAGE_A2.png)",
+   "tag": {
+    "tag_bant": [
+     2876,
+     2972
+    ],
+    "tag_x": [
+     243,
+     1587
+    ]
+   },
+   "slogan": {
+    "gecti": true,
+    "sebep": null,
+    "glif_farkli_payi": 0.9864,
+    "olcum": null
+   }
+  }
+ ]
+}
