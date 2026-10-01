@@ -33,7 +33,12 @@ def olc_tek(f):
     cift, renk, boy = f.parent.parent.name, f.parent.name, f.stem
     r = {'cift': cift, 'renk': renk, 'boy': boy, 'gecti': False, 'eksik': [], 'hata': None}
     try:
-        o = pilot11.sayfa_olc(f)
+        # uretimle ayni olcum (siparis-baski-v1 a1_poster.sayfa_olc_guvenli: gecersizse yedek, yine gecersizse hata)
+        if hasattr(a1_poster, 'sayfa_olc_guvenli'):
+            o, yedek = a1_poster.sayfa_olc_guvenli(pilot11, f)
+            r['olcum_yedek'] = yedek
+        else:
+            o = pilot11.sayfa_olc(f)
         m = a1_poster.murekkep(pilot11.norm(Image.open(f).convert('RGB'))[0])
         o2, duz = a1_poster.olcum_duzelt(dict(o), m)
         r['eksik_ham'] = [k for k in GEREK if k not in o]
