@@ -77,7 +77,11 @@ jobs:
                   tag = (v.get('eski_metin_izi_kapisi') or {}).get('bant')
                   bant[(r, ORAN[o])] = {'isim': isim, 'tag': tag, 'px': v.get('baski_px')}
           for b in ORAN.values():
-              bant[('WARM_PARCHMENT', b)] = bant[('CHAMPAGNE_IVORY', b)]
+              bant[('WARM_PARCHMENT', b)] = dict(bant[('CHAMPAGNE_IVORY', b)])
+              for r in ('MIDNIGHT_BLUE', 'DEEP_BLACK', 'PURE_WHITE', 'WARM_PARCHMENT'):   # eksik bant: ayni boyun CI'si
+                  for q in ('isim', 'tag'):
+                      if not bant[(r, b)].get(q):
+                          bant[(r, b)][q] = bant[('CHAMPAGNE_IVORY', b)][q]; print('bant', r, b, q, '<- CI', flush=True)
           sayi = 0
           for pdf in sorted(glob.glob('d/**/AstroLove_*.pdf', recursive=True)):
               ad = os.path.basename(pdf)
