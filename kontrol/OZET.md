@@ -8,4 +8,6 @@
 | CHAMPAGNE_IVORY | AstroLoveArt_Cancer_Libra_Champagne_Ivory.pdf | 22.82 | 5 | [300.0, 300.6] | PASS | PASS |
 | WARM_PARCHMENT | AstroLoveArt_Cancer_Libra_Warm_Parchment.pdf | 76.66 | 5 | [300.0, 300.6] | PASS | PASS |
 
+normalize: evet (LIBRA_CANCER -> CANCER_LIBRA, isimler yer degistirdi)
+
 SONUC: PASS
