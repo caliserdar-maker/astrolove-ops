@@ -1,0 +1,63 @@
+name: olcek-tani-siparis
+
+# SALT OKUR tani (Serdar 1 Eki 16:28, siparis 4188621967 DB 18x24 olcek): DB ve MB icin onayli 2400 referansi (p0)
+# ve BASKI dosyasi isim satiri olculeri ayni 2400 koordinatlarinda. Yalniz sayi loglanir; isim / goruntu yok.
+# Girdi siparis-dijital ile ayni (maskeli). Etsy / musteri / Drive yazimi YOK.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      receipt: {description: "receipt", required: true}
+      cift: {description: "cift", required: true}
+      isim1: {description: "isim1", required: true}
+      isim2: {description: "isim2", required: true}
+      mesaj_b64: {description: "mesaj (base64)", required: true}
+      renk_ref: {description: "siparis-baski-v1 commit", required: true}
+      oran: {description: "oran", required: false, default: "3x4"}
+
+jobs:
+  tani:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Girdi denetimi + maske
+        run: |
+          set -euo pipefail
+          for k in isim1 isim2; do v=$(jq -r ".inputs.$k" "$GITHUB_EVENT_PATH"); echo "::add-mask::$v"; echo "::add-mask::${v^^}"; done
+          m=$(jq -r '.inputs.mesaj_b64' "$GITHUB_EVENT_PATH" | base64 -d); echo "::add-mask::$m"
+          jq -re '.inputs.cift | test("^[A-Z]+_[A-Z]+$")' "$GITHUB_EVENT_PATH" >/dev/null
+          jq -re '.inputs.oran | test("^[0-9a-z_]+$")' "$GITHUB_EVENT_PATH" >/dev/null
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.renk_ref }}
+          path: _kod
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --quiet pillow opencv-python-headless numpy fonttools img2pdf pikepdf
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: tani
+        run: python scripts/siparis_dijital/olcek_tani.py _kod "${{ inputs.oran }}" 2>&1 | grep -E '^(OLCEK_TANI|Traceback|  File|[A-Za-z]*Error)'
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
