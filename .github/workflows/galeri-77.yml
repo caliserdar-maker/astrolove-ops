@@ -167,7 +167,9 @@ jobs:
               [ "$R" = "WARM_PARCHMENT" ] && [ "$WP_DAL" = "ATLA" ] && continue      # WP denemesi yok (Serdar 28 Eyl: merge beklenir)
               SB=_sb; KT=""
               if [ "$R" = "WARM_PARCHMENT" ] && [ -n "$WP_DAL" ]; then SB=_sbwp; KT="--tam"; fi   # WP: baski-duzelt dali, tum kapilar
-              (cd $SB && ../_sbenv/bin/python scripts/medya_v1/siparis_dosyasi.py --cift "$C" --renk "$R" --boy 11x14 --urun pod \
+              GIRIS=scripts/medya_v1/siparis_dosyasi.py   # WP: QC ayrintisi (f/g) WP_QC_AYRINTI.json'a, piksel ayni
+              [ "$R" = "WARM_PARCHMENT" ] && [ -n "$KT" ] && GIRIS=../scripts/pod/galeri77_wp_sarici.py
+              (cd $SB && ../_sbenv/bin/python $GIRIS --cift "$C" --renk "$R" --boy 11x14 --urun pod \
                 --isim1 EMILY --isim2 JAMES --mesaj-b64 "$MB64" --sip-kok "$SK" > "../_work/log_${C}_$R.txt" 2>&1)
               D="$SB/_siparis/${C}_${R}_11x14"
               [ -f "$D/KAPI_RAPORU.json" ] || { echo "$C $R: KAPI_RAPORU yok"; tail -4 "_work/log_${C}_$R.txt"; }
@@ -179,6 +181,9 @@ jobs:
                 FD=fonts python3 scripts/pod/galeri77_wptani.py "$C" "$D/KAPI_RAPORU.json" "$D/BASKI_11x14.jpg" $Y/BASKI_MIDNIGHT_BLUE.jpg \
                   "${WP_DAL}@$(git -C $SB rev-parse --short HEAD)" _work/wptani_$C
                 cp "$D/KAPI_RAPORU.json" _work/wptani_$C/KAPI_RAPORU.json
+                cp "$D/WP_QC_AYRINTI.json" _work/wptani_$C/ 2>/dev/null
+                python3 scripts/pod/galeri77_wpqc_ozet.py "$D/WP_QC_AYRINTI.json" 2>/dev/null
+                grep -E "(CHAMPAGNE_IVORY|MIDNIGHT_BLUE) (kimlik|siparis)" "_work/log_${C}_$R.txt" | cut -c1-400 | head -6
                 if [ -n "$ORNEK" ]; then   # ornek: tani yalniz TEMP/$ORNEK/<CIFT>/ (GALERI_77'ye yazilmaz)
                   rclone copy _work/wptani_$C "gdrive:ASTROLOVE/TEMP/$ORNEK/$C" -q; echo "WP_TANI: TEMP/$ORNEK/$C/WP_TANI.md"
                 else
