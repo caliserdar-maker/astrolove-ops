@@ -104,6 +104,12 @@ def renk_asamasi(a, g):
     print('RENK', a.renk, json.dumps({q: oz[q] for q in ('durum', 'pdf', 'kapilar_gecti')}),
           'PDF', (oz['pdf_kapisi'] or {}).get('MB'), 'MB', 'PASS' if (oz['pdf_kapisi'] or {}).get('gecti') else 'FAIL',
           {o: (v['kapilar_gecti'], v['kalan']) for o, v in oz['sayfa_kapilar'].items()}, flush=True)
+    for o, v in rk['oranlar'].items():               # olcek FAIL: denemelerin olculeri (isim yok; yalniz px)
+        if (v.get('kapilar') or {}).get('olcek') is False:
+            ok = v.get('olcek_kapisi') or {}
+            print('OLCEK_AYRINTI', a.renk, o, json.dumps({q: ok.get(q) for q in (
+                'konum_fark_px', 'kenar_fark_px', 'fark', 'k', 'yerlesim', 'ilk_yerlesim', 'denemeler')},
+                default=str), flush=True)
     sayfa_ok = len(oz['sayfa_kapilar']) == 5 and all(v['kapilar_gecti'] for v in oz['sayfa_kapilar'].values())
     return 0 if oz['durum'] == 'URETILDI' and (oz['pdf_kapisi'] or {}).get('gecti') and sayfa_ok else 1
 
