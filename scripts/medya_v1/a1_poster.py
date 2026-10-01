@@ -67,6 +67,62 @@ SEMBOL_UST = 80         # sembol kapisi bolgesi: olculen sembol bandinin bu kada
 SEMBOL_YAN = 0.5        # sembol kapisi: bolgenin iki yanina (bolge eni x oran) pencere; bolgeyle kesisen ve pencereye
                         # sigan bilesen de sayilir (28 Eyl: bolge sinirina degen kayik parca sayilmiyordu)
 
+# KAYNAK OLCUM GUVENLIGI (1 Eki, Test 3 ARIES_VIRGO MB 2:3, KeyError 'tag_bant'): kaynak_olcum ayrintisi (run 36918874524)
+# isim satiri 2600-2696 (/3600) bandinda ARIES'in E-S arasi > 20 px -> 4 kume, aday olmadi; 3 kumeli tagline
+# ("Two" "Souls" "One Bond", 0.847) isim satiri secildi, tagline bulunamadi. Olcum gecersizse (anahtar eksik ya da isim
+# bandi sablon araliginin disinda) kume boslugu KUME_BOSLUK_YEDEK ile YENIDEN olculur (isim-sonsuz arasi ~150 px, harf
+# ici bosluk ~25 px); yine gecersizse FAIL-CLOSED (net hata). Gecerli sayfalar yeniden olculmez (cikti ayni).
+OLCUM_GEREK = ('isim_bant', 'sol_isim', 'sonsuz', 'sag_isim', 'sembol_bant', 'sembol', 'tag_bant', 'tag_x')
+ISIM_ORAN = (0.66, 0.80)      # isim bandi merkezi / sayfa yuksekligi (sablon olcumu 0.735-0.751, 5 oran)
+KUME_BOSLUK_YEDEK = 60
+
+
+class KaynakOlcumHatasi(RuntimeError):
+    pass
+
+
+def olcum_sorunu(o):
+    """sayfa_olc sonucu gecerli mi: None ya da sorun metni."""
+    if o.get('hata'):
+        return o['hata']
+    eksik = [k for k in OLCUM_GEREK if k not in o]
+    if eksik:
+        return f'eksik {eksik}'
+    H = float(o['norm_boyut'][1])
+    c = (o['isim_bant'][0] + o['isim_bant'][1]) / 2 / H
+    if not ISIM_ORAN[0] <= c <= ISIM_ORAN[1]:
+        return f'isim bandi {c:.3f} H (sablon {ISIM_ORAN})'
+    if o['tag_bant'][0] < o['isim_bant'][1] or o['sembol_bant'][1] > o['isim_bant'][0]:
+        return 'bant sirasi (sembol < isim < tagline) bozuk'
+    return None
+
+
+def sayfa_olc_guvenli(p11, yol, **kw):
+    """pilot11.sayfa_olc + gecerlilik denetimi; gecersizse genis kume boslugu ile ikinci olcum, o da gecersizse hata.
+    Doner: (olcum, yedek_bilgi | None)."""
+    try:
+        o = p11.sayfa_olc(yol, **kw)
+    except SystemExit as e:
+        o = {'hata': f'sayfa_olc: {e}'}
+    s1 = olcum_sorunu(o)
+    if not s1:
+        return o, None
+    asil = p11.kumeler
+    p11.kumeler = lambda m, bosluk, _a=asil: _a(m, max(bosluk, KUME_BOSLUK_YEDEK))
+    try:
+        o2 = p11.sayfa_olc(yol, **kw)
+    except SystemExit as e:
+        o2 = {'hata': f'sayfa_olc: {e}'}
+    finally:
+        p11.kumeler = asil
+    s2 = olcum_sorunu(o2)
+    if s2:
+        raise KaynakOlcumHatasi(f'KAYNAK OLCUM HATASI {Path(yol).name}: {s1}; yedek olcum (kume boslugu '
+                                f'{KUME_BOSLUK_YEDEK}): {s2}. Kaynak dosya incelenmeli; uretim durduruldu.')
+    return o2, {'ilk_sorun': s1, 'yedek': f'kume boslugu {KUME_BOSLUK_YEDEK}',
+                'isim_bant': o2['isim_bant'], 'tag_bant': o2['tag_bant']}
+
+
 def murekkep(ref_norm):
     from pilot6 import LUMA, MUREKKEP
     return (np.asarray(ref_norm).astype(np.float32) @ LUMA) > MUREKKEP
@@ -228,7 +284,11 @@ class Poster:
         yol = self.HAM / f'{oran}_p{sayfa_no}.jpg'            # render kodu bu adi okur; icerik kayipsiz PNG
         Image.open(io.BytesIO(sayfa_png)).convert('RGB').save(yol, 'PNG')
         m = murekkep(self.p11.norm(Image.open(yol).convert('RGB'))[0])
-        o, duz = olcum_duzelt(self.p11.sayfa_olc(yol), m)   # o sayfanin KENDI olcumu + duzeltme
+        o_ham, yedek = sayfa_olc_guvenli(self.p11, yol)      # gecersiz olcum -> yedek / fail-closed (Test 3)
+        o, duz = olcum_duzelt(o_ham, m)                     # o sayfanin KENDI olcumu + duzeltme
+        if yedek:
+            duz = {**(duz if isinstance(duz, dict) else {'duzeltme': duz}), 'olcum_yedek': yedek}
+            print(f'KAYNAK_OLCUM_YEDEK {yol.name} {json.dumps(yedek)}', flush=True)
         kayit = dict(self.olcum[oran]); kayit['sayfalar'] = {str(sayfa_no): o}
         self.p16.REF_SAYFA = sayfa_no
         s, S = self.p16.oran_kur(oran, kayit, self.bg, kalibre=True)
