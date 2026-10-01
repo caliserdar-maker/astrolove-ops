@@ -19,13 +19,17 @@ from types import SimpleNamespace
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import surucu                                                     # noqa: E402
 
-ON_TEST_CIFT = {'TARA': 'CANCER_LEO', 'SERDAR': 'CANCER_LIBRA', 'MAXI': 'CANCER_LIBRA', 'ANNE': 'CANCER_LEO'}
+ON_TEST_CIFT = {'TARA': 'CANCER_LEO', 'SERDAR': 'CANCER_LIBRA', 'MAXI': 'CANCER_LIBRA', 'ANNE': 'CANCER_LEO',
+                'LIAM': 'ARIES_VIRGO', 'CAGLA': 'CANCER_LEO'}
 SETLER = {
     # ISIM ON TESTI (Serdar 1 Eki): olcek kapisi isim bagimli mi - 4 set x 5 renk x 5 boy
     'TARA': {'isim1': 'TARA', 'isim2': 'ROSS', 'mesaj': 'A King and his Crab'},
     'SERDAR': {'isim1': 'SERDAR', 'isim2': 'LENA', 'mesaj': 'To My Adorable Angel'},
     'MAXI': {'isim1': 'MAXIMILIAN', 'isim2': 'JO', 'mesaj': 'Two Souls, One Bond: Forever Ours!!'},
     'ANNE': {'isim1': 'ANNE-MARIE', 'isim2': 'LUCAS', 'mesaj': 'Love You to the Moon and Back'},
+    # Test 4 kapisi (1 Eki): Test 3 isimleri + uzun aksanli isim
+    'LIAM': {'isim1': 'LIAM', 'isim2': 'CATHERINE', 'mesaj': 'The World is Ours'},
+    'CAGLA': {'isim1': 'ÇAĞLAYANGÜL', 'isim2': 'AL', 'mesaj': 'Yağmurda Başlayan Aşkımız Sonsuzdur'},
     'A': {'isim1': 'ÇAĞLAYANGÜL', 'isim2': 'AL', 'mesaj': 'Yağmurda Başlayan Aşkımız Sonsuzdur'},
     'B': {'isim1': 'JO', 'isim2': 'MAXIMILLIAN', 'mesaj': 'Two Souls, One Bond: Forever Ours!!'},
 }
