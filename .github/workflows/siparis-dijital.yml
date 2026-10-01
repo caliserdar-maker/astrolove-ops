@@ -334,7 +334,7 @@ jobs:
         run: |
           set -euo pipefail
           free -g; df -h /mnt | tail -1
-          sudo fallocate -l 28G /mnt/takas2 && sudo chmod 600 /mnt/takas2 && sudo mkswap /mnt/takas2 >/dev/null && sudo swapon /mnt/takas2
+          sudo fallocate -l 32G /mnt/takas2 && sudo chmod 600 /mnt/takas2 && sudo mkswap /mnt/takas2 >/dev/null && sudo swapon /mnt/takas2
           free -g
       - name: WP BAKIR sayfa (${{ matrix.boy }})
         run: |

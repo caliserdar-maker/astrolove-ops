@@ -213,8 +213,15 @@ def wp_bakir_uret_v1(sd, sip, P_blue, P_ed, cik):
     """wp-katman dali (adfb2b9) siparis_dosyasi.wp_bakir_uret'in AYNISI; --kod v1 (renk_ref + kilitli WP dosyalari)
     iken v1'de bu fonksiyon yok. 1 Eki (siparis 4188621967 WP A2): duz renk baskisi uretimdeki POD koduyla."""
     import wp_ornek as wo
-    R, WP = wo.cift_boy(sip['cift'], sip['boy'], P_ed, P_blue, {sip['cift']: sip['sayfa']}, cik,
-                        isim=(sip['isim1'], sip['isim2']), mesaj=sip.get('mesaj') or '', siparis=True)
+    ek = getattr(sd, 'POD_EK_DENEME', None)         # duz renk baskisinda 3. olcek denemesi (yalniz WP hatti)
+    if ek is not None:
+        ek['etkin'] = True
+    try:
+        R, WP = wo.cift_boy(sip['cift'], sip['boy'], P_ed, P_blue, {sip['cift']: sip['sayfa']}, cik,
+                            isim=(sip['isim1'], sip['isim2']), mesaj=sip.get('mesaj') or '', siparis=True)
+    finally:
+        if ek is not None:
+            ek['etkin'] = False
     ozet = {a: R.get(a) for a in ('durum', 'duz_renk', 'plate_gecti', 'zemin_birebir', 'eski_iz', 'serdar_dikis')}
     if WP is None:
         return {**sip, 'durum': R.get('durum'), 'wp_bakir': ozet, 'kapilar_gecti': False}
