@@ -247,7 +247,25 @@ def plate_fark_maskesi(plate_yol):
 
 
 def plate_slogan_kapisi(kaynak, plate_yol, ed):
-    """Plate'te eski slogan kaldi mi? gecti=False ise siparis durur (SISTEM HATASI)."""
+    """Plate'te eski slogan kaldi mi? gecti=False ise siparis durur (SISTEM HATASI).
+
+    1 Eki (siparis 4188621967, yanlis alarm): bayt girdi her cagrida AYNI gecici dosyaya
+    (W/_plate_kapisi_kaynak.jpg) yaziliyordu; dijital yolda 3 paralel isci ayni klasorde birbirinin
+    sayfasini olcuyordu (CANCER_LEO DB / CI 2x3 'slogan glifi yok (0 px)'; ayni dosyalar seri tanida
+    25/25 PASS, glif 16202 px, pay 1.0). Gecici dosya artik cagriya ozel; kapi ve esik ayni."""
+    if isinstance(kaynak, (bytes, bytearray)):
+        import os, uuid
+        yol = W / f'_plate_kapisi_kaynak_{os.getpid()}_{uuid.uuid4().hex}.jpg'
+        yol.write_bytes(kaynak) if kaynak[:3] == b'\xff\xd8\xff' else \
+            Image.open(io.BytesIO(kaynak)).convert('RGB').save(yol, 'PNG')
+        try:
+            return _plate_slogan_kapisi(yol, plate_yol, ed)
+        finally:
+            yol.unlink(missing_ok=True)
+    return _plate_slogan_kapisi(kaynak, plate_yol, ed)
+
+
+def _plate_slogan_kapisi(kaynak, plate_yol, ed):
     import pilot11
     from pilot6 import LUMA
     eu = _mod('edisyon_uret')

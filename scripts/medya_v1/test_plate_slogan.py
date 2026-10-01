@@ -99,6 +99,22 @@ class PlateSloganTesti(unittest.TestCase):
         self.assertTrue(r['temiz']['gecti'], r['temiz'])
         self.assertFalse(r['kirli']['gecti'], r['kirli'])
 
+    def test_paralel_cagrilar_karismaz(self):
+        # 1 Eki: paralel iscilerin ortak gecici dosyasi birbirinin sayfasini olcturuyordu. Ayni anda
+        # temiz (slogan var) ve slogansiz sayfa: her cagri kendi sonucunu vermeli, gecici dosya kalmamali.
+        from concurrent.futures import ThreadPoolExecutor
+        im, renk = sayfa(True, False, self.font)
+        bos = zemin(True, False)
+        temiz = self.tmp / 'plate_paralel.png'; zemin(True, False).save(temiz)
+        import io as _io
+        def bayt(i):
+            b = _io.BytesIO(); i.save(b, 'PNG'); return b.getvalue()
+        isler = [bayt(im), bayt(bos)] * 4
+        with ThreadPoolExecutor(8) as h:
+            r = list(h.map(lambda b: sd.plate_slogan_kapisi(b, temiz, 'black')['gecti'], isler))
+        self.assertEqual(r, [True, False] * 4)
+        self.assertEqual(list(sd.W.glob('_plate_kapisi_kaynak*')), [])
+
 
 if __name__ == '__main__':
     unittest.main()
