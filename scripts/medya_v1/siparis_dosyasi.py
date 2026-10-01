@@ -1707,6 +1707,32 @@ def pod_uret(sip, kaynak_bayt, P_blue, P_ed, cik):
     return {**sip, **bi}
 
 
+# WP siparisi (Serdar 1 Eki: BAKIR Warm Parchment WP PASS, referans e4f65cd / kosu 36848215749): kilitli bakir kod
+# (wp_ornek.cift_boy siparis=True). d) dikis bilgi: onayli referans ciktida da FAIL (kenar dokusu, kontrast <= 0.8).
+WP_KAPILAR = ('a_renk', 'b_tasma', 'c_iz', 'e_kagit', 'f_kabartma', 'g_kontrast')
+
+
+def wp_bakir_uret(sip, P_blue, P_ed, cik):
+    sys.modules.setdefault('siparis_dosyasi', sys.modules[__name__])     # __main__ iken ikinci kopya yuklenmesin
+    import wp_ornek as wo
+    R, WP = wo.cift_boy(sip['cift'], sip['boy'], P_ed, P_blue, {sip['cift']: sip['sayfa']}, cik,
+                        isim=(sip['isim1'], sip['isim2']), mesaj=sip.get('mesaj') or '', siparis=True)
+    ozet = {a: R.get(a) for a in ('durum', 'duz_renk', 'plate_gecti', 'zemin_birebir', 'eski_iz', 'serdar_dikis')}
+    if WP is None:
+        return {**sip, 'durum': R.get('durum'), 'wp_bakir': ozet, 'kapilar_gecti': False}
+    ad = f'BASKI_{sip["boy"]}.jpg'
+    wo.kaydet_jpg(WP, cik / ad, 95)
+    q = R['qc']
+    bpx = [int(WP.shape[1]), int(WP.shape[0])]
+    kapilar = {'duz_renk_siparis': bool(R['siparis_duz_renk_kapilar'].get('kapilar_gecti')),
+               **{a: bool(q[a]['gecti']) for a in WP_KAPILAR},
+               'plate': bool(R['plate_gecti']), 'zemin_birebir': bool(R['zemin_birebir']['gecti']),
+               'eski_iz': bool(R['eski_iz']['gecti']), 'boy': bpx == list(sip['hedef_px'])}
+    return {**sip, 'durum': 'URETILDI', 'yontem': 'WP_BAKIR', 'baski_px': bpx,
+            'dosya_MB': round((cik / ad).stat().st_size / 1e6, 2), 'kapilar': kapilar,
+            'kapilar_gecti': all(kapilar.values()), 'bilgi_d_dikis': q['d_dikis'], 'wp_bakir': ozet}
+
+
 def _dijital_is(arg):
     """Tek (renk, oran) isi - paralel havuzda kosar (Serdar 4. madde)."""
     renk, oran, sip, klas, kon = arg
@@ -2010,7 +2036,10 @@ def main():
                     log('bant dogrulama', anahtar,
                         {a: bant_kontrol[anahtar].get(a)
                          for a in ('gecti', 'en_buyuk_fark', 'olculemeyen')})
-                r = pod_uret(x, kaynak_b[x['receipt']], P_blue, P_ed, cik)
+                if x['renk'] == 'WARM_PARCHMENT':
+                    r = wp_bakir_uret(x, P_blue, P_ed, cik)
+                else:
+                    r = pod_uret(x, kaynak_b[x['receipt']], P_blue, P_ed, cik)
                 r['bant_dogrulama'] = bant_kontrol[anahtar]
             elif x['urun'] == 'DIJITAL':
                 r = dijital_uret(x, P_blue, P_ed, cik)

@@ -1,0 +1,74 @@
+{
+ "karar": "Serdar 1 Eki 2026: BAKIR Warm Parchment ONAYLANDI (WP PASS)",
+ "referans": {
+  "commit": "e4f65cd",
+  "kosu": 36848215749,
+  "cikti": "TEMP/WP_ORNEK/CANCER_LIBRA/WP_CANCER_LIBRA_11x14_YANYANA.jpg"
+ },
+ "ozet": {
+  "dosya": {
+   "wp_bakir.py": "7cb81a05248d7a7853a90e2204bdab655f3c82e37f8d5177d5a2fb35873018d6",
+   "wp_katman.py": "f092bd36d74a9bf016d8acd018f302f4e23a25a39ca9cfd6a2987bf91db9eec3"
+  },
+  "wp_ornek_fonksiyon": {
+   "etiketle": "afe152fb4974b4f8680fab25d9c465ad3e0e9c1ed963471f43bfa34ce1cc5d76",
+   "yanyana": "23d47c3a6f67d33e20eee3a3281ce0c252820bb2859ca31557b7adf8b2981730",
+   "yanyana_baski": "f1119e9f70834a3fbf84ab0157017b16963fc5adb251568dfc0eea1ae0198756",
+   "sutun_profili": "5565a03759a472716a9b423aa62fe4da958008232e86f5fd8334c8795658779d",
+   "koyu_sutun": "aa9d5be41a98b3a854f4ff88dd7c107863934dc4fc0dedae3597add0f2b6a150",
+   "_yazi_maskesi": "f3147eb13cc53365a0ced0c87e9ce02d11550b3f663384441c749b25498c2d7f",
+   "yanyana_dedektor": "18ac1b4406838675d86df0f8913c50afabb7ce4f2840aa243ec20697142ab94c",
+   "serdar_dikis": "4842f96f9f6e546fe2b20f17fc20e19a6f4daf0a6945c9eab08c0a734dde4f9e",
+   "cift_boy": "d917ccc26720230ec1dcf0574a48c43723b9a72e730b482f3e7a5f562c477b4e"
+  },
+  "wp_ornek_sabit": {
+   "DUZ_RENK": [
+    "CHAMPAGNE_IVORY",
+    "MIDNIGHT_BLUE"
+   ],
+   "SERDAR_YAN": [
+    1290,
+    1311,
+    3975,
+    4234
+   ],
+   "SERDAR_SERIT": [
+    1561,
+    1567,
+    3490,
+    3750
+   ]
+  },
+  "wp_bakir_parametre": {
+   "BAKIR_KOYU": [
+    140.0,
+    72.0,
+    28.0
+   ],
+   "T0": 4.0,
+   "KENAR_PX": 2,
+   "KOYU_ALT": 0.55,
+   "KOYU_SIKISTIR": 0.6,
+   "ESIK_DE": 5.0,
+   "MIN_ALAN_BAKIR": 12,
+   "DOLU": 0.9,
+   "DIKIS_DUZLE": 15,
+   "KABARTMA_SIGMA": [
+    1.0,
+    1.5,
+    2.5,
+    4.0
+   ],
+   "KABARTMA_ESIK": [
+    0.7,
+    1.43
+   ],
+   "DIKIS_BOY": 100,
+   "DIKIS_T": [
+    3.0,
+    30.0
+   ],
+   "DIKIS_KOMSU": 3
+  }
+ }
+}

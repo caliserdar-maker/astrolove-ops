@@ -215,9 +215,11 @@ def yanyana_dedektor(img, geo, h, ofset=(0, 0)):
     return {'cizgi': hit[:5], 'sonuc': 'FAIL (cizgi var)' if hit else 'PASS (cizgi yok)'}
 
 
-def serdar_dikis(cift, boy, S_wp, P_wp0, B_cu, WP_cu, P_k, w, geo, h):
+def serdar_dikis(cift, boy, S_wp, P_wp0, B_cu, WP_cu, P_k, w, geo, h, zorla=False):
     """Serdar'in v2 YANYANA'da isaretledigi dikey cizgi: esleme, katman profilleri, yalniz o katmani yalniz o
     seritte (SERDAR_SERIT) plate sutunlarini serit disi temiz komsularin ortalamasina cekme.
+    zorla (siparis hatti): cizgi VINTAGE_11x14 plate'inin kendisinde (cifte bagli degil); siparis metni pencereye
+    dusebildigi icin katman karari beklenmez, serit her 11x14 sipariste onarilir (ayni islem, ayni serit).
     Donus: (yeni cikti, yeni kagit, rapor)."""
     x0y, x1y, y0y, y1y = SERDAR_YAN
     bx0, by0 = yanyana_baski(geo, x0y, y0y); bx1, by1 = yanyana_baski(geo, x1y, y1y)
@@ -236,7 +238,7 @@ def serdar_dikis(cift, boy, S_wp, P_wp0, B_cu, WP_cu, P_k, w, geo, h):
     kk = r['koyu_sutun']
     # 1 Eki olcumu: baski = plate = kullanilan kagit (13.8), duz renk 0.3 -> cizgi kagit katmaninda. Onayli WP o yerde
     # eski sloganin harfini tasir (6.9), karar onayliya bakmaz.
-    if kk['kagit_kullanilan'] > 4 and kk['duz_renk'] <= 4:
+    if zorla or (kk['kagit_kullanilan'] > 4 and kk['duz_renk'] <= 4):
         r['katman'] = 'plate (kagit)'
     elif kk['duz_renk'] > 4:
         r['katman'] = 'duz renk baskisi'
@@ -262,7 +264,7 @@ def kapi_ozet(r):
             'kalan': sorted(g for g, v in k.items() if v is False), 'kapilar': k}
 
 
-def cift_boy(cift, boy, P_ed, P_blue, no, cik):
+def cift_boy(cift, boy, P_ed, P_blue, no, cik, isim=ISIM, mesaj=MESAJ, siparis=False):
     R = {'cift': cift, 'boy': boy}
     oran = sd.BOY[boy][0]
     S_wp_yol = sd.pod_kaynak(cift, 'WARM_PARCHMENT', boy)
@@ -278,7 +280,7 @@ def cift_boy(cift, boy, P_ed, P_blue, no, cik):
         # ---- 3) duz renkte hat baskilari (kapilar bu renkte)
         s1, s2 = cift.split('_', 1)
         uret = {}
-        for tur, (i1, i2, m) in (('kimlik', (s1, s2, SLOGAN)), ('siparis', (*ISIM, MESAJ))):
+        for tur, (i1, i2, m) in (('kimlik', (s1, s2, SLOGAN)), ('siparis', (*isim, mesaj))):
             x = sd.normalize({'cift': cift, 'renk': renk, 'boy': boy, 'urun': 'pod',
                               'isim1': i1, 'isim2': i2, 'mesaj': m})
             x['receipt'] = f'WPK_{cift}_{boy}_{renk}_{tur}'; x['sayfa'] = no[cift]
@@ -363,7 +365,7 @@ def cift_boy(cift, boy, P_ed, P_blue, no, cik):
         yb0 = max(0, min(v[0] for a, v in et.items() if a != 'buyuk_sembol') - 60)
         yb1 = max(v[1] for a, v in et.items() if a != 'buyuk_sembol') + 60
         img0, geo = yanyana(S_wp, WP_cu, None, bant=[yb0, yb1],
-                            etiket=('ONAYLI WP (gri-kahve)', f'YENI BAKIR ({ISIM[0]} / {ISIM[1]})'))
+                            etiket=('ONAYLI WP (gri-kahve)', f'YENI BAKIR ({isim[0]} / {isim[1]})'))
         hpan = yb1 - yb0
         sdk = {'geo': geo}
         if cift == 'CANCER_LIBRA' and V2_YANYANA.exists():
@@ -376,10 +378,10 @@ def cift_boy(cift, boy, P_ed, P_blue, no, cik):
         sdk['once_profil'] = sutun_profili(img0j, *SERDAR_YAN)
         sdk['once_koyu'] = koyu_sutun(sdk['once_profil'])
         sdk['once_dedektor'] = yanyana_dedektor(img0j, geo, hpan)
-        WP_cu, P_k, sr = serdar_dikis(cift, boy, S_wp, P_wp, B_cu, WP_cu, P_k, w_te, geo, hpan)
+        WP_cu, P_k, sr = serdar_dikis(cift, boy, S_wp, P_wp, B_cu, WP_cu, P_k, w_te, geo, hpan, zorla=siparis)
         sdk.update(sr)
         img1, _ = yanyana(S_wp, WP_cu, None, bant=[yb0, yb1],
-                          etiket=('ONAYLI WP (gri-kahve)', f'YENI BAKIR ({ISIM[0]} / {ISIM[1]})'))
+                          etiket=('ONAYLI WP (gri-kahve)', f'YENI BAKIR ({isim[0]} / {isim[1]})'))
         rt = io.BytesIO(); img1.save(rt, 'JPEG', quality=90); img1j = Image.open(io.BytesIO(rt.getvalue()))
         sdk['sonra_profil'] = sutun_profili(img1j, *SERDAR_YAN)
         sdk['sonra_koyu'] = koyu_sutun(sdk['sonra_profil'])
@@ -429,7 +431,7 @@ def cift_boy(cift, boy, P_ed, P_blue, no, cik):
         x0, x1 = int(Wd * 0.06), int(Wd * 0.94)
         kaydet_jpg(WP_cu[max(0, y0):y1, x0:x1], cik / f'WP_{cift}_{boy}_ISIM_BANDI.jpg', 95)
         yanyana(S_wp, WP_cu, cik / f'WP_{cift}_{boy}_YANYANA.jpg', bant=[max(0, y0), y1],
-                etiket=('ONAYLI WP (gri-kahve)', f'YENI BAKIR ({ISIM[0]} / {ISIM[1]})'))
+                etiket=('ONAYLI WP (gri-kahve)', f'YENI BAKIR ({isim[0]} / {isim[1]})'))
         kaydet_jpg(np.concatenate([S_wp[max(0, y0):y1, x0:x1], WP_cu[max(0, y0):y1, x0:x1]], 0),
                    cik / f'WP_{cift}_{boy}_BANT_1e1.jpg', 95)
     o_cu = r_cu.get('olcum') or {}

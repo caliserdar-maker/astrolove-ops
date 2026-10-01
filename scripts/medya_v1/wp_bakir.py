@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """WARM PARCHMENT BAKIR BASKI + QC (1 Eki 2026, Serdar kesin karari). Etsy/Prodigi/musteri YOK.
+KILITLI (Serdar 1 Eki WP PASS, referans e4f65cd): parametre degismez; bkz. wp_kilit.py / wp_kilit.json.
 
 Karar: WP'de TUM ogeler (buyuk sembol, daire, kucuk semboller, isimler, sonsuz, mesaj) BAKIR; kagit/plate
 HIC degismez. Hedef bakir = plate'teki dairenin OLCULEN ortalamasi (Serdar: ~169/109/47). Daire plate'te zaten
