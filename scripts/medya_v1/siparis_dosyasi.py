@@ -1139,6 +1139,7 @@ class _HamKayit:
         return None if self.ham is None else (np.asarray(self.ham) > 0)
 
 
+MB_HEDEF = {'etkin': False}        # dijital MB: isim / mesaj bandi hedef cozunurlukte (BluePoster.hedef_render)
 SATIR_OLCEKLI = {'etkin': False}   # pod_uret: yalniz olcek kapisi FAIL olunca ikinci render (regresyon 36756875368)
 
 
@@ -1507,6 +1508,83 @@ class BluePoster:
         return p, {**bi, 'edisyon': 'blue', 'oran': oran, 'durum': 'URETILDI'}, \
             {'kirp': kirp, 'yeni': kayit.get('yeni'), 'yeni_ham': kayit.get('yeni_ham')}
 
+    def hedef_render(self, kaynak_bayt, sayfa_no, oran, isimler, tagline, hedef_en, ref_bayt=None, ref_sayfa=28):
+        """YALNIZ DIJITAL MB (Serdar 1 Eki, siparis 4188621967): isim / mesaj bandi HEDEF cozunurlukte cizilir.
+
+        Once onayli 2400 render (cikti ayni; isim plaka boyu ve yerlesim kaydedilir), sonra edisyon hattindaki
+        gibi olcek_kur(hedef_en): sayfa olcumu, bg hizasi, isim / tagline caplari ve bosluk k ile olceklenir,
+        isim punto = 2400 boyu x k (IsimPlakasi sabit). POD yolu bu fonksiyonu cagirmaz."""
+        import giris_dogrula as gd
+        self.P.p12.PROFIL = {y: v.copy() for y, v in self.profil.items()}
+        if oran not in self.hazir_oran:
+            if ref_bayt is None:
+                raise RuntimeError(f'Blue {oran}: Cancer-Libra referansi verilmedi (boy tavani)')
+            self.P.tavan = None
+            self.P(ref_bayt, ref_sayfa, 'blue', oran, isimler, tagline, referans=True)
+            self.hazir_oran.add(oran)
+        p16, p12 = self.P.p16, self.P.p12
+        olcek_kur(2400)
+        B = self.P.sayfa_kur(kaynak_bayt, sayfa_no, 'blue', oran)
+        boy0, yer0 = {}, {}
+        with _PlakaKayit(boy0), _SatirYerlesim(p16, yer0), _HamKayit(p16) as hk0:
+            p0, bi0, kirp = self.P.uret(B, isimler, tagline)
+        s0, S0 = B['s'], B['S']
+        yeni0 = hk0.maske()
+        k = hedef_en / 2400.0
+        h0 = dict(s0['bg_hiza'])
+        h1 = {**h0, 'dx': int(round(h0.get('dx', 0) * k)), 'dy': int(round(h0.get('dy', 0) * k))}
+        o1 = olcekle(B['o'], k)
+        kayit = dict(self.P.olcum[oran]); kayit['sayfalar'] = {str(sayfa_no): o1}
+        asil_hiza = p16.hizalama
+        olcek = olcek_kur(hedef_en)
+        try:
+            p16.REF_SAYFA = sayfa_no
+            p16.hizalama = lambda *a, **kw: (dict(h1), False)       # 2400 kilidi, k ile (arama yok)
+            s1, S1 = p16.oran_kur(oran, kayit, self.P.bg, kalibre=False)
+            g0, g1 = o1['isim_govde']; s1['isim_y'] = (g0 + g1) / 2
+            s1['cap'] = {y: int(round(s0['cap'][y] * k)) for y in ('sol', 'sag')}
+            s1['tag_cap'] = int(round(s0['tag_cap'] * k)); s1['tag_sinir'] = int(round(s0['tag_sinir'] * k))
+            s1['bosluk'] = s0['bosluk'] * k
+            capmap = {s0['cap'][y]: s1['cap'][y] for y in ('sol', 'sag')}
+            sabit = {(mt, capmap.get(c, c)): b * k for (mt, c), b in boy0.items()}
+            r = gd.siparis_dogrula(isimler[0], isimler[1], tagline, None)
+            yer = _SatirYerlesim(p16, yer0, k) if SATIR_OLCEKLI['etkin'] else _SatirYerlesim(p16, {})
+            with IsimPlakasi(sabit=sabit), yer, _HamKayit(p16) as hk1:
+                p1, bilgi1, merkez1, x1, yeni1 = p16.poster_kur(
+                    s1, S1, {'sol': r['sol']['deger'], 'sag': r['sag']['deger']}, tagline)
+        finally:
+            p16.hizalama = asil_hiza
+            olcek_kur(2400)
+        bi = {**bi0, 'edisyon': 'blue', 'oran': oran, 'durum': 'URETILDI', 'poster_px': list(p1.size),
+              'mb_hedef_render': {'k': round(k, 4), 'olcek': olcek, 'punto_2400': bi0.get('punto'),
+                                  'punto_hedef': bilgi1.get('punto'), 'bg_hiza': h1}}
+        return p1, bi, {'kirp': kirp, 'p0': p0, 'yeni': yeni1, 'yeni_ham': hk1.maske(),
+                        'maske': S1['genis'] | yeni1, 'maske_2400': S0['genis'] | (yeni0 if yeni0 is not None else False),
+                        'yeni_2400': yeni0}
+
+
+class _PlakaKayit:
+    """2400 Blue render'inda (metin, cap) -> kullanilan isim boyu (cikti degismez; IsimPlakasi kayit gibi)."""
+
+    def __init__(self, kayit):
+        self.kayit = kayit
+
+    def __enter__(self):
+        self._eski = (_mod('pilot12').plaka, _mod('pilot16').plaka)
+        asil = self._eski[1]
+
+        def kaydet(metin, prof, hedef_cap, olcek=1.0, tam=None):
+            r = asil(metin, prof, hedef_cap, olcek, tam)
+            self.kayit[(metin, hedef_cap)] = r[2] * olcek
+            return r
+        _mod('pilot12').plaka = kaydet
+        _mod('pilot16').plaka = kaydet
+        return self
+
+    def __exit__(self, *a):
+        _mod('pilot12').plaka, _mod('pilot16').plaka = self._eski
+        return False
+
 
 def degisim_maskesi(poster, kaynak_bayt):
     """Precise maske yoksa: uretilen poster ile normalize kaynak arasindaki gercek degisim."""
@@ -1625,7 +1703,11 @@ def render_et(ed, oran, sayfa, kaynak_bayt, isimler, mesaj, P_blue, P_ed,
         # Blue de plate zeminine gecer (Serdar onayi 25 Eyl): a1 sarmalayicisinin
         # `bg` girdisi HAZIR/bg.png yerine bu boyun plate'i olur. GIRDI degisikligi;
         # a1_poster kodu degismez. Hiza `bg_hiza` alaninda raporlanir.
-        poster, bi, ek = P_blue(kaynak_bayt, sayfa, oran, isimler, mesaj, ref_bayt=ref_bayt)
+        if MB_HEDEF['etkin'] and hedef_en and int(hedef_en) != 2400:
+            poster, bi, ek = P_blue.hedef_render(kaynak_bayt, sayfa, oran, isimler, mesaj, int(hedef_en),
+                                                 ref_bayt=ref_bayt)
+        else:
+            poster, bi, ek = P_blue(kaynak_bayt, sayfa, oran, isimler, mesaj, ref_bayt=ref_bayt)
         bi['plate'] = str(P_ed.plate('blue', oran, boy or ref_boy))
         bi['olcum_kaynagi'] = 'kendi dosyasi (a1 sarmalayicisi, zemin = plate)'
         # Olcek kapisi baski dosyasi uretildikten sonra (olcek_kapisi_baski) kosar:
@@ -1841,7 +1923,7 @@ def olcek_ikinci_deneme(ed, hedef_en, ilk, yeniden, olcek_olc, leke_olc, hedef_y
     leke yeniden olculur. ilk = (poster, bi, ek, baski, bpx); yeniden() -> (p, bi, ek, baski, bpx, gecici_yol)
     ya da None. Doner: secilen (poster, bi, ek, baski, bpx)."""
     poster, bi, ek, baski, bpx = ilk
-    if ed == 'blue' or bi['olcek_kapisi'].get('gecti') or hedef_en == 2400:
+    if (ed == 'blue' and not MB_HEDEF['etkin']) or bi['olcek_kapisi'].get('gecti') or hedef_en == 2400:
         return ilk
     SATIR_OLCEKLI['etkin'] = True
     try:
@@ -1876,6 +1958,7 @@ def _dijital_is(arg):
             hedef = list(im.size)
         P_ed = EdisyonPoster(); P_blue = BluePoster() if ed == 'blue' else None
         render_oran = 'A' if oran == 'a_series' else oran
+        MB_HEDEF['etkin'] = ed == 'blue'                 # yalniz dijital MB (Serdar 1 Eki); POD hic acmaz
         poster, bi, ek = render_et(ed, render_oran, sip['sayfa'], kb, isimler, mesaj,
                                    P_blue, P_ed, sip['cift'], ref_boy=boy,
                                    hedef_en=hedef[0], boy=boy)
@@ -1917,6 +2000,8 @@ def _dijital_is(arg):
         return renk, oran, kayit, None
     except BaseException as e:                                    # noqa: BLE001
         return renk, oran, {'durum': 'HATA', 'hata': f'{type(e).__name__}: {e}'}, None
+    finally:
+        MB_HEDEF['etkin'] = False
 
 
 def pdf_adi(cift, renk):

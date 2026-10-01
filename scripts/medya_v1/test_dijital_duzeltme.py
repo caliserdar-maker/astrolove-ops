@@ -105,5 +105,39 @@ class OlcekIkinciDeneme(unittest.TestCase):
         self.assertEqual(r[0], 'p1')
 
 
+class MbHedefBayragi(unittest.TestCase):
+    """MB hedef cozunurluk bayragi yalniz dijital MB isinde acik; POD ve diger renkler 2400 / kendi yolu."""
+
+    def _is(self, renk, hata=False):
+        from unittest.mock import patch
+        gorulen = {}
+
+        def sahte_render(ed, *a, **kw):
+            gorulen['etkin'] = sd.MB_HEDEF['etkin']
+            if hata:
+                raise RuntimeError('render')
+            return None, {'durum': 'ELLE KONTROL'}, None
+        d = Path(tempfile.mkdtemp()); y = d / 'k.jpg'
+        Image.new('RGB', (4800, 6000)).save(y)
+        with patch.object(sd, 'pod_kaynak', lambda *a: y), patch.object(sd, 'render_et', sahte_render), \
+                patch.object(sd, 'EdisyonPoster', lambda: None), patch.object(sd, 'BluePoster', lambda: None):
+            sd._dijital_is((renk, '4x5', {'cift': 'CANCER_LEO', 'isim1': 'A', 'isim2': 'B', 'mesaj': 'm',
+                                          'sayfa': 1}, d, d))
+        return gorulen.get('etkin'), sd.MB_HEDEF['etkin']
+
+    def test_yalniz_mb(self):
+        self.assertEqual(self._is('MIDNIGHT_BLUE'), (True, False))
+        for r in ('DEEP_BLACK', 'PURE_WHITE', 'CHAMPAGNE_IVORY', 'WARM_PARCHMENT'):
+            self.assertEqual(self._is(r), (False, False), r)
+
+    def test_hatada_kapanir(self):
+        self.assertEqual(self._is('MIDNIGHT_BLUE', hata=True), (True, False))
+
+    def test_pod_yolu_bayragi_acmaz(self):
+        self.assertFalse(sd.MB_HEDEF['etkin'])
+        import inspect
+        self.assertNotIn('MB_HEDEF', inspect.getsource(sd.pod_uret))
+
+
 if __name__ == '__main__':
     unittest.main()
