@@ -1,0 +1,76 @@
+{
+ "k": 1.3779,
+ "tam_2400": {
+  "SERDAR": 115,
+  "LENA": 115
+ },
+ "s4": {
+  "SERDAR": 634,
+  "LENA": 634
+ },
+ "banka_uretim_sn": 0.192,
+ "SERDAR": {
+  "mevcut_sn": 0.042,
+  "banka_sn": 0.056,
+  "boyut": [
+   [
+    116,
+    604
+   ],
+   [
+    116,
+    604
+   ]
+  ],
+  "piksel_fark_max": 0,
+  "farkli_piksel": 0,
+  "bayt_ayni": true
+ },
+ "LENA": {
+  "mevcut_sn": 0.029,
+  "banka_sn": 0.025,
+  "boyut": [
+   [
+    116,
+    410
+   ],
+   [
+    116,
+    410
+   ]
+  ],
+  "piksel_fark_max": 0,
+  "farkli_piksel": 0,
+  "bayt_ayni": true
+ },
+ "kapi_banka_vs_mevcut": {
+  "gecti": true,
+  "konum_fark_px": 0.0,
+  "kenar_fark_px": 0.0,
+  "esik": {
+   "konum": 1,
+   "harf_kenari": 2
+  },
+  "olcum": "dogal olcek; farklar 2400 px birimine normalize",
+  "fark": {
+   "cap_sol": 0.0,
+   "cap_sag": 0.0,
+   "taban_sol": 0.0,
+   "taban_sag": 0.0,
+   "satir_merkez": 0.0,
+   "bosluk_sol": 0.0,
+   "bosluk_sag": 0.0,
+   "sol_isim_x0": 0.0,
+   "sol_isim_x1": 0.0,
+   "sonsuz_x0": 0.0,
+   "sonsuz_x1": 0.0,
+   "sag_isim_x0": 0.0,
+   "sag_isim_x1": 0.0
+  },
+  "boyut": {
+   "hi_res": [],
+   "onayli_2400": []
+  }
+ },
+ "satir_piksel_fark_max": 0
+}
