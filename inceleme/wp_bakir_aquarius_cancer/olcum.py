@@ -5,7 +5,7 @@ Girdi (ayni klasor, workflow Drive'dan indirir):
   WP_BASKI.jpg                 bu ornegin WP baskisi (11x14, 3307x4200)
   REF_WP_BASKI.jpg             onayli referans WP baskisi (e4f65cd, run 36848215749; TEMP/WP_ORNEK/AQUARIUS_CANCER)
   KAPI_WARM_PARCHMENT.json     WP kapi raporu (d dikis bilgisi)   KAPI_MIDNIGHT_BLUE.json  bant olcumleri (2400 birim)
-Cikti (tam baskilar depoya girmez): REF_WP_KESIT_isim_mesaj_sembol.jpg + WP_KESIT_isim_mesaj_sembol.jpg (1:1), OLCUM.txt
+Cikti (tam baskilar depoya girmez; 05 kenar tasmasi duzeltmesi sonrasi 2abf0c2 ile yenilendi): REF_WP_KESIT_isim_mesaj_sembol.jpg + WP_KESIT_isim_mesaj_sembol.jpg (1:1), OLCUM.txt
 """
 import hashlib, json, os, sys
 import numpy as np
