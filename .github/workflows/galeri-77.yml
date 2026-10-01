@@ -35,6 +35,10 @@ on:
         description: "evet: Drive'da hazir (HAZIR satiri olan) ciftleri de yeniden uret"
         required: false
         default: hayir
+      wp_pod_kod:
+        description: "WP duz renk (CI/MB) kodu: wp = WP dalinin siparis_dosyasi; v1 = siparis-baski-v1 + kilitli WP dosyalari (siparis-dijital 36cb82d)"
+        required: false
+        default: "wp"
       ornek:
         description: "ornek klasoru (TEMP/<ad>/<CIFT>/): WP yeniden uretilir, 05+19 ve WP baskisi yalniz buraya; galeri/HAZIR/_KAYNAK'a dokunulmaz"
         required: false
@@ -69,6 +73,18 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: WP kilitli dosyalari siparis-baski-v1 ustune (yalniz wp_pod_kod=v1)
+        if: ${{ inputs.wp_pod_kod == 'v1' && inputs.wp_dal != '' && inputs.wp_dal != 'ATLA' }}
+        run: |
+          # 1 Eki: WP dalinin pod_uret'inde olcek ikinci denemesi yok -> CI 'olcek'/'isim_kalinti' FAIL, duz renk MB'ye
+          # duser (f_kabartma / g_kontrast FAIL). Bakir kodu (kilitli dosyalar) AYNEN; duz renk baskisi uretim POD koduyla.
+          set -euo pipefail
+          cp -r _sb _sbv1
+          for f in wp_bakir.py wp_katman.py wp_ornek.py wp_kilit.py wp_kilit.json wp_tani.py wp_dikis_kapisi.py test_wp_kilit.py; do
+            [ -e "_sbv1/scripts/medya_v1/$f" ] && { echo "HATA: $f v1'de zaten var" >&2; exit 1; }
+            cp "_sbwp/scripts/medya_v1/$f" "_sbv1/scripts/medya_v1/$f"
+          done
+          echo "v1: siparis-baski-v1 $(git -C _sb rev-parse --short HEAD) + kilitli WP $(git -C _sbwp rev-parse --short HEAD)"
       - run: |
           set -euo pipefail
           pip install -q numpy==2.1.3 pillow==11.0.0 scipy==1.14.1 opencv-python-headless==4.10.0.84 pyspellchecker==0.9.0 fonttools img2pdf pikepdf
@@ -100,6 +116,7 @@ jobs:
           MOD: ${{ inputs.mod }}
           YENIDEN: ${{ inputs.yeniden }}
           WP_DAL: ${{ inputs.wp_dal }}
+          WP_POD_KOD: ${{ inputs.wp_pod_kod }}
           ORNEK: ${{ inputs.ornek }}
           PARCA: ${{ matrix.parca }}
         run: |
@@ -167,6 +184,7 @@ jobs:
               [ "$R" = "WARM_PARCHMENT" ] && [ "$WP_DAL" = "ATLA" ] && continue      # WP denemesi yok (Serdar 28 Eyl: merge beklenir)
               SB=_sb; KT=""
               if [ "$R" = "WARM_PARCHMENT" ] && [ -n "$WP_DAL" ]; then SB=_sbwp; KT="--tam"; fi   # WP: baski-duzelt dali, tum kapilar
+              [ "$R" = "WARM_PARCHMENT" ] && [ -n "$KT" ] && [ "$WP_POD_KOD" = "v1" ] && SB=_sbv1
               GIRIS=scripts/medya_v1/siparis_dosyasi.py   # WP: QC ayrintisi (f/g) WP_QC_AYRINTI.json'a, piksel ayni
               [ "$R" = "WARM_PARCHMENT" ] && [ -n "$KT" ] && GIRIS=../scripts/pod/galeri77_wp_sarici.py
               (cd $SB && ../_sbenv/bin/python $GIRIS --cift "$C" --renk "$R" --boy 11x14 --urun pod \
@@ -175,7 +193,7 @@ jobs:
               [ -f "$D/KAPI_RAPORU.json" ] || { echo "$C $R: KAPI_RAPORU yok"; tail -4 "_work/log_${C}_$R.txt"; }
               if [ -f "$D/KAPI_RAPORU.json" ] && python3 scripts/pod/galeri77_kapi.py "$D/KAPI_RAPORU.json" $KT && [ -f "$D/BASKI_11x14.jpg" ]; then
                 cp "$D/BASKI_11x14.jpg" $Y/BASKI_$R.jpg; cp "$D/KAPI_RAPORU.json" $Y/KAPI_$R.json
-                [ "$R" = "WARM_PARCHMENT" ] && printf '%s' "$PLATE_T" > $Y/WP_PLATE.txt && printf '%s' "${WP_DAL:-siparis-baski-v1}@$(git -C $SB rev-parse --short HEAD)" > $Y/WP_KOD.txt
+                [ "$R" = "WARM_PARCHMENT" ] && printf '%s' "$PLATE_T" > $Y/WP_PLATE.txt && printf '%s' "${WP_DAL:-siparis-baski-v1}@$(git -C _sbwp rev-parse --short HEAD 2>/dev/null || git -C $SB rev-parse --short HEAD)$([ "$SB" = _sbv1 ] && echo "+v1@$(git -C _sb rev-parse --short HEAD)")" > $Y/WP_KOD.txt
               elif [ "$R" = "WARM_PARCHMENT" ] && [ -n "$KT" ] && [ -f "$D/KAPI_RAPORU.json" ]; then
                 # tum kapilar gecmedi: tani (WP_TANI.md + karsilastirma) Drive'a; yeni iterasyon yok
                 FD=fonts python3 scripts/pod/galeri77_wptani.py "$C" "$D/KAPI_RAPORU.json" "$D/BASKI_11x14.jpg" $Y/BASKI_MIDNIGHT_BLUE.jpg \
