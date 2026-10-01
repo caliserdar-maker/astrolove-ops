@@ -24,6 +24,7 @@ import siparis_dosyasi as sd                                     # noqa: E402
 Image.MAX_IMAGE_PIXELS = None
 CIFTLER = ('CANCER_LEO', 'CANCER_LIBRA', 'ARIES_LEO')
 MASKE_PAY = 4                 # 2400 px: eski glif maskesi genisletmesi (iz glifin yumusak kenarini da kapsar)
+KAYMA = 60                    # 2400 px: plate'te iz / maske hiza aramasi
 
 
 def bayt_png(a):
@@ -56,9 +57,26 @@ def temizle(plate_a, kaynaklar, ed):
     pl_png.unlink(missing_ok=True)
     if M24 is None:
         return None, None, {'sebep': 'mesaj bandi olculemedi'}
+    # 1 Eki (MB 16x20 / 11x14 QC FAIL): Blue plate sayfaya bg hizasiyla (olcek, dx, dy) oturur; plate koordinatinda
+    # iz, sayfa koordinatindaki eski glif maskesinden kayik olabilir. Kayma, plate bandinin yerel sapmasi ile maskenin
+    # korelasyonundan (+-KAYMA px, 2400) bulunur; diger edisyonlarda ~0.
+    Lp = np.asarray(Image.fromarray(plate_a).resize((2400, round(H * 2400 / Wd)), Image.LANCZOS)).astype(np.float32) @ LUMA
+    ys = np.nonzero(M24.any(1))[0]; xs = np.nonzero(M24.any(0))[0]
+    ty0, ty1, tx0, tx1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
+    K = KAYMA
+    r0, r1 = max(ty0 - K, 0), min(ty1 + K, Lp.shape[0]); c0, c1 = max(tx0 - K, 0), min(tx1 + K, 2400)
+    reg = Lp[r0:r1, c0:c1]
+    D = np.abs(reg - cv2.medianBlur(np.clip(reg, 0, 255).astype(np.uint8), 21).astype(np.float32))
+    T = M24[ty0:ty1, tx0:tx1].astype(np.float32)
+    kay = (0, 0)
+    if D.shape[0] > T.shape[0] and D.shape[1] > T.shape[1]:
+        sk = cv2.matchTemplate(D.astype(np.float32), T.astype(np.float32), cv2.TM_CCORR)
+        _, _, _, mx = cv2.minMaxLoc(sk)
+        kay = (int(mx[0] + c0 - tx0), int(mx[1] + r0 - ty0))
+        M24 = np.roll(np.roll(M24, kay[1], 0), kay[0], 1)
     M24 = cv2.dilate(M24.astype(np.uint8), cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * MASKE_PAY + 1,) * 2))
     M = cv2.resize(M24, (Wd, H), interpolation=cv2.INTER_NEAREST) > 0
-    y0 = int(min(b[0] for b in bantlar) * k) - int(40 * k); y1 = int(max(b[1] for b in bantlar) * k) + int(40 * k)
+    y0 = int((min(b[0] for b in bantlar) - K) * k) - int(40 * k); y1 = int((max(b[1] for b in bantlar) + K) * k) + int(40 * k)
     y0, y1 = max(y0, 0), min(y1, H)
     P = plate_a.astype(np.float32)
     kes = P[y0:y1]; Mb = M[y0:y1]
@@ -70,7 +88,7 @@ def temizle(plate_a, kaynaklar, ed):
     yeni[Mb] = lf[Mb]
     out = plate_a.copy()
     out[y0:y1] = np.clip(np.round(yeni), 0, 255).astype(np.uint8)
-    return out, M, {'bant_satir': [y0, y1], 'maske_px': int(M.sum()), 'bantlar_2400': bantlar}
+    return out, M, {'bant_satir': [y0, y1], 'maske_px': int(M.sum()), 'bantlar_2400': bantlar, 'kayma_2400': list(kay)}
 
 
 def kesit(once, sonra, M, hedef, satir):
@@ -90,6 +108,7 @@ def main():
     ap.add_argument('--renkler', default='MIDNIGHT_BLUE,DEEP_BLACK,PURE_WHITE,CHAMPAGNE_IVORY')
     ap.add_argument('--boylar', default='16x20,18x24,24x36,11x14,A2')
     ap.add_argument('--yaz', action='store_true', help='QC PASS ise PLATES\'e yaz (yedekli)')
+    ap.add_argument('--atla_yazilmis', default='', help='bu yedek klasorunde yedegi olan plate atlanir (yazilmis)')
     ap.add_argument('--cikti', default='plate_iz')
     a = ap.parse_args()
     cik = Path(a.cikti).resolve(); cik.mkdir(parents=True, exist_ok=True)
@@ -105,6 +124,9 @@ def main():
                 yol = Path(P_ed.plate(ed, oran, boy))
                 ad = f'{ed.upper()}{sd.PLATE_EK}_{boy}.png'
                 r['plate'] = ad
+                if a.atla_yazilmis and sd.rc('lsf', f'{sd.PLATES.rsplit("/", 1)[0]}/{a.atla_yazilmis}', '--include', ad).strip():
+                    r['atlandi'] = f'zaten yazilmis ({a.atla_yazilmis})'; r['qc'] = {'gecti': True}; r['yazildi'] = True
+                    R.append(r); print('PLATE_IZ', json.dumps(r), flush=True); continue
                 once = np.asarray(Image.open(yol).convert('RGB'))
                 kb = [sd.pod_kaynak(c, renk, boy).read_bytes() for c in CIFTLER]
                 sonra, M, bil = temizle(once, kb, ed)
@@ -114,12 +136,20 @@ def main():
                 sonra_png = cik / f'{renk}_{boy}_{ad}'
                 Image.fromarray(sonra).save(sonra_png)
                 qc = {'iz_once': [], 'iz_sonra': [], 'slogan': []}
+                dx, dy = bil.get('kayma_2400') or (0, 0)
                 for c, b in zip(CIFTLER, kb):
                     pk = sd.plate_slogan_kapisi(b, sonra_png, ed)
                     qc['slogan'].append(pk.get('gecti'))
                     bos = np.zeros(sonra.shape[:2], bool)
+                    bk, tb, tx = b, pk['tag_bant'], pk['tag_x']
+                    if (dx, dy) != (0, 0):                # iz plate koordinatinda: kaynak maskesi bulunan kaymayla olculur
+                        from PIL import ImageChops
+                        kk = sonra.shape[1] / 2400.0
+                        im_ = Image.open(__import__('io').BytesIO(b)).convert('RGB')
+                        bk = bayt_png(np.asarray(ImageChops.offset(im_, int(round(dx * kk)), int(round(dy * kk)))))
+                        tb, tx = [tb[0] + dy, tb[1] + dy], [tx[0] + dx, tx[1] + dx]
                     for ad_, pl in (('iz_once', once), ('iz_sonra', sonra)):
-                        iz = sd.eski_metin_izi_kapisi(Image.fromarray(pl), b, pk['tag_bant'], pk['tag_x'], bos)
+                        iz = sd.eski_metin_izi_kapisi(Image.fromarray(pl), bk, tb, tx, bos)
                         qc[ad_].append(iz.get('fazla'))
                 fark = np.abs(sonra.astype(np.int16) - once.astype(np.int16)).max(2) > 0
                 qc['maske_disi_degisen_px'] = int((fark & ~M).sum())
@@ -140,7 +170,7 @@ def main():
             except BaseException as e:                            # noqa: BLE001
                 r['hata'] = f'{type(e).__name__}: {str(e)[:200]}'
             R.append(r)
-            print('PLATE_IZ', json.dumps({q: r.get(q) for q in ('renk', 'boy', 'plate', 'maske_px', 'qc', 'yazildi', 'hata')}), flush=True)
+            print('PLATE_IZ', json.dumps({q: r.get(q) for q in ('renk', 'boy', 'plate', 'maske_px', 'kayma_2400', 'qc', 'yazildi', 'hata')}), flush=True)
     (cik / 'PLATE_IZ.json').write_text(json.dumps(R, indent=1, default=str))
     kotu = [f"{r['renk']} {r['boy']}" for r in R if not (r.get('qc') or {}).get('gecti') or (a.yaz and not r.get('yazildi'))]
     print('SONUC', 'PASS' if not kotu else f'FAIL {kotu}', flush=True)
