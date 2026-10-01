@@ -21,8 +21,12 @@ on:
         description: "MEDYA/ altina goreli klasor (or. CANCER_LIBRA). dosyalar doluysa yok sayilir; ikisi de bossa DUR"
         required: false
         default: ""
+      repo_dizin:
+        description: "Opsiyonel: astrolove-ops icindeki kaynak dizin (or. data/sosyal/pinterest/chatgpt_pilot_cl_20261001/pins). Doluysa once bu dizindeki jpg/png/mp4 Drive MEDYA/<klasor>/ altina yazilir"
+        required: false
+        default: ""
       dry_run:
-        description: "Yalniz goster; repoya push etme"
+        description: "Yalniz goster; repoya push etme (repo_dizin doluysa Drive'a da yazmaz)"
         type: boolean
         default: true
 
@@ -40,8 +44,13 @@ jobs:
         env:
           DOSYALAR: ${{ inputs.dosyalar }}
           KLASOR: ${{ inputs.klasor }}
+          REPO_DIZIN: ${{ inputs.repo_dizin }}
         run: |
           set -euo pipefail
+          if [ -n "${REPO_DIZIN// /}" ]; then
+            [ -n "${KLASOR// /}" ] && [ -z "${DOSYALAR// /}" ] || { echo "DUR: repo_dizin ile yalniz klasor verilir (dosyalar bos)." >&2; exit 1; }
+            case "$REPO_DIZIN" in /*|*..*) echo "DUR: gecersiz repo_dizin: $REPO_DIZIN" >&2; exit 1 ;; esac
+          fi
           if [ -z "${DOSYALAR// /}" ] && [ -z "${KLASOR// /}" ]; then
             echo "DUR: dosyalar ya da klasor gerekli (hepsini tasima secenegi yok)." >&2; exit 1
           fi
@@ -90,6 +99,29 @@ jobs:
               echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
             fi
           fi
+
+      - name: Ops reposunu al (repo_dizin icin)
+        if: ${{ inputs.repo_dizin != '' }}
+        uses: actions/checkout@v4
+        with:
+          path: ops
+
+      - name: Repo -> Drive MEDYA/<klasor>
+        if: ${{ inputs.repo_dizin != '' }}
+        env:
+          REPO_DIZIN: ${{ inputs.repo_dizin }}
+          KLASOR: ${{ inputs.klasor }}
+          DRY: ${{ inputs.dry_run }}
+        run: |
+          set -euo pipefail
+          [ -d "ops/$REPO_DIZIN" ] || { echo "DUR: repo dizini yok: $REPO_DIZIN" >&2; exit 1; }
+          n=$(find "ops/$REPO_DIZIN" -maxdepth 1 -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.mp4' \) | wc -l)
+          echo "repo dizininde $n medya dosyasi"
+          [ "$n" -gt 0 ] || { echo "DUR: dizinde medya yok" >&2; exit 1; }
+          if [ "$DRY" = "true" ]; then echo "dry-run: Drive'a yazilmadi"; exit 0; fi
+          rclone copy "ops/$REPO_DIZIN" "gdrive:ASTROLOVE/TEMP/SOSYAL/PINTEREST/MEDYA/$KLASOR" --max-depth 1 \
+            --include "*.jpg" --include "*.jpeg" --include "*.png" --include "*.mp4" --stats-one-line -v 2>&1 | tail -3
+          rclone lsl "gdrive:ASTROLOVE/TEMP/SOSYAL/PINTEREST/MEDYA/$KLASOR" | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Drive -> pinterest/
         env:
