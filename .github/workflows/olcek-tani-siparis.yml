@@ -18,11 +18,12 @@ on:
       renk_ref: {description: "siparis-baski-v1 commit", required: true}
       oran: {description: "oran", required: false, default: "3x4"}
       renkler: {description: "renkler", required: false, default: "DEEP_BLACK,MIDNIGHT_BLUE"}
+      profil: {description: "bos = olcek tanisi; 'renk:RENK:oran' ya da 'wp:boy' = hiz profili", required: false, default: ""}
 
 jobs:
   tani:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - name: Girdi denetimi + maske
         run: |
@@ -59,7 +60,26 @@ jobs:
               echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
             fi
           fi
+      - name: WP kodu (yalniz wp profili)
+        if: ${{ startsWith(inputs.profil, 'wp:') }}
+        run: |
+          set -euo pipefail
+          git -C _kod fetch -q origin adfb2b99489798296936669575309b777c7e1ca7 && git -C _kod show adfb2b99489798296936669575309b777c7e1ca7:scripts/medya_v1/wp_kilit.json > /dev/null
+          for f in wp_bakir.py wp_katman.py wp_ornek.py wp_kilit.py wp_kilit.json wp_tani.py test_wp_kilit.py; do
+            git -C _kod show "adfb2b99489798296936669575309b777c7e1ca7:scripts/medya_v1/$f" > "_kod/scripts/medya_v1/$f"
+          done
+          (cd _kod && python scripts/medya_v1/test_wp_kilit.py)
+          sudo fallocate -l 28G /mnt/takas2 && sudo chmod 600 /mnt/takas2 && sudo mkswap /mnt/takas2 >/dev/null && sudo swapon /mnt/takas2
+      - name: profil
+        if: ${{ inputs.profil != '' }}
+        env:
+          PROFIL: ${{ inputs.profil }}
+        run: |
+          case "$PROFIL" in *[!A-Za-z0-9_:x]*) echo "HATA: profil" >&2; exit 1 ;; esac
+          T="${PROFIL%%:*}"; A="${PROFIL#*:}"
+          python scripts/siparis_dijital/profil.py "$T" "$A" _kod 2>&1 | grep -E '^(PROFIL|SURE|Traceback|  File|[A-Za-z]*Error)'
       - name: tani
+        if: ${{ inputs.profil == '' }}
         run: python scripts/siparis_dijital/olcek_tani.py _kod "${{ inputs.oran }}" "${{ inputs.renkler }}" 2>&1 | grep -E '^(OLCEK_TANI|Traceback|  File|[A-Za-z]*Error)'
       - if: ${{ always() }}
         run: rm -rf ~/.config/rclone
