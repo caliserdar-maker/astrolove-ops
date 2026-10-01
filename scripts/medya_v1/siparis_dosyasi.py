@@ -1825,6 +1825,44 @@ def pod_uret(sip, kaynak_bayt, P_blue, P_ed, cik):
     return {**sip, **bi}
 
 
+def dijital_leke(baski, kaynak_bayt, ek):
+    """DIJITAL leke kapisi KAYNAGA karsi (POD ile ayni, leke_kapisi docstring'i). 1 Eki (siparis 4188621967):
+    dijital yol plate'e karsi olcuyordu; plate yalniz oge ayirmak icindir, burc resmini / yildizlari plate ile
+    karsilastirmak gercek tasarimi leke sayiyordu (CANCER_LEO DB + CI: 3x4 / 4x5 / 11x14 / A sayfalarinin hepsi
+    'leke' FAIL). Esik ve olcum ayni; yalniz referans tuval duzeldi."""
+    return leke_kapisi(baski, kaynak_bayt, ek['maske'])
+
+
+def olcek_ikinci_deneme(ed, hedef_en, ilk, yeniden, olcek_olc, leke_olc, hedef_yol):
+    """POD'daki (siparis-baski-v1 pod_uret) olcek ikinci denemesinin AYNISI, dijital yol icin.
+
+    olcek FAIL (Blue disi, hedef != 2400) -> isim satiri 2400 yerlesiminden olceklenerek yeniden render
+    (SATIR_OLCEKLI / _SatirYerlesim, POD ile ayni kod); yalniz olcek kapisi o zaman PASS olursa kullanilir,
+    leke yeniden olculur. ilk = (poster, bi, ek, baski, bpx); yeniden() -> (p, bi, ek, baski, bpx, gecici_yol)
+    ya da None. Doner: secilen (poster, bi, ek, baski, bpx)."""
+    poster, bi, ek, baski, bpx = ilk
+    if ed == 'blue' or bi['olcek_kapisi'].get('gecti') or hedef_en == 2400:
+        return ilk
+    SATIR_OLCEKLI['etkin'] = True
+    try:
+        r2 = yeniden()
+    finally:
+        SATIR_OLCEKLI['etkin'] = False
+    if r2 is None:
+        return ilk
+    p2, bi2, ek2, b2, bpx2, gecici = r2
+    ok2 = olcek_olc(b2, ek2, p2, bi2)
+    ilk_o = {q: bi['olcek_kapisi'].get(q) for q in ('konum_fark_px', 'kenar_fark_px')}
+    if ok2.get('gecti'):
+        Path(gecici).replace(hedef_yol)
+        bi2['leke_kapisi'] = leke_olc(b2, ek2)
+        bi2['olcek_kapisi'] = {**ok2, 'yerlesim': 'olcekli (2400 x k)', 'ilk_yerlesim': ilk_o}
+        return p2, bi2, ek2, b2, bpx2
+    Path(gecici).unlink(missing_ok=True)
+    bi['olcek_kapisi']['olcekli_deneme'] = {q: ok2.get(q) for q in ('konum_fark_px', 'kenar_fark_px')}
+    return ilk
+
+
 def _dijital_is(arg):
     """Tek (renk, oran) isi - paralel havuzda kosar (Serdar 4. madde)."""
     renk, oran, sip, klas, kon = arg
@@ -1846,9 +1884,22 @@ def _dijital_is(arg):
         jpg = klas / f'{sip["cift"]}_{renk}_{oran}_{boy}.jpg'
         butce = int(PDF_AZAMI_MB * 1e6 * 0.92 / len(DIJITAL_ORANLAR))
         baski, bpx = tek_dosya(poster, bi, ek, kb, hedef, jpg, kalite=DIJITAL_KALITE, azami_bayt=butce)
-        bi['leke_kapisi'] = leke_kapisi(baski, bi['plate'], ek['maske'])
+        bi['leke_kapisi'] = dijital_leke(baski, kb, ek)
         bi['olcek_kapisi'] = olcek_kapisi_baski(baski, ek.get('p0', poster),
                                                 bi['olcum']['isim_bant'])
+
+        def yeniden():                            # ikinci deneme: ayni render + ayni baski butcesi
+            p2, bi2, ek2 = render_et(ed, render_oran, sip['sayfa'], kb, isimler, mesaj, P_blue, P_ed,
+                                     sip['cift'], ref_boy=boy, hedef_en=hedef[0], boy=boy)
+            if p2 is None:
+                return None
+            gecici = klas / f'_olcekli_{jpg.name}'
+            b2, bpx2 = tek_dosya(p2, bi2, ek2, kb, hedef, gecici, kalite=DIJITAL_KALITE, azami_bayt=butce)
+            return p2, bi2, ek2, b2, bpx2, gecici
+        poster, bi, ek, baski, bpx = olcek_ikinci_deneme(
+            ed, hedef[0], (poster, bi, ek, baski, bpx), yeniden,
+            lambda b, e, p, i: olcek_kapisi_baski(b, e.get('p0', p), i['olcum']['isim_bant']),
+            lambda b, e: dijital_leke(b, kb, e), jpg)
         bi['isim_kalinti_kapisi'] = isim_kalinti_kapisi(baski, *koruma(ek)[:1], bi['olcum'],
                                                         ham=koruma(ek)[1], alan=ek.get('maske'))
         bi['isim_kenar_kapisi'] = (bpx.get('isim_bandi_temizligi') or {}).get('kenar')
