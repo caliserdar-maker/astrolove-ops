@@ -1,0 +1,256 @@
+name: prova
+
+# SIPARIS PROVASI (Serdar 1 Eki 2026): 78 cift x 5 renk x 5 boy, deneme isimleriyle tam siparis hatti
+# (scripts/siparis_dijital/prova.py -> surucu.py renk_asamasi / wp_asamasi, AYNI kod). Cikti yalniz kapi sonucu
+# + sure: Drive TEMP/SIPARIS_ISIM/PROVA/<kosu>/PROVA.md + json. Etsy / musteri / PLATES yazimi YOK.
+# Kapasite: max-parallel 8 (siparis-dijital icin is yeri; Serdar: en az 8 bos).
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      renk_ref:
+        description: "siparis-baski-v1 commit (renk + WP duz renk POD kodu)"
+        required: true
+      ciftler:
+        description: "virgullu; bos = 78 cift"
+        required: false
+        default: ""
+      isler:
+        description: "renk,wp"
+        required: false
+        default: "renk,wp"
+      parca_renk:
+        description: "renk basina parca sayisi"
+        required: false
+        default: "8"
+      parca_wp:
+        description: "WP boy basina parca sayisi"
+        required: false
+        default: "13"
+      set:
+        description: "A | B | bos = donusumlu"
+        required: false
+        default: ""
+
+concurrency: prova
+
+env:
+  RENK_REF: ${{ inputs.renk_ref }}
+  WP_REF: adfb2b99489798296936669575309b777c7e1ca7
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matris: ${{ steps.p.outputs.matris }}
+      tum: ${{ steps.p.outputs.tum }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RENK_REF }}
+          path: _kod
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --quiet pillow opencv-python-headless numpy fonttools
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - id: p
+        env:
+          CIFTLER: ${{ inputs.ciftler }}
+          ISLER: ${{ inputs.isler }}
+          PR: ${{ inputs.parca_renk }}
+          PW: ${{ inputs.parca_wp }}
+        run: |
+          set -euo pipefail
+          cd _kod && python3 - <<'EOF' >> "$GITHUB_OUTPUT"
+          import json, os, sys
+          sys.path.insert(0, 'scripts/medya_v1')
+          import siparis_dosyasi as sd
+          _, tum = sd.sayfa_no_tablosu()
+          sec = [c.strip() for c in os.environ['CIFTLER'].split(',') if c.strip()] or tum
+          assert all(c in tum for c in sec), 'bilinmeyen cift'
+          isler = os.environ['ISLER'].split(',')
+          m = []
+          def parcala(n):
+              n = max(1, min(int(n), len(sec)))
+              return [sec[i::n] for i in range(n)]
+          if 'renk' in isler:
+              for r in ('MIDNIGHT_BLUE', 'DEEP_BLACK', 'PURE_WHITE', 'CHAMPAGNE_IVORY'):
+                  for i, p in enumerate(parcala(os.environ['PR'])):
+                      m.append({'tur': 'renk', 'anahtar': r, 'parca': i, 'ciftler': ','.join(p)})
+          if 'wp' in isler:
+              for b in ('24x36', 'A2', '18x24', '16x20', '11x14'):
+                  for i, p in enumerate(parcala(os.environ['PW'])):
+                      m.append({'tur': 'wp', 'anahtar': b, 'parca': i, 'ciftler': ','.join(p)})
+          print('matris=' + json.dumps({'include': m}))
+          print('tum=' + ','.join(tum))
+          print(f'{len(sec)} cift, {len(m)} is', file=sys.stderr)
+          EOF
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
+
+  is:
+    needs: plan
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix: ${{ fromJSON(needs.plan.outputs.matris) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    name: ${{ matrix.tur }} ${{ matrix.anahtar }} p${{ matrix.parca }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RENK_REF }}
+          path: _kod
+      - name: WP kilitli dosyalari v1 kodunun ustune (siparis-dijital wp_pod_kod=v1 ile ayni)
+        if: ${{ matrix.tur == 'wp' }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.WP_REF }}
+          path: _wp
+      - if: ${{ matrix.tur == 'wp' }}
+        run: |
+          set -euo pipefail
+          for f in wp_bakir.py wp_katman.py wp_ornek.py wp_kilit.py wp_kilit.json wp_tani.py test_wp_kilit.py; do
+            [ -e "_kod/scripts/medya_v1/$f" ] && { echo "HATA: $f v1'de zaten var" >&2; exit 1; }
+            cp "_wp/scripts/medya_v1/$f" "_kod/scripts/medya_v1/$f"
+          done
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --quiet pillow opencv-python-headless numpy fonttools img2pdf pikepdf
+      - if: ${{ matrix.tur == 'wp' }}
+        run: cd _kod && python scripts/medya_v1/test_wp_kilit.py
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Takas alani (buyuk boy bellek)
+        if: ${{ matrix.tur == 'wp' && (matrix.anahtar == '24x36' || matrix.anahtar == 'A2') }}
+        run: |
+          sudo fallocate -l 28G /mnt/takas2 && sudo chmod 600 /mnt/takas2 && sudo mkswap /mnt/takas2 >/dev/null && sudo swapon /mnt/takas2
+      - name: prova
+        env:
+          CIFTLER: ${{ matrix.ciftler }}
+          TUM: ${{ needs.plan.outputs.tum }}
+          SET: ${{ inputs.set }}
+        run: |
+          set +e
+          if [ "${{ matrix.tur }}" = renk ]; then A=(--renk "${{ matrix.anahtar }}"); else A=(--boy "${{ matrix.anahtar }}"); fi
+          python scripts/siparis_dijital/prova.py --tur "${{ matrix.tur }}" "${A[@]}" --ciftler "$CIFTLER" \
+            --tum_ciftler "$TUM" --set "$SET" --kod _kod --kod-ref "siparis-baski-v1 $RENK_REF" \
+            --parca "${{ matrix.parca }}" --cikti "$GITHUB_WORKSPACE/out" 2>&1 | grep -v '^SURE '
+          exit 0
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: prova_${{ matrix.tur }}_${{ matrix.anahtar }}_${{ matrix.parca }}
+          path: out/PROVA_*.json
+          retention-days: 7
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
+
+  rapor:
+    needs: [plan, is]
+    if: ${{ always() && needs.plan.result == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: prova_*
+          path: prova
+          merge-multiple: true
+      - name: PROVA.md
+        run: |
+          set -euo pipefail
+          python3 - <<'EOF'
+          import glob, json, collections
+          R = collections.defaultdict(dict); sure = collections.defaultdict(float)
+          for f in glob.glob('prova/PROVA_*.json'):
+              d = json.load(open(f))
+              for c, v in d['ciftler'].items():
+                  R[c][(d['tur'], d['anahtar'])] = v
+                  sure[(d['tur'], d['anahtar'])] += v.get('sn', 0)
+          kol = [('renk', r) for r in ('MIDNIGHT_BLUE', 'DEEP_BLACK', 'PURE_WHITE', 'CHAMPAGNE_IVORY')] + \
+                [('wp', b) for b in ('16x20', '18x24', '24x36', '11x14', 'A2')]
+          kol = [k for k in kol if any(k in v for v in R.values())]
+          def hucre(v):
+              if v is None: return 'yok'
+              if v.get('gecti'): return 'PASS'
+              if v.get('hata'): return 'HATA ' + v['hata'][:60]
+              if 'sayfa' in v:
+                  return 'FAIL ' + '; '.join(f"{o}:{','.join(s.get('kalan') or []) or (s.get('hata') or '')[:40]}"
+                                             for o, s in v['sayfa'].items() if not s.get('gecti'))
+              return 'FAIL ' + ','.join(v.get('kalan') or [])
+          tam = [c for c in sorted(R) if all((R[c].get(k) or {}).get('gecti') for k in kol)]
+          sat = ['# SIPARIS PROVASI', '', f'cift: {len(R)}, tam PASS: {len(tam)}/{len(R)}', '',
+                 '| cift | set | ' + ' | '.join(f'{t} {a}' for t, a in kol) + ' |', '|' + '---|' * (len(kol) + 2)]
+          for c in sorted(R):
+              s = next((v.get('set') for v in R[c].values()), '')
+              sat.append(f'| {c} | {s} | ' + ' | '.join(hucre(R[c].get(k)) for k in kol) + ' |')
+          sat += ['', '## is suresi (toplam dk / cift basina sn)', '']
+          for k in kol:
+              n = sum(1 for c in R if k in R[c])
+              sat.append(f'- {k[0]} {k[1]}: {sure[k] / 60:.1f} dk, {sure[k] / max(n, 1):.0f} sn/cift')
+          open('PROVA.md', 'w').write('\n'.join(sat) + '\n')
+          print('\n'.join(sat[:4]))
+          kotu = [c for c in sorted(R) if c not in tam]
+          print('FAIL cift:', len(kotu), kotu)
+          EOF
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Drive
+        run: |
+          set -euo pipefail
+          D="gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PROVA/${{ github.run_id }}"
+          rclone copy PROVA.md "$D/" && rclone copy prova "$D/json/" && echo "drive: TEMP/SIPARIS_ISIM/PROVA/${{ github.run_id }}/PROVA.md"
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
