@@ -1,0 +1,125 @@
+name: iz-tara
+
+# SALT OKUR (1 Eki 2026, Serdar; siparis 4188621967 hayalet yazi): eski metin izi kapisi ile 78 cift x 5 renk x 13 boy
+# (plate'in mesaj bandi, cift kaynagindan eski glif maskesi). Kod: siparis-baski-v1 (KOD_REF). PLATES / POD_PRINT'e yazma
+# YOK; cikti Drive TEMP/IZ_TARA/<damga> + artifact. Tetik: config/iz_tara.trigger (bu dal).
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [claude/gracious-meitner-i72rkr]
+    paths:
+      - config/iz_tara.trigger
+
+concurrency: iz-tara
+
+env:
+  KOD_REF: 63435502b7adde16188034553afbb8d16ac474f6
+
+jobs:
+  olc:
+    strategy:
+      fail-fast: false
+      max-parallel: 12
+      matrix:
+        parca: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.KOD_REF }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Python bagimliliklari
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet --upgrade pip
+          python -m pip install --quiet pillow opencv-python-headless numpy fonttools img2pdf pikepdf
+      - name: rclone kur
+        run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then echo "HATA: RCLONE_CONF_B64 yok" >&2; exit 1; fi
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Iz taramasi (salt okur)
+        run: |
+          set -euo pipefail
+          python scripts/medya_v1/iz_tara.py --parca "${{ matrix.parca }}/24" --cikti iz_tara | grep -E "FAIL|HATA|\[[0-9]+/[0-9]+\].*(%25|%50|%75|%100)" || true
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: iz_tara_${{ matrix.parca }}
+          path: iz_tara
+          retention-days: 5
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
+
+  ozet:
+    needs: olc
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: a
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Ozet (renk x boy; FAIL listesi)
+        run: |
+          set -euo pipefail
+          mkdir -p rapor && cat a/*/*.jsonl > rapor/IZ_TARA.jsonl
+          python3 - <<'EOF'
+          import json, collections
+          R = [json.loads(s) for s in open('rapor/IZ_TARA.jsonl') if s.strip()]
+          t = collections.defaultdict(lambda: [0, 0, 0, 0, []])
+          for r in R:
+              k = (r['renk'], r['boy']); iz = r.get('iz') or {}
+              g = iz.get('gecti')
+              t[k][0] += 1
+              if g is True: t[k][1] += 1
+              elif g is False: t[k][2] += 1; t[k][4].append(iz.get('fazla'))
+              else: t[k][3] += 1
+          sat = ['# ESKI METIN IZI TARAMASI (plate mesaj bandi, 78 cift)', '', f'hucre: {len(R)}, FAIL: {sum(v[2] for v in t.values())}, olculemeyen/hata: {sum(v[3] for v in t.values())}', '',
+                 '| renk | boy | cift | PASS | FAIL | olculemeyen | fazla (FAIL) min / medyan / max |', '|---|---|---|---|---|---|---|']
+          for (rk, b), v in sorted(t.items()):
+              f = sorted(x for x in v[4] if x is not None)
+              sat.append(f'| {rk} | {b} | {v[0]} | {v[1]} | {v[2]} | {v[3]} | ' + (f'{f[0]} / {f[len(f)//2]} / {f[-1]}' if f else '-') + ' |')
+          sat += ['', '## FAIL hucreleri', ''] + [f"- {r['cift']} {r['renk']} {r['boy']}: fazla {r['iz'].get('fazla')}" for r in R if (r.get('iz') or {}).get('gecti') is False]
+          sat += ['', '## olculemeyen / hata', ''] + [f"- {r['cift']} {r['renk']} {r['boy']}: {r.get('hata') or (r.get('iz') or {}).get('sebep')}" for r in R if (r.get('iz') or {}).get('gecti') is None]
+          open('rapor/IZ_TARA.md', 'w').write('\n'.join(sat) + '\n')
+          print('\n'.join(sat[:90]))
+          EOF
+          D=$(date -u +%Y%m%d_%H%M)
+          rclone copy rapor "gdrive:ASTROLOVE/TEMP/IZ_TARA/$D" && echo "drive: TEMP/IZ_TARA/$D/IZ_TARA.md"
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
