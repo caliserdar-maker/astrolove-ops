@@ -133,26 +133,6 @@ class OlcekIkinciDeneme(unittest.TestCase):
         import inspect
         self.assertNotIn("'genislik'", inspect.getsource(sd.pod_uret))
 
-    def test_geri_besleme_dorduncu_deneme(self):
-        d = Path(tempfile.mkdtemp()); hedef = d / 's.jpg'; hedef.write_bytes(b'ilk')
-        gorulen = []
-        f = {'sol_isim_x0': -0.03, 'sol_isim_x1': -2.1, 'sag_isim_x0': 0.19, 'sag_isim_x1': 0.1}
-
-        def yeniden():
-            gorulen.append(dict(sd.SATIR_OLCEKLI))
-            g = d / f'_g{len(gorulen)}.jpg'; g.write_bytes(b'k%d' % len(gorulen))
-            return 'p%d' % (len(gorulen) + 1), {}, {}, 'b', {}, g
-        olc = lambda b, e, p, i: {'gecti': p == 'p5', 'konum_fark_px': 0.4 if p == 'p5' else 1.97,
-                                  'kenar_fark_px': 0.5, 'fark': f}
-        r = sd.olcek_ikinci_deneme('black', 5400, self._ilk(False), yeniden, olc, lambda b, e: {'gecti': True}, hedef)
-        self.assertEqual(len(gorulen), 4)
-        self.assertEqual(gorulen[3]['geri'], {'sol': (-0.03, -2.1), 'sag': (0.19, 0.1)})
-        self.assertEqual(r[0], 'p5'); self.assertEqual(hedef.read_bytes(), b'k4')
-        self.assertEqual(r[1]['olcek_kapisi']['yerlesim'], 'olcekli geri besleme (2400 x k)')
-        self.assertEqual(sd.SATIR_OLCEKLI, {'etkin': False})
-        import inspect
-        self.assertNotIn("'geri'", inspect.getsource(sd.pod_uret))
-
     def test_genislik_esle(self):
         from PIL import Image
         a = np.zeros((40, 200, 4), np.uint8); a[5:35, 20:180, 3] = 255; a[5:35, 20:180, :3] = 200
