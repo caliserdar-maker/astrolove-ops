@@ -48,11 +48,19 @@ if o.get('gecti') is False:
     satir += ['## olcek', f'- konum_fark_px {o.get("konum_fark_px")} (esik {o.get("esik", {}).get("konum")}) | kenar_fark_px '
               f'{o.get("kenar_fark_px")} (esik {o.get("esik", {}).get("harf_kenari")})',
               f'- farklar (2400 px): {json.dumps(o.get("fark"), ensure_ascii=False)}', f'- olcum: {o.get("olcum")}', '']
+if r.get('wp_bakir') or r.get('bilgi_d_dikis'):           # BAKIR WP (wp_ornek, 1 Eki): yontem ozeti + d) dikis bilgisi
+    satir += ['## wp_bakir', f'- yontem {r.get("yontem")} | {json.dumps(r.get("wp_bakir"), ensure_ascii=False)[:800]}',
+              f'- d_dikis (bilgi): {json.dumps(r.get("bilgi_d_dikis"), ensure_ascii=False)[:400]}', '']
 for ad in kalan:
     if ad not in ('temiz_ara_zemin', 'sembol', 'olcek'):
         d = r.get(f'{ad}_kapisi') or r.get(ad) or {}
         satir += [f'## {ad}', f'- {json.dumps(d, ensure_ascii=False)[:600]}', '']
 
+if not os.path.exists(WP):                                 # WP baskisi uretilemedi: yalniz metin tani
+    satir += ['## karsilastirma', '- WP baskisi uretilmedi (durum: ' + str(r.get('durum')) + ')']
+    open(os.path.join(OUT, 'WP_TANI.md'), 'w').write('\n'.join(satir) + '\n')
+    print(f'WP_TANI: {C} | basarisiz {", ".join(kalan) or "-"} | WP baskisi yok | {r.get("durum")}')
+    sys.exit(0)
 W, M = Image.open(WP).convert('RGB'), Image.open(MB).convert('RGB')
 PW = 700; PH = round(PW * W.height / W.width)
 satir_h = [PH + 40] + [420] * len(bolgeler)

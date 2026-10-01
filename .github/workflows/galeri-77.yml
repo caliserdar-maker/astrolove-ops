@@ -35,6 +35,10 @@ on:
         description: "evet: Drive'da hazir (HAZIR satiri olan) ciftleri de yeniden uret"
         required: false
         default: hayir
+      ornek:
+        description: "ornek klasoru (TEMP/<ad>/<CIFT>/): WP yeniden uretilir, 05+19 ve WP baskisi yalniz buraya; galeri/HAZIR/_KAYNAK'a dokunulmaz"
+        required: false
+        default: ""
 
 concurrency:
   group: galeri-77
@@ -96,11 +100,15 @@ jobs:
           MOD: ${{ inputs.mod }}
           YENIDEN: ${{ inputs.yeniden }}
           WP_DAL: ${{ inputs.wp_dal }}
+          ORNEK: ${{ inputs.ornek }}
           PARCA: ${{ matrix.parca }}
         run: |
           set +e -uo pipefail
           case "$MOD" in kaynak|tam) : ;; *) echo "HATA: mod kaynak|tam"; exit 1 ;; esac
           case "$CIFTLER" in *[!A-Z_0-9,]*) echo "HATA: ciftler A-Z_ ve virgul"; exit 1 ;; esac
+          case "$ORNEK" in *[!A-Z_0-9]*) echo "HATA: ornek A-Z_0-9"; exit 1 ;; esac
+          # ornek modu (Serdar 1 Eki): WP onay ornegi; uretim galerisi, HAZIR, _WPBEKLE ve _KAYNAK degismez
+          SK="gdrive:ASTROLOVE/TEMP/GALERI_77/_KAYNAK/SIPARIS"; [ -n "$ORNEK" ] && SK="gdrive:ASTROLOVE/TEMP/$ORNEK/_SIPARIS"
           if [ "$CIFTLER" = "HEPSI74" ]; then
             CIFTLER=$(tail -n +2 data/pod/pod78_ids.csv | cut -d, -f2 | grep -v -x -E 'CANCER_LIBRA|ARIES_LIBRA|AQUARIUS_LIBRA|CAPRICORN_LIBRA' | paste -sd,)
           fi
@@ -129,11 +137,12 @@ jobs:
           for C in "${BEN[@]}"; do
             n=$((n+1)); Y=_work/kaynak/$C; mkdir -p $Y; hata=""
             WPP=$(rclone cat "$G/_KAYNAK/$C/WP_PLATE.txt" 2>/dev/null)
-            if [ "$MOD" = "tam" ] && [ "$YENIDEN" != "evet" ] && [ -n "$(rclone lsf "$G/_HAZIR/$C.csv" 2>/dev/null)" ] \
+            if [ -z "$ORNEK" ] && [ "$MOD" = "tam" ] && [ "$YENIDEN" != "evet" ] && [ -n "$(rclone lsf "$G/_HAZIR/$C.csv" 2>/dev/null)" ] \
                && [ "$WPP" = "$PLATE_T" ]; then
               echo "[$n/$N] $C zaten hazir (HAZIR satiri var, WP plate ayni), atlandi"; continue
             fi
             rclone copy "$G/_KAYNAK/$C" $Y -q 2>/dev/null
+            [ -n "$ORNEK" ] && rm -f $Y/BASKI_WARM_PARCHMENT.jpg $Y/KAPI_WARM_PARCHMENT.json $Y/WP_PLATE.txt $Y/WP_KOD.txt   # ornek: WP her zaman yeniden
             if [ ! -f $Y/KAPAK.jpg ]; then
               rclone copyto "gdrive:ASTROLOVE/TEMP/POD_KAPAK_78/$KDAMGA/KAPAK_$C.jpg" $Y/KAPAK.jpg -q || hata="kapak yok"
             fi
@@ -156,26 +165,47 @@ jobs:
               SB=_sb; KT=""
               if [ "$R" = "WARM_PARCHMENT" ] && [ -n "$WP_DAL" ]; then SB=_sbwp; KT="--tam"; fi   # WP: baski-duzelt dali, tum kapilar
               (cd $SB && ../_sbenv/bin/python scripts/medya_v1/siparis_dosyasi.py --cift "$C" --renk "$R" --boy 11x14 --urun pod \
-                --isim1 EMILY --isim2 JAMES --mesaj-b64 "$MB64" --sip-kok "$G/_KAYNAK/SIPARIS" > "../_work/log_${C}_$R.txt" 2>&1)
+                --isim1 EMILY --isim2 JAMES --mesaj-b64 "$MB64" --sip-kok "$SK" > "../_work/log_${C}_$R.txt" 2>&1)
               D="$SB/_siparis/${C}_${R}_11x14"
               [ -f "$D/KAPI_RAPORU.json" ] || { echo "$C $R: KAPI_RAPORU yok"; tail -4 "_work/log_${C}_$R.txt"; }
               if [ -f "$D/KAPI_RAPORU.json" ] && python3 scripts/pod/galeri77_kapi.py "$D/KAPI_RAPORU.json" $KT && [ -f "$D/BASKI_11x14.jpg" ]; then
                 cp "$D/BASKI_11x14.jpg" $Y/BASKI_$R.jpg; cp "$D/KAPI_RAPORU.json" $Y/KAPI_$R.json
                 [ "$R" = "WARM_PARCHMENT" ] && printf '%s' "$PLATE_T" > $Y/WP_PLATE.txt && printf '%s' "${WP_DAL:-siparis-baski-v1}@$(git -C $SB rev-parse --short HEAD)" > $Y/WP_KOD.txt
-              elif [ "$R" = "WARM_PARCHMENT" ] && [ -n "$KT" ] && [ -f "$D/KAPI_RAPORU.json" ] && [ -f "$D/BASKI_11x14.jpg" ]; then
+              elif [ "$R" = "WARM_PARCHMENT" ] && [ -n "$KT" ] && [ -f "$D/KAPI_RAPORU.json" ]; then
                 # tum kapilar gecmedi: tani (WP_TANI.md + karsilastirma) Drive'a; yeni iterasyon yok
                 FD=fonts python3 scripts/pod/galeri77_wptani.py "$C" "$D/KAPI_RAPORU.json" "$D/BASKI_11x14.jpg" $Y/BASKI_MIDNIGHT_BLUE.jpg \
                   "${WP_DAL}@$(git -C $SB rev-parse --short HEAD)" _work/wptani_$C
                 cp "$D/KAPI_RAPORU.json" _work/wptani_$C/KAPI_RAPORU.json
                 rclone copy _work/wptani_$C "$G/_WPTANI/$C" -q && rclone copyto _work/wptani_$C/WP_TANI.md "$G/WP_TANI.md" -q
+                [ -n "$ORNEK" ] && rclone copy _work/wptani_$C "gdrive:ASTROLOVE/TEMP/$ORNEK/$C" -q
                 echo "WP_TANI: TEMP/GALERI_77/WP_TANI.md + _WPTANI/$C/ | $(rclone link "$G/_WPTANI/$C" 2>/dev/null)"
               elif [ "$R" != "WARM_PARCHMENT" ]; then
                 hata="$hata $R baski FAIL"; grep -h -E "_11x14 \{'urun'" "_work/log_${C}_$R.txt" | cut -c1-600; tail -3 "_work/log_${C}_$R.txt"
               fi
             done
             [ -f $Y/PW_KAYNAK.json ] || rclone lsjson "gdrive:ASTROLOVE/TEMP/POD_PRINT/$C/PURE_WHITE/11x14.jpg" > $Y/PW_KAYNAK.json 2>/dev/null
-            rclone copy $Y "$G/_KAYNAK/$C" -q
+            [ -z "$ORNEK" ] && rclone copy $Y "$G/_KAYNAK/$C" -q
             WPV=0; [ -f $Y/BASKI_WARM_PARCHMENT.jpg ] && WPV=1
+            if [ -n "$ORNEK" ]; then
+              # WP onay ornegi: 19 kart yerelde kurulur + QC; yalniz 05, 19 (3000x2250) + WP baskisi + QC Drive TEMP/$ORNEK/<CIFT>/
+              [ $WPV = 0 ] && hata="$hata WP RED (WP_TANI.md)"
+              if [ -z "$hata" ]; then
+                O=_work/out/$C; ORN="gdrive:ASTROLOVE/TEMP/$ORNEK/$C"
+                if bash scripts/pod/galeri77_cift.sh "$C" $Y $O > _work/cift_$C.txt 2>&1; then
+                  for f in 05_renk_ve_dijital.jpg 19_renk_warm_parchment.jpg; do rclone copyto $O/paket/$f "$ORN/$f" -q || hata="$hata $f yuklenemedi"; done
+                  rclone copy $O/QC.txt "$ORN" -q; rclone copy $O/TEMAS_$C.jpg "$ORN" -q
+                  for f in BASKI_WARM_PARCHMENT.jpg KAPI_WARM_PARCHMENT.json WP_KOD.txt; do rclone copy $Y/$f "$ORN" -q; done
+                  python3 -c "from PIL import Image;[print(f, Image.open('$O/paket/'+f).size) for f in ('05_renk_ve_dijital.jpg','19_renk_warm_parchment.jpg')]"
+                  echo "ORNEK: TEMP/$ORNEK/$C/ | $(tail -1 $O/QC.txt) | $(rclone link "$ORN" 2>/dev/null)"
+                  [ -z "$hata" ] && TAMAM=$((TAMAM+1))
+                else
+                  hata="ornek galeri QC FAIL"; tail -4 _work/cift_$C.txt; grep -h "FAIL" $O/QC.txt 2>/dev/null | cut -c1-300 | head -8
+                  [ -f $O/QC.txt ] && rclone copy $O/QC.txt "$ORN" -q
+                fi
+              fi
+              if [ -n "$hata" ]; then FAIL+=("$C: $hata"); echo "::warning::$C ornek: $hata"; fi
+              echo "[$n/$N] $C ornek ${hata:-OK}"; continue
+            fi
             if [ -z "$hata" ] && [ "$MOD" = "tam" ] && [ $WPV = 0 ] && [ "$YENIDEN" != "evet" ] \
                && [ -n "$(rclone lsf "$G/_WPBEKLE/$C.txt" 2>/dev/null)" ]; then
               # Serdar 30 Eyl: galeri WP'yi beklemez; 17 gorsel QC PASS cift HAZIR'a set=17 ile girer (yeniden uretmeden)
