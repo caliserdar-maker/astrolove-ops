@@ -1,0 +1,54 @@
+name: font-kopya
+
+# Siparis 4188621967 fontlari (kisisel-v1 assets/fonts) -> Drive TEMP/SIPARIS_FONTLAR/ (adlar aynen) + FONTLAR.md.
+# Tetik: config/font_kopya.trigger. Yalniz kopya; baska yazim yok.
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [claude/gracious-meitner-i72rkr]
+    paths:
+      - config/font_kopya.trigger
+
+jobs:
+  kopya:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: dal
+      - uses: actions/checkout@v4
+        with:
+          ref: kisisel-v1
+          path: kis
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Drive
+        run: |
+          set -euo pipefail
+          git -C kis log -1 --format='kisisel-v1 %h'
+          sha256sum kis/assets/fonts/Cinzel.ttf kis/assets/fonts/EBGaramond-Italic.ttf
+          D="gdrive:ASTROLOVE/TEMP/SIPARIS_FONTLAR"
+          rclone copyto kis/assets/fonts/Cinzel.ttf "$D/Cinzel.ttf"
+          rclone copyto kis/assets/fonts/EBGaramond-Italic.ttf "$D/EBGaramond-Italic.ttf"
+          rclone copyto dal/config/FONTLAR.md "$D/FONTLAR.md"
+          rclone lsl "$D"
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
