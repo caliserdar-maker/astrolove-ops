@@ -131,7 +131,13 @@ class OlcekIkinciDeneme(unittest.TestCase):
         self.assertEqual(r[1]['olcek_kapisi']['yerlesim'], 'olcekli profil 2400 (2400 x k)')
         self.assertFalse(sd.SATIR_OLCEKLI.get('profil_2400'))
         import inspect
-        self.assertNotIn("'profil_2400'", inspect.getsource(sd.pod_uret))
+        self.assertIn("if POD_EK_DENEME['etkin']", inspect.getsource(sd.pod_uret))   # POD'da yalniz WP bayragiyla
+
+    def test_pod_ek_deneme_varsayilan_kapali(self):
+        self.assertEqual(sd.POD_EK_DENEME, {'etkin': False})
+        import inspect
+        kaynak = inspect.getsource(sd.pod_uret)
+        self.assertIn("POD_EK_DENEME['etkin']", kaynak)               # yalniz bayrak acikken
 
     def test_profil_kaydi_ve_kullanimi(self):
         """_kaydet profil_2400 iken 2400 profilini kopyalar; _olcekli o profille plaka ister."""

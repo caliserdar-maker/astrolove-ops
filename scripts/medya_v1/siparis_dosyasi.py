@@ -1159,7 +1159,8 @@ class _HamKayit:
 
 
 MB_HEDEF = {'etkin': False}        # dijital MB: isim / mesaj bandi hedef cozunurlukte (BluePoster.hedef_render)
-SATIR_OLCEKLI = {'etkin': False}   # pod_uret: yalniz olcek kapisi FAIL olunca ikinci render (regresyon 36756875368)
+SATIR_OLCEKLI = {'etkin': False}
+POD_EK_DENEME = {'etkin': False}   # yalniz WP duz renk baskisi (surucu wp_bakir_uret_v1); POD siparisi acmaz   # pod_uret: yalniz olcek kapisi FAIL olunca ikinci render (regresyon 36756875368)
 
 
 class _SatirYerlesim:
@@ -2014,6 +2015,30 @@ def pod_uret(sip, kaynak_bayt, P_blue, P_ed, cik):
             else:
                 gecici.unlink(missing_ok=True)
                 bi['olcek_kapisi']['olcekli_deneme'] = {q: ok2.get(q) for q in ('konum_fark_px', 'kenar_fark_px')}
+    # WP DUZ RENK BASKISI (1 Eki, TEST 9000000001 CANCER_LIBRA 24x36): CI siparis baskisi iki denemede de olcek FAIL ->
+    # duz renk MB'ye dustu (MB 24x36 POD 600 + 300 sn, bakir a_renk / kabartma / kontrast FAIL). Yalniz WP hatti
+    # (POD_EK_DENEME, surucu wp_bakir_uret_v1 acar): dijital yolun 3. denemesi (isimler onayli 2400 profiliyle).
+    # POD siparisi bu bayragi ACMAZ: POD ciktisi bayt bayt ayni.
+    if POD_EK_DENEME['etkin'] and ed != 'blue' and not bi['olcek_kapisi'].get('gecti') and sip['hedef_px'][0] != 2400:
+        SATIR_OLCEKLI.update({'etkin': True, 'profil_2400': True})
+        try:
+            p3, bi3, ek3 = render_et(ed, oran, sip['sayfa'], kaynak_bayt, isimler, mesaj, P_blue, P_ed,
+                                     sip['cift'], ref_boy=sip['boy'], hedef_en=sip['hedef_px'][0], boy=sip['boy'])
+        finally:
+            SATIR_OLCEKLI['etkin'] = False; SATIR_OLCEKLI['profil_2400'] = False
+        if p3 is not None:
+            gecici = cik / f'_profil_{ad}'
+            b3, bpx3 = tek_dosya(p3, bi3, ek3, kaynak_bayt, sip['hedef_px'], gecici)
+            ok3 = olcek_kapisi_baski(b3, ek3.get('p0', p3), bi3['olcum']['isim_bant'])
+            if ok3.get('gecti'):
+                gecici.replace(cik / ad)
+                ilk = {q: bi['olcek_kapisi'].get(q) for q in ('konum_fark_px', 'kenar_fark_px')}
+                poster, bi, ek, baski, bpx = p3, bi3, ek3, b3, bpx3
+                bi['leke_kapisi'] = leke_kapisi(baski, kaynak_bayt, ek['maske'])
+                bi['olcek_kapisi'] = {**ok3, 'yerlesim': 'olcekli profil 2400 (WP duz renk)', 'ilk_yerlesim': ilk}
+            else:
+                gecici.unlink(missing_ok=True)
+                bi['olcek_kapisi']['profil_deneme'] = {q: ok3.get(q) for q in ('konum_fark_px', 'kenar_fark_px')}
     bi['isim_kalinti_kapisi'] = isim_kalinti_kapisi(baski, *koruma(ek)[:1], bi['olcum'], ham=koruma(ek)[1],
                                                     alan=ek.get('maske'))
     bi['isim_kenar_kapisi'] = (bpx.get('isim_bandi_temizligi') or {}).get('kenar')
