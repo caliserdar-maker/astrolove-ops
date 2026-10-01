@@ -75,3 +75,10 @@ bolumu okunmadan baslanmaz.
 - Kosu biter bitmez sonuc okunur, ayni dakikada sonraki duzeltme veya kosu baslar. Onay, kuyruk, "raporlayip bekle" yok.
 - Bu islerde HIZ VE KALITE madde 4 ("2 iterasyondan sonra DUR") GECERSIZDIR: FAIL'de durulmaz; 6 satir durum yazilir ve calismaya devam edilir.
 - Musteriye teslim, Etsy mesaji ve yukleme yine yalniz Serdar'in acik onayiyla.
+
+## ZAMANLAYICI YASAK (1 Eki 2026, Serdar kesin talimati)
+
+- Hicbir oturum, hicbir koşuda "X dk sonra bakarim" zamanlayicisi KURMAZ (send_later, ScheduleWakeup, cron ile bekleme, sleep ile uzun bekleme dahil).
+- Baslatilan her koşu ARALIKSIZ izlenir: GitHub API ile jobs her 30-60 sn okunur (tek komut icinde dongu), bir is biter bitmez sonucu okunur.
+- FAIL olan is icin koşunun tamamini bekleme: ayni dakikada rapor oku, duzelt, yerelde dogrula, o is icin yeni koşu baslat.
+- Kosu bitince ayni dakikada 6 satir rapor. Bekleme gereken tek durum: Serdar'in acik onayi gereken eylem (Etsy yazma, musteriye dokunan eylem).
