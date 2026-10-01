@@ -77,7 +77,7 @@ jobs:
         run: |
           case "$PROFIL" in *[!A-Za-z0-9_:x]*) echo "HATA: profil" >&2; exit 1 ;; esac
           T="${PROFIL%%:*}"; A="${PROFIL#*:}"
-          python scripts/siparis_dijital/profil.py "$T" "$A" _kod 2>&1 | grep -E '^(PROFIL|SURE|Traceback|  File|[A-Za-z]*Error)'
+          python scripts/siparis_dijital/profil.py "$T" "$A" _kod 2>&1 | grep -E '^(PROFIL|SURE|ISIM_SURE|Traceback|  File|[A-Za-z]*Error)'
       - name: tani
         if: ${{ inputs.profil == '' }}
         run: python scripts/siparis_dijital/olcek_tani.py _kod "${{ inputs.oran }}" "${{ inputs.renkler }}" 2>&1 | grep -E '^(OLCEK_TANI|Traceback|  File|[A-Za-z]*Error)'
