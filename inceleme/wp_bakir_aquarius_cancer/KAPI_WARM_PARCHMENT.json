@@ -43,9 +43,16 @@
   "plate": true,
   "zemin_birebir": true,
   "eski_iz": true,
-  "boy": true
+  "boy": true,
+  "dikis": true
  },
  "kapilar_gecti": true,
+ "dikis_kapisi": {
+  "cizgi": [],
+  "aday_sayi": 128,
+  "esik": 8.0,
+  "gecti": true
+ },
  "bilgi_d_dikis": {
   "yeni": [
    {
@@ -767,5 +774,5 @@
    }
   }
  },
- "toplam_sn": 188.5
+ "toplam_sn": 142.2
 }
