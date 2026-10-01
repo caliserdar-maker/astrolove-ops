@@ -1,0 +1,122 @@
+name: plate-etki
+
+# PLATE TEMIZLIGININ ETKISI (1 Eki 2026, siparis 4188621967): ayni kod (siparis-baski-v1), ayni girdi (EMILY / JAMES),
+# POD baski dosyasi iki kez: (1) temizlik oncesi YEDEK plate'lerle, (2) temiz PLATES ile. Fark yalniz mesaj bandinda
+# olmali; bant (+pay) disinda degisen piksel 0. Salt okur: PLATES / POD_PRINT'e yazma yok, Etsy / musteri YOK.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      kod_ref:
+        description: "siparis-baski-v1 commit"
+        required: true
+      yedek:
+        description: "yedek plate klasoru (PLATES_YEDEK_IZ_<damga>)"
+        required: true
+      cift:
+        description: "cift"
+        required: true
+        default: "CANCER_LEO"
+      renkler:
+        description: "virgullu"
+        required: true
+        default: "MIDNIGHT_BLUE,DEEP_BLACK,PURE_WHITE,CHAMPAGNE_IVORY"
+      boy:
+        description: "POD boyu"
+        required: true
+        default: "11x14"
+
+jobs:
+  etki:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.kod_ref }}
+          path: once
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.kod_ref }}
+          path: sonra
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --quiet pillow opencv-python-headless numpy fonttools img2pdf pikepdf
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: POD uret (yedek plate / temiz plate) + bant disi fark
+        env:
+          CIFT: ${{ inputs.cift }}
+          RENKLER: ${{ inputs.renkler }}
+          BOY: ${{ inputs.boy }}
+          YEDEK: ${{ inputs.yedek }}
+        run: |
+          set +e -uo pipefail
+          case "$CIFT$BOY$YEDEK" in *[!A-Za-z0-9_x]*) echo "HATA: girdi" >&2; exit 1 ;; esac
+          m=$(printf '%s' 'It Began With a Kiss in the Rain' | base64 -w0)
+          for renk in ${RENKLER//,/ }; do
+            for k in once sonra; do
+              ( cd "$k" && python - "$renk" "$k" "$m" > "../log_${k}_$renk.txt" 2>&1 <<'EOF'
+          import os, sys
+          sys.path.insert(0, 'scripts/medya_v1')
+          import siparis_dosyasi as sd
+          renk, k, m = sys.argv[1:4]
+          if k == 'once':
+              sd.PLATES = sd.PLATES.rsplit('/', 1)[0] + '/' + os.environ['YEDEK']
+          sys.argv = ['siparis_dosyasi.py', '--cift', os.environ['CIFT'], '--renk', renk, '--boy', os.environ['BOY'],
+                      '--isim1', 'EMILY', '--isim2', 'JAMES', '--mesaj-b64', m, '--sip-kok', os.path.abspath('../sip_' + k)]
+          print('PLATES', sd.PLATES)
+          sd.main()
+          EOF
+              ) || echo "uyari: $k $renk cikis $?"
+            done
+          done
+          python3 - <<'EOF'
+          import json, os, sys
+          import numpy as np
+          from PIL import Image
+          Image.MAX_IMAGE_PIXELS = None
+          C, B = os.environ['CIFT'], os.environ['BOY']
+          kotu = []
+          for renk in os.environ['RENKLER'].split(','):
+              rec = f'{C}_{renk}_{B}'
+              a_, b_ = f'once/_siparis/{rec}/BASKI_{B}.jpg', f'sonra/_siparis/{rec}/BASKI_{B}.jpg'
+              if not (os.path.exists(a_) and os.path.exists(b_)):
+                  print('ETKI', renk, 'dosya yok'); kotu.append(renk); continue
+              A = np.asarray(Image.open(a_).convert('RGB')).astype(np.int16)
+              Bm = np.asarray(Image.open(b_).convert('RGB')).astype(np.int16)
+              d = np.abs(A - Bm).max(2) > 0
+              R = json.load(open(f'sonra/_siparis/{rec}/KAPI_RAPORU.json'))
+              tb = (R.get('olcum') or {}).get('tag_bant')
+              k = A.shape[1] / 2400.0
+              y0, y1 = int((tb[0] - 40) * k) - 16, int((tb[1] + 40) * k) + 16
+              dis = d.copy(); dis[max(y0, 0):y1] = False
+              ys = np.nonzero(d.any(1))[0]
+              r = {'renk': renk, 'degisen_px': int(d.sum()), 'bant_disi_degisen_px': int(dis.sum()),
+                   'degisen_satir': [int(ys.min()), int(ys.max())] if ys.size else None, 'mesaj_bandi_satir': [y0, y1]}
+              print('ETKI', json.dumps(r))
+              if r['bant_disi_degisen_px'] != 0:
+                  kotu.append(renk)
+          print('SONUC', 'PASS' if not kotu else f'FAIL {kotu}')
+          sys.exit(1 if kotu else 0)
+          EOF
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
