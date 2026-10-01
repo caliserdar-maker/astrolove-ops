@@ -1574,9 +1574,19 @@ class BluePoster:
         p16, p12 = self.P.p16, self.P.p12
         olcek_kur(2400)
         B = self.P.sayfa_kur(kaynak_bayt, sayfa_no, 'blue', oran)
-        boy0, yer0 = {}, {}
-        with _PlakaKayit(boy0), _SatirYerlesim(p16, yer0), _HamKayit(p16) as hk0:
-            p0, bi0, kirp = self.P.uret(B, isimler, tagline)
+        boy0, yer0, tag0 = {}, {}, {}
+        asil_tag = p16.tagline_plaka
+
+        def tag_kaydet(s_, S_, metin):                           # 2400 tagline punto (shrink dahil son deger)
+            r_ = asil_tag(s_, S_, metin)
+            tag0['punto'] = r_[1].get('punto')
+            return r_
+        p16.tagline_plaka = tag_kaydet
+        try:
+            with _PlakaKayit(boy0), _SatirYerlesim(p16, yer0), _HamKayit(p16) as hk0:
+                p0, bi0, kirp = self.P.uret(B, isimler, tagline)
+        finally:
+            p16.tagline_plaka = asil_tag
         s0, S0 = B['s'], B['S']
         yeni0 = hk0.maske()
         k = hedef_en / 2400.0
@@ -1585,14 +1595,19 @@ class BluePoster:
         o1 = olcekle(B['o'], k)
         kayit = dict(self.P.olcum[oran]); kayit['sayfalar'] = {str(sayfa_no): o1}
         asil_hiza = p16.hizalama
+        asil_cp = p12.cap_punto
         olcek = olcek_kur(hedef_en)
         try:
+            if tag0.get('punto'):                                 # 1 Eki: mesaj puntosu 2400 x k (cap_punto yeniden
+                tp1 = max(int(round(tag0['punto'] * k)), 4)       # hesabi mesaji ~%4 genisletiyordu, MB 24x36)
+                p12.cap_punto = lambda *a_, **kw_: tp1
             p16.REF_SAYFA = sayfa_no
             p16.hizalama = lambda *a, **kw: (dict(h1), False)       # 2400 kilidi, k ile (arama yok)
             s1, S1 = p16.oran_kur(oran, kayit, self.P.bg, kalibre=False)
             g0, g1 = o1['isim_govde']; s1['isim_y'] = (g0 + g1) / 2
             s1['cap'] = {y: int(round(s0['cap'][y] * k)) for y in ('sol', 'sag')}
-            s1['tag_cap'] = int(round(s0['tag_cap'] * k)); s1['tag_sinir'] = int(round(s0['tag_sinir'] * k))
+            s1['tag_cap'] = int(round(s0['tag_cap'] * k))
+            s1['tag_sinir'] = 10 ** 6 if tag0.get('punto') else int(round(s0['tag_sinir'] * k))   # punto zaten son deger
             s1['bosluk'] = s0['bosluk'] * k
             capmap = {s0['cap'][y]: s1['cap'][y] for y in ('sol', 'sag')}
             sabit = {(mt, capmap.get(c, c)): b * k for (mt, c), b in boy0.items()}
@@ -1603,10 +1618,12 @@ class BluePoster:
                     s1, S1, {'sol': r['sol']['deger'], 'sag': r['sag']['deger']}, tagline)
         finally:
             p16.hizalama = asil_hiza
+            p12.cap_punto = asil_cp
             olcek_kur(2400)
         bi = {**bi0, 'edisyon': 'blue', 'oran': oran, 'durum': 'URETILDI', 'poster_px': list(p1.size),
               'mb_hedef_render': {'k': round(k, 4), 'olcek': olcek, 'punto_2400': bi0.get('punto'),
-                                  'punto_hedef': bilgi1.get('punto'), 'bg_hiza': h1}}
+                                  'punto_hedef': bilgi1.get('punto'), 'bg_hiza': h1,
+                                  'tag_punto_2400': tag0.get('punto'), 'tag_punto_hedef': (bilgi1.get('tagline') or {}).get('punto')}}
         return p1, bi, {'kirp': kirp, 'p0': p0, 'yeni': yeni1, 'yeni_ham': hk1.maske(),
                         'maske': S1['genis'] | yeni1, 'maske_2400': S0['genis'] | (yeni0 if yeni0 is not None else False),
                         'yeni_2400': yeni0}
