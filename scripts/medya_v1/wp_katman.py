@@ -180,7 +180,31 @@ def renk_ogren(Dw, P_wp, S_wp, ornek=ORNEK, tohum=0):
             'egitim_rmse': round(float(np.sqrt((kal ** 2).mean())), 2)}
 
 
+def renk_ogren_bantli(Dw, P_wp, S_wp, bantlar, pay=20):
+    """Genel model + bant bazli modeller (1 Eki: slogan murekkebi isim/sembolden farkli; tek polinom
+    ikisini birden uydururken mesaj kenarinda dE 6 kaliyordu). bantlar: {ad: (y0, y1)} WP satirlari."""
+    m = renk_ogren(Dw, P_wp, S_wp)
+    H = Dw.shape[0]
+    bm = []
+    for ad, (y0, y1) in bantlar.items():
+        a, b = max(0, y0 - pay), min(H, y1 + pay)
+        if (_agirlik(Dw[a:b]) > 0).sum() < 2000:
+            continue
+        mb = renk_ogren(Dw[a:b], P_wp[a:b], S_wp[a:b])
+        bm.append({'ad': ad, 'satir': [int(a), int(b)], **mb})
+    m['bant_modelleri'] = bm
+    return m
+
+
 def renk_uygula(Dw, P_wp, model, parca=512):
+    out = _renk_uygula1(Dw, P_wp, model, parca)
+    for b in model.get('bant_modelleri', []):
+        y0, y1 = b['satir']
+        out[y0:y1] = _renk_uygula1(Dw[y0:y1], P_wp[y0:y1], b, parca)
+    return out
+
+
+def _renk_uygula1(Dw, P_wp, model, parca=512):
     beta = np.array(model['beta'], np.float32)
     gam = np.array(model['gamma'], np.float32).T                   # K x 3
     out = P_wp.copy()

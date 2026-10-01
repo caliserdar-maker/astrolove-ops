@@ -1,1 +1,1 @@
-# wp katman ornek 3. kosu (plate CI glif olcutu + onarim) 2026-09-30T21:24:03Z
+# wp katman ornek 4. kosu (bant modeli, kosullu onarim, sonsuz olcumu) 2026-10-01T07:05:40Z

@@ -158,6 +158,24 @@ def test_plate_onar_glif():
     assert np.abs(onar - kirli)[:700].max() < 1e-3
 
 
+def test_bant_modeli():
+    """Mesaj murekkebi WP'de farkli renk: bant modeli mesaj dE'sini genel modelden dusurur."""
+    P_wp = doku()
+    S_ci = bas(CI_Z, alfa(SEMBOL + ISIM + MESAJ, {}), CI_M)
+    WP_MESAJ = np.array([150, 120, 90], np.float32)
+    S_wp = bas(bas(P_wp, alfa(SEMBOL + ISIM, KAYMA_WP), WP_M), alfa(MESAJ, KAYMA_WP), WP_MESAJ)
+    D = S_ci - CI_Z
+    hiz = wk.hizala(D, S_wp - P_wp, wk.bantlar(wk.murekkep_maskesi(S_wp - P_wp)))
+    Dw = wk.katman_tasi(D, hiz, (W, H))
+    g = wk.renk_ogren(Dw, P_wp, S_wp)
+    b = wk.renk_ogren_bantli(Dw, P_wp, S_wp, {'mesaj': (930, 980)})
+    bl = {'mesaj': (925, 985)}
+    rg = wk.fark_tablosu(wk.renk_uygula(Dw, P_wp, g), S_wp, P_wp, bl)['mesaj']['ort']
+    rb = wk.fark_tablosu(wk.renk_uygula(Dw, P_wp, b), S_wp, P_wp, bl)['mesaj']['ort']
+    assert rb < rg and rb < 2.5, (rg, rb)
+
+
 if __name__ == '__main__':
+    test_bant_modeli(); print('PASS test_bant_modeli')
     test_plate_onar(); print('PASS test_plate_onar')
     test_plate_onar_glif(); print('PASS test_plate_onar_glif')

@@ -105,6 +105,46 @@ def yanyana(sol, sag, yol, H=1800, bant=None, etiket=('YENI (katman)', 'ONAYLI W
     t.save(yol, 'JPEG', quality=90)
 
 
+def _kume(m, bosluk):
+    kol = np.nonzero(m.sum(0) > 0)[0]
+    if not len(kol):
+        return []
+    out, a, b = [], kol[0], kol[0]
+    for x in kol[1:]:
+        if x - b > bosluk:
+            out.append([int(a), int(b) + 1]); a = x
+        b = x
+    out.append([int(a), int(b) + 1])
+    return out
+
+
+def sonsuz_olc(S_c, B, P_c, isim_bant, k):
+    """Isim satiri: [isim1] bosluk [sonsuz] bosluk [isim2] (sutun kumeleri). Kaynak ve hat icin kutular,
+    iki bosluk, sonsuz merkez farki ve isim1 genislik farki. Kural: iki bosluk esit, satir ortali."""
+    H, Wd = S_c.shape[:2]
+    y0, y1 = int(isim_bant[0] * k) - int(20 * k), int(isim_bant[1] * k) + int(20 * k)
+    x0 = int(Wd * 0.05)
+    def bir(A):
+        m = wk.murekkep_maskesi((A - P_c)[y0:y1, x0:Wd - x0], kenar=0)
+        ys = np.nonzero(m.any(1))[0]
+        h = (ys[-1] - ys[0] + 1) if len(ys) else 1
+        kk = [[a + x0, b + x0] for a, b in _kume(m, max(int(0.45 * h), 6))]
+        if len(kk) != 3:
+            return {'kume': kk, 'hata': f'{len(kk)} kume'}
+        return {'isim1': kk[0], 'sonsuz': kk[1], 'isim2': kk[2],
+                'bosluk': [kk[1][0] - kk[0][1], kk[2][0] - kk[1][1]],
+                'satir_merkez': round((kk[0][0] + kk[2][1]) / 2, 1),
+                'sonsuz_merkez': round((kk[1][0] + kk[1][1]) / 2, 1)}
+    a, b = bir(S_c), bir(B)
+    r = {'kaynak': a, 'hat': b}
+    if 'hata' not in a and 'hata' not in b:
+        r['sonsuz_dx'] = round(b['sonsuz_merkez'] - a['sonsuz_merkez'], 1)
+        r['isim1_en_farki'] = (b['isim1'][1] - b['isim1'][0]) - (a['isim1'][1] - a['isim1'][0])
+        r['bosluk_farki'] = [b['bosluk'][0] - a['bosluk'][0], b['bosluk'][1] - a['bosluk'][1]]
+        r['satir_merkez_farki'] = round(b['satir_merkez'] - a['satir_merkez'], 1)
+    return r
+
+
 def kapi_ozet(r):
     k = r.get('kapilar') or {}
     return {'durum': r.get('durum'), 'hata': r.get('hata'), 'kapilar_gecti': r.get('kapilar_gecti'),
@@ -173,7 +213,10 @@ def cift_boy(cift, boy, P_ed, P_blue, no, cik):
     pt_bant = {a: et[a] for a in ('isim', 'mesaj') if a in et}
     onar_bant = {a: et[a] for a in ('kucuk_sembol', 'isim', 'mesaj') if a in et}
     once = wk.plate_iz(P_wp0, G, pt_bant)
-    P_wp, onarim = wk.plate_onar_glif(P_wp0, G, ink, onar_bant)
+    if once['gecti']:                  # 1 Eki: onarim temiz plate'te harf kenari dokusunu bozuyordu (mesaj dE 5 -> 6)
+        P_wp, onarim = P_wp0, {'uygulandi': False, 'sebep': 'iz testi onarimsiz gecti'}
+    else:
+        P_wp, onarim = wk.plate_onar_glif(P_wp0, G, ink, onar_bant)
     sonra = wk.plate_iz(P_wp, G, pt_bant)
     mk0 = wk.murekkep_maskesi(D_wp, kenar=0)
     zt = wk.ozet(wk.dE(P_wp0, S_wp), ~mk0)
@@ -181,7 +224,7 @@ def cift_boy(cift, boy, P_ed, P_blue, no, cik):
                   'eski_olcut_once': wk.plate_temizlik(P_wp0, S_wp, pt_bant),
                   'zemin_uyumu': {**zt, 'esik_ort': 0.5, 'gecti': zt.get('ort', 99) <= 0.5}}
     R['plate_gecti'] = bool(sonra['gecti'] and R['plate']['zemin_uyumu']['gecti'])
-    model = wk.renk_ogren(Dw_src, P_wp0, S_wp)
+    model = wk.renk_ogren_bantli(Dw_src, P_wp0, S_wp, {a: et[a] for a in ('isim', 'mesaj') if a in et})
     R['renk_modeli'] = {a: model[a] for a in ('derece', 'egitim_px', 'murekkep_px', 'egitim_rmse')}
 
     # ---- 5) kimlik farklari
@@ -192,6 +235,9 @@ def cift_boy(cift, boy, P_ed, P_blue, no, cik):
     # (b) CI hattinin kendi kimligi: hat baskisi (kaynagin yazisi) vs onayli CI (bant bazinda)
     B_id = wk.boyutla(wk.dizi(uret['kimlik'][1]['baski']), (Wd, H))
     R['kimlik_duz_renk'] = wk.fark_tablosu(B_id, S_c, P_c, et)
+    o_id = uret['kimlik'][0].get('olcum') or {}
+    if o_id.get('isim_bant'):
+        R['sonsuz'] = sonsuz_olc(S_c, B_id, P_c, o_id['isim_bant'], k)
     R['kimlik_duz_renk']['ozet'] = R['kimlik_duz_renk']['tum']
     # (c) UCTAN UCA: CI hat baskisi -> katman -> WP  vs  onayli WP
     WP_id, _ = wk.katman_bas(B_id, P_c, P_wp, hiz, model)
@@ -235,7 +281,11 @@ def cift_boy(cift, boy, P_ed, P_blue, no, cik):
         y1 = max(v[1] for a, v in et.items() if a != 'buyuk_sembol') + 60
         x0, x1 = int(Wd * 0.06), int(Wd * 0.94)
         kaydet_jpg(WP_cu[max(0, y0):y1, x0:x1], cik / f'WP_{cift}_{boy}_ISIM_BANDI.jpg', 95)
-        yanyana(WP_cu, S_wp, cik / f'WP_{cift}_{boy}_YANYANA.jpg', bant=[max(0, y0), y1])
+        yanyana(S_wp, WP_cu, cik / f'WP_{cift}_{boy}_YANYANA.jpg', bant=[max(0, y0), y1],
+                etiket=('ONAYLI WP (kaynak)', f'YENI BASKI ({ISIM[0]} / {ISIM[1]})'))
+    o_cu = r_cu.get('olcum') or {}
+    if o_cu.get('isim_bant'):
+        R['sonsuz_siparis'] = sonsuz_olc(S_c, B_cu, P_c, o_cu['isim_bant'], k)['hat']
     R['siparis_duz_renk_kapilar'] = kapi_ozet(r_cu)
     R['gecti'] = bool(R['plate_gecti'] and R['zemin_birebir']['gecti'] and r_cu.get('kapilar_gecti'))
     R['durum'] = 'URETILDI'
@@ -249,24 +299,28 @@ def tablo(hedef):
     rs = [json.loads(p.read_text()) for p in sorted(yer.glob('*/RAPOR_*.json'))]
     def f(d, a='ort'):
         return '-' if not d or d.get(a) is None else d[a]
-    sat = ['# WP katman yontemi: kimlik testi (30 Eyl 2026)', '',
-           'dE = CIE76 (Lab), ort/p99; parantezde murekkep maskesi IoU. KATMAN = onayli CI kaynagi katmanla WP\'ye '
-           'tasindi (yontemin kendisi). CI HAT = mevcut hattin kimlik baskisi (kaynagin burc adlari + slogani) vs onayli '
-           'CI. UCTAN UCA = CI hat baskisi -> katman -> WP vs onayli WP. Plate: medyan, iz CI glif maskesiyle olculur; eski glif izi kaynagin kendi '
-           'dokusuyla onarildi; iz orani once -> sonra (esik 1.25).', '',
-           '| cift | boy | plate iz (mesaj) once->sonra | zemin ort | KATMAN isim | KATMAN mesaj | KATMAN sembol (buyuk/kucuk) | '
-           'CI HAT isim | CI HAT mesaj | UCTAN UCA isim | UCTAN UCA mesaj | kapilar (CI siparis) |',
+    sat = ['# WP katman yontemi: kimlik testi (1 Eki 2026, Serdar karari: olcut KATMAN kimligi + kilitli hat tipografisi)', '',
+           'dE = CIE76 (Lab), ort/p99; parantezde murekkep maskesi IoU. KATMAN = onayli CI kaynagi katmanla WP\'ye tasindi. '
+           'Renk modeli: genel + isim / mesaj bandina ayri. Plate: medyan; iz orani CI glif maskesiyle (esik 1.25), onarim '
+           'yalniz iz testi kalirsa. Sonsuz: kaynak ve hat isim satirinda isim-sonsuz bosluklari (kural: esit, satir ortali); '
+           'sonsuz dx = hat - kaynak, isim1 en farki = kilitli Cinzel genislik farki. Bilgi: UCTAN UCA (hat tipografisi '
+           'Canva\'dan farkli oldugu icin olcut degil).', '',
+           '| cift | boy | plate iz isim/mesaj | KATMAN isim | KATMAN mesaj | KATMAN sembol (buyuk/kucuk) | '
+           'sonsuz dx | isim1 en farki | bosluk kaynak / hat / siparis | UCTAN UCA isim | UCTAN UCA mesaj | kapilar (CI siparis) |',
            '|---|---|---|---|---|---|---|---|---|---|---|---|']
     def h(d):
         return '-' if not d else f"{f(d)}/{f(d, 'p99')} ({f(d, 'iou')})"
     for R in rs:
-        k = R.get('kimlik') or {}; t = R.get('kimlik_kaynak_tabani') or {}; c = R.get('kimlik_duz_renk') or {}
-        pl = R.get('plate') or {}
-        io = lambda x: ((x or {}).get('mesaj') or {}).get('iz_orani', '-')
-        sat.append(f"| {R['cift']} | {R['boy']} | {io(pl.get('temizlik_once'))} -> {io(pl.get('temizlik'))} "
-                   f"{'TEMIZ' if R.get('plate_gecti') else 'KIRLI'} | {f(pl.get('zemin_uyumu'))} | "
+        k = R.get('kimlik') or {}; t = R.get('kimlik_kaynak_tabani') or {}
+        pl = R.get('plate') or {}; tm = pl.get('temizlik') or {}
+        io = lambda b: (tm.get(b) or {}).get('iz_orani', '-')
+        so = R.get('sonsuz') or {}
+        bk = lambda d: '/'.join(str(x) for x in (d or {}).get('bosluk', ['-']))
+        sat.append(f"| {R['cift']} | {R['boy']} | {io('isim')} / {io('mesaj')} {'TEMIZ' if R.get('plate_gecti') else 'KIRLI'} | "
                    f"{h(t.get('isim'))} | {h(t.get('mesaj'))} | {h(t.get('buyuk_sembol'))} / {h(t.get('kucuk_sembol'))} | "
-                   f"{h(c.get('isim'))} | {h(c.get('mesaj'))} | {h(k.get('isim'))} | {h(k.get('mesaj'))} | "
+                   f"{so.get('sonsuz_dx', '-')} | {so.get('isim1_en_farki', '-')} | "
+                   f"{bk(so.get('kaynak'))} / {bk(so.get('hat'))} / {bk(R.get('sonsuz_siparis'))} | "
+                   f"{h(k.get('isim'))} | {h(k.get('mesaj'))} | "
                    f"{'PASS' if (R.get('siparis_duz_renk_kapilar') or {}).get('kapilar_gecti') else 'FAIL ' + str((R.get('siparis_duz_renk_kapilar') or {}).get('kalan') or R.get('durum'))} |")
     (yer / 'KIMLIK_TABLOSU.md').write_text('\n'.join(sat) + '\n')
     (yer / 'KIMLIK_TABLOSU.json').write_text(json.dumps(rs, ensure_ascii=False, indent=1, default=str))
