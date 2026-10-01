@@ -1842,6 +1842,61 @@ def bant_dogrulama(cift, boy, P_ed):
             'gecti': bool(kiyas) and all(v['gecti'] for v in kiyas), 'renkler': out}
 
 
+# ------------------------------------------------------------------ ESKI METIN IZI KAPISI (Serdar 1 Eki, siparis 4188621967)
+# Bulgu: "A King and his Crab" arkasinda eski motto "Two Souls One Bond" silik izi (CI normal bakista, DB / PW
+# kontrastla okunuyor; 11x14 kesitlerde iz p99 3-7 gri seviye). Mevcut kapilar kacirdi: plate_slogan glif
+# PAYINA bakar (zayif iz farki esigin ustunde kalir), leke kaynaga karsi olcer (kaynakta da slogan var).
+# Olcum (2400 biriminde, mesaj bandi): eski glif maskesi G = KAYNAK sayfanin bantta yerel kontrast maskesi;
+# yeni oge maskesi N (+3 px) disarida birakilir; cikti lumasinin yerel zeminden (21 px medyan) sapmasi
+# G\N'de medyan alinir, ayni bandin glifsiz pikselindeki taban cikarilir. fazla > ESIK -> FAIL.
+IZ_ESIK = 0.6            # gri seviye (eski glif pikselinde isaretli ortalama fazla); sentetik kalibrasyon testte
+IZ_PAY = 3               # yeni oge maskesi genisletmesi (2400 px)
+IZ_MIN_PX = 200
+
+
+def eski_metin_izi_kapisi(cikti, kaynak, tag_bant, tag_x, yeni_maske=None, esik=IZ_ESIK):
+    """cikti: PIL (baski / sayfa); kaynak: bayt / yol / PIL (eski slogan iceren onayli sayfa); bant 2400 biriminde."""
+    import cv2
+    from pilot6 import LUMA
+    eu = _mod('edisyon_uret')
+    olcek_kur(2400)
+
+    def n24(im):
+        im = im if isinstance(im, Image.Image) else Image.open(io.BytesIO(im) if isinstance(im, (bytes, bytearray)) else im)
+        im = im.convert('RGB')
+        return np.asarray(im.resize((2400, round(im.height * 2400 / im.width)), Image.LANCZOS)).astype(np.float32) @ LUMA
+    Ls, Lo = n24(kaynak), n24(cikti)
+    h = min(Ls.shape[0], Lo.shape[0])
+    y0, y1 = max(int(tag_bant[0]) - 12, 0), min(int(tag_bant[1]) + 12, h)
+    x0, x1 = max(int(tag_x[0]) - 40, 0), min(int(tag_x[1]) + 40, 2400)
+    acik = float(np.median(Ls)) > 128
+    G = eu.edisyon_maske(Ls, acik)[y0:y1, x0:x1]
+    if yeni_maske is not None:
+        ym = np.asarray(yeni_maske).astype(np.uint8)
+        ym = cv2.resize(ym, (2400, round(ym.shape[0] * 2400 / ym.shape[1])), interpolation=cv2.INTER_NEAREST) > 0
+        N = np.zeros_like(G); hh = min(ym.shape[0], y1) - y0
+        if hh > 0:
+            N[:hh] = ym[y0:y0 + hh, x0:x1]
+    else:
+        N = eu.edisyon_maske(Lo, float(np.median(Lo)) > 128)[y0:y1, x0:x1]
+    N = cv2.dilate(N.astype(np.uint8), np.ones((2 * IZ_PAY + 1,) * 2, np.uint8)) > 0
+    def sapma(L):
+        u = np.clip(L, 0, 255).astype(np.uint8)
+        return L - cv2.medianBlur(u, 21).astype(np.float32)
+    ds = sapma(Ls[y0:y1, x0:x1]); do = sapma(Lo[y0:y1, x0:x1])
+    R = G & ~N
+    B = ~cv2.dilate(G.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool) & ~N
+    r = {'esik': esik, 'eski_glif_px': int(R.sum()), 'bant': [y0, y1], 'x': [x0, x1]}
+    if R.sum() < IZ_MIN_PX or B.sum() < IZ_MIN_PX:
+        return {**r, 'gecti': None, 'sebep': 'olculecek eski glif pikseli yok'}
+    yon = 1.0 if float(np.median(ds[G])) >= 0 else -1.0       # eski glif zeminden acik mi koyu mu (kaynakta)
+    iz, taban = float(np.mean(yon * do[R])), float(np.mean(yon * do[B]))
+    r.update({'yon': yon, 'iz_ort': round(iz, 2), 'taban_ort': round(taban, 2), 'fazla': round(iz - taban, 2),
+              'kaynak_glif_kontrast': round(float(np.mean(yon * ds[G])), 1)})
+    r['gecti'] = bool(iz - taban <= esik)
+    return r
+
+
 def kapilari_topla(bi, isimler, mesaj, baski_px, uretim_px, dosya_mb=None, azami_mb=None):
     fk = font_kapsami(isimler, mesaj)
     bk = boy_kapisi(baski_px, uretim_px, dosya_mb, azami_mb)
@@ -1854,7 +1909,8 @@ def kapilari_topla(bi, isimler, mesaj, baski_px, uretim_px, dosya_mb=None, azami
          'boy_siniri': bk['gecti'], 'font_kapsami': fk['gecti'],
          'mesaj_murekkep': bi.get('mesaj_kapisi', {}).get('gecti'),
          'isim_kalinti': bi.get('isim_kalinti_kapisi', {}).get('gecti'),
-         'isim_kenar': (bi.get('isim_kenar_kapisi') or {}).get('gecti')}
+         'isim_kenar': (bi.get('isim_kenar_kapisi') or {}).get('gecti'),
+         'eski_metin_izi': (bi.get('eski_metin_izi_kapisi') or {}).get('gecti')}
     return k, {'boy_siniri': bk, 'font_kapsami': fk, 'mesaj_murekkep': bi.get('mesaj_kapisi')}
 
 
@@ -1938,6 +1994,7 @@ def pod_uret(sip, kaynak_bayt, P_blue, P_ed, cik):
     bi['isim_kalinti_kapisi'] = isim_kalinti_kapisi(baski, *koruma(ek)[:1], bi['olcum'], ham=koruma(ek)[1],
                                                     alan=ek.get('maske'))
     bi['isim_kenar_kapisi'] = (bpx.get('isim_bandi_temizligi') or {}).get('kenar')
+    bi['eski_metin_izi_kapisi'] = _iz_kapisi(baski, kaynak_bayt, bi, ek)   # 1 Eki: yeni kapi (cikti degismez)
     if _TANI is not None:                         # baski_tani.py: goruntuler (kapiya etkisi yok)
         _TANI.update({'baski': baski, 'p0': ek.get('p0', poster), 'poster': poster, 'yeni': ek.get('yeni'),
                       'koruma': koruma(ek)})
@@ -1954,6 +2011,17 @@ def pod_uret(sip, kaynak_bayt, P_blue, P_ed, cik):
                'metin_render_px': metin_en,
                'kapilar': kapilar, 'kapilar_gecti': kapi_sonucu(kapilar)})
     return {**sip, **bi}
+
+
+def _iz_kapisi(baski, kaynak_bayt, bi, ek):
+    try:
+        o = bi.get('olcum') or {}
+        if not o.get('tag_bant') or not (o.get('tag_x') or o.get('tag_bant')):
+            return {'gecti': None, 'sebep': 'mesaj bandi olcumu yok'}
+        tx = o.get('tag_x') or [300, 2100]
+        return eski_metin_izi_kapisi(baski, kaynak_bayt, o['tag_bant'], tx, ek.get('yeni'))
+    except Exception as e:                                        # noqa: BLE001
+        return {'gecti': False, 'hata': f'{type(e).__name__}: {e}'}
 
 
 def dijital_leke(baski, kaynak_bayt, ek):
@@ -2042,8 +2110,10 @@ def _dijital_is(arg):
         bi['isim_kalinti_kapisi'] = isim_kalinti_kapisi(baski, *koruma(ek)[:1], bi['olcum'],
                                                         ham=koruma(ek)[1], alan=ek.get('maske'))
         bi['isim_kenar_kapisi'] = (bpx.get('isim_bandi_temizligi') or {}).get('kenar')
+        bi['eski_metin_izi_kapisi'] = _iz_kapisi(baski, kb, bi, ek)
         kapilar, ayrinti = kapilari_topla(bi, isimler, mesaj, bpx['baski_px'], hedef)
         kayit = {'durum': 'URETILDI', 'boy': boy, **bpx, 'kapilar': kapilar,
+                 'eski_metin_izi_kapisi': bi.get('eski_metin_izi_kapisi'),
                  'kapi_ayrinti': ayrinti, 'kapilar_gecti': kapi_sonucu(kapilar),
                  'olcek_kapisi': bi.get('olcek_kapisi'), 'leke_kapisi': bi.get('leke_kapisi'),
                  'metin_render_px': bi.get('poster_px', [2400])[0], 'sure_sn': bi.get('sure_sn')}
