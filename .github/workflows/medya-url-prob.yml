@@ -1,0 +1,35 @@
+name: medya-url-prob
+
+# Salt okur: verilen herkese acik medya URL'lerini yonlendirme izlemeden yoklar (HTTP kodu, content-type,
+# yonlendirme hedefi, boyut). Metricool/Pinterest "dogrudan dosya URL'si" kosulunun kaniti. Etsy YOK, yazma YOK.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      urls:
+        description: "bosluklu URL listesi"
+        required: true
+
+jobs:
+  prob:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Prob
+        env:
+          URLS: ${{ inputs.urls }}
+        run: |
+          hata=0
+          echo "| URL | HTTP | content-type | yonlendirme | bayt |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|---|---|---|---|---|" >> "$GITHUB_STEP_SUMMARY"
+          for u in $URLS; do
+            r=$(curl -sS -o /dev/null -m 30 -w '%{http_code}|%{content_type}|%{redirect_url}|%{size_download}' "$u") || r="ERR|||0"
+            IFS='|' read -r kod tip yon bayt <<< "$r"
+            echo "PROB $u -> $kod | $tip | ${yon:--} | $bayt"
+            echo "| $u | $kod | $tip | ${yon:--} | $bayt |" >> "$GITHUB_STEP_SUMMARY"
+            [ "$kod" = "200" ] && [ -z "$yon" ] || hata=1
+          done
+          [ $hata -eq 0 ] && echo "GENEL PASS" || { echo "GENEL FAIL"; exit 1; }
