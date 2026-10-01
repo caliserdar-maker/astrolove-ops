@@ -81,7 +81,8 @@ def main():
     oran = sys.argv[2] if len(sys.argv) > 2 else '3x4'
     boy = sd.DIJITAL_BOY[oran]
     from PIL import Image
-    for renk in ('DEEP_BLACK', 'MIDNIGHT_BLUE'):
+    renkler = (sys.argv[3].split(',') if len(sys.argv) > 3 else ['DEEP_BLACK', 'MIDNIGHT_BLUE'])
+    for renk in renkler:
         ed = sd.RENK_ED[renk]
         yol = sd.pod_kaynak(g['cift'], renk, boy); kb = yol.read_bytes()
         with Image.open(yol) as im:
@@ -108,6 +109,21 @@ def main():
               'kapi': {q: kap.get(q) for q in ('gecti', 'konum_fark_px', 'kenar_fark_px', 'fark')}}), flush=True)
         print('OLCEK_TANI_AYRINTI', renk, boy, 'p0', json.dumps(a0), flush=True)
         print('OLCEK_TANI_AYRINTI', renk, boy, 'baski', json.dumps(a1), flush=True)
+        # ham hi-res poster (birlestirme oncesi) ve plate: kuyruk nereden
+        sd.olcek_kur(poster.width); ap = ayrinti(sd, poster, bant, poster.width / 2400.0); sd.olcek_kur(2400)
+        print('OLCEK_TANI_AYRINTI', renk, boy, 'poster_hires', json.dumps(ap), flush=True)
+        from pilot6 import LUMA
+        pl = Image.open(bi['plate']).convert('RGB') if bi.get('plate') else None
+        sat = {}
+        for ad, im in (('p0', p0), ('baski', baski), ('poster', poster), ('plate', pl), ('kaynak', Image.open(yol))):
+            if im is None:
+                continue
+            kk = im.width / 2400.0
+            y0_, y1_ = int((bant[0] - 10) * kk), int((bant[1] + 10) * kk)
+            A = np.asarray(im.convert('RGB').crop((int(940 * kk), y0_, int(990 * kk), y1_))).astype(np.float32) @ LUMA
+            col = A.max(axis=0)                          # sutun basina en parlak (2400 birimine toplanir)
+            sat[ad] = {str(940 + int(i / kk)): round(float(v), 1) for i, v in enumerate(col) if int(i / kk) % 2 == 0}
+        print('OLCEK_TANI_SUTUN_MAKS', renk, boy, json.dumps(sat), flush=True)
     return 0
 
 

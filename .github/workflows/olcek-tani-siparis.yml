@@ -17,6 +17,7 @@ on:
       mesaj_b64: {description: "mesaj (base64)", required: true}
       renk_ref: {description: "siparis-baski-v1 commit", required: true}
       oran: {description: "oran", required: false, default: "3x4"}
+      renkler: {description: "renkler", required: false, default: "DEEP_BLACK,MIDNIGHT_BLUE"}
 
 jobs:
   tani:
@@ -30,6 +31,7 @@ jobs:
           m=$(jq -r '.inputs.mesaj_b64' "$GITHUB_EVENT_PATH" | base64 -d); echo "::add-mask::$m"
           jq -re '.inputs.cift | test("^[A-Z]+_[A-Z]+$")' "$GITHUB_EVENT_PATH" >/dev/null
           jq -re '.inputs.oran | test("^[0-9a-z_]+$")' "$GITHUB_EVENT_PATH" >/dev/null
+          jq -re '.inputs.renkler | test("^[A-Z_,]+$")' "$GITHUB_EVENT_PATH" >/dev/null
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
@@ -58,6 +60,6 @@ jobs:
             fi
           fi
       - name: tani
-        run: python scripts/siparis_dijital/olcek_tani.py _kod "${{ inputs.oran }}" 2>&1 | grep -E '^(OLCEK_TANI|Traceback|  File|[A-Za-z]*Error)'
+        run: python scripts/siparis_dijital/olcek_tani.py _kod "${{ inputs.oran }}" "${{ inputs.renkler }}" 2>&1 | grep -E '^(OLCEK_TANI|Traceback|  File|[A-Za-z]*Error)'
       - if: ${{ always() }}
         run: rm -rf ~/.config/rclone
