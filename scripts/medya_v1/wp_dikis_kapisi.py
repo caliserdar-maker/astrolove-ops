@@ -20,6 +20,28 @@ BOY = 60          # en az 60 satir gercek isabet (yazi satirlari sayilmaz)
 BOSLUK = 30       # cizgi boyunca kapanan bosluk (v2 dikisi kesikli)
 ARA = 10
 KENAR = 40
+HALE_KOYU = 4     # yazi maskesi genisletme (px)
+HALE_ACIK = 12    # acik kabartma halesi yaricapi (px)
+
+
+def hale_maskesi(rgb):
+    """Yazi + kabartma hale maskesi (2. karar, 1 Eki: AS 11x14 yanlis alarmi). Kilitli yazi maskesi (yerel ortanca 31 px)
+    kalin vuruslari kacirir (Scorpio sapi 17 px: pencerenin yarisindan genis, ortanca murekkep olur). Eklenen:
+      kalin = yerel kagit (41 px en acik) - L > 40 (ince-uzun bilesen = kil cizgi, yazi sayilmaz);
+      koyu hale = yazi 4 px genisletilir; acik hale = yazinin 12 px yakininda yerel ortancadan 6 luma acik pikseller."""
+    L = rgb @ wb.LUMA
+    u8 = np.clip(L, 0, 255).astype(np.uint8)
+    kalin = ((cv2.dilate(u8, np.ones((41, 41), np.uint8)).astype(np.float32) - L) > 40).astype(np.uint8)
+    mk = cv2.morphologyEx(kalin, cv2.MORPH_CLOSE, np.ones((15, 1), np.uint8))
+    n, lab, st, _ = cv2.connectedComponentsWithStats(mk, 8)
+    cizgi = np.zeros(n, bool)
+    cizgi[1:] = (st[1:, cv2.CC_STAT_WIDTH] <= 8) & (st[1:, cv2.CC_STAT_HEIGHT] >= 50)
+    kalin[cizgi[lab]] = 0
+    yazi = (wo._yazi_maskesi(rgb, ince=True) | cv2.dilate(kalin, np.ones((5, 5), np.uint8)).astype(bool)).astype(np.uint8)
+    koyu_hale = cv2.dilate(yazi, np.ones((2 * HALE_KOYU + 1,) * 2, np.uint8)).astype(bool)
+    yakin = cv2.dilate(yazi, np.ones((2 * HALE_ACIK + 1,) * 2, np.uint8)).astype(bool)
+    acik = (L - cv2.medianBlur(u8, 31).astype(np.float32)) > 6
+    return koyu_hale | (yakin & acik)
 
 
 def _seri(L, yazi, c, isaret, dd):
@@ -59,36 +81,46 @@ def _parca(v, esik):
     return en
 
 
+def olc(c, La, Lb, ya, yb, esik=ESIK):
+    """Tek aday: +-ARA px icinde en uzun parca; cizgiyse kayit, degilse None."""
+    s = 1.0 if c['tur'] == 'koyu' else -1.0
+    en = None
+    for dd in range(-ARA, ARA + 1):                      # yerlesik sutun cizgiden 7 px uzak olabilir (v2: 1293/1300)
+        v, o = _seri(La, ya, c, s, dd)
+        if v is None:
+            continue
+        b0, b1, h = _parca(v, esik)
+        if h and (en is None or h > en[0]):
+            en = (h, dd, b0, b1, v, o)
+    if en is None or en[0] < BOY:
+        return None
+    h, dd, b0, b1, v, o = en
+    seg = v[b0:b1 + 1]
+    dik = c['yon'] == 'dikey'
+    c2 = {**c, 'x': c['x'] + dd} if dik else {**c, 'y': c['y'] + dd}
+    vb, _ = _seri(Lb, yb, c2, s, 0)
+    sb = float(np.nanmedian(vb[b0:b1 + 1])) if vb is not None and np.isfinite(vb[b0:b1 + 1]).any() else 0.0
+    sa = float(np.nanmedian(seg))
+    if sa - sb < esik:
+        return None
+    yer = [o + b0, o + b1]
+    return {'yon': c['yon'], 'tur': c['tur'], ('x' if dik else 'y'): c2['x' if dik else 'y'], ('y' if dik else 'x'): yer,
+            'isabet': h, 'sapma_yeni': round(sa, 1), 'sapma_onayli': round(sb, 1)}
+
+
 def kapi(yeni, onayli, satirlar, esik=ESIK):
     """yeni, onayli: HxWx3 (ayni geometri). satirlar: bool[H] (bant satirlari). Donus {cizgi, aday_sayi, gecti}."""
     A = np.asarray(yeni, np.float32); B = np.asarray(onayli, np.float32)
-    ya, yb = wo._yazi_maskesi(A, ince=True), wo._yazi_maskesi(B, ince=True)
-    aday = wb.dikis(A, satirlar, T=(3.0, 120.0), murekkep=ya, bosluk=30, temsil='isabet')
+    # aday: kilitli yazi maskesiyle (genis hale dedektorde kil cizgiyi notr bolgeye gomer: v2 dikisi harfe 15 px);
+    # olcum: yazi + kabartma halesi satirlari haric
+    aday = wb.dikis(A, satirlar, T=(3.0, 120.0), murekkep=wo._yazi_maskesi(A, ince=True), bosluk=30, temsil='isabet')
+    ya, yb = hale_maskesi(A), hale_maskesi(B)
     La, Lb = A @ wb.LUMA, B @ wb.LUMA
     sonuc = []
     for c in aday:
-        s = 1.0 if c['tur'] == 'koyu' else -1.0
-        en = None
-        for dd in range(-ARA, ARA + 1):                  # yerlesik sutun cizgiden 7 px uzak olabilir (v2: 1293/1300)
-            v, o = _seri(La, ya, c, s, dd)
-            if v is None:
-                continue
-            b0, b1, h = _parca(v, esik)
-            if h and (en is None or h > en[0]):
-                en = (h, dd, b0, b1, v, o)
-        if en is None or en[0] < BOY:
-            continue
-        h, dd, b0, b1, v, o = en
-        seg = v[b0:b1 + 1]
-        c2 = {**c, 'x': c['x'] + dd} if c['yon'] == 'dikey' else {**c, 'y': c['y'] + dd}
-        vb, _ = _seri(Lb, yb, c2, s, 0)
-        sb = float(np.nanmedian(vb[b0:b1 + 1])) if vb is not None and np.isfinite(vb[b0:b1 + 1]).any() else 0.0
-        sa = float(np.nanmedian(seg))
-        if sa - sb >= esik:
-            yer = [o + b0, o + b1]
-            sonuc.append({'yon': c['yon'], 'tur': c['tur'], ('x' if c['yon'] == 'dikey' else 'y'): c2['x' if c['yon'] == 'dikey' else 'y'],
-                          ('y' if c['yon'] == 'dikey' else 'x'): yer, 'isabet': h, 'sapma_yeni': round(sa, 1),
-                          'sapma_onayli': round(sb, 1)})
+        r = olc(c, La, Lb, ya, yb, esik)
+        if r:
+            sonuc.append(r)
     return {'cizgi': sonuc[:10], 'aday_sayi': len(aday), 'esik': esik, 'gecti': not sonuc}
 
 

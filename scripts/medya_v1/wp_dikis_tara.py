@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """SALT OKUR dikis taramasi (Serdar 1 Eki): (1) e4f65cd WP ciktilari (3 cift x 11x14/8x10, TEMP/WP_ORNEK) siparis
 dikis kapisiyla (wp_dikis_kapisi); (2) WP plate'leri (PLATES/VINTAGE_<boy>.png, 11x14 / 8x10 / 24x36) tum sayfa,
-onayli WP kaynagina (POD_PRINT/<cift>/WARM_PARCHMENT/<boy>.jpg) gore. Hicbir dosya yazilmaz/yuklenmez; sonuc logda."""
+onayli WP kaynagina (POD_PRINT/<cift>/WARM_PARCHMENT/<boy>.jpg) gore. Sonuc logda; plate/kaynak salt okunur.
+--kesit: 24x36 aday kesitleri yalniz TEMP/WP_ORNEK/DIKIS_24x36'ya yazilir."""
 import argparse, json, sys, time
 from pathlib import Path
 
@@ -63,12 +64,59 @@ def plate(boy, cift):
     return {'plate': f'VINTAGE_{boy}', 'px': [S.shape[1], S.shape[0]], 'onayli': f'{cift}/{boy}', **r}
 
 
+KESIT = (1837, 2037, 4276, 4540)          # 24x36 adayi (x 1937, y 4376-4440) cevresi, 7200x10800 baski pikseli
+KESIT_HEDEF = 'gdrive:ASTROLOVE/TEMP/WP_ORNEK/DIKIS_24x36'
+
+
+def kesitler(cik):
+    """24x36 plate adayinin 1:1 kesiti + 3x buyutme (en yakin komsu) + 8x10/11x14 plate'te ayni goreli merkezde ayni
+    boyda (300 dpi: ayni fiziksel alan) kesit + onayli 24x36 WP ayni bolge. Plate'ler baski boyuna olceklenir (taramayla
+    ayni koordinat). Drive TEMP/WP_ORNEK/DIKIS_24x36'ya yazilir; plate/kaynak salt okunur."""
+    from PIL import Image
+    cik.mkdir(parents=True, exist_ok=True)
+    x0, x1, y0, y1 = KESIT
+    w, h = x1 - x0, y1 - y0
+    u8 = lambda a: Image.fromarray(np.clip(a, 0, 255).astype(np.uint8))
+    out = []
+    for boy in ('24x36', '8x10', '11x14'):
+        yol = sd.W / 'plates' / f'VINTAGE_{boy}.png'
+        yol.parent.mkdir(parents=True, exist_ok=True)
+        if not yol.exists():
+            sd.rc('copy', f'{sd.PLATES}/VINTAGE_{boy}.png', str(yol.parent), timeout=1800)
+        S = wk.dizi(sd.pod_kaynak('CANCER_LIBRA', 'WARM_PARCHMENT', boy))
+        H, W = S.shape[:2]
+        P = wk.boyutla(wk.dizi(yol), (W, H))
+        if boy == '24x36':
+            a, b, c, d = x0, x1, y0, y1
+        else:                                   # ayni goreli merkez, ayni piksel boyu
+            cx, cy = round((x0 + x1) / 2 / 7200 * W), round((y0 + y1) / 2 / 10800 * H)
+            a, b, c, d = cx - w // 2, cx + w // 2, cy - h // 2, cy + h // 2
+        k = P[c:d, a:b]
+        ad = f'PLATE_{boy}_x{a}-{b}_y{c}-{d}_1e1.png'
+        u8(k).save(cik / ad); out.append(ad)
+        if boy == '24x36':
+            ad3 = f'PLATE_24x36_x{a}-{b}_y{c}-{d}_3x.png'
+            u8(k).resize((w * 3, h * 3), Image.NEAREST).save(cik / ad3); out.append(ad3)
+            ado = f'ONAYLI_WP_24x36_CANCER_LIBRA_x{a}-{b}_y{c}-{d}_1e1.png'
+            u8(S[c:d, a:b]).save(cik / ado); out.append(ado)
+            L = k @ wk.LUMA
+            pr = [round(float(v), 1) for v in L[100:165].mean(0)[85:116]]   # aday satirlari (4376-4440), x 1922-1952
+            print('KESIT_PROFIL 24x36 x1922-1952 y4376-4440', pr, flush=True)
+        print('KESIT', boy, {'x': [a, b], 'y': [c, d], 'sayfa': [W, H]}, flush=True)
+        del S, P
+    sd.rc('copy', str(cik), KESIT_HEDEF, timeout=900)
+    print('KESIT_DOSYALAR', out, flush=True)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--ciftler', default='CANCER_LIBRA,AQUARIUS_CANCER,ARIES_SCORPIO')
     ap.add_argument('--boylar', default='11x14,8x10')
     ap.add_argument('--plateler', default='11x14,8x10,24x36')
+    ap.add_argument('--kesit', action='store_true', help='yalniz 24x36 aday kesitleri (Drive TEMP/WP_ORNEK/DIKIS_24x36)')
     a = ap.parse_args()
+    if a.kesit:
+        return kesitler(sd.W / 'kesit')
     isler = [('cikti', c, b) for c in a.ciftler.split(',') for b in a.boylar.split(',')] + \
             [('plate', 'CANCER_LIBRA', b) for b in a.plateler.split(',')]
     for i, (tur, c, b) in enumerate(isler, 1):
