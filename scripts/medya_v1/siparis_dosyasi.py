@@ -2059,26 +2059,35 @@ def pod_uret(sip, kaynak_bayt, P_blue, P_ed, cik):
     # duz renk MB'ye dustu (MB 24x36 POD 600 + 300 sn, bakir a_renk / kabartma / kontrast FAIL). Yalniz WP hatti
     # (POD_EK_DENEME, surucu wp_bakir_uret_v1 acar): dijital yolun 3. denemesi (isimler onayli 2400 profiliyle).
     # POD siparisi bu bayragi ACMAZ: POD ciktisi bayt bayt ayni.
+    # 1 Eki (olcek-tani 36904600390, CI 24x36 SERDAR / LENA): fark DIKEY YER (sol isim ust -0.86, taban -1.32; cap ayni)
+    # -> kutle yerlesimi (dikey: murekkep ust kenari 2400 x k). Sira: kutle, profil, kutle + profil; ilk PASS kullanilir.
     if POD_EK_DENEME['etkin'] and ed != 'blue' and not bi['olcek_kapisi'].get('gecti') and sip['hedef_px'][0] != 2400:
-        SATIR_OLCEKLI.update({'etkin': True, 'profil_2400': True})
-        try:
-            p3, bi3, ek3 = render_et(ed, oran, sip['sayfa'], kaynak_bayt, isimler, mesaj, P_blue, P_ed,
-                                     sip['cift'], ref_boy=sip['boy'], hedef_en=sip['hedef_px'][0], boy=sip['boy'])
-        finally:
-            SATIR_OLCEKLI['etkin'] = False; SATIR_OLCEKLI['profil_2400'] = False
-        if p3 is not None:
-            gecici = cik / f'_profil_{ad}'
+        ilk = {q: bi['olcek_kapisi'].get(q) for q in ('konum_fark_px', 'kenar_fark_px')}
+        ek_denemeler = {}
+        for ad3, bay in (('olcekli kutle (WP duz renk)', {'kutle': True}),
+                         ('olcekli profil 2400 (WP duz renk)', {'profil_2400': True}),
+                         ('olcekli kutle + profil 2400 (WP duz renk)', {'kutle': True, 'profil_2400': True})):
+            SATIR_OLCEKLI.update({'etkin': True, **bay})
+            try:
+                p3, bi3, ek3 = render_et(ed, oran, sip['sayfa'], kaynak_bayt, isimler, mesaj, P_blue, P_ed,
+                                         sip['cift'], ref_boy=sip['boy'], hedef_en=sip['hedef_px'][0], boy=sip['boy'])
+            finally:
+                SATIR_OLCEKLI.clear(); SATIR_OLCEKLI['etkin'] = False
+            if p3 is None:
+                continue
+            gecici = cik / f'_ek_{ad}'
             b3, bpx3 = tek_dosya(p3, bi3, ek3, kaynak_bayt, sip['hedef_px'], gecici)
             ok3 = olcek_kapisi_baski(b3, ek3.get('p0', p3), bi3['olcum']['isim_bant'])
+            ek_denemeler[ad3] = {q: ok3.get(q) for q in ('konum_fark_px', 'kenar_fark_px')}
             if ok3.get('gecti'):
                 gecici.replace(cik / ad)
-                ilk = {q: bi['olcek_kapisi'].get(q) for q in ('konum_fark_px', 'kenar_fark_px')}
                 poster, bi, ek, baski, bpx = p3, bi3, ek3, b3, bpx3
                 bi['leke_kapisi'] = leke_kapisi(baski, kaynak_bayt, ek['maske'])
-                bi['olcek_kapisi'] = {**ok3, 'yerlesim': 'olcekli profil 2400 (WP duz renk)', 'ilk_yerlesim': ilk}
-            else:
-                gecici.unlink(missing_ok=True)
-                bi['olcek_kapisi']['profil_deneme'] = {q: ok3.get(q) for q in ('konum_fark_px', 'kenar_fark_px')}
+                bi['olcek_kapisi'] = {**ok3, 'yerlesim': ad3, 'ilk_yerlesim': ilk, 'ek_denemeler': ek_denemeler}
+                break
+            gecici.unlink(missing_ok=True)
+        else:
+            bi['olcek_kapisi']['ek_denemeler'] = ek_denemeler
     bi['isim_kalinti_kapisi'] = isim_kalinti_kapisi(baski, *koruma(ek)[:1], bi['olcum'], ham=koruma(ek)[1],
                                                     alan=ek.get('maske'))
     bi['isim_kenar_kapisi'] = (bpx.get('isim_bandi_temizligi') or {}).get('kenar')

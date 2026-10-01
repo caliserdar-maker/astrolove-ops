@@ -112,9 +112,10 @@ class OlcekIkinciDeneme(unittest.TestCase):
         self.assertEqual(r[0], 'p3'); self.assertEqual(hedef.read_bytes(), b'k2')
         self.assertEqual(r[1]['olcek_kapisi']['yerlesim'], 'olcekli kutle (2400 x k)')
         self.assertFalse(sd.SATIR_OLCEKLI.get('kutle')); self.assertFalse(sd.SATIR_OLCEKLI['etkin'])
-        # POD'un kendi ikinci denemesi bu bayragi hic acmaz
+        # POD'un kendi ikinci denemesi kutle'yi yalniz WP bayragiyla (POD_EK_DENEME) acar
         import inspect
-        self.assertNotIn("'kutle'", inspect.getsource(sd.pod_uret))
+        src = inspect.getsource(sd.pod_uret)
+        self.assertLess(src.index("if POD_EK_DENEME['etkin']"), src.index("'kutle': True"))
 
     def test_profil_ucuncu_deneme(self):
         d = Path(tempfile.mkdtemp()); hedef = d / 's.jpg'; hedef.write_bytes(b'ilk')
