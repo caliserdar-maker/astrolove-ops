@@ -1,0 +1,81 @@
+name: kaynak-onizleme
+
+# SALT OKUR (Test 3, 1 Eki): POD_PRINT kaynak gorsellerinin kucuk onizlemesi + alt bolge 1:1 kesiti -> inceleme/kaynak-olcum
+# dali (kaynak_onizleme/). Isim / musteri yok (yalniz cift / renk / boy). Etsy / Drive yazimi YOK.
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+    inputs:
+      dosyalar:
+        description: "virgullu CIFT/RENK/BOY (orn. ARIES_VIRGO/MIDNIGHT_BLUE/20x30)"
+        required: true
+
+jobs:
+  onizleme:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - run: python -m pip install --quiet pillow numpy
+      - name: rclone
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /tmp/rc.zip https://downloads.rclone.org/rclone-current-linux-amd64.zip
+          unzip -q -j /tmp/rc.zip '*/rclone' -d /tmp/rcb && sudo install -m 755 /tmp/rcb/rclone /usr/local/bin/rclone
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Onizleme
+        env:
+          DOSYALAR: ${{ inputs.dosyalar }}
+        run: |
+          set -euo pipefail
+          mkdir -p ham on
+          IFS=',' read -ra L <<< "$DOSYALAR"
+          for d in "${L[@]}"; do
+            [[ "$d" =~ ^[A-Z]+_[A-Z]+/[A-Z_]+/[0-9A-Za-z]+$ ]] || { echo "HATA: $d" >&2; exit 1; }
+            n=${d//\//__}; rclone copyto "gdrive:ASTROLOVE/TEMP/POD_PRINT/$d.jpg" "ham/$n.jpg"
+          done
+          python3 - <<'PY'
+          import glob, os
+          import numpy as np
+          from PIL import Image
+          Image.MAX_IMAGE_PIXELS = None
+          for f in sorted(glob.glob('ham/*.jpg')):
+              n = os.path.basename(f)[:-4]
+              im = Image.open(f).convert('RGB'); W, H = im.size
+              im.resize((600, round(600 * H / W)), Image.LANCZOS).save(f'on/{n}_tum_600.jpg', quality=90)
+              k = W / 2400
+              y0, y1 = int(0.62 * H), int(0.95 * H)          # isim + mesaj bolgesi (2400 biriminde ~%62-95)
+              im.crop((0, y0, W, y1)).resize((2400, round(2400 * (y1 - y0) / W)), Image.LANCZOS).save(f'on/{n}_alt_2400.jpg', quality=90)
+              a = np.asarray(im.convert('L').resize((2400, round(2400 * H / W)), Image.BOX)).astype(float)
+              sat = a.max(axis=1); h = len(sat)
+              print(n, W, H, 'satir maks (2400 izgara, %55-%98, 20 px):',
+                    ' '.join(f'{y}:{int(sat[y])}' for y in range(int(.55 * h), int(.98 * h), 20)))
+          PY
+      - name: Dala yaz
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          B=inceleme/kaynak-olcum; U="https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          G=(-c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com")
+          git clone -q --depth 1 --branch "$B" "$U" _d
+          mkdir -p _d/kaynak_onizleme && cp on/* _d/kaynak_onizleme/
+          git -C _d "${G[@]}" add kaynak_onizleme && git -C _d "${G[@]}" commit -qm "kaynak onizleme: ${{ github.run_id }}"
+          git -C _d push -q origin "HEAD:refs/heads/$B" && echo "dal: $B $(git -C _d rev-parse --short HEAD)"
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
