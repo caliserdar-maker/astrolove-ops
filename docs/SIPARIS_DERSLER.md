@@ -88,6 +88,11 @@ onceki_kosu : PASS isleri bu koşulardan al (tek is yeniden kosuda)
 - Ders: Test 3, 1 dk once main'e giren dogrulanmamis kodla (4fb7a35) kostu.
 - Ders: iki oturum (koordinator + baski-duzelt) ayni anda ayni koda dokundu; tek sahip kurali konuldu.
 - Ders: koordinator hata ayiklarken Serdar'a yazmayi birakti; en gec 2 dk'da bir durum kurali konuldu.
+- Ders (koordinator, 19:35-20:00): test ciktisi `| tail` ile maskelendi, hatali kod push edildi (1 dk'da duzeldi);
+  baski-duzelt'in izledigi kaynak-olcum kosusu haber vermeden iptal edildi; ilk kaynak on testi seri ve 15 boy
+  (~40 dk) tasarlandi, paralel + 5 boy ile yeniden kuruldu; uzun bloklayan izleme donguleri Serdar'i yanitsiz birakti.
+- Isim on testi (prova, eski olcek kapisi): 36/37 PASS (TARA, SERDAR, MAXI, ANNE). MB 11x14 LIAM: esit bant olcumu
+  duz kenarli harflerde yeni sapma uretiyor; baski-duzelt olcum oncesi simetrik bulanik deniyor (126/126, en kotu 0.99).
 - Iyi giden: cift normalize, hizli kaynak denetimi (plan 6 sn), runner kuyrugu yok, paket 51 sn.
 
 ## Acik isler (Test 3 sonrasi, 1 Eki 19:45)

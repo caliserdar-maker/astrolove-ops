@@ -120,5 +120,10 @@ Hedef: Serdar isim + burc yeri + tagline verir, 15 dk icinde 5 PDF Drive'da (Tes
 - Test, birkac dakika once main'e giren DOGRULANMAMIS kodla baslatilmaz (Test 3, 4fb7a35 ile 1 dk sonra kostu).
 - Ayni koda ayni anda tek oturum dokunur: duzeltmeyi kim yapiyorsa o; koordinator o sirada kod degistirmez.
 - Koordinator sessiz kalmaz: hata ayiklarken de en gec 2 dk'da bir Serdar'a tek satir durum.
+- Test sonucu boru (`| tail`) ile maskelenmez: once test, cikis kodu kontrol, SONRA commit/push (1 Eki: `--is` anahtar
+  sozcugu hatasi bu yuzden main'e gitti, 1 dk sonra duzeltildi).
+- Baska oturumun izledigi kosu iptal edilmeden once o oturuma/Serdar'a yeni kosu no bildirilir.
+- Uzun bloklayan izleme dongusu yok: en fazla ~2 dk bekle, sonra Serdar'a durum yaz (Serdar iki kez durdurdu).
+- Yeni test/arac ilk surumde hizli tasarlanir: yalniz gereken boylar, paralel indirme/olcum.
 - Teshis icin OZET sayfa kaydinda `iz` (traceback) ve `olcek` (olcek kapisi ayrintisi) alanlari var (030f767, 1fa8f68);
   job loglari okunamadiginda once bunlara bakilir.
