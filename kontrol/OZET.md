@@ -1,11 +1,11 @@
-# DIJITAL 9000000002 SAGITTARIUS_CAPRICORN
+# DIJITAL 9000000002 CAPRICORN_SAGITTARIUS
 
 | renk | PDF | MB | sayfa | dpi | pdf_kapisi | sayfa kapilari |
 |---|---|---|---|---|---|---|
-| MIDNIGHT_BLUE | None | None | None | [] | FAIL | FAIL {} |
-| DEEP_BLACK | None | None | None | [] | FAIL | FAIL {} |
-| PURE_WHITE | None | None | None | [] | FAIL | FAIL {} |
-| CHAMPAGNE_IVORY | None | None | None | [] | FAIL | FAIL {} |
-| WARM_PARCHMENT | None | None | None | [] | FAIL | FAIL {'4x5': None, '3x4': None, '2x3': None, '11x14': None, 'a_series': None} |
+| MIDNIGHT_BLUE | AstroLoveArt_Capricorn_Sagittarius_Midnight_Blue.pdf | 21.41 | 5 | [300.0, 300.6] | PASS | PASS |
+| DEEP_BLACK | AstroLoveArt_Capricorn_Sagittarius_Deep_Black.pdf | 7.87 | 5 | [300.0, 300.6] | PASS | PASS |
+| PURE_WHITE | AstroLoveArt_Capricorn_Sagittarius_Pure_White.pdf | 7.67 | 5 | [300.0, 300.6] | PASS | PASS |
+| CHAMPAGNE_IVORY | AstroLoveArt_Capricorn_Sagittarius_Champagne_Ivory.pdf | 22.46 | 5 | [300.0, 300.6] | PASS | PASS |
+| WARM_PARCHMENT | AstroLoveArt_Capricorn_Sagittarius_Warm_Parchment.pdf | 76.44 | 5 | [300.0, 300.6] | PASS | PASS |
 
-SONUC: FAIL
+SONUC: PASS
