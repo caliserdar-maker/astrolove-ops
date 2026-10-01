@@ -124,7 +124,9 @@ def main():
                 yol = Path(P_ed.plate(ed, oran, boy))
                 ad = f'{ed.upper()}{sd.PLATE_EK}_{boy}.png'
                 r['plate'] = ad
-                if a.atla_yazilmis and sd.rc('lsf', f'{sd.PLATES.rsplit("/", 1)[0]}/{a.atla_yazilmis}', '--include', ad).strip():
+                yd = f'{sd.PLATES.rsplit("/", 1)[0]}/{a.atla_yazilmis}'
+                if a.atla_yazilmis and sd.rc('lsf', yd, '--include', ad).strip() and \
+                        sd.rc('md5sum', f'{yd}/{ad}').split()[:1] != sd.rc('md5sum', f'{sd.PLATES}/{ad}').split()[:1]:
                     r['atlandi'] = f'zaten yazilmis ({a.atla_yazilmis})'; r['qc'] = {'gecti': True}; r['yazildi'] = True
                     R.append(r); print('PLATE_IZ', json.dumps(r), flush=True); continue
                 once = np.asarray(Image.open(yol).convert('RGB'))
