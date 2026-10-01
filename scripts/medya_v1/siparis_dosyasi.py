@@ -279,20 +279,23 @@ def _plate_slogan_kapisi(kaynak, plate_yol, ed):
     d = {'plate': Path(plate_yol).name, 'esik': PLATE_SLOGAN_ESIK,
          'olcut': 'slogan glif piksellerinde |dosya - plate| > PLATE_ESIK payi'}
     maske = None if ed == 'blue' else (lambda L, acik: eu.edisyon_maske(L, acik))
-    try:
-        o = pilot11.sayfa_olc(yol, maske=maske)
-    except SystemExit as e:
-        o = {'hata': str(e)}
+    # 1 Eki (Test 4 kapisi): sayfa olcumuyle ayni guvenli olcum (ARIES E-S boslugu -> tagline isim satiri sanilir);
+    # gecersizse genis kume boslugu, o da gecersizse olcum yok sayilir (asagidaki fail-closed yol).
+    from a1_poster import sayfa_olc_guvenli, KaynakOlcumHatasi
+
+    def _olc(mk):
+        try:
+            return sayfa_olc_guvenli(pilot11, yol, gerek=('isim_bant', 'tag_bant', 'tag_x'), maske=mk)[0]
+        except KaynakOlcumHatasi as e:
+            return {'hata': str(e)}
+    o = _olc(maske)
     if 'tag_bant' not in o:
         # Yerel kontrast maskesi dokulu zeminde isim satirini bulamayabilir (28 Eyl: WP 18x24,
         # 30x40, AQ 12x16 'isim satiri bulunamadi'). Siparis render'i bantlari ZATEN
         # |dosya - plate| maskesiyle olcer; ayni olcum burada da denenir. Kirli plate'te slogan
         # farkta gorunmez -> bant yok -> FAIL (fail-closed korunur). Glif pikselleri asagida
         # yine bagimsiz yerel kontrast maskesinden alinir.
-        try:
-            o2 = pilot11.sayfa_olc(yol, maske=plate_fark_maskesi(plate_yol))
-        except SystemExit as e:
-            o2 = {'hata': str(e)}
+        o2 = _olc(plate_fark_maskesi(plate_yol))
         if 'tag_bant' not in o2:
             return {**d, 'gecti': False,
                     'sebep': f"dosya olculemedi: {o.get('hata') or 'slogan bandi yok'}; "

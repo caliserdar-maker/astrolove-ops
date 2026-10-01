@@ -81,30 +81,31 @@ class KaynakOlcumHatasi(RuntimeError):
     pass
 
 
-def olcum_sorunu(o):
-    """sayfa_olc sonucu gecerli mi: None ya da sorun metni."""
+def olcum_sorunu(o, gerek=OLCUM_GEREK):
+    """sayfa_olc sonucu gecerli mi: None ya da sorun metni. gerek: zorunlu anahtarlar (slogan kapisi yalniz
+    isim + tagline ister)."""
     if o.get('hata'):
         return o['hata']
-    eksik = [k for k in OLCUM_GEREK if k not in o]
+    eksik = [k for k in gerek if k not in o]
     if eksik:
         return f'eksik {eksik}'
     H = float(o['norm_boyut'][1])
     c = (o['isim_bant'][0] + o['isim_bant'][1]) / 2 / H
     if not ISIM_ORAN[0] <= c <= ISIM_ORAN[1]:
         return f'isim bandi {c:.3f} H (sablon {ISIM_ORAN})'
-    if o['tag_bant'][0] < o['isim_bant'][1] or o['sembol_bant'][1] > o['isim_bant'][0]:
+    if o['tag_bant'][0] < o['isim_bant'][1] or ('sembol_bant' in o and o['sembol_bant'][1] > o['isim_bant'][0]):
         return 'bant sirasi (sembol < isim < tagline) bozuk'
     return None
 
 
-def sayfa_olc_guvenli(p11, yol, **kw):
+def sayfa_olc_guvenli(p11, yol, gerek=OLCUM_GEREK, **kw):
     """pilot11.sayfa_olc + gecerlilik denetimi; gecersizse genis kume boslugu ile ikinci olcum, o da gecersizse hata.
     Doner: (olcum, yedek_bilgi | None)."""
     try:
         o = p11.sayfa_olc(yol, **kw)
     except SystemExit as e:
         o = {'hata': f'sayfa_olc: {e}'}
-    s1 = olcum_sorunu(o)
+    s1 = olcum_sorunu(o, gerek)
     if not s1:
         return o, None
     asil = p11.kumeler
@@ -115,7 +116,7 @@ def sayfa_olc_guvenli(p11, yol, **kw):
         o2 = {'hata': f'sayfa_olc: {e}'}
     finally:
         p11.kumeler = asil
-    s2 = olcum_sorunu(o2)
+    s2 = olcum_sorunu(o2, gerek)
     if s2:
         raise KaynakOlcumHatasi(f'KAYNAK OLCUM HATASI {Path(yol).name}: {s1}; yedek olcum (kume boslugu '
                                 f'{KUME_BOSLUK_YEDEK}): {s2}. Kaynak dosya incelenmeli; uretim durduruldu.')

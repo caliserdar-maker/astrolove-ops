@@ -80,6 +80,15 @@ class KaynakOlcumGuvenliTesti(unittest.TestCase):
             a1_poster.sayfa_olc_guvenli(pilot11, sayfa(self.k / 'c.png', isim_bolunmus=False, tagline=False))
         self.assertIn('KAYNAK OLCUM HATASI', str(h.exception))
 
+    def test_slogan_kapisi_bolunmus_isimde_tagline_bulur(self):
+        import siparis_dosyasi as sd
+        sd._mod = lambda ad, _m=sd._mod: sys.modules.get(ad) or _m(ad)
+        y = sayfa(self.k / 'd.png')
+        plate = self.k / 'plate.png'
+        Image.new('RGB', (2400, 3600), (4, 10, 40)).save(plate)
+        r = sd.plate_slogan_kapisi(y, plate, 'black')
+        self.assertEqual(r.get('tag_bant'), [3009, 3091], r)
+
 
 if __name__ == '__main__':
     unittest.main()
