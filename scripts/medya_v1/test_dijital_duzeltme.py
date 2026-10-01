@@ -126,9 +126,9 @@ class OlcekIkinciDeneme(unittest.TestCase):
             return 'p%d' % (len(gorulen) + 1), {}, {}, 'b', {}, g
         olc = lambda b, e, p, i: {'gecti': p == 'p4', 'konum_fark_px': 0.5 if p == 'p4' else 1.5, 'kenar_fark_px': 0.4}
         r = sd.olcek_ikinci_deneme('black', 5400, self._ilk(False), yeniden, olc, lambda b, e: {'gecti': True}, hedef)
-        self.assertEqual(gorulen, [(False, False), (True, False), (True, True)])
+        self.assertEqual(gorulen, [(False, False), (True, False), (False, True)])
         self.assertEqual(r[0], 'p4'); self.assertEqual(hedef.read_bytes(), b'k3')
-        self.assertEqual(r[1]['olcek_kapisi']['yerlesim'], 'olcekli kutle genislik (2400 x k)')
+        self.assertEqual(r[1]['olcek_kapisi']['yerlesim'], 'olcekli genislik (2400 x k)')
         self.assertFalse(sd.SATIR_OLCEKLI.get('genislik'))
         import inspect
         self.assertNotIn("'genislik'", inspect.getsource(sd.pod_uret))

@@ -1220,11 +1220,15 @@ class _SatirYerlesim:
                 cx, top = self._kutle(np.asarray(pl)[..., 3])
                 px, py = bilgi['isim_kutu'][y][:2]
                 self.kayit[f'murekkep_{y}'] = (px + cx, py + top)
-                if SATIR_OLCEKLI.get('genislik'):        # 3. deneme: murekkep genisligi (kapi ile ayni tanim)
-                    self.kayit[f'genislik_{y}'] = self._genislik(np.asarray(pl)[..., 3])
             o = S['oge']['sonsuz']
             mcx, _t = self._kutle(o['maske'])
             self.kayit['sonsuz_murekkep'] = int(round(x['inf'] - o['pay'][0])) + mcx
+        if SATIR_OLCEKLI.get('genislik'):                # 3. deneme: murekkep genisligi (kapi ile ayni tanim)
+            p16 = self.p16
+            olcek = p16.d_olcek(isimler, s, S)
+            for y in ('sol', 'sag'):
+                pl = p16.plaka(isimler[y], S["prof"][y], s["cap"][y], olcek)[0]
+                self.kayit[f'genislik_{y}'] = self._genislik(np.asarray(pl)[..., 3])
         return out
 
     def _olcekli(self, s, S, isimler, tagline):
@@ -2098,9 +2102,10 @@ def olcek_ikinci_deneme(ed, hedef_en, ilk, yeniden, olcek_olc, leke_olc, hedef_y
     # 1 Eki (siparis 4188621967 DB 18x24 konum 1.52; olcekli 1.97, kutle 1.97): ucuncu deneme GENISLIK. Fark yer
     # degil isim GENISLIGI (sol isim x0 +0.42 / x1 -1.65 -> 2.07 birim dar): sabit punto hi-res'te farkli
     # yuvarlanir, hicbir kaydirma ikisini birden 1'in altina indiremez. Hi-res isim plakasi yatayda 2400 x k
-    # murekkep genisligine (en fazla %2) esitlenir; render hi-res kalir (2400'den buyutme yok).
+    # murekkep genisligine (en fazla %2) esitlenir; yerlesim 1. denemeyle ayni (murekkep merkezi; merkez farki
+    # -0.6 idi, kutle yerlesimi 1.97'ye cikariyordu). Render hi-res kalir (2400'den buyutme yok).
     for ad, kutle, gen in (('olcekli (2400 x k)', False, False), ('olcekli kutle (2400 x k)', True, False),
-                           ('olcekli kutle genislik (2400 x k)', True, True)):
+                           ('olcekli genislik (2400 x k)', False, True)):
         if kutle and not kutle_dene:
             break
         SATIR_OLCEKLI['etkin'] = True; SATIR_OLCEKLI['kutle'] = kutle; SATIR_OLCEKLI['genislik'] = gen
