@@ -118,6 +118,14 @@ def wp_asamasi(a, g):
           'wp_kilit': 'TAMAM'}
     jpg = ara / f'BASKI_{a.boy}.jpg'
     if jpg.exists():
+        try:                                              # Serdar 1 Eki: eski metin izi kapisi WP sayfasinda da (sayi)
+            pl = P_ed.plate('vintage', sd.BOY[a.boy][0], a.boy)
+            pk = sd.plate_slogan_kapisi(yol.read_bytes(), pl, 'vintage')
+            oz['eski_metin_izi'] = (iz_olc(Image.open(jpg), yol.read_bytes(), pk['tag_bant'], pk['tag_x'], sd)
+                                    if pk.get('tag_bant') else {'gecti': None, 'sebep': 'mesaj bandi olculemedi'})
+        except Exception as e:                            # noqa: BLE001
+            oz['eski_metin_izi'] = {'gecti': False, 'hata': f'{type(e).__name__}: {e}'}
+        print('WP_IZ', a.boy, json.dumps(oz['eski_metin_izi']), flush=True)
         jpg.replace(cik / f'WP_{a.boy}.jpg')
     (cik / f'OZET_WP_{a.boy}.json').write_text(json.dumps(oz, ensure_ascii=False, indent=1, default=str))
     print('WP', a.boy, json.dumps({q: oz[q] for q in ('durum', 'kapilar_gecti', 'baski_px', 'dosya_MB', 'jpeg_kalite')}),
@@ -125,14 +133,102 @@ def wp_asamasi(a, g):
     return 0 if oz['durum'] == 'URETILDI' and oz['kapilar_gecti'] else 1
 
 
+def iz_olc(cikti, kaynak, tag_bant, tag_x, sd, esik=0.6):
+    """siparis-baski-v1 eski_metin_izi_kapisi (6343550) ile ayni olcum; WP kodu (adfb2b9) kilitli oldugu icin burada.
+    Yeni metin maskesi: ciktinin kendi yerel kontrast maskesi (+3 px)."""
+    import io, cv2
+    import numpy as np
+    from PIL import Image
+    from pilot6 import LUMA
+    eu = sd._mod('edisyon_uret'); sd.olcek_kur(2400)
+
+    def n24(im):
+        im = im if isinstance(im, Image.Image) else Image.open(io.BytesIO(im))
+        im = im.convert('RGB')
+        return np.asarray(im.resize((2400, round(im.height * 2400 / im.width)), Image.LANCZOS)).astype(np.float32) @ LUMA
+    Ls, Lo = n24(kaynak), n24(cikti)
+    h = min(Ls.shape[0], Lo.shape[0])
+    y0, y1 = max(int(tag_bant[0]) - 12, 0), min(int(tag_bant[1]) + 12, h)
+    x0, x1 = max(int(tag_x[0]) - 40, 0), min(int(tag_x[1]) + 40, 2400)
+    G = eu.edisyon_maske(Ls, float(np.median(Ls)) > 128)[y0:y1, x0:x1]
+    N = eu.edisyon_maske(Lo, float(np.median(Lo)) > 128)[y0:y1, x0:x1]
+    N = cv2.dilate(N.astype(np.uint8), np.ones((7, 7), np.uint8)) > 0
+
+    def sapma(L):
+        return L - cv2.medianBlur(np.clip(L, 0, 255).astype(np.uint8), 21).astype(np.float32)
+    ds, do = sapma(Ls[y0:y1, x0:x1]), sapma(Lo[y0:y1, x0:x1])
+    R = G & ~N
+    B = ~cv2.dilate(G.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool) & ~N
+    if R.sum() < 200 or B.sum() < 200:
+        return {'gecti': None, 'sebep': 'olculecek eski glif pikseli yok', 'eski_glif_px': int(R.sum())}
+    yon = 1.0 if float(np.median(ds[G])) >= 0 else -1.0
+    iz, taban = float(np.mean(yon * do[R])), float(np.mean(yon * do[B]))
+    return {'gecti': bool(iz - taban <= esik), 'fazla': round(iz - taban, 2), 'iz_ort': round(iz, 2),
+            'taban_ort': round(taban, 2), 'eski_glif_px': int(R.sum()), 'esik': esik}
+
+
 def kesit(jpg, hedef_kesit, hedef_onizleme):
     from PIL import Image
     Image.MAX_IMAGE_PIXELS = None
     with Image.open(jpg) as im:
         w, h = im.size
-        im.crop((0, int(h * KESIT_Y[0]), w, int(h * KESIT_Y[1]))).save(hedef_kesit, 'JPEG', quality=95, subsampling=0)
+        kes = im.crop((0, int(h * KESIT_Y[0]), w, int(h * KESIT_Y[1])))
+        kes.save(hedef_kesit, 'JPEG', quality=95, subsampling=0)
+        from PIL import ImageOps                          # kontrast artirilmis (iz kontrolu): %2 / %98 germe
+        ImageOps.autocontrast(kes.convert('L'), cutoff=2).save(str(hedef_kesit).replace('KESIT_', 'KONTRAST_'), 'JPEG', quality=92)
         im.convert('RGB').resize((1100, round(1100 * h / w)), Image.LANCZOS).save(hedef_onizleme, 'JPEG', quality=90)
     return [w, h]
+
+
+def _bantlar(jpg):
+    """Sayfanin alt bolgesinde (0.62-0.95) murekkep satir kumeleri: [(ad, x0, x1, y0, y1)] - isim satiri, mesaj."""
+    import numpy as np
+    from PIL import Image
+    Image.MAX_IMAGE_PIXELS = None
+    with Image.open(jpg) as im:
+        L = np.asarray(im.convert('L')).astype(np.float32)
+    H, W = L.shape
+    a0, a1 = int(H * 0.62), int(H * 0.95)
+    b = L[a0:a1]
+    m = np.abs(b - np.median(b)) > 45
+    sat = m.sum(1) > max(W * 0.002, 3)
+    kume, y = [], 0
+    while y < len(sat):
+        if sat[y]:
+            s0 = y
+            while y < len(sat) and (sat[y] or (y + 8 < len(sat) and sat[y:y + 8].any())):
+                y += 1
+            if y - s0 > H * 0.004:
+                kume.append((s0, y))
+        y += 1
+    out = []
+    for i, (s0, s1) in enumerate(kume[-2:]):
+        cols = np.nonzero(m[s0:s1].any(0))[0]
+        out.append(('isim_satiri' if i == 0 and len(kume) >= 2 else 'mesaj', int(cols.min()), int(cols.max()),
+                    a0 + s0, a0 + s1, W))
+    return out
+
+
+def mb_olcu_tablosu(eski_dizin, yeni_dizin):
+    sat = ['# MB eski (2400 buyutme) / yeni (hedef cozunurluk) olculeri', '',
+           '| sayfa | oge | genislik eski / yeni (%) | yukseklik eski / yeni (%) | merkez x fark (% en) | merkez y fark (% boy) |',
+           '|---|---|---|---|---|---|']
+    var = False
+    for y in sorted(Path(yeni_dizin).glob('*_MIDNIGHT_BLUE_*.jpg')):
+        e = Path(eski_dizin) / y.name
+        if not e.exists():
+            continue
+        var = True
+        E, Y = {b[0]: b for b in _bantlar(e)}, {b[0]: b for b in _bantlar(y)}
+        for ad in ('isim_satiri', 'mesaj'):
+            if ad not in E or ad not in Y:
+                sat.append(f'| {y.stem} | {ad} | olculemedi | | | |'); continue
+            _, ex0, ex1, ey0, ey1, W = E[ad]; _, yx0, yx1, yy0, yy1, _ = Y[ad]
+            ew, yw, eh, yh = ex1 - ex0, yx1 - yx0, ey1 - ey0, yy1 - yy0
+            sat.append(f'| {y.stem} | {ad} | {ew} / {yw} ({100 * (yw - ew) / max(ew, 1):+.2f}) | '
+                       f'{eh} / {yh} ({100 * (yh - eh) / max(eh, 1):+.2f}) | {100 * ((yx0 + yx1) - (ex0 + ex1)) / 2 / W:+.2f} | '
+                       f'{100 * ((yy0 + yy1) - (ey0 + ey1)) / 2 / W:+.2f} |')
+    return '\n'.join(sat) + '\n' if var else None
 
 
 def mb_karsilastir(eski, yeni, hedef, y=(0.69, 0.86), x=(0.12, 0.88)):
@@ -206,6 +302,11 @@ def pdf_asamasi(a, g):
         j = sorted((d / renk).glob(f'*_{renk}_11x14_*.jpg'))
         if j:
             kesit(j[0], inc / f'KESIT_{renk}_11x14.jpg', inc / f'ONIZLEME_{renk}_11x14.jpg')
+    # MB eski / yeni olcu tablosu (isimler + mesaj: genislik, yukseklik, merkez; % fark) - Serdar 1 Eki: <= %1
+    tab = mb_olcu_tablosu(kok / 'eski' / 'MIDNIGHT_BLUE' / 'MIDNIGHT_BLUE', kok / 'renk' / 'MIDNIGHT_BLUE' / 'MIDNIGHT_BLUE')
+    if tab:
+        (inc / 'MB_OLCU.md').write_text(tab)
+        print(tab, flush=True)
     # MB eski (2400 buyutme) / yeni (hedef cozunurluk) isim bandi 1:1 kesiti (Serdar 1 Eki)
     for boy in ('24x36', '16x20'):
         e = sorted((kok / 'eski' / 'MIDNIGHT_BLUE' / 'MIDNIGHT_BLUE').glob(f'*_MIDNIGHT_BLUE_*_{boy}.jpg'))
