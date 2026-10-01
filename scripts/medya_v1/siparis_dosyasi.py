@@ -1158,6 +1158,7 @@ class _HamKayit:
 
 
 MB_HEDEF = {'etkin': False}        # dijital MB: isim / mesaj bandi hedef cozunurlukte (BluePoster.hedef_render)
+GENISLIK_AZAMI = 0.02     # 3. dijital deneme: isim plakasi yatay yeniden ornekleme siniri (1 Eki)
 SATIR_OLCEKLI = {'etkin': False}   # pod_uret: yalniz olcek kapisi FAIL olunca ikinci render (regresyon 36756875368)
 
 
@@ -1191,6 +1192,21 @@ class _SatirYerlesim:
         t, _b = _uc(a.sum(axis=1))
         return (x0 + x1) / 2.0, t
 
+    @staticmethod
+    def _genislik(a):
+        x0, x1 = _uc(np.asarray(a, np.float32).sum(axis=0))
+        return x1 - x0
+
+    def _genislik_esle(self, pl, hedef):
+        """Isim plakasini (RGBA) yatayda murekkep genisligi `hedef` olacak sekilde yeniden orneklendirir (<= %2)."""
+        im = pl[0]
+        w = self._genislik(np.asarray(im)[..., 3])
+        f = hedef / max(w, 1e-6)
+        if abs(f - 1) > GENISLIK_AZAMI:
+            return pl, {'oran': round(f, 4), 'uygulandi': False}
+        yeni = im.resize((max(int(round(im.width * f)), 1), im.height), Image.LANCZOS)
+        return (yeni, *pl[1:]), {'oran': round(f, 4), 'uygulandi': True}
+
     def _kaydet(self, s, S, isimler, tagline):
         out = self.asil(s, S, isimler, tagline)
         _, bilgi, merkez, x, _ = out
@@ -1204,6 +1220,8 @@ class _SatirYerlesim:
                 cx, top = self._kutle(np.asarray(pl)[..., 3])
                 px, py = bilgi['isim_kutu'][y][:2]
                 self.kayit[f'murekkep_{y}'] = (px + cx, py + top)
+                if SATIR_OLCEKLI.get('genislik'):        # 3. deneme: murekkep genisligi (kapi ile ayni tanim)
+                    self.kayit[f'genislik_{y}'] = self._genislik(np.asarray(pl)[..., 3])
             o = S['oge']['sonsuz']
             mcx, _t = self._kutle(o['maske'])
             self.kayit['sonsuz_murekkep'] = int(round(x['inf'] - o['pay'][0])) + mcx
@@ -1220,6 +1238,13 @@ class _SatirYerlesim:
         inf = S["oge"]["sonsuz"]
         mm = {y: p16.murekkep_merkezi(pl[y][0]) for y in ("sol", "sag")}
         pyy = {y: s["isim_y"] - pl[y][0].height / 2 for y in ("sol", "sag")}
+        genislik_esle = {}
+        if SATIR_OLCEKLI.get('genislik') and r.get('genislik_sol'):
+            for y in ("sol", "sag"):
+                pl[y], genislik_esle[y] = self._genislik_esle(pl[y], r[f'genislik_{y}'] * k)
+            w = {y: pl[y][0].width for y in pl}
+            mm = {y: p16.murekkep_merkezi(pl[y][0]) for y in ("sol", "sag")}
+            pyy = {y: s["isim_y"] - pl[y][0].height / 2 for y in ("sol", "sag")}
         if SATIR_OLCEKLI.get('kutle') and r.get('murekkep_sol'):
             # dijital 2. yerlesim denemesi: yatay KUTLE merkezi, dikey ust kenar 2400 x k (kapi ile ayni tanim)
             x = {}
@@ -1272,6 +1297,8 @@ class _SatirYerlesim:
                  "kenar": [x0, p16.NORM_W - x0 - toplam], "satir_merkez": round(x0 + toplam / 2, 1),
                  "isim_geometri": isim_geometri, "isim_kutu": isim_kutu, "tagline": tbilgi,
                  "yerlesim": 'olcekli (2400 x k)'}
+        if genislik_esle:
+            bilgi['genislik_esle'] = genislik_esle
         return t.convert("RGB"), bilgi, merkez, x, yeni_genis
 
 
@@ -2035,8 +2062,15 @@ def _iz_kapisi(baski, kaynak_bayt, bi, ek):
         o = bi.get('olcum') or {}
         if not o.get('tag_bant') or not (o.get('tag_x') or o.get('tag_bant')):
             return {'gecti': None, 'sebep': 'mesaj bandi olcumu yok'}
-        tx = o.get('tag_x') or [300, 2100]
-        return eski_metin_izi_kapisi(baski, kaynak_bayt, o['tag_bant'], tx, ek.get('yeni'))
+        # 1 Eki (siparis 4188621967, iz-tani 36886773315): yatay pencere ESKI SLOGANIN OLCULEN genisligi
+        # (plate_slogan_kapisi tag_x, kaynak - plate). bi['olcum'] tag_x tasimiyordu -> [300, 2100] sabiti bandin
+        # iki yanindaki tasarim yildizlarini (DB 11x14: x 281 / 2094, 13x16 px) 'eski glif' sayiyordu; DB 11x14
+        # fazla 3.62'nin tamami bu 208 px, silik iz 0.00. Iz olcumu, esik, bant ve yeni maske AYNI.
+        pk = bi.get('plate_slogan_kapisi') or {}
+        tx = o.get('tag_x') or pk.get('tag_x') or [300, 2100]
+        r = eski_metin_izi_kapisi(baski, kaynak_bayt, o['tag_bant'], tx, ek.get('yeni'))
+        r['x_kaynagi'] = 'olcum' if o.get('tag_x') else ('plate_slogan_kapisi' if pk.get('tag_x') else 'sabit')
+        return r
     except Exception as e:                                        # noqa: BLE001
         return {'gecti': False, 'hata': f'{type(e).__name__}: {e}'}
 
@@ -2061,14 +2095,19 @@ def olcek_ikinci_deneme(ed, hedef_en, ilk, yeniden, olcek_olc, leke_olc, hedef_y
         return ilk
     ilk_o = {q: bi['olcek_kapisi'].get(q) for q in ('konum_fark_px', 'kenar_fark_px')}
     denemeler = {}
-    for ad, kutle in (('olcekli (2400 x k)', False), ('olcekli kutle (2400 x k)', True)):
+    # 1 Eki (siparis 4188621967 DB 18x24 konum 1.52; olcekli 1.97, kutle 1.97): ucuncu deneme GENISLIK. Fark yer
+    # degil isim GENISLIGI (sol isim x0 +0.42 / x1 -1.65 -> 2.07 birim dar): sabit punto hi-res'te farkli
+    # yuvarlanir, hicbir kaydirma ikisini birden 1'in altina indiremez. Hi-res isim plakasi yatayda 2400 x k
+    # murekkep genisligine (en fazla %2) esitlenir; render hi-res kalir (2400'den buyutme yok).
+    for ad, kutle, gen in (('olcekli (2400 x k)', False, False), ('olcekli kutle (2400 x k)', True, False),
+                           ('olcekli kutle genislik (2400 x k)', True, True)):
         if kutle and not kutle_dene:
             break
-        SATIR_OLCEKLI['etkin'] = True; SATIR_OLCEKLI['kutle'] = kutle
+        SATIR_OLCEKLI['etkin'] = True; SATIR_OLCEKLI['kutle'] = kutle; SATIR_OLCEKLI['genislik'] = gen
         try:
             r2 = yeniden()
         finally:
-            SATIR_OLCEKLI['etkin'] = False; SATIR_OLCEKLI['kutle'] = False
+            SATIR_OLCEKLI['etkin'] = False; SATIR_OLCEKLI['kutle'] = False; SATIR_OLCEKLI['genislik'] = False
         if r2 is None:
             continue
         p2, bi2, ek2, b2, bpx2, gecici = r2

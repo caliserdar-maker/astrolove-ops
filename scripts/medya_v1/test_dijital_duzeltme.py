@@ -116,6 +116,35 @@ class OlcekIkinciDeneme(unittest.TestCase):
         import inspect
         self.assertNotIn("'kutle'", inspect.getsource(sd.pod_uret))
 
+    def test_genislik_ucuncu_deneme(self):
+        d = Path(tempfile.mkdtemp()); hedef = d / 's.jpg'; hedef.write_bytes(b'ilk')
+        gorulen = []
+
+        def yeniden():
+            gorulen.append((sd.SATIR_OLCEKLI.get('kutle'), sd.SATIR_OLCEKLI.get('genislik')))
+            g = d / f'_g{len(gorulen)}.jpg'; g.write_bytes(b'k%d' % len(gorulen))
+            return 'p%d' % (len(gorulen) + 1), {}, {}, 'b', {}, g
+        olc = lambda b, e, p, i: {'gecti': p == 'p4', 'konum_fark_px': 0.5 if p == 'p4' else 1.5, 'kenar_fark_px': 0.4}
+        r = sd.olcek_ikinci_deneme('black', 5400, self._ilk(False), yeniden, olc, lambda b, e: {'gecti': True}, hedef)
+        self.assertEqual(gorulen, [(False, False), (True, False), (True, True)])
+        self.assertEqual(r[0], 'p4'); self.assertEqual(hedef.read_bytes(), b'k3')
+        self.assertEqual(r[1]['olcek_kapisi']['yerlesim'], 'olcekli kutle genislik (2400 x k)')
+        self.assertFalse(sd.SATIR_OLCEKLI.get('genislik'))
+        import inspect
+        self.assertNotIn("'genislik'", inspect.getsource(sd.pod_uret))
+
+    def test_genislik_esle(self):
+        from PIL import Image
+        a = np.zeros((40, 200, 4), np.uint8); a[5:35, 20:180, 3] = 255; a[5:35, 20:180, :3] = 200
+        pl = (Image.fromarray(a, 'RGBA'), 30, 30.0)
+        Y = sd._SatirYerlesim(None, {})
+        w0 = Y._genislik(a[..., 3])
+        yeni, bil = Y._genislik_esle(pl, w0 * 1.01)
+        self.assertTrue(bil['uygulandi']); self.assertEqual(yeni[0].height, 40); self.assertEqual(yeni[1:], (30, 30.0))
+        self.assertAlmostEqual(Y._genislik(np.asarray(yeni[0])[..., 3]), w0 * 1.01, delta=1.0)
+        ayni, bil = Y._genislik_esle(pl, w0 * 1.05)                    # %2 siniri: degismez
+        self.assertFalse(bil['uygulandi']); self.assertIs(ayni[0], pl[0])
+
     def test_hata_bayragi_geri_alir(self):
         r, _, _, _ = self._calis(hata=True)
         self.assertEqual(r, 'HATA'); self.assertFalse(sd.SATIR_OLCEKLI['etkin'])
