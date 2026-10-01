@@ -40,6 +40,10 @@ on:
         description: "MB/DB/PW/CI kodu (siparis-baski-v1 commit)"
         required: false
         default: "8a8b370edb74cb52402b4939d38ba14d2d2105fd"
+      wp_pod_kod:
+        description: "WP duz renk (CI/MB) baskisi kodu: wp = wp-katman dalinin siparis_dosyasi; v1 = renk_ref (kilitli WP dosyalari ayni)"
+        required: false
+        default: "wp"
 
 concurrency: siparis-dijital-${{ github.event.inputs.receipt }}-${{ github.event.inputs.isler }}
 
@@ -191,8 +195,26 @@ jobs:
           set -euo pipefail
           python -m pip install --quiet --upgrade pip
           python -m pip install --quiet pillow opencv-python-headless numpy fonttools img2pdf pikepdf
+      - name: Kod (siparis-baski-v1; yalniz wp_pod_kod=v1)
+        if: ${{ github.event.inputs.wp_pod_kod == 'v1' }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RENK_REF }}
+          path: _v1
       - name: WP kilidi (wp_kilit testi)
         run: cd _wp && python scripts/medya_v1/test_wp_kilit.py
+      - name: WP kilitli dosyalari v1 kodunun ustune (yalniz wp_pod_kod=v1)
+        if: ${{ github.event.inputs.wp_pod_kod == 'v1' }}
+        run: |
+          # 1 Eki (siparis 4188621967 WP A2): WP dalinin pod_uret'inde olcek ikinci denemesi yok -> CI A2 'olcek' FAIL,
+          # duz renk MB'ye dustu (a_renk / f_kabartma / g_kontrast FAIL). Bakir kodu (kilitli dosyalar) AYNEN kopyalanir,
+          # duz renk baskisi uretimdeki POD koduyla (renk_ref) yapilir. Kilit v1 kopyasinda da dogrulanir.
+          set -euo pipefail
+          for f in wp_bakir.py wp_katman.py wp_ornek.py wp_kilit.py wp_kilit.json wp_tani.py test_wp_kilit.py; do
+            [ -e "_v1/scripts/medya_v1/$f" ] && { echo "HATA: $f v1'de zaten var" >&2; exit 1; }
+            cp "_wp/scripts/medya_v1/$f" "_v1/scripts/medya_v1/$f"
+          done
+          (cd _v1 && python scripts/medya_v1/test_wp_kilit.py)
       - name: rclone kur
         run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
       - name: rclone.conf olustur
@@ -220,8 +242,10 @@ jobs:
           free -g
       - name: WP BAKIR sayfa (${{ matrix.boy }})
         run: |
-          python scripts/siparis_dijital/surucu.py --asama wp --boy "${{ matrix.boy }}" --kod _wp \
-            --kod-ref "claude/wp-katman-baski-60sk0s $WP_REF" --cikti "out/wp/${{ matrix.boy }}"
+          if [ "${{ github.event.inputs.wp_pod_kod }}" = "v1" ]; then KOD=_v1; REF="claude/wp-katman-baski-60sk0s $WP_REF + siparis-baski-v1 $RENK_REF"
+          else KOD=_wp; REF="claude/wp-katman-baski-60sk0s $WP_REF"; fi
+          python scripts/siparis_dijital/surucu.py --asama wp --boy "${{ matrix.boy }}" --kod "$KOD" \
+            --kod-ref "$REF" --cikti "out/wp/${{ matrix.boy }}"
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:

@@ -79,6 +79,31 @@ def renk_asamasi(a, g):
     return 0 if oz['durum'] == 'URETILDI' and (oz['pdf_kapisi'] or {}).get('gecti') and sayfa_ok else 1
 
 
+WP_KAPILAR = ('a_renk', 'b_tasma', 'c_iz', 'e_kagit', 'f_kabartma', 'g_kontrast')
+
+
+def wp_bakir_uret_v1(sd, sip, P_blue, P_ed, cik):
+    """wp-katman dali (adfb2b9) siparis_dosyasi.wp_bakir_uret'in AYNISI; --kod v1 (renk_ref + kilitli WP dosyalari)
+    iken v1'de bu fonksiyon yok. 1 Eki (siparis 4188621967 WP A2): duz renk baskisi uretimdeki POD koduyla."""
+    import wp_ornek as wo
+    R, WP = wo.cift_boy(sip['cift'], sip['boy'], P_ed, P_blue, {sip['cift']: sip['sayfa']}, cik,
+                        isim=(sip['isim1'], sip['isim2']), mesaj=sip.get('mesaj') or '', siparis=True)
+    ozet = {a: R.get(a) for a in ('durum', 'duz_renk', 'plate_gecti', 'zemin_birebir', 'eski_iz', 'serdar_dikis')}
+    if WP is None:
+        return {**sip, 'durum': R.get('durum'), 'wp_bakir': ozet, 'kapilar_gecti': False}
+    ad = f'BASKI_{sip["boy"]}.jpg'
+    wo.kaydet_jpg(WP, cik / ad, 95)
+    q = R['qc']
+    bpx = [int(WP.shape[1]), int(WP.shape[0])]
+    kapilar = {'duz_renk_siparis': bool(R['siparis_duz_renk_kapilar'].get('kapilar_gecti')),
+               **{a: bool(q[a]['gecti']) for a in WP_KAPILAR},
+               'plate': bool(R['plate_gecti']), 'zemin_birebir': bool(R['zemin_birebir']['gecti']),
+               'eski_iz': bool(R['eski_iz']['gecti']), 'boy': bpx == list(sip['hedef_px'])}
+    return {**sip, 'durum': 'URETILDI', 'yontem': 'WP_BAKIR', 'baski_px': bpx,
+            'dosya_MB': round((cik / ad).stat().st_size / 1e6, 2), 'kapilar': kapilar,
+            'kapilar_gecti': all(kapilar.values()), 'bilgi_d_dikis': q['d_dikis'], 'wp_bakir': ozet}
+
+
 def wp_asamasi(a, g):
     sd = kod_yukle(a.kod)
     sys.path.insert(0, str(Path(a.kod).resolve() / 'scripts' / 'medya_v1'))
@@ -111,7 +136,7 @@ def wp_asamasi(a, g):
     P_ed, P_blue = sd.EdisyonPoster(), sd.BluePoster()
     cik = Path(a.cikti).resolve(); cik.mkdir(parents=True, exist_ok=True)
     ara = cik / 'ara'; ara.mkdir(exist_ok=True)
-    r = sd.wp_bakir_uret(x, P_blue, P_ed, ara)
+    r = sd.wp_bakir_uret(x, P_blue, P_ed, ara) if hasattr(sd, 'wp_bakir_uret') else wp_bakir_uret_v1(sd, x, P_blue, P_ed, ara)
     oz = {'boy': a.boy, 'durum': r.get('durum'), 'yontem': r.get('yontem'), 'baski_px': r.get('baski_px'),
           'kapilar': r.get('kapilar'), 'kapilar_gecti': r.get('kapilar_gecti'), 'dosya_MB': r.get('dosya_MB'),
           'jpeg_kalite': kalite.get(f'BASKI_{a.boy}.jpg'), 'wp_bakir': r.get('wp_bakir'), 'kod': a.kod_ref,
