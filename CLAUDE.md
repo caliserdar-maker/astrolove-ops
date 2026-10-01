@@ -68,3 +68,10 @@ bolumu okunmadan baslanmaz.
 5. Uzun her kosuda ETA sayaci (islenen/toplam, gecen, kalan, yuzde).
 6. Rapor: en fazla 6 satir + dosya yollari. Aciklama yok.
 7. QC: tek script, olculebilir esik, PASS/FAIL. "Gozle bakiyorum" dongusu yok.
+
+## SIPARIS ISI KESINTISIZ (1 Eki 2026, Serdar kesin talimati)
+
+- Musteri siparisi dosyalari (dijital ve baski) TUM kapilar PASS olana kadar is ARALIKSIZ surer. Tek dakika bekleme yok.
+- Kosu biter bitmez sonuc okunur, ayni dakikada sonraki duzeltme veya kosu baslar. Onay, kuyruk, "raporlayip bekle" yok.
+- Bu islerde HIZ VE KALITE madde 4 ("2 iterasyondan sonra DUR") GECERSIZDIR: FAIL'de durulmaz; 6 satir durum yazilir ve calismaya devam edilir.
+- Musteriye teslim, Etsy mesaji ve yukleme yine yalniz Serdar'in acik onayiyla.
