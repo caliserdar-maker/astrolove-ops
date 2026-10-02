@@ -1,13 +1,13 @@
-# DIJITAL 9000000005 CANCER_LEO
+# DIJITAL 9000000005 SCORPIO_VIRGO
 
 | renk | PDF | MB | sayfa | dpi | pdf_kapisi | sayfa kapilari |
 |---|---|---|---|---|---|---|
-| MIDNIGHT_BLUE | None | None | None | [] | FAIL | FAIL {} |
-| DEEP_BLACK | None | None | None | [] | FAIL | FAIL {} |
-| PURE_WHITE | None | None | None | [] | FAIL | FAIL {} |
-| CHAMPAGNE_IVORY | None | None | None | [] | FAIL | FAIL {} |
-| WARM_PARCHMENT | None | None | None | [] | FAIL | FAIL {'4x5': None, '3x4': None, '2x3': None, '11x14': True, 'a_series': None} |
+| MIDNIGHT_BLUE | AstroLoveArt_Scorpio_Virgo_Midnight_Blue.pdf | 22.14 | 5 | [300.0, 300.6] | PASS | PASS |
+| DEEP_BLACK | AstroLoveArt_Scorpio_Virgo_Deep_Black.pdf | 8.61 | 5 | [300.0, 300.6] | PASS | PASS |
+| PURE_WHITE | AstroLoveArt_Scorpio_Virgo_Pure_White.pdf | 8.44 | 5 | [300.0, 300.6] | PASS | PASS |
+| CHAMPAGNE_IVORY | AstroLoveArt_Scorpio_Virgo_Champagne_Ivory.pdf | 22.93 | 5 | [300.0, 300.6] | PASS | PASS |
+| WARM_PARCHMENT | AstroLoveArt_Scorpio_Virgo_Warm_Parchment.pdf | 77.26 | 5 | [300.0, 300.6] | PASS | PASS |
 
-normalize: evet (LEO_CANCER -> CANCER_LEO, isimler yer degistirdi)
+normalize: hayir
 
-SONUC: FAIL
+SONUC: PASS
