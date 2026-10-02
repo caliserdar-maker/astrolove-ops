@@ -24,6 +24,33 @@ jobs:
           set -euo pipefail
           jq -re '.inputs.parcalar | test("^[A-Z_,]+$")' "$GITHUB_EVENT_PATH" >/dev/null
           echo "parcalar=$(jq -c '.inputs.parcalar | split(",")' "$GITHUB_EVENT_PATH")" >> "$GITHUB_OUTPUT"
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: "ZIP listesi (TEK listeleme; 2 Eki, 4 paralel tam listeleme Drive dakika kotasini asti)"
+        run: |
+          set -euo pipefail
+          rclone lsjson -R --files-only --fast-list --tpslimit 8 gdrive:ASTROLOVE --include "*_ALL_SIZES.zip" > zips.json
+          python -c "import json;d=json.load(open('zips.json'));print('ZIP', len(d), 'ad', len({z['Name'] for z in d}))"
+          rm -rf ~/.config/rclone
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zips
+          path: zips.json
+          retention-days: 1
   olc:
     needs: plan
     runs-on: ubuntu-latest
@@ -56,6 +83,9 @@ jobs:
               echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
             fi
           fi
+      - uses: actions/download-artifact@v4
+        with:
+          name: zips
       - name: Olc
         env:
           PARCA: ${{ matrix.parca }}
@@ -65,8 +95,6 @@ jobs:
           if [ "$PARCA" = GALERI ]; then
             python scripts/ornek/dikis_yayin.py --tur galeri --cik "out/DIKIS_$PARCA.jsonl"
           else
-            rclone lsjson -R --files-only --fast-list gdrive:ASTROLOVE --include "*_${PARCA}_ALL_SIZES.zip" > zips.json
-            python -c "import json;d=json.load(open('zips.json'));print('ZIP', len(d), 'ad', len({z['Name'] for z in d}))"
             python scripts/ornek/dikis_yayin.py --tur zip --edisyon "$PARCA" --zip-index zips.json --cik "out/DIKIS_$PARCA.jsonl"
           fi
           echo "SURE $PARCA $(( $(date +%s) - T0 )) sn"

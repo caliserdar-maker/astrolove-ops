@@ -28,7 +28,7 @@ BOY_ADI = {'2x3': '24x36', '3x4': '18x24', '4x5': '16x20', '11x14': '11x14', 'A'
 
 
 def rc(*a):
-    return subprocess.run(['rclone', *a], check=True, capture_output=True, text=True).stdout
+    return subprocess.run(['rclone', '--tpslimit', '4', '--retries', '5', '--low-level-retries', '20', *a], check=True, capture_output=True, text=True).stdout
 
 
 def olc(yol, tmp):
