@@ -1,0 +1,79 @@
+name: dikis-yayin
+
+# YAYINDAKI dijital dosyalarda tagline dikis olcumu (Serdar 2 Eki; salt okur, yeniden uretim YOK).
+# Etsy dijital ilan dosyalari (Drive'daki <SIGN>_<SIGN>_<EDISYON>_ALL_SIZES.zip, 5 JPG) + galeri kart 15/16 kaynaklari
+# (TEMP/GALERI_77/_KAYNAK/<CIFT>/BASKI_MIDNIGHT_BLUE / BASKI_DEEP_BLACK). Olcu scripts/ornek/dikis_kapisi.dikis (esik 13),
+# bant surucu._bantlar. Cikti yalniz Drive TEMP/DIKIS_YAYIN/<run_id>/. Etsy API / yazma YOK.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      parcalar: {description: "virgullu: edisyonlar ve/veya GALERI", required: false, default: "MIDNIGHT_BLUE,DEEP_BLACK,PURE_WHITE,CHAMPAGNE_IVORY,WARM_PARCHMENT,GALERI"}
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      parcalar: ${{ steps.p.outputs.parcalar }}
+    steps:
+      - id: p
+        run: |
+          set -euo pipefail
+          jq -re '.inputs.parcalar | test("^[A-Z_,]+$")' "$GITHUB_EVENT_PATH" >/dev/null
+          echo "parcalar=$(jq -c '.inputs.parcalar | split(",")' "$GITHUB_EVENT_PATH")" >> "$GITHUB_OUTPUT"
+  olc:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        parca: ${{ fromJSON(needs.plan.outputs.parcalar) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --quiet pillow numpy opencv-python-headless
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Olc
+        env:
+          PARCA: ${{ matrix.parca }}
+        run: |
+          set -euo pipefail
+          T0=$(date +%s); mkdir -p out
+          if [ "$PARCA" = GALERI ]; then
+            python scripts/ornek/dikis_yayin.py --tur galeri --cik "out/DIKIS_$PARCA.jsonl"
+          else
+            rclone lsjson -R --files-only --fast-list gdrive:ASTROLOVE --include "*_${PARCA}_ALL_SIZES.zip" > zips.json
+            python -c "import json;d=json.load(open('zips.json'));print('ZIP', len(d), 'ad', len({z['Name'] for z in d}))"
+            python scripts/ornek/dikis_yayin.py --tur zip --edisyon "$PARCA" --zip-index zips.json --cik "out/DIKIS_$PARCA.jsonl"
+          fi
+          echo "SURE $PARCA $(( $(date +%s) - T0 )) sn"
+      - name: Drive
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -d out ] && rclone copy out "gdrive:ASTROLOVE/TEMP/DIKIS_YAYIN/${{ github.run_id }}/"
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
