@@ -1,0 +1,38 @@
+[
+ {
+  "etiket": "MIDNIGHT_BLUE_24x36",
+  "tagline_kutu": [
+   884,
+   8934,
+   6313,
+   9362
+  ],
+  "ONCE": {
+   "dikis": 76.0,
+   "dikis_ust": 76.0,
+   "dikis_alt": 8.0,
+   "dikis_govde": 13.0,
+   "en_kotu_satir": 60,
+   "taban": 290,
+   "pencere": 11,
+   "satir": [
+    46,
+    382
+   ]
+  },
+  "SONRA": {
+   "dikis": 11.0,
+   "dikis_ust": 5.0,
+   "dikis_alt": 2.0,
+   "dikis_govde": 11.0,
+   "en_kotu_satir": 159,
+   "taban": 290,
+   "pencere": 11,
+   "satir": [
+    46,
+    382
+   ]
+  },
+  "tani": "bant 8975-9321 fark px 214965"
+ }
+]
