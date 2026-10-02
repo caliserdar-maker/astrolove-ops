@@ -6,7 +6,8 @@
   "cikti": "TEMP/WP_ORNEK/CANCER_LIBRA/WP_CANCER_LIBRA_11x14_YANYANA.jpg"
  },
  "ek_kararlar": [
-  "Serdar 1 Eki ~15:50: 24x36 plate acik dikey cizgi (x 1937, y 4376-4440) onarimi; serit x 1935-1940, y 4370-4446 (PLATE_SERITLER), yontem 11x14 ile ayni"
+  "Serdar 1 Eki ~15:50: 24x36 plate acik dikey cizgi (x 1937, y 4376-4440) onarimi; serit x 1935-1940, y 4370-4446 (PLATE_SERITLER), yontem 11x14 ile ayni",
+  "Serdar 2 Eki: SECENEK A, sayfa 45-78 ciftleri ikinci plate VINTAGE_B_<boy>.png (cift_boy plate secimi); kapi ve esikler ayni"
  ],
  "ozet": {
   "dosya": {
@@ -22,7 +23,7 @@
    "_yazi_maskesi": "f3147eb13cc53365a0ced0c87e9ce02d11550b3f663384441c749b25498c2d7f",
    "yanyana_dedektor": "18ac1b4406838675d86df0f8913c50afabb7ce4f2840aa243ec20697142ab94c",
    "serdar_dikis": "4842f96f9f6e546fe2b20f17fc20e19a6f4daf0a6945c9eab08c0a734dde4f9e",
-   "cift_boy": "035fb25f057ae71a82993c6d23ee97155c41981a09dd168b6bc718b7a48a58db",
+   "cift_boy": "73d82e12cf8101ecf8027401b6df7d8a47f8cce742d1efd23d52edaee7ecfcc9",
    "serit_uygula": "fa58a1e4de24c77424038e5b7c6d2f454fc143d7646e466123a00c0167d2fcdd",
    "plate_serit_onar": "63baa558d6508ecb6468d1358d3275d3aa32ae426d6e8f6bbe0e8318de5ad174"
   },

@@ -1,0 +1,255 @@
+name: wp-plate-b
+
+# WP PLATE B (Serdar onayi 2 Eki, SECENEK A): Canva sayfa 45-78 ciftleri icin ikinci VINTAGE plate.
+# plate : boy basina plate B (34 ciftin onayli WP kaynaklari, murekkep disi ortanca) + 78 cift tarama (uretimin qc()).
+# onay  : 390 hucre + iki yonlu test; YALNIZ hepsi PASS ise plate B PLATES'e yuklenir (yeni dosya adi VINTAGE_B_<boy>.png).
+# ornek : PISCES_SCORPIO x 5 boy, once = WP_REF (adfb2b9), sonra = plate secimli WP_REF adayi (e191733); uretimin kendisi.
+# kesit : once/sonra 1:1 kesit (onayli | once | sonra). Cikti yalniz Drive TEMP/WP_PLATE_B/<run_id>/.
+# Etsy / musteri YOK. Tetik: config/wp_plate_b.trigger degisikligi (bu dal).
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [claude/wp-katman-baski-60sk0s]
+    paths:
+      - config/wp_plate_b.trigger
+
+concurrency: wp-plate-b
+
+env:
+  WP_REF_ESKI: adfb2b99489798296936669575309b777c7e1ca7
+  WP_REF_YENI: e191733a5488c86dfdd9eee17eb107bc64f8b71d
+  CIK: gdrive:ASTROLOVE/TEMP/WP_PLATE_B/${{ github.run_id }}
+
+jobs:
+  plate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        boy: [11x14, 16x20, 18x24, 24x36, A2]
+    env:
+      BOY: ${{ matrix.boy }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --quiet pillow opencv-python-headless numpy
+      - name: Kilit testi
+        run: python scripts/medya_v1/test_wp_kilit.py
+      - name: Takas + gecici alan
+        run: |
+          set -euo pipefail
+          if [ "$BOY" = "24x36" ] || [ "$BOY" = "A2" ]; then
+            sudo fallocate -l 24G /mnt/takas4 && sudo chmod 600 /mnt/takas4 && sudo mkswap /mnt/takas4 >/dev/null && sudo swapon /mnt/takas4
+          fi
+          sudo mkdir -p /mnt/pb && sudo chown "$USER" /mnt/pb
+          free -g; df -h /mnt | tail -1
+      - name: rclone kur
+        run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then echo "HATA: RCLONE_CONF_B64 yok" >&2; exit 1; fi
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Indir (salt okur)
+        run: |
+          set -euo pipefail
+          T0=$(date +%s); mkdir -p _in/kok out
+          rclone copy gdrive:ASTROLOVE/TEMP/POD_PRINT _in/kok --include "*/WARM_PARCHMENT/$BOY.jpg" --transfers 16
+          rclone copyto "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PLATES/VINTAGE_$BOY.png" "_in/VINTAGE_$BOY.png"
+          echo "SURE indir $BOY $(( $(date +%s) - T0 )) sn"
+      - name: Plate B uret
+        run: python scripts/medya_v1/plate_b.py uret --boy "$BOY" --kok _in/kok --plate "_in/VINTAGE_$BOY.png" --tmp /mnt/pb --cik out
+      - name: Tara (78 cift, qc e_kagit + plate zemin)
+        run: python scripts/medya_v1/plate_b.py tara --boy "$BOY" --kok _in/kok --plate "_in/VINTAGE_$BOY.png" --plate-b "out/VINTAGE_B_$BOY.png" --cik out
+      - name: Drive (TEMP)
+        if: ${{ always() }}
+        run: '[ -d out ] && rclone copy out "$CIK/$BOY/" && echo "drive: TEMP/WP_PLATE_B/${{ github.run_id }}/$BOY/"'
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: tara_${{ matrix.boy }}
+          path: out/*.json
+          retention-days: 3
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone _in /mnt/pb
+
+  onay:
+    needs: plate
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --quiet pillow opencv-python-headless numpy
+      - uses: actions/download-artifact@v4
+        with:
+          path: art
+      - name: rclone kur
+        run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: 390 hucre + iki yonlu test
+        id: toplam
+        run: python scripts/medya_v1/plate_b.py toplam --kok art --cik out
+      - name: Drive (TEMP)
+        if: ${{ always() }}
+        run: '[ -d out ] && rclone copy out "$CIK/" && echo "drive: TEMP/WP_PLATE_B/${{ github.run_id }}/"'
+      - name: Plate B -> PLATES (yalniz 390/390 PASS + iki yon)
+        run: |
+          set -euo pipefail
+          for b in 11x14 16x20 18x24 24x36 A2; do
+            rclone copyto "$CIK/$b/VINTAGE_B_$b.png" "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PLATES/VINTAGE_B_$b.png"
+            rclone lsjson --hash "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PLATES/VINTAGE_B_$b.png" | python -c "import json,sys; d=json.load(sys.stdin)[0]; print('PLATES', d['Path'], d['Size'], d.get('Hashes',{}).get('md5'))"
+          done
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
+
+  ornek:
+    needs: onay
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        boy: [11x14, 16x20, 18x24, 24x36, A2]
+        kod: [once, sonra]
+    env:
+      BOY: ${{ matrix.boy }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.kod == 'once' && env.WP_REF_ESKI || env.WP_REF_YENI }}
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Python bagimliliklari
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet --upgrade pip
+          python -m pip install --quiet pillow opencv-python-headless numpy fonttools img2pdf pikepdf
+      - name: Kod + kilit
+        run: git rev-parse HEAD && python scripts/medya_v1/test_wp_kilit.py
+      - name: Takas
+        if: ${{ matrix.boy == '24x36' || matrix.boy == 'A2' }}
+        run: |
+          sudo fallocate -l 32G /mnt/takas5 && sudo chmod 600 /mnt/takas5 && sudo mkswap /mnt/takas5 >/dev/null && sudo swapon /mnt/takas5
+          free -g
+      - name: rclone kur
+        run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: WP uretimi (PISCES_SCORPIO, ${{ matrix.kod }})
+        run: python scripts/medya_v1/wp_ornek.py --cift PISCES_SCORPIO --boylar "$BOY" --hedef "$CIK/ORNEK_${{ matrix.kod }}_$BOY"
+      - name: Artifact icin topla
+        if: ${{ always() }}
+        run: |
+          mkdir -p art
+          cp "_siparis/WP_ORNEK/PISCES_SCORPIO/WP_PISCES_SCORPIO_${BOY}_BASKI.jpg" "_siparis/WP_ORNEK/PISCES_SCORPIO/RAPOR_${BOY}.json" art/ || true
+          ls -la art
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: ornek_${{ matrix.kod }}_${{ matrix.boy }}
+          path: art/*
+          retention-days: 3
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
+
+  kesit:
+    needs: ornek
+    if: ${{ always() && needs.ornek.result != 'skipped' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --quiet pillow opencv-python-headless numpy
+      - uses: actions/download-artifact@v4
+        with:
+          path: art
+          pattern: ornek_*
+      - name: rclone kur
+        run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Kesit (onayli | once | sonra, 1:1)
+        run: |
+          set -uo pipefail
+          rclone copy gdrive:ASTROLOVE/TEMP/POD_PRINT/PISCES_SCORPIO/WARM_PARCHMENT _onayli
+          for b in 11x14 16x20 18x24 24x36 A2; do
+            python scripts/medya_v1/plate_b.py kesit --cift PISCES_SCORPIO --boy "$b" --onayli "_onayli/$b.jpg" \
+              --once "art/ornek_once_$b" --sonra "art/ornek_sonra_$b" --cik out || echo "KESIT HATA $b"
+          done
+      - name: Drive (TEMP)
+        if: ${{ always() }}
+        run: '[ -d out ] && rclone copy out "$CIK/KESIT/" && echo "drive: TEMP/WP_PLATE_B/${{ github.run_id }}/KESIT/"'
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone

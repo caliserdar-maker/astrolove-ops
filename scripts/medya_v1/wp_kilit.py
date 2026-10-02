@@ -15,7 +15,9 @@ ORNEK_FONK = ('etiketle', 'yanyana', 'yanyana_baski', 'sutun_profili', 'koyu_sut
               'yanyana_dedektor', 'serdar_dikis', 'cift_boy', 'serit_uygula', 'plate_serit_onar')
 ORNEK_SABIT = ('DUZ_RENK', 'SERDAR_YAN', 'SERDAR_SERIT', 'PLATE_SERITLER')
 EK_KARARLAR = ['Serdar 1 Eki ~15:50: 24x36 plate acik dikey cizgi (x 1937, y 4376-4440) onarimi; serit x 1935-1940, '
-               'y 4370-4446 (PLATE_SERITLER), yontem 11x14 ile ayni']
+               'y 4370-4446 (PLATE_SERITLER), yontem 11x14 ile ayni',
+               'Serdar 2 Eki: SECENEK A, sayfa 45-78 ciftleri ikinci plate VINTAGE_B_<boy>.png (cift_boy plate secimi); '
+               'kapi ve esikler ayni']
 BAKIR_SABIT = ('BAKIR_KOYU', 'T0', 'KENAR_PX', 'KOYU_ALT', 'KOYU_SIKISTIR', 'ESIK_DE', 'MIN_ALAN_BAKIR', 'DOLU',
                'DIKIS_DUZLE', 'KABARTMA_SIGMA', 'KABARTMA_ESIK', 'DIKIS_BOY', 'DIKIS_T', 'DIKIS_KOMSU')
 

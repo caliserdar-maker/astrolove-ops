@@ -356,7 +356,10 @@ def cift_boy(cift, boy, P_ed, P_blue, no, cik, isim=ISIM, mesaj=MESAJ, siparis=F
     R['duz_renk'] = renk
 
     # ---- 1) ogrenme: ayni ciftin onayli kaynaklari
-    ad = f'VINTAGE_{boy}.png'
+    # Serdar 2 Eki (SECENEK A): Canva sayfa 45-78 (GEMINI_LIBRA..VIRGO_VIRGO) onayli WP kagidi farkli doku (TANI 2/3:
+    # e_kagit ~2.1, 5 boy, sinir GEMINI_LEO | GEMINI_LIBRA); bu ciftler kendi onayli kaynaklarindan uretilen ikinci
+    # plate'i kullanir. Kapilar ve esikler ayni. Sayfa = sayfa_no_tablosu (alfabetik POD_PRINT sirasi).
+    ad = f'VINTAGE_B_{boy}.png' if no[cift] >= 45 else f'VINTAGE_{boy}.png'
     y = plate_indir(ad)
     if y is None:                        # 1. kosu: VINTAGE_CANVA 11x14 dokusu kaynakla hizasiz (zemin dE 2.98)
         R['durum'] = f'FAIL: {ad} yok'
