@@ -1,0 +1,210 @@
+name: ornek-dikis
+
+# ORNEK URETIMI (Serdar onayi 2 Eki 2026): tagline dikis duzeltmesi ONCE / SONRA + sembol kapisi kesitleri.
+# Uretimle AYNI fonksiyonlar (scripts/ornek/ornek_is.py -> surucu.sayfa_asamasi / wp_asamasi), kod: renk_ref
+# (ornek-dikis-v1; DIKIS_DUZELT=1 -> SONRA). Cikti yalniz Drive TEMP/SIPARIS_ISIM/ORNEK_DIKIS_SEMBOL/<kosu>/ +
+# inceleme/ornek-dikis-sembol (OLCUM.md, kucuk onizlemeler). Etsy / musteri / PLATES yazimi YOK.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      renk_ref:
+        description: "ornek-dikis-v1 commit"
+        required: true
+      boy:
+        description: "24x36 | 11x14 | A2 | 16x20 | 18x24"
+        required: false
+        default: "24x36"
+      renkler:
+        description: "virgullu (WARM_PARCHMENT = wp hatti)"
+        required: false
+        default: "MIDNIGHT_BLUE,DEEP_BLACK,PURE_WHITE,CHAMPAGNE_IVORY,WARM_PARCHMENT"
+      set:
+        description: "prova.py SETLER anahtari"
+        required: false
+        default: "SERDAR"
+      sembol:
+        description: "ek sembol isleri SET:boy (virgullu, MB ONCE; orn. CAGLA:11x14,CAGLA:A2); bos = yok"
+        required: false
+        default: ""
+
+concurrency: ornek-dikis
+
+env:
+  RENK_REF: ${{ inputs.renk_ref }}
+  WP_REF: adfb2b99489798296936669575309b777c7e1ca7
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matris: ${{ steps.p.outputs.matris }}
+    steps:
+      - id: p
+        env:
+          BOY: ${{ inputs.boy }}
+          RENKLER: ${{ inputs.renkler }}
+          SET: ${{ inputs.set }}
+          SEMBOL: ${{ inputs.sembol }}
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os
+          ORAN = {'24x36': '2x3', '11x14': '11x14', 'A2': 'a_series', '16x20': '4x5', '18x24': '3x4'}
+          b = os.environ['BOY']; st = os.environ['SET']; m = []
+          for d in ('ONCE', 'SONRA'):
+              for r in [x.strip() for x in os.environ['RENKLER'].split(',') if x.strip()]:
+                  tur = 'wp' if r == 'WARM_PARCHMENT' else 'renk'
+                  m.append({'durum': d, 'tur': tur, 'renk': r, 'oran': ORAN[b], 'boy': b, 'set': st, 'etiket': f'{r}_{b}'})
+          for x in [x.strip() for x in os.environ['SEMBOL'].split(',') if x.strip()]:
+              s, bb = x.split(':')
+              m.append({'durum': 'ONCE', 'tur': 'renk', 'renk': 'MIDNIGHT_BLUE', 'oran': ORAN[bb], 'boy': bb, 'set': s,
+                        'etiket': f'SEMBOL_{s}_MIDNIGHT_BLUE_{bb}'})
+          print('matris=' + json.dumps({'include': m}))
+          PY
+
+  is:
+    needs: plan
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix: ${{ fromJSON(needs.plan.outputs.matris) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    name: ${{ matrix.durum }} ${{ matrix.etiket }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RENK_REF }}
+          path: _kod
+      - if: ${{ matrix.tur == 'wp' }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.WP_REF }}
+          path: _wp
+      - if: ${{ matrix.tur == 'wp' }}
+        run: |
+          set -euo pipefail
+          for f in wp_bakir.py wp_katman.py wp_ornek.py wp_kilit.py wp_kilit.json wp_tani.py test_wp_kilit.py; do
+            [ -e "_kod/scripts/medya_v1/$f" ] && { echo "HATA: $f v1'de zaten var" >&2; exit 1; }
+            cp "_wp/scripts/medya_v1/$f" "_kod/scripts/medya_v1/$f"
+          done
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --quiet pillow opencv-python-headless numpy fonttools img2pdf pikepdf
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Takas alani (buyuk boy bellek)
+        if: ${{ matrix.boy == '24x36' || matrix.boy == 'A2' }}
+        run: sudo fallocate -l 28G /mnt/takas2 && sudo chmod 600 /mnt/takas2 && sudo mkswap /mnt/takas2 >/dev/null && sudo swapon /mnt/takas2
+      - name: ornek
+        env:
+          DIKIS_DUZELT: ${{ matrix.durum == 'SONRA' && '1' || '0' }}
+        run: |
+          set -o pipefail
+          python scripts/ornek/ornek_is.py --tur "${{ matrix.tur }}" --renk "${{ matrix.renk }}" --oran "${{ matrix.oran }}" \
+            --boy "${{ matrix.boy }}" --set "${{ matrix.set }}" --etiket "${{ matrix.durum }}_${{ matrix.etiket }}" \
+            --kod _kod --kod-ref "ornek-dikis-v1 $RENK_REF" --cikti "$GITHUB_WORKSPACE/out" 2>&1 | grep -v '^SURE '
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: ornek_${{ matrix.durum }}_${{ matrix.etiket }}
+          path: out/
+          retention-days: 7
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
+
+  derle:
+    needs: [plan, is]
+    if: ${{ always() && needs.plan.result == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --quiet pillow opencv-python-headless numpy
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: ornek_*
+          path: giris
+          merge-multiple: true
+      - name: Derle (kesit + olcu + onizleme)
+        run: |
+          set -euo pipefail
+          ls giris
+          python scripts/ornek/ornek_derle.py giris "cikti/dikis_${{ inputs.boy }}"
+          for d in giris/*; do
+            if ls "$d"/sembol_* >/dev/null 2>&1; then mkdir -p "cikti/sembol/$(basename "$d")"; cp "$d"/sembol_*.png "$d"/SEMBOL_*.json "$d"/SAYFA_*.json "cikti/sembol/$(basename "$d")/" 2>/dev/null || true; fi
+          done
+          du -sh cikti
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Drive
+        run: |
+          set -euo pipefail
+          D="gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/ORNEK_DIKIS_SEMBOL/${{ github.run_id }}"
+          rclone copy cikti "$D/" --drive-chunk-size 64M 2>&1 | { grep -v NOTICE || true; }
+          rclone lsf -R "$D/" | sed "s|^|drive: ORNEK_DIKIS_SEMBOL/${{ github.run_id }}/|"
+      - name: Dala yaz (OLCUM + kucuk onizleme)
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          B=inceleme/ornek-dikis-sembol; U="https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          G=(-c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com")
+          if git clone -q --depth 1 --branch "$B" "$U" _d 2>/dev/null; then :; else
+            mkdir _d && git -C _d init -q && git -C _d remote add origin "$U" && git -C _d checkout -q -b "$B"; fi
+          K="_d/${{ github.run_id }}"; mkdir -p "$K"
+          find cikti -name 'OLCUM.*' -o -name 'SEMBOL_*.json' -o -name 'SAYFA_*.json' | while read f; do mkdir -p "$K/$(dirname "${f#cikti/}")"; cp "$f" "$K/${f#cikti/}"; done
+          python3 - <<'PY'
+          import glob, os
+          from PIL import Image
+          K = os.path.join('_d', os.environ['GITHUB_RUN_ID'])
+          for f in glob.glob('cikti/**/ONIZLEME_*.jpg', recursive=True) + glob.glob('cikti/**/KESIT_*.jpg', recursive=True):
+              im = Image.open(f); s = min(1.0, 1400 / max(im.size)); o = os.path.join(K, 'kucuk', os.path.basename(f))
+              os.makedirs(os.path.dirname(o), exist_ok=True); im.resize((max(1, int(im.width * s)), max(1, int(im.height * s)))).save(o, quality=80)
+          PY
+          git -C _d "${G[@]}" add -A && git -C _d "${G[@]}" commit -qm "ornek dikis/sembol: ${{ github.run_id }}"
+          git -C _d push -q origin "HEAD:refs/heads/$B" && echo "dal: $B $(git -C _d rev-parse --short HEAD)"
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
