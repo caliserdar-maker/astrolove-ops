@@ -1,1 +1,0 @@
-SECENEK A plate B deneme 2 2026-10-02T18:15:13Z

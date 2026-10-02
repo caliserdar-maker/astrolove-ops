@@ -15,8 +15,8 @@ tara : 78 cift x aday plate'ler, uretimin kendi qc() fonksiyonu (wp_bakir.qc, de
        zemin_uyumu. Secim = uretimin wo.plate_adi (sayfa < 45 VINTAGE; >= 45 plate B, 11x14'te alt kume B1/B2/B3).
        Iki yonlu: kendi plate'i PASS, diger her aday FAIL.
 kume : (uret icinde, 11x14) 34 kaynagin kagidi cift cift dE matrisi + kumeleme -> wo.PLATE_B_11x14 kaniti.
-kesit: PISCES_SCORPIO WP once (WP_REF adfb2b9) / sonra (plate B) 1:1, isim bandi; onayli kaynakla yan yana.
-Kilitli kod / esik degismez. Drive'a yazmaz (workflow yazar)."""
+kesit_a: onayli | yeni WP 1:1 (kagit penceresi, isim, mesaj/tagline bandi), KARAR A gorsel onayi.
+Kilitli kod / esik degismez. Drive'a yazmaz."""
 import argparse
 import json
 import sys
@@ -316,39 +316,6 @@ def toplam(a):
     return 0 if T['pass'] == T['hucre'] == 390 and T['iki_yon'] else 1
 
 
-def kesit(a):
-    """once/sonra BASKI + onayli kaynak, isim bandi 1:1 (RAPOR_<boy>.json bantlar)."""
-    cik = Path(a.cik); cik.mkdir(parents=True, exist_ok=True)
-    c, boy = a.cift, a.boy
-    S = np.asarray(Image.open(a.onayli).convert('RGB'))
-    H, W = S.shape[:2]
-    rap = {k: json.loads((Path(d) / f'RAPOR_{boy}.json').read_text()) for k, d in (('once', a.once), ('sonra', a.sonra))}
-    et = rap['sonra'].get('bantlar') or rap['once'].get('bantlar') or {}
-    y0, y1 = et.get('isim', [int(H * 0.70), int(H * 0.76)])
-    y0, y1 = max(0, y0 - 120), min(H, y1 + 120)
-    x0 = max(0, W // 2 - 600); x1 = min(W, x0 + 1200)
-    parca = [('ONAYLI', S)]
-    for k, d in (('ONCE_VINTAGE', a.once), ('SONRA_VINTAGE_B', a.sonra)):
-        img = np.asarray(Image.open(Path(d) / f'WP_{c}_{boy}_BASKI.jpg').convert('RGB'))
-        if img.shape[:2] != (H, W):
-            raise SystemExit(f'HATA: {k} {img.shape[:2]} != {(H, W)}')
-        parca.append((k, img))
-    seri, sonuc = [], {'cift': c, 'boy': boy, 'pencere': {'x': [x0, x1], 'y': [y0, y1]}}
-    for k, img in parca:
-        p = img[y0:y1, x0:x1]
-        Image.fromarray(p).save(cik / f'KESIT_{c}_{boy}_{k}_1e1.png')
-        seri += [p, np.full((p.shape[0], 8, 3), 255, np.uint8)]
-    Image.fromarray(np.concatenate(seri[:-1], 1)).save(cik / f'KESIT_{c}_{boy}_ONAYLI_ONCE_SONRA_1e1.png')
-    for k in ('once', 'sonra'):
-        r = rap[k]; q = r.get('qc') or {}
-        sonuc[k] = {'durum': r.get('durum'), 'gecti': r.get('gecti'), 'plate': (r.get('plate') or {}).get('ad'),
-                    'plate_gecti': r.get('plate_gecti'), 'zemin_uyumu': (r.get('plate') or {}).get('zemin_uyumu'),
-                    'e_kagit': q.get('e_kagit'), 'qc_gecti': q.get('gecti'),
-                    'kalan': sorted(g for g, v in q.items() if isinstance(v, dict) and v.get('gecti') is False)}
-    (cik / f'KESIT_{c}_{boy}.json').write_text(json.dumps(sonuc, ensure_ascii=False, indent=1, default=str))
-    log('KESIT', json.dumps(sonuc, ensure_ascii=False, default=str))
-
-
 def kesit_a(a):
     """KARAR A gorsel onay: onayli kaynak | yeni WP (uretim, en iyi / secili plate), 1:1.
     KAGIT: iki goruntude de murekkep yok (plate'e gore, 31 px genisletilmis), aralarindaki dE ortancasi en yuksek
@@ -405,7 +372,7 @@ def kesit_a(a):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('is_', choices=('uret', 'tara', 'toplam', 'kesit', 'kesit_a'))
+    ap.add_argument('is_', choices=('uret', 'tara', 'toplam', 'kesit_a'))
     ap.add_argument('--boy', default='11x14')
     ap.add_argument('--kok', default='')
     ap.add_argument('--plate', default='')
@@ -416,12 +383,11 @@ def main():
     ap.add_argument('--cik', required=True)
     ap.add_argument('--cift', default='PISCES_SCORPIO')
     ap.add_argument('--onayli', default='')
-    ap.add_argument('--once', default='')
     ap.add_argument('--sonra', default='')
     ap.add_argument('--isim', default='')
     ap.add_argument('--mesaj', default='')
     a = ap.parse_args()
-    r = {'uret': uret, 'tara': tara, 'toplam': toplam, 'kesit': kesit, 'kesit_a': kesit_a}[a.is_](a)
+    r = {'uret': uret, 'tara': tara, 'toplam': toplam, 'kesit_a': kesit_a}[a.is_](a)
     sys.exit(r or 0)
 
 
