@@ -46,6 +46,10 @@ on:
         description: "rapor bu prova kosu(lari)nin sonuclariyla birlesir (run id, bosluklu; yeni sonuc eskisinin ustune)"
         required: false
         default: ""
+      paralel:
+        description: "es zamanli is (siparis kosusu varken 4; Serdar 2 Eki gece on testi 8)"
+        required: false
+        default: "4"
 
 concurrency: prova
 
@@ -141,7 +145,7 @@ jobs:
     needs: plan
     strategy:
       fail-fast: false
-      max-parallel: 4             # Serdar 1 Eki: siparis kosusu varken prova runner'lari doldurmasin (en fazla 4)
+      max-parallel: ${{ fromJSON(inputs.paralel || '4') }}   # Serdar 1 Eki: siparis kosusu varken en fazla 4 (varsayilan); 2 Eki gece on testi 8
       matrix: ${{ fromJSON(needs.plan.outputs.matris) }}
     runs-on: ubuntu-latest
     timeout-minutes: 340
