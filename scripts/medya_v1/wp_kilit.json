@@ -19,7 +19,8 @@
    "_yazi_maskesi": "f3147eb13cc53365a0ced0c87e9ce02d11550b3f663384441c749b25498c2d7f",
    "yanyana_dedektor": "18ac1b4406838675d86df0f8913c50afabb7ce4f2840aa243ec20697142ab94c",
    "serdar_dikis": "4842f96f9f6e546fe2b20f17fc20e19a6f4daf0a6945c9eab08c0a734dde4f9e",
-   "cift_boy": "0de2c184aadca099fc8f4e9d8a46a4bdf9307c28bd18d319b8a15e58a14cd81c"
+   "cift_boy": "d4259ffd4c6109b267bfb34f743cfe9c1cc4197ee17181521fa216b24ca42cc7",
+   "plate_adi": "bfde32ad789936b7a2bde3ee79b6591056996c2f440402b1edce6ba83efca87f"
   },
   "wp_ornek_sabit": {
    "DUZ_RENK": [
@@ -37,7 +38,49 @@
     1567,
     3490,
     3750
-   ]
+   ],
+   "PLATE_B_11x14": {
+    "1": [
+     "GEMINI_LIBRA",
+     "GEMINI_PISCES",
+     "LEO_LIBRA",
+     "LEO_PISCES",
+     "LEO_SAGITTARIUS",
+     "LEO_SCORPIO",
+     "LEO_TAURUS",
+     "LEO_VIRGO",
+     "LIBRA_LIBRA",
+     "LIBRA_PISCES",
+     "LIBRA_SAGITTARIUS",
+     "LIBRA_SCORPIO",
+     "LIBRA_TAURUS",
+     "PISCES_SAGITTARIUS",
+     "PISCES_VIRGO",
+     "SAGITTARIUS_SAGITTARIUS",
+     "SAGITTARIUS_SCORPIO",
+     "SCORPIO_SCORPIO"
+    ],
+    "2": [
+     "GEMINI_SAGITTARIUS",
+     "GEMINI_SCORPIO",
+     "GEMINI_TAURUS",
+     "LIBRA_VIRGO",
+     "PISCES_PISCES",
+     "TAURUS_VIRGO",
+     "VIRGO_VIRGO"
+    ],
+    "3": [
+     "GEMINI_VIRGO",
+     "LEO_LEO",
+     "PISCES_SCORPIO",
+     "PISCES_TAURUS",
+     "SAGITTARIUS_TAURUS",
+     "SAGITTARIUS_VIRGO",
+     "SCORPIO_TAURUS",
+     "SCORPIO_VIRGO",
+     "TAURUS_TAURUS"
+    ]
+   }
   },
   "wp_bakir_parametre": {
    "BAKIR_KOYU": [
@@ -72,6 +115,7 @@
   }
  },
  "ek_kararlar": [
-  "Serdar 2 Eki: SECENEK A, sayfa 45-78 ciftleri ikinci plate VINTAGE_B_<boy>.png (cift_boy plate secimi); kapi ve esikler ayni"
+  "Serdar 2 Eki: SECENEK A, sayfa 45-78 ciftleri ikinci plate VINTAGE_B_<boy>.png (cift_boy plate secimi); kapi ve esikler ayni",
+  "Serdar 2 Eki (11x14 ek deneme): 11x14 sayfa 45-78 uc alt kume, cift bazli VINTAGE_B<k>_11x14.png (PLATE_B_11x14, plate_adi); diger boylar VINTAGE_B_<boy>.png; kapi ve esikler ayni"
  ]
 }

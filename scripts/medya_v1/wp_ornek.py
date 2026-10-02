@@ -258,6 +258,31 @@ def serdar_dikis(cift, boy, S_wp, P_wp0, B_cu, WP_cu, P_k, w, geo, h, zorla=Fals
     return np.clip(out, 0, 255), P_new, r
 
 
+# Serdar 2 Eki (SECENEK A, 11x14 ek deneme): 11x14'te sayfa 45-78 onayli WP kagidi uc alt kume (kosu 37046187292
+# tek plate B ile e_kagit p99: K1 2.84-2.90, K2 3.02-3.05, K3 4.92-5.02; 37044638005'te ayni ayrim). Her alt kume
+# kendi ciftlerinin kaynaklarindan uretilen plate'i kullanir (VINTAGE_B<k>_11x14.png). Diger boylar tek plate B.
+PLATE_B_11x14 = {
+    1: ('GEMINI_LIBRA', 'GEMINI_PISCES', 'LEO_LIBRA', 'LEO_PISCES', 'LEO_SAGITTARIUS', 'LEO_SCORPIO', 'LEO_TAURUS',
+        'LEO_VIRGO', 'LIBRA_LIBRA', 'LIBRA_PISCES', 'LIBRA_SAGITTARIUS', 'LIBRA_SCORPIO', 'LIBRA_TAURUS',
+        'PISCES_SAGITTARIUS', 'PISCES_VIRGO', 'SAGITTARIUS_SAGITTARIUS', 'SAGITTARIUS_SCORPIO', 'SCORPIO_SCORPIO'),
+    2: ('GEMINI_SAGITTARIUS', 'GEMINI_SCORPIO', 'GEMINI_TAURUS', 'LIBRA_VIRGO', 'PISCES_PISCES', 'TAURUS_VIRGO',
+        'VIRGO_VIRGO'),
+    3: ('GEMINI_VIRGO', 'LEO_LEO', 'PISCES_SCORPIO', 'PISCES_TAURUS', 'SAGITTARIUS_TAURUS', 'SAGITTARIUS_VIRGO',
+        'SCORPIO_TAURUS', 'SCORPIO_VIRGO', 'TAURUS_TAURUS')}
+
+
+def plate_adi(cift, sayfa, boy):
+    """Siparis yolunda plate secimi: sayfa 1-44 VINTAGE; 45-78 plate B (11x14'te cift bazli B1/B2/B3)."""
+    if sayfa < 45:
+        return f'VINTAGE_{boy}.png'
+    if boy != '11x14':
+        return f'VINTAGE_B_{boy}.png'
+    k = [k for k, v in PLATE_B_11x14.items() if cift in v]
+    if len(k) != 1:
+        raise ValueError(f'{cift}: PLATE_B_11x14 tablosunda yok')
+    return f'VINTAGE_B{k[0]}_11x14.png'
+
+
 def kapi_ozet(r):
     k = r.get('kapilar') or {}
     return {'durum': r.get('durum'), 'hata': r.get('hata'), 'kapilar_gecti': r.get('kapilar_gecti'),
@@ -306,8 +331,8 @@ def cift_boy(cift, boy, P_ed, P_blue, no, cik, isim=ISIM, mesaj=MESAJ, siparis=F
     # ---- 1) ogrenme: ayni ciftin onayli kaynaklari
     # Serdar 2 Eki (SECENEK A): Canva sayfa 45-78 (GEMINI_LIBRA..VIRGO_VIRGO) onayli WP kagidi farkli doku (TANI 2/3:
     # e_kagit ~2.1, 5 boy, sinir GEMINI_LEO | GEMINI_LIBRA); bu ciftler kendi onayli kaynaklarindan uretilen ikinci
-    # plate'i kullanir. Kapilar ve esikler ayni. Sayfa = sayfa_no_tablosu (alfabetik POD_PRINT sirasi).
-    ad = f'VINTAGE_B_{boy}.png' if no[cift] >= 45 else f'VINTAGE_{boy}.png'
+    # plate'i kullanir (11x14: alt kume plate'i, plate_adi). Kapilar ve esikler ayni. Sayfa = sayfa_no_tablosu.
+    ad = plate_adi(cift, no[cift], boy)
     y = plate_indir(ad)
     if y is None:                        # 1. kosu: VINTAGE_CANVA 11x14 dokusu kaynakla hizasiz (zemin dE 2.98)
         R['durum'] = f'FAIL: {ad} yok'

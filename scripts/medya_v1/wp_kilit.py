@@ -12,8 +12,8 @@ KOK = Path(__file__).resolve().parent
 JSON = KOK / 'wp_kilit.json'
 DOSYALAR = ('wp_bakir.py', 'wp_katman.py')
 ORNEK_FONK = ('etiketle', 'yanyana', 'yanyana_baski', 'sutun_profili', 'koyu_sutun', '_yazi_maskesi',
-              'yanyana_dedektor', 'serdar_dikis', 'cift_boy')
-ORNEK_SABIT = ('DUZ_RENK', 'SERDAR_YAN', 'SERDAR_SERIT')
+              'yanyana_dedektor', 'serdar_dikis', 'cift_boy', 'plate_adi')
+ORNEK_SABIT = ('DUZ_RENK', 'SERDAR_YAN', 'SERDAR_SERIT', 'PLATE_B_11x14')
 BAKIR_SABIT = ('BAKIR_KOYU', 'T0', 'KENAR_PX', 'KOYU_ALT', 'KOYU_SIKISTIR', 'ESIK_DE', 'MIN_ALAN_BAKIR', 'DOLU',
                'DIKIS_DUZLE', 'KABARTMA_SIGMA', 'KABARTMA_ESIK', 'DIKIS_BOY', 'DIKIS_T', 'DIKIS_KOMSU')
 
