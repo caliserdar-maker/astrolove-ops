@@ -11,8 +11,10 @@ uret : plate B = sayfa >= 45 ciftlerin MUREKKEP DISI piksel ortancasi. Murekkep 
        koyu, 9x9 genisletilmis. Murekkep yeri cifte gore degistigi icin bosluk dolar; 34 ciftin hepsinde murekkep olan
        piksel (ortak yazi) = VINTAGE degeri (temizlenmis plate, iz yok). Bellek: kaynaklar /mnt'de uint8 memmap,
        ortanca satir karolarinda.
-tara : 78 cift, uretimin kendi qc() fonksiyonu (wp_bakir.qc, ders 33) e_kagit + cift_boy'daki plate zemin_uyumu.
-       Secilen plate (sayfa < 45 -> VINTAGE, >= 45 -> VINTAGE_B) + sayfa >= 45 icin eski plate (kapi hassas mi).
+tara : 78 cift x aday plate'ler, uretimin kendi qc() fonksiyonu (wp_bakir.qc, ders 33) e_kagit + cift_boy'daki plate
+       zemin_uyumu. Secim = uretimin wo.plate_adi (sayfa < 45 VINTAGE; >= 45 plate B, 11x14'te alt kume B1/B2/B3).
+       Iki yonlu: kendi plate'i PASS, diger her aday FAIL.
+kume : (uret icinde, 11x14) 34 kaynagin kagidi cift cift dE matrisi + kumeleme -> wo.PLATE_B_11x14 kaniti.
 kesit: PISCES_SCORPIO WP once (WP_REF adfb2b9) / sonra (plate B) 1:1, isim bandi; onayli kaynakla yan yana.
 Kilitli kod / esik degismez. Drive'a yazmaz (workflow yazar)."""
 import argparse
@@ -28,6 +30,7 @@ from PIL import Image
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import wp_katman as wk                                           # noqa: E402
 import wp_bakir as wb                                            # noqa: E402
+import wp_ornek as wo                                            # noqa: E402 (plate_adi, PLATE_B_11x14)
 
 Image.MAX_IMAGE_PIXELS = None
 SAYFA_B = 45                    # Canva sayfa 45-78 (GEMINI_LIBRA..VIRGO_VIRGO) -> plate B
@@ -64,8 +67,14 @@ def plate_oku(yol, wh):
 def uret(a):
     tam = ciftler(a.kok, a.boy)
     grup = [(n, c) for n, c in tam if n >= SAYFA_B]
+    if a.alt:                                                            # 11x14 alt kume plate'i (Serdar 2 Eki ek deneme)
+        uye = wo.PLATE_B_11x14[a.alt]
+        grup = [(n, c) for n, c in grup if c in uye]
+        if len(grup) != len(uye):
+            raise SystemExit(f'HATA: alt kume {a.alt}: {len(grup)} kaynak, tablo {len(uye)}')
     S0 = wk.dizi(kaynak(a.kok, grup[0][1], a.boy)); H, W = S0.shape[:2]; del S0
     P = plate_oku(a.plate, (W, H))
+    Y = plate_oku(a.yedek, (W, H)) if a.yedek else P                     # tum ciftlerde murekkep olan piksel
     LP = P @ wk.LUMA
     tmp = Path(a.tmp); tmp.mkdir(parents=True, exist_ok=True)
     n = len(grup)
@@ -98,6 +107,8 @@ def uret(a):
         del x, m
         eta(n + i + 1, 3 * n, f'maske {c}')
     K.flush()
+    if not a.alt and a.boy in KUME_BOY:
+        kume_kanit(a, S, K, grup, H, W)
     # 3. gecis: murekkep disi ortanca; tum ciftlerde murekkep (ortak yazi) = VINTAGE degeri (temizlenmis plate)
     B = np.empty((H, W, 3), np.uint8)
     bos = np.zeros((H, W), bool)
@@ -112,7 +123,7 @@ def uret(a):
             med = np.nanmedian(k, axis=0)
         b = np.isnan(med[..., 0])
         bos[y:y + T] = b
-        med[b] = P[y:y + T][b]
+        med[b] = Y[y:y + T][b]
         if (~b).any():
             gecerli_min = min(gecerli_min, int((~m).sum(0)[~b].min()))
         B[y:y + T] = np.clip(np.rint(med), 0, 255).astype(np.uint8)
@@ -121,7 +132,8 @@ def uret(a):
     del S, K
     (tmp / 'S.npy').unlink(); (tmp / 'K.npy').unlink()
     cik = Path(a.cik); cik.mkdir(parents=True, exist_ok=True)
-    ad = f'VINTAGE_B_{a.boy}.png'
+    ek = f'B{a.alt}' if a.alt else 'B'
+    ad = f'VINTAGE_{ek}_{a.boy}.png'
     Image.fromarray(B).save(cik / ad, optimize=False, compress_level=6)
     ys, xs = np.nonzero(bos)
     Bf = B.astype(np.float32)
@@ -129,14 +141,82 @@ def uret(a):
     iz = int((LP - Bf @ wk.LUMA > KOYU).sum())                                # plate B'de VINTAGE'e gore koyu iz (beklenen 0)
     R = {'boy': a.boy, 'plate': ad, 'px': [W, H], 'cift_sayisi': n, 'ilk': grup[0][1], 'son': grup[-1][1],
          'yontem': ('B0 = grup ham ortancasi; murekkep = murekkep_maskesi(S - B0, kenar=0) | (L_VINTAGE - L_S > '
-                    f'{KOYU:g}), genisletme {GENIS}; plate B = murekkep disi ortanca, tum ciftlerde murekkep = VINTAGE'),
+                    f'{KOYU:g}), genisletme {GENIS}; plate = murekkep disi ortanca, tum ciftlerde murekkep = '
+                    + (Path(a.yedek).name if a.yedek else 'VINTAGE')), 'alt_kume': a.alt, 'uyeler': [c for _, c in grup],
          'bos_px': int(bos.sum()), 'bos_pay': round(float(bos.mean()), 5),
          'bos_kutu': [int(xs.min()), int(ys.min()), int(xs.max()), int(ys.max())] if bos.any() else None,
          'ortanca_min_ornek': gecerli_min, 'koyu_iz_px': iz,
          'B_vs_VINTAGE_dE': wk.ozet(fark), 'murekkep': bilgi, 'sure_sn': round(time.time() - T0, 1)}
-    (cik / f'PLATE_B_{a.boy}.json').write_text(json.dumps(R, ensure_ascii=False, indent=1))
-    log('PLATE_B', json.dumps({x: R[x] for x in R if x != 'murekkep'}, ensure_ascii=False))
+    (cik / f'PLATE_{ek}_{a.boy}.json').write_text(json.dumps(R, ensure_ascii=False, indent=1))
+    log('PLATE_' + ek, json.dumps({x: R[x] for x in R if x not in ('murekkep', 'uyeler')}, ensure_ascii=False))
     log('MUREKKEP_PAYI', min(x['murekkep_payi'] for x in bilgi), max(x['murekkep_payi'] for x in bilgi))
+
+
+KUME_BOY = ('11x14',)
+ORNEK_PX = 400000
+
+
+def _ortalama_bag(D, k):
+    """Ortalama baglantili hiyerarsik kumeleme (n kucuk): k kume kalana kadar en yakin iki kumeyi birlestir."""
+    kum = [[i] for i in range(len(D))]
+    while len(kum) > k:
+        en = None
+        for i in range(len(kum)):
+            for j in range(i + 1, len(kum)):
+                d = float(D[np.ix_(kum[i], kum[j])].mean())
+                if en is None or d < en[0]:
+                    en = (d, i, j)
+        _, i, j = en
+        kum[i] += kum.pop(j)
+    return [sorted(x) for x in kum]
+
+
+def kume_kanit(a, S, K, grup, H, W):
+    """11x14 alt kume kaniti: 34 kaynagin kagidi cift cift, ORNEK_PX rastgele piksel (iki ciftte de murekkep disi),
+    dE (uretimin lab'i) ort / p99 matrisi. Ortalama baglantili kumeleme (k=3) ve birini-disarida-birak en yakin kume
+    wo.PLATE_B_11x14 tablosuyla karsilastirilir. Karar kapisi DEGIL (kapi tara'daki capraz plate testi); kanit."""
+    n = len(grup)
+    rng = np.random.default_rng(0)
+    idx = np.sort(rng.choice(H * W, min(ORNEK_PX, H * W), replace=False))
+    L = np.empty((n, len(idx), 3), np.float32)
+    ok = np.empty((n, len(idx)), bool)
+    for i in range(n):
+        L[i] = wk.lab(S[i].reshape(-1, 3)[idx][:, None, :].astype(np.float32))[:, 0]
+        ok[i] = ~K[i].reshape(-1)[idx]
+    ort = np.zeros((n, n), np.float32); p99 = np.zeros((n, n), np.float32)
+    for i in range(n):
+        for j in range(i + 1, n):
+            m = ok[i] & ok[j]
+            d = np.sqrt(((L[i, m] - L[j, m]) ** 2).sum(-1))
+            ort[i, j] = ort[j, i] = d.mean(); p99[i, j] = p99[j, i] = np.percentile(d, 99)
+    ad = [c for _, c in grup]
+    tablo = {c: k for k, v in wo.PLATE_B_11x14.items() for c in v}
+    kum = _ortalama_bag(p99, 3)
+    bulunan = sorted(sorted(ad[i] for i in x) for x in kum)
+    beklenen = sorted(sorted(c for c in ad if tablo[c] == k) for k in wo.PLATE_B_11x14)
+    loo = {}
+    for i, c in enumerate(ad):
+        uz = {k: float(np.mean([p99[i, j] for j, d in enumerate(ad) if tablo[d] == k and j != i]))
+              for k in wo.PLATE_B_11x14}
+        loo[c] = {'tablo': tablo[c], 'en_yakin': min(uz, key=uz.get), 'p99_ort': {k: round(v, 2) for k, v in uz.items()}}
+    blok = {}
+    for k1 in wo.PLATE_B_11x14:
+        for k2 in wo.PLATE_B_11x14:
+            if k2 < k1:
+                continue
+            ii = [i for i, c in enumerate(ad) if tablo[c] == k1]; jj = [j for j, c in enumerate(ad) if tablo[c] == k2]
+            v = [(ort[i, j], p99[i, j]) for i in ii for j in jj if i != j]
+            blok[f'K{k1}-K{k2}'] = {'ort': [round(float(min(x[0] for x in v)), 2), round(float(max(x[0] for x in v)), 2)],
+                                   'p99': [round(float(min(x[1] for x in v)), 2), round(float(max(x[1] for x in v)), 2)]}
+    R = {'boy': a.boy, 'ornek_px': int(len(idx)), 'olcu': 'dE (wk.lab), iki kaynakta da murekkep disi pikseller',
+         'kumeleme': 'ortalama baglanti, p99 uzakligi, k=3', 'bulunan': bulunan, 'tablo': beklenen,
+         'eslesme': bulunan == beklenen,
+         'loo_eslesme': sum(v['tablo'] == v['en_yakin'] for v in loo.values()), 'n': n,
+         'blok': blok, 'loo': loo, 'ciftler': ad,
+         'matris_ort': np.round(ort, 2).tolist(), 'matris_p99': np.round(p99, 2).tolist()}
+    cik = Path(a.cik); cik.mkdir(parents=True, exist_ok=True)
+    (cik / f'KUME_{a.boy}.json').write_text(json.dumps(R, ensure_ascii=False, indent=1))
+    log('KUME', json.dumps({x: R[x] for x in ('boy', 'eslesme', 'loo_eslesme', 'n', 'blok')}, ensure_ascii=False))
 
 
 def e_kagit(P, S):
@@ -152,39 +232,66 @@ def zemin(P, S):
     return {'ort': z.get('ort'), 'p99': z.get('p99'), 'gecti': bool(z.get('ort', 99) <= 0.5)}
 
 
+def adaylar(boy):
+    if boy == '11x14':
+        return ['VINTAGE_11x14.png'] + [f'VINTAGE_B{k}_11x14.png' for k in sorted(wo.PLATE_B_11x14)]
+    return [f'VINTAGE_{boy}.png', f'VINTAGE_B_{boy}.png']
+
+
+def kisa(ad, boy):
+    x = ad[:-len(f'_{boy}.png')]
+    return 'VINTAGE' if x == 'VINTAGE' else x[len('VINTAGE_'):]
+
+
+def hucre(P, S):
+    r = {'e_kagit': e_kagit(P, S), 'zemin': zemin(P, S)}
+    r['gecti'] = bool(r['e_kagit']['gecti'] and r['zemin']['gecti'])
+    return r
+
+
+def _aralik(v):
+    return [min(v), max(v)] if v else None
+
+
 def tara(a):
+    """78 cift x aday plate'ler. Secim = uretimin wo.plate_adi (siparis yolu). Kendi plate'i PASS, diger her aday
+    plate FAIL olmali (iki yonlu test)."""
     tam = ciftler(a.kok, a.boy)
     S0 = wk.dizi(kaynak(a.kok, tam[0][1], a.boy)); H, W = S0.shape[:2]; del S0
-    PA = plate_oku(a.plate, (W, H))
-    PB = plate_oku(a.plate_b, (W, H))
+    PL = {kisa(ad, a.boy): plate_oku(Path(a.plates) / ad, (W, H)) for ad in adaylar(a.boy)}
     sat = []
     for i, (no, c) in enumerate(tam, 1):
         S = wk.dizi(kaynak(a.kok, c, a.boy))
-        sec = 'B' if no >= SAYFA_B else 'VINTAGE'
-        P = PB if sec == 'B' else PA
-        r = {'cift': c, 'sayfa': no, 'boy': a.boy, 'plate': sec, 'e_kagit': e_kagit(P, S), 'zemin': zemin(P, S)}
-        if sec == 'B':
-            r['eski_plate'] = {'e_kagit': e_kagit(PA, S), 'zemin': zemin(PA, S)}
-        r['gecti'] = bool(r['e_kagit']['gecti'] and r['zemin']['gecti'])
+        sec = kisa(wo.plate_adi(c, no, a.boy), a.boy)
+        r = {'cift': c, 'sayfa': no, 'boy': a.boy, 'plate': sec, **hucre(PL[sec], S)}
+        r['yanlis'] = {k: hucre(P, S) for k, P in PL.items() if k != sec}
+        if sec != 'VINTAGE':
+            r['eski_plate'] = r['yanlis']['VINTAGE']
         sat.append(r)
         log('HUCRE', json.dumps(r, ensure_ascii=False))
         eta(i, len(tam), c)
         del S
     A = [r for r in sat if r['plate'] == 'VINTAGE']
-    B = [r for r in sat if r['plate'] == 'B']
+    B = [r for r in sat if r['plate'] != 'VINTAGE']
+    yl = [(r['cift'], r['plate'], k, v['gecti']) for r in sat for k, v in r['yanlis'].items()]
     o = {'boy': a.boy, 'hucre': len(sat), 'pass': sum(r['gecti'] for r in sat),
          'A44_eski_pass': sum(r['gecti'] for r in A), 'A_n': len(A),
          'B34_B_pass': sum(r['gecti'] for r in B), 'B_n': len(B),
-         'B34_eski_fail': sum(not r['eski_plate']['e_kagit']['gecti'] for r in B),
-         'B_ort_aralik': [min(r['e_kagit']['ort'] for r in B), max(r['e_kagit']['ort'] for r in B)],
-         'B_eski_ort_aralik': [min(r['eski_plate']['e_kagit']['ort'] for r in B),
-                               max(r['eski_plate']['e_kagit']['ort'] for r in B)],
+         'B34_eski_fail': sum(not r['eski_plate']['gecti'] for r in B),
+         'B_ort_aralik': _aralik([r['e_kagit']['ort'] for r in B]),
+         'B_eski_ort_aralik': _aralik([r['eski_plate']['e_kagit']['ort'] for r in B]),
+         'yanlis_n': len(yl), 'yanlis_fail': sum(not g for *_, g in yl),
+         'yanlis_pass': [f'{c} {p}->{k}' for c, p, k, g in yl if g],
+         'plate': {k: {'n': sum(r['plate'] == k for r in sat), 'pass': sum(r['gecti'] for r in sat if r['plate'] == k),
+                       'e_ort': _aralik([r['e_kagit']['ort'] for r in sat if r['plate'] == k]),
+                       'e_p99': _aralik([r['e_kagit']['p99'] for r in sat if r['plate'] == k]),
+                       'zemin': _aralik([r['zemin']['ort'] for r in sat if r['plate'] == k])} for k in PL},
          'sure_sn': round(time.time() - T0, 1)}
-    o['iki_yon'] = bool(o['A44_eski_pass'] == o['A_n'] and o['B34_B_pass'] == o['B_n'] and o['B34_eski_fail'] == o['B_n'])
+    o['iki_yon'] = bool(o['pass'] == o['hucre'] and o['yanlis_fail'] == o['yanlis_n'])
     cik = Path(a.cik); cik.mkdir(parents=True, exist_ok=True)
     (cik / f'TARA_{a.boy}.json').write_text(json.dumps({'ozet': o, 'hucreler': sat}, ensure_ascii=False, indent=1))
     log('OZET', json.dumps(o, ensure_ascii=False))
-    return 0 if o['pass'] == o['hucre'] and o['iki_yon'] else 1
+    return 0 if o['iki_yon'] else 1
 
 
 def toplam(a):
@@ -194,15 +301,16 @@ def toplam(a):
     md = ['| cift | sayfa | ' + ' | '.join(o['boy'] for o in oz) + ' |', '|---|---|' + '---|' * len(oz)]
     for c in sorted({r['cift'] for r in sat}):
         rr = {r['boy']: r for r in sat if r['cift'] == c}
-        h = [f"{rr[o['boy']]['plate'][0]} {rr[o['boy']]['e_kagit']['ort']}/{rr[o['boy']]['e_kagit']['p99']} "
+        h = [f"{rr[o['boy']]['plate']} {rr[o['boy']]['e_kagit']['ort']}/{rr[o['boy']]['e_kagit']['p99']} "
              f"{'PASS' if rr[o['boy']]['gecti'] else 'FAIL'}" for o in oz if o['boy'] in rr]
         md.append(f"| {c} | {next(iter(rr.values()))['sayfa']} | " + ' | '.join(h) + ' |')
     T = {'hucre': sum(o['hucre'] for o in oz), 'pass': sum(o['pass'] for o in oz),
          'iki_yon': all(o['iki_yon'] for o in oz), 'boylar': oz}
+    T['yanlis_n'] = sum(o.get('yanlis_n', 0) for o in oz); T['yanlis_fail'] = sum(o.get('yanlis_fail', 0) for o in oz)
     Path(a.cik).mkdir(parents=True, exist_ok=True)
     (Path(a.cik) / 'TARA_390.md').write_text('\n'.join(md) + '\n')
     (Path(a.cik) / 'TARA_390.json').write_text(json.dumps(T, ensure_ascii=False, indent=1))
-    log('TOPLAM', json.dumps({x: T[x] for x in ('hucre', 'pass', 'iki_yon')}),
+    log('TOPLAM', json.dumps({x: T[x] for x in ('hucre', 'pass', 'iki_yon', 'yanlis_n', 'yanlis_fail')}),
         json.dumps([{x: o[x] for x in ('boy', 'pass', 'hucre', 'A44_eski_pass', 'B34_B_pass', 'B34_eski_fail',
                                        'B_ort_aralik', 'B_eski_ort_aralik')} for o in oz]))
     return 0 if T['pass'] == T['hucre'] == 390 and T['iki_yon'] else 1
@@ -247,7 +355,9 @@ def main():
     ap.add_argument('--boy', default='11x14')
     ap.add_argument('--kok', default='')
     ap.add_argument('--plate', default='')
-    ap.add_argument('--plate-b', default='')
+    ap.add_argument('--plates', default='', help='tara: aday plate klasoru (VINTAGE_<boy>.png, VINTAGE_B*_<boy>.png)')
+    ap.add_argument('--alt', type=int, default=0, help='uret: 11x14 alt kume (1/2/3, wo.PLATE_B_11x14)')
+    ap.add_argument('--yedek', default='', help='uret: tum ciftlerde murekkep olan piksel icin plate (vars. VINTAGE)')
     ap.add_argument('--tmp', default='/mnt/plate_b')
     ap.add_argument('--cik', required=True)
     ap.add_argument('--cift', default='PISCES_SCORPIO')

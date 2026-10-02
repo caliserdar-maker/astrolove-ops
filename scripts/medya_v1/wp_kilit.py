@@ -12,12 +12,14 @@ KOK = Path(__file__).resolve().parent
 JSON = KOK / 'wp_kilit.json'
 DOSYALAR = ('wp_bakir.py', 'wp_katman.py')
 ORNEK_FONK = ('etiketle', 'yanyana', 'yanyana_baski', 'sutun_profili', 'koyu_sutun', '_yazi_maskesi',
-              'yanyana_dedektor', 'serdar_dikis', 'cift_boy', 'serit_uygula', 'plate_serit_onar')
-ORNEK_SABIT = ('DUZ_RENK', 'SERDAR_YAN', 'SERDAR_SERIT', 'PLATE_SERITLER')
+              'yanyana_dedektor', 'serdar_dikis', 'cift_boy', 'plate_adi', 'serit_uygula', 'plate_serit_onar')
+ORNEK_SABIT = ('DUZ_RENK', 'SERDAR_YAN', 'SERDAR_SERIT', 'PLATE_SERITLER', 'PLATE_B_11x14')
 EK_KARARLAR = ['Serdar 1 Eki ~15:50: 24x36 plate acik dikey cizgi (x 1937, y 4376-4440) onarimi; serit x 1935-1940, '
                'y 4370-4446 (PLATE_SERITLER), yontem 11x14 ile ayni',
                'Serdar 2 Eki: SECENEK A, sayfa 45-78 ciftleri ikinci plate VINTAGE_B_<boy>.png (cift_boy plate secimi); '
-               'kapi ve esikler ayni']
+               'kapi ve esikler ayni',
+               'Serdar 2 Eki (11x14 ek deneme): 11x14 sayfa 45-78 uc alt kume, cift bazli VINTAGE_B<k>_11x14.png '
+               '(PLATE_B_11x14, plate_adi); diger boylar VINTAGE_B_<boy>.png; kapi ve esikler ayni']
 BAKIR_SABIT = ('BAKIR_KOYU', 'T0', 'KENAR_PX', 'KOYU_ALT', 'KOYU_SIKISTIR', 'ESIK_DE', 'MIN_ALAN_BAKIR', 'DOLU',
                'DIKIS_DUZLE', 'KABARTMA_SIGMA', 'KABARTMA_ESIK', 'DIKIS_BOY', 'DIKIS_T', 'DIKIS_KOMSU')
 

@@ -7,7 +7,8 @@
  },
  "ek_kararlar": [
   "Serdar 1 Eki ~15:50: 24x36 plate acik dikey cizgi (x 1937, y 4376-4440) onarimi; serit x 1935-1940, y 4370-4446 (PLATE_SERITLER), yontem 11x14 ile ayni",
-  "Serdar 2 Eki: SECENEK A, sayfa 45-78 ciftleri ikinci plate VINTAGE_B_<boy>.png (cift_boy plate secimi); kapi ve esikler ayni"
+  "Serdar 2 Eki: SECENEK A, sayfa 45-78 ciftleri ikinci plate VINTAGE_B_<boy>.png (cift_boy plate secimi); kapi ve esikler ayni",
+  "Serdar 2 Eki (11x14 ek deneme): 11x14 sayfa 45-78 uc alt kume, cift bazli VINTAGE_B<k>_11x14.png (PLATE_B_11x14, plate_adi); diger boylar VINTAGE_B_<boy>.png; kapi ve esikler ayni"
  ],
  "ozet": {
   "dosya": {
@@ -23,7 +24,8 @@
    "_yazi_maskesi": "f3147eb13cc53365a0ced0c87e9ce02d11550b3f663384441c749b25498c2d7f",
    "yanyana_dedektor": "18ac1b4406838675d86df0f8913c50afabb7ce4f2840aa243ec20697142ab94c",
    "serdar_dikis": "4842f96f9f6e546fe2b20f17fc20e19a6f4daf0a6945c9eab08c0a734dde4f9e",
-   "cift_boy": "73d82e12cf8101ecf8027401b6df7d8a47f8cce742d1efd23d52edaee7ecfcc9",
+   "cift_boy": "771a1012d753db25015e15f5bafd4f6424c60d55bbd4ac5a8a2978f821e68bdf",
+   "plate_adi": "bfde32ad789936b7a2bde3ee79b6591056996c2f440402b1edce6ba83efca87f",
    "serit_uygula": "fa58a1e4de24c77424038e5b7c6d2f454fc143d7646e466123a00c0167d2fcdd",
    "plate_serit_onar": "63baa558d6508ecb6468d1358d3275d3aa32ae426d6e8f6bbe0e8318de5ad174"
   },
@@ -52,6 +54,48 @@
       4370,
       4447
      ]
+    ]
+   },
+   "PLATE_B_11x14": {
+    "1": [
+     "GEMINI_LIBRA",
+     "GEMINI_PISCES",
+     "LEO_LIBRA",
+     "LEO_PISCES",
+     "LEO_SAGITTARIUS",
+     "LEO_SCORPIO",
+     "LEO_TAURUS",
+     "LEO_VIRGO",
+     "LIBRA_LIBRA",
+     "LIBRA_PISCES",
+     "LIBRA_SAGITTARIUS",
+     "LIBRA_SCORPIO",
+     "LIBRA_TAURUS",
+     "PISCES_SAGITTARIUS",
+     "PISCES_VIRGO",
+     "SAGITTARIUS_SAGITTARIUS",
+     "SAGITTARIUS_SCORPIO",
+     "SCORPIO_SCORPIO"
+    ],
+    "2": [
+     "GEMINI_SAGITTARIUS",
+     "GEMINI_SCORPIO",
+     "GEMINI_TAURUS",
+     "LIBRA_VIRGO",
+     "PISCES_PISCES",
+     "TAURUS_VIRGO",
+     "VIRGO_VIRGO"
+    ],
+    "3": [
+     "GEMINI_VIRGO",
+     "LEO_LEO",
+     "PISCES_SCORPIO",
+     "PISCES_TAURUS",
+     "SAGITTARIUS_TAURUS",
+     "SAGITTARIUS_VIRGO",
+     "SCORPIO_TAURUS",
+     "SCORPIO_VIRGO",
+     "TAURUS_TAURUS"
     ]
    }
   },
