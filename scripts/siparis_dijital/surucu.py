@@ -284,8 +284,13 @@ def wp_bakir_uret_v1(sd, sip, P_blue, P_ed, cik):
                **{a: bool(q[a]['gecti']) for a in WP_KAPILAR},
                'plate': bool(R['plate_gecti']), 'zemin_birebir': bool(R['zemin_birebir']['gecti']),
                'eski_iz': bool(R['eski_iz']['gecti']), 'boy': bpx == list(sip['hedef_px'])}
+    # Serdar 2 Eki (Test 4): e_kagit ve plate kapilarinin SAYILARI da OZET'e (yalniz true/false yetmez)
+    pl = R.get('plate') or {}
+    sayi = {'e_kagit': {k: q['e_kagit'].get(k) for k in ('px', 'ort', 'p99', 'esik_ort', 'esik_p99', 'gecti')},
+            'plate': {'zemin_uyumu': pl.get('zemin_uyumu'),
+                      'temizlik_gecti': (pl.get('temizlik') or {}).get('gecti'), 'gecti': R.get('plate_gecti')}}
     return {**sip, 'durum': 'URETILDI', 'yontem': 'WP_BAKIR', 'baski_px': bpx,
-            'dosya_MB': round((cik / ad).stat().st_size / 1e6, 2), 'kapilar': kapilar,
+            'dosya_MB': round((cik / ad).stat().st_size / 1e6, 2), 'kapilar': kapilar, 'kapi_sayilari': sayi,
             'kapilar_gecti': all(kapilar.values()), 'bilgi_d_dikis': q['d_dikis'], 'wp_bakir': ozet}
 
 
@@ -321,7 +326,8 @@ def wp_asamasi(a, g):
     r = sd.wp_bakir_uret(x, P_blue, P_ed, ara) if hasattr(sd, 'wp_bakir_uret') else wp_bakir_uret_v1(sd, x, P_blue, P_ed, ara)
     oz = {'boy': a.boy, 'durum': r.get('durum'), 'yontem': r.get('yontem'), 'baski_px': r.get('baski_px'),
           'kapilar': r.get('kapilar'), 'kapilar_gecti': r.get('kapilar_gecti'), 'dosya_MB': r.get('dosya_MB'),
-          'jpeg_kalite': kalite.get(f'BASKI_{a.boy}.jpg'), 'wp_bakir': r.get('wp_bakir'), 'kod': a.kod_ref,
+          'jpeg_kalite': kalite.get(f'BASKI_{a.boy}.jpg'), 'kapi_sayilari': r.get('kapi_sayilari'),
+          'wp_bakir': r.get('wp_bakir'), 'kod': a.kod_ref,
           'wp_kilit': 'TAMAM'}
     jpg = ara / f'BASKI_{a.boy}.jpg'
     if jpg.exists():
@@ -337,6 +343,7 @@ def wp_asamasi(a, g):
     (cik / f'OZET_WP_{a.boy}.json').write_text(json.dumps(oz, ensure_ascii=False, indent=1, default=str))
     print('WP', a.boy, json.dumps({q: oz[q] for q in ('durum', 'kapilar_gecti', 'baski_px', 'dosya_MB', 'jpeg_kalite')}),
           json.dumps(oz['kapilar']), flush=True)
+    print('WP_SAYI', a.boy, json.dumps(oz['kapi_sayilari'], default=str), flush=True)
     return 0 if oz['durum'] == 'URETILDI' and oz['kapilar_gecti'] else 1
 
 

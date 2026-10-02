@@ -2,8 +2,8 @@
 """WP plate - onayli kaynak kagit KAYMA TANISI (salt okur; Serdar onayi 2 Eki, Test 4 e_kagit + plate FAIL).
 
 Her boy icin: onayli WARM_PARCHMENT kaynagi (S) ile VINTAGE_<boy> plate'i (P0, siparis yolundaki gibi boyutla) arasinda
-- zemin_uyumu: dE(P, S) murekkep disi (wp_ornek: murekkep_maskesi(S - P0, kenar=0)), esik ort <= 0.5
-- e_kagit (yaklasik, kagit = plate): dE(P, S) 17 px genisletilmis murekkep disi, esik ort <= 0.5, p99 <= 3.0
+- zemin_uyumu: wp_ornek ile ayni uretim fonksiyonlari (wk.ozet / wk.dE / wk.murekkep_maskesi), esik ort <= 0.5
+- e_kagit burada YOK (ders 33): uretim degeri kayma_uretim.py (surucu.wp_asamasi -> wp_bakir.qc)
 - kayma: yuksek geciren luma (murekkep sifirlanmis) faz korelasyonu; global ve 4x4 karo
 - kayma sonrasi (P1 = P0 global kaydirilmis) ayni olcumler
 Isim / mesaj / musteri verisi YOK. Cikti: <cik>/KAYMA_<boy>.json + KESIT_<boy>.jpg (S | P0 | P1 | |S-P0| x4 | |S-P1| x4).
@@ -28,20 +28,14 @@ def dE_parca(wk, A, B, parca=512):
     return out
 
 
-def ozet(d, m):
-    v = d[m]
-    return {'px': int(v.size), 'ort': round(float(v.mean()), 3), 'p95': round(float(np.percentile(v, 95)), 2),
-            'p99': round(float(np.percentile(v, 99)), 2)}
-
-
 def olc(wk, S, P):
+    """zemin_uyumu, wp_ornek ile ayni: wk.ozet(wk.dE(P, S), ~wk.murekkep_maskesi(S - P, kenar=0)), esik ort <= 0.5.
+    e_kagit BURADA OLCULMEZ (ders 33): uretim wp_bakir.qc degeri kayma_uretim.py'den gelir."""
     mk = wk.murekkep_maskesi(S - P, kenar=0)
     d = dE_parca(wk, P, S)
-    haric = cv2.dilate(mk.astype(np.uint8), np.ones((17, 17), np.uint8)).astype(bool)
-    z, e = ozet(d, ~mk), ozet(d, ~haric)
-    z['gecti'] = z['ort'] <= 0.5
-    e['gecti'] = bool(e['ort'] <= 0.5 and e['p99'] <= 3.0)
-    return {'zemin_uyumu': z, 'e_kagit_yaklasik': e}, d, mk
+    z = wk.ozet(d, ~mk)
+    z['gecti'] = z.get('ort', 99) <= 0.5
+    return {'zemin_uyumu': z}, d, mk
 
 
 def yuksek(L, mk):

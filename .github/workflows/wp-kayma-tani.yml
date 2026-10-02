@@ -11,9 +11,14 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
+      receipt: {description: "test receipt (rakam)", required: true}
       cift: {description: "tek cift (orn. PISCES_SCORPIO)", required: true}
+      isim1: {description: "isim 1", required: true}
+      isim2: {description: "isim 2", required: true}
+      mesaj_b64: {description: "mesaj base64", required: true}
       boylar: {description: "virgullu WP boylari", required: false, default: "11x14,16x20,18x24,24x36,A2"}
-      wp_ref: {description: "WP kodu (wp_katman) commit", required: false, default: "adfb2b99489798296936669575309b777c7e1ca7"}
+      renk_ref: {description: "siparis-baski-v1 commit", required: true}
+      wp_ref: {description: "WP kodu commit", required: false, default: "adfb2b99489798296936669575309b777c7e1ca7"}
 
 jobs:
   plan:
@@ -24,6 +29,10 @@ jobs:
       - id: p
         run: |
           set -euo pipefail
+          for k in isim1 isim2; do v=$(jq -r ".inputs.$k" "$GITHUB_EVENT_PATH"); echo "::add-mask::$v"; echo "::add-mask::${v^^}"; done
+          m=$(jq -r '.inputs.mesaj_b64' "$GITHUB_EVENT_PATH" | base64 -d); echo "::add-mask::$m"
+          jq -re '.inputs.receipt | test("^[0-9]+$")' "$GITHUB_EVENT_PATH" >/dev/null
+          jq -re '.inputs.renk_ref | test("^[0-9a-f]{40}$")' "$GITHUB_EVENT_PATH" >/dev/null
           jq -re '.inputs.cift | test("^[A-Z]+_[A-Z]+$")' "$GITHUB_EVENT_PATH" >/dev/null
           jq -re '.inputs.boylar | test("^[0-9A-Za-z,]+$")' "$GITHUB_EVENT_PATH" >/dev/null
           jq -re '.inputs.wp_ref | test("^[0-9a-f]{40}$")' "$GITHUB_EVENT_PATH" >/dev/null
@@ -31,7 +40,7 @@ jobs:
   olc:
     needs: plan
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 180
     strategy:
       fail-fast: false
       matrix:
@@ -40,6 +49,11 @@ jobs:
       CIFT: ${{ inputs.cift }}
       BOY: ${{ matrix.boy }}
     steps:
+      - name: Maske
+        run: |
+          set -euo pipefail
+          for k in isim1 isim2; do v=$(jq -r ".inputs.$k" "$GITHUB_EVENT_PATH"); echo "::add-mask::$v"; echo "::add-mask::${v^^}"; done
+          m=$(jq -r '.inputs.mesaj_b64' "$GITHUB_EVENT_PATH" | base64 -d); echo "::add-mask::$m"
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
@@ -48,15 +62,31 @@ jobs:
           ref: ${{ inputs.wp_ref }}
           path: _wp
           fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.renk_ref }}
+          path: _v1
+          fetch-depth: 1
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: python -m pip install --quiet pillow numpy opencv-python-headless
+      - run: |
+          python -m pip install --quiet --upgrade pip
+          python -m pip install --quiet pillow opencv-python-headless numpy fonttools img2pdf pikepdf
+      - name: WP kilidi + kilitli dosyalar v1 ustune (siparis-dijital wp isiyle ayni)
+        run: |
+          set -euo pipefail
+          (cd _wp && python scripts/medya_v1/test_wp_kilit.py)
+          for f in wp_bakir.py wp_katman.py wp_ornek.py wp_kilit.py wp_kilit.json wp_tani.py test_wp_kilit.py; do
+            [ -e "_v1/scripts/medya_v1/$f" ] && { echo "HATA: $f v1'de zaten var" >&2; exit 1; }
+            cp "_wp/scripts/medya_v1/$f" "_v1/scripts/medya_v1/$f"
+          done
+          (cd _v1 && python scripts/medya_v1/test_wp_kilit.py)
       - name: Takas alani (buyuk boy bellek)
         if: ${{ matrix.boy == '24x36' || matrix.boy == 'A2' }}
         run: |
           set -euo pipefail
-          sudo fallocate -l 24G /mnt/takas2 && sudo chmod 600 /mnt/takas2 && sudo mkswap /mnt/takas2 >/dev/null && sudo swapon /mnt/takas2
+          sudo fallocate -l 32G /mnt/takas2 && sudo chmod 600 /mnt/takas2 && sudo mkswap /mnt/takas2 >/dev/null && sudo swapon /mnt/takas2
           free -g
       - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
       - name: rclone.conf olustur
@@ -82,8 +112,21 @@ jobs:
           rclone copyto "gdrive:ASTROLOVE/TEMP/POD_PRINT/$CIFT/WARM_PARCHMENT/$BOY.jpg" "_in/kaynak.jpg"
           rclone copyto "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PLATES/VINTAGE_$BOY.png" "_in/plate.png"
           ls -la _in; echo "SURE indir $(( $(date +%s) - T0 )) sn"
-      - name: Olc
+      - name: Olc (kayma)
         run: python scripts/wp/kayma_tani.py --wp-kod _wp/scripts/medya_v1 --kaynak _in/kaynak.jpg --plate _in/plate.png --boy "$BOY" --cik out
+      - name: Uretim yolu once / sonra (surucu.wp_asamasi; e_kagit = wp_bakir.qc)
+        run: |
+          set -euo pipefail
+          rm -rf _in
+          read DX DY < <(python -c "import json;k=json.load(open('out/KAYMA_$BOY.json'))['kayma_global']['karo_medyan'];print(k['dx'],k['dy'])")
+          echo "kayma dx=$DX dy=$DY"
+          python scripts/wp/kayma_uretim.py --kod _v1 --kod-ref "wp $WP_REF + v1 $RENK_REF" --boy "$BOY" --dx "$DX" --dy "$DY" --cikti uret
+          mkdir -p out/once out/sonra
+          cp uret/KAYMA_URETIM_$BOY.json out/
+          for t in once sonra; do cp uret/$t/OZET_WP_$BOY.json out/$t/ || true; done
+        env:
+          WP_REF: ${{ inputs.wp_ref }}
+          RENK_REF: ${{ inputs.renk_ref }}
       - name: Drive
         if: ${{ always() }}
         run: |
