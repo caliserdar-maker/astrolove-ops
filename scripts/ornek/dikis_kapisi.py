@@ -6,10 +6,10 @@ import numpy as np, cv2
 from PIL import Image
 LUMA = np.array([0.299, 0.587, 0.114], np.float32)
 
-def satirlar(rgb):
+def satirlar(rgb, taban_esik=40.0):
     a = np.asarray(rgb.convert('RGB')).astype(np.float32); L = a @ LUMA
     z = float(np.median(L)); d = np.abs(L - z)
-    m = d > max(40.0, 0.5 * float(np.percentile(d, 99.5)))
+    m = d > max(taban_esik, 0.5 * float(np.percentile(d, 99.5)))
     # IC piksel: glif kenarindan >= D px (kabartma golgesi / antialias kenarda; icerde renk yalniz satira bagli)
     rows = np.nonzero(m.sum(1) >= 3)[0]; Hm = (rows[-1] - rows[0] + 1) if len(rows) else 1
     D = max(3.0, 0.015 * Hm)
@@ -24,6 +24,8 @@ def satirlar(rgb):
 
 def dikis(rgb, w_oran=0.03):
     ys, v, n, taban = satirlar(rgb)
+    if len(ys) < 10:                                   # dusuk kontrast (WP bakir / parsomen): esik tabani 25
+        ys, v, n, taban = satirlar(rgb, 25.0)
     if len(ys) < 10: return {'hata': 'murekkep yok'}
     H = ys[-1] - ys[0] + 1; W = max(5, 2 * int(round(w_oran * H / 2)) + 1)
     pad = W // 2; vp = np.pad(v, ((pad, pad), (0, 0)), mode='edge')

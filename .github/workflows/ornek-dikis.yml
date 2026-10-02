@@ -26,6 +26,10 @@ on:
         description: "prova.py SETLER anahtari"
         required: false
         default: "SERDAR"
+      yalniz_derle:
+        description: "doluysa sayfa uretilmez; bu run id'nin ornek_* artifact'leri derlenir"
+        required: false
+        default: ""
       sembol:
         description: "ek sembol isleri SET:boy (virgullu, MB ONCE; orn. CAGLA:11x14,CAGLA:A2); bos = yok"
         required: false
@@ -67,6 +71,7 @@ jobs:
 
   is:
     needs: plan
+    if: ${{ inputs.yalniz_derle == '' }}
     strategy:
       fail-fast: false
       max-parallel: 10
@@ -150,10 +155,21 @@ jobs:
           python-version: "3.12"
       - run: python -m pip install --quiet pillow opencv-python-headless numpy
       - uses: actions/download-artifact@v4
+        if: ${{ inputs.yalniz_derle == '' }}
         with:
           pattern: ornek_*
           path: giris
           merge-multiple: true
+      - name: Onceki kosunun artifact'leri
+        if: ${{ inputs.yalniz_derle != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          K: ${{ inputs.yalniz_derle }}
+        run: |
+          set -euo pipefail
+          [[ "$K" =~ ^[0-9]+$ ]] || { echo "HATA: run id" >&2; exit 1; }
+          gh run download "$K" -R "$GITHUB_REPOSITORY" -p 'ornek_*' -D _ind
+          mkdir -p giris && for d in _ind/*; do cp -r "$d"/. giris/; done
       - name: Derle (kesit + olcu + onizleme)
         run: |
           set -euo pipefail
