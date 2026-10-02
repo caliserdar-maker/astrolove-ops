@@ -49,7 +49,7 @@ concurrency: siparis-dijital-${{ github.event.inputs.receipt }}-${{ github.event
 
 env:
   RENK_REF: ${{ github.event.inputs.renk_ref || '8a8b370edb74cb52402b4939d38ba14d2d2105fd' }}
-  WP_REF: adfb2b99489798296936669575309b777c7e1ca7
+  WP_REF: 58bed04f7817169a70eec18c920106f879643024
 
 jobs:
   plan:
