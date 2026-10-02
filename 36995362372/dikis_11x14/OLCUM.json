@@ -1,0 +1,72 @@
+[
+ {
+  "etiket": "DEEP_BLACK_11x14",
+  "tagline_kutu": [
+   1001,
+   3563,
+   2301,
+   3740
+  ],
+  "ONCE": {
+   "dikis": 14.0,
+   "dikis_ust": 14.0,
+   "dikis_alt": 12.5,
+   "dikis_govde": 4.0,
+   "en_kotu_satir": 21,
+   "taban": 118,
+   "pencere": 5,
+   "satir": [
+    18,
+    156
+   ]
+  },
+  "SONRA": {
+   "dikis": 7.0,
+   "dikis_ust": 5.0,
+   "dikis_alt": 7.0,
+   "dikis_govde": 3.0,
+   "en_kotu_satir": 118,
+   "taban": 118,
+   "pencere": 5,
+   "satir": [
+    18,
+    156
+   ]
+  }
+ },
+ {
+  "etiket": "PURE_WHITE_11x14",
+  "tagline_kutu": [
+   979,
+   3563,
+   2324,
+   3743
+  ],
+  "ONCE": {
+   "dikis": 18.0,
+   "dikis_ust": 15.0,
+   "dikis_alt": 18.0,
+   "dikis_govde": 3.5,
+   "en_kotu_satir": 129,
+   "taban": 119,
+   "pencere": 5,
+   "satir": [
+    16,
+    160
+   ]
+  },
+  "SONRA": {
+   "dikis": 12.0,
+   "dikis_ust": 5.0,
+   "dikis_alt": 12.0,
+   "dikis_govde": 4.0,
+   "en_kotu_satir": 129,
+   "taban": 119,
+   "pencere": 5,
+   "satir": [
+    16,
+    159
+   ]
+  }
+ }
+]
