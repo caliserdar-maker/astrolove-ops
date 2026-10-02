@@ -204,12 +204,12 @@ def _sembol_gecti(fark, dx, dy, iou, esik):
     return abs(dx) <= 1 and dy == 0 and fark <= esik['fark'] and iou >= esik['iou']
 
 
-# SEMBOL ZEMIN MASKESI (ORNEK, onay bekliyor; 2 Eki): fark yalniz sembol pikselinde, ZEMIN KATKISI DUSULEREK olculur.
+# SEMBOL ZEMIN MASKESI (Serdar onayi 2 Eki, varsayilan ACIK; SEMBOL_CEKIRDEK=0 kapatir): fark yalniz sembol pikselinde, ZEMIN KATKISI DUSULEREK olculur.
 # Sembol yari saydam altin; kisa isimde ~208 px kayinca farkli plate zeminine biner ve butun pikselleri zemin farki kadar
 # kayar (CAGLA MB 11x14 sag: zemin farki medyan RGB (0, -2, -6), fark 6.61; 1 px kenar maskesi 6.60 - yetmiyor).
 # Pencerede sembolden >= 7 px uzak zemin halkasinin (uretim - kaynak) medyani her aday hizalamada farktan dusulur.
 # Sembolun sekil / renk farki aynen olculur (yerel olcum: 6.61 -> 3.25). IoU ve hizalama aramasi degismez.
-SEMBOL_CEKIRDEK = {'etkin': os.environ.get('SEMBOL_CEKIRDEK') == '1'}
+SEMBOL_CEKIRDEK = {'etkin': os.environ.get('SEMBOL_CEKIRDEK', '1') != '0'}
 
 
 def sembol_kapisi(poster, S, s, merkez, m_src, esik, maske=None, doku=False):

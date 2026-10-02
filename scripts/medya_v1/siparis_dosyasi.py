@@ -691,10 +691,10 @@ def _uc(profil, q=OLCEK_UC):
     return nokta(q * T), nokta((1 - q) * T)
 
 
-# OLCEK GOVDE (ORNEK, onay bekliyor; 2 Eki): olcek penceresinde isim bandinin TAMAMEN disinda kalan murekkep bilesenleri
+# OLCEK GOVDE (Serdar onayi 2 Eki, varsayilan ACIK; OLCEK_GOVDE=0 kapatir): olcek penceresinde isim bandinin TAMAMEN disinda kalan murekkep bilesenleri
 # (aksan: U noktalari, G kavisi, C cengeli) atilir; yalniz harf govdesi olculur. CAGLA PW 11x14: pencere (bant +- 10) aksani
 # ortadan kesiyordu (125 px icerde, 243 px disarda) -> cap_sol 1.56; aksansiz ayni sayfa -0.22.
-OLCEK_GOVDE = {'etkin': os.environ.get('OLCEK_GOVDE') == '1'}
+OLCEK_GOVDE = {'etkin': os.environ.get('OLCEK_GOVDE', '1') != '0'}
 
 
 def satir_olc_alt(im, bant, k=1.0, pay=OLCEK_PAY):

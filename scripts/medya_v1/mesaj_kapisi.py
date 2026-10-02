@@ -31,12 +31,12 @@ if os.environ.get('MESAJ_ESIK'):
 ETKIN = {'edisyon': False}     # tagline ton eslemesi yalniz edisyon (Blue disi) render'inda (siparis_dosyasi)
 TON_SINIR = (0.6, 1.7)
 
-# DIKIS DUZELTMESI (ORNEK, Serdar onayi bekliyor; 2 Eki DIKIS_TANI): tagline profili (pilot7.altin_sekil) isim referans
+# DIKIS DUZELTMESI (Serdar onayi 2 Eki; DIKIS_TANI): tagline profili (pilot7.altin_sekil) isim referans
 # glifinden ornekleniyor; ilk satirlari kenar / parlama sicramasi (MB: dL +63, -99, +101) -> cap ust kenarinda ve aynalanan
 # ust uzantilarda cok cizgili acik bant; kuyruk_duzlestir'in SABIT kuyrugu baseline cevresinde iki sert kenarli serit.
 # Duzeltme: bas ve son %20'de |dL| > esik olan uc satirlar atilir, kalan profil butun banda gerilir (sabit kuyruk yok).
-# esik = max(6, 4 x medyan |dL|) (kisa profilde satir basi egim buyuk). Varsayilan KAPALI: DIKIS_DUZELT=1 ile acilir.
-DIKIS = {'etkin': os.environ.get('DIKIS_DUZELT') == '1'}
+# esik = max(6, 4 x medyan |dL|) (kisa profilde satir basi egim buyuk). Serdar onayi 2 Eki: varsayilan ACIK (DIKIS_DUZELT=0 kapatir).
+DIKIS = {'etkin': os.environ.get('DIKIS_DUZELT', '1') != '0'}
 DIKIS_UC, DIKIS_ESIK = 0.20, 6.0
 
 
