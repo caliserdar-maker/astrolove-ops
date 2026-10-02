@@ -26,7 +26,7 @@ Baski dosyasi HIBRIT birlestirmeyle kurulur: tuval o dosyadir, yalnizca degisen 
 Rapor hem gorsel dpi'yi hem de kisisellestirilen bandin gercek dpi'sini yazar.
 `--kaynak canva` secenegi POD_PRINT'te olmayan boylar icin durur (imzali URL listesi gerekir).
 """
-import argparse, io, json, re, subprocess, sys, time, urllib.request
+import argparse, io, json, os, re, subprocess, sys, time, urllib.request
 from pathlib import Path
 
 import numpy as np
@@ -691,6 +691,12 @@ def _uc(profil, q=OLCEK_UC):
     return nokta(q * T), nokta((1 - q) * T)
 
 
+# OLCEK GOVDE (ORNEK, onay bekliyor; 2 Eki): olcek penceresinde isim bandinin TAMAMEN disinda kalan murekkep bilesenleri
+# (aksan: U noktalari, G kavisi, C cengeli) atilir; yalniz harf govdesi olculur. CAGLA PW 11x14: pencere (bant +- 10) aksani
+# ortadan kesiyordu (125 px icerde, 243 px disarda) -> cap_sol 1.56; aksansiz ayni sayfa -0.22.
+OLCEK_GOVDE = {'etkin': os.environ.get('OLCEK_GOVDE') == '1'}
+
+
 def satir_olc_alt(im, bant, k=1.0, pay=OLCEK_PAY):
     """Isim satiri geometrisi 2400 px biriminde, ALT PIKSEL (olcek kapisi icin).
 
@@ -711,6 +717,15 @@ def satir_olc_alt(im, bant, k=1.0, pay=OLCEK_PAY):
     y0, y1 = max(int(np.floor(Y0)), 0), min(int(np.ceil(Y1)), im.height)
     kes = np.asarray(im.convert('RGB').crop((0, y0, im.width, y1))).astype(np.float32)
     m = eu.murekkep(kes)
+    if OLCEK_GOVDE['etkin']:
+        b0, b1 = bant[0] * k - y0, bant[1] * k - y0
+        n, lab, st, _ = cv2.connectedComponentsWithStats(m.astype(np.uint8), 8)
+        tut = np.ones(n, bool); tut[0] = False
+        for i in range(1, n):
+            ty, hy = st[i, cv2.CC_STAT_TOP], st[i, cv2.CC_STAT_HEIGHT]
+            if ty + hy <= b0 or ty >= b1:                    # bilesen bandin tamamen ustunde / altinda: aksan
+                tut[i] = False
+        m = tut[lab]
     km = [c for c in eu._kumeler(m, max(int(round(20 * k)), 1)) if c[1] - c[0] > 40 * k]
     if len(km) != 3:
         return {'hata': f'{len(km)} kume'}

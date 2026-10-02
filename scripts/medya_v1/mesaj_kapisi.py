@@ -40,6 +40,36 @@ DIKIS = {'etkin': os.environ.get('DIKIS_DUZELT') == '1'}
 DIKIS_UC, DIKIS_ESIK = 0.20, 6.0
 
 
+def altin_sekil_duz(mask, prof, bant, yumusak=False, sigma=None, kh=None, ks=None):
+    """pilot7.altin_sekil ile AYNI (gecis + glif kabartmasi); tek fark: taban (baseline) altinda profil AYNALANMAZ,
+    son satirin rengi duz devam eder (2. deneme, 2 Eki: aynalama kirpilan profilin son egimini baseline'da tepeye
+    ceviriyordu; 11x14 MB alt hat 10.5 -> 17). Ust (cap ustu) aynalama aynen."""
+    import pilot7
+    from PIL import Image as _I, ImageFilter
+    sigma = pilot7.SIGMA if sigma is None else sigma; kh = pilot7.KH if kh is None else kh; ks = pilot7.KS if ks is None else ks
+    m = np.asarray(mask).astype(np.float32) / 255.0
+    h, w = m.shape
+    ust, taban = bant
+    r = np.arange(h, dtype=np.float32)
+    u = (r - ust) / max(taban - ust, 1)
+    u = np.where(u < 0, -u, u)
+    u = np.clip(u, 0, 1)                                   # taban alti: duz uc (aynalama yok)
+    idx = u * (len(prof) - 1)
+    lo = np.floor(idx).astype(int)
+    hi = np.minimum(lo + 1, len(prof) - 1)
+    t = (idx - lo)[:, None]
+    base = (prof[lo] * (1 - t) + prof[hi] * t)[:, None, :] * np.ones((1, w, 1), np.float32)
+    hf = np.asarray(_I.fromarray((m * 255).astype(np.uint8), "L").filter(
+        ImageFilter.GaussianBlur(sigma))).astype(np.float32) / 255.0
+    gy = np.gradient(hf, axis=0)
+    sm = float(np.max(np.abs(gy))) or 1.0
+    sh = np.clip(gy / sm, -1, 1)[:, :, None]
+    o = np.zeros((h, w, 4), np.uint8)
+    o[..., :3] = np.clip(base * (1 + kh * np.clip(sh, 0, 1) + ks * np.clip(sh, -1, 0)), 0, 255).astype(np.uint8)
+    o[..., 3] = np.clip(m * 255, 0, 255).astype(np.uint8)
+    return _I.fromarray(o, "RGBA")
+
+
 def profil_kenar_kirp(prof, uc=DIKIS_UC, esik=DIKIS_ESIK):
     """Profilin bas / son kenar satirlarini atar. Doner (profil, (i0, i1))."""
     p = np.asarray(prof, np.float32)
@@ -100,6 +130,12 @@ def duzeltme_uygula(pilot12, pilot16=None):
         return p, int(ok[-1])
     kuyruk_duzlestir.eski = eski
     pilot12.kuyruk_duzlestir = kuyruk_duzlestir
+    asil_sekil = getattr(pilot12.altin_sekil, 'eski', pilot12.altin_sekil)
+    if DIKIS['etkin']:
+        altin_sekil_duz.eski = asil_sekil
+        pilot12.altin_sekil = altin_sekil_duz
+    else:
+        pilot12.altin_sekil = asil_sekil
     tp = getattr(pilot12.tagline_plaka, 'eski', pilot12.tagline_plaka)
 
     def tagline_plaka(s, S, metin):

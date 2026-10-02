@@ -11,7 +11,7 @@ Kapak / kart 09: Cancer-Libra posteri ayni sarmalayiciyla uretilir, canli ilan g
 oturtulur (olcek + konum olculur), sonra o alanin TAMAMI ciftin posteriyle degisir; sahnenin geri kalani ayni.
 Girdi: Drive KISISEL_PILOT/A1_LISTE.json {"sayfa": {"1": url, ...}} (imzali URL'ler, loga maskeli, kosu sonunda silinir)
 Cikti: Drive .../AQUARIUS_AQUARIUS_v1/REVIEW/A_ORNEK/"""
-import io, json, subprocess, sys, time, urllib.request
+import io, json, os, subprocess, sys, time, urllib.request
 from pathlib import Path
 import numpy as np
 from PIL import Image
@@ -204,6 +204,14 @@ def _sembol_gecti(fark, dx, dy, iou, esik):
     return abs(dx) <= 1 and dy == 0 and fark <= esik['fark'] and iou >= esik['iou']
 
 
+# SEMBOL ZEMIN MASKESI (ORNEK, onay bekliyor; 2 Eki): fark yalniz sembol pikselinde, ZEMIN KATKISI DUSULEREK olculur.
+# Sembol yari saydam altin; kisa isimde ~208 px kayinca farkli plate zeminine biner ve butun pikselleri zemin farki kadar
+# kayar (CAGLA MB 11x14 sag: zemin farki medyan RGB (0, -2, -6), fark 6.61; 1 px kenar maskesi 6.60 - yetmiyor).
+# Pencerede sembolden >= 7 px uzak zemin halkasinin (uretim - kaynak) medyani her aday hizalamada farktan dusulur.
+# Sembolun sekil / renk farki aynen olculur (yerel olcum: 6.61 -> 3.25). IoU ve hizalama aramasi degismez.
+SEMBOL_CEKIRDEK = {'etkin': os.environ.get('SEMBOL_CEKIRDEK') == '1'}
+
+
 def sembol_kapisi(poster, S, s, merkez, m_src, esik, maske=None, doku=False):
     """YENI KAPI: kucuk sembol bolgesi kaynak sayfadakiyle birebir mi? (olcek/aynalama/parca kaymasi yok)
     Bolge olculen banda BAGLI DEGIL: sembol x araligi (+pay) x [sembol bandi ustu - SEMBOL_UST, isim bandi ustu - 5].
@@ -234,6 +242,7 @@ def sembol_kapisi(poster, S, s, merkez, m_src, esik, maske=None, doku=False):
         c0, c1 = yan, x1 - x0 - yan                                # pencere icinde cekirdek sutunlari
         y0, y1 = s['sembol_bant'][0] - SEMBOL_UST, s['isim_bant'][0] - 5
         src = ref[y0:y1, x0:x1]; mk = ic(m_src[y0:y1, x0:x1], c0, c1)
+        zem = ~(cv2.dilate(mk.astype(np.uint8), np.ones((15, 15), np.uint8)) > 0) if SEMBOL_CEKIRDEK['etkin'] else None
         ex = int(round(merkez[y] - o['w'] / 2)) - (g[0] - x0) + (g[0] - o['gorsel'][0])
         en = None
         for dy in range(-SEMBOL_KAYMA, SEMBOL_KAYMA + 1):
@@ -248,7 +257,8 @@ def sembol_kapisi(poster, S, s, merkez, m_src, esik, maske=None, doku=False):
                     i = float((qm & mk).sum() / max((qm | mk).sum(), 1))
                     puan = f + 255.0 * (1.0 - i)
                 else:
-                    f = float(np.abs(q - src).max(2)[mk].mean())
+                    dz = np.median((q - src)[zem], 0) if zem is not None and zem.any() else 0.0
+                    f = float(np.abs(q - src - dz).max(2)[mk].mean())
                     puan = f
                 if en is None or puan < en[0]: en = (puan, f, dx, dy)
         _, f, dx, dy = en
