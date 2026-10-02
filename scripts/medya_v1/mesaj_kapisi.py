@@ -31,6 +31,28 @@ if os.environ.get('MESAJ_ESIK'):
 ETKIN = {'edisyon': False}     # tagline ton eslemesi yalniz edisyon (Blue disi) render'inda (siparis_dosyasi)
 TON_SINIR = (0.6, 1.7)
 
+# DIKIS DUZELTMESI (ORNEK, Serdar onayi bekliyor; 2 Eki DIKIS_TANI): tagline profili (pilot7.altin_sekil) isim referans
+# glifinden ornekleniyor; ilk satirlari kenar / parlama sicramasi (MB: dL +63, -99, +101) -> cap ust kenarinda ve aynalanan
+# ust uzantilarda cok cizgili acik bant; kuyruk_duzlestir'in SABIT kuyrugu baseline cevresinde iki sert kenarli serit.
+# Duzeltme: bas ve son %20'de |dL| > esik olan uc satirlar atilir, kalan profil butun banda gerilir (sabit kuyruk yok).
+# esik = max(6, 4 x medyan |dL|) (kisa profilde satir basi egim buyuk). Varsayilan KAPALI: DIKIS_DUZELT=1 ile acilir.
+DIKIS = {'etkin': os.environ.get('DIKIS_DUZELT') == '1'}
+DIKIS_UC, DIKIS_ESIK = 0.20, 6.0
+
+
+def profil_kenar_kirp(prof, uc=DIKIS_UC, esik=DIKIS_ESIK):
+    """Profilin bas / son kenar satirlarini atar. Doner (profil, (i0, i1))."""
+    p = np.asarray(prof, np.float32)
+    d = np.abs(np.diff(p @ LUMA)); n = len(d)
+    if n < 10:
+        return p.copy(), (0, len(p) - 1)
+    e = max(esik, 4.0 * float(np.median(d)))
+    bas = [i for i in range(int(n * uc)) if d[i] > e]
+    son = [i for i in range(int(n * (1 - uc)), n) if d[i] > e]
+    i0 = bas[-1] + 1 if bas else 0
+    i1 = son[0] if son else n
+    return p[i0:i1 + 1].copy(), (int(i0), int(i1))
+
 
 def ortak_profil(p1, p2):
     """Iki isim profilinin (farkli uzunluk) ortak boya yeniden orneklenmis ortalamasi."""
@@ -65,6 +87,9 @@ def duzeltme_uygula(pilot12, pilot16=None):
     eski = getattr(pilot12.kuyruk_duzlestir, 'eski', pilot12.kuyruk_duzlestir)
 
     def kuyruk_duzlestir(prof, oran=0.80):
+        if DIKIS['etkin']:
+            q, (i0, i1) = profil_kenar_kirp(prof)
+            return q, len(q) - 1
         p = np.asarray(prof, np.float32).copy()
         L = p @ LUMA
         med = float(np.median(L))
