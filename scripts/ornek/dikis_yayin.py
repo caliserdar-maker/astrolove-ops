@@ -71,7 +71,10 @@ def main():
     t0 = time.time()
     with open(a.cik, 'w') as f, tempfile.TemporaryDirectory() as tmp:
         if a.tur == 'zip':
-            idx = [z for z in json.load(open(a.zip_index)) if z['Name'].endswith(f'_{a.edisyon}_ALL_SIZES.zip')]
+            ed = '_'.join(w.capitalize() for w in a.edisyon.split('_'))     # MIDNIGHT_BLUE -> Midnight_Blue (Drive ZIP adi)
+            idx = [z for z in json.load(open(a.zip_index)) if z['Name'].endswith(f'_{ed}_ALL_SIZES.zip')]
+            if not idx:                                                       # 0 ZIP basari sayilmaz (ders 48)
+                print(f'HATA: {ed} icin ZIP yok', flush=True); sys.exit(2)
             ad_say = {}
             for z in idx:
                 ad_say.setdefault(z['Name'], []).append(z)
