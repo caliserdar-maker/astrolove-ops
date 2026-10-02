@@ -15,7 +15,7 @@ on:
         description: "ornek-dikis-v1 commit"
         required: true
       boy:
-        description: "24x36 | 11x14 | A2 | 16x20 | 18x24"
+        description: "virgullu: 24x36,11x14,A2,16x20,18x24"
         required: false
         default: "24x36"
       renkler:
@@ -32,6 +32,10 @@ on:
         default: ""
       sembol:
         description: "ek sembol isleri SET:boy (virgullu, MB ONCE; orn. CAGLA:11x14,CAGLA:A2); bos = yok"
+        required: false
+        default: ""
+      ek:
+        description: "ek isler SET:RENK:boy (virgullu, ONCE + SONRA; orn. CAGLA:PURE_WHITE:11x14); bos = yok"
         required: false
         default: ""
 
@@ -53,15 +57,22 @@ jobs:
           RENKLER: ${{ inputs.renkler }}
           SET: ${{ inputs.set }}
           SEMBOL: ${{ inputs.sembol }}
+          EK: ${{ inputs.ek }}
         run: |
           python3 - <<'PY' >> "$GITHUB_OUTPUT"
           import json, os
           ORAN = {'24x36': '2x3', '11x14': '11x14', 'A2': 'a_series', '16x20': '4x5', '18x24': '3x4'}
-          b = os.environ['BOY']; st = os.environ['SET']; m = []
-          for d in ('ONCE', 'SONRA'):
-              for r in [x.strip() for x in os.environ['RENKLER'].split(',') if x.strip()]:
-                  tur = 'wp' if r == 'WARM_PARCHMENT' else 'renk'
-                  m.append({'durum': d, 'tur': tur, 'renk': r, 'oran': ORAN[b], 'boy': b, 'set': st, 'etiket': f'{r}_{b}'})
+          st = os.environ['SET']; m = []
+          for b in [x.strip() for x in os.environ['BOY'].split(',') if x.strip()]:
+              for d in ('ONCE', 'SONRA'):
+                  for r in [x.strip() for x in os.environ['RENKLER'].split(',') if x.strip()]:
+                      tur = 'wp' if r == 'WARM_PARCHMENT' else 'renk'
+                      m.append({'durum': d, 'tur': tur, 'renk': r, 'oran': ORAN[b], 'boy': b, 'set': st, 'etiket': f'{r}_{b}'})
+          for x in [x.strip() for x in os.environ.get('EK', '').split(',') if x.strip()]:
+              s_, r, bb = x.split(':')
+              for d in ('ONCE', 'SONRA'):
+                  m.append({'durum': d, 'tur': 'wp' if r == 'WARM_PARCHMENT' else 'renk', 'renk': r, 'oran': ORAN[bb], 'boy': bb,
+                            'set': s_, 'etiket': f'EK_{s_}_{r}_{bb}'})
           for x in [x.strip() for x in os.environ['SEMBOL'].split(',') if x.strip()]:
               s, bb = x.split(':')
               m.append({'durum': 'ONCE', 'tur': 'renk', 'renk': 'MIDNIGHT_BLUE', 'oran': ORAN[bb], 'boy': bb, 'set': s,
@@ -125,6 +136,8 @@ jobs:
       - name: ornek
         env:
           DIKIS_DUZELT: ${{ matrix.durum == 'SONRA' && '1' || '0' }}
+          SEMBOL_CEKIRDEK: ${{ matrix.durum == 'SONRA' && '1' || '0' }}
+          OLCEK_GOVDE: ${{ matrix.durum == 'SONRA' && '1' || '0' }}
         run: |
           set -o pipefail
           python scripts/ornek/ornek_is.py --tur "${{ matrix.tur }}" --renk "${{ matrix.renk }}" --oran "${{ matrix.oran }}" \
@@ -174,7 +187,7 @@ jobs:
         run: |
           set -euo pipefail
           ls giris
-          python scripts/ornek/ornek_derle.py giris "cikti/dikis_${{ inputs.boy }}"
+          python scripts/ornek/ornek_derle.py giris cikti/dikis
           if ls giris/*/SEMBOL_*.json >/dev/null 2>&1; then python scripts/ornek/ornek_sembol.py giris cikti/sembol; fi
           du -sh cikti
       - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null

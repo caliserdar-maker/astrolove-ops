@@ -21,7 +21,11 @@ def main(giris, cikti):
             m = np.load(d / f'sembol_{i}_{y}_maske.npy')
             dE = np.sqrt(((lab(a) - lab(b)) ** 2).sum(2))
             f = np.abs(a - b).max(2)
+            zem = ~(cv2.dilate(m.astype(np.uint8), np.ones((15, 15), np.uint8)) > 0)
+            dz = np.median((b - a)[zem], 0) if zem.any() else np.zeros(3)
             v = {'is': d.name, 'sira': i, 'yan': y, **k['yan'][y],
+                 'fark_zemin_dusulmus': round(float(np.abs(b - a - dz).max(2)[m].mean()), 2),
+                 'zemin_fark_medyan_RGB': [round(float(x), 1) for x in dz],
                  'dE_murekkep_ort': round(float(dE[m].mean()), 2), 'dE_murekkep_p95': round(float(np.percentile(dE[m], 95)), 2),
                  'dE_gt_2.3_payi': round(float((dE[m] > 2.3).mean()), 3), 'dE_zemin_ort': round(float(dE[~m].mean()), 2),
                  'kanal_fark_ort_RGB': [round(float(x), 2) for x in (b - a)[m].mean(0)]}
@@ -38,9 +42,10 @@ def main(giris, cikti):
             print('SEMBOL', json.dumps(v), flush=True)
     (cikti / 'SEMBOL_OLCUM.json').write_text(json.dumps(sat, indent=1))
     t = ['# SEMBOL KAPISI KESITLERI', '', 'dE: CIE76, sembol murekkebi (kaynak maskesi); dE < 2.3 ~ gozle fark edilemez', '',
-         '| is | sira | yan | fark | iou | kaydirma px | dE ort | dE p95 | dE>2.3 payi | zemin dE | RGB fark ort |', '|---|---|---|---|---|---|---|---|---|---|---|']
+         'fark = kapinin olctugu (SONRA isinde SEMBOL_CEKIRDEK acik); fark_zemin_dusulmus = zemin halkasi (sembolden >= 7 px) fark medyani dusulmus (kapi formulu, kayittan)', '',
+         '| is | sira | yan | fark | fark_zemin_dusulmus | zemin fark medyan | iou | kaydirma px | dE ort | dE p95 | dE>2.3 payi | zemin dE | RGB fark ort |', '|---|---|---|---|---|---|---|---|---|---|---|---|---|']
     for v in sat:
-        t.append(f"| {v['is']} | {v['sira']} | {v['yan']} | {v['fark']} | {v['iou']} | {v['kaydirma_px']} | {v['dE_murekkep_ort']} | "
+        t.append(f"| {v['is']} | {v['sira']} | {v['yan']} | {v['fark']} | {v['fark_zemin_dusulmus']} | {v['zemin_fark_medyan_RGB']} | {v['iou']} | {v['kaydirma_px']} | {v['dE_murekkep_ort']} | "
                  f"{v['dE_murekkep_p95']} | {v['dE_gt_2.3_payi']} | {v['dE_zemin_ort']} | {v['kanal_fark_ort_RGB']} |")
     (cikti / 'SEMBOL_OLCUM.md').write_text('\n'.join(t) + '\n'); print('\n'.join(t))
 

@@ -87,6 +87,14 @@ def main(giris, cikti):
         if 'hata' in o or 'hata' in s:
             sat.append(f"| {t['etiket']} | {o.get('hata', o.get('dikis_ust'))} | | {s.get('hata', s.get('dikis_ust'))} | | |"); continue
         sat.append(f"| {t['etiket']} | {o['dikis_ust']} | {o['dikis_alt']} | {s['dikis_ust']} | {s['dikis_alt']} | {s['dikis_govde']} |")
+    sat += ['', '## Kapi / olcek (SAYFA json; SONRA: DIKIS_DUZELT + SEMBOL_CEKIRDEK + OLCEK_GOVDE)', '',
+            '| is | kapilar | kalan | olcek konum / kenar px | cap_sol | cap_sag |', '|---|---|---|---|---|---|']
+    for d in sorted(p for p in giris.iterdir() if p.is_dir()):
+        for js in sorted(d.glob('SAYFA_*.json')) + sorted(d.glob('OZET_WP_*.json')):
+            k = json.loads(js.read_text()); ok = k.get('olcek_kapisi') or {}; fk = ok.get('fark') or {}
+            kal = sorted(q for q, v in (k.get('kapilar') or {}).items() if v is False)
+            sat.append(f"| {d.name} | {'PASS' if k.get('kapilar_gecti') else 'FAIL'} | {','.join(kal)} | "
+                       f"{ok.get('konum_fark_px')} / {ok.get('kenar_fark_px')} | {fk.get('cap_sol')} | {fk.get('cap_sag')} |")
     (cikti / 'OLCUM.md').write_text('\n'.join(sat) + '\n'); (cikti / 'OLCUM.json').write_text(json.dumps(tablo, default=str, indent=1))
     print('\n'.join(sat))
 
