@@ -159,9 +159,7 @@ jobs:
           set -euo pipefail
           ls giris
           python scripts/ornek/ornek_derle.py giris "cikti/dikis_${{ inputs.boy }}"
-          for d in giris/*; do
-            if ls "$d"/sembol_* >/dev/null 2>&1; then mkdir -p "cikti/sembol/$(basename "$d")"; cp "$d"/sembol_*.png "$d"/SEMBOL_*.json "$d"/SAYFA_*.json "cikti/sembol/$(basename "$d")/" 2>/dev/null || true; fi
-          done
+          if ls giris/*/SEMBOL_*.json >/dev/null 2>&1; then python scripts/ornek/ornek_sembol.py giris cikti/sembol; fi
           du -sh cikti
       - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
       - name: rclone.conf olustur
@@ -195,12 +193,12 @@ jobs:
           if git clone -q --depth 1 --branch "$B" "$U" _d 2>/dev/null; then :; else
             mkdir _d && git -C _d init -q && git -C _d remote add origin "$U" && git -C _d checkout -q -b "$B"; fi
           K="_d/${{ github.run_id }}"; mkdir -p "$K"
-          find cikti -name 'OLCUM.*' -o -name 'SEMBOL_*.json' -o -name 'SAYFA_*.json' | while read f; do mkdir -p "$K/$(dirname "${f#cikti/}")"; cp "$f" "$K/${f#cikti/}"; done
+          find cikti -name 'OLCUM.*' -o -name 'SEMBOL_OLCUM.*' | while read f; do mkdir -p "$K/$(dirname "${f#cikti/}")"; cp "$f" "$K/${f#cikti/}"; done
           python3 - <<'PY'
           import glob, os
           from PIL import Image
           K = os.path.join('_d', os.environ['GITHUB_RUN_ID'])
-          for f in glob.glob('cikti/**/ONIZLEME_*.jpg', recursive=True) + glob.glob('cikti/**/KESIT_*.jpg', recursive=True):
+          for f in glob.glob('cikti/**/ONIZLEME_*.jpg', recursive=True) + glob.glob('cikti/**/KESIT_*.jpg', recursive=True) + glob.glob('cikti/**/SEMBOL_*_1e1.png', recursive=True):
               im = Image.open(f); s = min(1.0, 1400 / max(im.size)); o = os.path.join(K, 'kucuk', os.path.basename(f))
               os.makedirs(os.path.dirname(o), exist_ok=True); im.resize((max(1, int(im.width * s)), max(1, int(im.height * s)))).save(o, quality=80)
           PY
