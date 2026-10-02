@@ -19,7 +19,7 @@
    "_yazi_maskesi": "f3147eb13cc53365a0ced0c87e9ce02d11550b3f663384441c749b25498c2d7f",
    "yanyana_dedektor": "18ac1b4406838675d86df0f8913c50afabb7ce4f2840aa243ec20697142ab94c",
    "serdar_dikis": "4842f96f9f6e546fe2b20f17fc20e19a6f4daf0a6945c9eab08c0a734dde4f9e",
-   "cift_boy": "d917ccc26720230ec1dcf0574a48c43723b9a72e730b482f3e7a5f562c477b4e"
+   "cift_boy": "0de2c184aadca099fc8f4e9d8a46a4bdf9307c28bd18d319b8a15e58a14cd81c"
   },
   "wp_ornek_sabit": {
    "DUZ_RENK": [
@@ -70,5 +70,8 @@
    ],
    "DIKIS_KOMSU": 3
   }
- }
+ },
+ "ek_kararlar": [
+  "Serdar 2 Eki: SECENEK A, sayfa 45-78 ciftleri ikinci plate VINTAGE_B_<boy>.png (cift_boy plate secimi); kapi ve esikler ayni"
+ ]
 }
