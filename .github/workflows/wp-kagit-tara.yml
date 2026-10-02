@@ -1,0 +1,88 @@
+name: wp-kagit-tara
+
+# WP KAGIT TARAMASI (Serdar onayi 2 Eki, TANI 2; salt okur): 78 cift x 11x14 onayli WARM_PARCHMENT kaynak kagidi vs
+# VINTAGE_11x14 plate kagidi (e_kagit tanimi, uretim fonksiyonlari) + Drive koken bilgisi (btime / mtime / md5).
+# POD_PRINT ve PLATES salt okunur; cikti yalniz TEMP/WP_KAGIT_TARA/<run_id>/. Isim / musteri / Etsy YOK.
+# Tetik: config/wp_kagit_tara.trigger degisikligi (bu dal).
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [claude/wp-katman-baski-60sk0s]
+    paths:
+      - config/wp_kagit_tara.trigger
+
+concurrency: wp-kagit-tara
+
+jobs:
+  tara:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --quiet pillow opencv-python-headless numpy
+      - name: Kilit testi (wp_katman degismedi)
+        run: python scripts/medya_v1/test_wp_kilit.py
+      - name: rclone kur
+        run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then echo "HATA: RCLONE_CONF_B64 yok" >&2; exit 1; fi
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Koken bilgisi + indir (salt okur)
+        run: |
+          set -euo pipefail
+          T0=$(date +%s); mkdir -p out _in/kok
+          POD=gdrive:ASTROLOVE/TEMP/POD_PRINT
+          rclone lsjson -R -M --hash "$POD" --include "*/WARM_PARCHMENT/**" > out/meta_wp_tum.json
+          python - <<'PY'
+          import json
+          m = json.load(open('out/meta_wp_tum.json'))
+          json.dump([x for x in m if x['Path'].endswith('/WARM_PARCHMENT/11x14.jpg')], open('out/meta_11x14.json', 'w'))
+          PY
+          rclone lsjson -M --hash "$POD" --files-only > out/meta_pod_kok.json || true
+          rclone lsjson -M --hash gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PLATES --include "VINTAGE_*" > out/meta_plate.json
+          rclone copy "$POD" _in/kok --include "*/WARM_PARCHMENT/11x14.jpg" --transfers 16
+          rclone copyto gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PLATES/VINTAGE_11x14.png _in/VINTAGE_11x14.png
+          echo "SURE indir $(( $(date +%s) - T0 )) sn"
+          echo "PLATE_META $(cat out/meta_plate.json | tr -d '\n')"
+          echo "POD_KOK_DOSYALAR $(python -c "import json;print(json.dumps([(x['Path'],x['ModTime']) for x in json.load(open('out/meta_pod_kok.json'))]))")"
+      - name: Tara
+        run: python scripts/medya_v1/wp_kagit_tara.py --kok _in/kok --plate _in/VINTAGE_11x14.png --meta out/meta_11x14.json --cik out
+      - name: Diger boylar mtime ozeti (koken)
+        run: |
+          python - <<'PY'
+          import json, collections
+          m = json.load(open('out/meta_wp_tum.json'))
+          d = collections.defaultdict(dict)
+          for x in m:
+              c, _, f = x['Path'].split('/', 2)
+              d[c][f] = (x['ModTime'][:16], (x.get('Metadata') or {}).get('btime', '')[:16])
+          for c in sorted(d):
+              print('KOKEN', c, json.dumps(d[c], sort_keys=True))
+          PY
+      - name: Drive
+        if: ${{ always() }}
+        run: |
+          [ -d out ] && rclone copy out "gdrive:ASTROLOVE/TEMP/WP_KAGIT_TARA/${{ github.run_id }}/" && echo "drive: TEMP/WP_KAGIT_TARA/${{ github.run_id }}/"
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone _in
