@@ -335,6 +335,29 @@ def plate_adi(cift, sayfa, boy):
     return f'VINTAGE_B{k[0]}_11x14.png'
 
 
+# Serdar 2 Eki (KARAR A): 11x14 plate B1/B2/B3 ile 7 hucrede e_kagit p99 3.0'i asiyor (kosu 37052384573, uretimin qc()'si;
+# kesit 37055961309 Serdar goz onayi: fark yok). YALNIZ bu 7 hucre icin p99 siniri = olculen p99 + E_KAGIT_ISTISNA_PAY
+# (uretim / tarama farki olculen: SCORPIO_VIRGO 3.26 -> 3.28). Genel esikler (ort 0.5, p99 3.0) degismez; listede
+# olmayan her hucre eski kuralla.
+E_KAGIT_ISTISNA = {'11x14': {'GEMINI_SCORPIO': 3.24, 'PISCES_PISCES': 3.24, 'VIRGO_VIRGO': 3.26, 'LEO_LEO': 3.23,
+                             'PISCES_TAURUS': 3.23, 'SAGITTARIUS_TAURUS': 3.24, 'SCORPIO_VIRGO': 3.26}}
+E_KAGIT_ISTISNA_PAY = 0.10
+
+
+def e_kagit_istisna(cift, boy, q):
+    """qc sonucunda yalniz E_KAGIT_ISTISNA hucresinin e_kagit kapisi: ort genel esikte, p99 <= olculen + pay ise PASS."""
+    s = E_KAGIT_ISTISNA.get(boy, {}).get(cift)
+    e = q.get('e_kagit') or {}
+    if s is None or e.get('gecti', True):
+        return q
+    sinir = round(s + E_KAGIT_ISTISNA_PAY, 2)
+    if e.get('ort', 99) <= e.get('esik_ort', 0.5) and e.get('p99', 99) <= sinir:
+        q['e_kagit'] = {**e, 'gecti': True, 'istisna': {'olculen_p99': s, 'sinir_p99': sinir,
+                                                         'karar': 'Serdar 2 Eki KARAR A (7 hucre)'}}
+        q['gecti'] = all(v['gecti'] for v in q.values() if isinstance(v, dict) and 'gecti' in v)
+    return q
+
+
 def kapi_ozet(r):
     k = r.get('kapilar') or {}
     return {'durum': r.get('durum'), 'hata': r.get('hata'), 'kapilar_gecti': r.get('kapilar_gecti'),
@@ -480,7 +503,7 @@ def cift_boy(cift, boy, P_ed, P_blue, no, cik, isim=ISIM, mesaj=MESAJ, siparis=F
         print('PLATE_SERIT', cift, boy, json.dumps(ps, default=str), flush=True)
     R['bakir'] = {a: rb[a] for a in ('bakir', 'hedef', 'hedef_gecmis', 'kabartma_onayli', 'plate_dikis',
                                      'onarimsiz_d') if a in rb}
-    R['qc'] = rb['qc']
+    R['qc'] = e_kagit_istisna(cift, boy, rb['qc'])
     R['zemin_birebir'] = {'fark_max': round(float(np.abs(WP_cu - P_k)[np.abs(D_cu).max(-1) < 1].max()), 3)}
     R['zemin_birebir']['gecti'] = R['zemin_birebir']['fark_max'] < 0.5
     # dikis kaniti: her plate dikisinde ve Serdar'in isaretledigi yerde (CANCER_LIBRA 11x14, x~1563, y 3482-3590)
