@@ -1,0 +1,470 @@
+[
+ {
+  "etiket": "CHAMPAGNE_IVORY_11x14",
+  "tagline_kutu": [
+   989,
+   3664,
+   2296,
+   3734
+  ],
+  "ONCE": {
+   "dikis": 5.0,
+   "dikis_ust": 2.0,
+   "dikis_alt": 1.0,
+   "dikis_govde": 5.0,
+   "en_kotu_satir": 16,
+   "taban": 63,
+   "pencere": 5,
+   "satir": [
+    0,
+    62
+   ]
+  },
+  "SONRA": {
+   "dikis": 4.0,
+   "dikis_ust": 0.0,
+   "dikis_alt": 1.0,
+   "dikis_govde": 4.0,
+   "en_kotu_satir": 29,
+   "taban": 63,
+   "pencere": 5,
+   "satir": [
+    0,
+    61
+   ]
+  },
+  "tani": "bant 3670-3728 fark px 6898"
+ },
+ {
+  "etiket": "CHAMPAGNE_IVORY_24x36",
+  "tagline_kutu": [
+   1990,
+   8999,
+   5181,
+   9367
+  ],
+  "ONCE": {
+   "dikis": 11.0,
+   "dikis_ust": 3.0,
+   "dikis_alt": 11.0,
+   "dikis_govde": 2.0,
+   "en_kotu_satir": 243,
+   "taban": 228,
+   "pencere": 11,
+   "satir": [
+    0,
+    328
+   ]
+  },
+  "SONRA": {
+   "dikis": 3.0,
+   "dikis_ust": 2.0,
+   "dikis_alt": 2.0,
+   "dikis_govde": 3.0,
+   "en_kotu_satir": 112,
+   "taban": 228,
+   "pencere": 11,
+   "satir": [
+    0,
+    328
+   ]
+  },
+  "tani": "bant 9034-9332 fark px 32691"
+ },
+ {
+  "etiket": "DEEP_BLACK_11x14",
+  "tagline_kutu": [
+   998,
+   3561,
+   2306,
+   3742
+  ],
+  "ONCE": {
+   "dikis": 14.0,
+   "dikis_ust": 14.0,
+   "dikis_alt": 12.5,
+   "dikis_govde": 4.0,
+   "en_kotu_satir": 23,
+   "taban": 120,
+   "pencere": 5,
+   "satir": [
+    20,
+    158
+   ]
+  },
+  "SONRA": {
+   "dikis": 6.0,
+   "dikis_ust": 4.0,
+   "dikis_alt": 6.0,
+   "dikis_govde": 4.0,
+   "en_kotu_satir": 118,
+   "taban": 120,
+   "pencere": 5,
+   "satir": [
+    20,
+    158
+   ]
+  },
+  "tani": "bant 3578-3725 fark px 22227"
+ },
+ {
+  "etiket": "DEEP_BLACK_24x36",
+  "tagline_kutu": [
+   1978,
+   8924,
+   5217,
+   9375
+  ],
+  "ONCE": {
+   "dikis": 25.0,
+   "dikis_ust": 25.0,
+   "dikis_alt": 19.0,
+   "dikis_govde": 4.0,
+   "en_kotu_satir": 59,
+   "taban": 302,
+   "pencere": 11,
+   "satir": [
+    48,
+    403
+   ]
+  },
+  "SONRA": {
+   "dikis": 17.0,
+   "dikis_ust": 17.0,
+   "dikis_alt": 5.0,
+   "dikis_govde": 5.0,
+   "en_kotu_satir": 59,
+   "taban": 302,
+   "pencere": 11,
+   "satir": [
+    48,
+    403
+   ]
+  },
+  "tani": "bant 8967-9332 fark px 149124"
+ },
+ {
+  "etiket": "EK_CAGLA_MIDNIGHT_BLUE_11x14",
+  "tagline_kutu": [
+   505,
+   3558,
+   2798,
+   3744
+  ],
+  "ONCE": {
+   "dikis": 55.5,
+   "dikis_ust": 55.5,
+   "dikis_alt": 10.5,
+   "dikis_govde": 8.5,
+   "en_kotu_satir": 28,
+   "taban": 123,
+   "pencere": 5,
+   "satir": [
+    23,
+    162
+   ]
+  },
+  "SONRA": {
+   "dikis": 9.0,
+   "dikis_ust": 5.5,
+   "dikis_alt": 5.0,
+   "dikis_govde": 9.0,
+   "en_kotu_satir": 65,
+   "taban": 124,
+   "pencere": 5,
+   "satir": [
+    23,
+    162
+   ]
+  },
+  "tani": "bant 3576-3726 fark px 40238"
+ },
+ {
+  "etiket": "EK_CAGLA_MIDNIGHT_BLUE_A2",
+  "tagline_kutu": [
+   695,
+   5803,
+   4269,
+   6086
+  ],
+  "ONCE": {
+   "dikis": 62.0,
+   "dikis_ust": 62.0,
+   "dikis_alt": 8.0,
+   "dikis_govde": 8.0,
+   "en_kotu_satir": 36,
+   "taban": 189,
+   "pencere": 7,
+   "satir": [
+    31,
+    253
+   ]
+  },
+  "SONRA": {
+   "dikis": 15.0,
+   "dikis_ust": 5.0,
+   "dikis_alt": 3.0,
+   "dikis_govde": 15.0,
+   "en_kotu_satir": 105,
+   "taban": 189,
+   "pencere": 7,
+   "satir": [
+    31,
+    253
+   ]
+  },
+  "tani": "bant 5830-6059 fark px 94836"
+ },
+ {
+  "etiket": "EK_CAGLA_PURE_WHITE_11x14",
+  "tagline_kutu": [
+   485,
+   3560,
+   2820,
+   3743
+  ],
+  "ONCE": {
+   "dikis": 15.0,
+   "dikis_ust": 12.0,
+   "dikis_alt": 15.0,
+   "dikis_govde": 5.0,
+   "en_kotu_satir": 120,
+   "taban": 124,
+   "pencere": 5,
+   "satir": [
+    21,
+    163
+   ]
+  },
+  "SONRA": {
+   "dikis": 12.0,
+   "dikis_ust": 5.0,
+   "dikis_alt": 12.0,
+   "dikis_govde": 3.5,
+   "en_kotu_satir": 123,
+   "taban": 124,
+   "pencere": 5,
+   "satir": [
+    21,
+    163
+   ]
+  },
+  "tani": "bant 3577-3726 fark px 26537"
+ },
+ {
+  "etiket": "MIDNIGHT_BLUE_11x14",
+  "tagline_kutu": [
+   1002,
+   3559,
+   2302,
+   3742
+  ],
+  "ONCE": {
+   "dikis": 54.0,
+   "dikis_ust": 54.0,
+   "dikis_alt": 10.5,
+   "dikis_govde": 7.0,
+   "en_kotu_satir": 27,
+   "taban": 122,
+   "pencere": 5,
+   "satir": [
+    22,
+    160
+   ]
+  },
+  "SONRA": {
+   "dikis": 7.0,
+   "dikis_ust": 6.5,
+   "dikis_alt": 3.0,
+   "dikis_govde": 7.0,
+   "en_kotu_satir": 69,
+   "taban": 122,
+   "pencere": 5,
+   "satir": [
+    22,
+    160
+   ]
+  },
+  "tani": "bant 3576-3725 fark px 23032"
+ },
+ {
+  "etiket": "MIDNIGHT_BLUE_24x36",
+  "tagline_kutu": [
+   2057,
+   8934,
+   5141,
+   9362
+  ],
+  "ONCE": {
+   "dikis": 76.0,
+   "dikis_ust": 76.0,
+   "dikis_alt": 9.0,
+   "dikis_govde": 13.0,
+   "en_kotu_satir": 60,
+   "taban": 286,
+   "pencere": 11,
+   "satir": [
+    46,
+    382
+   ]
+  },
+  "SONRA": {
+   "dikis": 11.0,
+   "dikis_ust": 5.0,
+   "dikis_alt": 2.0,
+   "dikis_govde": 11.0,
+   "en_kotu_satir": 159,
+   "taban": 286,
+   "pencere": 11,
+   "satir": [
+    46,
+    382
+   ]
+  },
+  "tani": "bant 8975-9321 fark px 123184"
+ },
+ {
+  "etiket": "PURE_WHITE_11x14",
+  "tagline_kutu": [
+   977,
+   3558,
+   2328,
+   3744
+  ],
+  "ONCE": {
+   "dikis": 18.0,
+   "dikis_ust": 15.0,
+   "dikis_alt": 18.0,
+   "dikis_govde": 5.5,
+   "en_kotu_satir": 134,
+   "taban": 124,
+   "pencere": 5,
+   "satir": [
+    21,
+    165
+   ]
+  },
+  "SONRA": {
+   "dikis": 12.5,
+   "dikis_ust": 4.0,
+   "dikis_alt": 12.5,
+   "dikis_govde": 3.5,
+   "en_kotu_satir": 124,
+   "taban": 124,
+   "pencere": 5,
+   "satir": [
+    21,
+    164
+   ]
+  },
+  "tani": "bant 3576-3726 fark px 17247"
+ },
+ {
+  "etiket": "PURE_WHITE_24x36",
+  "tagline_kutu": [
+   1982,
+   8929,
+   5216,
+   9375
+  ],
+  "ONCE": {
+   "dikis": 24.0,
+   "dikis_ust": 12.0,
+   "dikis_alt": 24.0,
+   "dikis_govde": 6.0,
+   "en_kotu_satir": 289,
+   "taban": 298,
+   "pencere": 11,
+   "satir": [
+    44,
+    398
+   ]
+  },
+  "SONRA": {
+   "dikis": 8.0,
+   "dikis_ust": 8.0,
+   "dikis_alt": 3.0,
+   "dikis_govde": 5.0,
+   "en_kotu_satir": 54,
+   "taban": 298,
+   "pencere": 11,
+   "satir": [
+    44,
+    397
+   ]
+  },
+  "tani": "bant 8972-9332 fark px 87786"
+ },
+ {
+  "etiket": "WARM_PARCHMENT_11x14",
+  "tagline_kutu": [
+   983,
+   3612,
+   2305,
+   3740
+  ],
+  "ONCE": {
+   "dikis": 6.0,
+   "dikis_ust": 2.0,
+   "dikis_alt": 6.0,
+   "dikis_govde": 3.0,
+   "en_kotu_satir": 71,
+   "taban": 73,
+   "pencere": 5,
+   "satir": [
+    0,
+    112
+   ]
+  },
+  "SONRA": {
+   "dikis": 13.0,
+   "dikis_ust": 1.0,
+   "dikis_alt": 13.0,
+   "dikis_govde": 1.0,
+   "en_kotu_satir": 72,
+   "taban": 73,
+   "pencere": 5,
+   "satir": [
+    0,
+    112
+   ]
+  },
+  "tani": "bant 3624-3728 fark px 5196"
+ },
+ {
+  "etiket": "WARM_PARCHMENT_24x36",
+  "tagline_kutu": [
+   1988,
+   8981,
+   5185,
+   9369
+  ],
+  "ONCE": {
+   "dikis": 12.0,
+   "dikis_ust": 6.0,
+   "dikis_alt": 12.0,
+   "dikis_govde": 6.0,
+   "en_kotu_satir": 236,
+   "taban": 246,
+   "pencere": 11,
+   "satir": [
+    0,
+    346
+   ]
+  },
+  "SONRA": {
+   "dikis": 10.0,
+   "dikis_ust": 5.0,
+   "dikis_alt": 10.0,
+   "dikis_govde": 2.0,
+   "en_kotu_satir": 245,
+   "taban": 246,
+   "pencere": 11,
+   "satir": [
+    0,
+    346
+   ]
+  },
+  "tani": "bant 9018-9332 fark px 24398"
+ }
+]
