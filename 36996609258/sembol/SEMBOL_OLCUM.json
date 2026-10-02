@@ -1,0 +1,626 @@
+[
+ {
+  "is": "ONCE_MIDNIGHT_BLUE_11x14",
+  "sira": 0,
+  "yan": "sol",
+  "fark": 1.8,
+  "iou": 0.9983,
+  "dx": 0,
+  "dy": 0,
+  "gecti": true,
+  "kaynak_kutu": [
+   562,
+   1861,
+   1030,
+   2239
+  ],
+  "kaydirma_px": 23,
+  "dE_murekkep_ort": 0.99,
+  "dE_murekkep_p95": 2.27,
+  "dE_gt_2.3_payi": 0.043,
+  "dE_zemin_ort": 1.44,
+  "kanal_fark_ort_RGB": [
+   -0.08,
+   0.15,
+   0.31
+  ]
+ },
+ {
+  "is": "ONCE_MIDNIGHT_BLUE_11x14",
+  "sira": 0,
+  "yan": "sag",
+  "fark": 1.96,
+  "iou": 0.9991,
+  "dx": 1,
+  "dy": 0,
+  "gecti": true,
+  "kaynak_kutu": [
+   1399,
+   1861,
+   1943,
+   2239
+  ],
+  "kaydirma_px": -12,
+  "dE_murekkep_ort": 1.07,
+  "dE_murekkep_p95": 2.32,
+  "dE_gt_2.3_payi": 0.062,
+  "dE_zemin_ort": 1.57,
+  "kanal_fark_ort_RGB": [
+   -0.1,
+   0.07,
+   0.17
+  ]
+ },
+ {
+  "is": "ONCE_MIDNIGHT_BLUE_11x14",
+  "sira": 1,
+  "yan": "sol",
+  "fark": 1.8,
+  "iou": 0.9993,
+  "dx": 0,
+  "dy": 0,
+  "gecti": true,
+  "kaynak_kutu": [
+   562,
+   1861,
+   1030,
+   2239
+  ],
+  "kaydirma_px": 21,
+  "dE_murekkep_ort": 1.0,
+  "dE_murekkep_p95": 2.27,
+  "dE_gt_2.3_payi": 0.041,
+  "dE_zemin_ort": 1.43,
+  "kanal_fark_ort_RGB": [
+   -0.08,
+   0.15,
+   0.27
+  ]
+ },
+ {
+  "is": "ONCE_MIDNIGHT_BLUE_11x14",
+  "sira": 1,
+  "yan": "sag",
+  "fark": 1.97,
+  "iou": 0.9991,
+  "dx": 0,
+  "dy": 0,
+  "gecti": true,
+  "kaynak_kutu": [
+   1399,
+   1861,
+   1943,
+   2239
+  ],
+  "kaydirma_px": -13,
+  "dE_murekkep_ort": 1.08,
+  "dE_murekkep_p95": 2.32,
+  "dE_gt_2.3_payi": 0.062,
+  "dE_zemin_ort": 1.58,
+  "kanal_fark_ort_RGB": [
+   -0.1,
+   0.07,
+   0.18
+  ]
+ },
+ {
+  "is": "ONCE_SEMBOL_CAGLA_MIDNIGHT_BLUE_11x14",
+  "sira": 0,
+  "yan": "sol",
+  "fark": 2.01,
+  "iou": 0.9993,
+  "dx": 0,
+  "dy": 0,
+  "gecti": true,
+  "kaynak_kutu": [
+   562,
+   1861,
+   1030,
+   2239
+  ],
+  "kaydirma_px": 97,
+  "dE_murekkep_ort": 1.04,
+  "dE_murekkep_p95": 2.27,
+  "dE_gt_2.3_payi": 0.041,
+  "dE_zemin_ort": 1.68,
+  "kanal_fark_ort_RGB": [
+   -0.13,
+   0.2,
+   1.09
+  ]
+ },
+ {
+  "is": "ONCE_SEMBOL_CAGLA_MIDNIGHT_BLUE_11x14",
+  "sira": 0,
+  "yan": "sag",
+  "fark": 6.93,
+  "iou": 0.9974,
+  "dx": 0,
+  "dy": 0,
+  "gecti": false,
+  "kaynak_kutu": [
+   1399,
+   1861,
+   1943,
+   2239
+  ],
+  "kaydirma_px": 207,
+  "dE_murekkep_ort": 2.44,
+  "dE_murekkep_p95": 4.29,
+  "dE_gt_2.3_payi": 0.495,
+  "dE_zemin_ort": 4.04,
+  "kanal_fark_ort_RGB": [
+   0.16,
+   -1.84,
+   -6.79
+  ]
+ },
+ {
+  "is": "ONCE_SEMBOL_CAGLA_MIDNIGHT_BLUE_11x14",
+  "sira": 1,
+  "yan": "sol",
+  "fark": 1.97,
+  "iou": 0.9982,
+  "dx": -1,
+  "dy": 0,
+  "gecti": true,
+  "kaynak_kutu": [
+   614,
+   1864,
+   1082,
+   2239
+  ],
+  "kaydirma_px": 48,
+  "dE_murekkep_ort": 1.03,
+  "dE_murekkep_p95": 2.24,
+  "dE_gt_2.3_payi": 0.032,
+  "dE_zemin_ort": 1.43,
+  "kanal_fark_ort_RGB": [
+   -0.08,
+   0.11,
+   0.62
+  ]
+ },
+ {
+  "is": "ONCE_SEMBOL_CAGLA_MIDNIGHT_BLUE_11x14",
+  "sira": 1,
+  "yan": "sag",
+  "fark": 6.61,
+  "iou": 0.9964,
+  "dx": 0,
+  "dy": 0,
+  "gecti": false,
+  "kaynak_kutu": [
+   1485,
+   1864,
+   1857,
+   2239
+  ],
+  "kaydirma_px": 208,
+  "dE_murekkep_ort": 2.33,
+  "dE_murekkep_p95": 4.1,
+  "dE_gt_2.3_payi": 0.452,
+  "dE_zemin_ort": 4.66,
+  "kanal_fark_ort_RGB": [
+   0.31,
+   -1.69,
+   -6.46
+  ]
+ },
+ {
+  "is": "ONCE_SEMBOL_CAGLA_MIDNIGHT_BLUE_11x14",
+  "sira": 2,
+  "yan": "sol",
+  "fark": 1.97,
+  "iou": 0.9982,
+  "dx": -1,
+  "dy": 0,
+  "gecti": true,
+  "kaynak_kutu": [
+   614,
+   1864,
+   1082,
+   2239
+  ],
+  "kaydirma_px": 48,
+  "dE_murekkep_ort": 1.03,
+  "dE_murekkep_p95": 2.24,
+  "dE_gt_2.3_payi": 0.032,
+  "dE_zemin_ort": 1.43,
+  "kanal_fark_ort_RGB": [
+   -0.08,
+   0.11,
+   0.62
+  ]
+ },
+ {
+  "is": "ONCE_SEMBOL_CAGLA_MIDNIGHT_BLUE_11x14",
+  "sira": 2,
+  "yan": "sag",
+  "fark": 6.61,
+  "iou": 0.9964,
+  "dx": 0,
+  "dy": 0,
+  "gecti": false,
+  "kaynak_kutu": [
+   1485,
+   1864,
+   1857,
+   2239
+  ],
+  "kaydirma_px": 208,
+  "dE_murekkep_ort": 2.33,
+  "dE_murekkep_p95": 4.1,
+  "dE_gt_2.3_payi": 0.452,
+  "dE_zemin_ort": 4.66,
+  "kanal_fark_ort_RGB": [
+   0.31,
+   -1.69,
+   -6.46
+  ]
+ },
+ {
+  "is": "ONCE_SEMBOL_CAGLA_MIDNIGHT_BLUE_A2",
+  "sira": 0,
+  "yan": "sol",
+  "fark": 2.15,
+  "iou": 0.999,
+  "dx": 0,
+  "dy": 0,
+  "gecti": true,
+  "kaynak_kutu": [
+   533,
+   2054,
+   1021,
+   2447
+  ],
+  "kaydirma_px": 105,
+  "dE_murekkep_ort": 1.07,
+  "dE_murekkep_p95": 2.27,
+  "dE_gt_2.3_payi": 0.041,
+  "dE_zemin_ort": 1.71,
+  "kanal_fark_ort_RGB": [
+   -0.12,
+   -0.04,
+   0.31
+  ]
+ },
+ {
+  "is": "ONCE_SEMBOL_CAGLA_MIDNIGHT_BLUE_A2",
+  "sira": 0,
+  "yan": "sag",
+  "fark": 7.08,
+  "iou": 0.9967,
+  "dx": 0,
+  "dy": 0,
+  "gecti": false,
+  "kaynak_kutu": [
+   1410,
+   2054,
+   1978,
+   2447
+  ],
+  "kaydirma_px": 207,
+  "dE_murekkep_ort": 2.46,
+  "dE_murekkep_p95": 4.41,
+  "dE_gt_2.3_payi": 0.493,
+  "dE_zemin_ort": 3.84,
+  "kanal_fark_ort_RGB": [
+   0.21,
+   -1.83,
+   -7.0
+  ]
+ },
+ {
+  "is": "ONCE_SEMBOL_CAGLA_MIDNIGHT_BLUE_A2",
+  "sira": 1,
+  "yan": "sol",
+  "fark": 2.05,
+  "iou": 0.9987,
+  "dx": 0,
+  "dy": 0,
+  "gecti": true,
+  "kaynak_kutu": [
+   587,
+   2057,
+   1075,
+   2447
+  ],
+  "kaydirma_px": 51,
+  "dE_murekkep_ort": 1.03,
+  "dE_murekkep_p95": 2.27,
+  "dE_gt_2.3_payi": 0.038,
+  "dE_zemin_ort": 1.46,
+  "kanal_fark_ort_RGB": [
+   -0.12,
+   -0.03,
+   0.04
+  ]
+ },
+ {
+  "is": "ONCE_SEMBOL_CAGLA_MIDNIGHT_BLUE_A2",
+  "sira": 1,
+  "yan": "sag",
+  "fark": 7.16,
+  "iou": 0.9973,
+  "dx": 0,
+  "dy": 0,
+  "gecti": false,
+  "kaynak_kutu": [
+   1499,
+   2057,
+   1887,
+   2447
+  ],
+  "kaydirma_px": 208,
+  "dE_murekkep_ort": 2.43,
+  "dE_murekkep_p95": 4.2,
+  "dE_gt_2.3_payi": 0.477,
+  "dE_zemin_ort": 4.42,
+  "kanal_fark_ort_RGB": [
+   0.22,
+   -1.75,
+   -7.1
+  ]
+ },
+ {
+  "is": "ONCE_SEMBOL_CAGLA_MIDNIGHT_BLUE_A2",
+  "sira": 2,
+  "yan": "sol",
+  "fark": 2.05,
+  "iou": 0.9987,
+  "dx": 0,
+  "dy": 0,
+  "gecti": true,
+  "kaynak_kutu": [
+   587,
+   2057,
+   1075,
+   2447
+  ],
+  "kaydirma_px": 51,
+  "dE_murekkep_ort": 1.03,
+  "dE_murekkep_p95": 2.27,
+  "dE_gt_2.3_payi": 0.038,
+  "dE_zemin_ort": 1.46,
+  "kanal_fark_ort_RGB": [
+   -0.12,
+   -0.03,
+   0.04
+  ]
+ },
+ {
+  "is": "ONCE_SEMBOL_CAGLA_MIDNIGHT_BLUE_A2",
+  "sira": 2,
+  "yan": "sag",
+  "fark": 7.16,
+  "iou": 0.9973,
+  "dx": 0,
+  "dy": 0,
+  "gecti": false,
+  "kaynak_kutu": [
+   1499,
+   2057,
+   1887,
+   2447
+  ],
+  "kaydirma_px": 208,
+  "dE_murekkep_ort": 2.43,
+  "dE_murekkep_p95": 4.2,
+  "dE_gt_2.3_payi": 0.477,
+  "dE_zemin_ort": 4.42,
+  "kanal_fark_ort_RGB": [
+   0.22,
+   -1.75,
+   -7.1
+  ]
+ },
+ {
+  "is": "ONCE_SEMBOL_CAGLA_MIDNIGHT_BLUE_A2",
+  "sira": 3,
+  "yan": "sol",
+  "fark": 2.05,
+  "iou": 0.9987,
+  "dx": 0,
+  "dy": 0,
+  "gecti": true,
+  "kaynak_kutu": [
+   587,
+   2057,
+   1075,
+   2447
+  ],
+  "kaydirma_px": 51,
+  "dE_murekkep_ort": 1.03,
+  "dE_murekkep_p95": 2.27,
+  "dE_gt_2.3_payi": 0.038,
+  "dE_zemin_ort": 1.46,
+  "kanal_fark_ort_RGB": [
+   -0.12,
+   -0.03,
+   0.04
+  ]
+ },
+ {
+  "is": "ONCE_SEMBOL_CAGLA_MIDNIGHT_BLUE_A2",
+  "sira": 3,
+  "yan": "sag",
+  "fark": 7.16,
+  "iou": 0.9973,
+  "dx": 0,
+  "dy": 0,
+  "gecti": false,
+  "kaynak_kutu": [
+   1499,
+   2057,
+   1887,
+   2447
+  ],
+  "kaydirma_px": 208,
+  "dE_murekkep_ort": 2.43,
+  "dE_murekkep_p95": 4.2,
+  "dE_gt_2.3_payi": 0.477,
+  "dE_zemin_ort": 4.42,
+  "kanal_fark_ort_RGB": [
+   0.22,
+   -1.75,
+   -7.1
+  ]
+ },
+ {
+  "is": "ONCE_SEMBOL_CAGLA_MIDNIGHT_BLUE_A2",
+  "sira": 4,
+  "yan": "sol",
+  "fark": 2.05,
+  "iou": 0.9987,
+  "dx": 0,
+  "dy": 0,
+  "gecti": true,
+  "kaynak_kutu": [
+   587,
+   2057,
+   1075,
+   2447
+  ],
+  "kaydirma_px": 51,
+  "dE_murekkep_ort": 1.03,
+  "dE_murekkep_p95": 2.27,
+  "dE_gt_2.3_payi": 0.038,
+  "dE_zemin_ort": 1.46,
+  "kanal_fark_ort_RGB": [
+   -0.12,
+   -0.03,
+   0.04
+  ]
+ },
+ {
+  "is": "ONCE_SEMBOL_CAGLA_MIDNIGHT_BLUE_A2",
+  "sira": 4,
+  "yan": "sag",
+  "fark": 7.16,
+  "iou": 0.9973,
+  "dx": 0,
+  "dy": 0,
+  "gecti": false,
+  "kaynak_kutu": [
+   1499,
+   2057,
+   1887,
+   2447
+  ],
+  "kaydirma_px": 208,
+  "dE_murekkep_ort": 2.43,
+  "dE_murekkep_p95": 4.2,
+  "dE_gt_2.3_payi": 0.477,
+  "dE_zemin_ort": 4.42,
+  "kanal_fark_ort_RGB": [
+   0.22,
+   -1.75,
+   -7.1
+  ]
+ },
+ {
+  "is": "SONRA_MIDNIGHT_BLUE_11x14",
+  "sira": 0,
+  "yan": "sol",
+  "fark": 1.8,
+  "iou": 0.9983,
+  "dx": 0,
+  "dy": 0,
+  "gecti": true,
+  "kaynak_kutu": [
+   562,
+   1861,
+   1030,
+   2239
+  ],
+  "kaydirma_px": 23,
+  "dE_murekkep_ort": 0.99,
+  "dE_murekkep_p95": 2.27,
+  "dE_gt_2.3_payi": 0.043,
+  "dE_zemin_ort": 1.44,
+  "kanal_fark_ort_RGB": [
+   -0.08,
+   0.15,
+   0.31
+  ]
+ },
+ {
+  "is": "SONRA_MIDNIGHT_BLUE_11x14",
+  "sira": 0,
+  "yan": "sag",
+  "fark": 1.96,
+  "iou": 0.9991,
+  "dx": 1,
+  "dy": 0,
+  "gecti": true,
+  "kaynak_kutu": [
+   1399,
+   1861,
+   1943,
+   2239
+  ],
+  "kaydirma_px": -12,
+  "dE_murekkep_ort": 1.07,
+  "dE_murekkep_p95": 2.32,
+  "dE_gt_2.3_payi": 0.062,
+  "dE_zemin_ort": 1.57,
+  "kanal_fark_ort_RGB": [
+   -0.1,
+   0.07,
+   0.17
+  ]
+ },
+ {
+  "is": "SONRA_MIDNIGHT_BLUE_11x14",
+  "sira": 1,
+  "yan": "sol",
+  "fark": 1.8,
+  "iou": 0.9993,
+  "dx": 0,
+  "dy": 0,
+  "gecti": true,
+  "kaynak_kutu": [
+   562,
+   1861,
+   1030,
+   2239
+  ],
+  "kaydirma_px": 21,
+  "dE_murekkep_ort": 1.0,
+  "dE_murekkep_p95": 2.27,
+  "dE_gt_2.3_payi": 0.041,
+  "dE_zemin_ort": 1.43,
+  "kanal_fark_ort_RGB": [
+   -0.08,
+   0.15,
+   0.27
+  ]
+ },
+ {
+  "is": "SONRA_MIDNIGHT_BLUE_11x14",
+  "sira": 1,
+  "yan": "sag",
+  "fark": 1.97,
+  "iou": 0.9991,
+  "dx": 0,
+  "dy": 0,
+  "gecti": true,
+  "kaynak_kutu": [
+   1399,
+   1861,
+   1943,
+   2239
+  ],
+  "kaydirma_px": -13,
+  "dE_murekkep_ort": 1.08,
+  "dE_murekkep_p95": 2.32,
+  "dE_gt_2.3_payi": 0.062,
+  "dE_zemin_ort": 1.58,
+  "kanal_fark_ort_RGB": [
+   -0.1,
+   0.07,
+   0.18
+  ]
+ }
+]
