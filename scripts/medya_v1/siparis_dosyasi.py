@@ -663,18 +663,32 @@ def olcek_kapisi(g1, g0, k=1.0, hi_res_boyut=None, referans_boyut=None):
     for ad in ('sol_isim', 'sonsuz', 'sag_isim'):
         d[f'{ad}_x0'] = round(norm(g1[ad])[0] - g0[ad][0], 2)
         d[f'{ad}_x1'] = round(norm(g1[ad])[1] - g0[ad][1], 2)
+    konum_olcum = 'kenar'
+    if OLCEK_MERKEZ['etkin'] and 'merkez' in g1 and 'merkez' in g0:
+        # OLCEK MERKEZ: yatay konum (satir merkezi, bosluklar) kume kutle merkezlerinden; uc kenarlar asagida kenar olcutunde
+        m1 = {a: norm(v) for a, v in g1['merkez'].items()}
+        m0 = g0['merkez']
+        d['satir_merkez'] = round((m1['sol_isim'] + m1['sag_isim']) / 2 - (m0['sol_isim'] + m0['sag_isim']) / 2, 2)
+        d['bosluk_sol'] = round((m1['sonsuz'] - m1['sol_isim']) - (m0['sonsuz'] - m0['sol_isim']), 2)
+        d['bosluk_sag'] = round((m1['sag_isim'] - m1['sonsuz']) - (m0['sag_isim'] - m0['sonsuz']), 2)
+        konum_olcum = 'kutle merkezi'
     konum = ('satir_merkez', 'bosluk_sol', 'bosluk_sag', 'taban_sol', 'taban_sag',
              'cap_sol', 'cap_sag')
     en_k = max(abs(d[a]) for a in konum)
     en_h = max(abs(v) for a, v in d.items() if a not in konum)
     return {'gecti': bool(en_k <= OLCEK_KONUM and en_h <= OLCEK_KENAR),
             'konum_fark_px': en_k, 'kenar_fark_px': en_h,
-            'esik': {'konum': OLCEK_KONUM, 'harf_kenari': OLCEK_KENAR},
+            'esik': {'konum': OLCEK_KONUM, 'harf_kenari': OLCEK_KENAR}, 'yatay_konum': konum_olcum,
             'olcum': 'dogal olcek; farklar 2400 px birimine normalize', 'fark': d,
             'boyut': {'hi_res': list(hi_res_boyut or []),
                       'onayli_2400': list(referans_boyut or [])}}
 
 
+# OLCEK MERKEZ (Serdar onayi 2 Eki, OLCEK_AL_TANI; varsayilan ACIK, OLCEK_MERKEZ=0 kapatir): yatay KONUM (satir merkezi,
+# bosluk_sol / bosluk_sag) uc kuantil yerine kume KUTLE MERKEZLERINDEN olculur; uc kenarlar (x0 / x1, %0.2 / %99.8) kenar
+# olcutunde (<= 2 px) kalir, dikey konum (taban, cap) degismez. CAGLA MB 24x36: tek glif kenari (A sol bacagi -0.96, A
+# 0.55 px genis) bosluk_sag'i 1.28 yapiyordu; kutle merkezi farki -0.43. Gercek kayma korunur (1.2 px oteleme FAIL kalir).
+OLCEK_MERKEZ = {'etkin': os.environ.get('OLCEK_MERKEZ', '1') != '0'}
 OLCEK_PAY = 10          # satir_olc ile ayni pencere payi (2400 px birimi)
 OLCEK_UC = 0.002        # kenar = murekkep kutlesinin %0.2 / %99.8 noktasi
 
@@ -689,6 +703,12 @@ def _uc(profil, q=OLCEK_UC):
         once = float(cum[i - 1]) if i else 0.0
         return i + (h - once) / max(float(profil[i]), 1e-9)
     return nokta(q * T), nokta((1 - q) * T)
+
+
+def _merkez(profil):
+    """Kutle profilinin agirlik merkezi (piksel i = [i, i+1), merkez i + 0.5; _uc ile ayni koordinat)."""
+    p = np.asarray(profil, np.float64)
+    return float(((np.arange(len(p)) + 0.5) * p).sum() / max(p.sum(), 1e-9))
 
 
 # OLCEK GOVDE (Serdar onayi 2 Eki, varsayilan ACIK; OLCEK_GOVDE=0 kapatir): olcek penceresinde isim bandinin TAMAMEN disinda kalan murekkep bilesenleri
@@ -752,8 +772,10 @@ def satir_olc_alt(im, bant, k=1.0, pay=OLCEK_PAY):
         C = c[:, xa:xb]
         if C.sum() <= 0:
             return {'hata': f'{ad}: murekkep kutlesi yok'}
-        x0, x1 = _uc(C.sum(axis=0))
+        sx = C.sum(axis=0)
+        x0, x1 = _uc(sx)
         out[ad] = [round((xa + x0) / k, 2), round((xa + x1) / k, 2)]
+        out.setdefault('merkez', {})[ad] = round((xa + _merkez(sx)) / k, 3)
         if ad != 'sonsuz':
             u, t = _uc(C.sum(axis=1))
             y = ad.split('_')[0]
@@ -1251,6 +1273,8 @@ class _SatirYerlesim:
         a = np.asarray(a, np.float32)
         x0, x1 = _uc(a.sum(axis=0))
         t, b = _uc(a.sum(axis=1))
+        if OLCEK_MERKEZ['etkin']:                     # 2 Eki: yatay merkez olcek kapisiyla ayni (kutle merkezi)
+            return _merkez(a.sum(axis=0)), (t + b) / 2.0
         return (x0 + x1) / 2.0, (t + b) / 2.0
 
     def _kaydet(self, s, S, isimler, tagline):
