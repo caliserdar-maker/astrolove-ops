@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """YAYINDAKI dijital dosyalarda tagline DIKIS olcumu (salt okur; Serdar 2 Eki). Yeniden uretim YOK.
-Bant: surucu._bantlar (siparis yolunun bant bulucusu; 2400 genislikte), olcu: dikis_kapisi.dikis (ornek kosusu ile ayni,
+Bant: tagline_bandi (_bantlar maskesi; en alttaki yeterli yukseklikteki kume, 2400 genislikte), olcu: dikis_kapisi.dikis (ornek kosusu ile ayni,
 esik 13). Kopya olcum yazilmaz (ders 33). Dosyalar tek tek indirilir, olculur, silinir.
   --tur zip    : Drive'daki <SIGN>_<SIGN>_<EDISYON>_ALL_SIZES.zip (Etsy dijital ilan dosyasi), icindeki 5 JPG
   --tur galeri : TEMP/GALERI_77/_KAYNAK/<CIFT>/BASKI_{MIDNIGHT_BLUE,DEEP_BLACK}.jpg (galeri kart 15 / 16 kaynagi)
@@ -15,12 +15,12 @@ import time
 import zipfile
 from pathlib import Path
 
+import numpy as np
 from PIL import Image
 
 KOK = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(KOK / 'ornek')); sys.path.insert(0, str(KOK / 'siparis_dijital'))
 import dikis_kapisi as dk  # noqa: E402
-import surucu  # noqa: E402
 
 Image.MAX_IMAGE_PIXELS = None
 ESIK = 13.0
@@ -31,26 +31,51 @@ def rc(*a):
     return subprocess.run(['rclone', '--tpslimit', '4', '--retries', '5', '--low-level-retries', '20', *a], check=True, capture_output=True, text=True).stdout
 
 
+def tagline_bandi(L, oran=(0.62, 0.97), esik=45, min_yuk=0.015):
+    """2400 genislikte tagline satir kumesi: alt bolgede (oran) murekkep satir kumelerinden yuksekligi >= min_yuk x H olan
+    EN ALTTAKI. 2 Eki: surucu._bantlar son iki kumeyi alir; galeri / Etsy posterlerinde tagline altindaki ince yildiz
+    seridi (15 px) 'mesaj' sayiliyordu (154 galeri dosyasinin hepsi 'murekkep yok'). Maske _bantlar ile ayni olcu."""
+    H, W = L.shape
+    a0, a1 = int(H * oran[0]), int(H * oran[1])
+    b = L[a0:a1]
+    m = np.abs(b - np.median(b)) > esik
+    sat = m.sum(1) > max(W * 0.002, 3)
+    kume, y = [], 0
+    while y < len(sat):
+        if sat[y]:
+            s0 = y
+            while y < len(sat) and (sat[y] or (y + 8 < len(sat) and sat[y:y + 8].any())):
+                y += 1
+            if y - s0 >= H * min_yuk:
+                kume.append((s0, y))
+        y += 1
+    if not kume:
+        return None
+    s0, s1 = kume[-1]
+    cols = np.nonzero(m[s0:s1].any(0))[0]
+    return int(cols.min()), int(cols.max()), a0 + s0, a0 + s1, len(kume)
+
+
 def olc(yol, tmp):
-    """Tagline bandi (surucu._bantlar 'mesaj') -> tam cozunurlukte kirp -> dk.dikis."""
+    """Tagline bandi (tagline_bandi, 2400 genislik) -> tam cozunurlukte kirp -> dk.dikis (uretim ornek olcusu)."""
     with Image.open(yol) as im:
         W, H = im.size
         im.draft('RGB', (2400, int(2400 * H / W)))
         k = im.convert('RGB')
         if k.width != 2400:
             k = k.resize((2400, round(2400 * H / W)), Image.BILINEAR)
-    kucuk = Path(tmp) / 'k.jpg'; k.save(kucuk, quality=95)
-    b = {x[0]: x for x in surucu._bantlar(kucuk)}
-    if 'mesaj' not in b:
-        return {'hata': f'mesaj bandi yok ({list(b)})', 'px': [W, H]}
-    _, x0, x1, y0, y1, _w = b['mesaj']
+    L = np.asarray(k.convert('L')).astype(np.float32)
+    b = tagline_bandi(L)
+    if b is None:
+        return {'hata': 'tagline bandi yok', 'px': [W, H]}
+    x0, x1, y0, y1, nk = b
     s = W / 2400.0
     X0, X1, Y0, Y1 = int(x0 * s), int(x1 * s), int(y0 * s), int(y1 * s)
     p = int(0.12 * (Y1 - Y0))
     with Image.open(yol) as im:
         tag = im.convert('RGB').crop((max(X0 - p, 0), max(Y0 - p, 0), min(X1 + p, W), min(Y1 + p, H)))
     d = dk.dikis(tag)
-    d.update({'px': [W, H], 'tag_kutu': [X0, Y0, X1, Y1]})
+    d.update({'px': [W, H], 'tag_kutu': [X0, Y0, X1, Y1], 'kume_sayisi': nk})
     return d
 
 
