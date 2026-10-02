@@ -50,6 +50,10 @@ on:
         description: "es zamanli is (siparis kosusu varken 4; Serdar 2 Eki gece on testi 8)"
         required: false
         default: "4"
+      kesit:
+        description: "1 = FAIL hucrede sayfalarin isim + tagline bandi 1:1 kesiti Drive PROVA/<kosu>/kesit/ (bos = yok)"
+        required: false
+        default: ""
 
 concurrency: prova
 
@@ -202,13 +206,20 @@ jobs:
           CIFTLER: ${{ matrix.ciftler }}
           TUM: ${{ needs.plan.outputs.tum }}
           SET: ${{ matrix.set || inputs.set }}
+          KESIT: ${{ inputs.kesit == '1' && '1' || '' }}
         run: |
           set +e
           if [ "${{ matrix.tur }}" = renk ]; then A=(--renk "${{ matrix.anahtar }}"); else A=(--boy "${{ matrix.anahtar }}"); fi
           python scripts/siparis_dijital/prova.py --tur "${{ matrix.tur }}" "${A[@]}" --ciftler "$CIFTLER" \
             --tum_ciftler "$TUM" --set "$SET" --kod _kod --kod-ref "siparis-baski-v1 $RENK_REF" \
-            --parca "${{ matrix.parca }}" --cikti "$GITHUB_WORKSPACE/out" 2>&1 | grep -v '^SURE '
+            --parca "${{ matrix.parca }}" --cikti "$GITHUB_WORKSPACE/out" \
+            ${KESIT:+--kesit "$GITHUB_WORKSPACE/out/kesit"} 2>&1 | grep -v '^SURE '
           exit 0
+      - name: FAIL kesitleri (Drive)
+        if: ${{ always() && inputs.kesit == '1' }}
+        run: |
+          set -euo pipefail
+          if [ -d out/kesit ]; then rclone copy out/kesit "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PROVA/${{ github.run_id }}/kesit/"; ls out/kesit; fi
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:

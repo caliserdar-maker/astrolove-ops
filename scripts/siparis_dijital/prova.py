@@ -35,6 +35,28 @@ SETLER = {
 }
 
 
+BOY_PX = {(4800, 6000): '16x20', (5400, 7200): '18x24', (7200, 10800): '24x36', (3307, 4200): '11x14', (4960, 7015): 'A2'}
+
+
+def fail_kesit(d, cift, anahtar, hedef):
+    """FAIL hucrenin uretilen sayfalari (d altindaki JPEG'ler): isim + tagline bandi (sayfa yuksekliginin 0.62-0.95'i,
+    surucu.KESIT_Y ile ayni bolge, genis), tam cozunurluk 1:1. Kapi / sonuc degismez; yalniz goz kontrolu icin."""
+    from PIL import Image
+    Image.MAX_IMAGE_PIXELS = None
+    hedef.mkdir(parents=True, exist_ok=True)
+    yaz = []
+    for j in sorted(Path(d).rglob('*.jpg')):
+        with Image.open(j) as im:
+            boy = BOY_PX.get(im.size)
+            if not boy:
+                continue
+            W, H = im.size
+            ad = f'KESIT_{cift}_{anahtar}_{boy}.jpg'
+            im.convert('RGB').crop((0, int(0.62 * H), W, int(0.95 * H))).save(hedef / ad, 'JPEG', quality=90)
+            yaz.append(ad)
+    return yaz
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--tur', required=True, choices=('renk', 'wp'))
@@ -45,6 +67,7 @@ def main():
     ap.add_argument('--kod', required=True); ap.add_argument('--kod-ref', default='')
     ap.add_argument('--parca', default='0')
     ap.add_argument('--cikti', required=True)
+    ap.add_argument('--kesit', default='', help='klasor: FAIL hucrede sayfalarin isim + tagline bandi 1:1 (bos = yok)')
     a = ap.parse_args()
     cik = Path(a.cikti).resolve(); cik.mkdir(parents=True, exist_ok=True)
     kod = Path(a.kod).resolve()
@@ -90,6 +113,11 @@ def main():
         print(f'PROVA {a.tur} {anahtar} {cift} set {s} {"PASS" if r["gecti"] else "FAIL"} {r["sn"]} sn | '
               f'{i + 1}/{len(ciftler)} gecen {gecen / 60:.1f} dk kalan ~{gecen / (i + 1) * (len(ciftler) - i - 1) / 60:.1f} dk',
               flush=True)
+        if a.kesit and not r['gecti']:
+            try:
+                r['kesit'] = fail_kesit(d, cift, anahtar, Path(a.kesit))
+            except Exception as e:                                # noqa: BLE001  (kesit sonucu degistirmez)
+                r['kesit_hata'] = f'{type(e).__name__}: {e}'
         shutil.rmtree(d, ignore_errors=True)                       # sayfa / PDF saklanmaz
         for p in (sd.W / 'pod' / cift, ):                         # kaynak onbellegi (disk)
             shutil.rmtree(p, ignore_errors=True)
