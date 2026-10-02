@@ -6,10 +6,11 @@ VINTAGE_<boy> plate'i ile piksel piksel ayni (e_kagit ort 0.07-0.14); sayfa 45-7
 (e_kagit ort 1.95-2.32, 5 boyda da sinir GEMINI_LEO | GEMINI_LIBRA). Mevcut plate 78 kaynagin piksel ortancasi oldugu
 icin cogunluk (44) kagidina oturmus.
 
-uret : plate B = VINTAGE_<boy> + ortanca(kaynak - VINTAGE) yalniz sayfa >= 45 ciftlerin MUREKKEP DISI piksellerinde
-       (murekkep = wk.murekkep_maskesi(S - P, kenar=0), 9x9 genisletilmis). Murekkep yeri cifte gore degistigi icin
-       bosluk dolar; 34 ciftin hepsinde murekkep olan piksel (ortak yazi) = VINTAGE degeri (fark 0; temizlenmis plate,
-       iz yok). Bellek: kaynaklar /mnt'de uint8 memmap, ortanca satir karolarinda.
+uret : plate B = sayfa >= 45 ciftlerin MUREKKEP DISI piksel ortancasi. Murekkep grubun kendi kagidina gore aranir:
+       B0 = ham ortanca (plate_uret yontemi), murekkep = wk.murekkep_maskesi(S - B0, kenar=0) | VINTAGE'e gore belirgin
+       koyu, 9x9 genisletilmis. Murekkep yeri cifte gore degistigi icin bosluk dolar; 34 ciftin hepsinde murekkep olan
+       piksel (ortak yazi) = VINTAGE degeri (temizlenmis plate, iz yok). Bellek: kaynaklar /mnt'de uint8 memmap,
+       ortanca satir karolarinda.
 tara : 78 cift, uretimin kendi qc() fonksiyonu (wp_bakir.qc, ders 33) e_kagit + cift_boy'daki plate zemin_uyumu.
        Secilen plate (sayfa < 45 -> VINTAGE, >= 45 -> VINTAGE_B) + sayfa >= 45 icin eski plate (kapi hassas mi).
 kesit: PISCES_SCORPIO WP once (WP_REF adfb2b9) / sonra (plate B) 1:1, isim bandi; onayli kaynakla yan yana.
@@ -31,6 +32,7 @@ import wp_bakir as wb                                            # noqa: E402
 Image.MAX_IMAGE_PIXELS = None
 SAYFA_B = 45                    # Canva sayfa 45-78 (GEMINI_LIBRA..VIRGO_VIRGO) -> plate B
 GENIS = 9                       # murekkep maskesi genisletme (anti-alias kenari ortancaya girmesin)
+KOYU = 4 * wk.ESIK              # VINTAGE'e gore bu kadar koyu = murekkep (kagit doku farki ~ESIK, murekkep >> ESIK)
 T0 = time.time()
 
 
@@ -64,57 +66,77 @@ def uret(a):
     grup = [(n, c) for n, c in tam if n >= SAYFA_B]
     S0 = wk.dizi(kaynak(a.kok, grup[0][1], a.boy)); H, W = S0.shape[:2]; del S0
     P = plate_oku(a.plate, (W, H))
+    LP = P @ wk.LUMA
     tmp = Path(a.tmp); tmp.mkdir(parents=True, exist_ok=True)
     n = len(grup)
-    D = np.lib.format.open_memmap(tmp / 'D.npy', 'w+', np.int8, (n, H, W, 3))    # S - P (int8), murekkep = -128
+    S = np.lib.format.open_memmap(tmp / 'S.npy', 'w+', np.uint8, (n, H, W, 3))     # grup kaynaklari (uint8)
+    for i, (no, c) in enumerate(grup):
+        x = np.asarray(Image.open(kaynak(a.kok, c, a.boy)).convert('RGB'))
+        if x.shape[:2] != (H, W):
+            raise SystemExit(f'HATA: {c} {x.shape[:2]} != {(H, W)}')
+        S[i] = x
+        del x
+        eta(i + 1, 3 * n, f'oku {c}')
+    S.flush()
+    T = max(16, int(2.5e8 // (n * W * 3 * 4)))
+    # 1. gecis: grubun HAM ortancasi B0 (plate_uret yontemi). 1. deneme (37044638005) murekkebi VINTAGE'e gore
+    # ariyordu: B kagidinin dokusu VINTAGE'den farkli oldugu icin doku farki her ciftte "murekkep" (pay 0.26) ->
+    # sayfanin %23'u bos -> VINTAGE degeri -> zemin_uyumu 0.83-0.92. Murekkep artik grubun kendi kagidina gore.
+    B0 = np.empty((H, W, 3), np.float32)
+    for y in range(0, H, T):
+        B0[y:y + T] = np.median(S[:, y:y + T], axis=0)
+    # 2. gecis: murekkep = |S - B0| (murekkep_maskesi kenar=0) | VINTAGE'e gore belirgin koyu (cogunlukta murekkep
+    # olan piksel B0'a girse bile dislanir), 9x9 genisletilmis
+    K = np.lib.format.open_memmap(tmp / 'K.npy', 'w+', np.bool_, (n, H, W))
     bilgi = []
     for i, (no, c) in enumerate(grup):
-        S = wk.dizi(kaynak(a.kok, c, a.boy))
-        if S.shape[:2] != (H, W):
-            raise SystemExit(f'HATA: {c} {S.shape[:2]} != {(H, W)}')
-        d = S - P
-        ink = cv2.dilate(wk.murekkep_maskesi(d, kenar=0).astype(np.uint8), np.ones((GENIS, GENIS), np.uint8)).astype(bool)
-        di = np.rint(d)
-        kirp = int((np.abs(di[~ink]) > 127).sum())                       # murekkep disi |fark| > 127 (beklenen 0)
-        di = np.clip(di, -127, 127).astype(np.int8)
-        di[ink] = -128
-        D[i] = di
-        bilgi.append({'cift': c, 'sayfa': no, 'murekkep_payi': round(float(ink.mean()), 4), 'kirpilan_px': kirp})
-        del S, d, di, ink
-        eta(i + 1, n, c)
-    D.flush()
+        x = S[i].astype(np.float32)
+        m = wk.murekkep_maskesi(x - B0, kenar=0) | (LP - x @ wk.LUMA > KOYU)
+        K[i] = cv2.dilate(m.astype(np.uint8), np.ones((GENIS, GENIS), np.uint8)).astype(bool)
+        bilgi.append({'cift': c, 'sayfa': no, 'murekkep_payi': round(float(K[i].mean()), 4),
+                      'B0_dE_ort': round(float(wk.dE(x, B0)[~K[i]].mean()), 3)})
+        del x, m
+        eta(n + i + 1, 3 * n, f'maske {c}')
+    K.flush()
+    # 3. gecis: murekkep disi ortanca; tum ciftlerde murekkep (ortak yazi) = VINTAGE degeri (temizlenmis plate)
     B = np.empty((H, W, 3), np.uint8)
     bos = np.zeros((H, W), bool)
     gecerli_min = n
-    T = max(16, int(2.5e8 // (n * W * 3 * 4)))
-    for y in range(0, H, T):
-        k = D[:, y:y + T].astype(np.float32)
-        m = D[:, y:y + T, :, 0] == -128
+    for j, y in enumerate(range(0, H, T)):
+        k = S[:, y:y + T].astype(np.float32)
+        m = K[:, y:y + T]
         k[m] = np.nan
-        with np.errstate(all='ignore'):
-            import warnings
-            with warnings.catch_warnings():
-                warnings.simplefilter('ignore', RuntimeWarning)
-                med = np.nanmedian(k, axis=0)
+        import warnings
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', RuntimeWarning)
+            med = np.nanmedian(k, axis=0)
         b = np.isnan(med[..., 0])
         bos[y:y + T] = b
-        med[b] = 0.0                                                     # ortak yazi: VINTAGE degeri
-        gecerli_min = min(gecerli_min, int((~m).sum(0)[~b].min()) if (~b).any() else gecerli_min)
-        B[y:y + T] = np.clip(np.rint(P[y:y + T] + med), 0, 255).astype(np.uint8)
-    del D
-    (tmp / 'D.npy').unlink()
+        med[b] = P[y:y + T][b]
+        if (~b).any():
+            gecerli_min = min(gecerli_min, int((~m).sum(0)[~b].min()))
+        B[y:y + T] = np.clip(np.rint(med), 0, 255).astype(np.uint8)
+        del k, m
+        eta(2 * n + min(n, (j + 1) * n * T // H), 3 * n, 'ortanca')
+    del S, K
+    (tmp / 'S.npy').unlink(); (tmp / 'K.npy').unlink()
     cik = Path(a.cik); cik.mkdir(parents=True, exist_ok=True)
     ad = f'VINTAGE_B_{a.boy}.png'
     Image.fromarray(B).save(cik / ad, optimize=False, compress_level=6)
     ys, xs = np.nonzero(bos)
-    fark = wk.dE(B.astype(np.float32), P)
+    Bf = B.astype(np.float32)
+    fark = wk.dE(Bf, P)
+    iz = int((LP - Bf @ wk.LUMA > KOYU).sum())                                # plate B'de VINTAGE'e gore koyu iz (beklenen 0)
     R = {'boy': a.boy, 'plate': ad, 'px': [W, H], 'cift_sayisi': n, 'ilk': grup[0][1], 'son': grup[-1][1],
-         'yontem': 'VINTAGE + nanmedian(S - VINTAGE) murekkep disi (murekkep_maskesi kenar=0, genisletme 9)',
-         'bos_px': int(bos.sum()), 'bos_kutu': [int(xs.min()), int(ys.min()), int(xs.max()), int(ys.max())] if bos.any() else None,
-         'ortanca_min_ornek': gecerli_min,
+         'yontem': ('B0 = grup ham ortancasi; murekkep = murekkep_maskesi(S - B0, kenar=0) | (L_VINTAGE - L_S > '
+                    f'{KOYU:g}), genisletme {GENIS}; plate B = murekkep disi ortanca, tum ciftlerde murekkep = VINTAGE'),
+         'bos_px': int(bos.sum()), 'bos_pay': round(float(bos.mean()), 5),
+         'bos_kutu': [int(xs.min()), int(ys.min()), int(xs.max()), int(ys.max())] if bos.any() else None,
+         'ortanca_min_ornek': gecerli_min, 'koyu_iz_px': iz,
          'B_vs_VINTAGE_dE': wk.ozet(fark), 'murekkep': bilgi, 'sure_sn': round(time.time() - T0, 1)}
     (cik / f'PLATE_B_{a.boy}.json').write_text(json.dumps(R, ensure_ascii=False, indent=1))
     log('PLATE_B', json.dumps({x: R[x] for x in R if x != 'murekkep'}, ensure_ascii=False))
+    log('MUREKKEP_PAYI', min(x['murekkep_payi'] for x in bilgi), max(x['murekkep_payi'] for x in bilgi))
 
 
 def e_kagit(P, S):

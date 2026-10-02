@@ -90,7 +90,7 @@ jobs:
           path: out/*.json
           retention-days: 3
       - if: ${{ always() }}
-        run: rm -rf ~/.config/rclone _in /mnt/pb
+        run: rm -rf ~/.config/rclone _in && sudo rm -rf /mnt/pb
 
   onay:
     needs: plate
