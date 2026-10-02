@@ -1,0 +1,75 @@
+name: siparis-kesit-birlesik
+
+# Goz kontrolu kesiti (Serdar 2 Eki, Test 4): renk basina TEK dosya, 5 boy alt alta, 1:1 (olcekleme yok).
+# Her boyda tek parca: kucuk semboller (isim ustu) + isim satiri + tagline (ust / alt hat, dikis bolgesi).
+# Bant satirlari siparis-kesit-son ile ayni kaynaktan (KAPI_RAPORU_<renk>.json). Tagline dikis degeri uretim ornek
+# olcusuyle (scripts/ornek/dikis_kapisi.dikis, esik 13) etikete yazilir. Cikti yalniz Drive
+# TEMP/SIPARIS_ISIM/KESIT/<receipt>/. Salt okur; Etsy / musteri YOK.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      receipt:
+        description: "receipt"
+        required: true
+        default: "9000000004"
+      renkler:
+        description: "virgullu renkler"
+        required: false
+        default: "MIDNIGHT_BLUE,DEEP_BLACK,PURE_WHITE,CHAMPAGNE_IVORY"
+
+jobs:
+  kesit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Girdi
+        run: |
+          jq -re '.inputs.receipt | test("^[0-9]+$")' "$GITHUB_EVENT_PATH" >/dev/null
+          jq -re '.inputs.renkler | test("^[A-Z_,]+$")' "$GITHUB_EVENT_PATH" >/dev/null
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --quiet pillow pikepdf numpy opencv-python-headless
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Drive (PDF + KAPI_RAPORU)
+        run: |
+          set -euo pipefail
+          REC=$(jq -r '.inputs.receipt' "$GITHUB_EVENT_PATH")
+          rclone copy "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL/$REC" d --include '/AstroLove*.pdf' --include 'KAPI_RAPORU_*.json'
+          find d -type f -printf '%TY-%Tm-%Td %TH:%TM %s %p\n' | sort
+      - name: Birlesik kesitler
+        run: |
+          set -euo pipefail
+          T0=$(date +%s)
+          python3 scripts/siparis_dijital/kesit_birlesik.py "$(jq -r '.inputs.receipt' "$GITHUB_EVENT_PATH")" "$(jq -r '.inputs.renkler' "$GITHUB_EVENT_PATH")" d out
+          echo "SURE kesit $(( $(date +%s) - T0 )) sn"
+      - name: Drive
+        run: |
+          set -euo pipefail
+          REC=$(jq -r '.inputs.receipt' "$GITHUB_EVENT_PATH")
+          rclone copy out "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/KESIT/$REC/"
+          rclone lsl "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/KESIT/$REC/"
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
