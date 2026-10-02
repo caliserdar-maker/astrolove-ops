@@ -349,9 +349,63 @@ def kesit(a):
     log('KESIT', json.dumps(sonuc, ensure_ascii=False, default=str))
 
 
+def kesit_a(a):
+    """KARAR A gorsel onay: onayli kaynak | yeni WP (uretim, en iyi / secili plate), 1:1.
+    KAGIT: iki goruntude de murekkep yok (plate'e gore, 31 px genisletilmis), aralarindaki dE ortancasi en yuksek
+    400 px pencere (fark en gorunur yer). Bantlar: RAPOR bantlar (isim, mesaj = tagline) +-120 satir, orta 1600 px."""
+    cik = Path(a.cik); cik.mkdir(parents=True, exist_ok=True)
+    c, boy = a.cift, a.boy
+    S = wk.dizi(a.onayli); H, W = S.shape[:2]
+    O = wk.dizi(Path(a.sonra) / f'WP_{c}_{boy}_BASKI.jpg')
+    P = plate_oku(a.plates, (W, H))
+    rap = json.loads((Path(a.sonra) / f'RAPOR_{boy}.json').read_text())
+    if O.shape[:2] != (H, W):
+        raise SystemExit(f'HATA: WP {O.shape[:2]} != {(H, W)}')
+    ink = wk.murekkep_maskesi(S - P, kenar=0) | wk.murekkep_maskesi(O - P, kenar=0)
+    ink = cv2.dilate(ink.astype(np.uint8), np.ones((31, 31), np.uint8)).astype(bool)
+    d = wk.dE(S, O)
+    ii = cv2.integral(ink.astype(np.uint8))
+    en, n = None, 400
+    for y in range(0, H - n + 1, n // 4):
+        for x in range(0, W - n + 1, n // 4):
+            if ii[y + n, x + n] - ii[y, x + n] - ii[y + n, x] + ii[y, x]:
+                continue
+            v = float(np.median(d[y:y + n, x:x + n]))
+            if en is None or v > en[0]:
+                en = (v, x, y)
+    plate_ad = (rap.get('plate') or {}).get('ad')
+    q = rap.get('qc') or {}
+    R = {'cift': c, 'boy': boy, 'plate': plate_ad, 'isim': a.isim, 'mesaj': a.mesaj, 'durum': rap.get('durum'),
+         'gecti': rap.get('gecti'), 'plate_gecti': rap.get('plate_gecti'),
+         'zemin_uyumu': (rap.get('plate') or {}).get('zemin_uyumu'), 'e_kagit': q.get('e_kagit'),
+         'qc_kalan': sorted(g for g, v in q.items() if isinstance(v, dict) and v.get('gecti') is False), 'kesitler': {}}
+    def yaz(ad, sl, yon):
+        A_, B_ = np.clip(S[sl], 0, 255).astype(np.uint8), np.clip(O[sl], 0, 255).astype(np.uint8)
+        Image.fromarray(A_).save(cik / f'KESIT_{c}_{boy}_{ad}_ONAYLI_1e1.png')
+        Image.fromarray(B_).save(cik / f'KESIT_{c}_{boy}_{ad}_WP_1e1.png')
+        ara = np.full((8, A_.shape[1], 3) if yon == 0 else (A_.shape[0], 8, 3), 255, np.uint8)
+        Image.fromarray(np.concatenate([A_, ara, B_], yon)).save(cik / f'KESIT_{c}_{boy}_{ad}_ONAYLI_WP_1e1.png')
+        dd = wk.dE(S[sl], O[sl])
+        R['kesitler'][ad] = {'y': [sl[0].start, sl[0].stop], 'x': [sl[1].start, sl[1].stop],
+                             'dE_ort': round(float(dd.mean()), 2), 'dE_p99': round(float(np.percentile(dd, 99)), 2)}
+    if en is not None:
+        _, x0, y0 = en
+        yaz('KAGIT', (slice(y0, y0 + n), slice(x0, x0 + n)), 1)
+    else:
+        R['kesitler']['KAGIT'] = 'murekkepsiz pencere yok'
+    et = rap.get('bantlar') or {}
+    x0 = max(0, W // 2 - 800); x1 = min(W, x0 + 1600)
+    for b in ('isim', 'mesaj'):
+        if b in et:
+            y0, y1 = et[b]
+            yaz(b.upper(), (slice(max(0, y0 - 120), min(H, y1 + 120)), slice(x0, x1)), 0)
+    (cik / f'KESIT_{c}_{boy}.json').write_text(json.dumps(R, ensure_ascii=False, indent=1, default=str))
+    log('KESIT_A', json.dumps(R, ensure_ascii=False, default=str))
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('is_', choices=('uret', 'tara', 'toplam', 'kesit'))
+    ap.add_argument('is_', choices=('uret', 'tara', 'toplam', 'kesit', 'kesit_a'))
     ap.add_argument('--boy', default='11x14')
     ap.add_argument('--kok', default='')
     ap.add_argument('--plate', default='')
@@ -364,8 +418,10 @@ def main():
     ap.add_argument('--onayli', default='')
     ap.add_argument('--once', default='')
     ap.add_argument('--sonra', default='')
+    ap.add_argument('--isim', default='')
+    ap.add_argument('--mesaj', default='')
     a = ap.parse_args()
-    r = {'uret': uret, 'tara': tara, 'toplam': toplam, 'kesit': kesit}[a.is_](a)
+    r = {'uret': uret, 'tara': tara, 'toplam': toplam, 'kesit': kesit, 'kesit_a': kesit_a}[a.is_](a)
     sys.exit(r or 0)
 
 
