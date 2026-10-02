@@ -34,6 +34,11 @@ on:
         description: "ek sembol isleri SET:boy (virgullu, MB ONCE; orn. CAGLA:11x14,CAGLA:A2); bos = yok"
         required: false
         default: ""
+      olcek_yakala:
+        description: "olcek kapisi girdilerini kaydet (isim bandi, kapinin olctugu haliyle)"
+        type: boolean
+        required: false
+        default: false
       ek:
         description: "ek isler SET:RENK:boy (virgullu, ONCE + SONRA; orn. CAGLA:PURE_WHITE:11x14); bos = yok"
         required: false
@@ -138,6 +143,7 @@ jobs:
           DIKIS_DUZELT: ${{ matrix.durum == 'SONRA' && '1' || '0' }}
           SEMBOL_CEKIRDEK: ${{ matrix.durum == 'SONRA' && '1' || '0' }}
           OLCEK_GOVDE: ${{ matrix.durum == 'SONRA' && '1' || '0' }}
+          OLCEK_YAKALA: ${{ inputs.olcek_yakala && '1' || '0' }}
         run: |
           set -o pipefail
           python scripts/ornek/ornek_is.py --tur "${{ matrix.tur }}" --renk "${{ matrix.renk }}" --oran "${{ matrix.oran }}" \
@@ -189,6 +195,7 @@ jobs:
           ls giris
           python scripts/ornek/ornek_derle.py giris cikti/dikis
           if ls giris/*/SEMBOL_*.json >/dev/null 2>&1; then python scripts/ornek/ornek_sembol.py giris cikti/sembol; fi
+          for d in giris/*; do if ls "$d"/OLCEK_* >/dev/null 2>&1; then mkdir -p "cikti/olcek/$(basename "$d")"; cp "$d"/OLCEK_* "cikti/olcek/$(basename "$d")/"; fi; done
           du -sh cikti
       - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
       - name: rclone.conf olustur
@@ -222,7 +229,7 @@ jobs:
           if git clone -q --depth 1 --branch "$B" "$U" _d 2>/dev/null; then :; else
             mkdir _d && git -C _d init -q && git -C _d remote add origin "$U" && git -C _d checkout -q -b "$B"; fi
           K="_d/${{ github.run_id }}"; mkdir -p "$K"
-          find cikti -name 'OLCUM.*' -o -name 'SEMBOL_OLCUM.*' | while read f; do mkdir -p "$K/$(dirname "${f#cikti/}")"; cp "$f" "$K/${f#cikti/}"; done
+          find cikti -name 'OLCUM.*' -o -name 'SEMBOL_OLCUM.*' -o -name 'OLCEK_*' ! -name '*hires*' | while read f; do mkdir -p "$K/$(dirname "${f#cikti/}")"; cp "$f" "$K/${f#cikti/}"; done
           python3 - <<'PY'
           import glob, os
           from PIL import Image

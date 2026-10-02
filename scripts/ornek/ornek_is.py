@@ -43,6 +43,29 @@ def sembol_kancasi(cik):
     a1_poster.sembol_kapisi = sk
 
 
+def olcek_kancasi(cik, sd):
+    """Olcek kapisi girdileri (OLCEK_YAKALA=1): isim bandi, kapinin olctugu haliyle (esit bant + yumusatma) ve ham."""
+    asil = sd.olcek_kapisi_baski
+    say = [0]
+
+    def kapi(baski, p2400, bant, esit=False):
+        r = asil(baski, p2400, bant, esit=esit)
+        i = say[0]; say[0] += 1
+        k = baski.width / float(p2400.width)
+        y0, y1 = max(int(bant[0]) - 60, 0), int(bant[1]) + 60
+        pb = sd.yumusat(sd.esit_bant(baski, p2400.width)) if esit else baski.resize(p2400.size)
+        pr = sd.yumusat(p2400) if esit else p2400
+        pb.crop((0, y0, p2400.width, y1)).save(cik / f'OLCEK_{i}_baski_esit.png')
+        pr.crop((0, y0, p2400.width, y1)).save(cik / f'OLCEK_{i}_ref.png')
+        p2400.convert('RGB').crop((0, y0, p2400.width, y1)).save(cik / f'OLCEK_{i}_ref_ham.png')
+        baski.convert('RGB').crop((0, int(y0 * k), baski.width, int(y1 * k))).save(cik / f'OLCEK_{i}_baski_hires.png')
+        (cik / f'OLCEK_{i}.json').write_text(json.dumps({'bant': list(bant), 'pencere_kesit': [y0, y1], 'k': k, 'esit': esit,
+                                                         'sonuc': r}, default=str))
+        print('OLCEK_YAKALA', i, json.dumps({q: r.get(q) for q in ('gecti', 'konum_fark_px', 'kenar_fark_px')}), flush=True)
+        return r
+    sd.olcek_kapisi_baski = kapi
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--tur', required=True, choices=('renk', 'wp'))
@@ -61,6 +84,8 @@ def main():
         sd.kisisel_hazirla()
         if a.renk == 'MIDNIGHT_BLUE':
             sembol_kancasi(cik)
+        if os.environ.get('OLCEK_YAKALA') == '1':
+            olcek_kancasi(cik, sd)
         arg = SimpleNamespace(kod=str(kod), kod_ref=a.kod_ref, renk=a.renk, oran=a.oran, cikti=str(cik / 'is'))
         rc = surucu.sayfa_asamasi(arg, g)
         for f in (cik / 'is' / a.renk).glob('*.jpg'):
