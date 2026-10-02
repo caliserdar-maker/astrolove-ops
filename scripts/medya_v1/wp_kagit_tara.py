@@ -53,15 +53,22 @@ def kesit(a):
         ink |= wk.murekkep_maskesi(x - P, kenar=0)
     ink = cv2.dilate(ink.astype(np.uint8), np.ones((31, 31), np.uint8)).astype(bool)
     d = wk.dE(A[0], A[1])
-    n = a.kesit_px; H, W = ink.shape
+    H, W = ink.shape
+    print('KESIT_MUREKKEP_ORANI', round(float(ink.mean()), 3), flush=True)
     en = None
-    for y in range(n, H - 2 * n, n // 2):
-        for x in range(n, W - 2 * n, n // 2):
-            if ink[y:y + n, x:x + n].any():
-                continue
-            v = float(np.median(d[y:y + n, x:x + n]))
-            if en is None or v > en[0]:
-                en = (v, x, y)
+    for n in sorted({a.kesit_px, 300, 200, 128}, reverse=True):   # tum alan (kenar paylari dahil); bos yoksa kucuk pencere
+        if n > a.kesit_px:
+            continue
+        ii = cv2.integral(ink.astype(np.uint8))
+        for y in range(0, H - n + 1, max(n // 4, 1)):
+            for x in range(0, W - n + 1, max(n // 4, 1)):
+                if ii[y + n, x + n] - ii[y, x + n] - ii[y + n, x] + ii[y, x]:
+                    continue
+                v = float(np.median(d[y:y + n, x:x + n]))
+                if en is None or v > en[0]:
+                    en = (v, x, y)
+        if en is not None:
+            break
     if en is None:
         raise SystemExit('murekkepsiz pencere bulunamadi')
     _, x0, y0 = en
