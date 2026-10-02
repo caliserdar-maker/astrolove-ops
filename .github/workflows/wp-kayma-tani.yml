@@ -1,0 +1,95 @@
+name: wp-kayma-tani
+
+# WP plate - onayli kaynak kagit KAYMA TANISI (Serdar onayi 2 Eki; Test 4 37034490189 WP e_kagit + plate FAIL).
+# Salt okur: Drive POD_PRINT/<cift>/WARM_PARCHMENT/<boy>.jpg + SIPARIS_ISIM/PLATES/VINTAGE_<boy>.png indirilir,
+# scripts/wp/kayma_tani.py olcer. Cikti yalniz Drive TEMP/WP_KAYMA_TANI/<run_id>/ (KAYMA_<boy>.json, KESIT_<boy>.jpg).
+# Isim / mesaj / musteri verisi YOK. Etsy YOK.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      cift: {description: "tek cift (orn. PISCES_SCORPIO)", required: true}
+      boylar: {description: "virgullu WP boylari", required: false, default: "11x14,16x20,18x24,24x36,A2"}
+      wp_ref: {description: "WP kodu (wp_katman) commit", required: false, default: "adfb2b99489798296936669575309b777c7e1ca7"}
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      boylar: ${{ steps.p.outputs.boylar }}
+    steps:
+      - id: p
+        run: |
+          set -euo pipefail
+          jq -re '.inputs.cift | test("^[A-Z]+_[A-Z]+$")' "$GITHUB_EVENT_PATH" >/dev/null
+          jq -re '.inputs.boylar | test("^[0-9A-Za-z,]+$")' "$GITHUB_EVENT_PATH" >/dev/null
+          jq -re '.inputs.wp_ref | test("^[0-9a-f]{40}$")' "$GITHUB_EVENT_PATH" >/dev/null
+          echo "boylar=$(jq -c '.inputs.boylar | split(",")' "$GITHUB_EVENT_PATH")" >> "$GITHUB_OUTPUT"
+  olc:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        boy: ${{ fromJSON(needs.plan.outputs.boylar) }}
+    env:
+      CIFT: ${{ inputs.cift }}
+      BOY: ${{ matrix.boy }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.wp_ref }}
+          path: _wp
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --quiet pillow numpy opencv-python-headless
+      - name: Takas alani (buyuk boy bellek)
+        if: ${{ matrix.boy == '24x36' || matrix.boy == 'A2' }}
+        run: |
+          set -euo pipefail
+          sudo fallocate -l 24G /mnt/takas2 && sudo chmod 600 /mnt/takas2 && sudo mkswap /mnt/takas2 >/dev/null && sudo swapon /mnt/takas2
+          free -g
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Indir (salt okur)
+        run: |
+          set -euo pipefail
+          T0=$(date +%s)
+          mkdir -p _in
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_PRINT/$CIFT/WARM_PARCHMENT/$BOY.jpg" "_in/kaynak.jpg"
+          rclone copyto "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PLATES/VINTAGE_$BOY.png" "_in/plate.png"
+          ls -la _in; echo "SURE indir $(( $(date +%s) - T0 )) sn"
+      - name: Olc
+        run: python scripts/wp/kayma_tani.py --wp-kod _wp/scripts/medya_v1 --kaynak _in/kaynak.jpg --plate _in/plate.png --boy "$BOY" --cik out
+      - name: Drive
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -d out ] || { echo "cikti yok"; exit 1; }
+          rclone copy out "gdrive:ASTROLOVE/TEMP/WP_KAYMA_TANI/${{ github.run_id }}/$CIFT/"
+          echo "drive: TEMP/WP_KAYMA_TANI/${{ github.run_id }}/$CIFT/"
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
