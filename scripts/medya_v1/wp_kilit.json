@@ -19,8 +19,9 @@
    "_yazi_maskesi": "f3147eb13cc53365a0ced0c87e9ce02d11550b3f663384441c749b25498c2d7f",
    "yanyana_dedektor": "18ac1b4406838675d86df0f8913c50afabb7ce4f2840aa243ec20697142ab94c",
    "serdar_dikis": "4842f96f9f6e546fe2b20f17fc20e19a6f4daf0a6945c9eab08c0a734dde4f9e",
-   "cift_boy": "d4259ffd4c6109b267bfb34f743cfe9c1cc4197ee17181521fa216b24ca42cc7",
-   "plate_adi": "bfde32ad789936b7a2bde3ee79b6591056996c2f440402b1edce6ba83efca87f"
+   "cift_boy": "d31bbd94df9008f47a8a6444ab7c331cfb24efb466e813534f2451c29b1f1eac",
+   "plate_adi": "bfde32ad789936b7a2bde3ee79b6591056996c2f440402b1edce6ba83efca87f",
+   "e_kagit_istisna": "ff60f33ebd99d7d38d8754ab0f8c6860bb62cb81470f141930185a6abe86501b"
   },
   "wp_ornek_sabit": {
    "DUZ_RENK": [
@@ -80,7 +81,19 @@
      "SCORPIO_VIRGO",
      "TAURUS_TAURUS"
     ]
-   }
+   },
+   "E_KAGIT_ISTISNA": {
+    "11x14": {
+     "GEMINI_SCORPIO": 3.24,
+     "PISCES_PISCES": 3.24,
+     "VIRGO_VIRGO": 3.26,
+     "LEO_LEO": 3.23,
+     "PISCES_TAURUS": 3.23,
+     "SAGITTARIUS_TAURUS": 3.24,
+     "SCORPIO_VIRGO": 3.26
+    }
+   },
+   "E_KAGIT_ISTISNA_PAY": 0.1
   },
   "wp_bakir_parametre": {
    "BAKIR_KOYU": [
@@ -116,6 +129,7 @@
  },
  "ek_kararlar": [
   "Serdar 2 Eki: SECENEK A, sayfa 45-78 ciftleri ikinci plate VINTAGE_B_<boy>.png (cift_boy plate secimi); kapi ve esikler ayni",
-  "Serdar 2 Eki (11x14 ek deneme): 11x14 sayfa 45-78 uc alt kume, cift bazli VINTAGE_B<k>_11x14.png (PLATE_B_11x14, plate_adi); diger boylar VINTAGE_B_<boy>.png; kapi ve esikler ayni"
+  "Serdar 2 Eki (11x14 ek deneme): 11x14 sayfa 45-78 uc alt kume, cift bazli VINTAGE_B<k>_11x14.png (PLATE_B_11x14, plate_adi); diger boylar VINTAGE_B_<boy>.png; kapi ve esikler ayni",
+  "Serdar 2 Eki KARAR A: 7 hucre e_kagit istisnasi (11x14, E_KAGIT_ISTISNA, sinir = olculen p99 + 0.10); genel esikler degismez"
  ]
 }
