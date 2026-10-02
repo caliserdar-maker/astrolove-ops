@@ -41,6 +41,19 @@ def etiket(im, yazi, boy=56):
     return b
 
 
+def yedek_bant(im):
+    """KAPI_RAPORU olmayan renk (WP, 2 Eki gece): kesit satirlari sayfa oraniyla (surucu.KESIT_Y isim + mesaj bandi,
+    0.62-0.95); tagline satiri dikis_yayin.tagline_bandi (ayni maske, 2400 genislik). Bulunamazsa alt %8."""
+    import numpy as np
+    from dikis_yayin import tagline_bandi
+    W, H = im.size
+    k24 = im.convert('L').resize((2400, round(2400 * H / W)), Image.BILINEAR)
+    b = tagline_bandi(np.asarray(k24).astype(np.float32))
+    s = 2400 / W                                        # tag: 2400 biriminde (cagiran k ile carpar)
+    tag = [b[2], b[3]] if b else [0.87 * H * s, 0.95 * H * s]
+    return {'isim': None, 'tag': tag, 'y': (int(0.62 * H), int(0.95 * H)), 'yedek': True}
+
+
 def main(rec, renkler, d, cik):
     t_tum = time.time()
     cik = Path(cik); cik.mkdir(parents=True, exist_ok=True)
@@ -48,6 +61,8 @@ def main(rec, renkler, d, cik):
     bant = {}
     for r in renkler:
         f = en_yeni(f'{d}/**/KAPI_RAPORU_{r}.json')
+        if not f:                                     # WP: KAPI_RAPORU yok -> oransal bant (asagida, yedek_bant)
+            continue
         for o, v in json.load(open(f))['renkler'][r]['oranlar'].items():
             bant[(r, ORAN[o])] = {'isim': (v.get('isim_bandi_temizligi') or {}).get('satir'),
                                   'tag': (v.get('eski_metin_izi_kapisi') or {}).get('bant')}
@@ -63,10 +78,10 @@ def main(rec, renkler, d, cik):
                 for _, x in pg.images.items():
                     im = Image.open(io.BytesIO(x.read_raw_bytes())); im.load(); im = im.convert('RGB')
                     W, H = im.size; b = BOY[im.size]; k = W / 2400.0
-                    bb = bant[(r, b)]
-                    i0, i1 = bb['isim']; t0, t1 = int(bb['tag'][0] * k), int(bb['tag'][1] * k)
+                    bb = bant.get((r, b)) or yedek_bant(im)
+                    i0, i1 = bb['isim'] or (0, 0); t0, t1 = int(bb['tag'][0] * k), int(bb['tag'][1] * k)
                     span = t1 - i0
-                    y0, y1 = max(int(i0 - 1.3 * span), 0), min(int(t1 + 0.3 * span), H)
+                    y0, y1 = (max(int(i0 - 1.3 * span), 0), min(int(t1 + 0.3 * span), H)) if 'y' not in bb else bb['y']
                     th = t1 - t0; p_ = int(0.12 * th)
                     tag = im.crop((int(0.08 * W), max(t0 - p_, 0), int(0.92 * W), min(t1 + p_, H)))
                     try:
