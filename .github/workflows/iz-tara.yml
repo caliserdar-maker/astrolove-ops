@@ -1,0 +1,128 @@
+name: iz-tara
+
+# ESKI METIN IZI taramasi (Serdar 2 Eki IZ TANISI; salt okur, duzeltme / yeniden uretim YOK).
+# Olcu surucu.iz_olc (uretimin kendi iz olcusu, esik 0.6); kod siparis-baski-v1 (RENK_REF). Galeri 154 kaynak
+# PARALEL parcalarda (Serdar 2 Eki: galeri isi bir daha sirali kosmaz) + bir ciftin Etsy ZIP / POD dosyalari.
+# Cikti yalniz Drive TEMP/IZ_TARA/<run_id>/. Etsy API / yazma YOK.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      galeri_parca: {description: "galeri paralel parca sayisi (0 = galeri yok)", required: false, default: "3"}
+      cift: {description: "ZIP + POD bakilacak cift (bos = yok)", required: false, default: "TAURUS_TAURUS"}
+      renk: {description: "cift rengi", required: false, default: "DEEP_BLACK"}
+
+env:
+  RENK_REF: b8c8c4b17478fd956167577fa69913d06b9eb955
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      parcalar: ${{ steps.p.outputs.parcalar }}
+    steps:
+      - id: p
+        run: |
+          set -euo pipefail
+          n=$(jq -r '.inputs.galeri_parca // "3"' "$GITHUB_EVENT_PATH"); [[ "$n" =~ ^[0-9]$ ]] || { echo "HATA: galeri_parca" >&2; exit 1; }
+          c=$(jq -r '.inputs.cift // ""' "$GITHUB_EVENT_PATH"); [[ -z "$c" || "$c" =~ ^[A-Z]+_[A-Z]+$ ]] || { echo "HATA: cift" >&2; exit 1; }
+          r=$(jq -r '.inputs.renk // "DEEP_BLACK"' "$GITHUB_EVENT_PATH"); [[ "$r" =~ ^[A-Z_]+$ ]] || { echo "HATA: renk" >&2; exit 1; }
+          p=$(python3 -c "import json,sys;n,c=int(sys.argv[1]),sys.argv[2];print(json.dumps([f'G{i}of{n}' for i in range(n)]+(['CIFT'] if c else [])))" "$n" "$c")
+          echo "parcalar=$p" >> "$GITHUB_OUTPUT"; echo "$p"
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: "ZIP listesi (TEK listeleme, yalniz cift)"
+        run: |
+          set -euo pipefail
+          c=$(jq -r '.inputs.cift // ""' "$GITHUB_EVENT_PATH")
+          if [ -n "$c" ]; then
+            rclone lsjson -R --files-only --fast-list --tpslimit 8 gdrive:ASTROLOVE --include "*_ALL_SIZES.zip" > zips.json
+          else
+            echo '[]' > zips.json
+          fi
+          python -c "import json;print('ZIP', len(json.load(open('zips.json'))))"
+          rm -rf ~/.config/rclone
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zips
+          path: zips.json
+          retention-days: 1
+  olc:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        parca: ${{ fromJSON(needs.plan.outputs.parcalar) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Kod (siparis-baski-v1)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RENK_REF }}
+          path: _kod
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --quiet pillow opencv-python-headless numpy fonttools img2pdf pikepdf
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - uses: actions/download-artifact@v4
+        with:
+          name: zips
+      - name: Olc
+        env:
+          PARCA: ${{ matrix.parca }}
+        run: |
+          set -euo pipefail
+          T0=$(date +%s)
+          if [ "$PARCA" = CIFT ]; then
+            python scripts/ornek/iz_tara.py --tur cift --kod _kod --cift "$(jq -r '.inputs.cift' "$GITHUB_EVENT_PATH")" \
+              --renk "$(jq -r '.inputs.renk // "DEEP_BLACK"' "$GITHUB_EVENT_PATH")" --zip-index zips.json --cik out
+          else
+            i=${PARCA#G}; i=${i%of*}; n=${PARCA#*of}
+            python scripts/ornek/iz_tara.py --tur galeri --kod _kod --parca "$i" --parca-say "$n" --cik out
+          fi
+          echo "SURE $PARCA $(( $(date +%s) - T0 )) sn"
+      - name: Drive
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -d out ] && rclone copy out "gdrive:ASTROLOVE/TEMP/IZ_TARA/${{ github.run_id }}/"
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
