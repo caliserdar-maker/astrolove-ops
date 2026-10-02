@@ -154,6 +154,31 @@ Gece (20:00-21:10)
     tum yerler aranir.
 36. Uretim kodu degisince calisan isim on testi gecersiz olur; kapi icin yeni head ile yeniden kosulur.
 
+## FIZIKSEL SIPARIS VE TEDARIKCI DERSLERI (2 Eki; Christine 4178672285, Robert, Prodigi)
+
+Tedarikci / kargo
+37. Prodigi "shipped" = paket toplanmaya hazir, tasiyiciya verildi DEGIL. Christine ilk paketi 23 Eyl "shipped", hic
+    cikmadi; yenisi (UPS 1Z30715X1315632261) 30 Eyl'den beri yalniz "Label Created". KURAL: musteriye takip no yalniz
+    tasiyici ilk taramayi (pickup scan) yaptiktan sonra verilir; "shipped" mesaji tek basina musteriye iletilmez.
+38. Credit note para iadesi degil (PWI-1649573-CN = hesap kredisi). Iade her zaman karta, yazili teyitle istenir.
+39. Overnight ucreti odemek paketin zamaninda cikmasini garanti etmez ($23.75 odendi, paket 40+ saat taranmadi).
+40. Tarihi belli siparis (dogum gunu vb.) icin B plani gec kuruldu (teslim gunu sabahi). KURAL: teslim tarihinden
+    en az 2 is gunu once tasiyici taramasi yoksa yerel baski B plani ayni gun baslatilir.
+41. Turkiye'den CVS sitesi acilmiyor (ABD disi engel); FedEx Office aciliyor. FedEx'te ayni gun eve teslim yok
+    (en erken Pzt), yalniz magazadan teslim. Christine magazadan teslim istemedi.
+42. Yeni tedarikci (creativehub / theprintspace) 30 Eyl ve 1 Eki maillerine yanit vermedi; 2 Eki ucuncu mail,
+    son tarih ayni gun. Tedarikci seciminde iletisim hizi da olcut.
+
+Koordinator (2 Eki)
+43. Baskicilara ilk mailde musteri adi + acik adres + Drive linki yazildi; Serdar iki kez duzeltti. KURAL: ucuncu
+    tarafa ilk temasta kisisel veri ve dosya linki YOK; yalniz is tanimi + posta kodu. Onaydan sonra dosya EK olarak.
+44. Musterinin daha once reddettigi secenek (magazadan teslim) yeniden onerildi. Once musteri yazismasi okunur.
+45. FedEx urun boyu varsayilan 24x36 geldi, gec fark edildi ($109.99). Sepete eklemeden once boy/kagit/fiyat okunur.
+46. Kargo hala "Label Created" iken "yerel baskiyi iptal et" onerildi. Musterinin "beklerim" demesi, tasiyici
+    taramasi yokken B planini iptal etmez.
+47. Musteri mailinde zaman cizelgesi son tarihten basladi ("30 Eyl"), oncesi bos gorundu. Durum anlatilirken
+    ilk tarihten (23 Eyl) baslanir.
+
 ## TEST 4 BASLANGIC KAPISI (hepsi EVET olmadan dispatch yok; Serdar'a madde madde gosterilir)
 
 - [ ] Acik is listesi bos: Test 3 MB 11x14 + 24x36 duzeldi, Test 3 OZET 5/5 PASS.
@@ -171,3 +196,12 @@ Gece (20:00-21:10)
   WARM_PARCHMENT 18x24 (tag_bant yok). baski-duzelt inceliyor (kaynak-olcum 36929585913).
 - Isim on testi prova 36926624004 (6e02ffe, 54 is): 21:35'te 13 success, FAIL yok, devam ediyor.
 - Test 4 kapisi: kalan = 2 WP 18x24 dosyasi + isim on testinin bitmesi. Test 4 icin cift secimi bu 2 ciftin disindan.
+
+## DURUM 2 Eki 07:50 UTC
+
+- Isim on testi prova 36926624004 (main 27a526a, v1 6e02ffe): BITTI, 56/56 job success.
+- WP 18x24 LEO_SAGITTARIUS + LEO_VIRGO: son kayitli sonuc 36928614431 = 2 FAIL. 36929585913 success bitti ama sonuc
+  inceleme/kaynak-olcum dalinda yok; duzeldigi DOGRULANMADI. Test 4 cifti bu 2 ciftin disindan.
+- v1 head DEGISTI: f88439d (21:34, "guvenli kaynak olcumu ucuncu yedek, doku lekesi kumesi yok sayilir - WP 18x24").
+  Isim on testi 6e02ffe ile kostu -> ders 36 geregi f88439d ile YENIDEN kosulur; WP 18x24 2 dosya f88439d ile
+  kaynak on testi sonucu dala yazilmali. Ikisi PASS olmadan Test 4 kapisi kapali.

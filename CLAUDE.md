@@ -110,7 +110,7 @@ Hedef: Serdar isim + burc yeri + tagline verir, 15 dk icinde 5 PDF Drive'da (Tes
 - MB sayfalari paralel (5 is) kosar: 33 dk -> 6 dk. WP duz renk yalniz CHAMPAGNE_IVORY, JPEG 95 (5cf010a).
 - Bilinen darbogaz kapatilmadan test/siparis baslatilmaz; once olc, sonra kos.
 
-- TUM DERSLER (36 madde) ve TEST BASLANGIC KAPISI: docs/SIPARIS_DERSLER.md. Her test/siparis oncesi kapi madde madde
+- TUM DERSLER (47 madde; 37-47 fiziksel siparis + tedarikci) ve TEST BASLANGIC KAPISI: docs/SIPARIS_DERSLER.md. Her test/siparis oncesi kapi madde madde
   isaretlenip Serdar'a gosterilir; bir madde HAYIR ise dispatch yok.
 
 ### Test 3 dersleri (1 Eki 19:14, ARIES_VIRGO; 4 renk ~8 dk PASS, MB 2 sayfa FAIL)
