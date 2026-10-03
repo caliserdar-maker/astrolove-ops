@@ -37,9 +37,9 @@ jobs:
       - name: Kaynak PNG sha = kosu 37139696224 KOSU.txt
         run: |
           set -euo pipefail
-          rclone cat "gdrive:ASTROLOVE/TEMP/MOTOR/SOSYAL/78/KOSU.txt" | grep '\.png$' | grep -v TEMAS | sort > _kosu.txt
+          rclone cat "gdrive:ASTROLOVE/TEMP/MOTOR/SOSYAL/78/KOSU.txt" | grep '\.png$' | awk '{print $1, $2}' | sort > _kosu.txt
           grep -q '^kosu: 37139696224' <(rclone cat "gdrive:ASTROLOVE/TEMP/MOTOR/SOSYAL/78/KOSU.txt")
-          sed 's/  / /' kontrol/KAYNAK_PNG_SHA.txt | sort > _yerel.txt
+          awk '{print $1, $2}' kontrol/KAYNAK_PNG_SHA.txt | sort > _yerel.txt
           diff _kosu.txt _yerel.txt && echo "75/75 sha esit"
           ls kontrol/*.jpg | wc -l
       - name: Drive'a yukle (TEMP/MOTOR/SOSYAL/KONTROL_75)
