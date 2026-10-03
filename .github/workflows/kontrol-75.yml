@@ -12,6 +12,8 @@ on:
 permissions:
   contents: read
 
+concurrency: kontrol-75-drive
+
 jobs:
   yukle:
     runs-on: ubuntu-latest
@@ -47,6 +49,8 @@ jobs:
           set -euo pipefail
           D="gdrive:ASTROLOVE/TEMP/MOTOR/SOSYAL/KONTROL_75"
           rclone copy kontrol "$D"
-          rclone lsf "$D" | grep -c '\.jpg$'
+          # 3 Eki: iki es zamanli kosu ayni adli kopya yaratti (icerik ayni); klasorde ad basina tek dosya kalir
+          rclone dedupe --dedupe-mode newest "$D"
+          N=$(rclone lsf "$D" | grep -c '\.jpg$'); echo "jpg: $N"; [ "$N" = 75 ]
       - if: always()
         run: rm -rf ~/.config/rclone
