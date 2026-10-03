@@ -1,0 +1,327 @@
+{
+ "MIDNIGHT_BLUE_16x20": {
+  "sayfa": 1,
+  "inc": [
+   16.0,
+   20.0
+  ],
+  "dosya": "test5/MIDNIGHT_BLUE_16x20.jpeg",
+  "goruntu_px": [
+   4800,
+   6000
+  ],
+  "goruntu_sayisi": 1
+ },
+ "MIDNIGHT_BLUE_18x24": {
+  "sayfa": 2,
+  "inc": [
+   18.0,
+   24.0
+  ],
+  "dosya": "test5/MIDNIGHT_BLUE_18x24.jpeg",
+  "goruntu_px": [
+   5400,
+   7200
+  ],
+  "goruntu_sayisi": 1
+ },
+ "MIDNIGHT_BLUE_24x36": {
+  "sayfa": 3,
+  "inc": [
+   24.0,
+   36.0
+  ],
+  "dosya": "test5/MIDNIGHT_BLUE_24x36.jpeg",
+  "goruntu_px": [
+   7200,
+   10800
+  ],
+  "goruntu_sayisi": 1
+ },
+ "MIDNIGHT_BLUE_11x14": {
+  "sayfa": 4,
+  "inc": [
+   11.0,
+   14.0
+  ],
+  "dosya": "test5/MIDNIGHT_BLUE_11x14.jpeg",
+  "goruntu_px": [
+   3307,
+   4200
+  ],
+  "goruntu_sayisi": 1
+ },
+ "MIDNIGHT_BLUE_A2": {
+  "sayfa": 5,
+  "inc": [
+   16.535,
+   23.386
+  ],
+  "dosya": "test5/MIDNIGHT_BLUE_A2.jpeg",
+  "goruntu_px": [
+   4960,
+   7015
+  ],
+  "goruntu_sayisi": 1
+ },
+ "DEEP_BLACK_16x20": {
+  "sayfa": 1,
+  "inc": [
+   16.0,
+   20.0
+  ],
+  "dosya": "test5/DEEP_BLACK_16x20.jpeg",
+  "goruntu_px": [
+   4800,
+   6000
+  ],
+  "goruntu_sayisi": 1
+ },
+ "DEEP_BLACK_18x24": {
+  "sayfa": 2,
+  "inc": [
+   18.0,
+   24.0
+  ],
+  "dosya": "test5/DEEP_BLACK_18x24.jpeg",
+  "goruntu_px": [
+   5400,
+   7200
+  ],
+  "goruntu_sayisi": 1
+ },
+ "DEEP_BLACK_24x36": {
+  "sayfa": 3,
+  "inc": [
+   24.0,
+   36.0
+  ],
+  "dosya": "test5/DEEP_BLACK_24x36.jpeg",
+  "goruntu_px": [
+   7200,
+   10800
+  ],
+  "goruntu_sayisi": 1
+ },
+ "DEEP_BLACK_11x14": {
+  "sayfa": 4,
+  "inc": [
+   11.0,
+   14.0
+  ],
+  "dosya": "test5/DEEP_BLACK_11x14.jpeg",
+  "goruntu_px": [
+   3307,
+   4200
+  ],
+  "goruntu_sayisi": 1
+ },
+ "DEEP_BLACK_A2": {
+  "sayfa": 5,
+  "inc": [
+   16.535,
+   23.386
+  ],
+  "dosya": "test5/DEEP_BLACK_A2.jpeg",
+  "goruntu_px": [
+   4960,
+   7015
+  ],
+  "goruntu_sayisi": 1
+ },
+ "PURE_WHITE_16x20": {
+  "sayfa": 1,
+  "inc": [
+   16.0,
+   20.0
+  ],
+  "dosya": "test5/PURE_WHITE_16x20.jpeg",
+  "goruntu_px": [
+   4800,
+   6000
+  ],
+  "goruntu_sayisi": 1
+ },
+ "PURE_WHITE_18x24": {
+  "sayfa": 2,
+  "inc": [
+   18.0,
+   24.0
+  ],
+  "dosya": "test5/PURE_WHITE_18x24.jpeg",
+  "goruntu_px": [
+   5400,
+   7200
+  ],
+  "goruntu_sayisi": 1
+ },
+ "PURE_WHITE_24x36": {
+  "sayfa": 3,
+  "inc": [
+   24.0,
+   36.0
+  ],
+  "dosya": "test5/PURE_WHITE_24x36.jpeg",
+  "goruntu_px": [
+   7200,
+   10800
+  ],
+  "goruntu_sayisi": 1
+ },
+ "PURE_WHITE_11x14": {
+  "sayfa": 4,
+  "inc": [
+   11.0,
+   14.0
+  ],
+  "dosya": "test5/PURE_WHITE_11x14.jpeg",
+  "goruntu_px": [
+   3307,
+   4200
+  ],
+  "goruntu_sayisi": 1
+ },
+ "PURE_WHITE_A2": {
+  "sayfa": 5,
+  "inc": [
+   16.535,
+   23.386
+  ],
+  "dosya": "test5/PURE_WHITE_A2.jpeg",
+  "goruntu_px": [
+   4960,
+   7015
+  ],
+  "goruntu_sayisi": 1
+ },
+ "CHAMPAGNE_IVORY_16x20": {
+  "sayfa": 1,
+  "inc": [
+   16.0,
+   20.0
+  ],
+  "dosya": "test5/CHAMPAGNE_IVORY_16x20.jpeg",
+  "goruntu_px": [
+   4800,
+   6000
+  ],
+  "goruntu_sayisi": 1
+ },
+ "CHAMPAGNE_IVORY_18x24": {
+  "sayfa": 2,
+  "inc": [
+   18.0,
+   24.0
+  ],
+  "dosya": "test5/CHAMPAGNE_IVORY_18x24.jpeg",
+  "goruntu_px": [
+   5400,
+   7200
+  ],
+  "goruntu_sayisi": 1
+ },
+ "CHAMPAGNE_IVORY_24x36": {
+  "sayfa": 3,
+  "inc": [
+   24.0,
+   36.0
+  ],
+  "dosya": "test5/CHAMPAGNE_IVORY_24x36.jpeg",
+  "goruntu_px": [
+   7200,
+   10800
+  ],
+  "goruntu_sayisi": 1
+ },
+ "CHAMPAGNE_IVORY_11x14": {
+  "sayfa": 4,
+  "inc": [
+   11.0,
+   14.0
+  ],
+  "dosya": "test5/CHAMPAGNE_IVORY_11x14.jpeg",
+  "goruntu_px": [
+   3307,
+   4200
+  ],
+  "goruntu_sayisi": 1
+ },
+ "CHAMPAGNE_IVORY_A2": {
+  "sayfa": 5,
+  "inc": [
+   16.535,
+   23.386
+  ],
+  "dosya": "test5/CHAMPAGNE_IVORY_A2.jpeg",
+  "goruntu_px": [
+   4960,
+   7015
+  ],
+  "goruntu_sayisi": 1
+ },
+ "WARM_PARCHMENT_16x20": {
+  "sayfa": 1,
+  "inc": [
+   16.0,
+   20.0
+  ],
+  "dosya": "test5/WARM_PARCHMENT_16x20.jpeg",
+  "goruntu_px": [
+   4800,
+   6000
+  ],
+  "goruntu_sayisi": 1
+ },
+ "WARM_PARCHMENT_18x24": {
+  "sayfa": 2,
+  "inc": [
+   18.0,
+   24.0
+  ],
+  "dosya": "test5/WARM_PARCHMENT_18x24.jpeg",
+  "goruntu_px": [
+   5400,
+   7200
+  ],
+  "goruntu_sayisi": 1
+ },
+ "WARM_PARCHMENT_24x36": {
+  "sayfa": 3,
+  "inc": [
+   24.0,
+   36.0
+  ],
+  "dosya": "test5/WARM_PARCHMENT_24x36.jpeg",
+  "goruntu_px": [
+   7200,
+   10800
+  ],
+  "goruntu_sayisi": 1
+ },
+ "WARM_PARCHMENT_11x14": {
+  "sayfa": 4,
+  "inc": [
+   11.0,
+   14.0
+  ],
+  "dosya": "test5/WARM_PARCHMENT_11x14.jpeg",
+  "goruntu_px": [
+   3307,
+   4200
+  ],
+  "goruntu_sayisi": 1
+ },
+ "WARM_PARCHMENT_A2": {
+  "sayfa": 5,
+  "inc": [
+   16.535,
+   23.386
+  ],
+  "dosya": "test5/WARM_PARCHMENT_A2.jpeg",
+  "goruntu_px": [
+   4960,
+   7015
+  ],
+  "goruntu_sayisi": 1
+ }
+}
