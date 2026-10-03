@@ -1,0 +1,52 @@
+name: kontrol-75
+
+# Serdar onayli goz kontrol seti (3 Eki 2026): 75 PASS MB 4x5 poster, yan yana [satistaki orijinal | kosu 37139696224].
+# Yalniz Drive yuklemesi: kontrol/*.jpg -> TEMP/MOTOR/SOSYAL/KONTROL_75/. Yeni uretim yok. Once kaynak PNG sha'lari
+# kosunun KOSU.txt'si ile birebir karsilastirilir. Etsy YOK, musteri YOK.
+
+on:
+  push:
+    branches: [kontrol-75]
+    paths: [kontrol/**]
+
+permissions:
+  contents: read
+
+jobs:
+  yukle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Kaynak PNG sha = kosu 37139696224 KOSU.txt
+        run: |
+          set -euo pipefail
+          rclone cat "gdrive:ASTROLOVE/TEMP/MOTOR/SOSYAL/78/KOSU.txt" | grep '\.png$' | grep -v TEMAS | sort > _kosu.txt
+          grep -q '^kosu: 37139696224' <(rclone cat "gdrive:ASTROLOVE/TEMP/MOTOR/SOSYAL/78/KOSU.txt")
+          sed 's/  / /' kontrol/KAYNAK_PNG_SHA.txt | sort > _yerel.txt
+          diff _kosu.txt _yerel.txt && echo "75/75 sha esit"
+          ls kontrol/*.jpg | wc -l
+      - name: Drive'a yukle (TEMP/MOTOR/SOSYAL/KONTROL_75)
+        run: |
+          set -euo pipefail
+          D="gdrive:ASTROLOVE/TEMP/MOTOR/SOSYAL/KONTROL_75"
+          rclone copy kontrol "$D"
+          rclone lsf "$D" | grep -c '\.jpg$'
+      - if: always()
+        run: rm -rf ~/.config/rclone
