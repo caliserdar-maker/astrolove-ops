@@ -21,7 +21,9 @@ EK_KARARLAR = ['Serdar 1 Eki ~15:50: 24x36 plate acik dikey cizgi (x 1937, y 437
                'Serdar 2 Eki (11x14 ek deneme): 11x14 sayfa 45-78 uc alt kume, cift bazli VINTAGE_B<k>_11x14.png '
                '(PLATE_B_11x14, plate_adi); diger boylar VINTAGE_B_<boy>.png; kapi ve esikler ayni',
                'Serdar 2 Eki KARAR A: 7 hucre e_kagit istisnasi (11x14, E_KAGIT_ISTISNA, sinir = olculen p99 + 0.10); '
-               'genel esikler degismez']
+               'genel esikler degismez',
+               'Serdar 3 Eki (Test 5 tagline cift baski): hizala guvenilmez bant donusumunu kullanmaz (en yakin guvenilir '
+               'bant); ikinci metin kapisi (wp_bakir.ikinci_metin, c_iz icinde); diger esikler ayni']
 BAKIR_SABIT = ('BAKIR_KOYU', 'T0', 'KENAR_PX', 'KOYU_ALT', 'KOYU_SIKISTIR', 'ESIK_DE', 'MIN_ALAN_BAKIR', 'DOLU',
                'DIKIS_DUZLE', 'KABARTMA_SIGMA', 'KABARTMA_ESIK', 'DIKIS_BOY', 'DIKIS_T', 'DIKIS_KOMSU')
 

@@ -25,6 +25,9 @@ MIN_ALAN = 40             # parsomen benegi eleme (edisyon_uret.MASKE_MIN_ALAN)
 KENAR = 0.10              # sayfa kenar payi (edisyon_uret.MASKE_KENAR)
 BOSLUK = 12               # bant ayirma: bu kadar bos satir -> yeni bant
 PAY = 80                  # hizalama penceresi (bant disina)
+GUVEN_A = 0.02            # bant donusumu guvenilir: |A - I| <= (olcek / egim; gercek bantlar <= 0.0005, 3 Eki)
+GUVEN_FAZ = 0.3           # ECC kabul edilmediyse faz yaniti en az (gercek bantlar 0.46-0.88, sahte -0.06..0.17)
+GUVEN_ECC = 0.5           # ECC korelasyonu en az (gercek bantlar 0.73-0.997, sahte 0.31; 3 Eki SCORPIO_VIRGO 11x14)
 RAMPA = (2.0, 6.0)        # max|D| bu araliktayken zemin -> model gecisi
 DERECE = 3
 ORNEK = 300000            # renk modeli icin piksel ornegi
@@ -113,6 +116,27 @@ def hizala(D_ci, D_wp, bant_listesi, pay=PAY):
                       'olcek': [round(float(A[0, 0]), 5), round(float(A[1, 1]), 5)],
                       'faz': [round(float(sx), 2), round(float(sy), 2), round(float(yanit), 3)],
                       'ecc': None if cc is None else round(float(cc), 4), 'ecc_ok': ecc_ok})
+    # Serdar 3 Eki (Test 5 WP tagline cift baski): plate'e gore kalan doku lekeleri isim-mesaj arasinda sahte ince bant
+    # uretiyor; faz korelasyonu bu bantlarda tutarsiz kayma veriyor (dx -1154 / -875, olcek 1.107, egim 0.06, faz
+    # yaniti ~0) ve katman_tasi bolgeye CI'nin baska yerindeki murekkebi (siparis mesaji) tasiyordu. Guvenilmez bant
+    # donusumu kullanilmaz; en yakin guvenilir bandin donusumu gecer (bolge ayni). Guvenilir: kayma <= pay, afin
+    # matrisi birimden <= GUVEN_A, ve ECC kabul edildi (korelasyon >= GUVEN_ECC) ya da faz yaniti >= GUVEN_FAZ.
+    for s in sonuc:
+        A = np.array(s['A'])
+        s['guvenilir'] = bool(abs(s['dx']) <= pay and abs(s['dy']) <= pay and np.abs(A - np.eye(2)).max() <= GUVEN_A
+                              and ((s['ecc_ok'] and (s['ecc'] or 0) >= GUVEN_ECC) or s['faz'][2] >= GUVEN_FAZ))
+    iyi = [j for j, s in enumerate(sonuc) if s['guvenilir']]
+    for i, s in enumerate(sonuc):
+        if s['guvenilir']:
+            continue
+        if iyi:
+            m = (s['bant'][0] + s['bant'][1]) / 2.0
+            j = min(iyi, key=lambda j: abs((sonuc[j]['bant'][0] + sonuc[j]['bant'][1]) / 2.0 - m))
+            s['yedek'] = {'bant': sonuc[j]['bant'], 'dx': s['dx'], 'dy': s['dy'], 'faz': s['faz'], 'ecc_ok': s['ecc_ok']}
+            s['A'], s['t'] = sonuc[j]['A'], sonuc[j]['t']
+        else:
+            s['yedek'] = {'bant': None, 'dx': s['dx'], 'dy': s['dy'], 'faz': s['faz'], 'ecc_ok': s['ecc_ok']}
+            s['A'], s['t'] = np.eye(2).tolist(), [0.0, 0.0]
     # bolge: bantlar arasi bosluklarin ortasindan bolunur (tum sayfa kaplanir)
     for i, s in enumerate(sonuc):
         a = 0 if i == 0 else (sonuc[i - 1]['bant'][1] + s['bant'][0]) // 2
