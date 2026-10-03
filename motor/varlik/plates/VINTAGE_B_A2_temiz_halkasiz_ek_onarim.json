@@ -1,0 +1,52 @@
+{
+ "zemin": "motor/varlik/plates/VINTAGE_B_A2_temiz_halkasiz.png",
+ "once_sha256": "3d5f3167987d50ffb78d4a742f76af3a11c63c9e8e7a4d5d17b8b16a28ce1c2a",
+ "sonra_sha256": "a0f4d13649539dca2cc4532da9fb04b5955bd162b5fb3ed2fa397c2bf5bf18f4",
+ "qc_olcek": 0.66673,
+ "onarim": [
+  {
+   "cizgi_qc": "dikey:2805:4094:4218",
+   "tam_boy": {
+    "yon": "dikey",
+    "merkez": 4207.1,
+    "aralik": [
+     6140,
+     6326
+    ],
+    "yari_genislik": 8
+   },
+   "onarim": {
+    "serit": {
+     "x": [
+      4199,
+      4215
+     ],
+     "y": [
+      6125,
+      6341
+     ]
+    },
+    "komsu_sol": [
+     4194,
+     4197
+    ],
+    "komsu_sag": [
+     4217,
+     4220
+    ],
+    "haric_yazi_px": 167
+   }
+  }
+ ],
+ "degisen_px": 3689,
+ "qc": {
+  "hedef_kalan": [],
+  "yeni_cizgi": [],
+  "kagit": {
+   "dE_ort": 0.37,
+   "dE_ort_once": 0.37
+  },
+  "esik_dE_ort": 0.5,
+  "gecti": true
+ }
+}

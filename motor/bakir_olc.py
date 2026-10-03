@@ -36,15 +36,16 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--kaynak', required=True)
     ap.add_argument('--sabit', required=True)
+    ap.add_argument('--test5', help='Test 5 WP sayfasi (varsayilan KAYNAK/test5_WP_11x14.jpeg)')
     a = ap.parse_args()
     K = Path(a.kaynak)
     Z = json.loads(Path(a.sabit).read_text())
-    T = oku(K / 'test5_WP_11x14.jpeg')
+    T = oku(a.test5 or K / 'test5_WP_11x14.jpeg')
     P = oku(K / 'plates' / f"{Z['plate']}.png")                        # Test 5'in kagidi (ham plate)
     m, ink = murekkep(T, P)
     tb = bantlar(ink)
-    R = {'referans': 'TEMP/SIPARIS_ISIM/DIJITAL/9000000005/AstroLoveArt_Scorpio_Virgo_Warm_Parchment.pdf sayfa 4 '
-                     '(11x14, gomulu goruntu birebir)', 'test5_bantlar': tb, 'ogeler': {}}
+    R = {'referans': 'TEMP/SIPARIS_ISIM/DIJITAL/9000000005/AstroLoveArt_Scorpio_Virgo_Warm_Parchment.pdf '
+                     f"({Z['boy']} sayfasi, gomulu goruntu birebir)", 'test5_bantlar': tb, 'ogeler': {}}
     for ad, (y0, y1) in Z['bantlar'].items():
         kes = [(min(y1, b[1]) - max(y0, b[0]), b) for b in tb]
         ov, b = max(kes)

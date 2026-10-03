@@ -44,6 +44,7 @@ def main():
     ap.add_argument('--kaynak', required=True)
     ap.add_argument('--sabit', required=True)
     ap.add_argument('--boy', default='11x14')
+    ap.add_argument('--orijinal', help='orijinal WP posteri (varsayilan KAYNAK/orijinal_WP_11x14.jpg)')
     a = ap.parse_args()
     K = Path(a.kaynak)
     Z = json.loads(Path(a.sabit).read_text())
@@ -54,10 +55,22 @@ def main():
     if sha(zemin0) != Z['zemin']['sha256']:
         sys.exit('FAIL: temiz zemin sha uyusmuyor')
     Pc = oku(K / 'plates' / f'MODERN_{a.boy}.png')
-    daire = wb.daire_maskesi(Pc)
     Lc = Pc @ wk.LUMA
-    z = cv2.medianBlur(np.clip(Lc, 0, 255).astype(np.uint8), 31).astype(np.float32)
+    H, W = Lc.shape
+    # yerel kagit: 31 px medyan (11x14; halka tepesi 15 px = pencerenin %48'i, sinirda). Buyuk boyda pencere
+    # 2 x 31 x boy orani (3 Eki: 24x36 tepe 35 px, 67 px pencerede %52 -> medyan halkanin kendisi, tepe alfasi 0)
+    kw = 31 if W == 3307 else int(round(62 * W / 3307)) | 1
+    z = cv2.medianBlur(np.clip(Lc, 0, 255).astype(np.uint8), kw).astype(np.float32)
     mc = np.clip(z - Lc, 0, None)
+    if W == 3307:
+        daire = wb.daire_maskesi(Pc)
+    else:
+        # kilitli wp_bakir.daire_maskesi olcutu (yerel kontrast > 10, genislik >= %35, alan > 500), yerel kagit
+        # penceresi boyla olceklenmis (yukarida); 3 Eki: 3307'ye indirilmis maske 24x36 tepesini kaciriyordu
+        n, lab, st, _ = cv2.connectedComponentsWithStats((mc > 10).astype(np.uint8), 8)
+        q2 = (W / 3307) ** 2
+        tut = [i for i in range(1, n) if st[i, cv2.CC_STAT_WIDTH] > 0.35 * W and st[i, cv2.CC_STAT_AREA] > 500 * q2]
+        daire = np.isin(lab, tut)
     bolge = cv2.dilate(daire.astype(np.uint8), np.ones((7, 7), np.uint8)).astype(bool)
     ce = cv2.erode(daire.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
     Lk = float(np.median(mc[ce if ce.sum() > 500 else daire]))
@@ -77,8 +90,11 @@ def main():
     ys = np.nonzero(daire.any(1))[0]
     iz0 = wk.plate_iz(P0, daire, {'daire': (int(ys[0]), int(ys[-1]) + 1)}, kontrol_kayma=120)
     iz1 = wk.plate_iz(P1, daire, {'daire': (int(ys[0]), int(ys[-1]) + 1)}, kontrol_kayma=120)
-    O = oku(K / 'orijinal_WP_11x14.jpg')
-    kalan = kusur_bul(P1, O, P0, Z)
+    O = oku(a.orijinal or K / 'orijinal_WP_11x14.jpg')
+    # yalniz halka cikarmanin yarattigi cizgi sayilir: temiz zeminin kendisinde ayni olcumle gorunen kosu (3 Eki
+    # 16x20: x=484 kenar dokusu, plate_temizle'de ham plate referansiyla gorunmuyor) haric
+    once = kusur_bul(P0, O, P0, Z)
+    kalan = [c for c in kusur_bul(P1, O, P0, Z) if not wb.ayni_cizgi(c, once)]
     _, ink = murekkep(O, P0)
     haric = cv2.dilate((ink | daire).astype(np.uint8), np.ones((15, 15), np.uint8)).astype(bool)
     de = wk.dE(P1, O)[~haric]

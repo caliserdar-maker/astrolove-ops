@@ -1,0 +1,362 @@
+{
+ "bant_eleme": {
+  "tum": [
+   [
+    158,
+    173
+   ],
+   [
+    220,
+    236
+   ],
+   [
+    1500,
+    3177
+   ],
+   [
+    3791,
+    4197
+   ],
+   [
+    4401,
+    4571
+   ],
+   [
+    5137,
+    5288
+   ],
+   [
+    5810,
+    5859
+   ]
+  ],
+  "piksel": [
+   324,
+   326,
+   565464,
+   67584,
+   107315,
+   53527,
+   317
+  ]
+ },
+ "cift": "SCORPIO_VIRGO",
+ "renk": {
+  "ogeler": {
+   "buyuk_sembol": {
+    "rgb": [
+     107.4,
+     68.8,
+     23.5
+    ],
+    "dolu_px": 432972,
+    "Lk": 124.9,
+    "cv": 0.1444
+   },
+   "kucuk_sembol": {
+    "rgb": [
+     112.9,
+     74.3,
+     21.1
+    ],
+    "dolu_px": 46829,
+    "Lk": 116.2,
+    "cv": 0.1563
+   },
+   "isim": {
+    "rgb": [
+     106.5,
+     70.7,
+     23.6
+    ],
+    "dolu_px": 66437,
+    "Lk": 107.2,
+    "cv": 0.2321
+   },
+   "mesaj": {
+    "rgb": [
+     111.5,
+     75.0,
+     25.4
+    ],
+    "dolu_px": 34835,
+    "Lk": 96.6,
+    "cv": 0.2395
+   }
+  },
+  "hepsi": {
+   "rgb": [
+    107.1,
+    68.9,
+    23.0
+   ],
+   "dolu_px": 561684,
+   "Lk": 121.9,
+   "cv": 0.1684
+  }
+ },
+ "boy": "16x20",
+ "tuval": [
+  4800,
+  6000
+ ],
+ "plate": "VINTAGE_B_16x20",
+ "kaynak": {
+  "orijinal": "POD_PRINT/SCORPIO_VIRGO/WARM_PARCHMENT/16x20.jpg"
+ },
+ "bantlar": {
+  "buyuk_sembol": [
+   1500,
+   3177
+  ],
+  "kucuk_sembol": [
+   3791,
+   4197
+  ],
+  "isim": [
+   4401,
+   4571
+  ],
+  "mesaj": [
+   5137,
+   5288
+  ]
+ },
+ "buyuk_sembol": {
+  "katman": "main_symbols/scorpio_virgo_gold.png",
+  "kutu": [
+   1378,
+   1500,
+   3422,
+   3177
+  ],
+  "olcek": 0.2956138316296193,
+  "x": 1380,
+  "y": 1498,
+  "w": 2040,
+  "h": 1680,
+  "ncc": 0.9704
+ },
+ "kucuk_sembol_sol": {
+  "katman": "zodiac_symbols_gold/scorpio_symbol_gold.png",
+  "kutu": [
+   1316,
+   3805,
+   1757,
+   4169
+  ],
+  "olcek": 0.32419824786548634,
+  "x": 1316,
+  "y": 3805,
+  "w": 441,
+  "h": 364,
+  "ncc": 0.9768
+ },
+ "kucuk_sembol_sag": {
+  "katman": "zodiac_symbols_gold/virgo_symbol_gold.png",
+  "kutu": [
+   3157,
+   3791,
+   3561,
+   4197
+  ],
+  "olcek": 0.34019267784670437,
+  "x": 3157,
+  "y": 3791,
+  "w": 404,
+  "h": 406,
+  "ncc": 0.9831
+ },
+ "isim": {
+  "font": "Cinzel.ttf",
+  "wght": 500,
+  "taban_y": 4571,
+  "govde_px": {
+   "sol": 170,
+   "sag": 169
+  },
+  "punto": {
+   "sol": 241,
+   "sag": 240,
+   "kullanilan": 240
+  },
+  "kutu_sol": [
+   1035,
+   4401,
+   2039,
+   4571
+  ],
+  "kutu_sag": [
+   2953,
+   4402,
+   3765,
+   4571
+  ],
+  "bosluk_sol": 269,
+  "bosluk_sag": 269,
+  "satir_merkez_x": 2400.0,
+  "poster_merkez_x": 2400.0,
+  "kenar_payi": 480
+ },
+ "sonsuz": {
+  "kutu": [
+   2308,
+   4444,
+   2684,
+   4560
+  ],
+  "merkez_x": 2496.0,
+  "genislik": 376,
+  "katman": "orijinal posterden murekkep gucu (yuksek cozunurluklu kaynak yok: HAZIR/infinity.png 187x58)"
+ },
+ "sembol_isim_dx": {
+  "sol": -0.5,
+  "sag": 0.0
+ },
+ "sembol_isim_dy": {
+  "sol": 232,
+  "sag": 205
+ },
+ "mesaj": {
+  "font": "EBGaramond-Italic.ttf",
+  "wght": 400,
+  "kutu": [
+   1702,
+   5137,
+   3098,
+   5288
+  ],
+  "T_govde_px": 147,
+  "punto": 223,
+  "taban_y": 5288,
+  "merkez_x": 2400.0,
+  "genislik_siniri": 3340
+ },
+ "zemin": {
+  "dosya": "motor/varlik/plates/VINTAGE_B_16x20_temiz_halkasiz.png",
+  "sha256": "2f260c65e684ae1aeb6864fa3ff8aba4422fe0729ddd428559a8835cc87d9593",
+  "halkasiz": true,
+  "kaynak": {
+   "dosya": "motor/varlik/plates/VINTAGE_B_16x20_temiz.png",
+   "sha256": "679137d0f6e5296b741242344a02bf401e04373d53ffe56a56135c6270d54373"
+  },
+  "kayit": "motor/varlik/plates/VINTAGE_B_16x20_temiz_halkasiz.json",
+  "onceki": {
+   "dosya": "motor/varlik/plates/VINTAGE_B_16x20_temiz.png",
+   "sha256": "679137d0f6e5296b741242344a02bf401e04373d53ffe56a56135c6270d54373",
+   "kaynak": {
+    "dosya": "TEMP/SIPARIS_ISIM/PLATES/VINTAGE_B_16x20.png",
+    "sha256": "0bff7d09a8b34da6e134b58cb2c6af8c5b1a5879804d41fde74a3074a7117cba"
+   },
+   "kayit": "motor/varlik/plates/VINTAGE_B_16x20_temiz.json"
+  }
+ },
+ "bakir": {
+  "referans": "TEMP/SIPARIS_ISIM/DIJITAL/9000000005/AstroLoveArt_Scorpio_Virgo_Warm_Parchment.pdf (16x20 sayfasi, gomulu goruntu birebir)",
+  "test5_bantlar": [
+   [
+    1500,
+    3176
+   ],
+   [
+    3791,
+    4197
+   ],
+   [
+    4378,
+    4595
+   ],
+   [
+    5106,
+    5321
+   ]
+  ],
+  "ogeler": {
+   "buyuk_sembol": {
+    "bant": [
+     1500,
+     3176
+    ],
+    "rgb": [
+     118.6,
+     60.4,
+     23.1
+    ],
+    "dolu_px": 502588,
+    "Lk": 131.5,
+    "cv": 0.0732
+   },
+   "kucuk_sembol": {
+    "bant": [
+     3791,
+     4197
+    ],
+    "rgb": [
+     119.5,
+     61.4,
+     23.9
+    ],
+    "dolu_px": 58853,
+    "Lk": 128.4,
+    "cv": 0.0684
+   },
+   "isim": {
+    "bant": [
+     4378,
+     4595
+    ],
+    "rgb": [
+     115.3,
+     59.9,
+     23.8
+    ],
+    "dolu_px": 77251,
+    "Lk": 123.7,
+    "cv": 0.1182
+   },
+   "mesaj": {
+    "bant": [
+     5106,
+     5321
+    ],
+    "rgb": [
+     113.1,
+     58.9,
+     23.2
+    ],
+    "dolu_px": 57715,
+    "Lk": 109.0,
+    "cv": 0.1646
+   },
+   "daire": {
+    "rgb": [
+     151.4,
+     89.8,
+     29.4
+    ],
+    "dolu_px": 56864,
+    "Lk": 79.7,
+    "cv": 0.295,
+    "olcum": "halka katmani alfa >= 0.9; kagit = kagit_tabani(ham plate)"
+   }
+  },
+  "kabartma": {
+   "sigma": 2.0,
+   "a": 1.2068,
+   "b": 0.2627,
+   "r2": 0.508,
+   "kenar_kontrast": 0.3528
+  }
+ },
+ "halka": {
+  "dosya": "motor/varlik/halka/HALKA_16x20.png",
+  "sha256": "9b218397b32f84b1ee137a41d3cbd8295a8e174ec44f3e8ad07d3de20702bebe",
+  "daire_px": 97556,
+  "Lk_ci": 143.03,
+  "y": [
+   716,
+   3575
+  ],
+  "kaynak": "TEMP/SIPARIS_ISIM/PLATES/MODERN_16x20.png (kilitli wp_bakir.daire_maskesi)"
+ }
+}

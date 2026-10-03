@@ -35,6 +35,37 @@ def oku(f):
     return np.asarray(Image.open(f).convert('RGB'), np.float32)
 
 
+QC_W = 3307         # kapi esikleri 11x14 (3307 px) sayfada olculup kalibre edildi (3 Eki); buyuk boylar bu genislige
+                    # INTER_AREA ile indirilerek olculur (24x36'da harf ici e orijinalde bile 18, bellek 7 GB)
+
+
+def oku_n(f, W=None):
+    """QC olcegi: genislik QC_W'den buyukse INTER_AREA ile QC_W'ye (orani koruyarak; W verilirse o genislige)."""
+    im = Image.open(f).convert('RGB')
+    hw = W or QC_W
+    if im.width > hw:
+        im = im.resize((hw, int(round(im.height * hw / im.width))), Image.BOX)
+    return np.asarray(im, np.float32)
+
+
+def halka_plate(P):
+    """Plate'teki halka (altin edisyonlar): yerel arka plandan (31 px medyan) |fark| > 10 luma, genisligi sayfanin
+    >= %35'i olan bilesenler (kilitli wp_bakir.daire_maskesi ile ayni olcut, isaretsiz), KENAR_PX genisletme."""
+    L = P @ wk.LUMA
+    z = cv2.medianBlur(np.clip(L, 0, 255).astype(np.uint8), 31).astype(np.float32)
+    n, lab, st, _ = cv2.connectedComponentsWithStats((np.abs(z - L) > 10).astype(np.uint8), 8)
+    tut = np.zeros(n, bool)
+    tut[1:] = (st[1:, cv2.CC_STAT_WIDTH] > 0.35 * L.shape[1]) & (st[1:, cv2.CC_STAT_AREA] > 500)
+    return cv2.dilate(tut[lab].astype(np.uint8), np.ones((2 * wb.KENAR_PX + 1,) * 2, np.uint8)).astype(bool)
+
+
+def halka_alfa(Z, shape):
+    al = Image.open(KOK.parent / Z['halka']['dosya'])
+    if al.size != (shape[1], shape[0]):
+        al = al.resize((shape[1], shape[0]), Image.BOX)
+    return np.asarray(al, np.float32)
+
+
 def ocr(img, beyaz=None):
     with tempfile.TemporaryDirectory() as d:
         p = Path(d) / 'a.png'
@@ -120,11 +151,16 @@ def hat_bul(X, O, P, Z, mask_x=None, eski=False):
     sm = satirlar(Z, X.shape[0])
     mo = hat_maskesi(P, O)
     mx = hat_maskesi(P, X) if mask_x is None else mask_x
+    if 'halka' not in Z and Z.get('mod') == 'altin':
+        # altin edisyonlarda halka plate'te (iki sayfada ayni piksel): onayli b kurali (3 Eki) 'halka cevresi yazi
+        # sayilir' -> plate'teki halka cevresi iki sayfada da notr (PW 11x14 / 16x20 / A2: halka kenari kosusu)
+        hn = halka_plate(P)
+        mo, mx = mo | hn, mx | hn
     if 'halka' in Z:
         # halka iki sayfada da tasarim ogesi (orijinalde kahve, bakir baskida bakir): cevresi IKI sayfada da notr
         # (3 Eki, deneme 3: yalniz bakir sayfada murekkep sayilinca halka yanindaki kagit lifi tek tarafta
         # kopruyle 'cizgi' oluyordu, y=1755). Genel birlesim maskesi KULLANILMAZ (Test 5 kusurlarini da siliyordu).
-        ah = np.asarray(Image.open(KOK.parent / Z['halka']['dosya']), np.float32) > 5
+        ah = halka_alfa(Z, X.shape) > 5
         hn = cv2.dilate(ah.astype(np.uint8), np.ones((2 * wb.KENAR_PX + 1,) * 2, np.uint8)).astype(bool)
         mo, mx = mo | hn, mx | hn
     c_o = wb.dikis(O, sm, murekkep=mo)
@@ -191,7 +227,9 @@ def olc(ad, S, P, O, Z, isim1, isim2, mesaj, e_esik=None):
     R = {'ad': ad}
     b0 = bantlar(ink)
     top = ink.sum()
-    b = [x for x in b0 if ink[x[0]:x[1]].sum() >= 0.002 * top]
+    # metin bandi: murekkebin >= %0.5'i (3 Eki olcumu: WP 18x24 orijinal kagit lekesi bandi %0.21; Test 5 11x14 cift
+    # tagline parcasi %0.97 -> FAIL kalir)
+    b = [x for x in b0 if ink[x[0]:x[1]].sum() >= 0.005 * top]
     ib = Z['bantlar']['isim']
     # isim bandi: sabitteki isim bandiyla kesisen bant
     isb = [x for x in b if x[0] < ib[1] + 20 and x[1] > ib[0] - 20]
@@ -254,7 +292,7 @@ def olc(ad, S, P, O, Z, isim1, isim2, mesaj, e_esik=None):
         if 'bakir' in Z:
             renk[k]['dE_test5'] = de(Z['bakir']['ogeler'][k]['rgb'])
     if 'halka' in Z and 'bakir' in Z and 'daire' in Z['bakir']['ogeler']:
-        al = np.asarray(Image.open(KOK.parent / Z['halka']['dosya']), np.float32) / 255.0
+        al = halka_alfa(Z, S.shape) / 255.0
         dce = al >= 0.9
         rgb = S[dce].mean(0)
         renk['daire'] = {'rgb': [round(float(x), 1) for x in rgb], 'dE_orijinal': round(float(wk.dE(
@@ -286,15 +324,20 @@ def main():
     a = ap.parse_args()
     K = Path(a.kaynak)
     Z = json.loads(Path(a.sabit).read_text())
-    P = oku(a.plate_dosya or K / 'plates' / f"{Z['plate']}.png")
-    O = oku(a.orijinal or K / 'orijinal_WP_11x14.jpg')
+    P = oku_n(a.plate_dosya or K / 'plates' / f"{Z['plate']}.png")
+    O = oku_n(a.orijinal or K / 'orijinal_WP_11x14.jpg')
+    f = P.shape[1] / Z['tuval'][0]
+    if f != 1:                                                         # sabit koordinatlari QC olcegine
+        Z = json.loads(json.dumps(Z))
+        Z['bantlar'] = {k: [int(round(v[0] * f)), int(round(v[1] * f))] for k, v in Z['bantlar'].items()}
+    R0 = {'qc_olcek': {'tuval': Z['tuval'], 'qc_px': [P.shape[1], P.shape[0]], 'oran': round(f, 5)}}
     o1, o2, om = a.orijinal_metin.split('|')
     t5 = a.test5 or str(K / 'test5_WP_11x14.jpeg')
     sayfalar = [('orijinal', O, o1, o2, om)]
     if t5 != 'yok':
-        sayfalar.append(('test5', oku(t5), a.isim1, a.isim2, a.mesaj))
-    sayfalar.append(('motor', oku(a.motor), a.isim1, a.isim2, a.mesaj))
-    R = {}
+        sayfalar.append(('test5', oku_n(t5, P.shape[1]), a.isim1, a.isim2, a.mesaj))
+    sayfalar.append(('motor', oku_n(a.motor, P.shape[1]), a.isim1, a.isim2, a.mesaj))
+    R = dict(R0)
     for ad, S, i1, i2, ms in sayfalar:
         R[ad] = olc(ad, S, P, O, Z, i1, i2, ms, a.e_esik)
         print(ad, json.dumps({k: R[ad][k] for k in ('a_tagline', 'b_hat', 'c_kagit', 'd_isim', 'gecti')},
@@ -342,7 +385,7 @@ def main():
         for c in R['motor']['b_hat_eski']['orijinalde_olmayan']) or 'yok'))
     neg_ok = True
     if a.negatif:
-        Sn = oku(a.negatif)
+        Sn = oku_n(a.negatif, P.shape[1])
         en = renk_bandi(Sn @ wk.LUMA, murekkep(Sn, P)[1], Z, a.e_esik)
         R['negatif_e'] = {'dosya': a.negatif, **en}
         neg_ok = not en['gecti']

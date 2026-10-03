@@ -1,0 +1,152 @@
+name: motor-siparis
+
+# ADIM 1 (3 Eki 2026, Serdar onayi): TAM SIPARIS SETI motor ile katmanlardan. SCORPIO_VIRGO MAXWELL (Scorpio, sol) /
+# QUINN (Virgo, sag), "Written in the Stars, Always Yours"; 5 renk x 5 boy = 25 sayfa, 300 dpi. Sabitler satistaki
+# orijinalden (motor/sabitler, depoda). WP temiz zeminler inceleme/motor-varlik (bir kez onarildi, sha). QC a-e her
+# sayfa. Renk basina bir is (matris), sonra ozet. Cikti yalniz Drive TEMP/MOTOR/SIPARIS/<kosu>/. Etsy YOK, musteri YOK.
+
+on:
+  push:
+    branches: [motor]
+    paths: [motor/siparis.trigger]
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  ISIM1: MAXWELL
+  ISIM2: QUINN
+  MESAJ: "Written in the Stars, Always Yours"
+
+jobs:
+  renk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        renk: [MIDNIGHT_BLUE, DEEP_BLACK, PURE_WHITE, CHAMPAGNE_IVORY, WARM_PARCHMENT]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Kaynak paketi (inceleme/motor-kaynak-siparis)
+        run: |
+          set -euo pipefail
+          git fetch -q --depth 1 origin inceleme/motor-kaynak-siparis
+          git worktree add -q _k FETCH_HEAD
+          cd _k && git log -1 --format='kaynak %H' && cat KAYNAK.txt
+          for f in $(find . -name '*.parca00'); do b=${f%.parca00}; cat $b.parca* > $b; rm $b.parca*; done
+          python3 - <<'PY'
+          import hashlib
+          for s in open('MANIFEST.txt'):
+              p, n, h = s.rstrip('\n').split('\t')
+              assert hashlib.sha256(open(p, 'rb').read()).hexdigest() == h, p
+          print('MANIFEST sha: TAMAM')
+          PY
+      - name: WP temiz zeminler (inceleme/motor-varlik)
+        if: matrix.renk == 'WARM_PARCHMENT'
+        run: |
+          set -euo pipefail
+          git fetch -q --depth 1 origin inceleme/motor-varlik
+          git worktree add -q _v FETCH_HEAD
+          cd _v && git log -1 --format='varlik %H'
+          for f in $(find . -name '*.parca00'); do b=${f%.parca00}; cat $b.parca* > $b; rm $b.parca*; done
+          python3 - <<'PY'
+          import hashlib
+          for s in open('MANIFEST.txt'):
+              p, n, h = s.rstrip('\n').split('\t')
+              assert hashlib.sha256(open(p, 'rb').read()).hexdigest() == h, p
+          print('varlik MANIFEST sha: TAMAM')
+          PY
+          cp -n motor/varlik/plates/*.png ../motor/varlik/plates/
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q numpy pillow opencv-python-headless pymupdf
+          sudo apt-get install -y -q tesseract-ocr >/dev/null
+          tesseract --version | head -1; nproc; free -g | head -2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: 5 sayfa (motor + QC a-e) + PDF + temas
+        run: |
+          set -euo pipefail
+          echo "kod $(git rev-parse HEAD)"
+          R=${{ matrix.renk }}; O=_cikti
+          python3 motor/siparis_seti.py --kaynak _k --isim1 "$ISIM1" --isim2 "$ISIM2" --mesaj "$MESAJ" --cikti $O \
+            --renk $R --is 1 && echo PASS > $O/QC_SONUC_$R.txt || echo FAIL > $O/QC_SONUC_$R.txt
+          cd $O
+          mv OLCUM.md OLCUM_$R.md; mv SONUC.json SONUC_$R.json
+          mkdir -p hucre_qc; for d in hucre/*/; do n=$(basename $d); cp $d/QC.json hucre_qc/QC_$n.json 2>/dev/null || true; cp $d/QC.md hucre_qc/QC_$n.md 2>/dev/null || true; done
+          rm -rf hucre
+          sha256sum *.pdf *.jpg > SHA_$R.txt; cat SHA_$R.txt QC_SONUC_$R.txt
+      - name: Drive'a yukle (TEMP/MOTOR/SIPARIS/<kosu>)
+        run: |
+          set -euo pipefail
+          rclone copy _cikti "gdrive:ASTROLOVE/TEMP/MOTOR/SIPARIS/${{ github.run_id }}"
+          grep -qx PASS _cikti/QC_SONUC_${{ matrix.renk }}.txt
+      - if: always()
+        run: rm -rf ~/.config/rclone
+
+  ozet:
+    needs: renk
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q pillow pymupdf
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: OLCUM.md (25 hucre) + toplam sure
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          D="gdrive:ASTROLOVE/TEMP/MOTOR/SIPARIS/${{ github.run_id }}"
+          mkdir -p _o; rclone copy "$D" _o --include "SONUC_*.json" --include "SHA_*.txt"
+          BAS=$(gh api repos/${{ github.repository }}/actions/runs/${{ github.run_id }} --jq .run_started_at)
+          SURE=$(( $(date +%s) - $(date -d "$BAS" +%s) ))
+          python3 motor/siparis_seti.py --birlestir _o/SONUC_*.json --sure $SURE --cikti _o/OLCUM.md && Q=PASS || Q=FAIL
+          { echo "kod (motor dali): $(git rev-parse HEAD)"; echo "kosu: ${{ github.run_id }}"; echo "baslangic: $BAS";
+            echo "toplam_sure_sn: $SURE"; echo "QC (25 sayfa): $Q"; cat _o/SHA_*.txt; } > _o/KOSU.txt
+          cat _o/KOSU.txt
+          rclone copy _o/OLCUM.md "$D"; rclone copy _o/KOSU.txt "$D"
+          rclone lsl "$D"
+          [ $Q = PASS ]
+      - if: always()
+        run: rm -rf ~/.config/rclone

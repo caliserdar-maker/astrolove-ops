@@ -64,3 +64,6 @@ fonts/
 
 # V8 gecici ham medya ve ciktilari (depoda tutulmaz)
 _veri/
+motor/varlik/plates/VINTAGE_B_*.png
+motor/varlik/plates/VINTAGE_B1_11x14_temiz.png
+motor/varlik/plates/VINTAGE_B2_11x14_temiz.png

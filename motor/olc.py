@@ -50,7 +50,8 @@ def murekkep(S, P):
     W = m.shape[1]
     cx = st[:, cv2.CC_STAT_LEFT] + st[:, cv2.CC_STAT_WIDTH] / 2
     tut = np.zeros(n, bool)
-    tut[1:] = (st[1:, cv2.CC_STAT_AREA] >= MIN_ALAN) & (cx[1:] > ORTA[0] * W) & (cx[1:] < ORTA[1] * W)
+    q2 = (W / 3307) ** 2                                               # alan esigi 11x14'te olculdu; boyla olceklenir
+    tut[1:] = (st[1:, cv2.CC_STAT_AREA] >= MIN_ALAN * q2) & (cx[1:] > ORTA[0] * W) & (cx[1:] < ORTA[1] * W)
     return m, tut[lab]
 
 
@@ -202,6 +203,7 @@ def main():
     ap.add_argument('--orijinal', help='orijinal satis posteri (varsayilan: KAYNAK/orijinal_WP_11x14.jpg)')
     ap.add_argument('--plate-dosya', help='plate dosyasi (varsayilan: KAYNAK/plates/<plate>.png)')
     ap.add_argument('--altin', action='store_true', help='altin edisyon: katman tablosu (LUT) + yazi dokusu olc')
+    ap.add_argument('--mesaj-isim-tonu', action='store_true', help='tagline dokusu = isim altini (Serdar: DEEP_BLACK)')
     a = ap.parse_args()
     K = Path(a.kaynak)
     sol, sag = (x.lower() for x in a.cift.split('_'))
@@ -293,6 +295,14 @@ def main():
         R['altin']['isim_sag'] = profil_olc(S, ink, isim_sag[0], isim_sag[2], isim_sag[1], isim_sag[3])
         R['altin']['mesaj'] = profil_olc(S, ink_m, mk[0], mk[2], int(mb[0] + yy.min()), R['mesaj']['taban_y'])
         R['isaret'] = isaret(P)
+        if a.mesaj_isim_tonu:
+            # Serdar 3 Eki (ADIM 1): DEEP_BLACK tagline tonu isim altini ile ayni -> tagline dokusu = iki isim
+            # profilinin ortalamasi (her biri ayni satir sayisina yeniden orneklenir)
+            p1, p2 = np.asarray(R['altin']['isim_sol']), np.asarray(R['altin']['isim_sag'])
+            n = max(len(p1), len(p2))
+            rs = lambda p: np.stack([np.interp(np.linspace(0, len(p) - 1, n), np.arange(len(p)), p[:, c]) for c in range(3)], 1)
+            R['altin']['isim'] = [[round(float(v), 1) for v in r] for r in (rs(p1) + rs(p2)) / 2]
+            R['altin']['mesaj_profili'] = 'isim'
     Path(a.cikti).parent.mkdir(parents=True, exist_ok=True)
     Path(a.cikti).write_text(json.dumps(R, indent=1, ensure_ascii=False))
     print(json.dumps(R, indent=1, ensure_ascii=False))

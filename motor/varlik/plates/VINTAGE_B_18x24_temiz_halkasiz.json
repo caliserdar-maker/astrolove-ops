@@ -1,0 +1,72 @@
+{
+ "kaynak_zemin": {
+  "dosya": "motor/varlik/plates/VINTAGE_B_18x24_temiz.png",
+  "sha256": "05634802926441fee28bef1ff79fdf24952669db4936a77a3101f8cfbed4c751"
+ },
+ "halkasiz_zemin": {
+  "dosya": "motor/varlik/plates/VINTAGE_B_18x24_temiz_halkasiz.png",
+  "sha256": "fab47d5f590560874c2995e36fe6607f8b7ccf1a7c4584967bcfa125fd66befb"
+ },
+ "halka": {
+  "dosya": "motor/varlik/halka/HALKA_18x24.png",
+  "sha256": "57497b43de1a402dca88b3155258c7e3d7346fc9ac6f641572048229cfea1c87",
+  "daire_px": 139241,
+  "Lk_ci": 140.14,
+  "y": [
+   859,
+   4291
+  ],
+  "kaynak": "TEMP/SIPARIS_ISIM/PLATES/MODERN_18x24.png (kilitli wp_bakir.daire_maskesi)"
+ },
+ "degisen_px": 258374,
+ "qc": {
+  "halka_kalintisi": {
+   "once": {
+    "daire": {
+     "iz_orani": 5.86,
+     "koyulasma": 72.6,
+     "glif_px": 139241,
+     "kontrol": {
+      "iz_orani": 0.97,
+      "koyulasma": -1.24,
+      "glif_px": 139241
+     },
+     "gecti": false
+    },
+    "gecti": false,
+    "esik": {
+     "iz_orani_max": 1.25
+    }
+   },
+   "sonra": {
+    "daire": {
+     "iz_orani": 0.416,
+     "koyulasma": -2.31,
+     "glif_px": 139241,
+     "kontrol": {
+      "iz_orani": 0.913,
+      "koyulasma": -1.33,
+      "glif_px": 139241
+     },
+     "gecti": true
+    },
+    "gecti": true,
+    "esik": {
+     "iz_orani_max": 1.25
+    }
+   },
+   "gecti": true
+  },
+  "cizgi": {
+   "kalan": [],
+   "gecti": true
+  },
+  "kagit": {
+   "dE_ort": 0.39,
+   "dE_p95": 0.485,
+   "esik_ort": 0.5,
+   "gecti": true
+  },
+  "gecti": true
+ }
+}

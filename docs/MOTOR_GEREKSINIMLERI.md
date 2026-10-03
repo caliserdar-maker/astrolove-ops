@@ -32,6 +32,13 @@ Kalite
 - Kapi degisince iki yonlu test GERCEK kusurlu ornekle. Esik gevsetilerek PASS alinmaz.
 - Sonuc hucre bazinda raporlanir, job success degil. Tarama araci once 1 PASS + 1 FAIL ile dogrulanir, 0 kayit = FAIL.
 - Harf ici renk bandi kapisi (e) zorunlu; deneme 2 ciktisi (TEMP/MOTOR/PROTOTIP/37115656988) negatif test (Serdar, 3 Eki).
+- DEEP_BLACK tagline tonu = isim altini (Serdar, 3 Eki; olc.py --mesaj-isim-tonu).
+- Altin edisyonlar (MB, DB, PW, CI): plate ustune alfa bindirme; sembol rengi orijinalden olculen kanal tablosu (LUT),
+  yazi dokusu orijinal kelimenin harf cekirdegi satir profili (gurultu satirlari elenir, sigma 2 yumusatma) (3 Eki).
+- QC kapilari 3307 px olceginde (11x14'te kalibre); buyuk boylar BOX ile indirilir. e esigi edisyon basina: orijinallerin
+  en buyugu x 1.15, en az 3.6 (motor/sabitler/E_ESIK.json). Plate halkasi (altin edisyon) b'de notr (onayli kural) (3 Eki).
+- Temiz zemin bir kez: plate_temizle (tam boy) + gerekirse zemin_ek_onar (QC olceginde gorulen kosu); sha sabitlerde,
+  buyuk dosyalar inceleme/motor-varlik dalinda (3 Eki).
 - GOZ SON KARAR: Serdar'a her renk x boy TAM SAYFA gider, kesit secilip elenmez. Gorsel suphede once Serdar.
 Teslim
 - Teslim ve musteri mesaji yalniz Serdar onayiyla.

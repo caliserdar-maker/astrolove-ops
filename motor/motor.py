@@ -277,9 +277,12 @@ def main():
         return altin_bas(a, Z, K, C, i1, i2, mesaj, rap)
 
     # ---- murekkep gucu haritasi (katmanlar)
-    P_c = np.asarray(Image.open(K / 'plates' / 'MODERN_11x14.png').convert('RGB'), np.float32)
-    Lp = float(np.median(P_c @ wk.LUMA))                               # wp_ornek ile ayni (duz renk kagidi)
-    del P_c
+    P_c = np.asarray(Image.open(K / 'plates' / f"MODERN_{Z['boy']}.png").convert('RGB'))
+    Lc = np.empty(P_c.shape[:2], np.float32)                           # satir parcalari (bellek; sonuc ayni)
+    for i in range(0, len(Lc), 512):
+        Lc[i:i + 512] = P_c[i:i + 512].astype(np.float32) @ wk.LUMA
+    Lp = float(np.median(Lc))                                          # wp_ornek ile ayni (duz renk kagidi)
+    del P_c, Lc
     M = np.zeros((H, W), np.float32)
     A = np.zeros((H, W), np.float32)
     maske, golge = {}, {}
@@ -320,11 +323,12 @@ def main():
     kenar = I['kenar_payi']
     g_bosluk = (I['bosluk_sol'] + I['bosluk_sag']) / 2
     son = Z['sonsuz']
-    so = np.asarray(Image.open(K / 'orijinal_WP_11x14.jpg').convert('RGB'), np.float32)
-    pl = np.asarray(Image.open(K / 'plates' / f"{Z['plate']}.png").convert('RGB'), np.float32)
     x0, y0, x1, y1 = son['kutu']
     pad = 6
-    m_inf = np.clip((pl - so)[y0 - pad:y1 + pad, x0 - pad:x1 + pad] @ wk.LUMA, 0, None)
+    kk = (x0 - pad, y0 - pad, x1 + pad, y1 + pad)                      # yalniz sonsuz kutusu okunur (bellek)
+    so = np.asarray(Image.open(a.orijinal or K / 'orijinal_WP_11x14.jpg').convert('RGB').crop(kk), np.float32)
+    pl = np.asarray(Image.open(K / 'plates' / f"{Z['plate']}.png").convert('RGB').crop(kk), np.float32)
+    m_inf = np.clip((pl - so) @ wk.LUMA, 0, None)
     del so, pl
     Lk_inf = float(np.median(m_inf[m_inf > wk.ESIK]))
     a_inf = np.clip((m_inf - wk.ESIK * 0.0) / Lk_inf, 0, 1)
@@ -390,7 +394,7 @@ def main():
         sys.exit(f"FAIL: temiz zemin sha uyusmuyor {sha} != {Z['zemin']['sha256']}")
     rap['zemin'] = {'dosya': Z['zemin']['dosya'], 'sha256': sha}
     P = np.asarray(Image.open(zf).convert('RGB'), np.float32)
-    D = -np.repeat(M[..., None], 3, 2)                                 # D @ LUMA = -m (LUMA toplami 1)
+    D = None if 'bakir' in Z else -np.repeat(M[..., None], 3, 2)       # D @ LUMA = -m (LUMA toplami 1)
     rap['golge'] = golge
     if 'bakir' not in Z:
         hedef = Z['renk']['hepsi']['rgb']
@@ -409,30 +413,28 @@ def main():
                     mg |= v
             mg = cv2.dilate(mg.astype(np.uint8), np.ones((9, 9), np.uint8)).astype(bool)
             ys = np.nonzero(mg.any(1))[0]
-            satir = np.zeros(H, bool); satir[ys[0]:ys[-1] + 1] = True
+            # bellek (3 Eki, 24x36 WP): kilitli bakir_bas grubun satir bandinda (+-100 px) kosar; tum islemleri yerel
+            # (bilesen, medyan yalniz grup murekkebinde, genisletme / bulaniklik < 100 px), 11x14 ciktisi birebir ayni
+            c0, c1 = max(0, int(ys[0]) - 100), min(H, int(ys[-1]) + 101)
+            satir = np.zeros(c1 - c0, bool); satir[ys[0] - c0:ys[-1] + 1 - c0] = True
             kab = {'satirlar': satir, **kb} if g in ('isim', 'mesaj') else None
             hedef = Z['bakir']['ogeler'][g]['rgb']
-            out, bb = wb.bakir_bas(D * mg[..., None], out, hedef, Lp, {g: (int(ys[0]), int(ys[-1]) + 1)}, None,
-                                   kabartma=kab)
+            Dg = -np.repeat((M[c0:c1] * mg[c0:c1])[..., None], 3, 2)     # = D * mg, yalniz bant (bellek)
+            o2, bb = wb.bakir_bas(Dg, out[c0:c1], hedef, Lp,
+                                  {g: (int(ys[0]) - c0, int(ys[-1]) + 1 - c0)}, None, kabartma=kab)
+            out[c0:c1] = o2                                            # P yerinde (P bundan sonra okunmaz)
             rap['bakir'][g] = {**{k: v for k, v in bb.items() if k not in ('core', 'ce', 'M', 'dolu', 'te')},
                                'hedef': hedef, 'kabartma': bool(kab)}
     log('bakir', rap['bakir'])
-    u8 = np.clip(np.round(out), 0, 255).astype(np.uint8)
+    np.round(out, out=out); np.clip(out, 0, 255, out=out)               # yerinde (bellek); sonuc ayni
+    u8 = out.astype(np.uint8)
     del out, D
     im = Image.fromarray(u8)
     im.save(C / 'MOTOR.png', dpi=(300, 300))
     np.save(C / '_beklenen_maske.npy', np.packbits(A > 0.02))
     json.dump({k: [int(x) for x in np.nonzero(v.any(1))[0][[0, -1]]] + [int(x) for x in np.nonzero(v.any(0))[0][[0, -1]]]
                for k, v in maske.items()}, open(C / '_oge_kutulari.json', 'w'))
-    # PDF: 11x14 inc sayfa, 300 dpi goruntu (JPEG 95, eski sistemle ayni)
-    import fitz
-    jp = C / '_sayfa.jpg'
-    im.save(jp, 'JPEG', quality=95, subsampling=0, dpi=(300, 300))
-    d = fitz.open()
-    pg = d.new_page(width=W / 300 * 72, height=H / 300 * 72)
-    pg.insert_image(pg.rect, filename=str(jp))
-    d.save(C / 'MOTOR.pdf')
-    jp.unlink()
+    pdf_yaz(im, C, W, H)
     rap['sure_sn'] = round(time.time() - T0, 1)
     (C / 'MOTOR_RAPOR.json').write_text(json.dumps(rap, indent=1, ensure_ascii=False))
     log('bitti', C)

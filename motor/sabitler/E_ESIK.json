@@ -1,0 +1,8 @@
+{
+ "_": "qc e (harf ici renk bandi) esigi, edisyon basina. Yontem onayli WP esigiyle ayni (3 Eki): satistaki orijinal posterlerin (SCORPIO_VIRGO, 5 boy, 3307 px QC olcegi) olculen en buyugu x 1.15, en az 3.6. Olcum: yerel kosu set1 (motor 6b, qc.py QC_W).",
+ "MIDNIGHT_BLUE": {"esik": 4.39, "orijinal_e": {"16x20": 3.14, "18x24": 3.82, "24x36": 3.08, "11x14": 3.68, "A2": 3.21}},
+ "DEEP_BLACK": {"esik": 4.68, "orijinal_e": {"16x20": 4.07, "18x24": 4.05, "24x36": 3.22, "11x14": 3.7, "A2": 3.21}},
+ "PURE_WHITE": {"esik": 3.6, "orijinal_e": {"16x20": 2.18, "18x24": 2.7, "24x36": 1.92, "11x14": 1.97, "A2": 1.77}},
+ "CHAMPAGNE_IVORY": {"esik": 3.6, "orijinal_e": {"16x20": 1.2, "18x24": 1.01, "24x36": 1.27, "11x14": 1.37, "A2": 1.24}},
+ "WARM_PARCHMENT": {"esik": 3.6, "orijinal_e": {"16x20": 3.0, "18x24": 2.77, "24x36": 2.66, "11x14": 3.11, "A2": 2.41}}
+}

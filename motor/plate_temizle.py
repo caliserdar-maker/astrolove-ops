@@ -75,20 +75,31 @@ def main():
     ap.add_argument('--sabit', required=True)
     ap.add_argument('--plate', required=True)
     ap.add_argument('--cikti', required=True)
+    ap.add_argument('--orijinal', help='orijinal WP posteri (varsayilan KAYNAK/orijinal_WP_11x14.jpg)')
+    ap.add_argument('--sabit-yazma', action='store_true', help='sabitlere zemin yazma (baska ciftin plate'"'"'i: B1/B2)')
+    ap.add_argument('--diger', action='store_true', help='bilgi: diger 11x14 VINTAGE plate olcumu')
     a = ap.parse_args()
     K, C = Path(a.kaynak), Path(a.cikti)
     C.mkdir(parents=True, exist_ok=True)
     Z = json.loads(Path(a.sabit).read_text())
-    O = oku(K / 'orijinal_WP_11x14.jpg')
+    O = oku(a.orijinal or K / 'orijinal_WP_11x14.jpg')
     kf = K / 'plates' / f'{a.plate}.png'
     P0 = oku(kf)
+    # tek seferlik temizlik, en fazla 3 gecis: onarilan seridin yaninda ikinci bir kosu belirirse (3 Eki, 24x36
+    # x=4342) o da ayni kurulumda onarilir. 11x14 ve 16x20 / 18x24 / A2 ilk geciste temiz.
     kusur = kusur_bul(P0, O, P0, Z)
     P1, kayit = onar(P0.copy(), kusur)
-    u8 = np.clip(np.round(P1), 0, 255).astype(np.uint8)
     hedef = C / f'{a.plate}_temiz.png'
-    Image.fromarray(u8).save(hedef, optimize=False)
-    P1 = oku(hedef)
-    kalan = kusur_bul(P1, O, P0, Z)
+    for gecis in range(3):
+        u8 = np.clip(np.round(P1), 0, 255).astype(np.uint8)
+        Image.fromarray(u8).save(hedef, optimize=False)
+        P1 = oku(hedef)
+        kalan = kusur_bul(P1, O, P0, Z)
+        if not kalan or gecis == 2:
+            break
+        kusur = kusur + kalan
+        P1, k2 = onar(P1, kalan)
+        kayit += k2
     de0, de1 = kagit_dE(P0, O, P0), kagit_dE(P1, O, P0)
     degisen = np.abs(P1 - P0).max(2) > 0
     _, G = murekkep(O, P0)                                             # orijinal glifleri (eski yazi izi olcumu)
@@ -99,7 +110,7 @@ def main():
     # bilgi: ayni olcum diger 11x14 VINTAGE plate'lerinde (orijinal SCORPIO_VIRGO; baska ciftin yazi altinda kalan
     # kusurlari bu olcumle gorulemez, yalniz gosterge)
     diger = {}
-    for f in sorted((K / 'plates').glob('VINTAGE*_11x14.png')):
+    for f in sorted((K / 'plates').glob('VINTAGE*_11x14.png')) if a.diger else []:
         if f.stem == a.plate:
             continue
         Px = oku(f)
@@ -110,7 +121,7 @@ def main():
          'kusur': kusur, 'onarim': kayit, 'degisen_px': int(degisen.sum()),
          'kagit_once': de0, 'qc': qc, 'diger_plateler_gosterge': diger}
     (C / f'{a.plate}_temiz.json').write_text(json.dumps(R, indent=1, ensure_ascii=False))
-    if qc['gecti']:                                                    # motor yalniz QC'den gecmis zemini kullanir
+    if qc['gecti'] and not a.sabit_yazma:                              # motor yalniz QC'den gecmis zemini kullanir
         Z['zemin'] = {'dosya': str(hedef), 'sha256': R['temiz']['sha256'], 'kaynak': R['kaynak'],
                       'kayit': str(C / f'{a.plate}_temiz.json')}
         Path(a.sabit).write_text(json.dumps(Z, indent=1, ensure_ascii=False))
