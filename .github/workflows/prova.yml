@@ -54,6 +54,10 @@ on:
         description: "1 = FAIL hucrede sayfalarin isim + tagline bandi 1:1 kesiti Drive PROVA/<kosu>/kesit/ (bos = yok)"
         required: false
         default: ""
+      renkler:
+        description: "renk isleri yalniz bu renkler (virgullu; bos = 4 renk)"
+        required: false
+        default: ""
 
 concurrency: prova
 
@@ -100,6 +104,7 @@ jobs:
           ISLER: ${{ inputs.isler }}
           PR: ${{ inputs.parca_renk }}
           PW: ${{ inputs.parca_wp }}
+          RENKLER: ${{ inputs.renkler }}
         run: |
           set -euo pipefail
           cd _kod && python3 - <<'EOF' >> "$GITHUB_OUTPUT"
@@ -127,7 +132,10 @@ jobs:
                           m.append({'tur': 'wp', 'anahtar': b, 'parca': st, 'ciftler': ON_CIFT[st], 'set': st})
           else:
             if 'renk' in isler:
-              for r in ('MIDNIGHT_BLUE', 'DEEP_BLACK', 'PURE_WHITE', 'CHAMPAGNE_IVORY'):
+              R4 = ('MIDNIGHT_BLUE', 'DEEP_BLACK', 'PURE_WHITE', 'CHAMPAGNE_IVORY')
+              rs = [x.strip() for x in os.environ.get('RENKLER', '').split(',') if x.strip()] or list(R4)
+              assert all(x in R4 for x in rs), f'bilinmeyen renk: {rs}'
+              for r in rs:
                   for i, p in enumerate(parcala(os.environ['PR'])):
                       m.append({'tur': 'renk', 'anahtar': r, 'parca': i, 'ciftler': ','.join(p), 'set': ''})
             if 'wp' in isler:
