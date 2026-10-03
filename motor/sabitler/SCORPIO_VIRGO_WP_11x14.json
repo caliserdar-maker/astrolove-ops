@@ -235,5 +235,99 @@
    "sha256": "2cd7c2aef3074961f8e5a9ca9bedece1c651c077806e602326e9d75d541fe91d"
   },
   "kayit": "motor/varlik/plates/VINTAGE_B3_11x14_temiz.json"
+ },
+ "bakir": {
+  "referans": "TEMP/SIPARIS_ISIM/DIJITAL/9000000005/AstroLoveArt_Scorpio_Virgo_Warm_Parchment.pdf sayfa 4 (11x14, gomulu goruntu birebir)",
+  "test5_bantlar": [
+   [
+    498,
+    881
+   ],
+   [
+    925,
+    2224
+   ],
+   [
+    2655,
+    2940
+   ],
+   [
+    3065,
+    3221
+   ],
+   [
+    3496,
+    3534
+   ],
+   [
+    3578,
+    3729
+   ]
+  ],
+  "ogeler": {
+   "buyuk_sembol": {
+    "bant": [
+     925,
+     2224
+    ],
+    "rgb": [
+     121.6,
+     62.0,
+     23.6
+    ],
+    "dolu_px": 247701,
+    "Lk": 129.2,
+    "cv": 0.0744
+   },
+   "kucuk_sembol": {
+    "bant": [
+     2655,
+     2940
+    ],
+    "rgb": [
+     123.0,
+     63.2,
+     24.5
+    ],
+    "dolu_px": 28515,
+    "Lk": 125.4,
+    "cv": 0.0726
+   },
+   "isim": {
+    "bant": [
+     3065,
+     3221
+    ],
+    "rgb": [
+     119.2,
+     62.3,
+     24.9
+    ],
+    "dolu_px": 37495,
+    "Lk": 119.4,
+    "cv": 0.1209
+   },
+   "mesaj": {
+    "bant": [
+     3578,
+     3729
+    ],
+    "rgb": [
+     117.5,
+     61.8,
+     24.6
+    ],
+    "dolu_px": 28773,
+    "Lk": 101.9,
+    "cv": 0.1759
+   }
+  },
+  "kabartma": {
+   "sigma": 1.38,
+   "a": 1.2748,
+   "b": 0.2575,
+   "r2": 0.476,
+   "kenar_kontrast": 0.355
+  }
  }
 }

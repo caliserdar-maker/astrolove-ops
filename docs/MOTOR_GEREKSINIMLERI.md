@@ -18,6 +18,7 @@ Cikti
 - 5 renk PDF (MIDNIGHT_BLUE, DEEP_BLACK, PURE_WHITE, CHAMPAGNE_IVORY, WARM_PARCHMENT), her biri 5 sayfa (2x3, 3x4, 4x5, 11x14, A serisi), 300 dpi.
 - Dosya/klasor adi her yerde AstroLoveArt. Olculmemis boy/dpi iddiasi musteri metnine yazilmaz.
 - WARM_PARCHMENT: tum ogeler bakir (1 Eki karari). DEEP_BLACK: tagline tonu isim altiniyla esit.
+- WARM_PARCHMENT bakiri = eski sistem wp_bakir rengi ve dokusu (Serdar, 3 Eki).
 Hiz
 - Hedef: Serdar bilgiyi verdikten sonra en gec 15 dk, 5 PDF Drive'da (eski sistem Test 5: ~10 dk). Paralel uretim.
 - Siparis sirasinda baska kosu yok; ayni anda tek buyuk dogrulama.

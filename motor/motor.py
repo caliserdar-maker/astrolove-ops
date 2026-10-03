@@ -13,7 +13,9 @@ Katmanlar (sabitler: motor/olc.py ciktisi, orijinal satis posterinden olculur):
 Renk: once murekkep gucu haritasi kurulur: m = alfa x Lk(oge) x s, Lk = orijinalde olculen oge murekkep gucu,
 s = altin katmanin golgelenmesi (luma), genligi orijinalin olculen cv'sine (std/ortanca) esitlenir; isim/tagline
 golgesi burc adi altin plakasinin satir profili (ONAYLI.json). WARM_PARCHMENT'ta harita kilitli wp_bakir.bakir_bas
-ile bakira basilir, hedef = orijinal posterin olculen dolu murekkep rengi.
+ile bakira basilir. Serdar 3 Eki: bakir = eski sistem wp_bakir rengi ve dokusu -> sabitlerde 'bakir' varsa (bakir_olc.py,
+Test 5 WP 11x14 olcumu) her oge grubu kendi hedef rengi, golge genligi (cv) ve isim/mesajda kilitli kabartma ile
+basilir; yoksa orijinal posterin olculen rengi (prototip 1).
 
 Kullanim: motor.py --kaynak DIR --sabit motor/sabitler/X.json --isim1 MAXWELL --isim2 QUINN --mesaj "..." --cikti DIR
 """
@@ -136,7 +138,7 @@ def main():
     M = np.zeros((H, W), np.float32)
     A = np.zeros((H, W), np.float32)
     maske, golge = {}, {}
-    RO = Z['renk']['ogeler']
+    RO = Z['bakir']['ogeler'] if 'bakir' in Z else Z['renk']['ogeler']
     BANT = {'buyuk_sembol': 'buyuk_sembol', 'kucuk_sembol_sol': 'kucuk_sembol', 'kucuk_sembol_sag': 'kucuk_sembol',
             'isim1': 'isim', 'isim2': 'isim', 'sonsuz': 'isim', 'mesaj': 'mesaj'}
 
@@ -233,11 +235,30 @@ def main():
     P = np.asarray(Image.open(zf).convert('RGB'), np.float32)
     D = -np.repeat(M[..., None], 3, 2)                                 # D @ LUMA = -m (LUMA toplami 1)
     rap['golge'] = golge
-    hedef = Z['renk']['hepsi']['rgb']
-    bant = {ad: tuple(v) for ad, v in Z['bantlar'].items()}
-    out, bb = wb.bakir_bas(D, P, hedef, Lp, bant, None)
-    rap['bakir'] = {k: v for k, v in bb.items() if k not in ('core', 'ce', 'M', 'dolu', 'te')}
-    rap['bakir']['hedef'] = hedef
+    if 'bakir' not in Z:
+        hedef = Z['renk']['hepsi']['rgb']
+        bant = {ad: tuple(v) for ad, v in Z['bantlar'].items()}
+        out, bb = wb.bakir_bas(D, P, hedef, Lp, bant, None)
+        rap['bakir'] = {k: v for k, v in bb.items() if k not in ('core', 'ce', 'M', 'dolu', 'te')}
+        rap['bakir']['hedef'] = hedef
+    else:
+        # oge grubu basina kilitli bakir_bas: hedef = Test 5 grubunun olculen rengi; isim + mesajda kabartma
+        out, rap['bakir'] = P, {}
+        kb = Z['bakir']['kabartma']
+        for g in ('buyuk_sembol', 'kucuk_sembol', 'isim', 'mesaj'):
+            mg = np.zeros((H, W), bool)
+            for ad, v in maske.items():
+                if BANT[ad] == g:
+                    mg |= v
+            mg = cv2.dilate(mg.astype(np.uint8), np.ones((9, 9), np.uint8)).astype(bool)
+            ys = np.nonzero(mg.any(1))[0]
+            satir = np.zeros(H, bool); satir[ys[0]:ys[-1] + 1] = True
+            kab = {'satirlar': satir, **kb} if g in ('isim', 'mesaj') else None
+            hedef = Z['bakir']['ogeler'][g]['rgb']
+            out, bb = wb.bakir_bas(D * mg[..., None], out, hedef, Lp, {g: (int(ys[0]), int(ys[-1]) + 1)}, None,
+                                   kabartma=kab)
+            rap['bakir'][g] = {**{k: v for k, v in bb.items() if k not in ('core', 'ce', 'M', 'dolu', 'te')},
+                               'hedef': hedef, 'kabartma': bool(kab)}
     log('bakir', rap['bakir'])
     u8 = np.clip(np.round(out), 0, 255).astype(np.uint8)
     del out, D

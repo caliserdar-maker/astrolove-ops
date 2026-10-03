@@ -81,14 +81,17 @@ def gorunur_oran(X, c, maske):
     pikselleri kosuya katar; kosunun cogu notr kopru ise cizgi gorunmez (3 Eki: x=1342, kontrast -0.2)."""
     L = (X @ wk.LUMA).astype(np.float32)
     d, T = wb.DIKIS_KOMSU, wb.DIKIS_T
+    q = d + 3                                                          # sayfa kenari cizgileri icin kenar kopyasi
     if c['yon'] == 'dikey':
         y0, y1, k = c['y'][0], c['y'][1] + 1, c['x']
-        A = cv2.blur(L, (1, wb.DIKIS_DUZLE))[y0:y1, k - d - 2:k + d + 3]
-        mk = maske[y0:y1, k - 1:k + 2].any(1) if maske is not None else np.zeros(y1 - y0, bool)
+        B = np.pad(cv2.blur(L, (1, wb.DIKIS_DUZLE)), ((0, 0), (q, q)), mode='edge')
+        A = B[y0:y1, k + q - d - 2:k + q + d + 3]
+        mk = np.pad(maske, ((0, 0), (1, 1)))[y0:y1, k:k + 3].any(1)
     else:
         y0, y1, k = c['x'][0], c['x'][1] + 1, c['y']
-        A = cv2.blur(L, (wb.DIKIS_DUZLE, 1))[k - d - 2:k + d + 3, y0:y1].T
-        mk = maske[k - 1:k + 2, y0:y1].any(0) if maske is not None else np.zeros(y1 - y0, bool)
+        B = np.pad(cv2.blur(L, (wb.DIKIS_DUZLE, 1)), ((q, q), (0, 0)), mode='edge')
+        A = B[k + q - d - 2:k + q + d + 3, y0:y1].T
+        mk = np.pad(maske, ((1, 1), (0, 0)))[k:k + 3, y0:y1].any(0)
     j = d + 2
     en = np.zeros(A.shape[0], bool)
     for o in (-1, 0, 1):
@@ -106,19 +109,24 @@ def gorunur_oran(X, c, maske):
 GORUNUR = 0.6       # wp_bakir.dikis: gercek isabet >= %60 (orada boy'a gore; burada kosunun kendisine gore)
 
 
-def hat_bul(X, O, P, Z, mask_x=None):
-    """X'te olup orijinal O'da olmayan ince uzun duz cizgiler (kilitli wp_bakir.dikis, oge bantlari +-150 px,
-    tasarim alani). mask_x: X icin murekkep maskesi (None: hat_maskesi(P, X))."""
+def hat_bul(X, O, P, Z, mask_x=None, eski=False):
+    """X'te olup orijinal O'da olmayan ince uzun duz cizgiler (kilitli wp_bakir.dikis, oge bantlari +-150 px).
+    eski=False (yeni kural, Serdar onayi bekliyor): tasarim alani + kosunun >= %60'i gercek isabet.
+    eski=True (onceki kural): filtre yok, dikis'in buldugu ve orijinalde olmayan her cizgi.
+    mask_x: X icin murekkep maskesi (None: hat_maskesi(P, X)). Donus: (tum cizgiler, kusur sayilanlar)."""
     W = X.shape[1]
     sm = satirlar(Z, X.shape[0])
     c_o = wb.dikis(O, sm, murekkep=hat_maskesi(P, O))
     mx = hat_maskesi(P, X) if mask_x is None else mask_x
     c_x = []
     for c in wb.dikis(X, sm, murekkep=mx):
-        if tasarim_alani(c, W):
-            c['gorunur_oran'] = round(gorunur_oran(X, c, mx), 3)
-            c_x.append(c)
-    return c_x, [c for c in c_x if not wb.ayni_cizgi(c, c_o) and c['gorunur_oran'] >= GORUNUR]
+        c['gorunur_oran'] = round(gorunur_oran(X, c, mx), 3)
+        c['tasarim_alani'] = tasarim_alani(c, W)
+        c_x.append(c)
+    yeni = [c for c in c_x if not wb.ayni_cizgi(c, c_o)]
+    if not eski:
+        yeni = [c for c in yeni if c['tasarim_alani'] and c['gorunur_oran'] >= GORUNUR]
+    return c_x, yeni
 
 
 def normal(s):
@@ -150,7 +158,11 @@ def olc(ad, S, P, O, Z, isim1, isim2, mesaj):
     # b) ust/alt hat: kilitli dedektor, orijinalde olmayan cizgiler
     _, ink_o = murekkep(O, P)
     c_s, yeni = hat_bul(S, O, P, Z)
-    R['b_hat'] = {'cizgi': c_s[:10], 'orijinalde_olmayan': yeni[:10], 'gecti': len(yeni) == 0}
+    _, yeni_e = hat_bul(S, O, P, Z, eski=True)
+    R['b_hat'] = {'kural': 'yeni (tasarim alani + gorunur >= %60)', 'cizgi': c_s[:20],
+                  'orijinalde_olmayan': yeni[:10], 'gecti': len(yeni) == 0}
+    R['b_hat_eski'] = {'kural': 'eski (filtre yok)', 'orijinalde_olmayan': yeni_e[:20], 'sayi': len(yeni_e),
+                       'gecti': len(yeni_e) == 0}
     # c) kagit dokusu
     yazi = cv2.dilate((ink | ink_o).astype(np.uint8), np.ones((15, 15), np.uint8)).astype(bool)
     de = wk.dE(S, O)[~yazi]
@@ -179,11 +191,13 @@ def olc(ad, S, P, O, Z, isim1, isim2, mesaj):
             continue
         Lk = float(np.median(v)); dolu = mm & (m >= 0.9 * Lk)
         rgb = S[dolu].mean(0)
-        renk[k] = {'rgb': [round(float(x), 1) for x in rgb],
-                   'dE_orijinal': round(float(wk.dE(rgb[None, None], np.asarray(Z['renk']['ogeler'][k]['rgb'],
-                                                                             np.float32)[None, None])[0, 0]), 2)}
+        de = lambda ref: round(float(wk.dE(rgb[None, None], np.asarray(ref, np.float32)[None, None])[0, 0]), 2)
+        renk[k] = {'rgb': [round(float(x), 1) for x in rgb], 'dE_orijinal': de(Z['renk']['ogeler'][k]['rgb'])}
+        if 'bakir' in Z:
+            renk[k]['dE_test5'] = de(Z['bakir']['ogeler'][k]['rgb'])
     R['bilgi_renk'] = renk
     R['gecti'] = all(R[k]['gecti'] for k in ('a_tagline', 'b_hat', 'c_kagit', 'd_isim'))
+    R['gecti_eski_kural'] = all(R[k]['gecti'] for k in ('a_tagline', 'b_hat_eski', 'c_kagit', 'd_isim'))
     return R
 
 
@@ -218,17 +232,28 @@ def main():
             return f"{ok(x['gecti'])} ({x['isim_alti_metin_bandi']} bant, OCR '{x['ocr']}')"
         if k == 'b_hat':
             return f"{ok(x['gecti'])} ({len(x['orijinalde_olmayan'])} cizgi)"
+        if k == 'b_hat_eski':
+            return f"{ok(x['gecti'])} ({x['sayi']} cizgi)"
         if k == 'c_kagit':
             return f"{ok(x['gecti'])} (dE ort {x['dE_ort']}, p95 {x['dE_p95']})"
         return f"{ok(x['gecti'])} ({x.get('sol')} / {x.get('sag')})"
-    for k, ad in (('a_tagline', 'a) tagline tek kopya'), ('b_hat', 'b) ust/alt hat yok'),
+    for k, ad in (('a_tagline', 'a) tagline tek kopya'), ('b_hat', 'b) ust/alt hat yok - YENI kural (onay bekliyor)'),
+                  ('b_hat_eski', 'b) ust/alt hat yok - ESKI kural'),
                   ('c_kagit', 'c) kagit dokusu (dE <= 0.5)'), ('d_isim', 'd) isim harf harf (OCR)')):
         sat.append(f"| {ad} | {h(R['orijinal'], k)} | {h(R['test5'], k)} | {h(R['motor'], k)} |")
-    sat.append(f"| SONUC | {ok(R['orijinal']['gecti'])} | {ok(R['test5']['gecti'])} | {ok(R['motor']['gecti'])} |")
+    sat.append(f"| SONUC (yeni kural) | {ok(R['orijinal']['gecti'])} | {ok(R['test5']['gecti'])} | {ok(R['motor']['gecti'])} |")
+    sat.append(f"| SONUC (eski kural) | {ok(R['orijinal']['gecti_eski_kural'])} | {ok(R['test5']['gecti_eski_kural'])} | "
+               f"{ok(R['motor']['gecti_eski_kural'])} |")
     sat.append('')
-    sat.append('Renk (dolu murekkep, dE orijinale): ' + ', '.join(
+    if 'bakir' in Z:
+        sat.append('Bakir renk farki, motor vs Test 5 bakiri (dolu murekkep dE): ' + ', '.join(
+            f"{k} {v['dE_test5']}" for k, v in R['motor']['bilgi_renk'].items()))
+    sat.append('Renk farki orijinale (dE): ' + ', '.join(
         f"{k} {v['dE_orijinal']}" for k, v in R['motor']['bilgi_renk'].items()) + ' (motor); ' + ', '.join(
         f"{k} {v['dE_orijinal']}" for k, v in R['test5']['bilgi_renk'].items()) + ' (Test 5)')
+    sat.append('Eski kural cizgileri (motor): ' + (', '.join(
+        f"{c['yon']} {c.get('x')} {c.get('y')} gorunur {c['gorunur_oran']}{'' if c['tasarim_alani'] else ' kenar'}"
+        for c in R['motor']['b_hat_eski']['orijinalde_olmayan']) or 'yok'))
     Path(a.cikti).with_suffix('.md').write_text('\n'.join(sat) + '\n')
     print('\n'.join(sat))
     sys.exit(0 if R['motor']['gecti'] and R['orijinal']['gecti'] and not R['test5']['gecti'] else 1)

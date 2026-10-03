@@ -19,6 +19,7 @@ def main():
     ap.add_argument('--eski', required=True)
     ap.add_argument('--motor', required=True)
     ap.add_argument('--cikti', required=True)
+    ap.add_argument('--jpg', help='ayrica JPG (tam sayfa, < 10 MB: kalite 92..60, gerekirse olcek kuculur)')
     a = ap.parse_args()
     sayfa = [('ORIJINAL SATIS POSTERI (SCORPIO_VIRGO WARM_PARCHMENT 11x14)', a.orijinal),
              ('TEST 5 ESKI SISTEM (siparis-dijital, 9000000005 sayfa 4)', a.eski),
@@ -37,6 +38,17 @@ def main():
         d.text((x + 20, 40), ad, font=f, fill=(40, 30, 20))
     c.save(a.cikti, dpi=(300, 300))
     print(a.cikti, c.size)
+    if a.jpg:
+        sinir = 10 * 1024 * 1024
+        olcek = 1.0
+        while True:
+            im = c if olcek == 1.0 else c.resize((int(c.width * olcek), int(c.height * olcek)), Image.LANCZOS)
+            for q in (92, 88, 85, 80, 75, 70, 65, 60):
+                im.save(a.jpg, 'JPEG', quality=q, subsampling=0 if q >= 85 else 2, dpi=(300 * olcek,) * 2)
+                if Path(a.jpg).stat().st_size < sinir:
+                    print(a.jpg, im.size, 'kalite', q, 'olcek', olcek, Path(a.jpg).stat().st_size)
+                    return
+            olcek *= 0.8
 
 
 if __name__ == '__main__':
