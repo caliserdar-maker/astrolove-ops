@@ -15,7 +15,39 @@ permissions:
   actions: read
 
 jobs:
+  hazirla:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Onceki 78 ciktisini tasi (silme yok; 78 klasoru yalniz bu kosunun ciktisini tasir)
+        run: |
+          set -euo pipefail
+          D="gdrive:ASTROLOVE/TEMP/MOTOR/SOSYAL"
+          if rclone lsf "$D/78" --max-depth 1 | grep -q .; then
+            rclone move "$D/78" "$D/78_ONCEKI_$(rclone cat "$D/78/KOSU.txt" 2>/dev/null | sed -n 's/^kosu: //p' | head -1 || echo bilinmiyor)" --delete-empty-src-dirs
+          fi
+          rclone lsf "$D" --max-depth 1
+      - if: always()
+        run: rm -rf ~/.config/rclone
+
   parca:
+    needs: hazirla
     runs-on: ubuntu-latest
     timeout-minutes: 90
     strategy:

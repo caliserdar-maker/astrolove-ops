@@ -39,6 +39,12 @@ Kalite
   en buyugu x 1.15, en az 3.6 (motor/sabitler/E_ESIK.json). Plate halkasi (altin edisyon) b'de notr (onayli kural) (3 Eki).
 - Temiz zemin bir kez: plate_temizle (tam boy) + gerekirse zemin_ek_onar (QC olceginde gorulen kosu); sha sabitlerde,
   buyuk dosyalar inceleme/motor-varlik dalinda (3 Eki).
+- 78 cift (3 Eki, ADIM 3): plate halkasi ana sembol / bant olcumunden dislanir (orijinal halka plate'tekiyle birebir
+  cakismayabilir); sembol oturtma NCC >= 0.80, altindaysa cift FAIL (uretilmez). QC f) sembol rengi dE <= esik
+  (a-e sembol yerlesimini olcmuyordu: ilk kosuda 10 ciftte bozuk ana sembol a-e'den gecti). Yazi profili yalniz
+  dikey govdeden; isim OCR psm 7/8; e profili bitisik satir parcalarinda; MB e esigi 78 orijinalden (6.12).
+- Katman cizimi orijinalden farkli ciftler (AQUARIUS_LEO, AQUARIUS_TAURUS) ve ana sembol + kucuk sembol ayni bantta
+  (LIBRA_LIBRA): motorla sadik uretilemez, FAIL listesinde; kaynak katman / yerlesim karari Serdar'da.
 - GOZ SON KARAR: Serdar'a her renk x boy TAM SAYFA gider, kesit secilip elenmez. Gorsel suphede once Serdar.
 Teslim
 - Teslim ve musteri mesaji yalniz Serdar onayiyla.

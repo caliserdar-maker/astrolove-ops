@@ -59,8 +59,8 @@ def cift_isle(K, r, C):
     m, o = q.get('motor', {}), q.get('orijinal', {})
     sonuc.update({
         'gecti': rc == 0, 'qc_rc': rc,
-        'motor': {k: m.get(k, {}).get('gecti') for k in ('a_tagline', 'b_hat', 'c_kagit', 'd_isim', 'e_bant')},
-        'orijinal': {k: o.get(k, {}).get('gecti') for k in ('a_tagline', 'b_hat', 'c_kagit', 'd_isim', 'e_bant')},
+        'motor': {k: m.get(k, {}).get('gecti') for k in ('a_tagline', 'b_hat', 'c_kagit', 'd_isim', 'e_bant', 'f_sembol')},
+        'orijinal': {k: o.get(k, {}).get('gecti') for k in ('a_tagline', 'b_hat', 'c_kagit', 'd_isim', 'e_bant', 'f_sembol')},
         'a_ocr': m.get('a_tagline', {}).get('ocr'), 'b_cizgi': len(m.get('b_hat', {}).get('orijinalde_olmayan', [])),
         'c_dE': m.get('c_kagit', {}).get('dE_ort'), 'd': [m.get('d_isim', {}).get('sol'), m.get('d_isim', {}).get('sag')],
         'e': m.get('e_bant', {}).get('en_buyuk'), 'e_orijinal': o.get('e_bant', {}).get('en_buyuk'),
@@ -150,14 +150,14 @@ def rapor(sonuc, C, sure):
           f"Toplam sure: {(sure if sure is not None else time.time() - T0) / 60:.1f} dk. PASS {len(gec)} / {len(sonuc)}. Kapilar 3307 px QC olceginde; "
           f"e esigi MIDNIGHT_BLUE {json.loads((KOK / 'sabitler' / 'E_ESIK.json').read_text())['MIDNIGHT_BLUE']['esik']}.",
           '', 'FAIL (uretilmedi): ' + (', '.join(f"{s['cift']} ({s.get('hata') or ', '.join(k for k, v in s.get('motor', {}).items() if not v) or 'orijinal oz testi: ' + ', '.join(k for k, v in s.get('orijinal', {}).items() if not v)})" for s in sonuc if not s['gecti']) or 'yok'),
-          '', '| no | cift | sol / sag | tagline | a | b | c dE | d OCR | e (motor / orijinal) | renk dE orijinale | SONUC | sure |',
-          '|---|---|---|---|---|---|---|---|---|---|---|---|']
+          '', '| no | cift | sol / sag | tagline | a | b | c dE | d OCR | e (motor / orijinal) | f sembol | renk dE orijinale | SONUC | sure |',
+          '|---|---|---|---|---|---|---|---|---|---|---|---|---|']
     for i, s in enumerate(sonuc):
         m = s.get('motor', {})
         md.append(f"| {i + 1} | {s['cift']} | {s['sol'][1]} / {s['sag'][1]} | {s['tagline']} | {ok(m.get('a_tagline'))} | "
                   f"{ok(m.get('b_hat'))} ({s.get('b_cizgi')}) | {ok(m.get('c_kagit'))} ({s.get('c_dE')}) | "
                   f"{ok(m.get('d_isim'))} ({' / '.join(map(str, s.get('d', [])))}) | "
-                  f"{ok(m.get('e_bant'))} ({s.get('e')} / {s.get('e_orijinal')}) | "
+                  f"{ok(m.get('e_bant'))} ({s.get('e')} / {s.get('e_orijinal')}) | {ok(m.get('f_sembol'))} | "
                   + ', '.join(f'{k} {v}' for k, v in s.get('renk_dE', {}).items()) +
                   f" | {ok(s['gecti'])}{' ' + s['hata'] if s.get('hata') else ''} | {s['sure_sn']} s |")
     md += ['', f"Temas: TEMAS_78.jpg ({tm['px'][0]}x{tm['px'][1]}, {tm['bayt'] / 1e6:.1f} MB)"]

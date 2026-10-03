@@ -55,6 +55,24 @@ def murekkep(S, P):
     return m, tut[lab]
 
 
+def halka_maskesi(P):
+    """Plate'teki halka (tasarim cemberi): yerel kagittan (medyan pencere 31 px @ 3307, buyuk boyda 62 x oran)
+    |fark| > 10 luma, genisligi sayfanin >= %35'i olan bilesenler; W x 0.006 px genisletilir. 3 Eki (78 cift): 10
+    ciftin orijinalinde halka plate'tekiyle birebir cakismiyor, fark ana sembol kutusuna giriyordu (NCC 0.07)."""
+    L = P @ wk.LUMA
+    W = L.shape[1]
+    kw = 31 if W == 3307 else int(round(62 * W / 3307)) | 1
+    z = cv2.medianBlur(np.clip(L, 0, 255).astype(np.uint8), kw).astype(np.float32)
+    n, lab, st, _ = cv2.connectedComponentsWithStats((np.abs(z - L) > 10).astype(np.uint8), 8)
+    tut = np.zeros(n, bool)
+    tut[1:] = (st[1:, cv2.CC_STAT_WIDTH] > 0.35 * W) & (st[1:, cv2.CC_STAT_AREA] > 500 * (W / 3307) ** 2)
+    r = max(1, int(round(0.006 * W)))
+    return cv2.dilate(tut[lab].astype(np.uint8), np.ones((2 * r + 1, 2 * r + 1), np.uint8)).astype(bool)
+
+
+NCC_MIN = 0.80      # ana sembol oturtma alt siniri (olculen: dogru oturan 0.88-0.98, bozuk 0.07)
+
+
 def bantlar(ink, bosluk=40):
     on = ink.sum(1) > 0
     b, y, H = [], 0, len(on)
@@ -227,9 +245,13 @@ def main():
     H, W = S.shape[:2]
     q = W / 3307                                                       # kume bosluklari 11x14'te olculdu
     m, ink = murekkep(S, P)
-    b0 = bantlar(ink)
-    toplam = ink.sum()
-    b = [x for x in b0 if ink[x[0]:x[1]].sum() >= 0.01 * toplam]      # gurultu bantlari (kagit lekesi) < %1
+    # plate halkasi disi murekkep: bantlar ve sembol yerlesimi bununla (orijinal halka plate'tekiyle birebir
+    # cakismayan ciftlerde fark bantlari birlestiriyordu; LIBRA_LIBRA). Halka farki yoksa ink ile ayni.
+    hm = halka_maskesi(P)
+    ink_b = ink & ~hm
+    b0 = bantlar(ink_b)
+    toplam = ink_b.sum()
+    b = [x for x in b0 if ink_b[x[0]:x[1]].sum() >= 0.01 * toplam]    # gurultu bantlari (kagit lekesi) < %1
     if len(b) > 4:
         # ana sembol birden cok banda bolunebilir (3 Eki, ARIES_LIBRA: terazi alt cubugu > 40 px bosluk): yerlesim
         # sabit, son uc bant kucuk sembol / isim / mesaj; ustteki bantlar tek buyuk sembol bandi
@@ -237,24 +259,29 @@ def main():
     if len(b) != 4:
         sys.exit(f'FAIL: 4 bant bekleniyordu (buyuk sembol, kucuk sembol, isim, mesaj), bulunan {b}')
     bb, kb, ib, mb = b
-    R = {'bant_eleme': {'tum': b0, 'piksel': [int(ink[x[0]:x[1]].sum()) for x in b0]},
+    R = {'bant_eleme': {'tum': b0, 'piksel': [int(ink_b[x[0]:x[1]].sum()) for x in b0]},
          'cift': a.cift, 'renk': a.renk, 'boy': a.boy, 'tuval': [W, H], 'plate': a.plate,
          'kaynak': {'orijinal': 'POD_PRINT/%s/%s/%s.jpg' % (a.cift, a.renk, a.boy)},
          'bantlar': {'buyuk_sembol': bb, 'kucuk_sembol': kb, 'isim': ib, 'mesaj': mb}}
-    # buyuk sembol
+    # buyuk sembol (plate halkasi disinda: orijinalin halkasi plate'tekiyle birebir cakismayabilir)
     al, ak = alfa_katman(K / f'main_{sol}_{sag}_gold.png')
-    hk = kutu(ink[bb[0]:bb[1]]); hk = [hk[0], hk[1] + bb[0], hk[2], hk[3] + bb[0]]
-    R['buyuk_sembol'] = {'katman': f'main_symbols/{sol}_{sag}_gold.png', 'kutu': hk, **oturt(m, ink, hk, al, ak)}
+    hk = kutu(ink_b[bb[0]:bb[1]]); hk = [hk[0], hk[1] + bb[0], hk[2], hk[3] + bb[0]]
+    R['buyuk_sembol'] = {'katman': f'main_symbols/{sol}_{sag}_gold.png', 'kutu': hk,
+                         **oturt(np.where(hm, 0, m), ink_b, hk, al, ak)}
+    if R['buyuk_sembol']['ncc'] < NCC_MIN:
+        sys.exit(f"FAIL: ana sembol oturtma NCC {R['buyuk_sembol']['ncc']} < {NCC_MIN}")
     # kucuk semboller
-    kk = kumeler(ink[kb[0]:kb[1]], 200 * q)
+    kk = kumeler(ink_b[kb[0]:kb[1]], 200 * q)
     if len(kk) != 2:
         sys.exit(f'FAIL: kucuk sembol kume sayisi {len(kk)}')
     for taraf, burc, (x0, x1) in (('sol', sol, kk[0]), ('sag', sag, kk[1])):
-        yy = np.nonzero(ink[kb[0]:kb[1], x0:x1].any(1))[0]
+        yy = np.nonzero(ink_b[kb[0]:kb[1], x0:x1].any(1))[0]
         hk = [int(x0), int(kb[0] + yy.min()), int(x1), int(kb[0] + yy.max() + 1)]
         al, ak = alfa_katman(K / f'sym_{burc}_gold.png')
         R[f'kucuk_sembol_{taraf}'] = {'katman': f'zodiac_symbols_gold/{burc}_symbol_gold.png', 'kutu': hk,
-                                     **oturt(m, ink, hk, al, ak)}
+                                     **oturt(np.where(hm, 0, m), ink_b, hk, al, ak)}
+        if R[f'kucuk_sembol_{taraf}']['ncc'] < NCC_MIN:
+            sys.exit(f"FAIL: kucuk sembol ({taraf}) oturtma NCC {R[f'kucuk_sembol_{taraf}']['ncc']} < {NCC_MIN}")
     # isim satiri: sol isim / sonsuz / sag isim (kelime ici harf boslugu < 80 px)
     ik = kumeler(ink[ib[0]:ib[1]], 80 * q)
     if len(ik) != 3:

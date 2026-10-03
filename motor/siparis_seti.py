@@ -54,7 +54,7 @@ def hucre(K, cift, renk, ki, boy, a, C):
     q = json.loads((O / 'QC.json').read_text()) if (O / 'QC.json').exists() else {}
     m = q.get('motor', {})
     return {'renk': renk, 'boy': boy, 'gecti': r2.returncode == 0, 'qc_rc': r2.returncode,
-            'motor': {k: m.get(k, {}).get('gecti') for k in ('a_tagline', 'b_hat', 'c_kagit', 'd_isim', 'e_bant')},
+            'motor': {k: m.get(k, {}).get('gecti') for k in ('a_tagline', 'b_hat', 'c_kagit', 'd_isim', 'e_bant', 'f_sembol')},
             'e': m.get('e_bant', {}).get('en_buyuk'), 'e_orijinal': q.get('orijinal', {}).get('e_bant', {}).get('en_buyuk'),
             'e_test5': (q.get('test5') or {}).get('e_bant', {}).get('en_buyuk'),
             'c_dE': m.get('c_kagit', {}).get('dE_ort'), 'd': [m.get('d_isim', {}).get('sol'), m.get('d_isim', {}).get('sag')],

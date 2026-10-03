@@ -175,6 +175,7 @@ def hat_bul(X, O, P, Z, mask_x=None, eski=False):
     return c_x, yeni
 
 
+F_ESIK = 4.0       # f) sembol rengi dE: dogru oturan en buyuk 3.5 (78 cift, CAPRICORN_LIBRA) x 1.15; bozuk 94-102
 E_CEKIRDEK = 10     # harf ici: ustunde ve altinda >= 10 px murekkep (kabartma kenarin ~5 px icinde kalir)
 E_SIGMA = 2.0       # satir profili yumusatma (satir); basamak/ince serit kalir, yumusak gradyan kalmaz
 E_ESIK = 3.6        # luma; onayli referanslarin (orijinal + Test 5) olculen en buyugu 3.1 x 1.15 (3 Eki)
@@ -320,8 +321,16 @@ def olc(ad, S, P, O, Z, isim1, isim2, mesaj, e_esik=None):
             rgb[None, None], np.asarray(Z['bakir']['ogeler']['daire']['rgb'], np.float32)[None, None])[0, 0]), 2)}
     R['bilgi_renk'] = renk
     R['e_bant'] = renk_bandi(S @ wk.LUMA, ink, Z, e_esik)
-    R['gecti'] = all(R[k]['gecti'] for k in ('a_tagline', 'b_hat', 'c_kagit', 'd_isim', 'e_bant'))
-    R['gecti_eski_kural'] = all(R[k]['gecti'] for k in ('a_tagline', 'b_hat_eski', 'c_kagit', 'd_isim', 'e_bant'))
+    # f) sembol sadakati (altin edisyon; 3 Eki 78 cift: 10 ciftte ana sembol yanlis oturmus, dE 94-102, a-e gecmisti):
+    # buyuk / kucuk sembol dolu murekkep rengi orijinalden dE <= F_ESIK. WP bakir tasarim geregi farkli (Test 5 kiyasi).
+    if Z.get('mod') == 'altin':
+        fd = {k: renk.get(k, {}).get('dE_orijinal') for k in ('buyuk_sembol', 'kucuk_sembol')}
+        R['f_sembol'] = {'dE': fd, 'esik': F_ESIK, 'gecti': all(v is not None and v <= F_ESIK for v in fd.values())}
+    else:
+        R['f_sembol'] = {'uygulanmaz': 'bakir (WP)', 'gecti': True}
+    K5 = ('a_tagline', 'b_hat', 'c_kagit', 'd_isim', 'e_bant', 'f_sembol')
+    R['gecti'] = all(R[k]['gecti'] for k in K5)
+    R['gecti_eski_kural'] = all(R[k]['gecti'] for k in ('a_tagline', 'b_hat_eski', 'c_kagit', 'd_isim', 'e_bant', 'f_sembol'))
     return R
 
 
@@ -378,6 +387,8 @@ def main():
         if k == 'e_bant':
             return f"{ok(x['gecti'])} (en buyuk {x['en_buyuk']}, esik {x['esik']}; " + ', '.join(
                 f"{w['grup']} {w['sapma']}" for w in x['kelimeler']) + ')'
+        if k == 'f_sembol':
+            return f"{ok(x['gecti'])} ({x.get('dE', x.get('uygulanmaz'))})"
         if k == 'b_hat_eski':
             return f"{ok(x['gecti'])} ({x['sayi']} cizgi)"
         if k == 'c_kagit':
@@ -386,7 +397,7 @@ def main():
     for k, ad in (('a_tagline', 'a) tagline tek kopya'), ('b_hat', 'b) ust/alt hat yok - YENI kural (onayli 3 Eki)'),
                   ('b_hat_eski', 'b) ust/alt hat yok - ESKI kural'),
                   ('c_kagit', 'c) kagit dokusu (dE <= 0.5)'), ('d_isim', 'd) isim harf harf (OCR)'),
-                  ('e_bant', 'e) harf ici yatay renk bandi yok')):
+                  ('e_bant', 'e) harf ici yatay renk bandi yok'), ('f_sembol', 'f) sembol rengi orijinale (altin)')):
         sat.append(f"| {ad} | {h(R['orijinal'], k)} | {h(R['test5'], k)} | {h(R['motor'], k)} |")
     t = R['test5'] or {'gecti': None, 'gecti_eski_kural': None}
     ok2 = lambda v: '-' if v is None else ok(v)
