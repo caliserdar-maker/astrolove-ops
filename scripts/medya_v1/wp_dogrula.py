@@ -58,13 +58,20 @@ def calis(a):
     import wp_katman as wk
     asil_kaydet = wo.kaydet_jpg
     wo.kaydet_jpg = lambda arr, yol, q=95: asil_kaydet(arr, yol, 95)
-    zula = {}
-    asil_im = wb.ikinci_metin
+    zula, rapor = {}, {}
+    asil_im = getattr(wb, 'ikinci_metin', None)        # eski WP_REF'te yok (karsilastirma kosusu)
+    if asil_im is not None:
+        def im_sar(out, P_kagit, D_beklenen, k):       # siparis yolundaki cagriyi aynen yapar, girdileri saklar
+            zula.update(out=out, P_kagit=P_kagit, D=D_beklenen, k=k)
+            return asil_im(out, P_kagit, D_beklenen, k)
+        wb.ikinci_metin = im_sar
+    asil_cb = wo.cift_boy
 
-    def im_sar(out, P_kagit, B_ci, P_ci, k):           # siparis yolundaki cagriyi aynen yapar, girdileri saklar
-        zula.update(out=out, P_kagit=P_kagit, B_ci=B_ci, P_ci=P_ci, k=k)
-        return asil_im(out, P_kagit, B_ci, P_ci, k)
-    wb.ikinci_metin = im_sar
+    def cb_sar(*q, **kw):                                # R (qc ayrintisi) saklanir; uretim aynen
+        R, WP = asil_cb(*q, **kw)
+        rapor['R'] = R
+        return R, WP
+    wo.cift_boy = cb_sar
     no, ciftler = sd.sayfa_no_tablosu()
     if a.hucreler:
         hucreler = [tuple(h.split(':')) for h in a.hucreler.split(',')]
@@ -82,7 +89,7 @@ def calis(a):
         with Image.open(sd.pod_kaynak(x['cift'], 'WARM_PARCHMENT', boy)) as im:
             x['hedef_px'] = list(im.size)
         ara = cikti / 'ara' / f'{cift}_{boy}'; ara.mkdir(parents=True, exist_ok=True)
-        zula.clear()
+        zula.clear(); rapor.clear()
         hata = None
         try:
             r = su.wp_bakir_uret_v1(sd, x, P_blue, P_ed, ara)
@@ -94,9 +101,14 @@ def calis(a):
              'e_kagit': (r.get('kapi_sayilari') or {}).get('e_kagit'), 'sure_sn': round(time.time() - t0, 1)}
         if hata:
             h['hata'] = hata
+        q = (rapor.get('R') or {}).get('qc') or {}
+        h['qc_kalan'] = {g: {kk: vv for kk, vv in v.items() if not isinstance(vv, (list, dict)) or kk in ('hedefe_dE', 'oge_ort_rgb', 'yeni', 'onayli')}
+                         for g, v in q.items() if isinstance(v, dict) and v.get('gecti') is False and g != 'd_dikis'}
+        h['hizalama_yedek'] = [{'bant': s_.get('bant'), **(s_.get('yedek') or {})}
+                               for s_ in (rapor.get('R') or {}).get('hizalama') or [] if 'yedek' in s_]
         jpg = ara / f'BASKI_{boy}.jpg'
         if zula:
-            im = asil_im(zula['out'], zula['P_kagit'], zula['B_ci'], zula['P_ci'], zula['k'])
+            im = asil_im(zula['out'], zula['P_kagit'], zula['D'], zula['k'])
             h['ikinci_metin'] = im
             if boy in teslim:
                 h['teslim'] = {ad: teslim_olc(y, pl, zula, asil_im, cift, boy, ad, cikti, jpg) for ad, y, pl in teslim[boy]}
@@ -134,7 +146,7 @@ def teslim_olc(yol, plate, z, im_f, cift, boy, ad, cikti, jpg):
         Pk = np.asarray(im if im.size == (W, H) else im.resize((W, H), Image.LANCZOS)).astype(np.float32)
     else:
         Pk = z['P_kagit']
-    r = im_f(T, Pk, z['B_ci'], z['P_ci'], z['k'])
+    r = im_f(T, Pk, z['D'], z['k'])
     Y = np.asarray(Image.open(jpg).convert('RGB')) if jpg.exists() else np.clip(z['out'], 0, 255).astype(np.uint8)
     if 'kutu' in r and r['en_buyuk'] >= r['esik_alan']:
         x0, y0, x1, y1 = r['kutu']

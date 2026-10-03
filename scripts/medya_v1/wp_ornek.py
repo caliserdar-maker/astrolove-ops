@@ -504,7 +504,7 @@ def cift_boy(cift, boy, P_ed, P_blue, no, cik, isim=ISIM, mesaj=MESAJ, siparis=F
     R['bakir'] = {a: rb[a] for a in ('bakir', 'hedef', 'hedef_gecmis', 'kabartma_onayli', 'plate_dikis',
                                      'onarimsiz_d') if a in rb}
     # Serdar 3 Eki (Test 5, ders 49): ikinci metin / tagline izi kapisi; siparis yolunda c_iz kapisinin parcasi
-    im = wb.ikinci_metin(WP_cu, P_k, B_cu, P_ck, k)
+    im = wb.ikinci_metin(WP_cu, P_k, D_cu, k)
     rb['qc']['h_ikinci_metin'] = im
     rb['qc']['c_iz'] = {**rb['qc']['c_iz'], 'ikinci_metin': im, 'gecti': bool(rb['qc']['c_iz']['gecti'] and im['gecti'])}
     rb['qc']['gecti'] = all(v['gecti'] for v in rb['qc'].values() if isinstance(v, dict) and 'gecti' in v)
