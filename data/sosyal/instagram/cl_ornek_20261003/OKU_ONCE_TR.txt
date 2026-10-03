@@ -1,0 +1,71 @@
+ASTROLOVEART | CANCER & LIBRA | IG/FB ÖRNEK SETİ
+3 Ekim 2026 | Serdar incelemesi için tek çift örneği
+
+TESLİM
+- Carousel: 3 ayrı PNG, tam 1080x1350 px.
+- Reel: 3 ayrı ana kare PNG, tam 1080x1920 px; 9 saniyelik storyboard.
+- PNG dosyalarında yalnız duvar, ışık, gölge ve tek boş çerçeve var.
+- İç alan düz #C0C0C0. Poster, sembol, isim, logo veya herhangi bir yazı eklenmedi.
+- C01 ve C03 aynı boş sahnedir. C02, C01 sahnesinin %33,33 yakın planıdır.
+- Toplu üretim yapılmadı. Örnek set Serdar onayını bekliyor.
+
+KOORDİNAT VE FONT KURALI
+- Başlangıç noktası sol üst; x sağa, y aşağı. Bütün ölçüler final PNG üzerindedir.
+- Kutu: (x, y, genişlik, yükseklik). Sağ ve alt koordinatlar dış sınırdır, dahil değildir.
+- Teslim edilen bütün köşeler tam piksel sınırıdır. Reel ana kareleri %100, %105 ve %110 ölçeklerindedir.
+- Kenardaki 1 px yumuşatma çerçeve geçişidir. İç bölge tam tek renk olarak kontrol edildi.
+- Tüm metinler yatay ve dikey ortalı, #342F29, tek satır, harf aralığı 0 px.
+- Cormorant Garamond SemiBold 600; Manrope Medium 500. Google Fonts, ücretsiz açık kaynak.
+- Kodda px esas alınır. 96 DPI referansında punto = px x 0,75.
+- Font önerileri yalnız sahne dış yazıları içindir. Gerçek posterin kendi yazıları korunur.
+
+ÇERÇEVE İÇ KÖŞELERİ (sol üst; sağ üst; sağ alt; sol alt)
+C01: (204, 310); (876, 310); (876, 1150); (204, 1150) | C01_Bos_Sahne_1080x1350.png
+C02: (92, 165); (988, 165); (988, 1285); (92, 1285) | C02_Yakin_Plan_1080x1350.png
+C03: (204, 310); (876, 310); (876, 1150); (204, 1150) | C03_Bos_Sahne_1080x1350.png
+R01: (220, 520); (860, 520); (860, 1320); (220, 1320) | R01_00p00_Bos_Sahne_1080x1920.png
+R02: (204, 500); (876, 500); (876, 1340); (204, 1340) | R02_03p30_Bos_Sahne_1080x1920.png
+R03: (188, 480); (892, 480); (892, 1360); (188, 1360) | R03_06p60_Bos_Sahne_1080x1920.png
+
+SONRADAN EKLENECEK METİNLER
+C01 | Cancer & Libra | kutu (72, 100, 936, 76) | Cormorant Garamond 600 | 64 px / 48 pt
+C01 | The Shape of Your Connection | kutu (72, 184, 936, 60) | Cormorant Garamond 600 | 52 px / 39 pt
+C02 | Cancer & Libra, made personal. | kutu (72, 62, 936, 54) | Manrope 500 | 36 px / 27 pt
+C03 | Your names. Your line. | kutu (72, 149, 936, 76) | Cormorant Garamond 600 | 64 px / 48 pt
+C03 | AstroLoveArt on Etsy | kutu (72, 1210, 936, 52) | Manrope 500 | 36 px / 27 pt
+R01 | Cancer & Libra | kutu (84, 320, 852, 76) | Cormorant Garamond 600 | 64 px / 48 pt
+R02 | Your names. Your line. | kutu (84, 320, 852, 76) | Cormorant Garamond 600 | 56 px / 42 pt
+R03 | The Shape of Your Connection | kutu (84, 282, 852, 68) | Cormorant Garamond 600 | 54 px / 40.5 pt
+R03 | AstroLoveArt | kutu (84, 366, 852, 50) | Manrope 500 | 36 px / 27 pt
+
+REEL STORYBOARD | 9,00 sn | 30 fps | 270 kare
+- Poster, son kompozitin ilk karesinde tam görünür. PNGlerde gri yer tutucu bulunur.
+- Tek sürekli çekim: 0,00-6,60 sn boyunca %100den %110a yaklaşma, sonra 9,00a kadar sabit.
+- Kamera merkezi (540,920). Duvar, çerçeve ve poster birlikte hareket eder. Yazılar ekrana sabittir.
+- 0,00-2,60 sn: Cancer & Libra. Giriş 0,00-0,25; çıkış 2,35-2,60.
+- 2,60-2,85 sn: Yazısız kısa aralık, kamera devam eder.
+- 2,85-6,30 sn: Your names. Your line. Giriş 2,85-3,10; çıkış 6,05-6,30.
+- 6,30-6,60 sn: Yazısız kısa aralık, yaklaşma tamamlanır.
+- 6,60-9,00 sn: The Shape of Your Connection + AstroLoveArt. Giriş 6,60-6,90; son kareye kadar sabit.
+- R01 başlangıç, R02 3,30 sn, R03 6,60 sn konumunu gösterir. R03 son karede de kullanılır.
+- Geçişlerde de en fazla iki yazı satırı görünür; dönüş, eğilme, perspektif kayması yok.
+
+KOMPOZİT NOTU
+- Gri alan oranı 4:5. Gerçek Cancer & Libra posterinin 4:5 dosyasını kullanın.
+- Başka orandaki posteri esnetmeyin veya içeriğini kırpmayın.
+- Reel için önce gerçek posteri R01 iç alanına ekleyin, kamera hareketini bütün görüntüye uygulayın, sonra ekran yazılarını ekleyin.
+- R02/R03 storyboard ana kareleridir; hareketli kurgu için tek master R01den ilerleyin.
+
+DOĞRULANMADI
+- Referans Etsy sayfasına erişilemedi. Canlı ilanın çerçevesiyle birebir eşleşme doğrulanmadı.
+- Gerçek poster bu teslimde yerleştirilmedi. Sembol ve isimlerin son mobil okunurluğu doğrulanmadı.
+- Metinler raster olarak üretilmedi; nihai font dosyasıyla satır sığması son kompozitte doğrulanmadı.
+- İkinci carousel karesinin tekrar gösterilmesi iddiası doğrulanmadı; bağımsız anlaşılırlık için tasarım kararı verildi.
+
+KAYNAKLAR
+https://www.etsy.com/listing/4570143815
+https://developers.google.com/fonts
+https://github.com/google/fonts/blob/main/ofl/cormorantgaramond/METADATA.pb
+https://github.com/google/fonts/blob/main/ofl/manrope/METADATA.pb
+https://fonts.google.com/specimen/Cormorant+Garamond
+https://fonts.google.com/specimen/Manrope
