@@ -437,6 +437,34 @@ def ogeler(ce, et, W):
     return {a: m for a, m in o.items() if m.sum() >= 50}
 
 
+# Serdar 3 Eki (Test 5, ders 49): IKINCI METIN KAPISI. WP ciktisindaki her murekkep parcasi siparisin duz renk baskisinda
+# (ayni sayfa olcusu, birim esleme) karsiligi olan yerde olmali. Karsiligi olmayan buyuk bilesen = ikinci metin / tagline
+# izi (Test 5: hizalamada sahte bant, mesajin kaymis kesik kopyasi) -> FAIL. Tolerans hizalama + kabartma payi.
+IKINCI_TOL = 12             # px (2400 genislik olceginde; k ile olceklenir)
+IKINCI_ALAN = 100           # px^2 (2400 olceginde; k^2 ile olceklenir) en buyuk yabanci bilesen siniri
+
+
+def ikinci_metin(out, P_kagit, B_ci, P_ci, k):
+    """out / P_kagit: WP cikti ve kagidi (daire cikarilmis plate); B_ci / P_ci: siparisin duz renk baskisi ve kagidi,
+    WP boyutunda. Yabanci = cikti murekkebi - genisletilmis siparis murekkebi."""
+    m_out = wk.murekkep_maskesi(out - P_kagit, kenar=0)
+    m_ci = wk.murekkep_maskesi(B_ci - P_ci, kenar=0)
+    t = max(1, int(round(IKINCI_TOL * k)))
+    m_ci = cv2.dilate(m_ci.astype(np.uint8), np.ones((2 * t + 1, 2 * t + 1), np.uint8)).astype(bool)
+    y = (m_out & ~m_ci).astype(np.uint8)
+    n, lab, st, _ = cv2.connectedComponentsWithStats(y, 8)
+    alan = st[1:, cv2.CC_STAT_AREA] if n > 1 else np.zeros(0, int)
+    sinir = int(round(IKINCI_ALAN * k * k))
+    r = {'yabanci_px': int(y.sum()), 'bilesen': int((alan >= sinir).sum()), 'en_buyuk': int(alan.max()) if alan.size else 0,
+         'tol_px': t, 'esik_alan': sinir}
+    if alan.size:
+        i = int(alan.argmax()) + 1
+        x0, y0, w, h = (int(v) for v in st[i, :4])
+        r['kutu'] = [x0, y0, x0 + w, y0 + h]
+    r['gecti'] = bool(r['en_buyuk'] < sinir)
+    return r
+
+
 def qc(out, P_wp, S_wp, bilgi, et, daire, hedef, plate_iz=None, ek=None):
     """Tek QC, PASS/FAIL (a-e burada; f kabartma ve g kontrast `ek` ile gelir). P_wp = baskinin kagidi (daire
     cikarilmis plate). Daire artik murekkep (tek bakir modeli); ogelerden ayri tutulur."""
