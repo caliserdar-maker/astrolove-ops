@@ -1,0 +1,14 @@
+AstroLoveArt_Scorpio_Virgo_Champagne_Ivory.pdf
+AstroLoveArt_Scorpio_Virgo_Deep_Black.pdf
+AstroLoveArt_Scorpio_Virgo_Midnight_Blue.pdf
+AstroLoveArt_Scorpio_Virgo_Pure_White.pdf
+AstroLoveArt_Scorpio_Virgo_Warm_Parchment.pdf
+KONTROL/
+OZET.json
+OZET.md
+KONTROL/CHAMPAGNE_IVORY/
+KONTROL/DEEP_BLACK/
+KONTROL/INCELEME_11x14/
+KONTROL/MIDNIGHT_BLUE/
+KONTROL/PURE_WHITE/
+KONTROL/WARM_PARCHMENT/
