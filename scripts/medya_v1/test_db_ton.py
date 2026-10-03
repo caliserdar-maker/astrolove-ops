@@ -34,14 +34,18 @@ def olc(im, esitle):
 
 def test():
     # 1) olculen DB sapmasi (iki yon): esitlemesiz FAIL, esitlemeli PASS
-    for m in ((228, 172, 68), (243, 214, 110)):     # AQUARIUS_CAPRICORN (koyu), LEO_SAGITTARIUS orani (acik)
+    for m in ((228, 172, 68), (243, 214, 110), (238, 195, 48)):  # AQUARIUS_CAPRICORN, LEO_SAGITTARIUS, ARIES_LEO B orani
         r0, _ = olc(poster(m), False)
         r1, b = olc(poster(m), True)
         assert not r0['gecti'] and r1['gecti'] and b['uygulandi'], (m, r0, r1, b)
     # 2) gercek sapmalar esitlemeyle de FAIL: %35 koyu, gumus, turuncu-kirmizi
-    for m in ((155, 126, 50), (200, 200, 200), (230, 110, 40)):
+    for m in ((155, 126, 50), (200, 200, 200), (230, 110, 40), (238, 194, 20), (238, 194, 160)):  # + yalniz B bozuk
         r1, b = olc(poster(m), True)
         assert not r1['gecti'], (m, r1, b)
+    # 2b) soluk ve doygun mesaj (dE > DB_TON_DE_AZAMI): esitleme HIC uygulanmaz
+    for m in ((238, 194, 160), (238, 194, 20)):
+        _, b = olc(poster(m), True)
+        assert b['uygulandi'] is False, (m, b)
     # 3) acik zemin (DB disi): uygulanmaz
     _, b = olc(poster((228, 172, 68), zemin=(230, 220, 200)), True)
     assert b['uygulandi'] is False, b

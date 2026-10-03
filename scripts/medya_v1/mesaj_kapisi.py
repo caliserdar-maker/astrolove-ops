@@ -179,8 +179,11 @@ def murekkep(a, bant, k=1.0):
 # kanal kazanciyla esitlenir; yalniz koyu zeminde, yalniz altin tonlu murekkep pikseli. Kazanc DAR araliga kirpilir:
 # kucuk ton farki duzelir, gercek renk sapmasi kapida FAIL kalir (test_db_ton). Esikler (DE_ESIK, KONTRAST_ESIK) AYNI.
 DB_TON = {'etkin': os.environ.get('DB_TON_ESITLE', '1') != '0'}
-DB_TON_SINIR = (0.85, 1.15)
+DB_TON_SINIR = ((0.85, 1.15), (0.85, 1.15), (0.6, 1.7))   # R, G dar; B (altin murekkepte 50-100, ayni ton kaymasi
+# buyuk oran: ARIES_LEO set B isim B 89 / mesaj 56, kazanc 1.59) TON_SINIR ile ayni (3 Eki, 2. deneme)
 DB_ZEMIN_L = 40.0                  # zemin medyani bundan koyu degilse uygulanmaz (yalniz DB / koyu zemin)
+DB_TON_DE_AZAMI = 15.0             # esitleme oncesi dE bundan buyukse UYGULANMAZ: yalniz kucuk ton farki (olculen DB
+                                   # FAIL'leri dE 9.8-11.9); gercek renk sapmasi (soluk / gumus / koyu mesaj) kapida FAIL kalir
 
 
 def ton_esitle(poster, isim_bant, tag_bant, k=1.0, sinir=DB_TON_SINIR):
@@ -192,7 +195,12 @@ def ton_esitle(poster, isim_bant, tag_bant, k=1.0, sinir=DB_TON_SINIR):
         return poster, {'uygulandi': False, 'sebep': 'murekkep yok'}
     if float(np.dot(zt, LUMA)) > DB_ZEMIN_L:
         return poster, {'uygulandi': False, 'sebep': 'zemin koyu degil'}
-    kaz = np.clip(np.asarray(ci, np.float32) / np.maximum(np.asarray(ct, np.float32), 1.0), *sinir)
+    L0 = _lab(np.stack([ci, ct]))
+    de0 = float(np.linalg.norm(L0[0] - L0[1]))
+    if de0 > DB_TON_DE_AZAMI:
+        return poster, {'uygulandi': False, 'sebep': f'dE {de0:.1f} > {DB_TON_DE_AZAMI} (gercek sapma, esitlenmez)'}
+    sn = np.asarray(sinir, np.float32).reshape(-1, 2) * np.ones((3, 1), np.float32)
+    kaz = np.clip(np.asarray(ci, np.float32) / np.maximum(np.asarray(ct, np.float32), 1.0), sn[:, 0], sn[:, 1])
     y0, y1 = tag_bant[0] * k, tag_bant[1] * k
     p = 0.5 * (y1 - y0)
     r0, r1 = max(int(y0 - p), 0), min(int(y1 + p), a.shape[0])
@@ -207,7 +215,7 @@ def ton_esitle(poster, isim_bant, tag_bant, k=1.0, sinir=DB_TON_SINIR):
     return poster, {'uygulandi': True, 'kazanc': [round(float(v), 3) for v in kaz],
                     'dE_once': round(float(np.linalg.norm(L[0] - L[1])), 1),
                     'dE_sonra_tahmin': round(float(np.linalg.norm(L[0] - L[2])), 1),
-                    'piksel': int(altin.sum()), 'sinir': list(sinir)}
+                    'piksel': int(altin.sum()), 'sinir': sn.tolist()}
 
 
 def kapi(a, isim_bant, tag_bant, k=1.0):
