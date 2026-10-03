@@ -1,0 +1,52 @@
+name: ornek-tek-doku
+
+# TEK DOKU ornegi (3 Eki 2026, Serdar C.3): CANCER_LIBRA, SCORPIO_VIRGO, AQUARIUS_LEO tam sayfa 4:5 PNG + yan yana
+# [satistaki orijinal | eski kosu | yeni]. Kod: motor dali 13bd560. Yalniz Drive yuklemesi: ornek/ ->
+# TEMP/MOTOR/SOSYAL/TEK_DOKU_ORNEK/. Yeni uretim yok. Etsy YOK, musteri YOK.
+
+on:
+  push:
+    branches: [ornek-tek-doku]
+    paths: [ornek/**]
+
+permissions:
+  contents: read
+
+concurrency: ornek-tek-doku-drive
+
+jobs:
+  yukle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: PNG sha = SHA.txt
+        run: |
+          set -euo pipefail
+          cd ornek && awk '{print $1"  "$2}' SHA.txt | sha256sum -c -
+      - name: Drive'a yukle (TEMP/MOTOR/SOSYAL/TEK_DOKU_ORNEK)
+        run: |
+          set -euo pipefail
+          D="gdrive:ASTROLOVE/TEMP/MOTOR/SOSYAL/TEK_DOKU_ORNEK"
+          rclone copy ornek "$D"
+          rclone dedupe --dedupe-mode newest "$D"
+          rclone lsl "$D"
+          N=$(rclone lsf "$D" | grep -cE '_(TEK_DOKU_4x5\.png|YANYANA\.jpg)$'); echo "dosya: $N"; [ "$N" = 6 ]
+      - if: always()
+        run: rm -rf ~/.config/rclone
