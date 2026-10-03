@@ -2,7 +2,7 @@ name: ig-78-uret
 
 # IG/FB 78 cift tek kosu (Serdar 3 Eki 2026): onayli ig_bas.py ile carousel C01-C03 + Reel 9 sn (ig_78_uret.py),
 # Drive TEMP/SOSYAL/INSTAGRAM/MEDYA/v1 + QC, astrolove-media instagram/v1 push + tum URL probu,
-# Metricool CSV (ig_metricool_csv.py): baslangic bossa yalniz 3 gunluk ONIZLEME. Etsy YOK, Metricool'a yukleme YOK.
+# Metricool CSV (ig_metricool_csv.py): IG_FB_V1 + YT_V1 (YouTube Shorts) + TT_V1 (TikTok) ayri dosya; baslangic bossa yalniz 3 gunluk ONIZLEME. Etsy YOK, Metricool'a yukleme YOK.
 # Listing ID'ler ayri salt okur kosuda (ig-ilan-dogrula.yml) dogrulanir; burada Drive ILAN_DOGRULA.csv okunur.
 
 permissions:
@@ -170,9 +170,9 @@ jobs:
           if [ -n "$BASLANGIC" ]; then
             python3 scripts/sosyal/ig_metricool_csv.py "${A[@]}" --baslangic "$BASLANGIC" | tee -a "$GITHUB_STEP_SUMMARY"
             python3 /tmp/metin_kurali.py _csv
-            rclone copy _csv "$D" --include "IG_FB_V1_0*.csv"
+            rclone copy _csv "$D" --include "IG_FB_V1_0*.csv" --include "YT_V1_0*.csv" --include "TT_V1_0*.csv"
           fi
-          rclone lsl "$D" --include "IG_FB_V1_*.csv" | tee -a "$GITHUB_STEP_SUMMARY"
+          rclone lsl "$D" --include "IG_FB_V1_*.csv" --include "YT_V1_*.csv" --include "TT_V1_*.csv" | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Onizleme gorseli (ilk 3 gun, 6 gonderi)
         if: ${{ inputs.dry_run != true && inputs.yalniz_csv != true }}
