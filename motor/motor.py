@@ -222,7 +222,13 @@ def altin_bas(a, Z, K, C, i1, i2, mesaj, rap):
             c_, k_ = tdk.boya(l, Aa, Pb, W, isr, model)
             rap['tek_doku']['k'][ad] = k_
             return c_
-        bindir('daire', td_boya('daire', tdk.duz_l(a_halka, model), a_halka, P), a_halka, 0, 0)   # cember
+        # cember kesit konumu: halka_altin geometrisi (aciya gore yumusak merkez cizgisi + yari genislik)
+        import halka_altin as hka
+        d_h, hw_h = hka.geo_uv(a_halka.shape, kay['halka']['geometri'])
+        t_h = np.clip(1 - np.abs(d_h) / np.maximum(hw_h, 1e-3), 0, 1).astype(np.float32)
+        del d_h, hw_h
+        bindir('daire', td_boya('daire', tdk.duz_l(a_halka, model, olcekli=True, t=t_h), a_halka, P), a_halka, 0, 0)
+        del t_h
     if b.get('kaynak') != 'orijinal':
         bindir('buyuk_sembol', rgb_b, k[..., 3], b['x'], b['y'])
         del k, rgb_b
@@ -327,7 +333,7 @@ def altin_bas(a, Z, K, C, i1, i2, mesaj, rap):
         for ad in ('isim1', 'isim2', 'sonsuz', 'mesaj'):
             ys, xs = np.nonzero(maske[ad])
             kut.append((int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1))
-        P, rap['yildiz'] = tdk.yildiz_temizle(P, kut, W)
+        P, rap['yildiz'] = tdk.yildiz_temizle(P, kut, W, haric=a_halka > 0)
         log('yildiz', rap['yildiz'])
     out = P * (1 - A[..., None]) + Cp
     del Cp

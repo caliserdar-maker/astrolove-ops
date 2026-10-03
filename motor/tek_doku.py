@@ -10,8 +10,9 @@ Uygulama (her oge kendi alfasi ile, kabartma tek kez):
   dokulu ogeler (kucuk semboller, sonsuz): kendi luma dokusu
   duz ogeler (isimler, tagline, cember)  : luma = profil(t) x kabartma
   hepsinde renk = egri(luma x k); k, qc olcumuyle (QC olcegi cekirdek ortancasi) Lmed olacak sekilde (3 tur)
-Yildiz: yazi kutusu + pay icinde plate'in parlak noktalari (yerel 31 px medyandan > YILDIZ_T luma, kucuk bilesen)
-yerel medyanla doldurulur (yalniz bu pay icinde).
+Yildiz: yazi kutusu + pay icinde plate'in parlak noktalari (yerel 31 px medyandan > YILDIZ_T luma, kucuk bilesen),
+isinlariyla birlikte ayni plate'in yildizsiz bir parcasiyla degistirilir (doku kopyasi; 3 Eki goz kontrolu: medyan
+dolgusu gri leke birakiyordu). Cember: halka_altin geometrisi (t) + cizgi kalinligina olcekli kabartma.
 """
 import cv2
 import numpy as np
@@ -82,18 +83,37 @@ def doku_olc(A, L, W):
     gy, gx = yukseklik_egim(A, sig)
     tam = pred * np.clip(1 + coef[0] * gy[full] + coef[1] * gx[full], 0.5, 1.6)
     r2 = 1 - float(((Lf - tam) ** 2).sum() / max(((Lf - Lf.mean()) ** 2).sum(), 1e-6))
+    m8 = (A > 0.5).astype(np.uint8)
+    dt = cv2.distanceTransform(m8, cv2.DIST_L2, 5)
+    sirt = (dt >= cv2.dilate(dt, np.ones((3, 3), np.uint8))) & (dt > 1)
     return {'profil': [round(float(v), 1) for v in prof], 'pencere': pencere,
+            'yaricap': round(float(np.median(dt[sirt])), 2),
             'kabartma': {'sigma': round(float(sig), 2), 'a': round(float(coef[0]), 4), 'b': round(float(coef[1]), 4)},
             'r2': round(r2, 3)}
 
 
-def duz_l(A, model):
-    """isim / tagline / cember luma dokusu: boru profili x kabartma (tek kez)."""
+def cizgi_yaricapi(A):
+    m8 = (A > 0.5).astype(np.uint8)
+    dt = cv2.distanceTransform(m8, cv2.DIST_L2, 5)
+    sirt = (dt >= cv2.dilate(dt, np.ones((3, 3), np.uint8))) & (dt > 1)
+    return float(np.median(dt[sirt])) if sirt.any() else 1.0
+
+
+def duz_l(A, model, olcekli=False, t=None):
+    """isim / tagline / cember luma dokusu: boru profili x kabartma (tek kez).
+    olcekli (cember): kabartma sigmasi cizgi kalinligina gore (sigma x oge yaricapi / ana sembol yaricapi, <= sigma).
+    3 Eki goz kontrolu: ana sembolun kalin cizgisinde olculen sigma (6-9 px) 12 px cembere aynen uygulaninca cemberin
+    tamami kenar golgesi oluyor, alfa dalgalanmasi boyuna leke veriyordu (CANCER_LIBRA, AQUARIUS_LEO a ~ 1.65).
+    t: hazir kesit konumu (cember: halka_altin geometrisi, 0 kenar 1 merkez); yoksa boru_t."""
     d = model['doku']
-    t = boru_t(A, d['pencere'])
+    if t is None:
+        t = boru_t(A, d['pencere'])
     l = np.interp(t * 10 - 0.5, np.arange(10), np.asarray(d['profil'], np.float32)).astype(np.float32)
     kb = d['kabartma']
-    gy, gx = yukseklik_egim(A, kb['sigma'])
+    sig = kb['sigma']
+    if olcekli and d.get('yaricap'):
+        sig = kb['sigma'] * min(1.0, cizgi_yaricapi(A) / d['yaricap'])
+    gy, gx = yukseklik_egim(A, sig)
     return l * np.clip(1 + kb['a'] * gy + kb['b'] * gx, 0.5, 1.6)
 
 
@@ -138,24 +158,66 @@ def yildiz_maskesi(P, bolge):
     return cv2.dilate(m.astype(np.uint8), np.ones((7, 7), np.uint8)).astype(bool) & bolge, int(n - 1)
 
 
-def yildiz_temizle(P, kutular, W):
-    """kutular: [(x0, y0, x1, y1)] yazi kutulari; pay = W x PAY_ORAN. Plate kopyasinda yildizlar yerel kanal
-    medyaniyla doldurulur (yalniz pay icinde). Doner (P', kayit)."""
+UZANIM = 4.5             # yildiz isini / cekirdek yaricapi (olculen 117 plate yildizi, alan > 200: p95 3.6, en buyuk 4.0)
+
+
+def yildiz_temizle(P, kutular, W, haric=None):
+    """kutular: [(x0, y0, x1, y1)] yazi kutulari; pay = W x PAY_ORAN x TEMIZLIK_PAYI. Her yildiz (cekirdek + isinlar,
+    yaricap UZANIM x cekirdek + 16 px) ayni plate'in yakindaki yildizsiz bir parcasiyla degistirilir (doku kopyasi):
+    aday parcalar 16 yonde, gecis halkasinda kanal ortalamasi esitlenmis kare fark en kucuk olan; dairesel kosinus
+    gecis (F px). Duz medyan dolgusu YOK (3 Eki goz kontrolu: gri leke + kirik isin). haric: aday parca olamayacak
+    bolge (cember zemini). Doner (P', kayit)."""
     H = P.shape[0]
-    pay = int(round(PAY_ORAN * TEMIZLIK_PAYI * W))                    # kapi payindan %10 genis (kutu olcum farki)
+    q = W / 4800
+    pay = int(round(PAY_ORAN * TEMIZLIK_PAYI * W))
     bolge = np.zeros((H, W), bool)
     for x0, y0, x1, y1 in kutular:
         bolge[max(0, y0 - pay):min(H, y1 + pay), max(0, x0 - pay):min(W, x1 + pay)] = True
-    m, n = yildiz_maskesi(P, bolge)
-    if not m.any():
-        return P, {'pay_px': pay, 'yildiz_px': 0}
-    kw = 31 if W == 3307 else int(round(31 * W / 3307)) | 1
-    ys, xs = np.nonzero(m)
-    y0, y1, x0, x1 = max(0, ys.min() - kw), min(H, ys.max() + kw + 1), max(0, xs.min() - kw), min(W, xs.max() + kw + 1)
-    alt = np.clip(P[y0:y1, x0:x1], 0, 255).astype(np.uint8)
-    med = np.stack([cv2.medianBlur(np.ascontiguousarray(alt[..., c]), kw) for c in range(3)], -1).astype(np.float32)
+    L = P @ LUMA
+    R = L - yerel_medyan(L, W)
+    n, lab, st, cen = cv2.connectedComponentsWithStats((R > YILDIZ_T).astype(np.uint8), 8)
+    kucuk = np.zeros(n, bool)
+    kucuk[1:] = st[1:, cv2.CC_STAT_AREA] <= YILDIZ_ALAN * q ** 2
+    tum = kucuk[lab]                                                   # sayfadaki tum yildiz cekirdekleri
+    yasak = cv2.dilate(tum.astype(np.uint8), np.ones((int(120 * q) | 1,) * 2, np.uint8)).astype(bool)
+    if haric is not None:
+        yasak |= haric
+    hedef = [i for i in range(1, n) if kucuk[i] and bolge[lab == i].any()] if n > 1 else []
     P2 = P.copy()
-    mm = m[y0:y1, x0:x1]
-    P2[y0:y1, x0:x1][mm] = med[mm]
-    n2, _, _, _ = cv2.connectedComponentsWithStats(m.astype(np.uint8), 8)
-    return P2, {'pay_px': pay, 'yildiz_px': int(m.sum()), 'yildiz': int(n2 - 1)}
+    F = max(4, int(round(8 * q)))
+    kayit = []
+    for i in hedef:
+        cx, cy = cen[i]
+        rs = UZANIM * np.sqrt(st[i, cv2.CC_STAT_AREA] / np.pi) + 16 * q
+        h = int(np.ceil(rs)) + F
+        x0, y0 = int(round(cx)) - h, int(round(cy)) - h
+        if x0 < 0 or y0 < 0 or x0 + 2 * h + 1 > W or y0 + 2 * h + 1 > H:
+            continue
+        T = P2[y0:y0 + 2 * h + 1, x0:x0 + 2 * h + 1]
+        yy, xx = np.mgrid[-h:h + 1, -h:h + 1]
+        d = np.hypot(xx, yy)
+        w = np.clip((rs + F - d) / F, 0, 1)
+        w = 0.5 - 0.5 * np.cos(np.pi * w)                              # 1 icerde, kosinus gecis
+        ban = (d > rs) & (d <= rs + F)
+        en = None
+        for r_ in (2.2 * h, 3.0 * h, 4.0 * h, 5.5 * h):
+            for t_ in np.arange(16) * np.pi / 8:
+                dx, dy = int(round(r_ * np.cos(t_))), int(round(r_ * np.sin(t_)))
+                u0, v0 = x0 + dx, y0 + dy
+                if u0 < 0 or v0 < 0 or u0 + 2 * h + 1 > W or v0 + 2 * h + 1 > H:
+                    continue
+                if yasak[v0:v0 + 2 * h + 1, u0:u0 + 2 * h + 1].any():
+                    continue
+                D = P[v0:v0 + 2 * h + 1, u0:u0 + 2 * h + 1]
+                ofs = T[ban].mean(0) - D[ban].mean(0)
+                sk = float(((D[ban] + ofs - T[ban]) ** 2).mean())
+                if en is None or sk < en[0]:
+                    en = (sk, D + ofs, dx, dy)
+        if en is None:
+            kayit.append({'x': int(cx), 'y': int(cy), 'durum': 'aday parca yok'})
+            continue
+        P2[y0:y0 + 2 * h + 1, x0:x0 + 2 * h + 1] = T * (1 - w[..., None]) + en[1] * w[..., None]
+        kayit.append({'x': int(cx), 'y': int(cy), 'r': round(float(rs), 1), 'kaynak': [en[2], en[3]],
+                      'gecis_rmse': round(float(np.sqrt(en[0])), 2)})
+    return P2, {'pay_px': pay, 'yildiz': len(kayit), 'parca': kayit,
+                'eksik': sum(1 for k in kayit if 'durum' in k)}
