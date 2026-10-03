@@ -1,7 +1,7 @@
 name: wp-tagline-tani
 
 # Serdar 3 Eki (ders 52) zorunlu kontrol, 390 dogrulamasi DEGIL: (1) duzeltilmis ikinci metin kapisi (9a55c2b) gercek
-# Test 5 11x14 teslim sayfasinda; (2) a_renk FAIL 4 hucre (37106498911) eski kod 58bed04 ile de FAIL mi. Siparis yolu
+# Test 5 11x14 teslim sayfasinda; (2) a_renk FAIL 8 hucre (37106498911) eski kod 58bed04 ile de FAIL mi. Siparis yolu
 # (main surucu.wp_bakir_uret_v1, renk_ref b8c8c4b). PLATES'e yazma yok. Cikti Drive TEMP/WP_TAGLINE/<run_id>/.
 
 permissions:
@@ -98,10 +98,10 @@ jobs:
           python _arac/scripts/medya_v1/wp_dogrula.py pdf --pdf _t/t5.pdf --etiket T5 --cikti _t
           python _arac/scripts/medya_v1/wp_dogrula.py calis --surucu scripts/siparis_dijital/surucu.py --kod _v1 \
             --hucreler "SCORPIO_VIRGO:11x14" --teslim "T5|11x14|_t/T5_11x14.jpg|" --etiket "tani_yeni_T5" --cikti out
-      - name: a_renk 4 hucre (37106498911), ayni siparis yolu
+      - name: a_renk 8 hucre (37106498911), ayni siparis yolu
         run: |
           python _arac/scripts/medya_v1/wp_dogrula.py calis --surucu scripts/siparis_dijital/surucu.py --kod _v1 \
-            --hucreler "CANCER_LEO:11x14,LEO_LEO:11x14,LEO_SCORPIO:11x14,LIBRA_VIRGO:11x14" \
+            --hucreler "CANCER_LEO:11x14,LEO_LEO:11x14,LEO_SCORPIO:11x14,LIBRA_VIRGO:11x14,CAPRICORN_LEO:11x14,LEO_LIBRA:11x14,LEO_TAURUS:11x14,SAGITTARIUS_VIRGO:11x14" \
             --etiket "tani_${{ matrix.kod }}_arenk" --cikti out
       - name: Drive (TEMP)
         if: ${{ always() }}
