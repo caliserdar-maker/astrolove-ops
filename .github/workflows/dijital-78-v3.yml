@@ -1,0 +1,235 @@
+name: dijital-78-v3
+
+# ETSY'YE YAZMA YOK (Serdar 20 Eyl 2026). Etsy cagrisi yalniz ADIM 1'de,
+# canli POD galerisi icin 1 okuma (tavan 30). Drive'a yalniz TEMP/DIJITAL_78/
+# altina yazilir: GALERI_V1/ ve ZIP_FINAL/.
+
+on:
+  workflow_dispatch:
+    inputs:
+      cift:
+        description: "Ornek galeri cifti"
+        required: false
+        default: "ARIES_LEO"
+      zip_limit:
+        description: "ZIP sayisi siniri (0 = 390 ZIP'in tamami)"
+        required: false
+        default: "0"
+      galeri:
+        description: "ADIM 1 (galeri) kosulsun mu: evet/hayir"
+        required: false
+        default: "evet"
+  push:
+    branches: [dijital-v1]
+    paths:
+      - 'config/dijital78_v3.trigger'
+      - 'config/dijital78_v4.trigger'
+      - 'config/dijital78_v5.trigger'
+      - 'config/dijital78_v6.trigger'
+      - 'config/dijital78_v7.trigger'
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  ZIP_KOK: 1QH-lfhmgaTI8Ac6CK_WgU-2o5vFRgTGF     # Drive ALL_312_ZIPS (390 dosya)
+  DIJITAL_KOK: 1CIftw7DJhZBya5GWO8snGZodBzWCIh8g # Drive TEMP/DIJITAL_78
+  CIKTI: "gdrive:ASTROLOVE/TEMP/DIJITAL_78"
+  CROSSLINK: "gdrive:ASTROLOVE/TEMP/POD_LISTING/CROSSLINK_20260907_1219/apply/crosslink_result.json"
+  THANKYOU: "gdrive:ASTROLOVE/DIGITAL/THANKYOU/ASTROLOVE_DIGITAL_THANKYOU_EN.pdf"
+
+jobs:
+  v3:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      CIFT: ${{ inputs.cift || 'ARIES_LEO' }}
+      ZIPLIMIT: ${{ inputs.zip_limit || '0' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Bagimliliklar + fontlar
+        run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2 pillow==12.3.0 numpy==2.4.6
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libjpeg-turbo-progs tesseract-ocr ffmpeg
+          mkdir -p fonts
+          base=https://raw.githubusercontent.com/google/fonts/main/ofl
+          curl -fsSL -o "fonts/CormorantGaramond[wght].ttf"        "$base/cormorantgaramond/CormorantGaramond%5Bwght%5D.ttf"
+          curl -fsSL -o "fonts/CormorantGaramond-Italic[wght].ttf" "$base/cormorantgaramond/CormorantGaramond-Italic%5Bwght%5D.ttf"
+          curl -fsSL -o "fonts/Montserrat[wght].ttf"               "$base/montserrat/Montserrat%5Bwght%5D.ttf"
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          rclone version > _rc.txt 2>&1 || true; sed -n 1p _rc.txt; rm -f _rc.txt
+          command -v jpegtran djpeg tesseract ffmpeg
+          df -h /
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+
+      - name: Girdiler
+        id: girdiler
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out _out_zip _out_v2 _out_gal _out_pazar
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "$CROSSLINK" _work/crosslink_result.json
+          rclone copyto "$THANKYOU"  _work/thankyou.pdf
+          for f in crosslink_result.json thankyou.pdf; do
+            printf '  %-26s %s bayt\n' "$f" "$(stat -c%s _work/$f)"
+          done
+
+      - name: 'ADIM 1  Galeri kaynak eslemesi + ornek galeri (Etsy salt okur, tavan 30)'
+        if: ${{ steps.girdiler.outcome == 'success' && inputs.galeri != 'hayir' && !contains(github.event.head_commit.message, '[zip-only]') && !contains(github.event.head_commit.message, '[v2-only]') && !contains(github.event.head_commit.message, '[v3-only]') && !contains(github.event.head_commit.message, '[final]') && !contains(github.event.head_commit.message, '[dedupe]') }}
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          python scripts/etsy/dijital78_galeri.py --crosslink _work/crosslink_result.json \
+            --cift "$CIFT" --out _out --medya _work/galeri_medya --fonts fonts \
+            --kapak-uret scripts/pod/dijital_kapak_etiket.py --kapak-varyant V2_ALT_BANT \
+            --max-calls 30
+          ls -la _out
+
+      - name: 'ADIM 2  ZIP uretimi (390 ZIP, kayipsiz + tesekkur PDF, en uzun adim)'
+        if: ${{ always() && steps.girdiler.outcome == 'success' && !contains(github.event.head_commit.message, '[v2-only]') && !contains(github.event.head_commit.message, '[v3-only]') && !contains(github.event.head_commit.message, '[final]') && !contains(github.event.head_commit.message, '[dedupe]') }}
+        run: |
+          set -euo pipefail
+          python scripts/etsy/dijital78_zipfinal.py --kok "$ZIP_KOK" --pdf _work/thankyou.pdf \
+            --out _out_zip --out-dizin _work/zipcikti --calisma _work/zipfinal \
+            --esik 19800000 --is-parca 6 --limit "$ZIPLIMIT" \
+            --ilk-grup config/dijital78_kapi15.txt \
+            --yukle-kok "$DIJITAL_KOK" --yukle-yol "ZIP_FINAL"
+          df -h /
+
+      - name: 'ADIM 3  Galeri V2 (plakali kapak, 3 kart, 5 RENK, dizilim) - Etsy cagrisi YOK'
+        if: ${{ steps.girdiler.outcome == 'success' && (contains(github.event.head_commit.message, '[v2-only]') || contains(github.event.head_commit.message, '[v3-only]')) }}
+        env:
+          HEDEF: ${{ contains(github.event.head_commit.message, '[v3-only]') && 'GALERI_V3' || 'GALERI_V2' }}
+        run: |
+          set -euo pipefail
+          echo "GALERI_HEDEF=$HEDEF" >> "$GITHUB_ENV"
+          mkdir -p _out_v2 _work/ziplar
+          rclone copyto "$CIKTI/GALERI_V1/GALERI_KAYNAK.csv" _work/GALERI_KAYNAK.csv
+          rclone copy "$CIKTI/ZIP_FINAL/$CIFT" _work/ziplar -q --transfers 4
+          find _work/ziplar -name '*.zip' | wc -l
+          python scripts/etsy/dijital78_galeri_v2.py --kaynak-csv _work/GALERI_KAYNAK.csv \
+            --zip-dizin _work/ziplar --cift "$CIFT" --fonts fonts \
+            --out _out_v2 --medya _work/galeri_v2
+          ls -la _out_v2
+
+      - name: 'ADIM 4  78 cift galeri uretimi (Etsy cagrisi YOK)'
+        if: ${{ steps.girdiler.outcome == 'success' && contains(github.event.head_commit.message, '[final]') }}
+        run: |
+          set -euo pipefail
+          mkdir -p _out_gal _work/galeri_final
+          rclone copyto "$CIKTI/GALERI_V1/GALERI_KAYNAK.csv" _work/GALERI_KAYNAK.csv
+          python scripts/etsy/dijital78_galeri_final.py --zip-uzak "$CIKTI/ZIP_FINAL" \
+            --kaynak-csv _work/GALERI_KAYNAK.csv --crosslink _work/crosslink_result.json \
+            --fonts fonts --out _work/galeri_cikti --rapor _out_gal \
+            --calisma _work/galeri_final --yukle "$CIKTI/GALERI_FINAL" --is-parca 3
+          df -h / | tail -1
+
+      - name: 'ADIM 5  Pazar fiyat verisi (Etsy SALT OKUR, tavan 60)'
+        if: ${{ always() && steps.girdiler.outcome == 'success' && contains(github.event.head_commit.message, '[final]') }}
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          mkdir -p _out_pazar
+          python scripts/etsy/dijital78_pazar.py --out _out_pazar --max-calls 60 --sayfa 2
+
+      - name: ADIM 6 - GALERI_FINAL ikiz klasor birlestirme
+        if: ${{ steps.girdiler.outcome == 'success' && contains(github.event.head_commit.message, '[dedupe]') }}
+        run: |
+          set -euo pipefail
+          echo "birlestirme oncesi:"
+          rclone lsf "$CIKTI" --dirs-only | sed 's/^/  - /'
+          rclone dedupe --dedupe-mode newest "$CIKTI" -v 2>&1 | tail -20
+          rclone dedupe --dedupe-mode newest "$CIKTI/GALERI_FINAL" -v 2>&1 | tail -20
+          N=$(rclone lsf "$CIKTI/GALERI_FINAL" --dirs-only | wc -l)
+          echo "GALERI_FINAL cift klasoru: $N"
+          EKSIK=0
+          for c in $(rclone lsf "$CIKTI/GALERI_FINAL" --dirs-only | tr -d '/'); do
+            K=$(rclone lsf "$CIKTI/GALERI_FINAL/$c" --files-only | wc -l)
+            [ "$K" -eq 4 ] || { echo "::warning::$c dosya sayisi $K"; EKSIK=$((EKSIK+1)); }
+          done
+          echo "4 dosyasi eksik cift: $EKSIK"
+          [ "$N" -eq 78 ] && [ "$EKSIK" -eq 0 ] || { echo "::error::kapi FAIL (n=$N eksik=$EKSIK)"; exit 1; }
+          echo "KAPI PASS: 78 cift x 4 dosya, tek GALERI_FINAL"
+
+      - name: Sir taramasi + Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && \
+            rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && \
+            echo "Token geri yazildi" || true
+          if grep -rqaE 'x-api-key|refresh_token|access_token|client_secret' _out _out_zip _out_v2 _out_gal _out_pazar 2>/dev/null; then
+            echo "::error::ciktida sir benzeri anahtar bulundu, Drive'a yazilmadi"; exit 1
+          fi
+          if [ -n "$(ls -A _out 2>/dev/null)" ]; then
+            rclone copy _out "$CIKTI/GALERI_V1" -q
+            echo "GALERI_V1 (dosya | bayt | Drive id)"
+            rclone lsf "$CIKTI/GALERI_V1" --format "psi" --separator " | " | sed 's/^/  - /'
+          fi
+          if [ -n "$(ls -A _out_gal 2>/dev/null)" ]; then
+            rclone copy _out_gal "$CIKTI/GALERI_FINAL" -q
+            echo "GALERI_FINAL raporlari (dosya | bayt | Drive id)"
+            rclone lsf "$CIKTI/GALERI_FINAL" --format "psi" --separator " | " --files-only | sed 's/^/  - /'
+            echo "GALERI_FINAL cift klasoru: $(rclone lsf "$CIKTI/GALERI_FINAL" --dirs-only | wc -l)"
+          fi
+          if [ -n "$(ls -A _out_pazar 2>/dev/null)" ]; then
+            rclone copy _out_pazar "$CIKTI" -q
+            echo "PAZAR dosyalari (dosya | bayt | Drive id)"
+            rclone lsf "$CIKTI" --format "psi" --separator " | " --files-only --include "PAZAR_*" | sed 's/^/  - /'
+          fi
+          if [ -n "$(ls -A _out_v2 2>/dev/null)" ]; then
+            rclone copy _out_v2 "$CIKTI/${GALERI_HEDEF:-GALERI_V2}" -q
+            echo "${GALERI_HEDEF:-GALERI_V2} (dosya | bayt | Drive id)"
+            rclone lsf "$CIKTI/${GALERI_HEDEF:-GALERI_V2}" --format "psi" --separator " | " | sed 's/^/  - /'
+          fi
+          if [ -n "$(ls -A _out_zip 2>/dev/null)" ]; then
+            rclone copy _out_zip "$CIKTI/ZIP_FINAL" -q
+            echo "ZIP_FINAL raporlari yazildi"
+          fi
+          echo "ZIP_FINAL klasor sayisi: $(rclone lsf "$CIKTI/ZIP_FINAL" --dirs-only | wc -l)"
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: dijital-78-v3
+          path: |
+            _out/
+            _out_zip/
+            _out_v2/
+            _out_gal/
+            _out_pazar/
+          if-no-files-found: ignore
+
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone

@@ -1,0 +1,160 @@
+name: dijital-78-v2
+
+# SALT OKUR + YEREL ISLEM (Serdar 20 Eyl 2026, kuru deneme v1 sonrasi).
+# ETSY'YE YAZMA YOK. Etsy cagrisi yalniz ADIM 4'te (77-78 PW ilani getListingFiles),
+# tavan 85. Drive'a yalniz TEMP/DIJITAL_78/ altina rapor + optimize ZIP yazilir.
+# Dal uzerinde calisir; tetikleyici dosya push'u kullanilir.
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_calls:
+        description: "ADIM 4 Etsy cagri tavani"
+        required: false
+        default: "85"
+      zip_yukle:
+        description: "Optimize edilen ZIP'ler Drive'a yuklensin mi"
+        type: boolean
+        default: true
+  push:
+    branches: [dijital-v1]
+    paths:
+      - 'config/dijital78_v2.trigger'
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  ZIP_KOK: 1QH-lfhmgaTI8Ac6CK_WgU-2o5vFRgTGF     # Drive ALL_312_ZIPS
+  CIKTI: "gdrive:ASTROLOVE/TEMP/DIJITAL_78"
+  CROSSLINK: "gdrive:ASTROLOVE/TEMP/POD_LISTING/CROSSLINK_20260907_1219/apply/crosslink_result.json"
+  THANKYOU: "gdrive:ASTROLOVE/DIGITAL/THANKYOU/ASTROLOVE_DIGITAL_THANKYOU_EN.pdf"
+
+jobs:
+  v2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      MAXC: ${{ inputs.max_calls || '85' }}
+      ZIPYUKLE: ${{ github.event_name == 'push' && 'evet' || (inputs.zip_yukle && 'evet' || 'hayir') }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Bagimliliklar
+        run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2 Pillow==11.3.0
+          sudo apt-get update -qq && sudo apt-get install -y -qq libjpeg-turbo-progs
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          rclone version > _rc.txt 2>&1 || true; sed -n 1p _rc.txt; rm -f _rc.txt
+          command -v jpegtran djpeg
+          df -h /
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+
+      - name: Girdiler
+        id: girdiler
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out _work/optzip
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "$CIKTI/ENVANTER.csv"    _work/ENVANTER.csv
+          rclone copyto "$CIKTI/ZIP_KONTROL.csv" _work/ZIP_KONTROL.csv
+          rclone copyto "$CROSSLINK"             _work/crosslink_result.json
+          rclone copyto "$THANKYOU"              _work/thankyou.pdf
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_LISTING/XSELL_STATE.csv" _work/XSELL_STATE.csv \
+            2>/dev/null || echo "::warning::XSELL_STATE.csv yok"
+          rclone copyto --drive-export-formats txt \
+            "gdrive:ASTROLOVE/00_START_HERE__ASTROLOVE_FILE_SYSTEM.txt" _work/start_here.txt \
+            2>/dev/null || echo "::warning::START_HERE disa aktarilamadi"
+          for f in ENVANTER.csv ZIP_KONTROL.csv crosslink_result.json thankyou.pdf; do
+            printf '  %-26s %s bayt\n' "$f" "$(stat -c%s _work/$f)"
+          done
+
+      - name: 'ADIM 1-2  KALACAK v2 + LINK_ESLEME (0 Etsy cagrisi)'
+        run: |
+          set -euo pipefail
+          python scripts/etsy/dijital78_kalacak_v2.py --envanter _work/ENVANTER.csv \
+            --crosslink _work/crosslink_result.json --xsell _work/XSELL_STATE.csv --out _out
+
+      - name: 'ADIM 4  Pure White surum farki (Etsy salt okur)'
+        if: ${{ always() && steps.girdiler.outcome == 'success' }}
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          python scripts/etsy/dijital78_pw.py --envanter _work/ENVANTER.csv --kok "$ZIP_KOK" \
+            --ara-kok "gdrive:ASTROLOVE" --start-here _work/start_here.txt \
+            --out _out --calisma _work/pw --ornek-cift 5 --max-calls "$MAXC"
+
+      - name: 'ADIM 5  Metin taslaklari v2 + QC'
+        if: ${{ always() && steps.girdiler.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          python scripts/etsy/dijital78_metin_v2.py --zip-csv _work/ZIP_KONTROL.csv \
+            --pod-json _out/KALACAK_V2_OZET.json --out _out
+
+      - name: 'ADIM 3  Kayipsiz JPEG optimizasyonu (390 ZIP, en uzun adim)'
+        if: ${{ always() && steps.girdiler.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          python scripts/etsy/dijital78_zipopt.py --kok "$ZIP_KOK" --pdf _work/thankyou.pdf \
+            --out _out --opt-dizin _work/optzip --calisma _work/zipopt \
+            --esik 19800000 --is-parca 6 --ornek-dogrula 25
+          df -h /
+
+      - name: Sir taramasi + Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && \
+            rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && \
+            echo "Token geri yazildi" || true
+          if [ -d _out ] && grep -rqaE 'x-api-key|refresh_token|access_token|client_secret' _out/ 2>/dev/null; then
+            echo "::error::ciktida sir benzeri anahtar bulundu, Drive'a yazilmadi"; exit 1
+          fi
+          if [ -z "$(ls -A _out 2>/dev/null)" ]; then
+            echo "::warning::_out bos, Drive'a yazilmadi"; exit 0
+          fi
+          rclone copy _out "$CIKTI" -q
+          echo "Cikti: ASTROLOVE/TEMP/DIJITAL_78/  (dosya | bayt | Drive id)"
+          rclone lsf "$CIKTI" --format "psi" --separator " | " 2>/dev/null | sed 's/^/  - /' || true
+          n=$(find _work/optzip -maxdepth 1 -name '*.zip' 2>/dev/null | wc -l)
+          if [ "$ZIPYUKLE" = "evet" ] && [ "$n" -gt 0 ]; then
+            rclone copy _work/optzip "$CIKTI/ZIP_OPT" -q --transfers 4
+            echo "Optimize ZIP yuklendi: $n dosya -> TEMP/DIJITAL_78/ZIP_OPT/"
+          else
+            echo "Optimize ZIP yuklenmedi (ZIPYUKLE=$ZIPYUKLE, dosya=$n)"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: dijital-78-v2
+          path: _out/
+          if-no-files-found: ignore
+
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone

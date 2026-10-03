@@ -1,0 +1,1 @@
+GOREV_0023 teslim ornek 2026-09-27T07:20:11Z
