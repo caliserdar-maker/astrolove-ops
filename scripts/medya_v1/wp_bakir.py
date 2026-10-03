@@ -437,18 +437,19 @@ def ogeler(ce, et, W):
     return {a: m for a, m in o.items() if m.sum() >= 50}
 
 
-# Serdar 3 Eki (Test 5, ders 49): IKINCI METIN KAPISI. WP ciktisindaki her murekkep parcasi siparisin duz renk baskisinda
-# (ayni sayfa olcusu, birim esleme) karsiligi olan yerde olmali. Karsiligi olmayan buyuk bilesen = ikinci metin / tagline
-# izi (Test 5: hizalamada sahte bant, mesajin kaymis kesik kopyasi) -> FAIL. Tolerans hizalama + kabartma payi.
-IKINCI_TOL = 12             # px (2400 genislik olceginde; k ile olceklenir)
+# Serdar 3 Eki (Test 5, ders 49): IKINCI METIN KAPISI. WP ciktisindaki her murekkep parcasinin, siparisin duz renk
+# baskisinin WP geometrisine GUVENILIR bant donusumleriyle tasinmis katmaninda (D_cu) karsiligi olmali. Karsiligi olmayan
+# buyuk bilesen = ikinci metin / tagline izi (Test 5: sahte bant donusumuyle mesajin kaymis kesik kopyasi) -> FAIL.
+# Birim esleme kullanilmaz: CI ve WP duzenleri oge oge kayabilir (hizala bunun icin var; 3 Eki 390 kosusu AQUARIUS_LIBRA).
+IKINCI_TOL = 12             # px (2400 genislik olceginde; k ile olceklenir): kabartma + yuvarlama payi
 IKINCI_ALAN = 100           # px^2 (2400 olceginde; k^2 ile olceklenir) en buyuk yabanci bilesen siniri
 
 
-def ikinci_metin(out, P_kagit, B_ci, P_ci, k):
-    """out / P_kagit: WP cikti ve kagidi (daire cikarilmis plate); B_ci / P_ci: siparisin duz renk baskisi ve kagidi,
-    WP boyutunda. Yabanci = cikti murekkebi - genisletilmis siparis murekkebi."""
+def ikinci_metin(out, P_kagit, D_beklenen, k):
+    """out / P_kagit: WP cikti ve kagidi (daire cikarilmis plate); D_beklenen: siparis duz renk baskisinin WP
+    geometrisine tasinmis katmani (baski - kagit). Yabanci = cikti murekkebi - genisletilmis beklenen murekkep."""
     m_out = wk.murekkep_maskesi(out - P_kagit, kenar=0)
-    m_ci = wk.murekkep_maskesi(B_ci - P_ci, kenar=0)
+    m_ci = wk.murekkep_maskesi(D_beklenen, kenar=0)
     t = max(1, int(round(IKINCI_TOL * k)))
     m_ci = cv2.dilate(m_ci.astype(np.uint8), np.ones((2 * t + 1, 2 * t + 1), np.uint8)).astype(bool)
     y = (m_out & ~m_ci).astype(np.uint8)
@@ -463,7 +464,6 @@ def ikinci_metin(out, P_kagit, B_ci, P_ci, k):
         r['kutu'] = [x0, y0, x0 + w, y0 + h]
     r['gecti'] = bool(r['en_buyuk'] < sinir)
     return r
-
 
 def qc(out, P_wp, S_wp, bilgi, et, daire, hedef, plate_iz=None, ek=None):
     """Tek QC, PASS/FAIL (a-e burada; f kabartma ve g kontrast `ek` ile gelir). P_wp = baskinin kagidi (daire

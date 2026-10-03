@@ -2,7 +2,8 @@
 """Serdar 3 Eki (Test 5 WP tagline cift baski) testleri.
 1) hizala: WP kaynaginda karsiligi olmayan sahte ince bant (doku lekesi) guvenilmez sayilir, en yakin guvenilir bandin
    donusumu gecer; tasinan katmanda o bolgeye baska yerin murekkebi gelmez.
-2) ikinci metin kapisi (iki yonlu): mesajin kaymis kesik kopyasi olan cikti FAIL, temiz cikti PASS."""
+2) ikinci metin kapisi (iki yonlu): mesajin kaymis kesik kopyasi olan cikti FAIL, temiz cikti PASS.
+3) kapi beklenen katmani tasinmis haliyle olcer: CI'ya gore 40 px kaymis oge (duzen farki) yabanci sayilmaz."""
 import sys
 from pathlib import Path
 
@@ -61,20 +62,30 @@ def test_ikinci_metin_iki_yon():
     P = kagit(2)
     B_ci = sayfa(P)                                                # siparisin duz renk baskisi
     temiz = sayfa(P, kayma=2)                                     # WP cikti: ayni metin, 2 px hizalama farki
-    r = wb.ikinci_metin(temiz, P, B_ci, P, W / 2400.0)
+    r = wb.ikinci_metin(temiz, P, B_ci - P, W / 2400.0)
     assert r['gecti'] and r['bilesen'] == 0, r
     hayalet = temiz.copy()                                         # Test 5: mesajin saga kaymis, alti kesik kopyasi
     kop = sayfa(P)[930:1010, 0:W - 300]
     bolge = hayalet[880:920, 300:W]
     bolge[:] = np.where((kop[40:80] - P[930:970, 0:W - 300]).__abs__().max(-1, keepdims=True) > 30,
                         kop[40:80], bolge)
-    r2 = wb.ikinci_metin(hayalet, P, B_ci, P, W / 2400.0)
+    r2 = wb.ikinci_metin(hayalet, P, B_ci - P, W / 2400.0)
     assert not r2['gecti'] and r2['bilesen'] >= 1 and 880 <= r2['kutu'][1] <= 920, r2
     return r, r2
+
+
+def test_duzen_farki():
+    P = kagit(3)
+    B_ci = sayfa(P)
+    wp = sayfa(P, kayma=40)                                        # WP duzeninde ogeler 40 px asagida
+    D_tasinmis = wp - P                                            # hizala + katman_tasi sonucu (guvenilir bant)
+    assert not wb.ikinci_metin(wp, P, B_ci - P, W / 2400.0)['gecti']   # birim esleme: yanlis alarm
+    assert wb.ikinci_metin(wp, P, D_tasinmis, W / 2400.0)['gecti']     # tasinmis katman: PASS
 
 
 if __name__ == '__main__':
     test_sahte_bant(); print('PASS test_sahte_bant')
     r, r2 = test_ikinci_metin_iki_yon()
+    test_duzen_farki(); print('PASS test_duzen_farki')
     print('PASS test_ikinci_metin_iki_yon', 'temiz en_buyuk', r['en_buyuk'], '| hayalet en_buyuk', r2['en_buyuk'],
           'esik', r2['esik_alan'])
