@@ -1,0 +1,239 @@
+{
+ "bant_eleme": {
+  "tum": [
+   [
+    140,
+    196
+   ],
+   [
+    1047,
+    2224
+   ],
+   [
+    2655,
+    2940
+   ],
+   [
+    3083,
+    3203
+   ],
+   [
+    3600,
+    3705
+   ],
+   [
+    3983,
+    4005
+   ]
+  ],
+  "piksel": [
+   650,
+   280309,
+   33944,
+   53978,
+   27821,
+   160
+  ]
+ },
+ "cift": "SCORPIO_VIRGO",
+ "renk": {
+  "ogeler": {
+   "buyuk_sembol": {
+    "rgb": [
+     107.5,
+     68.9,
+     23.6
+    ],
+    "dolu_px": 212831,
+    "Lk": 124.5,
+    "cv": 0.1423
+   },
+   "kucuk_sembol": {
+    "rgb": [
+     113.8,
+     75.2,
+     21.7
+    ],
+    "dolu_px": 23139,
+    "Lk": 114.7,
+    "cv": 0.1554
+   },
+   "isim": {
+    "rgb": [
+     107.9,
+     72.2,
+     25.0
+    ],
+    "dolu_px": 33544,
+    "Lk": 105.2,
+    "cv": 0.2263
+   },
+   "mesaj": {
+    "rgb": [
+     113.6,
+     77.1,
+     27.0
+    ],
+    "dolu_px": 17753,
+    "Lk": 93.6,
+    "cv": 0.2213
+   }
+  },
+  "hepsi": {
+   "rgb": [
+    107.5,
+    69.2,
+    23.4
+   ],
+   "dolu_px": 276829,
+   "Lk": 121.1,
+   "cv": 0.1656
+  }
+ },
+ "boy": "11x14",
+ "tuval": [
+  3307,
+  4200
+ ],
+ "plate": "VINTAGE_B3_11x14",
+ "kaynak": {
+  "orijinal": "POD_PRINT/SCORPIO_VIRGO/WARM_PARCHMENT/11x14.jpg"
+ },
+ "bantlar": {
+  "buyuk_sembol": [
+   1047,
+   2224
+  ],
+  "kucuk_sembol": [
+   2655,
+   2940
+  ],
+  "isim": [
+   3083,
+   3203
+  ],
+  "mesaj": [
+   3600,
+   3705
+  ]
+ },
+ "buyuk_sembol": {
+  "katman": "main_symbols/scorpio_virgo_gold.png",
+  "kutu": [
+   936,
+   1047,
+   2371,
+   2224
+  ],
+  "olcek": 0.20750668114984203,
+  "x": 938,
+  "y": 1045,
+  "w": 1432,
+  "h": 1179,
+  "ncc": 0.9728
+ },
+ "kucuk_sembol_sol": {
+  "katman": "zodiac_symbols_gold/scorpio_symbol_gold.png",
+  "kutu": [
+   892,
+   2665,
+   1203,
+   2920
+  ],
+  "olcek": 0.22787340893614794,
+  "x": 892,
+  "y": 2665,
+  "w": 310,
+  "h": 256,
+  "ncc": 0.9593
+ },
+ "kucuk_sembol_sag": {
+  "katman": "zodiac_symbols_gold/virgo_symbol_gold.png",
+  "kutu": [
+   2185,
+   2655,
+   2469,
+   2940
+  ],
+  "olcek": 0.23778019534491227,
+  "x": 2185,
+  "y": 2657,
+  "w": 283,
+  "h": 283,
+  "ncc": 0.973
+ },
+ "isim": {
+  "font": "Cinzel.ttf",
+  "wght": 500,
+  "taban_y": 3203,
+  "govde_px": {
+   "sol": 120,
+   "sag": 119
+  },
+  "punto": {
+   "sol": 169,
+   "sag": 168,
+   "kullanilan": 168
+  },
+  "kutu_sol": [
+   695,
+   3083,
+   1400,
+   3203
+  ],
+  "kutu_sag": [
+   2041,
+   3084,
+   2612,
+   3203
+  ],
+  "bosluk_sol": 189,
+  "bosluk_sag": 188,
+  "satir_merkez_x": 1653.5,
+  "poster_merkez_x": 1653.5,
+  "kenar_payi": 331
+ },
+ "sonsuz": {
+  "kutu": [
+   1589,
+   3113,
+   1853,
+   3195
+  ],
+  "merkez_x": 1721.0,
+  "genislik": 264,
+  "katman": "orijinal posterden murekkep gucu (yuksek cozunurluklu kaynak yok: HAZIR/infinity.png 187x58)"
+ },
+ "sembol_isim_dx": {
+  "sol": 0.0,
+  "sag": 0.5
+ },
+ "sembol_isim_dy": {
+  "sol": 163,
+  "sag": 144
+ },
+ "mesaj": {
+  "font": "EBGaramond-Italic.ttf",
+  "wght": 400,
+  "kutu": [
+   1160,
+   3600,
+   2143,
+   3705
+  ],
+  "T_govde_px": 101,
+  "punto": 154,
+  "taban_y": 3705,
+  "merkez_x": 1651.5,
+  "genislik_siniri": 2334
+ },
+ "zemin": {
+  "dosya": "motor/varlik/plates/VINTAGE_B3_11x14_temiz.png",
+  "sha256": "981c51799885e0e576b644b0c93df74181df79b26732787768def1cc0065be1a",
+  "kaynak": {
+   "dosya": "TEMP/SIPARIS_ISIM/PLATES/VINTAGE_B3_11x14.png",
+   "sha256": "2cd7c2aef3074961f8e5a9ca9bedece1c651c077806e602326e9d75d541fe91d"
+  },
+  "kayit": "motor/varlik/plates/VINTAGE_B3_11x14_temiz.json"
+ }
+}

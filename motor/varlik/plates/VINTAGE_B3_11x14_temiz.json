@@ -1,0 +1,513 @@
+{
+ "kaynak": {
+  "dosya": "TEMP/SIPARIS_ISIM/PLATES/VINTAGE_B3_11x14.png",
+  "sha256": "2cd7c2aef3074961f8e5a9ca9bedece1c651c077806e602326e9d75d541fe91d"
+ },
+ "temiz": {
+  "dosya": "motor/varlik/plates/VINTAGE_B3_11x14_temiz.png",
+  "sha256": "981c51799885e0e576b644b0c93df74181df79b26732787768def1cc0065be1a"
+ },
+ "kusur": [
+  {
+   "yon": "dikey",
+   "tur": "acik",
+   "x": 887,
+   "y": [
+    2827,
+    2935
+   ],
+   "boy": 109,
+   "kontrast": 10.0,
+   "gorunur_oran": 0.972
+  },
+  {
+   "yon": "dikey",
+   "tur": "acik",
+   "x": 1018,
+   "y": [
+    3016,
+    3125
+   ],
+   "boy": 110,
+   "kontrast": 7.1,
+   "gorunur_oran": 1.0
+  },
+  {
+   "yon": "dikey",
+   "tur": "acik",
+   "x": 1128,
+   "y": [
+    3681,
+    3792
+   ],
+   "boy": 112,
+   "kontrast": 9.0,
+   "gorunur_oran": 0.991
+  },
+  {
+   "yon": "yatay",
+   "tur": "acik",
+   "y": 1147,
+   "x": [
+    2953,
+    3055
+   ],
+   "boy": 103,
+   "kontrast": 13.9,
+   "gorunur_oran": 0.922
+  }
+ ],
+ "onarim": [
+  {
+   "cizgi": {
+    "yon": "dikey",
+    "tur": "acik",
+    "x": 887,
+    "y": [
+     2827,
+     2935
+    ],
+    "boy": 109,
+    "kontrast": 10.0,
+    "gorunur_oran": 0.972
+   },
+   "onarim": {
+    "serit": {
+     "x": [
+      883,
+      891
+     ],
+     "y": [
+      2817,
+      2945
+     ]
+    },
+    "komsu_sol": [
+     878,
+     881
+    ],
+    "komsu_sag": [
+     893,
+     896
+    ],
+    "haric_yazi_px": 19
+   }
+  },
+  {
+   "cizgi": {
+    "yon": "dikey",
+    "tur": "acik",
+    "x": 1018,
+    "y": [
+     3016,
+     3125
+    ],
+    "boy": 110,
+    "kontrast": 7.1,
+    "gorunur_oran": 1.0
+   },
+   "onarim": {
+    "serit": {
+     "x": [
+      1014,
+      1022
+     ],
+     "y": [
+      3006,
+      3135
+     ]
+    },
+    "komsu_sol": [
+     1009,
+     1012
+    ],
+    "komsu_sag": [
+     1024,
+     1027
+    ],
+    "haric_yazi_px": 5
+   }
+  },
+  {
+   "cizgi": {
+    "yon": "dikey",
+    "tur": "acik",
+    "x": 1128,
+    "y": [
+     3681,
+     3792
+    ],
+    "boy": 112,
+    "kontrast": 9.0,
+    "gorunur_oran": 0.991
+   },
+   "onarim": {
+    "serit": {
+     "x": [
+      1124,
+      1132
+     ],
+     "y": [
+      3671,
+      3802
+     ]
+    },
+    "komsu_sol": [
+     1119,
+     1122
+    ],
+    "komsu_sag": [
+     1134,
+     1137
+    ],
+    "haric_yazi_px": 16
+   }
+  },
+  {
+   "cizgi": {
+    "yon": "yatay",
+    "tur": "acik",
+    "y": 1147,
+    "x": [
+     2953,
+     3055
+    ],
+    "boy": 103,
+    "kontrast": 13.9,
+    "gorunur_oran": 0.922
+   },
+   "onarim": {
+    "serit": {
+     "x": [
+      1143,
+      1151
+     ],
+     "y": [
+      2943,
+      3065
+     ]
+    },
+    "komsu_sol": [
+     1138,
+     1141
+    ],
+    "komsu_sag": [
+     1153,
+     1156
+    ],
+    "haric_yazi_px": 200
+   }
+  }
+ ],
+ "degisen_px": 4618,
+ "kagit_once": {
+  "dE_ort": 0.427,
+  "dE_p95": 1.513
+ },
+ "qc": {
+  "kalan_cizgi": [],
+  "kagit": {
+   "dE_ort": 0.429,
+   "dE_p95": 1.52
+  },
+  "esik_dE_ort": 0.5,
+  "iz": {
+   "kucuk_sembol": {
+    "iz_orani": 0.989,
+    "koyulasma": 0.03,
+    "glif_px": 33944,
+    "kontrol": {
+     "iz_orani": 0.895,
+     "koyulasma": -0.96,
+     "glif_px": 33944
+    },
+    "gecti": true
+   },
+   "isim": {
+    "iz_orani": 1.053,
+    "koyulasma": 0.24,
+    "glif_px": 53978,
+    "kontrol": {
+     "iz_orani": 1.065,
+     "koyulasma": 0.51,
+     "glif_px": 53978
+    },
+    "gecti": true
+   },
+   "mesaj": {
+    "iz_orani": 1.052,
+    "koyulasma": -0.1,
+    "glif_px": 27821,
+    "kontrol": {
+     "iz_orani": 1.116,
+     "koyulasma": 1.63,
+     "glif_px": 27821
+    },
+    "gecti": true
+   },
+   "gecti": true,
+   "esik": {
+    "iz_orani_max": 1.25
+   }
+  },
+  "gecti": true
+ },
+ "diger_plateler_gosterge": {
+  "VINTAGE_11x14": [
+   [
+    "dikey",
+    505,
+    [
+     3125,
+     3234
+    ]
+   ],
+   [
+    "dikey",
+    344,
+    [
+     3078,
+     3178
+    ]
+   ],
+   [
+    "dikey",
+    416,
+    [
+     1100,
+     1203
+    ]
+   ],
+   [
+    "dikey",
+    708,
+    [
+     1037,
+     1142
+    ]
+   ],
+   [
+    "dikey",
+    777,
+    [
+     1810,
+     1977
+    ]
+   ],
+   [
+    "dikey",
+    887,
+    [
+     2827,
+     2935
+    ]
+   ],
+   [
+    "dikey",
+    1018,
+    [
+     3017,
+     3125
+    ]
+   ],
+   [
+    "yatay",
+    [
+     2974,
+     3074
+    ],
+    1143
+   ],
+   [
+    "yatay",
+    [
+     2943,
+     3048
+    ],
+    1581
+   ],
+   [
+    "yatay",
+    [
+     2911,
+     3016
+    ],
+    2772
+   ],
+   [
+    "yatay",
+    [
+     2952,
+     3055
+    ],
+    1146
+   ],
+   [
+    "yatay",
+    [
+     2862,
+     2986
+    ],
+    3515
+   ]
+  ],
+  "VINTAGE_B1_11x14": [
+   [
+    "dikey",
+    887,
+    [
+     2827,
+     2935
+    ]
+   ],
+   [
+    "dikey",
+    1018,
+    [
+     3016,
+     3125
+    ]
+   ],
+   [
+    "dikey",
+    1128,
+    [
+     3682,
+     3792
+    ]
+   ],
+   [
+    "yatay",
+    [
+     2953,
+     3055
+    ],
+    1147
+   ]
+  ],
+  "VINTAGE_B2_11x14": [
+   [
+    "dikey",
+    887,
+    [
+     2827,
+     2935
+    ]
+   ],
+   [
+    "dikey",
+    1018,
+    [
+     3016,
+     3125
+    ]
+   ],
+   [
+    "dikey",
+    1128,
+    [
+     3682,
+     3792
+    ]
+   ],
+   [
+    "yatay",
+    [
+     2953,
+     3055
+    ],
+    1147
+   ]
+  ],
+  "VINTAGE_CANVA_11x14": [
+   [
+    "dikey",
+    505,
+    [
+     3123,
+     3232
+    ]
+   ],
+   [
+    "dikey",
+    532,
+    [
+     1140,
+     1254
+    ]
+   ],
+   [
+    "dikey",
+    2839,
+    [
+     3727,
+     3831
+    ]
+   ],
+   [
+    "dikey",
+    432,
+    [
+     1227,
+     1328
+    ]
+   ],
+   [
+    "dikey",
+    776,
+    [
+     1808,
+     1978
+    ]
+   ],
+   [
+    "dikey",
+    887,
+    [
+     2826,
+     2933
+    ]
+   ],
+   [
+    "dikey",
+    1018,
+    [
+     3015,
+     3123
+    ]
+   ],
+   [
+    "dikey",
+    2739,
+    [
+     3753,
+     3854
+    ]
+   ],
+   [
+    "yatay",
+    [
+     2964,
+     3074
+    ],
+    1145
+   ],
+   [
+    "yatay",
+    [
+     2943,
+     3048
+    ],
+    1582
+   ],
+   [
+    "yatay",
+    [
+     2908,
+     3016
+    ],
+    2770
+   ]
+  ]
+ }
+}
