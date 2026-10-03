@@ -1,0 +1,79 @@
+name: drive-dala-al
+
+# Drive dosyalarini (ASTROLOVE altinda) bir claude/* dalina commit eder; .zip istenirse acilir.
+# Claude'un sandbox'i Drive'dan buyuk dosya indiremez; bu yuzden runner -> dal -> git pull.
+# Yalniz claude/ ile baslayan dallara yazar. Etsy YOK, Drive'a yazma YOK.
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+    inputs:
+      dosyalar:
+        description: "ASTROLOVE altinda dosya yollari, ; ile ayrilmis"
+        required: true
+      dal:
+        description: "Hedef dal (claude/ ile baslamali)"
+        required: true
+      dizin:
+        description: "Daldaki hedef dizin"
+        required: true
+      zip_ac:
+        description: "true: .zip dosyalari hedef dizine acilir (zip'in kendisi commit edilmez)"
+        type: boolean
+        default: true
+
+jobs:
+  al:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Dal denetimi
+        env:
+          DAL: ${{ inputs.dal }}
+          DIZIN: ${{ inputs.dizin }}
+        run: |
+          case "$DAL" in claude/*) ;; *) echo "DUR: dal claude/ ile baslamali" >&2; exit 1;; esac
+          case "$DIZIN" in /*|*..*|.github*) echo "DUR: gecersiz dizin" >&2; exit 1;; esac
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.dal }}
+      - name: rclone
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Indir + commit
+        env:
+          DOSYALAR: ${{ inputs.dosyalar }}
+          DAL: ${{ inputs.dal }}
+          DIZIN: ${{ inputs.dizin }}
+          ZIP_AC: ${{ inputs.zip_ac }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$DIZIN" /tmp/al
+          IFS=';' read -ra L <<< "$DOSYALAR"
+          for y in "${L[@]}"; do
+            y="$(echo "$y" | xargs)"; [ -n "$y" ] || continue
+            ad="$(basename "$y")"
+            rclone copyto "gdrive:ASTROLOVE/$y" "/tmp/al/$ad"
+            sha256sum "/tmp/al/$ad" | tee -a "$GITHUB_STEP_SUMMARY"
+            if [ "$ZIP_AC" = "true" ] && [[ "$ad" == *.zip ]]; then
+              unzip -o -q "/tmp/al/$ad" -d "$DIZIN"
+            else
+              cp "/tmp/al/$ad" "$DIZIN/"
+            fi
+          done
+          find "$DIZIN" -type f -exec sha256sum {} + | sort -k2 | tee -a "$GITHUB_STEP_SUMMARY"
+          git config user.name "astrolove-ops"; git config user.email "actions@users.noreply.github.com"
+          git add -A "$DIZIN"
+          git diff --cached --quiet && { echo "degisiklik yok"; exit 0; }
+          git commit -qm "drive-dala-al: $DIZIN (${GITHUB_RUN_ID})"
+          git push origin "HEAD:$DAL"
