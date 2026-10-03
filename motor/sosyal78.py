@@ -42,7 +42,7 @@ def cift_isle(K, r, C):
 
     rc, son = kos('olc', [sys.executable, str(KOK / 'olc.py'), '--kaynak', str(K), '--cift', c, '--renk', 'MIDNIGHT_BLUE',
                          '--boy', '16x20', '--plate', 'BLUE_16x20', '--orijinal', str(orj), '--plate-dosya', str(pl),
-                         '--altin', '--cikti', str(S)])
+                         '--altin', '--govde-profil', '0.15', '--cikti', str(S)])
     if rc:
         return {**sonuc, 'hata': 'olc: ' + ' '.join(son), 'sure_sn': round(time.time() - t, 1)}
     rc, son = kos('motor', [sys.executable, str(KOK / 'motor.py'), '--kaynak', str(K), '--sabit', str(S),
@@ -106,12 +106,24 @@ def main():
     ap.add_argument('--cikti', required=True)
     ap.add_argument('--is', type=int, default=3, dest='isler')
     ap.add_argument('--cift', nargs='*')
+    ap.add_argument('--parca', type=int, help='Actions matrisi: bu parca (0..N-1), liste sirasi i %% N')
+    ap.add_argument('--parca-sayisi', type=int, default=1)
+    ap.add_argument('--birlestir', nargs='*', help='parca SONUC json dosyalari -> OLCUM_78.md + TEMAS_78.jpg '
+                                                   '(PNG\'ler --cikti dizininde)')
+    ap.add_argument('--sure', type=float, help='--birlestir: toplam sure (sn)')
     a = ap.parse_args()
     K, C = Path(a.kaynak).resolve(), Path(a.cikti).resolve()
     C.mkdir(parents=True, exist_ok=True)
     liste = list(csv.DictReader(open(K / 'liste.csv', encoding='utf-8')))
+    if a.birlestir:
+        sonuc = [s for f in a.birlestir for s in json.loads(Path(f).read_text())['hucreler']]
+        sira = [r['cift'] for r in liste]
+        sonuc.sort(key=lambda s: sira.index(s['cift']))
+        return rapor(sonuc, C, a.sure)
     if a.cift:
         liste = [r for r in liste if r['cift'] in a.cift]
+    if a.parca is not None:
+        liste = [r for i, r in enumerate(liste) if i % a.parca_sayisi == a.parca]
     sonuc, n = [], len(liste)
     with ProcessPoolExecutor(a.isler) as ex:
         fs = [ex.submit(cift_isle, K, r, C) for r in liste]
@@ -123,11 +135,19 @@ def main():
                   f"{s['cift']} {'PASS' if s['gecti'] else 'FAIL'} e {s.get('e')} {s.get('hata', '')}", flush=True)
     sira = [r['cift'] for r in liste]
     sonuc.sort(key=lambda s: sira.index(s['cift']))
+    if a.parca is not None:
+        (C / f'SONUC_parca{a.parca}.json').write_text(json.dumps({'hucreler': sonuc, 'sure_sn': round(time.time() - T0, 1)},
+                                                                 indent=1, ensure_ascii=False))
+        sys.exit(0)
+    rapor(sonuc, C, None)
+
+
+def rapor(sonuc, C, sure):
     tm = temas(sonuc, C, C / 'TEMAS_78.jpg')
     ok = lambda v: '-' if v is None else ('PASS' if v else 'FAIL')
     gec = [s for s in sonuc if s['gecti']]
     md = ['# OLCUM_78: sosyal medya posterleri, MIDNIGHT_BLUE 4x5 (16x20, 4800x6000, 300 dpi)', '',
-          f"Toplam sure: {(time.time() - T0) / 60:.1f} dk. PASS {len(gec)} / {len(sonuc)}. Kapilar 3307 px QC olceginde; "
+          f"Toplam sure: {(sure if sure is not None else time.time() - T0) / 60:.1f} dk. PASS {len(gec)} / {len(sonuc)}. Kapilar 3307 px QC olceginde; "
           f"e esigi MIDNIGHT_BLUE {json.loads((KOK / 'sabitler' / 'E_ESIK.json').read_text())['MIDNIGHT_BLUE']['esik']}.",
           '', 'FAIL (uretilmedi): ' + (', '.join(f"{s['cift']} ({s.get('hata') or ', '.join(k for k, v in s.get('motor', {}).items() if not v) or 'orijinal oz testi: ' + ', '.join(k for k, v in s.get('orijinal', {}).items() if not v)})" for s in sonuc if not s['gecti']) or 'yok'),
           '', '| no | cift | sol / sag | tagline | a | b | c dE | d OCR | e (motor / orijinal) | renk dE orijinale | SONUC | sure |',
@@ -142,7 +162,7 @@ def main():
                   f" | {ok(s['gecti'])}{' ' + s['hata'] if s.get('hata') else ''} | {s['sure_sn']} s |")
     md += ['', f"Temas: TEMAS_78.jpg ({tm['px'][0]}x{tm['px'][1]}, {tm['bayt'] / 1e6:.1f} MB)"]
     (C / 'OLCUM_78.md').write_text('\n'.join(md) + '\n')
-    (C / 'SONUC_78.json').write_text(json.dumps({'hucreler': sonuc, 'temas': tm, 'sure_sn': round(time.time() - T0, 1)},
+    (C / 'SONUC_78.json').write_text(json.dumps({'hucreler': sonuc, 'temas': tm, 'sure_sn': sure or round(time.time() - T0, 1)},
                                                 indent=1, ensure_ascii=False))
     print('\n'.join(md[:6]))
     sys.exit(0)

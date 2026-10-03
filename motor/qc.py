@@ -66,11 +66,11 @@ def halka_alfa(Z, shape):
     return np.asarray(al, np.float32)
 
 
-def ocr(img, beyaz=None):
+def ocr(img, beyaz=None, psm='7'):
     with tempfile.TemporaryDirectory() as d:
         p = Path(d) / 'a.png'
         Image.fromarray(img).save(p)
-        kom = ['tesseract', str(p), 'stdout', '--psm', '7']
+        kom = ['tesseract', str(p), 'stdout', '--psm', psm]
         if beyaz:
             kom += ['-c', f'tessedit_char_whitelist={beyaz}']
         return subprocess.run(kom, capture_output=True, text=True).stdout.strip()
@@ -207,11 +207,22 @@ def renk_bandi(L, ink, Z, esik=None):
                     ys.append(y); v.append(float(np.median(L[y, x0:x1][sel])))
             if len(v) < 20:
                 continue
-            v = np.asarray(v)
-            sm = np.convolve(np.pad(v, k, mode='edge'), g, 'valid')
-            r = np.abs(v - sm)
-            i = int(np.argmax(r[3:-3])) + 3
-            sonuc.append({'grup': grup, 'x': [int(x0), int(x1)], 'sapma': round(float(r[i]), 2), 'satir': ys[i]})
+            # profil yalniz bitisik satir parcalarinda (3 Eki, 78 cift: yukselen harf uclari 2 satir, sonra 4 satir
+            # bosluk; atlanan satirlar arasindaki tasarim gradyani 'basamak' olcuyordu). Parca >= 2k+1 satir.
+            ys_a, v = np.asarray(ys), np.asarray(v)
+            kes = np.nonzero(np.diff(ys_a) > 1)[0] + 1
+            en_k = None
+            for pv, py in zip(np.split(v, kes), np.split(ys_a, kes)):
+                if len(pv) < 2 * k + 1:
+                    continue
+                sm = np.convolve(np.pad(pv, k, mode='edge'), g, 'valid')
+                r = np.abs(pv - sm)
+                i = int(np.argmax(r[3:-3])) + 3
+                if en_k is None or r[i] > en_k[0]:
+                    en_k = (float(r[i]), int(py[i]))
+            if en_k is None:
+                continue
+            sonuc.append({'grup': grup, 'x': [int(x0), int(x1)], 'sapma': round(en_k[0], 2), 'satir': en_k[1]})
     en = max((x['sapma'] for x in sonuc), default=0.0)
     esik = esik or E_ESIK
     return {'kelimeler': sonuc, 'en_buyuk': en, 'esik': esik, 'gecti': bool(sonuc) and en <= esik}
@@ -271,8 +282,17 @@ def olc(ad, S, P, O, Z, isim1, isim2, mesaj, e_esik=None):
         y0, y1 = isb[0]
         kk = kumeler(ink[y0:y1], 80 * W / 3307)
         if len(kk) == 3:
-            o1 = ocr(ikili(S, P, ink, y0, y1, *kk[0]), 'ABCDEFGHIJKLMNOPQRSTUVWXYZÇĞİÖŞÜ')
-            o2 = ocr(ikili(S, P, ink, y0, y1, *kk[2]), 'ABCDEFGHIJKLMNOPQRSTUVWXYZÇĞİÖŞÜ')
+            # tagline ile ayni olcek sirasi (2x, 1x, 0.5x; 3 Eki 78 cift: SIENNA 2x'te 'STENNA'); beklenenle ayni
+            # okuyan ilk olcek. Yanlis dizilmis isim hicbir olcekte ayni okunmaz.
+            def oku_isim(k, bek):
+                # tek kelime: psm 7 (satir) sonra psm 8 (kelime; 3 Eki: SIENNA psm 7'de her olcekte 'STENNA')
+                for fx in (2, 1, 0.5):
+                    for psm in ('7', '8'):
+                        o = ocr(ikili(S, P, ink, y0, y1, *k, fx=fx), 'ABCDEFGHIJKLMNOPQRSTUVWXYZÇĞİÖŞÜ', psm)
+                        if o == bek:
+                            return o
+                return ocr(ikili(S, P, ink, y0, y1, *k), 'ABCDEFGHIJKLMNOPQRSTUVWXYZÇĞİÖŞÜ')
+            o1, o2 = oku_isim(kk[0], isim1), oku_isim(kk[2], isim2)
             d = {'sol': o1, 'sag': o2, 'beklenen': [isim1, isim2], 'gecti': o1 == isim1 and o2 == isim2,
                  'satir_merkez_x': round((kk[0][0] + kk[2][1]) / 2, 1), 'poster_merkez_x': W / 2}
         else:

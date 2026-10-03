@@ -159,13 +159,27 @@ def katman_cifti(S, f, yer):
     return A[..., :3][ce], S[y0:y1, x0:x1][ce]
 
 
-def profil_olc(S, ink, x0, x1, ust, taban):
+def profil_olc(S, ink, x0, x1, ust, taban, govde=0.0):
     """Altin yazi dokusu ORIJINALDEN: kelimenin harf cekirdegi (5x5 asindirilmis murekkep) satir ortanca RGB'si,
     ust..taban satirlari. Gecerli satir: cekirdek >= 15 piksel ve >= satir ortancasinin %25'i (serif / yatay cubuk
     satirlarinda birkac pikselin ortancasi gurultu: 3 Eki olcumu, ardisik satir 101 / 173 luma). Gecersiz satir en
     yakin gecerli satirlardan dogrusal; profil sigma 2 satir Gauss ile yumusatilir (qc e olcegi; orijinal kelimenin
     kendi e degeri 1.6-2.2)."""
     ce = cv2.erode(ink.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
+    if govde:
+        # yalniz dikey govde: sutundaki dikey kosusu >= govde x yukseklik olan cekirdek pikselleri (3 Eki, 78 cift:
+        # AQUARIUS'ta A yatay cizgisi satir profiline tumsek ekliyordu, yeni isimde e 5.2; govde kosusu tum boyuyla
+        # kalir, yatay cubuk / serif dusar)
+        y0, y1 = max(0, ust - 2), min(ce.shape[0], taban + 2)
+        b = ce[y0:y1, x0:x1]
+        yukari = np.zeros(b.shape, np.int32); asagi = np.zeros(b.shape, np.int32)
+        for i in range(b.shape[0]):
+            yukari[i] = (yukari[i - 1] + 1) * b[i] if i else b[i]
+        for i in range(b.shape[0] - 1, -1, -1):
+            asagi[i] = (asagi[i + 1] + 1) * b[i] if i < b.shape[0] - 1 else b[i]
+        L = max(5, int(govde * (taban - ust)))
+        g = np.zeros_like(ce); g[y0:y1, x0:x1] = b & (yukari + asagi - 1 >= L)
+        ce = g
     pr, n = [], []
     for y in range(ust, taban):
         sel = ce[y, x0:x1]
@@ -203,6 +217,8 @@ def main():
     ap.add_argument('--orijinal', help='orijinal satis posteri (varsayilan: KAYNAK/orijinal_WP_11x14.jpg)')
     ap.add_argument('--plate-dosya', help='plate dosyasi (varsayilan: KAYNAK/plates/<plate>.png)')
     ap.add_argument('--altin', action='store_true', help='altin edisyon: katman tablosu (LUT) + yazi dokusu olc')
+    ap.add_argument('--govde-profil', type=float, default=0.0,
+                    help='yazi profili yalniz dikey govdeden (kosu >= oran x yukseklik; 78 cift: 0.15)')
     ap.add_argument('--mesaj-isim-tonu', action='store_true', help='tagline dokusu = isim altini (Serdar: DEEP_BLACK)')
     a = ap.parse_args()
     K = Path(a.kaynak)
@@ -214,6 +230,10 @@ def main():
     b0 = bantlar(ink)
     toplam = ink.sum()
     b = [x for x in b0 if ink[x[0]:x[1]].sum() >= 0.01 * toplam]      # gurultu bantlari (kagit lekesi) < %1
+    if len(b) > 4:
+        # ana sembol birden cok banda bolunebilir (3 Eki, ARIES_LIBRA: terazi alt cubugu > 40 px bosluk): yerlesim
+        # sabit, son uc bant kucuk sembol / isim / mesaj; ustteki bantlar tek buyuk sembol bandi
+        b = [[b[0][0], b[-4][1]]] + b[-3:]
     if len(b) != 4:
         sys.exit(f'FAIL: 4 bant bekleniyordu (buyuk sembol, kucuk sembol, isim, mesaj), bulunan {b}')
     bb, kb, ib, mb = b
@@ -244,7 +264,19 @@ def main():
         yy = np.nonzero(ink[ib[0]:ib[1], x0:x1].any(1))[0]
         kut.append([int(x0), int(ib[0] + yy.min()), int(x1), int(ib[0] + yy.max() + 1)])
     isim_sol, sonsuz, isim_sag = kut
-    # taban cizgisi: isim kutusunun alti (SCORPIO / VIRGO'da inen harf yok)
+    # inen harf (AQUARIUS'ta Q kuyrugu): harf kumelerinin alt kenar ortancasi taban olur, kutu tabana kirpilir.
+    # Inen harf yoksa (SCORPIO / VIRGO, CANCER / LIBRA) kutu degismez (sabitler birebir ayni).
+    inen = {}
+    for t, k in (('sol', isim_sol), ('sag', isim_sag)):
+        alt = []
+        for x0, x1 in kumeler(ink[k[1]:k[3], k[0]:k[2]], 2):
+            yy = np.nonzero(ink[k[1]:k[3], k[0] + x0:k[0] + x1].any(1))[0]
+            alt.append(k[1] + int(yy.max()) + 1)
+        orta = int(np.median(alt))
+        if k[3] - orta > 0.08 * (orta - k[1]):
+            inen[t] = {'kutu_alt': k[3], 'taban': orta}
+            k[3] = orta
+    # taban cizgisi: isim kutusunun alti (inen harf haric)
     taban = int(round((isim_sol[3] + isim_sag[3]) / 2))
     cap = {'sol': isim_sol[3] - isim_sol[1], 'sag': isim_sag[3] - isim_sag[1]}
     cinzel = FONT / 'Cinzel.ttf'
@@ -256,6 +288,8 @@ def main():
                  'bosluk_sol': sonsuz[0] - isim_sol[2], 'bosluk_sag': isim_sag[0] - sonsuz[2],
                  'satir_merkez_x': round(satir_merkez, 1), 'poster_merkez_x': W / 2,
                  'kenar_payi': int(round(0.10 * W))}
+    if inen:
+        R['isim']['inen_harf'] = inen
     R['sonsuz'] = {'kutu': sonsuz, 'merkez_x': (sonsuz[0] + sonsuz[2]) / 2, 'genislik': sonsuz[2] - sonsuz[0],
                    'katman': 'orijinal posterden murekkep gucu (yuksek cozunurluklu kaynak yok: HAZIR/infinity.png 187x58)'}
     # sembol-isim hizasi (SECENEK D): kucuk sembol merkezi isim merkezinin ustunde
@@ -291,9 +325,12 @@ def main():
               'kucuk_sembol': [katman_cifti(S, K / f'sym_{b}_gold.png', R[f'kucuk_sembol_{t}'])
                                for t, b in (('sol', sol), ('sag', sag))]}
         R['altin'] = {k: lut_olc(v) for k, v in cf.items()}
-        R['altin']['isim_sol'] = profil_olc(S, ink, isim_sol[0], isim_sol[2], isim_sol[1], isim_sol[3])
-        R['altin']['isim_sag'] = profil_olc(S, ink, isim_sag[0], isim_sag[2], isim_sag[1], isim_sag[3])
-        R['altin']['mesaj'] = profil_olc(S, ink_m, mk[0], mk[2], int(mb[0] + yy.min()), R['mesaj']['taban_y'])
+        gv = a.govde_profil
+        R['altin']['isim_sol'] = profil_olc(S, ink, isim_sol[0], isim_sol[2], isim_sol[1], isim_sol[3], gv)
+        R['altin']['isim_sag'] = profil_olc(S, ink, isim_sag[0], isim_sag[2], isim_sag[1], isim_sag[3], gv)
+        R['altin']['mesaj'] = profil_olc(S, ink_m, mk[0], mk[2], int(mb[0] + yy.min()), R['mesaj']['taban_y'], gv)
+        if gv:
+            R['altin']['profil_olcum'] = f'dikey govde kosusu >= {gv} x yukseklik'
         R['isaret'] = isaret(P)
         if a.mesaj_isim_tonu:
             # Serdar 3 Eki (ADIM 1): DEEP_BLACK tagline tonu isim altini ile ayni -> tagline dokusu = iki isim
