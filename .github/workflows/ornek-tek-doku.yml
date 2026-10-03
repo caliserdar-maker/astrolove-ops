@@ -40,7 +40,8 @@ jobs:
         run: |
           set -euo pipefail
           cd ornek && awk '{print $1"  "$2}' SHA.txt | sha256sum -c -
-          cd DUZELTILMIS && awk '{print $1"  "$2}' SHA.txt | sha256sum -c -
+          (cd DUZELTILMIS && awk '{print $1"  "$2}' SHA.txt | sha256sum -c -)
+          cd GRADIENT && awk '{print $1"  "$2}' SHA.txt | sha256sum -c -
       - name: Drive'a yukle (TEMP/MOTOR/SOSYAL/TEK_DOKU_ORNEK)
         run: |
           set -euo pipefail
@@ -50,5 +51,6 @@ jobs:
           rclone lsl "$D"
           N=$(rclone lsf "$D" | grep -cE '_(TEK_DOKU_4x5\.png|YANYANA\.jpg)$'); echo "dosya: $N"; [ "$N" = 6 ]
           N=$(rclone lsf "$D/DUZELTILMIS" | grep -cE '_(TEK_DOKU_4x5\.png|YANYANA\.jpg)$'); echo "duzeltilmis: $N"; [ "$N" = 6 ]
+          N=$(rclone lsf "$D/GRADIENT" | grep -cE '_(TEK_DOKU_4x5\.png|YANYANA\.jpg)$'); echo "gradient: $N"; [ "$N" = 6 ]
       - if: always()
         run: rm -rf ~/.config/rclone
