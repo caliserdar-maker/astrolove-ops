@@ -1,0 +1,98 @@
+name: motor-sosyal
+
+# ADIM 2 (3 Eki 2026, Serdar onayi): Instagram posteri, motor ile katmanlardan. CANCER_LIBRA MIDNIGHT_BLUE 4x5 (16x20,
+# 4800x6000, 300 dpi). EMILY (Cancer, sol) / JAMES (Libra, sag), "It Began With a Kiss in the Rain". Sabitler satistaki
+# orijinal posterden (motor/olc.py --altin). QC a-e (motor/qc.py). Kaynak: inceleme/motor-kaynak-sosyal (MANIFEST sha).
+# Cikti yalniz Drive TEMP/MOTOR/SOSYAL/<kosu>/. Etsy YOK, musteri YOK, paylasim YOK.
+
+on:
+  push:
+    branches: [motor]
+    paths: [motor/sosyal.trigger]
+
+permissions:
+  contents: read
+
+jobs:
+  sosyal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Kaynak paketi (inceleme/motor-kaynak-sosyal)
+        run: |
+          set -euo pipefail
+          git fetch -q --depth 1 origin inceleme/motor-kaynak-sosyal
+          git worktree add -q _k FETCH_HEAD
+          cd _k && git log -1 --format='kaynak %H' && cat KAYNAK.txt
+          for f in $(find . -name '*.parca00'); do b=${f%.parca00}; cat $b.parca* > $b; rm $b.parca*; done
+          python3 - <<'PY'
+          import hashlib
+          for s in open('MANIFEST.txt'):
+              p, n, h = s.rstrip('\n').split('\t')
+              assert hashlib.sha256(open(p, 'rb').read()).hexdigest() == h, p
+          print('MANIFEST sha: TAMAM')
+          PY
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q numpy pillow opencv-python-headless pymupdf
+          sudo apt-get install -y -q tesseract-ocr >/dev/null
+          tesseract --version | head -1
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Olcum + motor + QC
+        env:
+          ISIM1: EMILY
+          ISIM2: JAMES
+          MESAJ: "It Began With a Kiss in the Rain"
+        run: |
+          set -euo pipefail
+          T0=$(date +%s)
+          S=motor/sabitler/CANCER_LIBRA_MB_16x20.json; O=_cikti; mkdir -p $O; Y=$O/SABITLER_YENIDEN_OLCUM.json
+          echo "kod $(git rev-parse HEAD)"
+          python3 motor/olc.py --kaynak _k --cift CANCER_LIBRA --renk MIDNIGHT_BLUE --boy 16x20 --plate BLUE_16x20 \
+            --orijinal _k/orijinal.jpg --altin --cikti $Y > /dev/null
+          python3 -c "import json;a=json.load(open('$Y'));b=json.load(open('$S'));print('sabitler yeniden olcum == depo:', a == b, [k for k in b if a.get(k) != b[k]])"
+          cp $S $O/SABITLER_CANCER_LIBRA_MB_16x20.json
+          python3 motor/motor.py --kaynak _k --sabit $S --isim1 "$ISIM1" --isim2 "$ISIM2" --mesaj "$MESAJ" \
+            --orijinal _k/orijinal.jpg --cikti $O
+          python3 motor/qc.py --kaynak _k --sabit $S --motor $O/MOTOR.png --isim1 "$ISIM1" --isim2 "$ISIM2" --mesaj "$MESAJ" \
+            --cikti $O/QC.json --orijinal _k/orijinal.jpg --orijinal-metin "CANCER|LIBRA|Two Souls · One Bond" \
+            --plate-dosya _k/plates/BLUE_16x20.png --test5 yok && echo PASS > $O/QC_SONUC.txt || echo FAIL > $O/QC_SONUC.txt
+          python3 motor/karsilastir.py --sayfa "ORIJINAL SATIS POSTERI (CANCER_LIBRA MIDNIGHT_BLUE 16x20)=_k/orijinal.jpg" \
+            --sayfa "YENI MOTOR (EMILY / JAMES, katmanlardan)=$O/MOTOR.png" --cikti $O/YANYANA_TAM_SAYFA.png --jpg $O/YANYANA_TAM_SAYFA.jpg
+          cd $O
+          N=AstroLoveArt_Emily_James_Cancer_Libra_Midnight_Blue_4x5
+          mv MOTOR.png $N.png; rm -f MOTOR.pdf _beklenen_maske.npy YANYANA_TAM_SAYFA.png
+          mv QC.md OLCUM.md
+          { echo "kod (motor dali): $(git rev-parse HEAD)"; echo "kaynak (inceleme/motor-kaynak-sosyal): $(git -C ../_k rev-parse HEAD)";
+            echo "kosu: ${{ github.run_id }}"; echo "sure_sn: $(( $(date +%s) - T0 ))"; sha256sum $N.png YANYANA_TAM_SAYFA.jpg SABITLER_*;
+            python3 -c "from PIL import Image; Image.MAX_IMAGE_PIXELS=None; im=Image.open('$N.png'); print('png', im.size, im.info.get('dpi'))";
+            ls -l YANYANA_TAM_SAYFA.jpg; echo "QC: $(cat QC_SONUC.txt)"; } > KOSU.txt
+          cat KOSU.txt OLCUM.md
+      - name: Drive'a yukle (TEMP/MOTOR/SOSYAL/<kosu>)
+        run: |
+          set -euo pipefail
+          D="gdrive:ASTROLOVE/TEMP/MOTOR/SOSYAL/${{ github.run_id }}"
+          rclone copy _cikti "$D"
+          rclone lsl "$D"
+          grep -qx PASS _cikti/QC_SONUC.txt
+      - if: always()
+        run: rm -rf ~/.config/rclone

@@ -112,6 +112,146 @@ def metin_katmani(metin, f, pr, govde_ust):
     return K, taban, [int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1]
 
 
+def pdf_yaz(im, C, W, H):
+    """PDF: sayfa W/300 x H/300 inc, 300 dpi goruntu (JPEG 95, eski sistemle ayni)."""
+    import fitz
+    jp = C / '_sayfa.jpg'
+    im.save(jp, 'JPEG', quality=95, subsampling=0, dpi=(300, 300))
+    d = fitz.open()
+    pg = d.new_page(width=W / 300 * 72, height=H / 300 * 72)
+    pg.insert_image(pg.rect, filename=str(jp))
+    d.save(C / 'MOTOR.pdf')
+    jp.unlink()
+
+
+def altin_bas(a, Z, K, C, i1, i2, mesaj, rap):
+    """ALTIN edisyonlar (MIDNIGHT_BLUE, DEEP_BLACK, PURE_WHITE, CHAMPAGNE_IVORY): orijinal, altin katmanlarin plate
+    ustune normal (alfa) bindirmesi (olculdu: oge disinda isilti yok, S - P p99 0.9). Sayfa = plate x (1 - A) + renk:
+      semboller : altin katman, rengi orijinalden olculen kanal tablosuyla (LUT, katman -> orijinal)
+      isim/mesaj: Cinzel / EB Garamond alfa, renk = orijinal kelimenin harf cekirdegi satir profili (olculen)
+      sonsuz    : orijinal posterden fark (S - P), satirla kayar (yuksek cozunurluklu kaynak yok)"""
+    W, H = Z['tuval']
+    sol, sag = (x.lower() for x in Z['cift'].split('_'))
+    pf = Path(a.plate_dosya) if a.plate_dosya else K / 'plates' / f"{Z['plate']}.png"
+    rap['zemin'] = {'dosya': pf.name, 'sha256': hashlib.sha256(pf.read_bytes()).hexdigest()}
+    P = np.asarray(Image.open(pf).convert('RGB'), np.float32)
+    if P.shape[:2] != (H, W):
+        sys.exit(f'FAIL: plate boyu {P.shape[:2]} != tuval {(H, W)}')
+    Cp = np.zeros((H, W, 3), np.float32)                               # on carpilmis renk
+    A = np.zeros((H, W), np.float32)
+    maske = {}
+    AL = Z['altin']
+
+    def bindir(ad, renk, al, x, y):
+        h, w = al.shape
+        x0, y0, x1, y1 = max(0, x), max(0, y), min(W, x + w), min(H, y + h)
+        aa = al[y0 - y:y1 - y, x0 - x:x1 - x]
+        cc = renk[y0 - y:y1 - y, x0 - x:x1 - x]
+        Cp[y0:y1, x0:x1] = Cp[y0:y1, x0:x1] * (1 - aa[..., None]) + cc * aa[..., None]
+        A[y0:y1, x0:x1] = A[y0:y1, x0:x1] * (1 - aa) + aa
+        mm = np.zeros((H, W), bool); mm[y0:y1, x0:x1] = aa > 0.02
+        maske[ad] = mm
+
+    def lut_uygula(rgb01, lut):
+        g = rgb01 * 255
+        return np.stack([np.interp(g[..., c], np.arange(256), np.asarray(lut[c], np.float32)) for c in range(3)], -1)
+
+    b = Z['buyuk_sembol']
+    k = olcekle(K / f'main_{sol}_{sag}_gold.png', b['w'], b['h'])
+    bindir('buyuk_sembol', lut_uygula(k[..., :3], AL['buyuk_sembol']['lut']), k[..., 3], b['x'], b['y'])
+    del k
+    log('buyuk sembol', b['w'], b['h'], b['x'], b['y'])
+
+    # isim satiri (SECENEK D, WP ile ayni kural)
+    I = Z['isim']
+    p = I['punto']['kullanilan']
+    kenar = I['kenar_payi']
+    g_bosluk = (I['bosluk_sol'] + I['bosluk_sag']) / 2
+    son = Z['sonsuz']
+    so = np.asarray(Image.open(a.orijinal).convert('RGB'), np.float32)
+    x0, y0, x1, y1 = son['kutu']
+    pad = 6
+    d_inf = (so - P)[y0 - pad:y1 + pad, x0 - pad:x1 + pad]
+    del so
+    sgn = Z.get('isaret', 1.0)
+    m_inf = np.clip(-(d_inf @ wk.LUMA) * sgn, 0, None)
+    a_inf = (m_inf >= wb.T0).astype(np.float32)                         # wp_bakir.T0 gurultu tabani
+    d_inf = d_inf * a_inf[..., None]
+    pr1, pr2 = np.asarray(AL['isim_sol'], np.float32) / 255, np.asarray(AL['isim_sag'], np.float32) / 255
+    olcek = 1.0
+    for _ in range(20):
+        f = font(I['font'], p * olcek, I['wght'])
+        gov = -f.getbbox('H', anchor='ls')[1]
+        k1, t1, kk1 = metin_katmani(i1, f, pr1, gov)
+        k2, t2, kk2 = metin_katmani(i2, f, pr2, gov)
+        w1, w2 = kk1[2] - kk1[0], kk2[2] - kk2[0]
+        winf = son['genislik'] * olcek
+        top = w1 + g_bosluk * olcek + winf + g_bosluk * olcek + w2
+        if top <= W - 2 * kenar:
+            break
+        olcek *= (W - 2 * kenar) / top * 0.999
+    sx = W / 2 - top / 2
+    taban = I['taban_y']
+    bindir('isim1', k1[..., :3] * 255, k1[..., 3], int(round(sx - kk1[0])), int(round(taban - t1)))
+    inf_x = sx + w1 + g_bosluk * olcek
+    if olcek != 1:
+        d_inf = cv2.resize(d_inf, None, fx=olcek, fy=olcek, interpolation=cv2.INTER_AREA)
+        a_inf = cv2.resize(a_inf, None, fx=olcek, fy=olcek, interpolation=cv2.INTER_AREA)
+    inf_y = int(round(y0 - pad + (son['kutu'][3] - son['kutu'][1]) * (1 - olcek) / 2))
+    inf_x0 = int(round(inf_x - pad * olcek))
+    x2 = inf_x + winf + g_bosluk * olcek
+    bindir('isim2', k2[..., :3] * 255, k2[..., 3], int(round(x2 - kk2[0])), int(round(taban - t2)))
+    merk = {'sol': sx + w1 / 2, 'sag': x2 + w2 / 2}
+    rap['isim_satiri'] = {'olcek': round(olcek, 4), 'punto': round(p * olcek, 1), 'baslangic_x': round(sx, 1),
+                          'genislik': round(top, 1), 'merkez_x': round(sx + top / 2, 1), 'isim_merkez': merk}
+    log('isim satiri', rap['isim_satiri'])
+
+    for t, burc in (('sol', sol), ('sag', sag)):
+        s = Z[f'kucuk_sembol_{t}']
+        kx = (s['kutu'][0] + s['kutu'][2]) / 2
+        ix = (I[f'kutu_{t}'][0] + I[f'kutu_{t}'][2]) / 2
+        dx = merk[t] - ix
+        k = olcekle(K / f'sym_{burc}_gold.png', s['w'], s['h'])
+        bindir(f'kucuk_sembol_{t}', lut_uygula(k[..., :3], AL['kucuk_sembol']['lut']), k[..., 3],
+               int(round(s['x'] + dx)), s['y'])
+        rap.setdefault('kucuk_sembol', {})[t] = {'merkez_x': round(kx + dx, 1), 'isim_merkez_x': round(merk[t], 1)}
+
+    MS = Z['mesaj']
+    prm = np.asarray(AL[AL.get('mesaj_profili', 'mesaj')], np.float32) / 255
+    pm = MS['punto']
+    for _ in range(20):
+        f = font(MS['font'], pm, MS['wght'])
+        gov = -f.getbbox('T', anchor='ls')[1]
+        km, tm, kkm = metin_katmani(mesaj, f, prm, gov)
+        wm = kkm[2] - kkm[0]
+        if wm <= MS['genislik_siniri']:
+            break
+        pm *= MS['genislik_siniri'] / wm * 0.999
+    bindir('mesaj', km[..., :3] * 255, km[..., 3], int(round(W / 2 - wm / 2 - kkm[0])), int(round(MS['taban_y'] - tm)))
+    rap['mesaj'] = {'punto': round(pm, 1), 'genislik': wm, 'kuculme': round(pm / MS['punto'], 4),
+                    'profil': AL.get('mesaj_profili', 'mesaj')}
+    log('tagline', rap['mesaj'])
+
+    out = P * (1 - A[..., None]) + Cp
+    del Cp
+    h, w = a_inf.shape
+    out[inf_y:inf_y + h, inf_x0:inf_x0 + w] += d_inf
+    mm = np.zeros((H, W), bool); mm[inf_y:inf_y + h, inf_x0:inf_x0 + w] = a_inf > 0.02
+    maske['sonsuz'] = mm
+    A[mm] = np.maximum(A[mm], a_inf[a_inf > 0.02])
+    u8 = np.clip(np.round(out), 0, 255).astype(np.uint8)
+    del out
+    im = Image.fromarray(u8)
+    im.save(C / 'MOTOR.png', dpi=(300, 300))
+    np.save(C / '_beklenen_maske.npy', np.packbits(A > 0.02))
+    json.dump({k: [int(x) for x in np.nonzero(v.any(1))[0][[0, -1]]] + [int(x) for x in np.nonzero(v.any(0))[0][[0, -1]]]
+               for k, v in maske.items()}, open(C / '_oge_kutulari.json', 'w'))
+    pdf_yaz(im, C, W, H)
+    rap['sure_sn'] = round(time.time() - T0, 1)
+    (C / 'MOTOR_RAPOR.json').write_text(json.dumps(rap, indent=1, ensure_ascii=False))
+    log('bitti', C)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--kaynak', required=True)
@@ -121,6 +261,8 @@ def main():
     ap.add_argument('--mesaj', required=True)
     ap.add_argument('--cikti', required=True)
     ap.add_argument('--tr', action='store_true', help='Turkce buyuk harf kurali (i -> İ)')
+    ap.add_argument('--orijinal', help='orijinal satis posteri (varsayilan: KAYNAK/orijinal_WP_11x14.jpg)')
+    ap.add_argument('--plate-dosya', help='altin edisyon plate dosyasi (varsayilan: KAYNAK/plates/<plate>.png)')
     a = ap.parse_args()
     K, C = Path(a.kaynak), Path(a.cikti)
     C.mkdir(parents=True, exist_ok=True)
@@ -130,6 +272,9 @@ def main():
     i1, i2 = buyuk(unicodedata.normalize('NFC', a.isim1), a.tr), buyuk(unicodedata.normalize('NFC', a.isim2), a.tr)
     mesaj = unicodedata.normalize('NFC', a.mesaj)
     rap = {'girdi': {'isim1': i1, 'isim2': i2, 'mesaj': mesaj}}
+    if Z.get('mod') == 'altin':
+        a.orijinal = a.orijinal or str(K / 'orijinal_WP_11x14.jpg')
+        return altin_bas(a, Z, K, C, i1, i2, mesaj, rap)
 
     # ---- murekkep gucu haritasi (katmanlar)
     P_c = np.asarray(Image.open(K / 'plates' / 'MODERN_11x14.png').convert('RGB'), np.float32)

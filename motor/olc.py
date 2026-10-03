@@ -23,6 +23,9 @@ import wp_katman as wk                                                # noqa: E4
 
 Image.MAX_IMAGE_PIXELS = None
 FONT = Path(__file__).resolve().parent / 'font'
+ORAN = {'16x20': '4x5', '8x10': '4x5', '18x24': '3x4', '12x16': '3x4', '24x36': '2x3', '12x18': '2x3', '11x14': '11x14',
+        'A2': 'A', 'A3': 'A', 'A4': 'A'}
+TAG_SINIR = {'2x3': 1905, '3x4': 1788, '4x5': 1670, '11x14': 1694, 'A': 1788}   # kisisel-v1 ORAN_SABITLERI (2400 px)
 MIN_ALAN = 150         # gurultu bileseni alt siniri (olculen: kagit benekleri kenar seritlerinde, tagline noktasi > 150)
 ORTA = (0.10, 0.90)    # tasarim ogeleri bu yatay aralikta (kenar payi %10); disi kagit dokusu
 
@@ -31,8 +34,18 @@ def oku(f, mod='RGB'):
     return np.asarray(Image.open(f).convert(mod), np.float32)
 
 
+def isaret(P):
+    """+1: acik kagit (murekkep kagittan koyu); -1: koyu kagit (MIDNIGHT_BLUE / DEEP_BLACK, altin kagittan acik)."""
+    return -1.0 if float(np.median(P[::16, ::16] @ wk.LUMA)) < 128 else 1.0
+
+
+def guc(S, P):
+    """murekkep gucu: |kagit - poster| lumasi, kagit yonune gore isaretli (acik kagitta P - S)."""
+    return np.clip(((P - S) @ wk.LUMA) * isaret(P), 0, None)
+
+
 def murekkep(S, P):
-    m = np.clip((P - S) @ wk.LUMA, 0, None)
+    m = guc(S, P)
     n, lab, st, _ = cv2.connectedComponentsWithStats((m > wk.ESIK).astype(np.uint8), 8)
     W = m.shape[1]
     cx = st[:, cv2.CC_STAT_LEFT] + st[:, cv2.CC_STAT_WIDTH] / 2
@@ -121,6 +134,52 @@ def punto_bul(dosya, wght, metin, hedef_px, kucuk=False):
     return int(round((lo + hi) / 2))
 
 
+def lut_olc(cifler):
+    """Altin edisyonlar: katman rengi -> orijinal renk, kanal basina 256 girisli tablo. Girdi: (katman RGB, orijinal RGB)
+    cekirdek piksel ciftleri (alfa > 0.98). Kutu basina ortalama, >= 20 piksel olan degerler arasi dogrusal."""
+    G = np.concatenate([g for g, _ in cifler]); S = np.concatenate([s for _, s in cifler])
+    lut = []
+    for c in range(3):
+        gi = np.clip(np.round(G[:, c]).astype(int), 0, 255)
+        n = np.bincount(gi, minlength=256); t = np.bincount(gi, weights=S[:, c], minlength=256)
+        v = np.nonzero(n >= 20)[0]
+        lut.append([round(float(x), 1) for x in np.interp(np.arange(256), v, t[v] / n[v])])
+    return {'lut': lut, 'n': int(len(G))}
+
+
+def katman_cifti(S, f, yer):
+    """oturtulmus katmanin cekirdek pikselleri: (katman RGB, orijinal RGB)."""
+    A = np.asarray(Image.open(f).convert('RGBA').resize((yer['w'], yer['h']), Image.LANCZOS), np.float32)
+    x, y = yer['x'], yer['y']
+    H, W = S.shape[:2]
+    x0, y0, x1, y1 = max(0, x), max(0, y), min(W, x + yer['w']), min(H, y + yer['h'])
+    A = A[y0 - y:y1 - y, x0 - x:x1 - x]
+    ce = A[..., 3] > 0.98 * 255
+    return A[..., :3][ce], S[y0:y1, x0:x1][ce]
+
+
+def profil_olc(S, ink, x0, x1, ust, taban):
+    """Altin yazi dokusu ORIJINALDEN: kelimenin harf cekirdegi (5x5 asindirilmis murekkep) satir ortanca RGB'si,
+    ust..taban satirlari. Gecerli satir: cekirdek >= 15 piksel ve >= satir ortancasinin %25'i (serif / yatay cubuk
+    satirlarinda birkac pikselin ortancasi gurultu: 3 Eki olcumu, ardisik satir 101 / 173 luma). Gecersiz satir en
+    yakin gecerli satirlardan dogrusal; profil sigma 2 satir Gauss ile yumusatilir (qc e olcegi; orijinal kelimenin
+    kendi e degeri 1.6-2.2)."""
+    ce = cv2.erode(ink.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
+    pr, n = [], []
+    for y in range(ust, taban):
+        sel = ce[y, x0:x1]
+        n.append(int(sel.sum()))
+        pr.append(np.median(S[y, x0:x1][sel], 0) if sel.sum() else np.zeros(3))
+    pr, n = np.asarray(pr, np.float32), np.asarray(n)
+    ok = n >= max(15, 0.25 * np.median(n[n > 0]))
+    i = np.nonzero(ok)[0]
+    g = np.exp(-0.5 * (np.arange(-6, 7) / 2.0) ** 2); g /= g.sum()
+    for c in range(3):
+        pr[:, c] = np.interp(np.arange(len(pr)), i, pr[i, c])
+        pr[:, c] = np.convolve(np.pad(pr[:, c], 6, mode='edge'), g, 'valid')
+    return [[round(float(v), 1) for v in r] for r in pr]
+
+
 def renk_olc(S, m, maske):
     """Ogenin dolu murekkep pikselleri (m >= 0.9 x ortanca) ortalama RGB'si (wp_bakir.DOLU ile ayni tanim).
     cv: cekirdek (3x3 asindirilmis murekkep) icinde m std / ortanca = golgelenme genligi (kabartma, parilti)."""
@@ -140,11 +199,15 @@ def main():
     ap.add_argument('--boy', required=True)
     ap.add_argument('--plate', required=True)
     ap.add_argument('--cikti', required=True)
+    ap.add_argument('--orijinal', help='orijinal satis posteri (varsayilan: KAYNAK/orijinal_WP_11x14.jpg)')
+    ap.add_argument('--plate-dosya', help='plate dosyasi (varsayilan: KAYNAK/plates/<plate>.png)')
+    ap.add_argument('--altin', action='store_true', help='altin edisyon: katman tablosu (LUT) + yazi dokusu olc')
     a = ap.parse_args()
     K = Path(a.kaynak)
     sol, sag = (x.lower() for x in a.cift.split('_'))
-    S = oku(K / 'orijinal_WP_11x14.jpg'); P = oku(K / 'plates' / f'{a.plate}.png')
+    S = oku(a.orijinal or K / 'orijinal_WP_11x14.jpg'); P = oku(a.plate_dosya or K / 'plates' / f'{a.plate}.png')
     H, W = S.shape[:2]
+    q = W / 3307                                                       # kume bosluklari 11x14'te olculdu
     m, ink = murekkep(S, P)
     b0 = bantlar(ink)
     toplam = ink.sum()
@@ -161,7 +224,7 @@ def main():
     hk = kutu(ink[bb[0]:bb[1]]); hk = [hk[0], hk[1] + bb[0], hk[2], hk[3] + bb[0]]
     R['buyuk_sembol'] = {'katman': f'main_symbols/{sol}_{sag}_gold.png', 'kutu': hk, **oturt(m, ink, hk, al, ak)}
     # kucuk semboller
-    kk = kumeler(ink[kb[0]:kb[1]], 200)
+    kk = kumeler(ink[kb[0]:kb[1]], 200 * q)
     if len(kk) != 2:
         sys.exit(f'FAIL: kucuk sembol kume sayisi {len(kk)}')
     for taraf, burc, (x0, x1) in (('sol', sol, kk[0]), ('sag', sag, kk[1])):
@@ -171,7 +234,7 @@ def main():
         R[f'kucuk_sembol_{taraf}'] = {'katman': f'zodiac_symbols_gold/{burc}_symbol_gold.png', 'kutu': hk,
                                      **oturt(m, ink, hk, al, ak)}
     # isim satiri: sol isim / sonsuz / sag isim (kelime ici harf boslugu < 80 px)
-    ik = kumeler(ink[ib[0]:ib[1]], 80)
+    ik = kumeler(ink[ib[0]:ib[1]], 80 * q)
     if len(ik) != 3:
         sys.exit(f'FAIL: isim satiri kume sayisi {len(ik)} (sol, sonsuz, sag bekleniyordu)')
     kut = []
@@ -198,17 +261,20 @@ def main():
                                     - (k[0] + k[2]) / 2, 1) for t, k in (('sol', isim_sol), ('sag', isim_sag))}
     R['sembol_isim_dy'] = {t: R['isim']['kutu_' + t][1] - R[f'kucuk_sembol_{t}']['kutu'][3] for t in ('sol', 'sag')}
     # mesaj (tagline): 'T' govdesi ile punto, taban = ilk kelimenin (Two) alt kenari
-    mk = kutu(ink[mb[0]:mb[1]]); mk = [mk[0], mk[1] + mb[0], mk[2], mk[3] + mb[0]]
-    ilk = kumeler(ink[mb[0]:mb[1]], 30)[0]
-    t_x = kumeler(ink[mb[0]:mb[1], ilk[0]:ilk[1]], 3)[0]                 # ilk harf (T)
-    yy = np.nonzero(ink[mb[0]:mb[1], ilk[0] + t_x[0]:ilk[0] + t_x[1]].any(1))[0]
+    # tagline kumesi: kelime boslugu < 400 px kumelerin en genisi (bant icindeki tek yildiz / kagit beneki disarida)
+    tx0, tx1 = max(kumeler(ink[mb[0]:mb[1]], 400 * q), key=lambda k: k[1] - k[0])
+    ink_m = np.zeros_like(ink); ink_m[mb[0]:mb[1], tx0:tx1] = ink[mb[0]:mb[1], tx0:tx1]
+    mk = kutu(ink_m[mb[0]:mb[1]]); mk = [mk[0], mk[1] + mb[0], mk[2], mk[3] + mb[0]]
+    ilk = [k for k in kumeler(ink_m[mb[0]:mb[1]], 30 * q) if k[0] >= tx0][0]
+    t_x = kumeler(ink_m[mb[0]:mb[1], ilk[0]:ilk[1]], 3)[0]                 # ilk harf (T)
+    yy = np.nonzero(ink_m[mb[0]:mb[1], ilk[0] + t_x[0]:ilk[0] + t_x[1]].any(1))[0]
     t_govde = int(yy.max() - yy.min() + 1)
-    yy_w = np.nonzero(ink[mb[0]:mb[1], ilk[0]:ilk[1]].any(1))[0]
+    yy_w = np.nonzero(ink_m[mb[0]:mb[1], ilk[0]:ilk[1]].any(1))[0]
     ebg = FONT / 'EBGaramond-Italic.ttf'
     R['mesaj'] = {'font': 'EBGaramond-Italic.ttf', 'wght': 400, 'kutu': mk, 'T_govde_px': t_govde,
                   'punto': punto_bul(ebg, 400, 'T', t_govde), 'taban_y': int(mb[0] + yy_w.max() + 1),
                   'merkez_x': round((mk[0] + mk[2]) / 2, 1),
-                  'genislik_siniri': round(1694 / 2400 * W)}   # ORAN_SABITLERI 11x14 tagline_genislik_siniri
+                  'genislik_siniri': round(TAG_SINIR[ORAN[a.boy]] / 2400 * W)}   # ORAN_SABITLERI tagline_genislik_siniri
     # renk: dolu murekkep ortalamasi (oge gruplari)
     renk = {}
     for ad, (y0, y1) in R['bantlar'].items():
@@ -216,6 +282,17 @@ def main():
         renk[ad] = dict(zip(('rgb', 'dolu_px', 'Lk', 'cv'), renk_olc(S, m, mm)))
     tum = renk_olc(S, m, ink)
     R['renk'] = {'ogeler': renk, 'hepsi': dict(zip(('rgb', 'dolu_px', 'Lk', 'cv'), tum))}
+    if a.altin:
+        # altin edisyon (koyu / acik kagit): semboller katman + olculen tablo; yazi dokusu orijinal satir profili
+        R['mod'] = 'altin'
+        cf = {'buyuk_sembol': [katman_cifti(S, K / f'main_{sol}_{sag}_gold.png', R['buyuk_sembol'])],
+              'kucuk_sembol': [katman_cifti(S, K / f'sym_{b}_gold.png', R[f'kucuk_sembol_{t}'])
+                               for t, b in (('sol', sol), ('sag', sag))]}
+        R['altin'] = {k: lut_olc(v) for k, v in cf.items()}
+        R['altin']['isim_sol'] = profil_olc(S, ink, isim_sol[0], isim_sol[2], isim_sol[1], isim_sol[3])
+        R['altin']['isim_sag'] = profil_olc(S, ink, isim_sag[0], isim_sag[2], isim_sag[1], isim_sag[3])
+        R['altin']['mesaj'] = profil_olc(S, ink_m, mk[0], mk[2], int(mb[0] + yy.min()), R['mesaj']['taban_y'])
+        R['isaret'] = isaret(P)
     Path(a.cikti).parent.mkdir(parents=True, exist_ok=True)
     Path(a.cikti).write_text(json.dumps(R, indent=1, ensure_ascii=False))
     print(json.dumps(R, indent=1, ensure_ascii=False))

@@ -72,7 +72,7 @@ jobs:
           S=motor/sabitler/SCORPIO_VIRGO_WP_11x14.json; O=_cikti; mkdir -p $O
           echo "kod $(git rev-parse HEAD)"
           python3 motor/motor.py --kaynak _k --sabit $S --isim1 "$ISIM1" --isim2 "$ISIM2" --mesaj "$MESAJ" --cikti $O
-          python3 motor/qc.py --kaynak _k --sabit $S --motor $O/MOTOR.png --isim1 "$ISIM1" --isim2 "$ISIM2" --mesaj "$MESAJ" --cikti $O/QC.json --negatif _negatif_deneme2.png
+          python3 motor/qc.py --kaynak _k --sabit $S --motor $O/MOTOR.png --isim1 "$ISIM1" --isim2 "$ISIM2" --mesaj "$MESAJ" --cikti $O/QC.json --negatif _negatif_deneme2.png --test5-fail
           python3 motor/karsilastir.py --orijinal _k/orijinal_WP_11x14.jpg --eski _k/test5_WP_11x14.jpeg --motor $O/MOTOR.png --cikti $O/YANYANA_TAM_SAYFA.png --jpg $O/YANYANA_TAM_SAYFA.jpg
           python3 motor/kesit.py --sabit $S --eski _k/test5_WP_11x14.jpeg --motor $O/MOTOR.png --cikti $O
           cd $O

@@ -15,21 +15,25 @@ FONT = Path(__file__).resolve().parent / 'font' / 'EBGaramond-Italic.ttf'
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--orijinal', required=True)
-    ap.add_argument('--eski', required=True)
-    ap.add_argument('--motor', required=True)
+    ap.add_argument('--orijinal')
+    ap.add_argument('--eski')
+    ap.add_argument('--motor')
+    ap.add_argument('--sayfa', action='append', help='"ETIKET=dosya" (tekrarlanir; verilirse yukaridakiler yerine)')
     ap.add_argument('--cikti', required=True)
     ap.add_argument('--jpg', help='ayrica JPG (tam sayfa, < 10 MB: kalite 92..60, gerekirse olcek kuculur)')
     a = ap.parse_args()
     sayfa = [('ORIJINAL SATIS POSTERI (SCORPIO_VIRGO WARM_PARCHMENT 11x14)', a.orijinal),
              ('TEST 5 ESKI SISTEM (siparis-dijital, 9000000005 sayfa 4)', a.eski),
              ('YENI MOTOR (katmanlardan, temiz zemin)', a.motor)]
+    if a.sayfa:
+        sayfa = [tuple(x.split('=', 1)) for x in a.sayfa]
     ims = [Image.open(f).convert('RGB') for _, f in sayfa]
     W, H = ims[0].size
     if any(im.size != (W, H) for im in ims):
         raise SystemExit(f'FAIL: sayfa olculeri farkli {[im.size for im in ims]}')
     ara, ust = 60, 160
-    c = Image.new('RGB', (3 * W + 2 * ara, H + ust), 'white')
+    n = len(sayfa)
+    c = Image.new('RGB', (n * W + (n - 1) * ara, H + ust), 'white')
     d = ImageDraw.Draw(c)
     f = ImageFont.truetype(str(FONT), 72)
     for i, ((ad, _), im) in enumerate(zip(sayfa, ims)):
