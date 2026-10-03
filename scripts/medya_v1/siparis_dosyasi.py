@@ -1920,6 +1920,15 @@ def render_et(ed, oran, sayfa, kaynak_bayt, isimler, mesaj, P_blue, P_ed,
                               hedef_en=hedef_en, boy=boy or ref_boy)
     if poster is None:
         return None, bi, None
+    if ed == 'black':                    # 3 Eki (Serdar): DB tagline tonu isim altinina (mesaj_kapisi.ton_esitle)
+        import mesaj_kapisi
+        o = bi.get('olcum') or {}
+        if mesaj_kapisi.DB_TON['etkin'] and o.get('isim_bant') and o.get('tag_bant'):
+            try:
+                poster, bi['db_ton'] = mesaj_kapisi.ton_esitle(poster, o['isim_bant'], o['tag_bant'],
+                                                               poster.width / 2400.0)
+            except Exception as e:                                # noqa: BLE001  (kapi yine olcer)
+                bi['db_ton'] = {'uygulandi': False, 'hata': f'{type(e).__name__}: {e}'}
     bi['plate_slogan_kapisi'] = pk
     if ek is None or 'maske' not in ek:
         ek = dict(ek or {}); ek['maske'] = degisim_maskesi(poster, kaynak_bayt)

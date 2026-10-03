@@ -172,6 +172,44 @@ def murekkep(a, bant, k=1.0):
     return z, (np.median(kes[c], 0) if c.any() else z), int(c.sum())
 
 
+# DB TON ESITLEME (Serdar 3 Eki; 74 cift on testi 37062933223, DB 5 FAIL): edisyon ton_esle hedefi isim PROFILININ
+# medyani; basilmis isim ise kabartma golgesiyle boyanir -> kapinin olctugu isim murekkebi ile mesaj murekkebi DB'de
+# iki yonde de sapar (yerel: AQUARIUS_CAPRICORN isim 238,194,77 / mesaj 228,172,68 dE 9.8; LEO_SAGITTARIUS 249,182,58 /
+# 254,201,83 dE 9.8). Duzeltme: render sonrasi, KAPI ILE AYNI olcu (murekkep) ile mesaj murekkebi isim murekkebine
+# kanal kazanciyla esitlenir; yalniz koyu zeminde, yalniz altin tonlu murekkep pikseli. Kazanc DAR araliga kirpilir:
+# kucuk ton farki duzelir, gercek renk sapmasi kapida FAIL kalir (test_db_ton). Esikler (DE_ESIK, KONTRAST_ESIK) AYNI.
+DB_TON = {'etkin': os.environ.get('DB_TON_ESITLE', '1') != '0'}
+DB_TON_SINIR = (0.85, 1.15)
+DB_ZEMIN_L = 40.0                  # zemin medyani bundan koyu degilse uygulanmaz (yalniz DB / koyu zemin)
+
+
+def ton_esitle(poster, isim_bant, tag_bant, k=1.0, sinir=DB_TON_SINIR):
+    """Doner (poster, bilgi). poster yerinde degisir (yalniz mesaj bandi satirlari)."""
+    a = np.asarray(poster.convert('RGB') if getattr(poster, 'mode', 'RGB') != 'RGB' else poster)
+    z, ci, ni = murekkep(a, isim_bant, k)
+    zt, ct, nt = murekkep(a, tag_bant, k)
+    if ni == 0 or nt == 0:
+        return poster, {'uygulandi': False, 'sebep': 'murekkep yok'}
+    if float(np.dot(zt, LUMA)) > DB_ZEMIN_L:
+        return poster, {'uygulandi': False, 'sebep': 'zemin koyu degil'}
+    kaz = np.clip(np.asarray(ci, np.float32) / np.maximum(np.asarray(ct, np.float32), 1.0), *sinir)
+    y0, y1 = tag_bant[0] * k, tag_bant[1] * k
+    p = 0.5 * (y1 - y0)
+    r0, r1 = max(int(y0 - p), 0), min(int(y1 + p), a.shape[0])
+    kes = a[r0:r1].astype(np.float32)
+    d = np.abs(kes - zt).max(2)
+    altin = (d > 12) & ((kes[..., 0] - kes[..., 2]) > 0.3 * kes[..., 0])
+    kes[altin] = np.clip(kes[altin] * kaz, 0, 255)
+    if poster.mode != 'RGB':
+        poster = poster.convert('RGB')
+    poster.paste(Image.fromarray(np.round(kes).astype(np.uint8), 'RGB'), (0, r0))
+    L = _lab(np.stack([ci, ct, ct * kaz]))
+    return poster, {'uygulandi': True, 'kazanc': [round(float(v), 3) for v in kaz],
+                    'dE_once': round(float(np.linalg.norm(L[0] - L[1])), 1),
+                    'dE_sonra_tahmin': round(float(np.linalg.norm(L[0] - L[2])), 1),
+                    'piksel': int(altin.sum()), 'sinir': list(sinir)}
+
+
 def kapi(a, isim_bant, tag_bant, k=1.0):
     a = np.asarray(a.convert('RGB') if hasattr(a, 'convert') else a)
     z, ci, ni = murekkep(a, isim_bant, k)
