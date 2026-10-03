@@ -1,0 +1,62 @@
+name: ig-ilan-dogrula
+
+# SALT OKUMA (Etsy'ye yazma YOK): IG/FB caption CSV'sindeki listing_id'ler canli ilanla eslestirilir.
+# Cikti: Drive TEMP/SOSYAL/INSTAGRAM/ILAN_DOGRULA.csv (+ caption CSV kopyasi). Token yenilenirse geri yazilir.
+
+permissions:
+  actions: read
+  contents: read
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  oku:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    env:
+      CAP: data/sosyal/instagram/caption/AstroLove_IG_FB_Captions_78_20261001.csv
+      D: gdrive:ASTROLOVE/TEMP/SOSYAL/INSTAGRAM
+    steps:
+      - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: rclone + token
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+          mkdir -p _work
+          echo "72837bc628b6f6169920a5a6175ee9b9  $CAP" | md5sum -c -
+      - name: Token indir
+        run: rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+      - name: Oku (salt okur)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -uo pipefail
+          python3 scripts/sosyal/ig_ilan_dogrula.py "$CAP" | tee -a "$GITHUB_STEP_SUMMARY"; rc=${PIPESTATUS[0]}
+          [ -f out/ILAN_DOGRULA.csv ] && rclone copyto out/ILAN_DOGRULA.csv "$D/ILAN_DOGRULA.csv"
+          rclone copyto "$CAP" "$D/$(basename "$CAP")"
+          exit $rc
+      - name: Token geri yaz
+        if: always()
+        run: |
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || echo "Token yenilenmedi"
+      - if: always()
+        run: rm -rf _work ~/.config/rclone
