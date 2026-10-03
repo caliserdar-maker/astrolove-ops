@@ -1,0 +1,207 @@
+name: ig-78-uret
+
+# IG/FB 78 cift tek kosu (Serdar 3 Eki 2026): onayli ig_bas.py ile carousel C01-C03 + Reel 9 sn (ig_78_uret.py),
+# Drive TEMP/SOSYAL/INSTAGRAM/MEDYA/v1 + QC, astrolove-media instagram/v1 push + tum URL probu,
+# Metricool CSV (ig_metricool_csv.py): baslangic bossa yalniz 3 gunluk ONIZLEME. Etsy YOK, Metricool'a yukleme YOK.
+# Listing ID'ler ayri salt okur kosuda (ig-ilan-dogrula.yml) dogrulanir; burada Drive ILAN_DOGRULA.csv okunur.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      ciftler:
+        description: "HEPSI ya da virgullu cift listesi"
+        required: true
+        default: HEPSI
+      dry_run:
+        description: "true: uret + Drive; Pages push, prob ve CSV yok"
+        type: boolean
+        default: true
+      yalniz_csv:
+        description: "true: uretim/push YOK; yalniz prob + CSV (baslangic ile)"
+        type: boolean
+        default: false
+      baslangic:
+        description: "Ilk gun (YYYY-MM-DD, Istanbul). Bos: yalniz 3 gunluk onizleme CSV"
+        required: false
+        default: ""
+
+concurrency:
+  group: pin-media-sync
+  cancel-in-progress: false
+
+jobs:
+  uret:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      PAKET: data/sosyal/instagram/cl_ornek_20261003
+      TAG: data/sosyal/instagram/IG_78_ORNEK_ISIM_TAGLINE.csv
+      CAP: data/sosyal/instagram/caption/AstroLove_IG_FB_Captions_78_20261001.csv
+      D: gdrive:ASTROLOVE/TEMP/SOSYAL/INSTAGRAM
+      POSTER: gdrive:ASTROLOVE/TEMP/MOTOR/SOSYAL/78
+      URL_KOK: https://caliserdar-maker.github.io/astrolove-media/instagram/v1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Kurulum (rclone, fontlar, metin_kurali)
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          echo "95ad5f07c75f03c532f718123edb19e7c21528a86c002c2a417eb82329183010  $PAKET/ig_bas.py" | sha256sum -c -
+          echo "72837bc628b6f6169920a5a6175ee9b9  $CAP" | md5sum -c -
+          git show origin/medya-v1:scripts/medya_v1/uretim/metin_kurali.py > /tmp/metin_kurali.py
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+          pip install -q pillow numpy
+          command -v ffmpeg >/dev/null || { sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null; }
+          mkdir -p /tmp/fontlar
+          curl -fsSL -o "/tmp/fontlar/CormorantGaramond[wght].ttf" "https://raw.githubusercontent.com/google/fonts/main/ofl/cormorantgaramond/CormorantGaramond%5Bwght%5D.ttf"
+          curl -fsSL -o "/tmp/fontlar/Manrope[wght].ttf" "https://raw.githubusercontent.com/google/fonts/main/ofl/manrope/Manrope%5Bwght%5D.ttf"
+          sha256sum /tmp/fontlar/*.ttf | tee -a "$GITHUB_STEP_SUMMARY"
+          printf '%s\n' "b20b7d9626dd956b2c5e558692ad328b1f19e3275e2782db4fa07670d83f35e0  /tmp/fontlar/CormorantGaramond[wght].ttf" \
+                        "3ae11c49db0455a3cc33e37d380f20fdb8c7f8b41dc07625c177e3d87a9d6ae6  /tmp/fontlar/Manrope[wght].ttf" | sha256sum -c -
+
+      - name: Posterler (Drive MOTOR/SOSYAL/78)
+        if: ${{ inputs.yalniz_csv != true }}
+        env:
+          CIFTLER: ${{ inputs.ciftler }}
+        run: |
+          set -euo pipefail
+          rclone copy "$POSTER" _poster --include "*.png" --max-depth 1
+          python3 - <<'EOF'
+          import csv, os, sys
+          tum = [r['cift'] for r in csv.DictReader(open(os.environ['TAG']))]
+          sec = tum if os.environ['CIFTLER'] == 'HEPSI' else os.environ['CIFTLER'].split(',')
+          eksik = [c for c in sec if not os.path.exists(f'_poster/{c}.png')]
+          print(f'poster {len(sec) - len(eksik)}/{len(sec)}')
+          sys.exit(f'DUR: poster yok ({len(eksik)}): {", ".join(eksik)}' if eksik else 0)
+          EOF
+          sha256sum _poster/*.png > _poster_sha.txt; wc -l < _poster_sha.txt
+
+      - name: Uret + QC
+        if: ${{ inputs.yalniz_csv != true }}
+        env:
+          CIFTLER: ${{ inputs.ciftler }}
+        run: |
+          set -euo pipefail
+          python3 scripts/sosyal/ig_78_uret.py --paket "$PAKET" --fontlar /tmp/fontlar --tagline "$TAG" --posterler _poster \
+            --cikti _out --ciftler "$CIFTLER" --reel --metin-kurali /tmp/metin_kurali.py | tee _uret.log
+          grep -E '^(SIGMA|QC)' _uret.log >> "$GITHUB_STEP_SUMMARY"
+          (cd _out && find . -type f \( -name '*.jpg' -o -name '*.mp4' \) | sort | xargs sha256sum) > _out/SHA256SUMS.txt
+          cp _poster_sha.txt _out/POSTER_SHA256.txt
+
+      - name: Drive (medya, QC, sha)
+        if: ${{ inputs.yalniz_csv != true }}
+        run: |
+          set -euo pipefail
+          rclone copyto _out/QC.csv "$D/V1_QC.csv"; rclone copyto _out/SIGMA.csv "$D/V1_SIGMA.csv"
+          rclone copyto _out/SHA256SUMS.txt "$D/V1_SHA256SUMS.txt"; rclone copyto _out/POSTER_SHA256.txt "$D/V1_POSTER_SHA256.txt"
+          rclone copy _out "$D/MEDYA/v1" --include "*/*.jpg" --include "*/*.mp4" --stats-one-line -v 2>&1 | tail -2
+
+      - name: Medya reposunu al
+        if: ${{ inputs.dry_run != true }}
+        uses: actions/checkout@v4
+        with:
+          repository: caliserdar-maker/astrolove-media
+          token: ${{ secrets.OPS_ADMIN_TOKEN }}
+          path: media
+
+      - name: Pages push (instagram/v1)
+        if: ${{ inputs.dry_run != true && inputs.yalniz_csv != true }}
+        working-directory: media
+        run: |
+          set -euo pipefail
+          for d in ../_out/*/; do c=$(basename "$d"); mkdir -p "instagram/v1/$c"
+            cp "$d"C0[123]_1080x1350.jpg "$d"REEL_1080x1920_9sn.mp4 "instagram/v1/$c/"; done
+          git add -A instagram/v1
+          n=$(git diff --cached --name-only | wc -l); echo "degisen: $n"; du -sh instagram/v1
+          if [ "$n" != "0" ]; then
+            git config user.name "astrolove-ops"; git config user.email "actions@users.noreply.github.com"
+            git commit -qm "instagram/v1: IG/FB 78 cift ($(date -u +%Y-%m-%d))"; git push
+          fi
+
+      - name: Pages bekle + tum URL probu
+        if: ${{ inputs.dry_run != true }}
+        run: |
+          set -euo pipefail
+          python3 - <<'EOF'
+          import csv, os, subprocess, sys, time
+          k = os.environ['URL_KOK']
+          ciftler = [r['cift'] for r in csv.DictReader(open(os.environ['TAG']))]
+          urls = [(f'{k}/{c}/C0{i}_1080x1350.jpg', 'image/jpeg') for c in ciftler for i in (1, 2, 3)]
+          urls += [(f'{k}/{c}/REEL_1080x1920_9sn.mp4', 'video/mp4') for c in ciftler]
+          def prob(u):
+              o = subprocess.run(['curl', '-s', '-o', '/dev/null', '-m', '60', '-w', '%{http_code}|%{content_type}|%{redirect_url}', u],
+                                 capture_output=True, text=True).stdout
+              return (o.split('|') + ['', '', ''])[:3]
+          son = urls[-1][0]
+          for i in range(60):
+              if prob(f'{son}?v={i}')[0] == '200': break
+              time.sleep(15)
+          hata = []
+          for u, t in urls:
+              c, ct, y = prob(u)
+              if c != '200' or ct != t or y: hata.append(f'{u} -> {c}|{ct}|{y}')
+          print(f'PROB {len(urls) - len(hata)}/{len(urls)} PASS' + ''.join('\n  ' + h for h in hata[:20]))
+          sys.exit(1 if hata else 0)
+          EOF
+          echo "PROB GENEL PASS" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Metricool CSV (+ onizleme)
+        if: ${{ inputs.dry_run != true }}
+        env:
+          BASLANGIC: ${{ inputs.baslangic }}
+        run: |
+          set -euo pipefail
+          rclone copyto "$D/ILAN_DOGRULA.csv" _ilan.csv
+          A=(--captions "$CAP" --sira data/sosyal/pinterest/SIRA_78.csv --ilan _ilan.csv --url-kok "$URL_KOK" --cikti _csv --metin-kurali /tmp/metin_kurali.py)
+          python3 scripts/sosyal/ig_metricool_csv.py "${A[@]}" --onizleme 3 | tee -a "$GITHUB_STEP_SUMMARY"
+          rclone copy _csv "$D" --include "IG_FB_V1_ONIZLEME_*.csv"
+          if [ -n "$BASLANGIC" ]; then
+            python3 scripts/sosyal/ig_metricool_csv.py "${A[@]}" --baslangic "$BASLANGIC" | tee -a "$GITHUB_STEP_SUMMARY"
+            python3 /tmp/metin_kurali.py _csv
+            rclone copy _csv "$D" --include "IG_FB_V1_0*.csv"
+          fi
+          rclone lsl "$D" --include "IG_FB_V1_*.csv" | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Onizleme gorseli (ilk 3 gun, 6 gonderi)
+        if: ${{ inputs.dry_run != true && inputs.yalniz_csv != true }}
+        run: |
+          set -euo pipefail
+          python3 - <<'EOF'
+          import csv
+          from PIL import Image, ImageDraw, ImageFont
+          r = [x for x in csv.DictReader(open('_csv/IG_FB_V1_ONIZLEME_3GUN.csv')) if x['Instagram'] == 'TRUE']
+          f = ImageFont.truetype('/tmp/fontlar/Manrope[wght].ttf', 26)
+          satirlar = []
+          for x in r:
+              c = x['cift']
+              if x['tur'] == 'C':
+                  ims = [Image.open(f'_out/{c}/C0{i}_1080x1350.jpg') for i in (1, 2, 3)]
+              else:
+                  ims = [Image.open(f'_out/{c}/REEL_kare_{t}sn.jpg').resize((760, 1350)) for t in ('0.00', '3.30', '6.60', '8.97')]
+              W = sum(i.width for i in ims) + 20 * len(ims)
+              s = Image.new('RGB', (W, 1410), 'white'); d = ImageDraw.Draw(s)
+              d.text((10, 10), f"{x['Date']} {x['Time']}  {'CAROUSEL' if x['tur'] == 'C' else 'REEL'}  {c}", fill='black', font=f)
+              xx = 0
+              for i in ims: s.paste(i, (xx, 60)); xx += i.width + 20
+              satirlar.append(s.resize((s.width // 3, s.height // 3)))
+          W = max(s.width for s in satirlar); H = sum(s.height for s in satirlar)
+          o = Image.new('RGB', (W, H), 'white'); y = 0
+          for s in satirlar: o.paste(s, (0, y)); y += s.height
+          o.save('_csv/IG_FB_V1_ONIZLEME_3GUN.jpg', quality=85)
+          print(o.size)
+          EOF
+          rclone copyto _csv/IG_FB_V1_ONIZLEME_3GUN.jpg "$D/IG_FB_V1_ONIZLEME_3GUN.jpg"
+      - if: always()
+        run: rm -rf ~/.config/rclone
