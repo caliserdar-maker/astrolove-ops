@@ -1,0 +1,125 @@
+name: wp-tagline-son
+
+# WP TAGLINE CIFT BASKI (Serdar 3 Eki): 390 dogrulamasinin 18x24 (4-5/6) ve 24x36 parcalari + AQUARIUS_LIBRA 11x14 (yeni kapi), 37106498911 arac uyumsuzlugu sonrasi, kesinlesen WP_REF 9a55c2b. Etsy / musteri YOK; PLATES'e yazma YOK; cikti Drive TEMP/WP_TAGLINE/<run_id>/.
+# Uretim = siparis yolu: main surucu.py wp_bakir_uret_v1, _v1 = renk_ref b8c8c4b + WP_REF adayi (29ece9f) kilitli dosyalari.
+# teshis : Test 5 (SCORPIO_VIRGO, MAXWELL / QUINN) ve Test 4 / kesit (PISCES_SCORPIO, SCORPIO_VIRGO 11x14; JAKOB / ZOFIA)
+#          teslim edilmis sayfalari yeni ikinci metin kapisindan; 1:1 kesit (teslim | yeni); yeni tam sayfa onizleme.
+# dogrula: 78 cift x 5 boy siparis yolunda (Test 5 isimleri), kapilar (c_iz icinde ikinci metin) + e_kagit istisnasi.
+# toplam : 390 hucre ozeti. Tetik: config/wp_tagline_son.trigger (bu dal).
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [claude/wp-katman-baski-60sk0s]
+    paths:
+      - config/wp_tagline_son.trigger
+
+concurrency: wp-tagline-son
+
+env:
+  RENK_REF: b8c8c4b17478fd956167577fa69913d06b9eb955
+  WP_REF: 9a55c2bee00e4ff987c609f43afbb34ead1211d5
+  CIK: gdrive:ASTROLOVE/TEMP/WP_TAGLINE/${{ github.run_id }}
+  KESIT: gdrive:ASTROLOVE/TEMP/WP_KESIT_A/37055961309
+
+jobs:
+  dogrula:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      max-parallel: 14
+      matrix:
+        include:
+          - {boy: 18x24, parca: '4/6', no: 4}
+          - {boy: 18x24, parca: '5/6', no: 5}
+          - {boy: 24x36, parca: '0/9', no: 0}
+          - {boy: 24x36, parca: '1/9', no: 1}
+          - {boy: 24x36, parca: '2/9', no: 2}
+          - {boy: 24x36, parca: '3/9', no: 3}
+          - {boy: 24x36, parca: '4/9', no: 4}
+          - {boy: 24x36, parca: '5/9', no: 5}
+          - {boy: 24x36, parca: '6/9', no: 6}
+          - {boy: 24x36, parca: '7/9', no: 7}
+          - {boy: 24x36, parca: '8/9', no: 8}
+          - {boy: 11x14, parca: 'AQUARIUS_LIBRA', no: 9}
+    env:
+      BOY: ${{ matrix.boy }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/wp-katman-baski-60sk0s
+          path: _arac
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.WP_REF }}
+          path: _wp
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RENK_REF }}
+          path: _v1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Python bagimliliklari
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet --upgrade pip
+          python -m pip install --quiet pillow opencv-python-headless numpy fonttools img2pdf pikepdf
+      - name: WP kilidi + kilitli dosyalar v1 ustune (siparis-dijital ile ayni)
+        run: |
+          set -euo pipefail
+          (cd _wp && python scripts/medya_v1/test_wp_kilit.py && python scripts/medya_v1/test_wp_ikinci_metin.py && python scripts/medya_v1/test_wp_istisna.py)
+          for f in wp_bakir.py wp_katman.py wp_ornek.py wp_kilit.py wp_kilit.json wp_tani.py test_wp_kilit.py; do
+            [ -e "_v1/scripts/medya_v1/$f" ] && { echo "HATA: $f v1'de zaten var" >&2; exit 1; }
+            cp "_wp/scripts/medya_v1/$f" "_v1/scripts/medya_v1/$f"
+          done
+          (cd _v1 && python scripts/medya_v1/test_wp_kilit.py)
+          git -C _wp rev-parse HEAD; git -C _v1 rev-parse HEAD; git rev-parse HEAD
+      - name: Takas (buyuk boy bellek)
+        if: ${{ matrix.boy == '24x36' || matrix.boy == 'A2' || matrix.boy == '18x24' }}
+        run: |
+          sudo fallocate -l 32G /mnt/takas7 && sudo chmod 600 /mnt/takas7 && sudo mkswap /mnt/takas7 >/dev/null && sudo swapon /mnt/takas7
+          free -g
+      - name: rclone kur
+        run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then echo "HATA: RCLONE_CONF_B64 yok" >&2; exit 1; fi
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: 390 hucre parcasi (siparis yolu, Test 5 isimleri)
+        run: |
+          python _arac/scripts/medya_v1/wp_dogrula.py calis --surucu scripts/siparis_dijital/surucu.py --kod _v1 \
+            --boy "$BOY" $( [ "${{ matrix.no }}" = 9 ] && echo --hucreler AQUARIUS_LIBRA:11x14 || echo --parca "${{ matrix.parca }}" ) \
+            --etiket "dogrula_${BOY}_${{ matrix.no }}" --cikti out
+      - name: Drive (TEMP)
+        if: ${{ always() }}
+        run: '[ -d out ] && rclone copy out "$CIK/dogrula/" --exclude "ara/**"'
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: dogrula_${{ matrix.boy }}_${{ matrix.no }}
+          path: out/*.json
+          retention-days: 3
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
+
