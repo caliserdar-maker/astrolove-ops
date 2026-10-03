@@ -1,0 +1,110 @@
+name: wp-tagline-tani
+
+# Serdar 3 Eki (ders 52) zorunlu kontrol, 390 dogrulamasi DEGIL: (1) duzeltilmis ikinci metin kapisi (9a55c2b) gercek
+# Test 5 11x14 teslim sayfasinda; (2) a_renk FAIL 4 hucre (37106498911) eski kod 58bed04 ile de FAIL mi. Siparis yolu
+# (main surucu.wp_bakir_uret_v1, renk_ref b8c8c4b). PLATES'e yazma yok. Cikti Drive TEMP/WP_TAGLINE/<run_id>/.
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [claude/wp-katman-baski-60sk0s]
+    paths:
+      - config/wp_tagline_tani.trigger
+
+concurrency: wp-tagline-tani
+
+env:
+  RENK_REF: b8c8c4b17478fd956167577fa69913d06b9eb955
+  WP_REF: 9a55c2bee00e4ff987c609f43afbb34ead1211d5
+  WP_ESKI: 58bed04f7817169a70eec18c920106f879643024
+  CIK: gdrive:ASTROLOVE/TEMP/WP_TAGLINE/${{ github.run_id }}
+
+jobs:
+  tani:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        kod: [yeni, eski]
+        boy: [11x14]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/wp-katman-baski-60sk0s
+          path: _arac
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.kod == 'eski' && env.WP_ESKI || env.WP_REF }}
+          path: _wp
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RENK_REF }}
+          path: _v1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Python bagimliliklari
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet --upgrade pip
+          python -m pip install --quiet pillow opencv-python-headless numpy fonttools img2pdf pikepdf
+      - name: WP kilidi + kilitli dosyalar v1 ustune (siparis-dijital ile ayni)
+        run: |
+          set -euo pipefail
+          (cd _wp && python scripts/medya_v1/test_wp_kilit.py)
+          for f in wp_bakir.py wp_katman.py wp_ornek.py wp_kilit.py wp_kilit.json wp_tani.py test_wp_kilit.py; do
+            [ -e "_v1/scripts/medya_v1/$f" ] && { echo "HATA: $f v1'de zaten var" >&2; exit 1; }
+            cp "_wp/scripts/medya_v1/$f" "_v1/scripts/medya_v1/$f"
+          done
+          (cd _v1 && python scripts/medya_v1/test_wp_kilit.py)
+          git -C _wp rev-parse HEAD; git -C _v1 rev-parse HEAD; git rev-parse HEAD
+      - name: Takas (buyuk boy bellek)
+        if: ${{ matrix.boy == '24x36' || matrix.boy == 'A2' || matrix.boy == '18x24' }}
+        run: |
+          sudo fallocate -l 32G /mnt/takas7 && sudo chmod 600 /mnt/takas7 && sudo mkswap /mnt/takas7 >/dev/null && sudo swapon /mnt/takas7
+          free -g
+      - name: rclone kur
+        run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RCLONE_CONF_B64:-}" ]; then echo "HATA: RCLONE_CONF_B64 yok" >&2; exit 1; fi
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Test 5 teslim sayfasi (yalniz yeni kod)
+        if: ${{ matrix.kod == 'yeni' }}
+        run: |
+          set -euo pipefail
+          mkdir -p _t
+          rclone backend copyid gdrive: 1mS2COdqaXUQKHfEHHa5wWj-SvLu2NX2B _t/t5.pdf
+          python _arac/scripts/medya_v1/wp_dogrula.py pdf --pdf _t/t5.pdf --etiket T5 --cikti _t
+          python _arac/scripts/medya_v1/wp_dogrula.py calis --surucu scripts/siparis_dijital/surucu.py --kod _v1 \
+            --hucreler "SCORPIO_VIRGO:11x14" --teslim "T5|11x14|_t/T5_11x14.jpg|" --etiket "tani_yeni_T5" --cikti out
+      - name: a_renk 4 hucre (37106498911), ayni siparis yolu
+        run: |
+          python _arac/scripts/medya_v1/wp_dogrula.py calis --surucu scripts/siparis_dijital/surucu.py --kod _v1 \
+            --hucreler "CANCER_LEO:11x14,LEO_LEO:11x14,LEO_SCORPIO:11x14,LIBRA_VIRGO:11x14" \
+            --etiket "tani_${{ matrix.kod }}_arenk" --cikti out
+      - name: Drive (TEMP)
+        if: ${{ always() }}
+        run: '[ -d out ] && rclone copy out "$CIK/tani_${{ matrix.kod }}/" --exclude "ara/**"'
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone _t
