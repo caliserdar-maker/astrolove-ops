@@ -137,6 +137,22 @@ def altin_bas(a, Z, K, C, i1, i2, mesaj, rap):
     P = np.asarray(Image.open(pf).convert('RGB'), np.float32)
     if P.shape[:2] != (H, W):
         sys.exit(f'FAIL: plate boyu {P.shape[:2]} != tuval {(H, W)}')
+    td = getattr(a, 'tek_doku', False)
+    P_ham = P
+    if td:
+        # Serdar 3 Eki TEK DOKU: cember plate'ten bir kez ayrildi (halka_altin.py, sha kayitli); burada halkasiz
+        # zemin + cember katmani, ana sembol modeliyle boyanir
+        import tek_doku as tdk
+        kay = json.loads((KOK / 'varlik' / 'plates' / f'{pf.stem}_halkasiz.json').read_text())
+        zf, hf = KOK.parent / kay['halkasiz_zemin']['dosya'], KOK.parent / kay['halka']['dosya']
+        for f_, h_ in ((zf, kay['halkasiz_zemin']['sha256']), (hf, kay['halka']['sha256'])):
+            if hashlib.sha256(f_.read_bytes()).hexdigest() != h_:
+                sys.exit(f'FAIL: {f_.name} sha uyusmuyor')
+        if kay['kaynak_plate']['sha256'] != rap['zemin']['sha256']:
+            sys.exit('FAIL: halkasiz zemin bu plate'"'"'ten degil')
+        P = np.asarray(Image.open(zf).convert('RGB'), np.float32)
+        a_halka = np.asarray(Image.open(hf), np.float32) / 255.0
+        rap['zemin']['halkasiz'] = {'dosya': kay['halkasiz_zemin']['dosya'], 'sha256': kay['halkasiz_zemin']['sha256']}
     Cp = np.zeros((H, W, 3), np.float32)                               # on carpilmis renk
     A = np.zeros((H, W), np.float32)
     maske = {}
@@ -152,6 +168,11 @@ def altin_bas(a, Z, K, C, i1, i2, mesaj, rap):
         mm = np.zeros((H, W), bool); mm[y0:y1, x0:x1] = aa > 0.02
         maske[ad] = mm
 
+    def plate_bolge(x, y, h, w):
+        """katman yerlesimi altindaki zemin (sayfa disi kenar kopyasi)."""
+        ys = np.clip(np.arange(y, y + h), 0, H - 1); xs = np.clip(np.arange(x, x + w), 0, W - 1)
+        return P[np.ix_(ys, xs)]
+
     def lut_uygula(rgb01, lut):
         g = rgb01 * 255
         return np.stack([np.interp(g[..., c], np.arange(256), np.asarray(lut[c], np.float32)) for c in range(3)], -1)
@@ -166,17 +187,45 @@ def altin_bas(a, Z, K, C, i1, i2, mesaj, rap):
         pd = 12
         kk = (x0 - pd, y0 - pd, x1 + pd, y1 + pd)
         so_b = np.asarray(Image.open(a.orijinal).convert('RGB').crop(kk), np.float32)
-        pb = P[y0 - pd:y1 + pd, x0 - pd:x1 + pd]
+        pb = P_ham[y0 - pd:y1 + pd, x0 - pd:x1 + pd]
         d_bs = so_b - pb
         mb = np.clip(-(d_bs @ wk.LUMA) * Z.get('isaret', 1.0), 0, None)
         mk_bs = cv2.dilate((mb > wk.ESIK).astype(np.uint8), np.ones((7, 7), np.uint8)).astype(bool) & (mb >= wb.T0)
-        mk_bs &= ~halka_maskesi(P)[y0 - pd:y1 + pd, x0 - pd:x1 + pd]
+        mk_bs &= ~halka_maskesi(P_ham)[y0 - pd:y1 + pd, x0 - pd:x1 + pd]
         d_bs = d_bs * mk_bs[..., None]
+        if td:
+            # kaplama alfasi: murekkep maskesi (> wk.ESIK), 1 px yumusatma (parlakliktan bagimsiz; altin dokusu
+            # parlakliga girmesin). Referans renkler: 5x5 asindirilmis cekirdek (tum ton araligi)
+            ink_b = (mb > wk.ESIK).astype(np.float32)
+            al_b = cv2.GaussianBlur(ink_b, (0, 0), 1.0) * mk_bs
+            rgb_ref_b = pb + d_bs
+            ce_b = cv2.erode(ink_b.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
+            ref_rgb, kb_al, kb_L = rgb_ref_b[ce_b], al_b, rgb_ref_b @ wk.LUMA
+            Lmed_q = tdk.qc_cekirdek_L(rgb_ref_b, mk_bs.astype(np.float32), pb, W, Z.get('isaret', 1.0))
         log('buyuk sembol (orijinal fark)', b['kutu'], int(mk_bs.sum()))
     else:
         k = olcekle(K / f'main_{sol}_{sag}_gold.png', b['w'], b['h'])
-        bindir('buyuk_sembol', lut_uygula(k[..., :3], AL['buyuk_sembol']['lut']), k[..., 3], b['x'], b['y'])
-        del k
+        rgb_b = lut_uygula(k[..., :3], AL['buyuk_sembol']['lut'])
+        if td:
+            ref_rgb, kb_al, kb_L = rgb_b[k[..., 3] > 0.98], k[..., 3], rgb_b @ wk.LUMA
+            Lmed_q = tdk.qc_cekirdek_L(rgb_b, k[..., 3], plate_bolge(b['x'], b['y'], *k.shape[:2]), W, Z.get('isaret', 1.0))
+    if td:
+        # ana sembol modeli: renk egrisi, parlaklik, kabartma (tum ogelere ayni, kabartma tek kez)
+        # Lmed: qc ile ayni olcum (QC olcegi, murekkep cekirdegi ortancasi); doku: boru profili x kabartma
+        model = {'egri': tdk.egri_olc(ref_rgb.astype(np.float32)), 'Lmed': Lmed_q, 'doku': tdk.doku_olc(kb_al, kb_L, W)}
+        rap['tek_doku'] = {'Lmed': round(model['Lmed'], 2), 'doku': model['doku'], 'k': {},
+                           'egri_ornek': {str(l): [round(float(v), 1) for v in model['egri'][l]] for l in (100, 150, 200, 240)}}
+        log('tek doku modeli', rap['tek_doku'])
+        isr = Z.get('isaret', 1.0)
+
+        def td_boya(ad, l, Aa, Pb):
+            c_, k_ = tdk.boya(l, Aa, Pb, W, isr, model)
+            rap['tek_doku']['k'][ad] = k_
+            return c_
+        bindir('daire', td_boya('daire', tdk.duz_l(a_halka, model), a_halka, P), a_halka, 0, 0)   # cember
+    if b.get('kaynak') != 'orijinal':
+        bindir('buyuk_sembol', rgb_b, k[..., 3], b['x'], b['y'])
+        del k, rgb_b
         log('buyuk sembol', b['w'], b['h'], b['x'], b['y'])
 
     # isim satiri (SECENEK D, WP ile ayni kural)
@@ -188,12 +237,21 @@ def altin_bas(a, Z, K, C, i1, i2, mesaj, rap):
     so = np.asarray(Image.open(a.orijinal).convert('RGB'), np.float32)
     x0, y0, x1, y1 = son['kutu']
     pad = 6
-    d_inf = (so - P)[y0 - pad:y1 + pad, x0 - pad:x1 + pad]
+    d_inf = (so - P_ham)[y0 - pad:y1 + pad, x0 - pad:x1 + pad]
+    if td:
+        L_s = so[y0 - pad:y1 + pad, x0 - pad:x1 + pad] @ wk.LUMA
+        L_p = P_ham[y0 - pad:y1 + pad, x0 - pad:x1 + pad] @ wk.LUMA
     del so
     sgn = Z.get('isaret', 1.0)
     m_inf = np.clip(-(d_inf @ wk.LUMA) * sgn, 0, None)
     a_inf = (m_inf >= wb.T0).astype(np.float32)                         # wp_bakir.T0 gurultu tabani
     d_inf = d_inf * a_inf[..., None]
+    if td:
+        # sonsuz: alfa = fark / cekirdek ortancasi; altin luma dokusu = (S - P(1 - a)) / a; ana sembol modeliyle
+        Lk_i = float(np.median(m_inf[m_inf > wk.ESIK]))
+        al_i = np.clip(m_inf / Lk_i, 0, 1) * (m_inf >= wb.T0)
+        lg = np.clip((L_s - L_p * (1 - al_i)) / np.maximum(al_i, 0.25), 0, 255)
+        rgb_i = td_boya('sonsuz', lg, al_i, P[y0 - pad:y1 + pad, x0 - pad:x1 + pad])
     pr1, pr2 = np.asarray(AL['isim_sol'], np.float32) / 255, np.asarray(AL['isim_sag'], np.float32) / 255
     olcek = 1.0
     for _ in range(20):
@@ -209,15 +267,24 @@ def altin_bas(a, Z, K, C, i1, i2, mesaj, rap):
         olcek *= (W - 2 * kenar) / top * 0.999
     sx = W / 2 - top / 2
     taban = I['taban_y']
-    bindir('isim1', k1[..., :3] * 255, k1[..., 3], int(round(sx - kk1[0])), int(round(taban - t1)))
+    xy1 = (int(round(sx - kk1[0])), int(round(taban - t1)))
+    bindir('isim1', td_boya('isim1', tdk.duz_l(k1[..., 3], model), k1[..., 3], plate_bolge(*xy1, *k1.shape[:2]))
+           if td else k1[..., :3] * 255, k1[..., 3], *xy1)
     inf_x = sx + w1 + g_bosluk * olcek
     if olcek != 1:
         d_inf = cv2.resize(d_inf, None, fx=olcek, fy=olcek, interpolation=cv2.INTER_AREA)
         a_inf = cv2.resize(a_inf, None, fx=olcek, fy=olcek, interpolation=cv2.INTER_AREA)
+        if td:
+            rgb_i = cv2.resize(rgb_i, None, fx=olcek, fy=olcek, interpolation=cv2.INTER_AREA)
+            al_i = cv2.resize(al_i, None, fx=olcek, fy=olcek, interpolation=cv2.INTER_AREA)
     inf_y = int(round(y0 - pad + (son['kutu'][3] - son['kutu'][1]) * (1 - olcek) / 2))
     inf_x0 = int(round(inf_x - pad * olcek))
     x2 = inf_x + winf + g_bosluk * olcek
-    bindir('isim2', k2[..., :3] * 255, k2[..., 3], int(round(x2 - kk2[0])), int(round(taban - t2)))
+    xy2 = (int(round(x2 - kk2[0])), int(round(taban - t2)))
+    bindir('isim2', td_boya('isim2', tdk.duz_l(k2[..., 3], model), k2[..., 3], plate_bolge(*xy2, *k2.shape[:2]))
+           if td else k2[..., :3] * 255, k2[..., 3], *xy2)
+    if td:
+        bindir('sonsuz', rgb_i, al_i, inf_x0, inf_y)
     merk = {'sol': sx + w1 / 2, 'sag': x2 + w2 / 2}
     rap['isim_satiri'] = {'olcek': round(olcek, 4), 'punto': round(p * olcek, 1), 'baslangic_x': round(sx, 1),
                           'genislik': round(top, 1), 'merkez_x': round(sx + top / 2, 1), 'isim_merkez': merk}
@@ -229,8 +296,11 @@ def altin_bas(a, Z, K, C, i1, i2, mesaj, rap):
         ix = (I[f'kutu_{t}'][0] + I[f'kutu_{t}'][2]) / 2
         dx = merk[t] - ix
         k = olcekle(K / f'sym_{burc}_gold.png', s['w'], s['h'])
-        bindir(f'kucuk_sembol_{t}', lut_uygula(k[..., :3], AL['kucuk_sembol']['lut']), k[..., 3],
-               int(round(s['x'] + dx)), s['y'])
+        rgb_k = lut_uygula(k[..., :3], AL['kucuk_sembol']['lut'])
+        xyk = (int(round(s['x'] + dx)), s['y'])
+        if td:
+            rgb_k = td_boya(f'kucuk_sembol_{t}', rgb_k @ wk.LUMA, k[..., 3], plate_bolge(*xyk, *k.shape[:2]))
+        bindir(f'kucuk_sembol_{t}', rgb_k, k[..., 3], *xyk)
         rap.setdefault('kucuk_sembol', {})[t] = {'merkez_x': round(kx + dx, 1), 'isim_merkez_x': round(merk[t], 1)}
 
     MS = Z['mesaj']
@@ -244,18 +314,29 @@ def altin_bas(a, Z, K, C, i1, i2, mesaj, rap):
         if wm <= MS['genislik_siniri']:
             break
         pm *= MS['genislik_siniri'] / wm * 0.999
-    bindir('mesaj', km[..., :3] * 255, km[..., 3], int(round(W / 2 - wm / 2 - kkm[0])), int(round(MS['taban_y'] - tm)))
+    xym = (int(round(W / 2 - wm / 2 - kkm[0])), int(round(MS['taban_y'] - tm)))
+    bindir('mesaj', td_boya('mesaj', tdk.duz_l(km[..., 3], model), km[..., 3], plate_bolge(*xym, *km.shape[:2]))
+           if td else km[..., :3] * 255, km[..., 3], *xym)
     rap['mesaj'] = {'punto': round(pm, 1), 'genislik': wm, 'kuculme': round(pm / MS['punto'], 4),
                     'profil': AL.get('mesaj_profili', 'mesaj')}
     log('tagline', rap['mesaj'])
 
+    if td:
+        # Serdar 3 Eki B: isim / sonsuz / tagline kutusu + pay icindeki plate yildizlari (yalniz bu payda)
+        kut = []
+        for ad in ('isim1', 'isim2', 'sonsuz', 'mesaj'):
+            ys, xs = np.nonzero(maske[ad])
+            kut.append((int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1))
+        P, rap['yildiz'] = tdk.yildiz_temizle(P, kut, W)
+        log('yildiz', rap['yildiz'])
     out = P * (1 - A[..., None]) + Cp
     del Cp
-    h, w = a_inf.shape
-    out[inf_y:inf_y + h, inf_x0:inf_x0 + w] += d_inf
-    mm = np.zeros((H, W), bool); mm[inf_y:inf_y + h, inf_x0:inf_x0 + w] = a_inf > 0.02
-    maske['sonsuz'] = mm
-    A[mm] = np.maximum(A[mm], a_inf[a_inf > 0.02])
+    if not td:
+        h, w = a_inf.shape
+        out[inf_y:inf_y + h, inf_x0:inf_x0 + w] += d_inf
+        mm = np.zeros((H, W), bool); mm[inf_y:inf_y + h, inf_x0:inf_x0 + w] = a_inf > 0.02
+        maske['sonsuz'] = mm
+        A[mm] = np.maximum(A[mm], a_inf[a_inf > 0.02])
     if d_bs is not None:
         x0, y0, x1, y1 = b['kutu']
         out[y0 - 12:y1 + 12, x0 - 12:x1 + 12] += d_bs
@@ -286,6 +367,8 @@ def main():
     ap.add_argument('--tr', action='store_true', help='Turkce buyuk harf kurali (i -> İ)')
     ap.add_argument('--orijinal', help='orijinal satis posteri (varsayilan: KAYNAK/orijinal_WP_11x14.jpg)')
     ap.add_argument('--plate-dosya', help='altin edisyon plate dosyasi (varsayilan: KAYNAK/plates/<plate>.png)')
+    ap.add_argument('--tek-doku', action='store_true', help='altin: tum ogeler ana sembol modeliyle + yazi cevresi '
+                                                              'yildiz temizligi (Serdar 3 Eki)')
     a = ap.parse_args()
     K, C = Path(a.kaynak), Path(a.cikti)
     C.mkdir(parents=True, exist_ok=True)

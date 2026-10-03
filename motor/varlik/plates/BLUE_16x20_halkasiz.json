@@ -1,0 +1,22 @@
+{
+ "kaynak_plate": {
+  "dosya": "TEMP/SIPARIS_ISIM/PLATES/BLUE_16x20.png",
+  "sha256": "cef460878b3f886a8dddea1b61dc298b8a1063618cc5ed63ab87deea15079cc0"
+ },
+ "halka": {
+  "dosya": "motor/varlik/halka/HALKA_BLUE_16x20.png",
+  "sha256": "2a11ac819c611eaa84e60e469316f345eaa8eb48f6e9e6113d9a7831ab2fa410",
+  "Lk": 210.94,
+  "px": 99569
+ },
+ "halkasiz_zemin": {
+  "dosya": "motor/varlik/plates/BLUE_16x20_halkasiz.png",
+  "sha256": "c3d0fa2769ab2d1d60beb43cf01ce530ed8a198e0aed96ba74ddca44cba2b1ba"
+ },
+ "qc": {
+  "halka_kalan_ortanca": 1.13,
+  "halka_kalan_p99": 2.97,
+  "halka_disi_degisen_px": 0,
+  "gecti": true
+ }
+}

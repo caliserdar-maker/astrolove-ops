@@ -233,7 +233,83 @@ def normal(s):
     return ''.join(c for c in s.lower() if c.isalnum())
 
 
-def olc(ad, S, P, O, Z, isim1, isim2, mesaj, e_esik=None):
+H_ESIK = 2.7       # h) oge rengi ana sembole dE (Lab); olculen: yeni (tek doku) 3 ornek en buyugu 2.35 x 1.15
+
+
+def lab(rgb):
+    return cv2.cvtColor(np.asarray(rgb, np.float32).reshape(1, 1, 3) / 255, cv2.COLOR_RGB2LAB)[0, 0]
+
+
+def yildiz_kapisi(S, ink, kutular):
+    """g) yazi kutusu + pay icinde parlak nokta (yildiz) var mi. Sayfanin kendi yerel medyanindan > YILDIZ_T, kucuk
+    bilesen, yazi murekkebi (3 px genisletilmis) disi. Kutular sayfadan olculur (isim satiri, tagline)."""
+    import tek_doku as tdk
+    H, W = S.shape[:2]
+    pay = int(round(tdk.PAY_ORAN * W))
+    bolge = np.zeros((H, W), bool)
+    for x0, y0, x1, y1 in kutular:
+        bolge[max(0, y0 - pay):min(H, y1 + pay), max(0, x0 - pay):min(W, x1 + pay)] = True
+    bolge &= ~cv2.dilate(ink.astype(np.uint8), np.ones((7, 7), np.uint8)).astype(bool)
+    L = S @ wk.LUMA
+    Rr = L - tdk.yerel_medyan(L, W)
+    n, lab_, st, cen = cv2.connectedComponentsWithStats(((Rr > tdk.YILDIZ_T) & bolge).astype(np.uint8), 8)
+    tepe = np.zeros(n, np.float32)
+    np.maximum.at(tepe, lab_.ravel(), Rr.ravel())
+    ys = [{'x': int(cen[i][0]), 'y': int(cen[i][1]), 'alan': int(st[i, 4]), 'tepe': round(float(tepe[i]), 1)}
+          for i in range(1, n) if st[i, 4] <= tdk.YILDIZ_ALAN * (W / 4800) ** 2 and tepe[i] >= YILDIZ_TEPE]
+    return {'pay_px': pay, 'yildiz': ys[:10], 'sayi': len(ys), 'gecti': len(ys) == 0}
+
+
+YILDIZ_TEPE = 25.0  # g) yildiz sayilan en dusuk tepe (luma, QC olcegi); olculen plate yildizlari >= 25, gurultu p99 3
+
+
+def oge_renkleri(S, P, ink, m, Z, isb, alt):
+    """h) ogelerin dolu murekkep ortalama rengi ve cekirdek lumasi; referans buyuk sembol."""
+    H, W = S.shape[:2]
+    hm = halka_plate(P)
+    r = {}
+
+    def ekle(ad, mm):
+        mm = mm & ink
+        if mm.sum() < 50:
+            return
+        Lk = np.median(m[mm]); d = mm & (m >= 0.9 * Lk)
+        # tam kaplama: 3x3 asindirilmis murekkep cekirdegi, ortanca renk (ince oge kenar karisimi ve dagilim genisligi
+        # etkisiz; 'dolu' ortalamasi genis dagilimli ana sembolu ust yariya kaydiriyordu)
+        ce = cv2.erode(mm.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+        ce = ce if ce.sum() >= 50 else mm
+        r[ad] = {'rgb': np.median(S[ce], 0), 'L': float(np.median(S[ce] @ wk.LUMA))}
+    for k in ('buyuk_sembol', 'kucuk_sembol'):
+        y0, y1 = Z['bantlar'][k]
+        mm = np.zeros((H, W), bool); mm[y0:y1] = True
+        ekle(k, mm & ~hm)
+    if isb:
+        y0, y1 = isb[0]
+        kk = kumeler(ink[y0:y1], 80 * W / 3307)
+        if len(kk) == 3:
+            for ad, (x0, x1) in zip(('isim_sol', 'sonsuz', 'isim_sag'), kk):
+                mm = np.zeros((H, W), bool); mm[y0:y1, x0:x1] = True
+                ekle(ad, mm)
+    if alt:
+        y0, y1 = alt[-1]
+        mm = np.zeros((H, W), bool); mm[y0:y1] = True
+        ekle('mesaj', mm)
+    L = S @ wk.LUMA
+    z = cv2.medianBlur(np.clip(L, 0, 255).astype(np.uint8), 31).astype(np.float32)
+    hc = hm & (np.abs(L - z) > 40)
+    hc = cv2.erode(hc.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool) if hc.sum() > 500 else hc
+    if hc.sum() > 50:
+        r['halka'] = {'rgb': np.median(S[hc], 0), 'L': float(np.median(L[hc]))}
+    if 'buyuk_sembol' not in r:
+        return {'gecti': False, 'sebep': 'buyuk sembol yok'}
+    ref = r['buyuk_sembol']
+    out = {k: {'dE': round(float(np.linalg.norm(lab(v['rgb']) - lab(ref['rgb']))), 2),
+               'dL': round(v['L'] - ref['L'], 1), 'rgb': [round(float(x), 1) for x in v['rgb']]} for k, v in r.items()}
+    en = max(v['dE'] for k, v in out.items() if k != 'buyuk_sembol')
+    return {'ogeler': out, 'en_buyuk': en, 'esik': H_ESIK, 'gecti': en <= H_ESIK}
+
+
+def olc(ad, S, P, O, Z, isim1, isim2, mesaj, e_esik=None, gh=False):
     H, W = S.shape[:2]
     m, ink = murekkep(S, P)
     R = {'ad': ad}
@@ -321,14 +397,29 @@ def olc(ad, S, P, O, Z, isim1, isim2, mesaj, e_esik=None):
             rgb[None, None], np.asarray(Z['bakir']['ogeler']['daire']['rgb'], np.float32)[None, None])[0, 0]), 2)}
     R['bilgi_renk'] = renk
     R['e_bant'] = renk_bandi(S @ wk.LUMA, ink, Z, e_esik)
+    if gh:
+        # g) yazi cevresi yildiz (Serdar 3 Eki B); h) tek doku: ogeler ana sembole gore (yalniz motor sayfasinda kapi)
+        kut = []
+        for bnt in (isb[:1] + alt[-1:]):
+            y0, y1 = bnt
+            xs = np.nonzero(ink[y0:y1].any(0))[0]
+            if bnt in alt:
+                xa, xb = max(kumeler(ink[y0:y1], 400 * W / 3307), key=lambda k: k[1] - k[0])
+            else:
+                xa, xb = xs.min(), xs.max() + 1
+            kut.append((int(xa), int(y0), int(xb), int(y1)))
+        R['g_yildiz'] = yildiz_kapisi(S, ink, kut)
+        R['h_tek_doku'] = oge_renkleri(S, P, ink, m, Z, isb, alt)
     # f) sembol sadakati (altin edisyon; 3 Eki 78 cift: 10 ciftte ana sembol yanlis oturmus, dE 94-102, a-e gecmisti):
     # buyuk / kucuk sembol dolu murekkep rengi orijinalden dE <= F_ESIK. WP bakir tasarim geregi farkli (Test 5 kiyasi).
     if Z.get('mod') == 'altin':
-        fd = {k: renk.get(k, {}).get('dE_orijinal') for k in ('buyuk_sembol', 'kucuk_sembol')}
+        # tek doku (gh): kucuk semboller ana sembol modeline baglandi (h olcer); f yalniz ana sembol x orijinal
+        fd = {k: renk.get(k, {}).get('dE_orijinal') for k in (('buyuk_sembol',) if gh else ('buyuk_sembol', 'kucuk_sembol'))}
         R['f_sembol'] = {'dE': fd, 'esik': F_ESIK, 'gecti': all(v is not None and v <= F_ESIK for v in fd.values())}
     else:
         R['f_sembol'] = {'uygulanmaz': 'bakir (WP)', 'gecti': True}
-    K5 = ('a_tagline', 'b_hat', 'c_kagit', 'd_isim', 'e_bant', 'f_sembol')
+    K5 = ('a_tagline', 'b_hat', 'c_kagit', 'd_isim', 'e_bant', 'f_sembol') + (('g_yildiz',) if gh else ()) + \
+        (('h_tek_doku',) if gh and ad == 'motor' else ())
     R['gecti'] = all(R[k]['gecti'] for k in K5)
     R['gecti_eski_kural'] = all(R[k]['gecti'] for k in ('a_tagline', 'b_hat_eski', 'c_kagit', 'd_isim', 'e_bant', 'f_sembol'))
     return R
@@ -349,6 +440,7 @@ def main():
     ap.add_argument('--plate-dosya', help='plate (varsayilan: KAYNAK/plates/<plate>.png)')
     ap.add_argument('--test5', help='eski sistem sayfasi (varsayilan: KAYNAK/test5_WP_11x14.jpeg; "yok": kiyas yok)')
     ap.add_argument('--test5-fail', action='store_true', help='prototip oz testi: Test 5 FAIL vermeli')
+    ap.add_argument('--gh', action='store_true', help='g (yazi cevresi yildiz) + h (tek doku, yalniz motor) kapilari')
     ap.add_argument('--e-esik', type=float, help='e esigi (altin edisyon: onayli referanslarin en buyugu x 1.15)')
     a = ap.parse_args()
     K = Path(a.kaynak)
@@ -368,7 +460,7 @@ def main():
     sayfalar.append(('motor', oku_n(a.motor, P.shape[1]), a.isim1, a.isim2, a.mesaj))
     R = dict(R0)
     for ad, S, i1, i2, ms in sayfalar:
-        R[ad] = olc(ad, S, P, O, Z, i1, i2, ms, a.e_esik)
+        R[ad] = olc(ad, S, P, O, Z, i1, i2, ms, a.e_esik, a.gh)
         print(ad, json.dumps({k: R[ad][k] for k in ('a_tagline', 'b_hat', 'c_kagit', 'd_isim', 'gecti')},
                              ensure_ascii=False), flush=True)
     Path(a.cikti).write_text(json.dumps(R, indent=1, ensure_ascii=False))
@@ -387,6 +479,13 @@ def main():
         if k == 'e_bant':
             return f"{ok(x['gecti'])} (en buyuk {x['en_buyuk']}, esik {x['esik']}; " + ', '.join(
                 f"{w['grup']} {w['sapma']}" for w in x['kelimeler']) + ')'
+        if k == 'g_yildiz':
+            return f"{ok(x['gecti'])} ({x['sayi']} nokta, pay {x['pay_px']} px)"
+        if k == 'h_tek_doku':
+            if 'ogeler' not in x:
+                return f"{ok(x['gecti'])} ({x.get('sebep')})"
+            return f"{ok(x['gecti'])} (en buyuk dE {x['en_buyuk']}, esik {x['esik']}; " + ', '.join(
+                f"{k2} {v['dE']}" for k2, v in x['ogeler'].items() if k2 != 'buyuk_sembol') + ')'
         if k == 'f_sembol':
             return f"{ok(x['gecti'])} ({x.get('dE', x.get('uygulanmaz'))})"
         if k == 'b_hat_eski':
@@ -397,7 +496,10 @@ def main():
     for k, ad in (('a_tagline', 'a) tagline tek kopya'), ('b_hat', 'b) ust/alt hat yok - YENI kural (onayli 3 Eki)'),
                   ('b_hat_eski', 'b) ust/alt hat yok - ESKI kural'),
                   ('c_kagit', 'c) kagit dokusu (dE <= 0.5)'), ('d_isim', 'd) isim harf harf (OCR)'),
-                  ('e_bant', 'e) harf ici yatay renk bandi yok'), ('f_sembol', 'f) sembol rengi orijinale (altin)')):
+                  ('e_bant', 'e) harf ici yatay renk bandi yok'), ('f_sembol', 'f) sembol rengi orijinale (altin)'),
+                  ('g_yildiz', 'g) yazi cevresi yildiz yok'), ('h_tek_doku', 'h) tek doku: ana sembole dE (motor kapi)')):
+        if k not in R['motor']:
+            continue
         sat.append(f"| {ad} | {h(R['orijinal'], k)} | {h(R['test5'], k)} | {h(R['motor'], k)} |")
     t = R['test5'] or {'gecti': None, 'gecti_eski_kural': None}
     ok2 = lambda v: '-' if v is None else ok(v)

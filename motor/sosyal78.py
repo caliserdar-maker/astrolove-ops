@@ -24,6 +24,9 @@ def sha(f):
     return hashlib.sha256(Path(f).read_bytes()).hexdigest()
 
 
+TEK_DOKU = False          # Serdar 3 Eki C: --tek-doku (motor) + --gh (qc g / h kapilari)
+
+
 def cift_isle(K, r, C):
     t = time.time()
     c = r['cift']
@@ -47,19 +50,20 @@ def cift_isle(K, r, C):
         return {**sonuc, 'hata': 'olc: ' + ' '.join(son), 'sure_sn': round(time.time() - t, 1)}
     rc, son = kos('motor', [sys.executable, str(KOK / 'motor.py'), '--kaynak', str(K), '--sabit', str(S),
                             '--isim1', r['sol_isim'], '--isim2', r['sag_isim'], '--mesaj', r['tagline'],
-                            '--orijinal', str(orj), '--plate-dosya', str(pl), '--cikti', str(O)])
+                            '--orijinal', str(orj), '--plate-dosya', str(pl), '--cikti', str(O)]
+                           + (['--tek-doku'] if TEK_DOKU else []))
     if rc:
         return {**sonuc, 'hata': 'motor: ' + ' '.join(son), 'sure_sn': round(time.time() - t, 1)}
     om = f"{c.split('_')[0]}|{c.split('_')[1]}|{ORIJINAL_TAGLINE}"
     rc, _ = kos('qc', [sys.executable, str(KOK / 'qc.py'), '--kaynak', str(K), '--sabit', str(S), '--motor',
                        str(O / 'MOTOR.png'), '--isim1', r['sol_isim'], '--isim2', r['sag_isim'], '--mesaj', r['tagline'],
                        '--cikti', str(O / 'QC.json'), '--orijinal', str(orj), '--orijinal-metin', om,
-                       '--plate-dosya', str(pl), '--test5', 'yok', '--e-esik', str(E)])
+                       '--plate-dosya', str(pl), '--test5', 'yok', '--e-esik', str(E)] + (['--gh'] if TEK_DOKU else []))
     q = json.loads((O / 'QC.json').read_text()) if (O / 'QC.json').exists() else {}
     m, o = q.get('motor', {}), q.get('orijinal', {})
     sonuc.update({
         'gecti': rc == 0, 'qc_rc': rc,
-        'motor': {k: m.get(k, {}).get('gecti') for k in ('a_tagline', 'b_hat', 'c_kagit', 'd_isim', 'e_bant', 'f_sembol')},
+        'motor': {k: m.get(k, {}).get('gecti') for k in ('a_tagline', 'b_hat', 'c_kagit', 'd_isim', 'e_bant', 'f_sembol', 'g_yildiz', 'h_tek_doku')},
         'orijinal': {k: o.get(k, {}).get('gecti') for k in ('a_tagline', 'b_hat', 'c_kagit', 'd_isim', 'e_bant', 'f_sembol')},
         'a_ocr': m.get('a_tagline', {}).get('ocr'), 'b_cizgi': len(m.get('b_hat', {}).get('orijinalde_olmayan', [])),
         'c_dE': m.get('c_kagit', {}).get('dE_ort'), 'd': [m.get('d_isim', {}).get('sol'), m.get('d_isim', {}).get('sag')],
@@ -114,12 +118,15 @@ def main():
     ap.add_argument('--cikti', required=True)
     ap.add_argument('--is', type=int, default=3, dest='isler')
     ap.add_argument('--cift', nargs='*')
+    ap.add_argument('--tek-doku', action='store_true', help='Serdar 3 Eki C: tek doku + g / h kapilari')
     ap.add_argument('--parca', type=int, help='Actions matrisi: bu parca (0..N-1), liste sirasi i %% N')
     ap.add_argument('--parca-sayisi', type=int, default=1)
     ap.add_argument('--birlestir', nargs='*', help='parca SONUC json dosyalari -> OLCUM_78.md + TEMAS_78.jpg '
                                                    '(PNG\'ler --cikti dizininde)')
     ap.add_argument('--sure', type=float, help='--birlestir: toplam sure (sn)')
     a = ap.parse_args()
+    global TEK_DOKU
+    TEK_DOKU = a.tek_doku
     K, C = Path(a.kaynak).resolve(), Path(a.cikti).resolve()
     C.mkdir(parents=True, exist_ok=True)
     liste = list(csv.DictReader(open(K / 'liste.csv', encoding='utf-8')))
