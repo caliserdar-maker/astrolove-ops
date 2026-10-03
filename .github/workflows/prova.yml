@@ -51,7 +51,7 @@ on:
         required: false
         default: "4"
       kesit:
-        description: "1 = FAIL hucrede sayfalarin isim + tagline bandi 1:1 kesiti Drive PROVA/<kosu>/kesit/ (bos = yok)"
+        description: "1 = FAIL hucrede, 2 = her hucrede sayfalarin isim + tagline bandi 1:1 kesiti Drive PROVA/<kosu>/kesit/ (bos = yok)"
         required: false
         default: ""
       renkler:
@@ -214,17 +214,18 @@ jobs:
           CIFTLER: ${{ matrix.ciftler }}
           TUM: ${{ needs.plan.outputs.tum }}
           SET: ${{ matrix.set || inputs.set }}
-          KESIT: ${{ inputs.kesit == '1' && '1' || '' }}
+          KESIT: ${{ inputs.kesit != '' && '1' || '' }}
+          KESIT_HEPSI: ${{ inputs.kesit == '2' && '1' || '' }}
         run: |
           set +e
           if [ "${{ matrix.tur }}" = renk ]; then A=(--renk "${{ matrix.anahtar }}"); else A=(--boy "${{ matrix.anahtar }}"); fi
           python scripts/siparis_dijital/prova.py --tur "${{ matrix.tur }}" "${A[@]}" --ciftler "$CIFTLER" \
             --tum_ciftler "$TUM" --set "$SET" --kod _kod --kod-ref "siparis-baski-v1 $RENK_REF" \
             --parca "${{ matrix.parca }}" --cikti "$GITHUB_WORKSPACE/out" \
-            ${KESIT:+--kesit "$GITHUB_WORKSPACE/out/kesit"} 2>&1 | grep -v '^SURE '
+            ${KESIT:+--kesit "$GITHUB_WORKSPACE/out/kesit"} ${KESIT_HEPSI:+--kesit-hepsi} 2>&1 | grep -v '^SURE '
           exit 0
       - name: FAIL kesitleri (Drive)
-        if: ${{ always() && inputs.kesit == '1' }}
+        if: ${{ always() && inputs.kesit != '' }}
         run: |
           set -euo pipefail
           if [ -d out/kesit ]; then rclone copy out/kesit "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PROVA/${{ github.run_id }}/kesit/"; ls out/kesit; fi

@@ -68,6 +68,7 @@ def main():
     ap.add_argument('--parca', default='0')
     ap.add_argument('--cikti', required=True)
     ap.add_argument('--kesit', default='', help='klasor: FAIL hucrede sayfalarin isim + tagline bandi 1:1 (bos = yok)')
+    ap.add_argument('--kesit-hepsi', action='store_true', help='kesit PASS hucrede de (once / sonra karsilastirmasi)')
     a = ap.parse_args()
     cik = Path(a.cikti).resolve(); cik.mkdir(parents=True, exist_ok=True)
     kod = Path(a.kod).resolve()
@@ -113,7 +114,7 @@ def main():
         print(f'PROVA {a.tur} {anahtar} {cift} set {s} {"PASS" if r["gecti"] else "FAIL"} {r["sn"]} sn | '
               f'{i + 1}/{len(ciftler)} gecen {gecen / 60:.1f} dk kalan ~{gecen / (i + 1) * (len(ciftler) - i - 1) / 60:.1f} dk',
               flush=True)
-        if a.kesit and not r['gecti']:
+        if a.kesit and (a.kesit_hepsi or not r['gecti']):
             try:
                 r['kesit'] = fail_kesit(d, cift, anahtar, Path(a.kesit))
             except Exception as e:                                # noqa: BLE001  (kesit sonucu degistirmez)
