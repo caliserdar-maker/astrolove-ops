@@ -1,0 +1,138 @@
+name: motor-sosyal78-ek
+
+# ADIM 3 ek (3 Eki 2026, Serdar onayli koordinator notu; 3 cift icin 2. deneme): AQUARIUS_LEO, AQUARIUS_TAURUS,
+# LIBRA_LIBRA yeniden (bant kurali + ana sembol orijinal farki geri donusu). QC f iki yonlu test (kosu 37134636169'un
+# bozuk 10 sayfasi negatif). 78 posterin TAM SAYFA montaji. Mevcut 75 PNG'ye dokunulmaz (yalniz 3 ekler).
+# Cikti Drive TEMP/MOTOR/SOSYAL/78/. Etsy YOK, musteri YOK.
+
+on:
+  push:
+    branches: [motor]
+    paths: [motor/sosyal78_ek.trigger]
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  parca:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Kaynak paketi (inceleme/motor-kaynak-sosyal78)
+        run: |
+          set -euo pipefail
+          git fetch -q --depth 1 origin inceleme/motor-kaynak-sosyal78
+          git worktree add -q _k FETCH_HEAD
+          cd _k && git log -1 --format='kaynak %H' && cat KAYNAK.txt
+          for f in $(find . -name '*.parca00'); do b=${f%.parca00}; cat $b.parca* > $b; rm $b.parca*; done
+          python3 - <<'PY'
+          import hashlib
+          for s in open('MANIFEST.txt'):
+              p, n, h = s.rstrip('\n').split('\t')
+              assert hashlib.sha256(open(p, 'rb').read()).hexdigest() == h, p
+          print('MANIFEST sha: TAMAM')
+          PY
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q numpy pillow opencv-python-headless pymupdf
+          sudo apt-get install -y -q tesseract-ocr >/dev/null
+          tesseract --version | head -1
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Parca (olc + motor + QC a-e)
+        run: |
+          set -euo pipefail
+          echo "kod $(git rev-parse HEAD)"; nproc; free -g | head -2
+          python3 motor/sosyal78.py --kaynak _k --cikti _cikti --is 3 --parca 0 --parca-sayisi 1 \
+            --cift AQUARIUS_LEO AQUARIUS_TAURUS LIBRA_LIBRA
+          mv _cikti/SONUC_parca0.json _cikti/SONUC_ek.json
+          cd _cikti; mkdir -p QC SABITLER
+          for d in hucre/*/; do c=$(basename $d); cp $d/QC.json QC/${c}_QC.json 2>/dev/null || true; cp $d/QC.md QC/${c}_QC.md 2>/dev/null || true
+            cp $d/SABITLER_*.json SABITLER/ 2>/dev/null || true; for l in olc motor qc; do cp $d/$l.log QC/${c}_$l.log 2>/dev/null || true; done; done
+          rm -rf hucre; ls | head; ls *.png | wc -l
+      - name: Drive'a yukle (TEMP/MOTOR/SOSYAL/78)
+        run: |
+          set -euo pipefail
+          rclone copy _cikti "gdrive:ASTROLOVE/TEMP/MOTOR/SOSYAL/78"
+      - if: always()
+        run: rm -rf ~/.config/rclone
+
+  ozet:
+    needs: parca
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q pillow pymupdf
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: QC f iki yonlu + OLCUM_78.md + TEMAS_78.jpg (78 tam sayfa)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          D="gdrive:ASTROLOVE/TEMP/MOTOR/SOSYAL/78"; N0="gdrive:ASTROLOVE/TEMP/MOTOR/SOSYAL/78_ONCEKI_37134636169"
+          git fetch -q --depth 1 origin inceleme/motor-kaynak-sosyal78
+          git worktree add -q _k FETCH_HEAD
+          (cd _k; for f in $(find . -name '*.parca00'); do b=${f%.parca00}; cat $b.parca* > $b; rm $b.parca*; done)
+          pip install -q numpy opencv-python-headless
+          sudo apt-get install -y -q tesseract-ocr >/dev/null
+          mkdir -p _o _neg
+          rclone copy "$D" _o --include "*.png" --include "SONUC_*.json" --include "QC/*_QC.json" --include "SABITLER/*.json" --transfers 8
+          for c in AQUARIUS_ARIES AQUARIUS_CANCER AQUARIUS_CAPRICORN AQUARIUS_GEMINI AQUARIUS_LEO AQUARIUS_SAGITTARIUS AQUARIUS_TAURUS GEMINI_GEMINI LIBRA_LIBRA PISCES_SCORPIO; do
+            rclone copyto "$N0/$c.png" _neg/$c.png; done
+          sha256sum _neg/*.png
+          python3 motor/negatif_f.py --kaynak _k --sabit-dizin _o/SABITLER --negatif-dizin _neg --qc-dizin _o/QC \
+            --cikti _o/NEGATIF_F.md && NF=PASS || NF=FAIL
+          BAS=$(gh api repos/${{ github.repository }}/actions/runs/${{ github.run_id }} --jq .run_started_at)
+          SURE=$(( $(date +%s) - $(date -d "$BAS" +%s) ))
+          python3 motor/sosyal78.py --kaynak _k --cikti _o --birlestir _o/SONUC_parca*.json _o/SONUC_ek.json --sure $SURE
+          N=$(ls _o/*.png | wc -l)
+          { echo "kod (motor dali): $(git rev-parse HEAD)"; echo "kosu (ek): ${{ github.run_id }} (75 PNG: kosu 37139696224)";
+            echo "toplam_sure_sn (ek): $SURE"; echo "PNG: $N / 78"; echo "QC f iki yonlu: $NF";
+            (cd _o && sha256sum *.png TEMAS_78.jpg); } > _o/KOSU_EK.txt
+          head -6 _o/KOSU_EK.txt; head -6 _o/OLCUM_78.md; cat _o/NEGATIF_F.md
+          for f in OLCUM_78.md TEMAS_78.jpg KOSU_EK.txt SONUC_78.json NEGATIF_F.md; do rclone copy _o/$f "$D"; done
+          rclone dedupe --dedupe-mode newest "$D"
+          [ $NF = PASS ]
+      - if: always()
+        run: rm -rf ~/.config/rclone

@@ -43,8 +43,10 @@ Kalite
   cakismayabilir); sembol oturtma NCC >= 0.80, altindaysa cift FAIL (uretilmez). QC f) sembol rengi dE <= esik
   (a-e sembol yerlesimini olcmuyordu: ilk kosuda 10 ciftte bozuk ana sembol a-e'den gecti). Yazi profili yalniz
   dikey govdeden; isim OCR psm 7/8; e profili bitisik satir parcalarinda; MB e esigi 78 orijinalden (6.12).
-- Katman cizimi orijinalden farkli ciftler (AQUARIUS_LEO, AQUARIUS_TAURUS) ve ana sembol + kucuk sembol ayni bantta
-  (LIBRA_LIBRA): motorla sadik uretilemez, FAIL listesinde; kaynak katman / yerlesim karari Serdar'da.
+- 3 cift 2. deneme (Serdar onayli koordinator notu): LIBRA_LIBRA kok neden bant kurali (kucuk sembol iki banda
+  bolunuyordu) -> kucuk sembol = isim ustundeki bant + <= 100 px yakin bantlar. AQUARIUS_LEO / AQUARIUS_TAURUS: LEGACY
+  katman cizimi orijinalden farkli (NCC 0.60 / 0.67) -> ana sembol sonsuz gibi orijinal posterden plate farki (yerinde).
+- QC f kalici negatif test: kosu 37134636169'un bozuk 10 sayfasi f FAIL vermeli (motor/negatif_f.py).
 - GOZ SON KARAR: Serdar'a her renk x boy TAM SAYFA gider, kesit secilip elenmez. Gorsel suphede once Serdar.
 Teslim
 - Teslim ve musteri mesaji yalniz Serdar onayiyla.

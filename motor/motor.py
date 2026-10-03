@@ -157,10 +157,27 @@ def altin_bas(a, Z, K, C, i1, i2, mesaj, rap):
         return np.stack([np.interp(g[..., c], np.arange(256), np.asarray(lut[c], np.float32)) for c in range(3)], -1)
 
     b = Z['buyuk_sembol']
-    k = olcekle(K / f'main_{sol}_{sag}_gold.png', b['w'], b['h'])
-    bindir('buyuk_sembol', lut_uygula(k[..., :3], AL['buyuk_sembol']['lut']), k[..., 3], b['x'], b['y'])
-    del k
-    log('buyuk sembol', b['w'], b['h'], b['x'], b['y'])
+    d_bs = None
+    if b.get('kaynak') == 'orijinal':
+        # ana sembol orijinal posterden plate farki (yerinde; LEGACY katman cizimi orijinalden farkli). Maske: kutu
+        # +-pad icinde murekkep (> wk.ESIK) 7 px genisletilmis, gurultu tabani (wb.T0) ustu, plate halkasi disi.
+        from olc import halka_maskesi
+        x0, y0, x1, y1 = b['kutu']
+        pd = 12
+        kk = (x0 - pd, y0 - pd, x1 + pd, y1 + pd)
+        so_b = np.asarray(Image.open(a.orijinal).convert('RGB').crop(kk), np.float32)
+        pb = P[y0 - pd:y1 + pd, x0 - pd:x1 + pd]
+        d_bs = so_b - pb
+        mb = np.clip(-(d_bs @ wk.LUMA) * Z.get('isaret', 1.0), 0, None)
+        mk_bs = cv2.dilate((mb > wk.ESIK).astype(np.uint8), np.ones((7, 7), np.uint8)).astype(bool) & (mb >= wb.T0)
+        mk_bs &= ~halka_maskesi(P)[y0 - pd:y1 + pd, x0 - pd:x1 + pd]
+        d_bs = d_bs * mk_bs[..., None]
+        log('buyuk sembol (orijinal fark)', b['kutu'], int(mk_bs.sum()))
+    else:
+        k = olcekle(K / f'main_{sol}_{sag}_gold.png', b['w'], b['h'])
+        bindir('buyuk_sembol', lut_uygula(k[..., :3], AL['buyuk_sembol']['lut']), k[..., 3], b['x'], b['y'])
+        del k
+        log('buyuk sembol', b['w'], b['h'], b['x'], b['y'])
 
     # isim satiri (SECENEK D, WP ile ayni kural)
     I = Z['isim']
@@ -239,6 +256,12 @@ def altin_bas(a, Z, K, C, i1, i2, mesaj, rap):
     mm = np.zeros((H, W), bool); mm[inf_y:inf_y + h, inf_x0:inf_x0 + w] = a_inf > 0.02
     maske['sonsuz'] = mm
     A[mm] = np.maximum(A[mm], a_inf[a_inf > 0.02])
+    if d_bs is not None:
+        x0, y0, x1, y1 = b['kutu']
+        out[y0 - 12:y1 + 12, x0 - 12:x1 + 12] += d_bs
+        mm = np.zeros((H, W), bool); mm[y0 - 12:y1 + 12, x0 - 12:x1 + 12] = mk_bs
+        maske['buyuk_sembol'] = mm
+        A[mm] = 1.0
     u8 = np.clip(np.round(out), 0, 255).astype(np.uint8)
     del out
     im = Image.fromarray(u8)

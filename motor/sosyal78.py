@@ -42,7 +42,7 @@ def cift_isle(K, r, C):
 
     rc, son = kos('olc', [sys.executable, str(KOK / 'olc.py'), '--kaynak', str(K), '--cift', c, '--renk', 'MIDNIGHT_BLUE',
                          '--boy', '16x20', '--plate', 'BLUE_16x20', '--orijinal', str(orj), '--plate-dosya', str(pl),
-                         '--altin', '--govde-profil', '0.15', '--cikti', str(S)])
+                         '--altin', '--govde-profil', '0.15', '--sembol-orijinal', '--cikti', str(S)])
     if rc:
         return {**sonuc, 'hata': 'olc: ' + ' '.join(son), 'sure_sn': round(time.time() - t, 1)}
     rc, son = kos('motor', [sys.executable, str(KOK / 'motor.py'), '--kaynak', str(K), '--sabit', str(S),
@@ -75,29 +75,37 @@ def cift_isle(K, r, C):
     return sonuc
 
 
-def temas(sonuc, C, cikti):
-    """78 posterin tamami tek sayfada (13 x 6), tam poster kucultulmus; FAIL olan hucre etiketli bos kutu."""
-    w, h, ara, ust = 360, 450, 16, 60
+def temas(sonuc, C, cikti, w=600):
+    """78 posterin tamami tek sayfada (13 x 6), TAM SAYFA (kesit yok) kucultulmus; FAIL olan hucre etiketli bos kutu.
+    Poster genisligi 600 px'ten baslar, JPG 10 MB'yi asarsa kuculur."""
+    for q in (92, 88):
+        r = _temas(sonuc, C, cikti, w, q)
+        if r:
+            return r
+    return temas(sonuc, C, cikti, int(w * 0.85))
+
+
+def _temas(sonuc, C, cikti, w, kalite):
+    h, ara, ust = int(w * 1.25), 16, int(60 * w / 360)
     sut = 13
     satir = (len(sonuc) + sut - 1) // sut
-    f = ImageFont.truetype(str(KOK / 'font' / 'EBGaramond-Italic.ttf'), 22)
-    c = Image.new('RGB', (sut * (w + ara) + ara, satir * (h + ust) + ara + 60), 'white')
+    f = ImageFont.truetype(str(KOK / 'font' / 'EBGaramond-Italic.ttf'), int(22 * w / 360))
+    c = Image.new('RGB', (sut * (w + ara) + ara, satir * (h + ust) + ara + ust), 'white')
     d = ImageDraw.Draw(c)
     d.text((ara, 15), 'AstroLoveArt sosyal medya, 78 cift, MIDNIGHT_BLUE 4x5 (motor)', font=f, fill=(30, 30, 30))
     for i, s in enumerate(sonuc):
-        x, y = ara + (i % sut) * (w + ara), 60 + (i // sut) * (h + ust)
+        x, y = ara + (i % sut) * (w + ara), ust + (i // sut) * (h + ust)
         d.text((x, y + 4), f"{i + 1}. {s['cift']}", font=f, fill=(30, 30, 30))
-        d.text((x, y + 28), f"{s['sol'][1]} / {s['sag'][1]}  {'PASS' if s['gecti'] else 'FAIL'}", font=f,
+        d.text((x, y + ust // 2), f"{s['sol'][1]} / {s['sag'][1]}  {'PASS' if s['gecti'] else 'FAIL'}", font=f,
                fill=(30, 30, 30) if s['gecti'] else (200, 0, 0))
         if s.get('png'):
             c.paste(Image.open(C / s['png']).convert('RGB').resize((w, h), Image.LANCZOS), (x, y + ust - 4))
         else:
             d.rectangle([x, y + ust - 4, x + w, y + ust - 4 + h], outline=(200, 0, 0), width=4)
-    for q in (90, 85, 80, 70):
-        c.save(cikti, 'JPEG', quality=q)
-        if Path(cikti).stat().st_size < 10 * 1024 * 1024:
-            return {'px': list(c.size), 'kalite': q, 'bayt': Path(cikti).stat().st_size}
-    raise SystemExit('FAIL: temas JPG 10 MB ustu')
+    c.save(cikti, 'JPEG', quality=kalite)
+    if Path(cikti).stat().st_size < 10 * 1024 * 1024:
+        return {'px': list(c.size), 'kalite': kalite, 'poster_px': [w, h], 'bayt': Path(cikti).stat().st_size}
+    return None
 
 
 def main():
@@ -116,7 +124,11 @@ def main():
     C.mkdir(parents=True, exist_ok=True)
     liste = list(csv.DictReader(open(K / 'liste.csv', encoding='utf-8')))
     if a.birlestir:
-        sonuc = [s for f in a.birlestir for s in json.loads(Path(f).read_text())['hucreler']]
+        d = {}
+        for f in a.birlestir:                                          # sonraki dosya ayni cifti gunceller (ek kosu)
+            for s in json.loads(Path(f).read_text())['hucreler']:
+                d[s['cift']] = s
+        sonuc = list(d.values())
         sira = [r['cift'] for r in liste]
         sonuc.sort(key=lambda s: sira.index(s['cift']))
         return rapor(sonuc, C, a.sure)

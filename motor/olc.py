@@ -237,6 +237,8 @@ def main():
     ap.add_argument('--altin', action='store_true', help='altin edisyon: katman tablosu (LUT) + yazi dokusu olc')
     ap.add_argument('--govde-profil', type=float, default=0.0,
                     help='yazi profili yalniz dikey govdeden (kosu >= oran x yukseklik; 78 cift: 0.15)')
+    ap.add_argument('--sembol-orijinal', action='store_true',
+                    help='altin: katman NCC_MIN alti ise ana sembol orijinal posterden fark olarak (yerinde)')
     ap.add_argument('--mesaj-isim-tonu', action='store_true', help='tagline dokusu = isim altini (Serdar: DEEP_BLACK)')
     a = ap.parse_args()
     K = Path(a.kaynak)
@@ -253,9 +255,15 @@ def main():
     toplam = ink_b.sum()
     b = [x for x in b0 if ink_b[x[0]:x[1]].sum() >= 0.01 * toplam]    # gurultu bantlari (kagit lekesi) < %1
     if len(b) > 4:
-        # ana sembol birden cok banda bolunebilir (3 Eki, ARIES_LIBRA: terazi alt cubugu > 40 px bosluk): yerlesim
-        # sabit, son uc bant kucuk sembol / isim / mesaj; ustteki bantlar tek buyuk sembol bandi
-        b = [[b[0][0], b[-4][1]]] + b[-3:]
+        # ana sembol ve / veya kucuk sembol birden cok banda bolunebilir (3 Eki: ARIES_LIBRA ana sembolde terazi alt
+        # cubugu 131 px asagida; LIBRA_LIBRA kucuk sembolde omega ile cubuklar 62 px). Yerlesim sabit: son iki bant
+        # isim / mesaj; kucuk sembol = isim ustundeki bant + ona <= 100 px (11x14 olcegi) yakin bantlar (yukari dogru);
+        # kalan ustteki bantlar tek buyuk sembol bandi.
+        ust = b[:-2]
+        k0 = len(ust) - 1
+        while k0 > 1 and ust[k0][0] - ust[k0 - 1][1] <= 100 * q:
+            k0 -= 1
+        b = [[ust[0][0], ust[k0 - 1][1]], [ust[k0][0], ust[-1][1]]] + b[-2:]
     if len(b) != 4:
         sys.exit(f'FAIL: 4 bant bekleniyordu (buyuk sembol, kucuk sembol, isim, mesaj), bulunan {b}')
     bb, kb, ib, mb = b
@@ -269,7 +277,13 @@ def main():
     R['buyuk_sembol'] = {'katman': f'main_symbols/{sol}_{sag}_gold.png', 'kutu': hk,
                          **oturt(np.where(hm, 0, m), ink_b, hk, al, ak)}
     if R['buyuk_sembol']['ncc'] < NCC_MIN:
-        sys.exit(f"FAIL: ana sembol oturtma NCC {R['buyuk_sembol']['ncc']} < {NCC_MIN}")
+        if not (a.altin and a.sembol_orijinal):
+            sys.exit(f"FAIL: ana sembol oturtma NCC {R['buyuk_sembol']['ncc']} < {NCC_MIN}")
+        # 3 Eki (Serdar onayli 2. deneme): LEGACY katman cizimi orijinalden farkli (AQUARIUS_LEO / AQUARIUS_TAURUS);
+        # ana sembol yerinde kalir (isimle kaymaz), sonsuz gibi orijinal posterden plate farki olarak alinir
+        R['buyuk_sembol'] = {'kaynak': 'orijinal', 'kutu': hk, 'ncc_katman': R['buyuk_sembol']['ncc'],
+                             'katman': 'orijinal posterden fark (S - P), plate halkasi disi; LEGACY katman orijinale '
+                                       f"oturmadi (NCC {R['buyuk_sembol']['ncc']} < {NCC_MIN})"}
     # kucuk semboller
     kk = kumeler(ink_b[kb[0]:kb[1]], 200 * q)
     if len(kk) != 2:
@@ -348,9 +362,10 @@ def main():
     if a.altin:
         # altin edisyon (koyu / acik kagit): semboller katman + olculen tablo; yazi dokusu orijinal satir profili
         R['mod'] = 'altin'
-        cf = {'buyuk_sembol': [katman_cifti(S, K / f'main_{sol}_{sag}_gold.png', R['buyuk_sembol'])],
-              'kucuk_sembol': [katman_cifti(S, K / f'sym_{b}_gold.png', R[f'kucuk_sembol_{t}'])
+        cf = {'kucuk_sembol': [katman_cifti(S, K / f'sym_{b}_gold.png', R[f'kucuk_sembol_{t}'])
                                for t, b in (('sol', sol), ('sag', sag))]}
+        if R['buyuk_sembol'].get('kaynak') != 'orijinal':
+            cf['buyuk_sembol'] = [katman_cifti(S, K / f'main_{sol}_{sag}_gold.png', R['buyuk_sembol'])]
         R['altin'] = {k: lut_olc(v) for k, v in cf.items()}
         gv = a.govde_profil
         R['altin']['isim_sol'] = profil_olc(S, ink, isim_sol[0], isim_sol[2], isim_sol[1], isim_sol[3], gv)
