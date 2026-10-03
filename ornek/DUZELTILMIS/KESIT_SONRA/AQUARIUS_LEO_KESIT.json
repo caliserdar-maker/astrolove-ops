@@ -1,0 +1,24 @@
+{
+ "ust_satir": "1:1",
+ "alt_satir": "4x kontrast",
+ "kutular": {
+  "a_cember_cevresi": {
+   "x": 560,
+   "y": 1880,
+   "w": 400,
+   "h": 400
+  },
+  "b_yildiz_temizligi": {
+   "x": 3538,
+   "y": 5118,
+   "w": 400,
+   "h": 400
+  },
+  "c_bos_zemin": {
+   "x": 3900,
+   "y": 250,
+   "w": 400,
+   "h": 400
+  }
+ }
+}
