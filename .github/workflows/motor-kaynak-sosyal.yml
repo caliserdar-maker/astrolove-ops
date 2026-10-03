@@ -1,0 +1,103 @@
+name: motor-kaynak-sosyal
+
+# ADIM 2 (Instagram posteri, 3 Eki 2026 Serdar onayi) kaynak paketi: CANCER_LIBRA MIDNIGHT_BLUE 16x20 (4x5).
+# Drive SALT OKUNUR. Orijinal satis posteri + BLUE plate + altin katmanlar + Test 5 MB 16x20 (eski sistem, kiyas)
+# manifest (boyut, sha256) ile inceleme/motor-kaynak-sosyal dalina (orphan). 90 MB ustu dosya parcalanir (birebir).
+# Yalniz motor dalinda push ile. Etsy YOK, musteri YOK.
+
+on:
+  push:
+    branches: [motor]
+    paths: [motor/kaynak_sosyal.trigger]
+
+permissions:
+  contents: write
+
+jobs:
+  kaynak:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q pymupdf
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Drive'dan indir (salt okuma)
+        run: |
+          set -euo pipefail
+          O=_kaynak; mkdir -p $O/plates; A=gdrive:ASTROLOVE; T=$A/TEMP; L=$A/ARCHIVE/LEGACY_COMPONENTS
+          rclone lsl "$T/POD_PRINT/CANCER_LIBRA/MIDNIGHT_BLUE/" > $O/pod_klasor.txt || true
+          rclone lsl "$T/SIPARIS_ISIM/PLATES/" > $O/plates_klasor.txt || true
+          cat $O/pod_klasor.txt
+          rclone copyto "$T/POD_PRINT/CANCER_LIBRA/MIDNIGHT_BLUE/16x20.jpg" $O/orijinal.jpg
+          rclone copyto "$T/SIPARIS_ISIM/PLATES/BLUE_16x20.png" $O/plates/BLUE_16x20.png
+          rclone copyto "$L/main_symbols/cancer_libra_gold.png" $O/main_cancer_libra_gold.png
+          for b in cancer libra; do
+            rclone copyto "$L/zodiac_symbols_gold/${b}_symbol_gold.png" $O/sym_${b}_gold.png
+            rclone copyto "$L/zodiac_names/${b}_name_gold.png" $O/name_${b}_gold.png
+          done
+          rclone copyto "$T/SIPARIS_ISIM/DIJITAL/9000000005/AstroLoveArt_Scorpio_Virgo_Midnight_Blue.pdf" _test5_mb.pdf
+          rclone copyto "$T/POD_PRINT/SCORPIO_VIRGO/MIDNIGHT_BLUE/16x20.jpg" $O/orijinal_SV_MB_16x20.jpg
+      - name: Test 5 MB 16x20 sayfasi (gomulu goruntu birebir)
+        run: |
+          set -euo pipefail
+          python3 - <<'EOF'
+          import fitz, json
+          d = fitz.open('_test5_mb.pdf'); kay = []
+          for i, p in enumerate(d):
+              w, h = p.rect.width / 72, p.rect.height / 72
+              kay.append({'sayfa': i + 1, 'inc': [round(w, 3), round(h, 3)]})
+              if abs(w - 16) < 0.05 and abs(h - 20) < 0.05:
+                  im = p.get_images(full=True)
+                  x = d.extract_image(im[0][0])
+                  open(f"_kaynak/test5_SV_MB_16x20.{x['ext']}", 'wb').write(x['image'])
+                  kay[-1].update({'goruntu_px': [x['width'], x['height']], 'ext': x['ext'], 'goruntu_sayisi': len(im)})
+          json.dump(kay, open('_kaynak/test5_sayfalar.json', 'w'), indent=1); print(kay)
+          EOF
+      - name: Manifest + parcala
+        run: |
+          set -euo pipefail
+          cd _kaynak
+          python3 - <<'EOF' > MANIFEST.txt
+          import hashlib, os
+          for r, _, fs in sorted(os.walk('.')):
+              for f in sorted(fs):
+                  p = os.path.join(r, f)
+                  if f == 'MANIFEST.txt': continue
+                  print(f"{p}\t{os.path.getsize(p)}\t{hashlib.sha256(open(p, 'rb').read()).hexdigest()}")
+          EOF
+          cat MANIFEST.txt
+          find . -type f -size +90M | while read f; do split -b 90M -d "$f" "$f.parca"; rm "$f"; echo "parcalandi $f"; done
+      - name: Commit (inceleme/motor-kaynak-sosyal, orphan)
+        run: |
+          set -euo pipefail
+          K=$(git rev-parse HEAD)
+          cd _kaynak
+          git init -q -b inceleme/motor-kaynak-sosyal
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          echo "motor dali $K, kosu ${{ github.run_id }}" > KAYNAK.txt
+          git add -A
+          git commit -q -m "motor-kaynak-sosyal: CANCER_LIBRA MB 16x20 kaynaklari (motor $K, kosu ${{ github.run_id }})"
+          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" HEAD:inceleme/motor-kaynak-sosyal
+          git log -1 --format='%H'
+      - if: always()
+        run: rm -rf ~/.config/rclone
