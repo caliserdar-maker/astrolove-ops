@@ -150,9 +150,21 @@ def altin_bas(a, Z, K, C, i1, i2, mesaj, rap):
                 sys.exit(f'FAIL: {f_.name} sha uyusmuyor')
         if kay['kaynak_plate']['sha256'] != rap['zemin']['sha256']:
             sys.exit('FAIL: halkasiz zemin bu plate'"'"'ten degil')
-        P = np.asarray(Image.open(zf).convert('RGB'), np.float32)
         a_halka = np.asarray(Image.open(hf), np.float32) / 255.0
         rap['zemin']['halkasiz'] = {'dosya': kay['halkasiz_zemin']['dosya'], 'sha256': kay['halkasiz_zemin']['sha256']}
+        # Serdar 3 Eki ek: zemin = puruzsuz radyal gradient (olculen egri, cember merkezi, 4:5 elips) + plate yildiz
+        # katmani (zemin_gradient.py, sha kayitli). Plate lekesi tasinmaz.
+        import zemin_gradient as zg
+        GJ = json.loads((KOK / 'varlik' / 'plates' / f'{pf.stem}_gradient.json').read_text())
+        yf = KOK.parent / GJ['yildiz']['dosya']
+        if GJ['kaynak']['sha256'] != kay['halkasiz_zemin']['sha256'] or \
+                hashlib.sha256(yf.read_bytes()).hexdigest() != GJ['yildiz']['sha256']:
+            sys.exit('FAIL: gradient / yildiz katmani sha uyusmuyor')
+        y_kat = np.asarray(Image.open(yf).convert('RGB'), np.float32)
+        P = zg.gradient(H, W, GJ['gradient']) + y_kat
+        rap['zemin']['gradient'] = {'merkez': GJ['gradient']['merkez'], 'elips': GJ['gradient']['elips'],
+                                    'merkez_rgb': GJ['olcum']['merkez_rgb'], 'kose_rgb': GJ['olcum']['kose_rgb'],
+                                    'yildiz': {'dosya': GJ['yildiz']['dosya'], 'sha256': GJ['yildiz']['sha256']}}
     Cp = np.zeros((H, W, 3), np.float32)                               # on carpilmis renk
     A = np.zeros((H, W), np.float32)
     maske = {}
@@ -333,7 +345,34 @@ def altin_bas(a, Z, K, C, i1, i2, mesaj, rap):
         for ad in ('isim1', 'isim2', 'sonsuz', 'mesaj'):
             ys, xs = np.nonzero(maske[ad])
             kut.append((int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1))
-        P, rap['yildiz'] = tdk.yildiz_temizle(P, kut, W, haric=a_halka > 0)
+        # yildiz katmanindan yazi kutusu + pay ile kesisen yildizlar cikarilir (gradient kalir; dolgu / yama yok)
+        pay = int(round(tdk.PAY_ORAN * tdk.TEMIZLIK_PAYI * W))
+        YL = np.asarray(GJ['yildiz']['liste'], np.float64)
+        at = np.zeros(len(YL), bool)
+        for k_, (cx_, cy_, rd_, _) in enumerate(YL):
+            for x0_, y0_, x1_, y1_ in kut:
+                dx_ = max(x0_ - pay - cx_, 0, cx_ - (x1_ + pay)); dy_ = max(y0_ - pay - cy_, 0, cy_ - (y1_ + pay))
+                if np.hypot(dx_, dy_) <= rd_:
+                    at[k_] = True
+                    break
+        # ortusen diskler: her katman pikseli en yakin yildizin; yalniz atilan yildizlarin pikselleri, tek kez silinir
+        sil = np.zeros((H, W), bool)
+        for k_ in np.nonzero(at)[0]:
+            cx_, cy_, rd_, _ = YL[k_]
+            ya, yb = max(0, int(cy_ - rd_) - 1), min(H, int(cy_ + rd_) + 2)
+            xa, xb = max(0, int(cx_ - rd_) - 1), min(W, int(cx_ + rd_) + 2)
+            yy_, xx_ = np.mgrid[ya:yb, xa:xb]
+            d0 = np.hypot(xx_ - cx_, yy_ - cy_)
+            sahip = d0 <= rd_
+            for j_ in np.nonzero(~at)[0]:
+                cj, cyj, rj, _ = YL[j_]
+                if np.hypot(cj - cx_, cyj - cy_) < rd_ + rj:
+                    dj = np.hypot(xx_ - cj, yy_ - cyj)
+                    sahip &= ~((dj <= rj) & (dj < d0))
+            sil[ya:yb, xa:xb] |= sahip
+        P[sil] -= y_kat[sil]
+        atilan = YL[at][:, :2].round(1).tolist()
+        rap['yildiz'] = {'pay_px': pay, 'yildiz': len(atilan), 'atilan': atilan}
         log('yildiz', rap['yildiz'])
     out = P * (1 - A[..., None]) + Cp
     del Cp
@@ -349,6 +388,12 @@ def altin_bas(a, Z, K, C, i1, i2, mesaj, rap):
         mm = np.zeros((H, W), bool); mm[y0 - 12:y1 + 12, x0 - 12:x1 + 12] = mk_bs
         maske['buyuk_sembol'] = mm
         A[mm] = 1.0
+    if td:
+        # 16 bit (float) hesap -> 8 bit: TPDF dither (+-1 LSB, sabit tohum) yalniz zemine; ZEMIN.png ayni gurultuyle
+        Nd = zg.dither(H, W)
+        Image.fromarray(np.clip(np.round(P + Nd), 0, 255).astype(np.uint8)).save(C / 'ZEMIN.png')
+        out += Nd * (1 - np.clip(A, 0, 1))[..., None]
+        del Nd
     u8 = np.clip(np.round(out), 0, 255).astype(np.uint8)
     del out
     im = Image.fromarray(u8)

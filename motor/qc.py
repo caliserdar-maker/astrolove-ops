@@ -338,6 +338,48 @@ def zemin_kapisi(S, ink, kutular):
     return {'leke': ls[:10], 'sayi': len(ls), 'esik': {'dE': J_DE, 'alan': J_ALAN}, 'gecti': not ls}
 
 
+K_ARTIS = 0.05     # k) radyal profil: %1'lik halkalarda ortalama luma disa dogru en fazla bu kadar artabilir. Olculen (3 Eki):
+                   # gradient zemin -0.018 (hep azalan); plate zeminli ornekler (ornek-tek-doku e12fad7) +0.15 / +0.23 / +0.27
+K_LEKE = 0.50      # k) yerel leke: zemin (sigma 10 px yumusak) - radyal profil, |fark| p99.9 (luma, QC olcegi). Olculen:
+                   # gradient + dither 0.05; plate zeminli ornekler ve orijinal 2.98 - 3.01
+
+
+def zemin_gradient_kapisi(S, P, ink, plate_ad):
+    """k) zemin puruzsuz radyal gradient mi (Serdar 3 Eki ek). Geometri: varlik/plates/<plate>_gradient.json (cember
+    merkezi, 4:5 elips). Zemin = murekkep (15 px), yildiz (yerel medyandan > 4, 25 px) ve plate cemberi (15 px) disi.
+    (1) tekduzelik: %1'lik s halkalarinda ortalama luma disa dogru K_ARTIS'tan fazla artmaz; (2) leke: maskeli Gauss
+    (10 px) zemin - halka profili, |fark| p99.9 <= K_LEKE."""
+    import tek_doku as tdk
+    gf = KOK / 'varlik' / 'plates' / f'{plate_ad}_gradient.json'
+    if not gf.exists():
+        return {'gecti': False, 'sebep': f'{gf.name} yok'}
+    g = json.loads(gf.read_text())['gradient']
+    H, W = S.shape[:2]
+    f = W / 4800
+    cx, cy = g['merkez'][0] * f, g['merkez'][1] * f
+    yy, xx = np.mgrid[0:H, 0:W].astype(np.float32)
+    sh = np.hypot(xx - cx, (yy - cy) / g['elips']) / (g['kose'] * f)
+    L = S @ wk.LUMA
+    R = L - tdk.yerel_medyan(L, W)
+    yil = cv2.dilate((R > 4).astype(np.uint8), np.ones((25, 25), np.uint8)).astype(bool)
+    hm = cv2.dilate(halka_plate(P).astype(np.uint8), np.ones((15, 15), np.uint8)).astype(bool)
+    zem = ~cv2.dilate(ink.astype(np.uint8), np.ones((15, 15), np.uint8)).astype(bool) & ~yil & ~hm
+    b = np.clip((sh * 100).astype(int), 0, 99)
+    n = np.bincount(b[zem], minlength=100)
+    mo = np.bincount(b[zem], L[zem], 100) / np.maximum(n, 1)
+    ok = np.nonzero(n >= 500)[0]
+    artis = np.diff(mo[ok])
+    en_artis = float(artis.max()) if artis.size else 0.0
+    prof = np.interp(sh, (ok + 0.5) / 100, mo[ok]).astype(np.float32)
+    num = cv2.GaussianBlur(np.where(zem, L, 0).astype(np.float32), (0, 0), 10)
+    den = cv2.GaussianBlur(zem.astype(np.float32), (0, 0), 10)
+    ic = zem & (den > 0.5)
+    res = np.abs(num / np.maximum(den, 1e-6) - prof)[ic]
+    leke = float(np.percentile(res, 99.9)) if res.size else 0.0
+    return {'en_artis': round(en_artis, 3), 'artis_esik': K_ARTIS, 'leke_p999': round(leke, 3), 'leke_esik': K_LEKE,
+            'zemin_px': int(zem.sum()), 'gecti': en_artis <= K_ARTIS and leke <= K_LEKE}
+
+
 def oge_renkleri(S, P, ink, m, Z, isb, alt):
     """h) ogelerin dolu murekkep ortalama rengi ve cekirdek lumasi; referans buyuk sembol."""
     H, W = S.shape[:2]
@@ -384,9 +426,11 @@ def oge_renkleri(S, P, ink, m, Z, isb, alt):
     return {'ogeler': out, 'en_buyuk': en, 'esik': H_ESIK, 'gecti': en <= H_ESIK}
 
 
-def olc(ad, S, P, O, Z, isim1, isim2, mesaj, e_esik=None, gh=False, tam=None):
+def olc(ad, S, P, O, Z, isim1, isim2, mesaj, e_esik=None, gh=False, tam=None, Pz=None):
     H, W = S.shape[:2]
-    m, ink = murekkep(S, P)
+    # Pz: bu sayfanin zemini (gradient zeminli motor sayfasi: ZEMIN.png); yoksa plate
+    Pz = P if Pz is None else Pz
+    m, ink = murekkep(S, Pz)
     R = {'ad': ad}
     b0 = bantlar(ink)
     top = ink.sum()
@@ -408,7 +452,7 @@ def olc(ad, S, P, O, Z, isim1, isim2, mesaj, e_esik=None, gh=False, tam=None):
         # tesseract harf yuksekligine duyarli (3 Eki: 16x20 orijinal 'Two' 2x'te 'lwo', 0.5x'te dogru): 2x, 1x, 0.5x
         # sirayla, girdiyle ayni okuyan ilk olcek. Yanlis / cift tagline hicbir olcekte ayni okunmaz.
         for fx in (2, 1, 0.5):
-            ocr_m = ocr(ikili(S, P, ink, y0, y1, xa, xb, fx=fx))
+            ocr_m = ocr(ikili(S, Pz, ink, y0, y1, xa, xb, fx=fx))
             if normal(ocr_m) == normal(mesaj):
                 break
     a_ocr = normal(ocr_m) == normal(mesaj)
@@ -424,7 +468,8 @@ def olc(ad, S, P, O, Z, isim1, isim2, mesaj, e_esik=None, gh=False, tam=None):
                        'gecti': len(yeni_e) == 0}
     # c) kagit dokusu
     yazi = cv2.dilate((ink | ink_o).astype(np.uint8), np.ones((15, 15), np.uint8)).astype(bool)
-    de = wk.dE(S, O)[~yazi]
+    # gradient zeminli sayfa: kagit dokusu kendi zeminine (ZEMIN.png) karsi; plate zeminli sayfa: orijinale
+    de = wk.dE(S, O if Pz is P else Pz)[~yazi]
     R['c_kagit'] = {'dE_ort': round(float(de.mean()), 3), 'dE_p95': round(float(np.percentile(de, 95)), 3),
                     'dE_p99': round(float(np.percentile(de, 99)), 3), 'esik_ort': 0.5,
                     'gecti': bool(de.mean() <= 0.5)}
@@ -440,10 +485,10 @@ def olc(ad, S, P, O, Z, isim1, isim2, mesaj, e_esik=None, gh=False, tam=None):
                 # tek kelime: psm 7 (satir) sonra psm 8 (kelime; 3 Eki: SIENNA psm 7'de her olcekte 'STENNA')
                 for fx in (2, 1, 0.5):
                     for psm in ('7', '8'):
-                        o = ocr(ikili(S, P, ink, y0, y1, *k, fx=fx), 'ABCDEFGHIJKLMNOPQRSTUVWXYZÇĞİÖŞÜ', psm)
+                        o = ocr(ikili(S, Pz, ink, y0, y1, *k, fx=fx), 'ABCDEFGHIJKLMNOPQRSTUVWXYZÇĞİÖŞÜ', psm)
                         if o == bek:
                             return o
-                return ocr(ikili(S, P, ink, y0, y1, *k), 'ABCDEFGHIJKLMNOPQRSTUVWXYZÇĞİÖŞÜ')
+                return ocr(ikili(S, Pz, ink, y0, y1, *k), 'ABCDEFGHIJKLMNOPQRSTUVWXYZÇĞİÖŞÜ')
             o1, o2 = oku_isim(kk[0], isim1), oku_isim(kk[2], isim2)
             d = {'sol': o1, 'sag': o2, 'beklenen': [isim1, isim2], 'gecti': o1 == isim1 and o2 == isim2,
                  'satir_merkez_x': round((kk[0][0] + kk[2][1]) / 2, 1), 'poster_merkez_x': W / 2}
@@ -488,6 +533,7 @@ def olc(ad, S, P, O, Z, isim1, isim2, mesaj, e_esik=None, gh=False, tam=None):
         # i) cember dokusu surekliligi (tam cozunurluk); j) yazi cevresi zemin dolgu lekesi (Serdar 3 Eki goz kontrolu)
         R['i_cember'] = cember_kapisi(*tam) if tam else {'gecti': False, 'sebep': 'tam cozunurluk sayfa yok'}
         R['j_zemin'] = zemin_kapisi(S, ink, kut)
+        R['k_gradient'] = zemin_gradient_kapisi(S, P, ink, Z['plate'])
     # f) sembol sadakati (altin edisyon; 3 Eki 78 cift: 10 ciftte ana sembol yanlis oturmus, dE 94-102, a-e gecmisti):
     # buyuk / kucuk sembol dolu murekkep rengi orijinalden dE <= F_ESIK. WP bakir tasarim geregi farkli (Test 5 kiyasi).
     if Z.get('mod') == 'altin':
@@ -497,7 +543,7 @@ def olc(ad, S, P, O, Z, isim1, isim2, mesaj, e_esik=None, gh=False, tam=None):
     else:
         R['f_sembol'] = {'uygulanmaz': 'bakir (WP)', 'gecti': True}
     K5 = ('a_tagline', 'b_hat', 'c_kagit', 'd_isim', 'e_bant', 'f_sembol') + (('g_yildiz', 'i_cember', 'j_zemin') if gh else ()) + \
-        (('h_tek_doku',) if gh and ad == 'motor' else ())
+        (('h_tek_doku', 'k_gradient') if gh and ad == 'motor' else ())
     R['gecti'] = all(R[k]['gecti'] for k in K5)
     R['gecti_eski_kural'] = all(R[k]['gecti'] for k in ('a_tagline', 'b_hat_eski', 'c_kagit', 'd_isim', 'e_bant', 'f_sembol'))
     return R
@@ -515,6 +561,7 @@ def main():
     ap.add_argument('--negatif', help='e kapisi negatif testi: bilinen kusurlu sayfa (deneme 2), FAIL beklenir')
     ap.add_argument('--orijinal', help='orijinal satis posteri (varsayilan: KAYNAK/orijinal_WP_11x14.jpg)')
     ap.add_argument('--orijinal-metin', default='SCORPIO|VIRGO|Two Souls · One Bond', help='isim1|isim2|tagline')
+    ap.add_argument('--zemin-motor', help='motor sayfasinin zemini (gradient: hucre/ZEMIN.png); murekkep ve c kapisi')
     ap.add_argument('--plate-dosya', help='plate (varsayilan: KAYNAK/plates/<plate>.png)')
     ap.add_argument('--test5', help='eski sistem sayfasi (varsayilan: KAYNAK/test5_WP_11x14.jpeg; "yok": kiyas yok)')
     ap.add_argument('--test5-fail', action='store_true', help='prototip oz testi: Test 5 FAIL vermeli')
@@ -540,7 +587,8 @@ def main():
     for ad, S, i1, i2, ms in sayfalar:
         fp = str(a.plate_dosya or K / 'plates' / f"{Z['plate']}.png")
         tam = {'orijinal': (str(a.orijinal or K / 'orijinal_WP_11x14.jpg'), fp), 'motor': (a.motor, fp)}.get(ad)
-        R[ad] = olc(ad, S, P, O, Z, i1, i2, ms, a.e_esik, a.gh, tam)
+        Pz = oku_n(a.zemin_motor, P.shape[1]) if (ad == 'motor' and a.zemin_motor) else None
+        R[ad] = olc(ad, S, P, O, Z, i1, i2, ms, a.e_esik, a.gh, tam, Pz)
         print(ad, json.dumps({k: R[ad][k] for k in ('a_tagline', 'b_hat', 'c_kagit', 'd_isim', 'gecti')},
                              ensure_ascii=False), flush=True)
     Path(a.cikti).write_text(json.dumps(R, indent=1, ensure_ascii=False))
@@ -570,6 +618,10 @@ def main():
             return f"{ok(x['gecti'])} (boyuna std {x.get('boyuna_std', x.get('sebep'))}, esik {I_ESIK})"
         if k == 'j_zemin':
             return f"{ok(x['gecti'])} ({x['sayi']} leke)"
+        if k == 'k_gradient':
+            if 'en_artis' not in x:
+                return f"{ok(x['gecti'])} ({x.get('sebep')})"
+            return f"{ok(x['gecti'])} (artis {x['en_artis']} / {K_ARTIS}, leke {x['leke_p999']} / {K_LEKE})"
         if k == 'f_sembol':
             return f"{ok(x['gecti'])} ({x.get('dE', x.get('uygulanmaz'))})"
         if k == 'b_hat_eski':
@@ -582,7 +634,8 @@ def main():
                   ('c_kagit', 'c) kagit dokusu (dE <= 0.5)'), ('d_isim', 'd) isim harf harf (OCR)'),
                   ('e_bant', 'e) harf ici yatay renk bandi yok'), ('f_sembol', 'f) sembol rengi orijinale (altin)'),
                   ('g_yildiz', 'g) yazi cevresi yildiz yok'), ('h_tek_doku', 'h) tek doku: ana sembole dE (motor kapi)'),
-                  ('i_cember', 'i) cember dokusu surekli'), ('j_zemin', 'j) yazi cevresi zemin dolgu lekesi yok')):
+                  ('i_cember', 'i) cember dokusu surekli'), ('j_zemin', 'j) yazi cevresi zemin dolgu lekesi yok'),
+                  ('k_gradient', 'k) zemin puruzsuz radyal gradient (motor kapi)')):
         if k not in R['motor']:
             continue
         sat.append(f"| {ad} | {h(R['orijinal'], k)} | {h(R['test5'], k)} | {h(R['motor'], k)} |")

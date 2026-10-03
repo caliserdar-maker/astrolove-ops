@@ -58,12 +58,13 @@ def cift_isle(K, r, C):
     rc, _ = kos('qc', [sys.executable, str(KOK / 'qc.py'), '--kaynak', str(K), '--sabit', str(S), '--motor',
                        str(O / 'MOTOR.png'), '--isim1', r['sol_isim'], '--isim2', r['sag_isim'], '--mesaj', r['tagline'],
                        '--cikti', str(O / 'QC.json'), '--orijinal', str(orj), '--orijinal-metin', om,
-                       '--plate-dosya', str(pl), '--test5', 'yok', '--e-esik', str(E)] + (['--gh'] if TEK_DOKU else []))
+                       '--plate-dosya', str(pl), '--test5', 'yok', '--e-esik', str(E)] + (['--gh'] if TEK_DOKU else []) +
+              (['--zemin-motor', str(O / 'ZEMIN.png')] if (O / 'ZEMIN.png').exists() else []))
     q = json.loads((O / 'QC.json').read_text()) if (O / 'QC.json').exists() else {}
     m, o = q.get('motor', {}), q.get('orijinal', {})
     sonuc.update({
         'gecti': rc == 0, 'qc_rc': rc,
-        'motor': {k: m.get(k, {}).get('gecti') for k in ('a_tagline', 'b_hat', 'c_kagit', 'd_isim', 'e_bant', 'f_sembol', 'g_yildiz', 'h_tek_doku')},
+        'motor': {k: m.get(k, {}).get('gecti') for k in ('a_tagline', 'b_hat', 'c_kagit', 'd_isim', 'e_bant', 'f_sembol', 'g_yildiz', 'h_tek_doku', 'i_cember', 'j_zemin', 'k_gradient')},
         'orijinal': {k: o.get(k, {}).get('gecti') for k in ('a_tagline', 'b_hat', 'c_kagit', 'd_isim', 'e_bant', 'f_sembol')},
         'a_ocr': m.get('a_tagline', {}).get('ocr'), 'b_cizgi': len(m.get('b_hat', {}).get('orijinalde_olmayan', [])),
         'c_dE': m.get('c_kagit', {}).get('dE_ort'), 'd': [m.get('d_isim', {}).get('sol'), m.get('d_isim', {}).get('sag')],
