@@ -228,13 +228,23 @@
   "genislik_siniri": 2334
  },
  "zemin": {
-  "dosya": "motor/varlik/plates/VINTAGE_B3_11x14_temiz.png",
-  "sha256": "981c51799885e0e576b644b0c93df74181df79b26732787768def1cc0065be1a",
+  "dosya": "motor/varlik/plates/VINTAGE_B3_11x14_temiz_halkasiz.png",
+  "sha256": "c2438605830fa9515a818f7a8c3d43c9e5b6bc32d47107ddb57ca056daf6890b",
+  "halkasiz": true,
   "kaynak": {
-   "dosya": "TEMP/SIPARIS_ISIM/PLATES/VINTAGE_B3_11x14.png",
-   "sha256": "2cd7c2aef3074961f8e5a9ca9bedece1c651c077806e602326e9d75d541fe91d"
+   "dosya": "motor/varlik/plates/VINTAGE_B3_11x14_temiz.png",
+   "sha256": "981c51799885e0e576b644b0c93df74181df79b26732787768def1cc0065be1a"
   },
-  "kayit": "motor/varlik/plates/VINTAGE_B3_11x14_temiz.json"
+  "kayit": "motor/varlik/plates/VINTAGE_B3_11x14_temiz_halkasiz.json",
+  "onceki": {
+   "dosya": "motor/varlik/plates/VINTAGE_B3_11x14_temiz.png",
+   "sha256": "981c51799885e0e576b644b0c93df74181df79b26732787768def1cc0065be1a",
+   "kaynak": {
+    "dosya": "TEMP/SIPARIS_ISIM/PLATES/VINTAGE_B3_11x14.png",
+    "sha256": "2cd7c2aef3074961f8e5a9ca9bedece1c651c077806e602326e9d75d541fe91d"
+   },
+   "kayit": "motor/varlik/plates/VINTAGE_B3_11x14_temiz.json"
+  }
  },
  "bakir": {
   "referans": "TEMP/SIPARIS_ISIM/DIJITAL/9000000005/AstroLoveArt_Scorpio_Virgo_Warm_Parchment.pdf sayfa 4 (11x14, gomulu goruntu birebir)",
@@ -320,6 +330,17 @@
     "dolu_px": 28773,
     "Lk": 101.9,
     "cv": 0.1759
+   },
+   "daire": {
+    "rgb": [
+     133.3,
+     73.8,
+     32.4
+    ],
+    "dolu_px": 27454,
+    "Lk": 103.8,
+    "cv": 0.128,
+    "olcum": "halka katmani alfa >= 0.9; kagit = kagit_tabani(ham plate)"
    }
   },
   "kabartma": {
@@ -329,5 +350,16 @@
    "r2": 0.476,
    "kenar_kontrast": 0.355
   }
+ },
+ "halka": {
+  "dosya": "motor/varlik/halka/HALKA_11x14.png",
+  "sha256": "2f516e1c963580c3117e89530eeae43d1cc793ba32175108df6e5b3159635e3c",
+  "daire_px": 49385,
+  "Lk_ci": 141.02,
+  "y": [
+   497,
+   2503
+  ],
+  "kaynak": "TEMP/SIPARIS_ISIM/PLATES/MODERN_11x14.png (kilitli wp_bakir.daire_maskesi)"
  }
 }

@@ -2,6 +2,7 @@ name: motor-prototip
 
 # Motor prototipi (3 Eki 2026, Serdar onayi): SCORPIO_VIRGO MAXWELL / QUINN WARM_PARCHMENT 11x14, katmanlardan.
 # Deneme 2: bakir = eski sistem wp_bakir rengi ve dokusu (sabitler 'bakir', motor/bakir_olc.py, Test 5 olcumu).
+# Deneme 3: harf ici renk bandi duzeltmesi + qc e kapisi (deneme 2 negatif test), halka bakir (motor/halka.py).
 # Yalniz motor dalinda push ile (main'e merge YOK). Kaynaklar: inceleme/motor-kaynak dali (Drive'dan birebir,
 # MANIFEST sha). Cikti Drive TEMP/MOTOR/PROTOTIP/<kosu>/ (yalniz yazma bu klasore). Etsy YOK, musteri YOK.
 
@@ -41,25 +42,6 @@ jobs:
           sudo apt-get install -y -q tesseract-ocr >/dev/null
           tesseract --version | head -1
           curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
-      - name: Motor + QC + karsilastirma
-        env:
-          ISIM1: MAXWELL
-          ISIM2: QUINN
-          MESAJ: "Written in the Stars, Always Yours"
-        run: |
-          set -euo pipefail
-          S=motor/sabitler/SCORPIO_VIRGO_WP_11x14.json; O=_cikti; mkdir -p $O
-          echo "kod $(git rev-parse HEAD)"
-          python3 motor/motor.py --kaynak _k --sabit $S --isim1 "$ISIM1" --isim2 "$ISIM2" --mesaj "$MESAJ" --cikti $O
-          python3 motor/qc.py --kaynak _k --sabit $S --motor $O/MOTOR.png --isim1 "$ISIM1" --isim2 "$ISIM2" --mesaj "$MESAJ" --cikti $O/QC.json
-          python3 motor/karsilastir.py --orijinal _k/orijinal_WP_11x14.jpg --eski _k/test5_WP_11x14.jpeg --motor $O/MOTOR.png --cikti $O/YANYANA_TAM_SAYFA.png --jpg $O/YANYANA_TAM_SAYFA.jpg
-          cd $O
-          mv MOTOR.png PROTOTIP_SCORPIO_VIRGO_WP_11x14.png; mv MOTOR.pdf PROTOTIP_SCORPIO_VIRGO_WP_11x14.pdf
-          mv QC.md OLCUM.md; rm -f _beklenen_maske.npy
-          cp ../motor/varlik/plates/VINTAGE_B3_11x14_temiz.json ZEMIN_TEMIZ.json
-          { echo "kod (motor dali): $(git rev-parse HEAD)"; echo "kaynak (inceleme/motor-kaynak): $(git -C ../_k rev-parse HEAD)";
-            echo "kosu: ${{ github.run_id }}"; sha256sum PROTOTIP_* YANYANA_TAM_SAYFA.*; ls -l YANYANA_TAM_SAYFA.jpg; } > KOSU.txt
-          cat KOSU.txt OLCUM.md
       - name: rclone.conf olustur
         env:
           RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
@@ -75,6 +57,32 @@ jobs:
               echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
             fi
           fi
+      - name: Negatif test girdisi (deneme 2 ciktisi, salt okuma)
+        run: |
+          set -euo pipefail
+          rclone copyto "gdrive:ASTROLOVE/TEMP/MOTOR/PROTOTIP/37115656988/PROTOTIP_SCORPIO_VIRGO_WP_11x14.png" _negatif_deneme2.png
+          sha256sum _negatif_deneme2.png
+      - name: Motor + QC + karsilastirma
+        env:
+          ISIM1: MAXWELL
+          ISIM2: QUINN
+          MESAJ: "Written in the Stars, Always Yours"
+        run: |
+          set -euo pipefail
+          S=motor/sabitler/SCORPIO_VIRGO_WP_11x14.json; O=_cikti; mkdir -p $O
+          echo "kod $(git rev-parse HEAD)"
+          python3 motor/motor.py --kaynak _k --sabit $S --isim1 "$ISIM1" --isim2 "$ISIM2" --mesaj "$MESAJ" --cikti $O
+          python3 motor/qc.py --kaynak _k --sabit $S --motor $O/MOTOR.png --isim1 "$ISIM1" --isim2 "$ISIM2" --mesaj "$MESAJ" --cikti $O/QC.json --negatif _negatif_deneme2.png
+          python3 motor/karsilastir.py --orijinal _k/orijinal_WP_11x14.jpg --eski _k/test5_WP_11x14.jpeg --motor $O/MOTOR.png --cikti $O/YANYANA_TAM_SAYFA.png --jpg $O/YANYANA_TAM_SAYFA.jpg
+          python3 motor/kesit.py --sabit $S --eski _k/test5_WP_11x14.jpeg --motor $O/MOTOR.png --cikti $O
+          cd $O
+          mv MOTOR.png PROTOTIP_SCORPIO_VIRGO_WP_11x14.png; mv MOTOR.pdf PROTOTIP_SCORPIO_VIRGO_WP_11x14.pdf
+          mv QC.md OLCUM.md; rm -f _beklenen_maske.npy
+          cp ../motor/varlik/plates/VINTAGE_B3_11x14_temiz.json ZEMIN_TEMIZ.json; cp ../motor/varlik/plates/VINTAGE_B3_11x14_temiz_halkasiz.json ZEMIN_HALKASIZ.json
+          rm -f YANYANA_TAM_SAYFA.png
+          { echo "kod (motor dali): $(git rev-parse HEAD)"; echo "kaynak (inceleme/motor-kaynak): $(git -C ../_k rev-parse HEAD)";
+            echo "kosu: ${{ github.run_id }}"; sha256sum PROTOTIP_* YANYANA_TAM_SAYFA.* KESIT_*; ls -l YANYANA_TAM_SAYFA.jpg; } > KOSU.txt
+          cat KOSU.txt OLCUM.md
       - name: Drive'a yukle (TEMP/MOTOR/PROTOTIP/<kosu>)
         run: |
           set -euo pipefail

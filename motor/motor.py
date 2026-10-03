@@ -140,19 +140,31 @@ def main():
     maske, golge = {}, {}
     RO = Z['bakir']['ogeler'] if 'bakir' in Z else Z['renk']['ogeler']
     BANT = {'buyuk_sembol': 'buyuk_sembol', 'kucuk_sembol_sol': 'kucuk_sembol', 'kucuk_sembol_sag': 'kucuk_sembol',
-            'isim1': 'isim', 'isim2': 'isim', 'sonsuz': 'isim', 'mesaj': 'mesaj'}
+            'isim1': 'isim', 'isim2': 'isim', 'sonsuz': 'isim', 'mesaj': 'mesaj', 'daire': 'daire'}
+
+    METIN = ('isim1', 'isim2', 'mesaj')
 
     def ekle(ad, katman, x, y, ham=None):
         a0 = A.copy()
         if ham is None:
             o = RO[BANT[ad]]
-            m, golge[ad] = murekkep_katmani(katman, o['Lk'], o['cv'])
+            # Serdar 3 Eki (deneme 3): isim/mesajda altin plaka satir profili golgesi YOK (ufuk cizgisi harf ici
+            # yatay renk bandi uretiyordu, qc e). WP'de yazi dokusu = kilitli kabartma (eski hattaki gibi).
+            cv_h = 0.0 if (ad in METIN and 'bakir' in Z) else o['cv']
+            m, golge[ad] = murekkep_katmani(katman, o['Lk'], cv_h)
             a = katman[..., 3]
         else:
             m, a = ham, katman
         yapistir(M, A, m, a, x, y)
         maske[ad] = (A - a0) > 0.02
 
+    if 'halka' in Z:                                                   # halka katmani (zemin halkasiz)
+        hf = KOK.parent / Z['halka']['dosya']
+        if hashlib.sha256(hf.read_bytes()).hexdigest() != Z['halka']['sha256']:
+            sys.exit('FAIL: halka katmani sha uyusmuyor')
+        ah = np.asarray(Image.open(hf), np.float32) / 255.0
+        ekle('daire', ah, 0, 0, ham=ah * RO['daire']['Lk'])
+        log('halka', Z['halka']['dosya'])
     b = Z['buyuk_sembol']
     ekle('buyuk_sembol', olcekle(K / f'main_{sol}_{sag}_gold.png', b['w'], b['h']), b['x'], b['y'])
     log('buyuk sembol', b['w'], b['h'], b['x'], b['y'])
@@ -245,7 +257,7 @@ def main():
         # oge grubu basina kilitli bakir_bas: hedef = Test 5 grubunun olculen rengi; isim + mesajda kabartma
         out, rap['bakir'] = P, {}
         kb = Z['bakir']['kabartma']
-        for g in ('buyuk_sembol', 'kucuk_sembol', 'isim', 'mesaj'):
+        for g in (('daire',) if 'halka' in Z else ()) + ('buyuk_sembol', 'kucuk_sembol', 'isim', 'mesaj'):
             mg = np.zeros((H, W), bool)
             for ad, v in maske.items():
                 if BANT[ad] == g:

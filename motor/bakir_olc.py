@@ -6,9 +6,10 @@ kagidina (ham PLATES/<plate>.png) gore yapilir; sonuc sabitler JSON'una 'bakir' 
 Oge gruplari (sabitlerdeki bantlar): buyuk_sembol, kucuk_sembol, isim (isim + sonsuz), mesaj. Test 5'te mesaj
 bandinin ustundeki kaymis ikinci kopya (bilinen hata) olcume girmez: her grup yalniz sabit bandiyla en cok
 kesisen Test 5 bandindan olculur. Test 5'te daire de bakira basildigi icin buyuk sembol, sembol kutusu (+-30 px) ile
-sinirlanir; daire motorda zeminin parcasidir (degismez).
+sinirlanir; daire ayri olculur (asagida).
 - rgb, Lk, cv: olc.renk_olc ile ayni tanim (dolu murekkep ortalamasi, murekkep gucu ortancasi, golge genligi).
 - kabartma: kilitli wp_bakir.kabartma_olc (isim + mesaj satirlari; eski hatta kabartma yalniz bunlara uygulanir).
+- daire: Test 5 halka bakiri (Serdar 3 Eki: halka da bakir), motor halka katmani geometrisiyle.
 
 Kullanim: bakir_olc.py --kaynak DIR --sabit motor/sabitler/X.json
 """
@@ -66,6 +67,19 @@ def main():
         y0, y1 = R['ogeler'][ad]['bant']
         A[y0:y1] = np.clip(m[y0:y1] / R['ogeler'][ad]['Lk'], 0, 1) * ink[y0:y1]
     R['kabartma'] = wb.kabartma_olc(A, T, P, sat, T.shape[1] / 2400.0)
+    # halka (daire): Test 5'te bakir. Geometri motor halka katmani (alfa >= 0.9 cekirdek); kagit = ham plate'ten
+    # kilitli wp_bakir.kagit_tabani ile halka cikarilmis kagit (m = kagit - Test 5 lumasi)
+    if 'halka' in Z:
+        al = np.asarray(Image.open(KOK.parent / Z['halka']['dosya']), np.float32) / 255.0
+        daire = al > 0.02
+        Pk, _ = wb.kagit_tabani(P, daire)
+        md = np.clip((Pk - T) @ wb.LUMA, 0, None)
+        ce = al >= 0.9
+        Lk = float(np.median(md[ce]))
+        dolu = ce & (md >= 0.9 * Lk)
+        R['ogeler']['daire'] = {'rgb': [round(float(x), 1) for x in T[dolu].mean(0)], 'dolu_px': int(dolu.sum()),
+                                'Lk': round(Lk, 1), 'cv': round(float(md[ce].std() / max(np.median(md[ce]), 1)), 4),
+                                'olcum': 'halka katmani alfa >= 0.9; kagit = kagit_tabani(ham plate)'}
     Z['bakir'] = R
     Path(a.sabit).write_text(json.dumps(Z, indent=1, ensure_ascii=False))
     print(json.dumps(R, indent=1, ensure_ascii=False))

@@ -10,6 +10,8 @@ b) ust/alt hat yok   : kilitli wp_bakir.dikis dedektoru (ince uzun duz cizgi, og
                        olmayan cizgi sayisi = 0
 c) kagit dokusu      : yazi disi kagitta dE(sayfa, orijinal) ortalamasi <= 0.5 (wp_ornek zemin_uyumu esigi)
 d) isim harf harf    : isim satirindaki sol / sag kume tesseract OCR (psm 7, buyuk harf) == girdi
+e) harf ici renk bandi: isim ve mesaj kelimelerinde harf cekirdegi satir profilinin yumusatilmisindan sapmasi
+                       <= 3.6 luma (renk_bandi; Serdar 3 Eki: deneme 2 "Always" / QUINN ufuk cizgisi)
 Bilgi: oge renkleri (dE orijinal), satir merkezi, sembol-isim merkez farki.
 """
 import argparse, json, subprocess, sys, tempfile
@@ -116,8 +118,16 @@ def hat_bul(X, O, P, Z, mask_x=None, eski=False):
     mask_x: X icin murekkep maskesi (None: hat_maskesi(P, X)). Donus: (tum cizgiler, kusur sayilanlar)."""
     W = X.shape[1]
     sm = satirlar(Z, X.shape[0])
-    c_o = wb.dikis(O, sm, murekkep=hat_maskesi(P, O))
+    mo = hat_maskesi(P, O)
     mx = hat_maskesi(P, X) if mask_x is None else mask_x
+    if 'halka' in Z:
+        # halka iki sayfada da tasarim ogesi (orijinalde kahve, bakir baskida bakir): cevresi IKI sayfada da notr
+        # (3 Eki, deneme 3: yalniz bakir sayfada murekkep sayilinca halka yanindaki kagit lifi tek tarafta
+        # kopruyle 'cizgi' oluyordu, y=1755). Genel birlesim maskesi KULLANILMAZ (Test 5 kusurlarini da siliyordu).
+        ah = np.asarray(Image.open(KOK.parent / Z['halka']['dosya']), np.float32) > 5
+        hn = cv2.dilate(ah.astype(np.uint8), np.ones((2 * wb.KENAR_PX + 1,) * 2, np.uint8)).astype(bool)
+        mo, mx = mo | hn, mx | hn
+    c_o = wb.dikis(O, sm, murekkep=mo)
     c_x = []
     for c in wb.dikis(X, sm, murekkep=mx):
         c['gorunur_oran'] = round(gorunur_oran(X, c, mx), 3)
@@ -127,6 +137,46 @@ def hat_bul(X, O, P, Z, mask_x=None, eski=False):
     if not eski:
         yeni = [c for c in yeni if c['tasarim_alani'] and c['gorunur_oran'] >= GORUNUR]
     return c_x, yeni
+
+
+E_CEKIRDEK = 10     # harf ici: ustunde ve altinda >= 10 px murekkep (kabartma kenarin ~5 px icinde kalir)
+E_SIGMA = 2.0       # satir profili yumusatma (satir); basamak/ince serit kalir, yumusak gradyan kalmaz
+E_ESIK = 3.6        # luma; onayli referanslarin (orijinal + Test 5) olculen en buyugu 3.1 x 1.15 (3 Eki)
+
+
+def renk_bandi(L, ink, Z):
+    """e) harf ici yatay renk basamagi / bandi: isim ve mesaj bantlarinda her kelime kumesi icin harf cekirdegi
+    (dikey E_CEKIRDEK px asindirilmis murekkep) satir ortanca lumasi; profilin kendi E_SIGMA yumusatilmisindan en
+    buyuk mutlak sapmasi. Yumusak tasarim gradyani (orijinal altin) sapma vermez; satirda keskin gecis (deneme 2:
+    altin plaka profilinin ufuk cizgisi) verir."""
+    ce = cv2.erode(ink.astype(np.uint8), np.ones((2 * E_CEKIRDEK + 1, 3), np.uint8)).astype(bool)
+    k = int(3 * E_SIGMA)
+    g = np.exp(-0.5 * (np.arange(-k, k + 1) / E_SIGMA) ** 2); g /= g.sum()
+    sonuc = []
+    b0 = bantlar(ink)
+    for grup, bosluk in (('isim', 80), ('mesaj', 400)):
+        y0s, y1s = Z['bantlar'][grup]
+        aday = [b for b in b0 if min(b[1], y1s + 60) > max(b[0], y0s - 60)]
+        if not aday:
+            continue
+        y0, y1 = max(aday, key=lambda b: b[1] - b[0])
+        for x0, x1 in kumeler(ink[y0:y1], bosluk):
+            if x1 - x0 < 300:
+                continue
+            ys, v = [], []
+            for y in range(y0, y1):
+                sel = ce[y, x0:x1]
+                if sel.sum() >= 15:
+                    ys.append(y); v.append(float(np.median(L[y, x0:x1][sel])))
+            if len(v) < 20:
+                continue
+            v = np.asarray(v)
+            sm = np.convolve(np.pad(v, k, mode='edge'), g, 'valid')
+            r = np.abs(v - sm)
+            i = int(np.argmax(r[3:-3])) + 3
+            sonuc.append({'grup': grup, 'x': [int(x0), int(x1)], 'sapma': round(float(r[i]), 2), 'satir': ys[i]})
+    en = max((x['sapma'] for x in sonuc), default=0.0)
+    return {'kelimeler': sonuc, 'en_buyuk': en, 'esik': E_ESIK, 'gecti': bool(sonuc) and en <= E_ESIK}
 
 
 def normal(s):
@@ -195,9 +245,17 @@ def olc(ad, S, P, O, Z, isim1, isim2, mesaj):
         renk[k] = {'rgb': [round(float(x), 1) for x in rgb], 'dE_orijinal': de(Z['renk']['ogeler'][k]['rgb'])}
         if 'bakir' in Z:
             renk[k]['dE_test5'] = de(Z['bakir']['ogeler'][k]['rgb'])
+    if 'halka' in Z and 'bakir' in Z and 'daire' in Z['bakir']['ogeler']:
+        al = np.asarray(Image.open(KOK.parent / Z['halka']['dosya']), np.float32) / 255.0
+        dce = al >= 0.9
+        rgb = S[dce].mean(0)
+        renk['daire'] = {'rgb': [round(float(x), 1) for x in rgb], 'dE_orijinal': round(float(wk.dE(
+            rgb[None, None], O[dce].mean(0)[None, None])[0, 0]), 2), 'dE_test5': round(float(wk.dE(
+            rgb[None, None], np.asarray(Z['bakir']['ogeler']['daire']['rgb'], np.float32)[None, None])[0, 0]), 2)}
     R['bilgi_renk'] = renk
-    R['gecti'] = all(R[k]['gecti'] for k in ('a_tagline', 'b_hat', 'c_kagit', 'd_isim'))
-    R['gecti_eski_kural'] = all(R[k]['gecti'] for k in ('a_tagline', 'b_hat_eski', 'c_kagit', 'd_isim'))
+    R['e_bant'] = renk_bandi(S @ wk.LUMA, ink, Z)
+    R['gecti'] = all(R[k]['gecti'] for k in ('a_tagline', 'b_hat', 'c_kagit', 'd_isim', 'e_bant'))
+    R['gecti_eski_kural'] = all(R[k]['gecti'] for k in ('a_tagline', 'b_hat_eski', 'c_kagit', 'd_isim', 'e_bant'))
     return R
 
 
@@ -210,6 +268,7 @@ def main():
     ap.add_argument('--isim2', required=True)
     ap.add_argument('--mesaj', required=True)
     ap.add_argument('--cikti', required=True)
+    ap.add_argument('--negatif', help='e kapisi negatif testi: bilinen kusurlu sayfa (deneme 2), FAIL beklenir')
     a = ap.parse_args()
     K = Path(a.kaynak)
     Z = json.loads(Path(a.sabit).read_text())
@@ -232,6 +291,9 @@ def main():
             return f"{ok(x['gecti'])} ({x['isim_alti_metin_bandi']} bant, OCR '{x['ocr']}')"
         if k == 'b_hat':
             return f"{ok(x['gecti'])} ({len(x['orijinalde_olmayan'])} cizgi)"
+        if k == 'e_bant':
+            return f"{ok(x['gecti'])} (en buyuk {x['en_buyuk']}, esik {x['esik']}; " + ', '.join(
+                f"{w['grup']} {w['sapma']}" for w in x['kelimeler']) + ')'
         if k == 'b_hat_eski':
             return f"{ok(x['gecti'])} ({x['sayi']} cizgi)"
         if k == 'c_kagit':
@@ -239,7 +301,8 @@ def main():
         return f"{ok(x['gecti'])} ({x.get('sol')} / {x.get('sag')})"
     for k, ad in (('a_tagline', 'a) tagline tek kopya'), ('b_hat', 'b) ust/alt hat yok - YENI kural (onay bekliyor)'),
                   ('b_hat_eski', 'b) ust/alt hat yok - ESKI kural'),
-                  ('c_kagit', 'c) kagit dokusu (dE <= 0.5)'), ('d_isim', 'd) isim harf harf (OCR)')):
+                  ('c_kagit', 'c) kagit dokusu (dE <= 0.5)'), ('d_isim', 'd) isim harf harf (OCR)'),
+                  ('e_bant', 'e) harf ici yatay renk bandi yok')):
         sat.append(f"| {ad} | {h(R['orijinal'], k)} | {h(R['test5'], k)} | {h(R['motor'], k)} |")
     sat.append(f"| SONUC (yeni kural) | {ok(R['orijinal']['gecti'])} | {ok(R['test5']['gecti'])} | {ok(R['motor']['gecti'])} |")
     sat.append(f"| SONUC (eski kural) | {ok(R['orijinal']['gecti_eski_kural'])} | {ok(R['test5']['gecti_eski_kural'])} | "
@@ -254,9 +317,19 @@ def main():
     sat.append('Eski kural cizgileri (motor): ' + (', '.join(
         f"{c['yon']} {c.get('x')} {c.get('y')} gorunur {c['gorunur_oran']}{'' if c['tasarim_alani'] else ' kenar'}"
         for c in R['motor']['b_hat_eski']['orijinalde_olmayan']) or 'yok'))
+    neg_ok = True
+    if a.negatif:
+        Sn = oku(a.negatif)
+        en = renk_bandi(Sn @ wk.LUMA, murekkep(Sn, P)[1], Z)
+        R['negatif_e'] = {'dosya': a.negatif, **en}
+        neg_ok = not en['gecti']
+        sat.append(f"e) negatif test (deneme 2 ciktisi, FAIL beklenir): {ok(en['gecti'])} (en buyuk {en['en_buyuk']}; "
+                   + ', '.join(f"{w['grup']} {w['sapma']}" for w in en['kelimeler']) + ') -> kapi '
+                   + ('CALISIYOR' if neg_ok else 'CALISMIYOR'))
+        Path(a.cikti).write_text(json.dumps(R, indent=1, ensure_ascii=False))
     Path(a.cikti).with_suffix('.md').write_text('\n'.join(sat) + '\n')
     print('\n'.join(sat))
-    sys.exit(0 if R['motor']['gecti'] and R['orijinal']['gecti'] and not R['test5']['gecti'] else 1)
+    sys.exit(0 if R['motor']['gecti'] and R['orijinal']['gecti'] and not R['test5']['gecti'] and neg_ok else 1)
 
 
 if __name__ == '__main__':

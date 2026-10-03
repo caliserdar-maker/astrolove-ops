@@ -19,6 +19,7 @@ Cikti
 - Dosya/klasor adi her yerde AstroLoveArt. Olculmemis boy/dpi iddiasi musteri metnine yazilmaz.
 - WARM_PARCHMENT: tum ogeler bakir (1 Eki karari). DEEP_BLACK: tagline tonu isim altiniyla esit.
 - WARM_PARCHMENT bakiri = eski sistem wp_bakir rengi ve dokusu (Serdar, 3 Eki).
+- WARM_PARCHMENT halkasi da bakir (Test 5'teki gibi; Serdar, 3 Eki).
 Hiz
 - Hedef: Serdar bilgiyi verdikten sonra en gec 15 dk, 5 PDF Drive'da (eski sistem Test 5: ~10 dk). Paralel uretim.
 - Siparis sirasinda baska kosu yok; ayni anda tek buyuk dogrulama.
@@ -30,6 +31,7 @@ Kalite
 - Kapilar: isim-burc dogru taraf, tagline harf harf, ust/alt hat yok, ikinci metin izi yok, renk/ton, kagit, olcek/konum.
 - Kapi degisince iki yonlu test GERCEK kusurlu ornekle. Esik gevsetilerek PASS alinmaz.
 - Sonuc hucre bazinda raporlanir, job success degil. Tarama araci once 1 PASS + 1 FAIL ile dogrulanir, 0 kayit = FAIL.
+- Harf ici renk bandi kapisi (e) zorunlu; deneme 2 ciktisi (TEMP/MOTOR/PROTOTIP/37115656988) negatif test (Serdar, 3 Eki).
 - GOZ SON KARAR: Serdar'a her renk x boy TAM SAYFA gider, kesit secilip elenmez. Gorsel suphede once Serdar.
 Teslim
 - Teslim ve musteri mesaji yalniz Serdar onayiyla.
