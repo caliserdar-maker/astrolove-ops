@@ -151,6 +151,29 @@ def halka_geo(f):
     cx, cy, c = np.linalg.lstsq(M, b, rcond=None)[0]
     return float(cx), float(cy), float(np.sqrt(c + cx ** 2 + cy ** 2))
 
+def cekirdek(al):
+    """oge cekirdegi: alfa > 0.95, 3 px asindirilmis (renk olcumu ve esitleme ayni maske)."""
+    return cv2.erode((al > 0.95).astype(np.uint8), np.ones((7, 7), np.uint8)).astype(bool)
+
+
+def omuz(L, diz=90.0):
+    """L' <= 100: diz ustu yumusak omuz (tanh), kirpilma yok."""
+    return np.where(L > diz, diz + (100 - diz) * np.tanh((L - diz) / (100 - diz)), L)
+
+
+def renk_esitle(rgb, al, hedef, duz):
+    """OGE RENK ESITLEME (Serdar 4 Eki): ogenin TAMAMINA tek kural, bolgesel yama yok. Cekirdek medyan Lab olculur;
+    L' = L x (hedef_L / L_med) x kL, a' = a + (hedef_a - a_med) + da, b' = b + (hedef_b - b_med) + db (kL, da, db: kapali
+    dongu duzeltmesi, ilk turda 1 / 0 / 0). L' tepede yumusak omuzla 100'u gecmez."""
+    Lab = cv2.cvtColor(np.clip(rgb, 0, 255).astype(np.float32) / 255, cv2.COLOR_RGB2LAB)
+    med = np.median(Lab[cekirdek(al)], 0)
+    k = hedef[0] / med[0] * duz.get('kL', 1.0)
+    da = hedef[1] - med[1] + duz.get('da', 0.0); db = hedef[2] - med[2] + duz.get('db', 0.0)
+    Lab[..., 0] = omuz(Lab[..., 0] * k); Lab[..., 1] += da; Lab[..., 2] += db
+    out = np.clip(cv2.cvtColor(Lab, cv2.COLOR_LAB2RGB), 0, 1) * 255
+    return out, {'med_once': [round(float(v), 2) for v in med], 'kL': round(float(k), 4), 'da': round(float(da), 2),
+                 'db': round(float(db), 2)}
+
 
 def main():
     ap = argparse.ArgumentParser()
@@ -159,6 +182,9 @@ def main():
         ap.add_argument('--' + k, required=True)
     ap.add_argument('--ana-sayfa', help='ASAMA 2: dokulu ana sembol sayfasi adi (SET dizininde <ad>.npz cila sonrasi, '
                                        'sayfa-json dizininde DOKU_AI_<ad>.json; oge = cift); verilmezse orijinal asset')
+    ap.add_argument('--renk-hedef', default='71.5,8.5,49.5',
+                    help='oge renk esitleme ortak hedefi Lab (Serdar 4 Eki); "yok" = esitleme kapali')
+    ap.add_argument('--renk-kazanc', help='kapali dongu duzeltmesi JSON {oge: {kL, da, db}} (renk_kapi.py ciktisi)')
     a = ap.parse_args()
     C = Path(a.cikti); C.mkdir(parents=True, exist_ok=True)
     Z = json.loads(SABIT.read_text())
@@ -180,7 +206,13 @@ def main():
 
     Cp = np.zeros((H, W, 3), np.float32); A = np.zeros((H, W), np.float32); kutu = {}
 
+    hedef = None if a.renk_hedef == 'yok' else [float(v) for v in a.renk_hedef.split(',')]
+    kazanc = json.loads(Path(a.renk_kazanc).read_text()) if a.renk_kazanc else {}
+    maske = {}
+
     def bindir(ad, rgb, al, x, y):
+        if hedef is not None:
+            rgb, rap.setdefault('renk', {})[ad] = renk_esitle(rgb, al, hedef, kazanc.get(ad, {}))
         x, y = int(round(x)), int(round(y))
         h, w = al.shape
         x0, y0, x1, y1 = max(0, x), max(0, y), min(W, x + w), min(H, y + h)
@@ -189,6 +221,7 @@ def main():
         A[y0:y1, x0:x1] = A[y0:y1, x0:x1] * (1 - aa) + aa
         ys, xs = np.nonzero(aa > 0.02)
         kutu[ad] = [int(x0 + xs.min()), int(y0 + ys.min()), int(x0 + xs.max()) + 1, int(y0 + ys.max()) + 1]
+        maske[ad] = (x0, y0, np.packbits(cekirdek(aa)), aa.shape)
 
     # 2 cember (supurulmus)
     R = np.load(a.cember).astype(np.float32)
@@ -291,6 +324,8 @@ def main():
     Image.fromarray(u8).save(C / 'POSTER.png', dpi=(300, 300))
     Image.fromarray(np.clip(np.round(A * 255), 0, 255).astype(np.uint8)).save(C / 'ALFA.png')   # butunlestirme katmani icin
     rap['kutu'] = kutu
+    np.savez_compressed(C / 'OGE_MASKE.npz', **{ad: np.concatenate([[x0, y0, sh[0], sh[1]], m.astype(np.int64)])
+                                               for ad, (x0, y0, m, sh) in maske.items()})
     rap['sure_sn'] = round(time.time() - T0, 1)
     (C / 'POSTER.json').write_text(json.dumps(rap, indent=1, ensure_ascii=False))
     log('bitti', C)
