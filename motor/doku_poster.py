@@ -289,6 +289,7 @@ def main():
     u8 = np.clip(np.round(out), 0, 255).astype(np.uint8)
     del out, P, Cp
     Image.fromarray(u8).save(C / 'POSTER.png', dpi=(300, 300))
+    Image.fromarray(np.clip(np.round(A * 255), 0, 255).astype(np.uint8)).save(C / 'ALFA.png')   # butunlestirme katmani icin
     rap['kutu'] = kutu
     rap['sure_sn'] = round(time.time() - T0, 1)
     (C / 'POSTER.json').write_text(json.dumps(rap, indent=1, ensure_ascii=False))
