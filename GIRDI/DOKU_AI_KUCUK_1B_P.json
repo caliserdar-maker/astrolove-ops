@@ -1,0 +1,90 @@
+{
+ "tur": "kucuk",
+ "boyut": [
+  2596,
+  1039
+ ],
+ "referans_kutu": [
+  0,
+  0,
+  640,
+  580
+ ],
+ "referans": "main_aquarius_aries_gold.png",
+ "ogeler": [
+  {
+   "oge": "CAPRICORN",
+   "kutu": [
+    670,
+    169,
+    1375,
+    869
+   ],
+   "kaynak": "sym_capricorn_gold.png",
+   "sha256": "4ef607a43b6c0f5b0bb803906bf72a629f8a514f4f0d6acbd39416c2f67f9a70",
+   "olcek": 0.60236,
+   "olcek_kaynagi": "16x20 orijinal CAPRICORN_CAPRICORN.jpg eslesme 0.35545 (ncc 0.9819) x 1.6946",
+   "kaynak_kirp": [
+    0,
+    0,
+    1171,
+    1162
+   ]
+  },
+  {
+   "oge": "GEMINI",
+   "kutu": [
+    1405,
+    212,
+    2009,
+    826
+   ],
+   "kaynak": "sym_gemini_gold.png",
+   "sha256": "51eb48192810bfde85e528511ec6dd61601c397ca12d477e1f04dbfad472f8ff",
+   "olcek": 0.49819,
+   "olcek_kaynagi": "16x20 orijinal GEMINI_GEMINI.jpg eslesme 0.29398 (ncc 0.9882) x 1.6946",
+   "kaynak_kirp": [
+    0,
+    0,
+    1213,
+    1232
+   ]
+  },
+  {
+   "oge": "LEO",
+   "kutu": [
+    2039,
+    212,
+    2566,
+    826
+   ],
+   "kaynak": "sym_leo_gold.png",
+   "sha256": "7e09eb50e89a1f9780c05a7df92a03db4ba8995cd6826c300fab47e3a547faa0",
+   "olcek": 0.51105,
+   "olcek_kaynagi": "16x20 orijinal LEO_LEO.jpg eslesme 0.30157 (ncc 0.9871) x 1.6946",
+   "kaynak_kirp": [
+    0,
+    0,
+    1031,
+    1201
+   ]
+  }
+ ],
+ "dosya": "DOKU_AI_KUCUK_1B_P.png",
+ "sha256": "c269803cf9c47589a79902ca20605b4b8e35cb1858d8a6ff3da224e3d087d5fd",
+ "olcek": "24x36 baski, 300 dpi, 1:1",
+ "oran_pad": {
+  "kaynak": "DOKU_AI_KUCUK_1B.png",
+  "kaynak_boyut": [
+   2596,
+   760
+  ],
+  "kaydirma": [
+   0,
+   139
+  ],
+  "oran_once": 3.4158,
+  "oran_sonra": 2.4986,
+  "not": "yalniz siyah bosluk; ogeler ve olcek ayni, kose referansi yerinde"
+ }
+}
