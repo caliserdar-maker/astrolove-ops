@@ -1,0 +1,169 @@
+{
+ "tur": "plaka",
+ "boyut": [
+  4702,
+  2320
+ ],
+ "referans_kutu": [
+  0,
+  0,
+  640,
+  580
+ ],
+ "ogeler": [
+  {
+   "oge": "LIBRA",
+   "hucre": [
+    2351,
+    0,
+    4702,
+    580
+   ],
+   "kutu": [
+    2960,
+    149,
+    4093,
+    431
+   ],
+   "kaynak": "libra_name_gold.png",
+   "sha256": "129a0020f8fcc7ec58d16aff0dd6c93502a289a2345a90b51c2226cfa15d47b6",
+   "kaynak_kirp": [
+    0,
+    0,
+    1998,
+    497
+   ],
+   "olcek": 0.56687,
+   "olcek_kaynagi": "16x20 orijinal LIBRA_LIBRA.jpg eslesme (ncc 0.9226): 0.33484 x 1.6929"
+  },
+  {
+   "oge": "PISCES",
+   "hucre": [
+    0,
+    580,
+    2351,
+    1160
+   ],
+   "kutu": [
+    475,
+    728,
+    1875,
+    1011
+   ],
+   "kaynak": "pisces_name_gold.png",
+   "sha256": "085544adcd80d3abf483f75a9aee469caff54245311a3a0c29c056ea0565bcad",
+   "kaynak_kirp": [
+    0,
+    0,
+    2013,
+    407
+   ],
+   "olcek": 0.69567,
+   "olcek_kaynagi": "16x20 orijinal PISCES_PISCES.jpg eslesme (ncc 0.9358): 0.41092 x 1.6929"
+  },
+  {
+   "oge": "SAGITTARIUS",
+   "hucre": [
+    2351,
+    580,
+    4702,
+    1160
+   ],
+   "kutu": [
+    2411,
+    729,
+    4642,
+    1010
+   ],
+   "kaynak": "sagittarius_name_gold.png",
+   "sha256": "60d4756db6d90c4017d9c149ba4dce378fe84bc49f473431eae58b33bc6dcf48",
+   "kaynak_kirp": [
+    0,
+    0,
+    2120,
+    267
+   ],
+   "olcek": 1.05225,
+   "olcek_kaynagi": "poster yazisi plakadan farkli (ncc 0.6632); buyuk harf yuksekligi kurali 163.47 px (16x20): 0.62155 x 1.6929"
+  },
+  {
+   "oge": "SCORPIO",
+   "hucre": [
+    0,
+    1160,
+    2351,
+    1740
+   ],
+   "kutu": [
+    328,
+    1306,
+    2023,
+    1593
+   ],
+   "kaynak": "scorpio_name_gold.png",
+   "sha256": "92114bb18a94d0285632e85845d664cf7e32a20873d8c16cdd0ac559ffc192ca",
+   "kaynak_kirp": [
+    0,
+    0,
+    2114,
+    358
+   ],
+   "olcek": 0.8019,
+   "olcek_kaynagi": "16x20 orijinal SCORPIO_SCORPIO.jpg eslesme (ncc 0.9275): 0.47367 x 1.6929"
+  },
+  {
+   "oge": "TAURUS",
+   "hucre": [
+    2351,
+    1160,
+    4702,
+    1740
+   ],
+   "kutu": [
+    2772,
+    1308,
+    4281,
+    1591
+   ],
+   "kaynak": "taurus_name_gold.png",
+   "sha256": "c4ab5fe4b4d0297354bde1e9a348927358e717a203bdd25e1799b03d51b5f225",
+   "kaynak_kirp": [
+    0,
+    0,
+    1983,
+    372
+   ],
+   "olcek": 0.76111,
+   "olcek_kaynagi": "16x20 orijinal TAURUS_TAURUS.jpg eslesme (ncc 0.9313): 0.44958 x 1.6929"
+  },
+  {
+   "oge": "VIRGO",
+   "hucre": [
+    0,
+    1740,
+    2351,
+    2320
+   ],
+   "kutu": [
+    490,
+    1887,
+    1861,
+    2172
+   ],
+   "kaynak": "virgo_name_gold.png",
+   "sha256": "39e965cfb7a9a2ed21ff50fe5929e7915a512703bb096eef81afb80bb9b99274",
+   "kaynak_kirp": [
+    0,
+    0,
+    1958,
+    407
+   ],
+   "olcek": 0.70005,
+   "olcek_kaynagi": "16x20 orijinal VIRGO_VIRGO.jpg eslesme (ncc 0.9348): 0.41351 x 1.6929"
+  }
+ ],
+ "dosya": "DOKU_AI_PLAKA_2.png",
+ "sha256": "891290a85fa0a56d97b35f59cae56050c5d5e4986258bb6f2ac835f17de40deb",
+ "referans": "main_aquarius_aries_gold.png",
+ "olcek": "24x36 baski, 300 dpi, 1:1"
+}

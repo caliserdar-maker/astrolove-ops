@@ -1,0 +1,169 @@
+{
+ "tur": "kucuk",
+ "boyut": [
+  3105,
+  2460
+ ],
+ "referans_kutu": [
+  0,
+  0,
+  640,
+  580
+ ],
+ "ogeler": [
+  {
+   "oge": "AQUARIUS",
+   "hucre": [
+    1035,
+    0,
+    2070,
+    820
+   ],
+   "kutu": [
+    1095,
+    219,
+    2010,
+    600
+   ],
+   "kaynak": "sym_aquarius_gold.png",
+   "sha256": "a7c9d83ec3fabceb33da77bb2d781996b5869376e8691fbc2749f7ef54f7f706",
+   "kaynak_kirp": [
+    0,
+    0,
+    10817,
+    4501
+   ],
+   "olcek": 0.08455,
+   "olcek_kaynagi": "16x20 orijinal AQUARIUS_AQUARIUS.jpg eslesme 0.04989 (ncc 0.9857) x 1.6946"
+  },
+  {
+   "oge": "ARIES",
+   "hucre": [
+    2070,
+    0,
+    3105,
+    820
+   ],
+   "kutu": [
+    2257,
+    102,
+    2917,
+    717
+   ],
+   "kaynak": "sym_aries_gold.png",
+   "sha256": "b95cc9187ad9b0e6068abf2261d2802abbdc1c5cd0e2596db547ea85c97cb7a6",
+   "kaynak_kirp": [
+    0,
+    0,
+    1299,
+    1211
+   ],
+   "olcek": 0.50811,
+   "olcek_kaynagi": "16x20 orijinal ARIES_ARIES.jpg eslesme 0.29983 (ncc 0.9827) x 1.6946"
+  },
+  {
+   "oge": "CANCER",
+   "hucre": [
+    0,
+    820,
+    1035,
+    1640
+   ],
+   "kutu": [
+    175,
+    933,
+    859,
+    1527
+   ],
+   "kaynak": "sym_cancer_gold.png",
+   "sha256": "2b5a32121ce8fa92ceef1a386f5ab1742a573681c30e742223be75005816cf28",
+   "kaynak_kirp": [
+    0,
+    0,
+    1167,
+    1012
+   ],
+   "olcek": 0.5865,
+   "olcek_kaynagi": "16x20 orijinal CANCER_CANCER.jpg eslesme 0.34609 (ncc 0.9808) x 1.6946"
+  },
+  {
+   "oge": "CAPRICORN",
+   "hucre": [
+    1035,
+    820,
+    2070,
+    1640
+   ],
+   "kutu": [
+    1200,
+    880,
+    1905,
+    1580
+   ],
+   "kaynak": "sym_capricorn_gold.png",
+   "sha256": "4ef607a43b6c0f5b0bb803906bf72a629f8a514f4f0d6acbd39416c2f67f9a70",
+   "kaynak_kirp": [
+    0,
+    0,
+    1171,
+    1162
+   ],
+   "olcek": 0.60236,
+   "olcek_kaynagi": "16x20 orijinal CAPRICORN_CAPRICORN.jpg eslesme 0.35545 (ncc 0.9819) x 1.6946"
+  },
+  {
+   "oge": "GEMINI",
+   "hucre": [
+    2070,
+    820,
+    3105,
+    1640
+   ],
+   "kutu": [
+    2285,
+    923,
+    2889,
+    1537
+   ],
+   "kaynak": "sym_gemini_gold.png",
+   "sha256": "51eb48192810bfde85e528511ec6dd61601c397ca12d477e1f04dbfad472f8ff",
+   "kaynak_kirp": [
+    0,
+    0,
+    1213,
+    1232
+   ],
+   "olcek": 0.49819,
+   "olcek_kaynagi": "16x20 orijinal GEMINI_GEMINI.jpg eslesme 0.29398 (ncc 0.9882) x 1.6946"
+  },
+  {
+   "oge": "LEO",
+   "hucre": [
+    0,
+    1640,
+    1035,
+    2460
+   ],
+   "kutu": [
+    254,
+    1743,
+    781,
+    2357
+   ],
+   "kaynak": "sym_leo_gold.png",
+   "sha256": "7e09eb50e89a1f9780c05a7df92a03db4ba8995cd6826c300fab47e3a547faa0",
+   "kaynak_kirp": [
+    0,
+    0,
+    1031,
+    1201
+   ],
+   "olcek": 0.51105,
+   "olcek_kaynagi": "16x20 orijinal LEO_LEO.jpg eslesme 0.30157 (ncc 0.9871) x 1.6946"
+  }
+ ],
+ "dosya": "DOKU_AI_KUCUK_1.png",
+ "sha256": "7df6b609d1017537a162c9b1564d930ca870d3e7499b101fb01b2a54ebeacca6",
+ "referans": "main_aquarius_aries_gold.png",
+ "olcek": "24x36 baski, 300 dpi, 1:1"
+}

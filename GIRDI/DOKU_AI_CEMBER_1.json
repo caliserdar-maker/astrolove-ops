@@ -1,0 +1,38 @@
+{
+ "tur": "cember",
+ "boyut": [
+  5800,
+  4968
+ ],
+ "referans_kutu": [
+  0,
+  0,
+  640,
+  580
+ ],
+ "ogeler": [
+  {
+   "oge": "HALKA",
+   "kutu": [
+    60,
+    60,
+    5740,
+    4908
+   ],
+   "kaynak": "HALKA_24x36.png",
+   "sha256": "6d75106b47e247ea0d70b3013431180bc7acbfc7d509f99428e50223972e075c",
+   "kaynak_kirp": [
+    760,
+    1529,
+    6440,
+    6377
+   ],
+   "olcek": 1.0,
+   "olcek_kaynagi": "HALKA_24x36 zaten 24x36 baski olcegi"
+  }
+ ],
+ "dosya": "DOKU_AI_CEMBER_1.png",
+ "sha256": "c709613ae27e345d654bc79f4388bff72c8d147ed070215c066fc67af4186d94",
+ "referans": "main_aquarius_aries_gold.png",
+ "olcek": "24x36 baski, 300 dpi, 1:1"
+}
