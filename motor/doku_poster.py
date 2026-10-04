@@ -157,6 +157,8 @@ def main():
     for k in ('set', 'sayfa-json', 'cember', 'cember-kutu', 'ana', 'ana16', 'plate', 'cift', 'isim1', 'isim2', 'mesaj',
               'cikti'):
         ap.add_argument('--' + k, required=True)
+    ap.add_argument('--ana-sayfa', help='ASAMA 2: dokulu ana sembol sayfasi adi (SET dizininde <ad>.npz cila sonrasi, '
+                                       'sayfa-json dizininde DOKU_AI_<ad>.json; oge = cift); verilmezse orijinal asset')
     a = ap.parse_args()
     C = Path(a.cikti); C.mkdir(parents=True, exist_ok=True)
     Z = json.loads(SABIT.read_text())
@@ -198,10 +200,19 @@ def main():
     ks = 0.500657280135945 / json.loads(Path(a.ana16).read_text())['p']['SCORPIO_VIRGO']['tm']['olcek16']
     s = J16['olcek16'] * ks
     im = Image.open(a.ana).convert('RGBA')
+    kk = im.getchannel('A').getbbox()                               # ana sayfa maskesi alfa > 0 kutusundan kirpilir
     im = im.resize((round(im.size[0] * s), round(im.size[1] * s)), Image.LANCZOS)
     an = np.asarray(im, np.float32); del im
     mx = h24[0] + J16['merkez_halkaya_gore16'][0] * k; my = h24[1] + J16['merkez_halkaya_gore16'][1] * k
-    bindir('ana_sembol', an[..., :3], an[..., 3] / 255, mx - an.shape[1] / 2, my - an.shape[0] / 2)
+    if a.ana_sayfa:
+        # dokulu: sekil = sayfa maskesi (asset alfasi, ayni olcek), doku = cila sonrasi Canva; asset kirpma kutusunun
+        # merkezi ayni yere
+        ar, aa, _ = oge(a.set, a.sayfa_json, [a.ana_sayfa], a.cift)
+        kx = (kk[0] + kk[2]) / 2 * s - an.shape[1] / 2; ky = (kk[1] + kk[3]) / 2 * s - an.shape[0] / 2
+        bindir('ana_sembol', ar, aa, mx + kx - aa.shape[1] / 2, my + ky - aa.shape[0] / 2)
+        rap['ana_sembol_doku'] = a.ana_sayfa
+    else:
+        bindir('ana_sembol', an[..., :3], an[..., 3] / 255, mx - an.shape[1] / 2, my - an.shape[0] / 2)
     rap['ana_sembol'] = {'dosya': Path(a.ana).name, 'olcek': round(s, 5), 'merkez': [round(mx, 1), round(my, 1)],
                          'kaynak': f'16x20 orijinal NCC {J16["ncc"]}, olcek16 {J16["olcek16"]} x {ks:.4f}'}
     del an
