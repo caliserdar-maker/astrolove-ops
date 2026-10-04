@@ -34,6 +34,17 @@ SONSUZ_KUTU = (4420, 4590, 2300, 2760)   # CANCER_LIBRA orijinal 16x20 sonsuz ce
 HALKA_KESIT = (1500, 1780, 2700, 4500)   # HALKA_24x36 ust yay (y0, y1, x0, x1): 1800 px kiris, 34 px cizgi
 
 
+ORAN_MIN, ORAN_MAX = 0.4, 2.5   # Canva en/boy orani 3:1 ve 1:3 ile sinirli, otesini sikistirip yeniden ciziyor (4 Eki)
+
+
+def oran_kapisi(ad, W, H):
+    """Canva'ya gidecek her sayfa: genislik / yukseklik ORAN_MIN..ORAN_MAX disi = hata (sayfa yazilmaz)."""
+    r = W / H
+    if not ORAN_MIN <= r <= ORAN_MAX:
+        raise SystemExit(f'FAIL oran kapisi: {ad} {W}x{H} oran {r:.3f} ({ORAN_MIN}-{ORAN_MAX} disi)')
+    return round(r, 4)
+
+
 def sha(b):
     return hashlib.sha256(b).hexdigest()
 
@@ -146,6 +157,7 @@ def main():
     ozet = []
     for ad, rgb, j in sayfalar:
         f = C / f'DOKU_AI_{ad}.png'
+        oran_kapisi(ad, rgb.shape[1], rgb.shape[0])
         Image.fromarray(np.clip(np.round(rgb), 0, 255).astype(np.uint8)).save(f, optimize=True)
         j |= {'dosya': f.name, 'sha256': sha(f.read_bytes()), 'referans': Path(a.referans).name,
               'olcek': '24x36 baski, 300 dpi, 1:1'}

@@ -36,6 +36,7 @@ def sha(f):
 
 def kaydet(C, ad, rgb, j):
     p = C / f'DOKU_AI_{ad}.png'
+    das.oran_kapisi(ad, rgb.shape[1], rgb.shape[0])
     Image.fromarray(np.clip(np.round(rgb), 0, 255).astype(np.uint8)).save(p, optimize=True)
     j |= {'dosya': p.name, 'sha256': sha(p), 'olcek': '24x36 baski, 300 dpi, 1:1'}
     (C / f'DOKU_AI_{ad}.json').write_text(json.dumps(j, ensure_ascii=False, indent=1))
