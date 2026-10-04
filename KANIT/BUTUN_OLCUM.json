@@ -1,0 +1,74 @@
+{
+ "isik": "sol ust",
+ "sicak_rgb": [
+  205.9,
+  164.0,
+  82.8
+ ],
+ "doz": {
+  "0": {
+   "isim_kontrast": [
+    9.43,
+    9.4,
+    10.2
+   ]
+  },
+  "HAFIF": {
+   "param": {
+    "golge_op": 0.18,
+    "golge_sigma": 10,
+    "golge_kayma": 8,
+    "parilti_op": 0.06,
+    "parilti_sigma": 6,
+    "tane": 0.8,
+    "isik": 0.015
+   },
+   "altin_dE00_ort": 0.27,
+   "altin_dE00_p95": 0.6,
+   "isim_kontrast": [
+    9.25,
+    9.21,
+    9.94
+   ],
+   "hale_px_p99": 7.6
+  },
+  "ORTA": {
+   "param": {
+    "golge_op": 0.3,
+    "golge_sigma": 14,
+    "golge_kayma": 12,
+    "parilti_op": 0.1,
+    "parilti_sigma": 8,
+    "tane": 1.3,
+    "isik": 0.03
+   },
+   "altin_dE00_ort": 0.45,
+   "altin_dE00_p95": 1.03,
+   "isim_kontrast": [
+    8.98,
+    8.93,
+    9.55
+   ],
+   "hale_px_p99": 12.0
+  },
+  "BELIRGIN": {
+   "param": {
+    "golge_op": 0.45,
+    "golge_sigma": 18,
+    "golge_kayma": 16,
+    "parilti_op": 0.15,
+    "parilti_sigma": 10,
+    "tane": 2.0,
+    "isik": 0.05
+   },
+   "altin_dE00_ort": 0.69,
+   "altin_dE00_p95": 1.64,
+   "isim_kontrast": [
+    8.58,
+    8.51,
+    8.98
+   ],
+   "hale_px_p99": 17.0
+  }
+ }
+}
