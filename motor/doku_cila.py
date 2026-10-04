@@ -60,7 +60,15 @@ def hizala(girdi_png, girdi_json, canva_jpg):
     O[y0:y1, x0:x1] = 0
     C = np.asarray(Image.open(canva_jpg).convert('RGB'), np.float32)
     cw, ch = C.shape[1], C.shape[0]
-    Cd = cv2.resize(C, (W, H), interpolation=cv2.INTER_AREA)
+    # tek tip olcek (genislikten); Canva kenar boslugunu degistirdiyse (oran farki) yukseklik ortadan kirpilir / doldurulur,
+    # kalan kayma ECC ve oge basina hizalamada
+    s = W / cw
+    hs = int(round(ch * s))
+    Cd = cv2.resize(C, (W, hs), interpolation=cv2.INTER_AREA)
+    if hs >= H:
+        o = (hs - H) // 2; Cd = Cd[o:o + H]
+    else:
+        o = (H - hs) // 2; Cd = cv2.copyMakeBorder(Cd, o, H - hs - o, 0, 0, cv2.BORDER_CONSTANT, value=0)
     L = Cd @ LUMA
     Ar = np.clip((L - 20) / 40, 0, 1); Ar[y0:y1, x0:x1] = 0
     wm = np.eye(2, 3, dtype=np.float32)
@@ -106,12 +114,18 @@ def hizala(girdi_png, girdi_json, canva_jpg):
         sel = o > 0
         t[Y0:Y1, X0:X1][sel] = tt[sel]
         ok[Y0:Y1, X0:X1] |= sel & ((tt @ LUMA) > 12)
-        gl.append({'ad': ad, 'r_px': round(r, 2), 'kayma_px': [round(float(w2[0, 2]), 2), round(float(w2[1, 2]), 2)]})
+        # sekil uyumu: kaydirilmis Canva siniri ile bizim maske (kapsam: bizim maskenin Canva altinda kalan orani)
+        cs = cv2.warpAffine(c, w2, c.shape[::-1], flags=cv2.INTER_NEAREST + cv2.WARP_INVERSE_MAP) > 0.5
+        om = o > 0.5
+        gl.append({'ad': ad, 'r_px': round(r, 2), 'kayma_px': [round(float(w2[0, 2]), 2), round(float(w2[1, 2]), 2)],
+                   'iou': round(float((cs & om).sum() / max((cs | om).sum(), 1)), 4),
+                   'kapsam': round(float((cs & om).sum() / max(om.sum(), 1)), 4)})
     gerek = cv2.dilate((O > 0).astype(np.uint8), np.ones((7, 7), np.uint8)).astype(bool) & ~ok
     t = cv2.inpaint(np.clip(np.round(t), 0, 255).astype(np.uint8), gerek.astype(np.uint8), 5, cv2.INPAINT_TELEA)
     ic = O > 0.5
     ic[y0:y1, x0:x1] = False
     olc = {'canva_boyut': [cw, ch], 'girdi_boyut': [W, H], 'olcek': [round(cw / W, 4), round(ch / H, 4)],
+           'oran_farki_px': hs - H,
            'ecc_cc': round(float(cc), 4), 'ek_olcek': [round(float(np.hypot(wm[0, 0], wm[1, 0])), 5),
                                                      round(float(np.hypot(wm[0, 1], wm[1, 1])), 5)],
            'kayma_px': [round(float(wm[0, 2]), 2), round(float(wm[1, 2]), 2)],
