@@ -20,6 +20,7 @@ import tek_doku as tdk                                               # noqa: E40
 
 LUMA = tdk.LUMA
 DMAX = 16
+DELIK = 300              # px; cizgi ici bosluk esigi
 NA = 24
 
 
@@ -38,7 +39,19 @@ def kapsama(rgb, zem):
     rb = rgb[..., 0] - rgb[..., 2]
     rz = zem[..., 0] - zem[..., 2]
     ic = rb[(rb - rz) > 100]
-    return np.clip((rb - rz) / max(float(np.median(ic) - np.median(rz)), 1.0), 0, 1)
+    A_r = np.clip((rb - rz) / max(float(np.median(ic) - np.median(rz)), 1.0), 0, 1)
+    # 4 Eki: soluk sari vurgularda (B yuksek) R - B dusuk -> maske delikleri; parlaklik kapsamasiyla birlesim
+    D = (rgb - zem) @ LUMA
+    A_l = np.clip(D / max(float(np.median(D[D > 40])), 1.0), 0, 1)
+    A = np.maximum(A_r, A_l)
+    # cizgi icindeki kucuk bosluklar (murekkeple cevrili, < DELIK px): altin (koyu / notr pah pikseli), zemin degil
+    m = (A > 0.5).astype(np.uint8)
+    n, lab, st, _ = cv2.connectedComponentsWithStats(1 - m, 4)
+    kucuk = np.zeros(n, bool); kucuk[1:] = st[1:, cv2.CC_STAT_AREA] < DELIK
+    kenar = np.unique(np.r_[lab[0], lab[-1], lab[:, 0], lab[:, -1]])
+    kucuk[kenar] = False
+    A[kucuk[lab]] = 1.0
+    return A
 
 
 def olc(rgb, zem):

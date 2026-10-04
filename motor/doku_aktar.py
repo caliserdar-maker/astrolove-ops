@@ -62,6 +62,23 @@ def ozellik(A):
     return t, nx * w, ny * w
 
 
+MUTLAK_D = 16.0
+
+
+def ozellik_mutlak(A):
+    """MUTLAK olcek rehberi (Serdar 4 Eki, Canva pahi mutlak px): kenardan ic uzaklik min(d, 16) / 16, disa normal."""
+    m8 = (A > 0.5).astype(np.uint8)
+    din = cv2.distanceTransform(m8, cv2.DIST_L2, 5)
+    dout = cv2.distanceTransform(1 - m8, cv2.DIST_L2, 5)
+    sd = cv2.GaussianBlur(din - dout, (0, 0), 1.0)
+    gx = cv2.Sobel(sd, cv2.CV_32F, 1, 0, ksize=3) / 8
+    gy = cv2.Sobel(sd, cv2.CV_32F, 0, 1, ksize=3) / 8
+    g = np.hypot(gx, gy)
+    w = np.clip(g / 0.3, 0, 1)
+    t = np.clip(sd + 0.5, 0, MUTLAK_D) / MUTLAK_D
+    return t.astype(np.float32), (-gx / np.maximum(g, 1e-6) * w).astype(np.float32), (-gy / np.maximum(g, 1e-6) * w).astype(np.float32)
+
+
 def kaynak_hazirla(rgb, zem, A, olcek):
     """on carpim geri alinmis renk + kapsama, olcekli (INTER_AREA, on carpimli)."""
     un = (rgb - zem * (1 - A[..., None])) / np.maximum(A[..., None], 0.3)
@@ -91,11 +108,12 @@ def _yama_enerji(Gt, Gs, Ct, Cs, T, Q, off):
     return E
 
 
-def aktar(src_rgb, src_A, hedef_A, tohum=1):
+def aktar(src_rgb, src_A, hedef_A, tohum=1, rehber=None):
     """Rehberli PatchMatch (Image Analogies / PatchMatch): hedef rengi = kaynak yamalarinin oylamasi. Rehber: goreli
     derinlik t ve disa normal (kenar yonu); renk tutarliligi: bir onceki turun ciktisi. Yalniz kaynak pikselleri kopyalanir."""
     rng = np.random.default_rng(tohum)
-    ts, nxs, nys = ozellik(src_A)
+    rehber = rehber or ozellik
+    ts, nxs, nys = rehber(src_A)
     Gs = np.stack([ts * W_T, nxs * W_N, nys * W_N], -1).astype(np.float32)
     # kaynak disi (kapsama < 0.5) renkler gecersiz: en yakin ic piksel rengiyle doldur
     ic = (src_A >= 0.5).astype(np.uint8)
@@ -108,7 +126,7 @@ def aktar(src_rgb, src_A, hedef_A, tohum=1):
     Cs = src_rgb[zy[lut[lab]], zx[lut[lab]]]
     gecerli = (src_A >= 0.6)
     gy_, gx_ = np.nonzero(gecerli)
-    tt, nxt, nyt = ozellik(hedef_A)
+    tt, nxt, nyt = rehber(hedef_A)
     Gt = np.stack([tt * W_T, nxt * W_N, nyt * W_N], -1).astype(np.float32)
     hm = cv2.dilate((hedef_A > 0.01).astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
     ty, tx = np.nonzero(hm)
