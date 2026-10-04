@@ -174,6 +174,37 @@ def renk_esitle(rgb, al, hedef, duz):
     return out, {'med_once': [round(float(v), 2) for v in med], 'kL': round(float(k), 4), 'da': round(float(da), 2),
                  'db': round(float(db), 2)}
 
+YUZDE = np.linspace(0, 100, 201)
+
+
+def l_yuzdelik(rgb, al):
+    Lab = cv2.cvtColor(np.clip(rgb, 0, 255).astype(np.float32) / 255, cv2.COLOR_RGB2LAB)
+    return np.percentile(Lab[..., 0][cekirdek(al)], YUZDE)
+
+
+def l_esitle(rgb, al, ref, hedef, duz):
+    """TEK DOKU BUTUNLUGU (Serdar 4 Eki): ogenin L dagilimi ana sembol cekirdeginin L dagilimina yuzdelik esleme ile
+    cekilir. Tek surekli, monoton, yumusak egri (201 yuzdelik cifti; fark egrisi 2 yuzdelik adim Gauss yumusatma;
+    aralik disinda uc farki sabit kayma), ogenin TUM piksellerine ayni egri; bolgesel yama yok. Kapali dongu (Lq): ikinci
+    turda hedef, poster uzerinde olculen yuzdelik farki kadar duzeltilir (cember alfasi cekirdekte ~0.95, zeminle karisir). a, b medyani ortak
+    hedefe (+ kapali dongu da / db)."""
+    Lab = cv2.cvtColor(np.clip(rgb, 0, 255).astype(np.float32) / 255, cv2.COLOR_RGB2LAB)
+    ce = cekirdek(al)
+    q = np.maximum.accumulate(np.percentile(Lab[..., 0][ce], YUZDE)) + np.arange(len(YUZDE)) * 1e-6
+    ref = ref + np.asarray(duz.get('Lq', 0.0))                  # kapali dongu: posterde olculen yuzdelik farki (bindirme alfasi < 1)
+    d = cv2.GaussianBlur((ref - q)[None].astype(np.float32), (0, 0), 2)[0]
+    y = np.maximum.accumulate(q + d)
+    L = Lab[..., 0]
+    Ln = np.interp(L, q, y)
+    Ln = np.where(L < q[0], L + d[0], np.where(L > q[-1], L + d[-1], Ln))
+    med = np.median(Lab[ce], 0)
+    da = hedef[1] - med[1] + duz.get('da', 0.0); db = hedef[2] - med[2] + duz.get('db', 0.0)
+    Lab[..., 0] = np.clip(Ln, 0, 100); Lab[..., 1] += da; Lab[..., 2] += db
+    out = np.clip(cv2.cvtColor(Lab, cv2.COLOR_LAB2RGB), 0, 1) * 255
+    return out, {'yontem': 'L yuzdelik esleme (ana sembol)', 'med_once': [round(float(v), 2) for v in med],
+                 'L_p5_p50_p99_once': [round(float(np.interp(p, YUZDE, q)), 2) for p in (5, 50, 99)],
+                 'da': round(float(da), 2), 'db': round(float(db), 2)}
+
 
 def main():
     ap = argparse.ArgumentParser()
@@ -184,6 +215,8 @@ def main():
                                        'sayfa-json dizininde DOKU_AI_<ad>.json; oge = cift); verilmezse orijinal asset')
     ap.add_argument('--renk-hedef', default='71.5,8.5,49.5',
                     help='oge renk esitleme ortak hedefi Lab (Serdar 4 Eki); "yok" = esitleme kapali')
+    ap.add_argument('--l-esleme', default='ana', help='TEK DOKU (Serdar 4 Eki): ogelerin L dagilimi ana sembol cekirdek '
+                                                      'L dagilimina yuzdelik esleme; "yok" = yalniz medyan esitleme')
     ap.add_argument('--renk-kazanc', help='kapali dongu duzeltmesi JSON {oge: {kL, da, db}} (renk_kapi.py ciktisi)')
     a = ap.parse_args()
     C = Path(a.cikti); C.mkdir(parents=True, exist_ok=True)
@@ -210,18 +243,41 @@ def main():
     kazanc = json.loads(Path(a.renk_kazanc).read_text()) if a.renk_kazanc else {}
     maske = {}
 
+    bekleyen = []
+    l_esle = a.l_esleme != 'yok'
+
     def bindir(ad, rgb, al, x, y):
+        """oge sira ile toplanir; renk islemi ana sembol referansi bilindikten sonra (bas)."""
+        bekleyen.append((ad, rgb, al, x, y))
+
+    def bas():
         if hedef is not None:
-            rgb, rap.setdefault('renk_esitleme', {})[ad] = renk_esitle(rgb, al, hedef, kazanc.get(ad, {}))
-        x, y = int(round(x)), int(round(y))
-        h, w = al.shape
-        x0, y0, x1, y1 = max(0, x), max(0, y), min(W, x + w), min(H, y + h)
-        aa = al[y0 - y:y1 - y, x0 - x:x1 - x]; cc = rgb[y0 - y:y1 - y, x0 - x:x1 - x]
-        Cp[y0:y1, x0:x1] = Cp[y0:y1, x0:x1] * (1 - aa[..., None]) + cc * aa[..., None]
-        A[y0:y1, x0:x1] = A[y0:y1, x0:x1] * (1 - aa) + aa
-        ys, xs = np.nonzero(aa > 0.02)
-        kutu[ad] = [int(x0 + xs.min()), int(y0 + ys.min()), int(x0 + xs.max()) + 1, int(y0 + ys.max()) + 1]
-        maske[ad] = (x0, y0, np.packbits(cekirdek(aa)), aa.shape)
+            ref = None
+            if l_esle:
+                i = [b[0] for b in bekleyen].index('ana_sembol')
+                ad, rgb, al, x, y = bekleyen[i]
+                rgb, rap.setdefault('renk_esitleme', {})[ad] = renk_esitle(rgb, al, hedef, kazanc.get(ad, {}))
+                bekleyen[i] = (ad, rgb, al, x, y)
+                ref = l_yuzdelik(rgb, al)
+            for i, (ad, rgb, al, x, y) in enumerate(bekleyen):
+                if l_esle and ad == 'ana_sembol':
+                    continue
+                if ref is not None:
+                    rgb, rap.setdefault('renk_esitleme', {})[ad] = l_esitle(rgb, al, ref, hedef, kazanc.get(ad, {}))
+                else:
+                    rgb, rap.setdefault('renk_esitleme', {})[ad] = renk_esitle(rgb, al, hedef, kazanc.get(ad, {}))
+                bekleyen[i] = (ad, rgb, al, x, y)
+        for ad, rgb, al, x, y in bekleyen:
+            x, y = int(round(x)), int(round(y))
+            h, w = al.shape
+            x0, y0, x1, y1 = max(0, x), max(0, y), min(W, x + w), min(H, y + h)
+            aa = al[y0 - y:y1 - y, x0 - x:x1 - x]; cc = rgb[y0 - y:y1 - y, x0 - x:x1 - x]
+            Cp[y0:y1, x0:x1] = Cp[y0:y1, x0:x1] * (1 - aa[..., None]) + cc * aa[..., None]
+            A[y0:y1, x0:x1] = A[y0:y1, x0:x1] * (1 - aa) + aa
+            ys, xs = np.nonzero(aa > 0.02)
+            kutu[ad] = [int(x0 + xs.min()), int(y0 + ys.min()), int(x0 + xs.max()) + 1, int(y0 + ys.max()) + 1]
+            maske[ad] = (x0, y0, np.packbits(cekirdek(aa)), aa.shape)
+        bekleyen.clear()
 
     # 2 cember (supurulmus)
     R = np.load(a.cember).astype(np.float32)
@@ -299,6 +355,9 @@ def main():
     bindir('tagline', rm, am, W / 2 - wm / 2 - km[0], MS['taban_y'] - tm)
     rap['tagline'] = {'punto': round(pm, 1), 'genislik': wm, 'kuculme': round(pm / MS['punto'], 4), 'yedek_doku': yd}
     log('tagline', rap['tagline'])
+
+    bas()
+    log('renk', rap.get('renk_esitleme'))
 
     # 7 yazi kutusu + pay icindeki yildizlar atilir (motor 3 Eki B kurali)
     pay = int(round(tdk.PAY_ORAN * tdk.TEMIZLIK_PAYI * W))
