@@ -174,6 +174,26 @@ def renk_esitle(rgb, al, hedef, duz):
     return out, {'med_once': [round(float(v), 2) for v in med], 'kL': round(float(k), 4), 'da': round(float(da), 2),
                  'db': round(float(db), 2)}
 
+DUZ_SIGMA = 220.0        # 7200 px genislikte (2000 px'te 60 px, koordinator denemesi)
+DUZ_SINIR = (0.80, 1.25)
+
+
+def l_duzle(rgb, al, W):
+    """OGE ICI BOLGESEL PARLAKLIK (Serdar 4 Eki): her piksele ayni surekli kural, yama yok. low = blur(L w) / blur(w)
+    (w = oge alfasi, sigma = DUZ_SIGMA x W / 7200); kazanc = cekirdek medyan L / low, DUZ_SINIR ile sinirli;
+    L' = L x (1 + w (kazanc - 1)). Ana sembol disindaki tum ogelere, yuzdelik eslemeden ONCE."""
+    Lab = cv2.cvtColor(np.clip(rgb, 0, 255).astype(np.float32) / 255, cv2.COLOR_RGB2LAB)
+    w = np.clip(al, 0, 1).astype(np.float32)
+    sg = DUZ_SIGMA * W / 7200
+    low = cv2.GaussianBlur(Lab[..., 0] * w, (0, 0), sg) / np.maximum(cv2.GaussianBlur(w, (0, 0), sg), 1e-4)
+    med = float(np.median(Lab[..., 0][cekirdek(al)]))
+    k = np.clip(med / np.maximum(low, 1e-3), *DUZ_SINIR)
+    Lab[..., 0] = np.clip(Lab[..., 0] * (1 + w * (k - 1)), 0, 100)
+    ce = cekirdek(al)
+    return np.clip(cv2.cvtColor(Lab, cv2.COLOR_LAB2RGB), 0, 1) * 255, {
+        'duz_kazanc_p1_p50_p99': [round(float(v), 3) for v in np.percentile(k[ce], (1, 50, 99))]}
+
+
 YUZDE = np.linspace(0, 100, 201)
 
 
@@ -217,6 +237,7 @@ def main():
                     help='oge renk esitleme ortak hedefi Lab (Serdar 4 Eki); "yok" = esitleme kapali')
     ap.add_argument('--l-esleme', default='ana', help='TEK DOKU (Serdar 4 Eki): ogelerin L dagilimi ana sembol cekirdek '
                                                       'L dagilimina yuzdelik esleme; "yok" = yalniz medyan esitleme')
+    ap.add_argument('--l-duzle', default='var', help='oge ici bolgesel parlaklik duzleme (Serdar 4 Eki); "yok" = kapali')
     ap.add_argument('--renk-kazanc', help='kapali dongu duzeltmesi JSON {oge: {kL, da, db}} (renk_kapi.py ciktisi)')
     a = ap.parse_args()
     C = Path(a.cikti); C.mkdir(parents=True, exist_ok=True)
@@ -263,7 +284,11 @@ def main():
                 if l_esle and ad == 'ana_sembol':
                     continue
                 if ref is not None:
+                    if a.l_duzle != 'yok':
+                        rgb, dz = l_duzle(rgb, al, W)
                     rgb, rap.setdefault('renk_esitleme', {})[ad] = l_esitle(rgb, al, ref, hedef, kazanc.get(ad, {}))
+                    if a.l_duzle != 'yok':
+                        rap['renk_esitleme'][ad].update(dz)
                 else:
                     rgb, rap.setdefault('renk_esitleme', {})[ad] = renk_esitle(rgb, al, hedef, kazanc.get(ad, {}))
                 bekleyen[i] = (ad, rgb, al, x, y)
@@ -377,7 +402,12 @@ def main():
     del y_kat
     rap['yildiz'] = {'toplam': len(YL), 'atilan': at, 'pay_px': pay}
     out = P * (1 - A[..., None]) + Cp
-    out += zg.dither(H, W) * (1 - np.clip(A, 0, 1))[..., None]
+    # 8 bit donusum: kanal basina bagimsiz TPDF +-1 LSB titresim (zemin; 5 Eki: ortak kanal titresimi JPEG q100'de
+    # kayboluyordu, kanal basina olan kaliyor). Ogeler uzerinde (1 - alfa) ile azalir.
+    rng = np.random.default_rng(zg.TOHUM)
+    za = (1 - np.clip(A, 0, 1))
+    for c in range(3):
+        out[..., c] += (rng.random((H, W), np.float32) + rng.random((H, W), np.float32) - 1) * za
     u8 = np.clip(np.round(out), 0, 255).astype(np.uint8)
     del out, P, Cp
     Image.fromarray(u8).save(C / 'POSTER.png', dpi=(300, 300))

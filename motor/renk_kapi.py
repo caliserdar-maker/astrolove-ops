@@ -4,7 +4,8 @@
 Her oge cekirdegi (doku_poster OGE_MASKE.npz: alfa > 0.95, 3 px asindirilmis) icinde medyan Lab (skimage, D65).
 Gecme sarti (Serdar 4 Eki, TEK DOKU): ogeler arasi EN BUYUK medyan dE00 <= ESIK; her oge ana sembolle L yuzdelikleri
 (p5, p25, p50, p75, p95, p99) farki <= YUZDE_ESIK; cok parlak piksel orani (L > ana sembol p99) farki <= PARLAK_ESIK puan;
-ana sembol leke = 0. DOKU (yalniz rapor): L yerel std (9 px pencere), cekirdekte medyan. Kapali dongu: hedefe kalan fark bir sonraki tur icin kazanc JSON'una yazilir
+ana sembol leke = 0; oge ici (ana sembol haric, Serdar 4 Eki): oge boyunca en az 10 esit dilim (cember 12 aci dilimi)
+arasinda medyan L farki <= DILIM_L_ESIK, HSV V > 0.95 orani farki <= DILIM_V_ESIK puan. DOKU (yalniz rapor): L yerel std (9 px pencere), cekirdekte medyan. Kapali dongu: hedefe kalan fark bir sonraki tur icin kazanc JSON'una yazilir
 (kL = kL_onceki x hedef_L / L_olculen, da / db = onceki + (hedef - olculen)).
 
 Kullanim: renk_kapi.py --poster GOLGE_1.png --dizin POSTER_DIZINI [--hedef 71.5,8.5,49.5] [--kazanc-cikti K.json]
@@ -27,6 +28,30 @@ ESIK = 1.0
 YUZDE = (5, 25, 50, 75, 95, 99)
 YUZDE_ESIK = 1.5
 PARLAK_ESIK = 1.0
+DILIM_N = 10            # oge boyunca esit dilim (cember: aci dilimi 12)
+DILIM_L_ESIK = 2.0      # dilimler arasi medyan L farki
+DILIM_V_ESIK = 5.0      # dilimler arasi cok parlak (HSV V > 0.95) oran farki, puan
+HALKA_MERKEZ = (3598.97, 4388.09)
+
+
+def dilimler(ad, Lk, V, m, x0, y0):
+    """oge ici bolgesel parlaklik (Serdar 4 Eki): oge boyunca esit dilimlerde medyan L ve HSV V > 0.95 orani."""
+    ys, xs = np.nonzero(m)
+    if ad == 'cember':
+        t = np.degrees(np.arctan2(-(ys + y0 - HALKA_MERKEZ[1]), xs + x0 - HALKA_MERKEZ[0])) % 360
+        n = 12; k = np.minimum(((t - t.min()) / (np.ptp(t) + 1e-6) * n).astype(int), n - 1)
+    else:
+        n = DILIM_N
+        u = xs if (xs.max() - xs.min()) >= (ys.max() - ys.min()) else ys
+        k = np.minimum(((u - u.min()) / (np.ptp(u) + 1e-6) * n).astype(int), n - 1)
+    Lm, Vo = [], []
+    for i in range(n):
+        q = k == i
+        if q.sum() < 300:
+            continue
+        Lm.append(float(np.median(Lk[ys[q], xs[q]]))); Vo.append(100 * float((V[ys[q], xs[q]] > 0.95 * 255).mean()))
+    return {'dilim_n': len(Lm), 'dilim_L_med': [round(v, 1) for v in Lm], 'dilim_V095': [round(v, 1) for v in Vo],
+            'dilim_L_fark': round(max(Lm) - min(Lm), 2), 'dilim_V_fark': round(max(Vo) - min(Vo), 2)}
 
 
 def olc(poster, dizin, hedef):
@@ -45,7 +70,9 @@ def olc(poster, dizin, hedef):
                  '_q': np.percentile(Lk[m], np.linspace(0, 100, 201)),
                  'L_yuzdelik': [round(float(q), 2) for q in np.percentile(Lk[m], YUZDE)],
                  'doku_std9': round(float(np.median(sd[m])), 3)}
-        del Lc, Lk, mu, sd
+        Vc = cv2.cvtColor(np.ascontiguousarray(P[y0:y0 + h, x0:x0 + w]), cv2.COLOR_RGB2HSV)[..., 2]
+        T[ad].update(dilimler(ad, Lk, Vc, m, x0, y0))
+        del Lc, Lk, mu, sd, Vc
         if ad == 'ana_sembol':
             T[ad]['leke'] = lk.olc(np.ascontiguousarray(P[y0:y0 + h, x0:x0 + w]), m.astype(np.float32))[0]
     ana = np.array(T['ana_sembol']['Lab'])
@@ -59,7 +86,9 @@ def olc(poster, dizin, hedef):
         t['L_yuzdelik_fark'] = [round(a_ - b_, 2) for a_, b_ in zip(t['L_yuzdelik'], T['ana_sembol']['L_yuzdelik'])]
         t['parlak_fark_puan'] = round(t['parlak_oran_yuzde'] - T['ana_sembol']['parlak_oran_yuzde'], 3)
         t['doku_oran_ana'] = round(t['doku_std9'] / max(T['ana_sembol']['doku_std9'], 1e-6), 3)
-        t['gecti'] = bool(max(abs(v) for v in t['L_yuzdelik_fark']) <= YUZDE_ESIK and abs(t['parlak_fark_puan']) <= PARLAK_ESIK)
+        t['dilim_gecti'] = bool(ad == 'ana_sembol' or (t['dilim_L_fark'] <= DILIM_L_ESIK and t['dilim_V_fark'] <= DILIM_V_ESIK))
+        t['gecti'] = bool(max(abs(v) for v in t['L_yuzdelik_fark']) <= YUZDE_ESIK and abs(t['parlak_fark_puan']) <= PARLAK_ESIK
+                          and t['dilim_gecti'])
     for ad, t in T.items():
         t['dE00_ana'] = round(float(deltaE_ciede2000(ana[None], np.array(t['Lab'])[None])[0]), 3)
         t['dE00_hedef'] = round(float(deltaE_ciede2000(np.array(hedef)[None], np.array(t['Lab'])[None])[0]), 3)
@@ -105,7 +134,7 @@ def main():
         print(f"{ad:11s} Lab {t['Lab'][0]:5.1f} {t['Lab'][1]:4.1f} {t['Lab'][2]:4.1f} dE_ana {t['dE00_ana']:4.2f} "
               f"dE_max {t['dE00_oge_max']:4.2f} | Lp {' '.join(f'{v:5.1f}' for v in t['L_yuzdelik'])} | fark maks "
               f"{max(abs(v) for v in t['L_yuzdelik_fark']):4.2f} | parlak% {t['parlak_oran_yuzde']:5.2f} | doku {t['doku_std9']:5.2f}"
-              f" ({t['doku_oran_ana']:.2f}x) {'OK' if t['gecti'] else 'X'}")
+              f" ({t['doku_oran_ana']:.2f}x) | dilim L {t['dilim_L_fark']:4.1f} V {t['dilim_V_fark']:4.1f} {'OK' if t['gecti'] else 'X'}")
     print('en buyuk cift', s['en_buyuk_cift'], 'leke_ana', s['leke_ana'], s['sonuc'])
     sys.exit(0 if s['sonuc'] == 'PASS' else 1)
 
