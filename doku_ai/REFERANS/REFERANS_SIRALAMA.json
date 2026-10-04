@@ -1,0 +1,629 @@
+{
+"yontem": "gruplar renk(Lab p50, R-B, G-B) / parlaklik(luma p5-p95 + 16 kutu histogram) / doku(yuksek gecirgen std s3, bant std s3-12, vurgu L>200 orani, sayisi/Mpx, boyu p90) / profil(kenardan 0-15 px luma ortancasi); robust z: (x-medyan)/max(MAD*1.4826, 0.5*std); D = karekok(grup RMS z kareleri ortalamasi). Olcek: sembol uzun kenari 2000 px (16x20 poster olcegi), A>0.95 ic pikseller.",
+"siralama": [
+{
+"cift": "TAURUS_TAURUS",
+"D": 0.536,
+"renk": 0.596,
+"parlaklik": 0.502,
+"doku": 0.482,
+"profil": 0.554
+},
+{
+"cift": "LEO_SCORPIO",
+"D": 0.566,
+"renk": 0.353,
+"parlaklik": 0.51,
+"doku": 0.692,
+"profil": 0.646
+},
+{
+"cift": "LIBRA_TAURUS",
+"D": 0.601,
+"renk": 0.367,
+"parlaklik": 0.839,
+"doku": 0.452,
+"profil": 0.635
+},
+{
+"cift": "SAGITTARIUS_SCORPIO",
+"D": 0.606,
+"renk": 0.396,
+"parlaklik": 0.651,
+"doku": 0.65,
+"profil": 0.684
+},
+{
+"cift": "SCORPIO_TAURUS",
+"D": 0.627,
+"renk": 0.617,
+"parlaklik": 0.436,
+"doku": 0.551,
+"profil": 0.836
+},
+{
+"cift": "CAPRICORN_SCORPIO",
+"D": 0.635,
+"renk": 0.249,
+"parlaklik": 0.664,
+"doku": 0.743,
+"profil": 0.747
+},
+{
+"cift": "GEMINI_PISCES",
+"D": 0.656,
+"renk": 0.423,
+"parlaklik": 0.638,
+"doku": 0.672,
+"profil": 0.828
+},
+{
+"cift": "LEO_PISCES",
+"D": 0.673,
+"renk": 0.373,
+"parlaklik": 0.519,
+"doku": 0.619,
+"profil": 1.011
+},
+{
+"cift": "PISCES_VIRGO",
+"D": 0.685,
+"renk": 0.292,
+"parlaklik": 0.537,
+"doku": 1.162,
+"profil": 0.395
+},
+{
+"cift": "LEO_VIRGO",
+"D": 0.689,
+"renk": 0.746,
+"parlaklik": 0.72,
+"doku": 0.52,
+"profil": 0.745
+},
+{
+"cift": "TAURUS_VIRGO",
+"D": 0.698,
+"renk": 0.471,
+"parlaklik": 0.685,
+"doku": 0.769,
+"profil": 0.817
+},
+{
+"cift": "LEO_LIBRA",
+"D": 0.704,
+"renk": 1.038,
+"parlaklik": 0.523,
+"doku": 0.563,
+"profil": 0.561
+},
+{
+"cift": "CANCER_LEO",
+"D": 0.72,
+"renk": 0.485,
+"parlaklik": 0.558,
+"doku": 1.178,
+"profil": 0.368
+},
+{
+"cift": "SCORPIO_VIRGO",
+"D": 0.725,
+"renk": 0.283,
+"parlaklik": 0.729,
+"doku": 0.968,
+"profil": 0.743
+},
+{
+"cift": "GEMINI_SCORPIO",
+"D": 0.732,
+"renk": 0.562,
+"parlaklik": 0.727,
+"doku": 0.946,
+"profil": 0.636
+},
+{
+"cift": "GEMINI_VIRGO",
+"D": 0.734,
+"renk": 0.248,
+"parlaklik": 0.526,
+"doku": 1.008,
+"profil": 0.896
+},
+{
+"cift": "LIBRA_LIBRA",
+"D": 0.739,
+"renk": 0.69,
+"parlaklik": 0.859,
+"doku": 0.856,
+"profil": 0.484
+},
+{
+"cift": "CAPRICORN_SAGITTARIUS",
+"D": 0.745,
+"renk": 0.448,
+"parlaklik": 0.817,
+"doku": 0.882,
+"profil": 0.756
+},
+{
+"cift": "PISCES_SCORPIO",
+"D": 0.751,
+"renk": 0.495,
+"parlaklik": 0.7,
+"doku": 0.729,
+"profil": 0.994
+},
+{
+"cift": "PISCES_TAURUS",
+"D": 0.755,
+"renk": 0.834,
+"parlaklik": 0.658,
+"doku": 0.638,
+"profil": 0.864
+},
+{
+"cift": "GEMINI_LEO",
+"D": 0.758,
+"renk": 0.454,
+"parlaklik": 0.474,
+"doku": 1.017,
+"profil": 0.912
+},
+{
+"cift": "LEO_SAGITTARIUS",
+"D": 0.766,
+"renk": 1.227,
+"parlaklik": 0.623,
+"doku": 0.434,
+"profil": 0.516
+},
+{
+"cift": "LIBRA_SCORPIO",
+"D": 0.768,
+"renk": 0.271,
+"parlaklik": 0.585,
+"doku": 1.007,
+"profil": 0.964
+},
+{
+"cift": "GEMINI_LIBRA",
+"D": 0.773,
+"renk": 0.334,
+"parlaklik": 0.61,
+"doku": 0.862,
+"profil": 1.079
+},
+{
+"cift": "CANCER_PISCES",
+"D": 0.783,
+"renk": 0.978,
+"parlaklik": 0.651,
+"doku": 0.886,
+"profil": 0.534
+},
+{
+"cift": "GEMINI_TAURUS",
+"D": 0.787,
+"renk": 0.573,
+"parlaklik": 0.576,
+"doku": 0.902,
+"profil": 1.002
+},
+{
+"cift": "GEMINI_GEMINI",
+"D": 0.82,
+"renk": 0.57,
+"parlaklik": 0.48,
+"doku": 1.359,
+"profil": 0.537
+},
+{
+"cift": "SAGITTARIUS_SAGITTARIUS",
+"D": 0.843,
+"renk": 0.45,
+"parlaklik": 0.667,
+"doku": 0.995,
+"profil": 1.099
+},
+{
+"cift": "LIBRA_PISCES",
+"D": 0.855,
+"renk": 0.666,
+"parlaklik": 0.779,
+"doku": 0.679,
+"profil": 1.187
+},
+{
+"cift": "LEO_TAURUS",
+"D": 0.871,
+"renk": 0.971,
+"parlaklik": 0.632,
+"doku": 1.141,
+"profil": 0.626
+},
+{
+"cift": "AQUARIUS_VIRGO",
+"D": 0.883,
+"renk": 0.354,
+"parlaklik": 1.323,
+"doku": 0.652,
+"profil": 0.903
+},
+{
+"cift": "CANCER_SCORPIO",
+"D": 0.886,
+"renk": 0.471,
+"parlaklik": 1.257,
+"doku": 0.794,
+"profil": 0.84
+},
+{
+"cift": "CAPRICORN_CAPRICORN",
+"D": 0.903,
+"renk": 0.585,
+"parlaklik": 0.495,
+"doku": 0.988,
+"profil": 1.304
+},
+{
+"cift": "CANCER_TAURUS",
+"D": 0.919,
+"renk": 0.281,
+"parlaklik": 1.046,
+"doku": 0.549,
+"profil": 1.38
+},
+{
+"cift": "LEO_LEO",
+"D": 0.927,
+"renk": 0.493,
+"parlaklik": 0.724,
+"doku": 1.396,
+"profil": 0.848
+},
+{
+"cift": "LIBRA_SAGITTARIUS",
+"D": 0.935,
+"renk": 1.114,
+"parlaklik": 0.824,
+"doku": 1.15,
+"profil": 0.501
+},
+{
+"cift": "CAPRICORN_PISCES",
+"D": 0.95,
+"renk": 0.677,
+"parlaklik": 0.676,
+"doku": 1.267,
+"profil": 1.045
+},
+{
+"cift": "AQUARIUS_LIBRA",
+"D": 0.964,
+"renk": 0.495,
+"parlaklik": 1.476,
+"doku": 0.879,
+"profil": 0.72
+},
+{
+"cift": "GEMINI_SAGITTARIUS",
+"D": 1.0,
+"renk": 0.817,
+"parlaklik": 0.824,
+"doku": 1.324,
+"profil": 0.95
+},
+{
+"cift": "PISCES_SAGITTARIUS",
+"D": 1.008,
+"renk": 0.679,
+"parlaklik": 0.952,
+"doku": 1.081,
+"profil": 1.237
+},
+{
+"cift": "ARIES_GEMINI",
+"D": 1.018,
+"renk": 0.881,
+"parlaklik": 1.321,
+"doku": 0.506,
+"profil": 1.169
+},
+{
+"cift": "ARIES_LEO",
+"D": 1.058,
+"renk": 0.876,
+"parlaklik": 0.91,
+"doku": 1.402,
+"profil": 0.958
+},
+{
+"cift": "VIRGO_VIRGO",
+"D": 1.136,
+"renk": 1.17,
+"parlaklik": 0.655,
+"doku": 1.714,
+"profil": 0.654
+},
+{
+"cift": "SAGITTARIUS_TAURUS",
+"D": 1.152,
+"renk": 0.988,
+"parlaklik": 1.477,
+"doku": 1.031,
+"profil": 1.045
+},
+{
+"cift": "CAPRICORN_LIBRA",
+"D": 1.174,
+"renk": 1.136,
+"parlaklik": 0.577,
+"doku": 1.828,
+"profil": 0.743
+},
+{
+"cift": "AQUARIUS_GEMINI",
+"D": 1.175,
+"renk": 0.935,
+"parlaklik": 1.417,
+"doku": 0.693,
+"profil": 1.468
+},
+{
+"cift": "CAPRICORN_GEMINI",
+"D": 1.179,
+"renk": 1.707,
+"parlaklik": 1.057,
+"doku": 0.595,
+"profil": 1.085
+},
+{
+"cift": "AQUARIUS_TAURUS",
+"D": 1.182,
+"renk": 0.595,
+"parlaklik": 1.131,
+"doku": 1.589,
+"profil": 1.197
+},
+{
+"cift": "ARIES_TAURUS",
+"D": 1.191,
+"renk": 1.526,
+"parlaklik": 0.886,
+"doku": 1.232,
+"profil": 1.021
+},
+{
+"cift": "CAPRICORN_LEO",
+"D": 1.217,
+"renk": 0.999,
+"parlaklik": 1.392,
+"doku": 1.088,
+"profil": 1.342
+},
+{
+"cift": "CANCER_CANCER",
+"D": 1.257,
+"renk": 1.794,
+"parlaklik": 1.547,
+"doku": 0.567,
+"profil": 0.626
+},
+{
+"cift": "CANCER_GEMINI",
+"D": 1.308,
+"renk": 1.268,
+"parlaklik": 1.786,
+"doku": 0.732,
+"profil": 1.227
+},
+{
+"cift": "AQUARIUS_PISCES",
+"D": 1.333,
+"renk": 0.59,
+"parlaklik": 1.375,
+"doku": 2.108,
+"profil": 0.656
+},
+{
+"cift": "ARIES_SCORPIO",
+"D": 1.363,
+"renk": 1.587,
+"parlaklik": 1.437,
+"doku": 1.309,
+"profil": 1.069
+},
+{
+"cift": "CANCER_SAGITTARIUS",
+"D": 1.399,
+"renk": 1.553,
+"parlaklik": 1.546,
+"doku": 1.051,
+"profil": 1.387
+},
+{
+"cift": "ARIES_PISCES",
+"D": 1.406,
+"renk": 1.257,
+"parlaklik": 1.366,
+"doku": 1.959,
+"profil": 0.789
+},
+{
+"cift": "CAPRICORN_VIRGO",
+"D": 1.425,
+"renk": 2.179,
+"parlaklik": 1.028,
+"doku": 0.751,
+"profil": 1.325
+},
+{
+"cift": "CANCER_CAPRICORN",
+"D": 1.441,
+"renk": 1.445,
+"parlaklik": 0.774,
+"doku": 1.517,
+"profil": 1.822
+},
+{
+"cift": "AQUARIUS_SAGITTARIUS",
+"D": 1.453,
+"renk": 1.786,
+"parlaklik": 1.3,
+"doku": 1.115,
+"profil": 1.523
+},
+{
+"cift": "CANCER_VIRGO",
+"D": 1.483,
+"renk": 2.5,
+"parlaklik": 0.887,
+"doku": 1.096,
+"profil": 0.746
+},
+{
+"cift": "ARIES_LIBRA",
+"D": 1.541,
+"renk": 2.233,
+"parlaklik": 1.855,
+"doku": 0.63,
+"profil": 0.824
+},
+{
+"cift": "ARIES_CAPRICORN",
+"D": 1.542,
+"renk": 1.971,
+"parlaklik": 1.767,
+"doku": 1.124,
+"profil": 1.111
+},
+{
+"cift": "SCORPIO_SCORPIO",
+"D": 1.732,
+"renk": 1.354,
+"parlaklik": 2.063,
+"doku": 1.632,
+"profil": 1.802
+},
+{
+"cift": "ARIES_CANCER",
+"D": 1.756,
+"renk": 1.066,
+"parlaklik": 2.136,
+"doku": 0.778,
+"profil": 2.457
+},
+{
+"cift": "ARIES_SAGITTARIUS",
+"D": 1.772,
+"renk": 0.552,
+"parlaklik": 2.47,
+"doku": 2.075,
+"profil": 1.358
+},
+{
+"cift": "AQUARIUS_CAPRICORN",
+"D": 1.775,
+"renk": 2.652,
+"parlaklik": 1.571,
+"doku": 1.448,
+"profil": 1.002
+},
+{
+"cift": "PISCES_PISCES",
+"D": 1.799,
+"renk": 1.458,
+"parlaklik": 1.092,
+"doku": 2.249,
+"profil": 2.139
+},
+{
+"cift": "AQUARIUS_SCORPIO",
+"D": 1.85,
+"renk": 1.227,
+"parlaklik": 2.481,
+"doku": 2.115,
+"profil": 1.248
+},
+{
+"cift": "ARIES_ARIES",
+"D": 1.866,
+"renk": 2.646,
+"parlaklik": 1.701,
+"doku": 1.792,
+"profil": 0.907
+},
+{
+"cift": "AQUARIUS_AQUARIUS",
+"D": 1.95,
+"renk": 0.81,
+"parlaklik": 1.358,
+"doku": 3.299,
+"profil": 1.35
+},
+{
+"cift": "AQUARIUS_LEO",
+"D": 2.07,
+"renk": 1.27,
+"parlaklik": 2.715,
+"doku": 2.08,
+"profil": 1.956
+},
+{
+"cift": "CANCER_LIBRA",
+"D": 2.096,
+"renk": 0.523,
+"parlaklik": 3.472,
+"doku": 0.943,
+"profil": 2.087
+},
+{
+"cift": "CAPRICORN_TAURUS",
+"D": 2.147,
+"renk": 2.919,
+"parlaklik": 1.26,
+"doku": 2.438,
+"profil": 1.546
+},
+{
+"cift": "AQUARIUS_CANCER",
+"D": 2.264,
+"renk": 1.694,
+"parlaklik": 3.742,
+"doku": 1.045,
+"profil": 1.593
+},
+{
+"cift": "SAGITTARIUS_VIRGO",
+"D": 2.4,
+"renk": 2.239,
+"parlaklik": 3.189,
+"doku": 1.207,
+"profil": 2.529
+},
+{
+"cift": "LIBRA_VIRGO",
+"D": 2.418,
+"renk": 2.085,
+"parlaklik": 3.459,
+"doku": 1.343,
+"profil": 2.297
+},
+{
+"cift": "AQUARIUS_ARIES",
+"D": 2.601,
+"renk": 3.999,
+"parlaklik": 2.989,
+"doku": 0.824,
+"profil": 1.204
+},
+{
+"cift": "ARIES_VIRGO",
+"D": 2.873,
+"renk": 1.069,
+"parlaklik": 4.909,
+"doku": 2.541,
+"profil": 1.153
+}
+]
+}

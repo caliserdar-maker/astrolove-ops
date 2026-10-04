@@ -1,0 +1,11 @@
+{
+ "olcek": "en buyuk baski 24x36 (7200x10800 px, 300 dpi); glifler 1:1 baski pikseli",
+ "glif_cozunurlugu": {
+  "isim": {"font": "Cinzel.ttf wght 500", "punto": 408, "buyuk_harf_govdesi_px": 286, "hucre_px": [640, 580], "glif": 36},
+  "tagline": {"font": "EBGaramond-Italic.ttf 400", "punto": 372, "T_govdesi_px": 248, "hucre_px": [540, 520], "glif": 83},
+  "maske": {"halka_cizgisi_px": 34, "halka_yayi_px": [1800, 280], "kucuk_sembol_px": [640, 555], "sonsuz_px": [643, 202]}
+ },
+ "sayfalar": {"isim": "3 x 2560x2320 (4x4 hucre, 1 referans + 12 glif)", "tagline": "4 x 2700x2600 (5x5 hucre, 1 referans + 20-21 glif)", "maske": "1 x 2323x1160", "toplam": 8},
+ "cikti_boyutu_kurali": "ChatGPT cikti boyutu VARSAYILMAZ. Donen her sayfa, gonderilen sayfanin piksel boyutundan kucukse k = donen_uzun_kenar / sayfa_uzun_kenar < 1: glif dokusu 1:1 degil -> o grup yeniden bolunur: sayfa_basi_glif = floor(nx*k) * floor(ny*k) - 1 (isim nx=ny=4, tagline nx=ny=5), sayfa_sayisi = ceil(glif / sayfa_basi_glif). Ornek ic hesap: k=0.5 -> isim 3 glif/sayfa (12 sayfa), tagline 3 glif/sayfa (28 sayfa).",
+ "donus_kapisi": "AI gorselinden yalniz doku alinir; sekil JSON'daki koken_ls + font + punto ile yeniden cizilen vektor maskeden (sekil sadakati). Olculecek: donen sayfa boyutu (k >= 1), glifler arasi ve sayfalar arasi renk/doku dagilimi (Lab p50, luma p5-p95, yuksek gecirgen std, vurgu orani/boyu) referans ana sembole gore."
+}

@@ -1,0 +1,49 @@
+{
+ "tur": "maske",
+ "boyut": [
+  2323,
+  1160
+ ],
+ "referans_kutu": [
+  0,
+  0,
+  640,
+  580
+ ],
+ "ogeler": [
+  {
+   "oge": "kucuk_sembol",
+   "kutu": [
+    740,
+    100,
+    1380,
+    655
+   ],
+   "not": "sym_cancer_gold.png alfa x 0.548"
+  },
+  {
+   "oge": "sonsuz",
+   "kutu": [
+    1480,
+    100,
+    2123,
+    302
+   ],
+   "not": "orijinal 16x20 posterden kapsama x 1.701 (yuksek cozunurluklu kaynak yok)"
+  },
+  {
+   "oge": "halka_yayi",
+   "kutu": [
+    261,
+    780,
+    2061,
+    1060
+   ],
+   "not": "HALKA_24x36.png [1500:1780, 2700:4500]"
+  }
+ ],
+ "dosya": "DOKU_AI_MASKE_1.png",
+ "sha256": "beef5e77c2887b5b9c51fecd989d2880ca65ef090f6bedac90d517a80f25056c",
+ "referans": "main_taurus_taurus_gold.png",
+ "olcek": "24x36 baski, 300 dpi, 1:1"
+}
