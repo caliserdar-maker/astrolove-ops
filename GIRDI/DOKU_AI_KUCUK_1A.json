@@ -1,0 +1,76 @@
+{
+ "tur": "kucuk",
+ "boyut": [
+  3019,
+  675
+ ],
+ "referans_kutu": [
+  0,
+  0,
+  640,
+  580
+ ],
+ "referans": "main_aquarius_aries_gold.png",
+ "ogeler": [
+  {
+   "oge": "AQUARIUS",
+   "kutu": [
+    670,
+    147,
+    1585,
+    528
+   ],
+   "kaynak": "sym_aquarius_gold.png",
+   "sha256": "a7c9d83ec3fabceb33da77bb2d781996b5869376e8691fbc2749f7ef54f7f706",
+   "olcek": 0.08455,
+   "olcek_kaynagi": "16x20 orijinal AQUARIUS_AQUARIUS.jpg eslesme 0.04989 (ncc 0.9857) x 1.6946",
+   "kaynak_kirp": [
+    0,
+    0,
+    10817,
+    4501
+   ]
+  },
+  {
+   "oge": "ARIES",
+   "kutu": [
+    1615,
+    30,
+    2275,
+    645
+   ],
+   "kaynak": "sym_aries_gold.png",
+   "sha256": "b95cc9187ad9b0e6068abf2261d2802abbdc1c5cd0e2596db547ea85c97cb7a6",
+   "olcek": 0.50811,
+   "olcek_kaynagi": "16x20 orijinal ARIES_ARIES.jpg eslesme 0.29983 (ncc 0.9827) x 1.6946",
+   "kaynak_kirp": [
+    0,
+    0,
+    1299,
+    1211
+   ]
+  },
+  {
+   "oge": "CANCER",
+   "kutu": [
+    2305,
+    40,
+    2989,
+    634
+   ],
+   "kaynak": "sym_cancer_gold.png",
+   "sha256": "2b5a32121ce8fa92ceef1a386f5ab1742a573681c30e742223be75005816cf28",
+   "olcek": 0.5865,
+   "olcek_kaynagi": "16x20 orijinal CANCER_CANCER.jpg eslesme 0.34609 (ncc 0.9808) x 1.6946",
+   "kaynak_kirp": [
+    0,
+    0,
+    1167,
+    1012
+   ]
+  }
+ ],
+ "dosya": "DOKU_AI_KUCUK_1A.png",
+ "sha256": "2548bd0f07a157865d878c6c611e7876e882bbce1217a55283026262e0c3adf6",
+ "olcek": "24x36 baski, 300 dpi, 1:1"
+}

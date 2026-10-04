@@ -1,0 +1,65 @@
+{
+ "tur": "cember_dilim",
+ "boyut": [
+  1184,
+  4921
+ ],
+ "referans_kutu": [
+  0,
+  0,
+  640,
+  580
+ ],
+ "referans": "main_aquarius_aries_gold.png",
+ "ogeler": [
+  {
+   "oge": "CEMBER_SAG",
+   "kutu": [
+    0,
+    610,
+    1184,
+    4921
+   ],
+   "kaynak": "HALKA_24x36.png",
+   "sha256": "6d75106b47e247ea0d70b3013431180bc7acbfc7d509f99428e50223972e075c",
+   "olcek": 1.0,
+   "kaynak_kirp": [
+    5316,
+    2117,
+    6500,
+    6428
+   ]
+  }
+ ],
+ "halka": {
+  "merkez": [
+   3598.97,
+   4388.09
+  ],
+  "yaricap": 2835.71,
+  "sag_uc_aci": 316,
+  "sol_uc_aci": 224,
+  "aci_araligi": [
+   316,
+   51
+  ],
+  "u_araligi": [
+   0,
+   95
+  ],
+  "aci_tanimi": "merkezden, saga 0, yukari 90 derece (saat yonu tersi); u = (aci - sag_uc) mod 360",
+  "merkeze_gore_kutu": [
+   1717.0,
+   -2271.1,
+   2901.0,
+   2039.9
+  ],
+  "sayfa_kaydirma": [
+   5316,
+   1507
+  ]
+ },
+ "dosya": "DOKU_AI_CEMBER_SAG.png",
+ "sha256": "f34d3d8bf4508ee136dd09cd596a7f473876211a521adde44accde6f000bba04",
+ "olcek": "24x36 baski, 300 dpi, 1:1"
+}
