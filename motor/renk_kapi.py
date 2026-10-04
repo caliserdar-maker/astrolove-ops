@@ -47,7 +47,7 @@ def olc(poster, dizin, hedef):
     for ad in T:
         T[ad]['dE00_oge_max'] = round(max(v for k, v in cift.items() if ad in k.split('|')), 3)
     sonuc = {'ogeler': T, 'en_buyuk_cift': [en, round(cift[en], 3)], 'esik': ESIK,
-             'leke_ana': T['ana_sembol'].get('leke'), 'renk_onceki': rap.get('renk', {})}
+             'leke_ana': T['ana_sembol'].get('leke'), 'renk_esitleme': rap.get('renk_esitleme', {})}
     sonuc['sonuc'] = 'PASS' if cift[en] <= ESIK and T['ana_sembol'].get('leke', 0) < lk.ESIK else 'FAIL'
     return sonuc
 

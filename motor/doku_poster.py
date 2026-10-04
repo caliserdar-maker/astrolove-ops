@@ -212,7 +212,7 @@ def main():
 
     def bindir(ad, rgb, al, x, y):
         if hedef is not None:
-            rgb, rap.setdefault('renk', {})[ad] = renk_esitle(rgb, al, hedef, kazanc.get(ad, {}))
+            rgb, rap.setdefault('renk_esitleme', {})[ad] = renk_esitle(rgb, al, hedef, kazanc.get(ad, {}))
         x, y = int(round(x)), int(round(y))
         h, w = al.shape
         x0, y0, x1, y1 = max(0, x), max(0, y), min(W, x + w), min(H, y + h)
