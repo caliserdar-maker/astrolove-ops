@@ -194,6 +194,25 @@ def l_duzle(rgb, al, W):
         'duz_kazanc_p1_p50_p99': [round(float(v), 3) for v in np.percentile(k[ce], (1, 50, 99))]}
 
 
+def duzle(rgb, al, W):
+    """GENIS OLCEKLI DUZLEME (Serdar onayli koordinator uygulamasi, 5 Eki; 2000 px'te sigma 60 = 7200 px'te ~216):
+    yuzdelik eslemeden SONRA, bitmis oge uzerinde. Her piksele ayni surekli kural, yama yok. w = doygunluk / parlaklik
+    rampasi x oge alfasi; low = blur(L w) / blur(w); g = medyan(L | w > 0.9) / low, 0.8-1.25; L' = L (1 - w) + L g w."""
+    sigma = 60.0 * W / 2000
+    x = np.clip(rgb, 0, 255).astype(np.float32) / 255
+    lab = cv2.cvtColor(x, cv2.COLOR_RGB2LAB)
+    L = lab[..., 0]
+    hsv = cv2.cvtColor(x, cv2.COLOR_RGB2HSV)
+    w = np.clip((hsv[..., 1] - 0.25) / 0.2, 0, 1) * np.clip((hsv[..., 2] - 0.35) / 0.2, 0, 1) * np.clip(al, 0, 1)
+    low = cv2.GaussianBlur(L * w, (0, 0), sigma) / (cv2.GaussianBlur(w, (0, 0), sigma) + 1e-6)
+    med = float(np.median(L[w > 0.9]))
+    g = np.clip(med / np.maximum(low, 1), 0.8, 1.25)
+    lab[..., 0] = L * (1 - w) + np.clip(L * g, 0, 100) * w
+    ce = w > 0.9
+    return np.clip(cv2.cvtColor(lab, cv2.COLOR_LAB2RGB), 0, 1) * 255, {
+        'duzle_sigma': round(sigma, 1), 'duzle_g_p1_p50_p99': [round(float(v), 3) for v in np.percentile(g[ce], (1, 50, 99))]}
+
+
 YUZDE = np.linspace(0, 100, 201)
 
 
@@ -284,10 +303,10 @@ def main():
                 if l_esle and ad == 'ana_sembol':
                     continue
                 if ref is not None:
-                    if a.l_duzle != 'yok':
-                        rgb, dz = l_duzle(rgb, al, W)
+                    # Serdar 5 Eki: once yuzdelik esleme + a, b kaydirma, EN SON genis olcekli duzleme (bitmis oge uzerinde)
                     rgb, rap.setdefault('renk_esitleme', {})[ad] = l_esitle(rgb, al, ref, hedef, kazanc.get(ad, {}))
                     if a.l_duzle != 'yok':
+                        rgb, dz = duzle(rgb, al, W)
                         rap['renk_esitleme'][ad].update(dz)
                 else:
                     rgb, rap.setdefault('renk_esitleme', {})[ad] = renk_esitle(rgb, al, hedef, kazanc.get(ad, {}))

@@ -113,10 +113,16 @@ def metin_katmani(metin, f, pr, govde_ust):
 
 
 def pdf_yaz(im, C, W, H):
-    """PDF: sayfa W/300 x H/300 inc, 300 dpi goruntu (JPEG 95, eski sistemle ayni)."""
+    """PDF: sayfa W/300 x H/300 inc, 300 dpi goruntu (JPEG q100 + kanal basina TPDF, 5 Eki; onceden JPEG 95)."""
     import fitz
     jp = C / '_sayfa.jpg'
-    im.save(jp, 'JPEG', quality=95, subsampling=0, dpi=(300, 300))
+    # Serdar 5 Eki ("Ok"): teslim JPEG q100 + kanal basina TPDF +-1 LSB (q95 titresimi siliyor, lacivert gradyanda halka)
+    rng = np.random.default_rng(20261005)
+    F = np.asarray(im, np.float32)
+    F = F + rng.random(F.shape, np.float32) + rng.random(F.shape, np.float32) - 1
+    im = Image.fromarray(np.clip(np.round(F), 0, 255).astype(np.uint8))
+    del F
+    im.save(jp, 'JPEG', quality=100, subsampling=0, dpi=(300, 300))
     d = fitz.open()
     pg = d.new_page(width=W / 300 * 72, height=H / 300 * 72)
     pg.insert_image(pg.rect, filename=str(jp))
