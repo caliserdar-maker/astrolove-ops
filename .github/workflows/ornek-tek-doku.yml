@@ -42,7 +42,8 @@ jobs:
           cd ornek && awk '{print $1"  "$2}' SHA.txt | sha256sum -c -
           (cd DUZELTILMIS && awk '{print $1"  "$2}' SHA.txt | sha256sum -c -)
           (cd GRADIENT && awk '{print $1"  "$2}' SHA.txt | sha256sum -c -)
-          cd UC_KABARTMA_D2 && awk '{print $1"  "$2}' SHA.txt | sha256sum -c -
+          (cd UC_KABARTMA_D2 && awk '{print $1"  "$2}' SHA.txt | sha256sum -c -)
+          cd DENEME3 && awk '{print $1"  "$2}' SHA.txt | sha256sum -c -
       - name: Drive'a yukle (TEMP/MOTOR/SOSYAL/TEK_DOKU_ORNEK)
         run: |
           set -euo pipefail
@@ -54,5 +55,6 @@ jobs:
           N=$(rclone lsf "$D/DUZELTILMIS" | grep -cE '_(TEK_DOKU_4x5\.png|YANYANA\.jpg)$'); echo "duzeltilmis: $N"; [ "$N" = 6 ]
           N=$(rclone lsf "$D/GRADIENT" | grep -cE '_(TEK_DOKU_4x5\.png|YANYANA\.jpg)$'); echo "gradient: $N"; [ "$N" = 6 ]
           N=$(rclone lsf "$D/UC_KABARTMA_D2" | grep -cE '_(TEK_DOKU_4x5\.png|YANYANA\.jpg)$'); echo "uc_kabartma: $N"; [ "$N" = 6 ]
+          N=$(rclone lsf "$D/DENEME3" | grep -cE '_(TEK_DOKU_4x5\.png|YANYANA\.jpg)$'); echo "deneme3: $N"; [ "$N" = 6 ]
       - if: always()
         run: rm -rf ~/.config/rclone
