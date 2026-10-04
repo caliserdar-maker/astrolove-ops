@@ -1,0 +1,66 @@
+name: kaynak-isim-plaka
+
+# Serdar 4 Eki: gercek Canva altin isim plakalari (zodiac_names/<burc>_name_gold.png, 12 burc) motor prototipi icin
+# depoya alinir (salt okur; Drive'a yazma yok). Etsy YOK, musteri YOK.
+
+on:
+  push:
+    branches: [kaynak-isim-plaka]
+    paths: [.github/workflows/kaynak-isim-plaka.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  al:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Plakalari indir (dosya kimligiyle)
+        run: |
+          set -euo pipefail
+          mkdir -p motor/varlik/isim_plaka
+          while read ad id; do
+            rclone backend copyid gdrive: "$id" "motor/varlik/isim_plaka/${ad}_name_gold.png"
+          done <<'L'
+          cancer 1fx3bjY7iIQXgGqTxlK4RXvYjiORB1ddl
+          gemini 1fVRn0rdROh0PeKX5Mlks3nACDG6DKxY8
+          libra 1HNI_KPZqTe3HOjnY8q5hB2Wgrs2_I75d
+          leo 1NmNGga-QiaaGqUHs0Rhhs8bx8-4bWl3f
+          capricorn 13AwvLW85yKYpakN00RaqFom1yxR4NcEc
+          scorpio 14Y5l_S7e71xB_wX4J1eFtXgA1w3Jk1jv
+          taurus 1NP39rDGH-UuTMQIbaTwbOEj-R-CBAZxt
+          pisces 1RntoYvbnqg3qPgyVCjGj4B5RI2cvSHnl
+          virgo 1Mdtf155osyMUXXQxFc4SpK_23UrywH6h
+          aries 1KbLWwMVUGBqfTVLMUUMIA5TVm-0LTHIi
+          aquarius 1PFONx5UiFQNPMI_276YYCSm8Pqb9ttbk
+          sagittarius 1uv0NlZud3W8jPA9AWEt_yf7NyDu3BFyI
+          L
+          ls -la motor/varlik/isim_plaka; (cd motor/varlik/isim_plaka && sha256sum *.png > SHA.txt)
+          [ "$(ls motor/varlik/isim_plaka/*.png | wc -l)" = 12 ]
+      - name: Dala commit
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add motor/varlik/isim_plaka
+          git commit -m "kaynak: 12 Canva altin isim plakasi (Drive zodiac_names, dosya kimligiyle)"
+          git push origin HEAD:kaynak-isim-plaka
+      - if: always()
+        run: rm -rf ~/.config/rclone
