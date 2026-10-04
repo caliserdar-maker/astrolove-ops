@@ -213,6 +213,10 @@ def altin_bas(a, Z, K, C, i1, i2, mesaj, rap):
             rgb_ref_b = pb + d_bs
             ce_b = cv2.erode(ink_b.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
             ref_rgb, kb_al, kb_L = rgb_ref_b[ce_b], al_b, rgb_ref_b @ wk.LUMA
+            # kabartma stili qc ile ayni tahminciyle: kapsama = fark / murekkep ortancasi (4 Eki: ikili maske bulaniklik
+            # alfasi stili 7 kat guclu olcuyordu)
+            D_b = ((pb - rgb_ref_b) @ wk.LUMA) * Z.get('isaret', 1.0)                # olc.guc ile ayni isaret
+            st_al = np.clip(D_b / max(float(np.median(D_b[D_b > 40])), 1.0), 0, 1) * mk_bs
             Lmed_q = tdk.qc_cekirdek_L(rgb_ref_b, mk_bs.astype(np.float32), pb, W, Z.get('isaret', 1.0))
         log('buyuk sembol (orijinal fark)', b['kutu'], int(mk_bs.sum()))
     else:
@@ -220,12 +224,14 @@ def altin_bas(a, Z, K, C, i1, i2, mesaj, rap):
         rgb_b = lut_uygula(k[..., :3], AL['buyuk_sembol']['lut'])
         if td:
             ref_rgb, kb_al, kb_L = rgb_b[k[..., 3] > 0.98], k[..., 3], rgb_b @ wk.LUMA
+            st_al = k[..., 3]
             Lmed_q = tdk.qc_cekirdek_L(rgb_b, k[..., 3], plate_bolge(b['x'], b['y'], *k.shape[:2]), W, Z.get('isaret', 1.0))
     if td:
         # ana sembol modeli: renk egrisi, parlaklik, kabartma (tum ogelere ayni, kabartma tek kez)
         # Lmed: qc ile ayni olcum (QC olcegi, murekkep cekirdegi ortancasi); doku: boru profili x kabartma
-        model = {'egri': tdk.egri_olc(ref_rgb.astype(np.float32)), 'Lmed': Lmed_q, 'doku': tdk.doku_olc(kb_al, kb_L, W)}
-        rap['tek_doku'] = {'Lmed': round(model['Lmed'], 2), 'doku': model['doku'], 'k': {},
+        model = {'egri': tdk.egri_olc(ref_rgb.astype(np.float32)), 'Lmed': Lmed_q, 'doku': tdk.doku_olc(kb_al, kb_L, W),
+                 'stil': tdk.stil_olc(st_al, kb_L, W)}
+        rap['tek_doku'] = {'Lmed': round(model['Lmed'], 2), 'doku': model['doku'], 'stil': model['stil'], 'k': {},
                            'egri_ornek': {str(l): [round(float(v), 1) for v in model['egri'][l]] for l in (100, 150, 200, 240)}}
         log('tek doku modeli', rap['tek_doku'])
         isr = Z.get('isaret', 1.0)
@@ -239,7 +245,30 @@ def altin_bas(a, Z, K, C, i1, i2, mesaj, rap):
         d_h, hw_h = hka.geo_uv(a_halka.shape, kay['halka']['geometri'])
         t_h = np.clip(1 - np.abs(d_h) / np.maximum(hw_h, 1e-3), 0, 1).astype(np.float32)
         del d_h, hw_h
-        bindir('daire', td_boya('daire', tdk.duz_l(a_halka, model, olcekli=True, t=t_h), a_halka, P), a_halka, 0, 0)
+        # Serdar 4 Eki: tum ogeler ana sembolun kabartma stiliyle (goreli derinlik + disa normal); cember normali radyal
+        yy_h, xx_h = np.mgrid[0:H, 0:W].astype(np.float32)
+        cxh, cyh = kay['halka']['geometri']['merkez']
+        th_h = np.arctan2(yy_h - cyh, xx_h - cxh)
+        del yy_h, xx_h
+        d_h, _ = hka.geo_uv(a_halka.shape, kay['halka']['geometri'])
+        th_h = np.where(d_h >= 0, th_h, th_h + np.pi).astype(np.float32)
+        del d_h
+        rgb_h = td_boya('daire', tdk.stil_l(a_halka, model, W, t=t_h, th=th_h), a_halka, P)
+        # uclar: orijinal cemberin solgunlasan / sonuklesen ucu (aci basina carpan, govdede 1)
+        gh_ = kay['halka']['geometri']
+        if 'uc_parlaklik' in gh_:
+            yy_h, xx_h = np.mgrid[0:H, 0:W].astype(np.float32)
+            ai = (np.degrees(np.arctan2(yy_h - cyh, xx_h - cxh)) + 180) / gh_['dilim_derece']
+            del yy_h, xx_h
+            nbh = len(gh_['uc_parlaklik'])
+            par_ = np.interp(ai, np.arange(nbh + 1), np.r_[gh_['uc_parlaklik'], gh_['uc_parlaklik'][0]]).astype(np.float32)
+            doy_ = np.interp(ai, np.arange(nbh + 1), np.r_[gh_['uc_doygunluk'], gh_['uc_doygunluk'][0]]).astype(np.float32)
+            del ai
+            gri = (rgb_h @ wk.LUMA)[..., None]
+            rgb_h = (gri + doy_[..., None] * (rgb_h - gri)) * par_[..., None]
+            del par_, doy_, gri
+        bindir('daire', rgb_h, a_halka, 0, 0)
+        del th_h, rgb_h
         del t_h
     if b.get('kaynak') != 'orijinal':
         bindir('buyuk_sembol', rgb_b, k[..., 3], b['x'], b['y'])
@@ -269,7 +298,7 @@ def altin_bas(a, Z, K, C, i1, i2, mesaj, rap):
         Lk_i = float(np.median(m_inf[m_inf > wk.ESIK]))
         al_i = np.clip(m_inf / Lk_i, 0, 1) * (m_inf >= wb.T0)
         lg = np.clip((L_s - L_p * (1 - al_i)) / np.maximum(al_i, 0.25), 0, 255)
-        rgb_i = td_boya('sonsuz', lg, al_i, P[y0 - pad:y1 + pad, x0 - pad:x1 + pad])
+        rgb_i = td_boya('sonsuz', tdk.stil_l(al_i, model, W), al_i, P[y0 - pad:y1 + pad, x0 - pad:x1 + pad])
     pr1, pr2 = np.asarray(AL['isim_sol'], np.float32) / 255, np.asarray(AL['isim_sag'], np.float32) / 255
     olcek = 1.0
     for _ in range(20):
@@ -286,7 +315,7 @@ def altin_bas(a, Z, K, C, i1, i2, mesaj, rap):
     sx = W / 2 - top / 2
     taban = I['taban_y']
     xy1 = (int(round(sx - kk1[0])), int(round(taban - t1)))
-    bindir('isim1', td_boya('isim1', tdk.duz_l(k1[..., 3], model), k1[..., 3], plate_bolge(*xy1, *k1.shape[:2]))
+    bindir('isim1', td_boya('isim1', tdk.stil_l(k1[..., 3], model, W), k1[..., 3], plate_bolge(*xy1, *k1.shape[:2]))
            if td else k1[..., :3] * 255, k1[..., 3], *xy1)
     inf_x = sx + w1 + g_bosluk * olcek
     if olcek != 1:
@@ -299,7 +328,7 @@ def altin_bas(a, Z, K, C, i1, i2, mesaj, rap):
     inf_x0 = int(round(inf_x - pad * olcek))
     x2 = inf_x + winf + g_bosluk * olcek
     xy2 = (int(round(x2 - kk2[0])), int(round(taban - t2)))
-    bindir('isim2', td_boya('isim2', tdk.duz_l(k2[..., 3], model), k2[..., 3], plate_bolge(*xy2, *k2.shape[:2]))
+    bindir('isim2', td_boya('isim2', tdk.stil_l(k2[..., 3], model, W), k2[..., 3], plate_bolge(*xy2, *k2.shape[:2]))
            if td else k2[..., :3] * 255, k2[..., 3], *xy2)
     if td:
         bindir('sonsuz', rgb_i, al_i, inf_x0, inf_y)
@@ -317,7 +346,7 @@ def altin_bas(a, Z, K, C, i1, i2, mesaj, rap):
         rgb_k = lut_uygula(k[..., :3], AL['kucuk_sembol']['lut'])
         xyk = (int(round(s['x'] + dx)), s['y'])
         if td:
-            rgb_k = td_boya(f'kucuk_sembol_{t}', rgb_k @ wk.LUMA, k[..., 3], plate_bolge(*xyk, *k.shape[:2]))
+            rgb_k = td_boya(f'kucuk_sembol_{t}', tdk.stil_l(k[..., 3], model, W), k[..., 3], plate_bolge(*xyk, *k.shape[:2]))
         bindir(f'kucuk_sembol_{t}', rgb_k, k[..., 3], *xyk)
         rap.setdefault('kucuk_sembol', {})[t] = {'merkez_x': round(kx + dx, 1), 'isim_merkez_x': round(merk[t], 1)}
 
@@ -333,7 +362,7 @@ def altin_bas(a, Z, K, C, i1, i2, mesaj, rap):
             break
         pm *= MS['genislik_siniri'] / wm * 0.999
     xym = (int(round(W / 2 - wm / 2 - kkm[0])), int(round(MS['taban_y'] - tm)))
-    bindir('mesaj', td_boya('mesaj', tdk.duz_l(km[..., 3], model), km[..., 3], plate_bolge(*xym, *km.shape[:2]))
+    bindir('mesaj', td_boya('mesaj', tdk.stil_l(km[..., 3], model, W), km[..., 3], plate_bolge(*xym, *km.shape[:2]))
            if td else km[..., :3] * 255, km[..., 3], *xym)
     rap['mesaj'] = {'punto': round(pm, 1), 'genislik': wm, 'kuculme': round(pm / MS['punto'], 4),
                     'profil': AL.get('mesaj_profili', 'mesaj')}

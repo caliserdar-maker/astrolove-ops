@@ -117,6 +117,60 @@ def duz_l(A, model, olcekli=False, t=None):
     return l * np.clip(1 + kb['a'] * gy + kb['b'] * gx, 0.5, 1.6)
 
 
+STIL_NB = 16               # kabartma stili: goreli derinlik t kutulari (0 kenar, 1 cizgi ortasi)
+
+
+def stil_alan(A, W, t=None, th=None):
+    """goreli derinlik t (boru_t) ve disa kenar normali th (kenar uzakligi alaninin egimi); w: normal guveni."""
+    if t is None:
+        t = boru_t(A, int(round(61 * W / 4800)) | 1)
+    m8 = (A > 0.5).astype(np.uint8)
+    ds = cv2.GaussianBlur(cv2.distanceTransform(m8, cv2.DIST_L2, 5), (0, 0), 1.0)
+    gx = cv2.Sobel(ds, cv2.CV_32F, 1, 0, ksize=3) / 8
+    gy = cv2.Sobel(ds, cv2.CV_32F, 0, 1, ksize=3) / 8
+    if th is None:
+        th = np.arctan2(-gy, -gx)
+        w = np.clip(np.hypot(gx, gy) / 0.3, 0, 1)
+    else:
+        w = np.ones_like(t)
+    return t.astype(np.float32), th.astype(np.float32), w.astype(np.float32)
+
+
+def stil_olc(A, L, W):
+    """Ana sembol kabartma stili (Serdar 4 Eki): goreli derinlik t kutularinda L = p(t) + qc(t) cos th + qs(t) sin th
+    (p: boru / kenar profili, q: vurgu-golge genligi, atan2(qs, qc): isik yonu, disa normal acisi). Kenar pikselleri
+    dahil (A >= 0.5). Kutular arasi Gauss (1 kutu) yumusatma."""
+    t, th, w = stil_alan(A, W)
+    ok = (A >= 0.5) & (w > 0.6)
+    b = np.clip((t * STIL_NB).astype(int), 0, STIL_NB - 1)
+    C = np.full((STIL_NB, 3), np.nan)
+    for i in range(STIL_NB):
+        s = ok & (b == i)
+        if s.sum() >= 60:
+            X = np.stack([np.ones(s.sum()), np.cos(th[s]), np.sin(th[s])], 1)
+            C[i] = np.linalg.lstsq(X, L[s], rcond=None)[0]
+    v = ~np.isnan(C[:, 0])
+    for j in range(3):
+        C[:, j] = np.interp(np.arange(STIL_NB), np.nonzero(v)[0], C[v, j])
+        C[:, j] = cv2.GaussianBlur(np.pad(C[:, j], 3, mode='edge').astype(np.float32)[None], (0, 0), 1.0)[0][3:-3]
+    q = np.hypot(C[:, 1], C[:, 2])
+    kenar = slice(0, int(0.45 * STIL_NB))
+    aci = float(np.degrees(np.arctan2(C[kenar, 2].sum(), C[kenar, 1].sum())))
+    return {'p': [round(float(x), 2) for x in C[:, 0]], 'qc': [round(float(x), 3) for x in C[:, 1]],
+            'qs': [round(float(x), 3) for x in C[:, 2]], 'isik_aci': round(aci, 1),
+            'vurgu_golge_kenar': round(float(2 * q[kenar].max()), 2)}
+
+
+def stil_l(A, model, W, t=None, th=None):
+    """oge luma dokusu = ana sembol stili (kendi t ve normaliyle): p(t) + w (qc(t) cos th + qs(t) sin th)."""
+    st = model['stil']
+    t, th, w = stil_alan(A, W, t, th)
+    x = np.clip(t * STIL_NB - 0.5, 0, STIL_NB - 1)
+    k = np.arange(STIL_NB)
+    p, qc, qs = (np.interp(x, k, np.asarray(st[n], np.float32)).astype(np.float32) for n in ('p', 'qc', 'qs'))
+    return p + w * (qc * np.cos(th) + qs * np.sin(th))
+
+
 def qc_cekirdek_L(rgb, A, Pb, W, isaret):
     """qc.oge_renkleri ile ayni olcum: bolge plate ustune birlestirilir, QC olcegine (3307, BOX) indirilir, murekkep
     (|fark| > 12) 3x3 asindirilmis cekirdeginin ortanca lumasi."""

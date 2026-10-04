@@ -46,9 +46,13 @@ def yerel(L):
 
 DILIM = 0.25      # derece
 YUMUSAT = 2.0     # derece (Gauss sigma, aci boyunca)
+UC_YUMUSAT = 0.5  # derece; uc bolgesi (hw < 2 px) yumusatmasi
 
 
-def geometri(alfa):
+def geometri(alfa, kapsama=None, renk=None):
+    """merkez / R / rc: geometrik alfadan; hw: kapsama alfasindan (fark / govde ortancasi; ince uclarda gercek
+    kapsama, 4 Eki uc olcumu). Uc bolgesinde aci yumusatmasi daralir (uc orijinalin otesine tasmaz)."""
+    kapsama = alfa if kapsama is None else kapsama
     ys, xs = np.nonzero(alfa > 0.02)
     w = alfa[ys, xs].astype(np.float64)
     M = np.stack([xs, ys, np.ones_like(xs)], 1).astype(np.float64) * np.sqrt(w)[:, None]
@@ -67,8 +71,35 @@ def geometri(alfa):
     rc = np.interp(idx, idx[var], rc[var], period=nb)
     g = YUMUSAT / DILIM
     yum = lambda v: cv2.GaussianBlur(np.tile(v, 3).astype(np.float32)[None], (0, 0), g)[0][nb:2 * nb]
+    yk_ = lambda v, gg: cv2.GaussianBlur(np.tile(v, 3).astype(np.float32)[None], (0, 0), gg)[0][nb:2 * nb]
+    hs, hk = yum(hw), yk_(hw, UC_YUMUSAT / DILIM)
+    lam = np.clip((hk - 0.5) / 1.5, 0, 1)                              # govde: genis yumusatma, uc: dar
+    hwf = np.where(hk < 0.03, 0.0, lam * hs + (1 - lam) * hk)
+    # uc (Serdar 4 Eki): orijinal cemberin incelen ucu solgunlasir ve sonuklesir. Dilim basina plate cemberi tepe
+    # parlakligi (fark p90) ve altin doygunlugu ((R - B) / toplam) govdeye (hw >= 3 px ortancasi) oranlanir; govdede 1.
+    par = np.ones(nb); doy = np.ones(nb)
+    if renk is not None:
+        Pc, mc = renk
+        yk, xk = np.nonzero(alfa > 0.5)
+        kk = (np.floor((np.degrees(np.arctan2(yk - cy, xk - cx)) + 180) / DILIM).astype(int)) % nb
+        L_ = mc[yk, xk]; rgb = Pc[yk, xk]
+        C_ = (rgb[:, 0] - rgb[:, 2]) / np.maximum(rgb.sum(1), 1)
+        for i in range(nb):
+            s_ = kk == i
+            if s_.sum() >= 3:
+                par[i] = np.percentile(L_[s_], 90); doy[i] = np.median(C_[s_])
+            else:
+                par[i] = np.nan; doy[i] = np.nan
+        ok_ = ~np.isnan(par)
+        par = np.interp(idx, idx[ok_], par[ok_], period=nb); doy = np.interp(idx, idx[ok_], doy[ok_], period=nb)
+        govde = hwf >= 3
+        par = yk_(par / np.median(par[govde]), UC_YUMUSAT / DILIM)
+        doy = yk_(doy / np.median(doy[govde]), UC_YUMUSAT / DILIM)
+        lam_u = np.clip((3 - hwf) / 1.5, 0, 1)                         # yalniz uc bolgesi (hw < 3 px)
+        par = np.clip(1 - lam_u * (1 - par), 0, 1); doy = np.clip(1 - lam_u * (1 - doy), 0, 1)   # uc pikselinde zemin karisimi kapsamadan
     return {'merkez': [round(cx, 3), round(cy, 3)], 'R': round(R, 3), 'dilim_derece': DILIM,
-            'rc': [round(float(v), 3) for v in yum(rc)], 'hw': [round(float(v), 3) for v in yum(hw)]}
+            'rc': [round(float(v), 3) for v in yum(rc)], 'hw': [round(float(v), 3) for v in hwf],
+            'uc_parlaklik': [round(float(v), 3) for v in par], 'uc_doygunluk': [round(float(v), 3) for v in doy]}
 
 
 def geo_uv(shape, geo):
@@ -86,7 +117,8 @@ def geo_uv(shape, geo):
 
 def geo_alfa(shape, geo):
     d, hw = geo_uv(shape, geo)
-    return np.clip(hw - np.abs(d) + 0.5, 0, 1).astype(np.float32) * (hw > 0.05)
+    # kapsama: yari pikselden ince yerde tepe 2 x hw (4 Eki: uc 0.33 px genislikte %80 kaplama parlak / basamakli idi)
+    return np.clip(np.minimum(hw - np.abs(d) + 0.5, 2 * hw), 0, 1).astype(np.float32) * (hw > 0.02)
 
 
 def main():
@@ -111,7 +143,9 @@ def main():
     tepe = cv2.dilate(mc * bolge, np.ones((kw, kw), np.uint8))
     alfa = np.clip(mc / np.maximum(0.5 * tepe, 1.0), 0, 1) * bolge
     alfa[mc < wb.T0] = 0
-    geo = geometri(alfa)
+    alfa_k = np.clip(mc / max(Lk, 1.0), 0, 1) * bolge                 # kapsama (ince uc)
+    alfa_k[mc < wb.T0] = 0
+    geo = geometri(alfa, alfa_k, renk=(P, mc))
     alfa_g = geo_alfa(alfa.shape, geo)
     alfa_sil = np.maximum(alfa, alfa_g)                               # zeminden silinecek: eski + yeni kaplama
     alfa = alfa_g

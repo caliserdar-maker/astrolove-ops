@@ -380,6 +380,123 @@ def zemin_gradient_kapisi(S, P, ink, plate_ad):
             'zemin_px': int(zem.sum()), 'gecti': en_artis <= K_ARTIS and leke <= K_LEKE}
 
 
+L_SEKIL = 0.10     # l) cember ucu: normalize kesit alani egrisi, orijinalden ortalama mutlak fark (esik olcumle, 4 Eki)
+L_RENK = 0.15      # l) cember ucu: tepe rengi altin doygunlugu (orijinal govdeye gore) ortalama mutlak fark
+M_Q = 0.03         # m) kabartma: (qc, qs) / core, ana sembolden ortalama vektor farki (goreli derinlik kutulari)
+M_ACI = 25.0       # m) kabartma: kenar bandi isik yonu acisi farki (derece); vurgu-golge / core < 0.02 ise uygulanmaz
+
+
+def _kesit(P, geo, a, d=np.arange(-14, 14.01, 0.5)):
+    cx, cy = geo['merkez']
+    k = int(round((a + 180) / geo['dilim_derece'])) % len(geo['rc'])
+    r0 = geo['R'] + geo['rc'][k]
+    t = np.radians(a)
+    xs = (cx + (r0 + d) * np.cos(t)).astype(np.float32)[None]
+    ys = (cy + (r0 + d) * np.sin(t)).astype(np.float32)[None]
+    smp = np.stack([cv2.remap(np.ascontiguousarray(P[..., c]), xs, ys, cv2.INTER_LINEAR)[0] for c in range(3)], -1)
+    L = smp @ wk.LUMA
+    bg = np.median(np.r_[L[:6], L[-6:]])
+    ex = np.clip(L - bg, 0, None)
+    i = int(np.argmax(ex))
+    rgb = smp[i]
+    return float(ex.sum() * 0.5), float((rgb[0] - rgb[2]) / max(rgb.sum(), 1.0))
+
+
+def uc_kapisi(f_sayfa, f_orijinal, plate_ad):
+    """l) cemberin iki ucu (Serdar 4 Eki): uc acisindan -14 / +3 derece, 0.5 derece adimla radyal kesit; kesit alani
+    (luma fazlasi) ve tepe rengi altin doygunlugu (R - B) / toplam, -14..-11 derece govdesine normalize. Orijinal posterle
+    ortalama mutlak fark: sekil <= L_SEKIL, renk <= L_RENK (renk yalniz orijinal alan > %5 olan acilarda)."""
+    gf = KOK / 'varlik' / 'plates' / f'{plate_ad}_halkasiz.json'
+    if not gf.exists():
+        return {'gecti': False, 'sebep': f'{gf.name} yok'}
+    geo = json.loads(gf.read_text())['halka']['geometri']
+    hw = np.asarray(geo['hw'])
+    nb = len(hw)
+    ang = np.arange(nb) * geo['dilim_derece'] - 180
+    bos = np.nonzero(hw <= 0.02)[0]
+    # en uzun bos aci araligi = cemberin acik oldugu yer; uclari sinirlari
+    uclar = [(float(ang[(bos.min() - 1) % nb]), -1), (float(ang[(bos.max() + 1) % nb]), 1)]
+    S = np.asarray(Image.open(f_sayfa).convert('RGB'), np.float32)
+    O = np.asarray(Image.open(f_orijinal).convert('RGB'), np.float32)
+    out = {}
+    ok = True
+    for ad, (a_uc, yon) in zip(('sag_uc', 'sol_uc'), uclar):
+        angs = a_uc + yon * np.arange(-14, 3.01, 0.5) * -1 if yon < 0 else a_uc - np.arange(-14, 3.01, 0.5)
+        ks = [_kesit(S, geo, a) for a in angs]
+        ko = [_kesit(O, geo, a) for a in angs]
+        As, Cs = np.array([k[0] for k in ks]), np.array([k[1] for k in ks])
+        Ao, Co = np.array([k[0] for k in ko]), np.array([k[1] for k in ko])
+        rs, ro = max(As[:7].mean(), 1e-3), max(Ao[:7].mean(), 1e-3)
+        cs, co = max(Cs[:7].mean(), 1e-3), max(Co[:7].mean(), 1e-3)
+        sek = float(np.abs(As / rs - Ao / ro).mean())
+        v = Ao / ro > 0.05
+        ren = float(np.abs(Cs[v] / cs - Co[v] / co).mean()) if v.any() else 0.0
+        g = sek <= L_SEKIL and ren <= L_RENK
+        ok &= g
+        out[ad] = {'uc_aci': round(a_uc, 2), 'sekil': round(sek, 3), 'renk': round(ren, 3), 'gecti': g}
+    return {**out, 'esik': {'sekil': L_SEKIL, 'renk': L_RENK}, 'gecti': bool(ok)}
+
+
+def kabartma_kapisi(f_sayfa, f_zemin, P, Z, isb, alt, ink, W_qc):
+    """m) kabartma stili (Serdar 4 Eki): her oge (isimler, sonsuz, kucuk semboller, tagline, cember) icin tam
+    cozunurlukte tek_doku.stil_olc (goreli derinlik t kutularinda L = p + qc cos th + qs sin th); ana sembolle:
+    (qc, qs) / core ortalama vektor farki <= M_Q ve kenar bandi isik acisi farki <= M_ACI."""
+    import tek_doku as tdk
+    S = np.asarray(Image.open(f_sayfa).convert('RGB'), np.float32)
+    Zm = np.asarray(Image.open(f_zemin).convert('RGB'), np.float32)
+    H, W = S.shape[:2]
+    f = W / W_qc
+    hm = cv2.resize(halka_plate(P).astype(np.uint8), (W, H), interpolation=cv2.INTER_NEAREST).astype(bool)
+    L = S @ wk.LUMA
+    D = L - Zm @ wk.LUMA
+    bolge = {}
+    for k in ('buyuk_sembol', 'kucuk_sembol'):
+        y0, y1 = Z['bantlar'][k]
+        mm = np.zeros((H, W), bool); mm[int(y0 * f):int(y1 * f)] = True
+        bolge[k] = mm & ~hm
+    if isb:
+        y0, y1 = isb[0]
+        kk = kumeler(ink[y0:y1], 80 * W_qc / 3307)
+        if len(kk) == 3:
+            for ad, (x0, x1) in zip(('isim_sol', 'sonsuz', 'isim_sag'), kk):
+                mm = np.zeros((H, W), bool); mm[int(y0 * f):int(y1 * f), int(x0 * f):int(x1 * f)] = True
+                bolge[ad] = mm
+    if alt:
+        y0, y1 = alt[-1]
+        mm = np.zeros((H, W), bool); mm[int(y0 * f):int(y1 * f)] = True
+        bolge['mesaj'] = mm
+    bolge['cember'] = cv2.dilate(hm.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
+    st = {}
+    for ad, mm in bolge.items():
+        ys, xs = np.nonzero(mm)
+        if ys.size == 0:
+            continue
+        y0, y1, x0, x1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
+        d = np.where(mm[y0:y1, x0:x1], D[y0:y1, x0:x1], 0)
+        if (d > 40).sum() < 200:
+            continue
+        A = np.clip(d / np.median(d[d > 40]), 0, 1)
+        st[ad] = tdk.stil_olc(A, L[y0:y1, x0:x1], W)
+    if 'buyuk_sembol' not in st:
+        return {'gecti': False, 'sebep': 'ana sembol yok'}
+    ref = st['buyuk_sembol']
+    vec = lambda s_: np.stack([s_['qc'], s_['qs']], 1) / max(max(s_['p']), 1.0)
+    out = {}
+    ok = True
+    for ad, s_ in st.items():
+        if ad == 'buyuk_sembol':
+            continue
+        dq = float(np.linalg.norm(vec(s_) - vec(ref), axis=1).mean())
+        da = abs((s_['isik_aci'] - ref['isik_aci'] + 180) % 360 - 180)
+        guclu = s_['vurgu_golge_kenar'] / max(max(s_['p']), 1.0) >= 0.02
+        g = dq <= M_Q and (da <= M_ACI or not guclu)
+        ok &= g
+        out[ad] = {'dq': round(dq, 4), 'isik_aci': s_['isik_aci'], 'aci_farki': round(float(da), 1),
+                   'vurgu_golge': s_['vurgu_golge_kenar'], 'gecti': bool(g)}
+    return {'ana_sembol': {'isik_aci': ref['isik_aci'], 'vurgu_golge': ref['vurgu_golge_kenar']}, 'ogeler': out,
+            'esik': {'dq': M_Q, 'aci': M_ACI}, 'gecti': bool(ok)}
+
+
 def oge_renkleri(S, P, ink, m, Z, isb, alt):
     """h) ogelerin dolu murekkep ortalama rengi ve cekirdek lumasi; referans buyuk sembol."""
     H, W = S.shape[:2]
@@ -426,7 +543,7 @@ def oge_renkleri(S, P, ink, m, Z, isb, alt):
     return {'ogeler': out, 'en_buyuk': en, 'esik': H_ESIK, 'gecti': en <= H_ESIK}
 
 
-def olc(ad, S, P, O, Z, isim1, isim2, mesaj, e_esik=None, gh=False, tam=None, Pz=None):
+def olc(ad, S, P, O, Z, isim1, isim2, mesaj, e_esik=None, gh=False, tam=None, Pz=None, tam_zemin=None):
     H, W = S.shape[:2]
     # Pz: bu sayfanin zemini (gradient zeminli motor sayfasi: ZEMIN.png); yoksa plate
     Pz = P if Pz is None else Pz
@@ -534,6 +651,10 @@ def olc(ad, S, P, O, Z, isim1, isim2, mesaj, e_esik=None, gh=False, tam=None, Pz
         R['i_cember'] = cember_kapisi(*tam) if tam else {'gecti': False, 'sebep': 'tam cozunurluk sayfa yok'}
         R['j_zemin'] = zemin_kapisi(S, ink, kut)
         R['k_gradient'] = zemin_gradient_kapisi(S, P, ink, Z['plate'])
+        if ad == 'motor' and tam and tam_zemin:
+            # l) cember uclari orijinale; m) kabartma stili ana sembole (Serdar 4 Eki; yalniz motor sayfasinda kapi)
+            R['l_uc'] = uc_kapisi(tam[0], tam_zemin[1], Z['plate'])
+            R['m_kabartma'] = kabartma_kapisi(tam[0], tam_zemin[0], P, Z, isb, alt, ink, W)
     # f) sembol sadakati (altin edisyon; 3 Eki 78 cift: 10 ciftte ana sembol yanlis oturmus, dE 94-102, a-e gecmisti):
     # buyuk / kucuk sembol dolu murekkep rengi orijinalden dE <= F_ESIK. WP bakir tasarim geregi farkli (Test 5 kiyasi).
     if Z.get('mod') == 'altin':
@@ -543,7 +664,7 @@ def olc(ad, S, P, O, Z, isim1, isim2, mesaj, e_esik=None, gh=False, tam=None, Pz
     else:
         R['f_sembol'] = {'uygulanmaz': 'bakir (WP)', 'gecti': True}
     K5 = ('a_tagline', 'b_hat', 'c_kagit', 'd_isim', 'e_bant', 'f_sembol') + (('g_yildiz', 'i_cember', 'j_zemin') if gh else ()) + \
-        (('h_tek_doku', 'k_gradient') if gh and ad == 'motor' else ())
+        (('h_tek_doku', 'k_gradient', 'l_uc', 'm_kabartma') if gh and ad == 'motor' else ())
     R['gecti'] = all(R[k]['gecti'] for k in K5)
     R['gecti_eski_kural'] = all(R[k]['gecti'] for k in ('a_tagline', 'b_hat_eski', 'c_kagit', 'd_isim', 'e_bant', 'f_sembol'))
     return R
@@ -588,7 +709,8 @@ def main():
         fp = str(a.plate_dosya or K / 'plates' / f"{Z['plate']}.png")
         tam = {'orijinal': (str(a.orijinal or K / 'orijinal_WP_11x14.jpg'), fp), 'motor': (a.motor, fp)}.get(ad)
         Pz = oku_n(a.zemin_motor, P.shape[1]) if (ad == 'motor' and a.zemin_motor) else None
-        R[ad] = olc(ad, S, P, O, Z, i1, i2, ms, a.e_esik, a.gh, tam, Pz)
+        tz = (a.zemin_motor or fp, str(a.orijinal or K / 'orijinal_WP_11x14.jpg')) if ad == 'motor' else None
+        R[ad] = olc(ad, S, P, O, Z, i1, i2, ms, a.e_esik, a.gh, tam, Pz, tz)
         print(ad, json.dumps({k: R[ad][k] for k in ('a_tagline', 'b_hat', 'c_kagit', 'd_isim', 'gecti')},
                              ensure_ascii=False), flush=True)
     Path(a.cikti).write_text(json.dumps(R, indent=1, ensure_ascii=False))
@@ -597,7 +719,7 @@ def main():
         R['test5'] = None
     sat = ['| olcum | orijinal | Test 5 eski | yeni motor |', '|---|---|---|---|']
     def h(r, k):
-        if r is None:
+        if r is None or k not in r:
             return '-'
         x = r[k]
         if k == 'a_tagline':
@@ -618,6 +740,16 @@ def main():
             return f"{ok(x['gecti'])} (boyuna std {x.get('boyuna_std', x.get('sebep'))}, esik {I_ESIK})"
         if k == 'j_zemin':
             return f"{ok(x['gecti'])} ({x['sayi']} leke)"
+        if k == 'l_uc':
+            if 'sag_uc' not in x:
+                return f"{ok(x['gecti'])} ({x.get('sebep')})"
+            return f"{ok(x['gecti'])} (sag sekil {x['sag_uc']['sekil']} renk {x['sag_uc']['renk']}; sol sekil " \
+                   f"{x['sol_uc']['sekil']} renk {x['sol_uc']['renk']})"
+        if k == 'm_kabartma':
+            if 'ogeler' not in x:
+                return f"{ok(x['gecti'])} ({x.get('sebep')})"
+            return f"{ok(x['gecti'])} (ana isik {x['ana_sembol']['isik_aci']}; " + ', '.join(
+                f"{k2} dq {v['dq']} aci {v['aci_farki']}" for k2, v in x['ogeler'].items()) + ')'
         if k == 'k_gradient':
             if 'en_artis' not in x:
                 return f"{ok(x['gecti'])} ({x.get('sebep')})"
@@ -635,7 +767,8 @@ def main():
                   ('e_bant', 'e) harf ici yatay renk bandi yok'), ('f_sembol', 'f) sembol rengi orijinale (altin)'),
                   ('g_yildiz', 'g) yazi cevresi yildiz yok'), ('h_tek_doku', 'h) tek doku: ana sembole dE (motor kapi)'),
                   ('i_cember', 'i) cember dokusu surekli'), ('j_zemin', 'j) yazi cevresi zemin dolgu lekesi yok'),
-                  ('k_gradient', 'k) zemin puruzsuz radyal gradient (motor kapi)')):
+                  ('k_gradient', 'k) zemin puruzsuz radyal gradient (motor kapi)'),
+                  ('l_uc', 'l) cember uclari orijinal gibi (motor kapi)'), ('m_kabartma', 'm) kabartma stili ana sembol (motor kapi)')):
         if k not in R['motor']:
             continue
         sat.append(f"| {ad} | {h(R['orijinal'], k)} | {h(R['test5'], k)} | {h(R['motor'], k)} |")

@@ -64,7 +64,7 @@ def cift_isle(K, r, C):
     m, o = q.get('motor', {}), q.get('orijinal', {})
     sonuc.update({
         'gecti': rc == 0, 'qc_rc': rc,
-        'motor': {k: m.get(k, {}).get('gecti') for k in ('a_tagline', 'b_hat', 'c_kagit', 'd_isim', 'e_bant', 'f_sembol', 'g_yildiz', 'h_tek_doku', 'i_cember', 'j_zemin', 'k_gradient')},
+        'motor': {k: m.get(k, {}).get('gecti') for k in ('a_tagline', 'b_hat', 'c_kagit', 'd_isim', 'e_bant', 'f_sembol', 'g_yildiz', 'h_tek_doku', 'i_cember', 'j_zemin', 'k_gradient', 'l_uc', 'm_kabartma')},
         'orijinal': {k: o.get(k, {}).get('gecti') for k in ('a_tagline', 'b_hat', 'c_kagit', 'd_isim', 'e_bant', 'f_sembol')},
         'a_ocr': m.get('a_tagline', {}).get('ocr'), 'b_cizgi': len(m.get('b_hat', {}).get('orijinalde_olmayan', [])),
         'c_dE': m.get('c_kagit', {}).get('dE_ort'), 'd': [m.get('d_isim', {}).get('sol'), m.get('d_isim', {}).get('sag')],
