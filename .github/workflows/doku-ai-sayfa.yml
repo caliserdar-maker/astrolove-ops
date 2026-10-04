@@ -2,7 +2,7 @@ name: doku-ai-sayfa
 
 # DOKU_AI (4 Eki 2026, Serdar onayi, YENI YONTEM): ChatGPT'ye gidecek harf sayfalari + referans onerisi.
 # Kod: motor dali motor/doku_ai_sayfa.py. Yalniz Drive yuklemesi: doku_ai/SAYFALAR -> TEMP/MOTOR/DOKU_AI/SAYFALAR,
-# doku_ai/REFERANS -> TEMP/MOTOR/DOKU_AI/REFERANS. Etsy YOK, musteri YOK.
+# doku_ai/REFERANS -> TEMP/MOTOR/DOKU_AI/REFERANS. 4 Eki: referans AQUARIUS_ARIES; eski TAURUS_TAURUS sayfalari ESKI/ altina. Etsy YOK, musteri YOK.
 
 on:
   push:
@@ -42,11 +42,17 @@ jobs:
         run: |
           set -euo pipefail
           D="gdrive:ASTROLOVE/TEMP/MOTOR/DOKU_AI"
+          E="$D/ESKI/SAYFALAR_TAURUS_TAURUS"
+          if ! rclone lsf "$E" >/dev/null 2>&1 || [ -z "$(rclone lsf "$E")" ]; then
+            rclone move "$D/SAYFALAR" "$E" --max-depth 1 --include 'DOKU_AI_*' --include 'SAYFA_PLANI.json'
+          fi
           rclone copy doku_ai/SAYFALAR "$D/SAYFALAR"
+          rclone check doku_ai/SAYFALAR "$D/SAYFALAR" --one-way --checksum
           rclone copy doku_ai/REFERANS "$D/REFERANS"
           rclone dedupe --dedupe-mode newest "$D"
           rclone lsl "$D"
           N=$(rclone lsf "$D/SAYFALAR" | grep -cE '^DOKU_AI_.*\.(png|json)$'); echo "sayfa dosyasi: $N"; [ "$N" = 16 ]
-          N=$(rclone lsf "$D/REFERANS" | grep -cE '^REFERANS_'); echo "referans dosyasi: $N"; [ "$N" = 3 ]
+          N=$(rclone lsf "$D/REFERANS" | grep -cE '^REFERANS_'); echo "referans dosyasi: $N"; [ "$N" = 4 ]
+          N=$(rclone lsf "$E" | grep -cE '^DOKU_AI_.*\.(png|json)$'); echo "eski: $N"; [ "$N" = 16 ]
       - if: always()
         run: rm -rf ~/.config/rclone
