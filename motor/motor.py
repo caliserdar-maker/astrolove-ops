@@ -224,8 +224,15 @@ def altin_bas(a, Z, K, C, i1, i2, mesaj, rap):
         rgb_b = lut_uygula(k[..., :3], AL['buyuk_sembol']['lut'])
         if td:
             ref_rgb, kb_al, kb_L = rgb_b[k[..., 3] > 0.98], k[..., 3], rgb_b @ wk.LUMA
-            st_al = k[..., 3]
-            Lmed_q = tdk.qc_cekirdek_L(rgb_b, k[..., 3], plate_bolge(b['x'], b['y'], *k.shape[:2]), W, Z.get('isaret', 1.0))
+            pb_k = plate_bolge(b['x'], b['y'], *k.shape[:2])
+            Lmed_q = tdk.qc_cekirdek_L(rgb_b, k[..., 3], pb_k, W, Z.get('isaret', 1.0))
+            # kabartma stili sayfa birlesimi uzerinden, qc m kapisinin yontemiyle (4 Eki 3. deneme: asset alfasi +
+            # carpilmamis renk stili 7 kat guclu olcuyordu): kapsama = fark / murekkep ortancasi, L = birlesim
+            comp_k = pb_k * (1 - k[..., 3:4]) + rgb_b * k[..., 3:4]
+            D_k = ((pb_k - comp_k) @ wk.LUMA) * Z.get('isaret', 1.0)                # olc.guc ile ayni isaret
+            st_al = np.clip(D_k / max(float(np.median(D_k[D_k > 40])), 1.0), 0, 1)
+            kb_L = comp_k @ wk.LUMA
+            del comp_k, D_k
     if td:
         # ana sembol modeli: renk egrisi, parlaklik, kabartma (tum ogelere ayni, kabartma tek kez)
         # Lmed: qc ile ayni olcum (QC olcegi, murekkep cekirdegi ortancasi); doku: boru profili x kabartma
@@ -296,8 +303,10 @@ def altin_bas(a, Z, K, C, i1, i2, mesaj, rap):
     if td:
         # sonsuz: alfa = fark / cekirdek ortancasi; altin luma dokusu = (S - P(1 - a)) / a; ana sembol modeliyle
         Lk_i = float(np.median(m_inf[m_inf > wk.ESIK]))
-        al_i = np.clip(m_inf / Lk_i, 0, 1) * (m_inf >= wb.T0)
-        lg = np.clip((L_s - L_p * (1 - al_i)) / np.maximum(al_i, 0.25), 0, 255)
+        # 4 Eki 3. deneme: alfa GEOMETRIK (parlaklik alfasi orijinalin kendi kabartmasini saydamlik olarak tasiyordu):
+        # esik (yari cekirdek), 3x3 kapama, 0.7 px yumusatma; doku ana sembol stilinden
+        ik = cv2.morphologyEx((m_inf >= 0.5 * Lk_i).astype(np.uint8), cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
+        al_i = np.clip(cv2.GaussianBlur(ik.astype(np.float32), (0, 0), 0.7), 0, 1)
         rgb_i = td_boya('sonsuz', tdk.stil_l(al_i, model, W), al_i, P[y0 - pad:y1 + pad, x0 - pad:x1 + pad])
     pr1, pr2 = np.asarray(AL['isim_sol'], np.float32) / 255, np.asarray(AL['isim_sag'], np.float32) / 255
     olcek = 1.0
