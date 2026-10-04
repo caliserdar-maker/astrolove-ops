@@ -2,7 +2,8 @@ name: doku-ai-sayfa
 
 # DOKU_AI (4 Eki 2026, Serdar onayi, YENI YONTEM): ChatGPT'ye gidecek harf sayfalari + referans onerisi.
 # Kod: motor dali motor/doku_ai_sayfa.py. Yalniz Drive yuklemesi: doku_ai/SAYFALAR -> TEMP/MOTOR/DOKU_AI/SAYFALAR,
-# doku_ai/REFERANS -> TEMP/MOTOR/DOKU_AI/REFERANS. 4 Eki: referans AQUARIUS_ARIES; eski TAURUS_TAURUS sayfalari ESKI/ altina. Etsy YOK, musteri YOK.
+# doku_ai/REFERANS -> TEMP/MOTOR/DOKU_AI/REFERANS. 4 Eki: referans AQUARIUS_ARIES; eski TAURUS_TAURUS sayfalari ESKI/ altina.
+# C adimi: doku_ai/DONUS -> TEMP/MOTOR/DOKU_AI/DONUS (EMILY kesiti, olcumler). Etsy YOK, musteri YOK.
 
 on:
   push:
@@ -49,10 +50,12 @@ jobs:
           rclone copy doku_ai/SAYFALAR "$D/SAYFALAR"
           rclone check doku_ai/SAYFALAR "$D/SAYFALAR" --one-way --checksum
           rclone copy doku_ai/REFERANS "$D/REFERANS"
+          rclone copy doku_ai/DONUS "$D/DONUS"
           rclone dedupe --dedupe-mode newest "$D"
           rclone lsl "$D"
           N=$(rclone lsf "$D/SAYFALAR" | grep -cE '^DOKU_AI_.*\.(png|json)$'); echo "sayfa dosyasi: $N"; [ "$N" = 16 ]
           N=$(rclone lsf "$D/REFERANS" | grep -cE '^REFERANS_'); echo "referans dosyasi: $N"; [ "$N" = 4 ]
           N=$(rclone lsf "$E" | grep -cE '^DOKU_AI_.*\.(png|json)$'); echo "eski: $N"; [ "$N" = 16 ]
+          N=$(rclone lsf "$D/DONUS" | grep -cE '^(EMILY_AI_KESIT\.png|CANCER_LIBRA_YENI_AI_SAYFA\.jpg|DONUS_OLCUM\.json|DONUS_HIZALAMA\.json)$'); echo "donus: $N"; [ "$N" = 4 ]
       - if: always()
         run: rm -rf ~/.config/rclone
