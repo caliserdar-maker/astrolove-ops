@@ -217,12 +217,13 @@ METIN = ('isim1', 'isim2', 'tagline')
 PARCA_Q = np.linspace(1, 99, 25)
 
 
-def parca_esitle(rgb, al, ref25, hedef):
+def parca_esitle(rgb, al, hedef):
     """HARF BAZLI ESITLEME (Serdar onayli koordinator uygulamasi, 5 Eki): metin ogesi Canva harf setinden harf harf
     gelir, harflerin parlaklik ve tonu farkli. Parca = cekirdegin (oge maskesi, renk_kapi ile ayni) 5x5 genisletilmis baglantili bilesenleri
     (harf, i noktasi, kuyruk); her oge pikseli en yakin parcaya baglanir. Her parcada L yuzdelikleri (1-99, 25) hedef
-    yuzdeliklere eslenir, a / b medyani hedefe kayar; w (alfa) ile harmanlanir. Her piksele ayni kural. Hedef (5 Eki,
-    8e9c727 RED): ogenin KENDI cekirdek dagilimi (global eslemeden sonra); ana sembole dogrudan cekme bakir yapiyordu."""
+    yuzdeliklere eslenir (a*, b* de ayni); w (alfa) ile harmanlanir. Her piksele ayni kural. Hedef (5 Eki,
+    8e9c727 RED): ogenin KENDI cekirdek dagilimi (global eslemeden sonra). a*, b* de L gibi yuzdelik esleme (Serdar onayi,
+    5 Eki): medyan kaydirma parlak yesilimsi harflerin (a* -10..-12) ic yayilimini +20 tasiyip bakir yapiyordu."""
     from scipy import ndimage as ndi
     w = np.clip(al, 0, 1).astype(np.float32)
     lab = cv2.cvtColor(np.clip(rgb, 0, 255).astype(np.float32) / 255, cv2.COLOR_RGB2LAB)
@@ -234,20 +235,19 @@ def parca_esitle(rgb, al, ref25, hedef):
     near = pl[idx[0], idx[1]]
     near[w <= 0.05] = 0
     out = lab.copy()
-    k = 0
+    say = 0
     for i in range(1, n):
         c = pl == i
         if c.sum() < 30:
             continue
         reg = near == i
         ww = w[reg]
-        src = np.maximum.accumulate(np.percentile(L[c], PARCA_Q) + np.arange(25) * 1e-4)
-        out[..., 0][reg] = np.interp(L[reg], src, ref25) * ww + L[reg] * (1 - ww)
-        out[..., 1][reg] = A[reg] + (hedef[1] - np.median(A[c])) * ww
-        out[..., 2][reg] = B[reg] + (hedef[2] - np.median(B[c])) * ww
-        k += 1
+        for k, X in enumerate((L, A, B)):
+            src = np.maximum.accumulate(np.percentile(X[c], PARCA_Q) + np.arange(25) * 1e-4)
+            out[..., k][reg] = np.interp(X[reg], src, hedef[k]) * ww + X[reg] * (1 - ww)
+        say += 1
     return np.clip(cv2.cvtColor(out, cv2.COLOR_LAB2RGB), 0, 1) * 255, {'yontem': 'parca (harf) bazli yuzdelik esleme',
-                                                                       'parca': k}
+                                                                       'parca': say}
 
 
 YUZDE = np.linspace(0, 100, 201)
@@ -347,9 +347,8 @@ def main():
                         # esitlenir (L yuzdelikleri + medyan a, b, tum parcalar birlikte, global eslemeden sonra)
                         Lab = cv2.cvtColor(np.clip(rgb, 0, 255).astype(np.float32) / 255, cv2.COLOR_RGB2LAB)
                         ce = cekirdek(al)
-                        oz = np.percentile(Lab[..., 0][ce], PARCA_Q)
-                        med = np.median(Lab[ce], 0)
-                        rgb, rap['renk_esitleme'][ad]['parca'] = parca_esitle(rgb, al, oz, med)
+                        oz = [np.percentile(Lab[..., k][ce], PARCA_Q) for k in range(3)]
+                        rgb, rap['renk_esitleme'][ad]['parca'] = parca_esitle(rgb, al, oz)
                 else:
                     rgb, rap.setdefault('renk_esitleme', {})[ad] = renk_esitle(rgb, al, hedef, kazanc.get(ad, {}))
                 bekleyen[i] = (ad, rgb, al, x, y)
