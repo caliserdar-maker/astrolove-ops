@@ -6,7 +6,9 @@ Gecme sarti (Serdar 4 Eki, TEK DOKU): ogeler arasi EN BUYUK medyan dE00 <= ESIK;
 (p5, p25, p50, p75, p95, p99) farki <= YUZDE_ESIK; cok parlak piksel orani (L > ana sembol p99) farki <= PARLAK_ESIK puan;
 ana sembol leke = 0; oge ici (ana sembol haric, Serdar 4 Eki): oge boyunca en az 10 esit dilim (cember 12 aci dilimi)
 arasinda cok parlak oran (L > ana p99) farki, ana sembolun kendi dilim farkini gecemez (Serdar 5 Eki; dilim medyan L
-ve HSV V > 0.95 farki yalniz rapor). DOKU (yalniz rapor): L yerel std (9 px pencere), cekirdekte medyan. Kapali dongu: hedefe kalan fark bir sonraki tur icin kazanc JSON'una yazilir
+ve HSV V > 0.95 farki yalniz rapor). Serdar 5 Eki: dilim kapisi YALNIZ RAPOR; metin ogelerinde (isim1, isim2, tagline)
+PARCA kapisi: parcalar (harf, i noktasi, kuyruk; cekirdek baglantili bilesenleri) arasi medyan L farki <= 1.0, b* <= 1.0,
+ton <= 3 derece. DOKU (yalniz rapor): L yerel std (9 px pencere), cekirdekte medyan. Kapali dongu: hedefe kalan fark bir sonraki tur icin kazanc JSON'una yazilir
 (kL = kL_onceki x hedef_L / L_olculen, da / db = onceki + (hedef - olculen)).
 
 Kullanim: renk_kapi.py --poster GOLGE_1.png --dizin POSTER_DIZINI [--hedef 71.5,8.5,49.5] [--kazanc-cikti K.json]
@@ -31,6 +33,26 @@ YUZDE_ESIK = 1.5
 PARLAK_ESIK = 1.0
 DILIM_N = 10            # oge boyunca esit dilim (cember: aci dilimi 12)
 HALKA_MERKEZ = (3598.97, 4388.09)
+METIN = ('isim1', 'isim2', 'tagline')
+PARCA_L_ESIK, PARCA_B_ESIK, PARCA_TON_ESIK = 1.0, 1.0, 3.0      # Serdar 5 Eki: harf bazli esitleme kapisi
+PARCA_MIN_PX = 300
+
+
+def parcalar(Lc, m):
+    """metin ogesi parcalari (harf, i noktasi, kuyruk): cekirdegin 5x5 genisletilmis baglantili bilesenleri; parca
+    basina medyan L, b*, ton (derece). Parcalar arasi en buyuk farklar."""
+    n, pl = cv2.connectedComponents(cv2.dilate(m.astype(np.uint8), np.ones((5, 5), np.uint8)))
+    pl = pl * m
+    P = []
+    for i in range(1, n):
+        c = pl == i
+        if c.sum() < PARCA_MIN_PX:
+            continue
+        med = np.median(Lc[c], 0)
+        P.append((float(med[0]), float(med[2]), float(np.degrees(np.arctan2(med[2], med[1])))))
+    P = np.array(P)
+    return {'parca_n': len(P), 'parca_L_fark': round(float(np.ptp(P[:, 0])), 2), 'parca_b_fark': round(float(np.ptp(P[:, 1])), 2),
+            'parca_ton_fark': round(float(np.ptp(P[:, 2])), 2)}
 
 
 def dilimler(ad, Lk, V, m, x0, y0):
@@ -72,6 +94,8 @@ def olc(poster, dizin, hedef):
                  'doku_std9': round(float(np.median(sd[m])), 3)}
         Vc = cv2.cvtColor(np.ascontiguousarray(P[y0:y0 + h, x0:x0 + w]), cv2.COLOR_RGB2HSV)[..., 2]
         T[ad].update(dilimler(ad, Lk, Vc, m, x0, y0))
+        if ad in METIN:
+            T[ad].update(parcalar(Lc, m))
         del Lc, Lk, mu, sd, Vc
         if ad == 'ana_sembol':
             T[ad]['leke'] = lk.olc(np.ascontiguousarray(P[y0:y0 + h, x0:x0 + w]), m.astype(np.float32))[0]
@@ -93,8 +117,11 @@ def olc(poster, dizin, hedef):
     for ad, t in T.items():
         t['dilim_esik'] = T['ana_sembol']['dilim_parlak_fark']
         t['dilim_gecti'] = bool(ad == 'ana_sembol' or t['dilim_parlak_fark'] <= t['dilim_esik'])
+        # Serdar 5 Eki: dilim kapisi yalniz RAPOR (FAIL vermez); metin ogelerinde parca kapisi
+        t['parca_gecti'] = bool(ad not in METIN or (t['parca_L_fark'] <= PARCA_L_ESIK and t['parca_b_fark'] <= PARCA_B_ESIK
+                                                     and t['parca_ton_fark'] <= PARCA_TON_ESIK))
         t['gecti'] = bool(max(abs(v) for v in t['L_yuzdelik_fark']) <= YUZDE_ESIK and abs(t['parlak_fark_puan']) <= PARLAK_ESIK
-                          and t['dilim_gecti'])
+                          and t['parca_gecti'])
     for ad, t in T.items():
         t['dE00_ana'] = round(float(deltaE_ciede2000(ana[None], np.array(t['Lab'])[None])[0]), 3)
         t['dE00_hedef'] = round(float(deltaE_ciede2000(np.array(hedef)[None], np.array(t['Lab'])[None])[0]), 3)
@@ -140,7 +167,9 @@ def main():
         print(f"{ad:11s} Lab {t['Lab'][0]:5.1f} {t['Lab'][1]:4.1f} {t['Lab'][2]:4.1f} dE_ana {t['dE00_ana']:4.2f} "
               f"dE_max {t['dE00_oge_max']:4.2f} | Lp {' '.join(f'{v:5.1f}' for v in t['L_yuzdelik'])} | fark maks "
               f"{max(abs(v) for v in t['L_yuzdelik_fark']):4.2f} | parlak% {t['parlak_oran_yuzde']:5.2f} | doku {t['doku_std9']:5.2f}"
-              f" ({t['doku_oran_ana']:.2f}x) | dilim parlak fark {t['dilim_parlak_fark']:5.2f} (esik {t['dilim_esik']:.2f}) {'OK' if t['gecti'] else 'X'}")
+              f" ({t['doku_oran_ana']:.2f}x) | dilim(rapor) {t['dilim_parlak_fark']:5.2f}/{t['dilim_esik']:.2f}"
+              + (f" | parca L {t['parca_L_fark']:5.2f} b {t['parca_b_fark']:5.2f} ton {t['parca_ton_fark']:5.2f} (n {t['parca_n']})"
+                 if 'parca_n' in t else '') + f" {'OK' if t['gecti'] else 'X'}")
     print('en buyuk cift', s['en_buyuk_cift'], 'leke_ana', s['leke_ana'], s['sonuc'])
     sys.exit(0 if s['sonuc'] == 'PASS' else 1)
 

@@ -213,6 +213,42 @@ def duzle(rgb, al, W):
         'duzle_sigma': round(sigma, 1), 'duzle_g_p1_p50_p99': [round(float(v), 3) for v in np.percentile(g[ce], (1, 50, 99))]}
 
 
+METIN = ('isim1', 'isim2', 'tagline')
+PARCA_Q = np.linspace(1, 99, 25)
+
+
+def parca_esitle(rgb, al, ref25, hedef):
+    """HARF BAZLI ESITLEME (Serdar onayli koordinator uygulamasi, 5 Eki): metin ogesi Canva harf setinden harf harf
+    gelir, harflerin parlaklik ve tonu farkli. Parca = cekirdegin (w > 0.9) 5x5 genisletilmis baglantili bilesenleri
+    (harf, i noktasi, kuyruk); her oge pikseli en yakin parcaya baglanir. Her parcada L yuzdelikleri (1-99, 25) ana sembol
+    cekirdek yuzdeliklerine eslenir, a / b medyani ortak hedefe kayar; w (alfa) ile harmanlanir. Her piksele ayni kural."""
+    from scipy import ndimage as ndi
+    w = np.clip(al, 0, 1).astype(np.float32)
+    lab = cv2.cvtColor(np.clip(rgb, 0, 255).astype(np.float32) / 255, cv2.COLOR_RGB2LAB)
+    L, A, B = lab[..., 0], lab[..., 1], lab[..., 2]
+    core = cekirdek(al)                       # oge maskesi cekirdegi (renk_kapi ile ayni maske; w > 0.9 kapiyla uyusmuyordu)
+    n, pl = cv2.connectedComponents(cv2.dilate(core.astype(np.uint8), np.ones((5, 5), np.uint8)))
+    pl = pl * core
+    _, idx = ndi.distance_transform_edt(pl == 0, return_indices=True)
+    near = pl[idx[0], idx[1]]
+    near[w <= 0.05] = 0
+    out = lab.copy()
+    k = 0
+    for i in range(1, n):
+        c = pl == i
+        if c.sum() < 30:
+            continue
+        reg = near == i
+        ww = w[reg]
+        src = np.maximum.accumulate(np.percentile(L[c], PARCA_Q) + np.arange(25) * 1e-4)
+        out[..., 0][reg] = np.interp(L[reg], src, ref25) * ww + L[reg] * (1 - ww)
+        out[..., 1][reg] = A[reg] + (hedef[1] - np.median(A[c])) * ww
+        out[..., 2][reg] = B[reg] + (hedef[2] - np.median(B[c])) * ww
+        k += 1
+    return np.clip(cv2.cvtColor(out, cv2.COLOR_LAB2RGB), 0, 1) * 255, {'yontem': 'parca (harf) bazli yuzdelik esleme',
+                                                                       'parca': k}
+
+
 YUZDE = np.linspace(0, 100, 201)
 
 
@@ -299,15 +335,16 @@ def main():
                 rgb, rap.setdefault('renk_esitleme', {})[ad] = renk_esitle(rgb, al, hedef, kazanc.get(ad, {}))
                 bekleyen[i] = (ad, rgb, al, x, y)
                 ref = l_yuzdelik(rgb, al)
+                ref25 = np.interp(PARCA_Q, YUZDE, ref)
             for i, (ad, rgb, al, x, y) in enumerate(bekleyen):
                 if l_esle and ad == 'ana_sembol':
                     continue
-                if ref is not None:
-                    # Serdar 5 Eki: once yuzdelik esleme + a, b kaydirma, EN SON genis olcekli duzleme (bitmis oge uzerinde)
+                if ref is not None and ad in METIN:
+                    # Serdar 5 Eki ("Guzel"): metin ogelerinde PARCA (harf) bazli yuzdelik esleme + a, b kaydirma
+                    rgb, rap.setdefault('renk_esitleme', {})[ad] = parca_esitle(rgb, al, ref25, hedef)
+                elif ref is not None:
+                    # diger ogeler: oge bazli yuzdelik esleme (genis olcekli duzleme 5 Eki kaldirildi)
                     rgb, rap.setdefault('renk_esitleme', {})[ad] = l_esitle(rgb, al, ref, hedef, kazanc.get(ad, {}))
-                    if a.l_duzle != 'yok':
-                        rgb, dz = duzle(rgb, al, W)
-                        rap['renk_esitleme'][ad].update(dz)
                 else:
                     rgb, rap.setdefault('renk_esitleme', {})[ad] = renk_esitle(rgb, al, hedef, kazanc.get(ad, {}))
                 bekleyen[i] = (ad, rgb, al, x, y)
