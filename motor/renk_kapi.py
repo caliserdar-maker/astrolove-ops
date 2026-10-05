@@ -36,6 +36,7 @@ HALKA_MERKEZ = (3598.97, 4388.09)
 METIN = ('isim1', 'isim2', 'tagline')
 PARCA_L_ESIK, PARCA_B_ESIK, PARCA_TON_ESIK = 1.0, 1.0, 3.0      # Serdar 5 Eki: harf bazli esitleme kapisi
 PARCA_MIN_PX = 300
+KIRMIZI_A, KIRMIZI_ESIK = 25.0, 1.5    # Serdar 5 Eki (8e9c727 RED): metin cekirdeginde a* > 25 orani <= %1.5
 
 
 def parcalar(Lc, m):
@@ -96,6 +97,7 @@ def olc(poster, dizin, hedef):
         T[ad].update(dilimler(ad, Lk, Vc, m, x0, y0))
         if ad in METIN:
             T[ad].update(parcalar(Lc, m))
+            T[ad]['kirmizi_yuzde'] = round(100 * float((Lc[..., 1][m] > KIRMIZI_A).mean()), 3)
         del Lc, Lk, mu, sd, Vc
         if ad == 'ana_sembol':
             T[ad]['leke'] = lk.olc(np.ascontiguousarray(P[y0:y0 + h, x0:x0 + w]), m.astype(np.float32))[0]
@@ -119,7 +121,8 @@ def olc(poster, dizin, hedef):
         t['dilim_gecti'] = bool(ad == 'ana_sembol' or t['dilim_parlak_fark'] <= t['dilim_esik'])
         # Serdar 5 Eki: dilim kapisi yalniz RAPOR (FAIL vermez); metin ogelerinde parca kapisi
         t['parca_gecti'] = bool(ad not in METIN or (t['parca_L_fark'] <= PARCA_L_ESIK and t['parca_b_fark'] <= PARCA_B_ESIK
-                                                     and t['parca_ton_fark'] <= PARCA_TON_ESIK))
+                                                     and t['parca_ton_fark'] <= PARCA_TON_ESIK
+                                                     and t['kirmizi_yuzde'] <= KIRMIZI_ESIK))
         t['gecti'] = bool(max(abs(v) for v in t['L_yuzdelik_fark']) <= YUZDE_ESIK and abs(t['parlak_fark_puan']) <= PARLAK_ESIK
                           and t['parca_gecti'])
     for ad, t in T.items():
@@ -168,7 +171,7 @@ def main():
               f"dE_max {t['dE00_oge_max']:4.2f} | Lp {' '.join(f'{v:5.1f}' for v in t['L_yuzdelik'])} | fark maks "
               f"{max(abs(v) for v in t['L_yuzdelik_fark']):4.2f} | parlak% {t['parlak_oran_yuzde']:5.2f} | doku {t['doku_std9']:5.2f}"
               f" ({t['doku_oran_ana']:.2f}x) | dilim(rapor) {t['dilim_parlak_fark']:5.2f}/{t['dilim_esik']:.2f}"
-              + (f" | parca L {t['parca_L_fark']:5.2f} b {t['parca_b_fark']:5.2f} ton {t['parca_ton_fark']:5.2f} (n {t['parca_n']})"
+              + (f" | parca L {t['parca_L_fark']:5.2f} b {t['parca_b_fark']:5.2f} ton {t['parca_ton_fark']:5.2f} (n {t['parca_n']}) kirmizi% {t['kirmizi_yuzde']:.2f}"
                  if 'parca_n' in t else '') + f" {'OK' if t['gecti'] else 'X'}")
     print('en buyuk cift', s['en_buyuk_cift'], 'leke_ana', s['leke_ana'], s['sonuc'])
     sys.exit(0 if s['sonuc'] == 'PASS' else 1)

@@ -219,9 +219,10 @@ PARCA_Q = np.linspace(1, 99, 25)
 
 def parca_esitle(rgb, al, ref25, hedef):
     """HARF BAZLI ESITLEME (Serdar onayli koordinator uygulamasi, 5 Eki): metin ogesi Canva harf setinden harf harf
-    gelir, harflerin parlaklik ve tonu farkli. Parca = cekirdegin (w > 0.9) 5x5 genisletilmis baglantili bilesenleri
-    (harf, i noktasi, kuyruk); her oge pikseli en yakin parcaya baglanir. Her parcada L yuzdelikleri (1-99, 25) ana sembol
-    cekirdek yuzdeliklerine eslenir, a / b medyani ortak hedefe kayar; w (alfa) ile harmanlanir. Her piksele ayni kural."""
+    gelir, harflerin parlaklik ve tonu farkli. Parca = cekirdegin (oge maskesi, renk_kapi ile ayni) 5x5 genisletilmis baglantili bilesenleri
+    (harf, i noktasi, kuyruk); her oge pikseli en yakin parcaya baglanir. Her parcada L yuzdelikleri (1-99, 25) hedef
+    yuzdeliklere eslenir, a / b medyani hedefe kayar; w (alfa) ile harmanlanir. Her piksele ayni kural. Hedef (5 Eki,
+    8e9c727 RED): ogenin KENDI cekirdek dagilimi (global eslemeden sonra); ana sembole dogrudan cekme bakir yapiyordu."""
     from scipy import ndimage as ndi
     w = np.clip(al, 0, 1).astype(np.float32)
     lab = cv2.cvtColor(np.clip(rgb, 0, 255).astype(np.float32) / 255, cv2.COLOR_RGB2LAB)
@@ -335,16 +336,20 @@ def main():
                 rgb, rap.setdefault('renk_esitleme', {})[ad] = renk_esitle(rgb, al, hedef, kazanc.get(ad, {}))
                 bekleyen[i] = (ad, rgb, al, x, y)
                 ref = l_yuzdelik(rgb, al)
-                ref25 = np.interp(PARCA_Q, YUZDE, ref)
             for i, (ad, rgb, al, x, y) in enumerate(bekleyen):
                 if l_esle and ad == 'ana_sembol':
                     continue
-                if ref is not None and ad in METIN:
-                    # Serdar 5 Eki ("Guzel"): metin ogelerinde PARCA (harf) bazli yuzdelik esleme + a, b kaydirma
-                    rgb, rap.setdefault('renk_esitleme', {})[ad] = parca_esitle(rgb, al, ref25, hedef)
-                elif ref is not None:
-                    # diger ogeler: oge bazli yuzdelik esleme (genis olcekli duzleme 5 Eki kaldirildi)
+                if ref is not None:
+                    # oge bazli yuzdelik esleme + a, b kaydirma (ana sembole; genis olcekli duzleme 5 Eki kaldirildi)
                     rgb, rap.setdefault('renk_esitleme', {})[ad] = l_esitle(rgb, al, ref, hedef, kazanc.get(ad, {}))
+                    if ad in METIN:
+                        # Serdar 5 Eki (8e9c727 RED, bakir harfler): SONRA harfler ogenin KENDI ortak dagilimina
+                        # esitlenir (L yuzdelikleri + medyan a, b, tum parcalar birlikte, global eslemeden sonra)
+                        Lab = cv2.cvtColor(np.clip(rgb, 0, 255).astype(np.float32) / 255, cv2.COLOR_RGB2LAB)
+                        ce = cekirdek(al)
+                        oz = np.percentile(Lab[..., 0][ce], PARCA_Q)
+                        med = np.median(Lab[ce], 0)
+                        rgb, rap['renk_esitleme'][ad]['parca'] = parca_esitle(rgb, al, oz, med)
                 else:
                     rgb, rap.setdefault('renk_esitleme', {})[ad] = renk_esitle(rgb, al, hedef, kazanc.get(ad, {}))
                 bekleyen[i] = (ad, rgb, al, x, y)
