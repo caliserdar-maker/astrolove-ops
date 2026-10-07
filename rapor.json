@@ -1,0 +1,258 @@
+{
+ "isler": [
+  "PISCES_PISCES",
+  "PISCES_SAGITTARIUS",
+  "PISCES_SCORPIO",
+  "PISCES_TAURUS",
+  "PISCES_VIRGO",
+  "SAGITTARIUS_SAGITTARIUS",
+  "SAGITTARIUS_SCORPIO",
+  "SAGITTARIUS_TAURUS",
+  "SAGITTARIUS_VIRGO",
+  "SCORPIO_SCORPIO"
+ ],
+ "sonuc": [
+  {
+   "cift": "PISCES_PISCES",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4640,
+    "input_tokens_details": {
+     "image_tokens": 4455,
+     "text_tokens": 185
+    },
+    "output_tokens": 6003,
+    "output_tokens_details": {
+     "image_tokens": 6003,
+     "text_tokens": 0
+    },
+    "total_tokens": 10643
+   },
+   "usd": 0.2167,
+   "sn": 71.4
+  },
+  {
+   "cift": "PISCES_SAGITTARIUS",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4622,
+    "input_tokens_details": {
+     "image_tokens": 4437,
+     "text_tokens": 185
+    },
+    "output_tokens": 7203,
+    "output_tokens_details": {
+     "image_tokens": 7203,
+     "text_tokens": 0
+    },
+    "total_tokens": 11825
+   },
+   "usd": 0.2525,
+   "sn": 82.5
+  },
+  {
+   "cift": "PISCES_SCORPIO",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4710,
+    "input_tokens_details": {
+     "image_tokens": 4525,
+     "text_tokens": 185
+    },
+    "output_tokens": 7717,
+    "output_tokens_details": {
+     "image_tokens": 7717,
+     "text_tokens": 0
+    },
+    "total_tokens": 12427
+   },
+   "usd": 0.2686,
+   "sn": 83.3
+  },
+  {
+   "cift": "PISCES_TAURUS",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4710,
+    "input_tokens_details": {
+     "image_tokens": 4525,
+     "text_tokens": 185
+    },
+    "output_tokens": 7717,
+    "output_tokens_details": {
+     "image_tokens": 7717,
+     "text_tokens": 0
+    },
+    "total_tokens": 12427
+   },
+   "usd": 0.2686,
+   "sn": 84.5
+  },
+  {
+   "cift": "PISCES_VIRGO",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4634,
+    "input_tokens_details": {
+     "image_tokens": 4449,
+     "text_tokens": 185
+    },
+    "output_tokens": 8232,
+    "output_tokens_details": {
+     "image_tokens": 8232,
+     "text_tokens": 0
+    },
+    "total_tokens": 12866
+   },
+   "usd": 0.2835,
+   "sn": 91.7
+  },
+  {
+   "cift": "SAGITTARIUS_SAGITTARIUS",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4070,
+    "input_tokens_details": {
+     "image_tokens": 3885,
+     "text_tokens": 185
+    },
+    "output_tokens": 4203,
+    "output_tokens_details": {
+     "image_tokens": 4203,
+     "text_tokens": 0
+    },
+    "total_tokens": 8273
+   },
+   "usd": 0.1581,
+   "sn": 52.8
+  },
+  {
+   "cift": "SAGITTARIUS_SCORPIO",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4662,
+    "input_tokens_details": {
+     "image_tokens": 4477,
+     "text_tokens": 185
+    },
+    "output_tokens": 6345,
+    "output_tokens_details": {
+     "image_tokens": 6345,
+     "text_tokens": 0
+    },
+    "total_tokens": 11007
+   },
+   "usd": 0.2271,
+   "sn": 76.9
+  },
+  {
+   "cift": "SAGITTARIUS_TAURUS",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4680,
+    "input_tokens_details": {
+     "image_tokens": 4495,
+     "text_tokens": 185
+    },
+    "output_tokens": 6775,
+    "output_tokens_details": {
+     "image_tokens": 6775,
+     "text_tokens": 0
+    },
+    "total_tokens": 11455
+   },
+   "usd": 0.2401,
+   "sn": 74.8
+  },
+  {
+   "cift": "SAGITTARIUS_VIRGO",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4662,
+    "input_tokens_details": {
+     "image_tokens": 4477,
+     "text_tokens": 185
+    },
+    "output_tokens": 6259,
+    "output_tokens_details": {
+     "image_tokens": 6259,
+     "text_tokens": 0
+    },
+    "total_tokens": 10921
+   },
+   "usd": 0.2245,
+   "sn": 70.9
+  },
+  {
+   "cift": "SCORPIO_SCORPIO",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4574,
+    "input_tokens_details": {
+     "image_tokens": 4389,
+     "text_tokens": 185
+    },
+    "output_tokens": 6173,
+    "output_tokens_details": {
+     "image_tokens": 6173,
+     "text_tokens": 0
+    },
+    "total_tokens": 10747
+   },
+   "usd": 0.2212,
+   "sn": 70.0
+  }
+ ],
+ "toplam_usd": 2.3609,
+ "butce_usd": 5.0
+}
