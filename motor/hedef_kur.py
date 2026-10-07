@@ -26,7 +26,8 @@ import zemin_gradient as zg                                          # noqa: E40
 
 GRAD = KOK / 'varlik' / 'plates' / 'BLUE_16x20_gradient.json'
 ESKI_HEDEF = (71.5, 8.5, 49.5)
-DOKU_SIGMA = {'tagline': 3.0}       # kalibrasyon (7 Eki): T5 tagline ic doku 5.79 -> sigma 3.0 ile 4.63 (REF 4.67)
+DOKU_BILATERAL = {'tagline': [24, 10], 'isim1': [16, 7], 'isim2': [16, 7]}   # D2 (7 Eki): sigma renk, sigma uzay @7200
+YAY_SIGMA, YAY_DUSUK_SIGMA = 40.0, 150.0     # D2: cember yay boyu yumusatma (px yay @7200)       # kalibrasyon (7 Eki): T5 tagline ic doku 5.79 -> sigma 3.0 ile 4.63 (REF 4.67)
 
 
 def dairesel_gauss(v, ok, sig):
@@ -95,7 +96,8 @@ def main():
     gg = np.where(var, 1 - (1 - oran) * uc, 1.0)
     out['cember'] = {'aci_derece': list(range(360)), 'k': np.round(np.clip(kk, 0.5, 1.0), 4).tolist(),
                      'g': np.round(gg, 4).tolist(), 'k_medyan': round(float(np.median(kk[gec])), 3)}
-    out['doku_sigma'] = DOKU_SIGMA
+    out['doku_bilateral'] = DOKU_BILATERAL
+    out['cember']['yay_sigma'] = YAY_SIGMA; out['cember']['yay_dusuk_sigma'] = YAY_DUSUK_SIGMA
     Path(a.cikti).write_text(json.dumps(out, indent=1))
     print(json.dumps({k: v for k, v in out.items() if k not in ('zemin_egri', 'cember')}))
     print('cember k medyan', out['cember']['k_medyan'], 'g min', round(float(gg.min()), 3),
