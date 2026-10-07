@@ -1,0 +1,119 @@
+{
+ "isler": [
+  "GEMINI_VIRGO",
+  "ARIES_LEO",
+  "CANCER_LIBRA"
+ ],
+ "sonuc": [
+  {
+   "cift": "GEMINI_VIRGO",
+   "denemeler": [
+    {
+     "model": "gpt-image-2",
+     "ek": [
+      "size",
+      "quality",
+      "input_fidelity"
+     ],
+     "kod": 400,
+     "hata": "{\n  \"error\": {\n    \"message\": \"The model 'gpt-image-2' does not support the 'input_fidelity' parameter.\",\n    \"type\": \"image_generation_user_error\",\n    \"param\": \"input_fidelity\",\n    \"code\": \"invalid_input_fidelity_model\"\n  }\n}"
+    }
+   ],
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4630,
+    "input_tokens_details": {
+     "image_tokens": 4445,
+     "text_tokens": 185
+    },
+    "output_tokens": 8232,
+    "output_tokens_details": {
+     "image_tokens": 8232,
+     "text_tokens": 0
+    },
+    "total_tokens": 12862
+   },
+   "usd": 0.2834,
+   "sn": 94.9
+  },
+  {
+   "cift": "ARIES_LEO",
+   "denemeler": [
+    {
+     "model": "gpt-image-2",
+     "ek": [
+      "size",
+      "quality",
+      "input_fidelity"
+     ],
+     "kod": 400,
+     "hata": "{\n  \"error\": {\n    \"message\": \"The model 'gpt-image-2' does not support the 'input_fidelity' parameter.\",\n    \"type\": \"image_generation_user_error\",\n    \"param\": \"input_fidelity\",\n    \"code\": \"invalid_input_fidelity_model\"\n  }\n}"
+    }
+   ],
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4630,
+    "input_tokens_details": {
+     "image_tokens": 4445,
+     "text_tokens": 185
+    },
+    "output_tokens": 7545,
+    "output_tokens_details": {
+     "image_tokens": 7545,
+     "text_tokens": 0
+    },
+    "total_tokens": 12175
+   },
+   "usd": 0.2628,
+   "sn": 90.0
+  },
+  {
+   "cift": "CANCER_LIBRA",
+   "denemeler": [
+    {
+     "model": "gpt-image-2",
+     "ek": [
+      "size",
+      "quality",
+      "input_fidelity"
+     ],
+     "kod": 400,
+     "hata": "{\n  \"error\": {\n    \"message\": \"The model 'gpt-image-2' does not support the 'input_fidelity' parameter.\",\n    \"type\": \"image_generation_user_error\",\n    \"param\": \"input_fidelity\",\n    \"code\": \"invalid_input_fidelity_model\"\n  }\n}"
+    }
+   ],
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4710,
+    "input_tokens_details": {
+     "image_tokens": 4525,
+     "text_tokens": 185
+    },
+    "output_tokens": 8232,
+    "output_tokens_details": {
+     "image_tokens": 8232,
+     "text_tokens": 0
+    },
+    "total_tokens": 12942
+   },
+   "usd": 0.2841,
+   "sn": 97.1
+  }
+ ],
+ "toplam_usd": 0.8303,
+ "butce_usd": 5.0
+}
