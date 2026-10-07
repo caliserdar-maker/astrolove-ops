@@ -1,6 +1,2 @@
-# gpt-sembol is listesi
-SCORPIO_TAURUS
-SCORPIO_VIRGO
-TAURUS_TAURUS
-TAURUS_VIRGO
-VIRGO_VIRGO
+# gpt-sembol tekrar (sekil kapisi)
+CANCER_CANCER
