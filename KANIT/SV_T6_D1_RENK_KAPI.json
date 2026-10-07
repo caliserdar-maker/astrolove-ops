@@ -1,0 +1,748 @@
+{
+ "ogeler": {
+  "cember": {
+   "Lab": [
+    73.55,
+    9.35,
+    51.24
+   ],
+   "px": 59026,
+   "L_yuzdelik": [
+    37.77,
+    55.45,
+    73.55,
+    84.5,
+    93.38,
+    95.67
+   ],
+   "doku_std9": 12.031,
+   "dilim_n": 6,
+   "dilim_L_med": [
+    82.5,
+    68.7,
+    63.1,
+    77.0,
+    76.6,
+    81.0
+   ],
+   "dilim_V095": [
+    58.4,
+    38.1,
+    13.7,
+    46.1,
+    45.4,
+    57.3
+   ],
+   "dilim_L_fark": 19.35,
+   "dilim_V_fark": 44.75,
+   "parlak_oran_yuzde": 0.0,
+   "L_yuzdelik_fark": [
+    -0.08,
+    -0.06,
+    -0.06,
+    -0.27,
+    -1.96,
+    -2.23
+   ],
+   "parlak_fark_puan": -1.063,
+   "doku_oran_ana": 5.648,
+   "dilim_parlak": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "dilim_parlak_fark": 0.0,
+   "dilim_esik": 2.45,
+   "dilim_gecti": true,
+   "parca_gecti": true,
+   "gecti": false,
+   "dE00_ana": 0.171,
+   "dE00_hedef": 0.229,
+   "dE00_oge_max": 1.08
+  },
+  "ana_sembol": {
+   "Lab": [
+    73.61,
+    9.55,
+    51.7
+   ],
+   "px": 1460685,
+   "L_yuzdelik": [
+    37.85,
+    55.51,
+    73.61,
+    84.77,
+    95.34,
+    97.9
+   ],
+   "doku_std9": 2.13,
+   "dilim_n": 10,
+   "dilim_L_med": [
+    46.6,
+    72.7,
+    82.1,
+    64.1,
+    68.1,
+    52.7,
+    78.7,
+    67.6,
+    73.4,
+    83.2
+   ],
+   "dilim_V095": [
+    9.8,
+    40.0,
+    64.0,
+    24.8,
+    39.5,
+    7.4,
+    51.5,
+    40.2,
+    42.4,
+    62.7
+   ],
+   "dilim_L_fark": 36.63,
+   "dilim_V_fark": 56.59,
+   "leke": 0.0,
+   "parlak_oran_yuzde": 1.063,
+   "L_yuzdelik_fark": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "parlak_fark_puan": 0.0,
+   "doku_oran_ana": 1.0,
+   "dilim_parlak": [
+    0.0,
+    0.55,
+    2.45,
+    0.75,
+    0.71,
+    0.07,
+    0.7,
+    1.08,
+    1.4,
+    2.26
+   ],
+   "dilim_parlak_fark": 2.45,
+   "dilim_esik": 2.45,
+   "dilim_gecti": true,
+   "parca_gecti": true,
+   "gecti": true,
+   "dE00_ana": 0.0,
+   "dE00_hedef": 0.147,
+   "dE00_oge_max": 1.169
+  },
+  "isim1": {
+   "Lab": [
+    73.65,
+    9.67,
+    51.74
+   ],
+   "px": 102654,
+   "L_yuzdelik": [
+    38.23,
+    55.49,
+    73.65,
+    84.68,
+    95.21,
+    97.75
+   ],
+   "doku_std9": 5.039,
+   "dilim_n": 10,
+   "dilim_L_med": [
+    58.7,
+    85.0,
+    73.7,
+    79.6,
+    59.9,
+    77.3,
+    76.6,
+    72.5,
+    73.7,
+    73.6
+   ],
+   "dilim_V095": [
+    15.1,
+    71.3,
+    38.7,
+    48.5,
+    19.9,
+    46.3,
+    47.8,
+    44.3,
+    43.8,
+    43.7
+   ],
+   "dilim_L_fark": 26.26,
+   "dilim_V_fark": 56.28,
+   "parca_n": 7,
+   "parca_L_fark": 0.19,
+   "parca_b_fark": 0.06,
+   "parca_ton_fark": 0.27,
+   "kirmizi_yuzde": 0.0,
+   "parlak_oran_yuzde": 0.222,
+   "L_yuzdelik_fark": [
+    0.38,
+    -0.02,
+    0.04,
+    -0.09,
+    -0.13,
+    -0.15
+   ],
+   "parlak_fark_puan": -0.841,
+   "doku_oran_ana": 2.366,
+   "dilim_parlak": [
+    0.01,
+    0.27,
+    0.36,
+    0.22,
+    0.15,
+    0.18,
+    0.05,
+    0.02,
+    0.43,
+    0.45
+   ],
+   "dilim_parlak_fark": 0.44,
+   "dilim_esik": 2.45,
+   "dilim_gecti": true,
+   "parca_gecti": true,
+   "gecti": true,
+   "dE00_ana": 0.084,
+   "dE00_hedef": 0.162,
+   "dE00_oge_max": 1.231
+  },
+  "sonsuz": {
+   "Lab": [
+    73.74,
+    9.66,
+    51.68
+   ],
+   "px": 15049,
+   "L_yuzdelik": [
+    37.76,
+    55.63,
+    73.74,
+    84.82,
+    95.16,
+    97.66
+   ],
+   "doku_std9": 10.791,
+   "dilim_n": 10,
+   "dilim_L_med": [
+    51.7,
+    66.4,
+    60.1,
+    84.9,
+    70.4,
+    62.8,
+    93.6,
+    75.7,
+    49.1,
+    76.2
+   ],
+   "dilim_V095": [
+    9.3,
+    21.9,
+    17.9,
+    78.2,
+    17.7,
+    10.2,
+    97.7,
+    38.9,
+    13.5,
+    25.8
+   ],
+   "dilim_L_fark": 44.54,
+   "dilim_V_fark": 88.39,
+   "parlak_oran_yuzde": 0.439,
+   "L_yuzdelik_fark": [
+    -0.09,
+    0.12,
+    0.13,
+    0.05,
+    -0.18,
+    -0.24
+   ],
+   "parlak_fark_puan": -0.624,
+   "doku_oran_ana": 5.066,
+   "dilim_parlak": [
+    0.0,
+    0.9,
+    0.29,
+    0.27,
+    0.0,
+    0.0,
+    2.21,
+    0.25,
+    0.0,
+    0.0
+   ],
+   "dilim_parlak_fark": 2.21,
+   "dilim_esik": 2.45,
+   "dilim_gecti": true,
+   "parca_gecti": true,
+   "gecti": true,
+   "dE00_ana": 0.123,
+   "dE00_hedef": 0.228,
+   "dE00_oge_max": 1.287
+  },
+  "isim2": {
+   "Lab": [
+    73.75,
+    9.63,
+    51.73
+   ],
+   "px": 86254,
+   "L_yuzdelik": [
+    38.22,
+    55.51,
+    73.75,
+    84.74,
+    95.18,
+    97.86
+   ],
+   "doku_std9": 3.882,
+   "dilim_n": 10,
+   "dilim_L_med": [
+    50.7,
+    83.6,
+    70.5,
+    70.6,
+    84.7,
+    53.4,
+    83.6,
+    80.4,
+    63.4,
+    81.2
+   ],
+   "dilim_V095": [
+    5.2,
+    59.4,
+    31.9,
+    21.4,
+    71.6,
+    2.3,
+    46.5,
+    34.5,
+    12.7,
+    36.5
+   ],
+   "dilim_L_fark": 33.99,
+   "dilim_V_fark": 69.24,
+   "parca_n": 5,
+   "parca_L_fark": 0.15,
+   "parca_b_fark": 0.07,
+   "parca_ton_fark": 0.24,
+   "kirmizi_yuzde": 0.0,
+   "parlak_oran_yuzde": 0.526,
+   "L_yuzdelik_fark": [
+    0.37,
+    0.0,
+    0.14,
+    -0.03,
+    -0.16,
+    -0.04
+   ],
+   "parlak_fark_puan": -0.537,
+   "doku_oran_ana": 1.823,
+   "dilim_parlak": [
+    0.18,
+    0.97,
+    0.66,
+    0.52,
+    0.43,
+    0.43,
+    0.64,
+    0.68,
+    0.15,
+    0.56
+   ],
+   "dilim_parlak_fark": 0.82,
+   "dilim_esik": 2.45,
+   "dilim_gecti": true,
+   "parca_gecti": true,
+   "gecti": true,
+   "dE00_ana": 0.116,
+   "dE00_hedef": 0.236,
+   "dE00_oge_max": 1.285
+  },
+  "kucuk_sol": {
+   "Lab": [
+    73.67,
+    9.66,
+    51.76
+   ],
+   "px": 71016,
+   "L_yuzdelik": [
+    37.92,
+    55.28,
+    73.67,
+    84.71,
+    95.13,
+    97.5
+   ],
+   "doku_std9": 2.613,
+   "dilim_n": 10,
+   "dilim_L_med": [
+    89.9,
+    75.4,
+    75.5,
+    92.7,
+    71.7,
+    89.9,
+    64.1,
+    61.9,
+    89.7,
+    57.5
+   ],
+   "dilim_V095": [
+    94.3,
+    47.8,
+    43.4,
+    88.8,
+    43.6,
+    79.8,
+    26.9,
+    27.6,
+    78.4,
+    33.8
+   ],
+   "dilim_L_fark": 35.19,
+   "dilim_V_fark": 67.35,
+   "parlak_oran_yuzde": 0.484,
+   "L_yuzdelik_fark": [
+    0.07,
+    -0.23,
+    0.06,
+    -0.06,
+    -0.21,
+    -0.4
+   ],
+   "parlak_fark_puan": -0.579,
+   "doku_oran_ana": 1.227,
+   "dilim_parlak": [
+    2.58,
+    0.71,
+    0.15,
+    2.17,
+    0.11,
+    2.09,
+    0.0,
+    0.14,
+    3.97,
+    0.0
+   ],
+   "dilim_parlak_fark": 3.97,
+   "dilim_esik": 2.45,
+   "dilim_gecti": false,
+   "parca_gecti": true,
+   "gecti": true,
+   "dE00_ana": 0.084,
+   "dE00_hedef": 0.176,
+   "dE00_oge_max": 1.241
+  },
+  "kucuk_sag": {
+   "Lab": [
+    73.67,
+    9.67,
+    51.69
+   ],
+   "px": 68790,
+   "L_yuzdelik": [
+    37.69,
+    55.43,
+    73.67,
+    84.69,
+    94.99,
+    97.57
+   ],
+   "doku_std9": 3.616,
+   "dilim_n": 10,
+   "dilim_L_med": [
+    88.0,
+    89.8,
+    55.5,
+    89.5,
+    84.8,
+    65.3,
+    89.8,
+    62.0,
+    82.1,
+    78.6
+   ],
+   "dilim_V095": [
+    97.3,
+    73.3,
+    28.3,
+    83.8,
+    68.7,
+    36.8,
+    95.1,
+    19.5,
+    58.7,
+    51.0
+   ],
+   "dilim_L_fark": 34.35,
+   "dilim_V_fark": 77.73,
+   "parlak_oran_yuzde": 0.426,
+   "L_yuzdelik_fark": [
+    -0.16,
+    -0.08,
+    0.06,
+    -0.08,
+    -0.35,
+    -0.33
+   ],
+   "parlak_fark_puan": -0.637,
+   "doku_oran_ana": 1.698,
+   "dilim_parlak": [
+    1.14,
+    0.34,
+    0.13,
+    0.96,
+    0.42,
+    0.59,
+    1.74,
+    0.07,
+    0.99,
+    0.11
+   ],
+   "dilim_parlak_fark": 1.67,
+   "dilim_esik": 2.45,
+   "dilim_gecti": true,
+   "parca_gecti": true,
+   "gecti": true,
+   "dE00_ana": 0.094,
+   "dE00_hedef": 0.177,
+   "dE00_oge_max": 1.243
+  },
+  "tagline": {
+   "Lab": [
+    72.2,
+    8.77,
+    51.08
+   ],
+   "px": 135028,
+   "L_yuzdelik": [
+    37.49,
+    55.79,
+    72.2,
+    84.52,
+    92.54,
+    96.18
+   ],
+   "doku_std9": 6.02,
+   "dilim_n": 10,
+   "dilim_L_med": [
+    71.7,
+    72.1,
+    69.9,
+    73.5,
+    71.1,
+    69.5,
+    74.0,
+    73.7,
+    72.7,
+    71.5
+   ],
+   "dilim_V095": [
+    18.2,
+    19.5,
+    18.7,
+    25.2,
+    28.5,
+    13.6,
+    16.6,
+    32.1,
+    23.9,
+    18.4
+   ],
+   "dilim_L_fark": 4.41,
+   "dilim_V_fark": 18.51,
+   "parca_n": 41,
+   "parca_L_fark": 9.63,
+   "parca_b_fark": 2.92,
+   "parca_ton_fark": 10.16,
+   "kirmizi_yuzde": 0.028,
+   "parlak_oran_yuzde": 0.0,
+   "L_yuzdelik_fark": [
+    -0.36,
+    0.28,
+    -1.41,
+    -0.25,
+    -2.8,
+    -1.72
+   ],
+   "parlak_fark_puan": -1.063,
+   "doku_oran_ana": 2.826,
+   "dilim_parlak": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "dilim_parlak_fark": 0.0,
+   "dilim_esik": 2.45,
+   "dilim_gecti": true,
+   "parca_gecti": false,
+   "gecti": false,
+   "dE00_ana": 1.169,
+   "dE00_hedef": 1.084,
+   "dE00_oge_max": 1.287
+  }
+ },
+ "en_buyuk_cift": [
+  "sonsuz|tagline",
+  1.287
+ ],
+ "esik": 1.0,
+ "leke_ana": 0.0,
+ "renk_esitleme": {
+  "ana_sembol": {
+   "med_once": [
+    62.96,
+    11.34,
+    49.09
+   ],
+   "kL": 1.1383,
+   "da": -2.97,
+   "db": 0.56
+  },
+  "cember": {
+   "yontem": "L yuzdelik esleme (ana sembol)",
+   "med_once": [
+    72.89,
+    6.78,
+    50.81
+   ],
+   "L_p5_p50_p99_once": [
+    40.54,
+    72.89,
+    81.13
+   ],
+   "da": 3.57,
+   "db": 2.67
+  },
+  "isim1": {
+   "yontem": "L yuzdelik esleme (ana sembol)",
+   "med_once": [
+    74.45,
+    12.36,
+    52.77
+   ],
+   "L_p5_p50_p99_once": [
+    44.9,
+    74.45,
+    96.71
+   ],
+   "da": -2.74,
+   "db": -1.06,
+   "parca": {
+    "yontem": "parca (harf) bazli yuzdelik esleme",
+    "parca": 7
+   }
+  },
+  "sonsuz": {
+   "yontem": "L yuzdelik esleme (ana sembol)",
+   "med_once": [
+    78.91,
+    11.39,
+    57.58
+   ],
+   "L_p5_p50_p99_once": [
+    54.94,
+    78.91,
+    96.1
+   ],
+   "da": -1.7,
+   "db": -5.83
+  },
+  "isim2": {
+   "yontem": "L yuzdelik esleme (ana sembol)",
+   "med_once": [
+    78.97,
+    11.28,
+    52.88
+   ],
+   "L_p5_p50_p99_once": [
+    40.36,
+    78.97,
+    97.08
+   ],
+   "da": -1.59,
+   "db": -1.11,
+   "parca": {
+    "yontem": "parca (harf) bazli yuzdelik esleme",
+    "parca": 5
+   }
+  },
+  "kucuk_sol": {
+   "yontem": "L yuzdelik esleme (ana sembol)",
+   "med_once": [
+    63.56,
+    12.91,
+    50.47
+   ],
+   "L_p5_p50_p99_once": [
+    35.81,
+    63.56,
+    96.45
+   ],
+   "da": -3.24,
+   "db": 1.27
+  },
+  "kucuk_sag": {
+   "yontem": "L yuzdelik esleme (ana sembol)",
+   "med_once": [
+    61.81,
+    12.47,
+    48.39
+   ],
+   "L_p5_p50_p99_once": [
+    33.16,
+    61.81,
+    96.44
+   ],
+   "da": -2.8,
+   "db": 3.34
+  },
+  "tagline": {
+   "yontem": "L yuzdelik esleme (ana sembol)",
+   "med_once": [
+    76.14,
+    11.23,
+    53.08
+   ],
+   "L_p5_p50_p99_once": [
+    42.3,
+    76.14,
+    96.81
+   ],
+   "da": -1.49,
+   "db": -1.05,
+   "parca": {
+    "yontem": "parca (harf) bazli yuzdelik esleme",
+    "parca": 43
+   },
+   "doku_sigma": 3.0
+  }
+ },
+ "yuzde_esik": 1.5,
+ "parlak_esik_puan": 1.0,
+ "sonuc": "FAIL",
+ "tur": 2
+}
