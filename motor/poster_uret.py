@@ -23,6 +23,10 @@ def main():
     C = Path(sys.argv[sys.argv.index('--cikti') + 1]); C.mkdir(parents=True, exist_ok=True)
     pargs = sys.argv[i + 1:]
     kaz = None
+    # HEDEF GORUNUM (7 Eki): hedef JSON verildiyse renk kapisi kapali dongu hedefi = REF donusumu sonrasi (kapi_hedef)
+    kh = []
+    if '--hedef-json' in pargs:
+        kh = ['--hedef', ','.join(map(str, json.loads(Path(pargs[pargs.index('--hedef-json') + 1]).read_text())['kapi_hedef']))]
     for tur in (1, 2):
         ek = ['--renk-kazanc', kaz] if kaz else []
         rc, out = kos(KOK / 'doku_poster.py', *pargs, '--cikti', C, *ek)
@@ -34,7 +38,7 @@ def main():
             print(out); sys.exit(f'FAIL: golge (tur {tur})')
         yeni = C / f'RENK_KAZANC_{tur}.json'
         rc, out = kos(KOK / 'renk_kapi.py', '--poster', C / 'GOLGE_1.png', '--dizin', C, '--rapor', C / 'RENK_KAPI.json',
-                      '--kazanc-cikti', yeni, *(['--onceki-kazanc', kaz] if kaz else []))
+                      '--kazanc-cikti', yeni, *(['--onceki-kazanc', kaz] if kaz else []), *kh)
         print(f'[tur {tur}]', out.strip().splitlines()[-1], flush=True)
         r = json.loads((C / 'RENK_KAPI.json').read_text()); r['tur'] = tur
         (C / 'RENK_KAPI.json').write_text(json.dumps(r, indent=1, ensure_ascii=False))

@@ -253,6 +253,59 @@ def parca_esitle(rgb, al, hedef):
 YUZDE = np.linspace(0, 100, 201)
 
 
+def ref_donusum(rgb, D):
+    """HEDEF GORUNUM (7 Eki): ana sembol L -> REF egrisi (25 yuzdelik cifti, dogrusal ara deger, aralik disi uc farki
+    sabit kayma) + a*, b* sabit kayma. Ogenin tum piksellerine ayni kural."""
+    Lab = cv2.cvtColor(np.clip(rgb, 0, 255).astype(np.float32) / 255, cv2.COLOR_RGB2LAB)
+    q = np.asarray(D['L_kaynak'], np.float32); y = np.asarray(D['L_hedef'], np.float32)
+    L = Lab[..., 0]
+    Ln = np.interp(L, q, y)
+    Lab[..., 0] = np.clip(np.where(L < q[0], L + y[0] - q[0], np.where(L > q[-1], L + y[-1] - q[-1], Ln)), 0, 100)
+    Lab[..., 1] += D['da']; Lab[..., 2] += D['db']
+    return np.clip(cv2.cvtColor(Lab, cv2.COLOR_LAB2RGB), 0, 1) * 255
+
+
+def doku_yumusat(rgb, al, sig):
+    """HEDEF GORUNUM (7 Eki): metin dokusu REF'ten puruzluyse ogenin TAMAMINA alfa agirlikli Gauss L yumusatma
+    (kenar korunur: zemin karismaz, kenar alfasi agirlikla azalir); a*, b* degismez."""
+    Lab = cv2.cvtColor(np.clip(rgb, 0, 255).astype(np.float32) / 255, cv2.COLOR_RGB2LAB)
+    w = np.clip(al, 0, 1).astype(np.float32)
+    L = Lab[..., 0]
+    Ls = cv2.GaussianBlur(L * w, (0, 0), sig) / np.maximum(cv2.GaussianBlur(w, (0, 0), sig), 1e-3)
+    Lab[..., 0] = L + (Ls - L) * w
+    return np.clip(cv2.cvtColor(Lab, cv2.COLOR_LAB2RGB), 0, 1) * 255
+
+
+def cember_donustur(R, cx, cy, C):
+    """HEDEF GORUNUM (7 Eki): cember REF kalinligi ve uc sonmesi. Her aci icin cemberin kendi merkez cizgisi c(aci)
+    (alfa agirlikli yaricap); yaricap boyunca c etrafinda k(aci) ile sikistirma (RGB + alfa, dogrusal ornekleme),
+    alfa x g(aci). k, g: hedef_kur (REF / T5 olcumu, surekli, 1 derece dugum, dogrusal ara deger)."""
+    H, W = R.shape[:2]
+    yy, xx = np.mgrid[0:H, 0:W].astype(np.float32)
+    dx = xx - np.float32(cx); dy = yy - np.float32(cy); del xx, yy
+    r = np.hypot(dx, dy); t = (np.degrees(np.arctan2(dy, dx)) + 360) % 360
+    del dx, dy
+    al = R[..., 3] / 255
+    b = (t * 4).astype(np.int32) % 1440                                # 0.25 derece
+    ws = np.bincount(b.ravel(), al.ravel(), 1440); rs = np.bincount(b.ravel(), (al * r).ravel(), 1440)
+    ok = ws > 1
+    c = np.interp(np.arange(1440), np.nonzero(ok)[0], rs[ok] / ws[ok], period=1440)
+    c = cv2.GaussianBlur(np.r_[c[-40:], c, c[:40]][None].astype(np.float64), (0, 0), 4)[0][40:-40]
+    aci = np.asarray(C['aci_derece'], np.float32)
+    k = np.interp(t, aci, np.asarray(C['k'], np.float32), period=360).astype(np.float32)
+    g = np.interp(t, aci, np.asarray(C['g'], np.float32), period=360).astype(np.float32)
+    cc = np.interp(t, np.arange(1440) / 4, c, period=360).astype(np.float32)
+    rk = cc + (r - cc) / k
+    del r, k, cc
+    th = np.radians(t)
+    mx = (np.float32(cx) + rk * np.cos(th)).astype(np.float32); my = (np.float32(cy) + rk * np.sin(th)).astype(np.float32)
+    del rk, th, t
+    out = np.stack([cv2.remap(np.ascontiguousarray(R[..., i]), mx, my, cv2.INTER_LINEAR, borderValue=0)
+                    for i in range(4)], -1)
+    out[..., 3] *= g
+    return out
+
+
 def l_yuzdelik(rgb, al):
     Lab = cv2.cvtColor(np.clip(rgb, 0, 255).astype(np.float32) / 255, cv2.COLOR_RGB2LAB)
     return np.percentile(Lab[..., 0][cekirdek(al)], YUZDE)
@@ -295,6 +348,8 @@ def main():
                                                       'L dagilimina yuzdelik esleme; "yok" = yalniz medyan esitleme')
     ap.add_argument('--l-duzle', default='var', help='oge ici bolgesel parlaklik duzleme (Serdar 4 Eki); "yok" = kapali')
     ap.add_argument('--renk-kazanc', help='kapali dongu duzeltmesi JSON {oge: {kL, da, db}} (renk_kapi.py ciktisi)')
+    ap.add_argument('--hedef-json', help='HEDEF GORUNUM (Serdar 7 Eki, ChatGPT referansi): hedef_kur.py ciktisi '
+                                         '(ana_donusum, kapi_hedef, zemin_egri, cember, doku_sigma)')
     a = ap.parse_args()
     C = Path(a.cikti); C.mkdir(parents=True, exist_ok=True)
     Z = json.loads(SABIT.read_text())
@@ -308,6 +363,10 @@ def main():
     # 1 zemin: gradient (merkez 24x36 halka merkezi, mesafe halka oraniyla) + plate yildizlari
     GJ = json.loads(GRAD.read_text())
     g = dict(GJ['gradient']); g['merkez'] = [h24[0], h24[1]]; g['kose'] = GJ['gradient']['kose'] * k
+    HJ = json.loads(Path(a.hedef_json).read_text()) if a.hedef_json else None
+    if HJ:
+        g['egri'] = HJ['zemin_egri']                                 # REF radyal profili (izotonik, 201 dugum)
+        rap['hedef_json'] = Path(a.hedef_json).name
     P = zg.gradient(H, W, g)
     plate = np.asarray(Image.open(a.plate).convert('RGB'), np.float32)
     YL, y_kat = zg.yildizlar(plate)
@@ -319,6 +378,8 @@ def main():
     hedef = None if a.renk_hedef == 'yok' else [float(v) for v in a.renk_hedef.split(',')]
     kazanc = json.loads(Path(a.renk_kazanc).read_text()) if a.renk_kazanc else {}
     maske = {}
+    # diger ogelerin a, b hedefi: REF donusumu sonrasi ana sembol (kapi_hedef); yoksa ortak hedef
+    hedef_ab = hedef if not (HJ and hedef) else [hedef[0], HJ['kapi_hedef'][1], HJ['kapi_hedef'][2]]
 
     bekleyen = []
     l_esle = a.l_esleme != 'yok'
@@ -334,6 +395,8 @@ def main():
                 i = [b[0] for b in bekleyen].index('ana_sembol')
                 ad, rgb, al, x, y = bekleyen[i]
                 rgb, rap.setdefault('renk_esitleme', {})[ad] = renk_esitle(rgb, al, hedef, kazanc.get(ad, {}))
+                if HJ:
+                    rgb = ref_donusum(rgb, HJ['ana_donusum'])
                 bekleyen[i] = (ad, rgb, al, x, y)
                 ref = l_yuzdelik(rgb, al)
             for i, (ad, rgb, al, x, y) in enumerate(bekleyen):
@@ -341,7 +404,7 @@ def main():
                     continue
                 if ref is not None:
                     # oge bazli yuzdelik esleme + a, b kaydirma (ana sembole; genis olcekli duzleme 5 Eki kaldirildi)
-                    rgb, rap.setdefault('renk_esitleme', {})[ad] = l_esitle(rgb, al, ref, hedef, kazanc.get(ad, {}))
+                    rgb, rap.setdefault('renk_esitleme', {})[ad] = l_esitle(rgb, al, ref, hedef_ab, kazanc.get(ad, {}))
                     if ad in METIN:
                         # Serdar 5 Eki (8e9c727 RED, bakir harfler): SONRA harfler ogenin KENDI ortak dagilimina
                         # esitlenir (L yuzdelikleri + medyan a, b, tum parcalar birlikte, global eslemeden sonra)
@@ -349,6 +412,9 @@ def main():
                         ce = cekirdek(al)
                         oz = [np.percentile(Lab[..., k][ce], PARCA_Q) for k in range(3)]
                         rgb, rap['renk_esitleme'][ad]['parca'] = parca_esitle(rgb, al, oz)
+                        if HJ and ad in HJ.get('doku_sigma', {}):
+                            rgb = doku_yumusat(rgb, al, HJ['doku_sigma'][ad])
+                            rap['renk_esitleme'][ad]['doku_sigma'] = HJ['doku_sigma'][ad]
                 else:
                     rgb, rap.setdefault('renk_esitleme', {})[ad] = renk_esitle(rgb, al, hedef, kazanc.get(ad, {}))
                 bekleyen[i] = (ad, rgb, al, x, y)
@@ -367,6 +433,9 @@ def main():
     # 2 cember (supurulmus)
     R = np.load(a.cember).astype(np.float32)
     cx0, cy0, _, _ = [int(v) for v in a.cember_kutu.split(',')]
+    if HJ:
+        R = cember_donustur(R, h24[0] - cx0, h24[1] - cy0, HJ['cember'])
+        rap['cember_hedef'] = {'k_medyan': HJ['cember']['k_medyan']}
     bindir('cember', R[..., :3], R[..., 3] / 255, cx0, cy0)
     del R
     # 3 ana sembol (orijinal)

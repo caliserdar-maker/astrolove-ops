@@ -34,7 +34,7 @@ PARLAK_ESIK = 1.0
 DILIM_N = 10            # oge boyunca esit dilim (cember: aci dilimi 12)
 HALKA_MERKEZ = (3598.97, 4388.09)
 METIN = ('isim1', 'isim2', 'tagline')
-PARCA_L_ESIK, PARCA_B_ESIK, PARCA_TON_ESIK = 1.0, 1.0, 3.0      # Serdar 5 Eki: harf bazli esitleme kapisi
+PARCA_L_ESIK, PARCA_B_ESIK, PARCA_TON_ESIK = 1.0, 1.5, 3.0   # b* 1.5: Serdar 7 Eki      # Serdar 5 Eki: harf bazli esitleme kapisi
 PARCA_MIN_PX = 300
 KIRMIZI_A, KIRMIZI_ESIK = 25.0, 1.5    # Serdar 5 Eki (8e9c727 RED): metin cekirdeginde a* > 25 orani <= %1.5
 
