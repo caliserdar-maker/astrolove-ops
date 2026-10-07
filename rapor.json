@@ -1,0 +1,258 @@
+{
+ "isler": [
+  "ARIES_TAURUS",
+  "ARIES_VIRGO",
+  "CANCER_CANCER",
+  "CANCER_CAPRICORN",
+  "CANCER_GEMINI",
+  "CANCER_LEO",
+  "CANCER_PISCES",
+  "CANCER_SAGITTARIUS",
+  "CANCER_SCORPIO",
+  "CANCER_TAURUS"
+ ],
+ "sonuc": [
+  {
+   "cift": "ARIES_TAURUS",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4712,
+    "input_tokens_details": {
+     "image_tokens": 4527,
+     "text_tokens": 185
+    },
+    "output_tokens": 8232,
+    "output_tokens_details": {
+     "image_tokens": 8232,
+     "text_tokens": 0
+    },
+    "total_tokens": 12944
+   },
+   "usd": 0.2841,
+   "sn": 91.1
+  },
+  {
+   "cift": "ARIES_VIRGO",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4680,
+    "input_tokens_details": {
+     "image_tokens": 4495,
+     "text_tokens": 185
+    },
+    "output_tokens": 6433,
+    "output_tokens_details": {
+     "image_tokens": 6433,
+     "text_tokens": 0
+    },
+    "total_tokens": 11113
+   },
+   "usd": 0.2299,
+   "sn": 71.7
+  },
+  {
+   "cift": "CANCER_CANCER",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4166,
+    "input_tokens_details": {
+     "image_tokens": 3981,
+     "text_tokens": 185
+    },
+    "output_tokens": 4286,
+    "output_tokens_details": {
+     "image_tokens": 4286,
+     "text_tokens": 0
+    },
+    "total_tokens": 8452
+   },
+   "usd": 0.1614,
+   "sn": 54.3
+  },
+  {
+   "cift": "CANCER_CAPRICORN",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4694,
+    "input_tokens_details": {
+     "image_tokens": 4509,
+     "text_tokens": 185
+    },
+    "output_tokens": 6946,
+    "output_tokens_details": {
+     "image_tokens": 6946,
+     "text_tokens": 0
+    },
+    "total_tokens": 11640
+   },
+   "usd": 0.2454,
+   "sn": 80.3
+  },
+  {
+   "cift": "CANCER_GEMINI",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4630,
+    "input_tokens_details": {
+     "image_tokens": 4445,
+     "text_tokens": 185
+    },
+    "output_tokens": 7719,
+    "output_tokens_details": {
+     "image_tokens": 7719,
+     "text_tokens": 0
+    },
+    "total_tokens": 12349
+   },
+   "usd": 0.2681,
+   "sn": 85.5
+  },
+  {
+   "cift": "CANCER_LEO",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4630,
+    "input_tokens_details": {
+     "image_tokens": 4445,
+     "text_tokens": 185
+    },
+    "output_tokens": 7716,
+    "output_tokens_details": {
+     "image_tokens": 7716,
+     "text_tokens": 0
+    },
+    "total_tokens": 12346
+   },
+   "usd": 0.268,
+   "sn": 88.5
+  },
+  {
+   "cift": "CANCER_PISCES",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4680,
+    "input_tokens_details": {
+     "image_tokens": 4495,
+     "text_tokens": 185
+    },
+    "output_tokens": 6775,
+    "output_tokens_details": {
+     "image_tokens": 6775,
+     "text_tokens": 0
+    },
+    "total_tokens": 11455
+   },
+   "usd": 0.2401,
+   "sn": 80.6
+  },
+  {
+   "cift": "CANCER_SAGITTARIUS",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4622,
+    "input_tokens_details": {
+     "image_tokens": 4437,
+     "text_tokens": 185
+    },
+    "output_tokens": 7288,
+    "output_tokens_details": {
+     "image_tokens": 7288,
+     "text_tokens": 0
+    },
+    "total_tokens": 11910
+   },
+   "usd": 0.2551,
+   "sn": 85.9
+  },
+  {
+   "cift": "CANCER_SCORPIO",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4640,
+    "input_tokens_details": {
+     "image_tokens": 4455,
+     "text_tokens": 185
+    },
+    "output_tokens": 6089,
+    "output_tokens_details": {
+     "image_tokens": 6089,
+     "text_tokens": 0
+    },
+    "total_tokens": 10729
+   },
+   "usd": 0.2192,
+   "sn": 70.1
+  },
+  {
+   "cift": "CANCER_TAURUS",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4712,
+    "input_tokens_details": {
+     "image_tokens": 4527,
+     "text_tokens": 185
+    },
+    "output_tokens": 8232,
+    "output_tokens_details": {
+     "image_tokens": 8232,
+     "text_tokens": 0
+    },
+    "total_tokens": 12944
+   },
+   "usd": 0.2841,
+   "sn": 94.0
+  }
+ ],
+ "toplam_usd": 2.4554,
+ "butce_usd": 5.0
+}
