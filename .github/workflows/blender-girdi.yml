@@ -23,14 +23,14 @@ jobs:
           if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
             [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
           fi
-      - name: Drive'dan indir (salt okur)
+      - name: "Drive indir - salt okur"
         run: |
           set -euo pipefail
           mkdir -p ham/ana ham/poster
           rclone copy "gdrive,root_folder_id=1Zu0pp9DUMOkUVco_haywVz9zlEfNeDgH:" ham/ana --include "*_gold.png" --transfers 8
           rclone copy "gdrive,root_folder_id=1ZV1pwbfXdTQLzKEUGHxFojXWBYIj3Vm-:" ham/poster --include "*.png" --transfers 8
           ls ham/ana | wc -l; ls ham/poster | wc -l
-      - name: Donustur (ana: alfa PNG, poster: 2000x3000 JPG)
+      - name: "Donustur - ana alfa PNG, poster 2000x3000 JPG"
         run: |
           set -euo pipefail
           pip install -q pillow numpy
