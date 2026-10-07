@@ -1,0 +1,14 @@
+{
+ "doku": {
+  "zemin_std_seviye": 0.411,
+  "yildiz": 76,
+  "kalan_maske_orani": 0.0
+ },
+ "T_zemin_seviye": 0.411,
+ "T_altin_seviye": 5.0,
+ "bant_sigma": 4.0,
+ "isik": "sol ust",
+ "kenar_px": 4.0,
+ "koyu": 0.4,
+ "acik": 0.15
+}

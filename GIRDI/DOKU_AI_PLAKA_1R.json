@@ -1,0 +1,170 @@
+{
+ "tur": "plaka_r",
+ "boyut": [
+  4878,
+  2320
+ ],
+ "referans_kutu": [
+  0,
+  0,
+  716,
+  378
+ ],
+ "ogeler": [
+  {
+   "oge": "AQUARIUS",
+   "hucre": [
+    2439,
+    0,
+    4878,
+    580
+   ],
+   "kutu": [
+    2741,
+    127,
+    4576,
+    453
+   ],
+   "kaynak": "aquarius_name_gold.png",
+   "sha256": "da50043ba613797eb93f33eb586d912ccc5e840db454044cac19fb57b3f7226f",
+   "kaynak_kirp": [
+    0,
+    0,
+    2109,
+    375
+   ],
+   "olcek": 0.87026,
+   "olcek_kaynagi": "poster yazisi plakadan farkli (ncc 0.6739); buyuk harf yuksekligi kurali 163.47 px (16x20): 0.51405 x 1.6929"
+  },
+  {
+   "oge": "ARIES",
+   "hucre": [
+    0,
+    580,
+    2439,
+    1160
+   ],
+   "kutu": [
+    639,
+    727,
+    1800,
+    1013
+   ],
+   "kaynak": "aries_name_gold.png",
+   "sha256": "e385871c7db4dbaf09864f260d38066ad053fe2f3f8ebe894eb0eb16afda4239",
+   "kaynak_kirp": [
+    0,
+    0,
+    1845,
+    454
+   ],
+   "olcek": 0.62917,
+   "olcek_kaynagi": "16x20 orijinal ARIES_ARIES.jpg eslesme (ncc 0.9408): 0.37164 x 1.6929"
+  },
+  {
+   "oge": "CANCER",
+   "hucre": [
+    2439,
+    580,
+    4878,
+    1160
+   ],
+   "kutu": [
+    2868,
+    725,
+    4449,
+    1014
+   ],
+   "kaynak": "cancer_name_gold.png",
+   "sha256": "d6b6039ac97335712e0c10bdbd0ab318ab3ecdc282b750c697405aad8ad3d7b9",
+   "kaynak_kirp": [
+    0,
+    0,
+    2153,
+    393
+   ],
+   "olcek": 0.73415,
+   "olcek_kaynagi": "16x20 orijinal CANCER_CANCER.jpg eslesme (ncc 0.9318): 0.43365 x 1.6929"
+  },
+  {
+   "oge": "CAPRICORN",
+   "hucre": [
+    0,
+    1160,
+    2439,
+    1740
+   ],
+   "kutu": [
+    60,
+    1306,
+    2379,
+    1593
+   ],
+   "kaynak": "capricorn_name_gold.png",
+   "sha256": "29bdaf1a2fb56410e1dd22864029e9a1edc6682e418312a112c06a957dc3893b",
+   "kaynak_kirp": [
+    0,
+    0,
+    2133,
+    264
+   ],
+   "olcek": 1.08743,
+   "olcek_kaynagi": "16x20 orijinal CAPRICORN_CAPRICORN.jpg eslesme (ncc 0.9292): 0.64233 x 1.6929"
+  },
+  {
+   "oge": "GEMINI",
+   "hucre": [
+    2439,
+    1160,
+    4878,
+    1740
+   ],
+   "kutu": [
+    2998,
+    1306,
+    4319,
+    1593
+   ],
+   "kaynak": "gemini_name_gold.png",
+   "sha256": "8d9a4cadc7a51ca9fd08cba5e0ab9855bf4e1d6b234072ede24a95eb5b35b702",
+   "kaynak_kirp": [
+    0,
+    0,
+    2084,
+    453
+   ],
+   "olcek": 0.63374,
+   "olcek_kaynagi": "16x20 orijinal GEMINI_GEMINI.jpg eslesme (ncc 0.9397): 0.37434 x 1.6929"
+  },
+  {
+   "oge": "LEO",
+   "hucre": [
+    0,
+    1740,
+    2439,
+    2320
+   ],
+   "kutu": [
+    823,
+    1892,
+    1616,
+    2167
+   ],
+   "kaynak": "leo_name_gold.png",
+   "sha256": "5cf63e7106c587d92ae3389665835628d428668b26112ba2a9a17aa6f98962ee",
+   "kaynak_kirp": [
+    0,
+    0,
+    2042,
+    708
+   ],
+   "olcek": 0.38834,
+   "olcek_kaynagi": "16x20 orijinal LEO_LEO.jpg eslesme (ncc 0.9579): 0.22939 x 1.6929"
+  }
+ ],
+ "referans": "onayli Canva harfleri, cila sonrasi: A = ISIM_1 (DOKU_AI_ISIM_1_CANVA.jpg), R = ISIM_2 v2 (DOKU_AI_ISIM_2_CANVA_v2.jpg); sekil vektor maske, 24x36 olcek",
+ "olcek": "24x36 baski, 300 dpi, 1:1",
+ "kaynak_sayfa": "DOKU_AI_PLAKA_1.png (175c4f0)",
+ "dosya": "DOKU_AI_PLAKA_1R.png",
+ "sha256": "80ef6012f2affe1bcd1e58f0a66b72857fc0e0e7e7a97399def17816355899b5"
+}

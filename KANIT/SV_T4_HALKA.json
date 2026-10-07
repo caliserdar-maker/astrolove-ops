@@ -1,0 +1,76 @@
+{
+ "GOLGE_1.png": {
+  "kanallar": {
+   "R": {
+    "halka_kontrast_p99": 0.047,
+    "artik_std": 0.013,
+    "aralik": [
+     0.4,
+     2.1
+    ],
+    "mono_ihlal": 1.701
+   },
+   "G": {
+    "halka_kontrast_p99": 0.051,
+    "artik_std": 0.013,
+    "aralik": [
+     1.3,
+     11.4
+    ],
+    "mono_ihlal": 0.0
+   },
+   "B": {
+    "halka_kontrast_p99": 0.05,
+    "artik_std": 0.013,
+    "aralik": [
+     11.2,
+     46.2
+    ],
+    "mono_ihlal": 0.0
+   }
+  },
+  "olcu_kanal": "B",
+  "halka_kontrast": 0.05,
+  "mono_ihlal": 0.0,
+  "esik": 0.12,
+  "mono_esik": 0.5,
+  "sonuc": "PASS"
+ },
+ "TESLIM_q100.jpg": {
+  "kanallar": {
+   "R": {
+    "halka_kontrast_p99": 0.067,
+    "artik_std": 0.019,
+    "aralik": [
+     0.5,
+     2.4
+    ],
+    "mono_ihlal": 2.601
+   },
+   "G": {
+    "halka_kontrast_p99": 0.097,
+    "artik_std": 0.024,
+    "aralik": [
+     1.2,
+     11.4
+    ],
+    "mono_ihlal": 0.0
+   },
+   "B": {
+    "halka_kontrast_p99": 0.103,
+    "artik_std": 0.028,
+    "aralik": [
+     11.1,
+     46.3
+    ],
+    "mono_ihlal": 0.0
+   }
+  },
+  "olcu_kanal": "B",
+  "halka_kontrast": 0.103,
+  "mono_ihlal": 0.0,
+  "esik": 0.12,
+  "mono_esik": 0.5,
+  "sonuc": "PASS"
+ }
+}

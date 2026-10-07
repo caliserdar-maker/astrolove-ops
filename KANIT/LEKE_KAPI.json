@@ -1,0 +1,65 @@
+{
+ "olcu": "solgun-parlak leke alani binde (cekirdek px, bilesen >= 800 px)",
+ "esik": 100.0,
+ "onayli": {
+  "KUCUK_1A_P:AQUARIUS": 17.757,
+  "KUCUK_1A_P:ARIES": 24.852,
+  "KUCUK_1A_P:CANCER": 13.783,
+  "KUCUK_1B_P:CAPRICORN": 0.0,
+  "KUCUK_1B_P:GEMINI": 61.015,
+  "KUCUK_1B_P:LEO": 63.003,
+  "KUCUK_2:LIBRA": 189.126,
+  "KUCUK_2:PISCES": 26.054,
+  "KUCUK_2:SAGITTARIUS": 0.0,
+  "KUCUK_2:SCORPIO": 39.639,
+  "KUCUK_2:TAURUS": 127.744,
+  "KUCUK_2:VIRGO": 46.533,
+  "LOGO_1:LOGO": 0.0
+ },
+ "semboller": {
+  "CANCER_LIBRA": {
+   "leke": 146.875,
+   "ceyrek": {
+    "sol_ust": 113.906,
+    "sag_ust": 112.901,
+    "sol_alt": 189.993,
+    "sag_alt": 166.046
+   },
+   "sonuc": "FAIL"
+  },
+  "AQUARIUS_ARIES": {
+   "leke": 139.014,
+   "ceyrek": {
+    "sol_ust": 216.354,
+    "sag_ust": 86.195,
+    "sol_alt": 67.343,
+    "sag_alt": 183.208
+   },
+   "sonuc": "FAIL"
+  },
+  "SCORPIO_VIRGO": {
+   "leke": 59.124,
+   "ceyrek": {
+    "sol_ust": 109.501,
+    "sag_ust": 63.033,
+    "sol_alt": 21.53,
+    "sag_alt": 15.338
+   },
+   "sonuc": "PASS"
+  },
+  "LEO_SAGITTARIUS": {
+   "leke": 76.724,
+   "ceyrek": {
+    "sol_ust": 62.046,
+    "sag_ust": 115.695,
+    "sol_alt": 35.266,
+    "sag_alt": 104.452
+   },
+   "sonuc": "PASS"
+  }
+ },
+ "esik_disi": [
+  "CANCER_LIBRA",
+  "AQUARIUS_ARIES"
+ ]
+}

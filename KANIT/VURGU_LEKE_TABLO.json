@@ -1,0 +1,25 @@
+{
+ "esik": 100.0,
+ "tablo": {
+  "CANCER_LIBRA": {
+   "eski": 146.875,
+   "cila_sonrasi": 41.474,
+   "yeni": 0.0
+  },
+  "AQUARIUS_ARIES": {
+   "eski": 139.014,
+   "cila_sonrasi": 40.722,
+   "yeni": 0.0
+  },
+  "SCORPIO_VIRGO": {
+   "eski": 59.124,
+   "cila_sonrasi": 19.363,
+   "yeni": 0.0
+  },
+  "LEO_SAGITTARIUS": {
+   "eski": 76.724,
+   "cila_sonrasi": 30.78,
+   "yeni": 0.0
+  }
+ }
+}

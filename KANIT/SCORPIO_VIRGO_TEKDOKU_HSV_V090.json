@@ -1,0 +1,34 @@
+{
+ "cember": {
+  "once": 6.9,
+  "sonra": 43.4
+ },
+ "ana_sembol": {
+  "once": 44.6,
+  "sonra": 44.6
+ },
+ "isim1": {
+  "once": 36.9,
+  "sonra": 45.2
+ },
+ "sonsuz": {
+  "once": 0.0,
+  "sonra": 42.5
+ },
+ "isim2": {
+  "once": 0.0,
+  "sonra": 43.0
+ },
+ "kucuk_sol": {
+  "once": 44.0,
+  "sonra": 45.1
+ },
+ "kucuk_sag": {
+  "once": 45.8,
+  "sonra": 44.5
+ },
+ "tagline": {
+  "once": 21.3,
+  "sonra": 47.2
+ }
+}

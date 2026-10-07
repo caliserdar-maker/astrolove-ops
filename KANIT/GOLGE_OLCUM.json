@@ -1,0 +1,206 @@
+{
+ "isik": "sol ust, golge sag alt 45 derece",
+ "renk": [
+  1.0,
+  2.0,
+  9.0
+ ],
+ "kademe": {
+  "1": {
+   "deger": {
+    "kayma": 28,
+    "bulanik": 12,
+    "opak": 0.55
+   },
+   "oge": {
+    "cember": {
+     "f": 0.5,
+     "kayma_px": 14.0,
+     "bulaniklik_sigma_px": 6.0,
+     "opaklik": 0.44
+    },
+    "ana_sembol": {
+     "f": 1.0,
+     "kayma_px": 28.0,
+     "bulaniklik_sigma_px": 12.0,
+     "opaklik": 0.55
+    },
+    "kucuk_sol": {
+     "f": 0.25,
+     "kayma_px": 7.0,
+     "bulaniklik_sigma_px": 3.0,
+     "opaklik": 0.385
+    },
+    "kucuk_sag": {
+     "f": 0.25,
+     "kayma_px": 7.0,
+     "bulaniklik_sigma_px": 3.0,
+     "opaklik": 0.385
+    },
+    "isim1": {
+     "f": 0.25,
+     "kayma_px": 7.0,
+     "bulaniklik_sigma_px": 3.0,
+     "opaklik": 0.385
+    },
+    "sonsuz": {
+     "f": 0.25,
+     "kayma_px": 7.0,
+     "bulaniklik_sigma_px": 3.0,
+     "opaklik": 0.385
+    },
+    "isim2": {
+     "f": 0.25,
+     "kayma_px": 7.0,
+     "bulaniklik_sigma_px": 3.0,
+     "opaklik": 0.385
+    },
+    "tagline": {
+     "f": 0.25,
+     "kayma_px": 7.0,
+     "bulaniklik_sigma_px": 3.0,
+     "opaklik": 0.385
+    }
+   },
+   "kontrast": [
+    9.45,
+    9.42,
+    10.22
+   ],
+   "altin_degisim_maks": 1.0552978515625
+  },
+  "2": {
+   "deger": {
+    "kayma": 60,
+    "bulanik": 24,
+    "opak": 0.75
+   },
+   "oge": {
+    "cember": {
+     "f": 0.5,
+     "kayma_px": 30.0,
+     "bulaniklik_sigma_px": 12.0,
+     "opaklik": 0.6
+    },
+    "ana_sembol": {
+     "f": 1.0,
+     "kayma_px": 60.0,
+     "bulaniklik_sigma_px": 24.0,
+     "opaklik": 0.75
+    },
+    "kucuk_sol": {
+     "f": 0.25,
+     "kayma_px": 15.0,
+     "bulaniklik_sigma_px": 6.0,
+     "opaklik": 0.525
+    },
+    "kucuk_sag": {
+     "f": 0.25,
+     "kayma_px": 15.0,
+     "bulaniklik_sigma_px": 6.0,
+     "opaklik": 0.525
+    },
+    "isim1": {
+     "f": 0.25,
+     "kayma_px": 15.0,
+     "bulaniklik_sigma_px": 6.0,
+     "opaklik": 0.525
+    },
+    "sonsuz": {
+     "f": 0.25,
+     "kayma_px": 15.0,
+     "bulaniklik_sigma_px": 6.0,
+     "opaklik": 0.525
+    },
+    "isim2": {
+     "f": 0.25,
+     "kayma_px": 15.0,
+     "bulaniklik_sigma_px": 6.0,
+     "opaklik": 0.525
+    },
+    "tagline": {
+     "f": 0.25,
+     "kayma_px": 15.0,
+     "bulaniklik_sigma_px": 6.0,
+     "opaklik": 0.525
+    }
+   },
+   "kontrast": [
+    9.53,
+    9.5,
+    10.3
+   ],
+   "altin_degisim_maks": 1.4372406005859375
+  },
+  "3": {
+   "deger": {
+    "kayma": 110,
+    "bulanik": 40,
+    "opak": 0.95
+   },
+   "oge": {
+    "cember": {
+     "f": 0.5,
+     "kayma_px": 55.0,
+     "bulaniklik_sigma_px": 20.0,
+     "opaklik": 0.76
+    },
+    "ana_sembol": {
+     "f": 1.0,
+     "kayma_px": 110.0,
+     "bulaniklik_sigma_px": 40.0,
+     "opaklik": 0.95
+    },
+    "kucuk_sol": {
+     "f": 0.25,
+     "kayma_px": 27.5,
+     "bulaniklik_sigma_px": 10.0,
+     "opaklik": 0.665
+    },
+    "kucuk_sag": {
+     "f": 0.25,
+     "kayma_px": 27.5,
+     "bulaniklik_sigma_px": 10.0,
+     "opaklik": 0.665
+    },
+    "isim1": {
+     "f": 0.25,
+     "kayma_px": 27.5,
+     "bulaniklik_sigma_px": 10.0,
+     "opaklik": 0.665
+    },
+    "sonsuz": {
+     "f": 0.25,
+     "kayma_px": 27.5,
+     "bulaniklik_sigma_px": 10.0,
+     "opaklik": 0.665
+    },
+    "isim2": {
+     "f": 0.25,
+     "kayma_px": 27.5,
+     "bulaniklik_sigma_px": 10.0,
+     "opaklik": 0.665
+    },
+    "tagline": {
+     "f": 0.25,
+     "kayma_px": 27.5,
+     "bulaniklik_sigma_px": 10.0,
+     "opaklik": 0.665
+    }
+   },
+   "kontrast": [
+    9.66,
+    9.62,
+    10.39
+   ],
+   "altin_degisim_maks": 1.7205047607421875
+  }
+ },
+ "0": {
+  "kontrast": [
+   9.43,
+   9.4,
+   10.2
+  ]
+ }
+}

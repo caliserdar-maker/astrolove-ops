@@ -1,0 +1,38 @@
+{
+ "tur": "logo",
+ "boyut": [
+  1456,
+  580
+ ],
+ "referans_kutu": [
+  0,
+  0,
+  640,
+  580
+ ],
+ "ogeler": [
+  {
+   "oge": "LOGO",
+   "kutu": [
+    760,
+    192,
+    1396,
+    388
+   ],
+   "kaynak": "logo.png",
+   "sha256": "ada195bb97908eeb13b3328cfa45a4ef0fecc04ce3542113a2accca351ff87c8",
+   "kaynak_kirp": [
+    0,
+    0,
+    1370,
+    423
+   ],
+   "olcek": 0.46423,
+   "olcek_kaynagi": "24x36 sonsuz genisligi 636 px / 1370"
+  }
+ ],
+ "dosya": "DOKU_AI_LOGO_1.png",
+ "sha256": "62239238b25dbc5417dab4dc353fdbf15129599c9372737d5d8ddb86b3042061",
+ "referans": "main_aquarius_aries_gold.png",
+ "olcek": "24x36 baski, 300 dpi, 1:1"
+}

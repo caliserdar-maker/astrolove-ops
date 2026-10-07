@@ -1,0 +1,151 @@
+{
+ "tur": "ana_sembol",
+ "boyut": [
+  7310,
+  7825
+ ],
+ "oran": 0.9342,
+ "pay_px": 60,
+ "referans_kutu": [
+  0,
+  0,
+  1685,
+  735
+ ],
+ "referans": "ONAYLI Canva dokusu, cila sonrasi: CANCER (KUCUK_1A_P), LIBRA (KUCUK_2 v2); siyah zemin",
+ "referans_ogeler": [
+  {
+   "oge": "CANCER",
+   "kutu": [
+    60,
+    60,
+    744,
+    654
+   ],
+   "kaynak": "KUCUK_1A_P.npz (cila sonrasi t1 x O)"
+  },
+  {
+   "oge": "LIBRA",
+   "kutu": [
+    804,
+    60,
+    1625,
+    675
+   ],
+   "kaynak": "KUCUK_2.npz (cila sonrasi t1 x O)"
+  }
+ ],
+ "ogeler": [
+  {
+   "oge": "CANCER_LIBRA",
+   "hucre": [
+    0,
+    735,
+    3655,
+    4280
+   ],
+   "kutu": [
+    60,
+    844,
+    3595,
+    4171
+   ],
+   "pay_min_px": 60,
+   "kaynak": "main_cancer_libra_gold.png",
+   "sha256": "e5a0b5801a5c0c3ed5d4bcf97c499b7d53162968e96bdd990e8adeaff8920261",
+   "kaynak_kirp": [
+    0,
+    0,
+    8185,
+    7702
+   ],
+   "olcek": 0.43192,
+   "olcek_kaynagi": "16x20 orijinal CANCER_LIBRA.jpg NCC 0.9913 olcek 0.2545 x 1.69714 (SCORPIO_VIRGO 24x36 sabiti 0.50066 / 16x20 0.295)",
+   "sekil": "asset alfasi (posterle NCC eslesmesi, istisna degil)"
+  },
+  {
+   "oge": "AQUARIUS_ARIES",
+   "hucre": [
+    3655,
+    735,
+    7310,
+    4280
+   ],
+   "kutu": [
+    3897,
+    1203,
+    7068,
+    3812
+   ],
+   "pay_min_px": 242,
+   "kaynak": "main_aquarius_aries_gold.png",
+   "sha256": "8c7223aa6c6c9e153d8999d29be77d43ca10aa8cad51fc0c3d18d02f451f0552",
+   "kaynak_kirp": [
+    0,
+    0,
+    5654,
+    4652
+   ],
+   "olcek": 0.56091,
+   "olcek_kaynagi": "16x20 orijinal AQUARIUS_ARIES.jpg NCC 0.9908 olcek 0.3305 x 1.69714 (SCORPIO_VIRGO 24x36 sabiti 0.50066 / 16x20 0.295)",
+   "sekil": "asset alfasi (posterle NCC eslesmesi, istisna degil)"
+  },
+  {
+   "oge": "SCORPIO_VIRGO",
+   "hucre": [
+    0,
+    4280,
+    3655,
+    7825
+   ],
+   "kutu": [
+    100,
+    4629,
+    3555,
+    7475
+   ],
+   "pay_min_px": 100,
+   "kaynak": "main_scorpio_virgo_gold.png",
+   "sha256": "9c94fe357b7eb1d62222c9654be41b38ad5f6065a43f70b974df29abcfd13c5e",
+   "kaynak_kirp": [
+    0,
+    0,
+    6901,
+    5684
+   ],
+   "olcek": 0.50066,
+   "olcek_kaynagi": "16x20 orijinal SCORPIO_VIRGO.jpg NCC 0.9782 olcek 0.295 x 1.69714 (SCORPIO_VIRGO 24x36 sabiti 0.50066 / 16x20 0.295)",
+   "sekil": "asset alfasi (posterle NCC eslesmesi, istisna degil)"
+  },
+  {
+   "oge": "LEO_SAGITTARIUS",
+   "hucre": [
+    3655,
+    4280,
+    7310,
+    7825
+   ],
+   "kutu": [
+    3871,
+    4340,
+    7094,
+    7765
+   ],
+   "pay_min_px": 60,
+   "kaynak": "main_leo_sagittarius_gold.png",
+   "sha256": "1e9f7091155cc1257ae65bf0757b20e42173d366c1e8c070e19e6c2ed84687ae",
+   "kaynak_kirp": [
+    0,
+    0,
+    6894,
+    7325
+   ],
+   "olcek": 0.46756,
+   "olcek_kaynagi": "16x20 orijinal LEO_SAGITTARIUS.jpg NCC 0.9918 olcek 0.2755 x 1.69714 (SCORPIO_VIRGO 24x36 sabiti 0.50066 / 16x20 0.295)",
+   "sekil": "asset alfasi (posterle NCC eslesmesi, istisna degil)"
+  }
+ ],
+ "olcek": "24x36 baski, 300 dpi, 1:1",
+ "dosya": "DOKU_AI_ANA_DENEME.png",
+ "sha256": "74ec4563596ebb7716ff27717e018c552e826ba2b805f51912d627ccdbd68685"
+}

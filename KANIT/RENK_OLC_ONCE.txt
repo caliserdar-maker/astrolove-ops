@@ -1,0 +1,24 @@
+
+CANCER_LIBRA
+oge                  L     a     b     C   ton  dE00 px
+ANA SEMBOL        72.4   8.7  49.0  49.7  79.9  0.00 138692
+CEMBER            70.1   6.4  48.2  48.6  82.5  2.38 17358
+KUCUK SEMBOLLER   76.5   9.3  52.3  53.1  79.9  3.21 12341
+ISIMLER+SONSUZ    70.3  10.4  50.5  51.5  78.3  1.92 14823
+TAGLINE           69.8   8.0  49.2  49.8  80.8  2.05 10601
+
+AQUARIUS_ARIES
+oge                  L     a     b     C   ton  dE00 px
+ANA SEMBOL        73.0   8.3  49.6  50.3  80.5  0.00 96686
+CEMBER            70.1   6.4  48.2  48.6  82.5  2.59 17358
+KUCUK SEMBOLLER   65.7  10.0  48.8  49.8  78.5  5.87 8275
+ISIMLER+SONSUZ    72.7  10.5  51.1  52.2  78.4  1.46 17659
+TAGLINE           68.5   8.8  48.8  49.6  79.8  3.53 9422
+
+SCORPIO_VIRGO
+oge                  L     a     b     C   ton  dE00 px
+ANA SEMBOL        63.0  11.0  48.9  50.2  77.3  0.00 118339
+CEMBER            70.1   6.4  48.2  48.6  82.5  6.54 17358
+KUCUK SEMBOLLER   62.1  12.0  48.6  50.0  76.2  1.00 12560
+ISIMLER+SONSUZ    72.2  10.0  51.2  52.1  79.0  7.42 20210
+TAGLINE           71.0   8.3  49.5  50.2  80.5  6.73 16579

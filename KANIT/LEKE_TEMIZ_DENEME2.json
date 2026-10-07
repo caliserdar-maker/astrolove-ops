@@ -1,0 +1,40 @@
+{
+ "leke_once": 146.875,
+ "leke_sonra": 43.061,
+ "ceyrek_once": {
+  "sol_ust": 113.906,
+  "sag_ust": 112.901,
+  "sol_alt": 189.993,
+  "sag_alt": 166.046
+ },
+ "ceyrek_sonra": {
+  "sol_ust": 40.891,
+  "sag_ust": 2.196,
+  "sol_alt": 63.069,
+  "sag_alt": 63.228
+ },
+ "esik": 100.0,
+ "kapi_leke_px": 258431,
+ "leke_bolgesi_px": 570800,
+ "degisen_px": 406174,
+ "leke_bolgesi_disi_degisen_oran": 0.0,
+ "kapi_maskesi_disi_degisen_px": 241178,
+ "oge": "CANCER_LIBRA",
+ "kutu": [
+  60,
+  844,
+  3595,
+  4171
+ ],
+ "kaynak": "ANA_DENEME.npz",
+ "poster": {
+  "yer": [
+   1832,
+   2375
+  ],
+  "poster_degisen_px": 406174,
+  "poster_leke_bolgesi_disi_degisen_px": 0,
+  "poster_leke_bolgesi_disi_oran": 0.0
+ },
+ "sonuc": "FAIL (gozle): sayisal esik gecti, duzeltilen bolgelerde blok/cizgi izi; 2 deneme siniri, durduruldu"
+}

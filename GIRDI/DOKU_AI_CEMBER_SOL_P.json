@@ -1,0 +1,79 @@
+{
+ "tur": "cember_dilim",
+ "boyut": [
+  1427,
+  3566
+ ],
+ "referans_kutu": [
+  0,
+  0,
+  640,
+  580
+ ],
+ "referans": "main_aquarius_aries_gold.png",
+ "ogeler": [
+  {
+   "oge": "CEMBER_SOL",
+   "kutu": [
+    159,
+    610,
+    1268,
+    3566
+   ],
+   "kaynak": "HALKA_24x36.png",
+   "sha256": "6d75106b47e247ea0d70b3013431180bc7acbfc7d509f99428e50223972e075c",
+   "olcek": 1.0,
+   "kaynak_kirp": [
+    700,
+    2182,
+    1809,
+    5138
+   ]
+  }
+ ],
+ "halka": {
+  "merkez": [
+   3598.97,
+   4388.09
+  ],
+  "yaricap": 2835.71,
+  "sag_uc_aci": 316,
+  "sol_uc_aci": 224,
+  "aci_araligi": [
+   131,
+   194
+  ],
+  "u_araligi": [
+   175,
+   238
+  ],
+  "aci_tanimi": "merkezden, saga 0, yukari 90 derece (saat yonu tersi); u = (aci - sag_uc) mod 360",
+  "merkeze_gore_kutu": [
+   -2899.0,
+   -2206.1,
+   -1790.0,
+   749.9
+  ],
+  "sayfa_kaydirma": [
+   541,
+   1572
+  ]
+ },
+ "dosya": "DOKU_AI_CEMBER_SOL_P.png",
+ "sha256": "edb52d55ec14e1ce69c087812720f98428dc254d8f9db6fd13950e4f4c0479a6",
+ "olcek": "24x36 baski, 300 dpi, 1:1",
+ "oran_pad": {
+  "kaynak": "DOKU_AI_CEMBER_SOL.png",
+  "kaynak_boyut": [
+   1109,
+   3566
+  ],
+  "kaydirma": [
+   159,
+   0
+  ],
+  "oran_once": 0.311,
+  "oran_sonra": 0.4002,
+  "not": "yalniz siyah bosluk; ogeler ve olcek ayni, kose referansi yerinde"
+ }
+}
