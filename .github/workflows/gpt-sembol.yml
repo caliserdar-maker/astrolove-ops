@@ -1,5 +1,5 @@
 name: gpt-sembol
-# ChatGPT resim modeli (OpenAI API) ile ana sembol baglantilari. Girdi: gpt_sembol/ (bu dal). Cikti: gpt-sembol-veri dali.
+# ChatGPT resim modeli (OpenAI API) ile ana sembol baglantilari. Girdi: gpt_sembol/ (bu dal). Cikti: gpt-sembol-veri-<kosu no> dali (paralel kosular birbirini ezmez).
 # Anahtar Drive TEMP/OPENAI_API_KEY.txt'den okunur ve maskelenir. Etsy'ye ve musteriye dokunmaz.
 on:
   push:
@@ -44,9 +44,9 @@ jobs:
           set -euo pipefail
           mkdir -p cikti; cd cikti
           echo "${{ github.run_id }}" > KOSU.txt
-          git init -q -b gpt-sembol-veri
+          git init -q -b gpt-sembol-veri-${{ github.run_number }}
           git config user.name "github-actions"; git config user.email "actions@github.com"
           git add -A && git commit -qm "gpt-sembol ciktisi (kosu ${{ github.run_id }})"
-          git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" gpt-sembol-veri
+          git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" gpt-sembol-veri-${{ github.run_number }}
       - name: "Sonuc"
         run: '[ -z "${URET_FAIL:-}" ]'

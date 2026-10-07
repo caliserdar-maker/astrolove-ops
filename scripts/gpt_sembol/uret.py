@@ -10,7 +10,7 @@ GIR = 'gpt_sembol/girdi'
 OUT = 'cikti'
 os.makedirs(OUT, exist_ok=True)
 BUTCE = float(os.environ.get('BUTCE_USD', '5'))
-MODELLER = [m.strip() for m in os.environ.get('MODELLER', 'gpt-image-2,gpt-image-1.5,gpt-image-1').split(',') if m.strip()]
+MODELLER = [m.strip() for m in os.environ.get('MODELLER', 'gpt-image-2').split(',') if m.strip()]
 # fiyat (USD / 1M token), openai.com/api/pricing 7 Eki 2026; tablo belirsiz oldugundan YUKSEK olan kullanilir (temkinli)
 FIYAT = dict(metin_girdi=5.0, resim_girdi=8.0, resim_cikti=30.0)
 
@@ -34,13 +34,21 @@ def maliyet(u):
     ct = u.get('output_tokens', 0)
     return round((mt * FIYAT['metin_girdi'] + rt * FIYAT['resim_girdi'] + ct * FIYAT['resim_cikti']) / 1e6, 4)
 
+def dosya(ad):
+    for uz, mt in (('.jpg', 'image/jpeg'), ('.png', 'image/png')):
+        if os.path.exists(f'{GIR}/{ad}{uz}'): return (f'{ad}{uz}', open(f'{GIR}/{ad}{uz}', 'rb'), mt)
+    raise FileNotFoundError(ad)
+
 def istek(model, c, ek):
-    files = [('image[]', (f'{c}_temiz.png', open(f'{GIR}/{c}_temiz.png', 'rb'), 'image/png')),
-             ('image[]', (f'{c}_kirmizi.png', open(f'{GIR}/{c}_kirmizi.png', 'rb'), 'image/png')),
-             ('image[]', ('STIL.png', open(f'{GIR}/STIL.png', 'rb'), 'image/png'))]
+    files = [('image[]', dosya(f'{c}_temiz')), ('image[]', dosya(f'{c}_kirmizi')), ('image[]', dosya('STIL'))]
     data = dict(model=model, prompt=ISTEM, n='1', **ek)
-    return requests.post('https://api.openai.com/v1/images/edits', headers={'Authorization': f'Bearer {KEY}'},
-                         data=data, files=files, timeout=600)
+    for dene in range(6):                      # hiz siniri (429, kota disi): bekle ve tekrar dene
+        r = requests.post('https://api.openai.com/v1/images/edits', headers={'Authorization': f'Bearer {KEY}'},
+                          data=data, files=files, timeout=600)
+        if r.status_code == 429 and 'quota' not in r.text.lower() and 'billing' not in r.text.lower():
+            time.sleep(60); [f[1][1].seek(0) for f in files]; continue
+        return r
+    return r
 
 isler = [l.strip() for l in open('gpt_sembol/is.txt') if l.strip() and not l.startswith('#')]
 rapor = dict(isler=isler, sonuc=[], toplam_usd=0.0, butce_usd=BUTCE)
@@ -53,7 +61,7 @@ for i, c in enumerate(isler, 1):
     adaylar = [model_ok] if model_ok else MODELLER
     for model in adaylar:
         # tam ayar -> sade ayar (model desteklemeyen parametreyi reddederse)
-        for ek in (dict(size='auto', quality='high', input_fidelity='high'), dict(size='auto', quality='high'), dict()):
+        for ek in (dict(size='auto', quality='high'),):
             r = istek(model, c, ek)
             if r.status_code == 200: break
             kayit.setdefault('denemeler', []).append(dict(model=model, ek=list(ek), kod=r.status_code, hata=r.text[:400]))
