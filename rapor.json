@@ -1,0 +1,133 @@
+{
+ "isler": [
+  "SCORPIO_TAURUS",
+  "SCORPIO_VIRGO",
+  "TAURUS_TAURUS",
+  "TAURUS_VIRGO",
+  "VIRGO_VIRGO"
+ ],
+ "sonuc": [
+  {
+   "cift": "SCORPIO_TAURUS",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4710,
+    "input_tokens_details": {
+     "image_tokens": 4525,
+     "text_tokens": 185
+    },
+    "output_tokens": 7803,
+    "output_tokens_details": {
+     "image_tokens": 7803,
+     "text_tokens": 0
+    },
+    "total_tokens": 12513
+   },
+   "usd": 0.2712,
+   "sn": 87.3
+  },
+  {
+   "cift": "SCORPIO_VIRGO",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4610,
+    "input_tokens_details": {
+     "image_tokens": 4425,
+     "text_tokens": 185
+    },
+    "output_tokens": 6862,
+    "output_tokens_details": {
+     "image_tokens": 6862,
+     "text_tokens": 0
+    },
+    "total_tokens": 11472
+   },
+   "usd": 0.2422,
+   "sn": 78.4
+  },
+  {
+   "cift": "TAURUS_TAURUS",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4610,
+    "input_tokens_details": {
+     "image_tokens": 4425,
+     "text_tokens": 185
+    },
+    "output_tokens": 6861,
+    "output_tokens_details": {
+     "image_tokens": 6861,
+     "text_tokens": 0
+    },
+    "total_tokens": 11471
+   },
+   "usd": 0.2422,
+   "sn": 75.9
+  },
+  {
+   "cift": "TAURUS_VIRGO",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4694,
+    "input_tokens_details": {
+     "image_tokens": 4509,
+     "text_tokens": 185
+    },
+    "output_tokens": 7119,
+    "output_tokens_details": {
+     "image_tokens": 7119,
+     "text_tokens": 0
+    },
+    "total_tokens": 11813
+   },
+   "usd": 0.2506,
+   "sn": 82.3
+  },
+  {
+   "cift": "VIRGO_VIRGO",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4662,
+    "input_tokens_details": {
+     "image_tokens": 4477,
+     "text_tokens": 185
+    },
+    "output_tokens": 6346,
+    "output_tokens_details": {
+     "image_tokens": 6346,
+     "text_tokens": 0
+    },
+    "total_tokens": 11008
+   },
+   "usd": 0.2271,
+   "sn": 72.1
+  }
+ ],
+ "toplam_usd": 1.2333,
+ "butce_usd": 5.0
+}
