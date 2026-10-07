@@ -1,0 +1,52 @@
+name: gpt-sembol
+# ChatGPT resim modeli (OpenAI API) ile ana sembol baglantilari. Girdi: gpt_sembol/ (bu dal). Cikti: gpt-sembol-veri dali.
+# Anahtar Drive TEMP/OPENAI_API_KEY.txt'den okunur ve maskelenir. Etsy'ye ve musteriye dokunmaz.
+on:
+  push:
+    branches: [gpt-sembol]
+    paths: [gpt_sembol/is.txt]
+permissions:
+  contents: write
+jobs:
+  uret:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: rclone kur
+        run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: "OpenAI anahtari (maskeli)"
+        run: |
+          set -euo pipefail
+          K=$(rclone cat "gdrive,root_folder_id=12N9iS2i4byMbkH5c0Inmni_nIv2zyTzH:OPENAI_API_KEY.txt" | tr -d '[:space:]')
+          echo "::add-mask::$K"
+          [ -n "$K" ] || { echo "anahtar bos"; exit 1; }
+          echo "OPENAI_API_KEY=$K" >> "$GITHUB_ENV"
+      - name: "Uret"
+        run: |
+          pip install -q requests
+          python3 scripts/gpt_sembol/uret.py || echo "URET_FAIL=1" >> "$GITHUB_ENV"
+      - name: "Veri dalina yaz (gpt-sembol-veri)"
+        if: always()
+        run: |
+          set -euo pipefail
+          mkdir -p cikti; cd cikti
+          echo "${{ github.run_id }}" > KOSU.txt
+          git init -q -b gpt-sembol-veri
+          git config user.name "github-actions"; git config user.email "actions@github.com"
+          git add -A && git commit -qm "gpt-sembol ciktisi (kosu ${{ github.run_id }})"
+          git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" gpt-sembol-veri
+      - name: "Sonuc"
+        run: '[ -z "${URET_FAIL:-}" ]'

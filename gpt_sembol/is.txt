@@ -1,0 +1,4 @@
+# gpt-sembol is listesi (her satir bir cift)
+GEMINI_VIRGO
+ARIES_LEO
+CANCER_LIBRA
