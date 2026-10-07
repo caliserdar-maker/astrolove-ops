@@ -1,0 +1,250 @@
+{
+ "isler": [
+  "CANCER_VIRGO",
+  "CAPRICORN_CAPRICORN",
+  "CAPRICORN_GEMINI",
+  "CAPRICORN_LEO",
+  "CAPRICORN_LIBRA",
+  "CAPRICORN_PISCES",
+  "CAPRICORN_SAGITTARIUS",
+  "CAPRICORN_SCORPIO",
+  "CAPRICORN_TAURUS",
+  "CAPRICORN_VIRGO"
+ ],
+ "sonuc": [
+  {
+   "cift": "CANCER_VIRGO",
+   "denemeler": [
+    {
+     "model": "gpt-image-2",
+     "ek": [
+      "size",
+      "quality"
+     ],
+     "kod": 400,
+     "hata": "{\n  \"error\": {\n    \"message\": \"Your request was rejected by the safety system. If you believe this is an error, contact us at help.openai.com and include the request ID req_3c92c97a93024ec58f59f4823403fa01. safety_violations=[abuse].\",\n    \"type\": \"image_generation_user_error\",\n    \"param\": null,\n    \"code\": \"moderation_blocked\",\n    \"moderation_details\": {\n      \"moderation_stage\": \"output\",\n    "
+    }
+   ],
+   "durum": "HATA",
+   "kod": 400
+  },
+  {
+   "cift": "CAPRICORN_CAPRICORN",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4550,
+    "input_tokens_details": {
+     "image_tokens": 4365,
+     "text_tokens": 185
+    },
+    "output_tokens": 5059,
+    "output_tokens_details": {
+     "image_tokens": 5059,
+     "text_tokens": 0
+    },
+    "total_tokens": 9609
+   },
+   "usd": 0.1876,
+   "sn": 61.7
+  },
+  {
+   "cift": "CAPRICORN_GEMINI",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4694,
+    "input_tokens_details": {
+     "image_tokens": 4509,
+     "text_tokens": 185
+    },
+    "output_tokens": 7032,
+    "output_tokens_details": {
+     "image_tokens": 7032,
+     "text_tokens": 0
+    },
+    "total_tokens": 11726
+   },
+   "usd": 0.248,
+   "sn": 79.3
+  },
+  {
+   "cift": "CAPRICORN_LEO",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4662,
+    "input_tokens_details": {
+     "image_tokens": 4477,
+     "text_tokens": 185
+    },
+    "output_tokens": 6432,
+    "output_tokens_details": {
+     "image_tokens": 6432,
+     "text_tokens": 0
+    },
+    "total_tokens": 11094
+   },
+   "usd": 0.2297,
+   "sn": 73.5
+  },
+  {
+   "cift": "CAPRICORN_LIBRA",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4262,
+    "input_tokens_details": {
+     "image_tokens": 4077,
+     "text_tokens": 185
+    },
+    "output_tokens": 4545,
+    "output_tokens_details": {
+     "image_tokens": 4545,
+     "text_tokens": 0
+    },
+    "total_tokens": 8807
+   },
+   "usd": 0.1699,
+   "sn": 54.6
+  },
+  {
+   "cift": "CAPRICORN_PISCES",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4640,
+    "input_tokens_details": {
+     "image_tokens": 4455,
+     "text_tokens": 185
+    },
+    "output_tokens": 6003,
+    "output_tokens_details": {
+     "image_tokens": 6003,
+     "text_tokens": 0
+    },
+    "total_tokens": 10643
+   },
+   "usd": 0.2167,
+   "sn": 68.2
+  },
+  {
+   "cift": "CAPRICORN_SAGITTARIUS",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4680,
+    "input_tokens_details": {
+     "image_tokens": 4495,
+     "text_tokens": 185
+    },
+    "output_tokens": 6603,
+    "output_tokens_details": {
+     "image_tokens": 6603,
+     "text_tokens": 0
+    },
+    "total_tokens": 11283
+   },
+   "usd": 0.235,
+   "sn": 81.0
+  },
+  {
+   "cift": "CAPRICORN_SCORPIO",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4680,
+    "input_tokens_details": {
+     "image_tokens": 4495,
+     "text_tokens": 185
+    },
+    "output_tokens": 6603,
+    "output_tokens_details": {
+     "image_tokens": 6603,
+     "text_tokens": 0
+    },
+    "total_tokens": 11283
+   },
+   "usd": 0.235,
+   "sn": 76.6
+  },
+  {
+   "cift": "CAPRICORN_TAURUS",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4630,
+    "input_tokens_details": {
+     "image_tokens": 4445,
+     "text_tokens": 185
+    },
+    "output_tokens": 7719,
+    "output_tokens_details": {
+     "image_tokens": 7719,
+     "text_tokens": 0
+    },
+    "total_tokens": 12349
+   },
+   "usd": 0.2681,
+   "sn": 87.3
+  },
+  {
+   "cift": "CAPRICORN_VIRGO",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4622,
+    "input_tokens_details": {
+     "image_tokens": 4437,
+     "text_tokens": 185
+    },
+    "output_tokens": 7202,
+    "output_tokens_details": {
+     "image_tokens": 7202,
+     "text_tokens": 0
+    },
+    "total_tokens": 11824
+   },
+   "usd": 0.2525,
+   "sn": 79.1
+  }
+ ],
+ "toplam_usd": 2.0425,
+ "butce_usd": 5.0
+}
