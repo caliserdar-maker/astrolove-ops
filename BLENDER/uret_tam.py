@@ -11,7 +11,7 @@ P = dict(pah=0.6, k=0.8, karisim=0.0, g=0.5, gs=60, golge_sigma=12, golge_dx=6, 
 P.update(json.loads(os.environ.get('AYAR', '{}')))
 OUT = sys.argv[1] if len(sys.argv) > 1 else '/home/claude/blender/cikti'
 import os; os.makedirs(OUT, exist_ok=True)
-z = np.load('/home/claude/blender/alfa_ogeler.npz')
+z = np.load(os.environ.get('ALFA', '/home/claude/blender/alfa_ogeler.npz'))
 ogeler = [(str(a), int(x), int(y), z[str(a)]) for (x, y), a in zip(z['_konum'], z['_ad'])]
 K = kure_yukle(f"/home/claude/blender/kure/{P['kure']}.exr")
 
