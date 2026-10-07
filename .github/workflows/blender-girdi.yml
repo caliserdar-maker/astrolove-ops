@@ -4,6 +4,8 @@ on:
   push:
     branches: [blender-girdi]
     paths: [.github/workflows/blender-girdi.yml]
+permissions:
+  contents: write
 jobs:
   al:
     runs-on: ubuntu-latest
@@ -50,8 +52,11 @@ jobs:
               Image.open('ham/poster/' + f).convert('RGB').resize((2000, 3000), Image.LANCZOS).save('cikti/poster/' + f.replace('.png', '.jpg'), quality=93)
           print('ana', len(os.listdir('cikti/ana')), 'poster', len(os.listdir('cikti/poster')))
           P
-      - uses: actions/upload-artifact@v4
-        with:
-          name: blender-girdi
-          path: cikti
-          retention-days: 14
+      - name: "Veri dalina yaz (blender-girdi-veri)"
+        run: |
+          set -euo pipefail
+          cd cikti
+          git init -q -b blender-girdi-veri
+          git config user.name "github-actions"; git config user.email "actions@github.com"
+          git add -A && git commit -qm "blender girdileri: 78 ana alfa + 78 poster onizleme"
+          git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" blender-girdi-veri
