@@ -1,0 +1,258 @@
+{
+ "isler": [
+  "LEO_SAGITTARIUS",
+  "LEO_SCORPIO",
+  "LEO_TAURUS",
+  "LEO_VIRGO",
+  "LIBRA_LIBRA",
+  "LIBRA_PISCES",
+  "LIBRA_SAGITTARIUS",
+  "LIBRA_SCORPIO",
+  "LIBRA_TAURUS",
+  "LIBRA_VIRGO"
+ ],
+ "sonuc": [
+  {
+   "cift": "LEO_SAGITTARIUS",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4710,
+    "input_tokens_details": {
+     "image_tokens": 4525,
+     "text_tokens": 185
+    },
+    "output_tokens": 7803,
+    "output_tokens_details": {
+     "image_tokens": 7803,
+     "text_tokens": 0
+    },
+    "total_tokens": 12513
+   },
+   "usd": 0.2712,
+   "sn": 88.0
+  },
+  {
+   "cift": "LEO_SCORPIO",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4622,
+    "input_tokens_details": {
+     "image_tokens": 4437,
+     "text_tokens": 185
+    },
+    "output_tokens": 7204,
+    "output_tokens_details": {
+     "image_tokens": 7204,
+     "text_tokens": 0
+    },
+    "total_tokens": 11826
+   },
+   "usd": 0.2525,
+   "sn": 85.0
+  },
+  {
+   "cift": "LEO_TAURUS",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4662,
+    "input_tokens_details": {
+     "image_tokens": 4477,
+     "text_tokens": 185
+    },
+    "output_tokens": 6347,
+    "output_tokens_details": {
+     "image_tokens": 6347,
+     "text_tokens": 0
+    },
+    "total_tokens": 11009
+   },
+   "usd": 0.2272,
+   "sn": 72.0
+  },
+  {
+   "cift": "LEO_VIRGO",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4710,
+    "input_tokens_details": {
+     "image_tokens": 4525,
+     "text_tokens": 185
+    },
+    "output_tokens": 7804,
+    "output_tokens_details": {
+     "image_tokens": 7804,
+     "text_tokens": 0
+    },
+    "total_tokens": 12514
+   },
+   "usd": 0.2712,
+   "sn": 86.6
+  },
+  {
+   "cift": "LIBRA_LIBRA",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4070,
+    "input_tokens_details": {
+     "image_tokens": 3885,
+     "text_tokens": 185
+    },
+    "output_tokens": 4201,
+    "output_tokens_details": {
+     "image_tokens": 4201,
+     "text_tokens": 0
+    },
+    "total_tokens": 8271
+   },
+   "usd": 0.158,
+   "sn": 51.8
+  },
+  {
+   "cift": "LIBRA_PISCES",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4710,
+    "input_tokens_details": {
+     "image_tokens": 4525,
+     "text_tokens": 185
+    },
+    "output_tokens": 7805,
+    "output_tokens_details": {
+     "image_tokens": 7805,
+     "text_tokens": 0
+    },
+    "total_tokens": 12515
+   },
+   "usd": 0.2713,
+   "sn": 89.6
+  },
+  {
+   "cift": "LIBRA_SAGITTARIUS",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4680,
+    "input_tokens_details": {
+     "image_tokens": 4495,
+     "text_tokens": 185
+    },
+    "output_tokens": 6776,
+    "output_tokens_details": {
+     "image_tokens": 6776,
+     "text_tokens": 0
+    },
+    "total_tokens": 11456
+   },
+   "usd": 0.2402,
+   "sn": 82.2
+  },
+  {
+   "cift": "LIBRA_SCORPIO",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4454,
+    "input_tokens_details": {
+     "image_tokens": 4269,
+     "text_tokens": 185
+    },
+    "output_tokens": 4717,
+    "output_tokens_details": {
+     "image_tokens": 4717,
+     "text_tokens": 0
+    },
+    "total_tokens": 9171
+   },
+   "usd": 0.1766,
+   "sn": 56.6
+  },
+  {
+   "cift": "LIBRA_TAURUS",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4630,
+    "input_tokens_details": {
+     "image_tokens": 4445,
+     "text_tokens": 185
+    },
+    "output_tokens": 7633,
+    "output_tokens_details": {
+     "image_tokens": 7633,
+     "text_tokens": 0
+    },
+    "total_tokens": 12263
+   },
+   "usd": 0.2655,
+   "sn": 82.1
+  },
+  {
+   "cift": "LIBRA_VIRGO",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4622,
+    "input_tokens_details": {
+     "image_tokens": 4437,
+     "text_tokens": 185
+    },
+    "output_tokens": 7117,
+    "output_tokens_details": {
+     "image_tokens": 7117,
+     "text_tokens": 0
+    },
+    "total_tokens": 11739
+   },
+   "usd": 0.2499,
+   "sn": 82.9
+  }
+ ],
+ "toplam_usd": 2.3836,
+ "butce_usd": 5.0
+}
