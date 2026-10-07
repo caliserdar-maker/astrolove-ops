@@ -1,0 +1,33 @@
+{
+ "isler": [
+  "CANCER_CANCER"
+ ],
+ "sonuc": [
+  {
+   "cift": "CANCER_CANCER",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4166,
+    "input_tokens_details": {
+     "image_tokens": 3981,
+     "text_tokens": 185
+    },
+    "output_tokens": 4287,
+    "output_tokens_details": {
+     "image_tokens": 4287,
+     "text_tokens": 0
+    },
+    "total_tokens": 8453
+   },
+   "usd": 0.1614,
+   "sn": 51.7
+  }
+ ],
+ "toplam_usd": 0.1614,
+ "butce_usd": 5.0
+}
