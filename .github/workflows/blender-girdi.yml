@@ -1,0 +1,57 @@
+name: blender-girdi
+# Blender tek malzeme yolu girdileri: 78 ana sembol (alfa) + 78 eski poster (2000x3000 yerlesim onizlemesi). Salt okur, Drive'a yazmaz.
+on:
+  push:
+    branches: [blender-girdi]
+    paths: [.github/workflows/blender-girdi.yml]
+jobs:
+  al:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: rclone kur
+        run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Drive'dan indir (salt okur)
+        run: |
+          set -euo pipefail
+          mkdir -p ham/ana ham/poster
+          rclone copy "gdrive,root_folder_id=1Zu0pp9DUMOkUVco_haywVz9zlEfNeDgH:" ham/ana --include "*_gold.png" --transfers 8
+          rclone copy "gdrive,root_folder_id=1ZV1pwbfXdTQLzKEUGHxFojXWBYIj3Vm-:" ham/poster --include "*.png" --transfers 8
+          ls ham/ana | wc -l; ls ham/poster | wc -l
+      - name: Donustur (ana: alfa PNG, poster: 2000x3000 JPG)
+        run: |
+          set -euo pipefail
+          pip install -q pillow numpy
+          python - <<'P'
+          import os, numpy as np
+          from PIL import Image
+          Image.MAX_IMAGE_PIXELS = None
+          os.makedirs('cikti/ana', exist_ok=True); os.makedirs('cikti/poster', exist_ok=True)
+          for f in sorted(os.listdir('ham/ana')):
+              im = Image.open('ham/ana/' + f)
+              a = np.asarray(im.convert('RGBA'))[..., 3]
+              ys, xs = np.nonzero(a > 8)
+              a = a[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
+              Image.fromarray(a).save('cikti/ana/' + f.replace('_gold.png', '_alfa.png'), optimize=True)
+              print(f, im.size, a.shape)
+          for f in sorted(os.listdir('ham/poster')):
+              Image.open('ham/poster/' + f).convert('RGB').resize((2000, 3000), Image.LANCZOS).save('cikti/poster/' + f.replace('.png', '.jpg'), quality=93)
+          print('ana', len(os.listdir('cikti/ana')), 'poster', len(os.listdir('cikti/poster')))
+          P
+      - uses: actions/upload-artifact@v4
+        with:
+          name: blender-girdi
+          path: cikti
+          retention-days: 14
