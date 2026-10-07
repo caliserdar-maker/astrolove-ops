@@ -1,2 +1,2 @@
-# gpt-sembol tekrar (sekil kapisi)
-CANCER_CANCER
+# gpt-sembol tekrar (API guvenlik reddi)
+CANCER_VIRGO
