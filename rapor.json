@@ -1,0 +1,258 @@
+{
+ "isler": [
+  "AQUARIUS_TAURUS",
+  "AQUARIUS_VIRGO",
+  "ARIES_ARIES",
+  "ARIES_CANCER",
+  "ARIES_CAPRICORN",
+  "ARIES_GEMINI",
+  "ARIES_LIBRA",
+  "ARIES_PISCES",
+  "ARIES_SAGITTARIUS",
+  "ARIES_SCORPIO"
+ ],
+ "sonuc": [
+  {
+   "cift": "AQUARIUS_TAURUS",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4710,
+    "input_tokens_details": {
+     "image_tokens": 4525,
+     "text_tokens": 185
+    },
+    "output_tokens": 8146,
+    "output_tokens_details": {
+     "image_tokens": 8146,
+     "text_tokens": 0
+    },
+    "total_tokens": 12856
+   },
+   "usd": 0.2815,
+   "sn": 89.5
+  },
+  {
+   "cift": "AQUARIUS_VIRGO",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4710,
+    "input_tokens_details": {
+     "image_tokens": 4525,
+     "text_tokens": 185
+    },
+    "output_tokens": 7719,
+    "output_tokens_details": {
+     "image_tokens": 7719,
+     "text_tokens": 0
+    },
+    "total_tokens": 12429
+   },
+   "usd": 0.2687,
+   "sn": 88.6
+  },
+  {
+   "cift": "ARIES_ARIES",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4634,
+    "input_tokens_details": {
+     "image_tokens": 4449,
+     "text_tokens": 185
+    },
+    "output_tokens": 8232,
+    "output_tokens_details": {
+     "image_tokens": 8232,
+     "text_tokens": 0
+    },
+    "total_tokens": 12866
+   },
+   "usd": 0.2835,
+   "sn": 90.5
+  },
+  {
+   "cift": "ARIES_CANCER",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4634,
+    "input_tokens_details": {
+     "image_tokens": 4449,
+     "text_tokens": 185
+    },
+    "output_tokens": 8232,
+    "output_tokens_details": {
+     "image_tokens": 8232,
+     "text_tokens": 0
+    },
+    "total_tokens": 12866
+   },
+   "usd": 0.2835,
+   "sn": 94.5
+  },
+  {
+   "cift": "ARIES_CAPRICORN",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4614,
+    "input_tokens_details": {
+     "image_tokens": 4429,
+     "text_tokens": 185
+    },
+    "output_tokens": 5831,
+    "output_tokens_details": {
+     "image_tokens": 5831,
+     "text_tokens": 0
+    },
+    "total_tokens": 10445
+   },
+   "usd": 0.2113,
+   "sn": 68.3
+  },
+  {
+   "cift": "ARIES_GEMINI",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4634,
+    "input_tokens_details": {
+     "image_tokens": 4449,
+     "text_tokens": 185
+    },
+    "output_tokens": 8232,
+    "output_tokens_details": {
+     "image_tokens": 8232,
+     "text_tokens": 0
+    },
+    "total_tokens": 12866
+   },
+   "usd": 0.2835,
+   "sn": 89.1
+  },
+  {
+   "cift": "ARIES_LIBRA",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4630,
+    "input_tokens_details": {
+     "image_tokens": 4445,
+     "text_tokens": 185
+    },
+    "output_tokens": 7633,
+    "output_tokens_details": {
+     "image_tokens": 7633,
+     "text_tokens": 0
+    },
+    "total_tokens": 12263
+   },
+   "usd": 0.2655,
+   "sn": 85.6
+  },
+  {
+   "cift": "ARIES_PISCES",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4634,
+    "input_tokens_details": {
+     "image_tokens": 4449,
+     "text_tokens": 185
+    },
+    "output_tokens": 8232,
+    "output_tokens_details": {
+     "image_tokens": 8232,
+     "text_tokens": 0
+    },
+    "total_tokens": 12866
+   },
+   "usd": 0.2835,
+   "sn": 89.6
+  },
+  {
+   "cift": "ARIES_SAGITTARIUS",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4634,
+    "input_tokens_details": {
+     "image_tokens": 4449,
+     "text_tokens": 185
+    },
+    "output_tokens": 7976,
+    "output_tokens_details": {
+     "image_tokens": 7976,
+     "text_tokens": 0
+    },
+    "total_tokens": 12610
+   },
+   "usd": 0.2758,
+   "sn": 88.2
+  },
+  {
+   "cift": "ARIES_SCORPIO",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4678,
+    "input_tokens_details": {
+     "image_tokens": 4493,
+     "text_tokens": 185
+    },
+    "output_tokens": 5574,
+    "output_tokens_details": {
+     "image_tokens": 5574,
+     "text_tokens": 0
+    },
+    "total_tokens": 10252
+   },
+   "usd": 0.2041,
+   "sn": 68.7
+  }
+ ],
+ "toplam_usd": 2.6409,
+ "butce_usd": 5.0
+}
