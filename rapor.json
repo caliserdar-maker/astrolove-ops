@@ -1,0 +1,158 @@
+{
+ "isler": [
+  "PISCES_VIRGO__A",
+  "CAPRICORN_LEO__A",
+  "CAPRICORN_GEMINI__A",
+  "PISCES_VIRGO__B",
+  "CAPRICORN_LEO__B",
+  "CAPRICORN_GEMINI__B"
+ ],
+ "sonuc": [
+  {
+   "cift": "PISCES_VIRGO__A",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 3175,
+    "input_tokens_details": {
+     "image_tokens": 2967,
+     "text_tokens": 208
+    },
+    "output_tokens": 8232,
+    "output_tokens_details": {
+     "image_tokens": 8232,
+     "text_tokens": 0
+    },
+    "total_tokens": 11407
+   },
+   "usd": 0.2717,
+   "sn": 93.4
+  },
+  {
+   "cift": "CAPRICORN_LEO__A",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 3189,
+    "input_tokens_details": {
+     "image_tokens": 2981,
+     "text_tokens": 208
+    },
+    "output_tokens": 6432,
+    "output_tokens_details": {
+     "image_tokens": 6432,
+     "text_tokens": 0
+    },
+    "total_tokens": 9621
+   },
+   "usd": 0.2178,
+   "sn": 79.8
+  },
+  {
+   "cift": "CAPRICORN_GEMINI__A",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 3205,
+    "input_tokens_details": {
+     "image_tokens": 2997,
+     "text_tokens": 208
+    },
+    "output_tokens": 6946,
+    "output_tokens_details": {
+     "image_tokens": 6946,
+     "text_tokens": 0
+    },
+    "total_tokens": 10151
+   },
+   "usd": 0.2334,
+   "sn": 81.5
+  },
+  {
+   "cift": "PISCES_VIRGO__B",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4634,
+    "input_tokens_details": {
+     "image_tokens": 4449,
+     "text_tokens": 185
+    },
+    "output_tokens": 8232,
+    "output_tokens_details": {
+     "image_tokens": 8232,
+     "text_tokens": 0
+    },
+    "total_tokens": 12866
+   },
+   "usd": 0.2835,
+   "sn": 98.3
+  },
+  {
+   "cift": "CAPRICORN_LEO__B",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4662,
+    "input_tokens_details": {
+     "image_tokens": 4477,
+     "text_tokens": 185
+    },
+    "output_tokens": 6519,
+    "output_tokens_details": {
+     "image_tokens": 6519,
+     "text_tokens": 0
+    },
+    "total_tokens": 11181
+   },
+   "usd": 0.2323,
+   "sn": 82.3
+  },
+  {
+   "cift": "CAPRICORN_GEMINI__B",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4694,
+    "input_tokens_details": {
+     "image_tokens": 4509,
+     "text_tokens": 185
+    },
+    "output_tokens": 7034,
+    "output_tokens_details": {
+     "image_tokens": 7034,
+     "text_tokens": 0
+    },
+    "total_tokens": 11728
+   },
+   "usd": 0.248,
+   "sn": 83.9
+  }
+ ],
+ "toplam_usd": 1.4867,
+ "butce_usd": 5.0
+}
