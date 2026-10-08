@@ -1,10 +1,7 @@
-# ogeler atlasi (kucuk semboller, sonsuz, harfler)
-sembol_1
-sembol_2
-sembol_3
-sonsuz
-buyuk_1
-buyuk_2
-italik_1
-italik_2
-italik_3
+# deneme a (kirmizisiz) / b (teget kirmizi)
+PISCES_VIRGO__A
+CAPRICORN_LEO__A
+CAPRICORN_GEMINI__A
+PISCES_VIRGO__B
+CAPRICORN_LEO__B
+CAPRICORN_GEMINI__B

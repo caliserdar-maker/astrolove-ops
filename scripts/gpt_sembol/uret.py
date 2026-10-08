@@ -51,13 +51,33 @@ ISTEM_OGE = (
     "Output the same framing as Image 1."
 )
 
+# Ana sembol, kirmizi hatsiz (deneme a, 8 Eki): ChatGPT hangi cizginin devam ettigine kendisi karar verir
+ISTEM_A = (
+    "Image 1 is a gold zodiac symbol made of two zodiac glyphs merged into one design. Image 2 is the style reference.\n\n"
+    "Edit Image 1 only. Re-render the gold metal exactly like the symbol in Image 2. Every stroke has one sharp, "
+    "continuous raised RIDGE along its center. Where two strokes cross, each stroke's ridge runs straight through the "
+    "crossing without breaking, and the two ridges cross at a single point. Where a stroke merges into another, its "
+    "ridge flows smoothly into the ridge of the stroke it joins. Everywhere else the metal is a smooth, rounded "
+    "transition: no notches, no dents, no pinches, no creases, no flat spots, no dark seams at any junction.\n\n"
+    "Do NOT change the outline, thickness or shape of the symbol. Do NOT connect strokes that are separate, and do "
+    "NOT separate strokes that touch. Do NOT change the background. Keep the same gold color and lighting as Image 2. "
+    "Output the same framing as Image 1."
+)
+
 def istek(model, c, ek):
+    if c.endswith('__A'):
+        files = [('image[]', dosya(f'{c}_temiz')), ('image[]', dosya('STIL'))]
+        data = dict(model=model, prompt=ISTEM_A, n='1', **ek)
+        return gonder(files, data)
     if os.path.exists(f'{GIR}/{c}_kirmizi.jpg') or os.path.exists(f'{GIR}/{c}_kirmizi.png'):
         files = [('image[]', dosya(f'{c}_temiz')), ('image[]', dosya(f'{c}_kirmizi')), ('image[]', dosya('STIL'))]
         data = dict(model=model, prompt=ISTEM, n='1', **ek)
     else:
         files = [('image[]', dosya(f'{c}_temiz')), ('image[]', dosya('STIL'))]
         data = dict(model=model, prompt=ISTEM_OGE, n='1', **ek)
+    return gonder(files, data)
+
+def gonder(files, data):
     for dene in range(6):                      # hiz siniri (429, kota disi): bekle ve tekrar dene
         r = requests.post('https://api.openai.com/v1/images/edits', headers={'Authorization': f'Bearer {KEY}'},
                           data=data, files=files, timeout=600)
