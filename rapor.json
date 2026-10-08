@@ -1,0 +1,133 @@
+{
+ "isler": [
+  "SAGITTARIUS_SCORPIO__A",
+  "GEMINI_VIRGO__A",
+  "CAPRICORN_SCORPIO__A",
+  "CAPRICORN_CAPRICORN__A",
+  "CANCER_LEO__A"
+ ],
+ "sonuc": [
+  {
+   "cift": "SAGITTARIUS_SCORPIO__A",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 3189,
+    "input_tokens_details": {
+     "image_tokens": 2981,
+     "text_tokens": 208
+    },
+    "output_tokens": 6346,
+    "output_tokens_details": {
+     "image_tokens": 6346,
+     "text_tokens": 0
+    },
+    "total_tokens": 9535
+   },
+   "usd": 0.2153,
+   "sn": 79.2
+  },
+  {
+   "cift": "GEMINI_VIRGO__A",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 3173,
+    "input_tokens_details": {
+     "image_tokens": 2965,
+     "text_tokens": 208
+    },
+    "output_tokens": 8232,
+    "output_tokens_details": {
+     "image_tokens": 8232,
+     "text_tokens": 0
+    },
+    "total_tokens": 11405
+   },
+   "usd": 0.2717,
+   "sn": 97.9
+  },
+  {
+   "cift": "CAPRICORN_SCORPIO__A",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 3198,
+    "input_tokens_details": {
+     "image_tokens": 2990,
+     "text_tokens": 208
+    },
+    "output_tokens": 6518,
+    "output_tokens_details": {
+     "image_tokens": 6518,
+     "text_tokens": 0
+    },
+    "total_tokens": 9716
+   },
+   "usd": 0.2205,
+   "sn": 78.3
+  },
+  {
+   "cift": "CAPRICORN_CAPRICORN__A",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 3133,
+    "input_tokens_details": {
+     "image_tokens": 2925,
+     "text_tokens": 208
+    },
+    "output_tokens": 5061,
+    "output_tokens_details": {
+     "image_tokens": 5061,
+     "text_tokens": 0
+    },
+    "total_tokens": 8194
+   },
+   "usd": 0.1763,
+   "sn": 132.0
+  },
+  {
+   "cift": "CANCER_LEO__A",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 3173,
+    "input_tokens_details": {
+     "image_tokens": 2965,
+     "text_tokens": 208
+    },
+    "output_tokens": 7630,
+    "output_tokens_details": {
+     "image_tokens": 7630,
+     "text_tokens": 0
+    },
+    "total_tokens": 10803
+   },
+   "usd": 0.2537,
+   "sn": 92.2
+  }
+ ],
+ "toplam_usd": 1.1375,
+ "butce_usd": 5.0
+}
