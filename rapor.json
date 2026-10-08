@@ -1,0 +1,33 @@
+{
+ "isler": [
+  "CANCER_VIRGO"
+ ],
+ "sonuc": [
+  {
+   "cift": "CANCER_VIRGO",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 4704,
+    "input_tokens_details": {
+     "image_tokens": 4519,
+     "text_tokens": 185
+    },
+    "output_tokens": 7375,
+    "output_tokens_details": {
+     "image_tokens": 7375,
+     "text_tokens": 0
+    },
+    "total_tokens": 12079
+   },
+   "usd": 0.2583,
+   "sn": 85.0
+  }
+ ],
+ "toplam_usd": 0.2583,
+ "butce_usd": 5.0
+}
