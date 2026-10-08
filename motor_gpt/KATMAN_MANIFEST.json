@@ -1,21 +1,26 @@
 {
- "_aciklama": "Onayli 78 ana sembol katmani (ChatGPT yuzeyi RGB + alfa, RGBA PNG) + standart yerlesim alfasi. Drive ASTROLOVE/ANA_SEMBOL78_KATMAN_20261008. 8 Eki 2026. 8 Eki aksam: kesik uc duzeltmesi, 57 cift PAYLI katman (payli=true, kaynak_x/y/w/h); 5 cift sekil kapisi FAIL nedeniyle eski.",
+ "_aciklama": "Onayli 78 ana sembol katmani (ChatGPT yuzeyi RGB + alfa, RGBA PNG) + standart yerlesim alfasi. Drive ASTROLOVE/ANA_SEMBOL78_KATMAN_20261008. 8 Eki 2026. 8 Eki gece: 60 cift PAYLI katman (kesik uc duzeltmesi); CANCER_LIBRA ve CAPRICORN_LIBRA yeniden uretim Serdar onayi bekliyor.",
  "_ek": {
   "ek/SCORPIO_VIRGO_T5_FAIL_tam.png": "eaa34b82830668586f05761b3a9f187fe1f99c782e2c1cd0f0b2d550a9f01780"
  },
  "ciftler": {
   "AQUARIUS_AQUARIUS": {
    "dosya": "AQUARIUS_AQUARIUS_ana.png",
-   "sha256": "27cfc1049eb158278a40942c2c045f91108f2d67f6fde67fb66ae375dad71e93",
-   "bayt": 4980943,
+   "sha256": "ce9c8a8a957025ffe3b9392886e399936ef2d33945491ad1cc1f463e5ed092b5",
+   "bayt": 6282568,
    "cift": "AQUARIUS_AQUARIUS",
-   "x": 1301,
-   "y": 3595,
-   "w": 4601,
-   "h": 1160,
+   "x": 1151,
+   "y": 3445,
+   "w": 4901,
+   "h": 1460,
+   "kaynak_x": 1301,
+   "kaynak_y": 3595,
+   "kaynak_w": 4601,
+   "kaynak_h": 1160,
+   "pay": 150,
    "gpt": "AQUARIUS_AQUARIUS_gpt_k2.png",
-   "payli": false,
-   "std_alfa_sha256": "61fe8caef7859309fe10e3fe24c4d3c734008b3d929ffd3e8681ff93ed4f9a47"
+   "payli": true,
+   "std_alfa_sha256": "1d2244263ace074bc1aa5313051181c5b6ed9721c35a31efb1c953dde67f4e7d"
   },
   "AQUARIUS_ARIES": {
    "dosya": "AQUARIUS_ARIES_ana.png",
@@ -390,16 +395,21 @@
   },
   "CANCER_CANCER": {
    "dosya": "CANCER_CANCER_ana.png",
-   "sha256": "c02c0cea020744950a4532b88bc8da61278d881a286160295800104f8b66e6f4",
-   "bayt": 6936423,
+   "sha256": "aa3a00faa6eec5c85d1b66f34dd6df23bc1824e0fb379394862a03f40f671ef6",
+   "bayt": 8139612,
    "cift": "CANCER_CANCER",
-   "x": 1570,
-   "y": 3192,
-   "w": 4063,
-   "h": 2004,
+   "x": 1420,
+   "y": 3042,
+   "w": 4363,
+   "h": 2304,
+   "kaynak_x": 1570,
+   "kaynak_y": 3192,
+   "kaynak_w": 4063,
+   "kaynak_h": 2004,
+   "pay": 150,
    "gpt": "CANCER_CANCER_gpt_k10.png",
-   "payli": false,
-   "std_alfa_sha256": "ad3f8e9e53f93987349b9dc6d9b9e7a65b6febe729dfcd81b6f7ef0e96108047"
+   "payli": true,
+   "std_alfa_sha256": "8497b9172dd0a90baf8a176447cfaf7db5e876b963d99c9138ea7966586ff603"
   },
   "CANCER_CAPRICORN": {
    "dosya": "CANCER_CAPRICORN_ana.png",
@@ -736,16 +746,21 @@
   },
   "GEMINI_PISCES": {
    "dosya": "GEMINI_PISCES_ana.png",
-   "sha256": "674b3128fccc4b5e9fcfde9677be94c670bcfb36ded2a0a81cb4bd4519a34081",
-   "bayt": 7580863,
+   "sha256": "a530e7016a90eb221f9a99b52687c7a8e60102524727c0a9ee94fc0897c58e06",
+   "bayt": 8838957,
    "cift": "GEMINI_PISCES",
-   "x": 2052,
-   "y": 2622,
-   "w": 3092,
-   "h": 3164,
+   "x": 1902,
+   "y": 2472,
+   "w": 3392,
+   "h": 3464,
+   "kaynak_x": 2052,
+   "kaynak_y": 2622,
+   "kaynak_w": 3092,
+   "kaynak_h": 3164,
+   "pay": 150,
    "gpt": "GEMINI_PISCES_gpt_k6.png",
-   "payli": false,
-   "std_alfa_sha256": "440c0598a1019e8be95febf6d69ac9c0c1d7a4a420a1cf8431fb61b90ebef397"
+   "payli": true,
+   "std_alfa_sha256": "fc510ab2b8bec1ee955c1fb942b209ed1cc9733183c00b8e915775dd235565d4"
   },
   "GEMINI_SAGITTARIUS": {
    "dosya": "GEMINI_SAGITTARIUS_ana.png",

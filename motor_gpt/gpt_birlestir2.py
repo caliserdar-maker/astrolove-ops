@@ -12,7 +12,7 @@ T0 = time.time()
 def log(*a): print(f'[{time.time()-T0:6.1f}s]', *a, flush=True)
 B = '/home/claude/blender/'
 c, gpt_yol, girdi_yol, KD, OD, kilit = sys.argv[1:7]
-PAY = 150
+PAY = int(os.environ.get('GIRDI_PAY', '150'))           # ChatGPT girdisindeki pay (8 Eki: LIBRA yeniden uretimi 300)
 os.makedirs(OD, exist_ok=True)
 
 def altinlik(rgb):
