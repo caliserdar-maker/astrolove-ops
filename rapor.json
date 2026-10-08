@@ -1,0 +1,58 @@
+{
+ "isler": [
+  "CANCER_LIBRA__A3",
+  "CAPRICORN_LIBRA__A3"
+ ],
+ "sonuc": [
+  {
+   "cift": "CANCER_LIBRA__A3",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 3334,
+    "input_tokens_details": {
+     "image_tokens": 3005,
+     "text_tokens": 329
+    },
+    "output_tokens": 8232,
+    "output_tokens_details": {
+     "image_tokens": 8232,
+     "text_tokens": 0
+    },
+    "total_tokens": 11566
+   },
+   "usd": 0.2726,
+   "sn": 97.2
+  },
+  {
+   "cift": "CAPRICORN_LIBRA__A3",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 3206,
+    "input_tokens_details": {
+     "image_tokens": 2877,
+     "text_tokens": 329
+    },
+    "output_tokens": 4802,
+    "output_tokens_details": {
+     "image_tokens": 4802,
+     "text_tokens": 0
+    },
+    "total_tokens": 8008
+   },
+   "usd": 0.1687,
+   "sn": 58.6
+  }
+ ],
+ "toplam_usd": 0.4413,
+ "butce_usd": 5.0
+}
