@@ -1,0 +1,233 @@
+{
+ "isler": [
+  "sembol_1",
+  "sembol_2",
+  "sembol_3",
+  "sonsuz",
+  "buyuk_1",
+  "buyuk_2",
+  "italik_1",
+  "italik_2",
+  "italik_3"
+ ],
+ "sonuc": [
+  {
+   "cift": "sembol_1",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 3171,
+    "input_tokens_details": {
+     "image_tokens": 3006,
+     "text_tokens": 165
+    },
+    "output_tokens": 8232,
+    "output_tokens_details": {
+     "image_tokens": 8232,
+     "text_tokens": 0
+    },
+    "total_tokens": 11403
+   },
+   "usd": 0.2718,
+   "sn": 103.4
+  },
+  {
+   "cift": "sembol_2",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 3171,
+    "input_tokens_details": {
+     "image_tokens": 3006,
+     "text_tokens": 165
+    },
+    "output_tokens": 8232,
+    "output_tokens_details": {
+     "image_tokens": 8232,
+     "text_tokens": 0
+    },
+    "total_tokens": 11403
+   },
+   "usd": 0.2718,
+   "sn": 99.0
+  },
+  {
+   "cift": "sembol_3",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 3171,
+    "input_tokens_details": {
+     "image_tokens": 3006,
+     "text_tokens": 165
+    },
+    "output_tokens": 8232,
+    "output_tokens_details": {
+     "image_tokens": 8232,
+     "text_tokens": 0
+    },
+    "total_tokens": 11403
+   },
+   "usd": 0.2718,
+   "sn": 98.8
+  },
+  {
+   "cift": "sonsuz",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 3146,
+    "input_tokens_details": {
+     "image_tokens": 2981,
+     "text_tokens": 165
+    },
+    "output_tokens": 6347,
+    "output_tokens_details": {
+     "image_tokens": 6347,
+     "text_tokens": 0
+    },
+    "total_tokens": 9493
+   },
+   "usd": 0.2151,
+   "sn": 76.2
+  },
+  {
+   "cift": "buyuk_1",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 3155,
+    "input_tokens_details": {
+     "image_tokens": 2990,
+     "text_tokens": 165
+    },
+    "output_tokens": 6345,
+    "output_tokens_details": {
+     "image_tokens": 6345,
+     "text_tokens": 0
+    },
+    "total_tokens": 9500
+   },
+   "usd": 0.2151,
+   "sn": 86.5
+  },
+  {
+   "cift": "buyuk_2",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 3186,
+    "input_tokens_details": {
+     "image_tokens": 3021,
+     "text_tokens": 165
+    },
+    "output_tokens": 5403,
+    "output_tokens_details": {
+     "image_tokens": 5403,
+     "text_tokens": 0
+    },
+    "total_tokens": 8589
+   },
+   "usd": 0.1871,
+   "sn": 78.1
+  },
+  {
+   "cift": "italik_1",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 3155,
+    "input_tokens_details": {
+     "image_tokens": 2990,
+     "text_tokens": 165
+    },
+    "output_tokens": 6774,
+    "output_tokens_details": {
+     "image_tokens": 6774,
+     "text_tokens": 0
+    },
+    "total_tokens": 9929
+   },
+   "usd": 0.228,
+   "sn": 90.7
+  },
+  {
+   "cift": "italik_2",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 3155,
+    "input_tokens_details": {
+     "image_tokens": 2990,
+     "text_tokens": 165
+    },
+    "output_tokens": 6775,
+    "output_tokens_details": {
+     "image_tokens": 6775,
+     "text_tokens": 0
+    },
+    "total_tokens": 9930
+   },
+   "usd": 0.228,
+   "sn": 88.5
+  },
+  {
+   "cift": "italik_3",
+   "durum": "TAMAM",
+   "model": "gpt-image-2",
+   "ayar": [
+    "size",
+    "quality"
+   ],
+   "usage": {
+    "input_tokens": 2802,
+    "input_tokens_details": {
+     "image_tokens": 2637,
+     "text_tokens": 165
+    },
+    "output_tokens": 4030,
+    "output_tokens_details": {
+     "image_tokens": 4030,
+     "text_tokens": 0
+    },
+    "total_tokens": 6832
+   },
+   "usd": 0.1428,
+   "sn": 54.4
+  }
+ ],
+ "toplam_usd": 2.0315,
+ "butce_usd": 5.0
+}
