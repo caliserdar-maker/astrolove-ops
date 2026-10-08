@@ -71,7 +71,16 @@ ISTEM_A2 = ISTEM_A + (
     "tips must stay exactly as wide as in Image 1. Keep the whole symbol inside the frame with the same margins as Image 1."
 )
 
+ISTEM_A3 = ISTEM_A2 + (
+    "\n\nTrace the outline of Image 1 exactly: every stroke keeps exactly the same width, curve and position as in Image 1 along "
+    "its whole length. Only the surface (metal shading) changes."
+)
+
 def istek(model, c, ek):
+    if c.endswith('__A3'):
+        files = [('image[]', dosya(f'{c}_temiz')), ('image[]', dosya('STIL'))]
+        data = dict(model=model, prompt=ISTEM_A3, n='1', **ek)
+        return gonder(files, data)
     if c.endswith('__A2'):
         files = [('image[]', dosya(f'{c}_temiz')), ('image[]', dosya('STIL'))]
         data = dict(model=model, prompt=ISTEM_A2, n='1', **ek)
