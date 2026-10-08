@@ -32,6 +32,13 @@ K = dict(zip([str(a) for a in z['_ad']], z['_konum'])); x0, y0 = K['ana']; H, W 
 G0 = np.asarray(Image.open(gpt_yol).convert('RGB')).astype(np.float32)
 Ti = np.asarray(Image.open(girdi_yol).convert('RGB')).astype(np.float32)
 s = Ti.shape[1] / (W + 2 * PAY)                       # girdi resmi olcegi (poster kirpma -> girdi)
+# KESIK UC duzeltmesi (8 Eki, ders 170-173): ana kutusu PAYLI (ChatGPT girdisindeki pay kadar, poster sinirinda kirpik).
+# Eskiden ChatGPT alfasi kaynagin siki kutusuna eslenip kutu disi altin kirpiliyordu (62 ciftte 117 duz kesik).
+KPAY = int(os.environ.get('KUTU_PAY', '150'))
+kx0, ky0, kW, kH = int(x0), int(y0), W, H                              # kaynak (siki) kutu
+px0, py0 = max(0, kx0 - KPAY), max(0, ky0 - KPAY); px1, py1 = min(7200, kx0 + kW + KPAY), min(10800, ky0 + kH + KPAY)
+ox, oy = kx0 - px0, ky0 - py0
+x0, y0, W, H = px0, py0, px1 - px0, py1 - py0                          # bundan sonra tum isler payli kutuda
 
 # 1) ChatGPT -> girdi
 ag = altinlik(G0); at = altinlik(Ti)
@@ -50,7 +57,7 @@ w2 = cv2.warpAffine(ag, M2[:2].astype(np.float32), (Ti.shape[1], Ti.shape[0])) >
 iou = (w2 & mt).sum() / (w2 | mt).sum()
 log('ChatGPT -> girdi IoU', round(float(iou), 3))
 # girdi -> ana kutusu: u = (X + PAY) * s  ->  X = u / s - PAY
-M3 = np.array([[1 / s, 0, -PAY], [0, 1 / s, -PAY], [0, 0, 1]])
+M3 = np.array([[1 / s, 0, -PAY + ox], [0, 1 / s, -PAY + oy], [0, 0, 1]])
 M = M3 @ M2                                            # ChatGPT -> ana kutusu (tam cozunurluk)
 F = float(np.sqrt(abs(np.linalg.det(M[:2, :2]))))
 log('buyutme', round(F, 2), 'ana', W, 'x', H)
@@ -64,11 +71,14 @@ buyuk = 1 + np.argmax(st[1:, cv2.CC_STAT_AREA])
 tut = np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] > 0.002 * st[buyuk, cv2.CC_STAT_AREA]])
 tut = cv2.dilate(tut.astype(np.uint8), np.ones((5, 5), np.uint8)) > 0
 A[~tut] = 0
-eski = z['ana'].astype(np.float32) / 255
-# yalniz kaynak sembolun yakini (ChatGPT kirpmaya giren cember parcasi vb. disarida kalir)
-yakin = cv2.dilate((eski > 0.5).astype(np.uint8), cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (61, 61))) > 0
+eski = np.zeros((H, W), np.float32); eski[oy:oy + kH, ox:ox + kW] = z['ana'].astype(np.float32) / 255
+# yalniz kaynak sembole DEGEN ChatGPT parcalari (cember parcasi vb. ayri parca disarida kalir). Eski piksel maskesi
+# (kaynak + 30 px) kaynaktan uzun ChatGPT uclarini da kesiyordu; artik parca bazli.
+yakin = cv2.dilate((eski > 0.5).astype(np.uint8), cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (31, 31))) > 0
 A_ham = A.copy()
-A[~yakin] = 0
+n_, lb_, st_, _ = cv2.connectedComponentsWithStats((A > 0.02).astype(np.uint8), 8)
+degen = np.unique(lb_[yakin & (lb_ > 0)])
+A[~np.isin(lb_, degen)] = 0
 iou2 = ((A > 0.5) & (eski > 0.5)).sum() / ((A > 0.5) | (eski > 0.5)).sum()
 log('yeni alfa / eski alfa IoU', round(float(iou2), 3))
 # --- sekil kapisi (8 Eki): topoloji + yerel fazla/eksik (IoU tek basina CANCER_LEO ek kopruyu kacirdi) ---
@@ -90,9 +100,17 @@ ts, tg = topoloji(ms), topoloji(mg_)
 fb, eb = en_buyuk(fazla), en_buyuk(eksik_)
 kapi = dict(iou=round(float(iou2), 3), topoloji_kaynak=ts, topoloji_gpt=tg, fazla_px=fb, eksik_px=eb, esik_px=int(0.5 * Dm * Dm))
 kapi['PASS'] = bool(iou2 >= 0.88 and ts == tg and fb <= kapi['esik_px'] and eb <= kapi['esik_px'])
+# kesik uc kapisi (ders 172): alfa payli kutu kenarina duz kesikle degmemeli (poster siniri haric)
+sys.path.insert(0, B); from kesik_uc import kesikler
+A8 = np.round(A * 255).astype(np.uint8)
+kk = [q for q in kesikler(A8) if not ((q['kenar'] == 'ust' and y0 == 0) or (q['kenar'] == 'sol' and x0 == 0)
+                                      or (q['kenar'] == 'alt' and y0 + H == 10800) or (q['kenar'] == 'sag' and x0 + W == 7200))]
+kapi['kesik_uc'] = kk; kapi['kutu'] = [int(x0), int(y0), int(W), int(H)]
+kapi['PASS'] = bool(kapi['PASS'] and not kk)
 log('SEKIL_KAPI', json.dumps(kapi))
 if os.environ.get('KAPI_SADECE') == '1': sys.exit(0 if kapi['PASS'] else 3)
-z['ana'] = np.round(A * 255).astype(np.uint8)
+z['ana'] = A8
+_ad = [str(a) for a in z['_ad']]; kon = z['_konum'].copy(); kon[_ad.index('ana')] = (x0, y0); z['_konum'] = kon
 np.savez_compressed(f'{OD}/{c}_alfa.npz', **z)
 
 def gw_hesapla():
@@ -123,7 +141,8 @@ if os.environ.get('KATMAN_YOL'):
     Gw = gw_hesapla()
     rgba = np.dstack([np.clip(np.round(Gw), 0, 255).astype(np.uint8), z['ana']])
     Image.fromarray(rgba, 'RGBA').save(os.environ['KATMAN_YOL'], optimize=False, compress_level=6)
-    json.dump(dict(cift=c, x=int(x0), y=int(y0), w=int(W), h=int(H), gpt=os.path.basename(gpt_yol)), open(os.environ['KATMAN_YOL'] + '.json', 'w'))
+    json.dump(dict(cift=c, x=int(x0), y=int(y0), w=int(W), h=int(H), kaynak_x=kx0, kaynak_y=ky0, kaynak_w=int(kW), kaynak_h=int(kH),
+                   pay=KPAY, gpt=os.path.basename(gpt_yol)), open(os.environ['KATMAN_YOL'] + '.json', 'w'))
     log('katman kaydedildi', os.environ['KATMAN_YOL']); sys.exit(0)
 
 # 3) motor posteri yeni alfayla
@@ -148,7 +167,7 @@ for yy in range(0, 10800, 1800):
     on[yy // 1800 * 500:yy // 1800 * 500 + 500] = np.clip(np.round(bf), 0, 255).astype(np.uint8)
 Image.fromarray(on).save(f'{d}/{c}_GPT_2000.jpg', quality=100, subsampling=0)
 # ana sembol yakin plani (girdi olceginde) karsilastirma icin
-Image.fromarray(out[y0 - PAY:y0 + H + PAY, x0 - PAY:x0 + W + PAY]).resize((Ti.shape[1], Ti.shape[0]), Image.LANCZOS).save(f'{d}/{c}_GPT_ana.png')
+Image.fromarray(out[max(0, ky0 - PAY):ky0 + kH + PAY, max(0, kx0 - PAY):kx0 + kW + PAY]).resize((Ti.shape[1], Ti.shape[0]), Image.LANCZOS).save(f'{d}/{c}_GPT_ana.png')
 os.remove(f'{d}/SV_BLENDER_tam.png')
 for f_ in ('SV_BLENDER_tam_q100.jpg', 'SV_BLENDER_2000.jpg'):   # disk: motor ara ciktilari gereksiz
     if os.path.exists(f'{d}/{f_}'): os.remove(f'{d}/{f_}')
