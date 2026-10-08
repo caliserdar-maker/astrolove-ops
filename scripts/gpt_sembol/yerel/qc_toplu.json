@@ -1,0 +1,1536 @@
+{
+ "AQUARIUS_AQUARIUS": {
+  "api": [
+   {
+    "kosu": 2,
+    "usd": 0.1074
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/AQUARIUS_AQUARIUS_gpt_k2.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "AQUARIUS_AQUARIUS_gpt_k2.png",
+    "ok": true,
+    "iou": 0.889
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.889
+ },
+ "AQUARIUS_ARIES": {
+  "api": [
+   {
+    "kosu": 2,
+    "usd": 0.2421
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/AQUARIUS_ARIES_gpt_k2.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "AQUARIUS_ARIES_gpt_k2.png",
+    "ok": true,
+    "iou": 0.938
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.938
+ },
+ "AQUARIUS_CANCER": {
+  "api": [
+   {
+    "kosu": 2,
+    "usd": 0.2225
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/AQUARIUS_CANCER_gpt_k2.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "AQUARIUS_CANCER_gpt_k2.png",
+    "ok": true,
+    "iou": 0.976
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.976
+ },
+ "AQUARIUS_CAPRICORN": {
+  "api": [
+   {
+    "kosu": 2,
+    "usd": 0.2783
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/AQUARIUS_CAPRICORN_gpt_k2.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "AQUARIUS_CAPRICORN_gpt_k2.png",
+    "ok": true,
+    "iou": 0.965
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.965
+ },
+ "AQUARIUS_GEMINI": {
+  "api": [
+   {
+    "kosu": 2,
+    "usd": 0.2376
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/AQUARIUS_GEMINI_gpt_k2.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "AQUARIUS_GEMINI_gpt_k2.png",
+    "ok": true,
+    "iou": 0.981
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.981
+ },
+ "AQUARIUS_LEO": {
+  "api": [
+   {
+    "kosu": 2,
+    "usd": 0.2401
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/AQUARIUS_LEO_gpt_k2.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "AQUARIUS_LEO_gpt_k2.png",
+    "ok": true,
+    "iou": 0.976
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.976
+ },
+ "AQUARIUS_LIBRA": {
+  "api": [
+   {
+    "kosu": 2,
+    "usd": 0.1699
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/AQUARIUS_LIBRA_gpt_k2.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "AQUARIUS_LIBRA_gpt_k2.png",
+    "ok": true,
+    "iou": 0.961
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.961
+ },
+ "AQUARIUS_PISCES": {
+  "api": [
+   {
+    "kosu": 2,
+    "usd": 0.2317
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/AQUARIUS_PISCES_gpt_k2.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "AQUARIUS_PISCES_gpt_k2.png",
+    "ok": true,
+    "iou": 0.888
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.888
+ },
+ "AQUARIUS_SAGITTARIUS": {
+  "api": [
+   {
+    "kosu": 2,
+    "usd": 0.2167
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/AQUARIUS_SAGITTARIUS_gpt_k2.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "AQUARIUS_SAGITTARIUS_gpt_k2.png",
+    "ok": true,
+    "iou": 0.983
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.983
+ },
+ "AQUARIUS_SCORPIO": {
+  "api": [
+   {
+    "kosu": 2,
+    "usd": 0.2349
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/AQUARIUS_SCORPIO_gpt_k2.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "AQUARIUS_SCORPIO_gpt_k2.png",
+    "ok": true,
+    "iou": 0.956
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.956
+ },
+ "_alinan_kosular": [
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11
+ ],
+ "_tekrar": [
+  "CANCER_CANCER",
+  "CANCER_VIRGO"
+ ],
+ "AQUARIUS_TAURUS": {
+  "api": [
+   {
+    "kosu": 3,
+    "usd": 0.2815
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/AQUARIUS_TAURUS_gpt_k3.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "AQUARIUS_TAURUS_gpt_k3.png",
+    "ok": true,
+    "iou": 0.92
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.92
+ },
+ "AQUARIUS_VIRGO": {
+  "api": [
+   {
+    "kosu": 3,
+    "usd": 0.2687
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/AQUARIUS_VIRGO_gpt_k3.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "AQUARIUS_VIRGO_gpt_k3.png",
+    "ok": true,
+    "iou": 0.899
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.899
+ },
+ "ARIES_ARIES": {
+  "api": [
+   {
+    "kosu": 3,
+    "usd": 0.2835
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/ARIES_ARIES_gpt_k3.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "ARIES_ARIES_gpt_k3.png",
+    "ok": true,
+    "iou": 0.959
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.959
+ },
+ "ARIES_CANCER": {
+  "api": [
+   {
+    "kosu": 3,
+    "usd": 0.2835
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/ARIES_CANCER_gpt_k3.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "ARIES_CANCER_gpt_k3.png",
+    "ok": true,
+    "iou": 0.938
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.938
+ },
+ "ARIES_CAPRICORN": {
+  "api": [
+   {
+    "kosu": 3,
+    "usd": 0.2113
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/ARIES_CAPRICORN_gpt_k3.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "ARIES_CAPRICORN_gpt_k3.png",
+    "ok": true,
+    "iou": 0.982
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.982
+ },
+ "ARIES_GEMINI": {
+  "api": [
+   {
+    "kosu": 3,
+    "usd": 0.2835
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/ARIES_GEMINI_gpt_k3.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "ARIES_GEMINI_gpt_k3.png",
+    "ok": true,
+    "iou": 0.925
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.925
+ },
+ "ARIES_LIBRA": {
+  "api": [
+   {
+    "kosu": 3,
+    "usd": 0.2655
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/ARIES_LIBRA_gpt_k3.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "ARIES_LIBRA_gpt_k3.png",
+    "ok": true,
+    "iou": 0.94
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.94
+ },
+ "ARIES_PISCES": {
+  "api": [
+   {
+    "kosu": 3,
+    "usd": 0.2835
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/ARIES_PISCES_gpt_k3.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "ARIES_PISCES_gpt_k3.png",
+    "ok": true,
+    "iou": 0.952
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.952
+ },
+ "ARIES_SAGITTARIUS": {
+  "api": [
+   {
+    "kosu": 3,
+    "usd": 0.2758
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/ARIES_SAGITTARIUS_gpt_k3.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "ARIES_SAGITTARIUS_gpt_k3.png",
+    "ok": true,
+    "iou": 0.982
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.982
+ },
+ "ARIES_SCORPIO": {
+  "api": [
+   {
+    "kosu": 3,
+    "usd": 0.2041
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/ARIES_SCORPIO_gpt_k3.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "ARIES_SCORPIO_gpt_k3.png",
+    "ok": true,
+    "iou": 0.976
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.976
+ },
+ "ARIES_TAURUS": {
+  "api": [
+   {
+    "kosu": 4,
+    "usd": 0.2841
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/ARIES_TAURUS_gpt_k4.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "ARIES_TAURUS_gpt_k4.png",
+    "ok": true,
+    "iou": 0.951
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.951
+ },
+ "ARIES_VIRGO": {
+  "api": [
+   {
+    "kosu": 4,
+    "usd": 0.2299
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/ARIES_VIRGO_gpt_k4.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "ARIES_VIRGO_gpt_k4.png",
+    "ok": true,
+    "iou": 0.928
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.928
+ },
+ "CANCER_CANCER": {
+  "api": [
+   {
+    "kosu": 4,
+    "usd": 0.1614
+   },
+   {
+    "kosu": 10,
+    "usd": 0.1614
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/CANCER_CANCER_gpt_k4.png",
+   "/home/claude/blender/gpt_api_all/CANCER_CANCER_gpt_k10.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "CANCER_CANCER_gpt_k4.png",
+    "ok": true,
+    "iou": 0.857
+   },
+   {
+    "gpt": "CANCER_CANCER_gpt_k10.png",
+    "ok": true,
+    "iou": 0.926
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.926
+ },
+ "CANCER_CAPRICORN": {
+  "api": [
+   {
+    "kosu": 4,
+    "usd": 0.2454
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/CANCER_CAPRICORN_gpt_k4.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "CANCER_CAPRICORN_gpt_k4.png",
+    "ok": true,
+    "iou": 0.956
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.956
+ },
+ "CANCER_GEMINI": {
+  "api": [
+   {
+    "kosu": 4,
+    "usd": 0.2681
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/CANCER_GEMINI_gpt_k4.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "CANCER_GEMINI_gpt_k4.png",
+    "ok": true,
+    "iou": 0.952
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.952
+ },
+ "CANCER_LEO": {
+  "api": [
+   {
+    "kosu": 4,
+    "usd": 0.268
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/CANCER_LEO_gpt_k4.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "CANCER_LEO_gpt_k4.png",
+    "ok": true,
+    "iou": 0.935
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.935
+ },
+ "CANCER_PISCES": {
+  "api": [
+   {
+    "kosu": 4,
+    "usd": 0.2401
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/CANCER_PISCES_gpt_k4.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "CANCER_PISCES_gpt_k4.png",
+    "ok": true,
+    "iou": 0.959
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.959
+ },
+ "CANCER_SAGITTARIUS": {
+  "api": [
+   {
+    "kosu": 4,
+    "usd": 0.2551
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/CANCER_SAGITTARIUS_gpt_k4.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "CANCER_SAGITTARIUS_gpt_k4.png",
+    "ok": true,
+    "iou": 0.981
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.981
+ },
+ "CANCER_SCORPIO": {
+  "api": [
+   {
+    "kosu": 4,
+    "usd": 0.2192
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/CANCER_SCORPIO_gpt_k4.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "CANCER_SCORPIO_gpt_k4.png",
+    "ok": true,
+    "iou": 0.961
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.961
+ },
+ "CANCER_TAURUS": {
+  "api": [
+   {
+    "kosu": 4,
+    "usd": 0.2841
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/CANCER_TAURUS_gpt_k4.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "CANCER_TAURUS_gpt_k4.png",
+    "ok": true,
+    "iou": 0.942
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.942
+ },
+ "CANCER_VIRGO": {
+  "api_hata": [
+   {
+    "kosu": 5,
+    "durum": "HATA",
+    "kod": 400
+   }
+  ],
+  "son": "PASS",
+  "api": [
+   {
+    "kosu": 11,
+    "usd": 0.2583
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/CANCER_VIRGO_gpt_k11.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "CANCER_VIRGO_gpt_k11.png",
+    "ok": true,
+    "iou": 0.945
+   }
+  ],
+  "iou": 0.945
+ },
+ "CAPRICORN_CAPRICORN": {
+  "api": [
+   {
+    "kosu": 5,
+    "usd": 0.1876
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/CAPRICORN_CAPRICORN_gpt_k5.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "CAPRICORN_CAPRICORN_gpt_k5.png",
+    "ok": true,
+    "iou": 0.973
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.973
+ },
+ "CAPRICORN_GEMINI": {
+  "api": [
+   {
+    "kosu": 5,
+    "usd": 0.248
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/CAPRICORN_GEMINI_gpt_k5.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "CAPRICORN_GEMINI_gpt_k5.png",
+    "ok": true,
+    "iou": 0.96
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.96
+ },
+ "CAPRICORN_LEO": {
+  "api": [
+   {
+    "kosu": 5,
+    "usd": 0.2297
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/CAPRICORN_LEO_gpt_k5.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "CAPRICORN_LEO_gpt_k5.png",
+    "ok": true,
+    "iou": 0.94
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.94
+ },
+ "CAPRICORN_LIBRA": {
+  "api": [
+   {
+    "kosu": 5,
+    "usd": 0.1699
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/CAPRICORN_LIBRA_gpt_k5.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "CAPRICORN_LIBRA_gpt_k5.png",
+    "ok": true,
+    "iou": 0.912
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.912
+ },
+ "CAPRICORN_PISCES": {
+  "api": [
+   {
+    "kosu": 5,
+    "usd": 0.2167
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/CAPRICORN_PISCES_gpt_k5.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "CAPRICORN_PISCES_gpt_k5.png",
+    "ok": true,
+    "iou": 0.964
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.964
+ },
+ "CAPRICORN_SAGITTARIUS": {
+  "api": [
+   {
+    "kosu": 5,
+    "usd": 0.235
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/CAPRICORN_SAGITTARIUS_gpt_k5.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "CAPRICORN_SAGITTARIUS_gpt_k5.png",
+    "ok": true,
+    "iou": 0.925
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.925
+ },
+ "CAPRICORN_SCORPIO": {
+  "api": [
+   {
+    "kosu": 5,
+    "usd": 0.235
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/CAPRICORN_SCORPIO_gpt_k5.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "CAPRICORN_SCORPIO_gpt_k5.png",
+    "ok": true,
+    "iou": 0.968
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.968
+ },
+ "CAPRICORN_TAURUS": {
+  "api": [
+   {
+    "kosu": 5,
+    "usd": 0.2681
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/CAPRICORN_TAURUS_gpt_k5.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "CAPRICORN_TAURUS_gpt_k5.png",
+    "ok": true,
+    "iou": 0.983
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.983
+ },
+ "CAPRICORN_VIRGO": {
+  "api": [
+   {
+    "kosu": 5,
+    "usd": 0.2525
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/CAPRICORN_VIRGO_gpt_k5.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "CAPRICORN_VIRGO_gpt_k5.png",
+    "ok": true,
+    "iou": 0.963
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.963
+ },
+ "GEMINI_GEMINI": {
+  "api": [
+   {
+    "kosu": 6,
+    "usd": 0.2421
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/GEMINI_GEMINI_gpt_k6.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "GEMINI_GEMINI_gpt_k6.png",
+    "ok": true,
+    "iou": 0.974
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.974
+ },
+ "GEMINI_LEO": {
+  "api": [
+   {
+    "kosu": 6,
+    "usd": 0.2713
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/GEMINI_LEO_gpt_k6.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "GEMINI_LEO_gpt_k6.png",
+    "ok": true,
+    "iou": 0.962
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.962
+ },
+ "GEMINI_LIBRA": {
+  "api": [
+   {
+    "kosu": 6,
+    "usd": 0.2583
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/GEMINI_LIBRA_gpt_k6.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "GEMINI_LIBRA_gpt_k6.png",
+    "ok": true,
+    "iou": 0.903
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.903
+ },
+ "GEMINI_PISCES": {
+  "api": [
+   {
+    "kosu": 6,
+    "usd": 0.2835
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/GEMINI_PISCES_gpt_k6.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "GEMINI_PISCES_gpt_k6.png",
+    "ok": true,
+    "iou": 0.88
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.88
+ },
+ "GEMINI_SAGITTARIUS": {
+  "api": [
+   {
+    "kosu": 6,
+    "usd": 0.2225
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/GEMINI_SAGITTARIUS_gpt_k6.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "GEMINI_SAGITTARIUS_gpt_k6.png",
+    "ok": true,
+    "iou": 0.957
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.957
+ },
+ "GEMINI_SCORPIO": {
+  "api": [
+   {
+    "kosu": 6,
+    "usd": 0.248
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/GEMINI_SCORPIO_gpt_k6.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "GEMINI_SCORPIO_gpt_k6.png",
+    "ok": true,
+    "iou": 0.973
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.973
+ },
+ "GEMINI_TAURUS": {
+  "api": [
+   {
+    "kosu": 6,
+    "usd": 0.2505
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/GEMINI_TAURUS_gpt_k6.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "GEMINI_TAURUS_gpt_k6.png",
+    "ok": true,
+    "iou": 0.944
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.944
+ },
+ "LEO_LEO": {
+  "api": [
+   {
+    "kosu": 6,
+    "usd": 0.2525
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/LEO_LEO_gpt_k6.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "LEO_LEO_gpt_k6.png",
+    "ok": true,
+    "iou": 0.943
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.943
+ },
+ "LEO_LIBRA": {
+  "api": [
+   {
+    "kosu": 6,
+    "usd": 0.235
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/LEO_LIBRA_gpt_k6.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "LEO_LIBRA_gpt_k6.png",
+    "ok": true,
+    "iou": 0.96
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.96
+ },
+ "LEO_PISCES": {
+  "api": [
+   {
+    "kosu": 6,
+    "usd": 0.2706
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/LEO_PISCES_gpt_k6.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "LEO_PISCES_gpt_k6.png",
+    "ok": true,
+    "iou": 0.955
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.955
+ },
+ "LEO_SAGITTARIUS": {
+  "api": [
+   {
+    "kosu": 7,
+    "usd": 0.2712
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/LEO_SAGITTARIUS_gpt_k7.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "LEO_SAGITTARIUS_gpt_k7.png",
+    "ok": true,
+    "iou": 0.965
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.965
+ },
+ "LEO_SCORPIO": {
+  "api": [
+   {
+    "kosu": 7,
+    "usd": 0.2525
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/LEO_SCORPIO_gpt_k7.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "LEO_SCORPIO_gpt_k7.png",
+    "ok": true,
+    "iou": 0.971
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.971
+ },
+ "LEO_TAURUS": {
+  "api": [
+   {
+    "kosu": 7,
+    "usd": 0.2272
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/LEO_TAURUS_gpt_k7.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "LEO_TAURUS_gpt_k7.png",
+    "ok": true,
+    "iou": 0.978
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.978
+ },
+ "LEO_VIRGO": {
+  "api": [
+   {
+    "kosu": 7,
+    "usd": 0.2712
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/LEO_VIRGO_gpt_k7.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "LEO_VIRGO_gpt_k7.png",
+    "ok": true,
+    "iou": 0.941
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.941
+ },
+ "LIBRA_LIBRA": {
+  "api": [
+   {
+    "kosu": 7,
+    "usd": 0.158
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/LIBRA_LIBRA_gpt_k7.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "LIBRA_LIBRA_gpt_k7.png",
+    "ok": true,
+    "iou": 0.972
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.972
+ },
+ "LIBRA_PISCES": {
+  "api": [
+   {
+    "kosu": 7,
+    "usd": 0.2713
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/LIBRA_PISCES_gpt_k7.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "LIBRA_PISCES_gpt_k7.png",
+    "ok": true,
+    "iou": 0.956
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.956
+ },
+ "LIBRA_SAGITTARIUS": {
+  "api": [
+   {
+    "kosu": 7,
+    "usd": 0.2402
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/LIBRA_SAGITTARIUS_gpt_k7.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "LIBRA_SAGITTARIUS_gpt_k7.png",
+    "ok": true,
+    "iou": 0.897
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.897
+ },
+ "LIBRA_SCORPIO": {
+  "api": [
+   {
+    "kosu": 7,
+    "usd": 0.1766
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/LIBRA_SCORPIO_gpt_k7.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "LIBRA_SCORPIO_gpt_k7.png",
+    "ok": true,
+    "iou": 0.891
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.891
+ },
+ "LIBRA_TAURUS": {
+  "api": [
+   {
+    "kosu": 7,
+    "usd": 0.2655
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/LIBRA_TAURUS_gpt_k7.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "LIBRA_TAURUS_gpt_k7.png",
+    "ok": true,
+    "iou": 0.957
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.957
+ },
+ "LIBRA_VIRGO": {
+  "api": [
+   {
+    "kosu": 7,
+    "usd": 0.2499
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/LIBRA_VIRGO_gpt_k7.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "LIBRA_VIRGO_gpt_k7.png",
+    "ok": true,
+    "iou": 0.952
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.952
+ },
+ "PISCES_PISCES": {
+  "api": [
+   {
+    "kosu": 8,
+    "usd": 0.2167
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/PISCES_PISCES_gpt_k8.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "PISCES_PISCES_gpt_k8.png",
+    "ok": true,
+    "iou": 0.969
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.969
+ },
+ "PISCES_SAGITTARIUS": {
+  "api": [
+   {
+    "kosu": 8,
+    "usd": 0.2525
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/PISCES_SAGITTARIUS_gpt_k8.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "PISCES_SAGITTARIUS_gpt_k8.png",
+    "ok": true,
+    "iou": 0.937
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.937
+ },
+ "PISCES_SCORPIO": {
+  "api": [
+   {
+    "kosu": 8,
+    "usd": 0.2686
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/PISCES_SCORPIO_gpt_k8.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "PISCES_SCORPIO_gpt_k8.png",
+    "ok": true,
+    "iou": 0.948
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.948
+ },
+ "PISCES_TAURUS": {
+  "api": [
+   {
+    "kosu": 8,
+    "usd": 0.2686
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/PISCES_TAURUS_gpt_k8.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "PISCES_TAURUS_gpt_k8.png",
+    "ok": true,
+    "iou": 0.947
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.947
+ },
+ "PISCES_VIRGO": {
+  "api": [
+   {
+    "kosu": 8,
+    "usd": 0.2835
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/PISCES_VIRGO_gpt_k8.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "PISCES_VIRGO_gpt_k8.png",
+    "ok": true,
+    "iou": 0.949
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.949
+ },
+ "SAGITTARIUS_SAGITTARIUS": {
+  "api": [
+   {
+    "kosu": 8,
+    "usd": 0.1581
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/SAGITTARIUS_SAGITTARIUS_gpt_k8.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "SAGITTARIUS_SAGITTARIUS_gpt_k8.png",
+    "ok": true,
+    "iou": 0.941
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.941
+ },
+ "SAGITTARIUS_SCORPIO": {
+  "api": [
+   {
+    "kosu": 8,
+    "usd": 0.2271
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/SAGITTARIUS_SCORPIO_gpt_k8.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "SAGITTARIUS_SCORPIO_gpt_k8.png",
+    "ok": true,
+    "iou": 0.979
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.979
+ },
+ "SAGITTARIUS_TAURUS": {
+  "api": [
+   {
+    "kosu": 8,
+    "usd": 0.2401
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/SAGITTARIUS_TAURUS_gpt_k8.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "SAGITTARIUS_TAURUS_gpt_k8.png",
+    "ok": true,
+    "iou": 0.944
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.944
+ },
+ "SAGITTARIUS_VIRGO": {
+  "api": [
+   {
+    "kosu": 8,
+    "usd": 0.2245
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/SAGITTARIUS_VIRGO_gpt_k8.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "SAGITTARIUS_VIRGO_gpt_k8.png",
+    "ok": true,
+    "iou": 0.967
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.967
+ },
+ "SCORPIO_SCORPIO": {
+  "api": [
+   {
+    "kosu": 8,
+    "usd": 0.2212
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/SCORPIO_SCORPIO_gpt_k8.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "SCORPIO_SCORPIO_gpt_k8.png",
+    "ok": true,
+    "iou": 0.969
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.969
+ },
+ "SCORPIO_TAURUS": {
+  "api": [
+   {
+    "kosu": 9,
+    "usd": 0.2712
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/SCORPIO_TAURUS_gpt_k9.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "SCORPIO_TAURUS_gpt_k9.png",
+    "ok": true,
+    "iou": 0.932
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.932
+ },
+ "SCORPIO_VIRGO": {
+  "api": [
+   {
+    "kosu": 9,
+    "usd": 0.2422
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/SCORPIO_VIRGO_gpt_k9.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "SCORPIO_VIRGO_gpt_k9.png",
+    "ok": true,
+    "iou": 0.952
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.952
+ },
+ "TAURUS_TAURUS": {
+  "api": [
+   {
+    "kosu": 9,
+    "usd": 0.2422
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/TAURUS_TAURUS_gpt_k9.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "TAURUS_TAURUS_gpt_k9.png",
+    "ok": true,
+    "iou": 0.956
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.956
+ },
+ "TAURUS_VIRGO": {
+  "api": [
+   {
+    "kosu": 9,
+    "usd": 0.2506
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/TAURUS_VIRGO_gpt_k9.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "TAURUS_VIRGO_gpt_k9.png",
+    "ok": true,
+    "iou": 0.954
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.954
+ },
+ "VIRGO_VIRGO": {
+  "api": [
+   {
+    "kosu": 9,
+    "usd": 0.2271
+   }
+  ],
+  "denenen": [
+   "/home/claude/blender/gpt_api_all/VIRGO_VIRGO_gpt_k9.png"
+  ],
+  "olcum": [
+   {
+    "gpt": "VIRGO_VIRGO_gpt_k9.png",
+    "ok": true,
+    "iou": 0.979
+   }
+  ],
+  "son": "PASS",
+  "iou": 0.979
+ },
+ "_usd_toplam": 19.08
+}
