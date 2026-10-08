@@ -1,0 +1,1172 @@
+{
+ "AQUARIUS_AQUARIUS": {
+  "iou": 0.889,
+  "topoloji_kaynak": [
+   2,
+   0
+  ],
+  "topoloji_gpt": [
+   2,
+   0
+  ],
+  "fazla_px": 27,
+  "eksik_px": 1024,
+  "esik_px": 617,
+  "PASS": false
+ },
+ "AQUARIUS_ARIES": {
+  "iou": 0.938,
+  "topoloji_kaynak": [
+   2,
+   0
+  ],
+  "topoloji_gpt": [
+   2,
+   0
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1541,
+  "PASS": true
+ },
+ "AQUARIUS_CANCER": {
+  "iou": 0.976,
+  "topoloji_kaynak": [
+   4,
+   0
+  ],
+  "topoloji_gpt": [
+   4,
+   0
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1590,
+  "PASS": true
+ },
+ "AQUARIUS_CAPRICORN": {
+  "iou": 0.965,
+  "topoloji_kaynak": [
+   2,
+   1
+  ],
+  "topoloji_gpt": [
+   2,
+   1
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1348,
+  "PASS": true
+ },
+ "AQUARIUS_GEMINI": {
+  "iou": 0.981,
+  "topoloji_kaynak": [
+   1,
+   1
+  ],
+  "topoloji_gpt": [
+   1,
+   1
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1800,
+  "PASS": true
+ },
+ "AQUARIUS_LEO": {
+  "iou": 0.976,
+  "topoloji_kaynak": [
+   2,
+   0
+  ],
+  "topoloji_gpt": [
+   2,
+   0
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1520,
+  "PASS": true
+ },
+ "AQUARIUS_LIBRA": {
+  "iou": 0.961,
+  "topoloji_kaynak": [
+   2,
+   0
+  ],
+  "topoloji_gpt": [
+   2,
+   0
+  ],
+  "fazla_px": 25,
+  "eksik_px": 0,
+  "esik_px": 1867,
+  "PASS": true
+ },
+ "AQUARIUS_PISCES": {
+  "iou": 0.888,
+  "topoloji_kaynak": [
+   2,
+   0
+  ],
+  "topoloji_gpt": [
+   2,
+   0
+  ],
+  "fazla_px": 589,
+  "eksik_px": 6310,
+  "esik_px": 1058,
+  "PASS": false
+ },
+ "AQUARIUS_SAGITTARIUS": {
+  "iou": 0.983,
+  "topoloji_kaynak": [
+   1,
+   0
+  ],
+  "topoloji_gpt": [
+   1,
+   0
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1897,
+  "PASS": true
+ },
+ "AQUARIUS_SCORPIO": {
+  "iou": 0.956,
+  "topoloji_kaynak": [
+   2,
+   0
+  ],
+  "topoloji_gpt": [
+   2,
+   0
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1590,
+  "PASS": true
+ },
+ "AQUARIUS_TAURUS": {
+  "iou": 0.92,
+  "topoloji_kaynak": [
+   2,
+   0
+  ],
+  "topoloji_gpt": [
+   2,
+   0
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1307,
+  "PASS": true
+ },
+ "AQUARIUS_VIRGO": {
+  "iou": 0.899,
+  "topoloji_kaynak": [
+   2,
+   1
+  ],
+  "topoloji_gpt": [
+   2,
+   1
+  ],
+  "fazla_px": 25,
+  "eksik_px": 701,
+  "esik_px": 1458,
+  "PASS": true
+ },
+ "ARIES_ARIES": {
+  "iou": 0.959,
+  "topoloji_kaynak": [
+   1,
+   1
+  ],
+  "topoloji_gpt": [
+   1,
+   1
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1608,
+  "PASS": true
+ },
+ "ARIES_CANCER": {
+  "iou": 0.938,
+  "topoloji_kaynak": [
+   1,
+   0
+  ],
+  "topoloji_gpt": [
+   1,
+   0
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1996,
+  "PASS": true
+ },
+ "ARIES_CAPRICORN": {
+  "iou": 0.982,
+  "topoloji_kaynak": [
+   1,
+   1
+  ],
+  "topoloji_gpt": [
+   1,
+   1
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1700,
+  "PASS": true
+ },
+ "ARIES_GEMINI": {
+  "iou": 0.925,
+  "topoloji_kaynak": [
+   1,
+   1
+  ],
+  "topoloji_gpt": [
+   1,
+   1
+  ],
+  "fazla_px": 363,
+  "eksik_px": 725,
+  "esik_px": 1543,
+  "PASS": true
+ },
+ "ARIES_LEO": {
+  "iou": 0.926,
+  "topoloji_kaynak": [
+   1,
+   0
+  ],
+  "topoloji_gpt": [
+   1,
+   0
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1149,
+  "PASS": true
+ },
+ "ARIES_LIBRA": {
+  "iou": 0.94,
+  "topoloji_kaynak": [
+   2,
+   0
+  ],
+  "topoloji_gpt": [
+   2,
+   0
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1843,
+  "PASS": true
+ },
+ "ARIES_PISCES": {
+  "iou": 0.952,
+  "topoloji_kaynak": [
+   1,
+   0
+  ],
+  "topoloji_gpt": [
+   1,
+   0
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1248,
+  "PASS": true
+ },
+ "ARIES_SAGITTARIUS": {
+  "iou": 0.982,
+  "topoloji_kaynak": [
+   1,
+   0
+  ],
+  "topoloji_gpt": [
+   1,
+   0
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 2174,
+  "PASS": true
+ },
+ "ARIES_SCORPIO": {
+  "iou": 0.976,
+  "topoloji_kaynak": [
+   1,
+   0
+  ],
+  "topoloji_gpt": [
+   1,
+   0
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 2048,
+  "PASS": true
+ },
+ "ARIES_TAURUS": {
+  "iou": 0.951,
+  "topoloji_kaynak": [
+   1,
+   1
+  ],
+  "topoloji_gpt": [
+   1,
+   1
+  ],
+  "fazla_px": 0,
+  "eksik_px": 8,
+  "esik_px": 1772,
+  "PASS": true
+ },
+ "ARIES_VIRGO": {
+  "iou": 0.928,
+  "topoloji_kaynak": [
+   1,
+   1
+  ],
+  "topoloji_gpt": [
+   1,
+   1
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1454,
+  "PASS": true
+ },
+ "CANCER_CANCER": {
+  "iou": 0.926,
+  "topoloji_kaynak": [
+   1,
+   0
+  ],
+  "topoloji_gpt": [
+   1,
+   0
+  ],
+  "fazla_px": 14,
+  "eksik_px": 3380,
+  "esik_px": 1774,
+  "PASS": false
+ },
+ "CANCER_CAPRICORN": {
+  "iou": 0.956,
+  "topoloji_kaynak": [
+   2,
+   1
+  ],
+  "topoloji_gpt": [
+   2,
+   1
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1289,
+  "PASS": true
+ },
+ "CANCER_GEMINI": {
+  "iou": 0.952,
+  "topoloji_kaynak": [
+   1,
+   1
+  ],
+  "topoloji_gpt": [
+   1,
+   1
+  ],
+  "fazla_px": 15,
+  "eksik_px": 0,
+  "esik_px": 1352,
+  "PASS": true
+ },
+ "CANCER_LEO": {
+  "iou": 0.935,
+  "topoloji_kaynak": [
+   2,
+   0
+  ],
+  "topoloji_gpt": [
+   2,
+   1
+  ],
+  "fazla_px": 21277,
+  "eksik_px": 1438,
+  "esik_px": 1608,
+  "PASS": false
+ },
+ "CANCER_LIBRA": {
+  "iou": 0.895,
+  "topoloji_kaynak": [
+   3,
+   0
+  ],
+  "topoloji_gpt": [
+   3,
+   0
+  ],
+  "fazla_px": 6829,
+  "eksik_px": 272,
+  "esik_px": 1435,
+  "PASS": false
+ },
+ "CANCER_PISCES": {
+  "iou": 0.959,
+  "topoloji_kaynak": [
+   1,
+   0
+  ],
+  "topoloji_gpt": [
+   1,
+   0
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1501,
+  "PASS": true
+ },
+ "CANCER_SAGITTARIUS": {
+  "iou": 0.981,
+  "topoloji_kaynak": [
+   1,
+   1
+  ],
+  "topoloji_gpt": [
+   1,
+   1
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 2226,
+  "PASS": true
+ },
+ "CANCER_SCORPIO": {
+  "iou": 0.961,
+  "topoloji_kaynak": [
+   1,
+   0
+  ],
+  "topoloji_gpt": [
+   1,
+   0
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1966,
+  "PASS": true
+ },
+ "CANCER_TAURUS": {
+  "iou": 0.942,
+  "topoloji_kaynak": [
+   2,
+   0
+  ],
+  "topoloji_gpt": [
+   2,
+   0
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1586,
+  "PASS": true
+ },
+ "CANCER_VIRGO": {
+  "iou": 0.945,
+  "topoloji_kaynak": [
+   1,
+   1
+  ],
+  "topoloji_gpt": [
+   1,
+   1
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1921,
+  "PASS": true
+ },
+ "CAPRICORN_CAPRICORN": {
+  "iou": 0.973,
+  "topoloji_kaynak": [
+   1,
+   1
+  ],
+  "topoloji_gpt": [
+   1,
+   1
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 2671,
+  "PASS": true
+ },
+ "CAPRICORN_GEMINI": {
+  "iou": 0.96,
+  "topoloji_kaynak": [
+   1,
+   1
+  ],
+  "topoloji_gpt": [
+   1,
+   1
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 2252,
+  "PASS": true
+ },
+ "CAPRICORN_LEO": {
+  "iou": 0.94,
+  "topoloji_kaynak": [
+   1,
+   1
+  ],
+  "topoloji_gpt": [
+   1,
+   1
+  ],
+  "fazla_px": 0,
+  "eksik_px": 10,
+  "esik_px": 2178,
+  "PASS": true
+ },
+ "CAPRICORN_LIBRA": {
+  "iou": 0.912,
+  "topoloji_kaynak": [
+   2,
+   1
+  ],
+  "topoloji_gpt": [
+   2,
+   1
+  ],
+  "fazla_px": 10416,
+  "eksik_px": 1885,
+  "esik_px": 1458,
+  "PASS": false
+ },
+ "CAPRICORN_PISCES": {
+  "iou": 0.964,
+  "topoloji_kaynak": [
+   1,
+   1
+  ],
+  "topoloji_gpt": [
+   1,
+   1
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1586,
+  "PASS": true
+ },
+ "CAPRICORN_SAGITTARIUS": {
+  "iou": 0.925,
+  "topoloji_kaynak": [
+   1,
+   2
+  ],
+  "topoloji_gpt": [
+   1,
+   2
+  ],
+  "fazla_px": 0,
+  "eksik_px": 159,
+  "esik_px": 2098,
+  "PASS": true
+ },
+ "CAPRICORN_SCORPIO": {
+  "iou": 0.968,
+  "topoloji_kaynak": [
+   1,
+   1
+  ],
+  "topoloji_gpt": [
+   1,
+   1
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1800,
+  "PASS": true
+ },
+ "CAPRICORN_TAURUS": {
+  "iou": 0.983,
+  "topoloji_kaynak": [
+   1,
+   1
+  ],
+  "topoloji_gpt": [
+   1,
+   1
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 2789,
+  "PASS": true
+ },
+ "CAPRICORN_VIRGO": {
+  "iou": 0.963,
+  "topoloji_kaynak": [
+   1,
+   1
+  ],
+  "topoloji_gpt": [
+   1,
+   1
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1566,
+  "PASS": true
+ },
+ "GEMINI_GEMINI": {
+  "iou": 0.974,
+  "topoloji_kaynak": [
+   1,
+   1
+  ],
+  "topoloji_gpt": [
+   1,
+   1
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1608,
+  "PASS": true
+ },
+ "GEMINI_LEO": {
+  "iou": 0.962,
+  "topoloji_kaynak": [
+   1,
+   1
+  ],
+  "topoloji_gpt": [
+   1,
+   1
+  ],
+  "fazla_px": 0,
+  "eksik_px": 3,
+  "esik_px": 1565,
+  "PASS": true
+ },
+ "GEMINI_LIBRA": {
+  "iou": 0.903,
+  "topoloji_kaynak": [
+   1,
+   1
+  ],
+  "topoloji_gpt": [
+   1,
+   1
+  ],
+  "fazla_px": 0,
+  "eksik_px": 54,
+  "esik_px": 1608,
+  "PASS": true
+ },
+ "GEMINI_PISCES": {
+  "iou": 0.88,
+  "topoloji_kaynak": [
+   1,
+   2
+  ],
+  "topoloji_gpt": [
+   1,
+   2
+  ],
+  "fazla_px": 4276,
+  "eksik_px": 1813,
+  "esik_px": 1456,
+  "PASS": false
+ },
+ "GEMINI_SAGITTARIUS": {
+  "iou": 0.957,
+  "topoloji_kaynak": [
+   1,
+   1
+  ],
+  "topoloji_gpt": [
+   1,
+   1
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1700,
+  "PASS": true
+ },
+ "GEMINI_SCORPIO": {
+  "iou": 0.973,
+  "topoloji_kaynak": [
+   1,
+   1
+  ],
+  "topoloji_gpt": [
+   1,
+   1
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 2171,
+  "PASS": true
+ },
+ "GEMINI_TAURUS": {
+  "iou": 0.944,
+  "topoloji_kaynak": [
+   1,
+   1
+  ],
+  "topoloji_gpt": [
+   1,
+   1
+  ],
+  "fazla_px": 0,
+  "eksik_px": 81,
+  "esik_px": 1795,
+  "PASS": true
+ },
+ "GEMINI_VIRGO": {
+  "iou": 0.939,
+  "topoloji_kaynak": [
+   1,
+   2
+  ],
+  "topoloji_gpt": [
+   1,
+   2
+  ],
+  "fazla_px": 0,
+  "eksik_px": 63,
+  "esik_px": 1058,
+  "PASS": true
+ },
+ "LEO_LEO": {
+  "iou": 0.943,
+  "topoloji_kaynak": [
+   1,
+   0
+  ],
+  "topoloji_gpt": [
+   1,
+   0
+  ],
+  "fazla_px": 48,
+  "eksik_px": 0,
+  "esik_px": 931,
+  "PASS": true
+ },
+ "LEO_LIBRA": {
+  "iou": 0.96,
+  "topoloji_kaynak": [
+   2,
+   0
+  ],
+  "topoloji_gpt": [
+   2,
+   0
+  ],
+  "fazla_px": 14,
+  "eksik_px": 0,
+  "esik_px": 1307,
+  "PASS": true
+ },
+ "LEO_PISCES": {
+  "iou": 0.955,
+  "topoloji_kaynak": [
+   1,
+   1
+  ],
+  "topoloji_gpt": [
+   1,
+   1
+  ],
+  "fazla_px": 0,
+  "eksik_px": 957,
+  "esik_px": 1608,
+  "PASS": true
+ },
+ "LEO_SAGITTARIUS": {
+  "iou": 0.965,
+  "topoloji_kaynak": [
+   1,
+   0
+  ],
+  "topoloji_gpt": [
+   1,
+   0
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1498,
+  "PASS": true
+ },
+ "LEO_SCORPIO": {
+  "iou": 0.971,
+  "topoloji_kaynak": [
+   1,
+   0
+  ],
+  "topoloji_gpt": [
+   1,
+   0
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1724,
+  "PASS": true
+ },
+ "LEO_TAURUS": {
+  "iou": 0.978,
+  "topoloji_kaynak": [
+   1,
+   1
+  ],
+  "topoloji_gpt": [
+   1,
+   1
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1819,
+  "PASS": true
+ },
+ "LEO_VIRGO": {
+  "iou": 0.941,
+  "topoloji_kaynak": [
+   1,
+   1
+  ],
+  "topoloji_gpt": [
+   1,
+   1
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1475,
+  "PASS": true
+ },
+ "LIBRA_LIBRA": {
+  "iou": 0.972,
+  "topoloji_kaynak": [
+   3,
+   0
+  ],
+  "topoloji_gpt": [
+   3,
+   0
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 2046,
+  "PASS": true
+ },
+ "LIBRA_PISCES": {
+  "iou": 0.956,
+  "topoloji_kaynak": [
+   3,
+   0
+  ],
+  "topoloji_gpt": [
+   3,
+   0
+  ],
+  "fazla_px": 514,
+  "eksik_px": 0,
+  "esik_px": 1682,
+  "PASS": true
+ },
+ "LIBRA_SAGITTARIUS": {
+  "iou": 0.897,
+  "topoloji_kaynak": [
+   2,
+   0
+  ],
+  "topoloji_gpt": [
+   2,
+   0
+  ],
+  "fazla_px": 0,
+  "eksik_px": 701,
+  "esik_px": 1700,
+  "PASS": true
+ },
+ "LIBRA_SCORPIO": {
+  "iou": 0.891,
+  "topoloji_kaynak": [
+   2,
+   0
+  ],
+  "topoloji_gpt": [
+   2,
+   0
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1270,
+  "PASS": true
+ },
+ "LIBRA_TAURUS": {
+  "iou": 0.957,
+  "topoloji_kaynak": [
+   2,
+   0
+  ],
+  "topoloji_gpt": [
+   2,
+   0
+  ],
+  "fazla_px": 24,
+  "eksik_px": 0,
+  "esik_px": 1568,
+  "PASS": true
+ },
+ "LIBRA_VIRGO": {
+  "iou": 0.952,
+  "topoloji_kaynak": [
+   2,
+   1
+  ],
+  "topoloji_gpt": [
+   2,
+   1
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1454,
+  "PASS": true
+ },
+ "PISCES_PISCES": {
+  "iou": 0.969,
+  "topoloji_kaynak": [
+   1,
+   0
+  ],
+  "topoloji_gpt": [
+   1,
+   0
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1037,
+  "PASS": true
+ },
+ "PISCES_SAGITTARIUS": {
+  "iou": 0.937,
+  "topoloji_kaynak": [
+   1,
+   0
+  ],
+  "topoloji_gpt": [
+   1,
+   0
+  ],
+  "fazla_px": 0,
+  "eksik_px": 11,
+  "esik_px": 1454,
+  "PASS": true
+ },
+ "PISCES_SCORPIO": {
+  "iou": 0.948,
+  "topoloji_kaynak": [
+   1,
+   0
+  ],
+  "topoloji_gpt": [
+   1,
+   0
+  ],
+  "fazla_px": 7,
+  "eksik_px": 0,
+  "esik_px": 1454,
+  "PASS": true
+ },
+ "PISCES_TAURUS": {
+  "iou": 0.947,
+  "topoloji_kaynak": [
+   1,
+   0
+  ],
+  "topoloji_gpt": [
+   1,
+   0
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1497,
+  "PASS": true
+ },
+ "PISCES_VIRGO": {
+  "iou": 0.949,
+  "topoloji_kaynak": [
+   1,
+   2
+  ],
+  "topoloji_gpt": [
+   1,
+   2
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1369,
+  "PASS": true
+ },
+ "SAGITTARIUS_SAGITTARIUS": {
+  "iou": 0.941,
+  "topoloji_kaynak": [
+   1,
+   0
+  ],
+  "topoloji_gpt": [
+   1,
+   0
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1207,
+  "PASS": true
+ },
+ "SAGITTARIUS_SCORPIO": {
+  "iou": 0.979,
+  "topoloji_kaynak": [
+   1,
+   1
+  ],
+  "topoloji_gpt": [
+   1,
+   1
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1800,
+  "PASS": true
+ },
+ "SAGITTARIUS_TAURUS": {
+  "iou": 0.944,
+  "topoloji_kaynak": [
+   1,
+   1
+  ],
+  "topoloji_gpt": [
+   1,
+   1
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1678,
+  "PASS": true
+ },
+ "SAGITTARIUS_VIRGO": {
+  "iou": 0.967,
+  "topoloji_kaynak": [
+   1,
+   1
+  ],
+  "topoloji_gpt": [
+   1,
+   1
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1726,
+  "PASS": true
+ },
+ "SCORPIO_SCORPIO": {
+  "iou": 0.969,
+  "topoloji_kaynak": [
+   1,
+   0
+  ],
+  "topoloji_gpt": [
+   1,
+   0
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1522,
+  "PASS": true
+ },
+ "SCORPIO_TAURUS": {
+  "iou": 0.932,
+  "topoloji_kaynak": [
+   1,
+   0
+  ],
+  "topoloji_gpt": [
+   1,
+   0
+  ],
+  "fazla_px": 123,
+  "eksik_px": 0,
+  "esik_px": 1891,
+  "PASS": true
+ },
+ "SCORPIO_VIRGO": {
+  "iou": 0.952,
+  "topoloji_kaynak": [
+   1,
+   1
+  ],
+  "topoloji_gpt": [
+   1,
+   1
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1415,
+  "PASS": true
+ },
+ "TAURUS_TAURUS": {
+  "iou": 0.956,
+  "topoloji_kaynak": [
+   1,
+   3
+  ],
+  "topoloji_gpt": [
+   1,
+   3
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1092,
+  "PASS": true
+ },
+ "TAURUS_VIRGO": {
+  "iou": 0.954,
+  "topoloji_kaynak": [
+   1,
+   0
+  ],
+  "topoloji_gpt": [
+   1,
+   0
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 1867,
+  "PASS": true
+ },
+ "VIRGO_VIRGO": {
+  "iou": 0.979,
+  "topoloji_kaynak": [
+   2,
+   2
+  ],
+  "topoloji_gpt": [
+   1,
+   2
+  ],
+  "fazla_px": 0,
+  "eksik_px": 0,
+  "esik_px": 2068,
+  "PASS": false
+ }
+}

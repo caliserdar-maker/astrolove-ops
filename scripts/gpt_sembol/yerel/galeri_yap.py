@@ -10,7 +10,9 @@ test = {'GEMINI_VIRGO': 0.939, 'ARIES_LEO': 0.926, 'CANCER_LIBRA': 0.895}
 ogeler = []
 for r in satir:
     c = r['cift']
-    if c in test:
+    if os.environ.get('GALERI_KAYNAK'):
+        src = f"{B}/{os.environ['GALERI_KAYNAK']}/{c}/{c}_2000.jpg"; q = qc.get(c, {}); durum = 'PASS'; iou = q.get('iou') or test.get(c); not_ = ''
+    elif c in test:
         src = f'{B}/gb_api/{c}/{c}_GPT_2000.jpg'; durum, iou, not_ = 'PASS', test[c], 'deneme (onayli)'
     else:
         q = qc.get(c, {}); src = f'{B}/gb_all/{c}/{c}_GPT_2000.jpg'

@@ -15,9 +15,14 @@ A = z['ana'].astype(np.float32) / 255
 Z = zincirler(np.pad(A, 32))
 G = serit.serit_yukseklik.graf
 dug = [(G['dmer'][k], G['ZON'][k]) for k in G['gercek']]
-B = Image.open(f'{D}/{c}/{c}_7200x10800.jpg').crop((x0 - PAY, y0 - PAY, x0 + w + PAY, y0 + h + PAY))
-s = 1536 / max(B.size); W2, H2 = round(B.size[0] * s), round(B.size[1] * s)
-temiz = B.resize((W2, H2), Image.LANCZOS); temiz.save(f'{O}/{c}_temiz.png')
+s = 1536 / (max(w, h) + 2 * PAY); W2, H2 = round((w + 2 * PAY) * s), round((h + 2 * PAY) * s)
+if os.path.exists(f'{D}/{c}/{c}_7200x10800.jpg'):
+    B = Image.open(f'{D}/{c}/{c}_7200x10800.jpg').crop((x0 - PAY, y0 - PAY, x0 + w + PAY, y0 + h + PAY))
+    temiz = B.resize((W2, H2), Image.LANCZOS)
+else:                                                       # poster silindiyse onceki temiz girdi (ayni kirpim/olcek)
+    temiz = Image.open(os.environ.get('TEMIZ_KAYNAK', '/home/claude/blender/gi_all_girdi') + f'/{c}_temiz.png').convert('RGB')
+    W2, H2 = temiz.size
+temiz.save(f'{O}/{c}_temiz.png')
 img = np.asarray(temiz).copy()
 for P, Wd, u in Z:
     q = P - 32 + PAY

@@ -133,6 +133,11 @@ def serit_yukseklik(A01, sd=None):
                 ss = (r > zon + wkol) & (r < zon + wkol + 4 * Dm)
                 if ss.sum() >= 3:
                     yon = np.arctan2(np.mean(yol[ss, 0]) - cy, np.mean(yol[ss, 1]) - cx)
+                if os.environ.get('SERIT_TEGET', '0') == '1':             # 8 Eki: kolun KAVSAGA GIRIS teget yonu (merkezden degil)
+                    st = (r > zon) & (r < zon + 2.5 * Dm)
+                    if st.sum() >= 4:
+                        q = yol[st].astype(np.float64); i0 = int(np.argmin(r[st])); i1 = int(np.argmax(r[st]))
+                        yon = np.arctan2(q[i1, 0] - q[i0, 0], q[i1, 1] - q[i0, 1])   # disari dogru
             bil.append(dict(bi=bi, uc=uc, yol=yol, r=r, dd=dd, wkol=wkol, yon=yon))
             sinir[(bi, uc)] = (k, zon, wkol)
             CAP[yol[:, 0], yol[:, 1]] = np.minimum(CAP[yol[:, 0], yol[:, 1]], wkol + SALIM * np.clip(r - zon, 0, None))

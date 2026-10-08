@@ -67,9 +67,31 @@ A[~tut] = 0
 eski = z['ana'].astype(np.float32) / 255
 # yalniz kaynak sembolun yakini (ChatGPT kirpmaya giren cember parcasi vb. disarida kalir)
 yakin = cv2.dilate((eski > 0.5).astype(np.uint8), cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (61, 61))) > 0
+A_ham = A.copy()
 A[~yakin] = 0
 iou2 = ((A > 0.5) & (eski > 0.5)).sum() / ((A > 0.5) | (eski > 0.5)).sum()
 log('yeni alfa / eski alfa IoU', round(float(iou2), 3))
+# --- sekil kapisi (8 Eki): topoloji + yerel fazla/eksik (IoU tek basina CANCER_LEO ek kopruyu kacirdi) ---
+def topoloji(m):
+    m = np.pad(m.astype(np.uint8), 4); n, _, st, _ = cv2.connectedComponentsWithStats(m, 8)   # pay: dis zemin tek parca
+    alan = m.sum(); parca = int(sum(st[1:, cv2.CC_STAT_AREA] > 0.002 * alan))
+    nh, _, sth, _ = cv2.connectedComponentsWithStats(1 - m, 4)
+    delik = int(sum(sth[1:, cv2.CC_STAT_AREA] > 0.0005 * alan)) - 1          # dis zemin haric
+    return parca, delik
+ms, mg_ = eski > 0.5, A_ham > 0.5                  # ham ChatGPT silueti (kirpmadan once)
+Dm = float(np.median(cv2.distanceTransform(ms.astype(np.uint8), cv2.DIST_L2, 5)[ms])) * 2      # tipik cizgi kalinligi
+k_ = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * int(0.35 * Dm) + 1,) * 2)
+mg_ = mg_ & (cv2.dilate(ms.astype(np.uint8), cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * int(3 * Dm) + 1,) * 2)) > 0)   # uzak poster ogeleri (cember yayi) haric
+fazla = mg_ & ~(cv2.dilate(ms.astype(np.uint8), k_) > 0)
+eksik_ = ms & ~(cv2.dilate(mg_.astype(np.uint8), k_) > 0)
+def en_buyuk(m):
+    n, _, st, _ = cv2.connectedComponentsWithStats(m.astype(np.uint8), 8); return int(st[1:, cv2.CC_STAT_AREA].max()) if n > 1 else 0
+ts, tg = topoloji(ms), topoloji(mg_)
+fb, eb = en_buyuk(fazla), en_buyuk(eksik_)
+kapi = dict(iou=round(float(iou2), 3), topoloji_kaynak=ts, topoloji_gpt=tg, fazla_px=fb, eksik_px=eb, esik_px=int(0.5 * Dm * Dm))
+kapi['PASS'] = bool(iou2 >= 0.88 and ts == tg and fb <= kapi['esik_px'] and eb <= kapi['esik_px'])
+log('SEKIL_KAPI', json.dumps(kapi))
+if os.environ.get('KAPI_SADECE') == '1': sys.exit(0 if kapi['PASS'] else 3)
 z['ana'] = np.round(A * 255).astype(np.uint8)
 np.savez_compressed(f'{OD}/{c}_alfa.npz', **z)
 
