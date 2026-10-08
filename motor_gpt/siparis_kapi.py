@@ -1,6 +1,7 @@
 # Siparis posteri kapilari (8 Eki 2026). PASS/FAIL, olculebilir esik.
 # Kullanim: python siparis_kapi.py IS_KLASORU REFERANS_POSTER(standart, ayni cift; yoksa '-') [--json CIKTI]
 #  a) ANA bolgesi referansla ayni: ana kutusunda |fark| ortalama <= 0.5 ve %99.9 <= 10 (olculen: 0.29 / 6; katman uint8 + JPEG payi);
+#     YEREL: fark > 10 bagli kume alani <= 0.5 * kalinlik^2 (ders 139 olcusu);
 #     ayrica degisebilir bant (isim satiri, kucuk semboller, sonsuz, tagline + 200 px parlama payi) DISINDA ayni.
 #  b) ogeler arasi dE00 (ana ile) <= 1 (renk_olcum.json)
 #  c) isim-burc: isim1 solda (x isim1 < x isim2), kucuk1 = ilk burcun sembolu (12 sembolle korelasyon en yuksek), kucuk1 isim1 uzerinde
@@ -30,11 +31,18 @@ if REF != '-':
         zr = np.load(os.environ['REF_ALFA']); Kr = {str(a): (int(x), int(y)) for (x, y), a in zip(zr['_konum'], zr['_ad'])}
         for ad in ('isim1', 'isim2', 'sonsuz', 'kucuk1', 'kucuk2', 'tagline'):
             x, y = Kr[ad]; h, w = zr[ad].shape; serbest[max(0, y - 200):y + h + 200, max(0, x - 200):x + w + 200] = True
+    # yerel kontrol (ders 139): genel ortalama %0.1'den kucuk yerel kusuru kacirir. Fark > 10 piksellerinden bagli kumeler;
+    # en buyuk kume alani 0.5 * kalinlik^2'yi asarsa FAIL (kalinlik: ana alfasi mesafe donusumu ortancasi x 2).
+    am = z['ana'] > 127
+    kal = float(np.median(cv2.distanceTransform(am.astype(np.uint8), cv2.DIST_L2, 5)[am])) * 2
+    n_, _, st_, _ = cv2.connectedComponentsWithStats((d > 10).astype(np.uint8), 8)
+    en_buyuk_kume = int(st_[1:, cv2.CC_STAT_AREA].max()) if n_ > 1 else 0
     dd = np.abs(P - R).max(2)
     dis = dd[~serbest]
     sonuc['a'] = dict(ana_ort=round(float(d.mean()), 3), ana_p999=int(np.percentile(d, 99.9)), dis_ort=round(float(dis.mean()), 3),
-                      dis_p999=int(np.percentile(dis, 99.9)))
-    sonuc['a']['PASS'] = bool(sonuc['a']['ana_ort'] <= 0.5 and sonuc['a']['ana_p999'] <= 10 and sonuc['a']['dis_ort'] <= 0.5 and sonuc['a']['dis_p999'] <= 10)
+                      dis_p999=int(np.percentile(dis, 99.9)), kume_px=en_buyuk_kume, kume_esik=int(0.5 * kal * kal), kalinlik=round(kal, 1))
+    sonuc['a']['PASS'] = bool(sonuc['a']['ana_ort'] <= 0.5 and sonuc['a']['ana_p999'] <= 10 and sonuc['a']['dis_ort'] <= 0.5 and sonuc['a']['dis_p999'] <= 10
+                               and en_buyuk_kume <= sonuc['a']['kume_esik'])
 # b)
 _src = open(B + 'renk_uyum.py').read()
 _ns = {}; exec('import numpy as np\n' + _src[_src.index('def de00'):_src.index('lab = lambda')], _ns)   # renk_uyum ile AYNI de00
