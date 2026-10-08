@@ -1,0 +1,122 @@
+name: zemin4
+# ZEMIN DENEME 4 (8 Eki 2026, Serdar onayi): tek poster, referans (mevcut) + yeni zemin (isima 0, golge altinin olculen isik
+# yonune hizali). Motor siparis-gpt 9888c17 SALT OKUNUR (zemin4/yama.py kopyayi yamalar). Tek isci (ders 137/182): adimlar sirali.
+# Kapilar FAIL ise gorsel YUKLENMEZ, yalniz olcum JSON'lari. 78 poster / siparis yoluna UYGULANMAZ.
+# Cikti: Drive TEMP 17Mn6YE-_IShFGTrkURefZnq6VSC0cFsH (KARSILASTIRMA_ZEMIN_DENEME4.jpg + 3 kesit + JSON).
+on:
+  push:
+    branches: [zemin-4]
+    paths: [zemin4/istek.json]
+permissions:
+  contents: read
+jobs:
+  zemin4:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      MOTOR_SHA: 9888c17ae51546ea5771eb5a19ad16ca05a12e03
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 1, sparse-checkout: "zemin4" }
+      - uses: actions/checkout@v4
+        with: { ref: "${{ env.MOTOR_SHA }}", path: sg, fetch-depth: 1, sparse-checkout: "motor_gpt" }
+      - name: Girdi + maske
+        run: |
+          set -euo pipefail
+          I=zemin4/istek.json
+          for k in isim1 isim2; do v=$(jq -r ".$k" $I); echo "::add-mask::$v"; echo "::add-mask::${v^^}"; done
+          m=$(jq -r '.mesaj_b64' $I | base64 -d); echo "::add-mask::$m"
+          echo "CIFT=$(jq -r .cift $I)" >> "$GITHUB_ENV"
+      - name: rclone
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /tmp/rc.zip https://downloads.rclone.org/rclone-current-linux-amd64.zip
+          unzip -q -j /tmp/rc.zip '*/rclone' -d /tmp/rcb && sudo install -m 755 /tmp/rcb/rclone /usr/local/bin/rclone
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: Kaynak indir (salt okur) + motor ortami
+        run: |
+          set -euo pipefail
+          K="gdrive,root_folder_id=1ZQGR0fI0HQNq1D2Lbmr2qlkNVbD8jRyD:"
+          P="gdrive,root_folder_id=1E-vvy7BVE2C2VEuRDoVUf6g9PZpvh5-H:"
+          mkdir -p /tmp/k /tmp/ref
+          ( rclone copy "$K" /tmp/k --include "${CIFT}_ana.png" --include "${CIFT}_ana.png.json" --include "${CIFT}_std_alfa.npz" --include "ek/**"
+            rclone copy "$P" /tmp/ref --include "${CIFT}_7200x10800.jpg" ) &
+          sudo mkdir -p /home/claude/ao/KANIT /home/claude/motor_klon/motor && sudo chown -R "$USER" /home/claude
+          ln -s "$GITHUB_WORKSPACE/sg/motor_gpt" /home/claude/blender
+          ln -s "$GITHUB_WORKSPACE/sg/motor_gpt/font" /home/claude/motor_klon/motor/font
+          ln -s "$GITHUB_WORKSPACE/sg/motor_gpt/ref" /home/claude/ref
+          python3 -m venv /home/claude/venv
+          /home/claude/venv/bin/pip install -q numpy==2.5.3 opencv-python-headless==5.0.0.93 pillow==12.3.0 scipy==1.18.1 scikit-image==0.26.0 potracer==0.0.4
+          wait
+          ls -la /tmp/k /tmp/k/ek /tmp/ref
+          python3 - <<'P'
+          import hashlib, json, os
+          m = json.load(open('sg/motor_gpt/KATMAN_MANIFEST.json'))['ciftler'][os.environ['CIFT']]
+          h = hashlib.sha256(open(f"/tmp/k/{m['dosya']}", 'rb').read()).hexdigest()
+          assert h == m['sha256'], 'katman sha256 uyusmuyor'; print('katman sha256 OK')
+          P
+          ln -s /tmp/k/ek/SCORPIO_VIRGO_T5_FAIL_tam.png /home/claude/ao/KANIT/SCORPIO_VIRGO_T5_FAIL_tam.png
+          # yamali motor koku: motor_gpt dosyalarina baglanti, yalniz uret_tam.py yamali kopya
+          mkdir /home/claude/m4 && for f in "$GITHUB_WORKSPACE"/sg/motor_gpt/*; do ln -s "$f" /home/claude/m4/; done
+          rm /home/claude/m4/uret_tam.py && /home/claude/venv/bin/python zemin4/yama.py sg/motor_gpt/uret_tam.py /home/claude/m4/uret_tam.py
+      - name: Isik yonu (ana altin)
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/out
+          /home/claude/venv/bin/python zemin4/isik_yonu.py /tmp/k/${CIFT}_ana.png /tmp/out/ZEMIN4_ISIK_YONU.json
+          echo "Z4_GOLGE=$(jq -r '.golge | "\(.dx),\(.dy),\(.tdx),\(.tdy)"' /tmp/out/ZEMIN4_ISIK_YONU.json)" >> "$GITHUB_ENV"
+      - name: Uret (referans = mevcut + yeni zemin, ayni kosu)
+        run: |
+          set -euo pipefail
+          I=zemin4/istek.json
+          MOTOR_KOK=/home/claude/m4 MOTOR_PY=/home/claude/venv/bin/python Z4_CIKTI=/tmp/SV_YENI.png Z4_TABAN=/tmp/out/TABAN.png \
+            /home/claude/venv/bin/python /home/claude/m4/siparis_uret.py "$(jq -r .cift $I)" "$(jq -r .isim1 $I)" "$(jq -r .isim2 $I)" \
+            "$(jq -r .mesaj_b64 $I)" "/tmp/k/${CIFT}_ana.png" /tmp/is_ref
+          free -m
+          MOTOR_KOK=/home/claude/m4 MOTOR_PY=/home/claude/venv/bin/python /home/claude/venv/bin/python zemin4/bindir_renk.py /tmp/is_ref /tmp/SV_YENI.png "/tmp/k/${CIFT}_ana.png" /tmp/is_yeni
+          rm -f /tmp/SV_YENI.png
+      - name: Kapilar + kontrol
+        run: |
+          set +e
+          PY=/home/claude/venv/bin/python; B=/home/claude/blender
+          F=$(ls /tmp/is_ref/AstroLoveArt_*.jpg | grep -v _2000); N=/tmp/is_yeni/$(basename $F)
+          REF_ALFA=/tmp/k/${CIFT}_std_alfa.npz $PY $B/siparis_kapi.py /tmp/is_ref /tmp/ref/${CIFT}_7200x10800.jpg --json /tmp/out/ZEMIN4_KAPI_MEVCUT.json; echo "kapi mevcut rc=$?"
+          REF_ALFA=/tmp/k/${CIFT}_std_alfa.npz $PY $B/siparis_kapi.py /tmp/is_yeni /tmp/ref/${CIFT}_7200x10800.jpg --json /tmp/out/ZEMIN4_KAPI_YENI.json; echo "kapi yeni rc=$?"
+          $PY $B/leke_kontrol.py $F $N /tmp/is_ref/${CIFT}_alfa.npz --json /tmp/out/ZEMIN4_LEKE_YENI.json; echo "leke rc=$?"
+          $PY zemin4/kontrol.py $F $N /tmp/is_ref/${CIFT}_alfa.npz /tmp/out/TABAN.png /tmp/out/ZEMIN4_ISIK_YONU.json /tmp/out /tmp/is_ref/amp.json; echo "kontrol rc=$?"
+          cp /tmp/is_ref/siparis.json /tmp/out/ZEMIN4_SIPARIS_MEVCUT.json; cp /tmp/is_yeni/siparis.json /tmp/out/ZEMIN4_SIPARIS_YENI.json
+          # karar: oge ici + leke + kapi b,c,d,e,f (yeni). Kapi a yeni zeminde bilgi amaclidir (zemin bilerek degisti).
+          python3 - <<'P'
+          import json
+          k = json.load(open('/tmp/out/ZEMIN4_KONTROL.json')); l = json.load(open('/tmp/out/ZEMIN4_LEKE_YENI.json')); y = json.load(open('/tmp/out/ZEMIN4_KAPI_YENI.json'))
+          kap = {h: y[h]['PASS'] for h in ('b', 'c', 'd', 'e', 'f') if h in y}
+          ok = k['PASS'] and l['PASS'] and all(kap.values())
+          ozet = dict(oge_ici=k['oge_ici'], leke=l['PASS'], kapi_yeni=kap, kapi_a_yeni_bilgi=y.get('a'), PASS=ok)
+          json.dump(ozet, open('/tmp/out/ZEMIN4_OZET.json', 'w'), indent=1, ensure_ascii=False); print(json.dumps(ozet, ensure_ascii=False))
+          open('/tmp/karar', 'w').write('PASS' if ok else 'FAIL')
+          P
+          ls -la /tmp/out
+      - name: Drive'a yaz (FAIL ise yalniz JSON)
+        if: always()
+        run: |
+          set -euo pipefail
+          D="gdrive,root_folder_id=17Mn6YE-_IShFGTrkURefZnq6VSC0cFsH:"
+          if [ "$(cat /tmp/karar 2>/dev/null)" = "PASS" ]; then
+            rclone copy /tmp/out "$D" --include "*.jpg" --include "*.json" --exclude "*"
+          else
+            rclone copy /tmp/out "$D" --include "*.json" --exclude "*"
+          fi
+          rclone lsl "$D" --include "KARSILASTIRMA_ZEMIN_DENEME4.jpg" --include "KESIT_*.jpg" --include "ZEMIN4_*.json" --max-depth 1
+      - name: Sonuc
+        run: '[ "$(cat /tmp/karar)" = "PASS" ]'
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
