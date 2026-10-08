@@ -1,7 +1,6 @@
-# deneme a (kirmizisiz) / b (teget kirmizi)
-PISCES_VIRGO__A
-CAPRICORN_LEO__A
-CAPRICORN_GEMINI__A
-PISCES_VIRGO__B
-CAPRICORN_LEO__B
-CAPRICORN_GEMINI__B
+# 8 hatali ciftin 5i, yontem A (kirmizisiz); digerleri onceki denemeden
+SAGITTARIUS_SCORPIO__A
+GEMINI_VIRGO__A
+CAPRICORN_SCORPIO__A
+CAPRICORN_CAPRICORN__A
+CANCER_LEO__A
