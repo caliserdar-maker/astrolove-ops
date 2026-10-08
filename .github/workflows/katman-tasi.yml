@@ -1,0 +1,34 @@
+name: katman-tasi
+# Gecici: 78 ana sembol katmani -> Drive ASTROLOVE/ANA_SEMBOL78_KATMAN_20261008. Her push bir parti; is bitince dal silinir.
+on:
+  push:
+    branches: [katman-tasi]
+permissions:
+  contents: read
+jobs:
+  tasi:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: rclone kur
+        run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: "Drive'a kopyala ve dogrula"
+        run: |
+          set -euo pipefail
+          D="gdrive,root_folder_id=1ZQGR0fI0HQNq1D2Lbmr2qlkNVbD8jRyD:"
+          rclone copy yukle/ "$D" --transfers 4
+          rclone check yukle/ "$D" --one-way
+          rclone lsf -R "$D" | wc -l
