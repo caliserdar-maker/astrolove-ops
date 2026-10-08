@@ -3,7 +3,7 @@
 # Kullanim: python siparis_uret.py CIFT ISIM1 ISIM2 MESAJ_B64 KATMAN_PNG IS_KLASORU
 #   CIFT ters sirada gelirse alfabetige cevrilir ve isimler de yer degistirir (isim1 = cift adindaki ILK burc, solda).
 # Cikti: IS_KLASORU/AstroLoveArt_<Burc1>_<Burc2>.jpg (7200x10800 JPEG q100) + _2000 onizleme + siparis.json
-import sys, os, json, time, base64, subprocess, numpy as np, cv2
+import sys, os, re, json, time, base64, subprocess, numpy as np, cv2
 from PIL import Image
 Image.MAX_IMAGE_PIXELS = None
 T0 = time.time()
@@ -11,7 +11,19 @@ def log(*a): print(f'[{time.time()-T0:6.1f}s]', *a, flush=True)
 B = os.environ.get('MOTOR_KOK', '/home/claude/blender') + '/'
 PY = os.environ.get('MOTOR_PY', B + 'venv/bin/python')
 cift, isim1, isim2, mesaj_b64, katman, IS = sys.argv[1:7]
-tag = base64.b64decode(mesaj_b64).decode('utf-8').strip()
+tag_orijinal = base64.b64decode(mesaj_b64).decode('utf-8').strip()
+# & -> "and" (Serdar, 8 Eki 2026): her & "and" olur, cevresinde tek bosluk; cift bosluk olusmaz. Sonra 35 karakter sinirina
+# yeniden bakilir; asarsa kisaltma YOK, FAIL (cikis 6).
+def ve_cevir(t):
+    return re.sub(r' {2,}', ' ', re.sub(r'\s*&\s*', ' and ', t)).strip()
+tag = ve_cevir(tag_orijinal)
+if tag != tag_orijinal: log('tagline: & -> and', f'({len(tag_orijinal)} -> {len(tag)} karakter)')
+if len(tag) > 35:
+    log(f'FAIL tagline donusumden sonra {len(tag)} karakter > 35; kisaltma yapilmaz')
+    os.makedirs(IS, exist_ok=True)
+    json.dump(dict(cift=cift, tagline_orijinal=tag_orijinal, tagline=tag, karakter=len(tag), hata='tagline > 35 karakter (& -> and sonrasi)'),
+              open(f'{IS}/siparis.json', 'w'), indent=1, ensure_ascii=False)
+    sys.exit(6)
 b1, b2 = cift.upper().split('_')
 if [b1, b2] != sorted([b1, b2]):
     b1, b2 = b2, b1; isim1, isim2 = isim2, isim1; log('cift alfabetige cevrildi, isimler yer degistirdi')
@@ -57,7 +69,7 @@ ad1, ad2 = b1.capitalize(), b2.capitalize()
 son = f'{IS}/AstroLoveArt_{ad1}_{ad2}.jpg'
 os.replace(f'{IS}/son/{c}/{c}_7200x10800.jpg', son)
 os.replace(f'{IS}/son/{c}/{c}_2000.jpg', f'{IS}/AstroLoveArt_{ad1}_{ad2}_2000.jpg')
-json.dump(dict(cift=c, isim1=isim1, isim2=isim2, tagline=tag, katman=os.path.basename(katman),
+json.dump(dict(cift=c, isim1=isim1, isim2=isim2, tagline_orijinal=tag_orijinal, tagline=tag, katman=os.path.basename(katman),
                renk=json.load(open(f'{IS}/son/{c}/renk_olcum.json')), sure_sn=round(time.time() - T0, 1)),
           open(f'{IS}/siparis.json', 'w'), indent=1, ensure_ascii=False)
 log('bitti', son)
