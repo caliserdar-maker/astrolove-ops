@@ -64,7 +64,18 @@ ISTEM_A = (
     "Output the same framing as Image 1."
 )
 
+# Yontem A + uc kurali (8 Eki 2026 gece, CANCER_LIBRA / CAPRICORN_LIBRA): ChatGPT uclari kaynaktan uzatiyordu
+ISTEM_A2 = ISTEM_A + (
+    "\n\nThe stroke ENDS (tips) must keep exactly the same length, shape and position as in Image 1. Do NOT extend, lengthen, "
+    "sharpen further or move any tip. Do NOT bring two tips closer together and NEVER join them; the empty gap between nearby "
+    "tips must stay exactly as wide as in Image 1. Keep the whole symbol inside the frame with the same margins as Image 1."
+)
+
 def istek(model, c, ek):
+    if c.endswith('__A2'):
+        files = [('image[]', dosya(f'{c}_temiz')), ('image[]', dosya('STIL'))]
+        data = dict(model=model, prompt=ISTEM_A2, n='1', **ek)
+        return gonder(files, data)
     if c.endswith('__A'):
         files = [('image[]', dosya(f'{c}_temiz')), ('image[]', dosya('STIL'))]
         data = dict(model=model, prompt=ISTEM_A, n='1', **ek)

@@ -34,6 +34,24 @@ jobs:
           echo "::add-mask::$K"
           [ -n "$K" ] || { echo "anahtar bos"; exit 1; }
           echo "OPENAI_API_KEY=$K" >> "$GITHUB_ENV"
+      - name: "Bakiye (API, 8 Eki)"
+        run: |
+          mkdir -p cikti
+          python3 - <<'PY'
+          import json, os, urllib.request, time
+          K = os.environ['OPENAI_API_KEY']; out = {}
+          uclar = {'credit_grants': 'https://api.openai.com/v1/dashboard/billing/credit_grants',
+                   'costs_30g': 'https://api.openai.com/v1/organization/costs?start_time=%d&limit=30' % (time.time() - 30 * 86400)}
+          for ad, u in uclar.items():
+              try:
+                  r = urllib.request.urlopen(urllib.request.Request(u, headers={'Authorization': 'Bearer ' + K}), timeout=60)
+                  d = json.load(r); out[ad] = dict(kod=200, veri={k: d[k] for k in ('total_granted', 'total_used', 'total_available') if k in d} or str(d)[:1500])
+              except urllib.error.HTTPError as e:
+                  out[ad] = dict(kod=e.code, hata=e.read().decode()[:300])
+              except Exception as e:
+                  out[ad] = dict(hata=repr(e)[:300])
+          json.dump(out, open('cikti/bakiye_once.json', 'w'), indent=1); print(json.dumps(out)[:2000])
+          PY
       - name: "Uret"
         run: |
           pip install -q requests

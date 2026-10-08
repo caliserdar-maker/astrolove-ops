@@ -1,6 +1,3 @@
-# 8 hatali ciftin 5i, yontem A (kirmizisiz); digerleri onceki denemeden
-SAGITTARIUS_SCORPIO__A
-GEMINI_VIRGO__A
-CAPRICORN_SCORPIO__A
-CAPRICORN_CAPRICORN__A
-CANCER_LEO__A
+# 8 Eki gece: LIBRA ciftleri, yontem A + uc kurali (ISTEM_A2), girdi payi 300 px
+CANCER_LIBRA__A2
+CAPRICORN_LIBRA__A2
