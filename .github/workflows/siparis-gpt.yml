@@ -1,0 +1,103 @@
+name: siparis-gpt
+# Kisisel siparis posteri, YENI YOL (8 Eki 2026): onayli ChatGPT ana sembol katmani (Drive ANA_SEMBOL78_KATMAN_20261008)
+# + motor (isim/tagline, diger ogeler onayli ayar) + renk_uyum. ChatGPT/OpenAI GEREKMEZ. Tek isci (bellek, ders 137).
+# Girdi: workflow_dispatch (main'e alininca) ya da test icin siparis_gpt/istek.json push'u (bu dal).
+# Cikti: Drive ASTROLOVE/TEMP/SIPARIS_ISIM/GPT/AstroLoveArt_<receipt>/AstroLoveArt_<Burc1>_<Burc2>.jpg (7200x10800 q100)
+# + _2000 onizleme + KAPI.json + SURE.json. Isim/mesaj loga yazilmaz (maske). Etsy'ye yazma / musteriye gonderim YOK.
+on:
+  workflow_dispatch:
+    inputs:
+      receipt: { description: "Etsy receipt (yalniz rakam)", required: true }
+      cift: { description: "Cift (orn. CANCER_LEO; ters gelirse alfabetige cevrilir, isimler yer degistirir)", required: true }
+      isim1: { description: "isim1 (cift adindaki ilk burc, solda)", required: true }
+      isim2: { description: "isim2", required: true }
+      mesaj_b64: { description: "tagline, base64 (UTF-8)", required: true }
+  push:
+    branches: [siparis-gpt]
+    paths: [siparis_gpt/istek.json]
+permissions:
+  contents: read
+concurrency:
+  group: siparis-gpt
+  cancel-in-progress: false
+jobs:
+  uret:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 1, sparse-checkout: "motor_gpt\nsiparis_gpt" }
+      - name: Girdi + maske
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            jq '.inputs | {receipt, cift, isim1, isim2, mesaj_b64}' "$GITHUB_EVENT_PATH" > /tmp/istek.json
+          else cp siparis_gpt/istek.json /tmp/istek.json; fi
+          for k in isim1 isim2; do v=$(jq -r ".$k" /tmp/istek.json); echo "::add-mask::$v"; echo "::add-mask::${v^^}"; done
+          m=$(jq -r '.mesaj_b64' /tmp/istek.json | base64 -d); echo "::add-mask::$m"
+          jq -re '.receipt | test("^[0-9]+$")' /tmp/istek.json >/dev/null || { echo "HATA: receipt rakam olmali" >&2; exit 1; }
+          jq -re '.cift | test("^[A-Z]+_[A-Z]+$")' /tmp/istek.json >/dev/null || { echo "HATA: cift" >&2; exit 1; }
+          C=$(jq -r '.cift' /tmp/istek.json | tr '_' '\n' | sort | paste -sd_)
+          echo "CIFT=$C" >> "$GITHUB_ENV"; echo "RECEIPT=$(jq -r .receipt /tmp/istek.json)" >> "$GITHUB_ENV"
+          echo "T_BAS=$(date -u +%s)" >> "$GITHUB_ENV"
+          echo "KOSU_OLUSTU=${{ github.event.repository.updated_at }}" >> /dev/null
+      - name: rclone
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /tmp/rc.zip https://downloads.rclone.org/rclone-current-linux-amd64.zip
+          unzip -q -j /tmp/rc.zip '*/rclone' -d /tmp/rcb && sudo install -m 755 /tmp/rcb/rclone /usr/local/bin/rclone
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: Kaynak indir (katman + standart alfa + standart poster) ve motor ortami (paralel)
+        run: |
+          set -euo pipefail
+          K="gdrive,root_folder_id=1ZQGR0fI0HQNq1D2Lbmr2qlkNVbD8jRyD:"
+          P="gdrive,root_folder_id=1E-vvy7BVE2C2VEuRDoVUf6g9PZpvh5-H:"
+          mkdir -p /tmp/k /tmp/ref
+          ( rclone copy "$K" /tmp/k --include "${CIFT}_ana.png" --include "${CIFT}_ana.png.json" --include "${CIFT}_std_alfa.npz" --include "ek/**"
+            rclone copy "$P" /tmp/ref --include "${CIFT}_7200x10800.jpg" ) &
+          sudo mkdir -p /home/claude/ao/KANIT /home/claude/motor_klon/motor && sudo chown -R "$USER" /home/claude
+          ln -s "$GITHUB_WORKSPACE/motor_gpt" /home/claude/blender
+          ln -s "$GITHUB_WORKSPACE/motor_gpt/font" /home/claude/motor_klon/motor/font
+          ln -s "$GITHUB_WORKSPACE/motor_gpt/ref" /home/claude/ref
+          python3 -m venv /home/claude/blender/venv
+          /home/claude/blender/venv/bin/pip install -q numpy==2.5.3 opencv-python-headless==5.0.0.93 pillow==12.3.0 scipy==1.18.1 scikit-image==0.26.0 potracer==0.0.4
+          wait
+          ls -la /tmp/k /tmp/k/ek /tmp/ref
+          ln -s /tmp/k/ek/SCORPIO_VIRGO_T5_FAIL_tam.png /home/claude/ao/KANIT/SCORPIO_VIRGO_T5_FAIL_tam.png
+      - name: Uret
+        run: |
+          set -euo pipefail
+          I=/tmp/istek.json
+          /home/claude/blender/venv/bin/python /home/claude/blender/siparis_uret.py "$(jq -r .cift $I)" "$(jq -r .isim1 $I)" "$(jq -r .isim2 $I)" "$(jq -r .mesaj_b64 $I)" "/tmp/k/${CIFT}_ana.png" /tmp/is
+      - name: Kapilar
+        run: |
+          set +e
+          REF_ALFA=/tmp/k/${CIFT}_std_alfa.npz /home/claude/blender/venv/bin/python /home/claude/blender/siparis_kapi.py /tmp/is /tmp/ref/${CIFT}_7200x10800.jpg --json /tmp/is/KAPI.json
+          echo "KAPI_RC=$?" >> "$GITHUB_ENV"
+      - name: Drive'a yaz
+        if: always()
+        run: |
+          set -euo pipefail
+          D="gdrive,root_folder_id=12N9iS2i4byMbkH5c0Inmni_nIv2zyTzH:SIPARIS_ISIM/GPT/AstroLoveArt_${RECEIPT}"
+          T_SON=$(date -u +%s)
+          python3 - <<'P'
+          import json, os
+          t0, t1 = int(os.environ['T_BAS']), int(os.environ.get('T_SON', '0') or 0)
+          json.dump(dict(kosu=os.environ['GITHUB_RUN_ID'], is_basi_utc=t0), open('/tmp/is/SURE.json', 'w'))
+          P
+          ls /tmp/is
+          rclone copy /tmp/is "$D" --include "AstroLoveArt_*.jpg" --include "KAPI.json" --include "SURE.json" --include "siparis.json" --exclude "*"
+          rclone lsl "$D"
+      - name: Sonuc
+        run: '[ "${KAPI_RC:-1}" = "0" ]'
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
