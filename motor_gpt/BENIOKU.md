@@ -21,3 +21,10 @@ Onayli 78 poster ile ayni sonuc: ChatGPT ana sembol katmani + motor (isim, tagli
 - Motor & alfasini harflerle ayni cizer (golge, parilti); ChatGPT yuzeyi renk_uyum icinde (AMP_JSON) ayni alfayla bindirilir,
   rengi yalniz ortalama Lab kaydirmasiyla ana ortancasina. Tek JPEG kaydi (ikinci kayit ana farkini 0.341 -> 0.487 yapiyordu).
 - Kapi d: & iceren tagline bagimsiz cizilir (ayni & alfasi). Kapi f: her & icin IoU >= 0.90, leke, dE00 <= 1.
+
+## Etsy teslim dosyasi (8 Eki 2026, Serdar onayli B q97, ders 199)
+- Cikti: AstroLoveArt_<Burc1>_<Burc2>_7200x10800.jpg (musteriye giden) + AstroLoveArt_<Burc1>_<Burc2>.jpg (q100 ana kopya). Ikisi de 300 dpi.
+- Teslim: 7200x10800, 4:4:4, TPDF titresim (genlik 0.5) yalniz koyu zeminde (oge alfasi 0), mozjpeg 4.1.1 q97 -sample 1x1 -optimize -progressive,
+  JFIF yogunlugu yerinde 300 dpi (teslim_jpg.py). ~17 MB (< 20 MB, Etsy "Complete order" siniri).
+- bin/cjpeg-mozjpeg-4.1.1: mozjpeg 4.1.1 kaynaktan derlendi (libjpeg statik, glibc >= 2.34), sha256 8e256d4e665b5147dab2486700e91ad0e451c67ca4b8a0dbe4122c8002a0dbfc.
+- Kapi g: < 20 MB, 7200x10800, 4:4:4, dpi 300 (teslim + ana), halka <= 0.075 (onayli B q97 0.066; bilinen bozuk Pillow q95 0.093).

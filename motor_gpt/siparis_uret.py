@@ -2,7 +2,8 @@
 # diger ogeler onayli ayarla) + renk_uyum. ChatGPT GEREKMEZ.
 # Kullanim: python siparis_uret.py CIFT ISIM1 ISIM2 MESAJ_B64 KATMAN_PNG IS_KLASORU
 #   CIFT ters sirada gelirse alfabetige cevrilir ve isimler de yer degistirir (isim1 = cift adindaki ILK burc, solda).
-# Cikti: IS_KLASORU/AstroLoveArt_<Burc1>_<Burc2>.jpg (7200x10800 JPEG q100) + _2000 onizleme + siparis.json
+# Cikti: IS_KLASORU/AstroLoveArt_<Burc1>_<Burc2>.jpg (7200x10800 JPEG q100 ana kopya, 300 dpi) + _7200x10800.jpg (Etsy teslim: mozjpeg q97,
+#        4:4:4, titresim yalniz koyu zeminde, 300 dpi, < 20 MB) + _2000 onizleme + siparis.json
 import sys, os, json, time, base64, subprocess, numpy as np, cv2
 from PIL import Image
 Image.MAX_IMAGE_PIXELS = None
@@ -72,13 +73,14 @@ for f_ in ('SV_BLENDER_tam.png', 'SV_BLENDER_tam_q100.jpg', 'SV_BLENDER_2000.jpg
 log('ana bindirildi')
 # 5) renk uyumu (ogeler -> ana altini)
 p = subprocess.run([PY, B + 'renk_uyum.py', c, IS, f'{IS}/son'], capture_output=True, text=True,
-                   env=dict(os.environ, **({'AMP_JSON': f'{IS}/amp.json'} if amp else {})))
+                   env=dict(os.environ, TESLIM_JPG=f'{IS}/son/{c}_teslim.jpg', CJPEG=B + 'bin/cjpeg-mozjpeg-4.1.1', **({'AMP_JSON': f'{IS}/amp.json'} if amp else {})))
 print(p.stdout[-600:])
 if p.returncode: print(p.stderr[-1500:]); sys.exit(5)
 ad1, ad2 = b1.capitalize(), b2.capitalize()
 son = f'{IS}/AstroLoveArt_{ad1}_{ad2}.jpg'
 os.replace(f'{IS}/son/{c}/{c}_7200x10800.jpg', son)
 os.replace(f'{IS}/son/{c}/{c}_2000.jpg', f'{IS}/AstroLoveArt_{ad1}_{ad2}_2000.jpg')
+os.replace(f'{IS}/son/{c}_teslim.jpg', f'{IS}/AstroLoveArt_{ad1}_{ad2}_7200x10800.jpg')     # Etsy teslim dosyasi (q97, 300 dpi); _<ad>.jpg q100 ana kopya
 json.dump(dict(cift=c, isim1=isim1, isim2=isim2, tagline=tag, katman=os.path.basename(katman),
                amp=None if amp is None else dict(olcu=amp['olcu'], konum=[[q['x'], q['y'], *q['alfa'].shape] for q in amp['ampler']]),
                renk=json.load(open(f'{IS}/son/{c}/renk_olcum.json')), sure_sn=round(time.time() - T0, 1)),

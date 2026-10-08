@@ -77,12 +77,20 @@ log('kaydirma Lab', kay); log('dE00 sonra', sonra)
 os.makedirs(f'{OD}/{c}', exist_ok=True)
 rs = np.random.default_rng(11)
 out = np.clip(np.round(P + rs.random(P.shape, dtype=np.float32) - rs.random(P.shape, dtype=np.float32)), 0, 255).astype(np.uint8)
-Image.fromarray(out).save(f'{OD}/{c}/{c}_7200x10800.jpg', quality=100, subsampling=0)
+Image.fromarray(out).save(f'{OD}/{c}/{c}_7200x10800.jpg', quality=100, subsampling=0, dpi=(300, 300))   # 300 dpi (8 Eki, Serdar)
+del out
 on = np.empty((3000, 2000, 3), np.uint8)
 for yy in range(0, 10800, 1800):
     bf = cv2.resize(P[yy:yy + 1800], (2000, 500), interpolation=cv2.INTER_AREA)
     bf += rs.random(bf.shape, dtype=np.float32) - rs.random(bf.shape, dtype=np.float32)
     on[yy // 1800 * 500:yy // 1800 * 500 + 500] = np.clip(np.round(bf), 0, 255).astype(np.uint8)
-Image.fromarray(on).save(f'{OD}/{c}/{c}_2000.jpg', quality=100, subsampling=0)
-json.dump(dict(once=once, sonra=sonra, kaydirma=kay, PASS=all(v <= 1.0 for v in sonra.values())), open(f'{OD}/{c}/renk_olcum.json', 'w'), indent=1)
+Image.fromarray(on).save(f'{OD}/{c}/{c}_2000.jpg', quality=100, subsampling=0, dpi=(300, 300))
+# Etsy teslim dosyasi (8 Eki 2026, Serdar onayli B q97, ders 199): ayni kayan nokta goruntuden, titresim yalniz koyu zeminde, mozjpeg q97, 300 dpi
+teslim = None
+if os.environ.get('TESLIM_JPG'):
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import teslim_jpg
+    ekler = [(q['x'], q['y'], np.load(q['alfa'])) for q in json.load(open(os.environ['AMP_JSON']))] if os.environ.get('AMP_JSON') else []
+    teslim = teslim_jpg.yaz(P, z, os.environ['TESLIM_JPG'], os.environ['CJPEG'], ekler=ekler)
+    log('teslim', teslim)
+json.dump(dict(once=once, sonra=sonra, kaydirma=kay, teslim=teslim, PASS=all(v <= 1.0 for v in sonra.values())), open(f'{OD}/{c}/renk_olcum.json', 'w'), indent=1)
 log('bitti', 'PASS' if all(v <= 1.0 for v in sonra.values()) else 'FAIL')
