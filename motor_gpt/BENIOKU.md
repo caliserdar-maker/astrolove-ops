@@ -12,3 +12,12 @@ Onayli 78 poster ile ayni sonuc: ChatGPT ana sembol katmani + motor (isim, tagli
 - Actions: .github/workflows/siparis-gpt.yml (motor_gpt /home/claude/blender'a baglanir; yollar yerel ile ayni)
 - Paket surumleri: numpy 2.5.3, opencv-python-headless 5.0.0.93, pillow 12.3.0, scipy 1.18.1, scikit-image 0.26.0, potracer 0.0.4
 - Katman cikarimi (yeniden gerekirse): katman_cikar.py (gpt_birlestir2.py KATMAN_YOL modu)
+
+## & isareti (8 Eki 2026, Serdar onayi)
+- Tagline'daki "&" artik "and" olmaz; her & ChatGPT & isaretiyle dizilir (amp/AMP_ALFA.png 16 bit + AMP_YUZEY.png, sha256 AMP_MANIFEST.json).
+- 35 karakter siniri musterinin yazdigi metne uygulanir.
+- Boy: & murekkep yuksekligi = ayni puntoda "A" buyuk harf yuksekligi. Aralik: & yerinde "and" olsaydi komsu kelimelerle olacak
+  murekkep bosluklarinin ortalamasi (onayli ornek: Forever and Always 58/51 -> 54 px). Taban ortak. Birden cok & desteklenir.
+- Motor & alfasini harflerle ayni cizer (golge, parilti); ChatGPT yuzeyi renk_uyum icinde (AMP_JSON) ayni alfayla bindirilir,
+  rengi yalniz ortalama Lab kaydirmasiyla ana ortancasina. Tek JPEG kaydi (ikinci kayit ana farkini 0.341 -> 0.487 yapiyordu).
+- Kapi d: & iceren tagline bagimsiz cizilir (ayni & alfasi). Kapi f: her & icin IoU >= 0.90, leke, dE00 <= 1.

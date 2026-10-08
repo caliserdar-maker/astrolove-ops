@@ -94,8 +94,83 @@ def en_iyi(ad, metin, font, wght, p0):
 d = {}
 for ad, isim in (('isim1', s['isim1']), ('isim2', s['isim2'])):
     v, p = en_iyi(ad, isim.upper(), 'Cinzel.ttf', 500, 405); d[ad] = dict(iou=round(v, 4), punto=p)
-v, p = en_iyi('tagline', s['tagline'], 'EBGaramond-Italic.ttf', 400, 372); d['tagline'] = dict(iou=round(v, 4), punto=p)
+if '&' not in s['tagline']:
+    v, p = en_iyi('tagline', s['tagline'], 'EBGaramond-Italic.ttf', 400, 372); d['tagline'] = dict(iou=round(v, 4), punto=p)
+else:
+    # & iceren tagline (8 Eki 2026): tam satir bagimsiz cizilir; her & yerine AYNI ChatGPT & alfasi (amp/AMP_ALFA.png),
+    # boy = ayni puntoda "A" buyuk harf yuksekligi, & ile komsu kelime arasi = tagline kelime bosluklari ortalamasi, taban ortak.
+    AMP_A = np.asarray(Image.open(B + 'amp/AMP_ALFA.png')).astype(np.float32) / 65535
+    def amp_satir(tag, tp):
+        F = ImageFont.truetype(FONT + 'EBGaramond-Italic.ttf', tp); F.set_variation_by_axes([400])
+        def yz(m):
+            bb = F.getbbox(m, anchor='ls'); im = Image.new('L', (bb[2] - bb[0] + 40, bb[3] - bb[1] + 40), 0)
+            ImageDraw.Draw(im).text((20 - bb[0], 20 - bb[1]), m, font=F, fill=255, anchor='ls'); a = np.asarray(im)
+            yy, xx = np.nonzero(a > 127); return a, xx.min(), xx.max() + 1, 20 - bb[1], yy.min()
+        def bosluk(a):
+            k = ~(a > 127).any(0); yy, xx = np.nonzero(a > 127); out, i = [], xx.min()
+            while i < xx.max():
+                if k[i]:
+                    j = i
+                    while k[j]: j += 1
+                    out.append(j - i); i = j
+                else: i += 1
+            return out
+        A_ = yz('A'); cap = A_[3] - A_[4]
+        pr = [q.strip() for q in tag.split('&')]
+        gl = []                                                     # her & icin: "<onceki> and <sonraki>" murekkep bosluklari ortalamasi
+        for i in range(len(pr) - 1):
+            o_ = pr[i].split()[-1] if pr[i] else ''; s_ = pr[i + 1].split()[0] if pr[i + 1] else ''
+            if not o_ and not s_: o_, s_ = 'Forever', 'Always'
+            r = sorted(bosluk(yz(' '.join(x for x in (o_, 'and', s_) if x))[0]), reverse=True)[:int(bool(o_)) + int(bool(s_))]
+            gl.append(int(round(float(np.mean(r)))))
+        yy, xx = np.nonzero(AMP_A > 0.5); sc = cap / (yy.max() + 1 - yy.min())
+        As = cv2.resize(AMP_A, (int(round(AMP_A.shape[1] * sc)), int(round(AMP_A.shape[0] * sc))), interpolation=cv2.INTER_AREA)
+        A8 = np.round(As * 255).astype(np.uint8); yy, xx = np.nonzero(A8 > 127); ik = (xx.min(), xx.max() + 1, yy.max() + 1)
+        par, ara = [], []
+        for i, q in enumerate(pr):
+            if q:
+                if par: ara.append(gl[i - 1])                       # onceki eleman & (metinler & ile ayrilir)
+                r = yz(q); par.append((r[0], r[1], r[2], r[3]))
+            if i < len(pr) - 1:
+                if par: ara.append(gl[i])
+                par.append((A8, ik[0], ik[1], ik[2]))
+        top = sum(q[2] - q[1] for q in par) + sum(ara)
+        tv = np.zeros((max(q[0].shape[0] for q in par) + 400, top + 400), np.uint8); tb = tv.shape[0] - 150; xi = 0
+        for j, (a, il, ir, bl) in enumerate(par):
+            sl = tv[tb - bl:tb - bl + a.shape[0], xi - il + 200:xi - il + 200 + a.shape[1]]; np.maximum(sl, a, out=sl)
+            xi += ir - il + (ara[j] if j < len(ara) else 0)
+        return tv, top, A8
+    tp = 372
+    while True:
+        tv, top, A8b = amp_satir(s['tagline'], tp)
+        if top <= 7200 - 1400 or tp <= 200: break
+        tp -= 4
+    d['tagline'] = dict(iou=round(iou(z['tagline'], tv), 4), punto=tp, amp=True)
 sonuc['d'] = dict(**d, PASS=bool(all(x['iou'] >= 0.985 for x in d.values())))
+# f) & kapisi (8 Eki 2026): her & icin son goruntudeki altin silueti / beklenen & alfasi IoU >= 0.90; leke (ChatGPT & yuzeyine gore,
+#    ortalama kaydirma cikarildiktan sonra |L farki| > 6 kume <= 0.5*kalinlik^2); dE00 (ana ile) <= 1
+if '&' in s['tagline']:
+    f = dict(beklenen=s['tagline'].count('&'), ampler=[])
+    kon = (s.get('amp') or {}).get('konum') or []
+    G_ = np.asarray(Image.open(B + 'amp/AMP_YUZEY.png').convert('RGB')).astype(np.float32) / 255
+    AA = np.asarray(Image.open(B + 'amp/AMP_ALFA.png')).astype(np.float32) / 65535
+    for (x, y, h, w) in kon:
+        a8 = A8b if A8b.shape == (h, w) else cv2.resize(A8b, (w, h))
+        Pc = P[y:y + h, x:x + w].astype(np.float32)
+        fv = Pc / 255; V = fv.max(2); sari = fv[..., 0] - fv[..., 2]
+        sil = (np.clip((V - 0.30) / 0.20, 0, 1) * np.clip((sari + 0.05) / 0.15, 0, 1)) > 0.5
+        m = a8 > 127; io = float((sil & m).sum() / max((sil | m).sum(), 1))
+        As = cv2.resize(AA, (w, h), interpolation=cv2.INTER_AREA); Gs = cv2.resize(G_ * AA[..., None], (w, h), interpolation=cv2.INTER_AREA) / np.maximum(As, 1e-4)[..., None]
+        Lk = cv2.cvtColor(np.clip(Gs, 0, 1).astype(np.float32), cv2.COLOR_RGB2Lab)[..., 0]; Lp = cv2.cvtColor(fv.astype(np.float32), cv2.COLOR_RGB2Lab)[..., 0]
+        icm = cv2.distanceTransform(m.astype(np.uint8), cv2.DIST_L2, 5) > 3; r_ = Lp - Lk; r_ -= np.median(r_[icm])
+        kal = float(np.median(cv2.distanceTransform(m.astype(np.uint8), cv2.DIST_L2, 5)[m])) * 2
+        n_, _, st_, _ = cv2.connectedComponentsWithStats(((np.abs(r_) > 6) & icm).astype(np.uint8), 8); kume = int(st_[1:, cv2.CC_STAT_AREA].max()) if n_ > 1 else 0
+        ic2 = cv2.erode((a8 > 242).astype(np.uint8), np.ones((5, 5), np.uint8)) > 0
+        de = round(de00(La, np.median(cv2.cvtColor(fv.astype(np.float32), cv2.COLOR_RGB2Lab)[ic2], 0)), 2)
+        f['ampler'].append(dict(konum=[x, y], iou=round(io, 3), leke_kume=kume, leke_esik=int(0.5 * kal * kal), dE00=de,
+                                PASS=bool(io >= 0.90 and kume <= int(0.5 * kal * kal) and de <= 1.0)))
+    f['PASS'] = bool(len(f['ampler']) == f['beklenen'] and all(q['PASS'] for q in f['ampler']))
+    sonuc['f'] = f
 # e) dikis: ana kutusu kenarlarinda (yalniz sembolun OLMADIGI zemin pikselleri) kenar adimi komsu adimla ayni olmali
 y0, y1, x0, x1 = kutu('ana'); Pf = P.astype(np.float32).mean(2); e = {}
 ana_a = z['ana'] > 0

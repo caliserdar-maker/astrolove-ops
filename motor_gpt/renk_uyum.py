@@ -61,6 +61,18 @@ for ad in OGELER:
     L = lab(reg[sec]) + d[None, :] * a[sec][:, None]                       # kenarda alfa kadar (yumusak gecis)
     reg[sec] = np.clip(cv2.cvtColor(L.reshape(-1, 1, 3).astype(np.float32), cv2.COLOR_Lab2RGB).reshape(-1, 3) * 255, 0, 255)
 sonra = {ad: round(de00(Lana, ortanca(ad)), 2) for ad in OGELER if ad in K}
+# ChatGPT "&" (8 Eki 2026, siparis-gpt): motor & alfasini harflerle ayni cizdi (golge, parilti, kenar); ChatGPT yuzeyi ayni alfayla
+# bindirilir, rengi YALNIZ ortalama Lab kaydirmasiyla ana ortancasina (ders 135). Tek JPEG kaydi; ek titresim yok (ders 177).
+if os.environ.get('AMP_JSON'):
+    for i, q in enumerate(json.load(open(os.environ['AMP_JSON'])), 1):
+        A8 = np.load(q['alfa']); G8 = np.load(q['yuzey']); x, y = q['x'], q['y']; h, w = A8.shape
+        icm = cv2.erode((A8 > 242).astype(np.uint8), np.ones((5, 5), np.uint8)) > 0
+        GL = cv2.cvtColor(G8.astype(np.float32) / 255, cv2.COLOR_RGB2Lab); dk = Lana - np.median(GL[icm], 0); GL += dk
+        Gn = np.clip(cv2.cvtColor(GL, cv2.COLOR_Lab2RGB), 0, 1) * 255
+        Aa = cv2.GaussianBlur(A8.astype(np.float32) / 255, (0, 0), 0.5)[..., None]   # motor kenar_yum 0.5 ile ayni kenar
+        reg = P[y:y + h, x:x + w]; P[y:y + h, x:x + w] = Gn * Aa + reg * (1 - Aa)
+        kay[f'amp{i}'] = np.round(dk, 2).tolist()
+        sonra[f'amp{i}'] = round(de00(Lana, np.median(lab(P[y:y + h, x:x + w][icm]), 0)), 2)
 log('kaydirma Lab', kay); log('dE00 sonra', sonra)
 os.makedirs(f'{OD}/{c}', exist_ok=True)
 rs = np.random.default_rng(11)
