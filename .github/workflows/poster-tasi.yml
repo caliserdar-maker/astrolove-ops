@@ -1,0 +1,34 @@
+name: poster-tasi
+# 78 poster baski dosyasi (7200x10800) -> Drive POSTER78_CHATGPT_7200x10800_20261008. Gecici dal; her push 10 dosya.
+on:
+  push:
+    branches: [poster-tasi]
+permissions:
+  contents: read
+jobs:
+  tasi:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: rclone kur
+        run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: "Drive'a kopyala ve dogrula"
+        run: |
+          set -euo pipefail
+          D="gdrive,root_folder_id=1E-vvy7BVE2C2VEuRDoVUf6g9PZpvh5-H:"
+          rclone copy tasi/ "$D" --transfers 4 --include "*.jpg"
+          rclone check tasi/ "$D" --one-way --include "*.jpg"
+          rclone lsf "$D" | wc -l
