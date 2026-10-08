@@ -1,2 +1,10 @@
-# gpt-sembol tekrar (API guvenlik reddi)
-CANCER_VIRGO
+# ogeler atlasi (kucuk semboller, sonsuz, harfler)
+sembol_1
+sembol_2
+sembol_3
+sonsuz
+buyuk_1
+buyuk_2
+italik_1
+italik_2
+italik_3

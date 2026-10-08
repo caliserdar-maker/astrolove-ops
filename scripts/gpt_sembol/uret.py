@@ -39,9 +39,25 @@ def dosya(ad):
         if os.path.exists(f'{GIR}/{ad}{uz}'): return (f'{ad}{uz}', open(f'{GIR}/{ad}{uz}', 'rb'), mt)
     raise FileNotFoundError(ad)
 
+# Ogeler (kucuk semboller, sonsuz, harf atlasi; kirmizi hat yok): 2 resim (pafta + stil)
+ISTEM_OGE = (
+    "Image 1 shows gold zodiac glyphs or gold lettering on a dark navy background. Image 2 is the style reference.\n\n"
+    "Edit Image 1 only. Re-render every gold element with exactly the same gold metal, surface, bevel, color and "
+    "lighting as the gold symbol in Image 2: smooth, rounded, polished metal with a soft highlight running along each "
+    "stroke. Where strokes meet or cross, the ridges flow continuously into each other with smooth transitions: no "
+    "notches, no dents, no dark seams.\n\n"
+    "Do NOT change the shape, outline, thickness, size or position of any element. Do NOT add, remove, merge or "
+    "redraw any letter, mark or symbol; keep every letter exactly as it is. Do NOT change the background. "
+    "Output the same framing as Image 1."
+)
+
 def istek(model, c, ek):
-    files = [('image[]', dosya(f'{c}_temiz')), ('image[]', dosya(f'{c}_kirmizi')), ('image[]', dosya('STIL'))]
-    data = dict(model=model, prompt=ISTEM, n='1', **ek)
+    if os.path.exists(f'{GIR}/{c}_kirmizi.jpg') or os.path.exists(f'{GIR}/{c}_kirmizi.png'):
+        files = [('image[]', dosya(f'{c}_temiz')), ('image[]', dosya(f'{c}_kirmizi')), ('image[]', dosya('STIL'))]
+        data = dict(model=model, prompt=ISTEM, n='1', **ek)
+    else:
+        files = [('image[]', dosya(f'{c}_temiz')), ('image[]', dosya('STIL'))]
+        data = dict(model=model, prompt=ISTEM_OGE, n='1', **ek)
     for dene in range(6):                      # hiz siniri (429, kota disi): bekle ve tekrar dene
         r = requests.post('https://api.openai.com/v1/images/edits', headers={'Authorization': f'Bearer {KEY}'},
                           data=data, files=files, timeout=600)
