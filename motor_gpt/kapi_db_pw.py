@@ -28,7 +28,7 @@ for r in [k for k in s['renk'] if k != 'MIDNIGHT_BLUE']:
             if os.path.lexists(f'{D}/{dst}'): os.remove(f'{D}/{dst}')
             os.symlink(os.path.abspath(src), f'{D}/{dst}')
         ro = dict(s['renk'][r]); ro['teslim'] = ro.get('olcu_' + ol) or (ro['teslim'] if ol == '24x36' else ro['olcu_16x20'])   # siparis: olcu_<OL>
-        json.dump(dict(cift=c, isim1=s['isim1'], isim2=s['isim2'], tagline=s['tagline'], olcu=ol, renk=ro), open(f'{D}/siparis.json', 'w'), ensure_ascii=False)
+        json.dump(dict(cift=c, isim1=s['isim1'], isim2=s['isim2'], tagline=s['tagline'], olcu=ol, renk=ro, amp=s.get('amp')), open(f'{D}/siparis.json', 'w'), ensure_ascii=False)   # amp: & kapisi (f)
         p = subprocess.run([PY, B + 'siparis_kapi.py', D, '-', '--json', f'{D}/KAPI.json'], capture_output=True, text=True)
         if not os.path.exists(f'{D}/KAPI.json'): print(p.stdout[-500:], p.stderr[-1500:]); R[ol] = dict(PASS=False, hata='siparis_kapi calismadi'); continue
         R[ol] = json.load(open(f'{D}/KAPI.json'))

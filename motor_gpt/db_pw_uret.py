@@ -107,7 +107,8 @@ for r, png in SV.items():
     log('ana bindirildi', r)
 # 5) renk uyumu (ogeler -> ana altini) + teslim (24x36 onayli yol; 16x20 yontem B, yan zemin = ayni rengin 16x20 plakasi, gren hedefi = 24x36 zemin greni)
 ad1, ad2 = b1.capitalize(), b2.capitalize()
-rapor = dict(cift=c, isim1=isim1, isim2=isim2, tagline=tag, katman=os.path.basename(katman), plaka=plaka_rapor, renk={}, siparis_olcu=SIP_OL or None)
+rapor = dict(cift=c, isim1=isim1, isim2=isim2, tagline=tag, katman=os.path.basename(katman), plaka=plaka_rapor, renk={}, siparis_olcu=SIP_OL or None,
+             amp=None if amp is None else dict(olcu=amp['olcu'], konum=[[q['x'], q['y'], *q['alfa'].shape] for q in amp['ampler']]))   # & kapisi (f) konumlari, siparis_uret ile ayni
 for r in ['MIDNIGHT_BLUE'] + RENKLER:
     TB = f'{IS}/{r}'; ek = {'AMP_JSON': f'{IS}/amp.json'} if amp else {}
     if r != 'MIDNIGHT_BLUE' and SIP_OL:
