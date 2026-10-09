@@ -1,0 +1,453 @@
+{
+ "DEEP_BLACK": {
+  "16x20": {
+   "b": {
+    "dE00": {
+     "kucuk1": 0.12,
+     "kucuk2": 0.1,
+     "sonsuz": 0.12,
+     "isim1": 0.16,
+     "isim2": 0.09,
+     "tagline": 0.07,
+     "cember": 0.09
+    },
+    "en_kotu": 0.16,
+    "PASS": true
+   },
+   "c": {
+    "kucuk1": "CANCER",
+    "kucuk2": "LIBRA",
+    "beklenen": [
+     "CANCER",
+     "LIBRA"
+    ],
+    "isim1_solda": true,
+    "kucuk1_isim1_ustunde": true,
+    "PASS": true
+   },
+   "d": {
+    "isim1": {
+     "iou": 1.0,
+     "punto": 405
+    },
+    "isim2": {
+     "iou": 1.0,
+     "punto": 405
+    },
+    "tagline": {
+     "iou": 1.0,
+     "punto": 372
+    },
+    "PASS": true
+   },
+   "e": {
+    "ust": {
+     "adim": 0.305,
+     "komsu": 0.296,
+     "n": 4141,
+     "PASS": true
+    },
+    "alt": {
+     "adim": 0.0,
+     "komsu": 0.0,
+     "n": 4141,
+     "PASS": true
+    },
+    "sol": {
+     "adim": 0.137,
+     "komsu": 0.131,
+     "n": 3932,
+     "PASS": true
+    },
+    "sag": {
+     "adim": 0.112,
+     "komsu": 0.115,
+     "n": 3932,
+     "PASS": true
+    },
+    "PASS": true
+   },
+   "g": {
+    "dosya": "AstroLoveArt_Cancer_Libra_16x20.jpg",
+    "olcu": "16x20",
+    "bayt": 1477670,
+    "mb": 1.48,
+    "boyut": [
+     4800,
+     6000
+    ],
+    "hedef": [
+     4800,
+     6000
+    ],
+    "ornekleme_444": true,
+    "dpi_teslim": [
+     300,
+     300
+    ],
+    "dpi_ana": [
+     300,
+     300
+    ],
+    "halka": 0.0065,
+    "halka_kutular": {
+     "567,167": 0.0065,
+     "1733,5556": 0.0021
+    },
+    "halka_esik": 0.1,
+    "gren": {
+     "kaynak": 0.0,
+     "sigma": 0.0,
+     "kodlama_oncesi": 0.0,
+     "hedef": 0.0
+    },
+    "PASS": true
+   },
+   "h": {
+    "bosluk_min": 1229,
+    "icerik_tam": true,
+    "piksel_tam": true,
+    "PASS": true,
+    "bosluk_7200": {
+     "sol": 1229,
+     "ust": 1287,
+     "sag": 1229,
+     "alt": 1267
+    },
+    "yontem": "B"
+   },
+   "i": {
+    "sol": {
+     "sapma": 0.429,
+     "referans": 0.771,
+     "PASS": true
+    },
+    "sag": {
+     "sapma": 0.299,
+     "referans": 0.142,
+     "PASS": true
+    },
+    "PASS": true
+   },
+   "PASS": true
+  },
+  "L": {
+   "ana": {
+    "kaydirma_L": 0.0,
+    "kalan_std": 0.23,
+    "kume_px": 0,
+    "esik_px": 1352,
+    "kalinlik": 52.0,
+    "PASS": true
+   },
+   "isim1": {
+    "kaydirma_L": 0.04,
+    "kalan_std": 0.37,
+    "kume_px": 0,
+    "esik_px": 98,
+    "kalinlik": 14.0,
+    "PASS": true
+   },
+   "sonsuz": {
+    "kaydirma_L": 0.0,
+    "kalan_std": 0.36,
+    "kume_px": 0,
+    "esik_px": 35,
+    "kalinlik": 8.4,
+    "PASS": true
+   },
+   "isim2": {
+    "kaydirma_L": 0.0,
+    "kalan_std": 0.35,
+    "kume_px": 0,
+    "esik_px": 103,
+    "kalinlik": 14.4,
+    "PASS": true
+   },
+   "kucuk1": {
+    "kaydirma_L": 0.0,
+    "kalan_std": 0.35,
+    "kume_px": 0,
+    "esik_px": 176,
+    "kalinlik": 18.8,
+    "PASS": true
+   },
+   "kucuk2": {
+    "kaydirma_L": 0.0,
+    "kalan_std": 0.34,
+    "kume_px": 0,
+    "esik_px": 191,
+    "kalinlik": 19.6,
+    "PASS": true
+   },
+   "tagline": {
+    "kaydirma_L": 0.0,
+    "kalan_std": 0.33,
+    "kume_px": 0,
+    "esik_px": 49,
+    "kalinlik": 10.0,
+    "PASS": true
+   },
+   "cember": {
+    "kaydirma_L": 0.0,
+    "kalan_std": 0.35,
+    "kume_px": 0,
+    "esik_px": 38,
+    "kalinlik": 8.8,
+    "PASS": true
+   },
+   "PASS": true
+  },
+  "K": {
+   "kesik": {},
+   "PASS": true
+  },
+  "N": {
+   "zemin_L": 0.0,
+   "altin_L_ortanca": 62.6,
+   "altin_RGB": [
+    201.0,
+    139.0,
+    31.0
+   ],
+   "kontrast_orani": 7.2,
+   "oge_cevresi_2_60px": {
+    "px": 7294032,
+    "koyulasma_L_p99": -0.0,
+    "koyulasma_L_max": -0.0,
+    "acilma_L_p99": 8.66,
+    "acilma_L_max": 13.52,
+    "koyu_1L_oran": 0.0,
+    "acik_1L_oran": 0.5131
+   },
+   "not_": "golge/isima MB kurallariyla AYNI (degistirilmedi); FAIL degil, Serdar karari"
+  },
+  "PASS": true
+ },
+ "PURE_WHITE": {
+  "16x20": {
+   "b": {
+    "dE00": {
+     "kucuk1": 0.12,
+     "kucuk2": 0.09,
+     "sonsuz": 0.09,
+     "isim1": 0.16,
+     "isim2": 0.09,
+     "tagline": 0.07,
+     "cember": 0.09
+    },
+    "en_kotu": 0.16,
+    "PASS": true
+   },
+   "c": {
+    "kucuk1": "CANCER",
+    "kucuk2": "LIBRA",
+    "beklenen": [
+     "CANCER",
+     "LIBRA"
+    ],
+    "isim1_solda": true,
+    "kucuk1_isim1_ustunde": true,
+    "PASS": true
+   },
+   "d": {
+    "isim1": {
+     "iou": 1.0,
+     "punto": 405
+    },
+    "isim2": {
+     "iou": 1.0,
+     "punto": 405
+    },
+    "tagline": {
+     "iou": 1.0,
+     "punto": 372
+    },
+    "PASS": true
+   },
+   "e": {
+    "ust": {
+     "adim": 0.255,
+     "komsu": 0.248,
+     "n": 4141,
+     "PASS": true
+    },
+    "alt": {
+     "adim": 0.0,
+     "komsu": 0.0,
+     "n": 4141,
+     "PASS": true
+    },
+    "sol": {
+     "adim": 0.086,
+     "komsu": 0.082,
+     "n": 3932,
+     "PASS": true
+    },
+    "sag": {
+     "adim": 0.123,
+     "komsu": 0.128,
+     "n": 3932,
+     "PASS": true
+    },
+    "PASS": true
+   },
+   "g": {
+    "dosya": "AstroLoveArt_Cancer_Libra_16x20.jpg",
+    "olcu": "16x20",
+    "bayt": 1200952,
+    "mb": 1.2,
+    "boyut": [
+     4800,
+     6000
+    ],
+    "hedef": [
+     4800,
+     6000
+    ],
+    "ornekleme_444": true,
+    "dpi_teslim": [
+     300,
+     300
+    ],
+    "dpi_ana": [
+     300,
+     300
+    ],
+    "halka": 0.0,
+    "halka_kutular": {
+     "567,167": 0.0,
+     "1733,5556": 0.0
+    },
+    "halka_esik": 0.1,
+    "gren": {
+     "kaynak": 0.0,
+     "sigma": 0.0,
+     "kodlama_oncesi": 0.0,
+     "hedef": 0.0
+    },
+    "PASS": true
+   },
+   "h": {
+    "bosluk_min": 1229,
+    "icerik_tam": true,
+    "piksel_tam": true,
+    "PASS": true,
+    "bosluk_7200": {
+     "sol": 1229,
+     "ust": 1287,
+     "sag": 1229,
+     "alt": 1267
+    },
+    "yontem": "B"
+   },
+   "i": {
+    "sol": {
+     "sapma": 0.0,
+     "referans": 0.0,
+     "PASS": true
+    },
+    "sag": {
+     "sapma": 0.0,
+     "referans": 0.0,
+     "PASS": true
+    },
+    "PASS": true
+   },
+   "PASS": true
+  },
+  "L": {
+   "ana": {
+    "kaydirma_L": 0.0,
+    "kalan_std": 0.23,
+    "kume_px": 0,
+    "esik_px": 1352,
+    "kalinlik": 52.0,
+    "PASS": true
+   },
+   "isim1": {
+    "kaydirma_L": 0.04,
+    "kalan_std": 0.37,
+    "kume_px": 0,
+    "esik_px": 98,
+    "kalinlik": 14.0,
+    "PASS": true
+   },
+   "sonsuz": {
+    "kaydirma_L": 0.0,
+    "kalan_std": 0.37,
+    "kume_px": 0,
+    "esik_px": 35,
+    "kalinlik": 8.4,
+    "PASS": true
+   },
+   "isim2": {
+    "kaydirma_L": 0.0,
+    "kalan_std": 0.35,
+    "kume_px": 0,
+    "esik_px": 103,
+    "kalinlik": 14.4,
+    "PASS": true
+   },
+   "kucuk1": {
+    "kaydirma_L": 0.0,
+    "kalan_std": 0.35,
+    "kume_px": 0,
+    "esik_px": 176,
+    "kalinlik": 18.8,
+    "PASS": true
+   },
+   "kucuk2": {
+    "kaydirma_L": 0.0,
+    "kalan_std": 0.34,
+    "kume_px": 0,
+    "esik_px": 191,
+    "kalinlik": 19.6,
+    "PASS": true
+   },
+   "tagline": {
+    "kaydirma_L": 0.0,
+    "kalan_std": 0.33,
+    "kume_px": 0,
+    "esik_px": 49,
+    "kalinlik": 10.0,
+    "PASS": true
+   },
+   "cember": {
+    "kaydirma_L": 0.0,
+    "kalan_std": 0.36,
+    "kume_px": 0,
+    "esik_px": 38,
+    "kalinlik": 8.8,
+    "PASS": true
+   },
+   "PASS": true
+  },
+  "K": {
+   "kesik": {},
+   "PASS": true
+  },
+  "N": {
+   "zemin_L": 100.0,
+   "altin_L_ortanca": 62.6,
+   "altin_RGB": [
+    201.0,
+    139.0,
+    31.0
+   ],
+   "kontrast_orani": 2.92,
+   "oge_cevresi_2_60px": {
+    "px": 7209820,
+    "koyulasma_L_p99": 32.73,
+    "koyulasma_L_max": 48.57,
+    "acilma_L_p99": 0.0,
+    "acilma_L_max": 0.0,
+    "koyu_1L_oran": 0.3912,
+    "acik_1L_oran": 0.0
+   },
+   "not_": "golge/isima MB kurallariyla AYNI (degistirilmedi); FAIL degil, Serdar karari"
+  },
+  "PASS": true
+ },
+ "PASS": true
+}

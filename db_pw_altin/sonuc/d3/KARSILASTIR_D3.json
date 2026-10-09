@@ -1,0 +1,106 @@
+{
+ "DEEP_BLACK": {
+  "boyut": [
+   4800,
+   6000
+  ],
+  "serit_px": [
+   384,
+   16
+  ],
+  "bant_d2": {
+   "sol": {
+    "max_abs": 6.277,
+    "satir_05_ustu": 457,
+    "satir_1_ustu": 364,
+    "ort": 0.247
+   },
+   "sag": {
+    "max_abs": 0.279,
+    "satir_05_ustu": 0,
+    "satir_1_ustu": 0,
+    "ort": 0.004
+   }
+  },
+  "bant_d3": {
+   "sol": {
+    "max_abs": 0.238,
+    "satir_05_ustu": 0,
+    "satir_1_ustu": 0,
+    "ort": 0.003
+   },
+   "sag": {
+    "max_abs": 0.214,
+    "satir_05_ustu": 0,
+    "satir_1_ustu": 0,
+    "ort": 0.002
+   }
+  },
+  "fark_d3_d2": {
+   "px": 254158,
+   "max": 12.0,
+   "kutu": [
+    0,
+    0,
+    4799,
+    5999
+   ],
+   "seritte_px": 212740,
+   "poster_icinde_px": 41418,
+   "poster_icinde_max": 10.0,
+   "ort_mutlak": 0.0294
+  }
+ },
+ "PURE_WHITE": {
+  "boyut": [
+   4800,
+   6000
+  ],
+  "serit_px": [
+   384,
+   16
+  ],
+  "bant_d2": {
+   "sol": {
+    "max_abs": 0.0,
+    "satir_05_ustu": 0,
+    "satir_1_ustu": 0,
+    "ort": 0.0
+   },
+   "sag": {
+    "max_abs": 0.0,
+    "satir_05_ustu": 0,
+    "satir_1_ustu": 0,
+    "ort": 0.0
+   }
+  },
+  "bant_d3": {
+   "sol": {
+    "max_abs": 0.0,
+    "satir_05_ustu": 0,
+    "satir_1_ustu": 0,
+    "ort": 0.0
+   },
+   "sag": {
+    "max_abs": 0.0,
+    "satir_05_ustu": 0,
+    "satir_1_ustu": 0,
+    "ort": 0.0
+   }
+  },
+  "fark_d3_d2": {
+   "px": 607,
+   "max": 4.0,
+   "kutu": [
+    1384,
+    1440,
+    3983,
+    5159
+   ],
+   "seritte_px": 0,
+   "poster_icinde_px": 607,
+   "poster_icinde_max": 4.0,
+   "ort_mutlak": 0.0
+  }
+ }
+}

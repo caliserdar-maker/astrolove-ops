@@ -1,0 +1,476 @@
+{
+ "cift": "CANCER_LIBRA",
+ "katman": "CANCER_LIBRA_ana.png",
+ "plaka": {
+  "BLACK_24x36": {
+   "cember": [
+    3598.8,
+    4393.9,
+    2839.5
+   ],
+   "bant_px": 60.0,
+   "silinen_cember_px": 435068,
+   "bantta_kaybolan_diger_px": 2771,
+   "sonra_halka_ici_max": 0,
+   "zemin_bg": 0,
+   "zemin_disi_oran": 0.00187,
+   "zemin_disi_tepe_p99": 250.0
+  },
+  "BLACK_16x20": {
+   "cember": [
+    2399.1,
+    2407.5,
+    1673.2
+   ],
+   "bant_px": 40.0,
+   "silinen_cember_px": 172696,
+   "bantta_kaybolan_diger_px": 1115,
+   "sonra_halka_ici_max": 0,
+   "zemin_bg": 0,
+   "zemin_disi_oran": 0.00396,
+   "zemin_disi_tepe_p99": 228.0
+  },
+  "PURE_WHITE_24x36": {
+   "cember": [
+    3599.0,
+    4393.5,
+    2839.1
+   ],
+   "bant_px": 60.0,
+   "silinen_cember_px": 405186,
+   "bantta_kaybolan_diger_px": 366,
+   "sonra_halka_ici_max": 0,
+   "zemin_bg": 255,
+   "zemin_disi_oran": 0.00152,
+   "zemin_disi_tepe_p99": 1.0
+  },
+  "PURE_WHITE_16x20": {
+   "cember": [
+    2399.2,
+    2407.5,
+    1673.1
+   ],
+   "bant_px": 40.0,
+   "silinen_cember_px": 169023,
+   "bantta_kaybolan_diger_px": 329,
+   "sonra_halka_ici_max": 0,
+   "zemin_bg": 255,
+   "zemin_disi_oran": 0.00013,
+   "zemin_disi_tepe_p99": 1.0
+  }
+ },
+ "renk": {
+  "MIDNIGHT_BLUE": {
+   "once": {
+    "kucuk1": 4.37,
+    "kucuk2": 4.62,
+    "sonsuz": 4.18,
+    "isim1": 4.86,
+    "isim2": 4.72,
+    "tagline": 4.16,
+    "cember": 4.28
+   },
+   "sonra": {
+    "kucuk1": 0.02,
+    "kucuk2": 0.03,
+    "sonsuz": 0.05,
+    "isim1": 0.08,
+    "isim2": 0.11,
+    "tagline": 0.08,
+    "cember": 0.07
+   },
+   "kaydirma": {
+    "kucuk1": [
+     -5.150000095367432,
+     -0.8600000143051147,
+     2.4800000190734863
+    ],
+    "kucuk2": [
+     -5.519999980926514,
+     -0.7300000190734863,
+     2.0899999141693115
+    ],
+    "sonsuz": [
+     -4.789999961853027,
+     -0.9200000166893005,
+     3.3299999237060547
+    ],
+    "isim1": [
+     -5.869999885559082,
+     -0.9200000166893005,
+     1.090000033378601
+    ],
+    "isim2": [
+     -5.630000114440918,
+     -0.9200000166893005,
+     1.9199999570846558
+    ],
+    "tagline": [
+     -4.909999847412109,
+     -0.8299999833106995,
+     2.0899999141693115
+    ],
+    "cember": [
+     -4.909999847412109,
+     -1.0199999809265137,
+     3.2799999713897705
+    ]
+   },
+   "teslim": null,
+   "PASS": true
+  },
+  "DEEP_BLACK": {
+   "once": {
+    "kucuk1": 4.36,
+    "kucuk2": 4.61,
+    "sonsuz": 4.16,
+    "isim1": 4.76,
+    "isim2": 4.73,
+    "tagline": 4.15,
+    "cember": 4.29
+   },
+   "sonra": {
+    "kucuk1": 0.04,
+    "kucuk2": 0.02,
+    "sonsuz": 0.14,
+    "isim1": 0.12,
+    "isim2": 0.11,
+    "tagline": 0.09,
+    "cember": 0.07
+   },
+   "kaydirma": {
+    "kucuk1": [
+     -5.150000095367432,
+     -0.800000011920929,
+     2.4200000762939453
+    ],
+    "kucuk2": [
+     -5.510000228881836,
+     -0.7200000286102295,
+     2.0899999141693115
+    ],
+    "sonsuz": [
+     -4.789999961853027,
+     -0.8299999833106995,
+     3.3399999141693115
+    ],
+    "isim1": [
+     -5.739999771118164,
+     -0.9200000166893005,
+     1.090000033378601
+    ],
+    "isim2": [
+     -5.630000114440918,
+     -0.9800000190734863,
+     2.0
+    ],
+    "tagline": [
+     -4.909999847412109,
+     -0.800000011920929,
+     2.0899999141693115
+    ],
+    "cember": [
+     -4.909999847412109,
+     -1.0199999809265137,
+     3.359999895095825
+    ]
+   },
+   "teslim": {
+    "dosya": "CANCER_LIBRA_teslim.jpg",
+    "bayt": 1477670,
+    "mb": 1.48,
+    "boyut": [
+     4800,
+     6000
+    ],
+    "ornekleme_444": true,
+    "dpi": [
+     300,
+     300
+    ],
+    "halka": 0.0065,
+    "halka_kutular": {
+     "567,167": 0.0065,
+     "1733,5556": 0.0021
+    },
+    "halka_sigma": 8,
+    "halka_esik": 0.1,
+    "PASS": true,
+    "gren": {
+     "kaynak": 0.0,
+     "sigma": 0.0,
+     "kodlama_oncesi": 0.0,
+     "hedef": 0.0
+    },
+    "olcu": "16x20",
+    "yontem": "B",
+    "hedef_px": [
+     4800,
+     6000
+    ],
+    "bosluk_7200": {
+     "sol": 1229,
+     "ust": 1287,
+     "sag": 1229,
+     "alt": 1267
+    },
+    "h": {
+     "bosluk_min": 1229,
+     "icerik_tam": true,
+     "piksel_tam": true,
+     "PASS": true
+    },
+    "dikis": {
+     "sol": {
+      "sapma": 0.429,
+      "referans": 0.771,
+      "PASS": true
+     },
+     "sag": {
+      "sapma": 0.299,
+      "referans": 0.142,
+      "PASS": true
+     },
+     "PASS": true
+    }
+   },
+   "PASS": true,
+   "olcu_16x20": {
+    "dosya": "CANCER_LIBRA_teslim.jpg",
+    "bayt": 1477670,
+    "mb": 1.48,
+    "boyut": [
+     4800,
+     6000
+    ],
+    "ornekleme_444": true,
+    "dpi": [
+     300,
+     300
+    ],
+    "halka": 0.0065,
+    "halka_kutular": {
+     "567,167": 0.0065,
+     "1733,5556": 0.0021
+    },
+    "halka_sigma": 8,
+    "halka_esik": 0.1,
+    "PASS": true,
+    "gren": {
+     "kaynak": 0.0,
+     "sigma": 0.0,
+     "kodlama_oncesi": 0.0,
+     "hedef": 0.0
+    },
+    "olcu": "16x20",
+    "yontem": "B",
+    "hedef_px": [
+     4800,
+     6000
+    ],
+    "bosluk_7200": {
+     "sol": 1229,
+     "ust": 1287,
+     "sag": 1229,
+     "alt": 1267
+    },
+    "h": {
+     "bosluk_min": 1229,
+     "icerik_tam": true,
+     "piksel_tam": true,
+     "PASS": true
+    },
+    "dikis": {
+     "sol": {
+      "sapma": 0.429,
+      "referans": 0.771,
+      "PASS": true
+     },
+     "sag": {
+      "sapma": 0.299,
+      "referans": 0.142,
+      "PASS": true
+     },
+     "PASS": true
+    }
+   }
+  },
+  "PURE_WHITE": {
+   "once": {
+    "kucuk1": 4.36,
+    "kucuk2": 4.61,
+    "sonsuz": 4.17,
+    "isim1": 4.76,
+    "isim2": 4.73,
+    "tagline": 4.15,
+    "cember": 4.3
+   },
+   "sonra": {
+    "kucuk1": 0.03,
+    "kucuk2": 0.02,
+    "sonsuz": 0.14,
+    "isim1": 0.11,
+    "isim2": 0.11,
+    "tagline": 0.09,
+    "cember": 0.09
+   },
+   "kaydirma": {
+    "kucuk1": [
+     -5.150000095367432,
+     -0.8100000023841858,
+     2.4200000762939453
+    ],
+    "kucuk2": [
+     -5.510000228881836,
+     -0.7300000190734863,
+     2.0899999141693115
+    ],
+    "sonsuz": [
+     -4.789999961853027,
+     -0.8399999737739563,
+     3.380000114440918
+    ],
+    "isim1": [
+     -5.739999771118164,
+     -0.9399999976158142,
+     1.090000033378601
+    ],
+    "isim2": [
+     -5.630000114440918,
+     -1.0,
+     2.0
+    ],
+    "tagline": [
+     -4.909999847412109,
+     -0.8100000023841858,
+     2.0899999141693115
+    ],
+    "cember": [
+     -4.909999847412109,
+     -1.0499999523162842,
+     3.359999895095825
+    ]
+   },
+   "teslim": {
+    "dosya": "CANCER_LIBRA_teslim.jpg",
+    "bayt": 1200952,
+    "mb": 1.2,
+    "boyut": [
+     4800,
+     6000
+    ],
+    "ornekleme_444": true,
+    "dpi": [
+     300,
+     300
+    ],
+    "halka": 0.0,
+    "halka_kutular": {
+     "567,167": 0.0,
+     "1733,5556": 0.0
+    },
+    "halka_sigma": 8,
+    "halka_esik": 0.1,
+    "PASS": true,
+    "gren": {
+     "kaynak": 0.0,
+     "sigma": 0.0,
+     "kodlama_oncesi": 0.0,
+     "hedef": 0.0
+    },
+    "olcu": "16x20",
+    "yontem": "B",
+    "hedef_px": [
+     4800,
+     6000
+    ],
+    "bosluk_7200": {
+     "sol": 1229,
+     "ust": 1287,
+     "sag": 1229,
+     "alt": 1267
+    },
+    "h": {
+     "bosluk_min": 1229,
+     "icerik_tam": true,
+     "piksel_tam": true,
+     "PASS": true
+    },
+    "dikis": {
+     "sol": {
+      "sapma": 0.0,
+      "referans": 0.0,
+      "PASS": true
+     },
+     "sag": {
+      "sapma": 0.0,
+      "referans": 0.0,
+      "PASS": true
+     },
+     "PASS": true
+    }
+   },
+   "PASS": true,
+   "olcu_16x20": {
+    "dosya": "CANCER_LIBRA_teslim.jpg",
+    "bayt": 1200952,
+    "mb": 1.2,
+    "boyut": [
+     4800,
+     6000
+    ],
+    "ornekleme_444": true,
+    "dpi": [
+     300,
+     300
+    ],
+    "halka": 0.0,
+    "halka_kutular": {
+     "567,167": 0.0,
+     "1733,5556": 0.0
+    },
+    "halka_sigma": 8,
+    "halka_esik": 0.1,
+    "PASS": true,
+    "gren": {
+     "kaynak": 0.0,
+     "sigma": 0.0,
+     "kodlama_oncesi": 0.0,
+     "hedef": 0.0
+    },
+    "olcu": "16x20",
+    "yontem": "B",
+    "hedef_px": [
+     4800,
+     6000
+    ],
+    "bosluk_7200": {
+     "sol": 1229,
+     "ust": 1287,
+     "sag": 1229,
+     "alt": 1267
+    },
+    "h": {
+     "bosluk_min": 1229,
+     "icerik_tam": true,
+     "piksel_tam": true,
+     "PASS": true
+    },
+    "dikis": {
+     "sol": {
+      "sapma": 0.0,
+      "referans": 0.0,
+      "PASS": true
+     },
+     "sag": {
+      "sapma": 0.0,
+      "referans": 0.0,
+      "PASS": true
+     },
+     "PASS": true
+    }
+   }
+  }
+ },
+ "sure_sn": 166.3
+}
