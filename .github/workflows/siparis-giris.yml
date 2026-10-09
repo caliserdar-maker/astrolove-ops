@@ -1,6 +1,6 @@
 name: siparis-giris
 # KISISEL DIJITAL SIPARIS GIRISI (9 Eki 2026, Serdar): musteriye 1 dosya = secilen renk + secilen olcu.
-# Yonlendirme: MIDNIGHT_BLUE -> YENI YOL (siparis-gpt kodu, sabit SHA; yontem B olcu) ANCAK anahtar aciksa
+# Yonlendirme: MIDNIGHT_BLUE, DEEP_BLACK, PURE_WHITE (9 Eki gece, DB/PW yeni altin Serdar onayli) -> YENI YOL (siparis-gpt kodu, sabit SHA; yontem B olcu) ANCAK anahtar aciksa
 #   (ANAHTAR ACIK, Serdar 9 Eki aksam, Test 12 onayi: repo degiskeni SIPARIS_GPT_ACIK yoksa varsayilan '1'; degisken API'den
 #   yazilamiyor, proxy 403) ya da girdi yeni_yol=ac (yalniz test).
 #   Diger renkler -> ESKI YOL (siparis-dijital, isler=renk:<R>, renk_ref acik). WARM_PARCHMENT -> ESKI YOL (Serdar 9 Eki aksam:
@@ -27,7 +27,7 @@ on:
         type: choice
         options: ["8x10", "11x14", "12x16", "12x18", "16x20", "16x24", "18x24", "20x30", "24x30", "24x36", "A4", "A3", "A2"]
       yeni_yol:
-        description: "anahtar = repo degiskeni SIPARIS_GPT_ACIK; ac = yalniz test icin yeni yol (Midnight Blue)"
+        description: "anahtar = repo degiskeni SIPARIS_GPT_ACIK; ac = yalniz test icin yeni yol (MB, DB, PW)"
         required: true
         type: choice
         default: anahtar
@@ -40,7 +40,7 @@ on:
 permissions:
   contents: read
 env:
-  GPT_REF: ${{ vars.SIPARIS_GPT_REF || '11a305054290d79b41eb7331b661dd28fb51311d' }}
+  GPT_REF: ${{ vars.SIPARIS_GPT_REF || '8f05e9219bc0115c13dcf7a21fa6026229222bfe' }}
   ESKI_RENK_REF: ${{ vars.ESKI_RENK_REF || 'b8c8c4b17478fd956167577fa69913d06b9eb955' }}
   WP_REF: ${{ vars.SIPARIS_WP_REF || '360cbef947994c7d4b3c9ae95275f778a18af716' }}
 jobs:
@@ -61,7 +61,7 @@ jobs:
           jq -re '.inputs.receipt | test("^[0-9]+$")' "$E" >/dev/null || { echo "HATA: receipt rakam olmali" >&2; exit 1; }
           jq -re '.inputs.cift | test("^[A-Z]+_[A-Z]+$")' "$E" >/dev/null || { echo "HATA: cift" >&2; exit 1; }
           R=$(jq -r '.inputs.renk' "$E"); O=$(jq -r '.inputs.olcu' "$E"); Y=$(jq -r '.inputs.yeni_yol' "$E"); KURU=$(jq -r '.inputs.kuru' "$E")
-          if [ "$R" = "MIDNIGHT_BLUE" ] && { [ "$Y" = "ac" ] || [ "$ACIK" = "1" ]; }; then YOL=yeni
+          if { [ "$R" = "MIDNIGHT_BLUE" ] || [ "$R" = "DEEP_BLACK" ] || [ "$R" = "PURE_WHITE" ]; } && { [ "$Y" = "ac" ] || [ "$ACIK" = "1" ]; }; then YOL=yeni
           else YOL=eski; fi
           [ "$KURU" = "true" ] && Z=kuru || Z=uret
           case "$YOL" in yeni) KOD="siparis-gpt $GPT_REF";; eski) if [ "$R" = "WARM_PARCHMENT" ]; then KOD="siparis-dijital wp_ref $WP_REF"; else KOD="siparis-dijital renk_ref $ESKI_RENK_REF"; fi;; *) KOD="yok";; esac
@@ -139,7 +139,12 @@ jobs:
           P="gdrive,root_folder_id=1E-vvy7BVE2C2VEuRDoVUf6g9PZpvh5-H:"
           mkdir -p /tmp/k /tmp/ref
           ( rclone copy "$K" /tmp/k --include "${CIFT}_ana.png" --include "${CIFT}_ana.png.json" --include "${CIFT}_std_alfa.npz" --include "ek/**"
-            rclone copy "$P" /tmp/ref --include "${CIFT}_7200x10800.jpg" ) &
+            rclone copy "$P" /tmp/ref --include "${CIFT}_7200x10800.jpg"
+            if [ "$RENK" != "MIDNIGHT_BLUE" ]; then                            # DB/PW: eski sistemin plakasi (24x36 motor zemini + aile plakasi)
+              ED=$([ "$RENK" = "DEEP_BLACK" ] && echo BLACK || echo PURE_WHITE)
+              FAM=$(python3 -c "import sys;a={'8x10':'16x20','16x20':'16x20','24x30':'16x20','11x14':'11x14','12x16':'18x24','18x24':'18x24','12x18':'24x36','16x24':'24x36','20x30':'24x36','24x36':'24x36','A4':'A2','A3':'A2','A2':'A2'};print(a[sys.argv[1]])" "$OLCU")
+              mkdir -p /tmp/pl; for b in 24x36 $FAM; do rclone copy "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PLATES/${ED}_$b.png" /tmp/pl; done
+            fi ) &
           sudo mkdir -p /home/claude/ao/KANIT /home/claude/motor_klon/motor && sudo chown -R "$USER" /home/claude
           ln -s "$GITHUB_WORKSPACE/motor_gpt" /home/claude/blender
           ln -s "$GITHUB_WORKSPACE/motor_gpt/font" /home/claude/motor_klon/motor/font
@@ -153,11 +158,21 @@ jobs:
         run: |
           set -euo pipefail
           I=/tmp/istek.json
-          /home/claude/blender/venv/bin/python /home/claude/blender/siparis_uret.py "$(jq -r .cift $I)" "$(jq -r .isim1 $I)" "$(jq -r .isim2 $I)" "$(jq -r .mesaj_b64 $I)" "/tmp/k/${CIFT}_ana.png" /tmp/is
+          if [ "$RENK" = "MIDNIGHT_BLUE" ]; then
+            /home/claude/blender/venv/bin/python /home/claude/blender/siparis_uret.py "$(jq -r .cift $I)" "$(jq -r .isim1 $I)" "$(jq -r .isim2 $I)" "$(jq -r .mesaj_b64 $I)" "/tmp/k/${CIFT}_ana.png" /tmp/is
+          else                                                               # DB/PW yeni altin (Serdar 9 Eki gece): MB referansiyla ayni kosu
+            ED=$([ "$RENK" = "DEEP_BLACK" ] && echo BLACK || echo PURE_WHITE); ls -la /tmp/pl
+            [ -s "/tmp/pl/${ED}_24x36.png" ] || { echo "::error::plaka indirilemedi (${ED}_24x36)"; exit 1; }
+            RENKLER="$RENK" SIPARIS_OLCU="$OLCU" /home/claude/blender/venv/bin/python /home/claude/blender/db_pw_uret.py "$(jq -r .cift $I)" "$(jq -r .isim1 $I)" "$(jq -r .isim2 $I)" "$(jq -r .mesaj_b64 $I)" "/tmp/k/${CIFT}_ana.png" /tmp/pl /tmp/is
+          fi
       - name: Kapilar
         run: |
           set +e
-          REF_ALFA=/tmp/k/${CIFT}_std_alfa.npz /home/claude/blender/venv/bin/python /home/claude/blender/siparis_kapi.py /tmp/is /tmp/ref/${CIFT}_7200x10800.jpg --json /tmp/is/KAPI.json
+          if [ "$RENK" = "MIDNIGHT_BLUE" ]; then
+            REF_ALFA=/tmp/k/${CIFT}_std_alfa.npz /home/claude/blender/venv/bin/python /home/claude/blender/siparis_kapi.py /tmp/is /tmp/ref/${CIFT}_7200x10800.jpg --json /tmp/is/KAPI.json
+          else
+            KAPI_OLCULER="$OLCU" /home/claude/blender/venv/bin/python /home/claude/blender/kapi_db_pw.py /tmp/is --json /tmp/is/KAPI.json
+          fi
           echo "KAPI_RC=$?" >> "$GITHUB_ENV"
       - name: Drive'a yaz
         if: always()
@@ -165,7 +180,12 @@ jobs:
           set -euo pipefail
           D="gdrive,root_folder_id=12N9iS2i4byMbkH5c0Inmni_nIv2zyTzH:SIPARIS_ISIM/GPT/AstroLoveArt_${RECEIPT}"
           python3 -c "import json,os; json.dump(dict(kosu=os.environ['GITHUB_RUN_ID'], is_basi_utc=int(os.environ['T_BAS']), giris='siparis-giris', gpt_ref=os.environ['GPT_REF']), open('/tmp/is/SURE.json','w'))"
-          rclone copy /tmp/is "$D" --include "AstroLoveArt_*.jpg" --include "KAPI.json" --include "SURE.json" --include "siparis.json" --exclude "*"
+          if [ "$RENK" = "MIDNIGHT_BLUE" ]; then
+            rclone copy /tmp/is "$D" --include "AstroLoveArt_*.jpg" --include "KAPI.json" --include "SURE.json" --include "siparis.json" --exclude "*"
+          else                                                               # yalniz secilen renk: ana kopya, teslim, onizleme
+            rclone copy /tmp/is/$RENK "$D" --include "AstroLoveArt_*.jpg" --exclude "*"
+            rclone copy /tmp/is "$D" --include "KAPI.json" --include "SURE.json" --include "siparis.json" --exclude "*"
+          fi
           rclone lsl "$D"
       - name: Sonuc
         run: '[ "${KAPI_RC:-1}" = "0" ]'
