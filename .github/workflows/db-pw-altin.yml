@@ -68,7 +68,7 @@ jobs:
           git fetch -q --depth 1 origin main && mkdir -p _ana && git --work-tree=_ana checkout FETCH_HEAD -- scripts/siparis_dijital && git reset -q
           git -C _kod log --oneline -1; ls _ana/scripts/siparis_dijital
       - name: Kaynak indir + ortamlar
-        if: env.MOD == 'uret'
+        if: env.MOD == 'uret' || env.MOD == 'd3'
         run: |
           set -euo pipefail
           K="gdrive,root_folder_id=1ZQGR0fI0HQNq1D2Lbmr2qlkNVbD8jRyD:"
@@ -86,15 +86,17 @@ jobs:
           ls -la /tmp/k /tmp/k/ek /tmp/pl
           ln -s /tmp/k/ek/SCORPIO_VIRGO_T5_FAIL_tam.png /home/claude/ao/KANIT/SCORPIO_VIRGO_T5_FAIL_tam.png
       - name: Yeni (DB + PW, yeni altin)
-        if: env.MOD == 'uret'
+        if: env.MOD == 'uret' || env.MOD == 'd3'
         run: |
           set -euo pipefail
           I=db_pw_altin/istek.json
+          [ "$MOD" = "d3" ] && export OLCULER_TESLIM=16x20      # d3 (Serdar 9 Eki aksam): yalniz 16x20; 24x36 teslim uretilmez
           /home/claude/blender/venv/bin/python motor_gpt/db_pw_uret.py "$CIFT" "$(jq -r .isim1 $I)" "$(jq -r .isim2 $I)" "$(jq -r .mesaj_b64 $I)" "/tmp/k/${CIFT}_ana.png" /tmp/pl /tmp/is
       - name: Kapilar (yeni)
-        if: env.MOD == 'uret'
+        if: env.MOD == 'uret' || env.MOD == 'd3'
         run: |
           set +e
+          [ "$MOD" = "d3" ] && export KAPI_OLCULER=16x20
           /home/claude/blender/venv/bin/python motor_gpt/kapi_db_pw.py /tmp/is --json /tmp/is/KAPI.json; echo "KAPI_RC=$?" >> "$GITHUB_ENV"
       - name: Eski sistem (b8c8c4b, ayni isimler; DB/PW x 2x3, 4x5; SIRAYLA - ortak _siparis klasoru)
         if: env.MOD == 'uret'
@@ -118,8 +120,28 @@ jobs:
           rc=$?
           for f in /tmp/eski_*.log; do grep -E "^SAYFA|Error|HATA" $f | tail -5 > $S/$(basename $f); done
           exit $rc
+      - name: d3 karsilastir (onayli d2 16x20, salt okur) + Drive d3
+        if: env.MOD == 'd3' && always()
+        run: |
+          set +e
+          S=db_pw_altin/sonuc/d$DENEME; O=/tmp/teslim; mkdir -p $S $O /tmp/d2
+          R="gdrive,root_folder_id=12N9iS2i4byMbkH5c0Inmni_nIv2zyTzH:DB_PW_ALTIN_20261009"
+          rclone copy "$R/d2" /tmp/d2 --include "AstroLoveArt_*_16x20.jpg"; ls -la /tmp/d2
+          /home/claude/blender/venv/bin/python db_pw_altin/karsilastir_d3.py /tmp/d2 /tmp/is $O $S; rc=$?
+          for r in DEEP_BLACK PURE_WHITE; do cp /tmp/is/$r/AstroLoveArt_*_16x20.jpg $O/ 2>/dev/null; done
+          [ -e /tmp/is/KAPI.json ] && cp /tmp/is/KAPI.json $S/ && cp /tmp/is/KAPI.json $O/
+          python3 - <<'PY'
+          import json, os
+          s = json.load(open('/tmp/is/siparis.json')) if os.path.exists('/tmp/is/siparis.json') else {}
+          for k in ('isim1', 'isim2', 'tagline'): s.pop(k, None)
+          json.dump(s, open(os.environ['GITHUB_WORKSPACE'] + f"/db_pw_altin/sonuc/d{os.environ['DENEME']}/URETIM.json", 'w'), indent=1)
+          PY
+          ls -la $O
+          rclone copy $O "$R/d$DENEME" || rc=1
+          rclone lsjson "$R/d$DENEME" --files-only | python3 -c "import json,sys;json.dump({x['Name']: 'https://drive.google.com/file/d/'+x['ID']+'/view' for x in json.load(sys.stdin)}, open(sys.argv[1],'w'), indent=1)" $S/LINKLER.json || rc=1
+          cat $S/LINKLER.json; exit $rc
       - name: Sonuc (kapi)
-        if: env.MOD == 'uret'
+        if: env.MOD == 'uret' || env.MOD == 'd3'
         run: '[ "${KAPI_RC:-1}" = "0" ]'
       - name: Dala yaz
         if: always()

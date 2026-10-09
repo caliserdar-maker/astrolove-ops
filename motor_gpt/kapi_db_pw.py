@@ -15,12 +15,13 @@ s = json.load(open(f'{IS}/siparis.json')); c = s['cift']; b1, b2 = c.split('_');
 sys.path.insert(0, B); import kesik_uc
 z = np.load(f'{IS}/{c}_alfa.npz'); K = {str(a): (int(x), int(y)) for (x, y), a in zip(z['_konum'], z['_ad'])}
 sonuc = {}
+OLS = [o for o in os.environ.get('KAPI_OLCULER', '24x36,16x20').split(',') if o]   # d3: yalniz 16x20
 def lab(x): return cv2.cvtColor((x / 255).astype(np.float32), cv2.COLOR_RGB2Lab)
 mb = f'{IS}/MIDNIGHT_BLUE/AstroLoveArt_{a1}_{a2}_Midnight_Blue.jpg'
 for r in [k for k in s['renk'] if k != 'MIDNIGHT_BLUE']:
     rn = '_'.join(w.capitalize() for w in r.split('_')); TB = f'{IS}/{r}'; ana = f'{TB}/AstroLoveArt_{a1}_{a2}_{rn}.jpg'
     R = sonuc[r] = {}
-    for ol in ('24x36', '16x20'):                                       # onayli kapi betigi, beklenen dosya duzeniyle
+    for ol in OLS:                                                      # onayli kapi betigi, beklenen dosya duzeniyle
         D = f'{TB}/kapi_{ol}'; os.makedirs(D, exist_ok=True)
         for src, dst in ((ana, f'AstroLoveArt_{a1}_{a2}.jpg'), (f'{TB}/AstroLoveArt_{a1}_{a2}_{rn}_{ol}.jpg', f'AstroLoveArt_{a1}_{a2}_{ol}.jpg'),
                          (f'{IS}/{c}_alfa.npz', f'{c}_alfa.npz')):
@@ -59,10 +60,10 @@ for r in [k for k in s['renk'] if k != 'MIDNIGHT_BLUE']:
                                            acilma_L_p99=round(float(np.percentile(dL[m], 99)), 2), acilma_L_max=round(float(dL[m].max()), 2),
                                            koyu_1L_oran=round(float((dL[m] < -1).mean()), 4), acik_1L_oran=round(float((dL[m] > 1).mean()), 4)),
                   not_='golge/isima MB kurallariyla AYNI (degistirilmedi); FAIL degil, Serdar karari')
-    R['PASS'] = bool(all(R[k].get('PASS') for k in ('24x36', '16x20', 'L', 'K')))
-    print(r, 'PASS' if R['PASS'] else 'FAIL', {k: R[k].get('PASS') for k in ('24x36', '16x20', 'L', 'K')}, flush=True)
+    R['PASS'] = bool(all(R[k].get('PASS') for k in (*OLS, 'L', 'K')))
+    print(r, 'PASS' if R['PASS'] else 'FAIL', {k: R[k].get('PASS') for k in (*OLS, 'L', 'K')}, flush=True)
 sonuc['PASS'] = bool(all(v['PASS'] for v in sonuc.values() if isinstance(v, dict)))
 if JS: json.dump(sonuc, open(JS, 'w'), indent=1, ensure_ascii=False)
-print(json.dumps({r: {ol: {k: (v.get('PASS') if isinstance(v, dict) else v) for k, v in sonuc[r][ol].items()} for ol in ('24x36', '16x20')}
+print(json.dumps({r: {ol: {k: (v.get('PASS') if isinstance(v, dict) else v) for k, v in sonuc[r][ol].items()} for ol in OLS}
                   for r in sonuc if r != 'PASS'}, ensure_ascii=False))
 sys.exit(0 if sonuc['PASS'] else 1)

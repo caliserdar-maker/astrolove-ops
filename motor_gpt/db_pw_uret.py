@@ -17,6 +17,7 @@ if len(tag) > 35: log('FAIL tagline > 35 karakter'); sys.exit(6)
 RENK = {'DEEP_BLACK': ('BLACK', 0), 'PURE_WHITE': ('PURE_WHITE', 255)}
 RENKLER = [r for r in os.environ.get('RENKLER', 'DEEP_BLACK,PURE_WHITE').split(',') if r]
 OLCULER = ('24x36', '16x20')
+YALNIZ16 = os.environ.get('OLCULER_TESLIM', '24x36,16x20') == '16x20'   # d3 (Serdar 9 Eki aksam): yalniz 16x20 teslim; 24x36 teslim URETILMEZ
 b1, b2 = cift.upper().split('_')
 if [b1, b2] != sorted([b1, b2]):
     b1, b2 = b2, b1; isim1, isim2 = isim2, isim1; log('cift alfabetige cevrildi, isimler yer degistirdi')
@@ -104,6 +105,7 @@ for r in ['MIDNIGHT_BLUE'] + RENKLER:
     if r != 'MIDNIGHT_BLUE':
         ek.update(TESLIM_JPG=f'{TB}/son/{c}_teslim.jpg', CJPEG=B + 'bin/cjpeg-mozjpeg-4.1.1', OLCU='24x36', OLCU_HEPSI=f'{TB}/OLCU',
                   OLCU_HEPSI_LISTE='16x20', ZEMIN_TUVAL_16X20=TEMIZ[r]['16x20'], GREN_HEDEF_KAYNAK='1', TITRESIM_YALNIZ_DEGISEN='1')
+        if YALNIZ16: ek['OLCU'] = '16x20'; ek.pop('OLCU_HEPSI'); ek.pop('OLCU_HEPSI_LISTE')     # ayni tek_olcu('16x20') cagrisi
     p = subprocess.run([PY, B + 'renk_uyum.py', c, TB, f'{TB}/son'], capture_output=True, text=True, env=dict(os.environ, **ek))
     print(p.stdout[-900:])
     if p.returncode: print(p.stderr[-1500:]); sys.exit(5)
@@ -112,9 +114,12 @@ for r in ['MIDNIGHT_BLUE'] + RENKLER:
     os.replace(f'{TB}/son/{c}/{c}_7200x10800.jpg', f'{TB}/AstroLoveArt_{ad1}_{ad2}_{rn}.jpg')
     os.replace(f'{TB}/son/{c}/{c}_2000.jpg', f'{TB}/AstroLoveArt_{ad1}_{ad2}_{rn}_2000.jpg')
     if r != 'MIDNIGHT_BLUE':
-        os.replace(f'{TB}/son/{c}_teslim.jpg', f'{TB}/AstroLoveArt_{ad1}_{ad2}_{rn}_24x36.jpg')
-        os.replace(f'{TB}/OLCU/{c}_16x20.jpg', f'{TB}/AstroLoveArt_{ad1}_{ad2}_{rn}_16x20.jpg')
-        ro['olcu_16x20'] = json.load(open(f'{TB}/OLCU/OLCU_TABLO.json'))['16x20']
+        if YALNIZ16:
+            os.replace(f'{TB}/son/{c}_teslim.jpg', f'{TB}/AstroLoveArt_{ad1}_{ad2}_{rn}_16x20.jpg'); ro['olcu_16x20'] = ro['teslim']
+        else:
+            os.replace(f'{TB}/son/{c}_teslim.jpg', f'{TB}/AstroLoveArt_{ad1}_{ad2}_{rn}_24x36.jpg')
+            os.replace(f'{TB}/OLCU/{c}_16x20.jpg', f'{TB}/AstroLoveArt_{ad1}_{ad2}_{rn}_16x20.jpg')
+            ro['olcu_16x20'] = json.load(open(f'{TB}/OLCU/OLCU_TABLO.json'))['16x20']
     rapor['renk'][r] = ro
     log('renk tamam', r, 'dE00 sonra', ro['sonra'])
 rapor['sure_sn'] = round(time.time() - T0, 1)
