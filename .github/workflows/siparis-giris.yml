@@ -40,7 +40,7 @@ on:
 permissions:
   contents: read
 env:
-  GPT_REF: ${{ vars.SIPARIS_GPT_REF || '8f05e9219bc0115c13dcf7a21fa6026229222bfe' }}
+  GPT_REF: ${{ vars.SIPARIS_GPT_REF || '243c9a49e97d37829dccf4308e57e0d4279f225c' }}
   ESKI_RENK_REF: ${{ vars.ESKI_RENK_REF || 'b8c8c4b17478fd956167577fa69913d06b9eb955' }}
   WP_REF: ${{ vars.SIPARIS_WP_REF || '360cbef947994c7d4b3c9ae95275f778a18af716' }}
 jobs:
@@ -184,7 +184,7 @@ jobs:
             rclone copy /tmp/is "$D" --include "AstroLoveArt_*.jpg" --include "KAPI.json" --include "SURE.json" --include "siparis.json" --exclude "*"
           else                                                               # yalniz secilen renk: ana kopya, teslim, onizleme
             rclone copy /tmp/is/$RENK "$D" --include "AstroLoveArt_*.jpg" --exclude "*"
-            rclone copy /tmp/is "$D" --include "KAPI.json" --include "SURE.json" --include "siparis.json" --exclude "*"
+            rclone copy /tmp/is "$D" --max-depth 1 --include "KAPI.json" --include "SURE.json" --include "siparis.json" --exclude "*"
           fi
           rclone lsl "$D"
       - name: Sonuc
