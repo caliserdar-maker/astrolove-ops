@@ -99,7 +99,14 @@ def iou(a, b):
     h, w = min(a.shape[0], b.shape[0]), min(a.shape[1], b.shape[1]); A_, B_ = a[:h, :w] > 127, b[:h, :w] > 127
     return float((A_ & B_).sum() / max((A_ | B_).sum(), 1))
 def en_iyi(ad, metin, font, wght, p0):
-    return max((iou(z[ad], ciz(metin, font, wght, p)), p) for p in range(p0 - 120, p0 + 1, 4))
+    # 9 Eki aksam (ders 275): punto 1'er adimla taranir. Sablon uzun isimde satiri kucultur (p = round(405 * olcek), orn. 324);
+    # eski 4'lu adim (405, 401, ... 285) 405'e 4'un kati uzak olmayan puntoyu hic cizmiyordu -> boyut farki > 3 px -> IoU 0 (olcum hatasi).
+    # Once boy (genislik, yukseklik) en yakin punto bulunur, IoU yalniz onun +-2 komsulugunda hesaplanir (hiz).
+    a = kirp(z[ad]); best = None
+    for p in range(max(60, p0 - 345), p0 + 1):
+        b = ciz(metin, font, wght, p); f = abs(a.shape[0] - b.shape[0]) + abs(a.shape[1] - b.shape[1])
+        if best is None or f < best[0]: best = (f, p)
+    return max((iou(z[ad], ciz(metin, font, wght, p)), p) for p in range(best[1] - 2, min(p0, best[1] + 2) + 1))
 d = {}
 for ad, isim in (('isim1', s['isim1']), ('isim2', s['isim2'])):
     v, p = en_iyi(ad, isim.upper(), 'Cinzel.ttf', 500, 405); d[ad] = dict(iou=round(v, 4), punto=p)
