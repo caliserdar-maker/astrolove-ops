@@ -1,0 +1,14 @@
+DERSLER.md
+DERSLER_d2.md
+d2/
+d3/
+AstroLoveArt_Cancer_Libra_Deep_Black_16x20.jpg
+AstroLoveArt_Cancer_Libra_Pure_White_16x20.jpg
+KAPI.json
+KARSILASTIR_D3.json
+KESIT_SOL_SERIT_Deep_Black_16x20_D2_D3_1x1.jpg
+KESIT_SOL_SERIT_Deep_Black_16x20_D2_D3_x8.jpg
+KESIT_SOL_SERIT_Pure_White_16x20_D2_D3_1x1.jpg
+KESIT_SOL_SERIT_Pure_White_16x20_D2_D3_x8.jpg
+YANYANA_Deep_Black_16x20_D2_D3.jpg
+YANYANA_Pure_White_16x20_D2_D3.jpg
