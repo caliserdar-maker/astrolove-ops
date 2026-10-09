@@ -15,7 +15,7 @@ concurrency:
 jobs:
   is:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 1 }
@@ -60,6 +60,81 @@ jobs:
                   im.convert('RGB').resize((1200, int(1200 * im.size[1] / im.size[0])), Image.LANCZOS).save('db_pw_altin/veri/POD_' + os.path.basename(f), quality=92)
           P
           ls -la $V
+      - name: Kod (eski sistem b8c8c4b + main surucu, salt okur)
+        if: env.MOD == 'uret'
+        run: |
+          set -euo pipefail
+          git fetch -q --depth 10 origin siparis-baski-v1 && git worktree add -q --detach _kod b8c8c4b
+          git fetch -q --depth 1 origin main && mkdir -p _ana && git --work-tree=_ana checkout FETCH_HEAD -- scripts/siparis_dijital && git reset -q
+          git -C _kod log --oneline -1; ls _ana/scripts/siparis_dijital
+      - name: Kaynak indir + ortamlar
+        if: env.MOD == 'uret'
+        run: |
+          set -euo pipefail
+          K="gdrive,root_folder_id=1ZQGR0fI0HQNq1D2Lbmr2qlkNVbD8jRyD:"
+          mkdir -p /tmp/k /tmp/pl
+          ( rclone copy "$K" /tmp/k --include "${CIFT}_ana.png" --include "${CIFT}_ana.png.json" --include "ek/**"
+            for p in BLACK_24x36 PURE_WHITE_24x36 BLACK_16x20 PURE_WHITE_16x20; do rclone copy "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PLATES/$p.png" /tmp/pl; done ) &
+          sudo mkdir -p /home/claude/ao/KANIT /home/claude/motor_klon/motor && sudo chown -R "$USER" /home/claude
+          ln -s "$GITHUB_WORKSPACE/motor_gpt" /home/claude/blender
+          ln -s "$GITHUB_WORKSPACE/motor_gpt/font" /home/claude/motor_klon/motor/font
+          ln -s "$GITHUB_WORKSPACE/motor_gpt/ref" /home/claude/ref
+          python3 -m venv /home/claude/blender/venv
+          /home/claude/blender/venv/bin/pip install -q numpy==2.5.3 opencv-python-headless==5.0.0.93 pillow==12.3.0 scipy==1.18.1 scikit-image==0.26.0 potracer==0.0.4
+          python3 -m venv /tmp/eskivenv && /tmp/eskivenv/bin/pip install -q pillow opencv-python-headless numpy fonttools img2pdf pikepdf
+          wait
+          ls -la /tmp/k /tmp/k/ek /tmp/pl
+          ln -s /tmp/k/ek/SCORPIO_VIRGO_T5_FAIL_tam.png /home/claude/ao/KANIT/SCORPIO_VIRGO_T5_FAIL_tam.png
+      - name: Yeni (DB + PW, yeni altin)
+        if: env.MOD == 'uret'
+        run: |
+          set -euo pipefail
+          I=db_pw_altin/istek.json
+          /home/claude/blender/venv/bin/python motor_gpt/db_pw_uret.py "$CIFT" "$(jq -r .isim1 $I)" "$(jq -r .isim2 $I)" "$(jq -r .mesaj_b64 $I)" "/tmp/k/${CIFT}_ana.png" /tmp/pl /tmp/is
+      - name: Kapilar (yeni)
+        if: env.MOD == 'uret'
+        run: |
+          set +e
+          /home/claude/blender/venv/bin/python motor_gpt/kapi_db_pw.py /tmp/is --json /tmp/is/KAPI.json; echo "KAPI_RC=$?" >> "$GITHUB_ENV"
+      - name: Eski sistem (b8c8c4b, ayni isimler; DB/PW x 2x3, 4x5)
+        if: env.MOD == 'uret'
+        run: |
+          set -uo pipefail
+          jq '{receipt: "900000009", cift, isim1, isim2, mesaj_b64}' db_pw_altin/istek.json > /tmp/girdi.json
+          export SIPARIS_GIRDI_JSON=/tmp/girdi.json
+          for r in DEEP_BLACK PURE_WHITE; do
+            ( for o in 2x3 4x5; do /tmp/eskivenv/bin/python _ana/scripts/siparis_dijital/surucu.py --asama sayfa --renk $r --oran $o --kod _kod \
+                --kod-ref "siparis-baski-v1 b8c8c4b" --cikti /tmp/eski/$r > /tmp/eski_${r}_$o.log 2>&1; echo "ESKI $r $o rc=$?"; grep -E "^SAYFA" /tmp/eski_${r}_$o.log; done ) &
+          done; wait
+          find /tmp/eski -name "*.jpg" | sort
+      - name: Yan yana (eski | yeni) + Drive + ozet
+        if: env.MOD == 'uret' && always()
+        run: |
+          set -uo pipefail
+          C=$(echo "$CIFT" | python3 -c "import sys;a,b=sys.stdin.read().strip().split('_');print(a.capitalize()+'_'+b.capitalize())")
+          O=/tmp/teslim; S=db_pw_altin/sonuc/d$DENEME; mkdir -p $O $S
+          for r in DEEP_BLACK PURE_WHITE; do rn=$(echo $r | python3 -c "import sys;print('_'.join(w.capitalize() for w in sys.stdin.read().strip().split('_')))")
+            for f in /tmp/is/$r/AstroLoveArt_*.jpg; do [ -e "$f" ] && cp "$f" $O/; done
+            for p in "2x3 24x36" "4x5 16x20"; do set -- $p
+              e=$(ls /tmp/eski/$r/$r/*_${1}_*.jpg 2>/dev/null | grep -v _olcekli_ | head -1); y=/tmp/is/$r/AstroLoveArt_${C}_${rn}_$2.jpg
+              [ -n "$e" ] && cp "$e" $O/ESKI_AstroLoveArt_${C}_${rn}_$2.jpg
+              if [ -n "$e" ] && [ -e "$y" ]; then /home/claude/blender/venv/bin/python db_pw_altin/yanyana.py "$e" "$y" $O/YANYANA_${rn}_$2_ESKI_YENI.jpg $S/ONIZLEME_${rn}_$2.jpg; fi
+            done; done
+          cp /tmp/is/MIDNIGHT_BLUE/AstroLoveArt_*_Midnight_Blue_2000.jpg $S/ 2>/dev/null || true
+          for r in DEEP_BLACK PURE_WHITE; do cp /tmp/is/$r/AstroLoveArt_*_2000.jpg $S/ 2>/dev/null || true; done
+          python3 - <<'PY'
+          import json, os
+          s = json.load(open('/tmp/is/siparis.json')) if os.path.exists('/tmp/is/siparis.json') else {}
+          for k in ('isim1', 'isim2', 'tagline'): s.pop(k, None)
+          json.dump(s, open(os.environ['GITHUB_WORKSPACE'] + f"/db_pw_altin/sonuc/d{os.environ['DENEME']}/URETIM.json", 'w'), indent=1)
+          PY
+          [ -e /tmp/is/KAPI.json ] && cp /tmp/is/KAPI.json $S/ && cp /tmp/is/KAPI.json $O/
+          [ -e /tmp/is/plaka/PLAKA.json ] && cp /tmp/is/plaka/PLAKA.json $S/
+          for f in /tmp/eski_*.log; do grep -E "^SAYFA|Error|HATA" $f | tail -5 > $S/$(basename $f) || true; done
+          D="gdrive,root_folder_id=12N9iS2i4byMbkH5c0Inmni_nIv2zyTzH:DB_PW_ALTIN_20261009/d$DENEME"
+          rclone copy $O "$D"
+          rclone lsjson "$D" --files-only | python3 -c "import json,sys;json.dump({x['Name']: 'https://drive.google.com/file/d/'+x['ID']+'/view' for x in json.load(sys.stdin)}, open('$S/LINKLER.json','w'), indent=1)"
+          cat $S/LINKLER.json; ls -la $S
       - name: Dala yaz
         if: always()
         run: |

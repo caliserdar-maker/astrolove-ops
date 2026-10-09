@@ -92,7 +92,8 @@ def donustur(P, M, olcu, yontem):
     else:
         s = Hc_ / H0; Wp = int(round(W0 * s)); ox = (W0 - Wp) // 2
         Ps = cv2.resize(P, (Wp, Hc_), interpolation=cv2.INTER_AREA)
-        C = _profil(W0, Hc_, s, ox)
+        TV = os.environ.get('ZEMIN_TUVAL_' + olcu.upper())                  # DB/PW (9 Eki, db-pw-altin): yan zemin = eski sistemin AYNI olcu plakasi
+        C = _profil(W0, Hc_, s, ox) if not TV else cv2.resize(np.asarray(Image.open(TV).convert('RGB')).astype(np.float32), (W0, Hc_), interpolation=cv2.INTER_AREA if Image.open(TV).size[0] > W0 else cv2.INTER_CUBIC)
         # yan seritler: ana goruntunun oge disi kenar bolgelerinden fazlalik (yildiz + doku), ayni s ile kucultulmus; ayna YOK
         D = cv2.dilate(M, np.ones((121, 121), np.uint8))
         bos = np.where(~D.any(0))[0]; sol = bos[bos < W0 // 2]; sag = bos[bos >= W0 // 2]
@@ -104,7 +105,8 @@ def donustur(P, M, olcu, yontem):
         sw = W0 - ox - Wp
         if kaynak_s.shape[1] < max(ox, sw) + F: raise ValueError(f'serit kaynagi dar: {kaynak_s.shape[1]} < {max(ox, sw) + F}')
         k2 = np.roll(kaynak_s, Hc_ // 2, axis=0)                                                # sag serit: ayni kaynak, yarim boy kaydirma
-        if d1:
+        if TV: pass                                                                             # plaka kendi dokusunu tasir: fazlalik eklenmez
+        elif d1:
             C[:, :ox] += kaynak_s[:, :ox]; C[:, ox + Wp:] += k2[:, -sw:]
         else:
             C[:, :ox + F] += kaynak_s[:, :ox + F]                                               # sol serit (+ yumusatma bolgesi)
@@ -119,7 +121,7 @@ def donustur(P, M, olcu, yontem):
         C[:, ox:ox + Wp] = Ps * a[None, :, None] + C[:, ox:ox + Wp] * (1 - a[None, :, None])
         Mc = np.zeros((Hc_, W0), np.uint8); Mc[:, ox:ox + Wp] = cv2.resize(M, (Wp, Hc_), interpolation=cv2.INTER_NEAREST)
         T = lambda x, y: (ox + x * s, y * s)
-        bilgi = dict(yontem='B1' if d1 else 'B', olcek=round(s, 4), yan_serit_px=[ox, W0 - ox - Wp])
+        bilgi = dict(yontem='B1' if d1 else 'B', olcek=round(s, 4), yan_serit_px=[ox, W0 - ox - Wp], yan_zemin=os.path.basename(TV) if TV else 'profil')
     C = np.clip(C, 0, 255)
     P2 = cv2.resize(C, (w, h), interpolation=cv2.INTER_AREA) if (C.shape[1], C.shape[0]) != (w, h) else C
     M2 = cv2.resize(Mc, (w, h), interpolation=cv2.INTER_NEAREST) if (Mc.shape[1], Mc.shape[0]) != (w, h) else Mc
@@ -145,6 +147,8 @@ def yaz(P2, M2, bilgi, yol, cjpeg, q=97, seed=11):
     H, W = P2.shape[:2]; bg = M2 == 0
     g0 = gren_olc(P2, bg, bilgi['_kutu'])
     hedef = GREN_HEDEF_AZ if bilgi['olcu'] in AZ_GREN else GREN_HEDEF
+    if os.environ.get('GREN_HEDEF_KAYNAK') == '1' and bilgi.get('gren_24x36') is not None:    # DB/PW: hedef = ayni posterin 24x36 zemin greni
+        hedef = bilgi['gren_24x36']
     sn = float(np.sqrt(max(0.0, hedef ** 2 - g0 ** 2)) / GREN_K) if g0 is not None else 0.0
     U = np.empty(P2.shape, np.uint8)
     for y0 in range(0, H, 1200):
