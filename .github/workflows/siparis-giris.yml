@@ -1,10 +1,12 @@
 name: siparis-giris
 # KISISEL DIJITAL SIPARIS GIRISI (9 Eki 2026, Serdar): musteriye 1 dosya = secilen renk + secilen olcu.
 # Yonlendirme: MIDNIGHT_BLUE -> YENI YOL (siparis-gpt kodu, sabit SHA; yontem B olcu) ANCAK anahtar aciksa
-#   (repo degiskeni SIPARIS_GPT_ACIK == '1'; varsayilan KAPALI) ya da girdi yeni_yol=ac (yalniz test).
+#   (ANAHTAR ACIK, Serdar 9 Eki aksam, Test 12 onayi: repo degiskeni SIPARIS_GPT_ACIK yoksa varsayilan '1'; degisken API'den
+#   yazilamiyor, proxy 403) ya da girdi yeni_yol=ac (yalniz test).
 #   Diger renkler -> ESKI YOL (siparis-dijital, isler=renk:<R>, renk_ref acik). WARM_PARCHMENT -> DUR (su an teslim edilemez).
 # kuru=true: yalniz yonlendirme karari yazilir, uretim YOK. Isim/mesaj loga yazilmaz (::add-mask::, girdiler olay dosyasindan okunur).
-# Etsy'ye yazma / musteriye gonderim YOK. Geri donus: SIPARIS_GPT_ACIK degiskenini silmek (ya da 0) -> tum renkler eski yola.
+# Etsy'ye yazma / musteriye gonderim YOK. Geri donus: repo degiskeni SIPARIS_GPT_ACIK=0 (GitHub ayarlari) ya da bu satirdaki
+#   varsayilani '0' yapmak -> tum renkler eski yola.
 on:
   workflow_dispatch:
     inputs:
@@ -48,7 +50,7 @@ jobs:
       - id: k
         name: Karar
         env:
-          ACIK: ${{ vars.SIPARIS_GPT_ACIK || '0' }}
+          ACIK: ${{ vars.SIPARIS_GPT_ACIK || '1' }}
         run: |
           set -euo pipefail
           E="$GITHUB_EVENT_PATH"
@@ -61,7 +63,8 @@ jobs:
           elif [ "$R" = "MIDNIGHT_BLUE" ] && { [ "$Y" = "ac" ] || [ "$ACIK" = "1" ]; }; then YOL=yeni
           else YOL=eski; fi
           [ "$KURU" = "true" ] && Z=kuru || Z=uret
-          echo "::notice title=YONLENDIRME::renk=$R olcu=$O anahtar=$ACIK yeni_yol=$Y -> $YOL ($Z)"
+          case "$YOL" in yeni) KOD="siparis-gpt $GPT_REF";; eski) KOD="siparis-dijital renk_ref $ESKI_RENK_REF";; *) KOD="yok";; esac
+          echo "::notice title=YONLENDIRME::renk=$R olcu=$O anahtar=$ACIK yeni_yol=$Y -> $YOL ($Z) kod=$KOD"
           { echo "### Siparis yonlendirme"; echo "renk $R, olcu $O, anahtar $ACIK, yeni_yol $Y -> **$YOL** ($Z)"; } >> "$GITHUB_STEP_SUMMARY"
           [ "$Z" = "kuru" ] && echo "yol=kuru-$YOL" >> "$GITHUB_OUTPUT" || echo "yol=$YOL" >> "$GITHUB_OUTPUT"
           if [ "$YOL" = "dur" ] && [ "$Z" = "uret" ]; then echo "::error title=DUR::Warm Parchment su an teslim edilemez (Serdar karari)"; exit 1; fi
