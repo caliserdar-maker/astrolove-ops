@@ -96,45 +96,31 @@ jobs:
         run: |
           set +e
           /home/claude/blender/venv/bin/python motor_gpt/kapi_db_pw.py /tmp/is --json /tmp/is/KAPI.json; echo "KAPI_RC=$?" >> "$GITHUB_ENV"
-      - name: Eski sistem (b8c8c4b, ayni isimler; DB/PW x 2x3, 4x5)
+      - name: Eski sistem (b8c8c4b, ayni isimler; DB/PW x 2x3, 4x5; SIRAYLA - ortak _siparis klasoru)
         if: env.MOD == 'uret'
         run: |
-          set -uo pipefail
+          set +e
           jq '{receipt: "900000009", cift, isim1, isim2, mesaj_b64}' db_pw_altin/istek.json > /tmp/girdi.json
           export SIPARIS_GIRDI_JSON=/tmp/girdi.json
-          for r in DEEP_BLACK PURE_WHITE; do
-            ( for o in 2x3 4x5; do /tmp/eskivenv/bin/python _ana/scripts/siparis_dijital/surucu.py --asama sayfa --renk $r --oran $o --kod _kod \
-                --kod-ref "siparis-baski-v1 b8c8c4b" --cikti /tmp/eski/$r > /tmp/eski_${r}_$o.log 2>&1; echo "ESKI $r $o rc=$?"; grep -E "^SAYFA" /tmp/eski_${r}_$o.log; done ) &
-          done; wait
-          find /tmp/eski -name "*.jpg" | sort
+          for r in DEEP_BLACK PURE_WHITE; do for o in 2x3 4x5; do
+            /tmp/eskivenv/bin/python _ana/scripts/siparis_dijital/surucu.py --asama sayfa --renk $r --oran $o --kod _kod \
+              --kod-ref "siparis-baski-v1 b8c8c4b" --cikti /tmp/eski/$r > /tmp/eski_${r}_$o.log 2>&1
+            rc=$?; echo "ESKI $r $o rc=$rc"; grep -E "^SAYFA" /tmp/eski_${r}_$o.log
+            [ $rc = 0 ] || tail -25 /tmp/eski_${r}_$o.log
+          done; done
+          find /tmp/eski -name "*.jpg" | sort; true
       - name: Yan yana (eski | yeni) + Drive + ozet
         if: env.MOD == 'uret' && always()
         run: |
-          set -uo pipefail
-          C=$(echo "$CIFT" | python3 -c "import sys;a,b=sys.stdin.read().strip().split('_');print(a.capitalize()+'_'+b.capitalize())")
-          O=/tmp/teslim; S=db_pw_altin/sonuc/d$DENEME; mkdir -p $O $S
-          for r in DEEP_BLACK PURE_WHITE; do rn=$(echo $r | python3 -c "import sys;print('_'.join(w.capitalize() for w in sys.stdin.read().strip().split('_')))")
-            for f in /tmp/is/$r/AstroLoveArt_*.jpg; do [ -e "$f" ] && cp "$f" $O/; done
-            for p in "2x3 24x36" "4x5 16x20"; do set -- $p
-              e=$(ls /tmp/eski/$r/$r/*_${1}_*.jpg 2>/dev/null | grep -v _olcekli_ | head -1); y=/tmp/is/$r/AstroLoveArt_${C}_${rn}_$2.jpg
-              [ -n "$e" ] && cp "$e" $O/ESKI_AstroLoveArt_${C}_${rn}_$2.jpg
-              if [ -n "$e" ] && [ -e "$y" ]; then /home/claude/blender/venv/bin/python db_pw_altin/yanyana.py "$e" "$y" $O/YANYANA_${rn}_$2_ESKI_YENI.jpg $S/ONIZLEME_${rn}_$2.jpg; fi
-            done; done
-          cp /tmp/is/MIDNIGHT_BLUE/AstroLoveArt_*_Midnight_Blue_2000.jpg $S/ 2>/dev/null || true
-          for r in DEEP_BLACK PURE_WHITE; do cp /tmp/is/$r/AstroLoveArt_*_2000.jpg $S/ 2>/dev/null || true; done
-          python3 - <<'PY'
-          import json, os
-          s = json.load(open('/tmp/is/siparis.json')) if os.path.exists('/tmp/is/siparis.json') else {}
-          for k in ('isim1', 'isim2', 'tagline'): s.pop(k, None)
-          json.dump(s, open(os.environ['GITHUB_WORKSPACE'] + f"/db_pw_altin/sonuc/d{os.environ['DENEME']}/URETIM.json", 'w'), indent=1)
-          PY
-          [ -e /tmp/is/KAPI.json ] && cp /tmp/is/KAPI.json $S/ && cp /tmp/is/KAPI.json $O/
-          [ -e /tmp/is/plaka/PLAKA.json ] && cp /tmp/is/plaka/PLAKA.json $S/
-          for f in /tmp/eski_*.log; do grep -E "^SAYFA|Error|HATA" $f | tail -5 > $S/$(basename $f) || true; done
-          D="gdrive,root_folder_id=12N9iS2i4byMbkH5c0Inmni_nIv2zyTzH:DB_PW_ALTIN_20261009/d$DENEME"
-          rclone copy $O "$D"
-          rclone lsjson "$D" --files-only | python3 -c "import json,sys;json.dump({x['Name']: 'https://drive.google.com/file/d/'+x['ID']+'/view' for x in json.load(sys.stdin)}, open('$S/LINKLER.json','w'), indent=1)"
-          cat $S/LINKLER.json; ls -la $S
+          set +e
+          S=db_pw_altin/sonuc/d$DENEME; mkdir -p $S
+          bash db_pw_altin/yanyana_adim.sh /tmp/is /tmp/eski /tmp/teslim $S "gdrive,root_folder_id=12N9iS2i4byMbkH5c0Inmni_nIv2zyTzH:DB_PW_ALTIN_20261009/d$DENEME"
+          rc=$?
+          for f in /tmp/eski_*.log; do grep -E "^SAYFA|Error|HATA" $f | tail -5 > $S/$(basename $f); done
+          exit $rc
+      - name: Sonuc (kapi)
+        if: env.MOD == 'uret'
+        run: '[ "${KAPI_RC:-1}" = "0" ]'
       - name: Dala yaz
         if: always()
         run: |
