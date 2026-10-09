@@ -34,7 +34,41 @@ def girdi():
     mesaj = base64.b64decode(g['mesaj_b64']).decode('utf-8')
     cift, i1, i2, norm = cift_normalize(g['cift'].strip().upper(), g['isim1'].strip().upper(), g['isim2'].strip().upper())
     return {'receipt': g['receipt'], 'cift': cift, 'isim1': i1, 'isim2': i2, 'mesaj': mesaj,
-            'normalize': norm, 'cift_girdi': g['cift'].strip().upper()}
+            'normalize': norm, 'cift_girdi': g['cift'].strip().upper(),
+            'isler': (g.get('isler') or '').strip(), 'onceki_kosu': (g.get('onceki_kosu') or '').strip()}
+
+
+TUM5 = ('MIDNIGHT_BLUE', 'DEEP_BLACK', 'PURE_WHITE', 'CHAMPAGNE_IVORY', 'WARM_PARCHMENT')
+
+
+def istenen_renkler(isler, onceki_kosu=''):
+    """OZET'te beklenecek renkler (9 Eki, ders 291): giris tek renk siparisi isler=renk:<R> ya da wp:<5 oran> gonderir;
+    paket yalniz o rengi bekler. isler bos ya da onceki_kosu verilmis (FAIL isin yeniden kosusu, tum siparis) -> 5 renk."""
+    i = [x.strip() for x in (isler or '').split(',') if x.strip() and x.strip() != 'paket']
+    if not i or (onceki_kosu or '').strip():
+        return set(TUM5)
+    s = {x.split(':', 1)[1] for x in i if x.startswith('renk:')}
+    if any(x.startswith('wp:') for x in i):
+        s.add('WARM_PARCHMENT')
+    return s
+
+
+def ozet_sonuc(renkler, istenen):
+    """(hepsi, satirlar): yalniz istenen renkler sayilir; istenmeyen satir 'ISTENMEDI' yazilir, sonuca girmez."""
+    sat, hepsi = [], bool(istenen)
+    for renk in TUM5:
+        if renk not in istenen:
+            sat.append(f"| {renk} | - | - | - | - | ISTENMEDI | ISTENMEDI |"); continue
+        z = renkler.get(renk) or {}
+        k = z.get('pdf_kapisi') or {}
+        dpi = sorted({d for s_ in k.get('sayfalar', []) for d in s_['dpi']})
+        sk = z.get('sayfa_kapilar') or {}
+        skg = {o: (v.get('kapilar_gecti') if isinstance(v, dict) else v) for o, v in sk.items()}
+        ok = bool(k.get('gecti')) and len(skg) == 5 and all(skg.values())
+        hepsi &= ok
+        sat.append(f"| {renk} | {z.get('pdf')} | {k.get('MB')} | {k.get('sayfa_sayisi')} | {dpi} | "
+                   f"{'PASS' if k.get('gecti') else 'FAIL'} | {'PASS' if ok else 'FAIL ' + str(skg)} |")
+    return hepsi, sat
 
 
 # KAYNAK DENETIMI (Serdar 1 Eki, Test 2 dersi: eksik kaynakta 13 is bosuna acilmasin). siparis_dosyasi ile ayni yollar:
@@ -552,20 +586,13 @@ def pdf_asamasi(a, g):
             mb_karsilastir(e[0], y[0], inc / f'MB_ESKI_YENI_{boy}_ISIM_BANDI.jpg')
     sat = [f"# DIJITAL {g['receipt']} {g['cift']}", '', '| renk | PDF | MB | sayfa | dpi | pdf_kapisi | sayfa kapilari |',
            '|---|---|---|---|---|---|---|']
-    hepsi = True
-    for renk in ('MIDNIGHT_BLUE', 'DEEP_BLACK', 'PURE_WHITE', 'CHAMPAGNE_IVORY', 'WARM_PARCHMENT'):
-        z = OZ['renkler'].get(renk) or {}
-        k = z.get('pdf_kapisi') or {}
-        dpi = sorted({d for s in k.get('sayfalar', []) for d in s['dpi']})
-        sk = z.get('sayfa_kapilar') or {}
-        skg = {o: (v.get('kapilar_gecti') if isinstance(v, dict) else v) for o, v in sk.items()}
-        ok = bool(k.get('gecti')) and len(skg) == 5 and all(skg.values())
-        hepsi &= ok
-        sat.append(f"| {renk} | {z.get('pdf')} | {k.get('MB')} | {k.get('sayfa_sayisi')} | {dpi} | "
-                   f"{'PASS' if k.get('gecti') else 'FAIL'} | {'PASS' if ok else 'FAIL ' + str(skg)} |")
+    istenen = istenen_renkler(g.get('isler'), g.get('onceki_kosu'))
+    hepsi, s2 = ozet_sonuc(OZ['renkler'], istenen)
+    sat += s2
+    OZ['istenen'] = sorted(istenen)
     OZ['gecti'] = hepsi
     OZ['normalize'] = {'yapildi': bool(g.get('normalize')), 'girdi': g.get('cift_girdi', g['cift']), 'cift': g['cift']}
-    sat += ['', f"normalize: {'evet' if g.get('normalize') else 'hayir'}"
+    sat += ['', f"istenen renkler: {', '.join(r for r in TUM5 if r in istenen)}", f"normalize: {'evet' if g.get('normalize') else 'hayir'}"
                 + (f" ({g.get('cift_girdi')} -> {g['cift']}, isimler yer degistirdi)" if g.get('normalize') else ''),
             '', f"SONUC: {'PASS' if hepsi else 'FAIL'}"]
     (paket / 'OZET.md').write_text('\n'.join(sat) + '\n')
