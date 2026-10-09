@@ -12,3 +12,9 @@
    gren hedefi = ayni posterin 24x36 zemin greni (MB'nin 1.49'u DB/PW'ye uymaz).
 6. Drive'dan buyuk dosya MCP ile indirilemez (base64 baglama girer): yerel deneme icin kaynaklar bir kesif kosusuyla
    kendi dala alinir (gitignore'a ragmen `git add -f`).
+7. Yontem B dikis seviye eslemesi (satir ortalamasi farki, sigma 150) yalniz profil zemininde anlamli. Plaka tuvalinde iki yan da ayni
+   duz zemin; eslemede plakadaki kayan yildiz/yildizlar satir ortalamasini cekip siyah yan seride +6.3 seviyeye varan 364 satirlik
+   kahverengi bant yapti (d2 DB 16x20 sol). Dikis kapisi (kapi_dikis) bunu YAKALAMADI (bant satirlara yayilip seyreliyor):
+   gozle bulundu. Duzeltme (TV varken esleme yok) yerelde: bant 0.24, dikis PASS. Ek kapi onerisi: yan serit - plaka satir farki <= 1.
+8. Eski sistem sayfalari ayni anda kosulmaz (ortak _siparis klasoru / kisisel-v1 acma yarisi); `bash -e` altinda alt kabuk hata
+   satiri basmadan cikar: hata logu her zaman basilir.

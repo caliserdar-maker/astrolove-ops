@@ -113,7 +113,7 @@ def donustur(P, M, olcu, yontem):
             C[:, ox + Wp - F:] += k2[:, -(sw + F):]
         # dikis seviye eslemesi (9 Eki, deneme 2): serit ile poster kenari arasindaki dusuk frekans farki satir boyunca (sigma 150)
         # serite sabit ofset olarak eklenir (profil modeli kenarda ana goruntuden ~1-4 seviye sapiyor; deneme 1'de mavi kanalda cizgi)
-        for xs_, xe_, sl in (() if d1 else ((ox, ox + F, np.s_[:, :ox + F]), (ox + Wp - F, ox + Wp, np.s_[:, ox + Wp - F:]))):
+        for xs_, xe_, sl in (() if (d1 or TV) else ((ox, ox + F, np.s_[:, :ox + F]), (ox + Wp - F, ox + Wp, np.s_[:, ox + Wp - F:]))):   # TV: iki yan da ayni duz plaka zemini, seviye eslemesi yildizdan bant yapiyordu (d2 DB 16x20)
             d = (Ps[:, xs_ - ox:xe_ - ox] - C[:, xs_:xe_]).mean(1)
             d = cv2.GaussianBlur(d.reshape(-1, 1, 3).astype(np.float32), (1, 0), sigmaX=0.1, sigmaY=150).reshape(-1, 3)
             C[sl] += d[:, None, :]
