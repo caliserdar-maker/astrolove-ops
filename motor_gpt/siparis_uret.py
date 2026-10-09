@@ -82,7 +82,7 @@ os.replace(f'{IS}/son/{c}/{c}_7200x10800.jpg', son)
 os.replace(f'{IS}/son/{c}/{c}_2000.jpg', f'{IS}/AstroLoveArt_{ad1}_{ad2}_2000.jpg')
 OLCU = os.environ.get('OLCU', '24x36')                                   # 9 Eki 2026 (Serdar): 1 dosya = secilen olcu, AstroLoveArt_<B1>_<B2>_<Olcu>.jpg
 os.replace(f'{IS}/son/{c}_teslim.jpg', f'{IS}/AstroLoveArt_{ad1}_{ad2}_{OLCU}.jpg')     # Etsy teslim dosyasi (300 dpi); _<ad>.jpg q100 ana kopya (2:3)
-json.dump(dict(cift=c, isim1=isim1, isim2=isim2, tagline=tag, katman=os.path.basename(katman), olcu=OLCU, renk=os.environ.get('RENK', 'MIDNIGHT_BLUE'),
+json.dump(dict(cift=c, isim1=isim1, isim2=isim2, tagline=tag, katman=os.path.basename(katman), olcu=OLCU, renk_secim=os.environ.get('RENK', 'MIDNIGHT_BLUE'),
                amp=None if amp is None else dict(olcu=amp['olcu'], konum=[[q['x'], q['y'], *q['alfa'].shape] for q in amp['ampler']]),
                renk=json.load(open(f'{IS}/son/{c}/renk_olcum.json')), sure_sn=round(time.time() - T0, 1)),
           open(f'{IS}/siparis.json', 'w'), indent=1, ensure_ascii=False)
