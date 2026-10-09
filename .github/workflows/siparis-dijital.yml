@@ -40,6 +40,10 @@ on:
         description: "MB/DB/PW/CI kodu (siparis-baski-v1 commit)"
         required: false
         default: "8a8b370edb74cb52402b4939d38ba14d2d2105fd"
+      wp_ref:
+        description: "WP kodu (wp-katman / wp-tagline-duzelt commit, tam 40 karakter SHA); bos = 58bed04 (eski onayli)"
+        required: false
+        default: ""
       wp_pod_kod:
         description: "WP duz renk (CI/MB) baskisi kodu: v1 = renk_ref (kilitli WP dosyalari ayni; varsayilan, 1 Eki hiz + A2/16x20 duz renk); wp = wp-katman dalinin siparis_dosyasi"
         required: false
@@ -49,7 +53,7 @@ concurrency: siparis-dijital-${{ github.event.inputs.receipt }}-${{ github.event
 
 env:
   RENK_REF: ${{ github.event.inputs.renk_ref || '8a8b370edb74cb52402b4939d38ba14d2d2105fd' }}
-  WP_REF: 58bed04f7817169a70eec18c920106f879643024
+  WP_REF: ${{ github.event.inputs.wp_ref || '58bed04f7817169a70eec18c920106f879643024' }}   # 9 Eki: giris WP icin 360cbef (tagline cift baski duzeltmesi) verir
 
 jobs:
   plan:
@@ -72,6 +76,8 @@ jobs:
           m=$(jq -r '.inputs.mesaj_b64' "$GITHUB_EVENT_PATH" | base64 -d); echo "::add-mask::$m"
           jq -re '.inputs.receipt | test("^[0-9]+$")' "$GITHUB_EVENT_PATH" >/dev/null || { echo "HATA: receipt rakam olmali" >&2; exit 1; }
           jq -re '.inputs.cift | test("^[A-Z]+_[A-Z]+$")' "$GITHUB_EVENT_PATH" >/dev/null || { echo "HATA: cift" >&2; exit 1; }
+          jq -re '(.inputs.wp_ref // "") | test("^([0-9a-f]{40})?$")' "$GITHUB_EVENT_PATH" >/dev/null || { echo "HATA: wp_ref tam 40 karakter SHA olmali" >&2; exit 1; }
+          echo "::notice title=WP_REF::$WP_REF"
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1

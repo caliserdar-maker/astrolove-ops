@@ -3,7 +3,8 @@ name: siparis-giris
 # Yonlendirme: MIDNIGHT_BLUE -> YENI YOL (siparis-gpt kodu, sabit SHA; yontem B olcu) ANCAK anahtar aciksa
 #   (ANAHTAR ACIK, Serdar 9 Eki aksam, Test 12 onayi: repo degiskeni SIPARIS_GPT_ACIK yoksa varsayilan '1'; degisken API'den
 #   yazilamiyor, proxy 403) ya da girdi yeni_yol=ac (yalniz test).
-#   Diger renkler -> ESKI YOL (siparis-dijital, isler=renk:<R>, renk_ref acik). WARM_PARCHMENT -> DUR (su an teslim edilemez).
+#   Diger renkler -> ESKI YOL (siparis-dijital, isler=renk:<R>, renk_ref acik). WARM_PARCHMENT -> ESKI YOL (Serdar 9 Eki aksam:
+#   tagline cift baski duzeltmesi gozle onayli) isler=wp:<5 oran>, wp_ref WP_REF (360cbef = 58bed04 + yalniz WP dosyalari).
 # kuru=true: yalniz yonlendirme karari yazilir, uretim YOK. Isim/mesaj loga yazilmaz (::add-mask::, girdiler olay dosyasindan okunur).
 # Etsy'ye yazma / musteriye gonderim YOK. Geri donus: repo degiskeni SIPARIS_GPT_ACIK=0 (GitHub ayarlari) ya da bu satirdaki
 #   varsayilani '0' yapmak -> tum renkler eski yola.
@@ -41,6 +42,7 @@ permissions:
 env:
   GPT_REF: ${{ vars.SIPARIS_GPT_REF || '11a305054290d79b41eb7331b661dd28fb51311d' }}
   ESKI_RENK_REF: ${{ vars.ESKI_RENK_REF || 'b8c8c4b17478fd956167577fa69913d06b9eb955' }}
+  WP_REF: ${{ vars.SIPARIS_WP_REF || '360cbef947994c7d4b3c9ae95275f778a18af716' }}
 jobs:
   yonlendir:
     runs-on: ubuntu-latest
@@ -59,15 +61,13 @@ jobs:
           jq -re '.inputs.receipt | test("^[0-9]+$")' "$E" >/dev/null || { echo "HATA: receipt rakam olmali" >&2; exit 1; }
           jq -re '.inputs.cift | test("^[A-Z]+_[A-Z]+$")' "$E" >/dev/null || { echo "HATA: cift" >&2; exit 1; }
           R=$(jq -r '.inputs.renk' "$E"); O=$(jq -r '.inputs.olcu' "$E"); Y=$(jq -r '.inputs.yeni_yol' "$E"); KURU=$(jq -r '.inputs.kuru' "$E")
-          if [ "$R" = "WARM_PARCHMENT" ]; then YOL=dur
-          elif [ "$R" = "MIDNIGHT_BLUE" ] && { [ "$Y" = "ac" ] || [ "$ACIK" = "1" ]; }; then YOL=yeni
+          if [ "$R" = "MIDNIGHT_BLUE" ] && { [ "$Y" = "ac" ] || [ "$ACIK" = "1" ]; }; then YOL=yeni
           else YOL=eski; fi
           [ "$KURU" = "true" ] && Z=kuru || Z=uret
-          case "$YOL" in yeni) KOD="siparis-gpt $GPT_REF";; eski) KOD="siparis-dijital renk_ref $ESKI_RENK_REF";; *) KOD="yok";; esac
+          case "$YOL" in yeni) KOD="siparis-gpt $GPT_REF";; eski) if [ "$R" = "WARM_PARCHMENT" ]; then KOD="siparis-dijital wp_ref $WP_REF"; else KOD="siparis-dijital renk_ref $ESKI_RENK_REF"; fi;; *) KOD="yok";; esac
           echo "::notice title=YONLENDIRME::renk=$R olcu=$O anahtar=$ACIK yeni_yol=$Y -> $YOL ($Z) kod=$KOD"
           { echo "### Siparis yonlendirme"; echo "renk $R, olcu $O, anahtar $ACIK, yeni_yol $Y -> **$YOL** ($Z)"; } >> "$GITHUB_STEP_SUMMARY"
           [ "$Z" = "kuru" ] && echo "yol=kuru-$YOL" >> "$GITHUB_OUTPUT" || echo "yol=$YOL" >> "$GITHUB_OUTPUT"
-          if [ "$YOL" = "dur" ] && [ "$Z" = "uret" ]; then echo "::error title=DUR::Warm Parchment su an teslim edilemez (Serdar karari)"; exit 1; fi
 
   eski:
     needs: yonlendir
@@ -85,11 +85,14 @@ jobs:
           E="$GITHUB_EVENT_PATH"
           for k in isim1 isim2; do v=$(jq -r ".inputs.$k" "$E"); echo "::add-mask::$v"; echo "::add-mask::${v^^}"; done
           m=$(jq -r '.inputs.mesaj_b64' "$E" | base64 -d); echo "::add-mask::$m"
+          R=$(jq -r .inputs.renk "$E")
+          if [ "$R" = "WARM_PARCHMENT" ]; then ISLER="wp:16x20,wp:18x24,wp:24x36,wp:11x14,wp:A2"; EK=(-f wp_ref="$WP_REF")
+          else ISLER="renk:$R"; EK=(); fi
           gh workflow run siparis-dijital.yml -R "$GITHUB_REPOSITORY" --ref main \
             -f receipt="$(jq -r .inputs.receipt "$E")" -f cift="$(jq -r .inputs.cift "$E")" \
             -f isim1="$(jq -r .inputs.isim1 "$E")" -f isim2="$(jq -r .inputs.isim2 "$E")" -f mesaj_b64="$(jq -r .inputs.mesaj_b64 "$E")" \
-            -f isler="renk:$(jq -r .inputs.renk "$E")" -f renk_ref="$ESKI_RENK_REF" -f wp_pod_kod=v1 > /dev/null
-          echo "::notice title=ESKI YOL::siparis-dijital tetiklendi (renk:$(jq -r .inputs.renk "$E"), renk_ref $ESKI_RENK_REF)"
+            -f isler="$ISLER" -f renk_ref="$ESKI_RENK_REF" -f wp_pod_kod=v1 "${EK[@]}" > /dev/null
+          echo "::notice title=ESKI YOL::siparis-dijital tetiklendi (isler $ISLER, renk_ref $ESKI_RENK_REF$([ "$R" = WARM_PARCHMENT ] && echo ", wp_ref $WP_REF"))"
 
   yeni:
     needs: yonlendir
