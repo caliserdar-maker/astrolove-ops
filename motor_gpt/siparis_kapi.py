@@ -1,6 +1,6 @@
 # Siparis posteri kapilari (8 Eki 2026). PASS/FAIL, olculebilir esik.
 # Kullanim: python siparis_kapi.py IS_KLASORU REFERANS_POSTER(standart, ayni cift; yoksa '-') [--json CIKTI]
-#  a) ANA bolgesi referansla ayni: ana kutusunda |fark| ortalama <= 0.5 ve %99.9 <= 10 (olculen: 0.29 / 6; katman uint8 + JPEG payi);
+#  a) ANA bolgesi referansla ayni: ana kutusunda |fark| ortalama <= 0.5 (9 Eki: sigma 2 bulanik fark) ve %99.9 <= 10 (ham piksel);
 #     YEREL: fark > 10 bagli kume alani <= 0.5 * kalinlik^2 (ders 139 olcusu);
 #     ayrica degisebilir bant (isim satiri, kucuk semboller, sonsuz, tagline + 200 px parlama payi) DISINDA ayni.
 #  b) ogeler arasi dE00 (ana ile) <= 1 (renk_olcum.json)
@@ -40,8 +40,15 @@ if REF != '-':
     en_buyuk_kume = int(st_[1:, cv2.CC_STAT_AREA].max()) if n_ > 1 else 0
     dd = np.abs(P - R).max(2)
     dis = dd[~serbest]
-    sonuc['a'] = dict(ana_ort=round(float(d.mean()), 3), ana_p999=int(np.percentile(d, 99.9)), dis_ort=round(float(dis.mean()), 3),
-                      dis_p999=int(np.percentile(dis, 99.9)), kume_px=en_buyuk_kume, kume_esik=int(0.5 * kal * kal), kalinlik=round(kal, 1))
+    # 9 Eki 2026 (Serdar onayli kalibrasyon, ders 250-251): iki ORTALAMA sigma 2 bulanik fark uzerinden (piksel gurultusu / titresim /
+    # JPEG yeniden kodlamasi ayiklanir; renk kaymasi ve sekil farki kalir). Esik 0.5 AYNI. %99.9 ve yerel kume HAM piksel uzerinde, degismez.
+    db = np.zeros((10800, 7200), np.float32)
+    for ch in range(3):
+        db = np.maximum(db, np.abs(cv2.GaussianBlur((P[..., ch] - R[..., ch]).astype(np.float32), (0, 0), 2)))
+    sonuc['a'] = dict(ana_ort=round(float(db[y0:y1, x0:x1].mean()), 3), ana_p999=int(np.percentile(d, 99.9)), dis_ort=round(float(db[~serbest].mean()), 3),
+                      dis_p999=int(np.percentile(dis, 99.9)), kume_px=en_buyuk_kume, kume_esik=int(0.5 * kal * kal), kalinlik=round(kal, 1),
+                      ham_ana_ort=round(float(d.mean()), 3), ham_dis_ort=round(float(dis.mean()), 3), ortalama='sigma 2 bulanik fark')
+    del db
     sonuc['a']['PASS'] = bool(sonuc['a']['ana_ort'] <= 0.5 and sonuc['a']['ana_p999'] <= 10 and sonuc['a']['dis_ort'] <= 0.5 and sonuc['a']['dis_p999'] <= 10
                                and en_buyuk_kume <= sonuc['a']['kume_esik'])
 # b)
