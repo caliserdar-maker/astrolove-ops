@@ -48,6 +48,21 @@ def cdn_ncc(url, yerel):
     r = requests.get(url, timeout=120); r.raise_for_status(); return round(ncc(gri(r.content), gri(yerel)), 5)
 
 
+BANT = (60, 1500, 940, 1700)   # Digital File metin bandi (kart 3000x2250); tum kart NCC'si eski/yeni ayirmaz (0.9956), bant ayirir (0.21 / 1.0)
+
+
+def bant_ncc(url, yerel):
+    r = requests.get(url, timeout=120); r.raise_for_status()
+    Y = Image.open(yerel).convert("L"); C = Image.open(io.BytesIO(r.content)).convert("L")
+    if C.size != Y.size: C = C.resize(Y.size, Image.LANCZOS)
+    return round(ncc(np.asarray(C.crop(BANT)).astype(np.float32), np.asarray(Y.crop(BANT)).astype(np.float32)), 4)
+
+
+def drive_var(hedef):
+    r = subprocess.run(["rclone", "lsf", hedef], capture_output=True, text=True)
+    return r.returncode == 0 and bool(r.stdout.strip())
+
+
 def kisi(api, lid):
     L = api.get(f"/listings/{lid}") or {}
     return {k: L.get(k) for k in KISI}
@@ -63,16 +78,22 @@ def ozet(api, shop, lid):
 
 def bir_ilan(api, shop, lid, cift, yeni, out, yedek_drive):
     o = Path(out) / f"{lid}_{cift}"; o.mkdir(parents=True, exist_ok=True)
+    g0 = G.galeri(api, lid)
+    if len(g0) > 1 and bant_ncc(g0[1]["url_fullxfull"], yeni) >= 0.95:     # yedekten ONCE: zaten yeni kartsa dokunma
+        raise SystemExit(f"DUR {cift}: canli 2. gorsel zaten yeni kart")
     man = G.yedek_al(api, shop, lid, o)
-    if yedek_drive: drive_kopya(o / "yedek", f"{yedek_drive}/{lid}_{cift}")
+    if yedek_drive:
+        h = f"{yedek_drive}/{lid}_{cift}"
+        if drive_var(h): h += time.strftime("_tekrar_%Y%m%d_%H%M%S", time.gmtime())     # ilk yedegin ustune YAZILMAZ
+        drive_kopya(o / "yedek", h)
     once = ozet(api, shop, lid)
     if once["kor"]["state"] != "active": raise SystemExit(f"DUR {cift}: state {once['kor']['state']}")
     if len(once["ids"]) != 17: raise SystemExit(f"DUR {cift}: {len(once['ids'])} gorsel (17 bekleniyordu)")
     if once["ids"] != [x["listing_image_id"] for x in man["galeri"]]: raise SystemExit(f"DUR {cift}: yedek sonrasi galeri degisti")
     eski2 = once["ids"][1]
     if eski2 in {i for _, i in once["bag"]}: raise SystemExit(f"DUR {cift}: 2. gorsel renk bagli")
-    n_eski = cdn_ncc(once["url"][1], yeni)
-    if n_eski >= 0.9999: raise SystemExit(f"DUR {cift}: canli 2. gorsel zaten yeni kart (NCC {n_eski})")
+    n_eski = cdn_ncc(once["url"][1], yeni); b_eski = bant_ncc(once["url"][1], yeni)
+    if b_eski >= 0.95: raise SystemExit(f"DUR {cift}: canli 2. gorsel zaten yeni kart (bant {b_eski})")
     with open(yeni, "rb") as fh:
         r = api.post_file(f"/shops/{shop}/listings/{lid}/images", files={"image": ("02_format.jpg", fh, "image/jpeg")},
                           data={"rank": str(once["rank"][1]), "overwrite": "true", "alt_text": once["alt"][1]})
@@ -93,9 +114,10 @@ def bir_ilan(api, shop, lid, cift, yeni, out, yedek_drive):
         if son["kor"].get(k) != once["kor"].get(k): sorun.append(f"korunan {k}")
     if son["kisi"] != once["kisi"]: sorun.append("kisisellestirme")
     n_yeni = cdn_ncc(son["url"][1], yeni) if len(son["url"]) > 1 else -1
-    if n_yeni < 0.995: sorun.append(f"2. gorsel NCC {n_yeni}")
+    b_yeni = bant_ncc(son["url"][1], yeni) if len(son["url"]) > 1 else -1
+    if n_yeni < 0.9995 or b_yeni < 0.95: sorun.append(f"2. gorsel NCC {n_yeni} bant {b_yeni}")
     rap = dict(cift=cift, listing_id=lid, sonuc="PASS" if not sorun else "FAIL", sorun=sorun, yol=yol, eski_id=eski2, yeni_id=yid,
-               ncc_eski_canli_vs_yeni=n_eski, ncc_yeni_canli=n_yeni, gorsel=len(son["ids"]), renk_bagi=len(son["bag"]),
+               ncc_eski_canli_vs_yeni=n_eski, bant_eski=b_eski, ncc_yeni_canli=n_yeni, bant_yeni=b_yeni, gorsel=len(son["ids"]), renk_bagi=len(son["bag"]),
                video=len(son["kor"]["video_ids"]), kota=api.remaining)
     (o / "rapor.json").write_text(json.dumps(rap, indent=1, ensure_ascii=False))
     return rap
@@ -117,7 +139,8 @@ def main():
     if a.mod == "ciftler":
         T = [r for r in csv.DictReader(open(a.tablo, encoding="utf-8")) if r["listing_id"] != CL]
         if any(r["PASS"] != "True" for r in T): raise SystemExit("DUR: TABLO'da PASS olmayan cift var")
-        tamam = {p.name.split("_", 1)[0] for p in out.glob("*/rapor.json") if json.loads(p.read_text())["sonuc"] == "PASS"}
+        tamam = {p.parent.name.split("_", 1)[0] for p in out.glob("*/rapor.json") if json.loads(p.read_text())["sonuc"] == "PASS"}
+        log(f"onceki PASS (atlanir): {sorted(tamam)}")
         is_ = [r for r in T if r["listing_id"] not in tamam]
         if a.limit: is_ = is_[:a.limit]
         t0 = time.time()
@@ -133,7 +156,10 @@ def main():
     else:
         o = out / f"{CL}_CANCER_LIBRA"; o.mkdir(parents=True, exist_ok=True)
         man = G.yedek_al(api, shop, CL, o)
-        if a.yedek_drive: drive_kopya(o / "yedek", f"{a.yedek_drive}/{CL}_CANCER_LIBRA")
+        if a.yedek_drive:
+            h = f"{a.yedek_drive}/{CL}_CANCER_LIBRA"
+            if drive_var(h): h += time.strftime("_tekrar_%Y%m%d_%H%M%S", time.gmtime())
+            drive_kopya(o / "yedek", h)
         k0 = kisi(api, CL)
         # 1. gorsel adayi: canli 1. gorsele en yakin kapak (kaynak dizinine 01_kapak.jpg olarak yazilir); < 0.995 ise DUR
         canli1 = man["galeri"][0]["url"]
@@ -148,7 +174,8 @@ def main():
         g = G.galeri(api, CL); sorun = list(rap.get("sorun") or [])
         n1 = cdn_ncc(g[0]["url_fullxfull"], Path(a.kaynak) / "01_kapak.jpg"); n2 = cdn_ncc(g[1]["url_fullxfull"], Path(a.kaynak) / "02_format.jpg")
         if n1 < 0.995: sorun.append(f"1. gorsel NCC {n1}")
-        if n2 < 0.995: sorun.append(f"2. gorsel NCC {n2}")
+        b2 = bant_ncc(g[1]["url_fullxfull"], Path(a.kaynak) / "02_format.jpg")
+        if n2 < 0.9995 or b2 < 0.95: sorun.append(f"2. gorsel NCC {n2} bant {b2}")
         if kisi(api, CL) != k0: sorun.append("kisisellestirme")
         bag = sorted((v.get("value"), v.get("image_id")) for v in G.var_img(api, shop, CL))
         sira = {x.get("listing_image_id"): i + 1 for i, x in enumerate(g)}
