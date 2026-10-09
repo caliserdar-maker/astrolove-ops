@@ -1,0 +1,58 @@
+{
+ "BLACK_24x36": {
+  "cember": [
+   3598.8,
+   4393.9,
+   2839.5
+  ],
+  "bant_px": 60.0,
+  "silinen_cember_px": 435068,
+  "bantta_kaybolan_diger_px": 2771,
+  "sonra_halka_ici_max": 0,
+  "zemin_bg": 0,
+  "zemin_disi_oran": 0.00187,
+  "zemin_disi_tepe_p99": 250.0
+ },
+ "BLACK_16x20": {
+  "cember": [
+   2399.1,
+   2407.5,
+   1673.2
+  ],
+  "bant_px": 40.0,
+  "silinen_cember_px": 172696,
+  "bantta_kaybolan_diger_px": 1115,
+  "sonra_halka_ici_max": 0,
+  "zemin_bg": 0,
+  "zemin_disi_oran": 0.00396,
+  "zemin_disi_tepe_p99": 228.0
+ },
+ "PURE_WHITE_24x36": {
+  "cember": [
+   3599.0,
+   4393.5,
+   2839.1
+  ],
+  "bant_px": 60.0,
+  "silinen_cember_px": 405186,
+  "bantta_kaybolan_diger_px": 366,
+  "sonra_halka_ici_max": 0,
+  "zemin_bg": 255,
+  "zemin_disi_oran": 0.00152,
+  "zemin_disi_tepe_p99": 1.0
+ },
+ "PURE_WHITE_16x20": {
+  "cember": [
+   2399.2,
+   2407.5,
+   1673.1
+  ],
+  "bant_px": 40.0,
+  "silinen_cember_px": 169023,
+  "bantta_kaybolan_diger_px": 329,
+  "sonra_halka_ici_max": 0,
+  "zemin_bg": 255,
+  "zemin_disi_oran": 0.00013,
+  "zemin_disi_tepe_p99": 1.0
+ }
+}
