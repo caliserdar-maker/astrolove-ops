@@ -90,7 +90,28 @@ teslim = None
 if os.environ.get('TESLIM_JPG'):
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import teslim_jpg
     ekler = [(q['x'], q['y'], np.load(q['alfa'])) for q in json.load(open(os.environ['AMP_JSON']))] if os.environ.get('AMP_JSON') else []
-    teslim = teslim_jpg.yaz(P, z, os.environ['TESLIM_JPG'], os.environ['CJPEG'], ekler=ekler)
-    log('teslim', teslim)
+    import olcu                                                        # 9 Eki 2026 (Serdar): musteriye 1 dosya, secilen olcu, yontem B
+    M = (~teslim_jpg.zemin_maskesi(P.shape, z, ekler)).astype(np.uint8)
+    def tek_olcu(OL, yol):
+        if OL == '24x36':                                               # 2:3 en buyuk: onayli teslim_jpg yolu AYNEN (Test 8/10)
+            t = teslim_jpg.yaz(P, z, yol, os.environ['CJPEG'], ekler=ekler)
+            _, _, b = olcu.donustur(P, M, OL, 'B'); b.pop('_kutu')
+            t.update(olcu=OL, yontem=b['yontem'], hedef_px=b['hedef_px'], bosluk_7200=b['bosluk_7200'], h=b['h'], dikis=dict(uygulanmaz=True, PASS=True))
+            return t
+        P2, M2, b = olcu.donustur(P, M, OL, 'B')
+        g = olcu.yaz(P2, M2, b, yol, os.environ['CJPEG']); del P2
+        Y = np.asarray(Image.open(yol).convert('RGB')).astype(np.float32); dk = olcu.kapi_dikis(Y, M2, b); del Y
+        b.pop('_kutu')
+        return dict(**g, olcu=OL, yontem=b['yontem'], hedef_px=b['hedef_px'], bosluk_7200=b['bosluk_7200'], h=b['h'], dikis=dk)
+    OL = os.environ.get('OLCU', '24x36')
+    if OL not in olcu.OLCU: raise SystemExit(f'HATA: olcu {OL} tanimsiz')
+    teslim = tek_olcu(OL, os.environ['TESLIM_JPG'])
+    log('teslim', {k: teslim.get(k) for k in ('olcu', 'yontem', 'mb', 'halka', 'h', 'dikis')})
+    if os.environ.get('OLCU_HEPSI'):                                   # yalniz prova: 13 olcunun gercek MB / kapi tablosu (yuzer kaynak)
+        H = os.environ['OLCU_HEPSI']; os.makedirs(H, exist_ok=True); tablo = {}; t0 = time.time()
+        for i, o in enumerate(olcu.OLCU, 1):
+            tablo[o] = tek_olcu(o, f'{H}/{c}_{o}.jpg'); g_ = time.time() - t0
+            log(f'[{i}/{len(olcu.OLCU)}] {o} MB {tablo[o]["mb"]} halka {tablo[o].get("halka")} | gecen {g_/60:.1f} dk | kalan ~{g_/i*(len(olcu.OLCU)-i)/60:.1f} dk | %{100*i//len(olcu.OLCU)}')
+            json.dump(tablo, open(f'{H}/OLCU_TABLO.json', 'w'), indent=1)
 json.dump(dict(once=once, sonra=sonra, kaydirma=kay, teslim=teslim, PASS=all(v <= 1.0 for v in sonra.values())), open(f'{OD}/{c}/renk_olcum.json', 'w'), indent=1)
 log('bitti', 'PASS' if all(v <= 1.0 for v in sonra.values()) else 'FAIL')

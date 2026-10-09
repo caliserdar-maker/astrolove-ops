@@ -7,7 +7,8 @@
 #  c) isim-burc: isim1 solda (x isim1 < x isim2), kucuk1 = ilk burcun sembolu (12 sembolle korelasyon en yuksek), kucuk1 isim1 uzerinde
 #  d) yazim: isim1, isim2, tagline alfalari girdiden bagimsiz cizimle ayni (IoU >= 0.985)
 #  e) dikis yok: ana kutusu kenarlarinda (zemin pikselleri) kenar adimi <= komsu adim * 1.5 + 0.6
-#  g) Etsy teslim dosyasi: < 20 MB, 7200x10800, 4:4:4, 300 dpi (ana kopya da), halka <= 0.075
+#  g) Etsy teslim dosyasi: < 20 MB, secilen olcunun tam pikseli, 4:4:4, 300 dpi (ana kopya da), halka <= 0.075 yalniz 7200 genislikte
+#  h) olcu cercevesi (ogeler icinde, >= 300 px bosluk)  i) yontem B dikisi
 import sys, os, json, numpy as np, cv2
 from PIL import Image, ImageDraw, ImageFont
 Image.MAX_IMAGE_PIXELS = None
@@ -194,20 +195,27 @@ for ad_, (ic, dis_, yon) in {'ust': (y0, y0 - 1, 1), 'alt': (y1 - 1, y1, -1), 's
         ref = np.abs(Pf[y0:y1, ic + 5 * yon] - Pf[y0:y1, dis_ + 5 * yon])[m].mean() if m.any() else 0.0
     e[ad_] = dict(adim=round(float(adim), 3), komsu=round(float(ref), 3), n=int(m.sum()), PASS=bool(adim <= ref * 1.5 + 0.6))
 sonuc['e'] = dict(**e, PASS=bool(all(v['PASS'] for v in e.values())))
-# g) Etsy teslim dosyasi (8 Eki 2026, ders 199): < 20 MB, 7200x10800, 4:4:4, 300 dpi (ana kopya dahil), halka <= 0.075 (onayli B q97 0.066,
-#    bilinen bozuk Pillow q95 0.093-0.098; olcu renk_uyum'da kayan nokta goruntuye gore, teslim_jpg.py)
+# g) Etsy teslim dosyasi (8 Eki 2026, ders 199; 9 Eki: secilen olcu): < 20 MB, olcunun tam pikseli, 4:4:4, 300 dpi (ana kopya dahil);
+#    halka <= 0.075 YALNIZ 7200 genislikte (24x36, 24x30; Serdar 9 Eki, ders 257).
+# h) olcu cercevesi: tum ogeler icinde, her yanda >= 300 px bosluk (7200 olceginde), piksel tam (olcu.py).
+# i) B dikisi: eklenen yan serit ile poster birlesim cizgisi (olcu.kapi_dikis; 2:3'te uygulanmaz).
 from PIL import JpegImagePlugin
-tes = son.replace('.jpg', '_7200x10800.jpg'); g = dict(dosya=os.path.basename(tes))
-if os.path.exists(tes):
-    it, im0 = Image.open(tes), Image.open(son); ro_t = s.get('renk', {}).get('teslim') or {}
-    g.update(bayt=os.path.getsize(tes), mb=round(os.path.getsize(tes) / 1e6, 2), boyut=list(it.size), ornekleme_444=JpegImagePlugin.get_sampling(it) == 0,
+sys.path.insert(0, B); import olcu as _olcu
+OL = s.get('olcu', '24x36'); tes = son.replace('.jpg', f'_{OL}.jpg'); g = dict(dosya=os.path.basename(tes), olcu=OL)
+ro_t = s.get('renk', {}).get('teslim') or {}
+if os.path.exists(tes) and OL in _olcu.OLCU:
+    hw_ = list(_olcu.OLCU[OL]); it, im0 = Image.open(tes), Image.open(son)
+    g.update(bayt=os.path.getsize(tes), mb=round(os.path.getsize(tes) / 1e6, 2), boyut=list(it.size), hedef=hw_, ornekleme_444=JpegImagePlugin.get_sampling(it) == 0,
              dpi_teslim=[round(float(v)) for v in it.info.get('dpi', (0, 0))], dpi_ana=[round(float(v)) for v in im0.info.get('dpi', (0, 0))],
-             halka=ro_t.get('halka'), halka_kutular=ro_t.get('halka_kutular'))
-    g['PASS'] = bool(g['bayt'] < 20_000_000 and g['boyut'] == [7200, 10800] and g['ornekleme_444'] and g['dpi_teslim'] == [300, 300]
-                     and g['dpi_ana'] == [300, 300] and g['halka'] is not None and g['halka'] <= 0.075)
+             halka=ro_t.get('halka'), halka_kutular=ro_t.get('halka_kutular'), halka_kapisi=hw_[0] == 7200)
+    g['PASS'] = bool(g['bayt'] < 20_000_000 and g['boyut'] == hw_ and g['ornekleme_444'] and g['dpi_teslim'] == [300, 300]
+                     and g['dpi_ana'] == [300, 300] and (not g['halka_kapisi'] or (g['halka'] is not None and g['halka'] <= 0.075)))
 else:
-    g['PASS'] = False; g['hata'] = 'teslim dosyasi yok'
+    g['PASS'] = False; g['hata'] = 'teslim dosyasi yok ya da olcu tanimsiz'
 sonuc['g'] = g
+sonuc['h'] = dict(**(ro_t.get('h') or {}), bosluk_7200=ro_t.get('bosluk_7200'), yontem=ro_t.get('yontem'))
+sonuc['h']['PASS'] = bool((ro_t.get('h') or {}).get('PASS'))
+sonuc['i'] = dict(ro_t.get('dikis') or {}); sonuc['i']['PASS'] = bool((ro_t.get('dikis') or {}).get('PASS'))
 sonuc['PASS'] = bool(all(v['PASS'] for k, v in sonuc.items() if isinstance(v, dict)))
 print(json.dumps(sonuc, ensure_ascii=False))
 if JS: json.dump(sonuc, open(JS, 'w'), indent=1, ensure_ascii=False)

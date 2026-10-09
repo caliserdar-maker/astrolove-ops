@@ -2,8 +2,8 @@
 # diger ogeler onayli ayarla) + renk_uyum. ChatGPT GEREKMEZ.
 # Kullanim: python siparis_uret.py CIFT ISIM1 ISIM2 MESAJ_B64 KATMAN_PNG IS_KLASORU
 #   CIFT ters sirada gelirse alfabetige cevrilir ve isimler de yer degistirir (isim1 = cift adindaki ILK burc, solda).
-# Cikti: IS_KLASORU/AstroLoveArt_<Burc1>_<Burc2>.jpg (7200x10800 JPEG q100 ana kopya, 300 dpi) + _7200x10800.jpg (Etsy teslim: mozjpeg q97,
-#        4:4:4, titresim yalniz koyu zeminde, 300 dpi, < 20 MB) + _2000 onizleme + siparis.json
+# Cikti: IS_KLASORU/AstroLoveArt_<Burc1>_<Burc2>.jpg (7200x10800 JPEG q100 ana kopya, 300 dpi) + _<OLCU>.jpg (Etsy teslim: secilen olcunun
+#        tam pikseli @300 dpi, 4:4:4, < 20 MB; ortam OLCU, varsayilan 24x36; olcu.py yontem B) + _2000 onizleme + siparis.json
 import sys, os, json, time, base64, subprocess, numpy as np, cv2
 from PIL import Image
 Image.MAX_IMAGE_PIXELS = None
@@ -80,8 +80,9 @@ ad1, ad2 = b1.capitalize(), b2.capitalize()
 son = f'{IS}/AstroLoveArt_{ad1}_{ad2}.jpg'
 os.replace(f'{IS}/son/{c}/{c}_7200x10800.jpg', son)
 os.replace(f'{IS}/son/{c}/{c}_2000.jpg', f'{IS}/AstroLoveArt_{ad1}_{ad2}_2000.jpg')
-os.replace(f'{IS}/son/{c}_teslim.jpg', f'{IS}/AstroLoveArt_{ad1}_{ad2}_7200x10800.jpg')     # Etsy teslim dosyasi (q97, 300 dpi); _<ad>.jpg q100 ana kopya
-json.dump(dict(cift=c, isim1=isim1, isim2=isim2, tagline=tag, katman=os.path.basename(katman),
+OLCU = os.environ.get('OLCU', '24x36')                                   # 9 Eki 2026 (Serdar): 1 dosya = secilen olcu, AstroLoveArt_<B1>_<B2>_<Olcu>.jpg
+os.replace(f'{IS}/son/{c}_teslim.jpg', f'{IS}/AstroLoveArt_{ad1}_{ad2}_{OLCU}.jpg')     # Etsy teslim dosyasi (300 dpi); _<ad>.jpg q100 ana kopya (2:3)
+json.dump(dict(cift=c, isim1=isim1, isim2=isim2, tagline=tag, katman=os.path.basename(katman), olcu=OLCU, renk=os.environ.get('RENK', 'MIDNIGHT_BLUE'),
                amp=None if amp is None else dict(olcu=amp['olcu'], konum=[[q['x'], q['y'], *q['alfa'].shape] for q in amp['ampler']]),
                renk=json.load(open(f'{IS}/son/{c}/renk_olcum.json')), sure_sn=round(time.time() - T0, 1)),
           open(f'{IS}/siparis.json', 'w'), indent=1, ensure_ascii=False)

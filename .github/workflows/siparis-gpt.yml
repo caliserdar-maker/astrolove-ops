@@ -2,8 +2,9 @@ name: siparis-gpt
 # Kisisel siparis posteri, YENI YOL (8 Eki 2026): onayli ChatGPT ana sembol katmani (Drive ANA_SEMBOL78_KATMAN_20261008)
 # + motor (isim/tagline, diger ogeler onayli ayar) + renk_uyum. ChatGPT/OpenAI GEREKMEZ. Tek isci (bellek, ders 137).
 # Girdi: workflow_dispatch (main'e alininca) ya da test icin siparis_gpt/istek.json push'u (bu dal).
-# Cikti: Drive ASTROLOVE/TEMP/SIPARIS_ISIM/GPT/AstroLoveArt_<receipt>/AstroLoveArt_<Burc1>_<Burc2>.jpg (7200x10800 q100)
-# + _2000 onizleme + KAPI.json + SURE.json. Isim/mesaj loga yazilmaz (maske). Etsy'ye yazma / musteriye gonderim YOK.
+# Cikti: Drive ASTROLOVE/TEMP/SIPARIS_ISIM/GPT/AstroLoveArt_<receipt>/AstroLoveArt_<Burc1>_<Burc2>.jpg (7200x10800 q100 ana kopya)
+# + AstroLoveArt_<Burc1>_<Burc2>_<Olcu>.jpg (9 Eki: musteriye giden TEK dosya, secilen olcu, yontem B) + _2000 onizleme + KAPI.json + SURE.json.
+# Renk: yalniz MIDNIGHT_BLUE (diger renkler eski yol; giris workflow'u yonlendirir). prova_olcu_hepsi: 13 olcu tablosu -> TEMP/OLCU_PROVA_20261009. Isim/mesaj loga yazilmaz (maske). Etsy'ye yazma / musteriye gonderim YOK.
 on:
   workflow_dispatch:
     inputs:
@@ -12,6 +13,8 @@ on:
       isim1: { description: "isim1 (cift adindaki ilk burc, solda)", required: true }
       isim2: { description: "isim2", required: true }
       mesaj_b64: { description: "tagline, base64 (UTF-8)", required: true }
+      renk: { description: "renk (yeni yol yalniz MIDNIGHT_BLUE)", required: true, default: "MIDNIGHT_BLUE" }
+      olcu: { description: "olcu: 8x10 11x14 12x16 12x18 16x20 16x24 18x24 20x30 24x30 24x36 A4 A3 A2", required: true, default: "24x36" }
   push:
     branches: [siparis-gpt]
     paths: [siparis_gpt/istek.json]
@@ -31,7 +34,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            jq '.inputs | {receipt, cift, isim1, isim2, mesaj_b64}' "$GITHUB_EVENT_PATH" > /tmp/istek.json
+            jq '.inputs | {receipt, cift, isim1, isim2, mesaj_b64, renk, olcu}' "$GITHUB_EVENT_PATH" > /tmp/istek.json
           else cp siparis_gpt/istek.json /tmp/istek.json; fi
           for k in isim1 isim2; do v=$(jq -r ".$k" /tmp/istek.json); echo "::add-mask::$v"; echo "::add-mask::${v^^}"; done
           m=$(jq -r '.mesaj_b64' /tmp/istek.json | base64 -d); echo "::add-mask::$m"
@@ -39,6 +42,11 @@ jobs:
           jq -re '.cift | test("^[A-Z]+_[A-Z]+$")' /tmp/istek.json >/dev/null || { echo "HATA: cift" >&2; exit 1; }
           C=$(jq -r '.cift' /tmp/istek.json | tr '_' '\n' | sort | paste -sd_)
           echo "CIFT=$C" >> "$GITHUB_ENV"; echo "RECEIPT=$(jq -r .receipt /tmp/istek.json)" >> "$GITHUB_ENV"
+          R=$(jq -r '.renk // "MIDNIGHT_BLUE"' /tmp/istek.json); O=$(jq -r '.olcu // "24x36"' /tmp/istek.json)
+          [ "$R" = "MIDNIGHT_BLUE" ] || { echo "HATA: yeni yol yalniz MIDNIGHT_BLUE ($R eski yola)" >&2; exit 1; }
+          case " 8x10 11x14 12x16 12x18 16x20 16x24 18x24 20x30 24x30 24x36 A4 A3 A2 " in *" $O "*) ;; *) echo "HATA: olcu $O" >&2; exit 1;; esac
+          echo "RENK=$R" >> "$GITHUB_ENV"; echo "OLCU=$O" >> "$GITHUB_ENV"
+          echo "PROVA=$(jq -r '.prova_olcu_hepsi // false' /tmp/istek.json)" >> "$GITHUB_ENV"
           echo "T_BAS=$(date -u +%s)" >> "$GITHUB_ENV"
           echo "KOSU_OLUSTU=${{ github.event.repository.updated_at }}" >> /dev/null
       - name: rclone
@@ -77,6 +85,7 @@ jobs:
         run: |
           set -euo pipefail
           I=/tmp/istek.json
+          [ "$PROVA" = "true" ] && export OLCU_HEPSI=/tmp/is/OLCU_HEPSI
           /home/claude/blender/venv/bin/python /home/claude/blender/siparis_uret.py "$(jq -r .cift $I)" "$(jq -r .isim1 $I)" "$(jq -r .isim2 $I)" "$(jq -r .mesaj_b64 $I)" "/tmp/k/${CIFT}_ana.png" /tmp/is
       - name: Kapilar
         run: |
@@ -88,6 +97,7 @@ jobs:
         run: |
           set -euo pipefail
           D="gdrive,root_folder_id=12N9iS2i4byMbkH5c0Inmni_nIv2zyTzH:SIPARIS_ISIM/GPT/AstroLoveArt_${RECEIPT}"
+          [ "${PROVA:-false}" = "true" ] && D="gdrive,root_folder_id=12N9iS2i4byMbkH5c0Inmni_nIv2zyTzH:OLCU_PROVA_20261009"
           T_SON=$(date -u +%s)
           python3 - <<'P'
           import json, os
@@ -95,7 +105,7 @@ jobs:
           json.dump(dict(kosu=os.environ['GITHUB_RUN_ID'], is_basi_utc=t0), open('/tmp/is/SURE.json', 'w'))
           P
           ls /tmp/is
-          rclone copy /tmp/is "$D" --include "AstroLoveArt_*.jpg" --include "KAPI.json" --include "SURE.json" --include "siparis.json" --exclude "*"
+          rclone copy /tmp/is "$D" --include "AstroLoveArt_*.jpg" --include "KAPI.json" --include "SURE.json" --include "siparis.json" --include "OLCU_HEPSI/**" --exclude "*"
           rclone lsl "$D"
       - name: Sonuc
         run: '[ "${KAPI_RC:-1}" = "0" ]'
