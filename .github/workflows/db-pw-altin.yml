@@ -1,0 +1,72 @@
+name: db-pw-altin
+# ORNEK (Serdar 9 Eki 2026): MB'de onayli yeni altin dokusu (ChatGPT ana sembol katmani + motor + renk_uyum) DEEP_BLACK ve PURE_WHITE'a.
+# Zemin = eski sistemin DB/PW plakasi (PLATES, renk_ref b8c8c4b ile ayni), DEGISMEZ; yalniz altin ogeler yeni doku.
+# Tetik: yalniz bu dalda db_pw_altin/istek.json push'u. Yazma: yalniz bu dal (db_pw_altin/sonuc, veri) + Drive TEMP/DB_PW_ALTIN_20261009.
+# Etsy'ye yazma / musteriye gonderim / main / siparis-gpt / Drive'daki mevcut dosyalara dokunma YOK. Isim/mesaj loga yazilmaz (maske).
+on:
+  push:
+    branches: [db-pw-altin]
+    paths: [db_pw_altin/istek.json]
+permissions:
+  contents: write
+concurrency:
+  group: db-pw-altin
+  cancel-in-progress: false
+jobs:
+  is:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 1 }
+      - name: Girdi + maske
+        run: |
+          set -euo pipefail
+          I=db_pw_altin/istek.json
+          for k in isim1 isim2; do v=$(jq -r ".$k" $I); echo "::add-mask::$v"; echo "::add-mask::${v^^}"; done
+          m=$(jq -r '.mesaj_b64' $I | base64 -d); echo "::add-mask::$m"
+          echo "MOD=$(jq -r .mod $I)" >> "$GITHUB_ENV"; echo "CIFT=$(jq -r .cift $I)" >> "$GITHUB_ENV"; echo "DENEME=$(jq -r '.deneme // 0' $I)" >> "$GITHUB_ENV"
+      - name: rclone
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /tmp/rc.zip https://downloads.rclone.org/rclone-current-linux-amd64.zip
+          unzip -q -j /tmp/rc.zip '*/rclone' -d /tmp/rcb && sudo install -m 755 /tmp/rcb/rclone /usr/local/bin/rclone
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: Kesif (kaynaklari bu dala al, salt okur)
+        if: env.MOD == 'kesif'
+        run: |
+          set -euo pipefail
+          V=db_pw_altin/veri; mkdir -p $V /tmp/pod
+          K="gdrive,root_folder_id=1ZQGR0fI0HQNq1D2Lbmr2qlkNVbD8jRyD:"
+          rclone copy "$K" $V --include "${CIFT}_ana.png" --include "${CIFT}_ana.png.json" --include "${CIFT}_std_alfa.npz"
+          for p in BLACK_24x36 PURE_WHITE_24x36 BLACK_16x20 PURE_WHITE_16x20; do rclone copy "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PLATES/$p.png" $V; done
+          for r in DEEP_BLACK PURE_WHITE; do for b in 24x36 16x20; do rclone copyto "gdrive:ASTROLOVE/TEMP/POD_PRINT/$CIFT/$r/$b.jpg" /tmp/pod/${r}_$b.jpg; done; done
+          python3 -m pip install -q pillow numpy
+          python3 - <<'P'
+          from PIL import Image; import numpy as np, glob, os
+          Image.MAX_IMAGE_PIXELS = None
+          for f in sorted(glob.glob('db_pw_altin/veri/*.png')) + sorted(glob.glob('/tmp/pod/*.jpg')):
+              im = Image.open(f); print(os.path.basename(f), im.size, im.mode, os.path.getsize(f), im.info.get('dpi'))
+              if f.startswith('/tmp/pod'):
+                  im.convert('RGB').resize((1200, int(1200 * im.size[1] / im.size[0])), Image.LANCZOS).save('db_pw_altin/veri/POD_' + os.path.basename(f), quality=92)
+          P
+          ls -la $V
+      - name: Dala yaz
+        if: always()
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add db_pw_altin/veri db_pw_altin/sonuc 2>/dev/null || true
+          git commit -qm "db-pw-altin: $MOD $DENEME sonuc" || { echo degisiklik yok; exit 0; }
+          for i in 1 2 3 4; do git pull -q --rebase origin db-pw-altin && git push -q origin HEAD:db-pw-altin && exit 0; sleep $((2**i)); done; exit 1
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
