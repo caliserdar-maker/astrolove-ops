@@ -26,7 +26,9 @@ SIGMA_HALKA, ESIK_HALKA = 8, 0.10        # 300 dpi piksel; esik: bilinen FAIL (T
 GREN_HEDEF = 1.49                         # toplam zemin greni (HP sigma 1, kanal MAD ortancasi): 16x20'de Serdar onayli sigma 1.6'yi veren duzey
 #   (= 24x36 onayli kaynagin HP std'si 1.49, ders 266 olcusu); her olcude ayni toplam gren, eklenen sigma olcuye gore hesaplanir
 GREN_K = 0.8716                           # beyaz Gauss gurultunun HP(sigma 1) / sigma orani
-AZ_GREN = {'20x30', '24x30'}              # Serdar 9 Eki aksam: bu iki olcude hedef = 24x36'nin KENDI gren duzeyi (ayni posterin P'si; MB < 20)
+AZ_GREN = {'20x30', '24x30'}              # Serdar 9 Eki aksam: bu iki olcude hedef = 24x36'nin kendi gren duzeyi (MB < 20)
+GREN_HEDEF_AZ = 1.055                     # = Serdar'a gosterilen ve onaylanan olcum (24x36 q100 ana kopya, kutularda MAD ortancasi; 24x30 18.8 MB /
+                                          #   halka 0.078). Kosu ici P'den olcmek (deneme 1) daha dusuk cikti (yuzer P, q100 gurultusu yok): 0.103 FAIL
 
 
 def gren_olc(I, bg, kutular):
@@ -142,7 +144,7 @@ def yaz(P2, M2, bilgi, yol, cjpeg, q=97, seed=11):
     sys.path.insert(0, B); import teslim_jpg
     H, W = P2.shape[:2]; bg = M2 == 0
     g0 = gren_olc(P2, bg, bilgi['_kutu'])
-    hedef = bilgi['gren_24x36'] if bilgi['olcu'] in AZ_GREN and bilgi.get('gren_24x36') else GREN_HEDEF
+    hedef = GREN_HEDEF_AZ if bilgi['olcu'] in AZ_GREN else GREN_HEDEF
     sn = float(np.sqrt(max(0.0, hedef ** 2 - g0 ** 2)) / GREN_K) if g0 is not None else 0.0
     U = np.empty(P2.shape, np.uint8)
     for y0 in range(0, H, 1200):

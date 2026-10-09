@@ -111,8 +111,8 @@ jobs:
           rclone copy /tmp/is "$D" --include "AstroLoveArt_*.jpg" --include "KAPI.json" --include "SURE.json" --include "siparis.json" --include "OLCU_HEPSI/**" --exclude "*"
           rclone lsl "$D"
           if [ "${PROVA:-false}" = "true" ] && [ -f /tmp/is/OLCU_HEPSI/OLCU_TABLO.json ]; then
-            python3 -c "import json;t=json.load(open('/tmp/is/OLCU_HEPSI/OLCU_TABLO.json'));[print('::warning::OLCU',o,'MB',v.get('mb'),'halka',v.get('halka'),'gren',(v.get('gren') or {}).get('sigma'),'h',v.get('h',{}).get('PASS'),'dikis',v.get('dikis',{}).get('PASS'),'PASS',v.get('PASS')) for o,v in t.items()]"
-            rclone lsjson "$D/OLCU_HEPSI" --files-only | python3 -c "import json,sys;[print('::warning::DOSYA',x['Name'],x['ID']) for x in json.load(sys.stdin) if x['Name'].endswith('.jpg')]"
+            python3 -c "import json;t=json.load(open('/tmp/is/OLCU_HEPSI/OLCU_TABLO.json'));print('::warning::TABLO '+' ; '.join(f\"{o} MB {v.get('mb')} halka {v.get('halka')} gren {(v.get('gren') or {}).get('sigma')} hedef {(v.get('gren') or {}).get('hedef')} h {v.get('h',{}).get('PASS')} dikis {v.get('dikis',{}).get('PASS')} PASS {v.get('PASS')}\" for o,v in t.items()))"
+            rclone lsjson "$D/OLCU_HEPSI" --files-only | python3 -c "import json,sys;print('::warning::DOSYALAR '+' ; '.join(x['Name']+' '+x['ID'] for x in json.load(sys.stdin) if x['Name'].endswith('.jpg')))"
           fi
       - name: Sonuc
         run: '[ "${KAPI_RC:-1}" = "0" ]'
