@@ -37,7 +37,7 @@ on:
 permissions:
   contents: read
 env:
-  GPT_REF: ${{ vars.SIPARIS_GPT_REF || '103dbf45187560f97f44c76a726bf8ef93845f8f' }}
+  GPT_REF: ${{ vars.SIPARIS_GPT_REF || '11a305054290d79b41eb7331b661dd28fb51311d' }}
   ESKI_RENK_REF: ${{ vars.ESKI_RENK_REF || 'b8c8c4b17478fd956167577fa69913d06b9eb955' }}
 jobs:
   yonlendir:
