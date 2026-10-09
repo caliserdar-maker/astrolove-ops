@@ -1,0 +1,130 @@
+name: gorsel02
+
+# Ilan gorseli 02 "Choose your format" yeni Digital File metni (Serdar 9 Eki onayi: 3 satir; CANCER_LIBRA 17'lik set).
+# mod uret   : 78 cift yeni 02 (kart02_yeni78.py): eski metin modu onayli 02 ile PIKSEL AYNI + OCR. Etsy YOK.
+#              Cikti Drive TEMP/GORSEL02_YENI_78/<CIFT>/02_format.jpg + TABLO.csv.
+# mod ciftler: 77 ilan, YALNIZ 2. gorsel (gorsel02_degistir.py). ETSY'YE YAZAR. limit=1 ile once tek ilan.
+#              Yedek TEMP/GORSEL02_YEDEK_20261009/<lid>_<CIFT>/ (tum canli gorseller + manifest), kayit TEMP/GORSEL02_YAYIN/.
+# mod cl     : CANCER_LIBRA 17'lik set (cl_galeri_degistir.uygula). ETSY'YE YAZAR.
+# Etsy kilidi (kilit_bekle.py), token geri yazilir, sir loga yazilmaz.
+
+permissions:
+  actions: read
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      mod: {description: "uret | ciftler | cl", required: true, type: choice, options: [uret, ciftler, cl]}
+      limit: {description: "ciftler: bu kosuda en fazla N ilan (0 = hepsi)", required: false, default: "0"}
+      onay: {description: "ciftler/cl icin GORSEL02 yaz", required: false, default: ""}
+
+jobs:
+  is:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        if: ${{ inputs.mod != 'uret' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Kurulum
+        run: |
+          set -euo pipefail
+          pip install -q numpy==2.1.3 pillow==11.0.0 scipy==1.14.1 opencv-python-headless==4.10.0.84 requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+          if [ "${{ inputs.mod }}" = "uret" ]; then
+            sudo apt-get -qq update >/dev/null && sudo apt-get -qq install -y tesseract-ocr >/dev/null
+            mkdir -p fonts; base=https://raw.githubusercontent.com/google/fonts/main/ofl
+            curl -fsSL "$base/ebgaramond/EBGaramond%5Bwght%5D.ttf" -o 'fonts/EBGaramond[wght].ttf'
+            curl -fsSL "$base/montserrat/Montserrat%5Bwght%5D.ttf" -o 'fonts/Montserrat[wght].ttf'
+            curl -fsSL "$base/lato/Lato-Regular.ttf" -o fonts/Lato-Regular.ttf
+          fi
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: uret
+        if: ${{ inputs.mod == 'uret' }}
+        run: |
+          set -uo pipefail
+          G="gdrive:ASTROLOVE/TEMP/GALERI_77"; mkdir -p _work/K/CANCER_LIBRA _work/O
+          rclone copyto "$G/HAZIR.csv" _work/HAZIR.csv
+          rclone copyto "$G/_KAYNAK/CANCER_LIBRA/BASKI_MIDNIGHT_BLUE.jpg" _work/K/CANCER_LIBRA/BASKI_MIDNIGHT_BLUE.jpg
+          python3 -c "import csv;[print(r['cift'].strip()) for r in csv.DictReader(open('_work/HAZIR.csv',encoding='utf-8')) if (r.get('listing_id') or '').strip() and r['listing_id'].strip()!='4570143815']" > _work/c.txt
+          cat _work/c.txt | xargs -P 8 -I{} sh -c 'rclone copyto "'$G'/_KAYNAK/{}/BASKI_MIDNIGHT_BLUE.jpg" "_work/K/{}/BASKI_MIDNIGHT_BLUE.jpg" -q && rclone copyto "'$G'/{}/02_format.jpg" "_work/O/{}/02_format.jpg" -q'
+          echo "cift $(wc -l < _work/c.txt) | MB $(ls _work/K/*/BASKI_MIDNIGHT_BLUE.jpg | wc -l) | onayli 02 $(ls _work/O/*/02_format.jpg | wc -l)"
+          python3 scripts/pod/duvar_zemin.py data/pod/kapak_sahne_v9.png guclu _work/duvar.png acik3 > /dev/null
+          python3 scripts/pod/kart02_yeni78.py _work/HAZIR.csv _work/K _work/O _work/duvar.png fonts _work/YENI | tee _work/log.txt | tail -3
+          RC=${PIPESTATUS[0]}
+          grep OZET _work/log.txt | sed 's/^/::warning::/'
+          python3 -c "import csv;r=list(csv.DictReader(open('_work/YENI/TABLO.csv')));f=[x['cift']+'('+('eski '+x['eski_max_fark'] if x['eski_ayni']!='True' else 'ocr/bant')+')' for x in r if x['PASS']!='True'];print('::warning::FAIL '+(' '.join(f) or 'yok')+' | eski_ayni '+str(sum(x['eski_ayni']=='True' for x in r))+' ocr_ayni '+str(sum(x['ocr_ayni']=='True' for x in r))+' bant_ok '+str(sum(x['bant_ok']=='True' for x in r))+' / '+str(len(r)))"
+          rclone copy _work/YENI "gdrive:ASTROLOVE/TEMP/GORSEL02_YENI_78" --exclude "*/_is/**" -q
+          K=$(rclone lsjson gdrive:ASTROLOVE/TEMP --dirs-only | python3 -c "import json,sys;print([x['ID'] for x in json.load(sys.stdin) if x['Name']=='GORSEL02_YENI_78'][0])"); echo "::warning::KLASOR GORSEL02_YENI_78 $K"
+          exit $RC
+      - name: Etsy yaz (ciftler / cl)
+        if: ${{ inputs.mod != 'uret' }}
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          MOD: ${{ inputs.mod }}
+          LIMIT: ${{ inputs.limit }}
+          ONAY: ${{ inputs.onay }}
+        run: |
+          set -uo pipefail
+          [ "$ONAY" = "GORSEL02" ] || { echo "::error::onay GORSEL02 degil, yazma yok"; exit 1; }
+          umask 077; mkdir -p _work _out
+          T="gdrive:ASTROLOVE/TEMP"
+          rclone copyto "$T/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copy "$T/GORSEL02_YENI_78" _work/YENI -q
+          rclone copy "$T/GORSEL02_YAYIN" _out --include "*/rapor.json" --include "*/rapor_gorsel02.json" -q 2>/dev/null || true
+          Y="$T/GORSEL02_YEDEK_20261009"
+          if [ "$MOD" = "ciftler" ]; then
+            python3 scripts/etsy/gorsel02_degistir.py ciftler --tablo _work/YENI/TABLO.csv --yeni _work/YENI --out _out --yedek-drive "$Y" \
+              --confirm GORSEL02 --limit "${LIMIT:-0}" | tee _work/log.txt; RC=${PIPESTATUS[0]}
+          else
+            mkdir -p _work/CL17 _work/kapak
+            for f in data/pod/cl_galeri_final19/*.jpg; do b=$(basename $f); case $b in 05_*|19_*) ;; *) cp "$f" _work/CL17/;; esac; done
+            cp _work/YENI/CANCER_LIBRA/02_format.jpg _work/CL17/02_format.jpg
+            cp data/pod/cl_galeri_final19/01_kapak.jpg _work/kapak/final19_01_kapak.jpg
+            rclone copyto "$T/GALERI_77/_KAYNAK/CANCER_LIBRA/KAPAK.jpg" _work/kapak/kaynak_KAPAK.jpg -q 2>/dev/null || true
+            KD=$(rclone lsf --dirs-only "$T/POD_KAPAK_78/" | tr -d '/' | grep -E '^[0-9]{8}_[0-9]{4}$' | sort | tail -1)
+            rclone copyto "$T/POD_KAPAK_78/$KD/KAPAK_CANCER_LIBRA.jpg" _work/kapak/pod78_${KD}_KAPAK.jpg -q 2>/dev/null || true
+            ls _work/CL17 _work/kapak
+            ADAY=$(ls _work/kapak/*.jpg | paste -sd,)
+            python3 scripts/etsy/gorsel02_degistir.py cl --kaynak _work/CL17 --alt data/pod/cl_galeri_alt_metin.csv --kapak-sec "$ADAY" \
+              --out _out --yedek-drive "$Y" --confirm GORSEL02 | tee _work/log.txt; RC=${PIPESTATUS[0]}
+          fi
+          grep -E "OZET|DUR|HATA|kapak adaylari" _work/log.txt | tail -5 | sed 's/^/::warning::/'
+          python3 - <<'P'
+          import json, glob
+          r = [json.load(open(p)) for p in sorted(glob.glob('_out/*/rapor.json')) if 'cift' in json.load(open(p))]
+          ps = sum(1 for x in r if x['sonuc'] == 'PASS'); y = sorted({x.get('yol') for x in r})
+          print(f"::warning::TOPLAM 77 ilan kaydi: {len(r)} kayit, PASS {ps}, yol {y}, ncc min {min([x['ncc_yeni_canli'] for x in r] or [0])}")
+          for p in glob.glob('_out/*/rapor_gorsel02.json'):
+              print('::warning::CL ' + json.dumps(json.load(open(p)), ensure_ascii=False)[:900])
+          P
+          echo "RC=$RC" >> "$GITHUB_ENV"
+      - name: Token + kayit Drive'a
+        if: ${{ always() && inputs.mod != 'uret' }}
+        run: |
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
+          if grep -rqE 'x-api-key|refresh_token|"access_token"' _out/ 2>/dev/null; then echo "::error::ciktida sir benzeri anahtar"; exit 1; fi
+          [ -d _out ] && rclone copy _out "gdrive:ASTROLOVE/TEMP/GORSEL02_YAYIN" --exclude "*/yedek/*.jpg" -q || true
+          K=$(rclone lsjson gdrive:ASTROLOVE/TEMP --dirs-only | python3 -c "import json,sys;print(' '.join(x['Name']+'='+x['ID'] for x in json.load(sys.stdin) if x['Name'] in ('GORSEL02_YEDEK_20261009','GORSEL02_YAYIN')))"); echo "::warning::KLASOR $K"
+          [ "${RC:-1}" = "0" ]
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone

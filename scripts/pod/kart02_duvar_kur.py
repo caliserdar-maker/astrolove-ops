@@ -67,17 +67,15 @@ YAZI = [
     ('Digital File', 'EBGaramond[wght].ttf', 400, 64, 355, 1456, (22, 38, 65)),
     ('Print', 'EBGaramond[wght].ttf', 400, 64, 1437, 1456, (22, 38, 65)),
     ('Framed', 'EBGaramond[wght].ttf', 400, 64, 2416, 1456, (22, 38, 65)),
-    ('All 5 colors as print-ready PDFs. 300 dpi. Sent', 'Lato-Regular.ttf', None, 38, 110, 1558, (37, 44, 57)),
     ('Hahnemühle Photo Rag fine art paper.', 'Lato-Regular.ttf', None, 38, 1182, 1558, (37, 44, 56)),
     ('Classic wood frame in Antique Gold, Black,', 'Lato-Regular.ttf', None, 38, 2155, 1558, (37, 45, 57)),
-    ('within 24 hours via Etsy Messages.', 'Lato-Regular.ttf', None, 38, 200, 1603, (37, 45, 56)),
     ('Unframed, ready for your frame.', 'Lato-Regular.ttf', None, 38, 1233, 1603, (37, 45, 57)),
     ('White or Natural. Arrives ready to hang.', 'Lato-Regular.ttf', None, 38, 2179, 1603, (37, 44, 56)),
     (f'A personal gift for {BA} and {BB} couples.', 'EBGaramond[wght].ttf', 430, 43, None, 1865, (23, 39, 66)),
     ('PERSONALIZED ZODIAC COUPLE WALL ART', 'Lato-Regular.ttf', None, 30, 140, 2172, (174, 143, 83)),
 ]
 # metni degisen satir onayli metnin merkezinde kalir (onayli metin -> olculen x)
-ESKI_METIN = {'All 5 colors as print-ready PDFs. 300 dpi. Sent': 'All 5 colors as print ready PDFs. 300 dpi. Sent'}
+ESKI_METIN = {}
 satirlar = []
 for t, fy, w, s, x, y, renk in YAZI:
     f = ImageFont.truetype(os.path.join(FD, fy), s)
@@ -95,6 +93,10 @@ for t, fy, w, s, x, y, renk in YAZI:
     d.text((x, y), t, font=f, fill=r, anchor='ls')
     satirlar.append(dict(metin=t, kutu=kutu, renk=r, onayli_renk=list(renk),
                          kontrast=round(kontrast(float(lum(np.array(r))), lw), 2)))
+# Digital File aciklamasi (Serdar 9 Eki, 1 JPG teslim kurali): tek kaynak kart02_dijital_metin.py; ESKI_DIJITAL=1 -> 30 Eyl metni
+import kart02_dijital_metin as KD
+for t, kutu, r in KD.ciz(d, D, FD, KD.ESKI if os.environ.get('ESKI_DIJITAL') == '1' else KD.YENI, duvar_lum, yazi_rengi, ImageFont, os):
+    satirlar.append(dict(metin=t, kutu=kutu, renk=r, onayli_renk=list(r), kontrast=round(kontrast(float(lum(np.array(r))), duvar_lum(D, kutu)), 2)))
 out.save(CIK, quality=95, subsampling=0)
 bx, by = yer['baski'][1]; dx, dy = yer['dijital'][1]; cx, cy = yer['cerceve'][1]
 poster = [(bx, by, PW, PH), (dx + on_x, dy + on_y, PW, PH), (cx + FC, cy + FC, PW, PH)]
