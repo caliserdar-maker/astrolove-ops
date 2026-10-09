@@ -53,11 +53,12 @@ once = {ad: round(de00(Lana, ortanca(ad)), 2) for ad in OGELER if ad in K}
 log('dE00 once', once)
 if SADECE_OLC: print(json.dumps(once)); sys.exit(0)
 kay = {}
+MDEG = np.zeros(P.shape[:2], bool)                                         # degisen pikseller (DB/PW: titresim yalniz burada, zemin plaka ile ayni)
 for ad in OGELER:
     if ad not in K: continue
     x, y = K[ad]; a, m = ic(ad); h, w = a.shape
     d = Lana - ortanca(ad); kay[ad] = np.round(d, 2).tolist()
-    reg = P[y:y + h, x:x + w]; sec = a > 0.003
+    reg = P[y:y + h, x:x + w]; sec = a > 0.003; MDEG[y:y + h, x:x + w] |= sec
     L = lab(reg[sec]) + d[None, :] * a[sec][:, None]                       # kenarda alfa kadar (yumusak gecis)
     reg[sec] = np.clip(cv2.cvtColor(L.reshape(-1, 1, 3).astype(np.float32), cv2.COLOR_Lab2RGB).reshape(-1, 3) * 255, 0, 255)
 sonra = {ad: round(de00(Lana, ortanca(ad)), 2) for ad in OGELER if ad in K}
@@ -70,13 +71,15 @@ if os.environ.get('AMP_JSON'):
         GL = cv2.cvtColor(G8.astype(np.float32) / 255, cv2.COLOR_RGB2Lab); dk = Lana - np.median(GL[icm], 0); GL += dk
         Gn = np.clip(cv2.cvtColor(GL, cv2.COLOR_Lab2RGB), 0, 1) * 255
         Aa = cv2.GaussianBlur(A8.astype(np.float32) / 255, (0, 0), 0.5)[..., None]   # motor kenar_yum 0.5 ile ayni kenar
-        reg = P[y:y + h, x:x + w]; P[y:y + h, x:x + w] = Gn * Aa + reg * (1 - Aa)
+        reg = P[y:y + h, x:x + w]; P[y:y + h, x:x + w] = Gn * Aa + reg * (1 - Aa); MDEG[y:y + h, x:x + w] |= Aa[..., 0] > 0
         kay[f'amp{i}'] = np.round(dk, 2).tolist()
         sonra[f'amp{i}'] = round(de00(Lana, np.median(lab(P[y:y + h, x:x + w][icm]), 0)), 2)
 log('kaydirma Lab', kay); log('dE00 sonra', sonra)
 os.makedirs(f'{OD}/{c}', exist_ok=True)
 rs = np.random.default_rng(11)
-out = np.clip(np.round(P + rs.random(P.shape, dtype=np.float32) - rs.random(P.shape, dtype=np.float32)), 0, 255).astype(np.uint8)
+tp = rs.random(P.shape, dtype=np.float32) - rs.random(P.shape, dtype=np.float32)
+if os.environ.get('TITRESIM_YALNIZ_DEGISEN') == '1': tp *= MDEG[..., None]   # DB/PW (db-pw-altin): degismeyen zemin bayt ayni kalir
+out = np.clip(np.round(P + tp), 0, 255).astype(np.uint8); del tp
 Image.fromarray(out).save(f'{OD}/{c}/{c}_7200x10800.jpg', quality=100, subsampling=0, dpi=(300, 300))   # 300 dpi (8 Eki, Serdar)
 del out
 on = np.empty((3000, 2000, 3), np.uint8)
@@ -104,7 +107,9 @@ if os.environ.get('TESLIM_JPG'):
             return t
         P2, M2, b = olcu.donustur(P, M, OL, 'B')
         g = olcu.yaz(P2, M2, b, yol, os.environ['CJPEG']); del P2
-        Y = np.asarray(Image.open(yol).convert('RGB')).astype(np.float32); dk = olcu.kapi_dikis(Y, M2, b); del Y
+        Y = np.asarray(Image.open(yol).convert('RGB')).astype(np.float32); dk = olcu.kapi_dikis(Y, M2, b)
+        sr = olcu.kapi_serit(Y, b, os.environ.get('ZEMIN_TUVAL_' + OL.upper())); del Y      # DB/PW yan serit = plaka (MB: uygulanmaz)
+        dk = dict(dk, serit=sr, PASS=bool(dk.get('PASS') and sr['PASS']))
         b.pop('_kutu')
         return dict(**g, olcu=OL, yontem=b['yontem'], hedef_px=b['hedef_px'], bosluk_7200=b['bosluk_7200'], h=b['h'], dikis=dk)
     OL = os.environ.get('OLCU', '24x36')

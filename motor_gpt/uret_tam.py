@@ -39,6 +39,14 @@ for y0 in range(0, H, 600):
     for c in range(3):
         zemin[y0:y0 + len(yy), :, c] = np.interp(r, rr, LIN[c])
 log('zemin')
+# DB/PW (9 Eki 2026, db-pw-altin): ZEMINLER="AD=plaka.png,..." -> ayni ogeler (MB'deki ayni rgb, golge, isima) eski sistemin
+# DB/PW plakasi uzerine de bindirilir (zemin DEGISMEZ: yildiz eklenmez). MB ciktisi ve rastgele akisi AYNEN (bos ise hic etkisi yok).
+ZEK, ZPL = {}, {}
+for _q in [q for q in os.environ.get('ZEMINLER', '').split(',') if q]:
+    _ad, _yol = _q.split('=', 1); _pl = Image.open(_yol).convert('RGB')
+    if _pl.size != (W, H): _pl = _pl.resize((W, H), Image.LANCZOS)
+    ZPL[_ad] = np.asarray(_pl).copy(); ZEK[_ad] = lineer(ZPL[_ad].astype(np.float32) / 255).astype(np.float32); del _pl
+    log('ek zemin', _ad, _yol)
 
 # --- 2 yildizlar: T5 posterden (oge bolgeleri disi), yerel zemine gore fazlalik; satir bloklariyla (bellek) ---
 t5 = np.asarray(Image.open('/home/claude/ao/KANIT/SCORPIO_VIRGO_T5_FAIL_tam.png').convert('RGB'))
@@ -256,7 +264,9 @@ if P['temas']:                                                      # temas golg
     gt = cv2.GaussianBlur(Atum, (0, 0), 4.0)
     gt = cv2.warpAffine(gt, np.float32([[1, 0, 2], [0, 1, 3]]), (W, H)) * P['temas']
     g = 1 - (1 - g) * (1 - gt); del gt
-zemin *= (1 - g[..., None]); del g
+zemin *= (1 - g[..., None])
+for _z in ZEK.values(): _z *= (1 - g[..., None])
+del g
 log('golge katmani')
 
 # --- 5 altin ogeler ---
@@ -335,6 +345,8 @@ for ad, x, y, a in ogeler:
     if P['kenar_yum']:
         A = cv2.GaussianBlur(A, (0, 0), P['kenar_yum'])
     sl[:] = sl * (1 - A[..., None]) + rgb * A[..., None]
+    for _z in ZEK.values():
+        s2 = _z[y:y + A.shape[0], x:x + A.shape[1]]; s2[:] = s2 * (1 - A[..., None]) + rgb * A[..., None]
     if P['isima']:
         x4, y4 = x // 4, y // 4; px_, py_ = x - x4 * 4, y - y4 * 4
         pad = np.pad((rgb * A[..., None]).astype(np.float32), ((py_, (-(A.shape[0] + py_)) % 4), (px_, (-(A.shape[1] + px_)) % 4), (0, 0)))
@@ -353,11 +365,13 @@ if P['isima']:                                                       # altin isi
         a0, a1 = max(0, y0_ // 4 - 2), min(sm.shape[0], y1_ // 4 + 2)
         bl = cv2.resize(sm[a0:a1], (W, (a1 - a0) * 4), interpolation=cv2.INTER_LINEAR)
         zemin[y0_:y1_] += bl[y0_ - a0 * 4:y1_ - a0 * 4] * P['isima']
+        for _z in ZEK.values(): _z[y0_:y1_] += bl[y0_ - a0 * 4:y1_ - a0 * 4] * P['isima']
     del sm, ISIK
     log('isima')
 # --- 6 sRGB + TPDF titresim -> 8 bit ---
 rs = np.random.default_rng(11)
 out = np.empty((H, W, 3), np.uint8)
+EKOUT = {k: np.empty((H, W, 3), np.uint8) for k in ZEK}
 for y0 in range(0, H, 600):
     zb = zemin[y0:y0 + 600]
     if P['renk_ayar'] or P['kararma']:                              # tek ortak renk dokunusu: tum poster ayni
@@ -370,12 +384,22 @@ for y0 in range(0, H, 600):
             xx_ = (np.arange(W, dtype=np.float32)[None] - W / 2) / (W / 2)
             zb = zb * (1 - P['kararma'] * np.clip((xx_ ** 2 + yy_ ** 2) / 2, 0, 1) ** 1.5)[..., None]
     b = srgb(zb) * 255
-    b += rs.random(b.shape, np.float32) - rs.random(b.shape, np.float32)
+    tp_ = rs.random(b.shape, np.float32) - rs.random(b.shape, np.float32)
+    b += tp_
     if P['gren']:                                                   # tum postere ayni ince gren (zemin ve oge ayni malzeme hissi)
         gn = cv2.GaussianBlur(rs.standard_normal(b.shape[:2]).astype(np.float32), (0, 0), 0.8)
         b += (gn / 0.35 * P['gren'])[..., None]
     out[y0:y0 + 600] = np.clip(np.round(b), 0, 255).astype(np.uint8)
-del zemin
+    for k_, z_ in ZEK.items():                                      # ek zemin: ayni titresim; gren yalniz ogede (alfa agirlikli), zemin dokusu DEGISMEZ
+        b0 = srgb(z_[y0:y0 + 600]) * 255; pl_ = ZPL[k_][y0:y0 + 600].astype(np.float32)
+        dg = (np.abs(b0 - pl_).max(2) > 0.25)[..., None]           # titresim yalniz oge/golge/isimanin degistirdigi yerde; kalan zemin = plaka (bayt ayni)
+        b2 = np.where(dg, b0 + tp_, pl_)
+        if P['gren']: b2 += (gn / 0.35 * P['gren'] * np.clip(Atum[y0:y0 + 600], 0, 1))[..., None]
+        EKOUT[k_][y0:y0 + 600] = np.clip(np.round(b2), 0, 255).astype(np.uint8)
+del zemin, ZEK, ZPL
+for k_, o_ in EKOUT.items():
+    Image.fromarray(o_).save(f'{OUT}/SV_{k_}_tam.png', optimize=False, compress_level=3); log('ek zemin kaydedildi', k_)
+del EKOUT
 im = Image.fromarray(out)
 im.save(f'{OUT}/SV_BLENDER_tam.png', optimize=False, compress_level=3)
 im.save(f'{OUT}/SV_BLENDER_tam_q100.jpg', quality=100, subsampling=0)

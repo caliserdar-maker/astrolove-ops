@@ -92,7 +92,8 @@ def donustur(P, M, olcu, yontem):
     else:
         s = Hc_ / H0; Wp = int(round(W0 * s)); ox = (W0 - Wp) // 2
         Ps = cv2.resize(P, (Wp, Hc_), interpolation=cv2.INTER_AREA)
-        C = _profil(W0, Hc_, s, ox)
+        TV = os.environ.get('ZEMIN_TUVAL_' + olcu.upper())                  # DB/PW (9 Eki, db-pw-altin): yan zemin = eski sistemin AYNI olcu plakasi
+        C = _profil(W0, Hc_, s, ox) if not TV else cv2.resize(np.asarray(Image.open(TV).convert('RGB')).astype(np.float32), (W0, Hc_), interpolation=cv2.INTER_AREA if Image.open(TV).size[0] > W0 else cv2.INTER_CUBIC)
         # yan seritler: ana goruntunun oge disi kenar bolgelerinden fazlalik (yildiz + doku), ayni s ile kucultulmus; ayna YOK
         D = cv2.dilate(M, np.ones((121, 121), np.uint8))
         bos = np.where(~D.any(0))[0]; sol = bos[bos < W0 // 2]; sag = bos[bos >= W0 // 2]
@@ -104,14 +105,15 @@ def donustur(P, M, olcu, yontem):
         sw = W0 - ox - Wp
         if kaynak_s.shape[1] < max(ox, sw) + F: raise ValueError(f'serit kaynagi dar: {kaynak_s.shape[1]} < {max(ox, sw) + F}')
         k2 = np.roll(kaynak_s, Hc_ // 2, axis=0)                                                # sag serit: ayni kaynak, yarim boy kaydirma
-        if d1:
+        if TV: pass                                                                             # plaka kendi dokusunu tasir: fazlalik eklenmez
+        elif d1:
             C[:, :ox] += kaynak_s[:, :ox]; C[:, ox + Wp:] += k2[:, -sw:]
         else:
             C[:, :ox + F] += kaynak_s[:, :ox + F]                                               # sol serit (+ yumusatma bolgesi)
             C[:, ox + Wp - F:] += k2[:, -(sw + F):]
         # dikis seviye eslemesi (9 Eki, deneme 2): serit ile poster kenari arasindaki dusuk frekans farki satir boyunca (sigma 150)
         # serite sabit ofset olarak eklenir (profil modeli kenarda ana goruntuden ~1-4 seviye sapiyor; deneme 1'de mavi kanalda cizgi)
-        for xs_, xe_, sl in (() if d1 else ((ox, ox + F, np.s_[:, :ox + F]), (ox + Wp - F, ox + Wp, np.s_[:, ox + Wp - F:]))):
+        for xs_, xe_, sl in (() if (d1 or TV) else ((ox, ox + F, np.s_[:, :ox + F]), (ox + Wp - F, ox + Wp, np.s_[:, ox + Wp - F:]))):   # TV: iki yan da ayni duz plaka zemini, seviye eslemesi yildizdan bant yapiyordu (d2 DB 16x20)
             d = (Ps[:, xs_ - ox:xe_ - ox] - C[:, xs_:xe_]).mean(1)
             d = cv2.GaussianBlur(d.reshape(-1, 1, 3).astype(np.float32), (1, 0), sigmaX=0.1, sigmaY=150).reshape(-1, 3)
             C[sl] += d[:, None, :]
@@ -119,7 +121,7 @@ def donustur(P, M, olcu, yontem):
         C[:, ox:ox + Wp] = Ps * a[None, :, None] + C[:, ox:ox + Wp] * (1 - a[None, :, None])
         Mc = np.zeros((Hc_, W0), np.uint8); Mc[:, ox:ox + Wp] = cv2.resize(M, (Wp, Hc_), interpolation=cv2.INTER_NEAREST)
         T = lambda x, y: (ox + x * s, y * s)
-        bilgi = dict(yontem='B1' if d1 else 'B', olcek=round(s, 4), yan_serit_px=[ox, W0 - ox - Wp])
+        bilgi = dict(yontem='B1' if d1 else 'B', olcek=round(s, 4), yan_serit_px=[ox, W0 - ox - Wp], yan_zemin=os.path.basename(TV) if TV else 'profil')
     C = np.clip(C, 0, 255)
     P2 = cv2.resize(C, (w, h), interpolation=cv2.INTER_AREA) if (C.shape[1], C.shape[0]) != (w, h) else C
     M2 = cv2.resize(Mc, (w, h), interpolation=cv2.INTER_NEAREST) if (Mc.shape[1], Mc.shape[0]) != (w, h) else Mc
@@ -145,6 +147,8 @@ def yaz(P2, M2, bilgi, yol, cjpeg, q=97, seed=11):
     H, W = P2.shape[:2]; bg = M2 == 0
     g0 = gren_olc(P2, bg, bilgi['_kutu'])
     hedef = GREN_HEDEF_AZ if bilgi['olcu'] in AZ_GREN else GREN_HEDEF
+    if os.environ.get('GREN_HEDEF_KAYNAK') == '1' and bilgi.get('gren_24x36') is not None:    # DB/PW: hedef = ayni posterin 24x36 zemin greni
+        hedef = bilgi['gren_24x36']
     sn = float(np.sqrt(max(0.0, hedef ** 2 - g0 ** 2)) / GREN_K) if g0 is not None else 0.0
     U = np.empty(P2.shape, np.uint8)
     for y0 in range(0, H, 1200):
@@ -173,6 +177,29 @@ def kapi_g(yol, P2, bg, bilgi):
     g['PASS'] = bool(g['bayt'] < 20_000_000 and g['boyut'] == [w, h] and g['ornekleme_444'] and g['dpi'] == [300, 300]
                      and hk is not None and hk <= ESIK_HALKA)
     return g
+
+
+def kapi_serit(Y, bilgi, tv, esik=1.0):
+    """DB/PW yan serit kapisi (Serdar 9 Eki gece; d2 DB 16x20 sol seritte +6.3 bant, mevcut dikis kapisi kacirdi):
+    yontem B'de yan zemin = ayni aile plakasi (ZEMIN_TUVAL). Teslim dosyasinin yan seritleri (dikisten 4 px uzak) plakanin ayni
+    yoldan (7200 tuval -> hedef piksel) kucultulmus haliyle satir satir karsilastirilir: satir ortancasi (kanal basina), sigma 20 satir
+    yumusatma, en buyuk |fark| <= esik. Kalibrasyon: d2 DB 16x20 7.59 FAIL, d3 0.00 PASS (PW d2/d3 0.00)."""
+    if not tv or not str(bilgi.get('yontem', '')).startswith('B') or not bilgi.get('yan_serit_px'):
+        return dict(uygulanmaz=True, PASS=True)
+    h, w = Y.shape[:2]; Hc_ = bilgi['tuval_7200'][1]
+    pl = Image.open(tv).convert('RGB'); TV = np.asarray(pl).astype(np.float32)
+    C = cv2.resize(TV, (W0, Hc_), interpolation=cv2.INTER_AREA if pl.size[0] > W0 else cv2.INTER_CUBIC)
+    Pt = cv2.resize(C, (w, h), interpolation=cv2.INTER_AREA) if (w, h) != (W0, Hc_) else C
+    f = w / W0; ox, sw = bilgi['yan_serit_px']; L = int(ox * f) - 4; R = w - int(sw * f) + 4
+    out = {}
+    for ad, sl in (('sol', np.s_[:, 4:L]), ('sag', np.s_[:, R:w - 4])):
+        if sl[1].stop is not None and sl[1].start is not None and sl[1].stop - sl[1].start < 8:
+            out[ad] = None; continue
+        med = np.median(Y[sl].astype(np.float32) - Pt[sl], axis=1)
+        g = cv2.GaussianBlur(med.reshape(-1, 1, 3).astype(np.float32), (1, 0), sigmaX=0.1, sigmaY=20).reshape(-1, 3)
+        out[ad] = round(float(np.abs(g).max()), 2)
+    v = [x for x in out.values() if x is not None]
+    return dict(**out, esik=esik, plaka=os.path.basename(tv), PASS=bool(all(x <= esik for x in v)))
 
 
 def kapi_dikis(Y, M2, bilgi):
