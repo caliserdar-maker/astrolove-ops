@@ -95,6 +95,10 @@ if os.environ.get('TESLIM_JPG'):
     def tek_olcu(OL, yol):
         if OL == '24x36':                                               # 2:3 en buyuk: onayli teslim_jpg yolu AYNEN (Test 8/10)
             t = teslim_jpg.yaz(P, z, yol, os.environ['CJPEG'], ekler=ekler)
+            # 9 Eki aksam (Serdar): halka her olcude sigma 8 ile, ayni olcunun yuzer kaynagina (burada P) gore; gren eklenmez (kaynak greni)
+            t['halka_s4'], t['halka_kutular_s4'] = t['halka'], t['halka_kutular']
+            t['halka'], t['halka_kutular'] = olcu.halka_olc(np.asarray(Image.open(yol).convert('RGB')), P, M == 0, olcu.KUTU)
+            t['gren'] = dict(kaynak=round(olcu.gren_olc(P, M == 0, olcu.KUTU), 3), sigma=0.0, hedef=olcu.GREN_HEDEF)
             _, _, b = olcu.donustur(P, M, OL, 'B'); b.pop('_kutu')
             t.update(olcu=OL, yontem=b['yontem'], hedef_px=b['hedef_px'], bosluk_7200=b['bosluk_7200'], h=b['h'], dikis=dict(uygulanmaz=True, PASS=True))
             return t
@@ -109,9 +113,10 @@ if os.environ.get('TESLIM_JPG'):
     log('teslim', {k: teslim.get(k) for k in ('olcu', 'yontem', 'mb', 'halka', 'h', 'dikis')})
     if os.environ.get('OLCU_HEPSI'):                                   # yalniz prova: 13 olcunun gercek MB / kapi tablosu (yuzer kaynak)
         H = os.environ['OLCU_HEPSI']; os.makedirs(H, exist_ok=True); tablo = {}; t0 = time.time()
-        for i, o in enumerate(olcu.OLCU, 1):
+        LS = [o for o in os.environ.get('OLCU_HEPSI_LISTE', '').split(',') if o] or list(olcu.OLCU)   # prova: istege bagli olcu listesi
+        for i, o in enumerate(LS, 1):
             tablo[o] = tek_olcu(o, f'{H}/{c}_{o}.jpg'); g_ = time.time() - t0
-            log(f'[{i}/{len(olcu.OLCU)}] {o} MB {tablo[o]["mb"]} halka {tablo[o].get("halka")} | gecen {g_/60:.1f} dk | kalan ~{g_/i*(len(olcu.OLCU)-i)/60:.1f} dk | %{100*i//len(olcu.OLCU)}')
+            log(f'[{i}/{len(LS)}] {o} MB {tablo[o]["mb"]} halka {tablo[o].get("halka")} | gecen {g_/60:.1f} dk | kalan ~{g_/i*(len(LS)-i)/60:.1f} dk | %{100*i//len(LS)}')
             json.dump(tablo, open(f'{H}/OLCU_TABLO.json', 'w'), indent=1)
 json.dump(dict(once=once, sonra=sonra, kaydirma=kay, teslim=teslim, PASS=all(v <= 1.0 for v in sonra.values())), open(f'{OD}/{c}/renk_olcum.json', 'w'), indent=1)
 log('bitti', 'PASS' if all(v <= 1.0 for v in sonra.values()) else 'FAIL')

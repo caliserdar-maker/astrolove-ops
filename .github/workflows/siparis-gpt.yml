@@ -4,7 +4,7 @@ name: siparis-gpt
 # Girdi: workflow_dispatch (main'e alininca) ya da test icin siparis_gpt/istek.json push'u (bu dal).
 # Cikti: Drive ASTROLOVE/TEMP/SIPARIS_ISIM/GPT/AstroLoveArt_<receipt>/AstroLoveArt_<Burc1>_<Burc2>.jpg (7200x10800 q100 ana kopya)
 # + AstroLoveArt_<Burc1>_<Burc2>_<Olcu>.jpg (9 Eki: musteriye giden TEK dosya, secilen olcu, yontem B) + _2000 onizleme + KAPI.json + SURE.json.
-# Renk: yalniz MIDNIGHT_BLUE (diger renkler eski yol; giris workflow'u yonlendirir). prova_olcu_hepsi: 13 olcu tablosu -> TEMP/OLCU_PROVA_20261009. Isim/mesaj loga yazilmaz (maske). Etsy'ye yazma / musteriye gonderim YOK.
+# Renk: yalniz MIDNIGHT_BLUE (diger renkler eski yol; giris workflow'u yonlendirir). prova_olcu_hepsi: 13 olcu (ya da prova_olculer) tablosu -> TEMP/OLCU_PROVA_20261009/d<deneme>_<CIFT>. Isim/mesaj loga yazilmaz (maske). Etsy'ye yazma / musteriye gonderim YOK.
 on:
   workflow_dispatch:
     inputs:
@@ -47,6 +47,9 @@ jobs:
           case " 8x10 11x14 12x16 12x18 16x20 16x24 18x24 20x30 24x30 24x36 A4 A3 A2 " in *" $O "*) ;; *) echo "HATA: olcu $O" >&2; exit 1;; esac
           echo "RENK=$R" >> "$GITHUB_ENV"; echo "OLCU=$O" >> "$GITHUB_ENV"
           echo "PROVA=$(jq -r '.prova_olcu_hepsi // false' /tmp/istek.json)" >> "$GITHUB_ENV"
+          LS=$(jq -r '(.prova_olculer // []) | join(",")' /tmp/istek.json)
+          for o in ${LS//,/ }; do case " 8x10 11x14 12x16 12x18 16x20 16x24 18x24 20x30 24x30 24x36 A4 A3 A2 " in *" $o "*) ;; *) echo "HATA: prova olcu $o" >&2; exit 1;; esac; done
+          echo "OLCU_LISTE=$LS" >> "$GITHUB_ENV"; echo "DENEME=$(jq -r '.deneme // 0' /tmp/istek.json)" >> "$GITHUB_ENV"
           echo "T_BAS=$(date -u +%s)" >> "$GITHUB_ENV"
           echo "KOSU_OLUSTU=${{ github.event.repository.updated_at }}" >> /dev/null
       - name: rclone
@@ -85,7 +88,7 @@ jobs:
         run: |
           set -euo pipefail
           I=/tmp/istek.json
-          [ "$PROVA" = "true" ] && export OLCU_HEPSI=/tmp/is/OLCU_HEPSI
+          [ "$PROVA" = "true" ] && export OLCU_HEPSI=/tmp/is/OLCU_HEPSI OLCU_HEPSI_LISTE="$OLCU_LISTE"
           /home/claude/blender/venv/bin/python /home/claude/blender/siparis_uret.py "$(jq -r .cift $I)" "$(jq -r .isim1 $I)" "$(jq -r .isim2 $I)" "$(jq -r .mesaj_b64 $I)" "/tmp/k/${CIFT}_ana.png" /tmp/is
       - name: Kapilar
         run: |
@@ -97,7 +100,7 @@ jobs:
         run: |
           set -euo pipefail
           D="gdrive,root_folder_id=12N9iS2i4byMbkH5c0Inmni_nIv2zyTzH:SIPARIS_ISIM/GPT/AstroLoveArt_${RECEIPT}"
-          [ "${PROVA:-false}" = "true" ] && D="gdrive,root_folder_id=12N9iS2i4byMbkH5c0Inmni_nIv2zyTzH:OLCU_PROVA_20261009"
+          [ "${PROVA:-false}" = "true" ] && D="gdrive,root_folder_id=12N9iS2i4byMbkH5c0Inmni_nIv2zyTzH:OLCU_PROVA_20261009/d${DENEME}_${CIFT}"
           T_SON=$(date -u +%s)
           python3 - <<'P'
           import json, os
@@ -107,6 +110,10 @@ jobs:
           ls /tmp/is
           rclone copy /tmp/is "$D" --include "AstroLoveArt_*.jpg" --include "KAPI.json" --include "SURE.json" --include "siparis.json" --include "OLCU_HEPSI/**" --exclude "*"
           rclone lsl "$D"
+          if [ "${PROVA:-false}" = "true" ] && [ -f /tmp/is/OLCU_HEPSI/OLCU_TABLO.json ]; then
+            python3 -c "import json;t=json.load(open('/tmp/is/OLCU_HEPSI/OLCU_TABLO.json'));[print('::warning::OLCU',o,'MB',v.get('mb'),'halka',v.get('halka'),'gren',(v.get('gren') or {}).get('sigma'),'h',v.get('h',{}).get('PASS'),'dikis',v.get('dikis',{}).get('PASS'),'PASS',v.get('PASS')) for o,v in t.items()]"
+            rclone lsjson "$D/OLCU_HEPSI" --files-only | python3 -c "import json,sys;[print('::warning::DOSYA',x['Name'],x['ID']) for x in json.load(sys.stdin) if x['Name'].endswith('.jpg')]"
+          fi
       - name: Sonuc
         run: '[ "${KAPI_RC:-1}" = "0" ]'
       - if: ${{ always() }}
