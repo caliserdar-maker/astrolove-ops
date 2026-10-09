@@ -447,6 +447,11 @@ def cift_boy(cift, boy, P_ed, P_blue, no, cik, isim=ISIM, mesaj=MESAJ, siparis=F
                                                      default=str), flush=True)
     R['bakir'] = {a: rb[a] for a in ('bakir', 'hedef', 'hedef_gecmis', 'kabartma_onayli', 'plate_dikis',
                                      'onarimsiz_d') if a in rb}
+    # Serdar 3 Eki (Test 5, ders 49): ikinci metin / tagline izi kapisi; siparis yolunda c_iz kapisinin parcasi
+    im = wb.ikinci_metin(WP_cu, P_k, D_cu, k)
+    rb['qc']['h_ikinci_metin'] = im
+    rb['qc']['c_iz'] = {**rb['qc']['c_iz'], 'ikinci_metin': im, 'gecti': bool(rb['qc']['c_iz']['gecti'] and im['gecti'])}
+    rb['qc']['gecti'] = all(v['gecti'] for v in rb['qc'].values() if isinstance(v, dict) and 'gecti' in v)
     R['qc'] = e_kagit_istisna(cift, boy, rb['qc'])
     R['zemin_birebir'] = {'fark_max': round(float(np.abs(WP_cu - P_k)[np.abs(D_cu).max(-1) < 1].max()), 3)}
     R['zemin_birebir']['gecti'] = R['zemin_birebir']['fark_max'] < 0.5
