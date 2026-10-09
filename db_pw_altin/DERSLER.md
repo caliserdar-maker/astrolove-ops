@@ -18,3 +18,10 @@
    gozle bulundu. Duzeltme (TV varken esleme yok) yerelde: bant 0.24, dikis PASS. Ek kapi onerisi: yan serit - plaka satir farki <= 1.
 8. Eski sistem sayfalari ayni anda kosulmaz (ortak _siparis klasoru / kisisel-v1 acma yarisi); `bash -e` altinda alt kabuk hata
    satiri basmadan cikar: hata logu her zaman basilir.
+9. d3 (yalniz 16x20, 9ceb4e8 duzeltmesi): DB sol serit bandi 6.28 -> 0.24 seviye (sag 0.21; hedef <= 0.5). Serit-plaka satir farki
+   olcusu (karsilastir_d3.py) bandi yakaliyor; kapi_dikis yakalamiyordu -> siparise alinirken bu olcu kapi olarak eklenmeli.
+10. PW 16x20 d2/d3 farki 0 DEGIL: 607 px, en cok 4 seviye, yalniz oge bolgesinde (x 1384-3983, y 1440-5159), seritte 0.
+   Yerelde ayni makinede fark 0 idi. Olasi neden: iki ayri Actions kosucusunda kayan nokta farki (DOGRULANMADI).
+   "Fark 0" beklentisi yalniz ayni makinede guvenilir; karsilastirmada esik kullanilmali.
+11. mozjpeg trellis nicemlemesi dosya geneline baglidir: seritte degisiklik, degismeyen oge bloklarinda da +-1-2 seviye fark yapar
+   (DB d3: 1807 blok, kodlama oncesi poster ici ayni).
