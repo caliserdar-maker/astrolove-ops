@@ -112,10 +112,10 @@ def calis(a):
             h['ikinci_metin'] = im
             if boy in teslim:
                 h['teslim'] = {ad: teslim_olc(y, pl, zula, asil_im, cift, boy, ad, cikti, jpg) for ad, y, pl in teslim[boy]}
-            if a.onizleme and jpg.exists():
-                hedef = cikti / f'ONIZLEME_{cift}_{boy}.jpg'
-                jpg.replace(hedef)
-                h['onizleme'] = hedef.name
+        if a.onizleme and jpg.exists():                      # eski WP_REF'te kapi yok (zula bos); onizleme yine yazilir
+            hedef = cikti / f'ONIZLEME_{cift}_{boy}.jpg'
+            jpg.replace(hedef)
+            h['onizleme'] = hedef.name
         import shutil
         shutil.rmtree(ara, ignore_errors=True)                # disk: hucre basina ara dosyalar (onizleme tasindi)
         zula.clear()
