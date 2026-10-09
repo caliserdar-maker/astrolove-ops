@@ -1,13 +1,13 @@
 {
- "_aciklama": "Onayli 78 ana sembol katmani (ChatGPT yuzeyi RGB + alfa, RGBA PNG) + standart yerlesim alfasi. Drive ASTROLOVE/ANA_SEMBOL78_KATMAN_20261008. 8 Eki 2026. 8 Eki gece: 66 cift PAYLI katman (kesik uc tur 1 + tur 2 duzeltmesi); CANCER_LIBRA ve CAPRICORN_LIBRA ChatGPT A3 yeniden uretim (Serdar onayli, pay 300).",
+ "_aciklama": "Onayli 78 ana sembol katmani (ChatGPT yuzeyi RGB + alfa, RGBA PNG) + standart yerlesim alfasi. Drive ASTROLOVE/ANA_SEMBOL78_KATMAN_20261008. 8 Eki 2026. 8 Eki gece: 66 cift PAYLI katman (kesik uc tur 1 + tur 2 duzeltmesi); CANCER_LIBRA ve CAPRICORN_LIBRA ChatGPT A3 yeniden uretim (Serdar onayli, pay 300). 9 Eki: 77 cift ana kenar yumusatma (kosu 2, duzeltme 2, KENAR_DOLGU=yumusak; Serdar \"uygun\"); ARIES_VIRGO onayli hal (degismedi).",
  "_ek": {
   "ek/SCORPIO_VIRGO_T5_FAIL_tam.png": "eaa34b82830668586f05761b3a9f187fe1f99c782e2c1cd0f0b2d550a9f01780"
  },
  "ciftler": {
   "AQUARIUS_AQUARIUS": {
    "dosya": "AQUARIUS_AQUARIUS_ana.png",
-   "sha256": "ce9c8a8a957025ffe3b9392886e399936ef2d33945491ad1cc1f463e5ed092b5",
-   "bayt": 6282568,
+   "sha256": "13606980bc3fb46971c7931a2650893f45bf496eb2237c41253966982ce8b342",
+   "bayt": 6258790,
    "cift": "AQUARIUS_AQUARIUS",
    "x": 1151,
    "y": 3445,
@@ -20,12 +20,12 @@
    "pay": 150,
    "gpt": "AQUARIUS_AQUARIUS_gpt_k2.png",
    "payli": true,
-   "std_alfa_sha256": "1d2244263ace074bc1aa5313051181c5b6ed9721c35a31efb1c953dde67f4e7d"
+   "std_alfa_sha256": "75991c3d500d545d134cea7053da069c6af588894fdef763aa6aab290a56b7f1"
   },
   "AQUARIUS_ARIES": {
    "dosya": "AQUARIUS_ARIES_ana.png",
-   "sha256": "fbb1cb17d2af9898ffff11aa37c8f522873e7c1afc9562fe10ca5290b6a5909a",
-   "bayt": 7956145,
+   "sha256": "1e4fb0968bda443393d660dbc053fc16f4a3fd131847c045866a1240323e0c7c",
+   "bayt": 7918612,
    "cift": "AQUARIUS_ARIES",
    "x": 1881,
    "y": 2710,
@@ -38,12 +38,12 @@
    "pay": 150,
    "gpt": "AQUARIUS_ARIES_gpt_k2.png",
    "payli": true,
-   "std_alfa_sha256": "3d4d6eee54cbabfe5cc786b5573d8672820e84798928c9c2c1ae5b2bf1901c91"
+   "std_alfa_sha256": "f541985726247c94184f14fefc5d71af4500305e6de80249286b0447657dd877"
   },
   "AQUARIUS_CANCER": {
    "dosya": "AQUARIUS_CANCER_ana.png",
-   "sha256": "ac8dea4fba4468d1ff0a560e870f33c450ee9373c6e39609c9429e94ce041322",
-   "bayt": 8187827,
+   "sha256": "5abf40786b99a369dfc0d0d512324d49d47a8a1671a7c74b96a864e4cea4dd17",
+   "bayt": 8179654,
    "cift": "AQUARIUS_CANCER",
    "x": 1804,
    "y": 2847,
@@ -55,12 +55,13 @@
    "kaynak_h": 2407,
    "pay": 150,
    "gpt": "AQUARIUS_CANCER_gpt_k2.png",
-   "payli": true
+   "payli": true,
+   "std_alfa_sha256": "3fce10678a47b077253364edc4ced4a300503c9acce421d80409d5d4eeaf0df0"
   },
   "AQUARIUS_CAPRICORN": {
    "dosya": "AQUARIUS_CAPRICORN_ana.png",
-   "sha256": "e37785b7448557717ecd9d38964530196ec76d18f221149088b92b28428b4a4a",
-   "bayt": 9050563,
+   "sha256": "698de1f0171c7d885297030a39a450cd63dbaa28919d3c427c41610df430053b",
+   "bayt": 9047988,
    "cift": "AQUARIUS_CAPRICORN",
    "x": 1820,
    "y": 2445,
@@ -73,12 +74,12 @@
    "pay": 150,
    "gpt": "AQUARIUS_CAPRICORN_gpt_k2.png",
    "payli": true,
-   "std_alfa_sha256": "26376a54d80df52a44da604f5b9f6307010ebf6dc27e114df345ae483458c682"
+   "std_alfa_sha256": "113e131b169085b6fc3b7718c12d8e069daad9323e30ced34b5abe0028120124"
   },
   "AQUARIUS_GEMINI": {
    "dosya": "AQUARIUS_GEMINI_ana.png",
-   "sha256": "ff5bc4b08862c822c63d5a2ce22e010a18f94e5917ded92f7c948ca4eeec91e6",
-   "bayt": 7039508,
+   "sha256": "87ab55ed36f239d9ed083b9facceb21533a8ef5f492c0a92102ecc2d57f2f6a2",
+   "bayt": 7030169,
    "cift": "AQUARIUS_GEMINI",
    "x": 1926,
    "y": 2757,
@@ -91,12 +92,12 @@
    "pay": 150,
    "gpt": "AQUARIUS_GEMINI_gpt_k2.png",
    "payli": true,
-   "std_alfa_sha256": "a9c47bf190315596ff7aa0cb9738db3663f5a5f4f29702a3a8be118eef4b63a4"
+   "std_alfa_sha256": "07055432c17ca90c6418ecfa41b8d1e29f0515aa934db403b29d6bd372dac99d"
   },
   "AQUARIUS_LEO": {
    "dosya": "AQUARIUS_LEO_ana.png",
-   "sha256": "da6066a0442b3e9c8579fd7f27c21aea0cd82cd220c0b349fcf3890d05ff3b97",
-   "bayt": 8866018,
+   "sha256": "c9bab26b1c2fbc6028160c8d484b43805469f19cea4357a2403eee4c440c126b",
+   "bayt": 8856141,
    "cift": "AQUARIUS_LEO",
    "x": 1722,
    "y": 2287,
@@ -109,12 +110,12 @@
    "pay": 150,
    "gpt": "AQUARIUS_LEO_gpt_k2.png",
    "payli": true,
-   "std_alfa_sha256": "6f07aefc76f18b4ba76c73d5a28a224bcd234e3f9cdf396093aec987ebb76a78"
+   "std_alfa_sha256": "1d7e4ad43b99a00d6aadf128d83f81a4862cd26c4f1aa0843cd9f874596c6c54"
   },
   "AQUARIUS_LIBRA": {
    "dosya": "AQUARIUS_LIBRA_ana.png",
-   "sha256": "e67f41f7f14e14f38d509be615a8ab47876c53017f30a126c881e54d50951442",
-   "bayt": 7272074,
+   "sha256": "cd079000d83f92d0691339698afab2759b46143cb4329e66bf7cc258690ccad9",
+   "bayt": 7270255,
    "cift": "AQUARIUS_LIBRA",
    "x": 1543,
    "y": 2911,
@@ -127,25 +128,30 @@
    "pay": 150,
    "gpt": "AQUARIUS_LIBRA_gpt_k2.png",
    "payli": true,
-   "std_alfa_sha256": "dd5bea60becfff70058f91c9b7a42fb8f0e6e8d137e765c5b7b4910964833fc7"
+   "std_alfa_sha256": "b785c5c8007d5cea640dd9bca8a53ddf53ec88a7e73db4b5797947c814b7e9e8"
   },
   "AQUARIUS_PISCES": {
    "dosya": "AQUARIUS_PISCES_ana.png",
-   "sha256": "bb152d1424cda8c3ecc24356bc0e46912a65385d367969a387e0705a8fa4aead",
-   "bayt": 7101620,
+   "sha256": "fe11aeb263577ad86d6b5b14c4ad15c8467d801b189e59184570899d0760cab9",
+   "bayt": 8287219,
    "cift": "AQUARIUS_PISCES",
-   "x": 2284,
-   "y": 2437,
-   "w": 2643,
-   "h": 3423,
+   "x": 2134,
+   "y": 2287,
+   "w": 2943,
+   "h": 3723,
+   "kaynak_x": 2284,
+   "kaynak_y": 2437,
+   "kaynak_w": 2643,
+   "kaynak_h": 3423,
+   "pay": 150,
    "gpt": "AQUARIUS_PISCES_gpt_k2.png",
-   "payli": false,
-   "std_alfa_sha256": "5230a3548f5c30a21d723989b3b168daa1b584a3c9ca8a5e75fbb5ceb0dfdb07"
+   "payli": true,
+   "std_alfa_sha256": "1279db2fdc0a07f0bcfc9e8bc7d9e7e15fdab34a1641d461873a0ec0bb78ca3d"
   },
   "AQUARIUS_SAGITTARIUS": {
    "dosya": "AQUARIUS_SAGITTARIUS_ana.png",
-   "sha256": "285c5c441e539f73631744a825017ee5c16ad237769e7cad338bf4925a87c156",
-   "bayt": 8538166,
+   "sha256": "8080a9d0c8f83b39b727f09a8a93fe01741dbd5d8b93ea45f9982000566764cf",
+   "bayt": 8491209,
    "cift": "AQUARIUS_SAGITTARIUS",
    "x": 1526,
    "y": 2703,
@@ -158,12 +164,12 @@
    "pay": 150,
    "gpt": "AQUARIUS_SAGITTARIUS_gpt_k2.png",
    "payli": true,
-   "std_alfa_sha256": "5a0747930e3de36287947ef9a372822f073c6e8ef2ea82f71e9e0ea33af6ad7c"
+   "std_alfa_sha256": "f304ead868e39ec1477f43100f1c5b5e2eb0e9efcd8f84fe7be4f0a5221a0bcb"
   },
   "AQUARIUS_SCORPIO": {
    "dosya": "AQUARIUS_SCORPIO_ana.png",
-   "sha256": "933aab04c438c89c40eec70913129beff7637320a2dcaad20f50b99bf56e0684",
-   "bayt": 9361795,
+   "sha256": "5943eb65dd9990281dde914d9f480c3f9a4354c7f4db9890f23e4a4f8abfee14",
+   "bayt": 9325943,
    "cift": "AQUARIUS_SCORPIO",
    "x": 1616,
    "y": 2572,
@@ -176,25 +182,30 @@
    "pay": 150,
    "gpt": "AQUARIUS_SCORPIO_gpt_k2.png",
    "payli": true,
-   "std_alfa_sha256": "4747a8e5102afb4a3ab38db8e38f68d4e3ea6a9600878743eb0ad83eb1c3db53"
+   "std_alfa_sha256": "daa93e71ea39f92f37002ad2e612d496826a34c5b7b34c49da365ad1972bd901"
   },
   "AQUARIUS_TAURUS": {
    "dosya": "AQUARIUS_TAURUS_ana.png",
-   "sha256": "08777bc7fe7f6ac23cc42c008abb7557c102d41b998682f482fb812f0506e627",
-   "bayt": 8152689,
+   "sha256": "248cdcb71ec7effca1cc60218d2b7c079817af51ac5cebf5948463e28c4ee2e0",
+   "bayt": 9355422,
    "cift": "AQUARIUS_TAURUS",
-   "x": 1941,
-   "y": 2588,
-   "w": 3435,
-   "h": 3265,
+   "x": 1791,
+   "y": 2438,
+   "w": 3735,
+   "h": 3565,
+   "kaynak_x": 1941,
+   "kaynak_y": 2588,
+   "kaynak_w": 3435,
+   "kaynak_h": 3265,
+   "pay": 150,
    "gpt": "AQUARIUS_TAURUS_gpt_k3.png",
-   "payli": false,
-   "std_alfa_sha256": "a98e360eba41df62887051534d0153c6a02a71e84364332de2083940b36ee427"
+   "payli": true,
+   "std_alfa_sha256": "70e68d2662efa47a8026293d8facb9046b7c21e90001b559326b236624a5732a"
   },
   "AQUARIUS_VIRGO": {
    "dosya": "AQUARIUS_VIRGO_ana.png",
-   "sha256": "2f76c26626fcefd30b65f482c0f4bbbf8591e5f44a1dec6f5884459d9f2aa171",
-   "bayt": 8929951,
+   "sha256": "2b3da8ff85f8bbf145552a1b8ce99a16aaf4a66b85be1fc0f100e6906e5efad2",
+   "bayt": 8911274,
    "cift": "AQUARIUS_VIRGO",
    "x": 1673,
    "y": 2458,
@@ -207,12 +218,12 @@
    "pay": 150,
    "gpt": "AQUARIUS_VIRGO_gpt_k3.png",
    "payli": true,
-   "std_alfa_sha256": "452f473d69d0272ce857a98e39179106f0e94a946026b52185bd8a4e6c908308"
+   "std_alfa_sha256": "0f070923bd82d0628da2666b2b6f5fcdb66a973f0bc05dbac5996001171dc064"
   },
   "ARIES_ARIES": {
    "dosya": "ARIES_ARIES_ana.png",
-   "sha256": "ec5778d841b39946e72e3133a216a503684ca0755b995b11d1abd15c800bc53a",
-   "bayt": 8935007,
+   "sha256": "248efa27becd720ac819e58b29473711466190583eb641deb9ba3765c40a5493",
+   "bayt": 8859726,
    "cift": "ARIES_ARIES",
    "x": 1857,
    "y": 2616,
@@ -225,12 +236,12 @@
    "pay": 150,
    "gpt": "ARIES_ARIES_gpt_k3.png",
    "payli": true,
-   "std_alfa_sha256": "971a6c39964977e28b1e592bda1bd85b2582b43cbc3990496885e1ff01819909"
+   "std_alfa_sha256": "4748ddac86bc95d6cf8167cca9c1738bb73e1fbb31017d133f59f52bbb927124"
   },
   "ARIES_CANCER": {
    "dosya": "ARIES_CANCER_ana.png",
-   "sha256": "f926a8d382ea52db10b7ecdc56f22706b17490b27d8017a750476242f9d9d5b7",
-   "bayt": 9416390,
+   "sha256": "0f85bf721a6a9ba33e1348c8ed3acf066a86da2a200437890509d8ce30f18da3",
+   "bayt": 9334289,
    "cift": "ARIES_CANCER",
    "x": 1861,
    "y": 2418,
@@ -243,25 +254,30 @@
    "pay": 150,
    "gpt": "ARIES_CANCER_gpt_k3.png",
    "payli": true,
-   "std_alfa_sha256": "b532fb3cd1076283486a652fd68d507bf295755a81bf240fc2e428a8fa02708a"
+   "std_alfa_sha256": "bee3ce57d8ffb47d68ab6771f853734d708516a42297932f3f7f1e518c3a93ee"
   },
   "ARIES_CAPRICORN": {
    "dosya": "ARIES_CAPRICORN_ana.png",
-   "sha256": "42d6dc913dd227331490a29992a00bd52b38650e4247886f71bde376fd056139",
-   "bayt": 8388580,
+   "sha256": "931986e346bd248a310c7b284d20fd4c76034a99518ad64ee7a0052da757a8c2",
+   "bayt": 9705721,
    "cift": "ARIES_CAPRICORN",
-   "x": 2207,
-   "y": 2196,
-   "w": 2790,
-   "h": 4069,
+   "x": 2057,
+   "y": 2046,
+   "w": 3090,
+   "h": 4369,
+   "kaynak_x": 2207,
+   "kaynak_y": 2196,
+   "kaynak_w": 2790,
+   "kaynak_h": 4069,
+   "pay": 150,
    "gpt": "ARIES_CAPRICORN_gpt_k3.png",
-   "payli": false,
-   "std_alfa_sha256": "c0c35de29c89c460e153183003e435ad521f1b07fd1bb369dc5b9c127a07b66d"
+   "payli": true,
+   "std_alfa_sha256": "852cfad7738bdb84c15b5ca37665b68d1ec58bb6d8c3f9e993cb5809990ca6c8"
   },
   "ARIES_GEMINI": {
    "dosya": "ARIES_GEMINI_ana.png",
-   "sha256": "8bbe89bf3749d59a144210bd8e61d1652a8410b1686b1b61d053ab0552782ca7",
-   "bayt": 8148863,
+   "sha256": "96f4c6607f8dfccb910d151814dc3f56187544643ca3114e8087ac6c5b604e55",
+   "bayt": 8127589,
    "cift": "ARIES_GEMINI",
    "x": 1946,
    "y": 2646,
@@ -274,12 +290,12 @@
    "pay": 150,
    "gpt": "ARIES_GEMINI_gpt_k3.png",
    "payli": true,
-   "std_alfa_sha256": "4a79cae75db9d2d81f47c8cc309dc87c32361ae6f900de5400d4a8b2027a4d53"
+   "std_alfa_sha256": "44a517d5bb1f5dc7507b8384fe6088700da1fbfeb8aaf53dfe3311d26b9cc9a2"
   },
   "ARIES_LEO": {
    "dosya": "ARIES_LEO_ana.png",
-   "sha256": "cf0370c5581eccf6c4736612d0ad540f3246f4bebed9d81451d3634a171fa183",
-   "bayt": 7581784,
+   "sha256": "60e80106f664f6d0b173cd8d7c165e9750ea06501ac4f133e359709c5cbe84d8",
+   "bayt": 7515925,
    "cift": "ARIES_LEO",
    "x": 1987,
    "y": 2502,
@@ -292,12 +308,12 @@
    "pay": 150,
    "gpt": "ARIES_LEO_gpt.png",
    "payli": true,
-   "std_alfa_sha256": "a9ca6be3204d13e1e3a51f154dac631d0fcfc940ee4912c11cb1866b188fced6"
+   "std_alfa_sha256": "6bd64ac257ddcacdc544d9d9a2ff6fadbba41ef13bcb64301253f2d19040a221"
   },
   "ARIES_LIBRA": {
    "dosya": "ARIES_LIBRA_ana.png",
-   "sha256": "34122162352f18995ff808add7034f4ab6353e1673633c642b880b2317055c18",
-   "bayt": 8057863,
+   "sha256": "39beab649b338e126777aa633cbb97dab0e11d0b63e7b442bbbe0eac7d586096",
+   "bayt": 8032103,
    "cift": "ARIES_LIBRA",
    "x": 1889,
    "y": 2656,
@@ -310,12 +326,12 @@
    "pay": 150,
    "gpt": "ARIES_LIBRA_gpt_k3.png",
    "payli": true,
-   "std_alfa_sha256": "2ab1a75c0b0fcc7ed1a01deff0f5f24ecca14d5f77bc41505ed27a3099264f5d"
+   "std_alfa_sha256": "e6c2597c5d88c2b9f1ef08fe632367aaa875a3e4f4bd9e212ce0c4aaeedd0879"
   },
   "ARIES_PISCES": {
    "dosya": "ARIES_PISCES_ana.png",
-   "sha256": "00aa4ac9bf2bb27ac08183d54d420503a403e24dc185c0223495a0202dbcb44a",
-   "bayt": 8278562,
+   "sha256": "96d76083151a8f9587177f5ed1e003504026dfa2c82cecdee0b2a762045e6282",
+   "bayt": 8237607,
    "cift": "ARIES_PISCES",
    "x": 1918,
    "y": 2656,
@@ -328,12 +344,12 @@
    "pay": 150,
    "gpt": "ARIES_PISCES_gpt_k3.png",
    "payli": true,
-   "std_alfa_sha256": "485eca01fd17e15586497874fd0fa82481582a7b57991a4d625e287702c7eaa7"
+   "std_alfa_sha256": "695f3c1f5a9c9eaa78c6ddd8436eb5d71837ad8f7ed422a20628b51e5ee32753"
   },
   "ARIES_SAGITTARIUS": {
    "dosya": "ARIES_SAGITTARIUS_ana.png",
-   "sha256": "f502188a659e65917ee29003d626cbae3317b8f0b84f02c3dbc2bd4290e7009b",
-   "bayt": 8947970,
+   "sha256": "c5ae41182599c9d3ad60bdc3f75a351844374e16eb3f01bf40fe960ca977bad9",
+   "bayt": 8903400,
    "cift": "ARIES_SAGITTARIUS",
    "x": 1665,
    "y": 2666,
@@ -345,12 +361,13 @@
    "kaynak_h": 3185,
    "pay": 150,
    "gpt": "ARIES_SAGITTARIUS_gpt_k3.png",
-   "payli": true
+   "payli": true,
+   "std_alfa_sha256": "aa2d9050621ac258fe32c35ceac70fe3caf449fc6328a99a9fad3522ade25bc4"
   },
   "ARIES_SCORPIO": {
    "dosya": "ARIES_SCORPIO_ana.png",
-   "sha256": "863a9f94443279accbfdd084d70a78ec199d809aa698283557ca135b14b0be8b",
-   "bayt": 8797664,
+   "sha256": "16e9919a270cb3a4017aae056eb9bc8a6a1ef99b446b8c9f204903dcf2d8b0ed",
+   "bayt": 8747670,
    "cift": "ARIES_SCORPIO",
    "x": 1543,
    "y": 3019,
@@ -363,12 +380,12 @@
    "pay": 150,
    "gpt": "ARIES_SCORPIO_gpt_k3.png",
    "payli": true,
-   "std_alfa_sha256": "531dcc430ed173d78bd0fad1cc588388b70ad0740c4ef1c37e9d06c06a7c064e"
+   "std_alfa_sha256": "7a8d47c120e902a15d26423b46ab63eb5d963559ff04d2e879fa75dbef0f78cd"
   },
   "ARIES_TAURUS": {
    "dosya": "ARIES_TAURUS_ana.png",
-   "sha256": "c7acc49b2a024d2a080572d57a706d7365184c8b338fa28fb6af5a7e594fefab",
-   "bayt": 9981991,
+   "sha256": "1536cd0dac086713ec3bdfa3dd5cce6074debf54ec137d66faa779ad29e005eb",
+   "bayt": 9916781,
    "cift": "ARIES_TAURUS",
    "x": 1730,
    "y": 2529,
@@ -381,7 +398,7 @@
    "pay": 150,
    "gpt": "ARIES_TAURUS_gpt_k4.png",
    "payli": true,
-   "std_alfa_sha256": "b328518040e17f81af58d0d48de0f54609f29fa9b7b91b3f3129fffdc12849bd"
+   "std_alfa_sha256": "6a9fc10d0e8e14dbf40aae3ca016d234b8356549f91b4626d735ee84a99b10ae"
   },
   "ARIES_VIRGO": {
    "dosya": "ARIES_VIRGO_ana.png",
@@ -403,8 +420,8 @@
   },
   "CANCER_CANCER": {
    "dosya": "CANCER_CANCER_ana.png",
-   "sha256": "aa3a00faa6eec5c85d1b66f34dd6df23bc1824e0fb379394862a03f40f671ef6",
-   "bayt": 8139612,
+   "sha256": "f08818998ca4a6ef10a7f45988c468502ebb84eaf5d10f584703524f027d227b",
+   "bayt": 8128251,
    "cift": "CANCER_CANCER",
    "x": 1420,
    "y": 3042,
@@ -417,12 +434,12 @@
    "pay": 150,
    "gpt": "CANCER_CANCER_gpt_k10.png",
    "payli": true,
-   "std_alfa_sha256": "8497b9172dd0a90baf8a176447cfaf7db5e876b963d99c9138ea7966586ff603"
+   "std_alfa_sha256": "6755ec8075bd733c55e30f9f784cc7d001f1ff327f89d54e4f539d23e42ecbf8"
   },
   "CANCER_CAPRICORN": {
    "dosya": "CANCER_CAPRICORN_ana.png",
-   "sha256": "971c8791ae76b99157b048dc21df7b3ddc39bd15ae7117956c062b7fdcc40a48",
-   "bayt": 10527520,
+   "sha256": "a8408a1dddd6f02c345b826dcc8994f3550d96e284004dd0e1b7505f9f87e1b0",
+   "bayt": 10460713,
    "cift": "CANCER_CAPRICORN",
    "x": 1518,
    "y": 2646,
@@ -435,12 +452,12 @@
    "pay": 150,
    "gpt": "CANCER_CAPRICORN_gpt_k4.png",
    "payli": true,
-   "std_alfa_sha256": "552918adeca8652ba152f6fe54216d66ee858a81ce788b4799c41bf0f00a7f9d"
+   "std_alfa_sha256": "fa53a702a4c074ce90022ac99b60b8d82fef000b40c99e09e4a725353196f7a3"
   },
   "CANCER_GEMINI": {
    "dosya": "CANCER_GEMINI_ana.png",
-   "sha256": "c97900f2d790f9eef850917750c78957a123f135bae792cea7186e76b4da0af4",
-   "bayt": 8135272,
+   "sha256": "a75665c21695fa16bf6626312f23e7ed9ffa5858680b0f6c5fabe0cb017790ff",
+   "bayt": 8148842,
    "cift": "CANCER_GEMINI",
    "x": 1991,
    "y": 2609,
@@ -453,12 +470,12 @@
    "pay": 150,
    "gpt": "CANCER_GEMINI_gpt_k4.png",
    "payli": true,
-   "std_alfa_sha256": "1d098ea50c39b735072ba6a3df192740737c3bd80fb09459b7f0a600fd682097"
+   "std_alfa_sha256": "b0daacf3bf25b76e40be7e9adaa12761a32a308fb33c8d6906387e03e044f0e9"
   },
   "CANCER_LEO": {
    "dosya": "CANCER_LEO_ana.png",
-   "sha256": "53f7538c36ef52f9e61f3f14f712e7987f2323c0b4f24262e805f7cea98c9353",
-   "bayt": 9746217,
+   "sha256": "85de3acd79837857ccf727f5962abce6990ba21fb188a7c180f9dd94f79dfa6d",
+   "bayt": 9670384,
    "cift": "CANCER_LEO",
    "x": 1857,
    "y": 2324,
@@ -471,12 +488,12 @@
    "pay": 150,
    "gpt": "CANCER_LEO__A_gpt.png",
    "payli": true,
-   "std_alfa_sha256": "44848a278d42c472e110f6019e66881aa195ec24923da2283fc2cd60679e311f"
+   "std_alfa_sha256": "0d41f5f64a918ebc7d6149bba31825d32646cd4d16ce1e453c9d8387f6ed7eae"
   },
   "CANCER_LIBRA": {
    "dosya": "CANCER_LIBRA_ana.png",
-   "sha256": "0ca54f63da76f9143ec4426f3a2183ffbbb1ccd86e29366d3c4053ba0b81d6a0",
-   "bayt": 11941491,
+   "sha256": "e86c2629629305fd90bbb66494238faef9b4ad1acb815eb7b3ed55e7f44fc2d2",
+   "bayt": 11940202,
    "cift": "CANCER_LIBRA",
    "x": 1531,
    "y": 2070,
@@ -488,12 +505,13 @@
    "kaynak_h": 3332,
    "pay": 300,
    "gpt": "CANCER_LIBRA__A3_gpt.png",
-   "payli": true
+   "payli": true,
+   "std_alfa_sha256": "27c03dc233c2357f44b01f51c6470b4df6c47e74efbb4df630927d84e56c22d3"
   },
   "CANCER_PISCES": {
    "dosya": "CANCER_PISCES_ana.png",
-   "sha256": "3b33e57b96883d3a1400ee3a22e7947131d2ea27866c3eb93afe97ff93fbf6da",
-   "bayt": 9060214,
+   "sha256": "3903b6efc18ef195ef0fdd775355b583ed9ae8bbbe5e9622fe530e6fd94d6c7c",
+   "bayt": 8997248,
    "cift": "CANCER_PISCES",
    "x": 2012,
    "y": 2244,
@@ -505,25 +523,31 @@
    "kaynak_h": 3593,
    "pay": 150,
    "gpt": "CANCER_PISCES_gpt_k4.png",
-   "payli": true
+   "payli": true,
+   "std_alfa_sha256": "316f4913be8824554dc674dbc90e72deacd4e90d69c56551b4a4dbd429480717"
   },
   "CANCER_SAGITTARIUS": {
    "dosya": "CANCER_SAGITTARIUS_ana.png",
-   "sha256": "b6b112ca4da911108a35f2d5f1d8695be48710d7bb44a774a9156fe657c9d14b",
-   "bayt": 8497390,
+   "sha256": "63e43d89814f27c7bc5f5ab84585070a35ac1abe646f66add542521bfa67fecd",
+   "bayt": 9766312,
    "cift": "CANCER_SAGITTARIUS",
-   "x": 1815,
-   "y": 2685,
-   "w": 3578,
-   "h": 3148,
+   "x": 1665,
+   "y": 2535,
+   "w": 3878,
+   "h": 3448,
+   "kaynak_x": 1815,
+   "kaynak_y": 2685,
+   "kaynak_w": 3578,
+   "kaynak_h": 3148,
+   "pay": 150,
    "gpt": "CANCER_SAGITTARIUS_gpt_k4.png",
-   "payli": false,
-   "std_alfa_sha256": "53f7a016b9a33e019cb2295aefcf153557a277209c4562dc0ce700a6588c9898"
+   "payli": true,
+   "std_alfa_sha256": "0d0ab6a5dee920f69781922c6a76c6aa250f70d9dc2cb232520526c22f5230a8"
   },
   "CANCER_SCORPIO": {
    "dosya": "CANCER_SCORPIO_ana.png",
-   "sha256": "f8d6c2ac46d73ef89e01ff6aafea727fc4d0dd643685b57d3efc62926080cd23",
-   "bayt": 8152736,
+   "sha256": "c3ef3ceb69f5c2c92e743f86e63ab02075efb5b6ac6ec9936a55e9cc64014ad6",
+   "bayt": 8139093,
    "cift": "CANCER_SCORPIO",
    "x": 1726,
    "y": 2831,
@@ -536,12 +560,12 @@
    "pay": 150,
    "gpt": "CANCER_SCORPIO_gpt_k4.png",
    "payli": true,
-   "std_alfa_sha256": "ef06f282c29bb695f24aeefbe54e8604d420ca4c6cba69b34d7291db836fbbd3"
+   "std_alfa_sha256": "ae4aa74e646a519e41233acb4f43b2dca6608e6fcf3bd0f1604bc2256666e1a9"
   },
   "CANCER_TAURUS": {
    "dosya": "CANCER_TAURUS_ana.png",
-   "sha256": "25530f1f706636abfc130c08467248fd846d65e7d46787b79bf00adb2c5b96b5",
-   "bayt": 9187101,
+   "sha256": "b7fbd9f9ce995240519c53230bd7b4ef0575521416198389f6cad2e71fbe9e12",
+   "bayt": 9134123,
    "cift": "CANCER_TAURUS",
    "x": 1840,
    "y": 2465,
@@ -554,12 +578,12 @@
    "pay": 150,
    "gpt": "CANCER_TAURUS_gpt_k4.png",
    "payli": true,
-   "std_alfa_sha256": "1ff1b8284245fc9a60e4652c37f1d8f6bd025dbd7ddad78b5b5d96783e7e93b3"
+   "std_alfa_sha256": "1d2ab78ee47d10b181f35051c021684a8feab4b8cbe5b0137540a5f0fb5b7aaa"
   },
   "CANCER_VIRGO": {
    "dosya": "CANCER_VIRGO_ana.png",
-   "sha256": "df346e0e2a327dbf0575319554e50abefb358dfca5eb86347b232a97a5a0daca",
-   "bayt": 8496420,
+   "sha256": "fb617bbebbf8887dc7abb272695503afd957029f18973c7102e2c7e61f86a5d5",
+   "bayt": 8480467,
    "cift": "CANCER_VIRGO",
    "x": 1865,
    "y": 2546,
@@ -571,25 +595,31 @@
    "kaynak_h": 2809,
    "pay": 150,
    "gpt": "CANCER_VIRGO_gpt_k11.png",
-   "payli": true
+   "payli": true,
+   "std_alfa_sha256": "f5a4a77e079b89d9b1790114f4a137ee440e76e95a688d4d8607a65dea902f26"
   },
   "CAPRICORN_CAPRICORN": {
    "dosya": "CAPRICORN_CAPRICORN_ana.png",
-   "sha256": "ff3023abd90be701fe2aba4fb5a0463a67947bc5ba3c2b6d20911c739aa678d7",
-   "bayt": 7717747,
+   "sha256": "13f92bcb348cd812875acab669a8e0772f94a2dae9020631a42fe718d08ce7a1",
+   "bayt": 9004329,
    "cift": "CAPRICORN_CAPRICORN",
-   "x": 1533,
-   "y": 3256,
-   "w": 4136,
-   "h": 2439,
+   "x": 1383,
+   "y": 3106,
+   "w": 4436,
+   "h": 2739,
+   "kaynak_x": 1533,
+   "kaynak_y": 3256,
+   "kaynak_w": 4136,
+   "kaynak_h": 2439,
+   "pay": 150,
    "gpt": "CAPRICORN_CAPRICORN__A_gpt.png",
-   "payli": false,
-   "std_alfa_sha256": "dd6f9e52fb46372182100ba31eaa977b17d398378b591d59e31babed840a1b7e"
+   "payli": true,
+   "std_alfa_sha256": "cc7188fd7fe241332b8914ab3b7ed9fea2b9658f65b774e7f5d6c9025f587ef9"
   },
   "CAPRICORN_GEMINI": {
    "dosya": "CAPRICORN_GEMINI_ana.png",
-   "sha256": "a7fec204ff0787c0ed7213900ffbca3ebe1a2e42952eef5e36c11288ec74029b",
-   "bayt": 8877799,
+   "sha256": "7af2ce57ffd199290fd49fe5252dbee80c94171e81e4a196a188ad165fbcf8c1",
+   "bayt": 8881220,
    "cift": "CAPRICORN_GEMINI",
    "x": 1714,
    "y": 2670,
@@ -602,12 +632,12 @@
    "pay": 150,
    "gpt": "CAPRICORN_GEMINI__A_gpt.png",
    "payli": true,
-   "std_alfa_sha256": "251d4ddfcd3c93ac5a54f2b18959d20c542829e8cbee7dcff33b2647e0e17c52"
+   "std_alfa_sha256": "86cc840455bb69b37d9997d82044cd229a4509299e4281dbbc5f6b71aea8ed3b"
   },
   "CAPRICORN_LEO": {
    "dosya": "CAPRICORN_LEO_ana.png",
-   "sha256": "357a646d14e608201e74e5764dadc535106f2b54d6a1098e7aa1837593809096",
-   "bayt": 8922170,
+   "sha256": "00ae05560faabe017459beb35acc80046d6294a12335eace23a4c2a69f52b55c",
+   "bayt": 8891982,
    "cift": "CAPRICORN_LEO",
    "x": 1649,
    "y": 2569,
@@ -620,12 +650,12 @@
    "pay": 150,
    "gpt": "CAPRICORN_LEO__A_gpt.png",
    "payli": true,
-   "std_alfa_sha256": "6ee5c207f7197b6ae6ddb828f26d0bcc535d852c25ad1c666fa657edac70d562"
+   "std_alfa_sha256": "5c68b3456ac0a0262f383764bc4bb1ca56b5bb3e205923491155d80ccbf9189f"
   },
   "CAPRICORN_LIBRA": {
    "dosya": "CAPRICORN_LIBRA_ana.png",
-   "sha256": "30096858c08b8d3f0a864033cd1c0cf37479c3d9bb3e3237225069f84d28a5b0",
-   "bayt": 9600312,
+   "sha256": "7f481ece2837c6fd0843834cc81648356290d030ac1e08a52cd94a59c0c8fd80",
+   "bayt": 9543088,
    "cift": "CAPRICORN_LIBRA",
    "x": 1213,
    "y": 2734,
@@ -637,12 +667,13 @@
    "kaynak_h": 2197,
    "pay": 300,
    "gpt": "CAPRICORN_LIBRA__A3_gpt.png",
-   "payli": true
+   "payli": true,
+   "std_alfa_sha256": "9f172bab84c6f5e7f057ddee95f764fc8d429eca84234561b6e601d148c33b87"
   },
   "CAPRICORN_PISCES": {
    "dosya": "CAPRICORN_PISCES_ana.png",
-   "sha256": "3a96cc3da8af5917be2e26041c0cd8dc6b7b0c67fb57894c906bf67c74b0c6fd",
-   "bayt": 9004557,
+   "sha256": "d87c045686bd74666a01100ccf31f004fc2617c97875ae4e85fa0bb678ea6e20",
+   "bayt": 8963573,
    "cift": "CAPRICORN_PISCES",
    "x": 1567,
    "y": 2643,
@@ -655,12 +686,12 @@
    "pay": 150,
    "gpt": "CAPRICORN_PISCES_gpt_k5.png",
    "payli": true,
-   "std_alfa_sha256": "e4035f5b55397e1428510d543d7003db9981f5cb244db91cf8f3b77795036a4d"
+   "std_alfa_sha256": "536f148d30debaf846fad54726826d46f0c8a99dae3a6cea5e7a56c5b519835c"
   },
   "CAPRICORN_SAGITTARIUS": {
    "dosya": "CAPRICORN_SAGITTARIUS_ana.png",
-   "sha256": "dc0c3327736f221a3f2f64b25a1064f622ff0f3914e3a2a1f408fe81823bd85c",
-   "bayt": 8047011,
+   "sha256": "6d9bd222b04a328bd684c08c9fa5bfd824a356f68fc3ec436d5d5a8737785116",
+   "bayt": 7991900,
    "cift": "CAPRICORN_SAGITTARIUS",
    "x": 2175,
    "y": 2462,
@@ -673,12 +704,12 @@
    "pay": 150,
    "gpt": "CAPRICORN_SAGITTARIUS_gpt_k5.png",
    "payli": true,
-   "std_alfa_sha256": "b9d5d7e1f31cd4c0c22cedaeae7c773415c18f3bc1ecf8f849e373b29bf14f45"
+   "std_alfa_sha256": "ec74ea3c59c46d123158b3065633586df6845ae6e3f309316332eea56f4c5a1e"
   },
   "CAPRICORN_SCORPIO": {
    "dosya": "CAPRICORN_SCORPIO_ana.png",
-   "sha256": "6d0d2a437426de59ab38c66f253fc4a5795a810f8ab2cfa07d17a2864a3210ca",
-   "bayt": 8720332,
+   "sha256": "261a9f52d15b0053b49f2a99a724683bdde5d718d26223f9df7d2b2a705214ad",
+   "bayt": 8711549,
    "cift": "CAPRICORN_SCORPIO",
    "x": 1677,
    "y": 2686,
@@ -691,25 +722,30 @@
    "pay": 150,
    "gpt": "CAPRICORN_SCORPIO__A_gpt.png",
    "payli": true,
-   "std_alfa_sha256": "929c3fd9bf36071a73b48ea3fd99522f30e7c6a8589c3ed8f2709335f7595be0"
+   "std_alfa_sha256": "65a6b2d422caad7d2ad918862af571176f0b27b6ab76a2a43d7938aa11e08415"
   },
   "CAPRICORN_TAURUS": {
    "dosya": "CAPRICORN_TAURUS_ana.png",
-   "sha256": "3e2c1586ab7afbd694343691f4085dad0459536ae373ab0d23b926468fec4290",
-   "bayt": 7146669,
+   "sha256": "6b2db2531ceb13a434194f7ef62ab9517d21dbc450782cc2bd4df76416b45bb8",
+   "bayt": 8273434,
    "cift": "CAPRICORN_TAURUS",
-   "x": 2019,
-   "y": 2595,
-   "w": 3166,
-   "h": 2957,
+   "x": 1869,
+   "y": 2445,
+   "w": 3466,
+   "h": 3257,
+   "kaynak_x": 2019,
+   "kaynak_y": 2595,
+   "kaynak_w": 3166,
+   "kaynak_h": 2957,
+   "pay": 150,
    "gpt": "CAPRICORN_TAURUS_gpt_k5.png",
-   "payli": false,
-   "std_alfa_sha256": "520aa64fa3c7f49d86001181a91b9f3892772930458edfdbeae2c75385fd91e9"
+   "payli": true,
+   "std_alfa_sha256": "55210c3026224d11c7ce7ee377ba9baedff6e7c4dcb865bf25d743b9bc19759d"
   },
   "CAPRICORN_VIRGO": {
    "dosya": "CAPRICORN_VIRGO_ana.png",
-   "sha256": "713aa5bac9d71082c62e870d803193a5b872adff4a3712bbc3279c7ff8af7d26",
-   "bayt": 8480484,
+   "sha256": "edd8fb900a7f5b7b1c89cf3d86283f6ab5ea876cfef21ad109db7f764cb052c7",
+   "bayt": 8483293,
    "cift": "CAPRICORN_VIRGO",
    "x": 1779,
    "y": 2700,
@@ -722,38 +758,48 @@
    "pay": 150,
    "gpt": "CAPRICORN_VIRGO_gpt_k5.png",
    "payli": true,
-   "std_alfa_sha256": "dcec83183eda6077f777eb2611ba1970f06a8def788cab9ed93d7dd2febe7eb5"
+   "std_alfa_sha256": "c018aa84688ef2e54717574856a7b8f1ad54aed5785229449a330fbf0aede41c"
   },
   "GEMINI_GEMINI": {
    "dosya": "GEMINI_GEMINI_ana.png",
-   "sha256": "93d37ae351530cdb5d28774ed7f77a39bcc849d44a1b45b34d92939d2340e689",
-   "bayt": 6601562,
+   "sha256": "31ba0e8df298812d1fc9280a652e7566f7cc78df200b018543eb59467bbbeb90",
+   "bayt": 7870190,
    "cift": "GEMINI_GEMINI",
-   "x": 2264,
-   "y": 2712,
-   "w": 2668,
-   "h": 3244,
+   "x": 2114,
+   "y": 2562,
+   "w": 2968,
+   "h": 3544,
+   "kaynak_x": 2264,
+   "kaynak_y": 2712,
+   "kaynak_w": 2668,
+   "kaynak_h": 3244,
+   "pay": 150,
    "gpt": "GEMINI_GEMINI_gpt_k6.png",
-   "payli": false,
-   "std_alfa_sha256": "c40069fea52dc3a0d7c64cc7feef25254b35195243b2ef436fb1b21952088160"
+   "payli": true,
+   "std_alfa_sha256": "cbdbf42dfc18c7e23a98265682a9eb28103315e6cecee77fddd2cbdb04badf31"
   },
   "GEMINI_LEO": {
    "dosya": "GEMINI_LEO_ana.png",
-   "sha256": "38ba1f93cbffd158d287c559a5a4ef2abe6591595784c335e15b660664ccab58",
-   "bayt": 7090671,
+   "sha256": "5b8f8734149a09462032ba77b960a9d4472bf06043e19693607844ecf344d896",
+   "bayt": 8253247,
    "cift": "GEMINI_LEO",
-   "x": 2129,
-   "y": 2541,
-   "w": 2957,
-   "h": 3142,
+   "x": 1979,
+   "y": 2391,
+   "w": 3257,
+   "h": 3442,
+   "kaynak_x": 2129,
+   "kaynak_y": 2541,
+   "kaynak_w": 2957,
+   "kaynak_h": 3142,
+   "pay": 150,
    "gpt": "GEMINI_LEO_gpt_k6.png",
-   "payli": false,
-   "std_alfa_sha256": "0a0e0efc6d3a9cc45e100aa933b048ba8aa834361278090d0052c76f88a2598f"
+   "payli": true,
+   "std_alfa_sha256": "cecdaf38dc061738cd38af4b83c2dc5de4cd684f96acb9a3523063a7135bbd38"
   },
   "GEMINI_LIBRA": {
    "dosya": "GEMINI_LIBRA_ana.png",
-   "sha256": "1cb743c0f9be47d7e12fa8e9fbc28595be6b02f9013fedb66d2834536e610c1b",
-   "bayt": 8741341,
+   "sha256": "726418441c8bca7ddb8029a532d0288a60cb5d68a85343c8940a6a1516fc529e",
+   "bayt": 8755622,
    "cift": "GEMINI_LIBRA",
    "x": 1918,
    "y": 2133,
@@ -766,12 +812,12 @@
    "pay": 150,
    "gpt": "GEMINI_LIBRA_gpt_k6.png",
    "payli": true,
-   "std_alfa_sha256": "e526f2896b47617db97a4e38c3fa1702da92522df0b0473da5bd1a9e408d80c2"
+   "std_alfa_sha256": "3f6741abafef0d627b578cf754601ed6530c87c39f28e1cc053c44e124e75fa8"
   },
   "GEMINI_PISCES": {
    "dosya": "GEMINI_PISCES_ana.png",
-   "sha256": "a530e7016a90eb221f9a99b52687c7a8e60102524727c0a9ee94fc0897c58e06",
-   "bayt": 8838957,
+   "sha256": "90df073a784028148bece051efbab848c8ee552fb95dbcd35e7aff934338c13b",
+   "bayt": 8841291,
    "cift": "GEMINI_PISCES",
    "x": 1902,
    "y": 2472,
@@ -784,25 +830,30 @@
    "pay": 150,
    "gpt": "GEMINI_PISCES_gpt_k6.png",
    "payli": true,
-   "std_alfa_sha256": "fc510ab2b8bec1ee955c1fb942b209ed1cc9733183c00b8e915775dd235565d4"
+   "std_alfa_sha256": "07e0d1a8ecce6c8c0a97ebc69f387b66b21ad3546abaff9968fb482e39472c40"
   },
   "GEMINI_SAGITTARIUS": {
    "dosya": "GEMINI_SAGITTARIUS_ana.png",
-   "sha256": "585b02a6543ca97ea14a2aadcc8a6965d6ad654356c6a2fb76340ea08f554b1b",
-   "bayt": 6981416,
+   "sha256": "969eae042658afc5f70d99ee6d771810f6261aaeacbbad7189cf3338e19ba23f",
+   "bayt": 8242067,
    "cift": "GEMINI_SAGITTARIUS",
-   "x": 1860,
-   "y": 2880,
-   "w": 3480,
-   "h": 2558,
+   "x": 1710,
+   "y": 2730,
+   "w": 3780,
+   "h": 2858,
+   "kaynak_x": 1860,
+   "kaynak_y": 2880,
+   "kaynak_w": 3480,
+   "kaynak_h": 2558,
+   "pay": 150,
    "gpt": "GEMINI_SAGITTARIUS_gpt_k6.png",
-   "payli": false,
-   "std_alfa_sha256": "2bdaff712fb1c9009a547c39e07f309328f768d8b372ca025871a022a8dae33d"
+   "payli": true,
+   "std_alfa_sha256": "47db518a92c6e7038f1c68a1e24bce15a9e74678d815918b7232dba0e01b8b90"
   },
   "GEMINI_SCORPIO": {
    "dosya": "GEMINI_SCORPIO_ana.png",
-   "sha256": "f4bf95643dfede11d83b204f74b1e766219340e72c991d82639ed92acfacf4f6",
-   "bayt": 8641367,
+   "sha256": "980dc6c0613b6ad284408d0ec1dd0bc6f9eb298b4880ab2f3a9d8890a5d776bb",
+   "bayt": 8645048,
    "cift": "GEMINI_SCORPIO",
    "x": 1767,
    "y": 2703,
@@ -815,12 +866,12 @@
    "pay": 150,
    "gpt": "GEMINI_SCORPIO_gpt_k6.png",
    "payli": true,
-   "std_alfa_sha256": "599e08d132c767f2b4dcc8d75d571240b8ac29f4fd7621463f5680db4a8721bf"
+   "std_alfa_sha256": "432a6a80380a05c15b0f75630df6a8beb6c5faa8366fee4947ce604887face33"
   },
   "GEMINI_TAURUS": {
    "dosya": "GEMINI_TAURUS_ana.png",
-   "sha256": "2687336a0d56e1cd8442c53d5306694458bc73a211cea81d88faf6b36cb2e932",
-   "bayt": 8225382,
+   "sha256": "0415423706633bf78d12c6f7e11dfab01ceaba2d4b7e16f5b6e8198105351b20",
+   "bayt": 8223327,
    "cift": "GEMINI_TAURUS",
    "x": 2036,
    "y": 2301,
@@ -833,12 +884,12 @@
    "pay": 150,
    "gpt": "GEMINI_TAURUS_gpt_k6.png",
    "payli": true,
-   "std_alfa_sha256": "7dbfb2ae051d8fbe69e1ebc25741592aefcd179db41728287574cc9ae486469d"
+   "std_alfa_sha256": "069cc3691db1d25c87ccf36996ac11bfec92d25624508ba0e06b6d7709a97ef9"
   },
   "GEMINI_VIRGO": {
    "dosya": "GEMINI_VIRGO_ana.png",
-   "sha256": "01aee4991b530e9034fe58cffcfc346fd27c98bf2b7db7337f4e693f044de587",
-   "bayt": 8043738,
+   "sha256": "8b83a307e3acd03f454c1e624caebe30c49abd0633084b1165a45363d447b659",
+   "bayt": 8021999,
    "cift": "GEMINI_VIRGO",
    "x": 1804,
    "y": 2650,
@@ -851,12 +902,12 @@
    "pay": 150,
    "gpt": "GEMINI_VIRGO__A_gpt.png",
    "payli": true,
-   "std_alfa_sha256": "9d656c9b3e9f8491cd42e6292e6ff16b3e3beccd50c493d31f3c4af0dc0f0ff2"
+   "std_alfa_sha256": "b85c1a283a58d8d58cc8fd3649cd34e1e771d942d7ca2ca923b8309a941b4db1"
   },
   "LEO_LEO": {
    "dosya": "LEO_LEO_ana.png",
-   "sha256": "68ac99f046b3e93c774523dd2412242d5a9d8c923b67d1129e438598f6ab7c85",
-   "bayt": 7852112,
+   "sha256": "1e8e2ff3dcf3b819bb96d82bf7fd8a8edb406ffaa0abafde67743d30b5b639d5",
+   "bayt": 7798533,
    "cift": "LEO_LEO",
    "x": 2118,
    "y": 2442,
@@ -869,12 +920,12 @@
    "pay": 150,
    "gpt": "LEO_LEO_gpt_k6.png",
    "payli": true,
-   "std_alfa_sha256": "8937d389aabd3606aa2a23bce3d7c4fb737d8202ce93b37bc7bdf480a182e10f"
+   "std_alfa_sha256": "9808f8d120e6272bce33827504b0c55d6066be3643607d1c8fc1d70fd9fdfc95"
   },
   "LEO_LIBRA": {
    "dosya": "LEO_LIBRA_ana.png",
-   "sha256": "5665d0227943122b29c1d7f94760f2f69deadd45087cef388a7190bfb459cff7",
-   "bayt": 8686089,
+   "sha256": "809c90dfa394eb933a30f0fa6ce4539eaee77f4469e6e84591132db656e675a3",
+   "bayt": 8645533,
    "cift": "LEO_LIBRA",
    "x": 1677,
    "y": 2354,
@@ -887,12 +938,12 @@
    "pay": 150,
    "gpt": "LEO_LIBRA_gpt_k6.png",
    "payli": true,
-   "std_alfa_sha256": "d691030d93ba6ddd5438b478cb0bd78ebfd095160bde46c31b1943151f8255bd"
+   "std_alfa_sha256": "2b76b2325a184de8d8d9e51aa6aa29466eb5b1722599b258cffb29c11cb59dd4"
   },
   "LEO_PISCES": {
    "dosya": "LEO_PISCES_ana.png",
-   "sha256": "0a1216ae99de4ce227dbe02ad8a7f49d7d87d517b2d7e32d2be030f4f05012f9",
-   "bayt": 9552495,
+   "sha256": "e65e8eae18aae680bd5c35a6831f73ceb5ef70f9040109dff11df9d57a3dab12",
+   "bayt": 9507267,
    "cift": "LEO_PISCES",
    "x": 1730,
    "y": 2478,
@@ -905,12 +956,12 @@
    "pay": 150,
    "gpt": "LEO_PISCES_gpt_k6.png",
    "payli": true,
-   "std_alfa_sha256": "bbbfc169e38a338023bdc94dc72e0088e13c402259d9ab110055613815d2f2f6"
+   "std_alfa_sha256": "ff4c6217a2a7dd2e2fd159553147cef3d485b16e33993630cbb066b91862db48"
   },
   "LEO_SAGITTARIUS": {
    "dosya": "LEO_SAGITTARIUS_ana.png",
-   "sha256": "dd9e4835ba30752f986af908d3fcd8c603e2a9ff2a9f3389ed4bac8c4d4452d3",
-   "bayt": 9585257,
+   "sha256": "3f9518ece81ac948f3fd11bf38f676472b81e71ebfe3fa4b35ab31a11d34e956",
+   "bayt": 9552474,
    "cift": "LEO_SAGITTARIUS",
    "x": 1836,
    "y": 2371,
@@ -923,12 +974,12 @@
    "pay": 150,
    "gpt": "LEO_SAGITTARIUS_gpt_k7.png",
    "payli": true,
-   "std_alfa_sha256": "6ed5dbf34c9768f5f9035ca69e4f8b6eeaf90cb45dc6a737d9fda0d8c54a38a2"
+   "std_alfa_sha256": "e29a5f6b1927dae9175643edf7015fb14e21cf87803e3791ca98661854159ce6"
   },
   "LEO_SCORPIO": {
    "dosya": "LEO_SCORPIO_ana.png",
-   "sha256": "0ecb4542c7da491328aae6ffd537b6ed37e810718cbad1aa5c3661e72db93dac",
-   "bayt": 9781468,
+   "sha256": "0ffe8709e2177d32ef3f1fce8e3ba140ec58904c5ae80d3cd0137917526761c6",
+   "bayt": 9741649,
    "cift": "LEO_SCORPIO",
    "x": 1893,
    "y": 2391,
@@ -941,12 +992,12 @@
    "pay": 150,
    "gpt": "LEO_SCORPIO_gpt_k7.png",
    "payli": true,
-   "std_alfa_sha256": "fdd3c60fc4817d9d52e2cb89e9a8d12278dab7c3c179e12a58cc14d93559f8a4"
+   "std_alfa_sha256": "84fc4b009aef425a12247a083d7300fa1a3ea8479844c28cf3defa94d47ebbff"
   },
   "LEO_TAURUS": {
    "dosya": "LEO_TAURUS_ana.png",
-   "sha256": "4c9de07d8c98f234eb39443ce95b686583dea96f19f40c51bdab46b52702f13b",
-   "bayt": 9015986,
+   "sha256": "bbc1aaea6d050fc50639d9e82c6a27c58ef21b1cad50bd6ac34a8710610a3fb7",
+   "bayt": 9000508,
    "cift": "LEO_TAURUS",
    "x": 1620,
    "y": 2646,
@@ -959,12 +1010,12 @@
    "pay": 150,
    "gpt": "LEO_TAURUS_gpt_k7.png",
    "payli": true,
-   "std_alfa_sha256": "0a201cb989df4e05d4e63951853e21377771d1b6312cc14b4353fe8441880a1c"
+   "std_alfa_sha256": "30f7ad534aecb7a997a4e5f902cd80aa7fa24b01fd8b35c02327b458f7d5d18a"
   },
   "LEO_VIRGO": {
    "dosya": "LEO_VIRGO_ana.png",
-   "sha256": "427a6f49d19890b689647f1a593fe9d744659089ec6484ebe935429342f2ec0f",
-   "bayt": 8758100,
+   "sha256": "bbc0750fff4e1c84fa1076c9575574e5365628b1ef35496e4b3645d376d7a030",
+   "bayt": 8732310,
    "cift": "LEO_VIRGO",
    "x": 1828,
    "y": 2452,
@@ -977,12 +1028,12 @@
    "pay": 150,
    "gpt": "LEO_VIRGO_gpt_k7.png",
    "payli": true,
-   "std_alfa_sha256": "8fe448bf60e2601eba2b4502991161125158ac12a96409ea7f2c0bdb00e1a43c"
+   "std_alfa_sha256": "327bd398fefde6efd87032fda42726bbbf591527c1264e571a9eabea4058e4e0"
   },
   "LIBRA_LIBRA": {
    "dosya": "LIBRA_LIBRA_ana.png",
-   "sha256": "481fd1d8bc0291c829dbb7a23624c9f2207145a011d91a2d65716edef98a82c3",
-   "bayt": 7364838,
+   "sha256": "3d6aa2fc388a0e9b83865dc6c784e1ecda07d1b0783877531a99c475f2526cac",
+   "bayt": 7372190,
    "cift": "LIBRA_LIBRA",
    "x": 1538,
    "y": 3025,
@@ -995,12 +1046,12 @@
    "pay": 150,
    "gpt": "LIBRA_LIBRA_gpt_k7.png",
    "payli": true,
-   "std_alfa_sha256": "046b9fd696cf505bd61b64185294278df67ebb076a0bc63f09f5e7050ac76787"
+   "std_alfa_sha256": "72df77334bc3af2aabae08ca0274ac79a0e67128cfdef80b5ff6532011e322e1"
   },
   "LIBRA_PISCES": {
    "dosya": "LIBRA_PISCES_ana.png",
-   "sha256": "93d1abdc76af1cf49b26dca1011d250193ddb73934a9e1e1a950e4a7a4388b31",
-   "bayt": 9249972,
+   "sha256": "9bde5a007404a9c28463dce6783e43009ebcda23a6b46c6b8dbb7e10cf468e7e",
+   "bayt": 9196678,
    "cift": "LIBRA_PISCES",
    "x": 1836,
    "y": 2203,
@@ -1013,12 +1064,12 @@
    "pay": 150,
    "gpt": "LIBRA_PISCES_gpt_k7.png",
    "payli": true,
-   "std_alfa_sha256": "37cb602ee17d1e9e77a4b07d6149b08edf53e4a41555dbe335c955f1e5436522"
+   "std_alfa_sha256": "078caf09d3c966ea1d62562832e196add0e59320fa6d39d062bdf05cc3e22e39"
   },
   "LIBRA_SAGITTARIUS": {
    "dosya": "LIBRA_SAGITTARIUS_ana.png",
-   "sha256": "9eb7030e9a21babc58c1537f3b4eb8ad3ccaa28dcd9773799ba538d77e4790ef",
-   "bayt": 8882215,
+   "sha256": "3cdf957e03ecdba984a7d81c704cb0827595ae65910177b05bf0e23182c9d411",
+   "bayt": 8836584,
    "cift": "LIBRA_SAGITTARIUS",
    "x": 2024,
    "y": 2341,
@@ -1031,12 +1082,12 @@
    "pay": 150,
    "gpt": "LIBRA_SAGITTARIUS_gpt_k7.png",
    "payli": true,
-   "std_alfa_sha256": "da1c5054733c24b9e9eb8437a0f8d47e33e368b144ea748c6f041c2678bafd9e"
+   "std_alfa_sha256": "c493b91d6f772c49dd8ea95ab82f1e939e8f8561c948d3742c528fdd4ad3aa8e"
   },
   "LIBRA_SCORPIO": {
    "dosya": "LIBRA_SCORPIO_ana.png",
-   "sha256": "a3323f9f61bde215280f52b0b701a3c48d29c2bbf4da4795174dbd982c19437b",
-   "bayt": 8813528,
+   "sha256": "2af3872722e3869d80d13362e283cc7fe7ecfe125331cc178f24aef8e0bc756d",
+   "bayt": 8802272,
    "cift": "LIBRA_SCORPIO",
    "x": 1388,
    "y": 3022,
@@ -1049,12 +1100,12 @@
    "pay": 150,
    "gpt": "LIBRA_SCORPIO_gpt_k7.png",
    "payli": true,
-   "std_alfa_sha256": "d2aa5003d3827ce9c23abd3d184b88dc3a0f198b8efc979e80989d1353f4807c"
+   "std_alfa_sha256": "5af6651b8824d065e008567631da69baeb384ebfa1c6cb81978ddca12dd237cc"
   },
   "LIBRA_TAURUS": {
    "dosya": "LIBRA_TAURUS_ana.png",
-   "sha256": "bd1c7b1e05fdc1c8174df83bbd8af5d72e01b8adaa54e8ff2ef2b63061cb6415",
-   "bayt": 8475734,
+   "sha256": "9a0938a4818a20e1dcb4e0db60558d8f9b1f2db68766dab6de7cbc34cd433f86",
+   "bayt": 8449612,
    "cift": "LIBRA_TAURUS",
    "x": 1844,
    "y": 2636,
@@ -1067,12 +1118,12 @@
    "pay": 150,
    "gpt": "LIBRA_TAURUS_gpt_k7.png",
    "payli": true,
-   "std_alfa_sha256": "e4505e93171ef9f0f9e1c796e5fe9f24927b817d5a669e6ffba19443f588f9c8"
+   "std_alfa_sha256": "882722e68e5358ceb1eff0dbe34749587d24d90be77f2bb053201e313383dd7b"
   },
   "LIBRA_VIRGO": {
    "dosya": "LIBRA_VIRGO_ana.png",
-   "sha256": "204e5501d153bd51afc1ec8373a5179bf46d1d5caa47b1caba24e8c9de6d47a5",
-   "bayt": 9774209,
+   "sha256": "c8196b65f8d7e99fb571cae4806f1d9065af77407bd00c51dcdedc73755ab548",
+   "bayt": 9731741,
    "cift": "LIBRA_VIRGO",
    "x": 1624,
    "y": 2432,
@@ -1085,25 +1136,30 @@
    "pay": 150,
    "gpt": "LIBRA_VIRGO_gpt_k7.png",
    "payli": true,
-   "std_alfa_sha256": "bae6466234aa5f61cd951993c0a1433fa2cfa3ec001d6d95f0ad9157e1833cac"
+   "std_alfa_sha256": "64b32eb599b5456abdc16f4bb563f5e6c93521778f4c5f7ce3c92b6105bae0a8"
   },
   "PISCES_PISCES": {
    "dosya": "PISCES_PISCES_ana.png",
-   "sha256": "174a1e887306d302ffcd4c1f79b2108dbc6f87f484685dd6ae3cde751b605870",
-   "bayt": 7508079,
+   "sha256": "d3a049ea22db88b29d393307415cdef809bdd0d74a826402535d0ea8e43f20bc",
+   "bayt": 8778830,
    "cift": "PISCES_PISCES",
-   "x": 2300,
-   "y": 2310,
-   "w": 2611,
-   "h": 3703,
+   "x": 2150,
+   "y": 2160,
+   "w": 2911,
+   "h": 4003,
+   "kaynak_x": 2300,
+   "kaynak_y": 2310,
+   "kaynak_w": 2611,
+   "kaynak_h": 3703,
+   "pay": 150,
    "gpt": "PISCES_PISCES_gpt_k8.png",
-   "payli": false,
-   "std_alfa_sha256": "9780d45e7f93e1fd35f5e5d98ef8d42895eac8bc8675500bd2dad302e6b18ffa"
+   "payli": true,
+   "std_alfa_sha256": "0ed16fc534be414b7f9f102ce6561bc5bcb6072bc50c8b773c635751cf752adb"
   },
   "PISCES_SAGITTARIUS": {
    "dosya": "PISCES_SAGITTARIUS_ana.png",
-   "sha256": "138453a7c1248ce65aba01613ac4264b9ec4e77ea3c477ced0f8a4d168dbdbb5",
-   "bayt": 8516583,
+   "sha256": "6a96411c889e4a656683f052cc41055e098eac50349ed33deb9415ae5fb62fad",
+   "bayt": 8474723,
    "cift": "PISCES_SAGITTARIUS",
    "x": 2040,
    "y": 2358,
@@ -1116,12 +1172,12 @@
    "pay": 150,
    "gpt": "PISCES_SAGITTARIUS_gpt_k8.png",
    "payli": true,
-   "std_alfa_sha256": "702bc03e62bfa518ab3666f04ae787f8d60b81803647e04ce0141665708321e5"
+   "std_alfa_sha256": "6f24a93c42f2b5cf971a976cffc448ed3573e5cb9db02d3a4c30b0c4812f4752"
   },
   "PISCES_SCORPIO": {
    "dosya": "PISCES_SCORPIO_ana.png",
-   "sha256": "3a0ae7be3b8f0cf69589342a2565086c18125976e8136725e548cd7f6ea8c5fa",
-   "bayt": 8735051,
+   "sha256": "02b16a9aa92a660f1f67266879c179f88a91ba9e1036b395aae229111bd4be3d",
+   "bayt": 8716207,
    "cift": "PISCES_SCORPIO",
    "x": 1804,
    "y": 2609,
@@ -1134,12 +1190,12 @@
    "pay": 150,
    "gpt": "PISCES_SCORPIO_gpt_k8.png",
    "payli": true,
-   "std_alfa_sha256": "186ddaed7f28c0b4bc47b5ab3145df45462e0d4c229072f07d8d711347fdc572"
+   "std_alfa_sha256": "bb57742d636ce2bb746ee57b00ba12e69dc33c8d80bdabdbc30ab4a93e7b1f12"
   },
   "PISCES_TAURUS": {
    "dosya": "PISCES_TAURUS_ana.png",
-   "sha256": "bd187994afcea15009382e79de5f1e09c2f0389d282ac251dd049311bb9f0182",
-   "bayt": 8451274,
+   "sha256": "8f710ed73904acd31c1f1b5655d552f76c9a44ad772a8f4250b85efbbf3d5b46",
+   "bayt": 8426604,
    "cift": "PISCES_TAURUS",
    "x": 1885,
    "y": 2586,
@@ -1152,12 +1208,12 @@
    "pay": 150,
    "gpt": "PISCES_TAURUS_gpt_k8.png",
    "payli": true,
-   "std_alfa_sha256": "2e5d915253018d9d70e9dbb2fe2cbcae6b5e2dbb40dedeb023de9d1089a49eb3"
+   "std_alfa_sha256": "beeffae263b1678de7988d6eafe5950b12e4ba2472448d0448da6a9facff1837"
   },
   "PISCES_VIRGO": {
    "dosya": "PISCES_VIRGO_ana.png",
-   "sha256": "6e5ebba80c269ec0a6450cc5d35aed811f64cb47d7c9621b914f193d34f46631",
-   "bayt": 8562820,
+   "sha256": "b6172f89188fdd8f50a2a165a582fe7790151ff7b745b54f3420fefbe7c974d0",
+   "bayt": 8546857,
    "cift": "PISCES_VIRGO",
    "x": 1902,
    "y": 2468,
@@ -1170,25 +1226,30 @@
    "pay": 150,
    "gpt": "PISCES_VIRGO__A_gpt.png",
    "payli": true,
-   "std_alfa_sha256": "5f7257b03c4f33545219b620831c867b6dc6c2d8ceb61fb50c170c47eae8eabb"
+   "std_alfa_sha256": "925ffcdb40c7082b3489519fad35724954f379ca351a6ae6b28f3469e25d2948"
   },
   "SAGITTARIUS_SAGITTARIUS": {
    "dosya": "SAGITTARIUS_SAGITTARIUS_ana.png",
-   "sha256": "70704268ad82066c8caadce8a7cdce6a62af485ffb6c868f4c229077ef657f78",
-   "bayt": 5975837,
+   "sha256": "971168f20efbdde6e2f4016f0f34d9988ca8ad1e9c903ec42dfa185ab137b77d",
+   "bayt": 7217131,
    "cift": "SAGITTARIUS_SAGITTARIUS",
-   "x": 1713,
-   "y": 3491,
-   "w": 3782,
-   "h": 1790,
+   "x": 1563,
+   "y": 3341,
+   "w": 4082,
+   "h": 2090,
+   "kaynak_x": 1713,
+   "kaynak_y": 3491,
+   "kaynak_w": 3782,
+   "kaynak_h": 1790,
+   "pay": 150,
    "gpt": "SAGITTARIUS_SAGITTARIUS_gpt_k8.png",
-   "payli": false,
-   "std_alfa_sha256": "423d94c1b7e6a82e3beb46af0a372282a8a2b7e1d451614c6ef4f29ba0d3eea6"
+   "payli": true,
+   "std_alfa_sha256": "29956857e32c82e7f07fce772bc6ff7fc536d0a452618a9ab05a75a5dd841f81"
   },
   "SAGITTARIUS_SCORPIO": {
    "dosya": "SAGITTARIUS_SCORPIO_ana.png",
-   "sha256": "923d652e234342e9623a023ba0af22988a670d038e85e1e21f67ffdbbc60e9b1",
-   "bayt": 9186186,
+   "sha256": "3b155dddd7fb3ac34284460202e6c516f969b008b28dc36e4b5dc5d7ef0168e1",
+   "bayt": 9140818,
    "cift": "SAGITTARIUS_SCORPIO",
    "x": 1616,
    "y": 2861,
@@ -1201,12 +1262,12 @@
    "pay": 150,
    "gpt": "SAGITTARIUS_SCORPIO__A_gpt.png",
    "payli": true,
-   "std_alfa_sha256": "fcaea09015018b336c0cdd6bf42825f90cdead907aa09656a772a0a1427b69e4"
+   "std_alfa_sha256": "8810a74a1f178006e53c886c69ef48ee220a0d2c5d1104696854164275b3dc81"
   },
   "SAGITTARIUS_TAURUS": {
    "dosya": "SAGITTARIUS_TAURUS_ana.png",
-   "sha256": "f03d9868a6896061f8e3a3c1db4a8cacf762f2e969e65b01e3c6acab04b43bd4",
-   "bayt": 8650895,
+   "sha256": "f4c693d9f60f6fc01430ff2ccfc43d4145423e27e1718037ef244310a2970a52",
+   "bayt": 8615017,
    "cift": "SAGITTARIUS_TAURUS",
    "x": 1755,
    "y": 2740,
@@ -1219,12 +1280,12 @@
    "pay": 150,
    "gpt": "SAGITTARIUS_TAURUS_gpt_k8.png",
    "payli": true,
-   "std_alfa_sha256": "24b2644e324c0ce1c91f9b25bc5c2219a33c793fc7b2e19b1ec623bc76673086"
+   "std_alfa_sha256": "86a093cad0dcdf24c35d14b21ea0dd24d1fd0b6c2cf605ddd0983622b89079d6"
   },
   "SAGITTARIUS_VIRGO": {
    "dosya": "SAGITTARIUS_VIRGO_ana.png",
-   "sha256": "69e9873f951720b2d5b9aedeb4f4090dda6ae04c12b2b7934449d17e5473ae21",
-   "bayt": 9049394,
+   "sha256": "9f31481a493ee4b8cc4e3ea39dde640c7366dbd656848f24868fd9d766fb2a88",
+   "bayt": 8992369,
    "cift": "SAGITTARIUS_VIRGO",
    "x": 2081,
    "y": 2442,
@@ -1237,12 +1298,12 @@
    "pay": 150,
    "gpt": "SAGITTARIUS_VIRGO_gpt_k8.png",
    "payli": true,
-   "std_alfa_sha256": "4f37ae7ad23ac2a92274109cf08077837cc9e58e665035898b480c9fcc0b27ec"
+   "std_alfa_sha256": "f38d545c4e1e5ad7a5a51d9fa597d460cee601169fb928e5d1d7bbd84b033a81"
   },
   "SCORPIO_SCORPIO": {
    "dosya": "SCORPIO_SCORPIO_ana.png",
-   "sha256": "faac368bd9c9787b1c0bf2c77e25a23f975cad323e6c76d7dafeaa153b432fe8",
-   "bayt": 9444850,
+   "sha256": "317fcf582ca927b47504a5a1ff5cd4015a5f3aac93597d8a51a5f4f0f07a492f",
+   "bayt": 9412680,
    "cift": "SCORPIO_SCORPIO",
    "x": 1571,
    "y": 2790,
@@ -1255,12 +1316,12 @@
    "pay": 150,
    "gpt": "SCORPIO_SCORPIO_gpt_k8.png",
    "payli": true,
-   "std_alfa_sha256": "fe318ec2d9af78802a6fb547416aa69c2fb6e3754ef52fc476ecfe4892bb39e7"
+   "std_alfa_sha256": "9c1724f6bda5a29baf6d3a406db92e22445796cad33f1cb3549b7fb1f3613e15"
   },
   "SCORPIO_TAURUS": {
    "dosya": "SCORPIO_TAURUS_ana.png",
-   "sha256": "0c4b34f468b0aceb048d1a462f4f2633904795bcc714770f4d78d0d7737bb0d3",
-   "bayt": 9793207,
+   "sha256": "adf1ceff1d926aa1e5d16c49f55b0441b077172640a40ab909a77aa7f5e35256",
+   "bayt": 9759470,
    "cift": "SCORPIO_TAURUS",
    "x": 1869,
    "y": 2452,
@@ -1273,12 +1334,12 @@
    "pay": 150,
    "gpt": "SCORPIO_TAURUS_gpt_k9.png",
    "payli": true,
-   "std_alfa_sha256": "4e9f524c9d606d24b60b151dfbc8ecd4893805f7799abfdc53d6e6fb45af98d3"
+   "std_alfa_sha256": "84b491177fcfad23528bf50e622d7e448a3d7af16fa297d79772c6690d056be8"
   },
   "SCORPIO_VIRGO": {
    "dosya": "SCORPIO_VIRGO_ana.png",
-   "sha256": "dfd019aacc1adac0dc210feafc2ca9f77201f9675eef1b42243e3aa04a5cfc23",
-   "bayt": 8904253,
+   "sha256": "c3c32f1c00cac64ac31755f5f026a90fba159e2dd35d80efd25b6c164a7cf6a1",
+   "bayt": 8851477,
    "cift": "SCORPIO_VIRGO",
    "x": 1722,
    "y": 2697,
@@ -1291,12 +1352,12 @@
    "pay": 150,
    "gpt": "SCORPIO_VIRGO_gpt_k9.png",
    "payli": true,
-   "std_alfa_sha256": "2f867daad39989834c6e6878c5e0024ff92afe1dd118752f196a2d44b5c6d4c5"
+   "std_alfa_sha256": "7d11f7b85ff71eb6953d1f5ceb767898c7e7f9fa352d6a8260ddc081316bee10"
   },
   "TAURUS_TAURUS": {
    "dosya": "TAURUS_TAURUS_ana.png",
-   "sha256": "e65fb5faa1853635f3bf98c32f3a31d42354f4fac3604eb143fc8c1bc2c5edb4",
-   "bayt": 9175110,
+   "sha256": "9961d128a1339ce331237f7449083c70ee70c36e0d1efadf8e91b9f018232688",
+   "bayt": 9097064,
    "cift": "TAURUS_TAURUS",
    "x": 1673,
    "y": 2760,
@@ -1309,12 +1370,12 @@
    "pay": 150,
    "gpt": "TAURUS_TAURUS_gpt_k9.png",
    "payli": true,
-   "std_alfa_sha256": "fea5bb35d5b7159c62374effa3081c8f9df69c1d20b8edbf08d2882f393d07ad"
+   "std_alfa_sha256": "f5b453dc5fed8a01fb18a40df3e661ffcd69a31dd4fbb17a23eceee68087cf42"
   },
   "TAURUS_VIRGO": {
    "dosya": "TAURUS_VIRGO_ana.png",
-   "sha256": "3d83a105a3c1acbbba1f1211ade27176c93d64d062ddadf30a6f192e0740190a",
-   "bayt": 8743123,
+   "sha256": "daada57321b9e410a9f45141c1e07b855550c41099f97ead62c9cd16d6295b8b",
+   "bayt": 8736261,
    "cift": "TAURUS_VIRGO",
    "x": 2024,
    "y": 2495,
@@ -1327,20 +1388,25 @@
    "pay": 150,
    "gpt": "TAURUS_VIRGO_gpt_k9.png",
    "payli": true,
-   "std_alfa_sha256": "d8c194ba5fc0f64287fe94728fd1c5f754df410fb42cd9e61037e5e6ff32ab29"
+   "std_alfa_sha256": "3ba865cfb5bf53f9011032db47e6c6fa593a259cc29d320139bca8e11155b792"
   },
   "VIRGO_VIRGO": {
    "dosya": "VIRGO_VIRGO_ana.png",
-   "sha256": "7b7e0bba04cd40d40251b7227d80e0a8786dac9efb6edcbd15b71b53f725b12f",
-   "bayt": 7476238,
+   "sha256": "d0a8a2a508411c0d26881127002fafcd42f8f025624aae1525edc9776e192ca5",
+   "bayt": 8660075,
    "cift": "VIRGO_VIRGO",
-   "x": 1827,
-   "y": 2904,
-   "w": 3545,
-   "h": 2661,
+   "x": 1677,
+   "y": 2754,
+   "w": 3845,
+   "h": 2961,
+   "kaynak_x": 1827,
+   "kaynak_y": 2904,
+   "kaynak_w": 3545,
+   "kaynak_h": 2661,
+   "pay": 150,
    "gpt": "VIRGO_VIRGO_gpt_k9.png",
-   "payli": false,
-   "std_alfa_sha256": "934045311b9de63882f1a23d3309cdf07b9936d019e59b028d8f102a81d57aaa"
+   "payli": true,
+   "std_alfa_sha256": "d3aed12808b2f9792db29b9eaeb3a508fc5b3e313d2cf061a1e846f39bf6b312"
   }
  }
 }
