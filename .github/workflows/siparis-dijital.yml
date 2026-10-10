@@ -48,6 +48,10 @@ on:
         description: "WP duz renk (CI/MB) baskisi kodu: v1 = renk_ref (kilitli WP dosyalari ayni; varsayilan, 1 Eki hiz + A2/16x20 duz renk); wp = wp-katman dalinin siparis_dosyasi"
         required: false
         default: "v1"
+      tek_olcu:
+        description: "TEK JPG (Serdar 10 Eki, adim 4): CI / WP siparis olcusu (orn. 8x10); bos = eski PDF paketi. Doluysa paket PDF yerine AstroLoveArt_<B1>_<B2>_<Renk>_<Olcu>.jpg uretir (aile sayfasindan)"
+        required: false
+        default: ""
 
 concurrency: siparis-dijital-${{ github.event.inputs.receipt }}-${{ github.event.inputs.isler }}
 
@@ -444,6 +448,20 @@ jobs:
                 if [ -d "out/renk/$n" ]; then rm -rf "out/eski/$n"; mv "out/renk/$n" "out/eski/$n"; fi; mkdir -p "out/renk/$n";; esac
               cp -r "$d"/. "out/renk/$n/"; rm -f "out/renk/$n/OZET_$n.json" "out/renk/$n/KAPI_RAPORU_$n.json"; echo "sayfa $x <- $k"; done
           done
+      - name: mozjpeg (siparis-gpt motor_gpt/bin; yalniz tek JPG)
+        if: ${{ github.event.inputs.tek_olcu != '' }}
+        uses: actions/checkout@v4
+        with:
+          ref: 243c9a49e97d37829dccf4308e57e0d4279f225c
+          path: _sg
+          sparse-checkout: motor_gpt/bin
+      - name: mozjpeg yolu
+        if: ${{ github.event.inputs.tek_olcu != '' }}
+        run: |
+          set -euo pipefail
+          jq -re '.inputs.tek_olcu | test("^(8x10|16x20|24x30|11x14|12x16|18x24|12x18|16x24|20x30|24x36|A4|A3|A2)$")' "$GITHUB_EVENT_PATH" >/dev/null || { echo "HATA: tek_olcu" >&2; exit 1; }
+          C="$GITHUB_WORKSPACE/_sg/motor_gpt/bin/cjpeg-mozjpeg-4.1.1"; chmod +x "$C"; "$C" -version 2>&1 | head -1
+          echo "CJPEG_MOZ=$C" >> "$GITHUB_ENV"
       - name: WP PDF + ozet + kesitler
         id: pdf
         run: |

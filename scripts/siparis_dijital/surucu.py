@@ -35,7 +35,8 @@ def girdi():
     cift, i1, i2, norm = cift_normalize(g['cift'].strip().upper(), g['isim1'].strip().upper(), g['isim2'].strip().upper())
     return {'receipt': g['receipt'], 'cift': cift, 'isim1': i1, 'isim2': i2, 'mesaj': mesaj,
             'normalize': norm, 'cift_girdi': g['cift'].strip().upper(),
-            'isler': (g.get('isler') or '').strip(), 'onceki_kosu': (g.get('onceki_kosu') or '').strip()}
+            'isler': (g.get('isler') or '').strip(), 'onceki_kosu': (g.get('onceki_kosu') or '').strip(),
+            'tek_olcu': (g.get('tek_olcu') or '').strip()}
 
 
 TUM5 = ('MIDNIGHT_BLUE', 'DEEP_BLACK', 'PURE_WHITE', 'CHAMPAGNE_IVORY', 'WARM_PARCHMENT')
@@ -562,9 +563,74 @@ def plate_kesit(src, plate, hedef, tag_bant=None):
     Image.fromarray(np.concatenate([a, p, f], 0).astype(np.uint8)).save(hedef, 'JPEG', quality=95, subsampling=0)
 
 
+TEK_RENKLER = ('CHAMPAGNE_IVORY', 'WARM_PARCHMENT')
+TEK_ORAN = {'16x20': '4x5', '18x24': '3x4', '24x36': '2x3', '11x14': '11x14', 'A2': 'a_series'}   # aile sayfa boyu -> oran
+
+
+def tek_asamasi(a, g, sd, kok):
+    """TEK JPG (Serdar 10 Eki, adim 4): CI / WP siparisinde PDF yerine siparis olcusunde tek teslim JPG. Aile sayfasi bu
+    kosunun renk / wp isinden (ayni kod, ayni sayfa kapilari); olcuye getirme + kapi g: tek_jpg.py. Cikti
+    paket/AstroLoveArt_<B1>_<B2>_<Renk>_<Olcu>.jpg + paket/OZET.json (SONUC = aile sayfasi kapilari + kapi g)."""
+    sys.path.insert(0, str(Path(__file__).resolve().parent)); import tek_jpg
+    olcu = g['tek_olcu']
+    if olcu not in tek_jpg.OLCU:
+        raise SystemExit(f'HATA tek_olcu {olcu}')
+    aile = tek_jpg.OLCU[olcu][0]; oran = TEK_ORAN[aile]
+    paket = kok / 'paket'; paket.mkdir(exist_ok=True)
+    istenen = istenen_renkler(g.get('isler'), g.get('onceki_kosu')) & set(TEK_RENKLER)
+    if len(istenen) != 1:
+        raise SystemExit(f'HATA tek JPG tek renk ister (CI ya da WP): {sorted(istenen)}')
+    renk = istenen.pop()
+    if renk == 'WARM_PARCHMENT':
+        o = kok / 'wp' / aile
+        sayfa = o / f'WP_{aile}.jpg'
+        z = json.loads((o / f'OZET_WP_{aile}.json').read_text()) if (o / f'OZET_WP_{aile}.json').exists() else {}
+        sk = {'durum': z.get('durum'), 'kapilar_gecti': z.get('kapilar_gecti'), 'kapilar': z.get('kapilar'),
+              'kapi_sayilari': z.get('kapi_sayilari')}
+    else:
+        d = kok / 'renk' / renk
+        f = d / f'OZET_{renk}.json'
+        if not f.exists() and d.exists():
+            birlestir(sd, d, renk, g['cift'])
+        z = json.loads(f.read_text()) if f.exists() else {}
+        sk = (z.get('sayfa_kapilar') or {}).get(oran) or {}
+        j = sorted((d / renk).glob(f'*_{renk}_{oran}_{aile}.jpg')) if d.exists() else []
+        sayfa = j[0] if j else d / 'YOK.jpg'
+    b1, b2 = (w.capitalize() for w in g['cift'].split('_'))
+    rn = '_'.join(w.capitalize() for w in renk.split('_'))
+    hedef = paket / f'AstroLoveArt_{b1}_{b2}_{rn}_{olcu}.jpg'
+    tek = {'olcu': olcu, 'aile': aile, 'renk': renk, 'sayfa': sayfa.name, 'sayfa_kapilari': sk}
+    if sayfa.exists():
+        cj = os.environ.get('CJPEG_MOZ') or str(kok / 'bin' / 'cjpeg-mozjpeg-4.1.1')
+        P, bg, bilgi = tek_jpg.uret(str(sayfa), olcu, str(hedef), cj)
+        tek.update(bilgi); tek['g'] = tek_jpg.kapi_g(str(hedef), olcu, P, bg); del P, bg
+        tek['dosya'] = hedef.name
+        kesit(hedef, kok / 'inceleme' / f'KESIT_TEK_{renk}_{olcu}.jpg', kok / 'inceleme' / f'ONIZLEME_TEK_{renk}_{olcu}.jpg')
+    else:
+        tek['g'] = {'PASS': False, 'hata': 'aile sayfasi yok'}
+    tek['gecti'] = bool(sk.get('kapilar_gecti') and tek['g'].get('PASS'))
+    OZ = {'receipt': g['receipt'], 'cift': g['cift'], 'tek_jpg': tek, 'istenen': [renk], 'gecti': tek['gecti'],
+          'normalize': {'yapildi': bool(g.get('normalize')), 'girdi': g.get('cift_girdi', g['cift']), 'cift': g['cift']}}
+    kal = sorted(k for k, v in (sk.get('kapilar') or {}).items() if v is False)
+    gg = tek['g']
+    sat = [f"# DIJITAL TEK JPG {g['receipt']} {g['cift']}", '', '| renk | olcu | aile sayfasi | sayfa kapilari | dosya | MB | px | 4:4:4 | dpi | halka |',
+           '|---|---|---|---|---|---|---|---|---|---|',
+           f"| {renk} | {olcu} | {aile} | {'PASS' if sk.get('kapilar_gecti') else 'FAIL ' + str(kal)} | {tek.get('dosya', '-')} | "
+           f"{gg.get('mb')} | {gg.get('boyut')} | {gg.get('ornekleme_444')} | {gg.get('dpi')} | {gg.get('halka')} |",
+           '', f"SONUC: {'PASS' if tek['gecti'] else 'FAIL'}"]
+    (paket / 'OZET.md').write_text('\n'.join(sat) + '\n')
+    (paket / 'OZET.json').write_text(json.dumps(OZ, ensure_ascii=False, indent=1, default=str))
+    (kok / 'inceleme' / 'OZET.md').write_text('\n'.join(sat) + '\n')
+    print('\n'.join(sat), flush=True)
+    return 0 if tek['gecti'] else 1
+
+
 def pdf_asamasi(a, g):
     """WP PDF + tum renklerin ozeti + 11x14 kesitleri. a.cikti altinda renk/<RENK>/ ve wp/<boy>/ beklenir."""
     sd = kod_yukle(a.kod)
+    if g.get('tek_olcu'):                                # Serdar 10 Eki (adim 4): CI / WP tek JPG, PDF yok
+        kok = Path(a.cikti).resolve(); (kok / 'inceleme').mkdir(parents=True, exist_ok=True)
+        return tek_asamasi(a, g, sd, kok)
     kok = Path(a.cikti).resolve()
     paket = kok / 'paket'; paket.mkdir(exist_ok=True)
     inc = kok / 'inceleme'; inc.mkdir(exist_ok=True)

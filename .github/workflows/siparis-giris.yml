@@ -85,14 +85,17 @@ jobs:
           E="$GITHUB_EVENT_PATH"
           for k in isim1 isim2; do v=$(jq -r ".inputs.$k" "$E"); echo "::add-mask::$v"; echo "::add-mask::${v^^}"; done
           m=$(jq -r '.inputs.mesaj_b64' "$E" | base64 -d); echo "::add-mask::$m"
-          R=$(jq -r .inputs.renk "$E")
-          if [ "$R" = "WARM_PARCHMENT" ]; then ISLER="wp:16x20,wp:18x24,wp:24x36,wp:11x14,wp:A2"; EK=(-f wp_ref="$WP_REF")
+          R=$(jq -r .inputs.renk "$E"); O=$(jq -r .inputs.olcu "$E")
+          # TEK JPG (Serdar 10 Eki, adim 4): CI ve WP siparisi PDF yerine secilen olcude tek JPG (aile sayfasindan, tek_jpg.py).
+          AILE=$(python3 -c "import sys;a={'8x10':'16x20','16x20':'16x20','24x30':'16x20','11x14':'11x14','12x16':'18x24','18x24':'18x24','12x18':'24x36','16x24':'24x36','20x30':'24x36','24x36':'24x36','A4':'A2','A3':'A2','A2':'A2'};print(a[sys.argv[1]])" "$O")
+          if [ "$R" = "WARM_PARCHMENT" ]; then ISLER="wp:$AILE"; EK=(-f wp_ref="$WP_REF" -f tek_olcu="$O")
+          elif [ "$R" = "CHAMPAGNE_IVORY" ]; then ISLER="renk:$R"; EK=(-f tek_olcu="$O")
           else ISLER="renk:$R"; EK=(); fi
           gh workflow run siparis-dijital.yml -R "$GITHUB_REPOSITORY" --ref main \
             -f receipt="$(jq -r .inputs.receipt "$E")" -f cift="$(jq -r .inputs.cift "$E")" \
             -f isim1="$(jq -r .inputs.isim1 "$E")" -f isim2="$(jq -r .inputs.isim2 "$E")" -f mesaj_b64="$(jq -r .inputs.mesaj_b64 "$E")" \
             -f isler="$ISLER" -f renk_ref="$ESKI_RENK_REF" -f wp_pod_kod=v1 "${EK[@]}" > /dev/null
-          echo "::notice title=ESKI YOL::siparis-dijital tetiklendi (isler $ISLER, renk_ref $ESKI_RENK_REF$([ "$R" = WARM_PARCHMENT ] && echo ", wp_ref $WP_REF"))"
+          echo "::notice title=ESKI YOL::siparis-dijital tetiklendi (isler $ISLER, renk_ref $ESKI_RENK_REF$([ "$R" = WARM_PARCHMENT ] && echo ", wp_ref $WP_REF")$([ "$R" = WARM_PARCHMENT ] || [ "$R" = CHAMPAGNE_IVORY ] && echo ", TEK JPG $O"))"
 
   yeni:
     needs: yonlendir
