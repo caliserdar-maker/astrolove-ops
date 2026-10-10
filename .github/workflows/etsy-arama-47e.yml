@@ -1,0 +1,79 @@
+name: etsy-arama-47e
+
+# SALT OKUR: kategori agaci (tek GET /seller-taxonomy/nodes) -> 47e_KATEGORI_ADLARI.csv
+# etsy-arama oturumu (10 Eki 2026 gece). Cikti: Drive ASTROLOVE/TEMP/ETSY_ARAMA_20261010/47e_KATEGORI_ADLARI.csv
+
+permissions:
+  actions: read
+  contents: read
+
+on:
+  push:
+    branches: [claude/keen-curie-2hza60]
+    paths:
+      - config/etsy_arama_47e.trigger
+
+jobs:
+  oku47e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 140
+    steps:
+      - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Token
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+      - name: Guvenlik testi (yazma metodu yok)
+        run: |
+          if grep -nE "api\.(patch|put|post|delete|post_json|put_json|post_file)" scripts/etsy/arama_47e.py; then
+            echo "::error::Salt-okur betikte yazma metodu bulundu"; exit 1
+          fi
+      - name: 47e oku (yalniz GET)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          python rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_ARAMA_20261010/47d_RAKIP_ILAN_ALANLAR.csv" _work/47d.csv
+          mkdir -p _out
+          python scripts/etsy/arama_47e.py _work/47d.csv _out/47e_KATEGORI_ADLARI.csv 2>&1 | tee _work/kosu.log
+      - name: Token geri yaz + cikti Drive'a
+        if: always()
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || echo "Token yenilenmedi"
+          [ -f _work/kosu.log ] && python3 scripts/guvenlik/log_suz.py < _work/kosu.log > _work/47e_kosu_log.txt || true
+          D="gdrive:ASTROLOVE/TEMP/ETSY_ARAMA_20261010"
+          for f in 47e_KATEGORI_ADLARI.csv; do
+            [ -f "_out/$f" ] && rclone copyto "_out/$f" "$D/$f" -q || echo "yok: $f"
+          done
+          [ -f _work/47e_kosu_log.txt ] && rclone copyto _work/47e_kosu_log.txt "$D/canli/47e_kosu_log.txt" -q || true
+          rclone lsl "$D" --max-depth 1 --include "47e*"
+      - if: always()
+        run: rm -rf _work ~/.config/rclone
