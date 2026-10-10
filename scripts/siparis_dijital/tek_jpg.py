@@ -27,6 +27,7 @@ OLCU = {'8x10': ('16x20', 8, 10), '16x20': ('16x20', 16, 20), '24x30': ('16x20',
 MB_SINIR = 20.0
 SIGMA_HALKA, ESIK_HALKA = 8, 0.10
 Q = 97
+KALITE = (97, 95, 93, 91, 89, 87, 85)   # 20 MB altina inene kadar (kapi g halka ayrica olcer)
 KAGIT_MIN = 0.6     # kutunun en az bu kadari kagit (murekkep disi) ise olculur
 
 
@@ -96,11 +97,16 @@ def uret(sayfa, olcu, cikti, cjpeg, seed=11):
         bgf = cv2.GaussianBlur(bg.astype(np.float32), (0, 0), 2)[..., None]
         P = np.clip(P + rs.normal(0, ek, P.shape).astype(np.float32) * bgf, 0, 255)
     Y8 = np.round(P).astype(np.uint8)
+    # Test 19 (10 Eki): WP 24x30 (16x20 sayfasindan x1.5) q97'de 28.5 MB > 20 MB (Etsy dosya siniri). Kalite merdiveni:
+    # q97'den 2'ser asagi, ilk < 20 MB olan; halka kapisi (g) son dosyada ayrica olculur (kalite dusunce bant artarsa FAIL).
     with tempfile.TemporaryDirectory() as td:
         ppm = os.path.join(td, 'g.ppm'); Image.fromarray(Y8).save(ppm)
-        subprocess.run([cjpeg, '-quality', str(Q), '-sample', '1x1', '-optimize', '-progressive', '-outfile', cikti, ppm], check=True)
+        for q in KALITE:
+            subprocess.run([cjpeg, '-quality', str(q), '-sample', '1x1', '-optimize', '-progressive', '-outfile', cikti, ppm], check=True)
+            if os.path.getsize(cikti) / 1e6 < MB_SINIR:
+                break
     dpi_yaz(cikti)
-    return P, bg, dict(sayfa_px=[S.shape[1], S.shape[0]], hedef_px=[W, H], kucultme=kucult,
+    return P, bg, dict(sayfa_px=[S.shape[1], S.shape[0]], hedef_px=[W, H], kucultme=kucult, kalite=q,
                       gren=dict(kaynak=round(g_kay or 0, 3), once=round(g_once or 0, 3), ek_sigma=round(ek, 3)))
 
 
@@ -125,7 +131,7 @@ if __name__ == '__main__':
     P, bg, bilgi = uret(sayfa, olcu, cikti, cj)
     g = kapi_g(cikti, olcu, P, bg)
     out = dict(olcu=olcu, aile=OLCU[olcu][0], **bilgi, g=g, PASS=g['PASS'])
-    print('TEK_JPG', olcu, json.dumps({k: out[k] for k in ('aile', 'hedef_px', 'gren', 'PASS')}), 'MB', g['mb'], 'halka', g['halka'], flush=True)
+    print('TEK_JPG', olcu, json.dumps({k: out[k] for k in ('aile', 'hedef_px', 'kalite', 'gren', 'PASS')}), 'MB', g['mb'], 'halka', g['halka'], flush=True)
     if js:
         json.dump(out, open(js, 'w'), indent=1)
     sys.exit(0 if out['PASS'] else 1)
