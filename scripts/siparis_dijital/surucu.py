@@ -173,6 +173,26 @@ def kod_yukle(kod):
     return sd
 
 
+
+def amp_kur(g):
+    """B2 (Serdar 10 Eki): tagline'da '&' varsa onayli ChatGPT & (amp_eski.kur: pilot12.ciz_cap sarmasi). AMP_MOD=glif yalniz
+    bilinen FAIL testi (fontun & glifi, eski davranis). kisisel_hazirla'dan SONRA cagrilir."""
+    if '&' not in (g.get('mesaj') or ''):
+        return None
+    if os.environ.get('AMP_MOD', 'yeni') == 'glif':
+        print('AMP glif: fontun & glifi (bilinen FAIL testi)', flush=True)
+        return 'glif'
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import amp_eski, pilot12
+    amp_eski.kur(pilot12)
+    print('AMP yeni & kuruldu (onayli ChatGPT &, sha256 denetimli)', flush=True)
+    return amp_eski
+
+
+def amp_cizim(m):
+    """Son '&' cizimi (punto, A yuksekligi, & boyu, bosluklar) - rapor icin."""
+    return (m.KAYIT[-1] if m.KAYIT else None) if hasattr(m, 'KAYIT') else m
+
 def renk_asamasi(a, g):
     sd = kod_yukle(a.kod)
     no, _ = sd.sayfa_no_tablosu()
@@ -180,6 +200,7 @@ def renk_asamasi(a, g):
                       'yalniz_renk': True, 'isim1': g['isim1'], 'isim2': g['isim2'], 'mesaj': g['mesaj']})
     x['sayfa'] = no[x['cift']]
     sd.kisisel_hazirla()
+    amp = amp_kur(g)
     P_ed, P_blue = sd.EdisyonPoster(), sd.BluePoster()
     cik = Path(a.cikti).resolve(); cik.mkdir(parents=True, exist_ok=True)
     import shutil
@@ -209,7 +230,7 @@ def renk_asamasi(a, g):
                                 'kalan': sorted(k for k, d in (v.get('kapilar') or {}).items() if d is False),
                                 'baski_px': v.get('baski_px'), 'hata': v.get('hata'), 'iz': v.get('iz'), 'olcek': v.get('olcek_kapisi')}
                             for o, v in rk['oranlar'].items()},
-          'kapilar_gecti': r.get('kapilar_gecti'), 'kod': a.kod_ref}
+          'kapilar_gecti': r.get('kapilar_gecti'), 'kod': a.kod_ref, 'amp': amp_cizim(amp)}
     (cik / f'OZET_{a.renk}.json').write_text(json.dumps(oz, ensure_ascii=False, indent=1, default=str))
     (cik / f'KAPI_RAPORU_{a.renk}.json').write_text(json.dumps(
         {q: v for q, v in r.items() if q not in ('isim1', 'isim2', 'mesaj')}, ensure_ascii=False, indent=1, default=str))
@@ -235,9 +256,11 @@ def sayfa_asamasi(a, g):
                       'yalniz_renk': True, 'isim1': g['isim1'], 'isim2': g['isim2'], 'mesaj': g['mesaj']})
     x['sayfa'] = no[x['cift']]
     sd.kisisel_hazirla()
+    amp = amp_kur(g)
     cik = Path(a.cikti).resolve(); klas = cik / a.renk; kon = cik / 'KONTROL'
     klas.mkdir(parents=True, exist_ok=True); kon.mkdir(parents=True, exist_ok=True)
     renk, oran, kayit, _ = sd._dijital_is((a.renk, a.oran, x, klas, kon))
+    kayit['amp'] = amp_cizim(amp)
     (cik / f'SAYFA_{a.renk}_{oran}.json').write_text(json.dumps(kayit, ensure_ascii=False, indent=1, default=str))
     if oran == '11x14':
         inc = cik / 'inceleme'; inc.mkdir(exist_ok=True)
@@ -393,6 +416,7 @@ def wp_asamasi(a, g):
     with Image.open(yol) as im:
         x['hedef_px'] = list(im.size)
     sd.kisisel_hazirla()
+    amp = amp_kur(g)
     P_ed, P_blue = sd.EdisyonPoster(), sd.BluePoster()
     cik = Path(a.cikti).resolve(); cik.mkdir(parents=True, exist_ok=True)
     ara = cik / 'ara'; ara.mkdir(exist_ok=True)
@@ -401,7 +425,7 @@ def wp_asamasi(a, g):
           'kapilar': r.get('kapilar'), 'kapilar_gecti': r.get('kapilar_gecti'), 'dosya_MB': r.get('dosya_MB'),
           'jpeg_kalite': kalite.get(f'BASKI_{a.boy}.jpg'), 'kapi_sayilari': r.get('kapi_sayilari'),
           'wp_bakir': r.get('wp_bakir'), 'kod': a.kod_ref,
-          'wp_kilit': 'TAMAM'}
+          'wp_kilit': 'TAMAM', 'amp': amp_cizim(amp)}
     jpg = ara / f'BASKI_{a.boy}.jpg'
     if jpg.exists():
         try:                                              # Serdar 1 Eki: eski metin izi kapisi WP sayfasinda da (sayi)
@@ -606,9 +630,21 @@ def tek_asamasi(a, g, sd, kok):
         tek.update(bilgi); tek['g'] = tek_jpg.kapi_g(str(hedef), olcu, P, bg); del P, bg
         tek['dosya'] = hedef.name
         kesit(hedef, kok / 'inceleme' / f'KESIT_TEK_{renk}_{olcu}.jpg', kok / 'inceleme' / f'ONIZLEME_TEK_{renk}_{olcu}.jpg')
+        if '&' in (g.get('mesaj') or ''):                 # B2: & kapisi (f, d, renk, leke) son JPG'de bagimsiz
+            sd.kisisel_hazirla()
+            import amp_eski, pilot12, numpy as np
+            from PIL import Image
+            Image.MAX_IMAGE_PIXELS = None
+            ciz = getattr(pilot12.ciz_cap, 'eski', pilot12.ciz_cap)
+            rgb = np.asarray(Image.open(hedef).convert('RGB'))
+            tek['amp'] = amp_eski.kapi_amp(rgb, g['mesaj'], ciz, pilot12.FONT_DIR / pilot12.TAG_FONT, pilot12.TAG_W,
+                                           y_bant=(0.70, 0.97), kesit=kok / 'inceleme' / f'AMP_KESIT_{renk}_{olcu}.jpg')
+            del rgb
+            print('AMP_KAPI', json.dumps({q: tek['amp'].get(q) for q in ('PASS', 'f', 'd', 'renk', 'f_gecti', 'd_gecti',
+                                                                           'renk_gecti', 'leke_gecti', 'eslesme')}), flush=True)
     else:
         tek['g'] = {'PASS': False, 'hata': 'aile sayfasi yok'}
-    tek['gecti'] = bool(sk.get('kapilar_gecti') and tek['g'].get('PASS'))
+    tek['gecti'] = bool(sk.get('kapilar_gecti') and tek['g'].get('PASS') and (tek.get('amp') or {'PASS': True}).get('PASS'))
     OZ = {'receipt': g['receipt'], 'cift': g['cift'], 'tek_jpg': tek, 'istenen': [renk], 'gecti': tek['gecti'],
           'normalize': {'yapildi': bool(g.get('normalize')), 'girdi': g.get('cift_girdi', g['cift']), 'cift': g['cift']}}
     kal = sorted(k for k, v in (sk.get('kapilar') or {}).items() if v is False)
@@ -617,6 +653,9 @@ def tek_asamasi(a, g, sd, kok):
            '|---|---|---|---|---|---|---|---|---|---|',
            f"| {renk} | {olcu} | {aile} | {'PASS' if sk.get('kapilar_gecti') else 'FAIL ' + str(kal)} | {tek.get('dosya', '-')} | "
            f"{gg.get('mb')} | {gg.get('boyut')} | {gg.get('ornekleme_444')} | {gg.get('dpi')} | {gg.get('halka')} |",
+           *([f"& kapisi: {'PASS' if tek['amp'].get('PASS') else 'FAIL'} | f IoU {tek['amp'].get('f')} (>= 0.90) | d kelime IoU "
+                f"{tek['amp'].get('d')} (>= 0.85, fark kumesi <= kalinlik^2) | renk dE {tek['amp'].get('renk')} (<= 5.0) | leke "
+                f"{[x and x.get('en_buyuk_kume') for x in tek['amp'].get('leke', [])]}"] if tek.get('amp') else []),
            '', f"SONUC: {'PASS' if tek['gecti'] else 'FAIL'}"]
     (paket / 'OZET.md').write_text('\n'.join(sat) + '\n')
     (paket / 'OZET.json').write_text(json.dumps(OZ, ensure_ascii=False, indent=1, default=str))

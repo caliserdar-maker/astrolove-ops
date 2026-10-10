@@ -52,12 +52,17 @@ on:
         description: "TEK JPG (Serdar 10 Eki, adim 4): CI / WP siparis olcusu (orn. 8x10); bos = eski PDF paketi. Doluysa paket PDF yerine AstroLoveArt_<B1>_<B2>_<Renk>_<Olcu>.jpg uretir (aile sayfasindan)"
         required: false
         default: ""
+      amp:
+        description: "Tagline & (Serdar 10 Eki B2): bos/yeni = onayli ChatGPT & (varsayilan); glif = fontun & glifi (YALNIZ bilinen FAIL testi)"
+        required: false
+        default: ""
 
 concurrency: siparis-dijital-${{ github.event.inputs.receipt }}-${{ github.event.inputs.isler }}
 
 env:
   RENK_REF: ${{ github.event.inputs.renk_ref || '8a8b370edb74cb52402b4939d38ba14d2d2105fd' }}
   WP_REF: ${{ github.event.inputs.wp_ref || '58bed04f7817169a70eec18c920106f879643024' }}   # 9 Eki: giris WP icin 360cbef (tagline cift baski duzeltmesi) verir
+  AMP_MOD: ${{ github.event.inputs.amp == 'glif' && 'glif' || 'yeni' }}   # B2: tagline & (glif yalniz bilinen FAIL testi)
 
 jobs:
   plan:
