@@ -20,9 +20,11 @@ MIN_PX = 400        # bilesen en az (3307 olcegi; alanla olceklenir)
 ISTISNA = {('SAGITTARIUS_VIRGO', '11x14'): (24.1, 1296.7, 2522)}
 
 
-def istisna_mi(cift, boy, y):
+def istisna_mi(cift, boy, y, s=1.0):
+    """s = goruntu genisligi / 3307 (istisna degerleri 3307 olceginde; 19 karti kesiti ~0.417). s=1'de eski davranis."""
     t = ISTISNA.get((cift, boy))
-    return bool(t and abs(y['aci'] - t[0]) <= 1.0 and abs(y['merkez_fark'] - t[1]) <= 5.0 and abs(y['px'] - t[2]) <= 0.02 * t[2])
+    return bool(t and abs(y['aci'] - t[0]) <= 1.0 and abs(y['merkez_fark'] / s - t[1]) <= 5.0
+                and abs(y['px'] / (s * s) - t[2]) <= 0.02 * t[2])
 
 
 def L_kanal(rgb):
@@ -85,9 +87,10 @@ def tara(rgb, ac, kesit=None, ad='', cift=None, boy=None):
             yab.append(dict(kutu=[int(st[i, 0]), int(st[i, 1]), int(st[i, 0] + st[i, 2]), int(st[i, 1] + st[i, 3])], px=int(st[i, 4]),
                             merkez=[round(cx, 1), round(cy, 1)], R=round(R, 1), artik=round(art, 2), aci=round(aci, 1),
                             merkez_fark=round(dm, 1)))
-    ist = [y for y in yab if istisna_mi(cift, boy, y)]
-    yab = [y for y in yab if not istisna_mi(cift, boy, y)]
-    r = dict(boyut=[w, h], asil=dict(cx=round(cx0, 1), cy=round(cy0, 1), R=round(R0, 1)), yabanci=yab, istisna=ist, PASS=not yab)
+    ist = [y for y in yab if istisna_mi(cift, boy, y, s)]
+    yab = [y for y in yab if not istisna_mi(cift, boy, y, s)]
+    r = dict(boyut=[w, h], olcek=round(s, 4), asil=dict(cx=round(cx0, 1), cy=round(cy0, 1), R=round(R0, 1)), yabanci=yab, istisna=ist,
+             esik=dict(R_tol=R_TOL, artik=ARTIK, aci_min=ACI_MIN, merkez_min=MERKEZ_MIN), PASS=not yab)
     if kesit and yab:
         os.makedirs(kesit, exist_ok=True)
         for j, y in enumerate(yab):
