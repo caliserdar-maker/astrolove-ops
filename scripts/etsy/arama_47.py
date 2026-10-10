@@ -219,7 +219,7 @@ def rakip(ok, ids_csv, ek_csv, not_):
     out, donen = [], set()
     for i in range(0, len(ids), 100):
         parti = ids[i:i + 100]
-        r = ok.get("/listings/batch", {"listing_ids": ",".join(parti), "includes": "Images,Shipping,Videos,Shop"})
+        r = ok.get("/listings/batch", {"listing_ids": ",".join(parti), "includes": "Images,Videos,Shop,Personalization"})  # batch Shipping kabul etmez (400)
         for x in r.get("results") or []:
             lid = str(x.get("listing_id"))
             donen.add(lid)
@@ -231,7 +231,7 @@ def rakip(ok, ids_csv, ek_csv, not_):
                 "listing_id": lid, "magaza": u((x.get("shop") or {}).get("shop_name")) or "API vermedi",
                 "title": u(x.get("title")), "tags": " | ".join(u(t) for t in x.get("tags") or []),
                 "taxonomy_id": x.get("taxonomy_id"), "fiyat": para(x.get("price")),
-                "abd_kargo": ucret or ("kargo profili API vermedi" if not sp else "ABD hedefi yok"),
+                "abd_kargo": ucret or ("API vermedi (batch ucu Shipping vermez)" if not sp else "ABD hedefi yok"),
                 "abd_ucretsiz": ("evet" if ucret.startswith("0.00") else "hayir") if ucret else "-",
                 "processing_days": (f"{sp.get('min_processing_days')}-{sp.get('max_processing_days')}" if sp else
                                     (f"{x.get('processing_min')}-{x.get('processing_max')}" if x.get("processing_min") is not None
@@ -259,15 +259,18 @@ def yaz(out, ad, rows):
     return len(rows)
 
 
-def run(api, shop, out, ids_csv, ek_csv=None):
+def run(api, shop, out, ids_csv, ek_csv=None, yalniz_rakip=False):
     out.mkdir(parents=True, exist_ok=True)
     ok, kayip, not_ = Okuyucu(api), Counter(), []
     sonuc = {}
     durdu = ""
+    if yalniz_rakip:
+        not_.append("Bu kosu yalniz rakip (2. deneme); 47/47b/47c ilk kosudan (17:23 UTC, 16 cagri, hata 0).")
     try:
-        sonuc["47_BIZIM_ILAN_ALANLAR.csv"] = bizim(ok, shop, kayip)
-        sonuc["47b_KARGO.csv"] = kargo(ok, shop)
-        sonuc["47c_MAGAZA.csv"] = magaza(ok, shop)
+        if not yalniz_rakip:
+            sonuc["47_BIZIM_ILAN_ALANLAR.csv"] = bizim(ok, shop, kayip)
+            sonuc["47b_KARGO.csv"] = kargo(ok, shop)
+            sonuc["47c_MAGAZA.csv"] = magaza(ok, shop)
         sonuc["47d_RAKIP_ILAN_ALANLAR.csv"] = rakip(ok, ids_csv, ek_csv, not_)
     except Sinir as e:
         durdu = str(e)
@@ -298,7 +301,9 @@ def main():
     store = TokenStore(os.environ["TOKEN_FILE"], key, secret)
     if store.needs_refresh():
         store.refresh()
-    return run(Etsy(store), shop, Path(sys.argv[1]), sys.argv[2], sys.argv[3] if len(sys.argv) > 3 else None)
+    arg = [a for a in sys.argv[1:] if a != "--yalniz-rakip"]
+    return run(Etsy(store), shop, Path(arg[0]), arg[1], arg[2] if len(arg) > 2 else None,
+               yalniz_rakip="--yalniz-rakip" in sys.argv)
 
 
 if __name__ == "__main__":

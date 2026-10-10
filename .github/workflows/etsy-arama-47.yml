@@ -60,18 +60,24 @@ jobs:
           TOKEN_FILE: _work/ETSY_TOKEN.json
         run: |
           set -euo pipefail
-          python scripts/etsy/arama_47.py _out data/etsy_arama_20261010/47_rakip_ids.csv 2>&1 | tee _work/kosu.log
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_ARAMA_20261010/47_OKUMA_NOTU.txt" _work/onceki_not.txt 2>/dev/null || true
+          # 2. deneme: yalniz rakip (batch ucu Shipping include kabul etmiyor; 47/47b/47c ilk kosuda tamam)
+          python scripts/etsy/arama_47.py _out data/etsy_arama_20261010/47_rakip_ids.csv --yalniz-rakip 2>&1 | tee _work/kosu.log
       - name: Token geri yaz + cikti Drive'a
         if: always()
         run: |
           set -euo pipefail
           [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || echo "Token yenilenmedi"
           [ -f _work/kosu.log ] && python3 scripts/guvenlik/log_suz.py < _work/kosu.log > _work/47_kosu_log.txt || true
+          if [ -f _work/onceki_not.txt ] && [ -f _out/47_OKUMA_NOTU.txt ]; then
+            { cat _work/onceki_not.txt; echo; echo "--- 2. DENEME (yalniz rakip) ---"; cat _out/47_OKUMA_NOTU.txt; } > _work/birlesik.txt
+            mv _work/birlesik.txt _out/47_OKUMA_NOTU.txt
+          fi
           D="gdrive:ASTROLOVE/TEMP/ETSY_ARAMA_20261010"
           for f in 47_BIZIM_ILAN_ALANLAR.csv 47b_KARGO.csv 47c_MAGAZA.csv 47d_RAKIP_ILAN_ALANLAR.csv 47_OKUMA_NOTU.txt; do
             [ -f "_out/$f" ] && rclone copyto "_out/$f" "$D/$f" -q || echo "yok: $f"
           done
-          [ -f _work/47_kosu_log.txt ] && rclone copyto _work/47_kosu_log.txt "$D/canli/47_kosu_log.txt" -q || true
+          [ -f _work/47_kosu_log.txt ] && rclone copyto _work/47_kosu_log.txt "$D/canli/47_kosu_log_2.txt" -q || true
           rclone lsl "$D" --max-depth 1 --include "47*"
       - if: always()
         run: rm -rf _work ~/.config/rclone
