@@ -140,7 +140,7 @@ def _kaydir(m, dx, dy):
     return np.roll(np.roll(m, dy, 0), dx, 1)
 
 
-def _beklenen(eski_ciz, fp, wght, metin, cap_px, A):
+def _beklenen(eski_ciz, fp, wght, metin, cap_px, A, glif=False):
     """Beklenen satir maskesi (0..1) ve eleman araliklari; 'A' yuksekligi ~cap_px olacak punto ile."""
     lo, hi = 4, 900
     for _ in range(24):
@@ -150,7 +150,7 @@ def _beklenen(eski_ciz, fp, wght, metin, cap_px, A):
         if hi - lo < 0.5:
             break
     p = max(int(round((lo + hi) / 2)), 4)
-    if '&' in metin:
+    if '&' in metin and not glif:
         cr, cu, ct, bilgi = dizgi(eski_ciz, fp, wght, p, metin, A)
         el = bilgi['elemanlar']
     else:
@@ -166,8 +166,9 @@ def _murekkep(L, beklenen_bolge):
     return bg - L
 
 
-def kapi_amp(rgb, metin, eski_ciz, fp, wght, A=None, y_bant=(0.76, 0.96), kesit=None):
-    """rgb: son sayfa (H, W, 3) uint8. Doner rapor dict (f, d, renk, leke, PASS)."""
+def kapi_amp(rgb, metin, eski_ciz, fp, wght, A=None, y_bant=(0.76, 0.96), kesit=None, glif=False):
+    """rgb: son sayfa (H, W, 3) uint8. Doner rapor dict (f, d, renk, leke, PASS). glif=True: beklenen = fontun & glifi
+    (yalniz karsilastirma / eski sayfada & yeri; kapi karari icin KULLANILMAZ)."""
     A = amp_alfa() if A is None else A
     H, W = rgb.shape[:2]
     ya, yb = int(H * y_bant[0]), int(H * y_bant[1])
@@ -178,7 +179,7 @@ def kapi_amp(rgb, metin, eski_ciz, fp, wght, A=None, y_bant=(0.76, 0.96), kesit=
     f4 = 4.0
     K4 = cv2.resize(np.clip(koyu, 0, 40), None, fx=1 / f4, fy=1 / f4, interpolation=cv2.INTER_AREA)
     cap0 = 71.0 * W / 2400
-    E0, _, _ = _beklenen(eski_ciz, fp, wght, metin, cap0, A)
+    E0, _, _ = _beklenen(eski_ciz, fp, wght, metin, cap0, A, glif)
     en_iyi = None
     for s in np.arange(0.70, 1.31, 0.02):
         e = cv2.resize(E0, None, fx=s / f4, fy=s / f4, interpolation=cv2.INTER_AREA)
@@ -194,7 +195,7 @@ def kapi_amp(rgb, metin, eski_ciz, fp, wght, A=None, y_bant=(0.76, 0.96), kesit=
     v0, s0, loc = en_iyi
     en = None
     for ds in np.arange(-0.02, 0.0201, 0.005):
-        E, el, bilgi = _beklenen(eski_ciz, fp, wght, metin, cap0 * (s0 + ds), A)
+        E, el, bilgi = _beklenen(eski_ciz, fp, wght, metin, cap0 * (s0 + ds), A, glif)
         x0, y0 = int(loc[0] * f4), int(loc[1] * f4)
         xa, xb, ya2, yb2 = max(0, x0 - 24), min(W, x0 + E.shape[1] + 24), max(0, y0 - 24), min(yb - ya, y0 + E.shape[0] + 24)
         r = cv2.matchTemplate(np.clip(koyu[ya2:yb2, xa:xb], 0, 40), E, cv2.TM_CCOEFF_NORMED)
@@ -219,7 +220,7 @@ def kapi_amp(rgb, metin, eski_ciz, fp, wght, A=None, y_bant=(0.76, 0.96), kesit=
     t = max(2, int(round(0.04 * cap)))
     # elemanlar: her & ve her KELIME ayri (tek harf hatasi kelime IoU'sunu dusurur); kelime araligi onek cizimiyle
     p_ = bilgi.get('punto')
-    metinler = [q for q in ([x.strip() for x in metin.split('&')] if '&' in metin else [metin]) if q]
+    metinler = [q for q in ([x.strip() for x in metin.split('&')] if '&' in metin and not glif else [metin]) if q]
     gen = lambda q: eski_ciz(fp, wght, p_, q)[0].width
     el2, mi = [], 0
     for tur, a, b in el:
@@ -227,7 +228,7 @@ def kapi_amp(rgb, metin, eski_ciz, fp, wght, A=None, y_bant=(0.76, 0.96), kesit=
             el2.append(('amp', '&', a, b)); continue
         ks = metinler[mi].split(); mi += 1
         for i, kw in enumerate(ks):
-            sag = gen(' '.join(ks[:i + 1])); el2.append(('metin', kw, a + sag - gen(kw), a + sag))
+            sag = gen(' '.join(ks[:i + 1])); el2.append(('amp' if kw == '&' else 'metin', kw, a + sag - gen(kw), a + sag))
     harf = np.zeros_like(Bm)
     for tur, ad, a, b in el2:
         if tur == 'metin':
@@ -272,6 +273,7 @@ def kapi_amp(rgb, metin, eski_ciz, fp, wght, A=None, y_bant=(0.76, 0.96), kesit=
         n_, _, st2, _ = cv2.connectedComponentsWithStats(xo, 8)
         fk = int(st2[1:, 4].max()) if n_ > 1 else 0
         rap['elemanlar'].append({'tur': tur, 'iou': round(en_i, 3), 'olcek': round(sc, 3), 'kayma': [int(dx), int(dy)],
+                                 'kutu': [int(bx0 + X), int(ya + by0 + Y), int(bx0 + X + es.shape[1]), int(ya + by0 + Y + es.shape[0])],
                                  'fark_kume': fk, 'fark_sinir': int(round(ESIK_FARK * kw * kw)), 'kalinlik': round(kw, 1),
                                  **({'kelime_no': len(rap['d'])} if tur == 'metin' else {})})
         if tur == 'amp':
