@@ -4,6 +4,7 @@ name: gorsel19
 # mod yedek: SALT OKUMA, 78 ilan galeri manifesti -> Drive TEMP/GORSEL19_YEDEK_20261010/YEDEK_78.json.
 # mod ekle : ETSY'YE YAZAR (onay GORSEL19). Kartlar TEMP/WP19_SON78_20261010 (TABLO_78 78/78 PASS). cift=GEMINI_LEO ile once tek ilan.
 #            Ilan basina tam yedek TEMP/GORSEL19_YEDEK_20261010/<lid>_<CIFT>/, kayit TEMP/GORSEL19_YAYIN/.
+# wp_bag=evet (Serdar 10 Eki): yedekte 4 renk kendi gorseline bagliysa WP de yeni gorsele baglanir; degilse baglanmaz.
 # Etsy kilidi (kilit_bekle.py), token geri yazilir, sir loga yazilmaz.
 
 permissions:
@@ -17,6 +18,7 @@ on:
       cift: {description: "ekle: virgullu cift listesi (bos = hepsi)", required: false, default: ""}
       limit: {description: "ekle: en fazla N ilan (0 = hepsi)", required: false, default: "0"}
       onay: {description: "ekle icin GORSEL19", required: false, default: ""}
+      wp_bag: {description: "evet: MB/DB/PW/CI kendi gorsellerine bagliysa yeni gorsel Warm Parchment varyasyonuna baglanir (Serdar 10 Eki)", required: false, default: "evet"}
 
 jobs:
   is:
@@ -56,6 +58,7 @@ jobs:
           CIFT: ${{ inputs.cift }}
           LIMIT: ${{ inputs.limit }}
           ONAY: ${{ inputs.onay }}
+          WP_BAG: ${{ inputs.wp_bag }}
         run: |
           set -uo pipefail
           case "$CIFT" in *[!A-Z_,]*) echo "::error::cift A-Z_ ve virgul"; exit 1 ;; esac
@@ -74,7 +77,7 @@ jobs:
             rclone copy "$T/WP19_SON78_20261010" _work/SON -q
             rclone copy "$T/GORSEL19_YAYIN" _out --include "*/rapor.json" -q 2>/dev/null || true
             python3 scripts/etsy/gorsel19_ekle.py ekle --ids data/pod/pod78_ids.csv --kartlar _work/SON --tablo _work/SON/TABLO_78.csv \
-              --alt data/pod/cl_galeri_alt_metin.csv --out _out --yedek-drive "$Y" --confirm GORSEL19 --cift "$CIFT" --limit "${LIMIT:-0}" \
+              --alt data/pod/cl_galeri_alt_metin.csv --out _out --yedek-drive "$Y" --confirm GORSEL19 --cift "$CIFT" --limit "${LIMIT:-0}" $([ "$WP_BAG" = evet ] && echo --wp-bag) \
               | tee _work/log.txt; RC=${PIPESTATUS[0]}
           fi
           grep -E "OZET|DUR|HATA|\] [A-Z_]+ (PASS|FAIL)" _work/log.txt | tail -12 | sed 's/^/::warning::/'

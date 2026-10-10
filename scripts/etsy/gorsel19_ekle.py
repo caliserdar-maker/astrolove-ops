@@ -11,7 +11,9 @@ Mod ekle (ETSY'YE YAZAR, --confirm GORSEL19): ilan basina
      renk baglari, video, state/baslik/etiket/aciklama/envanter, kisisellestirme AYNI.
   Geri okuma FAIL ise yeni gorsel silinir (ilan eski haline doner, galeri tekrar okunur), ilan FAIL raporlanir ve atlanir.
   On kosul FAIL = yazma yok, ilan atlanir. Yalniz geri alma dogrulanamazsa kosu DURUR.
-  Renk bagi (Warm Parchment varyasyonu) EKLENMEZ (Serdar: baska alan degismez).
+  --wp-bag (Serdar 10 Eki karari): yalniz ilanda MB/DB/PW/CI kendi renk gorsellerine (14-17. gorsel) bagli ve WP bagi yoksa,
+  yeni 18. gorsel "Warm Parchment" varyasyonuna baglanir (variation-images POST = mevcut 4 bag AYNEN + WP). Geri okuma: 4 bag
+  ayni + WP -> yeni id. Kosul saglanmazsa BAGLANMAZ (rapora yazilir). FAIL'de once 4 bag geri yazilir, sonra yeni gorsel silinir.
 Kullanim: gorsel19_ekle.py yedek --ids pod78_ids.csv --out OUT
           gorsel19_ekle.py ekle --ids pod78_ids.csv --kartlar SON78_DIR --tablo TABLO_78.csv --alt ALT.csv --out OUT
                            --yedek-drive gdrive:... --confirm GORSEL19 [--cift A,B | --limit N]
@@ -46,7 +48,16 @@ def alt19(alt_csv):
     raise SystemExit("HATA: alt metin 19 yok")
 
 
-def bir_ilan(api, shop, lid, cift, kart, alt, out, yedek_drive):
+RENK4 = {"Midnight Blue": 14, "Deep Black": 15, "Pure White": 16, "Champagne Ivory": 17}
+
+
+def bag_kosulu(once):
+    sira = {i: n + 1 for n, i in enumerate(once["ids"])}
+    b = {v: sira.get(i) for v, i in once["bag"]}
+    return b == RENK4
+
+
+def bir_ilan(api, shop, lid, cift, kart, alt, out, yedek_drive, wp_bag=False):
     o = Path(out) / f"{lid}_{cift}"; o.mkdir(parents=True, exist_ok=True)
     if Image.open(kart).size != (3000, 2250): raise SystemExit(f"DUR {cift}: kart boyutu {Image.open(kart).size}")
     g0 = G.galeri(api, lid)
@@ -67,26 +78,44 @@ def bir_ilan(api, shop, lid, cift, kart, alt, out, yedek_drive):
     yid = r.get("listing_image_id")
     if not yid or yid in once["ids"]: raise SystemExit(f"DUR {cift}: yukleme id {yid}")
     beklenen = once["ids"] + [yid]
-    def ok(s): return s["ids"] == beklenen and all(b > a for a, b in zip(s["rank"], s["rank"][1:]))
+    bag_hedef, bag_not, vi0 = once["bag"], "istenmedi", None
+    if wp_bag:
+        if bag_kosulu(once):
+            vi0 = [{"property_id": v["property_id"], "value_id": v["value_id"], "image_id": v["image_id"]} for v in G.var_img(api, shop, lid)]
+            rv = G.renk_degerleri(api, lid)
+            if "Warm Parchment" not in rv or len(vi0) != 4:
+                bag_not = f"BAGLANMADI: WP degeri {('Warm Parchment' in rv)} / mevcut bag {len(vi0)}"
+            else:
+                pid, vid = rv["Warm Parchment"]
+                api.post_json(f"/shops/{shop}/listings/{lid}/variation-images",
+                              {"variation_images": vi0 + [{"property_id": pid, "value_id": vid, "image_id": yid}]})
+                bag_hedef = sorted(once["bag"] + [("Warm Parchment", yid)]); bag_not = "WP baglandi"
+        else:
+            bag_not = "BAGLANMADI: MB/DB/PW/CI kendi gorsellerine bagli degil"
+    bag_hedef = [tuple(x) for x in bag_hedef]
+    def ok(s): return s["ids"] == beklenen and all(b > a for a, b in zip(s["rank"], s["rank"][1:])) and [tuple(x) for x in s["bag"]] == bag_hedef
     son = G.kararli(lambda: ozet(api, shop, lid), ok)
     sorun = []
     if not ok(son): sorun.append(f"sira/id {son['ids']}")
     if son["alt"][:ONCE_N] != once["alt"]: sorun.append("alt metin (ilk 17)")
     if len(son["alt"]) > ONCE_N and son["alt"][ONCE_N] != alt: sorun.append("alt metin (18)")
-    if son["bag"] != once["bag"]: sorun.append("renk baglari")
+    if [tuple(x) for x in son["bag"]] != bag_hedef: sorun.append(f"renk baglari {son['bag']}")
     for k in ("state", "title", "tags", "desc_sha", "inv_sha", "n_urun", "video_ids"):
         if son["kor"].get(k) != once["kor"].get(k): sorun.append(f"korunan {k}")
     if son["kisi"] != once["kisi"]: sorun.append("kisisellestirme")
     n_yeni = cdn_ncc(son["url"][ONCE_N], kart) if len(son["url"]) > ONCE_N and son["ids"][ONCE_N] == yid else -1
     if n_yeni < 0.9995: sorun.append(f"18. gorsel NCC {n_yeni}")
     geri = ""
+    if sorun and vi0 is not None:                      # once 4 bag geri (WP bagi kalkar)
+        api.post_json(f"/shops/{shop}/listings/{lid}/variation-images", {"variation_images": vi0})
     if sorun and yid in son["ids"]:
         G.gorsel_sil(api, shop, lid, yid)
-        g2 = G.kararli(lambda: ozet(api, shop, lid), lambda s: s["ids"] == once["ids"])
-        geri = "yeni gorsel silindi, galeri eski hal" if g2["ids"] == once["ids"] else f"GERI ALMA DOGRULANAMADI {g2['ids']}"
+        g2 = G.kararli(lambda: ozet(api, shop, lid), lambda s: s["ids"] == once["ids"] and s["bag"] == once["bag"])
+        geri = "yeni gorsel silindi, galeri eski hal" if (g2["ids"] == once["ids"] and g2["bag"] == once["bag"]) \
+            else f"GERI ALMA DOGRULANAMADI {g2['ids']} {g2['bag']}"
     rap = dict(cift=cift, listing_id=lid, sonuc="PASS" if not sorun else "FAIL", sorun=sorun, geri_alma=geri, yeni_id=yid,
                ncc_yeni_canli=n_yeni, gorsel=len(son["ids"]), sira_ilk17_ayni=son["ids"][:ONCE_N] == once["ids"],
-               renk_bagi=len(son["bag"]), video=len(son["kor"]["video_ids"]), kota=api.remaining,
+               renk_bagi=len(son["bag"]), bag=son["bag"], wp_bag=bag_not, video=len(son["kor"]["video_ids"]), kota=api.remaining,
                link=f"https://www.etsy.com/listing/{lid}")
     (o / "rapor.json").write_text(json.dumps(rap, indent=1, ensure_ascii=False))
     return rap
@@ -98,6 +127,7 @@ def main():
     ap.add_argument("--tablo"); ap.add_argument("--alt"); ap.add_argument("--out", required=True)
     ap.add_argument("--yedek-drive", default=""); ap.add_argument("--confirm", default=""); ap.add_argument("--cift", default="")
     ap.add_argument("--limit", type=int, default=0); ap.add_argument("--kota-taban", type=int, default=300)
+    ap.add_argument("--wp-bag", action="store_true")
     a = ap.parse_args()
     k, s = os.environ.get("ETSY_API_KEY", ""), os.environ.get("ETSY_SHARED_SECRET", ""); mask(k); mask(s)
     st = TokenStore(os.environ["TOKEN_FILE"], k, s)
@@ -132,7 +162,7 @@ def main():
         if api.remaining is not None and str(api.remaining).isdigit() and int(api.remaining) < a.kota_taban:
             log(f"DUR: kota {api.remaining} < {a.kota_taban}"); break
         try:
-            rap = bir_ilan(api, shop, lid, c, Path(a.kartlar) / c / KART, alt, out, a.yedek_drive)
+            rap = bir_ilan(api, shop, lid, c, Path(a.kartlar) / c / KART, alt, out, a.yedek_drive, a.wp_bag)
         except SystemExit as e:                      # on kosul DUR: Etsy'ye yazilmadi -> ilan atlanir, raporlanir
             if not str(e).startswith("DUR"): raise
             rap = dict(cift=c, listing_id=lid, sonuc="FAIL", sorun=[str(e)], geri_alma="yazma yok (on kosul)", ncc_yeni_canli=-1,
@@ -140,7 +170,7 @@ def main():
             (out / f"{lid}_{c}").mkdir(parents=True, exist_ok=True)
             (out / f"{lid}_{c}" / "rapor.json").write_text(json.dumps(rap, indent=1, ensure_ascii=False))
         rows.append(rap); g = time.time() - t0
-        log(f"[{i}/{len(is_)}] {c} {rap['sonuc']} {rap['sorun'] or ''} {rap['geri_alma']} ncc {rap['ncc_yeni_canli']} gorsel {rap['gorsel']} | "
+        log(f"[{i}/{len(is_)}] {c} {rap['sonuc']} {rap['sorun'] or ''} {rap['geri_alma']} ncc {rap['ncc_yeni_canli']} gorsel {rap['gorsel']} bag {rap.get('wp_bag')} | "
             f"gecen {g/60:.1f} dk | kalan ~{g/i*(len(is_)-i)/60:.1f} dk | %{100*i//len(is_)} | kota {api.remaining} | {rap['link']}")
         if rap["sonuc"] != "PASS" and rap["geri_alma"] not in ("yazma yok (on kosul)", "yeni gorsel silindi, galeri eski hal"):
             log(f"DUR: {c} geri alma dogrulanamadi"); break        # ilan eski haline donmediyse kosu durur
