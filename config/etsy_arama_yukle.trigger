@@ -1,1 +1,1 @@
-2026-10-10 capraz kontrol ekleri
+2026-10-10 koordinator duzeltmesi

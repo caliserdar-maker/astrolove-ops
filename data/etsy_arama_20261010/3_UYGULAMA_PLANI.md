@@ -9,8 +9,8 @@
 
 ## Veri kaynağı (Serdar 10 Eki): iki kaynak + çapraz kontrol
 - Kaynak 1 (ANA): Shop Manager > Stats > Marketplace insights (son 30 gün arama + rekabet, benzer terimler, üstteki ilanlar).
-- Kaynak 2 (yardımcı): eRank Basic (Keyword Explorer 100/gün, Listing Audit 50/gün).
-- 167 aday terim `5_CAPRAZ_KONTROL.csv`; iki kaynak da okunur. `scripts/etsy/arama_capraz.py` fark oranını hesaplar; 2 kattan büyük fark "ÇELİŞKİLİ", karar MI'ya göre. MI'sız terim için karar verilmez; eRank tek başına kanıt değil.
+- Kaynak 2 (yardımcı): eRank PRO (Keyword Explorer 200/gün, Listing Audit 200/gün).
+- 204 aday terim `5_CAPRAZ_KONTROL.csv` (G1 12, G2 16, G5 37 alıcı araması, G3 76, G4 63; öncelik G1, G2, G5, G3, G4); iki kaynak da okunur. `scripts/etsy/arama_capraz.py` fark oranını hesaplar; 2 kattan büyük fark "ÇELİŞKİLİ", karar MI'ya göre. MI'sız terim için karar verilmez; eRank tek başına kanıt değil.
 - Veri toplama: ChatGPT ajanı (`6_CHATGPT_AJAN_GOREV.md`, 2 gün). Faz 2 etiketleri (G4) ancak MI'da ölçüldükten sonra kesinleşir; MI'da 0 ya da "yok" çıkan aday etiket uygulanmaz.
 
 ## Öneri: iki faz, aynı anda tek alan
