@@ -285,6 +285,42 @@ def birlestir(sd, d, renk, cift):
 
 WP_KAPILAR = ('a_renk', 'b_tasma', 'c_iz', 'e_kagit', 'f_kabartma', 'g_kontrast')
 
+# Serdar 10 Eki (ders 79, 306): a_renk ISIMLI ISTISNA. 360cbef siparis yolunda bu ciftlerde ogeler arasi en buyuk dE genel
+# esigi (wp_bakir.ESIK_DE 5.0) az farkla asiyor (sonsuz + daire); Serdar 1:1 kesitte "sorun yok" dedi. Sinir = olculen + 0.10,
+# cift + oran bazli (olcum: tmp-arenk kosusu, EMILY / JAMES, galeri mesaji). Genel esik ve WP kodu (360cbef) DEGISMEZ; listede
+# olmayan cift / oran eski kuralla. Istisna yalniz ogeler arasi farka: hedefe dE ve kahve orani yine genel esikle.
+WP_A_RENK_PAY = 0.10
+WP_A_RENK_OLCULEN = {     # (cift, boy): olculen ogeler_arasi_max_dE (tmp-arenk kosusu 38035889660, 10 Eki; diger 4 oran 2.08-4.25, genel esikle PASS)
+    ('CANCER_LEO', '11x14'): 5.05,
+    ('CAPRICORN_LEO', '11x14'): 5.05,
+    ('LEO_LEO', '11x14'): 5.28,
+    ('LEO_LIBRA', '11x14'): 5.04,
+    ('LEO_PISCES', '11x14'): 5.31,
+    ('LEO_SAGITTARIUS', '11x14'): 5.37,
+    ('LEO_SCORPIO', '11x14'): 5.16,
+    ('LEO_TAURUS', '11x14'): 5.05,
+    ('LEO_VIRGO', '11x14'): 5.22,
+    ('SAGITTARIUS_VIRGO', '11x14'): 5.05,
+}
+WP_A_RENK_ISTISNA = {k: round(v + WP_A_RENK_PAY, 2) for k, v in WP_A_RENK_OLCULEN.items()}
+
+
+def a_renk_karar(cift, boy, a):
+    """a = wp_bakir.qc()['a_renk']. Doner (gecti, ayrinti). Ayrinti her zaman degerleri tasir (ders 307)."""
+    hed = max((a.get('hedefe_dE') or {}).values(), default=0.0)
+    ara, e = float(a.get('ogeler_arasi_max_dE') or 0.0), float(a.get('esik_dE') or 0.0)
+    k, ek = float(a.get('kahve_orani') or 0.0), float(a.get('esik_kahve') or 0.0)
+    sinir = WP_A_RENK_ISTISNA.get((cift, boy))
+    r = {'hedefe_max_dE': round(float(hed), 2), 'ogeler_arasi_max_dE': round(ara, 2), 'esik_dE': e, 'kahve_orani': k,
+         'esik_kahve': ek, 'istisna_sinir': sinir, 'genel_gecti': bool(a.get('gecti'))}
+    if a.get('gecti'):
+        r['gecti'] = True
+    else:
+        r['gecti'] = bool(sinir is not None and hed <= e and k <= ek and ara <= sinir)
+        if r['gecti']:
+            r['istisna'] = 'Serdar 10 Eki goz onayi (ders 79), sinir = olculen + %.2f' % WP_A_RENK_PAY
+    return r['gecti'], r
+
 
 def wp_bakir_uret_v1(sd, sip, P_blue, P_ed, cik):
     """wp-katman dali (adfb2b9) siparis_dosyasi.wp_bakir_uret'in AYNISI; --kod v1 (renk_ref + kilitli WP dosyalari)
@@ -318,11 +354,13 @@ def wp_bakir_uret_v1(sd, sip, P_blue, P_ed, cik):
                **{a: bool(q[a]['gecti']) for a in WP_KAPILAR},
                'plate': bool(R['plate_gecti']), 'zemin_birebir': bool(R['zemin_birebir']['gecti']),
                'eski_iz': bool(R['eski_iz']['gecti']), 'boy': bpx == list(sip['hedef_px'])}
+    kapilar['a_renk'], a_renk_sayi = a_renk_karar(sip['cift'], sip['boy'], q['a_renk'])
     # Serdar 2 Eki (Test 4): e_kagit ve plate kapilarinin SAYILARI da OZET'e (yalniz true/false yetmez)
     pl = R.get('plate') or {}
     sayi = {'e_kagit': {k: q['e_kagit'].get(k) for k in ('px', 'ort', 'p99', 'esik_ort', 'esik_p99', 'gecti')},
             'plate': {'zemin_uyumu': pl.get('zemin_uyumu'),
-                      'temizlik_gecti': (pl.get('temizlik') or {}).get('gecti'), 'gecti': R.get('plate_gecti')}}
+                      'temizlik_gecti': (pl.get('temizlik') or {}).get('gecti'), 'gecti': R.get('plate_gecti')},
+            'a_renk': a_renk_sayi}
     return {**sip, 'durum': 'URETILDI', 'yontem': 'WP_BAKIR', 'baski_px': bpx,
             'dosya_MB': round((cik / ad).stat().st_size / 1e6, 2), 'kapilar': kapilar, 'kapi_sayilari': sayi,
             'kapilar_gecti': all(kapilar.values()), 'bilgi_d_dikis': q['d_dikis'], 'wp_bakir': ozet}
