@@ -33,7 +33,8 @@ jobs:
       - name: Drive'a
         run: |
           set -euo pipefail
-          rclone copy data/etsy_arama_20261010 "gdrive:ASTROLOVE/TEMP/ETSY_ARAMA_20261010" -q
-          rclone lsl "gdrive:ASTROLOVE/TEMP/ETSY_ARAMA_20261010" --max-depth 1
+          # ADIM 3: yalniz ADIM3_ANALIZ alt klasoru (klasordeki diger dosyalara dokunulmaz)
+          rclone copy data/etsy_arama_20261010/ADIM3_ANALIZ "gdrive:ASTROLOVE/TEMP/ETSY_ARAMA_20261010/ADIM3_ANALIZ" -q
+          rclone lsl "gdrive:ASTROLOVE/TEMP/ETSY_ARAMA_20261010/ADIM3_ANALIZ"
       - if: always()
         run: rm -rf ~/.config/rclone

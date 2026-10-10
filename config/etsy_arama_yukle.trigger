@@ -1,1 +1,1 @@
-2026-10-10 koordinator duzeltmesi
+2026-10-10 ADIM3 analiz
