@@ -6,3 +6,4 @@
 4. Ayın 14 Etsy arama ziyaretiyle pilot/kontrol farkı ölçülemez; öncü gösterge Search analytics gösterimi.
 5. 78 ilanın tüm nitelikleri tek API dökümüyle (82 GET, 2 dk) okunabiliyor: `scripts/etsy/arama_oku.py` (dal claude/keen-curie-2hza60).
 6. Kategori 121'in nitelik listesi (`/seller-taxonomy/nodes/121/properties`) boş alanları kesin gösterir; tahmin yerine bunu oku.
+7. Anahtar kelime kararı yalnız Marketplace insights ile verilir; eRank yardımcı, iki kaynak 2 kattan fazla ayrışırsa "çelişkili" işaretlenir (Serdar 10 Eki).

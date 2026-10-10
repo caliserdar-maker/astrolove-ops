@@ -1,1 +1,1 @@
-2026-10-10 ciktilar
+2026-10-10 capraz kontrol ekleri
