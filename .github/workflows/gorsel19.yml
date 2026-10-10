@@ -1,0 +1,91 @@
+name: gorsel19
+
+# C2 (Serdar 10 Eki onayi): WP 19 ilan karti 78 ilana 18. gorsel (scripts/etsy/gorsel19_ekle.py).
+# mod yedek: SALT OKUMA, 78 ilan galeri manifesti -> Drive TEMP/GORSEL19_YEDEK_20261010/YEDEK_78.json.
+# mod ekle : ETSY'YE YAZAR (onay GORSEL19). Kartlar TEMP/WP19_SON78_20261010 (TABLO_78 78/78 PASS). cift=GEMINI_LEO ile once tek ilan.
+#            Ilan basina tam yedek TEMP/GORSEL19_YEDEK_20261010/<lid>_<CIFT>/, kayit TEMP/GORSEL19_YAYIN/.
+# Etsy kilidi (kilit_bekle.py), token geri yazilir, sir loga yazilmaz.
+
+permissions:
+  actions: read
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      mod: {description: "yedek | ekle", required: true, type: choice, options: [yedek, ekle]}
+      cift: {description: "ekle: virgullu cift listesi (bos = hepsi)", required: false, default: ""}
+      limit: {description: "ekle: en fazla N ilan (0 = hepsi)", required: false, default: "0"}
+      onay: {description: "ekle icin GORSEL19", required: false, default: ""}
+
+jobs:
+  is:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Kurulum
+        run: |
+          set -euo pipefail
+          pip install -q numpy==2.1.3 pillow==11.0.0 scipy==1.14.1 opencv-python-headless==4.10.0.84 requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: Etsy (yedek / ekle)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          MOD: ${{ inputs.mod }}
+          CIFT: ${{ inputs.cift }}
+          LIMIT: ${{ inputs.limit }}
+          ONAY: ${{ inputs.onay }}
+        run: |
+          set -uo pipefail
+          case "$CIFT" in *[!A-Z_,]*) echo "::error::cift A-Z_ ve virgul"; exit 1 ;; esac
+          umask 077; mkdir -p _work _out
+          T="gdrive:ASTROLOVE/TEMP"; Y="$T/GORSEL19_YEDEK_20261010"
+          rclone mkdir "$Y"; rclone mkdir "$T/GORSEL19_YAYIN"
+          rclone copyto "$T/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          if [ "$MOD" = "yedek" ]; then
+            python3 scripts/etsy/gorsel19_ekle.py yedek --ids data/pod/pod78_ids.csv --out _out | tee _work/log.txt; RC=${PIPESTATUS[0]}
+            if [ "$RC" = 0 ]; then
+              H="$Y/YEDEK_78.json"; [ -n "$(rclone lsf "$H" 2>/dev/null)" ] && H="$Y/YEDEK_78_$(date -u +%Y%m%d_%H%M%S).json"
+              rclone copyto _out/YEDEK_78.json "$H" -q && rclone check _out "$Y" --include "$(basename "$H")" --one-way -q 2>/dev/null; echo "::warning::YEDEK $H"
+            fi
+          else
+            [ "$ONAY" = "GORSEL19" ] || { echo "::error::onay GORSEL19 degil, yazma yok"; exit 1; }
+            rclone copy "$T/WP19_SON78_20261010" _work/SON -q
+            rclone copy "$T/GORSEL19_YAYIN" _out --include "*/rapor.json" -q 2>/dev/null || true
+            python3 scripts/etsy/gorsel19_ekle.py ekle --ids data/pod/pod78_ids.csv --kartlar _work/SON --tablo _work/SON/TABLO_78.csv \
+              --alt data/pod/cl_galeri_alt_metin.csv --out _out --yedek-drive "$Y" --confirm GORSEL19 --cift "$CIFT" --limit "${LIMIT:-0}" \
+              | tee _work/log.txt; RC=${PIPESTATUS[0]}
+          fi
+          grep -E "OZET|DUR|HATA|\] [A-Z_]+ (PASS|FAIL)" _work/log.txt | tail -12 | sed 's/^/::warning::/'
+          echo "RC=$RC" >> "$GITHUB_ENV"
+      - name: Token + kayit Drive'a
+        if: ${{ always() }}
+        run: |
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
+          if grep -rqE 'x-api-key|refresh_token|"access_token"' _out/ 2>/dev/null; then echo "::error::ciktida sir benzeri anahtar"; exit 1; fi
+          [ "${{ inputs.mod }}" = "ekle" ] && [ -d _out ] && rclone copy _out "gdrive:ASTROLOVE/TEMP/GORSEL19_YAYIN" --exclude "*/yedek/*.jpg" -q || true
+          K=$(rclone lsjson gdrive:ASTROLOVE/TEMP --dirs-only | python3 -c "import json,sys;print(' '.join(x['Name']+'='+x['ID'] for x in json.load(sys.stdin) if x['Name'] in ('GORSEL19_YEDEK_20261010','GORSEL19_YAYIN')))"); echo "::warning::KLASOR $K"
+          [ "${RC:-1}" = "0" ]
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone
