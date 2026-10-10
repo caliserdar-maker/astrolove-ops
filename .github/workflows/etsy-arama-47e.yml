@@ -60,7 +60,7 @@ jobs:
           TOKEN_FILE: _work/ETSY_TOKEN.json
         run: |
           set -euo pipefail
-          python rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_ARAMA_20261010/47d_RAKIP_ILAN_ALANLAR.csv" _work/47d.csv
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_ARAMA_20261010/47d_RAKIP_ILAN_ALANLAR.csv" _work/47d.csv
           mkdir -p _out
           python scripts/etsy/arama_47e.py _work/47d.csv _out/47e_KATEGORI_ADLARI.csv 2>&1 | tee _work/kosu.log
       - name: Token geri yaz + cikti Drive'a
