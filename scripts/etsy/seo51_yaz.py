@@ -168,7 +168,7 @@ def main():
             L = api.get(f"/listings/{lid}") or {}
             P = (api.get(f"/shops/{shop}/listings/{lid}/properties", ok404=True) or {}).get("results") or []
             nit = {x.get("property_name"): {"property_id": x.get("property_id"), "value_ids": x.get("value_ids"), "values": x.get("values")}
-                   for x in P if x.get("property_name") in ("Subject", "Room", "Holiday", "Occasion")}
+                   for x in P if x.get("property_name") in ("Subject", "Art subject", "Room", "Holiday", "Occasion")}   # Subject ilan duzeyinde "Art subject" (pid 400394338806)
             H.append({"listing_id": L.get("listing_id"), "cift": c, "title": L.get("title"), "tags": L.get("tags"),
                       "description_ilk400": (L.get("description") or "")[:400], "nitelikler": nit})
             g = time.time() - t0

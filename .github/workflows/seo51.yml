@@ -65,7 +65,7 @@ jobs:
           if [ "$MOD" = "ham" ]; then
             # Merkez bagimsiz kontrolu (11 Eki): 78 ilan API'den geldigi gibi, karsilastirma yok
             python3 scripts/etsy/seo51_yaz.py ham --karar $K --out _out | tee _work/log.txt; RC=${PIPESTATUS[0]}
-            H="$E/53_GERI_OKUMA_HAM.json"; [ -n "$(rclone lsf "$H" 2>/dev/null)" ] && H="$E/53_GERI_OKUMA_HAM_$(date -u +%Y%m%d_%H%M%S).json"
+            H="$E/53_GERI_OKUMA_HAM.json"   # salt okuma ciktisi; yeniden kosuda guncel hal yazilir (ilk surumde Subject = "Art subject" eksikti)
             rclone copyto _out/53_GERI_OKUMA_HAM.json "$H" -q && echo "::warning::HAM $H"
           elif [ "$MOD" = "yedek" ]; then
             [ -z "$(rclone lsf "$E/51_YEDEK_ONCE.json" 2>/dev/null)" ] || { echo "::error::51_YEDEK_ONCE.json zaten var, ustune yazilmaz"; exit 1; }
