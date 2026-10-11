@@ -56,7 +56,7 @@ jobs:
           CIFT: ${{ inputs.cift }}
           ONAY: ${{ inputs.onay }}
         run: |
-          set -uo pipefail
+          set +e -uo pipefail   # varsayilan bash -e: sonucsuz grep adimi durdurmasin (11 Eki yedek kosusu)
           case "$CIFT" in *[!A-Z_,]*) echo "::error::cift A-Z_ ve virgul"; exit 1 ;; esac
           umask 077; mkdir -p _work _out
           T="gdrive:ASTROLOVE/TEMP"; E="$T/ETSY_ARAMA_20261010"; K=data/seo/50_KARAR_YAZIM_20261011.csv
@@ -67,7 +67,7 @@ jobs:
             python3 scripts/etsy/seo51_yaz.py yedek --karar $K --nitelik _work/46.csv --out _out | tee _work/log.txt; RC=${PIPESTATUS[0]}
             rclone copyto _out/51_YEDEK_ONCE.json "$E/51_YEDEK_ONCE.json" -q && rclone copyto _out/51_ON_DENETIM.csv "$E/51_ON_DENETIM.csv" -q
             rclone check _out "$E" --include "51_*" --one-way -q && echo "::warning::yedek Drive'da dogrulandi (rclone check)"
-            grep FAIL _out/51_ON_DENETIM.csv | head -5 | sed 's/^/::warning::ON_DENETIM /'
+            grep FAIL _out/51_ON_DENETIM.csv | head -5 | sed 's/^/::warning::ON_DENETIM /' || true
           else
             rclone copyto "$E/51_YEDEK_ONCE.json" _work/51_YEDEK_ONCE.json -q || { echo "::error::yedek yok"; exit 1; }
             rclone copy "$E/51_YAZIM" _out -q 2>/dev/null || true
@@ -85,7 +85,7 @@ jobs:
             rclone copy _out "$E/51_YAZIM" -q
             [ -f _out/52_YAZIM_RAPORU.csv ] && rclone copyto _out/52_YAZIM_RAPORU.csv "$E/52_YAZIM_RAPORU.csv" -q
           fi
-          grep -E "OZET|DUR|HATA|FAIL" _work/log.txt | tail -6 | sed 's/^/::warning::/'
+          grep -E "OZET|DUR|HATA|FAIL|\] [A-Z_]+ (PASS|FAIL)" _work/log.txt | tail -8 | sed 's/^/::warning::/' || true
           echo "RC=$RC" >> "$GITHUB_ENV"
       - name: Token + kontrol
         if: ${{ always() }}
