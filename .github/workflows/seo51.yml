@@ -73,6 +73,10 @@ jobs:
             rclone copy "$E/51_YAZIM" _out -q 2>/dev/null || true
             if [ "$MOD" = "yaz" ]; then
               [ "$ONAY" = "SEO51" ] || { echo "::error::onay SEO51 degil, yazma yok"; exit 1; }
+              # Ek kural (Merkez + Serdar 11 Eki): on denetimde tek ilan bile FAIL ise hicbir ilana yazilmaz
+              rclone copyto "$E/51_ON_DENETIM.csv" _work/51_ON_DENETIM.csv -q || { echo "::error::on denetim yok"; exit 1; }
+              NF=$(awk -F, 'NR>1 && $3!="PASS"' _work/51_ON_DENETIM.csv | wc -l); NP=$(awk -F, 'NR>1 && $3=="PASS"' _work/51_ON_DENETIM.csv | wc -l)
+              [ "$NF" = 0 ] && [ "$NP" = 78 ] || { echo "::error::on denetim FAIL $NF / PASS $NP, yazma yok"; exit 1; }
               python3 scripts/etsy/seo51_yaz.py yaz --karar $K --yedek _work/51_YEDEK_ONCE.json --out _out --confirm SEO51 --cift "$CIFT" | tee _work/log.txt; RC=${PIPESTATUS[0]}
             else
               [ "$ONAY" = "GERIAL" ] || { echo "::error::onay GERIAL degil, yazma yok"; exit 1; }
