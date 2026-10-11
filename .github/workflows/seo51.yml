@@ -4,6 +4,7 @@ name: seo51
 # mod yedek: SALT OKUMA -> Drive TEMP/ETSY_ARAMA_20261010/51_YEDEK_ONCE.json + 51_ON_DENETIM.csv (ustune yazilmaz).
 # mod yaz  : ETSY'YE YAZAR (onay SEO51). Once pilot cift=CANCER_LEO,SCORPIO_SCORPIO,CAPRICORN_SAGITTARIUS; kayit 51_YAZIM/rapor,
 #            rapor 52_YAZIM_RAPORU.csv. Yapilan PASS ilan tekrar yazilmaz. Ilk FAIL'de DUR.
+# mod ham  : SALT OKUMA, 78 ilan ham geri okuma -> 53_GERI_OKUMA_HAM.json (Merkez bagimsiz kontrol).
 # mod geri : ETSY'YE YAZAR (onay GERIAL): yedekten eski hal. YALNIZ Serdar onayiyla.
 # Etsy kilidi (kilit_bekle.py), token geri yazilir, sir loga yazilmaz.
 
@@ -14,7 +15,7 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-      mod: {description: "yedek | yaz | geri", required: true, type: choice, options: [yedek, yaz, geri]}
+      mod: {description: "yedek | yaz | geri", required: true, type: choice, options: [yedek, yaz, geri, ham]}
       cift: {description: "yaz/geri: virgullu cift listesi (bos = hepsi)", required: false, default: ""}
       onay: {description: "yaz icin SEO51, geri icin GERIAL", required: false, default: ""}
 
@@ -61,7 +62,12 @@ jobs:
           umask 077; mkdir -p _work _out
           T="gdrive:ASTROLOVE/TEMP"; E="$T/ETSY_ARAMA_20261010"; K=data/seo/50_KARAR_YAZIM_20261011.csv
           rclone copyto "$T/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
-          if [ "$MOD" = "yedek" ]; then
+          if [ "$MOD" = "ham" ]; then
+            # Merkez bagimsiz kontrolu (11 Eki): 78 ilan API'den geldigi gibi, karsilastirma yok
+            python3 scripts/etsy/seo51_yaz.py ham --karar $K --out _out | tee _work/log.txt; RC=${PIPESTATUS[0]}
+            H="$E/53_GERI_OKUMA_HAM.json"; [ -n "$(rclone lsf "$H" 2>/dev/null)" ] && H="$E/53_GERI_OKUMA_HAM_$(date -u +%Y%m%d_%H%M%S).json"
+            rclone copyto _out/53_GERI_OKUMA_HAM.json "$H" -q && echo "::warning::HAM $H"
+          elif [ "$MOD" = "yedek" ]; then
             [ -z "$(rclone lsf "$E/51_YEDEK_ONCE.json" 2>/dev/null)" ] || { echo "::error::51_YEDEK_ONCE.json zaten var, ustune yazilmaz"; exit 1; }
             rclone copyto "$E/46_NITELIK_SECENEK.csv" _work/46.csv -q
             python3 scripts/etsy/seo51_yaz.py yedek --karar $K --nitelik _work/46.csv --out _out | tee _work/log.txt; RC=${PIPESTATUS[0]}

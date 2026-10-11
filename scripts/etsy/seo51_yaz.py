@@ -12,6 +12,8 @@ Mod yedek (SALT OKUMA): 78 ilan baslik, etiket, tam aciklama, tum nitelikler, st
 Mod yaz (ETSY'YE YAZAR, --confirm SEO51): --cift ile secilen ilanlar (bos = kalan hepsi). Ilan basina: on kosul -> PATCH
   title + tags + description -> 3 x updateListingProperty -> geri okuma (dosyayla birebir) + korunan alanlar ayni.
   Ilk FAIL'de DURUR (geri alma elle, mod geri ile).
+  Denetim FAIL ilan yazilmaz, listelenir, digerlerine devam edilir; yazim sonrasi geri okuma FAIL'de DURUR.
+Mod ham (SALT OKUMA): 78 ilan API'den geldigi gibi (title, tags, description ilk 400, Subject/Room/Holiday/Occasion) -> 53_GERI_OKUMA_HAM.json.
 Mod geri (ETSY'YE YAZAR, --confirm GERIAL): yedekten baslik, etiket, aciklama ve 3 niteligi eski haline dondurur. CALISTIRILMAZ
   (yalniz Serdar onayiyla).
 Kullanim: seo51_yaz.py yedek --karar K.csv --nitelik N.csv --out OUT
@@ -127,7 +129,7 @@ def karsilastir(son, k, bek_desc, plan, once):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("mod", choices=["yedek", "yaz", "geri"]); ap.add_argument("--karar"); ap.add_argument("--nitelik", default="")
+    ap.add_argument("mod", choices=["yedek", "yaz", "geri", "ham"]); ap.add_argument("--karar"); ap.add_argument("--nitelik", default="")
     ap.add_argument("--yedek"); ap.add_argument("--out", required=True); ap.add_argument("--confirm", default="")
     ap.add_argument("--cift", default=""); ap.add_argument("--kota-taban", type=int, default=300)
     a = ap.parse_args()
@@ -157,6 +159,24 @@ def main():
         n = sum(1 for x in D if x[2] == "PASS")
         log(f"OZET yedek: 78 ilan | on denetim PASS {n}/78 | nitelik plan {json.dumps(plan, ensure_ascii=False)} | API {api.calls - c0} | kota {api.remaining}")
         return 0 if n == 78 else 1
+
+    if a.mod == "ham":
+        # Merkez bagimsiz kontrolu (11 Eki): 78 ilan API'den GELDIGI GIBI, karsilastirma yok
+        ids = [(r["listing_id"].strip(), r["cift"].strip()) for r in csv.DictReader(open(a.karar, encoding="utf-8"))]
+        H = []
+        for i, (lid, c) in enumerate(ids, 1):
+            L = api.get(f"/listings/{lid}") or {}
+            P = (api.get(f"/shops/{shop}/listings/{lid}/properties", ok404=True) or {}).get("results") or []
+            nit = {x.get("property_name"): {"property_id": x.get("property_id"), "value_ids": x.get("value_ids"), "values": x.get("values")}
+                   for x in P if x.get("property_name") in ("Subject", "Room", "Holiday", "Occasion")}
+            H.append({"listing_id": L.get("listing_id"), "cift": c, "title": L.get("title"), "tags": L.get("tags"),
+                      "description_ilk400": (L.get("description") or "")[:400], "nitelikler": nit})
+            g = time.time() - t0
+            log(f"[{i}/{len(ids)}] {c} | gecen {g:.0f}s | kalan ~{g/i*(len(ids)-i):.0f}s | %{100*i//len(ids)}")
+        (out / "53_GERI_OKUMA_HAM.json").write_text(json.dumps({"_ts_utc": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()),
+                                                               "ilanlar": H}, indent=1, ensure_ascii=False), encoding="utf-8")
+        log(f"OZET ham: {len(H)} ilan | API {api.calls - c0} | kota {api.remaining}")
+        return 0 if len(H) == 78 else 1
 
     Y = json.loads(Path(a.yedek).read_text(encoding="utf-8")); plan = Y["_nitelik_plan"]
     if a.mod == "geri":
@@ -218,14 +238,17 @@ def main():
         log(f"[{i}/{len(is_)}] {c} {'PASS' if r['PASS'] else 'FAIL'} {r['hata']} | API {r['api']} | gecen {g/60:.1f} dk | "
             f"kalan ~{g/i*(len(is_)-i)/60:.1f} dk | %{100*i//len(is_)} | kota {api.remaining} | https://www.etsy.com/listing/{lid}")
         if not r["PASS"]:
-            log(f"DUR: {c} FAIL"); break
+            if r["hata"].startswith("YAZILMADI"):          # denetim FAIL: o ilana yazilmadi, listelenir, digerlerine devam (Merkez 11 Eki)
+                log(f"ATLANDI (denetim FAIL, yazilmadi): {c} {r['hata']}"); continue
+            log(f"DUR: {c} yazim sonrasi geri okuma FAIL"); break
     rows = [json.loads(p.read_text()) for p in sorted(rap_yol.glob("*.json")) if not p.stem.endswith("_sonra")]
     with open(out / "52_YAZIM_RAPORU.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f); w.writerow(["listing_id", "cift", "baslik_ok", "etiket_ok", "aciklama_ok", "nitelik_ok", "hata"])
         for r in sorted(rows, key=lambda x: x["cift"]):
             w.writerow([r["listing_id"], r["cift"], r["baslik_ok"], r["etiket_ok"], r["aciklama_ok"], r["nitelik_ok"], r["hata"]])
     n = sum(1 for r in rows if r["PASS"])
-    log(f"OZET yaz: toplam rapor {len(rows)} | PASS {n} | bu kosu API {api.calls - c0} | kota {api.remaining}")
+    atla = [r["cift"] for r in rows if not r["PASS"] and r["hata"].startswith("YAZILMADI")]
+    log(f"OZET yaz: toplam rapor {len(rows)} | PASS {n} | yazilmadi (denetim FAIL) {len(atla)} {atla} | bu kosu API {api.calls - c0} | kota {api.remaining}")
     return 0 if all(r["PASS"] for r in rows) and rows else 1
 
 
