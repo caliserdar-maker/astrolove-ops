@@ -9,6 +9,8 @@ QC per pair (all must hold):
   q_boy   : in slides 1 and 2 the two small signs keep the poster's height relation
             (output height ratio / poster height ratio within 1 +- 0.05) and no sign is wider than 1.3 x target height.
             Measured on the actual sign images ig_uret pastes (alpha bbox), poster heights from PosterR.
+  q_bosluk: in slides 1 and 2 the centre symbol leaves >= 30 px free on both sides to the small signs
+            (horizontal gap between the pasted alpha bboxes on the slide).
   q_olcu  : 4 files, each 1080x1350
 Writes QC.csv, QC.json, FAIL.txt; with --kontak also KONTAK_IG1.jpg (all cover slides).
 """
@@ -30,38 +32,70 @@ def qc_poster(P):
             'boy_sol': int(P.sign_a[4]), 'boy_sag': int(P.sign_b[4])}
 
 
-def glyph_box(im, thr=32):
+def glyph_bbox(im, thr=32):
     a = np.asarray(im)[..., 3]
     ys, xs = np.nonzero(a > thr)
-    return (int(xs.max() - xs.min() + 1), int(ys.max() - ys.min() + 1)) if len(xs) else (0, 0)
+    return (int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1) if len(xs) else None
 
 
-KAYIT = []
-_sign_pair = PU.sign_pair
+# Instrumentation: record the sign / centre images ig_uret actually pastes and where (no change to the output).
+SIGNS, CENTERS, PASTES = [], [], []
+_sign_pair, _fit_center, _paste = PU.sign_pair, PU.fit_center, IG.lib.paste
 
 
 def sign_pair_kayit(P, sign_h, *a, **k):
-    """Wraps pin_uret.sign_pair: records the two sign images ig_uret actually pastes, per target height."""
-    sa, sb, sw = _sign_pair(P, sign_h, *a, **k)
-    KAYIT.append((sign_h, glyph_box(sa), glyph_box(sb)))
-    return sa, sb, sw
+    res = _sign_pair(P, sign_h, *a, **k)
+    SIGNS.append((sign_h, res[0], res[1]))
+    return res
 
 
-PU.sign_pair = sign_pair_kayit
+def fit_center_kayit(*a, **k):
+    c = _fit_center(*a, **k)
+    CENTERS.append(c)
+    return c
+
+
+def paste_kayit(canvas, layer, *a, **k):
+    r = _paste(canvas, layer, *a, **k)
+    PASTES.append((layer, r[0], r[1]))
+    return r
+
+
+PU.sign_pair, PU.fit_center, IG.lib.paste = sign_pair_kayit, fit_center_kayit, paste_kayit
+
+
+def on_slide(layer):
+    """alpha bbox of a pasted layer in slide coordinates (last paste of that exact object)."""
+    for lay, x, y in reversed(PASTES):
+        if lay is layer:
+            b = glyph_bbox(layer)
+            return None if b is None else (x + b[0], y + b[1], x + b[2], y + b[3])
+    return None
 
 
 def qc_boy(rec):
     poster = rec['boy_sol'] / max(1, rec['boy_sag'])
-    ok, sapma, gen = len(KAYIT) == 2, 0.0, 0.0
-    for h, (wa, ha), (wb, hb) in KAYIT:
+    ok_b, ok_g, sapma, gen, boy, bos = len(SIGNS) == 2, len(CENTERS) == 2, 0.0, 0.0, [], []
+    for i, (h, sa, sb) in enumerate(SIGNS):
+        A, B = glyph_bbox(sa), glyph_bbox(sb)
+        wa, ha = (A[2] - A[0], A[3] - A[1]) if A else (0, 0)
+        wb, hb = (B[2] - B[0], B[3] - B[1]) if B else (0, 0)
         d = abs((ha / max(1, hb)) / poster - 1)
-        g = max(wa, wb) / h
-        sapma, gen = max(sapma, d), max(gen, g)
-        ok = ok and ha > 0 and hb > 0 and d <= 0.05 and max(wa, wb) <= 1.3 * h + 0.5
+        sapma, gen = max(sapma, d), max(gen, max(wa, wb) / h)
+        ok_b = ok_b and ha > 0 and hb > 0 and d <= 0.05 and max(wa, wb) <= 1.3 * h + 0.5
+        boy.append(f'{h}:{ha}/{hb}')
+        a_, b_, c_ = on_slide(sa), on_slide(sb), on_slide(CENTERS[i]) if i < len(CENTERS) else None
+        if None in (a_, b_, c_):
+            ok_g = False; bos.append(f'{h}:?')
+            continue
+        gl, gr = c_[0] - a_[2], b_[0] - c_[2]
+        ok_g = ok_g and gl >= 30 and gr >= 30
+        bos.append(f'{h}:{gl}/{gr}')
     rec['oran_sapma'] = round(sapma, 4)
     rec['max_gen_oran'] = round(gen, 3)
-    rec['cikti_boy'] = ' '.join(f'{h}:{ha}/{hb}' for h, (_, ha), (_, hb) in KAYIT)
-    rec['q_boy'] = ok
+    rec['cikti_boy'] = ' '.join(boy)
+    rec['bosluk_sol_sag'] = ' '.join(bos)
+    rec['q_boy'], rec['q_bosluk'] = ok_b, ok_g
 
 
 def main():
@@ -83,7 +117,7 @@ def main():
             sz = Image.open(poster).size
             rec['poster_olcu'] = f'{sz[0]}x{sz[1]}'
             rec.update(qc_poster(PU.PosterR(poster)))
-            KAYIT.clear()
+            SIGNS.clear(); CENTERS.clear(); PASTES.clear()
             out = IG.build(poster, A, B, os.path.join(g.out, key))
             qc_boy(rec)
             olc = {k: Image.open(v).size for k, v in out.items()}
@@ -91,14 +125,14 @@ def main():
             rec['kapak'] = out['1']
             rec['hata'] = ''
         except Exception as e:
-            rec.update(q_parca=False, q_boy=False, q_olcu=False,
+            rec.update(q_parca=False, q_boy=False, q_bosluk=False, q_olcu=False,
                        hata=f'{type(e).__name__}: {e}', iz=traceback.format_exc()[-600:])
-        rec['PASS'] = all(rec.get(k) for k in ('q_parca', 'q_boy', 'q_olcu'))
+        rec['PASS'] = all(rec.get(k) for k in ('q_parca', 'q_boy', 'q_bosluk', 'q_olcu'))
         rows.append(rec)
         el = time.time() - t0; eta = el / i * (n - i)
         print(f'[{i}/{n}] {100 * i / n:5.1f}% gecen {el / 60:5.1f} dk kalan {eta / 60:5.1f} dk  {key} '
               f'{"PASS" if rec["PASS"] else "FAIL"} {rec.get("hata", "")}', flush=True)
-    keys = ['cift', 'a', 'b', 'poster_olcu', 'PASS', 'q_parca', 'q_boy', 'q_olcu', 'boy_sol', 'boy_sag', 'oran_sapma', 'max_gen_oran', 'cikti_boy', 'hata']
+    keys = ['cift', 'a', 'b', 'poster_olcu', 'PASS', 'q_parca', 'q_boy', 'q_bosluk', 'q_olcu', 'boy_sol', 'boy_sag', 'oran_sapma', 'max_gen_oran', 'cikti_boy', 'bosluk_sol_sag', 'hata']
     with open(os.path.join(g.out, 'QC.csv'), 'w', newline='', encoding='utf-8') as fh:
         w = csv.DictWriter(fh, keys, extrasaction='ignore'); w.writeheader(); w.writerows(rows)
     json.dump(rows, open(os.path.join(g.out, 'QC.json'), 'w'), indent=1, default=str)

@@ -48,7 +48,7 @@ def navy_glow(profile, cy_frac, gain=0.70, sigma=0.42):
     return Image.fromarray(np.clip(np.round(out), 0, 255).astype(np.uint8), 'RGB')
 
 
-def build(poster_path, A, B, out_dir, muzik=None, kareler=None):
+def build(poster_path, A, B, out_dir, muzik=None, kareler=None, bilgi=None):
     os.makedirs(out_dir, exist_ok=True)
     slug = f'{A.lower()}-and-{B.lower()}'
     P = PU.PosterR(poster_path)
@@ -63,10 +63,8 @@ def build(poster_path, A, B, out_dir, muzik=None, kareler=None):
         return lib.metal_text('ASTROLOVEART', int(W * frac), BR, tracking=0.14, bevel=0.9)
 
     Qv = lib.scale_h(Q, 265 * Q.size[1] / 997)
-    MER = lib.scale_h(P.layer(P.merged, only_label=False), 380)
-    if MER.size[0] > D * 0.78:
-        MER = lib.scale_w(MER, round(D * 0.78))
-    SA, SB, SW = PU.sign_pair(P, SIGN_H)
+    SA, SB, SW, R = PU.sign_pair(P, SIGN_H)
+    MER = PU.fit_center(lib.scale_h(P.layer(P.merged, only_label=False), round(380 * R)), D, SA, SB)
 
     def orbit_base(cv):
         sw = SW
@@ -204,7 +202,12 @@ def build(poster_path, A, B, out_dir, muzik=None, kareler=None):
     f_out = MER.size[1] / (P.merged[4] + 20) * ZN
     pcx = P.merged[1] + P.merged[3] / 2; pcy = P.merged[2] + P.merged[4] / 2
     sx = W / 2 + (mx - W / 2) * ZN; sy = H / 2 + (my - H / 2) * ZN
-    cw_a = W * sp / f_out; ch_a = cw_a * 16 / 9
+    cw_a = W * sp / f_out
+    if bilgi is not None:
+        bilgi['kamera_orani'] = round(cw_a / 2160, 3)
+    # a very large symbol on the poster (ARIES_CAPRICORN) would need a crop wider than the wall image: start from the
+    # full wall width (symbol then smaller than in the navy part by 1/kamera_orani); pairs below the limit are unchanged
+    cw_a = min(cw_a, 2160.0); ch_a = cw_a * 16 / 9
     BOX_A = (PX + pcx * sp - sx * cw_a / W + cw_a / 2, PY + pcy * sp - sy * ch_a / H + ch_a / 2, cw_a)
     BOX_F = (1080.0, 1920.0, 2160.0)
     _yy, _xx = np.mgrid[0:H, 0:W].astype(np.float32)
@@ -212,7 +215,8 @@ def build(poster_path, A, B, out_dir, muzik=None, kareler=None):
     def cam(t):
         e = ease(t, 16.6, 18.6)
         cx, cy, cw = [BOX_A[i] * (1 - e) + BOX_F[i] * e for i in range(3)]
-        ch = cw * 16 / 9; cy = float(np.clip(cy, ch / 2, 3840 - ch / 2)); cx = float(np.clip(cx, cw / 2, 2160 - cw / 2))
+        cw = min(float(cw), 2160.0); ch = min(cw * 16 / 9, 3840.0)   # float rounding may overshoot the wall by ~1e-13
+        cy = float(np.clip(cy, ch / 2, 3840 - ch / 2)); cx = float(np.clip(cx, cw / 2, 2160 - cw / 2))
         return cx, cy, cw, ch
 
     def wall(t):

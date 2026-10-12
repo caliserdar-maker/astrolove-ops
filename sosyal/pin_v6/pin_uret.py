@@ -115,12 +115,22 @@ def ring_mask(D, w, y0, y1):
 def sign_pair(P, sign_h, max_w_ratio=1.3):
     """The two small signs at ONE common scale, so they keep the size relation they have on the poster
     (Aquarius is a low, wide glyph). The taller sign gets sign_h; no sign gets wider than max_w_ratio * sign_h.
-    Also returns the ring stroke width, measured on the taller sign at 150 px (as before)."""
+    Also returns the ring stroke width (taller sign at 150 px, as before) and the size factor r (see below)."""
     la, lb = P.layer(P.sign_a, only_label=False), P.layer(P.sign_b, only_label=False)
-    k = min(sign_h / max(la.size[1], lb.size[1]), max_w_ratio * sign_h / max(la.size[0], lb.size[0]))
+    k_nom = sign_h / max(la.size[1], lb.size[1])
+    k = min(k_nom, max_w_ratio * sign_h / max(la.size[0], lb.size[0]))
     sc = lambda im: im.resize((max(1, round(im.size[0] * k)), max(1, round(im.size[1] * k))), Image.LANCZOS)
     tall = la if la.size[1] >= lb.size[1] else lb
-    return sc(la), sc(lb), L.stroke_width(lib.scale_h(tall, 150))
+    # r < 1 when a wide glyph forced the signs smaller: the centre symbol is then scaled by r too,
+    # so signs and centre keep the proportion of the approved design (Gemini & Leo: r = 1)
+    return sc(la), sc(lb), L.stroke_width(lib.scale_h(tall, 150)), k / k_nom
+
+
+def fit_center(center, D, a, b, gap=34):
+    """The centre symbol may not crowd the two small signs: at least `gap` px free on each side
+    (a wide merged symbol next to wide signs, e.g. Aquarius & Aquarius, is scaled down a little)."""
+    max_w = min(D * 0.78, D - max(a.size[0], b.size[0]) - 2 * gap)
+    return lib.scale_w(center, round(max_w)) if center.size[0] > max_w else center
 
 
 def sign_labels(cv, W, D, cy_lab, center_w, A, B, BR, base_size, tracking):
@@ -192,11 +202,9 @@ def build(poster_path, A, B, out_dir):
     # ---------- P2: two signs on one orbit, merged symbol in the centre
     cv = navy_glow(prof, 0.47)
     cy, D, sign_h = H * 0.47, 640, 120
-    a, b, sw = sign_pair(P, sign_h)
-    # sign labels: same size for both, shrunk together if the longer one does not fit beside the frame edge
-    center = lib.scale_h(P.layer(P.merged, only_label=False), 410)
-    if center.size[0] > D * 0.78:
-        center = lib.scale_w(center, round(D * 0.78))
+    a, b, sw, r = sign_pair(P, sign_h)
+    center = lib.scale_h(P.layer(P.merged, only_label=False), round(410 * r))
+    center = fit_center(center, D, a, b)
     lab_gap = 44
     lab_h = lib.metal_text(A.upper(), int(W * L.TYPE['label']['size']), BR, tracking=L.TYPE['label']['tracking'], bevel=0.9).size[1]
     rm = ring_mask(D, max(1.6, sw * 0.30), -sign_h / 2 - 28, sign_h / 2 + lab_gap + lab_h + 26)

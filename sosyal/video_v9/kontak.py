@@ -8,7 +8,7 @@ from PIL import Image, ImageDraw, ImageFont
 HERE = os.path.dirname(os.path.abspath(__file__))
 ap = argparse.ArgumentParser(); ap.add_argument('dir'); ap.add_argument('--beklenen', type=int, default=78); g = ap.parse_args()
 rs = [json.load(open(p)) for p in sorted(glob.glob(os.path.join(g.dir, '*-qc.json')))]
-cols = ['cift', 'sonuc', 'q_poster', 'q_video', 'q_son', 'codec', 'w', 'h', 'fps', 'kare', 'sure', 'son_oran', 'bos_oran', 'mb', 'uretim_sn', 'dosya', 'hata']
+cols = ['cift', 'sonuc', 'q_poster', 'q_video', 'q_son', 'codec', 'w', 'h', 'fps', 'kare', 'sure', 'son_oran', 'bos_oran', 'kamera_orani', 'mb', 'uretim_sn', 'dosya', 'hata']
 with open(os.path.join(g.dir, 'QC.csv'), 'w', newline='') as f:
     w = csv.DictWriter(f, cols, extrasaction='ignore'); w.writeheader(); [w.writerow(r) for r in rs]
 json.dump(rs, open(os.path.join(g.dir, 'QC.json'), 'w'), indent=1)

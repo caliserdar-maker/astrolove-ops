@@ -75,8 +75,9 @@ def main():
         r = dict(cift=key, a=A, b=B, q_poster=False, q_video=False, q_son=False)
         try:
             ts = time.time()
-            mp4 = VU.build(os.path.join(g.posters, key + '.jpg'), A, B, g.out)[0]
-            r['q_poster'] = True; r['uretim_sn'] = round(time.time() - ts)
+            bilgi = {}
+            mp4 = VU.build(os.path.join(g.posters, key + '.jpg'), A, B, g.out, bilgi=bilgi)[0]
+            r['q_poster'] = True; r.update(bilgi); r['uretim_sn'] = round(time.time() - ts)
             r['dosya'] = os.path.basename(mp4); r['mb'] = round(os.path.getsize(mp4) / 1e6, 2)
             r.update(qc_video(mp4, g.out, slug))
         except Exception as e:
@@ -88,7 +89,7 @@ def main():
         el = time.time() - t0; n = i + 1
         print(f'ILERLEME {key} {r["sonuc"]} | is {n}/{len(pairs)} | genel ~{g.sira + n}/{toplam} %{100 * (g.sira + n) / toplam:.0f} | '
               f'gecen {el / 60:.1f} dk | kalan (bu is) {el / n * (len(pairs) - n) / 60:.1f} dk | '
-              + ' '.join(f'{k}={r.get(k)}' for k in ('q_poster', 'q_video', 'q_son', 'son_oran', 'bos_oran', 'sure', 'kare', 'uretim_sn', 'hata')),
+              + ' '.join(f'{k}={r.get(k)}' for k in ('q_poster', 'q_video', 'q_son', 'son_oran', 'bos_oran', 'sure', 'kare', 'kamera_orani', 'uretim_sn', 'hata')),
               flush=True)
     print(f'OZET {len(pairs) - len(fails)}/{len(pairs)} PASS' + (f' FAIL: {",".join(fails)}' if fails else ''))
     sys.exit(1 if fails else 0)
