@@ -13,6 +13,10 @@ on:
         description: "true: 234 pin gorseli astrolove-media pinterest/v6/ e push + prob + gorsel_url (FAIL.txt varsa DUR)"
         type: boolean
         default: false
+      normalize_test:
+        description: "true: Pages probundan sonra 1 pin URL'si icin Metricool normalize GET (gonderi YOK)"
+        type: boolean
+        default: false
 
 concurrency:
   group: pin-media-sync
@@ -111,6 +115,21 @@ jobs:
           EOF
           echo "URL_ARG=--url-kok $URL_KOK" >> "$GITHUB_ENV"
 
+      - name: Normalize testi (1 URL, gonderi yok)
+        if: ${{ inputs.pages == true && inputs.normalize_test == true }}
+        run: |
+          set -uo pipefail
+          u="$URL_KOK/$(head -1 _out/gorseller.txt)"
+          python3 scripts/sosyal/metricool_normalize_test.py _work/mc.json "$u" _out/NORMALIZE_TEST.json | tee -a "$GITHUB_STEP_SUMMARY"
+          python3 - <<'EOF'
+          import json, re, subprocess
+          d = json.load(open('_out/NORMALIZE_TEST.json'))
+          m = re.findall(r'https?://[^"\s]+', json.dumps(d.get('yanit')))
+          for u in m[:2]:
+              o = subprocess.run(['curl', '-s', '-o', '/dev/null', '-m', '60', '-w', '%{http_code}|%{content_type}|%{size_download}', u], capture_output=True, text=True).stdout
+              print('normalize URL probu', u[:120], o)
+          EOF
+
       - name: Plan
         run: |
           set -uo pipefail
@@ -118,7 +137,7 @@ jobs:
           python3 scripts/sosyal/pin_v6_plan.py --metin _out/PIN_METIN_234_LINKLI.csv --sira data/sosyal/pinterest/SIRA_78.csv \
             --panolar _out/PANOLAR.json --pinler _out/PINLER.json --cikti _out/PIN_V6_PLAN_KURU.csv ${URL_ARG:-} 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
           rc=${PIPESTATUS[0]}
-          rclone copy _out "$D/PLAN" --include "PIN_V6_PLAN_KURU.csv" --include "PANOLAR*.json" --include "PINLER.json" --include "PIN_V6_SHA256SUMS.txt"
+          rclone copy _out "$D/PLAN" --include "PIN_V6_PLAN_KURU.csv" --include "PANOLAR*.json" --include "PINLER.json" --include "PIN_V6_SHA256SUMS.txt" --include "NORMALIZE_TEST.json"
           rclone lsl "$D/PLAN" | tee -a "$GITHUB_STEP_SUMMARY"
           exit $rc
       - if: always()
