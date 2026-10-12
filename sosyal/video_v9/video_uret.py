@@ -205,8 +205,8 @@ def build(poster_path, A, B, out_dir, muzik=None, kareler=None, bilgi=None):
     cw_a = W * sp / f_out
     if bilgi is not None:
         bilgi['kamera_orani'] = round(cw_a / 2160, 3)
-    # a very large symbol on the poster would need a crop wider than the wall image: start from the full wall width
-    # (symbol then slightly smaller than in the navy part); pairs below the limit are unchanged
+    # a very large symbol on the poster (ARIES_CAPRICORN) would need a crop wider than the wall image: start from the
+    # full wall width (symbol then smaller than in the navy part by 1/kamera_orani); pairs below the limit are unchanged
     cw_a = min(cw_a, 2160.0); ch_a = cw_a * 16 / 9
     BOX_A = (PX + pcx * sp - sx * cw_a / W + cw_a / 2, PY + pcy * sp - sy * ch_a / H + ch_a / 2, cw_a)
     BOX_F = (1080.0, 1920.0, 2160.0)
@@ -215,7 +215,8 @@ def build(poster_path, A, B, out_dir, muzik=None, kareler=None, bilgi=None):
     def cam(t):
         e = ease(t, 16.6, 18.6)
         cx, cy, cw = [BOX_A[i] * (1 - e) + BOX_F[i] * e for i in range(3)]
-        ch = cw * 16 / 9; cy = float(np.clip(cy, ch / 2, 3840 - ch / 2)); cx = float(np.clip(cx, cw / 2, 2160 - cw / 2))
+        cw = min(float(cw), 2160.0); ch = min(cw * 16 / 9, 3840.0)   # float rounding may overshoot the wall by ~1e-13
+        cy = float(np.clip(cy, ch / 2, 3840 - ch / 2)); cx = float(np.clip(cx, cw / 2, 2160 - cw / 2))
         return cx, cy, cw, ch
 
     def wall(t):
