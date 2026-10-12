@@ -112,6 +112,26 @@ def ring_mask(D, w, y0, y1):
     return np.where(side & inside, 0, np.where(side, m * soft, m))
 
 
+def sign_labels(cv, W, D, cy_lab, center_w, A, B, BR, base_size, tracking):
+    """Labels under the two orbit signs. Centred under the sign when they fit; a long name (SAGITTARIUS)
+    may not touch the centre symbol nor the frame edge: first it slides outward inside its free band,
+    only if the band is still too narrow both labels shrink together."""
+    mk = lambda t, s: lib.metal_text(t.upper(), s, BR, tracking=tracking, bevel=0.9)
+    edge, gap = 30, 28
+    band = (W / 2 - center_w / 2 - gap) - edge          # free width on each side
+    size = base_size
+    widest = max(mk(A, size).size[0], mk(B, size).size[0])
+    if widest > band:
+        size = int(size * band / widest)
+    la, lb = mk(A, size), mk(B, size)
+    for lab, side in ((la, -1), (lb, 1)):
+        cx = W / 2 + side * D / 2
+        lo = edge + lab.size[0] / 2 if side < 0 else W / 2 + center_w / 2 + gap + lab.size[0] / 2
+        hi = W / 2 - center_w / 2 - gap - lab.size[0] / 2 if side < 0 else W - edge - lab.size[0] / 2
+        lib.paste(cv, lab, min(max(cx, lo), hi), cy_lab, shadow=False)
+    return la.size[1]
+
+
 def build(poster_path, A, B, out_dir):
     os.makedirs(out_dir, exist_ok=True)
     P = PosterR(poster_path)
@@ -165,22 +185,16 @@ def build(poster_path, A, B, out_dir):
     b = lib.scale_h(P.layer(P.sign_b, only_label=False), sign_h)
     sw = L.stroke_width(lib.scale_h(P.layer(P.sign_a, only_label=False), 150))
     # sign labels: same size for both, shrunk together if the longer one does not fit beside the frame edge
-    lab_size = int(W * L.TYPE['label']['size'])
-    mk = lambda t, s: lib.metal_text(t.upper(), s, BR, tracking=L.TYPE['label']['tracking'], bevel=0.9)
-    max_lab = 2 * (W / 2 - D / 2 - 40)
-    widest = max(mk(A, lab_size).size[0], mk(B, lab_size).size[0])
-    if widest > max_lab:
-        lab_size = int(lab_size * max_lab / widest)
-    lab_a, lab_b = mk(A, lab_size), mk(B, lab_size)
-    lab_gap = 44
-    rm = ring_mask(D, max(1.6, sw * 0.30), -sign_h / 2 - 28, sign_h / 2 + lab_gap + lab_a.size[1] + 26)
-    lib.paste(cv, lib.metal_from_mask(rm, P.ramp, bevel=0.9), W / 2, cy, shadow=False)
-    lib.paste(cv, a, W / 2 - D / 2, cy); lib.paste(cv, b, W / 2 + D / 2, cy)
-    lib.paste(cv, lab_a, W / 2 - D / 2, cy + sign_h / 2 + lab_gap, shadow=False)
-    lib.paste(cv, lab_b, W / 2 + D / 2, cy + sign_h / 2 + lab_gap, shadow=False)
     center = lib.scale_h(P.layer(P.merged, only_label=False), 410)
     if center.size[0] > D * 0.78:
         center = lib.scale_w(center, round(D * 0.78))
+    lab_gap = 44
+    lab_h = lib.metal_text(A.upper(), int(W * L.TYPE['label']['size']), BR, tracking=L.TYPE['label']['tracking'], bevel=0.9).size[1]
+    rm = ring_mask(D, max(1.6, sw * 0.30), -sign_h / 2 - 28, sign_h / 2 + lab_gap + lab_h + 26)
+    lib.paste(cv, lib.metal_from_mask(rm, P.ramp, bevel=0.9), W / 2, cy, shadow=False)
+    lib.paste(cv, a, W / 2 - D / 2, cy); lib.paste(cv, b, W / 2 + D / 2, cy)
+    sign_labels(cv, W, D, cy + sign_h / 2 + lab_gap, center.size[0], A, B, BR,
+                int(W * L.TYPE['label']['size']), L.TYPE['label']['tracking'])
     a_ = np.asarray(center)[..., 3].astype(np.float32)
     yy, xx = np.mgrid[0:a_.shape[0], 0:a_.shape[1]]
     gx = (xx * a_).sum() / a_.sum(); gy = (yy * a_).sum() / a_.sum()
