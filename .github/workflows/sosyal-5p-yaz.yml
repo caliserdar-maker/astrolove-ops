@@ -1,0 +1,109 @@
+name: sosyal-5p-yaz
+
+# 5 platform TEK GUN canli zamanlama (Serdar karari 12 Eki 2026 gece denemesi) + kalan gunler KURU plan.
+# 1) Drive listeleri  2) GEMINI_LEO videosu: FINAL (yoksa ORNEK'teki son surum)  3) plan_5p.py (baslangic = gun 1)
+# 4) metricool_5p_yaz.py --gun 1: video Metricool S3, 7 gonderi POST + geri okuma dogrulama (mod=kuru: POST yok)
+# 5) Drive: PLAN_5_PLATFORM.csv (gun 2..78, ZAMANLANMAZ), PLAN_5_PLATFORM_GUN1.csv, DOGRULAMA_GUN1.json
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      mod:
+        type: choice
+        options: [kuru, yaz]
+        default: kuru
+      baslangic:
+        default: "2026-10-12"
+      kar:
+        default: "2026-10-12T23:00"
+      th:
+        default: "2026-10-12T23:15"
+      vid:
+        default: "2026-10-13T03:00"
+      sinir:
+        default: "2026-10-13T01:00"
+      yt_kategori:
+        default: "HOWTO_STYLE"
+
+jobs:
+  yaz:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      K: gdrive:ASTROLOVE/TEMP/IG_V6_20261012/KARUSEL
+      V: gdrive:ASTROLOVE/TEMP/VIDEO_V9_20261012/FINAL
+      VO: gdrive:ASTROLOVE/TEMP/VIDEO_V9_20261012/ORNEK
+      O: gdrive:ASTROLOVE/TEMP/SOSYAL_PLAN_20261012
+      URL_KOK: https://caliserdar-maker.github.io/astrolove-media/instagram/v6
+    steps:
+      - uses: actions/checkout@v4
+      - name: rclone + token
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            export RCLONE_CONFIG_GDRIVE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET"
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+          mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/METRICOOL_TOKEN.json" _work/mc.json
+          python3 -c "import json;print('::add-mask::'+json.load(open('_work/mc.json'))['userToken'])"
+
+      - name: Listeler + video
+        run: |
+          set -euo pipefail
+          rclone lsjson -R "$K" --no-modtime > _out/KARUSEL.json
+          rclone lsjson "$V" --files-only > _out/VIDEO.json
+          f=gemini-and-leo-astroloveart-reel.mp4
+          if rclone lsf "$V" --include "$f" | grep -q .; then
+            rclone copyto "$V/$f" _work/gun1.mp4; kaynak="FINAL/$f"
+          else
+            son=$(rclone lsjson "$VO" -R --files-only | python3 -c "import json,sys;x=[e for e in json.load(sys.stdin) if 'gemini' in e['Path'].lower() and 'leo' in e['Path'].lower() and e['Path'].endswith('.mp4')];x.sort(key=lambda e:e['ModTime']);print(x[-1]['Path'] if x else '')")
+            [ -n "$son" ] || { echo "DUR: GEMINI_LEO videosu FINAL ve ORNEK'te yok"; exit 1; }
+            rclone copyto "$VO/$son" _work/gun1.mp4; kaynak="ORNEK/$son"
+          fi
+          echo "VIDEO_KAYNAK $kaynak $(stat -c %s _work/gun1.mp4) bayt sha256 $(sha256sum _work/gun1.mp4 | cut -c1-64) $(rclone lsjson "$V" --include "$f" | python3 -c "import json,sys;x=json.load(sys.stdin);print('modtime', x[0]['ModTime'] if x else '-')")" | tee -a "$GITHUB_STEP_SUMMARY" _out/VIDEO_KAYNAK.txt
+
+      - name: Plan
+        env:
+          BAS: ${{ inputs.baslangic }}
+          YTK: ${{ inputs.yt_kategori }}
+        run: |
+          set -euo pipefail
+          python3 scripts/sosyal/plan_5p.py --metin-dir data/sosyal/metin --karusel _out/KARUSEL.json --video _out/VIDEO.json \
+            --url-kok "$URL_KOK" --baslangic "$BAS" --yt-kategori "$YTK" --cikti _out/PLAN_TUM.csv | tee -a "$GITHUB_STEP_SUMMARY"
+          python3 - <<'EOF' | tee -a "$GITHUB_STEP_SUMMARY"
+          import csv
+          r = list(csv.DictReader(open('_out/PLAN_TUM.csv', encoding='utf-8')))
+          for ad, sec in (('PLAN_5_PLATFORM_GUN1.csv', [x for x in r if x['gun'] == '1']), ('PLAN_5_PLATFORM.csv', [x for x in r if x['gun'] != '1'])):
+              with open('_out/' + ad, 'w', newline='', encoding='utf-8') as f:
+                  w = csv.DictWriter(f, fieldnames=list(r[0]), lineterminator='\n'); w.writeheader(); w.writerows(sec)
+              print(ad, len(sec), 'satir', sec[0]['tarih_saat'], '->', sec[-1]['tarih_saat'])
+          EOF
+
+      - name: Gun 1 Metricool (mod=${{ inputs.mod }})
+        env:
+          MOD: ${{ inputs.mod }}
+          KAR: ${{ inputs.kar }}
+          TH: ${{ inputs.th }}
+          VID: ${{ inputs.vid }}
+          SINIR: ${{ inputs.sinir }}
+        run: |
+          set -uo pipefail
+          python3 scripts/sosyal/metricool_5p_yaz.py --token-dosya _work/mc.json --plan _out/PLAN_TUM.csv --gun 1 \
+            --video _work/gun1.mp4 --kar "$KAR" --th "$TH" --vid "$VID" --sinir "$SINIR" --mod "$MOD" --cikti _work/yz 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+          rc=${PIPESTATUS[0]}
+          cp _work/yz/DOGRULAMA.json "_out/DOGRULAMA_GUN1_${MOD}.json" 2>/dev/null || true
+          rclone copy _out "$O" --include "PLAN_5_PLATFORM.csv" --include "PLAN_5_PLATFORM_GUN1.csv" --include "DOGRULAMA_GUN1_*.json" --include "VIDEO_KAYNAK.txt"
+          rclone lsl "$O" | tee -a "$GITHUB_STEP_SUMMARY"
+          exit $rc
+
+      - if: always()
+        run: rm -rf _work ~/.config/rclone
