@@ -8,6 +8,7 @@ QC per video (all must hold):
   q_poster : PosterR found the poster parts (no exception)
   q_video  : 1080x1920, 30 fps, 24.0 s (720 frames), H.264
   q_son    : the "Make it yours" area of the 22 s frame is not empty
+  q_kamera : wall camera starts inside the wall image (kamera_orani < 1); sembol_buyume recorded
 Exit code 1 if any pair FAILs.
 """
 import argparse, json, os, subprocess, sys, time, traceback
@@ -72,24 +73,24 @@ def main():
     for i, key in enumerate(pairs):
         A, B = [s.capitalize() for s in key.split('_')]
         slug = f'{A.lower()}-and-{B.lower()}'
-        r = dict(cift=key, a=A, b=B, q_poster=False, q_video=False, q_son=False)
+        r = dict(cift=key, a=A, b=B, q_poster=False, q_video=False, q_son=False, q_kamera=False)
         try:
             ts = time.time()
             bilgi = {}
             mp4 = VU.build(os.path.join(g.posters, key + '.jpg'), A, B, g.out, bilgi=bilgi)[0]
-            r['q_poster'] = True; r.update(bilgi); r['uretim_sn'] = round(time.time() - ts)
+            r['q_poster'] = True; r.update(bilgi); r['q_kamera'] = r.get('kamera_orani', 9) < 1.0; r['uretim_sn'] = round(time.time() - ts)
             r['dosya'] = os.path.basename(mp4); r['mb'] = round(os.path.getsize(mp4) / 1e6, 2)
             r.update(qc_video(mp4, g.out, slug))
         except Exception as e:
             r.update(hata=f'{type(e).__name__}: {e}', iz=traceback.format_exc()[-600:])
-        r['sonuc'] = 'PASS' if (r['q_poster'] and r['q_video'] and r['q_son']) else 'FAIL'
+        r['sonuc'] = 'PASS' if (r['q_poster'] and r['q_video'] and r['q_son'] and r['q_kamera']) else 'FAIL'
         json.dump(r, open(os.path.join(g.out, f'{slug}-qc.json'), 'w'), indent=1)
         if r['sonuc'] == 'FAIL':
             fails.append(key)
         el = time.time() - t0; n = i + 1
         print(f'ILERLEME {key} {r["sonuc"]} | is {n}/{len(pairs)} | genel ~{g.sira + n}/{toplam} %{100 * (g.sira + n) / toplam:.0f} | '
               f'gecen {el / 60:.1f} dk | kalan (bu is) {el / n * (len(pairs) - n) / 60:.1f} dk | '
-              + ' '.join(f'{k}={r.get(k)}' for k in ('q_poster', 'q_video', 'q_son', 'son_oran', 'bos_oran', 'sure', 'kare', 'kamera_orani', 'uretim_sn', 'hata')),
+              + ' '.join(f'{k}={r.get(k)}' for k in ('q_poster', 'q_video', 'q_son', 'q_kamera', 'son_oran', 'bos_oran', 'sure', 'kare', 'kamera_orani', 'sembol_buyume', 'uretim_sn', 'hata')),
               flush=True)
     print(f'OZET {len(pairs) - len(fails)}/{len(pairs)} PASS' + (f' FAIL: {",".join(fails)}' if fails else ''))
     sys.exit(1 if fails else 0)
