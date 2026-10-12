@@ -128,6 +128,7 @@ def sign_pair(P, sign_h, max_w_ratio=1.3):
 
 GEMINI_LEO_ASPECT = 0.941638608305275      # w/h of the merged-symbol layer in the approved Gemini & Leo design
 GEMINI_LEO_SIGNS = 0.9635                  # mean sqrt(w*h) of the two small signs / sign_h in that design
+CENTER_SCALE = 1.0                          # global size of the centre symbol vs. the 12 Oct design (Serdar decides)
 
 
 def sign_size(a, b, sign_h):
@@ -142,7 +143,7 @@ def center_scaled(layer, ref_h, a, b, sign_h, kind='merged'):
     - it never gets taller than there;
     - when the small signs look smaller than there (e.g. a wide Aquarius), the centre gets smaller by the same factor.
     kind='q' for the question mark (its own shape, only height and the sign factor apply)."""
-    f = min(1.0, sign_size(a, b, sign_h))
+    f = min(1.0, sign_size(a, b, sign_h)) * CENTER_SCALE
     if kind == 'q':
         k = ref_h * f / layer.size[1]
     else:
