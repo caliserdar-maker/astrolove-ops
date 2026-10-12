@@ -11,7 +11,7 @@ QC per pair (all must hold):
             placed exactly as pin_uret.build places them)
   q_halka : every merged-symbol pixel lies inside the ring's inner radius
   q_olcu  : p1, p2, p3 are 1000x1500
-Writes QC.csv, QC.json, FAIL.txt; with --kontak also KONTAK_P2.jpg and KONTAK_PARCA.jpg.
+Writes QC.csv, QC.json, FAIL.txt (only if a pair failed); with --kontak also KONTAK_P2.jpg and KONTAK_PARCA.jpg.
 """
 import argparse, csv, json, os, sys, time, traceback
 import numpy as np
@@ -127,7 +127,11 @@ def main():
         w = csv.DictWriter(fh, keys, extrasaction='ignore'); w.writeheader(); w.writerows(rows)
     json.dump(rows, open(os.path.join(g.out, 'QC.json'), 'w'), indent=1, default=str)
     fails = [r['cift'] for r in rows if not r['PASS']]
-    open(os.path.join(g.out, 'FAIL.txt'), 'w').write('\n'.join(fails) + ('\n' if fails else ''))
+    fp = os.path.join(g.out, 'FAIL.txt')                      # only written when something failed
+    if fails:
+        open(fp, 'w').write('\n'.join(fails) + '\n')
+    elif os.path.exists(fp):
+        os.remove(fp)
     if g.kontak:
         ok = [r for r in rows if not r.get('hata')]
         sl = lambda r: f"{r['a'].lower()}-and-{r['b'].lower()}"

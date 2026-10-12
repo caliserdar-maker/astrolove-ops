@@ -123,19 +123,25 @@ jobs:
         if: ${{ inputs.mod == 'hepsi' }}
         run: |
           set +e -uo pipefail   # Actions varsayilani bash -e; kapilar sonuna kadar kossun
-          mkdir -p _w/P2000 _o/PINLER _pv
+          mkdir -p _w/P2000 _w/refp _o/PINLER _o/DOGRULA_REF _pv
           rclone copy "$D/_POSTER2000" _w/P2000 -q --transfers 8
           N=$(ls _w/P2000/*.jpg | wc -l); echo "::warning::POSTER2000 $N"; [ "$N" = 78 ] || { echo "::error::78 poster yok"; exit 1; }
+          rclone copyto gdrive:AstroLoveArt_Gemini_Leo_2000.jpg _w/refp/GEMINI_LEO.jpg --drive-root-folder-id "$REF_DIR" -q
+          python3 sosyal/pin_v6/pin_toplu.py --posters _w/refp --out _o/DOGRULA_REF --pairs GEMINI_LEO > /dev/null
+          python3 sosyal/pin_v6/dogrula.py _o/DOGRULA_REF | sed 's/^/::warning::REF /'; DR=${PIPESTATUS[0]}
           python3 sosyal/pin_v6/pin_toplu.py --posters _w/P2000 --out _o/PINLER --kontak | tee _w/log.txt; RC=${PIPESTATUS[0]}
           grep OZET _w/log.txt | sed 's/^/::warning::/'
+          if [ -f _o/PINLER/FAIL.txt ]; then echo "::warning::FAIL.txt var: $(tr '\n' ' ' < _o/PINLER/FAIL.txt)"
+          else rclone deletefile "$D/PINLER/FAIL.txt" -q 2>/dev/null; echo "::warning::FAIL yok, Drive PINLER/FAIL.txt silindi (varsa)"; fi
           rclone copy _o/PINLER "$D/PINLER" -q --transfers 8
-          echo "::warning::DRIVE PINLER $(rclone lsf "$D/PINLER" | wc -l) dosya"
-          cp _o/PINLER/QC.* _o/PINLER/FAIL.txt _pv/
+          echo "::warning::DRIVE PINLER $(rclone lsf "$D/PINLER" | wc -l) dosya; FAIL.txt Drive'da: $(rclone lsf "$D/PINLER" --include FAIL.txt | wc -l)"
+          cp _o/PINLER/QC.* _pv/; cp _o/PINLER/FAIL.txt _pv/ 2>/dev/null
           python3 -c "
           from PIL import Image
           for k in ('KONTAK_P2','KONTAK_PARCA'):
               im=Image.open('_o/PINLER/'+k+'.jpg'); im.thumbnail((2400,2400)); im.save('_pv/'+k+'_kucuk.jpg',quality=80)"
-          echo "RC=$RC" >> "$GITHUB_ENV"
+          echo "DR=$DR RC=$RC" | tee _pv/SONUC.txt
+          echo "RC=$(( DR + RC ))" >> "$GITHUB_ENV"
       - name: link (Etsy salt okuma)
         if: ${{ inputs.mod == 'link' }}
         env:
