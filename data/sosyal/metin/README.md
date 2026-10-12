@@ -7,6 +7,8 @@ ChatGPT arastirmasiyla karsilastirildiktan sonra kesinlesecek. Yayin yok.
 | IG_KARUSEL_78.csv | cift_anahtari, burc_sol, burc_sag, caption, referans_hashtag, alt_metin_1..4 |
 | IG_REEL_78.csv | cift_anahtari, caption, referans_hashtag |
 | TIKTOK_78.csv | cift_anahtari, caption (tek paragraf, B sablonu: profilde tiklanabilir link yok), referans_hashtag, kapak_yazisi |
+| YOUTUBE_SHORTS_78.csv | cift_anahtari, baslik, aciklama (3 hashtag sonda), etiketler, kategori, made_for_kids, sentetik_icerik |
+| THREADS_78.csv | cift_anahtari, metin, konu_etiketi, alt_metin_1..4 |
 | FACEBOOK_78.csv | cift_anahtari, gonderi_metni (3 gorsel: slayt 2, 3, 4), reel_caption, referans_hashtag, alt_metin_2..4 |
 
 - Hashtag'ler yalniz caption / gonderi_metni / reel_caption icinde (metnin sonunda).
@@ -14,3 +16,5 @@ ChatGPT arastirmasiyla karsilastirildiktan sonra kesinlesecek. Yayin yok.
 - Sablonlar: `data/sosyal/arastirma/raporlar/INSTAGRAM_CLAUDE.md`, `TIKTOK_CLAUDE.md`, `FACEBOOK_CLAUDE.md` (AYNEN). Cift adi alfabetik (Gemini & Leo, Pisces & Scorpio).
 - Alt metinler: ornek isim yazilmaz ("the couple's two names"); gorsel tarifi `sosyal/ig_v6/onayli/` ve `sosyal/pin_v6/onayli/` dosyalarina gore.
 - Uret ve denetle: `python3 data/sosyal/metin/metin_78_uret.py` (PASS/FAIL; 78 satir, uzun/orta tire ve "+" yok, yasak ifade ve ornek isim yok, hashtag <= 5, caption <= 2200, iki burc dogru ve alfabetik).
+
+- YouTube ve Threads: `python3 data/sosyal/metin/metin_yt_threads_uret.py` (raporlar: YOUTUBE_SHORTS_CLAUDE.md, THREADS_CLAUDE.md).
