@@ -8,7 +8,7 @@ QC per pair (all must hold):
   q_parca : PosterR found the parts (merged, left sign, right sign, names), each non-empty, no exception
   q_boy   : in slides 1 and 2 the two small signs keep the poster's height relation
             (output height ratio / poster height ratio within 1 +- 0.05) and no sign is wider than 1.3 x target height.
-            Measured on the actual sign images ig_uret pastes (alpha bbox), poster heights from PosterR.
+            Output and poster heights both measured as alpha bbox of the same cut-out (output: as pasted; poster: at poster scale).
   q_bosluk: in slides 1 and 2 the centre symbol leaves >= 30 px free on both sides to the small signs
             (horizontal gap between the pasted alpha bboxes on the slide).
   q_olcu  : 4 files, each 1080x1350
@@ -27,9 +27,12 @@ from pin_toplu import contact
 
 
 def qc_poster(P):
+    """parts found + the two small-sign heights ON THE POSTER, measured exactly like the output
+    (alpha bbox of the same cut-out ig_uret scales and pastes; the PosterR component box can differ from it)."""
     parts = [P.merged, P.sign_a, P.sign_b, P.names_row]
-    return {'q_parca': all(c is not None and c[3] > 0 and c[4] > 0 for c in parts),
-            'boy_sol': int(P.sign_a[4]), 'boy_sag': int(P.sign_b[4])}
+    hp = [glyph_bbox(P.layer(c, only_label=False)) for c in (P.sign_a, P.sign_b)]
+    return {'q_parca': all(c is not None and c[3] > 0 and c[4] > 0 for c in parts) and None not in hp,
+            'boy_sol': hp[0][3] - hp[0][1] if hp[0] else 0, 'boy_sag': hp[1][3] - hp[1][1] if hp[1] else 0}
 
 
 def glyph_bbox(im, thr=32):
