@@ -4,6 +4,8 @@ name: pin-v6
 # mod ornek : 78 poster (Drive POSTER78_CHATGPT_7200x10800_20261008, 9 Eki surumu) -> 2000x3000 (yalniz olcekleme),
 #             poster kapisi (olcu, lacivert, OCR'da Serdar/Lena yok) + POSTER_KONTAK, Gemini & Leo onayli/ dogrulamasi,
 #             CAPRICORN_SAGITTARIUS ornegi -> TEMP/PIN_V6_20261012/ORNEK/. 2000'lik posterler TEMP/PIN_V6_20261012/_POSTER2000/.
+# mod tek   : _POSTER2000'den tek cift yeniden -> ORNEK/ (eski dosyalarin yerine) + Gemini & Leo onayli/ dogrulamasi +
+#             PIN_METIN_234_LINKLI.csv guncel PIN_METIN_234.csv'den yeniden (linkler ayni, Etsy cagrisi yok).
 # mod hepsi : 78 cift x 3 pin + parcalar + QC (PASS/FAIL) + KONTAK_P2 / KONTAK_PARCA -> TEMP/PIN_V6_20261012/PINLER/.
 # mod link  : PIN_METIN_234.csv etsy_link doldurma. ETSY SALT OKUMA (public GET, yalniz API anahtari, token yok).
 # Onizleme (kucuk dosyalar) pin-v6-onizleme dalina yazilir. Sir loga yazilmaz.
@@ -15,7 +17,8 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-      mod: {description: "ornek | hepsi | link", required: true, type: choice, options: [ornek, hepsi, link]}
+      mod: {description: "ornek | tek | hepsi | link", required: true, type: choice, options: [ornek, tek, hepsi, link]}
+      cift: {description: "tek: cift anahtari (ornek CAPRICORN_SAGITTARIUS)", required: false, default: "CAPRICORN_SAGITTARIUS"}
 
 jobs:
   is:
@@ -90,6 +93,29 @@ jobs:
           cp _o/ORNEK/*.jpg _o/ORNEK/QC.* _pv/ 2>/dev/null; cp _o/KONTROL/* _pv/; cp _o/DOGRULA_78/gemini-and-leo-*p*.jpg _pv/ 2>/dev/null
           echo "PK=$PK DR=$DR D78=$D78 OR=$OR" | tee _pv/SONUC.txt
           echo "RC=$(( PK + DR + OR ))" >> "$GITHUB_ENV"
+      - name: tek
+        if: ${{ inputs.mod == 'tek' }}
+        env:
+          CIFT: ${{ inputs.cift }}
+        run: |
+          set +e -uo pipefail   # Actions varsayilani bash -e; kapilar sonuna kadar kossun
+          case "$CIFT" in *[!A-Z_]*|"") echo "::error::cift A-Z_"; exit 1 ;; esac
+          mkdir -p _w/P2000 _w/refp _o/ORNEK _o/DOGRULA_REF _pv
+          rclone copyto "$D/_POSTER2000/$CIFT.jpg" "_w/P2000/$CIFT.jpg" -q || { echo "::error::poster yok $CIFT"; exit 1; }
+          rclone copyto gdrive:AstroLoveArt_Gemini_Leo_2000.jpg _w/refp/GEMINI_LEO.jpg --drive-root-folder-id "$REF_DIR" -q
+          python3 sosyal/pin_v6/pin_toplu.py --posters _w/refp --out _o/DOGRULA_REF --pairs GEMINI_LEO > /dev/null
+          python3 sosyal/pin_v6/dogrula.py _o/DOGRULA_REF | sed 's/^/::warning::REF /'; DR=${PIPESTATUS[0]}
+          python3 sosyal/pin_v6/pin_toplu.py --posters _w/P2000 --out _o/ORNEK --pairs "$CIFT" | tee _w/orn.txt; OR=${PIPESTATUS[0]}
+          grep OZET _w/orn.txt | sed 's/^/::warning::ORNEK /'
+          rclone sync _o/ORNEK "$D/ORNEK" -q && echo "::warning::DRIVE ORNEK $(rclone lsf "$D/ORNEK" | tr '\n' ' ')"
+          rclone copy _o/DOGRULA_REF "$D/DOGRULA/REF_2000" -q
+          rclone copyto "$D/PIN_METIN_234_LINKLI.csv" _w/eski_linkli.csv -q
+          python3 sosyal/pin_v6/link_birlestir.py sosyal/pin_v6/PIN_METIN_234.csv _w/eski_linkli.csv _o/PIN_METIN_234_LINKLI.csv | tee _w/lb.txt; LB=${PIPESTATUS[0]}
+          grep OZET _w/lb.txt | sed 's/^/::warning::/'
+          if [ "$LB" = 0 ]; then rclone copyto _o/PIN_METIN_234_LINKLI.csv "$D/PIN_METIN_234_LINKLI.csv" -q && echo "::warning::DRIVE PIN_METIN_234_LINKLI.csv yeniden yazildi"; fi
+          cp _o/ORNEK/* _o/PIN_METIN_234_LINKLI.csv _pv/; cp _o/DOGRULA_REF/gemini-and-leo-*p2.jpg _pv/ 2>/dev/null
+          echo "DR=$DR OR=$OR LB=$LB" | tee _pv/SONUC.txt
+          echo "RC=$(( DR + OR + LB ))" >> "$GITHUB_ENV"
       - name: hepsi
         if: ${{ inputs.mod == 'hepsi' }}
         run: |
