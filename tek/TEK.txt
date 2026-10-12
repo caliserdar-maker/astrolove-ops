@@ -1,0 +1,13 @@
+gemini-and-leo: 1/720 kare  %0  gecen 0 sn  kalan 61 sn
+gemini-and-leo: 61/720 kare  %8  gecen 8 sn  kalan 89 sn
+gemini-and-leo: 121/720 kare  %17  gecen 18 sn  kalan 88 sn
+gemini-and-leo: 181/720 kare  %25  gecen 32 sn  kalan 94 sn
+gemini-and-leo: 241/720 kare  %33  gecen 46 sn  kalan 92 sn
+gemini-and-leo: 301/720 kare  %42  gecen 57 sn  kalan 79 sn
+gemini-and-leo: 361/720 kare  %50  gecen 66 sn  kalan 66 sn
+gemini-and-leo: 421/720 kare  %58  gecen 75 sn  kalan 54 sn
+gemini-and-leo: 481/720 kare  %67  gecen 86 sn  kalan 43 sn
+gemini-and-leo: 541/720 kare  %75  gecen 100 sn  kalan 33 sn
+gemini-and-leo: 601/720 kare  %83  gecen 108 sn  kalan 21 sn
+gemini-and-leo: 661/720 kare  %92  gecen 112 sn  kalan 10 sn
+gemini-and-leo: 720/720 kare  %100  gecen 115 sn  kalan 0 sn

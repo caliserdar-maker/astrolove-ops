@@ -1,1 +1,1 @@
-KR=0 DG=1 KF=0
+KR=0 DG=1 TR=1 MR=0
