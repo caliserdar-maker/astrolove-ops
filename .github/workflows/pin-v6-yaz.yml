@@ -13,7 +13,7 @@ on:
     inputs:
       mod:
         type: choice
-        options: [yedek, sil, tek, hepsi]
+        options: [yedek, sil, tek, hepsi, kontrol]
         default: yedek
       baslangic:
         description: "Plan gunu 1 (YYYY-MM-DD)"
@@ -62,7 +62,7 @@ jobs:
           exit $rc
 
       - name: Plan (baslangic) + yaz
-        if: ${{ inputs.mod == 'tek' || inputs.mod == 'hepsi' }}
+        if: ${{ inputs.mod == 'tek' || inputs.mod == 'hepsi' || inputs.mod == 'kontrol' }}
         env:
           MOD: ${{ inputs.mod }}
           BAS: ${{ inputs.baslangic }}
