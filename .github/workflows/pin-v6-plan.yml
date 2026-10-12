@@ -1,0 +1,49 @@
+name: pin-v6-plan
+
+# KURU: Pinterest V6 (234 pin) Metricool takvimi. Metricool'a YAZMA YOK (yalniz GET pano listesi).
+# Girdi: Drive TEMP/PIN_V6_20261012/PIN_METIN_234_LINKLI.csv + PINLER/ (dosya id). Cikti: Drive TEMP/PIN_V6_20261012/PLAN/.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      D: gdrive:ASTROLOVE/TEMP/PIN_V6_20261012
+    steps:
+      - uses: actions/checkout@v4
+      - name: rclone + token
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            export RCLONE_CONFIG_GDRIVE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET"
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+          mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/METRICOOL_TOKEN.json" _work/mc.json
+          python3 -c "import json;print('::add-mask::'+json.load(open('_work/mc.json'))['userToken'])"
+      - name: Oku + plan
+        run: |
+          set -uo pipefail
+          rclone copyto "$D/PIN_METIN_234_LINKLI.csv" _out/PIN_METIN_234_LINKLI.csv
+          rclone lsjson "$D/PINLER" --files-only --no-modtime > _out/PINLER.json
+          echo "PINLER dosya: $(python3 -c "import json;print(len(json.load(open('_out/PINLER.json'))))")" | tee -a "$GITHUB_STEP_SUMMARY"
+          python3 scripts/sosyal/metricool_panolar.py _work/mc.json _out 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+          python3 scripts/sosyal/pin_v6_plan.py --metin _out/PIN_METIN_234_LINKLI.csv --sira data/sosyal/pinterest/SIRA_78.csv \
+            --panolar _out/PANOLAR.json --pinler _out/PINLER.json --cikti _out/PIN_V6_PLAN_KURU.csv 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+          rc=${PIPESTATUS[0]}
+          rclone copy _out "$D/PLAN" --include "PIN_V6_PLAN_KURU.csv" --include "PANOLAR*.json" --include "PINLER.json"
+          rclone lsl "$D/PLAN" | tee -a "$GITHUB_STEP_SUMMARY"
+          exit $rc
+      - if: always()
+        run: rm -rf _work ~/.config/rclone
