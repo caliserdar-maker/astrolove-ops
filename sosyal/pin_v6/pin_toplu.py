@@ -42,7 +42,7 @@ def qc_poster(P):
     r['q_boy'] = abs(r['boy_oran'] - 1) <= 0.05 and max(wa, wb) <= 1.3 * SIGN_H
     # P2 placement, same arithmetic as pin_uret.build (W 1000, D 640, lib.paste rounding)
     Wc, D = PU.W, 640
-    center = PU.lib.scale_h(P.layer(P.merged, only_label=False), round(410 * rr))
+    center = PU.center_scaled(P.layer(P.merged, only_label=False), 410, oa, ob, SIGN_H)
     center = PU.fit_center(center, D, oa, ob)
     al = np.asarray(center)[..., 3].astype(np.float32)
     gx = (np.mgrid[0:al.shape[0], 0:al.shape[1]][1] * al).sum() / al.sum()

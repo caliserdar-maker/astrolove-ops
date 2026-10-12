@@ -76,7 +76,7 @@ jobs:
           python3 sosyal/ig_v6/ig_toplu.py --posters _w/P2000 --out _o/ORNEK --pairs "$CIFTLER" | tee _w/orn.txt; OR=${PIPESTATUS[0]}
           grep OZET _w/orn.txt | sed 's/^/::warning::ORNEK /'
           INC=(); for k in ${SLAYTLAR//,/ }; do INC+=(--include "*-ig-$k.jpg"); done
-          for c in ${CIFTLER//,/ }; do rclone copy "_o/ORNEK/$c" "$D/$KLASOR/$c" -q "${INC[@]}"; cp _o/ORNEK/$c/*.jpg _pv/; done
+          for c in ${CIFTLER//,/ }; do rclone copy "_o/ORNEK/$c" "$D/$KLASOR/$c" -q "${INC[@]}"; for k in ${SLAYTLAR//,/ }; do cp _o/ORNEK/$c/*-ig-$k.jpg _pv/; done; done
           rclone copy _o/ORNEK "$D/$KLASOR" -q --include "QC.*" --include "FAIL.txt"
           rclone copy _o/DOGRULA_REF/GEMINI_LEO "$D/DOGRULA/REF_2000" -q
           echo "::warning::DRIVE $KLASOR $(rclone lsf -R --files-only "$D/$KLASOR" | wc -l) dosya"
