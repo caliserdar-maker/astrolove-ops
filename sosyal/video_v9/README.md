@@ -26,3 +26,13 @@ Cozulen .m4a dosyasi depoya commit edilmez.
 ## Kurallar
 - Poster pikselleri yalniz kesilir, olceklenir, tasinir. Yapay zeka ile degistirilmez.
 - Gorsel yazilarinda cumle sonu nokta yok, "and" yerine "&".
+
+## Toplu uretim (Actions: `video-v9.yml`)
+- `mod=ornek`: Drive `AstroLoveArt_Gemini_Leo_2000.jpg` ile 6 kare + `dogrula.py` (her kare < 2.5). PASS ise CAPRICORN_SAGITTARIUS
+  sessiz + 3 muzikli hal -> Drive `TEMP/VIDEO_V9_20261012/ORNEK/`.
+- `mod=hepsi`: `_POSTER2000` (pin-uretim'in 78 posteri) -> matrix (is basina `grup` cift) `video_toplu.py` -> `SESSIZ/`;
+  `kontak.py` QC.csv / QC.json / FAIL.txt / KONTAK_9s.jpg.
+  QC: q_poster (PosterR hatasiz), q_video (1080x1920, 30/1 fps, 720 kare, 24.0 sn, h264), q_son (22 sn karesinde
+  "Make it yours" bandinda >= %0.5 parlak piksel; onayli karede %7.1, bos bantta %0).
+- `mod=muzik muzik=N`: SESSIZ/ + muzik N (kopya, yeniden kodlama yok) -> `FINAL/`, ses ve video suresi 24 sn kontrolu.
+- Parola yalniz repo secret `MUZIK_PAROLA` (env ile `openssl -pass env:`).
