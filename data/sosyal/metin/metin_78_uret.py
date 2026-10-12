@@ -3,6 +3,7 @@
 Kaynak sablonlar (AYNEN): data/sosyal/arastirma/raporlar/
   INSTAGRAM_CLAUDE.md C.1, C.2, C.4, B.3 | TIKTOK_CLAUDE.md C.1 (B sablonu), C.4, B.3
   FACEBOOK_CLAUDE.md C.1, C.2, C.3, C.4
+Alt metinler 12 Eki duzeltmesi: ornek isim yok; gorsel sosyal/ig_v6/onayli ve pin_v6/onayli'ye gore.
 Calistir: python3 data/sosyal/metin/metin_78_uret.py  (uretir + denetler, FAIL'de cikis 1)
 """
 import csv
@@ -34,16 +35,20 @@ def ig_karusel(a, b):
 
 
 def ig_alt(a, b):
+    # Gorsel: sosyal/ig_v6/onayli/IG_1..4_*_NIHAI.jpg; ornek isim yazilmaz (Serdar, 12 Eki)
     return [
-        f"Slide 1. A navy background with gold zodiac art. Text on the image reads: "
-        f"{a} & {b}, as one? Zodiac art with your names & message. Swipe to reveal.",
+        f"Slide 1. A navy background with the gold {a} sign on the left and the gold {b} sign "
+        "on the right, and a gold question mark between them inside a thin gold circle. "
+        f"Text on the image reads: {a} & {b}, as one? Zodiac art with your names & message. "
+        "Swipe to reveal.",
         f"Slide 2. The {a} sign and the {b} sign in gold on navy, and one gold symbol that "
-        "merges both signs. Below it, the sample names Emily and James joined by an infinity "
+        "merges both signs. Below it, the couple's two names joined by an infinity "
         "sign. Text on the image reads: Two signs, Your shared symbol, Your names, your message.",
-        f"Slide 3. The personalized poster hanging on a wall. It shows the merged {a} and {b} "
-        "gold symbol on navy with two names and a short message.",
-        f"Slide 4. Close-up of the poster with the names Emily and James under the gold {a} and "
-        f"{b} symbol. Text on the image reads: Make it yours, AstroLoveArt, On Etsy.",
+        f"Slide 3. The personalized poster hanging on a cream wall. It shows the merged {a} and {b} "
+        "gold symbol on navy, the two signs, the couple's two names and a short message.",
+        f"Slide 4. Close-up of the poster with the couple's two names under the gold {a} and "
+        f"{b} signs, and a short message. Text below the poster reads: Make it yours, "
+        "AstroLoveArt, On Etsy.",
     ]
 
 
@@ -84,14 +89,15 @@ def fb_reel(a, b):
 
 
 def fb_alt(a, b):
+    # Gorsel: sosyal/ig_v6/onayli/IG_2..4_*_NIHAI.jpg; ornek isim yazilmaz (Serdar, 12 Eki)
     return [
         f"Slide 2. The {a} sign and the {b} sign in gold on navy, and one gold symbol that "
-        "merges both signs, with two sample names below. Text on the image reads: "
+        "merges both signs, with the couple's two names below. Text on the image reads: "
         "Two signs, Your shared symbol.",
-        f"Slide 3. A room scene with the personalized {a} and {b} poster on a wall: "
-        "one gold merged symbol on navy with two names and a short message.",
-        f"Slide 4. Close-up of the poster showing the gold {a} and {b} symbol and two sample "
-        "names. Text on the image reads: Make it yours, AstroLoveArt, On Etsy.",
+        f"Slide 3. A room scene with the personalized {a} and {b} poster on a cream wall: "
+        "one gold merged symbol on navy with the couple's two names and a short message.",
+        f"Slide 4. Close-up of the poster showing the gold {a} and {b} signs and the couple's two "
+        "names. Text below the poster reads: Make it yours, AstroLoveArt, On Etsy.",
     ]
 
 
@@ -114,11 +120,11 @@ def uret():
         ig_r.append([k, ig_reel(a, b), IG_REEL_HT])
         tt.append([k, tiktok(a, b), TT_HT, tiktok_kapak(a, b)])
         fb.append([k, fb_gonderi(a, b), fb_reel(a, b), FB_HT, *fb_alt(a, b)])
-    yaz("IG_KARUSEL_78.csv", ["cift_anahtari", "burc_sol", "burc_sag", "caption", "hashtagler",
+    yaz("IG_KARUSEL_78.csv", ["cift_anahtari", "burc_sol", "burc_sag", "caption", "referans_hashtag",
                               "alt_metin_1", "alt_metin_2", "alt_metin_3", "alt_metin_4"], ig_k)
-    yaz("IG_REEL_78.csv", ["cift_anahtari", "caption", "hashtagler"], ig_r)
-    yaz("TIKTOK_78.csv", ["cift_anahtari", "caption", "hashtagler", "kapak_yazisi"], tt)
-    yaz("FACEBOOK_78.csv", ["cift_anahtari", "gonderi_metni", "reel_caption", "hashtagler",
+    yaz("IG_REEL_78.csv", ["cift_anahtari", "caption", "referans_hashtag"], ig_r)
+    yaz("TIKTOK_78.csv", ["cift_anahtari", "caption", "referans_hashtag", "kapak_yazisi"], tt)
+    yaz("FACEBOOK_78.csv", ["cift_anahtari", "gonderi_metni", "reel_caption", "referans_hashtag",
                             "alt_metin_2", "alt_metin_3", "alt_metin_4"], fb)
 
 
@@ -127,7 +133,7 @@ def uret():
 YASAK_KAR = ["—", "–", "‒", "―", "−", "+"]
 YASAK_SOZ = ["constellation", "tarot", "tattoo", "wallpaper", "friendship", "tag your",
              "comment your", "best seller", "bestseller", "frame", "paper", "size", "price",
-             "$", "astrolove ", "astrolove,", "astrolove."]
+             "$", "emily", "james", "sample name", "astrolove ", "astrolove,", "astrolove."]
 HATALAR = []
 
 
@@ -186,15 +192,15 @@ def denetle():
             kontrol(sorted([a, b]) == [a, b], f"{ad} {r['cift_anahtari']}: alfabetik degil")
             if "burc_sol" in r:
                 kontrol((r["burc_sol"], r["burc_sag"]) == (a, b), f"{ad} {r['cift_anahtari']}: burc_sol/sag")
-            kontrol(ht_say(r["hashtagler"]) <= ht_sinir, f"{ad} {r['cift_anahtari']}: hashtag > {ht_sinir}")
-            metin_denetle(ad, r, "hashtagler", r["hashtagler"], a, b, cift_adi_gerekli=False)
+            kontrol(ht_say(r["referans_hashtag"]) <= ht_sinir, f"{ad} {r['cift_anahtari']}: hashtag > {ht_sinir}")
+            metin_denetle(ad, r, "referans_hashtag", r["referans_hashtag"], a, b, cift_adi_gerekli=False)
             for alan in alanlar:
                 v = r[alan]
                 metin_denetle(ad, r, alan, v, a, b)
                 if alan in ("caption", "gonderi_metni", "reel_caption"):
                     kontrol(utf16(v) <= 2200, f"{ad} {r['cift_anahtari']} {alan}: {utf16(v)} > 2200")
                     kontrol(ht_say(v) <= 5, f"{ad} {r['cift_anahtari']} {alan}: hashtag > 5")
-                    kontrol(v.endswith(r["hashtagler"]), f"{ad} {r['cift_anahtari']} {alan}: hashtagler sutunuyla uyusmuyor")
+                    kontrol(v.endswith(r["referans_hashtag"]), f"{ad} {r['cift_anahtari']} {alan}: referans_hashtag ile bitmiyor")
                 if alan.startswith("alt_metin"):
                     kontrol(utf16(v) <= 1000, f"{ad} {r['cift_anahtari']} {alan}: alt metin > 1000")
             if ad == "TIKTOK_78.csv":
@@ -233,10 +239,14 @@ def karsilastir():
                        ("FB gonderi", bf and bf[0] == fb_gonderi(a, b)),
                        ("FB Reel", bf and bf[1] == fb_reel(a, b)),
                        ("FB alt metin 2-4", bf and bf[3].split("\n") == fb_alt(a, b))]:
-            kontrol(bool(ok), f"ornek farkli: {k} {ad}")
             not_ = ""
+            if "alt metin" in ad:
+                # bilincli fark (12 Eki): ornek isim yok, gorsel IG/PIN v6 onayli dosyalara gore
+                not_ = "bilincli: ornek isim yerine the couple's two names, gorsele gore"
+            else:
+                kontrol(bool(ok), f"ornek farkli: {k} {ad}")
             if ad.startswith("IG") and (ia, ib) != (a, b):
-                not_ = f"rapor sirasi {ia} & {ib}; CSV alfabetik {a} & {b} (yalniz sira farkli)"
+                not_ += f" rapor sirasi {ia} & {ib}; CSV alfabetik {a} & {b} (yalniz sira farkli)"
             satirlar.append(f"{k:16} {ad:20} {'AYNI' if ok else 'FARKLI'} {not_}")
     return satirlar
 
@@ -254,4 +264,4 @@ if __name__ == "__main__":
         print("FAIL", len(HATALAR))
         print("\n".join(HATALAR[:40]))
         sys.exit(1)
-    print("PASS: 4 dosya x 78 satir, tire/+ yok, yasak ifade yok, hashtag <= 5, caption <= 2200, cift adlari dogru")
+    print("PASS: 4 dosya x 78 satir, tire/+ yok, yasak ifade ve ornek isim yok, hashtag <= 5, caption <= 2200, cift adlari dogru")
