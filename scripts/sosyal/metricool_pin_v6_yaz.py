@@ -82,7 +82,7 @@ def dogrula(r, p):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--token-dosya', required=True); ap.add_argument('--mod', required=True, choices=['yedek', 'sil', 'tek', 'hepsi'])
+    ap.add_argument('--token-dosya', required=True); ap.add_argument('--mod', required=True, choices=['yedek', 'sil', 'tek', 'hepsi', 'kontrol'])
     ap.add_argument('--cikti', required=True); ap.add_argument('--plan')
     a = ap.parse_args()
     os.makedirs(a.cikti, exist_ok=True)
@@ -135,6 +135,24 @@ def main():
     def mevcut():
         return {anahtar(p['publicationDate']['dateTime'], (p.get('pinterestData') or {}).get('pinLink')): p
                 for p in liste(mc, datetime.combine(bas, datetime.min.time()), gun) if aglar(p) == ['pinterest']}
+
+    if a.mod == 'kontrol':
+        # SALT OKUMA: plan araligindaki tum Pinterest gonderileri; saatten bagimsiz (link+baslik) eslestirme
+        tum = [p for p in liste(mc, datetime.combine(bas, datetime.min.time()) - timedelta(days=1), gun + 2) if aglar(p) == ['pinterest']]
+        from collections import defaultdict
+        idx = defaultdict(list)
+        for p in tum:
+            pd = p.get('pinterestData') or {}
+            idx[(pd.get('pinLink'), pd.get('pinTitle'))].append(p)
+        sorun = []
+        for r in plan:
+            m = idx.get((r['link'], r['baslik']), [])
+            t = [x['publicationDate']['dateTime'][:16] for x in m]
+            if len(m) != 1 or t[0] != r['tarih_saat'].replace(' ', 'T'):
+                sorun.append(f"{r['tarih_saat']} {r['cift']} {r['pin']}: {len(m)} eslesme, saat {t}, id {[x.get('id') for x in m]}, "
+                             f"durum {[mpb.pin_durum(x) for x in m]}")
+        print(f'KONTROL: aralikta {len(tum)} Pinterest gonderisi, plan {len(plan)}, sorunlu {len(sorun)}' + ''.join('\n  ' + x for x in sorun[:20]))
+        sys.exit(0 if not sorun else 6)
 
     var = mevcut()
     sec = plan[:1] if a.mod == 'tek' else plan
