@@ -180,6 +180,14 @@ def build(poster_path, A, B, out_dir, muzik=None, kareler=None, bilgi=None):
         cw, ch = W / z, H / z; x0 = (W - cw) / 2; y0 = (H - ch) / 2
         return np.asarray(Image.fromarray(np.clip(img, 0, 255).astype(np.uint8)).resize((W, H), Image.LANCZOS, box=(x0, y0, x0 + cw, y0 + ch))).astype(np.float32)
 
+    T_G0, T_G1 = 13.9, 15.4
+
+    def grown(t):
+        g = 1 + (G - 1) * ease(t, T_G0, T_G1)
+        lay = MER.resize((max(1, round(MER.size[0] * g)), max(1, round(MER.size[1] * g))), Image.LANCZOS)
+        x, y = centred(lay)
+        return full(lay, x, y)
+
     def navy(t):
         keep = 1 - ease(t, 14.4, 15.4)
         f = BG + (BASE - BG) * keep
@@ -188,7 +196,8 @@ def build(poster_path, A, B, out_dir, muzik=None, kareler=None, bilgi=None):
         d, reveal = dust_and_reveal(t)
         aA = ease(t, 8.4, 9.4) * (1 - ease(t, 11.0, 12.0))
         aB = ease(t, 11.6, 12.6) * keep
-        for (c, a), k in [(t1, a1), (LQ, aq), (LM, reveal), (tA, aA), (tB, aB)]:
+        lm = LM if (G <= 1.0 or t < T_G0) else grown(t)
+        for (c, a), k in [(t1, a1), (LQ, aq), (lm, reveal), (tA, aA), (tB, aB)]:
             if np.any(np.asarray(k) > 0):
                 al = a * k; f = f * (1 - al[..., None]) + c * al[..., None]
         if d is not None:
@@ -199,10 +208,22 @@ def build(poster_path, A, B, out_dir, muzik=None, kareler=None, bilgi=None):
 
     # ---------- wall: start on the poster's own symbol (same size and place as the navy symbol), then pull back
     sp = PW / P.w
-    f_out = MER.size[1] / (P.merged[4] + 20) * ZN
     pcx = P.merged[1] + P.merged[3] / 2; pcy = P.merged[2] + P.merged[4] / 2
-    sx = W / 2 + (mx - W / 2) * ZN; sy = H / 2 + (my - H / 2) * ZN
+    # The orbit symbol is small (65%). To keep the match cut, the camera would have to start wider than the wall
+    # image. Instead the symbol alone grows gently by G while the orbit, signs and names fade out (13.9-15.4 s),
+    # so the poster's symbol appears at exactly the same size and place and the camera can still pull back.
+    cw0 = W * sp / (MER.size[1] / (P.merged[4] + 20) * ZN)
+    G = max(1.0, cw0 / 2160.0 * 1.12)                       # 12% headroom so a short pull-back always remains
+    if G > 1.0:
+        MER_G = MER.resize((round(MER.size[0] * G), round(MER.size[1] * G)), Image.LANCZOS)
+    else:
+        MER_G = MER
+    mxg, myg = centred(MER_G)
+    f_out = MER_G.size[1] / (P.merged[4] + 20) * ZN
+    sx = W / 2 + (mxg - W / 2) * ZN; sy = H / 2 + (myg - H / 2) * ZN
     cw_a = W * sp / f_out
+    if bilgi is not None:
+        bilgi['sembol_buyume'] = round(G, 3)
     if bilgi is not None:
         bilgi['kamera_orani'] = round(cw_a / 2160, 3)
     # a very large symbol on the poster (ARIES_CAPRICORN) would need a crop wider than the wall image: start from the
