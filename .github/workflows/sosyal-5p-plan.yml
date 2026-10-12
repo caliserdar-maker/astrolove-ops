@@ -114,7 +114,10 @@ jobs:
               time.sleep(15)
           hata = []
           for a in ad:
-              c, t, r = prob(f'{k}/{urllib.parse.quote(a)}')
+              for j in range(5):  # tekil 5xx (Pages 503) gecici: 5 deneme, 10 sn ara
+                  c, t, r = prob(f'{k}/{urllib.parse.quote(a)}')
+                  if c == '200' or not c.startswith('5'): break
+                  time.sleep(10)
               if c != '200' or not t.startswith('image/') or r: hata.append(f'{a} {c} {t} {r}')
           print(f'KARUSEL PROB {len(ad) - len(hata)}/{len(ad)} PASS' + ''.join('\n  ' + h for h in hata[:10]))
           sys.exit(1 if hata else 0)
