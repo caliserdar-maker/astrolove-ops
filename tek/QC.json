@@ -1,0 +1,20 @@
+[
+ {
+  "cift": "CAPRICORN_SAGITTARIUS",
+  "a": "Capricorn",
+  "b": "Sagittarius",
+  "poster_olcu": "2000x3000",
+  "q_parca": true,
+  "boy_sol": 195,
+  "boy_sag": 182,
+  "boy_oran": 1.071,
+  "q_boy": true,
+  "halka_ic_r": 784.9,
+  "sembol_max_r": 604.5,
+  "q_halka": true,
+  "merged_parca_sayisi": 1,
+  "q_olcu": true,
+  "hata": "",
+  "PASS": true
+ }
+]
