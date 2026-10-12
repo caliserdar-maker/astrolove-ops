@@ -5,7 +5,8 @@ Usage:
 Pair key is alphabetic (CLAUDE.md): first sign = --a (left small sign), second = --b (right).
 QC per pair (all must hold):
   q_parca : 5 parts found (merged, left sign, right sign, names, message), each non-empty
-  q_boy   : left / right small sign heights within 25% of each other (max/min <= 1.25)
+  q_boy   : P2 small signs (pin_uret.sign_pair, common scale): output height ratio left/right = poster ratio +-5%,
+            and no sign wider than 1.3 x target height (P2 sign_h 120 px)
   q_halka : every merged-symbol pixel lies inside the ring's inner radius
   q_olcu  : p1, p2, p3 are 1000x1500
 Writes QC.csv, QC.json, FAIL.txt; with --kontak also KONTAK_P2.jpg and KONTAK_PARCA.jpg.
@@ -18,15 +19,24 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import pin_uret as PU
 
+SIGN_H = 120  # P2 target height of the small signs (pin_uret.build)
+
 
 def qc_poster(P):
     r = {}
     parts = [P.merged, P.sign_a, P.sign_b, P.names_row, P.msg_row]
     r['q_parca'] = all(c is not None and c[3] > 0 and c[4] > 0 for c in parts)
-    ha, hb = int(P.sign_a[4]), int(P.sign_b[4])
+    ha, hb = int(P.sign_a[4]), int(P.sign_b[4])               # poster: cut-box heights of the two small signs
     r['boy_sol'], r['boy_sag'] = ha, hb
-    r['boy_oran'] = round(max(ha, hb) / max(1, min(ha, hb)), 3)
-    r['q_boy'] = r['boy_oran'] <= 1.25
+    oa, ob, _ = PU.sign_pair(P, SIGN_H)                       # exactly the layers pasted on P2
+
+    def box(im):
+        ys, xs = np.nonzero(np.asarray(im)[..., 3] > 128)
+        return xs.max() - xs.min() + 1, ys.max() - ys.min() + 1
+    (wa, oha), (wb, ohb) = box(oa), box(ob)
+    r['p2_sol'], r['p2_sag'] = f'{wa}x{oha}', f'{wb}x{ohb}'
+    r['boy_oran'] = round((oha / ohb) / (ha / hb), 3)          # output ratio / poster ratio
+    r['q_boy'] = abs(r['boy_oran'] - 1) <= 0.05 and max(wa, wb) <= 1.3 * SIGN_H
     # ring = open arc (gap at the bottom): centre from a least-squares circle fit, inner radius = 1st pct distance
     comps = sorted(P.comps, key=lambda c: -c[5])
     ring_ids = [c[0] for c in comps[:6] if c[5] / float(c[3] * c[4]) < 0.03 and c[3] > 0.6 * P.w]
@@ -97,7 +107,7 @@ def main():
         print(f'[{i}/{n}] {100 * i / n:5.1f}% gecen {el / 60:5.1f} dk kalan {eta / 60:5.1f} dk  {key} '
               f'{"PASS" if rec["PASS"] else "FAIL"} {rec.get("hata", "")}', flush=True)
     keys = ['cift', 'a', 'b', 'poster_olcu', 'PASS', 'q_parca', 'q_boy', 'q_halka', 'q_olcu', 'boy_sol', 'boy_sag',
-            'boy_oran', 'halka_ic_r', 'sembol_max_r', 'merged_parca_sayisi', 'hata']
+            'p2_sol', 'p2_sag', 'boy_oran', 'halka_ic_r', 'sembol_max_r', 'merged_parca_sayisi', 'hata']
     with open(os.path.join(g.out, 'QC.csv'), 'w', newline='', encoding='utf-8') as fh:
         w = csv.DictWriter(fh, keys, extrasaction='ignore'); w.writeheader(); w.writerows(rows)
     json.dump(rows, open(os.path.join(g.out, 'QC.json'), 'w'), indent=1, default=str)
