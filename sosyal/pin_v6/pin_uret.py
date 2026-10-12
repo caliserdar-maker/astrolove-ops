@@ -126,10 +126,35 @@ def sign_pair(P, sign_h, max_w_ratio=1.3):
     return sc(la), sc(lb), L.stroke_width(lib.scale_h(tall, 150)), k / k_nom
 
 
-def fit_center(center, D, a, b, gap=34):
-    """The centre symbol may not crowd the two small signs: at least `gap` px free on each side
-    (a wide merged symbol next to wide signs, e.g. Aquarius & Aquarius, is scaled down a little)."""
-    max_w = min(D * 0.78, D - max(a.size[0], b.size[0]) - 2 * gap)
+GEMINI_LEO_ASPECT = 0.941638608305275      # w/h of the merged-symbol layer in the approved Gemini & Leo design
+GEMINI_LEO_SIGNS = 0.9635                  # mean sqrt(w*h) of the two small signs / sign_h in that design
+
+
+def sign_size(a, b, sign_h):
+    """how big the two small signs look, relative to the approved Gemini & Leo design (1.0 there)"""
+    g = ((a.size[0] * a.size[1]) ** 0.5 + (b.size[0] * b.size[1]) ** 0.5) / 2
+    return g / sign_h / GEMINI_LEO_SIGNS
+
+
+def center_scaled(layer, ref_h, a, b, sign_h, kind='merged'):
+    """Centre symbol sized like the approved Gemini & Leo design (ref_h tall there):
+    - its visual size (sqrt of width x height) matches that design, so a wide symbol gets lower, not wider;
+    - it never gets taller than there;
+    - when the small signs look smaller than there (e.g. a wide Aquarius), the centre gets smaller by the same factor.
+    kind='q' for the question mark (its own shape, only height and the sign factor apply)."""
+    f = min(1.0, sign_size(a, b, sign_h))
+    if kind == 'q':
+        k = ref_h * f / layer.size[1]
+    else:
+        target = ref_h * GEMINI_LEO_ASPECT ** 0.5 * f
+        k = min(target / (layer.size[0] * layer.size[1]) ** 0.5, ref_h * f / layer.size[1])
+    return layer.resize((max(1, round(layer.size[0] * k)), max(1, round(layer.size[1] * k))), Image.LANCZOS)
+
+
+def fit_center(center, D, a, b, gap=34, max_frac=0.62):
+    """The centre symbol stays inside the orbit like in the approved design (width <= 0.62 x orbit) and
+    leaves at least `gap` px free on each side of the small signs."""
+    max_w = min(D * max_frac, D - max(a.size[0], b.size[0]) - 2 * gap)
     return lib.scale_w(center, round(max_w)) if center.size[0] > max_w else center
 
 
@@ -203,7 +228,7 @@ def build(poster_path, A, B, out_dir):
     cv = navy_glow(prof, 0.47)
     cy, D, sign_h = H * 0.47, 640, 120
     a, b, sw, r = sign_pair(P, sign_h)
-    center = lib.scale_h(P.layer(P.merged, only_label=False), round(410 * r))
+    center = center_scaled(P.layer(P.merged, only_label=False), 410, a, b, sign_h)
     center = fit_center(center, D, a, b)
     lab_gap = 44
     lab_h = lib.metal_text(A.upper(), int(W * L.TYPE['label']['size']), BR, tracking=L.TYPE['label']['tracking'], bevel=0.9).size[1]
