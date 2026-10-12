@@ -1,0 +1,105 @@
+name: ig-v6
+
+# Instagram / Facebook / Threads karusel v6 (Serdar onayli tasarim 12 Eki 2026), paket sosyal/ig_v6/.
+# Poster kaynagi: pin-v6'nin kullandigi 78 poster (9 Eki surumu, Midnight Blue, ORNEK isimli, 2000x3000),
+#   Drive TEMP/PIN_V6_20261012/_POSTER2000/. Yeni poster uretilmez; 78 degilse is yapmadan FAIL.
+# mod ornek : Gemini & Leo onayli/ dogrulamasi (Drive AstroLoveArt_Gemini_Leo_2000.jpg) + CAPRICORN_SAGITTARIUS
+#             4 slayt -> TEMP/IG_V6_20261012/ORNEK/.
+# mod hepsi : 78 cift x 4 slayt + QC (PASS/FAIL) + KONTAK_IG1.jpg -> TEMP/IG_V6_20261012/KARUSEL/<CIFT>/.
+# Yayin / Metricool yok. Onizleme (kucuk dosyalar) ig-v6-onizleme dalina yazilir. Sir loga yazilmaz.
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+    inputs:
+      mod: {description: "ornek | hepsi", required: true, type: choice, options: [ornek, hepsi]}
+
+jobs:
+  is:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      D: gdrive:ASTROLOVE/TEMP/IG_V6_20261012
+      P: gdrive:ASTROLOVE/TEMP/PIN_V6_20261012/_POSTER2000
+      REF_DIR: 1_rcZ69bhw00QfHedBiWywEoHPu9Y4bkB
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Kurulum
+        run: |
+          set -euo pipefail
+          pip install -q numpy==2.1.3 pillow==11.0.0 scipy==1.14.1 opencv-python-headless==4.10.0.84
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: Posterler (pin-v6 _POSTER2000, 78 olmali)
+        run: |
+          set -euo pipefail
+          mkdir -p _w/P2000
+          rclone copy "$P" _w/P2000 -q --transfers 8 --include "*.jpg"
+          N=$(ls _w/P2000/*.jpg | wc -l); echo "::warning::POSTER2000 $N"
+          [ "$N" = 78 ] || { echo "::error::78 poster yok ($N)"; exit 1; }
+          python3 -c "
+          import glob,sys
+          from PIL import Image
+          bad=[p for p in glob.glob('_w/P2000/*.jpg') if Image.open(p).size!=(2000,3000)]
+          print('::warning::OLCU 2000x3000 olmayan', len(bad), bad[:5]); sys.exit(1 if bad else 0)"
+      - name: ornek
+        if: ${{ inputs.mod == 'ornek' }}
+        run: |
+          set +e -uo pipefail   # Actions varsayilani bash -e; kapilar sonuna kadar kossun
+          mkdir -p _w/refp _o/DOGRULA_REF _o/DOGRULA_78 _o/ORNEK _pv
+          rclone copyto gdrive:AstroLoveArt_Gemini_Leo_2000.jpg _w/refp/GEMINI_LEO.jpg --drive-root-folder-id "$REF_DIR" -q
+          python3 sosyal/ig_v6/ig_toplu.py --posters _w/refp --out _o/DOGRULA_REF --pairs GEMINI_LEO > /dev/null
+          python3 sosyal/ig_v6/dogrula.py _o/DOGRULA_REF/GEMINI_LEO | sed 's/^/::warning::REF /'; DR=${PIPESTATUS[0]}
+          python3 sosyal/ig_v6/ig_toplu.py --posters _w/P2000 --out _o/DOGRULA_78 --pairs GEMINI_LEO > /dev/null
+          python3 sosyal/ig_v6/dogrula.py _o/DOGRULA_78/GEMINI_LEO | sed 's/^/::warning::BILGI_78 (onayli EMILY-JAMES posterinden, setteki GEMINI_LEO baska isimli) /'
+          python3 sosyal/ig_v6/ig_toplu.py --posters _w/P2000 --out _o/ORNEK --pairs CAPRICORN_SAGITTARIUS | tee _w/orn.txt; OR=${PIPESTATUS[0]}
+          grep OZET _w/orn.txt | sed 's/^/::warning::ORNEK /'
+          rclone copy _o/ORNEK/CAPRICORN_SAGITTARIUS "$D/ORNEK" -q
+          rclone copy _o/DOGRULA_REF/GEMINI_LEO "$D/DOGRULA/REF_2000" -q
+          echo "::warning::DRIVE ORNEK $(rclone lsf "$D/ORNEK" | wc -l) dosya"
+          cp _o/ORNEK/CAPRICORN_SAGITTARIUS/*.jpg _o/ORNEK/QC.* _pv/; cp _o/DOGRULA_REF/GEMINI_LEO/*.jpg _pv/
+          echo "DR=$DR OR=$OR" | tee _pv/SONUC.txt
+          echo "RC=$(( DR + OR ))" >> "$GITHUB_ENV"
+      - name: hepsi
+        if: ${{ inputs.mod == 'hepsi' }}
+        run: |
+          set +e -uo pipefail   # Actions varsayilani bash -e; kapilar sonuna kadar kossun
+          mkdir -p _o/KARUSEL _pv
+          python3 sosyal/ig_v6/ig_toplu.py --posters _w/P2000 --out _o/KARUSEL --kontak | tee _w/log.txt; RC=${PIPESTATUS[0]}
+          grep OZET _w/log.txt | sed 's/^/::warning::/'
+          rclone copy _o/KARUSEL "$D/KARUSEL" -q --transfers 8
+          echo "::warning::DRIVE KARUSEL $(rclone lsf -R --files-only "$D/KARUSEL" | wc -l) dosya"
+          cp _o/KARUSEL/QC.* _o/KARUSEL/FAIL.txt _pv/
+          python3 -c "
+          from PIL import Image
+          im=Image.open('_o/KARUSEL/KONTAK_IG1.jpg'); im.thumbnail((2400,2400)); im.save('_pv/KONTAK_IG1_kucuk.jpg',quality=80)"
+          echo "RC=$RC" >> "$GITHUB_ENV"
+      - name: Onizleme dali
+        if: ${{ always() }}
+        run: |
+          set +e -uo pipefail
+          [ -n "$(ls -A _pv 2>/dev/null)" ] || exit 0
+          B=ig-v6-onizleme; M="${{ inputs.mod }}"
+          git config user.name "github-actions"; git config user.email "actions@github.com"
+          git fetch -q origin $B 2>/dev/null && git worktree add -q _pvw origin/$B 2>/dev/null || { git worktree add -q --detach _pvw; (cd _pvw && git checkout -q --orphan tmp && git rm -rqf . ); }
+          rm -rf "_pvw/$M"; mkdir -p "_pvw/$M"; cp -r _pv/* "_pvw/$M/"
+          cd _pvw && git add -A && git commit -qm "ig-v6 onizleme: $M (kosu ${{ github.run_id }})" && git push -q origin HEAD:refs/heads/$B && echo "::warning::ONIZLEME $B/$M"
+      - name: Sonuc
+        if: ${{ always() }}
+        run: |
+          rm -rf ~/.config/rclone
+          [ "${RC:-1}" = "0" ]

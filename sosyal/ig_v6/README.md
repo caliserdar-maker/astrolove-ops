@@ -16,3 +16,10 @@ python3 sosyal/ig_v6/ig_uret.py --poster <cift posteri 2000x3000 jpg> --a Gemini
 ## Kurallar
 - Poster pikselleri yalniz kesilir, olceklenir, tasinir. Yapay zeka ile degistirilmez.
 - Gorsel yazilarinda cumle sonu nokta yok, "and" yerine "&".
+
+## Toplu uretim + QC (workflow ig-v6)
+- `ig_toplu.py --posters <dir> --out <dir> [--pairs ...] [--kontak]`: her cift ayri klasorde 4 slayt, ilerleme sayaci,
+  QC PASS/FAIL (PosterR parcalari bulundu, sol/sag burc boyu +-%25, 4 dosya 1080x1350), QC.csv/json, FAIL.txt, KONTAK_IG1.jpg.
+- `dogrula.py <dir>`: Gemini & Leo 4 slayti `onayli/` ile ortalama fark (< 2 PASS).
+- Workflow `ig-v6` (mod ornek | hepsi): posterler pin-v6'nin Drive TEMP/PIN_V6_20261012/_POSTER2000/ klasorunden (78 sart),
+  cikti Drive TEMP/IG_V6_20261012/ORNEK/ ve KARUSEL/<CIFT>/. Yayin yok.
