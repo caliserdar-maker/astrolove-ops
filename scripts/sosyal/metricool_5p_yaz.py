@@ -39,7 +39,9 @@ def video_yukle(mc, yol):
     for u in ([y.get('presignedUrl')] if y.get('presignedUrl') else [p.get('presignedUrl') for p in y.get('parts') or []]):
         print(f'::add-mask::{u}', flush=True)
     if y.get('presignedUrl'):
-        st, _ = s3.put_parca(y['presignedUrl'], veri, istek['parts'][0]['hash'], False)
+        st, _ = s3.put_parca(y['presignedUrl'], veri, istek['parts'][0]['hash'], True)
+        if st >= 400:
+            st, _ = s3.put_parca(y['presignedUrl'], veri, istek['parts'][0]['hash'], False)
         if st >= 400:
             sys.exit(f'DUR: video PUT {st}')
         tamam = {'simple': {'fileUrl': y.get('fileUrl')}}
@@ -47,7 +49,10 @@ def video_yukle(mc, yol):
         et = []
         for p in sorted(y.get('parts') or [], key=lambda p: p['partNumber']):
             b = veri[p['startByte']:p['endByte']]
-            st, e = s3.put_parca(p['presignedUrl'], b, s3.b64sha(b), False)
+            # presigned URL sha256 basligini imzaliyor (s3 testinde basliksiz 403): once baslikli
+            st, e = s3.put_parca(p['presignedUrl'], b, s3.b64sha(b), True)
+            if st >= 400:
+                st, e = s3.put_parca(p['presignedUrl'], b, s3.b64sha(b), False)
             if st >= 400:
                 sys.exit(f"DUR: video parca {p['partNumber']} PUT {st}")
             et.append({'partNumber': p['partNumber'], 'etag': e})
