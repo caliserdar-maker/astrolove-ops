@@ -74,11 +74,9 @@ def build(poster_path, A, B, out_dir):
         m = np.asarray(im.resize((Lw // ss, Hh // ss), Image.LANCZOS)).astype(np.float32) / 255
         return lib.trim(lib.metal_from_mask(m, BR, bevel=0.9))
 
-    def orbit(cv, cy, D, sign_h, center):
+    def orbit(cv, cy, D, sign_h, raw, ref_h, kind):
         a, b, sw, r = PU.sign_pair(P, sign_h)
-        if r < 1:
-            center = center.resize((round(center.size[0] * r), round(center.size[1] * r)), Image.LANCZOS)
-        center = PU.fit_center(center, D, a, b)
+        center = PU.fit_center(PU.center_scaled(raw, ref_h, a, b, sign_h, kind), D, a, b)
         lab_gap = 44
         lab_h = lib.metal_text(A.upper(), int(W * L.TYPE['label']['size']), BR, tracking=L.TYPE['label']['tracking'], bevel=0.9).size[1]
         rm = PU.ring_mask(D, max(1.6, sw * 0.30), -sign_h / 2 - 28, sign_h / 2 + lab_gap + lab_h + 26)
@@ -100,7 +98,7 @@ def build(poster_path, A, B, out_dir):
     # ---------- 1 cover: the question
     cy, D = H * 0.47, 660
     cv = navy_glow(prof, 0.47)
-    orbit(cv, cy, D, 150, lib.scale_h(Q, 285 * Q.size[1] / 997))
+    orbit(cv, cy, D, 150, Q, 285 * Q.size[1] / 997, 'q')
     lib.paste(cv, text(f'{A} & {B}, as one?', 0.084), W / 2, H * 0.13)
     lib.paste(cv, text('Zodiac art with your names & message', 0.056), W / 2, H * 0.81)
     sw_ = text('Swipe to reveal', 0.040); ar = arrow(130)
@@ -110,7 +108,7 @@ def build(poster_path, A, B, out_dir):
 
     # ---------- 2 the answer
     cv = navy_glow(prof, 0.47)
-    orbit(cv, cy, D, 120, lib.scale_h(P.layer(P.merged, only_label=False), 420))
+    orbit(cv, cy, D, 120, P.layer(P.merged, only_label=False), 420, 'merged')
     lines(cv, [text('Two signs', 0.070), text('Your shared symbol', 0.070)], H * 0.125, 12)
     names = lib.scale_w(P.layer(P.names_row, only_label=False), round(W * 0.74))
     lib.paste(cv, names, W / 2, H * 0.795)
