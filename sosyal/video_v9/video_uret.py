@@ -105,7 +105,7 @@ def build(poster_path, A, B, out_dir, muzik=None, kareler=None, bilgi=None):
     mx, my = centred(MER); LM = full(MER, mx, my)
     tA = merge_layers([full(text('Two signs', 0.070), W / 2, 318), full(text('Your shared symbol', 0.070), W / 2, 404)])
     names = lib.scale_w(P.layer(P.names_row, only_label=False), round(W * 0.74))
-    tB = merge_layers([full(names, W / 2, 1150), full(text('Your names, your message', 0.054), W / 2, 1232)])
+    tB = merge_layers([full(names, W / 2, 1150), full(text('Your names, your message', 0.054), W / 2, 1272)])
     end = bg.copy()
     _e1, _e2, _e3 = text('Make it yours', 0.090), brand(0.046), text('On Etsy', 0.052)
     lib.paste(end, _e1, W / 2, CY - 130); lib.paste(end, _e2, W / 2, CY + 10, shadow=False); lib.paste(end, _e3, W / 2, CY + 135)
