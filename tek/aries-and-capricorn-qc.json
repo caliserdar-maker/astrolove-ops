@@ -1,0 +1,11 @@
+{
+ "cift": "ARIES_CAPRICORN",
+ "a": "Aries",
+ "b": "Capricorn",
+ "q_poster": false,
+ "q_video": false,
+ "q_son": false,
+ "hata": "ValueError: box offset can't be negative",
+ "iz": "rk/astrolove-ops/astrolove-ops/sosyal/video_v9/video_uret.py\", line 225, in wall\n    return np.asarray(WALL.resize((W, H), Image.LANCZOS, box=(cx - cw / 2, cy - ch / 2, cx + cw / 2, cy + ch / 2))).astype(np.float32)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/PIL/Image.py\", line 2365, in resize\n    return self._new(self.im.resize(size, resample, box))\n                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nValueError: box offset can't be negative\n",
+ "sonuc": "FAIL"
+}

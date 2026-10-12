@@ -1,0 +1,25 @@
+aquarius-and-leo: 1/720 kare  %0  gecen 0 sn  kalan 95 sn
+aquarius-and-leo: 61/720 kare  %8  gecen 14 sn  kalan 148 sn
+aquarius-and-leo: 121/720 kare  %17  gecen 30 sn  kalan 148 sn
+aquarius-and-leo: 181/720 kare  %25  gecen 52 sn  kalan 154 sn
+aquarius-and-leo: 241/720 kare  %33  gecen 75 sn  kalan 149 sn
+aquarius-and-leo: 301/720 kare  %42  gecen 93 sn  kalan 130 sn
+aquarius-and-leo: 361/720 kare  %50  gecen 109 sn  kalan 109 sn
+aquarius-and-leo: 421/720 kare  %58  gecen 124 sn  kalan 88 sn
+aquarius-and-leo: 481/720 kare  %67  gecen 142 sn  kalan 70 sn
+aquarius-and-leo: 541/720 kare  %75  gecen 165 sn  kalan 55 sn
+aquarius-and-leo: 601/720 kare  %83  gecen 180 sn  kalan 36 sn
+aquarius-and-leo: 661/720 kare  %92  gecen 186 sn  kalan 17 sn
+aquarius-and-leo: 720/720 kare  %100  gecen 191 sn  kalan 0 sn
+ILERLEME AQUARIUS_LEO PASS | is 1/2 | genel ~1/2 %50 | gecen 3.3 dk | kalan (bu is) 3.3 dk | q_poster=True q_video=True q_son=True son_oran=0.0712 bos_oran=0.0 sure=24.0 kare=720 kamera_orani=0.735 uretim_sn=195 hata=None
+aries-and-capricorn: 1/720 kare  %0  gecen 0 sn  kalan 101 sn
+aries-and-capricorn: 61/720 kare  %8  gecen 14 sn  kalan 156 sn
+aries-and-capricorn: 121/720 kare  %17  gecen 31 sn  kalan 155 sn
+aries-and-capricorn: 181/720 kare  %25  gecen 54 sn  kalan 160 sn
+aries-and-capricorn: 241/720 kare  %33  gecen 78 sn  kalan 155 sn
+aries-and-capricorn: 301/720 kare  %42  gecen 97 sn  kalan 135 sn
+aries-and-capricorn: 361/720 kare  %50  gecen 113 sn  kalan 113 sn
+aries-and-capricorn: 421/720 kare  %58  gecen 129 sn  kalan 92 sn
+aries-and-capricorn: 481/720 kare  %67  gecen 148 sn  kalan 73 sn
+ILERLEME ARIES_CAPRICORN FAIL | is 2/2 | genel ~2/2 %100 | gecen 6.0 dk | kalan (bu is) 0.0 dk | q_poster=False q_video=False q_son=False son_oran=None bos_oran=None sure=None kare=None kamera_orani=None uretim_sn=None hata=ValueError: box offset can't be negative
+OZET 1/2 PASS FAIL: ARIES_CAPRICORN
