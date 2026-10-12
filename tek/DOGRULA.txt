@@ -1,7 +1,7 @@
-kare 2s: ortalama fark 0.363 PASS
-kare 5s: ortalama fark 0.033 PASS
-kare 8s: ortalama fark 0.034 PASS
-kare 13s: ortalama fark 0.075 PASS
-kare 17s: ortalama fark 13.867 FAIL
-kare 22s: ortalama fark 0.179 PASS
-OZET dogrulama 6 kare, esik 2.5: FAIL
+kare 2s: ortalama fark 1.246 PASS
+kare 5s: ortalama fark 1.118 PASS
+kare 8s: ortalama fark 0.962 PASS
+kare 13s: ortalama fark 0.072 PASS
+kare 17s: ortalama fark 1.265 PASS
+kare 22s: ortalama fark 1.027 PASS
+OZET dogrulama 6 kare, esik 2.5: PASS
