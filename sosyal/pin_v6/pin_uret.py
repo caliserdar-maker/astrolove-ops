@@ -123,6 +123,13 @@ def sign_pair(P, sign_h, max_w_ratio=1.3):
     return sc(la), sc(lb), L.stroke_width(lib.scale_h(tall, 150))
 
 
+def fit_center(center, D, a, b, gap=34):
+    """The centre symbol may not crowd the two small signs: at least `gap` px free on each side
+    (a wide merged symbol next to wide signs, e.g. Aquarius & Aquarius, is scaled down a little)."""
+    max_w = min(D * 0.78, D - max(a.size[0], b.size[0]) - 2 * gap)
+    return lib.scale_w(center, round(max_w)) if center.size[0] > max_w else center
+
+
 def sign_labels(cv, W, D, cy_lab, center_w, A, B, BR, base_size, tracking):
     """Labels under the two orbit signs. Centred under the sign when they fit; a long name (SAGITTARIUS)
     may not touch the centre symbol nor the frame edge: first it slides outward inside its free band,
@@ -195,8 +202,7 @@ def build(poster_path, A, B, out_dir):
     a, b, sw = sign_pair(P, sign_h)
     # sign labels: same size for both, shrunk together if the longer one does not fit beside the frame edge
     center = lib.scale_h(P.layer(P.merged, only_label=False), 410)
-    if center.size[0] > D * 0.78:
-        center = lib.scale_w(center, round(D * 0.78))
+    center = fit_center(center, D, a, b)
     lab_gap = 44
     lab_h = lib.metal_text(A.upper(), int(W * L.TYPE['label']['size']), BR, tracking=L.TYPE['label']['tracking'], bevel=0.9).size[1]
     rm = ring_mask(D, max(1.6, sw * 0.30), -sign_h / 2 - 28, sign_h / 2 + lab_gap + lab_h + 26)

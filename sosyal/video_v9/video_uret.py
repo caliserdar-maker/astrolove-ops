@@ -63,10 +63,8 @@ def build(poster_path, A, B, out_dir, muzik=None, kareler=None, bilgi=None):
         return lib.metal_text('ASTROLOVEART', int(W * frac), BR, tracking=0.14, bevel=0.9)
 
     Qv = lib.scale_h(Q, 265 * Q.size[1] / 997)
-    MER = lib.scale_h(P.layer(P.merged, only_label=False), 380)
-    if MER.size[0] > D * 0.78:
-        MER = lib.scale_w(MER, round(D * 0.78))
     SA, SB, SW = PU.sign_pair(P, SIGN_H)
+    MER = PU.fit_center(lib.scale_h(P.layer(P.merged, only_label=False), 380), D, SA, SB)
 
     def orbit_base(cv):
         sw = SW
