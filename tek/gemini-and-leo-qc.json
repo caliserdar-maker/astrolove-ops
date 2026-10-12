@@ -5,4 +5,19 @@
  "q_poster": true,
  "q_video": true,
  "q_son": true,
- "q_kamera": 
+ "q_kamera": true,
+ "sembol_buyume": 1.426,
+ "kamera_orani": 0.892,
+ "uretim_sn": 186,
+ "dosya": "gemini-and-leo-astroloveart-reel.mp4",
+ "mb": 11.78,
+ "codec": "h264",
+ "w": 1080,
+ "h": 1920,
+ "fps": "30/1",
+ "kare": 720,
+ "sure": 24.0,
+ "son_oran": 0.0715,
+ "bos_oran": 0.0,
+ "sonuc": "PASS"
+}
