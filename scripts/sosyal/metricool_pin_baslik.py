@@ -28,7 +28,7 @@ class MC:
         print(f'::add-mask::{self.t}', flush=True)
         self.son = 0.0
 
-    def istek(self, yontem, yol, params=None, govde=None):
+    def istek(self, yontem, yol, params=None, govde=None, yok404=False):
         q = dict(params or {}, userId=self.u, blogId=self.b)
         url = f'{API}{yol}?{urllib.parse.urlencode(q)}'
         veri = json.dumps(govde).encode() if govde is not None else None
@@ -46,6 +46,8 @@ class MC:
                     return json.loads(g) if g else None
             except urllib.error.HTTPError as e:
                 self.son = time.time()
+                if e.code == 404 and yok404:
+                    return None
                 if e.code == 429 and deneme < 3:
                     s = int(e.headers.get('Retry-After') or 60)
                     print(f'429: {s} sn bekleniyor', flush=True); time.sleep(s); continue
@@ -55,6 +57,17 @@ class MC:
 
 def veri(j):
     return j.get('data', j) if isinstance(j, dict) else j
+
+
+def oku(mc, pid):
+    """Tekil GET; 404 donerse (3 Eki swagger'daki uc bu kimlikle bulamiyor) liste ucundan ayni id."""
+    p = mc.istek('GET', f'/v2/scheduler/posts/{pid}', yok404=True)
+    if p is not None:
+        return veri(p), 'tekil'
+    for x in veri(mc.istek('GET', '/v2/scheduler/posts', {'start': BAS, 'end': SON, 'timezone': TZ})):
+        if x.get('id') == pid:
+            return x, 'liste'
+    raise SystemExit(f'DUR: {pid} ne tekil ne liste ucunda bulundu')
 
 
 def pin_durum(p):
@@ -132,7 +145,7 @@ def main():
     with open(yol, 'w', newline='', encoding='utf-8') as f:
         w = csv.DictWriter(f, fieldnames=k, lineterminator='\n'); w.writeheader()
         for i, r in enumerate(sec, 1):
-            once = veri(mc.istek('GET', f"/v2/scheduler/posts/{r['id']}"))
+            once, kaynak = oku(mc, r['id'])
             o = satir(once)
             if o['durum'] != 'PENDING' or o['eski_baslik'] != r['eski_baslik']:
                 sonuc.append(dict(r, okunan_baslik=o['eski_baslik'], diger_fark='', sonuc=f"ATLANDI durum={o['durum']}"))
@@ -140,14 +153,14 @@ def main():
             yeni = copy.deepcopy(once)
             yeni['pinterestData']['pinTitle'] = r['yeni_baslik']
             mc.istek('PUT', f"/v2/scheduler/posts/{r['id']}", govde=yeni)
-            sonra = veri(mc.istek('GET', f"/v2/scheduler/posts/{r['id']}"))
+            sonra, _ = oku(mc, r['id'])
             okunan = (sonra.get('pinterestData') or {}).get('pinTitle')
             df = [x for x in fark(once, sonra) if x != 'pinterestData.pinTitle']
             ok = okunan == r['yeni_baslik'] and not df
             sonuc.append(dict(r, okunan_baslik=okunan, diger_fark='|'.join(df), sonuc='PASS' if ok else 'FAIL'))
             w.writerow({x: sonuc[-1].get(x, '') for x in k}); f.flush()
             g = time.time() - t0
-            print(f"[{i}/{len(sec)}] {r['id']} {sonuc[-1]['sonuc']} | gecen {g:.0f} sn, kalan ~{g / i * (len(sec) - i):.0f} sn, "
+            print(f"[{i}/{len(sec)}] {r['id']} ({kaynak}) {sonuc[-1]['sonuc']} | gecen {g:.0f} sn, kalan ~{g / i * (len(sec) - i):.0f} sn, "
                   f"%{100 * i / len(sec):.0f}" + (f' fark: {df}' if df else ''), flush=True)
             if not ok:
                 raise SystemExit(f"DUR: dogrulama FAIL {r['id']} (okunan={okunan!r}, fark={df})")
