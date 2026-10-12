@@ -250,6 +250,9 @@ def build(poster_path, A, B, out_dir, muzik=None, kareler=None, bilgi=None):
         mx_ = np.clip(np.minimum(_xx - x0, x1 - _xx) / feather + 0.5, 0, 1); my_ = np.clip(np.minimum(_yy - y0, y1 - _yy) / feather + 0.5, 0, 1)
         return mx_ * my_
 
+    _g = np.random.default_rng(99)
+    GRAIN = (_g.uniform(-0.5, 0.5, (H, W, 3)) + _g.uniform(-0.5, 0.5, (H, W, 3))).astype(np.float32)
+
     def frame(n):
         t = n / FPS
         if t < 15.4:
@@ -265,7 +268,11 @@ def build(poster_path, A, B, out_dir, muzik=None, kareler=None, bilgi=None):
         else:
             v = ease(t, 19.6, 20.6); f = BG + (END - BG) * v
         f = f * ease(t, 0, 1.0) * (1 - ease(t, 23.1, 24.0)) if (t < 1.0 or t > 23.1) else f
-        return np.clip(f + np.random.default_rng(n).uniform(-0.5, 0.5, f.shape), 0, 255).astype(np.uint8)
+        r = np.random.default_rng(n)
+        tpdf = r.uniform(-0.5, 0.5, f.shape) + r.uniform(-0.5, 0.5, f.shape)
+        # fine static grain (3 levels) + light moving grain: no visible rings in the navy gradient, also after
+        # Instagram/TikTok re-encoding (tested 12 Oct 2026); too small to be seen as noise
+        return np.clip(f + GRAIN * 3.0 + tpdf * 0.6, 0, 255).astype(np.uint8)
 
     if kareler:
         outs = []
@@ -276,7 +283,7 @@ def build(poster_path, A, B, out_dir, muzik=None, kareler=None, bilgi=None):
 
     tmp = os.path.join(out_dir, f'_{slug}_sessiz.mp4')
     enc = subprocess.Popen(['ffmpeg', '-v', 'error', '-y', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-s', f'{W}x{H}', '-r', str(FPS), '-i', '-',
-                            '-c:v', 'libx264', '-profile:v', 'high', '-pix_fmt', 'yuv420p', '-crf', '16', '-preset', 'slow', '-r', str(FPS), tmp],
+                            '-c:v', 'libx264', '-profile:v', 'high', '-pix_fmt', 'yuv420p', '-crf', '16', '-preset', 'slow', '-tune', 'grain', '-aq-mode', '3', '-r', str(FPS), tmp],
                            stdin=subprocess.PIPE)
     t0 = time.time()
     for n in range(NF):
