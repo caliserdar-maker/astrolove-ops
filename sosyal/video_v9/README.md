@@ -34,5 +34,7 @@ Cozulen .m4a dosyasi depoya commit edilmez.
   `kontak.py` QC.csv / QC.json / FAIL.txt / KONTAK_9s.jpg.
   QC: q_poster (PosterR hatasiz), q_video (1080x1920, 30/1 fps, 720 kare, 24.0 sn, h264), q_son (22 sn karesinde
   "Make it yours" bandinda >= %0.5 parlak piksel; onayli karede %7.1, bos bantta %0).
-- `mod=muzik muzik=N`: SESSIZ/ + muzik N (kopya, yeniden kodlama yok) -> `FINAL/`, ses ve video suresi 24 sn kontrolu.
-- Parola yalniz repo secret `MUZIK_PAROLA` (env ile `openssl -pass env:`).
+- `mod=muzik muzik=N`: SESSIZ/ + muzik N (kopya, yeniden kodlama yok) -> `FINAL/`.
+- `mod=ornek_muzik muzik=N`: ORNEK/ sessiz ornege muzik N -> `ORNEK/..._muzikN.mp4`. `muzik_ekle.py` QC: ses ve video 24.0 sn, 720 kare, -16 LUFS +-1.
+- `mod=hepsi` 78/78 PASS ise ayni kosuda muzik N (varsayilan 2, kesin secim) eklenir -> `FINAL/`.
+- Parola: Drive `ASTROLOVE/TEMP/MUZIK_PAROLA.txt` (rclone cat, hemen `::add-mask::`, openssl'e env ile). Dosyaya/loga yazilmaz.

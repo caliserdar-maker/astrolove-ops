@@ -3,10 +3,13 @@ name: video-v9
 # Reel videosu v9 (Serdar onayli tasarim 12 Eki 2026), paket sosyal/video_v9/.
 # Posterler: Drive TEMP/PIN_V6_20261012/_POSTER2000 (pin-uretim'in kullandigi 78 poster, POSTER78_CHATGPT_7200x10800_20261008'den yalniz olcekleme).
 # mod ornek : Drive AstroLoveArt_Gemini_Leo_2000.jpg ile --kareler 2,5,8,13,17,22 + onayli/ dogrulamasi (her kare < 2.5);
-#             PASS ise CAPRICORN_SAGITTARIUS sessiz video + (MUZIK_PAROLA varsa) 3 muzikli hal -> TEMP/VIDEO_V9_20261012/ORNEK/.
-# mod hepsi : 78 SESSIZ video, paralel isler (matrix) + QC (PASS/FAIL) + KONTAK_9s.jpg -> TEMP/VIDEO_V9_20261012/SESSIZ/.
-# mod muzik : SESSIZ/ videolarina muzik N (yeniden kodlama yok) + ses suresi 24 sn kontrolu -> TEMP/VIDEO_V9_20261012/FINAL/.
-# Muzik parolasi yalniz secrets.MUZIK_PAROLA (env); cozulen .m4a depoya/Drive'a girmez. Onizleme (kucuk dosyalar) video-v9-onizleme dalina.
+#             PASS ise CAPRICORN_SAGITTARIUS sessiz video -> TEMP/VIDEO_V9_20261012/ORNEK/.
+# mod ornek_muzik : ORNEK/ sessiz ornege muzik N -> ORNEK/..._muzikN.mp4 (QC: ses/video 24.0 sn, -16 LUFS +-1).
+# mod hepsi : 78 SESSIZ video, paralel isler (matrix) + QC (PASS/FAIL) + KONTAK_9s.jpg -> TEMP/VIDEO_V9_20261012/SESSIZ/;
+#             78/78 PASS ise ayni kosuda muzik N eklenir -> FINAL/.
+# mod muzik : SESSIZ/ videolarina muzik N (yeniden kodlama yok) + QC -> TEMP/VIDEO_V9_20261012/FINAL/.
+# Muzik parolasi Drive ASTROLOVE/TEMP/MUZIK_PAROLA.txt (Serdar karari 12 Eki): rclone cat ile okunur, hemen ::add-mask::, yalniz
+# openssl'e env ile verilir; dosyaya/loga yazilmaz. Cozulen .m4a depoya/Drive'a girmez. Onizleme (kucuk dosyalar) video-v9-onizleme dalina.
 
 permissions:
   actions: read
@@ -16,17 +19,18 @@ on:
   workflow_dispatch:
     inputs:
       mod:
-        description: ornek | hepsi | muzik
+        description: ornek | ornek_muzik | hepsi | muzik
         required: true
         type: choice
         options:
         - ornek
+        - ornek_muzik
         - hepsi
         - muzik
       muzik:
-        description: 'muzik: 1 | 2 | 3'
+        description: 'muzik: 1 | 2 | 3 (kesin secim 2)'
         required: false
-        default: '1'
+        default: '2'
       grup:
         description: 'hepsi: is basina cift sayisi'
         required: false
@@ -62,7 +66,6 @@ jobs:
       env:
         MOD: ${{ inputs.mod }}
         GRUP: ${{ inputs.grup }}
-        MUZIK_PAROLA: ${{ secrets.MUZIK_PAROLA }}
       run: |
         set -euo pipefail
         if [ "$MOD" = hepsi ]; then
@@ -76,9 +79,6 @@ jobs:
         print('matrix=' + json.dumps({'include': m}))" "$GRUP" >> "$GITHUB_OUTPUT"
         else
           echo 'matrix={"include":[{"no":0,"sira":0,"pairs":""}]}' >> "$GITHUB_OUTPUT"
-        fi
-        if [ "$MOD" != hepsi ]; then
-          if [ -n "${MUZIK_PAROLA:-}" ]; then echo "::warning::MUZIK_PAROLA tanimli"; else echo "::warning::MUZIK_PAROLA YOK"; fi
         fi
         rm -rf ~/.config/rclone
   ornek:
@@ -110,11 +110,8 @@ jobs:
         if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
           grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
     - name: ornek
-      env:
-        MUZIK_PAROLA: ${{ secrets.MUZIK_PAROLA }}
       run: |
         set +e -uo pipefail   # Actions varsayilani bash -e; kapilar sonuna kadar kossun
-        [ -n "${MUZIK_PAROLA:-}" ] && echo "::add-mask::$MUZIK_PAROLA"
         mkdir -p _w/refp _w/P2000 _o/DOGRULA _o/ORNEK _pv
         rclone copyto gdrive:AstroLoveArt_Gemini_Leo_2000.jpg _w/refp/GEMINI_LEO.jpg --drive-root-folder-id "$REF_DIR" -q
         rclone copyto "$P2000/CAPRICORN_SAGITTARIUS.jpg" _w/P2000/CAPRICORN_SAGITTARIUS.jpg -q
@@ -128,16 +125,6 @@ jobs:
           python3 sosyal/video_v9/video_toplu.py --posters _w/P2000 --out _o/ORNEK --pairs CAPRICORN_SAGITTARIUS | tee _w/orn.txt; OR=${PIPESTATUS[0]}
           grep -E 'ILERLEME|OZET' _w/orn.txt | sed 's/^/::warning::ORNEK /'
           V=_o/ORNEK/capricorn-and-sagittarius-astroloveart-reel.mp4
-          if [ "$OR" = 0 ] && [ -n "${MUZIK_PAROLA:-}" ]; then
-            mkdir -p _w/m
-            for N in 1 2 3; do
-              openssl enc -d -aes-256-cbc -pbkdf2 -in sosyal/video_v9/assets/muzik_$N.m4a.enc -out _w/m/muzik_$N.m4a -pass env:MUZIK_PAROLA || { MZ=1; continue; }
-              ffmpeg -v error -y -i "$V" -i _w/m/muzik_$N.m4a -map 0:v -map 1:a -c copy -t 24 -movflags +faststart "_o/ORNEK/capricorn-and-sagittarius-astroloveart-reel_muzik$N.mp4" || MZ=1
-              A=$(ffprobe -v error -select_streams a:0 -show_entries stream=duration -of csv=p=0 "_o/ORNEK/capricorn-and-sagittarius-astroloveart-reel_muzik$N.mp4")
-              echo "::warning::ORNEK muzik$N ses suresi $A sn"
-            done
-            rm -rf _w/m
-          elif [ -z "${MUZIK_PAROLA:-}" ]; then echo "::warning::MUZIK_PAROLA YOK: muzikli haller yazilmadi"; MZ=1; fi
           [ -f "$V" ] && mv "$V" _o/ORNEK/capricorn-and-sagittarius-astroloveart-reel_sessiz.mp4
         else echo "::error::dogrulama FAIL, ornek video uretilmedi"; fi
         rclone copy _o/DOGRULA "$D/DOGRULA" -q
@@ -287,8 +274,8 @@ jobs:
         rm -rf ~/.config/rclone
         [ "${RC:-1}" = "0" ]
   muzik:
-    if: ${{ inputs.mod == 'muzik' }}
-    needs: hazirla
+    if: ${{ always() && needs.hazirla.result == 'success' && (inputs.mod == 'muzik' || inputs.mod == 'ornek_muzik' || (inputs.mod == 'hepsi' && needs.topla.result == 'success')) }}
+    needs: [hazirla, topla]
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -307,42 +294,45 @@ jobs:
         printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
         if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
           grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
     - name: muzik
       env:
-        MUZIK_PAROLA: ${{ secrets.MUZIK_PAROLA }}
         N: ${{ inputs.muzik }}
+        MOD: ${{ inputs.mod }}
       run: |
         set +e -uo pipefail
         case "$N" in 1|2|3) ;; *) echo "::error::muzik 1|2|3"; exit 1 ;; esac
-        [ -n "${MUZIK_PAROLA:-}" ] || { echo "::error::MUZIK_PAROLA secret yok"; exit 1; }
-        echo "::add-mask::$MUZIK_PAROLA"
-        mkdir -p _w/S _w/m _o/FINAL _pv
-        openssl enc -d -aes-256-cbc -pbkdf2 -in sosyal/video_v9/assets/muzik_$N.m4a.enc -out _w/m/muzik.m4a -pass env:MUZIK_PAROLA || { echo "::error::muzik cozulemedi"; exit 1; }
-        rclone copy "$D/SESSIZ" _w/S -q --include "*-astroloveart-reel.mp4" --transfers 8
-        T=$(ls _w/S/*.mp4 | wc -l); echo "::warning::SESSIZ $T video"
-        F=0; i=0; T0=$(date +%s); echo "dosya,ses_sn,video_sn,sonuc" > _o/FINAL/MUZIK_QC.csv
-        for v in _w/S/*.mp4; do
-          b=$(basename "$v"); i=$((i+1))
-          ffmpeg -v error -y -i "$v" -i _w/m/muzik.m4a -map 0:v -map 1:a -c copy -t 24 -movflags +faststart "_o/FINAL/$b"
-          A=$(ffprobe -v error -select_streams a:0 -show_entries stream=duration -of csv=p=0 "_o/FINAL/$b")
-          V=$(ffprobe -v error -select_streams v:0 -show_entries stream=duration -of csv=p=0 "_o/FINAL/$b")
-          S=$(python3 -c "import sys;a=float(sys.argv[1] or 0);v=float(sys.argv[2] or 0);print('PASS' if abs(a-24)<0.05 and abs(v-24)<0.05 else 'FAIL')" "${A:-0}" "${V:-0}")
-          [ "$S" = PASS ] || F=$((F+1)); echo "$b,$A,$V,$S" >> _o/FINAL/MUZIK_QC.csv
-          E=$(( $(date +%s) - T0 )); echo "ILERLEME $i/$T %$(( 100*i/T )) gecen ${E} sn kalan $(( E*(T-i)/i )) sn $b ses=$A $S"
-        done
+        mkdir -p _w/S _w/m _o/F _pv
+        P=$(rclone cat "gdrive:ASTROLOVE/TEMP/MUZIK_PAROLA.txt" 2>/dev/null | tr -d '\r\n')
+        [ -n "$P" ] && echo "::add-mask::$P"
+        [ -n "$P" ] || { echo "::error::muzik parolasi Drive'dan okunamadi"; exit 1; }
+        MUZIK_PAROLA="$P" openssl enc -d -aes-256-cbc -pbkdf2 -in "sosyal/video_v9/assets/muzik_$N.m4a.enc" -out _w/m/muzik.m4a -pass env:MUZIK_PAROLA \
+          || { unset P; echo "::error::muzik cozulemedi"; exit 1; }
+        unset P
+        if [ "$MOD" = ornek_muzik ]; then
+          G=capricorn-and-sagittarius-astroloveart-reel_sessiz.mp4; HEDEF="$D/ORNEK"; EK="_muzik$N"; BEK=1
+          rclone copyto "$D/ORNEK/$G" "_w/S/$G" -q
+        else
+          HEDEF="$D/FINAL"; EK=""; BEK=78
+          rclone copy "$D/SESSIZ" _w/S -q --include "*-astroloveart-reel.mp4" --transfers 8
+        fi
+        echo "::warning::GIRIS $(ls _w/S/*.mp4 | wc -l) video, muzik $N"
+        python3 sosyal/video_v9/muzik_ekle.py --muzik _w/m/muzik.m4a --giris _w/S --cikis _o/F --ek "$EK" --beklenen $BEK | tee _w/mz.txt; RC=${PIPESTATUS[0]}
         rm -rf _w/m
-        echo "::warning::OZET muzik $N: $((T-F))/$T PASS (ses 24 sn)"
-        rclone copy _o/FINAL "$D/FINAL" -q --transfers 8
-        echo "::warning::DRIVE FINAL $(rclone lsf "$D/FINAL" --include '*.mp4' | wc -l) mp4"
-        cp _o/FINAL/MUZIK_QC.csv _pv/
-        [ "$T" = 78 ] || F=$((F+1))
-        echo "RC=$F" >> "$GITHUB_ENV"
+        grep OZET _w/mz.txt | sed 's/^/::warning::/'; [ "$BEK" = 1 ] && grep ILERLEME _w/mz.txt | sed 's/^/::warning::/'
+        if [ "$MOD" = ornek_muzik ]; then rclone copy _o/F "$HEDEF" -q --include "*.mp4"; rclone copyto _o/F/MUZIK_QC.csv "$HEDEF/MUZIK_QC_ORNEK.csv" -q
+        else rclone copy _o/F "$HEDEF" -q --transfers 8; fi
+        echo "::warning::DRIVE $(basename "$HEDEF") $(rclone lsf "$HEDEF" --include '*.mp4' | wc -l) mp4"
+        cp _o/F/MUZIK_QC.csv _w/mz.txt _pv/
+        echo "RC=$RC" >> "$GITHUB_ENV"
     - name: Onizleme dali
       if: ${{ always() }}
       run: |
         set +e -uo pipefail
         [ -n "$(ls -A _pv 2>/dev/null)" ] || exit 0
-        B=video-v9-onizleme; M="${{ inputs.mod }}"
+        B=video-v9-onizleme; M="${{ inputs.mod }}_muzik"
         git config user.name "github-actions"; git config user.email "actions@github.com"
         for i in 1 2 3 4 5; do
           rm -rf _pvw; git worktree prune

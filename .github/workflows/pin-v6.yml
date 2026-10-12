@@ -18,7 +18,8 @@ on:
   workflow_dispatch:
     inputs:
       mod: {description: "ornek | tek | hepsi | link", required: true, type: choice, options: [ornek, tek, hepsi, link]}
-      cift: {description: "tek: cift anahtari (ornek CAPRICORN_SAGITTARIUS)", required: false, default: "CAPRICORN_SAGITTARIUS"}
+      cift: {description: "tek: cift anahtari, virgulle birden fazla (ornek CAPRICORN_SAGITTARIUS)", required: false, default: "CAPRICORN_SAGITTARIUS"}
+      hedef: {description: "tek: Drive alt klasoru (PIN_V6_20261012/<hedef>)", required: false, default: "ORNEK"}
 
 jobs:
   is:
@@ -97,17 +98,19 @@ jobs:
         if: ${{ inputs.mod == 'tek' }}
         env:
           CIFT: ${{ inputs.cift }}
+          HEDEF: ${{ inputs.hedef }}
         run: |
           set +e -uo pipefail   # Actions varsayilani bash -e; kapilar sonuna kadar kossun
-          case "$CIFT" in *[!A-Z_]*|"") echo "::error::cift A-Z_"; exit 1 ;; esac
+          case "$CIFT" in *[!A-Z_,]*|"") echo "::error::cift A-Z_ ve virgul"; exit 1 ;; esac
+          case "$HEDEF" in *[!A-Z0-9_]*|"") echo "::error::hedef A-Z0-9_"; exit 1 ;; esac
           mkdir -p _w/P2000 _w/refp _o/ORNEK _o/DOGRULA_REF _pv
-          rclone copyto "$D/_POSTER2000/$CIFT.jpg" "_w/P2000/$CIFT.jpg" -q || { echo "::error::poster yok $CIFT"; exit 1; }
+          for c in ${CIFT//,/ }; do rclone copyto "$D/_POSTER2000/$c.jpg" "_w/P2000/$c.jpg" -q || { echo "::error::poster yok $c"; exit 1; }; done
           rclone copyto gdrive:AstroLoveArt_Gemini_Leo_2000.jpg _w/refp/GEMINI_LEO.jpg --drive-root-folder-id "$REF_DIR" -q
           python3 sosyal/pin_v6/pin_toplu.py --posters _w/refp --out _o/DOGRULA_REF --pairs GEMINI_LEO > /dev/null
           python3 sosyal/pin_v6/dogrula.py _o/DOGRULA_REF | sed 's/^/::warning::REF /'; DR=${PIPESTATUS[0]}
           python3 sosyal/pin_v6/pin_toplu.py --posters _w/P2000 --out _o/ORNEK --pairs "$CIFT" | tee _w/orn.txt; OR=${PIPESTATUS[0]}
           grep OZET _w/orn.txt | sed 's/^/::warning::ORNEK /'
-          rclone sync _o/ORNEK "$D/ORNEK" -q && echo "::warning::DRIVE ORNEK $(rclone lsf "$D/ORNEK" | tr '\n' ' ')"
+          rclone copy _o/ORNEK "$D/$HEDEF" -q && echo "::warning::DRIVE $HEDEF $(rclone lsf "$D/$HEDEF" | tr '\n' ' ')"
           rclone copy _o/DOGRULA_REF "$D/DOGRULA/REF_2000" -q
           rclone copyto "$D/PIN_METIN_234_LINKLI.csv" _w/eski_linkli.csv -q
           python3 sosyal/pin_v6/link_birlestir.py sosyal/pin_v6/PIN_METIN_234.csv _w/eski_linkli.csv _o/PIN_METIN_234_LINKLI.csv | tee _w/lb.txt; LB=${PIPESTATUS[0]}

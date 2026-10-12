@@ -3,9 +3,9 @@ name: ig-v6
 # Instagram / Facebook / Threads karusel v6 (Serdar onayli tasarim 12 Eki 2026), paket sosyal/ig_v6/.
 # Poster kaynagi: pin-v6'nin kullandigi 78 poster (9 Eki surumu, Midnight Blue, ORNEK isimli, 2000x3000),
 #   Drive TEMP/PIN_V6_20261012/_POSTER2000/. Yeni poster uretilmez; 78 degilse is yapmadan FAIL.
-# mod ornek : Gemini & Leo onayli/ dogrulamasi (Drive AstroLoveArt_Gemini_Leo_2000.jpg) + CAPRICORN_SAGITTARIUS
-#             4 slayt -> TEMP/IG_V6_20261012/ORNEK/.
-# mod hepsi : 78 cift x 4 slayt + QC (PASS/FAIL) + KONTAK_IG1.jpg -> TEMP/IG_V6_20261012/KARUSEL/<CIFT>/.
+# mod ornek : Gemini & Leo onayli/ dogrulamasi (Drive AstroLoveArt_Gemini_Leo_2000.jpg) + girdi `ciftler`
+#             (`slaytlar`) -> TEMP/IG_V6_20261012/<klasor>/<CIFT>/ + QC.
+# mod hepsi : 78 cift x 4 slayt + QC (PASS/FAIL) + KONTAK_IG1.jpg -> TEMP/IG_V6_20261012/KARUSEL/<CIFT>/ (sync: eskinin yerine).
 # Yayin / Metricool yok. Onizleme (kucuk dosyalar) ig-v6-onizleme dalina yazilir. Sir loga yazilmaz.
 
 permissions:
@@ -15,6 +15,9 @@ on:
   workflow_dispatch:
     inputs:
       mod: {description: "ornek | hepsi", required: true, type: choice, options: [ornek, hepsi]}
+      ciftler: {description: "ornek: cift anahtarlari (virgulle)", required: false, default: "CAPRICORN_SAGITTARIUS"}
+      klasor: {description: "ornek: Drive alt klasoru (TEMP/IG_V6_20261012/<klasor>/<CIFT>/)", required: false, default: "ORNEK"}
+      slaytlar: {description: "ornek: Drive'a yuklenecek slaytlar (orn. 1,2)", required: false, default: "1,2,3,4"}
 
 jobs:
   is:
@@ -58,6 +61,10 @@ jobs:
           print('::warning::OLCU 2000x3000 olmayan', len(bad), bad[:5]); sys.exit(1 if bad else 0)"
       - name: ornek
         if: ${{ inputs.mod == 'ornek' }}
+        env:
+          CIFTLER: ${{ inputs.ciftler }}
+          KLASOR: ${{ inputs.klasor }}
+          SLAYTLAR: ${{ inputs.slaytlar }}
         run: |
           set +e -uo pipefail   # Actions varsayilani bash -e; kapilar sonuna kadar kossun
           mkdir -p _w/refp _o/DOGRULA_REF _o/DOGRULA_78 _o/ORNEK _pv
@@ -66,12 +73,14 @@ jobs:
           python3 sosyal/ig_v6/dogrula.py _o/DOGRULA_REF/GEMINI_LEO | sed 's/^/::warning::REF /'; DR=${PIPESTATUS[0]}
           python3 sosyal/ig_v6/ig_toplu.py --posters _w/P2000 --out _o/DOGRULA_78 --pairs GEMINI_LEO > /dev/null
           python3 sosyal/ig_v6/dogrula.py _o/DOGRULA_78/GEMINI_LEO | sed 's/^/::warning::BILGI_78 (onayli EMILY-JAMES posterinden, setteki GEMINI_LEO baska isimli) /'
-          python3 sosyal/ig_v6/ig_toplu.py --posters _w/P2000 --out _o/ORNEK --pairs CAPRICORN_SAGITTARIUS | tee _w/orn.txt; OR=${PIPESTATUS[0]}
+          python3 sosyal/ig_v6/ig_toplu.py --posters _w/P2000 --out _o/ORNEK --pairs "$CIFTLER" | tee _w/orn.txt; OR=${PIPESTATUS[0]}
           grep OZET _w/orn.txt | sed 's/^/::warning::ORNEK /'
-          rclone copy _o/ORNEK/CAPRICORN_SAGITTARIUS "$D/ORNEK" -q
+          INC=(); for k in ${SLAYTLAR//,/ }; do INC+=(--include "*-ig-$k.jpg"); done
+          for c in ${CIFTLER//,/ }; do rclone copy "_o/ORNEK/$c" "$D/$KLASOR/$c" -q "${INC[@]}"; cp _o/ORNEK/$c/*.jpg _pv/; done
+          rclone copy _o/ORNEK "$D/$KLASOR" -q --include "QC.*" --include "FAIL.txt"
           rclone copy _o/DOGRULA_REF/GEMINI_LEO "$D/DOGRULA/REF_2000" -q
-          echo "::warning::DRIVE ORNEK $(rclone lsf "$D/ORNEK" | wc -l) dosya"
-          cp _o/ORNEK/CAPRICORN_SAGITTARIUS/*.jpg _o/ORNEK/QC.* _pv/; cp _o/DOGRULA_REF/GEMINI_LEO/*.jpg _pv/
+          echo "::warning::DRIVE $KLASOR $(rclone lsf -R --files-only "$D/$KLASOR" | wc -l) dosya"
+          cp _o/ORNEK/QC.* _pv/; cp _o/DOGRULA_REF/GEMINI_LEO/*.jpg _pv/
           echo "DR=$DR OR=$OR" | tee _pv/SONUC.txt
           echo "RC=$(( DR + OR ))" >> "$GITHUB_ENV"
       - name: hepsi
@@ -81,7 +90,7 @@ jobs:
           mkdir -p _o/KARUSEL _pv
           python3 sosyal/ig_v6/ig_toplu.py --posters _w/P2000 --out _o/KARUSEL --kontak | tee _w/log.txt; RC=${PIPESTATUS[0]}
           grep OZET _w/log.txt | sed 's/^/::warning::/'
-          rclone copy _o/KARUSEL "$D/KARUSEL" -q --transfers 8
+          rclone sync _o/KARUSEL "$D/KARUSEL" -q --transfers 16 --checkers 16
           echo "::warning::DRIVE KARUSEL $(rclone lsf -R --files-only "$D/KARUSEL" | wc -l) dosya"
           cp _o/KARUSEL/QC.* _o/KARUSEL/FAIL.txt _pv/
           python3 -c "

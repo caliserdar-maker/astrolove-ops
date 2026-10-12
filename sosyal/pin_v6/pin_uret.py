@@ -112,6 +112,17 @@ def ring_mask(D, w, y0, y1):
     return np.where(side & inside, 0, np.where(side, m * soft, m))
 
 
+def sign_pair(P, sign_h, max_w_ratio=1.3):
+    """The two small signs at ONE common scale, so they keep the size relation they have on the poster
+    (Aquarius is a low, wide glyph). The taller sign gets sign_h; no sign gets wider than max_w_ratio * sign_h.
+    Also returns the ring stroke width, measured on the taller sign at 150 px (as before)."""
+    la, lb = P.layer(P.sign_a, only_label=False), P.layer(P.sign_b, only_label=False)
+    k = min(sign_h / max(la.size[1], lb.size[1]), max_w_ratio * sign_h / max(la.size[0], lb.size[0]))
+    sc = lambda im: im.resize((max(1, round(im.size[0] * k)), max(1, round(im.size[1] * k))), Image.LANCZOS)
+    tall = la if la.size[1] >= lb.size[1] else lb
+    return sc(la), sc(lb), L.stroke_width(lib.scale_h(tall, 150))
+
+
 def sign_labels(cv, W, D, cy_lab, center_w, A, B, BR, base_size, tracking):
     """Labels under the two orbit signs. Centred under the sign when they fit; a long name (SAGITTARIUS)
     may not touch the centre symbol nor the frame edge: first it slides outward inside its free band,
@@ -181,9 +192,7 @@ def build(poster_path, A, B, out_dir):
     # ---------- P2: two signs on one orbit, merged symbol in the centre
     cv = navy_glow(prof, 0.47)
     cy, D, sign_h = H * 0.47, 640, 120
-    a = lib.scale_h(P.layer(P.sign_a, only_label=False), sign_h)
-    b = lib.scale_h(P.layer(P.sign_b, only_label=False), sign_h)
-    sw = L.stroke_width(lib.scale_h(P.layer(P.sign_a, only_label=False), 150))
+    a, b, sw = sign_pair(P, sign_h)
     # sign labels: same size for both, shrunk together if the longer one does not fit beside the frame edge
     center = lib.scale_h(P.layer(P.merged, only_label=False), 410)
     if center.size[0] > D * 0.78:
