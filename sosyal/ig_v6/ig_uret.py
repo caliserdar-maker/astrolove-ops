@@ -75,9 +75,7 @@ def build(poster_path, A, B, out_dir):
         return lib.trim(lib.metal_from_mask(m, BR, bevel=0.9))
 
     def orbit(cv, cy, D, sign_h, center):
-        a = lib.scale_h(P.layer(P.sign_a, only_label=False), sign_h)
-        b = lib.scale_h(P.layer(P.sign_b, only_label=False), sign_h)
-        sw = L.stroke_width(lib.scale_h(P.layer(P.sign_a, only_label=False), 150))
+        a, b, sw = PU.sign_pair(P, sign_h)
         if center.size[0] > D * 0.78:
             center = lib.scale_w(center, round(D * 0.78))
         lab_gap = 44

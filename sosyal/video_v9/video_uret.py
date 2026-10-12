@@ -66,11 +66,10 @@ def build(poster_path, A, B, out_dir, muzik=None, kareler=None):
     MER = lib.scale_h(P.layer(P.merged, only_label=False), 380)
     if MER.size[0] > D * 0.78:
         MER = lib.scale_w(MER, round(D * 0.78))
-    SA = lib.scale_h(P.layer(P.sign_a, only_label=False), SIGN_H)
-    SB = lib.scale_h(P.layer(P.sign_b, only_label=False), SIGN_H)
+    SA, SB, SW = PU.sign_pair(P, SIGN_H)
 
     def orbit_base(cv):
-        sw = L.stroke_width(lib.scale_h(P.layer(P.sign_a, only_label=False), 150))
+        sw = SW
         lab_gap = 44
         lab_h = lib.metal_text(A.upper(), int(W * L.TYPE['label']['size']), BR, tracking=L.TYPE['label']['tracking'], bevel=0.9).size[1]
         rm = PU.ring_mask(D, max(1.6, sw * 0.30), -SIGN_H / 2 - 28, SIGN_H / 2 + lab_gap + lab_h + 26)
