@@ -5,6 +5,7 @@ name: video-v9
 # mod ornek : Drive AstroLoveArt_Gemini_Leo_2000.jpg ile --kareler 2,5,8,13,17,22 + onayli/ dogrulamasi (her kare < 2.5);
 #             PASS ise CAPRICORN_SAGITTARIUS sessiz video -> TEMP/VIDEO_V9_20261012/ORNEK/.
 # mod ornek_muzik : ORNEK/ sessiz ornege muzik N -> ORNEK/..._muzikN.mp4 (QC: ses/video 24.0 sn, -16 LUFS +-1).
+# mod tek   : Gemini & Leo onayli/ dogrulamasi + verilen ciftler (cift=) sessiz uretim + QC + muzik N -> ORNEK/{slug}-astroloveart-reel_muzikN.mp4.
 # mod hepsi : 78 SESSIZ video, paralel isler (matrix) + QC (PASS/FAIL) + KONTAK_9s.jpg -> TEMP/VIDEO_V9_20261012/SESSIZ/;
 #             78/78 PASS ise ayni kosuda muzik N eklenir -> FINAL/.
 # mod muzik : SESSIZ/ videolarina muzik N (yeniden kodlama yok) + QC -> TEMP/VIDEO_V9_20261012/FINAL/.
@@ -19,18 +20,23 @@ on:
   workflow_dispatch:
     inputs:
       mod:
-        description: ornek | ornek_muzik | hepsi | muzik
+        description: ornek | ornek_muzik | tek | hepsi | muzik
         required: true
         type: choice
         options:
         - ornek
         - ornek_muzik
+        - tek
         - hepsi
         - muzik
       muzik:
         description: 'muzik: 1 | 2 | 3 (kesin secim 2)'
         required: false
         default: '2'
+      cift:
+        description: 'tek: cift anahtarlari virgulle (ornek AQUARIUS_LEO,ARIES_CAPRICORN)'
+        required: false
+        default: AQUARIUS_LEO
       grup:
         description: 'hepsi: is basina cift sayisi'
         required: false
@@ -254,6 +260,84 @@ jobs:
         from PIL import Image
         im=Image.open('_qc/KONTAK_9s.jpg'); im.thumbnail((2400,2400)); im.save('_pv/KONTAK_9s_kucuk.jpg',quality=80)"
         echo "RC=$RC" >> "$GITHUB_ENV"
+    - name: Onizleme dali
+      if: ${{ always() }}
+      run: |
+        set +e -uo pipefail
+        [ -n "$(ls -A _pv 2>/dev/null)" ] || exit 0
+        B=video-v9-onizleme; M="${{ inputs.mod }}"
+        git config user.name "github-actions"; git config user.email "actions@github.com"
+        for i in 1 2 3 4 5; do
+          rm -rf _pvw; git worktree prune
+          git fetch -q origin $B 2>/dev/null && git worktree add -q _pvw origin/$B 2>/dev/null || { git worktree add -q --detach _pvw; (cd _pvw && git checkout -q --orphan tmp && git rm -rqf . ); }
+          rm -rf "_pvw/$M"; mkdir -p "_pvw/$M"; cp -r _pv/* "_pvw/$M/"
+          (cd _pvw && git add -A && git commit -qm "video-v9 onizleme: $M (kosu ${{ github.run_id }})" && git push -q origin HEAD:refs/heads/$B) && { echo "::warning::ONIZLEME $B/$M"; break; }
+          sleep $(( RANDOM % 10 + 3 ))
+        done
+    - name: Sonuc
+      if: ${{ always() }}
+      run: |
+        rm -rf ~/.config/rclone
+        [ "${RC:-1}" = "0" ]
+  tek:
+    if: ${{ inputs.mod == 'tek' }}
+    needs: hazirla
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Kurulum
+      run: |
+        set -euo pipefail
+        pip install -q numpy==2.1.3 pillow==11.0.0 scipy==1.14.1 opencv-python-headless==4.10.0.84
+        sudo apt-get -qq update >/dev/null && sudo apt-get -qq install -y ffmpeg >/dev/null
+        echo "::warning::CPU $(nproc), $(ffmpeg -version | head -1 | cut -d' ' -f1-3)"
+    - name: rclone
+      run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+    - name: rclone.conf
+      env:
+        RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      run: |
+        set -euo pipefail
+        mkdir -p ~/.config/rclone; umask 077
+        printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+        if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+          grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+    - name: tek
+      env:
+        CIFT: ${{ inputs.cift }}
+        N: ${{ inputs.muzik }}
+      run: |
+        set +e -uo pipefail
+        case "$CIFT" in *[!A-Z_,]*|"") echo "::error::cift A-Z_ ve virgul"; exit 1 ;; esac
+        case "$N" in 1|2|3) ;; *) echo "::error::muzik 1|2|3"; exit 1 ;; esac
+        mkdir -p _w/refp _w/P2000 _w/m _o/DOGRULA _o/T _o/F _pv
+        rclone copyto gdrive:AstroLoveArt_Gemini_Leo_2000.jpg _w/refp/GEMINI_LEO.jpg --drive-root-folder-id "$REF_DIR" -q
+        python3 sosyal/video_v9/video_uret.py --poster _w/refp/GEMINI_LEO.jpg --a Gemini --b Leo --out _o/DOGRULA --kareler 2,5,8,13,17,22 > /dev/null; KR=$?
+        python3 sosyal/video_v9/dogrula.py _o/DOGRULA | tee _w/dg.txt; DG=${PIPESTATUS[0]}
+        sed 's/^/::warning::DOGRULA /' _w/dg.txt
+        for k in ${CIFT//,/ }; do rclone copyto "$P2000/$k.jpg" "_w/P2000/$k.jpg" -q || echo "::error::poster yok $k"; done
+        python3 sosyal/video_v9/video_toplu.py --posters _w/P2000 --out _o/T --pairs "$CIFT" | tee _w/t.txt; TR=${PIPESTATUS[0]}
+        grep -E 'ILERLEME|OZET' _w/t.txt | sed 's/^/::warning::TEK /'
+        P=$(rclone cat "gdrive:ASTROLOVE/TEMP/MUZIK_PAROLA.txt" 2>/dev/null | tr -d '\r\n')
+        [ -n "$P" ] && echo "::add-mask::$P"
+        [ -n "$P" ] || { echo "::error::muzik parolasi Drive'dan okunamadi"; exit 1; }
+        MUZIK_PAROLA="$P" openssl enc -d -aes-256-cbc -pbkdf2 -in "sosyal/video_v9/assets/muzik_$N.m4a.enc" -out _w/m/muzik.m4a -pass env:MUZIK_PAROLA \
+          || { unset P; echo "::error::muzik cozulemedi"; exit 1; }
+        unset P
+        python3 sosyal/video_v9/muzik_ekle.py --muzik _w/m/muzik.m4a --giris _o/T --cikis _o/F --ek "_muzik$N" | tee _w/mz.txt; MR=${PIPESTATUS[0]}
+        rm -rf _w/m
+        grep -E 'ILERLEME|OZET' _w/mz.txt | sed 's/^/::warning::MUZIK /'
+        rclone copy _o/F "$D/ORNEK" -q --include "*.mp4"
+        for k in ${CIFT//,/ }; do s=$(echo "$k" | tr 'A-Z' 'a-z' | sed 's/_/-and-/'); rclone copy _o/T "$D/ORNEK" -q --include "$s-qc.json" --include "$s-kare_9s.jpg"; done
+        echo "::warning::DRIVE ORNEK $(rclone lsf "$D/ORNEK" | tr '\n' ' ')"
+        cp _o/T/*-qc.json _o/T/*-kare_9s.jpg _o/F/MUZIK_QC.csv _pv/ 2>/dev/null; cp _w/dg.txt _pv/DOGRULA.txt; cp _w/t.txt _pv/TEK.txt; cp _w/mz.txt _pv/MUZIK.txt
+        echo "KR=$KR DG=$DG TR=$TR MR=$MR" | tee _pv/SONUC.txt
+        echo "RC=$(( KR + DG + TR + MR ))" >> "$GITHUB_ENV"
     - name: Onizleme dali
       if: ${{ always() }}
       run: |

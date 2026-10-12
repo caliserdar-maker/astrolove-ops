@@ -48,7 +48,7 @@ def navy_glow(profile, cy_frac, gain=0.70, sigma=0.42):
     return Image.fromarray(np.clip(np.round(out), 0, 255).astype(np.uint8), 'RGB')
 
 
-def build(poster_path, A, B, out_dir, muzik=None, kareler=None):
+def build(poster_path, A, B, out_dir, muzik=None, kareler=None, bilgi=None):
     os.makedirs(out_dir, exist_ok=True)
     slug = f'{A.lower()}-and-{B.lower()}'
     P = PU.PosterR(poster_path)
@@ -204,7 +204,12 @@ def build(poster_path, A, B, out_dir, muzik=None, kareler=None):
     f_out = MER.size[1] / (P.merged[4] + 20) * ZN
     pcx = P.merged[1] + P.merged[3] / 2; pcy = P.merged[2] + P.merged[4] / 2
     sx = W / 2 + (mx - W / 2) * ZN; sy = H / 2 + (my - H / 2) * ZN
-    cw_a = W * sp / f_out; ch_a = cw_a * 16 / 9
+    cw_a = W * sp / f_out
+    if bilgi is not None:
+        bilgi['kamera_orani'] = round(cw_a / 2160, 3)
+    # a very large symbol on the poster would need a crop wider than the wall image: start from the full wall width
+    # (symbol then slightly smaller than in the navy part); pairs below the limit are unchanged
+    cw_a = min(cw_a, 2160.0); ch_a = cw_a * 16 / 9
     BOX_A = (PX + pcx * sp - sx * cw_a / W + cw_a / 2, PY + pcy * sp - sy * ch_a / H + ch_a / 2, cw_a)
     BOX_F = (1080.0, 1920.0, 2160.0)
     _yy, _xx = np.mgrid[0:H, 0:W].astype(np.float32)
