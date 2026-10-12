@@ -1,0 +1,78 @@
+name: metricool-pin-baslik
+
+# Metricool bekleyen Pinterest pinlerinde yalniz pinTitle duzeltmesi (Serdar onayi 12 Eki 2026).
+# kuru: liste + KURU_DENEME.csv (yazma YOK) | tek: 1 gonderi PUT + GET dogrulama | hepsi: kalanlar.
+# Token: Drive TEMP/METRICOOL_TOKEN.json (loga yazilmaz). Cikti: Drive TEMP/PIN_BASLIK_20261012/.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      mod:
+        description: "kuru | tek | hepsi"
+        type: choice
+        options: [kuru, tek, hepsi]
+        default: kuru
+      secret_kaydet:
+        description: "true: token gecerliyse METRICOOL_USER_TOKEN repo secret'ina yazilir"
+        type: boolean
+        default: false
+
+concurrency:
+  group: metricool-yazma
+  cancel-in-progress: false
+
+jobs:
+  baslik:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      D: gdrive:ASTROLOVE/TEMP/PIN_BASLIK_20261012
+    steps:
+      - uses: actions/checkout@v4
+      - name: rclone + token
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            export RCLONE_CONFIG_GDRIVE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET"
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+          mkdir -p _work
+          rclone copyto "gdrive:ASTROLOVE/TEMP/METRICOOL_TOKEN.json" _work/mc.json
+          python3 - <<'EOF'
+          import json
+          t = json.load(open('_work/mc.json'))
+          print(f"::add-mask::{t['userToken']}")
+          print('token alanlari:', sorted(t), 'userId', t['userId'], 'blogId', t['blogId'], 'token uzunlugu', len(t['userToken']))
+          EOF
+
+      - name: Calistir (${{ inputs.mod }})
+        env:
+          MOD: ${{ inputs.mod }}
+        run: |
+          set -uo pipefail
+          python3 scripts/sosyal/metricool_pin_baslik.py --token-dosya _work/mc.json --mod "$MOD" --cikti _out 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+          rc=${PIPESTATUS[0]}
+          rclone copy _out "$D" --include "*.csv" --include "HAM_LISTE.json" 2>&1 | tail -2 || true
+          rclone lsl "$D" | tee -a "$GITHUB_STEP_SUMMARY" || true
+          exit $rc
+
+      - name: Secret kaydet (METRICOOL_USER_TOKEN)
+        if: ${{ success() && inputs.secret_kaydet == true }}
+        env:
+          OPS_ADMIN_TOKEN: ${{ secrets.OPS_ADMIN_TOKEN }}
+        run: |
+          set -euo pipefail
+          pip install -q pynacl
+          python3 -c "import json;print(json.load(open('_work/mc.json'))['userToken'],end='')" \
+            | python3 scripts/common/gh_secrets.py secret astrolove-ops METRICOOL_USER_TOKEN
+
+      - if: always()
+        run: rm -rf _work ~/.config/rclone
