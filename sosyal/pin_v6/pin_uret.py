@@ -128,7 +128,7 @@ def sign_pair(P, sign_h, max_w_ratio=1.3):
 
 GEMINI_LEO_ASPECT = 0.941638608305275      # w/h of the merged-symbol layer in the approved Gemini & Leo design
 GEMINI_LEO_SIGNS = 0.9635                  # mean sqrt(w*h) of the two small signs / sign_h in that design
-CENTER_SCALE = 1.0                          # global size of the centre symbol vs. the 12 Oct design (Serdar decides)
+CENTER_SCALE = 0.65                         # merged symbol in the orbit at 65% of the first design (Serdar, 12 Oct 2026)
 
 
 def sign_size(a, b, sign_h):
@@ -141,14 +141,16 @@ def center_scaled(layer, ref_h, a, b, sign_h, kind='merged'):
     """Centre symbol sized like the approved Gemini & Leo design (ref_h tall there):
     - its visual size (sqrt of width x height) matches that design, so a wide symbol gets lower, not wider;
     - it never gets taller than there;
-    - when the small signs look smaller than there (e.g. a wide Aquarius), the centre gets smaller by the same factor.
-    kind='q' for the question mark (its own shape, only height and the sign factor apply)."""
-    f = min(1.0, sign_size(a, b, sign_h)) * CENTER_SCALE
-    if kind == 'q':
+    - when the small signs look smaller than there (e.g. a wide Aquarius), the centre gets smaller by the same factor;
+    - the merged symbol is then set to CENTER_SCALE of that size (Serdar: 65%).
+    kind='q' for the question mark: its own shape, only height and the sign factor apply, no CENTER_SCALE."""
+    f = min(1.0, sign_size(a, b, sign_h))
+    if kind == 'q':                                   # the question mark keeps its approved size
         k = ref_h * f / layer.size[1]
-    else:
-        target = ref_h * GEMINI_LEO_ASPECT ** 0.5 * f
-        k = min(target / (layer.size[0] * layer.size[1]) ** 0.5, ref_h * f / layer.size[1])
+        return layer.resize((max(1, round(layer.size[0] * k)), max(1, round(layer.size[1] * k))), Image.LANCZOS)
+    f *= CENTER_SCALE
+    target = ref_h * GEMINI_LEO_ASPECT ** 0.5 * f
+    k = min(target / (layer.size[0] * layer.size[1]) ** 0.5, ref_h * f / layer.size[1])
     return layer.resize((max(1, round(layer.size[0] * k)), max(1, round(layer.size[1] * k))), Image.LANCZOS)
 
 
