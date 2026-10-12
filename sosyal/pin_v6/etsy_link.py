@@ -22,7 +22,7 @@ def main(src, out):
     shop = os.environ['ETSY_SHOP_ID']
     listings, off = [], 0
     while True:
-        r = api.get(f'/application/shops/{shop}/listings/active', params={'limit': 100, 'offset': off})
+        r = api.get(f'/shops/{shop}/listings/active', params={'limit': 100, 'offset': off})
         listings += r.get('results', [])
         off += 100
         if off >= r.get('count', 0):
