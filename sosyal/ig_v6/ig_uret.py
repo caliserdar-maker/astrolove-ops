@@ -75,7 +75,9 @@ def build(poster_path, A, B, out_dir):
         return lib.trim(lib.metal_from_mask(m, BR, bevel=0.9))
 
     def orbit(cv, cy, D, sign_h, center):
-        a, b, sw = PU.sign_pair(P, sign_h)
+        a, b, sw, r = PU.sign_pair(P, sign_h)
+        if r < 1:
+            center = center.resize((round(center.size[0] * r), round(center.size[1] * r)), Image.LANCZOS)
         center = PU.fit_center(center, D, a, b)
         lab_gap = 44
         lab_h = lib.metal_text(A.upper(), int(W * L.TYPE['label']['size']), BR, tracking=L.TYPE['label']['tracking'], bevel=0.9).size[1]
