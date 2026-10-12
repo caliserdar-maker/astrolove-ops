@@ -8,7 +8,7 @@ Saat: dateTime Europe/Istanbul olarak acikca yazilir; utc ve Europe/Madrid karsi
 belirsiz/yok olan (yaz saati gecisi) satirlar 5 dk ONCEYE alinir ve 'dst_notu' ile isaretlenir (25 Eki 2026 03:00 -> 02:55).
 Metinler data/sosyal/metin/*_78.csv'den AYNEN; referans_hashtag gonderilmez.
 Kullanim: plan_5p.py --metin-dir D --karusel KARUSEL.json --video VIDEO.json --url-kok URL --baslangic 2026-10-14
-                      [--yt-kategori 26] --cikti PLAN_5_PLATFORM.csv"""
+                      [--yt-kategori HOWTO_STYLE (bos: YOUTUBE_SHORTS_78.csv kategori sutunu)] --cikti PLAN_5_PLATFORM.csv"""
 import argparse, csv, json, re, sys
 from collections import Counter, defaultdict
 from datetime import date, datetime, timedelta
@@ -78,7 +78,7 @@ def main():
     ap = argparse.ArgumentParser()
     for k in ('metin-dir', 'karusel', 'video', 'url-kok', 'cikti'):
         ap.add_argument('--' + k, required=True)
-    ap.add_argument('--baslangic', default='2026-10-14'); ap.add_argument('--yt-kategori', default='26')
+    ap.add_argument('--baslangic', default='2026-10-14'); ap.add_argument('--yt-kategori', default='')
     a = ap.parse_args()
     D = a.metin_dir
     IGK, IGR, FB, TH, TT, YT = (oku(D, x) for x in ('IG_KARUSEL_78.csv', 'IG_REEL_78.csv', 'FACEBOOK_78.csv', 'THREADS_78.csv',
@@ -134,7 +134,7 @@ def main():
                                  'commercialContentOwnBrand': True, 'commercialContentThirdParty': False},
                   'kapak_yazisi': tt['kapak_yazisi'], 'NOT': 'API metin ustu yazi desteklemez; kapak videodan/thumbnail'})
         satir('03:00', g2, 'youtube', 'SHORT', yt['aciklama'], vurl, [], baslik=yt['baslik'], video=True,
-              ek={'youtubeData': {'title': yt['baslik'], 'type': 'SHORT', 'privacy': 'PUBLIC', 'category': a.yt_kategori,
+              ek={'youtubeData': {'title': yt['baslik'], 'type': 'SHORT', 'privacy': 'PUBLIC', 'category': a.yt_kategori or yt['kategori'],
                                   'madeForKids': yt['made_for_kids'].lower() == 'true',
                                   'isAiGeneratedContent': yt['sentetik_icerik'].lower() == 'true', 'notifySubscribers': True,
                                   'tags': [x.strip() for x in yt['etiketler'].split(',') if x.strip()]}})
@@ -151,6 +151,9 @@ def main():
             hata.append(f'ortak burc gun {i}-{i + 1}: {s[i - 1]} {s[i]}')
     if s[0] != ILK:
         hata.append('ilk gun GEMINI_LEO degil')
+    for r in out:
+        if r['platform'] == 'youtube' and json.loads(r['ek_alanlar'])['youtubeData'].get('category') != 'HOWTO_STYLE':
+            hata.append(f"youtube kategori {r['cift']}: {json.loads(r['ek_alanlar'])['youtubeData'].get('category')}")
     SINIR = {'instagram': 2200, 'facebook': 63206, 'threads': 500, 'tiktok': 2200, 'youtube': 5000}
     for r in out:
         m = r['metin']

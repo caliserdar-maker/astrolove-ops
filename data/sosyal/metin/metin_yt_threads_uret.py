@@ -11,6 +11,7 @@ YT_DESC = ('{A} and {B}, as one? Watch the {A} and {B} zodiac signs become one s
            'This zodiac couple art adds your two names and a personal message, made by AstroLoveArt. '
            'A personalized gift idea for an anniversary, engagement or wedding. '
            'Make it yours: search AstroLoveArt on Etsy.\n\n#zodiaccompatibility #zodiaccouple #zodiacart')
+YT_KATEGORI = 'HOWTO_STYLE'  # Howto & Style (YouTube 26); Serdar karari 12 Eki 2026, EDUCATION kullanilmaz
 YT_TAGS = '{a} and {b} compatibility,{a} and {b},zodiac compatibility,zodiac couple art,personalized zodiac gift'
 TH_TEXT = ('{A} & {B}, as one? Two zodiac signs become one shared gold symbol, with your two names and your message. '
            'Zodiac couple art by AstroLoveArt, made for you on Etsy.')
@@ -29,13 +30,14 @@ for A, B in PAIRS:
     k = f'{A.upper()}_{B.upper()}'
     f = dict(A=A, B=B, a=A.lower(), b=B.lower())
     r = dict(cift_anahtari=k, baslik=YT_TITLE.format(**f), aciklama=YT_DESC.format(**f), etiketler=YT_TAGS.format(**f),
-             kategori='26', made_for_kids='false', sentetik_icerik='true')
+             kategori=YT_KATEGORI, made_for_kids='false', sentetik_icerik='true')
     yt.append(r)
     t = dict(cift_anahtari=k, metin=TH_TEXT.format(**f), konu_etiketi=TH_TOPIC, **{f'alt_metin_{i+1}': x.format(**f) for i, x in enumerate(TH_ALT)})
     th.append(t)
     if len(r['baslik']) > 100: err.append((k, 'yt baslik > 100'))
     if len(r['aciklama'].encode()) > 5000: err.append((k, 'yt aciklama > 5000 bayt'))
     if len(r['etiketler']) + r['etiketler'].count(' ') * 0 > 500: err.append((k, 'yt etiket > 500'))
+    if r['kategori'] != 'HOWTO_STYLE': err.append((k, 'yt kategori HOWTO_STYLE degil'))
     if r['aciklama'].count('#') > 3: err.append((k, 'yt hashtag > 3'))
     if len(t['metin']) > 500: err.append((k, 'threads metin > 500'))
     if '&' in TH_TOPIC or '.' in TH_TOPIC or not 1 <= len(TH_TOPIC) <= 50: err.append((k, 'konu etiketi kurali'))
