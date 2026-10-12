@@ -16,6 +16,9 @@ BAS, SON = '2026-10-11T14:00:00', '2026-10-16T23:00:00'
 ESKI = re.compile(r'^A Personalized Anniversary Gift for an? (.+?) and (.+?) Couple$')
 BEKLE = 1.1
 YOK = '__404__'
+# PUT sonrasi Metricool'un kendisinin degistirdigi alanlar (3. deneme olcumu, 385760353): duzenleme zamani ve
+# Pinterest'e gitmeyen instagramData varsayilanlari. Metin, link, gorsel, pano, saat, durum burada YOK -> degisirse FAIL.
+IZINLI_FARK = ('creationDate.dateTime', 'creationDate.timezone', 'instagramData.type', 'instagramData.showReelOnFeed')
 
 
 def yeni_baslik(eski):
@@ -175,9 +178,10 @@ def main():
                 sonuc.append(dict(r, sonuc='ATLANDI PUT sonrasi bulunamadi (yayinlanmis olabilir)'))
                 w.writerow({x: sonuc[-1].get(x, '') for x in k}); f.flush(); continue
             okunan = (sonra.get('pinterestData') or {}).get('pinTitle')
-            df = [x for x in fark(once, sonra) if x not in ('pinterestData.pinTitle', 'id')]
+            tum = [x for x in fark(once, sonra) if x not in ('pinterestData.pinTitle', 'id')]
+            df = [x for x in tum if x not in IZINLI_FARK]
             ok = okunan == r['yeni_baslik'] and not df
-            sonuc.append(dict(r, yeni_id=sonra.get('id'), okunan_baslik=okunan, diger_fark='|'.join(df),
+            sonuc.append(dict(r, yeni_id=sonra.get('id'), okunan_baslik=okunan, diger_fark='|'.join(tum),
                               sonuc='PASS' if ok else 'FAIL'))
             w.writerow({x: sonuc[-1].get(x, '') for x in k}); f.flush()
             g = time.time() - t0
