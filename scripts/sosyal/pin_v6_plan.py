@@ -32,7 +32,9 @@ def main():
     for k in ('metin', 'sira', 'panolar', 'pinler', 'cikti'):
         ap.add_argument('--' + k, required=True)
     ap.add_argument('--url-kok', default='', help='GitHub Pages koku; verilirse gorsel_url doldurulur')
+    ap.add_argument('--baslangic', default=str(BAS), help='plan gunu 1 (YYYY-MM-DD); 13 Eki 2026 Serdar karari')
     a = ap.parse_args()
+    bas = date.fromisoformat(a.baslangic)
     M = list(csv.DictReader(open(a.metin, encoding='utf-8-sig')))
     r0 = M[0]
     K = {'cift': kol(r0, 'cift_anahtari', 'cift', 'pair'), 'pin': kol(r0, 'pin', 'varyant', 'tip'),
@@ -63,7 +65,7 @@ def main():
                 hata.append(f"pano metinde farkli {c} {pin}: {r.get('pano')}")
             pid = pano_id.get(PANO[pin].lower(), '')
             dosya = r[K['dosya']].strip()
-            out.append({'plan_gunu': g + 1, 'tarih_saat': f'{BAS + timedelta(days=g + ek)} {saat}', 'cift': c, 'pin': pin.upper(),
+            out.append({'plan_gunu': g + 1, 'tarih_saat': f'{bas + timedelta(days=g + ek)} {saat}', 'cift': c, 'pin': pin.upper(),
                         'pano': PANO[pin], 'pano_id': pid or 'PANO_YOK', 'baslik': r[K['baslik']], 'aciklama': r[K['aciklama']],
                         'alt_metin': r[K['alt']], 'link': r[K['link']], 'gorsel_dosya': dosya,
                         'drive_id': dosya_id.get(dosya, 'DOSYA_YOK'),
