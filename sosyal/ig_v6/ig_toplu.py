@@ -12,7 +12,7 @@ QC per pair (all must hold):
   q_bosluk: in slides 1 and 2 the centre symbol leaves >= 30 px free on both sides to the small signs
             (horizontal gap between the pasted alpha bboxes on the slide).
   q_olcu  : 4 files, each 1080x1350
-Writes QC.csv, QC.json, FAIL.txt; with --kontak also KONTAK_IG1.jpg (all cover slides).
+Writes QC.csv, QC.json, FAIL.txt; with --kontak also KONTAK_IG1.jpg (all cover slides) and KONTAK_IG2.jpg (all slide 2).
 """
 import argparse, csv, json, os, sys, time, traceback
 import numpy as np
@@ -111,7 +111,7 @@ def main():
     rows, t0, n = [], time.time(), len(pairs)
     for i, key in enumerate(pairs, 1):
         A, B = [s.capitalize() for s in key.split('_')]
-        rec = {'cift': key, 'a': A, 'b': B, 'kapak': ''}
+        rec = {'cift': key, 'a': A, 'b': B, 'kapak': '', 'slayt2': ''}
         try:
             poster = os.path.join(g.posters, key + '.jpg')
             sz = Image.open(poster).size
@@ -122,7 +122,7 @@ def main():
             qc_boy(rec)
             olc = {k: Image.open(v).size for k, v in out.items()}
             rec['q_olcu'] = len(olc) == 4 and all(s == (IG.W, IG.H) for s in olc.values())
-            rec['kapak'] = out['1']
+            rec['kapak'], rec['slayt2'] = out['1'], out['2']
             rec['hata'] = ''
         except Exception as e:
             rec.update(q_parca=False, q_boy=False, q_bosluk=False, q_olcu=False,
@@ -142,6 +142,8 @@ def main():
         ok = [r for r in rows if r['kapak']]
         contact([(r['kapak'], r['cift'] + ('' if r['PASS'] else '  FAIL')) for r in ok],
                 270, 13, os.path.join(g.out, 'KONTAK_IG1.jpg'), f'IG 1 kapak x {len(ok)}')
+        contact([(r['slayt2'], r['cift'] + ('' if r['PASS'] else '  FAIL')) for r in ok],
+                270, 13, os.path.join(g.out, 'KONTAK_IG2.jpg'), f'IG 2 sembol x {len(ok)}')
     print(f'OZET PASS {n - len(fails)}/{n} FAIL {len(fails)}: {" ".join(fails) or "yok"}')
     return 0 if not fails else 1
 

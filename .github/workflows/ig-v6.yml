@@ -87,15 +87,19 @@ jobs:
         if: ${{ inputs.mod == 'hepsi' }}
         run: |
           set +e -uo pipefail   # Actions varsayilani bash -e; kapilar sonuna kadar kossun
-          mkdir -p _o/KARUSEL _pv
-          python3 sosyal/ig_v6/ig_toplu.py --posters _w/P2000 --out _o/KARUSEL --kontak | tee _w/log.txt; RC=${PIPESTATUS[0]}
+          mkdir -p _o/KARUSEL _pv _w/refp _o/DOGRULA_REF
+          rclone copyto gdrive:AstroLoveArt_Gemini_Leo_2000.jpg _w/refp/GEMINI_LEO.jpg --drive-root-folder-id "$REF_DIR" -q
+          python3 sosyal/ig_v6/ig_toplu.py --posters _w/refp --out _o/DOGRULA_REF --pairs GEMINI_LEO > /dev/null
+          python3 sosyal/ig_v6/dogrula.py _o/DOGRULA_REF/GEMINI_LEO | tee _pv/DOGRULA.txt | sed 's/^/::warning::REF /'; DR=${PIPESTATUS[0]}
+          python3 sosyal/ig_v6/ig_toplu.py --posters _w/P2000 --out _o/KARUSEL --kontak | tee _w/log.txt; RC=${PIPESTATUS[0]}; RC=$(( RC + DR ))
           grep OZET _w/log.txt | sed 's/^/::warning::/'
           rclone sync _o/KARUSEL "$D/KARUSEL" -q --transfers 16 --checkers 16
-          echo "::warning::DRIVE KARUSEL $(rclone lsf -R --files-only "$D/KARUSEL" | wc -l) dosya"
+          echo "DRIVE KARUSEL $(rclone lsf -R --files-only "$D/KARUSEL" | wc -l) dosya, $(rclone lsf --dirs-only "$D/KARUSEL" | wc -l) klasor" | tee _pv/DRIVE_SAYI.txt | sed 's/^/::warning::/'
           cp _o/KARUSEL/QC.* _o/KARUSEL/FAIL.txt _pv/
           python3 -c "
           from PIL import Image
-          im=Image.open('_o/KARUSEL/KONTAK_IG1.jpg'); im.thumbnail((2400,2400)); im.save('_pv/KONTAK_IG1_kucuk.jpg',quality=80)"
+          for k in ('KONTAK_IG1','KONTAK_IG2'):
+              im=Image.open('_o/KARUSEL/'+k+'.jpg'); im.thumbnail((2400,2400)); im.save('_pv/'+k+'_kucuk.jpg',quality=80)"
           echo "RC=$RC" >> "$GITHUB_ENV"
       - name: Onizleme dali
         if: ${{ always() }}
