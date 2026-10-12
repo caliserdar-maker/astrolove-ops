@@ -54,7 +54,7 @@ jobs:
       - name: ornek
         if: ${{ inputs.mod == 'ornek' }}
         run: |
-          set -uo pipefail
+          set +e -uo pipefail   # Actions varsayilani bash -e; kapilar sonuna kadar kossun
           mkdir -p _w/P2000 _w/big _o/ORNEK _o/DOGRULA_REF _o/DOGRULA_78 _o/KONTROL _pv
           rclone lsf gdrive: --drive-root-folder-id "$SRC_ID" --files-only --include "*_7200x10800.jpg" | sort > _w/liste.txt
           N=$(wc -l < _w/liste.txt); echo "::warning::KAYNAK $N poster (POSTER78_CHATGPT_7200x10800_20261008)"
@@ -79,7 +79,7 @@ jobs:
           python3 sosyal/pin_v6/pin_toplu.py --posters _w/refp --out _o/DOGRULA_REF --pairs GEMINI_LEO > /dev/null
           python3 sosyal/pin_v6/dogrula.py _o/DOGRULA_REF | sed 's/^/::warning::REF /'; DR=${PIPESTATUS[0]}
           python3 sosyal/pin_v6/pin_toplu.py --posters _w/P2000 --out _o/DOGRULA_78 --pairs GEMINI_LEO > /dev/null
-          python3 sosyal/pin_v6/dogrula.py _o/DOGRULA_78 | sed 's/^/::warning::78 /'; D78=${PIPESTATUS[0]}
+          python3 sosyal/pin_v6/dogrula.py _o/DOGRULA_78 | sed 's/^/::warning::BILGI_78 (onayli EMILY-JAMES posterinden, setteki GEMINI_LEO baska isimli) /'; D78=${PIPESTATUS[0]}
           python3 sosyal/pin_v6/pin_toplu.py --posters _w/P2000 --out _o/ORNEK --pairs CAPRICORN_SAGITTARIUS | tee _w/orn.txt; OR=${PIPESTATUS[0]}
           grep OZET _w/orn.txt | sed 's/^/::warning::ORNEK /'
           rclone copy _w/P2000 "$D/_POSTER2000" -q --transfers 8
@@ -89,11 +89,11 @@ jobs:
           echo "::warning::DRIVE _POSTER2000 $(rclone lsf "$D/_POSTER2000" | wc -l) dosya, ORNEK $(rclone lsf "$D/ORNEK" | wc -l) dosya"
           cp _o/ORNEK/*.jpg _o/ORNEK/QC.* _pv/ 2>/dev/null; cp _o/KONTROL/* _pv/; cp _o/DOGRULA_78/gemini-and-leo-*p*.jpg _pv/ 2>/dev/null
           echo "PK=$PK DR=$DR D78=$D78 OR=$OR" | tee _pv/SONUC.txt
-          echo "RC=$(( PK + DR + D78 + OR ))" >> "$GITHUB_ENV"
+          echo "RC=$(( PK + DR + OR ))" >> "$GITHUB_ENV"
       - name: hepsi
         if: ${{ inputs.mod == 'hepsi' }}
         run: |
-          set -uo pipefail
+          set +e -uo pipefail   # Actions varsayilani bash -e; kapilar sonuna kadar kossun
           mkdir -p _w/P2000 _o/PINLER _pv
           rclone copy "$D/_POSTER2000" _w/P2000 -q --transfers 8
           N=$(ls _w/P2000/*.jpg | wc -l); echo "::warning::POSTER2000 $N"; [ "$N" = 78 ] || { echo "::error::78 poster yok"; exit 1; }
@@ -114,7 +114,7 @@ jobs:
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
         run: |
-          set -uo pipefail
+          set +e -uo pipefail   # Actions varsayilani bash -e; kapilar sonuna kadar kossun
           mkdir -p _o/LINK _pv
           python3 sosyal/pin_v6/etsy_link.py sosyal/pin_v6/PIN_METIN_234.csv _o/LINK | tee _w_link.txt; RC=${PIPESTATUS[0]}
           grep OZET _w_link.txt | sed 's/^/::warning::/'
@@ -125,8 +125,8 @@ jobs:
       - name: Onizleme dali
         if: ${{ always() }}
         run: |
-          set -uo pipefail
-          [ -d _pv ] || exit 0
+          set +e -uo pipefail   # Actions varsayilani bash -e; kapilar sonuna kadar kossun
+          [ -n "$(ls -A _pv 2>/dev/null)" ] || exit 0
           if grep -rqE 'x-api-key|refresh_token|"access_token"' _pv/ 2>/dev/null; then echo "::error::onizlemede sir benzeri anahtar"; exit 1; fi
           B=pin-v6-onizleme; M="${{ inputs.mod }}"
           git config user.name "github-actions"; git config user.email "actions@github.com"

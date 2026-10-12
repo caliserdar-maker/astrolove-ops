@@ -4,7 +4,7 @@ Usage: python3 poster_kontrol.py <dir with PAIR.jpg> <out_dir>
 Per poster: size 2000x3000, background navy (Midnight Blue: blue clearly above red in the whole-poster median),
 names row OCR (tesseract) does not contain SERDAR or LENA. Writes POSTER_KONTROL.csv, POSTER_KONTAK.jpg.
 """
-import csv, os, subprocess, sys, tempfile
+import csv, os, re, subprocess, sys, tempfile
 import numpy as np
 from PIL import Image, ImageDraw
 
@@ -42,7 +42,8 @@ def main(src, out):
         except Exception as e:
             rec['isimler_ocr'] = f'HATA {type(e).__name__}: {e}'
         up = rec['isimler_ocr'].upper()
-        rec['q_ornek_isim'] = not any(n in up for n in YASAK) and not up.startswith('HATA')
+        words = set(re.findall(r'[A-Z]+', up))  # whole words: ELENA / SELENA are not LENA
+        rec['q_ornek_isim'] = not (words & set(YASAK)) and not up.startswith('HATA')
         rec['PASS'] = rec['q_olcu'] and rec['q_lacivert'] and rec['q_ornek_isim']
         rows.append(rec)
         t = im.copy(); t.thumbnail((200, 300)); thumbs.append((t, key))
