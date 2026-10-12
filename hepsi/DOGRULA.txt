@@ -1,0 +1,1 @@
+DOGRULAMA {"1": {"ortalama": 1.246, "p99": 9, "max": 235}, "2": {"ortalama": 0.267, "p99": 6, "max": 232}, "3": {"ortalama": 0.906, "p99": 5, "max": 26}, "4": {"ortalama": 1.152, "p99": 6, "max": 220}, "PASS": true}
