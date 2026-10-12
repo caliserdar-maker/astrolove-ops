@@ -152,11 +152,9 @@ def build(poster_path, A, B, out_dir):
     def put(im, cy):
         img.paste(im, (round(W / 2 - im.size[0] / 2), round(cy - im.size[1] / 2)), im)
 
-    l1 = flat('Your names', 96); l2 = flat('Your zodiac wall art', 96)
-    if l2.size[0] > W * 0.86:
-        s = W * 0.86 / l2.size[0]; l1 = flat('Your names', int(96 * s)); l2 = flat('Your zodiac wall art', int(96 * s))
-    put(l1, 86); put(l2, 182)
-    put(fit(lambda s: flat(pair_caps, s, 0.18), 50, W * 0.86), 266)
+    # two lines on top (Serdar 12 Oct 2026, option C)
+    put(fit(lambda s: flat('Personalized zodiac wall art', s), 96, W * 0.86), 120)
+    put(fit(lambda s: flat(pair_caps, s, 0.18), 58, W * 0.86), 238)
     put(flat('ASTROLOVEART', 38, 0.24), (box['py'] + box['ph'] + 1438) / 2)
     out['p1'] = save(img, 'p1')
 
