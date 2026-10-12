@@ -31,6 +31,7 @@ def main():
     ap = argparse.ArgumentParser()
     for k in ('metin', 'sira', 'panolar', 'pinler', 'cikti'):
         ap.add_argument('--' + k, required=True)
+    ap.add_argument('--url-kok', default='', help='GitHub Pages koku; verilirse gorsel_url doldurulur')
     a = ap.parse_args()
     M = list(csv.DictReader(open(a.metin, encoding='utf-8-sig')))
     r0 = M[0]
@@ -65,7 +66,8 @@ def main():
             out.append({'plan_gunu': g + 1, 'tarih_saat': f'{BAS + timedelta(days=g + ek)} {saat}', 'cift': c, 'pin': pin.upper(),
                         'pano': PANO[pin], 'pano_id': pid or 'PANO_YOK', 'baslik': r[K['baslik']], 'aciklama': r[K['aciklama']],
                         'alt_metin': r[K['alt']], 'link': r[K['link']], 'gorsel_dosya': dosya,
-                        'drive_id': dosya_id.get(dosya, 'DOSYA_YOK')})
+                        'drive_id': dosya_id.get(dosya, 'DOSYA_YOK'),
+                        'gorsel_url': f"{a.url_kok.rstrip('/')}/{dosya}" if a.url_kok else ''})
     # kontroller
     from collections import Counter
     if len(out) != 234:

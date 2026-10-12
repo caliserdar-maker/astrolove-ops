@@ -7,7 +7,16 @@ permissions:
   contents: read
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      pages:
+        description: "true: 234 pin gorseli astrolove-media pinterest/v6/ e push + prob + gorsel_url (FAIL.txt varsa DUR)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: pin-media-sync
+  cancel-in-progress: false
 
 jobs:
   plan:
@@ -15,6 +24,7 @@ jobs:
     timeout-minutes: 15
     env:
       D: gdrive:ASTROLOVE/TEMP/PIN_V6_20261012
+      URL_KOK: https://caliserdar-maker.github.io/astrolove-media/pinterest/v6
     steps:
       - uses: actions/checkout@v4
       - name: rclone + token
@@ -32,17 +42,83 @@ jobs:
           mkdir -p _work _out
           rclone copyto "gdrive:ASTROLOVE/TEMP/METRICOOL_TOKEN.json" _work/mc.json
           python3 -c "import json;print('::add-mask::'+json.load(open('_work/mc.json'))['userToken'])"
-      - name: Oku + plan
+      - name: Girdiler
         run: |
-          set -uo pipefail
+          set -euo pipefail
           rclone copyto "$D/PIN_METIN_234_LINKLI.csv" _out/PIN_METIN_234_LINKLI.csv
           rclone lsjson "$D/PINLER" --files-only --no-modtime > _out/PINLER.json
           echo "PINLER dosya: $(python3 -c "import json;print(len(json.load(open('_out/PINLER.json'))))")" | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Gorseller (Drive PINLER -> on kosul)
+        if: ${{ inputs.pages == true }}
+        run: |
+          set -euo pipefail
+          python3 - <<'EOF'
+          import csv, json, sys
+          ad = {x['Name'] for x in json.load(open('_out/PINLER.json'))}
+          if 'FAIL.txt' in ad:
+              sys.exit('DUR: PINLER/FAIL.txt var (pin-uretim QC FAIL); Pages push yapilmadi')
+          need = [r['dosya'] for r in csv.DictReader(open('_out/PIN_METIN_234_LINKLI.csv', encoding='utf-8-sig'))]
+          eksik = [n for n in need if n not in ad]
+          if len(need) != 234 or eksik:
+              sys.exit(f'DUR: gorsel eksik {len(eksik)}: {eksik[:10]}')
+          open('_out/gorseller.txt', 'w').write('\n'.join(need) + '\n')
+          print('gorsel 234/234 hazir')
+          EOF
+          rclone copy "$D/PINLER" _img --files-from _out/gorseller.txt --stats-one-line -v 2>&1 | tail -2
+          pip install -q pillow
+          python3 - <<'EOF'
+          from PIL import Image; import glob
+          b = [(f, Image.open(f).size) for f in glob.glob('_img/*.jpg')]
+          print('jpg', len(b), 'boyutlar', sorted({s for _, s in b}))
+          EOF
+          (cd _img && sha256sum *.jpg) > _out/PIN_V6_SHA256SUMS.txt; wc -l < _out/PIN_V6_SHA256SUMS.txt
+
+      - name: Medya reposunu al
+        if: ${{ inputs.pages == true }}
+        uses: actions/checkout@v4
+        with:
+          repository: caliserdar-maker/astrolove-media
+          token: ${{ secrets.OPS_ADMIN_TOKEN }}
+          path: media
+
+      - name: Pages push (pinterest/v6) + prob
+        if: ${{ inputs.pages == true }}
+        run: |
+          set -euo pipefail
+          mkdir -p media/pinterest/v6 && cp _img/*.jpg media/pinterest/v6/
+          cd media && git add -A pinterest/v6
+          n=$(git diff --cached --name-only | wc -l); echo "degisen: $n"
+          if [ "$n" != "0" ]; then
+            git config user.name "astrolove-ops"; git config user.email "actions@users.noreply.github.com"
+            git commit -qm "pinterest/v6: 234 pin ($(date -u +%Y-%m-%d))"; git push
+          fi
+          cd ..
+          python3 - <<'EOF'
+          import os, subprocess, sys, time
+          k = os.environ['URL_KOK']; ad = open('_out/gorseller.txt').read().split()
+          def prob(u):
+              o = subprocess.run(['curl', '-s', '-o', '/dev/null', '-m', '60', '-w', '%{http_code}|%{content_type}|%{redirect_url}', u],
+                                 capture_output=True, text=True).stdout
+              return (o.split('|') + ['', '', ''])[:3]
+          for i in range(60):
+              if prob(f'{k}/{ad[-1]}?v={i}')[0] == '200': break
+              time.sleep(15)
+          hata = [f'{n} {prob(f"{k}/{n}")}' for n in ad]
+          hata = [h for h in hata if "'200', 'image/jpeg', ''" not in h]
+          print(f'PROB {len(ad) - len(hata)}/{len(ad)} PASS' + ''.join('\n  ' + h for h in hata[:10]))
+          sys.exit(1 if hata else 0)
+          EOF
+          echo "URL_ARG=--url-kok $URL_KOK" >> "$GITHUB_ENV"
+
+      - name: Plan
+        run: |
+          set -uo pipefail
           python3 scripts/sosyal/metricool_panolar.py _work/mc.json _out 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
           python3 scripts/sosyal/pin_v6_plan.py --metin _out/PIN_METIN_234_LINKLI.csv --sira data/sosyal/pinterest/SIRA_78.csv \
-            --panolar _out/PANOLAR.json --pinler _out/PINLER.json --cikti _out/PIN_V6_PLAN_KURU.csv 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+            --panolar _out/PANOLAR.json --pinler _out/PINLER.json --cikti _out/PIN_V6_PLAN_KURU.csv ${URL_ARG:-} 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
           rc=${PIPESTATUS[0]}
-          rclone copy _out "$D/PLAN" --include "PIN_V6_PLAN_KURU.csv" --include "PANOLAR*.json" --include "PINLER.json"
+          rclone copy _out "$D/PLAN" --include "PIN_V6_PLAN_KURU.csv" --include "PANOLAR*.json" --include "PINLER.json" --include "PIN_V6_SHA256SUMS.txt"
           rclone lsl "$D/PLAN" | tee -a "$GITHUB_STEP_SUMMARY"
           exit $rc
       - if: always()
