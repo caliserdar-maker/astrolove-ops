@@ -55,6 +55,9 @@ class MC:
                 if e.code == 429 and deneme < 3:
                     s = int(e.headers.get('Retry-After') or 60)
                     print(f'429: {s} sn bekleniyor', flush=True); time.sleep(s); continue
+                if e.code in (502, 503, 504) and yontem in ('GET', 'DELETE') and deneme < 3:
+                    print(f'{e.code} {yontem}: {10 * (deneme + 1)} sn sonra yeniden', flush=True)
+                    time.sleep(10 * (deneme + 1)); continue
                 govde_h = e.read()[:300].decode('utf-8', 'replace').replace(self.t, '***')
                 raise SystemExit(f'HTTP {e.code} {yontem} {yol}: {govde_h}')
 
