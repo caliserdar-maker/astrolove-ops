@@ -1,0 +1,2 @@
+ILERLEME 1/1 %100 gecen 1 sn kalan 0 sn capricorn-and-sagittarius-astroloveart-reel_muzik2.mp4 ses=24.0 video=24.0 kare=720 lufs=-16.0 PASS
+OZET muzik 1/1 PASS, beklenen 1: PASS
