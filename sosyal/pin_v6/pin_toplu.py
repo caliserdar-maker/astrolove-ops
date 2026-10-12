@@ -7,6 +7,8 @@ QC per pair (all must hold):
   q_parca : 5 parts found (merged, left sign, right sign, names, message), each non-empty
   q_boy   : P2 small signs (pin_uret.sign_pair, common scale): output height ratio left/right = poster ratio +-5%,
             and no sign wider than 1.3 x target height (P2 sign_h 120 px)
+  q_bosluk: P2 free space between the centre symbol and each small sign >= 30 px (visible pixels, alpha > 128,
+            placed exactly as pin_uret.build places them)
   q_halka : every merged-symbol pixel lies inside the ring's inner radius
   q_olcu  : p1, p2, p3 are 1000x1500
 Writes QC.csv, QC.json, FAIL.txt; with --kontak also KONTAK_P2.jpg and KONTAK_PARCA.jpg.
@@ -28,15 +30,28 @@ def qc_poster(P):
     r['q_parca'] = all(c is not None and c[3] > 0 and c[4] > 0 for c in parts)
     ha, hb = int(P.sign_a[4]), int(P.sign_b[4])               # poster: cut-box heights of the two small signs
     r['boy_sol'], r['boy_sag'] = ha, hb
-    oa, ob, _ = PU.sign_pair(P, SIGN_H)                       # exactly the layers pasted on P2
+    oa, ob, _, rr = PU.sign_pair(P, SIGN_H)                   # exactly the layers pasted on P2
 
     def box(im):
         ys, xs = np.nonzero(np.asarray(im)[..., 3] > 128)
-        return xs.max() - xs.min() + 1, ys.max() - ys.min() + 1
-    (wa, oha), (wb, ohb) = box(oa), box(ob)
+        return xs.min(), xs.max() + 1, ys.min(), ys.max() + 1
+    (ax0, ax1, ay0, ay1), (bx0, bx1, by0, by1) = box(oa), box(ob)
+    wa, oha, wb, ohb = ax1 - ax0, ay1 - ay0, bx1 - bx0, by1 - by0
     r['p2_sol'], r['p2_sag'] = f'{wa}x{oha}', f'{wb}x{ohb}'
     r['boy_oran'] = round((oha / ohb) / (ha / hb), 3)          # output ratio / poster ratio
     r['q_boy'] = abs(r['boy_oran'] - 1) <= 0.05 and max(wa, wb) <= 1.3 * SIGN_H
+    # P2 placement, same arithmetic as pin_uret.build (W 1000, D 640, lib.paste rounding)
+    Wc, D = PU.W, 640
+    center = PU.lib.scale_h(P.layer(P.merged, only_label=False), round(410 * rr))
+    center = PU.fit_center(center, D, oa, ob)
+    al = np.asarray(center)[..., 3].astype(np.float32)
+    gx = (np.mgrid[0:al.shape[0], 0:al.shape[1]][1] * al).sum() / al.sum()
+    cxc = int(round(Wc / 2 + (center.size[0] / 2 - gx) * 0.8 - center.size[0] / 2))
+    cx0, cx1, _, _ = box(center)
+    xa = int(round(Wc / 2 - D / 2 - oa.size[0] / 2)); xb = int(round(Wc / 2 + D / 2 - ob.size[0] / 2))
+    r['bosluk_sol'] = int((cxc + cx0) - (xa + ax1))
+    r['bosluk_sag'] = int((xb + bx0) - (cxc + cx1))
+    r['q_bosluk'] = min(r['bosluk_sol'], r['bosluk_sag']) >= 30
     # ring = open arc (gap at the bottom): centre from a least-squares circle fit, inner radius = 1st pct distance
     comps = sorted(P.comps, key=lambda c: -c[5])
     ring_ids = [c[0] for c in comps[:6] if c[5] / float(c[3] * c[4]) < 0.03 and c[3] > 0.6 * P.w]
@@ -99,15 +114,15 @@ def main():
             rec['q_olcu'] = all(s == (1000, 1500) for s in olc.values()) and len(olc) == 3
             rec['hata'] = ''
         except Exception as e:
-            rec.update(q_parca=False, q_boy=False, q_halka=False, q_olcu=False,
+            rec.update(q_parca=False, q_boy=False, q_bosluk=False, q_halka=False, q_olcu=False,
                        hata=f'{type(e).__name__}: {e}', iz=traceback.format_exc()[-600:])
-        rec['PASS'] = all(rec.get(k) for k in ('q_parca', 'q_boy', 'q_halka', 'q_olcu'))
+        rec['PASS'] = all(rec.get(k) for k in ('q_parca', 'q_boy', 'q_bosluk', 'q_halka', 'q_olcu'))
         rows.append(rec)
         el = time.time() - t0; eta = el / i * (n - i)
         print(f'[{i}/{n}] {100 * i / n:5.1f}% gecen {el / 60:5.1f} dk kalan {eta / 60:5.1f} dk  {key} '
               f'{"PASS" if rec["PASS"] else "FAIL"} {rec.get("hata", "")}', flush=True)
-    keys = ['cift', 'a', 'b', 'poster_olcu', 'PASS', 'q_parca', 'q_boy', 'q_halka', 'q_olcu', 'boy_sol', 'boy_sag',
-            'p2_sol', 'p2_sag', 'boy_oran', 'halka_ic_r', 'sembol_max_r', 'merged_parca_sayisi', 'hata']
+    keys = ['cift', 'a', 'b', 'poster_olcu', 'PASS', 'q_parca', 'q_boy', 'q_bosluk', 'q_halka', 'q_olcu', 'boy_sol', 'boy_sag',
+            'p2_sol', 'p2_sag', 'boy_oran', 'bosluk_sol', 'bosluk_sag', 'halka_ic_r', 'sembol_max_r', 'merged_parca_sayisi', 'hata']
     with open(os.path.join(g.out, 'QC.csv'), 'w', newline='', encoding='utf-8') as fh:
         w = csv.DictWriter(fh, keys, extrasaction='ignore'); w.writeheader(); w.writerows(rows)
     json.dump(rows, open(os.path.join(g.out, 'QC.json'), 'w'), indent=1, default=str)
