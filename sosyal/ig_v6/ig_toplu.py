@@ -6,11 +6,14 @@ Pair key is alphabetic (CLAUDE.md): first sign = --a (left small sign), second =
 Each pair is written to its own folder <out>/<PAIR>/ (4 slides).
 QC per pair (all must hold):
   q_parca : PosterR found the parts (merged, left sign, right sign, names), each non-empty, no exception
-  q_boy   : left / right small sign heights within 25% of each other (max/min <= 1.25)
+  q_boy   : in slides 1 and 2 the two small signs keep the poster's height relation
+            (output height ratio / poster height ratio within 1 +- 0.05) and no sign is wider than 1.3 x target height.
+            Measured on the actual sign images ig_uret pastes (alpha bbox), poster heights from PosterR.
   q_olcu  : 4 files, each 1080x1350
 Writes QC.csv, QC.json, FAIL.txt; with --kontak also KONTAK_IG1.jpg (all cover slides).
 """
 import argparse, csv, json, os, sys, time, traceback
+import numpy as np
 from PIL import Image
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -23,10 +26,42 @@ from pin_toplu import contact
 
 def qc_poster(P):
     parts = [P.merged, P.sign_a, P.sign_b, P.names_row]
-    ha, hb = int(P.sign_a[4]), int(P.sign_b[4])
-    oran = round(max(ha, hb) / max(1, min(ha, hb)), 3)
     return {'q_parca': all(c is not None and c[3] > 0 and c[4] > 0 for c in parts),
-            'boy_sol': ha, 'boy_sag': hb, 'boy_oran': oran, 'q_boy': oran <= 1.25}
+            'boy_sol': int(P.sign_a[4]), 'boy_sag': int(P.sign_b[4])}
+
+
+def glyph_box(im, thr=32):
+    a = np.asarray(im)[..., 3]
+    ys, xs = np.nonzero(a > thr)
+    return (int(xs.max() - xs.min() + 1), int(ys.max() - ys.min() + 1)) if len(xs) else (0, 0)
+
+
+KAYIT = []
+_sign_pair = PU.sign_pair
+
+
+def sign_pair_kayit(P, sign_h, *a, **k):
+    """Wraps pin_uret.sign_pair: records the two sign images ig_uret actually pastes, per target height."""
+    sa, sb, sw = _sign_pair(P, sign_h, *a, **k)
+    KAYIT.append((sign_h, glyph_box(sa), glyph_box(sb)))
+    return sa, sb, sw
+
+
+PU.sign_pair = sign_pair_kayit
+
+
+def qc_boy(rec):
+    poster = rec['boy_sol'] / max(1, rec['boy_sag'])
+    ok, sapma, gen = len(KAYIT) == 2, 0.0, 0.0
+    for h, (wa, ha), (wb, hb) in KAYIT:
+        d = abs((ha / max(1, hb)) / poster - 1)
+        g = max(wa, wb) / h
+        sapma, gen = max(sapma, d), max(gen, g)
+        ok = ok and ha > 0 and hb > 0 and d <= 0.05 and max(wa, wb) <= 1.3 * h + 0.5
+    rec['oran_sapma'] = round(sapma, 4)
+    rec['max_gen_oran'] = round(gen, 3)
+    rec['cikti_boy'] = ' '.join(f'{h}:{ha}/{hb}' for h, (_, ha), (_, hb) in KAYIT)
+    rec['q_boy'] = ok
 
 
 def main():
@@ -48,7 +83,9 @@ def main():
             sz = Image.open(poster).size
             rec['poster_olcu'] = f'{sz[0]}x{sz[1]}'
             rec.update(qc_poster(PU.PosterR(poster)))
+            KAYIT.clear()
             out = IG.build(poster, A, B, os.path.join(g.out, key))
+            qc_boy(rec)
             olc = {k: Image.open(v).size for k, v in out.items()}
             rec['q_olcu'] = len(olc) == 4 and all(s == (IG.W, IG.H) for s in olc.values())
             rec['kapak'] = out['1']
@@ -61,7 +98,7 @@ def main():
         el = time.time() - t0; eta = el / i * (n - i)
         print(f'[{i}/{n}] {100 * i / n:5.1f}% gecen {el / 60:5.1f} dk kalan {eta / 60:5.1f} dk  {key} '
               f'{"PASS" if rec["PASS"] else "FAIL"} {rec.get("hata", "")}', flush=True)
-    keys = ['cift', 'a', 'b', 'poster_olcu', 'PASS', 'q_parca', 'q_boy', 'q_olcu', 'boy_sol', 'boy_sag', 'boy_oran', 'hata']
+    keys = ['cift', 'a', 'b', 'poster_olcu', 'PASS', 'q_parca', 'q_boy', 'q_olcu', 'boy_sol', 'boy_sag', 'oran_sapma', 'max_gen_oran', 'cikti_boy', 'hata']
     with open(os.path.join(g.out, 'QC.csv'), 'w', newline='', encoding='utf-8') as fh:
         w = csv.DictWriter(fh, keys, extrasaction='ignore'); w.writeheader(); w.writerows(rows)
     json.dump(rows, open(os.path.join(g.out, 'QC.json'), 'w'), indent=1, default=str)
