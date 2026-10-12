@@ -1,3 +1,3 @@
-cift,a,b,poster_olcu,PASS,q_parca,q_boy,q_halka,q_olcu,boy_sol,boy_sag,p2_sol,p2_sag,boy_oran,halka_ic_r,sembol_max_r,merged_parca_sayisi,hata
-AQUARIUS_LEO,Aquarius,Leo,2000x3000,True,True,True,True,True,107,171,145x61,84x98,0.995,784.9,548.6,2,
-AQUARIUS_AQUARIUS,Aquarius,Aquarius,2000x3000,True,True,True,True,True,107,107,145x61,145x61,1.0,784.9,649.9,2,
+cift,a,b,poster_olcu,PASS,q_parca,q_boy,q_bosluk,q_halka,q_olcu,boy_sol,boy_sag,p2_sol,p2_sag,boy_oran,bosluk_sol,bosluk_sag,halka_ic_r,sembol_max_r,merged_parca_sayisi,hata
+AQUARIUS_LEO,Aquarius,Leo,2000x3000,True,True,True,True,True,True,107,171,145x61,84x98,0.995,56,61,784.9,548.6,2,
+AQUARIUS_AQUARIUS,Aquarius,Aquarius,2000x3000,True,True,True,True,True,True,107,107,145x61,145x61,1.0,44,42,784.9,649.9,2,
