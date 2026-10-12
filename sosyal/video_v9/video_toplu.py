@@ -78,7 +78,7 @@ def main():
             ts = time.time()
             bilgi = {}
             mp4 = VU.build(os.path.join(g.posters, key + '.jpg'), A, B, g.out, bilgi=bilgi)[0]
-            r['q_poster'] = True; r.update(bilgi); r['q_kamera'] = r.get('kamera_orani', 9) < 1.0; r['uretim_sn'] = round(time.time() - ts)
+            r['q_poster'] = True; r.update(bilgi); r['q_kamera'] = bool(float(r.get('kamera_orani', 9)) < 1.0); r['uretim_sn'] = round(time.time() - ts)
             r['dosya'] = os.path.basename(mp4); r['mb'] = round(os.path.getsize(mp4) / 1e6, 2)
             r.update(qc_video(mp4, g.out, slug))
         except Exception as e:
