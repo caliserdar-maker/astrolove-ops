@@ -117,7 +117,11 @@ def karsilastir(g, p):
         if k.endswith('Data'):
             o = p.get(k) or {}
             for a, b in v.items():
-                if o.get(a) != b:
+                ok = o.get(a)
+                # Metricool normallestirmesi: buyuk/kucuk harf (SHORT->short), false -> alan yok (None)
+                if ok == b or (isinstance(b, str) and isinstance(ok, str) and ok.lower() == b.lower()) or (b is False and ok is None):
+                    continue
+                if True:
                     f.append(f'{k}.{a}: gonderilen {b!r}, okunan {o.get(a)!r}')
     return f
 
