@@ -37,6 +37,10 @@ on:
         description: 'tek: cift anahtarlari virgulle (ornek AQUARIUS_LEO,ARIES_CAPRICORN)'
         required: false
         default: AQUARIUS_LEO
+      kareler:
+        description: 'tek: doluysa yalniz bu saniyelerin kareleri (ornek 3,9,17), video/muzik yok'
+        required: false
+        default: ''
       grup:
         description: 'hepsi: is basina cift sayisi'
         required: false
@@ -311,9 +315,11 @@ jobs:
       env:
         CIFT: ${{ inputs.cift }}
         N: ${{ inputs.muzik }}
+        KARELER: ${{ inputs.kareler }}
       run: |
         set +e -uo pipefail
         case "$CIFT" in *[!A-Z_,]*|"") echo "::error::cift A-Z_ ve virgul"; exit 1 ;; esac
+        case "$KARELER" in *[!0-9.,]*) echo "::error::kareler sayi ve virgul"; exit 1 ;; esac
         case "$N" in 1|2|3) ;; *) echo "::error::muzik 1|2|3"; exit 1 ;; esac
         mkdir -p _w/refp _w/P2000 _w/m _o/DOGRULA _o/T _o/F _pv
         rclone copyto gdrive:AstroLoveArt_Gemini_Leo_2000.jpg _w/refp/GEMINI_LEO.jpg --drive-root-folder-id "$REF_DIR" -q
@@ -321,6 +327,16 @@ jobs:
         python3 sosyal/video_v9/dogrula.py _o/DOGRULA | tee _w/dg.txt; DG=${PIPESTATUS[0]}
         sed 's/^/::warning::DOGRULA /' _w/dg.txt
         for k in ${CIFT//,/ }; do rclone copyto "$P2000/$k.jpg" "_w/P2000/$k.jpg" -q || echo "::error::poster yok $k"; done
+        if [ -n "$KARELER" ]; then
+          KF=0
+          for k in ${CIFT//,/ }; do
+            a=$(echo "${k%%_*}" | sed 's/.*/\L&/; s/^./\U&/'); b=$(echo "${k#*_}" | sed 's/.*/\L&/; s/^./\U&/')
+            python3 sosyal/video_v9/video_uret.py --poster "_w/P2000/$k.jpg" --a "$a" --b "$b" --out _pv --kareler "$KARELER" || { KF=$((KF+1)); echo "::error::kare FAIL $k"; }
+          done
+          ls _pv | sed 's/^/::warning::KARE /'; cp _w/dg.txt _pv/DOGRULA.txt
+          echo "KR=$KR DG=$DG KF=$KF" | tee _pv/SONUC.txt
+          echo "RC=$(( KR + DG + KF ))" >> "$GITHUB_ENV"; exit 0
+        fi
         python3 sosyal/video_v9/video_toplu.py --posters _w/P2000 --out _o/T --pairs "$CIFT" | tee _w/t.txt; TR=${PIPESTATUS[0]}
         grep -E 'ILERLEME|OZET' _w/t.txt | sed 's/^/::warning::TEK /'
         P=$(rclone cat "gdrive:ASTROLOVE/TEMP/MUZIK_PAROLA.txt" 2>/dev/null | tr -d '\r\n')
