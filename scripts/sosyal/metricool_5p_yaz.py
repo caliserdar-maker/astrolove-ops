@@ -39,9 +39,9 @@ def video_yukle(mc, yol, ctype='video/mp4', uzanti='mp4'):
     for u in ([y.get('presignedUrl')] if y.get('presignedUrl') else [p.get('presignedUrl') for p in y.get('parts') or []]):
         print(f'::add-mask::{u}', flush=True)
     if y.get('presignedUrl'):
-        st, _ = s3.put_parca(y['presignedUrl'], veri, istek['parts'][0]['hash'], True)
+        st, _ = s3.put_parca(y['presignedUrl'], veri, istek['parts'][0]['hash'], True, ctype)
         if st >= 400:
-            st, _ = s3.put_parca(y['presignedUrl'], veri, istek['parts'][0]['hash'], False)
+            st, _ = s3.put_parca(y['presignedUrl'], veri, istek['parts'][0]['hash'], False, ctype)
         if st >= 400:
             sys.exit(f'DUR: video PUT {st}')
         tamam = {'simple': {'fileUrl': y.get('fileUrl')}}

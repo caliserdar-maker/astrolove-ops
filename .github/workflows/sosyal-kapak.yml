@@ -15,6 +15,10 @@ on:
       s3_test:
         type: boolean
         default: true
+      yalniz_s3:
+        description: "true = yalniz kapak S3 testi (kapaklar Drive KAPAK'tan alinir, uretim/plan yok)"
+        type: boolean
+        default: false
 
 jobs:
   kapak:
@@ -50,6 +54,7 @@ jobs:
           [ -f _work/ig.json ] && python3 -c "import json;print('::add-mask::'+json.load(open('_work/ig.json'))['token'])" || true
 
       - name: Posterler (78, 2000x3000)
+        if: ${{ inputs.yalniz_s3 != true }}
         run: |
           set -euo pipefail
           mkdir -p _w/P2000
@@ -61,6 +66,7 @@ jobs:
           print('POSTER', len(f), 'olcu disi', len(bad), bad[:3]); sys.exit(1 if len(f)!=78 or bad else 0)"
 
       - name: 78 kapak (once GEMINI_LEO onayli karsilastirma)
+        if: ${{ inputs.yalniz_s3 != true }}
         run: |
           set -uo pipefail
           python3 sosyal/kapak_v1/kapak_toplu.py --posters _w/P2000 --out _o/KAPAK --esik 2.5 | tee -a "$GITHUB_STEP_SUMMARY"
@@ -74,9 +80,14 @@ jobs:
         if: ${{ inputs.s3_test == true }}
         run: |
           set -uo pipefail
+          [ -f _o/KAPAK/aquarius-and-aquarius-astroloveart-kapak.jpg ] || rclone copyto "$KD/aquarius-and-aquarius-astroloveart-kapak.jpg" _o/KAPAK/aquarius-and-aquarius-astroloveart-kapak.jpg
           python3 scripts/sosyal/metricool_s3_test.py _work/mc.json _o/KAPAK/aquarius-and-aquarius-astroloveart-kapak.jpg _out/KAPAK_S3_TEST.json | tee -a "$GITHUB_STEP_SUMMARY"
+          rc=${PIPESTATUS[0]}
+          rclone copy _out "$O" --include "KAPAK_S3_TEST.json"
+          grep -q '"sonuc": "OK"' _out/KAPAK_S3_TEST.json && exit $rc || exit 1
 
       - name: Facebook / YouTube kapak (yalniz okuma)
+        if: ${{ inputs.yalniz_s3 != true }}
         run: |
           set -uo pipefail
           python3 - <<'EOF' | tee -a "$GITHUB_STEP_SUMMARY"
@@ -102,6 +113,7 @@ jobs:
           EOF
 
       - name: Plan 77 gun + kapak (KURU, Metricool'a yazma yok)
+        if: ${{ inputs.yalniz_s3 != true }}
         run: |
           set -uo pipefail
           rclone lsjson -R "$K" --no-modtime > _out/KARUSEL.json

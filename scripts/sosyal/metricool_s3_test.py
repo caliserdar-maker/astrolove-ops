@@ -16,8 +16,10 @@ def b64sha(b):
     return base64.b64encode(hashlib.sha256(b).digest()).decode()
 
 
-def put_parca(url, veri, h, sha_baslik):
+def put_parca(url, veri, h, sha_baslik, ctype=None):
     bas = {'Content-Length': str(len(veri))}
+    if ctype:   # SIMPLE presigned URL Content-Type'i imzaliyor (kapak jpg 403, 13 Eki)
+        bas['Content-Type'] = ctype
     if sha_baslik:
         bas['x-amz-checksum-sha256'] = h
     r = urllib.request.Request(url, data=veri, method='PUT', headers=bas)
@@ -49,9 +51,9 @@ def main():
     etaglar = []
     if y.get('uploadType') == 'SIMPLE' or y.get('presignedUrl'):
         h = istek['parts'][0]['hash']
-        st, et = put_parca(y['presignedUrl'], veri, h, True)
+        st, et = put_parca(y['presignedUrl'], veri, h, True, istek['contentType'])
         if st >= 400:
-            st, et = put_parca(y['presignedUrl'], veri, h, False)
+            st, et = put_parca(y['presignedUrl'], veri, h, False, istek['contentType'])
         rapor['yukle'] = [{'parca': 1, 'http': st}]
         tamam = {'simple': {'fileUrl': y.get('fileUrl')}}
     else:
