@@ -34,6 +34,13 @@ def mm(v):
     except Exception: return None
 
 
+def boy_kesin(p):
+    """Format metni boyu dogrudan veriyorsa True (8x10-inch, a4); yalniz olcuyle eslesme (or. 210x300-mm ~ A4) False."""
+    at = {k.lower(): str(v).lower() for k, v in (p.get("attributes") or {}).items()}
+    fmt = at.get("paperformat") or at.get("format") or ""
+    return bool(re.search(r"(^|[^0-9])\d+x\d+-inch|(^|[^0-9a-z])a[0-9]($|[^0-9])", fmt))
+
+
 def boy_bul(p):
     """Urunun boyu: once format oznitelik metni (8x10 / A4), sonra dikey olcu (mm, +-4)."""
     at = {k.lower(): str(v).lower() for k, v in (p.get("attributes") or {}).items()}
@@ -92,7 +99,8 @@ def main():
             for cu in poster_kat:
                 for p in urunler[cu]:
                     pt, g, mat, yon = kagit(p)
-                    if g == gsm and mat and boy_bul(p) == ad: aday.append((0 if yon in ("ver", "portrait", "vertical") else 1, p, cu, pt, yon))
+                    if g == gsm and mat and boy_bul(p) == ad:
+                        aday.append(((0 if boy_kesin(p) else 1, 0 if cu == "posters" else 1, 0 if yon in ("ver", "portrait", "vertical") else 1), p, cu, pt, yon))
             if not aday:
                 for u in ULKE: satir.append(dict(urun=urun, gsm=gsm, boy=ad, ulke=u, para=ULKE[u], fiyat="YOK", productUid="", kagit="", cerceve="", yon=""))
                 continue
@@ -115,7 +123,7 @@ def main():
                     if (at.get("framecolor") or at.get("framecolour")) != renk or boy_bul(p) != ad: continue
                     pt, g, mat, yon = kagit(p)
                     if at.get("mattetype", at.get("passepartout", "none")) not in ("", "none", "no-passepartout", "no-matte"): continue
-                    aday.append(((0 if g == 200 else 1 if g == 250 else 2), 0 if yon in ("ver", "portrait", "vertical") else 1, p, pt, yon, g))
+                    aday.append(((0 if boy_kesin(p) else 1, 0 if g == 200 else 1 if g == 250 else 2), 0 if yon in ("ver", "portrait", "vertical") else 1, p, pt, yon, g))
             if not aday:
                 for u in ULKE: satir.append(dict(urun=f"Framed {renk}", gsm="", boy=ad, ulke=u, para=ULKE[u], fiyat="YOK", productUid="", kagit="", cerceve=renk, yon=""))
                 continue
