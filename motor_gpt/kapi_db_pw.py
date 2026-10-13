@@ -28,7 +28,7 @@ for r in [k for k in s['renk'] if k != 'MIDNIGHT_BLUE']:
             if os.path.lexists(f'{D}/{dst}'): os.remove(f'{D}/{dst}')
             os.symlink(os.path.abspath(src), f'{D}/{dst}')
         ro = dict(s['renk'][r]); ro['teslim'] = ro.get('olcu_' + ol) or (ro['teslim'] if ol == '24x36' else ro['olcu_16x20'])   # siparis: olcu_<OL>
-        json.dump(dict(cift=c, isim1=s['isim1'], isim2=s['isim2'], tagline=s['tagline'], olcu=ol, renk=ro, amp=s.get('amp')), open(f'{D}/siparis.json', 'w'), ensure_ascii=False)   # amp: & kapisi (f)
+        json.dump(dict(cift=c, isim1=s['isim1'], isim2=s['isim2'], tagline=s['tagline'], olcu=ol, renk=ro, amp=s.get('amp'), tarih=s.get('tarih')), open(f'{D}/siparis.json', 'w'), ensure_ascii=False)   # amp: & kapisi (f)
         p = subprocess.run([PY, B + 'siparis_kapi.py', D, '-', '--json', f'{D}/KAPI.json'], capture_output=True, text=True)
         if not os.path.exists(f'{D}/KAPI.json'): print(p.stdout[-500:], p.stderr[-1500:]); R[ol] = dict(PASS=False, hata='siparis_kapi calismadi'); continue
         R[ol] = json.load(open(f'{D}/KAPI.json'))
@@ -62,6 +62,25 @@ for r in [k for k in s['renk'] if k != 'MIDNIGHT_BLUE']:
                   not_='golge/isima MB kurallariyla AYNI (degistirilmedi); FAIL degil, Serdar karari')
     R['PASS'] = bool(all(R[k].get('PASS') for k in (*OLS, 'L', 'K')))
     print(r, 'PASS' if R['PASS'] else 'FAIL', {k: R[k].get('PASS') for k in (*OLS, 'L', 'K')}, flush=True)
+# MB (BIZIM YILIMIZ ornegi, KAPI_MB_REF verilirse): onayli siparis_kapi.py AYNEN, a) standart posterle (REF_ALFA ortamdan) + b..i
+if os.environ.get('KAPI_MB_REF') and 'MIDNIGHT_BLUE' in s['renk']:
+    r = 'MIDNIGHT_BLUE'; rn = 'Midnight_Blue'; TB = f'{IS}/{r}'; R = sonuc[r] = {}
+    for ol in OLS:
+        D = f'{TB}/kapi_{ol}'; os.makedirs(D, exist_ok=True)
+        for src, dst in ((mb, f'AstroLoveArt_{a1}_{a2}.jpg'), (f'{TB}/AstroLoveArt_{a1}_{a2}_{rn}_{ol}.jpg', f'AstroLoveArt_{a1}_{a2}_{ol}.jpg'),
+                         (f'{IS}/{c}_alfa.npz', f'{c}_alfa.npz')):
+            if os.path.lexists(f'{D}/{dst}'): os.remove(f'{D}/{dst}')
+            os.symlink(os.path.abspath(src), f'{D}/{dst}')
+        ro = dict(s['renk'][r]); ro['teslim'] = ro.get('olcu_' + ol)
+        json.dump(dict(cift=c, isim1=s['isim1'], isim2=s['isim2'], tagline=s['tagline'], olcu=ol, renk=ro, amp=s.get('amp'), tarih=s.get('tarih')),
+                  open(f'{D}/siparis.json', 'w'), ensure_ascii=False)
+        p = subprocess.run([PY, B + 'siparis_kapi.py', D, os.environ['KAPI_MB_REF'], '--json', f'{D}/KAPI.json'], capture_output=True, text=True)
+        if not os.path.exists(f'{D}/KAPI.json'): print(p.stdout[-500:], p.stderr[-1500:]); R[ol] = dict(PASS=False, hata='siparis_kapi calismadi'); continue
+        R[ol] = json.load(open(f'{D}/KAPI.json'))
+    kk = {ad: kesik_uc.kesikler(z[ad]) for ad in K}
+    R['K'] = dict(kesik={ad: v for ad, v in kk.items() if v}, PASS=not any(kk.values()))
+    R['PASS'] = bool(all(R[k].get('PASS') for k in (*OLS, 'K')))
+    print(r, 'PASS' if R['PASS'] else 'FAIL', {k: R[k].get('PASS') for k in (*OLS, 'K')}, flush=True)
 sonuc['PASS'] = bool(all(v['PASS'] for v in sonuc.values() if isinstance(v, dict)))
 if JS: json.dump(sonuc, open(JS, 'w'), indent=1, ensure_ascii=False)
 print(json.dumps({r: {ol: {k: (v.get('PASS') if isinstance(v, dict) else v) for k, v in sonuc[r][ol].items()} for ol in OLS}

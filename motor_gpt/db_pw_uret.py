@@ -107,10 +107,13 @@ for r, png in SV.items():
     log('ana bindirildi', r)
 # 5) renk uyumu (ogeler -> ana altini) + teslim (24x36 onayli yol; 16x20 yontem B, yan zemin = ayni rengin 16x20 plakasi, gren hedefi = 24x36 zemin greni)
 ad1, ad2 = b1.capitalize(), b2.capitalize()
+MB_TESLIM = os.environ.get('MB_TESLIM') == '1'                          # BIZIM YILIMIZ ornegi: MB de secilen olcuyle teslim
 rapor = dict(cift=c, isim1=isim1, isim2=isim2, tagline=tag, katman=os.path.basename(katman), plaka=plaka_rapor, renk={}, siparis_olcu=SIP_OL or None,
              amp=None if amp is None else dict(olcu=amp['olcu'], konum=[[q['x'], q['y'], *q['alfa'].shape] for q in amp['ampler']]))   # & kapisi (f) konumlari, siparis_uret ile ayni
 for r in ['MIDNIGHT_BLUE'] + RENKLER:
     TB = f'{IS}/{r}'; ek = {'AMP_JSON': f'{IS}/amp.json'} if amp else {}
+    if r == 'MIDNIGHT_BLUE' and SIP_OL and MB_TESLIM:                   # BIZIM YILIMIZ: MB teslimi siparis_uret.py ile AYNI cagri (TESLIM_JPG, CJPEG, OLCU)
+        ek.update(TESLIM_JPG=f'{TB}/son/{c}_teslim.jpg', CJPEG=B + 'bin/cjpeg-mozjpeg-4.1.1', OLCU=SIP_OL)
     if r != 'MIDNIGHT_BLUE' and SIP_OL:
         ek.update(TESLIM_JPG=f'{TB}/son/{c}_teslim.jpg', CJPEG=B + 'bin/cjpeg-mozjpeg-4.1.1', OLCU=SIP_OL, GREN_HEDEF_KAYNAK='1',
                   TITRESIM_YALNIZ_DEGISEN='1', **{'ZEMIN_TUVAL_' + SIP_OL.upper(): TEMIZ[r][FAM]})
@@ -125,7 +128,7 @@ for r in ['MIDNIGHT_BLUE'] + RENKLER:
     rn = '_'.join(w.capitalize() for w in r.split('_'))
     os.replace(f'{TB}/son/{c}/{c}_7200x10800.jpg', f'{TB}/AstroLoveArt_{ad1}_{ad2}_{rn}.jpg')
     os.replace(f'{TB}/son/{c}/{c}_2000.jpg', f'{TB}/AstroLoveArt_{ad1}_{ad2}_{rn}_2000.jpg')
-    if r != 'MIDNIGHT_BLUE' and SIP_OL:
+    if SIP_OL and (r != 'MIDNIGHT_BLUE' or MB_TESLIM):
         os.replace(f'{TB}/son/{c}_teslim.jpg', f'{TB}/AstroLoveArt_{ad1}_{ad2}_{rn}_{SIP_OL}.jpg'); ro['olcu_' + SIP_OL] = ro['teslim']
     elif r != 'MIDNIGHT_BLUE':
         if YALNIZ16:
@@ -136,6 +139,9 @@ for r in ['MIDNIGHT_BLUE'] + RENKLER:
             ro['olcu_16x20'] = json.load(open(f'{TB}/OLCU/OLCU_TABLO.json'))['16x20']
     rapor['renk'][r] = ro
     log('renk tamam', r, 'dE00 sonra', ro['sonra'])
+if os.environ.get('PAPER_TARIH', '').strip():                          # BIZIM YILIMIZ: tarih satiri (kapi d bagimsiz cizim icin)
+    rapor['tarih'] = dict(metin=os.environ['PAPER_TARIH'].strip(), punto=int(os.environ.get('TARIH_PUNTO', '166')),
+                          aralik=float(os.environ.get('TARIH_ARALIK', '36')), ara=int(os.environ.get('TARIH_ARA', '378')))
 rapor['sure_sn'] = round(time.time() - T0, 1)
 json.dump(rapor, open(f'{IS}/siparis.json', 'w'), indent=1, ensure_ascii=False)
 log('bitti')

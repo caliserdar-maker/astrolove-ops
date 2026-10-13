@@ -7,7 +7,7 @@ Image.MAX_IMAGE_PIXELS = None
 T0 = time.time()
 def log(*a): print(f'[{time.time()-T0:6.1f}s]', *a, flush=True)
 c, TB, OD = sys.argv[1:4]; SADECE_OLC = '--olc' in sys.argv
-OGELER = ('kucuk1', 'kucuk2', 'sonsuz', 'isim1', 'isim2', 'tagline', 'cember')
+OGELER = ('kucuk1', 'kucuk2', 'sonsuz', 'isim1', 'isim2', 'tagline', 'cember', 'tarih')   # tarih: BIZIM YILIMIZ (yalniz sablonda varsa)
 
 def de00(L1, L2):
     L1, a1, b1 = L1; L2, a2, b2 = L2

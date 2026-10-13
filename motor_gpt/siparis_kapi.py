@@ -27,7 +27,7 @@ if REF != '-':
     R = np.asarray(Image.open(REF).convert('RGB')).astype(np.int16)
     y0, y1, x0, x1 = kutu('ana'); d = np.abs(P[y0:y1, x0:x1] - R[y0:y1, x0:x1]).max(2)
     serbest = np.zeros((10800, 7200), bool)
-    for ad in ('isim1', 'isim2', 'sonsuz', 'kucuk1', 'kucuk2', 'tagline'):
+    for ad in ('isim1', 'isim2', 'sonsuz', 'kucuk1', 'kucuk2', 'tagline') + (('tarih',) if 'tarih' in K else ()):   # tarih: BIZIM YILIMIZ
         a, b_, c_, d_ = kutu(ad, 200); serbest[a:b_, c_:d_] = True
     if os.environ.get('REF_ALFA'):                                   # referansin oge yerleri (isim boyu degisince kayar)
         zr = np.load(os.environ['REF_ALFA']); Kr = {str(a): (int(x), int(y)) for (x, y), a in zip(zr['_konum'], zr['_ad'])}
@@ -61,7 +61,7 @@ def ortanca(ad):
     x, y = K[ad]; a = z[ad]; m = cv2.erode((a > 242).astype(np.uint8), np.ones((5, 5), np.uint8)) > 0
     return np.median(lab(P[y:y + a.shape[0], x:x + a.shape[1]].astype(np.float32)[m]), 0)
 La = ortanca('ana')
-dE = {ad: round(de00(La, ortanca(ad)), 2) for ad in ('kucuk1', 'kucuk2', 'sonsuz', 'isim1', 'isim2', 'tagline', 'cember')}
+dE = {ad: round(de00(La, ortanca(ad)), 2) for ad in ('kucuk1', 'kucuk2', 'sonsuz', 'isim1', 'isim2', 'tagline', 'cember', 'tarih') if ad in K}
 sonuc['b'] = dict(dE00=dE, en_kotu=max(dE.values()), PASS=bool(max(dE.values()) <= 1.0))
 # c)
 KUCUK = {'AQUARIUS': ('KUCUK_1', [1095, 219, 2010, 600]), 'ARIES': ('KUCUK_1', [2257, 102, 2917, 717]),
@@ -162,7 +162,15 @@ else:
         if top <= 7200 - 1400 or tp <= 200: break
         tp -= 4
     d['tagline'] = dict(iou=round(iou(z['tagline'], tv), 4), punto=tp, amp=True)
-sonuc['d'] = dict(**d, PASS=bool(all(x['iou'] >= 0.985 for x in d.values())))
+if s.get('tarih'):                                                    # BIZIM YILIMIZ (13 Eki 2026): tarih satiri girdiden bagimsiz cizilir
+    def tarih_ciz(metin, punto, aralik, wght=500):                      # olustur_alfa_sablon.tarih_ciz ile AYNI cizim
+        F = ImageFont.truetype(FONT + 'Cinzel.ttf', punto); F.set_variation_by_axes([wght])
+        il = [F.getlength(ch) for ch in metin]; asc, desc = F.getmetrics()
+        im = Image.new('L', (int(sum(il) + aralik * (len(metin) - 1)) + 4 * punto, asc + desc + 2 * punto), 0); dr = ImageDraw.Draw(im); x = 2 * punto
+        for ch, w_ in zip(metin, il): dr.text((x, asc + punto), ch, font=F, fill=255, anchor='ls'); x += w_ + aralik
+        return np.asarray(im)
+    t_ = s['tarih']; d['tarih'] = dict(iou=round(iou(z['tarih'], tarih_ciz(t_['metin'], int(t_['punto']), float(t_['aralik']))), 4), punto=t_['punto'])
+sonuc['d'] = dict(**d, PASS=bool(all(x['iou'] >= 0.985 for x in d.values()) and (('tarih' in d) == bool(s.get('tarih')))))
 # f) & kapisi (8 Eki 2026): her & icin son goruntudeki altin silueti / beklenen & alfasi IoU >= 0.90; leke (ChatGPT & yuzeyine gore,
 #    ortalama kaydirma cikarildiktan sonra |L farki| > 6 kume <= 0.5*kalinlik^2); dE00 (ana ile) <= 1
 if '&' in s['tagline']:

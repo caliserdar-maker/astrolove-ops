@@ -111,6 +111,28 @@ while r[2] - r[1] > W - 2 * KENAR:
 ekle('tagline', int(round(ORTA - (r[2] - r[1]) / 2 - r[1])), int(round(TABAN_TAG - r[3])), r[0])
 log('tagline punto', tp)
 
+# --- tarih satiri (BIZIM YILIMIZ, 13 Eki 2026; yalniz PAPER_TARIH verilirse): Cinzel 500 buyuk harf, harf araligi,
+#     ortali, taban = tagline tabani + TARIH_ARA. Sartname 8x10 (2400 px) olcusu x 3.6 = 2:3 sablon (7200 px):
+#     46 px -> 166 punto, harf araligi 10 -> 36 px, satir arasi 105 -> 378 px. Cizim tarih_ciz() (siparis_kapi d ile ayni).
+def tarih_ciz(metin, punto, aralik, font=FONT + 'Cinzel.ttf', wght=500):
+    F = ImageFont.truetype(font, punto); F.set_variation_by_axes([wght])
+    ilerle = [F.getlength(ch) for ch in metin]
+    gen = int(sum(ilerle) + aralik * (len(metin) - 1)) + 4 * punto
+    asc, desc = F.getmetrics()
+    im = Image.new('L', (gen, asc + desc + 2 * punto), 0); dr = ImageDraw.Draw(im)
+    x, taban = 2 * punto, asc + punto
+    for ch, w_ in zip(metin, ilerle):
+        dr.text((x, taban), ch, font=F, fill=255, anchor='ls'); x += w_ + aralik
+    a = np.asarray(im); ys, xs = np.nonzero(a > 127)
+    return a, xs.min(), xs.max() + 1, taban
+PAPER_TARIH = os.environ.get('PAPER_TARIH', '').strip()
+if PAPER_TARIH:
+    TP_, TA_, TR_ = int(os.environ.get('TARIH_PUNTO', '166')), float(os.environ.get('TARIH_ARALIK', '36')), int(os.environ.get('TARIH_ARA', '378'))
+    rt = tarih_ciz(PAPER_TARIH, TP_, TA_)
+    if rt[2] - rt[1] > W - 2 * KENAR: log('HATA tarih satiri sigmiyor', rt[2] - rt[1]); sys.exit(8)
+    ekle('tarih', int(round(ORTA - (rt[2] - rt[1]) / 2 - rt[1])), int(round(TABAN_TAG + TR_ - rt[3])), rt[0])
+    log('tarih punto', TP_, 'aralik', TA_, 'taban', TABAN_TAG + TR_)
+
 # --- cember: onayli ---
 zs = np.load(B + 'alfa_ogeler.npz'); Ks = dict(zip([str(a) for a in zs['_ad']], zs['_konum']))
 OUT['cember'] = (int(Ks['cember'][0]), int(Ks['cember'][1]), zs['cember'])
