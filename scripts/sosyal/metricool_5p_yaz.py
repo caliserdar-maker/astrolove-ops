@@ -131,63 +131,105 @@ def karsilastir(g, p):
 
 
 def coklu(a):
-    """--gunler 2-78: plan saatleriyle; video + kapak cift basina (KAPAK/VIDEO klasorunden). kuru: POST yok."""
+    """--gunler 2-78: plan saatleriyle; video + kapak cift basina Metricool S3'e. kuru: POST yok.
+    yaz: cift cift; her ciftin 7 gonderisi yazilir, hemen geri okunup dogrulanir; FAIL -> DUR (cikis 3).
+    Saati gecmis (simdi+15 dk'dan once) satirlar ATLANIR ve raporlanir."""
     g1, g2 = (int(x) for x in a.gunler.split('-'))
     plan = [r for r in csv.DictReader(open(a.plan, encoding='utf-8')) if g1 <= int(r['gun']) <= g2]
     hata, out = [], []
-    ilk = datetime.fromisoformat(min(r['tarih_saat'] for r in plan))
-    if ilk < simdi_ist() + timedelta(minutes=30):
-        hata.append(f'ilk gonderi {ilk} gecmiste/cok yakin')
+    sinir = simdi_ist() + timedelta(minutes=15)
+    atla = [r for r in plan if datetime.fromisoformat(r['tarih_saat']) < sinir]
+    plan = [r for r in plan if r not in atla]
+    for r in atla:
+        out.append({'gun': r['gun'], 'cift': r['cift'], 'platform': r['platform'], 'tur': r['tur'], 'saat': r['tarih_saat'],
+                    'kapak': '', 'durum': 'ATLANDI_SAAT_GECMIS', 'id': ''})
     if 'GEMINI_LEO' in {r['cift'] for r in plan}:
         hata.append('GEMINI_LEO planda (Metricool da zaten var)')
     vdir, kdir = a.video_dir, a.kapak_dir
     mc = mpb.MC(json.load(open(a.token_dosya)))
-    var, son = [], datetime.fromisoformat(max(r['tarih_saat'] for r in plan)) + timedelta(hours=2)
-    t = ilk - timedelta(hours=2)
-    while t < son:   # liste ucu 7 gunluk parcalarla (mevcut gonderi = ZATEN_VAR, tekrar yazilmaz)
-        var += liste(mc, t, min(son, t + timedelta(days=7))); t += timedelta(days=7)
+    yol = os.path.join(a.cikti, f'KURU_{a.gunler}.json' if a.mod == 'kuru' else f'YAZIM_{a.gunler}.json')
+
+    def kaydet():
+        json.dump(out, open(yol, 'w'), ensure_ascii=False, indent=1)
+
+    def aralik(rs):
+        t = [datetime.fromisoformat(r['tarih_saat']) for r in rs]
+        return min(t) - timedelta(hours=1), max(t) + timedelta(hours=1)
+    var = []
+    if plan:
+        bas, son = aralik(plan)
+        t = bas
+        while t < son:   # liste ucu 7 gunluk parcalarla (mevcut gonderi = ZATEN_VAR, tekrar yazilmaz)
+            var += liste(mc, t, min(son, t + timedelta(days=7))); t += timedelta(days=7)
     t0 = time.time()
-    ciftler = sorted({r['cift'] for r in plan}, key=lambda c: min(int(r['gun']) for r in plan if r['cift'] == c))
+    ciftler = sorted({r['cift'] for r in plan}, key=lambda c: min(r['tarih_saat'] for r in plan if r['cift'] == c))
     for i, c in enumerate(ciftler, 1):
-        rs = [r for r in plan if r['cift'] == c]
+        rs = sorted([r for r in plan if r['cift'] == c], key=lambda r: (r['tarih_saat'], r['platform']))
         vd = next((r['video_dosya'] for r in rs if r['video_dosya']), '')
         kd = next((r.get('kapak_dosya', '') for r in rs if r.get('kapak_dosya')), '')
         for ad, d, kok in (('video', vd, vdir), ('kapak', kd, kdir)):
-            if not d or (kok and not os.path.exists(os.path.join(kok, d))) or 'YOK' in (rs[0].get(f'{ad}_drive_id') or '') + d:
+            if any(r['medya_url'].startswith('VIDEO:') for r in rs) and (
+                    not d or (kok and not os.path.exists(os.path.join(kok, d))) or 'YOK' in (rs[0].get(f'{ad}_drive_id') or '') + d):
                 hata.append(f'{c} {ad} yok: {d}')
-        if a.mod == 'yaz':
+        if hata and a.mod == 'yaz':
+            break
+        yazilacak = [r for r in rs if not any(ag(p) == [r['platform']] and (p.get('text') or '') == govde(r, datetime.fromisoformat(r['tarih_saat']), '')['text'] for p in var)]
+        if a.mod == 'yaz' and any(r['medya_url'].startswith('VIDEO:') for r in yazilacak):
             vurl, _ = video_yukle(mc, os.path.join(vdir, vd))
             kurl, _ = video_yukle(mc, os.path.join(kdir, kd), 'image/jpeg', 'jpg')
         else:
             vurl, kurl = 'https://static.metricool.com/video/KURU.mp4', f'https://static.metricool.com/KURU/{kd}'
+        yeni = []
         for r in rs:
             b = govde(r, datetime.fromisoformat(r['tarih_saat']), vurl, kurl)
             if r['medya_url'].startswith('VIDEO:') and not b.get('videoThumbnailUrl'):
                 hata.append(f"{c} {r['platform']} kapak alani yok")
-            es = [p for p in var if ag(p) == [r['platform']] and p.get('text') == b['text']]
-            if es:
-                durum = 'ZATEN_VAR'
+            if r not in yazilacak:
+                durum, pid = 'ZATEN_VAR', ''
             elif a.mod == 'kuru':
-                durum = 'KURU'
+                durum, pid = 'KURU', ''
             else:
                 y = mpb.veri(mc.istek('POST', '/v2/scheduler/posts', govde=b))
-                durum = 'YAZILDI ' + str((y or {}).get('id') if isinstance(y, dict) else '')
-            out.append({'gun': r['gun'], 'cift': c, 'platform': r['platform'], 'tur': r['tur'], 'saat': b['publicationDate']['dateTime'],
-                        'kapak': b.get('videoThumbnailUrl', ''), 'durum': durum, 'govde': b})
+                durum, pid = 'YAZILDI', str((y or {}).get('id') if isinstance(y, dict) else '')
+            x = {'gun': r['gun'], 'cift': c, 'platform': r['platform'], 'tur': r['tur'], 'saat': b['publicationDate']['dateTime'],
+                 'kapak': b.get('videoThumbnailUrl', ''), 'durum': durum, 'id': pid, 'govde': b}
+            out.append(x)
+            if durum == 'YAZILDI':
+                yeni.append(x)
+        if yeni:   # geri okuma: bu ciftin yazdigi her gonderi
+            oku = liste(mc, *aralik(rs))
+            for x in yeni:
+                b = x.pop('govde')
+                p = next((p for p in oku if x['id'] and str(p.get('id')) == x['id']), None) or \
+                    next((p for p in oku if ag(p) == [x['platform']] and p.get('text') == b['text']), None)
+                f = ['GERI OKUNAMADI'] if p is None else [k for k in karsilastir(b, p) if not k.startswith('medya URL farkli')]
+                x['dogrulama'] = f or 'PASS'
+                if f:
+                    hata.append(f"{c} {x['platform']} {x['tur']} {x['saat']}: {'; '.join(f)}")
+        for x in out:
+            x.pop('govde', None) if a.mod == 'yaz' else None
+        kaydet()
         g = time.time() - t0
-        if i % 10 == 0 or i == len(ciftler):
-            print(f'[{i}/{len(ciftler)}] {c} | gecen {g:.0f} sn, kalan ~{g / i * (len(ciftler) - i):.0f} sn, %{100 * i / len(ciftler):.0f}', flush=True)
+        if a.mod == 'yaz' or i % 10 == 0 or i == len(ciftler):
+            print(f"[{i}/{len(ciftler)}] {c} {'FAIL' if hata else 'PASS'} yazilan {sum(x['durum'] == 'YAZILDI' for x in out)} | gecen {g:.0f} sn, "
+                  f"kalan ~{g / i * (len(ciftler) - i):.0f} sn, %{100 * i / len(ciftler):.0f}", flush=True)
+        if hata and a.mod == 'yaz':
+            break
     from collections import Counter
-    n = Counter((x['platform'], x['tur']) for x in out)
-    if len(out) != 7 * len(ciftler) or any(v != len(ciftler) for v in n.values()):
-        hata.append(f'satir {len(out)} / tur sayilari {dict(n)}')
-    json.dump(out, open(os.path.join(a.cikti, f'KURU_{a.gunler}.json' if a.mod == 'kuru' else f'YAZIM_{a.gunler}.json'), 'w'),
-              ensure_ascii=False, indent=1)
-    kap = sum(1 for x in out if x['kapak'])
-    print(f"{a.mod.upper()} gun {a.gunler}: {len(ciftler)} cift, {len(out)} gonderi, kapakli video gonderisi {kap}, "
-          f"ilk {min(x['saat'] for x in out)}, son {max(x['saat'] for x in out)}", flush=True)
+    yz = [x for x in out if x['durum'] != 'ATLANDI_SAAT_GECMIS']
+    n = Counter((x['platform'], x['tur']) for x in yz)
+    tek = Counter((x['platform'], x['tur'], x['cift']) for x in yz)
+    if not hata and a.mod == 'kuru' and (len(yz) != len(plan) or any(v != 1 for v in tek.values())):
+        hata.append(f'satir {len(yz)} / plan {len(plan)} / tekrar {[k for k, v in tek.items() if v != 1][:3]}')
+    if not hata and a.mod == 'yaz' and any(v != 1 for v in tek.values()):
+        hata.append(f'tekrar {[k for k, v in tek.items() if v != 1][:3]}')
+    kaydet()
+    say = Counter(x['durum'] for x in out)
+    zs = [x['saat'] for x in yz]
+    print(f"{a.mod.upper()} gun {a.gunler}: {len(ciftler)} cift, durum {dict(say)}, kapakli video gonderisi {sum(1 for x in yz if x['kapak'])}, "
+          f"ilk {min(zs) if zs else '-'}, son {max(zs) if zs else '-'}; atlanan (saat gecmis) {len(atla)}", flush=True)
     print('SONUC ' + ('PASS' if not hata else 'FAIL: ' + '; '.join(hata[:15])), flush=True)
-    sys.exit(1 if hata else 0)
+    sys.exit(0 if not hata else (3 if a.mod == 'yaz' else 1))
 
 
 def main():
