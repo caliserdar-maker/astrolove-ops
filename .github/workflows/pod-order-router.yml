@@ -20,8 +20,10 @@ on:
   # yetkilendirip ETSY_TOKEN.json'i yeniledikten sonra asagidaki iki satir acilir:
   # 21 Eyl 2026 (Serdar onayi): transactions_r + transactions_w alindi, cron CANLI otomatik moda acildi.
   # NOT: schedule yalniz VARSAYILAN DALDAKI (main) surumden tetiklenir.
-  schedule:
-    - cron: "*/15 * * * *"        # onayli mod: paket hazirla, GONDERME (26 Eyl, Serdar onayi sart)
+  # 13 Eki 2026 (Serdar karari): CRON KAPALI. Siparisler hicbir platforma otomatik gonderilmez; siparis gelirse Serdar
+  # elle verir. Otomasyon gunde 10-20 siparis olunca yeniden degerlendirilecek. Elle calistirma (workflow_dispatch) acik.
+  # schedule:
+  #   - cron: "*/15 * * * *"        # onayli mod: paket hazirla, GONDERME (26 Eyl, Serdar onayi sart)
   workflow_dispatch:
     inputs:
       submit:
