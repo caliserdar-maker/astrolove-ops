@@ -1,0 +1,186 @@
+name: bizim-yilimiz-ornek
+# BIZIM YILIMIZ (Paper) ORNEK (13 Eki 2026, Serdar onayli Adim 1): Cancer-Libra, SERDAR / LENA, 12 JUNE 2025.
+# 5 renk x (8x10 poster + 5x7 kart) -> Drive TEMP/BIZIM_YILIMIZ_ORNEK_20261013/ (+ isim/tarih kesitleri, kapi JSON).
+#  yeni yol (MB/DB/PW): bizim-yilimiz dali motor_gpt (siparis-gpt 243c9a4 + tarih ogesi), db_pw_uret tek motor kosusu, kapilar a-i.
+#  eski yol (CI/WP): siparis-dijital AYNEN (renk_ref b8c8c4b, WP wp_ref 360cbef, tek_olcu 8x10; siparis-giris ile ayni girdiler)
+#    + scripts/paper/paper_son.py tarih satiri (eski yolun isim altini profilinden). Kart: 8x10 -> 1500x2100 (yukseklik + yan kirpma).
+# Etsy'ye yazma / taslak ilan / musteriye gonderim YOK. Zamanlama YOK (yalniz workflow_dispatch).
+on:
+  workflow_dispatch:
+    inputs:
+      by_ref: { description: "bizim-yilimiz dali commit (tam SHA)", required: true, default: "d1e484c02f35bdc8e0f866e613adefb49d466f67" }
+permissions:
+  contents: read
+env:
+  CIFT: CANCER_LIBRA
+  ISIM1: SERDAR
+  ISIM2: LENA
+  D: "gdrive:ASTROLOVE/TEMP/BIZIM_YILIMIZ_ORNEK_20261013"
+  ESKI_RENK_REF: b8c8c4b17478fd956167577fa69913d06b9eb955
+  WP_REF: 360cbef947994c7d4b3c9ae95275f778a18af716
+jobs:
+  yeni:
+    strategy:
+      fail-fast: false
+      matrix:
+        tur: [poster, kart]
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: "${{ github.sha }}", fetch-depth: 1, sparse-checkout: "scripts/paper" }
+      - uses: actions/checkout@v4
+        with: { ref: "${{ github.event.inputs.by_ref }}", fetch-depth: 1, sparse-checkout: "motor_gpt", path: _by }
+      - name: Metinler
+        run: |
+          set -euo pipefail
+          if [ "${{ matrix.tur }}" = poster ]; then T1="Paper Anniversary"; T2="YEAR ONE · 12 JUNE 2025"; else T1="Happy First Anniversary"; T2="PAPER · 12 JUNE 2025"; fi
+          { echo "T1=$T1"; echo "T2=$T2"; echo "M64=$(printf '%s' "$T1" | base64 -w0)"; } >> "$GITHUB_ENV"
+      - name: rclone + tesseract
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /tmp/rc.zip https://downloads.rclone.org/rclone-current-linux-amd64.zip
+          unzip -q -j /tmp/rc.zip '*/rclone' -d /tmp/rcb && sudo install -m 755 /tmp/rcb/rclone /usr/local/bin/rclone
+          sudo apt-get -qq update >/dev/null && sudo apt-get -qq install -y tesseract-ocr >/dev/null
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: Kaynak + motor ortami (siparis-giris yeni yol ile ayni)
+        run: |
+          set -euo pipefail
+          K="gdrive,root_folder_id=1ZQGR0fI0HQNq1D2Lbmr2qlkNVbD8jRyD:"
+          P="gdrive,root_folder_id=1E-vvy7BVE2C2VEuRDoVUf6g9PZpvh5-H:"
+          mkdir -p /tmp/k /tmp/ref /tmp/pl
+          ( rclone copy "$K" /tmp/k --include "${CIFT}_ana.png" --include "${CIFT}_ana.png.json" --include "${CIFT}_std_alfa.npz" --include "ek/**"
+            rclone copy "$P" /tmp/ref --include "${CIFT}_7200x10800.jpg"
+            for f in BLACK_24x36 BLACK_16x20 PURE_WHITE_24x36 PURE_WHITE_16x20; do rclone copy "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PLATES/$f.png" /tmp/pl; done ) &
+          sudo mkdir -p /home/claude/ao/KANIT /home/claude/motor_klon/motor && sudo chown -R "$USER" /home/claude
+          ln -s "$GITHUB_WORKSPACE/_by/motor_gpt" /home/claude/blender
+          ln -s "$GITHUB_WORKSPACE/_by/motor_gpt/font" /home/claude/motor_klon/motor/font
+          ln -s "$GITHUB_WORKSPACE/_by/motor_gpt/ref" /home/claude/ref
+          python3 -m venv /home/claude/blender/venv
+          /home/claude/blender/venv/bin/pip install -q numpy==2.5.3 opencv-python-headless==5.0.0.93 pillow==12.3.0 scipy==1.18.1 scikit-image==0.26.0 potracer==0.0.4
+          wait
+          ls -la /tmp/k /tmp/ref /tmp/pl
+          for f in BLACK_24x36 BLACK_16x20 PURE_WHITE_24x36 PURE_WHITE_16x20; do [ -s /tmp/pl/$f.png ] || { echo "::error::plaka yok $f"; exit 1; }; done
+          ln -s /tmp/k/ek/SCORPIO_VIRGO_T5_FAIL_tam.png /home/claude/ao/KANIT/SCORPIO_VIRGO_T5_FAIL_tam.png
+      - name: Uret (MB + DB + PW, tek motor kosusu)
+        run: |
+          set -euo pipefail
+          RENKLER=DEEP_BLACK,PURE_WHITE SIPARIS_OLCU=8x10 MB_TESLIM=1 PAPER_TARIH="$T2" \
+            /home/claude/blender/venv/bin/python /home/claude/blender/db_pw_uret.py "$CIFT" "$ISIM1" "$ISIM2" "$M64" "/tmp/k/${CIFT}_ana.png" /tmp/pl /tmp/is
+      - name: Kapilar (a-i, MB standart posterle)
+        run: |
+          set +e
+          KAPI_OLCULER=8x10 KAPI_MB_REF=/tmp/ref/${CIFT}_7200x10800.jpg REF_ALFA=/tmp/k/${CIFT}_std_alfa.npz \
+            /home/claude/blender/venv/bin/python /home/claude/blender/kapi_db_pw.py /tmp/is --json /tmp/is/KAPI.json
+          echo "KAPI_RC=$?" >> "$GITHUB_ENV"
+      - name: Son islem (kart / kesit / metin kapisi)
+        run: |
+          set +e
+          mkdir -p /tmp/son; RC=0
+          for R in MIDNIGHT_BLUE DEEP_BLACK PURE_WHITE; do
+            RN=$(python3 -c "import sys;print('_'.join(w.capitalize() for w in sys.argv[1].split('_')))" $R)
+            /home/claude/blender/venv/bin/python scripts/paper/paper_son.py --girdi "/tmp/is/$R/AstroLoveArt_Cancer_Libra_${RN}_8x10.jpg" --cikti /tmp/son \
+              --ad "AstroLoveArt_Cancer_Libra_${RN}" --tur "${{ matrix.tur }}" --font /home/claude/blender/font/Cinzel.ttf \
+              --bekle "$ISIM1|$ISIM2|$T1|${T2//·/ }" > /tmp/son/_log_$R.txt 2>&1 || RC=1
+            tail -c 600 /tmp/son/_log_$R.txt; echo
+          done
+          cp /tmp/is/KAPI.json "/tmp/son/KAPI_YENI_YOL_${{ matrix.tur }}.json"; cp /tmp/is/siparis.json "/tmp/son/SIPARIS_YENI_YOL_${{ matrix.tur }}.json"
+          rm -f /tmp/son/_log_*.txt
+          echo "SON_RC=$RC" >> "$GITHUB_ENV"
+      - name: Drive'a yaz
+        if: always()
+        run: |
+          set -euo pipefail
+          rclone copy /tmp/son "$D" -q && rclone lsl "$D" | sed 's/^/  /'
+      - name: Sonuc
+        run: |
+          echo "kapi=$KAPI_RC son=$SON_RC"; python3 -c "import json;k=json.load(open('/tmp/is/KAPI.json'));print('::warning::YENI ${{ matrix.tur }} '+' '.join(f'{r}:{v.get(\"PASS\")}' for r,v in k.items() if isinstance(v,dict)))"
+          [ "${KAPI_RC:-1}" = "0" ] && [ "${SON_RC:-1}" = "0" ]
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
+
+  eski:
+    strategy:
+      fail-fast: false
+      matrix:
+        renk: [CHAMPAGNE_IVORY, WARM_PARCHMENT]
+        tur: [poster, kart]
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    permissions:
+      actions: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: "${{ github.sha }}", fetch-depth: 1, sparse-checkout: "scripts/paper" }
+      - uses: actions/checkout@v4
+        with: { ref: "${{ github.event.inputs.by_ref }}", fetch-depth: 1, sparse-checkout: "motor_gpt/font", path: _by }
+      - name: Metinler + receipt
+        run: |
+          set -euo pipefail
+          if [ "${{ matrix.tur }}" = poster ]; then T1="Paper Anniversary"; T2="YEAR ONE · 12 JUNE 2025"; N=1; else T1="Happy First Anniversary"; T2="PAPER · 12 JUNE 2025"; N=2; fi
+          [ "${{ matrix.renk }}" = CHAMPAGNE_IVORY ] && B=0 || B=2
+          { echo "T1=$T1"; echo "T2=$T2"; echo "M64=$(printf '%s' "$T1" | base64 -w0)"; echo "REC=900001310$((B + N))"; } >> "$GITHUB_ENV"
+      - name: Eski yol (siparis-dijital AYNEN, siparis-giris ile ayni girdiler) + bekle
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          R="${{ matrix.renk }}"
+          if [ "$R" = WARM_PARCHMENT ]; then EK=(-f isler="wp:16x20" -f wp_ref="$WP_REF"); else EK=(-f isler="renk:$R"); fi
+          OUT=$(gh workflow run siparis-dijital.yml -R "$GITHUB_REPOSITORY" --ref main -f receipt="$REC" -f cift="$CIFT" -f isim1="$ISIM1" -f isim2="$ISIM2" \
+                -f mesaj_b64="$M64" -f renk_ref="$ESKI_RENK_REF" -f wp_pod_kod=v1 -f tek_olcu=8x10 "${EK[@]}" 2>&1); echo "$OUT"
+          ID=$(echo "$OUT" | grep -oE 'runs/[0-9]+' | head -1 | cut -d/ -f2)
+          if [ -z "$ID" ]; then sleep 15; ID=$(gh run list -R "$GITHUB_REPOSITORY" -w siparis-dijital.yml -e workflow_dispatch -L 10 --json databaseId,displayTitle,createdAt -q '.[0].databaseId'); fi
+          echo "::notice title=ESKI YOL ${{ matrix.renk }} ${{ matrix.tur }}::siparis-dijital kosu $ID receipt $REC"
+          echo "ESKI_ID=$ID" >> "$GITHUB_ENV"
+          gh run watch "$ID" -R "$GITHUB_REPOSITORY" -i 30 --exit-status > /dev/null && echo "eski yol PASS" || { echo "::error::eski yol kosusu $ID FAIL"; exit 1; }
+      - name: rclone + tesseract + python
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /tmp/rc.zip https://downloads.rclone.org/rclone-current-linux-amd64.zip
+          unzip -q -j /tmp/rc.zip '*/rclone' -d /tmp/rcb && sudo install -m 755 /tmp/rcb/rclone /usr/local/bin/rclone
+          sudo apt-get -qq update >/dev/null && sudo apt-get -qq install -y tesseract-ocr >/dev/null
+          pip install -q numpy==2.2.6 opencv-python-headless==4.12.0.88 pillow==11.3.0
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: Tarih satiri + kart + kesit + metin kapisi
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/e /tmp/son
+          rclone copy "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL/$REC" /tmp/e --include "/AstroLoveArt_*_8x10.jpg" --include "/OZET*.json" --include "/KAPI*.json"
+          ls -la /tmp/e
+          G=$(ls /tmp/e/AstroLoveArt_*_8x10.jpg | head -1); [ -n "$G" ] || { echo "::error::eski yol 8x10 yok"; exit 1; }
+          RN=$(python3 -c "import sys;print('_'.join(w.capitalize() for w in sys.argv[1].split('_')))" ${{ matrix.renk }})
+          python3 scripts/paper/paper_son.py --girdi "$G" --cikti /tmp/son --ad "AstroLoveArt_Cancer_Libra_${RN}" --tur "${{ matrix.tur }}" \
+            --font _by/motor_gpt/font/Cinzel.ttf --tarih-ekle "$T2" --bekle "$ISIM1|$ISIM2|$T1|${T2//·/ }" | tail -c 1500
+          for f in /tmp/e/OZET*.json /tmp/e/KAPI*.json; do [ -f "$f" ] && cp "$f" "/tmp/son/ESKI_YOL_${{ matrix.renk }}_${{ matrix.tur }}_$(basename "$f")"; done; true
+      - name: Drive'a yaz
+        if: always()
+        run: |
+          set -euo pipefail
+          [ -d /tmp/son ] && rclone copy /tmp/son "$D" -q; rclone lsl "$D" | sed 's/^/  /' || true
+      - name: Inceleme dalini sil (siparis-dijital yan urunu, ornek receipt)
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X DELETE "repos/$GITHUB_REPOSITORY/git/refs/heads/inceleme/siparis-$REC" && echo "silindi inceleme/siparis-$REC" || echo "dal yok"
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
