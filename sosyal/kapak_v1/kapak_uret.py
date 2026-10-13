@@ -27,6 +27,7 @@ W, H = 1080, 1920
 LOGO = os.path.join(HERE, 'assets', 'logo_sonsuz.png')
 GRID_TOP, GRID_BOT = (H - 1440) // 2, (H - 1440) // 2 + 1440   # centre 3:4 band shown in the profile grid
 MARGIN = 30
+LABEL_MAX = 440          # each name centred at W/2 +- 260: 60 px from the edge, 80 px between the two names
 
 
 def build(poster_path, A, B, out_dir):
@@ -55,15 +56,20 @@ def build(poster_path, A, B, out_dir):
 
     # signs with their names below, logo between the signs
     sa, sb, sw, r = PU.sign_pair(P, 160)
-    ls = 86
-    mk = lambda t, s: lib.metal_text(t.upper(), s, BR, tracking=0.18, bevel=1.0)
-    la, lb = mk(A, ls), mk(B, ls)
-    while max(la.size[0], lb.size[0]) > W * 0.37:
-        ls -= 2
-        la, lb = mk(A, ls), mk(B, ls)
+    # both names share one size: first tighten letter spacing (0.18 -> 0.08), only then shrink the type
+    # (13 Oct 2026: long names such as SAGITTARIUS dropped to 48 px with spacing fixed; now 64 px)
+    ls, tr = 86, 0.18
+    mk = lambda t: lib.metal_text(t.upper(), ls, BR, tracking=tr, bevel=1.0)
+    la, lb = mk(A), mk(B)
+    while max(la.size[0], lb.size[0]) > LABEL_MAX:
+        if tr > 0.08 + 1e-9:
+            tr = round(tr - 0.02, 2)
+        else:
+            ls -= 2
+        la, lb = mk(A), mk(B)
     ys = cy + merged.size[1] / 2 + 150
     yl = ys + 124 + max(la.size[1], lb.size[1]) / 2
-    off = max(260, max(la.size[0], lb.size[0]) / 2 + 60)
+    off = 260
     put('burc_a', sa, W / 2 - off, ys); put('ad_a', la, W / 2 - off, yl, shadow=False)
     put('burc_b', sb, W / 2 + off, ys); put('ad_b', lb, W / 2 + off, yl, shadow=False)
     put('logo', lib.scale_w(Image.open(LOGO).convert('RGBA'), 150), W / 2, ys)
@@ -87,7 +93,7 @@ def build(poster_path, A, B, out_dir):
             if g < 24:
                 hata.append(f'{names[i]}-{names[j]} bosluk {g}px < 24')
     qc = {'cift': f'{A.upper()}_{B.upper()}', 'dosya': os.path.basename(path), 'boyut': list(cv.size),
-          'ad_punto': ls, 'kutular': {k: [int(v) for v in r_] for k, r_ in rects.items()},
+          'ad_punto': ls, 'ad_aralik': tr, 'kutular': {k: [int(v) for v in r_] for k, r_ in rects.items()},
           'sonuc': 'PASS' if not hata and cv.size == (W, H) else 'FAIL', 'hata': hata}
     return path, qc
 
