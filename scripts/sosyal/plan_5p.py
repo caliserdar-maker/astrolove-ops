@@ -79,6 +79,7 @@ def main():
     for k in ('metin-dir', 'karusel', 'video', 'url-kok', 'cikti'):
         ap.add_argument('--' + k, required=True)
     ap.add_argument('--baslangic', default='2026-10-14'); ap.add_argument('--yt-kategori', default='')
+    ap.add_argument('--kapak', default='', help='KAPAK klasoru lsjson (kapak_v1); verilirse video satirlarina kapak_dosya')
     a = ap.parse_args()
     D = a.metin_dir
     IGK, IGR, FB, TH, TT, YT = (oku(D, x) for x in ('IG_KARUSEL_78.csv', 'IG_REEL_78.csv', 'FACEBOOK_78.csv', 'THREADS_78.csv',
@@ -96,6 +97,7 @@ def main():
         if not x.get('IsDir') and re.search(r'\.(jpe?g|png)$', x['Name'], re.I) and '/' in x['Path']:
             kar[x['Path'].split('/')[0]].append(x['Name'])
     vid = {x['Name']: x.get('ID', '') for x in json.load(open(a.video)) if x['Name'].endswith('.mp4')}
+    kap = {x['Name']: x.get('ID', '') for x in json.load(open(a.kapak)) if x['Name'].endswith('.jpg')} if a.kapak else None
     if hata:
         sys.exit('DUR: ' + '; '.join(hata))
     s = sira(ciftler)
@@ -115,6 +117,9 @@ def main():
                         'platform': platform, 'cift': c, 'tur': tur, 'metin': metin, 'medya_url': ' | '.join(medya),
                         'alt_metinler': ' | '.join(alt), 'baslik': baslik, 'ek_alanlar': json.dumps(ek or {}, ensure_ascii=False),
                         'video_dosya': vdosya if video else '', 'video_drive_id': vid.get(vdosya, 'VIDEO_YOK') if video else ''})
+            if kap is not None:
+                kd = vdosya.replace('-reel.mp4', '-kapak.jpg')
+                out[-1].update(kapak_dosya=kd if video else '', kapak_drive_id=kap.get(kd, 'KAPAK_YOK') if video else '')
         k, f, th, tt, yt = IGK[c], FB[c], TH[c], TT[c], YT[c]
         satir('20:00', gun, 'instagram', 'KARUSEL', k['caption'], urls, [k[f'alt_metin_{i}'] for i in (1, 2, 3, 4)],
               ek={'instagramData': {'type': 'POST', 'autoPublish': True}})
@@ -176,11 +181,13 @@ def main():
             hata.append(f"fb 3 gorsel degil {r['cift']}")
         if r['video_drive_id'] == 'VIDEO_YOK':
             hata.append(f"video yok {r['cift']}")
+        if r.get('kapak_drive_id') == 'KAPAK_YOK':
+            hata.append(f"kapak yok {r['cift']}")
         if 'DUZELMEDI' in r['dst_notu']:
             hata.append(f"dst {r['tarih_saat']}")
     out.sort(key=lambda r: (r['utc'], r['platform']))
     with open(a.cikti, 'w', newline='', encoding='utf-8') as fh:
-        w = csv.DictWriter(fh, fieldnames=KOL, lineterminator='\n'); w.writeheader(); w.writerows(out)
+        w = csv.DictWriter(fh, fieldnames=KOL + (['kapak_dosya', 'kapak_drive_id'] if kap is not None else []), lineterminator='\n'); w.writeheader(); w.writerows(out)
     open(a.cikti.replace('.csv', '_SIRA.csv'), 'w').write('gun,tarih,cift\n' + ''.join(
         f'{i + 1},{bas + timedelta(days=i)},{c}\n' for i, c in enumerate(s)))
     dst = [r for r in out if r['dst_notu']]

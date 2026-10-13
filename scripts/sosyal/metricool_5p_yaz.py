@@ -7,7 +7,7 @@
 - Yazimdan sonra liste ucundan geri okunur: metin, medya, saat, ag, ag alanlari karsilastirilir -> DOGRULAMA.json.
 Kullanim: metricool_5p_yaz.py --token-dosya T --plan PLAN.csv --gun 1 --video V.mp4 --kar 2026-10-12T23:00
           --th 2026-10-12T23:15 --vid 2026-10-13T03:00 --sinir 2026-10-13T01:00 --mod kuru|yaz --cikti DIR"""
-import argparse, csv, importlib.util, json, os, sys
+import argparse, csv, importlib.util, json, os, sys, time
 from datetime import datetime, timedelta
 
 D = os.path.dirname(__file__)
@@ -28,12 +28,12 @@ def simdi_ist():
     return datetime.utcnow() + timedelta(hours=3)
 
 
-def video_yukle(mc, yol):
-    """S3 planner yuklemesi; donus (url, rapor). Presigned URL'ler maskelenir, yazilmaz."""
+def video_yukle(mc, yol, ctype='video/mp4', uzanti='mp4'):
+    """S3 planner yuklemesi (video ya da kapak jpg); donus (url, rapor). Presigned URL'ler maskelenir, yazilmaz."""
     veri = open(yol, 'rb').read()
     n = len(veri)
     parca = [(0, n)] if n < 5 * 1024 * 1024 else [(s, min(n, s + s3.PARCA)) for s in range(0, n, s3.PARCA)]
-    istek = {'resourceType': 'planner', 'contentType': 'video/mp4', 'fileExtension': 'mp4',
+    istek = {'resourceType': 'planner', 'contentType': ctype, 'fileExtension': uzanti,
              'parts': [{'size': e - s, 'startByte': s, 'endByte': e, 'hash': s3.b64sha(veri[s:e])} for s, e in parca]}
     y = mpb.veri(mc.istek('PUT', '/v2/media/s3/upload-transactions', govde=istek))
     for u in ([y.get('presignedUrl')] if y.get('presignedUrl') else [p.get('presignedUrl') for p in y.get('parts') or []]):
@@ -76,7 +76,7 @@ def ag(p):
     return [(x.get('network') or '').lower() for x in p.get('providers') or []]
 
 
-def govde(r, saat, video_url):
+def govde(r, saat, video_url, kapak_url=''):
     ek = json.loads(r['ek_alanlar'] or '{}')
     medya = [video_url] if r['medya_url'].startswith('VIDEO:') else r['medya_url'].split(' | ')
     alt = [x for x in r['alt_metinler'].split(' | ') if x] if r['alt_metinler'] else []
@@ -91,6 +91,8 @@ def govde(r, saat, video_url):
          'draft': False, 'shortener': False, 'saveExternalMediaFiles': False}
     if alt:
         g['mediaAltText'] = alt
+    if r['medya_url'].startswith('VIDEO:') and kapak_url:
+        g['videoThumbnailUrl'] = kapak_url   # kapak_v1 gorseli (IG Reel, FB Reel, TikTok business, YouTube)
     for k, v in ek.items():
         if k.endswith('Data'):
             g[k] = v
@@ -111,6 +113,8 @@ def karsilastir(g, p):
         f.append(f'medya sayisi {len(m)} != {len(g["media"])}')
     elif m != g['media']:
         f.append('medya URL farkli (Metricool kopyalamis olabilir): ' + ' | '.join(x[:90] for x in m))
+    if g.get('videoThumbnailUrl') and not p.get('videoThumbnailUrl'):
+        f.append('kapak (videoThumbnailUrl) okunamadi')
     if g.get('mediaAltText') and p.get('mediaAltText') != g['mediaAltText']:
         f.append(f"alt metin: {str(p.get('mediaAltText'))[:80]!r}")
     for k, v in g.items():
@@ -126,14 +130,78 @@ def karsilastir(g, p):
     return f
 
 
+def coklu(a):
+    """--gunler 2-78: plan saatleriyle; video + kapak cift basina (KAPAK/VIDEO klasorunden). kuru: POST yok."""
+    g1, g2 = (int(x) for x in a.gunler.split('-'))
+    plan = [r for r in csv.DictReader(open(a.plan, encoding='utf-8')) if g1 <= int(r['gun']) <= g2]
+    hata, out = [], []
+    ilk = datetime.fromisoformat(min(r['tarih_saat'] for r in plan))
+    if ilk < simdi_ist() + timedelta(minutes=30):
+        hata.append(f'ilk gonderi {ilk} gecmiste/cok yakin')
+    if 'GEMINI_LEO' in {r['cift'] for r in plan}:
+        hata.append('GEMINI_LEO planda (Metricool da zaten var)')
+    vdir, kdir = a.video_dir, a.kapak_dir
+    mc = mpb.MC(json.load(open(a.token_dosya)))
+    var, son = [], datetime.fromisoformat(max(r['tarih_saat'] for r in plan)) + timedelta(hours=2)
+    t = ilk - timedelta(hours=2)
+    while t < son:   # liste ucu 7 gunluk parcalarla (mevcut gonderi = ZATEN_VAR, tekrar yazilmaz)
+        var += liste(mc, t, min(son, t + timedelta(days=7))); t += timedelta(days=7)
+    t0 = time.time()
+    ciftler = sorted({r['cift'] for r in plan}, key=lambda c: min(int(r['gun']) for r in plan if r['cift'] == c))
+    for i, c in enumerate(ciftler, 1):
+        rs = [r for r in plan if r['cift'] == c]
+        vd = next((r['video_dosya'] for r in rs if r['video_dosya']), '')
+        kd = next((r.get('kapak_dosya', '') for r in rs if r.get('kapak_dosya')), '')
+        for ad, d, kok in (('video', vd, vdir), ('kapak', kd, kdir)):
+            if not d or (kok and not os.path.exists(os.path.join(kok, d))) or 'YOK' in (rs[0].get(f'{ad}_drive_id') or '') + d:
+                hata.append(f'{c} {ad} yok: {d}')
+        if a.mod == 'yaz':
+            vurl, _ = video_yukle(mc, os.path.join(vdir, vd))
+            kurl, _ = video_yukle(mc, os.path.join(kdir, kd), 'image/jpeg', 'jpg')
+        else:
+            vurl, kurl = 'https://static.metricool.com/video/KURU.mp4', f'https://static.metricool.com/KURU/{kd}'
+        for r in rs:
+            b = govde(r, datetime.fromisoformat(r['tarih_saat']), vurl, kurl)
+            if r['medya_url'].startswith('VIDEO:') and not b.get('videoThumbnailUrl'):
+                hata.append(f"{c} {r['platform']} kapak alani yok")
+            es = [p for p in var if ag(p) == [r['platform']] and p.get('text') == b['text']]
+            if es:
+                durum = 'ZATEN_VAR'
+            elif a.mod == 'kuru':
+                durum = 'KURU'
+            else:
+                y = mpb.veri(mc.istek('POST', '/v2/scheduler/posts', govde=b))
+                durum = 'YAZILDI ' + str((y or {}).get('id') if isinstance(y, dict) else '')
+            out.append({'gun': r['gun'], 'cift': c, 'platform': r['platform'], 'tur': r['tur'], 'saat': b['publicationDate']['dateTime'],
+                        'kapak': b.get('videoThumbnailUrl', ''), 'durum': durum, 'govde': b})
+        g = time.time() - t0
+        if i % 10 == 0 or i == len(ciftler):
+            print(f'[{i}/{len(ciftler)}] {c} | gecen {g:.0f} sn, kalan ~{g / i * (len(ciftler) - i):.0f} sn, %{100 * i / len(ciftler):.0f}', flush=True)
+    from collections import Counter
+    n = Counter((x['platform'], x['tur']) for x in out)
+    if len(out) != 7 * len(ciftler) or any(v != len(ciftler) for v in n.values()):
+        hata.append(f'satir {len(out)} / tur sayilari {dict(n)}')
+    json.dump(out, open(os.path.join(a.cikti, f'KURU_{a.gunler}.json' if a.mod == 'kuru' else f'YAZIM_{a.gunler}.json'), 'w'),
+              ensure_ascii=False, indent=1)
+    kap = sum(1 for x in out if x['kapak'])
+    print(f"{a.mod.upper()} gun {a.gunler}: {len(ciftler)} cift, {len(out)} gonderi, kapakli video gonderisi {kap}, "
+          f"ilk {min(x['saat'] for x in out)}, son {max(x['saat'] for x in out)}", flush=True)
+    print('SONUC ' + ('PASS' if not hata else 'FAIL: ' + '; '.join(hata[:15])), flush=True)
+    sys.exit(1 if hata else 0)
+
+
 def main():
     ap = argparse.ArgumentParser()
-    for k in ('token-dosya', 'plan', 'video', 'kar', 'th', 'vid', 'sinir', 'cikti'):
+    for k in ('token-dosya', 'plan', 'cikti'):
         ap.add_argument('--' + k, required=True)
+    for k in ('video', 'kar', 'th', 'vid', 'sinir', 'gunler', 'video-dir', 'kapak-dir', 'kapak'):
+        ap.add_argument('--' + k, default='')
     ap.add_argument('--gun', type=int, default=1)
     ap.add_argument('--mod', choices=['kuru', 'yaz'], default='kuru')
     a = ap.parse_args()
     os.makedirs(a.cikti, exist_ok=True)
+    if a.gunler:
+        return coklu(a)
     satir = [r for r in csv.DictReader(open(a.plan, encoding='utf-8')) if int(r['gun']) == a.gun]
     if len(satir) != 7 or len({r['cift'] for r in satir}) != 1:
         sys.exit(f'DUR: gun {a.gun} satir {len(satir)}')

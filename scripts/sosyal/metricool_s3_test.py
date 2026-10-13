@@ -37,7 +37,9 @@ def main():
     if not parcalar:
         for s in range(0, n, PARCA):
             parcalar.append((s, min(n, s + PARCA)))
-    istek = {'resourceType': 'planner', 'contentType': 'video/mp4', 'fileExtension': 'mp4',
+    uz = os.path.splitext(yol)[1].lstrip('.').lower()   # mp4 (video) ya da jpg (kapak)
+    istek = {'resourceType': 'planner', 'contentType': {'jpg': 'image/jpeg', 'jpeg': 'image/jpeg', 'png': 'image/png'}.get(uz, 'video/mp4'),
+             'fileExtension': uz,
              'parts': [{'size': e - s, 'startByte': s, 'endByte': e, 'hash': b64sha(veri[s:e])} for s, e in parcalar]}
     rapor = {'dosya': os.path.basename(yol), 'boyut': n, 'parca': len(parcalar), 'sha256': hashlib.sha256(veri).hexdigest()}
     y = mpb.veri(mc.istek('PUT', '/v2/media/s3/upload-transactions', govde=istek))
