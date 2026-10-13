@@ -19,11 +19,12 @@ S = requests.Session(); S.headers.update({"X-API-KEY": os.environ["GELATO_API_KE
 CAGRI = [0]
 
 
-def istek(yontem, yol, **kw):
+def istek(yontem, yol, yok404=False, **kw):
     if not any(p.match(f"{yontem} /v3{yol}") for p in IZIN): raise RuntimeError(f"IZINSIZ UC: {yontem} {yol}")
     for d in range(4):
         CAGRI[0] += 1; r = S.request(yontem, BASE + yol, timeout=60, **kw)
         if r.status_code == 429 or r.status_code >= 500: time.sleep(2 + 3 * d); continue
+        if r.status_code == 404 and yok404: return None
         if r.status_code != 200: raise SystemExit(f"HATA {yontem} {yol} -> {r.status_code}: {r.text[:300]}")
         return r.json()
     raise SystemExit(f"HATA {yontem} {yol}: tekrarlar tukendi")
@@ -37,14 +38,14 @@ def mm(v):
 def boy_kesin(p):
     """Format metni boyu dogrudan veriyorsa True (8x10-inch, a4); yalniz olcuyle eslesme (or. 210x300-mm ~ A4) False."""
     at = {k.lower(): str(v).lower() for k, v in (p.get("attributes") or {}).items()}
-    fmt = at.get("paperformat") or at.get("format") or ""
+    fmt = at.get("paperformat") or at.get("format") or at.get("unifiedpaperformat") or ""
     return bool(re.search(r"(^|[^0-9])\d+x\d+-inch|(^|[^0-9a-z])a[0-9]($|[^0-9])", fmt))
 
 
 def boy_bul(p):
     """Urunun boyu: once format oznitelik metni (8x10 / A4), sonra dikey olcu (mm, +-4)."""
     at = {k.lower(): str(v).lower() for k, v in (p.get("attributes") or {}).items()}
-    fmt = at.get("paperformat") or at.get("format") or ""
+    fmt = at.get("paperformat") or at.get("format") or at.get("unifiedpaperformat") or ""
     for ad, (a, b) in BOY.items():
         if ad.startswith("A"):
             if re.search(rf"(^|[^0-9a-z]){ad.lower()}($|[^0-9])", fmt): return ad
@@ -59,81 +60,81 @@ def boy_bul(p):
     return None
 
 
+KAGIT_ESDEGER = {170: ("170-gsm-uncoated", "65-lb-cover-uncoated"), 200: ("200-gsm-uncoated", "80-lb-cover-uncoated"),
+                 250: ("250-gsm-uncoated-offwhite-archival", "100-lb-cover-uncoated-offwhite-archival")}
+DIKEY = ("ver", "portrait", "vertical")
+
+
+def ozn(p):
+    return {k.lower(): str(v).lower() for k, v in (p.get("attributes") or {}).items()}
+
+
+def kagit_turu(at):
+    """(kagit metni, mat mi, silk/parlak mi). PaperType yoksa UnifiedPaperType."""
+    pt = at.get("papertype") or at.get("unifiedpapertype") or ""
+    return pt, ("uncoated" in pt and "silk" not in pt and "gloss" not in pt), ("silk" in pt or "gloss" in pt or ("coated" in pt and "uncoated" not in pt))
+
+
 def main():
     out = Path(sys.argv[1]); out.mkdir(parents=True, exist_ok=True); t0 = time.time()
     kat = istek("GET", "/catalogs"); kat = kat.get("data", kat) if isinstance(kat, dict) else kat
     (out / "_kataloglar.json").write_text(json.dumps(kat, indent=1, ensure_ascii=False))
-    secili = [c["catalogUid"] for c in kat if "poster" in c.get("catalogUid", "").lower()]
-    print(f"katalog: {len(kat)} | poster kataloglari: {secili}", flush=True)
+    POSTER, CERCEVE, CERCEVE_FA = "posters", "framed-posters", "fine-art-framed-poster"     # mounted (paspartulu) ve askili HARIC
+    secili = [c["catalogUid"] for c in kat if c.get("catalogUid") in (POSTER, CERCEVE, CERCEVE_FA)]
+    print(f"katalog: {len(kat)} | kullanilan: {secili} (mounted-framed-posters paspartulu, poster-hangers / hanging-posters askili: haric)", flush=True)
     urunler = {}
     for cu in secili:
-        det = istek("GET", f"/catalogs/{cu}"); (out / f"_katalog_{cu}.json").write_text(json.dumps(det, indent=1, ensure_ascii=False))
         off, top = 0, []
         while True:
             r = istek("POST", f"/catalogs/{cu}/products:search", json={"limit": 100, "offset": off})
             p = r.get("products") or []; top += p
             if len(p) < 100 or off > 20000: break
             off += 100
-        urunler[cu] = top
-        (out / f"_urunler_{cu}.json").write_text(json.dumps(top[:5], indent=1, ensure_ascii=False))
-        print(f"{cu}: {len(top)} urun ({time.time() - t0:.0f}s)", flush=True)
-    # oznitelik deger ozetleri
-    ozet = {cu: {} for cu in urunler}
-    for cu, ps in urunler.items():
-        for p in ps:
-            for k, v in (p.get("attributes") or {}).items(): ozet[cu].setdefault(k, {}).setdefault(str(v), 0); ozet[cu][k][str(v)] += 1
-    (out / "_oznitelik_ozet.json").write_text(json.dumps(ozet, indent=1, ensure_ascii=False))
-    for cu, o in ozet.items():
-        for k, v in o.items(): print(f"  {cu}.{k}: {sorted(v)[:40]}", flush=True)
-    # secim: mat (uncoated) kagit, gsm, dikey yon
-    def kagit(p):
-        at = {k.lower(): str(v).lower() for k, v in (p.get("attributes") or {}).items()}
-        pt = at.get("papertype", ""); m = re.search(r"(\d{3})-gsm", pt)
-        return pt, int(m.group(1)) if m else None, ("uncoated" in pt or "matt" in pt), at.get("orientation", "")
-    satir = []; isler = []
-    poster_kat = [cu for cu in urunler if "framed" not in cu.lower()]
-    cer_kat = [cu for cu in urunler if "framed" in cu.lower()]
+        urunler[cu] = top; print(f"{cu}: {len(top)} urun ({time.time() - t0:.0f}s)", flush=True)
+    isler, satir = [], []
+
+    def yok(urun, gsm, ad, kagit="", cerceve=""):
+        for u in ULKE: satir.append(dict(urun=urun, gsm=gsm, boy=ad, ulke=u, para=ULKE[u], fiyat="YOK", productUid="", kagit=kagit, cerceve=cerceve, yon=""))
+
+    # a) mat posterler: gsm adli kagit once, sonra ABD lb esdegeri; A boylari yalniz tam format (pf_a4 = 210x297)
     for urun, gsm in GSM.items():
         for ad in BOY:
             aday = []
-            for cu in poster_kat:
-                for p in urunler[cu]:
-                    pt, g, mat, yon = kagit(p)
-                    if g == gsm and mat and boy_bul(p) == ad:
-                        aday.append(((0 if boy_kesin(p) else 1, 0 if cu == "posters" else 1, 0 if yon in ("ver", "portrait", "vertical") else 1), p, cu, pt, yon))
-            if not aday:
-                for u in ULKE: satir.append(dict(urun=urun, gsm=gsm, boy=ad, ulke=u, para=ULKE[u], fiyat="YOK", productUid="", kagit="", cerceve="", yon=""))
-                continue
-            aday.sort(key=lambda x: x[0]); _, p, cu, pt, yon = aday[0]
+            for p in urunler.get(POSTER, []):
+                at = ozn(p); pt = at.get("papertype", "")
+                if pt not in KAGIT_ESDEGER[gsm] or boy_bul(p) != ad: continue
+                if ad.startswith("A") and not boy_kesin(p): continue
+                aday.append(((0 if boy_kesin(p) else 1, KAGIT_ESDEGER[gsm].index(pt), 0 if at.get("orientation") in DIKEY else 1), p, pt, at.get("orientation", "")))
+            if not aday: yok(urun, gsm, ad); continue
+            aday.sort(key=lambda x: x[0]); _, p, pt, yon = aday[0]
             isler.append(dict(urun=urun, gsm=gsm, boy=ad, p=p, kagit=pt, cerceve="", yon=yon))
-    # cerceveli: her boy x her cerceve rengi, tercihen 200 gsm mat, dikey
-    renkler = set()
-    for cu in cer_kat:
-        for p in urunler[cu]:
-            at = {k.lower(): str(v).lower() for k, v in (p.get("attributes") or {}).items()}
-            renk = at.get("framecolor", "") or at.get("framecolour", "")
-            if renk: renkler.add(renk)
-    print(f"cerceve renkleri: {sorted(renkler)}", flush=True)
+    # b) cerceveli (paspartusuz): her renk x boy; MAT (200 gsm uncoated / 80 lb uncoated; yoksa fine-art enhanced matte) + ayri SILK satiri
+    renkler = sorted({ozn(p).get("framecolor", "") for cu in (CERCEVE, CERCEVE_FA) for p in urunler.get(cu, [])} - {""})
+    print(f"cerceve renkleri: {renkler}", flush=True)
     for ad in BOY:
-        for renk in sorted(renkler):
-            aday = []
-            for cu in cer_kat:
-                for p in urunler[cu]:
-                    at = {k.lower(): str(v).lower() for k, v in (p.get("attributes") or {}).items()}
-                    if (at.get("framecolor") or at.get("framecolour")) != renk or boy_bul(p) != ad: continue
-                    pt, g, mat, yon = kagit(p)
-                    if at.get("mattetype", at.get("passepartout", "none")) not in ("", "none", "no-passepartout", "no-matte"): continue
-                    aday.append(((0 if boy_kesin(p) else 1, 0 if g == 200 else 1 if g == 250 else 2), 0 if yon in ("ver", "portrait", "vertical") else 1, p, pt, yon, g))
-            if not aday:
-                for u in ULKE: satir.append(dict(urun=f"Framed {renk}", gsm="", boy=ad, ulke=u, para=ULKE[u], fiyat="YOK", productUid="", kagit="", cerceve=renk, yon=""))
-                continue
-            aday.sort(key=lambda x: (x[0], x[1])); _, _, p, pt, yon, g = aday[0]
-            isler.append(dict(urun=f"Framed {renk}", gsm=g or "", boy=ad, p=p, kagit=pt, cerceve=renk, yon=yon))
-    n = len(isler) * len(ULKE)
+        for renk in renkler:
+            mat, silk = [], []
+            for cu in (CERCEVE, CERCEVE_FA):
+                for p in urunler.get(cu, []):
+                    at = ozn(p)
+                    if at.get("framecolor") != renk or boy_bul(p) != ad: continue
+                    if ad.startswith("A") and not boy_kesin(p): continue
+                    pt, m, sk = kagit_turu(at); g = re.search(r"(\d{3})-gsm", pt); lb = "80-lb" in pt
+                    if not ((g and g.group(1) == "200") or lb): continue
+                    k = (0 if boy_kesin(p) else 1, 0 if cu == CERCEVE else 1, 0 if at.get("orientation") in DIKEY else 1)
+                    (mat if m else silk if sk else []).append((k, p, pt, at.get("orientation", ""), cu))
+            for etiket, liste in (("mat", mat), ("silk", silk)):
+                urun = f"Framed {renk}" + ("" if etiket == "mat" else " (silk/parlak)")
+                if not liste:
+                    yok(urun, 200, ad, kagit=f"{etiket} yok", cerceve=renk); continue
+                liste.sort(key=lambda x: x[0]); _, p, pt, yon, cu = liste[0]
+                isler.append(dict(urun=urun, gsm=200, boy=ad, p=p, kagit=f"{pt} ({cu})", cerceve=renk, yon=yon))
+    n = len(isler) * len(ULKE); yok404 = 0
     for i, isx in enumerate(isler):
         uid = isx["p"]["productUid"]
         for u, para in ULKE.items():
-            r = istek("GET", f"/products/{uid}/prices", params={"country": u, "currency": para})
+            r = istek("GET", f"/products/{uid}/prices", yok404=True, params={"country": u, "currency": para})
+            if r is None: yok404 += 1; r = []
             r = r if isinstance(r, list) else r.get("data", r.get("prices", []))
             bir = [x for x in r if int(x.get("quantity", 0)) == 1 and int(x.get("pageCount") or 1) in (0, 1)] or [x for x in r if int(x.get("quantity", 0)) == 1]
             fiyat = bir[0]["price"] if bir else "YOK"; pc = bir[0].get("currency", para) if bir else para
@@ -146,12 +147,13 @@ def main():
     satir.sort(key=lambda x: (x["urun"].startswith("Framed"), x["urun"], sira[x["boy"]], list(ULKE).index(x["ulke"])))
     with open(out / "GELATO_FIYAT.csv", "w", newline="", encoding="utf-8") as fh:
         w = csv.writer(fh); w.writerow(["urun", "gsm", "boy", "ulke", "para birimi", "fiyat", "productUid", "kagit", "cerceve", "yon"])
-        for s in satir: w.writerow([s[k] for k in ("urun", "gsm", "boy", "ulke", "para", "fiyat", "productUid", "kagit", "cerceve", "yon")])
-    pm = {(s["boy"], s["ulke"]): s["fiyat"] for s in satir if s["urun"] == "Premium Matte"}
-    print("OZET Premium Matte 8x10: " + ", ".join(f"{u} {pm.get(('8x10', u))}" for u in ULKE), flush=True)
-    print("OZET Premium Matte 24x36: " + ", ".join(f"{u} {pm.get(('24x36', u))}" for u in ULKE), flush=True)
-    print(f"OZET cerceve renkleri: {sorted(renkler)} | altin: {'VAR' if any('gold' in r or 'brass' in r for r in renkler) else 'YOK'}", flush=True)
-    print(f"OZET satir {len(satir)} | YOK {sum(1 for s in satir if s['fiyat'] == 'YOK')} | API cagri {CAGRI[0]} | {time.time() - t0:.0f}s", flush=True)
+        for x in satir: w.writerow([x[k] for k in ("urun", "gsm", "boy", "ulke", "para", "fiyat", "productUid", "kagit", "cerceve", "yon")])
+    fx = lambda v: v if v == "YOK" else f"{float(v):.2f}"
+    for urun in ("Classic Matte", "Premium Matte"):
+        print(f"OZET {urun} A4: " + ", ".join(f"{x['ulke']} {fx(x['fiyat'])}" for x in satir if x["urun"] == urun and x["boy"] == "A4"), flush=True)
+    altin = [x for x in satir if x["urun"] == "Framed gold" and x["ulke"] == "US"]
+    print("OZET mat altin US: " + ", ".join(f"{x['boy']} {fx(x['fiyat'])}" for x in altin), flush=True)
+    print(f"OZET satir {len(satir)} | YOK {sum(1 for x in satir if x['fiyat'] == 'YOK')} | fiyat 404 {yok404} | API cagri {CAGRI[0]} | {time.time() - t0:.0f}s", flush=True)
 
 
 if __name__ == "__main__":

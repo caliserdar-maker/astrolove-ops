@@ -41,8 +41,11 @@ jobs:
           grep -E "^(OZET|HATA|katalog|cerceve renkleri)" _work/log.txt | head -8 | sed 's/^/::warning::/'
           python3 scripts/guvenlik/log_suz.py < _work/log.txt > _out/GELATO_LOG.txt
           N=$(python3 scripts/guvenlik/log_suz.py --say < _out/GELATO_LOG.txt); [ "$N" = "0" ] || { echo "::error::log temizlenemedi"; exit 1; }
-          R="gdrive:ASTROLOVE/TEMP/GELATO_FIYAT_20261013"; rclone mkdir "$R"; rclone copy _out "$R" -q && rclone check _out "$R" --one-way -q && echo "Drive PASS"
-          rclone lsjson "$R" | python3 -c "import json,sys;[print('::warning::DOSYA',d['Name'],d['ID']) for d in json.load(sys.stdin) if d['Name'] in ('GELATO_FIYAT.csv','GELATO_LOG.txt')]"
+          R="gdrive:ASTROLOVE/TEMP/GELATO_FIYAT_20261013"; rclone mkdir "$R"
+          if [ -f _out/GELATO_FIYAT.csv ] && [ -z "$(rclone lsf "$R/GELATO_FIYAT_v1.csv" 2>/dev/null)" ]; then
+            rclone moveto "$R/GELATO_FIYAT.csv" "$R/GELATO_FIYAT_v1.csv" -q && echo "eski CSV -> GELATO_FIYAT_v1.csv"; fi
+          rclone copy _out "$R" -q && rclone check _out "$R" --one-way -q && echo "Drive PASS"
+          rclone lsjson "$R" | python3 -c "import json,sys;[print('::warning::DOSYA',d['Name'],d['ID']) for d in json.load(sys.stdin) if d['Name'] in ('GELATO_FIYAT.csv','GELATO_FIYAT_v1.csv','GELATO_LOG.txt')]"
           exit $RC
       - if: ${{ always() }}
         run: rm -rf _work ~/.config/rclone
