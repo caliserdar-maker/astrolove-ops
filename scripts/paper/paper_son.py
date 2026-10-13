@@ -80,11 +80,12 @@ def eski_tarih_ekle(P, metin, font):
     H, W = P.shape[:2]
     s = W / W8
     d = koyu_murekkep(P)
-    ink = d > 14
+    ink = d > 40                                                        # WP parsomen dokusu (p90 ~11, p99 ~110 yazi dahil) elensin
+    ink[:, : int(0.15 * W)] = False; ink[:, int(0.85 * W):] = False      # WP: koyu parsomen kenarlari yazi sanilmasin (yazi ortada)
     # alt yazi bandi: 0.80H..0.95H arasindaki en kalabalik satir kumesi
     y0b, y1b = int(0.80 * H), int(0.95 * H)
     sat = ink[y0b:y1b].sum(1)
-    kk = [(a + y0b, b + y0b) for a, b in kumeler(sat, max(3, int(4 * s)), int(10 * s))]
+    kk = [(a + y0b, b + y0b) for a, b in kumeler(sat, max(int(4 * s), 0.15 * sat.max()), int(10 * s))]   # satir esigi bagil: doku lekeleri yazi satiri sayilmaz
     if not kk:
         raise SystemExit('HATA: alt yazi satiri bulunamadi')
     t0, t1 = max(kk, key=lambda q: ink[q[0]:q[1]].sum())
@@ -97,16 +98,16 @@ def eski_tarih_ekle(P, metin, font):
     # isim satiri: alt yazi bandinin ustundeki ilk kume (0.62H..t0)
     y0n = int(0.62 * H)
     satn = ink[y0n:t0].sum(1)
-    kn = [(a + y0n, b + y0n) for a, b in kumeler(satn, max(3, int(4 * s)), int(10 * s))]
+    kn = [(a + y0n, b + y0n) for a, b in kumeler(satn, max(int(4 * s), 0.15 * satn.max()), int(10 * s))]
     if not kn:
         raise SystemExit('HATA: isim satiri bulunamadi')
     n0, n1 = kn[-1]
-    yan = np.zeros(W, bool); yan[: int(0.42 * W)] = True; yan[int(0.58 * W):] = True   # orta (sonsuz) haric
-    guclu = (d > 28) & yan[None, :]
+    yan = np.zeros(W, bool); yan[int(0.15 * W): int(0.42 * W)] = True; yan[int(0.58 * W): int(0.85 * W)] = True   # orta (sonsuz) ve kenarlar haric
+    guclu = (d > 55) & yan[None, :]
     prof, satirlar = [], []
     for y in range(n0, n1):
         m = guclu[y]
-        if m.sum() >= 3:
+        if m.sum() >= max(3, 0.2 * guclu[n0:n1].sum(1).max()):
             prof.append(np.median(P[y][m], 0)); satirlar.append(y)
     if len(prof) < 8:
         raise SystemExit('HATA: isim profili olculemedi')
@@ -138,7 +139,7 @@ def murekkep_kutusu(P):
     k = 4
     kucuk = cv2.resize(L, (L.shape[1] // k, L.shape[0] // k), interpolation=cv2.INTER_AREA)
     bg = cv2.resize(cv2.medianBlur(kucuk.astype(np.uint8), 31).astype(np.float32), (L.shape[1], L.shape[0]), interpolation=cv2.INTER_LINEAR)
-    m = (np.abs(L - bg) > 18).astype(np.uint8)
+    m = (np.abs(L - bg) > 30).astype(np.uint8)                          # 30: WP parsomen dokusu kenara yapisik bilesen olusturmasin (18'de kenar 0 px)
     n, lab, st, _ = cv2.connectedComponentsWithStats(m, 8)
     tut = np.zeros(n, bool)
     tut[1:] = np.maximum(st[1:, cv2.CC_STAT_WIDTH], st[1:, cv2.CC_STAT_HEIGHT]) >= 50     # yildiz / parilti (< 50 px) haric; cember, sembol, harfler kalir
@@ -167,11 +168,18 @@ def kesit(P, bilgi_y=None):
 
 
 def ocr_kapisi(P_kesit, bekle, gecici):
-    g = cv2.cvtColor(P_kesit, cv2.COLOR_RGB2GRAY)
-    if np.median(g) < 128:
-        g = 255 - g
-    g = cv2.resize(g, None, fx=1.5, fy=1.5, interpolation=cv2.INTER_CUBIC)
-    _, b = cv2.threshold(g, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    # yazi = yerel zeminden belirgin ayrisan pikseller (koyu ya da acik zemin, parsomen dokusu dahil); doku lekeleri kucuk bilesen olarak elenir
+    W_ = P_kesit.shape[1]
+    Pk = np.ascontiguousarray(P_kesit[:, int(0.12 * W_): int(0.88 * W_)])
+    L = cv2.cvtColor(Pk, cv2.COLOR_RGB2LAB)[..., 0].astype(np.float32)
+    k = 4
+    kucuk = cv2.resize(L, (L.shape[1] // k, L.shape[0] // k), interpolation=cv2.INTER_AREA)
+    bg = cv2.resize(cv2.medianBlur(kucuk.astype(np.uint8), 31).astype(np.float32), (L.shape[1], L.shape[0]), interpolation=cv2.INTER_LINEAR)
+    m = (np.abs(L - bg) > 30).astype(np.uint8)
+    n, lab, st, _ = cv2.connectedComponentsWithStats(m, 8)
+    tut = np.zeros(n, bool); tut[1:] = st[1:, cv2.CC_STAT_AREA] >= 25
+    b = np.where(tut[lab], 0, 255).astype(np.uint8)
+    b = cv2.resize(b, None, fx=1.5, fy=1.5, interpolation=cv2.INTER_CUBIC)
     cv2.imwrite(gecici, b)
     env = dict(os.environ, OMP_THREAD_LIMIT='1')
     out = subprocess.run(['tesseract', gecici, '-', '--psm', '6'], capture_output=True, text=True, timeout=120, env=env).stdout

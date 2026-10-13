@@ -1,6 +1,6 @@
 name: bizim-yilimiz-ornek
 # BIZIM YILIMIZ (Paper) ORNEK (13 Eki 2026, Serdar onayli Adim 1): Cancer-Libra, SERDAR / LENA, 12 JUNE 2025.
-# 5 renk x (8x10 poster + 5x7 kart) -> Drive TEMP/BIZIM_YILIMIZ_ORNEK_20261013/ (+ isim/tarih kesitleri, kapi JSON).
+# 2. deneme (receipt 900001311N; 1. deneme 900001310N). 5 renk x (8x10 poster + 5x7 kart) -> Drive TEMP/BIZIM_YILIMIZ_ORNEK_20261013/ (+ isim/tarih kesitleri, kapi JSON).
 #  yeni yol (MB/DB/PW): bizim-yilimiz dali motor_gpt (siparis-gpt 243c9a4 + tarih ogesi), db_pw_uret tek motor kosusu, kapilar a-i.
 #  eski yol (CI/WP): siparis-dijital AYNEN (renk_ref b8c8c4b, WP wp_ref 360cbef, tek_olcu 8x10; siparis-giris ile ayni girdiler)
 #    + scripts/paper/paper_son.py tarih satiri (eski yolun isim altini profilinden). Kart: 8x10 -> 1500x2100 (yukseklik + yan kirpma).
@@ -129,7 +129,7 @@ jobs:
           set -euo pipefail
           if [ "${{ matrix.tur }}" = poster ]; then T1="Paper Anniversary"; T2="YEAR ONE · 12 JUNE 2025"; N=1; else T1="Happy First Anniversary"; T2="PAPER · 12 JUNE 2025"; N=2; fi
           [ "${{ matrix.renk }}" = CHAMPAGNE_IVORY ] && B=0 || B=2
-          { echo "T1=$T1"; echo "T2=$T2"; echo "M64=$(printf '%s' "$T1" | base64 -w0)"; echo "REC=900001310$((B + N))"; } >> "$GITHUB_ENV"
+          { echo "T1=$T1"; echo "T2=$T2"; echo "M64=$(printf '%s' "$T1" | base64 -w0)"; echo "REC=900001311$((B + N))"; } >> "$GITHUB_ENV"
       - name: Eski yol (siparis-dijital AYNEN, siparis-giris ile ayni girdiler) + bekle
         env:
           GH_TOKEN: ${{ github.token }}
@@ -143,7 +143,13 @@ jobs:
           if [ -z "$ID" ]; then sleep 15; ID=$(gh run list -R "$GITHUB_REPOSITORY" -w siparis-dijital.yml -e workflow_dispatch -L 10 --json databaseId,displayTitle,createdAt -q '.[0].databaseId'); fi
           echo "::notice title=ESKI YOL ${{ matrix.renk }} ${{ matrix.tur }}::siparis-dijital kosu $ID receipt $REC"
           echo "ESKI_ID=$ID" >> "$GITHUB_ENV"
-          gh run watch "$ID" -R "$GITHUB_REPOSITORY" -i 30 --exit-status > /dev/null && echo "eski yol PASS" || { echo "::error::eski yol kosusu $ID FAIL"; exit 1; }
+          # 1. deneme dersi: 'gh run watch' kosu surerken hata verip cikti (gecici API hatasi); yerine hataya dayanikli 30 sn yoklama
+          for i in $(seq 1 280); do
+            S=$(gh run view "$ID" -R "$GITHUB_REPOSITORY" --json status,conclusion -q '.status+" "+.conclusion' 2>/dev/null || echo "okunamadi")
+            case "$S" in "completed success") echo "eski yol PASS ($i)"; break;; completed*) echo "::error::eski yol kosusu $ID: $S"; exit 1;; esac
+            sleep 30
+          done
+          [ "$S" = "completed success" ] || { echo "::error::eski yol kosusu $ID bitmedi: $S"; exit 1; }
       - name: rclone + tesseract + python
         run: |
           set -euo pipefail
