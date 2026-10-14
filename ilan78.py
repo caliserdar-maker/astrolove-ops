@@ -11,8 +11,8 @@ SIGN_TAG = {"aries": "aries gifts", "taurus": "taurus gifts", "gemini": "gemini 
 COMMON = ["1st anniversary gift", "paper anniversary", "1 year anniversary", "first anniversary", "anniversary card",
           "1st anniversary card", "gift for husband", "gift for boyfriend", "newlywed gift", "wedding keepsake", "anniversary gift"]
 LEAD = {"A": "1st Anniversary Gift for Husband", "B": "1 Year Anniversary Gift for Boyfriend", "C": "1st Wedding Anniversary Gift"}
-OPEN = {"A": "A personalized 1st anniversary gift for your husband, made from your two zodiac signs, {a} and {b}.",
-        "B": "A personalized 1 year anniversary gift for your boyfriend, made from your two zodiac signs, {a} and {b}.",
+OPEN = {"A": "A personalized 1st anniversary gift for your husband or your wife, made from your two zodiac signs, {a} and {b}.",
+        "B": "A personalized 1 year anniversary gift for your boyfriend or your girlfriend, made from your two zodiac signs, {a} and {b}.",
         "C": "A personalized 1st wedding anniversary gift made from your two zodiac signs, {a} and {b}."}
 BODY = """{open} Your names and your special date are added to your own shared symbol, for married couples and for couples celebrating one year together.
 
@@ -20,9 +20,9 @@ Every AstroLoveArt design merges two zodiac signs into one shared symbol. This l
 
 HOW TO ORDER
 1. Choose your style and your format.
-2. In the personalization box, write {names} and your special date (your wedding day or the day you met). Example: {ex}, 14 June 2025.
-3. Heading: "Paper Anniversary" for married couples or "Our First Year" for couples who are dating. Tell us which one you prefer. The card always says "Happy First Anniversary".
-4. Optional: a short line of your own, up to 20 characters, to replace "Year One".
+2. Fill in the personalization boxes: {names} and your special date (your wedding day or the day you met). Example: {ex}, 14 June 2025.
+3. Top line: "Paper Anniversary" for married couples or "Our First Year" for couples who are dating. The card always says "Happy First Anniversary".
+4. Optional short line: up to 20 characters of your own to replace "Year One". Leave it empty to keep "Year One".
 
 FREE PREVIEW BEFORE YOU ORDER
 Would you like to see your design first? Message us your names, your date and your chosen style, and we will send you a free preview.
@@ -34,9 +34,9 @@ STYLES
 Starlit, Timeless, First Page, Layers, Botanical.
 
 FORMATS
-- Printable card 5x7: a single-sided flat card as a digital file, to print at home or at a print shop.
-- Digital file: an 8x10 inch, 300 dpi JPG for your own printing.
-- Print: printed on matte paper and shipped by our production partner. Unframed; it fits standard frames.
+- Digital card 5x7: a single-sided flat card sent as a digital file, to print at home or at a print shop. Nothing is shipped.
+- Digital file 8x10: an 8x10 inch, 300 dpi JPG for your own printing. Nothing is shipped.
+- Shipped print 8x10: printed on matte paper and shipped to you by our production partner. Unframed; it fits standard frames.
 
 PLEASE NOTE
 The gold, relief and paper layer looks are printed visual effects. Prints are flat matte prints, with no foil, no raised layers and no cut paper pieces. Colors can look slightly different on screens and on paper.
@@ -53,9 +53,9 @@ for i, (x, y) in enumerate(PAIRS):
     title = f"{LEAD[g]}, Personalized {a} {b} Zodiac Couple Print with Names and Date, Paper Anniversary Card"
     tags = COMMON + ([SIGN_TAG[x], SIGN_TAG[y]] if x != y else [SIGN_TAG[x], "couple gift"])
     if x != y:
-        names, ex = f"the {a} name, the {b} name", f"{a}: Emma, {b}: James"
+        names, ex = f"the name under {a}, the name under {b}", f"{a}: Emma, {b}: James"
     else:
-        names, ex = "the first name (left), the second name (right)", "Emma, James"
+        names, ex = "the name on the left, the name on the right", "Emma, James"
     desc = BODY.format(open=OPEN[g].format(a=a, b=b), a=a, b=b, names=names, ex=ex)
     # checks
     assert len(title) <= 140, title
