@@ -69,6 +69,18 @@ def names(e, factory, track):
                          target_h=e["EMMA"]["visible_height"] / 100 * CH, max_w=0.28)
 
 
+def strong(mask):
+    """small card text (date, short line) prints at only ~3 mm cap height: solid, slightly bolder ink so it does not look faint"""
+    return mask.point(lambda v: min(255, int(v * 1.3)))
+
+
+def scaled(el, k):
+    """same element, k times wider target (only the card date/line, which ChatGPT measured very small)"""
+    d = dict(el)
+    d["width"] = el["width"] * k
+    return d
+
+
 def symbols(e):
     return rv.hero_mask(e["hero"]), rv.signs_mask(e["left"], e["right"])
 
@@ -108,9 +120,9 @@ def ink_card(name, c_sym, c_txt, c_sub, head_f, name_f):
     b = rv.apply_ink(b, hero, c_sym)
     b = rv.apply_ink(b, small, c_sym)
     b = rv.apply_ink(b, rv.union(heading(e, head_f, -0.03), names(e, name_f, 0.25)), c_txt)
-    sub = rv.union(small_line(DATE, fs("Cinzel", 500), 0.55, e["14 JUNE 2025"], "14 JUNE 2025"),
+    sub = rv.union(small_line(DATE, fs("Cinzel", 500), 0.55, scaled(e["14 JUNE 2025"], 1.1), "14 JUNE 2025"),
                    small_line(LINE, fs("Cinzel", 500), 0.75, e["YEAR ONE"], "YEAR ONE"))
-    return rv.apply_ink(b, sub, c_sub, press=False)
+    return rv.apply_ink(b, strong(sub), c_sub, press=False, density=1.0)
 
 
 def first_page():
@@ -132,10 +144,10 @@ def layers():
     b = rv.apply_ink(b, small, "#6E3A24")
     b = rv.apply_papercut(b, heading(e, fs("DMSerif"), -0.10), "#A34729", lift=4)
     ms = fs("Montserrat", 600)
-    sub = rv.union(names(e, ms, 0.35),
-                   small_line(LINE, ms, 0.65, e["YEAR ONE"], "YEAR ONE", max_w_pct=37),  # ic kemerin ust genisligi ~%41 (olculdu)
-                   small_line(DATE, ms, 0.40, e["14 JUNE 2025"], "14 JUNE 2025"))
-    return rv.apply_ink(b, sub, "#592319")
+    b = rv.apply_ink(b, names(e, ms, 0.35), "#592319")
+    sub = rv.union(small_line(LINE, ms, 0.65, e["YEAR ONE"], "YEAR ONE", max_w_pct=37),  # ic kemerin ust genisligi ~%41 (olculdu)
+                   small_line(DATE, ms, 0.40, scaled(e["14 JUNE 2025"], 1.15), "14 JUNE 2025"))
+    return rv.apply_ink(b, strong(sub), "#592319", press=False, density=1.0)
 
 
 if __name__ == "__main__":
