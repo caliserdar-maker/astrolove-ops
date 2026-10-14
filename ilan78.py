@@ -21,7 +21,7 @@ Every AstroLoveArt design merges two zodiac signs into one shared symbol. This l
 HOW TO ORDER
 1. Choose your style and your format.
 2. Fill in the personalization boxes: {names} and your special date (your wedding day or the day you met). Example: {ex}, 14 June 2025.
-3. Top line: "Paper Anniversary" for married couples or "Our First Year" for couples who are dating. The card always says "Happy First Anniversary".
+3. Heading: "Paper Anniversary" for married couples or "Our First Year" for couples who are dating. The card always says "Happy First Anniversary".
 4. Optional short line: up to 20 characters of your own to replace "Year One". Leave it empty to keep "Year One".
 
 FREE PREVIEW BEFORE YOU ORDER
@@ -29,6 +29,10 @@ Would you like to see your design first? Message us your names, your date and yo
 
 AFTER YOU ORDER
 We send your final preview in Etsy Messages within 24 hours. As soon as you approve it, we prepare your file or your print.
+
+DELIVERY
+- Digital card and digital file: sent in Etsy Messages as soon as you approve your preview.
+- Shipped print: made and shipped within 4 to 7 days after your approval, with free shipping. Estimated delivery: US 3 to 8 days, UK and Australia 5 to 10 days, EU 5 to 12 days.
 
 STYLES
 Starlit, Timeless, First Page, Layers, Botanical.
