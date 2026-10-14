@@ -1,0 +1,49 @@
+name: by78-say
+# BIZIM YILIMIZ 78: Drive TEMP/BIZIM_YILIMIZ_78_20261014 sayimi (SALT OKUMA). Zamanlama YOK.
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  say:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: a04542bac1ddb6b72ea976aad214b03ee80e3d62, fetch-depth: 1, sparse-checkout: BIZIM_YILIMIZ_78_ILAN_METIN.csv }
+      - name: rclone
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /tmp/rc.zip https://downloads.rclone.org/rclone-current-linux-amd64.zip
+          unzip -q -j /tmp/rc.zip '*/rclone' -d /tmp/rcb && sudo install -m 755 /tmp/rcb/rclone /usr/local/bin/rclone
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: Say
+        run: |
+          set -euo pipefail
+          rclone lsf -R --files-only "gdrive:ASTROLOVE/TEMP/BIZIM_YILIMIZ_78_20261014" > /tmp/l.txt
+          python3 - <<'P'
+          import csv, collections
+          L = [l.strip() for l in open('/tmp/l.txt') if l.strip()]
+          ciftler = [r['cift'] for r in csv.DictReader(open('BIZIM_YILIMIZ_78_ILAN_METIN.csv'))]
+          kon = sorted(l for l in L if '/' not in l and l.startswith('KONTAK_'))
+          say = collections.Counter()
+          for l in L:
+              p = l.split('/')
+              if len(p) == 3 and p[0] in ciftler:
+                  say[(p[0], p[1])] += 1
+          eksik = [c for c in ciftler if not all(say[(c, t)] >= n for t, n in (('poster', 5), ('kart', 5), ('galeri', 10)))]
+          var = len([c for c in ciftler if c not in eksik])
+          poster = sum(1 for l in L if l.count('/') == 2 and l.split('/')[1] == 'poster' and l.endswith('_8x10.jpg'))
+          kart = sum(1 for l in L if l.count('/') == 2 and l.split('/')[1] == 'kart' and l.endswith('_5x7.jpg'))
+          galeri = sum(1 for l in L if l.count('/') == 2 and l.split('/')[1] == 'galeri' and l.endswith('.jpg'))
+          print(f"::warning::SAYIM cift tam {var}/78, eksik {eksik}; KONTAK {len(kon)} ({kon[0] if kon else '-'}..{kon[-1] if kon else '-'}); poster {poster}, kart {kart}, galeri {galeri}; toplam dosya {len(L)}")
+          import sys; sys.exit(0 if var == 78 and len(kon) == 13 else 1)
+          P
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
