@@ -178,6 +178,20 @@ def main():
             ranks = [x.get("rank") for x in ims]
             boy = {x.get("rank"): (x.get("full_width"), x.get("full_height")) for x in ims}
             hata = [rk for rk in range(1, 14) if boy.get(rk) != (DIKEY if rk in (1, 9, 10, 11, 12, 13) else YATAY)]
+            bos = [rk for rk in hata if boy.get(rk) == (None, None) and rk in dict(YUKLE)]
+            if hata and bos == hata and ranks == list(range(1, 14)):   # boyutu hic yazilmamis gorsel: o rank'i 1 kez yeniden yukle
+                for rk in bos:
+                    yukle(c, lid, dict(YUKLE)[rk], rk, overwrite=True)
+                state(c, f"yeniden yukleme {bos}")
+                R["olaylar"].append(f"{c}: rank {bos} boyutsuzdu, yeniden yuklendi")
+                for _ in range(4):
+                    ims = gorseller(lid)
+                    if all(x.get("full_width") for x in ims):
+                        break
+                    time.sleep(8)
+                ranks = [x.get("rank") for x in ims]
+                boy = {x.get("rank"): (x.get("full_width"), x.get("full_height")) for x in ims}
+                hata = [rk for rk in range(1, 14) if boy.get(rk) != (DIKEY if rk in (1, 9, 10, 11, 12, 13) else YATAY)]
             if ranks != list(range(1, 14)) or hata:
                 raise Dur(f"{c} {lid}: overwrite beklendigi gibi degil: sira {ranks}, boyut hatali rank {hata} {[boy.get(r) for r in hata]}")
             rankid = {x.get("rank"): x.get("listing_image_id") for x in ims}
