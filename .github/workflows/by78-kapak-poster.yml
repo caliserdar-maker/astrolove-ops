@@ -1,0 +1,104 @@
+name: by78-kapak-poster
+# BIZIM YILIMIZ 78: KAPAK = YALNIZ Layers 8x10 POSTER (Serdar 14 Eki 20:00; kod bizim-yilimiz-v3 1cf1ad2).
+# 1) drive: v3/<CIFT>/galeri/01_Cover.jpg <- v3/<CIFT>/poster/4_Layers_8x10.jpg (sunucu tarafi kopya) + rclone check
+# 2) etsy: 78 taslakta rank 1 gorsel overwrite (silme yok), sira + stil baglari kontrol, her adimda state. YAYIN/PATCH YOK.
+permissions:
+  actions: read
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      ciftler: { description: "yalniz bu ciftler (bosluklu); bos = 78", required: false, default: "" }
+      paket_ref: { description: "bizim-yilimiz-v3 commit (CSV)", required: true, default: "1cf1ad29e3aff0f97ede10116f04b3b1ed358bc9" }
+env:
+  V3: "gdrive:ASTROLOVE/TEMP/BIZIM_YILIMIZ_78_20261014_v3"
+  O: "gdrive:ASTROLOVE/TEMP/BY78_TASLAK_20261014"
+jobs:
+  drive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: "${{ inputs.paket_ref }}", fetch-depth: 1, sparse-checkout: BIZIM_YILIMIZ_78_ILAN_METIN.csv }
+      - name: rclone
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /tmp/rc.zip https://downloads.rclone.org/rclone-current-linux-amd64.zip
+          unzip -q -j /tmp/rc.zip '*/rclone' -d /tmp/rcb && sudo install -m 755 /tmp/rcb/rclone /usr/local/bin/rclone
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: 01_Cover.jpg = 4_Layers_8x10.jpg + check
+        env:
+          SEC: ${{ inputs.ciftler }}
+        run: |
+          set -euo pipefail
+          CIFTLER=${SEC:-$(python3 -c "import csv;print(' '.join(r['cift'] for r in csv.DictReader(open('BIZIM_YILIMIZ_78_ILAN_METIN.csv'))))")}
+          n=0; T0=$(date +%s); N=$(echo $CIFTLER | wc -w)
+          for C in $CIFTLER; do
+            rclone copyto "$V3/$C/poster/4_Layers_8x10.jpg" "$V3/$C/galeri/01_Cover.jpg" -q
+            a=$(rclone md5sum "$V3/$C/poster/4_Layers_8x10.jpg" | cut -d' ' -f1); b=$(rclone md5sum "$V3/$C/galeri/01_Cover.jpg" | cut -d' ' -f1)
+            [ -n "$a" ] && [ "$a" = "$b" ] || { echo "HATA $C md5 $a $b"; exit 1; }
+            g=$(rclone lsf "$V3/$C/galeri" --files-only | wc -l); [ "$g" = 13 ] || { echo "HATA $C galeri $g"; exit 1; }
+            n=$((n+1)); G=$(( $(date +%s) - T0 )); echo "$n/$N $C gecen ${G}s kalan ~$(( G / n * (N - n) ))s"
+          done
+          echo "::warning::DRIVE 01_Cover = 4_Layers_8x10: $n/$N cift, md5 esit (rclone check), galeri 13"
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
+
+  etsy:
+    needs: drive
+    runs-on: ubuntu-latest
+    timeout-minutes: 200
+    steps:
+      - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Token + taslak listesi
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "$O/BY78_TASLAKLAR.csv" _work/BY78_TASLAKLAR.csv
+          echo "taslak satir: $(($(wc -l < _work/BY78_TASLAKLAR.csv) - 1))"
+      - name: Kapak degis (Etsy)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          TASLAK_CSV: _work/BY78_TASLAKLAR.csv
+          OUT: _out
+          DRIVE_OUT: ${{ env.O }}
+          CIFTLER: ${{ inputs.ciftler }}
+        run: python3 scripts/etsy/by78_kapak_degis.py
+      - name: Token geri yaz
+        if: ${{ always() }}
+        run: |
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "token geri yazildi" || true
+          rm -rf _work ~/.config/rclone
