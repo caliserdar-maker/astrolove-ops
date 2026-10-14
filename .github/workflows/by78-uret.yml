@@ -1,20 +1,22 @@
 name: by78-uret
-# BIZIM YILIMIZ 78 cift uretimi (Serdar 14 Eki 2026): paket bizim-yilimiz-v3 (a04542b) kod/uret_hepsi.py AYNEN.
-# 13 is x 6 cift (CSV sirasi); her is kendi KONTAK sayfasini uretir (6 cift = 1 sayfa, numara = is no).
-# Cikti: Drive TEMP/BIZIM_YILIMIZ_78_20261014/<CIFT>/{poster,kart,galeri} + KONTAK_01..13.jpg; rclone check.
+# BIZIM YILIMIZ 78 cift uretimi (Serdar 14 Eki 2026): paket bizim-yilimiz-v3 kod/uret_hepsi.py AYNEN.
+# 13 is x 6 cift (CSV sirasi). Galeri 13 gorsel (01_Cover.jpg ... 13_Style_Botanical.jpg; "_A" yok, eski 05/06 yok; 7e3b3f3).
+# Cikti: Drive TEMP/<hedef>/<CIFT>/{poster,kart,galeri} + rclone check; KONTAK_v3_01..13.jpg kontak-v2 dalina (kontak isi).
 # Etsy'ye yazma YOK. Zamanlama YOK (yalniz workflow_dispatch).
 on:
   workflow_dispatch:
     inputs:
-      paket_ref: { description: "bizim-yilimiz-v3 commit (tam SHA)", required: true, default: "a04542bac1ddb6b72ea976aad214b03ee80e3d62" }
-      hedef: { description: "Drive TEMP altindaki hedef klasor", required: false, default: "BIZIM_YILIMIZ_78_20261014" }
-      ciftler: { description: "yalniz bu ciftler (bosluklu; doluysa isler yerine tek is, KONTAK yuklenmez, 3x3 KAPAK_9 _KONTROL'e)", required: false, default: "" }
+      paket_ref: { description: "bizim-yilimiz-v3 commit (tam SHA)", required: true, default: "7e3b3f3c28d1260b8888c31ca11050e5541997c3" }
+      hedef: { description: "Drive TEMP altindaki hedef klasor", required: false, default: "BIZIM_YILIMIZ_78_20261014_v3" }
+      ciftler: { description: "yalniz bu ciftler (bosluklu; doluysa tek is, KONTAK yok, 3x3 KAPAK_9 _KONTROL'e)", required: false, default: "" }
       turler: { description: "Drive'a yuklenecek turler", required: false, default: "poster kart galeri" }
       isler: { description: "yalniz bu isler (JSON liste, orn. [1]); bos = 13 is", required: false, default: "[1,2,3,4,5,6,7,8,9,10,11,12,13]" }
+      kontak_onek: { description: "kontak-v2 dalindaki kontak adi oneki", required: false, default: "KONTAK_v3_" }
 permissions:
   contents: read
 env:
-  D: "gdrive:ASTROLOVE/TEMP/${{ github.event.inputs.hedef || 'BIZIM_YILIMIZ_78_20261014' }}"
+  D: "gdrive:ASTROLOVE/TEMP/${{ github.event.inputs.hedef || 'BIZIM_YILIMIZ_78_20261014_v3' }}"
+  GALERI_N: "13"
 jobs:
   uret:
     strategy:
@@ -22,7 +24,7 @@ jobs:
       matrix:
         is: ${{ fromJSON(github.event.inputs.ciftler != '' && '[0]' || (github.event.inputs.isler || '[1,2,3,4,5,6,7,8,9,10,11,12,13]')) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
         with: { ref: "${{ github.event.inputs.paket_ref }}", fetch-depth: 1 }
@@ -53,45 +55,61 @@ jobs:
           echo "is $K: $CIFTLER"
           T0=$(date +%s)
           BY_ROOT=$PWD python3 kod/uret_hepsi.py $CIFTLER
-          [ "$K" = 1 ] || [ "$K" = 0 ] || mv cikti/KONTAK_01.jpg "cikti/KONTAK_$(printf %02d $K).jpg"   # 14 Eki ders: is 1'de mv ayni dosya -> exit 1
+          for C in $CIFTLER; do                                         # 5 + 5 + 13, galeri adlari "_A" icermez
+            p=$(ls cikti/$C/poster/*_8x10.jpg | wc -l); k=$(ls cikti/$C/kart/*_5x7.jpg | wc -l); g=$(ls cikti/$C/galeri/*.jpg | wc -l)
+            a=$(ls cikti/$C/galeri | grep -c '_A\.jpg' || true)
+            [ "$p$k$g$a" = "55${GALERI_N}0" ] || { echo "HATA $C poster $p kart $k galeri $g _A $a"; exit 1; }
+          done
           echo "SURE_SN=$(( $(date +%s) - T0 ))" >> "$GITHUB_ENV"; echo "CIFTLER=$CIFTLER" >> "$GITHUB_ENV"
       - name: Drive'a yaz + rclone check
         run: |
           set -euo pipefail
           for C in $CIFTLER; do
             for t in ${{ github.event.inputs.turler || 'poster kart galeri' }}; do
-              rclone copy "cikti/$C/$t" "$D/$C/$t" --transfers 8 -q
-              rclone check "cikti/$C/$t" "$D/$C/$t" --one-way -q
+              if [ "$t" = poster ]; then F=(--include "*_8x10.jpg"); elif [ "$t" = kart ]; then F=(--include "*_5x7.jpg"); else F=(--include "*.jpg"); fi
+              rclone copy "cikti/$C/$t" "$D/$C/$t" "${F[@]}" --transfers 8 -q
+              rclone check "cikti/$C/$t" "$D/$C/$t" "${F[@]}" --one-way -q
             done
           done
-          if [ "${{ matrix.is }}" = 0 ]; then                       # secili ciftler: KONTAK yok; 01_Cover_A 3x3 tek sayfa (en fazla 2400 px)
+          if [ "${{ matrix.is }}" = 0 ]; then
             python3 -c "
           import sys; from PIL import Image
           c=sys.argv[1:]; W,H=800,600; s=Image.new('RGB',(3*W,((len(c)+2)//3)*H),'white')
-          for i,p in enumerate(c): s.paste(Image.open(f'cikti/{p}/galeri/01_Cover_A.jpg').convert('RGB').resize((W,H),Image.LANCZOS),((i%3)*W,(i//3)*H))
+          for i,p in enumerate(c): s.paste(Image.open(f'cikti/{p}/galeri/01_Cover.jpg').convert('RGB').resize((W,H),Image.LANCZOS),((i%3)*W,(i//3)*H))
           s.save('KAPAK_9.jpg',quality=90)" $CIFTLER
             rclone copyto KAPAK_9.jpg "$D/_KONTROL/KAPAK_9.jpg" -q
-            N=$(for C in $CIFTLER; do for t in ${{ github.event.inputs.turler || 'poster kart galeri' }}; do find "cikti/$C/$t" -name '*.jpg'; done; done | wc -l)
-            echo "::warning::CIFTLER: $CIFTLER | yuklenen ($(echo ${{ github.event.inputs.turler || 'poster kart galeri' }})) dosya $N | rclone check PASS | KAPAK_9 $(rclone lsjson "$D/_KONTROL" --include "/KAPAK_9.jpg" | python3 -c 'import json,sys;print(json.load(sys.stdin)[0]["ID"])')"
+            echo "::warning::CIFTLER: $CIFTLER | rclone check PASS"
             exit 0
           fi
           K=$(printf %02d ${{ matrix.is }})
-          rclone copyto "cikti/KONTAK_$K.jpg" "$D/KONTAK_$K.jpg" -q && rclone check cikti "$D" --one-way --include "/KONTAK_$K.jpg" -q
-          N=$(find cikti -path '*/poster/*_8x10.jpg' -o -path '*/kart/*_5x7.jpg' -o -path '*/galeri/*.jpg' | wc -l)
-          echo "::warning::IS ${{ matrix.is }}: $CIFTLER | dosya $N | uretim ${SURE_SN} sn | rclone check PASS | KONTAK_$K $(rclone lsjson "$D" --include "/KONTAK_$K.jpg" | python3 -c 'import json,sys;print(json.load(sys.stdin)[0]["ID"])')"
+          mkdir -p kontak && mv cikti/KONTAK_01.jpg "kontak/${{ github.event.inputs.kontak_onek || 'KONTAK_v3_' }}$K.jpg"
+          N=$(for C in $CIFTLER; do ls cikti/$C/poster/*_8x10.jpg cikti/$C/kart/*_5x7.jpg cikti/$C/galeri/*.jpg; done | wc -l)
+          echo "::warning::IS ${{ matrix.is }}: $CIFTLER | dosya $N | uretim ${SURE_SN} sn | rclone check PASS"
+      - if: ${{ matrix.is != 0 }}
+        uses: actions/upload-artifact@v4
+        with: { name: "kontak_${{ matrix.is }}", path: kontak, retention-days: 2 }
       - if: ${{ always() }}
         run: rm -rf ~/.config/rclone
 
-  dal-sil:
+  kontak:
+    needs: uret
+    if: ${{ github.event.inputs.ciftler == '' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - name: Kalan inceleme dali (Bizim Yilimiz 1. deneme yan urunu)
+      - uses: actions/checkout@v4
+        with: { ref: kontak-v2, fetch-depth: 1 }
+      - uses: actions/download-artifact@v4
+        with: { pattern: "kontak_*", path: k, merge-multiple: true }
+      - name: KONTAK -> kontak-v2
         env:
-          GH_TOKEN: ${{ github.token }}
+          PAKET: ${{ github.event.inputs.paket_ref }}
         run: |
-          B=inceleme/siparis-9000013102
-          if gh api "repos/$GITHUB_REPOSITORY/git/refs/heads/$B" >/dev/null 2>&1; then
-            gh api -X DELETE "repos/$GITHUB_REPOSITORY/git/refs/heads/$B" && echo "::warning::silindi $B"
-          else echo "::warning::$B zaten yok"; fi
+          set -euo pipefail
+          ls k; cp k/*.jpg .
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ${{ github.event.inputs.kontak_onek || 'KONTAK_v3_' }}*.jpg
+          git commit -qm "${{ github.event.inputs.kontak_onek || 'KONTAK_v3_' }}01..13: 78 cift (bizim-yilimiz-v3 ${PAKET:0:8}; satir = 5 poster + 5 kart + 01_Cover)"
+          git push -q origin HEAD:kontak-v2
+          echo "::warning::KONTAK $(ls k | wc -l) dosya, commit $(git rev-parse HEAD)"

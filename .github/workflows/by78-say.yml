@@ -1,9 +1,10 @@
 name: by78-say
-# BIZIM YILIMIZ 78: Drive TEMP/BIZIM_YILIMIZ_78_20261014 sayimi (SALT OKUMA). Zamanlama YOK.
+# BIZIM YILIMIZ 78: Drive TEMP/<hedef> sayimi (SALT OKUMA). Galeri 13 (7e3b3f3 adlari) veya eski 10. Zamanlama YOK.
 on:
   workflow_dispatch:
     inputs:
-      hedef: { description: "Drive TEMP altindaki klasor", required: false, default: "BIZIM_YILIMIZ_78_20261014" }
+      hedef: { description: "Drive TEMP altindaki klasor", required: false, default: "BIZIM_YILIMIZ_78_20261014_v3" }
+      galeri: { description: "cift basi galeri sayisi (13 = yeni ad listesi kontrol edilir)", required: false, default: "13" }
 permissions:
   contents: read
 jobs:
@@ -12,7 +13,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-        with: { ref: a04542bac1ddb6b72ea976aad214b03ee80e3d62, fetch-depth: 1, sparse-checkout: BIZIM_YILIMIZ_78_ILAN_METIN.csv }
+        with: { ref: 7e3b3f3c28d1260b8888c31ca11050e5541997c3, fetch-depth: 1, sparse-checkout: BIZIM_YILIMIZ_78_ILAN_METIN.csv }
       - name: rclone
         env:
           RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
@@ -28,9 +29,13 @@ jobs:
       - name: Say
         run: |
           set -euo pipefail
-          rclone lsf -R --files-only "gdrive:ASTROLOVE/TEMP/${{ github.event.inputs.hedef || 'BIZIM_YILIMIZ_78_20261014' }}" > /tmp/l.txt
+          rclone lsf -R --files-only "gdrive:ASTROLOVE/TEMP/${{ github.event.inputs.hedef || 'BIZIM_YILIMIZ_78_20261014_v3' }}" > /tmp/l.txt
+          export GN="${{ github.event.inputs.galeri || '13' }}"
           python3 - <<'P'
-          import csv, collections
+          import csv, collections, os
+          GN = int(os.environ.get('GN', '13'))
+          AD13 = {f'{n}.jpg' for n in ('01_Cover', '02_Shared_Symbol', '03_Formats', '04_Five_Styles', '05_Layers_Material', '06_Personalization',
+                  '07_Size_Gift_Scene', '08_Free_Preview', '09_Style_Starlit', '10_Style_Timeless', '11_Style_FirstPage', '12_Style_Layers', '13_Style_Botanical')}
           L = [l.strip() for l in open('/tmp/l.txt') if l.strip()]
           ciftler = [r['cift'] for r in csv.DictReader(open('BIZIM_YILIMIZ_78_ILAN_METIN.csv'))]
           kon = sorted(l for l in L if '/' not in l and l.startswith('KONTAK_'))
@@ -39,13 +44,19 @@ jobs:
               p = l.split('/')
               if len(p) == 3 and p[0] in ciftler:
                   say[(p[0], p[1])] += 1
-          eksik = [c for c in ciftler if not all(say[(c, t)] >= n for t, n in (('poster', 5), ('kart', 5), ('galeri', 10)))]
+          gal = collections.defaultdict(set)
+          for l in L:
+              p = l.split('/')
+              if len(p) == 3 and p[1] == 'galeri':
+                  gal[p[0]].add(p[2])
+          eksik = [c for c in ciftler if not (say[(c, 'poster')] == 5 and say[(c, 'kart')] == 5 and say[(c, 'galeri')] == GN
+                                              and (GN != 13 or gal[c] == AD13))]
           var = len([c for c in ciftler if c not in eksik])
           poster = sum(1 for l in L if l.count('/') == 2 and l.split('/')[1] == 'poster' and l.endswith('_8x10.jpg'))
           kart = sum(1 for l in L if l.count('/') == 2 and l.split('/')[1] == 'kart' and l.endswith('_5x7.jpg'))
           galeri = sum(1 for l in L if l.count('/') == 2 and l.split('/')[1] == 'galeri' and l.endswith('.jpg'))
           print(f"::warning::SAYIM cift tam {var}/78, eksik {eksik}; KONTAK {len(kon)} ({kon[0] if kon else '-'}..{kon[-1] if kon else '-'}); poster {poster}, kart {kart}, galeri {galeri}; toplam dosya {len(L)}")
-          import sys; sys.exit(0 if var == 78 and len(kon) == 13 else 1)
+          import sys; sys.exit(0 if var == 78 and len(L) == 78 * (10 + GN) + len(kon) else 1)
           P
       - if: ${{ always() }}
         run: rm -rf ~/.config/rclone
