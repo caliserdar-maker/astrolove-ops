@@ -9,6 +9,8 @@ on:
   workflow_dispatch:
     inputs:
       paket_ref: { description: "bizim-yilimiz-v3 commit (CSV)", required: true, default: "6296081705126001952459a2e0f8eca2858bc2af" }
+      oku: { description: "true = yalniz SALT OKUMA (aciklama karsilastirma), yazma yok", required: false, default: "false" }
+      listing_id: { description: "oku=true icin taslak id", required: false, default: "" }
 env:
   O: "gdrive:ASTROLOVE/TEMP/BY_TASLAK_CANCER_LIBRA_20261014"
 jobs:
@@ -51,7 +53,18 @@ jobs:
           ls _img; [ "$(ls _img/*.jpg | wc -l)" = 10 ] || { echo "HATA galeri 10 degil"; exit 1; }
           rclone copy "$O" _out --include "/DURUM.json" -q || true
           ls -la _out
+      - name: Salt okuma (aciklama)
+        if: ${{ inputs.oku == 'true' }}
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          CSV: _paket/BIZIM_YILIMIZ_78_ILAN_METIN.csv
+          LISTING_ID: ${{ inputs.listing_id }}
+          OUT: _out
+        run: python3 scripts/etsy/by_taslak_oku.py
       - name: Taslak
+        if: ${{ inputs.oku != 'true' }}
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
