@@ -2640,7 +2640,7 @@
         {
           "id": "print_details",
           "type": "text",
-          "content": "8 x 10 in and larger\nMatte paper\nShipped unframed",
+          "content": "8 x 10 in\nMatte paper\nShipped unframed",
           "center_x_pct": 82,
           "center_y_pct": 80,
           "width_pct": 27,
