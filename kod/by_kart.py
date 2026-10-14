@@ -54,11 +54,11 @@ def heading(e, factory, track=0):
                     at("Anniversary", factory, s, track, e["Anniversary"]))
 
 
-def small_line(text, factory, track, el, ref):
+def small_line(text, factory, track, el, ref, max_w_pct=None):
     """date / short line: size from the sample text width, shrink only if a long custom line overflows"""
     size = fit_size(ref, factory, track, el["width"] / 100 * CW)
     m = rv.text_mask(text, factory(size), track / 100 * CW)
-    lim = el.get("max_width", 70) / 100 * CW
+    lim = (max_w_pct if max_w_pct is not None else el.get("max_width", 70)) / 100 * CW
     if m.width > lim:
         size = int(size * lim / m.width)
     return at(text, factory, size, track, el)
@@ -133,7 +133,7 @@ def layers():
     b = rv.apply_papercut(b, heading(e, fs("DMSerif"), -0.10), "#A34729", lift=4)
     ms = fs("Montserrat", 600)
     sub = rv.union(names(e, ms, 0.35),
-                   small_line(LINE, ms, 0.65, e["YEAR ONE"], "YEAR ONE"),
+                   small_line(LINE, ms, 0.65, e["YEAR ONE"], "YEAR ONE", max_w_pct=52),  # kemerin ici dar
                    small_line(DATE, ms, 0.40, e["14 JUNE 2025"], "14 JUNE 2025"))
     return rv.apply_ink(b, sub, "#592319")
 
