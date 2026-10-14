@@ -1,0 +1,4 @@
+KONTAK_01..13.jpg: Bizim Yilimiz 78 cift kontak sayfalari (v2 uretim, 14 Eki 2026).
+Kaynak: caliserdar-maker/astrolove-ops dal bizim-yilimiz-v3, commit ce424b33a2eab421c190c6e742931d8eb323179b
+Uretim: kod/uret_hepsi.py (Actions koşusu 38579188529, by78-uret.yml, 13 is x 6 cift), cikti Drive TEMP/BIZIM_YILIMIZ_78_20261014_v2.
+Dosyalar Drive'daki KONTAK_01..13.jpg ile bayt bayt ayni (Drive'dan indirildi).
