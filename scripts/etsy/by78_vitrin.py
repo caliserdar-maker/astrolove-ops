@@ -170,6 +170,11 @@ def main():
                 ims = gorseller(lid)
                 sonra = {x.get("rank"): x.get("listing_image_id") for x in ims}
                 S[c]["id_degisti"] = " ".join(str(rk) for rk, _ in YUKLE if once.get(rk) != sonra.get(rk))
+            for _ in range(4):                                # Etsy yeni gorselin boyutunu birkac sn gec yaziyor (20:23 PISCES_SAGITTARIUS)
+                if all(x.get("full_width") for x in ims):
+                    break
+                time.sleep(8)
+                ims = gorseller(lid)
             ranks = [x.get("rank") for x in ims]
             boy = {x.get("rank"): (x.get("full_width"), x.get("full_height")) for x in ims}
             hata = [rk for rk in range(1, 14) if boy.get(rk) != (DIKEY if rk in (1, 9, 10, 11, 12, 13) else YATAY)]
