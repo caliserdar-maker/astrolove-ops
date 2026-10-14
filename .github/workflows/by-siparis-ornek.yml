@@ -86,11 +86,8 @@ jobs:
           set -euo pipefail
           K=$(cat _out/KLASOR.txt)
           D="gdrive:ASTROLOVE/SIPARIS_ISIM/BIZIM_YILIMIZ/$K"
-          rclone copy "_out/$K" "$D" -q
-          # paralel koşular ayni adli klasoru iki kez acabilir (14 Eki test): yalniz ust seviyedeki ayni adli KLASORLER birlestirilir
-          rclone dedupe merge "gdrive:ASTROLOVE/SIPARIS_ISIM" --max-depth 1 -q
-          rclone dedupe merge "gdrive:ASTROLOVE/SIPARIS_ISIM/BIZIM_YILIMIZ" --max-depth 1 -q
-          rclone check "_out/$K" "$D" --one-way -q
+          # Ayni anda TEK kosu: paralel iki kosu ayni adli Drive klasorunu iki kez acabilir (14 Eki testi)
+          rclone copy "_out/$K" "$D" -q && rclone check "_out/$K" "$D" --one-way -q
           rclone lsjson "$D" | python3 -c "import json,sys;[print('DRIVE',d['Name'],d['Size'],'https://drive.google.com/file/d/'+d['ID']+'/view') for d in json.load(sys.stdin)]"
           echo "Drive: ASTROLOVE/SIPARIS_ISIM/BIZIM_YILIMIZ/$K"
       - if: ${{ always() }}
