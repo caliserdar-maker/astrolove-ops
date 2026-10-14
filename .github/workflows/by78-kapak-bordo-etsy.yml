@@ -1,20 +1,20 @@
 name: by78-kapak-bordo-etsy
-# BIZIM YILIMIZ: bordo kare kapak rank 1 (overwrite) + Layers bagi rank 13 (Serdar 15 Eki). YAYIN/PATCH YOK.
-# Varsayilan YALNIZ CANCER_LIBRA. Kalan 77 icin Serdar onayi gerekir (ciftler girdisi bilerek verilir).
+# BIZIM YILIMIZ: bordo kare kapak rank 1 (overwrite) + Layers bagi 13 + video, tek kosu (Serdar 15 Eki). YAYIN/PATCH/SILME YOK.
+# ciftler: "HEPSI" = CANCER_LIBRA haric tum taslaklar (CSV sirasi) ya da bosluklu liste. BY78_KAPAK_VIDEO.csv ile kaldigi yerden.
 permissions:
   actions: read
   contents: read
 on:
   workflow_dispatch:
     inputs:
-      ciftler: { description: "taslak ciftleri (bosluklu); varsayilan yalniz CANCER_LIBRA", required: true, default: "CANCER_LIBRA" }
+      ciftler: { description: "HEPSI (CANCER_LIBRA haric) ya da bosluklu cift listesi", required: true, default: "LEO_LEO" }
 env:
   V3: "gdrive:ASTROLOVE/TEMP/BIZIM_YILIMIZ_78_20261014_v3"
   O: "gdrive:ASTROLOVE/TEMP/BY78_TASLAK_20261014"
 jobs:
   etsy:
     runs-on: ubuntu-latest
-    timeout-minutes: 150
+    timeout-minutes: 300
     steps:
       - uses: actions/checkout@v4
       - name: Etsy kilidi (sira bekle, iptal yok)
@@ -46,7 +46,9 @@ jobs:
           umask 077; mkdir -p _work _out
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
           rclone copyto "$O/BY78_TASLAKLAR.csv" _work/BY78_TASLAKLAR.csv
-      - name: Kapak + Layers bagi (Etsy)
+          rclone copy "$O" _out --include "/BY78_KAPAK_VIDEO.csv" -q || true
+          [ -f _out/BY78_KAPAK_VIDEO.csv ] && echo "onceki durum: $(grep -c ',TAMAM,' _out/BY78_KAPAK_VIDEO.csv) TAMAM" || echo "onceki durum yok"
+      - name: Kapak + Layers bagi + video (Etsy)
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
@@ -56,7 +58,7 @@ jobs:
           OUT: _out
           DRIVE_OUT: ${{ env.O }}
           CIFTLER: ${{ inputs.ciftler }}
-        run: python3 scripts/etsy/by78_kapak_bordo.py
+        run: python3 scripts/etsy/by78_kapak_video.py
       - name: Token geri yaz
         if: ${{ always() }}
         run: |

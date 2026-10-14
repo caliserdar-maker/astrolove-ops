@@ -2,8 +2,8 @@
 """BY78 78 TASLAK BAGIMSIZ KONTROL (14 Eki 2026, Takip gorevi). SALT OKUR: Etsy API'ye yalniz GET; yazma metodu YOK.
 Her listing_id icin satir basina PASS/FAIL + neden:
   state=draft; baslik, 13 etiket, aciklama = BIZIM_YILIMIZ_78_ILAN_METIN.csv (HTML kacislari cozulur); uzun/orta tire yok;
-  13 gorsel: 1 = bordo kare kapak 2400x2400 (15 Eki; gecis doneminde eski dikey 2400x3000 de kabul), 2-8 yatay 3200x2400,
-  9-13 dikey 2400x3000 (stil vitrinleri + rank 13 Layers vitrini);
+  13 gorsel: 1 = bordo kare kapak 2400x2400 (15 Eki), 2-8 yatay 3200x2400, 9-13 dikey 2400x3000 (stil vitrinleri + rank 13 Layers);
+  1 video (15 Eki);
   envanter 15 urun (5 stil x 3 format), fiyat yalniz formata gore (Digital card 5x7 5, Digital file 8x10 9, Shipped print 8x10 29), hepsi acik;
   Style'a bagli gorsel: Starlit=9, Timeless=10, First Page=11, Botanical=12, Layers=13 (15 Eki, Serdar);
   kisisellestirme 5 kutu (adlar, Your special date, Heading, Optional short line), zorunluluk ve sinirlar (11, 11, 20, 20, 20);
@@ -86,7 +86,7 @@ def ilan_kontrol(api, shop, cift, lid, m):
     if ims:
         w, h = ims[0].get("full_width"), ims[0].get("full_height")
         kapak = "kare" if (w, h) == KARE else ("dikey" if (w, h) == DIKEY else f"{w}x{h}")
-        if kapak not in ("kare", "dikey"):
+        if kapak != "kare":
             n.append(f"1. gorsel 2400x2400 (kare kapak) degil {w}x{h}")
         boy = [(i + 1, x.get("full_width"), x.get("full_height")) for i, x in enumerate(ims)]
         yanlis = [b for b in boy if 2 <= b[0] <= 8 and (b[1], b[2]) != YATAY]
@@ -95,6 +95,9 @@ def ilan_kontrol(api, shop, cift, lid, m):
         yanlis = [b for b in boy if b[0] >= 9 and (b[1], b[2]) != DIKEY]
         if yanlis:
             n.append(f"9+ 2400x3000 olmayan {len(yanlis)}: {yanlis[:3]}")
+    vids = (api.get(f"/listings/{lid}/videos", ok404=True) or {}).get("results") or []
+    if len(vids) != 1:
+        n.append(f"video {len(vids)} (1 olmali)")
     img_ids = {x.get("listing_image_id") for x in ims}
     id_rank = {x.get("listing_image_id"): i + 1 for i, x in enumerate(ims)}
 
@@ -145,7 +148,7 @@ def ilan_kontrol(api, shop, cift, lid, m):
     props = (api.get(f"/shops/{shop}/listings/{lid}/properties") or {}).get("results") or []
     if any(p.get("property_name") == "Holiday" for p in props):
         n.append("Holiday niteligi var")
-    return n, dict(state=L.get("state"), gorsel=len(ims), kapak=kapak, urun=len(prods), stil_gorsel=len(set(secili)), kutu=len(per))
+    return n, dict(state=L.get("state"), gorsel=len(ims), kapak=kapak, video=len(vids), urun=len(prods), stil_gorsel=len(set(secili)), kutu=len(per))
 
 
 def calistir(api, shop, taslak, metin, out):
@@ -170,7 +173,7 @@ def calistir(api, shop, taslak, metin, out):
         sonuc.append(dict(cift=c, listing_id=lid, sonuc="PASS" if not nd else "FAIL", neden="; ".join(nd), **ay))
         if i % 10 == 0 or i == len(taslak):
             print(f"[{i}/{len(taslak)}] PASS {sum(s['sonuc'] == 'PASS' for s in sonuc)} | kota {getattr(api, 'remaining', None)}", flush=True)
-    alan = ["cift", "listing_id", "sonuc", "neden", "state", "gorsel", "kapak", "urun", "stil_gorsel", "kutu"]
+    alan = ["cift", "listing_id", "sonuc", "neden", "state", "gorsel", "kapak", "video", "urun", "stil_gorsel", "kutu"]
     with open(out / "KONTROL.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=alan, extrasaction="ignore", lineterminator="\n"); w.writeheader(); w.writerows(sonuc)
     n_pass = sum(s["sonuc"] == "PASS" for s in sonuc)

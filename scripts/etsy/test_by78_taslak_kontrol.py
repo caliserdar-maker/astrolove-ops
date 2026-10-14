@@ -35,6 +35,7 @@ def ilan(lid, m, cift):
                                  production_partners=[dict(production_partner_id=k.PARTNER)], who_made="i_did", when_made="made_to_order"),
         f"/listings/{lid}/images": dict(results=ims),
         f"/listings/{lid}/inventory": dict(products=prods),
+        f"/listings/{lid}/videos": dict(results=[dict(video_id=int(lid))]),
         f"/shops/1/listings/{lid}/variation-images": dict(results=[dict(property_id=513, value_id=vid[s], value=s, image_id={"Starlit": 9, "Timeless": 10, "First Page": 11, "Layers": 13, "Botanical": 12}[s])
                                                                      for i, s in enumerate(k.STYLES)]),
         f"/listings/{lid}/personalization": dict(personalization_questions=[
@@ -62,7 +63,8 @@ class Test(unittest.TestCase):
         bozuk = ilan("222", M[1], "LEO_LEO")
         bozuk["/listings/222"]["state"] = "active"
         bozuk["/listings/222"]["description"] = "Leo and Leo text — changed."
-        bozuk["/listings/222/images"]["results"][0].update(full_width=3200, full_height=2400)
+        bozuk["/listings/222/images"]["results"][0].update(full_width=2400, full_height=3000)   # eski dikey kapak artik FAIL
+        bozuk["/listings/222/videos"]["results"] = []
         bozuk["/listings/222/inventory"]["products"][2]["offerings"][0]["price"] = dict(amount=2500, divisor=100)
         bozuk["/listings/222/inventory"]["products"][4]["offerings"][0]["is_enabled"] = False
         bozuk["/shops/1/listings/222/variation-images"]["results"][1]["image_id"] = 9
@@ -79,7 +81,7 @@ class Test(unittest.TestCase):
         self.assertEqual(rows[0]["sonuc"], "PASS", rows[0]["neden"])
         self.assertEqual(rows[1]["sonuc"], "FAIL")
         for parca in ("state active", "aciklama farkli", "uzun/orta tire", "1. gorsel 2400x2400 (kare kapak) degil", "fiyat", "kapali urun 1",
-                      "stil gorselleri ayni degil", "stil bag sirasi", "Layers=1", "kisisellestirme", "Holiday"):
+                      "stil gorselleri ayni degil", "stil bag sirasi", "Layers=1", "video 0 (1 olmali)", "kisisellestirme", "Holiday"):
             self.assertIn(parca, rows[1]["neden"])
 
 
