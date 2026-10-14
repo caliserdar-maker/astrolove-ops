@@ -25,9 +25,9 @@ def ilan(lid, m, cift):
     prods = [dict(property_values=[dict(property_id=513, values=[s], value_ids=[vid[s]]), dict(property_id=514, values=[f], value_ids=[1])],
                   offerings=[dict(price=dict(amount=int(p * 100), divisor=100), quantity=999, is_enabled=True)])
              for s in k.STYLES for f, p in k.FIYAT.items()]
-    ims = [dict(rank=1, listing_image_id=1, full_width=2400, full_height=3000)] + \
+    ims = [dict(rank=1, listing_image_id=1, full_width=2400, full_height=2400)] + \
           [dict(rank=r, listing_image_id=r, full_width=3200, full_height=2400) for r in range(2, 9)] + \
-          [dict(rank=r, listing_image_id=r, full_width=2400, full_height=3000) for r in range(9, 13)]
+          [dict(rank=r, listing_image_id=r, full_width=2400, full_height=3000) for r in range(9, 14)]
     return {
         f"/listings/{lid}": dict(state="draft", title=m["baslik"], tags=[m[f"etiket_{i}"] for i in range(1, 14)],
                                  description=m["aciklama"].replace('"', "&quot;"), shop_section_id=k.SECTION, shipping_profile_id=k.SHIP,
@@ -35,7 +35,7 @@ def ilan(lid, m, cift):
                                  production_partners=[dict(production_partner_id=k.PARTNER)], who_made="i_did", when_made="made_to_order"),
         f"/listings/{lid}/images": dict(results=ims),
         f"/listings/{lid}/inventory": dict(products=prods),
-        f"/shops/1/listings/{lid}/variation-images": dict(results=[dict(property_id=513, value_id=vid[s], value=s, image_id={"Starlit": 9, "Timeless": 10, "First Page": 11, "Layers": 1, "Botanical": 12}[s])
+        f"/shops/1/listings/{lid}/variation-images": dict(results=[dict(property_id=513, value_id=vid[s], value=s, image_id={"Starlit": 9, "Timeless": 10, "First Page": 11, "Layers": 13, "Botanical": 12}[s])
                                                                      for i, s in enumerate(k.STYLES)]),
         f"/listings/{lid}/personalization": dict(personalization_questions=[
             dict(question_text=t, required=r, max_allowed_characters=n) for t, r, n in
@@ -66,6 +66,7 @@ class Test(unittest.TestCase):
         bozuk["/listings/222/inventory"]["products"][2]["offerings"][0]["price"] = dict(amount=2500, divisor=100)
         bozuk["/listings/222/inventory"]["products"][4]["offerings"][0]["is_enabled"] = False
         bozuk["/shops/1/listings/222/variation-images"]["results"][1]["image_id"] = 9
+        bozuk["/shops/1/listings/222/variation-images"]["results"][3]["image_id"] = 1   # Layers eski kapaga bagli
         bozuk["/listings/222/personalization"]["personalization_questions"][0]["question_text"] = "Name under Leo"
         bozuk["/shops/1/listings/222/properties"]["results"].append(dict(property_name="Holiday"))
         y.update(bozuk)
@@ -77,8 +78,8 @@ class Test(unittest.TestCase):
         self.assertFalse(ok)                                    # 78 degil + 1 FAIL
         self.assertEqual(rows[0]["sonuc"], "PASS", rows[0]["neden"])
         self.assertEqual(rows[1]["sonuc"], "FAIL")
-        for parca in ("state active", "aciklama farkli", "uzun/orta tire", "1. gorsel dikey degil", "fiyat", "kapali urun 1",
-                      "stil gorselleri ayni degil", "kisisellestirme", "Holiday"):
+        for parca in ("state active", "aciklama farkli", "uzun/orta tire", "1. gorsel 2400x2400 (kare kapak) degil", "fiyat", "kapali urun 1",
+                      "stil gorselleri ayni degil", "stil bag sirasi", "Layers=1", "kisisellestirme", "Holiday"):
             self.assertIn(parca, rows[1]["neden"])
 
 
