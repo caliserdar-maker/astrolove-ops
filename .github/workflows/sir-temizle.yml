@@ -18,6 +18,9 @@ on:
         type: choice
         options: [tara, temizle]
         default: tara
+      hedefler:
+        description: "bos = TEMP agaci (yavas); dolu = 'KLASOR_ID/DOSYA_ADI' listesi, ';' ile (Drive aramasindan)"
+        default: ""
 
 jobs:
   tara:
@@ -54,13 +57,20 @@ jobs:
       - name: Drive TEMP taramasi (son 7 gun)
         env:
           MOD: ${{ inputs.mod }}
+          HEDEF: ${{ inputs.hedefler }}
         run: |
           set -uo pipefail
-          # tek seferlik hizli liste (--fast-list), sonra yalniz listelenen dosyalar indirilir
-          rclone lsf "$T" -R --fast-list --files-only --max-age 7d --include "*.txt" --include "*.json" --include "*.log" \
-            --exclude "METRICOOL_TOKEN.json" --exclude "ig_token.json" --exclude "ETSY_TOKEN.json" --exclude "*TOKEN*.json" > _rapor/liste.txt
-          echo "liste: $(wc -l < _rapor/liste.txt) dosya"
-          rclone copy "$T" _scan --files-from _rapor/liste.txt --no-traverse -q --transfers 16
+          uzak() { if [ -n "$HEDEF" ]; then echo "gdrive,root_folder_id=${1%%/*}:${1#*/}"; else echo "$T/$1"; fi; }
+          if [ -n "$HEDEF" ]; then
+            echo "$HEDEF" | tr ';' '\n' | sed '/^$/d' > _rapor/liste.txt
+            while IFS= read -r rel; do mkdir -p "_scan/$(dirname "$rel")"; rclone copyto "$(uzak "$rel")" "_scan/$rel" -q || echo "indirilemedi: $rel"; done < _rapor/liste.txt
+          else
+            # tek seferlik hizli liste (--fast-list), sonra yalniz listelenen dosyalar indirilir
+            rclone lsf "$T" -R --fast-list --files-only --max-age 7d --include "*.txt" --include "*.json" --include "*.log" \
+              --exclude "METRICOOL_TOKEN.json" --exclude "ig_token.json" --exclude "ETSY_TOKEN.json" --exclude "*TOKEN*.json" > _rapor/liste.txt
+            rclone copy "$T" _scan --files-from _rapor/liste.txt --no-traverse -q --transfers 16
+          fi
+          echo "liste: $(wc -l < _rapor/liste.txt) dosya
           python3 - <<'EOF' > _rapor/DRIVE.txt
           import glob, os, sys
           sys.path.insert(0, 'scripts/guvenlik')
@@ -91,10 +101,10 @@ jobs:
             while IFS= read -r rel; do
               mkdir -p "_temiz/$(dirname "$rel")"
               python3 scripts/guvenlik/sir_koru.py temizle --sir-json _work/METRICOOL_TOKEN.json --sir-json _work/ig_token.json --sir-json _work/ETSY_TOKEN.json "_scan/$rel" "_temiz/$rel" || { echo "DUR: $rel temizlenemedi"; exit 1; }
-              rclone copyto "_temiz/$rel" "$T/$rel.temiz_tmp" -q || { echo "DUR: $rel temiz kopya yuklenemedi"; exit 1; }
-              rclone deletefile "$T/$rel" --drive-use-trash=false -q          # kalici sil: cop/surum gecmisinde token kalmasin
-              rclone moveto "$T/$rel.temiz_tmp" "$T/$rel" -q
-              rclone copyto "$T/$rel" "_temiz/_kontrol.txt" -q
+              rclone copyto "_temiz/$rel" "$(uzak "$rel").temiz_tmp" -q || { echo "DUR: $rel temiz kopya yuklenemedi"; exit 1; }
+              rclone deletefile "$(uzak "$rel")" --drive-use-trash=false -q          # kalici sil: cop/surum gecmisinde token kalmasin
+              rclone moveto "$(uzak "$rel").temiz_tmp" "$(uzak "$rel")" -q
+              rclone copyto "$(uzak "$rel")" "_temiz/_kontrol.txt" -q
               python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/METRICOOL_TOKEN.json --sir-json _work/ig_token.json --sir-json _work/ETSY_TOKEN.json _temiz/_kontrol.txt > /dev/null \
                 && echo "TEMIZLENDI: $rel (kalici silindi + temiz kopya yazildi + yeniden tarandi: TEMIZ)" | tee -a _rapor/DRIVE.txt \
                 || { echo "FAIL: $rel yeniden taramada temiz degil" | tee -a _rapor/DRIVE.txt; exit 1; }
