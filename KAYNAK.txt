@@ -4,3 +4,4 @@ Uretim: kod/uret_hepsi.py (Actions koşusu 38579188529, by78-uret.yml, 13 is x 6
 Dosyalar Drive'daki KONTAK_01..13.jpg ile bayt bayt ayni (Drive'dan indirildi).
 SIPARIS_TEST.jpg: by-siparis testi 14 Eki (kod bizim-yilimiz-v3 e3d168c + scripts/siparis_by/by_siparis.py); ONIZLEME Layers + NIHAI Starlit, CANCER_LIBRA SEYMA/ILKER. Yerel uretim, Actions kosulari 38591728706 (ONIZLEME) ve 38592041563 (NIHAI) ile ayni kod ve girdi.
 GALERI_CL_10.jpg / KAPAK_CL_1600.jpg: BIZIM_YILIMIZ_78_20261014_v2/CANCER_LIBRA/galeri 01-10 (2x5, 1200 px, JPG 88) + 01_Cover_A uzun kenar 1600 (2026-10-14)
+PIN_KONTAK.jpg: 78 dikey pin V1 (Drive TEMP/PIN_BY78_V1, zemin PIN_ZEMIN_BOTANIK_MESE, First Page EMMA/JAMES, kod 7e3b3f3c28d1260b8888c31ca11050e5541997c3) 2026-10-14
