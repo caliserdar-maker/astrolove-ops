@@ -14,6 +14,7 @@ on:
     inputs:
       taslak_yol: { description: "Drive ASTROLOVE/TEMP altindaki taslak CSV", required: false, default: "BY78_TASLAK_20261014/BY78_TASLAKLAR.csv" }
       metin_ref: { description: "ilan metni dali/commit", required: false, default: "bizim-yilimiz-v3" }
+      mod: { description: "tam (ilan basi ~7 GET) | hafif (getListingsByListingIds 1 GET + bag kaydi)", required: false, default: "tam" }
 
 jobs:
   kontrol:
@@ -55,6 +56,11 @@ jobs:
           rclone copyto "gdrive:ASTROLOVE/TEMP/$TASLAK" _work/TASLAK.csv
           git fetch -q --depth 1 origin "$METIN_REF" && git show FETCH_HEAD:BIZIM_YILIMIZ_78_ILAN_METIN.csv > _work/METIN.csv
           echo "metin $(git rev-parse --short FETCH_HEAD) | taslak $(($(wc -l < _work/TASLAK.csv) - 1)) satir"
+          if [ "${{ inputs.mod }}" = hafif ]; then
+            rclone copyto "gdrive:ASTROLOVE/TEMP/BY78_TASLAK_20261014/BY78_KAPAK_VIDEO.csv" _work/BAG.csv
+            rclone copyto "gdrive:ASTROLOVE/TEMP/BY78_TASLAK_20261014/BY78_VIDEO_ETSY.json" _work/CL.json
+            echo "bag kaydi $(($(wc -l < _work/BAG.csv) - 1)) satir + CL"
+          fi
       - name: Guvenlik testi (yazma metodu varsa DUR) + birim test
         run: |
           set -euo pipefail
@@ -68,16 +74,21 @@ jobs:
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
           TOKEN_FILE: _work/ETSY_TOKEN.json
-        run: python scripts/etsy/by78_taslak_kontrol.py --taslak _work/TASLAK.csv --metin _work/METIN.csv --out _out
+        run: |
+          if [ "${{ inputs.mod }}" = hafif ]; then
+            python scripts/etsy/by78_taslak_kontrol.py --taslak _work/TASLAK.csv --metin _work/METIN.csv --out _out --hafif --bag-csv _work/BAG.csv --cl-json _work/CL.json
+          else
+            python scripts/etsy/by78_taslak_kontrol.py --taslak _work/TASLAK.csv --metin _work/METIN.csv --out _out
+          fi
       - name: Token geri yazimi ve cikti Drive'a
         if: ${{ always() }}
         run: |
           set -euo pipefail
           [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "yenilenen token geri yazildi" || true
-          [ -f _out/KONTROL.csv ] || { echo "cikti yok"; exit 1; }
+          [ -f _out/KONTROL.csv ] || [ -f _out/KONTROL_HAFIF.csv ] || { echo "cikti yok"; exit 1; }
           python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/ETSY_TOKEN.json _out || { echo "::error::Ciktida sir bulundu; Drive'a yazilmadi"; exit 1; }
           rclone copy _out "gdrive:ASTROLOVE/TEMP/BY78_TASLAK_KONTROL" -q
           echo "Cikti: ASTROLOVE/TEMP/BY78_TASLAK_KONTROL/ (KONTROL.csv, OZET.md)"
-          cat _out/OZET.md >> "$GITHUB_STEP_SUMMARY"
+          cat _out/OZET*.md >> "$GITHUB_STEP_SUMMARY"
       - if: always()
         run: rm -rf _work ~/.config/rclone

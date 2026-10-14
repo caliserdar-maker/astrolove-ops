@@ -10,7 +10,11 @@ Her listing_id icin satir basina PASS/FAIL + neden:
   bolum, kargo, iade, kategori, islem 4-7, production partner, who_made, when_made; Holiday niteligi YOK.
 Taslak CSV'de 78 farkli cift ve 78 farkli listing_id.
 Cikti: <OUT>/KONTROL.csv, <OUT>/OZET.md. Ortam: ETSY_API_KEY, ETSY_SHARED_SECRET, ETSY_SHOP_ID, TOKEN_FILE.
-Kullanim: by78_taslak_kontrol.py --taslak BY78_TASLAKLAR.csv --metin BIZIM_YILIMIZ_78_ILAN_METIN.csv --out DIR"""
+Kullanim: by78_taslak_kontrol.py --taslak BY78_TASLAKLAR.csv --metin BIZIM_YILIMIZ_78_ILAN_METIN.csv --out DIR
+HAFIF MOD (15 Eki, kota tabani 500): --hafif --bag-csv BY78_KAPAK_VIDEO.csv --cl-json BY78_VIDEO_ETSY.json
+  getListingsByListingIds (100'luk paket, includes=images,videos): 78 ilan icin 1 istek. Her ilan: state=draft, 13 gorsel,
+  rank 1 2400x2400, 2-8 3200x2400, 9-13 2400x3000, 1 video. 5 stil bagi istek atmadan: bag CSV (77 satir TAMAM) + CL kaydi
+  (yazma aninda Etsy'den okunup dogrulandi); 78 cift, hepsinde Starlit=9 Timeless=10 First Page=11 Botanical=12 Layers=13."""
 import argparse
 import csv
 import html
@@ -185,9 +189,80 @@ def calistir(api, shop, taslak, metin, out):
     return n_pass == len(sonuc) == 78 and not genel
 
 
+BAG_METIN = "Starlit=9 Timeless=10 First Page=11 Botanical=12 Layers=13"
+
+
+def hafif_calistir(api, taslak, bag_satir, cl_kayit, out):
+    """Toplu okuma (getListingsByListingIds) + istek atmadan bag kaydi. Donus: (ok, sonuc listesi)."""
+    out = Path(out); out.mkdir(parents=True, exist_ok=True)
+    kota_bas = None
+    ids = [r["listing_id"].strip() for r in taslak]
+    L = {}
+    for i in range(0, len(ids), 100):
+        d = api.get("/listings/batch", params={"listing_ids": ",".join(ids[i:i + 100]), "includes": "images,videos"}) or {}
+        kota_bas = kota_bas or getattr(api, "remaining", None)
+        for x in d.get("results") or []:
+            L[str(x.get("listing_id"))] = x
+    bag = {r["cift"]: r for r in bag_satir}
+    cl = (cl_kayit.get("ilan") or {}).get("CANCER_LIBRA") or {}
+    if cl:
+        bag["CANCER_LIBRA"] = dict(cift="CANCER_LIBRA", listing_id=str(cl.get("listing_id")), sonuc=cl.get("sonuc") and "TAMAM",
+                                   bag=" ".join(f"{a}={v[1]}" for a, v in sorted((cl.get("bag_sonra") or {}).items(), key=lambda x: x[1][1])))
+    genel = []
+    if len(taslak) != 78 or len(set(ids)) != 78:
+        genel.append(f"taslak {len(taslak)} satir / {len(set(ids))} farkli id (78 olmali)")
+    if len(bag) != 78:
+        genel.append(f"bag kaydi {len(bag)} cift (78 olmali)")
+    sonuc = []
+    for r in taslak:
+        c, lid = r["cift"].strip().upper(), r["listing_id"].strip()
+        n = []
+        x = L.get(lid)
+        if not x:
+            n.append("toplu okumada yok")
+        else:
+            if x.get("state") != "draft":
+                n.append(f"state {x.get('state')}")
+            ims = sorted(x.get("images") or [], key=lambda y: y.get("rank") or 0)
+            if len(ims) != 13:
+                n.append(f"gorsel {len(ims)} (13 olmali)")
+            boy = [(i + 1, y.get("full_width"), y.get("full_height")) for i, y in enumerate(ims)]
+            if boy and (boy[0][1], boy[0][2]) != KARE:
+                n.append(f"rank 1 {boy[0][1]}x{boy[0][2]} (2400x2400 olmali)")
+            yanlis = [b for b in boy if 2 <= b[0] <= 8 and (b[1], b[2]) != YATAY]
+            if yanlis:
+                n.append(f"2-8 3200x2400 olmayan {yanlis[:3]}")
+            yanlis = [b for b in boy if b[0] >= 9 and (b[1], b[2]) != DIKEY]
+            if yanlis:
+                n.append(f"9-13 2400x3000 olmayan {yanlis[:3]}")
+            if len(x.get("videos") or []) != 1:
+                n.append(f"video {len(x.get('videos') or [])} (1 olmali)")
+        b = bag.get(c)
+        if not b:
+            n.append("bag kaydi yok")
+        elif str(b.get("listing_id")) != lid or b.get("sonuc") != "TAMAM" or b.get("bag") != BAG_METIN:
+            n.append(f"bag kaydi {b.get('listing_id')} {b.get('sonuc')} {b.get('bag')}")
+        sonuc.append(dict(cift=c, listing_id=lid, sonuc="FAIL" if n else "PASS", neden="; ".join(n),
+                          state=(x or {}).get("state"), gorsel=len((x or {}).get("images") or []),
+                          video=len((x or {}).get("videos") or [])))
+    alan = ["cift", "listing_id", "sonuc", "neden", "state", "gorsel", "video"]
+    with open(out / "KONTROL_HAFIF.csv", "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=alan, extrasaction="ignore", lineterminator="\n"); w.writeheader(); w.writerows(sonuc)
+    n_pass = sum(x["sonuc"] == "PASS" for x in sonuc)
+    md = ["# BY78 hafif kontrol", "", f"- PASS {n_pass}/{len(sonuc)}", f"- Genel: {'; '.join(genel) if genel else 'PASS'}",
+          f"- Etsy GET {getattr(api, 'calls', '?')} | kota bas {kota_bas} son {getattr(api, 'remaining', '?')} | yazma 0", "", "## FAIL"]
+    md += [f"- {x['cift']} {x['listing_id']}: {x['neden']}" for x in sonuc if x["sonuc"] == "FAIL"] or ["- yok"]
+    (out / "OZET_HAFIF.md").write_text("\n".join(md) + "\n", encoding="utf-8")
+    print("\n".join(md))
+    print(f"::warning::HAFIF KONTROL PASS {n_pass}/{len(sonuc)} | genel {'; '.join(genel) if genel else 'PASS'} | Etsy GET {getattr(api, 'calls', '?')} | "
+          f"kota bas {kota_bas} son {getattr(api, 'remaining', '?')} | FAIL {[(x['cift'], x['neden'][:80]) for x in sonuc if x['sonuc'] == 'FAIL'][:5]}")
+    return n_pass == len(sonuc) == 78 and not genel, sonuc
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--taslak", required=True); ap.add_argument("--metin", required=True); ap.add_argument("--out", required=True)
+    ap.add_argument("--hafif", action="store_true"); ap.add_argument("--bag-csv"); ap.add_argument("--cl-json")
     a = ap.parse_args()
     sys.path.insert(0, str(Path(__file__).resolve().parent))
     from etsy_common import Etsy, TokenStore, mask
@@ -198,6 +273,10 @@ def main():
         store.refresh()
     api = Etsy(store)
     taslak = list(csv.DictReader(open(a.taslak, encoding="utf-8-sig")))
+    if a.hafif:
+        import json
+        ok, _ = hafif_calistir(api, taslak, list(csv.DictReader(open(a.bag_csv, encoding="utf-8-sig"))), json.load(open(a.cl_json)), a.out)
+        sys.exit(0 if ok else 1)
     metin = list(csv.DictReader(open(a.metin, encoding="utf-8-sig")))
     ok = calistir(api, os.environ["ETSY_SHOP_ID"], taslak, metin, a.out)
     sys.exit(0 if ok else 1)

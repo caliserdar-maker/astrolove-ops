@@ -85,5 +85,38 @@ class Test(unittest.TestCase):
             self.assertIn(parca, rows[1]["neden"])
 
 
+class TestHafif(unittest.TestCase):
+    def test_hafif(self):
+        tas = [dict(cift="CANCER_LIBRA", listing_id="111")] + [dict(cift=f"C{i}_X", listing_id=str(200 + i)) for i in range(77)]
+        def il(lid, kapak=(2400, 2400), video=1, state="draft"):
+            ims = [dict(rank=1, full_width=kapak[0], full_height=kapak[1])] + [dict(rank=r, full_width=3200, full_height=2400) for r in range(2, 9)] + \
+                  [dict(rank=r, full_width=2400, full_height=3000) for r in range(9, 14)]
+            return dict(listing_id=int(lid), state=state, images=ims, videos=[dict(video_id=1)] * video)
+        res = {t["listing_id"]: il(t["listing_id"]) for t in tas}
+        res["200"] = il("200", kapak=(2400, 3000))                      # eski dikey kapak
+        res["201"] = il("201", video=0)                                 # video yok
+        res["202"] = il("202", state="active")
+        class Api:
+            calls, remaining = 0, 600
+            def get(self, path, params=None, ok404=False):
+                self.calls += 1
+                assert path == "/listings/batch" and params["includes"] == "images,videos"
+                return dict(results=[res[i] for i in params["listing_ids"].split(",") if i in res])
+        bag = [dict(cift=t["cift"], listing_id=t["listing_id"], sonuc="TAMAM", bag=k.BAG_METIN) for t in tas[1:]]
+        bag[5]["bag"] = "Starlit=9 Timeless=10 First Page=11 Botanical=12 Layers=1"   # C5_X bag hatali
+        cl = {"ilan": {"CANCER_LIBRA": {"listing_id": 111, "sonuc": "PASS", "bag_sonra": {
+            "Starlit": [1, 9], "Timeless": [2, 10], "First Page": [3, 11], "Botanical": [4, 12], "Layers": [5, 13]}}}}
+        api = Api()
+        with tempfile.TemporaryDirectory() as t:
+            ok, sonuc = k.hafif_calistir(api, tas, bag, cl, t)
+        self.assertEqual(api.calls, 1)
+        self.assertFalse(ok)
+        fail = {x["cift"]: x["neden"] for x in sonuc if x["sonuc"] == "FAIL"}
+        self.assertEqual(set(fail), {"C0_X", "C1_X", "C2_X", "C5_X"}, fail)
+        self.assertIn("rank 1 2400x3000", fail["C0_X"]); self.assertIn("video 0", fail["C1_X"])
+        self.assertIn("state active", fail["C2_X"]); self.assertIn("Layers=1", fail["C5_X"])
+        self.assertEqual(sum(x["sonuc"] == "PASS" for x in sonuc), 74)
+
+
 if __name__ == "__main__":
     unittest.main()
