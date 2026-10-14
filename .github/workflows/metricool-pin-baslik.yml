@@ -58,10 +58,11 @@ jobs:
           MOD: ${{ inputs.mod }}
         run: |
           set -uo pipefail
-          python3 scripts/sosyal/metricool_pin_baslik.py --token-dosya _work/mc.json --mod "$MOD" --cikti _out 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+          python3 scripts/sosyal/metricool_pin_baslik.py --token-dosya _work/mc.json --mod "$MOD" --cikti _out 2>&1 | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
           rc=${PIPESTATUS[0]}
+          python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/mc.json _out || exit 1   # sir varsa Drive'a yuklenmez
           rclone copy _out "$D" --include "*.csv" --include "HAM_LISTE.json" 2>&1 | tail -2 || true
-          rclone lsl "$D" | tee -a "$GITHUB_STEP_SUMMARY" || true
+          rclone lsl "$D" | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY" || true
           exit $rc
 
       - name: Secret kaydet (METRICOOL_USER_TOKEN)
@@ -75,4 +76,6 @@ jobs:
             | python3 scripts/common/gh_secrets.py secret astrolove-ops METRICOOL_USER_TOKEN
 
       - if: always()
-        run: rm -rf _work ~/.config/rclone
+        run: |
+          rm -rf _work ~/.config/rclone
+          if [ -f "$RUNNER_TEMP/SIR_ENGEL" ]; then echo "::error::sir iceren satir engellendi (sir_koru)"; exit 1; fi

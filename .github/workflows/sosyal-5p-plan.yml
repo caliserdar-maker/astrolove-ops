@@ -56,14 +56,14 @@ jobs:
           set -euo pipefail
           rclone lsjson -R "$K" --no-modtime > _out/KARUSEL.json
           rclone lsjson "$V" --files-only --no-modtime > _out/VIDEO.json
-          python3 - <<'EOF' | tee -a "$GITHUB_STEP_SUMMARY"
+          python3 - <<'EOF' | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
           import json
           k = [x for x in json.load(open('_out/KARUSEL.json')) if not x['IsDir']]
           v = [x for x in json.load(open('_out/VIDEO.json')) if x['Name'].endswith('.mp4')]
           print(f"KARUSEL dosya {len(k)}, klasor {len({x['Path'].split('/')[0] for x in k})}, toplam {sum(x['Size'] for x in k)/1e6:.1f} MB")
           print(f"VIDEO mp4 {len(v)}, toplam {sum(x['Size'] for x in v)/1e6:.1f} MB, en buyuk {max((x['Size'] for x in v), default=0)/1e6:.1f} MB")
           EOF
-          python3 - <<'EOF' | tee -a "$GITHUB_STEP_SUMMARY"
+          python3 - <<'EOF' | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
           import importlib.util, json
           sp = importlib.util.spec_from_file_location('mpb', 'scripts/sosyal/metricool_pin_baslik.py')
           mpb = importlib.util.module_from_spec(sp); sp.loader.exec_module(mpb)
@@ -82,7 +82,7 @@ jobs:
           set -uo pipefail
           rclone copyto "$V/gemini-and-leo-astroloveart-reel.mp4" _work/test.mp4
           ls -la _work/test.mp4
-          python3 scripts/sosyal/metricool_s3_test.py _work/mc.json _work/test.mp4 _out/S3_TEST.json | tee -a "$GITHUB_STEP_SUMMARY"
+          python3 scripts/sosyal/metricool_s3_test.py _work/mc.json _work/test.mp4 _out/S3_TEST.json | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
 
       - name: Medya reposunu al
         if: ${{ inputs.pages == true }}
@@ -103,7 +103,7 @@ jobs:
             if [ "$n" != "0" ]; then git config user.name astrolove-ops; git config user.email actions@users.noreply.github.com; \
             git commit -qm "instagram/v6: karusel ($(date -u +%Y-%m-%d))"; git push; fi)
           (cd _kar && find . -type f | sed 's|^\./||' | sort) > _out/karusel_dosyalar.txt
-          python3 - <<'EOF' | tee -a "$GITHUB_STEP_SUMMARY"
+          python3 - <<'EOF' | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
           import os, subprocess, sys, time, urllib.parse
           k = os.environ['URL_KOK']; ad = open('_out/karusel_dosyalar.txt').read().split('\n'); ad = [a for a in ad if a]
           def prob(u):
@@ -129,11 +129,14 @@ jobs:
         run: |
           set -uo pipefail
           python3 scripts/sosyal/plan_5p.py --metin-dir data/sosyal/metin --karusel _out/KARUSEL.json --video _out/VIDEO.json \
-            --url-kok "$URL_KOK" --baslangic "$BAS" --cikti _out/PLAN_5_PLATFORM.csv 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+            --url-kok "$URL_KOK" --baslangic "$BAS" --cikti _out/PLAN_5_PLATFORM.csv 2>&1 | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
           rc=${PIPESTATUS[0]}
+          python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/mc.json _out || exit 1   # sir varsa Drive'a yuklenmez
           rclone copy _out "$O" --include "PLAN_5_PLATFORM*.csv" --include "S3_TEST.json" --include "YT_KATEGORI.json" --include "KARUSEL.json" --include "VIDEO.json"
-          rclone lsl "$O" | tee -a "$GITHUB_STEP_SUMMARY"
+          rclone lsl "$O" | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
           exit $rc
 
       - if: always()
-        run: rm -rf _work ~/.config/rclone
+        run: |
+          rm -rf _work ~/.config/rclone
+          if [ -f "$RUNNER_TEMP/SIR_ENGEL" ]; then echo "::error::sir iceren satir engellendi (sir_koru)"; exit 1; fi

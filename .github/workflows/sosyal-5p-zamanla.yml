@@ -62,7 +62,7 @@ jobs:
                                   if g1 <= int(r['gun']) <= g2 and r['video_dosya']})))
           EOF
           rclone copy "$V" _w/video -q --transfers 8 --files-from _w/videolar.txt
-          echo "PLAN $(($(wc -l < _w/PLAN.csv) - 1)) satir; kapak $(ls _w/kapak | wc -l); video $(ls _w/video | wc -l)/$(wc -l < _w/videolar.txt)" | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "PLAN $(($(wc -l < _w/PLAN.csv) - 1)) satir; kapak $(ls _w/kapak | wc -l); video $(ls _w/video | wc -l)/$(wc -l < _w/videolar.txt)" | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
 
       - name: Zamanla (mod=${{ inputs.mod }}, gunler=${{ inputs.gunler }})
         env:
@@ -71,11 +71,14 @@ jobs:
         run: |
           set -uo pipefail
           python3 scripts/sosyal/metricool_5p_yaz.py --token-dosya _work/mc.json --plan _w/PLAN.csv --gunler "$GUNLER" --mod "$MOD" \
-            --video-dir _w/video --kapak-dir _w/kapak --cikti _out 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+            --video-dir _w/video --kapak-dir _w/kapak --cikti _out 2>&1 | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
           rc=${PIPESTATUS[0]}
+          python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/mc.json _out || exit 1   # sir varsa Drive'a yuklenmez
           rclone copy _out "$O" --include "*.json"
-          rclone lsl "$O" --include "YAZIM_*.json" --include "KURU_*.json" | tee -a "$GITHUB_STEP_SUMMARY"
+          rclone lsl "$O" --include "YAZIM_*.json" --include "KURU_*.json" | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
           exit $rc
 
       - if: always()
-        run: rm -rf _work ~/.config/rclone
+        run: |
+          rm -rf _work ~/.config/rclone
+          if [ -f "$RUNNER_TEMP/SIR_ENGEL" ]; then echo "::error::sir iceren satir engellendi (sir_koru)"; exit 1; fi

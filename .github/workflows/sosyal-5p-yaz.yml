@@ -69,7 +69,7 @@ jobs:
             [ -n "$son" ] || { echo "DUR: GEMINI_LEO videosu FINAL ve ORNEK'te yok"; exit 1; }
             rclone copyto "$VO/$son" _work/gun1.mp4; kaynak="ORNEK/$son"
           fi
-          echo "VIDEO_KAYNAK $kaynak $(stat -c %s _work/gun1.mp4) bayt sha256 $(sha256sum _work/gun1.mp4 | cut -c1-64) $(rclone lsjson "$V" --include "$f" | python3 -c "import json,sys;x=json.load(sys.stdin);print('modtime', x[0]['ModTime'] if x else '-')")" | tee -a "$GITHUB_STEP_SUMMARY" _out/VIDEO_KAYNAK.txt
+          echo "VIDEO_KAYNAK $kaynak $(stat -c %s _work/gun1.mp4) bayt sha256 $(sha256sum _work/gun1.mp4 | cut -c1-64) $(rclone lsjson "$V" --include "$f" | python3 -c "import json,sys;x=json.load(sys.stdin);print('modtime', x[0]['ModTime'] if x else '-')")" | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY" _out/VIDEO_KAYNAK.txt
 
       - name: Plan
         env:
@@ -78,8 +78,8 @@ jobs:
         run: |
           set -euo pipefail
           python3 scripts/sosyal/plan_5p.py --metin-dir data/sosyal/metin --karusel _out/KARUSEL.json --video _out/VIDEO.json \
-            --url-kok "$URL_KOK" --baslangic "$BAS" --yt-kategori "$YTK" --cikti _out/PLAN_TUM.csv | tee -a "$GITHUB_STEP_SUMMARY"
-          python3 - <<'EOF' | tee -a "$GITHUB_STEP_SUMMARY"
+            --url-kok "$URL_KOK" --baslangic "$BAS" --yt-kategori "$YTK" --cikti _out/PLAN_TUM.csv | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
+          python3 - <<'EOF' | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
           import csv
           r = list(csv.DictReader(open('_out/PLAN_TUM.csv', encoding='utf-8')))
           for ad, sec in (('PLAN_5_PLATFORM_GUN1.csv', [x for x in r if x['gun'] == '1']), ('PLAN_5_PLATFORM.csv', [x for x in r if x['gun'] != '1'])):
@@ -98,12 +98,15 @@ jobs:
         run: |
           set -uo pipefail
           python3 scripts/sosyal/metricool_5p_yaz.py --token-dosya _work/mc.json --plan _out/PLAN_TUM.csv --gun 1 \
-            --video _work/gun1.mp4 --kar "$KAR" --th "$TH" --vid "$VID" --sinir "$SINIR" --mod "$MOD" --cikti _work/yz 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+            --video _work/gun1.mp4 --kar "$KAR" --th "$TH" --vid "$VID" --sinir "$SINIR" --mod "$MOD" --cikti _work/yz 2>&1 | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
           rc=${PIPESTATUS[0]}
           cp _work/yz/DOGRULAMA.json "_out/DOGRULAMA_GUN1_${MOD}.json" 2>/dev/null || true
+          python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/mc.json _out || exit 1   # sir varsa Drive'a yuklenmez
           rclone copy _out "$O" --include "PLAN_5_PLATFORM.csv" --include "PLAN_5_PLATFORM_GUN1.csv" --include "DOGRULAMA_GUN1_*.json" --include "VIDEO_KAYNAK.txt"
-          rclone lsl "$O" | tee -a "$GITHUB_STEP_SUMMARY"
+          rclone lsl "$O" | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
           exit $rc
 
       - if: always()
-        run: rm -rf _work ~/.config/rclone
+        run: |
+          rm -rf _work ~/.config/rclone
+          if [ -f "$RUNNER_TEMP/SIR_ENGEL" ]; then echo "::error::sir iceren satir engellendi (sir_koru)"; exit 1; fi

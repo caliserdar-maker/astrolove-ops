@@ -1,0 +1,154 @@
+name: sir-temizle
+
+# GUVENLIK (14 Eki 2026, OZET.txt token sizintisi): degerler hicbir yere yazilmaz, yalniz dosya adi + sayi.
+# 1) Drive ASTROLOVE/TEMP altinda son 7 gunun .txt/.json/.log dosyalari (token depolari haric) taranir.
+#    '::add-mask::' satiri ya da bilinen sir degeri iceren dosya (mod=temizle): temiz kopya yazilir, orijinal
+#    KALICI silinir (cop kutusu/surum gecmisi kalmasin), temiz kopya ayni ad/klasore konur, yeniden taranir.
+#    Yalniz genel desen (anahtar-deseni/presigned-url) eslesen dosyalar listelenir, dokunulmaz.
+# 2) Son 7 gunun Metricool/sosyal is akisi loglari (GitHub API) ayni taramadan gecer: deger acik mi?
+
+permissions:
+  contents: read
+  actions: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      mod:
+        type: choice
+        options: [tara, temizle]
+        default: tara
+
+jobs:
+  tara:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      T: gdrive:ASTROLOVE/TEMP
+      R: gdrive:ASTROLOVE/TEMP/SOSYAL_DURUM_20261014
+    steps:
+      - uses: actions/checkout@v4
+      - name: rclone + sir kaynaklari (yalniz maskelemek ve karsilastirmak icin)
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+          mkdir -p ~/.config/rclone _work _scan _temiz _rapor; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            export RCLONE_CONFIG_GDRIVE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET"
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+          for f in METRICOOL_TOKEN.json ig_token.json ETSY_TOKEN.json; do rclone copyto "$T/$f" "_work/$f" -q 2>/dev/null || true; done
+          python3 - <<'EOF'
+          import glob, sys
+          sys.path.insert(0, 'scripts/guvenlik')
+          import sir_koru
+          for f in glob.glob('_work/*.json'):
+              for v in sir_koru.sir_json(f):
+                  print('::add-mask::' + v)
+          EOF
+          ls _work | sed 's/^/kaynak: /'
+
+      - name: Drive TEMP taramasi (son 7 gun)
+        env:
+          MOD: ${{ inputs.mod }}
+        run: |
+          set -uo pipefail
+          rclone copy "$T" _scan --max-age 7d --include "*.txt" --include "*.json" --include "*.log" \
+            --exclude "METRICOOL_TOKEN.json" --exclude "ig_token.json" --exclude "ETSY_TOKEN.json" --exclude "*TOKEN*.json" -q --transfers 8
+          python3 - <<'EOF' > _rapor/DRIVE.txt
+          import glob, os, sys
+          sys.path.insert(0, 'scripts/guvenlik')
+          import sir_koru
+          sirlar = set()
+          for f in glob.glob('_work/*.json'):
+              sirlar |= sir_koru.sir_json(f)
+          n, tem, liste = 0, [], []
+          for kok, _, ds in os.walk('_scan'):
+              for d in ds:
+                  p = os.path.join(kok, d); n += 1
+                  say = {}
+                  for s in open(p, encoding='utf-8', errors='ignore'):
+                      b = sir_koru.bulgu(s, sirlar)
+                      if b: say[b] = say.get(b, 0) + 1
+                  if say:
+                      rel = os.path.relpath(p, '_scan')
+                      liste.append((rel, say))
+                      if 'add-mask' in say or 'sir-degeri' in say:
+                          tem.append(rel)
+          print(f'TARANAN {n} dosya; bulgulu {len(liste)}; temizlenecek (add-mask/sir-degeri) {len(tem)}')
+          for rel, say in liste:
+              print(f"  {'TEMIZLENECEK' if rel in tem else 'YALNIZ LISTE'} {rel} {say}")
+          open('_rapor/temizlenecek.txt', 'w').write('\n'.join(tem) + ('\n' if tem else ''))
+          EOF
+          cat _rapor/DRIVE.txt
+          if [ "$MOD" = "temizle" ] && [ -s _rapor/temizlenecek.txt ]; then
+            while IFS= read -r rel; do
+              mkdir -p "_temiz/$(dirname "$rel")"
+              python3 scripts/guvenlik/sir_koru.py temizle --sir-json _work/METRICOOL_TOKEN.json --sir-json _work/ig_token.json --sir-json _work/ETSY_TOKEN.json "_scan/$rel" "_temiz/$rel" || { echo "DUR: $rel temizlenemedi"; exit 1; }
+              rclone copyto "_temiz/$rel" "$T/$rel.temiz_tmp" -q || { echo "DUR: $rel temiz kopya yuklenemedi"; exit 1; }
+              rclone deletefile "$T/$rel" --drive-use-trash=false -q          # kalici sil: cop/surum gecmisinde token kalmasin
+              rclone moveto "$T/$rel.temiz_tmp" "$T/$rel" -q
+              rclone copyto "$T/$rel" "_temiz/_kontrol.txt" -q
+              python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/METRICOOL_TOKEN.json --sir-json _work/ig_token.json --sir-json _work/ETSY_TOKEN.json _temiz/_kontrol.txt > /dev/null \
+                && echo "TEMIZLENDI: $rel (kalici silindi + temiz kopya yazildi + yeniden tarandi: TEMIZ)" | tee -a _rapor/DRIVE.txt \
+                || { echo "FAIL: $rel yeniden taramada temiz degil" | tee -a _rapor/DRIVE.txt; exit 1; }
+            done < _rapor/temizlenecek.txt
+          fi
+
+      - name: GitHub Actions loglari (son 7 gun, Metricool/sosyal is akislari)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -uo pipefail
+          python3 - <<'EOF' > _rapor/LOG.txt
+          import glob, json, os, subprocess, sys
+          from datetime import datetime, timedelta, timezone
+          sys.path.insert(0, 'scripts/guvenlik')
+          import sir_koru
+          sirlar = set()
+          for f in glob.glob('_work/*.json'):
+              sirlar |= sir_koru.sir_json(f)
+          repo = os.environ['GITHUB_REPOSITORY']
+          akislar = ['metricool-durum', 'metricool-oku', 'metricool-pin-baslik', 'pin-v6-plan', 'pin-v6-yaz', 'sosyal-5p-plan',
+                     'sosyal-5p-yaz', 'sosyal-5p-zamanla', 'sosyal-durum-oku', 'sosyal-kapak', 'yt-kapak-oku']
+          sinir = datetime.now(timezone.utc) - timedelta(days=7)
+          def api(yol):
+              r = subprocess.run(['gh', 'api', yol], capture_output=True, text=True)
+              return r.stdout if r.returncode == 0 else None
+          is_say, acik, bulgu_is = 0, 0, []
+          for a in akislar:
+              d = api(f'repos/{repo}/actions/workflows/{a}.yml/runs?per_page=50')
+              if not d: continue
+              for run in json.loads(d).get('workflow_runs', []):
+                  if datetime.fromisoformat(run['created_at'].replace('Z', '+00:00')) < sinir: continue
+                  for j in json.loads(api(f"repos/{repo}/actions/runs/{run['id']}/jobs") or '{"jobs":[]}')['jobs']:
+                      log = api(f"repos/{repo}/actions/jobs/{j['id']}/logs")
+                      if log is None: continue
+                      is_say += 1
+                      say = {}
+                      for s in log.splitlines():
+                          if any(v in s for v in sirlar):
+                              say['sir-degeri-acik'] = say.get('sir-degeri-acik', 0) + 1
+                          elif '::add-mask::' in s and "add-mask::'+" not in s and 'add-mask::{' not in s and "add-mask::' +" not in s:
+                              say['add-mask-satiri'] = say.get('add-mask-satiri', 0) + 1
+                      if say:
+                          bulgu_is.append(f"{a} run {run['id']} job {j['id']} {say}")
+                          acik += say.get('sir-degeri-acik', 0)
+          print(f'LOG TARAMASI: {is_say} is logu; sir degeri ACIK gorunen satir {acik}; bulgulu is {len(bulgu_is)}')
+          for b in bulgu_is: print('  ' + b)
+          EOF
+          cat _rapor/LOG.txt
+
+      - name: Rapor -> Drive
+        run: |
+          set -uo pipefail
+          cat _rapor/DRIVE.txt _rapor/LOG.txt > _rapor/SIR_TARAMA.txt
+          python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/METRICOOL_TOKEN.json --sir-json _work/ig_token.json --sir-json _work/ETSY_TOKEN.json _rapor/SIR_TARAMA.txt || exit 1
+          rclone copyto _rapor/SIR_TARAMA.txt "$R/SIR_TARAMA.txt" -q
+          echo "rapor: $R/SIR_TARAMA.txt"
+
+      - if: always()
+        run: rm -rf _work _scan _temiz ~/.config/rclone

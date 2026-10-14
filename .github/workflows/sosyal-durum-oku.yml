@@ -41,7 +41,7 @@ jobs:
         env:
           PIN_BAS: ${{ inputs.pin_bas }}
         run: |
-          python3 - <<'EOF' | tee -a "$GITHUB_STEP_SUMMARY" _out/OZET.txt
+          python3 - <<'EOF' | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY" _out/OZET.txt
           import csv, importlib.util, json, os
           from datetime import datetime, timedelta
           sp = importlib.util.spec_from_file_location('mpb', 'scripts/sosyal/metricool_pin_baslik.py')
@@ -105,8 +105,11 @@ jobs:
                         + (f" {json.dumps(x['ek'], ensure_ascii=False)[:200]}" if x.get('ek') else ''))
           json.dump({'okuma': f'{simdi:%Y-%m-%dT%H:%M}', 'pinterest': pin_out, 'gun': gun_out}, open('_out/SOSYAL_DURUM.json', 'w'), ensure_ascii=False, indent=1)
           EOF
+          python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/mc.json _out || exit 1   # sir varsa Drive'a yuklenmez
           rclone copy _out "$O" -q
-          rclone lsl "$O" | tee -a "$GITHUB_STEP_SUMMARY"
+          rclone lsl "$O" | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
 
       - if: always()
-        run: rm -rf _work ~/.config/rclone
+        run: |
+          rm -rf _work ~/.config/rclone
+          if [ -f "$RUNNER_TEMP/SIR_ENGEL" ]; then echo "::error::sir iceren satir engellendi (sir_koru)"; exit 1; fi

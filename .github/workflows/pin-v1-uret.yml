@@ -61,13 +61,13 @@ jobs:
             export RCLONE_CONFIG_GDRIVE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET"; fi
           pip install -q pillow numpy
           rclone copyto "$D/V1_PINLER.csv" _eski_pinler.csv
-          python3 scripts/sosyal/yeniden_zamanla.py _eski_pinler.csv _yeni_pinler.csv --dk 35 | tee -a "$GITHUB_STEP_SUMMARY"
-          python3 scripts/sosyal/metricool_csv.py _yeni_pinler.csv _csv --onek "$ONEK" --min-dk 30 --metin-kurali /tmp/metin_kurali.py | tee -a "$GITHUB_STEP_SUMMARY"
+          python3 scripts/sosyal/yeniden_zamanla.py _eski_pinler.csv _yeni_pinler.csv --dk 35 | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
+          python3 scripts/sosyal/metricool_csv.py _yeni_pinler.csv _csv --onek "$ONEK" --min-dk 30 --metin-kurali /tmp/metin_kurali.py | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
           python3 /tmp/metin_kurali.py _csv
           for f in $(rclone lsf "$D" --files-only --max-depth 1 --include "PIN_V1_[0-9]*.csv"); do rclone moveto "$D/$f" "$D/${f%.csv}_ESKI_KULLANMA.csv"; done
           rclone copy _csv "$D" --include "${ONEK}_*.csv"
           rclone copyto _yeni_pinler.csv "$D/${ONEK}_PINLER.csv"
-          rclone lsl "$D" --include "PIN_V1*.csv" | tee -a "$GITHUB_STEP_SUMMARY"
+          rclone lsl "$D" --include "PIN_V1*.csv" | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
           echo "YALNIZ_CSV_TAMAM=1" >> "$GITHUB_ENV"
 
       - name: On kosul (AI sahne + metin_kurali)
@@ -121,9 +121,13 @@ jobs:
         if: ${{ inputs.yalniz_csv != true }}
         run: |
           set -euo pipefail
+          python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/mc.json _out || exit 1   # sir varsa Drive'a yuklenmez
           rclone copyto _out/ONIZLEME_2CIFT.jpg "$D/ONIZLEME_2CIFT.jpg"
+          python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/mc.json _out || exit 1   # sir varsa Drive'a yuklenmez
           rclone copyto _out/QC.csv "$D/V1_QC.csv"
+          python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/mc.json _out || exit 1   # sir varsa Drive'a yuklenmez
           rclone copyto _out/PINLER.csv "$D/V1_PINLER.csv"
+          python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/mc.json _out || exit 1   # sir varsa Drive'a yuklenmez
           rclone copy _out/v1 "$D/MEDYA/v1" --stats-one-line -v 2>&1 | tail -2
 
       - name: Medya reposunu al
@@ -173,7 +177,12 @@ jobs:
         if: ${{ inputs.dry_run != true && inputs.yalniz_csv != true }}
         run: |
           set -euo pipefail
-          python3 scripts/sosyal/metricool_csv.py _out/PINLER.csv _csv --onek PIN_V1 --metin-kurali /tmp/metin_kurali.py | tee -a "$GITHUB_STEP_SUMMARY"
+          python3 scripts/sosyal/metricool_csv.py _out/PINLER.csv _csv --onek PIN_V1 --metin-kurali /tmp/metin_kurali.py | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
           python3 /tmp/metin_kurali.py _csv
           rclone copy _csv "$D" --include "PIN_V1_*.csv" -v 2>&1 | tail -2
-          rclone lsl "$D" --include "PIN_V1_*.csv" | tee -a "$GITHUB_STEP_SUMMARY"
+          rclone lsl "$D" --include "PIN_V1_*.csv" | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
+
+      - if: always()
+        run: |
+          rm -rf _work ~/.config/rclone
+          if [ -f "$RUNNER_TEMP/SIR_ENGEL" ]; then echo "::error::sir iceren satir engellendi (sir_koru)"; exit 1; fi

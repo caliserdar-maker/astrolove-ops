@@ -41,7 +41,7 @@ jobs:
           BAS: ${{ inputs.bas }}
           BIT: ${{ inputs.bit }}
         run: |
-          python3 - <<'EOF' | tee -a "$GITHUB_STEP_SUMMARY"
+          python3 - <<'EOF' | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
           import importlib.util, json, os
           sp = importlib.util.spec_from_file_location('mpb', 'scripts/sosyal/metricool_pin_baslik.py')
           mpb = importlib.util.module_from_spec(sp); sp.loader.exec_module(mpb)
@@ -68,4 +68,6 @@ jobs:
                   print('  ', json.dumps(kisa, ensure_ascii=False, default=str)[:300], '|', str(m)[:70].replace('\n', ' '))
           EOF
       - if: always()
-        run: rm -rf _work ~/.config/rclone
+        run: |
+          rm -rf _work ~/.config/rclone
+          if [ -f "$RUNNER_TEMP/SIR_ENGEL" ]; then echo "::error::sir iceren satir engellendi (sir_koru)"; exit 1; fi

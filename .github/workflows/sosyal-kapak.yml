@@ -69,11 +69,12 @@ jobs:
         if: ${{ inputs.yalniz_s3 != true }}
         run: |
           set -uo pipefail
-          python3 sosyal/kapak_v1/kapak_toplu.py --posters _w/P2000 --out _o/KAPAK --esik 2.5 | tee -a "$GITHUB_STEP_SUMMARY"
+          python3 sosyal/kapak_v1/kapak_toplu.py --posters _w/P2000 --out _o/KAPAK --esik 2.5 | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
           rc=${PIPESTATUS[0]}
+          python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/mc.json _o || exit 1   # sir varsa Drive'a yuklenmez
           rclone copy _o/KAPAK "$KD" -q --transfers 8
           rclone lsjson "$KD" --files-only > _out/KAPAK.json
-          python3 -c "import json;x=json.load(open('_out/KAPAK.json'));print('Drive KAPAK', sum(e['Name'].endswith('-kapak.jpg') for e in x), 'kapak +', [e['Name'] for e in x if not e['Name'].endswith('-kapak.jpg')])" | tee -a "$GITHUB_STEP_SUMMARY"
+          python3 -c "import json;x=json.load(open('_out/KAPAK.json'));print('Drive KAPAK', sum(e['Name'].endswith('-kapak.jpg') for e in x), 'kapak +', [e['Name'] for e in x if not e['Name'].endswith('-kapak.jpg')])" | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
           exit $rc
 
       - name: Metricool kapak S3 testi (1 kapak, gonderi YOK)
@@ -81,8 +82,9 @@ jobs:
         run: |
           set -uo pipefail
           [ -f _o/KAPAK/aquarius-and-aquarius-astroloveart-kapak.jpg ] || rclone copyto "$KD/aquarius-and-aquarius-astroloveart-kapak.jpg" _o/KAPAK/aquarius-and-aquarius-astroloveart-kapak.jpg
-          python3 scripts/sosyal/metricool_s3_test.py _work/mc.json _o/KAPAK/aquarius-and-aquarius-astroloveart-kapak.jpg _out/KAPAK_S3_TEST.json | tee -a "$GITHUB_STEP_SUMMARY"
+          python3 scripts/sosyal/metricool_s3_test.py _work/mc.json _o/KAPAK/aquarius-and-aquarius-astroloveart-kapak.jpg _out/KAPAK_S3_TEST.json | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
           rc=${PIPESTATUS[0]}
+          python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/mc.json _out || exit 1   # sir varsa Drive'a yuklenmez
           rclone copy _out "$O" --include "KAPAK_S3_TEST.json"
           grep -q '"sonuc": "OK"' _out/KAPAK_S3_TEST.json && exit $rc || exit 1
 
@@ -90,7 +92,7 @@ jobs:
         if: ${{ inputs.yalniz_s3 != true }}
         run: |
           set -uo pipefail
-          python3 - <<'EOF' | tee -a "$GITHUB_STEP_SUMMARY"
+          python3 - <<'EOF' | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
           import importlib.util, json, os, urllib.request, urllib.parse
           sp = importlib.util.spec_from_file_location('mpb', 'scripts/sosyal/metricool_pin_baslik.py')
           mpb = importlib.util.module_from_spec(sp); sp.loader.exec_module(mpb)
@@ -119,19 +121,22 @@ jobs:
           rclone lsjson -R "$K" --no-modtime > _out/KARUSEL.json
           rclone lsjson "$V" --files-only --no-modtime > _out/VIDEO.json
           python3 scripts/sosyal/plan_5p.py --metin-dir data/sosyal/metin --karusel _out/KARUSEL.json --video _out/VIDEO.json \
-            --kapak _out/KAPAK.json --url-kok "$URL_KOK" --baslangic 2026-10-12 --cikti _out/PLAN_TUM.csv | tee -a "$GITHUB_STEP_SUMMARY"
+            --kapak _out/KAPAK.json --url-kok "$URL_KOK" --baslangic 2026-10-12 --cikti _out/PLAN_TUM.csv | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
           r1=${PIPESTATUS[0]}
           python3 -c "
           import csv
           r=list(csv.DictReader(open('_out/PLAN_TUM.csv',encoding='utf-8'))); s=[x for x in r if x['cift']!='GEMINI_LEO']
           w=csv.DictWriter(open('_out/PLAN_5_PLATFORM.csv','w',newline='',encoding='utf-8'),fieldnames=list(r[0]),lineterminator='\n'); w.writeheader(); w.writerows(s)
-          print('PLAN_5_PLATFORM.csv', len(s), 'satir (GEMINI_LEO haric)', s[0]['tarih_saat'], '->', s[-1]['tarih_saat'])" | tee -a "$GITHUB_STEP_SUMMARY"
+          print('PLAN_5_PLATFORM.csv', len(s), 'satir (GEMINI_LEO haric)', s[0]['tarih_saat'], '->', s[-1]['tarih_saat'])" | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
           python3 scripts/sosyal/metricool_5p_yaz.py --token-dosya _work/mc.json --plan _out/PLAN_5_PLATFORM.csv --gunler 2-78 \
-            --kapak-dir _o/KAPAK --mod kuru --cikti _out 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+            --kapak-dir _o/KAPAK --mod kuru --cikti _out 2>&1 | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
           r2=${PIPESTATUS[0]}
+          python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/mc.json _out || exit 1   # sir varsa Drive'a yuklenmez
           rclone copy _out "$O" --include "PLAN_5_PLATFORM.csv" --include "KURU_2-78.json" --include "KAPAK_S3_TEST.json"
-          rclone lsl "$O" --include "PLAN_5_PLATFORM.csv" --include "KURU_2-78.json" --include "KAPAK_S3_TEST.json" | tee -a "$GITHUB_STEP_SUMMARY"
+          rclone lsl "$O" --include "PLAN_5_PLATFORM.csv" --include "KURU_2-78.json" --include "KAPAK_S3_TEST.json" | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
           exit $(( r1 + r2 ))
 
       - if: always()
-        run: rm -rf _work ~/.config/rclone
+        run: |
+          rm -rf _work ~/.config/rclone
+          if [ -f "$RUNNER_TEMP/SIR_ENGEL" ]; then echo "::error::sir iceren satir engellendi (sir_koru)"; exit 1; fi

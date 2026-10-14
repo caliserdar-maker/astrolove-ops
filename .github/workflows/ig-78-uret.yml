@@ -67,7 +67,7 @@ jobs:
           mkdir -p /tmp/fontlar
           curl -fsSL -o "/tmp/fontlar/CormorantGaramond[wght].ttf" "https://raw.githubusercontent.com/google/fonts/main/ofl/cormorantgaramond/CormorantGaramond%5Bwght%5D.ttf"
           curl -fsSL -o "/tmp/fontlar/Manrope[wght].ttf" "https://raw.githubusercontent.com/google/fonts/main/ofl/manrope/Manrope%5Bwght%5D.ttf"
-          sha256sum /tmp/fontlar/*.ttf | tee -a "$GITHUB_STEP_SUMMARY"
+          sha256sum /tmp/fontlar/*.ttf | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
           printf '%s\n' "b20b7d9626dd956b2c5e558692ad328b1f19e3275e2782db4fa07670d83f35e0  /tmp/fontlar/CormorantGaramond[wght].ttf" \
                         "3ae11c49db0455a3cc33e37d380f20fdb8c7f8b41dc07625c177e3d87a9d6ae6  /tmp/fontlar/Manrope[wght].ttf" | sha256sum -c -
 
@@ -104,8 +104,11 @@ jobs:
         if: ${{ inputs.yalniz_csv != true }}
         run: |
           set -euo pipefail
+          python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/mc.json _out || exit 1   # sir varsa Drive'a yuklenmez
           rclone copyto _out/QC.csv "$D/V1_QC.csv"; rclone copyto _out/SIGMA.csv "$D/V1_SIGMA.csv"
+          python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/mc.json _out || exit 1   # sir varsa Drive'a yuklenmez
           rclone copyto _out/SHA256SUMS.txt "$D/V1_SHA256SUMS.txt"; rclone copyto _out/POSTER_SHA256.txt "$D/V1_POSTER_SHA256.txt"
+          python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/mc.json _out || exit 1   # sir varsa Drive'a yuklenmez
           rclone copy _out "$D/MEDYA/v1" --include "*/*.jpg" --include "*/*.mp4" --stats-one-line -v 2>&1 | tail -2
 
       - name: Medya reposunu al
@@ -165,14 +168,14 @@ jobs:
           set -euo pipefail
           rclone copyto "$D/ILAN_DOGRULA.csv" _ilan.csv
           A=(--captions "$CAP" --sira data/sosyal/pinterest/SIRA_78.csv --ilan _ilan.csv --url-kok "$URL_KOK" --cikti _csv --metin-kurali /tmp/metin_kurali.py)
-          python3 scripts/sosyal/ig_metricool_csv.py "${A[@]}" --onizleme 3 | tee -a "$GITHUB_STEP_SUMMARY"
+          python3 scripts/sosyal/ig_metricool_csv.py "${A[@]}" --onizleme 3 | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
           rclone copy _csv "$D" --include "IG_FB_V1_ONIZLEME_*.csv"
           if [ -n "$BASLANGIC" ]; then
-            python3 scripts/sosyal/ig_metricool_csv.py "${A[@]}" --baslangic "$BASLANGIC" | tee -a "$GITHUB_STEP_SUMMARY"
+            python3 scripts/sosyal/ig_metricool_csv.py "${A[@]}" --baslangic "$BASLANGIC" | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
             python3 /tmp/metin_kurali.py _csv
             rclone copy _csv "$D" --include "IG_FB_V1_0*.csv" --include "YT_V1_0*.csv" --include "TT_V1_0*.csv"
           fi
-          rclone lsl "$D" --include "IG_FB_V1_*.csv" --include "YT_V1_*.csv" --include "TT_V1_*.csv" | tee -a "$GITHUB_STEP_SUMMARY"
+          rclone lsl "$D" --include "IG_FB_V1_*.csv" --include "YT_V1_*.csv" --include "TT_V1_*.csv" | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
 
       - name: Onizleme gorseli (ilk 3 gun, 6 gonderi)
         if: ${{ inputs.dry_run != true && inputs.yalniz_csv != true }}
@@ -205,3 +208,8 @@ jobs:
           rclone copyto _csv/IG_FB_V1_ONIZLEME_3GUN.jpg "$D/IG_FB_V1_ONIZLEME_3GUN.jpg"
       - if: always()
         run: rm -rf ~/.config/rclone
+
+      - if: always()
+        run: |
+          rm -rf _work ~/.config/rclone
+          if [ -f "$RUNNER_TEMP/SIR_ENGEL" ]; then echo "::error::sir iceren satir engellendi (sir_koru)"; exit 1; fi

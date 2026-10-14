@@ -29,7 +29,7 @@ def yeni_baslik(eski):
 class MC:
     def __init__(self, tok):
         self.t, self.u, self.b = tok['userToken'], str(tok['userId']), str(tok['blogId'])
-        print(f'::add-mask::{self.t}', flush=True)
+        # token maskesi is akisinin token adiminda verilir; burada stdout'a YAZILMAZ (14 Eki: tee ile dosyaya sizdi)
         self.son = 0.0
 
     def istek(self, yontem, yol, params=None, govde=None, yok404=False):

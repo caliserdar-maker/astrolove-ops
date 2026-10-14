@@ -55,10 +55,11 @@ jobs:
           YEDEK_DRIVE: gdrive:ASTROLOVE/TEMP/PIN_V6_20261012/ESKI_YEDEK
         run: |
           set -uo pipefail
-          python3 scripts/sosyal/metricool_pin_v6_yaz.py --token-dosya _work/mc.json --mod "$MOD" --cikti _out 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+          python3 scripts/sosyal/metricool_pin_v6_yaz.py --token-dosya _work/mc.json --mod "$MOD" --cikti _out 2>&1 | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
           rc=${PIPESTATUS[0]}
+          python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/mc.json _out || exit 1   # sir varsa Drive'a yuklenmez
           rclone copy _out "$YEDEK_DRIVE" --include "ESKI_YEDEK.csv" --include "SILME_SONUC.json"
-          rclone lsl "$YEDEK_DRIVE" | tee -a "$GITHUB_STEP_SUMMARY"
+          rclone lsl "$YEDEK_DRIVE" | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
           exit $rc
 
       - name: Plan (baslangic) + yaz
@@ -73,12 +74,15 @@ jobs:
           python3 scripts/sosyal/metricool_panolar.py _work/mc.json _out > /dev/null
           python3 scripts/sosyal/pin_v6_plan.py --metin _out/PIN_METIN_234_LINKLI.csv --sira data/sosyal/pinterest/SIRA_78.csv \
             --panolar _out/PANOLAR.json --pinler _out/PINLER.json --cikti _out/PIN_V6_PLAN_YAYIN.csv --url-kok "$URL_KOK" --baslangic "$BAS" \
-            | tee -a "$GITHUB_STEP_SUMMARY" || exit 1
-          python3 scripts/sosyal/metricool_pin_v6_yaz.py --token-dosya _work/mc.json --mod "$MOD" --cikti _out --plan _out/PIN_V6_PLAN_YAYIN.csv 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+            | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY" || exit 1
+          python3 scripts/sosyal/metricool_pin_v6_yaz.py --token-dosya _work/mc.json --mod "$MOD" --cikti _out --plan _out/PIN_V6_PLAN_YAYIN.csv 2>&1 | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
           rc=${PIPESTATUS[0]}
+          python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/mc.json _out || exit 1   # sir varsa Drive'a yuklenmez
           rclone copy _out "$D/PLAN" --include "PIN_V6_PLAN_YAYIN.csv" --include "YAZIM_*.csv" --include "DOGRULAMA_*.txt"
-          rclone lsl "$D/PLAN" | tee -a "$GITHUB_STEP_SUMMARY"
+          rclone lsl "$D/PLAN" | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
           exit $rc
 
       - if: always()
-        run: rm -rf _work ~/.config/rclone
+        run: |
+          rm -rf _work ~/.config/rclone
+          if [ -f "$RUNNER_TEMP/SIR_ENGEL" ]; then echo "::error::sir iceren satir engellendi (sir_koru)"; exit 1; fi

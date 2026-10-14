@@ -51,7 +51,7 @@ jobs:
           BAS: ${{ inputs.bas }}
           BIT: ${{ inputs.bit }}
         run: |
-          python3 - <<'EOF' | tee -a "$GITHUB_STEP_SUMMARY"
+          python3 - <<'EOF' | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
           import importlib.util, json, os, re
           from datetime import datetime, timedelta
           sp = importlib.util.spec_from_file_location('mpb', 'scripts/sosyal/metricool_pin_baslik.py')
@@ -98,7 +98,7 @@ jobs:
       - name: Yayinlanan videolarin herkese acik kapagi
         run: |
           set -uo pipefail
-          python3 - <<'EOF' | tee -a "$GITHUB_STEP_SUMMARY"
+          python3 - <<'EOF' | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
           import json, os, subprocess
           import numpy as np
           from PIL import Image
@@ -167,8 +167,11 @@ jobs:
               print('KAPAK', json.dumps({k: v for k, v in d.items() if k != 'kare_farklari'}, ensure_ascii=False))
           json.dump(sonuc, open('_out/YT_KAPAK_OLCUM.json', 'w'), ensure_ascii=False, indent=1)
           EOF
+          python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/mc.json _out || exit 1   # sir varsa Drive'a yuklenmez
           rclone copy _out "$O" -q
-          rclone lsl "$O" | tee -a "$GITHUB_STEP_SUMMARY"
+          rclone lsl "$O" | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
 
       - if: always()
-        run: rm -rf _work ~/.config/rclone
+        run: |
+          rm -rf _work ~/.config/rclone
+          if [ -f "$RUNNER_TEMP/SIR_ENGEL" ]; then echo "::error::sir iceren satir engellendi (sir_koru)"; exit 1; fi

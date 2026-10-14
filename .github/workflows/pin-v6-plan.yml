@@ -51,7 +51,7 @@ jobs:
           set -euo pipefail
           rclone copyto "$D/PIN_METIN_234_LINKLI.csv" _out/PIN_METIN_234_LINKLI.csv
           rclone lsjson "$D/PINLER" --files-only --no-modtime > _out/PINLER.json
-          echo "PINLER dosya: $(python3 -c "import json;print(len(json.load(open('_out/PINLER.json'))))")" | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "PINLER dosya: $(python3 -c "import json;print(len(json.load(open('_out/PINLER.json'))))")" | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
 
       - name: Gorseller (Drive PINLER -> on kosul)
         if: ${{ inputs.pages == true }}
@@ -120,7 +120,7 @@ jobs:
         run: |
           set -uo pipefail
           u="$URL_KOK/$(head -1 _out/gorseller.txt)"
-          python3 scripts/sosyal/metricool_normalize_test.py _work/mc.json "$u" _out/NORMALIZE_TEST.json | tee -a "$GITHUB_STEP_SUMMARY"
+          python3 scripts/sosyal/metricool_normalize_test.py _work/mc.json "$u" _out/NORMALIZE_TEST.json | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
           python3 - <<'EOF'
           import json, re, subprocess
           d = json.load(open('_out/NORMALIZE_TEST.json'))
@@ -133,12 +133,15 @@ jobs:
       - name: Plan
         run: |
           set -uo pipefail
-          python3 scripts/sosyal/metricool_panolar.py _work/mc.json _out 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+          python3 scripts/sosyal/metricool_panolar.py _work/mc.json _out 2>&1 | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
           python3 scripts/sosyal/pin_v6_plan.py --metin _out/PIN_METIN_234_LINKLI.csv --sira data/sosyal/pinterest/SIRA_78.csv \
-            --panolar _out/PANOLAR.json --pinler _out/PINLER.json --cikti _out/PIN_V6_PLAN_KURU.csv ${URL_ARG:-} 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+            --panolar _out/PANOLAR.json --pinler _out/PINLER.json --cikti _out/PIN_V6_PLAN_KURU.csv ${URL_ARG:-} 2>&1 | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
           rc=${PIPESTATUS[0]}
+          python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/mc.json _out || exit 1   # sir varsa Drive'a yuklenmez
           rclone copy _out "$D/PLAN" --include "PIN_V6_PLAN_KURU.csv" --include "PANOLAR*.json" --include "PINLER.json" --include "PIN_V6_SHA256SUMS.txt" --include "NORMALIZE_TEST.json"
-          rclone lsl "$D/PLAN" | tee -a "$GITHUB_STEP_SUMMARY"
+          rclone lsl "$D/PLAN" | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
           exit $rc
       - if: always()
-        run: rm -rf _work ~/.config/rclone
+        run: |
+          rm -rf _work ~/.config/rclone
+          if [ -f "$RUNNER_TEMP/SIR_ENGEL" ]; then echo "::error::sir iceren satir engellendi (sir_koru)"; exit 1; fi

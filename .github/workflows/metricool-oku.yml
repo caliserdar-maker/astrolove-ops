@@ -48,14 +48,19 @@ jobs:
         run: |
           set -euo pipefail
           K=data/sosyal/kaynak/metricool; mkdir -p "$K" /tmp/o
-          python3 scripts/sosyal/metricool_hesaplar.py /tmp/w/mc.json /tmp/o | tee -a "$GITHUB_STEP_SUMMARY"
+          python3 scripts/sosyal/metricool_hesaplar.py /tmp/w/mc.json /tmp/o | python3 scripts/guvenlik/sir_koru.py tee --sir-json /tmp/w/mc.json "$GITHUB_STEP_SUMMARY"
           rclone copy /tmp/o gdrive:ASTROLOVE/TEMP/SOSYAL/METRICOOL_OKU --include "HAM_*.json"
           cp /tmp/o/HESAPLAR.json "$K/HESAPLAR_$(date -u +%Y%m%d).json"
           curl -fsSL -o "$K/METRICOOL_API_SINIRLAMALAR.html" "https://help.metricool.com/api-limitations-per-social-network-n7zlr" || echo "sinirlamalar sayfasi alinamadi"
           curl -fsSL -o "$K/GITHUB_PAGES_LIMITS.html" "https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits" || echo "pages limits alinamadi"
           curl -fsSL -o "$K/GITHUB_LARGE_FILES.html" "https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-large-files-on-github" || echo "large files alinamadi"
-          ls -la "$K" | tee -a "$GITHUB_STEP_SUMMARY"
+          ls -la "$K" | python3 scripts/guvenlik/sir_koru.py tee --sir-json /tmp/w/mc.json "$GITHUB_STEP_SUMMARY"
           git config user.name "astrolove-ops"; git config user.email "actions@users.noreply.github.com"
           git add -A "$K"; git diff --cached --quiet || { git commit -qm "metricool-oku: hesap ozeti + kaynak belgeler (${GITHUB_RUN_ID})"; git push origin "HEAD:$DAL"; }
       - if: always()
         run: rm -rf /tmp/w ~/.config/rclone
+
+      - if: always()
+        run: |
+          rm -rf _work ~/.config/rclone
+          if [ -f "$RUNNER_TEMP/SIR_ENGEL" ]; then echo "::error::sir iceren satir engellendi (sir_koru)"; exit 1; fi
