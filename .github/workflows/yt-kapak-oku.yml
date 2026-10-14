@@ -1,0 +1,174 @@
+name: yt-kapak-oku
+
+# SALT OKUMA: YouTube Shorts kapak (thumbnail) teshisi. Metricool'a YAZMA / SILME / YENIDEN ZAMANLAMA YOK.
+# 1) Metricool zamanlayici: tum YouTube gonderileri (12 Eki - 31 Ara) -> yayinlanan: durum, uyari alanlari, link;
+#    bekleyen: videoThumbnailUrl dolu mu (toplam / kapakli / kapaksiz).
+# 2) Yayinlanan her video icin herkese acik kapak (i.ytimg.com oar2/hqdefault) indirilir; videonun karelerine
+#    (ffmpeg, 0-10 sn) ve onayli kapak_v1 gorseline benzerligi olculur; kucuk kopyalar Drive TEMP/YT_KAPAK_20261014/.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      bas:
+        default: "2026-10-12T00:00:00"
+      bit:
+        default: "2026-12-31T00:00:00"
+
+jobs:
+  oku:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      KD: gdrive:ASTROLOVE/TEMP/VIDEO_V9_20261012/KAPAK
+      V: gdrive:ASTROLOVE/TEMP/VIDEO_V9_20261012/FINAL
+      O: gdrive:ASTROLOVE/TEMP/YT_KAPAK_20261014
+    steps:
+      - uses: actions/checkout@v4
+      - name: Paketler
+        run: |
+          pip install -q numpy==2.1.3 pillow==11.0.0
+          sudo apt-get install -y -qq ffmpeg >/dev/null
+      - name: rclone + token
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+          mkdir -p ~/.config/rclone _work _out; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            export RCLONE_CONFIG_GDRIVE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET"
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+          rclone copyto "gdrive:ASTROLOVE/TEMP/METRICOOL_TOKEN.json" _work/mc.json
+          python3 -c "import json;print('::add-mask::'+json.load(open('_work/mc.json'))['userToken'])"
+
+      - name: Metricool YouTube gonderileri (GET)
+        env:
+          BAS: ${{ inputs.bas }}
+          BIT: ${{ inputs.bit }}
+        run: |
+          python3 - <<'EOF' | tee -a "$GITHUB_STEP_SUMMARY"
+          import importlib.util, json, os, re
+          from datetime import datetime, timedelta
+          sp = importlib.util.spec_from_file_location('mpb', 'scripts/sosyal/metricool_pin_baslik.py')
+          mpb = importlib.util.module_from_spec(sp); sp.loader.exec_module(mpb)
+          mc = mpb.MC(json.load(open('_work/mc.json')))
+          TZ = 'Europe/Istanbul'
+          t, son, ps = datetime.fromisoformat(os.environ['BAS']), datetime.fromisoformat(os.environ['BIT']), {}
+          while t < son:
+              e = min(son, t + timedelta(days=7))
+              for p in mpb.veri(mc.istek('GET', '/v2/scheduler/posts', {'start': t.strftime('%Y-%m-%dT%H:%M:%S'),
+                                         'end': e.strftime('%Y-%m-%dT%H:%M:%S'), 'timezone': TZ})) or []:
+                  ps[p.get('id')] = p
+              t = e
+          yt = [p for p in ps.values() if any((x.get('network') or '').lower() == 'youtube' for x in p.get('providers') or [])]
+          yt.sort(key=lambda p: (p.get('publicationDate') or {}).get('dateTime', ''))
+          out, yay, bek = [], [], []
+          for p in yt:
+              pr = next(x for x in p['providers'] if (x.get('network') or '').lower() == 'youtube')
+              yd = p.get('youtubeData') or {}
+              baslik = yd.get('title') or ''
+              m = re.match(r'(\w+) and (\w+)', baslik)
+              cift = f'{m.group(1).upper()}_{m.group(2).upper()}' if m else '?'
+              r = {'id': p.get('id'), 'cift': cift, 'saat': (p.get('publicationDate') or {}).get('dateTime'), 'durum': pr.get('status'),
+                   'detay': pr.get('detailedStatus'), 'link': pr.get('publicUrl'), 'video_id': pr.get('id') if pr.get('status') == 'PUBLISHED' else '',
+                   'kapak_alani': bool(p.get('videoThumbnailUrl')), 'kapak_url': p.get('videoThumbnailUrl') or '',
+                   'saglayici_diger': {k: v for k, v in pr.items() if k not in ('network', 'status', 'publicUrl', 'id', 'detailedStatus') and v not in (None, '', [], {})},
+                   'gonderi_uyari': {k: v for k, v in p.items() if re.search(r'warn|error|fail|messag|notif', k, re.I) and v not in (None, '', [], {})}}
+              out.append(r)
+              (yay if pr.get('status') == 'PUBLISHED' else bek).append(r)
+          json.dump(out, open('_out/YT_GONDERILER.json', 'w'), ensure_ascii=False, indent=1)
+          print(f'YOUTUBE gonderi {len(yt)}: yayinlanan {len(yay)}, bekleyen {len(bek)}')
+          for r in yay:
+              print('YAYIN', r['id'], r['cift'], r['saat'], r['durum'], r['detay'], r['link'], 'kapak_alani', r['kapak_alani'],
+                    json.dumps(r['saglayici_diger'], ensure_ascii=False)[:500], json.dumps(r['gonderi_uyari'], ensure_ascii=False)[:300])
+          durumlar = {}
+          for r in bek:
+              durumlar[r['durum']] = durumlar.get(r['durum'], 0) + 1
+          print(f"BEKLEYEN {len(bek)} (durum {durumlar}): kapakli {sum(r['kapak_alani'] for r in bek)}, kapaksiz {sum(not r['kapak_alani'] for r in bek)}"
+                + ''.join(f"\n  kapaksiz {r['id']} {r['cift']} {r['saat']}" for r in bek if not r['kapak_alani']))
+          if bek:
+              print('ilk bekleyen', bek[0]['saat'], bek[0]['cift'], '| son', bek[-1]['saat'], bek[-1]['cift'])
+          EOF
+
+      - name: Yayinlanan videolarin herkese acik kapagi
+        run: |
+          set -uo pipefail
+          python3 - <<'EOF' | tee -a "$GITHUB_STEP_SUMMARY"
+          import json, os, subprocess
+          import numpy as np
+          from PIL import Image
+          yay = [r for r in json.load(open('_out/YT_GONDERILER.json')) if r['durum'] == 'PUBLISHED' and r['video_id']]
+          def g(p, w=90, h=160):
+              im = Image.open(p).convert('L')
+              W, H = im.size
+              if W > H:   # yatay kapak (hqdefault 4:3): ortadaki dikey bandi kirp
+                  bw = int(H * 9 / 16); im = im.crop(((W - bw) // 2, 0, (W + bw) // 2, H))
+              return np.asarray(im.resize((w, h)), np.float32)
+          sonuc = []
+          for r in yay:
+              vid, c = r['video_id'], r['cift']
+              a, b = c.lower().split('_')
+              os.makedirs(f'_w/{vid}', exist_ok=True)
+              d = {'cift': c, 'video_id': vid, 'link': r['link']}
+              for ad in ('oar2', 'hqdefault', 'hq720', 'maxresdefault', 'frame0', 'hq1', 'hq2', 'hq3'):
+                  yol = f'_w/{vid}/{ad}.jpg'
+                  o = subprocess.run(['curl', '-s', '-o', yol, '-w', '%{http_code}', f'https://i.ytimg.com/vi/{vid}/{ad}.jpg'],
+                                     capture_output=True, text=True).stdout
+                  if o == '200':
+                      im = Image.open(yol); d.setdefault('kapaklar', {})[ad] = list(im.size)
+                  elif os.path.exists(yol):
+                      os.remove(yol)
+              ana = next((f'_w/{vid}/{x}.jpg' for x in ('oar2', 'hq720', 'hqdefault') if os.path.exists(f'_w/{vid}/{x}.jpg')), None)
+              if not ana:
+                  d['sonuc'] = 'KAPAK INDIRILEMEDI'; sonuc.append(d); print(json.dumps(d, ensure_ascii=False)); continue
+              d['ana'] = os.path.basename(ana)
+              A = g(ana)
+              d['parlaklik_ort'] = round(float(A.mean()), 1)
+              # video kareleri
+              mp4 = f'_w/{vid}/v.mp4'; kp = f'_w/{vid}/kapak_v1.jpg'
+              subprocess.run(['rclone', 'copyto', f"{os.environ['V']}/{a}-and-{b}-astroloveart-reel.mp4", mp4, '-q'])
+              subprocess.run(['rclone', 'copyto', f"{os.environ['KD']}/{a}-and-{b}-astroloveart-kapak.jpg", kp, '-q'])
+              kare = {}
+              if os.path.exists(mp4):
+                  for t in [0, 0.04, 0.25, 0.5, 1, 1.5, 2, 3, 4, 5, 6, 7, 8, 9, 10]:
+                      f = f'_w/{vid}/kare_{t}.jpg'
+                      subprocess.run(['ffmpeg', '-loglevel', 'error', '-y', '-ss', str(t), '-i', mp4, '-frames:v', '1', f])
+                      if os.path.exists(f):
+                          kare[t] = float(np.abs(A - g(f)).mean())
+                  d['ilk_kare_parlaklik'] = round(float(g(f'_w/{vid}/kare_0.jpg').mean()), 1) if os.path.exists(f'_w/{vid}/kare_0.jpg') else None
+              if kare:
+                  t = min(kare, key=kare.get); d['en_yakin_kare_sn'] = t; d['kare_farki'] = round(kare[t], 1)
+                  d['kare_farklari'] = {str(k): round(v, 1) for k, v in kare.items()}
+              if os.path.exists(kp):
+                  d['kapak_v1_farki'] = round(float(np.abs(A - g(kp)).mean()), 1)
+              # yorum: fark < 12 benzer kabul
+              if d.get('kapak_v1_farki', 999) < 12 and d['kapak_v1_farki'] <= d.get('kare_farki', 999):
+                  d['sonuc'] = 'KAPAK = onayli kapak_v1'
+              elif d['parlaklik_ort'] < 20:
+                  d['sonuc'] = 'SIYAH / cok koyu kare'
+              elif 'en_yakin_kare_sn' in d:
+                  d['sonuc'] = f"videodan kare (~{d['en_yakin_kare_sn']} sn)"
+              else:
+                  d['sonuc'] = 'belirsiz'
+              # kucuk kopyalar
+              os.makedirs('_out/kucuk', exist_ok=True)
+              Image.open(ana).convert('RGB').resize((270, int(270 * Image.open(ana).size[1] / Image.open(ana).size[0]))).save(
+                  f"_out/kucuk/{c}_{vid}_yt_{d['ana']}", quality=85)
+              if 'en_yakin_kare_sn' in d:
+                  im = Image.open(f"_w/{vid}/kare_{d['en_yakin_kare_sn']}.jpg").convert('RGB'); im.resize((270, 480)).save(f'_out/kucuk/{c}_{vid}_video_kare.jpg', quality=85)
+              if os.path.exists(f'_w/{vid}/kare_0.jpg'):
+                  Image.open(f'_w/{vid}/kare_0.jpg').convert('RGB').resize((270, 480)).save(f'_out/kucuk/{c}_{vid}_ilk_kare.jpg', quality=85)
+              sonuc.append(d)
+              print('KAPAK', json.dumps({k: v for k, v in d.items() if k != 'kare_farklari'}, ensure_ascii=False))
+          json.dump(sonuc, open('_out/YT_KAPAK_OLCUM.json', 'w'), ensure_ascii=False, indent=1)
+          EOF
+          rclone copy _out "$O" -q
+          rclone lsl "$O" | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - if: always()
+        run: rm -rf _work ~/.config/rclone
