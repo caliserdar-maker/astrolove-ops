@@ -9,6 +9,8 @@ on:
   workflow_dispatch:
     inputs:
       paket_ref: { description: "bizim-yilimiz-v3 commit (CSV)", required: true, default: "6296081705126001952459a2e0f8eca2858bc2af" }
+      mod: { description: "ac = yeni taslak | duzelt = eski taslagi duzelt (PATCH gerekirse sil + yeniden ac)", required: false, default: "ac" }
+      eski_id: { description: "mod=duzelt icin eski taslak id", required: false, default: "" }
       oku: { description: "true = yalniz SALT OKUMA (aciklama karsilastirma), yazma yok", required: false, default: "false" }
       listing_id: { description: "oku=true icin taslak id", required: false, default: "" }
 env:
@@ -73,6 +75,8 @@ jobs:
           CSV: _paket/BIZIM_YILIMIZ_78_ILAN_METIN.csv
           IMG_DIR: _img
           OUT: _out
+          MOD: ${{ inputs.mod }}
+          ESKI_ID: ${{ inputs.eski_id }}
         run: python3 scripts/etsy/by_taslak_ac.py
       - name: Drive'a rapor
         if: ${{ always() }}
