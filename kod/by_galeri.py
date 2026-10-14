@@ -29,7 +29,7 @@ def sym_png(mask, h, path):
 
 # ---- KAPAK (01_Cover) yeni olcu (Takip 14 Eki, Serdar: "tablo cok daha buyuk, yazilar cok daha buyuk") ----
 # Poster olcusu ve yazi puntolari gallery_layout.json slide 1'de (poster 70/50/54/90, 8x10 orani 54*3200 / 90*2400 = 0.8).
-KAPAK = dict(sol_pct=4, poster_bosluk_px=80, sag_bosluk_pct=3, pair_max=280, sutun_yukseklik_pct=80,
+KAPAK = dict(sol_pct=4, poster_bosluk_px=160, sag_bosluk_pct=3, pair_max=280, sutun_yukseklik_pct=80,
              sira=["collection", "pair", "headline", "product", "personalization", "formats"])
 BURCLAR = ["Aquarius", "Aries", "Cancer", "Capricorn", "Gemini", "Leo", "Libra", "Pisces", "Sagittarius", "Scorpio", "Taurus", "Virgo"]
 
