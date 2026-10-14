@@ -1,0 +1,67 @@
+name: by-taslak-hazirlik
+# BIZIM YILIMIZ CANCER_LIBRA taslak HAZIRLIGI (14 Eki 2026, Takip gorevi).
+# Tek Etsy yazmasi: magaza bolumu "1st Anniversary Gifts" (Serdar onayli; varsa acilmaz, bolum < 20).
+# Geri kalan GET. ILAN ACMA YOK, PATCH YOK, canli 78 ilana yazma YOK. Payload'lar yalniz dosyaya yazilir.
+permissions:
+  actions: read
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      paket_ref: { description: "bizim-yilimiz-v3 commit (CSV icin)", required: true, default: "00b2c60ef9a8262fce2570890d6aeadb412aab12" }
+jobs:
+  hazirlik:
+    runs-on: ubuntu-latest
+    timeout-minutes: 130
+    steps:
+      - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - uses: actions/checkout@v4
+        with: { ref: "${{ inputs.paket_ref }}", path: _paket, fetch-depth: 0, sparse-checkout: BIZIM_YILIMIZ_78_ILAN_METIN.csv, sparse-checkout-cone-mode: false }
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Token
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+      - name: Hazirlik (bolum + GET + payload dosyalari)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          CSV: _paket/BIZIM_YILIMIZ_78_ILAN_METIN.csv
+          OUT: _out
+        run: |
+          set -euo pipefail
+          python3 scripts/etsy/by_taslak_hazirlik.py | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Drive'a rapor
+        if: ${{ always() }}
+        run: |
+          [ -d _out ] && rclone copy _out "gdrive:ASTROLOVE/TEMP/BY_TASLAK_HAZIRLIK_20261014" -q && echo "::warning::rapor Drive TEMP/BY_TASLAK_HAZIRLIK_20261014" || true
+      - name: Token geri yaz
+        if: ${{ always() }}
+        run: |
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "token geri yazildi" || true
+          rm -rf _work ~/.config/rclone
