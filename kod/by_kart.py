@@ -133,7 +133,7 @@ def layers():
     b = rv.apply_papercut(b, heading(e, fs("DMSerif"), -0.10), "#A34729", lift=4)
     ms = fs("Montserrat", 600)
     sub = rv.union(names(e, ms, 0.35),
-                   small_line(LINE, ms, 0.65, e["YEAR ONE"], "YEAR ONE", max_w_pct=52),  # kemerin ici dar
+                   small_line(LINE, ms, 0.65, e["YEAR ONE"], "YEAR ONE", max_w_pct=37),  # ic kemerin ust genisligi ~%41 (olculdu)
                    small_line(DATE, ms, 0.40, e["14 JUNE 2025"], "14 JUNE 2025"))
     return rv.apply_ink(b, sub, "#592319")
 

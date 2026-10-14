@@ -457,7 +457,7 @@ def layers():
                   same_size_full(w2, "Anniversary", fs("DMSerif"), -0.15, e["Anniversary"], "w", max_w=0.86 * W))
     bg = apply_papercut(bg, title, "#A34729", lift=5)
     names = names_full(N1, N2, fs("Montserrat", 600), 0.35, e["SERDAR"], e["LENA"])
-    sub = union(same_size_full(LINE, "YEAR ONE", fs("Montserrat", 600), 0.65, e["YEAR ONE"], "w", max_w=0.46 * W),  # kemerin ici dar
+    sub = union(same_size_full(LINE, "YEAR ONE", fs("Montserrat", 600), 0.65, e["YEAR ONE"], "w", max_w=0.32 * W),  # ic kemerin ust genisligi ~%36 (olculdu)
                 text_full(DATE, fs("Montserrat", 600), 0.40, e["12 JUNE 2025"], "w"))
     bg = apply_ink(bg, union(names, sub), "#592319")
     return bg
