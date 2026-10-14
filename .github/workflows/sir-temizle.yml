@@ -128,10 +128,14 @@ jobs:
           akislar = ['metricool-durum', 'metricool-oku', 'metricool-pin-baslik', 'pin-v6-plan', 'pin-v6-yaz', 'sosyal-5p-plan',
                      'sosyal-5p-yaz', 'sosyal-5p-zamanla', 'sosyal-durum-oku', 'sosyal-kapak', 'yt-kapak-oku']
           sinir = datetime.now(timezone.utc) - timedelta(days=7)
+          hatalar = []
           def api(yol):
-              r = subprocess.run(['gh', 'api', yol], capture_output=True, text=True)
-              return r.stdout if r.returncode == 0 else None
-          is_say, acik, bulgu_is = 0, 0, []
+              r = subprocess.run(['gh', 'api', '-H', 'Accept: application/vnd.github+json', yol], capture_output=True, text=True)
+              if r.returncode != 0:
+                  hatalar.append(f"{yol.split('/actions/')[-1][:60]}: {r.stderr.strip()[:150]}")
+                  return None
+              return r.stdout
+          is_say, acik, bulgu_is, maskeli = 0, 0, [], 0
           for a in akislar:
               d = api(f'repos/{repo}/actions/workflows/{a}.yml/runs?per_page=50')
               if not d: continue
@@ -142,6 +146,7 @@ jobs:
                       if log is None: continue
                       is_say += 1
                       say = {}
+                      maskeli += sum('***' in s for s in log.splitlines())
                       for s in log.splitlines():
                           if any(v in s for v in sirlar):
                               say['sir-degeri-acik'] = say.get('sir-degeri-acik', 0) + 1
@@ -150,7 +155,9 @@ jobs:
                       if say:
                           bulgu_is.append(f"{a} run {run['id']} job {j['id']} {say}")
                           acik += say.get('sir-degeri-acik', 0)
-          print(f'LOG TARAMASI: {is_say} is logu; sir degeri ACIK gorunen satir {acik}; bulgulu is {len(bulgu_is)}')
+          print(f'LOG TARAMASI: {is_say} is logu; sir degeri ACIK gorunen satir {acik}; bulgulu is {len(bulgu_is)}; *** (maskeli) satir {maskeli}')
+          print(f'API hatasi {len(hatalar)}' + ''.join('\n  ' + h for h in hatalar[:8]))
+          if is_say == 0: print('UYARI: hic log okunamadi; log durumu DOGRULANAMADI')
           for b in bulgu_is: print('  ' + b)
           EOF
           cat _rapor/LOG.txt
