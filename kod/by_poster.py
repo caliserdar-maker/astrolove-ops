@@ -34,6 +34,9 @@ if HEADING not in ("Paper Anniversary", "Our First Year"):
     raise SystemExit(f"HATA: HEADING yalniz 'Paper Anniversary' ya da 'Our First Year' olabilir: {HEADING!r}")
 LINE = os.environ.get("LINE", "YEAR ONE").strip() or "YEAR ONE"
 STYLE = os.environ.get("STYLE", "").strip()
+# Siparis metninde latin disi harf (U+00FF ustu: Ğ Ş İ ı ...) varsa woff yerine latin-ext eklenmis TTF (14 Eki 2026).
+# Latin harfler ve kerning ayni; yalniz bu harfler varken kullanilir, varsayilan cikti bayt bayt ayni kalir.
+LATINEXT = any(ord(c) > 0xFF for c in N1 + N2 + DATE + LINE + HEADING)
 Z = f"{ROOT}/z"
 F = f"{ROOT}/fonts"
 OUT = os.environ.get("OUT", f"{ROOT}/cikti/{PAIR}/poster")
@@ -60,6 +63,8 @@ def fs(family, weight=400, style="normal"):
     fam = {"Cormorant": "cormorant-garamond", "Montserrat": "montserrat",
            "DMSerif": "dm-serif-display"}[family]
     path = f"{F}/{fam}-latin-{weight}-{style}.woff"
+    if LATINEXT:                                       # Ğ Ş İ ı ...: ayni font + latin-ext glifleri (kod/font_latinext.py)
+        path = f"{F}/{fam}-latinext-{weight}-{style}.ttf"
     return lambda size: ImageFont.truetype(path, size, layout_engine=ImageFont.Layout.RAQM)
 
 

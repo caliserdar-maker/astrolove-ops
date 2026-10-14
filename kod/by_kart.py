@@ -19,7 +19,7 @@ PK = f"{rv.ROOT}/kart"
 OUT = os.environ.get("OUT", f"{rv.ROOT}/cikti/{rv.PAIR}/kart")
 N1, N2 = os.environ.get("NAME1", "EMMA"), os.environ.get("NAME2", "JAMES")
 DATE = os.environ.get("DATE", "14 JUNE 2025")
-LINE = os.environ.get("LINE", "YEAR ONE")
+LINE = os.environ.get("LINE", "YEAR ONE").strip() or "YEAR ONE"   # bos LINE posterdeki gibi "YEAR ONE" (14 Eki, Serdar)
 MEAS = {d["name"]: d for d in json.load(open(f"{PK}/Olculer_5x7.json"))["designs"]}
 fs = rv.fs
 
