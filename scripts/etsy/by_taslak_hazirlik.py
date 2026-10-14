@@ -67,7 +67,7 @@ def oas_ozet():
                     continue
                 body = (((op.get("requestBody") or {}).get("content") or {}))
                 pers[f"{m.upper()} {p}"] = dict(operationId=op.get("operationId"), summary=(op.get("summary") or "")[:200],
-                                               description=(op.get("description") or "")[:600], body=json.dumps(body)[:1500])
+                                               description=(op.get("description") or "")[:600], body=json.dumps(body)[:5000])
     sema = {k: json.dumps(v)[:2500] for k, v in S.items() if "ersonaliz" in k}
     ads = sorted({p for p in paths if re.search(r"(^|/)(ads?|advert\w*|promot\w*|marketing)(/|$)", p.lower())})
     listing_ads = {}
@@ -137,8 +137,9 @@ def main():
         R["iade_politikasi"] = {a: rp.get(a) for a in ("return_policy_id", "accepts_returns", "accepts_exchanges", "return_deadline")}
     pp = (api.get(f"/shops/{shop}/production-partners", ok404=True) or {}).get("results") or []
     R["uretim_ortaklari"] = [(x.get("production_partner_id"), x.get("partner_name"), x.get("location")) for x in pp]
-    per = api.get(f"/shops/{shop}/listings/{REF_LISTING}/personalization", ok404=True)
-    R["referans_kisisellestirme"] = per
+    R["referans_kisisellestirme"] = api.get(f"/listings/{REF_LISTING}/personalization", ok404=True)   # OAS: getListingPersonalization
+    bl = (api.get("/listings/batch", params={"listing_ids": str(REF_LISTING), "includes": "personalization"}, ok404=True) or {}).get("results") or [{}]
+    R["referans_kisisellestirme_batch"] = {k_: v for k_, v in bl[0].items() if "ersonaliz" in k_}
     tx = api.get(f"/seller-taxonomy/nodes/{L.get('taxonomy_id')}/properties", ok404=True) if L.get("taxonomy_id") else None
     R["kategori_ozellikleri"] = [(p.get("property_id"), p.get("name"), p.get("supports_variations"), p.get("is_required"))
                                  for p in ((tx or {}).get("results") or [])]
@@ -160,12 +161,19 @@ def main():
                   is_personalizable="true", personalization_is_required="true",
                   production_partner_ids=",".join(str(x.get("production_partner_id")) for x in (L.get("production_partners") or [])) or None,
                   materials="ACIK SORU (canli ilandaki Hahnemuhle ifadesi yeni ilanda kullanilmaz)")
+    # OAS 3.0.0: POST /shops/{shop}/listings/{id}/personalization (updateListingPersonalization); question_type enum
+    # text_input|dropdown|unlabeled_upload|labeled_upload; "Currently, only a single question with type 'text_input' is supported";
+    # question_text 1..45 karakter; dropdown'da instructions yok. Bu yuzden: 1 dropdown (Top line) + 1 text_input (diger 4 bilgi).
     pers = dict(personalization_questions=[
-        dict(question_text="Name under Cancer", instruction="Up to 11 letters. Printed in capitals.", question_type="text", required=True, max_allowed_characters=11),
-        dict(question_text="Name under Libra", instruction="Up to 11 letters. Printed in capitals.", question_type="text", required=True, max_allowed_characters=11),
-        dict(question_text="Special date", instruction="Your wedding day or the day you met. Example: 14 June 2025", question_type="text", required=True, max_allowed_characters=20),
-        dict(question_text="Top line", instruction="Write Paper Anniversary (married) or Our First Year (dating). The card always says Happy First Anniversary.", question_type="text", required=True, max_allowed_characters=20),
-        dict(question_text="Short line (optional)", instruction="Up to 20 characters, replaces Year One. Leave empty to keep Year One.", question_type="text", required=False, max_allowed_characters=20)])
+        dict(question_text="Top line", question_type="dropdown", required=True,
+             options=[dict(label="Paper Anniversary"), dict(label="Our First Year")]),
+        dict(question_text="Names, date and optional line", question_type="text_input", required=True, max_allowed_characters=100,
+             instructions="Please write on separate lines: 1) Name under Cancer (max 11 letters) 2) Name under Libra (max 11 letters) "
+                          "3) Special date, e.g. 14 June 2025 4) Optional short line, max 20 characters, replaces Year One")])
+    pers_alternatif_5_alan = dict(not_="OAS'a gore REDDEDILIR (tek text_input); yalniz karsilastirma icin", personalization_questions=[
+        dict(question_text=q, question_type="text_input", required=r, max_allowed_characters=m)
+        for q, r, m in (("Name under Cancer", True, 11), ("Name under Libra", True, 11), ("Special date", True, 20),
+                        ("Top line", True, 20), ("Short line (optional)", False, 20))])
     prodsP = []
     for st in STYLES:
         for fm, pr, kod in FORMATS:
@@ -176,7 +184,7 @@ def main():
     inventory = dict(products=prodsP, price_on_property=[514], quantity_on_property=[], sku_on_property=[513, 514])
     gorseller = ["01_Cover_A.jpg", "02_Shared_Symbol_A.jpg", "03_Five_Styles_A.jpg", "04_Personalization_A.jpg", "05_Starlit_Timeless_A.jpg",
                  "06_FirstPage_Botanical_A.jpg", "07_Layers_Material_A.jpg", "08_Formats_A.jpg", "09_Size_Gift_Scene_A.jpg", "10_Free_Preview_A.jpg"]
-    for n, b in (("PAYLOAD_1_createDraftListing.json", create), ("PAYLOAD_2_personalization.json", pers),
+    for n, b in (("PAYLOAD_1_createDraftListing.json", create), ("PAYLOAD_2_personalization_POST.json", pers), ("PAYLOAD_2b_5alan_REDDEDILIR.json", pers_alternatif_5_alan),
                  ("PAYLOAD_3_inventory.json", inventory), ("PAYLOAD_4_gorseller.json", dict(sira=gorseller, kaynak="Drive TEMP/BIZIM_YILIMIZ_78_20261014_v2/CANCER_LIBRA/galeri"))):
         json.dump(b, open(out / n, "w"), indent=1, ensure_ascii=False)
     R["payload_ozet"] = dict(baslik_uzunluk=len(row["baslik"]), etiket=len(tags), urun=len(prodsP), fiyatlar={f: p for f, p, _ in FORMATS},
