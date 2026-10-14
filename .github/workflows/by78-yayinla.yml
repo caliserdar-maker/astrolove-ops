@@ -2,8 +2,9 @@ name: by78-yayinla
 
 # BY78 78 ILAN YAYINI (14 Eki 2026). YALNIZ Serdar'in acik onayiyla; onay girdisi tam olarak SERDAR_YAYIN_ONAYI olmali.
 # Hedef YALNIZ Drive TEMP/BY78_TASLAK_20261014/BY78_TASLAKLAR.csv (78 listing_id); canli 78 ilan (data/pod/pod78_ids.csv) hedefte -> FAIL.
-# Her ilan: GET; draft ise TEK yazma (updateListing yalniz state=active, yeniden deneme yok); sonra GET dogrulama.
-# Dogrulama FAIL -> ilan hemen state=inactive (tek istek), tekrar okunur, YAYIN.csv sonuc=geri_alindi, is DURUR.
+# Az istek (15 Eki): basta 1 toplu okuma (getListingsByListingIds); ilan basina YALNIZ PATCH state=active (yeniden deneme yok),
+# PATCH yaniti ile state/baslik/etiket kontrolu; 10 yayinda bir ve sonda toplu okuma ile active + url. adet=1 ~3 istek, 77 ~86 istek.
+# Beklenmeyen durum -> ilan hemen state=inactive (tek istek), YAYIN.csv sonuc=geri_alindi, is DURUR.
 # adet=1 yalniz ilk ilan; adet=0 kalan hepsi. Tekrar kosuda active olanlar atlanir. Hata ya da kota < 500 -> DUR.
 # Cikti: Drive TEMP/BY78_YAYIN/ (YAYIN.csv son kosu, YAYIN_<damga>.csv, OZET.md).
 
