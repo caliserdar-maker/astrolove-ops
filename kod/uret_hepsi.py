@@ -25,7 +25,7 @@ for k in range(0, len(PAIRS), 6):
         b = f"{ROOT}/cikti/{p}"
         ims = [Image.open(f"{b}/poster/{n}_8x10.jpg").resize((240, 300)) for n in ("1_Starlit", "2_Timeless", "3_FirstPage", "4_Layers", "5_Botanical")]
         ims += [Image.open(f"{b}/kart/{n}_5x7.jpg").resize((214, 300)) for n in ("1_Starlit", "2_Timeless", "3_FirstPage", "4_Layers", "5_Botanical")]
-        ims += [Image.open(f"{b}/galeri/01_Cover.jpg").resize((400, 300))]
+        ims += [Image.open(f"{b}/galeri/01_Cover.jpg").resize((240, 300))]   # kapak = Layers posteri (4:5)
         rows.append(ims)
     wd = sum(m.width + 6 for m in rows[0])
     sheet = Image.new("RGB", (wd, len(rows) * 306), "white")

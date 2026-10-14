@@ -1,4 +1,4 @@
-"""Bizim Yilimiz Etsy gallery (13 images, 3200x2400, order SIRA below; old 05/06 are no longer made) for one pair.
+"""Bizim Yilimiz Etsy gallery (13 images, order SIRA below; 01_Cover = Layers 8x10 poster copy 2400x3000, others 3200x2400) for one pair.
 Needs posters (by_poster.py) and the First Page card (by_kart.py) of the same pair with example names EMMA / JAMES.
 Env: BY_ROOT, PAIR. Output: <ROOT>/cikti/<PAIR>/galeri/*.jpg
 """
@@ -223,7 +223,15 @@ def main():
     json.dump(d, open(f"{WORK}/gallery_layout.json", "w"), ensure_ascii=False, indent=1)
     from pathlib import Path
     secili = [int(x) for x in os.environ.get("GALERI_SLAYT", "").split(",") if x.strip()] or None   # bos = 13 gorsel (YENI numaralar)
-    render(Path(WORK), Path(f"{SRC}/galeri"), secili)
+    # KAPAK = YALNIZ POSTER (Serdar 14 Eki 20:00: Etsy kare/dikey kirpma kapak yazilarini kesiyor):
+    # 01_Cover.jpg = o ciftin poster/4_Layers_8x10.jpg dosyasinin birebir kopyasi (2400x3000, yeniden boyutlandirma yok).
+    digerleri = [n for n in (secili or [s["number"] for s in d["slides"]]) if n != 1]
+    if digerleri:
+        render(Path(WORK), Path(f"{SRC}/galeri"), digerleri)
+    if secili is None or 1 in secili:
+        os.makedirs(f"{SRC}/galeri", exist_ok=True)
+        shutil.copyfile(f"{SRC}/poster/4_Layers_8x10.jpg", f"{SRC}/galeri/01_Cover.jpg")
+        print("01_Cover.jpg = poster/4_Layers_8x10.jpg (kopya)")
 
 
 if __name__ == "__main__":
