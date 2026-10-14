@@ -56,7 +56,7 @@ def main():
             p = E["pair"]
             f = ImageFont.truetype(f"{ROOT}/galeri/{p['font']['file']}", p["font"]["size_px"])
             f.set_variation_by_axes([p["font"]["weight"]])
-            if f.getlength(p["content"]) > p["width_pct"] / 100 * 3200:
+            if f.getlength(p["content"]) > 1300:   # posterle arada boşluk kalsın (Takip 14 Eki)
                 # long pair names: two lines, slightly smaller, rest of the column moves down
                 p["content"] = f"{A} &\n{B}"
                 size = p["font"]["size_px"]
