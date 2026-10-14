@@ -1,4 +1,4 @@
-"""Bizim Yilimiz Etsy gallery (15 images, 3200x2400: 01-10 + 11-15 stil gorselleri) for one pair.
+"""Bizim Yilimiz Etsy gallery (13 images, 3200x2400, order SIRA below; old 05/06 are no longer made) for one pair.
 Needs posters (by_poster.py) and the First Page card (by_kart.py) of the same pair with example names EMMA / JAMES.
 Env: BY_ROOT, PAIR. Output: <ROOT>/cikti/<PAIR>/galeri/*.jpg
 """
@@ -32,6 +32,14 @@ def sym_png(mask, h, path):
 KAPAK = dict(sol_pct=4, poster_bosluk_px=160, sag_bosluk_pct=3, pair_max=280, sutun_yukseklik_pct=80,
              sira=["collection", "pair", "headline", "product", "personalization", "formats"])
 BURCLAR = ["Aquarius", "Aries", "Cancer", "Capricorn", "Gemini", "Leo", "Libra", "Pisces", "Sagittarius", "Scorpio", "Taurus", "Virgo"]
+# ---- GALERI SIRASI (Takip 14 Eki, ChatGPT degerlendirmesi, Serdar onayi): 13 gorsel; eski 05 ve 06 URETILMEZ ----
+# (eski slayt no, yeni no, dosya adi). Yeni adlarda "_A" yok: eski 10'lu galeri dosyalariyla karismaz.
+SIRA = [(1, 1, "01_Cover"), (2, 2, "02_Shared_Symbol"), (8, 3, "03_Formats"), (3, 4, "04_Five_Styles"),
+        (7, 5, "05_Layers_Material"), (4, 6, "06_Personalization"), (9, 7, "07_Size_Gift_Scene"), (10, 8, "08_Free_Preview"),
+        (11, 9, "09_Style_Starlit"), (12, 10, "10_Style_Timeless"), (13, 11, "11_Style_FirstPage"), (14, 12, "12_Style_Layers"),
+        (15, 13, "13_Style_Botanical")]
+# eski slayt 9 (olcek) dipnotu: ~1,6 kat punto, ince yazilarla ayni renk (scale_label), okunur yerde
+DIPNOT = dict(kat=1.6)
 # ---- STIL GORSELLERI 11-15 (Takip 14 Eki, Serdar: "style secilince ilgili poster gorunsun"): kapakla ayni duzen ----
 STILLER = [  # (no, ad, poster dosyasi, headline)
     (11, "Starlit", "Poster_Stil1_Starlit_EMMA_JAMES.jpg", "Navy and gold,\nunder the stars."),
@@ -182,9 +190,39 @@ def main():
     for s, st in zip(yeni, STILLER):
         kapak_yerlesim(s, st)
     d["slides"] += yeni
+    # eski slayt 4: ornek posterde sagdaki kisa satir gercekten basili (LINE ile uretilen First Page posteri)
+    s4 = next(s for s in d["slides"] if s["number"] == 4)
+    E4 = {e["id"]: e for e in s4["elements"]}
+    satir = E4["shortline_example"]["content"]
+    import subprocess
+    env = dict(os.environ, STYLE="3", LINE=satir, OUT=f"{WORK}/poster_line")
+    r = subprocess.run([sys.executable, f"{os.path.dirname(os.path.abspath(__file__))}/by_poster.py"], env=env, capture_output=True, text=True)
+    if r.returncode:
+        raise SystemExit(f"HATA: LINE posteri uretilemedi\n{r.stderr[-1500:]}")
+    shutil.copy(f"{WORK}/poster_line/3_FirstPage_8x10.jpg", f"{WORK}/source_assets/Poster_Stil3_FirstPage_EMMA_JAMES_LINE.jpg")
+    E4["sample_poster"]["content"]["source_file"] = "source_assets/Poster_Stil3_FirstPage_EMMA_JAMES_LINE.jpg"
+    print("slayt 4 ornek poster LINE:", repr(satir))
+    # eski slayt 9: dipnot
+    s9 = next(s for s in d["slides"] if s["number"] == 9)
+    E9 = {e["id"]: e for e in s9["elements"]}
+    n9 = E9["card_digital_note"]
+    eski = (n9["font"]["size_px"], n9["color_hex"], n9["center_y_pct"])
+    n9["font"]["size_px"] = round(n9["font"]["size_px"] * DIPNOT["kat"])
+    n9["color_hex"] = E9["scale_label"]["color_hex"]
+    for k, v in DIPNOT.items():
+        if k != "kat":
+            n9[k] = v
+    n9["height_pct"] = max(n9["height_pct"], (n9["font"]["size_px"] + 4) / 24)
+    print("slayt 9 dipnot:", eski, "->", (n9["font"]["size_px"], n9["color_hex"], n9["center_y_pct"]))
+    # yeni sira + numara + dosya adi; eski 05 ve 06 cikarilir
+    m = {a: (b, n) for a, b, n in SIRA}
+    d["slides"] = sorted([s for s in d["slides"] if s["number"] in m], key=lambda s: m[s["number"]][0])
+    for s in d["slides"]:
+        b, n = m[s["number"]]
+        s["number"], s["preview_file"] = b, f"A_Previews/{n}.jpg"
     json.dump(d, open(f"{WORK}/gallery_layout.json", "w"), ensure_ascii=False, indent=1)
     from pathlib import Path
-    secili = [int(x) for x in os.environ.get("GALERI_SLAYT", "").split(",") if x.strip()] or None   # bos = 10 gorsel
+    secili = [int(x) for x in os.environ.get("GALERI_SLAYT", "").split(",") if x.strip()] or None   # bos = 13 gorsel (YENI numaralar)
     render(Path(WORK), Path(f"{SRC}/galeri"), secili)
 
 
