@@ -368,4 +368,14 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except SystemExit as e:
+        if isinstance(e.code, str):                   # HATA mesaji: job logu okunamadigi icin annotation'a yaz
+            print(f"::error::{e.code[:900]}")
+            raise SystemExit(1)
+        raise
+    except Exception as e:                            # beklenmeyen hata da annotation'a
+        import traceback
+        print(f"::error::{type(e).__name__}: {str(e)[:500]} | {traceback.format_exc()[-700:]}".replace("\n", " / "))
+        raise SystemExit(1)
