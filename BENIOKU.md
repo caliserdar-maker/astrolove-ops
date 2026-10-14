@@ -19,7 +19,11 @@ BY_ROOT=$PWD python3 kod/uret_hepsi.py CANCER_LIBRA        # tek cift
 BY_ROOT=$PWD python3 kod/uret_hepsi.py                     # 78 cift (~45 sn/cift, 2 cekirdek)
 ```
 Musteri dosyasi (siparis): `BY_ROOT=$PWD PAIR=CANCER_LIBRA NAME1=SERDAR NAME2=LENA DATE="12 JUNE 2025" LINE="YEAR ONE" python3 kod/by_poster.py` (ve by_kart.py). NAME1 = cift adindaki ILK burcun (soldaki) ismi. Cikti: cikti/<CIFT>/poster|kart.
-Ust satir "Our First Year" secenegi ve stil secimi icin tek dosya uretimi henuz parametre degil (siradaki is).
+Siparis parametreleri (14 Eki, ana oturum): HEADING="Paper Anniversary" (varsayilan) | "Our First Year" (yazi boyu HER ZAMAN "Paper Anniversary" ile ayni,
+kisa baslik buyumez; Layers'ta 1. kelime ust, kalan alt satir), LINE (varsayilan "YEAR ONE"; boyu "YEAR ONE" ile ayni, yalniz tasarsa kuculur),
+STYLE=1..5 | 1_Starlit | FirstPage ... (tek stil, yan yana sayfa yok). Kartta baslik her zaman "Happy First Anniversary" (HEADING kullanilmaz).
+Ornek: `BY_ROOT=$PWD PAIR=CANCER_LIBRA NAME1=SERDAR NAME2=LENA DATE="12 JUNE 2025" HEADING="Our First Year" STYLE=3 python3 kod/by_poster.py`
+Varsayilanlarla cikti a04542b ile bayt bayt ayni (10/10 dosya, 14 Eki testi).
 
 ## Kurallar (degismez)
 - Birlesik sembol ve burc isaretleri sekilleri DEGISMEZ; yalniz orantili kucultulur (INTER_AREA).
