@@ -221,13 +221,31 @@ def place(mask, s, el):
     return full_mask(m, el["center_x"] / 100 * W, el["center_y"] / 100 * H)
 
 
+def _ink(path):
+    """ink amount of a main symbol source (sum of alpha, measured on a 4x reduced copy), and its width"""
+    im = Image.open(path).convert("L")
+    a = np.array(im.reduce(4)).astype(np.float64)
+    ys, xs = np.where(a > 8)
+    return a.sum() * 16, (xs.max() - xs.min() + 1) * 4
+
+
+INK_CL, W_CL = _ink(f"{KAY}/ana/cancer_libra_alfa.png")
+INK_P = float(MASKS["hero"].astype(np.float64).sum())
+
+
 def hero_mask(el):
     """Layout boxes were measured on CANCER_LIBRA. Other pairs keep the relative size of the
-    78 live posters (yerlesim78.json ana box width), clamped so tall/wide symbols stay in the design."""
+    78 live posters (yerlesim78.json ana box width), but never carry more ink than CANCER_LIBRA
+    (Serdar 14 Eki: heavy / tall symbols came too close to the text above and below).
+    CANCER_LIBRA itself is unchanged."""
     mask = MASKS["hero"]
     tw = el["width"] / 100 * W * REF_W[PAIR] / REF_W["CANCER_LIBRA"]
     s = tw / mask.shape[1]
-    s = min(s, el["visible_height"] / 100 * H * 1.10 / mask.shape[0], el["width"] / 100 * W * 1.3 / mask.shape[1])
+    s_cl = el["width"] / 100 * W / W_CL                       # scale CANCER_LIBRA gets in this box
+    s_ink = s_cl * (INK_CL / INK_P) ** 0.5                     # same ink area as CANCER_LIBRA
+    s = min(s, s_ink,
+            el["visible_height"] / 100 * H * 0.90 / mask.shape[0],   # en fazla CANCER_LIBRA boyunun %90'i (Serdar 14 Eki)
+            el["width"] / 100 * W * 1.15 / mask.shape[1])
     return place(mask, s, el)
 
 
