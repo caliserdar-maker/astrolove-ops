@@ -2,13 +2,13 @@
 """BIZIM YILIMIZ 77 TASLAK: bordo kare kapak + Layers bagi 13 + video, tek kosu (Serdar 15 Eki).
 YAYIN YOK, PATCH/updateListing YOK, SILME YOK (yalniz acil durumda state=inactive).
 
-Ilan basina istek (hedef 6):
-  1) getListing?includes=Images,Inventory,Videos   state + gorseller + Style value_id + mevcut video
+Ilan basina istek (en fazla 7; Etsy includes'ta inventory YOK: images, videos ... -> envanter ayri GET):
+  1) getListing?includes=Images,Videos + getListingInventory   state + gorseller + mevcut video + Style value_id
      state draft degilse ilan ATLANIR (raporlanir); "active" ise aninda inactive ve TUM IS DURUR
   2) uploadListingImage rank=1 overwrite=true      00_Kapak.jpg  (rank 1 zaten 2400x2400 ise atlanir)
   3) updateVariationImages                          Starlit=9 Timeless=10 First Page=11 Botanical=12 Layers=13
   4) uploadListingVideo                             00_Video.mp4  (ilanda video varsa atlanir)
-  5) getListing?includes=Images,Videos              son state + 13 gorsel, rank 1 2400x2400, 1 video
+  5) getListing?includes=Images,Videos              son state + 13 gorsel, rank 1 2400x2400, 1 video (tek okuma)
   6) getListingVariationImages                      5 bag
   Bos boyut (None): 8 sn bekleyip yeniden okunur (en fazla 4); hala bossa o rank 1 kez yeniden yuklenir.
 Kota < 500 olursa ilan bitince DURUR; BY78_KAPAK_VIDEO.csv'de tamam olanlar tekrar kosuda atlanir.
@@ -34,7 +34,7 @@ P_STYLE = 513
 KARE, DIKEY, YATAY = (2400, 2400), (2400, 3000), (3200, 2400)
 BAG = {"Starlit": 9, "Timeless": 10, "First Page": 11, "Botanical": 12, "Layers": 13}
 KOTA_MIN = 500
-ISTEK_TAHMIN = 6
+ISTEK_TAHMIN = 7
 ALAN = ["cift", "listing_id", "sonuc", "kapak_id", "video_id", "bag", "state", "istek", "not"]
 
 
@@ -156,7 +156,7 @@ def main():
             n0 = api.calls
             try:
                 # 1) state + gorseller + value_id + video
-                L, ims = oku(lid, "Images,Inventory,Videos")
+                L, ims = oku(lid, "images,videos")
                 st = L.get("state")
                 if st == "active":
                     acil(c, lid, "basla")
@@ -165,7 +165,8 @@ def main():
                 if [x.get("rank") for x in ims] != list(range(1, 14)):
                     raise Atla(f"baslangic gorsel sirasi {[x.get('rank') for x in ims]}")
                 rank_id = {x.get("rank"): x.get("listing_image_id") for x in ims}
-                vid = {v["values"][0]: v["value_ids"][0] for p in (L.get("inventory") or {}).get("products") or []
+                inv = api.get(f"/listings/{lid}/inventory") or {}
+                vid = {v["values"][0]: v["value_ids"][0] for p in inv.get("products") or []
                        for v in p.get("property_values") or [] if v.get("property_id") == P_STYLE and v.get("value_ids")}
                 if sorted(vid) != sorted(BAG):
                     raise Atla(f"Style value_id eksik {sorted(vid)}")
@@ -187,13 +188,13 @@ def main():
                                       data={"name": f"AstroLoveArt_{c}_video.mp4"})
                     p.unlink()
                 # 5) son okuma
-                L2, ims2 = oku(lid, "Images,Videos")
+                L2, ims2 = oku(lid, "images,videos")
                 if L2.get("state") == "active":
                     acil(c, lid, "son")
                 bos = 0
                 while not all(x.get("full_width") for x in ims2) and bos < 4:
                     time.sleep(8); bos += 1
-                    L2, ims2 = oku(lid, "Images,Videos")
+                    L2, ims2 = oku(lid, "images,videos")
                 if (ims2[0].get("full_width") if ims2 else 1) is None:      # hala bos: rank 1 bir kez yeniden yukle
                     p = indir(c, "00_Kapak.jpg")
                     with open(p, "rb") as fh:
@@ -202,7 +203,7 @@ def main():
                     p.unlink()
                     R["olaylar"].append(f"{c}: rank 1 boyutsuzdu, yeniden yuklendi")
                     time.sleep(8)
-                    L2, ims2 = oku(lid, "Images,Videos")
+                    L2, ims2 = oku(lid, "images,videos")
                 hata = []
                 if L2.get("state") != "draft":
                     hata.append(f"state {L2.get('state')}")
