@@ -4,7 +4,9 @@ Hedef: YALNIZ taslak CSV'deki (Drive TEMP/BY78_TASLAK_20261014/BY78_TASLAKLAR.cs
 Kara liste: canli 78 kisisel cift ilani (data/pod/pod78_ids.csv) hedefte varsa HIC istek yapilmadan FAIL.
 Her ilan: GET (ilan + envanter) -> state "active" ise ATLA; "draft" degilse ATLA + raporla;
   draft ise TEK yazma: updateListing PATCH /shops/{shop}/listings/{id} govde yalniz state=active (tek istek, yeniden deneme YOK)
-  -> GET: state active + url var + baslik/etiket/fiyat yayin oncesiyle ayni; degilse FAIL ve DUR.
+  -> GET: state active + url var + baslik/etiket/fiyat yayin oncesiyle ayni; degilse FAIL:
+     ilan active ise HEMEN state=inactive (tek istek), tekrar okunur, YAYIN.csv sonuc=geri_alindi, is DURUR.
+  Betikte tek yazma yolu var: durum(lid, state), state yalniz active ya da inactive.
 Her sonuc aninda YAYIN.csv'ye (cift, listing_id, once, sonra, url, saat, sonuc, not). Hata -> DUR. Kota < 500 -> DUR.
 --adet N: en fazla N YENI yayin (1 = yalniz ilk; 0 = kalan hepsi).
 Ortam: ETSY_API_KEY, ETSY_SHARED_SECRET, ETSY_SHOP_ID, TOKEN_FILE
@@ -56,8 +58,8 @@ def hedef_kontrol(taslak, kara):
     return h
 
 
-def calistir(api, shop, taslak, kara, out, adet, yayinla):
-    """yayinla(lid) -> TEK PATCH state=active (yeniden deneme yok). Donus: cikis kodu."""
+def calistir(api, shop, taslak, kara, out, adet, durum):
+    """durum(lid, 'active'|'inactive') -> TEK PATCH (yeniden deneme yok). Donus: cikis kodu."""
     out = Path(out); out.mkdir(parents=True, exist_ok=True)
     h = hedef_kontrol(taslak, kara)
     if h:
@@ -91,7 +93,7 @@ def calistir(api, shop, taslak, kara, out, adet, yayinla):
                 yaz(cift=c, listing_id=lid, once=o["state"], sonra=o["state"], sonuc="ATLANDI_DRAFT_DEGIL",
                     **{"not": f"state {o['state']}; yazilmadi"}); continue
             try:
-                yayinla(lid)
+                durum(lid, "active")
             except Exception as e:                       # tek deneme: hata -> DUR
                 yaz(cift=c, listing_id=lid, once="draft", sonra="?", sonuc="HATA", **{"not": str(e)[:300]})
                 raise Dur(f"{c} {lid}: updateListing hatasi: {str(e)[:200]}")
@@ -102,7 +104,18 @@ def calistir(api, shop, taslak, kara, out, adet, yayinla):
             yaz(cift=c, listing_id=lid, once="draft", sonra=s["state"], url=s["url"], sonuc="YAYINLANDI" if ok else "FAIL",
                 **{"not": "" if ok else f"state {s['state']}, url {'var' if s['url'] else 'yok'}, degisen {fark}"})
             if not ok:
-                raise Dur(f"{c} {lid}: yayin sonrasi dogrulama FAIL (state {s['state']}, degisen {fark})")
+                neden = f"state {s['state']}, url {'var' if s['url'] else 'yok'}, degisen {fark}"
+                if s["state"] != "active":
+                    raise Dur(f"{c} {lid}: yayin sonrasi dogrulama FAIL ({neden}); ilan active degil, geri alma gerekmedi")
+                try:
+                    durum(lid, "inactive")                      # tek istek, yeniden deneme yok
+                except Exception as e:
+                    yaz(cift=c, listing_id=lid, once="active", sonra="?", sonuc="GERI_ALMA_HATASI", **{"not": f"{neden} | {str(e)[:200]}"})
+                    raise Dur(f"{c} {lid}: dogrulama FAIL ve inactive yapilamadi: {str(e)[:200]} -> ELLE PASIF YAPIN")
+                s2 = ozet(api, lid)
+                yaz(cift=c, listing_id=lid, once="active", sonra=s2["state"], url=s2["url"],
+                    sonuc="geri_alindi" if s2["state"] == "inactive" else "GERI_ALMA_DOGRULANAMADI", **{"not": neden})
+                raise Dur(f"{c} {lid}: yayin sonrasi dogrulama FAIL ({neden}); state=inactive yapildi, simdi {s2['state']}")
             g = time.time() - t0
             print(f"[{i}/{len(taslak)}] {c} {lid} YAYINLANDI {s['url']} | yeni {yeni} | gecen {g:.0f} sn | kota {api.remaining}", flush=True)
     except Dur as e:
@@ -145,17 +158,19 @@ def main():
     shop = os.environ["ETSY_SHOP_ID"]
     hedef = {r["listing_id"].strip() for r in taslak}
 
-    def yayinla(lid):
+    def durum(lid, state):
         if lid not in hedef or lid in kara or not re.fullmatch(r"\d+", lid):
             raise SystemExit(f"YASAK: {lid} hedef listede degil")
-        r = requests.patch(f"{API}/shops/{shop}/listings/{lid}", data={"state": "active"}, headers=api._headers(), timeout=60)
+        if state not in ("active", "inactive"):
+            raise SystemExit(f"YASAK: state {state!r}")
+        r = requests.patch(f"{API}/shops/{shop}/listings/{lid}", data={"state": state}, headers=api._headers(), timeout=60)
         api.calls += 1
         if r.headers.get("x-remaining-today") is not None:
             api.remaining = r.headers.get("x-remaining-today")
         if r.status_code != 200:
             raise RuntimeError(f"PATCH {r.status_code}: {r.text[:200]}")
 
-    sys.exit(calistir(api, shop, taslak, kara, a.out, a.adet, yayinla))
+    sys.exit(calistir(api, shop, taslak, kara, a.out, a.adet, durum))
 
 
 if __name__ == "__main__":

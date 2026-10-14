@@ -1,5 +1,5 @@
 """by78_yayinla: sahte Etsy ile (ag yok). 1 zaten active -> atla, 1 draft -> active, canli listeden ID -> FAIL (istek yok),
-yayin sonrasi baslik degisirse FAIL + DUR, PATCH hatasinda yeniden deneme yok + DUR."""
+yayin sonrasi baslik degisirse -> inactive + geri_alindi + DUR, URL yoksa -> geri_alindi, PATCH hatasinda yeniden deneme yok + DUR."""
 import csv
 import importlib.util
 import os
@@ -23,6 +23,7 @@ class SahteEtsy:
                                url="")
         self.patchler = []
         self.bozuk_baslik = None
+        self.url_yok = None
 
     def get(self, path, params=None, ok404=False):
         self.calls += 1
@@ -32,12 +33,13 @@ class SahteEtsy:
                                        offerings=[dict(price=dict(amount=500, divisor=100))])])
         return dict(self.L[lid])
 
-    def yayinla(self, lid):
-        self.patchler.append(lid)
-        self.L[lid]["state"] = "active"
-        self.L[lid]["url"] = f"https://www.etsy.com/listing/{lid}/x"
-        if lid == self.bozuk_baslik:
-            self.L[lid]["title"] = "DEGISTI"
+    def durum(self, lid, state):
+        self.patchler.append((lid, state))
+        self.L[lid]["state"] = state
+        if state == "active":
+            self.L[lid]["url"] = "" if lid == self.url_yok else f"https://www.etsy.com/listing/{lid}/x"
+            if lid == self.bozuk_baslik:
+                self.L[lid]["title"] = "DEGISTI"
 
 
 def taslak(api):
@@ -52,20 +54,20 @@ class Test(unittest.TestCase):
     def test_adet1_atla_ve_yayinla(self):
         api = SahteEtsy(active={0})
         with tempfile.TemporaryDirectory() as t:
-            kod = y.calistir(api, SHOP, taslak(api), set(), t, 1, api.yayinla)
+            kod = y.calistir(api, SHOP, taslak(api), set(), t, 1, api.durum)
             r = oku(t)
         print("\nadet=1:", [(x["cift"], x["once"], x["sonra"], x["sonuc"]) for x in r[:3]], "...", len(r), "satir")
         self.assertEqual(kod, 0)
         self.assertEqual(r[0]["sonuc"], "ATLANDI_ZATEN_ACTIVE")
         self.assertEqual((r[1]["once"], r[1]["sonra"], r[1]["sonuc"]), ("draft", "active", "YAYINLANDI"))
         self.assertTrue(r[1]["url"])
-        self.assertEqual(api.patchler, [r[1]["listing_id"]])            # tek yazma
+        self.assertEqual(api.patchler, [(r[1]["listing_id"], "active")])   # tek yazma
         self.assertTrue(all(x["sonuc"] == "BEKLIYOR" for x in r[2:]))
 
     def test_adet0_tekrar_kosu(self):
         api = SahteEtsy(active={0, 1})                                   # onceki kosuda 1 yayinlanmis gibi
         with tempfile.TemporaryDirectory() as t:
-            kod = y.calistir(api, SHOP, taslak(api), set(), t, 0, api.yayinla)
+            kod = y.calistir(api, SHOP, taslak(api), set(), t, 0, api.durum)
             r = oku(t)
         print("adet=0 tekrar:", {s: sum(x["sonuc"] == s for x in r) for s in {x["sonuc"] for x in r}}, "PATCH", len(api.patchler))
         self.assertEqual(kod, 0)
@@ -76,7 +78,7 @@ class Test(unittest.TestCase):
         api = SahteEtsy()
         kara = {list(api.L)[5]}                                          # canli 78 ilandan biri hedefte
         with tempfile.TemporaryDirectory() as t:
-            kod = y.calistir(api, SHOP, taslak(api), kara, t, 0, api.yayinla)
+            kod = y.calistir(api, SHOP, taslak(api), kara, t, 0, api.durum)
         print("canli ID hedefte: kod", kod, "| Etsy cagrisi", api.calls, "| PATCH", len(api.patchler))
         self.assertEqual(kod, 3)
         self.assertEqual((api.calls, api.patchler), (0, []))
@@ -85,19 +87,32 @@ class Test(unittest.TestCase):
         api = SahteEtsy()
         api.bozuk_baslik = list(api.L)[1]
         with tempfile.TemporaryDirectory() as t:
-            kod = y.calistir(api, SHOP, taslak(api), set(), t, 0, api.yayinla)
+            kod = y.calistir(api, SHOP, taslak(api), set(), t, 0, api.durum)
             r = oku(t)
-        print("baslik degisti:", r[-1]["sonuc"], r[-1]["not"], "| PATCH", len(api.patchler))
+        lid = list(api.L)[1]
+        print("baslik degisti:", [(x["cift"], x["once"], x["sonra"], x["sonuc"]) for x in r[-2:]], "| PATCH", api.patchler[-2:])
         self.assertEqual(kod, 4)
-        self.assertEqual(len(api.patchler), 2)                           # ikincide durdu
-        self.assertEqual(r[-1]["sonuc"], "FAIL")
+        self.assertEqual(api.patchler, [(list(api.L)[0], "active"), (lid, "active"), (lid, "inactive")])   # ikincide geri alip durdu
+        self.assertEqual((r[-2]["sonuc"], r[-1]["sonuc"], r[-1]["sonra"]), ("FAIL", "geri_alindi", "inactive"))
+        self.assertEqual(api.L[lid]["state"], "inactive")
+        self.assertEqual(len(r), 3)                                      # sonraki ilanlara gecilmedi
+
+    def test_url_yoksa_geri_al(self):
+        api = SahteEtsy()
+        lid = api.url_yok = list(api.L)[0]
+        with tempfile.TemporaryDirectory() as t:
+            kod = y.calistir(api, SHOP, taslak(api), set(), t, 0, api.durum)
+            r = oku(t)
+        print("URL yok:", [(x["once"], x["sonra"], x["sonuc"], x["not"]) for x in r], "| PATCH", api.patchler)
+        self.assertEqual((kod, r[-1]["sonuc"], api.L[lid]["state"]), (4, "geri_alindi", "inactive"))
+        self.assertEqual(api.patchler, [(lid, "active"), (lid, "inactive")])
 
     def test_patch_hatasi_yeniden_deneme_yok(self):
         api = SahteEtsy()
         n = []
 
-        def hata(lid):
-            n.append(lid); raise RuntimeError("PATCH 500")
+        def hata(lid, state):
+            n.append((lid, state)); raise RuntimeError("PATCH 500")
         with tempfile.TemporaryDirectory() as t:
             kod = y.calistir(api, SHOP, taslak(api), set(), t, 0, hata)
             r = oku(t)

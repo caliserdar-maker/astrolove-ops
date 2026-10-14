@@ -3,6 +3,7 @@ name: by78-yayinla
 # BY78 78 ILAN YAYINI (14 Eki 2026). YALNIZ Serdar'in acik onayiyla; onay girdisi tam olarak SERDAR_YAYIN_ONAYI olmali.
 # Hedef YALNIZ Drive TEMP/BY78_TASLAK_20261014/BY78_TASLAKLAR.csv (78 listing_id); canli 78 ilan (data/pod/pod78_ids.csv) hedefte -> FAIL.
 # Her ilan: GET; draft ise TEK yazma (updateListing yalniz state=active, yeniden deneme yok); sonra GET dogrulama.
+# Dogrulama FAIL -> ilan hemen state=inactive (tek istek), tekrar okunur, YAYIN.csv sonuc=geri_alindi, is DURUR.
 # adet=1 yalniz ilk ilan; adet=0 kalan hepsi. Tekrar kosuda active olanlar atlanir. Hata ya da kota < 500 -> DUR.
 # Cikti: Drive TEMP/BY78_YAYIN/ (YAYIN.csv son kosu, YAYIN_<damga>.csv, OZET.md).
 
@@ -34,8 +35,9 @@ jobs:
         run: |
           set -euo pipefail
           n=$(grep -cE "\.(patch|put|post|delete|post_json|put_json|post_file)\(|method=.(PATCH|PUT|POST|DELETE)" scripts/etsy/by78_yayinla.py || true)
-          y=$(grep -cE 'requests\.patch\(f"\{API\}/shops/\{shop\}/listings/\{lid\}", data=\{"state": "active"\}' scripts/etsy/by78_yayinla.py || true)
-          [ "$n" = 1 ] && [ "$y" = 1 ] || { echo "::error::betikte yalniz tek yazma (state=active PATCH) olmali: yazma $n, izinli $y"; exit 1; }
+          y=$(grep -cE 'requests\.patch\(f"\{API\}/shops/\{shop\}/listings/\{lid\}", data=\{"state": state\}' scripts/etsy/by78_yayinla.py || true)
+          z=$(grep -cE 'if state not in \("active", "inactive"\):' scripts/etsy/by78_yayinla.py || true)
+          [ "$n" = 1 ] && [ "$y" = 1 ] && [ "$z" = 1 ] || { echo "::error::betikte yalniz tek yazma yolu (state active/inactive PATCH) olmali: yazma $n, izinli $y, state kapisi $z"; exit 1; }
           python3 -m unittest scripts/etsy/test_by78_yayinla.py 2>&1 | tail -3
       - name: Etsy kilidi (sira bekle, iptal yok)
         env:
