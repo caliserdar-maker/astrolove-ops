@@ -1,0 +1,102 @@
+name: by78-kapak
+# BIZIM YILIMIZ: 78 cift YALNIZ 01_Cover (Serdar onayi 14 Eki; paket bizim-yilimiz-v3 bc9ea1a, GALERI_SLAYT=1).
+# Poster/kart kapak girdisi olarak yeniden uretilir (by_poster/by_kart kodu v2 uretimi ce424b3 ile ayni) ama YUKLENMEZ.
+# Drive <hedef>/<CIFT>/galeri/01_Cover_A.jpg uzerine yazilir + rclone check; KAPAK_KONTAK_1/2.jpg kontak-v2 dalina.
+# Etsy'ye yazma YOK. Zamanlama YOK.
+on:
+  workflow_dispatch:
+    inputs:
+      paket_ref: { description: "bizim-yilimiz-v3 commit (tam SHA)", required: true, default: "bc9ea1a5ce4b17d07d74f3982bcf05af2db27edd" }
+      hedef: { description: "Drive TEMP altindaki klasor", required: false, default: "BIZIM_YILIMIZ_78_20261014_v2" }
+permissions:
+  contents: read
+env:
+  D: "gdrive:ASTROLOVE/TEMP/${{ github.event.inputs.hedef || 'BIZIM_YILIMIZ_78_20261014_v2' }}"
+jobs:
+  kapak:
+    strategy:
+      fail-fast: false
+      matrix:
+        is: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: "${{ github.event.inputs.paket_ref }}", fetch-depth: 1 }
+      - name: Kurulum
+        run: |
+          set -euo pipefail
+          pip install -q numpy==2.5.3 opencv-python-headless==5.0.0.93 pillow==12.3.0
+          python3 -c "from PIL import features; import sys; sys.exit(0 if features.check('raqm') else 1)"
+          curl -fsSL -o /tmp/rc.zip https://downloads.rclone.org/rclone-current-linux-amd64.zip
+          unzip -q -j /tmp/rc.zip '*/rclone' -d /tmp/rcb && sudo install -m 755 /tmp/rcb/rclone /usr/local/bin/rclone
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: Kapak uret (6 cift) + Drive + rclone check
+        run: |
+          set -euo pipefail
+          K=${{ matrix.is }}
+          CIFTLER=$(python3 -c "import csv,sys;r=[x['cift'] for x in csv.DictReader(open('BIZIM_YILIMIZ_78_ILAN_METIN.csv'))];k=int(sys.argv[1]);print(' '.join(r[6*(k-1):6*k]))" $K)
+          export BY_ROOT=$PWD NAME1=EMMA NAME2=JAMES DATE="14 JUNE 2025" LINE="YEAR ONE"    # uret_hepsi.py ile ayni ornek girdiler
+          T0=$(date +%s); i=0
+          for C in $CIFTLER; do
+            i=$((i+1))
+            PAIR=$C python3 kod/by_poster.py > /dev/null
+            PAIR=$C python3 kod/by_kart.py > /dev/null
+            PAIR=$C GALERI_SLAYT=1 python3 kod/by_galeri.py
+            n=$(ls cikti/$C/galeri | wc -l); [ "$n" = 1 ] || { echo "HATA $C galeri dosya sayisi $n"; exit 1; }
+            rclone copyto "cikti/$C/galeri/01_Cover_A.jpg" "$D/$C/galeri/01_Cover_A.jpg" -q
+            rclone check "cikti/$C/galeri" "$D/$C/galeri" --one-way --include "/01_Cover_A.jpg" -q
+            G=$(( $(date +%s) - T0 )); echo "$i/6 $C gecen ${G}s kalan ~$(( G / i * (6 - i) ))s %$(( 100 * i / 6 ))"
+          done
+          mkdir -p kapak400; for C in $CIFTLER; do python3 -c "import sys;from PIL import Image;im=Image.open(sys.argv[1]);im.resize((400,300),Image.LANCZOS).save(sys.argv[2],quality=92)" "cikti/$C/galeri/01_Cover_A.jpg" "kapak400/$C.jpg"; done
+          echo "::warning::IS $K: $CIFTLER | 6/6 kapak yazildi | rclone check PASS"
+      - uses: actions/upload-artifact@v4
+        with: { name: "kapak400_${{ matrix.is }}", path: kapak400, retention-days: 2 }
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
+
+  kontak:
+    needs: kapak
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: kontak-v2, fetch-depth: 1 }
+      - uses: actions/download-artifact@v4
+        with: { pattern: "kapak400_*", path: k, merge-multiple: true }
+      - name: KAPAK_KONTAK_1/2 (39 kapak, 400 px) + push
+        env:
+          PAKET: ${{ github.event.inputs.paket_ref }}
+        run: |
+          set -euo pipefail
+          pip install -q pillow==12.3.0
+          git fetch -q --depth 1 origin "$PAKET" && git show "$PAKET:BIZIM_YILIMIZ_78_ILAN_METIN.csv" > /tmp/l.csv
+          python3 - <<'P'
+          import csv
+          from PIL import Image
+          c = [r['cift'] for r in csv.DictReader(open('/tmp/l.csv'))]
+          assert len(c) == 78
+          for n, part in ((1, c[:39]), (2, c[39:])):
+              cols, W, H, g = 6, 400, 300, 8
+              rows = (len(part) + cols - 1) // cols
+              s = Image.new('RGB', (cols * W + (cols + 1) * g, rows * H + (rows + 1) * g), (240, 240, 240))
+              for i, p in enumerate(part):
+                  s.paste(Image.open(f'k/{p}.jpg').convert('RGB'), (g + (i % cols) * (W + g), g + (i // cols) * (H + g)))
+              s.save(f'KAPAK_KONTAK_{n}.jpg', quality=88)
+              print(n, len(part), s.size)
+          P
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add KAPAK_KONTAK_1.jpg KAPAK_KONTAK_2.jpg
+          git commit -qm "KAPAK_KONTAK_1/2: 78 yeni kapak (bizim-yilimiz-v3 ${PAKET:0:8}, 39+39, 400 px)"
+          git push -q origin HEAD:kontak-v2
+          echo "::warning::KONTAK commit $(git rev-parse HEAD)"
