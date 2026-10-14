@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 """BIZIM YILIMIZ 78 TASLAK: VITRIN GORSELLERI (Serdar 14 Eki). YAYIN YOK, PATCH YOK (yalniz acil state=inactive).
 
-Hedef galeri (12): 1 = vitrin/01_Cover.jpg, 2-8 ayni, 9-12 = vitrin/Style_Starlit, Style_Timeless, Style_FirstPage, Style_Botanical.
+Takip notu (14 Eki): SILME YOK (token'da listings_d yok). uploadListingImage ayni rank'e overwrite=true:
+  rank 1 = vitrin/01_Cover.jpg, 9 = Style_Starlit, 10 = Style_Timeless, 11 = Style_FirstPage, 12 = Style_Botanical,
+  13 = vitrin/01_Cover.jpg (Layers; silinemedigi icin). Galeri 13 gorsel kalir.
 Stil baglari: Starlit=9, Timeless=10, First Page=11, Botanical=12, Layers=1.
-Her taslak (BY78_TASLAKLAR.csv) icin asamalar (BY78_VITRIN.csv'de tutulur, tekrar kosuda kaldigi yerden):
-  sil   : rank >= 9 eski stil gorselleri silinir (deleteListingImage). ILK SILME 403 ise DUR (ilan degismez).
-  kapak : rank 1 = vitrin/01_Cover.jpg (uploadListingImage rank=1 overwrite=true)
-  stil  : eksik rank 9..12 yuklenir
-  bag   : variation-images 5 bag
-  tamam : 12 gorsel, sira 1..12, 5 bag dogru, state draft
+Kontrol (her ilan): 13 gorsel, sira 1..13, rank 1 ve 9-13 dikey 2400x3000, 2-8 yatay 3200x2400, 9-13 yeni gorsel (id degisti),
+  5 bag dogru, state draft. Ilk ilanda overwrite beklendigi gibi calismazsa (eski gorsel kaldi, sira kaydi, ekstra gorsel) DUR.
+Asamalar BY78_VITRIN.csv'de: gorsel -> bag -> tamam (tekrar kosuda kaldigi yerden; overwrite tekrar edilebilir).
 Her yazma adimindan sonra state okunur; "active" -> aninda inactive ve TUM IS DURUR. Kota < 500 -> DUR.
 
 Ortam: ETSY_API_KEY, ETSY_SHARED_SECRET, ETSY_SHOP_ID, TOKEN_FILE, TASLAK_CSV, V3, OUT, DRIVE_OUT, CIFTLER (bos = hepsi)
@@ -27,12 +26,13 @@ from etsy_common import Etsy, TokenStore, mask  # noqa: E402
 
 REF = 4570143815
 P_STYLE = 513
-STIL = [("Starlit", "Style_Starlit.jpg", 9), ("Timeless", "Style_Timeless.jpg", 10),
-        ("First Page", "Style_FirstPage.jpg", 11), ("Botanical", "Style_Botanical.jpg", 12)]
+YUKLE = [(1, "01_Cover.jpg"), (9, "Style_Starlit.jpg"), (10, "Style_Timeless.jpg"), (11, "Style_FirstPage.jpg"),
+         (12, "Style_Botanical.jpg"), (13, "01_Cover.jpg")]
+DIKEY, YATAY = (2400, 3000), (3200, 2400)
 BAG = {"Starlit": 9, "Timeless": 10, "First Page": 11, "Botanical": 12, "Layers": 1}
-ASAMA = ["", "sil", "kapak", "stil", "bag", "tamam"]
+ASAMA = ["", "gorsel", "bag", "tamam"]
 KOTA_MIN = 500
-ISTEK_ILAN = 17
+ISTEK_ILAN = 14
 ORNEK = ["CANCER_LIBRA", "LEO_LEO", "SAGITTARIUS_SAGITTARIUS"]
 
 
@@ -45,7 +45,7 @@ class Kilitli(Etsy):
 
     def _izin(self, method, path):
         lid = str(self.lid or "")
-        ok = [("POST", rf"^/shops/\d+/listings/{lid}/images$"), ("DELETE", rf"^/shops/\d+/listings/{lid}/images/\d+$"),
+        ok = [("POST", rf"^/shops/\d+/listings/{lid}/images$"),
               ("POST", rf"^/shops/\d+/listings/{lid}/variation-images$"), ("PATCH", rf"^/shops/\d+/listings/{lid}$")] if lid else []
         if str(REF) in path or not any(m == method and re.match(p, path) for m, p in ok):
             raise SystemExit(f"YASAK yazma: {method} {path}")
@@ -56,8 +56,8 @@ class Kilitli(Etsy):
     def post_json(self, path, body):
         self._izin("POST", path); return super().post_json(path, body)
 
-    def delete(self, path):
-        self._izin("DELETE", path); return super().delete(path)
+    def delete(self, *a, **k):
+        raise SystemExit("YASAK: DELETE (listings_d yok; overwrite kullanilir)")
 
     def patch(self, path, data):
         self._izin("PATCH", path)
@@ -93,10 +93,10 @@ def main():
 
     def yaz(drive=False):
         with open(dur_f, "w", newline="") as fh:
-            w = csv.DictWriter(fh, fieldnames=["cift", "listing_id", "asama", "gorsel", "stil_bag", "state"])
+            w = csv.DictWriter(fh, fieldnames=["cift", "listing_id", "asama", "gorsel", "stil_bag", "id_degisti", "state"])
             w.writeheader()
             for c in sorted(S):
-                w.writerow({k_: S[c].get(k_, "") for k_ in ("cift", "listing_id", "asama", "gorsel", "stil_bag", "state")})
+                w.writerow({k_: S[c].get(k_, "") for k_ in ("cift", "listing_id", "asama", "gorsel", "stil_bag", "id_degisti", "state")})
         json.dump(R, open(out / "BY78_VITRIN_RAPOR.json", "w"), indent=1, ensure_ascii=False, default=str)
         if drive and DOUT:
             subprocess.run(["rclone", "copy", str(out), DOUT, "--include", "/BY78_VITRIN*", "-q"], check=True)
@@ -159,38 +159,22 @@ def main():
             state(c, "basla")
             ims = gorseller(lid)
 
-            if gec("sil"):
-                if len(ims) != 13 or [x.get("rank") for x in ims] != list(range(1, 14)):
+            if gec("gorsel"):
+                if [x.get("rank") for x in ims] != list(range(1, 14)):
                     raise Dur(f"{c} {lid}: baslangic galerisi 13 degil {[x.get('rank') for x in ims]}")
-                for x in ims[8:]:                             # rank 9..13 eski stil gorselleri
-                    try:
-                        api.delete(f"/shops/{shop}/listings/{lid}/images/{x['listing_image_id']}")
-                    except SystemExit as e:
-                        raise Dur(f"{c} {lid}: gorsel silinemedi (rank {x.get('rank')}): {str(e.code)[:200]}")
-                asama = S[c]["asama"] = "sil"
-                state(c, "sil")
+                once = {x.get("rank"): x.get("listing_image_id") for x in ims}
+                for rk, ad in YUKLE:
+                    yukle(c, lid, ad, rk, overwrite=True)
+                asama = S[c]["asama"] = "gorsel"
+                state(c, "gorsel")
                 ims = gorseller(lid)
-                if len(ims) != 8:
-                    raise Dur(f"{c} {lid}: silme sonrasi {len(ims)} gorsel")
-
-            if gec("kapak"):
-                yukle(c, lid, "01_Cover.jpg", 1, overwrite=True)
-                asama = S[c]["asama"] = "kapak"
-                state(c, "kapak")
-                ims = gorseller(lid)
-
-            if gec("stil"):
-                var = {x.get("rank") for x in ims}
-                for st_, ad, rk in STIL:
-                    if rk not in var:
-                        yukle(c, lid, ad, rk)
-                asama = S[c]["asama"] = "stil"
-                state(c, "stil")
-                ims = gorseller(lid)
-
+                sonra = {x.get("rank"): x.get("listing_image_id") for x in ims}
+                S[c]["id_degisti"] = " ".join(str(rk) for rk, _ in YUKLE if once.get(rk) != sonra.get(rk))
             ranks = [x.get("rank") for x in ims]
-            if ranks != list(range(1, 13)):
-                raise Dur(f"{c} {lid}: gorsel sirasi {ranks}")
+            boy = {x.get("rank"): (x.get("full_width"), x.get("full_height")) for x in ims}
+            hata = [rk for rk in range(1, 14) if boy.get(rk) != (DIKEY if rk in (1, 9, 10, 11, 12, 13) else YATAY)]
+            if ranks != list(range(1, 14)) or hata:
+                raise Dur(f"{c} {lid}: overwrite beklendigi gibi degil: sira {ranks}, boyut hatali rank {hata} {[boy.get(r) for r in hata]}")
             rankid = {x.get("rank"): x.get("listing_image_id") for x in ims}
             idrank = {v: k_ for k_, v in rankid.items()}
             inv = api.get(f"/listings/{lid}/inventory") or {}
@@ -211,7 +195,7 @@ def main():
             S[c].update(asama="tamam", gorsel=len(ims), stil_bag=" ".join(f"{a}={rk}" for a, rk in sorted(bag.items(), key=lambda x: x[1])))
             if c in ORNEK:
                 R["ilan"][c] = dict(listing_id=lid, gorsel_sira=[(x.get("rank"), x.get("full_width"), x.get("full_height")) for x in ims],
-                                    stil_bag=S[c]["stil_bag"], state=S[c]["state"])
+                                    stil_bag=S[c]["stil_bag"], id_degisti=S[c].get("id_degisti"), state=S[c]["state"])
             if i % 5 == 0 or i == len(rows):
                 yaz(True)
             el = time.time() - t0
@@ -224,7 +208,7 @@ def main():
     R["bitis"] = time.strftime("%H:%M:%S"); R["kota_son"] = api.remaining
     n = sum(1 for r in rows if S.get(r["cift"], {}).get("asama") == "tamam" and S[r["cift"]].get("state") == "draft")
     yaz(True)
-    print(f"::warning::VITRIN {n}/{len(rows)} tamam (draft, 12 gorsel, 5 bag) | kota {api.remaining}")
+    print(f"::warning::VITRIN {n}/{len(rows)} tamam (draft, 13 gorsel, 1+9-13 dikey, 2-8 yatay, 5 bag) | kota {api.remaining}")
     for c, o in R["ilan"].items():
         print(f"::warning::{c} {o['listing_id']} {o['state']} sira {[x[0] for x in o['gorsel_sira']]} | {o['stil_bag']}")
     if n != len(rows):

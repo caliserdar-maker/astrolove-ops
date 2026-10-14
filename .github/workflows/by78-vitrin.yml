@@ -1,7 +1,7 @@
 name: by78-vitrin
 # BIZIM YILIMIZ 78: VITRIN (Serdar 14 Eki): poster kirik beyaz zeminde (kod bizim-yilimiz-v3 kod/by_vitrin.py).
 # 1) vitrin: v3/<CIFT>/poster -> by_vitrin.py -> v3/<CIFT>/vitrin/ (5 dosya, 2400x3000) + rclone check
-# 2) etsy: 78 taslak galeri 12 (1 vitrin kapak, 2-8 ayni, 9-12 vitrin stiller) + 5 stil bagi; her adimda state. YAYIN/PATCH YOK.
+# 2) etsy: SILME YOK, overwrite: rank 1 + 13 = vitrin kapak, 9-12 vitrin stiller (galeri 13) + 5 stil bagi; her adimda state. YAYIN/PATCH YOK.
 permissions:
   actions: read
   contents: read
