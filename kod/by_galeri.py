@@ -1,4 +1,4 @@
-"""Bizim Yilimiz Etsy gallery (10 images, 3200x2400) for one pair.
+"""Bizim Yilimiz Etsy gallery (15 images, 3200x2400: 01-10 + 11-15 stil gorselleri) for one pair.
 Needs posters (by_poster.py) and the First Page card (by_kart.py) of the same pair with example names EMMA / JAMES.
 Env: BY_ROOT, PAIR. Output: <ROOT>/cikti/<PAIR>/galeri/*.jpg
 """
@@ -32,9 +32,39 @@ def sym_png(mask, h, path):
 KAPAK = dict(sol_pct=4, poster_bosluk_px=160, sag_bosluk_pct=3, pair_max=280, sutun_yukseklik_pct=80,
              sira=["collection", "pair", "headline", "product", "personalization", "formats"])
 BURCLAR = ["Aquarius", "Aries", "Cancer", "Capricorn", "Gemini", "Leo", "Libra", "Pisces", "Sagittarius", "Scorpio", "Taurus", "Virgo"]
+# ---- STIL GORSELLERI 11-15 (Takip 14 Eki, Serdar: "style secilince ilgili poster gorunsun"): kapakla ayni duzen ----
+STILLER = [  # (no, ad, poster dosyasi, headline)
+    (11, "Starlit", "Poster_Stil1_Starlit_EMMA_JAMES.jpg", "Navy and gold,\nunder the stars."),
+    (12, "Timeless", "Poster_Stil2_Timeless_EMMA_JAMES.jpg", "Cream and gold,\nsoft and classic."),
+    (13, "First Page", "Poster_Stil3_FirstPage_EMMA_JAMES.jpg", "Cream and burgundy,\nlike a love letter."),
+    (14, "Layers", "Poster_Stil4_Layers_EMMA_JAMES.jpg", "Peach and terracotta,\na layered paper look."),
+    (15, "Botanical", "Poster_Stil5_Botanical_EMMA_JAMES.jpg", "Cream and green,\nwith botanicals.")]
 
 
-def kapak_yerlesim(s):
+def _sigdir(e, metinler, col, font):
+    """e'nin puntosunu, verilen tum metinlerin (78 ciftte / 5 stilde ayni) her satiri sutuna sigana kadar kucultur."""
+    fd = e["font"]
+    tr = e.get("letter_spacing_px") or 0
+    def gen(size, line):
+        f = font(fd, size)
+        return f.getlength(line) if not tr else sum(f.getlength(c) for c in line) + tr * size / fd["size_px"] * max(0, len(line) - 1)
+    size = fd["size_px"]
+    while max(gen(size, ln) for m in metinler for ln in m.split("\n")) > col:
+        size -= 1
+    if size != fd["size_px"]:
+        if tr:
+            e["letter_spacing_px"] = round(tr * size / fd["size_px"], 2)
+        fd["size_px"] = size
+    return size
+
+
+def _font(fd, size):
+    f = ImageFont.truetype(f"{ROOT}/galeri/{fd['file']}", size)
+    f.set_variation_by_axes([fd["weight"]])
+    return f
+
+
+def kapak_yerlesim(s, stil=None):
     """Slide 1: poster + kagit/golge buyur; sol sutun yazilari buyur, pair HER ZAMAN iki satir (78 ciftte ayni punto),
     dikey dizilim esit aralikla yeniden hesaplanir ve sutun dikeyde ortalanir. Yeni kagit + golge temiz zemine cizilir."""
     W, H = 3200, 2400
@@ -63,6 +93,25 @@ def kapak_yerlesim(s):
     p["content"] = f"{A} &\n{B}"
     fd["size_px"] = size
     p["line_height_em"] = 1.0
+    olcu = {}
+    if stil:                                       # stil gorseli: buyuk ad tek satir, kapaktaki pair puntosuyla
+        no, ad, dosya, baslik = stil
+        if max(font(size).getlength(x[1]) for x in STILLER) > col:
+            raise SystemExit("HATA: stil adi sutuna sigmiyor")
+        p["content"] = ad
+        E["collection"]["content"] = f"STYLE {no - 10} OF 5"
+        E["headline"]["content"] = baslik
+        E["product"]["content"] = f"{A} & {B}\nanniversary art"
+        E["personalization"]["content"] = "Your names. Your date."
+        E["hero_poster"]["content"]["source_file"] = f"source_assets/{dosya}"
+        E["hero_poster"]["content"]["style"] = ad
+        ciftler = [f"{a} & {b}" for i, a in enumerate(BURCLAR) for b in BURCLAR[i:]]      # 78 cift: alfabetik sira
+        olcu = dict(headline=_sigdir(E["headline"], [x[3] for x in STILLER], col, _font),
+                    product=_sigdir(E["product"], [c + "\nanniversary art" for c in ciftler], col, _font),
+                    collection=_sigdir(E["collection"], [f"STYLE {i} OF 5" for i in range(1, 6)], col, _font),
+                    formats=_sigdir(E["formats"], [E["formats"]["content"]], col, _font))
+        s["preview_file"] = f"A_Previews/{no}_Style_{ad.replace(' ', '')}.jpg"
+        s["number"] = no
     for k in KAPAK["sira"] + ["brand"]:
         E[k]["center_x_pct"] = (x0 + col / 2) / W * 100
         E[k]["width_pct"] = col / W * 100
@@ -96,7 +145,8 @@ def kapak_yerlesim(s):
     ImageDraw.Draw(bg).rectangle(box, fill=kagit["fill_hex"])
     bg.save(f"{WORK}/01_Cover_B_yeni.png")
     s["clean_background_file"] = "01_Cover_B_yeni.png"
-    print("kapak", dict(pair_punto=size, sutun_px=[round(x0), round(x0 + col)], poster_px=box, aralik_px=round(gap)))
+    print("stil " + str(stil[0]) if stil else "kapak", dict(pair_punto=size, sutun_px=[round(x0), round(x0 + col)], poster_px=box,
+                                                         aralik_px=round(gap), **{k + "_punto": v for k, v in olcu.items()}))
 
 
 def main():
@@ -123,8 +173,15 @@ def main():
             if c == "Libra":
                 c = B
             e["content"] = c
+    import copy
+    s1 = next(s for s in d["slides"] if s["number"] == 1)
+    yeni = [copy.deepcopy(s1) for _ in STILLER]       # kapak metinleri cifte gore degistirilmeden once kopyalanir
+    for s in d["slides"]:
         if s["number"] == 1:
             kapak_yerlesim(s)
+    for s, st in zip(yeni, STILLER):
+        kapak_yerlesim(s, st)
+    d["slides"] += yeni
     json.dump(d, open(f"{WORK}/gallery_layout.json", "w"), ensure_ascii=False, indent=1)
     from pathlib import Path
     secili = [int(x) for x in os.environ.get("GALERI_SLAYT", "").split(",") if x.strip()] or None   # bos = 10 gorsel

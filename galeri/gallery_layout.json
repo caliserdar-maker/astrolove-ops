@@ -321,7 +321,7 @@
         {
           "id": "formats",
           "type": "text",
-          "content": "CARD  /  DIGITAL  /  PRINT",
+          "content": "DIGITAL CARD  /  FILE  /  PRINT",
           "center_x_pct": 26,
           "center_y_pct": 79,
           "width_pct": 40,
@@ -2388,7 +2388,7 @@
         {
           "id": "card_heading",
           "type": "text",
-          "content": "Printable card",
+          "content": "Digital card",
           "center_x_pct": 18,
           "center_y_pct": 33,
           "width_pct": 27,
@@ -2442,7 +2442,7 @@
         {
           "id": "print_heading",
           "type": "text",
-          "content": "Print",
+          "content": "Shipped print",
           "center_x_pct": 82,
           "center_y_pct": 33,
           "width_pct": 27,
@@ -2872,7 +2872,7 @@
         {
           "id": "card_label",
           "type": "text",
-          "content": "5 x 7 in card",
+          "content": "5 x 7 in digital card",
           "center_x_pct": 22.5,
           "center_y_pct": 88,
           "width_pct": 31,
