@@ -1,0 +1,87 @@
+name: by78-pin-zamanla
+# BY78 dikey pin zamanlama (14 Eki 2026). Etsy API YOK (listing_id'ler Drive BY78_TASLAKLAR.csv'den).
+# mod=kuru (varsayilan): link doldurulur, 78 istek ISTEKLER.json'a yazilir; Metricool'a HIC istek yok.
+#   KONTROL PASS ise PIN_PLAN_BY78.csv (linkli) Drive TEMP'e yazilir.
+# mod=gonder: YALNIZ Takip/Serdar acik onayiyla; onay girdisi tam olarak SERDAR_ONAYLADI olmali.
+#   Gorsel Metricool S3'e, POST /v2/scheduler/posts; GONDERIM.csv her kosuda Drive'a yazilir, tekrar kosuda gonderilmisler atlanir.
+# Cikti: Drive ASTROLOVE/TEMP/BY78_PIN_ZAMANLA/ (ISTEKLER.json, KONTROL.txt, GONDERIM.csv). Token loga/dosyaya yazilmaz.
+on:
+  workflow_dispatch:
+    inputs:
+      mod: { description: "kuru (gonderim yok) | gonder (acik onayla)", type: choice, options: [kuru, gonder], default: kuru }
+      onay: { description: "gonder icin tam olarak: SERDAR_ONAYLADI", required: false, default: "" }
+      adet: { description: "gonder: en fazla bu kadar YENI pin (0 = hepsi; ilk deneme icin 1)", required: false, default: "0" }
+      taslak_yol: { description: "Drive ASTROLOVE/TEMP altindaki taslak CSV", required: false, default: "BY78_TASLAK_20261014/BY78_TASLAKLAR.csv" }
+permissions:
+  contents: read
+jobs:
+  zamanla:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      T: gdrive:ASTROLOVE/TEMP
+      O: gdrive:ASTROLOVE/TEMP/BY78_PIN_ZAMANLA
+    steps:
+      - name: Onay kapisi
+        env:
+          MOD: ${{ inputs.mod }}
+          ONAY: ${{ inputs.onay }}
+        run: |
+          if [ "$MOD" = gonder ] && [ "$ONAY" != SERDAR_ONAYLADI ]; then echo "::error::gonder icin onay=SERDAR_ONAYLADI gerekli"; exit 1; fi
+          echo "mod=$MOD"
+      - uses: actions/checkout@v4
+      - name: rclone
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+          mkdir -p ~/.config/rclone _w _out; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Girdiler (plan, taslak, pin listesi, V6, onceki gonderim)
+        env:
+          TASLAK: ${{ inputs.taslak_yol }}
+        run: |
+          set -euo pipefail
+          rclone copyto "$T/PIN_PLAN_BY78.csv" _w/PLAN.csv
+          rclone copyto "$T/$TASLAK" _w/TASLAK.csv || { echo "::error::taslak CSV yok: $TASLAK"; exit 1; }
+          rclone lsjson "$T/PIN_BY78_V1" --files-only > _w/PIN.json
+          rclone copyto "$T/PIN_V6_20261012/PLAN/PIN_V6_PLAN_YAYIN.csv" _w/V6.csv
+          rclone copyto "$O/GONDERIM.csv" _w/ONCEKI.csv 2>/dev/null && echo "onceki GONDERIM.csv var" || echo "onceki gonderim yok"
+          wc -l _w/PLAN.csv _w/TASLAK.csv _w/V6.csv
+      - name: Kuru (Metricool istegi yok)
+        if: ${{ inputs.mod == 'kuru' }}
+        run: |
+          set -uo pipefail
+          python3 scripts/sosyal/by78_pin_zamanla.py --mod kuru --plan _w/PLAN.csv --taslak _w/TASLAK.csv --pin-liste _w/PIN.json \
+            --v6 _w/V6.csv --cikti _out | tee _out/KONTROL.txt
+          rc=${PIPESTATUS[0]}
+          python3 scripts/guvenlik/sir_koru.py tara _out || exit 1
+          rclone copy _out "$O" -q --include "ISTEKLER.json" --include "KONTROL.txt"
+          if [ "$rc" = 0 ]; then rclone copyto _out/PIN_PLAN_BY78.csv "$T/PIN_PLAN_BY78.csv" -q && echo "PIN_PLAN_BY78.csv (linkli) Drive'a yazildi"; fi
+          exit $rc
+      - name: Gonder (yalniz onayla)
+        if: ${{ inputs.mod == 'gonder' && inputs.onay == 'SERDAR_ONAYLADI' }}
+        env:
+          ADET: ${{ inputs.adet }}
+        run: |
+          set -uo pipefail
+          rclone copyto "$T/METRICOOL_TOKEN.json" _w/mc.json
+          python3 -c "import json;print('::add-mask::'+json.load(open('_w/mc.json'))['userToken'])"
+          rclone copy "$T/PIN_BY78_V1" _w/pin -q --transfers 8 --include "*.jpg"
+          O_ARG=""; [ -f _w/ONCEKI.csv ] && O_ARG="--onceki _w/ONCEKI.csv"
+          python3 scripts/sosyal/by78_pin_zamanla.py --mod gonder --plan _w/PLAN.csv --taslak _w/TASLAK.csv --pin-liste _w/PIN.json \
+            --v6 _w/V6.csv --cikti _out --token-dosya _w/mc.json --pin-dir _w/pin --adet "$ADET" $O_ARG \
+            | python3 scripts/guvenlik/sir_koru.py tee --sir-json _w/mc.json _out/KONTROL.txt "$GITHUB_STEP_SUMMARY"
+          rc=${PIPESTATUS[0]}
+          python3 scripts/guvenlik/sir_koru.py tara --sir-json _w/mc.json _out || exit 1
+          rclone copy _out "$O" -q --include "GONDERIM.csv" --include "ISTEKLER.json" --include "KONTROL.txt"
+          [ -f _out/GONDERIM.csv ] && rclone copyto _out/PIN_PLAN_BY78.csv "$T/PIN_PLAN_BY78.csv" -q
+          exit $rc
+      - if: always()
+        run: |
+          rm -rf ~/.config/rclone _w/mc.json _w/pin
+          if [ -f "$RUNNER_TEMP/SIR_ENGEL" ]; then echo "::error::sir iceren satir engellendi (sir_koru)"; exit 1; fi
