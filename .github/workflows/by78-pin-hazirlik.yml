@@ -13,7 +13,7 @@ on:
     inputs:
       mod:
         type: choice
-        options: [incele, plan, pano]
+        options: [incele, plan, pano, pano_oku]
         default: incele
 
 jobs:
@@ -100,6 +100,24 @@ jobs:
           python3 scripts/guvenlik/sir_koru.py tara --sir-json _w/mc.json _out || exit 1
           rclone copy _out "$O" -q --include "PANO_AC.json"
           exit $rc
+      - name: Pinterest panolari (mod=pano_oku; yalniz GET)
+        if: ${{ inputs.mod == 'pano_oku' }}
+        run: |
+          set -uo pipefail
+          rclone copyto "gdrive:ASTROLOVE/TEMP/METRICOOL_TOKEN.json" _w/mc.json
+          python3 -c "import json;print('::add-mask::'+json.load(open('_w/mc.json'))['userToken'])"
+          python3 - <<'EOF' | python3 scripts/guvenlik/sir_koru.py tee --sir-json _w/mc.json "$GITHUB_STEP_SUMMARY"
+          import importlib.util, json
+          sp = importlib.util.spec_from_file_location('mpb', 'scripts/sosyal/metricool_pin_baslik.py')
+          mpb = importlib.util.module_from_spec(sp); sp.loader.exec_module(mpb)
+          mc = mpb.MC(json.load(open('_w/mc.json')))
+          liste = mpb.veri(mc.istek('GET', '/v2/scheduler/boards/pinterest', {'brandId': mc.b}))
+          if isinstance(liste, dict):
+              liste = next((v for v in liste.values() if isinstance(v, list)), [])
+          print('PANO', len(liste))
+          for b in liste:
+              print(' ', b.get('id'), '|', b.get('name'), '|', (b.get('owner') or {}).get('username'), '|', b.get('privacy'), '|', (b.get('description') or '')[:120])
+          EOF
       - if: always()
         run: |
           rm -rf ~/.config/rclone _w/mc.json
