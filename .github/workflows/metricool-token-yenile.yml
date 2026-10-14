@@ -1,0 +1,117 @@
+name: metricool-token-yenile
+
+# Metricool token yenileme (Serdar onayi 14 Eki 2026). Degerler hicbir yere yazilmaz (maskeli; dosyaya/ozete tee yok).
+# 1) Yeni token (Drive TEMP/METRICOOL_TOKEN_YENI_20261014.json) okunur, maskelenir, tek GET ile dogrulanir.
+# 2) Repo secret METRICOOL_USER_TOKEN guncellenir (gh_secrets.py, OPS_ADMIN_TOKEN).
+# 3) Drive TEMP/METRICOOL_TOKEN.json ayni ad/kimlikle yeni degere guncellenir; kimlik oncesi/sonrasi karsilastirilir.
+# 4) METRICOOL_TOKEN_YENI_20261014.json KALICI silinir.  5) Eski token tek GET ile denenir (yalniz HTTP kodu).
+# Metricool'a YAZMA YOK.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: metricool-token
+  cancel-in-progress: false
+
+jobs:
+  yenile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      T: gdrive:ASTROLOVE/TEMP
+      YENI_ID: 1ywQrr7irP3BzM3Oj72RNkuXnrcTMILEL
+    steps:
+      - uses: actions/checkout@v4
+      - name: rclone + tokenlar (maskeli)
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+          mkdir -p ~/.config/rclone _work; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            export RCLONE_CONFIG_GDRIVE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET"
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+          rclone copyto "$T/METRICOOL_TOKEN.json" _work/eski.json -q
+          rclone copyto "$T/METRICOOL_TOKEN_YENI_20261014.json" _work/yeni.json -q
+          python3 - <<'EOF'
+          import json
+          e, y = json.load(open('_work/eski.json')), json.load(open('_work/yeni.json'))
+          for d in (e, y):
+              print('::add-mask::' + d['userToken'])
+          eksik = [k for k in ('userToken', 'userId', 'blogId') if not y.get(k)]
+          print('YENI alanlar:', sorted(y), '| eksik:', eksik)
+          print('userId ayni:', str(e.get('userId')) == str(y.get('userId')), '| blogId ayni:', str(e.get('blogId')) == str(y.get('blogId')),
+                '| token farkli:', e['userToken'] != y['userToken'], '| yeni token uzunlugu:', len(y['userToken']))
+          if eksik or e['userToken'] == y['userToken']:
+              raise SystemExit('DUR: yeni token dosyasi gecersiz ya da eskiyle ayni')
+          EOF
+          rclone lsjson --stat "$T/METRICOOL_TOKEN_YENI_20261014.json" | python3 -c "import json,os,sys;i=json.load(sys.stdin)['ID'];print('YENI dosya kimligi eslesiyor:', i==os.environ['YENI_ID']);sys.exit(0 if i==os.environ['YENI_ID'] else 1)"
+          rclone lsjson --stat "$T/METRICOOL_TOKEN.json" | python3 -c "import json,sys;print(json.load(sys.stdin)['ID'])" > _work/eski_id.txt
+          echo "METRICOOL_TOKEN.json kimligi (once): $(cat _work/eski_id.txt)"
+
+      - name: Yeni token on testi (tek GET, yazma yok)
+        run: |
+          set -euo pipefail
+          python3 - <<'EOF'
+          import json, urllib.request, urllib.parse, urllib.error
+          def dene(d):
+              q = urllib.parse.urlencode({'start': '2026-10-14T00:00:00', 'end': '2026-10-21T00:00:00', 'timezone': 'Europe/Istanbul',
+                                          'userId': d['userId'], 'blogId': d['blogId']})
+              r = urllib.request.Request(f'https://app.metricool.com/api/v2/scheduler/posts?{q}', headers={'X-Mc-Auth': d['userToken']})
+              try:
+                  with urllib.request.urlopen(r, timeout=60) as y:
+                      v = json.load(y); v = v.get('data', v) if isinstance(v, dict) else v
+                      return y.status, len(v or [])
+              except urllib.error.HTTPError as e:
+                  return e.code, None
+          k, n = dene(json.load(open('_work/yeni.json')))
+          print(f'YENI token GET: HTTP {k}, gonderi {n} (14-21 Eki)')
+          if k != 200:
+              raise SystemExit('DUR: yeni token calismiyor; secret ve Drive dosyasina dokunulmadi')
+          EOF
+
+      - name: Repo secret METRICOOL_USER_TOKEN
+        env:
+          OPS_ADMIN_TOKEN: ${{ secrets.OPS_ADMIN_TOKEN }}
+        run: |
+          set -euo pipefail
+          pip install -q pynacl
+          python3 -c "import json;print(json.load(open('_work/yeni.json'))['userToken'],end='')" \
+            | python3 scripts/common/gh_secrets.py secret astrolove-ops METRICOOL_USER_TOKEN > /dev/null
+          echo "SECRET METRICOOL_USER_TOKEN guncellendi"
+
+      - name: Drive METRICOOL_TOKEN.json (ayni ad + kimlik) ve gecici dosyanin kalici silinmesi
+        run: |
+          set -euo pipefail
+          rclone copyto _work/yeni.json "$T/METRICOOL_TOKEN.json" -q
+          yeni_id=$(rclone lsjson --stat "$T/METRICOOL_TOKEN.json" | python3 -c "import json,sys;print(json.load(sys.stdin)['ID'])")
+          echo "METRICOOL_TOKEN.json kimligi (sonra): $yeni_id | ayni: $([ "$yeni_id" = "$(cat _work/eski_id.txt)" ] && echo EVET || echo HAYIR)"
+          rclone copyto "$T/METRICOOL_TOKEN.json" _work/kontrol.json -q
+          cmp -s _work/kontrol.json _work/yeni.json && echo "Drive icerigi yeni token: EVET" || { echo "DUR: Drive icerigi yeni tokenla ayni degil"; exit 1; }
+          rclone deletefile "$T/METRICOOL_TOKEN_YENI_20261014.json" --drive-use-trash=false -q
+          rclone lsf "$T" --include "METRICOOL_TOKEN_YENI_20261014.json" | grep -q . && { echo "DUR: gecici dosya hala var"; exit 1; } || echo "METRICOOL_TOKEN_YENI_20261014.json kalici silindi"
+
+      - name: Eski token gecersiz mi (tek GET, yalniz HTTP kodu)
+        run: |
+          python3 - <<'EOF'
+          import json, urllib.request, urllib.parse, urllib.error
+          d = json.load(open('_work/eski.json'))
+          q = urllib.parse.urlencode({'start': '2026-10-14T00:00:00', 'end': '2026-10-15T00:00:00', 'timezone': 'Europe/Istanbul',
+                                      'userId': d['userId'], 'blogId': d['blogId']})
+          r = urllib.request.Request(f'https://app.metricool.com/api/v2/scheduler/posts?{q}', headers={'X-Mc-Auth': d['userToken']})
+          try:
+              with urllib.request.urlopen(r, timeout=60) as y:
+                  print(f'ESKI token GET: HTTP {y.status} -> HALA GECERLI')
+          except urllib.error.HTTPError as e:
+              print(f'ESKI token GET: HTTP {e.code} -> ' + ('GECERSIZ' if e.code in (401, 403) else 'beklenmeyen kod'))
+          EOF
+
+      - if: always()
+        run: rm -rf _work ~/.config/rclone

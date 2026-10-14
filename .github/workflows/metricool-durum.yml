@@ -56,6 +56,22 @@ jobs:
                   ek = {k: v for k, v in x.items() if k not in ('network', 'status', 'publicUrl', 'id', 'detailedStatus') and v not in (None, '', [], {})}
                   print('GONDERI', i, x.get('network'), 'plan', (p.get('publicationDate') or {}).get('dateTime'), x.get('status'), x.get('detailedStatus'),
                         x.get('publicUrl'), json.dumps(ek, ensure_ascii=False)[:400])
+          # okuma testi: 12 Eki - 31 Ara tum gonderiler ag + durum bazinda (7 gunluk parcalar)
+          from datetime import datetime, timedelta
+          t, son, tum = datetime(2026, 10, 12), datetime(2026, 12, 31), {}
+          while t < son:
+              e = min(son, t + timedelta(days=7))
+              for p in mpb.veri(mc.istek('GET', '/v2/scheduler/posts', {'start': t.strftime('%Y-%m-%dT%H:%M:%S'), 'end': e.strftime('%Y-%m-%dT%H:%M:%S'), 'timezone': TZ})) or []:
+                  tum[p.get('id')] = p
+              t = e
+          say = {}
+          for p in tum.values():
+              for x in p.get('providers') or []:
+                  k = (x.get('network'), x.get('status'))
+                  say[k] = say.get(k, 0) + 1
+          print(f'SAYIM 12 Eki-31 Ara: toplam gonderi {len(tum)}')
+          for ag in sorted({k[0] for k in say}):
+              print(f"  {ag}: {sum(v for k, v in say.items() if k[0] == ag)} " + str({k[1]: v for k, v in say.items() if k[0] == ag}))
           for yol in ('/v2/analytics/posts/facebook', '/v2/analytics/reels/facebook', '/v2/analytics/posts/instagram', '/v2/analytics/reels/instagram'):
               try:
                   d = mpb.veri(mc.istek('GET', yol, {'from': os.environ['BAS'], 'to': os.environ['BIT'], 'timezone': TZ})) or []
