@@ -130,7 +130,7 @@ jobs:
           sinir = datetime.now(timezone.utc) - timedelta(days=7)
           hatalar = []
           def api(yol):
-              r = subprocess.run(['gh', 'api', '-H', 'Accept: application/vnd.github+json', yol], capture_output=True, text=True)
+              r = subprocess.run(['gh', 'api', '-H', 'Accept: application/vnd.github+json'] + (['--allow-escape-sequences'] if yol.endswith('/logs') else []) + [yol], capture_output=True, text=True)
               if r.returncode != 0:
                   hatalar.append(f"{yol.split('/actions/')[-1][:60]}: {r.stderr.strip()[:150]}")
                   return None
