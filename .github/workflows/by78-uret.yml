@@ -1,0 +1,81 @@
+name: by78-uret
+# BIZIM YILIMIZ 78 cift uretimi (Serdar 14 Eki 2026): paket bizim-yilimiz-v3 (a04542b) kod/uret_hepsi.py AYNEN.
+# 13 is x 6 cift (CSV sirasi); her is kendi KONTAK sayfasini uretir (6 cift = 1 sayfa, numara = is no).
+# Cikti: Drive TEMP/BIZIM_YILIMIZ_78_20261014/<CIFT>/{poster,kart,galeri} + KONTAK_01..13.jpg; rclone check.
+# Etsy'ye yazma YOK. Zamanlama YOK (yalniz workflow_dispatch).
+on:
+  workflow_dispatch:
+    inputs:
+      paket_ref: { description: "bizim-yilimiz-v3 commit (tam SHA)", required: true, default: "a04542bac1ddb6b72ea976aad214b03ee80e3d62" }
+permissions:
+  contents: read
+env:
+  D: "gdrive:ASTROLOVE/TEMP/BIZIM_YILIMIZ_78_20261014"
+jobs:
+  uret:
+    strategy:
+      fail-fast: false
+      matrix:
+        is: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: "${{ github.event.inputs.paket_ref }}", fetch-depth: 1 }
+      - name: Kurulum (yerel test ile ayni surumler; raqm zorunlu)
+        run: |
+          set -euo pipefail
+          sudo apt-get -qq update >/dev/null && sudo apt-get -qq install -y libfribidi0 libraqm0 >/dev/null || true
+          pip install -q numpy==2.5.3 opencv-python-headless==5.0.0.93 pillow==12.3.0
+          python3 -c "from PIL import features; import sys; r=features.check('raqm'); print('raqm', r); sys.exit(0 if r else 1)"
+          curl -fsSL -o /tmp/rc.zip https://downloads.rclone.org/rclone-current-linux-amd64.zip
+          unzip -q -j /tmp/rc.zip '*/rclone' -d /tmp/rcb && sudo install -m 755 /tmp/rcb/rclone /usr/local/bin/rclone
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: Uret (6 cift, uret_hepsi.py AYNEN)
+        run: |
+          set -euo pipefail
+          K=${{ matrix.is }}
+          CIFTLER=$(python3 -c "import csv,sys;r=[x['cift'] for x in csv.DictReader(open('BIZIM_YILIMIZ_78_ILAN_METIN.csv'))];k=int(sys.argv[1]);print(' '.join(r[6*(k-1):6*k]))" $K)
+          echo "is $K: $CIFTLER"
+          T0=$(date +%s)
+          BY_ROOT=$PWD python3 kod/uret_hepsi.py $CIFTLER
+          mv cikti/KONTAK_01.jpg "cikti/KONTAK_$(printf %02d $K).jpg"
+          echo "SURE_SN=$(( $(date +%s) - T0 ))" >> "$GITHUB_ENV"; echo "CIFTLER=$CIFTLER" >> "$GITHUB_ENV"
+      - name: Drive'a yaz + rclone check
+        run: |
+          set -euo pipefail
+          for C in $CIFTLER; do
+            for t in poster kart galeri; do
+              rclone copy "cikti/$C/$t" "$D/$C/$t" --transfers 8 -q
+              rclone check "cikti/$C/$t" "$D/$C/$t" --one-way -q
+            done
+          done
+          K=$(printf %02d ${{ matrix.is }})
+          rclone copyto "cikti/KONTAK_$K.jpg" "$D/KONTAK_$K.jpg" -q && rclone check cikti "$D" --one-way --include "/KONTAK_$K.jpg" -q
+          N=$(find cikti -path '*/poster/*_8x10.jpg' -o -path '*/kart/*_5x7.jpg' -o -path '*/galeri/*.jpg' | wc -l)
+          echo "::warning::IS ${{ matrix.is }}: $CIFTLER | dosya $N | uretim ${SURE_SN} sn | rclone check PASS | KONTAK_$K $(rclone lsjson "$D" --include "/KONTAK_$K.jpg" | python3 -c 'import json,sys;print(json.load(sys.stdin)[0]["ID"])')"
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
+
+  dal-sil:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Kalan inceleme dali (Bizim Yilimiz 1. deneme yan urunu)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          B=inceleme/siparis-9000013102
+          if gh api "repos/$GITHUB_REPOSITORY/git/refs/heads/$B" >/dev/null 2>&1; then
+            gh api -X DELETE "repos/$GITHUB_REPOSITORY/git/refs/heads/$B" && echo "::warning::silindi $B"
+          else echo "::warning::$B zaten yok"; fi
