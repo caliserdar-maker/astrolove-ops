@@ -1,0 +1,91 @@
+name: by78-yayinla
+
+# BY78 78 ILAN YAYINI (14 Eki 2026). YALNIZ Serdar'in acik onayiyla; onay girdisi tam olarak SERDAR_YAYIN_ONAYI olmali.
+# Hedef YALNIZ Drive TEMP/BY78_TASLAK_20261014/BY78_TASLAKLAR.csv (78 listing_id); canli 78 ilan (data/pod/pod78_ids.csv) hedefte -> FAIL.
+# Her ilan: GET; draft ise TEK yazma (updateListing yalniz state=active, yeniden deneme yok); sonra GET dogrulama.
+# adet=1 yalniz ilk ilan; adet=0 kalan hepsi. Tekrar kosuda active olanlar atlanir. Hata ya da kota < 500 -> DUR.
+# Cikti: Drive TEMP/BY78_YAYIN/ (YAYIN.csv son kosu, YAYIN_<damga>.csv, OZET.md).
+
+permissions:
+  actions: read
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      onay: { description: "Zorunlu: SERDAR_YAYIN_ONAYI", required: true, default: "" }
+      adet: { description: "1 = yalniz ilk ilan; 0 = kalan hepsi", required: true, default: "1" }
+
+jobs:
+  yayinla:
+    runs-on: ubuntu-latest
+    timeout-minutes: 170
+    steps:
+      - name: Onay kapisi
+        env:
+          ONAY: ${{ inputs.onay }}
+          ADET: ${{ inputs.adet }}
+        run: |
+          [ "$ONAY" = SERDAR_YAYIN_ONAYI ] || { echo "::error::onay=SERDAR_YAYIN_ONAYI gerekli; Etsy'ye istek yapilmadi"; exit 1; }
+          [[ "$ADET" =~ ^[0-9]+$ ]] || { echo "::error::adet rakam olmali"; exit 1; }
+          echo "onay tamam, adet=$ADET"
+      - uses: actions/checkout@v4
+      - name: Guvenlik testi (tek yazma cagrisi) + birim test
+        run: |
+          set -euo pipefail
+          n=$(grep -cE "\.(patch|put|post|delete|post_json|put_json|post_file)\(|method=.(PATCH|PUT|POST|DELETE)" scripts/etsy/by78_yayinla.py || true)
+          y=$(grep -cE 'requests\.patch\(f"\{API\}/shops/\{shop\}/listings/\{lid\}", data=\{"state": "active"\}' scripts/etsy/by78_yayinla.py || true)
+          [ "$n" = 1 ] && [ "$y" = 1 ] || { echo "::error::betikte yalniz tek yazma (state=active PATCH) olmali: yazma $n, izinli $y"; exit 1; }
+          python3 -m unittest scripts/etsy/test_by78_yayinla.py 2>&1 | tail -3
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Token + hedef liste
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          echo "DAMGA=$(date -u +%Y%m%d_%H%M)" >> "$GITHUB_ENV"
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/BY78_TASLAK_20261014/BY78_TASLAKLAR.csv" _work/TASLAK.csv
+          echo "taslak $(($(wc -l < _work/TASLAK.csv) - 1)) satir | kara liste $(($(wc -l < data/pod/pod78_ids.csv) - 1)) ID"
+      - name: Yayin (draft -> active, tek yazma)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          ADET: ${{ inputs.adet }}
+        run: python scripts/etsy/by78_yayinla.py --taslak _work/TASLAK.csv --kara data/pod/pod78_ids.csv --out _out --adet "$ADET"
+      - name: Token geri yazimi ve cikti Drive'a
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "yenilenen token geri yazildi" || true
+          [ -f _out/YAYIN.csv ] || { echo "YAYIN.csv yok (hedef kontrol ya da onceki adim FAIL)"; exit 0; }
+          python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/ETSY_TOKEN.json _out || { echo "::error::Ciktida sir bulundu; Drive'a yazilmadi"; exit 1; }
+          D="gdrive:ASTROLOVE/TEMP/BY78_YAYIN"
+          rclone copyto _out/YAYIN.csv "$D/YAYIN_${DAMGA}.csv" -q && rclone copyto _out/YAYIN.csv "$D/YAYIN.csv" -q
+          [ -f _out/OZET.md ] && rclone copyto _out/OZET.md "$D/OZET_${DAMGA}.md" -q && cat _out/OZET.md >> "$GITHUB_STEP_SUMMARY"
+          echo "Cikti: ASTROLOVE/TEMP/BY78_YAYIN/YAYIN.csv (+ YAYIN_${DAMGA}.csv)"
+      - if: always()
+        run: rm -rf _work ~/.config/rclone
