@@ -26,6 +26,14 @@ PAIR = os.environ.get("PAIR", "CANCER_LIBRA").upper()
 N1 = os.environ.get("NAME1", "SERDAR")
 N2 = os.environ.get("NAME2", "LENA")
 DATE = os.environ.get("DATE", "12 JUNE 2025")
+# Siparis yolu (14 Eki 2026): HEADING = ust satir ("Paper Anniversary" varsayilan / "Our First Year"); yazi boyu HER ZAMAN
+# "Paper Anniversary" icin olculen boy (kisa baslik genislige gore BUYUMEZ). LINE = kisa satir (varsayilan "YEAR ONE"; boyu
+# "YEAR ONE" ornek genisliginden, yalniz tasarsa kuculur; by_kart.small_line ile ayni kural). STYLE = tek stil (1..5 ya da ad).
+HEADING = os.environ.get("HEADING", "Paper Anniversary").strip()
+if HEADING not in ("Paper Anniversary", "Our First Year"):
+    raise SystemExit(f"HATA: HEADING yalniz 'Paper Anniversary' ya da 'Our First Year' olabilir: {HEADING!r}")
+LINE = os.environ.get("LINE", "YEAR ONE").strip() or "YEAR ONE"
+STYLE = os.environ.get("STYLE", "").strip()
 Z = f"{ROOT}/z"
 F = f"{ROOT}/fonts"
 OUT = os.environ.get("OUT", f"{ROOT}/cikti/{PAIR}/poster")
@@ -233,6 +241,37 @@ def symbol_mask(el):
     raise RuntimeError("use hero_mask / signs_mask")
 
 
+def fit_size(s, factory, tracking_pct, target, by):
+    """fit_text ile ayni dongu; yalniz puntoyu dondurur"""
+    track = tracking_pct / 100 * W
+    size = 200
+    for _ in range(4):
+        m = text_mask(s, factory(size), track)
+        cur = m.height if by == "h" else m.width
+        size = max(8, round(size * target / cur))
+    return size
+
+
+def same_size_full(s, ref, factory, tracking_pct, el, by, target=None, max_w=None):
+    """s metnini, ref metninin el kutusunda alacagi puntoyla ciz (kisa metin BUYUMEZ); ust cizgisi ref ile ayni.
+    s == ref ise text_full ile birebir ayni sonuc. max_w: tasarsa yalniz kuculur (piksel)."""
+    if s == ref:
+        return text_full(ref, factory, tracking_pct, el, by, target)
+    if target is None:
+        target = (el["visible_height"] / 100 * H) if by == "h" else (el["width"] / 100 * W)
+    size = fit_size(ref, factory, tracking_pct, target, by)
+    track = tracking_pct / 100 * W
+    mr = text_mask(ref, factory(size), track)
+    m = text_mask(s, factory(size), track)
+    lim = max_w if max_w is not None else target
+    if by == "w" and m.width > lim:
+        size = int(size * lim / m.width)
+        m = text_mask(s, factory(size), track)
+    cx, cy = el["center_x"] / 100 * W, el["center_y"] / 100 * H
+    top = cy - mr.height / 2                                   # ref'in ust cizgisi (buyuk harf tepesi) korunur
+    return full_mask(m, cx, top + m.height / 2)
+
+
 def text_full(s, factory, tracking_pct, el, by, target=None):
     if target is None:
         target = (el["visible_height"] / 100 * H) if by == "h" else (el["width"] / 100 * W)
@@ -328,6 +367,18 @@ def union(*ms):
 
 
 # ---------------- styles ----------------
+def select_styles(all_styles):
+    """STYLE bos = 5 stil; '3', '3_FirstPage', 'FirstPage' ya da 'first page' = tek stil"""
+    if not STYLE:
+        return all_styles
+    k = STYLE.lower().replace(" ", "").replace("_", "")
+    sel = [(n, f) for n, f in all_styles if k in (n[0], n.lower().replace("_", ""), n.split("_", 1)[1].lower())]
+    if len(sel) != 1:
+        raise SystemExit(f"HATA: STYLE taninmadi: {STYLE!r} (1..5, 1_Starlit, Starlit ...)")
+    return sel
+
+
+
 def els(name):
     return {e["element"]: e for e in MEAS[name]["elements"]}
 
@@ -345,9 +396,9 @@ def gold_style(name, tex, k, shadow, shadow_op, glow, names_font, title_font, sm
     sym = union(hero_mask(e["hero"]), signs_mask(e["left"], e["right"]))
     txt = union(
         names_full(N1, N2, names_font, 0.35, e["SERDAR"], e["LENA"], t_names / 100 * H),
-        text_full("Paper Anniversary", title_font, 0, e["Paper Anniversary"], "w", t_title_w),
+        same_size_full(HEADING, "Paper Anniversary", title_font, 0, e["Paper Anniversary"], "w", t_title_w),
         text_full(DATE, small_font, 0.55, e["12 JUNE 2025"], "w", t_date_w),
-        text_full("YEAR ONE", small_font, 0.75, e["YEAR ONE"], "w", t_year_w),
+        same_size_full(LINE, "YEAR ONE", small_font, 0.75, e["YEAR ONE"], "w", t_year_w, max_w=0.70 * W),
         divider_mask(MEAS[name]["removed_dividers"]),
     )
     bg = apply_gold(bg, sym, gold, shadow, shadow_op, glow, bevel=bevel)
@@ -375,11 +426,11 @@ def ink_style(name, color_sym, color_small, color_txt, color_sub, title_f, names
     bg = bgimg(name)
     bg = apply_ink(bg, hero_mask(e["hero"]), color_sym)
     bg = apply_ink(bg, signs_mask(e["left"], e["right"]), color_small)
-    t = text_full("Paper Anniversary", title_f, -0.03, e["Paper Anniversary"], title_by)
+    t = same_size_full(HEADING, "Paper Anniversary", title_f, -0.03, e["Paper Anniversary"], title_by)
     n = names_full(N1, N2, names_f, 0.25, e["SERDAR"], e["LENA"])
     bg = apply_ink(bg, union(t, n), color_txt)
     sub = union(text_full(DATE, small_f, 0.55, e["12 JUNE 2025"], "w", 0.30 * W),
-                text_full("YEAR ONE", small_f, 0.75, e["YEAR ONE"], "w", 0.20 * W))
+                same_size_full(LINE, "YEAR ONE", small_f, 0.75, e["YEAR ONE"], "w", 0.20 * W, max_w=0.70 * W))
     bg = apply_ink(bg, sub, color_sub, press=False)
     return bg
 
@@ -400,11 +451,13 @@ def layers():
     bg = bgimg(name)
     bg = apply_papercut(bg, hero_mask(e["hero"]), "#A84A2C", lift=7)
     bg = apply_ink(bg, signs_mask(e["left"], e["right"]), "#6E3A24")
-    title = union(text_full("Paper", fs("DMSerif"), -0.10, e["Paper"], "w"),
-                  text_full("Anniversary", fs("DMSerif"), -0.15, e["Anniversary"], "w"))
+    # iki satir: 1. kelime "Paper" kutusunda, kalan kelimeler "Anniversary" kutusunda; puntolar Paper/Anniversary ile ayni
+    w1, w2 = (HEADING.split(" ", 1) + [""])[:2] if HEADING != "Paper Anniversary" else ("Paper", "Anniversary")
+    title = union(same_size_full(w1, "Paper", fs("DMSerif"), -0.10, e["Paper"], "w", max_w=0.86 * W),
+                  same_size_full(w2, "Anniversary", fs("DMSerif"), -0.15, e["Anniversary"], "w", max_w=0.86 * W))
     bg = apply_papercut(bg, title, "#A34729", lift=5)
     names = names_full(N1, N2, fs("Montserrat", 600), 0.35, e["SERDAR"], e["LENA"])
-    sub = union(text_full("YEAR ONE", fs("Montserrat", 600), 0.65, e["YEAR ONE"], "w"),
+    sub = union(same_size_full(LINE, "YEAR ONE", fs("Montserrat", 600), 0.65, e["YEAR ONE"], "w", max_w=0.70 * W),
                 text_full(DATE, fs("Montserrat", 600), 0.40, e["12 JUNE 2025"], "w"))
     bg = apply_ink(bg, union(names, sub), "#592319")
     return bg
@@ -413,12 +466,14 @@ def layers():
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
     ims = []
-    for n, fn in [("1_Starlit", starlit), ("2_Timeless", timeless), ("3_FirstPage", first_page),
-                  ("4_Layers", layers), ("5_Botanical", botanical)]:
+    for n, fn in select_styles([("1_Starlit", starlit), ("2_Timeless", timeless), ("3_FirstPage", first_page),
+                                ("4_Layers", layers), ("5_Botanical", botanical)]):
         im = fn()
         im.save(f"{OUT}/{n}_8x10.jpg", quality=97, subsampling=0, dpi=(300, 300))
         ims.append(im)
         print(n)
+    if len(ims) < 5:
+        raise SystemExit(0)                                    # tek stil (siparis): yan yana sayfa yok
     small = [i.resize((720, 900), Image.LANCZOS) for i in ims]
     sheet = Image.new("RGB", (720 * 5 + 20 * 6, 940), (236, 236, 236))
     for k, i in enumerate(small):

@@ -141,12 +141,15 @@ def layers():
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
     ims = []
-    for n, fn in [("1_Starlit", starlit), ("2_Timeless", timeless), ("3_FirstPage", first_page),
-                  ("4_Layers", layers), ("5_Botanical", botanical)]:
+    # STYLE (14 Eki 2026, siparis yolu): by_poster.select_styles ile ayni; kart basligi HER ZAMAN "Happy First Anniversary" (HEADING kullanilmaz)
+    for n, fn in rv.select_styles([("1_Starlit", starlit), ("2_Timeless", timeless), ("3_FirstPage", first_page),
+                                   ("4_Layers", layers), ("5_Botanical", botanical)]):
         im = fn()
         im.save(f"{OUT}/{n}_5x7.jpg", quality=97, subsampling=0, dpi=(300, 300))
         ims.append(im)
         print(n)
+    if len(ims) < 5:
+        raise SystemExit(0)                                    # tek stil (siparis): yan yana sayfa yok
     th = [i.resize((500, 700), Image.LANCZOS) for i in ims]
     sheet = Image.new("RGB", (5 * 500 + 6 * 15, 730), (236, 236, 236))
     for k, t in enumerate(th):
