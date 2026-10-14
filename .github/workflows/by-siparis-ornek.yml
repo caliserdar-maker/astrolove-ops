@@ -1,0 +1,45 @@
+name: by-siparis-ornek
+# BIZIM YILIMIZ siparis parametreleri ORNEGI (14 Eki 2026): HEADING / STYLE (dal bizim-yilimiz-v3-siparis). Etsy YOK. Zamanlama YOK.
+on:
+  workflow_dispatch:
+    inputs:
+      ref: { description: "bizim-yilimiz-v3-siparis commit (tam SHA)", required: true, default: "85f53a89c652362b4e998d21785001f15e692bef" }
+permissions:
+  contents: read
+jobs:
+  ornek:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: "${{ github.event.inputs.ref }}", fetch-depth: 1 }
+      - name: Kurulum
+        run: |
+          set -euo pipefail
+          pip install -q numpy==2.5.3 opencv-python-headless==5.0.0.93 pillow==12.3.0
+          python3 -c "from PIL import features; import sys; sys.exit(0 if features.check('raqm') else 1)"
+          curl -fsSL -o /tmp/rc.zip https://downloads.rclone.org/rclone-current-linux-amd64.zip
+          unzip -q -j /tmp/rc.zip '*/rclone' -d /tmp/rcb && sudo install -m 755 /tmp/rcb/rclone /usr/local/bin/rclone
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: Ornek (SERDAR / LENA, Our First Year, First Page) + Drive
+        run: |
+          set -euo pipefail
+          O=out; export BY_ROOT=$PWD PAIR=CANCER_LIBRA NAME1=SERDAR NAME2=LENA DATE="12 JUNE 2025" STYLE=3
+          HEADING="Our First Year" OUT=$O python3 kod/by_poster.py
+          OUT=$O python3 kod/by_kart.py
+          mv $O/3_FirstPage_8x10.jpg $O/AstroLoveArt_Cancer_Libra_FirstPage_OurFirstYear_8x10.jpg
+          mv $O/3_FirstPage_5x7.jpg $O/AstroLoveArt_Cancer_Libra_FirstPage_Kart_5x7.jpg
+          D="gdrive:ASTROLOVE/TEMP/BIZIM_YILIMIZ_78_20261014/ORNEK_SIPARIS"
+          rclone copy $O "$D" -q && rclone check $O "$D" --one-way -q
+          rclone lsjson "$D" | python3 -c "import json,sys;[print('::warning::DOSYA',d['Name'],d['ID']) for d in json.load(sys.stdin)]"
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
