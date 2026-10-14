@@ -75,12 +75,12 @@ jobs:
               m = re.match(r'(\w+) and (\w+)', baslik)
               cift = f'{m.group(1).upper()}_{m.group(2).upper()}' if m else '?'
               r = {'id': p.get('id'), 'cift': cift, 'saat': (p.get('publicationDate') or {}).get('dateTime'), 'durum': pr.get('status'),
-                   'detay': pr.get('detailedStatus'), 'link': pr.get('publicUrl'), 'video_id': pr.get('id') if pr.get('status') == 'PUBLISHED' else '',
+                   'detay': pr.get('detailedStatus'), 'link': pr.get('publicUrl'), 'video_id': (re.search(r'/shorts/([\w-]+)', pr.get('publicUrl') or '') or [None, ''])[1],
                    'kapak_alani': bool(p.get('videoThumbnailUrl')), 'kapak_url': p.get('videoThumbnailUrl') or '',
                    'saglayici_diger': {k: v for k, v in pr.items() if k not in ('network', 'status', 'publicUrl', 'id', 'detailedStatus') and v not in (None, '', [], {})},
                    'gonderi_uyari': {k: v for k, v in p.items() if re.search(r'warn|error|fail|messag|notif', k, re.I) and v not in (None, '', [], {})}}
               out.append(r)
-              (yay if pr.get('status') == 'PUBLISHED' else bek).append(r)
+              (yay if r['link'] else bek).append(r)
           json.dump(out, open('_out/YT_GONDERILER.json', 'w'), ensure_ascii=False, indent=1)
           print(f'YOUTUBE gonderi {len(yt)}: yayinlanan {len(yay)}, bekleyen {len(bek)}')
           for r in yay:
@@ -102,7 +102,7 @@ jobs:
           import json, os, subprocess
           import numpy as np
           from PIL import Image
-          yay = [r for r in json.load(open('_out/YT_GONDERILER.json')) if r['durum'] == 'PUBLISHED' and r['video_id']]
+          yay = [r for r in json.load(open('_out/YT_GONDERILER.json')) if r['video_id']]   # yayinda olan her video (ERROR=uyarili yayin dahil)
           def g(p, w=90, h=160):
               im = Image.open(p).convert('L')
               W, H = im.size
