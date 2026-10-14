@@ -1,0 +1,101 @@
+name: by78-kapak-bordo
+# BIZIM YILIMIZ 78: bordo Etsy kapagi (Serdar 15 Eki; kod bizim-yilimiz-v3 kod/by_kapak.py).
+# Girdi Drive v3/<CIFT>/poster/4_Layers_8x10.jpg -> 00_Kapak.jpg (2400x2400, 300 dpi) -> Drive v3/<CIFT>/vitrin/00_Kapak.jpg + rclone check.
+# KONTAK_KAPAK_BORDO_78.jpg (13 satir x 6, kare 300 px, alti cift adi) -> kontak-v2. Etsy'ye yazma YOK. Zamanlama YOK.
+on:
+  workflow_dispatch:
+    inputs:
+      paket_ref: { description: "bizim-yilimiz-v3 commit (tam SHA)", required: true, default: "4eaa4b3194276d9bccd531644c19327c751bfcb3" }
+permissions:
+  contents: read
+env:
+  V3: "gdrive:ASTROLOVE/TEMP/BIZIM_YILIMIZ_78_20261014_v3"
+jobs:
+  kapak:
+    strategy:
+      fail-fast: false
+      matrix:
+        is: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: "${{ inputs.paket_ref }}", fetch-depth: 1 }
+      - name: Kurulum + rclone
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          sudo apt-get -qq update >/dev/null && sudo apt-get -qq install -y libfribidi0 libraqm0 >/dev/null || true
+          pip install -q numpy==2.5.3 opencv-python-headless==5.0.0.93 pillow==12.3.0
+          python3 -c "from PIL import features; import sys; sys.exit(0 if features.check('raqm') else 1)"
+          curl -fsSL -o /tmp/rc.zip https://downloads.rclone.org/rclone-current-linux-amd64.zip
+          unzip -q -j /tmp/rc.zip '*/rclone' -d /tmp/rcb && sudo install -m 755 /tmp/rcb/rclone /usr/local/bin/rclone
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: Kapak (6 cift) + Drive + check
+        run: |
+          set -euo pipefail
+          K=${{ matrix.is }}
+          CIFTLER=$(python3 -c "import csv,sys;r=[x['cift'] for x in csv.DictReader(open('BIZIM_YILIMIZ_78_ILAN_METIN.csv'))];k=int(sys.argv[1]);print(' '.join(r[6*(k-1):6*k]))" $K)
+          n=0; T0=$(date +%s); mkdir -p k300
+          for C in $CIFTLER; do
+            rclone copyto "$V3/$C/poster/4_Layers_8x10.jpg" "cikti/$C/poster/4_Layers_8x10.jpg" -q
+            BY_ROOT=$PWD PAIR=$C python3 kod/by_kapak.py
+            python3 -c "from PIL import Image;import sys;im=Image.open(sys.argv[1]);assert im.size==(2400,2400),im.size;im.resize((300,300),Image.LANCZOS).save(sys.argv[2],quality=92)" "cikti/$C/vitrin/00_Kapak.jpg" "k300/$C.jpg"
+            rclone copyto "cikti/$C/vitrin/00_Kapak.jpg" "$V3/$C/vitrin/00_Kapak.jpg" -q
+            rclone check "cikti/$C/vitrin" "$V3/$C/vitrin" --one-way --include "/00_Kapak.jpg" -q
+            n=$((n+1)); G=$(( $(date +%s) - T0 )); echo "$n/6 $C gecen ${G}s kalan ~$(( G / n * (6 - n) ))s"
+          done
+          echo "::warning::KAPAK IS $K: $n/6 ($CIFTLER) 2400x2400, rclone check PASS"
+      - uses: actions/upload-artifact@v4
+        with: { name: "k300_${{ matrix.is }}", path: k300, retention-days: 2 }
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
+
+  kontak:
+    needs: kapak
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: kontak-v2, fetch-depth: 1 }
+      - uses: actions/download-artifact@v4
+        with: { pattern: "k300_*", path: k, merge-multiple: true }
+      - name: KONTAK_KAPAK_BORDO_78 (13 x 6, 300 px, cift adi) + push
+        env:
+          PAKET: ${{ inputs.paket_ref }}
+        run: |
+          set -euo pipefail
+          pip install -q pillow==12.3.0
+          git fetch -q --depth 1 origin "$PAKET" && git show "$PAKET:BIZIM_YILIMIZ_78_ILAN_METIN.csv" > /tmp/l.csv
+          python3 - <<'P'
+          import csv
+          from PIL import Image, ImageDraw, ImageFont
+          c = [r['cift'] for r in csv.DictReader(open('/tmp/l.csv'))]
+          assert len(c) == 78, len(c)
+          eksik = [p for p in c if not __import__('os').path.exists(f'k/{p}.jpg')]
+          assert not eksik, eksik
+          cols, rows, W, T, g = 6, 13, 300, 34, 8
+          s = Image.new('RGB', (cols * W + (cols + 1) * g, rows * (W + T) + (rows + 1) * g), (245, 245, 245))
+          d = ImageDraw.Draw(s)
+          try:
+              f = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 17)
+          except OSError:
+              f = ImageFont.load_default()
+          for i, p in enumerate(c):
+              x, y = g + (i % cols) * (W + g), g + (i // cols) * (W + T + g)
+              s.paste(Image.open(f'k/{p}.jpg').convert('RGB'), (x, y))
+              d.text((x + W / 2, y + W + T / 2), p, font=f, fill=(40, 30, 30), anchor='mm')
+          s.save('KONTAK_KAPAK_BORDO_78.jpg', quality=88)
+          print('78/78', s.size)
+          P
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add KONTAK_KAPAK_BORDO_78.jpg
+          git commit -qm "KONTAK_KAPAK_BORDO_78: 78 bordo kapak (bizim-yilimiz-v3 ${PAKET:0:8}, 13x6, 300 px)"
+          git push -q origin HEAD:kontak-v2
+          echo "::warning::KONTAK 78/78 commit $(git rev-parse HEAD)"
