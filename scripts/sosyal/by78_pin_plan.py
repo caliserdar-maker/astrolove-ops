@@ -16,7 +16,7 @@ from datetime import date, datetime, timedelta
 
 SLOT = {'A': '12:30', 'B': '16:15', 'C': '19:15'}
 BOARD = '1st Anniversary Gift Ideas'
-YASAK = ['—', '–', '&amp;', 'OBA', 'bright white', 'museum', 'foil', '12-colour', 'gold']  # 5 stilden 3'u altin degil (14 Eki)
+YASAK = ['—', '–', '&amp;', 'OBA', 'bright white', 'museum', 'foil', '12-colour', 'gold', 'printable']  # gold: 5 stilden 3'u altin degil; printable: format adi digital card (14 Eki)
 
 BASLIK = {
     'A': '1st Anniversary Gift for Husband, {a} & {b} Zodiac Paper Anniversary Print with Names',
@@ -26,15 +26,15 @@ BASLIK = {
 ACIKLAMA = {
     'A': ('Celebrating your first year together? This paper anniversary gift turns your two signs, {a} and {b}, '
           'into one shared zodiac symbol with your names and your wedding date. Choose from 5 styles: Starlit, '
-          'Timeless, First Page, Layers and Botanical. Get it as a 5x7 printable card, an 8x10 digital file or an '
-          '8x10 print. Free preview before you order. Personalized 1st anniversary gift for husband by AstroLoveArt.'),
+          'Timeless, First Page, Layers and Botanical. Get it as a 5x7 digital card, an 8x10 digital file or a '
+          'shipped 8x10 print. Free preview before you order. Personalized 1st anniversary gift for your husband or your wife by AstroLoveArt.'),
     'B': ('One year of you two. Your signs, {a} and {b}, become one shared zodiac symbol with both of your names and '
-          'the day you met, a sweet one year anniversary gift for your boyfriend or girlfriend. 5 styles to choose '
-          'from, as a 5x7 printable card, an 8x10 digital file or an 8x10 print. Ask for a free preview of your '
+          'the day you met, a sweet one year anniversary gift for your boyfriend or your girlfriend. 5 styles to choose '
+          'from, as a 5x7 digital card, an 8x10 digital file or a shipped 8x10 print. Ask for a free preview of your '
           'design first. Personalized zodiac couple gift by AstroLoveArt.'),
     'C': ('Paper is the traditional gift for the first wedding anniversary. This personalized print joins {a} and '
           '{b} into one shared zodiac symbol, with your two names and your wedding date. Pick one of 5 styles and '
-          'get it as a 5x7 printable card, an 8x10 digital file or an 8x10 print. Free preview before you order. '
+          'get it as a 5x7 digital card, an 8x10 digital file or a shipped 8x10 print. Free preview before you order. '
           'A keepsake for your first year of marriage by AstroLoveArt.'),
 }
 
