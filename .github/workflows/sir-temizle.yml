@@ -22,7 +22,7 @@ on:
 jobs:
   tara:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 90
     env:
       T: gdrive:ASTROLOVE/TEMP
       R: gdrive:ASTROLOVE/TEMP/SOSYAL_DURUM_20261014
@@ -56,8 +56,11 @@ jobs:
           MOD: ${{ inputs.mod }}
         run: |
           set -uo pipefail
-          rclone copy "$T" _scan --max-age 7d --include "*.txt" --include "*.json" --include "*.log" \
-            --exclude "METRICOOL_TOKEN.json" --exclude "ig_token.json" --exclude "ETSY_TOKEN.json" --exclude "*TOKEN*.json" -q --transfers 8
+          # tek seferlik hizli liste (--fast-list), sonra yalniz listelenen dosyalar indirilir
+          rclone lsf "$T" -R --fast-list --files-only --max-age 7d --include "*.txt" --include "*.json" --include "*.log" \
+            --exclude "METRICOOL_TOKEN.json" --exclude "ig_token.json" --exclude "ETSY_TOKEN.json" --exclude "*TOKEN*.json" > _rapor/liste.txt
+          echo "liste: $(wc -l < _rapor/liste.txt) dosya"
+          rclone copy "$T" _scan --files-from _rapor/liste.txt --no-traverse -q --transfers 16
           python3 - <<'EOF' > _rapor/DRIVE.txt
           import glob, os, sys
           sys.path.insert(0, 'scripts/guvenlik')
