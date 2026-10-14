@@ -3,6 +3,7 @@ name: by78-pin-hazirlik
 # "Bizim Yilimiz" 78 ilan icin Pinterest pin HAZIRLIGI (YAYIN YOK; Metricool/Pinterest'e gonderim yok).
 # mod=incele : 3 ciftin (A/B/C grubu) galeri kontak sayfasi + olculer, 78 galeri listesi, mevcut V6 pin plani saatleri.
 # mod=plan   : scripts/sosyal/by78_pin_plan.py -> PIN_PLAN_BY78.csv (Drive ASTROLOVE/TEMP).
+# mod=pano   : Pinterest panosu "1st Anniversary Gift Ideas" Metricool ile acilir (Serdar onayi 14 Eki); pin YOK.
 
 permissions:
   contents: read
@@ -12,7 +13,7 @@ on:
     inputs:
       mod:
         type: choice
-        options: [incele, plan]
+        options: [incele, plan, pano]
         default: incele
 
 jobs:
@@ -86,5 +87,20 @@ jobs:
           python3 scripts/guvenlik/sir_koru.py tara _out || exit 1
           rclone copyto _out/PIN_PLAN_BY78.csv "gdrive:ASTROLOVE/TEMP/PIN_PLAN_BY78.csv" -q
           echo "Cikti: ASTROLOVE/TEMP/PIN_PLAN_BY78.csv"
+      - name: Pinterest panosu ac (mod=pano; yalniz pano, pin yok)
+        if: ${{ inputs.mod == 'pano' }}
+        run: |
+          set -uo pipefail
+          rclone copyto "gdrive:ASTROLOVE/TEMP/METRICOOL_TOKEN.json" _w/mc.json
+          python3 -c "import json;print('::add-mask::'+json.load(open('_w/mc.json'))['userToken'])"
+          python3 scripts/sosyal/metricool_pano_ac.py _w/mc.json "1st Anniversary Gift Ideas" \
+            "Personalized 1st anniversary gift ideas for couples: zodiac paper anniversary prints and cards with your names and date, by AstroLoveArt." _out \
+            | python3 scripts/guvenlik/sir_koru.py tee --sir-json _w/mc.json "$GITHUB_STEP_SUMMARY"
+          rc=${PIPESTATUS[0]}
+          python3 scripts/guvenlik/sir_koru.py tara --sir-json _w/mc.json _out || exit 1
+          rclone copy _out "$O" -q --include "PANO_AC.json"
+          exit $rc
       - if: always()
-        run: rm -rf ~/.config/rclone
+        run: |
+          rm -rf ~/.config/rclone _w/mc.json
+          if [ -f "$RUNNER_TEMP/SIR_ENGEL" ]; then echo "::error::sir iceren satir engellendi (sir_koru)"; exit 1; fi

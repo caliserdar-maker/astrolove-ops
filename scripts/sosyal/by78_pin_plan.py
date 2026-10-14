@@ -16,7 +16,7 @@ from datetime import date, datetime, timedelta
 
 SLOT = {'A': '12:30', 'B': '16:15', 'C': '19:15'}
 BOARD = '1st Anniversary Gift Ideas'
-YASAK = ['—', '–', '&amp;', 'OBA', 'bright white', 'museum', 'foil', '12-colour']
+YASAK = ['—', '–', '&amp;', 'OBA', 'bright white', 'museum', 'foil', '12-colour', 'gold']  # 5 stilden 3'u altin degil (14 Eki)
 
 BASLIK = {
     'A': '1st Anniversary Gift for Husband, {a} & {b} Zodiac Paper Anniversary Print with Names',
@@ -28,7 +28,7 @@ ACIKLAMA = {
           'into one shared zodiac symbol with your names and your wedding date. Choose from 5 styles: Starlit, '
           'Timeless, First Page, Layers and Botanical. Get it as a 5x7 printable card, an 8x10 digital file or an '
           '8x10 print. Free preview before you order. Personalized 1st anniversary gift for husband by AstroLoveArt.'),
-    'B': ('One year of you two. Your signs, {a} and {b}, become one gold zodiac symbol with both of your names and '
+    'B': ('One year of you two. Your signs, {a} and {b}, become one shared zodiac symbol with both of your names and '
           'the day you met, a sweet one year anniversary gift for your boyfriend or girlfriend. 5 styles to choose '
           'from, as a 5x7 printable card, an 8x10 digital file or an 8x10 print. Ask for a free preview of your '
           'design first. Personalized zodiac couple gift by AstroLoveArt.'),
