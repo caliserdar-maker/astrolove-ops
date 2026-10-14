@@ -1,0 +1,112 @@
+name: by78-pin-gorsel
+# BY78 dikey pin V1 (14 Eki 2026, Serdar onayi): 78 cift x 1 pin 2000x3000 JPG 90 -> Drive TEMP/PIN_BY78_V1/<CIFT>.jpg
+# + PIN_KONTAK.jpg kontak-v2 dalina. YAYIN YOK (Pinterest/Metricool'a gonderim yok). Etsy API YOK.
+# Poster/kart (First Page, EMMA / JAMES): Drive <paket>/<CIFT>/{poster,kart}/3_FirstPage_*.jpg varsa oradan;
+# yoksa bizim-yilimiz-v3 KOD_REF ile STYLE=3 uretilir. Tasarim: scripts/sosyal/by78_pin_v1.py.
+on:
+  workflow_dispatch:
+    inputs:
+      paket: { description: "Drive TEMP altindaki paket", required: false, default: "BIZIM_YILIMIZ_78_20261014_v3" }
+permissions:
+  contents: read
+env:
+  KOD_REF: 7e3b3f3c28d1260b8888c31ca11050e5541997c3
+  HEDEF: gdrive:ASTROLOVE/TEMP/PIN_BY78_V1
+jobs:
+  pin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        parca: [0, 1, 2, 3, 4, 5]
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 1 }
+      - name: Kod + kurulum
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          git fetch -q --depth 1 origin "$KOD_REF" && git worktree add -q _kod FETCH_HEAD
+          pip install -q numpy==2.5.3 opencv-python-headless==5.0.0.93 pillow==12.3.0
+          python3 -c "from PIL import features; import sys; sys.exit(0 if features.check('raqm') else 1)"
+          curl -fsSL -o /tmp/rc.zip https://downloads.rclone.org/rclone-current-linux-amd64.zip
+          unzip -q -j /tmp/rc.zip '*/rclone' -d /tmp/rcb && sudo install -m 755 /tmp/rcb/rclone /usr/local/bin/rclone
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: Poster + kart (Drive ya da uret) -> pin -> Drive
+        env:
+          PARCA: ${{ matrix.parca }}
+          PAKET: ${{ inputs.paket }}
+        run: |
+          set -euo pipefail
+          CIFTLER=$(ls _kod/kaynak/ana/*_alfa.png | xargs -n1 basename | sed 's/_alfa.png//' | tr a-z A-Z | sort | awk -v p="$PARCA" '(NR-1)%6==p')
+          echo "parca $PARCA: $(echo $CIFTLER | wc -w) cift"
+          drive=0; uret=0
+          for C in $CIFTLER; do
+            mkdir -p "_in/$C"
+            rclone copyto "gdrive:ASTROLOVE/TEMP/$PAKET/$C/poster/3_FirstPage_8x10.jpg" "_in/$C/3_FirstPage_8x10.jpg" -q 2>/dev/null || true
+            rclone copyto "gdrive:ASTROLOVE/TEMP/$PAKET/$C/kart/3_FirstPage_5x7.jpg" "_in/$C/3_FirstPage_5x7.jpg" -q 2>/dev/null || true
+            if [ -s "_in/$C/3_FirstPage_8x10.jpg" ] && [ -s "_in/$C/3_FirstPage_5x7.jpg" ]; then drive=$((drive+1)); echo "KAYNAK drive $C"; else
+              (cd _kod && BY_ROOT=$PWD PAIR=$C NAME1=EMMA NAME2=JAMES DATE="14 JUNE 2025" LINE="YEAR ONE" STYLE=3 OUT="../_in/$C" python3 kod/by_poster.py >/dev/null \
+                && BY_ROOT=$PWD PAIR=$C NAME1=EMMA NAME2=JAMES DATE="14 JUNE 2025" LINE="YEAR ONE" STYLE=3 OUT="../_in/$C" python3 kod/by_kart.py >/dev/null)
+              uret=$((uret+1)); echo "KAYNAK uretildi $C"; fi
+          done
+          echo "KAYNAK OZET parca $PARCA: drive $drive, uretildi $uret"
+          python3 scripts/sosyal/by78_pin_v1.py --zemin assets/pin/PIN_ZEMIN_BOTANIK_MESE.png --fontlar _kod/galeri/fonts --girdi _in --cikti _out $CIFTLER
+          rclone copy _out "$HEDEF" -q --transfers 8 && rclone check _out "$HEDEF" --one-way -q
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
+  kontak:
+    needs: pin
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: kontak-v2, fetch-depth: 1 }
+      - name: 78 pin oku + kontak
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          pip install -q pillow==12.3.0
+          curl -fsSL -o /tmp/rc.zip https://downloads.rclone.org/rclone-current-linux-amd64.zip
+          unzip -q -j /tmp/rc.zip '*/rclone' -d /tmp/rcb && sudo install -m 755 /tmp/rcb/rclone /usr/local/bin/rclone
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && export RCLONE_CONFIG_GDRIVE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET" || true; fi
+          rclone copy "$HEDEF" /tmp/p -q --transfers 8 --include "*.jpg"
+          python3 - <<'EOF'
+          import os, sys
+          from PIL import Image, ImageDraw
+          fs = sorted(f for f in os.listdir('/tmp/p') if f.endswith('.jpg'))
+          bozuk = [f for f in fs if Image.open(f'/tmp/p/{f}').size != (2000, 3000)]
+          print('PIN', len(fs), '| 2000x3000 olmayan', bozuk)
+          if len(fs) != 78 or bozuk:
+              sys.exit('FAIL: 78/78 degil')
+          tw, th, sut = 200, 300, 13
+          sat = (len(fs) + sut - 1) // sut
+          K = Image.new('RGB', (sut * (tw + 8) + 8, sat * (th + 26) + 8), (240, 240, 240))
+          d = ImageDraw.Draw(K)
+          for i, f in enumerate(fs):
+              im = Image.open(f'/tmp/p/{f}').convert('RGB').resize((tw, th), Image.LANCZOS)
+              x, y = 8 + (i % sut) * (tw + 8), 8 + (i // sut) * (th + 26)
+              K.paste(im, (x, y)); d.text((x, y + th + 5), f[:-4][:30], fill=(0, 0, 0))
+          K.save('PIN_KONTAK.jpg', quality=85)
+          print('KONTAK', K.size, round(os.path.getsize('PIN_KONTAK.jpg') / 1e6, 2), 'MB')
+          EOF
+          echo "PIN_KONTAK.jpg: 78 dikey pin V1 (Drive TEMP/PIN_BY78_V1, zemin PIN_ZEMIN_BOTANIK_MESE, First Page EMMA/JAMES, kod $KOD_REF) $(date -u +%F)" >> KAYNAK.txt
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add PIN_KONTAK.jpg KAYNAK.txt && git commit -qm "PIN_KONTAK: 78 dikey pin V1 (Drive TEMP/PIN_BY78_V1)"
+          for i in 1 2 3; do git push -q origin HEAD:kontak-v2 && break; git pull -q --rebase origin kontak-v2; sleep $((2**i)); done
+          git log -1 --format='kontak-v2 %h'
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone /tmp/p

@@ -45,9 +45,11 @@ def main():
         ap.add_argument('--' + k, required=True)
     ap.add_argument('--baslangic', default='2026-10-16')
     ap.add_argument('--gorsel', default='09_Size_Gift_Scene')
+    ap.add_argument('--pin', help='PIN_BY78_V1 lsjson: verilirse gorsel = PIN_BY78_V1/<CIFT>.jpg (dikey pin V1, 14 Eki)')
     a = ap.parse_args()
     M = list(csv.DictReader(open(a.metin, encoding='utf-8-sig')))
     G = json.load(open(a.galeri))
+    PIN = {x['Name'] for x in json.load(open(a.pin))} if a.pin else None
     V6 = list(csv.DictReader(open(a.v6, encoding='utf-8')))
     hata = []
     galeri = defaultdict(list)
@@ -63,10 +65,16 @@ def main():
     for r in M:
         c, g = r['cift'], r['grup']
         A, B = (s.capitalize() for s in c.split('_'))
-        adlar = sorted(n for n in galeri.get(c, []) if n.startswith(a.gorsel))
-        if len(adlar) != 1:
-            hata.append(f'{c}: {a.gorsel} gorseli {len(adlar)} adet ({sorted(galeri.get(c, []))[:3]})')
-        satir[c] = {'cift': c, 'grup': g, 'gorsel': f"BIZIM_YILIMIZ_78_20261014_v2/{c}/galeri/{adlar[0] if adlar else '?'}",
+        if PIN is not None:
+            if f'{c}.jpg' not in PIN:
+                hata.append(f'{c}: PIN_BY78_V1/{c}.jpg yok')
+            gorsel = f'PIN_BY78_V1/{c}.jpg'
+        else:
+            adlar = sorted(n for n in galeri.get(c, []) if n.startswith(a.gorsel))
+            if len(adlar) != 1:
+                hata.append(f'{c}: {a.gorsel} gorseli {len(adlar)} adet ({sorted(galeri.get(c, []))[:3]})')
+            gorsel = f"BIZIM_YILIMIZ_78_20261014_v2/{c}/galeri/{adlar[0] if adlar else '?'}"
+        satir[c] = {'cift': c, 'grup': g, 'gorsel': gorsel,
                     'baslik': BASLIK[g].format(a=A, b=B), 'aciklama': ACIKLAMA[g].format(a=A, b=B), 'board': BOARD}
 
     # takvim: her gun A/B/C birer; V6 ayni gun cakismasi ve art arda ortak burc yok

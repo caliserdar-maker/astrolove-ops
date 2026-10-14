@@ -83,7 +83,8 @@ jobs:
         if: ${{ inputs.mod == 'plan' }}
         run: |
           set -euo pipefail
-          python3 scripts/sosyal/by78_pin_plan.py --metin _w/METIN.csv --galeri _w/GALERI.json --v6 _w/PIN_V6_PLAN.csv --cikti _out/PIN_PLAN_BY78.csv
+          P=""; if rclone lsjson "gdrive:ASTROLOVE/TEMP/PIN_BY78_V1" --files-only > _w/PIN.json 2>/dev/null && [ -s _w/PIN.json ]; then P="--pin _w/PIN.json"; echo "gorsel: PIN_BY78_V1 ($(python3 -c "import json;print(len(json.load(open('_w/PIN.json'))))") dosya)"; fi
+          python3 scripts/sosyal/by78_pin_plan.py --metin _w/METIN.csv --galeri _w/GALERI.json --v6 _w/PIN_V6_PLAN.csv --cikti _out/PIN_PLAN_BY78.csv $P
           python3 scripts/guvenlik/sir_koru.py tara _out || exit 1
           rclone copyto _out/PIN_PLAN_BY78.csv "gdrive:ASTROLOVE/TEMP/PIN_PLAN_BY78.csv" -q
           echo "Cikti: ASTROLOVE/TEMP/PIN_PLAN_BY78.csv"
