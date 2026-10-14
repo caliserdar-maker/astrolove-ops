@@ -7,6 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       paket_ref: { description: "bizim-yilimiz-v3 commit (tam SHA)", required: true, default: "a04542bac1ddb6b72ea976aad214b03ee80e3d62" }
+      isler: { description: "yalniz bu isler (JSON liste, orn. [1]); bos = 13 is", required: false, default: "[1,2,3,4,5,6,7,8,9,10,11,12,13]" }
 permissions:
   contents: read
 env:
@@ -16,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        is: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+        is: ${{ fromJSON(github.event.inputs.isler || '[1,2,3,4,5,6,7,8,9,10,11,12,13]') }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
@@ -48,7 +49,7 @@ jobs:
           echo "is $K: $CIFTLER"
           T0=$(date +%s)
           BY_ROOT=$PWD python3 kod/uret_hepsi.py $CIFTLER
-          mv cikti/KONTAK_01.jpg "cikti/KONTAK_$(printf %02d $K).jpg"
+          [ "$K" = 1 ] || mv cikti/KONTAK_01.jpg "cikti/KONTAK_$(printf %02d $K).jpg"   # 14 Eki ders: is 1'de mv ayni dosya -> exit 1
           echo "SURE_SN=$(( $(date +%s) - T0 ))" >> "$GITHUB_ENV"; echo "CIFTLER=$CIFTLER" >> "$GITHUB_ENV"
       - name: Drive'a yaz + rclone check
         run: |
