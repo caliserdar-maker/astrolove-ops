@@ -1,0 +1,61 @@
+name: etsy-bolum-arastir
+
+# Magaza bolumu adi arastirmasi (14 Eki 2026). SALT OKUR: yalniz GET + statik OAS; OAuth yok, Etsy'ye yazma yok.
+# Cikti: Drive ASTROLOVE/TEMP/BOLUM_ARASTIRMA_20261014/ (BOLUM_ARASTIRMA.md / .json).
+
+permissions:
+  actions: read
+  contents: read
+
+on:
+  workflow_dispatch:
+
+jobs:
+  oku:
+    runs-on: ubuntu-latest
+    timeout-minutes: 140
+    steps:
+      - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          mkdir -p _work _out
+          curl -fsSL -o _work/oas.json https://www.etsy.com/openapi/generated/oas/3.0.0.json || echo "OAS indirilemedi"
+      - name: Guvenlik testi (yazma metodu varsa DUR)
+        run: |
+          set -euo pipefail
+          if grep -nE "\.(patch|put|post|delete|post_json|put_json|post_file)\(|requests\.(patch|put|post|delete)|TokenStore" scripts/etsy/bolum_arastir.py; then
+            echo "::error::Salt-okur betikte yazma metodu ya da OAuth bulundu"; exit 1
+          fi
+          echo "yalniz GET + API anahtari: OK"
+      - name: Arastirma (yalniz GET)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+        run: |
+          set -euo pipefail
+          python scripts/etsy/bolum_arastir.py --oas _work/oas.json --out _out
+      - name: Drive
+        if: ${{ always() }}
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            export RCLONE_CONFIG_GDRIVE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET"; fi
+          python3 scripts/guvenlik/sir_koru.py tara _out || { echo "::error::Ciktida sir bulundu; Drive'a yazilmadi"; exit 1; }
+          rclone copy _out "gdrive:ASTROLOVE/TEMP/BOLUM_ARASTIRMA_20261014" -q
+          echo "Cikti: ASTROLOVE/TEMP/BOLUM_ARASTIRMA_20261014/"
+      - if: always()
+        run: rm -rf _work ~/.config/rclone
