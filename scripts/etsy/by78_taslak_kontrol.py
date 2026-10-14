@@ -2,7 +2,7 @@
 """BY78 78 TASLAK BAGIMSIZ KONTROL (14 Eki 2026, Takip gorevi). SALT OKUR: Etsy API'ye yalniz GET; yazma metodu YOK.
 Her listing_id icin satir basina PASS/FAIL + neden:
   state=draft; baslik, 13 etiket, aciklama = BIZIM_YILIMIZ_78_ILAN_METIN.csv (HTML kacislari cozulur); uzun/orta tire yok;
-  13 gorsel: 1. dikey (kapak = poster), 2-13 yatay 3200x2400;
+  12 veya 13 gorsel (vitrin, 14 Eki): 1 ve 9+ dikey 2400x3000 (kapak + stil vitrinleri), 2-8 yatay 3200x2400;
   envanter 15 urun (5 stil x 3 format), fiyat yalniz formata gore (Digital card 5x7 5, Digital file 8x10 9, Shipped print 8x10 29), hepsi acik;
   Style'a bagli gorsel: 5 stilin her birinde var ve farkli;
   kisisellestirme 5 kutu (adlar, Your special date, Heading, Optional short line), zorunluluk ve sinirlar (11, 11, 20, 20, 20);
@@ -24,6 +24,7 @@ STYLES = ["Starlit", "Timeless", "First Page", "Layers", "Botanical"]
 FIYAT = {"Digital card 5x7": 5.0, "Digital file 8x10": 9.0, "Shipped print 8x10": 29.0}
 P_STYLE, P_FORMAT = 513, 514
 YATAY = (3200, 2400)
+DIKEY = (2400, 3000)
 TIRE = re.compile("[–—]")
 
 
@@ -76,16 +77,19 @@ def ilan_kontrol(api, shop, cift, lid, m):
             n.append(f"{ad} {okunan} (beklenen {bek})")
 
     ims = sorted(((api.get(f"/listings/{lid}/images") or {}).get("results") or []), key=lambda x: x.get("rank") or 0)
-    if len(ims) != 13:
-        n.append(f"gorsel {len(ims)} (13 olmali)")
+    if len(ims) not in (12, 13):
+        n.append(f"gorsel {len(ims)} (12 veya 13 olmali)")
     if ims:
         w, h = ims[0].get("full_width"), ims[0].get("full_height")
         if not (w and h and h > w):
             n.append(f"1. gorsel dikey degil {w}x{h}")
-        yanlis = [(x.get("rank"), x.get("full_width"), x.get("full_height")) for x in ims[1:]
-                  if (x.get("full_width"), x.get("full_height")) != YATAY]
+        boy = [(i + 1, x.get("full_width"), x.get("full_height")) for i, x in enumerate(ims)]
+        yanlis = [b for b in boy if 2 <= b[0] <= 8 and (b[1], b[2]) != YATAY]
         if yanlis:
-            n.append(f"2-13 3200x2400 olmayan {len(yanlis)}: {yanlis[:3]}")
+            n.append(f"2-8 3200x2400 olmayan {len(yanlis)}: {yanlis[:3]}")
+        yanlis = [b for b in boy if (b[0] == 1 or b[0] >= 9) and (b[1], b[2]) != DIKEY]
+        if yanlis:
+            n.append(f"1 ve 9+ 2400x3000 olmayan {len(yanlis)}: {yanlis[:3]}")
     img_ids = {x.get("listing_image_id") for x in ims}
 
     inv = api.get(f"/listings/{lid}/inventory") or {}

@@ -26,7 +26,8 @@ def ilan(lid, m, cift):
                   offerings=[dict(price=dict(amount=int(p * 100), divisor=100), quantity=999, is_enabled=True)])
              for s in k.STYLES for f, p in k.FIYAT.items()]
     ims = [dict(rank=1, listing_image_id=1, full_width=2400, full_height=3000)] + \
-          [dict(rank=r, listing_image_id=r, full_width=3200, full_height=2400) for r in range(2, 14)]
+          [dict(rank=r, listing_image_id=r, full_width=3200, full_height=2400) for r in range(2, 9)] + \
+          [dict(rank=r, listing_image_id=r, full_width=2400, full_height=3000) for r in range(9, 13)]
     return {
         f"/listings/{lid}": dict(state="draft", title=m["baslik"], tags=[m[f"etiket_{i}"] for i in range(1, 14)],
                                  description=m["aciklama"].replace('"', "&quot;"), shop_section_id=k.SECTION, shipping_profile_id=k.SHIP,
@@ -34,7 +35,7 @@ def ilan(lid, m, cift):
                                  production_partners=[dict(production_partner_id=k.PARTNER)], who_made="i_did", when_made="made_to_order"),
         f"/listings/{lid}/images": dict(results=ims),
         f"/listings/{lid}/inventory": dict(products=prods),
-        f"/shops/1/listings/{lid}/variation-images": dict(results=[dict(property_id=513, value_id=vid[s], value=s, image_id=9 + i)
+        f"/shops/1/listings/{lid}/variation-images": dict(results=[dict(property_id=513, value_id=vid[s], value=s, image_id={"Starlit": 9, "Timeless": 10, "First Page": 11, "Layers": 1, "Botanical": 12}[s])
                                                                      for i, s in enumerate(k.STYLES)]),
         f"/listings/{lid}/personalization": dict(personalization_questions=[
             dict(question_text=t, required=r, max_allowed_characters=n) for t, r, n in
