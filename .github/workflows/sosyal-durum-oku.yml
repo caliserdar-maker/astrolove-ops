@@ -1,0 +1,112 @@
+name: sosyal-durum-oku
+
+# SALT OKUMA (yalniz GET /v2/scheduler/posts): Pinterest V6 zamani gelen pinler + 5 platform gun 2 / gun 3 durumu.
+# Metricool'a YAZMA / SILME / YENIDEN ZAMANLAMA YOK. Sonuc Drive TEMP/SOSYAL_DURUM_20261014/.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      pin_bas:
+        default: "2026-10-13T14:00:00"
+
+jobs:
+  oku:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      O: gdrive:ASTROLOVE/TEMP/SOSYAL_DURUM_20261014
+    steps:
+      - uses: actions/checkout@v4
+      - name: rclone + token
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+          mkdir -p ~/.config/rclone _work _out; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            export RCLONE_CONFIG_GDRIVE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET"
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+          rclone copyto "gdrive:ASTROLOVE/TEMP/METRICOOL_TOKEN.json" _work/mc.json
+          python3 -c "import json;print('::add-mask::'+json.load(open('_work/mc.json'))['userToken'])"
+          rclone copyto "gdrive:ASTROLOVE/TEMP/PIN_V6_20261012/PLAN/PIN_V6_PLAN_YAYIN.csv" _work/pin_plan.csv
+          rclone copyto "gdrive:ASTROLOVE/TEMP/SOSYAL_PLAN_20261012/PLAN_5_PLATFORM.csv" _work/plan5.csv
+
+      - name: Durum (GET)
+        env:
+          PIN_BAS: ${{ inputs.pin_bas }}
+        run: |
+          python3 - <<'EOF' | tee -a "$GITHUB_STEP_SUMMARY" _out/OZET.txt
+          import csv, importlib.util, json, os
+          from datetime import datetime, timedelta
+          sp = importlib.util.spec_from_file_location('mpb', 'scripts/sosyal/metricool_pin_baslik.py')
+          mpb = importlib.util.module_from_spec(sp); sp.loader.exec_module(mpb)
+          mc = mpb.MC(json.load(open('_work/mc.json')))
+          TZ = 'Europe/Istanbul'
+          simdi = datetime.utcnow() + timedelta(hours=3)
+          bas = datetime.fromisoformat(os.environ['PIN_BAS'])
+          ps, t = {}, bas - timedelta(hours=8)
+          while t < simdi + timedelta(days=2):
+              e = t + timedelta(days=4)
+              for p in mpb.veri(mc.istek('GET', '/v2/scheduler/posts', {'start': t.strftime('%Y-%m-%dT%H:%M:%S'),
+                                         'end': e.strftime('%Y-%m-%dT%H:%M:%S'), 'timezone': TZ})) or []:
+                  ps[p.get('id')] = p
+              t = e
+          def ag(p): return [(x.get('network') or '').lower() for x in p.get('providers') or []]
+          def zt(p): return datetime.fromisoformat((p.get('publicationDate') or {}).get('dateTime'))
+          def pr(p): return (p.get('providers') or [{}])[0]
+          def ek(x): return {k: v for k, v in x.items() if k not in ('network', 'status', 'publicUrl', 'id', 'detailedStatus') and v not in (None, '', [], {})}
+          print(f'OKUMA {simdi:%Y-%m-%d %H:%M} Istanbul; listelenen gonderi {len(ps)}')
+          # 1) Pinterest
+          plan = {(r['link'], r['baslik']): r for r in csv.DictReader(open('_work/pin_plan.csv', encoding='utf-8'))}
+          pins = sorted([p for p in ps.values() if ag(p) == ['pinterest'] and bas <= zt(p) <= simdi], key=zt)
+          say = {}
+          for p in pins:
+              say[pr(p).get('status')] = say.get(pr(p).get('status'), 0) + 1
+          print(f'PINTEREST zamani gelen {len(pins)} (13 Eki 14:00 -> simdi): {say}')
+          pin_out = []
+          for p in pins:
+              pd = p.get('pinterestData') or {}
+              r = plan.get((pd.get('pinLink'), pd.get('pinTitle')), {})
+              x = {'id': p.get('id'), 'saat': (p.get('publicationDate') or {}).get('dateTime'), 'durum': pr(p).get('status'),
+                   'detay': pr(p).get('detailedStatus'), 'link': pr(p).get('publicUrl'), 'cift': r.get('cift', '?'), 'pin': r.get('pin', '?'),
+                   'pano': r.get('pano', pd.get('boardId')), 'ek': ek(pr(p))}
+              pin_out.append(x)
+              if x['durum'] != 'PUBLISHED':
+                  print(f"  {x['durum']} {x['saat']} {x['cift']} {x['pin']} ({x['pano']}): {x['detay']} {json.dumps(x['ek'], ensure_ascii=False)[:300]}")
+          for x in [x for x in pin_out if x['durum'] == 'PUBLISHED'][:3]:
+              print(f"  ilk yayin {x['saat']} {x['cift']} {x['pin']}: {x['link']}")
+          # 2) 5 platform gun 2 / gun 3
+          p5 = list(csv.DictReader(open('_work/plan5.csv', encoding='utf-8')))
+          gun_out = {}
+          for g in ('2', '3'):
+              rs = [r for r in p5 if r['gun'] == g]
+              c = rs[0]['cift']
+              print(f'GUN {g} {c}:')
+              gun_out[g] = []
+              for r in sorted(rs, key=lambda r: (r['tarih_saat'], r['platform'])):
+                  t0 = datetime.fromisoformat(r['tarih_saat'])
+                  es = [p for p in ps.values() if ag(p) == [r['platform']] and abs((zt(p) - t0).total_seconds()) < 60 and (p.get('text') or '')[:40] in r['metin'] + ' ' + r['metin']]
+                  es = es or [p for p in ps.values() if ag(p) == [r['platform']] and abs((zt(p) - t0).total_seconds()) < 60]
+                  if not es:
+                      x = {'platform': r['platform'], 'tur': r['tur'], 'saat': r['tarih_saat'], 'durum': 'BULUNAMADI'}
+                  else:
+                      p = es[0]
+                      x = {'platform': r['platform'], 'tur': r['tur'], 'saat': r['tarih_saat'], 'id': p.get('id'), 'durum': pr(p).get('status'),
+                           'detay': pr(p).get('detailedStatus'), 'link': pr(p).get('publicUrl'), 'ek': ek(pr(p)), 'eslesme': len(es)}
+                  gun_out[g].append(x)
+                  zaman = 'zamani geldi' if t0 <= simdi else 'henuz gelmedi'
+                  print(f"  {x['saat'][5:16]} {x['platform']:9} {x['tur']:16} {x['durum']:9} ({zaman}) {x.get('detay') or ''} | {x.get('link') or ''}"
+                        + (f" {json.dumps(x['ek'], ensure_ascii=False)[:200]}" if x.get('ek') else ''))
+          json.dump({'okuma': f'{simdi:%Y-%m-%dT%H:%M}', 'pinterest': pin_out, 'gun': gun_out}, open('_out/SOSYAL_DURUM.json', 'w'), ensure_ascii=False, indent=1)
+          EOF
+          rclone copy _out "$O" -q
+          rclone lsl "$O" | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - if: always()
+        run: rm -rf _work ~/.config/rclone
