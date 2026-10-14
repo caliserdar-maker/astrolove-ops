@@ -7,11 +7,12 @@ on:
   workflow_dispatch:
     inputs:
       paket_ref: { description: "bizim-yilimiz-v3 commit (tam SHA)", required: true, default: "a04542bac1ddb6b72ea976aad214b03ee80e3d62" }
+      hedef: { description: "Drive TEMP altindaki hedef klasor", required: false, default: "BIZIM_YILIMIZ_78_20261014" }
       isler: { description: "yalniz bu isler (JSON liste, orn. [1]); bos = 13 is", required: false, default: "[1,2,3,4,5,6,7,8,9,10,11,12,13]" }
 permissions:
   contents: read
 env:
-  D: "gdrive:ASTROLOVE/TEMP/BIZIM_YILIMIZ_78_20261014"
+  D: "gdrive:ASTROLOVE/TEMP/${{ github.event.inputs.hedef || 'BIZIM_YILIMIZ_78_20261014' }}"
 jobs:
   uret:
     strategy:

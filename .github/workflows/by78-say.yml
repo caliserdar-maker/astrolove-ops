@@ -2,6 +2,8 @@ name: by78-say
 # BIZIM YILIMIZ 78: Drive TEMP/BIZIM_YILIMIZ_78_20261014 sayimi (SALT OKUMA). Zamanlama YOK.
 on:
   workflow_dispatch:
+    inputs:
+      hedef: { description: "Drive TEMP altindaki klasor", required: false, default: "BIZIM_YILIMIZ_78_20261014" }
 permissions:
   contents: read
 jobs:
@@ -26,7 +28,7 @@ jobs:
       - name: Say
         run: |
           set -euo pipefail
-          rclone lsf -R --files-only "gdrive:ASTROLOVE/TEMP/BIZIM_YILIMIZ_78_20261014" > /tmp/l.txt
+          rclone lsf -R --files-only "gdrive:ASTROLOVE/TEMP/${{ github.event.inputs.hedef || 'BIZIM_YILIMIZ_78_20261014' }}" > /tmp/l.txt
           python3 - <<'P'
           import csv, collections
           L = [l.strip() for l in open('/tmp/l.txt') if l.strip()]
