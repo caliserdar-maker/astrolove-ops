@@ -1,0 +1,108 @@
+name: galeri-tek-sayfa
+# Bir ciftin 10 galeri gorseli tek sayfa (2 sutun x 5 satir, 1200 px, sol ustte 01-10, JPG 88, <= 8 MB)
+# + 01_Cover_A uzun kenar 1600 px kopyasi -> kontak-v2 dali (GALERI_<kisa>_10.jpg, KAPAK_<kisa>_1600.jpg).
+# Drive yalniz OKUNUR. Etsy YOK. (14 Eki 2026, ChatGPT degerlendirmesi icin)
+on:
+  workflow_dispatch:
+    inputs:
+      cift: { description: "Cift (orn. CANCER_LIBRA)", required: true, default: "CANCER_LIBRA" }
+      kisa: { description: "Dosya adi kisaltmasi (orn. CL)", required: true, default: "CL" }
+      klasor: { description: "Drive ASTROLOVE/TEMP altindaki paket", required: false, default: "BIZIM_YILIMIZ_78_20261014_v2" }
+permissions:
+  contents: read
+jobs:
+  sayfa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: kontak-v2, fetch-depth: 1 }
+      - name: rclone + Pillow
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          pip install -q pillow==12.3.0
+          curl -fsSL -o /tmp/rc.zip https://downloads.rclone.org/rclone-current-linux-amd64.zip
+          unzip -q -j /tmp/rc.zip '*/rclone' -d /tmp/rcb && sudo install -m 755 /tmp/rcb/rclone /usr/local/bin/rclone
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: Galeri indir (salt okur)
+        env:
+          CIFT: ${{ inputs.cift }}
+          KLASOR: ${{ inputs.klasor }}
+        run: |
+          set -euo pipefail
+          rclone copy "gdrive:ASTROLOVE/TEMP/$KLASOR/$CIFT/galeri" /tmp/g -q
+          ls -la /tmp/g
+      - name: Tek sayfa + kapak 1600
+        env:
+          KISA: ${{ inputs.kisa }}
+        run: |
+          set -euo pipefail
+          python3 - <<'EOF'
+          import os, sys
+          from PIL import Image, ImageDraw, ImageFont
+          k = os.environ['KISA']
+          fs = sorted(f for f in os.listdir('/tmp/g') if f[:2].isdigit() and 1 <= int(f[:2]) <= 10 and f.lower().endswith(('.jpg', '.jpeg', '.png')))
+          nos = [f[:2] for f in fs]
+          if nos != [f'{i:02d}' for i in range(1, 11)]:
+              sys.exit(f'FAIL: 01-10 tam degil: {fs}')
+          print('GORSEL', fs)
+          W, G = 1200, 16
+          ims = []
+          for f in fs:
+              im = Image.open(f'/tmp/g/{f}').convert('RGB')
+              print(f, im.size)
+              ims.append(im.resize((W, round(im.height * W / im.width)), Image.LANCZOS))
+          rows = [ims[i:i + 2] for i in range(0, 10, 2)]
+          rh = [max(i.height for i in r) for r in rows]
+          S = Image.new('RGB', (2 * W + 3 * G, sum(rh) + (len(rows) + 1) * G), (235, 235, 235))
+          d = ImageDraw.Draw(S)
+          try:
+              font = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 40)
+          except OSError:
+              font = ImageFont.load_default()
+          y = G
+          for ri, r in enumerate(rows):
+              for ci, im in enumerate(r):
+                  x = G + ci * (W + G)
+                  S.paste(im, (x, y))
+                  n = f'{ri * 2 + ci + 1:02d}'
+                  b = d.textbbox((0, 0), n, font=font)
+                  d.rounded_rectangle((x + 14, y + 14, x + 14 + b[2] - b[0] + 24, y + 14 + b[3] - b[1] + 20), 10, fill=(20, 20, 20))
+                  d.text((x + 26 - b[0], y + 24 - b[1]), n, font=font, fill=(255, 255, 255))
+              y += rh[ri] + G
+          out = f'GALERI_{k}_10.jpg'
+          S.save(out, quality=88)
+          mb = os.path.getsize(out) / 1e6
+          print(f'{out} {S.size[0]}x{S.size[1]} {mb:.2f} MB')
+          if mb > 8:
+              sys.exit(f'FAIL: {out} {mb:.2f} MB > 8 MB')
+          c = Image.open('/tmp/g/01_Cover_A.jpg').convert('RGB')
+          s = 1600 / max(c.size)
+          c = c.resize((round(c.width * s), round(c.height * s)), Image.LANCZOS)
+          out2 = f'KAPAK_{k}_1600.jpg'
+          c.save(out2, quality=92)
+          print(f'{out2} {c.size[0]}x{c.size[1]} {os.path.getsize(out2) / 1e6:.2f} MB')
+          EOF
+      - name: kontak-v2 dalina
+        env:
+          CIFT: ${{ inputs.cift }}
+          KISA: ${{ inputs.kisa }}
+          KLASOR: ${{ inputs.klasor }}
+        run: |
+          set -euo pipefail
+          echo "GALERI_${KISA}_10.jpg / KAPAK_${KISA}_1600.jpg: $KLASOR/$CIFT/galeri 01-10 (2x5, 1200 px, JPG 88) + 01_Cover_A uzun kenar 1600 ($(date -u +%F))" >> KAYNAK.txt
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "GALERI_${KISA}_10.jpg" "KAPAK_${KISA}_1600.jpg" KAYNAK.txt
+          git commit -qm "GALERI_${KISA}_10 + KAPAK_${KISA}_1600: $CIFT galeri tek sayfa ($KLASOR)"
+          for i in 1 2 3; do git push -q origin HEAD:kontak-v2 && break; git pull -q --rebase origin kontak-v2; sleep $((2**i)); done
+          git log -1 --format='kontak-v2 %h'
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone /tmp/g
