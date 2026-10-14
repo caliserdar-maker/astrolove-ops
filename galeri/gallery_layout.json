@@ -195,13 +195,13 @@
             "weight": 600,
             "italic": false,
             "file": "fonts/Manrope.ttf",
-            "size_px": 70,
-            "size_pct_of_canvas_height": 2.916667
+            "size_px": 102,
+            "size_pct_of_canvas_height": 4.25
           },
           "color_hex": "#713244",
           "alignment": "left",
           "vertical_alignment": "center",
-          "letter_spacing_px": 7.78,
+          "letter_spacing_px": 11.34,
           "letter_spacing_em": 0.1111111111111111,
           "line_height_em": 1.15,
           "line_breaks": "explicit; preserve newlines",
