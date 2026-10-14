@@ -193,9 +193,12 @@ def main():
             R["eski_taslak"] = f"{eski} zaten yok"
         elif E.get("state") == "draft":
             api.silinebilir = eski
-            api.delete(f"/listings/{eski}")
+            try:
+                api.delete(f"/listings/{eski}")
+                R["eski_taslak"] = f"{eski} silindi" if api.get(f"/listings/{eski}", ok404=True) is None else f"{eski} SILINEMEDI"
+            except SystemExit as e:                   # 14 Eki: token'da listings_d kapsami yok (403) -> silinmez, is devam eder
+                R["eski_taslak"] = f"{eski} SILINEMEDI (draft kaldi): {str(e.code)[:160]}"
             api.silinebilir = None
-            R["eski_taslak"] = f"{eski} silindi" if api.get(f"/listings/{eski}", ok404=True) is None else f"{eski} SILINEMEDI"
         else:
             R["eski_taslak"] = f"{eski} state={E.get('state')}: SILINMEDI"
         print("eski taslak:", R["eski_taslak"])
@@ -205,7 +208,8 @@ def main():
     while True:
         r_ = api.get(f"/shops/{shop}/listings", params={"state": "draft", "limit": 100, "offset": off}) or {}
         for x in r_.get("results") or []:
-            drafts[x.get("title")] = x.get("listing_id")
+            if str(x.get("listing_id")) != eski:          # eski CANCER_LIBRA taslagi ASLA yeniden kullanilmaz
+                drafts[x.get("title")] = x.get("listing_id")
         off += 100
         if off >= (r_.get("count") or 0):
             break
