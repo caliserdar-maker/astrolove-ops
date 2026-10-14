@@ -146,9 +146,9 @@
           "id": "hero_poster",
           "type": "poster",
           "content": {
-            "style": "Starlit",
+            "style": "Layers",
             "format": "8x10 artwork",
-            "source_file": "source_assets/Poster_Stil1_Starlit_EMMA_JAMES.jpg"
+            "source_file": "source_assets/Poster_Stil4_Layers_EMMA_JAMES.jpg"
           },
           "center_x_pct": 70,
           "center_y_pct": 50,
@@ -179,7 +179,7 @@
             "apply_again": false
           },
           "name": "hero_poster",
-          "asset_binding": "posters.Starlit"
+          "asset_binding": "posters.Layers"
         },
         {
           "id": "collection",
