@@ -1,0 +1,101 @@
+name: sosyal-video-degistir
+
+# Metricool: TEK bekleyen video gonderisinin videosunu FINAL_KAPAKLI videosuyla degistirir (Serdar onayi 15 Eki 2026:
+# yalniz 17 Eki 03:00 Facebook 394635992 PISCES_SAGITTARIUS denemesi). Diger her gonderi AYRI ONAY ister.
+# scripts/sosyal/metricool_video_degistir.py: ONCE.json -> yukleme -> donusturulmus dosya olcumu -> PUT (yalniz media[0]) ->
+# GET fark kontrolu. mod kuru: yukleme / PUT yok. mod geri: ONCE.json govdesiyle geri alma.
+# Sonuc Drive TEMP/SOSYAL_VIDEO_DEGISTIR_<tarih>/<id>/ (ONCE.json, SONRA.json, DEGISTIR_RAPOR.json).
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      id:
+        description: 'Metricool gonderi id'
+        required: true
+      ag:
+        description: 'facebook | instagram | tiktok | youtube'
+        required: true
+      cift:
+        description: 'ornek PISCES_SAGITTARIUS (gonderi metniyle eslesmeli)'
+        required: true
+      mod:
+        type: choice
+        options: [kuru, yaz, geri]
+        default: kuru
+      once:
+        description: 'geri: Drive yolu (ornek ASTROLOVE/TEMP/SOSYAL_VIDEO_DEGISTIR_20261015/394635992/ONCE.json)'
+        default: ''
+
+concurrency:
+  group: metricool-video-degistir
+  cancel-in-progress: false
+
+jobs:
+  degistir:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      D: gdrive:ASTROLOVE/TEMP/VIDEO_V9_20261012
+    steps:
+      - uses: actions/checkout@v4
+      - name: Paketler
+        run: |
+          pip install -q numpy==2.1.3 pillow==11.0.0
+          sudo apt-get -qq update >/dev/null && sudo apt-get install -y -qq ffmpeg >/dev/null
+          echo "O=gdrive:ASTROLOVE/TEMP/SOSYAL_VIDEO_DEGISTIR_$(TZ=Europe/Istanbul date +%Y%m%d)/${{ inputs.id }}" >> "$GITHUB_ENV"
+      - name: rclone + token
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          for d in 1 2 3; do curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1; command -v rclone >/dev/null && break; sleep $((d * 10)); done
+          command -v rclone >/dev/null || { sudo apt-get -qq update >/dev/null; sudo apt-get install -y -qq rclone >/dev/null; }
+          mkdir -p ~/.config/rclone _work _out; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            export RCLONE_CONFIG_GDRIVE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET"
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+          rclone copyto "gdrive:ASTROLOVE/TEMP/METRICOOL_TOKEN.json" _work/mc.json
+          python3 -c "import json;print('::add-mask::'+json.load(open('_work/mc.json'))['userToken'])"
+
+      - name: Video + kapak + (geri) ONCE
+        env:
+          CIFT: ${{ inputs.cift }}
+          MOD: ${{ inputs.mod }}
+          ONCE: ${{ inputs.once }}
+        run: |
+          set -euo pipefail
+          case "$CIFT" in *[!A-Z_]*|'') echo "::error::cift bicimi"; exit 1 ;; esac
+          s=$(echo "$CIFT" | tr 'A-Z' 'a-z' | sed 's/_/-and-/')
+          rclone copyto "$D/FINAL_KAPAKLI/$s-astroloveart-reel.mp4" _work/video.mp4
+          rclone copyto "$D/KAPAK/$s-astroloveart-kapak.jpg" _work/kapak.jpg
+          ls -l _work/video.mp4 _work/kapak.jpg
+          if [ "$MOD" = geri ]; then rclone copyto "gdrive:$ONCE" _work/ONCE_geri.json; fi
+
+      - name: Degistir (${{ inputs.mod }})
+        env:
+          ID: ${{ inputs.id }}
+          AG: ${{ inputs.ag }}
+          CIFT: ${{ inputs.cift }}
+          MOD: ${{ inputs.mod }}
+        run: |
+          set -uo pipefail
+          EK=(); [ "$MOD" = geri ] && EK=(--once _work/ONCE_geri.json)
+          python3 scripts/sosyal/metricool_video_degistir.py --token _work/mc.json --id "$ID" --ag "$AG" --cift "$CIFT" \
+            --video _work/video.mp4 --kapak _work/kapak.jpg --mod "$MOD" --cikti _out "${EK[@]}" 2>&1 \
+            | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY" _out/OZET.txt
+          rc=${PIPESTATUS[0]}
+          rm -f _out/_*.mp4
+          python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/mc.json _out || exit 1   # sir varsa Drive'a yuklenmez
+          rclone copy _out "$O" -q
+          rclone lsl "$O" | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
+          exit $rc
+
+      - if: always()
+        run: |
+          rm -rf _work ~/.config/rclone
+          if [ -f "$RUNNER_TEMP/SIR_ENGEL" ]; then echo "::error::sir iceren satir engellendi (sir_koru)"; exit 1; fi
