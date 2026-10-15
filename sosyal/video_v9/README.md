@@ -44,5 +44,5 @@ Cozulen .m4a dosyasi depoya commit edilmez.
 kosinus capraz gecis (orijinalin siyahtan acilisiyla ortusur, siyah kare yok). Sure (24.0 sn), kare (720) ve ses (kopya) ayni.
 Neden: Facebook oynaticisi ilk kareyle aciliyor, v9 ilk karesi siyah. (1. yontem, basa 0.5 sn ekleme, "kapak, siyah, acilis"
 verdigi icin birakildi.) QC: ilk kare = kapak (fark < 2.0), 0-1.5 sn her kare parlaklik >= kapak/2, kayma < 2.0,
-kare/sure/ses ayni, <= 60 sn. Actions: `video-kapak-basa.yml` (`mod=ornek` -> `KAPAKLI_ORNEK2/`, `mod=hepsi` -> `FINAL_KAPAKLI/`;
+kare/sure/ses ayni, <= 60 sn. Actions: `video-kapak-basa.yml` (`mod=ornek` -> `KAPAKLI_ORNEK2/`, `mod=hepsi` -> 6 paralel is -> `FINAL_KAPAKLI/` + `KAPAKLI_QC.csv` + `KONTAK_0sn.jpg`;
 FINAL/ degismez).

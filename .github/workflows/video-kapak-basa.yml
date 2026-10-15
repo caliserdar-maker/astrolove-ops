@@ -5,7 +5,8 @@ name: video-kapak-basa
 # 0.5-1.0 sn kapaktan orijinale capraz gecis; kare/sure ayni, ses kopya (birebir). QC: ilk kare = kapak < 2.0,
 # 0-1.5 sn her kare parlaklik >= kapak/2, kayma < 2.0, kare/sure/ses ayni, <= 60 sn.
 # mod ornek : cift= (virgulle) -> Drive TEMP/VIDEO_V9_20261012/KAPAKLI_ORNEK2/ (video + 0 / 0.5 / 0.8 / 1.2 sn kareleri + QC json).
-# mod hepsi : 78 video -> TEMP/VIDEO_V9_20261012/FINAL_KAPAKLI/ + KAPAKLI_QC.csv. FINAL/ ve KAPAK/ DEGISMEZ.
+# mod hepsi : 78 video, parca= paralel is (matrix) -> TEMP/VIDEO_V9_20261012/FINAL_KAPAKLI/ + KAPAKLI_QC.csv + KONTAK_0sn.jpg.
+#             FINAL/ ve KAPAK/ DEGISMEZ. Ozet isi: 78 QC json, hepsi PASS mi.
 # Metricool'a / platformlara YAZMA YOK.
 
 permissions:
@@ -21,20 +22,74 @@ on:
       cift:
         description: 'ornek: dosya on eki (ornek capricorn-and-libra), virgulle'
         default: capricorn-and-libra
+      parca:
+        description: 'hepsi: paralel is sayisi'
+        default: '6'
+
+env:
+  D: gdrive:ASTROLOVE/TEMP/VIDEO_V9_20261012
 
 jobs:
-  kapak_basa:
+  hazirla:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 10
+    outputs:
+      matrix: ${{ steps.m.outputs.matrix }}
+      hedef: ${{ steps.m.outputs.hedef }}
+    steps:
+      - name: rclone
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: Is listesi
+        id: m
+        env:
+          MOD: ${{ inputs.mod }}
+          CIFT: ${{ inputs.cift }}
+          PARCA: ${{ inputs.parca }}
+        run: |
+          set -euo pipefail
+          if [ "$MOD" = hepsi ]; then
+            rclone lsf "$D/FINAL" --files-only --include "*-astroloveart-reel.mp4" | sed 's/-astroloveart-reel\.mp4$//' | sort > liste.txt
+            rclone lsf "$D/KAPAK" --files-only --include "*-astroloveart-kapak.jpg" | sed 's/-astroloveart-kapak\.jpg$//' | sort > kapak.txt
+            N=$(wc -l < liste.txt); echo "::warning::FINAL $N video, KAPAK $(wc -l < kapak.txt) kapak"
+            [ "$N" = 78 ] || { echo "::error::FINAL'de 78 video yok ($N)"; exit 1; }
+            comm -23 liste.txt kapak.txt | grep . && { echo "::error::kapagi olmayan video var"; exit 1; } || true
+            echo "hedef=$D/FINAL_KAPAKLI" >> "$GITHUB_OUTPUT"
+          else
+            echo "${CIFT//,/$'\n'}" | sed '/^$/d' > liste.txt; PARCA=1
+            echo "hedef=$D/KAPAKLI_ORNEK2" >> "$GITHUB_OUTPUT"
+          fi
+          python3 -c "
+          import json, sys
+          p = open('liste.txt').read().split(); k = max(1, min(int(sys.argv[1]), len(p)))
+          m = [{'no': i + 1, 'ciftler': ','.join(p[i::k])} for i in range(k)]
+          print('matrix=' + json.dumps({'include': m}))" "$PARCA" >> "$GITHUB_OUTPUT"
+          rm -rf ~/.config/rclone
+
+  isle:
+    needs: hazirla
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.hazirla.outputs.matrix) }}
     env:
-      D: gdrive:ASTROLOVE/TEMP/VIDEO_V9_20261012
+      HEDEF: ${{ needs.hazirla.outputs.hedef }}
     steps:
       - uses: actions/checkout@v4
       - name: Paketler
         run: |
           pip install -q numpy==2.1.3 pillow==11.0.0
           sudo apt-get -qq update >/dev/null && sudo apt-get install -y -qq ffmpeg >/dev/null
-          echo "::warning::CPU $(nproc), $(ffmpeg -version | head -1 | cut -d' ' -f1-3)"
+          echo "::warning::parca ${{ matrix.no }}: CPU $(nproc), $(ffmpeg -version | head -1 | cut -d' ' -f1-3)"
       - name: rclone
         env:
           RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
@@ -49,50 +104,98 @@ jobs:
       - name: Kapak basa + QC
         env:
           MOD: ${{ inputs.mod }}
-          CIFT: ${{ inputs.cift }}
+          CIFTLER: ${{ matrix.ciftler }}
         run: |
           set +e -uo pipefail
           mkdir -p _w/v _w/k _o
-          if [ "$MOD" = hepsi ]; then
-            rclone copy "$D/FINAL" _w/v -q --include "*-astroloveart-reel.mp4" --transfers 8
-            rclone copy "$D/KAPAK" _w/k -q --include "*-astroloveart-kapak.jpg" --transfers 8
-            HEDEF="$D/FINAL_KAPAKLI"
-          else
-            for c in ${CIFT//,/ }; do
-              rclone copyto "$D/FINAL/$c-astroloveart-reel.mp4" "_w/v/$c-astroloveart-reel.mp4" -q
-              rclone copyto "$D/KAPAK/$c-astroloveart-kapak.jpg" "_w/k/$c-astroloveart-kapak.jpg" -q
-            done
-            HEDEF="$D/KAPAKLI_ORNEK2"
-          fi
+          for c in ${CIFTLER//,/ }; do
+            rclone copyto "$D/FINAL/$c-astroloveart-reel.mp4" "_w/v/$c-astroloveart-reel.mp4" -q
+            rclone copyto "$D/KAPAK/$c-astroloveart-kapak.jpg" "_w/k/$c-astroloveart-kapak.jpg" -q
+          done
           ls _w/v/*.mp4 > _w/liste.txt; N=$(wc -l < _w/liste.txt); i=0; F=0; T0=$(date +%s)
-          [ "$MOD" != hepsi ] || [ "$N" = 78 ] || { echo "::error::FINAL'de 78 video yok ($N)"; exit 1; }
-          while read -r v; do
+          [ "$N" = "$(echo "${CIFTLER//,/ }" | wc -w)" ] || { echo "::error::indirilen video $N, beklenen $(echo "${CIFTLER//,/ }" | wc -w)"; F=$((F + 1)); }
+          # liste fd 3'ten okunur, ffmpeg -nostdin: dongu icindeki komutlar listeyi yutmasin (yerel test, 15 Eki)
+          while read -r v <&3; do
             i=$((i + 1)); b=$(basename "$v" -astroloveart-reel.mp4); k="_w/k/$b-astroloveart-kapak.jpg"
             if [ ! -f "$k" ]; then echo "::error::kapak yok $b"; F=$((F + 1)); continue; fi
             python3 sosyal/video_v9/kapak_basa.py --video "$v" --kapak "$k" --cikis "_o/$b-astroloveart-reel.mp4" --qc "_o/$b-kapakli-qc.json" | tail -1
             [ "${PIPESTATUS[0]}" = 0 ] || F=$((F + 1))
-            if [ "$MOD" != hepsi ]; then
-              for t in 0 0.5 0.8 1.2; do
-                n=$(python3 -c "print(round($t * 30))")
-                ffmpeg -v error -y -i "_o/$b-astroloveart-reel.mp4" -vf "select=eq(n\,$n)" -vsync 0 -frames:v 1 -q:v 2 "_o/$b-kare-${t}sn.jpg"
-              done
-            fi
-            G=$(( $(date +%s) - T0 )); echo "ILERLEME $i/$N %$(( 100 * i / N )) gecen ${G} sn kalan $(( G * (N - i) / i )) sn FAIL $F"
-          done < _w/liste.txt
-          python3 - <<'EOF' | tee -a "$GITHUB_STEP_SUMMARY"
-          import csv, glob, json
-          q = [json.load(open(f)) for f in sorted(glob.glob('_o/*-kapakli-qc.json'))]
-          alan = ['cikis', 'sonuc', 'kapak_parlaklik', 'ilk_kare_fark', 'tam_kapak_fark', 'min_parlaklik_0_1.5', 'parlaklik_0_0.5_0.8_1.2',
-                  'kayma_fark', 'kare_once', 'kare_sonra', 'video_sn_once', 'video_sn_sonra', 'ses_sn_sonra', 'ses_ayni',
-                  'bayt_once', 'bayt_sonra', 'uretim_sn']
-          with open('_o/KAPAKLI_QC.csv', 'w', newline='') as f:
-              w = csv.DictWriter(f, alan, extrasaction='ignore'); w.writeheader(); [w.writerow(x) for x in q]
-          for x in q:
-              print(' | '.join(f'{a}={x.get(a)}' for a in alan))
-          print(f"OZET {sum(x['sonuc'] == 'PASS' for x in q)}/{len(q)} PASS")
-          EOF
+            for t in 0 0.5 0.8 1.2; do
+              [ "$MOD" = hepsi ] && [ "$t" != 0 ] && continue
+              n=$(python3 -c "print(round($t * 30))")
+              ffmpeg -nostdin -v error -y -i "_o/$b-astroloveart-reel.mp4" -vf "select=eq(n\,$n)" -vsync 0 -frames:v 1 -q:v 2 "_o/$b-kare-${t}sn.jpg"
+            done
+            G=$(( $(date +%s) - T0 )); echo "ILERLEME parca ${{ matrix.no }} $i/$N %$(( 100 * i / N )) gecen ${G} sn kalan $(( G * (N - i) / i )) sn FAIL $F"
+          done 3< _w/liste.txt
+          Q=$(grep -l '"sonuc": "PASS"' _o/*-kapakli-qc.json 2>/dev/null | wc -l)
+          [ "$i" = "$N" ] && [ "$Q" = "$N" ] || { echo "::error::islenen $i, PASS QC $Q, beklenen $N"; F=$((F + 1)); }
+          if [ "$MOD" = hepsi ]; then mkdir -p _o/ILK_KARE && mv _o/*-kare-0sn.jpg _o/ILK_KARE/ 2>/dev/null; fi
           rclone copy _o "$HEDEF" -q --transfers 8
-          rclone lsl "$HEDEF" | tail -20
+          echo "::warning::parca ${{ matrix.no }}: $N video, FAIL $F, $(( $(date +%s) - T0 )) sn"
           [ "$F" = 0 ] || { echo "::error::$F video FAIL"; exit 1; }
       - if: always()
         run: rm -rf ~/.config/rclone _w
+
+  ozet:
+    needs: [hazirla, isle]
+    if: ${{ always() && needs.hazirla.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      HEDEF: ${{ needs.hazirla.outputs.hedef }}
+      MOD: ${{ inputs.mod }}
+    steps:
+      - name: Paketler
+        run: pip install -q pillow==11.0.0
+      - name: rclone
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: Ozet (78/78 PASS?)
+        run: |
+          set -uo pipefail
+          mkdir -p _q
+          rclone copy "$HEDEF" _q -q --include "*-kapakli-qc.json" --include "ILK_KARE/*.jpg"
+          python3 - <<'EOF' | tee -a "$GITHUB_STEP_SUMMARY"
+          import csv, glob, json, os
+          from PIL import Image
+          q = [json.load(open(f)) for f in sorted(glob.glob('_q/*-kapakli-qc.json'))]
+          alan = ['cikis', 'sonuc', 'kapak_parlaklik', 'ilk_kare_fark', 'tam_kapak_fark', 'min_parlaklik_0_1.5', 'parlaklik_0_0.5_0.8_1.2',
+                  'kayma_fark', 'kare_once', 'kare_sonra', 'video_sn_once', 'video_sn_sonra', 'ses_sn_sonra', 'ses_ayni',
+                  'bayt_once', 'bayt_sonra', 'uretim_sn']
+          with open('_q/KAPAKLI_QC.csv', 'w', newline='') as f:
+              w = csv.DictWriter(f, alan, extrasaction='ignore'); w.writeheader(); [w.writerow(x) for x in q]
+          ok = [x for x in q if x['sonuc'] == 'PASS']
+          beklenen = 78 if os.environ['MOD'] == 'hepsi' else max(1, len(q))
+          def ar(k):
+              v = [x[k] for x in q if isinstance(x.get(k), (int, float))]
+              return f'{min(v)} / {max(v)}' if v else '-'
+          print(f'OZET {len(ok)}/{len(q)} PASS (beklenen {beklenen}) -> {"PASS" if len(ok) == len(q) == beklenen else "FAIL"}')
+          for k in ('ilk_kare_fark', 'tam_kapak_fark', 'min_parlaklik_0_1.5', 'kayma_fark', 'kapak_parlaklik', 'uretim_sn'):
+              print(f'  {k} min / max: {ar(k)}')
+          print(f"  oran min_parlaklik / kapak min: {min((x['min_parlaklik_0_1.5'] / x['kapak_parlaklik'] for x in q), default=0):.2f} (esik 0.50)")
+          print(f"  kare 720 ve 24.0 sn: {sum(x['kare_sonra'] == 720 and abs(x['video_sn_sonra'] - 24) < 0.02 for x in q)}/{len(q)}, ses ayni: {sum(bool(x.get('ses_ayni')) for x in q)}/{len(q)}")
+          print(f"  toplam boyut once {sum(x['bayt_once'] for x in q) / 1e9:.2f} GB, sonra {sum(x['bayt_sonra'] for x in q) / 1e9:.2f} GB")
+          for x in q:
+              if x['sonuc'] != 'PASS':
+                  print('  FAIL', x['cikis'], {k: v for k, v in x['kapilar'].items() if not v})
+          ims = sorted(glob.glob('_q/ILK_KARE/*.jpg'))
+          if ims:   # kontak: her videonun ilk karesi (13 sutun)
+              tw, th, cols = 120, 213, 13
+              kt = Image.new('RGB', (tw * cols, th * ((len(ims) + cols - 1) // cols)))
+              for i, p in enumerate(ims):
+                  kt.paste(Image.open(p).convert('RGB').resize((tw, th)), ((i % cols) * tw, (i // cols) * th))
+              kt.save('_q/KONTAK_0sn.jpg', quality=85)
+          open('_q/SONUC.txt', 'w').write('PASS' if len(ok) == len(q) == beklenen else 'FAIL')
+          EOF
+          rclone copy _q "$HEDEF" -q --include "KAPAKLI_QC.csv" --include "KONTAK_0sn.jpg" --include "SONUC.txt"
+          grep -q PASS _q/SONUC.txt
+      - if: always()
+        run: rm -rf ~/.config/rclone

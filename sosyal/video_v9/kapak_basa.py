@@ -43,19 +43,19 @@ def probe(p):
 
 def kareler(p, w, h, n):
     """First n frames as float RGB arrays (one ffmpeg decode)."""
-    r = subprocess.run(['ffmpeg', '-v', 'error', '-i', p, '-frames:v', str(n), '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-'],
+    r = subprocess.run(['ffmpeg', '-nostdin', '-v', 'error', '-i', p, '-frames:v', str(n), '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-'],
                        capture_output=True, check=True)
     return np.frombuffer(r.stdout, np.uint8).reshape(-1, h, w, 3).astype(np.float32)
 
 
 def kare(p, i, w, h):
-    r = subprocess.run(['ffmpeg', '-v', 'error', '-i', p, '-vf', f'select=eq(n\\,{i})', '-vsync', '0', '-frames:v', '1',
+    r = subprocess.run(['ffmpeg', '-nostdin', '-v', 'error', '-i', p, '-vf', f'select=eq(n\\,{i})', '-vsync', '0', '-frames:v', '1',
                         '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-'], capture_output=True, check=True)
     return np.frombuffer(r.stdout, np.uint8).reshape(h, w, 3).astype(np.float32)
 
 
 def ses_md5(p):
-    r = subprocess.run(['ffmpeg', '-v', 'error', '-i', p, '-map', '0:a', '-c', 'copy', '-f', 'md5', '-'],
+    r = subprocess.run(['ffmpeg', '-nostdin', '-v', 'error', '-i', p, '-map', '0:a', '-c', 'copy', '-f', 'md5', '-'],
                        capture_output=True, text=True, check=True)
     return r.stdout.strip()
 
@@ -87,7 +87,7 @@ def main():
           f'fps={v["fps_str"]},trim=end_frame={nb},setpts=PTS-STARTPTS[k];[0:v]setsar=1,format=yuv420p,split[o1][o2];'
           f'[o1]trim=end_frame={nb},setpts=PTS-STARTPTS[h];[o2]trim=start_frame={nb},setpts=PTS-STARTPTS[t];'
           f"[h][k]blend=all_expr='A*{x}+B*(1-{x})'[m];[m][t]concat=n=2:v=1:a=0[vo]")
-    cmd = ['ffmpeg', '-v', 'error', '-y', '-i', g.video, '-loop', '1', '-framerate', v['fps_str'], '-t', f'{b + 1:.3f}',
+    cmd = ['ffmpeg', '-nostdin', '-v', 'error', '-y', '-i', g.video, '-loop', '1', '-framerate', v['fps_str'], '-t', f'{b + 1:.3f}',
            '-i', g.kapak, '-filter_complex', fc, '-map', '[vo]']
     if v['ses_sn']:
         cmd += ['-map', '0:a', '-c:a', 'copy']
