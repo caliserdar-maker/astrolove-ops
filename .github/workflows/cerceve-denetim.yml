@@ -1,0 +1,69 @@
+name: cerceve-denetim
+# Cerceve kaldirma (eski 78) + BY aciklama plani icin SALT OKUMA (15 Eki 2026, Serdar). Etsy'ye yalniz GET (~8 istek); yazma metodu varsa FAIL.
+# Gorseller Etsy CDN'den (kota yok). Cercevesiz kapak ORNEGI yerelde uretilir (Etsy'ye yuklenmez).
+# Cikti: Drive TEMP/CERCEVE_KALDIR_20261015/. Kota tabani 500.
+permissions:
+  actions: read
+  contents: read
+on:
+  workflow_dispatch: {}
+jobs:
+  denetim:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+      - name: Guvenlik (yazma metodu yok)
+        run: |
+          if grep -nE "api\.(patch|put|post|delete|post_json|put_json|post_file)\(|requests\.(patch|put|post|delete)" scripts/etsy/cerceve_denetim.py; then
+            echo "::error::salt okur betikte yazma metodu"; exit 1; fi
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2 numpy pillow opencv-python-headless
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Token + BY listesi
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/BY78_TASLAK_20261014/BY78_TASLAKLAR.csv" _work/BY.csv
+      - name: Cercevesiz kapak ornegi (yerel, Etsy yok)
+        run: |
+          set -euo pipefail
+          python3 scripts/pod/cercevesiz_kapak_ornek.py data/pod/cl_galeri_final19/01_kapak.jpg _out/ORNEK_CL_kapak_cercevesiz.jpg | tee _out/ORNEK_QC.txt
+          grep -qx PASS _out/ORNEK_QC.txt
+      - name: Denetim (yalniz GET)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: python3 scripts/etsy/cerceve_denetim.py --eski data/pod/pod78_ids.csv --by _work/BY.csv --kart data/pod/cl_galeri_final19 --out _out
+      - name: Token geri yaz + cikti Drive'a
+        if: ${{ always() }}
+        run: |
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "token geri yazildi" || true
+          if [ -d _out ] && ls _out/* >/dev/null 2>&1; then
+            python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/ETSY_TOKEN.json _out || { echo "::error::ciktida sir"; exit 1; }
+            rclone copy _out "gdrive:ASTROLOVE/TEMP/CERCEVE_KALDIR_20261015" -q && echo "Cikti: TEMP/CERCEVE_KALDIR_20261015/"
+          fi
+          rm -rf _work ~/.config/rclone
