@@ -1,0 +1,45 @@
+name: kagit-ornek
+# Eski 78 galeri rank 2 (iki sutun, Framed yok, genel kagit) + rank 12 (genel kagit karti) CL ornegi (15 Eki 2026, Serdar NOT 1).
+# Etsy YOK; yalniz yerel uretim + Drive TEMP/CERCEVE_KALDIR_20261015/. Pillow surumu canli 02 hattiyla ayni (gorsel02.yml).
+permissions:
+  contents: read
+on:
+  workflow_dispatch: {}
+jobs:
+  ornek:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q numpy==2.1.3 pillow==11.0.0 scipy==1.14.1
+          sudo apt-get install -y -qq tesseract-ocr >/dev/null
+          (curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null) || sudo apt-get install -y -qq rclone >/dev/null
+          mkdir -p _out fonts
+          base=https://raw.githubusercontent.com/google/fonts/main/ofl
+          curl -fsSL "$base/ebgaramond/EBGaramond%5Bwght%5D.ttf" -o 'fonts/EBGaramond[wght].ttf'
+          curl -fsSL "$base/lato/Lato-Regular.ttf" -o fonts/Lato-Regular.ttf
+          cp 'assets/fonts/Montserrat[wght].ttf' fonts/
+          python3 scripts/pod/duvar_zemin.py data/pod/kapak_sahne_v9.png guclu _work_duvar.png acik3
+      - name: Ornekler + QC
+        run: |
+          set -euo pipefail
+          python3 scripts/pod/kart02_iki_sutun.py data/pod/cl_galeri_krem_kaynak/02_format.jpg _work_duvar.png fonts _out/ORNEK_CL_r02_format_iki_sutun.jpg | tee _out/KAGIT_QC.txt
+          python3 scripts/pod/kart12_kagit_genel.py data/pod/cl_galeri_final19/13_kagit.jpg _work_duvar.png fonts _out/ORNEK_CL_r12_kagit_genel.jpg | tee -a _out/KAGIT_QC.txt
+          [ "$(grep -c '^PASS$' _out/KAGIT_QC.txt)" = "2" ]
+      - name: rclone.conf + Drive
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            export RCLONE_CONFIG_GDRIVE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET"; fi
+          rclone copy _out "gdrive:ASTROLOVE/TEMP/CERCEVE_KALDIR_20261015" -q && echo "Drive: TEMP/CERCEVE_KALDIR_20261015/"
+          rm -rf ~/.config/rclone
