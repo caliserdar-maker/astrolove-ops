@@ -3,7 +3,9 @@
 --ciftler "CANCER_LIBRA" | HEPSI  (data/pod/pod78_ids.csv)
 Ilan basina: envanter GET -> varyasyon gorsel baglari GET (once) -> envanter PUT: 4 cerceve degeri (Antique Gold/Black/White/
   Natural Frame) urunleri SILINIR, 'Digital File, Print or Framed?' menu adi 'Format' olur; kalan urunlerin fiyat/stok/sku/
-  readiness/deger id'leri AYNI (390 -> 130) -> updateListing PATCH yalniz {description} -> baglar GET (sonra, once ile ayni).
+  readiness/deger id'leri AYNI (390 -> 130) -> updateListing PATCH yalniz {description, materials} -> baglar GET (sonra, once ile ayni).
+Kagit ifadesi (Serdar NOT 1, 15 Eki; tedarikci kararina BAGLI DEGIL): PRINT bolumunde Hahnemuhle / Photo Rag / 308 gsm /
+  100% cotton / giclee / archival / ISO 9706 -> "Printed on premium matte art paper with long-lasting inks"; materials -> MATERIALS.
 Aciklama: onaylanan once/sonra listesi (her degisiklik tam 1 kez bulunmali, yoksa DUR). Sonuc metinde 'frame' yalniz
   "Frames shown in photos are for display only and are not included. Prints ship unframed." satirinda gecer; uzun tire yok.
 Tekrar kosu: aciklamasi zaten yeni ve envanterde cerceve yoksa ATLANIR. Ilk hatada DUR; kota < 500 DUR; ilan active degilse DUR.
@@ -28,13 +30,17 @@ YENI_AD = "Format"
 CERCEVE = {"Antique Gold Frame", "Black Frame", "White Frame", "Natural Frame"}
 KALAN = {"Digital File", "Print"}
 YENI_SATIR = "Frames shown in photos are for display only and are not included. Prints ship unframed."
+KAGIT_SATIR = "- Printed on premium matte art paper with long-lasting inks"
+MATERIALS = ["matte art paper", "ink"]
+KAGIT_YASAK = re.compile(r"hahnem|photo rag|\bgsm\b|cotton|gicl|archival|museum|iso 9706|acid", re.I)
 DEGIS = [
     ("Choose a digital file, a print or a framed print.", "Choose a digital file or a print."),
     ("1. Digital File, Print or Framed? Choose your format.", "1. Format: choose Digital File or Print."),
     ("For every print and framed print, we send you a preview", "For every print, we send you a preview"),
     ("- Unframed, ready for the frame of your choice\n", ""),
-    ("Hahnemühle rates Photo Rag as museum quality (ISO 9706).",
-     "Hahnemühle rates Photo Rag as museum quality (ISO 9706).\n" + YENI_SATIR),
+    ("- Hahnemühle Photo Rag, 308 gsm, 100% cotton, acid-free, matte finish\n- Giclée print with pigment-based archival inks\n",
+     KAGIT_SATIR + "\n"),
+    ("Hahnemühle rates Photo Rag as museum quality (ISO 9706).", YENI_SATIR),
     ("FRAMED\n- Classic wood frame in Antique Gold, Black, White or Natural (oak effect)\n"
      "- 20 mm (0.8 in) frame face, acrylic (Perspex) front, no mat\n- Arrives ready to hang, hanging hardware included\n"
      "- Printed on 200 gsm enhanced matte fine art paper\nFramed prints use a different paper from our unframed prints. "
@@ -70,7 +76,15 @@ def yeni_aciklama(d):
         raise Dur("uzun/orta tire")
     if re.search(r"prodigi|printful|gelato|printify|shortrun", t, re.I):
         raise Dur("tedarikci adi")
+    if KAGIT_YASAK.search(t):
+        raise Dur(f"kagit ifadesi kaldi: {KAGIT_YASAK.findall(t)}")
+    if t.count(KAGIT_SATIR) != 1:
+        raise Dur("kagit satiri 1 kez olmali")
     return t
+
+
+def mat_norm(m):
+    return [str(v).strip().lower() for v in (m or [])]
 
 
 def para(p):
@@ -92,7 +106,7 @@ def kur(store):
 
         def patch(self, path, data):
             self._k("PATCH", path)
-            if set(data) != {"description"}:
+            if not data or not set(data) <= {"description", "materials"}:
                 raise SystemExit(f"YASAK PATCH alani: {sorted(data)}")
             return super().patch(path, data)
 
@@ -151,7 +165,11 @@ def calistir(api, shop, ciftler, ids_csv, R, out):
         if x.get("state") != "active" or str(x.get("shop_id")) != str(shop):
             raise Dur(f"{c}: state {x.get('state')} shop {x.get('shop_id')}")
         d0 = html.unescape(x.get("description") or "")
+        mat_gerek = mat_norm(x.get("materials")) != MATERIALS
+        K["materials_once"] = x.get("materials")
         if YENI_SATIR in d0:
+            if KAGIT_YASAK.search(d0) or d0.count(KAGIT_SATIR) != 1:
+                raise Dur(f"{c}: cerceve satiri var ama kagit ifadesi eski (yarim kalmis surum)")
             K["aciklama"] = "zaten yeni"
             d1 = None
         else:
@@ -162,7 +180,7 @@ def calistir(api, shop, ciftler, ids_csv, R, out):
         prods = inv.get("products") or []
         fmt = lambda p: next((v.get("values") or [""])[0] for v in p.get("property_values") or [] if v["property_id"] == P_FORMAT)  # noqa: E731
         cerceveli = [p for p in prods if fmt(p) in CERCEVE]
-        if not cerceveli and d1 is None:
+        if not cerceveli and d1 is None and not mat_gerek:
             K["sonuc"] = "ATLANDI_ZATEN_YAPILDI"
             continue
         n_is += 1
@@ -202,13 +220,21 @@ def calistir(api, shop, ciftler, ids_csv, R, out):
             norm = lambda s: (tuple((k, vals, vids) for k, vals, vids in s[0]),) + s[1:]  # noqa: E731
             if {k: norm(v) for k, v in sonra.items()} != {k: norm(v) for k, v in once.items()}:
                 raise Dur(f"{c}: kalan urunlerde fiyat/stok/sku/deger id degisti")
+        veri = {}
         if d1 is not None:
-            y = api.patch(f"/shops/{shop}/listings/{lid}", {"description": d1}) or {}
+            veri["description"] = d1
+        if mat_gerek:
+            veri["materials"] = ",".join(MATERIALS)
+        if veri:
+            y = api.patch(f"/shops/{shop}/listings/{lid}", veri) or {}
             kota(api)
             if y.get("state") != "active":
                 raise Dur(f"{c}: PATCH sonrasi state {y.get('state')}")
-            if html.unescape(y.get("description") or "").replace("\r\n", "\n") != d1:
+            if html.unescape(y.get("description") or "").replace("\r\n", "\n") != (d1 if d1 is not None else d0.replace("\r\n", "\n")):
                 raise Dur(f"{c}: aciklama yanitla eslesmiyor")
+            K["materials_sonra"] = y.get("materials")
+            if mat_norm(y.get("materials")) != MATERIALS:
+                raise Dur(f"{c}: materials yanitla eslesmiyor {y.get('materials')}")
             if (y.get("title"), y.get("tags"), y.get("shipping_profile_id")) != (x.get("title"), x.get("tags"), x.get("shipping_profile_id")):
                 raise Dur(f"{c}: baslik/etiket/profil degisti")
         if bag_kontrol:
