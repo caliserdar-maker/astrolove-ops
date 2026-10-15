@@ -51,7 +51,7 @@ jobs:
           BAS: ${{ inputs.bas }}
           ADET: ${{ inputs.adet }}
         run: |
-          set -uo pipefail
+          set +e -uo pipefail   # varsayilan bash -e: FAIL'de de cikti Drive'a yuklensin
           python3 scripts/sosyal/sosyal_kapak_oku.py --token _work/mc.json --bas "$BAS" --adet "$ADET" --cikti _out --is _w 2>&1 \
             | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY" _out/OZET.txt
           rc=${PIPESTATUS[0]}

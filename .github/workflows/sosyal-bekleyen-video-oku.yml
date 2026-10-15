@@ -42,7 +42,7 @@ jobs:
         env:
           BIT: ${{ inputs.bit }}
         run: |
-          set -uo pipefail
+          set +e -uo pipefail   # varsayilan bash -e: FAIL'de de cikti Drive'a yuklensin
           python3 scripts/sosyal/bekleyen_video_oku.py --token _work/mc.json --cikti _out --bit "$BIT" 2>&1 \
             | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY" _out/OZET.txt
           rc=${PIPESTATUS[0]}

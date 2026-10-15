@@ -3,8 +3,9 @@ name: sosyal-video-degistir
 # Metricool: TEK bekleyen video gonderisinin videosunu FINAL_KAPAKLI videosuyla degistirir (Serdar onayi 15 Eki 2026:
 # yalniz 17 Eki 03:00 Facebook 394635992 PISCES_SAGITTARIUS denemesi). Diger her gonderi AYRI ONAY ister.
 # scripts/sosyal/metricool_video_degistir.py: ONCE.json -> yukleme -> donusturulmus dosya olcumu -> PUT (yalniz media[0]) ->
-# GET fark kontrolu. mod kuru: yukleme / PUT yok. mod geri: ONCE.json govdesiyle geri alma.
-# Sonuc Drive TEMP/SOSYAL_VIDEO_DEGISTIR_<tarih>/<id>/ (ONCE.json, SONRA.json, DEGISTIR_RAPOR.json).
+# GET fark kontrolu. mod kuru: yukleme / PUT yok. mod kontrol: SALT OKUMA, uuid ile bul + ONCE.json ile tam fark (izinli
+# yalniz id, media[0]). mod geri: ONCE.json govdesiyle geri alma (uuid ile bulur). PUT gonderiye yeni id verir (15 Eki olcumu).
+# Sonuc Drive TEMP/SOSYAL_VIDEO_DEGISTIR_<tarih>/<uuid ya da id>/ (ONCE/SONRA/SIMDI.json, FARK.csv, *_RAPOR.json). FAIL'de de yuklenir.
 
 permissions:
   contents: read
@@ -13,8 +14,11 @@ on:
   workflow_dispatch:
     inputs:
       id:
-        description: 'Metricool gonderi id'
-        required: true
+        description: 'Metricool gonderi id (PUT sonrasi degisir; kontrol/geri uuid ile bulur)'
+        default: ''
+      uuid:
+        description: 'Metricool gonderi uuid (kontrol / geri icin)'
+        default: ''
       ag:
         description: 'facebook | instagram | tiktok | youtube'
         required: true
@@ -23,10 +27,10 @@ on:
         required: true
       mod:
         type: choice
-        options: [kuru, yaz, geri]
+        options: [kuru, yaz, kontrol, geri]
         default: kuru
       once:
-        description: 'geri: Drive yolu (ornek ASTROLOVE/TEMP/SOSYAL_VIDEO_DEGISTIR_20261015/394635992/ONCE.json)'
+        description: 'kontrol / geri: Drive yolu (ornek ASTROLOVE/TEMP/SOSYAL_VIDEO_DEGISTIR_20261015/394635992/ONCE.json)'
         default: ''
 
 concurrency:
@@ -45,7 +49,7 @@ jobs:
         run: |
           pip install -q numpy==2.1.3 pillow==11.0.0
           sudo apt-get -qq update >/dev/null && sudo apt-get install -y -qq ffmpeg >/dev/null
-          echo "O=gdrive:ASTROLOVE/TEMP/SOSYAL_VIDEO_DEGISTIR_$(TZ=Europe/Istanbul date +%Y%m%d)/${{ inputs.id }}" >> "$GITHUB_ENV"
+          echo "O=gdrive:ASTROLOVE/TEMP/SOSYAL_VIDEO_DEGISTIR_$(TZ=Europe/Istanbul date +%Y%m%d)/${{ inputs.uuid || inputs.id }}" >> "$GITHUB_ENV"
       - name: rclone + token
         env:
           RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
@@ -62,7 +66,7 @@ jobs:
           rclone copyto "gdrive:ASTROLOVE/TEMP/METRICOOL_TOKEN.json" _work/mc.json
           python3 -c "import json;print('::add-mask::'+json.load(open('_work/mc.json'))['userToken'])"
 
-      - name: Video + kapak + (geri) ONCE
+      - name: Video + kapak (kuru/yaz) ya da ONCE (kontrol/geri)
         env:
           CIFT: ${{ inputs.cift }}
           MOD: ${{ inputs.mod }}
@@ -71,21 +75,26 @@ jobs:
           set -euo pipefail
           case "$CIFT" in *[!A-Z_]*|'') echo "::error::cift bicimi"; exit 1 ;; esac
           s=$(echo "$CIFT" | tr 'A-Z' 'a-z' | sed 's/_/-and-/')
-          rclone copyto "$D/FINAL_KAPAKLI/$s-astroloveart-reel.mp4" _work/video.mp4
-          rclone copyto "$D/KAPAK/$s-astroloveart-kapak.jpg" _work/kapak.jpg
-          ls -l _work/video.mp4 _work/kapak.jpg
-          if [ "$MOD" = geri ]; then rclone copyto "gdrive:$ONCE" _work/ONCE_geri.json; fi
+          if [ "$MOD" = kuru ] || [ "$MOD" = yaz ]; then
+            rclone copyto "$D/FINAL_KAPAKLI/$s-astroloveart-reel.mp4" _work/video.mp4
+            rclone copyto "$D/KAPAK/$s-astroloveart-kapak.jpg" _work/kapak.jpg
+            ls -l _work/video.mp4 _work/kapak.jpg
+          else
+            [ -n "$ONCE" ] || { echo "::error::$MOD icin once= gerekli"; exit 1; }
+            rclone copyto "gdrive:$ONCE" _work/ONCE_ref.json; ls -l _work/ONCE_ref.json
+          fi
 
       - name: Degistir (${{ inputs.mod }})
         env:
           ID: ${{ inputs.id }}
+          UUID: ${{ inputs.uuid }}
           AG: ${{ inputs.ag }}
           CIFT: ${{ inputs.cift }}
           MOD: ${{ inputs.mod }}
         run: |
-          set -uo pipefail
-          EK=(); [ "$MOD" = geri ] && EK=(--once _work/ONCE_geri.json)
-          python3 scripts/sosyal/metricool_video_degistir.py --token _work/mc.json --id "$ID" --ag "$AG" --cift "$CIFT" \
+          set +e -uo pipefail   # varsayilan bash -e FAIL'de adimi kapatiyordu: rapor Drive'a yuklenmiyordu (38712850093)
+          EK=(); { [ "$MOD" = geri ] || [ "$MOD" = kontrol ]; } && EK=(--once _work/ONCE_ref.json)
+          python3 scripts/sosyal/metricool_video_degistir.py --token _work/mc.json --id "$ID" --uuid "$UUID" --ag "$AG" --cift "$CIFT" \
             --video _work/video.mp4 --kapak _work/kapak.jpg --mod "$MOD" --cikti _out "${EK[@]}" 2>&1 \
             | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY" _out/OZET.txt
           rc=${PIPESTATUS[0]}
