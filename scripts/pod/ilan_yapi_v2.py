@@ -429,7 +429,7 @@ def write_diff(path, before, after):
 def parser():
     p = argparse.ArgumentParser()
     p.add_argument("command", choices=("kuru", "yaz")); p.add_argument("ilan")
-    p.add_argument("--confirm"); p.add_argument("--yalniz", default=""); p.add_argument("--kota-alt", type=int, default=400)
+    p.add_argument("--confirm"); p.add_argument("--yalniz", default=""); p.add_argument("--kota-alt", type=int, default=10)
     p.add_argument("--csv", default="data/pod/yapi_v2.csv")
     p.add_argument("--ilan-csv", default="", help="78 POD ilan listesi (ilan_id/listing_id sutunu); hepsi icin zorunlu")
     p.add_argument("--aciklama", action="store_true",

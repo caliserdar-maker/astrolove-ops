@@ -6,7 +6,7 @@
      magaza production partner listesi; kullanilan her kargo profili icin getShopShippingProfile (+destinations):
      acik ulkeler, processing min/max.
  Cikti: out/POD_URETIM_KARGO_API.csv + out/POD_KARGO_ULKELER.csv -> Drive DIJITAL_78.
- Kota tabani: x-remaining-today < 230 olursa DUR.
+ Kota tabani: x-remaining-today < 10 olursa DUR.
 Kullanim: pod_uretim_kargo_oku.py <tek_ilan_id> <metin78_csv>"""
 import csv
 import json
@@ -17,7 +17,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from etsy_common import Etsy, TokenStore, mask  # noqa: E402
 
-KOTA_TABAN = 230
+KOTA_TABAN = 10  # Serdar 15 Eki: Etsy kota tabani 10
 OUT = Path("out")
 
 

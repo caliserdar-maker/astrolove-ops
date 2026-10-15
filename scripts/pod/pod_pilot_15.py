@@ -396,7 +396,7 @@ def main():
     ap.add_argument("--listing", default="4570110641")
     ap.add_argument("--cift", default="AQUARIUS_ARIES")
     ap.add_argument("--is-dizin", default="_work/pilot15")
-    ap.add_argument("--kota-alt", type=int, default=400)
+    ap.add_argument("--kota-alt", type=int, default=10)
     ap.add_argument("--confirm", default="")
     ap.add_argument("--adim", default="1,2,3",
                     help="yalniz bu adimlari yaz (or. '3' = yalniz aciklama). Atlanan adim "

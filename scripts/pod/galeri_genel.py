@@ -324,7 +324,7 @@ def main():
     ap.add_argument("--out", default="_out/galeri")
     ap.add_argument("--listing", default="")
     ap.add_argument("--confirm", default="")
-    ap.add_argument("--kota-alt", type=int, default=400)
+    ap.add_argument("--kota-alt", type=int, default=10)
     a = ap.parse_args()
     sys.exit(oku(a) if a.mod == "oku" else yaz(a))
 

@@ -126,7 +126,7 @@ def main():
     ap.add_argument("mod", choices=["yedek", "ekle"]); ap.add_argument("--ids", required=True); ap.add_argument("--kartlar")
     ap.add_argument("--tablo"); ap.add_argument("--alt"); ap.add_argument("--out", required=True)
     ap.add_argument("--yedek-drive", default=""); ap.add_argument("--confirm", default=""); ap.add_argument("--cift", default="")
-    ap.add_argument("--limit", type=int, default=0); ap.add_argument("--kota-taban", type=int, default=300)
+    ap.add_argument("--limit", type=int, default=0); ap.add_argument("--kota-taban", type=int, default=10)
     ap.add_argument("--wp-bag", action="store_true")
     a = ap.parse_args()
     k, s = os.environ.get("ETSY_API_KEY", ""), os.environ.get("ETSY_SHARED_SECRET", ""); mask(k); mask(s)

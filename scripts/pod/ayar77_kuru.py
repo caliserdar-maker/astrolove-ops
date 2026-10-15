@@ -34,7 +34,7 @@ from pod_sku import SIGN3  # noqa: E402
 
 CL_ID = "4570143815"
 CL_A, CL_B = "Cancer", "Libra"
-KOTA_TABAN = 300
+KOTA_TABAN = 10  # Serdar 15 Eki: Etsy kota tabani 10
 RU_YALIN = {"Aries": "Овен", "Taurus": "Телец", "Gemini": "Близнецы", "Cancer": "Рак", "Leo": "Лев",
             "Virgo": "Дева", "Libra": "Весы", "Scorpio": "Скорпион", "Sagittarius": "Стрелец",
             "Capricorn": "Козерог", "Aquarius": "Водолей", "Pisces": "Рыбы"}

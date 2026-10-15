@@ -32,7 +32,7 @@ ILAN_JSON = KOK.parent / "etsy" / "seo" / "pod_changes_v2.json"
 PILOT = "4570110641"
 ESKI, YENI = 30.99, 29.99
 BOYUT_3099 = "8x10"   # etiket: "4:5 · 8x10 in (20x25 cm)" -> icerik esleseme
-KOTA_ALT = 400
+KOTA_ALT = 10  # Serdar 15 Eki: Etsy kota tabani 10
 PLAN_SUTUN = ["listing_id", "cift", "urun", "teklif", "para", "adet_3099", "boyut_3099",
               "fiyatlar", "yapi", "durum", "neden"]
 SONUC_SUTUN = ["listing_id", "cift", "durum", "degisen", "eski_fiyat", "yeni_fiyat",

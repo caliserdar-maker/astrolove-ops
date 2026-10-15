@@ -6,7 +6,7 @@ Secilen taslak(lar) (BY78_TASLAKLAR.csv; workflow varsayilani YALNIZ CANCER_LIBR
      (ilanda zaten video varsa yukleme YAPILMAZ, DUR: Etsy ilan basina 1 video)
   2) uploadListingVideo <- Drive v3/<CIFT>/vitrin/00_Video.mp4
   3) state oku; video bilgisi (API ne donduruyorsa); gorseller ve 5 stil bagi ONCE ile ayni olmali
-"active" -> aninda inactive ve TUM IS DURUR. Kota < 500 -> DUR.
+"active" -> aninda inactive ve TUM IS DURUR. Kota < 10 -> DUR.
 Cikti: <OUT>/BY78_VIDEO_ETSY.json (+ Drive).
 Ortam: ETSY_API_KEY, ETSY_SHARED_SECRET, ETSY_SHOP_ID, TOKEN_FILE, TASLAK_CSV, V3, OUT, DRIVE_OUT, CIFTLER (zorunlu)
 """
@@ -25,7 +25,7 @@ from etsy_common import Etsy, TokenStore, mask  # noqa: E402
 REF = 4570143815
 P_STYLE = 513
 BEKLENEN = {"Starlit": 9, "Timeless": 10, "First Page": 11, "Botanical": 12, "Layers": 13}
-KOTA_MIN = 500
+KOTA_MIN = 10  # Serdar 15 Eki: Etsy kota tabani 10
 
 
 class Dur(Exception):

@@ -11,7 +11,7 @@ Ilan basina:
   3) Geri okuma: dosya 5 (PDF id ayni, 4 ZIP bayt = Drive), gorsel 6 + sira (Etsy'den
      indirilen her gorsel Drive kaynagiyla piksel duzeyinde), state ACTIVE degismemis.
      Tutmazsa o ilanda DUR, kalanlara gecilmez.
-Kota: her istekten sonra x-remaining-today loglanir; < 400 ise DUR (STATE'ten devam).
+Kota: her istekten sonra x-remaining-today loglanir; < 10 ise DUR (STATE'ten devam).
 STATE: --state-out CSV ilan basi aninda; --resume ile PASS olanlar atlanir.
 Varsayilan DRY-RUN (--apply yoksa yazma yok). --pairs ZORUNLU (bos verilmez).
 """
@@ -37,7 +37,7 @@ from wp_mockup_common import EDITIONS  # noqa: E402
 SET07_IDX = GALLERY_ORDER.index("SET07")   # 4 -> rank 5
 READBACK_WAIT = 4      # 6 Eyl 2026 (Mo onayi): 8 -> 4 sn; Actions dakikasi ve kota tasarrufu
 READBACK_TRIES = 5
-QUOTA_STOP = 400
+QUOTA_STOP = 10  # Serdar 15 Eki: Etsy kota tabani 10
 PIX_MAD_MAX = 6.0
 
 
@@ -240,7 +240,7 @@ def set07_degistir(il, lid, pair, mock_dir, apply_, rapor):
 def ilan_isle(il, pair, lid, zip_dir, mock_dir, apply_, rapor):
     up = pair.upper()
     st = il.state(lid)
-    # kota kapisi ilan BASINDA (1 GET sonrasi): 400'un altina hic inilmez, yazma yapilmadan durulur
+    # kota kapisi ilan BASINDA (1 GET sonrasi): 10'un altina hic inilmez, yazma yapilmadan durulur
     rem = il.api.remaining
     if rem is not None and str(rem).isdigit() and int(rem) < QUOTA_STOP:
         return "KOTA", f"kota {rem} < {QUOTA_STOP}; ilana dokunulmadi"

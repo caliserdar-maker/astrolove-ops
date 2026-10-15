@@ -82,7 +82,7 @@ def aciklama_asamasi(metin):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--is-dizin", default="_work/durum15")
-    ap.add_argument("--kota-alt", type=int, default=300)
+    ap.add_argument("--kota-alt", type=int, default=10)
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--sg-karsilastir", default="true")
     a = ap.parse_args()

@@ -8,7 +8,7 @@ Ilk FAIL'de DUR. Kota (x-remaining-today) < --kota-taban + ILAN_UST ise yeni ila
 Ilerleme --ilerleme JSON: {ilanlar: {listing_id: {cift, set, durum}}}; PASS olan ayni set tekrar yuklenmez;
 PASS set=17 iken satir set=19 olursa TAMAMLA_BEKLIYOR (05/19 ekleme ayri adim; bu kosu dokunmaz).
 Kullanim: galeri77_yukle.py --hazir HAZIR.csv --paket DIR --out OUT --ilerleme ILERLEME.json --confirm GALERI77
-          [--yedek-drive gdrive:...] [--kota-taban 150] [--limit N]
+          [--yedek-drive gdrive:...] [--kota-taban 10] [--limit N]
 """
 import argparse
 import csv
@@ -41,7 +41,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--hazir", required=True); ap.add_argument("--paket", required=True); ap.add_argument("--out", required=True)
     ap.add_argument("--ilerleme", required=True); ap.add_argument("--confirm", default="")
-    ap.add_argument("--yedek-drive", default=""); ap.add_argument("--kota-taban", type=int, default=150)
+    ap.add_argument("--yedek-drive", default=""); ap.add_argument("--kota-taban", type=int, default=10)
     ap.add_argument("--limit", type=int, default=0)
     a = ap.parse_args()
     if a.confirm != "GALERI77":

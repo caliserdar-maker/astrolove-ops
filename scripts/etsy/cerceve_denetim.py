@@ -24,7 +24,7 @@ import numpy as np
 import requests
 from PIL import Image, ImageDraw
 
-KOTA_MIN = 500
+KOTA_MIN = 10  # Serdar 15 Eki: Etsy kota tabani 10
 CL_ESKI = "4570143815"
 FRAME = re.compile(r"\b(frames?|framed|unframed|framing)\b", re.I)
 # Kart -> cerceve iceriyor mu (gorsel ya da yazi): CL kesin 19 kart incelemesi (15 Eki)

@@ -62,7 +62,7 @@ CAGRI_ILAN = 14  # apply'da ilan basina tahmini Etsy cagrisi (okuma + yukleme + 
 OKUMA_BEKLE = 3
 SIRA_DENEME, SIRA_BEKLE = 5, 5  # siralar tekillesene kadar en fazla 5 x 5 sn (Serdar 28 Eyl)
 YUKLEME_BEKLE = 5  # yuklemeden sonra rank cagrisina kadar (Serdar 28 Eyl)
-KOTA_TABAN = 150  # altina dusunce yeni ilana baslanmaz (router rezervi 150, Serdar 28 Eyl)
+KOTA_TABAN = 10  # Serdar 15 Eki: Etsy kota tabani 10
 
 
 def simdi():

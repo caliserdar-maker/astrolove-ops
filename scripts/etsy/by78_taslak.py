@@ -44,7 +44,7 @@ GALERI = ["01_Cover", "02_Shared_Symbol", "03_Formats", "04_Five_Styles", "05_La
 STIL_GORSEL = {"Starlit": 9, "Timeless": 10, "First Page": 11, "Layers": 12, "Botanical": 13}   # rank
 ASAMA = ["olusturuldu", "envanter", "gorseller", "varyasyon_gorsel", "kisisel", "nitelik", "tamam"]
 ISTEK_ILAN = 31            # ilan basina istek (olcum: 1+1+1+1+13+1+1+1+1+1+8+1)
-KOTA_MIN = 500
+KOTA_MIN = 10  # Serdar 15 Eki: Etsy kota tabani 10
 ORNEK = ["CANCER_LIBRA", "LEO_LEO", "SAGITTARIUS_SAGITTARIUS"]
 
 

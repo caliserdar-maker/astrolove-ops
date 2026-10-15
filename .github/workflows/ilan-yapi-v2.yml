@@ -10,7 +10,7 @@ on:
       mod: {description: "kuru veya yaz", required: true, default: "kuru"}
       ilan: {description: "ilan id veya hepsi", required: true, default: "hepsi"}
       yalniz: {description: "virgullu ilan id filtresi", required: false, default: ""}
-      kota_alt: {description: "minimum kalan kota", required: true, default: "400"}
+      kota_alt: {description: "minimum kalan kota", required: true, default: "10"}
       confirm: {description: "yaz icin YAPI_V2", required: false, default: ""}
 
 jobs:

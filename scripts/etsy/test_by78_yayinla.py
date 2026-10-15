@@ -46,7 +46,7 @@ class SahteEtsy:
             if lid == self.bozuk_baslik:
                 self.L[lid]["title"] = "DEGISTI"
         if self.kota_dus is not None and len(self.patchler) >= self.kota_dus:
-            self.remaining = "499"
+            self.remaining = "9"
         return dict(self.L[lid])                                   # PATCH yaniti = guncel ilan
 
 
@@ -143,7 +143,7 @@ class Test(unittest.TestCase):
 
     def test_kota_tabani(self):
         api = SahteEtsy()
-        api.kota_dus = 5                                                 # 5. PATCH'ten sonra kota 499
+        api.kota_dus = 5                                                 # 5. PATCH'ten sonra kota 9 (taban 10)
         with tempfile.TemporaryDirectory() as t:
             kod = y.calistir(api, SHOP, taslak(api), set(), t, 0, api.durum)
         print("kota tabani: PATCH", len(api.patchler), "kod", kod)

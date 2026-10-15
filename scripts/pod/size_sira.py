@@ -34,7 +34,7 @@ import fiyat_kar as F  # noqa: E402
 
 HEDEF = ["8x10", "11x14", "12x16", "12x18", "16x20", "16x24", "18x24", "20x30", "24x30", "24x36", "A4", "A3", "A2"]
 INC, ASERI = HEDEF[:10], HEDEF[10:]
-KOTA_TABAN = 150
+KOTA_TABAN = 10  # Serdar 15 Eki: Etsy kota tabani 10
 CL_ID = "4570143815"
 MALIYET = None
 FIYAT_RX = re.compile(r"(\$ ?\d+(?:\.\d{2})?|\b\d+\.99\b|\bUSD ?\d+|\b\d+ ?USD\b)")

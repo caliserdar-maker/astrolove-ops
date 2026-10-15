@@ -21,7 +21,7 @@ from etsy_common import Etsy, TokenStore, mask  # noqa: E402
 from pod_listing_create import build_listing, build_ru, load_ru_template, personalization_questions  # noqa: E402
 from pod_listing_update import load_template  # noqa: E402
 
-KOTA_TABAN = 230
+KOTA_TABAN = 10  # Serdar 15 Eki: Etsy kota tabani 10
 OUT = Path("out")
 BURC_EN = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn",
            "Aquarius", "Pisces"]

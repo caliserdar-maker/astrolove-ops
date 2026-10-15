@@ -14,7 +14,7 @@ on:
     inputs:
       mod: {description: "yedek (salt okuma) | yaz", default: "yedek"}
       confirm: {description: "yaz icin tam olarak: HAZIRLIK", default: ""}
-      kota_taban: {description: "bu kotanin altinda temiz dur", default: "150"}
+      kota_taban: {description: "bu kotanin altinda temiz dur", default: "10"}
 
 jobs:
   hazirlik:

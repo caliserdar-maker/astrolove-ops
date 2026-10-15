@@ -381,7 +381,7 @@ def main():
     ap.add_argument("--atla", default="", help="toplu: atlanacak ilan id'leri (virgullu)")
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--is-dizin", default="_work/boy15")
-    ap.add_argument("--kota-alt", type=int, default=400)
+    ap.add_argument("--kota-alt", type=int, default=10)
     ap.add_argument("--confirm", default="")
     a = ap.parse_args()
     if a.mod in ("yaz", "toplu") and a.confirm != "BOY_15":

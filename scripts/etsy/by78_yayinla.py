@@ -8,7 +8,7 @@ Az istek (kota tabani 500, Serdar 15 Eki):
      PATCH yaniti (guncel ilan) -> state=active, baslik ve etiketler toplu okumayla ayni mi.
   3) 10 yeni yayinda bir ve en sonda toplu okuma: o gruptaki ilanlar state=active + url var mi.
   Beklenmeyen durum (yanit ya da toplu dogrulama) -> o ilan HEMEN state=inactive (tek istek), YAYIN.csv sonuc=geri_alindi, is DURUR.
-  Draft olmayan ilan ATLANIR (active: ATLANDI_ZATEN_ACTIVE). Hata ya da kota < 500 -> DUR.
+  Draft olmayan ilan ATLANIR (active: ATLANDI_ZATEN_ACTIVE). Hata ya da kota < 10 -> DUR.
   Betikte tek yazma yolu var: durum(lid, state), state yalniz active ya da inactive; PATCH yanitini dondurur.
 Her sonuc aninda YAYIN.csv'ye (cift, listing_id, once, sonra, url, saat, sonuc, not).
 --adet N: en fazla N YENI yayin (1 = yalniz ilk; 0 = kalan hepsi).
@@ -23,7 +23,7 @@ import sys
 import time
 from pathlib import Path
 
-KOTA_MIN = 500
+KOTA_MIN = 10  # Serdar 15 Eki: Etsy kota tabani 10
 GRUP = 10
 ALAN = ["cift", "listing_id", "once", "sonra", "url", "saat", "sonuc", "not"]
 

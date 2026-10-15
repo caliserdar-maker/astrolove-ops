@@ -227,7 +227,7 @@ jobs:
             rclone copy _out/teklif "gdrive:ASTROLOVE/TEMP/POD_5X7/ROUTER_KURU/teklif" --include "*.md" --include "*.json" --include "*.csv" -q
             echo "ciktilar: gdrive:ASTROLOVE/TEMP/POD_5X7/ROUTER_KURU/teklif"
           elif [ "$MOD" = "eslesme_kanit" ]; then
-            python scripts/prodigi/eslesme_kanit.py --limit "$LIMIT" --kota-alt 150
+            python scripts/prodigi/eslesme_kanit.py --limit "$LIMIT" --kota-alt 10
           elif [ "$MOD" = "siparis_izin_kapat" ]; then
             python scripts/prodigi/manuel_siparis.py izin_kapat --file-id "$SIPARIS_DOSYA_ID" \
               --remote "$SIPARIS_REMOTE" --sku "$SIPARIS_SKU" --ref "$SIPARIS_REF" \

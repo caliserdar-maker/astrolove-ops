@@ -11,7 +11,7 @@ Ilan basina istek (en fazla 7; Etsy includes'ta inventory YOK: images, videos ..
   5) getListing?includes=Images,Videos              son state + 13 gorsel, rank 1 2400x2400, 1 video (tek okuma)
   6) getListingVariationImages                      5 bag
   Bos boyut (None): 8 sn bekleyip yeniden okunur (en fazla 4); hala bossa o rank 1 kez yeniden yuklenir.
-Kota < 500 olursa ilan bitince DURUR; BY78_KAPAK_VIDEO.csv'de tamam olanlar tekrar kosuda atlanir.
+Kota < 10 olursa ilan bitince DURUR; BY78_KAPAK_VIDEO.csv'de tamam olanlar tekrar kosuda atlanir.
 CANCER_LIBRA (4595350971) her zaman haric.
 Ortam: ETSY_API_KEY, ETSY_SHARED_SECRET, ETSY_SHOP_ID, TOKEN_FILE, TASLAK_CSV, V3, OUT, DRIVE_OUT,
        CIFTLER ("HEPSI" = CANCER_LIBRA haric tum taslaklar CSV sirasiyla; ya da bosluklu cift listesi)
@@ -33,7 +33,7 @@ HARIC = {"CANCER_LIBRA"}
 P_STYLE = 513
 KARE, DIKEY, YATAY = (2400, 2400), (2400, 3000), (3200, 2400)
 BAG = {"Starlit": 9, "Timeless": 10, "First Page": 11, "Botanical": 12, "Layers": 13}
-KOTA_MIN = 500
+KOTA_MIN = 10  # Serdar 15 Eki: Etsy kota tabani 10
 ISTEK_TAHMIN = 7
 ALAN = ["cift", "listing_id", "sonuc", "kapak_id", "video_id", "bag", "state", "istek", "not"]
 

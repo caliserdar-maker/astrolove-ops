@@ -95,7 +95,7 @@ jobs:
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
           python scripts/etsy/cl_galeri_degistir_selftest.py > /dev/null && echo "selftest PASS"
           python scripts/etsy/galeri77_yukle.py --hazir _work/HAZIR.csv --paket _paket --out _out --ilerleme _work/ILERLEME.json \
-            --confirm GALERI77 --yedek-drive "gdrive:ASTROLOVE/TEMP/GALERI_YAYIN/YEDEK" --kota-taban 150 --limit "$LIMIT"
+            --confirm GALERI77 --yedek-drive "gdrive:ASTROLOVE/TEMP/GALERI_YAYIN/YEDEK" --kota-taban 10 --limit "$LIMIT"
       - name: Token + ilerleme + rapor Drive'a
         if: ${{ always() && steps.g.outputs.n != '0' }}
         run: |

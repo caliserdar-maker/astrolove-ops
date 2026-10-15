@@ -48,7 +48,7 @@ from wp_listing_update import norm, tags_of, validate  # noqa: E402
 HERE = Path(__file__).resolve().parent
 PRICES_CSV = HERE / "pod_prices.csv"
 MAX_TITLE = 140
-QUOTA_MIN = 400
+QUOTA_MIN = 10  # Serdar 15 Eki: Etsy kota tabani 10
 QUANTITY = 999
 MAX_IMAGES = 12          # EK 3 (6 Eyl): 10 kare + 2 teknik kart
 PIX_MAX = 6.0            # geri okuma piksel esigi (gri 48x48 ortalama fark; ayni gorsel yeniden kodlanmis <= 0.09 olculdu)

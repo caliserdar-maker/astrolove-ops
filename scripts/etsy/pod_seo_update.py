@@ -312,8 +312,8 @@ def main():
                 f"{rec['pair']} | gecen {gecen / 60:.1f} dk, kalan ~{kalan_sure / 60:.1f} dk "
                 f"| kota {api.remaining}")
             if api.remaining is not None and str(api.remaining).isdigit() \
-                    and int(api.remaining) < 60:
-                durdu = f"kota {api.remaining} < 60; {i - 1}/{len(guncellenecek)} ilandan sonra DUR"
+                    and int(api.remaining) < 10:
+                durdu = f"kota {api.remaining} < 10; {i - 1}/{len(guncellenecek)} ilandan sonra DUR"
                 log(f"DUR: {durdu}")
                 break
             try:

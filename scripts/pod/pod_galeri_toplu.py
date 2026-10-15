@@ -27,7 +27,7 @@ from pod_cover_from_video import (gallery, variation_images,  # noqa: E402
 
 DRV = "gdrive:ASTROLOVE/TEMP/POD_RANK3_TO_11"
 PILOT_BITEN = "4570031205"
-KOTA_ALT = 400
+KOTA_ALT = 10  # Serdar 15 Eki: Etsy kota tabani 10
 SUTUN = ["listing_id", "cift", "durum", "rank_cagrisi", "neden", "kota", "sn"]
 T0 = time.time()
 

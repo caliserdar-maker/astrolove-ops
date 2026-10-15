@@ -33,7 +33,7 @@ SET17 = [n for n in TAM19 if n not in (5, 19)]          # 30 Eyl: WP bekleyen ci
 RENK_SIRA = {"Midnight Blue": 15, "Deep Black": 16, "Pure White": 17, "Champagne Ivory": 18, "Warm Parchment": 19}
 IMG_LIMIT = 20
 OKUMA_TEKRAR, OKUMA_BEKLE = 8, 4
-QUOTA_MIN = 150  # router rezervi (Serdar 28 Eyl)
+QUOTA_MIN = 10  # Serdar 15 Eki: Etsy kota tabani 10
 
 
 def gorsel_sil(api, shop, lid, iid):

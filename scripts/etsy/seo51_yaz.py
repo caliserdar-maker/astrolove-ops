@@ -131,7 +131,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("mod", choices=["yedek", "yaz", "geri", "ham"]); ap.add_argument("--karar"); ap.add_argument("--nitelik", default="")
     ap.add_argument("--yedek"); ap.add_argument("--out", required=True); ap.add_argument("--confirm", default="")
-    ap.add_argument("--cift", default=""); ap.add_argument("--kota-taban", type=int, default=300)
+    ap.add_argument("--cift", default=""); ap.add_argument("--kota-taban", type=int, default=10)
     a = ap.parse_args()
     k_, s_ = os.environ.get("ETSY_API_KEY", ""), os.environ.get("ETSY_SHARED_SECRET", ""); mask(k_); mask(s_)
     st = TokenStore(os.environ["TOKEN_FILE"], k_, s_)

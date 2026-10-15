@@ -438,7 +438,7 @@ def main():
     ap.add_argument("--hepsi", action="store_true", help="yaz: kalan tum ilanlar (pilot haric)")
     ap.add_argument("--atla", default=PILOT)
     ap.add_argument("--confirm", default="")
-    ap.add_argument("--kota-alt", type=int, default=400)
+    ap.add_argument("--kota-alt", type=int, default=10)
     ap.add_argument("--yalniz-envanter", action="store_true", help="yaz: metin/kisisellestirme/nitelik atlanir")
     ap.add_argument("--oncelik", default=ONCELIK, help="metin2 --hepsi: once bu sira (ilki pilot: FAIL ise durur)")
     a = ap.parse_args()

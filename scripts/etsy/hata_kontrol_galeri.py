@@ -32,7 +32,7 @@ from etsy_common import APIKeyStore, Etsy  # noqa: E402
 KOK = Path(__file__).resolve().parents[2]
 ESKI = KOK / 'pano/codex/veri/kart_seti_20260924'
 YENI = KOK / 'data/pod/cl_galeri_final19'
-KOTA_TABAN = 1500
+KOTA_TABAN = 10  # Serdar 15 Eki: Etsy kota tabani 10
 ALT_YASAK = [r'mock-?up', r'framed room', r'room mock', r'frame mock', r'on a warm stone', r'stone-gray wall']
 RENKLER = ['MB', 'DB', 'WP', 'CI', 'PW']
 

@@ -26,7 +26,7 @@ sys.path.insert(0, str(KOK / "scripts/etsy"))
 READINESS_ID = 1517641240112
 HEDEF_MIN, HEDEF_MAX = 4, 7
 ESKI, YENI = "within 5 business days", "within 7 business days"
-KOTA_TABAN = 150
+KOTA_TABAN = 10  # Serdar 15 Eki: Etsy kota tabani 10
 BEKLE, TEKRAR = 4, 4
 
 

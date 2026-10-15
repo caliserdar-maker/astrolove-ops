@@ -19,7 +19,7 @@ MATERIALS = ["matte paper", "ink"]
 FIYAT = {"Digital card 5x7": 5.0, "Digital file 8x10": 9.0, "Shipped print 8x10": 29.0}
 STYLES = ["Starlit", "Timeless", "First Page", "Layers", "Botanical"]
 P_STYLE, P_FORMAT = 513, 514
-KOTA_MIN = 500
+KOTA_MIN = 10  # Serdar 15 Eki: Etsy kota tabani 10
 ORNEK = ["CANCER_LIBRA", "LEO_LEO"]
 TIRE = re.compile("[–—]")
 

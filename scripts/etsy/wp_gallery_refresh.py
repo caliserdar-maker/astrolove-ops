@@ -56,7 +56,7 @@ CHUNK = 3               # tur basina yuklenecek/silinecek gorsel
 IMG_LIMIT = 10          # Etsy ilan basina gorsel siniri
 READBACK_WAIT = 10
 READBACK_TRIES = 4
-QUOTA_STOP = 400
+QUOTA_STOP = 10  # Serdar 15 Eki: Etsy kota tabani 10
 PIX_MAD_MAX = 6.0       # Etsy yeniden kodladigi icin bayt esitligi beklenmez
 
 

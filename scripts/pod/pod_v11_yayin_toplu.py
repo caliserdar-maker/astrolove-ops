@@ -36,7 +36,7 @@ KAYNAK = "gdrive:ASTROLOVE/TEMP/POD_V11_URETIM"
 YAYIN = "gdrive:ASTROLOVE/TEMP/POD_V11_YAYIN"
 GOLD_STATE = "gdrive:ASTROLOVE/TEMP/POD_COVER_GOLD_B_77/state.json"
 CIFT_JSON = KOK.parent / "etsy" / "seo" / "pod_changes_v2.json"
-KOTA_ALT = 400
+KOTA_ALT = 10  # Serdar 15 Eki: Etsy kota tabani 10
 SUTUN = ["listing_id", "cift", "durum", "yeni_kapak_id", "yeni_video_id",
          "silinen_kapak_id", "silinen_video_id", "neden", "kota", "sn"]
 T0 = time.time()

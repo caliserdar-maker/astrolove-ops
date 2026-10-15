@@ -350,7 +350,7 @@ def main():
     ap.add_argument("--out", default="_out/metin78")
     ap.add_argument("--katalog", default=str(KOK.parent / "etsy" / "seo" / "pod_changes_v2.json"))
     ap.add_argument("--limit", type=int, default=0)
-    ap.add_argument("--kota-alt", type=int, default=200)
+    ap.add_argument("--kota-alt", type=int, default=10)
     ap.add_argument("--ornek", default="4570143815,LEO_LEO,CAPRICORN_SAGITTARIUS")
     a = ap.parse_args()
     out = pathlib.Path(a.out)

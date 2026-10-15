@@ -18,7 +18,7 @@ on:
       confirm: {description: "yaz icin tam olarak: SIZESIRA", default: ""}
       yalniz: {description: "yalniz bu listing_id'ler (virgul)", default: ""}
       haric: {description: "dokunulmayacak listing_id'ler (virgul)", default: ""}
-      kota_taban: {description: "bu kotanin altinda temiz dur", default: "150"}
+      kota_taban: {description: "bu kotanin altinda temiz dur", default: "10"}
       fiyat99: {description: "true = ayni yazimda .99 fiyatlari asagi yuvarla (kar kapisi, Prodigi teklif)", type: boolean, default: true}
 
 jobs:

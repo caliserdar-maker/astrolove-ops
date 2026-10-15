@@ -60,7 +60,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--is-dizin", default="_work/kanit")
     ap.add_argument("--limit", type=int, default=0)
-    ap.add_argument("--kota-alt", type=int, default=150)
+    ap.add_argument("--kota-alt", type=int, default=10)
     ap.add_argument("--siparis-adet", type=int, default=20)
     a = ap.parse_args()
     isd = pathlib.Path(a.is_dizin)

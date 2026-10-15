@@ -8,7 +8,7 @@ Secilen taslak(lar) (BY78_TASLAKLAR.csv; workflow varsayilani YALNIZ CANCER_LIBR
   4) stil baglari: Layers -> rank 13 gorselinin image_id'si; Starlit/Timeless/First Page/Botanical mevcut bagda kalir (9/10/11/12 olmali)
      (updateVariationImages = POST variation-images; 5 bag birlikte gonderilir)
   5) state oku + baglari oku (Starlit=9 Timeless=10 First Page=11 Botanical=12 Layers=13)
-"active" -> aninda inactive ve TUM IS DURUR. Kota < 500 -> DUR.
+"active" -> aninda inactive ve TUM IS DURUR. Kota < 10 -> DUR.
 Cikti: <OUT>/BY78_KAPAK_BORDO.json (+ Drive).
 Ortam: ETSY_API_KEY, ETSY_SHARED_SECRET, ETSY_SHOP_ID, TOKEN_FILE, TASLAK_CSV, V3, OUT, DRIVE_OUT, CIFTLER (zorunlu)
 """
@@ -28,7 +28,7 @@ REF = 4570143815
 P_STYLE = 513
 KARE = (2400, 2400)
 BEKLENEN = {"Starlit": 9, "Timeless": 10, "First Page": 11, "Botanical": 12, "Layers": 13}
-KOTA_MIN = 500
+KOTA_MIN = 10  # Serdar 15 Eki: Etsy kota tabani 10
 
 
 class Dur(Exception):

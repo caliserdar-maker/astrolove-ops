@@ -8,7 +8,7 @@ Stil baglari: Starlit=9, Timeless=10, First Page=11, Botanical=12, Layers=1.
 Kontrol (her ilan): 13 gorsel, sira 1..13, rank 1 ve 9-13 dikey 2400x3000, 2-8 yatay 3200x2400, 9-13 yeni gorsel (id degisti),
   5 bag dogru, state draft. Ilk ilanda overwrite beklendigi gibi calismazsa (eski gorsel kaldi, sira kaydi, ekstra gorsel) DUR.
 Asamalar BY78_VITRIN.csv'de: gorsel -> bag -> tamam (tekrar kosuda kaldigi yerden; overwrite tekrar edilebilir).
-Her yazma adimindan sonra state okunur; "active" -> aninda inactive ve TUM IS DURUR. Kota < 500 -> DUR.
+Her yazma adimindan sonra state okunur; "active" -> aninda inactive ve TUM IS DURUR. Kota < 10 -> DUR.
 
 Ortam: ETSY_API_KEY, ETSY_SHARED_SECRET, ETSY_SHOP_ID, TOKEN_FILE, TASLAK_CSV, V3, OUT, DRIVE_OUT, CIFTLER (bos = hepsi)
 """
@@ -31,7 +31,7 @@ YUKLE = [(1, "01_Cover.jpg"), (9, "Style_Starlit.jpg"), (10, "Style_Timeless.jpg
 DIKEY, YATAY = (2400, 3000), (3200, 2400)
 BAG = {"Starlit": 9, "Timeless": 10, "First Page": 11, "Botanical": 12, "Layers": 1}
 ASAMA = ["", "gorsel", "bag", "tamam"]
-KOTA_MIN = 500
+KOTA_MIN = 10  # Serdar 15 Eki: Etsy kota tabani 10
 ISTEK_ILAN = 14
 ORNEK = ["CANCER_LIBRA", "LEO_LEO", "SAGITTARIUS_SAGITTARIUS"]
 

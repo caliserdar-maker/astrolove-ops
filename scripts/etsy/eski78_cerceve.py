@@ -8,7 +8,7 @@ Kagit ifadesi (Serdar NOT 1, 15 Eki; tedarikci kararina BAGLI DEGIL): PRINT bolu
   100% cotton / giclee / archival / ISO 9706 -> "Printed on premium matte art paper with long-lasting inks"; materials -> MATERIALS.
 Aciklama: onaylanan once/sonra listesi (her degisiklik tam 1 kez bulunmali, yoksa DUR). Sonuc metinde 'frame' yalniz
   "Frames shown in photos are for display only and are not included. Prints ship unframed." satirinda gecer; uzun tire yok.
-Tekrar kosu: aciklamasi zaten yeni ve envanterde cerceve yoksa ATLANIR. Ilk hatada DUR; kota < 500 DUR; ilan active degilse DUR.
+Tekrar kosu: aciklamasi zaten yeni ve envanterde cerceve yoksa ATLANIR. Ilk hatada DUR; kota < 10 DUR; ilan active degilse DUR.
 Cikti: OUT/ESKI78_CERCEVE.json + <CIFT>_ACIKLAMA_ONCE/SONRA.txt
 """
 import argparse
@@ -23,7 +23,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 KOK = Path(__file__).resolve().parents[2]
-KOTA_MIN = 500
+KOTA_MIN = 10  # Serdar 15 Eki: Etsy kota tabani 10
 P_FORMAT = 514
 ESKI_AD = "Digital File, Print or Framed?"
 YENI_AD = "Format"

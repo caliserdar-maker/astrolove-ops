@@ -38,7 +38,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from etsy_common import Etsy, TokenStore, log, mask  # noqa: E402
 from wp_mockup_common import EDITIONS  # noqa: E402
 
-QUOTA_STOP = 500  # x-remaining-today bu esigin altina inerse temiz cikis
+QUOTA_STOP = 10  # Serdar 15 Eki: Etsy kota tabani 10
 
 
 TS_RE = re.compile(r"^(\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2})(?:\.\d+)?(Z|[+-]\d{2}:?\d{2})?$")

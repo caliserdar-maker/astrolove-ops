@@ -128,7 +128,7 @@ def main():
     ap.add_argument("mod", choices=["ciftler", "cl"]); ap.add_argument("--tablo"); ap.add_argument("--yeni"); ap.add_argument("--kaynak")
     ap.add_argument("--alt"); ap.add_argument("--kapak-sec", default=""); ap.add_argument("--out", required=True)
     ap.add_argument("--yedek-drive", default=""); ap.add_argument("--confirm", default=""); ap.add_argument("--limit", type=int, default=0)
-    ap.add_argument("--kota-taban", type=int, default=300)
+    ap.add_argument("--kota-taban", type=int, default=10)
     a = ap.parse_args()
     if a.confirm != "GORSEL02": raise SystemExit("HATA: --confirm GORSEL02 gerekir.")
     k, s = os.environ.get("ETSY_API_KEY", ""), os.environ.get("ETSY_SHARED_SECRET", ""); mask(k); mask(s)

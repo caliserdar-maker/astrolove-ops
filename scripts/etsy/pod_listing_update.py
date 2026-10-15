@@ -30,7 +30,7 @@ from wp_listing_update import load_block, norm, readback, tags_of, validate  # n
 REPO_ROOT = Path(__file__).resolve().parents[2]
 TEMPLATE_MD = REPO_ROOT / "docs" / "POD_LISTING_TEMPLATE.md"
 MAX_TAG = 20
-QUOTA_MIN = 400
+QUOTA_MIN = 10  # Serdar 15 Eki: Etsy kota tabani 10
 
 TAGS_EN = ["zodiac wall art", "{pair}", "couple compatibility", "astrology wall art",
            "zodiac couple gift", "anniversary gift", "star sign poster", "couples wall decor",

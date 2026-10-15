@@ -5,7 +5,7 @@ Her taslak (BY78_TASLAKLAR.csv) icin:
   state oku (draft degilse DUR) -> rank 1 gorseli zaten 2400x3000 poster mi? degilse uploadListingImage rank=1 overwrite=true
   (silme izni listings_d token'da yok; overwrite ayni sirayi degistirir) -> gorselleri oku (13 adet, rank 1 = 2400x3000)
   -> stil bag(lar)i oku (Starlit=9 ... Botanical=13); bozuksa yeniden bagla -> state oku.
-  "active" -> aninda inactive ve TUM IS DURUR. Kota < 500 -> DUR.
+  "active" -> aninda inactive ve TUM IS DURUR. Kota < 10 -> DUR.
 Cikti: <OUT>/BY78_KAPAK_DEGIS.csv + BY78_KAPAK_RAPOR.json (Drive'a her ilandan sonra).
 
 Ortam: ETSY_API_KEY, ETSY_SHARED_SECRET, ETSY_SHOP_ID, TOKEN_FILE, TASLAK_CSV, V3, OUT, DRIVE_OUT, CIFTLER (bos = hepsi)
@@ -25,7 +25,7 @@ from etsy_common import Etsy, TokenStore, mask  # noqa: E402
 REF = 4570143815
 P_STYLE = 513
 STIL_GORSEL = {"Starlit": 9, "Timeless": 10, "First Page": 11, "Layers": 12, "Botanical": 13}
-KOTA_MIN = 500
+KOTA_MIN = 10  # Serdar 15 Eki: Etsy kota tabani 10
 ISTEK_ILAN = 7
 ORNEK = ["CANCER_LIBRA", "LEO_LEO", "SAGITTARIUS_SAGITTARIUS"]
 

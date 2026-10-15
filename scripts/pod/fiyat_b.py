@@ -157,7 +157,7 @@ def main():
     ap.add_argument("--listing", required=True)
     ap.add_argument("--out", default="_out/fiyat_b")
     ap.add_argument("--beklenen-urun", type=int, default=80)
-    ap.add_argument("--kota-alt", type=int, default=200)
+    ap.add_argument("--kota-alt", type=int, default=10)
     ap.add_argument("--confirm", default="")
     ap.add_argument("--izinli-boy", default="", help="virgullu; yalniz bu boylar (5 renk) degisebilir, fazlasi/eksigi KAPI")
     ap.add_argument("--yalniz-active", action="store_true", help="ilan state active degilse yazma (cikis 3)")
