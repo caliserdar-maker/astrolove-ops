@@ -7,6 +7,7 @@ name: video-kapak-basa
 # mod ornek : cift= (virgulle) -> Drive TEMP/VIDEO_V9_20261012/KAPAKLI_ORNEK2/ (video + 0 / 0.5 / 0.8 / 1.2 sn kareleri + QC json).
 # mod hepsi : 78 video, parca= paralel is (matrix) -> TEMP/VIDEO_V9_20261012/FINAL_KAPAKLI/ + KAPAKLI_QC.csv + KONTAK_0sn.jpg.
 #             FINAL/ ve KAPAK/ DEGISMEZ. Ozet isi: 78 QC json, hepsi PASS mi.
+# mod ozet  : yalniz ozet isi (FINAL_KAPAKLI'daki QC json'lardan 78/78 tablo), video islenmez.
 # Metricool'a / platformlara YAZMA YOK.
 
 permissions:
@@ -17,7 +18,7 @@ on:
     inputs:
       mod:
         type: choice
-        options: [ornek, hepsi]
+        options: [ornek, hepsi, ozet]
         default: ornek
       cift:
         description: 'ornek: dosya on eki (ornek capricorn-and-libra), virgulle'
@@ -43,7 +44,10 @@ jobs:
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
         run: |
           set -euo pipefail
-          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+          # rclone.org kurulum betigi 15 Eki'de baglantiyi kesti (38708902325 ozet): 3 deneme, sonra apt paketi
+          for d in 1 2 3; do curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1; command -v rclone >/dev/null && break; sleep $((d * 10)); done
+          command -v rclone >/dev/null || { sudo apt-get -qq update >/dev/null; sudo apt-get install -y -qq rclone >/dev/null; }
+          rclone version | head -1
           mkdir -p ~/.config/rclone; umask 077
           printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
           if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
@@ -56,6 +60,10 @@ jobs:
           PARCA: ${{ inputs.parca }}
         run: |
           set -euo pipefail
+          if [ "$MOD" = ozet ]; then
+            echo "hedef=$D/FINAL_KAPAKLI" >> "$GITHUB_OUTPUT"; echo 'matrix={"include":[{"no":0,"ciftler":""}]}' >> "$GITHUB_OUTPUT"
+            rm -rf ~/.config/rclone; exit 0
+          fi
           if [ "$MOD" = hepsi ]; then
             rclone lsf "$D/FINAL" --files-only --include "*-astroloveart-reel.mp4" | sed 's/-astroloveart-reel\.mp4$//' | sort > liste.txt
             rclone lsf "$D/KAPAK" --files-only --include "*-astroloveart-kapak.jpg" | sed 's/-astroloveart-kapak\.jpg$//' | sort > kapak.txt
@@ -76,6 +84,7 @@ jobs:
 
   isle:
     needs: hazirla
+    if: ${{ inputs.mod != 'ozet' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:
@@ -96,7 +105,10 @@ jobs:
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
         run: |
           set -euo pipefail
-          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+          # rclone.org kurulum betigi 15 Eki'de baglantiyi kesti (38708902325 ozet): 3 deneme, sonra apt paketi
+          for d in 1 2 3; do curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1; command -v rclone >/dev/null && break; sleep $((d * 10)); done
+          command -v rclone >/dev/null || { sudo apt-get -qq update >/dev/null; sudo apt-get install -y -qq rclone >/dev/null; }
+          rclone version | head -1
           mkdir -p ~/.config/rclone; umask 077
           printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
           if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
@@ -153,7 +165,10 @@ jobs:
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
         run: |
           set -euo pipefail
-          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+          # rclone.org kurulum betigi 15 Eki'de baglantiyi kesti (38708902325 ozet): 3 deneme, sonra apt paketi
+          for d in 1 2 3; do curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1; command -v rclone >/dev/null && break; sleep $((d * 10)); done
+          command -v rclone >/dev/null || { sudo apt-get -qq update >/dev/null; sudo apt-get install -y -qq rclone >/dev/null; }
+          rclone version | head -1
           mkdir -p ~/.config/rclone; umask 077
           printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
           if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
@@ -173,7 +188,7 @@ jobs:
           with open('_q/KAPAKLI_QC.csv', 'w', newline='') as f:
               w = csv.DictWriter(f, alan, extrasaction='ignore'); w.writeheader(); [w.writerow(x) for x in q]
           ok = [x for x in q if x['sonuc'] == 'PASS']
-          beklenen = 78 if os.environ['MOD'] == 'hepsi' else max(1, len(q))
+          beklenen = 78 if os.environ['MOD'] in ('hepsi', 'ozet') else max(1, len(q))
           def ar(k):
               v = [x[k] for x in q if isinstance(x.get(k), (int, float))]
               return f'{min(v)} / {max(v)}' if v else '-'
