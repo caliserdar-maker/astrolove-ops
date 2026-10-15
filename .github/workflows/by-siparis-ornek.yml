@@ -20,6 +20,9 @@ on:
       format: { description: "poster 8x10 | kart 5x7 | ikisi", type: choice, options: [poster, kart, ikisi], default: ikisi }
 permissions:
   contents: read
+concurrency:            # ayni anda tek kosu (14 Eki: paralel iki kosu ayni Drive klasorunu iki kez acti); iptal yok, sira
+  group: by-siparis
+  cancel-in-progress: false
 jobs:
   uret:
     runs-on: ubuntu-latest
