@@ -10,15 +10,25 @@ permissions:
 
 on:
   workflow_dispatch:
+    inputs:
+      cikti:
+        description: "Cikti dosya adi (TEMP altina). Varsayilan 14 Eki temel kaydi; yeni okumada tarihli ad ver, temeli ezme."
+        required: false
+        default: TRAFIK_ONCESI_20261014.csv
 
 jobs:
   oku:
     runs-on: ubuntu-latest
     timeout-minutes: 140
     env:
-      CIKTI: TRAFIK_ONCESI_20261014.csv
+      CIKTI: ${{ inputs.cikti || 'TRAFIK_ONCESI_20261014.csv' }}
     steps:
       - uses: actions/checkout@v4
+      - name: Cikti adi kontrolu (temel kaydi ezme)
+        run: |
+          set -euo pipefail
+          case "$CIKTI" in TRAFIK_*.csv) ;; *) echo "::error::cikti TRAFIK_*.csv olmali"; exit 1;; esac
+          echo "cikti: $CIKTI"
       - name: Etsy kilidi (sira bekle, iptal yok)
         env:
           GH_TOKEN: ${{ github.token }}
