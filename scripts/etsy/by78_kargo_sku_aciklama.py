@@ -13,7 +13,7 @@ Aciklama: ABOUT OUR DESIGNS bolumu silinir; FORMATS Shipped print satiri ve DELI
   Denetim: 'frame' YOK, uzun/orta tire YOK, tedarikci adi YOK; degisiklik disinda metin ayni.
 --adim eski_kargo : eski 78 poster profili 314711751541'e CA 0, everywhere else 12, TR 18, IL 18, NO 14 (Serdar 15 Eki).
                 KAPI: BY 78'in hicbiri o profilde degilse; once yedek, sonra mevcut hedefler birebir ayni kalmali. Istek ~8.
-Guvenlik: yalniz listelenen uclar (Kilitli); ilan active degilse DUR; kota < 500 DUR.
+Guvenlik: yalniz listelenen uclar (Kilitli); ilan active degilse DUR; kota < 10 DUR (Serdar 15 Eki: taban 10).
 Cikti: OUT/BY_KSA_<adim>.json (+ ONCE/SONRA aciklama .txt). Ortam: ETSY_*, TOKEN_FILE, TASLAK_CSV.
 """
 import argparse
@@ -27,7 +27,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-KOTA_MIN = 500
+KOTA_MIN = 10  # Serdar 15 Eki: Etsy kota tabani 10
 ESKI_PROFIL = 314711751541
 PROFIL_AD = "BY Print 8x10 Worldwide"
 ORIGIN_ZIP = "28216"
