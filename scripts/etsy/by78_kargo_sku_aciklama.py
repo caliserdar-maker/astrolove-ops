@@ -3,12 +3,16 @@
 --adim profil : YENI kargo profili "BY Print 8x10 Worldwide" (ayni adla varsa olusturmaz, eksik hedefleri ekler):
                 US 0 (3-8 gun), eu 0 (5-12), GB 0 (5-10), AU 5 (5-10), everywhere else 12 (7-21; 6 Eyl Mo kurali).
                 Cikis US 28216. Eski poster profili 314711751541'e DOKUNULMAZ. Istek ~7.
---adim ilan --ciftler "CANCER_LIBRA ..." --profil ID :
+--adim ilan --ciftler "CANCER_LIBRA ..." | HEPSI --profil ID :
                 ilan basina: envanter GET -> stil-gorsel baglari GET (once) -> envanter PUT (SKU, sku_on_property [513,514];
                 fiyat/stok/readiness/deger id'leri AYNI; price_on_property da [513,514] olur, fiyatlar ayni) -> updateListing PATCH yalniz {description, shipping_profile_id}
                 -> stil-gorsel baglari GET (sonra, once ile ayni olmali). Yanitlarla dogrulama; ilk hatada DUR.
+Tekrar kosu: aciklamasi ve profili zaten yeni olan ilan ATLANIR. Stil-gorsel bag okumasi ilk ilanda ve her 10. ilanda
+(digerlerinde PUT yaniti deger id esitligi yeterli; CL 15 Eki: PUT baglari bozmadi). ETA satiri her ilanda.
 Aciklama: ABOUT OUR DESIGNS bolumu silinir; FORMATS Shipped print satiri ve DELIVERY Shipped satiri degisir; RETURNS eklenir.
   Denetim: 'frame' YOK, uzun/orta tire YOK, tedarikci adi YOK; degisiklik disinda metin ayni.
+--adim eski_kargo : eski 78 poster profili 314711751541'e CA 0, everywhere else 12, TR 18, IL 18, NO 14 (Serdar 15 Eki).
+                KAPI: BY 78'in hicbiri o profilde degilse; once yedek, sonra mevcut hedefler birebir ayni kalmali. Istek ~8.
 Guvenlik: yalniz listelenen uclar (Kilitli); ilan active degilse DUR; kota < 500 DUR.
 Cikti: OUT/BY_KSA_<adim>.json (+ ONCE/SONRA aciklama .txt). Ortam: ETSY_*, TOKEN_FILE, TASLAK_CSV.
 """
@@ -178,12 +182,63 @@ def profil_adimi(api, shop, R):
     return pid
 
 
+# Eski 78 poster profili dunya kargosu (Serdar karari 15 Eki): CA 0, everywhere else 12, TR 18, IL 18, NO 14 (AU 0 zaten var).
+# Teslim: CA 5-10 (6 Eyl Mo kurali), digerleri 7-21 (6 Eyl Mo kurali, everywhere else).
+ESKI_EK = [("CA", "country", "CA", 0, 5, 10), ("EVERYWHERE", "region", "none", 12, 7, 21), ("TR", "country", "TR", 18, 7, 21),
+           ("IL", "country", "IL", 18, 7, 21), ("NO", "country", "NO", 14, 7, 21)]
+
+
+def eski_kargo_adimi(api, shop, taslak, R, out):
+    """KAPI: BY 78 ilanin HICBIRI eski profilde olmamali (once BY 77 tasinir). Yedek -> eksik hedefleri ekle -> geri okuma:
+    mevcut hedefler birebir ayni, yeni hedefler beklenen."""
+    api.izin = [("POST", rf"^/shops/{shop}/shipping-profiles/{ESKI_PROFIL}/destinations$")]
+    ids = [r["listing_id"] for r in csv.DictReader(open(taslak)) if r.get("listing_id")]
+    by = []
+    for i in range(0, len(ids), 100):
+        by += (api.get("/listings/batch", params={"listing_ids": ",".join(ids[i:i + 100])}) or {}).get("results") or []
+    kota(api)
+    eskide = [x["listing_id"] for x in by if x.get("shipping_profile_id") == ESKI_PROFIL]
+    R["by_eski_profilde"] = eskide
+    if len(by) != len(ids) or eskide:
+        raise Dur(f"KAPI: BY ilan okundu {len(by)}/{len(ids)}; eski profilde kalan {len(eskide)}")
+
+    def anahtar(x):
+        cc = (x.get("destination_country_iso") or "").upper()
+        rg = (x.get("destination_region") or "none").lower()
+        return cc if cc else ("EVERYWHERE" if rg == "none" else rg.upper())
+
+    def imza(P):
+        return {anahtar(x): (para(x.get("primary_cost")), para(x.get("secondary_cost")), x.get("min_delivery_days"), x.get("max_delivery_days"))
+                for x in P.get("shipping_profile_destinations") or []}
+    P0 = api.get(f"/shops/{shop}/shipping-profiles/{ESKI_PROFIL}") or {}
+    (out / "ESKI_PROFIL_YEDEK.json").write_text(json.dumps(P0, indent=1, ensure_ascii=False), encoding="utf-8")
+    i0 = imza(P0)
+    R["once"] = i0
+    for key, tur, kod, ucret, dmin, dmax in ESKI_EK:
+        if key in i0:
+            continue
+        body = {"primary_cost": ucret, "secondary_cost": ucret, "min_delivery_days": dmin, "max_delivery_days": dmax}
+        body["destination_country_iso" if tur == "country" else "destination_region"] = kod
+        api.post(f"/shops/{shop}/shipping-profiles/{ESKI_PROFIL}/destinations", body)
+        R["olaylar"].append(f"eski profile hedef eklendi {key} {ucret} USD {dmin}-{dmax}")
+        kota(api)
+    i1 = imza(api.get(f"/shops/{shop}/shipping-profiles/{ESKI_PROFIL}") or {})
+    R["sonra"] = i1
+    bek = dict(i0)
+    bek.update({k: (float(u), float(u), a, b) for k, _, _, u, a, b in ESKI_EK if k not in i0})
+    if i1 != bek:
+        raise Dur(f"eski profil beklenen degil: {i1} != {bek}")
+    print(f"::warning::ESKI PROFIL PASS {ESKI_PROFIL} | {i1}")
+
+
 def ilan_adimi(api, shop, ciftler, pid, taslak, R, out):
     if not pid:
         raise Dur("--profil gerekli")
     if int(pid) == ESKI_PROFIL:
         raise Dur("eski poster profili BY icin kullanilamaz")
     rows = {r["cift"]: r for r in csv.DictReader(open(taslak)) if r.get("listing_id")}
+    if ciftler == ["HEPSI"]:
+        ciftler = sorted(rows)
     eksik = [c for c in ciftler if c not in rows]
     if eksik:
         raise Dur(f"taslak listesinde yok: {eksik}")
@@ -194,19 +249,26 @@ def ilan_adimi(api, shop, ciftler, pid, taslak, R, out):
         for x in (api.get("/listings/batch", params={"listing_ids": ",".join(ids[i:i + 100])}) or {}).get("results") or []:
             L[str(x["listing_id"])] = x
     kota(api)
-    for c in ciftler:
+    import time
+    t0, n_is = time.time(), 0
+    for i, c in enumerate(ciftler, 1):
         lid = str(rows[c]["listing_id"])
         x = L.get(lid) or {}
         K = R["ilan"][c] = {"listing_id": lid, "link": f"https://www.etsy.com/listing/{lid}"}
         if x.get("state") != "active" or str(x.get("shop_id")) != str(shop):
             raise Dur(f"{c}: state {x.get('state')} shop {x.get('shop_id')}")
         d0 = html.unescape(x.get("description") or "")
+        if "RETURNS" in d0 and str(x.get("shipping_profile_id")) == str(pid) and "ABOUT OUR DESIGNS" not in d0:
+            K["sonuc"] = "ATLANDI_ZATEN_YAPILDI"       # tekrar kosuda yazilmaz (CL 15 Eki)
+            continue
         d1 = yeni_aciklama(d0)
+        n_is += 1
+        bag_kontrol = n_is == 1 or n_is % 10 == 0 or len(ciftler) == 1   # hafif: ilk + her 10.; digerlerinde deger id esitligi
         (out / f"{c}_ACIKLAMA_ONCE.txt").write_text(d0, encoding="utf-8")
         (out / f"{c}_ACIKLAMA_SONRA.txt").write_text(d1, encoding="utf-8")
 
         inv = api.get(f"/listings/{lid}/inventory") or {}
-        vi0 = (api.get(f"/shops/{shop}/listings/{lid}/variation-images") or {}).get("results") or []
+        vi0 = ((api.get(f"/shops/{shop}/listings/{lid}/variation-images") or {}).get("results") or []) if bag_kontrol else []
         bag0 = sorted((v.get("property_id"), v.get("value_id"), v.get("image_id")) for v in vi0)
         prods, once = [], {}
         for p in inv.get("products") or []:
@@ -253,18 +315,24 @@ def ilan_adimi(api, shop, ciftler, pid, taslak, R, out):
             raise Dur(f"{c}: aciklama yanitla eslesmiyor")
         if (y.get("title"), y.get("tags")) != (x.get("title"), x.get("tags")):
             raise Dur(f"{c}: baslik/etiket degisti")
-        vi1 = (api.get(f"/shops/{shop}/listings/{lid}/variation-images") or {}).get("results") or []
-        bag1 = sorted((v.get("property_id"), v.get("value_id"), v.get("image_id")) for v in vi1)
-        K["stil_gorsel_bag"] = dict(once=len(bag0), sonra=len(bag1), ayni=bag0 == bag1)
-        if bag0 != bag1 or len(bag1) != 5:
-            raise Dur(f"{c}: stil-gorsel baglari degisti/eksik {bag0} -> {bag1}")
+        if bag_kontrol:
+            vi1 = (api.get(f"/shops/{shop}/listings/{lid}/variation-images") or {}).get("results") or []
+            bag1 = sorted((v.get("property_id"), v.get("value_id"), v.get("image_id")) for v in vi1)
+            K["stil_gorsel_bag"] = dict(once=len(bag0), sonra=len(bag1), ayni=bag0 == bag1)
+            if bag0 != bag1 or len(bag1) != 5:
+                raise Dur(f"{c}: stil-gorsel baglari degisti/eksik {bag0} -> {bag1}")
         K["sonuc"] = "PASS"
-        print(f"::warning::{c} {lid} PASS | SKU {len(skular)} | profil {pid} | bag 5 ayni | {K['link']}")
+        g = time.time() - t0
+        print(f"[{i}/{len(ciftler)}] {c} {lid} PASS | SKU {len(skular)} | bag {'5 ayni' if bag_kontrol else 'deger id ayni'} | "
+              f"gecen {g:.0f}s | kalan ~{g / i * (len(ciftler) - i):.0f}s | %{i / len(ciftler) * 100:.0f} | kota {api.remaining}", flush=True)
+    n_pass = sum(1 for v in R["ilan"].values() if v.get("sonuc") == "PASS")
+    n_atla = sum(1 for v in R["ilan"].values() if v.get("sonuc") == "ATLANDI_ZATEN_YAPILDI")
+    print(f"::warning::ILAN PASS {n_pass} | atlandi {n_atla} | toplam {len(ciftler)} | profil {pid}")
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--adim", required=True, choices=["profil", "ilan"])
+    ap.add_argument("--adim", required=True, choices=["profil", "ilan", "eski_kargo"])
     ap.add_argument("--ciftler", default="")
     ap.add_argument("--profil", default="")
     ap.add_argument("--out", default="_out")
@@ -283,6 +351,8 @@ def main():
         if a.adim == "profil":
             profil_adimi(api, shop, R)
             print(f"::warning::PROFIL PASS {R['profil_id']} | {R['profil']['hedefler']}")
+        elif a.adim == "eski_kargo":
+            eski_kargo_adimi(api, shop, os.environ["TASLAK_CSV"], R, out)
         else:
             ilan_adimi(api, shop, a.ciftler.split(), a.profil, os.environ["TASLAK_CSV"], R, out)
     except Dur as e:

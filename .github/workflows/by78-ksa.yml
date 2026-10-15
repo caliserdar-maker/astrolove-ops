@@ -8,9 +8,9 @@ on:
   workflow_dispatch:
     inputs:
       adim:
-        description: "profil | ilan"
+        description: "profil | ilan | eski_kargo"
         type: choice
-        options: [profil, ilan]
+        options: [profil, ilan, eski_kargo]
         default: profil
       ciftler:
         description: "ilan adimi: bosluklu cift listesi (ornek CANCER_LIBRA)"
