@@ -25,7 +25,7 @@ from PIL import Image
 AGLAR = ('instagram', 'facebook', 'tiktok', 'youtube', 'threads')
 TZ = 'Europe/Istanbul'
 ESIK = 12          # ortalama mutlak gri fark; altinda "benzer"
-SIYAH = 20         # parlaklik ortalamasi; altinda "siyah"
+SIYAH_MUTLAK = 3   # parlaklik ortalamasi; altinda referanstan bagimsiz "siyah" (ilk kare 0.0)
 KARELER = [0, 0.04, 0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 BURCLAR = ('aries', 'taurus', 'gemini', 'cancer', 'leo', 'virgo', 'libra', 'scorpio', 'sagittarius',
            'capricorn', 'aquarius', 'pisces')
@@ -115,7 +115,9 @@ def kimlikler(link):
     """Herkese acik linkten eslestirme parcalari (yol bolumleri, >= 6 karakter)."""
     p = urllib.parse.urlparse(link or '')
     parca = [x for x in re.split(r'[/?=&]', p.path + '?' + p.query) if len(x) >= 6]
-    return [x for x in parca if x.lower() not in ('reel', 'reels', 'videos', 'shorts', 'watch', 'permalink.php')]
+    # hesap adi (@astroloveart) her kayitta gecer -> kimlik degil (15 Eki: TikTok yanlis eslesme)
+    return [x for x in parca if not x.startswith('@')
+            and x.lower() not in ('reel', 'reels', 'video', 'videos', 'shorts', 'watch', 'permalink.php', 'astroloveart')]
 
 
 def eslestir(recs, post_zaman, link):
@@ -200,13 +202,18 @@ def fark(a, b):
 
 
 def sinifla(d):
-    if 'fark_bizim_kapak' in d and d['fark_bizim_kapak'] < ESIK and d['fark_bizim_kapak'] <= d.get('en_yakin_kare_fark', 999):
-        return 'bizim kapak'
-    if d['parlaklik'] < SIYAH:
+    """En yakin referans kazanir (bizim kapak da koyu: 15 Eki olcumu parlaklik 10-15; mutlak parlaklik esigi yanilir).
+    siyah = en yakin referans videonun ilk karesi (0 sn, parlaklik 0) ya da gorsel neredeyse tamamen siyah."""
+    if d['parlaklik'] < SIYAH_MUTLAK:
         return 'siyah'
-    if d.get('en_yakin_kare_fark', 999) < ESIK:
-        return f"videodan kare (~{d['en_yakin_kare_sn']} sn)"
-    return 'belirsiz (hicbir referansa benzemiyor)'
+    aday = {}
+    if 'fark_bizim_kapak' in d:
+        aday['bizim kapak'] = d['fark_bizim_kapak']
+    if 'en_yakin_kare_sn' in d:
+        aday['siyah' if d['en_yakin_kare_sn'] <= 0.04 else f"videodan kare (~{d['en_yakin_kare_sn']} sn)"] = d['en_yakin_kare_fark']
+    if not aday or min(aday.values()) >= ESIK:
+        return 'belirsiz (hicbir referansa benzemiyor)'
+    return min(aday, key=aday.get)
 
 
 def cift_bul(p):
@@ -414,7 +421,7 @@ def main():
             for k in d['kaynaklar']:
                 print('   ', json.dumps(k, ensure_ascii=False), flush=True)
 
-    json.dump({'okuma': simdi.strftime('%Y-%m-%dT%H:%M'), 'esik_benzer': ESIK, 'esik_siyah': SIYAH, 'gonderiler': sonuc},
+    json.dump({'okuma': simdi.strftime('%Y-%m-%dT%H:%M'), 'esik_benzer': ESIK, 'esik_siyah_mutlak': SIYAH_MUTLAK, 'gonderiler': sonuc},
               open(os.path.join(o.cikti, 'SOSYAL_KAPAK_OLCUM.json'), 'w'), ensure_ascii=False, indent=1)
     alanlar = ['platform', 'gonderi', 'saat', 'cift', 'link', 'gosterilen_kapak', 'kaynak', 'parlaklik', 'fark_bizim_kapak',
                'fark_ilk_kare', 'fark_8sn', 'en_yakin_kare_sn', 'en_yakin_kare_fark', 'bizim_kapak_parlaklik',
