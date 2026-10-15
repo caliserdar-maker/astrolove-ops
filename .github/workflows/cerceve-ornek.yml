@@ -1,0 +1,39 @@
+name: cerceve-ornek
+# "Frame not included" etiket ornegi (15 Eki 2026, Serdar). Etsy YOK; yalniz yerel uretim + Drive TEMP/CERCEVE_KALDIR_20261015/.
+permissions:
+  contents: read
+on:
+  workflow_dispatch: {}
+jobs:
+  ornek:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q numpy pillow
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          mkdir -p _font _out
+          curl -fsSL -o "_font/Montserrat[wght].ttf" "https://raw.githubusercontent.com/google/fonts/main/ofl/montserrat/Montserrat%5Bwght%5D.ttf"
+      - name: Etiket ornekleri (kapak + yatak sahnesi)
+        run: |
+          set -euo pipefail
+          python3 scripts/pod/cerceve_etiket.py data/pod/cl_galeri_final19/01_kapak.jpg _out/ORNEK_CL_r01_kapak_FrameNotIncluded.jpg _font | tee _out/ETIKET_QC.txt
+          python3 scripts/pod/cerceve_etiket.py data/pod/cl_galeri_final19/09_yatak_sahne.jpg _out/ORNEK_CL_r08_yatak_FrameNotIncluded.jpg _font | tee -a _out/ETIKET_QC.txt
+          [ "$(grep -c '^PASS$' _out/ETIKET_QC.txt)" = "2" ]
+      - name: rclone.conf + Drive
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            export RCLONE_CONFIG_GDRIVE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET"; fi
+          rclone copy _out "gdrive:ASTROLOVE/TEMP/CERCEVE_KALDIR_20261015" -q && echo "Drive: TEMP/CERCEVE_KALDIR_20261015/"
+          rm -rf ~/.config/rclone
