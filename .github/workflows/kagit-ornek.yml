@@ -14,11 +14,20 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: |
+      - name: Paketler
+        run: |
           set -euo pipefail
           pip install -q numpy==2.1.3 pillow==11.0.0 scipy==1.14.1
+          sudo apt-get update -qq
           sudo apt-get install -y -qq tesseract-ocr >/dev/null
-          (curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null) || sudo apt-get install -y -qq rclone >/dev/null
+          tesseract --version | head -1
+      - name: rclone kur
+        run: |
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || { echo "rclone.org erisilemedi, apt"; sudo apt-get install -y -qq rclone >/dev/null; }
+          rclone version | head -1
+      - name: Fontlar + duvar
+        run: |
+          set -euo pipefail
           mkdir -p _out fonts
           base=https://raw.githubusercontent.com/google/fonts/main/ofl
           curl -fsSL "$base/ebgaramond/EBGaramond%5Bwght%5D.ttf" -o 'fonts/EBGaramond[wght].ttf'
