@@ -231,6 +231,56 @@ def eski_kargo_adimi(api, shop, taslak, R, out):
     print(f"::warning::ESKI PROFIL PASS {ESKI_PROFIL} | {i1}")
 
 
+def kontrol_adimi(api, shop, pid, taslak, R, out):
+    """SALT OKUMA: 78/78 toplu (1 istek) + yeni profil + eski profil + 3 ornek envanter SKU. ~6 istek."""
+    api.izin = []
+    rows = [r for r in csv.DictReader(open(taslak)) if r.get("listing_id")]
+    L = {}
+    ids = [str(r["listing_id"]) for r in rows]
+    for i in range(0, len(ids), 100):
+        for x in (api.get("/listings/batch", params={"listing_ids": ",".join(ids[i:i + 100])}) or {}).get("results") or []:
+            L[str(x["listing_id"])] = x
+    sorun = {}
+    for r in rows:
+        x = L.get(str(r["listing_id"])) or {}
+        d = html.unescape(x.get("description") or "")
+        n = []
+        if x.get("state") != "active":
+            n.append(f"state {x.get('state')}")
+        if str(x.get("shipping_profile_id")) != str(pid):
+            n.append(f"profil {x.get('shipping_profile_id')}")
+        if "ABOUT OUR DESIGNS" in d or "RETURNS" not in d or YENI_SHIP_FMT not in d or YENI_DELIV not in d:
+            n.append("aciklama")
+        for rx, ad in YASAK:
+            if rx.search(d):
+                n.append(ad)
+        if n:
+            sorun[r["cift"]] = n
+    R["toplu"] = dict(okunan=len(L), toplam=len(rows), sorunlu=sorun)
+    profiller = {}
+    for p_ in (pid, ESKI_PROFIL):
+        P = api.get(f"/shops/{shop}/shipping-profiles/{p_}") or {}
+        profiller[str(p_)] = {((x.get("destination_country_iso") or "") or (x.get("destination_region") or "")): (
+            para(x.get("primary_cost")), x.get("min_delivery_days"), x.get("max_delivery_days")) for x in P.get("shipping_profile_destinations") or []}
+    R["profiller"] = profiller
+    orn = {}
+    for c in ("CANCER_LIBRA", "LEO_LEO", "SAGITTARIUS_SCORPIO"):
+        r = next((r for r in rows if r["cift"] == c), None)
+        if not r:
+            continue
+        inv = api.get(f"/listings/{r['listing_id']}/inventory") or {}
+        sk = [p.get("sku") for p in inv.get("products") or []]
+        orn[c] = dict(urun=len(sk), sku_dolu=sum(1 for s_ in sk if s_), dogru=sum(1 for p in inv.get("products") or []
+                      if p.get("sku") == sku(c, *[{v["property_id"]: v["values"][0] for v in p.get("property_values") or []}[k] for k in (P_STYLE, P_FORMAT)])),
+                      sku_on=inv.get("sku_on_property"))
+    R["ornek_envanter"] = orn
+    ok = not sorun and len(L) == len(rows) and all(v["dogru"] == 15 for v in orn.values())
+    print(f"::warning::KONTROL {'PASS' if ok else 'FAIL'} | {len(rows) - len(sorun)}/{len(rows)} temiz | sorunlu {list(sorun)[:10]} | "
+          f"ornek SKU {[(k, v['dogru']) for k, v in orn.items()]} | profiller {profiller}")
+    if not ok:
+        raise Dur("toplu kontrol FAIL")
+
+
 def ilan_adimi(api, shop, ciftler, pid, taslak, R, out):
     if not pid:
         raise Dur("--profil gerekli")
@@ -332,7 +382,7 @@ def ilan_adimi(api, shop, ciftler, pid, taslak, R, out):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--adim", required=True, choices=["profil", "ilan", "eski_kargo"])
+    ap.add_argument("--adim", required=True, choices=["profil", "ilan", "eski_kargo", "kontrol"])
     ap.add_argument("--ciftler", default="")
     ap.add_argument("--profil", default="")
     ap.add_argument("--out", default="_out")
@@ -351,6 +401,8 @@ def main():
         if a.adim == "profil":
             profil_adimi(api, shop, R)
             print(f"::warning::PROFIL PASS {R['profil_id']} | {R['profil']['hedefler']}")
+        elif a.adim == "kontrol":
+            kontrol_adimi(api, shop, a.profil, os.environ["TASLAK_CSV"], R, out)
         elif a.adim == "eski_kargo":
             eski_kargo_adimi(api, shop, os.environ["TASLAK_CSV"], R, out)
         else:

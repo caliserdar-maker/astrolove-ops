@@ -8,9 +8,9 @@ on:
   workflow_dispatch:
     inputs:
       adim:
-        description: "profil | ilan | eski_kargo"
+        description: "profil | ilan | eski_kargo | kontrol (salt okuma)"
         type: choice
-        options: [profil, ilan, eski_kargo]
+        options: [profil, ilan, eski_kargo, kontrol]
         default: profil
       ciftler:
         description: "ilan adimi: bosluklu cift listesi (ornek CANCER_LIBRA)"
@@ -40,7 +40,7 @@ jobs:
       - run: |
           set -euo pipefail
           pip install -q requests==2.34.2
-          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || { echo "rclone.org erisilemedi, apt"; sudo apt-get install -y -qq rclone >/dev/null; }
       - name: rclone.conf olustur
         env:
           RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
