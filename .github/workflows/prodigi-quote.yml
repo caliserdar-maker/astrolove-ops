@@ -25,7 +25,7 @@ on:
       mode:
         description: "pilot = pilot_skus.csv (US) | hpr_sizes = hpr_sizes.txt (US + DE) | ship_everywhere = 8 ulke Standard kargo (18x24) | inserts = branded insert fiyat/ozellik (8 tip, US + DE) | maliyet_api = 16 HPR boy x 7 ulke Budget/Standard + net (DIJITAL_78) | ekstra_tesis = kartpostal/sticker: canli siparis tesis + fatura kalemi (yalniz GET) + ECB kuru | hesap_oku = hesap ayari/adres ucu var mi (yalniz GET) | canli_guvenli_test = TEK canli sahte siparis + HEMEN iptal (Serdar onayi 25 Eyl; Pause indefinitely acik) | siparis_oku = skus alanindaki 'order_id,merchantReference' siparisini yalniz GET ile bul | arastir_0006 = dokuman alintisi + siparis GET + insert link bicimi kontrolu (salt okuma)"
         type: choice
-        options: [pilot, dunya_8x10, cerceve_katalog, cerceve_renk, cerceve_alu, hpr_sizes, ship_everywhere, inserts, maliyet_api, ekstra_tesis, hesap_oku, canli_guvenli_test, siparis_oku, arastir_0006]
+        options: [pilot, dunya_8x10, dunya_boy, cerceve_katalog, cerceve_renk, cerceve_alu, hpr_sizes, ship_everywhere, inserts, maliyet_api, ekstra_tesis, hesap_oku, canli_guvenli_test, siparis_oku, arastir_0006]
         default: pilot
 
 concurrency:
@@ -152,6 +152,12 @@ jobs:
             cat out/PRODIGI_MALIYET_API_OZET.md >> "$GITHUB_STEP_SUMMARY"
             rclone copy out "gdrive:ASTROLOVE/TEMP/DIJITAL_78" --include "PRODIGI_MALIYET_API*" -q
             rclone copy out/raw "gdrive:ASTROLOVE/TEMP/DIJITAL_78/PRODIGI_MALIYET_API_RAW" -q
+            exit 0
+          fi
+          if [ "$MODE" = "dunya_boy" ]; then
+            python scripts/prodigi/prodigi_dunya_boy.py --out-dir out
+            cat out/DUNYA_BOY_NET.md >> "$GITHUB_STEP_SUMMARY" || true
+            rclone copy out "gdrive:ASTROLOVE/TEMP/PRODIGI/DUNYA_BOY_20261015" -q
             exit 0
           fi
           if [ "$MODE" = "dunya_8x10" ]; then
