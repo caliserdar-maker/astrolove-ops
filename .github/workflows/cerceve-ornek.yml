@@ -17,13 +17,12 @@ jobs:
           set -euo pipefail
           pip install -q numpy pillow
           curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
-          mkdir -p _font _out
-          curl -fsSL -o "_font/Montserrat[wght].ttf" "https://raw.githubusercontent.com/google/fonts/main/ofl/montserrat/Montserrat%5Bwght%5D.ttf"
+          mkdir -p _out
       - name: Etiket ornekleri (kapak + yatak sahnesi)
         run: |
           set -euo pipefail
-          python3 scripts/pod/cerceve_etiket.py data/pod/cl_galeri_final19/01_kapak.jpg _out/ORNEK_CL_r01_kapak_FrameNotIncluded.jpg _font | tee _out/ETIKET_QC.txt
-          python3 scripts/pod/cerceve_etiket.py data/pod/cl_galeri_final19/09_yatak_sahne.jpg _out/ORNEK_CL_r08_yatak_FrameNotIncluded.jpg _font | tee -a _out/ETIKET_QC.txt
+          python3 scripts/pod/cerceve_etiket.py data/pod/cl_galeri_final19/01_kapak.jpg _out/ORNEK_CL_r01_kapak_FrameNotIncluded.jpg assets/fonts | tee _out/ETIKET_QC.txt
+          python3 scripts/pod/cerceve_etiket.py data/pod/cl_galeri_final19/09_yatak_sahne.jpg _out/ORNEK_CL_r08_yatak_FrameNotIncluded.jpg assets/fonts | tee -a _out/ETIKET_QC.txt
           [ "$(grep -c '^PASS$' _out/ETIKET_QC.txt)" = "2" ]
       - name: rclone.conf + Drive
         env:
