@@ -5,7 +5,7 @@
                 Cikis US 28216. Eski poster profili 314711751541'e DOKUNULMAZ. Istek ~7.
 --adim ilan --ciftler "CANCER_LIBRA ..." --profil ID :
                 ilan basina: envanter GET -> stil-gorsel baglari GET (once) -> envanter PUT (SKU, sku_on_property [513,514];
-                fiyat/stok/readiness/deger id'leri AYNI) -> updateListing PATCH yalniz {description, shipping_profile_id}
+                fiyat/stok/readiness/deger id'leri AYNI; price_on_property da [513,514] olur, fiyatlar ayni) -> updateListing PATCH yalniz {description, shipping_profile_id}
                 -> stil-gorsel baglari GET (sonra, once ile ayni olmali). Yanitlarla dogrulama; ilk hatada DUR.
 Aciklama: ABOUT OUR DESIGNS bolumu silinir; FORMATS Shipped print satiri ve DELIVERY Shipped satiri degisir; RETURNS eklenir.
   Denetim: 'frame' YOK, uzun/orta tire YOK, tedarikci adi YOK; degisiklik disinda metin ayni.
@@ -223,7 +223,7 @@ def ilan_adimi(api, shop, ciftler, pid, taslak, R, out):
                                               readiness_state_id=o.get("readiness_state_id"))]))
         if len(prods) != 15:
             raise Dur(f"{c}: urun {len(prods)} (15 beklenir)")
-        govde = dict(products=prods, price_on_property=inv.get("price_on_property") or [],
+        govde = dict(products=prods, price_on_property=[P_STYLE, P_FORMAT],   # Etsy: sku_on 2 ozellikse price_on 0 ya da 2 (15 Eki 400)
                      quantity_on_property=inv.get("quantity_on_property") or [], sku_on_property=[P_STYLE, P_FORMAT],
                      readiness_state_on_property=inv.get("readiness_state_on_property") or [])
         inv2 = api.put_json(f"/listings/{lid}/inventory", govde) or {}
