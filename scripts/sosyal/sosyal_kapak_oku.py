@@ -231,7 +231,8 @@ def video_mu(p):
         return True
     for m in p.get('media') or []:
         u = m if isinstance(m, str) else json.dumps(m)
-        if re.search(r'\.(mp4|mov|m4v)(\?|$)|video', u, re.I):
+        # yalniz uzanti: Metricool gorselleri de /video/ yolunda tutar (15 Eki: 78 Pinterest jpg video sanildi)
+        if re.search(r'\.(mp4|mov|m4v)(\?|$)', u, re.I):
             return True
     return False
 
