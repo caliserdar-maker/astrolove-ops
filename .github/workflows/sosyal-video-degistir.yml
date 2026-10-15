@@ -1,7 +1,7 @@
 name: sosyal-video-degistir
 
-# Metricool: TEK bekleyen video gonderisinin videosunu FINAL_KAPAKLI videosuyla degistirir (Serdar onayi 15 Eki 2026:
-# yalniz 17 Eki 03:00 Facebook 394635992 PISCES_SAGITTARIUS denemesi). Diger her gonderi AYRI ONAY ister.
+# Metricool: bekleyen video gonderilerinin videosunu FINAL_KAPAKLI videosuyla degistirir. Her gonderi grubu AYRI ONAY ister
+# (15 Eki onaylari: 17 Eki FB 394635992 denemesi; 17 Eki IG/TikTok/YT PISCES_SAGITTARIUS). Coklu hedef: hedef=ag:id:uuid,...
 # scripts/sosyal/metricool_video_degistir.py: ONCE.json -> yukleme -> donusturulmus dosya olcumu -> PUT (yalniz media[0]) ->
 # GET fark kontrolu. mod kuru: yukleme / PUT yok. mod kontrol: SALT OKUMA, uuid ile bul + ONCE.json ile tam fark (izinli
 # yalniz id, media[0]). mod geri: ONCE.json govdesiyle geri alma (uuid ile bulur). PUT gonderiye yeni id verir (15 Eki olcumu).
@@ -20,8 +20,11 @@ on:
         description: 'Metricool gonderi uuid (kontrol / geri icin)'
         default: ''
       ag:
-        description: 'facebook | instagram | tiktok | youtube'
-        required: true
+        description: 'tek hedef: facebook | instagram | tiktok | youtube'
+        default: ''
+      hedef:
+        description: 'kuru/yaz coklu hedef: ag:id:uuid virgulle (ayni cift; ilk FAIL -> DUR)'
+        default: ''
       cift:
         description: 'ornek PISCES_SAGITTARIUS (gonderi metniyle eslesmeli)'
         required: true
@@ -49,7 +52,8 @@ jobs:
         run: |
           pip install -q numpy==2.1.3 pillow==11.0.0
           sudo apt-get -qq update >/dev/null && sudo apt-get install -y -qq ffmpeg >/dev/null
-          echo "O=gdrive:ASTROLOVE/TEMP/SOSYAL_VIDEO_DEGISTIR_$(TZ=Europe/Istanbul date +%Y%m%d)/${{ inputs.uuid || inputs.id }}" >> "$GITHUB_ENV"
+          K="${{ inputs.uuid || inputs.id }}"; [ -n "${{ inputs.hedef }}" ] && K="${{ inputs.cift }}_${{ inputs.mod }}_$(TZ=Europe/Istanbul date +%H%M)"
+          echo "O=gdrive:ASTROLOVE/TEMP/SOSYAL_VIDEO_DEGISTIR_$(TZ=Europe/Istanbul date +%Y%m%d)/$K" >> "$GITHUB_ENV"
       - name: rclone + token
         env:
           RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
@@ -88,17 +92,18 @@ jobs:
         env:
           ID: ${{ inputs.id }}
           UUID: ${{ inputs.uuid }}
+          HEDEF: ${{ inputs.hedef }}
           AG: ${{ inputs.ag }}
           CIFT: ${{ inputs.cift }}
           MOD: ${{ inputs.mod }}
         run: |
           set +e -uo pipefail   # varsayilan bash -e FAIL'de adimi kapatiyordu: rapor Drive'a yuklenmiyordu (38712850093)
           EK=(); { [ "$MOD" = geri ] || [ "$MOD" = kontrol ]; } && EK=(--once _work/ONCE_ref.json)
-          python3 scripts/sosyal/metricool_video_degistir.py --token _work/mc.json --id "$ID" --uuid "$UUID" --ag "$AG" --cift "$CIFT" \
+          python3 scripts/sosyal/metricool_video_degistir.py --token _work/mc.json --id "$ID" --uuid "$UUID" --ag "$AG" --hedef "$HEDEF" --cift "$CIFT" \
             --video _work/video.mp4 --kapak _work/kapak.jpg --mod "$MOD" --cikti _out "${EK[@]}" 2>&1 \
             | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY" _out/OZET.txt
           rc=${PIPESTATUS[0]}
-          rm -f _out/_*.mp4
+          find _out -name '_*.mp4' -delete
           python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/mc.json _out || exit 1   # sir varsa Drive'a yuklenmez
           rclone copy _out "$O" -q
           rclone lsl "$O" | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
