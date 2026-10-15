@@ -39,8 +39,10 @@ Cozulen .m4a dosyasi depoya commit edilmez.
 - `mod=hepsi` 78/78 PASS ise ayni kosuda muzik N (varsayilan 2, kesin secim) eklenir -> `FINAL/`.
 - Parola: Drive `ASTROLOVE/TEMP/MUZIK_PAROLA.txt` (rclone cat, hemen `::add-mask::`, openssl'e env ile). Dosyaya/loga yazilmaz.
 
-## Basa kapak (15 Eki 2026, Serdar onayi)
-`kapak_basa.py`: FINAL videonun basina 0.5 sn (15 kare) kapak_v1 gorseli, sert kesme; muzik 0.5 sn kaydirilir (senkron korunur),
-v9 x264 ayarlariyla yeniden kodlanir -> 24.5 sn, 735 kare. Neden: Facebook oynaticisi ilk kareyle aciliyor, v9 ilk karesi siyah.
-QC: ilk kare = kapak (fark < 2.0), kayma yok, kare/sure/LUFS, <= 60 sn. Actions: `video-kapak-basa.yml`
-(`mod=ornek` -> `KAPAKLI_ORNEK/`, `mod=hepsi` -> `FINAL_KAPAKLI/`; FINAL/ degismez).
+## Basa kapak (15 Eki 2026, Serdar onayi, 2. yontem)
+`kapak_basa.py`: FINAL videonun siyah acilisinin USTUNE kapak_v1: 0-0.5 sn tam kapak, 0.5-1.0 sn kapaktan orijinale
+kosinus capraz gecis (orijinalin siyahtan acilisiyla ortusur, siyah kare yok). Sure (24.0 sn), kare (720) ve ses (kopya) ayni.
+Neden: Facebook oynaticisi ilk kareyle aciliyor, v9 ilk karesi siyah. (1. yontem, basa 0.5 sn ekleme, "kapak, siyah, acilis"
+verdigi icin birakildi.) QC: ilk kare = kapak (fark < 2.0), 0-1.5 sn her kare parlaklik >= kapak/2, kayma < 2.0,
+kare/sure/ses ayni, <= 60 sn. Actions: `video-kapak-basa.yml` (`mod=ornek` -> `KAPAKLI_ORNEK2/`, `mod=hepsi` -> `FINAL_KAPAKLI/`;
+FINAL/ degismez).

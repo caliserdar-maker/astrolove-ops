@@ -1,9 +1,10 @@
 name: video-kapak-basa
 
-# Reel videolarinin basina 0.5 sn kapak (Serdar onayi 15 Eki 2026; sosyal-kapak-oku 38700285414 uzerine).
-# sosyal/video_v9/kapak_basa.py: FINAL/<cift>-astroloveart-reel.mp4 + KAPAK/<cift>-astroloveart-kapak.jpg -> sert kesme,
-# muzik 0.5 sn kaydirilir, v9 x264 ayarlari, QC (ilk kare = kapak < 2.0, kare/sure/LUFS, <= 60 sn) PASS/FAIL.
-# mod ornek : cift= (virgulle) -> Drive TEMP/VIDEO_V9_20261012/KAPAKLI_ORNEK/ (video + ilk kare + 8.5 sn karesi + QC json).
+# Reel videolarinin siyah acilisinin ustune kapak (Serdar onayi 15 Eki 2026, 2. yontem; sure EKLENMEZ).
+# sosyal/video_v9/kapak_basa.py: FINAL/<cift>-astroloveart-reel.mp4 + KAPAK/<cift>-astroloveart-kapak.jpg -> 0-0.5 sn tam kapak,
+# 0.5-1.0 sn kapaktan orijinale capraz gecis; kare/sure ayni, ses kopya (birebir). QC: ilk kare = kapak < 2.0,
+# 0-1.5 sn her kare parlaklik >= kapak/2, kayma < 2.0, kare/sure/ses ayni, <= 60 sn.
+# mod ornek : cift= (virgulle) -> Drive TEMP/VIDEO_V9_20261012/KAPAKLI_ORNEK2/ (video + 0 / 0.5 / 0.8 / 1.2 sn kareleri + QC json).
 # mod hepsi : 78 video -> TEMP/VIDEO_V9_20261012/FINAL_KAPAKLI/ + KAPAKLI_QC.csv. FINAL/ ve KAPAK/ DEGISMEZ.
 # Metricool'a / platformlara YAZMA YOK.
 
@@ -61,7 +62,7 @@ jobs:
               rclone copyto "$D/FINAL/$c-astroloveart-reel.mp4" "_w/v/$c-astroloveart-reel.mp4" -q
               rclone copyto "$D/KAPAK/$c-astroloveart-kapak.jpg" "_w/k/$c-astroloveart-kapak.jpg" -q
             done
-            HEDEF="$D/KAPAKLI_ORNEK"
+            HEDEF="$D/KAPAKLI_ORNEK2"
           fi
           ls _w/v/*.mp4 > _w/liste.txt; N=$(wc -l < _w/liste.txt); i=0; F=0; T0=$(date +%s)
           [ "$MOD" != hepsi ] || [ "$N" = 78 ] || { echo "::error::FINAL'de 78 video yok ($N)"; exit 1; }
@@ -71,16 +72,19 @@ jobs:
             python3 sosyal/video_v9/kapak_basa.py --video "$v" --kapak "$k" --cikis "_o/$b-astroloveart-reel.mp4" --qc "_o/$b-kapakli-qc.json" | tail -1
             [ "${PIPESTATUS[0]}" = 0 ] || F=$((F + 1))
             if [ "$MOD" != hepsi ]; then
-              ffmpeg -v error -y -i "_o/$b-astroloveart-reel.mp4" -vf "select=eq(n\,0)" -vsync 0 -frames:v 1 -q:v 2 "_o/$b-ilk-kare.jpg"
-              ffmpeg -v error -y -ss 8.5 -i "_o/$b-astroloveart-reel.mp4" -frames:v 1 -q:v 2 "_o/$b-kare-8.5sn.jpg"
+              for t in 0 0.5 0.8 1.2; do
+                n=$(python3 -c "print(round($t * 30))")
+                ffmpeg -v error -y -i "_o/$b-astroloveart-reel.mp4" -vf "select=eq(n\,$n)" -vsync 0 -frames:v 1 -q:v 2 "_o/$b-kare-${t}sn.jpg"
+              done
             fi
             G=$(( $(date +%s) - T0 )); echo "ILERLEME $i/$N %$(( 100 * i / N )) gecen ${G} sn kalan $(( G * (N - i) / i )) sn FAIL $F"
           done < _w/liste.txt
           python3 - <<'EOF' | tee -a "$GITHUB_STEP_SUMMARY"
           import csv, glob, json
           q = [json.load(open(f)) for f in sorted(glob.glob('_o/*-kapakli-qc.json'))]
-          alan = ['cikis', 'sonuc', 'ilk_kare_fark', 'son_kapak_fark', 'kayma_fark', 'kare_once', 'kare_sonra', 'video_sn_sonra',
-                  'ses_sn_sonra', 'toplam_sn', 'bayt_once', 'bayt_sonra', 'lufs_once', 'lufs_sonra', 'uretim_sn']
+          alan = ['cikis', 'sonuc', 'kapak_parlaklik', 'ilk_kare_fark', 'tam_kapak_fark', 'min_parlaklik_0_1.5', 'parlaklik_0_0.5_0.8_1.2',
+                  'kayma_fark', 'kare_once', 'kare_sonra', 'video_sn_once', 'video_sn_sonra', 'ses_sn_sonra', 'ses_ayni',
+                  'bayt_once', 'bayt_sonra', 'uretim_sn']
           with open('_o/KAPAKLI_QC.csv', 'w', newline='') as f:
               w = csv.DictWriter(f, alan, extrasaction='ignore'); w.writeheader(); [w.writerow(x) for x in q]
           for x in q:
