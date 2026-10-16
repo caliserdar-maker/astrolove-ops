@@ -1,0 +1,44 @@
+name: gecici-test-indir
+# GECICI (16 Eki 2026): test receipt (9xxxxxxxxx) klasorunden tek JPG'yi artifact olarak verir (1 gun saklama).
+# Yalniz Drive okuma. Etsy / musteri YOK. Is bitince artifact silinir ve bu dosya main'den kaldirilir.
+on:
+  workflow_dispatch:
+    inputs:
+      yol:
+        description: "TEMP altindaki yol (yalniz SIPARIS_ISIM/GPT/AstroLoveArt_9.../*.jpg)"
+        required: true
+permissions:
+  contents: read
+jobs:
+  indir:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Girdi denetimi
+        run: jq -re '.inputs.yol | test("^SIPARIS_ISIM/GPT/AstroLoveArt_9[0-9]{9}/[A-Za-z0-9_]+\\.jpg$")' "$GITHUB_EVENT_PATH" >/dev/null
+      - name: rclone
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /tmp/rc.zip https://downloads.rclone.org/rclone-current-linux-amd64.zip
+          unzip -q -j /tmp/rc.zip '*/rclone' -d /tmp/rcb && sudo install -m 755 /tmp/rcb/rclone /usr/local/bin/rclone
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: Indir
+        run: |
+          set -euo pipefail
+          Y=$(jq -r .inputs.yol "$GITHUB_EVENT_PATH"); mkdir -p out
+          rclone copy "gdrive,root_folder_id=12N9iS2i4byMbkH5c0Inmni_nIv2zyTzH:$Y" out/
+          ls -la out; rm -rf ~/.config/rclone
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dosya
+          path: out/
+          retention-days: 1
