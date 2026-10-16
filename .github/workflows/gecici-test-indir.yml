@@ -1,14 +1,18 @@
 name: gecici-test-indir
-# GECICI (16 Eki 2026): test receipt (9xxxxxxxxx) klasorunden tek JPG'yi artifact olarak verir (1 gun saklama).
-# Yalniz Drive okuma. Etsy / musteri YOK. Is bitince artifact silinir ve bu dosya main'den kaldirilir.
+# GECICI (16 Eki 2026): test receipt (9xxxxxxxxx) klasorunden tek JPG'yi SIFRELI olarak gecici dala yazar.
+# Sifreleme: rastgele AES-256 anahtari, girdi olarak verilen RSA acik anahtariyla sarilir (yalniz Claude oturumu acar).
+# Yalniz Drive okuma. Etsy / musteri YOK. Is bitince dal silinir ve bu dosya main'den kaldirilir.
 on:
   workflow_dispatch:
     inputs:
       yol:
         description: "TEMP altindaki yol (yalniz SIPARIS_ISIM/GPT/AstroLoveArt_9.../*.jpg)"
         required: true
+      pub_b64:
+        description: "RSA acik anahtar (PEM, base64)"
+        required: true
 permissions:
-  contents: read
+  contents: write
 jobs:
   indir:
     runs-on: ubuntu-latest
@@ -16,6 +20,8 @@ jobs:
     steps:
       - name: Girdi denetimi
         run: jq -re '.inputs.yol | test("^SIPARIS_ISIM/GPT/AstroLoveArt_9[0-9]{9}/[A-Za-z0-9_]+\\.jpg$")' "$GITHUB_EVENT_PATH" >/dev/null
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 1, sparse-checkout: README.md }
       - name: rclone
         run: |
           set -euo pipefail
@@ -31,14 +37,19 @@ jobs:
           printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
           if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
             grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
-      - name: Indir
+      - name: Indir + sifrele + gecici dala yaz
         run: |
           set -euo pipefail
-          Y=$(jq -r .inputs.yol "$GITHUB_EVENT_PATH"); mkdir -p out
-          rclone copy "gdrive,root_folder_id=12N9iS2i4byMbkH5c0Inmni_nIv2zyTzH:$Y" out/
-          ls -la out; rm -rf ~/.config/rclone
-      - uses: actions/upload-artifact@v4
-        with:
-          name: dosya
-          path: out/
-          retention-days: 1
+          Y=$(jq -r .inputs.yol "$GITHUB_EVENT_PATH"); mkdir -p /tmp/o /tmp/e
+          rclone copy "gdrive,root_folder_id=12N9iS2i4byMbkH5c0Inmni_nIv2zyTzH:$Y" /tmp/o/
+          rm -rf ~/.config/rclone
+          F=$(ls /tmp/o/*.jpg | head -1); [ -s "$F" ]
+          jq -r .inputs.pub_b64 "$GITHUB_EVENT_PATH" | base64 -d > /tmp/pub.pem
+          openssl rand -out /tmp/aes.key 32
+          openssl enc -aes-256-cbc -pbkdf2 -salt -in "$F" -out /tmp/e/dosya.enc -pass file:/tmp/aes.key
+          openssl pkeyutl -encrypt -pubin -inkey /tmp/pub.pem -in /tmp/aes.key -out /tmp/e/anahtar.enc
+          rm -f /tmp/aes.key /tmp/o/*
+          cd /tmp/e && git init -q && git checkout -q -b gecici/test-indir
+          git -c user.name=bot -c user.email=bot@users.noreply.github.com add . && git -c user.name=bot -c user.email=bot@users.noreply.github.com commit -q -m "gecici sifreli"
+          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" gecici/test-indir
+          ls -la /tmp/e
