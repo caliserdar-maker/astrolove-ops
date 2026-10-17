@@ -151,7 +151,7 @@ def calistir(api, shop, ciftler, ids_csv, R, out):
     if eksik:
         raise Dur(f"listede yok: {eksik}")
     ids = [str(rows[c]["listing_id"]) for c in ciftler]
-    api.izin = [("PUT", rf"^/listings/({'|'.join(ids)})/inventory$"), ("PATCH", rf"^/shops/{shop}/listings/({'|'.join(ids)})$")]
+    api.izin = [("PUT", rf"^/listings/({'|'.join(ids)})/inventory\?max_variations_supported=3$"), ("PATCH", rf"^/shops/{shop}/listings/({'|'.join(ids)})$")]
     L = {}
     for i in range(0, len(ids), 100):
         for x in (api.get("/listings/batch", params={"listing_ids": ",".join(ids[i:i + 100])}) or {}).get("results") or []:
@@ -206,7 +206,8 @@ def calistir(api, shop, ciftler, ids_csv, R, out):
             govde = dict(products=yeni, price_on_property=inv.get("price_on_property") or [],
                          quantity_on_property=inv.get("quantity_on_property") or [], sku_on_property=inv.get("sku_on_property") or [],
                          readiness_state_on_property=inv.get("readiness_state_on_property") or [])
-            inv2 = api.put_json(f"/listings/{lid}/inventory", govde) or {}
+            # 3 menu (format, renk, boy): parametresiz PUT 409 "maximum 2 variations" (17 Eki CL; docs/REFERANS_ILAN_CL.md)
+            inv2 = api.put_json(f"/listings/{lid}/inventory?max_variations_supported=3", govde) or {}
             kota(api)
             p2 = inv2.get("products") or []
             sonra = {(fmt(p), p.get("sku")): imza(p) for p in p2}
