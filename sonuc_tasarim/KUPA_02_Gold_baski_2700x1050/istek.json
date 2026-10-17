@@ -1,0 +1,40 @@
+{
+  "variant_ids": [
+    1320
+  ],
+  "format": "png",
+  "option_groups": [
+    "Default",
+    "Environment",
+    "Flat, Premium",
+    "Halloween",
+    "Holiday season",
+    "Lifestyle",
+    "Lifestyle 2",
+    "Lifestyle 2, Premium",
+    "Lifestyle 3",
+    "Lifestyle 3, Premium",
+    "Lifestyle 4, Premium",
+    "Lifestyle, Premium",
+    "Placeholder",
+    "Product specs",
+    "Red, white & blue",
+    "Spring/summer vibes",
+    "Templates",
+    "Valentine's Day"
+  ],
+  "files": [
+    {
+      "placement": "default",
+      "image_url": "https://raw.githubusercontent.com/caliserdar-maker/astrolove-ops/kupa-printful-sonuc/tasarim/KUPA_02_Gold_baski_2700x1050.png",
+      "position": {
+        "area_width": 2700,
+        "area_height": 1050,
+        "width": 2700,
+        "height": 1050,
+        "top": 0,
+        "left": 0
+      }
+    }
+  ]
+}
