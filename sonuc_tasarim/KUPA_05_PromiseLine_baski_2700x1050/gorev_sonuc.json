@@ -1,0 +1,260 @@
+{
+  "code": 200,
+  "result": {
+    "task_key": "gt-985578127",
+    "status": "completed",
+    "mockups": [
+      {
+        "placement": "default",
+        "variant_ids": [
+          1320
+        ],
+        "mockup_url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/05f22b5da6b5cede255406beab436326/white-glossy-mug-white-11-oz-handle-on-right-6ad3674f54b2b.png",
+        "generator_mockup_id": 347,
+        "extra": [
+          {
+            "generator_mockup_id": 348,
+            "title": "Handle on Left",
+            "option": "Handle on Left",
+            "option_group": "Default",
+            "url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/450394822fb72b022a54759d63179a8a/white-glossy-mug-white-11-oz-handle-on-left-6ad3674f54b90.png"
+          },
+          {
+            "generator_mockup_id": 350,
+            "title": "Front view",
+            "option": "Front view",
+            "option_group": "Default",
+            "url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/cc8a0cc7e40c9e3d77d30b0ee09010d7/white-glossy-mug-white-11-oz-front-view-6ad3674f54bb2.png"
+          },
+          {
+            "generator_mockup_id": 1878,
+            "title": "Woman",
+            "option": "Woman",
+            "option_group": "Lifestyle",
+            "url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/c343fa9920b2cbbad4f008327788c018/white-glossy-mug-white-11-oz-woman-6ad3674f54bce.png"
+          },
+          {
+            "generator_mockup_id": 7450,
+            "title": "Cutting board",
+            "option": "Cutting board",
+            "option_group": "Environment",
+            "url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/575e8a1645615c71cc2d53c271c1eb1a/white-glossy-mug-white-11-oz-cutting-board-6ad3674f54be8.png"
+          },
+          {
+            "generator_mockup_id": 7452,
+            "title": "Office environment",
+            "option": "Office environment",
+            "option_group": "Environment",
+            "url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/dca26568365c59c677b1457f60f1eb82/white-glossy-mug-white-11-oz-office-environment-6ad3674f54c01.png"
+          },
+          {
+            "generator_mockup_id": 9944,
+            "title": "Halloween",
+            "option": "Halloween",
+            "option_group": "Halloween",
+            "url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/37ace5be75017e5f743c89d88b6b2198/white-glossy-mug-white-11-oz-halloween-6ad3674f54c19.png"
+          },
+          {
+            "generator_mockup_id": 10997,
+            "title": "Handle on Left",
+            "option": "Handle on Left",
+            "option_group": "Holiday season",
+            "url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/5cbaaac18d434cc913a39b023a0c74f4/white-glossy-mug-white-11-oz-handle-on-left-6ad3674f54c32.png"
+          },
+          {
+            "generator_mockup_id": 12006,
+            "title": "Handle on Left",
+            "option": "Handle on Left",
+            "option_group": "Valentine's Day",
+            "url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/62fd198047fd15edfd8f3d3c30dfcf46/white-glossy-mug-white-11-oz-handle-on-left-6ad3674f54c4b.png"
+          },
+          {
+            "generator_mockup_id": 13978,
+            "title": "Handle on Left",
+            "option": "Handle on Left",
+            "option_group": "Spring/summer vibes",
+            "url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/08cab6567bfbc0e509954afbfc63f22d/white-glossy-mug-white-11-oz-handle-on-left-6ad3674f54c7c.png"
+          },
+          {
+            "generator_mockup_id": 14607,
+            "title": "Handle on Left",
+            "option": "Handle on Left",
+            "option_group": "Red, white & blue",
+            "url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/154aa4ece123660cd99d610de146448f/white-glossy-mug-white-11-oz-handle-on-left-6ad3674f54c96.png"
+          },
+          {
+            "generator_mockup_id": 14608,
+            "title": "Handle on Right",
+            "option": "Handle on Right",
+            "option_group": "Red, white & blue",
+            "url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/bfa198f784293b1a7e0ba3a81d775986/white-glossy-mug-white-11-oz-handle-on-right-6ad3674f54caf.png"
+          },
+          {
+            "generator_mockup_id": 16977,
+            "title": "Handle on Right",
+            "option": "Handle on Right",
+            "option_group": "Holiday season",
+            "url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/ef172798421ba11b028619a18db42e31/white-glossy-mug-white-11-oz-handle-on-right-6ad3674f54cc7.png"
+          },
+          {
+            "generator_mockup_id": 16978,
+            "title": "Front view",
+            "option": "Front view",
+            "option_group": "Holiday season",
+            "url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/1be4031607ce452b81c522b9cf5360d8/white-glossy-mug-white-11-oz-front-view-6ad3674f54ce0.png"
+          },
+          {
+            "generator_mockup_id": 16981,
+            "title": "Handle on Right",
+            "option": "Handle on Right",
+            "option_group": "Valentine's Day",
+            "url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/ef7a8c320df76b3c2599c5e704e4bc27/white-glossy-mug-white-11-oz-handle-on-right-6ad3674f54cf8.png"
+          },
+          {
+            "generator_mockup_id": 16982,
+            "title": "Front view",
+            "option": "Front view",
+            "option_group": "Valentine's Day",
+            "url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/998d549ee3686ecf6ee0ff2a7a3f49e5/white-glossy-mug-white-11-oz-front-view-6ad3674f54d10.png"
+          },
+          {
+            "generator_mockup_id": 16989,
+            "title": "Handle on Right",
+            "option": "Handle on Right",
+            "option_group": "Spring/summer vibes",
+            "url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/b9eaf3f82cf9642ec000e2538d6f6403/white-glossy-mug-white-11-oz-handle-on-right-6ad3674f54d28.png"
+          },
+          {
+            "generator_mockup_id": 16990,
+            "title": "Front view",
+            "option": "Front view",
+            "option_group": "Spring/summer vibes",
+            "url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/d359ec8391f63aeda1b3ac76e37700e3/white-glossy-mug-white-11-oz-front-view-6ad3674f54d3f.png"
+          },
+          {
+            "generator_mockup_id": 17975,
+            "title": "Handle on Right",
+            "option": "Handle on Right",
+            "option_group": "Lifestyle 2",
+            "url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/ee5500cec7d312f6e6ef08b3a9e683ad/white-glossy-mug-white-11-oz-handle-on-right-6ad3674f54d57.png"
+          },
+          {
+            "generator_mockup_id": 17977,
+            "title": "Handle on Left",
+            "option": "Handle on Left",
+            "option_group": "Lifestyle 2",
+            "url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/483dc51879096af030b42b207c010a8d/white-glossy-mug-white-11-oz-handle-on-left-6ad3674f54d6e.png"
+          },
+          {
+            "generator_mockup_id": 18009,
+            "title": "Handle on Left",
+            "option": "Handle on Left",
+            "option_group": "Lifestyle 3",
+            "url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/fd3ef15574b8994f661297a39dff425b/white-glossy-mug-white-11-oz-handle-on-left-6ad3674f54d86.png"
+          },
+          {
+            "generator_mockup_id": 18010,
+            "title": "Handle on Right",
+            "option": "Handle on Right",
+            "option_group": "Lifestyle 3",
+            "url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/ab0adcae8a7845a2ea8d6d742de27537/white-glossy-mug-white-11-oz-handle-on-right-6ad3674f54d9f.png"
+          },
+          {
+            "generator_mockup_id": 23917,
+            "title": "Front view",
+            "option": "Front view",
+            "option_group": "Flat, Premium",
+            "url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/ab53a6c8846726d740be4241d83e1837/white-glossy-mug-white-11-oz-front-view-6ad3674f54db6.png"
+          },
+          {
+            "generator_mockup_id": 23919,
+            "title": "Front view",
+            "option": "Front view",
+            "option_group": "Lifestyle, Premium",
+            "url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/46a3eb0997320dd6db8b062ea8b1202c/white-glossy-mug-white-11-oz-front-view-6ad3674f54dce.png"
+          },
+          {
+            "generator_mockup_id": 24629,
+            "title": "Handle on Left",
+            "option": "Handle on Left",
+            "option_group": "Lifestyle 2, Premium",
+            "url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/afecb32b764329760d77488f70d071ee/white-glossy-mug-white-11-oz-handle-on-left-6ad3674f54de6.png"
+          },
+          {
+            "generator_mockup_id": 24632,
+            "title": "Handle on Right",
+            "option": "Handle on Right",
+            "option_group": "Lifestyle 2, Premium",
+            "url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/17083949bad1acc113a493f465695674/white-glossy-mug-white-11-oz-handle-on-right-6ad3674f54e01.png"
+          },
+          {
+            "generator_mockup_id": 24687,
+            "title": "Handle on Right",
+            "option": "Handle on Right",
+            "option_group": "Lifestyle 3, Premium",
+            "url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/44c21f7875bb82b4bcfb34050e8513c0/white-glossy-mug-white-11-oz-handle-on-right-6ad3674f54e1b.png"
+          },
+          {
+            "generator_mockup_id": 24689,
+            "title": "Handle on Left",
+            "option": "Handle on Left",
+            "option_group": "Lifestyle 3, Premium",
+            "url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/f505157dc1dda64a270852be158dcb16/white-glossy-mug-white-11-oz-handle-on-left-6ad3674f54e33.png"
+          },
+          {
+            "generator_mockup_id": 24794,
+            "title": "Handle on Left",
+            "option": "Handle on Left",
+            "option_group": "Lifestyle 4, Premium",
+            "url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/5bbe58cd912edaf47b928b1f49fdf14d/white-glossy-mug-white-11-oz-handle-on-left-6ad3674f54e4b.png"
+          },
+          {
+            "generator_mockup_id": 24795,
+            "title": "Handle on Right",
+            "option": "Handle on Right",
+            "option_group": "Lifestyle 4, Premium",
+            "url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/97e2f37013245dfbddc369070b22b0f9/white-glossy-mug-white-11-oz-handle-on-right-6ad3674f54e63.png"
+          },
+          {
+            "generator_mockup_id": 29622,
+            "title": "Front",
+            "option": "Front",
+            "option_group": "Product specs",
+            "url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/ca2754f15896da17c2b0a65d992a28a5/white-glossy-mug-white-11-oz-front-6ad3674f54e7b.png"
+          },
+          {
+            "generator_mockup_id": 35364,
+            "title": "Donuts",
+            "option": "Donuts",
+            "option_group": "Environment",
+            "url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/c89cd4b2315bcd8d3d3c9215113b77b6/white-glossy-mug-white-11-oz-donuts-6ad3674f54e90.png"
+          },
+          {
+            "generator_mockup_id": 35365,
+            "title": "Pineapple",
+            "option": "Pineapple",
+            "option_group": "Environment",
+            "url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/eff85f177513e1bda2ab8c2ccf9fb651/white-glossy-mug-white-11-oz-pineapple-6ad3674f54eab.png"
+          },
+          {
+            "generator_mockup_id": 35366,
+            "title": "Watermelon",
+            "option": "Watermelon",
+            "option_group": "Environment",
+            "url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/81723da5fe5ff9efca02eb1e09170b0c/white-glossy-mug-white-11-oz-watermelon-6ad3674f54ec6.png"
+          }
+        ]
+      }
+    ],
+    "printfiles": [
+      {
+        "variant_ids": [
+          1320
+        ],
+        "placement": "default",
+        "url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/698f6fb201027b6c51f5bb48f67d6467/printfile_default.png"
+      }
+    ]
+  },
+  "extra": []
+}
