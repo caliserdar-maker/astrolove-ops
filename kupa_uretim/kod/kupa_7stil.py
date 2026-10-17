@@ -288,6 +288,8 @@ def maske(ad):
 
 
 BOSLUK_TOL = 2.0   # px (on-gorunus), olcum gurultusu payi
+BOSLUK_MM = float(_os0.environ.get("BOSLUK_MM", "1.5"))   # sembol ile sus arasi en az bosluk (mm); Cancer-Libra'da daha azsa onunki
+PX_MM = DPI / 25.4
 
 
 def bosluk_px(edt, m, k, cx, cy):
@@ -441,11 +443,11 @@ def oge_ciz(im, o, kutu, s):
         if o.get("alan"):
             k = math.sqrt((y1 - y0) * (x1 - x0) / (m.height * m.width))
             k_ref = math.sqrt((y1 - y0) * (x1 - x0) / (REF_ANA[0] * REF_ANA[1]))
-            if _os0.environ.get("SEMBOL_KURAL", "standart") != "alan":
-                k = k_ref   # STANDART 17 Eki: posterdeki olcek, tum ciftlerde ayni (= Cancer-Libra olcegi)
+            if _os0.environ.get("SEMBOL_KURAL") == "poster":
+                k = k_ref   # deneme: posterdeki olcek (Serdar 17 Eki: cok kucuk, kullanilmiyor)
             gmax = o["maxg"] * s if o.get("maxg") else 1.05 * REF_ANA[0] * k_ref
             k = min(k, gmax / m.width, 1.05 * REF_ANA[1] * k_ref / m.height)
-            if o.get("_edt") is not None:   # STANDART: suslere en az Cancer-Libra kadar bosluk; dar ise %1 adimlarla kucult
+            if o.get("_edt") is not None:   # STANDART (Serdar 17 Eki): sembol suse degmez; bosluk BOSLUK_MM'den azsa %1 adimlarla kucult
                 cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
                 hedef = o["_hedef"]
                 while k > 0.3 * k_ref and bosluk_px(o["_edt"], m, k, cx, cy) < hedef - BOSLUK_TOL:
@@ -592,7 +594,7 @@ def yuz_tuvali(ogeler, s):
     for o in ogeler:
         o["_don"] = don
     ana = [o for o in ogeler if o["tip"] == "sembol" and o.get("alan") and o["ad"] == "ana" and not o.get("bagli")]
-    if ana and _os0.environ.get("SEMBOL_KURAL", "standart") != "alan":
+    if ana and _os0.environ.get("SEMBOL_KURAL") != "eski":
         sus = Image.new("RGB", (2 * TV, FH), "white")
         for o in ogeler:
             if o["tip"] in SUS_TIPLERI:
@@ -604,7 +606,7 @@ def yuz_tuvali(ogeler, s):
         (a, b), (c, e) = don(*o["kutu"][:2]), don(*o["kutu"][2:])
         ref = Image.open(SEM.parent / "CANCER_LIBRA" / "ana.png").getchannel("A")
         k_ref = math.sqrt((e - b) * (c - a) / (REF_ANA[0] * REF_ANA[1]))
-        o["_edt"], o["_hedef"] = edt, bosluk_px(edt, ref, k_ref, (a + c) / 2, (b + e) / 2)
+        o["_edt"], o["_hedef"] = edt, min(BOSLUK_MM * PX_MM, bosluk_px(edt, ref, k_ref, (a + c) / 2, (b + e) / 2))
     for o in sorted(ogeler, key=lambda o: 1 if o.get("bagli") else 0):
         (a, b), (c, e) = don(*o["kutu"][:2]), don(*o["kutu"][2:])
         oge_ciz(im, o, (a, b, c, e), s)
