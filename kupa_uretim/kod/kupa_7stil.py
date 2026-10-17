@@ -287,6 +287,24 @@ def maske(ad):
     return Image.open(SEM / f"{ad}.png").getchannel("A")
 
 
+BOSLUK_TOL = 2.0   # px (on-gorunus), olcum gurultusu payi
+
+
+def bosluk_px(edt, m, k, cx, cy):
+    """Sembol (m maskesi, k olcegi, merkez cx,cy) ile sus murekkebi arasindaki en kucuk uzaklik (px)."""
+    mm = np.asarray(m.resize((max(1, round(m.width * k)), max(1, round(m.height * k))), Image.LANCZOS)) > 76
+    x0, y0 = int(round(cx - mm.shape[1] / 2)), int(round(cy - mm.shape[0] / 2))
+    ys, xs = np.where(mm)
+    ys, xs = ys + y0, xs + x0
+    ic = (ys >= 0) & (ys < edt.shape[0]) & (xs >= 0) & (xs < edt.shape[1])
+    if not ic.all():
+        return 0.0
+    return float(edt[ys, xs].min())
+
+
+SUS_TIPLERI = ("susleme", "kurdele", "ip", "ayrac", "halkali")
+
+
 def boya(im, m, x, y, renk):
     im.paste(Image.new("RGB", m.size, renk), (int(round(x)), int(round(y))), m)
 
@@ -423,10 +441,19 @@ def oge_ciz(im, o, kutu, s):
         if o.get("alan"):
             k = math.sqrt((y1 - y0) * (x1 - x0) / (m.height * m.width))
             k_ref = math.sqrt((y1 - y0) * (x1 - x0) / (REF_ANA[0] * REF_ANA[1]))
+            if _os0.environ.get("SEMBOL_KURAL", "standart") != "alan":
+                k = k_ref   # STANDART 17 Eki: posterdeki olcek, tum ciftlerde ayni (= Cancer-Libra olcegi)
             gmax = o["maxg"] * s if o.get("maxg") else 1.05 * REF_ANA[0] * k_ref
             k = min(k, gmax / m.width, 1.05 * REF_ANA[1] * k_ref / m.height)
+            if o.get("_edt") is not None:   # STANDART: suslere en az Cancer-Libra kadar bosluk; dar ise %1 adimlarla kucult
+                cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+                hedef = o["_hedef"]
+                while k > 0.3 * k_ref and bosluk_px(o["_edt"], m, k, cx, cy) < hedef - BOSLUK_TOL:
+                    k *= 0.99
+                o["_olcek_orani"] = k / k_ref
         m = m.resize((max(1, round(m.width * k)), max(1, round(m.height * k))), Image.LANCZOS)
-        boya(im, m, (x0 + x1) / 2 - m.width / 2, (y0 + y1) / 2 - m.height / 2, o["renk"])
+        renk = (0, 255, 0) if (_os0.environ.get("SEMBOL_TEST_RENK") and o["ad"] == "ana" and not o.get("bagli")) else o["renk"]   # olcum icin
+        boya(im, m, (x0 + x1) / 2 - m.width / 2, (y0 + y1) / 2 - m.height / 2, renk)
     elif t == "sonsuz":
         m = maske("sonsuz")
         k = (x1 - x0) / m.width
@@ -564,6 +591,20 @@ def yuz_tuvali(ogeler, s):
             satir_yerlestir(o["satir"], s)
     for o in ogeler:
         o["_don"] = don
+    ana = [o for o in ogeler if o["tip"] == "sembol" and o.get("alan") and o["ad"] == "ana" and not o.get("bagli")]
+    if ana and _os0.environ.get("SEMBOL_KURAL", "standart") != "alan":
+        sus = Image.new("RGB", (2 * TV, FH), "white")
+        for o in ogeler:
+            if o["tip"] in SUS_TIPLERI:
+                (a, b), (c, e) = don(*o["kutu"][:2]), don(*o["kutu"][2:])
+                oge_ciz(sus, o, (a, b, c, e), s)
+        murekkep = np.asarray(sus).min(-1) < 215
+        edt = ndimage.distance_transform_edt(~murekkep) if murekkep.any() else np.full(murekkep.shape, 1e9)
+        o = ana[0]
+        (a, b), (c, e) = don(*o["kutu"][:2]), don(*o["kutu"][2:])
+        ref = Image.open(SEM.parent / "CANCER_LIBRA" / "ana.png").getchannel("A")
+        k_ref = math.sqrt((e - b) * (c - a) / (REF_ANA[0] * REF_ANA[1]))
+        o["_edt"], o["_hedef"] = edt, bosluk_px(edt, ref, k_ref, (a + c) / 2, (b + e) / 2)
     for o in sorted(ogeler, key=lambda o: 1 if o.get("bagli") else 0):
         (a, b), (c, e) = don(*o["kutu"][:2]), don(*o["kutu"][2:])
         oge_ciz(im, o, (a, b, c, e), s)
