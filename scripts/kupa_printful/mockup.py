@@ -9,12 +9,15 @@ TOKEN = os.environ["PRINTFUL_TOKEN"]
 URL, OUT = sys.argv[1], pathlib.Path(sys.argv[2])
 OUT.mkdir(parents=True, exist_ok=True)
 URUN = 19
+UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+      "(KHTML, like Gecko) Chrome/129.0 Safari/537.36 astrolove-ops")
 
 
 def istek(yol, veri=None):
     req = urllib.request.Request(
         API + yol, data=json.dumps(veri).encode() if veri is not None else None,
-        headers={"Authorization": f"Bearer {TOKEN}", "Content-Type": "application/json"},
+        headers={"Authorization": f"Bearer {TOKEN}", "Content-Type": "application/json",
+                 "User-Agent": UA, "Accept": "application/json"},
         method="POST" if veri is not None else "GET")
     try:
         with urllib.request.urlopen(req, timeout=90) as r:
@@ -22,6 +25,12 @@ def istek(yol, veri=None):
     except urllib.error.HTTPError as e:
         print("OZET HATA", yol, e.code, e.read().decode()[:2000])
         raise
+
+
+def indir(u, hedef):
+    req = urllib.request.Request(u, headers={"User-Agent": UA})
+    with urllib.request.urlopen(req, timeout=120) as r:
+        hedef.write_bytes(r.read())
 
 
 def kaydet(ad, veri):
@@ -101,6 +110,6 @@ for m in durum["result"]["mockups"]:
     for ad, u in parcalar:
         n += 1
         hedef = OUT / f"{n:02d}_{str(ad).replace(' ', '_').replace('/', '-')}.png"
-        urllib.request.urlretrieve(u, hedef)
+        indir(u, hedef)
         print("OZET mockup", hedef.name)
 print("OZET toplam_mockup", n)
