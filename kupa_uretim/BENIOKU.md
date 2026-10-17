@@ -16,12 +16,13 @@ Doğrulama (17.10.2026): bu klasördeki kod ve dosyalarla 7 kapak, tek kupa, yak
 
 Baskı dosyaları (11 oz 2700x1050, 15 oz 2700x1140) bu dalda `tasarim/` klasöründe.
 
-## Bu klasörde OLMAYANLAR
-- `kupa_7stil.py` çalışması için: süs görselleri (`kupa_suslemeler/`) ve sembol maskeleri (`sembol/`: ana, sol, sag, sonsuz, halka_ring, halka_sembol). Sembol maskeleri Midnight Blue posterinden `sembol_cikar.py` ile çıkarılır (yeniden çizim yok).
+- `susleme/`: 7 stilin süs görselleri (22 PNG; `kupa_7stil.py` girdisi)
+- `sembol/CANCER_LIBRA/`: sembol maskeleri (ana, sol, sag, sonsuz, halka_ring, halka_sembol). Diğer çiftler: Midnight Blue posterinden `python3 kod/sembol_cikar.py <poster> sembol/<CIFT> sembol/CANCER_LIBRA/sonsuz.png` (yeniden çizim yok).
+- Doğrulama: `python3 kod/kupa_7stil.py sembol/CANCER_LIBRA font susleme <cikti>` 7 baskı dosyasını `tasarim/` ile birebir aynı üretir (Emily & James varsayılan).
 
 ## Komutlar (NN = 01..07; stil adları: 01_Botanical 02_Gold 03_NazarBond 04_RoseRibbon 05_PromiseLine 06_AegeanTile 07_Mediterranean)
 Baskı dosyası (çift başına, 7 stil):
-`python3 kod/kupa_7stil.py <sembol_klasoru> font <susleme_klasoru> <cikti>`
+`python3 kod/kupa_7stil.py sembol/<CIFT> font susleme <cikti>`
 Ortam: `CIFT='{"isim1":"Emily","isim2":"James","burc":"CANCER · LIBRA"}'`, `MESAJ='...'`, `YALNIZ=04` (tek stil).
 
 Kapak (galeri 1, 3-8):
