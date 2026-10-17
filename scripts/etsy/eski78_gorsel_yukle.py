@@ -31,6 +31,9 @@ import cl_galeri_degistir as G  # noqa: E402
 from etsy_common import Etsy, TokenStore, mask  # noqa: E402
 
 KOTA_MIN = 10  # Serdar 15 Eki: Etsy kota tabani 10
+ROOT = Path(__file__).resolve().parents[2]
+R6_REF = ROOT / "data/pod/cl_galeri_final19/07_cerceveler.jpg"   # "Four classic frames" karti (15-17 Eki raporundaki canli rank 6)
+R6_ESIK = 0.95
 YUKLE = [1, 2, 3, 5, 7, 8, 9, 10, 12, 13]
 SIL = 6
 
@@ -90,6 +93,41 @@ def kota(api):
         pass
 
 
+def cdn_gri(url):
+    for k in range(3):
+        try:
+            r = requests.get(url, timeout=120); r.raise_for_status(); return gri(r.content)
+        except Exception:                                       # noqa: BLE001
+            time.sleep(3 * (k + 1))
+    raise SystemExit(f"DUR: CDN indirilemedi {url}")
+
+
+def r6_dogrula(g0):
+    """canli rank 6 = 'Four classic frames' karti mi (NCC >= R6_ESIK ve 18 gorsel icinde en benzeri)."""
+    ref = gri(R6_REF)
+    n = [round(ncc(cdn_gri(x.get("url_fullxfull")), ref), 4) for x in g0]
+    en = max(range(len(n)), key=lambda i: n[i])
+    return n[5], en + 1, n
+
+
+def sayfa(once_dir, g_son, out, c):
+    """once (yedek, 18) | sonra (canli geri okuma, 17) kucuk resim sayfasi."""
+    from PIL import ImageDraw
+    once = sorted(once_dir.glob("*.jpg"), key=lambda p: int(p.name.split("_", 1)[0]))
+    tw, th = 480, 360; n = max(len(once), len(g_son))
+    S = Image.new("RGB", (2 * tw + 60, n * (th + 10) + 50), "white"); d = ImageDraw.Draw(S)
+    d.text((10, 10), f"{c}: ONCE (yedek, {len(once)}) | SONRA (canli geri okuma, {len(g_son)})", fill=(0, 0, 0))
+    for i in range(n):
+        y = 40 + i * (th + 10)
+        d.text((5, y + th // 2), str(i + 1), fill=(0, 0, 0))
+        if i < len(once):
+            S.paste(Image.open(once[i]).convert("RGB").resize((tw, th)), (30, y))
+        if i < len(g_son):
+            r = requests.get(g_son[i]["url_fullxfull"], timeout=120)
+            S.paste(Image.open(io.BytesIO(r.content)).convert("RGB").resize((tw, th)), (40 + tw, y))
+    S.save(out / "ONCE_SONRA_CANLI.jpg", quality=80)
+
+
 def bir_ilan(api, shop, lid, c, a, b, kay, out, yedek_drive):
     o = out / f"{lid}_{c}"; o.mkdir(parents=True, exist_ok=True)
     qc = json.loads((kay / c / "_QC.json").read_text())
@@ -100,9 +138,13 @@ def bir_ilan(api, shop, lid, c, a, b, kay, out, yedek_drive):
     g0 = G.galeri(api, lid)
     if [x.get("listing_image_id") for x in g0] != u_ids or len(u_ids) != 18:
         raise SystemExit(f"DUR {c}: canli galeri uretimden sonra degisti ya da 18 degil ({len(g0)})")
+    # rank 6 dogrulamasi YAZMADAN ONCE: degilse hicbir sey yazilmaz
+    n6, en, nlist = r6_dogrula(g0)
+    if n6 < R6_ESIK or en != 6:
+        raise SystemExit(f"DUR {c}: canli rank 6 'Four classic frames' degil (NCC {n6}, en benzer rank {en}); YAZMA YOK")
     man = G.yedek_al(api, shop, lid, o)
     if yedek_drive:
-        drive_kopya(o / "yedek", f"{yedek_drive}/{lid}_{c}")
+        drive_kopya(o / "yedek", f"{yedek_drive}/{c}/YEDEK")
     kor0 = man["korunan"]
     if kor0["state"] != "active":
         raise SystemExit(f"DUR {c}: state {kor0['state']}")
@@ -153,6 +195,8 @@ def bir_ilan(api, shop, lid, c, a, b, kay, out, yedek_drive):
     bag1 = sorted((v.get("value_id"), v.get("image_id")) for v in G.var_img(api, shop, lid))
     if bag1 != bag0:
         sorun.append("renk baglari")
+    if len(bag1) != 5 or not {i for _, i in bag1} <= set(gi):
+        sorun.append(f"renk bagi {len(bag1)} (5 beklenir) / galeride olmayan gorsele bagli")
     kor1 = G.korunanlar(api, shop, lid)
     for k in ("state", "title", "tags", "desc_sha", "inv_sha", "n_urun", "video_ids"):
         if kor1.get(k) != kor0.get(k):
@@ -163,8 +207,12 @@ def bir_ilan(api, shop, lid, c, a, b, kay, out, yedek_drive):
         nccs[r] = cdn_ncc(url.get(yid), kay / c / f"r{r:02d}.jpg")
         if nccs[r] < 0.999:
             sorun.append(f"r{r} NCC {nccs[r]}")
+    try:
+        sayfa(o / "yedek", g, o, c)
+    except Exception as e:                                      # noqa: BLE001
+        sorun.append(f"once/sonra sayfasi: {e}")
     rap = dict(cift=c, listing_id=lid, sonuc="PASS" if not sorun else "FAIL", sorun=sorun, yol=yol, gorsel=len(gi),
-               silinen_r6=u_ids[SIL - 1], yeni_id=yeni_id, ncc=nccs, renk_bagi=len(bag1), kota=api.remaining)
+               silinen_r6=u_ids[SIL - 1], r6_ncc=n6, yeni_id=yeni_id, ncc=nccs, renk_bagi=len(bag1), istek=api.calls, kota=api.remaining)
     (o / "rapor.json").write_text(json.dumps(rap, indent=1, ensure_ascii=False))
     return rap
 
@@ -203,6 +251,9 @@ def main():
             f"%{100 * i // len(is_)} | kota {api.remaining}")
         if rap["sonuc"] != "PASS":
             break
+    for r in sonuc:
+        print(f"::warning::{r['cift']} {r['sonuc']} | gorsel {r.get('gorsel')} | r6_ncc {r.get('r6_ncc')} | renk_bagi {r.get('renk_bagi')} | "
+              f"ncc_min {min((r.get('ncc') or {0: None}).values(), default=None)} | yol {r.get('yol')} | sorun {r.get('sorun')}"[:900])
     n = sum(1 for r in sonuc if r["sonuc"] == "PASS")
     print(f"::warning::ESKI78 GORSEL YUKLE PASS {n}/{len(sonuc)} (onceki {len(tamam)}) | "
           + "; ".join(f"{r['cift']} {r['sonuc']} {r['sorun']}" for r in sonuc if r["sonuc"] != "PASS")[:800] + f" | kota {api.remaining}")

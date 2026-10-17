@@ -55,8 +55,8 @@ jobs:
           umask 077; mkdir -p _work _out
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
           K="gdrive:ASTROLOVE/TEMP/ESKI78_GORSEL_20261017"
-          if [ "${{ inputs.ciftler }}" = "HEPSI" ]; then rclone copy "$K" _work/KAY -q --transfers 8 --exclude "*/ONCE_SONRA.jpg"
-          else for c in ${{ inputs.ciftler }}; do rclone copy "$K/$c" "_work/KAY/$c" -q --exclude "ONCE_SONRA.jpg"; rclone copy "$K/_canli/$c" "_work/KAY/_canli/$c" -q; done; fi
+          if [ "${{ inputs.ciftler }}" = "HEPSI" ]; then rclone copy "$K" _work/KAY -q --transfers 8 --exclude "*/ONCE_SONRA.jpg" --exclude "*/YEDEK/**"
+          else for c in ${{ inputs.ciftler }}; do rclone copy "$K/$c" "_work/KAY/$c" -q --exclude "ONCE_SONRA.jpg" --exclude "YEDEK/**"; rclone copy "$K/_canli/$c" "_work/KAY/_canli/$c" -q; done; fi
           rclone copy "gdrive:ASTROLOVE/TEMP/ESKI78_GORSEL_YUKLE_20261017" _out -q --include "*/rapor.json" || true
       - name: Calistir
         env:
@@ -68,7 +68,7 @@ jobs:
         run: |
           if [ "${{ inputs.mod }}" = "yukle" ]; then
             python3 scripts/etsy/eski78_gorsel_yukle.py --kaynak _work/KAY --out _out --ciftler "$CIFTLER" --confirm ESKI78_GORSEL \
-              --yedek-drive "gdrive:ASTROLOVE/TEMP/ESKI78_GORSEL_YUKLE_20261017/_YEDEK"
+              --yedek-drive "gdrive:ASTROLOVE/TEMP/ESKI78_GORSEL_20261017"
           else
             python3 scripts/etsy/eski78_gorsel_kontrol.py --kaynak _work/KAY --out _out --ciftler "$CIFTLER"
           fi
