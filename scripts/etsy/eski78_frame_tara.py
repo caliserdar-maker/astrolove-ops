@@ -142,6 +142,13 @@ def main():
     tek = {f"{k[0]}|{k[1]}": sorted(v) for k, v in sorted(fiyat.items(), key=lambda kv: (str(kv[0][0]), str(kv[0][1])))}
     print(f"::warning::YAPI fiyat (format|boy -> fiyat, renkler ayni mi): {str(tek)[:950]}")
     print(f"::warning::YAPI sku: dolu {sum(1 for x in skus if x)}/{len(skus)} benzersiz {len(set(skus))} ornek {skus[:3]}")
+    # CL gorsel alt metinleri (adim 4 icin; 1 GET)
+    imgs = (api.get(f"/listings/{cl['listing_id'].strip()}/images") or {}).get("results") or []
+    import json as _j
+    (out / "CL_GORSEL_ALT.json").write_text(_j.dumps([dict(rank=g.get("rank"), listing_image_id=g.get("listing_image_id"),
+                                                             alt_text=g.get("alt_text")) for g in imgs], ensure_ascii=False, indent=1))
+    for g in sorted(imgs, key=lambda g: g.get("rank") or 0):
+        print(f"::notice::ALT r{g.get('rank')} {g.get('listing_image_id')}: {g.get('alt_text')}")
     p0 = (inv.get("products") or [{}])[0]
     print(f"::warning::YAPI urun0: {str({k: p0.get(k) for k in ('sku', 'property_values', 'offerings')})[:900]}")
     aries = next((t for t in tab if t["listing_id"] == "4570031205"), None)
