@@ -56,7 +56,10 @@ im.paste((205, 195, 182), (0, 0), golge.filter(ImageFilter.GaussianBlur(16)))
 d.rounded_rectangle([kx0, ky0, kx1, ky1], 26, fill=(255, 255, 255), outline=CIZGI, width=3)
 yaz(d, kx0 + 70, ky0 + 50, "PERSONALIZATION", font("Cinzel[wght].ttf", 40, 600), SOLUK, aralik=6)
 f_et, f_de = font("EBGaramond[wght].ttf", 64, 400), font("EBGaramond[wght].ttf", 64, 600)
-satirlar = [(f"Name under {B1}:", I1), (f"Name under {B2}:", I2), ("Message:", MESAJ)]
+if B1 == B2:   # ayni burclu cift: sol / sag sembol (ONERI 17 Eki)
+    satirlar = [(f"Name under left {B1}:", I1), (f"Name under right {B2}:", I2), ("Message:", MESAJ)]
+else:
+    satirlar = [(f"Name under {B1}:", I1), (f"Name under {B2}:", I2), ("Message:", MESAJ)]
 for j, (et, de) in enumerate(satirlar):
     y = ky0 + 140 + j * 92
     yaz(d, kx0 + 70, y, et, f_et, SOLUK)
@@ -70,12 +73,24 @@ d.polygon([(ax - 26, ky1 + 118), (ax + 26, ky1 + 118), (ax, ky1 + 160)], fill=VU
 # sonuc: on ve arka (saydam bosluk kirpilir, ayni yukseklige olceklenir)
 HY = 600
 for k, (p, et) in enumerate([(ON, "FRONT"), (ARKA, "BACK")]):
-    m = Image.open(p).convert("RGBA")
-    m = m.crop(m.getchannel("A").point(lambda a: 255 if a > 8 else 0).getbbox())
-    m = m.resize((round(m.width * HY / m.height), HY), Image.LANCZOS)
+    m = Image.open(p)
     cx = W / 2 + (k * 2 - 1) * 520
-    x0, y0 = int(cx - m.width / 2), int(ky1 + 190)
-    im.paste(m, (x0, y0), m)
+    y0 = int(ky1 + 190)
+    if m.mode == "RGBA":   # Printful saydam mockup (Cancer-Libra onayli kart)
+        m = m.crop(m.getchannel("A").point(lambda a: 255 if a > 8 else 0).getbbox())
+        m = m.resize((round(m.width * HY / m.height), HY), Image.LANCZOS)
+        x0 = int(cx - m.width / 2)
+        im.paste(m, (x0, y0), m)
+    else:   # tek kupa sahnesi (2576 kare, kapak_canva TEK ciktisi): kart_uzunluk gibi yuvarlak koseli kare (ONERI 17 Eki)
+        mx = 1230 if k == 0 else 1350
+        m = m.convert("RGB").crop((mx - 950, 1330 - 950, mx + 950, 1330 + 950)).resize((HY, HY), Image.LANCZOS)
+        x0 = int(cx - HY / 2)
+        golge = Image.new("L", (W, W), 0)
+        ImageDraw.Draw(golge).rounded_rectangle([x0, y0 + 10, x0 + HY, y0 + HY + 10], 22, fill=60)
+        im.paste((205, 195, 182), (0, 0), golge.filter(ImageFilter.GaussianBlur(14)))
+        maske = Image.new("L", (HY, HY), 0)
+        ImageDraw.Draw(maske).rounded_rectangle([0, 0, HY - 1, HY - 1], 22, fill=255)
+        im.paste(m, (x0, y0), maske)
     ortala(d, et, y0 + HY + 24, font("Cinzel[wght].ttf", 44, 600), YAZI, aralik=8, cx=cx)
 
 d.line([(W / 2 - 700, 2190), (W / 2 + 700, 2190)], fill=CIZGI, width=3)

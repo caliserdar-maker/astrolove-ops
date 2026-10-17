@@ -35,6 +35,7 @@ import os as _os0, json as _json0
 if _os0.environ.get("CIFT"):          # zor ornek testi: {"isim1": "...", "isim2": "...", "burc": "..."}
     _c = _json0.loads(_os0.environ["CIFT"])
     ISIM1, ISIM2, BURC = _c["isim1"], _c["isim2"], _c["burc"]
+AYNI_BURC = len(set(BURC.split(" · "))) == 1   # ayni burclu cift (12 cift)
 
 GREEN, TERRA = (44, 73, 56), (205, 98, 60)
 GOLD, NAVY = (182, 133, 44), (10, 30, 62)
@@ -207,7 +208,7 @@ STILLER = [
                      glif_w=108, logo=(34, 12)),
         T(BURC, (-255, 505, 255, 545), G_BURC, aralik=12, genis=(-380, 380), hedef_mm=BURC_MM),
     ], arka=[
-        MESAJ1("Different Stars Same Heart", -75, 70, 800, G_MESAJ, ad=F_ITAL),
+        MESAJ1("Same Stars Same Heart" if AYNI_BURC else "Different Stars Same Heart", -75, 70, 800, G_MESAJ, ad=F_ITAL),  # ONERI 17 Eki: ayni burcta "Different" anlamsiz
         T(f"{ISIM1} & {ISIM2}", (-222, 30, 202, 72), G_AISIM, aralik=2),
         AYRAC(155, -205, 195, G_AYRAC, (38, 95)),
     ]),
