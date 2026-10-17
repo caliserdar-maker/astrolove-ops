@@ -1,0 +1,70 @@
+name: eski78-gorsel-uret
+# ESKI 78 galeri cerceve temizligi: canli galeriyi OKUR (API anahtari, ilan basina 1 GET; CDN indirme), yeni kartlari uretir,
+# QC + once/sonra sayfalari -> Drive TEMP/ESKI78_GORSEL_20261017/. ETSY'YE YAZMAZ (Serdar 17 Eki onayi: uretim; yukleme ayri onay).
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      ciftler:
+        description: "bosluklu cift listesi ya da HEPSI"
+        default: "HEPSI"
+jobs:
+  uret:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Kurulum
+        run: |
+          set -euo pipefail
+          pip install -q numpy==2.1.3 pillow==11.0.0 scipy==1.14.1 opencv-python-headless==4.10.0.84 requests==2.34.2 || { echo "::error::pip"; exit 1; }
+          sudo apt-get -qq update >/dev/null && sudo apt-get -qq install -y tesseract-ocr >/dev/null || { echo "::error::tesseract"; exit 1; }
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null 2>&1 || sudo apt-get -qq install -y rclone >/dev/null || { echo "::error::rclone"; exit 1; }
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: Fontlar + duvar
+        run: |
+          set -euo pipefail
+          mkdir -p fonts _work; base=https://raw.githubusercontent.com/google/fonts/main/ofl
+          curl -fsSL --retry 3 "$base/ebgaramond/EBGaramond%5Bwght%5D.ttf" -o 'fonts/EBGaramond[wght].ttf' || { echo "::error::font EBGaramond"; exit 1; }
+          curl -fsSL --retry 3 "$base/lato/Lato-Regular.ttf" -o fonts/Lato-Regular.ttf || { echo "::error::font Lato"; exit 1; }
+          cp 'assets/fonts/Montserrat[wght].ttf' fonts/ || { echo "::error::font Montserrat (assets)"; exit 1; }
+          python3 scripts/pod/duvar_zemin.py data/pod/kapak_sahne_v9.png guclu _work/duvar.png acik3 || { echo "::error::duvar"; exit 1; }
+      - name: Kaynak (cift MB baskisi, r2 krem icin)
+        run: |
+          set -euo pipefail
+          G="gdrive:ASTROLOVE/TEMP/GALERI_77/_KAYNAK"
+          python3 -c "import csv;[print(r['cift']) for r in csv.DictReader(open('data/pod/pod78_ids.csv'))]" > _work/c.txt
+          cat _work/c.txt | xargs -P 8 -I{} sh -c 'rclone copyto "'$G'/{}/BASKI_MIDNIGHT_BLUE.jpg" "_work/K/{}/BASKI_MIDNIGHT_BLUE.jpg" -q || echo "EKSIK {}"' | tee _work/eksik.txt
+          [ ! -s _work/eksik.txt ] || { echo "::error::kaynak eksik: $(tr '\n' ' ' < _work/eksik.txt)"; exit 1; }
+      - name: Canli galeri indir (salt okuma)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          CIFTLER: ${{ inputs.ciftler }}
+        run: python3 scripts/etsy/eski78_gorsel_indir.py --out _work/CANLI --ciftler "$CIFTLER"
+      - name: Uret + QC
+        env:
+          CIFTLER: ${{ inputs.ciftler }}
+        run: python3 scripts/pod/eski78_gorsel_uret.py --canli _work/CANLI --kaynak _work/K --duvar _work/duvar.png --fd fonts --out _work/OUT --ciftler "$CIFTLER" --is 4
+      - name: Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          if [ -d _work/OUT ]; then
+            mkdir -p _work/OUT/_canli; for d in _work/CANLI/*/; do c=$(basename "$d"); mkdir -p "_work/OUT/_canli/$c"; cp "$d/galeri.json" "_work/OUT/_canli/$c/" 2>/dev/null || true; done
+            rclone copy _work/OUT "gdrive:ASTROLOVE/TEMP/ESKI78_GORSEL_20261017" -q --transfers 8 && echo "Drive: TEMP/ESKI78_GORSEL_20261017/"
+            K=$(rclone lsjson gdrive:ASTROLOVE/TEMP --dirs-only | python3 -c "import json,sys;print([x['ID'] for x in json.load(sys.stdin) if x['Name']=='ESKI78_GORSEL_20261017'][0])"); echo "::warning::KLASOR ESKI78_GORSEL_20261017 $K"
+          fi
+          rm -rf ~/.config/rclone
