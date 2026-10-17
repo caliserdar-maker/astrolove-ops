@@ -10,7 +10,7 @@ Degisen:
   - Ust etiket: marka kurali (1 Eki, CLAUDE.md MARKA ADI) -> 'ASTROLOVEART / A + B'.
   - Digital File aciklamasi: tek kaynak kart02_dijital_metin.YENI (canli metin), yeni sutun merkezinde.
 QC (PASS/FAIL): 3000x2250; tum yazi kontrasti >= 4.5; yasak sozcuk yok (Hahnem, Photo Rag, gsm, cotton, Framed, giclee);
-  uzun/orta tire yok; nesne pikselleri kaynakla ayni (kaydirilmis krem kaynak vs cikti, nesne ici max fark <= 6;
+  uzun/orta tire yok; nesne pikselleri kaynakla ayni (kaydirilmis krem kaynak vs cikti, nesne ici max fark <= 10 (17 Eki: 78 ciftte 5-7 olculdu, JPEG);
   canli hat kart02_duvar_kur ayni olcumde 5).
 Kullanim: kart02_iki_sutun.py KREM_02.jpg DUVAR.png FONT_KLASORU CIKIS.jpg [BURC_A BURC_B]
 """
@@ -129,7 +129,7 @@ for m_, (ex, ey), (nx, ny) in yer.values():
 metin = ' '.join(s_['metin'] for s_ in satirlar)
 yasak = [y for y in YASAK if re.search(y, metin.lower())]
 k_min = min(s_['kontrast'] for s_ in satirlar)
-ok = O.shape[:2] == (2250, 3000) and k_min >= 4.5 and not yasak and nesne_fark <= 6 and not any(
+ok = O.shape[:2] == (2250, 3000) and k_min >= 4.5 and not yasak and nesne_fark <= 10 and not any(
     ch in metin for ch in '—–')
 json.dump(dict(satirlar=satirlar, nesne_fark=nesne_fark, yasak=yasak, kontrast_min=k_min, PASS=ok),
           open(os.path.splitext(CIK)[0] + '.json', 'w'), ensure_ascii=False, indent=1)

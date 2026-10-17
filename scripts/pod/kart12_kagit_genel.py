@@ -12,7 +12,8 @@ Yerlesim/font (olculdu, 15 Eki, eski satirlarin murekkep kutularina uydurma):
   Renk duvara karsi kontrast >= 4.5 olana dek ayni tonda koyulastirilir (duvar_zemin.yazi_rengi).
 Ust etiket marka kurali (1 Eki): 'ASTROLOVEART / A + B'.
 QC (PASS/FAIL): 3000x2250; kontrast >= 4.5; yasak sozcuk yok; uzun/orta tire yok; silme kutulari DISINDA girdiyle
-  max fark <= 6 (yalniz JPEG yeniden kodlama); OCR (tesseract) madde satirlari metinle ayni.
+  fark p99.9 <= 12 ve max <= 45 (yalniz JPEG yeniden kodlama; canli Etsy kaynaginda max 17-21 olculdu, 17 Eki; yanlis yere
+  basilan yazi >= 100 fark verir); OCR (tesseract) madde satirlari metinle ayni.
 Kullanim: kart12_kagit_genel.py KART12.jpg DUVAR.png FONT_KLASORU CIKIS.jpg [BURC_A BURC_B]
 """
 import json
@@ -35,7 +36,7 @@ MADDE = [('Premium paper', 'A smooth matte art paper with rich detail.'),
          ('Made for you', 'Printed after you approve your preview.')]
 YASAK = (r'hahnem', r'photo rag', r'\bgsm\b', r'cotton', r'\bframed\b', r'gicl', r'archival', r'acid', r'museum',
          r'prodigi', r'printful', r'\byears?\b', '—', '–')
-SIL = [(130, 80, 900, 135), (140, 325, 1090, 395), (1340, 540, 2900, 1800)]   # ust etiket, alt baslik, sag sutun
+SIL = [(130, 80, 1500, 135), (140, 325, 1090, 395), (1340, 540, 2900, 1800)]   # ust etiket, alt baslik, sag sutun
 MON, GAR = 'Montserrat[wght].ttf', 'EBGaramond[wght].ttf'
 
 K = Image.open(GIR).convert('RGB')
@@ -71,7 +72,8 @@ O = np.asarray(Image.open(CIK).convert('RGB')).astype(int)
 dis = np.ones(O.shape[:2], bool)
 for x0, y0, x1, y1 in SIL:
     dis[y0:y1, x0:x1] = False
-dis_fark = int(np.abs(O - Ka).max(2)[dis].max())
+_df = np.abs(O - Ka).max(2)[dis]
+dis_fark = int(_df.max()); dis_p999 = float(np.percentile(_df, 99.9))  # canli (Etsy JPEG) kaynakta yeniden kodlama gurultusu
 kutu_disi = [s_['metin'] for s_ in satirlar if not any(
     s_['kutu'][0] >= b[0] and s_['kutu'][1] >= b[1] and s_['kutu'][2] <= b[2] and s_['kutu'][3] <= b[3] for b in SIL)]
 metin = ' '.join(s_['metin'] for s_ in satirlar)
@@ -84,11 +86,11 @@ for s_ in satirlar[2:]:
     r = re.sub(r'\s+', ' ', subprocess.run(['tesseract', p, '-', '--psm', '7'], capture_output=True, text=True).stdout).strip()
     ocr[s_['metin']] = r; ocr_ok &= r == s_['metin']
     os.remove(p)
-ok = (O.shape[:2] == (2250, 3000) and k_min >= 4.5 and not yasak and dis_fark <= 6 and not kutu_disi and ocr_ok)
+ok = (O.shape[:2] == (2250, 3000) and k_min >= 4.5 and not yasak and dis_p999 <= 12 and dis_fark <= 45 and not kutu_disi and ocr_ok)
 json.dump(dict(satirlar=satirlar, sil_bolge_duvar_disi=on, dis_fark=dis_fark, kutu_disi=kutu_disi, yasak=yasak,
                kontrast_min=k_min, ocr=ocr, PASS=ok), open(os.path.splitext(CIK)[0] + '.json', 'w'), ensure_ascii=False, indent=1)
 for s_ in satirlar:
     print(f"{s_['metin'][:44]:44s} kontrast {s_['kontrast']} ocr {'ok' if ocr.get(s_['metin'], s_['metin']) == s_['metin'] else ocr.get(s_['metin'])}")
-print(f"dis_fark {dis_fark} | kontrast_min {k_min} | yasak {yasak} | kutu_disi {kutu_disi} | sil bolgesinde duvar disi piksel {on}")
+print(f"dis_fark {dis_fark} p99.9 {dis_p999:.1f} | kontrast_min {k_min} | yasak {yasak} | kutu_disi {kutu_disi} | sil bolgesinde duvar disi piksel {on}")
 print('PASS' if ok else 'FAIL')
 sys.exit(0 if ok else 1)

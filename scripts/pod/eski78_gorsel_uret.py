@@ -14,7 +14,7 @@ Canli rank -> islem (onayli CL ornegi 17 Eki ile ayni kural):
   r12 kagit            genel kagit karti (kart12_kagit_genel.py)
   r13 surec            alt baslik + 04 maddesi
 Ust etiket (ASTROLOVE / ASTROLOVEART) olduğu gibi (Serdar 17 Eki: ayri is).
-QC (cift basina PASS/FAIL): her metin degisikligi kutu disi fark <= 6, olcum hatasi < 40, yasak sozcuk yok; etiket kontrast PASS;
+QC (cift basina PASS/FAIL): her metin degisikligi kutu disi fark p99.9 <= 12 ve max <= 45 (canli Etsy JPEG yeniden kodlama gurultusu; yanlis yere yazi >= 100), olcum hatasi < 40, yasak sozcuk yok; etiket kontrast PASS;
   r12 betigi PASS; r2 betigi PASS + baski posteri canli r2 posteriyle NCC >= 0.97 (dogru cift); tum ciktilar 3000x2250.
 Cikti: OUT/<CIFT>/rNN_*.jpg + OUT/<CIFT>/ONCE_SONRA.jpg + OUT/TABLO.csv
 Kullanim: eski78_gorsel_uret.py --canli CANLI --kaynak K --duvar DUVAR.png --fd FONTS --out OUT [--ciftler ...] [--is 4]"""
@@ -87,11 +87,11 @@ def cift_isle(arg):
             m = np.ones(Ka.shape[:2], bool)
             for i in isler:
                 x0, y0, x1, y1 = i["kutu"]; m[y0:y1, x0:x1] = False
-            dis = int(np.abs(Ka - B).max(2)[m].max()); hata = max(x["hata"] for x in rp)
+            _d = np.abs(Ka - B).max(2)[m]; dis = int(_d.max()); p999 = float(np.percentile(_d, 99.9)); hata = max(x["hata"] for x in rp)
             yazi = " ".join(t for x in rp for t in x["yeni"]).lower(); yas = [s for s in YASAK if s in yazi]
-            R[f"r{r}"] = dict(kutu_disi=dis, olcum_hata=hata, yasak=yas)
-            if dis > 6 or hata >= 40 or yas:
-                ok = False; R["notlar"].append(f"r{r} metin FAIL dis={dis} hata={hata} yasak={yas}")
+            R[f"r{r}"] = dict(kutu_disi=dis, kutu_disi_p999=round(p999, 1), olcum_hata=hata, yasak=yas)
+            if p999 > 12 or dis > 45 or hata >= 40 or yas:
+                ok = False; R["notlar"].append(f"r{r} metin FAIL dis={dis} p99.9={p999:.1f} hata={hata} yasak={yas}")
         # etiketler (metinli kartlarda metin sonrasi)
         for r in sorted(ETIKET):
             g = os.path.join(o, f"r{r:02d}.jpg") if r in METIN else src[r]
