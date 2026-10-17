@@ -10,7 +10,7 @@ Yerlesim/font (olculdu, 15 Eki, eski satirlarin murekkep kutularina uydurma):
   madde basligi EB Garamond 400 105 px, x 1365, tabanlar 633 / 989 / 1345 / 1700, renk (16,25,40)
   madde satiri  Montserrat 500 44 px, x 1365, tabanlar 711 / 1067 / 1421 / 1777, renk (16,24,32)
   Renk duvara karsi kontrast >= 4.5 olana dek ayni tonda koyulastirilir (duvar_zemin.yazi_rengi).
-Ust etiket marka kurali (1 Eki): 'ASTROLOVEART / A + B'.
+Ust etiket: canli kartin kendi 'ASTROLOVE / A + B' satiri AYNEN kalir (Serdar 17 Eki; silinmez, yeniden yazilmaz).
 QC (PASS/FAIL): 3000x2250; kontrast >= 4.5; yasak sozcuk yok; uzun/orta tire yok; silme kutulari DISINDA girdiyle
   fark p99.9 <= 12 ve max <= 45 (yalniz JPEG yeniden kodlama; canli Etsy kaynaginda max 17-21 olculdu, 17 Eki; yanlis yere
   basilan yazi >= 100 fark verir); OCR (tesseract) madde satirlari metinle ayni.
@@ -36,7 +36,7 @@ MADDE = [('Premium paper', 'A smooth matte art paper with rich detail.'),
          ('Made for you', 'Printed after you approve your preview.')]
 YASAK = (r'hahnem', r'photo rag', r'\bgsm\b', r'cotton', r'\bframed\b', r'gicl', r'archival', r'acid', r'museum',
          r'prodigi', r'printful', r'\byears?\b', '—', '–')
-SIL = [(130, 80, 1500, 135), (140, 325, 1090, 395), (1340, 540, 2900, 1800)]   # ust etiket, alt baslik, sag sutun
+SIL = [(140, 325, 1090, 395), (1340, 540, 2900, 1800)]   # alt baslik, sag sutun (ust etiket canli kartta kalir)
 MON, GAR = 'Montserrat[wght].ttf', 'EBGaramond[wght].ttf'
 
 K = Image.open(GIR).convert('RGB')
@@ -53,8 +53,7 @@ def font(fy, s, w):
     f = ImageFont.truetype(os.path.join(FD, fy), s); f.set_variation_by_axes([w]); return f
 
 
-YAZI = [(f'ASTROLOVEART / {BA.upper()} + {BB.upper()}', MON, 400, 37, 139, 122, (81, 74, 53)),
-        (ALT_BASLIK, MON, 400, 49, 150, 373, (21, 28, 37))]
+YAZI = [(ALT_BASLIK, MON, 400, 49, 150, 373, (21, 28, 37))]
 for (bas, sat), tb, ts in zip(MADDE, (633, 989, 1345, 1700), (711, 1067, 1421, 1777)):
     YAZI += [(bas, GAR, 400, 105, 1365, tb, (16, 25, 40)), (sat, MON, 500, 44, 1365, ts, (16, 24, 32))]
 satirlar = []
@@ -80,7 +79,7 @@ metin = ' '.join(s_['metin'] for s_ in satirlar)
 yasak = [y for y in YASAK if re.search(y, metin.lower())]
 k_min = min(s_['kontrast'] for s_ in satirlar)
 ocr_ok = True; ocr = {}
-for s_ in satirlar[2:]:
+for s_ in satirlar[1:]:
     x0, y0, x1, y1 = s_['kutu']; c = Image.open(CIK).crop((x0 - 20, y0 - 20, x1 + 20, y1 + 20))
     c = c.resize((c.width * 2, c.height * 2), Image.LANCZOS); p = os.path.splitext(CIK)[0] + '_ocr.png'; c.save(p)
     r = re.sub(r'\s+', ' ', subprocess.run(['tesseract', p, '-', '--psm', '7'], capture_output=True, text=True).stdout).strip()

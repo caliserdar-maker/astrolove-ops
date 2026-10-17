@@ -7,7 +7,7 @@ Degisen:
     Nesne pikselleri krem kaynaktan aynen kopyalanir (kaydirma tam sayi px), golge nesneyle birlikte kayar.
   - Alt baslik: 'One design, two ways to enjoy it.'
   - Print aciklamasi: tedarikciden bagimsiz genel ifade (BASKI_SATIR).
-  - Ust etiket: marka kurali (1 Eki, CLAUDE.md MARKA ADI) -> 'ASTROLOVEART / A + B'.
+  - Ust etiket: diger kartlarla ayni 'ASTROLOVE / A + B' (Serdar 17 Eki; marka adi ayri is).
   - Digital File aciklamasi: tek kaynak kart02_dijital_metin.YENI (canli metin), yeni sutun merkezinde.
 QC (PASS/FAIL): 3000x2250; tum yazi kontrasti >= 4.5; yasak sozcuk yok (Hahnem, Photo Rag, gsm, cotton, Framed, giclee);
   uzun/orta tire yok; nesne pikselleri kaynakla ayni (kaydirilmis krem kaynak vs cikti, nesne ici max fark <= 10 (17 Eki: 78 ciftte 5-7 olculdu, JPEG);
@@ -90,7 +90,7 @@ c_pbas = eski_merkez('Print', GAR, 64, 400, 1437) + dP
 c_p1 = eski_merkez('Hahnemühle Photo Rag fine art paper.', LAT, 38, None, 1182) + dP
 c_p2 = eski_merkez('Unframed, ready for your frame.', LAT, 38, None, 1233) + dP
 YAZI = [  # (metin, font, wght, punto, x (None = merkez c), taban y, onayli renk, merkez)
-    (f'ASTROLOVEART / {BA.upper()} + {BB.upper()}', LAT, None, 40, 140, 130, (174, 143, 83), None),
+    (f'ASTROLOVE / {BA.upper()} + {BB.upper()}', LAT, None, 40, 140, 130, (174, 143, 83), None),
     ('Choose your format.', GAR, 430, 102, 140, 246, (22, 38, 65), None),
     (ALT_BASLIK, LAT, None, 52, 145, 367, (37, 45, 57), None),
     ('Digital File', GAR, 400, 64, None, 1456, (22, 38, 65), c_dbas),

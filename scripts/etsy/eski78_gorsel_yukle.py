@@ -217,11 +217,79 @@ def bir_ilan(api, shop, lid, c, a, b, kay, out, yedek_drive):
     return rap
 
 
+def duzelt(api, shop, lid, c, kay, out, yedek_drive, kartlar=(2, 12)):
+    """Onceki yuklemesi PASS olan ilanda yalniz verilen kartlari (uretim rNN) yeniden yukler (Serdar 17 Eki: r2/r12 ust etiket).
+    Canli rank: r2 -> 2, r12 -> 11 (rank 6 silindigi icin). Ayni alt metin; overwrite eskiyi silmezse eski silinir."""
+    CANLI_RANK = {2: 2, 12: 11}
+    o = out / f"{lid}_{c}"; rap0 = json.loads((o / "rapor.json").read_text())
+    if rap0.get("sonuc") != "PASS":
+        raise SystemExit(f"DUR {c}: onceki yukleme PASS degil")
+    qc = json.loads((kay / c / "_QC.json").read_text())
+    if not qc.get("PASS"):
+        raise SystemExit(f"DUR {c}: uretim QC PASS degil")
+    g0 = G.galeri(api, lid); ids0 = [x.get("listing_image_id") for x in g0]
+    if len(ids0) != 17:
+        raise SystemExit(f"DUR {c}: canli {len(ids0)} gorsel (17 beklenir)")
+    for k in kartlar:
+        if ids0[CANLI_RANK[k] - 1] != rap0["yeni_id"][str(k)]:
+            raise SystemExit(f"DUR {c}: canli rank {CANLI_RANK[k]} onceki yuklemedeki r{k} degil")
+    od = o / "duzelt"; od.mkdir(exist_ok=True)
+    man = G.yedek_al(api, shop, lid, od)
+    if yedek_drive:
+        drive_kopya(od / "yedek", f"{yedek_drive}/{c}/YEDEK_DUZELT")
+    kor0 = man["korunan"]; bag0 = sorted((v.get("value_id"), v.get("image_id")) for v in man["variation_images"])
+    alt0 = [x.get("alt_text") or "" for x in g0]
+    ids = list(ids0); yeni = {}; yol = []
+    for k in kartlar:
+        r = CANLI_RANK[k]
+        with open(kay / c / f"r{k:02d}.jpg", "rb") as fh:
+            y = api.post_file(f"/shops/{shop}/listings/{lid}/images", files={"image": (f"r{k:02d}.jpg", fh, "image/jpeg")},
+                              data={"rank": str(r), "overwrite": "true", "alt_text": alt0[r - 1]})
+        kota(api)
+        yid = (y or {}).get("listing_image_id")
+        if not yid or yid in ids0:
+            raise SystemExit(f"DUR {c}: r{k} yukleme id {yid}")
+        eski = ids[r - 1]; ids[r - 1] = yid; yeni[k] = yid
+        g = G.kararli(lambda: G.galeri(api, lid), lambda g: [x.get("listing_image_id") for x in g] == ids)
+        gi = [x.get("listing_image_id") for x in g]
+        if gi != ids:
+            if len(gi) == 18 and eski in gi:
+                G.gorsel_sil(api, shop, lid, eski); yol.append(f"r{k}: eski silindi")
+                g = G.kararli(lambda: G.galeri(api, lid), lambda g: [x.get("listing_image_id") for x in g] == ids)
+                gi = [x.get("listing_image_id") for x in g]
+            if gi != ids:
+                raise SystemExit(f"DUR {c}: r{k} sonrasi galeri beklenmedik {gi}")
+    sorun = []
+    if len(gi) != 17 or any(i in gi for i in (ids0[CANLI_RANK[k] - 1] for k in kartlar)):
+        sorun.append("eski kart duruyor / sayi")
+    if [x.get("alt_text") or "" for x in g] != alt0:
+        sorun.append("alt metin degisti")
+    bag1 = sorted((v.get("value_id"), v.get("image_id")) for v in G.var_img(api, shop, lid))
+    if bag1 != bag0 or len(bag1) != 5:
+        sorun.append(f"renk baglari {len(bag1)}")
+    kor1 = G.korunanlar(api, shop, lid)
+    for kk in ("state", "title", "tags", "desc_sha", "inv_sha", "n_urun", "video_ids"):
+        if kor1.get(kk) != kor0.get(kk):
+            sorun.append(f"korunan {kk}")
+    url = {x.get("listing_image_id"): x.get("url_fullxfull") for x in g}
+    nccs = {k: cdn_ncc(url.get(v), kay / c / f"r{k:02d}.jpg") for k, v in yeni.items()}
+    sorun += [f"r{k} NCC {v}" for k, v in nccs.items() if v < 0.999]
+    rap = dict(cift=c, listing_id=lid, sonuc="PASS" if not sorun else "FAIL", sorun=sorun, yol=yol, gorsel=len(gi), yeni_id=yeni,
+               eski_id={k: ids0[CANLI_RANK[k] - 1] for k in kartlar}, ncc=nccs, renk_bagi=len(bag1), istek=api.calls, kota=api.remaining)
+    (od / "rapor_duzelt.json").write_text(json.dumps(rap, indent=1, ensure_ascii=False))
+    if not sorun:                                               # ana rapor guncel kartlari gostersin
+        rap0["yeni_id"].update({str(k): v for k, v in yeni.items()}); rap0["ncc"].update({str(k): v for k, v in nccs.items()})
+        (o / "rapor.json").write_text(json.dumps(rap0, indent=1, ensure_ascii=False))
+    print(f"::warning::DUZELT {c} {rap['sonuc']} | gorsel {rap['gorsel']} | yeni {yeni} | ncc {nccs} | renk {len(bag1)} | yol {yol} | "
+          f"sorun {sorun} | istek {api.calls} | kota {api.remaining}"[:900])
+    return 0 if not sorun else 1
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--kaynak", required=True); ap.add_argument("--out", required=True); ap.add_argument("--yedek-drive", default="")
     ap.add_argument("--confirm", default=""); ap.add_argument("--ciftler", default="HEPSI"); ap.add_argument("--limit", type=int, default=0)
-    ap.add_argument("--ids", default="data/pod/pod78_ids.csv")
+    ap.add_argument("--ids", default="data/pod/pod78_ids.csv"); ap.add_argument("--duzelt", action="store_true")
     a = ap.parse_args()
     if a.confirm != "ESKI78_GORSEL":
         raise SystemExit("HATA: --confirm ESKI78_GORSEL gerekir.")
@@ -231,6 +299,12 @@ def main():
         st.refresh()
     api = Etsy(st); shop = os.environ["ETSY_SHOP_ID"]; out = Path(a.out); out.mkdir(parents=True, exist_ok=True); kay = Path(a.kaynak)
     rows = list(csv.DictReader(open(a.ids)))
+    if a.duzelt:
+        r = next(x for x in rows if x["cift"] == a.ciftler.strip())
+        try:
+            return duzelt(api, shop, r["listing_id"].strip(), r["cift"], kay, out, a.yedek_drive)
+        except SystemExit as e:
+            print(f"::error::{str(e.code)[:800]}"); return 1
     if a.ciftler != "HEPSI":
         sec = a.ciftler.split(); rows = sorted((r for r in rows if r["cift"] in sec), key=lambda r: sec.index(r["cift"]))
     tamam = {p.parent.name.split("_", 1)[1] for p in out.glob("*/rapor.json") if json.loads(p.read_text())["sonuc"] == "PASS"}

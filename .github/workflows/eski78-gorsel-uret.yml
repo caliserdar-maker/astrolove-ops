@@ -55,6 +55,25 @@ jobs:
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
           CIFTLER: ${{ inputs.ciftler }}
         run: python3 scripts/etsy/eski78_gorsel_indir.py --out _work/CANLI --ciftler "$CIFTLER"
+      - name: CANCER_LIBRA kaynagi = yukleme oncesi yedek (canli galeri 17 Eki yuklemesiyle degisti)
+        env:
+          CIFTLER: ${{ inputs.ciftler }}
+        run: |
+          set -euo pipefail
+          case " $CIFTLER " in *" HEPSI "*|*" CANCER_LIBRA "*) ;; *) exit 0;; esac
+          K="gdrive:ASTROLOVE/TEMP/ESKI78_GORSEL_20261017"
+          rm -rf _work/CANLI/CANCER_LIBRA _work/CLY; mkdir -p _work/CANLI/CANCER_LIBRA
+          rclone copy "$K/CANCER_LIBRA/YEDEK" _work/CLY -q
+          rclone copyto "$K/_canli/CANCER_LIBRA/galeri.json" _work/CANLI/CANCER_LIBRA/galeri.json -q
+          python3 - <<'PY'
+          import json, shutil, glob, os
+          g = json.load(open('_work/CANLI/CANCER_LIBRA/galeri.json')); m = json.load(open('_work/CLY/manifest.json'))
+          a = [x['listing_image_id'] for x in g['gorseller']]; b = [x['listing_image_id'] for x in m['galeri']]
+          assert a == b and len(a) == 18, f"yedek != uretim galerisi {len(a)} {len(b)}"
+          for p in glob.glob('_work/CLY/*.jpg'):
+              n = int(os.path.basename(p).split('_', 1)[0]); shutil.copyfile(p, f'_work/CANLI/CANCER_LIBRA/r{n:02d}.jpg')
+          print('CL kaynak: yedekten', len(glob.glob('_work/CANLI/CANCER_LIBRA/r*.jpg')), 'gorsel')
+          PY
       - name: Uret + QC
         env:
           CIFTLER: ${{ inputs.ciftler }}

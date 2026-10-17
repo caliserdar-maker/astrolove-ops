@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       mod:
-        description: "yukle | kontrol"
+        description: "yukle | duzelt (yalniz r2+r12, tek cift) | kontrol"
         default: "kontrol"
       ciftler:
         description: "bosluklu cift listesi ya da HEPSI"
@@ -25,6 +25,7 @@ jobs:
       - name: Onay kapisi
         run: |
           [ "${{ inputs.mod }}" = "kontrol" ] || [ "${{ inputs.onay }}" = "SERDAR_GORSEL_17EKI" ] || { echo "::error::onay yok"; exit 1; }
+          [ "${{ inputs.mod }}" != "duzelt" ] || [ "$(echo ${{ inputs.ciftler }} | wc -w)" = "1" ] || { echo "::error::duzelt tek cift"; exit 1; }
       - uses: actions/checkout@v4
       - name: Etsy kilidi (sira bekle, iptal yok)
         env:
@@ -57,7 +58,7 @@ jobs:
           K="gdrive:ASTROLOVE/TEMP/ESKI78_GORSEL_20261017"
           if [ "${{ inputs.ciftler }}" = "HEPSI" ]; then rclone copy "$K" _work/KAY -q --transfers 8 --exclude "*/ONCE_SONRA.jpg" --exclude "*/YEDEK/**"
           else for c in ${{ inputs.ciftler }}; do rclone copy "$K/$c" "_work/KAY/$c" -q --exclude "ONCE_SONRA.jpg" --exclude "YEDEK/**"; rclone copy "$K/_canli/$c" "_work/KAY/_canli/$c" -q; done; fi
-          rclone copy "gdrive:ASTROLOVE/TEMP/ESKI78_GORSEL_YUKLE_20261017" _out -q --include "*/rapor.json" || true
+          rclone copy "gdrive:ASTROLOVE/TEMP/ESKI78_GORSEL_YUKLE_20261017" _out -q --include "*/rapor.json" --include "*/duzelt/rapor_duzelt.json" || true
       - name: Calistir
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
@@ -66,7 +67,10 @@ jobs:
           TOKEN_FILE: _work/ETSY_TOKEN.json
           CIFTLER: ${{ inputs.ciftler }}
         run: |
-          if [ "${{ inputs.mod }}" = "yukle" ]; then
+          if [ "${{ inputs.mod }}" = "duzelt" ]; then
+            python3 scripts/etsy/eski78_gorsel_yukle.py --duzelt --kaynak _work/KAY --out _out --ciftler "$CIFTLER" --confirm ESKI78_GORSEL \
+              --yedek-drive "gdrive:ASTROLOVE/TEMP/ESKI78_GORSEL_20261017"
+          elif [ "${{ inputs.mod }}" = "yukle" ]; then
             python3 scripts/etsy/eski78_gorsel_yukle.py --kaynak _work/KAY --out _out --ciftler "$CIFTLER" --confirm ESKI78_GORSEL \
               --yedek-drive "gdrive:ASTROLOVE/TEMP/ESKI78_GORSEL_20261017"
           else
