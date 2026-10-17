@@ -1,0 +1,42 @@
+name: pinterest-kontrol
+# Pinterest 17 Eki kontrolu (SALT OKUMA). Metricool ve Pinterest'e YAZMA / SILME / DEGISTIRME YOK; yalniz GET.
+# scripts/sosyal/pinterest_kontrol.py: 30 / 7 gun toplam, gunluk gosterim, pano bazinda, en yeni 5 pinin sayfasinda "PDF".
+# Token loga yazilmaz (::add-mask:: + sir_koru). Cikti: Drive ASTROLOVE/TEMP/PINTEREST_20261017/.
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+jobs:
+  oku:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      O: gdrive:ASTROLOVE/TEMP/PINTEREST_20261017
+    steps:
+      - uses: actions/checkout@v4
+      - name: rclone + token
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+          mkdir -p ~/.config/rclone _work _out; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Kontrol (yalniz GET)
+        run: |
+          set -uo pipefail
+          rclone copyto "gdrive:ASTROLOVE/TEMP/METRICOOL_TOKEN.json" _work/mc.json
+          python3 -c "import json;print('::add-mask::'+json.load(open('_work/mc.json'))['userToken'])"
+          python3 scripts/sosyal/pinterest_kontrol.py _work/mc.json _out | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
+          rc=${PIPESTATUS[0]}
+          python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/mc.json _out || exit 1
+          rclone copy _out "$O" -q --exclude "_sayfa/**"
+          rclone lsl "$O" | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
+          exit $rc
+      - if: always()
+        run: |
+          rm -rf _work ~/.config/rclone
+          if [ -f "$RUNNER_TEMP/SIR_ENGEL" ]; then echo "::error::sir iceren satir engellendi (sir_koru)"; exit 1; fi
