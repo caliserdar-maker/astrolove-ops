@@ -71,9 +71,24 @@ def main():
                 if v.get("property_id") == P_FORMAT:
                     fmt.append((v.get("values") or [""])[0]); adlar.add(v.get("property_name"))
         fr = [f for f in fmt if f in CERCEVE]
+        # geri okuma (17 Eki adim 3): fiyat renkten bagimsiz mi, stok, SKU
+        fiyat, stok, skus = {}, set(), []
+        fiyat_tutarsiz = 0
+        for p in prods:
+            d_ = {v.get("property_id"): (v.get("values") or [""])[0] for v in p.get("property_values") or []}
+            o = (p.get("offerings") or [{}])[0]; pr = o.get("price") or {}
+            f_ = round(pr.get("amount", 0) / (pr.get("divisor") or 1), 2); k_ = (d_.get(514), d_.get(513))
+            if k_ in fiyat and fiyat[k_] != f_:
+                fiyat_tutarsiz += 1
+            fiyat[k_] = f_; stok.add(o.get("quantity")); skus.append(p.get("sku") or "")
+        frame_satir = [ln for ln in d.splitlines() if FRAME.search(ln) and ln.strip() != YENI_SATIR]
         tab.append(dict(cift=r["cift"], listing_id=lid, state=x.get("state"), urun=len(prods), format_menu="|".join(sorted(a_ for a_ in adlar if a_)),
                         framed_urun=len(fr), framed_deger=len(set(fr)), aciklama_frame=len(FRAME.findall(d)),
-                        yeni_satir=YENI_SATIR in d, kagit_sozu=len(KAGIT.findall(d)), materials=";".join(x.get("materials") or [])))
+                        yeni_satir=YENI_SATIR in d, kagit_sozu=len(KAGIT.findall(d)), materials=";".join(x.get("materials") or []),
+                        frame_disi_satir=len(frame_satir), fiyat_imza=";".join(f"{k[0]}|{k[1]}={v}" for k, v in sorted(fiyat.items(), key=str)),
+                        fiyat_tutarsiz=fiyat_tutarsiz, stok="|".join(sorted(str(q) for q in stok)),
+                        sku_dolu=sum(1 for q in skus if q), sku_benzersiz=len(set(skus)),
+                        sku_onek_ok=all(q.startswith(f"POD-{r['cift'].split('_')[0][:3]}_{r['cift'].split('_')[1][:3]}-") for q in skus if q)))
         if i % 10 == 0 or i == len(rows):
             g = time.time() - t0
             print(f"[{i}/{len(rows)}] %{i * 100 // len(rows)} gecen {g:.0f}s kalan ~{g / i * (len(rows) - i):.0f}s kota {ham.remaining}", flush=True)
@@ -86,8 +101,26 @@ def main():
     oz = lambda c: dict(Counter(str(t[c]) for t in tab))  # noqa: E731
     print("::warning::OZET " + " | ".join(f"{c}: {oz(c)}" for c in ("state", "urun", "format_menu", "framed_urun", "framed_deger",
                                                                    "aciklama_frame", "yeni_satir", "kagit_sozu", "materials")))
-    sap = [t for t in tab if t["framed_urun"] == 0 or t["yeni_satir"] or t["urun"] != 390]
-    print(f"::warning::sapan ilan ({len(sap)}): " + "; ".join(f"{t['cift']} urun {t['urun']} framed {t['framed_urun']} frame_soz {t['aciklama_frame']}" for t in sap)[:900])
+    # KONTROL (17 Eki adim 3): ilan basina PASS/FAIL; fiyat imzasi CL ile ayni (CL canlida dogrulandi)
+    cl_imza = next((t["fiyat_imza"] for t in tab if t["cift"] == "CANCER_LIBRA"), None)
+    for t in tab:
+        ned = []
+        if t["state"] != "active": ned.append(f"state {t['state']}")
+        if t["urun"] != 130: ned.append(f"urun {t['urun']}")
+        if t["framed_urun"]: ned.append(f"framed {t['framed_urun']}")
+        if t["format_menu"] != "Format": ned.append(f"menu {t['format_menu']}")
+        if not t["yeni_satir"] or t["frame_disi_satir"]: ned.append(f"frame satir yeni={t['yeni_satir']} disi={t['frame_disi_satir']}")
+        if t["kagit_sozu"]: ned.append(f"kagit {t['kagit_sozu']}")
+        if t["materials"] != "matte art paper;ink": ned.append(f"materials {t['materials']}")
+        if t["fiyat_tutarsiz"] or t["fiyat_imza"] != cl_imza: ned.append("fiyat")
+        if t["stok"] != "999": ned.append(f"stok {t['stok']}")
+        if t["sku_dolu"] != t["urun"] or t["sku_benzersiz"] != 26 or not t["sku_onek_ok"]:
+            ned.append(f"sku dolu {t['sku_dolu']} benzersiz {t['sku_benzersiz']} onek {t['sku_onek_ok']}")
+        t["kontrol"] = "PASS" if not ned else "FAIL: " + ", ".join(ned)
+    n_pass = sum(1 for t in tab if t["kontrol"] == "PASS")
+    print(f"::warning::KONTROL PASS {n_pass}/{len(tab)} | FAIL: " + "; ".join(f"{t['cift']} ({t['kontrol'][6:]})" for t in tab if t["kontrol"] != "PASS")[:900])
+    with open(out / "ESKI78_KONTROL.csv", "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=list(tab[0])); w.writeheader(); w.writerows(tab)
     # yapi tanisi (ilk ilan, CL): ozellikler, deger sayilari, *_on_property alanlari (409 "max 2 variations" icin)
     cl = next((r for r in rows if r["cift"] == "CANCER_LIBRA"), rows[0])
     inv = api.get(f"/listings/{cl['listing_id'].strip()}/inventory") or {}
