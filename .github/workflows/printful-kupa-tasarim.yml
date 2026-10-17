@@ -1,0 +1,61 @@
+name: printful-kupa-tasarim (gecici)
+on:
+  workflow_dispatch:
+    inputs:
+      stil:
+        description: "tasarim/ altindaki dosya adi, uzantisiz (ornek: KUPA_01_Botanical_baski_2700x1050)"
+        required: true
+permissions:
+  contents: write
+jobs:
+  calis:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: kupa-printful-sonuc
+          path: sonuc_dal
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: rclone kur
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || { echo "rclone.org erisilemedi, apt"; sudo apt-get install -y -qq rclone >/dev/null; }
+          rclone version | head -1
+      - name: Printful token (Drive TEMP/PRINTFUL_TOKEN.json, maskeli)
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            export RCLONE_CONFIG_GDRIVE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET"; fi
+          T=$(rclone cat "gdrive:ASTROLOVE/TEMP/PRINTFUL_TOKEN.json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["api_token"].strip())')
+          rm -rf ~/.config/rclone
+          [ -n "$T" ] || { echo "HATA: PRINTFUL_TOKEN.json api_token bos"; exit 1; }
+          echo "::add-mask::$T"
+          echo "PRINTFUL_TOKEN=$T" >> "$GITHUB_ENV"
+          echo "token okundu (maskeli)"
+      - name: Mockup
+        run: |
+          cd sonuc_dal
+          URL="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/kupa-printful-sonuc/tasarim/${{ inputs.stil }}.png"
+          mkdir -p "sonuc_tasarim/${{ inputs.stil }}"
+          set -o pipefail
+          python "$GITHUB_WORKSPACE/scripts/kupa_printful/mockup.py" "$URL" "sonuc_tasarim/${{ inputs.stil }}" 2>&1 \
+            | sed "s/${PRINTFUL_TOKEN}/***/g" | tee "sonuc_tasarim/${{ inputs.stil }}/LOG.txt"
+      - name: Sonuclari dala yaz (force yok)
+        if: always()
+        run: |
+          cd sonuc_dal
+          git config user.name "astrolove-bot"
+          git config user.email "astrolove-bot@users.noreply.github.com"
+          git add -A
+          git commit -qm "printful mockup: ${{ inputs.stil }}" || exit 0
+          git pull -q --rebase origin kupa-printful-sonuc
+          git push -q origin HEAD:kupa-printful-sonuc
