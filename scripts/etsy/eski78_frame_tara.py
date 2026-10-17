@@ -84,10 +84,23 @@ def main():
     (out / "OZET.md").write_text("\n".join(md) + "\n", encoding="utf-8")
     from collections import Counter
     oz = lambda c: dict(Counter(str(t[c]) for t in tab))  # noqa: E731
-    for c in ("state", "urun", "format_menu", "framed_urun", "framed_deger", "aciklama_frame", "yeni_satir", "kagit_sozu", "materials"):
-        print(f"::warning::{c}: {oz(c)}")
+    print("::warning::OZET " + " | ".join(f"{c}: {oz(c)}" for c in ("state", "urun", "format_menu", "framed_urun", "framed_deger",
+                                                                   "aciklama_frame", "yeni_satir", "kagit_sozu", "materials")))
     sap = [t for t in tab if t["framed_urun"] == 0 or t["yeni_satir"] or t["urun"] != 390]
     print(f"::warning::sapan ilan ({len(sap)}): " + "; ".join(f"{t['cift']} urun {t['urun']} framed {t['framed_urun']} frame_soz {t['aciklama_frame']}" for t in sap)[:900])
+    # yapi tanisi (ilk ilan, CL): ozellikler, deger sayilari, *_on_property alanlari (409 "max 2 variations" icin)
+    inv = api.get(f"/listings/{rows[0]['listing_id'].strip()}/inventory") or {}
+    from collections import Counter, defaultdict
+    pv = Counter(); dg = defaultdict(set)
+    for p in inv.get("products") or []:
+        for v in p.get("property_values") or []:
+            pv[(v.get("property_id"), v.get("property_name"), v.get("scale_id"))] += 1
+            dg[v.get("property_id")].add(tuple(v.get("values") or []))
+    print(f"::warning::YAPI {rows[0]['cift']}: urun {len(inv.get('products') or [])} | ozellik {dict(pv)} | deger_sayisi "
+          f"{ {k: len(v) for k, v in dg.items()} } | price_on {inv.get('price_on_property')} qty_on {inv.get('quantity_on_property')} "
+          f"sku_on {inv.get('sku_on_property')} ready_on {inv.get('readiness_state_on_property')}")
+    p0 = (inv.get("products") or [{}])[0]
+    print(f"::warning::YAPI urun0: {str({k: p0.get(k) for k in ('sku', 'property_values', 'offerings')})[:900]}")
     aries = next((t for t in tab if t["listing_id"] == "4570031205"), None)
     print(f"::warning::4570031205: {aries}")
     print(f"::warning::BITTI | istek {ham.calls} | kota {ham.remaining}")
