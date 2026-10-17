@@ -1,0 +1,83 @@
+name: eski78-gorsel-yukle
+# ESKI 78 galeri: yeni kartlari yukler (rank 1,2,3,5,7,8,9,10,12,13 overwrite + alt metin), rank 6'yi SILER. ETSY'YE YAZAR.
+# onay alani SERDAR_GORSEL_17EKI olmali (Serdar'in once/sonra onayindan sonra). mod=yukle | kontrol (salt okuma geri okuma).
+# Kaynak: Drive TEMP/ESKI78_GORSEL_20261017/ (eski78-gorsel-uret). Cikti: Drive TEMP/ESKI78_GORSEL_YUKLE_20261017/.
+permissions:
+  actions: read
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      mod:
+        description: "yukle | kontrol"
+        default: "kontrol"
+      ciftler:
+        description: "bosluklu cift listesi ya da HEPSI"
+        default: "CANCER_LIBRA"
+      onay:
+        description: "SERDAR_GORSEL_17EKI (yalniz mod=yukle)"
+        default: ""
+jobs:
+  cerceve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - name: Onay kapisi
+        run: |
+          [ "${{ inputs.mod }}" = "kontrol" ] || [ "${{ inputs.onay }}" = "SERDAR_GORSEL_17EKI" ] || { echo "::error::onay yok"; exit 1; }
+      - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2 numpy==2.1.3 pillow==11.0.0
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || { echo "rclone.org erisilemedi, apt"; sudo apt-get install -y -qq rclone >/dev/null; }
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Token
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          K="gdrive:ASTROLOVE/TEMP/ESKI78_GORSEL_20261017"
+          if [ "${{ inputs.ciftler }}" = "HEPSI" ]; then rclone copy "$K" _work/KAY -q --transfers 8 --exclude "*/ONCE_SONRA.jpg"
+          else for c in ${{ inputs.ciftler }}; do rclone copy "$K/$c" "_work/KAY/$c" -q --exclude "ONCE_SONRA.jpg"; rclone copy "$K/_canli/$c" "_work/KAY/_canli/$c" -q; done; fi
+          rclone copy "gdrive:ASTROLOVE/TEMP/ESKI78_GORSEL_YUKLE_20261017" _out -q --include "*/rapor.json" || true
+      - name: Calistir
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          CIFTLER: ${{ inputs.ciftler }}
+        run: |
+          if [ "${{ inputs.mod }}" = "yukle" ]; then
+            python3 scripts/etsy/eski78_gorsel_yukle.py --kaynak _work/KAY --out _out --ciftler "$CIFTLER" --confirm ESKI78_GORSEL \
+              --yedek-drive "gdrive:ASTROLOVE/TEMP/ESKI78_GORSEL_YUKLE_20261017/_YEDEK"
+          else
+            python3 scripts/etsy/eski78_gorsel_kontrol.py --kaynak _work/KAY --out _out --ciftler "$CIFTLER"
+          fi
+      - name: Token geri yaz + cikti Drive'a
+        if: ${{ always() }}
+        run: |
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "token geri yazildi" || true
+          if [ -d _out ] && ls _out/* >/dev/null 2>&1; then
+            python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/ETSY_TOKEN.json _out || { echo "::error::ciktida sir"; exit 1; }
+            rclone copy _out "gdrive:ASTROLOVE/TEMP/ESKI78_GORSEL_YUKLE_20261017" -q --exclude "*/yedek/*.jpg" && echo "Cikti: TEMP/ESKI78_GORSEL_YUKLE_20261017/"
+          fi
+          rm -rf _work ~/.config/rclone
