@@ -170,7 +170,7 @@ def main():
             yay.append((p['publicationDate']['dateTime'], p, pr))
     yay.sort(key=lambda x: x[0], reverse=True)
     print(f'YAYINLANMIS Pinterest (13 Eki+): {len(yay)}; en yeni 5 incelenecek')
-    sd = os.path.join(out, '_sayfa'); os.makedirs(sd, exist_ok=True)
+    sd = os.environ.get('SAYFA_DIR') or os.path.join(out, '_sayfa'); os.makedirs(sd, exist_ok=True)   # HTML Drive'a gitmez
     pdf_var = 0
     with open(os.path.join(out, 'PIN_SAYFA_20261017.csv'), 'w', newline='', encoding='utf-8') as f:
         w = csv.writer(f, lineterminator='\n'); w.writerow(['yayin', 'link', 'pano', 'baslik', 'pdf_ifadesi_var_mi', 'http', 'not'])

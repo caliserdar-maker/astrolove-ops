@@ -30,7 +30,7 @@ jobs:
           set -uo pipefail
           rclone copyto "gdrive:ASTROLOVE/TEMP/METRICOOL_TOKEN.json" _work/mc.json
           python3 -c "import json;print('::add-mask::'+json.load(open('_work/mc.json'))['userToken'])"
-          python3 scripts/sosyal/pinterest_kontrol.py _work/mc.json _out | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
+          SAYFA_DIR=_work/_sayfa python3 scripts/sosyal/pinterest_kontrol.py _work/mc.json _out | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
           rc=${PIPESTATUS[0]}
           python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/mc.json _out || exit 1
           rclone copy _out "$O" -q --exclude "_sayfa/**"
