@@ -47,9 +47,12 @@ jobs:
           sleep 15
       - name: Printful mockup
         run: |
-          cd /tmp/s
+          set -o pipefail
+          cd /tmp/s && mkdir -p sonuc
+          # log proxy'den okunamiyor: cikti (token sansurlu) dala da yazilir
           python "$GITHUB_WORKSPACE/scripts/kupa_printful/mockup.py" \
-            "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/kupa-printful-sonuc/KALIBRASYON_2700x1050.png" sonuc
+            "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/kupa-printful-sonuc/KALIBRASYON_2700x1050.png" sonuc 2>&1 \
+            | sed -u "s|${PRINTFUL_TOKEN}|***|g" | tee /tmp/s/MOCKUP_LOG.txt
       - name: Sonuclari dala yaz
         if: always()
         env:
