@@ -1,0 +1,14 @@
+ulke | boy | varyant | kargo secenegi | ucret | para birimi | teslim (gun) | adres | vergi/KDV (API)
+US | 11 oz | 1320 | Flat Rate (Estimated delivery: Oct 23⁠–26)  | 6.69 | USD | 4-6 | ornek: state_code=NY, city=New York, zip=10001 | API vermedi
+US | 11 oz | 1320 | Standard rate with CO2 offsetting (Estimated delivery: Oct 23⁠–26)  | 6.78 | USD | 4-6 | ornek: state_code=NY, city=New York, zip=10001 | API vermedi
+US | 15 oz | 4830 | Flat Rate (Estimated delivery: Oct 24⁠–26)  | 7.29 | USD | 4-6 | ornek: state_code=NY, city=New York, zip=10001 | API vermedi
+US | 15 oz | 4830 | Standard rate with CO2 offsetting (Estimated delivery: Oct 24⁠–26)  | 7.38 | USD | 4-6 | ornek: state_code=NY, city=New York, zip=10001 | API vermedi
+GB | 11 oz | 1320 | Flat Rate (Estimated delivery: Oct 21⁠–23)  | 5.19 | USD | 2-4 | yalniz ulke kodu | API vermedi
+GB | 11 oz | 1320 | Standard rate with CO2 offsetting (Estimated delivery: Oct 21⁠–23)  | 5.28 | USD | 2-4 | yalniz ulke kodu | API vermedi
+GB | 15 oz | 4830 | Flat Rate (Estimated delivery: Oct 21⁠–23)  | 6.09 | USD | 2-4 | yalniz ulke kodu | API vermedi
+GB | 15 oz | 4830 | Standard rate with CO2 offsetting (Estimated delivery: Oct 21⁠–23)  | 6.18 | USD | 2-4 | yalniz ulke kodu | API vermedi
+DE | 11 oz | 1320 | Flat Rate (Estimated delivery: Oct 22⁠–26)  | 5.39 | USD | 3-6 | yalniz ulke kodu | API vermedi
+DE | 11 oz | 1320 | Standard rate with CO2 offsetting (Estimated delivery: Oct 22⁠–26)  | 5.48 | USD | 3-6 | yalniz ulke kodu | API vermedi
+DE | 15 oz | 4830 | Flat Rate (Estimated delivery: Oct 22⁠–26)  | 6.09 | USD | 3-6 | yalniz ulke kodu | API vermedi
+DE | 15 oz | 4830 | Standard rate with CO2 offsetting (Estimated delivery: Oct 22⁠–26)  | 6.18 | USD | 3-6 | yalniz ulke kodu | API vermedi
+DE | 15 oz | 4830 | Express (Estimated delivery: Oct 23⁠–26)  | 13.02 | USD | 3-5 | yalniz ulke kodu | API vermedi

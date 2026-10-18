@@ -1,0 +1,218 @@
+{
+  "code": 200,
+  "result": {
+    "product": {
+      "id": 19,
+      "main_category_id": 195,
+      "type": "MUG",
+      "description": "Whether you're drinking your morning coffee, evening tea, or something in between—this mug's for you! It's sturdy and glossy with a vivid print that'll withstand the microwave and dishwasher.\n\n• Ceramic\n• 11 oz mug dimensions: 3.8″ (9.6 cm) in height, 3.2″ (8.2 cm) in diameter\n• 15 oz mug dimensions: 4.7″ (11.9 cm) in height, 3.3″ (8.5 cm) in diameter\n• 20 oz mug dimensions: 4.3″ (10.9 cm) in height, 3.7″ (9.3 cm) in diameter\n• Dishwasher and microwave safe\n• Blank product sourced from China",
+      "type_name": "Mug | Glossy | Ceramic | White",
+      "title": "White Glossy Mug",
+      "brand": null,
+      "model": "White Glossy Mug",
+      "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/8c/8c4ac4a450b8485bc8a6e041a5a23666_l",
+      "variant_count": 3,
+      "currency": "USD",
+      "options": [
+        {
+          "id": "license_type",
+          "title": "License type",
+          "type": "multi_select",
+          "values": {
+            "CLC": "Collegiate Licensing Company",
+            "AFFINITY": "Affinity",
+            "BR": "BR",
+            "EX": "EX",
+            "NCAA": "NCAA",
+            "FAN": "Fan",
+            "BCOMPLY": "BrandComply",
+            "TAG": "Tag",
+            "DLH": "DLH",
+            "CORE81": "Core81"
+          },
+          "additional_price": null,
+          "additional_price_breakdown": []
+        }
+      ],
+      "dimensions": {
+        "11oz": "9x3.5",
+        "15oz": "9x3.8"
+      },
+      "is_discontinued": false,
+      "avg_fulfillment_time": null,
+      "techniques": [
+        {
+          "key": "SUBLIMATION",
+          "display_name": "Sublimation",
+          "is_default": true
+        }
+      ],
+      "files": [
+        {
+          "id": "default",
+          "type": "default",
+          "title": "Print file",
+          "additional_price": null,
+          "options": []
+        },
+        {
+          "id": "preview",
+          "type": "mockup",
+          "title": "Mockup",
+          "additional_price": null,
+          "options": []
+        }
+      ],
+      "origin_country": null
+    },
+    "variants": [
+      {
+        "id": 1320,
+        "product_id": 19,
+        "name": "White Glossy Mug 11 oz",
+        "size": "11 oz",
+        "color": "White",
+        "color_code": null,
+        "color_code2": null,
+        "image": "https://files.cdn.printful.com/products/19/1320_1663762583.jpg",
+        "price": "6.07",
+        "in_stock": true,
+        "availability_regions": {
+          "US": "United States",
+          "EU": "Europe",
+          "EU_LV": "Latvia",
+          "EU_ES": "Spain",
+          "CA": "Canada",
+          "UK": "United Kingdom",
+          "JP": "Japan",
+          "AU": "Australia",
+          "BR": "Brazil"
+        },
+        "availability_status": [
+          {
+            "region": "US",
+            "status": "in_stock"
+          },
+          {
+            "region": "EU",
+            "status": "in_stock"
+          },
+          {
+            "region": "EU_LV",
+            "status": "in_stock"
+          },
+          {
+            "region": "EU_ES",
+            "status": "in_stock"
+          },
+          {
+            "region": "CA",
+            "status": "in_stock"
+          },
+          {
+            "region": "UK",
+            "status": "in_stock"
+          },
+          {
+            "region": "JP",
+            "status": "in_stock"
+          },
+          {
+            "region": "AU",
+            "status": "in_stock"
+          },
+          {
+            "region": "BR",
+            "status": "in_stock"
+          }
+        ],
+        "material": []
+      },
+      {
+        "id": 4830,
+        "product_id": 19,
+        "name": "White Glossy Mug 15 oz",
+        "size": "15 oz",
+        "color": "White",
+        "color_code": null,
+        "color_code2": null,
+        "image": "https://files.cdn.printful.com/products/19/4830_1519394046.jpg",
+        "price": "8.11",
+        "in_stock": true,
+        "availability_regions": {
+          "US": "United States",
+          "EU": "Europe",
+          "EU_LV": "Latvia",
+          "EU_ES": "Spain",
+          "CA": "Canada",
+          "UK": "United Kingdom",
+          "AU": "Australia"
+        },
+        "availability_status": [
+          {
+            "region": "US",
+            "status": "in_stock"
+          },
+          {
+            "region": "EU",
+            "status": "in_stock"
+          },
+          {
+            "region": "EU_LV",
+            "status": "in_stock"
+          },
+          {
+            "region": "EU_ES",
+            "status": "in_stock"
+          },
+          {
+            "region": "CA",
+            "status": "in_stock"
+          },
+          {
+            "region": "UK",
+            "status": "in_stock"
+          },
+          {
+            "region": "AU",
+            "status": "in_stock"
+          }
+        ],
+        "material": []
+      },
+      {
+        "id": 16586,
+        "product_id": 19,
+        "name": "White Glossy Mug 20 oz",
+        "size": "20 oz",
+        "color": "White",
+        "color_code": null,
+        "color_code2": null,
+        "image": "https://files.cdn.printful.com/products/19/16586_1680616351.jpg",
+        "price": "9.69",
+        "in_stock": true,
+        "availability_regions": {
+          "US": "United States",
+          "EU": "Europe",
+          "EU_LV": "Latvia"
+        },
+        "availability_status": [
+          {
+            "region": "US",
+            "status": "in_stock"
+          },
+          {
+            "region": "EU",
+            "status": "in_stock"
+          },
+          {
+            "region": "EU_LV",
+            "status": "in_stock"
+          }
+        ],
+        "material": []
+      }
+    ]
+  },
+  "extra": []
+}

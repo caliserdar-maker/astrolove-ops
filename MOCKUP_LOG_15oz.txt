@@ -1,0 +1,373 @@
+===== [1/8] kalibrasyon  <- tasarim/KALIBRASYON_2700x1140.png
+OZET boy 15 gorsel https://raw.githubusercontent.com/caliserdar-maker/astrolove-ops/kupa-printful-sonuc/tasarim/KALIBRASYON_2700x1140.png
+OZET varyant 1320 White Glossy Mug 11 oz 11 oz
+OZET varyant 4830 White Glossy Mug 15 oz 15 oz
+OZET varyant 16586 White Glossy Mug 20 oz 20 oz
+OZET secilen_varyant 4830 White Glossy Mug 15 oz 15 oz (BOY=15)
+OZET yerlesimler ['default']
+OZET option_groups ['Default', 'Environment', 'Flat, Premium', 'Halloween', 'Holiday season', 'Lifestyle', 'Lifestyle 2', 'Lifestyle 2, Premium', 'Lifestyle 3', 'Lifestyle 3, Premium', 'Lifestyle 4, Premium', 'Lifestyle, Premium', 'Placeholder', 'Product specs', 'Red, white & blue', 'Spring/summer vibes', 'Templates', "Valentine's Day"]
+OZET options ['Cookies', 'Cutting board', 'Donuts', 'Front', 'Front view', 'Halloween', 'Handle on Left', 'Handle on Right', 'Office environment', 'Pineapple', 'Watermelon', 'Woman', 'default']
+OZET printfile {"printfile_id": 44, "width": 2700, "height": 1140, "dpi": 300, "fill_mode": "fit", "can_rotate": false} yerlesim default
+OZET printfile_kontrol boy=15 varyant=4830 printfile=44 olcu=2700x1140 dpi=300 beklenen=44 2700x1140
+OZET template {"template_id": 920, "image_url": "https://files.cdn.printful.com/o/upload/api-template/d3/d33a21bee19498f1cc7ed51531cc1b8a?v=1643279809", "background_url": null, "template_width": 728, "template_height": 728.0, "print_area_width": 649.0, "print_area_height": 274.0, "print_area_top": 117.0, "print_area_left": 40.0, "orientation": "any"}
+OZET gorsel_olcu (2700, 1140)
+OZET task_key gt-986008077
+1/30 durum=completed gecen=10 sn kalan<= 290 sn %3
+OZET mockup 01_default_15oz.png
+OZET mockup 02_Handle_on_Left_15oz.png
+OZET mockup 03_Front_view_15oz.png
+OZET mockup 04_Woman_15oz.png
+OZET mockup 05_Cutting_board_15oz.png
+OZET mockup 06_Office_environment_15oz.png
+OZET mockup 07_Halloween_15oz.png
+OZET mockup 08_Handle_on_Left_15oz.png
+OZET mockup 09_Handle_on_Left_15oz.png
+OZET mockup 10_Handle_on_Left_15oz.png
+OZET mockup 11_Handle_on_Left_15oz.png
+OZET mockup 12_Handle_on_Right_15oz.png
+OZET mockup 13_Handle_on_Right_15oz.png
+OZET mockup 14_Front_view_15oz.png
+OZET mockup 15_Handle_on_Right_15oz.png
+OZET mockup 16_Front_view_15oz.png
+OZET mockup 17_Handle_on_Right_15oz.png
+OZET mockup 18_Front_view_15oz.png
+OZET mockup 19_Handle_on_Right_15oz.png
+OZET mockup 20_Handle_on_Left_15oz.png
+OZET mockup 21_Handle_on_Left_15oz.png
+OZET mockup 22_Handle_on_Right_15oz.png
+OZET mockup 23_Front_view_15oz.png
+OZET mockup 24_Front_view_15oz.png
+OZET mockup 25_Handle_on_Left_15oz.png
+OZET mockup 26_Handle_on_Right_15oz.png
+OZET mockup 27_Handle_on_Right_15oz.png
+OZET mockup 28_Handle_on_Left_15oz.png
+OZET mockup 29_Handle_on_Left_15oz.png
+OZET mockup 30_Handle_on_Right_15oz.png
+OZET mockup 31_Front_15oz.png
+OZET mockup 32_Cookies_15oz.png
+OZET toplam_mockup 32
+[1/8] kalibrasyon cikis=0 24s | gecen 24s | kalan ~168s | %12
+===== [2/8] KUPA_01_Botanical_baski_2700x1140  <- tasarim/KUPA_01_Botanical_baski_2700x1140.png
+OZET boy 15 gorsel https://raw.githubusercontent.com/caliserdar-maker/astrolove-ops/kupa-printful-sonuc/tasarim/KUPA_01_Botanical_baski_2700x1140.png
+OZET varyant 1320 White Glossy Mug 11 oz 11 oz
+OZET varyant 4830 White Glossy Mug 15 oz 15 oz
+OZET varyant 16586 White Glossy Mug 20 oz 20 oz
+OZET secilen_varyant 4830 White Glossy Mug 15 oz 15 oz (BOY=15)
+OZET yerlesimler ['default']
+OZET option_groups ['Default', 'Environment', 'Flat, Premium', 'Halloween', 'Holiday season', 'Lifestyle', 'Lifestyle 2', 'Lifestyle 2, Premium', 'Lifestyle 3', 'Lifestyle 3, Premium', 'Lifestyle 4, Premium', 'Lifestyle, Premium', 'Placeholder', 'Product specs', 'Red, white & blue', 'Spring/summer vibes', 'Templates', "Valentine's Day"]
+OZET options ['Cookies', 'Cutting board', 'Donuts', 'Front', 'Front view', 'Halloween', 'Handle on Left', 'Handle on Right', 'Office environment', 'Pineapple', 'Watermelon', 'Woman', 'default']
+OZET printfile {"printfile_id": 44, "width": 2700, "height": 1140, "dpi": 300, "fill_mode": "fit", "can_rotate": false} yerlesim default
+OZET printfile_kontrol boy=15 varyant=4830 printfile=44 olcu=2700x1140 dpi=300 beklenen=44 2700x1140
+OZET template {"template_id": 920, "image_url": "https://files.cdn.printful.com/o/upload/api-template/d3/d33a21bee19498f1cc7ed51531cc1b8a?v=1643279809", "background_url": null, "template_width": 728, "template_height": 728.0, "print_area_width": 649.0, "print_area_height": 274.0, "print_area_top": 117.0, "print_area_left": 40.0, "orientation": "any"}
+OZET gorsel_olcu (2700, 1140)
+OZET task_key gt-986008169
+1/30 durum=completed gecen=10 sn kalan<= 290 sn %3
+OZET mockup 01_default_15oz.png
+OZET mockup 02_Handle_on_Left_15oz.png
+OZET mockup 03_Front_view_15oz.png
+OZET mockup 04_Woman_15oz.png
+OZET mockup 05_Cutting_board_15oz.png
+OZET mockup 06_Office_environment_15oz.png
+OZET mockup 07_Halloween_15oz.png
+OZET mockup 08_Handle_on_Left_15oz.png
+OZET mockup 09_Handle_on_Left_15oz.png
+OZET mockup 10_Handle_on_Left_15oz.png
+OZET mockup 11_Handle_on_Left_15oz.png
+OZET mockup 12_Handle_on_Right_15oz.png
+OZET mockup 13_Handle_on_Right_15oz.png
+OZET mockup 14_Front_view_15oz.png
+OZET mockup 15_Handle_on_Right_15oz.png
+OZET mockup 16_Front_view_15oz.png
+OZET mockup 17_Handle_on_Right_15oz.png
+OZET mockup 18_Front_view_15oz.png
+OZET mockup 19_Handle_on_Right_15oz.png
+OZET mockup 20_Handle_on_Left_15oz.png
+OZET mockup 21_Handle_on_Left_15oz.png
+OZET mockup 22_Handle_on_Right_15oz.png
+OZET mockup 23_Front_view_15oz.png
+OZET mockup 24_Front_view_15oz.png
+OZET mockup 25_Handle_on_Left_15oz.png
+OZET mockup 26_Handle_on_Right_15oz.png
+OZET mockup 27_Handle_on_Right_15oz.png
+OZET mockup 28_Handle_on_Left_15oz.png
+OZET mockup 29_Handle_on_Left_15oz.png
+OZET mockup 30_Handle_on_Right_15oz.png
+OZET mockup 31_Front_15oz.png
+OZET mockup 32_Cookies_15oz.png
+OZET toplam_mockup 32
+[2/8] KUPA_01_Botanical_baski_2700x1140 cikis=0 20s | gecen 44s | kalan ~132s | %25
+===== [3/8] KUPA_02_Gold_baski_2700x1140  <- tasarim/KUPA_02_Gold_baski_2700x1140.png
+OZET boy 15 gorsel https://raw.githubusercontent.com/caliserdar-maker/astrolove-ops/kupa-printful-sonuc/tasarim/KUPA_02_Gold_baski_2700x1140.png
+OZET varyant 1320 White Glossy Mug 11 oz 11 oz
+OZET varyant 4830 White Glossy Mug 15 oz 15 oz
+OZET varyant 16586 White Glossy Mug 20 oz 20 oz
+OZET secilen_varyant 4830 White Glossy Mug 15 oz 15 oz (BOY=15)
+OZET yerlesimler ['default']
+OZET option_groups ['Default', 'Environment', 'Flat, Premium', 'Halloween', 'Holiday season', 'Lifestyle', 'Lifestyle 2', 'Lifestyle 2, Premium', 'Lifestyle 3', 'Lifestyle 3, Premium', 'Lifestyle 4, Premium', 'Lifestyle, Premium', 'Placeholder', 'Product specs', 'Red, white & blue', 'Spring/summer vibes', 'Templates', "Valentine's Day"]
+OZET options ['Cookies', 'Cutting board', 'Donuts', 'Front', 'Front view', 'Halloween', 'Handle on Left', 'Handle on Right', 'Office environment', 'Pineapple', 'Watermelon', 'Woman', 'default']
+OZET printfile {"printfile_id": 44, "width": 2700, "height": 1140, "dpi": 300, "fill_mode": "fit", "can_rotate": false} yerlesim default
+OZET printfile_kontrol boy=15 varyant=4830 printfile=44 olcu=2700x1140 dpi=300 beklenen=44 2700x1140
+OZET template {"template_id": 920, "image_url": "https://files.cdn.printful.com/o/upload/api-template/d3/d33a21bee19498f1cc7ed51531cc1b8a?v=1643279809", "background_url": null, "template_width": 728, "template_height": 728.0, "print_area_width": 649.0, "print_area_height": 274.0, "print_area_top": 117.0, "print_area_left": 40.0, "orientation": "any"}
+OZET gorsel_olcu (2700, 1140)
+OZET HATA /mockup-generator/create-task/19 429 {"code":429,"result":"You've recently sent too many requests. Please try again after 40 seconds.","error":{"reason":"TooManyRequests","message":"You've recently sent too many requests. Please try again after 40 seconds."}}
+Traceback (most recent call last):
+  File "/home/runner/work/astrolove-ops/astrolove-ops/main/scripts/kupa_printful/mockup.py", line 187, in <module>
+    main()
+  File "/home/runner/work/astrolove-ops/astrolove-ops/main/scripts/kupa_printful/mockup.py", line 154, in main
+    gorev = istek(f"/mockup-generator/create-task/{URUN}", token, govde)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/astrolove-ops/astrolove-ops/main/scripts/kupa_printful/mockup.py", line 38, in istek
+    with urllib.request.urlopen(req, timeout=90) as r:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/urllib/request.py", line 215, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/urllib/request.py", line 521, in open
+    response = meth(req, response)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/urllib/request.py", line 630, in http_response
+    response = self.parent.error(
+               ^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/urllib/request.py", line 559, in error
+    return self._call_chain(*args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/urllib/request.py", line 492, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/urllib/request.py", line 639, in http_error_default
+    raise HTTPError(req.full_url, code, msg, hdrs, fp)
+urllib.error.HTTPError: HTTP Error 429: Too Many Requests
+[3/8] KUPA_02_Gold_baski_2700x1140 cikis=1 1s | gecen 45s | kalan ~75s | %37
+===== [4/8] KUPA_03_NazarBond_baski_2700x1140  <- tasarim/KUPA_03_NazarBond_baski_2700x1140.png
+OZET boy 15 gorsel https://raw.githubusercontent.com/caliserdar-maker/astrolove-ops/kupa-printful-sonuc/tasarim/KUPA_03_NazarBond_baski_2700x1140.png
+OZET varyant 1320 White Glossy Mug 11 oz 11 oz
+OZET varyant 4830 White Glossy Mug 15 oz 15 oz
+OZET varyant 16586 White Glossy Mug 20 oz 20 oz
+OZET secilen_varyant 4830 White Glossy Mug 15 oz 15 oz (BOY=15)
+OZET yerlesimler ['default']
+OZET option_groups ['Default', 'Environment', 'Flat, Premium', 'Halloween', 'Holiday season', 'Lifestyle', 'Lifestyle 2', 'Lifestyle 2, Premium', 'Lifestyle 3', 'Lifestyle 3, Premium', 'Lifestyle 4, Premium', 'Lifestyle, Premium', 'Placeholder', 'Product specs', 'Red, white & blue', 'Spring/summer vibes', 'Templates', "Valentine's Day"]
+OZET options ['Cookies', 'Cutting board', 'Donuts', 'Front', 'Front view', 'Halloween', 'Handle on Left', 'Handle on Right', 'Office environment', 'Pineapple', 'Watermelon', 'Woman', 'default']
+OZET printfile {"printfile_id": 44, "width": 2700, "height": 1140, "dpi": 300, "fill_mode": "fit", "can_rotate": false} yerlesim default
+OZET printfile_kontrol boy=15 varyant=4830 printfile=44 olcu=2700x1140 dpi=300 beklenen=44 2700x1140
+OZET template {"template_id": 920, "image_url": "https://files.cdn.printful.com/o/upload/api-template/d3/d33a21bee19498f1cc7ed51531cc1b8a?v=1643279809", "background_url": null, "template_width": 728, "template_height": 728.0, "print_area_width": 649.0, "print_area_height": 274.0, "print_area_top": 117.0, "print_area_left": 40.0, "orientation": "any"}
+OZET gorsel_olcu (2700, 1140)
+OZET HATA /mockup-generator/create-task/19 429 {"code":429,"result":"You've recently sent too many requests. Please try again after 39 seconds.","error":{"reason":"TooManyRequests","message":"You've recently sent too many requests. Please try again after 39 seconds."}}
+Traceback (most recent call last):
+  File "/home/runner/work/astrolove-ops/astrolove-ops/main/scripts/kupa_printful/mockup.py", line 187, in <module>
+    main()
+  File "/home/runner/work/astrolove-ops/astrolove-ops/main/scripts/kupa_printful/mockup.py", line 154, in main
+    gorev = istek(f"/mockup-generator/create-task/{URUN}", token, govde)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/astrolove-ops/astrolove-ops/main/scripts/kupa_printful/mockup.py", line 38, in istek
+    with urllib.request.urlopen(req, timeout=90) as r:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/urllib/request.py", line 215, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/urllib/request.py", line 521, in open
+    response = meth(req, response)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/urllib/request.py", line 630, in http_response
+    response = self.parent.error(
+               ^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/urllib/request.py", line 559, in error
+    return self._call_chain(*args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/urllib/request.py", line 492, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/urllib/request.py", line 639, in http_error_default
+    raise HTTPError(req.full_url, code, msg, hdrs, fp)
+urllib.error.HTTPError: HTTP Error 429: Too Many Requests
+[4/8] KUPA_03_NazarBond_baski_2700x1140 cikis=1 1s | gecen 46s | kalan ~46s | %50
+===== [5/8] KUPA_04_RoseRibbon_baski_2700x1140  <- tasarim/KUPA_04_RoseRibbon_baski_2700x1140.png
+OZET boy 15 gorsel https://raw.githubusercontent.com/caliserdar-maker/astrolove-ops/kupa-printful-sonuc/tasarim/KUPA_04_RoseRibbon_baski_2700x1140.png
+OZET varyant 1320 White Glossy Mug 11 oz 11 oz
+OZET varyant 4830 White Glossy Mug 15 oz 15 oz
+OZET varyant 16586 White Glossy Mug 20 oz 20 oz
+OZET secilen_varyant 4830 White Glossy Mug 15 oz 15 oz (BOY=15)
+OZET yerlesimler ['default']
+OZET option_groups ['Default', 'Environment', 'Flat, Premium', 'Halloween', 'Holiday season', 'Lifestyle', 'Lifestyle 2', 'Lifestyle 2, Premium', 'Lifestyle 3', 'Lifestyle 3, Premium', 'Lifestyle 4, Premium', 'Lifestyle, Premium', 'Placeholder', 'Product specs', 'Red, white & blue', 'Spring/summer vibes', 'Templates', "Valentine's Day"]
+OZET options ['Cookies', 'Cutting board', 'Donuts', 'Front', 'Front view', 'Halloween', 'Handle on Left', 'Handle on Right', 'Office environment', 'Pineapple', 'Watermelon', 'Woman', 'default']
+OZET printfile {"printfile_id": 44, "width": 2700, "height": 1140, "dpi": 300, "fill_mode": "fit", "can_rotate": false} yerlesim default
+OZET printfile_kontrol boy=15 varyant=4830 printfile=44 olcu=2700x1140 dpi=300 beklenen=44 2700x1140
+OZET template {"template_id": 920, "image_url": "https://files.cdn.printful.com/o/upload/api-template/d3/d33a21bee19498f1cc7ed51531cc1b8a?v=1643279809", "background_url": null, "template_width": 728, "template_height": 728.0, "print_area_width": 649.0, "print_area_height": 274.0, "print_area_top": 117.0, "print_area_left": 40.0, "orientation": "any"}
+OZET gorsel_olcu (2700, 1140)
+OZET HATA /mockup-generator/create-task/19 429 {"code":429,"result":"You've recently sent too many requests. Please try again after 37 seconds.","error":{"reason":"TooManyRequests","message":"You've recently sent too many requests. Please try again after 37 seconds."}}
+Traceback (most recent call last):
+  File "/home/runner/work/astrolove-ops/astrolove-ops/main/scripts/kupa_printful/mockup.py", line 187, in <module>
+    main()
+  File "/home/runner/work/astrolove-ops/astrolove-ops/main/scripts/kupa_printful/mockup.py", line 154, in main
+    gorev = istek(f"/mockup-generator/create-task/{URUN}", token, govde)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/astrolove-ops/astrolove-ops/main/scripts/kupa_printful/mockup.py", line 38, in istek
+    with urllib.request.urlopen(req, timeout=90) as r:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/urllib/request.py", line 215, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/urllib/request.py", line 521, in open
+    response = meth(req, response)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/urllib/request.py", line 630, in http_response
+    response = self.parent.error(
+               ^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/urllib/request.py", line 559, in error
+    return self._call_chain(*args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/urllib/request.py", line 492, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/urllib/request.py", line 639, in http_error_default
+    raise HTTPError(req.full_url, code, msg, hdrs, fp)
+urllib.error.HTTPError: HTTP Error 429: Too Many Requests
+[5/8] KUPA_04_RoseRibbon_baski_2700x1140 cikis=1 2s | gecen 48s | kalan ~28s | %62
+===== [6/8] KUPA_05_PromiseLine_baski_2700x1140  <- tasarim/KUPA_05_PromiseLine_baski_2700x1140.png
+OZET boy 15 gorsel https://raw.githubusercontent.com/caliserdar-maker/astrolove-ops/kupa-printful-sonuc/tasarim/KUPA_05_PromiseLine_baski_2700x1140.png
+OZET varyant 1320 White Glossy Mug 11 oz 11 oz
+OZET varyant 4830 White Glossy Mug 15 oz 15 oz
+OZET varyant 16586 White Glossy Mug 20 oz 20 oz
+OZET secilen_varyant 4830 White Glossy Mug 15 oz 15 oz (BOY=15)
+OZET yerlesimler ['default']
+OZET option_groups ['Default', 'Environment', 'Flat, Premium', 'Halloween', 'Holiday season', 'Lifestyle', 'Lifestyle 2', 'Lifestyle 2, Premium', 'Lifestyle 3', 'Lifestyle 3, Premium', 'Lifestyle 4, Premium', 'Lifestyle, Premium', 'Placeholder', 'Product specs', 'Red, white & blue', 'Spring/summer vibes', 'Templates', "Valentine's Day"]
+OZET options ['Cookies', 'Cutting board', 'Donuts', 'Front', 'Front view', 'Halloween', 'Handle on Left', 'Handle on Right', 'Office environment', 'Pineapple', 'Watermelon', 'Woman', 'default']
+OZET printfile {"printfile_id": 44, "width": 2700, "height": 1140, "dpi": 300, "fill_mode": "fit", "can_rotate": false} yerlesim default
+OZET printfile_kontrol boy=15 varyant=4830 printfile=44 olcu=2700x1140 dpi=300 beklenen=44 2700x1140
+OZET template {"template_id": 920, "image_url": "https://files.cdn.printful.com/o/upload/api-template/d3/d33a21bee19498f1cc7ed51531cc1b8a?v=1643279809", "background_url": null, "template_width": 728, "template_height": 728.0, "print_area_width": 649.0, "print_area_height": 274.0, "print_area_top": 117.0, "print_area_left": 40.0, "orientation": "any"}
+OZET gorsel_olcu (2700, 1140)
+OZET HATA /mockup-generator/create-task/19 429 {"code":429,"result":"You've recently sent too many requests. Please try again after 36 seconds.","error":{"reason":"TooManyRequests","message":"You've recently sent too many requests. Please try again after 36 seconds."}}
+Traceback (most recent call last):
+  File "/home/runner/work/astrolove-ops/astrolove-ops/main/scripts/kupa_printful/mockup.py", line 187, in <module>
+    main()
+  File "/home/runner/work/astrolove-ops/astrolove-ops/main/scripts/kupa_printful/mockup.py", line 154, in main
+    gorev = istek(f"/mockup-generator/create-task/{URUN}", token, govde)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/astrolove-ops/astrolove-ops/main/scripts/kupa_printful/mockup.py", line 38, in istek
+    with urllib.request.urlopen(req, timeout=90) as r:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/urllib/request.py", line 215, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/urllib/request.py", line 521, in open
+    response = meth(req, response)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/urllib/request.py", line 630, in http_response
+    response = self.parent.error(
+               ^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/urllib/request.py", line 559, in error
+    return self._call_chain(*args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/urllib/request.py", line 492, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/urllib/request.py", line 639, in http_error_default
+    raise HTTPError(req.full_url, code, msg, hdrs, fp)
+urllib.error.HTTPError: HTTP Error 429: Too Many Requests
+[6/8] KUPA_05_PromiseLine_baski_2700x1140 cikis=1 1s | gecen 49s | kalan ~16s | %75
+===== [7/8] KUPA_06_AegeanTile_baski_2700x1140  <- tasarim/KUPA_06_AegeanTile_baski_2700x1140.png
+OZET boy 15 gorsel https://raw.githubusercontent.com/caliserdar-maker/astrolove-ops/kupa-printful-sonuc/tasarim/KUPA_06_AegeanTile_baski_2700x1140.png
+OZET varyant 1320 White Glossy Mug 11 oz 11 oz
+OZET varyant 4830 White Glossy Mug 15 oz 15 oz
+OZET varyant 16586 White Glossy Mug 20 oz 20 oz
+OZET secilen_varyant 4830 White Glossy Mug 15 oz 15 oz (BOY=15)
+OZET yerlesimler ['default']
+OZET option_groups ['Default', 'Environment', 'Flat, Premium', 'Halloween', 'Holiday season', 'Lifestyle', 'Lifestyle 2', 'Lifestyle 2, Premium', 'Lifestyle 3', 'Lifestyle 3, Premium', 'Lifestyle 4, Premium', 'Lifestyle, Premium', 'Placeholder', 'Product specs', 'Red, white & blue', 'Spring/summer vibes', 'Templates', "Valentine's Day"]
+OZET options ['Cookies', 'Cutting board', 'Donuts', 'Front', 'Front view', 'Halloween', 'Handle on Left', 'Handle on Right', 'Office environment', 'Pineapple', 'Watermelon', 'Woman', 'default']
+OZET printfile {"printfile_id": 44, "width": 2700, "height": 1140, "dpi": 300, "fill_mode": "fit", "can_rotate": false} yerlesim default
+OZET printfile_kontrol boy=15 varyant=4830 printfile=44 olcu=2700x1140 dpi=300 beklenen=44 2700x1140
+OZET template {"template_id": 920, "image_url": "https://files.cdn.printful.com/o/upload/api-template/d3/d33a21bee19498f1cc7ed51531cc1b8a?v=1643279809", "background_url": null, "template_width": 728, "template_height": 728.0, "print_area_width": 649.0, "print_area_height": 274.0, "print_area_top": 117.0, "print_area_left": 40.0, "orientation": "any"}
+OZET gorsel_olcu (2700, 1140)
+OZET HATA /mockup-generator/create-task/19 429 {"code":429,"result":"You've recently sent too many requests. Please try again after 36 seconds.","error":{"reason":"TooManyRequests","message":"You've recently sent too many requests. Please try again after 36 seconds."}}
+Traceback (most recent call last):
+  File "/home/runner/work/astrolove-ops/astrolove-ops/main/scripts/kupa_printful/mockup.py", line 187, in <module>
+    main()
+  File "/home/runner/work/astrolove-ops/astrolove-ops/main/scripts/kupa_printful/mockup.py", line 154, in main
+    gorev = istek(f"/mockup-generator/create-task/{URUN}", token, govde)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/astrolove-ops/astrolove-ops/main/scripts/kupa_printful/mockup.py", line 38, in istek
+    with urllib.request.urlopen(req, timeout=90) as r:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/urllib/request.py", line 215, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/urllib/request.py", line 521, in open
+    response = meth(req, response)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/urllib/request.py", line 630, in http_response
+    response = self.parent.error(
+               ^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/urllib/request.py", line 559, in error
+    return self._call_chain(*args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/urllib/request.py", line 492, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/urllib/request.py", line 639, in http_error_default
+    raise HTTPError(req.full_url, code, msg, hdrs, fp)
+urllib.error.HTTPError: HTTP Error 429: Too Many Requests
+[7/8] KUPA_06_AegeanTile_baski_2700x1140 cikis=1 1s | gecen 50s | kalan ~7s | %87
+===== [8/8] KUPA_07_Mediterranean_baski_2700x1140  <- tasarim/KUPA_07_Mediterranean_baski_2700x1140.png
+OZET boy 15 gorsel https://raw.githubusercontent.com/caliserdar-maker/astrolove-ops/kupa-printful-sonuc/tasarim/KUPA_07_Mediterranean_baski_2700x1140.png
+OZET varyant 1320 White Glossy Mug 11 oz 11 oz
+OZET varyant 4830 White Glossy Mug 15 oz 15 oz
+OZET varyant 16586 White Glossy Mug 20 oz 20 oz
+OZET secilen_varyant 4830 White Glossy Mug 15 oz 15 oz (BOY=15)
+OZET yerlesimler ['default']
+OZET option_groups ['Default', 'Environment', 'Flat, Premium', 'Halloween', 'Holiday season', 'Lifestyle', 'Lifestyle 2', 'Lifestyle 2, Premium', 'Lifestyle 3', 'Lifestyle 3, Premium', 'Lifestyle 4, Premium', 'Lifestyle, Premium', 'Placeholder', 'Product specs', 'Red, white & blue', 'Spring/summer vibes', 'Templates', "Valentine's Day"]
+OZET options ['Cookies', 'Cutting board', 'Donuts', 'Front', 'Front view', 'Halloween', 'Handle on Left', 'Handle on Right', 'Office environment', 'Pineapple', 'Watermelon', 'Woman', 'default']
+OZET printfile {"printfile_id": 44, "width": 2700, "height": 1140, "dpi": 300, "fill_mode": "fit", "can_rotate": false} yerlesim default
+OZET printfile_kontrol boy=15 varyant=4830 printfile=44 olcu=2700x1140 dpi=300 beklenen=44 2700x1140
+OZET template {"template_id": 920, "image_url": "https://files.cdn.printful.com/o/upload/api-template/d3/d33a21bee19498f1cc7ed51531cc1b8a?v=1643279809", "background_url": null, "template_width": 728, "template_height": 728.0, "print_area_width": 649.0, "print_area_height": 274.0, "print_area_top": 117.0, "print_area_left": 40.0, "orientation": "any"}
+OZET gorsel_olcu (2700, 1140)
+OZET HATA /mockup-generator/create-task/19 429 {"code":429,"result":"You've recently sent too many requests. Please try again after 35 seconds.","error":{"reason":"TooManyRequests","message":"You've recently sent too many requests. Please try again after 35 seconds."}}
+Traceback (most recent call last):
+  File "/home/runner/work/astrolove-ops/astrolove-ops/main/scripts/kupa_printful/mockup.py", line 187, in <module>
+    main()
+  File "/home/runner/work/astrolove-ops/astrolove-ops/main/scripts/kupa_printful/mockup.py", line 154, in main
+    gorev = istek(f"/mockup-generator/create-task/{URUN}", token, govde)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/astrolove-ops/astrolove-ops/main/scripts/kupa_printful/mockup.py", line 38, in istek
+    with urllib.request.urlopen(req, timeout=90) as r:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/urllib/request.py", line 215, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/urllib/request.py", line 521, in open
+    response = meth(req, response)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/urllib/request.py", line 630, in http_response
+    response = self.parent.error(
+               ^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/urllib/request.py", line 559, in error
+    return self._call_chain(*args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/urllib/request.py", line 492, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/urllib/request.py", line 639, in http_error_default
+    raise HTTPError(req.full_url, code, msg, hdrs, fp)
+urllib.error.HTTPError: HTTP Error 429: Too Many Requests
+[8/8] KUPA_07_Mediterranean_baski_2700x1140 cikis=1 0s | gecen 50s | kalan ~0s | %100
+===== KARGO
+OZET ilk_deneme US 11 oz HTTP 400 {"code": 400, "result": "State code is missing", "error": {"reason": "BadRequest", "message": "State code is missing"}}
+[1/6 %16] OZET kargo US 11 oz v1320 HTTP 200 ornek_adres=True [('Flat Rate (Estimated delivery: Oct 23\u2060–26) ', '6.69', 'USD'), ('Standard rate with CO2 offsetting (Estimated delivery: Oct 23\u2060–26) ', '6.78', 'USD')] vergi=yok
+OZET ilk_deneme US 15 oz HTTP 400 {"code": 400, "result": "State code is missing", "error": {"reason": "BadRequest", "message": "State code is missing"}}
+[2/6 %33] OZET kargo US 15 oz v4830 HTTP 200 ornek_adres=True [('Flat Rate (Estimated delivery: Oct 24\u2060–26) ', '7.29', 'USD'), ('Standard rate with CO2 offsetting (Estimated delivery: Oct 24\u2060–26) ', '7.38', 'USD')] vergi=yok
+[3/6 %50] OZET kargo GB 11 oz v1320 HTTP 200 ornek_adres=False [('Flat Rate (Estimated delivery: Oct 21\u2060–23) ', '5.19', 'USD'), ('Standard rate with CO2 offsetting (Estimated delivery: Oct 21\u2060–23) ', '5.28', 'USD')] vergi=yok
+[4/6 %66] OZET kargo GB 15 oz v4830 HTTP 200 ornek_adres=False [('Flat Rate (Estimated delivery: Oct 21\u2060–23) ', '6.09', 'USD'), ('Standard rate with CO2 offsetting (Estimated delivery: Oct 21\u2060–23) ', '6.18', 'USD')] vergi=yok
+[5/6 %83] OZET kargo DE 11 oz v1320 HTTP 200 ornek_adres=False [('Flat Rate (Estimated delivery: Oct 22\u2060–26) ', '5.39', 'USD'), ('Standard rate with CO2 offsetting (Estimated delivery: Oct 22\u2060–26) ', '5.48', 'USD')] vergi=yok
+[6/6 %100] OZET kargo DE 15 oz v4830 HTTP 200 ornek_adres=False [('Flat Rate (Estimated delivery: Oct 22\u2060–26) ', '6.09', 'USD'), ('Standard rate with CO2 offsetting (Estimated delivery: Oct 22\u2060–26) ', '6.18', 'USD'), ('Express (Estimated delivery: Oct 23\u2060–26) ', '13.02', 'USD')] vergi=yok
+ulke | boy | varyant | kargo secenegi | ucret | para birimi | teslim (gun) | adres | vergi/KDV (API)
+US | 11 oz | 1320 | Flat Rate (Estimated delivery: Oct 23⁠–26)  | 6.69 | USD | 4-6 | ornek: state_code=NY, city=New York, zip=10001 | API vermedi
+US | 11 oz | 1320 | Standard rate with CO2 offsetting (Estimated delivery: Oct 23⁠–26)  | 6.78 | USD | 4-6 | ornek: state_code=NY, city=New York, zip=10001 | API vermedi
+US | 15 oz | 4830 | Flat Rate (Estimated delivery: Oct 24⁠–26)  | 7.29 | USD | 4-6 | ornek: state_code=NY, city=New York, zip=10001 | API vermedi
+US | 15 oz | 4830 | Standard rate with CO2 offsetting (Estimated delivery: Oct 24⁠–26)  | 7.38 | USD | 4-6 | ornek: state_code=NY, city=New York, zip=10001 | API vermedi
+GB | 11 oz | 1320 | Flat Rate (Estimated delivery: Oct 21⁠–23)  | 5.19 | USD | 2-4 | yalniz ulke kodu | API vermedi
+GB | 11 oz | 1320 | Standard rate with CO2 offsetting (Estimated delivery: Oct 21⁠–23)  | 5.28 | USD | 2-4 | yalniz ulke kodu | API vermedi
+GB | 15 oz | 4830 | Flat Rate (Estimated delivery: Oct 21⁠–23)  | 6.09 | USD | 2-4 | yalniz ulke kodu | API vermedi
+GB | 15 oz | 4830 | Standard rate with CO2 offsetting (Estimated delivery: Oct 21⁠–23)  | 6.18 | USD | 2-4 | yalniz ulke kodu | API vermedi
+DE | 11 oz | 1320 | Flat Rate (Estimated delivery: Oct 22⁠–26)  | 5.39 | USD | 3-6 | yalniz ulke kodu | API vermedi
+DE | 11 oz | 1320 | Standard rate with CO2 offsetting (Estimated delivery: Oct 22⁠–26)  | 5.48 | USD | 3-6 | yalniz ulke kodu | API vermedi
+DE | 15 oz | 4830 | Flat Rate (Estimated delivery: Oct 22⁠–26)  | 6.09 | USD | 3-6 | yalniz ulke kodu | API vermedi
+DE | 15 oz | 4830 | Standard rate with CO2 offsetting (Estimated delivery: Oct 22⁠–26)  | 6.18 | USD | 3-6 | yalniz ulke kodu | API vermedi
+DE | 15 oz | 4830 | Express (Estimated delivery: Oct 23⁠–26)  | 13.02 | USD | 3-5 | yalniz ulke kodu | API vermedi

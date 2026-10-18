@@ -1,0 +1,85 @@
+{
+  "code": 200,
+  "result": {
+    "version": 100,
+    "variant_mapping": [
+      {
+        "variant_id": 1320,
+        "templates": [
+          {
+            "placement": "default",
+            "template_id": 919
+          }
+        ]
+      },
+      {
+        "variant_id": 4830,
+        "templates": [
+          {
+            "placement": "default",
+            "template_id": 920
+          }
+        ]
+      },
+      {
+        "variant_id": 16586,
+        "templates": [
+          {
+            "placement": "default",
+            "template_id": 181779
+          }
+        ]
+      }
+    ],
+    "templates": [
+      {
+        "template_id": 919,
+        "image_url": "https://files.cdn.printful.com/o/upload/api-template/3f/3f769a18d1341f45633c4c7be714adc4?v=1643280024",
+        "background_url": null,
+        "background_color": null,
+        "printfile_id": 43,
+        "template_width": 728,
+        "template_height": 728.0,
+        "print_area_width": 671.0,
+        "print_area_height": 261.0,
+        "print_area_top": 163.0,
+        "print_area_left": 29.0,
+        "is_template_on_front": true,
+        "orientation": "any"
+      },
+      {
+        "template_id": 920,
+        "image_url": "https://files.cdn.printful.com/o/upload/api-template/d3/d33a21bee19498f1cc7ed51531cc1b8a?v=1643279809",
+        "background_url": null,
+        "background_color": null,
+        "printfile_id": 44,
+        "template_width": 728,
+        "template_height": 728.0,
+        "print_area_width": 649.0,
+        "print_area_height": 274.0,
+        "print_area_top": 117.0,
+        "print_area_left": 40.0,
+        "is_template_on_front": true,
+        "orientation": "any"
+      },
+      {
+        "template_id": 181779,
+        "image_url": "https://files.cdn.printful.com/o/upload/api-template/9f/9f9cca36af43f2b7f94854041ab87463?v=1681222300",
+        "background_url": null,
+        "background_color": null,
+        "printfile_id": 426,
+        "template_width": 728,
+        "template_height": 728.0,
+        "print_area_width": 700.0,
+        "print_area_height": 275.0,
+        "print_area_top": 166.0,
+        "print_area_left": 14.0,
+        "is_template_on_front": true,
+        "orientation": "any"
+      }
+    ],
+    "min_dpi": 150,
+    "conflicting_placements": []
+  },
+  "extra": []
+}

@@ -1,0 +1,91 @@
+{
+  "code": 200,
+  "result": {
+    "product_id": 19,
+    "available_placements": {
+      "default": "Print file"
+    },
+    "printfiles": [
+      {
+        "printfile_id": 43,
+        "width": 2700,
+        "height": 1050,
+        "dpi": 300,
+        "fill_mode": "fit",
+        "can_rotate": false
+      },
+      {
+        "printfile_id": 44,
+        "width": 2700,
+        "height": 1140,
+        "dpi": 300,
+        "fill_mode": "fit",
+        "can_rotate": false
+      },
+      {
+        "printfile_id": 426,
+        "width": 3071,
+        "height": 1205,
+        "dpi": 300,
+        "fill_mode": "fit",
+        "can_rotate": false
+      }
+    ],
+    "variant_printfiles": [
+      {
+        "variant_id": 1320,
+        "placements": {
+          "default": 43
+        }
+      },
+      {
+        "variant_id": 4830,
+        "placements": {
+          "default": 44
+        }
+      },
+      {
+        "variant_id": 16586,
+        "placements": {
+          "default": 426
+        }
+      }
+    ],
+    "option_groups": [
+      "Default",
+      "Environment",
+      "Flat, Premium",
+      "Halloween",
+      "Holiday season",
+      "Lifestyle",
+      "Lifestyle 2",
+      "Lifestyle 2, Premium",
+      "Lifestyle 3",
+      "Lifestyle 3, Premium",
+      "Lifestyle 4, Premium",
+      "Lifestyle, Premium",
+      "Placeholder",
+      "Product specs",
+      "Red, white & blue",
+      "Spring/summer vibes",
+      "Templates",
+      "Valentine's Day"
+    ],
+    "options": [
+      "Cookies",
+      "Cutting board",
+      "Donuts",
+      "Front",
+      "Front view",
+      "Halloween",
+      "Handle on Left",
+      "Handle on Right",
+      "Office environment",
+      "Pineapple",
+      "Watermelon",
+      "Woman",
+      "default"
+    ]
+  },
+  "extra": []
+}
