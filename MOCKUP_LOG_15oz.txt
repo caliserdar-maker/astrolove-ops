@@ -371,3 +371,299 @@ DE | 11 oz | 1320 | Standard rate with CO2 offsetting (Estimated delivery: Oct 2
 DE | 15 oz | 4830 | Flat Rate (Estimated delivery: Oct 22⁠–26)  | 6.09 | USD | 3-6 | yalniz ulke kodu | API vermedi
 DE | 15 oz | 4830 | Standard rate with CO2 offsetting (Estimated delivery: Oct 22⁠–26)  | 6.18 | USD | 3-6 | yalniz ulke kodu | API vermedi
 DE | 15 oz | 4830 | Express (Estimated delivery: Oct 23⁠–26)  | 13.02 | USD | 3-5 | yalniz ulke kodu | API vermedi
+===== [1/6] KUPA_02_Gold_baski_2700x1140  <- tasarim/KUPA_02_Gold_baski_2700x1140.png
+OZET boy 15 gorsel https://raw.githubusercontent.com/caliserdar-maker/astrolove-ops/kupa-printful-sonuc/tasarim/KUPA_02_Gold_baski_2700x1140.png
+OZET varyant 1320 White Glossy Mug 11 oz 11 oz
+OZET varyant 4830 White Glossy Mug 15 oz 15 oz
+OZET varyant 16586 White Glossy Mug 20 oz 20 oz
+OZET secilen_varyant 4830 White Glossy Mug 15 oz 15 oz (BOY=15)
+OZET yerlesimler ['default']
+OZET option_groups ['Default', 'Environment', 'Flat, Premium', 'Halloween', 'Holiday season', 'Lifestyle', 'Lifestyle 2', 'Lifestyle 2, Premium', 'Lifestyle 3', 'Lifestyle 3, Premium', 'Lifestyle 4, Premium', 'Lifestyle, Premium', 'Placeholder', 'Product specs', 'Red, white & blue', 'Spring/summer vibes', 'Templates', "Valentine's Day"]
+OZET options ['Cookies', 'Cutting board', 'Donuts', 'Front', 'Front view', 'Halloween', 'Handle on Left', 'Handle on Right', 'Office environment', 'Pineapple', 'Watermelon', 'Woman', 'default']
+OZET printfile {"printfile_id": 44, "width": 2700, "height": 1140, "dpi": 300, "fill_mode": "fit", "can_rotate": false} yerlesim default
+OZET printfile_kontrol boy=15 varyant=4830 printfile=44 olcu=2700x1140 dpi=300 beklenen=44 2700x1140
+OZET template {"template_id": 920, "image_url": "https://files.cdn.printful.com/o/upload/api-template/d3/d33a21bee19498f1cc7ed51531cc1b8a?v=1643279809", "background_url": null, "template_width": 728, "template_height": 728.0, "print_area_width": 649.0, "print_area_height": 274.0, "print_area_top": 117.0, "print_area_left": 40.0, "orientation": "any"}
+OZET gorsel_olcu (2700, 1140)
+OZET task_key gt-986009185
+1/30 durum=completed gecen=10 sn kalan<= 290 sn %3
+OZET mockup 01_default_15oz.png
+OZET mockup 02_Handle_on_Left_15oz.png
+OZET mockup 03_Front_view_15oz.png
+OZET mockup 04_Woman_15oz.png
+OZET mockup 05_Cutting_board_15oz.png
+OZET mockup 06_Office_environment_15oz.png
+OZET mockup 07_Halloween_15oz.png
+OZET mockup 08_Handle_on_Left_15oz.png
+OZET mockup 09_Handle_on_Left_15oz.png
+OZET mockup 10_Handle_on_Left_15oz.png
+OZET mockup 11_Handle_on_Left_15oz.png
+OZET mockup 12_Handle_on_Right_15oz.png
+OZET mockup 13_Handle_on_Right_15oz.png
+OZET mockup 14_Front_view_15oz.png
+OZET mockup 15_Handle_on_Right_15oz.png
+OZET mockup 16_Front_view_15oz.png
+OZET mockup 17_Handle_on_Right_15oz.png
+OZET mockup 18_Front_view_15oz.png
+OZET mockup 19_Handle_on_Right_15oz.png
+OZET mockup 20_Handle_on_Left_15oz.png
+OZET mockup 21_Handle_on_Left_15oz.png
+OZET mockup 22_Handle_on_Right_15oz.png
+OZET mockup 23_Front_view_15oz.png
+OZET mockup 24_Front_view_15oz.png
+OZET mockup 25_Handle_on_Left_15oz.png
+OZET mockup 26_Handle_on_Right_15oz.png
+OZET mockup 27_Handle_on_Right_15oz.png
+OZET mockup 28_Handle_on_Left_15oz.png
+OZET mockup 29_Handle_on_Left_15oz.png
+OZET mockup 30_Handle_on_Right_15oz.png
+OZET mockup 31_Front_15oz.png
+OZET mockup 32_Cookies_15oz.png
+OZET toplam_mockup 32
+[1/6] KUPA_02_Gold_baski_2700x1140 cikis=0 23s | gecen 23s | kalan ~115s | %16
+===== [2/6] KUPA_03_NazarBond_baski_2700x1140  <- tasarim/KUPA_03_NazarBond_baski_2700x1140.png
+OZET boy 15 gorsel https://raw.githubusercontent.com/caliserdar-maker/astrolove-ops/kupa-printful-sonuc/tasarim/KUPA_03_NazarBond_baski_2700x1140.png
+OZET varyant 1320 White Glossy Mug 11 oz 11 oz
+OZET varyant 4830 White Glossy Mug 15 oz 15 oz
+OZET varyant 16586 White Glossy Mug 20 oz 20 oz
+OZET secilen_varyant 4830 White Glossy Mug 15 oz 15 oz (BOY=15)
+OZET yerlesimler ['default']
+OZET option_groups ['Default', 'Environment', 'Flat, Premium', 'Halloween', 'Holiday season', 'Lifestyle', 'Lifestyle 2', 'Lifestyle 2, Premium', 'Lifestyle 3', 'Lifestyle 3, Premium', 'Lifestyle 4, Premium', 'Lifestyle, Premium', 'Placeholder', 'Product specs', 'Red, white & blue', 'Spring/summer vibes', 'Templates', "Valentine's Day"]
+OZET options ['Cookies', 'Cutting board', 'Donuts', 'Front', 'Front view', 'Halloween', 'Handle on Left', 'Handle on Right', 'Office environment', 'Pineapple', 'Watermelon', 'Woman', 'default']
+OZET printfile {"printfile_id": 44, "width": 2700, "height": 1140, "dpi": 300, "fill_mode": "fit", "can_rotate": false} yerlesim default
+OZET printfile_kontrol boy=15 varyant=4830 printfile=44 olcu=2700x1140 dpi=300 beklenen=44 2700x1140
+OZET template {"template_id": 920, "image_url": "https://files.cdn.printful.com/o/upload/api-template/d3/d33a21bee19498f1cc7ed51531cc1b8a?v=1643279809", "background_url": null, "template_width": 728, "template_height": 728.0, "print_area_width": 649.0, "print_area_height": 274.0, "print_area_top": 117.0, "print_area_left": 40.0, "orientation": "any"}
+OZET gorsel_olcu (2700, 1140)
+OZET task_key gt-986009266
+1/30 durum=completed gecen=10 sn kalan<= 290 sn %3
+OZET mockup 01_default_15oz.png
+OZET mockup 02_Handle_on_Left_15oz.png
+OZET mockup 03_Front_view_15oz.png
+OZET mockup 04_Woman_15oz.png
+OZET mockup 05_Cutting_board_15oz.png
+OZET mockup 06_Office_environment_15oz.png
+OZET mockup 07_Halloween_15oz.png
+OZET mockup 08_Handle_on_Left_15oz.png
+OZET mockup 09_Handle_on_Left_15oz.png
+OZET mockup 10_Handle_on_Left_15oz.png
+OZET mockup 11_Handle_on_Left_15oz.png
+OZET mockup 12_Handle_on_Right_15oz.png
+OZET mockup 13_Handle_on_Right_15oz.png
+OZET mockup 14_Front_view_15oz.png
+OZET mockup 15_Handle_on_Right_15oz.png
+OZET mockup 16_Front_view_15oz.png
+OZET mockup 17_Handle_on_Right_15oz.png
+OZET mockup 18_Front_view_15oz.png
+OZET mockup 19_Handle_on_Right_15oz.png
+OZET mockup 20_Handle_on_Left_15oz.png
+OZET mockup 21_Handle_on_Left_15oz.png
+OZET mockup 22_Handle_on_Right_15oz.png
+OZET mockup 23_Front_view_15oz.png
+OZET mockup 24_Front_view_15oz.png
+OZET mockup 25_Handle_on_Left_15oz.png
+OZET mockup 26_Handle_on_Right_15oz.png
+OZET mockup 27_Handle_on_Right_15oz.png
+OZET mockup 28_Handle_on_Left_15oz.png
+OZET mockup 29_Handle_on_Left_15oz.png
+OZET mockup 30_Handle_on_Right_15oz.png
+OZET mockup 31_Front_15oz.png
+OZET mockup 32_Cookies_15oz.png
+OZET toplam_mockup 32
+[2/6] KUPA_03_NazarBond_baski_2700x1140 cikis=0 20s | gecen 43s | kalan ~86s | %33
+===== [3/6] KUPA_04_RoseRibbon_baski_2700x1140  <- tasarim/KUPA_04_RoseRibbon_baski_2700x1140.png
+OZET boy 15 gorsel https://raw.githubusercontent.com/caliserdar-maker/astrolove-ops/kupa-printful-sonuc/tasarim/KUPA_04_RoseRibbon_baski_2700x1140.png
+OZET varyant 1320 White Glossy Mug 11 oz 11 oz
+OZET varyant 4830 White Glossy Mug 15 oz 15 oz
+OZET varyant 16586 White Glossy Mug 20 oz 20 oz
+OZET secilen_varyant 4830 White Glossy Mug 15 oz 15 oz (BOY=15)
+OZET yerlesimler ['default']
+OZET option_groups ['Default', 'Environment', 'Flat, Premium', 'Halloween', 'Holiday season', 'Lifestyle', 'Lifestyle 2', 'Lifestyle 2, Premium', 'Lifestyle 3', 'Lifestyle 3, Premium', 'Lifestyle 4, Premium', 'Lifestyle, Premium', 'Placeholder', 'Product specs', 'Red, white & blue', 'Spring/summer vibes', 'Templates', "Valentine's Day"]
+OZET options ['Cookies', 'Cutting board', 'Donuts', 'Front', 'Front view', 'Halloween', 'Handle on Left', 'Handle on Right', 'Office environment', 'Pineapple', 'Watermelon', 'Woman', 'default']
+OZET printfile {"printfile_id": 44, "width": 2700, "height": 1140, "dpi": 300, "fill_mode": "fit", "can_rotate": false} yerlesim default
+OZET printfile_kontrol boy=15 varyant=4830 printfile=44 olcu=2700x1140 dpi=300 beklenen=44 2700x1140
+OZET template {"template_id": 920, "image_url": "https://files.cdn.printful.com/o/upload/api-template/d3/d33a21bee19498f1cc7ed51531cc1b8a?v=1643279809", "background_url": null, "template_width": 728, "template_height": 728.0, "print_area_width": 649.0, "print_area_height": 274.0, "print_area_top": 117.0, "print_area_left": 40.0, "orientation": "any"}
+OZET gorsel_olcu (2700, 1140)
+OZET 429 /mockup-generator/create-task/19 deneme 1/6, 44 sn bekleniyor
+OZET task_key gt-986009486
+1/30 durum=completed gecen=10 sn kalan<= 290 sn %3
+OZET mockup 01_default_15oz.png
+OZET mockup 02_Handle_on_Left_15oz.png
+OZET mockup 03_Front_view_15oz.png
+OZET mockup 04_Woman_15oz.png
+OZET mockup 05_Cutting_board_15oz.png
+OZET mockup 06_Office_environment_15oz.png
+OZET mockup 07_Halloween_15oz.png
+OZET mockup 08_Handle_on_Left_15oz.png
+OZET mockup 09_Handle_on_Left_15oz.png
+OZET mockup 10_Handle_on_Left_15oz.png
+OZET mockup 11_Handle_on_Left_15oz.png
+OZET mockup 12_Handle_on_Right_15oz.png
+OZET mockup 13_Handle_on_Right_15oz.png
+OZET mockup 14_Front_view_15oz.png
+OZET mockup 15_Handle_on_Right_15oz.png
+OZET mockup 16_Front_view_15oz.png
+OZET mockup 17_Handle_on_Right_15oz.png
+OZET mockup 18_Front_view_15oz.png
+OZET mockup 19_Handle_on_Right_15oz.png
+OZET mockup 20_Handle_on_Left_15oz.png
+OZET mockup 21_Handle_on_Left_15oz.png
+OZET mockup 22_Handle_on_Right_15oz.png
+OZET mockup 23_Front_view_15oz.png
+OZET mockup 24_Front_view_15oz.png
+OZET mockup 25_Handle_on_Left_15oz.png
+OZET mockup 26_Handle_on_Right_15oz.png
+OZET mockup 27_Handle_on_Right_15oz.png
+OZET mockup 28_Handle_on_Left_15oz.png
+OZET mockup 29_Handle_on_Left_15oz.png
+OZET mockup 30_Handle_on_Right_15oz.png
+OZET mockup 31_Front_15oz.png
+OZET mockup 32_Cookies_15oz.png
+OZET toplam_mockup 32
+[3/6] KUPA_04_RoseRibbon_baski_2700x1140 cikis=0 64s | gecen 107s | kalan ~107s | %50
+===== [4/6] KUPA_05_PromiseLine_baski_2700x1140  <- tasarim/KUPA_05_PromiseLine_baski_2700x1140.png
+OZET boy 15 gorsel https://raw.githubusercontent.com/caliserdar-maker/astrolove-ops/kupa-printful-sonuc/tasarim/KUPA_05_PromiseLine_baski_2700x1140.png
+OZET varyant 1320 White Glossy Mug 11 oz 11 oz
+OZET varyant 4830 White Glossy Mug 15 oz 15 oz
+OZET varyant 16586 White Glossy Mug 20 oz 20 oz
+OZET secilen_varyant 4830 White Glossy Mug 15 oz 15 oz (BOY=15)
+OZET yerlesimler ['default']
+OZET option_groups ['Default', 'Environment', 'Flat, Premium', 'Halloween', 'Holiday season', 'Lifestyle', 'Lifestyle 2', 'Lifestyle 2, Premium', 'Lifestyle 3', 'Lifestyle 3, Premium', 'Lifestyle 4, Premium', 'Lifestyle, Premium', 'Placeholder', 'Product specs', 'Red, white & blue', 'Spring/summer vibes', 'Templates', "Valentine's Day"]
+OZET options ['Cookies', 'Cutting board', 'Donuts', 'Front', 'Front view', 'Halloween', 'Handle on Left', 'Handle on Right', 'Office environment', 'Pineapple', 'Watermelon', 'Woman', 'default']
+OZET printfile {"printfile_id": 44, "width": 2700, "height": 1140, "dpi": 300, "fill_mode": "fit", "can_rotate": false} yerlesim default
+OZET printfile_kontrol boy=15 varyant=4830 printfile=44 olcu=2700x1140 dpi=300 beklenen=44 2700x1140
+OZET template {"template_id": 920, "image_url": "https://files.cdn.printful.com/o/upload/api-template/d3/d33a21bee19498f1cc7ed51531cc1b8a?v=1643279809", "background_url": null, "template_width": 728, "template_height": 728.0, "print_area_width": 649.0, "print_area_height": 274.0, "print_area_top": 117.0, "print_area_left": 40.0, "orientation": "any"}
+OZET gorsel_olcu (2700, 1140)
+OZET task_key gt-986009577
+1/30 durum=completed gecen=10 sn kalan<= 290 sn %3
+OZET mockup 01_default_15oz.png
+OZET mockup 02_Handle_on_Left_15oz.png
+OZET mockup 03_Front_view_15oz.png
+OZET mockup 04_Woman_15oz.png
+OZET mockup 05_Cutting_board_15oz.png
+OZET mockup 06_Office_environment_15oz.png
+OZET mockup 07_Halloween_15oz.png
+OZET mockup 08_Handle_on_Left_15oz.png
+OZET mockup 09_Handle_on_Left_15oz.png
+OZET mockup 10_Handle_on_Left_15oz.png
+OZET mockup 11_Handle_on_Left_15oz.png
+OZET mockup 12_Handle_on_Right_15oz.png
+OZET mockup 13_Handle_on_Right_15oz.png
+OZET mockup 14_Front_view_15oz.png
+OZET mockup 15_Handle_on_Right_15oz.png
+OZET mockup 16_Front_view_15oz.png
+OZET mockup 17_Handle_on_Right_15oz.png
+OZET mockup 18_Front_view_15oz.png
+OZET mockup 19_Handle_on_Right_15oz.png
+OZET mockup 20_Handle_on_Left_15oz.png
+OZET mockup 21_Handle_on_Left_15oz.png
+OZET mockup 22_Handle_on_Right_15oz.png
+OZET mockup 23_Front_view_15oz.png
+OZET mockup 24_Front_view_15oz.png
+OZET mockup 25_Handle_on_Left_15oz.png
+OZET mockup 26_Handle_on_Right_15oz.png
+OZET mockup 27_Handle_on_Right_15oz.png
+OZET mockup 28_Handle_on_Left_15oz.png
+OZET mockup 29_Handle_on_Left_15oz.png
+OZET mockup 30_Handle_on_Right_15oz.png
+OZET mockup 31_Front_15oz.png
+OZET mockup 32_Cookies_15oz.png
+OZET toplam_mockup 32
+[4/6] KUPA_05_PromiseLine_baski_2700x1140 cikis=0 17s | gecen 124s | kalan ~62s | %66
+===== [5/6] KUPA_06_AegeanTile_baski_2700x1140  <- tasarim/KUPA_06_AegeanTile_baski_2700x1140.png
+OZET boy 15 gorsel https://raw.githubusercontent.com/caliserdar-maker/astrolove-ops/kupa-printful-sonuc/tasarim/KUPA_06_AegeanTile_baski_2700x1140.png
+OZET varyant 1320 White Glossy Mug 11 oz 11 oz
+OZET varyant 4830 White Glossy Mug 15 oz 15 oz
+OZET varyant 16586 White Glossy Mug 20 oz 20 oz
+OZET secilen_varyant 4830 White Glossy Mug 15 oz 15 oz (BOY=15)
+OZET yerlesimler ['default']
+OZET option_groups ['Default', 'Environment', 'Flat, Premium', 'Halloween', 'Holiday season', 'Lifestyle', 'Lifestyle 2', 'Lifestyle 2, Premium', 'Lifestyle 3', 'Lifestyle 3, Premium', 'Lifestyle 4, Premium', 'Lifestyle, Premium', 'Placeholder', 'Product specs', 'Red, white & blue', 'Spring/summer vibes', 'Templates', "Valentine's Day"]
+OZET options ['Cookies', 'Cutting board', 'Donuts', 'Front', 'Front view', 'Halloween', 'Handle on Left', 'Handle on Right', 'Office environment', 'Pineapple', 'Watermelon', 'Woman', 'default']
+OZET printfile {"printfile_id": 44, "width": 2700, "height": 1140, "dpi": 300, "fill_mode": "fit", "can_rotate": false} yerlesim default
+OZET printfile_kontrol boy=15 varyant=4830 printfile=44 olcu=2700x1140 dpi=300 beklenen=44 2700x1140
+OZET template {"template_id": 920, "image_url": "https://files.cdn.printful.com/o/upload/api-template/d3/d33a21bee19498f1cc7ed51531cc1b8a?v=1643279809", "background_url": null, "template_width": 728, "template_height": 728.0, "print_area_width": 649.0, "print_area_height": 274.0, "print_area_top": 117.0, "print_area_left": 40.0, "orientation": "any"}
+OZET gorsel_olcu (2700, 1140)
+OZET 429 /mockup-generator/create-task/19 deneme 1/6, 48 sn bekleniyor
+OZET task_key gt-986009808
+1/30 durum=completed gecen=10 sn kalan<= 290 sn %3
+OZET mockup 01_default_15oz.png
+OZET mockup 02_Handle_on_Left_15oz.png
+OZET mockup 03_Front_view_15oz.png
+OZET mockup 04_Woman_15oz.png
+OZET mockup 05_Cutting_board_15oz.png
+OZET mockup 06_Office_environment_15oz.png
+OZET mockup 07_Halloween_15oz.png
+OZET mockup 08_Handle_on_Left_15oz.png
+OZET mockup 09_Handle_on_Left_15oz.png
+OZET mockup 10_Handle_on_Left_15oz.png
+OZET mockup 11_Handle_on_Left_15oz.png
+OZET mockup 12_Handle_on_Right_15oz.png
+OZET mockup 13_Handle_on_Right_15oz.png
+OZET mockup 14_Front_view_15oz.png
+OZET mockup 15_Handle_on_Right_15oz.png
+OZET mockup 16_Front_view_15oz.png
+OZET mockup 17_Handle_on_Right_15oz.png
+OZET mockup 18_Front_view_15oz.png
+OZET mockup 19_Handle_on_Right_15oz.png
+OZET mockup 20_Handle_on_Left_15oz.png
+OZET mockup 21_Handle_on_Left_15oz.png
+OZET mockup 22_Handle_on_Right_15oz.png
+OZET mockup 23_Front_view_15oz.png
+OZET mockup 24_Front_view_15oz.png
+OZET mockup 25_Handle_on_Left_15oz.png
+OZET mockup 26_Handle_on_Right_15oz.png
+OZET mockup 27_Handle_on_Right_15oz.png
+OZET mockup 28_Handle_on_Left_15oz.png
+OZET mockup 29_Handle_on_Left_15oz.png
+OZET mockup 30_Handle_on_Right_15oz.png
+OZET mockup 31_Front_15oz.png
+OZET mockup 32_Cookies_15oz.png
+OZET toplam_mockup 32
+[5/6] KUPA_06_AegeanTile_baski_2700x1140 cikis=0 64s | gecen 188s | kalan ~37s | %83
+===== [6/6] KUPA_07_Mediterranean_baski_2700x1140  <- tasarim/KUPA_07_Mediterranean_baski_2700x1140.png
+OZET boy 15 gorsel https://raw.githubusercontent.com/caliserdar-maker/astrolove-ops/kupa-printful-sonuc/tasarim/KUPA_07_Mediterranean_baski_2700x1140.png
+OZET varyant 1320 White Glossy Mug 11 oz 11 oz
+OZET varyant 4830 White Glossy Mug 15 oz 15 oz
+OZET varyant 16586 White Glossy Mug 20 oz 20 oz
+OZET secilen_varyant 4830 White Glossy Mug 15 oz 15 oz (BOY=15)
+OZET yerlesimler ['default']
+OZET option_groups ['Default', 'Environment', 'Flat, Premium', 'Halloween', 'Holiday season', 'Lifestyle', 'Lifestyle 2', 'Lifestyle 2, Premium', 'Lifestyle 3', 'Lifestyle 3, Premium', 'Lifestyle 4, Premium', 'Lifestyle, Premium', 'Placeholder', 'Product specs', 'Red, white & blue', 'Spring/summer vibes', 'Templates', "Valentine's Day"]
+OZET options ['Cookies', 'Cutting board', 'Donuts', 'Front', 'Front view', 'Halloween', 'Handle on Left', 'Handle on Right', 'Office environment', 'Pineapple', 'Watermelon', 'Woman', 'default']
+OZET printfile {"printfile_id": 44, "width": 2700, "height": 1140, "dpi": 300, "fill_mode": "fit", "can_rotate": false} yerlesim default
+OZET printfile_kontrol boy=15 varyant=4830 printfile=44 olcu=2700x1140 dpi=300 beklenen=44 2700x1140
+OZET template {"template_id": 920, "image_url": "https://files.cdn.printful.com/o/upload/api-template/d3/d33a21bee19498f1cc7ed51531cc1b8a?v=1643279809", "background_url": null, "template_width": 728, "template_height": 728.0, "print_area_width": 649.0, "print_area_height": 274.0, "print_area_top": 117.0, "print_area_left": 40.0, "orientation": "any"}
+OZET gorsel_olcu (2700, 1140)
+OZET task_key gt-986009871
+1/30 durum=completed gecen=10 sn kalan<= 290 sn %3
+OZET mockup 01_default_15oz.png
+OZET mockup 02_Handle_on_Left_15oz.png
+OZET mockup 03_Front_view_15oz.png
+OZET mockup 04_Woman_15oz.png
+OZET mockup 05_Cutting_board_15oz.png
+OZET mockup 06_Office_environment_15oz.png
+OZET mockup 07_Halloween_15oz.png
+OZET mockup 08_Handle_on_Left_15oz.png
+OZET mockup 09_Handle_on_Left_15oz.png
+OZET mockup 10_Handle_on_Left_15oz.png
+OZET mockup 11_Handle_on_Left_15oz.png
+OZET mockup 12_Handle_on_Right_15oz.png
+OZET mockup 13_Handle_on_Right_15oz.png
+OZET mockup 14_Front_view_15oz.png
+OZET mockup 15_Handle_on_Right_15oz.png
+OZET mockup 16_Front_view_15oz.png
+OZET mockup 17_Handle_on_Right_15oz.png
+OZET mockup 18_Front_view_15oz.png
+OZET mockup 19_Handle_on_Right_15oz.png
+OZET mockup 20_Handle_on_Left_15oz.png
+OZET mockup 21_Handle_on_Left_15oz.png
+OZET mockup 22_Handle_on_Right_15oz.png
+OZET mockup 23_Front_view_15oz.png
+OZET mockup 24_Front_view_15oz.png
+OZET mockup 25_Handle_on_Left_15oz.png
+OZET mockup 26_Handle_on_Right_15oz.png
+OZET mockup 27_Handle_on_Right_15oz.png
+OZET mockup 28_Handle_on_Left_15oz.png
+OZET mockup 29_Handle_on_Left_15oz.png
+OZET mockup 30_Handle_on_Right_15oz.png
+OZET mockup 31_Front_15oz.png
+OZET mockup 32_Cookies_15oz.png
+OZET toplam_mockup 32
+[6/6] KUPA_07_Mediterranean_baski_2700x1140 cikis=0 18s | gecen 206s | kalan ~0s | %100
