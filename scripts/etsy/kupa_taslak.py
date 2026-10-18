@@ -14,6 +14,7 @@
              b) createDraftListing (tek POST): CSV basligi/aciklamasi/13 etiket birebir, i_did, made_to_order, fiziksel,
                 Ceramic, kategori 1062 Mugs, readiness BY ile ayni (1517641240112), fiyat 24.00, stok 999.
              c) envanter: Style (513) x Size (514) = 14 urun, fiyat yalniz boya gore (11 oz 24.00, 15 oz 29.00), stok 999,
+                price_on_property ve sku_on_property [513, 514] (Etsy: ya bos ya iki ozellik),
                 SKU KUPA-CANCER_LIBRA-<stil no>-<11|15>.  d) 13 gorsel (galeri 01-13 sirasi) + video.
              e) Style -> kapak baglari (Rose Ribbon=01, Botanical=03 ... Mediterranean=08).  f) kisisellestirme: tek kutu,
                 zorunlu, 256 karakter, talimat CSV.  g) nitelikler (kategori 1062).  h) geri okuma kontrolleri.
@@ -501,7 +502,9 @@ def yaz(api, shop, out):
                 for ad, no, _, _ in STILLER for bad, bk, fiyat in BOYLAR]
     inv = api.get(f"/listings/{lid}/inventory") or {}
     if len(inv.get("products") or []) != 14:
-        api.put_json(f"/listings/{lid}/inventory", dict(products=urunler(), price_on_property=[P_SIZE], quantity_on_property=[],
+        # Etsy (18 Eki 400): *_on_property ya bos ya iki ozellik; sku iki ozellikte -> fiyat da [513, 514]
+        # (fiyatlar yine yalniz boya gore: her stilde 11 oz 24.00, 15 oz 29.00; BY78 ile ayni yontem)
+        api.put_json(f"/listings/{lid}/inventory", dict(products=urunler(), price_on_property=[P_STYLE, P_SIZE], quantity_on_property=[],
                                                         sku_on_property=[P_STYLE, P_SIZE], readiness_state_on_property=[]))
     state_oku("2 envanter")
 
@@ -577,7 +580,7 @@ def yaz(api, shop, out):
         "aciklama CSV ile birebir": html.unescape(L.get("description") or "").strip() == desc.strip(),
         "13 etiket CSV ile birebir": sorted(L.get("tags") or []) == sorted(tags) and len(L.get("tags") or []) == 13,
         "14 secenek, fiyat, SKU, stok 999": sorted(tablo) == sorted(bek_tablo) and len(tablo) == 14,
-        "fiyat yalniz boya gore": inv.get("price_on_property") == [P_SIZE],
+        "fiyat yalniz boya gore": all(f == dict((b_, f_) for b_, _, f_ in BOYLAR)[bo] for _, bo, f, *_ in tablo),
         "13 gorsel 1-13 sirada": [x.get("rank") for x in ims] == list(range(1, 14)),
         "video var": len(vids) == 1,
         "7 stil dogru kapak": bag == bek_bag,
