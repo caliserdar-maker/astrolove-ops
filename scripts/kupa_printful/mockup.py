@@ -12,6 +12,7 @@ eksiz dosyalarinin ustune yazilmaz."""
 import json
 import os
 import pathlib
+import re
 import struct
 import sys
 import time
@@ -28,18 +29,27 @@ BOYLAR = {
 }
 
 
-def istek(yol, token, veri=None):
-    req = urllib.request.Request(
-        API + yol, data=json.dumps(veri).encode() if veri is not None else None,
-        headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json",
-                 "User-Agent": UA, "Accept": "application/json"},
-        method="POST" if veri is not None else "GET")
-    try:
-        with urllib.request.urlopen(req, timeout=90) as r:
-            return json.load(r)
-    except urllib.error.HTTPError as e:
-        print("OZET HATA", yol, e.code, e.read().decode()[:2000])
-        raise
+def istek(yol, token, veri=None, deneme=6):
+    """429 (TooManyRequests) gelirse mesajdaki sure + 5 sn beklenip en fazla `deneme` kez tekrar denenir."""
+    for i in range(1, deneme + 1):
+        req = urllib.request.Request(
+            API + yol, data=json.dumps(veri).encode() if veri is not None else None,
+            headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json",
+                     "User-Agent": UA, "Accept": "application/json"},
+            method="POST" if veri is not None else "GET")
+        try:
+            with urllib.request.urlopen(req, timeout=90) as r:
+                return json.load(r)
+        except urllib.error.HTTPError as e:
+            govde = e.read().decode()[:2000]
+            if e.code == 429 and i < deneme:
+                sn = re.search(r"after (\d+) seconds", govde)
+                bekle = (int(sn.group(1)) if sn else 60) + 5
+                print(f"OZET 429 {yol} deneme {i}/{deneme}, {bekle} sn bekleniyor", flush=True)
+                time.sleep(bekle)
+                continue
+            print("OZET HATA", yol, e.code, govde)
+            raise
 
 
 def indir(u, hedef):

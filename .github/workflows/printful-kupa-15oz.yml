@@ -8,6 +8,12 @@ on:
       boy:
         description: "Kupa boyu: 11 ya da 15"
         default: "15"
+      isler:
+        description: "HEPSI ya da bosluklu liste: kalibrasyon 01_Botanical 02_Gold 03_NazarBond 04_RoseRibbon 05_PromiseLine 06_AegeanTile 07_Mediterranean"
+        default: "HEPSI"
+      kargo:
+        description: "Kargo ucretleri adimi: evet / hayir"
+        default: "evet"
 permissions:
   contents: write
 jobs:
@@ -16,6 +22,8 @@ jobs:
     timeout-minutes: 40
     env:
       BOY: ${{ inputs.boy }}
+      ISLER: ${{ inputs.isler }}
+      KARGO: ${{ inputs.kargo }}
       DAL: kupa-printful-sonuc
     steps:
       - uses: actions/checkout@v4
@@ -34,8 +42,21 @@ jobs:
           set -euo pipefail
           case "$BOY" in 11|15) ;; *) echo "::error::boy 11 ya da 15 olmali ($BOY)"; exit 1;; esac
           cd s
-          if [ -e "sonuc_${BOY}oz" ] || [ -e "MOCKUP_LOG_${BOY}oz.txt" ]; then
-            echo "::error::DUR: sonuc_${BOY}oz/ ya da MOCKUP_LOG_${BOY}oz.txt dalda zaten var; mevcut dosyalara dokunulmaz"; exit 1; fi
+          TUM="kalibrasyon 01_Botanical 02_Gold 03_NazarBond 04_RoseRibbon 05_PromiseLine 06_AegeanTile 07_Mediterranean"
+          [ "$ISLER" = HEPSI ] && ISLER="$TUM"
+          if [ "$BOY" = 15 ]; then OLCU=2700x1140; else OLCU=2700x1050; fi
+          KLASORLER=""
+          for x in $ISLER; do
+            echo " $TUM " | grep -q " $x " || { echo "::error::bilinmeyen is: $x"; exit 1; }
+            k=$([ "$x" = kalibrasyon ] && echo kalibrasyon || echo "KUPA_${x}_baski_${OLCU}")
+            if [ -n "$(find "sonuc_${BOY}oz/$k" -name '*.png' 2>/dev/null)" ]; then
+              echo "::error::DUR: sonuc_${BOY}oz/$k icinde mockup zaten var; mevcut dosyalara dokunulmaz"; exit 1; fi
+            KLASORLER="$KLASORLER $k"
+          done
+          if [ "$KARGO" = evet ] && [ -e "sonuc_${BOY}oz/KARGO.json" ]; then
+            echo "::error::DUR: sonuc_${BOY}oz/KARGO.json zaten var (kargo=hayir ile kos)"; exit 1; fi
+          echo "IS_LISTE=$ISLER" >> "$GITHUB_ENV"; echo "KLASORLER=$KLASORLER" >> "$GITHUB_ENV"
+          echo "isler: $ISLER | klasorler:$KLASORLER | kargo: $KARGO"
           ONCE=$(git ls-tree -r --name-only HEAD kupa_uretim | wc -l)
           echo "KUPA_URETIM_ONCE=$ONCE" >> "$GITHUB_ENV"
           echo "DAL_ONCE=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
@@ -69,9 +90,8 @@ jobs:
           RAW="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${DAL}"
           if [ "$BOY" = 15 ]; then OLCU=2700x1140; KAL="tasarim/KALIBRASYON_2700x1140.png"; else OLCU=2700x1050; KAL="KALIBRASYON_2700x1050.png"; fi
           LOG="MOCKUP_LOG_${BOY}oz.txt"; HED="sonuc_${BOY}oz"
-          STILLER="01_Botanical 02_Gold 03_NazarBond 04_RoseRibbon 05_PromiseLine 06_AegeanTile 07_Mediterranean"
           sansur() { sed -u "s|${PRINTFUL_TOKEN}|***|g"; }
-          t0=$(date +%s); n=0; top=8; hata=""
+          t0=$(date +%s); n=0; top=$(echo $IS_LISTE | wc -w); hata=""
           calis() {  # $1 klasor, $2 dala gore yol
             n=$((n+1)); s0=$(date +%s)
             echo "===== [$n/$top] $1  <- $2" | tee -a "$LOG"
@@ -80,16 +100,19 @@ jobs:
             g=$(( $(date +%s) - t0 )); echo "[$n/$top] $1 cikis=$k $(( $(date +%s) - s0 ))s | gecen ${g}s | kalan ~$(( g * (top - n) / n ))s | %$(( 100 * n / top ))" | tee -a "$LOG"
             return $k
           }
-          calis kalibrasyon "$KAL"; k=$?
-          if [ $k -ne 0 ]; then echo "::error::DUR: kalibrasyon mockup cikis $k (printfile/varyant/olcu kontrolu ya da API hatasi); stiller kosulmadi"; exit 1; fi
-          grep -h "printfile_kontrol" "$LOG" | head -1 | sed 's/^/::warning::/'
-          for st in $STILLER; do
-            calis "KUPA_${st}_baski_${OLCU}" "tasarim/KUPA_${st}_baski_${OLCU}.png" || hata="$hata KUPA_${st}"
+          for st in $IS_LISTE; do
+            if [ "$st" = kalibrasyon ]; then
+              calis kalibrasyon "$KAL"; k=$?
+              if [ $k -ne 0 ]; then echo "::error::DUR: kalibrasyon mockup cikis $k (printfile/varyant/olcu kontrolu ya da API hatasi); stiller kosulmadi"; exit 1; fi
+            else
+              calis "KUPA_${st}_baski_${OLCU}" "tasarim/KUPA_${st}_baski_${OLCU}.png" || hata="$hata KUPA_${st}"
+            fi
           done
+          grep -h "printfile_kontrol" "$LOG" | tail -1 | sed 's/^/::warning::/'
           echo "::warning::MOCKUP boy $BOY | klasor $(ls -d $HED/*/ | wc -l) | png $(find $HED -name '*.png' | wc -l) | hata:${hata:- yok}"
           [ -z "$hata" ]
       - name: Kargo ucretleri (POST /shipping/rates, US/GB/DE x 1320/4830)
-        if: always()
+        if: always() && inputs.kargo == 'evet'
         run: |
           set -uo pipefail
           cd s
@@ -110,11 +133,15 @@ jobs:
             echo "::error::DUR: token sonuc dosyalarinda goruldu, push edilmedi"; exit 1; fi
           git config user.name "astrolove-bot"
           git config user.email "astrolove-bot@users.noreply.github.com"
-          for p in "$HED" "$LOG"; do if [ -e "$p" ]; then git add -- "$p"; fi; done
-          DIGER=$(git diff --cached --name-only | grep -vE "^(${HED}/|${LOG}$)" || true)
-          DEG=$(git diff --cached --name-only --diff-filter=DMR || true)
-          if [ -n "$DIGER$DEG" ]; then echo "::error::DUR: beklenmeyen degisiklik (yeni klasor disi ya da mevcut dosya): $DIGER $DEG"; exit 1; fi
-          git commit -qm "printful kupa ${BOY} oz: mockup (kalibrasyon + 7 stil) + kargo ucretleri (US/GB/DE)"
+          IZIN="^(${LOG}"; for k in $KLASORLER; do IZIN="$IZIN|${HED}/${k}/"; done
+          [ "$KARGO" = evet ] && IZIN="$IZIN|${HED}/KARGO\\.(json|txt)"; IZIN="$IZIN)"
+          for p in "$LOG" $(for k in $KLASORLER; do echo "$HED/$k"; done) "$HED/KARGO.json" "$HED/KARGO.txt"; do
+            if [ -e "$p" ]; then git add -- "$p"; fi; done
+          DIGER=$(git diff --cached --name-only | grep -vE "$IZIN" || true)
+          DEG=$(git diff --cached --name-only --diff-filter=DR || true)
+          if [ -n "$DIGER$DEG" ]; then echo "::error::DUR: beklenmeyen degisiklik (izinli klasor disi ya da silme): $DIGER $DEG"; exit 1; fi
+          git diff --cached --quiet && { echo "::warning::yazilacak degisiklik yok"; exit 0; }
+          git commit -qm "printful kupa ${BOY} oz: mockup (${IS_LISTE}) | kargo ${KARGO}"
           for i in 1 2 3; do
             if git push -q origin "HEAD:${DAL}"; then break; fi
             [ $i = 3 ] && { echo "::error::push 3 denemede olmadi"; exit 1; }
