@@ -1,0 +1,127 @@
+name: printful-kupa-15oz
+# Printful kupa mockup (boy 11/15) + kargo ucretleri. Salt okuma: siparis, urun, magaza kaydi OLUSTURULMAZ.
+# Sonuclar kupa-printful-sonuc dalina NORMAL commit + push ile yeni klasore yazilir (sonuc_<boy>oz/, MOCKUP_LOG_<boy>oz.txt).
+# git init / force push YOK; mevcut dosya degisirse ya da silinirse push edilmez. kupa_uretim/ dosya sayisi once/sonra yazilir.
+on:
+  workflow_dispatch:
+    inputs:
+      boy:
+        description: "Kupa boyu: 11 ya da 15"
+        default: "15"
+permissions:
+  contents: write
+jobs:
+  calis:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      BOY: ${{ inputs.boy }}
+      DAL: kupa-printful-sonuc
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: main
+      - uses: actions/checkout@v4
+        with:
+          ref: kupa-printful-sonuc
+          path: s
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Girdi ve on kontrol
+        run: |
+          set -euo pipefail
+          case "$BOY" in 11|15) ;; *) echo "::error::boy 11 ya da 15 olmali ($BOY)"; exit 1;; esac
+          cd s
+          if [ -e "sonuc_${BOY}oz" ] || [ -e "MOCKUP_LOG_${BOY}oz.txt" ]; then
+            echo "::error::DUR: sonuc_${BOY}oz/ ya da MOCKUP_LOG_${BOY}oz.txt dalda zaten var; mevcut dosyalara dokunulmaz"; exit 1; fi
+          ONCE=$(git ls-tree -r --name-only HEAD kupa_uretim | wc -l)
+          echo "KUPA_URETIM_ONCE=$ONCE" >> "$GITHUB_ENV"
+          echo "DAL_ONCE=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
+          echo "kupa_uretim/ dosya sayisi (once): $ONCE, dal $(git rev-parse --short HEAD)"
+      - name: rclone kur
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || { echo "rclone.org erisilemedi, apt"; sudo apt-get install -y -qq rclone >/dev/null; }
+          rclone version | head -1
+      - name: Printful token (Drive TEMP/PRINTFUL_TOKEN.json, maskeli)
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            export RCLONE_CONFIG_GDRIVE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET"; fi
+          T=$(rclone cat "gdrive:ASTROLOVE/TEMP/PRINTFUL_TOKEN.json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["api_token"].strip())')
+          rm -rf ~/.config/rclone
+          [ -n "$T" ] || { echo "HATA: PRINTFUL_TOKEN.json api_token bos"; exit 1; }
+          echo "::add-mask::$T"
+          echo "PRINTFUL_TOKEN=$T" >> "$GITHUB_ENV"
+          echo "token okundu (maskeli)"
+      - name: Printful mockup (kalibrasyon + 7 stil)
+        run: |
+          set -uo pipefail
+          cd s
+          RAW="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${DAL}"
+          if [ "$BOY" = 15 ]; then OLCU=2700x1140; KAL="tasarim/KALIBRASYON_2700x1140.png"; else OLCU=2700x1050; KAL="KALIBRASYON_2700x1050.png"; fi
+          LOG="MOCKUP_LOG_${BOY}oz.txt"; HED="sonuc_${BOY}oz"
+          STILLER="01_Botanical 02_Gold 03_NazarBond 04_RoseRibbon 05_PromiseLine 06_AegeanTile 07_Mediterranean"
+          sansur() { sed -u "s|${PRINTFUL_TOKEN}|***|g"; }
+          t0=$(date +%s); n=0; top=8; hata=""
+          calis() {  # $1 klasor, $2 dala gore yol
+            n=$((n+1)); s0=$(date +%s)
+            echo "===== [$n/$top] $1  <- $2" | tee -a "$LOG"
+            python "$GITHUB_WORKSPACE/main/scripts/kupa_printful/mockup.py" "$RAW/$2" "$HED/$1" 2>&1 | sansur | tee -a "$LOG"
+            k=${PIPESTATUS[0]}
+            g=$(( $(date +%s) - t0 )); echo "[$n/$top] $1 cikis=$k $(( $(date +%s) - s0 ))s | gecen ${g}s | kalan ~$(( g * (top - n) / n ))s | %$(( 100 * n / top ))" | tee -a "$LOG"
+            return $k
+          }
+          calis kalibrasyon "$KAL"; k=$?
+          if [ $k -ne 0 ]; then echo "::error::DUR: kalibrasyon mockup cikis $k (printfile/varyant/olcu kontrolu ya da API hatasi); stiller kosulmadi"; exit 1; fi
+          grep -h "printfile_kontrol" "$LOG" | head -1 | sed 's/^/::warning::/'
+          for st in $STILLER; do
+            calis "KUPA_${st}_baski_${OLCU}" "tasarim/KUPA_${st}_baski_${OLCU}.png" || hata="$hata KUPA_${st}"
+          done
+          echo "::warning::MOCKUP boy $BOY | klasor $(ls -d $HED/*/ | wc -l) | png $(find $HED -name '*.png' | wc -l) | hata:${hata:- yok}"
+          [ -z "$hata" ]
+      - name: Kargo ucretleri (POST /shipping/rates, US/GB/DE x 1320/4830)
+        if: always()
+        run: |
+          set -uo pipefail
+          cd s
+          sansur() { sed -u "s|${PRINTFUL_TOKEN}|***|g"; }
+          echo "===== KARGO" | tee -a "MOCKUP_LOG_${BOY}oz.txt"
+          python "$GITHUB_WORKSPACE/main/scripts/kupa_printful/kargo.py" "sonuc_${BOY}oz" 2>&1 | sansur | tee -a "MOCKUP_LOG_${BOY}oz.txt"
+          k=${PIPESTATUS[0]}
+          [ -f "sonuc_${BOY}oz/KARGO.txt" ] && echo "::warning::KARGO $(tail -n +2 sonuc_${BOY}oz/KARGO.txt | cut -d'|' -f1-6 | tr '\n' ';' | cut -c1-900)"
+          exit $k
+      - name: Sonuclari dala yaz (normal commit + push)
+        if: always()
+        run: |
+          set -euo pipefail
+          cd s
+          HED="sonuc_${BOY}oz"; LOG="MOCKUP_LOG_${BOY}oz.txt"
+          [ -e "$HED" ] || [ -e "$LOG" ] || { echo "::error::yazilacak sonuc yok"; exit 1; }
+          if [ -n "${PRINTFUL_TOKEN:-}" ] && grep -rlF "$PRINTFUL_TOKEN" $HED $LOG 2>/dev/null; then
+            echo "::error::DUR: token sonuc dosyalarinda goruldu, push edilmedi"; exit 1; fi
+          git config user.name "astrolove-bot"
+          git config user.email "astrolove-bot@users.noreply.github.com"
+          for p in "$HED" "$LOG"; do if [ -e "$p" ]; then git add -- "$p"; fi; done
+          DIGER=$(git diff --cached --name-only | grep -vE "^(${HED}/|${LOG}$)" || true)
+          DEG=$(git diff --cached --name-only --diff-filter=DMR || true)
+          if [ -n "$DIGER$DEG" ]; then echo "::error::DUR: beklenmeyen degisiklik (yeni klasor disi ya da mevcut dosya): $DIGER $DEG"; exit 1; fi
+          git commit -qm "printful kupa ${BOY} oz: mockup (kalibrasyon + 7 stil) + kargo ucretleri (US/GB/DE)"
+          for i in 1 2 3; do
+            if git push -q origin "HEAD:${DAL}"; then break; fi
+            [ $i = 3 ] && { echo "::error::push 3 denemede olmadi"; exit 1; }
+            git pull -q --rebase origin "$DAL"
+          done
+          git fetch -q origin "$DAL"
+          SONRA=$(git ls-tree -r --name-only "origin/${DAL}" kupa_uretim | wc -l)
+          N=$(git ls-tree -r --name-only "origin/${DAL}" "$HED" | wc -l)
+          echo "::warning::DAL ${DAL} commit $(git rev-parse --short origin/${DAL}) (once ${DAL_ONCE}) | ${HED}/ dosya $N | kupa_uretim once ${KUPA_URETIM_ONCE} sonra ${SONRA}"
+          [ "$SONRA" = "$KUPA_URETIM_ONCE" ] || { echo "::error::kupa_uretim/ dosya sayisi degisti: ${KUPA_URETIM_ONCE} -> ${SONRA}"; exit 1; }
