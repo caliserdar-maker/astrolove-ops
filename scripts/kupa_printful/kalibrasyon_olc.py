@@ -3,7 +3,7 @@
 Kullanim: python kalibrasyon_olc.py <boy 11|15> <mockup.png> [<mockup.png> ...]
 Kalibrasyon dosyasi: kirmizi FRONT cizgisi x=560.7, mavi BACK x=2139.3, yesil CENTER x=1350; siyah cerceve
 tasarimin 1050 px yuksekligi (15 oz dosyasinda y=45..1094, ust/alt 45 px beyaz).
-Her mockup icin: govde yatay merkezi (alfa), gorunen renkli cizgi, olcek s = cerceve yuksekligi / 1050,
+Her mockup icin: govde yatay merkezi (alfa, orta bant en genis kosu), gorunen renkli cizgi, olcek s = cerceve yuksekligi / 1050,
 govde merkezine dusen printfile x = cizgi_x + (merkez - cizgi_px) / s; cerceve ust/alt cizgisi ile govde
 ust/alt kenari arasi bosluk (printfile px). Seffaf arka planli olmayan mockup atlanir."""
 import json
@@ -47,13 +47,19 @@ def olc(yol):
     satirlar = np.where(sat > 0.25 * sat.max())[0]
     y_ust, y_alt = int(satirlar.min()), int(satirlar.max())
     s = (y_alt - y_ust) / 1050.0
-    # govde kenarlari: cercevenin alt %12'lik bandi (kulp yok), her satirda alfa kosusu
+    # govde kenarlari: cercevenin orta %40'lik bandinda her satirin EN GENIS alfa kosusu (kulp ayri kosu kalir)
     sol, sag = [], []
-    for y in range(int(y_alt - 0.12 * (y_alt - y_ust)), y_alt - 3):
+    h = y_alt - y_ust
+    for y in range(int(y_ust + 0.3 * h), int(y_ust + 0.7 * h)):
         xs = np.where(al[y])[0]
-        if len(xs):
-            sol.append(xs.min())
-            sag.append(xs.max())
+        if not len(xs):
+            continue
+        br = np.where(np.diff(xs) > 1)[0]
+        bas = np.r_[xs[0], xs[br + 1]]
+        son = np.r_[xs[br], xs[-1]]
+        i = int(np.argmax(son - bas))
+        sol.append(bas[i])
+        sag.append(son[i])
     merkez = (float(np.median(sol)) + float(np.median(sag))) / 2
     # merkeze en yakin cizgi
     k, (x_c, _) = min(adaylar.items(), key=lambda kv: abs(kv[1][0] - merkez))
@@ -61,10 +67,22 @@ def olc(yol):
     # dikey: govde ust/alt (merkez sutunu, alfa) ile cerceve arasi
     kol = np.where(al[:, int(round(merkez))])[0]
     g_ust, g_alt = int(kol.min()), int(kol.max())
+    # on agiz kenari: agiz elipsinin merkez satiri = govde tam genisligine ilk ulasilan satir; on kenar = 2*merkez - arka kenar
+    gl, gr = float(np.median(sol)), float(np.median(sag))
+    kulp_sag = (gr - merkez) > (merkez - gl) + 30
+    y_el = g_ust
+    for y in range(g_ust, y_ust):
+        xs = np.where(al[y])[0]
+        if len(xs) and (xs.min() <= gl + 2 if not kulp_sag else xs.max() >= gr - 2) and \
+                (xs.max() >= gr - 2 if not kulp_sag else xs.min() <= gl + 2):
+            y_el = y
+            break
+    on_agiz = 2 * y_el - g_ust
     return {"dosya": yol, "cizgi": k, "cizgi_px": round(x_c, 1), "govde_merkez_px": round(merkez, 1),
             "olcek": round(s, 4), "printfile_x_merkez": round(pf_x, 1), "cerceve_y": [y_ust, y_alt],
             "govde_y": [g_ust, g_alt], "ust_bosluk_pf": round((y_ust - g_ust) / s, 1),
-            "alt_bosluk_pf": round((g_alt - y_alt) / s, 1)}
+            "alt_bosluk_pf": round((g_alt - y_alt) / s, 1), "on_agiz_y": on_agiz,
+            "ust_bosluk_on_agiz_pf": round((y_ust - on_agiz) / s, 1)}
 
 
 if __name__ == "__main__":
