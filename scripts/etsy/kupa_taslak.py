@@ -442,7 +442,15 @@ def yaz(api, shop, out):
 
     # b) taslak
     def state_oku(adim):
-        L = api.get(f"/listings/{api.lid}") or {}
+        L = None
+        for i in range(6):                 # yeni ilan birkac saniye 404 donebilir
+            L = api.get(f"/listings/{api.lid}", ok404=True)
+            if L:
+                break
+            print(f"{adim}: GET /listings/{api.lid} 404, {5 * (i + 1)} sn bekleniyor", flush=True)
+            time.sleep(5 * (i + 1))
+        if not L:
+            kaydet(); raise SystemExit(f"DUR: /listings/{api.lid} okunamadi (404) ({adim})")
         st = L.get("state")
         R["adimlar"].append((adim, st, api.remaining))
         print(f"{adim}: state={st} kota={api.remaining}", flush=True)
@@ -621,7 +629,15 @@ def main():
     if a.mod == "oku":
         oku(SaltOkur(store), shop, out)
     else:
-        yaz(Kilitli(store), shop, out)
+        try:
+            yaz(Kilitli(store), shop, out)
+        except BaseException as e:  # noqa: BLE001  hata nedeni rapora ve annotation'a (job loglari okunamiyor)
+            f = out / "KUPA_TASLAK.json"
+            R = json.load(open(f)) if f.exists() else {}
+            R["hata"] = f"{type(e).__name__}: {e}"[:1500]
+            json.dump(R, open(f, "w"), indent=1, ensure_ascii=False, default=str)
+            print(f"::error::KUPA YAZ HATA {R['hata'][:600]}")
+            raise
 
 
 if __name__ == "__main__":
