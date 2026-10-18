@@ -12,6 +12,7 @@ on:
   workflow_dispatch:
     inputs:
       mod: { description: "oku | yaz", required: true, default: "oku" }
+      listing_id: { description: "yaz: YALNIZ bu mevcut taslak (DURUM.json ile ayni olmali, degilse yazma yok) + kosu sonu salt son okuma", required: false, default: "" }
 env:
   O: "gdrive:ASTROLOVE/TEMP/KUPA_TASLAK_CANCER_LIBRA_20261018"
   DAL: kupa-printful-sonuc
@@ -72,6 +73,11 @@ jobs:
           ls -la _img; [ "$(ls _img/*.jpg | wc -l)" = 13 ] && [ "$(ls _img/*.mp4 | wc -l)" = 1 ] || { echo "HATA galeri 13+1 degil"; exit 1; }
           rclone copy "$O" _out --include "/DURUM.json" -q || true
           [ -f _out/DURUM.json ] && cat _out/DURUM.json || echo "onceki durum yok"
+          if [ -n "${{ inputs.listing_id }}" ]; then
+            D=$(python3 -c 'import json;print(json.load(open("_out/DURUM.json")).get("listing_id",""))' 2>/dev/null || true)
+            [ "$D" = "${{ inputs.listing_id }}" ] || { echo "::error::DUR: DURUM.json listing_id '$D' != ${{ inputs.listing_id }}; yeni ilan acilmasin diye yazma yok"; exit 1; }
+            echo "kapı: DURUM.json listing_id = $D (mevcut taslak kullanilacak)"
+          fi
       - name: Etsy YAZ (taslak)
         if: ${{ inputs.mod == 'yaz' }}
         env:
@@ -84,6 +90,16 @@ jobs:
           IMG_DIR: _img
           OUT: _out
         run: python3 main/scripts/etsy/kupa_taslak.py --mod yaz
+      - name: Son okuma (salt okuma, ayri adim)
+        if: ${{ always() && inputs.mod == 'yaz' && inputs.listing_id != '' }}
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          LISTING_ID: ${{ inputs.listing_id }}
+          OUT: _out
+        run: python3 main/scripts/etsy/kupa_son_oku.py
       - name: Printful token (maskeli)
         if: ${{ inputs.mod == 'oku' }}
         run: |
