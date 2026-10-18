@@ -1,0 +1,15 @@
+ulke | boy | varyant | kargo secenegi | ucret | para birimi | teslim (gun) | adres | vergi/KDV (API)
+FR | 11 oz | 1320 | Flat Rate (Estimated delivery: Oct 22⁠–26)  | 5.39 | USD | 3-6 | yalniz ulke kodu | API vermedi
+FR | 15 oz | 4830 | Flat Rate (Estimated delivery: Oct 22⁠–26)  | 6.09 | USD | 3-6 | yalniz ulke kodu | API vermedi
+IT | 11 oz | 1320 | Flat Rate (Estimated delivery: Oct 22⁠–26)  | 5.39 | USD | 3-6 | yalniz ulke kodu | API vermedi
+IT | 15 oz | 4830 | Flat Rate (Estimated delivery: Oct 23⁠–26)  | 6.09 | USD | 4-6 | yalniz ulke kodu | API vermedi
+ES | 11 oz | 1320 | Flat Rate (Estimated delivery: Oct 22)  | 5.39 | USD | 3-3 | yalniz ulke kodu | API vermedi
+ES | 15 oz | 4830 | Flat Rate (Estimated delivery: Oct 22)  | 6.09 | USD | 3-3 | yalniz ulke kodu | API vermedi
+NL | 11 oz | 1320 | Flat Rate (Estimated delivery: Oct 22⁠–26)  | 5.39 | USD | 3-6 | yalniz ulke kodu | API vermedi
+NL | 15 oz | 4830 | Flat Rate (Estimated delivery: Oct 22⁠–26)  | 6.09 | USD | 3-6 | yalniz ulke kodu | API vermedi
+PL | 11 oz | 1320 | Flat Rate (Estimated delivery: Oct 23⁠–26)  | 5.39 | USD | 4-6 | yalniz ulke kodu | API vermedi
+PL | 15 oz | 4830 | Flat Rate (Estimated delivery: Oct 23⁠–26)  | 6.09 | USD | 4-6 | yalniz ulke kodu | API vermedi
+AU | 11 oz | 1320 | Flat Rate (Estimated delivery: Oct 23⁠–27)  | 8.69 | USD | 3-7 | ornek: state_code=NSW, city=Sydney, zip=2000 | API vermedi
+AU | 15 oz | 4830 | Flat Rate (Estimated delivery: Oct 23⁠–27)  | 9.59 | USD | 3-7 | ornek: state_code=NSW, city=Sydney, zip=2000 | API vermedi
+CA | 11 oz | 1320 | Flat Rate (Estimated delivery: Oct 23⁠–26)  | 8.09 | USD | 3-6 | ornek: state_code=ON, city=Toronto, zip=M5V 2T6 | API vermedi
+CA | 15 oz | 4830 | Flat Rate (Estimated delivery: Oct 23⁠–26)  | 8.69 | USD | 3-6 | ornek: state_code=ON, city=Toronto, zip=M5V 2T6 | API vermedi

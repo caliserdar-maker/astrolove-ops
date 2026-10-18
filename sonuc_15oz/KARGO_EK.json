@@ -1,0 +1,700 @@
+[
+  {
+    "ulke": "FR",
+    "boy": "11 oz",
+    "varyant": 1320,
+    "alici": {
+      "country_code": "FR"
+    },
+    "ornek_adres": false,
+    "http": 200,
+    "secenekler": [
+      {
+        "id": "STANDARD",
+        "name": "Flat Rate (Estimated delivery: Oct 22⁠–26) ",
+        "rate": "5.39",
+        "currency": "USD",
+        "minDeliveryDays": 3,
+        "maxDeliveryDays": 6,
+        "minDeliveryDate": "2026-10-22",
+        "maxDeliveryDate": "2026-10-26"
+      }
+    ],
+    "vergi_alanlari": {},
+    "ham": {
+      "code": 200,
+      "result": [
+        {
+          "id": "STANDARD",
+          "name": "Flat Rate (Estimated delivery: Oct 22⁠–26) ",
+          "rate": "5.39",
+          "currency": "USD",
+          "minDeliveryDays": 3,
+          "maxDeliveryDays": 6,
+          "minDeliveryDate": "2026-10-22",
+          "maxDeliveryDate": "2026-10-26"
+        },
+        {
+          "id": "STANDARD_CARBON_OFFSET",
+          "name": "Standard rate with CO2 offsetting (Estimated delivery: Oct 22⁠–26) ",
+          "rate": "5.48",
+          "currency": "USD",
+          "minDeliveryDays": 3,
+          "maxDeliveryDays": 6,
+          "minDeliveryDate": "2026-10-22",
+          "maxDeliveryDate": "2026-10-26"
+        }
+      ],
+      "extra": []
+    }
+  },
+  {
+    "ulke": "FR",
+    "boy": "15 oz",
+    "varyant": 4830,
+    "alici": {
+      "country_code": "FR"
+    },
+    "ornek_adres": false,
+    "http": 200,
+    "secenekler": [
+      {
+        "id": "STANDARD",
+        "name": "Flat Rate (Estimated delivery: Oct 22⁠–26) ",
+        "rate": "6.09",
+        "currency": "USD",
+        "minDeliveryDays": 3,
+        "maxDeliveryDays": 6,
+        "minDeliveryDate": "2026-10-22",
+        "maxDeliveryDate": "2026-10-26"
+      }
+    ],
+    "vergi_alanlari": {},
+    "ham": {
+      "code": 200,
+      "result": [
+        {
+          "id": "STANDARD",
+          "name": "Flat Rate (Estimated delivery: Oct 22⁠–26) ",
+          "rate": "6.09",
+          "currency": "USD",
+          "minDeliveryDays": 3,
+          "maxDeliveryDays": 6,
+          "minDeliveryDate": "2026-10-22",
+          "maxDeliveryDate": "2026-10-26"
+        },
+        {
+          "id": "STANDARD_CARBON_OFFSET",
+          "name": "Standard rate with CO2 offsetting (Estimated delivery: Oct 22⁠–26) ",
+          "rate": "6.18",
+          "currency": "USD",
+          "minDeliveryDays": 3,
+          "maxDeliveryDays": 6,
+          "minDeliveryDate": "2026-10-22",
+          "maxDeliveryDate": "2026-10-26"
+        }
+      ],
+      "extra": []
+    }
+  },
+  {
+    "ulke": "IT",
+    "boy": "11 oz",
+    "varyant": 1320,
+    "alici": {
+      "country_code": "IT"
+    },
+    "ornek_adres": false,
+    "http": 200,
+    "secenekler": [
+      {
+        "id": "STANDARD",
+        "name": "Flat Rate (Estimated delivery: Oct 22⁠–26) ",
+        "rate": "5.39",
+        "currency": "USD",
+        "minDeliveryDays": 3,
+        "maxDeliveryDays": 6,
+        "minDeliveryDate": "2026-10-22",
+        "maxDeliveryDate": "2026-10-26"
+      }
+    ],
+    "vergi_alanlari": {},
+    "ham": {
+      "code": 200,
+      "result": [
+        {
+          "id": "STANDARD",
+          "name": "Flat Rate (Estimated delivery: Oct 22⁠–26) ",
+          "rate": "5.39",
+          "currency": "USD",
+          "minDeliveryDays": 3,
+          "maxDeliveryDays": 6,
+          "minDeliveryDate": "2026-10-22",
+          "maxDeliveryDate": "2026-10-26"
+        },
+        {
+          "id": "STANDARD_CARBON_OFFSET",
+          "name": "Standard rate with CO2 offsetting (Estimated delivery: Oct 22⁠–26) ",
+          "rate": "5.48",
+          "currency": "USD",
+          "minDeliveryDays": 3,
+          "maxDeliveryDays": 6,
+          "minDeliveryDate": "2026-10-22",
+          "maxDeliveryDate": "2026-10-26"
+        }
+      ],
+      "extra": []
+    }
+  },
+  {
+    "ulke": "IT",
+    "boy": "15 oz",
+    "varyant": 4830,
+    "alici": {
+      "country_code": "IT"
+    },
+    "ornek_adres": false,
+    "http": 200,
+    "secenekler": [
+      {
+        "id": "STANDARD",
+        "name": "Flat Rate (Estimated delivery: Oct 23⁠–26) ",
+        "rate": "6.09",
+        "currency": "USD",
+        "minDeliveryDays": 4,
+        "maxDeliveryDays": 6,
+        "minDeliveryDate": "2026-10-23",
+        "maxDeliveryDate": "2026-10-26"
+      }
+    ],
+    "vergi_alanlari": {},
+    "ham": {
+      "code": 200,
+      "result": [
+        {
+          "id": "STANDARD",
+          "name": "Flat Rate (Estimated delivery: Oct 23⁠–26) ",
+          "rate": "6.09",
+          "currency": "USD",
+          "minDeliveryDays": 4,
+          "maxDeliveryDays": 6,
+          "minDeliveryDate": "2026-10-23",
+          "maxDeliveryDate": "2026-10-26"
+        },
+        {
+          "id": "STANDARD_CARBON_OFFSET",
+          "name": "Standard rate with CO2 offsetting (Estimated delivery: Oct 23⁠–26) ",
+          "rate": "6.18",
+          "currency": "USD",
+          "minDeliveryDays": 4,
+          "maxDeliveryDays": 6,
+          "minDeliveryDate": "2026-10-23",
+          "maxDeliveryDate": "2026-10-26"
+        }
+      ],
+      "extra": []
+    }
+  },
+  {
+    "ulke": "ES",
+    "boy": "11 oz",
+    "varyant": 1320,
+    "alici": {
+      "country_code": "ES"
+    },
+    "ornek_adres": false,
+    "http": 200,
+    "secenekler": [
+      {
+        "id": "STANDARD",
+        "name": "Flat Rate (Estimated delivery: Oct 22) ",
+        "rate": "5.39",
+        "currency": "USD",
+        "minDeliveryDays": 3,
+        "maxDeliveryDays": 3,
+        "minDeliveryDate": "2026-10-22",
+        "maxDeliveryDate": "2026-10-22"
+      }
+    ],
+    "vergi_alanlari": {},
+    "ham": {
+      "code": 200,
+      "result": [
+        {
+          "id": "STANDARD",
+          "name": "Flat Rate (Estimated delivery: Oct 22) ",
+          "rate": "5.39",
+          "currency": "USD",
+          "minDeliveryDays": 3,
+          "maxDeliveryDays": 3,
+          "minDeliveryDate": "2026-10-22",
+          "maxDeliveryDate": "2026-10-22"
+        },
+        {
+          "id": "STANDARD_CARBON_OFFSET",
+          "name": "Standard rate with CO2 offsetting (Estimated delivery: Oct 22) ",
+          "rate": "5.48",
+          "currency": "USD",
+          "minDeliveryDays": 3,
+          "maxDeliveryDays": 3,
+          "minDeliveryDate": "2026-10-22",
+          "maxDeliveryDate": "2026-10-22"
+        }
+      ],
+      "extra": []
+    }
+  },
+  {
+    "ulke": "ES",
+    "boy": "15 oz",
+    "varyant": 4830,
+    "alici": {
+      "country_code": "ES"
+    },
+    "ornek_adres": false,
+    "http": 200,
+    "secenekler": [
+      {
+        "id": "STANDARD",
+        "name": "Flat Rate (Estimated delivery: Oct 22) ",
+        "rate": "6.09",
+        "currency": "USD",
+        "minDeliveryDays": 3,
+        "maxDeliveryDays": 3,
+        "minDeliveryDate": "2026-10-22",
+        "maxDeliveryDate": "2026-10-22"
+      }
+    ],
+    "vergi_alanlari": {},
+    "ham": {
+      "code": 200,
+      "result": [
+        {
+          "id": "STANDARD",
+          "name": "Flat Rate (Estimated delivery: Oct 22) ",
+          "rate": "6.09",
+          "currency": "USD",
+          "minDeliveryDays": 3,
+          "maxDeliveryDays": 3,
+          "minDeliveryDate": "2026-10-22",
+          "maxDeliveryDate": "2026-10-22"
+        },
+        {
+          "id": "STANDARD_CARBON_OFFSET",
+          "name": "Standard rate with CO2 offsetting (Estimated delivery: Oct 22) ",
+          "rate": "6.18",
+          "currency": "USD",
+          "minDeliveryDays": 3,
+          "maxDeliveryDays": 3,
+          "minDeliveryDate": "2026-10-22",
+          "maxDeliveryDate": "2026-10-22"
+        }
+      ],
+      "extra": []
+    }
+  },
+  {
+    "ulke": "NL",
+    "boy": "11 oz",
+    "varyant": 1320,
+    "alici": {
+      "country_code": "NL"
+    },
+    "ornek_adres": false,
+    "http": 200,
+    "secenekler": [
+      {
+        "id": "STANDARD",
+        "name": "Flat Rate (Estimated delivery: Oct 22⁠–26) ",
+        "rate": "5.39",
+        "currency": "USD",
+        "minDeliveryDays": 3,
+        "maxDeliveryDays": 6,
+        "minDeliveryDate": "2026-10-22",
+        "maxDeliveryDate": "2026-10-26"
+      }
+    ],
+    "vergi_alanlari": {},
+    "ham": {
+      "code": 200,
+      "result": [
+        {
+          "id": "STANDARD",
+          "name": "Flat Rate (Estimated delivery: Oct 22⁠–26) ",
+          "rate": "5.39",
+          "currency": "USD",
+          "minDeliveryDays": 3,
+          "maxDeliveryDays": 6,
+          "minDeliveryDate": "2026-10-22",
+          "maxDeliveryDate": "2026-10-26"
+        },
+        {
+          "id": "STANDARD_CARBON_OFFSET",
+          "name": "Standard rate with CO2 offsetting (Estimated delivery: Oct 22⁠–26) ",
+          "rate": "5.48",
+          "currency": "USD",
+          "minDeliveryDays": 3,
+          "maxDeliveryDays": 6,
+          "minDeliveryDate": "2026-10-22",
+          "maxDeliveryDate": "2026-10-26"
+        }
+      ],
+      "extra": []
+    }
+  },
+  {
+    "ulke": "NL",
+    "boy": "15 oz",
+    "varyant": 4830,
+    "alici": {
+      "country_code": "NL"
+    },
+    "ornek_adres": false,
+    "http": 200,
+    "secenekler": [
+      {
+        "id": "STANDARD",
+        "name": "Flat Rate (Estimated delivery: Oct 22⁠–26) ",
+        "rate": "6.09",
+        "currency": "USD",
+        "minDeliveryDays": 3,
+        "maxDeliveryDays": 6,
+        "minDeliveryDate": "2026-10-22",
+        "maxDeliveryDate": "2026-10-26"
+      }
+    ],
+    "vergi_alanlari": {},
+    "ham": {
+      "code": 200,
+      "result": [
+        {
+          "id": "STANDARD",
+          "name": "Flat Rate (Estimated delivery: Oct 22⁠–26) ",
+          "rate": "6.09",
+          "currency": "USD",
+          "minDeliveryDays": 3,
+          "maxDeliveryDays": 6,
+          "minDeliveryDate": "2026-10-22",
+          "maxDeliveryDate": "2026-10-26"
+        },
+        {
+          "id": "STANDARD_CARBON_OFFSET",
+          "name": "Standard rate with CO2 offsetting (Estimated delivery: Oct 22⁠–26) ",
+          "rate": "6.18",
+          "currency": "USD",
+          "minDeliveryDays": 3,
+          "maxDeliveryDays": 6,
+          "minDeliveryDate": "2026-10-22",
+          "maxDeliveryDate": "2026-10-26"
+        }
+      ],
+      "extra": []
+    }
+  },
+  {
+    "ulke": "PL",
+    "boy": "11 oz",
+    "varyant": 1320,
+    "alici": {
+      "country_code": "PL"
+    },
+    "ornek_adres": false,
+    "http": 200,
+    "secenekler": [
+      {
+        "id": "STANDARD",
+        "name": "Flat Rate (Estimated delivery: Oct 23⁠–26) ",
+        "rate": "5.39",
+        "currency": "USD",
+        "minDeliveryDays": 4,
+        "maxDeliveryDays": 6,
+        "minDeliveryDate": "2026-10-23",
+        "maxDeliveryDate": "2026-10-26"
+      }
+    ],
+    "vergi_alanlari": {},
+    "ham": {
+      "code": 200,
+      "result": [
+        {
+          "id": "STANDARD",
+          "name": "Flat Rate (Estimated delivery: Oct 23⁠–26) ",
+          "rate": "5.39",
+          "currency": "USD",
+          "minDeliveryDays": 4,
+          "maxDeliveryDays": 6,
+          "minDeliveryDate": "2026-10-23",
+          "maxDeliveryDate": "2026-10-26"
+        },
+        {
+          "id": "STANDARD_CARBON_OFFSET",
+          "name": "Standard rate with CO2 offsetting (Estimated delivery: Oct 23⁠–26) ",
+          "rate": "5.48",
+          "currency": "USD",
+          "minDeliveryDays": 4,
+          "maxDeliveryDays": 6,
+          "minDeliveryDate": "2026-10-23",
+          "maxDeliveryDate": "2026-10-26"
+        }
+      ],
+      "extra": []
+    }
+  },
+  {
+    "ulke": "PL",
+    "boy": "15 oz",
+    "varyant": 4830,
+    "alici": {
+      "country_code": "PL"
+    },
+    "ornek_adres": false,
+    "http": 200,
+    "secenekler": [
+      {
+        "id": "STANDARD",
+        "name": "Flat Rate (Estimated delivery: Oct 23⁠–26) ",
+        "rate": "6.09",
+        "currency": "USD",
+        "minDeliveryDays": 4,
+        "maxDeliveryDays": 6,
+        "minDeliveryDate": "2026-10-23",
+        "maxDeliveryDate": "2026-10-26"
+      }
+    ],
+    "vergi_alanlari": {},
+    "ham": {
+      "code": 200,
+      "result": [
+        {
+          "id": "STANDARD",
+          "name": "Flat Rate (Estimated delivery: Oct 23⁠–26) ",
+          "rate": "6.09",
+          "currency": "USD",
+          "minDeliveryDays": 4,
+          "maxDeliveryDays": 6,
+          "minDeliveryDate": "2026-10-23",
+          "maxDeliveryDate": "2026-10-26"
+        },
+        {
+          "id": "STANDARD_CARBON_OFFSET",
+          "name": "Standard rate with CO2 offsetting (Estimated delivery: Oct 23⁠–26) ",
+          "rate": "6.18",
+          "currency": "USD",
+          "minDeliveryDays": 4,
+          "maxDeliveryDays": 6,
+          "minDeliveryDate": "2026-10-23",
+          "maxDeliveryDate": "2026-10-26"
+        }
+      ],
+      "extra": []
+    }
+  },
+  {
+    "ulke": "AU",
+    "boy": "11 oz",
+    "varyant": 1320,
+    "alici": {
+      "country_code": "AU",
+      "state_code": "NSW",
+      "city": "Sydney",
+      "zip": "2000"
+    },
+    "ornek_adres": true,
+    "http": 200,
+    "secenekler": [
+      {
+        "id": "STANDARD",
+        "name": "Flat Rate (Estimated delivery: Oct 23⁠–27) ",
+        "rate": "8.69",
+        "currency": "USD",
+        "minDeliveryDays": 3,
+        "maxDeliveryDays": 7,
+        "minDeliveryDate": "2026-10-23",
+        "maxDeliveryDate": "2026-10-27"
+      }
+    ],
+    "vergi_alanlari": {},
+    "ham": {
+      "code": 200,
+      "result": [
+        {
+          "id": "STANDARD",
+          "name": "Flat Rate (Estimated delivery: Oct 23⁠–27) ",
+          "rate": "8.69",
+          "currency": "USD",
+          "minDeliveryDays": 3,
+          "maxDeliveryDays": 7,
+          "minDeliveryDate": "2026-10-23",
+          "maxDeliveryDate": "2026-10-27"
+        },
+        {
+          "id": "STANDARD_CARBON_OFFSET",
+          "name": "Standard rate with CO2 offsetting (Estimated delivery: Oct 23⁠–27) ",
+          "rate": "8.78",
+          "currency": "USD",
+          "minDeliveryDays": 3,
+          "maxDeliveryDays": 7,
+          "minDeliveryDate": "2026-10-23",
+          "maxDeliveryDate": "2026-10-27"
+        }
+      ],
+      "extra": []
+    }
+  },
+  {
+    "ulke": "AU",
+    "boy": "15 oz",
+    "varyant": 4830,
+    "alici": {
+      "country_code": "AU",
+      "state_code": "NSW",
+      "city": "Sydney",
+      "zip": "2000"
+    },
+    "ornek_adres": true,
+    "http": 200,
+    "secenekler": [
+      {
+        "id": "STANDARD",
+        "name": "Flat Rate (Estimated delivery: Oct 23⁠–27) ",
+        "rate": "9.59",
+        "currency": "USD",
+        "minDeliveryDays": 3,
+        "maxDeliveryDays": 7,
+        "minDeliveryDate": "2026-10-23",
+        "maxDeliveryDate": "2026-10-27"
+      }
+    ],
+    "vergi_alanlari": {},
+    "ham": {
+      "code": 200,
+      "result": [
+        {
+          "id": "STANDARD",
+          "name": "Flat Rate (Estimated delivery: Oct 23⁠–27) ",
+          "rate": "9.59",
+          "currency": "USD",
+          "minDeliveryDays": 3,
+          "maxDeliveryDays": 7,
+          "minDeliveryDate": "2026-10-23",
+          "maxDeliveryDate": "2026-10-27"
+        },
+        {
+          "id": "STANDARD_CARBON_OFFSET",
+          "name": "Standard rate with CO2 offsetting (Estimated delivery: Oct 23⁠–27) ",
+          "rate": "9.68",
+          "currency": "USD",
+          "minDeliveryDays": 3,
+          "maxDeliveryDays": 7,
+          "minDeliveryDate": "2026-10-23",
+          "maxDeliveryDate": "2026-10-27"
+        }
+      ],
+      "extra": []
+    }
+  },
+  {
+    "ulke": "CA",
+    "boy": "11 oz",
+    "varyant": 1320,
+    "alici": {
+      "country_code": "CA",
+      "state_code": "ON",
+      "city": "Toronto",
+      "zip": "M5V 2T6"
+    },
+    "ornek_adres": true,
+    "http": 200,
+    "secenekler": [
+      {
+        "id": "STANDARD",
+        "name": "Flat Rate (Estimated delivery: Oct 23⁠–26) ",
+        "rate": "8.09",
+        "currency": "USD",
+        "minDeliveryDays": 3,
+        "maxDeliveryDays": 6,
+        "minDeliveryDate": "2026-10-23",
+        "maxDeliveryDate": "2026-10-26"
+      }
+    ],
+    "vergi_alanlari": {},
+    "ham": {
+      "code": 200,
+      "result": [
+        {
+          "id": "STANDARD",
+          "name": "Flat Rate (Estimated delivery: Oct 23⁠–26) ",
+          "rate": "8.09",
+          "currency": "USD",
+          "minDeliveryDays": 3,
+          "maxDeliveryDays": 6,
+          "minDeliveryDate": "2026-10-23",
+          "maxDeliveryDate": "2026-10-26"
+        },
+        {
+          "id": "STANDARD_CARBON_OFFSET",
+          "name": "Standard rate with CO2 offsetting (Estimated delivery: Oct 23⁠–26) ",
+          "rate": "8.18",
+          "currency": "USD",
+          "minDeliveryDays": 3,
+          "maxDeliveryDays": 6,
+          "minDeliveryDate": "2026-10-23",
+          "maxDeliveryDate": "2026-10-26"
+        }
+      ],
+      "extra": []
+    }
+  },
+  {
+    "ulke": "CA",
+    "boy": "15 oz",
+    "varyant": 4830,
+    "alici": {
+      "country_code": "CA",
+      "state_code": "ON",
+      "city": "Toronto",
+      "zip": "M5V 2T6"
+    },
+    "ornek_adres": true,
+    "http": 200,
+    "secenekler": [
+      {
+        "id": "STANDARD",
+        "name": "Flat Rate (Estimated delivery: Oct 23⁠–26) ",
+        "rate": "8.69",
+        "currency": "USD",
+        "minDeliveryDays": 3,
+        "maxDeliveryDays": 6,
+        "minDeliveryDate": "2026-10-23",
+        "maxDeliveryDate": "2026-10-26"
+      }
+    ],
+    "vergi_alanlari": {},
+    "ham": {
+      "code": 200,
+      "result": [
+        {
+          "id": "STANDARD",
+          "name": "Flat Rate (Estimated delivery: Oct 23⁠–26) ",
+          "rate": "8.69",
+          "currency": "USD",
+          "minDeliveryDays": 3,
+          "maxDeliveryDays": 6,
+          "minDeliveryDate": "2026-10-23",
+          "maxDeliveryDate": "2026-10-26"
+        },
+        {
+          "id": "STANDARD_CARBON_OFFSET",
+          "name": "Standard rate with CO2 offsetting (Estimated delivery: Oct 23⁠–26) ",
+          "rate": "8.78",
+          "currency": "USD",
+          "minDeliveryDays": 3,
+          "maxDeliveryDays": 6,
+          "minDeliveryDate": "2026-10-23",
+          "maxDeliveryDate": "2026-10-26"
+        }
+      ],
+      "extra": []
+    }
+  }
+]
