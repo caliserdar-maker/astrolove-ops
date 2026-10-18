@@ -46,4 +46,4 @@ Video (Rose Ribbon kapağı, 6,3 sn, 1080x1080):
 
 Yeni sahne ölçümü: `olcum.py` / `olcum_tek.py` (geometri), `pafta.py` (kontrol paftası), `esitle.py` (ön/arka tek kupa boy eşitleme).
 
-Gerekenler: Python 3, numpy, scipy, Pillow; video için ffmpeg.
+Gerekenler: Python 3, numpy, scipy, Pillow; video için ffmpeg ve opencv-python-headless (cv2).

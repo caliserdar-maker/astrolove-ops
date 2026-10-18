@@ -46,8 +46,15 @@ for i, o in enumerate(nesne, 1):
     if o[0].start >= sy0 - 5 and o[0].stop <= sy1 + 5 and o[1].start >= sx0 + 50 and o[1].stop <= sx1 - 50:
         if np.abs(np.median(P[lab == i], 0) - ana_renk).sum() < 25:
             sembol.append((i, o))
-isaret = [(i, o) for i, o in aday if o[1].start >= sx0 and o[1].stop <= sx1]
+# isaretler: isim satirinin hemen ustu, yuz ortasina yakin (+-340 px) ve sembolle ayni murekkep rengi
+# (18 Eki duzeltme: dar sembollerde, ornegin Aries-Capricorn, isaretler sembolun x araligi disinda kaliyordu)
+isaret = [(i, o) for i, o in aday
+          if abs((o[1].start + o[1].stop) / 2 - FACE_ON) <= 340 and np.abs(np.median(P[lab == i], 0) - ana_renk).sum() < 40]
 print("isim satiri y", isim_ust, "isaret ust", isaret_ust, "sembol parca", len(sembol), "isaret parca", len(isaret))
+if not isaret or not sembol:
+    sys.exit(f"HATA: isaret ({len(isaret)}) veya sembol ({len(sembol)}) bulunamadi")
+if os.environ.get("SADECE_TESPIT"):
+    sys.exit(0)
 HERO = np.isin(lab, [i for i, _ in sembol])
 ISARET = np.isin(lab, [i for i, _ in isaret])
 # yumusak (kenar yumusatmali) maske: koyuluk orani, sembol cevresiyle sinirli
