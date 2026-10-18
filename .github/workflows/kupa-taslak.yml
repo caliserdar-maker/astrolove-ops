@@ -2,6 +2,8 @@ name: kupa-taslak
 # KUPA CANCER_LIBRA Etsy TASLAK (Serdar 18 Eki 2026). YAYIN YOK, Etsy Ads YOK.
 # mod=oku: SALT OKUMA (kategori/nitelik, BY hazirlik, iade/ortak/bolum, OAS) + Printful kargo ek (FR IT ES NL PL AU CA, Flat Rate)
 #          -> kupa-printful-sonuc dali sonuc_15oz/KARGO_EK.txt (normal commit, force yok).
+# mod=yaz: ETSY'YE YAZAR (Serdar onayi 18 Eki): bolum + kargo profili (yoksa) + 1 TASLAK (CSV metni, 14 secenek, 13 gorsel + video,
+#          stil kapaklari, kisisellestirme, nitelikler) + geri okuma kontrolleri. PATCH yalniz acil state=inactive. Yayin yok.
 # Rapor: Drive TEMP/KUPA_TASLAK_CANCER_LIBRA_20261018/. Etsy kilidi: kilit_bekle.py. Kota tabani 10.
 permissions:
   actions: read
@@ -9,7 +11,7 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-      mod: { description: "oku", required: true, default: "oku" }
+      mod: { description: "oku | yaz", required: true, default: "oku" }
 env:
   O: "gdrive:ASTROLOVE/TEMP/KUPA_TASLAK_CANCER_LIBRA_20261018"
   DAL: kupa-printful-sonuc
@@ -61,6 +63,27 @@ jobs:
           KUPA_CSV: s/kupa_uretim/ilan/KUPA78_ILAN_METIN.csv
           OUT: _out
         run: python3 main/scripts/etsy/kupa_taslak.py --mod oku
+      - name: Galeri + onceki durum (yaz)
+        if: ${{ inputs.mod == 'yaz' }}
+        run: |
+          set -euo pipefail
+          mkdir -p _img
+          rclone copy "gdrive:ASTROLOVE/TEMP/KUPA78_GALERI_20261018/CANCER_LIBRA/galeri" _img -q --include "[01][0-9]_*.jpg" --include "VIDEO_*.mp4"
+          ls -la _img; [ "$(ls _img/*.jpg | wc -l)" = 13 ] && [ "$(ls _img/*.mp4 | wc -l)" = 1 ] || { echo "HATA galeri 13+1 degil"; exit 1; }
+          rclone copy "$O" _out --include "/DURUM.json" -q || true
+          [ -f _out/DURUM.json ] && cat _out/DURUM.json || echo "onceki durum yok"
+      - name: Etsy YAZ (taslak)
+        if: ${{ inputs.mod == 'yaz' }}
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          BY_CSV: _work/BY78_TASLAKLAR.csv
+          KUPA_CSV: s/kupa_uretim/ilan/KUPA78_ILAN_METIN.csv
+          IMG_DIR: _img
+          OUT: _out
+        run: python3 main/scripts/etsy/kupa_taslak.py --mod yaz
       - name: Printful token (maskeli)
         if: ${{ inputs.mod == 'oku' }}
         run: |
