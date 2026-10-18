@@ -10,6 +10,9 @@ on:
       ciftler:
         description: "HEPSI ya da bosluklu cift listesi"
         default: "HEPSI"
+      isaret:
+        description: "Yeniden uretim kontrolu (bos = yok). Ornek: ARIES_CAPRICORN=2 AQUARIUS_PISCES=3. Doluysa: isaret parca = beklenen ve baski+galeri Drive'daki eskiyle fark 0; tutmazsa eski korunur, yeni _yeni/<KOD>'a yazilir."
+        default: ""
 env:
   DRIVE: "gdrive:ASTROLOVE/TEMP/KUPA78_GALERI_20261018"
 jobs:
@@ -117,6 +120,7 @@ jobs:
       - name: Uret + kontrol + Drive
         env:
           GRUP: ${{ matrix.grup }}
+          ISARET: ${{ inputs.isaret }}
         run: |
           cd kupa/kupa_uretim
           mkdir -p /tmp/out /tmp/qc
@@ -125,14 +129,31 @@ jobs:
             n=$((n+1)); a=${KOD%%_*}; b=${KOD#*_}
             B1="$(echo ${a:0:1})$(echo ${a:1} | tr A-Z a-z)"; B2="$(echo ${b:0:1})$(echo ${b:1} | tr A-Z a-z)"
             s=$(date +%s)
+            HEDEF="$DRIVE/$KOD"
             if bash kod/uret_cift.sh "$KOD" "$B1" "$B2" "sembol/$KOD" "/tmp/out/$KOD" > "/tmp/qc/${KOD}_log.txt" 2>&1; then
-              python3 "$GITHUB_WORKSPACE/main/scripts/kupa/kupa78_kontrol.py" "$KOD" "/tmp/out/$KOD" ../tasarim "/tmp/qc/${KOD}.json" | tee -a /tmp/qc/OZET.txt
+              if [ -z "$ISARET" ]; then
+                python3 "$GITHUB_WORKSPACE/main/scripts/kupa/kupa78_kontrol.py" "$KOD" "/tmp/out/$KOD" ../tasarim "/tmp/qc/${KOD}.json" | tee -a /tmp/qc/OZET.txt
+              else
+                python3 "$GITHUB_WORKSPACE/main/scripts/kupa/kupa78_kontrol.py" "$KOD" "/tmp/out/$KOD" ../tasarim "/tmp/qc/${KOD}.json" | tee "/tmp/qc/${KOD}_k1.txt"
+                BEK=$(echo "$ISARET" | tr ' ' '\n' | grep "^$KOD=" | cut -d= -f2 || true)
+                # uret_cift.sh video ciktisini tail -1 ile kesiyor; isaret sayisi icin video ayni girdilerle gecici dosyaya yeniden uretilir
+                python3 -I kod/video_kupa.py sahne/kapak/sahne_04_RoseRibbon.jpg geo/kapak_04_RoseRibbon.json "/tmp/out/$KOD/baski/KUPA_04_RoseRibbon_baski_2700x1050.png" "/tmp/out/$KOD/galeri/01_KAPAK_04_RoseRibbon.jpg" "/tmp/v_$KOD.mp4" > "/tmp/qc/${KOD}_video.txt" 2>&1 || true
+                cat "/tmp/qc/${KOD}_video.txt" >> "/tmp/qc/${KOD}_log.txt"
+                BUL=$(grep -o 'isaret parca [0-9]*' "/tmp/qc/${KOD}_video.txt" | awk '{print $3}' | tail -1)
+                echo "video tekrar md5 ayni: $(cmp -s "/tmp/v_$KOD.mp4" "/tmp/out/$KOD/galeri/VIDEO_$KOD.mp4" && echo evet || echo hayir)" >> "/tmp/qc/${KOD}_log.txt"
+                mkdir -p "/tmp/eski/$KOD"
+                rclone copy "$DRIVE/$KOD" "/tmp/eski/$KOD" -q --transfers 8 --include "baski/KUPA_*_baski_2700x1050.png" --include "galeri/[01][0-9]_*.jpg" || true
+                if python3 "$GITHUB_WORKSPACE/main/scripts/kupa/kupa_ek_kontrol.py" "$KOD" "/tmp/qc/${KOD}.json" "/tmp/out/$KOD" "/tmp/eski/$KOD" "${BUL:-yok}" "${BEK:-?}" | tee -a /tmp/qc/OZET.txt; then :; fi
+                grep -q "^PASS $KOD" /tmp/qc/OZET.txt || HEDEF="$DRIVE/_yeni/$KOD"
+              fi
             else
               python3 -c "import json,sys;t=open(sys.argv[2]).read()[-400:];json.dump(dict(cift=sys.argv[1],PASS=False,sorun=['uret_cift.sh hata: '+t]),open(sys.argv[3],'w'))" "$KOD" "/tmp/qc/${KOD}_log.txt" "/tmp/qc/${KOD}.json"
               echo "FAIL $KOD uret_cift.sh hata" | tee -a /tmp/qc/OZET.txt
+              [ -n "$ISARET" ] && HEDEF="$DRIVE/_yeni/$KOD"
             fi
             cp "/tmp/qc/${KOD}.json" "/tmp/out/$KOD/_QC.json" 2>/dev/null || true
-            rclone copy "/tmp/out/$KOD" "$DRIVE/$KOD" -q --transfers 8 --exclude "ara/**" --exclude "baski/tasarim/**" || echo "FAIL $KOD drive" | tee -a /tmp/qc/OZET.txt
+            echo "Drive hedef: $HEDEF"
+            rclone copy "/tmp/out/$KOD" "$HEDEF" -q --transfers 8 --exclude "ara/**" --exclude "baski/tasarim/**" || echo "FAIL $KOD drive" | tee -a /tmp/qc/OZET.txt
             g=$(( $(date +%s) - t0 )); echo "[$n/$top] $KOD $(( $(date +%s) - s ))s | gecen ${g}s | kalan ~$(( g * (top - n) / n ))s | %$(( 100 * n / top ))"
           done
           rclone copy /tmp/qc "$DRIVE/_qc" -q --include "*.json" --include "*_log.txt"
