@@ -12,19 +12,28 @@ Akis (her KUPA- transaction'i icin):
      cakisma > 0 ya da dala < 1,1 mm FAIL; 1,1-1,2 mm GOZ (baski uretilir, Serdar onayi istenir); >= 1,2 mm PASS.
      Bir kapi FAIL ise baski yok; SORU.md (Serdar'a soru) yazilir. Burc alt sinir / < 1,95 mm yalniz bilgi notu.
   3) Cikti: <cikti>/<receipt>/<transaction>/ BASKI_*.png (11 oz 2700x1050 | 15 oz 2700x1140, 300 dpi),
-     ONIZLEME_*.jpg, PRINTFUL_TASLAK.json (confirm=false yuku; GONDERILMEZ), OZET.json. --drive verilirse rclone ile Drive'a.
+     ONIZLEME_*.jpg, PRINTFUL_TASLAK.json (confirm=false yuku; GONDERILMEZ), OZET.json, MUSTERI_MESAJI_TASLAK.md
+     (kupa_orchard/mesaj/MUSTERI_MESAJLARI.md sablonlari; yalniz TASLAK, gonderimi Serdar yapar), FAIL'de SORU.md.
+     --drive verilirse rclone ile <drive>/<receipt>/<transaction>/ (ASTROLOVE/KUPA_SIPARIS).
+  Siparis BEKLETILMEZ (Serdar 19.10): kapilar PASS/GOZ ise baski hemen hazirlanir. Printful'a gonderim her siparis
+  icin Serdar'in acik onayiyla, ayri adimda. Log HERKESE ACIK (public depo): receipt/transaction yerine opak kod,
+  isim/adres/mesaj loga yazilmaz; ayrinti yalniz Drive'da.
   Baski, kupa_orchard/kod/cift.py 1. ve 1b. bolumuyle birebir ayni cagridir (ayni girdi -> ayni piksel).
   kontrol_burc.py 8 stilin 11 oz dosyasini istedigi icin 8 stil paralel uretilir; kapi yalniz siparis stilinin satirina bakar.
 
 Kullanim:
-  python3 kupa_siparis.py --kod <kupa_orchard klasoru> --receipt-json <dosya> --cikti <klasor> [--drive gdrive:ASTROLOVE/SIPARIS_KUPA]
+  python3 kupa_siparis.py --kod <kupa_orchard klasoru> --receipt-json <dosya> --cikti <klasor> [--drive gdrive:ASTROLOVE/KUPA_SIPARIS]
   python3 kupa_siparis.py --kod ... --receipt-id <no> --cikti ...      (ortam: ETSY_API_KEY, ETSY_SHARED_SECRET, ETSY_SHOP_ID, TOKEN_FILE)
+  python3 kupa_siparis.py --kod ... --tara 3 --state STATE.csv --cikti ...   (son 3 gunun odenmis/gonderilmemis receipt'leri;
+                                                                              STATE'teki transaction tekrar islenmez)
 Printful TASLAK gonderimi bu betikte YOK (ayri adim, yazilmadi): yalniz Serdar'in o receipt icin acik onayiyla, confirm=false.
 Bagimlilik: numpy 2.5.3, pillow 12.3.0, scipy 1.18.1 (kupa-orchard78 ile ayni), fonttools.
 """
 import argparse
 import concurrent.futures as cf
+import csv
 import hashlib
+import hmac
 import html
 import json
 import os
@@ -59,11 +68,19 @@ ISIM_IZINLI = " -'’."                 # harf disinda isimde izinli isaretler (
 ENV = {"GOLGE_US": "0.4", "PARLA": "0.7"}   # cift.py ENV (baski_kes okumaz; birebirlik icin ayni)
 DENEME_ENV = ("BURC_MIN",)            # yalniz kapi denemesi icin baski_kes'e gecer (OZET.json "deneme_ortam")
 METIN_KAPI = ("isim1_uzunluk", "isim2_uzunluk", "isim1_isaret", "isim2_isaret", "mesaj_uzunluk", "karakter_ebgaramond")
+DURUM_SIRA = {"PASS": 0, "GOZ": 1, "FAIL": 2}
+STATE_ALAN = ["transaction_id", "receipt_id", "sku", "durum", "zaman"]
 t0 = time.time()
 
 
 def log(m):
     print(f"[{time.time() - t0:5.1f}s] {m}", flush=True)
+
+
+def kod_(x):
+    """Public loga receipt/transaction yerine opak kod (order_router.receipt_kod ile ayni anahtar)."""
+    k = (os.environ.get("SIPARIS_KOD_ANAHTARI") or os.environ.get("ETSY_SHARED_SECRET") or "astrolove").encode()
+    return "S-" + hmac.new(k, str(x).encode(), hashlib.sha256).hexdigest()[:8]
 
 
 def piksel(p):
@@ -73,8 +90,10 @@ def piksel(p):
 
 # ------------------------------------------------------------------ girdi
 def receipt_oku(a):
+    """-> receipt listesi. JSON dosyasi tek receipt ya da {"results": [...]} olabilir."""
     if a.receipt_json:
-        return json.load(open(a.receipt_json, encoding="utf-8"))
+        j = json.load(open(a.receipt_json, encoding="utf-8"))
+        return j.get("results") if "results" in j else [j]
     sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "etsy"))
     from etsy_common import Etsy, TokenStore, mask
 
@@ -93,7 +112,19 @@ def receipt_oku(a):
     store = TokenStore(os.environ["TOKEN_FILE"], k, s)
     if store.needs_refresh():
         store.refresh()
-    return SaltOkur(store).get(f"/shops/{os.environ['ETSY_SHOP_ID']}/receipts/{a.receipt_id}")
+    api, shop = SaltOkur(store), os.environ["ETSY_SHOP_ID"]
+    if a.receipt_id:
+        return [api.get(f"/shops/{shop}/receipts/{a.receipt_id}")]
+    out, offset = [], 0
+    p = {"was_paid": "true", "was_shipped": "false", "limit": 100, "min_created": int(time.time()) - a.tara * 86400}
+    for _ in range(5):
+        res = (api.get(f"/shops/{shop}/receipts", params={**p, "offset": offset}) or {}).get("results") or []
+        out += res
+        if len(res) < 100:
+            break
+        offset += 100
+    log(f"Etsy: {len(out)} odenmis/gonderilmemis receipt (son {a.tara} gun), kota {api.remaining}, cagri {api.calls}")
+    return out
 
 
 def sku_coz(sku):
@@ -265,11 +296,108 @@ def soru_yaz(d, rc, t, kap, sebep=None, musteri=False):
     (d / "SORU.md").write_text("\n".join(sat) + "\n", encoding="utf-8")
 
 
+def sablonlar(kod):
+    """kupa_orchard/mesaj/MUSTERI_MESAJLARI.md -> {no: metin} (## <no>. <baslik> bolumleri)."""
+    p = Path(kod) / "mesaj" / "MUSTERI_MESAJLARI.md"
+    parca = re.split(r"^## (\d+)\. .*$", p.read_text(encoding="utf-8"), flags=re.M)
+    return {int(parca[i]): parca[i + 1].strip() for i in range(1, len(parca), 2)}
+
+
+def mesaj_taslak(d, kod, rc, t, s, m, kap, sebep, durum):
+    """Hangi sablon: FAIL girdi -> 4; isim > 10 -> 2; mesaj > 30 -> 3; karakter -> 5; PASS/GOZ -> 1 (+6 ayni burc).
+    Baski/olcum FAIL'i (musteri metni dogru) icin musteri mesaji yok: karar Serdar'in."""
+    S = sablonlar(kod)
+    nolar = []
+    if sebep:
+        nolar = [4]
+    elif durum == "FAIL":
+        if any(kap.get(k, ("",))[0] == "FAIL" for k in ("isim1_uzunluk", "isim2_uzunluk")):
+            nolar.append(2)
+        if kap.get("mesaj_uzunluk", ("",))[0] == "FAIL":
+            nolar.append(3)
+        if any(kap.get(k, ("",))[0] == "FAIL" for k in ("karakter_ebgaramond", "isim1_isaret", "isim2_isaret")):
+            nolar.append(5)
+    else:
+        nolar = [1] + ([6] if s and s["burc1"] == s["burc2"] else [])
+    if not nolar:
+        return None
+    eksik = karakter_kapisi(kod, m)[1] if m else []
+    deger = {"[Customer name]": (str(rc.get("name") or "").split() or ["there"])[0],
+             "[Name 1]": (m or {}).get("isim1", ""), "[Name 2]": (m or {}).get("isim2", ""),
+             "[Message]": (m or {}).get("mesaj", ""), "[Style]": s["stil_ad"] if s else "",
+             "[Size]": f"{s['boy']} oz" if s else "", "[Unsupported character or emoji]": " ".join(eksik) or "a character"}
+    sat = [f"# MUSTERI MESAJI TASLAGI (GONDERILMEDI): receipt {rc.get('receipt_id')} transaction {t.get('transaction_id')}",
+           "", "Yalniz TASLAK. Etsy'den gonderimi Serdar yapar ya da bu mesaja ozel acik onay verir.", ""]
+    for no in nolar:
+        metin = S[no]
+        for k, v in deger.items():
+            metin = metin.replace(k, v)
+        sat += [f"## Sablon {no}", "", metin, ""]
+    (d / "MUSTERI_MESAJI_TASLAK.md").write_text("\n".join(sat), encoding="utf-8")
+    return nolar
+
+
 def drive_yaz(d, hedef, rid):
     r = subprocess.run(["rclone", "copy", str(d), f"{hedef}/{rid}/{d.name}", "-q", "--include", "BASKI_*.png",
                         "--include", "ONIZLEME_*.jpg", "--include", "PRINTFUL_TASLAK.json", "--include", "OZET.json",
-                        "--include", "SORU.md", "--include", "kontrol/burc_mesafe.txt"], capture_output=True, text=True)
+                        "--include", "SORU.md", "--include", "MUSTERI_MESAJI_TASLAK.md", "--include", "kontrol/burc_mesafe.txt"],
+                       capture_output=True, text=True)
     return r.returncode == 0, r.stderr[-300:]
+
+
+def state_oku(p):
+    if not p or not Path(p).exists():
+        return {}
+    return {r["transaction_id"]: r for r in csv.DictReader(open(p, encoding="utf-8"))}
+
+
+def state_yaz(p, st):
+    with open(p, "w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=STATE_ALAN)
+        w.writeheader()
+        w.writerows(st.values())
+
+
+def kalem_isle(kod, rc, t, d):
+    rid = str(rc.get("receipt_id"))
+    d.mkdir(parents=True, exist_ok=True)
+    ozet = {"receipt_id": rid, "transaction_id": t.get("transaction_id"), "sku": t.get("sku"), "kapilar": {}, "notlar": [],
+            "deneme_ortam": {k: os.environ[k] for k in DENEME_ENV if k in os.environ}}
+    s, hata = sku_coz(t.get("sku"))
+    m, hata2 = metin_coz(t) if s else (None, None)
+    kap = {}
+    if hata or hata2:
+        ozet.update(durum="FAIL", sebep=hata or hata2, musteri_mesaji_gerekiyor=bool(hata2))
+        soru_yaz(d, rc, t, {}, hata or hata2, musteri=bool(hata2))
+    else:
+        ozet.update(sku_coz=s, metin={k: m[k] for k in ("isim1", "isim2", "mesaj", "mesaj_bos")})
+        kap = metin_kapilari(kod, m)
+        if all(v[0] == "PASS" for v in kap.values()):
+            sem = d / "sembol"
+            r = subprocess.run(["bash", str(Path(kod) / "kod" / "sembol_al.sh"), s["cift"], str(sem)],
+                               capture_output=True, text=True, cwd=kod)
+            if r.returncode:
+                kap["sembol"] = ("FAIL", r.stderr[-300:])
+            else:
+                k2, notlar, sat = is_isle(kod, str(sem), s, m, d)
+                kap.update(k2)
+                ozet["notlar"], ozet["baski_kes"] = notlar, sat
+        ozet["kapilar"] = {k: {"durum": v[0], "ayrinti": v[1]} for k, v in kap.items()}
+        if all(v[0] != "FAIL" for v in kap.values()):
+            ad = f"AstroLoveArt_{s['burc1']}_{s['burc2']}_{s['stil_ad'].replace(' ', '_')}"
+            png, jpg = cikti_yaz(d, s, ad)
+            yuk = printful_yuk(rc, t, s, png)
+            (d / "PRINTFUL_TASLAK.json").write_text(json.dumps(yuk, indent=1, ensure_ascii=False), encoding="utf-8")
+            ozet.update(durum="GOZ" if any(v[0] == "GOZ" for v in kap.values()) else "PASS", baski=png.name, onizleme=jpg.name,
+                        piksel=piksel(png), printful={"variant_id": PRINTFUL[s["boy"]]["variant_id"],
+                                                      "printfile_id": PRINTFUL[s["boy"]]["printfile_id"]},
+                        printful_gonderim="Serdar onayi bekliyor (her siparis ayri onay)")
+        else:
+            ozet.update(durum="FAIL", musteri_mesaji_gerekiyor=musteri_mesaji(kap))
+            soru_yaz(d, rc, t, kap, musteri=ozet["musteri_mesaji_gerekiyor"])
+    ozet["musteri_mesaji_taslak"] = mesaj_taslak(d, kod, rc, t, s, m, kap, hata2, ozet["durum"])
+    (d / "OZET.json").write_text(json.dumps(ozet, indent=1, ensure_ascii=False), encoding="utf-8")
+    return ozet
 
 
 def main():
@@ -278,60 +406,50 @@ def main():
     g = ap.add_mutually_exclusive_group(required=True)
     g.add_argument("--receipt-json")
     g.add_argument("--receipt-id")
+    g.add_argument("--tara", type=int, help="son N gunun odenmis/gonderilmemis receipt'leri")
     ap.add_argument("--cikti", required=True)
-    ap.add_argument("--drive", help="rclone hedefi, ornek gdrive:ASTROLOVE/SIPARIS_KUPA")
+    ap.add_argument("--drive", help="rclone hedefi, ornek gdrive:ASTROLOVE/KUPA_SIPARIS")
+    ap.add_argument("--state", help="islenen transaction defteri (CSV); varsa ayni transaction tekrar islenmez")
     a = ap.parse_args()
     kod = str(Path(a.kod).resolve())
-    rc = receipt_oku(a)
-    rid = str(rc.get("receipt_id"))
-    kupa = [t for t in rc.get("transactions") or [] if str(t.get("sku") or "").startswith("KUPA-")]
-    log(f"receipt {rid}: {len(kupa)} kupa kalemi")
+    st = state_oku(a.state)
+    isler = [(rc, t) for rc in receipt_oku(a) for t in rc.get("transactions") or []
+             if str(t.get("sku") or "").startswith("KUPA-")]
+    yeni = [(rc, t) for rc, t in isler if str(t.get("transaction_id")) not in st]
+    log(f"kupa kalemi {len(isler)}, yeni {len(yeni)} (STATE'te {len(isler) - len(yeni)})")
     genel = []
-    for i, t in enumerate(kupa, 1):
-        d = Path(a.cikti).resolve() / rid / str(t.get("transaction_id"))
-        d.mkdir(parents=True, exist_ok=True)
-        ozet = {"receipt_id": rid, "transaction_id": t.get("transaction_id"), "sku": t.get("sku"), "kapilar": {}, "notlar": [],
-                "deneme_ortam": {k: os.environ[k] for k in DENEME_ENV if k in os.environ}}
-        s, hata = sku_coz(t.get("sku"))
-        m, hata2 = metin_coz(t) if s else (None, None)
-        if hata or hata2:
-            ozet.update(durum="FAIL", sebep=hata or hata2, musteri_mesaji_gerekiyor=bool(hata2))
-            soru_yaz(d, rc, t, {}, hata or hata2, musteri=bool(hata2))
-        else:
-            ozet.update(sku_coz=s, metin={k: m[k] for k in ("isim1", "isim2", "mesaj", "mesaj_bos")})
-            kap = metin_kapilari(kod, m)
-            if all(v[0] == "PASS" for v in kap.values()):
-                sem = d / "sembol"
-                r = subprocess.run(["bash", str(Path(kod) / "kod" / "sembol_al.sh"), s["cift"], str(sem)],
-                                   capture_output=True, text=True, cwd=kod)
-                if r.returncode:
-                    kap["sembol"] = ("FAIL", r.stderr[-300:])
-                else:
-                    k2, notlar, sat = is_isle(kod, str(sem), s, m, d)
-                    kap.update(k2)
-                    ozet["notlar"], ozet["baski_kes"] = notlar, sat
-            ozet["kapilar"] = {k: {"durum": v[0], "ayrinti": v[1]} for k, v in kap.items()}
-            if all(v[0] != "FAIL" for v in kap.values()):
-                ad = f"AstroLoveArt_{s['burc1']}_{s['burc2']}_{s['stil_ad'].replace(' ', '_')}"
-                png, jpg = cikti_yaz(d, s, ad)
-                yuk = printful_yuk(rc, t, s, png)
-                (d / "PRINTFUL_TASLAK.json").write_text(json.dumps(yuk, indent=1, ensure_ascii=False), encoding="utf-8")
-                ozet.update(durum="GOZ" if any(v[0] == "GOZ" for v in kap.values()) else "PASS", baski=png.name, onizleme=jpg.name,
-                            piksel=piksel(png), printful={"variant_id": PRINTFUL[s["boy"]]["variant_id"],
-                                                          "printfile_id": PRINTFUL[s["boy"]]["printfile_id"]})
-            else:
-                ozet.update(durum="FAIL", musteri_mesaji_gerekiyor=musteri_mesaji(kap))
-                soru_yaz(d, rc, t, kap, musteri=ozet["musteri_mesaji_gerekiyor"])
+    for i, (rc, t) in enumerate(yeni, 1):
+        rid, tid = str(rc.get("receipt_id")), str(t.get("transaction_id"))
+        d = Path(a.cikti).resolve() / rid / tid
+        try:
+            ozet = kalem_isle(kod, rc, t, d)
+        except Exception as e:  # noqa: BLE001  tek kalemin hatasi digerlerini durdurmaz; ayrinti yalniz Drive'da
+            ozet = {"receipt_id": rid, "transaction_id": tid, "sku": t.get("sku"), "durum": "FAIL", "notlar": [],
+                    "sebep": f"uretim hatasi {type(e).__name__}: {str(e)[-600:]}"}
+            d.mkdir(parents=True, exist_ok=True)
+            (d / "OZET.json").write_text(json.dumps(ozet, indent=1, ensure_ascii=False), encoding="utf-8")
+            soru_yaz(d, rc, t, {}, ozet["sebep"])
         if a.drive:
             ok, err = drive_yaz(d, a.drive, rid)
             ozet["drive"] = "tamam" if ok else f"HATA {err}"
-        (d / "OZET.json").write_text(json.dumps(ozet, indent=1, ensure_ascii=False), encoding="utf-8")
+        if a.state and ozet.get("drive", "tamam") == "tamam":
+            st[tid] = {"transaction_id": tid, "receipt_id": rid, "sku": t.get("sku"), "durum": ozet["durum"],
+                       "zaman": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())}
+            state_yaz(a.state, st)
         genel.append(ozet)
+        k = kod_(tid)
+        # public log: opak kod + SKU + durum; isim/adres/mesaj YOK
+        if ozet["durum"] == "FAIL":
+            print(f"::error title=KUPA FAIL {k}::{t.get('sku')} baski yok; Drive KUPA_SIPARIS SORU.md (Serdar)", flush=True)
+        elif ozet["durum"] == "GOZ":
+            print(f"::warning title=KUPA GOZ {k}::{t.get('sku')} baski hazir; teslim oncesi Serdar onayi", flush=True)
         g_ = time.time() - t0
-        log(f"[{i}/{len(kupa)} %{100 * i // len(kupa)}] {t.get('sku')} -> {ozet['durum']} {ozet.get('piksel', '')} "
-            f"{'; '.join(ozet['notlar'])} (gecen {g_:.0f}s, kalan ~{g_ / i * (len(kupa) - i):.0f}s)")
-    (Path(a.cikti).resolve() / rid / "OZET.json").write_text(json.dumps(genel, indent=1, ensure_ascii=False), encoding="utf-8")
-    sys.exit(1 if any(o["durum"] == "FAIL" for o in genel) else 0)
+        log(f"[{i}/{len(yeni)} %{100 * i // len(yeni)}] {k} {t.get('sku')} -> {ozet['durum']} {ozet.get('piksel', '')} "
+            f"drive {ozet.get('drive', '-')} (gecen {g_:.0f}s, kalan ~{g_ / i * (len(yeni) - i):.0f}s)")
+    if genel:
+        Path(a.cikti).mkdir(parents=True, exist_ok=True)
+        (Path(a.cikti) / "KOSU_OZET.json").write_text(json.dumps(genel, indent=1, ensure_ascii=False), encoding="utf-8")
+    sys.exit(1 if any(o["durum"] == "FAIL" or str(o.get("drive", "")).startswith("HATA") for o in genel) else 0)
 
 
 if __name__ == "__main__":
