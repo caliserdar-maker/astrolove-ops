@@ -1,0 +1,57 @@
+{
+ "kapak_olcu": "3000x2250",
+ "poster_kutu_kapak": [
+  787,
+  326,
+  1425,
+  1814
+ ],
+ "poster_oran": 1.273,
+ "sembol_kutu": [
+  559,
+  319,
+  318,
+  300
+ ],
+ "sembol_altinlik": {
+  "kapak": 125.1,
+  "sembolsuz": -39.7,
+  "cevre_lacivert": -39.3,
+  "glif_kapak": 103.1,
+  "sondugu_an_video": -39.1
+ },
+ "video": {
+  "olcu": "1440x1080",
+  "oran": 1.3333,
+  "kare": 180,
+  "sure_sn": 6.0,
+  "fps": "30/1",
+  "codec": "h264",
+  "ses_akisi": false,
+  "boyut_mb": 2.3
+ },
+ "ilk_kare_fark": 1.459,
+ "son_kare_fark": 1.449,
+ "taban_420_kayipsiz": 1.423,
+ "sembol_kutu_taban": 2.073,
+ "sembol_tam_kare": 141,
+ "sembol_tam_sn": 4.7,
+ "sembol_kutu_fark_en_buyuk": {
+  "kare": 49,
+  "fark": 23.234
+ },
+ "kapi": {
+  "olcu_4_3": true,
+  "kare_180": true,
+  "sure_6": true,
+  "ses_yok": true,
+  "ilk_kare_kapak": true,
+  "son_kare_kapak": true,
+  "sembol_tam_bitiste": true,
+  "poster_oran_2_3": false,
+  "sembol_altin": true,
+  "glif_altin": true,
+  "sembol_soner": true
+ },
+ "sonuc": "FAIL"
+}
