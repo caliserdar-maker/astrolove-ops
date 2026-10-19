@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """K2 (sosyal -> Etsy) link envanteri (19 Eki 2026). SALT OKUMA: Metricool'a ve hicbir platforma YAZMA YOK, yalniz GET.
 Uclar (data/sosyal/kaynak/metricool/METRICOOL_SWAGGER.json):
-  /v2/scheduler/posts (12 Eki - 29 Ara, 5 gunluk parcalar)  text, firstCommentText, pinterestData.pinLink,
+  /v2/scheduler/posts (12 Eki - 29 Ara, 1 gunluk parcalar; 1. kosu 5 gunde 100 kayitta kesiliyordu)  text, firstCommentText, pinterestData.pinLink,
       tiktokData.articleLink, smartLinkData.targetUrl, providers[].status/publicUrl
   /v2/settings/brands, /v2/settings/brands/{id}, /admin/simpleProfiles   profil kullanici adlari / profil URL'leri
   /linkinbio/instagram/getbioButtons, /linkinbio/instagram/getbiocatalog  Metricool link-in-bio icerigi (okuma)
@@ -120,7 +120,9 @@ ACICI = urllib.request.build_opener(Yonlendirme)
 
 
 def kontrol(u):
-    """GET + elle yonlendirme izleme. Donus: (zincir [(kod, url)], son_kod, son_url, hata)."""
+    """GET + elle yonlendirme izleme. Donus: (zincir [(kod, url)], son_kod, son_url, hata).
+    hata alani 4xx/5xx yanitta engel isaretlerini de tasir: Server basligi, x-datadome / x-dd-b basliklari,
+    govdede captcha-delivery / datadome gecisi (1. kosu: 156 URL'nin hepsi Actions'tan 403)."""
     zincir, simdi = [], u
     for _ in range(10):
         r = urllib.request.Request(simdi, method='GET', headers={'User-Agent': UA, 'Accept': 'text/html,*/*',
@@ -134,7 +136,14 @@ def kontrol(u):
             zincir.append((e.code, simdi))
             yer = e.headers.get('Location') if e.code in (301, 302, 303, 307, 308) else None
             if not yer:
-                return zincir, e.code, simdi, ''
+                try:
+                    g = e.read(4096).decode('utf-8', 'replace').lower()
+                except Exception:
+                    g = ''
+                isaret = [f"server={e.headers.get('Server', '')}"] + [f'{h}={e.headers.get(h)}' for h in ('x-datadome', 'x-dd-b')
+                                                                       if e.headers.get(h)]
+                isaret += [m for m in ('captcha-delivery', 'datadome') if m in g]
+                return zincir, e.code, simdi, ' '.join(isaret)
             simdi = urllib.parse.urljoin(simdi, yer)
         except Exception as e:
             return zincir, 0, simdi, f'{type(e).__name__}: {str(e)[:120]}'
@@ -154,11 +163,12 @@ def main():
     ps, t = {}, datetime.combine(BAS, datetime.min.time())
     son = datetime.combine(SON + timedelta(days=1), datetime.min.time())
     while t < son:
-        e = min(t + timedelta(days=5), son)
+        e = min(t + timedelta(days=1), son)
         j = guvenli(mc, f'scheduler_{t:%Y%m%d}', '/v2/scheduler/posts', {'start': f'{t:%Y-%m-%dT%H:%M:%S}',
                     'end': f'{e:%Y-%m-%dT%H:%M:%S}', 'timezone': TZ}, out)
         ls = liste(j)
-        log(f'SCHEDULER {t:%Y-%m-%d} - {e:%Y-%m-%d}: {len(ls) if ls is not None else "yanit yok"} kayit')
+        log(f'SCHEDULER {t:%Y-%m-%d}: {len(ls) if ls is not None else "yanit yok"} kayit'
+            + ('  UYARI: 100 ve ustu, yanit kesilmis olabilir' if ls and len(ls) >= 100 else ''))
         for p in ls or []:
             ps[str(p.get('id'))] = p
         t = e
