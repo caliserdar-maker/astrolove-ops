@@ -17,6 +17,7 @@ on:
       ciftler: { description: "TUMU ya da virgul/bosluk ayrimli CIFT (alfabetik anahtar, orn. CANCER_LIBRA)", required: true, default: "CANCER_LIBRA" }
       hedef: { description: "Drive ASTROLOVE/KUPA_ORCHARD78/<hedef>", required: true, default: "ORCHARD78_20261019" }
       metin_ref: { description: "kupa-orchard dalinda commit: kupa_orchard/ilan/KUPA78_ORCHARD_METIN.csv", required: true, default: "0278b13" }
+      haric: { description: "atlanacak ciftler, bosluk ayrimli CIFT=neden (orn. SAGITTARIUS_SAGITTARIUS=uretim_HATA)", required: false, default: "" }
 env:
   O: "gdrive:ASTROLOVE/TEMP/KUPA_ORCHARD_TASLAK_20261019"
 jobs:
@@ -64,16 +65,24 @@ jobs:
           echo "metin ${{ inputs.metin_ref }}: $N satir"; [ "$N" = 78 ] || { echo "::error::metin satiri $N (78 olmali)"; exit 1; }
       - name: Galeri + video (kuru, yaz)
         if: ${{ inputs.mod != 'oku' }}
+        env:
+          HARIC: ${{ inputs.haric }}
         run: |
           set -euo pipefail
-          K="gdrive:ASTROLOVE/KUPA_ORCHARD78/${{ inputs.hedef }}"; n=0; T=$(echo $CIFT_LISTE | wc -w); t0=$(date +%s)
-          for c in $CIFT_LISTE; do
-            rclone copy "$K/$c/galeri" "_img/$c/galeri" -q --include "/[01][0-9]_*.jpg"
-            rclone copy "$K/$c/video" "_img/$c/video" -q --include "/*.mp4"
+          K="gdrive:ASTROLOVE/KUPA_ORCHARD78/${{ inputs.hedef }}"; t0=$(date +%s)
+          # mukerrer klasor / eksik-fazla galeri olan cift ATLANIR (ATLA.txt); yalniz temiz ciftler indirilir
+          rclone lsjson "$K" --dirs-only --no-modtime --no-mimetype > _work/kok.json
+          rclone lsjson -R "$K" --files-only --no-modtime --no-mimetype --include "/*/galeri/[01][0-9]_*.jpg" --include "/*/video/*.mp4" > _work/dosyalar.json
+          python3 main/scripts/etsy/kupa_medya_tara.py _work/kok.json _work/dosyalar.json _work $CIFT_LISTE --haric $HARIC
+          cp _work/ATLA.txt _out/ATLA.txt
+          echo "YAZ_LISTE=$(cat _work/YAZ_LISTE.txt)" >> "$GITHUB_ENV"
+          [ -s _work/ATLA.txt ] && echo "::warning::ATLANAN $(tr '\n' ';' < _work/ATLA.txt | cut -c1-900)"
+          rclone copy "$K" _img --files-from _work/INDIR.txt --transfers 16 -q
+          for c in $(cat _work/YAZ_LISTE.txt); do
             g=$(ls _img/$c/galeri/*.jpg 2>/dev/null | wc -l); v=$(ls _img/$c/video/*.mp4 2>/dev/null | wc -l)
-            [ "$g" = 14 ] && [ "$v" = 1 ] || { echo "::error::$c galeri $g/14 video $v/1"; exit 1; }
-            n=$((n+1)); s=$(( $(date +%s) - t0 )); echo "indir [$n/$T] $c | gecen ${s} sn | kalan ~$(( s * (T - n) / n )) sn | %$(( 100 * n / T ))"
+            [ "$g" = 14 ] && [ "$v" = 1 ] || { echo "::error::$c indirme galeri $g/14 video $v/1"; exit 1; }
           done
+          echo "indirme: $(cat _work/YAZ_LISTE.txt | wc -w) cift, $(wc -l < _work/INDIR.txt) dosya, $(( $(date +%s) - t0 )) sn"
       - name: Etsy token + onceki durum (oku, yaz)
         if: ${{ inputs.mod != 'kuru' }}
         run: |
@@ -101,7 +110,7 @@ jobs:
           METIN_CSV: _work/KUPA78_ORCHARD_METIN.csv
           IMG_ROOT: _img
           OUT: _out
-        run: python3 main/scripts/etsy/kupa_taslak.py --mod kuru --ciftler "$CIFT_LISTE"
+        run: python3 main/scripts/etsy/kupa_taslak.py --mod kuru --ciftler "$YAZ_LISTE"
       - name: Etsy YAZ (taslak)
         if: ${{ inputs.mod == 'yaz' }}
         env:
@@ -112,7 +121,8 @@ jobs:
           METIN_CSV: _work/KUPA78_ORCHARD_METIN.csv
           IMG_ROOT: _img
           OUT: _out
-        run: python3 main/scripts/etsy/kupa_taslak.py --mod yaz --ciftler "$CIFT_LISTE"
+          ATLA_DOSYA: _out/ATLA.txt
+        run: python3 main/scripts/etsy/kupa_taslak.py --mod yaz --ciftler "$YAZ_LISTE"
       - name: Son okuma (salt okuma, ayri adim)
         if: ${{ always() && inputs.mod == 'yaz' }}
         env:
@@ -123,7 +133,8 @@ jobs:
           OUT: _out
         run: |
           [ -f _out/DURUM.json ] || { echo "DURUM.json yok"; exit 0; }
-          for c in $CIFT_LISTE; do
+          [ "$(echo $YAZ_LISTE | wc -w)" -le 5 ] || { echo "toplu kosu: son okuma atlandi (geri okuma yaz icinde)"; exit 0; }
+          for c in $YAZ_LISTE; do
             L=$(python3 -c 'import json,sys; print(json.load(open("_out/DURUM.json")).get("ciftler", {}).get(sys.argv[1], ""))' "$c")
             [ -n "$L" ] || continue
             LISTING_ID=$L python3 main/scripts/etsy/kupa_son_oku.py && mv _out/KUPA_SON_OKU.json "_out/KUPA_SON_OKU_$c.json"

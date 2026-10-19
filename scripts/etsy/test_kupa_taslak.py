@@ -50,6 +50,7 @@ class KuruTest(unittest.TestCase):
                          {"11 oz": 24.0, "15 oz": 29.0})
         vi = next(x["json"] for x in yaz if x["url"].endswith("/variation-images"))["variation_images"]
         self.assertEqual([v["image_id"] - 800000 for v in vi], [1, 8, 9, 10, 11, 12, 13, 14])
+        self.assertTrue(all("9000000001" in x["url"] for x in yaz[1:]))
 
     def test_eski_stil_metni_durdurur(self):
         satir = dict(kod="CANCER_LIBRA", baslik="x", etiketler=ETIKET, kisisellestirme_talimati="y",
@@ -71,6 +72,60 @@ class KuruTest(unittest.TestCase):
                 api._izin(m, p)
         with self.assertRaises(SystemExit):
             api.patch("/shops/1/listings/9000000001", {"title": "x"})
+
+    def _dongu_hazirla(self, ciftler, kotu):
+        for c in ciftler:
+            if c == "CANCER_LIBRA":
+                continue
+            g = self.d / f"img/{c}/galeri"; g.mkdir(parents=True)
+            (self.d / f"img/{c}/video").mkdir()
+            for n in GALERI:
+                (g / f"{n}.jpg").write_bytes(b"x")
+            (self.d / f"img/{c}/video/v.mp4").write_bytes(b"v")
+        with open(self.d / "metin.csv", "a", newline="", encoding="utf-8") as f:
+            for c in ciftler:
+                a, b = c.split("_")
+                desc = ACIKLAMA + (" Lena & Serdar" if c in kotu else "")
+                csv.writer(f).writerow([c, f"{a} {b} Mug", ETIKET, "Please write 3 lines", desc])
+
+    def test_dongu_fail_sonraki_cifte_gecer_ve_liste(self):
+        ciftler = ["ARIES_ARIES", "ARIES_TAURUS", "ARIES_GEMINI"]
+        self._dongu_hazirla(ciftler, kotu={"ARIES_TAURUS"})
+        out = self.d / "yaz"; out.mkdir()
+        api = k.Kuru("1"); api.kuru = False          # metin kapisi gercek yazdaki gibi DURDURUR
+        k.yaz_dongu(api, "1", out, ciftler)
+        k.liste_yaz(out, ciftler)
+        D = json.load(open(out / "DURUM.json"))
+        self.assertEqual(D["tamam"], ["ARIES_ARIES", "ARIES_GEMINI"])
+        rows = {r["cift"]: r for r in csv.DictReader(open(out / "KUPA_TASLAK_LISTE.csv"))}
+        self.assertEqual(len(rows), 78)
+        self.assertEqual(rows["ARIES_TAURUS"]["durum"], "FAIL")
+        self.assertIn("kisi adi", rows["ARIES_TAURUS"]["neden"])
+        self.assertEqual(rows["ARIES_GEMINI"]["listing_id"], str(D["ciftler"]["ARIES_GEMINI"]))
+        # ikinci kosu: tamam ciftler atlanir, yeni ilan acilmaz
+        n = api.n
+        k.yaz_dongu(api, "1", out, ["ARIES_ARIES", "ARIES_GEMINI"])
+        self.assertEqual(api.n, n)
+
+    def test_dongu_ardisik_iki_fail_durur(self):
+        ciftler = ["ARIES_ARIES", "ARIES_TAURUS", "ARIES_GEMINI"]
+        self._dongu_hazirla(ciftler, kotu={"ARIES_ARIES", "ARIES_TAURUS"})
+        out = self.d / "yaz"; out.mkdir()
+        api = k.Kuru("1"); api.kuru = False
+        with self.assertRaises(SystemExit):
+            k.yaz_dongu(api, "1", out, ciftler)
+        self.assertEqual(getattr(api, "n", 0), 0)
+
+    def test_dongu_cancer_libra_atlanir(self):
+        out = self.d / "yaz"; out.mkdir()
+        json.dump({"ciftler": {"CANCER_LIBRA": 4598525642}}, open(out / "DURUM.json", "w"))
+        api = k.Kuru("1"); api.kuru = False
+        k.yaz_dongu(api, "1", out, ["CANCER_LIBRA"])
+        self.assertEqual(api.kayit, [])
+
+    def test_kisi_adi_kapisi(self):
+        satir = dict(kod="CANCER_LIBRA", baslik="x", etiketler=ETIKET, kisisellestirme_talimati="y", aciklama=ACIKLAMA + " serdar")
+        self.assertEqual(k.metin_kontrol(satir)[4], ["ilanda kisi adi ['serdar']"])
 
     def test_78_cift(self):
         self.assertEqual(len(k.CIFTLER), 78)

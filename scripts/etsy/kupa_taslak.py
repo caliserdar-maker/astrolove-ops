@@ -311,6 +311,9 @@ def metin_kontrol(row):
         hata.append(f"talimat {len(inst)} > {TALIMAT_MAX}")
     if "AstroLove " in desc.replace("AstroLoveArt", ""):
         hata.append("aciklamada yalniz 'AstroLove' (marka AstroLoveArt)")
+    ad = re.findall(r"\b(?:Lena|Serdar)\b", title + "\n" + desc + "\n" + " ".join(tags) + "\n" + inst, re.I)
+    if ad:
+        hata.append(f"ilanda kisi adi {sorted(set(ad))}")
     eski = [s for s in ESKI_STILLER if re.search(rf"\b{s}\b", title + "\n" + desc)]
     if eski:
         hata.append(f"eski 7 stil adi metinde {eski}")
@@ -654,7 +657,9 @@ class Kuru(Kilitli):
     def taslak_olustur(self, shop, body):
         self._izin("POST", f"/shops/{shop}/listings")
         self._kaydet("POST", f"/shops/{shop}/listings", data=body)
-        lid = 9000000001                   # KURU sahte listing_id
+        self.n = getattr(self, "n", 0) + 1
+        lid = 9000000000 + self.n          # KURU sahte listing_id (cift basina yeni ilan, durum sifirdan)
+        self.inv, self.ims, self.vids, self.vis, self.per, self.props = None, [], [], [], [], {}
         self.L = dict(listing_id=lid, state="draft", title=body["title"], description=body["description"],
                       tags=body["tags"].split(","), who_made=body["who_made"], when_made=body["when_made"],
                       listing_type=body["type"], materials=body["materials"].split(","), taxonomy_id=body["taxonomy_id"],
@@ -735,7 +740,7 @@ def kuru(shop, out, pair):
                 yazma_dagilim={u: sum(1 for k in yazma if re.sub(r"\d{6,}", "{id}", k["url"].replace(API, "")) == u)
                                for u in sorted({re.sub(r"\d{6,}", "{id}", k["url"].replace(API, "")) for k in yazma})},
                 kontrol=R["kontrol"], metin=R["metin"], eski_taslak_yok_sayildi=R.get("eski_taslak_yok_sayildi"),
-                not_="KURU: ag/token yok; listing_id 9000000001, gorsel id 8000NN, value_id 50NN sahtedir.")
+                not_="KURU: ag/token yok; listing_id 90000000NN, gorsel id 8000NN, value_id 50NN sahtedir.")
     json.dump(dict(ozet=ozet, istekler=api.kayit), open(out / f"KURU_{pair}.json", "w"), indent=1, ensure_ascii=False)
     (out / f"KUPA_TASLAK_{pair}.json").unlink()
     print(f"KURU {pair}: {len(api.kayit)} istek ({len(yazma)} yazma) | kontrol {sum(R['kontrol'].values())}/{len(R['kontrol'])} | "
@@ -771,9 +776,18 @@ def main():
     if a.mod == "oku":
         oku(SaltOkur(store), shop, out, ciftler[0])
         return
-    api = Kilitli(store)
+    try:
+        yaz_dongu(Kilitli(store), shop, out, ciftler)
+    finally:
+        liste_yaz(out, ciftler)
+
+
+def yaz_dongu(api, shop, out, ciftler, ardisik_max=2):
+    """Cift basina yaz. Tek ciftin FAIL'i kaydedilir ve sonrakine gecilir; ardisik 2 FAIL -> DUR.
+    Kota tabani ve "active" (acil inactive) aninda DUR. DURUM.json kaldigi yerden devam ettirir."""
     t0 = time.time()
     D = json.load(open(out / "DURUM.json")) if (out / "DURUM.json").exists() else {}
+    ardisik = 0
     for i, c in enumerate(ciftler, 1):
         api.lid = None
         if c in D.get("tamam", []) or D.get("ciftler", {}).get(c) in YAZMA_YASAK:
@@ -781,16 +795,53 @@ def main():
             continue
         try:
             yaz(api, shop, out, c)
+            ardisik = 0
         except BaseException as e:  # noqa: BLE001  hata nedeni rapora ve annotation'a (job loglari okunamiyor)
             f = out / f"KUPA_TASLAK_{c}.json"
             R = json.load(open(f)) if f.exists() else {}
             R["hata"] = f"{type(e).__name__}: {e}"[:1500]
             json.dump(R, open(f, "w"), indent=1, ensure_ascii=False, default=str)
             print(f"::error::KUPA YAZ HATA {c} {R['hata'][:600]}")
-            raise
+            ardisik += 1
+            if (not isinstance(e, SystemExit) or e.code == 2 or "kota" in str(e) or "YASAK" in str(e)
+                    or ardisik >= ardisik_max):
+                raise
         g = time.time() - t0
         print(f"ETA cift [{i}/{len(ciftler)}] {c} | gecen {g / 60:.1f} dk | kalan ~{g / i * (len(ciftler) - i) / 60:.1f} dk | "
               f"%{100 * i // len(ciftler)} | kota {api.remaining}", flush=True)
+
+
+def liste_yaz(out, ciftler):
+    """OUT/KUPA_TASLAK_LISTE.csv: 78 cift, listing_id, durum (TAMAM/YARIM/FAIL/ATLANDI/ACILMADI), neden."""
+    D = json.load(open(out / "DURUM.json")) if (out / "DURUM.json").exists() else {}
+    atla = {}
+    if os.environ.get("ATLA_DOSYA") and Path(os.environ["ATLA_DOSYA"]).exists():
+        for satir in Path(os.environ["ATLA_DOSYA"]).read_text().splitlines():
+            if "|" in satir:
+                c, neden = satir.split("|", 1); atla[c] = neden
+    sayac = {}
+    with open(out / "KUPA_TASLAK_LISTE.csv", "w", newline="", encoding="utf-8") as fh:
+        w = csv.writer(fh)
+        w.writerow(["cift", "listing_id", "durum", "neden", "link"])
+        for c in CIFTLER:
+            lid = D.get("ciftler", {}).get(c, "")
+            f = out / f"KUPA_TASLAK_{c}.json"
+            hata = (json.load(open(f)).get("hata") or "") if f.exists() else ""
+            if c in D.get("tamam", []):
+                durum, neden = "TAMAM", "13/13"
+            elif lid in YAZMA_YASAK:
+                durum, neden = "VAR (yazma yasak)", "onceki taslak; talimat panelden"
+            elif c in atla:
+                durum, neden = "ATLANDI", atla[c]
+            elif hata:
+                durum, neden = ("YARIM" if lid else "FAIL"), hata[:300]
+            elif lid:
+                durum, neden = "YARIM", "kontrol bitmedi"
+            else:
+                durum, neden = "ACILMADI", "" if c in ciftler else "bu kosuda yok"
+            sayac[durum] = sayac.get(durum, 0) + 1
+            w.writerow([c, lid, durum, neden, f"https://www.etsy.com/your/shops/me/listing-editor/edit/{lid}" if lid else ""])
+    print(f"::warning::LISTE {sayac} -> KUPA_TASLAK_LISTE.csv")
 
 
 if __name__ == "__main__":
