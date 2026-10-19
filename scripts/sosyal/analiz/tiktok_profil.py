@@ -167,21 +167,29 @@ def main():
 
     # 3) yardim sayfalari
     md += ['## 3. TikTok yardim sayfasi: profilde website linki kosulu', '']
-    yr = []
-    for u in YARDIM:
+    yr, kuyruk, gorulen = [], list(YARDIM), set()
+    while kuyruk and len(gorulen) < 6:
+        u = kuyruk.pop(0)
+        if u in gorulen:
+            continue
+        gorulen.add(u)
         st, son_url, govde = web(u)
-        metin = html.unescape(re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', ' ', re.sub(r'(?s)<(script|style)[^>]*>.*?</\1>', ' ', govde))))
+        # metin script icindeki JSON'da olabilir: kacislari coz, etiketleri at (script dahil, govde atilmaz)
+        g = govde.replace('\\u002F', '/').replace('\\u003C', '<').replace('\\u003E', '>').replace('\\"', '"').replace('\\n', ' ')
+        metin = html.unescape(re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', ' ', g)))
         baslik = re.search(r'<title>(.*?)</title>', govde, re.S)
         cumle = sorted({c.strip() for c in re.split(r'(?<=[.!?])\s+', metin)
-                        if re.search(r'website|web site|link in bio|bio link', c, re.I) and len(c) < 400})
+                        if re.search(r'website', c, re.I) and re.search(r'profile|bio|follower|account', c, re.I) and len(c) < 400})
+        for h in re.findall(r'href="(/en/[^"#?]*(?:link|website)[^"#?]*)"', g):
+            kuyruk.append('https://support.tiktok.com' + h)
         yr.append({'url': u, 'status': st, 'son_url': son_url, 'baslik': baslik.group(1).strip() if baslik else None,
                    'uzunluk': len(govde), 'website_cumleleri': cumle[:30], 'govde_basi': govde[:200] if not cumle else None})
-        print(f'YARDIM {u}: status {st}, {len(cumle)} cumle')
+        print(f'YARDIM {u}: status {st}, son {son_url}, {len(cumle)} cumle')
         for c in cumle[:12]:
             print('   ', c[:300])
-        md += [f'- {u} (GET {okuma}, HTTP {d(st)}, baslik: {d(yr[-1]["baslik"])}'
+        md += [f'- {u} (GET {okuma}, HTTP {d(st)}, son URL {son_url}, baslik: {d(yr[-1]["baslik"])}'
                + (f', hata: {govde[:150]}' if st is None else '') + ')']
-        md += [f'  - "{c}"' for c in cumle[:12]] or ['  - website cumlesi: erisilemedi']
+        md += [f'  - "{c}"' for c in cumle[:12]] or ['  - website cumlesi: erisilemedi (sayfa JS ile yukleniyor / cumle yok)']
     ham(out, 'yardim', yr)
     md += ['']
     open(os.path.join(out, 'K3_PROFIL.md'), 'w').write('\n'.join(md) + '\n')
