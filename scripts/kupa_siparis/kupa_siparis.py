@@ -57,6 +57,8 @@ VARSAYILAN_MESAJ = "My favorite place is with you"
 ISIM_AZAMI, MESAJ_AZAMI = 10, 30
 ISIM_IZINLI = " -'’."                 # harf disinda isimde izinli isaretler (harf sayisina girmez)
 ENV = {"GOLGE_US": "0.4", "PARLA": "0.7"}   # cift.py ENV (baski_kes okumaz; birebirlik icin ayni)
+DENEME_ENV = ("BURC_MIN",)            # yalniz kapi denemesi icin baski_kes'e gecer (OZET.json "deneme_ortam")
+METIN_KAPI = ("isim1_uzunluk", "isim2_uzunluk", "isim1_isaret", "isim2_isaret", "mesaj_uzunluk", "karakter_ebgaramond")
 t0 = time.time()
 
 
@@ -156,6 +158,7 @@ def metin_kapilari(kod, m):
 # ------------------------------------------------------------------ baski (cift.py 1 ve 1b ile ayni cagri)
 def baski_kes(kod, st, sem, m, s, cikti, d_in=None):
     env = dict(ENV, PATH=os.environ.get("PATH", "/usr/bin:/bin"))
+    env.update({k: os.environ[k] for k in DENEME_ENV if k in os.environ})
     if d_in:
         env["D_IN"] = d_in
     k = Path(kod) / "kod"
@@ -245,9 +248,17 @@ def printful_yuk(rc, t, s, png):
                        "_printfile_id": p["printfile_id"], "_boyut": "x".join(map(str, p["boyut"]))}]}
 
 
-def soru_yaz(d, rc, t, kap, sebep=None):
+def musteri_mesaji(kap):
+    """Musterinin metni duzeltmesi gereken FAIL (metin kapisi)."""
+    return any(v[0] == "FAIL" for k, v in kap.items() if k in METIN_KAPI)
+
+
+def soru_yaz(d, rc, t, kap, sebep=None, musteri=False):
     sat = [f"# Serdar'a soru: receipt {rc.get('receipt_id')} transaction {t.get('transaction_id')}", "",
            f"SKU: {t.get('sku')}", "Baski URETILMEDI (kapi FAIL). Musteriye yazilmadi; karar Serdar'in.", ""]
+    if musteri:
+        sat += ["MUSTERI MESAJI GEREKIYOR: metin kurala uymuyor. Mesaj yalniz TASLAK olarak hazirlanir;",
+                "gonderim yalniz Serdar'in bu siparise ozel acik onayiyla.", ""]
     if sebep:
         sat.append(f"- girdi: {sebep}")
     sat += [f"- {k}: {v[0]} ({v[1]})" for k, v in kap.items() if v[0] == "FAIL"]
@@ -279,12 +290,13 @@ def main():
     for i, t in enumerate(kupa, 1):
         d = Path(a.cikti).resolve() / rid / str(t.get("transaction_id"))
         d.mkdir(parents=True, exist_ok=True)
-        ozet = {"receipt_id": rid, "transaction_id": t.get("transaction_id"), "sku": t.get("sku"), "kapilar": {}, "notlar": []}
+        ozet = {"receipt_id": rid, "transaction_id": t.get("transaction_id"), "sku": t.get("sku"), "kapilar": {}, "notlar": [],
+                "deneme_ortam": {k: os.environ[k] for k in DENEME_ENV if k in os.environ}}
         s, hata = sku_coz(t.get("sku"))
         m, hata2 = metin_coz(t) if s else (None, None)
         if hata or hata2:
-            ozet.update(durum="FAIL", sebep=hata or hata2)
-            soru_yaz(d, rc, t, {}, hata or hata2)
+            ozet.update(durum="FAIL", sebep=hata or hata2, musteri_mesaji_gerekiyor=bool(hata2))
+            soru_yaz(d, rc, t, {}, hata or hata2, musteri=bool(hata2))
         else:
             ozet.update(sku_coz=s, metin={k: m[k] for k in ("isim1", "isim2", "mesaj", "mesaj_bos")})
             kap = metin_kapilari(kod, m)
@@ -308,8 +320,8 @@ def main():
                             piksel=piksel(png), printful={"variant_id": PRINTFUL[s["boy"]]["variant_id"],
                                                           "printfile_id": PRINTFUL[s["boy"]]["printfile_id"]})
             else:
-                ozet["durum"] = "FAIL"
-                soru_yaz(d, rc, t, kap)
+                ozet.update(durum="FAIL", musteri_mesaji_gerekiyor=musteri_mesaji(kap))
+                soru_yaz(d, rc, t, kap, musteri=ozet["musteri_mesaji_gerekiyor"])
         if a.drive:
             ok, err = drive_yaz(d, a.drive, rid)
             ozet["drive"] = "tamam" if ok else f"HATA {err}"
