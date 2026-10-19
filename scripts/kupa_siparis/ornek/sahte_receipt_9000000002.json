@@ -1,0 +1,4 @@
+{"receipt_id": 9000000002, "name": "Test Alici", "first_line": "1 Test Street", "city": "London", "zip": "SW1A 1AA", "country_iso": "GB",
+ "transactions": [
+  {"transaction_id": 4, "sku": "KUPA-CANCER_LIBRA-01-15", "quantity": 2, "title": "Orchard couple mug",
+   "variations": [{"property_id": 54, "formatted_name": "Personalization", "formatted_value": "Emily\nJames"}]}]}
