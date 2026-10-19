@@ -1,5 +1,6 @@
 name: tiktok-analiz
 # TikTok anlik durum tespiti 19 Eki 2026 (SALT OKUMA). Metricool ve TikTok'a YAZMA / SILME / DEGISTIRME YOK; yalniz GET.
+# mod=profil: scripts/sosyal/analiz/tiktok_profil.py (K3 profil linki; Metricool GET + tiktok.com / support.tiktok.com GET).
 # scripts/sosyal/analiz/tiktok.py: hesap gunluk (1 Eki+), video bazinda (13 Eki+), plan/gercek (13 Eki+), metrik-kaynak eslemesi.
 # Token: secret METRICOOL_USER_TOKEN (userId/blogId Drive METRICOOL_TOKEN.json'dan). Loga yazilmaz (::add-mask:: + sir_koru).
 # Sir taramasini gecmeyen dosya _work'te kalir, Drive'a gitmez. Cikti: Drive ASTROLOVE/TEMP/SOSYAL_ANALIZ_20261019/TIKTOK/.
@@ -7,6 +8,10 @@ permissions:
   contents: read
 on:
   workflow_dispatch:
+    inputs:
+      mod:
+        description: "analiz (19 Eki tespit) | profil (K3: Metricool TikTok hesap bilgisi + herkese acik profil + yardim sayfasi, K3_PROFIL.md)"
+        default: analiz
 jobs:
   oku:
     runs-on: ubuntu-latest
@@ -37,7 +42,8 @@ jobs:
           rclone copyto "gdrive:ASTROLOVE/TEMP/METRICOOL_TOKEN.json" _work/kimlik.json
           python3 -c "import json,os;d=json.load(open('_work/kimlik.json'));json.dump({'userToken':os.environ['MC_TOK'],'userId':d['userId'],'blogId':d['blogId']},open('_work/mc.json','w'))"
           python3 -c "import json;print('::add-mask::'+json.load(open('_work/kimlik.json'))['userToken'])"
-          python3 scripts/sosyal/analiz/tiktok.py _work/mc.json _out | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json --sir-json _work/kimlik.json "$GITHUB_STEP_SUMMARY"
+          if [ "${{ inputs.mod }}" = "profil" ]; then BETIK=scripts/sosyal/analiz/tiktok_profil.py; else BETIK=scripts/sosyal/analiz/tiktok.py; fi
+          python3 $BETIK _work/mc.json _out | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json --sir-json _work/kimlik.json "$GITHUB_STEP_SUMMARY"
           rc=${PIPESTATUS[0]}
           mkdir -p _work/engel
           for f in _out/*; do
