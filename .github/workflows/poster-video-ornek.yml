@@ -12,6 +12,9 @@ on:
       kapak:
         description: 'KAPAK/ altindaki kapak dosyasi'
         default: 4570143815_CANCER_LIBRA.jpg
+      surum:
+        description: 'v1 (ilk ornek) | v2 (toz 5 kat, sembol tozla birlikte, sonsuzluktan da toz; cikti V2/)'
+        default: v2
 jobs:
   uret:
     runs-on: ubuntu-latest
@@ -20,6 +23,7 @@ jobs:
       O: gdrive:ASTROLOVE/TEMP/POSTER_VIDEO_ORNEK_20261019
       K: gdrive:ASTROLOVE/TEMP/KAPAK_P2_78_20261019/KAPAK
       KAPAK: ${{ inputs.kapak }}
+      SURUM: ${{ inputs.surum }}
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-python@v5
@@ -46,6 +50,8 @@ jobs:
         set +e -uo pipefail   # QC FAIL olsa da ciktilar Drive'a gitsin
         case "$KAPAK" in *[!A-Za-z0-9_.]*|'') echo "::error::kapak adi gecersiz"; exit 1 ;; esac
         CIFT=$(echo "$KAPAK" | sed -E 's/^[0-9]+_//; s/\.jpg$//')
+        case "$SURUM" in v1) EK=""; PV=ornek ;; v2) EK="--v2"; O="$O/V2"; PV=ornek_v2 ;; *) echo "::error::surum v1|v2"; exit 1 ;; esac
+        echo "PV=$PV" >> "$GITHUB_ENV"
         mkdir -p _w _o
         rclone copyto "$K/$KAPAK" _w/kapak.jpg -q || { echo "::error::kapak yok"; exit 1; }
         python3 -c "from PIL import Image;print('::warning::GIRDI kapak', Image.open('_w/kapak.jpg').size)"
@@ -63,11 +69,11 @@ jobs:
             if s not in seen and len(s) < 400: seen.add(s); print('-', s)
         " | head -40 | tee -a _o/ETSY_VIDEO_SARTLARI.txt
         sed 's/^/::warning::ETSY /' _o/ETSY_VIDEO_SARTLARI.txt | head -40
-        python3 -I sosyal/poster_video/poster_ilan_video.py _w/kapak.jpg _o "$CIFT" | tee _w/log.txt; RC=${PIPESTATUS[0]}
+        python3 -I sosyal/poster_video/poster_ilan_video.py _w/kapak.jpg _o "$CIFT" $EK | tee _w/log.txt; RC=${PIPESTATUS[0]}
         grep -E '^\{|SONUC' _w/log.txt | sed 's/^/::warning::QC /' | cut -c1-3000
         rclone copy _o "$O" -q
         echo "::warning::DRIVE $(rclone lsf "$O" | tr '\n' ' ')"
-        mkdir -p _pv; cp _o/KONTAK.jpg _o/MASKE.jpg _o/*_QC.json _o/ETSY_VIDEO_SARTLARI.txt _pv/ 2>/dev/null
+        mkdir -p _pv; cp _o/KONTAK.jpg _o/MASKE.jpg _o/*QC.json _o/ETSY_VIDEO_SARTLARI.txt _pv/ 2>/dev/null
         echo "RC=$RC" >> "$GITHUB_ENV"
     - name: Onizleme dali
       if: ${{ always() }}
@@ -79,8 +85,8 @@ jobs:
         for i in 1 2 3; do
           rm -rf _pvw; git worktree prune
           git fetch -q origin $B 2>/dev/null && git worktree add -q _pvw origin/$B 2>/dev/null || { git worktree add -q --detach _pvw; (cd _pvw && git checkout -q --orphan tmp && git rm -rqf . ); }
-          rm -rf _pvw/ornek; mkdir -p _pvw/ornek; cp _pv/* _pvw/ornek/
-          (cd _pvw && git add -A && git commit -qm "poster video onizleme (kosu ${{ github.run_id }})" && git push -q origin HEAD:refs/heads/$B) && { echo "::warning::ONIZLEME $B/ornek"; break; }
+          rm -rf "_pvw/$PV"; mkdir -p "_pvw/$PV"; cp _pv/* "_pvw/$PV/"
+          (cd _pvw && git add -A && git commit -qm "poster video onizleme (kosu ${{ github.run_id }})" && git push -q origin HEAD:refs/heads/$B) && { echo "::warning::ONIZLEME $B/$PV"; break; }
           sleep 5
         done
     - name: Sonuc
