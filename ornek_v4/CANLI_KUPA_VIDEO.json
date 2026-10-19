@@ -1,0 +1,18 @@
+{
+ "listing_id": 4598525642,
+ "cagrilar": [
+  {
+   "yol": "GET /listings/{id}/videos (API anahtari)",
+   "kota": "28",
+   "sonuc": 1
+  }
+ ],
+ "video": {
+  "video_id": 848686959,
+  "height": 1080,
+  "width": 1080,
+  "video_state": "active"
+ },
+ "indirilen_bayt": 195295,
+ "etsy_cagri_sayisi": 1
+}
