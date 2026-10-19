@@ -15,6 +15,12 @@ Usage:
        cross-fades into the question mark, then the approved animation continues unchanged.
     B: starts at the moment the merged symbol is complete (T_LAND_END + 1.0 s); the rest plays at the same speed; the
        end card is held so the video stays 24 s; same 0.9 s fade-out at the end.
+  --acilis B1|C (19 Oct 2026; from 3 s on identical to B):
+    B1: 0-0.8 s B's first frame with the top text ("Two signs / Your shared symbol") fully shown, merged symbol in the
+        centre; 0.8-1.2 s soft cross-fade to the wall scene of the video (wall + real poster, full view, as at 18.6 s);
+        2.7-3.0 s cross-fade back into B.
+    C:  0-1.2 s the real poster on the wall (poster 90% of the frame width, its names readable); 1.2-1.5 s cross-fade
+        into B; B from 1.5 s on.
 Writes {a}-and-{b}-astroloveart-reel.mp4
 """
 import argparse, json, os, subprocess, sys, time
@@ -45,7 +51,7 @@ T_END_FREEZE = 23.1              # end card is complete and still from here unti
 
 def kaynak_t(t, acilis, t0):
     """Output time -> time on the approved v9 timeline. B: shifted by t0, end card held (no change for None / A)."""
-    return min(t + t0, T_END_FREEZE) if acilis == 'B' else t
+    return min(t + t0, T_END_FREEZE) if acilis in ('B', 'B1', 'C') else t
 
 
 def acilis_alfa(t, acilis):
@@ -207,14 +213,14 @@ def build(poster_path, A, B, out_dir, muzik=None, kareler=None, bilgi=None, acil
         x, y = centred(lay)
         return full(lay, x, y)
 
-    def navy(t):
+    def navy(t, tam_ust=False):
         keep = 1 - ease(t, 14.4, 15.4)
         f = BG + (BASE - BG) * keep
         a1 = (1.0 if acilis == 'A' else ease(t, 0.3, 1.3)) * (1 - ease(t, 3.3, 4.3))
         ko = acilis_alfa(t, acilis)
         aq = (1 - ease(t, 3.4, 4.6)) * (1 - ko)
         d, reveal = dust_and_reveal(t)
-        aA = ease(t, 8.4, 9.4) * (1 - ease(t, 11.0, 12.0))
+        aA = 1.0 if tam_ust else ease(t, 8.4, 9.4) * (1 - ease(t, 11.0, 12.0))
         aB = ease(t, 11.6, 12.6) * keep
         lm = LM if (G <= 1.0 or t < T_G0) else grown(t)
         for (c, a), k in [(t1, a1), (LQ, aq), (lm, max(reveal, ko)), (tA, aA), (tB, aB)]:
@@ -275,6 +281,40 @@ def build(poster_path, A, B, out_dir, muzik=None, kareler=None, bilgi=None, acil
         bilgi.update(T_LAND_END=round(T_LAND_END, 3), T_B0=float(T_B0), acilis=acilis or 'eski',
                      sembol_kutu=[int(round(mx - MER.size[0] / 2)), int(round(my - MER.size[1] / 2)), MER.size[0], MER.size[1]],
                      etiket_y=int(CY + SIGN_H / 2 + 44), soru_y=330)
+    def wall_box(cx, cy, cw):
+        ch = cw * 16 / 9
+        return np.asarray(WALL.resize((W, H), Image.LANCZOS, box=(cx - cw / 2, cy - ch / 2, cx + cw / 2, cy + ch / 2))).astype(np.float32)
+
+    C_BOX = (PX + PW / 2, PY + PH / 2, PW / 0.90)     # acilis C: poster 90% of the frame width, centred
+    if bilgi is not None:
+        k = W / C_BOX[2]; x0 = C_BOX[0] - C_BOX[2] / 2; y0 = C_BOX[1] - C_BOX[2] * 8 / 9
+        nr = P.names_row
+        bilgi['c_isim_kutu'] = [int(round((PX + nr[1] * sp - x0) * k)), int(round((PY + nr[2] * sp - y0) * k)),
+                                int(round(nr[3] * sp * k)), int(round(nr[4] * sp * k))]
+        bilgi['ust_yazi_y'] = [318, 404]
+    ACIL = {}
+
+    def acilis_kare(to, f):
+        """B1 / C opening on top of B's frame f (output time to < 3 s); B unchanged from 3 s on."""
+        if acilis == 'B1' and to < 3.0:
+            if 'O' not in ACIL:
+                ACIL['O'] = navy(T_B0, tam_ust=True); ACIL['W'] = wall(18.6)
+            O, Wf = ACIL['O'], ACIL['W']
+            if to < 0.8:
+                return O
+            if to < 1.2:
+                u = ease(to, 0.8, 1.2); return O * (1 - u) + Wf * u
+            if to < 2.7:
+                return Wf
+            u = ease(to, 2.7, 3.0); return Wf * (1 - u) + f * u
+        if acilis == 'C' and to < 1.5:
+            if 'C' not in ACIL:
+                ACIL['C'] = wall_box(*C_BOX)
+            if to < 1.2:
+                return ACIL['C']
+            u = ease(to, 1.2, 1.5); return ACIL['C'] * (1 - u) + f * u
+        return f
+
     _g = np.random.default_rng(99)
     GRAIN = (_g.uniform(-0.5, 0.5, (H, W, 3)) + _g.uniform(-0.5, 0.5, (H, W, 3))).astype(np.float32)
 
@@ -293,6 +333,7 @@ def build(poster_path, A, B, out_dir, muzik=None, kareler=None, bilgi=None, acil
             u = ease(t, 18.8, 19.8); f = wall(t) * (1 - u) + BG * u
         else:
             v = ease(t, 19.6, 20.6); f = BG + (END - BG) * v
+        f = acilis_kare(to, f)
         if acilis is None:
             f = f * ease(t, 0, 1.0) * (1 - ease(t, 23.1, 24.0)) if (t < 1.0 or t > 23.1) else f
         elif to > T_END_FREEZE:      # A and B: no black opening, same fade-out on the output clock
@@ -339,7 +380,7 @@ if __name__ == '__main__':
     ap.add_argument('--out', required=True)
     ap.add_argument('--muzik')
     ap.add_argument('--kareler')
-    ap.add_argument('--acilis', choices=['A', 'B'])
+    ap.add_argument('--acilis', choices=['A', 'B', 'B1', 'C'])
     ap.add_argument('--bilgi', help='write layout/timing info (JSON) here')
     g = ap.parse_args()
     k = [float(x) for x in g.kareler.split(',')] if g.kareler else None
