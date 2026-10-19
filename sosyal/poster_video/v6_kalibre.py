@@ -4,11 +4,12 @@ Kupa V6 = kupa-orchard video6b.py, yalniz N 5200 -> 10400 ve parcacik sigma 0.9 
 Olcumler (iki videoya ayni formul):
   SM = cekirdek sembol pikselleri (kupa: video6b maske('nosym') > 0.95; poster: v6 MS > 0.95), d_t = |f_t - f_son| (kanal max),
   gorunen oran V(t) = ort clip(1 - d_t / d_9, 0, 1) (d_9 = silinmis hal 0,3 sn; d_9 < 20 olan pikseller haric; toz dahil)
-  toz yogunlugu D(t) = sembol bolgesinde (SM 7 px genisletilmis) tozlu kare ile toz kapali kopya farki > 20 olan piksel / |SM|,
-  eksi kodlama gurultusu tabani (5,3-6 sn ortalamasi; o karelerde iki dosya da kapak)
-Poster kalibrasyonu: her turda N <- N x medyan(D_kupa / D_poster) (D_kupa en buyugunun %20'sinden buyuk kareler; tur basina x0,5-x2,5) ve murekkep
-egrisi c(t) (piksel basina min(c, F), F = yerel toz birikimi) c += V_kupa - V_poster (monoton, son kare 1); N0 26000,
-   en fazla 5 tur, tolerans: her 0,5 sn V +-0,05 ve D +-%10 (D_kupa < en buyugunun %20'si ise mutlak %2 en buyuk).
+  alan basina toz yogunlugu D(t) = sembol bolgesinde (SM 7 px genisletilmis) tozlu kare ile toz kapali kopya farki > 20 olan
+  piksel / bolge pikseli (V6 karari 19 Eki: secenek a), eksi kodlama gurultusu tabani (5,3-6 sn; o karelerde iki dosya da kapak).
+  Kayit icin toz pikseli / sembol pikseli de tabloda (ust siniri bolge/sembol alani, kupa ~5, poster ~2,5).
+Poster kalibrasyonu: her turda N <- N x medyan(D_kupa / D_poster) (D_kupa en buyugunun %20'sinden buyuk kareler; tur basina x0,5-x2) ve murekkep
+egrisi c(t) (piksel basina min(c, F), F = yerel toz birikimi) c += V_kupa - V_poster (monoton, son kare 1); N0 65000 (yerel deneme),
+   en fazla 5 tur, tolerans: her 0,5 sn V +-0,10 ve D +-%10 (D_kupa < en buyugunun %20'si ise mutlak %2 en buyuk).
 Ilk/son kare = guncel kapak (Serdar ek): kupa = KUPA_ALT_YAZI V4 A_V4.jpg (kupalar canli kapaktan aynen; katmanlarin uretildigi
 kapakla kupa bolgesinde fark <= 3 kontrol edilir), poster = KAPAK_P2_78 BASLIK_A/KAPAK_A (tasan 40) ya da KAPAK/ (38).
 Kullanim: v6_kalibre.py <poster_kapak.jpg> <kupa video/ klasoru> <kupa guncel kapak jpg> <video6b.py> <cikti_dir> <is_dir>
@@ -39,25 +40,27 @@ def olc(F, FT, SM):
     d9 = np.abs(F[9].astype(np.int16) - fs).max(-1)
     gec = SM & (d9 >= 20)
     bol = cv2.dilate(SM.astype(np.uint8), np.ones((15, 15), np.uint8)) > 0
-    V, D = [], []
+    V, D, DS = [], [], []
     for i in range(len(F)):
         dt = np.abs(F[i].astype(np.int16) - fs).max(-1)
         V.append(float(np.clip(1 - dt[gec] / d9[gec], 0, 1).mean()))
         tz = np.abs(F[i].astype(np.int16) - FT[i].astype(np.int16)).max(-1) > 20
-        D.append(float((tz & bol).sum() / SM.sum()))
+        n_ = float((tz & bol).sum()); D.append(n_ / bol.sum()); DS.append(n_ / SM.sum())
     D = np.array(D); D = np.clip(D - D[160:].mean(), 0, None)    # kodlama gurultusu tabani (5,3-6 sn, iki dosya da kapak)
-    return np.array(V), D
+    DS = np.array(DS); DS = np.clip(DS - DS[160:].mean(), 0, None)
+    return np.array(V), D, DS, int(bol.sum())
 
 
-def tol(Vk, Dk, Vp, Dp):
+def tol(Vk, Dk, Vp, Dp, DSk, DSp):
     dm = Dk.max(); sat = {}
     for t in TS:
         i = min(len(Vk) - 1, int(round(t * FPS)))
         dv = abs(Vp[i] - Vk[i])
         dd_ok = abs(Dp[i] - Dk[i]) <= (0.10 * Dk[i] if Dk[i] >= 0.2 * dm else 0.02 * dm)
         sat[f'{t:g}'] = {'kare': i, 'kupa_gorunen': round(Vk[i], 3), 'poster_gorunen': round(Vp[i], 3),
-                         'kupa_toz_yogunlugu': round(Dk[i], 3), 'poster_toz_yogunlugu': round(Dp[i], 3),
-                         'gorunen_ok': dv <= 0.05, 'toz_ok': bool(dd_ok)}
+                         'kupa_toz_alan_basina': round(Dk[i], 3), 'poster_toz_alan_basina': round(Dp[i], 3),
+                         'kupa_toz_px_sembol_px': round(DSk[i], 3), 'poster_toz_px_sembol_px': round(DSp[i], 3),
+                         'gorunen_ok': dv <= 0.10, 'toz_ok': bool(dd_ok)}
     return sat, all(v['gorunen_ok'] and v['toz_ok'] for v in sat.values())
 
 
@@ -80,7 +83,7 @@ FK, pk = Q.kareler(K6); FKT, _ = Q.kareler(KT)
 oku = lambda p_: cv2.resize(np.asarray(Image.open(p_).convert('RGB')).astype(np.float32), (FK.shape[2], FK.shape[1]), interpolation=cv2.INTER_AREA)
 mk = np.clip((1 - oku(os.path.join(VD, 'k_mask_nosym.png')).mean(-1) / np.maximum(oku(os.path.join(VD, 'k_beyaz.png')).mean(-1), 1)) * 1.4, 0, 1)
 SMK = mk > 0.95
-Vk, Dk = olc(FK, FKT, SMK)
+Vk, Dk, DSk, bolk = olc(FK, FKT, SMK)
 R['kupa_v6'] = {'video': pk, 'N': 10400, 'tane_sigma': 0.45, 'sembol_piksel': int(SMK.sum()), 'kapak': os.path.basename(KK)}
 
 
@@ -107,30 +110,33 @@ def poster(N, c, ad):
         calis([PY, '-I', os.path.join(HERE, 'poster_video_v6.py'), KAPAK, m_, 'murekkep'], dict(V6_N=str(N), V6_C=cj, **ek))
     F, p = Q.kareler(mp); FT, _ = Q.kareler(mt)
     SM = np.asarray(Image.open(mp + '.sembol_maske.png')) > 127
-    V, D = olc(F, FT, SM)
-    return mp, V, D, int(SM.sum()), p
+    V, D, DS, bol = olc(F, FT, SM)
+    return mp, V, D, int(SM.sum()), p, DS, bol
 
 
 ease = lambda x: (lambda y: y * y * (3 - 2 * y))(min(1.0, max(0.0, x)))
 c = np.array([ease((k / (NB - 1) - 0.36) / 0.64) for k in range(NB)])   # baslangic: kupanin murekkep egrisi
-N = 26000
+N = 65000
 sec = Dk[:NB] >= 0.2 * Dk.max()
 tur = []
 for k in range(5):   # her tur: N (yogunluk orani, ust uste binme yuzunden dogrusal degil) ve c (gorunen oran farki) birlikte
-    mp, Vp, Dp, smp, pp = poster(N, c, f'p{k + 1}')
-    sat, ok = tol(Vk, Dk, Vp, Dp)
+    mp, Vp, Dp, smp, pp, DSp, bolp = poster(N, c, f'p{k + 1}')
+    sat, ok = tol(Vk, Dk, Vp, Dp, DSk, DSp)
     oran = float(np.median(Dk[:NB][sec] / np.maximum(Dp[:NB][sec], 1e-6)))
     tur.append({'tur': k + 1, 'N': N, 'ok': ok, 'yogunluk_orani_kupa_poster': round(oran, 3),
                 'en_buyuk_V_fark': round(float(np.abs(Vp[:NB] - Vk[:NB]).max()), 3)})
     print('TUR', tur[-1], flush=True)
     if ok:
         break
-    N = int(round(N * min(2.5, max(0.5, oran)) / 100.0) * 100)
+    if any(not v['toz_ok'] for v in sat.values()):
+        N = int(round(N * min(2.0, max(0.5, oran)) / 100.0) * 100)
     c = np.clip(c + (Vk[:NB] - Vp[:NB]), 0, 1); c = np.maximum.accumulate(c); c[-1] = 1.0
     c = np.maximum.accumulate(np.convolve(np.pad(c, 2, mode='edge'), np.ones(5) / 5, mode='valid')); c[-1] = 1.0
 R['kalibrasyon_turlari'] = tur
 R['parcacik_hesabi'] = {'kupa_N': 10400, 'kupa_sembol_px': int(SMK.sum()), 'poster_sembol_px': smp, 'alan_orani': round(smp / SMK.sum(), 2),
-                        'N': tur[-1]['N'], 'not': 'N her turda N x medyan(D_kupa / D_poster) ile ayarlandi (ust uste binme: dogrusal degil)'}
+                        'kupa_bolge_px': bolk, 'poster_bolge_px': bolp, 'bolge_alan_orani': round(bolp / bolk, 2),
+                        'N': tur[-1]['N'], 'N_kupa_orani': round(tur[-1]['N'] / 10400, 2),
+                        'not': 'alan basina yogunluk esitlendi; N her turda N x medyan(D_kupa / D_poster) (ust uste binme: dogrusal degil)'}
 P6 = os.path.join(OUT, 'CANCER_LIBRA_ilan_video_v6.mp4')
 os.replace(mp, P6); ic = json.load(open(mp + '.ic.json')); SMP = np.asarray(Image.open(mp + '.sembol_maske.png')) > 127
 FP, pp = Q.kareler(P6)
@@ -142,7 +148,7 @@ tb = os.path.join(IS, '_t.mp4')
 subprocess.run(['ffmpeg', '-v', 'error', '-y', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-s', f'{kap.shape[1]}x{kap.shape[0]}', '-r', '30',
                 '-i', '-', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '0', tb], input=kap.tobytes(), check=True)
 R['poster_v6'].update(taban_420=Q.fk(Q.kareler(tb)[0][0], kap), ilk_kare_fark=Q.fk(FP[0], kap), son_kare_fark=Q.fk(FP[-1], kap),
-                      kapak=os.path.basename(KAPAK))
+                      kapak=os.path.basename(KAPAK), kapak_klasoru=os.environ.get('KAPAK_KLASORU', ''))
 pv = R['poster_v6']; kv = R['kupa_v6']
 R['kapi'] = {'kupa_10400_045': R['kupa_kod_farki'] and pk['kare'] == 180 and pk['olcu'] == '1080x1080',
              'poster_180_kare_1440x1080': pp['kare'] == 180 and pp['olcu'] == '1440x1080' and not pp['ses_akisi'],

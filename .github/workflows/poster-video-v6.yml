@@ -2,14 +2,15 @@ name: poster-video-v6
 # V6 ORNEKLERI (19 Eki 2026, Serdar). Etsy API KULLANILMAZ; Etsy'ye ve Metricool'a YAZMA YOK. Toplu uretim yok.
 # A) kupa V6 = kupa-orchard video6b.py (cift.py Cancer Libra Emily James katmanlari), yalniz N 10400 ve sigma 0.45 (referans).
 # B) poster V6 = sosyal/poster_video/poster_video_v6.py, sosyal/poster_video/v6_kalibre.py ile kupaya gore ayarlanir
-#    (parcacik sayisi: sembol alanina gore toz yogunlugu; murekkep egrisi: gorunen oran). Cikti: .../POSTER_VIDEO_ORNEK_20261019/V6/.
+#    (parcacik sayisi: alan basina toz yogunlugu, V6 karari secenek a; murekkep egrisi: gorunen oran). Cikti: .../POSTER_VIDEO_ORNEK_20261019/V6/.
+# Ilk/son kare = ilanin guncel kapagi: kupa = KUPA_ALT_YAZI_20261019/V4/A_V4.jpg; poster = KAPAK_P2_78 BASLIK_A/KAPAK_A (varsa) yoksa KAPAK/.
 permissions:
   contents: write   # yalniz poster-video-onizleme dalina kucuk onizleme
 on:
   workflow_dispatch:
     inputs:
       kapak:
-        description: 'KAPAK/ altindaki kapak dosyasi'
+        description: 'KAPAK_P2_78 kapak dosyasi (once BASLIK_A/KAPAK_A, yoksa KAPAK/)'
         default: 4570143815_CANCER_LIBRA.jpg
 jobs:
   uret:
@@ -17,7 +18,8 @@ jobs:
     timeout-minutes: 60
     env:
       O: gdrive:ASTROLOVE/TEMP/POSTER_VIDEO_ORNEK_20261019/V6
-      K: gdrive:ASTROLOVE/TEMP/KAPAK_P2_78_20261019/KAPAK
+      K: gdrive:ASTROLOVE/TEMP/KAPAK_P2_78_20261019
+      KUPA_KAPAK: gdrive:ASTROLOVE/TEMP/KUPA_ALT_YAZI_20261019/V4/A_V4.jpg
       KAPAK: ${{ inputs.kapak }}
     steps:
     - uses: actions/checkout@v4
@@ -50,9 +52,15 @@ jobs:
         T0=$(date +%s)
         (cd _w/k/kupa_orchard && python3 -I kod/cift.py Cancer Libra Emily James "My favorite place is with you" ../../sem ../../kupa) > _w/cift.log 2>&1; CR=$?
         tail -2 _w/cift.log; echo "::warning::KUPA KATMANLARI rc=$CR $(( $(date +%s) - T0 )) sn"
-        rclone copyto "$K/$KAPAK" _w/kapak.jpg -q || { echo "::error::kapak yok"; exit 1; }
-        python3 -I sosyal/poster_video/v6_kalibre.py _w/kapak.jpg _w/kupa/video _w/kupa/galeri/01_Orange_Blossom_kapak.jpg \
-          _w/k/kupa_orchard/kod/video6b.py _o _w/is | tee _w/qc.txt; QC=${PIPESTATUS[0]}
+        KAPAK_KLASORU=""
+        for d in BASLIK_A/KAPAK_A KAPAK; do
+          rclone lsf "$K/$d" --files-only --include "$KAPAK" -q | grep -qx "$KAPAK" && { KAPAK_KLASORU=$d; break; }
+        done
+        [ -n "$KAPAK_KLASORU" ] && rclone copyto "$K/$KAPAK_KLASORU/$KAPAK" _w/kapak.jpg -q || { echo "::error::kapak yok"; exit 1; }
+        export KAPAK_KLASORU; echo "::warning::POSTER KAPAGI KAPAK_P2_78_20261019/$KAPAK_KLASORU/$KAPAK"
+        rclone copyto "$KUPA_KAPAK" _w/A_V4.jpg -q || { echo "::error::kupa kapagi A_V4 yok"; exit 1; }
+        python3 -I sosyal/poster_video/v6_kalibre.py _w/kapak.jpg _w/kupa/video _w/A_V4.jpg \
+          _w/k/kupa_orchard/kod/video6b.py _o _w/is _w/kupa/galeri/01_Orange_Blossom_kapak.jpg | tee _w/qc.txt; QC=${PIPESTATUS[0]}
         grep -E '^\{|TUR|TABLO|SONUC' _w/qc.txt | sed 's/^/::warning::QC /' | cut -c1-3000
         echo "::warning::SURE $(( $(date +%s) - T0 )) sn"
         rclone copy _o "$O" -q
