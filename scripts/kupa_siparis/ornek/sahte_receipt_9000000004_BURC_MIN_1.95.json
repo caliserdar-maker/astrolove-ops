@@ -1,0 +1,23 @@
+{
+ "name": "Test Alici",
+ "first_line": "1 Test Street",
+ "city": "Berlin",
+ "zip": "10115",
+ "country_iso": "DE",
+ "receipt_id": 9000000004,
+ "transactions": [
+  {
+   "transaction_id": 8,
+   "sku": "KUPA-SAGITTARIUS_SAGITTARIUS-03-11",
+   "quantity": 1,
+   "title": "Orchard couple mug",
+   "variations": [
+    {
+     "property_id": 54,
+     "formatted_name": "Personalization",
+     "formatted_value": "Maximilian\nJosephine\nForever my favorite adventure!"
+    }
+   ]
+  }
+ ]
+}

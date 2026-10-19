@@ -1,0 +1,95 @@
+{
+ "results": [
+  {
+   "first_line": "1 Test Street",
+   "city": "Berlin",
+   "zip": "10115",
+   "country_iso": "DE",
+   "receipt_id": 9000000005,
+   "name": "Test Alici",
+   "transactions": [
+    {
+     "transaction_id": 11,
+     "sku": "KUPA-CANCER_LIBRA-01-11",
+     "quantity": 1,
+     "title": "Orchard couple mug",
+     "variations": [
+      {
+       "property_id": 54,
+       "formatted_name": "Personalization",
+       "formatted_value": "Emily\nJames\nMy favorite place is with you"
+      }
+     ]
+    },
+    {
+     "transaction_id": 12,
+     "sku": "KUPA-SAGITTARIUS_SAGITTARIUS-03-15",
+     "quantity": 1,
+     "title": "Orchard couple mug",
+     "variations": [
+      {
+       "property_id": 54,
+       "formatted_name": "Personalization",
+       "formatted_value": "Maximilian\nJosephine\n"
+      }
+     ]
+    },
+    {
+     "transaction_id": 13,
+     "sku": "KUPA-CANCER_LIBRA-02-11",
+     "quantity": 1,
+     "title": "Orchard couple mug",
+     "variations": [
+      {
+       "property_id": 54,
+       "formatted_name": "Personalization",
+       "formatted_value": "Christopher\nJames"
+      }
+     ]
+    },
+    {
+     "transaction_id": 16,
+     "sku": "POD-CAN_LIB-DB-5x7",
+     "quantity": 1,
+     "variations": []
+    }
+   ]
+  },
+  {
+   "first_line": "1 Test Street",
+   "city": "Berlin",
+   "zip": "10115",
+   "country_iso": "DE",
+   "receipt_id": 9000000006,
+   "name": "Deneme Kisi",
+   "transactions": [
+    {
+     "transaction_id": 14,
+     "sku": "KUPA-AQUARIUS_AQUARIUS-01-11",
+     "quantity": 1,
+     "title": "Orchard couple mug",
+     "variations": [
+      {
+       "property_id": 54,
+       "formatted_name": "Personalization",
+       "formatted_value": "Maximilian\nJosephine\nForever my favorite adventure!"
+      }
+     ]
+    },
+    {
+     "transaction_id": 15,
+     "sku": "KUPA-CANCER_LIBRA-01-15",
+     "quantity": 1,
+     "title": "Orchard couple mug",
+     "variations": [
+      {
+       "property_id": 513,
+       "formatted_name": "Style",
+       "formatted_value": "Orange Blossom"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
