@@ -5,7 +5,7 @@ name: kupa-taslak
 # mod=yaz : ETSY'YE YAZAR, yalniz Serdar'in o kosuya ozel onayiyla: cift basina 1 YENI taslak (8 Orchard stili x 11/15 oz
 #           = 16 urun, 14 gorsel + video, stil gorselleri, kisisellestirme, nitelikler) + geri okuma + salt son okuma.
 #           Yeni bolum/kargo/iade kaydi acilmaz. Eski taslak 4597843405'e yazma yok. PATCH yalniz acil state=inactive.
-# Gorsel: Drive ASTROLOVE/KUPA_ORCHARD78/<hedef>/<CIFT>/{galeri/01-14_*.jpg, video/*.mp4}
+# Metin: kupa-orchard dali kupa_orchard/ilan/KUPA78_ORCHARD_METIN.csv (metin_ref). Gorsel: Drive ASTROLOVE/KUPA_ORCHARD78/<hedef>/<CIFT>/{galeri/01-14_*.jpg, video/*.mp4}
 # Rapor: Drive TEMP/KUPA_ORCHARD_TASLAK_20261019/ (DURUM.json: cift -> listing_id). Etsy kilidi: kilit_bekle.py. Kota tabani 10.
 permissions:
   actions: read
@@ -16,7 +16,7 @@ on:
       mod: { description: "oku | kuru | yaz", required: true, default: "kuru" }
       ciftler: { description: "TUMU ya da virgul/bosluk ayrimli CIFT (alfabetik anahtar, orn. CANCER_LIBRA)", required: true, default: "CANCER_LIBRA" }
       hedef: { description: "Drive ASTROLOVE/KUPA_ORCHARD78/<hedef>", required: true, default: "ORCHARD78_20261019" }
-      metin: { description: "Drive yolu: KUPA78_ORCHARD_METIN.csv", required: true, default: "ASTROLOVE/KUPA_ORCHARD78/KUPA78_ORCHARD_METIN.csv" }
+      metin_ref: { description: "kupa-orchard dalinda commit: kupa_orchard/ilan/KUPA78_ORCHARD_METIN.csv", required: true, default: "847ffec" }
 env:
   O: "gdrive:ASTROLOVE/TEMP/KUPA_ORCHARD_TASLAK_20261019"
 jobs:
@@ -31,6 +31,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: cd main && python3 scripts/etsy/kilit_bekle.py
+      - uses: actions/checkout@v4
+        with: { ref: kupa-orchard, path: orchard, fetch-depth: 0, sparse-checkout: kupa_orchard/ilan }
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - name: Kurulum
@@ -57,7 +59,9 @@ jobs:
           mkdir -p _work _out _img
           L=$(cd main/scripts/etsy && python3 -c 'import os, kupa_taslak as k; print(" ".join(k.cift_listesi(os.environ["CIFTLER"])))')
           echo "CIFT_LISTE=$L" >> "$GITHUB_ENV"; echo "cift: $(echo $L | wc -w) | $L"
-          rclone copyto "gdrive:${{ inputs.metin }}" _work/KUPA78_ORCHARD_METIN.csv || { [ "${{ inputs.mod }}" = oku ] && echo "metin yok (oku)"; [ "${{ inputs.mod }}" = oku ]; }
+          git -C orchard show "${{ inputs.metin_ref }}:kupa_orchard/ilan/KUPA78_ORCHARD_METIN.csv" > _work/KUPA78_ORCHARD_METIN.csv
+          N=$(python3 -c 'import csv,sys; print(len(list(csv.DictReader(open(sys.argv[1], encoding="utf-8")))))' _work/KUPA78_ORCHARD_METIN.csv)
+          echo "metin ${{ inputs.metin_ref }}: $N satir"; [ "$N" = 78 ] || { echo "::error::metin satiri $N (78 olmali)"; exit 1; }
       - name: Galeri + video (kuru, yaz)
         if: ${{ inputs.mod != 'oku' }}
         run: |
