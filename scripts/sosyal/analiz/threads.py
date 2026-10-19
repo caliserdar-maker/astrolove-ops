@@ -3,7 +3,8 @@
 Uclar ve metrik adlari data/sosyal/kaynak/metricool/METRICOOL_SWAGGER.json'dan:
   /v2/analytics/timelines  metric aciklamasi "For Threads (posts metrics): count, views, likes, replies, reposts,
                            engagement, quotes, interactions, shares". Threads icin HESAP metrigi (takipci vb.) belgede YOK;
-                           network listesinde 'threads' yazmiyor. Belgesiz adlar (TAKIPCI_ADAY) DENEME; yanit ne derse o.
+                           network listesinde 'threads' yazmiyor. 1. kosu (19 Eki 11:42 UTC): subject zorunlu, gecerli
+                           [posts, account]; subject=account icin 400 yanitindaki gecerli liste HESAP_METRIK (belgede yok).
   /v2/analytics/aggregation  ayni metrikler, donem toplami (timelines ile capraz kontrol)
   /v2/analytics/posts/threads  ozet "Download a CSV with the list of threads posts"; sema ThreadsPost: publishedDate, id,
                            text, mediaType, shortCode, isQuotePost, permalink, views, likes, replies, reposts, quotes,
@@ -37,9 +38,8 @@ PLAN_BAS = date(2026, 10, 12)
 YOK = 'erisilemedi'
 TL = '/v2/analytics/timelines'
 METRIK = ['count', 'views', 'likes', 'replies', 'reposts', 'quotes', 'shares', 'interactions', 'engagement']   # belgede
-TAKIPCI_ADAY = ['followers', 'followers_count', 'delta_followers', 'followers_delta_count', 'followers_gained',
-                'followers_lost', 'profile_views']                                                            # belgesiz
-SUBJ = [('posts', {'subject': 'posts'}), ('yok', {})]
+HESAP_METRIK = ['followers_count', 'delta_followers', 'views', 'likes', 'replies', 'reposts', 'quotes']   # 400 yanitindan
+SERI = [(m, 'account', False) for m in HESAP_METRIK] + [(m, 'posts', True) for m in METRIK]
 # gonderi tablosu: (sutun, ThreadsPost alani)
 GON = [('goruntulenme', 'views'), ('begeni', 'likes'), ('yanit', 'replies'), ('yeniden_paylasim', 'reposts'),
        ('alinti', 'quotes'), ('paylasim', 'shares'), ('engagement', 'engagement')]
@@ -194,47 +194,38 @@ def main():
     j = guvenli(mc, 'catalogs_threads_scopes', '/v2/analytics/catalogs/threads/scopes', {}, out)
     log(f'SCOPES threads: {json.dumps(mpb.veri(j), ensure_ascii=False)[:400] if j is not None else "HTTP hata"}')
 
-    # 1) timelines: belgedeki gonderi metrikleri (subject=posts, olmazsa subject yok) + belgesiz takipci adaylari
+    # 1) timelines: subject=account (hesap; adlar 1. kosu 400 yanitindan) + subject=posts (belgedeki posts metrics)
     S, KOL = {}, []
-    for m in METRIK + TAKIPCI_ADAY:
-        belge = m in METRIK
-        denemeler = SUBJ if belge else [('account', {'subject': 'account'}), ('yok', {})]
-        for sj, ek in denemeler:
-            j = guvenli(mc, f'timeline_{m}_{sj}', TL, dict(aralik, metric=m, **ek), out)
-            ss = seriler(j) if j is not None else {}
-            durum = 'HTTP hata' if j is None else ('bos yanit' if not ss or not any(ss.values()) else 'veri var')
-            log(f'TIMELINE {m} subject={sj} ({"belgede" if belge else "belgede YOK, deneme"}): {durum}; '
-                + '; '.join(f'{k}: {len(g)} gun, toplam {sayi(sum(g.values()))}' for k, g in ss.items()))
-            kaynak.append(['TH_HESAP_GUNLUK.csv', m, TL, f'network=threads metric={m} subject={sj}',
-                           'evet (posts metrics)' if belge else 'hayir (deneme)', durum])
-            if durum == 'veri var':
-                for k, g in ss.items():
-                    c = m if len(ss) == 1 else f'{m}[{k}]'
-                    c = f'{c}__subject_{sj}'
-                    S[c] = g; KOL.append(c)
-                break
-    for m in METRIK + TAKIPCI_ADAY:
-        if not any(c.split('[')[0].split('__')[0] == m for c in KOL):
-            KOL.append(m); S[m] = None
+    for m, sj, belge in SERI:
+        j = guvenli(mc, f'timeline_{sj}_{m}', TL, dict(aralik, metric=m, subject=sj), out)
+        ss = seriler(j) if j is not None else {}
+        durum = 'HTTP hata' if j is None else ('bos yanit' if not ss or not any(ss.values()) else 'veri var')
+        c = f'{sj}.{m}'
+        g = {}
+        for k, v in ss.items():
+            for d, x in v.items():
+                g[d] = g.get(d, 0) + x
+        log(f'TIMELINE {c} ({"belgede" if belge else "belgede YOK, 400 yanitindaki liste"}): {durum}; {len(g)} gun'
+            + (f', ilk {min(g)}, son {max(g)}, toplam {sayi(sum(g.values()))}' if g else '') + f'; seriler {sorted(ss)}')
+        kaynak.append(['TH_HESAP_GUNLUK.csv', c, TL, f'network=threads metric={m} subject={sj}',
+                       'evet (posts metrics)' if belge else 'hayir (400 yanitindaki gecerli deger)', durum])
+        S[c] = g; KOL.append(c)
     yaz_csv(out, 'TH_HESAP_GUNLUK.csv', ['tarih'] + KOL + ['kaynak'],
-            [[str(d)] + [sayi(S[c].get(d)) if S[c] and d in S[c] else YOK for c in KOL]
+            [[str(d)] + [sayi(S[c].get(d)) if d in S[c] else YOK for c in KOL]
              + [f'{TL} network=threads; okuma {okuma}'] for d in gunler])
-
-    # aggregation (donem toplami, capraz kontrol)
-    ag = []
-    for m in METRIK + TAKIPCI_ADAY[:2]:
-        for sj, ek in (SUBJ if m in METRIK else [('account', {'subject': 'account'})]):
-            j = guvenli(mc, f'aggregation_{m}_{sj}', '/v2/analytics/aggregation', dict(aralik, metric=m, **ek), out)
-            v = mpb.veri(j) if j is not None else None
-            v = v if isinstance(v, (int, float)) else (v.get('value') if isinstance(v, dict) else None)
-            tl = next((sum(S[c].values()) for c in KOL if S[c] and c.split('[')[0].split('__')[0] == m), None)
-            ag.append([f'{BAS} - {BUGUN}', m, sj, 'belgede' if m in METRIK else 'belgesiz', sayi(v), sayi(tl),
-                       '/v2/analytics/aggregation | /v2/analytics/timelines toplam', okuma])
-            log(f'AGGREGATION {m} subject={sj}: {ag[-1][4]} | timelines toplam {ag[-1][5]}')
-            if j is not None:
-                break
-    yaz_csv(out, 'TH_HESAP_TOPLAM.csv', ['donem', 'metrik', 'subject', 'belge', 'aggregation', 'timelines_toplam', 'kaynak',
-                                         'okuma'], ag)
+    tp = []
+    for c in KOL:
+        g = S[c]
+        son_g = max(g) if g else None
+        tp.append([f'{BAS} - {BUGUN}', c, len(g), str(min(g)) if g else YOK, str(son_g) if g else YOK,
+                   sayi(g[son_g]) if g else YOK, sayi(sum(g.values())) if g else YOK, f'{TL}; okuma {okuma}'])
+        log(f'TOPLAM {c}: gun {tp[-1][2]}, ilk {tp[-1][3]}, son {tp[-1][4]} = {tp[-1][5]}, toplam {tp[-1][6]}')
+    yaz_csv(out, 'TH_HESAP_TOPLAM.csv', ['donem', 'seri', 'veri_gunu', 'ilk_gun', 'son_gun', 'son_gun_degeri', 'toplam',
+                                         'kaynak'], tp)
+    # aggregation: 1. kosuda yalniz engagement destekli (digerleri 400 NotImplemented, ThreadsAnalyticsExtractor)
+    j = guvenli(mc, 'aggregation_posts_engagement', '/v2/analytics/aggregation', dict(aralik, metric='engagement',
+                subject='posts'), out)
+    log(f'AGGREGATION posts/engagement: {json.dumps(mpb.veri(j), default=str)[:200] if j is not None else "HTTP hata"}')
 
     # 3) scheduler (12 Eki - bugun)
     ps, t = {}, datetime.combine(PLAN_BAS, datetime.min.time())
@@ -309,14 +300,15 @@ def main():
     # timelines gunluk degeri gonderi tablosunun yayin gunu toplamina esit mi (olcum; yorum yok)
     kars = []
     for sut, f in GON[:6]:
-        c = next((c for c in KOL if S[c] and c.split('[')[0].split('__')[0] == f), None)
-        for d in gunler:
-            if str(d) < str(PLAN_BAS):
-                continue
-            tv = S[c].get(d) if c else None
-            gv = gun_top[str(d)].get(sut)
-            kars.append([str(d), f, sayi(tv) if tv is not None else YOK, sayi(gv) if gv is not None else 0,
-                         '' if tv is None else ('esit' if abs((tv or 0) - (gv or 0)) < 1e-9 else 'farkli')])
+        for sj in ('posts', 'account'):
+            c = f'{sj}.{f}'
+            for d in gunler:
+                if str(d) < str(PLAN_BAS):
+                    continue
+                tv = (S.get(c) or {}).get(d)
+                gv = gun_top[str(d)].get(sut)
+                kars.append([str(d), c, sayi(tv) if tv is not None else YOK, sayi(gv) if gv is not None else 0,
+                             '' if tv is None else ('esit' if abs(tv - (gv or 0)) < 1e-9 else 'farkli')])
     yaz_csv(out, 'TH_TIMELINE_GONDERI_KARSILASTIRMA.csv', ['tarih', 'metrik', 'timelines_gunluk', 'gonderi_yayin_gunu_toplami',
                                                             'sonuc'], kars)
     log(f'KARSILASTIRMA timelines vs gonderi yayin gunu: {dict(Counter(r[4] or "timeline yok" for r in kars))}')
