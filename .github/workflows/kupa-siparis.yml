@@ -110,7 +110,7 @@ jobs:
           SAHTE: ${{ inputs.sahte_receipt }}
           HEDEF: ${{ inputs.hedef || 'KUPA_SIPARIS' }}
         run: |
-          set -uo pipefail
+          set +e -uo pipefail     # FAIL kalem cikis 1 verir; Drive/STATE adimlari yine kosar, koşu sonda kirmizi (Serdar'a bildirim)
           args=(--kod _kod/kupa_orchard --cikti _out --drive "gdrive:ASTROLOVE/$HEDEF")
           if [ -n "${SAHTE:-}" ]; then args+=(--receipt-json "$SAHTE")
           elif [ -n "${RID:-}" ]; then [[ "$RID" =~ ^[0-9]+$ ]] || { echo "receipt yalniz rakam"; exit 1; }; args+=(--receipt-id "$RID" --state _work/STATE.csv)
