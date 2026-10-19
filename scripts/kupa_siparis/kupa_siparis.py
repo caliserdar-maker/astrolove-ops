@@ -14,9 +14,11 @@ Akis (her KUPA- transaction'i icin):
   3) Cikti: <cikti>/<receipt>/<transaction>/ BASKI_*.png (11 oz 2700x1050 | 15 oz 2700x1140, 300 dpi),
      ONIZLEME_*.jpg, PRINTFUL_TASLAK.json (confirm=false yuku; GONDERILMEZ), OZET.json, MUSTERI_MESAJI_TASLAK.md
      (kupa_orchard/mesaj/MUSTERI_MESAJLARI.md sablonlari; yalniz TASLAK, gonderimi Serdar yapar), FAIL'de SORU.md.
+     PASS/GOZ'de ELLE_SIPARIS.txt: Printful siparisini elle vermek icin urun, varyant, adet, baski dosyasi, kontrol metni
+     ve kopyalanacak alici adresi (Serdar 19.10: Printful siparisi simdilik ELLE; cron ve e-posta yok). Yalniz Drive'a.
      --drive verilirse rclone ile <drive>/<receipt>/<transaction>/ (ASTROLOVE/KUPA_SIPARIS).
-  Siparis BEKLETILMEZ (Serdar 19.10): kapilar PASS/GOZ ise baski hemen hazirlanir. Printful'a gonderim her siparis
-  icin Serdar'in acik onayiyla, ayri adimda. Log HERKESE ACIK (public depo): receipt/transaction yerine opak kod,
+  Siparis BEKLETILMEZ (Serdar 19.10): kapilar PASS/GOZ ise baski hemen hazirlanir. Printful'a API ile gonderim YOK;
+  siparisi Serdar ELLE_SIPARIS.txt ile Printful panelinden verir. Log HERKESE ACIK (public depo): receipt/transaction yerine opak kod,
   isim/adres/mesaj loga yazilmaz; ayrinti yalniz Drive'da.
   Baski, kupa_orchard/kod/cift.py 1. ve 1b. bolumuyle birebir ayni cagridir (ayni girdi -> ayni piksel).
   kontrol_burc.py 8 stilin 11 oz dosyasini istedigi icin 8 stil paralel uretilir; kapi yalniz siparis stilinin satirina bakar.
@@ -279,6 +281,44 @@ def printful_yuk(rc, t, s, png):
                        "_printfile_id": p["printfile_id"], "_boyut": "x".join(map(str, p["boyut"]))}]}
 
 
+def elle_siparis_yaz(d, rc, t, s, m, png, durum):
+    """Printful panelinde elle siparis icin tek sayfa (yalniz Drive; public loga yazilmaz)."""
+    p = PRINTFUL[s["boy"]]
+    w, h = p["boyut"]
+    sat = [f"ELLE SIPARIS: receipt {rc.get('receipt_id')} / transaction {t.get('transaction_id')}",
+           f"Durum: {durum}" + (" (ONCE BASKI DOSYASINA BAK: dala 1,1-1,2 mm; ONIZLEME ve BASKI gozle kontrol)"
+                                 if durum == "GOZ" else ""),
+           "",
+           "URUN",
+           f"  White Glossy Mug {s['boy']} oz (Printful variant {p['variant_id']})",
+           f"  Adet: {int(t.get('quantity') or 1)}",
+           f"  Stil: {s['no']} {s['stil_ad']}",
+           f"  Cift: {s['burc1']} + {s['burc2']} ({s['cift']})",
+           "",
+           "BASKI DOSYASI",
+           f"  {png.name}",
+           f"  {w}x{h} px, 300 dpi",
+           "",
+           "KONTROL (baskidaki metin)",
+           f"  Isim 1: {m['isim1']}",
+           f"  Isim 2: {m['isim2']}",
+           f"  Mesaj: {m['mesaj']}" + (" (musteri bos birakti: varsayilan)" if m["mesaj_bos"] else ""),
+           "",
+           "ALICI ADRESI (kopyala)",
+           f"  Ad: {rc.get('name') or ''}",
+           f"  Adres 1: {rc.get('first_line') or ''}",
+           f"  Adres 2: {rc.get('second_line') or ''}",
+           f"  Posta kodu: {rc.get('zip') or ''}",
+           f"  Sehir: {rc.get('city') or ''}",
+           f"  Eyalet: {rc.get('state') or ''}",
+           f"  Ulke: {rc.get('country_iso') or ''}",
+           "",
+           "NOT",
+           "  E-posta ve telefon BOS birakilir (Printful aliciya bildirim gondermesin; Etsy zaten bildiriyor).",
+           "  Musteri mesaji taslagi: MUSTERI_MESAJI_TASLAK.md (gonderimi Serdar yapar)."]
+    (d / "ELLE_SIPARIS.txt").write_text("\n".join(sat) + "\n", encoding="utf-8")
+
+
 def musteri_mesaji(kap):
     """Musterinin metni duzeltmesi gereken FAIL (metin kapisi)."""
     return any(v[0] == "FAIL" for k, v in kap.items() if k in METIN_KAPI)
@@ -340,7 +380,8 @@ def mesaj_taslak(d, kod, rc, t, s, m, kap, sebep, durum):
 def drive_yaz(d, hedef, rid):
     r = subprocess.run(["rclone", "copy", str(d), f"{hedef}/{rid}/{d.name}", "-q", "--include", "BASKI_*.png",
                         "--include", "ONIZLEME_*.jpg", "--include", "PRINTFUL_TASLAK.json", "--include", "OZET.json",
-                        "--include", "SORU.md", "--include", "MUSTERI_MESAJI_TASLAK.md", "--include", "kontrol/burc_mesafe.txt"],
+                        "--include", "SORU.md", "--include", "MUSTERI_MESAJI_TASLAK.md", "--include", "ELLE_SIPARIS.txt",
+                        "--include", "kontrol/burc_mesafe.txt"],
                        capture_output=True, text=True)
     return r.returncode == 0, r.stderr[-300:]
 
@@ -391,7 +432,8 @@ def kalem_isle(kod, rc, t, d):
             ozet.update(durum="GOZ" if any(v[0] == "GOZ" for v in kap.values()) else "PASS", baski=png.name, onizleme=jpg.name,
                         piksel=piksel(png), printful={"variant_id": PRINTFUL[s["boy"]]["variant_id"],
                                                       "printfile_id": PRINTFUL[s["boy"]]["printfile_id"]},
-                        printful_gonderim="Serdar onayi bekliyor (her siparis ayri onay)")
+                        printful_gonderim="ELLE (Serdar, ELLE_SIPARIS.txt)")
+            elle_siparis_yaz(d, rc, t, s, m, png, ozet["durum"])
         else:
             ozet.update(durum="FAIL", musteri_mesaji_gerekiyor=musteri_mesaji(kap))
             soru_yaz(d, rc, t, kap, musteri=ozet["musteri_mesaji_gerekiyor"])

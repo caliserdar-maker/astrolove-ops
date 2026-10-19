@@ -3,7 +3,7 @@ name: kupa-siparis
 # Orchard kupa siparisi -> Printful baski dosyasi (Serdar 19 Eki 2026). scripts/kupa_siparis/kupa_siparis.py
 # Etsy'ye YAZMAZ (yalniz GET), musteriye DOKUNMAZ, Printful'a GONDERMEZ: kapilar PASS/GOZ ise baski + onizleme +
 # PRINTFUL_TASLAK.json (confirm=false yuku) + musteri mesaji TASLAGI Drive ASTROLOVE/KUPA_SIPARIS/<receipt>/<transaction>/.
-# Siparis BEKLETILMEZ (Serdar 19.10); Printful'a gonderim her siparis icin Serdar'in acik onayiyla, ayri adimda.
+# Siparis BEKLETILMEZ (Serdar 19.10). Printful siparisini Serdar ELLE verir (ELLE_SIPARIS.txt); API gonderimi ve cron YOK.
 # pod-order-router KUPA- SKU'larini POD disi sayip atlar (parse_tx); bu akis ondan bagimsizdir.
 # Kod: kupa-orchard dali kupa_orchard/ (baski_kes, kontrol_burc, mesaj sablonlari). Sembol: kupa-printful-sonuc (yalniz okunur).
 # printful-kupa-mockup.yml ve printful-kupa-tasarim.yml ile ILGISI YOK; onlar calistirilmaz.
