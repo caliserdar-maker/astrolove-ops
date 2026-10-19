@@ -7,6 +7,10 @@ permissions:
   contents: read
 on:
   workflow_dispatch:
+    inputs:
+      mod:
+        description: "analiz (19 Eki tespit) | karsilastir (ChatGPT PIEV01 ayrismasi: subject posts/account, /stats/timeline PIEV, takvim 19-25 Eki)"
+        default: analiz
 jobs:
   oku:
     runs-on: ubuntu-latest
@@ -39,7 +43,9 @@ jobs:
           python3 -c "import json;print('::add-mask::'+json.load(open('_work/kimlik.json'))['userToken'])"
           mkdir -p _work/onceki
           rclone copy "gdrive:ASTROLOVE/TEMP/PINTEREST_20261017" _work/onceki --include "HAM_*.json" -q || echo "onceki okuma yok"
-          python3 scripts/sosyal/analiz/pinterest.py _work/mc.json _out _work/onceki | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json --sir-json _work/kimlik.json "$GITHUB_STEP_SUMMARY"
+          if [ "${{ inputs.mod }}" = "karsilastir" ]; then BETIK="scripts/sosyal/analiz/pinterest_karsilastir.py _work/mc.json _out"
+          else BETIK="scripts/sosyal/analiz/pinterest.py _work/mc.json _out _work/onceki"; fi
+          python3 $BETIK | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json --sir-json _work/kimlik.json "$GITHUB_STEP_SUMMARY"
           rc=${PIPESTATUS[0]}
           mkdir -p _work/engel
           for f in _out/*; do
