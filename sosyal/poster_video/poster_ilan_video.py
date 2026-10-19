@@ -21,7 +21,12 @@ tozla birlikte olusur: her sembol pikselinin varis zamani = oraya inen ilk parca
 varistan), piksel varistan sonra FADE (0.06 = ~0.3 sn) icinde kapak rengine gelir, varis olmadan gorunmez; parcacik indigi
 pikselde FADE boyunca durur, sonra sembole karisir. Kontak 0-6 sn her 0,5 sn; cikti <ad>_ilan_video_v2.mp4, QC.json.
 Poster oran kapisi 1.20-1.35 (kapaktaki poster ~4:5; 1. ornekte 1.273 olculdu).
-Kullanim: python3 -I poster_ilan_video.py <kapak.jpg> <cikti_dizini> <ad> [--v2]"""
+v3 (--v3, Serdar 19 Eki; v2'nin tum kurallari + iki duzeltme): (1) sembol tozla ayni hizda ~2,5 sn'de duzgun olusur: her sembol
+pikseline kaynaklara (iki glif + sonsuzluk) uzakligina gore (yumusak gurultulu) sira verilir, sira 2,2-4,7 sn araligina esit
+dagitilir (gorunen oran dogrusal artar); her parcacik hedef pikselin zamaninda iner (kalkis da ayni araliga yayilir); piksel
+varistan sonra 0,25 sn'de tam renk. (2) zarif toz: boy cesitli (%88 cok kucuk, %12 biraz buyuk), renk karisimi (sembolun altin
+tonlari %50, acik sampanya %30, parlak vurgu %20), yari saydam, yumusak parilti ve titresim (2,5-6 Hz), yollar genis yayili.
+Kullanim: python3 -I poster_ilan_video.py <kapak.jpg> <cikti_dizini> <ad> [--v2 | --v3]"""
 import json, os, subprocess, sys, time
 import numpy as np, cv2
 from PIL import Image, ImageDraw, ImageFont
@@ -31,10 +36,12 @@ sys.path.insert(0, os.path.join(HERE, '..', 'pin_v6'))
 import pin_uret as PU
 
 KAPAK, OUT, AD = sys.argv[1:4]
-V2 = '--v2' in sys.argv[4:]
+V3 = '--v3' in sys.argv[4:]
+V2 = '--v2' in sys.argv[4:] or V3                                     # v3, v2'nin kurallarini (toz 5 kat, sonsuzluk, genis inpaint) tasir
 VW, VH, FPS, SURE, SILME, BITIS = 1440, 1080, 30, 6.0, 0.3, 5.0
 N = 26000 if V2 else 5200                                             # v2: 5 kat (Serdar)
 FADE = 0.06                                                           # v2: piksel varistan sonra tam renge (tt birimi)
+V3_T0, V3_T1, V3_FADE_SN = 2.2, 4.7, 0.25                             # v3: sembol olusum araligi (sn) ve piksel gecisi
 ESIK_IK = 0.2                     # ilk/son kare: kayipsiz 4:2:0 tabaninin en fazla 0.2 ustu
 rng = np.random.default_rng(11)
 t0 = time.time()
@@ -139,7 +146,40 @@ par = (0.55 + 0.45 * rng.random(N)).astype(np.float32)
 nT, nB, nS = int(round(SURE * FPS)), int(round(BITIS * FPS)), int(round(SILME * FPS))
 R['toz_parcacik'] = {'v1': 5200, 'bu_ornek': N}
 TARR = gec + 0.38                                                     # parcacigin sembole indigi an (uu = 1), tt birimi
-if V2:                                                                # piksel basina varis haritasi
+DUR = 0.38
+SNT = (nB - 1) / FPS                                                  # tt = 1 anindaki saniye (4,967)
+if V3:   # piksel zaman haritasi: kaynaklara uzaklik + yumusak gurultu -> sira -> 2,2-4,7 sn esit dagilim
+    from scipy.ndimage import distance_transform_edt
+    FADE = V3_FADE_SN / SNT
+    n_, lab_g, _, cen = cv2.connectedComponentsWithStats((MG > 0.35).astype(np.uint8), 8)
+    kay = [cen[k] for k in range(1, n_) if (lab_g == k).sum() > 20]  # glif ve sonsuzluk parcalarinin merkezleri
+    yy_, xx_ = np.mgrid[0:VH, 0:VW].astype(np.float32)
+    uz = np.min([np.hypot(xx_ - cx, yy_ - cy) for cx, cy in kay], axis=0)
+    gz = cv2.GaussianBlur(np.random.default_rng(7).random((VH, VW)).astype(np.float32), (0, 0), 10)
+    gz = (gz - gz.mean()) / (gz.std() + 1e-6)
+    sm = MS > 0.5
+    anah = uz + gz * 0.08 * (uz[sm].max() - uz[sm].min())
+    sira = np.empty(int(sm.sum()), np.float32); sira[np.argsort(anah[sm])] = np.arange(int(sm.sum()), dtype=np.float32)
+    VAR = np.full((VH, VW), np.inf, np.float32)
+    VAR[sm] = (V3_T0 + (V3_T1 - V3_T0) * sira / max(1, sm.sum() - 1)) / SNT
+    ii = distance_transform_edt(~sm, return_indices=True)[1]
+    VAR = VAR[ii[0], ii[1]]                                           # sembol disi bolge (kenar, golge): en yakin sembol pikseli
+    R['v3'] = {'kaynak_sayisi': len(kay), 'olusum_sn': [V3_T0, V3_T1], 'piksel_gecis_sn': V3_FADE_SN}
+    dx = np.clip(np.round(dst[:, 0]).astype(int), 0, VW - 1); dy = np.clip(np.round(dst[:, 1]).astype(int), 0, VH - 1)
+    TARR = VAR[dy, dx]                                                # parcacik hedef pikselin zamaninda iner
+    DUR = (0.38 * (0.75 + 0.5 * rng.random(N))).astype(np.float32)   # ucus 1,4-2,4 sn: ayni bolgeye farkli anlarda kalkis
+    gec = TARR - DUR                                                  # kalkis: ayni araliga yayilir
+    big = rng.random(N) < 0.12                                        # boy: %88 cok kucuk, %12 biraz buyuk
+    tip = rng.random(N)
+    sampanya = np.float32([246, 228, 190]) + rng.normal(0, 6, (N, 3)).astype(np.float32)
+    vurgu = np.float32([255, 248, 226]) + rng.normal(0, 4, (N, 3)).astype(np.float32)
+    renk = np.where((tip < 0.5)[:, None], gold[rng.integers(100, 226, N)], np.where((tip < 0.8)[:, None], sampanya, vurgu))
+    renk = np.clip(renk, 0, 255).astype(np.float32)
+    par = np.where(big, 0.28 + 0.22 * rng.random(N), 0.15 + 0.25 * rng.random(N)).astype(np.float32)   # yari saydam
+    ftr, fph = (2.5 + 3.5 * rng.random(N)).astype(np.float32), (2 * np.pi * rng.random(N)).astype(np.float32)
+    yay = -(10 + 30 * rng.random(N).astype(np.float32))               # yollar daha genis yayili (topak yok)
+    yan = ((rng.random(N) - 0.5) * 14).astype(np.float32)
+elif V2:                                                              # piksel basina varis haritasi
     from scipy.ndimage import distance_transform_edt
     VAR = np.full((VH, VW), np.inf, np.float32)
     dx = np.clip(np.round(dst[:, 0]).astype(int), 0, VW - 1); dy = np.clip(np.round(dst[:, 1]).astype(int), 0, VH - 1)
@@ -157,11 +197,34 @@ def a_harita(tt):
     return ease((tt - 0.36) / 0.64) * np.clip(MREG, 0, 1)
 
 
+TOZ_IST = {}
+
+
+def toz_v3(f, p, gor, ag):
+    """v3 zarif toz: kucuk ve buyuk parcaciklar ayri bulaniklikla, yari saydam, yumusak parilti eklenir."""
+    xi, yi = p[:, 0].astype(int), p[:, 1].astype(int)
+    ok = gor & (xi >= 0) & (xi < VW) & (yi >= 0) & (yi < VH) & (ag > 0)
+    al_t = np.zeros((VH, VW), np.float32); kat_t = np.zeros((VH, VW, 3), np.float32)
+    for m_, sg, kz in ((ok & ~big, 0.55, 1.0), (ok & big, 1.3, 2.4)):
+        al = np.zeros((VH, VW), np.float32); kat = np.zeros((VH, VW, 3), np.float32)
+        np.add.at(al, (yi[m_], xi[m_]), ag[m_])
+        for c in range(3):
+            np.add.at(kat[..., c], (yi[m_], xi[m_]), renk[m_, c] * ag[m_])
+        al_t += cv2.GaussianBlur(al, (0, 0), sg) * kz; kat_t += cv2.GaussianBlur(kat, (0, 0), sg) * kz
+    rk = kat_t / np.maximum(al_t[..., None], 1e-4)
+    a3 = np.clip(al_t, 0, 0.75)[..., None]
+    g = f * (1 - a3) + rk * a3
+    pa = cv2.GaussianBlur(kat_t, (0, 0), 3.5) * 0.35                  # yumusak parilti (eklenir)
+    TOZ_IST.setdefault('ucan', []).append(int(ok.sum())); TOZ_IST.setdefault('doygun', []).append(
+        float((al_t > 0.75).sum() / max(1, (al_t > 0.05).sum())))
+    return np.clip(g + pa, 0, 255).astype(np.uint8)
+
+
 def kare(i):
     if i == 0 or i >= nB:
         return KAP8
     tt = i / (nB - 1)
-    uu = np.clip((tt - gec) / 0.38, 0, 1)
+    uu = np.clip((tt - gec) / DUR, 0, 1)
     # v1: ilk varislarla sifirdan, tum alan birlikte; v2: piksel varis haritasiyla. BITIS'te tam (kenar artigi yok)
     A = a_harita(tt)[..., None]
     f = BASE * (1 - A) + FULL * A
@@ -169,9 +232,17 @@ def kare(i):
         e = ease(i / nS)
         f = KAP * (1 - e) + f * e
     ue = uu * uu * (3 - 2 * uu)
+    if V3:   # yari dogrusal: hedefe yaklasirken yavaslayip yigilma (topak) olmaz
+        ue = 0.55 * uu + 0.45 * ue
     p = src * (1 - ue)[:, None] + dst * ue[:, None]
     p[:, 1] += yay * np.sin(np.pi * ue)
     p[:, 0] += np.sin(tt * 8 + np.arange(N) * 0.41) * 0.8 * np.sin(np.pi * ue)
+    if V3:
+        p[:, 0] += yan * np.sin(np.pi * ue)
+        gor = (uu > 0) & (tt < TARR + FADE)
+        ag = par * np.minimum(1, uu / 0.15) * np.where(tt > TARR, 0.6 * (1 - np.clip((tt - TARR) / FADE, 0, 1)), 1.0) \
+            * (0.7 + 0.3 * np.sin(2 * np.pi * ftr * (i / FPS) + fph))  # titresim
+        return toz_v3(f, p, gor, ag)
     if V2:   # ucusta belirir, indigi pikselde FADE boyunca durur, piksel tam renge gelirken soner
         gor = (uu > 0) & (tt < TARR + FADE)
         ag = par * np.minimum(1, uu / 0.15) * (1 - np.clip((tt - TARR) / FADE, 0, 1))
@@ -192,7 +263,7 @@ def kare(i):
     return np.clip(f * (1 - a3) + rk * a3, 0, 255).astype(np.uint8)
 
 
-mp4 = os.path.join(OUT, f'{AD}_ilan_video{"_v2" if V2 else ""}.mp4')
+mp4 = os.path.join(OUT, f'{AD}_ilan_video{"_v3" if V3 else "_v2" if V2 else ""}.mp4')
 enc = subprocess.Popen(['ffmpeg', '-y', '-loglevel', 'error', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-s', f'{VW}x{VH}',
                         '-r', str(FPS), '-i', '-', '-an', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '12',
                         '-preset', 'slow', '-movflags', '+faststart', mp4], stdin=subprocess.PIPE)
@@ -259,6 +330,28 @@ if V2:
     kapi['sonsuz_bulundu'] = R.get('sonsuz_parca', 0) >= 1
     kapi['iz_yok_0_3sn'] = R['iz_orani_0_3sn'] <= 1.3                        # bolge ici ince ayrinti cevre halkadan en fazla %30 fazla
     kapi['parca_parca_3sn'] = cizim['3']['tam'] > 0.05 and cizim['3']['yok'] > 0.05   # 3. sn: kismen cizili (v1: tumu kismi)
+if V3:   # 0,5 sn tablosu: ic harita (sembol pikselleri, A > 0.5) ve videodan (altinlik kapak/sembolsuz arasinin yarisini gecti)
+    rbk, rbb = KAP[..., 0] - KAP[..., 2], BASE[..., 0] - BASE[..., 2]
+    vm = (MS > 0.5) & (rbk - rbb > 40)
+    tab = {}
+    for k in range(13):
+        i_ = min(len(FR) - 1, k * 15)
+        ic_ = float((a_harita(i_ / (nB - 1)) [MS > 0.5] > 0.5).mean()) if 0 < i_ < nB else (1.0 if i_ == 0 or i_ >= nB else 0.0)
+        if 0 < i_ <= nS:
+            ic_ = None
+        fr_ = FR[i_].astype(np.float32); vid_ = float(((fr_[..., 0] - fr_[..., 2] - rbb)[vm] > 0.5 * (rbk - rbb)[vm]).mean())
+        tab[f'{k * 0.5:g}'] = {'ic_harita': None if ic_ is None else round(ic_, 3), 'video': round(vid_, 3)}
+    R['gorunen_sembol_orani'] = tab
+    sr = [tab[f'{k * 0.5:g}']['ic_harita'] for k in range(1, 11)]     # 0,5 - 5,0 sn (0,5 sn: sondu)
+    sr = [0.0 if x is None else x for x in sr]
+    R['en_buyuk_0_5sn_artis'] = round(max(b - a for a, b in zip(sr, sr[1:])), 3)
+    u = np.array(TOZ_IST['ucan'][int(1.0 * FPS):int(4.5 * FPS)])
+    R['toz_akis'] = {'ucan_parcacik_1_4_5sn_min': int(u.min()), 'max': int(u.max()), 'ort': int(u.mean()),
+                     'doygun_piksel_orani_en_buyuk': round(max(TOZ_IST['doygun']), 3), 'doygun_ort': round(float(np.mean(TOZ_IST['doygun'])), 3)}
+    kapi['artis_0_5sn_en_fazla_30'] = R['en_buyuk_0_5sn_artis'] <= 0.30
+    x0_, x1_ = max(0, SK[1].start - 20), min(VW, SK[1].stop + 20); y0_, y1_ = max(0, SK[0].start - 20), min(VH, SK[0].stop + 20)
+    Image.fromarray(FR[90][y0_:y1_, x0_:x1_]).resize(((x1_ - x0_) * 2, (y1_ - y0_) * 2), Image.LANCZOS).save(
+        os.path.join(OUT, 'YAKIN_3sn_200.jpg'), quality=94)
 R['kapi'] = kapi; R['sonuc'] = 'PASS' if all(kapi.values()) else 'FAIL'
 json.dump(R, open(os.path.join(OUT, 'QC.json' if V2 else f'{AD}_QC.json'), 'w'), indent=1, default=str)
 
