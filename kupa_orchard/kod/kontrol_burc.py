@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 """Bagimsiz kontrol: uretilmis baski dosyalarinda burc satiri ile susleme arasi en kisa fiziksel mesafe (mm) ve isim satiri ayrimi.
 Her stil icin ayni girdilerle BURC_YOK baskisi uretilir, fark = burc yazisi.
-Kullanim: python3 -I kontrol_burc.py <cift_klasoru> <burc1> <burc2> <sembol_klasoru>"""
+Kullanim: python3 -I kontrol_burc.py <cift_klasoru> <burc1> <burc2> <sembol_klasoru> [isim1 isim2 mesaj]
+Isim ve mesaj verilmezse Maximilian & Josephine, "Forever my favorite adventure!" (zor ornek) kullanilir;
+uretimde ilanin isim ve mesaji AYNEN verilmelidir (baski ile birebir ayni girdi)."""
 import os, subprocess, sys, time
 import numpy as np
 from PIL import Image
 from scipy import ndimage
 
 D, B1, B2, SEM = sys.argv[1:5]
+I1, I2, MS = (sys.argv[5:8] if len(sys.argv) >= 8 else ('Maximilian', 'Josephine', 'Forever my favorite adventure!'))
 D, SEM = os.path.abspath(D), os.path.abspath(SEM)
 KOD = os.path.dirname(os.path.abspath(__file__)) + '/'
 V = os.path.abspath(os.path.join(KOD, '..', 'varlik')) + '/'
@@ -19,9 +22,9 @@ t0 = time.time()
 sonuc = []
 for i, st in enumerate(RENK, 1):
     on = f'{D}/kontrol/{st}_yok'
-    r = subprocess.run(['python3', '-I', KOD + 'baski_kes.py', V + 'kes/' + st.upper() + 'R', SEM, 'Maximilian', 'Josephine', B1, B2,
-                        'Forever my favorite adventure!', RENK[st], on], capture_output=True, text=True, cwd=KOD,
-                       env={'PATH': '/usr/bin:/bin', 'BURC_YOK': '1'})
+    r = subprocess.run([sys.executable, '-I', KOD + 'baski_kes.py', V + 'kes/' + st.upper() + 'R', SEM, I1, I2, B1, B2,
+                        MS, RENK[st], on], capture_output=True, text=True, cwd=KOD,
+                       env={'PATH': os.environ.get('PATH', '/usr/bin:/bin'), 'BURC_YOK': '1'})
     if r.returncode:
         raise SystemExit(r.stderr[-1500:])
     P = np.asarray(Image.open(f'{D}/baski/B_{st}_baski_11oz.png').convert('RGB')).astype(float)

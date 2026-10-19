@@ -21,7 +21,8 @@ ST8 = [('orange', 'Orange Blossom'), ('fig', 'Purple Fig'), ('olive', 'Olive Bre
        ('almond', 'Almond Blossom'), ('lemon', 'Lemon Grove'), ('grape', 'Blue Grape'), ('loquat', 'Golden Loquat')]
 RENKLER = {'orange': '10,40,24', 'fig': '52,18,48', 'olive': '12,24,78', 'pomegranate': '100,16,24', 'almond': '52,22,14',
            'lemon': '12,22,76', 'grape': '16,30,90', 'loquat': '62,24,10'}
-ENV = {'GOLGE_US': '0.4', 'PARLA': '0.7', 'PATH': '/usr/bin:/bin'}
+ENV = {'GOLGE_US': '0.4', 'PARLA': '0.7', 'PATH': os.environ.get('PATH', '/usr/bin:/bin')}
+PY = sys.executable   # Actions'ta setup-python yorumlayicisi; yerelde ayni python3
 ADIM = 8 + 8 + 8 + 8 + 6 + 1 + 3
 sayac = [0]
 t0 = time.time()
@@ -48,7 +49,7 @@ def baski(st, isim1, isim2, mesaj, cikti, bayrak=(), d_in=None):
         env['D_IN'] = d_in
     for b in bayrak:
         env[b] = '1'
-    o = calis(['python3', '-I', KOD + 'baski_kes.py', V + 'kes/' + st.upper() + 'R', SEM, isim1, isim2, B1, B2, mesaj, RENKLER[st], cikti], env)
+    o = calis([PY, '-I', KOD + 'baski_kes.py', V + 'kes/' + st.upper() + 'R', SEM, isim1, isim2, B1, B2, mesaj, RENKLER[st], cikti], env)
     return [l.split('] ', 1)[1] for l in o.splitlines() if ('on:' in l or 'arka:' in l or 'tasma' in l)]
 
 
@@ -56,13 +57,13 @@ def giydir(sahne, baski_png, geo, cikti, d_in=None):
     env = dict(ENV)
     if d_in:
         env['D_IN'] = d_in
-    calis(['python3', '-I', KOD + 'kapak_canva3.py', sahne, baski_png, geo, cikti], env)
+    calis([PY, '-I', KOD + 'kapak_canva3.py', sahne, baski_png, geo, cikti], env)
 
 
 def baslik(src, cikti, renk):
     env = dict(ENV)
     env['RENK'] = renk
-    calis(['python3', '-I', KOD + 'baslik4.py', src, B1, B2, cikti], env)
+    calis([PY, '-I', KOD + 'baslik4.py', src, B1, B2, cikti], env)
 
 
 # 1) 8 stil baski dosyasi
@@ -305,7 +306,7 @@ giydir(SC_, VD + 'beyaz.png', GK, VD + 'k_beyaz.png')
 for ad in ('nosym', 'noglif', 'nomes'):
     giydir(SC_, VD + f'mask_{ad}.png', GK, VD + f'k_mask_{ad}.png')
 ilerle('video katman giydirme')
-calis(['python3', '-I', KOD + 'video6b.py', VD, GD + '01_Orange_Blossom_kapak.jpg', VD + f'ORCHARD_{B1}_{B2}_video_6sn.mp4'])
+calis([PY, '-I', KOD + 'video6b.py', VD, GD + '01_Orange_Blossom_kapak.jpg', VD + f'ORCHARD_{B1}_{B2}_video_6sn.mp4'])
 ilerle('video')
 LOG.close()
 print(open(OUT + '/olcum.txt').read())
