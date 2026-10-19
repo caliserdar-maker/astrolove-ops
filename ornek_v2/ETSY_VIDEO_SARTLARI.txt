@@ -1,0 +1,2 @@
+URL https://help.etsy.com/hc/en-us/articles/360053206073-How-to-Add-Listing-Videos HTTP 403
+URL https://help.etsy.com/hc/en-us/articles/360053206073 HTTP 403
