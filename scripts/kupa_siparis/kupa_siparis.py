@@ -7,8 +7,10 @@ Akis (her KUPA- transaction'i icin):
      Kisisellestirme 3 satir: isim1, isim2, mesaj (mesaj bossa "My favorite place is with you").
      isim1 = ciftteki ILK burc (posterde sol), isim2 = ikinci burc (sag).
   2) Kapilar: isim <= 10 harf, mesaj <= 30 karakter, tum karakterler EB Garamond'da (isimler duz, mesaj italik),
-     baski_kes tasma False, kontrol_burc dala cakisma 0. Bir kapi FAIL ise baski yok; SORU.md (Serdar'a soru) yazilir.
-     GOZ (FAIL degil, teslim oncesi gozle): burc < 1,95 mm ya da dala < 1,2 mm (ozet.py ile ayni esik).
+     baski_kes isim/mesaj tasmasi False. Burc tasma isareti FAIL DEGIL (1,70 mm alt sinirda on gorunus 14 px payi dar);
+     karar siparis stilinin baskisinda kontrol_burc olcumuyle (Serdar + kupa oturumu 19 Eki, ozet.py 0bbdac6):
+     cakisma > 0 ya da dala < 1,1 mm FAIL; 1,1-1,2 mm GOZ (baski uretilir, Serdar onayi istenir); >= 1,2 mm PASS.
+     Bir kapi FAIL ise baski yok; SORU.md (Serdar'a soru) yazilir. Burc alt sinir / < 1,95 mm yalniz bilgi notu.
   3) Cikti: <cikti>/<receipt>/<transaction>/ BASKI_*.png (11 oz 2700x1050 | 15 oz 2700x1140, 300 dpi),
      ONIZLEME_*.jpg, PRINTFUL_TASLAK.json (confirm=false yuku; GONDERILMEZ), OZET.json. --drive verilirse rclone ile Drive'a.
   Baski, kupa_orchard/kod/cift.py 1. ve 1b. bolumuyle birebir ayni cagridir (ayni girdi -> ayni piksel).
@@ -173,9 +175,9 @@ def tasma_oku(satirlar):
 
 
 def is_isle(kod, sem, s, m, d):
-    """8 stil 11 oz (kontrol_burc girdisi) + siparis 15 oz ise 1b. Doner: kapilar, goz, dosyalar."""
+    """8 stil 11 oz (kontrol_burc girdisi) + siparis 15 oz ise 1b. Doner: kapilar, bilgi notlari, baski_kes satirlari."""
     (d / "baski").mkdir(parents=True, exist_ok=True)
-    kap, goz = {}, []
+    kap, notlar = {}, []
     with cf.ThreadPoolExecutor(max_workers=os.cpu_count() or 4) as ex:
         isler = {st: ex.submit(baski_kes, kod, st, sem, m, s, str(d / "baski" / f"B_{st}")) for st, _ in ST8}
         if s["boy"] == "15":
@@ -185,9 +187,12 @@ def is_isle(kod, sem, s, m, d):
     log(f"8 stil 11 oz{' + 15 oz' if o15 else ''} baski tamam")
     sat = o15 if o15 else olcum[s["stil"]]
     tasma, burc_mm = tasma_oku(sat)
-    kap["baski_tasma"] = ("PASS" if tasma and "True" not in tasma.values() else "FAIL", f"{tasma}")
+    kap["baski_tasma"] = ("PASS" if tasma and tasma["isim"] == tasma["mesaj"] == "False" else "FAIL",
+                          f"isim {tasma and tasma['isim']}, mesaj {tasma and tasma['mesaj']}")
+    if tasma and tasma["burc"] == "True":
+        notlar.append("burc alt sinirda (on gorunus payi dar); karar kontrol_burc olcumu")
     if burc_mm is not None and burc_mm < 1.95 - 1e-6:
-        goz.append(f"burc {burc_mm:.2f} mm < 1,95")
+        notlar.append(f"burc {burc_mm:.2f} mm < 1,95")
     # kontrol_burc.py (degistirilmeden): siparisin isim ve mesaji AYNEN
     r = subprocess.run([sys.executable, "-I", str(Path(kod) / "kod" / "kontrol_burc.py"), str(d), s["burc1"], s["burc2"], sem,
                         m["isim1"], m["isim2"], m["mesaj"]], capture_output=True, text=True,
@@ -198,11 +203,10 @@ def is_isle(kod, sem, s, m, d):
         satir = next((x for x in (d / "kontrol" / "burc_mesafe.txt").read_text().splitlines() if x.split()[0] == s["stil"]), "")
         cak = int(satir.split("cakisma px ")[1].split(",")[0])
         dal = float(satir.split("dala en kisa ")[1].split(" mm")[0])
-        kap["kontrol_burc"] = ("PASS" if cak == 0 else "FAIL", satir.strip())
-        if cak == 0 and dal < 1.2:
-            goz.append(f"dala {dal:.2f} mm < 1,2")
-    log(f"kontrol_burc: {kap['kontrol_burc'][1]}")
-    return kap, goz, sat
+        kap["kontrol_burc"] = ("FAIL" if cak or dal < 1.1 else "GOZ" if dal < 1.2 else "PASS",
+                               f"dala {dal:.2f} mm, cakisma {cak} px")
+    log(f"kontrol_burc: {kap['kontrol_burc']}")
+    return kap, notlar, sat
 
 
 def cikti_yaz(d, s, ad):
@@ -275,7 +279,7 @@ def main():
     for i, t in enumerate(kupa, 1):
         d = Path(a.cikti).resolve() / rid / str(t.get("transaction_id"))
         d.mkdir(parents=True, exist_ok=True)
-        ozet = {"receipt_id": rid, "transaction_id": t.get("transaction_id"), "sku": t.get("sku"), "kapilar": {}, "goz": []}
+        ozet = {"receipt_id": rid, "transaction_id": t.get("transaction_id"), "sku": t.get("sku"), "kapilar": {}, "notlar": []}
         s, hata = sku_coz(t.get("sku"))
         m, hata2 = metin_coz(t) if s else (None, None)
         if hata or hata2:
@@ -291,16 +295,16 @@ def main():
                 if r.returncode:
                     kap["sembol"] = ("FAIL", r.stderr[-300:])
                 else:
-                    k2, goz, sat = is_isle(kod, str(sem), s, m, d)
+                    k2, notlar, sat = is_isle(kod, str(sem), s, m, d)
                     kap.update(k2)
-                    ozet["goz"], ozet["baski_kes"] = goz, sat
+                    ozet["notlar"], ozet["baski_kes"] = notlar, sat
             ozet["kapilar"] = {k: {"durum": v[0], "ayrinti": v[1]} for k, v in kap.items()}
-            if all(v[0] == "PASS" for v in kap.values()):
+            if all(v[0] != "FAIL" for v in kap.values()):
                 ad = f"AstroLoveArt_{s['burc1']}_{s['burc2']}_{s['stil_ad'].replace(' ', '_')}"
                 png, jpg = cikti_yaz(d, s, ad)
                 yuk = printful_yuk(rc, t, s, png)
                 (d / "PRINTFUL_TASLAK.json").write_text(json.dumps(yuk, indent=1, ensure_ascii=False), encoding="utf-8")
-                ozet.update(durum="GOZ" if ozet["goz"] else "PASS", baski=png.name, onizleme=jpg.name,
+                ozet.update(durum="GOZ" if any(v[0] == "GOZ" for v in kap.values()) else "PASS", baski=png.name, onizleme=jpg.name,
                             piksel=piksel(png), printful={"variant_id": PRINTFUL[s["boy"]]["variant_id"],
                                                           "printfile_id": PRINTFUL[s["boy"]]["printfile_id"]})
             else:
@@ -313,7 +317,7 @@ def main():
         genel.append(ozet)
         g_ = time.time() - t0
         log(f"[{i}/{len(kupa)} %{100 * i // len(kupa)}] {t.get('sku')} -> {ozet['durum']} {ozet.get('piksel', '')} "
-            f"{'; '.join(ozet['goz'])} (gecen {g_:.0f}s, kalan ~{g_ / i * (len(kupa) - i):.0f}s)")
+            f"{'; '.join(ozet['notlar'])} (gecen {g_:.0f}s, kalan ~{g_ / i * (len(kupa) - i):.0f}s)")
     (Path(a.cikti).resolve() / rid / "OZET.json").write_text(json.dumps(genel, indent=1, ensure_ascii=False), encoding="utf-8")
     sys.exit(1 if any(o["durum"] == "FAIL" for o in genel) else 0)
 
