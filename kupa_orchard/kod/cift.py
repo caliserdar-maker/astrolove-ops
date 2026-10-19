@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Orchard: bir burc cifti icin tam ilan seti (Cancer + Libra ile onaylanan yontemin aynisi).
-Uretir: 8 stil baski dosyasi (11 oz), 8 kapak, galeri 1-14 (2048 JPG), 400 px mobil pafta, 6 sn video (ilk/son kare = kapak).
+Uretir: 8 stil baski dosyasi (11 oz 2700x1050 ve 15 oz 2700x1140), 8 kapak, galeri 1-14 (2048 JPG), 400 px mobil pafta, 6 sn video (ilk/son kare = kapak).
 Kullanim: python3 -I cift.py <burc1> <burc2> <isim1> <isim2> <mesaj> <sembol_klasoru> <cikti_klasoru>
 Sembol klasoru: ana.png (ozgun sembol), sol.png, sag.png (iki kucuk burc isareti).
 """
@@ -22,7 +22,7 @@ ST8 = [('orange', 'Orange Blossom'), ('fig', 'Purple Fig'), ('olive', 'Olive Bre
 RENKLER = {'orange': '10,40,24', 'fig': '52,18,48', 'olive': '12,24,78', 'pomegranate': '100,16,24', 'almond': '52,22,14',
            'lemon': '12,22,76', 'grape': '16,30,90', 'loquat': '62,24,10'}
 ENV = {'GOLGE_US': '0.4', 'PARLA': '0.7', 'PATH': '/usr/bin:/bin'}
-ADIM = 8 + 8 + 8 + 6 + 1 + 3
+ADIM = 8 + 8 + 8 + 8 + 6 + 1 + 3
 sayac = [0]
 t0 = time.time()
 LOG = open(OUT + '/olcum.txt', 'w')
@@ -42,8 +42,10 @@ def calis(args, env=None):
     return r.stdout
 
 
-def baski(st, isim1, isim2, mesaj, cikti, bayrak=()):
+def baski(st, isim1, isim2, mesaj, cikti, bayrak=(), d_in=None):
     env = dict(ENV)
+    if d_in:
+        env['D_IN'] = d_in
     for b in bayrak:
         env[b] = '1'
     o = calis(['python3', '-I', KOD + 'baski_kes.py', V + 'kes/' + st.upper() + 'R', SEM, isim1, isim2, B1, B2, mesaj, RENKLER[st], cikti], env)
@@ -68,6 +70,20 @@ for st, ad in ST8:
     o = baski(st, ISIM1, ISIM2, MESAJ, f'{OUT}/baski/B_{st}')
     LOG.write(f'{ad}: ' + ' | '.join(o) + '\n')
     ilerle(f'baski {ad}')
+
+# 1b) 8 stil 15 oz baski dosyasi (Serdar 19.10): desen 11 oz ile ayni fiziksel boyda, on/arka 15 oz capina (8,5 cm = 3,35 inc)
+# gore yerlesir, 2700x1050 cizilip dikeyde ortalanarak 2700x1140'a tamamlanir
+for st, ad in ST8:
+    tmp = f'{OUT}/baski/T15_{st}'
+    o = baski(st, ISIM1, ISIM2, MESAJ, tmp, d_in='3.35')
+    a = np.asarray(Image.open(tmp + '_baski_11oz.png').convert('RGB'))
+    b = np.full((1140, 2700, 3), 255, np.uint8)
+    b[45:45 + 1050] = a
+    Image.fromarray(b).save(f'{OUT}/baski/B_{st}_baski_15oz.png', dpi=(300, 300))
+    os.remove(tmp + '_baski_11oz.png')
+    os.replace(tmp + '_onizleme.jpg', f'{OUT}/baski/B_{st}_onizleme_15oz.jpg')
+    LOG.write(f'{ad} 15 oz: ' + ' | '.join(x for x in o if 'kaydedildi' not in x) + '\n')
+    ilerle(f'baski 15 oz {ad}')
 
 # 2) 8 kapak (onayli sahneler, ayni giydirme ve baslik)
 for st, ad in ST8:
