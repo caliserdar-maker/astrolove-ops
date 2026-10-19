@@ -4,11 +4,13 @@
 Girdi DIR: ESKI_<CIFT>.mp4, A_<CIFT>.mp4, B_<CIFT>.mp4, bilgi_eski.json (video_uret.py --bilgi), muzik.m4a.
 Olcumler (gri, 1080x1920 kare):
   parlaklik        karenin gri ortalamasi
-  r_sembol         birlesik sembol kutusunda (bilgi.sembol_kutu) kare ile referans arasindaki korelasyon
-                   (ikisi de gauss sigma 3; kamera yakinlasmasi %0-3 farki tolere edilir). Referans: ESKI, T_B0 + 0.5 sn
-                   (sembol tam, toz yok).
-  r_ad             burc adlari bandi (etiket_y .. +70 px, tum genislik) ve soru metni bandi (soru_y +-60 px):
-                   referans ESKI 3.0 sn (ikisi de tam gorunur, solma 3.3 sn'de baslar). B'de soru metni yok (tasarim geregi).
+  r_sembol         birlesik sembol kutusunda (bilgi.sembol_kutu) kare ile referans arasindaki korelasyon (gauss sigma 3).
+                   Referans: ESKI, T_B0 + 0.5 sn (sembol tam, toz yok). Referans karesi, kaynak zamanlarindaki kamera
+                   yakinlasmasi z(t) = 1 + (ZN - 1) * ease(t, 0, 15.4) oranina gore ekran merkezinde olceklenir
+                   (1. kosu: duzeltmesiz A 0. kare 0.887; %1.6 yakinlasma farki).
+  r_etiket         burc adlari bandi (etiket_y-10 .. +70 px), sembol kutusunun solu ve sagi (sembol haric; 1. kosuda
+                   ortadaki sembol bandi kesiyordu). r_soru: soru metni bandi (soru_y +-60 px). Referans ESKI 3.0 sn (ikisi de
+                   tam gorunur, solma 3.3 sn'de baslar), ayni yakinlasma duzeltmesi. B'de soru metni yok (tasarim geregi).
   okunur           r >= 0.9
 Kapilar (A ve B): 0. kare parlaklik > 0; 0. karede r_sembol >= 0.9 ve r_ad(etiket) >= 0.9; 1080x1920, 720 kare,
   video 24.0 sn (+-0.05); ses akisi var, 24.0 sn (+-0.05); ses paketleri muzik dosyasiyla ayni (md5) -> yumusak giris/cikis
@@ -20,6 +22,28 @@ from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 ESIK_R = 0.9
 SN = [0, 0.5, 1, 2, 3]
+ZN, T_END_FREEZE = 1.03, 23.1          # video_uret.py ile ayni
+
+
+def ease(t, a, b):
+    s = min(max((t - a) / (b - a), 0.0), 1.0); return 0.5 - 0.5 * np.cos(np.pi * s)
+
+
+def z(ts):
+    return 1 + (ZN - 1) * ease(ts, 0, 15.4) if ts < 15.4 else ZN
+
+
+def kaynak(k, t, t0):
+    return min(t + t0, T_END_FREEZE) if k == 'B' else t
+
+
+def olcekle(g, oran):
+    """Gri kareyi ekran merkezinde 'oran' kadar buyut (oran < 1 kucult): referansi olculen karenin yakinlasmasina getirir."""
+    if abs(oran - 1) < 1e-6:
+        return g
+    a = 1 / oran; cx, cy = 540, 960
+    im = Image.fromarray(g).transform((1080, 1920), Image.AFFINE, (a, 0, cx * (1 - a), 0, a, cy * (1 - a)), Image.BICUBIC)
+    return np.asarray(im, np.float32)
 
 
 def kare(v, t):
@@ -65,23 +89,26 @@ def main():
     d, cift = sys.argv[1], sys.argv[2]
     bi = json.load(open(os.path.join(d, 'bilgi_eski.json')))
     x, y, w, h = bi['sembol_kutu']; ey, sy = bi['etiket_y'], bi['soru_y']
-    kut = {'sembol': (slice(max(0, y), y + h), slice(max(0, x), x + w)),
-           'etiket': (slice(ey - 10, ey + 70), slice(0, 1080)), 'soru': (slice(sy - 60, sy + 60), slice(0, 1080))}
+    kut = {'sembol': (slice(max(0, y), y + h), slice(max(0, x), x + w)), 'soru': (slice(sy - 60, sy + 60), slice(0, 1080))}
+    eb = slice(ey - 10, ey + 70); sol_, sag_ = slice(0, max(0, x - 10)), slice(min(1080, x + w + 10), 1080)
     V = {k: os.path.join(d, f'{k}_{cift}.mp4') for k in ('ESKI', 'A', 'B')}
-    ref_s = gri(kare(V['ESKI'], bi['T_B0'] + 0.5)); ref_a = gri(kare(V['ESKI'], 3.0))
+    T0 = bi['T_B0']; ts_s, ts_a = T0 + 0.5, 3.0
+    ref_s = gri(kare(V['ESKI'], ts_s)); ref_a = gri(kare(V['ESKI'], ts_a))
 
-    def olc(a):
-        g = gri(a)
+    def olc(a, k, t):
+        g = gri(a); zk = z(kaynak(k, t, T0))
+        rs = olcekle(ref_s, zk / z(ts_s)); ra = olcekle(ref_a, zk / z(ts_a))
+        et = np.concatenate([g[eb, sol_].ravel(), g[eb, sag_].ravel()]); er = np.concatenate([ra[eb, sol_].ravel(), ra[eb, sag_].ravel()])
         return {'parlaklik': round(float(np.asarray(Image.fromarray(a).convert('L'), np.float32).mean()), 2),
-                'r_sembol': kor(g[kut['sembol']], ref_s[kut['sembol']]),
-                'r_etiket': kor(g[kut['etiket']], ref_a[kut['etiket']]), 'r_soru': kor(g[kut['soru']], ref_a[kut['soru']])}
+                'r_sembol': kor(g[kut['sembol']], rs[kut['sembol']]), 'r_etiket': kor(et, er),
+                'r_soru': kor(g[kut['soru']], ra[kut['soru']])}
 
     muz = ses_md5(os.path.join(d, 'muzik.m4a'))
     S, KAR, rc = {}, {}, 0
     for k, v in V.items():
         p = probe(v); m = ses_md5(v); r = rms(v)
         kr = {t: kare(v, t) for t in SN}; KAR[k] = kr
-        o = {t: olc(a) for t, a in kr.items()}
+        o = {t: olc(a, k, t) for t, a in kr.items()}
         S[k] = {'probe': p, 'ses_md5_ayni': m == muz and bool(m), 'rms_db': r, 'kareler': {str(t): o[t] for t in SN}}
         if k != 'ESKI':
             o0 = o[0]
@@ -95,7 +122,7 @@ def main():
     # 1) ESKI zaman cizelgesi: ad ve sembol hangi saniyede okunur (0.1 sn adim)
     zc = {}
     for t in [i / 10 for i in range(0, 31)] + [i / 10 for i in range(60, 101)]:
-        zc[f'{t:.1f}'] = olc(kare(V['ESKI'], t))
+        zc[f'{t:.1f}'] = olc(kare(V['ESKI'], t), 'ESKI', t)
     ilk = lambda key: next((float(t) for t, o in zc.items() if o[key] >= ESIK_R), None)
     S['ESKI']['okunur_ilk_sn'] = {'etiket': ilk('r_etiket'), 'soru_metni': ilk('r_soru'), 'sembol': ilk('r_sembol')}
     S['ESKI']['zaman_cizelgesi'] = zc

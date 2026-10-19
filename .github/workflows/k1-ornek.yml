@@ -46,7 +46,7 @@ jobs:
           grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
     - name: Uret + QC
       run: |
-        set -uo pipefail
+        set +e -uo pipefail   # Actions varsayilani bash -e; QC FAIL olsa da ciktilar Drive'a gitsin (1. kosu 39253230287 yuklemedi)
         case "$CIFT" in *[!A-Z_]*|'') echo "::error::cift gecersiz"; exit 1 ;; esac
         mkdir -p _w/ref _w/dg _w/m _o
         rclone copyto gdrive:AstroLoveArt_Gemini_Leo_2000.jpg _w/ref/GEMINI_LEO.jpg --drive-root-folder-id "$REF_DIR" -q
