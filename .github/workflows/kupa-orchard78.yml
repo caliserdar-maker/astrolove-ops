@@ -1,0 +1,182 @@
+name: kupa-orchard78
+
+# Orchard kupa toplu uretim (Serdar onayi 19 Eki 2026). Etsy'ye YAZMAZ, musteriye dokunmaz; yalniz Drive'a yazar.
+# Kod: kupa-orchard dali, kupa_orchard/ (cift.py, kontrol_burc.py, ozet.py).
+# Sembol: kupa-printful-sonuc dali kupa_uretim/sembol/<CIFT>/ (yalniz OKUNUR; o dalin workflow'lari calistirilmaz).
+# Cikti: Drive ASTROLOVE/KUPA_ORCHARD78/<hedef>/<CIFT>/ {baski, galeri, video, olcum.txt, kontrol/burc_mesafe.txt, OZET.json}
+#        + ASTROLOVE/KUPA_ORCHARD78/<hedef>/RAPOR.md
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      ciftler:
+        description: 'TUMU ya da bosluk/virgulle CIFT listesi (ornek CANCER_LIBRA,AQUARIUS_AQUARIUS)'
+        default: 'TUMU'
+      hedef:
+        description: 'Drive alt klasoru (ASTROLOVE/KUPA_ORCHARD78/<hedef>)'
+        default: 'DENEME'
+      isim1:
+        default: 'Emily'
+      isim2:
+        default: 'James'
+      mesaj:
+        default: 'My favorite place is with you'
+      kod_ref:
+        description: 'kupa-orchard dalinda commit ya da dal adi'
+        default: 'kupa-orchard'
+      grup:
+        description: 'paralel is sayisi'
+        default: '10'
+
+jobs:
+  liste:
+    runs-on: ubuntu-24.04
+    outputs:
+      matris: ${{ steps.m.outputs.matris }}
+    steps:
+      - id: m
+        env:
+          CIFTLER: ${{ inputs.ciftler }}
+          GRUP: ${{ inputs.grup }}
+        run: |
+          python3 - <<'EOF'
+          import itertools, json, os, re
+          Z = ['ARIES', 'TAURUS', 'GEMINI', 'CANCER', 'LEO', 'VIRGO', 'LIBRA', 'SCORPIO', 'SAGITTARIUS', 'CAPRICORN', 'AQUARIUS', 'PISCES']
+          tum = sorted('_'.join(sorted(p)) for p in itertools.combinations_with_replacement(Z, 2))
+          assert len(tum) == 78
+          girdi = os.environ['CIFTLER'].strip()
+          secim = tum if girdi.upper() == 'TUMU' else [c.strip().upper() for c in re.split(r'[,\s]+', girdi) if c.strip()]
+          bilinmeyen = [c for c in secim if c not in tum]
+          assert not bilinmeyen, f'bilinmeyen cift: {bilinmeyen}'
+          n = max(1, min(int(os.environ['GRUP']), len(secim)))
+          gruplar = [secim[i::n] for i in range(n)]
+          matris = {'include': [{'no': i + 1, 'ciftler': ' '.join(g)} for i, g in enumerate(gruplar) if g]}
+          print(json.dumps(matris, indent=1))
+          open(os.environ['GITHUB_OUTPUT'], 'a').write('matris=' + json.dumps(matris) + '\n')
+          EOF
+
+  uret:
+    needs: liste
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.liste.outputs.matris) }}
+    name: uret ${{ matrix.no }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.kod_ref }}
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Kurulum (yereldeki surumlerle ayni)
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg libraqm0 >/dev/null
+          python -m pip install -q numpy==2.5.3 pillow==12.3.0 scipy==1.18.1 opencv-python-headless==5.0.0.93
+          python -c "from PIL import features; assert features.check('raqm'), 'raqm yok'; print('raqm', features.version('raqm'), 'freetype', features.version('freetype2'))"
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Uret, kontrol et, Drive'a yaz
+        env:
+          CIFTLER: ${{ matrix.ciftler }}
+          HEDEF: ${{ inputs.hedef }}
+          ISIM1: ${{ inputs.isim1 }}
+          ISIM2: ${{ inputs.isim2 }}
+          MESAJ: ${{ inputs.mesaj }}
+        run: |
+          set -uo pipefail
+          K=kupa_orchard/kod
+          git fetch -q --depth 1 origin kupa-printful-sonuc
+          T0=$(date +%s); N=$(echo $CIFTLER | wc -w); I=0; HATA=0
+          for C in $CIFTLER; do
+            I=$((I+1))
+            B1=$(python -c "import sys; print(sys.argv[1].split('_')[0].title())" "$C")
+            B2=$(python -c "import sys; print(sys.argv[1].split('_')[1].title())" "$C")
+            mkdir -p sem/$C out log
+            for f in ana sol sag; do git show "origin/kupa-printful-sonuc:kupa_uretim/sembol/$C/$f.png" > sem/$C/$f.png; done
+            mkdir -p out/$C
+            if python -I $K/cift.py "$B1" "$B2" "$ISIM1" "$ISIM2" "$MESAJ" sem/$C out/$C > log/$C.txt 2>&1 \
+               && python -I $K/kontrol_burc.py out/$C "$B1" "$B2" sem/$C "$ISIM1" "$ISIM2" "$MESAJ" >> log/$C.txt 2>&1 \
+               && python -I $K/ozet.py out/$C $C > oz_$C.txt 2>> log/$C.txt; then
+              cat oz_$C.txt >> ozet_satir.txt; cat oz_$C.txt
+            else
+              HATA=1; echo "$C HATA uretim" >> ozet_satir.txt; echo "$C HATA uretim"; tail -25 log/$C.txt
+              printf '{"cift": "%s", "durum": "HATA", "sorun": ["uretim hatasi"], "goz": []}\n' "$C" > out/$C/OZET.json
+            fi
+            cp log/$C.txt out/$C/uretim_log.txt
+            rclone copy out/$C "gdrive:ASTROLOVE/KUPA_ORCHARD78/$HEDEF/$C" -q \
+              --include "baski/B_*_baski_11oz.png" --include "baski/B_*_baski_15oz.png" --include "galeri/**" \
+              --include "video/*.mp4" --include "olcum.txt" --include "kontrol/burc_mesafe.txt" --include "OZET.json" \
+              --include "uretim_log.txt" || { HATA=1; echo "$C HATA drive"; }
+            rm -rf out/$C sem/$C
+            G=$(( $(date +%s) - T0 )); echo "[$I/$N %$((100*I/N))] $C (gecen ${G}s, kalan ~$(( G*(N-I)/I ))s)"
+          done
+          cat ozet_satir.txt >> "$GITHUB_STEP_SUMMARY"
+          exit $HATA
+
+  rapor:
+    needs: uret
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: RAPOR.md
+        env:
+          HEDEF: ${{ inputs.hedef }}
+        run: |
+          set -euo pipefail
+          rclone copy "gdrive:ASTROLOVE/KUPA_ORCHARD78/$HEDEF" oz -q --include "*/OZET.json"
+          python3 - <<'EOF'
+          import glob, json, os
+          oz = [json.load(open(p)) for p in sorted(glob.glob('oz/*/OZET.json'))]
+          say = {d: sum(o['durum'] == d for o in oz) for d in ('TAMAM', 'GOZ', 'HATA')}
+          r = [f"# Kupa Orchard toplu uretim raporu: {os.environ['HEDEF']}", '',
+               f"Cift: {len(oz)} | TAMAM {say['TAMAM']} | GOZ {say['GOZ']} | HATA {say['HATA']}", '',
+               '| Cift | Durum | En kucuk burc (mm) | En kisa dal (mm) | Not |', '|---|---|---|---|---|']
+          for o in oz:
+              st = o.get('stil', {}).values()
+              burc = min([v for s in st for k, v in s.items() if k.startswith('burc')] or [0])
+              dal = min([s['dala_mm'] for s in st if 'dala_mm' in s] or [0])
+              r.append(f"| {o['cift']} | {o['durum']} | {burc:.2f} | {dal:.2f} | {'; '.join(o.get('sorun', []) + o.get('goz', []))} |")
+          r += ['', '## Piksel ozetleri (dogrulama)', '']
+          for o in oz:
+              for k, v in o.get('dosya', {}).items():
+                  if k.startswith('baski/'):
+                      r.append(f"{o['cift']} {k} {v}")
+          open('RAPOR.md', 'w').write('\n'.join(r) + '\n')
+          print('\n'.join(r[:6]))
+          EOF
+          rclone copyto RAPOR.md "gdrive:ASTROLOVE/KUPA_ORCHARD78/$HEDEF/RAPOR.md" -q
+          head -90 RAPOR.md >> "$GITHUB_STEP_SUMMARY"
+          echo "Drive: $(rclone link "gdrive:ASTROLOVE/KUPA_ORCHARD78/$HEDEF" 2>/dev/null || echo link alinamadi)"
+          rm -rf ~/.config/rclone
