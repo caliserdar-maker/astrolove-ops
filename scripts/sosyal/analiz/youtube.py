@@ -2,9 +2,10 @@
 """YouTube Shorts anlik durum tespiti (19 Eki 2026). SALT OKUMA: Metricool'a ve YouTube'a YAZMA YOK, yalniz GET.
 Uclar ve metrik adlari (data/sosyal/kaynak/metricool/METRICOOL_SWAGGER.json):
   /v2/analytics/timelines network=youtube  belgede "For Youtube": views, interactions, likes, dislikes, comments, shares;
-                                           scope 'viewed' / 'published' (YouTube icin). Abone ve izlenme suresi belgede YOK:
+                                           scope belgede 'viewed'/'published', API'de gecerli: all, publishedInRange, revenue
+                                           (1. kosu 400 yaniti). Abone ve izlenme suresi belgede YOK:
                                            belgesiz adlar (ABONE_ADAY, SURE_ADAY) denenir, CSV'de "belgesiz" diye isaretlenir.
-  /v2/analytics/aggregation network=youtube ayni metrikler, donem toplami (timelines ile capraz kontrol)
+  /v2/analytics/aggregation network=youtube 1. kosuda NotImplemented (YouTubeAnalyticsExtractor); yalniz views denenir
   /v2/analytics/posts/youtube              /stats/youtube/videos'un belgedeki halefi ("Deprecated. Use GET
                                            /v2/analytics/posts/youtube"); sema YouTubeGlobalVideo: videoId, publishedAt,
                                            views, engagedViews, watchMinutes, averageViewDuration, likes, dislikes, comments,
@@ -43,9 +44,12 @@ TZ = 'Europe/Istanbul'
 BAS, BUGUN = date(2026, 10, 1), date(2026, 10, 19)
 PLAN_BAS = date(2026, 10, 13)
 METRIK = ['views', 'interactions', 'likes', 'dislikes', 'comments', 'shares']          # belgede
-ABONE_ADAY = ['subscribers', 'totalSubscribers', 'subscribersGained', 'subscribersLost', 'followers']   # belgesiz
-SURE_ADAY = ['watchMinutes', 'estimatedMinutesWatched', 'averageViewDuration']                       # belgesiz
-SCOPE = [('yok', {}), ('viewed', {'scope': 'viewed'}), ('published', {'scope': 'published'})]
+# 1. kosu (39246155757) ham yanitlari: 'subscribers' gecersiz, gecerli alanlar "viewerPercentage, totalViews, totalLikes,
+# totalDisLikes, totalComments, totalVideos, totalSubscribers, subscribersGained, subscriber..." (mesaj 300 krk kesik);
+# scope 'viewed'/'published' gecersiz, gecerli "all, publishedInRange, revenue"; aggregation YouTube'da NotImplemented.
+ABONE_ADAY = ['totalSubscribers', 'subscribersGained', 'subscribersLost', 'viewerPercentage', 'totalViews']   # belgesiz
+SURE_ADAY = ['estimatedMinutesWatched', 'averageViewDuration']                                              # belgesiz
+SCOPE = [('yok', {}), ('all', {'scope': 'all'}), ('publishedInRange', {'scope': 'publishedInRange'})]
 VID_K = [('views', 'goruntulenme'), ('engagedViews', 'etkin_goruntulenme'), ('likes', 'begeni'), ('dislikes', 'begenmeme'),
          ('comments', 'yorum'), ('shares', 'paylasim'), ('watchMinutes', 'izlenme_dk'),
          ('averageViewDuration', 'ort_izleme_sn'), ('averageViewPercentage', 'ort_izlenme_orani'), ('duration', 'sure')]
@@ -115,6 +119,15 @@ def video_id(url):
 
 
 def yerel(t):
+    """ISO metin ya da Metricool {dateTime, timezone} (publishedAt Europe/Madrid gelir) -> Istanbul yerel."""
+    if isinstance(t, dict) and t.get('dateTime'):
+        try:
+            d = datetime.fromisoformat(t['dateTime'])
+            if d.tzinfo is None:
+                d = d.replace(tzinfo=ZoneInfo(t.get('timezone') or 'UTC'))
+            return d.astimezone(ZoneInfo(TZ)).strftime('%Y-%m-%d %H:%M')
+        except (ValueError, KeyError):
+            return str(t)
     if not isinstance(t, str) or not t:
         return str(t or '')
     try:
@@ -202,8 +215,8 @@ def main():
                 S[ad] = g; KOL.append(ad)
                 kay.append(['YT_KANAL_GUNLUK.csv', ad, '/v2/analytics/timelines', f'network=youtube metric={m} '
                             f'{"scope=" + sc if sc != "yok" else "scope yok"}', f'{belge}; gunluk deger (dateTime ilk 10 karakter)'])
-            if m not in METRIK and sc == 'yok' and not g:
-                break      # belgesiz aday scope'suz bossa scope'lu deneme yapilmaz
+            if m not in METRIK and sc == 'yok' and j is None:
+                break      # belgesiz aday scope'suz 400 ise (gecersiz alan) scope'lu deneme yapilmaz
     for m in METRIK + ABONE_ADAY:
         if not any(k == m or k.startswith(m + '_') for k in KOL):
             kay.append(['YT_KANAL_GUNLUK.csv', m, '/v2/analytics/timelines', f'network=youtube metric={m}',
@@ -214,7 +227,7 @@ def main():
     print(f'KANAL GUNLUK veri olan sutunlar: {KOL or "yok"}; abone: '
           f'{[k for k in KOL if k.split("_")[0] in ABONE_ADAY] or YOK}; sure: {[k for k in KOL if k.split("_")[0] in SURE_ADAY] or YOK}')
     ag = []
-    for m in METRIK + ABONE_ADAY[:2] + SURE_ADAY[:1]:
+    for m in METRIK[:1]:
         j = guvenli(mc, f'aggregation_{m}', '/v2/analytics/aggregation', dict(ara, metric=m), out)
         v = mpb.veri(j) if j is not None else None
         v = v if isinstance(v, (int, float)) else (v.get('value') if isinstance(v, dict) else None)
@@ -275,6 +288,10 @@ def main():
     print(f'PLAN {PLAN_BAS} - {BUGUN}: planlanan {sum(tp.values())}; {dict(tp)}')
     for r in detay:
         print('PLAN', r[0], r[2], r[3], r[4], 'tip', r[7], 'kat', r[8], 'AI', r[9], 'kapak', r[11], r[14][:120])
+    for zt, p, pr in sch:
+        if (pr.get('status') or '') not in ('PUBLISHED', 'PENDING'):
+            print('HATA_PROVIDER', zt, json.dumps(pr, ensure_ascii=False, default=str)[:800])
+            print('HATA_GONDERI_ALANLARI', zt, {k: v for k, v in p.items() if re.search(r'err|fail|warn|detail|status', k, re.I)})
     kay += [['YT_PLAN_*.csv', 'durum', '/v2/scheduler/posts', 'providers[network=youtube].status', ''],
             ['YT_PLAN_DETAY.csv', 'hata_ayrinti', '/v2/scheduler/posts', 'providers[network=youtube].detail', ''],
             ['YT_PLAN_DETAY.csv', 'yayin_zamani', '/v2/scheduler/posts', 'publicationDate.dateTime', 'publicationDate.timezone'],
