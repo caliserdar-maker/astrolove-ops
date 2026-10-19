@@ -1,39 +1,42 @@
 name: kupa-taslak
-# KUPA CANCER_LIBRA Etsy TASLAK (Serdar 18 Eki 2026). YAYIN YOK, Etsy Ads YOK.
-# mod=oku: SALT OKUMA (kategori/nitelik, BY hazirlik, iade/ortak/bolum, OAS) + Printful kargo ek (FR IT ES NL PL AU CA, Flat Rate)
-#          -> kupa-printful-sonuc dali sonuc_15oz/KARGO_EK.txt (normal commit, force yok).
-# mod=yaz: ETSY'YE YAZAR (Serdar onayi 18 Eki): bolum + kargo profili (yoksa) + 1 TASLAK (CSV metni, 14 secenek, 13 gorsel + video,
-#          stil kapaklari, kisisellestirme, nitelikler) + geri okuma kontrolleri. PATCH yalniz acil state=inactive. Yayin yok.
-# Rapor: Drive TEMP/KUPA_TASLAK_CANCER_LIBRA_20261018/. Etsy kilidi: kilit_bekle.py. Kota tabani 10.
+# KUPA ORCHARD Etsy TASLAK (Serdar 19 Eki 2026). YAYIN YOK, Etsy Ads YOK. Kod: scripts/etsy/kupa_taslak.py
+# mod=oku : SALT OKUMA (kategori/nitelik, BY hazirlik, iade/ortak/bolum/kargo, sabit kayitlar, ayni baslikli taslak, OAS).
+# mod=kuru: AG/TOKEN YOK, Etsy'ye dokunmaz: galeri + metin indirilir, gonderilecek her istek KURU_<CIFT>.json'a yazilir.
+# mod=yaz : ETSY'YE YAZAR, yalniz Serdar'in o kosuya ozel onayiyla: cift basina 1 YENI taslak (8 Orchard stili x 11/15 oz
+#           = 16 urun, 14 gorsel + video, stil gorselleri, kisisellestirme, nitelikler) + geri okuma + salt son okuma.
+#           Yeni bolum/kargo/iade kaydi acilmaz. Eski taslak 4597843405'e yazma yok. PATCH yalniz acil state=inactive.
+# Gorsel: Drive ASTROLOVE/KUPA_ORCHARD78/<hedef>/<CIFT>/{galeri/01-14_*.jpg, video/*.mp4}
+# Rapor: Drive TEMP/KUPA_ORCHARD_TASLAK_20261019/ (DURUM.json: cift -> listing_id). Etsy kilidi: kilit_bekle.py. Kota tabani 10.
 permissions:
   actions: read
-  contents: write
+  contents: read
 on:
   workflow_dispatch:
     inputs:
-      mod: { description: "oku | yaz", required: true, default: "oku" }
-      listing_id: { description: "yaz: YALNIZ bu mevcut taslak (DURUM.json ile ayni olmali, degilse yazma yok) + kosu sonu salt son okuma", required: false, default: "" }
+      mod: { description: "oku | kuru | yaz", required: true, default: "kuru" }
+      ciftler: { description: "TUMU ya da virgul/bosluk ayrimli CIFT (alfabetik anahtar, orn. CANCER_LIBRA)", required: true, default: "CANCER_LIBRA" }
+      hedef: { description: "Drive ASTROLOVE/KUPA_ORCHARD78/<hedef>", required: true, default: "ORCHARD78_20261019" }
+      metin: { description: "Drive yolu: KUPA78_ORCHARD_METIN.csv", required: true, default: "ASTROLOVE/KUPA_ORCHARD78/KUPA78_ORCHARD_METIN.csv" }
 env:
-  O: "gdrive:ASTROLOVE/TEMP/KUPA_TASLAK_CANCER_LIBRA_20261018"
-  DAL: kupa-printful-sonuc
+  O: "gdrive:ASTROLOVE/TEMP/KUPA_ORCHARD_TASLAK_20261019"
 jobs:
   kupa:
     runs-on: ubuntu-latest
-    timeout-minutes: 140
+    timeout-minutes: 340
     steps:
       - uses: actions/checkout@v4
         with: { path: main }
       - name: Etsy kilidi (sira bekle, iptal yok)
+        if: ${{ inputs.mod != 'kuru' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: cd main && python3 scripts/etsy/kilit_bekle.py
-      - uses: actions/checkout@v4
-        with: { ref: kupa-printful-sonuc, path: s, fetch-depth: 0 }
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - name: Kurulum
         run: |
           set -euo pipefail
+          case "${{ inputs.mod }}" in oku|kuru|yaz) ;; *) echo "::error::mod oku|kuru|yaz olmali"; exit 1;; esac
           pip install -q requests==2.34.2
           curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || sudo apt-get install -y -qq rclone >/dev/null
       - name: rclone.conf
@@ -46,13 +49,36 @@ jobs:
           printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
           if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
             echo "::add-mask::$GOOGLE_CLIENT_SECRET"; echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
-      - name: Etsy token + BY listesi
+      - name: Cift listesi + metin
+        env:
+          CIFTLER: ${{ inputs.ciftler }}
         run: |
           set -euo pipefail
-          umask 077; mkdir -p _work _out
+          mkdir -p _work _out _img
+          L=$(cd main/scripts/etsy && python3 -c 'import os, kupa_taslak as k; print(" ".join(k.cift_listesi(os.environ["CIFTLER"])))')
+          echo "CIFT_LISTE=$L" >> "$GITHUB_ENV"; echo "cift: $(echo $L | wc -w) | $L"
+          rclone copyto "gdrive:${{ inputs.metin }}" _work/KUPA78_ORCHARD_METIN.csv || { [ "${{ inputs.mod }}" = oku ] && echo "metin yok (oku)"; [ "${{ inputs.mod }}" = oku ]; }
+      - name: Galeri + video (kuru, yaz)
+        if: ${{ inputs.mod != 'oku' }}
+        run: |
+          set -euo pipefail
+          K="gdrive:ASTROLOVE/KUPA_ORCHARD78/${{ inputs.hedef }}"; n=0; T=$(echo $CIFT_LISTE | wc -w); t0=$(date +%s)
+          for c in $CIFT_LISTE; do
+            rclone copy "$K/$c/galeri" "_img/$c/galeri" -q --include "/[01][0-9]_*.jpg"
+            rclone copy "$K/$c/video" "_img/$c/video" -q --include "/*.mp4"
+            g=$(ls _img/$c/galeri/*.jpg 2>/dev/null | wc -l); v=$(ls _img/$c/video/*.mp4 2>/dev/null | wc -l)
+            [ "$g" = 14 ] && [ "$v" = 1 ] || { echo "::error::$c galeri $g/14 video $v/1"; exit 1; }
+            n=$((n+1)); s=$(( $(date +%s) - t0 )); echo "indir [$n/$T] $c | gecen ${s} sn | kalan ~$(( s * (T - n) / n )) sn | %$(( 100 * n / T ))"
+          done
+      - name: Etsy token + onceki durum (oku, yaz)
+        if: ${{ inputs.mod != 'kuru' }}
+        run: |
+          set -euo pipefail
+          umask 077
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
           rclone copyto "gdrive:ASTROLOVE/TEMP/BY78_TASLAK_20261014/BY78_TASLAKLAR.csv" _work/BY78_TASLAKLAR.csv
-          echo "BY satir: $(($(wc -l < _work/BY78_TASLAKLAR.csv) - 1))"
+          rclone copy "$O" _out --include "/DURUM.json" -q || true
+          [ -f _out/DURUM.json ] && cat _out/DURUM.json || echo "onceki durum yok"
       - name: Etsy SALT OKUMA
         if: ${{ inputs.mod == 'oku' }}
         env:
@@ -61,23 +87,17 @@ jobs:
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
           TOKEN_FILE: _work/ETSY_TOKEN.json
           BY_CSV: _work/BY78_TASLAKLAR.csv
-          KUPA_CSV: s/kupa_uretim/ilan/KUPA78_ILAN_METIN.csv
           OUT: _out
-        run: python3 main/scripts/etsy/kupa_taslak.py --mod oku
-      - name: Galeri + onceki durum (yaz)
-        if: ${{ inputs.mod == 'yaz' }}
         run: |
-          set -euo pipefail
-          mkdir -p _img
-          rclone copy "gdrive:ASTROLOVE/TEMP/KUPA78_GALERI_20261018/CANCER_LIBRA/galeri" _img -q --include "[01][0-9]_*.jpg" --include "VIDEO_*.mp4"
-          ls -la _img; [ "$(ls _img/*.jpg | wc -l)" = 13 ] && [ "$(ls _img/*.mp4 | wc -l)" = 1 ] || { echo "HATA galeri 13+1 degil"; exit 1; }
-          rclone copy "$O" _out --include "/DURUM.json" -q || true
-          [ -f _out/DURUM.json ] && cat _out/DURUM.json || echo "onceki durum yok"
-          if [ -n "${{ inputs.listing_id }}" ]; then
-            D=$(python3 -c 'import json;print(json.load(open("_out/DURUM.json")).get("listing_id",""))' 2>/dev/null || true)
-            [ "$D" = "${{ inputs.listing_id }}" ] || { echo "::error::DUR: DURUM.json listing_id '$D' != ${{ inputs.listing_id }}; yeni ilan acilmasin diye yazma yok"; exit 1; }
-            echo "kapı: DURUM.json listing_id = $D (mevcut taslak kullanilacak)"
-          fi
+          [ -f _work/KUPA78_ORCHARD_METIN.csv ] && export METIN_CSV=_work/KUPA78_ORCHARD_METIN.csv
+          python3 main/scripts/etsy/kupa_taslak.py --mod oku --ciftler "$CIFT_LISTE"
+      - name: KURU (Etsy'ye istek yok)
+        if: ${{ inputs.mod == 'kuru' }}
+        env:
+          METIN_CSV: _work/KUPA78_ORCHARD_METIN.csv
+          IMG_ROOT: _img
+          OUT: _out
+        run: python3 main/scripts/etsy/kupa_taslak.py --mod kuru --ciftler "$CIFT_LISTE"
       - name: Etsy YAZ (taslak)
         if: ${{ inputs.mod == 'yaz' }}
         env:
@@ -85,61 +105,28 @@ jobs:
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
           TOKEN_FILE: _work/ETSY_TOKEN.json
-          BY_CSV: _work/BY78_TASLAKLAR.csv
-          KUPA_CSV: s/kupa_uretim/ilan/KUPA78_ILAN_METIN.csv
-          IMG_DIR: _img
+          METIN_CSV: _work/KUPA78_ORCHARD_METIN.csv
+          IMG_ROOT: _img
           OUT: _out
-        run: python3 main/scripts/etsy/kupa_taslak.py --mod yaz
+        run: python3 main/scripts/etsy/kupa_taslak.py --mod yaz --ciftler "$CIFT_LISTE"
       - name: Son okuma (salt okuma, ayri adim)
-        if: ${{ always() && inputs.mod == 'yaz' && inputs.listing_id != '' }}
+        if: ${{ always() && inputs.mod == 'yaz' }}
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
           TOKEN_FILE: _work/ETSY_TOKEN.json
-          LISTING_ID: ${{ inputs.listing_id }}
           OUT: _out
-        run: python3 main/scripts/etsy/kupa_son_oku.py
-      - name: Printful token (maskeli)
-        if: ${{ inputs.mod == 'oku' }}
         run: |
-          set -euo pipefail
-          T=$(rclone cat "gdrive:ASTROLOVE/TEMP/PRINTFUL_TOKEN.json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["api_token"].strip())')
-          [ -n "$T" ] || { echo "HATA: PRINTFUL token bos"; exit 1; }
-          echo "::add-mask::$T"; echo "PRINTFUL_TOKEN=$T" >> "$GITHUB_ENV"
-      - name: Printful kargo ek (FR IT ES NL PL AU CA, Flat Rate)
-        if: ${{ inputs.mod == 'oku' }}
-        env:
-          KARGO_ULKELER: "FR IT ES NL PL AU CA"
-          KARGO_AD: KARGO_EK
-          KARGO_YALNIZ: "Flat Rate"
-        run: |
-          set -uo pipefail
-          cd s
-          [ -e sonuc_15oz/KARGO_EK.txt ] && { echo "::error::sonuc_15oz/KARGO_EK.txt zaten var; dokunulmaz"; exit 1; }
-          python "$GITHUB_WORKSPACE/main/scripts/kupa_printful/kargo.py" sonuc_15oz 2>&1 | sed -u "s|${PRINTFUL_TOKEN}|***|g" | tee "$GITHUB_WORKSPACE/_out/KARGO_EK_LOG.txt"
-          k=${PIPESTATUS[0]}
-          [ -f sonuc_15oz/KARGO_EK.txt ] && echo "::warning::KARGO_EK $(tail -n +2 sonuc_15oz/KARGO_EK.txt | cut -d'|' -f1,2,4,5,6 | tr '\n' ';' | cut -c1-900)"
-          exit $k
-      - name: KARGO_EK dala yaz (normal commit + push)
-        if: ${{ always() && inputs.mod == 'oku' }}
-        run: |
-          set -euo pipefail
-          cd s
-          [ -e sonuc_15oz/KARGO_EK.txt ] || { echo "KARGO_EK yok, commit yok"; exit 0; }
-          if grep -rlF "${PRINTFUL_TOKEN:-TOKEN_YOK_X}" sonuc_15oz/KARGO_EK.txt sonuc_15oz/KARGO_EK.json; then echo "::error::token goruldu, push yok"; exit 1; fi
-          git config user.name "astrolove-bot"; git config user.email "astrolove-bot@users.noreply.github.com"
-          git add -- sonuc_15oz/KARGO_EK.txt sonuc_15oz/KARGO_EK.json
-          X=$(git diff --cached --name-status | grep -vE "^A[[:space:]]+sonuc_15oz/KARGO_EK\.(txt|json)$" || true)
-          [ -z "$X" ] || { echo "::error::beklenmeyen degisiklik: $X"; exit 1; }
-          ONCE=$(git ls-tree -r --name-only HEAD kupa_uretim | wc -l)
-          git commit -qm "kupa kargo ek: Printful Flat Rate FR IT ES NL PL AU CA x 1320/4830"
-          for i in 1 2 3; do git push -q origin "HEAD:${DAL}" && break; [ $i = 3 ] && exit 1; git pull -q --rebase origin "$DAL"; done
-          git fetch -q origin "$DAL"
-          echo "::warning::DAL commit $(git rev-parse --short origin/${DAL}) | kupa_uretim once $ONCE sonra $(git ls-tree -r --name-only origin/${DAL} kupa_uretim | wc -l)"
+          [ -f _out/DURUM.json ] || { echo "DURUM.json yok"; exit 0; }
+          for c in $CIFT_LISTE; do
+            L=$(python3 -c 'import json,sys; print(json.load(open("_out/DURUM.json")).get("ciftler", {}).get(sys.argv[1], ""))' "$c")
+            [ -n "$L" ] || continue
+            LISTING_ID=$L python3 main/scripts/etsy/kupa_son_oku.py && mv _out/KUPA_SON_OKU.json "_out/KUPA_SON_OKU_$c.json"
+          done
       - name: Drive'a rapor
         if: ${{ always() }}
-        run: '[ -d _out ] && rclone copy _out "$O" -q && echo "::warning::rapor Drive TEMP/KUPA_TASLAK_CANCER_LIBRA_20261018" || true'
+        run: '[ -d _out ] && rclone copy _out "$O" -q && echo "::warning::rapor Drive TEMP/KUPA_ORCHARD_TASLAK_20261019" || true'
       - name: Token geri yaz
         if: ${{ always() }}
         run: |

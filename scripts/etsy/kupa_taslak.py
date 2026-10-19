@@ -1,32 +1,35 @@
 #!/usr/bin/env python3
-"""KUPA: CANCER_LIBRA kupa ilani TASLAK (Serdar 18 Eki 2026). YAYIN YOK, Etsy Ads YOK.
+"""KUPA ORCHARD: 78 cift kupa ilani TASLAK (Serdar 19 Eki 2026). YAYIN YOK, Etsy Ads YOK.
 
---mod oku  : SALT OKUMA (Etsy'ye yazma yok; kilitli istemci her yazmayi durdurur).
-             kupa kategorisi (taxonomy) adaylari + secilen dugumun nitelikleri (zorunlu/istege bagli, olasi degerler),
-             Bizim Yilimiz CANCER_LIBRA ilaninin hazirlik ayari (readiness_state_id, processing, kargo profili),
-             iade politikalari, uretim ortaklari, bolumler, kargo profilleri, ayni baslikli taslak var mi,
-             Etsy OAS (statik): ilgili uclarin istek alanlari (production partner olusturma ucu var mi dahil).
+--mod oku  : SALT OKUMA (Etsy'ye yazma yok; SaltOkur her yazmayi durdurur). Kategori/nitelik, BY hazirlik ayari,
+             iade/ortak/bolum/kargo profilleri, sabit kayitlarin varligi, ayni baslikli taslak, Etsy OAS.
              Cikti: OUT/KUPA_OKU.json + OUT/KUPA_OKU.md
---mod yaz  : ETSY'YE YAZAR (Serdar onayi 18 Eki). Yalniz yeni kayitlar + 1 taslak; mevcut ilan/profil/politika/ortaga yazma YOK.
-             a) bolum "Zodiac Couple Mugs" (yoksa POST), kargo profili "Kupa Free US UK EU" (yoksa POST; US/EU/GB 0 USD,
-                baska hedef yok; islem 4-7 is gunu ve teslim gunleri BY profiliyle ayni), iade politikasi iade yok/degisim yok
-                (mevcut 1513990287785 ayniysa o; yoksa POST), uretim ortagi 5817638 (Serdar 18 Eki: mevcut ortak; API olusturamaz).
+--mod kuru : AG YOK, TOKEN YOK. yaz() ile ayni kod yolu, Etsy bellekte taklit edilir (Kuru istemci); gonderilecek her
+             istek (GET dahil) sirasiyla OUT/KURU_<CIFT>.json'a yazilir. Izin listesi (Kilitli._izin) kuruda da uygulanir.
+--mod yaz  : ETSY'YE YAZAR (yalniz Serdar'in o adima ozel onayiyla kosulur). Cift basina 1 YENI taslak; yeni kayit
+             (bolum/kargo profili/iade) OLUSTURULMAZ, sabit kayitlar yalniz okunup dogrulanir.
              b) createDraftListing (tek POST): CSV basligi/aciklamasi/13 etiket birebir, i_did, made_to_order, fiziksel,
-                Ceramic, kategori 1062 Mugs, readiness BY ile ayni (1517641240112), fiyat 24.00, stok 999.
-             c) envanter: Style (513) x Size (514) = 14 urun, fiyat yalniz boya gore (11 oz 24.00, 15 oz 29.00), stok 999,
-                price_on_property ve sku_on_property [513, 514] (Etsy: ya bos ya iki ozellik),
-                SKU KUPA-CANCER_LIBRA-<stil no>-<11|15>.  d) 13 gorsel (galeri 01-13 sirasi) + video.
-             e) Style -> kapak baglari (Rose Ribbon=01, Botanical=03 ... Mediterranean=08).  f) kisisellestirme: tek kutu,
+                Ceramic, kategori 1062 Mugs, readiness 1517641240112, bolum 60980873, kargo 318301958420,
+                iade 1513990287785, ortak 5817638, fiyat 24.00, stok 999.
+             c) envanter: Style (513) x Size (514) = 16 urun (8 Orchard stili x 11/15 oz), fiyat yalniz boya gore
+                (11 oz 24.00, 15 oz 29.00), stok 999, price_on_property ve sku_on_property [513, 514],
+                SKU KUPA-<CIFT>-<01-08>-<11|15>.  d) 14 gorsel (galeri 01-14 sirasi) + video.
+             e) Style -> gorsel (Orange Blossom=01, Purple Fig=08 ... Golden Loquat=14).  f) kisisellestirme: tek kutu,
                 zorunlu, 256 karakter, talimat CSV.  g) nitelikler (kategori 1062).  h) geri okuma kontrolleri.
              Her yazmadan sonra state okunur; "active" gorulurse aninda state=inactive + DUR. updateListing (PATCH) YOK
-             (CLAUDE.md: taslagi yayina alir); PATCH yalniz acil {"state": "inactive"}. Ikinci kosu ikinci ilan acmaz
-             (DURUM.json + ayni baslikli taslak). Cikti: OUT/KUPA_TASLAK.json + OUT/DURUM.json
-Ortam: ETSY_API_KEY, ETSY_SHARED_SECRET, ETSY_SHOP_ID, TOKEN_FILE, BY_CSV (BY78_TASLAKLAR.csv), KUPA_CSV, IMG_DIR, OUT
+             (CLAUDE.md: taslagi yayina alir); PATCH yalniz acil {"state": "inactive"}. DELETE yok.
+             Eski 7 stil taslagi 4597843405 (ESKI_TASLAK) hicbir yazmada hedef olamaz ve "ayni baslikli taslak"
+             aramasinda yok sayilir. Ikinci kosu ikinci ilan acmaz (DURUM.json cift -> listing_id + ayni baslikli taslak).
+             Cikti: OUT/KUPA_TASLAK_<CIFT>.json + OUT/DURUM.json
+Ortam: ETSY_API_KEY, ETSY_SHARED_SECRET, ETSY_SHOP_ID, TOKEN_FILE (oku/yaz), BY_CSV (oku), METIN_CSV
+       (KUPA78_ORCHARD_METIN.csv: kod, baslik, etiketler, kisisellestirme_talimati, aciklama), IMG_ROOT
+       (<IMG_ROOT>/<CIFT>/galeri/01-14_*.jpg ve <IMG_ROOT>/<CIFT>/video/*.mp4), OUT
 Kota tabani 10 (Serdar 15 Eki): x-remaining-today < 10 ise DUR.
 """
 import argparse
 import csv
 import html
+import itertools
 import json
 import os
 import re
@@ -39,7 +42,6 @@ import requests
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from etsy_common import API, Etsy, TokenStore, mask  # noqa: E402
 
-PAIR = "CANCER_LIBRA"
 KOTA_MIN = 10
 OAS = "https://www.etsy.com/openapi/generated/oas/3.0.0.json"
 OAS_OP = ["createDraftListing", "createShopReturnPolicy", "createShopShippingProfile", "createShopShippingProfileDestination",
@@ -47,6 +49,9 @@ OAS_OP = ["createDraftListing", "createShopReturnPolicy", "createShopShippingPro
           "updateListingPersonalization", "updateListingProperty", "updateListingInventory", "uploadListingImage",
           "getListingPersonalization", "getShopReadinessStateDefinitions", "createShopReadinessStateDefinition"]
 KUPA_ADLARI = ("mug", "mugs")
+BURCLAR = ["ARIES", "TAURUS", "GEMINI", "CANCER", "LEO", "VIRGO", "LIBRA", "SCORPIO", "SAGITTARIUS", "CAPRICORN",
+           "AQUARIUS", "PISCES"]
+CIFTLER = sorted("_".join(sorted(p)) for p in itertools.combinations_with_replacement(BURCLAR, 2))   # 78, alfabetik anahtar
 
 
 class SaltOkur(Etsy):
@@ -142,7 +147,7 @@ def oas_ozet():
     return R
 
 
-def oku(api, shop, out):
+def oku(api, shop, out, PAIR):
     R = {"kota_bas": None}
     api.get(f"/shops/{shop}")
     R["kota_bas"] = api.remaining
@@ -201,8 +206,12 @@ def oku(api, shop, out):
     R["bolumler"] = [dict(id=x.get("shop_section_id"), ad=x.get("title"), aktif_ilan=x.get("active_listing_count")) for x in secs]
     sps = (api.get(f"/shops/{shop}/shipping-profiles") or {}).get("results") or []
     R["kargo_profilleri"] = [dict(id=x.get("shipping_profile_id"), ad=x.get("title")) for x in sps]
-    if os.environ.get("KUPA_CSV"):
-        row = next(r for r in csv.DictReader(open(os.environ["KUPA_CSV"], encoding="utf-8")) if r["kod"] == PAIR)
+    R["sabit_kayit"] = dict(ortak=PARTNER in [x["id"] for x in R["uretim_ortaklari"]],
+                            bolum=BOLUM_ID in [x["id"] for x in R["bolumler"]],
+                            kargo=PROFIL_ID in [x["id"] for x in R["kargo_profilleri"]],
+                            iade=[x for x in R["iade_politikalari"] if x["id"] == IADE_ID])
+    if os.environ.get("METIN_CSV"):
+        row = metin_satiri(PAIR)
         drafts = (api.get(f"/shops/{shop}/listings", params={"state": "draft", "limit": 100}) or {}).get("results") or []
         R["ayni_baslikli_taslak"] = [x.get("listing_id") for x in drafts if x.get("title") == row["baslik"]]
     R["kota_son"] = api.remaining
@@ -222,7 +231,7 @@ def oku(api, shop, out):
                   f"olcek={p['olcekler']} degerler({len(p['degerler'])})={[d[1] for d in p['degerler']][:40]}")
     md += ["", f"BY ilan: {R.get('by_ilan')}", f"BY kargo: {R.get('by_kargo_profili')}", f"hazirlik: {R['hazirlik_tanimlari']}",
            f"iade: {R['iade_politikalari']}", f"ortak: {R['uretim_ortaklari']}", f"bolum: {R['bolumler']}",
-           f"kargo profilleri: {R['kargo_profilleri']}", f"ayni baslikli taslak: {R.get('ayni_baslikli_taslak')}",
+           f"kargo profilleri: {R['kargo_profilleri']}", f"sabit kayit: {R['sabit_kayit']}", f"ayni baslikli taslak: {R.get('ayni_baslikli_taslak')}",
            f"OAS production partner yollari: {(R['oas'] or {}).get('production_partner_yollari')}"]
     (out / "KUPA_OKU.md").write_text("\n".join(md) + "\n")
     print("\n".join(md))
@@ -236,18 +245,18 @@ def oku(api, shop, out):
 TAXONOMY = 1062                     # Home & Living > Kitchen & Dining > Drink & Barware > Drinkware > Mugs (oku 18 Eki)
 READINESS = 1517641240112           # made_to_order 4-7 gun = BY CANCER_LIBRA 4595350971 (oku 18 Eki)
 PARTNER = 5817638                   # "Printing and Fulfillment Partner", United States (Serdar 18 Eki)
-IADE_ID = 1513990287785             # iade yok, degisim yok (oku 18 Eki; ayni kayit kullanilir)
-BOLUM_AD = "Zodiac Couple Mugs"
-PROFIL_AD = "Kupa Free US UK EU"
-ORIGIN = ("US", "28216")            # BY profiliyle ayni cikis
-ISLEM = (4, 7)                      # BY ile ayni hazirlik (4-7 is gunu)
-# (anahtar, tur, kod, ucret, min, max teslim gunu) = BY profilindeki US/EU/GB degerleri; baska hedef YOK
-HEDEF = [("US", "country", "US", 0, 3, 8), ("EU", "region", "eu", 0, 5, 12), ("GB", "country", "GB", 0, 5, 10)]
+IADE_ID = 1513990287785             # iade yok, degisim yok
+BOLUM_ID = 60980873                 # "Zodiac Couple Mugs" (18 Eki kosusunda olustu)
+PROFIL_ID = 318301958420            # "Kupa Free US UK EU" (18 Eki kosusunda olustu)
+ESKI_TASLAK = {4597843405}          # eski 7 stil CANCER_LIBRA taslagi: bu kod ona YAZMAZ, onu "ayni baslikli taslak" saymaz
 P_STYLE, P_SIZE = 513, 514
-STILLER = [("Rose Ribbon", "04", "RoseRibbon", 1), ("Botanical", "01", "Botanical", 3), ("Gold", "02", "Gold", 4),
-           ("Nazar Bond", "03", "NazarBond", 5), ("Promise Line", "05", "PromiseLine", 6), ("Aegean Tile", "06", "AegeanTile", 7),
-           ("Mediterranean", "07", "Mediterranean", 8)]          # (menu adi, stil no, dosya adi parcasi, kapak rank)
+# (menu adi, stil no, galeri sirasi); galeri dosya adi <sira>_<Ad_Soyad>... (kupa_orchard/kod/cift.py)
+STILLER = [("Orange Blossom", "01", 1), ("Purple Fig", "02", 8), ("Olive Breeze", "03", 9), ("Pomegranate Bloom", "04", 10),
+           ("Almond Blossom", "05", 11), ("Lemon Grove", "06", 12), ("Blue Grape", "07", 13), ("Golden Loquat", "08", 14)]
+ESKI_STILLER = ["Rose Ribbon", "Botanical", "Gold", "Nazar Bond", "Promise Line", "Aegean Tile", "Mediterranean"]
 BOYLAR = [("11 oz", "11", 24.00), ("15 oz", "15", 29.00)]
+N_URUN = len(STILLER) * len(BOYLAR)
+N_GORSEL = 14
 MALZEME = ["Ceramic"]
 SORU_METNI = "Personalization"
 SORU_MAX = 256
@@ -259,18 +268,31 @@ NITELIK = [(148789511893, "Materials", [83], ["Ceramic"]), (200, "Primary color"
            (396998957792, "Graphic", [2534], ["Zodiac"])]
 NITELIK_BOS = ["Secondary color (stile gore degisir)", "Width/Height/Depth (iki boy)", "Capacity (iki boy; Size menusu)",
                "Holiday (BY ile ayni: bos)", "Material features (Upcycled degil)"]
-TIRE = re.compile("[\u2013\u2014]")
+METIN_SUTUN = ["kod", "baslik", "etiketler", "kisisellestirme_talimati", "aciklama"]
+TIRE = re.compile("[–—]")
 
 
-def sku(no, boy):
-    return f"KUPA-{PAIR}-{no}-{boy}"
+def sku(pair, no, boy):
+    return f"KUPA-{pair}-{no}-{boy}"
+
+
+def metin_satiri(pair):
+    rows = list(csv.DictReader(open(os.environ["METIN_CSV"], encoding="utf-8")))
+    eksik = [c for c in METIN_SUTUN if rows and c not in rows[0]]
+    if not rows or eksik:
+        raise SystemExit(f"DUR: METIN_CSV sutun eksik {eksik} (beklenen {METIN_SUTUN})")
+    r = [x for x in rows if x["kod"] == pair]
+    if len(r) != 1:
+        raise SystemExit(f"DUR: METIN_CSV'de {pair} satiri {len(r)} (1 olmali)")
+    return r[0]
 
 
 def metin_kontrol(row):
+    """(title, desc, tags, inst, hata, uyari). hata -> yaz DURUR; uyari yalniz rapora."""
     title, desc = row["baslik"], row["aciklama"]
     tags = [t.strip() for t in row["etiketler"].split(",")]
     inst = row["kisisellestirme_talimati"]
-    hata = []
+    hata, uyari = [], []
     if TIRE.search(title + desc + " ".join(tags) + inst):
         hata.append("uzun/orta tire var")
     if len(title) > 140:
@@ -286,23 +308,41 @@ def metin_kontrol(row):
         hata.append(f"talimat {len(inst)} > {SORU_MAX}")
     if "AstroLove " in desc.replace("AstroLoveArt", ""):
         hata.append("aciklamada yalniz 'AstroLove' (marka AstroLoveArt)")
-    return title, desc, tags, inst, hata
+    eski = [s for s in ESKI_STILLER if re.search(rf"\b{s}\b", title + "\n" + desc)]
+    if eski:
+        hata.append(f"eski 7 stil adi metinde {eski}")
+    yok = [ad for ad, *_ in STILLER if ad not in desc]
+    if yok:
+        uyari.append(f"aciklamada gecmeyen Orchard stili {yok}")
+    return title, desc, tags, inst, hata, uyari
+
+
+def medya(pair):
+    """<IMG_ROOT>/<CIFT>/galeri/01-14 + <IMG_ROOT>/<CIFT>/video/*.mp4; stil -> gorsel adi kontrolu."""
+    kok = Path(os.environ["IMG_ROOT"]) / pair
+    galeri = sorted((kok / "galeri").glob("[0-1][0-9]_*.jpg"))
+    video = sorted((kok / "video").glob("*.mp4"))
+    hata = []
+    if [int(p.name[:2]) for p in galeri] != list(range(1, N_GORSEL + 1)):
+        hata.append(f"galeri 01-{N_GORSEL} degil: {[p.name for p in galeri]}")
+    if len(video) != 1:
+        hata.append(f"video 1 degil: {[p.name for p in video]}")
+    if not hata:
+        for ad, _, rk in STILLER:
+            if ad.replace(" ", "_") not in galeri[rk - 1].name:
+                hata.append(f"gorsel {rk:02d} ({galeri[rk - 1].name}) {ad} degil")
+    return galeri, video, hata
 
 
 class Kilitli(Etsy):
-    """Izinli yazmalar: yeni bolum/profil/hedef/iade, taslak olusturma ve YALNIZ bu taslagin alt uclari.
-    PATCH yalniz acil {"state": "inactive"}. DELETE yok. Kota < 10 -> DUR."""
+    """Izinli yazmalar: taslak olusturma ve YALNIZ o taslagin alt uclari. Yeni bolum/profil/iade YOK.
+    PATCH yalniz acil {"state": "inactive"}. DELETE yok. ESKI_TASLAK'a yazma yok. Kota < 10 -> DUR."""
     lid = None
-    profil = None
-    iade_izin = False
 
     def _izin(self, method, path):
-        ok = [("POST", r"^/shops/\d+/sections$"), ("POST", r"^/shops/\d+/shipping-profiles$"),
-              ("POST", r"^/shops/\d+/listings$")]
-        if self.profil:
-            ok.append(("POST", rf"^/shops/\d+/shipping-profiles/{self.profil}/destinations$"))
-        if self.iade_izin:
-            ok.append(("POST", r"^/shops/\d+/policies/return$"))
+        if any(re.search(rf"/listings/{e}(/|$)", path) for e in ESKI_TASLAK):
+            raise SystemExit(f"YASAK yazma (eski taslak): {method} {path}")
+        ok = [("POST", r"^/shops/\d+/listings$")]
         if self.lid:
             L = self.lid
             ok += [("PUT", rf"^/listings/{L}/inventory$"), ("POST", rf"^/shops/\d+/listings/{L}/images$"),
@@ -327,6 +367,15 @@ class Kilitli(Etsy):
         self.kota()
         return r
 
+    def taslak_olustur(self, shop, body):
+        """createDraftListing: TEK deneme (tekrar ikinci ilan acabilir). (status, json|None, metin)."""
+        self._izin("POST", f"/shops/{shop}/listings")
+        self.calls += 1
+        r_ = requests.post(API + f"/shops/{shop}/listings", data=body, headers=self._headers(), timeout=120)
+        self.remaining = r_.headers.get("x-remaining-today", self.remaining)
+        self.kota()
+        return r_.status_code, (r_.json() if r_.status_code in (200, 201) else None), r_.text[:300]
+
     def kota(self):
         try:
             if self.remaining is not None and int(self.remaining) < KOTA_MIN:
@@ -338,108 +387,45 @@ class Kilitli(Etsy):
         raise SystemExit("YASAK: DELETE")
 
 
-def yaz(api, shop, out):
-    R = {"olaylar": [], "adimlar": [], "nitelik_bos": NITELIK_BOS}
+def yaz(api, shop, out, pair):
+    R = {"cift": pair, "olaylar": [], "adimlar": [], "nitelik_bos": NITELIK_BOS}
     durum_f = out / "DURUM.json"
     D = json.load(open(durum_f)) if durum_f.exists() else {}
+    D.setdefault("ciftler", {})
+    rapor_f = out / f"KUPA_TASLAK_{pair}.json"
 
     def kaydet():
         json.dump(D, open(durum_f, "w"), indent=1)
-        json.dump(R, open(out / "KUPA_TASLAK.json", "w"), indent=1, ensure_ascii=False, default=str)
+        json.dump(R, open(rapor_f, "w"), indent=1, ensure_ascii=False, default=str)
 
-    row = next(r for r in csv.DictReader(open(os.environ["KUPA_CSV"], encoding="utf-8")) if r["kod"] == PAIR)
-    title, desc, tags, inst, hata = metin_kontrol(row)
+    title, desc, tags, inst, hata, uyari = metin_kontrol(metin_satiri(pair))
     R["metin"] = dict(baslik_kr=len(title), etiket=len(tags), etiket_max=max(len(t) for t in tags), talimat_kr=len(inst),
-                      tire_yok=not TIRE.search(title + desc + " ".join(tags) + inst))
-    if hata:
+                      hata=hata, uyari=uyari)
+    if hata and not getattr(api, "kuru", False):
         kaydet(); raise SystemExit(f"DUR: metin kontrolu {hata}")
-    img_dir = Path(os.environ["IMG_DIR"])
-    galeri = sorted(img_dir.glob("[0-1][0-9]_*.jpg"))
-    video = sorted(img_dir.glob("VIDEO_*.mp4"))
-    if [int(p.name[:2]) for p in galeri] != list(range(1, 14)) or len(video) != 1:
-        kaydet(); raise SystemExit(f"DUR: galeri {[p.name for p in galeri]} video {[p.name for p in video]}")
-    for ad, no, parca, rk in STILLER:
-        if parca not in galeri[rk - 1].name:
-            kaydet(); raise SystemExit(f"DUR: kapak {rk} ({galeri[rk - 1].name}) {ad} degil")
+    galeri, video, mhata = medya(pair)
+    if mhata:
+        kaydet(); raise SystemExit(f"DUR: medya {mhata}")
     R["galeri"] = [p.name for p in galeri] + [video[0].name]
 
     api.get(f"/shops/{shop}")
     R["kota_bas"] = api.remaining
-    print(f"kota basta {api.remaining}")
+    print(f"{pair}: kota basta {api.remaining}")
 
-    # a) kayitlar
+    # a) sabit kayitlar (yalniz okunur; olusturma yok)
     pp = (api.get(f"/shops/{shop}/production-partners") or {}).get("results") or []
-    if PARTNER not in [x.get("production_partner_id") for x in pp]:
-        kaydet(); raise SystemExit(f"DUR: uretim ortagi {PARTNER} yok")
     secs = (api.get(f"/shops/{shop}/sections") or {}).get("results") or []
-    b = [x for x in secs if (x.get("title") or "").strip().lower() == BOLUM_AD.lower()]
-    if b:
-        bolum = b[0]["shop_section_id"]; R["olaylar"].append(f"bolum zaten var {bolum}")
-    else:
-        if len(secs) >= 20:
-            kaydet(); raise SystemExit("DUR: bolum sayisi 20")
-        api.post(f"/shops/{shop}/sections", {"title": BOLUM_AD})
-        secs = (api.get(f"/shops/{shop}/sections") or {}).get("results") or []
-        b = [x for x in secs if (x.get("title") or "").strip().lower() == BOLUM_AD.lower()]
-        if len(b) != 1:
-            kaydet(); raise SystemExit("DUR: bolum olusmadi")
-        bolum = b[0]["shop_section_id"]; R["olaylar"].append(f"bolum OLUSTURULDU {bolum}")
-    R["bolum"] = bolum
-
+    prof = api.get(f"/shops/{shop}/shipping-profiles/{PROFIL_ID}", ok404=True) or {}
     rps = (api.get(f"/shops/{shop}/policies/return") or {}).get("results") or []
-    uygun = [x for x in rps if x.get("accepts_returns") is False and x.get("accepts_exchanges") is False]
-    if uygun:
-        iade = IADE_ID if IADE_ID in [x["return_policy_id"] for x in uygun] else uygun[0]["return_policy_id"]
-        R["olaylar"].append(f"iade politikasi mevcut kullanildi {iade}")
-    else:
-        api.iade_izin = True
-        r_ = api.post(f"/shops/{shop}/policies/return", {"accepts_returns": "false", "accepts_exchanges": "false"}) or {}
-        api.iade_izin = False
-        iade = r_.get("return_policy_id")
-        R["olaylar"].append(f"iade politikasi OLUSTURULDU {iade}")
-    R["iade"] = iade
-
-    def hedef_anahtar(x):
-        cc = (x.get("destination_country_iso") or "").upper()
-        rg = (x.get("destination_region") or "none").lower()
-        return cc if cc else ("EVERYWHERE" if rg == "none" else rg.upper())
-
-    sps = (api.get(f"/shops/{shop}/shipping-profiles") or {}).get("results") or []
-    v = [x for x in sps if (x.get("title") or "").strip() == PROFIL_AD]
-    if len(v) > 1:
-        kaydet(); raise SystemExit(f"DUR: ayni adla {len(v)} profil")
-    if v:
-        pid = v[0]["shipping_profile_id"]; R["olaylar"].append(f"kargo profili zaten var {pid}")
-        prof = api.get(f"/shops/{shop}/shipping-profiles/{pid}") or {}
-    else:
-        _, _, kod, ucret, dmin, dmax = HEDEF[0]
-        body = {"title": PROFIL_AD, "origin_country_iso": ORIGIN[0], "origin_postal_code": ORIGIN[1], "primary_cost": ucret,
-                "secondary_cost": ucret, "min_processing_time": ISLEM[0], "max_processing_time": ISLEM[1],
-                "processing_time_unit": "business_days", "destination_country_iso": kod, "min_delivery_days": dmin,
-                "max_delivery_days": dmax}
-        prof = api.post(f"/shops/{shop}/shipping-profiles", body) or {}
-        pid = prof.get("shipping_profile_id")
-        if not pid:
-            kaydet(); raise SystemExit(f"DUR: kargo profili olusmadi {str(prof)[:200]}")
-        R["olaylar"].append(f"kargo profili OLUSTURULDU {pid}")
-    api.profil = pid
-    var = {hedef_anahtar(x) for x in prof.get("shipping_profile_destinations") or []}
-    for key, tur, kod, ucret, dmin, dmax in HEDEF:
-        if key in var:
-            continue
-        body = {"primary_cost": ucret, "secondary_cost": ucret, "min_delivery_days": dmin, "max_delivery_days": dmax}
-        body["destination_country_iso" if tur == "country" else "destination_region"] = kod
-        api.post(f"/shops/{shop}/shipping-profiles/{pid}/destinations", body)
-        R["olaylar"].append(f"kargo hedefi eklendi {key} {ucret} USD {dmin}-{dmax} gun")
-    son = api.get(f"/shops/{shop}/shipping-profiles/{pid}") or {}
-    hed = {hedef_anahtar(x): (para(x.get("primary_cost")), para(x.get("secondary_cost")), x.get("min_delivery_days"),
-                              x.get("max_delivery_days")) for x in son.get("shipping_profile_destinations") or []}
-    bek = {k_: (float(u), float(u), a, b_) for k_, _, _, u, a, b_ in HEDEF}
-    R["kargo_profili"] = dict(id=pid, ad=son.get("title"), cikis=(son.get("origin_country_iso"), son.get("origin_postal_code")),
-                              hedefler=hed)
-    if hed != bek:
-        kaydet(); raise SystemExit(f"DUR: kargo hedefleri {hed} != {bek}")
-    kaydet()
+    iade = [x for x in rps if x.get("return_policy_id") == IADE_ID]
+    eksik = [ad for ad, ok in (("ortak", PARTNER in [x.get("production_partner_id") for x in pp]),
+                               ("bolum", BOLUM_ID in [x.get("shop_section_id") for x in secs]),
+                               ("kargo profili", prof.get("shipping_profile_id") == PROFIL_ID),
+                               ("iade (iade yok/degisim yok)", bool(iade) and iade[0].get("accepts_returns") is False
+                                and iade[0].get("accepts_exchanges") is False)) if not ok]
+    if eksik:
+        kaydet(); raise SystemExit(f"DUR: sabit kayit yok/uyumsuz {eksik}")
+    R["sabit"] = dict(ortak=PARTNER, bolum=BOLUM_ID, kargo=(PROFIL_ID, prof.get("title")), iade=IADE_ID)
 
     # b) taslak
     def state_oku(adim):
@@ -454,56 +440,58 @@ def yaz(api, shop, out):
             kaydet(); raise SystemExit(f"DUR: /listings/{api.lid} okunamadi (404) ({adim})")
         st = L.get("state")
         R["adimlar"].append((adim, st, api.remaining))
-        print(f"{adim}: state={st} kota={api.remaining}", flush=True)
+        print(f"{pair} {adim}: state={st} kota={api.remaining}", flush=True)
         if st == "active":
             api.patch(f"/shops/{shop}/listings/{api.lid}", {"state": "inactive"})
             st2 = (api.get(f"/listings/{api.lid}") or {}).get("state")
             R["adimlar"].append((adim + " ACIL inactive", st2, api.remaining)); kaydet()
-            print(f"::error::ACIL: {adim} sonrasi active -> inactive yapildi (simdi {st2}). DUR.")
+            print(f"::error::ACIL: {pair} {adim} sonrasi active -> inactive yapildi (simdi {st2}). DUR.")
             raise SystemExit(2)
         if st != "draft":
             kaydet(); raise SystemExit(f"DUR: beklenmeyen state {st} ({adim})")
         return L
 
-    lid = D.get("listing_id")
-    if not lid:
+    def ayni_baslik():
         drafts = (api.get(f"/shops/{shop}/listings", params={"state": "draft", "limit": 100}) or {}).get("results") or []
-        lid = next((x["listing_id"] for x in drafts if x.get("title") == title), None)
+        R["eski_taslak_yok_sayildi"] = [x["listing_id"] for x in drafts if x.get("title") == title and x["listing_id"] in ESKI_TASLAK]
+        return next((x["listing_id"] for x in drafts if x.get("title") == title and x["listing_id"] not in ESKI_TASLAK), None)
+
+    lid = D["ciftler"].get(pair)
+    if lid in ESKI_TASLAK:
+        kaydet(); raise SystemExit(f"DUR: DURUM.json {pair} = eski taslak {lid}")
+    lid = lid or ayni_baslik()
     if lid:
-        R["olusturma"] = "VAR OLAN TASLAK kullanildi (ikinci ilan acilmadi)"
+        R["olusturma"] = f"VAR OLAN TASLAK {lid} kullanildi (ikinci ilan acilmadi)"
     else:
         body = {"quantity": 999, "title": title, "description": desc, "price": BOYLAR[0][2], "who_made": "i_did",
                 "when_made": "made_to_order", "is_supply": "false", "taxonomy_id": TAXONOMY, "type": "physical",
-                "shipping_profile_id": pid, "return_policy_id": iade, "readiness_state_id": READINESS, "shop_section_id": bolum,
-                "tags": ",".join(tags), "materials": ",".join(MALZEME), "should_auto_renew": "true",
-                "production_partner_ids": str(PARTNER)}
-        api._izin("POST", f"/shops/{shop}/listings")
-        r_ = requests.post(API + f"/shops/{shop}/listings", data=body, headers=api._headers(), timeout=120)   # TEK deneme
-        api.remaining = r_.headers.get("x-remaining-today", api.remaining)
-        if r_.status_code not in (200, 201):
-            drafts = (api.get(f"/shops/{shop}/listings", params={"state": "draft", "limit": 100}) or {}).get("results") or []
-            lid = next((x["listing_id"] for x in drafts if x.get("title") == title), None)
+                "shipping_profile_id": PROFIL_ID, "return_policy_id": IADE_ID, "readiness_state_id": READINESS,
+                "shop_section_id": BOLUM_ID, "tags": ",".join(tags), "materials": ",".join(MALZEME),
+                "should_auto_renew": "true", "production_partner_ids": str(PARTNER)}
+        kod, js, metin = api.taslak_olustur(shop, body)
+        if kod not in (200, 201):
+            lid = ayni_baslik()
             if lid:
-                D["listing_id"] = lid
+                D["ciftler"][pair] = lid
             kaydet()
-            raise SystemExit(f"DUR: createDraftListing {r_.status_code}: {r_.text[:300]} | ayni baslikli taslak: {lid}")
-        lid = r_.json().get("listing_id")
+            raise SystemExit(f"DUR: createDraftListing {kod}: {metin} | ayni baslikli taslak: {lid}")
+        lid = js.get("listing_id")
         R["olusturma"] = "yeni taslak (tek POST)"
     api.lid = lid
-    D["listing_id"] = lid; kaydet()
-    print(f"::warning::listing_id {lid}")
+    D["ciftler"][pair] = lid; kaydet()
+    print(f"::warning::{pair} listing_id {lid}")
     state_oku("1 olusturma")
 
     # c) envanter
     def urunler():
-        return [dict(sku=sku(no, bk), property_values=[dict(property_id=P_STYLE, property_name="Style", values=[ad]),
-                                                        dict(property_id=P_SIZE, property_name="Size", values=[bad])],
+        return [dict(sku=sku(pair, no, bk), property_values=[dict(property_id=P_STYLE, property_name="Style", values=[ad]),
+                                                              dict(property_id=P_SIZE, property_name="Size", values=[bad])],
                      offerings=[dict(price=fiyat, quantity=999, is_enabled=True, readiness_state_id=READINESS)])
-                for ad, no, _, _ in STILLER for bad, bk, fiyat in BOYLAR]
+                for ad, no, _ in STILLER for bad, bk, fiyat in BOYLAR]
     inv = api.get(f"/listings/{lid}/inventory") or {}
-    if len(inv.get("products") or []) != 14:
+    if len(inv.get("products") or []) != N_URUN:
         # Etsy (18 Eki 400): *_on_property ya bos ya iki ozellik; sku iki ozellikte -> fiyat da [513, 514]
-        # (fiyatlar yine yalniz boya gore: her stilde 11 oz 24.00, 15 oz 29.00; BY78 ile ayni yontem)
+        # (fiyatlar yine yalniz boya gore: her stilde 11 oz 24.00, 15 oz 29.00)
         api.put_json(f"/listings/{lid}/inventory", dict(products=urunler(), price_on_property=[P_STYLE, P_SIZE], quantity_on_property=[],
                                                         sku_on_property=[P_STYLE, P_SIZE], readiness_state_on_property=[]))
     state_oku("2 envanter")
@@ -517,16 +505,17 @@ def yaz(api, shop, out):
         with open(p, "rb") as fh:
             api.post_file(f"/shops/{shop}/listings/{lid}/images", files={"image": (p.name, fh, "image/jpeg")}, data={"rank": str(rk)})
         g = time.time() - t0
-        print(f"gorsel [{rk}/13] {p.name} | gecen {g:.0f} sn | kalan ~{g / rk * (13 - rk):.0f} sn | %{100 * rk // 13}", flush=True)
+        print(f"{pair} gorsel [{rk}/{N_GORSEL}] {p.name} | gecen {g:.0f} sn | kalan ~{g / rk * (N_GORSEL - rk):.0f} sn | "
+              f"%{100 * rk // N_GORSEL}", flush=True)
     state_oku("3 gorseller")
     vids = (api.get(f"/listings/{lid}/videos", ok404=True) or {}).get("results") or []
     if not vids:
         with open(video[0], "rb") as fh:
             api.post_file(f"/shops/{shop}/listings/{lid}/videos", files={"video": ("video.mp4", fh, "video/mp4")},
-                          data={"name": f"AstroLoveArt_{PAIR}_mug_video.mp4"})
+                          data={"name": f"AstroLoveArt_{pair}_mug_video.mp4"})
     state_oku("4 video")
 
-    # e) stil -> kapak
+    # e) stil -> gorsel
     ims = sorted(((api.get(f"/listings/{lid}/images") or {}).get("results") or []), key=lambda x: x.get("rank") or 0)
     rank_id = {x.get("rank"): x.get("listing_image_id") for x in ims}
     inv = api.get(f"/listings/{lid}/inventory") or {}
@@ -534,9 +523,9 @@ def yaz(api, shop, out):
            if v.get("property_id") == P_STYLE and v.get("value_ids")}
     if sorted(vid) != sorted(a for a, *_ in STILLER) or any(rank_id.get(rk) is None for *_, rk in STILLER):
         kaydet(); raise SystemExit(f"DUR: Style value_id {sorted(vid)} / rank {sorted(rank_id)}")
-    vi = [dict(property_id=P_STYLE, value_id=vid[ad], image_id=rank_id[rk]) for ad, _, _, rk in STILLER]
+    vi = [dict(property_id=P_STYLE, value_id=vid[ad], image_id=rank_id[rk]) for ad, _, rk in STILLER]
     api.post_json(f"/shops/{shop}/listings/{lid}/variation-images", {"variation_images": vi})
-    state_oku("5 stil kapaklari")
+    state_oku("5 stil gorselleri")
 
     # f) kisisellestirme
     Q = [dict(question_text=SORU_METNI, question_type="text_input", required=True, max_allowed_characters=SORU_MAX,
@@ -568,29 +557,28 @@ def yaz(api, shop, out):
         o = (p.get("offerings") or [{}])[0]
         tablo.append((pv.get(P_STYLE), pv.get(P_SIZE), para(o.get("price")), o.get("quantity"), p.get("sku"),
                       o.get("is_enabled"), o.get("readiness_state_id")))
-    bek_tablo = [(ad, bad, fiyat, 999, sku(no, bk), True, READINESS) for ad, no, _, _ in STILLER for bad, bk, fiyat in BOYLAR]
+    bek_tablo = [(ad, bad, fiyat, 999, sku(pair, no, bk), True, READINESS) for ad, no, _ in STILLER for bad, bk, fiyat in BOYLAR]
     id_rank = {x.get("listing_image_id"): x.get("rank") for x in ims}
     vid2 = {v["value_ids"][0]: v["values"][0] for p in inv.get("products") or [] for v in p.get("property_values") or []
             if v.get("property_id") == P_STYLE and v.get("value_ids")}
     bag = {vid2.get(v.get("value_id")): id_rank.get(v.get("image_id")) for v in vis if v.get("property_id") == P_STYLE}
-    bek_bag = {ad: rk for ad, _, _, rk in STILLER}
-    adlar = [x.get("name") or "" for x in ims]
+    bek_bag = {ad: rk for ad, _, rk in STILLER}
     K = {
         "baslik CSV ile birebir": L.get("title") == title,
         "aciklama CSV ile birebir": html.unescape(L.get("description") or "").strip() == desc.strip(),
         "13 etiket CSV ile birebir": sorted(L.get("tags") or []) == sorted(tags) and len(L.get("tags") or []) == 13,
-        "14 secenek, fiyat, SKU, stok 999": sorted(tablo) == sorted(bek_tablo) and len(tablo) == 14,
+        f"{N_URUN} secenek, fiyat, SKU, stok 999": sorted(tablo) == sorted(bek_tablo) and len(tablo) == N_URUN,
         "fiyat yalniz boya gore": all(f == dict((b_, f_) for b_, _, f_ in BOYLAR)[bo] for _, bo, f, *_ in tablo),
-        "13 gorsel 1-13 sirada": [x.get("rank") for x in ims] == list(range(1, 14)),
+        f"{N_GORSEL} gorsel 1-{N_GORSEL} sirada": [x.get("rank") for x in ims] == list(range(1, N_GORSEL + 1)),
         "video var": len(vids) == 1,
-        "7 stil dogru kapak": bag == bek_bag,
+        f"{len(STILLER)} stil dogru gorsel": bag == bek_bag,
         "kisisellestirme zorunlu, 256, talimat": len(per) == 1 and per[0].get("required") is True
         and per[0].get("max_allowed_characters") == SORU_MAX and (per[0].get("instructions") or "") == inst
         and per[0].get("question_type") == "text_input",
         "state draft": L.get("state") == "draft",
         "kargo/iade/bolum/ortak": (L.get("shipping_profile_id"), L.get("return_policy_id"), L.get("shop_section_id"),
                                    sorted(p_.get("production_partner_id") for p_ in L.get("production_partners") or []))
-        == (pid, iade, bolum, [PARTNER]),
+        == (PROFIL_ID, IADE_ID, BOLUM_ID, [PARTNER]),
         "i_did, made_to_order, fiziksel, Ceramic, kategori": (L.get("who_made"), L.get("when_made"), L.get("listing_type") or L.get("type"),
                                                                [m.lower() for m in L.get("materials") or []], L.get("taxonomy_id"))
         == ("i_did", "made_to_order", "physical", [m.lower() for m in MALZEME], TAXONOMY),
@@ -602,27 +590,173 @@ def yaz(api, shop, out):
                     tablo=tablo, bag=bag, gorsel_rank=[x.get("rank") for x in ims], gorsel_boyut=[(x.get("full_width"), x.get("full_height")) for x in ims],
                     video=[(v.get("video_id"), v.get("video_state")) for v in vids],
                     kisisellestirme=per, nitelik=[(p_.get("property_name"), p_.get("values")) for p_ in props],
-                    readiness=L.get("readiness_state_id"), islem=(L.get("processing_min"), L.get("processing_max")),
-                    is_personalizable=L.get("is_personalizable"), personalization_is_required=L.get("personalization_is_required"),
-                    personalization_char_count_max=L.get("personalization_char_count_max"), adlar=adlar,
-                    etiketler=L.get("tags"), url=L.get("url"))
+                    readiness=L.get("readiness_state_id"), etiketler=L.get("tags"), url=L.get("url"))
     R["kota_son"] = api.remaining
     R["cagri"] = api.calls
     kaydet()
     kotu = [k_ for k_, v_ in K.items() if not v_]
-    print(f"::warning::TASLAK {lid} state={L.get('state')} | kontrol {len(K) - len(kotu)}/{len(K)} PASS | FAIL: {kotu} | "
-          f"kota {R['kota_bas']} -> {R['kota_son']} | {R['olaylar']}")
+    print(f"::warning::{pair} TASLAK {lid} state={L.get('state')} | kontrol {len(K) - len(kotu)}/{len(K)} PASS | FAIL: {kotu} | "
+          f"kota {R['kota_bas']} -> {R['kota_son']} | metin hata {hata} uyari {uyari}")
     if L.get("state") != "draft":
-        raise SystemExit(f"HATA: son state {L.get('state')}")
+        raise SystemExit(f"HATA: {pair} son state {L.get('state')}")
     if kotu:
-        raise SystemExit(f"FAIL kontrol: {kotu}")
+        raise SystemExit(f"FAIL kontrol {pair}: {kotu}")
+    return R
+
+
+# ------------------------------------------------------------------ kuru
+class Kuru(Kilitli):
+    """AG YOK. Etsy bellekte taklit edilir; yaz() kodu degismeden kosar. Her istek (GET dahil) self.kayit'a duser.
+    Kilitli._izin ve PATCH kurali aynen uygulanir (izin disi yazma kuruda da DURDURUR)."""
+    kuru = True
+
+    def __init__(self, shop, eski_baslik=None):          # Etsy.__init__ cagrilmaz: token/ag yok
+        self.shop, self.calls, self.remaining, self.lid = str(shop), 0, "KURU", None
+        self.kayit, self.eski_baslik = [], eski_baslik
+        self.L, self.inv, self.ims, self.vids, self.vis, self.per, self.props = None, None, [], [], [], [], {}
+
+    def _kaydet(self, method, path, params=None, data=None, json_body=None, files=None):
+        k = dict(no=len(self.kayit) + 1, method=method, url=API + path, yazma=method != "GET")
+        if params:
+            k["params"] = params
+        if data is not None:
+            k["form"] = data
+        if json_body is not None:
+            k["json"] = json_body
+        if files:
+            k["dosya"] = {a: dict(ad=f[0], mime=f[2], bayt=os.fstat(f[1].fileno()).st_size) for a, f in files.items()}
+        self.kayit.append(k)
+        self.calls += 1
+
+    def _call(self, method, path, params=None, data=None, ok404=False, json_body=None):
+        if method != "GET":
+            self._izin(method, path)
+            if method == "PATCH" and data != {"state": "inactive"}:
+                raise SystemExit("YASAK: PATCH yalniz acil durum (state=inactive)")
+        self._kaydet(method, path, params, data, json_body)
+        return self._sim(method, path, params, data, ok404, json_body)
+
+    def post_file(self, path, files, data=None):
+        self._izin("POST", path)
+        self._kaydet("POST", path, data=data, files=files)
+        if path.endswith("/images"):
+            rk = int(data["rank"])
+            self.ims.append(dict(rank=rk, listing_image_id=800000 + rk, full_width=2048, full_height=2048, name=files["image"][0]))
+            return self.ims[-1]
+        self.vids.append(dict(video_id=900001, video_state="active"))
+        return self.vids[-1]
+
+    def taslak_olustur(self, shop, body):
+        self._izin("POST", f"/shops/{shop}/listings")
+        self._kaydet("POST", f"/shops/{shop}/listings", data=body)
+        lid = 9000000001                   # KURU sahte listing_id
+        self.L = dict(listing_id=lid, state="draft", title=body["title"], description=body["description"],
+                      tags=body["tags"].split(","), who_made=body["who_made"], when_made=body["when_made"],
+                      listing_type=body["type"], materials=body["materials"].split(","), taxonomy_id=body["taxonomy_id"],
+                      shipping_profile_id=body["shipping_profile_id"], return_policy_id=body["return_policy_id"],
+                      shop_section_id=body["shop_section_id"], readiness_state_id=body["readiness_state_id"],
+                      production_partners=[dict(production_partner_id=int(body["production_partner_ids"]))])
+        return 201, dict(listing_id=lid), ""
+
+    def _sim(self, method, path, params, data, ok404, js):
+        s, lid = self.shop, self.lid
+        if method == "GET":
+            sabit = {f"/shops/{s}": {}, f"/shops/{s}/production-partners": dict(results=[dict(production_partner_id=PARTNER)]),
+                     f"/shops/{s}/sections": dict(results=[dict(shop_section_id=BOLUM_ID, title="Zodiac Couple Mugs")]),
+                     f"/shops/{s}/shipping-profiles/{PROFIL_ID}": dict(shipping_profile_id=PROFIL_ID, title="Kupa Free US UK EU"),
+                     f"/shops/{s}/policies/return": dict(results=[dict(return_policy_id=IADE_ID, accepts_returns=False,
+                                                                       accepts_exchanges=False)]),
+                     # eski taslak ayni baslikla duruyormus gibi: yok sayilmali (ESKI_TASLAK)
+                     f"/shops/{s}/listings": dict(results=[dict(listing_id=e, title=self.eski_baslik) for e in ESKI_TASLAK])}
+            if path in sabit:
+                return sabit[path]
+            if path == f"/listings/{lid}":
+                return self.L
+            if path == f"/listings/{lid}/inventory":
+                return self.inv or dict(products=[])
+            if path == f"/listings/{lid}/images":
+                return dict(results=self.ims)
+            if path == f"/listings/{lid}/videos":
+                return dict(results=self.vids)
+            if path == f"/listings/{lid}/personalization":
+                return dict(personalization_questions=self.per)
+            if path == f"/shops/{s}/listings/{lid}/properties":
+                return dict(results=list(self.props.values()))
+            if path == f"/shops/{s}/listings/{lid}/variation-images":
+                return dict(results=self.vis)
+            raise SystemExit(f"KURU: taklit edilmeyen GET {path}")
+        if path == f"/listings/{lid}/inventory":
+            stil = {}
+            urun = []
+            for p in js["products"]:
+                pv = []
+                for v in p["property_values"]:
+                    vid = stil.setdefault(v["values"][0], 5000 + len(stil)) if v["property_id"] == P_STYLE else 6000
+                    pv.append(dict(v, value_ids=[vid]))
+                o = p["offerings"][0]
+                urun.append(dict(sku=p["sku"], property_values=pv,
+                                 offerings=[dict(o, price=dict(amount=round(o["price"] * 100), divisor=100))]))
+            self.inv = dict(products=urun)
+            return self.inv
+        if path.endswith("/variation-images"):
+            self.vis = js["variation_images"]
+            return dict(results=self.vis)
+        if path.endswith("/personalization"):
+            self.per = js["personalization_questions"]
+            return js
+        if "/properties/" in path:
+            pid_ = int(path.rsplit("/", 1)[1])
+            self.props[pid_] = dict(property_id=pid_, value_ids=[int(x) for x in data["value_ids"].split(",")],
+                                    values=data["values"].split(","))
+            return self.props[pid_]
+        if method == "PATCH":
+            self.L["state"] = data["state"]
+            return self.L
+        raise SystemExit(f"KURU: taklit edilmeyen {method} {path}")
+
+
+def kuru(shop, out, pair):
+    row = metin_satiri(pair)
+    api = Kuru(shop, eski_baslik=row["baslik"])
+    out = out / "kuru"                     # gercek DURUM.json'a dokunmaz; kuru her zaman yeni taslak yolunu gosterir
+    out.mkdir(parents=True, exist_ok=True)
+    durum_f = out / "DURUM.json"
+    if durum_f.exists():
+        durum_f.unlink()
+    R = yaz(api, shop, out, pair)
+    durum_f.unlink()
+    yazma = [k for k in api.kayit if k["yazma"]]
+    ozet = dict(cift=pair, istek=len(api.kayit), yazma=len(yazma),
+                yazma_dagilim={u: sum(1 for k in yazma if re.sub(r"\d{6,}", "{id}", k["url"].replace(API, "")) == u)
+                               for u in sorted({re.sub(r"\d{6,}", "{id}", k["url"].replace(API, "")) for k in yazma})},
+                kontrol=R["kontrol"], metin=R["metin"], eski_taslak_yok_sayildi=R.get("eski_taslak_yok_sayildi"),
+                not_="KURU: ag/token yok; listing_id 9000000001, gorsel id 8000NN, value_id 50NN sahtedir.")
+    json.dump(dict(ozet=ozet, istekler=api.kayit), open(out / f"KURU_{pair}.json", "w"), indent=1, ensure_ascii=False)
+    (out / f"KUPA_TASLAK_{pair}.json").unlink()
+    print(f"KURU {pair}: {len(api.kayit)} istek ({len(yazma)} yazma) | kontrol {sum(R['kontrol'].values())}/{len(R['kontrol'])} | "
+          f"metin hata {R['metin']['hata']} | uyari {R['metin']['uyari']} -> {out / f'KURU_{pair}.json'}")
+    return ozet
+
+
+def cift_listesi(girdi):
+    secim = CIFTLER if girdi.strip().upper() == "TUMU" else [c.strip().upper() for c in re.split(r"[,\s]+", girdi) if c.strip()]
+    bilinmeyen = [c for c in secim if c not in CIFTLER]
+    if bilinmeyen or not secim:
+        raise SystemExit(f"DUR: bilinmeyen cift {bilinmeyen} (anahtar alfabetik: CANCER_LIBRA)")
+    return secim
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--mod", required=True, choices=["oku", "yaz"])
+    ap.add_argument("--mod", required=True, choices=["oku", "kuru", "yaz"])
+    ap.add_argument("--ciftler", default="CANCER_LIBRA", help="TUMU ya da virgul/bosluk ayrimli CIFT listesi")
     a = ap.parse_args()
     out = Path(os.environ.get("OUT", "_out")); out.mkdir(parents=True, exist_ok=True)
+    ciftler = cift_listesi(a.ciftler)
+    if a.mod == "kuru":
+        for c in ciftler:
+            kuru(os.environ.get("ETSY_SHOP_ID", "39729443"), out, c)
+        return
     k, s = os.environ.get("ETSY_API_KEY", ""), os.environ.get("ETSY_SHARED_SECRET", "")
     mask(k); mask(s)
     store = TokenStore(os.environ["TOKEN_FILE"], k, s)
@@ -630,17 +764,24 @@ def main():
         store.refresh()
     shop = os.environ["ETSY_SHOP_ID"]
     if a.mod == "oku":
-        oku(SaltOkur(store), shop, out)
-    else:
+        oku(SaltOkur(store), shop, out, ciftler[0])
+        return
+    api = Kilitli(store)
+    t0 = time.time()
+    for i, c in enumerate(ciftler, 1):
+        api.lid = None
         try:
-            yaz(Kilitli(store), shop, out)
+            yaz(api, shop, out, c)
         except BaseException as e:  # noqa: BLE001  hata nedeni rapora ve annotation'a (job loglari okunamiyor)
-            f = out / "KUPA_TASLAK.json"
+            f = out / f"KUPA_TASLAK_{c}.json"
             R = json.load(open(f)) if f.exists() else {}
             R["hata"] = f"{type(e).__name__}: {e}"[:1500]
             json.dump(R, open(f, "w"), indent=1, ensure_ascii=False, default=str)
-            print(f"::error::KUPA YAZ HATA {R['hata'][:600]}")
+            print(f"::error::KUPA YAZ HATA {c} {R['hata'][:600]}")
             raise
+        g = time.time() - t0
+        print(f"ETA cift [{i}/{len(ciftler)}] {c} | gecen {g / 60:.1f} dk | kalan ~{g / i * (len(ciftler) - i) / 60:.1f} dk | "
+              f"%{100 * i // len(ciftler)} | kota {api.remaining}", flush=True)
 
 
 if __name__ == "__main__":
