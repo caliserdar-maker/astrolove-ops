@@ -55,6 +55,8 @@ from kisisel_siparis import _kisisel_alanlar  # noqa: E402
 
 ZODYAK = ["ARIES", "TAURUS", "GEMINI", "CANCER", "LEO", "VIRGO", "LIBRA", "SCORPIO", "SAGITTARIUS", "CAPRICORN",
           "AQUARIUS", "PISCES"]
+KISA3 = {z[:3]: z for z in ZODYAK}
+assert len(KISA3) == 12
 # cift.py ST8 ve RENKLER ile ayni sira/deger (kupa-orchard dali)
 ST8 = [("orange", "Orange Blossom"), ("fig", "Purple Fig"), ("olive", "Olive Breeze"), ("pomegranate", "Pomegranate Bloom"),
        ("almond", "Almond Blossom"), ("lemon", "Lemon Grove"), ("grape", "Blue Grape"), ("loquat", "Golden Loquat")]
@@ -134,6 +136,8 @@ def sku_coz(sku):
     if not m:
         return None, f"SKU bicimi gecersiz: {sku!r}"
     b1, b2, no, boy = m.groups()
+    # 32 karakteri asan SKU 3 harfle yazilir (kupa_taslak.sku; yalniz SAGITTARIUS_SAGITTARIUS -> SAG_SAG)
+    b1, b2 = KISA3.get(b1, b1), KISA3.get(b2, b2)
     if b1 not in ZODYAK or b2 not in ZODYAK:
         return None, f"bilinmeyen burc: {b1}_{b2}"
     if [b1, b2] != sorted([b1, b2]):

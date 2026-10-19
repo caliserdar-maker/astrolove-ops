@@ -276,7 +276,13 @@ TIRE = re.compile("[–—]")
 
 
 def sku(pair, no, boy):
-    return f"KUPA-{pair}-{no}-{boy}"
+    """Etsy SKU en fazla 32 karakter (19 Eki: SAGITTARIUS_SAGITTARIUS 34 -> 400). Sigmazsa burclar 3 harf
+    (KUPA-SAG_SAG-01-11); kupa_siparis.sku_coz iki bicimi de cozer. Diger 77 ciftte SKU degismez."""
+    s = f"KUPA-{pair}-{no}-{boy}"
+    if len(s) > 32:
+        b1, b2 = pair.split("_")
+        s = f"KUPA-{b1[:3]}_{b2[:3]}-{no}-{boy}"
+    return s
 
 
 def metin_satiri(pair):
