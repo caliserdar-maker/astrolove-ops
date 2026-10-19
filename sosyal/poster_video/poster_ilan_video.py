@@ -6,16 +6,17 @@ sifirdan yumusakca olusur, BITIS (5,0 sn) aninda tam; sonra kapak sabit. Zamanla
 parlaklik kupa koduyla ayni. Fark: mesaj yazilmaz (baslik, duvar, glifler, isimler, mesaj sabit); toz rengi posterin altini.
 Kapak 4:3 (3000x2250) -> video 1440x1080.
 
-Sembol ve glif maskeleri kaynak posterden (PosterR: altin alfa, birlesik sembol parcalari, kucuk burclar) cikar; kapaga
-SIFT eslesmesi + RANSAC homografi ile olculerek tasinir (kapak uretim kodu depoda yok). Sembolsuz hal: kupadaki gibi
+Poster kapakta lacivert dikdortgen olarak bulunur; sembol ve glif maskeleri dogrudan kapaktaki posterden (PosterR: altin alfa,
+birlesik sembol parcalari, kucuk burclar) cikar (kapak uretim kodu depoda yok). Sembolsuz hal: kupadaki gibi
 BOS = KAPAK + (sembolsuz poster - poster) farki; sembolsuz poster = lib.Poster.bg (klasik Telea inpaint, yapay zeka yok).
 Poster pikselleri yalniz olceklenir/tasinir; ilk ve son karede kapak oldugu gibi.
 
 QC (ayni betik, kodlanmis videodan): sure, olcu, ses akisi yok, dosya MB; ilk ve son kare ile kapak arasindaki ortalama
 mutlak fark (kapagin kayipsiz 4:2:0 kodlamasindaki fark + 0.2'den kucuk); sembol kutusunda kapakla farkin kalici olarak son karenin (kapak) kodlama tabanina + 0.5 indigi ilk kare
 (sembol tam; crf 12, 4:2:0 kaybi taban olarak olculur); sembol sondugu anda kutudaki altin
-artigi; eslesme ic nokta sayisi ve poster bolgesi farki. KONTAK.jpg: 0/1/2/3/4/5 sn + son kare.
-Kullanim: python3 -I poster_ilan_video.py <kapak.jpg> <poster2000.jpg> <cikti_dizini> <ad>"""
+artigi (cevre laciverde +-15), kapakta sembol ve gliflerde altinlik >= 40, poster orani 1.40-1.60. KONTAK.jpg: 0/1/2/3/4/5 sn
++ son kare; MASKE.jpg: sembol (kirmizi) ve glif (yesil) maskeleri kapak uzerinde.
+Kullanim: python3 -I poster_ilan_video.py <kapak.jpg> <cikti_dizini> <ad>"""
 import json, os, subprocess, sys, time
 import numpy as np, cv2
 from PIL import Image, ImageDraw, ImageFont
@@ -24,7 +25,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, '..', 'pin_v6'))
 import pin_uret as PU
 
-KAPAK, POSTER, OUT, AD = sys.argv[1:5]
+KAPAK, OUT, AD = sys.argv[1:4]
 VW, VH, FPS, SURE, SILME, BITIS = 1440, 1080, 30, 6.0, 0.3, 5.0
 N = 5200
 ESIK_IK = 0.2                     # ilk/son kare: kayipsiz 4:2:0 tabaninin en fazla 0.2 ustu
@@ -39,47 +40,55 @@ kap_src = np.asarray(Image.open(KAPAK).convert('RGB'))
 R['kapak_olcu'] = f'{kap_src.shape[1]}x{kap_src.shape[0]}'
 KAP8 = cv2.resize(kap_src, (VW, VH), interpolation=cv2.INTER_AREA)
 KAP = KAP8.astype(np.float32)
-P = PU.PosterR(POSTER)
 
-# ---------- eslesme: poster -> kapak (SIFT + RANSAC homografi), kucultulmus kopyalarda, sonra tam olcege
-ps = 1000 / P.w; ks = 1500 / kap_src.shape[1]
-pg = cv2.cvtColor(cv2.resize(P.img.astype(np.uint8), None, fx=ps, fy=ps, interpolation=cv2.INTER_AREA), cv2.COLOR_RGB2GRAY)
-kg = cv2.cvtColor(cv2.resize(kap_src, None, fx=ks, fy=ks, interpolation=cv2.INTER_AREA), cv2.COLOR_RGB2GRAY)
-sift = cv2.SIFT_create(8000)
-k1, d1 = sift.detectAndCompute(pg, None); k2, d2 = sift.detectAndCompute(kg, None)
-eS = [m for m, n in cv2.BFMatcher().knnMatch(d1, d2, k=2) if m.distance < 0.75 * n.distance]
-a = np.float32([k1[m.queryIdx].pt for m in eS]); b = np.float32([k2[m.trainIdx].pt for m in eS])
-Hs, inl = cv2.findHomography(a, b, cv2.RANSAC, 3.0)
-R['eslesme'] = {'eslesen': len(eS), 'ic_nokta': int(inl.sum())}
-# poster tam px -> video px
-Hm = np.diag([VW / kap_src.shape[1] / ks, VH / kap_src.shape[0] / ks, 1.0]) @ Hs @ np.diag([ps, ps, 1.0])
-kose = cv2.perspectiveTransform(np.float32([[[0, 0]], [[P.w, 0]], [[P.w, P.h]], [[0, P.h]]]), Hm).reshape(-1, 2)
-R['poster_koseleri_video'] = [[round(float(x), 1), round(float(y), 1)] for x, y in kose]
-warp = lambda im, inter=cv2.INTER_LINEAR: cv2.warpPerspective(im, Hm, (VW, VH), flags=inter, borderValue=0)
-icm = warp(np.ones((P.h, P.w), np.float32)); ic = cv2.erode((icm > 0.99).astype(np.uint8), np.ones((15, 15), np.uint8)) > 0
-R['eslesme']['poster_bolgesi_fark'] = round(float(np.abs(warp(P.img) - KAP)[ic].mean()), 2)
+# ---------- poster kapakta: koyu dikdortgen (duvar acik bej). 1. kosuda (39291450782)
+# kaynak poster -> kapak SIFT eslesmesi yanlis oturdu (61 ic nokta, sembol maskesinde altinlik -1.1): parca ayrimi artik
+# dogrudan kapaktaki poster uzerinde (PosterR), eslesme yok.
+kf = kap_src.astype(np.float32); lum_ = kf @ np.float32([0.299, 0.587, 0.114])
+lac = (lum_ < 90).astype(np.uint8)      # koyu bolge (posterin alt kenari neredeyse siyah, B > R sarti orada tutmaz)
+lac = cv2.morphologyEx(lac, cv2.MORPH_CLOSE, np.ones((25, 25), np.uint8))
+n_, lab_, st_, _ = cv2.connectedComponentsWithStats(lac, 8)
+bi = 1 + int(np.argmax(st_[1:, 4]))
+x0, y0, cw, ch = (int(v) for v in st_[bi, :4]); x1, y1 = x0 + cw, y0 + ch
+R['poster_kutu_kapak'] = [x0, y0, cw, ch]; R['poster_oran'] = round(ch / cw, 3)
+s_ = 2000 / cw
+tmp = os.path.join(OUT, '_poster_kapaktan.png')
+Image.fromarray(cv2.resize(kap_src[y0:y1, x0:x1], (2000, round(ch * s_)), interpolation=cv2.INTER_CUBIC)).save(tmp)
+P = PU.PosterR(tmp); os.remove(tmp)
+
+
+def vid(m):
+    """poster (2000 px genislik) uzayindaki katman -> kapak -> video (1440x1080)."""
+    c = np.zeros(kap_src.shape[:2] + m.shape[2:], np.float32)
+    c[y0:y1, x0:x1] = cv2.resize(m.astype(np.float32), (cw, ch), interpolation=cv2.INTER_AREA)
+    return cv2.resize(c, (VW, VH), interpolation=cv2.INTER_AREA)
+
 
 # ---------- maskeler (poster uzayi) -> video
 ids = [c[0] for c in P.merged_parts]
-msym = (np.isin(P.lab, ids) & True).astype(np.uint8)
+msym = np.isin(P.lab, ids).astype(np.uint8)
 msym_g = cv2.dilate(msym, np.ones((9, 9), np.uint8)).astype(np.float32)
 msym_g = cv2.GaussianBlur(msym_g, (0, 0), 2.0)                        # sembol bolgesi (yumusak kenar)
 MS_p = np.clip(P.alpha * cv2.dilate(msym, np.ones((7, 7), np.uint8)), 0, 1)   # sembolun altin alfasi
 MG_p = np.zeros_like(P.alpha)
-for s_ in (P.sign_a, P.sign_b):
-    _, x, y, w, h, _ = s_
+for s2 in (P.sign_a, P.sign_b):
+    _, x, y, w, h, _ = s2
     MG_p[y:y + h, x:x + w] = P.alpha[y:y + h, x:x + w]
 D_p = (P.bg - P.img) * msym_g[..., None]                              # sembolsuz - tam (yalniz sembol bolgesinde)
-MS, MG, DIFF, MREG = warp(MS_p), warp(MG_p), warp(D_p), warp(msym_g)
+MS, MG, DIFF, MREG = vid(MS_p), vid(MG_p), vid(D_p), vid(msym_g)
+PK = vid(np.ones_like(P.alpha)) > 0.99                                # poster alani (video)
 FULL = KAP
 BASE = np.clip(KAP + DIFF, 0, 255)
 ys, xs = np.where(MREG > 0.05)
 SK = (slice(ys.min(), ys.max() + 1), slice(xs.min(), xs.max() + 1))   # sembol kutusu (video px)
 R['sembol_kutu'] = [int(xs.min()), int(ys.min()), int(xs.max() - xs.min() + 1), int(ys.max() - ys.min() + 1)]
-rb = lambda im: float((im[..., 0] - im[..., 2])[MS > 0.5].mean())     # altinlik (R - B), sembol pikselleri
-R['sembol_altinlik'] = {'kapak': round(rb(KAP), 1), 'sembolsuz': round(rb(BASE), 1),
-                        'cevre_lacivert': round(float((KAP[..., 0] - KAP[..., 2])[(MREG < 0.01) & (warp(np.ones_like(P.alpha)) > 0.99)
-                                                       & (cv2.dilate((MREG > 0.05).astype(np.uint8), np.ones((61, 61), np.uint8)) > 0)].mean()), 1)}
+rb = lambda im, m=None: float((im[..., 0] - im[..., 2])[(MS > 0.5) if m is None else m].mean())   # altinlik (R - B)
+cevre = (MREG < 0.01) & PK & (cv2.dilate((MREG > 0.05).astype(np.uint8), np.ones((61, 61), np.uint8)) > 0)
+R['sembol_altinlik'] = {'kapak': round(rb(KAP), 1), 'sembolsuz': round(rb(BASE), 1), 'cevre_lacivert': round(rb(KAP, cevre), 1),
+                        'glif_kapak': round(rb(KAP, MG > 0.5), 1)}
+dbg = KAP.copy(); dbg[MS > 0.5] = dbg[MS > 0.5] * 0.3 + np.float32([255, 0, 0]) * 0.7
+dbg[MG > 0.5] = dbg[MG > 0.5] * 0.3 + np.float32([0, 255, 0]) * 0.7
+Image.fromarray(np.clip(dbg, 0, 255).astype(np.uint8)).resize((720, 540), Image.LANCZOS).save(os.path.join(OUT, 'MASKE.jpg'), quality=88)
 
 # ---------- toz (kupa video6b ile ayni davranis)
 
@@ -176,7 +185,9 @@ kapi = {'olcu_4_3': R['video']['olcu'] == f'{VW}x{VH}', 'kare_180': R['video']['
         'ilk_kare_kapak': R['ilk_kare_fark'] <= R['taban_420_kayipsiz'] + ESIK_IK,
         'son_kare_kapak': R['son_kare_fark'] <= R['taban_420_kayipsiz'] + ESIK_IK,
         'sembol_tam_bitiste': tam is not None and tam <= nB,
-        'eslesme': R['eslesme']['ic_nokta'] >= 50}
+        'poster_oran_2_3': 1.40 <= R['poster_oran'] <= 1.60, 'sembol_altin': R['sembol_altinlik']['kapak'] >= 40,
+        'glif_altin': R['sembol_altinlik']['glif_kapak'] >= 40,
+        'sembol_soner': abs(R['sembol_altinlik']['sondugu_an_video'] - R['sembol_altinlik']['cevre_lacivert']) <= 15}
 R['kapi'] = kapi; R['sonuc'] = 'PASS' if all(kapi.values()) else 'FAIL'
 json.dump(R, open(os.path.join(OUT, f'{AD}_QC.json'), 'w'), indent=1, default=str)
 
