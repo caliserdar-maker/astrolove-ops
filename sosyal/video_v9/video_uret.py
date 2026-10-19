@@ -10,6 +10,11 @@ Usage:
   --a = first sign of the pair key (LEFT small sign on the poster), --b = second (RIGHT).
   --muzik: final 24 s audio track (already shaped and at -16 LUFS); it is copied in without re-encoding.
   --kareler: only write these seconds as JPG frames (fast check), no video.
+  --acilis A|B (K1 sample, 19 Oct 2026; default = approved v9 unchanged):
+    A: frame 0 shows the merged symbol, the pair names and the question fully (no black opening); 0.6-1.4 s the symbol
+       cross-fades into the question mark, then the approved animation continues unchanged.
+    B: starts at the moment the merged symbol is complete (T_LAND_END + 1.0 s); the rest plays at the same speed; the
+       end card is held so the video stays 24 s; same 0.9 s fade-out at the end.
 Writes {a}-and-{b}-astroloveart-reel.mp4
 """
 import argparse, json, os, subprocess, sys, time
@@ -34,6 +39,20 @@ def ease(t, a, b):
     s = np.clip((t - a) / (b - a), 0, 1); return 0.5 - 0.5 * np.cos(np.pi * s)
 
 
+A_HOLD, A_CROSS = 0.6, 1.4      # acilis A: symbol fully shown 0-0.6 s, cross-fade to the question mark until 1.4 s
+T_END_FREEZE = 23.1              # end card is complete and still from here until the fade-out
+
+
+def kaynak_t(t, acilis, t0):
+    """Output time -> time on the approved v9 timeline. B: shifted by t0, end card held (no change for None / A)."""
+    return min(t + t0, T_END_FREEZE) if acilis == 'B' else t
+
+
+def acilis_alfa(t, acilis):
+    """Acilis A opening: weight of the full merged symbol (1 at frame 0, 0 from A_CROSS on)."""
+    return 1 - ease(t, A_HOLD, A_CROSS) if acilis == 'A' else 0.0
+
+
 def navy_glow(profile, cy_frac, gain=0.70, sigma=0.42):
     rs, prof = profile
     sm = np.stack([gaussian_filter1d(prof[:, c].astype(np.float64), 2.5, mode='nearest') for c in range(3)], 1)
@@ -48,7 +67,7 @@ def navy_glow(profile, cy_frac, gain=0.70, sigma=0.42):
     return Image.fromarray(np.clip(np.round(out), 0, 255).astype(np.uint8), 'RGB')
 
 
-def build(poster_path, A, B, out_dir, muzik=None, kareler=None, bilgi=None):
+def build(poster_path, A, B, out_dir, muzik=None, kareler=None, bilgi=None, acilis=None):
     os.makedirs(out_dir, exist_ok=True)
     slug = f'{A.lower()}-and-{B.lower()}'
     P = PU.PosterR(poster_path)
@@ -191,13 +210,14 @@ def build(poster_path, A, B, out_dir, muzik=None, kareler=None, bilgi=None):
     def navy(t):
         keep = 1 - ease(t, 14.4, 15.4)
         f = BG + (BASE - BG) * keep
-        a1 = ease(t, 0.3, 1.3) * (1 - ease(t, 3.3, 4.3))
-        aq = 1 - ease(t, 3.4, 4.6)
+        a1 = (1.0 if acilis == 'A' else ease(t, 0.3, 1.3)) * (1 - ease(t, 3.3, 4.3))
+        ko = acilis_alfa(t, acilis)
+        aq = (1 - ease(t, 3.4, 4.6)) * (1 - ko)
         d, reveal = dust_and_reveal(t)
         aA = ease(t, 8.4, 9.4) * (1 - ease(t, 11.0, 12.0))
         aB = ease(t, 11.6, 12.6) * keep
         lm = LM if (G <= 1.0 or t < T_G0) else grown(t)
-        for (c, a), k in [(t1, a1), (LQ, aq), (lm, reveal), (tA, aA), (tB, aB)]:
+        for (c, a), k in [(t1, a1), (LQ, aq), (lm, max(reveal, ko)), (tA, aA), (tB, aB)]:
             if np.any(np.asarray(k) > 0):
                 al = a * k; f = f * (1 - al[..., None]) + c * al[..., None]
         if d is not None:
@@ -250,11 +270,17 @@ def build(poster_path, A, B, out_dir, muzik=None, kareler=None, bilgi=None):
         mx_ = np.clip(np.minimum(_xx - x0, x1 - _xx) / feather + 0.5, 0, 1); my_ = np.clip(np.minimum(_yy - y0, y1 - _yy) / feather + 0.5, 0, 1)
         return mx_ * my_
 
+    T_B0 = np.ceil((T_LAND_END + 1.0) * FPS) / FPS    # first frame with the merged symbol complete (dust gone)
+    if bilgi is not None:
+        bilgi.update(T_LAND_END=round(T_LAND_END, 3), T_B0=float(T_B0), acilis=acilis or 'eski',
+                     sembol_kutu=[int(round(mx - MER.size[0] / 2)), int(round(my - MER.size[1] / 2)), MER.size[0], MER.size[1]],
+                     etiket_y=int(CY + SIGN_H / 2 + 44), soru_y=330)
     _g = np.random.default_rng(99)
     GRAIN = (_g.uniform(-0.5, 0.5, (H, W, 3)) + _g.uniform(-0.5, 0.5, (H, W, 3))).astype(np.float32)
 
     def frame(n):
-        t = n / FPS
+        to = n / FPS
+        t = kaynak_t(to, acilis, T_B0)
         if t < 15.4:
             f = navy(t)
         elif t < 18.4:
@@ -267,7 +293,10 @@ def build(poster_path, A, B, out_dir, muzik=None, kareler=None, bilgi=None):
             u = ease(t, 18.8, 19.8); f = wall(t) * (1 - u) + BG * u
         else:
             v = ease(t, 19.6, 20.6); f = BG + (END - BG) * v
-        f = f * ease(t, 0, 1.0) * (1 - ease(t, 23.1, 24.0)) if (t < 1.0 or t > 23.1) else f
+        if acilis is None:
+            f = f * ease(t, 0, 1.0) * (1 - ease(t, 23.1, 24.0)) if (t < 1.0 or t > 23.1) else f
+        elif to > T_END_FREEZE:      # A and B: no black opening, same fade-out on the output clock
+            f = f * (1 - ease(to, T_END_FREEZE, 24.0))
         r = np.random.default_rng(n)
         tpdf = r.uniform(-0.5, 0.5, f.shape) + r.uniform(-0.5, 0.5, f.shape)
         # fine static grain (3 levels) + light moving grain: no visible rings in the navy gradient, also after
@@ -310,6 +339,11 @@ if __name__ == '__main__':
     ap.add_argument('--out', required=True)
     ap.add_argument('--muzik')
     ap.add_argument('--kareler')
+    ap.add_argument('--acilis', choices=['A', 'B'])
+    ap.add_argument('--bilgi', help='write layout/timing info (JSON) here')
     g = ap.parse_args()
     k = [float(x) for x in g.kareler.split(',')] if g.kareler else None
-    print(build(g.poster, g.a, g.b, g.out, g.muzik, k))
+    bi = {} if g.bilgi else None
+    print(build(g.poster, g.a, g.b, g.out, g.muzik, k, bi, g.acilis))
+    if g.bilgi:
+        json.dump(bi, open(g.bilgi, 'w'), indent=1)
