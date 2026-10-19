@@ -1,0 +1,149 @@
+{
+ "poster_v5": {
+  "video": {
+   "olcu": "1440x1080",
+   "kare": 180,
+   "fps": "30/1",
+   "sure_sn": 6.0,
+   "ses_akisi": false,
+   "boyut_mb": 4.52
+  },
+  "taban_420": 1.423,
+  "ilk_kare_fark": 1.591,
+  "son_kare_fark": 1.516,
+  "parametre": {
+   "N": 26000,
+   "tane_sigma": {
+    "v4": 0.9,
+    "v5": 0.45
+   },
+   "birikim_esik": [
+    0.2,
+    1.0
+   ]
+  },
+  "tablo_0_5sn": {
+   "0": {
+    "kare": 0,
+    "murekkep": 1.0,
+    "toz_birikimi": null
+   },
+   "0.5": {
+    "kare": 15,
+    "murekkep": 0.0,
+    "toz_birikimi": 0.0
+   },
+   "1": {
+    "kare": 30,
+    "murekkep": 0.0,
+    "toz_birikimi": 0.0
+   },
+   "1.5": {
+    "kare": 45,
+    "murekkep": 0.0,
+    "toz_birikimi": 0.0
+   },
+   "2": {
+    "kare": 60,
+    "murekkep": 0.0,
+    "toz_birikimi": 0.037
+   },
+   "2.5": {
+    "kare": 75,
+    "murekkep": 0.017,
+    "toz_birikimi": 0.199
+   },
+   "3": {
+    "kare": 90,
+    "murekkep": 0.205,
+    "toz_birikimi": 0.364
+   },
+   "3.5": {
+    "kare": 105,
+    "murekkep": 0.407,
+    "toz_birikimi": 0.526
+   },
+   "4": {
+    "kare": 120,
+    "murekkep": 0.611,
+    "toz_birikimi": 0.689
+   },
+   "4.5": {
+    "kare": 135,
+    "murekkep": 0.812,
+    "toz_birikimi": 0.849
+   },
+   "5": {
+    "kare": 150,
+    "murekkep": 1.0,
+    "toz_birikimi": 1.0
+   },
+   "5.5": {
+    "kare": 165,
+    "murekkep": 1.0,
+    "toz_birikimi": 1.0
+   },
+   "6": {
+    "kare": 179,
+    "murekkep": 1.0,
+    "toz_birikimi": 1.0
+   }
+  },
+  "ihlal_en_buyuk": 0.0,
+  "murekkep_toz_onunde_kare": [],
+  "sembol_tam_kare": 149,
+  "kapi": {
+   "sure_6": true,
+   "kare_180": true,
+   "fps_30": true,
+   "olcu_1440x1080": true,
+   "ses_yok": true,
+   "ilk_kare_kapak": true,
+   "son_kare_kapak": true,
+   "murekkep_tozdan_once_degil": true,
+   "sembol_tam_5sn": true,
+   "toz_26000": true,
+   "tane_0_45": true
+  },
+  "sonuc": "PASS"
+ },
+ "kupa_ince_toz": {
+  "eski": {
+   "olcu": "1080x1080",
+   "kare": 180,
+   "fps": "30/1",
+   "sure_sn": 6.0,
+   "ses_akisi": false,
+   "boyut_mb": 0.6
+  },
+  "ince": {
+   "olcu": "1080x1080",
+   "kare": 180,
+   "fps": "30/1",
+   "sure_sn": 6.0,
+   "ses_akisi": false,
+   "boyut_mb": 0.83
+  },
+  "tane_sigma": {
+   "eski": 0.9,
+   "ince": 0.45
+  },
+  "toz_disi_fark": {
+   "ortalama_en_buyuk": 0.097,
+   "en_buyuk_piksel": 6
+  },
+  "toz_ici_fark_ortalama_en_buyuk": 2.108,
+  "toz_piksel_3sn": {
+   "eski": 27587,
+   "ince": 26171
+  },
+  "kapi": {
+   "kare_ayni": true,
+   "sure_ayni": true,
+   "olcu_ayni": true,
+   "ses_yok": true,
+   "toz_disi_ayni": true
+  },
+  "sonuc": "PASS"
+ }
+}
