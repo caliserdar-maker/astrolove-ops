@@ -16,7 +16,7 @@ on:
       mod: { description: "oku | kuru | yaz", required: true, default: "kuru" }
       ciftler: { description: "TUMU ya da virgul/bosluk ayrimli CIFT (alfabetik anahtar, orn. CANCER_LIBRA)", required: true, default: "CANCER_LIBRA" }
       hedef: { description: "Drive ASTROLOVE/KUPA_ORCHARD78/<hedef>", required: true, default: "ORCHARD78_20261019" }
-      metin_ref: { description: "kupa-orchard dalinda commit: kupa_orchard/ilan/KUPA78_ORCHARD_METIN.csv", required: true, default: "847ffec" }
+      metin_ref: { description: "kupa-orchard dalinda commit: kupa_orchard/ilan/KUPA78_ORCHARD_METIN.csv", required: true, default: "0278b13" }
 env:
   O: "gdrive:ASTROLOVE/TEMP/KUPA_ORCHARD_TASLAK_20261019"
 jobs:

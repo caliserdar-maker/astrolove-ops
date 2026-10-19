@@ -249,6 +249,8 @@ IADE_ID = 1513990287785             # iade yok, degisim yok
 BOLUM_ID = 60980873                 # "Zodiac Couple Mugs" (18 Eki kosusunda olustu)
 PROFIL_ID = 318301958420            # "Kupa Free US UK EU" (18 Eki kosusunda olustu)
 ESKI_TASLAK = {4597843405}          # eski 7 stil CANCER_LIBRA taslagi: bu kod ona YAZMAZ, onu "ayni baslikli taslak" saymaz
+DOKUNMA = {4598525642}              # Orchard CANCER_LIBRA (19 Eki); talimati Serdar panelden elle duzeltiyor: yazma YOK
+YAZMA_YASAK = ESKI_TASLAK | DOKUNMA
 P_STYLE, P_SIZE = 513, 514
 # (menu adi, stil no, galeri sirasi); galeri dosya adi <sira>_<Ad_Soyad>... (kupa_orchard/kod/cift.py)
 STILLER = [("Orange Blossom", "01", 1), ("Purple Fig", "02", 8), ("Olive Breeze", "03", 9), ("Pomegranate Bloom", "04", 10),
@@ -260,6 +262,7 @@ N_GORSEL = 14
 MALZEME = ["Ceramic"]
 SORU_METNI = "Personalization"
 SORU_MAX = 256
+TALIMAT_MAX = 120                   # Etsy "Custom options" paneli: talimat en fazla 120 karakter (19 Eki; API 256 kabul ediyor)
 # kategori 1062 nitelikleri: (property_id, ad, value_ids, values)
 NITELIK = [(148789511893, "Materials", [83], ["Ceramic"]), (200, "Primary color", [10], ["White"]),
            (47626760110, "Dishwasher safe", [1094], ["Yes"]), (47626760308, "Microwave safe", [1144], ["Yes"]),
@@ -304,8 +307,8 @@ def metin_kontrol(row):
         hata.append(f"20 karakteri asan etiket {uzun}")
     if not re.fullmatch(r"[A-Za-z0-9 ]+", "".join(tags).replace(" ", "") or "x"):
         hata.append("etikette harf/rakam/bosluk disi karakter")
-    if len(inst) > SORU_MAX:
-        hata.append(f"talimat {len(inst)} > {SORU_MAX}")
+    if len(inst) > TALIMAT_MAX:
+        hata.append(f"talimat {len(inst)} > {TALIMAT_MAX}")
     if "AstroLove " in desc.replace("AstroLoveArt", ""):
         hata.append("aciklamada yalniz 'AstroLove' (marka AstroLoveArt)")
     eski = [s for s in ESKI_STILLER if re.search(rf"\b{s}\b", title + "\n" + desc)]
@@ -340,8 +343,8 @@ class Kilitli(Etsy):
     lid = None
 
     def _izin(self, method, path):
-        if any(re.search(rf"/listings/{e}(/|$)", path) for e in ESKI_TASLAK):
-            raise SystemExit(f"YASAK yazma (eski taslak): {method} {path}")
+        if any(re.search(rf"/listings/{e}(/|$)", path) for e in YAZMA_YASAK):
+            raise SystemExit(f"YASAK yazma (eski/dokunulmaz taslak): {method} {path}")
         ok = [("POST", r"^/shops/\d+/listings$")]
         if self.lid:
             L = self.lid
@@ -454,11 +457,11 @@ def yaz(api, shop, out, pair):
     def ayni_baslik():
         drafts = (api.get(f"/shops/{shop}/listings", params={"state": "draft", "limit": 100}) or {}).get("results") or []
         R["eski_taslak_yok_sayildi"] = [x["listing_id"] for x in drafts if x.get("title") == title and x["listing_id"] in ESKI_TASLAK]
-        return next((x["listing_id"] for x in drafts if x.get("title") == title and x["listing_id"] not in ESKI_TASLAK), None)
+        return next((x["listing_id"] for x in drafts if x.get("title") == title and x["listing_id"] not in YAZMA_YASAK), None)
 
     lid = D["ciftler"].get(pair)
-    if lid in ESKI_TASLAK:
-        kaydet(); raise SystemExit(f"DUR: DURUM.json {pair} = eski taslak {lid}")
+    if lid in YAZMA_YASAK:
+        kaydet(); raise SystemExit(f"DUR: DURUM.json {pair} = yazilmayacak taslak {lid}")
     lid = lid or ayni_baslik()
     if lid:
         R["olusturma"] = f"VAR OLAN TASLAK {lid} kullanildi (ikinci ilan acilmadi)"
@@ -601,6 +604,8 @@ def yaz(api, shop, out, pair):
         raise SystemExit(f"HATA: {pair} son state {L.get('state')}")
     if kotu:
         raise SystemExit(f"FAIL kontrol {pair}: {kotu}")
+    if pair not in D.setdefault("tamam", []):
+        D["tamam"].append(pair); kaydet()
     return R
 
 
@@ -768,8 +773,12 @@ def main():
         return
     api = Kilitli(store)
     t0 = time.time()
+    D = json.load(open(out / "DURUM.json")) if (out / "DURUM.json").exists() else {}
     for i, c in enumerate(ciftler, 1):
         api.lid = None
+        if c in D.get("tamam", []) or D.get("ciftler", {}).get(c) in YAZMA_YASAK:
+            print(f"::warning::{c} ATLANDI: taslak var ({D.get('ciftler', {}).get(c)}); yazma yok")
+            continue
         try:
             yaz(api, shop, out, c)
         except BaseException as e:  # noqa: BLE001  hata nedeni rapora ve annotation'a (job loglari okunamiyor)

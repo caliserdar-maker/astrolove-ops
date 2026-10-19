@@ -56,9 +56,16 @@ class KuruTest(unittest.TestCase):
                      aciklama="Rose Ribbon or Nazar Bond")
         self.assertTrue(k.metin_kontrol(satir)[4])
 
+    def test_talimat_120(self):
+        satir = dict(kod="CANCER_LIBRA", baslik="x", etiketler=ETIKET, kisisellestirme_talimati="a" * 120, aciklama=ACIKLAMA)
+        self.assertEqual(k.metin_kontrol(satir)[4], [])
+        satir["kisisellestirme_talimati"] = "a" * 121
+        self.assertEqual(k.metin_kontrol(satir)[4], ["talimat 121 > 120"])
+
     def test_izin(self):
         api = k.Kuru("1"); api.lid = 9000000001
-        for m, p in [("PUT", "/listings/4597843405/inventory"), ("POST", "/shops/1/sections"),
+        for m, p in [("PUT", "/listings/4597843405/inventory"), ("POST", "/shops/1/listings/4598525642/personalization"),
+                     ("POST", "/shops/1/sections"),
                      ("POST", "/shops/1/shipping-profiles"), ("DELETE", "/shops/1/listings/9000000001")]:
             with self.assertRaises(SystemExit):
                 api._izin(m, p)
