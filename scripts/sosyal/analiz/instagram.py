@@ -20,6 +20,7 @@ import re
 import sys
 from collections import Counter, defaultdict
 from datetime import date, datetime, timedelta
+from zoneinfo import ZoneInfo
 
 KOK = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sp = importlib.util.spec_from_file_location('mpb', os.path.join(KOK, 'metricool_pin_baslik.py'))
@@ -35,18 +36,21 @@ HESAP = [(m, 'account', None, True) for m in ('delta_followers', 'followers_gain
                                                'postsCount', 'postsInteractions')] \
     + [(m, 'account', None, False) for m in ('followers', 'reach', 'views', 'impressions', 'profile_views',
                                               'website_clicks', 'profile_links_taps', 'accounts_engaged')] \
-    + [('profile_links_taps', 'contact_button_type', None, True), ('views', 'media_product_type', None, True),
-       ('reach', 'media_product_type', None, True), ('reach', 'follow_type', None, True)]
-ICERIK = [(m, 'posts', None, True) for m in ('count', 'reach', 'impressions', 'likes', 'comments', 'saves', 'shares',
+    + [(m, 'media_product_type', sc, True) for m in ('views', 'reach') for sc in ('POST', 'CAROUSEL_CONTAINER', 'REEL')] \
+    + [('reach', 'follow_type', sc, True) for sc in ('FOLLOWER', 'NON_FOLLOWER')] \
+    + [('profile_links_taps', 'contact_button_type', sc, True) for sc in ('TEXT', 'EMAIL', 'UNDEFINED')]
+# 1. kosu (19 Eki 11:33 UTC): breakdown scope'suz 400 "Invalid field 'null'"; posts 'saves' 400 (gecerli: saved)
+ICERIK = [(m, 'posts', None, True) for m in ('count', 'reach', 'impressions', 'likes', 'comments', 'saved', 'shares', 'follows', 'clicks',
                                               'interactions', 'engagement')] \
     + [(m, 'reels', None, True) for m in ('count', 'reach', 'videoviews', 'impressions', 'likes', 'comments', 'saved',
                                           'shares', 'interactions', 'engagement')]
 # gonderi tablosu: (sutun, posts alani, reels alani)
-GON = [('erisim', 'reach', 'reach'), ('goruntulenme_views', 'views', 'views'), ('gosterim_impressions', 'impressions',
-       'impressions'), ('begeni', 'likes', 'likes'), ('yorum', 'comments', 'comments'), ('kayit', 'saved', 'saved'),
+GON = [('erisim', 'reach', 'reach'), ('goruntulenme_views', 'views', 'views'), ('gosterim_impressionsTotal', 'impressionsTotal',
+       'impressionsTotal'), ('begeni', 'likes', 'likes'), ('yorum', 'comments', 'comments'), ('kayit', 'saved', 'saved'),
        ('paylasim', 'shares', 'shares'), ('etkilesim', 'interactions', 'interactions'),
        ('reel_izlenme_videoViews', None, 'videoViews'), ('reel_ort_izleme_suresi', None, 'averageWatchTime'),
-       ('reel_toplam_izleme_suresi', None, 'videoViewTotalTime'), ('reel_sure_sn', None, 'durationSeconds')]
+       ('reel_toplam_izleme_suresi', None, 'videoViewTotalTime'), ('reel_sure_sn', None, 'durationSeconds'),
+       ('reel_skip_rate', None, 'reelsSkipRate'), ('reel_repost', None, 'reposts'), ('takip_follows', 'follows', None)]
 BURC = ('aries', 'taurus', 'gemini', 'cancer', 'leo', 'virgo', 'libra', 'scorpio', 'sagittarius', 'capricorn',
         'aquarius', 'pisces')
 OZET = None
@@ -85,7 +89,7 @@ def guvenli(mc, ad, yol, params, out):
     try:
         j = mc.istek('GET', yol, params)
     except SystemExit as e:
-        log(f'{ad}: HATA {str(e)[:220]}'); ham(out, ad, {'_hata': str(e)[:300]})
+        log(f'{ad}: HATA {str(e)[:220]}'); ham(out, ad, {'_hata': str(e)[:2000]})
         return None
     ham(out, ad, j)
     return j
@@ -116,8 +120,15 @@ def kod(url):
 
 
 def zaman(x):
+    """publishedAt -> Istanbul saati. 1. kosu: yanit timezone=Europe/Madrid (istenen TZ yok sayiliyor)."""
     v = x.get('publishedAt') if isinstance(x, dict) else None
-    return (v.get('dateTime') if isinstance(v, dict) else v) or ''
+    t, tz = (v.get('dateTime'), v.get('timezone')) if isinstance(v, dict) else (v, None)
+    if not t:
+        return ''
+    try:
+        return datetime.fromisoformat(t).replace(tzinfo=ZoneInfo(tz or TZ)).astimezone(ZoneInfo(TZ)).strftime('%Y-%m-%dT%H:%M:%S')
+    except Exception:
+        return t
 
 
 def main():
@@ -139,17 +150,17 @@ def main():
             p = dict(aralik, network='instagram', metric=m, subject=subj)
             if scope:
                 p['scope'] = scope
-            ad = f'timeline_{subj}_{m}'
+            ad = f'timeline_{subj}_{m}' + (f'_{scope}' if scope else '')
             j = guvenli(mc, ad, TL, p, out)
             ss = seriler(j) if j is not None else {}
             durum = 'HTTP hata' if j is None else ('bos yanit' if not ss else
                                                    ('deger yok' if not any(ss.values()) else 'veri var'))
-            log(f'TIMELINE {subj}/{m} ({"belgede" if belgede else "belgede YOK, deneme"}): {durum}; '
+            log(f'TIMELINE {subj}/{m}{"/" + scope if scope else ""} ({"belgede" if belgede else "belgede YOK, deneme"}): {durum}; '
                 + '; '.join(f'{k}: {len(g)} gun, toplam {sayi(sum(g.values()))}' for k, g in ss.items()))
             if not ss:
                 ss = {m: None}
             for k, g in ss.items():
-                c = f'{m}' if (len(ss) == 1 and subj in ('account', 'posts', 'reels')) else f'{m}[{subj}:{k}]'
+                c = f'{m}' if (len(ss) == 1 and subj in ('account', 'posts', 'reels')) else f'{m}[{subj}' + (f'={scope}' if scope else '') + f':{k}]'
                 c = f'{subj}.{c}' if subj in ('posts', 'reels') else c
                 kol.append(c); S[c] = g
                 kaynak.append([csv_ad, c, TL, f'network=instagram metric={m} subject={subj}' + (f' scope={scope}' if scope else '')
@@ -158,7 +169,8 @@ def main():
                 [[str(d)] + [sayi(S[c].get(d)) if S[c] and d in S[c] else YOK for c in kol]
                  + [f'{TL} network=instagram; okuma {okuma}'] for d in gunler])
         yaz_csv(out, csv_ad.replace('GUNLUK', 'TOPLAM'), ['donem'] + kol + ['kaynak'],
-                [[f'{BAS} - {BUGUN}'] + [sayi(sum(S[c].values())) if S[c] else YOK for c in kol]
+                [[f'{BAS} - {BUGUN} (followers: son gunun degeri; digerleri toplam)']
+                 + [(sayi(S[c][max(S[c])]) if c == 'followers' else sayi(sum(S[c].values()))) if S[c] else YOK for c in kol]
                  + [f'{TL}; okuma {okuma}']])
     timeline_oku(HESAP, 'IG_HESAP_GUNLUK.csv')
     timeline_oku(ICERIK, 'IG_ICERIK_GUNLUK.csv')
@@ -239,9 +251,10 @@ def main():
             if isinstance(v, (int, float)) and not isinstance(v, bool):
                 tur_deger[tur][sut].append(v)
         tur_deger[tur]['_n'].append(1)
-        satir.append([zaman(x), tur, x.get('type') or '', cift(x.get('content')) or s[3],
+        pa = x.get('publishedAt') or {}
+        satir.append([zaman(x), f"{pa.get('dateTime', '')} {pa.get('timezone', '')}".strip() if isinstance(pa, dict) else pa, tur, x.get('type') or '', cift(x.get('content')) or s[3],
                       s[0], s[1]] + deg + [x.get('url') or '', uc])
-    yaz_csv(out, 'IG_GONDERI.csv', ['yayin_zamani', 'tur', 'metricool_type', 'cift', 'plan_zamani', 'plan_durum']
+    yaz_csv(out, 'IG_GONDERI.csv', ['yayin_zamani_istanbul', 'publishedAt_ham', 'tur', 'metricool_type', 'cift', 'plan_zamani', 'plan_durum']
             + [g[0] for g in GON] + ['url', 'kaynak_uc'], satir)
     for r in satir:
         log('GONDERI ' + ' | '.join(str(v) for v in r[:-1]))
