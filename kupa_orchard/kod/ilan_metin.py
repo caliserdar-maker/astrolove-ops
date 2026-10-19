@@ -2,7 +2,7 @@
 """Orchard kupa 78 ilan metni (Serdar onayi 19 Eki 2026). Cikti: kupa_orchard/ilan/KUPA78_ORCHARD_METIN.csv
 Sutunlar eski kupa_taslak.py ile ayni: kod, baslik, baslik_kr, etiketler, kisisellestirme_talimati, talimat_kr, aciklama.
 Baslik ve 13 etiket: 17 Eki Marketplace Insights olcumuyle onayli kalip (ilk etiket: "{a} and {b}", sigmazsa "{a} {b}", o da sigmazsa "wedding mugs").
-Kontroller (biri bile FAIL ise CSV yazilmaz): baslik <= 140, 13 tekrarsiz etiket <= 20, talimat <= 256,
+Kontroller (biri bile FAIL ise CSV yazilmaz): baslik <= 140, 13 tekrarsiz etiket <= 20, talimat <= 120 (Etsy panel siniri),
 uzun/orta tire yok, "Lena" ve "Serdar" yok (ilanda isim olmaz), yer tutucu kalmamis.
 Kullanim: python3 -I ilan_metin.py"""
 import csv, itertools, os, re, sys
@@ -16,11 +16,9 @@ BASLIK = '{B1} and {B2} Personalized Mug, Zodiac Symbols with Names, Gift for Co
 ETIKET = ['personalized mug', 'couple mug', 'custom coffee mug', 'custom name mug', 'gift for couple', 'newlywed gift',
           'zodiac mug', 'zodiac symbols', 'zodiac gift', 'astrology mug', 'evil eye mug', 'engagement mug']
 
-TALIMAT = {
-    'farkli': 'Please enter:\n1. Name for {B1} (up to 10 letters)\n2. Name for {B2} (up to 10 letters)\n'
-              '3. Message (one line, up to 30 characters including spaces)\nLeave line 3 blank for: My favorite place is with you',
-    'ayni': 'Please enter:\n1. Left name (up to 10 letters)\n2. Right name (up to 10 letters)\n'
-            '3. Message (one line, up to 30 characters including spaces)\nLeave line 3 blank for: My favorite place is with you',
+TALIMAT = {   # Etsy yeni "Custom options" ekrani talimati en fazla 120 karakter kabul ediyor (Serdar paneli, 19.10)
+    'farkli': '1. Name for {B1} (max 10 letters)\n2. Name for {B2} (max 10 letters)\n3. Message (max 30 characters or blank)',
+    'ayni': '1. Left name (max 10 letters)\n2. Right name (max 10 letters)\n3. Message (max 30 characters or blank)',
 }
 ISIM_SATIRI = {
     'farkli': '1. Name for {B1} (up to 10 letters)\n2. Name for {B2} (up to 10 letters)',
@@ -79,8 +77,8 @@ for i, kod in enumerate(CIFTLER, 1):
         hatalar.append(f'{kod}: baslik {len(baslik)} > 140')
     if len(etiket) != 13 or len(set(etiket)) != 13 or any(len(e) > 20 for e in etiket):
         hatalar.append(f'{kod}: etiket {etiket}')
-    if len(talimat) > 256:
-        hatalar.append(f'{kod}: talimat {len(talimat)} > 256')
+    if len(talimat) > 120:
+        hatalar.append(f'{kod}: talimat {len(talimat)} > 120')
     if re.search('[–—]', tum):
         hatalar.append(f'{kod}: uzun/orta tire')
     if re.search(r'lena|serdar', tum, re.I):
