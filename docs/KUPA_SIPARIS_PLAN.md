@@ -46,7 +46,8 @@ eksik 4, karakter 5), FAIL'de `SORU.md`, `kontrol/burc_mesafe.txt`.
 
 ## 4. Onay akisi (ilk siparisler)
 
-PASS -> baski hazir, Serdar onizlemeye bakar, "Printful taslak" onayi verir. GOZ -> ayni + teslim oncesi gozle kontrol.
+PASS -> baski hazir; Serdar Printful siparisini ELLE_SIPARIS.txt ile panelden ELLE verir (19.10: API gonderimi ve cron yok).
+GOZ -> ayni, once baski dosyasina gozle bakilir.
 FAIL -> baski yok; SORU.md + musteri mesaji taslagi; Serdar mesaji gonderir ya da karar verir, duzeltilmis metinle
 `--receipt-id` ile yeniden kosulur (STATE'teki satir silinerek).
 
