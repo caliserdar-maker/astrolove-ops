@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       mod:
-        description: "analiz (19 Eki tespit) | karsilastir (ChatGPT PIEV01 ayrismasi: subject posts/account, /stats/timeline PIEV, takvim 19-25 Eki)"
+        description: "analiz (19 Eki tespit) | karsilastir (ChatGPT PIEV01 ayrismasi) | k4 (Eylul/Ekim pin farki, kontak sayfalari, P3 pano plan/zamanlayici; cikti K4/)"
         default: analiz
 jobs:
   oku:
@@ -44,11 +44,17 @@ jobs:
           mkdir -p _work/onceki
           rclone copy "gdrive:ASTROLOVE/TEMP/PINTEREST_20261017" _work/onceki --include "HAM_*.json" -q || echo "onceki okuma yok"
           if [ "${{ inputs.mod }}" = "karsilastir" ]; then BETIK="scripts/sosyal/analiz/pinterest_karsilastir.py _work/mc.json _out"
+          elif [ "${{ inputs.mod }}" = "k4" ]; then
+            pip install -q pillow >/dev/null 2>&1 || true
+            mkdir -p _work/k1 _work/plan _work/img
+            rclone copy "$O" _work/k1 --include "HAM_posts_pinterest.json" --max-depth 1 -q || echo "K1 okuma yok"
+            rclone copy "gdrive:ASTROLOVE/TEMP/PIN_V6_20261012/PLAN" _work/plan --include "PIN_V6_PLAN_YAYIN.csv" -q || echo "PLAN_YAYIN yok"
+            BETIK="scripts/sosyal/analiz/pinterest_k4.py _work/mc.json _out/K4 _work/img --onceki _work/onceki/HAM_posts_pinterest.json --k1 _work/k1/HAM_posts_pinterest.json --metin sosyal/pin_v6/PIN_METIN_234.csv --plan _work/plan/PIN_V6_PLAN_YAYIN.csv --panolar data/sosyal/pinterest/v6_plan/PANOLAR_HAM.json"
           else BETIK="scripts/sosyal/analiz/pinterest.py _work/mc.json _out _work/onceki"; fi
           python3 $BETIK | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json --sir-json _work/kimlik.json "$GITHUB_STEP_SUMMARY"
           rc=${PIPESTATUS[0]}
           mkdir -p _work/engel
-          for f in _out/*; do
+          find _out -type f | while read -r f; do
             python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/mc.json --sir-json _work/kimlik.json "$f" >/dev/null 2>&1 \
               || { echo "TARAMA GECMEDI (Drive'a gitmez): $(basename "$f")"; mv "$f" _work/engel/; }
           done

@@ -4,13 +4,17 @@ Uclar ve metrik adlari data/sosyal/kaynak/metricool/METRICOOL_SWAGGER.json'dan (
   /v2/analytics/timelines network=facebook subject=account   belgede (account metrics): page_posts_impressions,
       page_actions_post_reactions_total, postsCount, postsInteractions, likes, pageFollows, pageImpressions, pageViews,
       page_daily_follows_unique, page_daily_unfollows_unique
-      belgede OLMAYAN (DENEME; 400 yanitindaki "Valid values" listesi ham dosyada tam saklanir): reach,
-      page_impressions_unique, page_total_actions
+      belgede OLMAYAN, 1. kosu 400 yanitinin "Valid values" listesinde olan (19 Eki 11:42 UTC): Follows, Unfollows,
+      page_media_view, page_website_clicks_logged_in_unique, ctaClicks, page_total_actions
+      (ayni listede reach / page_impressions_unique YOK: sayfa erisimi bu uctan okunamaz)
       subject=account 400 verirse ayni metrik subject'siz bir kez daha okunur (FB icin subject zorunlulugu belgede yok)
-  /v2/analytics/timelines subject=posts|reels|stories         belgedeki posts / reels / stories metrikleri (yayin gunune gore)
+  /v2/analytics/timelines subject=posts|reels|stories         belgedeki posts / reels metrikleri; reels ve stories icin
+      1. kosu "Valid values" listesindekiler (reels: post_total_media_view_unique, post_video_avg_time_watched,
+      post_video_view_time, interactions; stories: count)
   /v2/analytics/aggregation, /stats/aggregations/facebook     sayfa toplami (ham)
   /v2/analytics/posts/facebook, /v2/analytics/reels/facebook  gonderi bazinda (FacebookPost / FacebookReel semasi)
-  /v2/analytics/stories/facebook, /stats/facebook/posts       ham (sayi + alanlar loga)
+  /stats/facebook/posts                                        gonderi bazinda ucuncu kaynak (totalMediaViewUnique, permalinkUrl)
+  /v2/analytics/stories/facebook                               ham (sayi + alanlar loga)
   /v2/scheduler/posts                                          plan / yayin / hata (12 Eki - bugun)
 Metricool bir degeri vermiyorsa "erisilemedi"; tahmin yok. Ham yanitlar HAM_*.json, ozet OZET.txt.
 Kullanim: facebook.py TOKEN.json CIKTI_DIR"""
@@ -41,20 +45,32 @@ TL = '/v2/analytics/timelines'
 HESAP = [(m, 'account', True) for m in ('likes', 'pageFollows', 'page_daily_follows_unique', 'page_daily_unfollows_unique',
                                         'pageImpressions', 'page_posts_impressions', 'pageViews', 'postsCount',
                                         'postsInteractions', 'page_actions_post_reactions_total')] \
-    + [(m, 'account', False) for m in ('reach', 'page_impressions_unique', 'page_total_actions')]
+    + [(m, 'account', False) for m in ('Follows', 'Unfollows', 'page_media_view', 'page_website_clicks_logged_in_unique',
+                                       'ctaClicks', 'page_total_actions')]
 ICERIK = [(m, 'posts', True) for m in ('count', 'impressionsunique', 'impressions', 'reactions', 'comments', 'shares',
                                        'clicks', 'interactions', 'engagement')] \
     + [(m, 'reels', True) for m in ('count', 'blue_reels_play_count', 'post_impressions_unique',
                                     'post_video_likes_by_reaction_type', 'post_video_social_actions', 'engagement')] \
-    + [('storiesCount', 'stories', True)]
+    + [(m, 'reels', False) for m in ('post_total_media_view_unique', 'post_video_avg_time_watched', 'post_video_view_time',
+                                     'interactions')] \
+    + [('count', 'stories', False)]
 KUMULATIF = ('likes', 'pageFollows')   # toplam degil son gunun degeri
-# gonderi tablosu: (sutun, FacebookPost alani, FacebookReel alani); ayni icerik iki uctan gelirse once posts alani
-GON = [('erisim', 'impressionsUnique', 'postImpressionsUnique'), ('gosterim', 'impressions', None),
-       ('tepki', 'reactions', 'postVideoReactions'), ('yorum', 'comments', None), ('paylasim', 'shares', None),
-       ('tiklama', 'clicks', None), ('link_tiklama', 'linkclicks', None), ('etkilesim_engagement', 'engagement', 'engagement'),
-       ('reel_sosyal_eylem', None, 'postVideoSocialActions'), ('izlenme', 'videoViews', 'blueReelsPlayCount'),
-       ('reel_ort_izleme_sn', None, 'postVideoAvgTimeWatchedSeconds'),
-       ('toplam_izleme_sn', 'videoTimeWatched', 'postVideoViewTimeSeconds'), ('reel_sure_sn', None, 'length')]
+# gonderi tablosu: (sutun, {kaynak: alan}); ayni icerik birden cok uctan gelirse sira posts > reels > stats
+GON = [('erisim', {'posts': 'impressionsUnique', 'reels': 'postImpressionsUnique', 'stats': 'impressionsUnique'}),
+       ('medya_izlenme_tekil', {'stats': 'totalMediaViewUnique'}),
+       ('gosterim', {'posts': 'impressions', 'stats': 'impressions'}),
+       ('tepki', {'posts': 'reactions', 'reels': 'postVideoReactions', 'stats': 'reactions'}),
+       ('yorum', {'posts': 'comments', 'stats': 'comments'}), ('paylasim', {'posts': 'shares', 'stats': 'shares'}),
+       ('tiklama', {'posts': 'clicks', 'stats': 'clicks'}), ('link_tiklama', {'posts': 'linkclicks', 'stats': 'linkclicks'}),
+       ('etkilesim_engagement', {'posts': 'engagement', 'reels': 'engagement', 'stats': 'engagement'}),
+       ('reel_sosyal_eylem', {'reels': 'postVideoSocialActions'}),
+       ('izlenme', {'posts': 'videoViews', 'reels': 'blueReelsPlayCount', 'stats': 'videoViews'}),
+       ('reel_ort_izleme_sn', {'reels': 'postVideoAvgTimeWatchedSeconds'}),
+       ('toplam_izleme_sn', {'posts': 'videoTimeWatched', 'reels': 'postVideoViewTimeSeconds', 'stats': 'videoTimeWatched'}),
+       ('reel_sure_sn', {'reels': 'length'})]
+KAYNAKLAR = (('/v2/analytics/posts/facebook', 'posts', 'postId'), ('/v2/analytics/reels/facebook', 'reels', 'reelId'),
+             ('/stats/facebook/posts', 'stats', 'postId'))
+SAYFA_ID = {'1331479546706857', '122109181653467288'}   # Metricool pageId ve yeni sayfa kimligi (URL'de); icerik kimligi DEGIL
 BURC = ('aries', 'taurus', 'gemini', 'cancer', 'leo', 'virgo', 'libra', 'scorpio', 'sagittarius', 'capricorn',
         'aquarius', 'pisces')
 OZET = None
@@ -155,8 +171,14 @@ def alan(x, ad):
 
 
 def kimlikler(*metin):
-    """URL / postId ('sayfa_gonderi') icindeki 8+ haneli sayilar; sayfa kimligi haric."""
-    return {s for m in metin for s in re.findall(r'\d{8,}', str(m or '')) if s != '1331479546706857'}
+    """Icerik kimligi: her metindeki (postId 'sayfa_gonderi', .../posts/N, /reel/N) SON 8+ haneli sayi; sayfa kimlikleri haric.
+    1. kosu: tum sayilar alininca sayfa kimligi 122109181653467288 ortak cikti, 7 gonderi tek kayitta birlesti."""
+    out = set()
+    for m in metin:
+        s = [x for x in re.findall(r'\d{8,}', str(m or '')) if x not in SAYFA_ID]
+        if s:
+            out.add(s[-1])
+    return out
 
 
 def zaman(x):
@@ -204,7 +226,7 @@ def main():
             ss = seriler(j) if j is not None else {}
             durum = 'HTTP hata' if j is None else ('bos yanit' if not ss else
                                                    ('deger yok' if not any(ss.values()) else 'veri var'))
-            log(f'TIMELINE {subj}/{m} ({"belgede" if belgede else "belgede YOK, deneme"}; {ad}): {durum}; '
+            log(f'TIMELINE {subj}/{m} ({"belgede" if belgede else "belgede YOK, Valid values listesinde"}; {ad}): {durum}; '
                 + '; '.join(f'{k}: {len(g)} gun, toplam {sayi(sum(g.values()))}' for k, g in ss.items()))
             if not ss:
                 ss = {m: None}
@@ -212,7 +234,7 @@ def main():
                 c = (m if subj == 'account' else f'{subj}.{m}') + ('' if len(ss) == 1 else f'[{k}]')
                 kol.append(c); S[c] = g
                 kaynak.append([csv_ad, c, TL, f'network=facebook metric={m}' + (' subject YOK (subject=account 400)' if ad.endswith('_subjectsiz') else f' subject={subj}')
-                               + ('' if len(ss) == 1 else f' seri={k}'), 'evet' if belgede else 'hayir (deneme)', durum])
+                               + ('' if len(ss) == 1 else f' seri={k}'), 'evet' if belgede else 'hayir (1. kosu Valid values listesinde)', durum])
         yaz_csv(out, csv_ad, ['tarih'] + kol + ['kaynak'],
                 [[str(d)] + [sayi(S[c].get(d)) if S[c] and d in S[c] else YOK for c in kol]
                  + [f'{TL} network=facebook; okuma {okuma}'] for d in gunler])
@@ -276,32 +298,31 @@ def main():
     # 2) gonderi bazinda (12 Eki - bugun)
     a2 = {'from': f'{PLAN_BAS}T00:00:00', 'to': f'{BUGUN}T23:59:59', 'timezone': TZ}
     kay = {}   # kimlik -> {'posts': x, 'reels': y}
-    for uc, ad, idk in (('/v2/analytics/posts/facebook', 'posts', 'postId'), ('/v2/analytics/reels/facebook', 'reels', 'reelId')):
-        j = guvenli(mc, f'{ad}_facebook', uc, a2, out)
+    eski = {'start': f'{PLAN_BAS:%Y%m%d}', 'end': f'{BUGUN:%Y%m%d}', 'timezone': TZ}
+    for uc, ad, idk in KAYNAKLAR:
+        j = guvenli(mc, 'stats_facebook_posts' if ad == 'stats' else f'{ad}_facebook', uc, eski if ad == 'stats' else a2, out)
         ls = liste(j)
         log(f'{uc}: {len(ls) if ls is not None else "yanit yok"} kayit; alanlar {sorted(ls[0]) if ls else "-"}')
         for x in ls or []:
-            ids = kimlikler(alan(x, idk), alan(x, 'link'), alan(x, 'reelUrl'), alan(x, 'url'))
+            ids = kimlikler(alan(x, idk), alan(x, 'link'), alan(x, 'reelUrl'), alan(x, 'url'), alan(x, 'permalinkUrl'))
             k = next((kk for kk in kay if ids & kay[kk]['_id']), None) or (sorted(ids)[0] if ids else f'{ad}_{len(kay)}')
             r = kay.setdefault(k, {'_id': set()})
             r['_id'] |= ids
             if ad in r:
                 log(f'  {ad}: {k} ayni uctan iki kez geldi (ilk kayit tutulur)'); continue
             r[ad] = x
-    for uc, ad, prm in (('/v2/analytics/stories/facebook', 'stories_facebook', a2),
-                        ('/stats/facebook/posts', 'stats_facebook_posts', {'start': f'{PLAN_BAS:%Y%m%d}', 'end': f'{BUGUN:%Y%m%d}',
-                                                                            'timezone': TZ})):
-        ls = liste(guvenli(mc, ad, uc, prm, out))
-        log(f'{uc} (ham): {len(ls) if ls is not None else "yanit yok"} kayit; alanlar {sorted(ls[0]) if ls and isinstance(ls[0], dict) else "-"}')
+    ls = liste(guvenli(mc, 'stories_facebook', '/v2/analytics/stories/facebook', a2, out))
+    log(f'/v2/analytics/stories/facebook (ham): {len(ls) if ls is not None else "yanit yok"} kayit; '
+        f'alanlar {sorted(ls[0]) if ls and isinstance(ls[0], dict) else "-"}')
 
     plan_id = {}
     for zt, p, pr, tur in sch:
         for i in kimlikler(pr.get('publicUrl'), pr.get('id')):
             plan_id[i] = (zt, pr.get('status'), tur, cift(p.get('text')))
     satir, tur_deger, eslesen_plan = [], defaultdict(lambda: defaultdict(list)), set()
-    for k, r in sorted(kay.items(), key=lambda kv: zaman(kv[1].get('posts') or kv[1].get('reels'))[0]):
-        xp, xr = r.get('posts'), r.get('reels')
-        zi, zham = zaman(xp or xr)
+    for k, r in sorted(kay.items(), key=lambda kv: zaman(kv[1].get('posts') or kv[1].get('reels') or kv[1].get('stats'))[0]):
+        xp, xr, xs = r.get('posts'), r.get('reels'), r.get('stats')
+        zi, zham = zaman(xp or xr or xs)
         s = next((plan_id[i] for i in r['_id'] if i in plan_id), None)
         esl = 'kimlik'
         if s is None and zi:   # kimlik eslesmezse: ayni gun +-90 dk icindeki plan
@@ -313,24 +334,23 @@ def main():
         s = s or ('', '', '', '')
         if s[0]:
             eslesen_plan.add(s[0])
-        tip = str(alan(xp, 'type') or '')
+        tip = str(alan(xp, 'type') or alan(xs, 'type') or '')
         tur = 'Reel' if xr is not None or s[2] == 'Reel' else 'gonderi'
         deg, kaynak_alan = [], []
-        for sut, fp, fr in GON:
+        for sut, alanlar in GON:
             v, nereden = None, ''
-            if xp is not None and fp and alan(xp, fp) is not None:
-                v, nereden = alan(xp, fp), f'posts.{fp}'
-            elif xr is not None and fr and alan(xr, fr) is not None:
-                v, nereden = alan(xr, fr), f'reels.{fr}'
+            for kn in ('posts', 'reels', 'stats'):
+                if kn in alanlar and alan(r.get(kn), alanlar[kn]) is not None:
+                    v, nereden = alan(r.get(kn), alanlar[kn]), f'{kn}.{alanlar[kn]}'; break
             deg.append(sayi(v)); kaynak_alan.append(nereden)
             if sayi(v) != YOK:
                 tur_deger[tur][sut].append(sayi(v))
         tur_deger[tur]['_n'].append(1)
-        metin = ' '.join(str(alan(x, a) or '') for x in (xp, xr) for a in ('text', 'description'))
+        metin = ' '.join(str(alan(x, a) or '') for x in (xp, xr, xs) for a in ('text', 'description'))
         satir.append([zi, zham, tur, tip, cift(metin) or s[3], s[0], s[1], esl if s[0] else ''] + deg
                      + [json.dumps(alan(xr, 'postVideoReactions'), ensure_ascii=False) if xr is not None else '',
                         json.dumps(alan(xr, 'postVideoSocialActions'), ensure_ascii=False) if xr is not None else '',
-                        alan(xp, 'link') or alan(xr, 'reelUrl') or '', '+'.join(a for a in ('posts', 'reels') if a in r),
+                        alan(xp, 'link') or alan(xs, 'link') or alan(xr, 'reelUrl') or '', '+'.join(a for a in ('posts', 'reels', 'stats') if a in r),
                         ';'.join(sorted({a for a in kaynak_alan if a}))])
     yaz_csv(out, 'FB_GONDERI.csv', ['yayin_zamani_istanbul', 'zaman_ham', 'tur', 'metricool_type', 'cift', 'plan_zamani',
                                     'plan_durum', 'plan_eslesme'] + [g[0] for g in GON]
@@ -342,7 +362,7 @@ def main():
     # 3) gonderi / Reel karsilastirmasi (yalniz olculen degerler)
     kar = []
     for tur, d in sorted(tur_deger.items()):
-        for sut, _, _ in GON:
+        for sut, _ in GON:
             v = d.get(sut) or []
             kar.append([tur, len(d['_n']), sut, len(v), sayi(sum(v) / len(v)) if v else YOK, sayi(sum(v)) if v else YOK])
     yaz_csv(out, 'FB_TUR_KARSILASTIRMA.csv', ['tur', 'icerik_sayisi', 'olcu', 'olculen_n', 'ortalama', 'toplam'], kar)
@@ -351,9 +371,11 @@ def main():
             log(f'TUR {r[0]} (n={r[1]}) {r[2]}: olculen {r[3]}, ort {r[4]}, toplam {r[5]}')
 
     # 5) metrik kaynagi
-    for sut, fp, fr in GON:
-        kaynak.append(['FB_GONDERI.csv', sut, '/v2/analytics/posts/facebook | /v2/analytics/reels/facebook',
-                       f'FacebookPost.{fp or "-"} | FacebookReel.{fr or "-"}', 'evet (sema)', 'iki uctan da varsa posts alani'])
+    uc_ad = {ad: uc for uc, ad, _ in KAYNAKLAR}
+    for sut, alanlar in GON:
+        kaynak.append(['FB_GONDERI.csv', sut, ' | '.join(uc_ad[k] for k in alanlar), ' | '.join(f'{k}.{a}' for k, a in alanlar.items()),
+                       'evet (FacebookPost/FacebookReel semasi)' if sut != 'medya_izlenme_tekil' else 'hayir (1. kosu yanitinda)',
+                       'birden cok uctan varsa sira posts > reels > stats; kullanilan alan: kullanilan_alanlar sutunu'])
     kaynak += [['FB_GONDERI.csv', 'plan_zamani/plan_durum', '/v2/scheduler/posts', 'publicationDate.dateTime, providers[facebook].status',
                 'evet (sema)', 'publicUrl/postId kimligi, yoksa +-90 dk saat eslesmesi (plan_eslesme sutunu)'],
                ['FB_PLAN_*.csv', 'durum', '/v2/scheduler/posts', 'providers[facebook].status, detailedStatus, facebookData.type, media',
