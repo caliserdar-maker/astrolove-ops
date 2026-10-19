@@ -9,7 +9,10 @@ Olcumler (iki videoya ayni formul):
 Poster kalibrasyonu: her turda N <- N x medyan(D_kupa / D_poster) (D_kupa en buyugunun %20'sinden buyuk kareler; tur basina x0,5-x2,5) ve murekkep
 egrisi c(t) (piksel basina min(c, F), F = yerel toz birikimi) c += V_kupa - V_poster (monoton, son kare 1); N0 26000,
    en fazla 5 tur, tolerans: her 0,5 sn V +-0,05 ve D +-%10 (D_kupa < en buyugunun %20'si ise mutlak %2 en buyuk).
-Kullanim: v6_kalibre.py <poster_kapak.jpg> <kupa video/ klasoru> <kupa kapak jpg> <video6b.py> <cikti_dir> <is_dir>"""
+Ilk/son kare = guncel kapak (Serdar ek): kupa = KUPA_ALT_YAZI V4 A_V4.jpg (kupalar canli kapaktan aynen; katmanlarin uretildigi
+kapakla kupa bolgesinde fark <= 3 kontrol edilir), poster = KAPAK_P2_78 BASLIK_A/KAPAK_A (tasan 40) ya da KAPAK/ (38).
+Kullanim: v6_kalibre.py <poster_kapak.jpg> <kupa video/ klasoru> <kupa guncel kapak jpg> <video6b.py> <cikti_dir> <is_dir>
+          [katmanlarin uretildigi kupa kapagi (cift.py galeri 01)]"""
 import importlib.util, json, os, subprocess, sys
 import numpy as np, cv2
 from PIL import Image, ImageDraw
@@ -17,6 +20,7 @@ from PIL import Image, ImageDraw
 HERE = os.path.dirname(os.path.abspath(__file__))
 sp = importlib.util.spec_from_file_location('q5', os.path.join(HERE, 'v5_qc.py')); Q = importlib.util.module_from_spec(sp); sp.loader.exec_module(Q)
 KAPAK, VD, KK, V6B, OUT, IS = sys.argv[1:7]
+KK_KATMAN = sys.argv[7] if len(sys.argv) > 7 else KK   # katmanlarin uretildigi kupa kapagi (cift.py galeri 01); KK = guncel kapak
 os.makedirs(OUT, exist_ok=True); os.makedirs(IS, exist_ok=True)
 FPS, NB = 30, 150
 TS = [k * 0.5 for k in range(13)]
@@ -77,7 +81,21 @@ oku = lambda p_: cv2.resize(np.asarray(Image.open(p_).convert('RGB')).astype(np.
 mk = np.clip((1 - oku(os.path.join(VD, 'k_mask_nosym.png')).mean(-1) / np.maximum(oku(os.path.join(VD, 'k_beyaz.png')).mean(-1), 1)) * 1.4, 0, 1)
 SMK = mk > 0.95
 Vk, Dk = olc(FK, FKT, SMK)
-R['kupa_v6'] = {'video': pk, 'N': 10400, 'tane_sigma': 0.45, 'sembol_piksel': int(SMK.sum())}
+R['kupa_v6'] = {'video': pk, 'N': 10400, 'tane_sigma': 0.45, 'sembol_piksel': int(SMK.sum()), 'kapak': os.path.basename(KK)}
+
+
+def kapak_kontrol(F, kap_yol, hw):
+    kap = np.clip(np.round(cv2.resize(np.asarray(Image.open(kap_yol).convert('RGB')).astype(np.float32), hw, interpolation=cv2.INTER_AREA)), 0, 255).astype(np.uint8)
+    tb = os.path.join(IS, '_t.mp4')
+    subprocess.run(['ffmpeg', '-v', 'error', '-y', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-s', f'{hw[0]}x{hw[1]}', '-r', '30',
+                    '-i', '-', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '0', tb], input=kap.tobytes(), check=True)
+    return {'taban_420': Q.fk(Q.kareler(tb)[0][0], kap), 'ilk_kare_fark': Q.fk(F[0], kap), 'son_kare_fark': Q.fk(F[-1], kap)}
+
+
+R['kupa_v6'].update(kapak_kontrol(FK, KK, (FK.shape[2], FK.shape[1])))
+if KK_KATMAN != KK:   # guncel kapak katmanlarla ayni geometride mi: kupa (sembol) bolgesinde fark
+    a_ = oku(KK); b_ = oku(KK_KATMAN); bol_ = cv2.dilate(SMK.astype(np.uint8), np.ones((61, 61), np.uint8)) > 0
+    R['kupa_v6']['kapak_katman_kupa_bolgesi_fark'] = round(float(np.abs(a_ - b_)[bol_].mean()), 3)
 
 # ---------- B) poster V6 kalibrasyonu
 
@@ -123,11 +141,14 @@ kap = cv2.resize(np.asarray(Image.open(KAPAK).convert('RGB')), (FP.shape[2], FP.
 tb = os.path.join(IS, '_t.mp4')
 subprocess.run(['ffmpeg', '-v', 'error', '-y', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-s', f'{kap.shape[1]}x{kap.shape[0]}', '-r', '30',
                 '-i', '-', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '0', tb], input=kap.tobytes(), check=True)
-R['poster_v6'].update(taban_420=Q.fk(Q.kareler(tb)[0][0], kap), ilk_kare_fark=Q.fk(FP[0], kap), son_kare_fark=Q.fk(FP[-1], kap))
-pv = R['poster_v6']
+R['poster_v6'].update(taban_420=Q.fk(Q.kareler(tb)[0][0], kap), ilk_kare_fark=Q.fk(FP[0], kap), son_kare_fark=Q.fk(FP[-1], kap),
+                      kapak=os.path.basename(KAPAK))
+pv = R['poster_v6']; kv = R['kupa_v6']
 R['kapi'] = {'kupa_10400_045': R['kupa_kod_farki'] and pk['kare'] == 180 and pk['olcu'] == '1080x1080',
              'poster_180_kare_1440x1080': pp['kare'] == 180 and pp['olcu'] == '1440x1080' and not pp['ses_akisi'],
              'ilk_kare_kapak': pv['ilk_kare_fark'] <= pv['taban_420'] + 0.2, 'son_kare_kapak': pv['son_kare_fark'] <= pv['taban_420'] + 0.2,
+             'kupa_ilk_kare_kapak': kv['ilk_kare_fark'] <= kv['taban_420'] + 0.2, 'kupa_son_kare_kapak': kv['son_kare_fark'] <= kv['taban_420'] + 0.2,
+             'kupa_kapak_katman_ayni': kv.get('kapak_katman_kupa_bolgesi_fark', 0) <= 3.0,
              'murekkep_tozun_onunde_degil': pv['ihlal_en_buyuk'] <= 0, 'gorunen_ve_toz_kupa_ile_ayni': ok}
 R['sonuc'] = 'PASS' if all(bool(v) for v in R['kapi'].values()) else 'FAIL'
 json.dump(R, open(os.path.join(OUT, 'QC.json'), 'w'), indent=1, default=str)
