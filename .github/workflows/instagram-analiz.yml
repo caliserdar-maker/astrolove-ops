@@ -2,17 +2,22 @@ name: instagram-analiz
 # Instagram anlik durum tespiti 19 Eki 2026 (SALT OKUMA). Metricool ve Instagram'a YAZMA / SILME / DEGISTIRME YOK; yalniz GET.
 # scripts/sosyal/analiz/instagram.py: hesap gunluk (1 Eki+), gonderi bazinda (12 Eki+), karusel/Reel, plan/gercek (12 Eki+).
 # Token: secret METRICOOL_USER_TOKEN (userId/blogId Drive METRICOOL_TOKEN.json'dan). Loga yazilmaz (::add-mask:: + sir_koru).
+# mod=k2_link: scripts/sosyal/analiz/k2_link.py (K2 link envanteri: scheduler 12 Eki - 29 Ara, URL GET kontrolu, profil) -> .../K2_LINK/.
 # Sir taramasini gecmeyen dosya _work'te kalir, Drive'a gitmez. Cikti: Drive ASTROLOVE/TEMP/SOSYAL_ANALIZ_20261019/INSTAGRAM/.
 permissions:
   contents: read
 on:
   workflow_dispatch:
+    inputs:
+      mod:
+        description: "analiz (19 Eki Instagram tespit) | k2_link (K2 Etsy link envanteri, tum aglar)"
+        default: analiz
 jobs:
   oku:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     env:
-      O: gdrive:ASTROLOVE/TEMP/SOSYAL_ANALIZ_20261019/INSTAGRAM
+      O: gdrive:ASTROLOVE/TEMP/SOSYAL_ANALIZ_20261019/${{ inputs.mod == 'k2_link' && 'K2_LINK' || 'INSTAGRAM' }}
     steps:
       - uses: actions/checkout@v4
       - name: rclone + token
@@ -37,7 +42,8 @@ jobs:
           rclone copyto "gdrive:ASTROLOVE/TEMP/METRICOOL_TOKEN.json" _work/kimlik.json
           python3 -c "import json,os;d=json.load(open('_work/kimlik.json'));json.dump({'userToken':os.environ['MC_TOK'],'userId':d['userId'],'blogId':d['blogId']},open('_work/mc.json','w'))"
           python3 -c "import json;print('::add-mask::'+json.load(open('_work/kimlik.json'))['userToken'])"
-          python3 scripts/sosyal/analiz/instagram.py _work/mc.json _out | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json --sir-json _work/kimlik.json "$GITHUB_STEP_SUMMARY"
+          if [ "${{ inputs.mod }}" = "k2_link" ]; then BETIK=scripts/sosyal/analiz/k2_link.py; else BETIK=scripts/sosyal/analiz/instagram.py; fi
+          python3 $BETIK _work/mc.json _out | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json --sir-json _work/kimlik.json "$GITHUB_STEP_SUMMARY"
           rc=${PIPESTATUS[0]}
           mkdir -p _work/engel
           for f in _out/*; do
