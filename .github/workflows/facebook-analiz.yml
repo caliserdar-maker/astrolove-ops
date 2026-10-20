@@ -46,6 +46,8 @@ jobs:
           if [ "${{ inputs.mod }}" = "degisim" ]; then
             O="gdrive:ASTROLOVE/TEMP/SOSYAL_DEGISIM_20261020/FACEBOOK"
             pip install -q pillow numpy >/dev/null 2>&1 || true
+            sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null
+            command -v ffmpeg >/dev/null || { echo "::error::ffmpeg kurulamadi"; exit 1; }
             T=gdrive:ASTROLOVE/TEMP; mkdir -p _work/dg
             P2A="$T/KAPAK_P2_78_20261019/BASLIK_A/KAPAK_A"; P2="$T/KAPAK_P2_78_20261019/KAPAK"; KUPA="$T/KUPA_KAPAK_78_20261019/KAPAK"
             Y1="$T/KAPAK_Y1_78_20261019/KAPAK"; YEDEK="$T/KAPAK_P2_78_20261019/YEDEK"; VK="$T/VIDEO_V9_20261012/KAPAK"

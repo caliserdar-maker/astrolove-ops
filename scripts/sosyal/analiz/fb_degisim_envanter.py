@@ -88,8 +88,12 @@ def indir(url, yol):
 
 
 def kare(url, t, yol):
-    r = subprocess.run(['ffmpeg', '-v', 'error', '-y', '-ss', str(t), '-i', url, '-frames:v', '1', yol],
-                       capture_output=True, timeout=120)
+    try:
+        r = subprocess.run(['ffmpeg', '-v', 'error', '-y', '-ss', str(t), '-i', url, '-frames:v', '1', yol],
+                           capture_output=True, timeout=120)
+    except (OSError, subprocess.TimeoutExpired) as e:
+        print(f'  kare {t} sn okunamadi: {str(e)[:120]}')
+        return None
     if r.returncode or not os.path.exists(yol):
         print(f'  kare {t} sn okunamadi: {r.stderr.decode()[:120]}')
         return None
