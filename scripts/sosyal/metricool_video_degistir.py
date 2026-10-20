@@ -24,6 +24,9 @@ Hedef: --hedef ag:id:uuid (virgulle birden fazla) ya da tek hedef icin --ag/--id
 kapak URL'si ve indirilen kapak - --kapak farki (< ESIK) kapidir. Diger aglarda yalniz media[0] degisir.
 --yt-kapak (20 Eki, Serdar onayi TikTok/YouTube P degisimi): ayni mekanizma youtube hedeflerinde (KAPAK_AG'ye youtube).
 Cift kapisi: sko.cift_bul ayni burcu bir kez sayar (ARIES_ARIES -> None); metin/baslikta 'X and|& Y' de kabul edilir.
+--kaynak-kapi (20 Eki, P videolari; 1. tek_ig kosusu 39452185574 min_parlaklik 12.8 < 74.1 ile DUR): P acilisi tasarim geregi
+0-1.5 sn'de koyulasir (p_qc: siyah kare = B'nin en koyu karesinden koyu). min_parlaklik yerine: donusmus / gonderideki video
+0-1.5 sn kare kare --video kaynagi ile ayni (fark < ESIK) ve 0. kare parlakligi > 60. Bayrak yoksa davranis ayni.
 Token loga/dosyaya yazilmaz; presigned URL'ler maskelenir."""
 import argparse, copy, csv, importlib.util, json, os, re, subprocess, sys
 from datetime import datetime, timedelta
@@ -36,6 +39,7 @@ MIN_SAAT = 2
 TZ = 'Europe/Istanbul'
 IG_VARSAYILAN = ('instagramData.type', 'instagramData.showReelOnFeed')
 KURAL = ('id, media[0], creationDate.*; instagramData.type / showReelOnFeed yalniz ONCE\'de yoksa ve ag instagram degilse')
+P_ILK_KARE_MIN = 60   # sosyal/video_v9/p_qc.py: 0. kare siyah degil (ortalama > 60)
 KAPAK_AG = set()   # --fb-kapak: videoThumbnailUrl bu aglarda izinli ve degisir
 
 
@@ -49,7 +53,7 @@ def simdi_ist():
     return datetime.utcnow() + timedelta(hours=3)
 
 
-def olc(kb, yol, kapak):
+def olc(kb, yol, kapak, kaynak=''):
     """Videonun ilk kare / parlaklik / kare / sure olcumu (kapak_basa ile ayni esikler)."""
     v = kb.probe(yol)
     W, H = v['w'], v['h']
@@ -63,6 +67,13 @@ def olc(kb, yol, kapak):
     q['kapilar'] = {'ilk_kare': q['ilk_kare_fark'] < kb.ESIK, 'min_parlaklik': min(parl) >= float(K.mean()) / 2,
                     'kare': v['kare'] == 720, 'sure': abs(v['video_sn'] - 24.0) <= 0.05,
                     'ses': v['ses_sn'] is not None and abs(v['ses_sn'] - 24.0) <= 0.05}
+    if kaynak:   # --kaynak-kapi (P videolari): min_parlaklik yerine onayli kaynakla esitlik + p_qc ilk kare kurali
+        Kk = kb.kareler(kaynak, W, H, n)
+        fk = [round(float(np.abs(x - y).mean()), 2) for x, y in zip(ilk, Kk)]
+        q['kaynak_kare_fark_max_0_1.5'] = max(fk) if len(fk) == n else 'kare sayisi farkli'
+        del q['kapilar']['min_parlaklik']
+        q['kapilar']['kaynak_ile_ayni_0_1.5'] = len(fk) == n and max(fk) < kb.ESIK
+        q['kapilar']['ilk_kare_siyah_degil'] = parl[0] > P_ILK_KARE_MIN
     q['sonuc'] = 'PASS' if all(q['kapilar'].values()) else 'FAIL'
     return q
 
@@ -161,6 +172,7 @@ def main():
     a.add_argument('--hedef', default='', help='ag:id:uuid[,ag:id:uuid...]')
     a.add_argument('--video', default=''); a.add_argument('--kapak', default=''); a.add_argument('--once', default='')
     a.add_argument('--fb-kapak', action='store_true')
+    a.add_argument('--kaynak-kapi', action='store_true')
     a.add_argument('--yt-kapak', action='store_true')
     o = a.parse_args()
     if o.fb_kapak:
@@ -281,7 +293,7 @@ def main():
     hc = subprocess.run(['curl', '-sL', '-m', '300', '-o', indir, '-w', '%{http_code}', yeni_url], capture_output=True, text=True).stdout
     if hc != '200':
         dur(f'donusturulmus dosya indirilemedi http {hc} (hicbir gonderiye yazilmadi)')
-    q = olc(kb, indir, o.kapak)
+    q = olc(kb, indir, o.kapak, o.video if o.kaynak_kapi else '')
     os.remove(indir)
     adim('donusturulmus_olcum', **q)
     if q['sonuc'] != 'PASS':
@@ -324,7 +336,7 @@ def main():
         m_sonra = (sonra.get('media') or [''])[0]
         m2 = os.path.join(o.cikti, '_gonderideki.mp4')
         hc = subprocess.run(['curl', '-sL', '-m', '300', '-o', m2, '-w', '%{http_code}', m_sonra], capture_output=True, text=True).stdout
-        q2 = olc(kb, m2, o.kapak) if hc == '200' else {'sonuc': f'INDIRILEMEDI http {hc}'}
+        q2 = olc(kb, m2, o.kapak, o.video if o.kaynak_kapi else '') if hc == '200' else {'sonuc': f'INDIRILEMEDI http {hc}'}
         if os.path.exists(m2):
             os.remove(m2)
         kapi = {'izinsiz_fark_yok': not izinsiz, 'media0_yeni': m_sonra.split('?')[0] == yeni_url.split('?')[0],

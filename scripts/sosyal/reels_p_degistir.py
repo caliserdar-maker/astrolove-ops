@@ -114,7 +114,7 @@ def main():
         rk = os.path.join(o.cikti, f'{c}_{o.mod}')
         komut = [sys.executable, os.path.join(D, 'metricool_video_degistir.py'), '--token', o.token, '--cift', c, '--mod', 'yaz',
                  '--hedef', ','.join(f'{ag}:{pid}:{h["uuid"]}' for ag, pid, h, _ in hed), '--video', vid, '--kapak', kap,
-                 '--cikti', rk] + (['--fb-kapak'] if any(ag == 'facebook' for ag, *_ in hed) else [])
+                 '--cikti', rk, '--kaynak-kapi'] + (['--fb-kapak'] if any(ag == 'facebook' for ag, *_ in hed) else [])
         r = subprocess.run(komut, capture_output=True, text=True)
         if os.path.isdir(rk):   # presigned URL maskesi (::add-mask::) dosyaya yazilmaz
             open(os.path.join(rk, 'LOG.txt'), 'w').write(''.join(x for x in (r.stdout + r.stderr).splitlines(True)
