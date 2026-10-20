@@ -19,6 +19,7 @@ import importlib.util
 import json
 import os
 import re
+import subprocess
 import sys
 import time
 import urllib.request
@@ -87,11 +88,15 @@ def thumb_parl(url, is_dir, W, H):
 
 
 def ac_olc(kaynak):
-    """ffprobe + ilk 1.5 sn kareleri (kaynak: URL ya da yerel yol)."""
+    """ffprobe + ilk 1.5 sn kareleri (kaynak: URL ya da yerel yol). kb.kareler ile ayni ffmpeg okumasi; 1. kosu (39434936016)
+    adimi 2.5 dk'da 'canceled' (muhtemel neden bellek: 8 paralel x 46 kare float32 ~1 GB/video); kareler uint8, yalniz ilk kare float32."""
     v = kb.probe(kaynak)
     W, H = v['w'], v['h']
-    ilk = kb.kareler(kaynak, W, H, int(round(kb.KONTROL_SN * v['fps'])) + 1)
-    return {'W': W, 'H': H, 'sure': round(v['toplam_sn'], 2), 'ilk': ilk[0], 'parl': [float(f.mean()) for f in ilk]}
+    n = int(round(kb.KONTROL_SN * v['fps'])) + 1
+    r = subprocess.run(['ffmpeg', '-nostdin', '-v', 'error', '-i', kaynak, '-frames:v', str(n), '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-'],
+                       capture_output=True, check=True)
+    a = np.frombuffer(r.stdout, np.uint8).reshape(-1, H, W, 3)
+    return {'W': W, 'H': H, 'sure': round(v['toplam_sn'], 2), 'ilk': a[0].astype(np.float32), 'parl': [float(f.mean()) for f in a]}
 
 
 def _dene(f, *a):
@@ -154,7 +159,7 @@ def main():
     aday = {dosya_cift(x): x for x in al if x.endswith('.mp4') and dosya_cift(x)}
     log(f'ADAY {ADAY_YOL}: {len(aday)} mp4' + ('' if al else ' (klasor bos / okunamadi; yalniz yol yazilir)'))
 
-    # olcum: benzersiz medya URL + aday dosyalari (8 paralel)
+    # olcum: benzersiz medya URL + aday dosyalari (4 paralel)
     t0 = time.time()
     url_tam = {}
     for x in sat0:
@@ -162,10 +167,10 @@ def main():
         m = m if isinstance(m, str) else (m or {}).get('url', '')
         url_tam.setdefault(kisa(m), m)
     url = sorted(set(url_tam) - {''})
-    with ThreadPoolExecutor(8) as ex:
+    with ThreadPoolExecutor(4) as ex:
         V = dict(zip(url, ex.map(lambda u: _dene(ac_olc, url_tam[u]), url)))
     gerekli = sorted({c for c in (cift_ad((x[2].get('youtubeData') or {}).get('title'), x[2].get('text')) for x in sat0) if c in aday})
-    with ThreadPoolExecutor(8) as ex:
+    with ThreadPoolExecutor(4) as ex:
         A = dict(zip(gerekli, ex.map(lambda c: _dene(ac_olc, os.path.join(aday_dir, 'video', aday[c])), gerekli)))
     log(f'OLCUM: {len(url)} benzersiz video URL ({sum(1 for v in V.values() if v[1])} hata), {len(A)} aday '
         f'({sum(1 for v in A.values() if v[1])} hata), {time.time() - t0:.0f} sn')
