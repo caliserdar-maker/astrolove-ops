@@ -108,6 +108,8 @@ def main():
     for k in ('token-dosya', 'esleme', 'url-kok', 'mod', 'cikti'):
         ap.add_argument('--' + k, required=True)
     ap.add_argument('--normalize', default=''); ap.add_argument('--onceki', default='')
+    ap.add_argument('--normalize-atla', action='store_true',
+                    help='dogrulama ucu hata verdiyse github.io adresi dogrudan yazilir (Serdar onayi 20 Eki)')
     a = ap.parse_args()
     os.makedirs(a.cikti, exist_ok=True)
     mc = mpb.MC(json.load(open(a.token_dosya)))
@@ -134,12 +136,19 @@ def main():
             u = yeni_url(a.url_kok, r)
             temel = dict(uuid=r['uuid'], eski_id=r['gonderi_id'], tarih=r['tarih'], aile=r['aile'], cift=r['cift'],
                          eski_gorsel=r['eski_medya'], yeni_gorsel=u)
-            if datetime.fromisoformat(r['tarih'][:19]).replace(tzinfo=IST) - simdi() < ESIK:
+            kalan = datetime.fromisoformat(r['tarih'][:19]).replace(tzinfo=IST) - simdi()
+            if kalan <= timedelta(0):
+                g, _ = bul(mc, r['uuid'], r['tarih'])
+                d = mpb.pin_durum(g) if g else 'bulunamadi'
+                kayit(**temel, yeni_alt=alt_metin(r['aile'], r['cift'], ''), eski_alt=((g or {}).get('mediaAltText') or [''])[0],
+                      durum='YAYIMLANDI_ESKI' if d == 'PUBLISHED' else f'GECMIS_{d}', **{'not': 'yayin zamani gecti; yazma yok'})
+                continue
+            if kalan < ESIK:
                 kayit(**temel, yeni_alt=alt_metin(r['aile'], r['cift'], ''), durum='ATLANDI_2SAAT')
                 continue
             if a.mod == 'test' and n_yaz >= 1:
                 break
-            if u not in ok_url:
+            if not a.normalize_atla and u not in ok_url:
                 kayit(**temel, durum='DUR', **{'not': 'yeni URL normalize OK degil'})
                 raise SystemExit(f'DUR: normalize OK olmayan URL {u}')
             once, notu = bul(mc, r['uuid'], r['tarih'])
