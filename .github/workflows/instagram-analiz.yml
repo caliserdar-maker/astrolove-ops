@@ -2,6 +2,7 @@ name: instagram-analiz
 # Instagram anlik durum tespiti 19 Eki 2026 (SALT OKUMA). Metricool ve Instagram'a YAZMA / SILME / DEGISTIRME YOK; yalniz GET.
 # scripts/sosyal/analiz/instagram.py: hesap gunluk (1 Eki+), gonderi bazinda (12 Eki+), karusel/Reel, plan/gercek (12 Eki+).
 # Token: secret METRICOOL_USER_TOKEN (userId/blogId Drive METRICOOL_TOKEN.json'dan). Loga yazilmaz (::add-mask:: + sir_koru).
+# mod=ig_bekleyen: scripts/sosyal/analiz/ig_bekleyen.py (bekleyen IG gonderileri + medya olcumu, yeni kapak adayi) -> SOSYAL_DEGISIM_20261020/INSTAGRAM/.
 # mod=k2_link: scripts/sosyal/analiz/k2_link.py (K2 link envanteri: scheduler 12 Eki - 29 Ara, URL GET kontrolu, profil) -> .../K2_LINK/.
 # Sir taramasini gecmeyen dosya _work'te kalir, Drive'a gitmez. Cikti: Drive ASTROLOVE/TEMP/SOSYAL_ANALIZ_20261019/INSTAGRAM/.
 permissions:
@@ -10,14 +11,14 @@ on:
   workflow_dispatch:
     inputs:
       mod:
-        description: "analiz (19 Eki Instagram tespit) | k2_link (K2 Etsy link envanteri, tum aglar)"
+        description: "analiz (19 Eki Instagram tespit) | k2_link (K2 Etsy link envanteri, tum aglar) | ig_bekleyen (20 Eki bekleyen IG + kapak esleme)"
         default: analiz
 jobs:
   oku:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      O: gdrive:ASTROLOVE/TEMP/SOSYAL_ANALIZ_20261019/${{ inputs.mod == 'k2_link' && 'K2_LINK' || 'INSTAGRAM' }}
+      O: gdrive:ASTROLOVE/TEMP/${{ inputs.mod == 'ig_bekleyen' && 'SOSYAL_DEGISIM_20261020/INSTAGRAM' || inputs.mod == 'k2_link' && 'SOSYAL_ANALIZ_20261019/K2_LINK' || 'SOSYAL_ANALIZ_20261019/INSTAGRAM' }}
     steps:
       - uses: actions/checkout@v4
       - name: rclone + token
@@ -42,8 +43,18 @@ jobs:
           rclone copyto "gdrive:ASTROLOVE/TEMP/METRICOOL_TOKEN.json" _work/kimlik.json
           python3 -c "import json,os;d=json.load(open('_work/kimlik.json'));json.dump({'userToken':os.environ['MC_TOK'],'userId':d['userId'],'blogId':d['blogId']},open('_work/mc.json','w'))"
           python3 -c "import json;print('::add-mask::'+json.load(open('_work/kimlik.json'))['userToken'])"
-          if [ "${{ inputs.mod }}" = "k2_link" ]; then BETIK=scripts/sosyal/analiz/k2_link.py; else BETIK=scripts/sosyal/analiz/instagram.py; fi
-          python3 $BETIK _work/mc.json _out | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json --sir-json _work/kimlik.json "$GITHUB_STEP_SUMMARY"
+          EK=""
+          if [ "${{ inputs.mod }}" = "k2_link" ]; then BETIK=scripts/sosyal/analiz/k2_link.py
+          elif [ "${{ inputs.mod }}" = "ig_bekleyen" ]; then
+            BETIK=scripts/sosyal/analiz/ig_bekleyen.py; EK="_work/aday _work/is"; mkdir -p _work/aday
+            python3 -c "import numpy, PIL" 2>/dev/null || pip install -q numpy pillow
+            T=gdrive:ASTROLOVE/TEMP
+            rclone lsf "$T/KAPAK_P2_78_20261019/BASLIK_A/KAPAK_A" > _work/aday/P2_A.txt || true
+            rclone lsf "$T/KAPAK_P2_78_20261019/KAPAK" > _work/aday/P2.txt || true
+            rclone lsf "$T/KUPA_KAPAK_78_20261019/KAPAK" > _work/aday/KUPA.txt || true
+            rclone lsf "$T/KAPAK_Y1_78_20261019/KAPAK" > _work/aday/Y1.txt || true
+          else BETIK=scripts/sosyal/analiz/instagram.py; fi
+          python3 $BETIK _work/mc.json _out $EK | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json --sir-json _work/kimlik.json "$GITHUB_STEP_SUMMARY"
           rc=${PIPESTATUS[0]}
           mkdir -p _work/engel
           for f in _out/*; do
