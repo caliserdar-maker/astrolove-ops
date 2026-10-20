@@ -21,6 +21,8 @@ Usage:
         2.7-3.0 s cross-fade back into B.
     C:  0-1.2 s the real poster on the wall (poster 90% of the frame width, its names readable); 1.2-1.5 s cross-fade
         into B; B from 1.5 s on.
+  --acilis P --acilis_kare P.png (20 Oct 2026): same timing as C with the pin-look frame from acilis_p.py
+        (PIN_V2 wall, "A / & / B" title, poster): 0-1.2 s P frame, 1.2-1.5 s cross-fade into B; B from 1.5 s on.
 Writes {a}-and-{b}-astroloveart-reel.mp4
 """
 import argparse, json, os, subprocess, sys, time
@@ -51,7 +53,7 @@ T_END_FREEZE = 23.1              # end card is complete and still from here unti
 
 def kaynak_t(t, acilis, t0):
     """Output time -> time on the approved v9 timeline. B: shifted by t0, end card held (no change for None / A)."""
-    return min(t + t0, T_END_FREEZE) if acilis in ('B', 'B1', 'C') else t
+    return min(t + t0, T_END_FREEZE) if acilis in ('B', 'B1', 'C', 'P') else t
 
 
 def acilis_alfa(t, acilis):
@@ -73,7 +75,7 @@ def navy_glow(profile, cy_frac, gain=0.70, sigma=0.42):
     return Image.fromarray(np.clip(np.round(out), 0, 255).astype(np.uint8), 'RGB')
 
 
-def build(poster_path, A, B, out_dir, muzik=None, kareler=None, bilgi=None, acilis=None):
+def build(poster_path, A, B, out_dir, muzik=None, kareler=None, bilgi=None, acilis=None, acilis_kare_yol=None):
     os.makedirs(out_dir, exist_ok=True)
     slug = f'{A.lower()}-and-{B.lower()}'
     P = PU.PosterR(poster_path)
@@ -313,6 +315,12 @@ def build(poster_path, A, B, out_dir, muzik=None, kareler=None, bilgi=None, acil
             if to < 1.2:
                 return ACIL['C']
             u = ease(to, 1.2, 1.5); return ACIL['C'] * (1 - u) + f * u
+        if acilis == 'P' and to < 1.5:
+            if 'P' not in ACIL:
+                ACIL['P'] = np.asarray(Image.open(acilis_kare_yol).convert('RGB').resize((W, H))).astype(np.float32)
+            if to < 1.2:
+                return ACIL['P']
+            u = ease(to, 1.2, 1.5); return ACIL['P'] * (1 - u) + f * u
         return f
 
     _g = np.random.default_rng(99)
@@ -380,11 +388,14 @@ if __name__ == '__main__':
     ap.add_argument('--out', required=True)
     ap.add_argument('--muzik')
     ap.add_argument('--kareler')
-    ap.add_argument('--acilis', choices=['A', 'B', 'B1', 'C'])
+    ap.add_argument('--acilis', choices=['A', 'B', 'B1', 'C', 'P'])
+    ap.add_argument('--acilis_kare', help='P: 1080x1920 opening frame from acilis_p.py')
     ap.add_argument('--bilgi', help='write layout/timing info (JSON) here')
     g = ap.parse_args()
     k = [float(x) for x in g.kareler.split(',')] if g.kareler else None
     bi = {} if g.bilgi else None
-    print(build(g.poster, g.a, g.b, g.out, g.muzik, k, bi, g.acilis))
+    if g.acilis == 'P' and not g.acilis_kare:
+        ap.error('--acilis P needs --acilis_kare')
+    print(build(g.poster, g.a, g.b, g.out, g.muzik, k, bi, g.acilis, g.acilis_kare))
     if g.bilgi:
         json.dump(bi, open(g.bilgi, 'w'), indent=1)
