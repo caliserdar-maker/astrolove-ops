@@ -1,0 +1,261 @@
+{
+ "kupa_kod_farki": [
+  "N = 10400                                                 # toz 2 kat (Serdar 18.10)",
+  "    al = cv2.GaussianBlur(al, (0, 0), 0.45) * 2.0",
+  "    kat = cv2.GaussianBlur(kat, (0, 0), 0.45) * 2.0"
+ ],
+ "kupa_v6": {
+  "video": {
+   "olcu": "1080x1080",
+   "kare": 180,
+   "fps": "30/1",
+   "sure_sn": 6.0,
+   "ses_akisi": false,
+   "boyut_mb": 0.91
+  },
+  "N": 10400,
+  "tane_sigma": 0.45,
+  "sembol_piksel": 1890,
+  "kapak": "A_V4.jpg",
+  "taban_420": 1.52,
+  "ilk_kare_fark": 1.765,
+  "son_kare_fark": 1.715,
+  "bilgi_crf17_tek_kare_fark": 2.272,
+  "kapak_katman_kupa_bolgesi_fark": 0.857
+ },
+ "kalibrasyon_turlari": [
+  {
+   "yerel_kalibrasyon": "N 65000 -> 59900 -> 58000 (yogunluk orani 0.922 / 0.968 / 0.977)",
+   "N": 58000,
+   "ok": true
+  }
+ ],
+ "parcacik_hesabi": {
+  "kupa_N": 10400,
+  "kupa_sembol_px": 1890,
+  "poster_sembol_px": 14721,
+  "alan_orani": 7.79,
+  "kupa_bolge_px": 9411,
+  "poster_bolge_px": 44274,
+  "bolge_alan_orani": 4.7,
+  "N": 58000,
+  "N_kupa_orani": 5.58,
+  "not": "alan basina yogunluk esitlendi; N her turda N x medyan(D_kupa / D_poster) (ust uste binme: dogrusal degil)"
+ },
+ "tablo_0_5sn": {
+  "0": {
+   "kare": 0,
+   "kupa_gorunen": 0.96,
+   "poster_gorunen": 0.954,
+   "kupa_toz_alan_basina": 0.0,
+   "poster_toz_alan_basina": 0.0,
+   "kupa_toz_px_sembol_px": 0.0,
+   "poster_toz_px_sembol_px": 0.0,
+   "toz_fark_yuzde": null,
+   "gorunen_fark": -0.006,
+   "toz_kapida": false,
+   "toz_ok": false
+  },
+  "0.5": {
+   "kare": 15,
+   "kupa_gorunen": 0.0,
+   "poster_gorunen": 0.0,
+   "kupa_toz_alan_basina": 0.0,
+   "poster_toz_alan_basina": 0.0,
+   "kupa_toz_px_sembol_px": 0.0,
+   "poster_toz_px_sembol_px": 0.0,
+   "toz_fark_yuzde": null,
+   "gorunen_fark": 0.0,
+   "toz_kapida": false,
+   "toz_ok": true
+  },
+  "1": {
+   "kare": 30,
+   "kupa_gorunen": 0.065,
+   "poster_gorunen": 0.033,
+   "kupa_toz_alan_basina": 0.16,
+   "poster_toz_alan_basina": 0.109,
+   "kupa_toz_px_sembol_px": 0.795,
+   "poster_toz_px_sembol_px": 0.329,
+   "toz_fark_yuzde": -31.5,
+   "gorunen_fark": -0.032,
+   "toz_kapida": false,
+   "toz_ok": false
+  },
+  "1.5": {
+   "kare": 45,
+   "kupa_gorunen": 0.229,
+   "poster_gorunen": 0.119,
+   "kupa_toz_alan_basina": 0.413,
+   "poster_toz_alan_basina": 0.36,
+   "kupa_toz_px_sembol_px": 2.056,
+   "poster_toz_px_sembol_px": 1.082,
+   "toz_fark_yuzde": -12.9,
+   "gorunen_fark": -0.11,
+   "toz_kapida": false,
+   "toz_ok": false
+  },
+  "2": {
+   "kare": 60,
+   "kupa_gorunen": 0.335,
+   "poster_gorunen": 0.223,
+   "kupa_toz_alan_basina": 0.508,
+   "poster_toz_alan_basina": 0.508,
+   "kupa_toz_px_sembol_px": 2.53,
+   "poster_toz_px_sembol_px": 1.528,
+   "toz_fark_yuzde": -0.0,
+   "gorunen_fark": -0.112,
+   "toz_kapida": true,
+   "toz_ok": true
+  },
+  "2.5": {
+   "kare": 75,
+   "kupa_gorunen": 0.401,
+   "poster_gorunen": 0.346,
+   "kupa_toz_alan_basina": 0.511,
+   "poster_toz_alan_basina": 0.506,
+   "kupa_toz_px_sembol_px": 2.547,
+   "poster_toz_px_sembol_px": 1.521,
+   "toz_fark_yuzde": -1.1,
+   "gorunen_fark": -0.055,
+   "toz_kapida": true,
+   "toz_ok": true
+  },
+  "3": {
+   "kare": 90,
+   "kupa_gorunen": 0.517,
+   "poster_gorunen": 0.472,
+   "kupa_toz_alan_basina": 0.504,
+   "poster_toz_alan_basina": 0.485,
+   "kupa_toz_px_sembol_px": 2.509,
+   "poster_toz_px_sembol_px": 1.459,
+   "toz_fark_yuzde": -3.7,
+   "gorunen_fark": -0.045,
+   "toz_kapida": true,
+   "toz_ok": true
+  },
+  "3.5": {
+   "kare": 105,
+   "kupa_gorunen": 0.651,
+   "poster_gorunen": 0.595,
+   "kupa_toz_alan_basina": 0.484,
+   "poster_toz_alan_basina": 0.459,
+   "kupa_toz_px_sembol_px": 2.41,
+   "poster_toz_px_sembol_px": 1.381,
+   "toz_fark_yuzde": -5.1,
+   "gorunen_fark": -0.056,
+   "toz_kapida": true,
+   "toz_ok": true
+  },
+  "4": {
+   "kare": 120,
+   "kupa_gorunen": 0.787,
+   "poster_gorunen": 0.715,
+   "kupa_toz_alan_basina": 0.433,
+   "poster_toz_alan_basina": 0.395,
+   "kupa_toz_px_sembol_px": 2.154,
+   "poster_toz_px_sembol_px": 1.188,
+   "toz_fark_yuzde": -8.7,
+   "gorunen_fark": -0.071,
+   "toz_kapida": true,
+   "toz_ok": true
+  },
+  "4.5": {
+   "kare": 135,
+   "kupa_gorunen": 0.909,
+   "poster_gorunen": 0.844,
+   "kupa_toz_alan_basina": 0.138,
+   "poster_toz_alan_basina": 0.186,
+   "kupa_toz_px_sembol_px": 0.686,
+   "poster_toz_px_sembol_px": 0.56,
+   "toz_fark_yuzde": 35.1,
+   "gorunen_fark": -0.066,
+   "toz_kapida": false,
+   "toz_ok": false
+  },
+  "5": {
+   "kare": 150,
+   "kupa_gorunen": 0.997,
+   "poster_gorunen": 0.998,
+   "kupa_toz_alan_basina": 0.0,
+   "poster_toz_alan_basina": 0.0,
+   "kupa_toz_px_sembol_px": 0.0,
+   "poster_toz_px_sembol_px": 0.0,
+   "toz_fark_yuzde": null,
+   "gorunen_fark": 0.001,
+   "toz_kapida": false,
+   "toz_ok": false
+  },
+  "5.5": {
+   "kare": 165,
+   "kupa_gorunen": 0.998,
+   "poster_gorunen": 1.0,
+   "kupa_toz_alan_basina": 0.0,
+   "poster_toz_alan_basina": 0.0,
+   "kupa_toz_px_sembol_px": 0.0,
+   "poster_toz_px_sembol_px": 0.0,
+   "toz_fark_yuzde": null,
+   "gorunen_fark": 0.002,
+   "toz_kapida": false,
+   "toz_ok": false
+  },
+  "6": {
+   "kare": 179,
+   "kupa_gorunen": 1.0,
+   "poster_gorunen": 1.0,
+   "kupa_toz_alan_basina": 0.0,
+   "poster_toz_alan_basina": 0.0,
+   "kupa_toz_px_sembol_px": 0.0,
+   "poster_toz_px_sembol_px": 0.0,
+   "toz_fark_yuzde": null,
+   "gorunen_fark": 0.0,
+   "toz_kapida": false,
+   "toz_ok": false
+  }
+ },
+ "poster_v6": {
+  "video": {
+   "olcu": "1440x1080",
+   "kare": 180,
+   "fps": "30/1",
+   "sure_sn": 6.0,
+   "ses_akisi": false,
+   "boyut_mb": 5.63
+  },
+  "N": 58000,
+  "tane_sigma": 0.45,
+  "ihlal_en_buyuk": 0.0,
+  "c_egri_0_5sn": {
+   "0": 0.0,
+   "0.5": 0.006,
+   "1": 0.063,
+   "1.5": 0.217,
+   "2": 0.24,
+   "2.5": 0.24,
+   "3": 0.385,
+   "3.5": 0.622,
+   "4": 0.875,
+   "4.5": 1.0,
+   "5": 1.0,
+   "5.5": 1.0,
+   "6": 1.0
+  },
+  "taban_420": 1.423,
+  "ilk_kare_fark": 1.59,
+  "son_kare_fark": 1.515,
+  "kapak": "kapak.jpg",
+  "kapak_klasoru": "KAPAK"
+ },
+ "kapi": {
+  "kupa_10400_045": true,
+  "poster_180_kare_1440x1080": true,
+  "ilk_kare_kapak": true,
+  "son_kare_kapak": true,
+  "kupa_ilk_kare_kapak": false,
+  "kupa_son_kare_kapak": true,
+  "kupa_kapak_katman_ayni": true,
+  "murekkep_tozun_onunde_degil": true,
+  "toz_alan_basina_2_4sn_10yuzde": true
+ },
+ "sonuc": "FAIL"
+}
