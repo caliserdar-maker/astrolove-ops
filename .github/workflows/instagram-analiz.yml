@@ -48,6 +48,8 @@ jobs:
           elif [ "${{ inputs.mod }}" = "ig_bekleyen" ]; then
             BETIK=scripts/sosyal/analiz/ig_bekleyen.py; EK="_work/aday _work/is"; mkdir -p _work/aday
             python3 -c "import numpy, PIL" 2>/dev/null || pip install -q numpy pillow
+            command -v ffprobe >/dev/null || { sudo apt-get update -qq >/dev/null && sudo apt-get install -y -qq ffmpeg >/dev/null; }
+            ffprobe -version | head -1
             T=gdrive:ASTROLOVE/TEMP
             rclone lsf "$T/KAPAK_P2_78_20261019/BASLIK_A/KAPAK_A" > _work/aday/P2_A.txt || true
             rclone lsf "$T/KAPAK_P2_78_20261019/KAPAK" > _work/aday/P2.txt || true
