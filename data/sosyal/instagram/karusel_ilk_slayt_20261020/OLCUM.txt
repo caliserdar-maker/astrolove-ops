@@ -1,0 +1,25 @@
+IG KARUSEL ILK SLAYT (CANCER_LIBRA, 1080x1350; Metricool yazma 0): PASS
+Poster kaynagi: P2a_v2.jpg kutu (787, 326, 2212, 2140) (1425x1814); duvar kapak_sahne_v9 leke_azalt guclu + acik3
+Yerlesim: poster 858x1092 @(111, 193); baslik taban y 145; ara 48 px; kural baslik 115.6 px (P2a_v2 192/1814); IG izgara 3:4 kirpimi her yandan 33.75 px; guvenli x [53.75, 1026.25]
+Golge (PIN_V2, olcek 1.103): [[4.4, 7.7, 15.4, 0.1], [1.1, 2.2, 3.3, 0.12]]
+PASS poster olcek <= 1: kaynak 1425x1814 -> 858x1092 (olcek 0.6020, oran 0.7857 / kaynak 0.7856)
+PASS A yasak karakter yok (. + =): 'CANCER & LIBRA'
+PASS A poster pikseli = kaynak (cercevesiz): NCC 0.99951 (JPEG sonrasi), kutu (111, 193, 969, 1285)
+PASS A cerceve yok (poster kenar 3 px = kaynak kenari): ortalama fark 0.88
+PASS A izgara 3:4 baslik kesilmez: kutu (59, 65, 1021, 148); pay sol 25.2 sag 25.2 ust 65 alt 1202 (>= 20)
+PASS A izgara 3:4 poster kesilmez: kutu (111, 193, 969, 1285); pay sol 77.2 sag 77.2 ust 193 alt 65 (>= 20)
+PASS A akis 4:5 baslik kesilmez: kutu (59, 65, 1021, 148); pay sol 59.0 sag 59.0 ust 65 alt 1202 (>= 20)
+PASS A akis 4:5 poster kesilmez: kutu (111, 193, 969, 1285); pay sol 111.0 sag 111.0 ust 193 alt 65 (>= 20)
+PASS A baslik - poster cakismaz: baslik murekkep alti 148, poster ust 193, bosluk 45
+PASS A kontrast >= 4.5: 6.35:1 (#162641, duvar %5 parlakligi baslik kutusunda)
+INFO A: baslik "CANCER & LIBRA" 115.6 px (A kurali 115.6 px, kucultme 1.0000), kutu (59, 65, 1021, 148)
+PASS B yasak karakter yok (. + =): 'Cancer & Libra, as one?'
+PASS B poster pikseli = kaynak (cercevesiz): NCC 0.99951 (JPEG sonrasi), kutu (111, 193, 969, 1285)
+PASS B cerceve yok (poster kenar 3 px = kaynak kenari): ortalama fark 0.88
+PASS B izgara 3:4 baslik kesilmez: kutu (54, 68, 1026, 161); pay sol 20.2 sag 20.2 ust 68 alt 1189 (>= 20)
+PASS B izgara 3:4 poster kesilmez: kutu (111, 193, 969, 1285); pay sol 77.2 sag 77.2 ust 193 alt 65 (>= 20)
+PASS B akis 4:5 baslik kesilmez: kutu (54, 68, 1026, 161); pay sol 54.0 sag 54.0 ust 68 alt 1189 (>= 20)
+PASS B akis 4:5 poster kesilmez: kutu (111, 193, 969, 1285); pay sol 111.0 sag 111.0 ust 193 alt 65 (>= 20)
+PASS B baslik - poster cakismaz: baslik murekkep alti 161, poster ust 193, bosluk 32
+PASS B kontrast >= 4.5: 6.38:1 (#162641, duvar %5 parlakligi baslik kutusunda)
+INFO B: baslik "Cancer & Libra, as one?" 107.1 px (A kurali 115.6 px, kucultme 0.9265), kutu (54, 68, 1026, 161)
