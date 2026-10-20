@@ -61,6 +61,24 @@ def bul(mc, uuid, tarih):
     return (m[0], '') if m else (None, 'uuid bulunamadi (silinmis/yayinlanmis olabilir)')
 
 
+def normalize(mc, u):
+    """GET /actions/normalize/image/url, Accept */* (Accept: application/json ile uc HTTP 500 'No acceptable representation'
+    donuyor: 12 Eki NORMALIZE_TEST.json, 20 Eki 39432035682). Donus: JSON ya da duz metin. HTTP hatasi -> SystemExit."""
+    import urllib.error, urllib.parse, urllib.request
+    q = urllib.parse.urlencode({'url': u, 'userId': mc.u, 'blogId': mc.b})
+    r = urllib.request.Request(f'{mpb.API}/actions/normalize/image/url?{q}', headers={'X-Mc-Auth': mc.t, 'Accept': '*/*'})
+    time.sleep(1.1)
+    try:
+        with urllib.request.urlopen(r, timeout=60) as y:
+            g = y.read().decode('utf-8', 'replace')
+    except urllib.error.HTTPError as e:
+        raise SystemExit(f'HTTP {e.code} normalize: ' + e.read()[:200].decode('utf-8', 'replace').replace(mc.t, '***'))
+    try:
+        return json.loads(g)
+    except ValueError:
+        return g.strip()
+
+
 def dogrula(mc, a, satirlar):
     urller = sorted({yeni_url(a.url_kok, r) for r in satirlar})
     yol = os.path.join(a.cikti, 'NORMALIZE.csv')
@@ -69,8 +87,8 @@ def dogrula(mc, a, satirlar):
         w = csv.writer(f, lineterminator='\n'); w.writerow(['url', 'sonuc', 'yanit'])
         for i, u in enumerate(urller, 1):
             try:
-                y = mc.istek('GET', '/actions/normalize/image/url', {'url': u})
-                m = re.findall(r'https?://([^/\s"]+)', json.dumps(y))
+                y = normalize(mc, u)
+                m = re.findall(r'https?://([^/\s"]+)', y if isinstance(y, str) else json.dumps(y))
                 ok = bool(m)                                   # HTTP 200 + yanitta URL (ham yanit yazilmaz: imzali URL olabilir)
                 s = f"200; anahtarlar {sorted(y) if isinstance(y, dict) else type(y).__name__}; url host {sorted(set(m))[:3]}"
             except SystemExit as e:
