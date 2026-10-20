@@ -36,7 +36,20 @@ for r in csv.DictReader(open(ILN, encoding='utf-8-sig')):
 diger = {r['listing_id'] for r in csv.DictReader(open(YL, encoding='utf-8')) if r.get('aile') != 'yildonumu'} if os.path.exists(YL) else set()
 lid = defaultdict(list, {c: [x for x in v if x not in diger] for c, v in lid.items()})
 coklu = {c: v for c, v in lid.items() if len(v) > 1}
-sutun = ['cift', 'sonuc', 'dusen_kapilar', 'video', 'kapak', 'N', 'N_turu', 'bolge_px', 'toz_2sn_yuzde', 'toz_2.5sn_yuzde', 'toz_3sn_yuzde',
+def kabul(r, d):
+    """Serdar kararlari (21 Eki): toz 2-4 sn sapmasi <= %13,2 KABUL (a); silme izi -> goz kontrolu (b, KONTROL_GOZ)"""
+    ok, goz, kal = [], [], []
+    for x in d:
+        if x == 'toz_2_4sn_10yuzde' and max(abs(v['fark_yuzde']) for v in r['toz_2_4sn'].values()) <= 13.2 + 1e-9:
+            ok.append('toz_2_4sn_10yuzde: karar a (21 Eki) sapma <= %13,2')
+        elif x == 'silme_izi_yok':
+            goz.append('silme_izi_yok: karar b (21 Eki) goz kontrolu KONTROL_GOZ/KONTAK_DOKU')
+        else:
+            kal.append(x)
+    return ok, goz, kal
+
+
+sutun = ['cift', 'sonuc', 'sonuc_kabul', 'kabul', 'goz_kontrolu', 'kalan_kapilar', 'dusen_kapilar', 'video', 'kapak', 'N', 'N_turu', 'bolge_px', 'toz_2sn_yuzde', 'toz_2.5sn_yuzde', 'toz_3sn_yuzde',
          'toz_3.5sn_yuzde', 'toz_4sn_yuzde', 'murekkep_ihlal', 'gorunen_5sn', 'ilk_kare_fark', 'son_kare_fark', 'taban_420',
          'sembol_bolgesi_4_97sn_fark', 'sembol_bolgesi_son_kare_fark', 'iz_parlaklik_farki', 'iz_doku_std_orani', 'iz_sapma8_silinen',
          'iz_sapma8_cevre', 'glif_bos_hal_farki', 'murekkep_rengi', 'ayni_burc', 'glif_benzerlik', 'glif_sol', 'glif_sag', 'olcu_kare_ses']
@@ -49,7 +62,9 @@ for c in TUM:
     if d:
         dus[c] = d
     iz, t4, p = r['silme_izi'], r['toz_2_4sn'], r['probe']
-    satirlar.append({'cift': c, 'sonuc': r['sonuc'], 'dusen_kapilar': ' '.join(d), 'video': r['video'], 'kapak': r['kapak'], 'N': r['N'],
+    kb, gz, kl = kabul(r, d)
+    satirlar.append({'cift': c, 'sonuc': r['sonuc'], 'sonuc_kabul': 'PASS' if not d else ('FAIL' if kl else ('GOZ_KONTROLU' if gz else 'KABUL')),
+                     'kabul': '; '.join(kb), 'goz_kontrolu': '; '.join(gz), 'kalan_kapilar': ' '.join(kl), 'dusen_kapilar': ' '.join(d), 'video': r['video'], 'kapak': r['kapak'], 'N': r['N'],
                      'N_turu': len(r['N_turlari']), 'bolge_px': r['bolge_px'], **{f'toz_{t}sn_yuzde': v['fark_yuzde'] for t, v in t4.items()},
                      'murekkep_ihlal': r['ihlal_en_buyuk'], 'gorunen_5sn': r['gorunen_5sn'], 'ilk_kare_fark': r['ilk_kare_fark'],
                      'son_kare_fark': r['son_kare_fark'], 'taban_420': r['taban_420'], 'sembol_bolgesi_4_97sn_fark': r['sembol_bolgesi_4_97sn_fark'],
@@ -64,7 +79,11 @@ with open(os.path.join(OUT, 'KONTROL_YD.csv'), 'w', newline='', encoding='utf-8'
 gec = sum(1 for s in satirlar if s['sonuc'] == 'PASS')
 liste = lambda k: [c for c, d in dus.items() if k in d]
 ayni = [s for s in satirlar if s.get('ayni_burc') is True]
+from collections import Counter as _C
+_sk = _C(s.get('sonuc_kabul', 'EKSIK') for s in satirlar)
 oz = [f'YIL DONUMU: PASS {gec}/78, FAIL {len(dus)}, EKSIK {len(eksik)}',
+      f'kararlarla (21 Eki a + b): PASS {_sk["PASS"]}, KABUL {_sk["KABUL"]}, GOZ_KONTROLU {_sk["GOZ_KONTROLU"]}, FAIL {_sk["FAIL"]}, EKSIK {_sk["EKSIK"]}; '
+      f'FAIL: {" ".join(s["cift"] + " (" + s["kalan_kapilar"] + ")" for s in satirlar if s.get("sonuc_kabul") == "FAIL") or "-"}',
       f'eksik: {" ".join(eksik) or "-"}',
       f'toz 2-4 sn +-%10 tutmayan (duzeltme turundan sonra; Serdar karar verir): ' +
       ('; '.join(f'{c} {[s["toz_" + t + "sn_yuzde"] for t in ("2", "2.5", "3", "3.5", "4")]}' for c in liste('toz_2_4sn_10yuzde')
