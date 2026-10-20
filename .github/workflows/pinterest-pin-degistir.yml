@@ -1,0 +1,147 @@
+name: pinterest-pin-degistir
+# Bekleyen Pinterest gonderilerinin gorseli + alt metni yeni pinle degisir (Serdar onayi 20 Eki 2026). Metricool'a YAZAR.
+# 1) ESLEME.csv'deki yeni pinler (poster PIN_V2/PIN, yildonumu KAPAK_Y1/PIN) astrolove-media pinterest/v7/{poster,y1}/ -> Pages prob.
+# 2) Her URL Metricool /actions/normalize/image/url (dogrula). 3) TEK gonderi (test) PUT + geri okuma.
+# 4) test PASS ise ve devam=true ise kalanlar (hepsi). Her FAIL -> DUR. Yayina < 2 sa kalan gonderi atlanir.
+# Cikti: Drive ASTROLOVE/TEMP/PINTEREST_PIN_DEGISIM_20261020/UYGULAMA/. Token loga yazilmaz (::add-mask:: + sir_koru).
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      devam:
+        description: "true: test PASS ise kalanlar da yazilir"
+        type: boolean
+        default: true
+concurrency:
+  group: metricool-yazma
+  cancel-in-progress: false
+jobs:
+  degistir:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      D: gdrive:ASTROLOVE/TEMP/PINTEREST_PIN_DEGISIM_20261020
+      URL_KOK: https://caliserdar-maker.github.io/astrolove-media/pinterest/v7
+    steps:
+      - uses: actions/checkout@v4
+      - name: rclone + token + girdiler
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          MC_TOK: ${{ secrets.METRICOOL_USER_TOKEN }}
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+          mkdir -p ~/.config/rclone _work _out/UYGULAMA _img/poster _img/y1; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            export RCLONE_CONFIG_GDRIVE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET"
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+          [ -n "${MC_TOK:-}" ] || { echo "::error::METRICOOL_USER_TOKEN bos"; exit 1; }
+          echo "::add-mask::$MC_TOK"
+          rclone copyto "gdrive:ASTROLOVE/TEMP/METRICOOL_TOKEN.json" _work/kimlik.json
+          python3 -c "import json;print('::add-mask::'+json.load(open('_work/kimlik.json'))['userToken'])"
+          python3 -c "import json,os;d=json.load(open('_work/kimlik.json'));json.dump({'userToken':os.environ['MC_TOK'],'userId':d['userId'],'blogId':d['blogId']},open('_work/mc.json','w'))"
+          rclone copyto "$D/ESLEME.csv" _work/ESLEME.csv
+          python3 - <<'EOF'
+          import csv
+          R = [r for r in csv.DictReader(open('_work/ESLEME.csv', encoding='utf-8-sig')) if r['durum'] == 'eslesti']
+          for ad in ('poster', 'yildonumu'):
+              n = sorted({r['yeni_pin_dosyasi'] for r in R if r['aile'] == ad})
+              open(f'_work/{ad}.txt', 'w').write('\n'.join(n) + '\n'); print(ad, len(n), 'dosya')
+          EOF
+          rclone copy "gdrive:ASTROLOVE/TEMP/KAPAK_P2_78_20261019/PIN_V2/PIN" _img/poster --files-from _work/poster.txt -q
+          rclone copy "gdrive:ASTROLOVE/TEMP/KAPAK_Y1_78_20261019/PIN" _img/y1 --files-from _work/yildonumu.txt -q
+          echo "indirilen poster $(ls _img/poster | wc -l)/$(grep -c . _work/poster.txt), y1 $(ls _img/y1 | wc -l)/$(grep -c . _work/yildonumu.txt)"
+          [ "$(ls _img/poster | wc -l)" = "$(grep -c . _work/poster.txt)" ] && [ "$(ls _img/y1 | wc -l)" = "$(grep -c . _work/yildonumu.txt)" ] || { echo "::error::pin dosyasi eksik"; exit 1; }
+          nj=$(file _img/poster/* _img/y1/* | grep -vc "JPEG image" || true); echo "JPEG olmayan: $nj"
+          [ "$nj" = "0" ] || { echo "::error::JPEG olmayan dosya"; exit 1; }
+
+      - name: Medya reposunu al
+        uses: actions/checkout@v4
+        with:
+          repository: caliserdar-maker/astrolove-media
+          token: ${{ secrets.OPS_ADMIN_TOKEN }}
+          path: media
+
+      - name: Pages push (pinterest/v7) + prob
+        run: |
+          set -euo pipefail
+          mkdir -p media/pinterest/v7/poster media/pinterest/v7/y1
+          cp _img/poster/*.jpg media/pinterest/v7/poster/; cp _img/y1/*.jpg media/pinterest/v7/y1/
+          cd media && git add -A pinterest/v7
+          n=$(git diff --cached --name-only | wc -l); echo "degisen: $n"
+          if [ "$n" != "0" ]; then
+            git config user.name "astrolove-ops"; git config user.email "actions@users.noreply.github.com"
+            git commit -qm "pinterest/v7: yeni pinler (poster PIN_V2 + yildonumu Y1) $(date -u +%Y-%m-%d)"; git push
+          fi
+          cd ..
+          python3 - <<'EOF'
+          import os, subprocess, sys, time
+          k = os.environ['URL_KOK']
+          ad = [f'poster/{x}' for x in open('_work/poster.txt').read().split()] + [f'y1/{x}' for x in open('_work/yildonumu.txt').read().split()]
+          def prob(u):
+              o = subprocess.run(['curl', '-s', '-o', '/dev/null', '-m', '60', '-w', '%{http_code}|%{content_type}', u], capture_output=True, text=True).stdout
+              return o
+          for i in range(60):
+              if all(prob(f'{k}/{x}?v={i}').startswith('200|image/jpeg') for x in (ad[0], ad[-1])): break
+              print(f'Pages bekleniyor {i * 15} sn', flush=True); time.sleep(15)
+          hata = [f'{x} {prob(f"{k}/{x}")}' for x in ad]
+          hata = [h for h in hata if '200|image/jpeg' not in h]
+          print(f'PROB {len(ad) - len(hata)}/{len(ad)} PASS' + ''.join('\n  ' + h for h in hata[:10]))
+          sys.exit(1 if hata else 0)
+          EOF
+
+      - name: Metricool dogrula + test + hepsi
+        run: |
+          set -uo pipefail
+          set +e   # varsayilan bash -e: ilk hatada cikip sonuc dosyalarini Drive'a yuklemiyordu (39432035682)
+          A="--token-dosya _work/mc.json --esleme _work/ESLEME.csv --url-kok $URL_KOK --cikti _out/UYGULAMA/ham"
+          kos() { python3 scripts/sosyal/metricool_pin_gorsel_degistir.py $A "$@" 2>&1 | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json --sir-json _work/kimlik.json "$GITHUB_STEP_SUMMARY"; return ${PIPESTATUS[0]}; }
+          kos --mod dogrula; rc=$?
+          if [ $rc = 0 ]; then YOL="normalize (dogrulama ucu OK)"; NARG="--normalize _out/UYGULAMA/ham/NORMALIZE.csv"
+          else YOL="dogrudan github.io (dogrulama ucu hata verdi; Serdar onayi 20 Eki)"; NARG="--normalize-atla"; fi
+          echo "YOL: $YOL" | tee _out/UYGULAMA/ham/YOL.txt
+          kos --mod test $NARG; rc=$?
+          if [ $rc = 0 ] && grep -q ",PASS," _out/UYGULAMA/ham/SONUC_test.csv && [ "${{ inputs.devam }}" = "true" ]; then
+            kos --mod hepsi $NARG --onceki _out/UYGULAMA/ham/SONUC_test.csv; rc=$?
+          elif [ $rc = 0 ]; then echo "test PASS yok ya da devam=false: kalanlar yazilmadi"; fi
+          python3 - <<'EOF'
+          import csv, os
+          from collections import Counter
+          d = '_out/UYGULAMA'; s = {}
+          for ad in ('SONUC_test.csv', 'SONUC_hepsi.csv'):
+              p = os.path.join(d, 'ham', ad)
+              if os.path.exists(p):
+                  for r in csv.DictReader(open(p, encoding='utf-8')):
+                      if r['uuid'] not in s or r['durum'] not in ('ATLANDI_2SAAT', 'YAYIMLANDI_ESKI'):
+                          s[r['uuid']] = r
+          R = sorted(s.values(), key=lambda r: r['tarih'])
+          if R:
+              with open(os.path.join(d, 'SONUC.csv'), 'w', newline='', encoding='utf-8') as f:
+                  w = csv.DictWriter(f, fieldnames=list(R[0]), lineterminator='\n'); w.writeheader(); w.writerows(R)
+          E = [r for r in csv.DictReader(open('_work/ESLEME.csv', encoding='utf-8-sig')) if r['durum'] == 'eslesti']
+          c = Counter(r['durum'] for r in R)
+          yol = open(os.path.join(d, 'ham', 'YOL.txt')).read().strip() if os.path.exists(os.path.join(d, 'ham', 'YOL.txt')) else 'YOL: -'
+          o = [yol, f'ESLEME eslesti: {len(E)}; islenen: {len(R)}; islenmeyen (DUR sonrasi): {len(E) - len(R)}',
+               f'Durum: {dict(c)}', f'Aile x durum: {dict(Counter((r["aile"], r["durum"]) for r in R))}',
+               'ATLANDI_2SAAT (yayina < 2 sa, yazma yok):'] + [f'  {r["tarih"]} {r["aile"]} {r["cift"]} uuid {r["uuid"]}' for r in R if r['durum'] == 'ATLANDI_2SAAT']
+          o += ['ZATEN ESKI GORSELLE YAYIMLANAN (YAYIMLANDI_ESKI / GECMIS_*, yazma yok):'] + [f'  {r["tarih"]} {r["aile"]} {r["cift"]} {r["durum"]} uuid {r["uuid"]}' for r in R if r['durum'] == 'YAYIMLANDI_ESKI' or r['durum'].startswith('GECMIS_')]
+          o += ['Diger (PASS disi):'] + [f'  {r["tarih"]} {r["aile"]} {r["cift"]} {r["durum"]} {r["not"][:200]}' for r in R if r['durum'] not in ('PASS', 'ATLANDI_2SAAT', 'YAYIMLANDI_ESKI') and not r['durum'].startswith('GECMIS_')]
+          open(os.path.join(d, 'OZET.txt'), 'w').write('\n'.join(o) + '\n'); print('\n'.join(o))
+          EOF
+          mkdir -p _work/engel
+          find _out -type f | while read -r f; do
+            python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/mc.json --sir-json _work/kimlik.json "$f" >/dev/null 2>&1 \
+              || { echo "TARAMA GECMEDI (Drive'a gitmez): $(basename "$f")"; mv "$f" _work/engel/; }
+          done
+          python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/mc.json --sir-json _work/kimlik.json _out || exit 1
+          rclone copy _out/UYGULAMA "$D/UYGULAMA" -q
+          rclone lsl "$D/UYGULAMA" --max-depth 1 | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
+          exit $rc
+
+      - if: always()
+        run: |
+          rm -rf _work ~/.config/rclone media
+          if [ -f "$RUNNER_TEMP/SIR_ENGEL" ]; then echo "::error::sir iceren satir engellendi (sir_koru)"; exit 1; fi

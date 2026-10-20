@@ -1,0 +1,112 @@
+name: ilan78-liste
+# 78 ilan videosu: yalniz rapor dosyalari (20 Eki 2026, Serdar karar c). Uretim YOK, Etsy'ye ve Metricool'a YAZMA YOK.
+# 1) KONTROL.csv / OZET.txt / kontaklar: ilan78_rapor.py (kararlar a + b + c), satirlar Drive SATIR/, kareler uretim kosularinin artifact'larindan.
+# 2) YUKLEME_LISTESI.csv: Drive KUPA/ ve POSTER/ videolari indirilir, ffprobe ile sure/olcu/kare, bayt boyutu.
+#    Sutunlar: aile, cift, listing_id, video_yolu, sure_sn, boyut_bayt, boyut_mb, olcu, kare, ses, kontrol (PASS/KABUL).
+# Yukleme ayri onayla, kapaklar bitince etsy-arama oturumunda.
+permissions:
+  contents: write   # yalniz poster-video-onizleme dalina
+  actions: read     # uretim kosularinin kare artifact'lari
+on:
+  workflow_dispatch:
+    inputs:
+      kosular:
+        description: 'kare artifact kosu numaralari (sirayla, bosluklu)'
+        default: '39431073309 39452316687'
+env:
+  O: gdrive:ASTROLOVE/TEMP/ILAN_VIDEO_78_20261020
+jobs:
+  liste:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Kurulum
+      run: |
+        set -euo pipefail
+        pip install -q pillow==11.0.0
+        sudo apt-get -qq update >/dev/null && sudo apt-get -qq install -y ffmpeg fonts-dejavu-core >/dev/null
+        curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+    - name: rclone.conf
+      env:
+        RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      run: |
+        set -euo pipefail
+        mkdir -p ~/.config/rclone; umask 077
+        printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+        if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+          grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+    - name: Kare artifact'lari
+      env:
+        GH_TOKEN: ${{ github.token }}
+        KOSULAR: ${{ inputs.kosular }}
+      run: |
+        set -euo pipefail
+        mkdir -p _a
+        for K in $KOSULAR; do
+          case "$K" in *[!0-9]*|'') echo "::error::kosu no gecersiz"; exit 1 ;; esac
+          gh run download "$K" -R "$GITHUB_REPOSITORY" -p 'satir-*' -D "_dl/$K"
+          for d in _dl/$K/*/; do cp -r "$d"* _a/ 2>/dev/null || true; done
+        done
+        echo "kare $(ls _a/kare | wc -l)"
+    - name: KONTROL + OZET + YUKLEME_LISTESI
+      run: |
+        set -euo pipefail
+        rm -rf _a/satir; mkdir -p _a/satir; rclone copy "$O/SATIR" _a/satir -q
+        echo "satir $(ls _a/satir | wc -l)"
+        set +e; python3 -I sosyal/poster_video/ilan78_rapor.py _a/satir _a/kare _r | tee _r_log.txt; RC=${PIPESTATUS[0]}   # bundan sonra set +e: denetim FAIL olsa da dosyalar Drive'a gider
+        mkdir -p _v/KUPA _v/POSTER
+        rclone copy "$O/KUPA" _v/KUPA -q --include '*.mp4'; rclone copy "$O/POSTER" _v/POSTER -q --include '*.mp4'
+        python3 - <<'EOF'
+        import csv, glob, json, os, re, subprocess
+        K = {r['cift']: r['sonuc_kabul'] for r in csv.DictReader(open('_r/KONTROL.csv', encoding='utf-8'))}
+        rows = []
+        for aile, d in (('kupa', 'KUPA'), ('poster', 'POSTER')):
+            for f in sorted(glob.glob(f'_v/{d}/*.mp4')):
+                ad = os.path.basename(f); m = re.fullmatch(r'(\d+)_([A-Z]+_[A-Z]+)\.mp4', ad)
+                assert m, ad
+                j = json.loads(subprocess.run(['ffprobe', '-v', 'error', '-count_frames', '-show_streams', '-show_format', '-of', 'json', f],
+                                              capture_output=True, text=True, check=True).stdout)
+                vs = [s for s in j['streams'] if s['codec_type'] == 'video'][0]
+                rows.append({'aile': aile, 'cift': m.group(2), 'listing_id': m.group(1),
+                             'video_yolu': f'ASTROLOVE/TEMP/ILAN_VIDEO_78_20261020/{d}/{ad}',
+                             'sure_sn': round(float(j['format']['duration']), 3), 'boyut_bayt': os.path.getsize(f),
+                             'boyut_mb': round(os.path.getsize(f) / 1e6, 2), 'olcu': f"{vs['width']}x{vs['height']}",
+                             'kare': int(vs['nb_read_frames']), 'ses': any(s['codec_type'] == 'audio' for s in j['streams']),
+                             'kontrol': K.get(m.group(2), '')})
+        with open('_r/YUKLEME_LISTESI.csv', 'w', newline='', encoding='utf-8') as fo:
+            w = csv.DictWriter(fo, list(rows[0])); w.writeheader(); w.writerows(rows)
+        n = {a: sum(r['aile'] == a for r in rows) for a in ('kupa', 'poster')}
+        ok = (n == {'kupa': 78, 'poster': 78} and len({(r['aile'], r['cift']) for r in rows}) == 156
+              and all(r['kontrol'] in ('PASS', 'KABUL') and r['kare'] == 180 and not r['ses'] for r in rows))
+        print(f"::warning::YUKLEME_LISTESI {n} toplam {sum(r['boyut_bayt'] for r in rows) / 1e6:.1f} MB, sure {min(r['sure_sn'] for r in rows)}-{max(r['sure_sn'] for r in rows)} sn, denetim {'PASS' if ok else 'FAIL'}")
+        raise SystemExit(0 if ok else 1)
+        EOF
+        LR=$?
+        sed 's/^/::warning::OZET /' _r/OZET.txt | head -4 | cut -c1-2000
+        rclone copy _r "$O" -q
+        echo "::warning::DRIVE $(rclone lsf "$O" --files-only | tr '\n' ' ')"
+        echo "RC=$(( RC + LR ))" >> "$GITHUB_ENV"
+    - name: Onizleme dali
+      if: ${{ always() }}
+      run: |
+        set +e -uo pipefail
+        [ -d _r ] || exit 0
+        B=poster-video-onizleme; PV=ilan78
+        git config user.name "github-actions"; git config user.email "actions@github.com"
+        for i in 1 2 3; do
+          rm -rf _pvw; git worktree prune
+          git fetch -q origin $B && git worktree add -q _pvw origin/$B || break
+          mkdir -p "_pvw/$PV"; cp _r/*.jpg _r/*.csv _r/OZET.txt "_pvw/$PV/"
+          (cd _pvw && git add -A && git commit -qm "ilan78 liste (kosu ${{ github.run_id }})" && git push -q origin HEAD:refs/heads/$B) && { echo "::warning::ONIZLEME $B/$PV"; break; }
+          sleep 5
+        done
+    - name: Sonuc
+      if: ${{ always() }}
+      run: |
+        rm -rf ~/.config/rclone _v
+        [ "${RC:-1}" = "0" ]

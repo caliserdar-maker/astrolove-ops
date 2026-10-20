@@ -1,0 +1,190 @@
+name: ilan-video-78
+# 78 kupa + 78 poster ilan videosu (20 Eki 2026, Serdar V6 onayi). Kural V6 (ae01cd4) birebir; ortam poster-video-v6 ile ayni.
+# Etsy API KULLANILMAZ; Etsy'ye ve Metricool'a YAZMA YOK. Yukleme ayri onayla.
+# Kupa: kupa-orchard cift.py katmanlari (Emily James, "My favorite place is with you"; 78 kapak orange stil) + video6b V6
+#       (N 10400, sigma 0.45), sahne = KUPA_KAPAK_78_20261019/KAPAK/<lid>_<CIFT>.jpg.
+# Poster: poster_video_v6.py, N = 58000 x bolge alani / CL bolge alani; sahne = KAPAK_P2_78 BASLIK_A/KAPAK_A (varsa) yoksa KAPAK/.
+# Kontrol: sosyal/poster_video/ilan78.py (cift basina), ilan78_rapor.py (KONTROL.csv, OZET.txt, kontak sayfalari).
+# Cikti: Drive ASTROLOVE/TEMP/ILAN_VIDEO_78_20261020/ {KUPA/, POSTER/, KONTROL.csv, OZET.txt, KONTAK_*.jpg}
+permissions:
+  contents: write   # yalniz poster-video-onizleme dalina kontak/KONTROL onizlemesi
+  actions: read     # onceki kosunun satir artifact'lari (kismi kosuda rapor 78 cifti birlestirir)
+on:
+  workflow_dispatch:
+    inputs:
+      ciftler:
+        description: 'TUMU ya da virgulle CIFT listesi'
+        default: 'TUMU'
+      grup:
+        description: 'paralel is sayisi'
+        default: '13'
+      onceki_kosu:
+        description: 'kismi kosuda: satirlari birlestirilecek onceki kosu no (bos = yok)'
+        default: ''
+env:
+  O: gdrive:ASTROLOVE/TEMP/ILAN_VIDEO_78_20261020
+  KK: gdrive:ASTROLOVE/TEMP/KUPA_KAPAK_78_20261019/KAPAK
+  PK: gdrive:ASTROLOVE/TEMP/KAPAK_P2_78_20261019
+jobs:
+  liste:
+    runs-on: ubuntu-latest
+    outputs:
+      matris: ${{ steps.m.outputs.matris }}
+    steps:
+    - id: m
+      env:
+        CIFTLER: ${{ inputs.ciftler }}
+        GRUP: ${{ inputs.grup }}
+      run: |
+        python3 - <<'EOF'
+        import itertools, json, os, re
+        Z = ['ARIES', 'TAURUS', 'GEMINI', 'CANCER', 'LEO', 'VIRGO', 'LIBRA', 'SCORPIO', 'SAGITTARIUS', 'CAPRICORN', 'AQUARIUS', 'PISCES']
+        tum = sorted('_'.join(sorted(p)) for p in itertools.combinations_with_replacement(Z, 2))
+        assert len(tum) == 78
+        g = os.environ['CIFTLER'].strip()
+        sec = tum if g.upper() == 'TUMU' else [c.strip().upper() for c in re.split(r'[,\s]+', g) if c.strip()]
+        assert not [c for c in sec if c not in tum], 'bilinmeyen cift'
+        n = max(1, min(int(os.environ['GRUP']), len(sec)))
+        m = {'include': [{'no': i + 1, 'ciftler': ' '.join(sec[i::n])} for i in range(n) if sec[i::n]]}
+        print(json.dumps(m)); open(os.environ['GITHUB_OUTPUT'], 'a').write('matris=' + json.dumps(m) + '\n')
+        EOF
+
+  uret:
+    needs: liste
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.liste.outputs.matris) }}
+    name: uret ${{ matrix.no }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Kurulum
+      run: |
+        set -euo pipefail
+        pip install -q numpy==2.1.3 pillow==11.0.0 scipy==1.14.1 opencv-python-headless==4.10.0.84
+        sudo apt-get -qq update >/dev/null && sudo apt-get -qq install -y ffmpeg fonts-dejavu-core >/dev/null
+        curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+    - name: rclone.conf
+      env:
+        RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      run: |
+        set -euo pipefail
+        mkdir -p ~/.config/rclone; umask 077
+        printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+        if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+          grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+    - name: Uret + kontrol + Drive
+      env:
+        CIFTLER: ${{ matrix.ciftler }}
+      run: |
+        set +e -uo pipefail
+        mkdir -p _w/k _o
+        git fetch -q origin kupa-orchard && git archive origin/kupa-orchard kupa_orchard | tar -x -C _w/k
+        rclone lsf "$KK" --files-only > _w/kk.txt; rclone lsf "$PK/BASLIK_A/KAPAK_A" --files-only > _w/pa.txt; rclone lsf "$PK/KAPAK" --files-only > _w/pk.txt
+        echo "kapak listeleri: kupa $(wc -l < _w/kk.txt), KAPAK_A $(wc -l < _w/pa.txt), KAPAK $(wc -l < _w/pk.txt)"
+        T0=$(date +%s); N=$(echo $CIFTLER | wc -w); I=0; HATA=0
+        for C in $CIFTLER; do
+          I=$((I+1))
+          B1=$(python3 -c "import sys; print(sys.argv[1].split('_')[0].title())" "$C")
+          B2=$(python3 -c "import sys; print(sys.argv[1].split('_')[1].title())" "$C")
+          KF=$(grep -E "^[0-9]+_${C}\.jpg$" _w/kk.txt | head -1)
+          PF=$(grep -E "^[0-9]+_${C}\.jpg$" _w/pa.txt | head -1); PKL=BASLIK_A/KAPAK_A
+          [ -n "$PF" ] || { PF=$(grep -E "^[0-9]+_${C}\.jpg$" _w/pk.txt | head -1); PKL=KAPAK; }
+          if [ -z "$KF" ] || [ -z "$PF" ]; then echo "::error::$C kapak yok (kupa '$KF' poster '$PF')"; HATA=1; continue; fi
+          mkdir -p _w/kap/$C
+          rclone copyto "$KK/$KF" "_w/kap/$C/$KF" -q && rclone copyto "$PK/$PKL/$PF" "_w/kap/$C/$PF" -q || { echo "::error::$C kapak indirilemedi"; HATA=1; continue; }
+          bash _w/k/kupa_orchard/kod/sembol_al.sh "$C" "_w/sem_$C" > /dev/null
+          (cd _w/k/kupa_orchard && python3 -I kod/cift.py "$B1" "$B2" Emily James "My favorite place is with you" "../../sem_$C" "../../ko_$C") > "_w/cift_$C.log" 2>&1
+          if [ $? -ne 0 ]; then echo "::error::$C cift.py hatasi"; tail -5 "_w/cift_$C.log"; HATA=1; continue; fi
+          python3 -I sosyal/poster_video/ilan78.py "$C" "_w/kap/$C/$KF" "_w/ko_$C" _w/k/kupa_orchard/kod/video6b.py "_w/kap/$C/$PF" "$PKL" _o _w/is \
+            || { echo "::error::$C ilan78 hatasi"; HATA=1; }
+          rclone copy _o/KUPA "$O/KUPA" -q && rclone copy _o/POSTER "$O/POSTER" -q || { echo "::error::$C drive"; HATA=1; }
+          rm -rf _o/KUPA/* _o/POSTER/* "_w/ko_$C" "_w/sem_$C" "_w/kap/$C" _w/is
+          G=$(( $(date +%s) - T0 )); echo "[$I/$N %$((100*I/N))] $C (gecen ${G}s, kalan ~$(( G*(N-I)/I ))s)"
+        done
+        echo "HATA=$HATA" >> "$GITHUB_ENV"
+    - uses: actions/upload-artifact@v4
+      if: ${{ always() }}
+      with:
+        name: satir-${{ matrix.no }}
+        path: |
+          _o/satir
+          _o/kare
+        if-no-files-found: warn
+    - name: Sonuc
+      if: ${{ always() }}
+      run: |
+        rm -rf _w ~/.config/rclone
+        [ "${HATA:-1}" = "0" ]
+
+  rapor:
+    needs: uret
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Kurulum
+      run: |
+        set -euo pipefail
+        pip install -q pillow==11.0.0
+        sudo apt-get -qq update >/dev/null && sudo apt-get -qq install -y fonts-dejavu-core >/dev/null
+        curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+    - name: rclone.conf
+      env:
+        RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      run: |
+        set -euo pipefail
+        mkdir -p ~/.config/rclone; umask 077
+        printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+        if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+          grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+    - uses: actions/download-artifact@v4
+      if: ${{ inputs.onceki_kosu != '' }}
+      with:
+        pattern: satir-*
+        path: _a
+        merge-multiple: true
+        run-id: ${{ inputs.onceki_kosu }}
+        github-token: ${{ github.token }}
+    - uses: actions/download-artifact@v4   # bu kosunun satirlari (onceki kosununkilerin ustune yazar)
+      with:
+        pattern: satir-*
+        path: _a
+        merge-multiple: true
+    - name: KONTROL + kontak + Drive
+      run: |
+        set +e -uo pipefail
+        python3 -I sosyal/poster_video/ilan78_rapor.py _a/satir _a/kare _r | tee _r_log.txt; RC=${PIPESTATUS[0]}
+        sed 's/^/::warning::OZET /' _r/OZET.txt | cut -c1-3000
+        mkdir -p _r/SATIR && cp _a/satir/*.json _r/SATIR/ 2>/dev/null
+        rclone copy _r "$O" -q
+        echo "::warning::DRIVE KUPA $(rclone lsf "$O/KUPA" | wc -l), POSTER $(rclone lsf "$O/POSTER" | wc -l), $(rclone lsf "$O" --files-only | tr '\n' ' ')"
+        echo "RC=$RC" >> "$GITHUB_ENV"
+    - name: Onizleme dali
+      if: ${{ always() }}
+      run: |
+        set +e -uo pipefail
+        [ -d _r ] || exit 0
+        B=poster-video-onizleme; PV=ilan78
+        git config user.name "github-actions"; git config user.email "actions@github.com"
+        for i in 1 2 3; do
+          rm -rf _pvw; git worktree prune
+          git fetch -q origin $B 2>/dev/null && git worktree add -q _pvw origin/$B 2>/dev/null || { git worktree add -q --detach _pvw; (cd _pvw && git checkout -q --orphan tmp && git rm -rqf . ); }
+          rm -rf "_pvw/$PV"; mkdir -p "_pvw/$PV"; cp _r/*.jpg _r/KONTROL.csv _r/OZET.txt "_pvw/$PV/"
+          (cd _pvw && git add -A && git commit -qm "ilan video 78 onizleme (kosu ${{ github.run_id }})" && git push -q origin HEAD:refs/heads/$B) && { echo "::warning::ONIZLEME $B/$PV"; break; }
+          sleep 5
+        done
+    - name: Sonuc
+      if: ${{ always() }}
+      run: |
+        rm -rf ~/.config/rclone
+        [ "${RC:-1}" = "0" ]

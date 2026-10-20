@@ -25,6 +25,7 @@ import sys
 import time
 import urllib.request
 from collections import Counter
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
@@ -119,6 +120,34 @@ def aday_yerel(yol, is_dir):
     return hedef
 
 
+def onceden_indir(isler, aday_yollari, is_dir):
+    """1. kosu 22 dk (sirali indirme): medya 8 paralel GET, adaylar klasor basina tek rclone copy --files-from."""
+    t = time.time()
+    with ThreadPoolExecutor(8) as ex:
+        hata = sum(1 for r in ex.map(lambda x: _dene(indir, *x), isler) if r)
+    kl = {}
+    for y in aday_yollari:
+        kl.setdefault(os.path.dirname(y), []).append(os.path.basename(y))
+    for d, ls in kl.items():
+        lf = os.path.join(is_dir, 'liste.txt'); open(lf, 'w').write('\n'.join(ls) + '\n')
+        gec = os.path.join(is_dir, 'aday_tmp'); os.makedirs(gec, exist_ok=True)
+        try:
+            subprocess.run(['rclone', 'copy', d, gec, '--files-from', lf, '--transfers', '8', '-q'], timeout=600)
+        except Exception as e:  # toplu indirme olmazsa aday_yerel dosya basina indirir
+            log(f'ONCEDEN INDIRME aday {d}: {type(e).__name__}')
+        for x in ls:
+            if os.path.exists(os.path.join(gec, x)):
+                os.replace(os.path.join(gec, x), os.path.join(is_dir, 'aday_' + x))
+    log(f'ONCEDEN INDIRME: {len(isler)} medya ({hata} hata), {len(aday_yollari)} aday, {time.time() - t:.0f} sn')
+
+
+def _dene(f, *a):
+    try:
+        f(*a)
+    except Exception as e:
+        return str(e)[:100]
+
+
 def gorsel_fark(a_yol, b_yol):
     a = np.asarray(Image.open(a_yol).convert('RGB'), np.float32)
     B = kb.kapak_dizi(b_yol, a.shape[1], a.shape[0])
@@ -180,6 +209,23 @@ def main():
     json.dump([x[1] for x in ig], open(os.path.join(out, 'HAM_instagram_bekleyen.json'), 'w'), ensure_ascii=False, indent=1)
 
     ad = adaylar(aday_dir)
+    isler, ayl = [], set()
+    for zt, p, pr in ig:
+        md = [m if isinstance(m, str) else (m or {}).get('url', '') for m in p.get('media') or []]
+        tip = ((p.get('instagramData') or {}).get('type') or '').upper()
+        if not md or (pr.get('status') or '') != 'PENDING':
+            continue
+        if tip == 'REEL':
+            isler.append((md[0], os.path.join(is_dir, f"r_{p.get('id')}.mp4")))
+            if p.get('videoThumbnailUrl'):
+                isler.append((p['videoThumbnailUrl'], os.path.join(is_dir, f"t_{p.get('id')}.jpg")))
+        else:
+            isler.append((md[0], os.path.join(is_dir, f"{'k' if len(md) > 1 else 'g'}_{p.get('id')}{'_1' if len(md) > 1 else ''}.jpg")))
+        a_, _ = aile(p.get('text') or '', md)
+        c_ = cift_ad(p.get('text') or '')
+        if aday_sec(ad, a_, c_)[1]:
+            ayl.add(aday_sec(ad, a_, c_)[1])
+    onceden_indir(isler, sorted(ayl), is_dir)
     satir, t0 = [], time.time()
     for i, (zt, p, pr) in enumerate(ig, 1):
         st = pr.get('status') or ''

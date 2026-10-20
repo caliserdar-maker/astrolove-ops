@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       mod:
-        description: "analiz (19 Eki tespit) | karsilastir (ChatGPT PIEV01 ayrismasi) | k4 (Eylul/Ekim pin farki, kontak sayfalari, P3 pano plan/zamanlayici; cikti K4/) | degisim (bekleyen Pinterest gonderileri + yeni pin esleme; cikti TEMP/PINTEREST_PIN_DEGISIM_20261020/)"
+        description: "analiz (19 Eki tespit) | karsilastir (ChatGPT PIEV01 ayrismasi) | k4 (Eylul/Ekim pin farki, kontak sayfalari, P3 pano plan/zamanlayici; cikti K4/) | degisim (bekleyen Pinterest gonderileri + yeni pin esleme; cikti TEMP/PINTEREST_PIN_DEGISIM_20261020/) | kontrol (degisim sonrasi ESLEME uuid gorsel/alt durumu; cikti UYGULAMA_KONTROL/)"
         default: analiz
 jobs:
   oku:
@@ -58,6 +58,10 @@ jobs:
             rclone copyto "gdrive:ASTROLOVE/TEMP/BY78_TASLAK_20261014/BY78_TASLAKLAR.csv" _work/dg/by78.csv || echo "BY78_TASLAKLAR yok"
             rclone copyto "gdrive:ASTROLOVE/TEMP/KUPA_ORCHARD_TASLAK_20261019/KUPA_TASLAK_LISTE.csv" _work/dg/kupa.csv || echo "KUPA_TASLAK_LISTE yok"
             BETIK="scripts/sosyal/analiz/pin_degisim_envanter.py _work/mc.json _out --poster-pin _work/dg/poster_pin.json --y1-pin _work/dg/y1_pin.json --by78 _work/dg/by78.csv --kupa _work/dg/kupa.csv --pod78 data/pod/pod78_ids.csv --v6 data/sosyal/pinterest/v6_plan/PIN_METIN_234_LINKLI.csv"
+          elif [ "${{ inputs.mod }}" = "kontrol" ]; then
+            O="gdrive:ASTROLOVE/TEMP/PINTEREST_PIN_DEGISIM_20261020/UYGULAMA_KONTROL"
+            rclone copyto "gdrive:ASTROLOVE/TEMP/PINTEREST_PIN_DEGISIM_20261020/ESLEME.csv" _work/ESLEME.csv
+            BETIK="scripts/sosyal/analiz/pin_degisim_kontrol.py _work/mc.json _work/ESLEME.csv https://caliserdar-maker.github.io/astrolove-media/pinterest/v7 _out"
           else BETIK="scripts/sosyal/analiz/pinterest.py _work/mc.json _out _work/onceki"; fi
           python3 $BETIK | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json --sir-json _work/kimlik.json "$GITHUB_STEP_SUMMARY"
           rc=${PIPESTATUS[0]}

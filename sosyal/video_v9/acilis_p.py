@@ -7,11 +7,13 @@ PIN_V2 kurali (claude/keen-curie-2hza60 d62abf53: pin_v2_ornek.pin_duvari + kapa
   baslik: "A / & / B" yigini (pin istifi: & %62, satir arasi %12, Q kuyrugu istife girmez), EB Garamond 430, #162641.
   poster: baslik altinda, pin araligi (55 px) ve pin golgesi; poster pikseli yalniz olceklenir (LANCZOS), oran kaynakla ayni.
 Yerlesim: pin olcusu (baslik 158 px, poster yuksekligi 990 px, ara 55 px) x s; s, blok TikTok/Reels arayuz alanlarina
-(ust %12 = 230 px, alt %20 = 384 px, sag %15 = 162 px; sola da ayni pay, yatay ortali) PAY px payla sigan en buyuk deger.
+(ust %12 = 230 px, alt %20 = 384 px, sag %15 = 162 px; sola da ayni pay, yatay ortali) PAY px payla sigan en buyuk deger,
+onayli CANCER_LIBRA ile bulunur ve 78 ciftte aynidir; sigmayan baslik (uzun ad, Q kuyrugu) yalniz kendisi kuculur.
 Blok 9:16 karede yatay ve dikey ortali (merkez 540, 960).
 Kullanim: acilis_p.py --poster P.jpg --a Cancer --b Libra --font EBGaramond[wght].ttf --out P_kare.png [--bilgi p.json]
 """
 import argparse
+import functools
 import json
 import os
 import sys
@@ -28,6 +30,7 @@ W, H = 1080, 1920
 RENK = (22, 38, 65)                                   # #162641
 UST, ALT, SAG = round(0.12 * H), round(0.20 * H), round(0.15 * W)   # arayuz alanlari (230, 384, 162)
 PAY = 20
+REF = ('CANCER', 'LIBRA')                         # onayli P (20 Eki) olcegi bu ciftle bulunur
 BOY_P, ARA_P, POSTER_H_P = 158, 55, 990               # PIN_V2 (1000x1500) olculeri
 G_P = [(4, 7, 14, 0.10), (1, 2, 3, 0.12)]             # PIN_V2 poster golgesi (dx, dy, sigma, guc)
 
@@ -81,26 +84,43 @@ def lum(c):
     return 0.2126 * c[..., 0] + 0.7152 * c[..., 1] + 0.0722 * c[..., 2]
 
 
-def yerlesim(font, a, b, oran):
-    """En buyuk s: blok (baslik + ara + poster) arayuz alanlari disinda, 9:16 merkezli, PAY payla."""
+@functools.lru_cache(maxsize=8)
+def olcek(font, oran):
+    """Onayli CANCER_LIBRA yerlesiminin olcegi s (20 Eki P ornegi ile ayni arama)."""
     hmax = 2 * min(H / 2 - UST, (H - ALT) - H / 2) - 2 * PAY
     wmax = 2 * ((W - SAG) - W / 2) - 2 * PAY
     s = 1.0
     while s > 0.3:
-        yg, bw, yh, gh = yigin(font, a, b, BOY_P * s)
+        yg, bw, yh, gh = yigin(font, *REF, BOY_P * s)
         ph = round(POSTER_H_P * s); pw = round(ph * oran)
         blok = yh + round(ARA_P * s) + ph
         if blok <= hmax and max(bw, pw) <= wmax and gh - yh <= round(ARA_P * s) - 4:
-            return s, yg, bw, yh, gh, pw, ph, blok, hmax, wmax
+            return s, pw, ph, hmax, wmax
         s -= 0.002
     raise SystemExit('P yerlesimi sigmadi')
+
+
+def yerlesim(font, a, b, oran):
+    """s: onayli CANCER_LIBRA ile bulunan en buyuk olcek (blok arayuz alanlari disinda, 9:16 merkezli, PAY payla);
+    78 ciftte ayni (poster ayni boy). Baslik (a/&/b) genislik, blok yuksekligi ya da Q kuyrugu nedeniyle sigmazsa
+    YALNIZ baslik 0,5 px adimla kuculur (20 Eki, 78 cift karari)."""
+    s, pw, ph, hmax, wmax = olcek(font, oran)
+    ara = round(ARA_P * s)
+    boy = BOY_P * s
+    while boy > 20:
+        yg, bw, yh, gh = yigin(font, a, b, boy)
+        blok = yh + ara + ph
+        if blok <= hmax and bw <= wmax and gh - yh <= ara - 4:
+            return s, boy, yg, bw, yh, gh, pw, ph, blok, hmax, wmax
+        boy -= 0.5
+    raise SystemExit('P basligi sigmadi')
 
 
 def p_kare(poster, a, b, font):
     A, B = a.upper(), b.upper()
     P = Image.open(poster).convert('RGB')
     oran = P.width / P.height
-    s, yg, bw, yh, gh, pw, ph, blok, hmax, wmax = yerlesim(font, A, B, oran)
+    s, boy, yg, bw, yh, gh, pw, ph, blok, hmax, wmax = yerlesim(font, A, B, oran)
     y0 = round(H / 2 - blok / 2)
     py = y0 + yh + round(ARA_P * s); px = (W - pw) // 2
     D = duvar916()
@@ -118,7 +138,8 @@ def p_kare(poster, a, b, font):
     bk = (min(k[0] for k in kutular), min(k[1] for k in kutular), max(k[2] for k in kutular), max(k[3] for k in kutular))
     Dl = lum(np.asarray(D).astype(np.float64))
     kontrast = min((float(np.percentile(Dl[k[1]:k[3], k[0]:k[2]], 5)) + 0.05) / (float(lum(np.array(RENK))) + 0.05) for k in kutular)
-    bilgi = dict(s=round(s, 3), baslik_px=round(BOY_P * s, 1), amp_px=round(BOY_P * s * 0.62, 1), baslik_kutu=bk,
+    bilgi = dict(s=round(s, 3), baslik_px=round(boy, 1), amp_px=round(boy * 0.62, 1), baslik_px_kural=round(BOY_P * s, 1),
+                 baslik_kucultme=round(boy / (BOY_P * s), 4), baslik_genislik=int(bw), baslik_kutu=bk,
                  poster_kutu=tuple(int(v) for v in (px, py, px + pw, py + ph)), poster_kaynak=f'{P.width}x{P.height}', blok_y=(int(y0), int(y0 + blok)),
                  blok_h=int(blok), blok_h_max=hmax, genislik_max=wmax, kontrast=round(kontrast, 2),
                  arayuz=dict(ust=UST, alt=H - ALT, sag=W - SAG, pay=PAY), golge=[[round(dx * s, 1), round(dy * s, 1), round(sg * s, 1), g] for dx, dy, sg, g in G_P])
