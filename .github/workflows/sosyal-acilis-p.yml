@@ -1,0 +1,99 @@
+name: sosyal-acilis-p
+# Acilis P ornegi (20 Eki 2026): video ilk karesi = yeni pin gorunumunun (PIN_V2) 9:16 hali. YALNIZ ORNEK; Metricool'a ve hicbir
+# hesaba YAZMA YOK, toplu uretim yok. sosyal/video_v9/acilis_p.py (P karesi) + video_uret.py --acilis P (C ile ayni zamanlama:
+# 0-1,2 sn P, 1,2-1,5 sn gecis, sonra B) + p_qc.py (olcum, KONTAK_B1_C_P.jpg, ILK_KARE_ARAYUZ.jpg, OLCUM.txt).
+# 1) Onayli v9 yolu degismedi mi (k1-ornek ile ayni: Gemini & Leo --kareler + dogrula.py); FAIL ise video uretilmez.
+# Muzik 2 (k1 ile ayni); parola Drive MUZIK_PAROLA.txt, ::add-mask::, cozulen .m4a Drive'a gitmez.
+# Cikti: Drive ASTROLOVE/TEMP/SOSYAL_ACILIS_P_20261020/
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      cift:
+        description: 'cift anahtari (alfabetik)'
+        default: CANCER_LIBRA
+jobs:
+  uret:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      O: gdrive:ASTROLOVE/TEMP/SOSYAL_ACILIS_P_20261020
+      P2000: gdrive:ASTROLOVE/TEMP/PIN_V6_20261012/_POSTER2000
+      REF_DIR: 1_rcZ69bhw00QfHedBiWywEoHPu9Y4bkB
+      CIFT: ${{ inputs.cift }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Kurulum
+      run: |
+        set -euo pipefail
+        pip install -q numpy==2.1.3 pillow==11.0.0 scipy==1.14.1 opencv-python-headless==4.10.0.84
+        sudo apt-get -qq update >/dev/null && sudo apt-get -qq install -y ffmpeg fonts-dejavu-core >/dev/null
+        curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+        curl -fsSL --retry 3 "https://raw.githubusercontent.com/google/fonts/main/ofl/ebgaramond/EBGaramond%5Bwght%5D.ttf" -o "$RUNNER_TEMP/EBGaramond[wght].ttf"
+        echo "::warning::CPU $(nproc)"
+    - name: rclone.conf
+      env:
+        RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      run: |
+        set -euo pipefail
+        mkdir -p ~/.config/rclone; umask 077
+        printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+        if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+          grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+    - name: Uret + QC
+      run: |
+        set +e -uo pipefail   # QC FAIL olsa da ciktilar Drive'a gitsin
+        case "$CIFT" in *[!A-Z_]*|'') echo "::error::cift gecersiz"; exit 1 ;; esac
+        V=sosyal/video_v9; Q=_q; mkdir -p _w/ref _w/dg _w/m $Q/kare _o
+        rclone copyto gdrive:AstroLoveArt_Gemini_Leo_2000.jpg _w/ref/GEMINI_LEO.jpg --drive-root-folder-id "$REF_DIR" -q
+        rclone copyto "$P2000/$CIFT.jpg" "$Q/poster.jpg" -q || { echo "::error::poster yok: $CIFT"; exit 1; }
+        # 1) onayli v9 yolu degismedi
+        python3 $V/video_uret.py --poster _w/ref/GEMINI_LEO.jpg --a Gemini --b Leo --out _w/dg --kareler 2,5,8,13,17,22 >/dev/null \
+          && python3 $V/dogrula.py _w/dg | tee _w/dg.txt; DG=${PIPESTATUS[0]}
+        sed 's/^/::warning::DOGRULA /' _w/dg.txt
+        [ "$DG" = 0 ] || { echo "::error::onayli v9 dogrulamasi FAIL, video uretilmedi"; exit 1; }
+        # 2) muzik 2
+        P=$(rclone cat "gdrive:ASTROLOVE/TEMP/MUZIK_PAROLA.txt" 2>/dev/null | tr -d '\r\n')
+        [ -n "$P" ] && echo "::add-mask::$P"
+        [ -n "$P" ] || { echo "::error::muzik parolasi Drive'dan okunamadi"; exit 1; }
+        MUZIK_PAROLA="$P" openssl enc -d -aes-256-cbc -pbkdf2 -in $V/assets/muzik_2.m4a.enc -out $Q/muzik.m4a -pass env:MUZIK_PAROLA \
+          || { unset P; echo "::error::muzik cozulemedi"; exit 1; }
+        unset P
+        a=$(echo "${CIFT%%_*}" | sed 's/.*/\L&/; s/^./\U&/'); b=$(echo "${CIFT#*_}" | sed 's/.*/\L&/; s/^./\U&/')
+        slug=$(echo "$a-and-$b" | tr 'A-Z' 'a-z')
+        # 3) P karesi
+        python3 $V/acilis_p.py --poster $Q/poster.jpg --a "$a" --b "$b" --font "$RUNNER_TEMP/EBGaramond[wght].ttf" --out $Q/P_kare.png --bilgi $Q/p.json \
+          || { echo "::error::P karesi uretilemedi"; exit 1; }
+        echo "::warning::P $(cat $Q/p.json | tr -d '\n ' | cut -c1-600)"
+        # 4) P videosu (muzikli) + kontak / esitlik kareleri (paralel)
+        T0=$(date +%s); KT=0,0.6,1.2,1.35,1.5,2,2.5,3
+        python3 $V/video_uret.py --poster $Q/poster.jpg --a "$a" --b "$b" --out _w/P --muzik $Q/muzik.m4a --acilis P --acilis_kare $Q/P_kare.png \
+          --bilgi $Q/bilgi_p.json > _w/P.log 2>&1 &
+        for ac in B1 C P; do ek=""; [ $ac = P ] && ek="--acilis_kare $Q/P_kare.png"
+          python3 $V/video_uret.py --poster $Q/poster.jpg --a "$a" --b "$b" --out $Q/kare/$ac --acilis $ac $ek --kareler $KT > _w/k_$ac.log 2>&1 & done
+        python3 $V/video_uret.py --poster $Q/poster.jpg --a "$a" --b "$b" --out $Q/kare/B_esit --acilis B --kareler 1.5,3,10,20 > _w/k_be.log 2>&1 &
+        python3 $V/video_uret.py --poster $Q/poster.jpg --a "$a" --b "$b" --out $Q/kare/P_esit --acilis P --acilis_kare $Q/P_kare.png --kareler 1.5,3,10,20 > _w/k_pe.log 2>&1 &
+        while [ "$(jobs -rp | wc -l)" -gt 0 ]; do
+          sleep 45; echo "ETA P: $(grep -o '[0-9]*/720 kare.*' _w/P.log | tail -1) | gecen $(( $(date +%s) - T0 )) sn"
+        done
+        wait
+        f="_w/P/$slug-astroloveart-reel.mp4"
+        [ -f "$f" ] && mv "$f" "$Q/P_$CIFT.mp4" || { echo "::error::P videosu uretilemedi"; tail -20 _w/P.log; exit 1; }
+        echo "::warning::URETIM $(( $(date +%s) - T0 )) sn"
+        # 5) QC
+        python3 $V/p_qc.py $Q "$CIFT" | tee _w/qc.txt; QC=${PIPESTATUS[0]}
+        sed 's/^/::warning::QC /' _w/qc.txt | cut -c1-900
+        cp "$Q/P_$CIFT.mp4" "_o/${CIFT}_P.mp4"
+        cp $Q/KONTAK_B1_C_P.jpg $Q/ILK_KARE_ARAYUZ.jpg $Q/OLCUM.txt $Q/P_kare.png $Q/p.json $Q/bilgi_p.json _o/ 2>/dev/null
+        cp _w/P.log _o/video_log.txt; cp _w/qc.txt _o/qc_log.txt
+        rm -f $Q/muzik.m4a
+        rclone copy _o "$O" -q
+        echo "::warning::DRIVE $(rclone lsf "$O" | tr '\n' ' ')"
+        exit $QC
+    - if: always()
+      run: rm -rf _w _q ~/.config/rclone
