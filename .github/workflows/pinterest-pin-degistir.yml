@@ -100,9 +100,12 @@ jobs:
           A="--token-dosya _work/mc.json --esleme _work/ESLEME.csv --url-kok $URL_KOK --cikti _out/UYGULAMA/ham"
           kos() { python3 scripts/sosyal/metricool_pin_gorsel_degistir.py $A "$@" 2>&1 | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json --sir-json _work/kimlik.json "$GITHUB_STEP_SUMMARY"; return ${PIPESTATUS[0]}; }
           kos --mod dogrula; rc=$?
-          if [ $rc = 0 ]; then kos --mod test --normalize _out/UYGULAMA/ham/NORMALIZE.csv; rc=$?; fi
+          if [ $rc = 0 ]; then YOL="normalize (dogrulama ucu OK)"; NARG="--normalize _out/UYGULAMA/ham/NORMALIZE.csv"
+          else YOL="dogrudan github.io (dogrulama ucu hata verdi; Serdar onayi 20 Eki)"; NARG="--normalize-atla"; fi
+          echo "YOL: $YOL" | tee _out/UYGULAMA/ham/YOL.txt
+          kos --mod test $NARG; rc=$?
           if [ $rc = 0 ] && grep -q ",PASS," _out/UYGULAMA/ham/SONUC_test.csv && [ "${{ inputs.devam }}" = "true" ]; then
-            kos --mod hepsi --normalize _out/UYGULAMA/ham/NORMALIZE.csv --onceki _out/UYGULAMA/ham/SONUC_test.csv; rc=$?
+            kos --mod hepsi $NARG --onceki _out/UYGULAMA/ham/SONUC_test.csv; rc=$?
           elif [ $rc = 0 ]; then echo "test PASS yok ya da devam=false: kalanlar yazilmadi"; fi
           python3 - <<'EOF'
           import csv, os
@@ -112,7 +115,7 @@ jobs:
               p = os.path.join(d, 'ham', ad)
               if os.path.exists(p):
                   for r in csv.DictReader(open(p, encoding='utf-8')):
-                      if r['uuid'] not in s or r['durum'] != 'ATLANDI_2SAAT':
+                      if r['uuid'] not in s or r['durum'] not in ('ATLANDI_2SAAT', 'YAYIMLANDI_ESKI'):
                           s[r['uuid']] = r
           R = sorted(s.values(), key=lambda r: r['tarih'])
           if R:
@@ -120,10 +123,12 @@ jobs:
                   w = csv.DictWriter(f, fieldnames=list(R[0]), lineterminator='\n'); w.writeheader(); w.writerows(R)
           E = [r for r in csv.DictReader(open('_work/ESLEME.csv', encoding='utf-8-sig')) if r['durum'] == 'eslesti']
           c = Counter(r['durum'] for r in R)
-          o = [f'ESLEME eslesti: {len(E)}; islenen: {len(R)}; islenmeyen (DUR sonrasi): {len(E) - len(R)}',
+          yol = open(os.path.join(d, 'ham', 'YOL.txt')).read().strip() if os.path.exists(os.path.join(d, 'ham', 'YOL.txt')) else 'YOL: -'
+          o = [yol, f'ESLEME eslesti: {len(E)}; islenen: {len(R)}; islenmeyen (DUR sonrasi): {len(E) - len(R)}',
                f'Durum: {dict(c)}', f'Aile x durum: {dict(Counter((r["aile"], r["durum"]) for r in R))}',
                'ATLANDI_2SAAT (yayina < 2 sa, yazma yok):'] + [f'  {r["tarih"]} {r["aile"]} {r["cift"]} uuid {r["uuid"]}' for r in R if r['durum'] == 'ATLANDI_2SAAT']
-          o += ['Diger (PASS disi):'] + [f'  {r["tarih"]} {r["aile"]} {r["cift"]} {r["durum"]} {r["not"][:200]}' for r in R if r['durum'] not in ('PASS', 'ATLANDI_2SAAT')]
+          o += ['ZATEN ESKI GORSELLE YAYIMLANAN (YAYIMLANDI_ESKI / GECMIS_*, yazma yok):'] + [f'  {r["tarih"]} {r["aile"]} {r["cift"]} {r["durum"]} uuid {r["uuid"]}' for r in R if r['durum'] == 'YAYIMLANDI_ESKI' or r['durum'].startswith('GECMIS_')]
+          o += ['Diger (PASS disi):'] + [f'  {r["tarih"]} {r["aile"]} {r["cift"]} {r["durum"]} {r["not"][:200]}' for r in R if r['durum'] not in ('PASS', 'ATLANDI_2SAAT', 'YAYIMLANDI_ESKI') and not r['durum'].startswith('GECMIS_')]
           open(os.path.join(d, 'OZET.txt'), 'w').write('\n'.join(o) + '\n'); print('\n'.join(o))
           EOF
           mkdir -p _work/engel
