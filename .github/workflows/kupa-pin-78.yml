@@ -45,6 +45,7 @@ jobs:
           CIFTLER: ${{ inputs.ciftler }}
         run: |
           set -uo pipefail
+          set +e   # betik FAIL ile cikarsa da yukleme yapilir (Actions varsayilan bash -e)
           pip install -q pillow numpy >/dev/null 2>&1
           rclone copy "gdrive:ASTROLOVE/TEMP/KUPA_KAPAK_78_20261019/KAPAK" _work/KAPAK --include "*.jpg" --transfers 8 -q
           n=$(ls _work/KAPAK/*.jpg | wc -l); echo "kapak $n"

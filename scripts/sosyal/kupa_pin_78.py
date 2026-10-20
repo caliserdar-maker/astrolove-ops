@@ -4,10 +4,11 @@ Her cift kendi V4 kapagindan (KUPA_KAPAK_78_20261019/KAPAK/<lid>_<B1>_<B2>.jpg):
 (kupa_kapak_78.stil_bul), eski baslik stilin yazisiz sahnesiyle silinir, ust duvar yansitmali uzatilir, masa +62 satir,
 baslik (Cinzel 650, stil rengi, S3 boyu; pin genisligine 40 px payla sigmazsa yalniz o cift en az oranda kuculur) ust kenar
 ile kupa arasina esit boslukla yazilir. Kupa ve plaka kapak pikselleri, olcek 2048 -> 1000 (0.48828 <= 1). Yapay zeka yok.
-Kapilar (cift basina): sahne = kapak duvari (ort <= 3); baslik cizimi eski yerinde = kapak basligi (NCC >= 0.99; sira/renk/
+Kapilar (cift basina): sahne = kapak duvari (ort <= 3); baslik cizimi eski yerinde = kapak basligi (NCC >= 0.99, dikey +-4 px arama; sira/renk/
 stil/olcek dogrulamasi); eski baslik kalintisi 0; kupa NCC >= 0.99; plaka NCC >= 0.99; baslik guvenli alanda (>= 40 px);
 bosluk esit (fark <= 3 px); ek yeri sicramasi yok (kivrim satiri adimi <= max(0.5, 4 x duvar medyani)); uzatmada duvar disi
-piksel 0 (kupa/kulp kopyasi yok); ayni burclu ciftte iki glif birbirine (NCC >= 0.90) ve sablona (>= 0.60; yerel olcum dogru glif 0.70-0.81, farkli glif
+piksel 0 (kupa/kulp kopyasi yok); ayni burclu ciftte iki glif birbirine (NCC >= 0.60; kupa egimi: 78 kosusunda ayni 0.70-0.95, farkli 0.08-0.13)
+ve sablona (>= 0.60; yerel olcum dogru glif 0.70-0.81, farkli glif
 0.08-0.13) esit.
 Cikti: PIN/PIN_KUPA_<B1>_<B2>.jpg, KONTAK_1..n.jpg (16'li, cift etiketli), KONTROL.csv, OZET.txt
 Kullanim: kupa_pin_78.py --kapak DIR --sahne DIR --font Cinzel.ttf --sembol DIR --cikti DIR [--is 4] [--ciftler A_B ...]"""
@@ -90,10 +91,15 @@ def is_(r):
     dd = np.abs(f - sc).max(2)[dm]
     k['sahne_fark_ort'] = round(float(dd.mean()), 2); kapi('sahne', dd.mean() <= 3)
     ok_, _ = olcek(font, b1, b2, GUVENLI_KAPAK)
-    t = sc.copy(); bt, _ = baslik_ciz(t, font, b1, b2, renk, y_ust=bk[1], olcek=ok_)
-    x0, y0, x1, y1 = bt
-    n0 = ncc(f[y0:y1, x0:x1].mean(2), t[y0:y1, x0:x1].mean(2))
-    k['kapak_baslik_olcek'] = ok_; k['baslik_dogrulama_ncc'] = round(n0, 4); kapi('baslik_dogrulama', n0 >= 0.99)
+    n0, dy0 = -1.0, 0
+    for dy in range(-4, 5):            # kutu ustu esikle 1-2 px asagida olculebilir (yuvarlak harf tasmasi; LEO_VIRGO dy -1)
+        t = sc.copy(); bt, _ = baslik_ciz(t, font, b1, b2, renk, y_ust=bk[1] + dy, olcek=ok_)
+        x0, y0, x1, y1 = bt
+        v = ncc(f[y0:y1, x0:x1].mean(2), t[y0:y1, x0:x1].mean(2))
+        if v > n0:
+            n0, dy0 = v, dy
+    k['kapak_baslik_olcek'] = ok_; k['baslik_dogrulama_ncc'] = round(n0, 4); k['baslik_dogrulama_dy'] = dy0
+    kapi('baslik_dogrulama', n0 >= 0.99)
     e = f.copy()
     ex0, ey0, ex1, ey1 = bk[0] - 12, bk[1] - 12, bk[2] + 12, bk[3] + 12
     e[ey0:ey1, ex0:ex1] = sc[ey0:ey1, ex0:ex1]
@@ -150,10 +156,10 @@ def is_(r):
         def kirp_(x):
             yy, xx = np.where(x > 0.3); return x[yy.min():yy.max() + 1, xx.min():xx.max() + 1]
         k['glif_sol_sablon'] = round(benzer(gl, kirp_(tl)), 3); k['glif_sag_sablon'] = round(benzer(gr, kirp_(tr)), 3)
-    except (FileNotFoundError, ValueError):
+    except (OSError, ValueError):
         k['glif_sol_sablon'] = k['glif_sag_sablon'] = ''
     if b1 == b2:
-        kapi('ayni_burc_glif', k['glif_lr_ncc'] >= 0.90 and k['glif_sol_sablon'] != '' and min(k['glif_sol_sablon'], k['glif_sag_sablon']) >= 0.60)
+        kapi('ayni_burc_glif', k['glif_lr_ncc'] >= 0.60 and k['glif_sol_sablon'] != '' and min(k['glif_sol_sablon'], k['glif_sag_sablon']) >= 0.60)
     yol = os.path.join(out, 'PIN', f'PIN_KUPA_{b1}_{b2}.jpg')
     pin.save(yol, quality=92, subsampling=0, optimize=True)
     k['fail'] = ';'.join(fail); k['sonuc'] = 'PASS' if not fail else 'FAIL'; k['sure_sn'] = round(time.time() - t0, 1)
