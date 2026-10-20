@@ -1,0 +1,67 @@
+name: yildonumu78-son
+# 78 yil donumu son kararlar (Serdar, 21 Eki): YALNIZ Drive guncelleme, uretim yok; Etsy'ye ve Metricool'a YAZMA YOK.
+# 1) KONTROL_GOZ/ARIES_SAGITTARIUS.mp4 -> YILDONUMU/ARIES_SAGITTARIUS_yd_video.mp4 (eski dosyanin yerine; md5 dogrulanir).
+# 2) sosyal/poster_video/yildonumu78_son.py: KONTROL_YD.csv (GOZ_KONTROLU 12 + ARIES_SAGITTARIUS KABUL, FAIL kalmaz), OZET_YD.txt,
+#    YUKLEME_LISTESI.csv (ARIES_SAGITTARIUS satiri yeni dosyayla, tum satirlara Drive md5; 234 satir).
+permissions:
+  contents: write   # yalniz poster-video-onizleme dalina
+on:
+  workflow_dispatch:
+env:
+  O: gdrive:ASTROLOVE/TEMP/ILAN_VIDEO_78_20261020
+jobs:
+  son:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+    - uses: actions/checkout@v4
+    - name: Kurulum
+      run: |
+        set -euo pipefail
+        sudo apt-get -qq update >/dev/null && sudo apt-get -qq install -y ffmpeg >/dev/null
+        curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+    - name: rclone.conf
+      env:
+        RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      run: |
+        set -euo pipefail
+        mkdir -p ~/.config/rclone; umask 077
+        printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+        if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+          grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+    - name: Drive guncelleme
+      run: |
+        set -euo pipefail
+        C=ARIES_SAGITTARIUS; mkdir -p _i _r
+        rclone copyto "$O/YILDONUMU/KONTROL_GOZ/$C.mp4" "_i/$C.mp4" -q
+        rclone copyto "$O/YILDONUMU/KONTROL_GOZ/OLCUM_$C.txt" "_i/OLCUM_$C.txt" -q
+        rclone copyto "$O/YILDONUMU/KONTROL_YD.csv" _i/KONTROL_YD.csv -q
+        rclone copyto "$O/YILDONUMU/OZET_YD.txt" _i/OZET_YD.txt -q
+        rclone copyto "$O/YUKLEME_LISTESI.csv" _i/YUKLEME_LISTESI.csv -q
+        cp _i/KONTROL_YD.csv _r/KONTROL_YD_onceki.csv; cp _i/YUKLEME_LISTESI.csv _r/YUKLEME_LISTESI_onceki.csv
+        rclone copyto "$O/YILDONUMU/KONTROL_GOZ/$C.mp4" "$O/YILDONUMU/${C}_yd_video.mp4"
+        Y=$(md5sum "_i/$C.mp4" | cut -d' ' -f1)
+        rclone md5sum "$O" --include "KUPA/*.mp4" --include "POSTER/*.mp4" --include "YILDONUMU/*_yd_video.mp4" > _i/md5.txt
+        D=$(grep " YILDONUMU/${C}_yd_video.mp4$" _i/md5.txt | cut -d' ' -f1)
+        echo "::warning::$C yerel md5 $Y, Drive YILDONUMU md5 $D, md5 satiri $(wc -l < _i/md5.txt)"
+        [ "$Y" = "$D" ] || { echo "::error::$C Drive kopyasi yeni dosyayla ayni degil"; exit 1; }
+        python3 -I sosyal/poster_video/yildonumu78_son.py _i/KONTROL_YD.csv _i/OZET_YD.txt "_i/OLCUM_$C.txt" _i/YUKLEME_LISTESI.csv \
+          "_i/$C.mp4" _i/md5.txt _r | sed 's/^/::warning::SON /'
+        rclone copyto _r/KONTROL_YD.csv "$O/YILDONUMU/KONTROL_YD.csv" -q
+        rclone copyto _r/OZET_YD.txt "$O/YILDONUMU/OZET_YD.txt" -q
+        rclone copyto _r/YUKLEME_LISTESI.csv "$O/YUKLEME_LISTESI.csv" -q
+        echo "::warning::DRIVE YILDONUMU mp4 $(rclone lsf "$O/YILDONUMU" --files-only --include '*_yd_video.mp4' | wc -l), YUKLEME satir $(( $(rclone cat "$O/YUKLEME_LISTESI.csv" | wc -l) - 1 ))"
+    - name: Onizleme dali
+      if: ${{ always() }}
+      run: |
+        set +e -uo pipefail
+        [ -d _r ] || exit 0
+        B=poster-video-onizleme; PV=yildonumu78_son
+        git config user.name "github-actions"; git config user.email "actions@github.com"
+        git fetch -q origin $B && git worktree add -q _pvw origin/$B || exit 0
+        rm -rf "_pvw/$PV"; mkdir -p "_pvw/$PV"; cp _r/* "_pvw/$PV/"
+        (cd _pvw && git add -A && git commit -qm "yil donumu 78 son (kosu ${{ github.run_id }})" && git push -q origin HEAD:refs/heads/$B) && echo "::warning::ONIZLEME $B/$PV"
+    - name: Temizlik
+      if: ${{ always() }}
+      run: rm -rf ~/.config/rclone _i
