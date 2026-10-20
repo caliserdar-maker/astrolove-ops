@@ -1,0 +1,15 @@
+S1 1000x1500: kapak olcek 0.48828; baski kirpimi 596x604 -> 434x440, olcek 0.7289 (<=1); panel 502x508 beyaz, kose 34, kenarlik yok; eski baslik kalintisi 0 px
+S1 kupa NCC 0.99627, plaka NCC 0.99265, panel icerik NCC 1.00000
+S1 bosluk: ust kenar -> baslik 56, baslik -> panel 56, panel -> kupa ust 57 px (panel y 289-797, kupa ust y 854)
+S1 SONUC PASS
+S2 1000x1500: tam genislik SIGMAZ: kupa 1453 px kaynak -> 1000 px icin iki kupa govdesi 1760 px + baslik + plaka > 1500. Sigan en buyuk: kaynak olcek 0.4209 (<=1), kupa 612x537 ve 608x540 px (genislik %61)
+S2 on kupa NCC 0.99101, arka kupa NCC 0.96572, plaka NCC 1.00000 (kapak pikselleri, maske ici)
+S2 bosluk: ust kenar -> baslik 50, baslik -> on kupa ust 52, plaka alti -> alt kenar 34 px; iki sahne gecisi y 804-835 (dogrusal 31 px); yan yuzey yansitma (yalniz kupasiz kenar seridi) on sol 157 px (serit 32), on sag 0, arka sol 0, arka sag 154 px (serit 36)
+S2 SONUC FAIL (tam genislik sarti saglanamadi)
+S3 1000x1250: kapak olcek 0.48828 (<=1); ust duvar uzatma 219.7 px, masa 30.3 px; eski baslik kalintisi 0 px
+S3 kupa NCC 0.99627, plaka NCC 0.99265
+S3 bosluk: ust kenar -> baslik 213 px, baslik -> kupa ust kenari 214 px (kupa ust y 604); baslik x 316-682
+S3 SONUC PASS
+Not: kupa uzerindeki "CANCER · LIBRA" satiri kupa pikseli, degistirilmedi.
+S2 GOZ KONTROLU FAIL (deneme 2): yan yuzey seridinde kulp parlamasi dikey cizgi olarak tekrar ediyor (sol y 520-580, sag y 1040-1120). En fazla 2 deneme; S2 durduruldu.
+Gorseller S1, S3, KONTAK_SECENEK, YAKIN_* Drive SECENEK klasorune tek Actions kosusuyla yuklendi (Serdar izni); S2 elendi.
