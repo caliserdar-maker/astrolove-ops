@@ -70,10 +70,11 @@ def dogrula(mc, a, satirlar):
         for i, u in enumerate(urller, 1):
             try:
                 y = mc.istek('GET', '/actions/normalize/image/url', {'url': u})
-                s = json.dumps(y, ensure_ascii=False)[:300]
-                ok = bool(y) and 'error' not in s.lower()
+                m = re.findall(r'https?://([^/\s"]+)', json.dumps(y))
+                ok = bool(m)                                   # HTTP 200 + yanitta URL (ham yanit yazilmaz: imzali URL olabilir)
+                s = f"200; anahtarlar {sorted(y) if isinstance(y, dict) else type(y).__name__}; url host {sorted(set(m))[:3]}"
             except SystemExit as e:
-                s, ok = str(e)[:300], False
+                s, ok = re.sub(r'https?://\S+', '<url>', str(e))[:200], False
             hata += not ok
             w.writerow([u, 'OK' if ok else 'HATA', s]); f.flush()
             if i % 20 == 0 or i == len(urller):
