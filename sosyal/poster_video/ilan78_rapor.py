@@ -19,7 +19,8 @@ def font(n):
 
 
 KARAR = {'toz': 'yalniz 4,0 sn yogunluk sapmasi (Serdar 20 Eki, karar a)',
-         'kod': 'kupa ilk/son kare crf 17 kodlama farki <= 0,008 (Serdar 20 Eki, karar b)'}
+         'kod': 'kupa ilk/son kare crf 17 kodlama farki <= 0,008 (Serdar 20 Eki, karar b)',
+         'toz_c': 'karar c: 3,0-3,5 sn sapmasi <= %12,2 (Serdar 20 Eki; 4,0 sn karar a)'}
 
 
 def kabul(r, d):
@@ -29,6 +30,8 @@ def kabul(r, d):
         tz = [p['toz_2_4sn'][t]['fark_yuzde'] for t in ('2', '2.5', '3', '3.5')]
         if x == 'poster.toz_2_4sn_10yuzde' and all(abs(v) <= 10 for v in tz):
             ok.append((x, KARAR['toz']))
+        elif x == 'poster.toz_2_4sn_10yuzde' and all(abs(v) <= 10 for v in tz[:2]) and all(abs(v) <= 12.2 + 1e-9 for v in tz[2:]):
+            ok.append((x, KARAR['toz_c']))
         elif x == 'kupa.ilk_kare_kapak' and k['ilk_kare_fark'] - k['ilk_kare_kabul_esigi'] <= 0.008 + 1e-9:
             ok.append((x, KARAR['kod']))
         elif x == 'kupa.son_kare_kapak' and k['son_kare_fark'] - (k['taban_420'] + 0.2) <= 0.008 + 1e-9:
@@ -73,7 +76,7 @@ gec = sum(1 for s in satirlar if s['sonuc'] == 'PASS')
 liste = lambda anahtar: [c for c, d in dus.items() if any(anahtar in x for x in d)]
 kab = sum(1 for s in satirlar if s.get('sonuc_kabul') == 'KABUL')
 oz = [f'PASS {gec}/78, FAIL {len(dus)}, EKSIK {len(eksik)}',
-      f'kararlarla (Serdar 20 Eki a + b): PASS {gec} + KABUL {kab} = {gec + kab}/78; kalan FAIL {len(kalan)}, EKSIK {len(eksik)}',
+      f'kararlarla (Serdar 20 Eki a + b + c): PASS {gec} + KABUL {kab} = {gec + kab}/78; kalan FAIL {len(kalan)}, EKSIK {len(eksik)}',
       f'kalan FAIL (kabul disi): ' + ('; '.join(f'{c}: {" ".join(d)}' for c, d in kalan.items()) or '-'),
       f'eksik: {" ".join(eksik)}',
       f'toz 2-4 sn +-%10 tutmayan: {" ".join(liste("toz_2_4sn")) or "-"}',
