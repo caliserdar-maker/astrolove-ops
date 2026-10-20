@@ -96,6 +96,7 @@ jobs:
       - name: Metricool dogrula + test + hepsi
         run: |
           set -uo pipefail
+          set +e   # varsayilan bash -e: ilk hatada cikip sonuc dosyalarini Drive'a yuklemiyordu (39432035682)
           A="--token-dosya _work/mc.json --esleme _work/ESLEME.csv --url-kok $URL_KOK --cikti _out/UYGULAMA/ham"
           kos() { python3 scripts/sosyal/metricool_pin_gorsel_degistir.py $A "$@" 2>&1 | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json --sir-json _work/kimlik.json "$GITHUB_STEP_SUMMARY"; return ${PIPESTATUS[0]}; }
           kos --mod dogrula; rc=$?
