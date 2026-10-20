@@ -89,6 +89,17 @@ def ads_oku(yol, pod):
     gez(j)
     out = {}
     for d in satir:
+        # 23 Eyl Shop Manager Ads tablosu: {cells: [baslik, baslik, hedef, '', Views, Clicks, CTR, Orders, Revenue, Spend, ROAS],
+        # href: /your/shops/me/advertising/listings/<id>} (1. kosu 39473171486: genel arama 0 ilan buldu)
+        if isinstance(d.get('cells'), list) and isinstance(d.get('href'), str):
+            m = re.search(r'/listings/(\d{9,11})', d['href'])
+            if m and len(d['cells']) > 4:
+                try:
+                    out[m.group(1)] = float(str(d['cells'][4]).replace(',', ''))
+                    alanlar['cells[4] (Views)'] += 1
+                except ValueError:
+                    pass
+            continue
         lid = next((str(v) for k, v in d.items() if re.search(r'listing', k, re.I) and re.fullmatch(r'\d{9,11}', str(v))), None)
         if not lid:
             lid = next((m.group(1) for v in d.values() if isinstance(v, str) for m in [re.search(r'/listing/(\d{9,11})', v)] if m), None)
