@@ -8,6 +8,7 @@ name: ilan-video-78
 # Cikti: Drive ASTROLOVE/TEMP/ILAN_VIDEO_78_20261020/ {KUPA/, POSTER/, KONTROL.csv, OZET.txt, KONTAK_*.jpg}
 permissions:
   contents: write   # yalniz poster-video-onizleme dalina kontak/KONTROL onizlemesi
+  actions: read     # onceki kosunun satir artifact'lari (kismi kosuda rapor 78 cifti birlestirir)
 on:
   workflow_dispatch:
     inputs:
@@ -17,6 +18,9 @@ on:
       grup:
         description: 'paralel is sayisi'
         default: '13'
+      onceki_kosu:
+        description: 'kismi kosuda: satirlari birlestirilecek onceki kosu no (bos = yok)'
+        default: ''
 env:
   O: gdrive:ASTROLOVE/TEMP/ILAN_VIDEO_78_20261020
   KK: gdrive:ASTROLOVE/TEMP/KUPA_KAPAK_78_20261019/KAPAK
@@ -144,6 +148,14 @@ jobs:
         if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
           grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
     - uses: actions/download-artifact@v4
+      if: ${{ inputs.onceki_kosu != '' }}
+      with:
+        pattern: satir-*
+        path: _a
+        merge-multiple: true
+        run-id: ${{ inputs.onceki_kosu }}
+        github-token: ${{ github.token }}
+    - uses: actions/download-artifact@v4   # bu kosunun satirlari (onceki kosununkilerin ustune yazar)
       with:
         pattern: satir-*
         path: _a

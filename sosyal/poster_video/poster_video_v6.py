@@ -54,7 +54,53 @@ x0, y0, cw, ch = (int(v) for v in st_[bi, :4]); x1, y1 = x0 + cw, y0 + ch
 s_ = 2000 / cw
 tmp = OUT + '._poster.png'
 Image.fromarray(cv2.resize(kap_src[y0:y1, x0:x1], (2000, round(ch * s_)), interpolation=cv2.INTER_CUBIC)).save(tmp)
-P = PU.PosterR(tmp); os.remove(tmp)
+
+
+class PosterV(PU.PosterR):
+    """PosterR; yalniz o 'sol veya sag kucuk burc bulunamadi' derse (21 Eki, LIBRA_TAURUS: Terazi taban cizgisi halkanin alt
+    acikliginda, halka kutusunun 9 px altinda): halkanin hemen altindaki (ust kenar <= ry1 + 40), ortalanmis, genis (> 0,2 W)
+    parca sembole katilir ve satir bantlarindan cikarilir. Basarili ayristirmalar (77 cift) degismez."""
+
+    def _find_parts(self):
+        try:
+            return super()._find_parts()
+        except RuntimeError as e:
+            if 'kucuk burc' not in str(e):
+                raise
+        Wp = self.w
+        comps = sorted(self.comps, key=lambda c: -c[5])
+        rings = [c for c in comps[:6] if c[5] / float(c[3] * c[4]) < 0.03 and c[3] > 0.6 * Wp]
+        self.ring = rings[0]
+        rx0 = min(c[1] for c in rings); ry0 = min(c[2] for c in rings)
+        rx1 = max(c[1] + c[3] for c in rings); ry1 = max(c[2] + c[4] for c in rings)
+        ring_ids = {c[0] for c in rings}
+        alt = [c for c in comps if c[0] not in ring_ids and ry1 < c[2] <= ry1 + 40 and c[3] > 0.2 * Wp
+               and abs(c[1] + c[3] / 2 - Wp / 2) < 0.05 * Wp]
+        alt_ids = {c[0] for c in alt}
+        inside = [c for c in comps if c[0] not in ring_ids and c[5] > 50
+                  and rx0 < c[1] + c[3] / 2 < rx1 and ry0 < c[2] + c[4] / 2 < ry1] + alt
+        self.merged_parts = inside
+        self.merged = self._union(inside)
+        below = sorted([c for c in comps if c[2] > ry1 and c[5] > 300 and c[0] not in alt_ids], key=lambda c: c[2])
+        bands = []
+        for c in below:
+            if bands and c[2] <= bands[-1]['y1'] + 40:
+                bands[-1]['cs'].append(c); bands[-1]['y1'] = max(bands[-1]['y1'], c[2] + c[4])
+            else:
+                bands.append({'cs': [c], 'y1': c[2] + c[4]})
+        if len(bands) < 3:
+            raise RuntimeError(f'beklenen en az 3 satir (burclar, isimler, mesaj), bulunan {len(bands)}')
+        left = [c for c in bands[0]['cs'] if c[1] + c[3] / 2 < Wp / 2]
+        right = [c for c in bands[0]['cs'] if c[1] + c[3] / 2 >= Wp / 2]
+        if not alt or not left or not right:
+            raise RuntimeError('sol veya sag kucuk burc bulunamadi (halka alti parca ile de)')
+        self.sign_a, self.sign_b = self._union(left), self._union(right)
+        self.names_row = self._union(bands[1]['cs'])
+        self.msg_row = self._union([c for b in bands[2:] for c in b['cs']])
+        self.halka_alti = [[int(v) for v in c[1:6]] for c in alt]
+
+
+P = PosterV(tmp); os.remove(tmp)
 
 
 def vid(m):
@@ -100,7 +146,7 @@ MM = cv2.dilate(MM, np.ones((3, 3), np.uint8))
 XX = np.arange(VW, dtype=np.float32)[None, :].repeat(VH, 0)
 print(f'poster kapakta {x0},{y0} {cw}x{ch} oran {ch / cw:.3f}; sonsuz {len(sonsuz)} parca, mesaj {len(mes)} parca', flush=True)
 GLIF = {'sign_a': [int(v) for v in P.sign_a[1:5]], 'sign_b': [int(v) for v in P.sign_b[1:5]], 'poster_w': int(P.w),
-        'sonsuz': [[int(v) for v in c[1:5]] for c in sonsuz]}   # QC (78 uretim): glif ve sonsuz yerleri (poster 2000 px olcegi)
+        'sonsuz': [[int(v) for v in c[1:5]] for c in sonsuz], 'halka_alti_sembol_parcasi': getattr(P, 'halka_alti', [])}   # QC (78 uretim): glif ve sonsuz yerleri (poster 2000 px olcegi)
 _g = [cv2.resize(P.alpha[y:y + h, x:x + w].astype(np.float32), (64, 64), interpolation=cv2.INTER_AREA) for _, x, y, w, h, _ in (P.sign_a, P.sign_b)]
 _g = [(g - g.mean()) / (g.std() + 1e-6) for g in _g]
 GLIF['benzerlik'] = round(float((_g[0] * _g[1]).mean()), 3)   # iki glifin NCC'si (ayni burcta yuksek olmali)
