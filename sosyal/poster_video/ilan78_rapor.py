@@ -18,12 +18,32 @@ def font(n):
         return ImageFont.load_default()
 
 
-sutun = ['cift', 'sonuc', 'dusen_kapilar', 'kupa_video', 'kupa_kapak', 'kupa_ilk_kare_fark', 'kupa_ilk_kare_kabul_esigi',
+KARAR = {'toz': 'yalniz 4,0 sn yogunluk sapmasi (Serdar 20 Eki, karar a)',
+         'kod': 'kupa ilk/son kare crf 17 kodlama farki <= 0,008 (Serdar 20 Eki, karar b)'}
+
+
+def kabul(r, d):
+    """dusen kapilardan kararla kabul edilenler: [(kapi, karar)]; kalan dusenler ayri"""
+    k, p = r['kupa'], r['poster']; ok, kal = [], []
+    for x in d:
+        tz = [p['toz_2_4sn'][t]['fark_yuzde'] for t in ('2', '2.5', '3', '3.5')]
+        if x == 'poster.toz_2_4sn_10yuzde' and all(abs(v) <= 10 for v in tz):
+            ok.append((x, KARAR['toz']))
+        elif x == 'kupa.ilk_kare_kapak' and k['ilk_kare_fark'] - k['ilk_kare_kabul_esigi'] <= 0.008 + 1e-9:
+            ok.append((x, KARAR['kod']))
+        elif x == 'kupa.son_kare_kapak' and k['son_kare_fark'] - (k['taban_420'] + 0.2) <= 0.008 + 1e-9:
+            ok.append((x, KARAR['kod']))
+        else:
+            kal.append(x)
+    return ok, kal
+
+
+sutun = ['cift', 'sonuc', 'sonuc_kabul', 'kabul', 'kalan_kapilar', 'dusen_kapilar', 'kupa_video', 'kupa_kapak', 'kupa_ilk_kare_fark', 'kupa_ilk_kare_kabul_esigi',
          'kupa_ilk_taban_02_icinde', 'kupa_son_kare_fark', 'kupa_taban_420', 'kupa_kapak_katman_fark', 'kupa_gorunen_5sn', 'kupa_olcu_kare_ses',
          'poster_video', 'poster_kapak', 'poster_kapak_klasoru', 'poster_N', 'poster_bolge_px', 'toz_2sn_yuzde', 'toz_2.5sn_yuzde',
          'toz_3sn_yuzde', 'toz_3.5sn_yuzde', 'toz_4sn_yuzde', 'murekkep_ihlal', 'poster_ilk_kare_fark', 'poster_son_kare_fark',
          'poster_taban_420', 'poster_gorunen_5sn', 'poster_olcu_kare_ses', 'ayni_burc', 'glif_benzerlik', 'glif_sonsuz_ok']
-satirlar, eksik, dus = [], [], {}
+satirlar, eksik, dus, kalan = [], [], {}, {}
 for c in TUM:
     r = R.get(c)
     if not r:
@@ -32,8 +52,12 @@ for c in TUM:
     d = [f'kupa.{a}' for a, v in k['kapi'].items() if not v] + [f'poster.{a}' for a, v in p['kapi'].items() if not v]
     if d:
         dus[c] = d
+    kb, kal = kabul(r, d)
+    if kal:
+        kalan[c] = kal
     pr = lambda x: f"{x['probe']['olcu']}/{x['probe']['kare']}/{'ses' if x['probe']['ses_akisi'] else 'sessiz'}"
-    satirlar.append({'cift': c, 'sonuc': r['sonuc'], 'dusen_kapilar': ' '.join(d), 'kupa_video': k['video'], 'kupa_kapak': k['kapak'],
+    satirlar.append({'cift': c, 'sonuc': r['sonuc'], 'sonuc_kabul': 'PASS' if not d else ('KABUL' if not kal else 'FAIL'),
+                     'kabul': '; '.join(f'{x}: {y}' for x, y in kb), 'kalan_kapilar': ' '.join(kal), 'dusen_kapilar': ' '.join(d), 'kupa_video': k['video'], 'kupa_kapak': k['kapak'],
                      'kupa_ilk_kare_fark': k['ilk_kare_fark'], 'kupa_ilk_kare_kabul_esigi': k['ilk_kare_kabul_esigi'],
                      'kupa_ilk_taban_02_icinde': k['ilk_kare_taban_02_icinde'], 'kupa_son_kare_fark': k['son_kare_fark'],
                      'kupa_taban_420': k['taban_420'], 'kupa_kapak_katman_fark': k['kapak_katman_kupa_bolgesi_fark'],
@@ -47,7 +71,10 @@ with open(os.path.join(OUT, 'KONTROL.csv'), 'w', newline='', encoding='utf-8') a
     w = csv.DictWriter(f, sutun); w.writeheader(); w.writerows(satirlar)
 gec = sum(1 for s in satirlar if s['sonuc'] == 'PASS')
 liste = lambda anahtar: [c for c, d in dus.items() if any(anahtar in x for x in d)]
+kab = sum(1 for s in satirlar if s.get('sonuc_kabul') == 'KABUL')
 oz = [f'PASS {gec}/78, FAIL {len(dus)}, EKSIK {len(eksik)}',
+      f'kararlarla (Serdar 20 Eki a + b): PASS {gec} + KABUL {kab} = {gec + kab}/78; kalan FAIL {len(kalan)}, EKSIK {len(eksik)}',
+      f'kalan FAIL (kabul disi): ' + ('; '.join(f'{c}: {" ".join(d)}' for c, d in kalan.items()) or '-'),
       f'eksik: {" ".join(eksik)}',
       f'toz 2-4 sn +-%10 tutmayan: {" ".join(liste("toz_2_4sn")) or "-"}',
       f'kupa ilk kare kabul esigini asan: {" ".join(liste("kupa.ilk_kare_kapak")) or "-"}',
@@ -71,4 +98,4 @@ for tur in ('kupa', 'poster'):
             for i, ek in enumerate(('3sn', 'son')):
                 K.paste(Image.open(os.path.join(KARE, f'{c}_{tur}_{ek}.jpg')).resize((tw, th), Image.LANCZOS), (300 + i * (tw + 8), y))
         K.save(os.path.join(OUT, f'KONTAK_{tur.upper()}_{s // 13 + 1}.jpg'), quality=88)
-sys.exit(0 if gec == 78 else 1)
+sys.exit(0 if gec + kab == 78 else 1)
