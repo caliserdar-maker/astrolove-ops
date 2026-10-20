@@ -57,8 +57,10 @@ def ilk_kare(yol):
     return np.frombuffer(r.stdout, np.uint8).reshape(H, W, 3)
 
 
-def main():
-    d, cift = sys.argv[1], sys.argv[2]
+def olc(d, cift, kontak=True):
+    """Olcumler (OLC listesine PASS/FAIL), ILK_KARE_ARAYUZ.jpg ve OLCUM.txt; kontak=True ise KONTAK_B1_C_P.jpg da.
+    Donus: (OLC, M) - M toplu tablo icin sayilar."""
+    OLC.clear(); M = {}
     a, b = (x.capitalize() for x in cift.split('_'))
     slug = f'{a.lower()}-and-{b.lower()}'
     vid = os.path.join(d, f'P_{cift}.mp4')
@@ -72,6 +74,7 @@ def main():
     sure = float(pr['format']['duration'])
     fps = eval(v['r_frame_rate'])
     md_v, md_m = (pcm_md5(vid), pcm_md5(os.path.join(d, 'muzik.m4a'))) if au else ('', '')
+    M.update(sure=round(sure, 3), kare=int(v.get('nb_frames', 0)), muzik_ayni=md_v == md_m and md_v != '')
     kayit('Video dosyasi', (v['width'], v['height']) == (W, H) and abs(fps - FPS) < 0.01 and abs(sure - 24.0) <= 0.05 and int(v.get('nb_frames', 720)) == 720,
           f"{v['width']}x{v['height']}, {fps:g} fps, {sure:.3f} sn, {v.get('nb_frames')} kare, {v['codec_name']}")
     kayit('Muzik degismedi', len(au) == 1 and md_v == md_m and md_v != '',
@@ -80,11 +83,13 @@ def main():
     # 2) 0. kare
     f0 = ilk_kare(vid)
     n0 = ncc(f0.mean(2), P.mean(2))
+    M.update(ilk_kare_ncc=round(n0, 4), ilk_kare_parlaklik=round(float(f0.mean()), 1))
     kayit('0. kare = P karesi, siyah degil', n0 >= 0.99 and f0.mean() > 60, f'NCC {n0:.4f}, ortalama parlaklik {f0.mean():.1f}')
     px0, py0, px1, py1 = bi['poster_kutu']
     src = Image.open(os.path.join(d, 'poster.jpg')).convert('L').resize((px1 - px0, py1 - py0), Image.LANCZOS)
     g0 = Image.fromarray(f0).convert('L').crop((px0 + 3, py0 + 3, px1 - 3, py1 - 3))
     n1 = ncc(g0, src.crop((3, 3, src.width - 3, src.height - 3)))
+    M['poster_ncc'] = round(n1, 4)
     kayit('Poster pikselleri (0. kare, kaynak)', n1 >= 0.99, f'NCC {n1:.4f}; poster {px1 - px0}x{py1 - py0} @({px0},{py0}), kaynak {bi["poster_kaynak"]}')
 
     # 3) arayuz alanlari, ortalama
@@ -92,6 +97,8 @@ def main():
     ogeler = {'baslik': tb, 'poster': bi['poster_kutu']}
     sol = W - ui['sag']
     pay = {k: (q[0] - sol, q[1] - ui['ust'], ui['sag'] - q[2], ui['alt'] - q[3]) for k, q in ogeler.items()}
+    M.update(pay_baslik='/'.join(str(x) for x in pay['baslik']), pay_poster='/'.join(str(x) for x in pay['poster']),
+             baslik_px=bi['baslik_px'], baslik_kucultme=bi.get('baslik_kucultme', 1.0), poster_kutu='x'.join(str(x) for x in bi['poster_kutu']))
     kayit('Arayuz alanlari (ust %12, alt %20, sag %15; sol ayni pay)', all(min(p) >= 0 for p in pay.values()),
           '; '.join(f'{k} pay sol/ust/sag/alt {p[0]}/{p[1]}/{p[2]}/{p[3]} px' for k, p in pay.items())
           + f" (alan: y {ui['ust']}-{ui['alt']}, x {sol}-{ui['sag']})")
@@ -109,12 +116,14 @@ def main():
     t = np.arange(len(F)) / FPS
     i15 = int(round(1.5 * FPS))
     toplam = float(np.abs(F[0] - F[i15]).mean())
-    gec = df[(t[1:] > 1.15) & (t[1:] <= 1.55)]
+    gec = df                                         # 0-3 sn tum ardisik kare adimlari (sert kesme hicbir yerde yok)
     oran = float(gec.max() / toplam)
     karanlik = parl[t < 1.5].min() >= 0.9 * parl[t >= 1.5].min()
+    M.update(gecis_adim_oran=round(oran, 3), siyah_kare_yok=bool(karanlik and parl[0] > 60))
     kayit('Gecis yumusak, siyah kare yok (0-3 sn)', oran <= 0.35 and karanlik and parl[0] > 60,
-          f'1,2-1,5 sn: en buyuk tek kare adimi {gec.max():.1f} = P->B toplam farkin ({toplam:.1f}) %{100 * oran:.0f}'
-          f' (esik %35; sert kesme %100), {len(gec)} gecis karesi; parlaklik 0. kare {parl[0]:.1f}, 0-1,5 sn en az {parl[t < 1.5].min():.1f}, '
+          f'0-3 sn: en buyuk tek kare adimi {gec.max():.1f} ({t[1:][int(gec.argmax())]:.2f} sn)'
+          f' = P->B toplam farkin ({toplam:.1f}) %{100 * oran:.0f}'
+          f' (esik %35; sert kesme %100); parlaklik 0. kare {parl[0]:.1f}, 0-1,5 sn en az {parl[t < 1.5].min():.1f}, '
           f'B (1,5-3 sn) en az {parl[t >= 1.5].min():.1f}; {len(F)} kare')
 
     # 5) 1,5 sn sonrasi B ile ayni
@@ -123,25 +132,37 @@ def main():
         x = np.asarray(Image.open(os.path.join(d, 'kare', 'P_esit', f'{slug}-kare_{s:g}s.jpg'))).astype(int)
         y = np.asarray(Image.open(os.path.join(d, 'kare', 'B_esit', f'{slug}-kare_{s:g}s.jpg'))).astype(int)
         fk.append(int(np.abs(x - y).max()))
-    kayit('1,5 sn sonrasi B ile ayni (akis degismedi)', max(fk) == 0, ', '.join(f'{s:g} sn fark {f}' for s, f in zip(ESIT_T, fk)))
+    # mp4'un kendisi: ayni saniyelerdeki kare B karesiyle ayni; kodlama farki icin PSNR >= 35 dB (koyu lacivert karelerde NCC
+    # kodlama gurultusune duyarli; yerel olcum: ayni kare 40-42 dB, yanlis kare ~4 dB)
+    nv = []
+    for s in ESIT_T:
+        r = subprocess.run(['ffmpeg', '-v', 'error', '-i', vid, '-ss', f'{s}', '-frames:v', '1', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-'],
+                           capture_output=True, check=True)
+        x = np.frombuffer(r.stdout, np.uint8).reshape(H, W, 3).astype(np.float64)
+        y = np.asarray(Image.open(os.path.join(d, 'kare', 'B_esit', f'{slug}-kare_{s:g}s.jpg')).convert('RGB')).astype(np.float64)
+        nv.append(10 * np.log10(255 ** 2 / max(((x - y) ** 2).mean(), 1e-9)))
+    M['b_fark_max'] = max(fk); M['mp4_b_psnr_min'] = round(min(nv), 1)
+    kayit('1,5 sn sonrasi B ile ayni (akis degismedi)', max(fk) == 0 and min(nv) >= 35,
+          ', '.join(f'{s:g} sn fark {f}' for s, f in zip(ESIT_T, fk)) + '; mp4 karesi / B PSNR ' + ', '.join(f'{n:.1f}' for n in nv) + ' dB (esik 35)')
 
-    # kontak: B1 / C / P ilk 3 sn
     try:
         fo = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 20)
         fb = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 28)
     except OSError:
         fo = fb = ImageFont.load_default(size=20)
-    tw, th = 216, 384
-    sh = Image.new('RGB', (120 + len(KONTAK_T) * (tw + 10), 50 + 3 * (th + 40)), 'white'); dr = ImageDraw.Draw(sh)
-    for j, s in enumerate(KONTAK_T):
-        dr.text((120 + j * (tw + 10), 12), f'{s:g} sn', font=fo, fill=(60, 60, 60))
-    for i, ac in enumerate(['B1', 'C', 'P']):
-        y = 50 + i * (th + 40)
-        dr.text((12, y + th // 2), ac, font=fb, fill=(20, 20, 20))
+    # kontak: B1 / C / P ilk 3 sn (yalniz tek ornekte)
+    if kontak:
+        tw, th = 216, 384
+        sh = Image.new('RGB', (120 + len(KONTAK_T) * (tw + 10), 50 + 3 * (th + 40)), 'white'); dr = ImageDraw.Draw(sh)
         for j, s in enumerate(KONTAK_T):
-            im = Image.open(os.path.join(d, 'kare', ac, f'{slug}-kare_{s:g}s.jpg')).resize((tw, th), Image.LANCZOS)
-            sh.paste(im, (120 + j * (tw + 10), y))
-    sh.save(os.path.join(d, 'KONTAK_B1_C_P.jpg'), quality=90)
+            dr.text((120 + j * (tw + 10), 12), f'{s:g} sn', font=fo, fill=(60, 60, 60))
+        for i, ac in enumerate(['B1', 'C', 'P']):
+            y = 50 + i * (th + 40)
+            dr.text((12, y + th // 2), ac, font=fb, fill=(20, 20, 20))
+            for j, s in enumerate(KONTAK_T):
+                im = Image.open(os.path.join(d, 'kare', ac, f'{slug}-kare_{s:g}s.jpg')).resize((tw, th), Image.LANCZOS)
+                sh.paste(im, (120 + j * (tw + 10), y))
+        sh.save(os.path.join(d, 'KONTAK_B1_C_P.jpg'), quality=90)
 
     # arayuz alanlari isaretli ilk kare
     im = Image.fromarray(f0).convert('RGBA'); ov = Image.new('RGBA', im.size, (0, 0, 0, 0)); o = ImageDraw.Draw(ov)
@@ -164,7 +185,13 @@ def main():
         fh.write('Zamanlama: 0-1,2 sn P karesi, 1,2-1,5 sn yumusak gecis (cos), 1,5 sn sonrasi B (C acilisi ile ayni kurgu)\n')
         fh.write(f"SONUC: {'PASS' if not fail else 'FAIL ' + ', '.join(fail)}\n")
     print('SONUC:', 'PASS' if not fail else 'FAIL ' + ', '.join(fail))
-    sys.exit(1 if fail else 0)
+    M['sonuc'] = 'PASS' if not fail else 'FAIL'; M['fail'] = '; '.join(fail)
+    return list(OLC), M
+
+
+def main():
+    _, M = olc(sys.argv[1], sys.argv[2])
+    sys.exit(0 if M['sonuc'] == 'PASS' else 1)
 
 
 if __name__ == '__main__':
