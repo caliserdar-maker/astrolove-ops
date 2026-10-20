@@ -6,12 +6,18 @@ name: threads-analiz
 # Sir taramasini gecmeyen dosya _work'te kalir, Drive'a gitmez. Cikti: Drive ASTROLOVE/TEMP/SOSYAL_ANALIZ_20261019/THREADS/.
 permissions:
   contents: read
+# mod=degisim (20 Eki): bekleyen Threads gonderileri envanteri + aile/cift + eski/yeni kapak olcumu (threads_degisim.py);
+# cikti Drive ASTROLOVE/TEMP/SOSYAL_DEGISIM_20261020/THREADS/. Drive'dan yalniz okuma, Metricool'a yazma yok.
 on:
   workflow_dispatch:
+    inputs:
+      mod:
+        description: "analiz (19 Eki tespit) | degisim (bekleyen gonderi + yeni kapak esleme)"
+        default: analiz
 jobs:
   oku:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     env:
       O: gdrive:ASTROLOVE/TEMP/SOSYAL_ANALIZ_20261019/THREADS
     steps:
@@ -38,7 +44,18 @@ jobs:
           rclone copyto "gdrive:ASTROLOVE/TEMP/METRICOOL_TOKEN.json" _work/kimlik.json
           python3 -c "import json,os;d=json.load(open('_work/kimlik.json'));json.dump({'userToken':os.environ['MC_TOK'],'userId':d['userId'],'blogId':d['blogId']},open('_work/mc.json','w'))"
           python3 -c "import json;print('::add-mask::'+json.load(open('_work/kimlik.json'))['userToken'])"
-          python3 scripts/sosyal/analiz/threads.py _work/mc.json _out | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json --sir-json _work/kimlik.json "$GITHUB_STEP_SUMMARY"
+          if [ "${{ inputs.mod }}" = "degisim" ]; then
+            O="gdrive:ASTROLOVE/TEMP/SOSYAL_DEGISIM_20261020/THREADS"
+            pip install -q numpy==2.1.3 pillow==11.0.0
+            P2="gdrive:ASTROLOVE/TEMP/KAPAK_P2_78_20261019"
+            mkdir -p _work/dg/p2 _work/is
+            rclone lsjson -R --files-only --max-depth 3 "$P2" > _work/dg/p2.json || echo "[]" > _work/dg/p2.json
+            rclone lsjson -R --files-only "gdrive:ASTROLOVE/TEMP/KUPA_KAPAK_78_20261019/KAPAK" > _work/dg/kupa.json || echo "[]" > _work/dg/kupa.json
+            rclone lsjson -R --files-only "gdrive:ASTROLOVE/TEMP/KAPAK_Y1_78_20261019/KAPAK" > _work/dg/y1.json || echo "[]" > _work/dg/y1.json
+            for k in BASLIK_A/KAPAK_A KAPAK YEDEK; do rclone copy "$P2/$k" "_work/dg/p2/$k" --transfers 8 -q || echo "$k kopyalanamadi"; done
+            BETIK="scripts/sosyal/analiz/threads_degisim.py _work/mc.json _out _work/is --p2-ls _work/dg/p2.json --p2-dir _work/dg/p2 --kupa-ls _work/dg/kupa.json --y1-ls _work/dg/y1.json --pod78 data/pod/pod78_ids.csv"
+          else BETIK="scripts/sosyal/analiz/threads.py _work/mc.json _out"; fi
+          python3 $BETIK | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json --sir-json _work/kimlik.json "$GITHUB_STEP_SUMMARY"
           rc=${PIPESTATUS[0]}
           mkdir -p _work/engel
           for f in _out/*; do
