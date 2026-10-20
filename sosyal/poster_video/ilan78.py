@@ -2,7 +2,8 @@
 """78 ilan videosu (20 Eki 2026, Serdar V6 onayi): bir cift icin kupa + poster videosu ve kontrolu. Kural V6 (ae01cd4) birebir.
 Kupa: kupa-orchard video6b.py, yalniz N 5200 -> 10400 ve sigma 0.9 -> 0.45 (v6_kalibre ile ayni degisiklik); katmanlar
       cift.py ciktisi (video/), sahne = ilanin yeni kupa kapagi (KUPA_KAPAK_78 KAPAK/).
-Poster: poster_video_v6.py (altin toz, sigma 0.45, murekkep egrisi v6_c_egri.json), N = 58000 x bolge alani / CL bolge alani.
+Poster: poster_video_v6.py (altin toz, sigma 0.45, murekkep egrisi v6_c_egri.json), N = 58000 x bolge alani / CL bolge alani;
+        yogunluk 2,0-4,0 sn +-%10 disindaysa bir kez N x olculen oran ile yeniden uretilir (Serdar onayi 20 Eki, secenek a).
 Kontrol (satir/<CIFT>.json): kare sayisi/olcu/ses; ilk ve son kare = kapak (kayipsiz 4:2:0 tabani + 0,2; kupada ilk kare
   icin CL'de olculen crf 17 duzeyi kabul: max(1,765, taban + 0,245)); sembol 5,0 sn'de tam (gorunen oran >= 0,98);
   poster: murekkep tozun onunde degil (ihlal <= 0), alan basina toz yogunlugu 2,0-4,0 sn kupa V6 referansi +-%10,
@@ -93,23 +94,39 @@ kucuk(F, 'kupa'); del F
 R['kupa'] = kv
 # ---------- POSTER
 PV = os.path.join(OUT, 'POSTER', os.path.splitext(os.path.basename(PK))[0] + '.mp4'); PT = os.path.join(IS, f'{CIFT}_tozsuz.mp4')
-env = {'V6_N': str(REF['poster_N']), 'V6_BOLGE_REF': str(REF['poster_bolge_px']), 'V6_N_REF': str(REF['poster_N']),
-       'V6_C': os.path.join(HERE, 'v6_c_egri.json')}
-calis([PY, '-I', os.path.join(HERE, 'poster_video_v6.py'), PK, PV, 'murekkep'], env)
-calis([PY, '-I', os.path.join(HERE, 'poster_video_v6.py'), PK, PT, 'murekkep'], dict(env, TOZSUZ='1'))
-ic = json.load(open(PV + '.ic.json')); SMP = np.asarray(Image.open(PV + '.sembol_maske.png')) > 127
-for e in ('.ic.json', '.sembol_maske.png'):
-    os.replace(PV + e, os.path.join(IS, os.path.basename(PV) + e))
-F, pp = Q.kareler(PV); FT, _ = Q.kareler(PT)
-D = toz(F, FT, SMP); del FT; os.remove(PT)
-for e in ('.ic.json', '.sembol_maske.png'):
-    if os.path.exists(PT + e):
-        os.remove(PT + e)
+ENV0 = {'V6_C': os.path.join(HERE, 'v6_c_egri.json')}
+TS4 = (2.0, 2.5, 3.0, 3.5, 4.0)
+
+
+def poster_tur(env):
+    """poster V6 videosu + toz kapali kopya; donus: ic, SM, kareler, alan basina toz yogunlugu, tablo (2,0-4,0 sn)"""
+    calis([PY, '-I', os.path.join(HERE, 'poster_video_v6.py'), PK, PV, 'murekkep'], dict(ENV0, **env))
+    calis([PY, '-I', os.path.join(HERE, 'poster_video_v6.py'), PK, PT, 'murekkep'], dict(ENV0, **env, TOZSUZ='1'))
+    ic_ = json.load(open(PV + '.ic.json')); SM_ = np.asarray(Image.open(PV + '.sembol_maske.png')) > 127
+    for e in ('.ic.json', '.sembol_maske.png'):
+        os.replace(PV + e, os.path.join(IS, os.path.basename(PV) + e))
+        if os.path.exists(PT + e):
+            os.remove(PT + e)
+    F_, _ = Q.kareler(PV); FT_, _ = Q.kareler(PT)
+    D_ = toz(F_, FT_, SM_); del FT_; os.remove(PT)
+    tb = {}
+    for t in TS4:
+        i = Q.ix(F_, t); ref = REF['kupa_toz_alan_basina'][f'{t:g}']
+        tb[f'{t:g}'] = {'poster': round(D_[i], 3), 'kupa_ref': ref, 'fark_yuzde': round(100 * (D_[i] / ref - 1), 1)}
+    return ic_, SM_, F_, D_, tb
+
+
+tutar = lambda tb: all(abs(v['fark_yuzde']) <= 10 for v in tb.values())
+ic, SMP, F, D, tab = poster_tur({'V6_N': str(REF['poster_N']), 'V6_BOLGE_REF': str(REF['poster_bolge_px']), 'V6_N_REF': str(REF['poster_N'])})
+turlar = [{'N': ic['N'], 'kaynak': 'N = 58000 x bolge / CL bolge', 'toz_2_4sn': tab, 'tutar': tutar(tab)}]
+if not tutar(tab):   # Serdar onayi (20 Eki, secenek a): bir kez N x olculen oran (medyan kupa_ref / poster, 2,0-4,0 sn), yeniden uret
+    oran = float(np.median([v['kupa_ref'] / max(v['poster'], 1e-6) for v in tab.values()]))
+    N2 = int(round(ic['N'] * oran / 100.0) * 100)
+    del F
+    ic, SMP, F, D, tab = poster_tur({'V6_N': str(N2)})
+    turlar.append({'N': ic['N'], 'kaynak': f'N1 x {oran:.3f} (olculen oran)', 'toz_2_4sn': tab, 'tutar': tutar(tab)})
+pp = Q.probe(PV)
 V = gorunen(F, SMP)
-tab = {}
-for t in (2.0, 2.5, 3.0, 3.5, 4.0):
-    i = Q.ix(F, t); ref = REF['kupa_toz_alan_basina'][f'{t:g}']
-    tab[f'{t:g}'] = {'poster': round(D[i], 3), 'kupa_ref': ref, 'fark_yuzde': round(100 * (D[i] / ref - 1), 1)}
 g = ic['glif']; W = g['poster_w']
 ax, bx = g['sign_a'][0] + g['sign_a'][2] / 2, g['sign_b'][0] + g['sign_b'][2] / 2
 ss = [c[0] + c[2] / 2 for c in g['sonsuz']]
@@ -119,16 +136,18 @@ glif_ok = (min(g['sign_a'][2:] + g['sign_b'][2:]) > 10 and ax < W / 2 < bx and g
            and len(ss) >= 1 and all(ax < x < bx for x in ss) and (not ayni or g['benzerlik'] >= 0.8))
 pv = {'video': os.path.basename(PV), 'kapak': os.path.basename(PK), 'kapak_klasoru': PKL, 'probe': pp, 'N': ic['N'],
       'bolge_px': ic['bolge_px'], 'sembol_px': int(SMP.sum()), 'ihlal_en_buyuk': round(max(ic['ihlal']), 4),
-      'gorunen_5sn': round(V[150], 3), 'toz_2_4sn': tab, 'glif': g, 'ayni_burc': ayni, **kapak(F, PK)}
+      'gorunen_5sn': round(V[150], 3), 'toz_2_4sn': tab, 'N_turlari': turlar, 'glif': g, 'ayni_burc': ayni, **kapak(F, PK)}
 pv['kapi'] = {'olcu_6sn_sessiz': pp['olcu'] == '1440x1080' and pp['kare'] == 180 and not pp['ses_akisi'],
               'ilk_kare_kapak': pv['ilk_kare_fark'] <= pv['taban_420'] + 0.2, 'son_kare_kapak': pv['son_kare_fark'] <= pv['taban_420'] + 0.2,
               'sembol_5sn_tam': pv['gorunen_5sn'] >= 0.98, 'murekkep_tozun_onunde_degil': pv['ihlal_en_buyuk'] <= 0,
-              'toz_2_4sn_10yuzde': all(abs(v['fark_yuzde']) <= 10 for v in tab.values()), 'glif_sonsuz': bool(glif_ok)}
+              'toz_2_4sn_10yuzde': tutar(tab), 'glif_sonsuz': bool(glif_ok)}
 kucuk(F, 'poster'); del F
 R['poster'] = pv
+kv['kapi'] = {k_: bool(v_) for k_, v_ in kv['kapi'].items()}; pv['kapi'] = {k_: bool(v_) for k_, v_ in pv['kapi'].items()}
+kv['ilk_kare_taban_02_icinde'] = bool(kv['ilk_kare_taban_02_icinde'])
 R['sonuc'] = 'PASS' if all(kv['kapi'].values()) and all(pv['kapi'].values()) else 'FAIL'
 R['sure_sn'] = round(time.time() - t0)
 json.dump(R, open(os.path.join(OUT, 'satir', f'{CIFT}.json'), 'w'), indent=1, default=str)
 dus = [f'kupa.{k}' for k, v in kv['kapi'].items() if not v] + [f'poster.{k}' for k, v in pv['kapi'].items() if not v]
-print(f"{CIFT} {R['sonuc']} N {pv['N']} toz% {[v['fark_yuzde'] for v in tab.values()]} kupa ilk {kv['ilk_kare_fark']} "
+print(f"{CIFT} {R['sonuc']} N {[t['N'] for t in turlar]} toz% {[v['fark_yuzde'] for v in tab.values()]} kupa ilk {kv['ilk_kare_fark']} "
       f"glif {g['benzerlik']} {R['sure_sn']}s {' '.join(dus)}", flush=True)
