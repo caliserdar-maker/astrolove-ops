@@ -7,9 +7,9 @@ Olcumler (iki videoya ayni formul):
   alan basina toz yogunlugu D(t) = sembol bolgesinde (SM 7 px genisletilmis) tozlu kare ile toz kapali kopya farki > 20 olan
   piksel / bolge pikseli (V6 karari 19 Eki: secenek a), eksi kodlama gurultusu tabani (5,3-6 sn; o karelerde iki dosya da kapak).
   Kayit icin toz pikseli / sembol pikseli de tabloda (ust siniri bolge/sembol alani, kupa ~5, poster ~2,5).
-Poster kalibrasyonu: her turda N <- N x medyan(D_kupa / D_poster) (D_kupa en buyugunun %20'sinden buyuk kareler; tur basina x0,5-x2) ve murekkep
-egrisi c(t) (piksel basina min(c, F), F = yerel toz birikimi) c += V_kupa - V_poster (monoton, son kare 1); N0 65000 (yerel deneme),
-   en fazla 5 tur, tolerans: her 0,5 sn V +-0,10 ve D +-%10 (D_kupa < en buyugunun %20'si ise mutlak %2 en buyuk).
+Poster: V6 karari (20 Eki, secenek a): N 58000 ve murekkep egrisi v6_c_egri.json (yerel kalibrasyon 3. tur: N 65000 -> 59900
+   -> 58000, her turda N x medyan(D_kupa / D_poster), c += V_kupa - V_poster). Kapi: alan basina yogunluk +-%10 yalniz 2,0-4,0 sn;
+   diger anlar ve gorunen oran farki yalniz tabloda (yollar uzun: toz bolgeye gec girer, 4,5 sn'de kenardan hala gecer).
 Ilk/son kare = guncel kapak (Serdar ek): kupa = KUPA_ALT_YAZI V4 A_V4.jpg (kupalar canli kapaktan aynen; katmanlarin uretildigi
 kapakla kupa bolgesinde fark <= 3 kontrol edilir), poster = KAPAK_P2_78 BASLIK_A/KAPAK_A (tasan 40) ya da KAPAK/ (38).
 Kullanim: v6_kalibre.py <poster_kapak.jpg> <kupa video/ klasoru> <kupa guncel kapak jpg> <video6b.py> <cikti_dir> <is_dir>
@@ -56,12 +56,14 @@ def tol(Vk, Dk, Vp, Dp, DSk, DSp):
     for t in TS:
         i = min(len(Vk) - 1, int(round(t * FPS)))
         dv = abs(Vp[i] - Vk[i])
-        dd_ok = abs(Dp[i] - Dk[i]) <= (0.10 * Dk[i] if Dk[i] >= 0.2 * dm else 0.02 * dm)
+        dd_ok = abs(Dp[i] - Dk[i]) <= 0.10 * Dk[i]
+        kapi_ = 2.0 <= t <= 4.0                                   # V6 karari: yogunluk kapisi yalniz 2,0-4,0 sn; digerleri tabloda
         sat[f'{t:g}'] = {'kare': i, 'kupa_gorunen': round(Vk[i], 3), 'poster_gorunen': round(Vp[i], 3),
                          'kupa_toz_alan_basina': round(Dk[i], 3), 'poster_toz_alan_basina': round(Dp[i], 3),
                          'kupa_toz_px_sembol_px': round(DSk[i], 3), 'poster_toz_px_sembol_px': round(DSp[i], 3),
-                         'gorunen_ok': dv <= 0.10, 'toz_ok': bool(dd_ok)}
-    return sat, all(v['gorunen_ok'] and v['toz_ok'] for v in sat.values())
+                         'toz_fark_yuzde': round(100 * (Dp[i] / Dk[i] - 1), 1) if Dk[i] > 0 else None,
+                         'gorunen_fark': round(Vp[i] - Vk[i], 3), 'toz_kapida': kapi_, 'toz_ok': bool(dd_ok)}
+    return sat, all(v['toz_ok'] for v in sat.values() if v['toz_kapida'])
 
 
 R = {}
@@ -92,7 +94,11 @@ def kapak_kontrol(F, kap_yol, hw):
     tb = os.path.join(IS, '_t.mp4')
     subprocess.run(['ffmpeg', '-v', 'error', '-y', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-s', f'{hw[0]}x{hw[1]}', '-r', '30',
                     '-i', '-', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '0', tb], input=kap.tobytes(), check=True)
-    return {'taban_420': Q.fk(Q.kareler(tb)[0][0], kap), 'ilk_kare_fark': Q.fk(F[0], kap), 'son_kare_fark': Q.fk(F[-1], kap)}
+    t17 = os.path.join(IS, '_t17.mp4')   # bilgi (kapi degil): videonun kendi kodlayici ayariyla (crf 17) tek kapak karesi
+    subprocess.run(['ffmpeg', '-v', 'error', '-y', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-s', f'{hw[0]}x{hw[1]}', '-r', '30',
+                    '-i', '-', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '17', '-preset', 'slow', t17], input=kap.tobytes(), check=True)
+    return {'taban_420': Q.fk(Q.kareler(tb)[0][0], kap), 'ilk_kare_fark': Q.fk(F[0], kap), 'son_kare_fark': Q.fk(F[-1], kap),
+            'bilgi_crf17_tek_kare_fark': Q.fk(Q.kareler(t17)[0][0], kap)}
 
 
 R['kupa_v6'].update(kapak_kontrol(FK, KK, (FK.shape[2], FK.shape[1])))
@@ -114,24 +120,11 @@ def poster(N, c, ad):
     return mp, V, D, int(SM.sum()), p, DS, bol
 
 
-ease = lambda x: (lambda y: y * y * (3 - 2 * y))(min(1.0, max(0.0, x)))
-c = np.array([ease((k / (NB - 1) - 0.36) / 0.64) for k in range(NB)])   # baslangic: kupanin murekkep egrisi
-N = 65000
-sec = Dk[:NB] >= 0.2 * Dk.max()
-tur = []
-for k in range(5):   # her tur: N (yogunluk orani, ust uste binme yuzunden dogrusal degil) ve c (gorunen oran farki) birlikte
-    mp, Vp, Dp, smp, pp, DSp, bolp = poster(N, c, f'p{k + 1}')
-    sat, ok = tol(Vk, Dk, Vp, Dp, DSk, DSp)
-    oran = float(np.median(Dk[:NB][sec] / np.maximum(Dp[:NB][sec], 1e-6)))
-    tur.append({'tur': k + 1, 'N': N, 'ok': ok, 'yogunluk_orani_kupa_poster': round(oran, 3),
-                'en_buyuk_V_fark': round(float(np.abs(Vp[:NB] - Vk[:NB]).max()), 3)})
-    print('TUR', tur[-1], flush=True)
-    if ok:
-        break
-    if any(not v['toz_ok'] for v in sat.values()):
-        N = int(round(N * min(2.0, max(0.5, oran)) / 100.0) * 100)
-    c = np.clip(c + (Vk[:NB] - Vp[:NB]), 0, 1); c = np.maximum.accumulate(c); c[-1] = 1.0
-    c = np.maximum.accumulate(np.convolve(np.pad(c, 2, mode='edge'), np.ones(5) / 5, mode='valid')); c[-1] = 1.0
+N = 58000   # V6 karari (20 Eki, secenek a): yerel kalibrasyon 3. tur; yollar ve zamanlama degismez
+c = np.array(json.load(open(os.path.join(HERE, 'v6_c_egri.json'))))   # ayni turun murekkep egrisi (kare 0..149)
+mp, Vp, Dp, smp, pp, DSp, bolp = poster(N, c, 'p')
+sat, ok = tol(Vk, Dk, Vp, Dp, DSk, DSp)
+tur = [{'yerel_kalibrasyon': 'N 65000 -> 59900 -> 58000 (yogunluk orani 0.922 / 0.968 / 0.977)', 'N': N, 'ok': ok}]
 R['kalibrasyon_turlari'] = tur
 R['parcacik_hesabi'] = {'kupa_N': 10400, 'kupa_sembol_px': int(SMK.sum()), 'poster_sembol_px': smp, 'alan_orani': round(smp / SMK.sum(), 2),
                         'kupa_bolge_px': bolk, 'poster_bolge_px': bolp, 'bolge_alan_orani': round(bolp / bolk, 2),
@@ -155,7 +148,7 @@ R['kapi'] = {'kupa_10400_045': R['kupa_kod_farki'] and pk['kare'] == 180 and pk[
              'ilk_kare_kapak': pv['ilk_kare_fark'] <= pv['taban_420'] + 0.2, 'son_kare_kapak': pv['son_kare_fark'] <= pv['taban_420'] + 0.2,
              'kupa_ilk_kare_kapak': kv['ilk_kare_fark'] <= kv['taban_420'] + 0.2, 'kupa_son_kare_kapak': kv['son_kare_fark'] <= kv['taban_420'] + 0.2,
              'kupa_kapak_katman_ayni': kv.get('kapak_katman_kupa_bolgesi_fark', 0) <= 3.0,
-             'murekkep_tozun_onunde_degil': pv['ihlal_en_buyuk'] <= 0, 'gorunen_ve_toz_kupa_ile_ayni': ok}
+             'murekkep_tozun_onunde_degil': pv['ihlal_en_buyuk'] <= 0, 'toz_alan_basina_2_4sn_10yuzde': ok}
 R['sonuc'] = 'PASS' if all(bool(v) for v in R['kapi'].values()) else 'FAIL'
 json.dump(R, open(os.path.join(OUT, 'QC.json'), 'w'), indent=1, default=str)
 # ---------- kontaklar ve yakin karsilastirma
