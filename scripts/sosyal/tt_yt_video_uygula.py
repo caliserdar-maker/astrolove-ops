@@ -7,7 +7,7 @@ Akis (cift basina, yayin sirasina gore):
      Cift basina tam 1 TikTok + 1 YouTube olmali; medya[0] ESLEME.csv'deki eski URL olmali (degilse ATLANDI: zaten degismis?).
      Yayina < 2 sa + PAY dk kalan cift ATLANDI. Onceki SONUC.csv'de PASS olan cift atlanir (yeniden calistirma).
   2. P videosunun 0. karesi -> kapak jpg (ffmpeg, q 2). metricool_video_degistir.py --mod yaz --hedef tiktok:id:uuid,youtube:id:uuid
-     --video P.mp4 --kapak ilk_kare.jpg --yt-kapak: tek video + tek kapak yuklemesi, donusturulmus dosya kapisi,
+     --video P.mp4 --kapak ilk_kare.jpg --yt-kapak --kaynak-kapi (P: min_parlaklik yerine kaynakla 0-1.5 sn esitlik; 1. tek 39452311658): tek video + tek kapak yuklemesi, donusturulmus dosya kapisi,
      PUT, uuid ile geri okuma (izinsiz fark yok = metin, tarih, saat, durum ayni; video yeni; YouTube kapagi yeni; gonderideki video PASS).
   3. Bir cift FAIL -> DUR (sonraki ciftlere gecilmez). mod tek: yalniz ilk uygun cift.
 Cikti: CIKTI/SONUC.csv, CIKTI/OZET.txt, CIKTI/<CIFT>/ (DEGISTIR_RAPOR.json, <uuid>/ONCE.json, SONRA.json, FARK.csv).
@@ -161,7 +161,7 @@ def main():
         subprocess.run(['ffmpeg', '-nostdin', '-v', 'error', '-y', '-i', v, '-frames:v', '1', '-q:v', '2', kapak], check=True)
         hedef = ','.join(f"{ag}:{p.get('id')}:{p.get('uuid')}" for _, ag, p in g)
         r = subprocess.run([sys.executable, os.path.join(D, 'metricool_video_degistir.py'), '--token', o.token, '--cift', c, '--mod', 'yaz',
-                            '--hedef', hedef, '--video', v, '--kapak', kapak, '--yt-kapak', '--cikti', cd],
+                            '--hedef', hedef, '--video', v, '--kapak', kapak, '--yt-kapak', '--kaynak-kapi', '--cikti', cd],
                            capture_output=True, text=True)
         satir_log = (r.stdout + r.stderr).splitlines()
         for s in satir_log:
