@@ -1,0 +1,83 @@
+name: yildonumu78-rapor
+# 78 yil donumu ilan videosu: YALNIZ rapor (yeniden uretim yok). Uretim kosusunun (yildonumu-video-78) satir/kare artifact'lari
+# + Drive YILDONUMU/ videolari -> KONTROL_YD.csv, OZET_YD.txt, KONTAK_YD_*.jpg, YUKLEME_LISTESI.csv (yildonumu listing_id duzeltmesi).
+# Etsy'ye ve Metricool'a YAZMA YOK.
+permissions:
+  contents: write   # yalniz poster-video-onizleme dalina
+  actions: read     # uretim kosusunun artifact'lari
+on:
+  workflow_dispatch:
+    inputs:
+      kosu:
+        description: 'yildonumu-video-78 kosu no'
+        required: true
+env:
+  O: gdrive:ASTROLOVE/TEMP/ILAN_VIDEO_78_20261020
+jobs:
+  rapor:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Kurulum
+      run: |
+        set -euo pipefail
+        pip install -q pillow==11.0.0
+        sudo apt-get -qq update >/dev/null && sudo apt-get -qq install -y ffmpeg fonts-dejavu-core >/dev/null
+        curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+    - name: rclone.conf
+      env:
+        RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      run: |
+        set -euo pipefail
+        mkdir -p ~/.config/rclone; umask 077
+        printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+        if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+          grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+    - name: Uretim kosusunun satir/kare artifact'lari
+      env:
+        GH_TOKEN: ${{ github.token }}
+        KOSU: ${{ inputs.kosu }}
+      run: |
+        set -euo pipefail
+        case "$KOSU" in *[!0-9]*|'') echo "::error::kosu no gecersiz"; exit 1 ;; esac
+        gh run download "$KOSU" -R "$GITHUB_REPOSITORY" -p 'yd-satir-*' -D _dl
+        mkdir -p _a; for d in _dl/*/; do cp -r "$d"* _a/; done
+        echo "satir $(ls _a/satir | wc -l), kare $(ls _a/kare | wc -l)"
+    - name: KONTROL_YD + kontak + YUKLEME_LISTESI + Drive
+      run: |
+        set +e -uo pipefail
+        mkdir -p _v _r
+        rclone copy "$O/YILDONUMU" _v -q --include '*_yd_video.mp4'
+        rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_ILK_GORSEL_20261019/ILANLAR.csv" _ilanlar.csv -q
+        rclone copyto "$O/YUKLEME_LISTESI.csv" _yl.csv -q
+        echo "video $(ls _v | wc -l), satir $(ls _a/satir 2>/dev/null | wc -l)"
+        python3 -I sosyal/poster_video/yildonumu78_rapor.py _a/satir _a/kare _v _ilanlar.csv _yl.csv _r | tee _r_log.txt; RC=${PIPESTATUS[0]}
+        sed 's/^/::warning::OZET /' _r/OZET_YD.txt | cut -c1-3000
+        mkdir -p _r/SATIR_YD && cp _a/satir/*.json _r/SATIR_YD/ 2>/dev/null
+        rclone copy _r "$O/YILDONUMU" -q --exclude 'YUKLEME_LISTESI.csv'
+        [ -s _r/YUKLEME_LISTESI.csv ] && rclone copyto _r/YUKLEME_LISTESI.csv "$O/YUKLEME_LISTESI.csv" -q
+        echo "::warning::DRIVE YILDONUMU mp4 $(rclone lsf "$O/YILDONUMU" --files-only --include '*.mp4' | wc -l), $(rclone lsf "$O/YILDONUMU" --files-only --exclude '*.mp4' | tr '\n' ' ')"
+        echo "RC=$RC" >> "$GITHUB_ENV"
+    - name: Onizleme dali
+      if: ${{ always() }}
+      run: |
+        set +e -uo pipefail
+        [ -d _r ] || exit 0
+        B=poster-video-onizleme; PV=yildonumu78
+        git config user.name "github-actions"; git config user.email "actions@github.com"
+        for i in 1 2 3; do
+          rm -rf _pvw; git worktree prune
+          git fetch -q origin $B && git worktree add -q _pvw origin/$B || break
+          rm -rf "_pvw/$PV"; mkdir -p "_pvw/$PV"; cp _r/*.jpg _r/*.csv _r/OZET_YD.txt "_pvw/$PV/"
+          (cd _pvw && git add -A && git commit -qm "yil donumu 78 onizleme (kosu ${{ github.run_id }})" && git push -q origin HEAD:refs/heads/$B) && { echo "::warning::ONIZLEME $B/$PV"; break; }
+          sleep 5
+        done
+    - name: Sonuc
+      if: ${{ always() }}
+      run: |
+        rm -rf ~/.config/rclone _v
+        [ "${RC:-1}" = "0" ]
