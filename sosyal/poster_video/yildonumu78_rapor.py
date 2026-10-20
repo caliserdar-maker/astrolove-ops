@@ -32,6 +32,9 @@ for r in csv.DictReader(open(ILN, encoding='utf-8-sig')):
         bul = bul * 2
     if len(bul) == 2:
         lid['_'.join(sorted(bul))].append(r['listing_id'])
+# poster ilanlarinin basliginda da 'anniversary' gecebilir: diger ailelerin (YUKLEME_LISTESI kupa/poster) listing_id'leri cikarilir
+diger = {r['listing_id'] for r in csv.DictReader(open(YL, encoding='utf-8')) if r.get('aile') != 'yildonumu'} if os.path.exists(YL) else set()
+lid = defaultdict(list, {c: [x for x in v if x not in diger] for c, v in lid.items()})
 coklu = {c: v for c, v in lid.items() if len(v) > 1}
 sutun = ['cift', 'sonuc', 'dusen_kapilar', 'video', 'kapak', 'N', 'N_turu', 'bolge_px', 'toz_2sn_yuzde', 'toz_2.5sn_yuzde', 'toz_3sn_yuzde',
          'toz_3.5sn_yuzde', 'toz_4sn_yuzde', 'murekkep_ihlal', 'gorunen_5sn', 'ilk_kare_fark', 'son_kare_fark', 'taban_420',

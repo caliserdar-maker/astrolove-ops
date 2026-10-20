@@ -143,7 +143,7 @@ jobs:
         mkdir -p _r/SATIR_YD && cp _a/satir/*.json _r/SATIR_YD/ 2>/dev/null
         rclone copy _r "$O/YILDONUMU" -q --exclude 'YUKLEME_LISTESI.csv'
         [ -s _r/YUKLEME_LISTESI.csv ] && rclone copyto _r/YUKLEME_LISTESI.csv "$O/YUKLEME_LISTESI.csv" -q
-        echo "::warning::DRIVE YILDONUMU mp4 $(rclone lsf "$O/YILDONUMU" --include '*.mp4' | wc -l), $(rclone lsf "$O/YILDONUMU" --files-only --exclude '*.mp4' | tr '\n' ' ')"
+        echo "::warning::DRIVE YILDONUMU mp4 $(rclone lsf "$O/YILDONUMU" --files-only --include '*.mp4' | wc -l), $(rclone lsf "$O/YILDONUMU" --files-only --exclude '*.mp4' | tr '\n' ' ')"
         echo "RC=$RC" >> "$GITHUB_ENV"
     - name: Onizleme dali
       if: ${{ always() }}
