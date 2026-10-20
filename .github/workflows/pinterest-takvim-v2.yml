@@ -1,7 +1,8 @@
 name: pinterest-takvim-v2
 # Pinterest takvim PLANI v2 (20 Eki 2026): gunde 10 pin (poster 4, yil donumu 3, kupa 3; kupa 1 Kas'tan), ayni link >= 3 gun.
 # mod plan: SALT OKUMA (yalniz GET) -> pin_takvim_v2.py (PLAN_V2.csv, OZET_V2.txt) + pin_takvim_uygula.py kuru (KURU_UYGULAMA.*).
-# mod yaz : METRICOOL'A YAZAR (onay PIN_TAKVIM_V2, ayri onay): Drive V2/PLAN_V2.csv -> pin_takvim_uygula.py yaz (yalniz publicationDate).
+# mod yaz : METRICOOL'A YAZAR (onay PIN_TAKVIM_V2, Serdar 20 Eki): Drive V2/PLAN_V2.csv -> pin_takvim_uygula.py yaz (YEDEK.json Drive
+#           dogrulamali, yalniz publicationDate, hata = atla) -> pin_yeni_kuru.py (KURU: 12 yeni yil donumu pini + pano notu) -> V2/UYGULAMA/.
 # Token: secret METRICOOL_USER_TOKEN (userId/blogId Drive METRICOOL_TOKEN.json'dan). Loga yazilmaz (::add-mask:: + sir_koru).
 # Cikti: Drive ASTROLOVE/TEMP/PINTEREST_TAKVIM_PLAN_20261020/V2/.
 permissions:
@@ -49,8 +50,14 @@ jobs:
             [ "${{ inputs.onay }}" = "PIN_TAKVIM_V2" ] || { echo "::error::onay PIN_TAKVIM_V2 degil, yazma yok"; exit 1; }
             rclone copyto "$O/PLAN_V2.csv" _work/g/PLAN_V2.csv || { echo "::error::PLAN_V2.csv yok"; exit 1; }
             python3 scripts/sosyal/analiz/pin_takvim_uygula.py _work/mc.json --plan _work/g/PLAN_V2.csv --mod yaz --confirm PIN_TAKVIM_V2 \
-              --out _out/UYGULAMA | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json --sir-json _work/kimlik.json "$GITHUB_STEP_SUMMARY"
+              --out _out/UYGULAMA --yedek-drive "$O/UYGULAMA" \
+              | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json --sir-json _work/kimlik.json "$GITHUB_STEP_SUMMARY"
             rc=${PIPESTATUS[0]}
+            if [ -f _out/UYGULAMA/YEDEK.json ]; then
+              python3 scripts/sosyal/analiz/pin_yeni_kuru.py _work/mc.json --plan _work/g/PLAN_V2.csv --yedek _out/UYGULAMA/YEDEK.json \
+                --out _out/UYGULAMA | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json --sir-json _work/kimlik.json "$GITHUB_STEP_SUMMARY"
+              [ "${PIPESTATUS[0]}" = 0 ] || echo "::warning::pin_yeni_kuru FAIL"
+            fi
           else
             python3 scripts/sosyal/analiz/pin_takvim_v2.py _work/mc.json _out --pod78 data/pod/pod78_ids.csv --by78 _work/g/by78.csv \
               --kupa _work/g/kupa.csv --kullanilmayan _work/g/kullanilmayan.csv \
