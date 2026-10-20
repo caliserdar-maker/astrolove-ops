@@ -58,6 +58,15 @@ os.execv(gercek, [gercek] + sys.argv[1:])
 '''
 
 
+CALISTIR = '''import sys
+motor, kapak, out, v = sys.argv[1:5]
+src = open(motor).read(); eski = 'VW, VH = 1080, 1080'
+assert src.count(eski) == 1, 'motor satiri bulunamadi'
+sys.argv = [motor, kapak, out]
+exec(compile(src.replace(eski, f'VW, VH = {int(v)}, {int(v)}'), motor, 'exec'), {'__name__': '__main__', '__file__': motor})
+'''
+
+
 def lum(a):
     return a.astype(np.float32) @ np.float32([0.299, 0.587, 0.114])
 
@@ -78,8 +87,8 @@ def poster_kutu():
     return int(np.floor(x0 * S)), int(np.floor(y0 * S)), int(np.ceil(x1 * S)), int(np.ceil(y1 * S))   # 1080 karede
 
 
-def uzat(KAP, ozel):
-    """Zemini kendi pikselleriyle dikeyde uzatir: (ust, alt) bantlar, her biri Y0 x W x 3 float."""
+def uzat(KAP, ozel, n_ust=Y0, n_alt=Y0):
+    """Zemini kendi pikselleriyle dikeyde uzatir: (ust, alt) bantlar, n_ust / n_alt x W x 3 float."""
     rng = np.random.default_rng(7)
     k = KAP.astype(np.float32)
     LF = cv2.GaussianBlur(k, (0, 0), sigmaX=6, sigmaY=0.01)          # yalniz yatay yumusatma (dikey egim korunur)
@@ -89,11 +98,12 @@ def uzat(KAP, ozel):
     cy, cx = np.where(temiz)
     if len(cy) < 50:
         raise SystemExit('doku icin temiz zemin bulunamadi')
-    d = np.arange(1, Y0 + 1, dtype=np.float32)[:, None, None]
     bant = {}
     LF40 = cv2.GaussianBlur(k, (0, 0), sigmaX=40, sigmaY=0.01)       # egim ve duzlesen deger: genis yatay ortalama
     for ad, satirlar in (('ust', np.arange(0, 80)), ('alt', np.arange(W - 50, W))):
         ys = satirlar.astype(np.float32); ym = ys.mean(); ke = 0.0 if ad == 'ust' else W - 1.0
+        n = n_ust if ad == 'ust' else n_alt
+        d = np.arange(1, n + 1, dtype=np.float32)[:, None, None]
 
         def fit(A):
             P = A[satirlar]
@@ -109,9 +119,9 @@ def uzat(KAP, ozel):
         # satirlarinin aynasi (ek satirinda doku surekli), sonrakiler temiz zeminden rastgele bloklar
         num = np.zeros_like(lf); den = np.zeros(lf.shape[:2] + (1,), np.float32)
         ram = np.ones(BS, np.float32); ram[:BS - BL] = np.sin(np.linspace(0, np.pi / 2, BS - BL + 2)[1:-1]); ram[BL:] = ram[:BS - BL][::-1]
-        for yb in range(0, Y0, BL):
+        for yb in range(0, n, BL):
             for xb in range(-(BS - BL), W, BL):
-                hh = min(BS, Y0 - yb); x_a, x_b = max(0, xb), min(W, xb + BS)
+                hh = min(BS, n - yb); x_a, x_b = max(0, xb), min(W, xb + BS)
                 wy = ram[:hh].copy()
                 if yb == 0:
                     wy[:BS - BL] = 1.0                                        # ek tarafinda rampa yok
@@ -137,21 +147,26 @@ def uzat(KAP, ozel):
     return bant['ust'], bant['alt'], bant
 
 
-def ilan_uret(kapak, is_dir):
+def ilan_uret(kapak, is_dir, v=W, ek_env=None, ad='ilan'):
+    """Onayli motoru calistirir. v != 1080: dosya degistirilmeden yalniz 'VW, VH = 1080, 1080' satiri v ile calistirilir."""
     shim = os.path.join(is_dir, 'shim'); os.makedirs(shim, exist_ok=True)
     yol = os.path.join(shim, 'ffmpeg'); open(yol, 'w').write(SHIM)
     os.chmod(yol, os.stat(yol).st_mode | stat.S_IEXEC)
-    raw = os.path.join(is_dir, 'ilan.rgb'); mp4 = os.path.join(is_dir, 'ilan.mp4')
-    env = dict(os.environ, **ILAN_ENV, YD_RAW=raw, YD_FFMPEG=subprocess.run(['which', 'ffmpeg'], capture_output=True, text=True).stdout.strip(),
+    raw = os.path.join(is_dir, f'{ad}.rgb'); mp4 = os.path.join(is_dir, f'{ad}.mp4')
+    env = dict({**os.environ, **ILAN_ENV, **(ek_env or {})}, YD_RAW=raw, YD_FFMPEG=subprocess.run(['which', 'ffmpeg'], capture_output=True, text=True).stdout.strip(),
                PATH=shim + os.pathsep + os.environ['PATH'])
-    r = subprocess.run([sys.executable, '-I', os.path.join(HERE, 'yildonumu_video.py'), kapak, mp4], env=env, text=True,
+    motor = os.path.join(HERE, 'yildonumu_video.py')
+    cmd = [sys.executable, '-I', motor, kapak, mp4]
+    if v != W:
+        cmd = [sys.executable, '-I', '-c', CALISTIR, motor, kapak, mp4, str(v)]
+    r = subprocess.run(cmd, env=env, text=True,
                        stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     print(r.stdout[-1500:], flush=True)
     if r.returncode:
         raise SystemExit('ilan videosu uretilemedi')
     ic = json.load(open(mp4 + '.ic.json'))
-    n = os.path.getsize(raw) // (W * W * 3)
-    return np.memmap(raw, np.uint8, 'r', shape=(n, W, W, 3)), mp4, ic
+    n = os.path.getsize(raw) // (v * v * 3)
+    return np.memmap(raw, np.uint8, 'r', shape=(n, v, v, 3)), mp4, ic
 
 
 def kareler(mp4, w, h):
