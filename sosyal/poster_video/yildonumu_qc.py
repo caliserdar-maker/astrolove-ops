@@ -5,8 +5,12 @@ referansiyla +-%10: tutmazsa tur 2 = N x olculen oran (78 poster kurali), yine t
 bandi ortalayan N (en fazla 3 uretim). Olcumler ilan78.py ile ayni formul.
 Kapilar: 1080x1080, 180 kare, ses yok; ilk/son kare = kapak (kayipsiz 4:2:0 tabani + 0,2); murekkep tozun onunde degil;
 sembol 5,0 sn'de tam (gorunen >= 0,98); toz 2,0-4,0 sn +-%10; sembol pikselleri kapaktan (4,97 sn karesi sembol bolgesinde
-kapakla son kare kadar ayni, + 0,2; ikisi de crf 17); silme izi yok (bos halde silinen bolge, cevre kagitla: ortalama parlaklik farki <= 1,5,
+kapakla son kare kadar ayni, + 0,2; ikisi de crf 17); silme izi yok (bos halde silinen bolge, cevre kagida oturtulan 2. derece yuzeyden ortalama parlaklik farki <= 1,5,
 ince doku std orani 0,7-1,3, 8'den buyuk sapma orani <= cevre + %1); glifler degismedi (bos halde glif fark <= 0,5).
+78 uretim (YD_TOPLU=1, Serdar 20 Eki): N0 = 49200 x bolge / CL Y1 bolgesi 27311 (onayli ornek, f57fd17); tutmazsa TEK
+duzeltme turu = bandi ortalayan N (olculen us yerine CL'de olculen us 0,62); yine tutmayan listelenir. Cikti satir/<CIFT>.json,
+kare/<CIFT>_yd_{3sn,son}.jpg; kontak ve yakin kirpim rapor adiminda. Glif kapisi: iki glif bulundu, sol < orta < sag, ayni
+satir; ayni burcta iki glif benzerligi >= 0,8.
 Kullanim: yildonumu_qc.py <y1_kapak.jpg> <CIFT> <cikti_dir> <is_dir>"""
 import importlib.util, json, os, subprocess, sys
 import numpy as np, cv2
@@ -18,6 +22,8 @@ KAPAK, CIFT, OUT, IS = sys.argv[1:5]
 os.makedirs(OUT, exist_ok=True); os.makedirs(IS, exist_ok=True)
 REF = json.load(open(os.path.join(HERE, 'v6_kupa_ref.json')))
 PY = sys.executable
+TOPLU = os.environ.get('YD_TOPLU') == '1'
+YD_N_REF, YD_BOLGE_REF, YD_US = 49200, 27311, 0.62   # onayli CL Y1 ornegi (f57fd17): N, bolge px, olculen us
 V = os.path.join(OUT, f'{CIFT}_yd_video.mp4'); VT = os.path.join(IS, f'{CIFT}_tozsuz.mp4')
 ENV0 = {'V6_C': os.path.join(HERE, 'v6_c_egri.json')}
 TS4 = (2.0, 2.5, 3.0, 3.5, 4.0)
@@ -53,14 +59,23 @@ def tur(env):
 
 
 tutar = lambda tb: all(abs(v['fark_yuzde']) <= 10 for v in tb.values())
-ic, SM, F, tab, log = tur({'V6_N': str(REF['poster_N']), 'V6_BOLGE_REF': str(REF['poster_bolge_px']), 'V6_N_REF': str(REF['poster_N'])})
-turlar = [{'N': ic['N'], 'kaynak': 'N = 58000 x bolge / CL poster bolgesi', 'toz_2_4sn': tab, 'tutar': tutar(tab)}]
-if not tutar(tab):   # tur 2: N x olculen oran (78 poster kurali)
+if TOPLU:
+    ic, SM, F, tab, log = tur({'V6_N': str(YD_N_REF), 'V6_BOLGE_REF': str(YD_BOLGE_REF), 'V6_N_REF': str(YD_N_REF)})
+    turlar = [{'N': ic['N'], 'kaynak': 'N = 49200 x bolge / CL Y1 bolgesi', 'toz_2_4sn': tab, 'tutar': tutar(tab)}]
+    if not tutar(tab):   # tek duzeltme: bandi ortala (CL olculen us)
+        rs = [v['kupa_ref'] / max(v['video'], 1e-6) for v in tab.values()]; hed = float(np.sqrt(min(rs) * max(rs)))
+        del F
+        ic, SM, F, tab, log = tur({'V6_N': str(int(round(ic['N'] * hed ** (1 / YD_US) / 100.0) * 100))})
+        turlar.append({'N': ic['N'], 'kaynak': f'N1 x {hed:.3f}^(1/{YD_US}) (bant ortalama, CL us)', 'toz_2_4sn': tab, 'tutar': tutar(tab)})
+else:
+    ic, SM, F, tab, log = tur({'V6_N': str(REF['poster_N']), 'V6_BOLGE_REF': str(REF['poster_bolge_px']), 'V6_N_REF': str(REF['poster_N'])})
+    turlar = [{'N': ic['N'], 'kaynak': 'N = 58000 x bolge / CL poster bolgesi', 'toz_2_4sn': tab, 'tutar': tutar(tab)}]
+if not TOPLU and not tutar(tab):   # tur 2: N x olculen oran (78 poster kurali)
     oran = float(np.median([v['kupa_ref'] / max(v['video'], 1e-6) for v in tab.values()]))
     del F
     ic, SM, F, tab, log = tur({'V6_N': str(int(round(ic['N'] * oran / 100.0) * 100))})
     turlar.append({'N': ic['N'], 'kaynak': f'N1 x {oran:.3f} (olculen oran)', 'toz_2_4sn': tab, 'tutar': tutar(tab)})
-if not tutar(tab):   # tur 3: olculen us (D ~ N^a, tur 1-2) ile bandi ortala: hedef oran = sqrt(en kucuk x en buyuk kupa/video)
+if not TOPLU and not tutar(tab):   # tur 3: olculen us (D ~ N^a, tur 1-2) ile bandi ortala: hedef oran = sqrt(en kucuk x en buyuk kupa/video)
     t1, t2 = turlar[0], turlar[1]
     a_ = float(np.median([np.log(t2['toz_2_4sn'][k]['video'] / t1['toz_2_4sn'][k]['video']) for k in tab]) / np.log(t2['N'] / t1['N']))
     rs = [v['kupa_ref'] / max(v['video'], 1e-6) for v in tab.values()]
@@ -87,9 +102,18 @@ kagit_k = cv2.medianBlur(kap, 31).astype(np.float32) @ np.float32([0.299, 0.587,
 ozellik = cv2.dilate(((kagit_k - lk) > 12).astype(np.uint8), np.ones((9, 9), np.uint8)) > 0   # kapakta murekkep/yazi/glif
 halka = (cv2.dilate(E.astype(np.uint8), np.ones((61, 61), np.uint8)) > 0) & ~(Wsil > 0.02) & ~ozellik
 hf = lambda l: l - cv2.GaussianBlur(l, (0, 0), 2.0)
+
+
+def yuzey(l, m):
+    """kagit isik gecisi: cevre halkasina 2. derece yuzey (silinen bolgedeki beklenen parlaklik)"""
+    yy, xx = np.where(m); s = float(max(l.shape))
+    A = lambda x, y: np.stack([np.ones_like(x), x, y, x * x, y * y, x * y], 1)
+    c, *_ = np.linalg.lstsq(A(xx / s, yy / s), l[m], rcond=None)
+    Y, X = np.mgrid[0:l.shape[0], 0:l.shape[1]]
+    return (A(X.ravel() / s, Y.ravel() / s) @ c).reshape(l.shape)
 bgB = cv2.medianBlur(np.clip(B, 0, 255).astype(np.uint8), 31).astype(np.float32) @ np.float32([0.299, 0.587, 0.114])
 iz = {'silinen_px': int(E.sum()), 'cevre_px': int(halka.sum()),
-      'parlaklik_farki': round(float(lb[E].mean() - lk[halka].mean()), 3),
+      'parlaklik_farki': round(float((lb[E] - yuzey(lk, halka)[E]).mean()), 3),
       'doku_std_orani': round(float(hf(lb)[E].std() / hf(lk)[halka].std()), 3),
       'sapma8_orani_silinen': round(float((np.abs(lb - bgB)[E] > 8).mean()), 4),
       'sapma8_orani_cevre': round(float((np.abs(lk - kagit_k)[halka] > 8).mean()), 4)}
@@ -108,7 +132,15 @@ R = {'cift': CIFT, 'kapak': os.path.basename(KAPAK), 'video': os.path.basename(V
      'taban_420': Q.fk(T0, kap), 'ilk_kare_fark': Q.fk(F[0], kap), 'son_kare_fark': Q.fk(F[-1], kap),
      'sembol_bolgesi_4_97sn_fark': fk_b(F[149]), 'sembol_bolgesi_son_kare_fark': fk_b(F[-1]), 'sembol_bolgesi_taban_420': fk_b(T0),
      'silme_izi': iz}
+g_ = ic['glif']; ax_ = g_['sign_a'][0] + g_['sign_a'][2] / 2; bx_ = g_['sign_b'][0] + g_['sign_b'][2] / 2
+ayni = CIFT.split('_')[0] == CIFT.split('_')[1]
+R['ayni_burc'] = ayni
+glif_ok = (min(g_['sign_a'][2:] + g_['sign_b'][2:]) > 10 and ax_ < g_['poster_w'] / 2 < bx_
+           and g_['sign_a'][0] + g_['sign_a'][2] <= g_['sign_b'][0]
+           and abs(g_['sign_a'][1] + g_['sign_a'][3] / 2 - g_['sign_b'][1] - g_['sign_b'][3] / 2) < 0.5 * max(g_['sign_a'][3], g_['sign_b'][3])
+           and (not ayni or g_['benzerlik'] >= 0.8))
 R['kapi'] = {k: bool(v) for k, v in {
+    'glif_iki_kucuk_burc': glif_ok,
     'olcu_6sn_sessiz': p['olcu'] == '1080x1080' and p['kare'] == 180 and not p['ses_akisi'],
     'ilk_kare_kapak': R['ilk_kare_fark'] <= R['taban_420'] + 0.2, 'son_kare_kapak': R['son_kare_fark'] <= R['taban_420'] + 0.2,
     'murekkep_tozun_onunde_degil': R['ihlal_en_buyuk'] <= 0, 'sembol_5sn_tam': R['gorunen_5sn'] >= 0.98,
@@ -117,6 +149,18 @@ R['kapi'] = {k: bool(v) for k, v in {
                      and iz['sapma8_orani_silinen'] <= iz['sapma8_orani_cevre'] + 0.01,
     'glifler_degismedi': iz['glif_bos_hal_farki'] <= 0.5}.items()}
 R['sonuc'] = 'PASS' if all(R['kapi'].values()) else 'FAIL'
+if TOPLU:
+    for d_ in ('satir', 'kare'):
+        os.makedirs(os.path.join(OUT, d_), exist_ok=True)
+    json.dump(R, open(os.path.join(OUT, 'satir', f'{CIFT}.json'), 'w'), indent=1, default=str)
+    for t_, ek in ((3.0, '3sn'), (None, 'son')):
+        f_ = F[Q.ix(F, t_)] if t_ is not None else F[-1]
+        Image.fromarray(f_).resize((360, 360), Image.LANCZOS).save(os.path.join(OUT, 'kare', f'{CIFT}_yd_{ek}.jpg'), quality=88)
+    for e in ('.ic.json', '.sembol_maske.png', '.bos.png', '.silme.png'):
+        os.replace(V + e, os.path.join(IS, os.path.basename(V) + e))
+    print(f"{CIFT} {R['sonuc']} N {[t['N'] for t in turlar]} toz% {[v['fark_yuzde'] for v in tab.values()]} "
+          f"glif {g_['benzerlik']} {' '.join(k for k, v in R['kapi'].items() if not v)}", flush=True)
+    sys.exit(0)
 json.dump(R, open(os.path.join(OUT, 'QC.json'), 'w'), indent=1, default=str)
 # kontak 0-6 sn her 0,5 sn; 3 sn sembol bolgesi %200
 Q.kontak([('Y1 VIDEO', F)], os.path.join(OUT, f'{CIFT}_yd_KONTAK.jpg'))
