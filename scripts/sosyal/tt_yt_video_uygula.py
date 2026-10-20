@@ -7,7 +7,7 @@ Akis (cift basina, yayin sirasina gore):
      Cift basina tam 1 TikTok + 1 YouTube olmali; medya[0] ESLEME.csv'deki eski URL olmali (degilse ATLANDI: zaten degismis?).
      Yayina < 2 sa + PAY dk kalan cift ATLANDI. Onceki SONUC.csv'de PASS olan cift atlanir (yeniden calistirma).
   2. P videosunun 0. karesi -> kapak jpg (ffmpeg, q 2). metricool_video_degistir.py --mod yaz --hedef tiktok:id:uuid,youtube:id:uuid
-     --video P.mp4 --kapak ilk_kare.jpg --yt-kapak ilk_kare.jpg: tek video + tek kapak yuklemesi, donusturulmus dosya kapisi,
+     --video P.mp4 --kapak ilk_kare.jpg --yt-kapak: tek video + tek kapak yuklemesi, donusturulmus dosya kapisi,
      PUT, uuid ile geri okuma (izinsiz fark yok = metin, tarih, saat, durum ayni; video yeni; YouTube kapagi yeni; gonderideki video PASS).
   3. Bir cift FAIL -> DUR (sonraki ciftlere gecilmez). mod tek: yalniz ilk uygun cift.
 Cikti: CIKTI/SONUC.csv, CIKTI/OZET.txt, CIKTI/<CIFT>/ (DEGISTIR_RAPOR.json, <uuid>/ONCE.json, SONRA.json, FARK.csv).
@@ -161,7 +161,7 @@ def main():
         subprocess.run(['ffmpeg', '-nostdin', '-v', 'error', '-y', '-i', v, '-frames:v', '1', '-q:v', '2', kapak], check=True)
         hedef = ','.join(f"{ag}:{p.get('id')}:{p.get('uuid')}" for _, ag, p in g)
         r = subprocess.run([sys.executable, os.path.join(D, 'metricool_video_degistir.py'), '--token', o.token, '--cift', c, '--mod', 'yaz',
-                            '--hedef', hedef, '--video', v, '--kapak', kapak, '--yt-kapak', kapak, '--cikti', cd],
+                            '--hedef', hedef, '--video', v, '--kapak', kapak, '--yt-kapak', '--cikti', cd],
                            capture_output=True, text=True)
         satir_log = (r.stdout + r.stderr).splitlines()
         for s in satir_log:
@@ -181,7 +181,7 @@ def main():
                              ('evet' if 'text' not in fk else 'HAYIR') if sonra else '',
                              ('evet' if not any(x.startswith('publicationDate') for x in fk) else 'HAYIR') if sonra else '',
                              'evet' if kp.get('uuid_ayni') else ('HAYIR' if sonra else ''), 'evet' if kp.get('media0_yeni') else ('HAYIR' if sonra else ''),
-                             ('evet' if kp.get('yt_kapak_yeni') else 'HAYIR') if ag == 'youtube' and sonra else ('degismedi (yalniz media[0])' if sonra else ''),
+                             ('evet' if kp.get('kapak_yeni') and kp.get('kapak_ilk_kare_fark') else 'HAYIR') if ag == 'youtube' and sonra else ('degismedi (yalniz media[0])' if sonra else ''),
                              ', '.join(x['alan'] for x in gr.get('fark') or [] if not x['izinli']),
                              (gr.get('gonderideki_video') or {}).get('sonuc', ''), gr.get('sonuc') or ('FAIL' if r.returncode else ''),
                              '' if gr.get('sonuc') == 'PASS' else (rp.get('sonuc') or f'rc {r.returncode}')[:300], kosu])
