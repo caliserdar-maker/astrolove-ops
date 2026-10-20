@@ -19,6 +19,9 @@ Mod yaz (birden cok hedef ayni cift; her FAIL -> DUR, sonraki hedefe gecilmez):
      uuid ile bul -> <uuid>/SONRA.json + FARK.csv; gonderideki video yeniden olculur. FAIL -> DUR.
 Diger modlar: kuru (1 + yerel olcum; yazma yok), kontrol (SALT OKUMA: --once ile tam fark), geri (ONCE govdesiyle PUT).
 Hedef: --hedef ag:id:uuid (virgulle birden fazla) ya da tek hedef icin --ag/--id/--uuid.
+--fb-kapak (20 Eki, Serdar onayi Reels P degisimi): facebook hedeflerinde videoThumbnailUrl de degisir = --kapak dosyasi
+(yeni videonun ilk karesi) Metricool'a bir kez yuklenir; FB icin izinli fark videoThumbnailUrl eklenir; PUT sonrasi
+kapak URL'si ve indirilen kapak - --kapak farki (< ESIK) kapidir. Diger aglarda yalniz media[0] degisir.
 Token loga/dosyaya yazilmaz; presigned URL'ler maskelenir."""
 import argparse, copy, csv, importlib.util, json, os, re, subprocess, sys
 from datetime import datetime, timedelta
@@ -31,6 +34,7 @@ MIN_SAAT = 2
 TZ = 'Europe/Istanbul'
 IG_VARSAYILAN = ('instagramData.type', 'instagramData.showReelOnFeed')
 KURAL = ('id, media[0], creationDate.*; instagramData.type / showReelOnFeed yalniz ONCE\'de yoksa ve ag instagram degilse')
+KAPAK_AG = set()   # --fb-kapak: videoThumbnailUrl bu aglarda izinli ve degisir
 
 
 def yukle(ad, yol):
@@ -59,6 +63,18 @@ def olc(kb, yol, kapak):
                     'ses': v['ses_sn'] is not None and abs(v['ses_sn'] - 24.0) <= 0.05}
     q['sonuc'] = 'PASS' if all(q['kapilar'].values()) else 'FAIL'
     return q
+
+
+def kapak_fark(kb, url, kapak, yol):
+    """URL'deki kapak gorseli - yerel --kapak: ortalama mutlak RGB farki (kapak boyutunda). Hata -> metin."""
+    hc = subprocess.run(['curl', '-sL', '-m', '120', '-o', yol, '-w', '%{http_code}', url], capture_output=True, text=True).stdout
+    if hc != '200':
+        return f'indirilemedi http {hc}'
+    try:
+        K = np.asarray(__import__('PIL.Image', fromlist=['Image']).open(kapak).convert('RGB'), np.float32)
+        return round(float(np.abs(kb.kapak_dizi(yol, K.shape[1], K.shape[0]) - K).mean()), 2)
+    finally:
+        os.remove(yol)
 
 
 def durum(p, ag):
@@ -103,6 +119,8 @@ def deger(x, yol):
 def izinli(yol, once, ag, medya=True):
     if yol == 'id' or yol.startswith('creationDate.') or (medya and yol == 'media[0]'):
         return True
+    if medya and yol == 'videoThumbnailUrl' and ag in KAPAK_AG:
+        return True
     if yol in IG_VARSAYILAN:
         return ag != 'instagram' and deger(once, yol) == '<yok>'
     return False
@@ -127,7 +145,10 @@ def main():
     a.add_argument('--ag', default=''); a.add_argument('--id', default=''); a.add_argument('--uuid', default='')
     a.add_argument('--hedef', default='', help='ag:id:uuid[,ag:id:uuid...]')
     a.add_argument('--video', default=''); a.add_argument('--kapak', default=''); a.add_argument('--once', default='')
+    a.add_argument('--fb-kapak', action='store_true')
     o = a.parse_args()
+    if o.fb_kapak:
+        KAPAK_AG.add('facebook')
     os.makedirs(o.cikti, exist_ok=True)
     yz = yukle('yz', os.path.join(D, 'metricool_5p_yaz.py'))
     sko = yukle('sko', os.path.join(D, 'sosyal_kapak_oku.py'))
@@ -247,6 +268,13 @@ def main():
     adim('donusturulmus_olcum', **q)
     if q['sonuc'] != 'PASS':
         dur('donusturulmus dosya kapisi: ' + ', '.join(k for k, v in q['kapilar'].items() if not v) + ' (hicbir gonderiye yazilmadi)')
+    kapak_url = ''
+    if any(h['ag'] in KAPAK_AG for h, *_ in onceler):
+        kapak_url, kk = yz.video_yukle(mc, o.kapak, 'image/jpeg', 'jpg')
+        kf = kapak_fark(kb, kapak_url, o.kapak, os.path.join(o.cikti, '_kapak.jpg'))
+        adim('kapak_yukleme', url=sko.kisa(kapak_url), boyut=kk['boyut'], prob=kk['prob'], fark=kf)
+        if not isinstance(kf, float) or kf >= kb.ESIK:
+            dur(f'yuklenen kapak farki {kf} (hicbir gonderiye yazilmadi)')
 
     # 3) hedefler sirayla; ilk FAIL -> DUR
     for i, (h, once, uuid, zaman, d) in enumerate(onceler, 1):
@@ -259,7 +287,11 @@ def main():
                 f"({i - 1}/{len(onceler)} yazildi)")
         yeni = copy.deepcopy(once)
         yeni['media'][0] = yeni_url
-        if mpb.fark(once, yeni) != ['media[0]']:
+        beklenen = ['media[0]']
+        if h['ag'] in KAPAK_AG:
+            yeni['videoThumbnailUrl'] = kapak_url
+            beklenen = sorted(['media[0]', 'videoThumbnailUrl'])
+        if sorted(mpb.fark(once, yeni)) != beklenen:
             dur(f'govde farki beklenmedik: {mpb.fark(once, yeni)}')
         y = mc.istek('PUT', f"/v2/scheduler/posts/{once.get('id')}", govde=yeni, yok404=True)
         if y is mpb.YOK:
@@ -280,6 +312,12 @@ def main():
         kapi = {'izinsiz_fark_yok': not izinsiz, 'media0_yeni': m_sonra.split('?')[0] == yeni_url.split('?')[0],
                 'durum_PENDING': durum(sonra, h['ag']) == 'PENDING', 'uuid_ayni': str(sonra.get('uuid')) == uuid,
                 'gonderideki_video_PASS': q2['sonuc'] == 'PASS'}
+        if h['ag'] in KAPAK_AG:
+            t_sonra = sonra.get('videoThumbnailUrl') or ''
+            kf2 = kapak_fark(kb, t_sonra, o.kapak, os.path.join(o.cikti, '_kapak2.jpg')) if t_sonra else 'kapak yok'
+            kapi['kapak_yeni'] = t_sonra.split('?')[0] == kapak_url.split('?')[0]
+            kapi['kapak_ilk_kare_fark'] = isinstance(kf2, float) and kf2 < kb.ESIK
+            q2['kapak_fark'] = kf2
         g.update(id_sonra=sonra.get('id'), fark=satir, kapilar=kapi, gonderideki_video=q2,
                  sonuc='PASS' if all(kapi.values()) else 'FAIL')
         adim('sonra', ag=h['ag'], id_yeni=sonra.get('id'), tablo=satir, izinsiz=izinsiz, kapilar=kapi)
