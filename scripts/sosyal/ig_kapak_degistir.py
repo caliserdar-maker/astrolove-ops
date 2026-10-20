@@ -113,7 +113,15 @@ def main():
         if isinstance(f0, float) and f0 < kb.ESIK:
             satir(**k, sonuc='ZATEN', kapak_fark=f0, neden='mevcut kapak zaten P karesi'); os.remove(kap); continue
 
-        kurl, kk = yz.video_yukle(mc, kap, 'image/jpeg', 'jpg')
+        for dn in range(3):   # kalan 39470805566: S3 PUT 'handshake operation timed out' (gonderiye yazmadan once)
+            try:
+                kurl, kk = yz.video_yukle(mc, kap, 'image/jpeg', 'jpg')
+                break
+            except Exception as x:
+                log(f'  {c}: kapak yukleme {dn + 1}/3 hata {type(x).__name__}: {str(x)[:120]}')
+                if dn == 2:
+                    dur(f'kapak yuklenemedi: {type(x).__name__} (yazilmadi)')
+                time.sleep(10 * (dn + 1))
         f1 = mvd.kapak_fark(kb, kurl, kap, os.path.join(isd, '_k1.jpg'))
         if not isinstance(f1, float) or f1 >= kb.ESIK:
             dur(f'yuklenen kapak farki {f1} (yazilmadi)')
