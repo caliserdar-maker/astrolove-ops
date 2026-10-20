@@ -1,0 +1,7 @@
+ARIES_SAGITTARIUS yeniden uretim (Serdar karar a, 21 Eki): tek duzeltme turu; sonuc FAIL
+onceki N 26900 (N = 49200 x bolge / CL Y1 bolgesi): toz % 2s -48.3 2.5s -53.0 3s -56.6 3.5s -58.0 4s -58.5
+onceki N 92800 (N1 x 2.156^(1/0.62) (bant ortalama, CL us)): toz % 2s +19.2 2.5s +15.5 3s +13.1 3.5s +8.4 4s +6.8
+yeni   N 79100 (onceki N 92800 x 0.885^(1/0.76) (olculen us, bant ortalama)): toz % 2s +14.2 2.5s +8.0 3s +5.9 3.5s +0.1 4s -2.9
+kapilar: glif_iki_kucuk_burc=PASS, olcu_6sn_sessiz=PASS, ilk_kare_kapak=PASS, son_kare_kapak=PASS, murekkep_tozun_onunde_degil=PASS, sembol_5sn_tam=PASS, toz_2_4sn_10yuzde=FAIL, sembol_pikselleri_kapaktan=PASS, silme_izi_yok=FAIL, glifler_degismedi=PASS
+ilk kare 1.609 / son kare 1.6 (taban 1.51 + 0,2); gorunen 5 sn 0.995; murekkep ihlal 0.0; silme izi {'silinen_px': 15792, 'cevre_px': 33312, 'parlaklik_farki': 0.713, 'doku_std_orani': 0.684, 'sapma8_orani_silinen': 0.0, 'sapma8_orani_cevre': 0.0015, 'glif_bos_hal_farki': 0.0}
+toz rengi [168.0, 74.0, 43.0]; probe {'olcu': '1080x1080', 'kare': 180, 'fps': '30/1', 'sure_sn': 6.0, 'ses_akisi': False, 'boyut_mb': 2.22}
