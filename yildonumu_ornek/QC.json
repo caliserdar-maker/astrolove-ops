@@ -1,0 +1,235 @@
+{
+ "cift": "CANCER_LIBRA",
+ "kapak": "kapak.jpg",
+ "video": "CANCER_LIBRA_yd_video.mp4",
+ "probe": {
+  "olcu": "1080x1080",
+  "kare": 180,
+  "fps": "30/1",
+  "sure_sn": 6.0,
+  "ses_akisi": false,
+  "boyut_mb": 2.07
+ },
+ "silinip_yeniden_olusan": [
+  "buyuk birlesik sembol"
+ ],
+ "sabit_kalan": [
+  "1st Anniversary Gift",
+  "A & B satiri",
+  "YEAR ONE",
+  "iki kucuk glif (toz kaynagi)",
+  "isimler",
+  "Paper Anniversary",
+  "tarih"
+ ],
+ "mesaj_satiri": "yok (Y1 tasariminda mesaj satiri yok; yazim adimi bos)",
+ "toz_kaynagi": "iki kucuk glif (aralarinda isaret yok)",
+ "toz_rengi": {
+  "ana_%78_sembol_murekkebi": [
+   168.0,
+   74.0,
+   44.0
+  ],
+  "acik_vurgu_%22": "murekkep x 0,55 + kagit isigi (255,236,214) x 0,45"
+ },
+ "N_turlari": [
+  {
+   "N": 35800,
+   "kaynak": "N = 58000 x bolge / CL poster bolgesi",
+   "toz_2_4sn": {
+    "2": {
+     "video": 0.454,
+     "kupa_ref": 0.508,
+     "fark_yuzde": -10.7
+    },
+    "2.5": {
+     "video": 0.437,
+     "kupa_ref": 0.511,
+     "fark_yuzde": -14.6
+    },
+    "3": {
+     "video": 0.424,
+     "kupa_ref": 0.504,
+     "fark_yuzde": -15.9
+    },
+    "3.5": {
+     "video": 0.395,
+     "kupa_ref": 0.484,
+     "fark_yuzde": -18.5
+    },
+    "4": {
+     "video": 0.324,
+     "kupa_ref": 0.433,
+     "fark_yuzde": -25.1
+    }
+   },
+   "tutar": false
+  },
+  {
+   "N": 42600,
+   "kaynak": "N1 x 1.189 (olculen oran)",
+   "toz_2_4sn": {
+    "2": {
+     "video": 0.496,
+     "kupa_ref": 0.508,
+     "fark_yuzde": -2.3
+    },
+    "2.5": {
+     "video": 0.487,
+     "kupa_ref": 0.511,
+     "fark_yuzde": -4.7
+    },
+    "3": {
+     "video": 0.469,
+     "kupa_ref": 0.504,
+     "fark_yuzde": -7.0
+    },
+    "3.5": {
+     "video": 0.448,
+     "kupa_ref": 0.484,
+     "fark_yuzde": -7.5
+    },
+    "4": {
+     "video": 0.371,
+     "kupa_ref": 0.433,
+     "fark_yuzde": -14.3
+    }
+   },
+   "tutar": false
+  },
+  {
+   "N": 49200,
+   "kaynak": "N2 x 1.093^(1/0.62) (olculen us, bant ortalama)",
+   "toz_2_4sn": {
+    "2": {
+     "video": 0.544,
+     "kupa_ref": 0.508,
+     "fark_yuzde": 7.0
+    },
+    "2.5": {
+     "video": 0.527,
+     "kupa_ref": 0.511,
+     "fark_yuzde": 3.2
+    },
+    "3": {
+     "video": 0.514,
+     "kupa_ref": 0.504,
+     "fark_yuzde": 2.0
+    },
+    "3.5": {
+     "video": 0.474,
+     "kupa_ref": 0.484,
+     "fark_yuzde": -2.0
+    },
+    "4": {
+     "video": 0.406,
+     "kupa_ref": 0.433,
+     "fark_yuzde": -6.3
+    }
+   },
+   "tutar": true
+  }
+ ],
+ "N": 49200,
+ "bolge_px": 27311,
+ "glif": {
+  "sign_a": [
+   933,
+   1555,
+   124,
+   108
+  ],
+  "sign_b": [
+   1330,
+   1553,
+   147,
+   112
+  ],
+  "poster_w": 2400,
+  "sonsuz": [],
+  "bantlar": 1,
+  "sembol_kutu": [
+   943,
+   1024,
+   1455,
+   1506
+  ],
+  "murekkep_rengi": [
+   168.0,
+   74.0,
+   44.0
+  ],
+  "benzerlik": 0.157
+ },
+ "toz_2_4sn": {
+  "2": {
+   "video": 0.544,
+   "kupa_ref": 0.508,
+   "fark_yuzde": 7.0
+  },
+  "2.5": {
+   "video": 0.527,
+   "kupa_ref": 0.511,
+   "fark_yuzde": 3.2
+  },
+  "3": {
+   "video": 0.514,
+   "kupa_ref": 0.504,
+   "fark_yuzde": 2.0
+  },
+  "3.5": {
+   "video": 0.474,
+   "kupa_ref": 0.484,
+   "fark_yuzde": -2.0
+  },
+  "4": {
+   "video": 0.406,
+   "kupa_ref": 0.433,
+   "fark_yuzde": -6.3
+  }
+ },
+ "ihlal_en_buyuk": 0.0,
+ "gorunen_5sn": 0.996,
+ "gorunen_0_5sn": {
+  "0": 0.961,
+  "0.5": 0.001,
+  "1": 0.076,
+  "1.5": 0.235,
+  "2": 0.368,
+  "2.5": 0.455,
+  "3": 0.555,
+  "3.5": 0.652,
+  "4": 0.745,
+  "4.5": 0.848,
+  "5": 0.996,
+  "5.5": 1.0,
+  "6": 1.0
+ },
+ "taban_420": 1.522,
+ "ilk_kare_fark": 1.634,
+ "son_kare_fark": 1.619,
+ "sembol_bolgesi_4_97sn_fark": 3.387,
+ "sembol_bolgesi_son_kare_fark": 3.397,
+ "sembol_bolgesi_taban_420": 2.734,
+ "silme_izi": {
+  "silinen_px": 29040,
+  "cevre_px": 35020,
+  "parlaklik_farki": 1.102,
+  "doku_std_orani": 0.833,
+  "sapma8_orani_silinen": 0.0,
+  "sapma8_orani_cevre": 0.0,
+  "glif_bos_hal_farki": 0.0
+ },
+ "kapi": {
+  "olcu_6sn_sessiz": true,
+  "ilk_kare_kapak": true,
+  "son_kare_kapak": true,
+  "murekkep_tozun_onunde_degil": true,
+  "sembol_5sn_tam": true,
+  "toz_2_4sn_10yuzde": true,
+  "sembol_pikselleri_kapaktan": true,
+  "silme_izi_yok": true,
+  "glifler_degismedi": true
+ },
+ "sonuc": "PASS"
+}
