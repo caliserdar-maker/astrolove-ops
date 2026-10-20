@@ -87,6 +87,19 @@ def bul(mc, mpb, pid, uuid, tarih):
     return (m[0], 'uuid') if m else (None, f'uuid {uuid} listede yok ({len(liste)} gonderi)')
 
 
+def cift_esit(sko, p, cift):
+    """sko.cift_bul ayni burcu bir kez sayar (ARIES_ARIES -> None): once onu, sonra metin/baslikta 'X and|& Y' dener."""
+    c = sko.cift_bul(p)
+    if c is not None and '_'.join(x.upper() for x in c) == cift:
+        return True
+    b = '|'.join(sko.BURCLAR)
+    for t in (p.get('text'), (p.get('youtubeData') or {}).get('title')):
+        m = re.search(r'\b(' + b + r')\s*(?:&|and)\s*(' + b + r')\b', (t or '').lower())
+        if m and '_'.join(sorted((m.group(1).upper(), m.group(2).upper()))) == cift:
+            return True
+    return False
+
+
 def deger(x, yol):
     """'a.b[0].c' yolundaki deger (yoksa '<yok>')."""
     for parca in re.findall(r'[^.\[\]]+|\[\d+\]', yol):
@@ -100,19 +113,21 @@ def deger(x, yol):
     return x
 
 
-def izinli(yol, once, ag, medya=True):
+def izinli(yol, once, ag, medya=True, kapak=False):
     if yol == 'id' or yol.startswith('creationDate.') or (medya and yol == 'media[0]'):
+        return True
+    if kapak and ag == 'youtube' and yol == 'videoThumbnailUrl':   # --yt-kapak (20 Eki): yalniz YouTube kapagi
         return True
     if yol in IG_VARSAYILAN:
         return ag != 'instagram' and deger(once, yol) == '<yok>'
     return False
 
 
-def fark_tablosu(mpb, sko, once, simdi, ag, cikti, medya=True):
+def fark_tablosu(mpb, sko, once, simdi, ag, cikti, medya=True, kapak=False):
     """Alan alan fark: (satirlar, izinsiz). <cikti>/FARK.csv yazar. URL'ler sorgusuz."""
     def k(v):
         return sko.kisa(v) if isinstance(v, str) and v.startswith('http') else json.dumps(v, ensure_ascii=False, default=str)[:300]
-    satir = [{'alan': y, 'once': k(deger(once, y)), 'simdi': k(deger(simdi, y)), 'izinli': izinli(y, once, ag, medya)}
+    satir = [{'alan': y, 'once': k(deger(once, y)), 'simdi': k(deger(simdi, y)), 'izinli': izinli(y, once, ag, medya, kapak)}
              for y in mpb.fark(once, simdi)]
     os.makedirs(cikti, exist_ok=True)
     with open(os.path.join(cikti, 'FARK.csv'), 'w', newline='', encoding='utf-8') as f:
@@ -127,6 +142,7 @@ def main():
     a.add_argument('--ag', default=''); a.add_argument('--id', default=''); a.add_argument('--uuid', default='')
     a.add_argument('--hedef', default='', help='ag:id:uuid[,ag:id:uuid...]')
     a.add_argument('--video', default=''); a.add_argument('--kapak', default=''); a.add_argument('--once', default='')
+    a.add_argument('--yt-kapak', default='', help='jpg: YouTube hedeflerinde videoThumbnailUrl da bununla degisir (20 Eki)')
     o = a.parse_args()
     os.makedirs(o.cikti, exist_ok=True)
     yz = yukle('yz', os.path.join(D, 'metricool_5p_yaz.py'))
@@ -218,7 +234,7 @@ def main():
                 'saat_tz_istanbul': (once.get('publicationDate') or {}).get('timezone') == TZ,
                 f'yayina_>=_{MIN_SAAT}_sa': zaman - simdi_ist() >= timedelta(hours=MIN_SAAT),
                 'tek_mp4_medya': len(medya) == 1 and isinstance(medya[0], str) and medya[0].split('?')[0].endswith('.mp4'),
-                'cift': c is not None and '_'.join(x.upper() for x in c) == o.cift,
+                'cift': cift_esit(sko, once, o.cift),
                 'kapak_alani': bool(once.get('videoThumbnailUrl')), 'uuid': bool(uuid) and (not h['uuid'] or uuid == h['uuid'])}
         rapor['gonderiler'][uuid] = {'ag': h['ag'], 'id_once': once.get('id'), 'yayin': zaman.isoformat(), 'once_kapi': kapi}
         adim('once', ag=h['ag'], yol=yol, id=once.get('id'), uuid=uuid, yayin=str(zaman), durum=durum(once, h['ag']), cift=c,
@@ -247,6 +263,19 @@ def main():
     adim('donusturulmus_olcum', **q)
     if q['sonuc'] != 'PASS':
         dur('donusturulmus dosya kapisi: ' + ', '.join(k for k, v in q['kapilar'].items() if not v) + ' (hicbir gonderiye yazilmadi)')
+    yt_kapak_url = ''
+    if o.yt_kapak and any(h['ag'] == 'youtube' for h, *_ in onceler):
+        yt_kapak_url, yk2 = yz.video_yukle(mc, o.yt_kapak, 'image/jpeg', 'jpg')
+        k2 = os.path.join(o.cikti, '_kapak_geri.img')
+        hc = subprocess.run(['curl', '-sL', '-m', '120', '-o', k2, '-w', '%{http_code}', yt_kapak_url], capture_output=True, text=True).stdout
+        from PIL import Image
+        ref = np.asarray(Image.open(o.yt_kapak).convert('RGB'), np.float32)
+        kf = (round(float(np.abs(kb.kapak_dizi(k2, ref.shape[1], ref.shape[0]) - ref).mean()), 2) if hc == '200' else None)
+        if os.path.exists(k2):
+            os.remove(k2)
+        adim('yt_kapak_yukleme', url=sko.kisa(yt_kapak_url), boyut=yk2['boyut'], prob=yk2['prob'], geri_okuma_fark=kf)
+        if kf is None or kf >= kb.ESIK:
+            dur(f'YouTube kapak geri okuma: http {hc}, fark {kf} (hicbir gonderiye yazilmadi)')
 
     # 3) hedefler sirayla; ilk FAIL -> DUR
     for i, (h, once, uuid, zaman, d) in enumerate(onceler, 1):
@@ -259,7 +288,10 @@ def main():
                 f"({i - 1}/{len(onceler)} yazildi)")
         yeni = copy.deepcopy(once)
         yeni['media'][0] = yeni_url
-        if mpb.fark(once, yeni) != ['media[0]']:
+        kapak_da = bool(yt_kapak_url) and h['ag'] == 'youtube'
+        if kapak_da:
+            yeni['videoThumbnailUrl'] = yt_kapak_url
+        if sorted(mpb.fark(once, yeni)) != sorted(['media[0]'] + (['videoThumbnailUrl'] if kapak_da else [])):
             dur(f'govde farki beklenmedik: {mpb.fark(once, yeni)}')
         y = mc.istek('PUT', f"/v2/scheduler/posts/{once.get('id')}", govde=yeni, yok404=True)
         if y is mpb.YOK:
@@ -270,7 +302,7 @@ def main():
             g['sonuc'] = 'PUT sonrasi bulunamadi'
             dur(f"{h['ag']} PUT sonrasi bulunamadi: {yol}")
         json.dump(sonra, open(os.path.join(d, 'SONRA.json'), 'w'), ensure_ascii=False, indent=1)
-        satir, izinsiz = fark_tablosu(mpb, sko, once, sonra, h['ag'], d)
+        satir, izinsiz = fark_tablosu(mpb, sko, once, sonra, h['ag'], d, kapak=kapak_da)
         m_sonra = (sonra.get('media') or [''])[0]
         m2 = os.path.join(o.cikti, '_gonderideki.mp4')
         hc = subprocess.run(['curl', '-sL', '-m', '300', '-o', m2, '-w', '%{http_code}', m_sonra], capture_output=True, text=True).stdout
@@ -280,6 +312,8 @@ def main():
         kapi = {'izinsiz_fark_yok': not izinsiz, 'media0_yeni': m_sonra.split('?')[0] == yeni_url.split('?')[0],
                 'durum_PENDING': durum(sonra, h['ag']) == 'PENDING', 'uuid_ayni': str(sonra.get('uuid')) == uuid,
                 'gonderideki_video_PASS': q2['sonuc'] == 'PASS'}
+        if kapak_da:
+            kapi['yt_kapak_yeni'] = sko.kisa(sonra.get('videoThumbnailUrl') or '') == sko.kisa(yt_kapak_url)
         g.update(id_sonra=sonra.get('id'), fark=satir, kapilar=kapi, gonderideki_video=q2,
                  sonuc='PASS' if all(kapi.values()) else 'FAIL')
         adim('sonra', ag=h['ag'], id_yeni=sonra.get('id'), tablo=satir, izinsiz=izinsiz, kapilar=kapi)
