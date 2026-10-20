@@ -1,0 +1,126 @@
+name: yildonumu78-ek
+# 78 yil donumu: Serdar kararlari (21 Eki). (a) toz sapmasi <= %13,2 olan 24 video KABUL; ARIES_SAGITTARIUS tek duzeltme turuyla
+# yeniden uretilir (onceki kosunun turlarindan olculen us, bant ortalama; diger kapilar ayni), PASS ise YILDONUMU/'deki dosyanin
+# yerine gecer. (b) silme izi kapisi dusen 13 cift icin goz kontrolu kontagi (kapak | 0,5 sn | 1,5 sn, %200).
+# Cikti: YILDONUMU/KONTROL_GOZ/ (KONTAK_DOKU_*.jpg, ARIES_SAGITTARIUS.mp4, OLCUM_ARIES_SAGITTARIUS.txt) + KONTROL_YD.csv, OZET_YD.txt,
+# KONTAK_YD_*, YUKLEME_LISTESI.csv yeniden.
+# Etsy'ye ve Metricool'a YAZMA YOK.
+permissions:
+  contents: write   # yalniz poster-video-onizleme dalina
+  actions: read     # uretim kosusunun artifact'lari
+on:
+  workflow_dispatch:
+    inputs:
+      kosu:
+        description: 'yildonumu-video-78 kosu no'
+        default: '39470855000'
+      yeni:
+        description: 'yeniden uretilecek cift'
+        default: 'ARIES_SAGITTARIUS'
+env:
+  O: gdrive:ASTROLOVE/TEMP/ILAN_VIDEO_78_20261020
+jobs:
+  rapor:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Kurulum
+      run: |
+        set -euo pipefail
+        pip install -q numpy==2.1.3 pillow==11.0.0 scipy==1.14.1 opencv-python-headless==4.10.0.84
+        sudo apt-get -qq update >/dev/null && sudo apt-get -qq install -y ffmpeg fonts-dejavu-core >/dev/null
+        curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+    - name: rclone.conf
+      env:
+        RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      run: |
+        set -euo pipefail
+        mkdir -p ~/.config/rclone; umask 077
+        printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+        if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+          grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+    - name: Uretim kosusunun satir/kare artifact'lari
+      env:
+        GH_TOKEN: ${{ github.token }}
+        KOSU: ${{ inputs.kosu }}
+      run: |
+        set -euo pipefail
+        case "$KOSU" in *[!0-9]*|'') echo "::error::kosu no gecersiz"; exit 1 ;; esac
+        gh run download "$KOSU" -R "$GITHUB_REPOSITORY" -p 'yd-satir-*' -D _dl
+        mkdir -p _a; for d in _dl/*/; do cp -r "$d"* _a/; done
+        echo "satir $(ls _a/satir | wc -l), kare $(ls _a/kare | wc -l)"
+    - name: Yeniden uretim + goz kontrolu + KONTROL_YD + YUKLEME_LISTESI + Drive
+      env:
+        C: ${{ inputs.yeni }}
+        KY: gdrive:ASTROLOVE/TEMP/KAPAK_Y1_78_20261019/KAPAK
+      run: |
+        set +e -uo pipefail
+        case "$C" in *[!A-Z_]*|'') echo "::error::cift gecersiz"; exit 1 ;; esac
+        mkdir -p _v _r _k _n _g
+        rclone copy "$O/YILDONUMU" _v -q --include '*_yd_video.mp4'
+        # (a) yeniden uretim
+        rclone copyto "$KY/$C.jpg" "_k/$C.jpg" -q
+        YD_TOPLU=1 YD_ONCEKI="_a/satir/$C.json" python3 -I sosyal/poster_video/yildonumu_qc.py "_k/$C.jpg" "$C" _n _w/is | tee _n_log.txt
+        python3 - <<'EOF' > "_g/OLCUM_$C.txt"
+        import json, os
+        c = os.environ['C']; r = json.load(open(f'_n/satir/{c}.json'))
+        o = r['N_turlari'][0]['onceki_turlar']; n = r['N_turlari'][1]
+        print(f"{c} yeniden uretim (Serdar karar a, 21 Eki): tek duzeltme turu; sonuc {r['sonuc']}")
+        for t in o:
+            print(f"onceki N {t['N']} ({t['kaynak']}): toz % " + ' '.join(f"{k}s {v['fark_yuzde']:+}" for k, v in t['toz_2_4sn'].items()))
+        print(f"yeni   N {n['N']} ({n['kaynak']}): toz % " + ' '.join(f"{k}s {v['fark_yuzde']:+}" for k, v in n['toz_2_4sn'].items()))
+        print('kapilar: ' + ', '.join(f"{k}={'PASS' if v else 'FAIL'}" for k, v in r['kapi'].items()))
+        print(f"ilk kare {r['ilk_kare_fark']} / son kare {r['son_kare_fark']} (taban {r['taban_420']} + 0,2); gorunen 5 sn {r['gorunen_5sn']}; "
+              f"murekkep ihlal {r['ihlal_en_buyuk']}; silme izi {r['silme_izi']}")
+        print(f"toz rengi {r['glif']['murekkep_rengi']}; probe {r['probe']}")
+        EOF
+        cat "_g/OLCUM_$C.txt"
+        cp "_n/${C}_yd_video.mp4" "_g/$C.mp4"
+        if [ "$(python3 -c "import json;print(json.load(open('_n/satir/$C.json'))['sonuc'])")" = PASS ]; then
+          cp "_n/${C}_yd_video.mp4" "_v/${C}_yd_video.mp4"; cp "_n/satir/$C.json" _a/satir/; cp _n/kare/* _a/kare/
+          rclone copyto "_n/${C}_yd_video.mp4" "$O/YILDONUMU/${C}_yd_video.mp4" -q && echo "::warning::$C PASS: YILDONUMU/${C}_yd_video.mp4 yenisiyle degisti"
+        else
+          echo "::warning::$C yeni video PASS degil: YILDONUMU/'deki eski dosya kaldi, yeni yalniz KONTROL_GOZ/'de"
+        fi
+        # (b) goz kontrolu
+        mkdir -p _gk
+        for J in _a/satir/*.json; do
+          D=$(basename "$J" .json)
+          python3 -c "import json,sys;sys.exit(0 if not json.load(open('$J'))['kapi'].get('silme_izi_yok', True) else 1)" && rclone copyto "$KY/$D.jpg" "_gk/$D.jpg" -q
+        done
+        python3 -I sosyal/poster_video/yildonumu_goz.py _a/satir _v _gk _g
+        # rapor
+        rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_ILK_GORSEL_20261019/ILANLAR.csv" _ilanlar.csv -q
+        rclone copyto "$O/YUKLEME_LISTESI.csv" _yl.csv -q
+        python3 -I sosyal/poster_video/yildonumu78_rapor.py _a/satir _a/kare _v _ilanlar.csv _yl.csv _r | tee _r_log.txt; RC=${PIPESTATUS[0]}
+        sed 's/^/::warning::OZET /' _r/OZET_YD.txt | head -3 | cut -c1-2500
+        mkdir -p _r/SATIR_YD && cp _a/satir/*.json _r/SATIR_YD/
+        rclone copy _r "$O/YILDONUMU" -q --exclude 'YUKLEME_LISTESI.csv'
+        [ -s _r/YUKLEME_LISTESI.csv ] && rclone copyto _r/YUKLEME_LISTESI.csv "$O/YUKLEME_LISTESI.csv" -q
+        rclone copy _g "$O/YILDONUMU/KONTROL_GOZ" -q
+        echo "::warning::DRIVE KONTROL_GOZ $(rclone lsf "$O/YILDONUMU/KONTROL_GOZ" --files-only | tr '\n' ' ')"
+        cp _g/*.jpg _g/*.txt _r/ 2>/dev/null
+        echo "RC=0" >> "$GITHUB_ENV"
+    - name: Onizleme dali
+      if: ${{ always() }}
+      run: |
+        set +e -uo pipefail
+        [ -d _r ] || exit 0
+        B=poster-video-onizleme; PV=yildonumu78_ek
+        git config user.name "github-actions"; git config user.email "actions@github.com"
+        for i in 1 2 3; do
+          rm -rf _pvw; git worktree prune
+          git fetch -q origin $B && git worktree add -q _pvw origin/$B || break
+          rm -rf "_pvw/$PV"; mkdir -p "_pvw/$PV"; cp _r/*.jpg _r/*.csv _r/*.txt "_pvw/$PV/"
+          (cd _pvw && git add -A && git commit -qm "yil donumu 78 onizleme (kosu ${{ github.run_id }})" && git push -q origin HEAD:refs/heads/$B) && { echo "::warning::ONIZLEME $B/$PV"; break; }
+          sleep 5
+        done
+    - name: Sonuc
+      if: ${{ always() }}
+      run: |
+        rm -rf ~/.config/rclone _v
+        [ "${RC:-1}" = "0" ]

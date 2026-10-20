@@ -59,7 +59,20 @@ def tur(env):
 
 
 tutar = lambda tb: all(abs(v['fark_yuzde']) <= 10 for v in tb.values())
-if TOPLU:
+if TOPLU and os.environ.get('YD_ONCEKI'):   # karar (a) 21 Eki: onceki kosunun turlarindan tek duzeltme (yalniz bu uretim)
+    _o = json.load(open(os.environ['YD_ONCEKI']))['N_turlari']
+    if len(_o) >= 2:
+        _u = float(np.median([np.log(_o[-1]['toz_2_4sn'][k]['video'] / _o[-2]['toz_2_4sn'][k]['video']) for k in _o[-1]['toz_2_4sn']])
+                   / np.log(_o[-1]['N'] / _o[-2]['N']))
+    else:
+        _u = YD_US
+    _u = max(_u, 0.2)
+    _rs = [v['kupa_ref'] / max(v['video'], 1e-6) for v in _o[-1]['toz_2_4sn'].values()]; _h = float(np.sqrt(min(_rs) * max(_rs)))
+    _N = int(round(_o[-1]['N'] * _h ** (1 / _u) / 100.0) * 100)
+    ic, SM, F, tab, log = tur({'V6_N': str(_N)})
+    turlar = [{'onceki_turlar': _o}, {'N': ic['N'], 'kaynak': f'onceki N {_o[-1]["N"]} x {_h:.3f}^(1/{_u:.2f}) (olculen us, bant ortalama)',
+                                      'toz_2_4sn': tab, 'tutar': tutar(tab)}]
+elif TOPLU:
     ic, SM, F, tab, log = tur({'V6_N': str(YD_N_REF), 'V6_BOLGE_REF': str(YD_BOLGE_REF), 'V6_N_REF': str(YD_N_REF)})
     turlar = [{'N': ic['N'], 'kaynak': 'N = 49200 x bolge / CL Y1 bolgesi', 'toz_2_4sn': tab, 'tutar': tutar(tab)}]
     if not tutar(tab):   # tek duzeltme: bandi ortala (CL olculen us)
@@ -158,7 +171,7 @@ if TOPLU:
         Image.fromarray(f_).resize((360, 360), Image.LANCZOS).save(os.path.join(OUT, 'kare', f'{CIFT}_yd_{ek}.jpg'), quality=88)
     for e in ('.ic.json', '.sembol_maske.png', '.bos.png', '.silme.png'):
         os.replace(V + e, os.path.join(IS, os.path.basename(V) + e))
-    print(f"{CIFT} {R['sonuc']} N {[t['N'] for t in turlar]} toz% {[v['fark_yuzde'] for v in tab.values()]} "
+    print(f"{CIFT} {R['sonuc']} N {[t['N'] for t in turlar if 'N' in t]} toz% {[v['fark_yuzde'] for v in tab.values()]} "
           f"glif {g_['benzerlik']} {' '.join(k for k, v in R['kapi'].items() if not v)}", flush=True)
     sys.exit(0)
 json.dump(R, open(os.path.join(OUT, 'QC.json'), 'w'), indent=1, default=str)
