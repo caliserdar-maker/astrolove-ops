@@ -99,6 +99,11 @@ WS, WM = np.clip(vid(RS_p), 0, 1), np.clip(vid(RM_p), 0, 1)      # karisim agirl
 MM = cv2.dilate(MM, np.ones((3, 3), np.uint8))
 XX = np.arange(VW, dtype=np.float32)[None, :].repeat(VH, 0)
 print(f'poster kapakta {x0},{y0} {cw}x{ch} oran {ch / cw:.3f}; sonsuz {len(sonsuz)} parca, mesaj {len(mes)} parca', flush=True)
+GLIF = {'sign_a': [int(v) for v in P.sign_a[1:5]], 'sign_b': [int(v) for v in P.sign_b[1:5]], 'poster_w': int(P.w),
+        'sonsuz': [[int(v) for v in c[1:5]] for c in sonsuz]}   # QC (78 uretim): glif ve sonsuz yerleri (poster 2000 px olcegi)
+_g = [cv2.resize(P.alpha[y:y + h, x:x + w].astype(np.float32), (64, 64), interpolation=cv2.INTER_AREA) for _, x, y, w, h, _ in (P.sign_a, P.sign_b)]
+_g = [(g - g.mean()) / (g.std() + 1e-6) for g in _g]
+GLIF['benzerlik'] = round(float((_g[0] * _g[1]).mean()), 3)   # iki glifin NCC'si (ayni burcta yuksek olmali)
 Image.fromarray(((MS > 0.95) * 255).astype(np.uint8)).save(OUT + '.sembol_maske.png')   # QC: cekirdek sembol pikselleri
 
 
@@ -124,6 +129,9 @@ def noktalar(m, N):
 
 
 N = int(os.environ.get('V6_N', '26000'))                 # v6: kalibre (v5: 26000)
+BOLGE_PX = int((cv2.dilate((MS > 0.95).astype(np.uint8), np.ones((15, 15), np.uint8)) > 0).sum())   # olcum bolgesi (v6_kalibre)
+if os.environ.get('V6_BOLGE_REF'):   # 78 uretim (20 Eki): N = 58000 x bolge alani / CL bolge alani
+    N = int(round(float(os.environ.get('V6_N_REF', '58000')) * BOLGE_PX / float(os.environ['V6_BOLGE_REF']) / 100.0) * 100)
 src, dst = noktalar(MG, N), noktalar(MS, N)
 os_, od = np.median(src[:, 0]), np.median(dst[:, 0])
 sol = src[:, 0] < os_
@@ -210,5 +218,5 @@ for i in range(nT):
 pr.stdin.close(); pr.wait()
 print(f'{nT} kare ({nT / FPS:.2f} sn), toz/yazi bitis {BITIS} sn, uretim {time.time() - t0:.0f}s', flush=True)
 import json
-json.dump({'N': N, 'tane_sigma': {'v4': 0.9, 'v5': TANE}, 'c_egri': [round(float(x), 4) for x in C_EGRI], **IC}, open(OUT + '.ic.json', 'w'))
+json.dump({'N': N, 'bolge_px': BOLGE_PX, 'glif': GLIF, 'tane_sigma': {'v4': 0.9, 'v5': TANE}, 'c_egri': [round(float(x), 4) for x in C_EGRI], **IC}, open(OUT + '.ic.json', 'w'))
 print('tamam', OUT)
