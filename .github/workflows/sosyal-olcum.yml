@@ -1,0 +1,74 @@
+name: sosyal-olcum
+# Sosyal once/sonra olcumu (SALT OKUMA, yalniz GET; Metricool'a / aglara yazma yok). Baslangic 20 Eki 2026; 27 Eki ve 3 Kas ayni is.
+# scripts/sosyal/analiz/olcum.py --tarih T: 6 ag hesap gunluk (T-14..T-1, Europe/Istanbul) + T-14..T yayinlanan gonderiler
+# (eski/yeni gorunum etiketi, esik --degisim). Cikti Drive TEMP/<klasor>/ (her ag GUNLUK/GONDERI csv, OZET.txt, TANIMLAR.txt, HAM/).
+# Token: secret METRICOOL_USER_TOKEN; loga yazilmaz (::add-mask:: + sir_koru).
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      tarih:
+        description: "olcum gunu YYYY-MM-DD (bos: bugun, Istanbul); veri tarih-1 gunune kadar"
+        default: ""
+      klasor:
+        description: "Drive TEMP altindaki cikti klasoru (bos: OLCUM_<YYYYMMDD>)"
+        default: ""
+      degisim:
+        description: "yeni gorunum esigi (Istanbul)"
+        default: "2026-10-21T00:00"
+jobs:
+  oku:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tarih + klasor
+        env:
+          TARIH: ${{ inputs.tarih }}
+          KLASOR: ${{ inputs.klasor }}
+        run: |
+          set -euo pipefail
+          T="${TARIH:-$(TZ=Europe/Istanbul date +%Y-%m-%d)}"
+          [[ "$T" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || { echo "::error::tarih bicimi"; exit 1; }
+          K="${KLASOR:-OLCUM_${T//-/}}"
+          [[ "$K" =~ ^[A-Z0-9_]+$ ]] || { echo "::error::klasor bicimi"; exit 1; }
+          echo "T=$T" >> "$GITHUB_ENV"; echo "O=gdrive:ASTROLOVE/TEMP/$K" >> "$GITHUB_ENV"; echo "tarih $T -> TEMP/$K"
+      - name: rclone + token
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+          mkdir -p ~/.config/rclone _work _out; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Analiz (yalniz GET)
+        env:
+          MC_TOK: ${{ secrets.METRICOOL_USER_TOKEN }}
+          DEGISIM: ${{ inputs.degisim }}
+        run: |
+          set -uo pipefail
+          umask 077
+          [ -n "${MC_TOK:-}" ] || { echo "::error::METRICOOL_USER_TOKEN bos"; exit 1; }
+          echo "::add-mask::$MC_TOK"
+          rclone copyto "gdrive:ASTROLOVE/TEMP/METRICOOL_TOKEN.json" _work/kimlik.json
+          python3 -c "import json,os;d=json.load(open('_work/kimlik.json'));json.dump({'userToken':os.environ['MC_TOK'],'userId':d['userId'],'blogId':d['blogId']},open('_work/mc.json','w'))"
+          python3 -c "import json;print('::add-mask::'+json.load(open('_work/kimlik.json'))['userToken'])"
+          python3 scripts/sosyal/analiz/olcum.py _work/mc.json _out --tarih "$T" --degisim "$DEGISIM" | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json --sir-json _work/kimlik.json "$GITHUB_STEP_SUMMARY"
+          rc=${PIPESTATUS[0]}
+          mkdir -p _work/engel
+          find _out -type f | while read -r f; do
+            python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/mc.json --sir-json _work/kimlik.json "$f" >/dev/null 2>&1 \
+              || { echo "TARAMA GECMEDI (Drive'a gitmez): $(basename "$f")"; mv "$f" _work/engel/; }
+          done
+          python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/mc.json --sir-json _work/kimlik.json _out || exit 1
+          rclone copy _out "$O" -q
+          rclone lsl "$O" | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
+          exit $rc
+      - if: always()
+        run: |
+          rm -rf _work ~/.config/rclone
+          if [ -f "$RUNNER_TEMP/SIR_ENGEL" ]; then echo "::error::sir iceren satir engellendi (sir_koru)"; exit 1; fi
