@@ -100,7 +100,10 @@ class PosterV(PU.PosterR):
         self.halka_alti = [[int(v) for v in c[1:6]] for c in alt]
 
 
-P = PosterV(tmp); os.remove(tmp)
+try:
+    P = PosterV(tmp)
+finally:   # ayristirma dusse de gecici kirpim cikti klasorunde kalmasin (20 Eki: LIBRA_TAURUS ._poster.png Drive'a gitmisti)
+    os.remove(tmp)
 
 
 def vid(m):
