@@ -1,0 +1,93 @@
+name: urun-gorsel-cl
+# URUN GORSELI CANCER_LIBRA (21 Eki 2026, Serdar onayi), TEK KOSU. Etsy'ye yalniz GET (ilan stil/renk dogrulamasi), yazma YOK.
+# 1) canli ilan dogrulamasi (poster 4570143815, kupa 4598525642, yil donumu 4595350971; kilit_bekle)
+# 2) 5 renk poster 8x10: siparis_dosyasi.py (siparis-baski-v1, degistirilmeden) EMILY / JAMES / "It Began With a Kiss in the Rain"
+# 3) yerelde uretilen 16 kupa + 5 yil donumu PNG (gecici/urun-gorsel-cl dali, sha256 kontrollu) + 5 poster PNG -> KONTAK, ZIP, LISTE
+# Cikti: Drive ASTROLOVE/TEMP/URUN_GORSEL_CL_20261021/ (hat ara dosyalari _HAT/ altinda)
+permissions:
+  actions: read
+  contents: read
+on:
+  workflow_dispatch: {}
+jobs:
+  uret:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      O: gdrive:ASTROLOVE/TEMP/URUN_GORSEL_CL_20261021
+    steps:
+      - uses: actions/checkout@v4
+      - name: Guvenlik (dogrulama betiginde yazma metodu yok)
+        run: |
+          if grep -nE "\.(patch|put|post|delete|post_json|put_json|post_file)\(|requests\.(patch|put|post|delete)" scripts/etsy/urun_ilan_dogrula.py; then
+            echo "::error::salt okur betikte yazma metodu"; exit 1; fi
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - uses: actions/checkout@v4
+        with:
+          ref: siparis-baski-v1
+          path: _sb
+      - uses: actions/checkout@v4
+        with:
+          ref: gecici/urun-gorsel-cl
+          path: _pk
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Bagimliliklar + rclone
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet --upgrade pip
+          python -m pip install --quiet pillow opencv-python-headless numpy fonttools scipy requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone _work _out; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Canli ilan dogrulamasi (yalniz GET)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -uo pipefail
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          python3 scripts/etsy/urun_ilan_dogrula.py _out | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "ILAN_RC=${PIPESTATUS[0]}" >> "$GITHUB_ENV"
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "token geri yazildi" || true
+      - name: 5 renk poster 8x10 (siparis_dosyasi.py)
+        run: |
+          set -euo pipefail
+          M=$(python3 -c "import base64;print(base64.b64encode('It Began With a Kiss in the Rain'.encode()).decode())")
+          i=0; t0=$(date +%s)
+          for R in MIDNIGHT_BLUE DEEP_BLACK PURE_WHITE CHAMPAGNE_IVORY WARM_PARCHMENT; do
+            i=$((i+1))
+            ( cd _sb && python scripts/medya_v1/siparis_dosyasi.py --cift CANCER_LIBRA --renk $R --boy 8x10 --isim1 EMILY --isim2 JAMES \
+                --mesaj-b64 "$M" --sip-kok "$O/_HAT" ) > _work/hat_$R.log 2>&1 || { tail -20 _work/hat_$R.log; exit 1; }
+            f=_sb/_siparis/CANCER_LIBRA_${R}_8x10/BASKI_8x10.jpg
+            [ -f "$f" ] || { echo "::error::hat ciktisi yok $f"; tail -20 _work/hat_$R.log; exit 1; }
+            python3 scripts/sosyal/urun_gorsel_cl.py duz "$f" "_pk/PAKET/POSTER_${R}.png" poster "$R"
+            g=$(( $(date +%s)-t0 )); echo "[$i/5 %$((i*20))] $R gecen ${g}s kalan ~$(( g/i*(5-i) ))s"
+          done
+      - name: Paket (KONTAK, ZIP, LISTE) + Drive
+        run: |
+          set -euo pipefail
+          ( cd _pk && sha256sum -c PAKET.sha256 )
+          n=$(ls _pk/PAKET/*.png | wc -l); echo "PNG $n"; [ "$n" = 26 ] || { echo "::error::PNG sayisi $n (26 bekleniyor)"; exit 1; }
+          python3 scripts/sosyal/urun_gorsel_cl.py paket _pk/PAKET
+          cp _out/ILAN_DOGRULAMA.txt _pk/PAKET/ 2>/dev/null || true
+          [ -f _pk/KUPA_OLCUM.json ] && cp _pk/KUPA_OLCUM.json _pk/PAKET/
+          [ -f _pk/NOT.txt ] && cat _pk/NOT.txt >> _pk/PAKET/LISTE.txt
+          rclone copy _pk/PAKET "$O" --transfers 8 -q
+          rclone lsl "$O" --max-depth 1
+          exit ${ILAN_RC:-1}
+      - if: always()
+        run: rm -rf _work ~/.config/rclone
