@@ -1,6 +1,8 @@
 name: burc-gift-yaz
 # Burc hediye ifadesi + yil donumu 77 ilan plani TEK KOSU (Serdar kararlari 22 Eki; PLAN_BURC_GIFT v3). scripts/etsy/burc_gift_yaz.py
 # yedek / siparis = SALT OKUMA. yaz = ETSY'YE YAZAR: onay SERDAR_BURC_GIFT + kume (cl -> pilot -> kalan).
+# geri_al = ETSY'YE YAZAR: onay SERDAR_GERI_AL + yedek_dizin (TEMP/BURC_GIFT_20261022/ altindaki yedek klasoru).
+# yaz, yazmadan once kumenin yedegini Drive'a yukler ve sayar (YEDEK_DRIVE).
 # Girdiler Drive'dan; onayli metin dosyalari sha256 ile sabit (degismisse DUR). Cikti: Drive TEMP/BURC_GIFT_20261022/<mod>_<kume>_<run>/.
 permissions:
   actions: read
@@ -8,22 +10,29 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-      mod: {description: "yedek | siparis | yaz", required: true, default: "yedek"}
+      mod: {description: "yedek | siparis | yaz | geri_al", required: true, default: "yedek"}
       kume: {description: "cl | pilot | kalan | id1,id2 (yedek icin hepsi de olur)", required: true, default: "cl"}
-      onay: {description: "yaz icin SERDAR_BURC_GIFT", required: false, default: ""}
+      onay: {description: "yaz icin SERDAR_BURC_GIFT, geri_al icin SERDAR_GERI_AL", required: false, default: ""}
+      yedek_dizin: {description: "geri_al: TEMP/BURC_GIFT_20261022/ altindaki yedek klasoru (orn. on_yedek_123/YEDEK_yaz_cl)", required: false, default: ""}
 env:
   SONRA_SHA: 12403d91f229946c1ce43bbfc1bfeaa8db5359fdcf6e7d2299ee70ba68eead4b
   ONCE_SHA: 3539e1bc28415df789581e865f188b8d72e3f062549583ae7f2f56ff90c997a4
 jobs:
   is:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 300   # kilit bekleme en fazla 120 dk + is
     steps:
       - name: Onay kapisi
-        env: {ONAY: "${{ inputs.onay }}", MOD: "${{ inputs.mod }}", KUME: "${{ inputs.kume }}"}
+        env: {ONAY: "${{ inputs.onay }}", MOD: "${{ inputs.mod }}", KUME: "${{ inputs.kume }}", YD: "${{ inputs.yedek_dizin }}"}
         run: |
           [[ "$KUME" =~ ^(cl|pilot|kalan|hepsi|[0-9]+(,[0-9]+)*)$ ]] || { echo "::error::kume"; exit 1; }
-          case "$MOD" in yedek|siparis) ;; yaz) [ "$ONAY" = "SERDAR_BURC_GIFT" ] || { echo "::error::onay yok"; exit 1; } ;; *) echo "::error::mod"; exit 1 ;; esac
+          case "$MOD" in
+            yedek|siparis) ;;
+            yaz) [ "$ONAY" = "SERDAR_BURC_GIFT" ] || { echo "::error::onay yok"; exit 1; } ;;
+            geri_al) [ "$ONAY" = "SERDAR_GERI_AL" ] || { echo "::error::onay yok"; exit 1; }
+                     [[ "$YD" =~ ^[A-Za-z0-9_,-]+(/[A-Za-z0-9_,-]+)*$ ]] || { echo "::error::yedek_dizin"; exit 1; } ;;
+            *) echo "::error::mod"; exit 1 ;;
+          esac
       - uses: actions/checkout@v4
       - name: Etsy kilidi (sira bekle, iptal yok)
         env:
@@ -57,16 +66,21 @@ jobs:
           rclone copyto "gdrive:ASTROLOVE/TEMP/DENETIM_20261021/AKTIF_METIN_39686295137/AKTIF_METIN.json" _work/ONCE.json
           echo "$SONRA_SHA  _work/SONRA_234.json" | sha256sum -c -
           echo "$ONCE_SHA  _work/ONCE.json" | sha256sum -c -
+          if [ "${{ inputs.mod }}" = "geri_al" ]; then
+            rclone copy "gdrive:ASTROLOVE/TEMP/BURC_GIFT_20261022/${{ inputs.yedek_dizin }}" _work/GERI --include "*.json"
+            echo "geri alma yedegi: $(ls _work/GERI | wc -l) dosya"
+          fi
       - name: Calistir
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
           TOKEN_FILE: _work/ETSY_TOKEN.json
+          YEDEK_DRIVE: gdrive:ASTROLOVE/TEMP/BURC_GIFT_20261022/on_yedek_${{ github.run_id }}
           MOD: ${{ inputs.mod }}
           KUME: ${{ inputs.kume }}
           ONAY: ${{ inputs.onay }}
-        run: python3 scripts/etsy/burc_gift_yaz.py --mod "$MOD" --kume "$KUME" --onay "$ONAY" --once _work/ONCE.json --sonra _work/SONRA_234.json --out _out
+        run: python3 scripts/etsy/burc_gift_yaz.py --mod "$MOD" --kume "$KUME" --onay "$ONAY" --once _work/ONCE.json --sonra _work/SONRA_234.json --out _out $( [ "$MOD" = geri_al ] && echo "--yedek-dizin _work/GERI" )
       - name: Token geri yaz + cikti Drive'a
         if: ${{ always() }}
         env:
