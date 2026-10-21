@@ -125,10 +125,10 @@ def profil_yeni(api, shop, out, R):
         pid = var[0]["shipping_profile_id"]
         R["olay"] = f"profil zaten var {pid}"
     else:
-        body = {"title": YENI_PROFIL_AD, "origin_country_iso": "TR", "primary_cost": 0, "secondary_cost": 0,
+        body = {"title": YENI_PROFIL_AD, "origin_country_iso": "US", "origin_postal_code": "28216", "primary_cost": 0, "secondary_cost": 0,
                 "min_processing_time": 1, "max_processing_time": 3, "processing_time_unit": "business_days",
                 "destination_country_iso": "US", "min_delivery_days": 1, "max_delivery_days": 2}
-        # Etsy olusturmada region "none" kabul etmiyor (21 Eki 400): once US 0, sonra "diger tum ulkeler" 0 eklenir (by78_ksa yontemi)
+        # Cikis US 28216 = mevcut BY profiliyle ayni (Serdar 21 Eki; TR posta kodu zorunlu 400). Etsy olusturmada region "none" kabul etmiyor (21 Eki 400): once US 0, sonra "diger tum ulkeler" 0 eklenir (by78_ksa yontemi)
         y = api.post(f"/shops/{shop}/shipping-profiles", body) or {}
         pid = y.get("shipping_profile_id")
         if not pid:
