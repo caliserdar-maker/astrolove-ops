@@ -127,12 +127,20 @@ def profil_yeni(api, shop, out, R):
     else:
         body = {"title": YENI_PROFIL_AD, "origin_country_iso": "TR", "primary_cost": 0, "secondary_cost": 0,
                 "min_processing_time": 1, "max_processing_time": 3, "processing_time_unit": "business_days",
-                "destination_region": "none", "min_delivery_days": 1, "max_delivery_days": 2}
+                "destination_country_iso": "US", "min_delivery_days": 1, "max_delivery_days": 2}
+        # Etsy olusturmada region "none" kabul etmiyor (21 Eki 400): once US 0, sonra "diger tum ulkeler" 0 eklenir (by78_ksa yontemi)
         y = api.post(f"/shops/{shop}/shipping-profiles", body) or {}
         pid = y.get("shipping_profile_id")
         if not pid:
             raise Dur(f"profil olusmadi: {str(y)[:300]}")
         R["olay"] = f"profil olusturuldu {pid}"
+    P0 = api.get(f"/shops/{shop}/shipping-profiles/{pid}") or {}
+    if not any((d.get("destination_region") or "").lower() == "none" and not d.get("destination_country_iso")
+               for d in P0.get("shipping_profile_destinations") or []):
+        api.post(f"/shops/{shop}/shipping-profiles/{pid}/destinations",
+                 {"primary_cost": 0, "secondary_cost": 0, "destination_region": "none", "min_delivery_days": 1, "max_delivery_days": 2})
+        R["olay"] += " + diger tum ulkeler 0 USD eklendi"
+        kota(api)
     P = profil_ozet(api.get(f"/shops/{shop}/shipping-profiles/{pid}") or {})
     R["yeni_profil"] = P
     if not any(h["bolge"] == "none" and not h["ulke"] for h in P["hedefler"]):
