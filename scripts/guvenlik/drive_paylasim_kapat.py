@@ -76,7 +76,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--mod", choices=["kuru", "uygula"], required=True)
     ap.add_argument("--hedef", required=True, help="hedef klasor kimliginin sha256 ilk 12 hanesi")
-    ap.add_argument("--tara", default="SIPARIS_ISIM,KUPA_SIPARIS", help="ASTROLOVE altindaki sayim kokleri")
+    ap.add_argument("--tara", default="TEMP/SIPARIS_ISIM,SIPARIS_ISIM,KUPA_SIPARIS", help="ASTROLOVE altindaki sayim kokleri")
     ap.add_argument("--cikti", required=True)
     a = ap.parse_args()
     os.makedirs(a.cikti, exist_ok=True)
