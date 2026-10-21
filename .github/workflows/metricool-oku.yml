@@ -2,32 +2,21 @@ name: metricool-oku
 
 # SALT OKUMA: Metricool bagli hesaplar + Instagram ozellikleri (yalniz GET) + Metricool API sinirlamalari
 # yardim sayfasi + GitHub Pages sinirlari belgesi. Metricool'a YAZMA YOK.
-# Ozet ve kamuya acik belgeler claude/* dalina; ham hesap yanitlari yalniz Drive TEMP/SOSYAL/METRICOOL_OKU/.
+# Tum cikti yalniz Drive TEMP/SOSYAL/METRICOOL_OKU/ (ozet + ham yanitlar + belgeler). Depoya/dala push YOK
+# (denetim 21 Eki B22, PLAN P0.2: public dal kanali kapatildi).
 
 permissions:
-  contents: write
+  contents: read
 
 on:
-  workflow_dispatch:
-    inputs:
-      dal:
-        description: "Ozetin yazilacagi dal (claude/ ile baslamali)"
-        required: true
-        default: claude/keen-euler-sdjdfx
+  workflow_dispatch: {}
 
 jobs:
   oku:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Dal denetimi
-        env:
-          DAL: ${{ inputs.dal }}
-        run: |
-          case "$DAL" in claude/*) ;; *) echo "DUR: dal claude/ ile baslamali" >&2; exit 1;; esac
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.dal }}
       - name: rclone + token
         env:
           RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
@@ -43,24 +32,17 @@ jobs:
           mkdir -p /tmp/w && rclone copyto "gdrive:ASTROLOVE/TEMP/METRICOOL_TOKEN.json" /tmp/w/mc.json
           python3 -c "import json;print('::add-mask::'+json.load(open('/tmp/w/mc.json'))['userToken'])"
       - name: Oku
-        env:
-          DAL: ${{ inputs.dal }}
         run: |
           set -euo pipefail
-          K=data/sosyal/kaynak/metricool; mkdir -p "$K" /tmp/o
+          mkdir -p /tmp/o
           python3 scripts/sosyal/metricool_hesaplar.py /tmp/w/mc.json /tmp/o | python3 scripts/guvenlik/sir_koru.py tee --sir-json /tmp/w/mc.json "$GITHUB_STEP_SUMMARY"
-          rclone copy /tmp/o gdrive:ASTROLOVE/TEMP/SOSYAL/METRICOOL_OKU --include "HAM_*.json"
-          cp /tmp/o/HESAPLAR.json "$K/HESAPLAR_$(date -u +%Y%m%d).json"
-          curl -fsSL -o "$K/METRICOOL_API_SINIRLAMALAR.html" "https://help.metricool.com/api-limitations-per-social-network-n7zlr" || echo "sinirlamalar sayfasi alinamadi"
-          curl -fsSL -o "$K/GITHUB_PAGES_LIMITS.html" "https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits" || echo "pages limits alinamadi"
-          curl -fsSL -o "$K/GITHUB_LARGE_FILES.html" "https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-large-files-on-github" || echo "large files alinamadi"
-          ls -la "$K" | python3 scripts/guvenlik/sir_koru.py tee --sir-json /tmp/w/mc.json "$GITHUB_STEP_SUMMARY"
-          git config user.name "astrolove-ops"; git config user.email "actions@users.noreply.github.com"
-          git add -A "$K"; git diff --cached --quiet || { git commit -qm "metricool-oku: hesap ozeti + kaynak belgeler (${GITHUB_RUN_ID})"; git push origin "HEAD:$DAL"; }
-      - if: always()
-        run: rm -rf /tmp/w ~/.config/rclone
-
+          curl -fsSL -o "/tmp/o/METRICOOL_API_SINIRLAMALAR.html" "https://help.metricool.com/api-limitations-per-social-network-n7zlr" || echo "sinirlamalar sayfasi alinamadi"
+          curl -fsSL -o "/tmp/o/GITHUB_PAGES_LIMITS.html" "https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits" || echo "pages limits alinamadi"
+          curl -fsSL -o "/tmp/o/GITHUB_LARGE_FILES.html" "https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-large-files-on-github" || echo "large files alinamadi"
+          python3 scripts/guvenlik/sir_koru.py tara --sir-json /tmp/w/mc.json /tmp/o || { echo "::error::ciktida sir"; exit 1; }
+          rclone copy /tmp/o "gdrive:ASTROLOVE/TEMP/SOSYAL/METRICOOL_OKU/${GITHUB_RUN_ID}"
+          ls -la /tmp/o | python3 scripts/guvenlik/sir_koru.py tee --sir-json /tmp/w/mc.json "$GITHUB_STEP_SUMMARY"
       - if: always()
         run: |
-          rm -rf _work ~/.config/rclone
+          rm -rf /tmp/w ~/.config/rclone
           if [ -f "$RUNNER_TEMP/SIR_ENGEL" ]; then echo "::error::sir iceren satir engellendi (sir_koru)"; exit 1; fi

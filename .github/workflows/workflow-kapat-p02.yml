@@ -1,0 +1,26 @@
+name: workflow-kapat-p02
+# PLAN P0.2 (Serdar onayi 22 Eki): Drive -> public dal kanallarini ve repo-public'i KAPATIR (disable). Liste sabit, girdi yok.
+# Silme yok; geri donus: ayni uc ile /enable. Etsy/Drive/Metricool'a dokunmaz. Gecici is akisi: P8 ile kaldirilir.
+permissions:
+  actions: write
+on:
+  workflow_dispatch: {}
+jobs:
+  kapat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Disable + durum oku
+        run: |
+          set -euo pipefail
+          for w in drive-dala-al.yml drive-onizleme-kopya.yml repo-public.yml; do
+            gh api -X PUT "repos/${GITHUB_REPOSITORY}/actions/workflows/$w/disable" >/dev/null
+          done
+          n=0
+          for w in drive-dala-al.yml drive-onizleme-kopya.yml repo-public.yml; do
+            s=$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/$w" --jq .state)
+            echo "$w $s"; [ "$s" = "disabled_manually" ] && n=$((n+1))
+          done
+          echo "SONUC disabled_manually $n/3"; [ "$n" = 3 ]
