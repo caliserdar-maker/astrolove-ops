@@ -85,6 +85,11 @@ def main():
     qx0, qy0, qx1, qy1 = int(np.floor(x0 * S)), int(np.floor(y0 * S)), int(np.ceil(x1 * S)), int(np.ceil(y1 * S))
     ys, xs = np.where(As > 0.5)
     t_x0, t_y0, t_x1, t_y1 = int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1   # eski yer (kapak 1080)
+    sag_b = W / 2 + (t_x1 - t_x0) / 2                              # ortali basligin sag kenari
+    if sag_b > (W - SAG) - 3:                                      # parti kurali (21 Eki): basligi sigmayan cift uretilmez
+        msg = (f'{CIFT}: BASLIK SIGMADI, uretilmedi: genislik {t_x1 - t_x0} px (olcek {S}), ortali sag kenar {sag_b:g} > '
+               f'{(W - SAG) - 3} (918 - 3); asim {sag_b - ((W - SAG) - 3):g} px')
+        open(os.path.join(OUT, 'OLCUM.txt'), 'w', encoding='utf-8').write(msg + '\n'); print(msg); sys.exit(3)
     # poster boyu: baslik + ARA + poster 230-1536'ya sigan en buyuk; V = bunu veren en buyuk cift motor boyu (<= 2400, buyutme yok)
     ph_max = (H - ALT) - UST - (t_y1 - t_y0) - ARA
     ph_v = lambda v: int(np.floor(y1 * v / 2400)) - int(np.ceil(y0 * v / 2400))  # noqa: E731
@@ -119,9 +124,18 @@ def main():
         F, ic, tab = tur({'V6_N': str(N1)}, 'ilan1')
         n_ok = n_ok and ic['N'] == N1
         O['toz_turlari'].append({'N': ic['N'], 'kaynak': f'N0 x {hed:.3f}^(1/0,62) (onayli 78 tek duzeltme kurali)', 'toz_2_4sn': tab, 'tutar': tutar(tab)})
+    if not tutar(tab) and len(O['toz_turlari']) == 2:   # parti 1 (21 Eki) tek duzeltme turu: onayli 78 kurali tur 3 (olculen us, bant ortalama)
+        t1_, t2_ = O['toz_turlari']
+        a_ = float(np.median([np.log(t2_['toz_2_4sn'][k]['v2'] / t1_['toz_2_4sn'][k]['v2']) for k in tab]) / np.log(t2_['N'] / t1_['N']))
+        rs = [v['onayli'] / max(v['v2'], 1e-6) for v in tab.values()]; hed = float(np.sqrt(min(rs) * max(rs)))
+        N2 = int(round(ic['N'] * hed ** (1 / a_) / 100.0) * 100)
+        del F; os.remove(os.path.join(IS, 'ilan1.rgb'))
+        F, ic, tab = tur({'V6_N': str(N2)}, 'ilan2')
+        n_ok = n_ok and ic['N'] == N2
+        O['toz_turlari'].append({'N': ic['N'], 'kaynak': f'N1 x {hed:.3f}^(1/{a_:.3f}) (olculen us, bant ortalama; onayli 78 tur 3)', 'toz_2_4sn': tab, 'tutar': tutar(tab)})
     O['toz_2_4sn'] = tab
     O['ilan'] = {'kare': int(F.shape[0]), 'N': ic['N'], 'N0_alan_kurali': N_bek, 'bolge_px': ic['bolge_px'], 'sure_sn': round(time.time() - t0)}
-    kapi['motor 180 kare; toz yogunlugu 2-4 sn onayli CL ilan ile +-%10 (N0 alan kurali, gerekirse tek duzeltme)'] = F.shape[0] == 180 and n_ok and tutar(tab)
+    kapi['motor 180 kare; toz yogunlugu 2-4 sn onayli CL ilan ile +-%10 (N0 alan kurali, gerekirse 78 duzeltme turlari)'] = F.shape[0] == 180 and n_ok and tutar(tab)
     KAPV = np.clip(np.round(cv2.resize(kf, (V, V), interpolation=cv2.INTER_AREA)), 0, 255).astype(np.uint8)
     O['ilan_kare0_kapak_fark'] = int(np.abs(F[0].astype(int) - KAPV.astype(int)).max())
     kapi[f'ilan ilk/son kare = kapak ({SB:.3f})'] = O['ilan_kare0_kapak_fark'] == 0 and int(np.abs(F[-1].astype(int) - KAPV.astype(int)).max()) == 0
