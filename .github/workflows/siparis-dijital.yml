@@ -6,7 +6,8 @@ name: siparis-dijital
 # olmadan uretilmez; eski gri-kahve WP teslim edilmez. Sayfalar ayni pdf_yap / pdf_kapisi ile PDF olur.
 # Isim / mesaj loga yazilmaz (GITHUB_EVENT_PATH'ten okunur, ::add-mask::). Etsy'ye yazma / musteriye gonderim YOK.
 # Cikti: Drive ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL/<receipt>/ ; kesit + onizleme yalniz Drive <receipt>/KONTROL (21 Eki: public dala yazma kaldirildi).
-# Isler arasi ara cikti: Drive <receipt>/_ARA/<run_id>/<renk_R | sayfa_R__oran | wp_boy | inceleme_paket> (21 Eki: public artifact kaldirildi).
+# Isler arasi ara cikti: Drive TEMP/SIPARIS_ARA/<run_id>/<renk_R | sayfa_R__oran | wp_boy | inceleme_paket> (21 Eki: public artifact kaldirildi;
+# receipt klasorunun DISINDA, kesit-son / kesit-birlesik KAPI_RAPORU secimine karismaz). Temizlik: Serdar karari (otomatik silme yok).
 
 permissions:
   contents: read
@@ -34,7 +35,7 @@ on:
         required: false
         default: ""
       onceki_kosu:
-        description: "PASS isleri bu kosularin artifact'lerinden al (run id'ler, bosluklu; sonraki oncekinin ustune)"
+        description: "PASS isleri bu kosularin ara ciktilarindan al (Drive TEMP/SIPARIS_ARA/<run id>; run id'ler bosluklu; sonraki oncekinin ustune; 21 Eki oncesi kosular yok)"
         required: false
         default: ""
       renk_ref:
@@ -119,6 +120,8 @@ jobs:
           set -euo pipefail
           python3 scripts/siparis_dijital/plan.py >> "$GITHUB_OUTPUT"
           cat "$GITHUB_OUTPUT"
+      - name: Ara cikti klasoru (tek iste; matris isleri ayni anda klasor yaratmasin)
+        run: rclone mkdir "gdrive:ASTROLOVE/TEMP/SIPARIS_ARA/${{ github.run_id }}"
       - if: ${{ always() }}
         run: rm -rf ~/.config/rclone
 
@@ -184,9 +187,8 @@ jobs:
         if: ${{ always() }}
         run: |
           set -euo pipefail
-          REC=$(jq -r '.inputs.receipt' "$GITHUB_EVENT_PATH"); [[ "$REC" =~ ^[0-9]+$ ]] || exit 1
           [ -d "out/renk/${{ matrix.renk }}" ] || { echo "cikti yok"; exit 0; }
-          rclone copy "out/renk/${{ matrix.renk }}" "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL/$REC/_ARA/${{ github.run_id }}/renk_${{ matrix.renk }}" --transfers 8
+          rclone sync "out/renk/${{ matrix.renk }}" "gdrive:ASTROLOVE/TEMP/SIPARIS_ARA/${{ github.run_id }}/renk_${{ matrix.renk }}" --transfers 8
       - if: ${{ always() }}
         run: rm -rf ~/.config/rclone
 
@@ -251,9 +253,8 @@ jobs:
         if: ${{ always() }}
         run: |
           set -euo pipefail
-          REC=$(jq -r '.inputs.receipt' "$GITHUB_EVENT_PATH"); [[ "$REC" =~ ^[0-9]+$ ]] || exit 1
           [ -d "out/renk/${{ matrix.renk }}" ] || { echo "cikti yok"; exit 0; }
-          rclone copy "out/renk/${{ matrix.renk }}" "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL/$REC/_ARA/${{ github.run_id }}/sayfa_${{ matrix.renk }}__${{ matrix.oran }}" --transfers 8
+          rclone sync "out/renk/${{ matrix.renk }}" "gdrive:ASTROLOVE/TEMP/SIPARIS_ARA/${{ github.run_id }}/sayfa_${{ matrix.renk }}__${{ matrix.oran }}" --transfers 8
       - if: ${{ always() }}
         run: rm -rf ~/.config/rclone
 
@@ -345,9 +346,8 @@ jobs:
         if: ${{ always() }}
         run: |
           set -euo pipefail
-          REC=$(jq -r '.inputs.receipt' "$GITHUB_EVENT_PATH"); [[ "$REC" =~ ^[0-9]+$ ]] || exit 1
           [ -d "out/wp/${{ matrix.boy }}" ] || { echo "cikti yok"; exit 0; }
-          rclone copy "out/wp/${{ matrix.boy }}" "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL/$REC/_ARA/${{ github.run_id }}/wp_${{ matrix.boy }}" \
+          rclone sync "out/wp/${{ matrix.boy }}" "gdrive:ASTROLOVE/TEMP/SIPARIS_ARA/${{ github.run_id }}/wp_${{ matrix.boy }}" \
             --include "/WP_${{ matrix.boy }}.jpg" --include "/OZET_WP_${{ matrix.boy }}.json" --transfers 8
       - if: ${{ always() }}
         run: rm -rf ~/.config/rclone
@@ -411,14 +411,13 @@ jobs:
           for r in $K; do
             [[ "$r" =~ ^[0-9]+$ ]] || { echo "HATA: run id" >&2; exit 1; }
             i=$((i+1)); mkdir -p "out/a0_$i"
-            rclone copy "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL/$REC/_ARA/$r" "out/a0_$i" --transfers 8 || echo "uyari: $r ara cikti yok"
+            rclone copy "gdrive:ASTROLOVE/TEMP/SIPARIS_ARA/$r" "out/a0_$i" --transfers 8 || echo "uyari: $r ara cikti yok"
           done
       - name: Bu kosunun ara ciktilari (Drive _ARA/<run>)
         run: |
           set -euo pipefail
-          mkdir -p out/a1; A="gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL/$REC/_ARA/${{ github.run_id }}"
-          if rclone lsf "$A" --max-depth 1 >/dev/null 2>&1; then rclone copy "$A" out/a1 --exclude "/inceleme_paket/**" --transfers 8
-          else echo "uyari: bu kosuda ara cikti yok"; fi
+          mkdir -p out/a1
+          rclone copy "gdrive:ASTROLOVE/TEMP/SIPARIS_ARA/${{ github.run_id }}" out/a1 --exclude "/inceleme_paket/**" --transfers 8
           ls out/a1
       - name: Artifact yerlesimi (bu kosu oncekinin ustune)
         run: |
@@ -484,7 +483,7 @@ jobs:
         if: ${{ always() }}
         run: |
           set -euo pipefail
-          rclone copy out/inc_paket "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL/$REC/_ARA/${{ github.run_id }}/inceleme_paket" --transfers 8
+          rclone sync out/inc_paket "gdrive:ASTROLOVE/TEMP/SIPARIS_ARA/${{ github.run_id }}/inceleme_paket" --transfers 8
       - if: ${{ always() }}
         run: rm -rf ~/.config/rclone
       - name: Sonuc
@@ -529,7 +528,7 @@ jobs:
       - name: Ara ciktilar (Drive _ARA/<run>; inceleme_paket + renk / sayfa)
         run: |
           set -euo pipefail
-          A="gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL/$REC/_ARA/${{ github.run_id }}"
+          A="gdrive:ASTROLOVE/TEMP/SIPARIS_ARA/${{ github.run_id }}"
           rclone copy "$A/inceleme_paket" out --transfers 8
           mkdir -p out/a; rclone copy "$A" out/a --include "/renk_*/**" --include "/sayfa_*/**" --transfers 8
           ls out/a
