@@ -37,6 +37,12 @@ jobs:
           T=$(rclone config dump | jq -r '.gdrive.token' | jq -r '.access_token'); echo "::add-mask::$T"
           [ -n "$T" ] && [ "$T" != null ] || { echo "HATA: token yok" >&2; exit 1; }
           mkdir -p _r
+          ilk_id=$(jq -r '[.[] | select(.Path | startswith("DAL_YEDEK_20261021/") | not)][0].ID' /tmp/dosya.json)
+          for u in "files/$ilk_id?fields=id,mimeType,capabilities(canReadRevisions)" "files/$ilk_id/revisions?fields=revisions(id,modifiedTime)"; do
+            c=$(curl -sS -o /tmp/y.json -w '%{http_code}' -H "Authorization: Bearer $T" "https://www.googleapis.com/drive/v3/$u")
+            echo "tani ${u%%\?*} -> $c $(jq -c 'if .error then {code: .error.code, status: .error.status, reason: .error.errors[0].reason, domain: .error.errors[0].domain, msg: .error.message} else {canReadRevisions: .capabilities.canReadRevisions, n: (.revisions|length)} end' /tmp/y.json)"
+          done
+          echo "token kapsami: $(curl -sS "https://oauth2.googleapis.com/tokeninfo?access_token=$T" | jq -c '{scope, expires_in}')"
           jq -c '.[] | select(.Path | startswith("DAL_YEDEK_20261021/") | not) | {p: .Path, id: .ID}' /tmp/dosya.json > /tmp/liste.jsonl
           echo "dosya: $(wc -l < /tmp/liste.jsonl)"
           echo '[' > _r/REVIZYON_LISTE.json; ilk=1; ns=0; nk=0
