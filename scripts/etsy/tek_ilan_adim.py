@@ -4,6 +4,8 @@
           profil + gorsel alt metinleri -> OUT/OKU.json.
   sale  : updateShop yalniz sale_message: Digital paragrafi birebir degisir (parca tam 1 kez olmali). Geri okuma: alan
           beklenenle ayni, diger metin alanlari ayni.
+  profil_yeni: "BY Digital Free Worldwide" profili (tek hedef: diger tum ulkeler 0 USD; ayni adla varsa yeniden kullanilir)
+          olusturulur, sonra yalniz ornek ilan ona alinir (profil adimi). Serdar 21 Eki: Kupa profiline tasima YOK.
   profil: updateListing yalniz shipping_profile_id (ornek ilan). Hedef profilin TUM hedefleri 0 USD olmali; ilan active
           olmali (taslak yayina alinmaz). Geri okuma: state active, profil yeni, baslik/etiket/aciklama ayni.
 Kota tabani 10. Sir loga yazilmaz. Ortam: ETSY_*, TOKEN_FILE."""
@@ -109,9 +111,39 @@ def profil(api, shop, out, R, pid):
     print(f"PROFIL PASS | {R['once']['profil']} -> {pid} | kota {api.remaining}")
 
 
+YENI_PROFIL_AD = "BY Digital Free Worldwide"
+
+
+def profil_yeni(api, shop, out, R):
+    """Yil donumu ilanlari icin dunya geneli ucretsiz profil (yoksa olustur; ayni adla varsa yeniden kullan), sonra ornek ilan."""
+    lst = (api.get(f"/shops/{shop}/shipping-profiles") or {}).get("results") or []
+    kota(api)
+    var = [p for p in lst if p.get("title") == YENI_PROFIL_AD]
+    if len(var) > 1:
+        raise Dur(f"ayni adla {len(var)} profil")
+    if var:
+        pid = var[0]["shipping_profile_id"]
+        R["olay"] = f"profil zaten var {pid}"
+    else:
+        body = {"title": YENI_PROFIL_AD, "origin_country_iso": "TR", "primary_cost": 0, "secondary_cost": 0,
+                "min_processing_time": 1, "max_processing_time": 3, "processing_time_unit": "business_days",
+                "destination_region": "none", "min_delivery_days": 1, "max_delivery_days": 2}
+        y = api.post(f"/shops/{shop}/shipping-profiles", body) or {}
+        pid = y.get("shipping_profile_id")
+        if not pid:
+            raise Dur(f"profil olusmadi: {str(y)[:300]}")
+        R["olay"] = f"profil olusturuldu {pid}"
+    P = profil_ozet(api.get(f"/shops/{shop}/shipping-profiles/{pid}") or {})
+    R["yeni_profil"] = P
+    if not any(h["bolge"] == "none" and not h["ulke"] for h in P["hedefler"]):
+        raise Dur("profilde 'diger tum ulkeler' hedefi yok")
+    print(f"PROFIL {R['olay']} | hedef {len(P['hedefler'])} | hepsi 0 USD: {all(h['ilk'] == 0 and h['ek'] == 0 for h in P['hedefler'])}")
+    profil(api, shop, out, R, str(pid))
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--mod", required=True, choices=["oku", "sale", "profil"])
+    ap.add_argument("--mod", required=True, choices=["oku", "sale", "profil", "profil_yeni"])
     ap.add_argument("--profil", default="")
     ap.add_argument("--out", default="_out")
     a = ap.parse_args()
@@ -128,6 +160,8 @@ def main():
             oku(api, shop, out, R)
         elif a.mod == "sale":
             sale(api, shop, out, R)
+        elif a.mod == "profil_yeni":
+            profil_yeni(api, shop, out, R)
         else:
             if not a.profil.isdigit():
                 raise Dur("--profil sayi olmali")

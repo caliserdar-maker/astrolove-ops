@@ -8,7 +8,7 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-      mod: {description: "oku | sale | profil", required: true, default: "oku"}
+      mod: {description: "oku | sale | profil | profil_yeni", required: true, default: "oku"}
       profil: {description: "profil modu: hedef ucretsiz kargo profil id", required: false, default: ""}
       onay: {description: "yazan modlar icin SERDAR_21EKI", required: false, default: ""}
 jobs:
@@ -19,7 +19,7 @@ jobs:
       - name: Onay kapisi
         env: {ONAY: "${{ inputs.onay }}", MOD: "${{ inputs.mod }}"}
         run: |
-          case "$MOD" in oku) ;; sale|profil) [ "$ONAY" = "SERDAR_21EKI" ] || { echo "::error::onay yok"; exit 1; } ;; *) echo "::error::mod"; exit 1 ;; esac
+          case "$MOD" in oku) ;; sale|profil|profil_yeni) [ "$ONAY" = "SERDAR_21EKI" ] || { echo "::error::onay yok"; exit 1; } ;; *) echo "::error::mod"; exit 1 ;; esac
       - uses: actions/checkout@v4
       - name: Etsy kilidi (sira bekle, iptal yok)
         env:
