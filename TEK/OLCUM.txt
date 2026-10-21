@@ -1,0 +1,22 @@
+kaynak: tek_on kupa kutusu (89, 417, 1542, 1693), tek_arka (504, 416, 1948, 1698) (2048 sahne, CL baskisi kapak_canva3 ile)
+KAPAK kupa NCC (kaynak sahne, ayni olcek): 1.00000; olcek 0.8103 (<=1); kupa kutusu (435, 625, 1613, 1659) PASS
+KAPAK baslik guvenli alan (4:5 x 245-1803, ust >= 221): murekkep (646, 221, 1402, 584) PASS
+KAPAK plaka 4:5 ve 34:27 icinde: (288, 1699, 1760, 1827) PASS
+KAPAK kupa 4:5 ve 34:27 icinde: (435, 625, 1613, 1659) PASS
+KAPAK plaka = V4 kapak plakasi (NCC, maske ici): 0.9989 PASS
+KAPAK bosluk: baslik alt 584 -> kupa ust 625 = 41 px; kupa alt 1659 -> plaka ust 1699 = 40 px; uzatma {'sol': 363, 'sag': 25, 'ust': 287, 'alt': 101, 'serit_sol': 48, 'serit_sag': 386, 'serit_ust': 314, 'serit_alt': 122}
+KAPAK ek yeri (sol serit siniri sutun adimi <= max(0.5, 4 x medyan)): 0.123 (medyan 0.122) PASS
+KAPAK uzatmada duvar disi piksel (kulp/kupa kopyasi): 0 PASS
+GALERI2 on kupa NCC: 1.00000; olcek 0.6075 PASS
+GALERI2 arka kupa NCC: 1.00000 PASS
+GALERI2 gecis kupalara degmez: gecis x 947-1107, on kupa x 60-943, arka x 1111-1988 PASS
+GALERI2 etiket ve kupa kenar payi >= 40: FRONT (318, 577, 685, 653), BACK (1405, 577, 1694, 652) PASS
+GALERI2 uzatmada duvar disi piksel: 0 PASS
+PIN kupa NCC: 1.00000; olcek 0.4883 (<=1, tek kucultme), kupa 710x623 px PASS
+PIN baslik/plaka kenar payi >= 40: baslik (316, 163, 684, 340), plaka x 141-859 y 1146-1209 PASS
+PIN bosluk esit (ust kenar-baslik = baslik-kupa): 163 / 164 px; kupa-plaka 19 px PASS
+PIN uzatmada duvar disi piksel: 0 PASS
+Yazilar: CANCER & LIBRA, PERSONALIZED GIFT MUG, FRONT, BACK (nokta, +, = yok); kupa uzerindeki "CANCER · LIBRA" urun baskisi
+SONUC PASS (ek yeri icin YAKIN_*.jpg goz kontrolu)
+GOZ KONTROLU (%200 kirpimlar): KAPAK_TEK ve PIN_TEK uzatmalari temiz. GALERI2: iki sahne gecisi (x 947-1107) kupalar arasinda hafif acik dikey bant olarak seciliyor (sutun ortalamasi 221 -> 237, sag sahnenin sol kenari daha aydinlik); kupalara degmiyor. 2 deneme siniri, duzeltilmedi.
+Kaynak notu: tek on/arka sahneler esitle.py ile esitlenmis onayli varliklar (kupa-orchard varlik/gorunum); baski bu sahnelere kapak_canva3.py ile tam cozunurlukte giydirildi.
