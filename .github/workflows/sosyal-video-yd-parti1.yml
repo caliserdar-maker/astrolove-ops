@@ -5,12 +5,16 @@ name: sosyal-video-yd-parti1
 # Cikti: Drive ASTROLOVE/TEMP/SOSYAL_VIDEO_YD_PARTI1_20261021/
 permissions:
   contents: read
+  actions: read     # onceki_kosu: o kosunun artifact'lari
 on:
   workflow_dispatch:
     inputs:
       ciftler:
         description: 'ciftler (virgulle)'
         default: CANCER_LIBRA,AQUARIUS_LIBRA,SCORPIO_TAURUS,ARIES_LIBRA
+      onceki_kosu:
+        description: 'bos: uret + topla; kosu no: uretim atlanir, o kosunun artifact'"'"'lari ile yalniz topla'
+        default: ''
 env:
   O: gdrive:ASTROLOVE/TEMP/SOSYAL_VIDEO_YD_PARTI1_20261021
   K: gdrive:ASTROLOVE/TEMP/KAPAK_Y1_78_20261019
@@ -30,6 +34,7 @@ jobs:
         echo "m=$(printf '%s' "$C" | python3 -c 'import json,sys; print(json.dumps([c for c in sys.stdin.read().split(",") if c]))')" >> "$GITHUB_OUTPUT"
   uret:
     needs: hazirla
+    if: ${{ inputs.onceki_kosu == '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 50
     strategy:
@@ -88,6 +93,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
     - name: Kurulum
       run: |
         set -euo pipefail
@@ -99,6 +107,8 @@ jobs:
         pattern: yd-*
         merge-multiple: true
         path: _a
+        run-id: ${{ inputs.onceki_kosu || github.run_id }}
+        github-token: ${{ github.token }}
     - name: rclone.conf
       env:
         RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
@@ -112,8 +122,11 @@ jobs:
     - name: KONTAK + OLCUM + Drive
       env:
         C: ${{ inputs.ciftler }}
+        ONCEKI: ${{ inputs.onceki_kosu }}
       run: |
         set +e -uo pipefail
+        case "$ONCEKI" in *[!0-9]*) echo "::error::onceki_kosu gecersiz"; exit 1 ;; esac
+        [ -n "$ONCEKI" ] && echo "::warning::uretim atlandi; artifact'lar kosu $ONCEKI"
         python3 -I sosyal/poster_video/yd_parti_topla.py _a _r "$C" > _r_log.txt 2>&1; RC=$?
         while IFS= read -r l; do echo "::warning::$l" | cut -c1-3900; done < _r_log.txt
         rclone copy _r "$O" -q
