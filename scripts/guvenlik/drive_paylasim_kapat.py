@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Drive'da 'baglantiya sahip herkes' (anyone/domain) paylasimini KAPATIR (Serdar 21 Eki karar 1).
 Hedef: kimligi sha256 ilk 12 hanesi --hedef ile verilen klasor + tum alt ogeleri (kimlik loga/girdiye yazilmaz).
-Ayrica --tara altindaki (ASTROLOVE/<yol>) tum ogelerde anyone/domain izinleri SAYILIR (degistirilmez).
+Ayrica Drive genelinde sahibin herkese/alana acik tum ogeleri SAYILIR ve kaydedilir (degistirilmez).
 Sira: once izinleri oku ve kaydet -> kapat -> geri oku, dogrula. Hedef disinda hicbir izne dokunmaz.
 Loga yalniz sayi yazilir; kimlik/ad yalniz --cikti klasorundeki JSON'a (Drive'a sahip-yalniz yuklenir).
 Ortam: DRIVE_TOKEN (OAuth access token). Cikis: 0 = hedefte anyone/domain izni kalmadi, 1 = kaldi ya da hata."""
@@ -19,7 +19,7 @@ API = "https://www.googleapis.com/drive/v3"
 ACIK = ("anyone", "domain")
 
 
-def istek(yontem, yol, params=None, deneme=4):
+def istek(yontem, yol, params=None, deneme=6):
     url = API + yol + ("?" + urllib.parse.urlencode(params) if params else "")
     for i in range(deneme):
         req = urllib.request.Request(url, method=yontem, headers={"Authorization": "Bearer " + os.environ["DRIVE_TOKEN"]})
@@ -28,7 +28,7 @@ def istek(yontem, yol, params=None, deneme=4):
                 govde = r.read()
                 return json.loads(govde) if govde else {}
         except urllib.error.HTTPError as e:
-            if e.code in (429, 500, 502, 503) and i < deneme - 1:
+            if (e.code in (429, 500, 502, 503) or (e.code == 403 and b"ateLimit" in (e.read() or b""))) and i < deneme - 1:
                 time.sleep(2 ** (i + 1))
                 continue
             raise
@@ -76,28 +76,21 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--mod", choices=["kuru", "uygula"], required=True)
     ap.add_argument("--hedef", required=True, help="hedef klasor kimliginin sha256 ilk 12 hanesi")
-    ap.add_argument("--tara", default="TEMP/SIPARIS_ISIM,SIPARIS_ISIM,KUPA_SIPARIS", help="ASTROLOVE altindaki sayim kokleri")
     ap.add_argument("--cikti", required=True)
     a = ap.parse_args()
     os.makedirs(a.cikti, exist_ok=True)
-    astro = klasor_bul("ASTROLOVE", "root")
-    sayim, hedef_ogeler = {}, None
-    for yol in [y.strip() for y in a.tara.split(",") if y.strip()]:
-        ust = astro
-        for parca in yol.split("/"):
-            ust = klasor_bul(parca, ust)
-        ogeler = alt_agac(ust)
-        sayim[yol] = {"oge": len(ogeler), "acik": [{"id": f["id"], "ad": f["name"], "tur": f["mimeType"].split(".")[-1],
-                                                    "izin": acik_izinler(f)} for f in ogeler if acik_izinler(f)]}
-        for f in ogeler:
-            if hashlib.sha256(f["id"].encode()).hexdigest()[:12] == a.hedef:
-                hedef_ogeler = alt_agac(f["id"])
-    if not hedef_ogeler:
-        raise SystemExit("HATA: hedef klasor tarama koklerinde bulunamadi")
+    acik_tum = liste("(visibility = 'anyoneWithLink' or visibility = 'anyoneCanFind' or visibility = 'domainWithLink' "
+                     "or visibility = 'domainCanFind') and trashed = false and 'me' in owners", "id,name,mimeType,parents,permissions(id,type,role)")
+    sayim = {"drive_geneli_acik": [{"id": f["id"], "ad": f["name"], "tur": f["mimeType"].split(".")[-1], "ust": f.get("parents"),
+                                    "izin": acik_izinler(f)} for f in acik_tum]}
+    hedef = [f for f in acik_tum if hashlib.sha256(f["id"].encode()).hexdigest()[:12] == a.hedef]
+    print(f"Drive geneli herkese/alan acik oge: {len(acik_tum)}")
+    if len(hedef) != 1:
+        json.dump({"tarama": sayim}, open(f"{a.cikti}/PAYLASIM_ONCE.json", "w"), ensure_ascii=False, indent=1)
+        raise SystemExit(f"HATA: hedef acik ogeler arasinda {len(hedef)} kez (1 beklenir; zaten kapali olabilir)")
+    hedef_ogeler = alt_agac(hedef[0]["id"])
     once = [{"id": f["id"], "ad": f["name"], "izin": f.get("permissions")} for f in hedef_ogeler]
     json.dump({"hedef_once": once, "tarama": sayim}, open(f"{a.cikti}/PAYLASIM_ONCE.json", "w"), ensure_ascii=False, indent=1)
-    for yol, s in sayim.items():
-        print(f"tarama {yol}: oge {s['oge']}, anyone/domain izinli oge {len(s['acik'])}")
     print(f"hedef: oge {len(once)}, anyone/domain izinli {sum(1 for f in hedef_ogeler if acik_izinler(f))}")
     if a.mod == "kuru":
         print("KURU: izin degismedi")
