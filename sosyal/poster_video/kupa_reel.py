@@ -11,7 +11,8 @@ sag kupanin baskisi (mesaj + isimler + nazar boncugu) x <= 898 (pay >= 20) olmal
 Hareket: onayli kupa ilan motoru video6b.py (kupa-orchard) V6 (N 10400, sigma 0,45; ilan78.py ile ayni iki degisiklik, baska
 degisiklik yok), V 1080 = bu olcek; ffmpeg'e giden ham kareler (kayipsiz) ara katmanla kopyalanir. Yalniz kupa hareket kutusu
 (motor karelerinin kapaktan farkli oldugu piksellerin kutusu + 8 px) ilan karesinden alinir; baslik, plaka, zemin sabit.
-Zaman: 0-1 sn tasarim, 1-6 sn ilan 0-5 sn, 6-8 sn tasarim. 30 fps, 240 kare, ses yok, H.264 yuv420p crf 17.
+Zaman: 0-1 sn tasarim, 1-6 sn ilan 0-5 sn, 6-8 sn tasarim. 30 fps, 240 kare, ses yok, H.264 yuv420p crf 14 (Serdar onayi 21 Eki;
+crf 17'de toz parcaciklarinda kupa PSNR 34,06).
 Cikti: <CIFT>_kupa_reel.mp4, ILK_KARE_ARAYUZ.jpg, KONTAK_0_8SN.jpg, YAKIN_EK_200.jpg, OLCUM.txt, OLCUM.json
 Kullanim: kupa_reel.py <kapak.jpg> <pin_S3.jpg> <katman_dizini (cift.py ciktisi)> <video6b.py> <sahne_dir> <Cinzel.ttf>
           <B1> <B2> <cikti> <is> [--onay_ilan ilan.mp4]"""
@@ -228,7 +229,7 @@ def main():
     # ---------- 4. video
     V = os.path.join(OUT, f'{CIFT}_kupa_reel.mp4')
     pr = subprocess.Popen(['ffmpeg', '-y', '-loglevel', 'error', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-s', f'{W}x{H}', '-r', str(FPS),
-                           '-i', '-', '-an', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '17', '-preset', 'slow',
+                           '-i', '-', '-an', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '14', '-preset', 'slow',
                            '-profile:v', 'high', '-tag:v', 'avc1', '-movflags', '+faststart', V], stdin=subprocess.PIPE)
     kaynak = []
     for i in range(TOPLAM):
@@ -304,15 +305,12 @@ def main():
     kk = KAP.astype(np.float32)
     beyaz = (kk.min(2) > 215) & (kk.max(2) - kk.min(2) < 14)
     by_ = np.where(beyaz.mean(1) > 0.05)[0]; ky0, ky1 = int(by_.min()), int(by_.max())
-    sat = beyaz[ky0 + 40:ky1 - 40]
-    sag_govde = np.where(sat[:, W // 2:].mean(0) > 0.5)[0] + W // 2
-    gr = sag_govde[np.concatenate([[True], np.diff(sag_govde) == 1])] if len(sag_govde) else sag_govde
-    gx1 = int(sag_govde[0]);
-    for x in sag_govde[1:]:
-        if x == gx1 + 1:
-            gx1 = int(x)
-        else:
-            break
+    govde = (kk.min(2) > 140) & (kk.max(2) - kk.min(2) < 22)      # govde: acik ve doygun degil (golgeli sag kenar dahil)
+    ga = govde[ky1 - 70:ky1 - 25, W // 2:].mean(0) > 0.5          # kupanin alt bandi: kulp burada yok (Serdar onayi 21 Eki)
+    cs = np.where(ga)[0] + W // 2
+    kos = max(np.split(cs, np.where(np.diff(cs) > 1)[0] + 1), key=len)
+    gx0, gx1 = int(kos[0]), int(kos[-1])
+    O['sag_govde_olcum'] = f'kupa alt bandi y {ky1 - 70}-{ky1 - 25} (kapak olcegi), acik + doygun degil, en uzun kesintisiz sutun dizisi'
     tum_kupa = np.where(beyaz[ky0:ky1].sum(0) > 20)[0]
     mm = np.clip((1 - cv2.resize(np.asarray(Image.open(os.path.join(KAT, 'video', 'k_mask_nomes.png')).convert('RGB')).astype(np.float32),
                                  (W, W), interpolation=cv2.INTER_AREA).mean(-1)
@@ -338,7 +336,7 @@ def main():
     kut = {'baslik': (int(bt_r[0]), int(bt_r[1]) + Yb, int(np.ceil(bt_r[2])), int(np.ceil(bt_r[3])) + Yb),
            'plaka': (int(pl_r[0]), int(pl_r[1]) + Yb, int(np.ceil(pl_r[2])), int(np.ceil(pl_r[3])) + Yb),
            'sag_kupa_baski (mesaj+isim+nazar)': kutu_r(sag_baski),
-           'sag_kupa_govde (kulp haric)': kutu_r((int(gr[0]) if len(gr) else 0, ky0, gx1 + 1, ky1)),
+           'sag_kupa_govde (kulp haric)': kutu_r((gx0, ky0, gx1 + 1, ky1)),
            'kupalar (kulp dahil)': kutu_r((int(tum_kupa.min()), ky0, int(tum_kupa.max()) + 1, ky1))}
     O['kutular'] = kut
     pay = lambda b: {'sag_918': SAG - b[2], 'ust_230': b[1] - UST, 'alt_1536': ALT_Y - b[3], 'sol_0': b[0]}  # noqa: E731
@@ -374,6 +372,17 @@ def main():
         sic = float(np.polyval(fb, s - 0.5) - np.polyval(fa, s - 0.5))
         oran = float(dv[s - 1] / np.median(np.r_[dv[s - 20:s - 2], dv[s + 1:s + 19]]))
         ek[ad] = {'y': int(s), 'sicrama': round(sic, 3), 'ek_satiri_fark_orani': round(oran, 3)}
+    # alt ek: referans = masanin kendi satirlarinda ayni oran (S3 bolgesi icinde plaka alti, ek satirindan uzak); Serdar onayi 21 Eki
+    tb0_ = int(np.ceil(pl_r[3])) + Yb + 4; sa_ = Yb + r1
+    dog = []
+    for y in range(tb0_ + 2, sa_ - 4):
+        kom = np.r_[dv[max(tb0_, y - 20):y - 2], dv[y + 1:min(sa_ - 2, y + 19)]]
+        if len(kom) >= 10:
+            dog.append(float(dv[y - 1] / np.median(kom)))
+    ek['alt']['masa_dogal_oran_max'] = round(max(dog), 3) if dog else None
+    ek['alt']['masa_satir_sayisi'] = len(dog)
+    ek['alt']['esik'] = round(max(1.5, max(dog)), 3) if dog else 1.5
+    ek['ust']['esik'] = 1.5
     O['ek_yeri'] = ek
     hp = l0 - cv2.GaussianBlur(l0, (0, 0), sigmaX=20, sigmaY=0.01)
     su = Yb + r0; sa = Yb + r1
@@ -384,7 +393,8 @@ def main():
                         'alt': round(float(hp[sa:H, 30:W - 30].mean(0).std()), 3), 'alt_ref_masa': round(ref_a, 3)}
     kapi['uzatmada dikey cizgi yok (sutun ortalamasi std <= 1,5 x kendi zemini)'] = (
         O['dikey_cizgi']['ust'] <= 1.5 * max(ref_u, 0.05) and O['dikey_cizgi']['alt'] <= 1.5 * max(ref_a, 0.05))
-    kapi['ek yeri gorunmuyor (sicrama < 1,0; ek satiri <= 1,5x komsu)'] = all(abs(e['sicrama']) < 1.0 and e['ek_satiri_fark_orani'] <= 1.5 for e in ek.values())
+    kapi['ek yeri gorunmuyor (sicrama < 1,0; ek satiri orani <= ust 1,5 / alt max(1,5, masanin kendi en buyuk orani))'] = all(
+        abs(e['sicrama']) < 1.0 and e['ek_satiri_fark_orani'] <= e['esik'] for e in ek.values())
     kapi['olcek <= 1 (kapak 2048 -> 1080, upscale yok)'] = K <= 1
 
     # ---------- 7. gorseller
@@ -442,7 +452,9 @@ def main():
            f"PLAKA ISTISNASI (Serdar A, en buyuk ve ortali): plaka zemini {kut['plaka']} arayuze {O['plaka_istisnasi']['zemin_arayuze_giris_px']} px girer; plaka yazisi {kut['plaka_yazisi']} sag pay {O['plaka_istisnasi']['yazi_sag_pay']} px (kural 20)",
            f"S3 bolgesi reel y {Yb + r0}-{Yb + r1}: masa on kenari (kapak y >= {kp.MASA_KES - MASA_PAY}) ve altindaki koyu bant alinmaz, masa yuzeyi asagi uzar; ilk kare NCC bu satirlarda",
            f"bosluk: {O['bosluk']}",
-           'ek yeri: ' + '; '.join(f"y {e['y']} sicrama {e['sicrama']}, ek satiri orani {e['ek_satiri_fark_orani']}" for e in ek.values()),
+           'ek yeri: ' + '; '.join(f"y {e['y']} sicrama {e['sicrama']}, ek satiri orani {e['ek_satiri_fark_orani']} (esik {e['esik']})" for e in ek.values())
+           + f"; alt referans: masanin kendi {ek['alt']['masa_satir_sayisi']} satirinda en buyuk oran {ek['alt']['masa_dogal_oran_max']}",
+           f"sag kupa govdesi: {O['sag_govde_olcum']}",
            f"dikey cizgi (sutun ortalamasi std): {O['dikey_cizgi']} (esik 1,5x kendi zemini)",
            f"zemin uzatma (yd_reel b11ec836 yontemi): ust {n_ust} satir (doku duvardan), alt {n_alt} satir (doku masadan)",
            'KAPILAR: ' + '; '.join(f"{'PASS' if v else 'FAIL'} {k_}" for k_, v in kapi.items()),
