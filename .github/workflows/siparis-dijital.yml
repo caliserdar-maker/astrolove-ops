@@ -5,7 +5,7 @@ name: siparis-dijital
 # WARM PARCHMENT: ONAYLI BAKIR (Serdar 1 Eki WP PASS) - claude/wp-katman-baski-60sk0s adfb2b9, wp_kilit TAMAM
 # olmadan uretilmez; eski gri-kahve WP teslim edilmez. Sayfalar ayni pdf_yap / pdf_kapisi ile PDF olur.
 # Isim / mesaj loga yazilmaz (GITHUB_EVENT_PATH'ten okunur, ::add-mask::). Etsy'ye yazma / musteriye gonderim YOK.
-# Cikti: Drive ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL/<receipt>/ ; 11x14 kesit + onizleme: inceleme/siparis-<receipt> dali.
+# Cikti: Drive ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL/<receipt>/ ; kesit + onizleme yalniz Drive <receipt>/KONTROL (21 Eki: public dala yazma kaldirildi).
 
 permissions:
   contents: read
@@ -125,7 +125,7 @@ jobs:
     needs: plan
     if: ${{ needs.plan.outputs.renk != '[]' }}
     permissions:
-      contents: write
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -179,28 +179,6 @@ jobs:
         run: |
           python scripts/siparis_dijital/surucu.py --asama renk --renk "${{ matrix.renk }}" --kod _kod \
             --kod-ref "siparis-baski-v1 $RENK_REF" --cikti "out/renk/${{ matrix.renk }}"
-      - name: Inceleme dalina ekle (bu isin kesitleri)
-        if: ${{ always() }}
-        env:
-          TOKEN: ${{ github.token }}
-          PARCA: out/renk/${{ matrix.renk }}/inceleme
-        run: |
-          set -uo pipefail
-          REC=$(jq -r '.inputs.receipt' "$GITHUB_EVENT_PATH"); [[ "$REC" =~ ^[0-9]+$ ]] || exit 1
-          ls "$PARCA" 2>/dev/null | grep -q . || { echo "kesit yok"; exit 0; }
-          B="inceleme/siparis-$REC"; U="https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-          G=(-c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com")
-          for i in 1 2 3 4 5 6; do
-            rm -rf _inc
-            if git clone -q --depth 1 --branch "$B" "$U" _inc 2>/dev/null; then :; else
-              git init -q _inc && git -C _inc checkout -q --orphan "$B" && git -C _inc remote add origin "$U"; fi
-            mkdir -p _inc/kontrol && cp "$PARCA"/* _inc/kontrol/
-            git -C _inc "${G[@]}" add kontrol
-            git -C _inc "${G[@]}" commit -qm "siparis $REC: ${{ github.job }} kesitleri" || { echo "degisiklik yok"; exit 0; }
-            if git -C _inc push -q origin "HEAD:refs/heads/$B"; then echo "dal: $B $(git -C _inc rev-parse --short HEAD)"; exit 0; fi
-            sleep $((RANDOM % 8 + 3))
-          done
-          echo "HATA: dala push edilemedi" >&2; exit 1
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:
@@ -214,7 +192,7 @@ jobs:
     needs: plan
     if: ${{ needs.plan.outputs.sayfa_var == '1' }}
     permissions:
-      contents: write
+      contents: read
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.plan.outputs.sayfa) }}
@@ -267,28 +245,6 @@ jobs:
         run: |
           python scripts/siparis_dijital/surucu.py --asama sayfa --renk "${{ matrix.renk }}" --oran "${{ matrix.oran }}" --kod _kod \
             --kod-ref "siparis-baski-v1 $RENK_REF" --cikti "out/renk/${{ matrix.renk }}"
-      - name: Inceleme dalina ekle (bu isin kesitleri)
-        if: ${{ always() }}
-        env:
-          TOKEN: ${{ github.token }}
-          PARCA: out/renk/${{ matrix.renk }}/inceleme
-        run: |
-          set -uo pipefail
-          REC=$(jq -r '.inputs.receipt' "$GITHUB_EVENT_PATH"); [[ "$REC" =~ ^[0-9]+$ ]] || exit 1
-          ls "$PARCA" 2>/dev/null | grep -q . || { echo "kesit yok"; exit 0; }
-          B="inceleme/siparis-$REC"; U="https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-          G=(-c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com")
-          for i in 1 2 3 4 5 6; do
-            rm -rf _inc
-            if git clone -q --depth 1 --branch "$B" "$U" _inc 2>/dev/null; then :; else
-              git init -q _inc && git -C _inc checkout -q --orphan "$B" && git -C _inc remote add origin "$U"; fi
-            mkdir -p _inc/kontrol && cp "$PARCA"/* _inc/kontrol/
-            git -C _inc "${G[@]}" add kontrol
-            git -C _inc "${G[@]}" commit -qm "siparis $REC: ${{ github.job }} kesitleri" || { echo "degisiklik yok"; exit 0; }
-            if git -C _inc push -q origin "HEAD:refs/heads/$B"; then echo "dal: $B $(git -C _inc rev-parse --short HEAD)"; exit 0; fi
-            sleep $((RANDOM % 8 + 3))
-          done
-          echo "HATA: dala push edilemedi" >&2; exit 1
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:
@@ -401,7 +357,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:
-      contents: write
+      contents: read
       actions: read
     steps:
       - name: Girdi + maske
@@ -537,7 +493,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
-      contents: write
+      contents: read
     steps:
       - name: Girdi + maske
         run: |
@@ -580,31 +536,12 @@ jobs:
           set -euo pipefail
           H="gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL/$REC/KONTROL"
           for r in out/renk/*; do [ -d "$r" ] || continue; rclone copy "$r" "$H/$(basename "$r")" --transfers 8; done
-          for d in out/a/renk_* out/a/sayfa_*; do [ -d "$d/KONTROL" ] || continue
+          for d in out/a/renk_* out/a/sayfa_*; do [ -d "$d" ] || continue
             n=$(basename "$d"); n=${n#renk_}; n=${n#sayfa_}; n=${n%%__*}
-            rclone copy "$d/KONTROL" "$H/$n/KONTROL" --transfers 8; done
+            [ -d "$d/KONTROL" ] && rclone copy "$d/KONTROL" "$H/$n/KONTROL" --transfers 8
+            [ -d "$d/inceleme" ] && rclone copy "$d/inceleme" "$H/$n/INCELEME" --transfers 8 || true; done
           [ -d out/wp ] && rclone copy out/wp "$H/WARM_PARCHMENT" --transfers 8 || true
           [ -d out/inceleme ] && rclone copy out/inceleme "$H/INCELEME_11x14" --transfers 8 || true
           echo "drive: TEMP/SIPARIS_ISIM/DIJITAL/$REC/KONTROL"
-      - name: Inceleme dalina ekle (paket kesitleri)
-        env:
-          TOKEN: ${{ github.token }}
-          PARCA: out/inceleme
-        run: |
-          set -uo pipefail
-          ls "$PARCA" 2>/dev/null | grep -q . || { echo "kesit yok"; exit 0; }
-          B="inceleme/siparis-$REC"; U="https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-          G=(-c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com")
-          for i in 1 2 3 4 5 6; do
-            rm -rf _inc
-            if git clone -q --depth 1 --branch "$B" "$U" _inc 2>/dev/null; then :; else
-              git init -q _inc && git -C _inc checkout -q --orphan "$B" && git -C _inc remote add origin "$U"; fi
-            mkdir -p _inc/kontrol && cp "$PARCA"/* _inc/kontrol/
-            git -C _inc "${G[@]}" add kontrol
-            git -C _inc "${G[@]}" commit -qm "siparis $REC: paket kesitleri" || { echo "degisiklik yok"; exit 0; }
-            if git -C _inc push -q origin "HEAD:refs/heads/$B"; then echo "dal: $B $(git -C _inc rev-parse --short HEAD)"; exit 0; fi
-            sleep $((RANDOM % 8 + 3))
-          done
-          echo "HATA: dala push edilemedi" >&2; exit 1
       - if: ${{ always() }}
         run: rm -rf ~/.config/rclone

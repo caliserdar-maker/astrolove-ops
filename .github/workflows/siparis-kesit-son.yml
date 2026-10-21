@@ -1,13 +1,13 @@
 name: siparis-kesit-son
 
 # Teslim oncesi 1:1 kontrol (Serdar 1 Eki): Drive'daki 5 PDF'in 25 sayfasindan isim + mesaj bandi kesitleri, 1:1
-# (olcekleme yok, JPEG q95) + her renk 18x24 tam sayfa 1200 px onizleme -> inceleme/siparis-<receipt> dali,
-# klasor inceleme/siparis_<receipt>_son/. Bant satirlari KAPI_RAPORU_<renk>.json'dan (isim bandi temizligi satiri,
+# (olcekleme yok, JPEG q95) + her renk 18x24 tam sayfa 1200 px onizleme -> yalniz Drive
+# TEMP/SIPARIS_ISIM/DIJITAL/<receipt>/KONTROL/SON_KESIT/ (21 Eki: public dala yazma kaldirildi). Bant satirlari KAPI_RAPORU_<renk>.json'dan (isim bandi temizligi satiri,
 # eski metin izi bandi); WP ayni boyun CI bantlarini kullanir (bant_dogrulama: WP = diger renkler +-1 px).
 # Salt okur (Drive); Etsy / musteri YOK.
 
 permissions:
-  contents: write
+  contents: read
 
 on:
   workflow_dispatch:
@@ -15,7 +15,7 @@ on:
       receipt:
         description: "receipt"
         required: true
-        default: "4188621967"
+        default: ""
 
 jobs:
   kesit:
@@ -108,23 +108,11 @@ jobs:
           assert sayi == 50, sayi
           EOF
           ls out/inceleme/siparis_${REC}_son | wc -l
-      - name: Inceleme dali
-        env:
-          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Drive (kesitler)
         run: |
           set -euo pipefail
           REC=$(jq -r '.inputs.receipt' "$GITHUB_EVENT_PATH")
-          B="inceleme/siparis-$REC"; U="https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-          G=(-c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com")
-          for i in 1 2 3 4 5 6; do
-            rm -rf _inc
-            git clone -q --depth 1 --branch "$B" "$U" _inc
-            mkdir -p "_inc/inceleme" && rm -rf "_inc/inceleme/siparis_${REC}_son" && cp -r "out/inceleme/siparis_${REC}_son" "_inc/inceleme/"
-            git -C _inc "${G[@]}" add inceleme
-            git -C _inc "${G[@]}" commit -qm "siparis $REC: teslim oncesi 1:1 isim + mesaj bandi kesitleri (25 sayfa) + 18x24 onizleme" || { echo "degisiklik yok"; exit 0; }
-            if git -C _inc push -q origin "HEAD:refs/heads/$B"; then echo "COMMIT $(git -C _inc rev-parse HEAD)"; exit 0; fi
-            sleep $((RANDOM % 8 + 3))
-          done
-          exit 1
+          rclone copy "out/inceleme/siparis_${REC}_son" "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL/$REC/KONTROL/SON_KESIT" --transfers 8
+          echo "drive: TEMP/SIPARIS_ISIM/DIJITAL/$REC/KONTROL/SON_KESIT"
       - if: ${{ always() }}
         run: rm -rf ~/.config/rclone
