@@ -1,6 +1,6 @@
 name: plate-etki
 
-# PLATE TEMIZLIGININ ETKISI (1 Eki 2026, siparis 4188621967): ayni kod (siparis-baski-v1), ayni girdi (EMILY / JAMES),
+# PLATE TEMIZLIGININ ETKISI (1 Eki 2026, siparis 9000000000): ayni kod (siparis-baski-v1), ayni girdi (EMILY / JAMES),
 # POD baski dosyasi iki kez: (1) temizlik oncesi YEDEK plate'lerle, (2) temiz PLATES ile. Fark yalniz mesaj bandinda
 # olmali; bant (+pay) disinda degisen piksel 0. Salt okur: PLATES / POD_PRINT'e yazma yok, Etsy / musteri YOK.
 

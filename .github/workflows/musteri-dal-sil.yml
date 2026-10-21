@@ -1,6 +1,6 @@
 name: musteri-dal-sil
-# ACIL MUSTERI VERISI (Serdar 21 Eki, madde 2): YALNIZ inceleme/siparis-4188621967 dali silinir (dal adi sabit, girdi yok).
-# Yedek: Drive SIPARIS_ISIM/DIJITAL/4188621967/DAL_YEDEK_20261021 (musteri-dal-yedek kosu 39605583575, check one-way 103 PASS).
+# ACIL MUSTERI VERISI (Serdar 21 Eki, madde 2): YALNIZ inceleme/siparis-9000000000 dali silinir (dal adi sabit, girdi yok).
+# Yedek: Drive SIPARIS_ISIM/DIJITAL/9000000000/DAL_YEDEK_20261021 (musteri-dal-yedek kosu 39605583575, check one-way 103 PASS).
 # Dal ucu yedeklenen d1c4848a degilse silmez (yedekten sonra yeni commit gelmis olur). Gecici is akisi: P8 ile kaldirilir.
 permissions:
   contents: write
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
-      B: inceleme/siparis-4188621967
+      B: inceleme/siparis-9000000000
       YEDEK_UC: d1c4848a34752976e632f4169ceb5678a8094871
       GH_TOKEN: ${{ github.token }}
     steps:

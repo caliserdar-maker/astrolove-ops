@@ -12,7 +12,7 @@ En gec 15 dk sonra 5 renk PDF (her biri 5 boy, 300 dpi) Drive'da, tum kapilar PA
 
 | Is | Cift / isimler | Basla | 5 PDF Drive'da | Sure | Not |
 |---|---|---|---|---|---|
-| EMILY (4188621967) | CANCER_LEO, EMILY / JAMES | 13:17 | 16:57 | ~3 sa 40 dk | 11 koşu; DB 18x24 olcek kapisi |
+| EMILY (9000000000) | CANCER_LEO, EMILY / JAMES | 13:17 | 16:57 | ~3 sa 40 dk | 11 koşu; DB 18x24 olcek kapisi |
 | Test 1 (9000000001) | CANCER_LIBRA, SERDAR / LENA, "To My Adorable Angel" | 17:26 | 18:42 | 76 dk | ilk koşu 35 dk, 2 sayfa FAIL |
 | Test 2 (9000000002) | CAPRICORN_SAGITTARIUS, GEORGE / MEG, "Happy 5th Anniversary" | 18:47:35 | 18:58:54 | 11 dk 19 sn | dogru dispatch 18:49:46'dan 9 dk 8 sn |
 
@@ -43,7 +43,8 @@ Paket: PDF'ler son isten ~1 dk sonra Drive'da; paket isi sonraki 5 dk'yi incelem
 ## Dispatch sablonu (siparis-dijital, main)
 
 ```
-receipt     : yalniz rakam (test: 900000000N)
+receipt     : yalniz rakam (test: 900000000N; test serisi 900000xxxx, Etsy gercek receipt 4... ile baslar;
+              9000000000 = depoda gercek siparis numarasi yerine notr ornek, test icin KULLANILMAZ - Serdar 21 Eki)
 cift        : ALFABETIK, orn. CAPRICORN_SAGITTARIUS
 isim1       : cift adindaki ilk burcun altina giden isim (sol)
 isim2       : ikinci burcun altina giden isim (sag)
@@ -108,7 +109,7 @@ onceki_kosu : PASS isleri bu koşulardan al (tek is yeniden kosuda)
 
 ## TUM DERSLER (EMILY + Test 1-3 + gece, 1 Eki; Serdar: Test 4'te hepsi uygulanacak)
 
-EMILY (4188621967)
+EMILY (9000000000)
 1. Tek sayfaya yama yapildi (DB 18x24 altin profili), kok neden cozulmedi; isim degisince hata baska sayfada cikti.
 2. Dosya/klasor adi AstroLove_ yazildi; marka her yerde AstroLoveArt.
 3. Musteri metninde olculmemis cozunurluk iddiasi (11x14 -> 22x28); boy/dpi iddiasi yalniz olcumle.

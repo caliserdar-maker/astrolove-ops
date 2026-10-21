@@ -348,7 +348,7 @@ def a_renk_karar(cift, boy, a):
 
 def wp_bakir_uret_v1(sd, sip, P_blue, P_ed, cik):
     """wp-katman dali (adfb2b9) siparis_dosyasi.wp_bakir_uret'in AYNISI; --kod v1 (renk_ref + kilitli WP dosyalari)
-    iken v1'de bu fonksiyon yok. 1 Eki (siparis 4188621967 WP A2): duz renk baskisi uretimdeki POD koduyla."""
+    iken v1'de bu fonksiyon yok. 1 Eki (siparis 9000000000 WP A2): duz renk baskisi uretimdeki POD koduyla."""
     import wp_ornek as wo
     ek = getattr(sd, 'POD_EK_DENEME', None)         # duz renk baskisinda 3. olcek denemesi (yalniz WP hatti)
     if ek is not None:

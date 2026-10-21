@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""OLCEK TANISI (Serdar 1 Eki 16:28, siparis 4188621967 DB 18x24): onayli 2400 referansi (p0) ve BASKI dosyasi
+"""OLCEK TANISI (Serdar 1 Eki 16:28, siparis 9000000000 DB 18x24): onayli 2400 referansi (p0) ve BASKI dosyasi
 isim satiri olculeri, DEEP_BLACK ve MIDNIGHT_BLUE icin AYNI 2400 koordinatlarinda.
 
 Yalniz SAYI yazar (isim / mesaj / goruntu yok): satir_olc_alt sonuclari (p0, baski), kume sinirlari, olcum
