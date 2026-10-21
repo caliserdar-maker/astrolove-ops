@@ -132,3 +132,9 @@ Hedef: Serdar isim + burc yeri + tagline verir, 15 dk icinde 5 PDF Drive'da (Tes
 - Yeni test/arac ilk surumde hizli tasarlanir: yalniz gereken boylar, paralel indirme/olcum.
 - Teshis icin OZET sayfa kaydinda `iz` (traceback) ve `olcek` (olcek kapisi ayrintisi) alanlari var (030f767, 1fa8f68);
   job loglari okunamadiginda once bunlara bakilir.
+
+## Çapraz inceleme ve bağlam (Serdar, 21 Eki 2026)
+- Etsy'ye veya Metricool'a toplu yazmadan önce ve sonuç raporu vermeden önce TEK bir bağımsız inceleme ajanı çalıştırılır. Görevi: "Bu planın/raporun neden yanlış olduğunu kanıtla; kapıların atladığı hataları, yanlış varsayımları ve kaynaksız iddiaları bul." Bulgular düzeltilmeden rapor verilmez. Bunun dışında "alt ajan yok" kuralı geçerlidir.
+- Raporlardaki her rakamın kaynağı yazılır (ölçüm / API / dosya / tahmin). Kaynaksız rakam yok.
+- Görev metinlerinde rol verme yok; oturum, işe başlamadan ilgili karar dosyalarını ve önceki sonuçları okur.
+- İş sırasında görevin dışında bir hata, risk ya da fırsat görülürse (ör. sipariş hattında kapı FAIL'i), kanıtıyla rapora eklenir; kendiliğinden düzeltilmez.
