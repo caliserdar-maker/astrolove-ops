@@ -302,7 +302,7 @@ jobs:
       - name: WP kilitli dosyalari v1 kodunun ustune (yalniz wp_pod_kod=v1)
         if: ${{ (github.event.inputs.wp_pod_kod || 'v1') == 'v1' }}
         run: |
-          # 1 Eki (siparis 4188621967 WP A2): WP dalinin pod_uret'inde olcek ikinci denemesi yok -> CI A2 'olcek' FAIL,
+          # 1 Eki (siparis 9000000000 WP A2): WP dalinin pod_uret'inde olcek ikinci denemesi yok -> CI A2 'olcek' FAIL,
           # duz renk MB'ye dustu (a_renk / f_kabartma / g_kontrast FAIL). Bakir kodu (kilitli dosyalar) AYNEN kopyalanir,
           # duz renk baskisi uretimdeki POD koduyla (renk_ref) yapilir. Kilit v1 kopyasinda da dogrulanir.
           set -euo pipefail

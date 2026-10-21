@@ -1,6 +1,6 @@
 name: musteri-dal-yedek
-# ACIL MUSTERI VERISI (Serdar 21 Eki, madde 0): inceleme/siparis-4188621967 dali silinmeden once TEK KOSU yedek.
-# Dalin son agaci (101 dosya) + tum gecmisi (git bundle, 22 commit) Drive SIPARIS_ISIM/DIJITAL/4188621967/DAL_YEDEK_20261021/
+# ACIL MUSTERI VERISI (Serdar 21 Eki, madde 0): inceleme/siparis-9000000000 dali silinmeden once TEK KOSU yedek.
+# Dalin son agaci (101 dosya) + tum gecmisi (git bundle, 22 commit) Drive SIPARIS_ISIM/DIJITAL/9000000000/DAL_YEDEK_20261021/
 # altina; rclone check one-way ile dogrulanir. Once mevcut Drive kopyasi karsilastirilir (bilgi). Log'a dosya icerigi /
 # musteri adi yazilmaz (yalniz sayilar). Etsy yok, silme yok, mevcut Drive dosyasina dokunulmaz (--ignore-existing).
 permissions:
@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: inceleme/siparis-4188621967
+          ref: inceleme/siparis-9000000000
           path: _d
           fetch-depth: 0
       - name: Agac + bundle
@@ -25,8 +25,8 @@ jobs:
           set -euo pipefail
           mkdir -p _y/AGAC
           ( cd _d && git rev-list --count HEAD && git rev-parse HEAD )
-          ( cd _d && git bundle create ../_y/inceleme_siparis-4188621967.bundle HEAD )
-          ( cd _d && git bundle verify ../_y/inceleme_siparis-4188621967.bundle >/dev/null && echo "bundle verify OK" )
+          ( cd _d && git bundle create ../_y/inceleme_siparis-9000000000.bundle HEAD )
+          ( cd _d && git bundle verify ../_y/inceleme_siparis-9000000000.bundle >/dev/null && echo "bundle verify OK" )
           ( cd _d && git ls-files -z | xargs -0 -I{} cp --parents {} ../_y/AGAC/ )
           n=$(find _y/AGAC -type f | wc -l); echo "agac dosya $n"; [ "$n" = 101 ] || { echo "::error::dosya sayisi $n (101 bekleniyor)"; exit 1; }
           ( cd _y && find . -type f ! -name SHA256.txt -print0 | sort -z | xargs -0 sha256sum > SHA256.txt )
@@ -52,7 +52,7 @@ jobs:
             rclone check _y/AGAC "${K}${alt}" --one-way --size-only --combined /tmp/c.txt -q >/dev/null 2>&1
             echo "Drive '${alt:-kok}': ayni $(grep -c '^=' /tmp/c.txt) / eksik $(grep -c '^-' /tmp/c.txt) / farkli $(grep -c '^\*' /tmp/c.txt)"
           done
-          echo "Drive 4188621967 toplam dosya: $(rclone lsf -R --files-only "$K" | wc -l)"
+          echo "Drive 9000000000 toplam dosya: $(rclone lsf -R --files-only "$K" | wc -l)"
       - name: Drive'a yedek + dogrulama
         run: |
           set -euo pipefail

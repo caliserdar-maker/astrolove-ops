@@ -1,5 +1,5 @@
 name: siparis-revizyon-ara
-# Serdar 21 Eki madde 3: SIPARIS_ISIM/DIJITAL/4188621967 dosyalarinin Drive revizyonlari (duzeltme oncesi sayfalar) SALT OKUNUR
+# Serdar 21 Eki madde 3: SIPARIS_ISIM/DIJITAL/9000000000 dosyalarinin Drive revizyonlari (duzeltme oncesi sayfalar) SALT OKUNUR
 # listelenir; bas (guncel) revizyon disindaki her revizyon Drive TEMP/SIPARIS_HAT_TANI_20261021/ESKI_REVIZYON/ altina kopyalanir.
 # Musteri dosyasina dokunulmaz (revizyon / keepForever / silme yok). Log'a yalniz sayi, zaman, boyut, md5 yazilir; isim / mesaj yok.
 # Artifact yok. Gecici is akisi: P8 ile kaldirilir.
