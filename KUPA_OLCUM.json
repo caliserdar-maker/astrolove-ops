@@ -1,0 +1,178 @@
+[
+ {
+  "dosya": "KUPA_ORANGE_BLOSSOM_ON.png",
+  "urun": "kupa",
+  "stil": "ORANGE_BLOSSOM",
+  "yuz": "ON",
+  "olcu": "2048x2048",
+  "urun_kutusu": "1487x1294 @ 60,411",
+  "piksel_birebir": true,
+  "dis_alfa_max": 0.0,
+  "opak_px": 1461357
+ },
+ {
+  "dosya": "KUPA_ORANGE_BLOSSOM_ARKA.png",
+  "urun": "kupa",
+  "stil": "ORANGE_BLOSSOM",
+  "yuz": "ARKA",
+  "olcu": "2048x2048",
+  "urun_kutusu": "1488x1293 @ 501,416",
+  "piksel_birebir": true,
+  "dis_alfa_max": 0.0,
+  "opak_px": 1460997
+ },
+ {
+  "dosya": "KUPA_PURPLE_FIG_ON.png",
+  "urun": "kupa",
+  "stil": "PURPLE_FIG",
+  "yuz": "ON",
+  "olcu": "2048x2048",
+  "urun_kutusu": "1487x1294 @ 60,411",
+  "piksel_birebir": true,
+  "dis_alfa_max": 0.0,
+  "opak_px": 1461357
+ },
+ {
+  "dosya": "KUPA_PURPLE_FIG_ARKA.png",
+  "urun": "kupa",
+  "stil": "PURPLE_FIG",
+  "yuz": "ARKA",
+  "olcu": "2048x2048",
+  "urun_kutusu": "1488x1293 @ 501,416",
+  "piksel_birebir": true,
+  "dis_alfa_max": 0.0,
+  "opak_px": 1460997
+ },
+ {
+  "dosya": "KUPA_OLIVE_BREEZE_ON.png",
+  "urun": "kupa",
+  "stil": "OLIVE_BREEZE",
+  "yuz": "ON",
+  "olcu": "2048x2048",
+  "urun_kutusu": "1487x1294 @ 60,411",
+  "piksel_birebir": true,
+  "dis_alfa_max": 0.0,
+  "opak_px": 1461357
+ },
+ {
+  "dosya": "KUPA_OLIVE_BREEZE_ARKA.png",
+  "urun": "kupa",
+  "stil": "OLIVE_BREEZE",
+  "yuz": "ARKA",
+  "olcu": "2048x2048",
+  "urun_kutusu": "1488x1293 @ 501,416",
+  "piksel_birebir": true,
+  "dis_alfa_max": 0.0,
+  "opak_px": 1460997
+ },
+ {
+  "dosya": "KUPA_POMEGRANATE_BLOOM_ON.png",
+  "urun": "kupa",
+  "stil": "POMEGRANATE_BLOOM",
+  "yuz": "ON",
+  "olcu": "2048x2048",
+  "urun_kutusu": "1487x1294 @ 60,411",
+  "piksel_birebir": true,
+  "dis_alfa_max": 0.0,
+  "opak_px": 1461357
+ },
+ {
+  "dosya": "KUPA_POMEGRANATE_BLOOM_ARKA.png",
+  "urun": "kupa",
+  "stil": "POMEGRANATE_BLOOM",
+  "yuz": "ARKA",
+  "olcu": "2048x2048",
+  "urun_kutusu": "1488x1293 @ 501,416",
+  "piksel_birebir": true,
+  "dis_alfa_max": 0.0,
+  "opak_px": 1460997
+ },
+ {
+  "dosya": "KUPA_ALMOND_BLOSSOM_ON.png",
+  "urun": "kupa",
+  "stil": "ALMOND_BLOSSOM",
+  "yuz": "ON",
+  "olcu": "2048x2048",
+  "urun_kutusu": "1487x1294 @ 60,411",
+  "piksel_birebir": true,
+  "dis_alfa_max": 0.0,
+  "opak_px": 1461357
+ },
+ {
+  "dosya": "KUPA_ALMOND_BLOSSOM_ARKA.png",
+  "urun": "kupa",
+  "stil": "ALMOND_BLOSSOM",
+  "yuz": "ARKA",
+  "olcu": "2048x2048",
+  "urun_kutusu": "1488x1293 @ 501,416",
+  "piksel_birebir": true,
+  "dis_alfa_max": 0.0,
+  "opak_px": 1460997
+ },
+ {
+  "dosya": "KUPA_LEMON_GROVE_ON.png",
+  "urun": "kupa",
+  "stil": "LEMON_GROVE",
+  "yuz": "ON",
+  "olcu": "2048x2048",
+  "urun_kutusu": "1487x1294 @ 60,411",
+  "piksel_birebir": true,
+  "dis_alfa_max": 0.0,
+  "opak_px": 1461357
+ },
+ {
+  "dosya": "KUPA_LEMON_GROVE_ARKA.png",
+  "urun": "kupa",
+  "stil": "LEMON_GROVE",
+  "yuz": "ARKA",
+  "olcu": "2048x2048",
+  "urun_kutusu": "1488x1293 @ 501,416",
+  "piksel_birebir": true,
+  "dis_alfa_max": 0.0,
+  "opak_px": 1460997
+ },
+ {
+  "dosya": "KUPA_BLUE_GRAPE_ON.png",
+  "urun": "kupa",
+  "stil": "BLUE_GRAPE",
+  "yuz": "ON",
+  "olcu": "2048x2048",
+  "urun_kutusu": "1487x1294 @ 60,411",
+  "piksel_birebir": true,
+  "dis_alfa_max": 0.0,
+  "opak_px": 1461357
+ },
+ {
+  "dosya": "KUPA_BLUE_GRAPE_ARKA.png",
+  "urun": "kupa",
+  "stil": "BLUE_GRAPE",
+  "yuz": "ARKA",
+  "olcu": "2048x2048",
+  "urun_kutusu": "1488x1293 @ 501,416",
+  "piksel_birebir": true,
+  "dis_alfa_max": 0.0,
+  "opak_px": 1460997
+ },
+ {
+  "dosya": "KUPA_GOLDEN_LOQUAT_ON.png",
+  "urun": "kupa",
+  "stil": "GOLDEN_LOQUAT",
+  "yuz": "ON",
+  "olcu": "2048x2048",
+  "urun_kutusu": "1487x1294 @ 60,411",
+  "piksel_birebir": true,
+  "dis_alfa_max": 0.0,
+  "opak_px": 1461357
+ },
+ {
+  "dosya": "KUPA_GOLDEN_LOQUAT_ARKA.png",
+  "urun": "kupa",
+  "stil": "GOLDEN_LOQUAT",
+  "yuz": "ARKA",
+  "olcu": "2048x2048",
+  "urun_kutusu": "1488x1293 @ 501,416",
+  "piksel_birebir": true,
+  "dis_alfa_max": 0.0,
+  "opak_px": 1460997
+ }
+]

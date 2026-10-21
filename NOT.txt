@@ -1,0 +1,4 @@
+NOT: KUPA PNG tuvali 2048x2048 (kupa-orchard tek kupa sahnesi), kupanin kendisi ~1486x1294 px (sahne cozunurlugu, olcek 1; Serdar kabul 21 Eki).
+NOT: kupa on yuz kulp siniri arka yuzde temiz cikan kulp maskesinin aynasi (deneme 3); masa/duvar ve masaya dusen golge saydam.
+NOT: yil donumu ornek metin ilan uretimindeki gibi EMMA / JAMES / 14 JUNE 2025 / YEAR ONE (bizim-yilimiz-v3 e3d168c by_poster, by_siparis.py).
+NOT: poster siparis_dosyasi.py (siparis-baski-v1) 8x10, EMILY / JAMES / It Began With a Kiss in the Rain.
