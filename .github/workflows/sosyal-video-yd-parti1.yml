@@ -13,7 +13,7 @@ on:
         description: 'ciftler (virgulle)'
         default: CANCER_LIBRA,AQUARIUS_LIBRA,SCORPIO_TAURUS,ARIES_LIBRA
       onceki_kosu:
-        description: 'bos: uret + topla; kosu no: uretim atlanir, o kosunun artifact'"'"'lari ile yalniz topla'
+        description: "bos: uret + topla; kosu no: uretim atlanir, o kosunun artifactlari ile yalniz topla"
         default: ''
 env:
   O: gdrive:ASTROLOVE/TEMP/SOSYAL_VIDEO_YD_PARTI1_20261021
