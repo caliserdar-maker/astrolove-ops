@@ -2,7 +2,7 @@
 """Metricool: bekleyen yil donumu (BY) pinlerinde baski vaadi duzeltmesi (Serdar kararlari 21 Eki 2026, PLAN_KARAR A).
 Yalniz Pinterest durumu PENDING olan gonderilerde YALNIZ su alanlar degisir: text (aciklama), mediaAltText, pinterestData.pinTitle.
 Degisimler birebir alt dize (DEGIS_*); baska metne dokunulmaz. GET -> degistir -> PUT -> GET; diger alan farki IZINLI_FARK disindaysa FAIL.
-Baslik 100 karakteri asarsa o pin YAZILMAZ (UZUN, Serdar karari). Degisimden sonra metinde vaat kalirsa YAZILMAZ (KALAN).
+Baslik 100'u asarsa once KISALT_BASLIK (Serdar 22 Eki); hala asarsa o pin YAZILMAZ (UZUN). Degisimden sonra metinde vaat kalirsa YAZILMAZ (KALAN).
 Ayrica pencere icindeki TUM gonderilerin medya adresleri host bazinda sayilir (Drive kapatma plani C2 on kosulu): MEDYA_HOST.csv.
 Uc noktalar: data/sosyal/kaynak/metricool/METRICOOL_SWAGGER.json  GET /v2/scheduler/posts?start&end&timezone  GET|PUT /v2/scheduler/posts/{id}
 Mod: kuru (liste + CSV, yazma YOK), tek (1 gonderi), hepsi (kalanlar). tek/hepsi --onay SERDAR_PIN_METIN ister. Token loga yazilmaz.
@@ -39,6 +39,9 @@ VAAT = re.compile(r'shipped 8x10 print|8x10 (?:paper anniversary )?print\b|shipp
                   re.I)
 TIRE = re.compile('[\\u2013\\u2014]')
 BASLIK_AZAMI = 100
+# Yalniz degisimden sonra 100'u asan basliklara (Serdar 22 Eki: "100'e kisaltilir, anlam korunur"): burc adlari zaten
+# zodyak oldugunu soyler, "Zodiac" duser; "Printable with Names" kalir. Hala uzunsa UZUN (yazilmaz).
+KISALT_BASLIK = [(' Zodiac Paper Anniversary Printable with Names', ' Paper Anniversary Printable with Names')]
 
 
 def uygula(s, kurallar):
@@ -53,7 +56,10 @@ def alanlar(p):
 
 
 def hedef_alanlar(a):
-    return {'baslik': uygula(a['baslik'], DEGIS_BASLIK), 'metin': uygula(a['metin'], DEGIS_METIN),
+    baslik = uygula(a['baslik'], DEGIS_BASLIK)
+    if len(baslik) > BASLIK_AZAMI and baslik != a['baslik']:
+        baslik = uygula(baslik, KISALT_BASLIK)
+    return {'baslik': baslik, 'metin': uygula(a['metin'], DEGIS_METIN),
             'alt': [uygula(x, DEGIS_ALT) for x in a['alt']]}
 
 
