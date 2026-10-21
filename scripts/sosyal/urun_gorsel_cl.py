@@ -17,6 +17,7 @@ from scipy import ndimage
 STIL = [('orange', 'ORANGE_BLOSSOM'), ('fig', 'PURPLE_FIG'), ('olive', 'OLIVE_BREEZE'), ('pomegranate', 'POMEGRANATE_BLOOM'),
         ('almond', 'ALMOND_BLOSSOM'), ('lemon', 'LEMON_GROVE'), ('grape', 'BLUE_GRAPE'), ('loquat', 'GOLDEN_LOQUAT')]   # cift.py ST8
 ESIK, BANT = 14.0, 3          # kulp farki (RGB max, 8 bit); kenar bandi (px)
+ESIK_ON = 8.0                 # on yuz kulp esigi (aynalanmis kulp bolgesi icinde)
 # kulp bolgesi: dikeyde kulbun beyaz pikselleri +-25 px (21 Eki deneme 1: masaya dusen kulp golgesi maskeye girmisti)
 
 
@@ -44,7 +45,7 @@ def zemin_modeli(a, bilinen):
     return B
 
 
-def kupa_kes(a, g, taraf):
+def kupa_kes(a, g, taraf, kulp_bolge=None, esik=ESIK):
     H, W, _ = a.shape
     xl, xr, yt, yb, et, eb = g
     gm = govde_maske(g, H, W)
@@ -62,7 +63,9 @@ def kupa_kes(a, g, taraf):
     cx0, cx1 = (kx0, kx1 - 60) if taraf == 'sol' else (kx0 + 60, kx1)
     ys = np.where(w[:, cx0:cx1].sum(1) > 3)[0]
     ky0, ky1 = int(ys.min()) - 25, int(ys.max()) + 25
-    km = np.zeros((H, W), bool); km[ky0:ky1, kx0:kx1] = fark[ky0:ky1, kx0:kx1] > ESIK
+    km = np.zeros((H, W), bool); km[ky0:ky1, kx0:kx1] = fark[ky0:ky1, kx0:kx1] > esik
+    if kulp_bolge is not None:                              # on yuz: arka yuzun temiz kulp siniri aynalanmis (deneme 3)
+        km &= kulp_bolge
     km = ndimage.binary_opening(km, iterations=2)
     km = ndimage.binary_closing(km, iterations=2)
     sert = (gm > 0.5) | km
@@ -73,7 +76,7 @@ def kupa_kes(a, g, taraf):
     ic = ndimage.binary_erosion(sert, iterations=BANT)
     dis = ndimage.binary_dilation(sert, iterations=BANT)
     bant = dis & ~ic
-    yum = np.clip((fark - 4) / (ESIK + 6 - 4), 0, 1)
+    yum = np.clip((fark - 4) / (esik + 6 - 4), 0, 1)
     alfa = np.where(ic, 1.0, np.where(bant, yum, 0.0))
     # govdenin alt kenari: masaya dusen golge farki yuksek; alt elips disinda alfa sifir
     alt = np.zeros((H, W), bool); alt[int(yb):, :] = True
@@ -85,11 +88,17 @@ def kupa_kes(a, g, taraf):
 def kupa(kdir, geo_on, geo_arka, out):
     os.makedirs(out, exist_ok=True)
     g_on = json.load(open(geo_on))['sol']; g_ar = json.load(open(geo_arka))['sag']
+    # on yuz kulp bolgesi: arka yuzde (orange, kulp ayni sahne pikselleri) temiz cikan kulp maskesi dikey eksende aynalanir
+    # (iki sahnede govde merkezi x 1024; esitle.py ayna konum), 15 px genisletilir; icinde esik 8 (kulp duvarla ayni tonda)
+    ar = np.asarray(Image.open(os.path.join(kdir, 'orange_tek_arka.jpg')).convert('RGB')).astype(float)
+    _, sert_ar, _, _ = kupa_kes(ar, g_ar, 'sag')
+    kulp_ar = sert_ar & (govde_maske(g_ar, *sert_ar.shape) < 0.5); kulp_ar[:, :int(g_ar[1]) - 2] = False
+    kulp_on = ndimage.binary_dilation(kulp_ar[:, ::-1], iterations=15)
     sat = []
     for kisa, ad in STIL:
         for yuz, g, taraf, dos in (('ON', g_on, 'sol', f'{kisa}_tek_on.jpg'), ('ARKA', g_ar, 'sag', f'{kisa}_tek_arka.jpg')):
             a = np.asarray(Image.open(os.path.join(kdir, dos)).convert('RGB')).astype(float)
-            alfa, sert, fark, B = kupa_kes(a, g, taraf)
+            alfa, sert, fark, B = kupa_kes(a, g, taraf, kulp_on if yuz == 'ON' else None, ESIK_ON if yuz == 'ON' else ESIK)
             rgba = np.dstack([a, alfa * 255]).round().clip(0, 255).astype(np.uint8)
             yol = os.path.join(out, f'KUPA_{ad}_{yuz}.png')
             Image.fromarray(rgba, 'RGBA').save(yol, optimize=True)
@@ -124,10 +133,10 @@ def paket(out):
     pngs = sorted(f for f in os.listdir(out) if f.endswith('.png'))
     sira = [f for p in ('POSTER_', 'YD_', 'KUPA_') for f in pngs if f.startswith(p)]
     try:
-        ft = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 18)
+        ft = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 14)
     except OSError:
         ft = ImageFont.load_default()
-    tw, th, lab, gap, sut = 300, 360, 30, 14, 6
+    tw, th, lab, gap, sut = 300, 360, 26, 14, 6
     sat_ = (len(sira) + sut - 1) // sut
     c = Image.new('RGB', (gap + sut * (tw + gap), gap + sat_ * (th + lab + gap)), 'white'); d = ImageDraw.Draw(c)
     liste = ['dosya\turun\tstil\tpiksel']
