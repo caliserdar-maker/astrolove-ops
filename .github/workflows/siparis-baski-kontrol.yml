@@ -1,6 +1,6 @@
 name: siparis-baski-kontrol
 
-# SALT OKUMA (28 Eyl, ACIL ...2285): Prodigi'ye giden baski dosyasinda Terazi cubugu kaymis mi + Prodigi siparis durumu.
+# SALT OKUMA (28 Eyl, ACIL, musteri R2): Prodigi'ye giden baski dosyasinda Terazi cubugu kaymis mi + Prodigi siparis durumu.
 # Etsy YOK. Prodigi yalniz GET (siparis/iptal/guncelleme YOK). Musteriye hicbir sey gitmez. Alici/adres yazilmaz.
 # 1) scripts/pod/siparis_baski_kontrol.py: POD_PRINT/<cift>/<renk>/<boy>.jpg vs CANCER_LIBRA ayni renk/boy (md5 = paket kaydi)
 # 2) scripts/prodigi/siparis_oku.py: siparis + ayni receipt'in yeniden basimi (asama, asset, eylemler)
@@ -17,7 +17,7 @@ on:
       boy: {description: "boy", default: "8x10"}
       md5: {description: "paket kaydindaki md5 (bos = denetleme)", default: "550ab8fc8d983ccdcee93294764047a9"}
       oid: {description: "Prodigi siparis id (bos = Prodigi okunmaz)", default: ""}
-      klasor: {description: "TEMP altindaki cikti klasoru", default: "SIPARIS_2285_DUZELTME"}
+      klasor: {description: "TEMP altindaki cikti klasoru", default: "SIPARIS_R2_DUZELTME"}
 
 jobs:
   kontrol:

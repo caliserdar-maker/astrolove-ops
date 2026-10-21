@@ -155,18 +155,18 @@ Gece (20:00-21:10)
     tum yerler aranir.
 36. Uretim kodu degisince calisan isim on testi gecersiz olur; kapi icin yeni head ile yeniden kosulur.
 
-## FIZIKSEL SIPARIS VE TEDARIKCI DERSLERI (2 Eki; Christine 4178672285, Robert, Prodigi)
+## FIZIKSEL SIPARIS VE TEDARIKCI DERSLERI (2 Eki; fiziksel siparis, musteri K3/K4, Prodigi; kimlikler yalniz Drive kaydinda)
 
 Tedarikci / kargo
-37. Prodigi "shipped" = paket toplanmaya hazir, tasiyiciya verildi DEGIL. Christine ilk paketi 23 Eyl "shipped", hic
-    cikmadi; yenisi (UPS 1Z30715X1315632261) 30 Eyl'den beri yalniz "Label Created". KURAL: musteriye takip no yalniz
+37. Prodigi "shipped" = paket toplanmaya hazir, tasiyiciya verildi DEGIL. Musteri (K3) ilk paketi 23 Eyl "shipped", hic
+    cikmadi; yenisi (UPS; takip no yalniz Drive kaydinda) 30 Eyl'den beri yalniz "Label Created". KURAL: musteriye takip no yalniz
     tasiyici ilk taramayi (pickup scan) yaptiktan sonra verilir; "shipped" mesaji tek basina musteriye iletilmez.
-38. Credit note para iadesi degil (PWI-1649573-CN = hesap kredisi). Iade her zaman karta, yazili teyitle istenir.
+38. Credit note para iadesi degil (Prodigi credit note = hesap kredisi; no yalniz Drive kaydinda). Iade her zaman karta, yazili teyitle istenir.
 39. Overnight ucreti odemek paketin zamaninda cikmasini garanti etmez ($23.75 odendi, paket 40+ saat taranmadi).
 40. Tarihi belli siparis (dogum gunu vb.) icin B plani gec kuruldu (teslim gunu sabahi). KURAL: teslim tarihinden
     en az 2 is gunu once tasiyici taramasi yoksa yerel baski B plani ayni gun baslatilir.
 41. Turkiye'den CVS sitesi acilmiyor (ABD disi engel); FedEx Office aciliyor. FedEx'te ayni gun eve teslim yok
-    (en erken Pzt), yalniz magazadan teslim. Christine magazadan teslim istemedi.
+    (en erken Pzt), yalniz magazadan teslim. Musteri magazadan teslim istemedi.
 42. Yeni tedarikci (creativehub / theprintspace) 30 Eyl ve 1 Eki maillerine yanit vermedi; 2 Eki ucuncu mail,
     son tarih ayni gun. Tedarikci seciminde iletisim hizi da olcut.
 
