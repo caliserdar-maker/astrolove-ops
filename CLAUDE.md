@@ -90,7 +90,7 @@ bolumu okunmadan baslanmaz.
 - Marka adi **AstroLoveArt**. Musterinin gorebilecegi her seyde (PDF/dosya/klasor adi, mesaj, metin) yalniz "AstroLove" YAZILMAZ.
 - Siparis dosyalari: AstroLoveArt_<Burc1>_<Burc2>_<Renk>.pdf (orn. AstroLoveArt_Cancer_Leo_Deep_Black.pdf).
 
-## SIPARIS URETIMI: OGRENILENLER (1 Eki 2026, Tara + Test 1 + Test 2; ayrinti docs/SIPARIS_DERSLER.md)
+## SIPARIS URETIMI: OGRENILENLER (1 Eki 2026, EMILY + Test 1 + Test 2; ayrinti docs/SIPARIS_DERSLER.md)
 
 Hedef: Serdar isim + burc yeri + tagline verir, 15 dk icinde 5 PDF Drive'da (Test 2: 11 dk 19 sn, PASS).
 
@@ -107,7 +107,7 @@ Hedef: Serdar isim + burc yeri + tagline verir, 15 dk icinde 5 PDF Drive'da (Tes
 - FAIL nedeni Drive SIPARIS_ISIM/DIJITAL/<receipt>/OZET.json (kapilar, kalan) ve KAPI_RAPORU_<RENK>.json'dan okunur
   (job loglari proxy'de kapali; annotations yalniz "exit code 1" verir).
 - Olcek (yazi yerlesim) kapisi FAIL'i isme bagliydi ve olcum hatasiydi (bfaed5d: esit bant olcumu, MB 2400 referansi
-  plaka_ss, dikey merkez). Tek sayfaya yama yapilmaz; kok neden + isim on testi (TARA, SERDAR, MAXI, ANNE,
+  plaka_ss, dikey merkez). Tek sayfaya yama yapilmaz; kok neden + isim on testi (EMILY, SERDAR, MAXI, ANNE,
   uzun/aksanli isimler orn. MAXIMILIAN, CAGLAYANGUL) ile dogrulanir.
 - MB sayfalari paralel (5 is) kosar: 33 dk -> 6 dk. WP duz renk yalniz CHAMPAGNE_IVORY, JPEG 95 (5cf010a).
 - Bilinen darbogaz kapatilmadan test/siparis baslatilmaz; once olc, sonra kos.

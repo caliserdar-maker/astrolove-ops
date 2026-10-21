@@ -1,6 +1,6 @@
 # Siparis uretimi: dersler ve olcumler
 
-Kaynak: 1 Ekim 2026, Tara siparisi + Test 1 + Test 2. Tum saatler UTC. Sayilar GitHub koşu kayitlari ve
+Kaynak: 1 Ekim 2026, EMILY siparisi + Test 1 + Test 2. Tum saatler UTC. Sayilar GitHub koşu kayitlari ve
 Drive OZET dosyalarindan alinmistir.
 
 ## Hedef
@@ -12,7 +12,7 @@ En gec 15 dk sonra 5 renk PDF (her biri 5 boy, 300 dpi) Drive'da, tum kapilar PA
 
 | Is | Cift / isimler | Basla | 5 PDF Drive'da | Sure | Not |
 |---|---|---|---|---|---|
-| Tara (4188621967) | CANCER_LEO, TARA / ROSS | 13:17 | 16:57 | ~3 sa 40 dk | 11 koşu; DB 18x24 olcek kapisi |
+| EMILY (4188621967) | CANCER_LEO, EMILY / JAMES | 13:17 | 16:57 | ~3 sa 40 dk | 11 koşu; DB 18x24 olcek kapisi |
 | Test 1 (9000000001) | CANCER_LIBRA, SERDAR / LENA, "To My Adorable Angel" | 17:26 | 18:42 | 76 dk | ilk koşu 35 dk, 2 sayfa FAIL |
 | Test 2 (9000000002) | CAPRICORN_SAGITTARIUS, GEORGE / MEG, "Happy 5th Anniversary" | 18:47:35 | 18:58:54 | 11 dk 19 sn | dogru dispatch 18:49:46'dan 9 dk 8 sn |
 
@@ -22,7 +22,7 @@ Paket: PDF'ler son isten ~1 dk sonra Drive'da; paket isi sonraki 5 dk'yi incelem
 
 ## Hatalar ve kok nedenleri
 
-1. **Olcek (yazi yerlesim) kapisi, isme bagli FAIL** (Tara: DB 18x24; Test 1: MB 11x14).
+1. **Olcek (yazi yerlesim) kapisi, isme bagli FAIL** (EMILY: DB 18x24; Test 1: MB 11x14).
    Kok neden olcumdeydi, baskida degil:
    - 2400 referansin 4x kutu kucultmesi 0.25 px font farkini ~0.9 px'e buyutuyordu, sapma harf sekline bagli.
    - MB'nin 2400 referansi farkli rasterlayici (pilot12.plaka, hinting) kullaniyordu, harf yuksekliginde 1.3 px'e kadar kayma.
@@ -38,7 +38,7 @@ Paket: PDF'ler son isten ~1 dk sonra Drive'da; paket isi sonraki 5 dk'yi incelem
 5. **Runner kuyrugu** (Test 2): ayni anda koşan prova 8 runner tuttu, CI 2 dk gec basladi.
 6. **Dispatch hatalari** (Test 1): Content-Type yok -> 415; girdi adi `mesaj` degil `mesaj_b64` -> 422.
    `renk_ref` varsayilani eski 8a8b370; her zaman guncel siparis-baski-v1 head verilir.
-7. **Bilinen darbogaz kapatilmadan test baslatildi** (Test 1): MB yavasligi Tara'dan biliniyordu.
+7. **Bilinen darbogaz kapatilmadan test baslatildi** (Test 1): MB yavasligi EMILY siparisinden biliniyordu.
 
 ## Dispatch sablonu (siparis-dijital, main)
 
@@ -91,7 +91,7 @@ onceki_kosu : PASS isleri bu koşulardan al (tek is yeniden kosuda)
 - Ders (koordinator, 19:35-20:00): test ciktisi `| tail` ile maskelendi, hatali kod push edildi (1 dk'da duzeldi);
   baski-duzelt'in izledigi kaynak-olcum kosusu haber vermeden iptal edildi; ilk kaynak on testi seri ve 15 boy
   (~40 dk) tasarlandi, paralel + 5 boy ile yeniden kuruldu; uzun bloklayan izleme donguleri Serdar'i yanitsiz birakti.
-- Isim on testi (prova, eski olcek kapisi): 36/37 PASS (TARA, SERDAR, MAXI, ANNE). MB 11x14 LIAM: esit bant olcumu
+- Isim on testi (prova, eski olcek kapisi): 36/37 PASS (EMILY, SERDAR, MAXI, ANNE). MB 11x14 LIAM: esit bant olcumu
   duz kenarli harflerde yeni sapma uretiyor; baski-duzelt olcum oncesi simetrik bulanik deniyor (126/126, en kotu 0.99).
 - Iyi giden: cift normalize, hizli kaynak denetimi (plan 6 sn), runner kuyrugu yok, paket 51 sn.
 
@@ -106,9 +106,9 @@ onceki_kosu : PASS isleri bu koşulardan al (tek is yeniden kosuda)
   bolunme zayifligini tasiyor. Duzeltme: slogan kapisina guvenli olcum (gerek = isim + tagline), 5 renk yeniden on test.
 - Test 3 MB yeniden kosu + paket, sonra Test 4 (yeni cift).
 
-## TUM DERSLER (Tara + Test 1-3 + gece, 1 Eki; Serdar: Test 4'te hepsi uygulanacak)
+## TUM DERSLER (EMILY + Test 1-3 + gece, 1 Eki; Serdar: Test 4'te hepsi uygulanacak)
 
-Tara (4188621967)
+EMILY (4188621967)
 1. Tek sayfaya yama yapildi (DB 18x24 altin profili), kok neden cozulmedi; isim degisince hata baska sayfada cikti.
 2. Dosya/klasor adi AstroLove_ yazildi; marka her yerde AstroLoveArt.
 3. Musteri metninde olculmemis cozunurluk iddiasi (11x14 -> 22x28); boy/dpi iddiasi yalniz olcumle.

@@ -19,11 +19,11 @@ from types import SimpleNamespace
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import surucu                                                     # noqa: E402
 
-ON_TEST_CIFT = {'TARA': 'CANCER_LEO', 'SERDAR': 'CANCER_LIBRA', 'MAXI': 'CANCER_LIBRA', 'ANNE': 'CANCER_LEO',
+ON_TEST_CIFT = {'EMILY': 'CANCER_LEO', 'SERDAR': 'CANCER_LIBRA', 'MAXI': 'CANCER_LIBRA', 'ANNE': 'CANCER_LEO',
                 'LIAM': 'ARIES_VIRGO', 'CAGLA': 'CANCER_LEO'}
 SETLER = {
     # ISIM ON TESTI (Serdar 1 Eki): olcek kapisi isim bagimli mi - 4 set x 5 renk x 5 boy
-    'TARA': {'isim1': 'TARA', 'isim2': 'ROSS', 'mesaj': 'A King and his Crab'},
+    'EMILY': {'isim1': 'EMILY', 'isim2': 'JAMES', 'mesaj': 'It Began With a Kiss in the Rain'},
     'SERDAR': {'isim1': 'SERDAR', 'isim2': 'LENA', 'mesaj': 'To My Adorable Angel'},
     'MAXI': {'isim1': 'MAXIMILIAN', 'isim2': 'JO', 'mesaj': 'Two Souls, One Bond: Forever Ours!!'},
     'ANNE': {'isim1': 'ANNE-MARIE', 'isim2': 'LUCAS', 'mesaj': 'Love You to the Moon and Back'},
