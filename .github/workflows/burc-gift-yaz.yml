@@ -27,7 +27,7 @@ jobs:
         run: |
           [[ "$KUME" =~ ^(cl|pilot|kalan|hepsi|[0-9]+(,[0-9]+)*)$ ]] || { echo "::error::kume"; exit 1; }
           case "$MOD" in
-            yedek|siparis) ;;
+            yedek|siparis) [ -z "$YD" ] || { echo "::error::yedek_dizin yalniz geri_al icin"; exit 1; } ;;
             yaz) [ "$ONAY" = "SERDAR_BURC_GIFT" ] || { echo "::error::onay yok"; exit 1; } ;;
             geri_al) [ "$ONAY" = "SERDAR_GERI_AL" ] || { echo "::error::onay yok"; exit 1; }
                      [[ "$YD" =~ ^[A-Za-z0-9_,-]+(/[A-Za-z0-9_,-]+)*$ ]] || { echo "::error::yedek_dizin"; exit 1; } ;;
@@ -58,6 +58,7 @@ jobs:
             [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
           fi
       - name: Token + onayli girdiler (sha256 kapisi)
+        env: {MOD: "${{ inputs.mod }}", YD: "${{ inputs.yedek_dizin }}"}
         run: |
           set -euo pipefail
           umask 077; mkdir -p _work _out
@@ -66,8 +67,8 @@ jobs:
           rclone copyto "gdrive:ASTROLOVE/TEMP/DENETIM_20261021/AKTIF_METIN_39686295137/AKTIF_METIN.json" _work/ONCE.json
           echo "$SONRA_SHA  _work/SONRA_234.json" | sha256sum -c -
           echo "$ONCE_SHA  _work/ONCE.json" | sha256sum -c -
-          if [ "${{ inputs.mod }}" = "geri_al" ]; then
-            rclone copy "gdrive:ASTROLOVE/TEMP/BURC_GIFT_20261022/${{ inputs.yedek_dizin }}" _work/GERI --include "*.json"
+          if [ "$MOD" = "geri_al" ]; then
+            rclone copy "gdrive:ASTROLOVE/TEMP/BURC_GIFT_20261022/$YD" _work/GERI --include "*.json"
             echo "geri alma yedegi: $(ls _work/GERI | wc -l) dosya"
           fi
       - name: Calistir
@@ -87,7 +88,10 @@ jobs:
           MOD: ${{ inputs.mod }}
           KUME: ${{ inputs.kume }}
         run: |
-          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "token geri yazildi" || true
+          if [ -f _work/ETSY_TOKEN.json.updated ]; then
+            rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "token geri yazildi" \
+              || { echo "::error::yenilenen token Drive'a geri yazilamadi"; exit 1; }
+          fi
           if [ -d _out ] && ls _out/* >/dev/null 2>&1; then
             python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/ETSY_TOKEN.json _out || { echo "::error::ciktida sir"; exit 1; }
             K=$(echo "$KUME" | cut -c1-20 | tr ',' '-')

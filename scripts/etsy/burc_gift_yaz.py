@@ -15,8 +15,10 @@ Modlar:
                -> yil donumu: uretim ortagi AYRI PATCH (production_partner_ids=""); 4xx ise FAIL degil, PANEL listesi
                -> geri okuma (10 sn arayla en fazla 3 deneme: metin + envanter) -> dogrulama. Ilk FAIL'de DUR.
             Envanter PUT ile PATCH arasinda kota DUR'u yok (yarim ilan birakmamak icin); ilan basina baslarken kalan >= 30 aranir.
-  geri_al : ETSY'YE YAZAR (--onay SERDAR_GERI_AL). --yedek-dizin'deki <id>.json'dan baslik/etiket/aciklama/materials/profil ve
-            envanteri (baski urunleri dahil, eski hazirlik) geri yazar; geri okuma.
+  geri_al : ETSY'YE YAZAR (--onay SERDAR_GERI_AL). --yedek-dizin'deki <id>.json'dan baslik/etiket/aciklama/materials/profil/
+            uretim ortagi, envanter (baski urunleri dahil, eski hazirlik) ve stil-gorsel baglarini geri yazar; geri okuma.
+            Yalniz ILK HAL yedegi kabul edilir (BY envanteri 15/5; CANCER_LIBRA 10/0). State active degilse dokunmaz.
+DOKUNMA: 4598525642 (CANCER_LIBRA kupa) kupa_taslak.py:250'de yazma yasak (19 Eki); Serdar karari gelene kadar ATLANIR.
 Kume: cl (CANCER_LIBRA 3 aile) | pilot (5 ilan) | kalan (geri kalan 226) | id1,id2,...
 Kullanim: burc_gift_yaz.py --mod yedek|siparis|yaz|geri_al --once ONCE.json --sonra SONRA.json --kume cl --out OUT [--onay KOD]"""
 import argparse
@@ -24,17 +26,21 @@ import html
 import json
 import os
 import pathlib
+import re
 import subprocess
 import sys
 import time
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
-from etsy_common import Etsy, TokenStore, mask  # noqa: E402
+import requests  # noqa: E402
+from etsy_common import API, Etsy, TokenStore, mask  # noqa: E402
 
 ONAY, ONAY_GERI = "SERDAR_BURC_GIFT", "SERDAR_GERI_AL"
 KOTA_TABAN = 10
 KOTA_ILAN = 30
 P_FORMAT = 514
+DOKUNMA = {"4598525642"}                                 # kupa_taslak.py:250 yazma yasak (19 Eki); Serdar karari bekler
+PANEL_HATA = re.compile(r"-> (400|409):")               # yalniz bu yanitlar 'panelde kaldir' sayilir; 429/5xx DUR
 BASKI = "Shipped print 8x10"
 ESKI_PROFIL, YENI_PROFIL = 318080539024, 318577242658   # BY Print 8x10 Worldwide -> BY Digital Free Worldwide (21 Eki, PASS)
 ORTAK_HAZIRLIK = 1517641240112                          # poster + kupa + BY ortak 4-7 gun tanimi: DEGISTIRILMEZ
@@ -83,7 +89,8 @@ def imza(inv):
 
 
 def inv_ozellik(inv):
-    return {k: sorted((inv or {}).get(k) or []) for k in ("price_on_property", "quantity_on_property", "sku_on_property")}
+    return {k: sorted((inv or {}).get(k) or []) for k in ("price_on_property", "quantity_on_property", "sku_on_property",
+                                                          "readiness_state_on_property")}
 
 
 def baski_mi(anahtar):
@@ -134,7 +141,37 @@ def alan_plani(cur, once, sonra):
 
 def stil_gorsel(api, shop, lid):
     return sorted((v.get("property_id"), v.get("value_id"), v.get("image_id"))
-                  for v in (api.get(f"/shops/{shop}/listings/{lid}/variation-images") or {}).get("results") or [])
+                  for v in (api.get(f"/shops/{shop}/listings/{lid}/variation-images", ok404=True) or {}).get("results") or [])
+
+
+def deger_adlari(inv):
+    """{(property_id, value_id): deger adi} ve tersi {(property_id, deger adi): value_id}"""
+    ad, vid = {}, {}
+    for p in (inv or {}).get("products") or []:
+        for v in p.get("property_values") or []:
+            for i, a in zip(v.get("value_ids") or [], v.get("values") or []):
+                ad[(v.get("property_id"), i)] = a
+                vid[(v.get("property_id"), a)] = i
+    return ad, vid
+
+
+def sg_ad(inv, sg):
+    ad = deger_adlari(inv)[0]
+    return sorted((pid, ad.get((pid, vi), f"?{vi}"), img) for pid, vi, img in sg or [])
+
+
+def sg_bagla(api, shop, lid, inv, hedef_ad):
+    """Stil-gorsel baglarini deger ADINA gore yeniden kurar (pod/ayar77_yaz.py:131-141 yolu); geri okuma 3 deneme."""
+    vid = deger_adlari(inv)[1]
+    istek = [{"property_id": pid, "value_id": vid[(pid, a)], "image_id": img} for pid, a, img in hedef_ad if (pid, a) in vid]
+    if len(istek) != len(hedef_ad):
+        raise Dur(f"stil-gorsel eslemesi kurulamadi {len(istek)}/{len(hedef_ad)}")
+    api.post_json(f"/shops/{shop}/listings/{lid}/variation-images", {"variation_images": istek})
+    for _ in range(3):
+        if sg_ad(inv, stil_gorsel(api, shop, lid)) == hedef_ad:
+            return True
+        time.sleep(BEKLE_SN)
+    return False
 
 
 def hazirlik_listesi(api, shop):
@@ -150,7 +187,19 @@ def hazirlik_listesi(api, shop):
 
 def _uygun(lst):
     return [d for d in lst if d.get("readiness_state") == "made_to_order" and d.get("min_processing_days") == 1
-            and d.get("max_processing_days") == 3 and d.get("readiness_state_id") != ORTAK_HAZIRLIK]
+            and d.get("max_processing_days") == 3 and d.get("processing_time_unit", "days") == "days"
+            and d.get("readiness_state_id") != ORTAK_HAZIRLIK]
+
+
+def tek_post(api, path, data):
+    """Idempotent olmayan olusturma ucu: TEK deneme (etsy_common 5xx'te 3 kez dener; by_taslak_ac.py:213 yolu)."""
+    api.calls += 1
+    r = requests.post(API + path, data=data, headers=api._headers(), timeout=120)
+    if r.headers.get("x-remaining-today") is not None:
+        api.remaining = r.headers["x-remaining-today"]
+    if r.status_code not in (200, 201):
+        raise SystemExit(f"HATA: POST {path} -> {r.status_code}: {r.text[:200]}")
+    return r.json()
 
 
 def hazirlik_bul(api, shop, olustur):
@@ -162,7 +211,7 @@ def hazirlik_bul(api, shop, olustur):
     if not olustur:
         return None, "yok"
     try:
-        api.post(f"/shops/{shop}/readiness-state-definitions",
+        tek_post(api, f"/shops/{shop}/readiness-state-definitions",
                  {"readiness_state": "made_to_order", "min_processing_time": 1, "max_processing_time": 3, "processing_time_unit": "days"})
     except SystemExit as e:
         print(f"hazirlik POST hatasi, liste yeniden okunuyor: {str(e)[:120]}")
@@ -192,7 +241,19 @@ def yedek_al(api, shop, lid, aile):
     x = api.get(f"/listings/{lid}") or {}
     inv = (api.get(f"/listings/{lid}/inventory") or {}) if aile == "yildonumu" else None
     sg = stil_gorsel(api, shop, lid) if aile == "yildonumu" else None
-    return {"ilan": x, "envanter": inv, "stil_gorsel": sg}
+    return {"ilan": x, "envanter": inv, "stil_gorsel": sg, "ilk_hal": ilk_hal_mi(x, inv)}
+
+
+def ilk_hal_mi(x, inv):
+    """BY yedegi yazma oncesi hali mi: baski urunleri (15/5) ya da CANCER_LIBRA (21 Eki'den beri 10/0, yeni profil).
+    Yarim kalmis bir kosudan sonra alinan yedek (10/0, eski olmayan hazirlik) ilk hal SAYILMAZ."""
+    if inv is None:
+        return True
+    i = imza(inv)
+    nb = sum(1 for k in i if baski_mi(k))
+    if len(i) == 15 and nb == 5:
+        return True
+    return len(i) == 10 and nb == 0 and all(v[4] == ORTAK_HAZIRLIK for v in i.values())
 
 
 def drive_yukle(yerel, hedef_alt):
@@ -201,6 +262,9 @@ def drive_yukle(yerel, hedef_alt):
     if not kok:
         return "drive yok (yerel)"
     hedef = f"{kok}/{hedef_alt}"
+    sk = pathlib.Path(__file__).resolve().parents[1] / "guvenlik" / "sir_koru.py"
+    if subprocess.run([sys.executable, str(sk), "tara", "--sir-json", os.environ.get("TOKEN_FILE", ""), str(yerel)]).returncode:
+        raise Dur("yedekte sir bulundu: Drive'a yuklenmedi")
     subprocess.run(["rclone", "copy", str(yerel), hedef, "-q"], check=True)
     n = len([s for s in subprocess.run(["rclone", "lsf", hedef], check=True, capture_output=True, text=True).stdout.split("\n") if s])
     yer = len(list(pathlib.Path(yerel).glob("*.json")))
@@ -209,13 +273,16 @@ def drive_yukle(yerel, hedef_alt):
     return f"{n} dosya {hedef}"
 
 
-def bir_ilan(api, shop, lid, hedef, once, out, hazirlik_al, R):
+def bir_ilan(api, shop, lid, hedef, once, out, hazirlik_al, R, by_ids=()):
     kota(api, KOTA_ILAN)
     x = api.get(f"/listings/{lid}") or {}
     if str(x.get("shop_id")) != str(shop):
         raise Dur("shop uyusmuyor")
     if x.get("state") != "active":
         R["sonuc"] = f"ATLANDI_STATE {x.get('state')}"   # updateListing taslagi yayina alir (CLAUDE.md 7 Eyl)
+        return
+    if str(lid) in DOKUNMA:
+        R["sonuc"] = "ATLANDI_DOKUNMA"
         return
     aile = hedef["aile"]
     sonra = {"title": hedef["baslik"], "tags": hedef["etiketler"], "description": hedef["aciklama"]}
@@ -252,14 +319,26 @@ def bir_ilan(api, shop, lid, hedef, once, out, hazirlik_al, R):
         R["sonuc"] = "ZATEN"
         return
     # yaz: envanter -> PATCH -> partner (aralarda kota DUR'u yok; yarim ilan birakilmaz)
+    if govde and nb:
+        sp = siparis_say(api, shop, by_ids, toplam=False)     # kapi ile bu ilan arasinda yeni baski siparisi geldi mi
+        if sp["baski_satiri"]:
+            raise Dur(f"gonderilmemis baski siparisi geldi ({sp['baski_satiri']} satir): yazma yok")
     if govde:
         api.put_json(f"/listings/{lid}/inventory", govde)
+        if sg0:
+            inv_p = api.get(f"/listings/{lid}/inventory") or {}
+            if sg_ad(inv_p, stil_gorsel(api, shop, lid)) != sg_ad(inv0, sg0):
+                R["stil_gorsel_yeniden"] = True
+                if not sg_bagla(api, shop, lid, inv_p, sg_ad(inv0, sg0)):
+                    raise Dur(f"stil-gorsel baglari PUT sonrasi kayboldu ve geri gelmedi {lid}")
     if data:
         api.patch(f"/shops/{shop}/listings/{lid}", data)
     if partner_yaz:
         try:
             api.patch(f"/shops/{shop}/listings/{lid}", {"production_partner_ids": ""})
         except SystemExit as e:
+            if not PANEL_HATA.search(str(e)):
+                raise Dur(f"uretim ortagi PATCH {lid}: {str(e)[:160]} (metin/envanter yazili; tekrar kosu tamamlar)")
             R["panel"] = f"uretim ortagi API ile kaldirilamadi ({str(e)[:120]}): panelde kaldir"
     # geri okuma (bayat okumaya karsi 3 deneme: metin + envanter)
     bek_inv = {k: v[:4] + (hazirlik,) for k, v in imza(inv0).items() if not baski_mi(k)} if aile == "yildonumu" else None
@@ -292,7 +371,7 @@ def bir_ilan(api, shop, lid, hedef, once, out, hazirlik_al, R):
             hata.append(f"envanter {len(imza(inv1))} urun, beklenen {len(bek_inv)}; fark var")
         if inv_ozellik(inv1) != inv_ozellik(inv0):
             hata.append("price/quantity/sku_on_property degisti")
-        if stil_gorsel(api, shop, lid) != sg0:
+        if sg_ad(inv1, stil_gorsel(api, shop, lid)) != sg_ad(inv0, sg0):
             hata.append("stil-gorsel baglari degisti")
     R["sonra"] = dict(alan_hata=hata, istek=api.calls, kota=api.remaining)
     if hata:
@@ -301,7 +380,7 @@ def bir_ilan(api, shop, lid, hedef, once, out, hazirlik_al, R):
     R["sonuc"] = "PASS"
 
 
-def siparis_say(api, shop, by_ids):
+def siparis_say(api, shop, by_ids, toplam=True):
     n_satir, n_makbuz, ofs = 0, 0, 0
     while True:
         d = api.get(f"/shops/{shop}/receipts", params={"was_shipped": "false", "was_canceled": "false", "limit": 100, "offset": ofs}) or {}
@@ -317,7 +396,7 @@ def siparis_say(api, shop, by_ids):
         ofs += len(r)
         if not r or ofs >= (d.get("count") or 0):
             break
-    toplam = (api.get(f"/shops/{shop}/receipts", params={"limit": 1}) or {}).get("count")
+    toplam = (api.get(f"/shops/{shop}/receipts", params={"limit": 1}) or {}).get("count") if toplam else None
     return {"gonderilmemis_makbuz_tarandi": ofs, "baski_satiri": n_satir, "baski_makbuz": n_makbuz, "magaza_toplam_makbuz": toplam}
 
 
@@ -339,19 +418,37 @@ def kume_sec(kume, sonra):
 
 
 def geri_al(api, shop, lid, yedek, R):
-    x0, inv0 = yedek["ilan"], yedek.get("envanter")
+    x0, inv0, sg0 = yedek["ilan"], yedek.get("envanter"), yedek.get("stil_gorsel")
+    if not yedek.get("ilk_hal", ilk_hal_mi(x0, inv0)):
+        raise Dur(f"{lid}: yedek ilk hal degil (yarim kosudan sonra alinmis); ilk hal yedegini ver (orn. yedek_hepsi_39690347254)")
+    kota(api, KOTA_ILAN)
+    x = api.get(f"/listings/{lid}") or {}
+    if x.get("state") != "active":
+        R["sonuc"] = f"ATLANDI_STATE {x.get('state')}"   # updateListing taslagi yayina alir
+        return
     data = {"title": norm(x0.get("title")), "tags": ",".join(x0.get("tags") or []), "description": norm(x0.get("description"))}
     if inv0 is not None:
         data["materials"] = ",".join(x0.get("materials") or [])
         data["shipping_profile_id"] = x0.get("shipping_profile_id")
         api.put_json(f"/listings/{lid}/inventory", envanter_govdesi(inv0, None, baski_cikar=False))
     api.patch(f"/shops/{shop}/listings/{lid}", data)
+    if inv0 is not None and partner_ids(x0) and partner_ids(x0) != partner_ids(x):
+        try:   # by_taslak_ac.py:211 production_partner_ids virgullu metin olarak yazar
+            api.patch(f"/shops/{shop}/listings/{lid}", {"production_partner_ids": ",".join(str(i) for i in partner_ids(x0))})
+        except SystemExit as e:
+            if not PANEL_HATA.search(str(e)):
+                raise
     y = api.get(f"/listings/{lid}") or {}
     hata = [k for k in ("title", "tags", "description") if not esdeger(ozet(y)[k], ozet(x0)[k], k)]
-    if inv0 is not None and imza(api.get(f"/listings/{lid}/inventory") or {}) != imza(inv0):
-        hata.append("envanter")
-    if inv0 is not None and partner_ids(x0):
-        R["panel"] = f"uretim ortagi {partner_ids(x0)} API ile geri yazilmaz: gerekirse panelde ekle"
+    if inv0 is not None:
+        inv1 = api.get(f"/listings/{lid}/inventory") or {}
+        if imza(inv1) != imza(inv0):
+            hata.append("envanter")
+        if sg0 is not None and sg_ad(inv1, stil_gorsel(api, shop, lid)) != sg_ad(inv0, sg0) and sg0:
+            if not sg_bagla(api, shop, lid, inv1, sg_ad(inv0, sg0)):
+                hata.append("stil-gorsel")
+        if partner_ids(x0) and partner_ids(y) != partner_ids(x0):
+            R["panel"] = f"uretim ortagi {partner_ids(x0)} geri gelmedi ({partner_ids(y)}): panelde ekle"
     R["sonuc"] = "GERI_ALINDI" if not hata else f"FAIL {hata}"
     if hata:
         raise Dur(f"geri alma FAIL {lid}: {hata}")
@@ -418,7 +515,11 @@ def main():
             if i % 25 == 0:
                 print(f"[{i}/{len(ids)}] istek {api.calls} kota {api.remaining}", flush=True)
         RAPOR["yedek"] = {"ilan": len(ids), "kayma_ya_da_aktif_degil": kayma, "drive": drive_yukle(yd, f"YEDEK_{a.mod}_{a.kume[:20]}")}
-        print("YEDEK", len(ids), "kayma/aktif degil", len(kayma), "|", RAPOR["yedek"]["drive"])
+        RAPOR["hazirlik_tanimlari"] = [{k: d.get(k) for k in ("readiness_state_id", "readiness_state", "min_processing_days",
+                                                              "max_processing_days", "processing_time_unit")} for d in hazirlik_listesi(api, shop)]
+        RAPOR["yedek"]["ilk_hal_degil"] = [json.loads((yd / f"{i}.json").read_text())["ilk_hal"] for i in ids].count(False)
+        print("YEDEK", len(ids), "kayma/aktif degil", len(kayma), "| ilk hal degil", RAPOR["yedek"]["ilk_hal_degil"], "|",
+              RAPOR["yedek"]["drive"], "| hazirlik tanimi", len(RAPOR["hazirlik_tanimlari"]))
         if a.mod == "yedek":
             return
         H = {}
@@ -432,7 +533,7 @@ def main():
         for n, lid in enumerate(ids, 1):
             R = {"listing_id": lid, "aile": sonra[lid]["aile"], "cift": sonra[lid]["cift"]}
             RAPOR["ilanlar"].append(R)
-            bir_ilan(api, shop, lid, sonra[lid], once[lid], out, hazirlik_al, R)
+            bir_ilan(api, shop, lid, sonra[lid], once[lid], out, hazirlik_al, R, by_ids)
             g = time.time() - t0
             print(f"[{n}/{len(ids)}] {R['aile']} {R['cift']} {R['sonuc']} | gecen {g:.0f} sn, kalan ~{g / n * (len(ids) - n):.0f} sn, "
                   f"%{100 * n // len(ids)} | kota {api.remaining}", flush=True)
