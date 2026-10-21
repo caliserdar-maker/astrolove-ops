@@ -18,13 +18,35 @@ def calistir(k, **kw):
     return subprocess.run(k, capture_output=True, text=True, timeout=180, **kw)
 
 
+def alt_hedef(L, eslesen):
+    """eslesen klasorlerin (listede acik olan) alt ogeleri; yalniz JSON ve adinda BANDI gecen gorseller."""
+    cocuk = {}
+    for x in L:
+        for u in x.get("ust") or []:
+            cocuk.setdefault(u, []).append(x)
+    goruldu = {x["id"] for x in eslesen}
+    kuyruk = [x["id"] for x in eslesen if x["tur"].endswith("folder")]
+    secilen = []
+    while kuyruk:
+        for y in cocuk.get(kuyruk.pop(), []):
+            if y["tur"].endswith("folder"):
+                kuyruk.append(y["id"])
+            elif y["id"] not in goruldu and (y["ad"].lower().endswith(".json") or "BANDI" in y["ad"]):
+                goruldu.add(y["id"])
+                secilen.append(y)
+    return secilen
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--liste", required=True)
     ap.add_argument("--cikti", required=True)
+    ap.add_argument("--alt", action="store_true", help="adi eslesen klasorlerin acik alt agaci: JSON + *BANDI* gorsel (adi zaten eslesenler haric)")
     a = ap.parse_args()
     L = json.load(open(a.liste))["tarama"]["drive_geneli_acik"]
     hedef = [x for x in L if DESEN.search(x["ad"])]
+    if a.alt:
+        hedef = alt_hedef(L, hedef)
     os.makedirs(a.cikti, exist_ok=True)
     sonuc, say = [], {"oge": len(hedef), "klasor": 0, "ocr": 0, "pdf": 0, "metin": 0, "atla": 0, "hata": 0}
     for i, x in enumerate(hedef, 1):

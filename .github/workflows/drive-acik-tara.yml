@@ -8,10 +8,11 @@ on:
   workflow_dispatch:
     inputs:
       liste_yolu: {description: "DENETIM_20261021 altindaki PAYLASIM_ONCE.json yolu", required: true, default: "PAYLASIM_39653869755/PAYLASIM_ONCE.json"}
+      alt: {description: "adi eslesen klasorlerin alt agaci (JSON + BANDI gorselleri)", type: boolean, default: false}
 jobs:
   tara:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
         with:
@@ -26,13 +27,14 @@ jobs:
         env:
           RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
           LISTE: ${{ inputs.liste_yolu }}
+          ALT: ${{ inputs.alt }}
         run: |
           set -euo pipefail
           [[ "$LISTE" =~ ^PAYLASIM_[0-9]+/PAYLASIM_ONCE\.json$ ]] || { echo "HATA: liste yolu"; exit 1; }
           mkdir -p ~/.config/rclone; umask 077
           printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
           rclone copyto "gdrive:ASTROLOVE/TEMP/DENETIM_20261021/$LISTE" /tmp/liste.json
-          python3 -I scripts/guvenlik/drive_acik_icerik.py --liste /tmp/liste.json --cikti /tmp/acik
+          python3 -I scripts/guvenlik/drive_acik_icerik.py --liste /tmp/liste.json --cikti /tmp/acik $([ "$ALT" = "true" ] && echo --alt)
           rclone copy /tmp/acik "gdrive:ASTROLOVE/TEMP/DENETIM_20261021/ACIK_ICERIK_${GITHUB_RUN_ID}" --error-on-no-transfer
           echo "Cikti: DENETIM_20261021/ACIK_ICERIK_${GITHUB_RUN_ID}/ICERIK.json"
       - if: always()
