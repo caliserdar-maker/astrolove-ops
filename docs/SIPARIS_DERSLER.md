@@ -43,7 +43,8 @@ Paket: PDF'ler son isten ~1 dk sonra Drive'da; paket isi sonraki 5 dk'yi incelem
 ## Dispatch sablonu (siparis-dijital, main)
 
 ```
-receipt     : yalniz rakam (test: 900000000N)
+receipt     : yalniz rakam (test: 900000000N; test serisi 900000xxxx, Etsy gercek receipt 4... ile baslar;
+              9000000000 = depoda gercek siparis numarasi yerine notr ornek, test icin KULLANILMAZ - Serdar 21 Eki)
 cift        : ALFABETIK, orn. CAPRICORN_SAGITTARIUS
 isim1       : cift adindaki ilk burcun altina giden isim (sol)
 isim2       : ikinci burcun altina giden isim (sag)
