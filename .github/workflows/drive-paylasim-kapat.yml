@@ -1,0 +1,54 @@
+name: drive-paylasim-kapat
+# Serdar 21 Eki karar 1: musteri teslim klasorunun "baglantiya sahip herkes" paylasimini kapatir.
+# scripts/guvenlik/drive_paylasim_kapat.py: once izinleri okur ve kaydeder, hedef klasor + alt ogelerde anyone/domain
+# iznini siler, geri okur. Hedef girdisi kimligin sha256 ilk 12 hanesidir (kimlik girdiye/loga yazilmaz).
+# Kayitlar yalniz Drive ASTROLOVE/TEMP/DENETIM_20261021/PAYLASIM_<run_id>/ (sahip-yalniz). Etsy'ye dokunmaz.
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      mod: {description: "kuru | uygula", required: true, default: "kuru"}
+      hedef: {description: "hedef klasor kimliginin sha256 ilk 12 hanesi", required: true}
+      onay: {description: "uygula icin KAPAT yazin", required: false, default: ""}
+jobs:
+  kapat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: scripts/guvenlik
+      - name: Girdi kapisi
+        env: {MOD: "${{ inputs.mod }}", ONAY: "${{ inputs.onay }}", HEDEF: "${{ inputs.hedef }}"}
+        run: |
+          set -euo pipefail
+          [[ "$HEDEF" =~ ^[0-9a-f]{12}$ ]] || { echo "HATA: hedef 12 haneli hex olmali"; exit 1; }
+          case "$MOD" in kuru) ;; uygula) [ "$ONAY" = "KAPAT" ] || { echo "HATA: uygula icin onay=KAPAT"; exit 1; } ;; *) echo "HATA: mod"; exit 1 ;; esac
+      - name: rclone
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /tmp/rc.zip https://downloads.rclone.org/rclone-current-linux-amd64.zip
+          unzip -q -j /tmp/rc.zip '*/rclone' -d /tmp/rcb && sudo install -m 755 /tmp/rcb/rclone /usr/local/bin/rclone
+      - name: Paylasimi oku, kapat, dogrula
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          MOD: ${{ inputs.mod }}
+          HEDEF: ${{ inputs.hedef }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          rclone lsf gdrive:ASTROLOVE/TEMP --max-depth 1 >/dev/null
+          DRIVE_TOKEN=$(rclone config dump | jq -r '.gdrive.token' | jq -r '.access_token')
+          [ -n "$DRIVE_TOKEN" ] && [ "$DRIVE_TOKEN" != null ] || { echo "HATA: Drive token alinamadi"; exit 1; }
+          echo "::add-mask::$DRIVE_TOKEN"; export DRIVE_TOKEN
+          set +e
+          python3 -I scripts/guvenlik/drive_paylasim_kapat.py --mod "$MOD" --hedef "$HEDEF" --cikti /tmp/paylasim
+          RC=$?
+          set -e
+          rclone copy /tmp/paylasim "gdrive:ASTROLOVE/TEMP/DENETIM_20261021/PAYLASIM_${GITHUB_RUN_ID}" --error-on-no-transfer
+          echo "kayit Drive'a yuklendi (DENETIM_20261021/PAYLASIM_${GITHUB_RUN_ID})"
+          exit $RC
+      - if: always()
+        run: rm -rf ~/.config/rclone /tmp/paylasim
