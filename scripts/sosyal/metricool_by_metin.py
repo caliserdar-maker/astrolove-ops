@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 from urllib.parse import urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from metricool_pin_baslik import IZINLI_FARK, MC, TZ, YOK, fark, pin_durum, veri  # noqa: E402
+from metricool_pin_baslik import IZINLI_FARK, MC, TZ, YOK, bul, fark, pin_durum, veri  # noqa: E402
 
 ONAY = 'SERDAR_PIN_METIN'
 DEGIS_METIN = [  # by78_pin_plan.py ACIKLAMA A/B/C (21 Eki onayi)
@@ -182,11 +182,17 @@ def main():
             if mc.istek('PUT', f"/v2/scheduler/posts/{once['id']}", govde=yeni, yok404=True) is YOK:
                 sonuc.append(dict(r, sonuc='ATLANDI PUT 404 (yayinlanmis olabilir)'))
                 w.writerow(sonuc[-1]); f.flush(); continue
+            # Metricool PUT sonrasi kimlik degisebilir (metricool_pin_baslik.oku): id -> uuid -> (saat + pinLink); >1 = kopya, DUR
             sonra = mc.istek('GET', f"/v2/scheduler/posts/{once['id']}", yok404=True)
             if sonra is YOK or sonra is None:
-                sonuc.append(dict(r, sonuc='ATLANDI PUT sonrasi bulunamadi'))
-                w.writerow(sonuc[-1]); f.flush(); continue
-            sonra = veri(sonra)
+                m = bul(veri(mc.istek('GET', '/v2/scheduler/posts', pencere)), r)
+                if len(m) > 1:
+                    raise SystemExit(f"DUR: {r['id']} PUT sonrasi {len(m)} eslesme (kopya?): {[x.get('id') for x in m]}")
+                if not m:
+                    raise SystemExit(f"DUR: {r['id']} PUT sonrasi ne kimlikle ne listede bulunamadi")
+                sonra = m[0]
+            else:
+                sonra = veri(sonra)
             okunan = alanlar(sonra)
             of = [x for x in okunan if okunan[x] != h[x]]
             tum = [x for x in fark(once, sonra) if x not in ('id', 'text', 'pinterestData.pinTitle')
