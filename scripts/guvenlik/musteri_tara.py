@@ -10,6 +10,7 @@ Test degerleri (900000000N, 9000000001, 999001) ayri sayilir (test_receipt), mus
 Ortam: GH_TOKEN (yalniz GET), GITHUB_REPOSITORY. Cikti: <out>/{LOG,ARTIFACT,GIT}_TARAMA.csv + OZET.md"""
 import argparse
 import csv
+import hashlib
 import io
 import json
 import os
@@ -25,7 +26,7 @@ from concurrent.futures import ThreadPoolExecutor
 IZINLI_ALAN = ("github.com", "noreply.github.com", "users.noreply.github.com", "anthropic.com", "example.com", "example.org",
                "rclone.org", "python.org", "iam.gserviceaccount.com", "prodigi.com", "metricool.com", "etsy.com", "googlegroups.com",
                "pypi.org", "astroloveart.com", "localhost")
-IZINLI_EPOSTA = {"caliserdar@gmail.com"}
+IZINLI_EPOSTA_SHA = {"b7f5f765c9f06afbf4fdd09c054db80da908639fdff0a8efb3a466cf48f9ae25"}   # magaza sahibi (SAHIP_EPOSTA); deger depoda tutulmaz
 DOSYA_UZANTI = re.compile(r"\.(png|jpe?g|gif|svg|webp|js|css|py|json|txt|md|csv|ya?ml|zip|pdf|ttf|woff2?)$", re.I)
 TEST_RECEIPT = re.compile(r"^(9000000\d{3}|999001|900000000\d)$")
 KALIP = {
@@ -57,7 +58,7 @@ def tara(metin):
     for m in KALIP["eposta"].finditer(metin):
         e = m.group(0).lower()
         alan = e.split("@", 1)[1]
-        if e in IZINLI_EPOSTA or DOSYA_UZANTI.search(e) or any(alan == a or alan.endswith("." + a) for a in IZINLI_ALAN) or "[bot]" in e:
+        if hashlib.sha256(e.encode()).hexdigest() in IZINLI_EPOSTA_SHA or DOSYA_UZANTI.search(e) or any(alan == a or alan.endswith("." + a) for a in IZINLI_ALAN) or "[bot]" in e:
             continue
         c["eposta"] += 1
     for m in KALIP["receipt_no"].finditer(metin):
