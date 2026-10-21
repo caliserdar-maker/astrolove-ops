@@ -1,0 +1,55 @@
+name: dal-yedek-sil-p04
+# PLAN P0.4 (Serdar onayi 22 Eki; denetim bulgu 4): claude/keen-curie-2hza60 dali (32 push tetikli workflow, Etsy'ye yazan
+# 16 isin kostugu dal) once tam git bundle olarak Drive'a yedeklenir, sonra silinir. Dal ve beklenen uc SABIT, girdi yok.
+# Sira: bundle create -> bundle verify (bos depoda) -> Drive'a kopya -> Drive'dan geri indirip sha256 ayni -> uc hala
+# e63dd52c mi -> dal silinir -> ls-remote ile yok dogrulamasi. Herhangi adim FAIL ise dal SILINMEZ.
+# Geri donus: git clone <bundle> ; git push origin <sha>:refs/heads/claude/keen-curie-2hza60. Gecici is akisi: P8 ile kaldirilir.
+permissions:
+  contents: write
+on:
+  workflow_dispatch: {}
+jobs:
+  yedek-sil:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      B: claude/keen-curie-2hza60
+      UC: e63dd52c
+      HEDEF: gdrive:ASTROLOVE/TEMP/DENETIM_20261021/DAL_YEDEK
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: rclone
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1 || sudo apt-get install -y -qq rclone >/dev/null
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Bundle + verify + Drive + geri indirme
+        run: |
+          set -euo pipefail
+          git fetch -q origin "+refs/heads/$B:refs/remotes/origin/$B"
+          sha=$(git rev-parse "origin/$B"); case "$sha" in "$UC"*) ;; *) echo "::error::dal ucu $sha, beklenen $UC (yeni commit var): DUR"; exit 1;; esac
+          f="keen-curie-2hza60_${sha:0:8}.bundle"
+          git bundle create "/tmp/$f" "origin/$B" 2>&1 | tail -1
+          mkdir /tmp/bos && git -C /tmp/bos init -q && git -C /tmp/bos bundle verify "/tmp/$f" | tail -1
+          s1=$(sha256sum "/tmp/$f" | cut -c1-64); echo "bundle $(du -h "/tmp/$f" | cut -f1) sha256 $s1"
+          rclone copyto "/tmp/$f" "$HEDEF/$f"
+          rclone copyto "$HEDEF/$f" /tmp/geri.bundle
+          s2=$(sha256sum /tmp/geri.bundle | cut -c1-64)
+          [ "$s1" = "$s2" ] || { echo "::error::Drive kopyasi farkli: DUR"; exit 1; }
+          printf '%s  %s\n' "$s1" "$f" > "/tmp/$f.sha256"; rclone copyto "/tmp/$f.sha256" "$HEDEF/$f.sha256"
+          echo "YEDEK PASS: $HEDEF/$f (sha256 Drive'dan geri indirilerek ayni)"
+      - name: Dali sil + dogrula
+        run: |
+          set -euo pipefail
+          sha=$(git ls-remote origin "refs/heads/$B" | cut -f1); case "$sha" in "$UC"*) ;; *) echo "::error::uc degisti ($sha): DUR"; exit 1;; esac
+          git push -q origin --delete "$B"
+          [ -z "$(git ls-remote origin "refs/heads/$B")" ] && echo "SONUC: dal silindi, ls-remote 0" || { echo "::error::dal hala var"; exit 1; }
+      - if: always()
+        run: rm -rf ~/.config/rclone /tmp/*.bundle
