@@ -1,0 +1,59 @@
+name: rclone-istemci-kontrol
+# Serdar 21 Eki madde 6 (yalniz PLAN icin olcum): RCLONE_CONF_B64 icindeki remote'larda client_id / client_secret / token
+# alanlari BOS mu DOLU mu + token'in hangi OAuth istemcisine bagli oldugu (tokeninfo aud, rclone'un herkese acik yerlesik
+# Drive istemcisi 202264815644 ile karsilastirma). Yalniz boolean / tur / sayi yazilir; hicbir deger loga yazilmaz.
+# Tek salt okuma Drive cagrisi (rclone lsf, kok, 1 seviye, yalniz sayi). Yazma yok. Gecici: P8 ile kaldirilir.
+permissions:
+  contents: read
+on:
+  workflow_dispatch: {}
+jobs:
+  kontrol:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: rclone
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /tmp/rc.zip https://downloads.rclone.org/rclone-current-linux-amd64.zip
+          unzip -q -j /tmp/rc.zip '*/rclone' -d /tmp/rcb && sudo install -m 755 /tmp/rcb/rclone /usr/local/bin/rclone
+          rclone version | head -1
+      - name: Conf alanlari (bos / dolu) + istemci
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+          echo "GOOGLE_CLIENT_SECRET secret'i: $([ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo DOLU || echo BOS)"
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          python3 - <<'EOF'
+          import configparser, json, os
+          c = configparser.RawConfigParser(); c.read(os.path.expanduser('~/.config/rclone/rclone.conf'))
+          print('remote sayisi', len(c.sections()))
+          for r in c.sections():
+              d = c[r]; tok = {}
+              try: tok = json.loads(d.get('token', '') or '{}')
+              except Exception: tok = {'_bozuk': True}
+              alan = lambda k: 'DOLU' if (d.get(k) or '').strip() else 'BOS'
+              print(f"remote={r} type={d.get('type')} client_id={alan('client_id')} client_secret={alan('client_secret')} "
+                    f"scope={d.get('scope') or '(varsayilan)'} root_folder_id={alan('root_folder_id')} team_drive={alan('team_drive')} "
+                    f"service_account_file={alan('service_account_file')} token={'DOLU' if tok else 'BOS'} "
+                    f"refresh_token={'DOLU' if tok.get('refresh_token') else 'BOS'} token_tipi={tok.get('token_type')}")
+              cid = (d.get('client_id') or '').strip()
+              print(f"  client_id .apps.googleusercontent.com ile biter: {cid.endswith('.apps.googleusercontent.com')}; "
+                    f"rclone yerlesik (202264815644) mi: {cid.startswith('202264815644')}")
+          EOF
+          # tek salt okuma cagrisi (token tazelenir); yalniz sayi
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            export RCLONE_CONFIG_GDRIVE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET"; echo "secret ezme: EVET"; else echo "secret ezme: HAYIR (client_id bos ya da secret yok)"; fi
+          echo "lsf kok (1 seviye) oge sayisi: $(rclone lsf gdrive: --max-depth 1 2>/dev/null | wc -l)"
+          T=$(rclone config dump | jq -r '.gdrive.token' | jq -r '.access_token'); echo "::add-mask::$T"
+          curl -sS "https://oauth2.googleapis.com/tokeninfo?access_token=$T" | python3 -c "
+          import json, sys
+          d = json.load(sys.stdin); aud = d.get('aud') or d.get('azp') or ''
+          print('tokeninfo: scope =', d.get('scope'), '| expires_in =', d.get('expires_in'))
+          print('token istemcisi rclone yerlesik (202264815644):', aud.startswith('202264815644'), '| aud bos:', not aud)"
+      - if: always()
+        run: rm -rf ~/.config/rclone
