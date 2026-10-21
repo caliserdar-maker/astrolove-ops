@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """Kupa pin metni v2 (21 Eki 2026): 78 kupa pin KURU metnindeki her urun iddiasi canli kupa ilaniyla dogrulanir. Metricool YOK.
-Etsy: tek GET /listings/<id>?includes=Inventory (salt okuma, kota tabani 10). Kanit:
-  - canli aciklama (her iddia icin aranan ifade), canli aciklama = KUPA78_ORCHARD_METIN.csv satiri (bosluk normalize),
-    78 CSV aciklamasinin iddia satirlari ayni (yalniz kisisellestirme satiri farkli) -> 78 ilana genellenir;
-  - stil sayisi: inventory Style (513) degerleri (etkin urunler), aciklamadaki "<n> STYLES" ve 8 stil adi;
+Etsy: tek GET /listings/batch?listing_ids=<78 kupa ilani>&includes=Inventory (salt okuma, kota tabani 10;
+  getListing includes Inventory kabul etmiyor, 21 Eki 1. deneme 400). Kanit:
+  - her iddia 78 canli aciklamanin HEPSINDE aranan ifadeyle gecmeli (bilgi: canli aciklama = KUPA78_ORCHARD_METIN.csv satiri);
+  - stil sayisi: her ilanin inventory Style (513) degerleri (etkin urunler); metinde o ilanin sayisi yazilir;
   - nazar: aciklamada "Every style ... evil eye on the back" + baski kaynagi (kupa-orchard geo_<stil>.json x8: nazar_d > 0).
 Dogrulanmayan iddianin cumlesi metinden cikar; stil sayisi canli degerle yazilir.
 Girdi: --once-csv KUPA_PIN_KURU.csv --once-govde KUPA_PIN_GOVDE.json --metin KUPA78_ORCHARD_METIN.csv --geo-dir DIR
-       (--ilan-json ILAN.json yerel test | canli: TOKEN_FILE, ETSY_* ortam) --listing ID --out OUT
+       (--ilan-json ILAN.json yerel test | canli: TOKEN_FILE, ETSY_* ortam) --out OUT (ilan kimlikleri once-csv link'lerinden)
 Cikti: OUT/KUPA_PIN_KURU.csv, OUT/KUPA_PIN_GOVDE.json, OUT/KUPA_METIN_DOGRULAMA.txt, OUT/ILAN_CANLI.json"""
 import argparse
 import csv
@@ -16,6 +16,7 @@ import json
 import os
 import re
 import sys
+from collections import Counter
 from pathlib import Path
 
 KOTA_TABAN = 10
@@ -60,7 +61,7 @@ def norm(t):
     return re.sub(r'\s+', ' ', (t or '').replace('\r', '')).strip()
 
 
-def canli_oku(listing, log):
+def canli_oku(ids, log):
     sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'etsy'))
     from etsy_common import Etsy, TokenStore, mask
     k, s = os.environ.get('ETSY_API_KEY', ''), os.environ.get('ETSY_SHARED_SECRET', '')
@@ -69,8 +70,8 @@ def canli_oku(listing, log):
     if st.needs_refresh():
         st.refresh()
     api = Etsy(st)
-    j = api.get(f'/listings/{listing}', params={'includes': 'Inventory'})
-    log(f'Etsy GET /listings/{listing}?includes=Inventory: cagri {api.calls}, kota {api.remaining} (taban {KOTA_TABAN})')
+    j = api.get('/listings/batch', params={'listing_ids': ','.join(ids), 'includes': 'Inventory'})
+    log(f'Etsy GET /listings/batch ({len(ids)} ilan, includes=Inventory): cagri {api.calls}, kota {api.remaining} (taban {KOTA_TABAN})')
     if api.remaining is not None and int(api.remaining) < KOTA_TABAN:
         log(f'DUR: kota {api.remaining} < {KOTA_TABAN} (baska cagri yok)')
     return j
@@ -78,7 +79,7 @@ def canli_oku(listing, log):
 
 def main():
     ap = argparse.ArgumentParser()
-    for k in ('once-csv', 'once-govde', 'metin', 'geo-dir', 'listing', 'out'):
+    for k in ('once-csv', 'once-govde', 'metin', 'geo-dir', 'out'):
         ap.add_argument('--' + k, required=True)
     ap.add_argument('--ilan-json', default='')
     a = ap.parse_args()
@@ -88,61 +89,61 @@ def main():
     def log(m):
         print(m, flush=True); rap.append(m)
 
-    j = json.load(open(a.ilan_json)) if a.ilan_json else canli_oku(a.listing, log)
-    desc, title, state = html.unescape(j.get('description') or ''), html.unescape(j.get('title') or ''), j.get('state')
-    inv = j.get('inventory') or {}
-    stil, boy = set(), set()
-    for p in inv.get('products') or []:
-        if p.get('is_deleted') or not any(o.get('is_enabled', True) for o in p.get('offerings') or [{}]):
-            continue
-        for pv in p.get('property_values') or []:
-            (stil if pv.get('property_id') == P_STYLE else boy if pv.get('property_id') == P_SIZE else set()).update(pv.get('values') or [])
-    json.dump({'listing_id': j.get('listing_id'), 'state': state, 'title': title, 'description': desc,
-               'stil_degerleri': sorted(stil), 'boy_degerleri': sorted(boy), 'urun_sayisi': len(inv.get('products') or [])},
+    once = list(csv.DictReader(open(a.once_csv, encoding='utf-8')))
+    govde = json.load(open(a.once_govde))
+    if len(once) != 78 or len(govde) != 78:
+        sys.exit(f'DUR: once {len(once)} satir / {len(govde)} govde (78 olmali)')
+    ids = [r['link'].rstrip('/').rsplit('/', 1)[1] for r in once]
+    j = json.load(open(a.ilan_json)) if a.ilan_json else canli_oku(ids, log)
+    ilan = {str(x.get('listing_id')): x for x in (j.get('results') or [])}
+    eksik = [i for i in ids if i not in ilan]
+    log(f'Canli okunan ilan {len(ilan)}/78; eksik {eksik[:5]}; state {dict(Counter(x.get("state") for x in ilan.values()))}')
+    M = {norm(r['baslik']): r for r in csv.DictReader(open(a.metin, encoding='utf-8'))}
+    stil, csv_ayni, dog_ilan = {}, 0, {k: 0 for k in KANIT}
+    adlar_ok = 0
+    for i, x in ilan.items():
+        desc, title = html.unescape(x.get('description') or ''), html.unescape(x.get('title') or '')
+        st = set()
+        for p in (x.get('inventory') or {}).get('products') or []:
+            if p.get('is_deleted') or not any(o.get('is_enabled', True) for o in p.get('offerings') or [{}]):
+                continue
+            for pv in p.get('property_values') or []:
+                if pv.get('property_id') == P_STYLE:
+                    st.update(pv.get('values') or [])
+        stil[i] = st
+        m = re.search(r'(\d+) STYLES', desc)
+        adlar = {s_ for s_ in STIL_GEO if s_ in desc}
+        adlar_ok += bool(st) and m is not None and int(m.group(1)) == len(st) and adlar == st
+        csv_ayni += norm(title) in M and norm(M[norm(title)]['aciklama']) == norm(desc)
+        for k, ifadeler in KANIT.items():
+            dog_ilan[k] += all(re.search(y, desc, re.I) for y in ifadeler)
+    json.dump({i: {'state': x.get('state'), 'title': x.get('title'), 'stil': sorted(stil[i])} for i, x in ilan.items()},
               open(os.path.join(a.out, 'ILAN_CANLI.json'), 'w'), ensure_ascii=False, indent=1)
-    log(f'Canli ilan {j.get("listing_id")} state {state}: "{title}"')
-    log(f'Inventory: {len(inv.get("products") or [])} urun; Style ({len(stil)}): {", ".join(sorted(stil))}; Size: {", ".join(sorted(boy))}')
-
-    # canli aciklama = CSV satiri, CSV iddia satirlari 78'de ayni
-    M = list(csv.DictReader(open(a.metin, encoding='utf-8')))
-    kod = next((r['kod'] for r in M if norm(r['baslik']) == norm(title)), None)
-    csv_ayni = kod is not None and norm(next(r['aciklama'] for r in M if r['kod'] == kod)) == norm(desc)
-    Z = r'(Aries|Taurus|Gemini|Cancer|Leo|Virgo|Libra|Scorpio|Sagittarius|Capricorn|Aquarius|Pisces)'
-    kalip = {re.sub(Z, 'X', '\n'.join(l for l in r['aciklama'].splitlines() if not re.match(r'^[12]\. ', l))) for r in M}
-    log(f'Canli aciklama = CSV ({kod}) satiri: {"EVET" if csv_ayni else "HAYIR"}; 78 CSV aciklamasinda iddia kalibi sayisi '
-        f'(kisisellestirme satirlari haric): {len(kalip)}')
-    genel = csv_ayni and len(kalip) == 1
-
-    dog = {}
-    for ad, ifadeler in KANIT.items():
-        dog[ad] = all(re.search(x, desc, re.I) for x in ifadeler)
-    m = re.search(r'(\d+) STYLES', desc)
-    n_desc = int(m.group(1)) if m else None
-    adlar = [s for s in STIL_GEO if s in desc]
-    # stil sayisi envanterden (alicinin secebildigi); aciklama ile uyum ayrica raporlanir
-    dog['stil'] = bool(stil)
-    log(f'Stil: envanter {len(stil)}, aciklama "{n_desc} STYLES", aciklamadaki stil adlari {len(adlar)}; uyum '
-        f'{"EVET" if len(stil) == n_desc == len(adlar) and set(stil) == set(adlar) else "HAYIR"}')
-    dog['boy'] = dog['boy'] and any('11' in b for b in boy) and any('15' in b for b in boy)
+    sayilar = Counter(len(v) for v in stil.values())
+    log(f'Stil (envanter, etkin urun): ilan basina stil sayisi {dict(sayilar)}; aciklamadaki "<n> STYLES" + stil adlari envanterle '
+        f'ayni: {adlar_ok}/{len(ilan)}')
+    log(f'Canli aciklama = KUPA78_ORCHARD_METIN.csv satiri: {csv_ayni}/{len(ilan)}')
+    tam = not eksik and len(ilan) == 78
+    dog = {k: tam and v == 78 for k, v in dog_ilan.items()}
+    dog['stil'] = tam and all(stil.values())
     geo = {}
-    for s, g in STIL_GEO.items():
+    for s_, g in STIL_GEO.items():
         try:
             Y = json.load(open(os.path.join(a.geo_dir, f'geo_{g}.json')))
             Y = Y.get('yerlesim', Y)
-            geo[s] = (Y.get('nazar_d') or 0) > 0 and Y.get('nazar_x') is not None
+            geo[s_] = (Y.get('nazar_d') or 0) > 0 and Y.get('nazar_x') is not None
         except (OSError, ValueError):
-            geo[s] = False
-    nazar_kaynak = all(geo.get(s) for s in stil) and len(stil) > 0
-    log(f'Nazar: aciklama {"VAR" if dog["nazar"] else "YOK"}; baski kaynagi (geo nazar_d > 0) '
-        f'{sum(geo.get(s, False) for s in stil)}/{len(stil)} stil')
+            geo[s_] = False
+    tum_stil = set().union(*stil.values()) if stil else set()
+    nazar_kaynak = bool(tum_stil) and all(geo.get(s_) for s_ in tum_stil)
+    log(f'Nazar: canli aciklamada {dog_ilan["nazar"]}/78; baski kaynagi (kupa-orchard geo nazar_d > 0) '
+        f'{sum(geo.get(s_, False) for s_ in tum_stil)}/{len(tum_stil)} stil ({", ".join(sorted(tum_stil))})')
     dog['nazar'] = dog['nazar'] and nazar_kaynak
-    if not genel:
-        log('UYARI: canli metin 78 ilana genellenemedi; tum urun iddialari dogrulanmamis sayilir')
-        dog = {k: False for k in dog}
-    N = len(stil)
-    log('Iddia dogrulama: ' + ', '.join(f'{k} {"OK" if v else "YOK"}' for k, v in sorted(dog.items())))
+    log('Iddia dogrulama (78 canli ilanin hepsinde): ' + ', '.join(f'{k} {"OK" if v else "YOK"} ({dog_ilan.get(k, "-")})'
+                                                                  for k, v in sorted(dog.items())))
+    genel = tam
 
-    def kur(cumleler, A, B):
+    def kur(cumleler, A, B, N):
         out, cik = [], []
         for c, idd in cumleler:
             if all(dog[i] for i in idd):
@@ -151,10 +152,6 @@ def main():
                 cik.append(c[:40])
         return ' '.join(out), cik
 
-    once = list(csv.DictReader(open(a.once_csv, encoding='utf-8')))
-    govde = json.load(open(a.once_govde))
-    if len(once) != 78 or len(govde) != 78:
-        sys.exit(f'DUR: once {len(once)} satir / {len(govde)} govde (78 olmali)')
     degisen, hata, cikan = 0, [], {}
     for r, g in zip(once, govde):
         if g['pinterestData']['pinLink'] != r['link'] or not g['publicationDate']['dateTime'].startswith(f"{r['plan_tarih']}T{r['plan_saat']}"):
@@ -162,7 +159,8 @@ def main():
         A, B = re.match(r'^(\w+) and (\w+) ', r['baslik']).groups()
         j_ = int(r['sablon']) - 1
         baslik = BASLIK[j_].format(A=A, B=B) if all(dog[i] for i in BASLIK_IDDIA[j_]) else f'{A} and {B} Personalized Zodiac Couple Mug'
-        aciklama, cik = kur(METIN[j_], A, B)
+        N = len(stil.get(r['link'].rstrip('/').rsplit('/', 1)[1], ()))
+        aciklama, cik = kur(METIN[j_], A, B, N)
         alt = ALT[0].format(A=A, B=B) if all(dog[i] for i in ALT[1]) else f'{A} and {B} personalized zodiac couple mug'
         for c in cik:
             cikan[c] = cikan.get(c, 0) + 1
@@ -174,7 +172,7 @@ def main():
             h.append('uzunluk')
         if not dog['nazar'] and re.search(r'evil eye|nazar', aciklama + alt, re.I):
             h.append('nazar kaldi')
-        if re.search(r'\b8 styles', aciklama) and N != 8:
+        if re.search(r'\b(\d+) styles', aciklama) and f'{N} styles' not in aciklama:
             h.append('stil sayisi')
         if (baslik, aciklama, alt) != (r['baslik'], r['aciklama'], r['alt_metin']):
             degisen += 1
@@ -187,7 +185,7 @@ def main():
         w = csv.DictWriter(f, fieldnames=list(once[0]), lineterminator='\n'); w.writeheader(); w.writerows(once)
     json.dump(govde, open(os.path.join(a.out, 'KUPA_PIN_GOVDE.json'), 'w'), ensure_ascii=False, indent=1)
     log(f'Metin: {degisen}/78 pin degisti; cikan cumle: {cikan or "yok"}; nazar ifadesi kalan pin '
-        f'{sum(1 for r in once if "evil eye" in r["aciklama"])}; "{N} styles" gecen {sum(1 for r in once if f"{N} styles" in r["aciklama"])}; '
+        f'{sum(1 for r in once if "evil eye" in r["aciklama"])}; "<n> styles" {dict(Counter(re.findall(r"(\d+) styles", " ".join(r["aciklama"] for r in once))))}; '
         f'denetim PASS {78 - len(hata)}/78; en uzun baslik {max(int(r["baslik_uzunluk"]) for r in once)}, '
         f'aciklama {max(int(r["aciklama_uzunluk"]) for r in once)}' + ''.join('\n  ' + x for x in hata[:5]))
     open(os.path.join(a.out, 'KUPA_METIN_DOGRULAMA.txt'), 'w').write('\n'.join(rap) + '\n')
