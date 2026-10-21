@@ -1,0 +1,54 @@
+name: ig-karusel-ilk-slayt-78
+
+# IG karusel ilk slayt A x78 (21 Eki 2026, Serdar karari: A, baslik tek satir, poster en buyuk). Yalniz Drive'a yazar;
+# Metricool / Etsy yazma YOK. Kaynak: TEMP/KAPAK_P2_78_20261019 (BASLIK_A/KAPAK_A varsa o, yoksa KAPAK = Etsy'ye yuklenen kapak).
+# scripts/sosyal/ig_karusel_ilk_slayt.py --kapak ... --kapak-a ... -> IG_ILK_<CIFT>.jpg, KONTAK_*.jpg, KONTROL.csv, OZET.txt.
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      ciftler:
+        description: 'bos = 78 cift; ya da A_B,C_D'
+        default: ''
+jobs:
+  uret:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      K: gdrive:ASTROLOVE/TEMP/KAPAK_P2_78_20261019
+      O: gdrive:ASTROLOVE/TEMP/IG_KARUSEL_ILK_SLAYT_78_20261021
+    steps:
+      - uses: actions/checkout@v4
+      - name: Paketler + font
+        run: |
+          pip install -q numpy==2.1.3 pillow==11.0.0 opencv-python-headless==4.10.0.84
+          curl -fsSL --retry 3 "https://raw.githubusercontent.com/google/fonts/main/ofl/ebgaramond/EBGaramond%5Bwght%5D.ttf" -o "$RUNNER_TEMP/EBGaramond[wght].ttf"
+      - name: rclone + kapaklar
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          for d in 1 2 3; do curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1; command -v rclone >/dev/null && break; sleep $((d * 10)); done
+          mkdir -p ~/.config/rclone _w/KAPAK _w/KAPAK_A _out; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; export RCLONE_CONFIG_GDRIVE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET"; fi
+          rclone copy "$K/KAPAK" _w/KAPAK --include "*.jpg" --transfers 16 -q
+          rclone copy "$K/BASLIK_A/KAPAK_A" _w/KAPAK_A --include "*.jpg" --transfers 16 -q
+          echo "KAPAK $(ls _w/KAPAK | wc -l), KAPAK_A $(ls _w/KAPAK_A | wc -l)"
+      - name: Uret + yukle
+        env:
+          CIFTLER: ${{ inputs.ciftler }}
+        run: |
+          set +e -uo pipefail
+          python3 scripts/sosyal/ig_karusel_ilk_slayt.py --kapak _w/KAPAK --kapak-a _w/KAPAK_A --font "$RUNNER_TEMP/EBGaramond[wght].ttf" \
+            --out _out --ciftler "$CIFTLER" 2>&1 | tee _out/kosu_log.txt
+          rc=${PIPESTATUS[0]}
+          rclone copy _out "$O" -q --transfers 16
+          rclone lsf "$O" | wc -l
+          cat _out/OZET.txt >> "$GITHUB_STEP_SUMMARY" || true
+          exit $rc
+      - if: always()
+        run: rm -rf _w ~/.config/rclone
