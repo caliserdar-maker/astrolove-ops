@@ -3,6 +3,10 @@ name: pinterest-takvim-v2
 # mod plan: SALT OKUMA (yalniz GET) -> pin_takvim_v2.py (PLAN_V2.csv, OZET_V2.txt) + pin_takvim_uygula.py kuru (KURU_UYGULAMA.*).
 # mod yaz : METRICOOL'A YAZAR (onay PIN_TAKVIM_V2, Serdar 20 Eki): Drive V2/PLAN_V2.csv -> pin_takvim_uygula.py yaz (YEDEK.json Drive
 #           dogrulamali, yalniz publicationDate, hata = atla) -> pin_yeni_kuru.py (KURU: 12 yeni yil donumu pini + pano notu) -> V2/UYGULAMA/.
+# mod medya: Drive ici kopya (Metricool yok): KAPAK_Y1_78_20261019/PIN/<CIFT>_PIN.jpg x12 -> SOSYAL/PINTEREST/MEDYA/v7/y1/,
+#            KUPA_PIN_78_20261020/PIN_KUPA_<CIFT>.jpg x78 -> MEDYA/v7/kupa/ (--ignore-existing + md5 check). Sonra pin-media-sync.yml.
+# mod yeni : METRICOOL'A YAZAR (onay PIN_YENI_V2, Serdar 21 Eki): "Zodiac Couple Mugs" panosu (metricool_pano_ac.py) + 12 yil donumu
+#            pini POST (V2/UYGULAMA/YENI_PIN_GOVDE.json, PLAN_V2 tarihleri) + 78 kupa pini KURU -> pin_yeni_uygula.py -> V2/YENI/.
 # Token: secret METRICOOL_USER_TOKEN (userId/blogId Drive METRICOOL_TOKEN.json'dan). Loga yazilmaz (::add-mask:: + sir_koru).
 # Cikti: Drive ASTROLOVE/TEMP/PINTEREST_TAKVIM_PLAN_20261020/V2/.
 permissions:
@@ -10,8 +14,8 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-      mod: {description: "plan (salt okuma + kuru uygulama) | yaz (Metricool'a yazar, onay gerekir)", required: true, default: plan, type: choice, options: [plan, yaz]}
-      onay: {description: "yaz icin PIN_TAKVIM_V2", required: false, default: ""}
+      mod: {description: "plan (salt okuma + kuru uygulama) | yaz (Metricool'a yazar, onay gerekir)", required: true, default: plan, type: choice, options: [plan, yaz, medya, yeni]}
+      onay: {description: "yaz icin PIN_TAKVIM_V2, yeni icin PIN_YENI_V2", required: false, default: ""}
 jobs:
   oku:
     runs-on: ubuntu-latest
@@ -58,6 +62,29 @@ jobs:
                 --out _out/UYGULAMA | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json --sir-json _work/kimlik.json "$GITHUB_STEP_SUMMARY"
               [ "${PIPESTATUS[0]}" = 0 ] || echo "::warning::pin_yeni_kuru FAIL"
             fi
+          elif [ "${{ inputs.mod }}" = "medya" ]; then
+            rclone copyto "$O/PLAN_V2.csv" _work/g/PLAN_V2.csv || { echo "::error::PLAN_V2.csv yok"; exit 1; }
+            python3 scripts/sosyal/analiz/pin_yeni_uygula.py liste --plan _work/g/PLAN_V2.csv --tur yd > _work/yd.txt
+            python3 scripts/sosyal/analiz/pin_yeni_uygula.py liste --plan _work/g/PLAN_V2.csv --tur kupa > _work/kupa.txt
+            [ "$(wc -l < _work/yd.txt)" = 12 ] && [ "$(wc -l < _work/kupa.txt)" = 78 ] || { echo "::error::liste 12/78 degil"; exit 1; }
+            M=$T/SOSYAL/PINTEREST/MEDYA/v7; mkdir -p _out/YENI; rc=0
+            for t in "yd:$T/KAPAK_Y1_78_20261019/PIN:$M/y1" "kupa:$T/KUPA_PIN_78_20261020:$M/kupa"; do
+              ad=${t%%:*}; r=${t#*:}; src=${r%%:gdrive*}; dst=gdrive${r#*:gdrive}
+              once=$(rclone lsf "$dst" --files-from-raw _work/$ad.txt 2>/dev/null | wc -l)
+              rclone copy "$src" "$dst" --files-from-raw _work/$ad.txt --ignore-existing --stats-one-line -v 2>&1 | tail -2
+              rclone check "$src" "$dst" --files-from-raw _work/$ad.txt --one-way 2>&1 | tail -3; c=${PIPESTATUS[0]}
+              sonra=$(rclone lsf "$dst" --files-from-raw _work/$ad.txt | wc -l)
+              echo "$ad: istenen $(wc -l < _work/$ad.txt), hedefte once $once, sonra $sonra, md5 check rc=$c ($dst)" | tee -a _out/YENI/MEDYA_KOPYA.txt
+              [ "$c" = 0 ] && [ "$sonra" = "$(wc -l < _work/$ad.txt)" ] || rc=1
+            done
+          elif [ "${{ inputs.mod }}" = "yeni" ]; then
+            [ "${{ inputs.onay }}" = "PIN_YENI_V2" ] || { echo "::error::onay PIN_YENI_V2 degil, yazma yok"; exit 1; }
+            rclone copyto "$O/PLAN_V2.csv" _work/g/PLAN_V2.csv || { echo "::error::PLAN_V2.csv yok"; exit 1; }
+            rclone copyto "$O/UYGULAMA/YENI_PIN_GOVDE.json" _work/g/YENI_PIN_GOVDE.json || { echo "::error::YENI_PIN_GOVDE.json yok"; exit 1; }
+            python3 scripts/sosyal/analiz/pin_yeni_uygula.py yeni _work/mc.json --plan _work/g/PLAN_V2.csv --govde _work/g/YENI_PIN_GOVDE.json \
+              --kupa-metin data/sosyal/pinterest/kupa/KUPA78_ORCHARD_METIN.csv --kupa-liste _work/g/kupa.csv --out _out/YENI \
+              --confirm PIN_YENI_V2 | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json --sir-json _work/kimlik.json "$GITHUB_STEP_SUMMARY"
+            rc=${PIPESTATUS[0]}
           else
             python3 scripts/sosyal/analiz/pin_takvim_v2.py _work/mc.json _out --pod78 data/pod/pod78_ids.csv --by78 _work/g/by78.csv \
               --kupa _work/g/kupa.csv --kullanilmayan _work/g/kullanilmayan.csv \
