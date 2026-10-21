@@ -1,0 +1,47 @@
+name: tani-kesit-yukle
+# SIPARIS HAT TANI 21 Eki 2026 (Serdar onayi (a)): TEK KOSU. gecici/siparis-hat-tani dalindaki 16 kesit PNG'yi
+# sha256 kontrolunden sonra yalniz Drive TEMP/SIPARIS_HAT_TANI_20261021/KESITLER/ icine yukler. Baska is yok: Etsy yok,
+# uretim yok, mevcut Drive dosyasina dokunulmaz (--ignore-existing, silme yok).
+permissions:
+  contents: read
+on:
+  workflow_dispatch: {}
+jobs:
+  yukle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      O: "gdrive,root_folder_id=1aUqcYzHzFR_MWor1r1yfZQ9-hZii81Pi:KESITLER"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: gecici/siparis-hat-tani
+          path: _k
+      - name: sha256 kontrolu
+        run: |
+          set -euo pipefail
+          cd _k/KESITLER && sha256sum -c ../KESIT.sha256
+          n=$(ls *.png | wc -l); echo "PNG $n"; [ "$n" = 16 ] || { echo "::error::PNG sayisi $n (16 bekleniyor)"; exit 1; }
+      - name: rclone
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /tmp/rc.zip https://downloads.rclone.org/rclone-current-linux-amd64.zip
+          unzip -q -j /tmp/rc.zip '*/rclone' -d /tmp/rcb && sudo install -m 755 /tmp/rcb/rclone /usr/local/bin/rclone
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: Drive'a yukle + dogrula
+        run: |
+          set -euo pipefail
+          rclone copy _k/KESITLER "$O" --ignore-existing --transfers 8 -q
+          rclone check _k/KESITLER "$O" --one-way
+          rclone lsl "$O"
+      - if: always()
+        run: rm -rf ~/.config/rclone
