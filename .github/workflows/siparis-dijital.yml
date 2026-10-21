@@ -6,6 +6,7 @@ name: siparis-dijital
 # olmadan uretilmez; eski gri-kahve WP teslim edilmez. Sayfalar ayni pdf_yap / pdf_kapisi ile PDF olur.
 # Isim / mesaj loga yazilmaz (GITHUB_EVENT_PATH'ten okunur, ::add-mask::). Etsy'ye yazma / musteriye gonderim YOK.
 # Cikti: Drive ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL/<receipt>/ ; kesit + onizleme yalniz Drive <receipt>/KONTROL (21 Eki: public dala yazma kaldirildi).
+# Isler arasi ara cikti: Drive <receipt>/_ARA/<run_id>/<renk_R | sayfa_R__oran | wp_boy | inceleme_paket> (21 Eki: public artifact kaldirildi).
 
 permissions:
   contents: read
@@ -179,12 +180,13 @@ jobs:
         run: |
           python scripts/siparis_dijital/surucu.py --asama renk --renk "${{ matrix.renk }}" --kod _kod \
             --kod-ref "siparis-baski-v1 $RENK_REF" --cikti "out/renk/${{ matrix.renk }}"
-      - uses: actions/upload-artifact@v4
+      - name: Ara cikti Drive'a (renk_${{ matrix.renk }}; public artifact yok)
         if: ${{ always() }}
-        with:
-          name: renk_${{ matrix.renk }}
-          path: out/renk/${{ matrix.renk }}
-          retention-days: 2
+        run: |
+          set -euo pipefail
+          REC=$(jq -r '.inputs.receipt' "$GITHUB_EVENT_PATH"); [[ "$REC" =~ ^[0-9]+$ ]] || exit 1
+          [ -d "out/renk/${{ matrix.renk }}" ] || { echo "cikti yok"; exit 0; }
+          rclone copy "out/renk/${{ matrix.renk }}" "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL/$REC/_ARA/${{ github.run_id }}/renk_${{ matrix.renk }}" --transfers 8
       - if: ${{ always() }}
         run: rm -rf ~/.config/rclone
 
@@ -245,12 +247,13 @@ jobs:
         run: |
           python scripts/siparis_dijital/surucu.py --asama sayfa --renk "${{ matrix.renk }}" --oran "${{ matrix.oran }}" --kod _kod \
             --kod-ref "siparis-baski-v1 $RENK_REF" --cikti "out/renk/${{ matrix.renk }}"
-      - uses: actions/upload-artifact@v4
+      - name: Ara cikti Drive'a (sayfa_${{ matrix.renk }}__${{ matrix.oran }}; public artifact yok)
         if: ${{ always() }}
-        with:
-          name: sayfa_${{ matrix.renk }}__${{ matrix.oran }}
-          path: out/renk/${{ matrix.renk }}
-          retention-days: 2
+        run: |
+          set -euo pipefail
+          REC=$(jq -r '.inputs.receipt' "$GITHUB_EVENT_PATH"); [[ "$REC" =~ ^[0-9]+$ ]] || exit 1
+          [ -d "out/renk/${{ matrix.renk }}" ] || { echo "cikti yok"; exit 0; }
+          rclone copy "out/renk/${{ matrix.renk }}" "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL/$REC/_ARA/${{ github.run_id }}/sayfa_${{ matrix.renk }}__${{ matrix.oran }}" --transfers 8
       - if: ${{ always() }}
         run: rm -rf ~/.config/rclone
 
@@ -338,14 +341,14 @@ jobs:
           else KOD=_wp; REF="claude/wp-katman-baski-60sk0s $WP_REF"; fi
           python scripts/siparis_dijital/surucu.py --asama wp --boy "${{ matrix.boy }}" --kod "$KOD" \
             --kod-ref "$REF" --cikti "out/wp/${{ matrix.boy }}"
-      - uses: actions/upload-artifact@v4
+      - name: Ara cikti Drive'a (wp_${{ matrix.boy }}; public artifact yok)
         if: ${{ always() }}
-        with:
-          name: wp_${{ matrix.boy }}
-          path: |
-            out/wp/${{ matrix.boy }}/WP_${{ matrix.boy }}.jpg
-            out/wp/${{ matrix.boy }}/OZET_WP_${{ matrix.boy }}.json
-          retention-days: 2
+        run: |
+          set -euo pipefail
+          REC=$(jq -r '.inputs.receipt' "$GITHUB_EVENT_PATH"); [[ "$REC" =~ ^[0-9]+$ ]] || exit 1
+          [ -d "out/wp/${{ matrix.boy }}" ] || { echo "cikti yok"; exit 0; }
+          rclone copy "out/wp/${{ matrix.boy }}" "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL/$REC/_ARA/${{ github.run_id }}/wp_${{ matrix.boy }}" \
+            --include "/WP_${{ matrix.boy }}.jpg" --include "/OZET_WP_${{ matrix.boy }}.json" --transfers 8
       - if: ${{ always() }}
         run: rm -rf ~/.config/rclone
 
@@ -379,21 +382,44 @@ jobs:
         with:
           python-version: "3.12"
       - run: python -m pip install --quiet pillow opencv-python-headless numpy fonttools img2pdf pikepdf
-      - name: Onceki kosularin artifact'leri (PASS isler)
-        if: ${{ github.event.inputs.onceki_kosu != '' }}
+      - name: rclone (dogrudan ikili)
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /tmp/rc.zip https://downloads.rclone.org/rclone-current-linux-amd64.zip
+          unzip -q -j /tmp/rc.zip '*/rclone' -d /tmp/rcb && sudo install -m 755 /tmp/rcb/rclone /usr/local/bin/rclone
+      - name: rclone.conf olustur
         env:
-          GH_TOKEN: ${{ github.token }}
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Onceki kosularin ara ciktilari (PASS isler; Drive _ARA/<run>)
+        if: ${{ github.event.inputs.onceki_kosu != '' }}
         run: |
           set -euo pipefail
           K=$(jq -r '.inputs.onceki_kosu' "$GITHUB_EVENT_PATH")
           i=0
           for r in $K; do
             [[ "$r" =~ ^[0-9]+$ ]] || { echo "HATA: run id" >&2; exit 1; }
-            i=$((i+1)); gh run download "$r" -R "$GITHUB_REPOSITORY" -D "out/a0_$i" || echo "uyari: $r artifact yok"
+            i=$((i+1)); mkdir -p "out/a0_$i"
+            rclone copy "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL/$REC/_ARA/$r" "out/a0_$i" --transfers 8 || echo "uyari: $r ara cikti yok"
           done
-      - uses: actions/download-artifact@v4
-        with:
-          path: out/a1
+      - name: Bu kosunun ara ciktilari (Drive _ARA/<run>)
+        run: |
+          set -euo pipefail
+          mkdir -p out/a1; A="gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL/$REC/_ARA/${{ github.run_id }}"
+          if rclone lsf "$A" --max-depth 1 >/dev/null 2>&1; then rclone copy "$A" out/a1 --exclude "/inceleme_paket/**" --transfers 8
+          else echo "uyari: bu kosuda ara cikti yok"; fi
+          ls out/a1
       - name: Artifact yerlesimi (bu kosu oncekinin ustune)
         run: |
           set -euo pipefail
@@ -431,26 +457,6 @@ jobs:
           echo "rc=$rc" >> "$GITHUB_OUTPUT"
           ls -la out/paket out/inceleme
           exit 0
-      - name: rclone (dogrudan ikili)
-        run: |
-          set -euo pipefail
-          curl -fsSL -o /tmp/rc.zip https://downloads.rclone.org/rclone-current-linux-amd64.zip
-          unzip -q -j /tmp/rc.zip '*/rclone' -d /tmp/rcb && sudo install -m 755 /tmp/rcb/rclone /usr/local/bin/rclone
-      - name: rclone.conf olustur
-        env:
-          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
-          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-        run: |
-          set -euo pipefail
-          mkdir -p ~/.config/rclone; umask 077
-          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
-          chmod 600 ~/.config/rclone/rclone.conf
-          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
-            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
-            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
-              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
-            fi
-          fi
       - name: Drive (TEMP/SIPARIS_ISIM/DIJITAL/<receipt>) - musteri PDF'leri + OZET
         run: |
           set -euo pipefail
@@ -474,13 +480,11 @@ jobs:
             cp "$r"/OZET_*.json "$r"/KAPI_RAPORU_*.json "out/inc_paket/renk/$n/" 2>/dev/null || true; done
           for w in out/wp/*; do [ -d "$w" ] || continue; cp "$w"/OZET_WP_*.json out/inc_paket/wp/ 2>/dev/null || true; done
           du -sh out/inc_paket
-      - uses: actions/upload-artifact@v4
+      - name: inceleme_paket Drive'a (public artifact yok)
         if: ${{ always() }}
-        with:
-          name: inceleme_paket
-          path: out/inc_paket
-          retention-days: 2
-          compression-level: 0
+        run: |
+          set -euo pipefail
+          rclone copy out/inc_paket "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL/$REC/_ARA/${{ github.run_id }}/inceleme_paket" --transfers 8
       - if: ${{ always() }}
         run: rm -rf ~/.config/rclone
       - name: Sonuc
@@ -502,15 +506,6 @@ jobs:
           m=$(jq -r '.inputs.mesaj_b64' "$GITHUB_EVENT_PATH" | base64 -d); echo "::add-mask::$m"
           r=$(jq -r '.inputs.receipt' "$GITHUB_EVENT_PATH"); [[ "$r" =~ ^[0-9]+$ ]] || exit 1
           echo "REC=$r" >> "$GITHUB_ENV"
-      - uses: actions/download-artifact@v4
-        with:
-          name: inceleme_paket
-          path: out
-      - name: KONTROL klasorleri (renk / sayfa / wp artifact'leri)
-        uses: actions/download-artifact@v4
-        with:
-          pattern: "{renk,sayfa}_*"
-          path: out/a
       - name: rclone (dogrudan ikili)
         run: |
           set -euo pipefail
@@ -531,6 +526,13 @@ jobs:
               echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
             fi
           fi
+      - name: Ara ciktilar (Drive _ARA/<run>; inceleme_paket + renk / sayfa)
+        run: |
+          set -euo pipefail
+          A="gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL/$REC/_ARA/${{ github.run_id }}"
+          rclone copy "$A/inceleme_paket" out --transfers 8
+          mkdir -p out/a; rclone copy "$A" out/a --include "/renk_*/**" --include "/sayfa_*/**" --transfers 8
+          ls out/a
       - name: Drive KONTROL (kesit / onizleme / kapi raporlari)
         run: |
           set -euo pipefail
