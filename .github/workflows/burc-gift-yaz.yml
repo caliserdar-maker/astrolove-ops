@@ -1,0 +1,83 @@
+name: burc-gift-yaz
+# Burc hediye ifadesi + yil donumu 77 ilan plani TEK KOSU (Serdar kararlari 22 Eki; PLAN_BURC_GIFT v3). scripts/etsy/burc_gift_yaz.py
+# yedek / siparis = SALT OKUMA. yaz = ETSY'YE YAZAR: onay SERDAR_BURC_GIFT + kume (cl -> pilot -> kalan).
+# Girdiler Drive'dan; onayli metin dosyalari sha256 ile sabit (degismisse DUR). Cikti: Drive TEMP/BURC_GIFT_20261022/<mod>_<kume>_<run>/.
+permissions:
+  actions: read
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      mod: {description: "yedek | siparis | yaz", required: true, default: "yedek"}
+      kume: {description: "cl | pilot | kalan | id1,id2 (yedek icin hepsi de olur)", required: true, default: "cl"}
+      onay: {description: "yaz icin SERDAR_BURC_GIFT", required: false, default: ""}
+env:
+  SONRA_SHA: 12403d91f229946c1ce43bbfc1bfeaa8db5359fdcf6e7d2299ee70ba68eead4b
+  ONCE_SHA: 3539e1bc28415df789581e865f188b8d72e3f062549583ae7f2f56ff90c997a4
+jobs:
+  is:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: Onay kapisi
+        env: {ONAY: "${{ inputs.onay }}", MOD: "${{ inputs.mod }}", KUME: "${{ inputs.kume }}"}
+        run: |
+          [[ "$KUME" =~ ^(cl|pilot|kalan|hepsi|[0-9]+(,[0-9]+)*)$ ]] || { echo "::error::kume"; exit 1; }
+          case "$MOD" in yedek|siparis) ;; yaz) [ "$ONAY" = "SERDAR_BURC_GIFT" ] || { echo "::error::onay yok"; exit 1; } ;; *) echo "::error::mod"; exit 1 ;; esac
+      - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || { echo "rclone.org erisilemedi, apt"; sudo apt-get install -y -qq rclone >/dev/null; }
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Token + onayli girdiler (sha256 kapisi)
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/DENETIM_20261021/SONRA_234.json" _work/SONRA_234.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/DENETIM_20261021/AKTIF_METIN_39686295137/AKTIF_METIN.json" _work/ONCE.json
+          echo "$SONRA_SHA  _work/SONRA_234.json" | sha256sum -c -
+          echo "$ONCE_SHA  _work/ONCE.json" | sha256sum -c -
+      - name: Calistir
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          MOD: ${{ inputs.mod }}
+          KUME: ${{ inputs.kume }}
+          ONAY: ${{ inputs.onay }}
+        run: python3 scripts/etsy/burc_gift_yaz.py --mod "$MOD" --kume "$KUME" --onay "$ONAY" --once _work/ONCE.json --sonra _work/SONRA_234.json --out _out
+      - name: Token geri yaz + cikti Drive'a
+        if: ${{ always() }}
+        env:
+          MOD: ${{ inputs.mod }}
+          KUME: ${{ inputs.kume }}
+        run: |
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "token geri yazildi" || true
+          if [ -d _out ] && ls _out/* >/dev/null 2>&1; then
+            python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/ETSY_TOKEN.json _out || { echo "::error::ciktida sir"; exit 1; }
+            K=$(echo "$KUME" | cut -c1-20 | tr ',' '-')
+            rclone copy _out "gdrive:ASTROLOVE/TEMP/BURC_GIFT_20261022/${MOD}_${K}_${GITHUB_RUN_ID}" -q && echo "Cikti: TEMP/BURC_GIFT_20261022/${MOD}_${K}_${GITHUB_RUN_ID}/"
+          fi
+      - if: always()
+        run: rm -rf _work ~/.config/rclone
