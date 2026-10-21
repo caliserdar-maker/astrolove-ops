@@ -70,10 +70,26 @@ jobs:
           i=0; t0=$(date +%s)
           for R in MIDNIGHT_BLUE DEEP_BLACK PURE_WHITE CHAMPAGNE_IVORY WARM_PARCHMENT; do
             i=$((i+1))
+            # Serdar karari 21 Eki (a): hat kapisi FAIL olsa da uretilen BASKI alinir; kapi sonucu HAT_KAPI_OZET.txt'ye yazilir
             ( cd _sb && python scripts/medya_v1/siparis_dosyasi.py --cift CANCER_LIBRA --renk $R --boy 8x10 --isim1 EMILY --isim2 JAMES \
-                --mesaj-b64 "$M" --sip-kok "$O/_HAT" ) > _work/hat_$R.log 2>&1 || { tail -20 _work/hat_$R.log; exit 1; }
+                --mesaj-b64 "$M" --sip-kok "$O/_HAT" ) > _work/hat_$R.log 2>&1 || echo "hat $R cikis kodu != 0 (kapi FAIL olabilir; rapora bakilir)"
             f=_sb/_siparis/CANCER_LIBRA_${R}_8x10/BASKI_8x10.jpg
             [ -f "$f" ] || { echo "::error::hat ciktisi yok $f"; tail -20 _work/hat_$R.log; exit 1; }
+            k=$(find _sb/_siparis/CANCER_LIBRA_${R}_8x10 -name KAPI_RAPORU.json | head -1)
+            [ -n "$k" ] || rclone copyto "$O/_HAT/CANCER_LIBRA_${R}_8x10/KAPI_RAPORU.json" _work/KAPI_$R.json -q && k=${k:-_work/KAPI_$R.json}
+            python3 - "$R" "$k" >> _pk/PAKET/HAT_KAPI_OZET.txt <<'PY'
+          import json, sys
+          r, yol = sys.argv[1], sys.argv[2]
+          d = json.load(open(yol)); d = d[0] if isinstance(d, list) else d
+          kp = d.get('kapilar') or {}
+          e = d.get('eski_metin_izi_kapisi') or {}
+          b = d.get('bant_dogrulama') or {}
+          br = (b.get('renkler') or {}).get(r) or {}
+          fail = [x for x, v in kp.items() if not v]
+          print(f"POSTER_{r}.png: kapilar_gecti={d.get('kapilar_gecti')}; FAIL kapilar {fail}; eski metin izi gecti={e.get('gecti')} "
+                f"(fazla {e.get('fazla')}, esik {e.get('esik')}, bant y {e.get('bant')}); bant hizasi bu renk gecti={br.get('gecti')} "
+                f"en buyuk fark {br.get('en_buyuk_fark')} px (esik {b.get('esik_px')} px, referans {b.get('referans')})")
+          PY
             python3 scripts/sosyal/urun_gorsel_cl.py duz "$f" "_pk/PAKET/POSTER_${R}.png" poster "$R"
             g=$(( $(date +%s)-t0 )); echo "[$i/5 %$((i*20))] $R gecen ${g}s kalan ~$(( g/i*(5-i) ))s"
           done
@@ -83,6 +99,8 @@ jobs:
           ( cd _pk && sha256sum -c PAKET.sha256 )
           n=$(ls _pk/PAKET/*.png | wc -l); echo "PNG $n"; [ "$n" = 26 ] || { echo "::error::PNG sayisi $n (26 bekleniyor)"; exit 1; }
           python3 scripts/sosyal/urun_gorsel_cl.py paket _pk/PAKET
+          { echo; echo "POSTER HAT KAPI SONUCLARI (siparis_dosyasi.py; Serdar karari 21 Eki: hattin urettigi haliyle pakete alindi):"; cat _pk/PAKET/HAT_KAPI_OZET.txt; } >> _pk/PAKET/LISTE.txt
+          sed -i '1i HAT KAPI OZETI 5 renk CANCER_LIBRA 8x10 EMILY / JAMES (gercek siparisten once ayri is; bu gorevde duzeltme yok)' _pk/PAKET/HAT_KAPI_OZET.txt
           cp _out/ILAN_DOGRULAMA.txt _pk/PAKET/ 2>/dev/null || true
           [ -f _pk/KUPA_OLCUM.json ] && cp _pk/KUPA_OLCUM.json _pk/PAKET/
           [ -f _pk/NOT.txt ] && cat _pk/NOT.txt >> _pk/PAKET/LISTE.txt
