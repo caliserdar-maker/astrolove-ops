@@ -1,0 +1,73 @@
+name: siparis-revizyon-ara
+# Serdar 21 Eki madde 3: SIPARIS_ISIM/DIJITAL/4188621967 dosyalarinin Drive revizyonlari (duzeltme oncesi sayfalar) SALT OKUNUR
+# listelenir; bas (guncel) revizyon disindaki her revizyon Drive TEMP/SIPARIS_HAT_TANI_20261021/ESKI_REVIZYON/ altina kopyalanir.
+# Musteri dosyasina dokunulmaz (revizyon / keepForever / silme yok). Log'a yalniz sayi, zaman, boyut, md5 yazilir; isim / mesaj yok.
+# Artifact yok. Gecici is akisi: P8 ile kaldirilir.
+permissions:
+  contents: read
+on:
+  workflow_dispatch: {}
+jobs:
+  ara:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      K: "gdrive,root_folder_id=1o-sK34SNVvZwULnoHwJ7J15KhedzMReS:"
+      O: "gdrive,root_folder_id=1aUqcYzHzFR_MWor1r1yfZQ9-hZii81Pi:ESKI_REVIZYON"
+    steps:
+      - name: rclone
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /tmp/rc.zip https://downloads.rclone.org/rclone-current-linux-amd64.zip
+          unzip -q -j /tmp/rc.zip '*/rclone' -d /tmp/rcb && sudo install -m 755 /tmp/rcb/rclone /usr/local/bin/rclone
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: Revizyon listesi + eski revizyonlarin kopyasi
+        run: |
+          set -euo pipefail
+          rclone lsjson -R --files-only "$K" > /tmp/dosya.json            # ayni zamanda token tazeler
+          T=$(rclone config dump | jq -r '.gdrive.token' | jq -r '.access_token'); echo "::add-mask::$T"
+          [ -n "$T" ] && [ "$T" != null ] || { echo "HATA: token yok" >&2; exit 1; }
+          mkdir -p _r
+          jq -c '.[] | select(.Path | startswith("DAL_YEDEK_20261021/") | not) | {p: .Path, id: .ID}' /tmp/dosya.json > /tmp/liste.jsonl
+          echo "dosya: $(wc -l < /tmp/liste.jsonl)"
+          echo '[' > _r/REVIZYON_LISTE.json; ilk=1; ns=0; nk=0
+          while read -r s; do
+            p=$(jq -r .p <<<"$s"); id=$(jq -r .id <<<"$s")
+            R=$(curl -fsS -H "Authorization: Bearer $T" "https://www.googleapis.com/drive/v3/files/$id/revisions?pageSize=200&fields=revisions(id,modifiedTime,size,md5Checksum,keepForever)")
+            n=$(jq '.revisions | length' <<<"$R"); ns=$((ns + n))
+            [ $ilk = 1 ] || echo ',' >> _r/REVIZYON_LISTE.json; ilk=0
+            jq -c --arg p "$p" --arg id "$id" '{yol: $p, id: $id, revizyonlar: .revisions}' <<<"$R" >> _r/REVIZYON_LISTE.json
+            if [ "$n" -gt 1 ]; then
+              # son (bas) revizyon guncel dosya; digerleri indirilir
+              jq -c '.revisions[:-1][]' <<<"$R" | while read -r v; do
+                rid=$(jq -r .id <<<"$v"); t=$(jq -r .modifiedTime <<<"$v" | tr -d ':-' | cut -c1-15)
+                h="_r/DOSYA/$(dirname "$p")/${t}__$(basename "$p")"; mkdir -p "$(dirname "$h")"
+                curl -fsS -H "Authorization: Bearer $T" -o "$h" "https://www.googleapis.com/drive/v3/files/$id/revisions/$rid?alt=media"
+                m=$(md5sum "$h" | cut -c1-32); [ "$m" = "$(jq -r .md5Checksum <<<"$v")" ] || { echo "HATA: md5 farki" >&2; exit 1; }
+                echo "  rev $t $(stat -c %s "$h") bayt md5 ${m:0:8} OK"
+              done
+            fi
+            echo "$(echo -n "$p" | md5sum | cut -c1-8) revizyon $n"
+          done < /tmp/liste.jsonl
+          echo ']' >> _r/REVIZYON_LISTE.json
+          jq -e . _r/REVIZYON_LISTE.json >/dev/null
+          nk=$(find _r/DOSYA -type f 2>/dev/null | wc -l)
+          echo "TOPLAM: dosya $(wc -l < /tmp/liste.jsonl), revizyon $ns, indirilen eski revizyon $nk"
+          jq -r '[.[] | .revizyonlar[] | .modifiedTime] | sort | "en eski \(.[0]) en yeni \(.[-1])"' _r/REVIZYON_LISTE.json
+      - name: Drive TEMP'e kopya + dogrulama
+        run: |
+          set -euo pipefail
+          rclone copy _r "$O" --transfers 8 -q
+          rclone check _r "$O" --one-way -q
+          echo "check one-way PASS: $(find _r -type f | wc -l) dosya"
+      - if: always()
+        run: rm -rf ~/.config/rclone _r /tmp/dosya.json /tmp/liste.jsonl
