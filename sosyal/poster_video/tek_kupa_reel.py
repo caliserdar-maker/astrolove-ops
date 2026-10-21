@@ -207,6 +207,7 @@ def plaka(font):
 
 def main():
     KO, VD, ESITLE, B1, B2, OUT, IS = sys.argv[1:8]
+    KO, VD, ESITLE, OUT, IS = (os.path.abspath(p) for p in (KO, VD, ESITLE, OUT, IS))   # giydirme cwd=kod/ ile calisir
     CIFT = f'{B1}_{B2}'
     os.makedirs(OUT, exist_ok=True); os.makedirs(IS, exist_ok=True)
     t0 = time.time()
