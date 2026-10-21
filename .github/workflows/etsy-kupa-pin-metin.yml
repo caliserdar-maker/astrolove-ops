@@ -1,0 +1,83 @@
+name: etsy-kupa-pin-metin
+
+# Kupa pin metni v2 (21 Eki 2026): 78 kupa pin KURU metnindeki urun iddialari canli kupa ilaniyla dogrulanir.
+# Etsy SALT OKUMA: tek GET /listings/batch (78 kupa ilani, includes=Inventory; kota tabani 10). Metricool YOK, Pinterest'e yazma YOK.
+# scripts/sosyal/analiz/kupa_pin_metin_v2.py. Drive V2/YENI: eski KUPA_PIN_KURU.csv / KUPA_PIN_GOVDE.json -> *_ONCE (varsa ustune
+# yazilmaz), yenileri + KUPA_METIN_DOGRULAMA.txt + ILAN_CANLI.json.
+
+permissions:
+  actions: read
+  contents: read
+
+on:
+  workflow_dispatch:
+
+jobs:
+  metin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    env:
+      Y: gdrive:ASTROLOVE/TEMP/PINTEREST_TAKVIM_PLAN_20261020/V2/YENI
+    steps:
+      - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Girdiler + _ONCE yedegi
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work/geo out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          for f in KUPA_PIN_KURU.csv KUPA_PIN_GOVDE.json; do
+            rclone copyto "$Y/$f" "_work/$f"
+            o="${f%.*}_ONCE.${f##*.}"
+            if [ -n "$(rclone lsf "$Y/$o" 2>/dev/null)" ]; then echo "$o zaten var, ustune yazilmadi"
+            else rclone copyto "$Y/$f" "$Y/$o"; echo "$o yazildi"; fi
+          done
+          git fetch -q --depth 1 origin kupa-orchard
+          for g in almond fig grape lemon loquat olive orange pomegranate; do
+            git show "FETCH_HEAD:kupa_orchard/kod/kaynak/geo_$g.json" > "_work/geo/geo_$g.json"; done
+      - name: Metin dogrulama (tek Etsy GET)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set +e
+          python scripts/sosyal/analiz/kupa_pin_metin_v2.py --once-csv _work/KUPA_PIN_KURU.csv --once-govde _work/KUPA_PIN_GOVDE.json \
+            --metin data/sosyal/pinterest/kupa/KUPA78_ORCHARD_METIN.csv --geo-dir _work/geo --out out
+          rc=$?
+          set -e
+          rclone copy out "$Y" --include "KUPA_METIN_DOGRULAMA.txt" --include "ILAN_CANLI.json" -q
+          if [ "$rc" = 0 ]; then
+            rclone copy out "$Y" --include "KUPA_PIN_KURU.csv" --include "KUPA_PIN_GOVDE.json" -q; echo "guncel metin yazildi"
+          else echo "::error::dogrulama FAIL (rc=$rc), KUPA_PIN_KURU/GOVDE degistirilmedi"; fi
+          rclone lsl "$Y"
+          exit $rc
+      - name: Token geri yaz
+        if: always()
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || echo "Token yenilenmedi"
+      - if: always()
+        run: rm -rf _work ~/.config/rclone
