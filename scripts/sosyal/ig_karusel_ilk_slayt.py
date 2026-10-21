@@ -9,7 +9,15 @@ yalniz olceklenmis hali, NCC 0.9999); burada yalniz LANCZOS ile kuculur (olcek <
 Olculer P2a_v2'den oransal: baslik 192 px / poster 1814 px, baslik murekkep alti - poster ust arasi 80 / 1814, ust ve alt
 pay esit. IG profil izgarasi 4:5'i ortadan 3:4 kirpar (her yandan 33.75 px): baslik ve poster x [34+PAY, 1046-PAY].
 Cikti: A.jpg, B.jpg, ONIZLEME_IZGARA.jpg (iki surumun 3:4 orta kirpimi yan yana), ONIZLEME_AKIS.jpg (4:5 tam), OLCUM.txt.
-Kullanim: ig_karusel_ilk_slayt.py --p2a P2a_v2.jpg --font EBGaramond[wght].ttf --out DIR"""
+Kullanim: ig_karusel_ilk_slayt.py --p2a P2a_v2.jpg --font EBGaramond[wght].ttf --out DIR
+
+TOPLU (21 Eki 2026, Serdar karari: ilk slayt = A, baslik TEK SATIR "<BURC> & <BURC>", poster en buyuk kalir):
+  --kapak KAPAK_DIR --kapak-a KAPAK_A_DIR --out DIR [--ciftler A_B,C_D]
+  Kaynak: cifte Etsy'ye yuklenen onayli kapak (KAPAK_P2_78_20261019: BASLIK_A/KAPAK_A'da varsa o, yoksa KAPAK;
+  dosya <listing>_<CIFT>.jpg, 3000x2250). Poster kutusu her kapakta koyu bolgeden OLCULUR ve KUTU ile ayni olmali.
+  Yerlesim (poster boyu/yeri, baslik boyu, taban cizgisi) A kurali (CANCER & LIBRA ile bulunan) ve 78 ciftte ayni;
+  izgara guvenli alanina sigmayan baslik YALNIZ kendisi 0,5 px adimla kuculur (en az oran), KONTROL'e yazilir.
+  Cikti: IG_ILK_<CIFT>.jpg, KONTAK_1..N.jpg (sayfa basina 16, cift adi etiketli), KONTROL.csv, OZET.txt."""
 import argparse
 import os
 import sys
@@ -82,12 +90,129 @@ def ncc(a, b):
     return float((a @ b) / np.sqrt((a @ a) * (b @ b)))
 
 
+def kutu_olc(arr):
+    """Poster kutusu: koyu (max kanal < 70) piksel orani; sutun > 0.6 (y 400-2050), satir > 0.8 (bulunan x araliginda)."""
+    k = arr.max(axis=2) < 70
+    sx = k[400:2050].mean(axis=0)
+    xs = np.where(sx > 0.6)[0]
+    if not len(xs):
+        return None
+    x0, x1 = int(xs[0]), int(xs[-1]) + 1
+    sy = k[:, x0:x1].mean(axis=1)
+    ys = np.where(sy > 0.8)[0]
+    return (x0, int(ys[0]), x1, int(ys[-1]) + 1) if len(ys) else None
+
+
+def kontak(yollar, etiketler, font, out, sayfa=16, sutun=4):
+    tw, th, et = 270, 338, 34
+    adlar = []
+    for p in range(0, len(yollar), sayfa):
+        parca = list(zip(yollar[p:p + sayfa], etiketler[p:p + sayfa]))
+        satir_ = (len(parca) + sutun - 1) // sutun
+        tv = Image.new('RGB', (sutun * (tw + 12) + 12, satir_ * (th + et + 12) + 12), 'white')
+        d = ImageDraw.Draw(tv)
+        f = ImageFont.truetype(font, 20); f.set_variation_by_axes([430])
+        for i, (y, e) in enumerate(parca):
+            x0, y0 = 12 + (i % sutun) * (tw + 12), 12 + (i // sutun) * (th + et + 12)
+            tv.paste(Image.open(y).convert('RGB').resize((tw, th), Image.LANCZOS), (x0, y0))
+            d.text((x0 + tw / 2, y0 + th + 6), e, font=f, fill=(20, 20, 20), anchor='ma')
+        ad = f'KONTAK_{p // sayfa + 1}.jpg'
+        tv.save(os.path.join(out, ad), quality=90)
+        adlar.append(ad)
+    return adlar
+
+
+def toplu(o):
+    import csv
+    import time
+    from collections import Counter
+    dosya = {}
+    for kod, d in (('KAPAK', o.kapak), ('KAPAK_A', o.kapak_a)):   # KAPAK_A sonra: varsa onu ezer (Etsy'ye yuklenen)
+        for ad in sorted(os.listdir(d)):
+            if ad.lower().endswith('.jpg') and '_' in ad:
+                lid, cift = ad[:-4].split('_', 1)
+                dosya[cift] = (kod, lid, os.path.join(d, ad))
+    ciftler = [c for c in o.ciftler.split(',') if c] if o.ciftler else sorted(dosya)
+    eksik = [c for c in ciftler if c not in dosya]
+    ph, pw, T, ara, _ = yerlesim(o.font)
+    mA, blA = tek_satir(o.font, BASLIK['A'], T)
+    taban_y = round((H - (blA + ara + ph)) / 2 + blA)
+    py, px = taban_y + ara, round((W - pw) / 2)
+    D = duvar45()
+    satirlar, t0 = [], time.time()
+    for i, c in enumerate([c for c in ciftler if c in dosya], 1):
+        kod, lid, yol = dosya[c]
+        sat, ok = {}, True
+
+        def k(ad, kosul, deger):
+            nonlocal ok
+            ok &= bool(kosul)
+            sat[ad] = deger
+            if not kosul:
+                sat.setdefault('fail', []).append(ad)
+
+        a, b = c.split('_')
+        metin = f'{a} & {b}'
+        src = np.asarray(Image.open(yol).convert('RGB'))
+        bul = kutu_olc(src)
+        k('kaynak_kutu', bul == KUTU and src.shape[:2] == (2250, 3000), f'{bul} {src.shape[1]}x{src.shape[0]}')
+        P = Image.fromarray(src).crop(KUTU)
+        k('olcek', ph / P.height <= 1, round(ph / P.height, 4))
+        k('yasak_karakter_yok', not any(x in metin for x in YASAK), metin)
+        k('baslik_metni', metin.split(' & ') == [a, b] and metin.isupper() and (a != b or metin.count(a) == 2), metin)
+        arr, bk, boy, Pk = ciz(D, o.font, metin, T, taban_y, ph, pw, px, py, P)
+        hedef = os.path.join(o.out, f'IG_ILK_{c}.jpg')
+        Image.fromarray(arr).save(hedef, quality=95, subsampling=0)
+        J = np.asarray(Image.open(hedef).convert('RGB'))
+        k('poster_ncc', ncc(J[py:py + ph, px:px + pw], np.asarray(Pk)) >= 0.999, round(ncc(J[py:py + ph, px:px + pw], np.asarray(Pk)), 5))
+        kenar = J[py:py + ph, px:px + pw].astype(int); Pa = np.asarray(Pk).astype(int)
+        fk = float(np.mean([np.abs(kenar[:3] - Pa[:3]).mean(), np.abs(kenar[-3:] - Pa[-3:]).mean(),
+                            np.abs(kenar[:, :3] - Pa[:, :3]).mean(), np.abs(kenar[:, -3:] - Pa[:, -3:]).mean()]))
+        k('cerceve_yok_kenar_fark', fk < 3, round(fk, 2))
+        paylar = {}
+        for g, (gx0, gx1) in {'izgara': (IZGARA_KES, W - IZGARA_KES), 'akis': (0, W)}.items():
+            for n, (a0, b0, a1, b1) in {'baslik': bk, 'poster': (px, py, px + pw, py + ph)}.items():
+                paylar[f'{g}_{n}'] = round(min(a0 - gx0, gx1 - a1, b0, H - b1), 1)
+        for x, v in paylar.items():
+            k(f'pay_{x}', v >= PAY, v)
+        k('baslik_poster_bosluk', py - bk[3] > 0, py - bk[3])
+        Dl = AP.lum(np.asarray(D).astype(np.float64)[bk[1]:bk[3], bk[0]:bk[2]])
+        kon = (float(np.percentile(Dl, 5)) + 0.05) / (float(AP.lum(np.array(AP.RENK))) + 0.05)
+        k('kontrast', kon >= 4.5, round(kon, 2))
+        r = dict(cift=c, kaynak=kod, listing_id=lid, baslik=metin, baslik_px=round(boy, 1), baslik_kural_px=round(T, 1),
+                 baslik_kucultme=round(boy / T, 4), baslik_kutu=bk, poster_kutu=(px, py, px + pw, py + ph), **sat,
+                 sonuc='PASS' if ok else 'FAIL', fail=' '.join(sat.get('fail', [])))
+        satirlar.append(r)
+        g = time.time() - t0
+        print(f'{i}/{len(ciftler)} %{100 * i // len(ciftler)} gecen {g:.0f}s kalan ~{g / i * (len(ciftler) - i):.0f}s {c} {r["sonuc"]} '
+              f'baslik {boy:.1f}px ({boy / T:.4f}) {r["fail"]}', flush=True)
+    alan = list(dict.fromkeys(x for r in satirlar for x in r))
+    with open(os.path.join(o.out, 'KONTROL.csv'), 'w', newline='', encoding='utf-8') as f:
+        w = csv.DictWriter(f, alan); w.writeheader(); w.writerows(satirlar)
+    kt = kontak([os.path.join(o.out, f'IG_ILK_{r["cift"]}.jpg') for r in satirlar], [r['cift'] for r in satirlar], o.font, o.out)
+    fail = [r['cift'] for r in satirlar if r['sonuc'] != 'PASS']
+    kuc = sorted((r for r in satirlar if r['baslik_kucultme'] < 1), key=lambda r: r['baslik_kucultme'])
+    oz = [f'IG KARUSEL ILK SLAYT A x{len(satirlar)} (1080x1350; Metricool yazma 0): {len(satirlar) - len(fail)} PASS / {len(fail)} FAIL, eksik {eksik}',
+          f'kaynak: {dict(Counter(r["kaynak"] for r in satirlar))} (KAPAK_P2_78_20261019, Etsy yuklenen surum); poster kutusu {KUTU} her kapakta olculdu',
+          f'yerlesim (78 ciftte ayni): poster {pw}x{ph} @({px}, {py}), olcek {ph / (KUTU[3] - KUTU[1]):.4f}; baslik kurali {T:.1f} px, taban y {taban_y}',
+          f'baslik kucultulen {len(kuc)}: ' + ', '.join(f'{r["cift"]} {r["baslik_px"]}px (x{r["baslik_kucultme"]})' for r in kuc),
+          'en kucuk pay: ' + ', '.join(f'{x} {min(r["pay_" + x] for r in satirlar)}' for x in ('izgara_baslik', 'izgara_poster', 'akis_baslik', 'akis_poster')),
+          f'poster NCC min {min(r["poster_ncc"] for r in satirlar)}; kenar fark max {max(r["cerceve_yok_kenar_fark"] for r in satirlar)}; kontrast min {min(r["kontrast"] for r in satirlar)}',
+          f'kontak: {kt}', f'FAIL: {fail}']
+    open(os.path.join(o.out, 'OZET.txt'), 'w').write('\n'.join(oz) + '\n')
+    print('\n'.join(oz))
+    sys.exit(0 if not fail and not eksik else 1)
+
+
 def main():
     ap = argparse.ArgumentParser()
-    for k in ('p2a', 'font', 'out'):
+    for k in ('font', 'out'):
         ap.add_argument('--' + k, required=True)
+    ap.add_argument('--p2a'); ap.add_argument('--kapak'); ap.add_argument('--kapak-a'); ap.add_argument('--ciftler', default='')
     o = ap.parse_args()
     os.makedirs(o.out, exist_ok=True)
+    if o.kapak:
+        return toplu(o)
     P = Image.open(o.p2a).convert('RGB').crop(KUTU)
     ph, pw, T, ara, pay_dikey = yerlesim(o.font)
     mA, blA = tek_satir(o.font, BASLIK['A'], T)
