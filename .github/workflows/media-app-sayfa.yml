@@ -60,7 +60,9 @@ jobs:
         run: |
           set -euo pipefail
           K=https://caliserdar-maker.github.io/astrolove-media
-          ornek=$(cd media && git ls-files pinterest | grep -iE '\.(jpg|png)$' | head -1)
+          (cd media && git ls-files pinterest) > _liste.txt   # boru + head pipefail altinda SIGPIPE (141) veriyordu
+          ornek=$(awk '!/(^|\/)[_.]/ && tolower($0) ~ /\.(jpg|png)$/ {print; exit}' _liste.txt)   # Jekyll '_'/'.' yayinlamaz
+          [ -n "$ornek" ] || { echo "::error::ornek medya yok"; exit 1; }
           for i in $(seq 1 40); do
             a=$(curl -s -o _a.html -w '%{http_code}' "$K/app/index.html"); b=$(curl -s -o _b.html -w '%{http_code}' "$K/app/privacy.html")
             if [ "$a" = 200 ] && [ "$b" = 200 ] && grep -q "AstroLoveArt Drive Automation" _a.html && grep -q "Limited Use" _b.html; then break; fi
