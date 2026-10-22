@@ -35,6 +35,10 @@ on:
         description: "Doluysa DUZENLEME MODU: JSON islem listesi (satir/blok degistir, ekle)"
         required: false
         default: ""
+      doc_id:
+        description: "Bos = START_HERE. Doluysa bu Google Docs belgesi (orn. PLAN.md 1RgW4UzotI22NHL-vEmMg_078i5cBAEK6TYTXk_9yAzI)"
+        required: false
+        default: ""
 
 concurrency:
   group: start-here
@@ -85,6 +89,16 @@ jobs:
               echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
             fi
           fi
+
+      - name: Belge secimi
+        if: ${{ inputs.doc_id != '' }}
+        env:
+          DOC: ${{ inputs.doc_id }}
+        run: |
+          set -euo pipefail
+          [[ "$DOC" =~ ^[A-Za-z0-9_-]{20,80}$ ]] || { echo "::error::doc_id"; exit 1; }
+          echo "START_HERE_DOC_ID=$DOC" >> "$GITHUB_ENV"
+          echo "Belge: $DOC (START_HERE degil)"
 
       - name: Kaydi duzenle (islem listesi)
         if: ${{ inputs.ops_file != '' }}

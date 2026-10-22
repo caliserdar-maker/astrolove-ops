@@ -1,0 +1,5 @@
+## KAYIT 22 Eki 2026 gece (Serdar kararlari, BAG EDISYONLARI kontrol paketi sonrasi)
+- SON TARIH 8 Ara 2026: bag edisyonu karari bu tarihten ONCE verilir. Neden: pasif 468 ilanin (390 dijital poster + 78 wallpaper) ilk bitisi 2026-12-08T13:47:29Z, sonuncusu 2027-01-10T17:13:21Z [OLCUM Etsy API, kosu 39826750261, 22 Eki]. Suresi dolmamis ilan ucretsiz yeniden acilir; dolmus ilan 0,20 USD yenileme ister [3. TARAF: Etsy topluluk + Alura; Etsy Help'te dogrulanmadi].
+- 4555411521 physical turde, pasif KALIR; geri cevirme yok (bag edisyonlari physical olacak). Deneme kosusu 39837277639: kargo profili Etsy tarafindan 313110417991 atandi, return_policy_id null oldu, ekli 2 dijital dosya duruyor.
+- Kopya kurali: sembol tek basina URUN olarak satilmaz / teslim edilmez (SVG, seffaf PNG, sticker yok). Ilan gorselinde sembol gosterilebilir; 3. kart ("Two signs. One shared symbol.") kalir, yalniz marka duzeltmesi (ASTROLOVE -> ASTROLOVEART, marka plani galeri kartlari maddesi).
+- Eski OAuth secret ****m8_V: Serdar Console'dan siliyor. rclone gecisi KAPANDI (yenileme testi 39827701043 PASS 9/9).
