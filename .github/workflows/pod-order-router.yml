@@ -201,6 +201,7 @@ jobs:
         if: ${{ inputs.sadece_test != true }}
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_KOTA_ROL: router
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
           TOKEN_FILE: _work/ETSY_TOKEN.json
@@ -267,6 +268,8 @@ jobs:
               echo "::error title=ISIM_BEKLIYOR ${kod}::Kisisellestirmeli siparis ${kod} Prodigi'ye GONDERILMEDI. Kart: https://drive.google.com/file/d/${fid}/view"
             done < _out/ISIM_YENI.txt
           fi
+          # Serdar 23 Eki (2c): kota yuzunden okunmayan receipt sessiz gecmez; paketler/Drive yazildiktan SONRA kosu kirmizi biter.
+          if [ -s _out/KOTA_DURDU.txt ]; then echo "::error title=ROUTER KOTA::$(head -c 400 _out/KOTA_DURDU.txt)"; exit 1; fi
       # Artifact'ta musteri verisi YOK (kart, paket/adres, STATE/receipt yalniz Drive'da): yalniz SKU haritasi.
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}

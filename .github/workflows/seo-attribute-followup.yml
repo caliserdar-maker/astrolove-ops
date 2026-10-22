@@ -7,6 +7,7 @@ permissions:
 
 on:
   push:
+    branches: [main]   # Serdar 23 Eki 2d: yalniz main (yeni dal push'u Etsy okumasin)
     paths:
       - "config/seo_attribute_followup.trigger"
   workflow_dispatch:

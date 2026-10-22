@@ -28,6 +28,10 @@ bolumu okunmadan baslanmaz.
 - Hicbir sir loga yazilmaz; token degerleri `::add-mask::` ile maskelenir.
 - Etsy kota tabani 10 (Serdar 15 Eki): tum betiklerde `x-remaining-today` < 10 ise DUR. Baska taban (150/300/500 vb.)
   Serdar onayi olmadan konmaz (14 Eki 500 tabani onaysizdi, kaldirildi).
+- KOTA ESIGI (Serdar 23 Eki): tum Etsy isleri esik formulune uyar: router disi isler kalan < taban + 2R + M ise baslamaz /
+  ilana baslamaz; pod-audit taban + 2R + P; router tabani 400. Tek kaynak `config/etsy_kota_esik.json` + `etsy_common.kota_esigi`;
+  rakamlar ve `aktif` yalniz Serdar onayindan sonra (o zamana kadar yukaridaki taban 10 gecerli). Aktifken her istekten once
+  siparis payi (taban + 2R) korunur; ilan basina `api.kota_kapisi(...)` toplu islere eklenmeli (su an yalniz beyan_marka_yaz toplu).
 - **updateListing bir TASLAGI otomatik yayina alir** (7 Eyl 2026 olcumu: gece
   aciklama guncellemesi 72 taslagi `active` yapti; `state_timestamp` = PATCH ani).
   Toplu guncellemede "ilan taslak kalir" varsayimi YAPILMAZ: yazmadan once state

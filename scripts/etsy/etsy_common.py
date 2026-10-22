@@ -153,14 +153,71 @@ class APIKeyStore:
         raise SystemExit("HATA: Bu is OAuth kullanmaz; public uc 401 dondurdu.")
 
 
+# ------------------------------------------------------------------ kota esigi
+# Serdar 23 Eki (SIRA 2b): router disindaki tum Etsy isleri kalan < taban + 2R + M ise baslamaz / ilana baslamaz;
+# pod-audit esigi taban + 2R + P; router tabani 400 (kendi --quota-min'i, burada muaf). R, M, P ve "aktif" Serdar
+# onayiyla config/etsy_kota_esik.json'da; dosya yoksa ya da aktif degilse hicbir sey degismez (CLAUDE.md taban 10 gecerli).
+KOTA_ESIK_DOSYA = Path(__file__).resolve().parents[2] / "config" / "etsy_kota_esik.json"
+
+
+def kota_esigi(rol=None, dosya=None):
+    """-> (esik, sert_taban) ya da (None, None). rol: genel | pod-audit | router (ETSY_KOTA_ROL, varsayilan genel).
+    esik: kosuya ve ilana baslama kapisi (taban + 2R + M | P); sert_taban: HER istekten once siparis payi (taban + 2R).
+    Dosya yoksa / aktif true degilse etkisiz (onay oncesi). aktif true iken bozuk config kosuyu durdurur (fail-closed)."""
+    p = Path(dosya or KOTA_ESIK_DOSYA)
+    if not p.exists():
+        return None, None
+    try:
+        c = json.loads(p.read_text(encoding="utf-8"))
+    except ValueError:
+        raise SystemExit(f"DUR: kota esigi dosyasi okunamadi: {p}")
+    if c.get("aktif") is not True:
+        return None, None
+    rol = rol or os.environ.get("ETSY_KOTA_ROL", "genel")
+    if rol not in ("genel", "pod-audit", "router"):
+        raise SystemExit(f"DUR: ETSY_KOTA_ROL bilinmiyor: {rol}")
+    if rol == "router":
+        return None, None
+    try:
+        taban, r = int(c["taban"]), int(c["R"])
+        esik = taban + 2 * r + int(c["P"] if rol == "pod-audit" else c["M"])
+    except (KeyError, TypeError, ValueError) as e:
+        raise SystemExit(f"DUR: kota esigi dosyasi eksik/bozuk ({e})")
+    return esik, taban + 2 * r
+
+
 # ------------------------------------------------------------------ api
 class Etsy:
     def __init__(self, store):
         self.store = store
         self.calls = 0
         self.remaining = None
+        self.esik, self.sert_taban = kota_esigi()
+        self._kapi_bakildi = False
+        if self.esik is not None:
+            log(f"KOTA ESIGI aktif: kosu/ilan {self.esik}, siparis payi (her istek) {self.sert_taban}")
         self.pace = 0.25  # sn; 5 QPS sinirinin altinda kalir
         self.verbose_quota = False  # True: her istekten sonra x-remaining-today loglanir (C gorevi, 5 Eyl 2026)
+
+    def kota_kapisi(self, ne="is"):
+        """Ise / ilana baslamadan cagrilir: kalan < esik ise SystemExit (kosu kirmizi, GitHub e-postasi). Esik pasifse etkisiz."""
+        if self.esik is not None and self.remaining is not None and int(self.remaining) < self.esik:
+            raise SystemExit(f"DUR: kota esigi: kalan {self.remaining} < {self.esik} ({ne} baslamadi)")
+
+    def _istek_oncesi(self):
+        """Esik aktifken: ilk yanittan sonra kosu kapisi (esik) bir kez; siparis payi (taban + 2R) HER istekten once.
+        SystemExit'i yakalayip devam eden betiklerde de sonraki her istek yine durur (payin altina inilmez)."""
+        if self.esik is None:
+            return
+        if self.remaining is None:
+            if self.calls:
+                raise SystemExit("DUR: kota esigi aktif ama x-remaining-today basligi okunamadi")
+            return
+        if not self._kapi_bakildi:
+            self._kapi_bakildi = True
+            self.kota_kapisi("kosu")
+        if int(self.remaining) < self.sert_taban:
+            raise SystemExit(f"DUR: kota siparis payi: kalan {self.remaining} < {self.sert_taban}")
 
     def _headers(self):
         headers = {"x-api-key": self.store.api_key_header}
@@ -196,6 +253,7 @@ class Etsy:
     def post_file(self, path, files, data=None):
         """Multipart yukleme (gorsel/dosya). Ilk denemede 400 normal olabilir
         (B37); 3 deneme."""
+        self._istek_oncesi()
         for attempt in range(3):
             self.calls += 1
             time.sleep(self.pace)
@@ -222,6 +280,7 @@ class Etsy:
         raise SystemExit(f"HATA: POST(file) {path} tekrarlar tukendi.")
 
     def _call(self, method, path, params=None, data=None, ok404=False, json_body=None):
+        self._istek_oncesi()
         for attempt in range(3):
             self.calls += 1
             time.sleep(self.pace)

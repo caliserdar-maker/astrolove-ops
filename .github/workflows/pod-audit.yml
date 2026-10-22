@@ -11,6 +11,7 @@ permissions:
 
 on:
   push:
+    branches: [main]   # Serdar 23 Eki 2d: yalniz main (yeni dal push'u Etsy okumasin)
     paths:
       - "config/pod_audit_readonly.trigger"
   workflow_dispatch:
@@ -69,6 +70,7 @@ jobs:
       - name: Denetim (salt okur)
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_KOTA_ROL: pod-audit
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
           TOKEN_FILE: _work/ETSY_TOKEN.json

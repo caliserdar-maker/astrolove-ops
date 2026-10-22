@@ -411,6 +411,8 @@ def toplu(api, shop, a, out):
     sonuc, dur = [], None
     for n, lid in enumerate(aday[:a.limit], 1):
         try:
+            if hasattr(api, "kota_kapisi"):   # Serdar 23 Eki 2b esigi (config aktifse): ilana baslamadan
+                api.kota_kapisi(f"ilan {lid}")
             R = yaz(api, shop, lid, out, bolum)
         except (Dur, Exception, SystemExit) as e:   # yazimdan ONCE durdu (state, kota, okuma hatasi): yazma yok
             dur = str(e)[:300]; sonuc.append(dict(ilan=lid, sonuc="DUR", hata=[dur], yazildi=[]))

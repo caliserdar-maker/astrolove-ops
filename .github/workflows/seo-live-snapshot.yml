@@ -10,6 +10,7 @@ permissions:
 on:
   workflow_dispatch:
   push:
+    branches: [main]   # Serdar 23 Eki 2d: yalniz main (yeni dal push'u Etsy okumasin)
     paths:
       - config/seo_live_snapshot.trigger
 

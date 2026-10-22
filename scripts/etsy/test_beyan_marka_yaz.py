@@ -205,6 +205,16 @@ def main():
     api = Sahte(ilanlar={"12": (KUPA, 8, RU), "13": (KUPA, 8, RU)}); api.remaining = m.KOTA_TABAN - 1
     okt6, Z6 = toplu(api, "kupa", ["12", "13"], limit=10)
     s.append(("toplu: kota < taban 10 -> DUR, yazma yok", isinstance(okt6, str) and "kota" in okt6 and api.yaz == []))
+    # kota esigi (Serdar 23 Eki 2b): toplu ilana baslamadan api.kota_kapisi cagirir
+    api = Sahte(ilanlar={"30": (KUPA, 8, RU), "31": (KUPA, 8, RU)}); cagri = []
+    def kapi(ne, A=api):
+        cagri.append(ne)
+        if len(cagri) == 2:
+            raise SystemExit("DUR: kota esigi: kalan 470 < 481 (ilan 31 baslamadi)")
+    api.kota_kapisi = kapi
+    okK, ZK = toplu(api, "kupa", ["30", "31"], limit=10)
+    s.append(("kota: toplu her ilandan once kota_kapisi; esik altinda ilan 31 yazilmaz, DUR", isinstance(okK, str)
+              and cagri == ["ilan 30", "ilan 31"] and {l for _, l, _ in api.yaz} == {"30"} and ZK["ozet"]["fail"][0]["sonuc"] == "DUR"))
     # inceleme 23 Eki bulgulari
     dolu_en = m.en_plan(KUPA, "kupa")[0]
     api = Sahte(ilanlar={"20": (dolu_en, 8, RU)}); api.batch_ru = False

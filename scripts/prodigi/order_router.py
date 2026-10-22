@@ -392,6 +392,9 @@ def zaten_siparis(idx, rid, items):
 
 
 # ------------------------------------------------------------------ Etsy
+KOTA_DURDU = []   # etsy_receipts kota yuzunden yarida kaldiysa neden (main errors'a ekler)
+
+
 def etsy_receipts(api, shop, since_days=0, max_pages=10, quota_min=0):
     """Odenmis/gonderilmemis receipt'ler. since_days>0 ise yalniz son N gun; en fazla max_pages cagri;
     kota quota_min altina inerse okuma durur (eldekiler islenir)."""
@@ -407,7 +410,11 @@ def etsy_receipts(api, shop, since_days=0, max_pages=10, quota_min=0):
             rem = int(api.remaining) if api.remaining is not None else None
         except ValueError:
             rem = None
-        if len(res) < 100 or (rem is not None and quota_min and rem < quota_min):
+        if len(res) < 100:
+            break
+        if rem is not None and quota_min and rem < quota_min:
+            # Serdar 23 Eki (2c): kota yuzunden okunmayan sayfa sessiz gecmez; cagiran errors'a yazar, kosu kirmizi biter.
+            KOTA_DURDU.append(f"receipt okumasi kota {rem} < {quota_min} yuzunden {offset + 100}. kayittan sonra durdu")
             break
         offset += 100
     return out
@@ -701,6 +708,7 @@ def main():
         sys.exit(f"HATA: --takip-baslangic bicimi 'YYYY-MM-DD HH:MM:SS' olmali: {a.takip_baslangic!r}")
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
     st = read_state(a.state)
+    KOTA_DURDU.clear()
     approve = (a.approve_mode == "on") and not a.submit
     mod = "ONAYLI MOD (paket hazirlama)" if approve else ("GONDERIM" if a.submit else ("DRY-RUN" if a.dry_run else "APPLY"))
     report = [f"# POD siparis yonlendirici — {a.env.upper()} — {mod} — {now()} UTC", ""]
@@ -757,6 +765,11 @@ def main():
         api = Etsy(store)
         q0 = api.remaining
         receipts = etsy_receipts(api, shop, a.since_days, a.max_pages, a.quota_min)
+        for k in KOTA_DURDU:   # kosuyu kirmizi bitiren adim is akisinin SONUNDA (paketler yine hazirlanir, Drive'a yazilir)
+            m = (f"KOTA: {k}; kalan receipt'ler (en eskiler) bu kosuda ISLENMEDI. Etsy'de odenmis/gonderilmemis kaldikca "
+                 f"--since-days ({a.since_days}) icindeyse sonraki ELLE kosuda okunur; cron kapali (13 Eki), kendiliginden kosu yok")
+            report.append(f"- {m}")
+            (out / "KOTA_DURDU.txt").write_text(m + "\n", encoding="utf-8")
         report.append(f"- Etsy odenmis/gonderilmemis receipt: {len(receipts)}"
                       + (f" (son {a.since_days} gun)" if a.since_days else "") + f" | kota {q0} -> {api.remaining}")
     idx = prodigi_indeks(prod) if not a.test_receipt else {"ref": set(), "kalem_ref": set(), "kayit": {}}
