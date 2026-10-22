@@ -25,6 +25,7 @@ on:
       durum: {description: "degistir: onay baglantisindaki state degeri (gizli degil)", required: false, default: ""}
       bekle_dk: {description: "degistir: kod dosyasini bekleme suresi (dk)", required: false, default: "30"}
       yenileme: {description: "dogrula: true ise token yenileme testi (>= 1 saat sonra)", required: false, default: "false"}
+      en_erken: {description: "dogrula: bu UTC zamandan once test baslamaz (orn. 2026-10-22T18:51:00Z); runner bekler", required: false, default: ""}
       beklenen: {description: "secret_son4: Console'daki ENABLED secret'in son 4 karakteri (loga ve env'e yazilmaz)", required: false, default: ""}
 
 env:
@@ -160,8 +161,14 @@ jobs:
         if: ${{ inputs.mod == 'dogrula' }}
         env:
           YENILEME: ${{ inputs.yenileme }}
+          EN_ERKEN: ${{ inputs.en_erken }}
         run: |
           set -euo pipefail
+          if [ -n "$EN_ERKEN" ]; then
+            [[ "$EN_ERKEN" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$ ]] || { echo "::error::en_erken bicimi"; exit 1; }
+            hedef=$(date -u -d "$EN_ERKEN" +%s); [ $((hedef - $(date -u +%s))) -le 9000 ] || { echo "::error::en_erken 150 dk'dan uzak"; exit 1; }
+            while [ "$(date -u +%s)" -lt "$hedef" ]; do echo "[bekliyor] $(date -u +%T) -> $EN_ERKEN"; sleep 60; done
+          fi
           ek=""; [ "$YENILEME" = "true" ] && ek="--yenileme-bekle"
           python3 scripts/common/rclone_gecis.py dogrula --conf ~/.config/rclone/rclone.conf --doc "$DOC_ID" --sheet "$SHEET_ID" --etiket adim7 $ek
       - name: geri_al (RCLONE_CONF_B64_YEDEK -> RCLONE_CONF_B64)
