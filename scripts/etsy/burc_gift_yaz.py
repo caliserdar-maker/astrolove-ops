@@ -98,6 +98,12 @@ def inv_ozellik(inv):
                                                           "readiness_state_on_property")}
 
 
+def satilamaz(inv):
+    """Silinmemis teklifler icinde quantity < 1 ya da is_enabled degil olanlar (Serdar 22 Eki kapisi: 'sold out' onlemi)."""
+    return [(p.get("sku"), o.get("quantity"), o.get("is_enabled")) for p in (inv or {}).get("products") or []
+            for o in p.get("offerings") or [] if not o.get("is_deleted") and (not (o.get("quantity") or 0) >= 1 or o.get("is_enabled") is not True)]
+
+
 def baski_mi(anahtar):
     return any(pid == P_FORMAT and BASKI in vals for pid, vals, _ in anahtar)
 
@@ -271,6 +277,7 @@ def bir_ilan(api, shop, lid, hedef, once, out, hazirlik_al, R, by_ids=()):
     if plan["description"] == "yaz":
         data["description"] = sonra["description"]
     inv0, govde, sg0, partner_yaz, hazirlik = None, None, None, False, None
+    sat0 = satilamaz(api.get(f"/listings/{lid}/inventory") or {}) if aile != "yildonumu" else None
     if aile == "yildonumu":
         if (x.get("materials") or []) != [MATERIALS]:
             data["materials"] = MATERIALS
@@ -292,6 +299,8 @@ def bir_ilan(api, shop, lid, hedef, once, out, hazirlik_al, R, by_ids=()):
     R["plan"] = dict(alanlar=plan, ek=sorted(k for k in data if k not in ("title", "tags", "description")), envanter=bool(govde),
                      partner=partner_yaz)
     if not data and not govde and not partner_yaz:
+        if aile == "yildonumu" and satilamaz(inv0):
+            raise Dur(f"ZATEN ama satilamaz teklif {len(satilamaz(inv0))}: {satilamaz(inv0)[:3]}")
         R["sonuc"] = "ZATEN"
         return
     # yaz: envanter -> PATCH -> partner (aralarda kota DUR'u yok; yarim ilan birakilmaz)
@@ -349,6 +358,15 @@ def bir_ilan(api, shop, lid, hedef, once, out, hazirlik_al, R, by_ids=()):
             hata.append("price/quantity/sku_on_property degisti")
         if sg_ad(inv1, stil_gorsel(api, shop, lid)) != sg_ad(inv0, sg0):
             hata.append("stil-gorsel baglari degisti")
+    # satis kapisi (Serdar 22 Eki): her teklif quantity >= 1 ve is_enabled = true. Yil donumu: kesin.
+    # Poster/kupa (envanterine yazilmaz): once satilabilir olan bir teklif sonra satilamaz olmamali.
+    inv_s = inv1 if aile == "yildonumu" else (api.get(f"/listings/{lid}/inventory") or {})
+    sat1 = satilamaz(inv_s)
+    R["satilamaz_teklif"] = len(sat1)
+    if aile == "yildonumu" and sat1:
+        hata.append(f"satilamaz teklif {len(sat1)}: {sat1[:3]}")
+    elif aile != "yildonumu" and set(sat1) - set(sat0 or []):
+        hata.append(f"yeni satilamaz teklif {sorted(set(sat1) - set(sat0 or []))[:3]}")
     if kis0 is not None:
         if set(data) - {"title", "tags", "description"} or govde or partner_yaz:
             hata.append(f"kisisel koruma ilaninda metin disi yazma: {sorted(data)}")
