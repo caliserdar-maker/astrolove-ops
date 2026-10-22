@@ -54,8 +54,8 @@ class Dur(Exception):
 
 
 def kota(api):
-    if api.remaining is not None and int(api.remaining) < KOTA_TABAN:
-        raise Dur(f"kota {api.remaining} < {KOTA_TABAN}")
+    if api.remaining is None or int(api.remaining) < KOTA_TABAN:
+        raise Dur(f"kota {api.remaining} < {KOTA_TABAN} (ya da x-remaining-today okunamadi)")
 
 
 def norm(s):
@@ -95,7 +95,9 @@ def ru_plan(desc, aile):
     n = len(MARKA.findall(d))
     yeni = MARKA.sub("AstroLoveArt", d)
     notu = f"marka {n}"
-    if aile in ("poster", "kupa") and d.strip():
+    if aile in ("poster", "kupa") and not d.strip():
+        raise Dur("RU ceviri var ama RU aciklama bos (beyan yeri yok)")
+    if aile in ("poster", "kupa"):
         if RU_BEYAN in yeni:
             notu += "; RU beyan zaten var"
         else:
@@ -113,6 +115,13 @@ def ru_ceviri(L):
     if isinstance(tr, dict):   # batch yaniti: {dil: ceviri} (marka_tara.py ile ayni)
         tr = list(tr.values())
     return next((t for t in tr if isinstance(t, dict) and t.get("language") == "ru"), None)
+
+
+def teklif_imza(inv):
+    """Satilabilir teklifin tam imzasi (urun, teklif, fiyat, acik, stok var): sayi esit kalip icerik degisirse yakalanir."""
+    return sorted((p.get("product_id"), o.get("offering_id"), json.dumps(o.get("price"), sort_keys=True), bool(o.get("is_enabled")),
+                   int(o.get("quantity") or 0) >= 1, bool(o.get("is_deleted")))
+                  for p in (inv or {}).get("products") or [] for o in p.get("offerings") or [])
 
 
 def satilabilir(inv):
@@ -145,9 +154,23 @@ def korunan(L):
     return k
 
 
-def kisisel_sorular(api, lid):
-    """/listings/{id}/personalization (burc_gift_yaz.kisisel ile ayni uc; yoksa None)."""
-    return (api.get(f"/listings/{lid}/personalization", ok404=True) or {}).get("personalization_questions")
+def kisisel_sorular(api, shop, lid, L):
+    """Kisisellestirme sorulari: /listings/{id}/personalization (burc_gift_yaz.kisisel), yoksa ilan alani (ayar77_kuru.sorular_of),
+    yoksa /shops/{shop}/listings/{id}/personalization (ayar77_kuru.py:295). Hicbiri yoksa None."""
+    q = (api.get(f"/listings/{lid}/personalization", ok404=True) or {}).get("personalization_questions")
+    if not isinstance(q, list):
+        q = L.get("personalization_questions")
+        p = L.get("personalization")
+        if not isinstance(q, list) and isinstance(p, dict):
+            q = p.get("personalization_questions")
+    if not isinstance(q, list):
+        q = (api.get(f"/shops/{shop}/listings/{lid}/personalization", ok404=True) or {}).get("personalization_questions")
+    return q if isinstance(q, list) else None
+
+
+def ru_tekil(api, shop, lid):
+    """RU ceviri: tekil GET (yazim ve geri okuma ile ayni kaynak; batch'e guvenilmez, inceleme 23 Eki A1)."""
+    return ru_gercek(api.get(f"/shops/{shop}/listings/{lid}/translations/ru", ok404=True) or {})
 
 
 def aktif_idler(api, shop):
@@ -173,9 +196,13 @@ def kuru(api, shop, a, out):
     satir, oz, ortaklar = [], {}, {}
     for L in ilan:
         d = norm(L.get("description"))
-        ru = ru_gercek(ru_ceviri(L))
         b = bolum.get(str(L.get("shop_section_id")), "?")
         aile = BOLUM_AILE.get(b, "?")
+        if aile in ("poster", "kupa"):   # RU yazimla ayni kaynaktan (tekil GET); batch ceviri ile uyusmazlik sayilir
+            ru = ru_tekil(api, shop, str(L["listing_id"])); kota(api)
+            ru_batch_uyusmaz = bool(ru) != bool(ru_gercek(ru_ceviri(L)))
+        else:
+            ru, ru_batch_uyusmaz = ru_gercek(ru_ceviri(L)), False
         try:
             en = "ekle" if en_plan(d, aile)[0] else "var"
         except Dur as e:
@@ -190,14 +217,14 @@ def kuru(api, shop, a, out):
                  ru_aciklama_marka=rp[1], ru_beyan=norm(ru.get("description")).count(RU_BEYAN),
                  ru_baslik_marka=len(MARKA.findall(norm(ru.get("title")))),
                  ru_etiket_marka=sum(len(MARKA.findall(t)) for t in ru.get("tags") or []), uretim_ortagi=ortak(L),
-                 kisisel={k: L.get(k) for k in KISISEL_ALAN})
+                 kisisel={k: L.get(k) for k in KISISEL_ALAN}, ru_batch_uyusmaz=ru_batch_uyusmaz)
         satir.append(x)
         po = ortaklar.setdefault(aile, {})
         anahtar = "ALAN YOK" if x["uretim_ortagi"] is None else (" | ".join(f"{i} {n} ({c})" for i, n, c in x["uretim_ortagi"]) or "BOS")
         po[anahtar] = po.get(anahtar, 0) + 1
         o = oz.setdefault(aile, dict(ilan=0, en_ekle=0, en_var=0, en_dur=0, eski_beyan=0, ru_yok=0, ru_yaz=0, ru_dur=0,
                                      ru_marka_ilan=0, ru_marka_toplam=0, ru_beyan_var=0, en_marka=0, ru_baslik_marka=0,
-                                     ru_etiket_marka=0, state_disi=0))
+                                     ru_etiket_marka=0, state_disi=0, ru_batch_uyusmaz=0, kisisel_acik=0))
         o["ilan"] += 1
         o["en_ekle"] += en == "ekle"; o["en_var"] += en == "var"; o["en_dur"] += en.startswith("DUR")
         o["eski_beyan"] += x["eski_beyan"] > 0
@@ -206,6 +233,7 @@ def kuru(api, shop, a, out):
         o["en_marka"] += x["en_marka"] > 0
         o["ru_baslik_marka"] += x["ru_baslik_marka"]; o["ru_etiket_marka"] += x["ru_etiket_marka"]
         o["state_disi"] += L.get("state") != "active"
+        o["ru_batch_uyusmaz"] += ru_batch_uyusmaz; o["kisisel_acik"] += bool(L.get("is_personalizable"))
     (out / "BEYAN_KURU.json").write_text(json.dumps(dict(ozet=oz, uretim_ortagi=ortaklar, ilanlar=satir), ensure_ascii=False, indent=1),
                                          encoding="utf-8")
     print(f"AKTIF {len(ilan)} ilan (liste {len(ids)})", flush=True)
@@ -219,9 +247,12 @@ def kuru(api, shop, a, out):
         L = next((x for x in ilan if str(x.get("listing_id")) == lid), None)
         if not L:
             print(f"PLAN {lid}: aktif listede yok", flush=True); continue
-        d = norm(L.get("description")); ru = ru_gercek(ru_ceviri(L))
+        d = norm(L.get("description"))
         aile = BOLUM_AILE.get(bolum.get(str(L.get("shop_section_id"))), "?")
-        rapor = [f"ILAN {lid} | state {L.get('state')} | aile {aile}"]
+        ru = ru_tekil(api, shop, lid) if aile in ("poster", "kupa") else ru_gercek(ru_ceviri(L))
+        soru = kisisel_sorular(api, shop, lid, L); kota(api)
+        rapor = [f"ILAN {lid} | state {L.get('state')} | aile {aile} | kisisellestirme acik {L.get('is_personalizable')} | "
+                 f"soru {'okunamadi' if soru is None else len(soru)} | ortak {ortak(L)}"]
         try:
             yeni, notu = en_plan(d, aile)
             rapor += [f"EN: {notu}"]
@@ -263,8 +294,8 @@ def yaz(api, shop, lid, out, bolum=None):
     """Tek ilan: yedek -> plan -> yazim -> geri okuma + kapi (1b). Donus R (sonuc PASS / ATLA / FAIL). Kapi farkinda Dur."""
     L = api.get(f"/listings/{lid}", {"includes": "Translations"}) or {}
     inv = api.get(f"/listings/{lid}/inventory", ok404=True) or {}
-    ru = ru_gercek(api.get(f"/shops/{shop}/listings/{lid}/translations/ru", ok404=True) or {})
-    soru0 = kisisel_sorular(api, lid)
+    ru = ru_tekil(api, shop, lid)
+    soru0 = kisisel_sorular(api, shop, lid, L)
     kota(api)
     (out / f"YEDEK_{lid}.json").write_text(json.dumps(dict(ilan=L, ru=ru, envanter=inv, kisisel_sorular=soru0), ensure_ascii=False,
                                                       indent=1), encoding="utf-8")
@@ -272,6 +303,10 @@ def yaz(api, shop, lid, out, bolum=None):
         raise Dur(f"{lid}: state {L.get('state')} (active degil): updateListing cagrilmaz")
     if ortak(L) is None:
         raise Dur(f"{lid}: production_partners okunamadi; kapi 1b karsilastiramaz, yazim yok")
+    if any(k not in L for k in KISISEL_ALAN):
+        raise Dur(f"{lid}: kisisellestirme alanlari API yanitinda yok; kapi 1b karsilastiramaz, yazim yok")
+    if L.get("is_personalizable") and not soru0:
+        raise Dur(f"{lid}: kisisellestirme acik ama sorular okunamadi; kapi 1b karsilastiramaz, yazim yok")
     if bolum is None:
         bolum = {str(s["shop_section_id"]): s.get("title") for s in (api.get(f"/shops/{shop}/sections") or {}).get("results") or []}
     aile = BOLUM_AILE.get(bolum.get(str(L.get("shop_section_id"))), "?")
@@ -287,7 +322,17 @@ def yaz(api, shop, lid, out, bolum=None):
         if yeni_ and len(TIRE.findall(yeni_)) > len(TIRE.findall(norm(eski_))):
             raise Dur(f"{lid}: yazim uzun/orta tire ekliyor")
     kota(api)   # taban 10 (CLAUDE.md); baska taban Serdar onayi olmadan konmaz
-    k0, sat0 = korunan(L), satilabilir(inv)
+    k0, sat0, imza0 = korunan(L), satilabilir(inv), teklif_imza(inv)
+    try:
+        return _yaz_dogrula(api, shop, lid, out, L, ru, soru0, en_yeni, ru_yeni, R, k0, sat0, imza0)
+    except (Exception, SystemExit) as e:   # yazim sonrasi HTTP/ag hatasi: kayit birakilir, toplu kosu DURur (inceleme A5)
+        R.update(sonuc="FAIL", hata=[f"istisna (yazim/geri okuma): {str(e)[:300]}"], istek=api.calls, kota=api.remaining)
+        (out / f"SONUC_{lid}.json").write_text(json.dumps(R, ensure_ascii=False, indent=1), encoding="utf-8")
+        print("SONUC", json.dumps(R, ensure_ascii=False), flush=True)
+        return R
+
+
+def _yaz_dogrula(api, shop, lid, out, L, ru, soru0, en_yeni, ru_yeni, R, k0, sat0, imza0):
     if en_yeni:
         api.patch(f"/shops/{shop}/listings/{lid}", {"description": en_yeni}); R["yazildi"].append("EN description (PATCH)")
     if ru_yeni:
@@ -301,12 +346,12 @@ def yaz(api, shop, lid, out, bolum=None):
     bek_ru = ru_yeni if ru_yeni and not R.get("ru_hata") else norm(ru.get("description"))
     for _ in range(3):
         y = api.get(f"/listings/{lid}") or {}
-        yru = ru_gercek(api.get(f"/shops/{shop}/listings/{lid}/translations/ru", ok404=True) or {})
+        yru = ru_tekil(api, shop, lid)
         if norm(y.get("description")) == bek_en and (not ru or norm(yru.get("description")) == bek_ru):
             break
         time.sleep(BEKLE_SN)
     inv1 = api.get(f"/listings/{lid}/inventory", ok404=True) or {}
-    soru1 = kisisel_sorular(api, lid)
+    soru1 = kisisel_sorular(api, shop, lid, y)
     hata = [f"RU PUT hata: {R['ru_hata']}"] if R.get("ru_hata") else []
     if norm(y.get("description")) != bek_en:
         hata.append("EN aciklama beklenenle ayni degil")
@@ -322,6 +367,8 @@ def yaz(api, shop, lid, out, bolum=None):
         hata.append("RU baslik/etiket degisti")
     if satilabilir(inv1) != sat0:
         hata.append(f"satilabilir teklif {sat0} -> {satilabilir(inv1)}")
+    elif teklif_imza(inv1) != imza0:
+        hata.append("teklif icerigi (fiyat/acik/stok) degisti")
     d1, r1 = norm(y.get("description")), norm(yru.get("description"))
     R["sonra"] = dict(state=y.get("state"), beyan=d1.count(BEYAN), eski_beyan=d1.count(ESKI_BEYAN), ru_beyan=r1.count(RU_BEYAN),
                       en_marka=len(MARKA.findall(d1)), ru_marka=len(MARKA.findall(r1)), satilabilir=satilabilir(inv1),
@@ -348,20 +395,25 @@ def toplu(api, shop, a, out):
     for L in sorted(ilan, key=lambda x: int(x["listing_id"])):
         if BOLUM_AILE.get(bolum.get(str(L.get("shop_section_id")))) != a.aile:
             continue
-        ru = ru_gercek(ru_ceviri(L))
+        lid = str(L["listing_id"])
         try:
-            yap = bool(en_plan(L.get("description"), a.aile)[0]) or bool(ru and ru_plan(ru.get("description"), a.aile)[0])
+            yap = bool(en_plan(L.get("description"), a.aile)[0])
+            if not yap and a.aile in ("poster", "kupa"):   # EN tamam: RU'yu yazimla ayni kaynaktan (tekil GET) oku
+                ru = ru_tekil(api, shop, lid); kota(api)
+                if not ru:
+                    raise Dur("poster/kupa ilaninda RU ceviri yok")
+                yap = bool(ru_plan(ru.get("description"), a.aile)[0])
         except Dur as e:
-            raise Dur(f"{L['listing_id']}: plan DUR ({e}); yazim yok")
+            raise Dur(f"{lid}: plan DUR ({e}); yazim yok")
         if yap:
-            aday.append(str(L["listing_id"]))
+            aday.append(lid)
     print(f"TOPLU aile {a.aile}: aday {len(aday)} (zaten tam olan atlandi) | limit {a.limit}", flush=True)
     sonuc, dur = [], None
     for n, lid in enumerate(aday[:a.limit], 1):
         try:
             R = yaz(api, shop, lid, out, bolum)
-        except Dur as e:
-            dur = str(e); sonuc.append(dict(ilan=lid, sonuc="DUR", hata=[dur], yazildi=[]))
+        except (Dur, Exception, SystemExit) as e:   # yazimdan ONCE durdu (state, kota, okuma hatasi): yazma yok
+            dur = str(e)[:300]; sonuc.append(dict(ilan=lid, sonuc="DUR", hata=[dur], yazildi=[]))
             print(f"[{n}] {lid} DUR: {dur}", flush=True); break
         sonuc.append({k: R.get(k) for k in ("ilan", "sonuc", "hata", "yazildi")})
         print(f"[{n}/{min(len(aday), a.limit)}] {lid} {R['sonuc']} | kota {api.remaining}", flush=True)

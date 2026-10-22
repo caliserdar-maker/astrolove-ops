@@ -15,6 +15,7 @@ on:
       taban: {description: "poster: ayni ref'in en az 3 kosusu, virgullu receipt (orn. 9000000003,9000000004,9000000005)", required: false, default: ""}
       ref_eski: {description: "poster: eski kod ref'i (motor_gpt agaci karsilastirilir)", required: false, default: ""}
       ref_yeni: {description: "poster: temiz kod ref'i", required: false, default: ""}
+      en_erken: {description: "UTC epoch: test kosularinin ilki baslamadan once; daha eski dosya FAIL (tazelik)", required: true}
 
 jobs:
   kiyas:
@@ -51,9 +52,11 @@ jobs:
           TABAN: ${{ inputs.taban }}
           REF_ESKI: ${{ inputs.ref_eski }}
           REF_YENI: ${{ inputs.ref_yeni }}
+          EN_ERKEN: ${{ inputs.en_erken }}
         run: |
           set +e -uo pipefail
-          [[ "$TUR" =~ ^(poster|kupa)$ ]] && [[ "$ESKI" =~ ^[A-Za-z0-9_/]+$ ]] && [[ "$YENI" =~ ^[A-Za-z0-9_/]+$ ]] || { echo "::error::girdi"; exit 1; }
+          [[ "$TUR" =~ ^(poster|kupa)$ ]] && [[ "$ESKI" =~ ^[A-Za-z0-9_/]+$ ]] && [[ "$YENI" =~ ^[A-Za-z0-9_/]+$ ]] \
+            && [[ "$EN_ERKEN" =~ ^[0-9]{10}$ ]] && [ "$ESKI" != "$YENI" ] || { echo "::error::girdi"; exit 1; }
           T="gdrive,root_folder_id=12N9iS2i4byMbkH5c0Inmni_nIv2zyTzH:"
           if [ "$TUR" = poster ]; then E="${T}SIPARIS_ISIM/GPT/AstroLoveArt_$ESKI"; Y="${T}SIPARIS_ISIM/GPT/AstroLoveArt_$YENI"
           else E="gdrive:ASTROLOVE/$ESKI"; Y="gdrive:ASTROLOVE/$YENI"; fi
@@ -61,7 +64,9 @@ jobs:
           echo "eski dosya $(find _e -type f | wc -l) | yeni dosya $(find _y -type f | wc -l)"
           EK=()
           if [ "$TUR" = poster ]; then
-            [[ "$TABAN" =~ ^[0-9,]+$ ]] && [[ "$REF_ESKI" =~ ^[0-9a-f]{7,40}$ ]] && [[ "$REF_YENI" =~ ^[0-9a-f]{7,40}$ ]] || { echo "::error::poster: taban/ref"; exit 1; }
+            [[ "$TABAN" =~ ^[0-9]+(,[0-9]+){2,}$ ]] && [[ "$REF_ESKI" =~ ^[0-9a-f]{7,40}$ ]] && [[ "$REF_YENI" =~ ^[0-9a-f]{7,40}$ ]] || { echo "::error::poster: taban/ref"; exit 1; }
+            n_tum=$(printf '%s\n' "$ESKI" "$YENI" ${TABAN//,/ } | sort | uniq -d | wc -l)
+            [ "$n_tum" = 0 ] || { echo "::error::eski / yeni / taban receipt'leri birbirinden farkli olmali"; exit 1; }
             RE=$(git rev-parse --verify --quiet "$REF_ESKI^{commit}") && RY=$(git rev-parse --verify --quiet "$REF_YENI^{commit}") \
               || { echo "::error::ref bulunamadi"; exit 1; }
             [ "$RE" != "$RY" ] || { echo "::error::ref_eski = ref_yeni"; exit 1; }
@@ -72,9 +77,9 @@ jobs:
             IFS=, read -ra TB <<< "$TABAN"
             for r in "${TB[@]}"; do rclone copy "${T}SIPARIS_ISIM/GPT/AstroLoveArt_$r" "_t/$r" -q; EK+=("_t/$r"); done
           fi
-          python3 scripts/siparis_test/esit_kiyas.py --tur "$TUR" --eski _e --yeni _y --out _out "${EK[@]}"
-          echo "KOD=$?" >> "$GITHUB_ENV"
+          python3 scripts/siparis_test/esit_kiyas.py --tur "$TUR" --eski _e --yeni _y --out _out --en-erken "$EN_ERKEN" "${EK[@]}"
+          KOD=$?
           rclone copy _out "gdrive:ASTROLOVE/TEMP/DENETIM_20261021/A3_KIYAS/${GITHUB_RUN_ID}_${TUR}" -q && echo "Cikti: A3_KIYAS/${GITHUB_RUN_ID}_${TUR}/"
-          [ "$(cat "$GITHUB_ENV" | grep -c KOD=0)" -ge 1 ]
+          exit "$KOD"
       - if: always()
         run: rm -rf _e _y _t _out ~/.config/rclone

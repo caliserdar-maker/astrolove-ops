@@ -38,6 +38,7 @@ class Sahte:
             self.soru[lid] = {"personalization_questions": [{"question_id": 1, "instructions": "Names", "max_allowed_characters": 256}]}
         self.inv = dict(products=[dict(offerings=[dict(is_enabled=True, quantity=3)])])
         self.remaining, self.calls, self.yaz, self.ru_bozuk, self.bozan = 500, 0, [], ru_bozuk, bozan
+        self.batch_ru, self.get_hata = True, False
 
     @staticmethod
     def lid(path):
@@ -53,10 +54,12 @@ class Sahte:
             for i in params["listing_ids"].split(","):
                 L = copy.deepcopy(self.ilan[i])
                 r = self.ru[i]
-                L["translations"] = {"ru": copy.deepcopy(r)} if r["description"] else {}
+                L["translations"] = {"ru": copy.deepcopy(r)} if r["description"] and self.batch_ru else {}
                 res.append(L)
             return {"results": res}
         lid = self.lid(path)
+        if self.get_hata:
+            raise SystemExit("HATA: 503 x")
         if path.endswith("/translations/ru"):
             return copy.deepcopy(self.ru[lid])
         if path.endswith("/inventory"):
@@ -202,6 +205,30 @@ def main():
     api = Sahte(ilanlar={"12": (KUPA, 8, RU), "13": (KUPA, 8, RU)}); api.remaining = m.KOTA_TABAN - 1
     okt6, Z6 = toplu(api, "kupa", ["12", "13"], limit=10)
     s.append(("toplu: kota < taban 10 -> DUR, yazma yok", isinstance(okt6, str) and "kota" in okt6 and api.yaz == []))
+    # inceleme 23 Eki bulgulari
+    dolu_en = m.en_plan(KUPA, "kupa")[0]
+    api = Sahte(ilanlar={"20": (dolu_en, 8, RU)}); api.batch_ru = False
+    okA1, ZA1 = toplu(api, "kupa", ["20"], limit=10)
+    s.append(("A1: EN yazilmis, RU yarim; batch RU gostermese de aday (tekil GET), RU yazilir", okA1 is True and ZA1["ozet"]["aday"] == 1
+              and [k for k, _, _ in api.yaz] == ["put"] and m.RU_BEYAN in api.ru["20"]["description"]))
+    api = Sahte(); api.soru["1"] = {}; r, _ = kos(api)
+    s.append(("A3: kisisellestirme acik, sorular okunamadi -> DUR, yazma yok", isinstance(r, str) and "sorular" in r and api.yaz == []))
+    api = Sahte(); del api.ilan["1"]["personalization_char_count_max"]; r, _ = kos(api)
+    s.append(("A3: kisisellestirme alani yanitta yok -> DUR", isinstance(r, str) and "kisisellestirme alanlari" in r and api.yaz == []))
+    def gh(A, l):
+        A.get_hata = True
+    api = Sahte(ilanlar={"21": (KUPA, 8, RU), "22": (KUPA, 8, RU)}, bozan=gh)
+    okA5, ZA5 = toplu(api, "kupa", ["21", "22"], limit=10)
+    s.append(("A5: yazim sonrasi okuma hatasi -> FAIL kaydi, kosu durur", okA5 is False and ZA5["ozet"]["fail"][0]["ilan"] == "21"
+              and "istisna" in ZA5["ozet"]["fail"][0]["hata"][0] and "22" not in {l for _, l, _ in api.yaz}))
+    def fiyat(A, l):
+        A.inv["products"][0]["offerings"][0]["price"] = {"amount": 999}
+    okA7, RA7 = kos(Sahte(bozan=fiyat))
+    s.append(("A7: teklif sayisi ayni, fiyat degisti -> FAIL", okA7 is False and "teklif icerigi" in " ".join(RA7["hata"])))
+    api = Sahte(ilanlar={"1": (EN, 9, "")}); api.ru["1"]["title"] = "RT"; r, _ = kos(api)
+    s.append(("A8: RU baslik var, RU aciklama bos -> DUR", isinstance(r, str) and "RU aciklama bos" in r and api.yaz == []))
+    api = Sahte(); api.remaining = None; r, _ = kos(api)
+    s.append(("A6: kota basligi okunamadi -> DUR, yazma yok", isinstance(r, str) and "kota" in r and api.yaz == []))
     for ad, ok_ in s:
         print(("PASS " if ok_ else "FAIL ") + ad)
     n = sum(ok_ for _, ok_ in s)

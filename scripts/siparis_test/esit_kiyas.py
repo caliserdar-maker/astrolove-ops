@@ -14,8 +14,12 @@ ESIT TANIMI (kosulardan ONCE; test bir sonraki turda):
     4. siparis.json: cift, isim1, isim2, tagline, olcu iki tarafta esit. KAPI.json iki tarafta FAIL icermez.
     5. TABAN: ayni ref'in en az 3 kosusu (--taban DIR DIR DIR ...) arasindaki dosya basina en buyuk piksel farki (max |fark|);
        eski-temiz max farki her dosyada TABAN'dan buyuk degil.
+  23 Eki ikinci inceleme: TAZELIK (her dosya mtime >= --en-erken; posterde ayrica >= SURE.json is_basi_utc; Drive'da eski
+    kosudan kalan dosya sahte PASS vermesin), DB/PW siparis.json 'siparis_olcu' (db_pw_uret.py:110), taban doygun (>= 255) FAIL,
+    taban klasorlerinde ayni 3 dosya, kupa OZET tam esit ('drive', 'musteri_mesaji_taslak' haric) + eski/yeni klasor ayri.
   Onizleme: ONIZ_*.jpg uzun kenar 1600, gercek oran (Merkez kontrolu); son onay Serdar.
-Kullanim: esit_kiyas.py --tur poster|kupa --eski DIR --yeni DIR --out DIR [--agac-eski H --agac-yeni H --taban D1 D2 D3 ...]"""
+Kullanim: esit_kiyas.py --tur poster|kupa --eski DIR --yeni DIR --out DIR --en-erken EPOCH
+          [--agac-eski H --agac-yeni H --ref-eski R --ref-yeni R --taban D1 D2 D3 ...]"""
 import argparse
 import hashlib
 import itertools
@@ -33,6 +37,18 @@ OLCU = {'8x10': (2400, 3000), '16x20': (4800, 6000), '24x30': (7200, 9000), '11x
         '24x36': (7200, 10800), 'A4': (2480, 3508), 'A3': (3508, 4961), 'A2': (4961, 7016)}
 ANA, ONIZ = (7200, 10800), (2000, 3000)
 KUPA_BASKI = {"11oz": (2700, 1050), "15oz": (2700, 1140)}   # kupa_siparis.py:66-67, :263
+OZET_DEGISKEN = ("drive", "musteri_mesaji_taslak")          # kupa_siparis.py:444,480: Drive sonucu / taslak yolu, kosuya bagli
+SURE_TOLERANS = 5   # sn: SURE.is_basi_utc ile dosya mtime ayni runner saati
+
+
+def taze(d, en_erken, taraf, hata, is_basi=None):
+    """Klasordeki her dosya bu testin kosusundan mi (rclone Drive modtime'i korur)? Degilse FAIL."""
+    alt = max(en_erken, (is_basi or 0) - SURE_TOLERANS)
+    eski = [p.name for p in pathlib.Path(d).rglob("*") if p.is_file() and p.stat().st_mtime < alt]
+    if not en_erken:
+        hata.append(f"{taraf}: --en-erken verilmedi (tazelik kapisi)")
+    elif eski:
+        hata.append(f"{taraf}: test baslangicindan ONCEKI dosya {sorted(eski)[:5]} (bos klasor sarti)")
 
 
 def dosyalar(d, desen):
@@ -82,6 +98,10 @@ def oniz(src, out, ad):
 
 
 def kupa(a, out, R, hata):
+    if pathlib.Path(a.eski).resolve() == pathlib.Path(a.yeni).resolve():
+        hata.append("eski ve yeni klasor ayni")
+    for taraf, d in (("eski", a.eski), ("yeni", a.yeni)):
+        taze(d, a.en_erken, taraf, hata)
     for desen in ("BASKI_*.png", "ONIZLEME_*.jpg"):
         de, dy = dosyalar(a.eski, desen), dosyalar(a.yeni, desen)
         if not de or set(de) != set(dy):
@@ -101,6 +121,11 @@ def kupa(a, out, R, hata):
                               for p in sorted(pathlib.Path(d).rglob("OZET.json"))]
     if not R["ozet_eski"] or R["ozet_eski"] != R["ozet_yeni"] or any(str(x).upper() not in ("PASS", "GOZ") for x in R["ozet_eski"]):
         hata.append(f"OZET sonuc eski {R['ozet_eski']} / yeni {R['ozet_yeni']}")
+    oe = [{k: v for k, v in json.loads(p.read_text()).items() if k not in OZET_DEGISKEN} for p in sorted(pathlib.Path(a.eski).rglob("OZET.json"))]
+    oy = [{k: v for k, v in json.loads(p.read_text()).items() if k not in OZET_DEGISKEN} for p in sorted(pathlib.Path(a.yeni).rglob("OZET.json"))]
+    if oe != oy:
+        fark = sorted({k for x, y in zip(oe, oy) for k in set(x) | set(y) if x.get(k) != y.get(k)})
+        hata.append(f"OZET.json icerik farkli (alanlar {fark or 'sayi'})")
     pe = [p.read_text() for p in sorted(pathlib.Path(a.eski).rglob("PRINTFUL_TASLAK.json"))]
     py = [p.read_text() for p in sorted(pathlib.Path(a.yeni).rglob("PRINTFUL_TASLAK.json"))]
     if not pe or pe != py:
@@ -118,7 +143,11 @@ def poster(a, out, R, hata):
     sj = {}
     for taraf, d, ref in (("eski", a.eski, a.ref_eski), ("yeni", a.yeni, a.ref_yeni), *((f"taban{i}", d, a.ref_eski) for i, d in enumerate(a.taban))):
         s = json_oku(d, "siparis.json")
-        sj[taraf] = {f: s.get(f) for f in ("cift", "isim1", "isim2", "tagline", "olcu")} if s else None
+        sj[taraf] = dict({f: s.get(f) for f in ("cift", "isim1", "isim2", "tagline")}, olcu=s.get("olcu") or s.get("siparis_olcu")) \
+            if s else None   # MB siparis_uret 'olcu'; DB/PW db_pw_uret.py:110 'siparis_olcu'
+        taze(d, a.en_erken, taraf, hata, (json_oku(d, "SURE.json") or {}).get("is_basi_utc"))
+        if not (json_oku(d, "SURE.json") or {}).get("is_basi_utc"):
+            hata.append(f"{taraf} SURE.json is_basi_utc yok")
         if not kapi_pass(d):
             hata.append(f"{taraf} KAPI.json yok ya da PASS degil")
         if not ref_ayni((json_oku(d, "SURE.json") or {}).get("gpt_ref", ""), ref):
@@ -133,6 +162,9 @@ def poster(a, out, R, hata):
     tb = [dosyalar(t, "AstroLoveArt_*.jpg") for t in a.taban]
     if len(tb) < 3:
         hata.append(f"taban icin en az 3 ayni-ref kosusu gerekir ({len(tb)})")
+    for i, x in enumerate(tb):
+        if set(x) != set(dy):
+            hata.append(f"taban{i} dosya kumesi yeni ile ayni degil ({sorted(x)})")
     for ad in sorted(set(de) & set(dy)):
         oe, oy = ozellik(de[ad]), ozellik(dy[ad])
         n = pathlib.Path(ad).name
@@ -149,6 +181,8 @@ def poster(a, out, R, hata):
             hata.append(f"{n}: format {oy['format']} dpi {oy['dpi']}")
         if r["max_fark"] is None or r["taban_max"] is None or None in taban or r["max_fark"] > r["taban_max"]:
             hata.append(f"{n}: eski-temiz farki {r['max_fark']} > taban {r['taban_max']}")
+        elif r["taban_max"] >= 255:
+            hata.append(f"{n}: taban doygun ({r['taban_max']}): piksel kapisi bir sey olcmez")
         oniz(dy[ad], out, ad)
 
 
@@ -163,6 +197,7 @@ def main():
     ap.add_argument("--taban", nargs="*", default=[])
     ap.add_argument("--ref-eski", default="")
     ap.add_argument("--ref-yeni", default="")
+    ap.add_argument("--en-erken", type=int, default=0, help="UTC epoch: test kosularinin ilki baslamadan once (tazelik)")
     a = ap.parse_args()
     out = pathlib.Path(a.out); out.mkdir(parents=True, exist_ok=True)
     R, hata = dict(tur=a.tur, dosya={}), []

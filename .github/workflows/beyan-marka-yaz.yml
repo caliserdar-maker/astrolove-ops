@@ -15,7 +15,7 @@ on:
   workflow_dispatch:
     inputs:
       mod: {description: "kuru | yaz | toplu", required: true, default: "kuru"}
-      ilan: {description: "ilan kimligi (yaz: tam 1; toplu: bos = ailedeki tum aktif)", required: false, default: "4570143815"}
+      ilan: {description: "ilan kimligi (yaz: tam 1; toplu: bos = ailedeki tum aktif)", required: false, default: ""}
       aile: {description: "toplu: poster | kupa | yil", required: false, default: ""}
       limit: {description: "toplu: en fazla yazilacak ilan", required: false, default: "10"}
       onay: {description: "yaz icin onay sozcugu", required: false, default: ""}
