@@ -1,0 +1,58 @@
+name: alfa78
+# 78 sembol alfasi tek ZIP (Serdar 22 Eki). API YOK (MERKEZ M11), Etsy YOK, musteri YOK; yalniz Drive dosya islemi.
+# Kaynak: Drive ANA_SEMBOL78_KATMAN_20261008 (salt okunur). Cikti: Drive TEMP/ALFA78_3400_<tarih>.zip + OZET.
+on:
+  push:
+    branches: [claude/loving-heisenberg-fn3g47]
+    paths: [scripts/alfa78/**, .github/workflows/alfa78.yml]
+permissions:
+  contents: read
+jobs:
+  alfa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: rclone
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Kaynak indir (salt okunur)
+        run: |
+          set -euo pipefail
+          mkdir -p kaynak md5
+          rclone copy "gdrive,root_folder_id=1ZQGR0fI0HQNq1D2Lbmr2qlkNVbD8jRyD:" kaynak --include "*_ana.png" --transfers 8
+          ls kaynak | wc -l
+          i=0; for id in 1XR08XrxvueDoeh0NiL2QMfg-lYHuCpqb 1vdbSbC-YajsPAIJzLbmkmD6qMrfVUV1f 1_XGtiWykYsCmNA2sEgClmavHUu1maIQe; do
+            i=$((i+1)); mkdir -p "md5/k$i"; rclone backend copyid gdrive: "$id" "md5/k$i/"; mv md5/k$i/* "md5/KATMAN_md5_$i.txt"; done
+          md5sum md5/*.txt
+      - name: Alfa + ZIP
+        run: |
+          set -euo pipefail
+          pip install -q pillow
+          T=$(TZ=Europe/Istanbul date +%Y%m%d); echo "T=$T" >> "$GITHUB_ENV"
+          python3 scripts/alfa78/alfa78.py kaynak md5 is/ALFA78_3400_$T || echo "ALFA_FAIL=1" >> "$GITHUB_ENV"
+          cd is && zip -q -r -9 ../ALFA78_3400_$T.zip ALFA78_3400_$T && cd ..
+          ls -l ALFA78_3400_$T.zip
+      - name: Drive TEMP yukle + link
+        run: |
+          set -euo pipefail
+          D="gdrive,root_folder_id=12N9iS2i4byMbkH5c0Inmni_nIv2zyTzH:"
+          rclone copy "ALFA78_3400_$T.zip" "$D"
+          L=$(rclone link "${D}ALFA78_3400_$T.zip")
+          B=$(stat -c %s "ALFA78_3400_$T.zip")
+          python3 - "$L" "$B" <<'PY'
+          import json, sys
+          o = json.load(open('is/OZET.json')); o.update(zip='ALFA78_3400_' + __import__('os').environ['T'] + '.zip', link=sys.argv[1], zip_bayt=int(sys.argv[2]))
+          json.dump(o, open('is/OZET.json', 'w'), indent=1, ensure_ascii=False); print(json.dumps(o, ensure_ascii=False))
+          PY
+          rclone copyto is/OZET.json "${D}ALFA78_3400_${T}_OZET.json"
+      - name: Sonuc
+        run: '[ -z "${ALFA_FAIL:-}" ]'
