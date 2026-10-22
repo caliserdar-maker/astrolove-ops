@@ -188,10 +188,9 @@ def yaz(api, shop, lid, out):
     for t in (en_yeni, ru_yeni):
         if t and TIRE.search(t):
             raise Dur("yeni metinde uzun/orta tire")
-    if api.remaining is not None and int(api.remaining) < KOTA_TABAN + 10:
-        raise Dur(f"kota {api.remaining} < {KOTA_TABAN + 10} (yazma + geri okuma payi)")
+    kota(api)   # taban 10 (CLAUDE.md); baska taban Serdar onayi olmadan konmaz
     k0, sat0 = korunan(L), satilabilir(inv)
-    R = dict(ilan=lid, en=en_not, ru_marka_once=ru_n, yazildi=[])
+    R = dict(ilan=lid, en=en_not, ru_marka_once=ru_n, ru_ceviri="var" if ru else "YOK (RU yazilmadi)", yazildi=[])
     if en_yeni:
         api.patch(f"/shops/{shop}/listings/{lid}", {"description": en_yeni}); R["yazildi"].append("EN description (PATCH)")
     if ru_yeni:
