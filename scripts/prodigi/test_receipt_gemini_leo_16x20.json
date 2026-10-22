@@ -1,0 +1,32 @@
+{
+ "receipt_id": 9900016201,
+ "name": "Test Buyer (SAHTE)",
+ "first_line": "742 Evergreen Terrace",
+ "second_line": "",
+ "city": "Springfield",
+ "state": "OR",
+ "zip": "97477",
+ "country_iso": "US",
+ "buyer_email": "test@example.com",
+ "is_shipped": false,
+ "transactions": [
+  {
+   "transaction_id": 9900016211,
+   "sku": "POD-GEM_LEO-DB-16x20",
+   "quantity": 1,
+   "price": {
+    "amount": 4999,
+    "divisor": 100
+   }
+  },
+  {
+   "transaction_id": 9900016212,
+   "sku": "WP-GEMINI-LEO-DIGITAL",
+   "quantity": 1,
+   "price": {
+    "amount": 999,
+    "divisor": 100
+   }
+  }
+ ]
+}

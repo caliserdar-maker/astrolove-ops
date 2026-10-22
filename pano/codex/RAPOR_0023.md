@@ -1,0 +1,6 @@
+- `scripts/etsy/seo_puan.py` cevrimdisi magaza SEO puanlamasini ekler.
+- Alti kural ilan basina 0 ile 100 arasinda puanlanir.
+- Her ilan icin otomatik uygulanmayan uc Ingilizce oneri uretilir.
+- Sonuclar `SEO_PUAN.csv` ve `OZET.md` dosyalarina yazilir.
+- Ham liste ile `results` veya `listings` zarfi desteklenir.
+- Sentetik testler PASS ve her kuralin FAIL senaryosunu kapsar.

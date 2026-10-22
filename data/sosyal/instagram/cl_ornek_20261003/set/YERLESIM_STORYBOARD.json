@@ -1,0 +1,804 @@
+{
+  "project": "AstroLoveArt Cancer & Libra IG/FB sample",
+  "date": "2026-10-03",
+  "status": "Serdar review sample only",
+  "coordinate_system": {
+    "origin": "top-left of final canvas",
+    "unit": "pixel",
+    "x_direction": "right",
+    "y_direction": "down",
+    "box_convention": "[x, y, width, height]; right and bottom coordinates are outer edges, exclusive",
+    "pixel_note": "All delivered inner corners are exact integer pixel edges. Reel keyframes are 100%,105%,110% of the master.",
+    "edge_note": "The one-pixel antialiased transition belongs to the frame boundary. The interior core is exactly #C0C0C0."
+  },
+  "color_space": "sRGB",
+  "png_dpi_metadata": 96,
+  "type_spec": {
+    "canonical_unit": "px",
+    "point_reference": "pt = px * 0.75 at 96 DPI",
+    "text_color": "#342F29",
+    "all_lines_centered": true,
+    "font_note": "Recommended for future overlay text only. Existing poster typography must remain in the real poster artwork."
+  },
+  "plates": [
+    {
+      "id": "C01",
+      "file": "C01_Bos_Sahne_1080x1350.png",
+      "canvas_px": [
+        1080,
+        1350
+      ],
+      "poster_inner_corners_px": {
+        "top_left": [
+          204,
+          310
+        ],
+        "top_right": [
+          876,
+          310
+        ],
+        "bottom_right": [
+          876,
+          1150
+        ],
+        "bottom_left": [
+          204,
+          1150
+        ]
+      },
+      "poster_inner_box_xywh": [
+        204,
+        310,
+        672,
+        840
+      ],
+      "poster_aspect_ratio": "4:5",
+      "placeholder_rgb": [
+        192,
+        192,
+        192
+      ],
+      "overlay_text_layers": [
+        {
+          "text": "Cancer & Libra",
+          "box_xywh": [
+            72,
+            100,
+            936,
+            76
+          ],
+          "font_family": "Cormorant Garamond",
+          "font_weight": 600,
+          "font_size_px": 64,
+          "font_size_pt_at_96dpi": 48.0,
+          "horizontal_alignment": "center",
+          "vertical_alignment": "center",
+          "color_hex": "#342F29",
+          "max_lines": 1,
+          "letter_spacing_px": 0,
+          "wrap": false,
+          "rendered_in_png": false
+        },
+        {
+          "text": "The Shape of Your Connection",
+          "box_xywh": [
+            72,
+            184,
+            936,
+            60
+          ],
+          "font_family": "Cormorant Garamond",
+          "font_weight": 600,
+          "font_size_px": 52,
+          "font_size_pt_at_96dpi": 39.0,
+          "horizontal_alignment": "center",
+          "vertical_alignment": "center",
+          "color_hex": "#342F29",
+          "max_lines": 1,
+          "letter_spacing_px": 0,
+          "wrap": false,
+          "rendered_in_png": false
+        }
+      ]
+    },
+    {
+      "id": "C02",
+      "file": "C02_Yakin_Plan_1080x1350.png",
+      "canvas_px": [
+        1080,
+        1350
+      ],
+      "poster_inner_corners_px": {
+        "top_left": [
+          92,
+          165
+        ],
+        "top_right": [
+          988,
+          165
+        ],
+        "bottom_right": [
+          988,
+          1285
+        ],
+        "bottom_left": [
+          92,
+          1285
+        ]
+      },
+      "poster_inner_box_xywh": [
+        92,
+        165,
+        896,
+        1120
+      ],
+      "poster_aspect_ratio": "4:5",
+      "placeholder_rgb": [
+        192,
+        192,
+        192
+      ],
+      "overlay_text_layers": [
+        {
+          "text": "Cancer & Libra, made personal.",
+          "box_xywh": [
+            72,
+            62,
+            936,
+            54
+          ],
+          "font_family": "Manrope",
+          "font_weight": 500,
+          "font_size_px": 36,
+          "font_size_pt_at_96dpi": 27.0,
+          "horizontal_alignment": "center",
+          "vertical_alignment": "center",
+          "color_hex": "#342F29",
+          "max_lines": 1,
+          "letter_spacing_px": 0,
+          "wrap": false,
+          "rendered_in_png": false
+        }
+      ]
+    },
+    {
+      "id": "C03",
+      "file": "C03_Bos_Sahne_1080x1350.png",
+      "canvas_px": [
+        1080,
+        1350
+      ],
+      "poster_inner_corners_px": {
+        "top_left": [
+          204,
+          310
+        ],
+        "top_right": [
+          876,
+          310
+        ],
+        "bottom_right": [
+          876,
+          1150
+        ],
+        "bottom_left": [
+          204,
+          1150
+        ]
+      },
+      "poster_inner_box_xywh": [
+        204,
+        310,
+        672,
+        840
+      ],
+      "poster_aspect_ratio": "4:5",
+      "placeholder_rgb": [
+        192,
+        192,
+        192
+      ],
+      "overlay_text_layers": [
+        {
+          "text": "Your names. Your line.",
+          "box_xywh": [
+            72,
+            149,
+            936,
+            76
+          ],
+          "font_family": "Cormorant Garamond",
+          "font_weight": 600,
+          "font_size_px": 64,
+          "font_size_pt_at_96dpi": 48.0,
+          "horizontal_alignment": "center",
+          "vertical_alignment": "center",
+          "color_hex": "#342F29",
+          "max_lines": 1,
+          "letter_spacing_px": 0,
+          "wrap": false,
+          "rendered_in_png": false
+        },
+        {
+          "text": "AstroLoveArt on Etsy",
+          "box_xywh": [
+            72,
+            1210,
+            936,
+            52
+          ],
+          "font_family": "Manrope",
+          "font_weight": 500,
+          "font_size_px": 36,
+          "font_size_pt_at_96dpi": 27.0,
+          "horizontal_alignment": "center",
+          "vertical_alignment": "center",
+          "color_hex": "#342F29",
+          "max_lines": 1,
+          "letter_spacing_px": 0,
+          "wrap": false,
+          "rendered_in_png": false
+        }
+      ]
+    },
+    {
+      "id": "R01",
+      "file": "R01_00p00_Bos_Sahne_1080x1920.png",
+      "canvas_px": [
+        1080,
+        1920
+      ],
+      "poster_inner_corners_px": {
+        "top_left": [
+          220,
+          520
+        ],
+        "top_right": [
+          860,
+          520
+        ],
+        "bottom_right": [
+          860,
+          1320
+        ],
+        "bottom_left": [
+          220,
+          1320
+        ]
+      },
+      "poster_inner_box_xywh": [
+        220,
+        520,
+        640,
+        800
+      ],
+      "poster_aspect_ratio": "4:5",
+      "placeholder_rgb": [
+        192,
+        192,
+        192
+      ],
+      "overlay_text_layers": [
+        {
+          "text": "Cancer & Libra",
+          "box_xywh": [
+            84,
+            320,
+            852,
+            76
+          ],
+          "font_family": "Cormorant Garamond",
+          "font_weight": 600,
+          "font_size_px": 64,
+          "font_size_pt_at_96dpi": 48.0,
+          "horizontal_alignment": "center",
+          "vertical_alignment": "center",
+          "color_hex": "#342F29",
+          "max_lines": 1,
+          "letter_spacing_px": 0,
+          "wrap": false,
+          "rendered_in_png": false,
+          "enter_sec": [
+            0,
+            0.25
+          ],
+          "exit_sec": [
+            2.35,
+            2.6
+          ]
+        }
+      ],
+      "keyframe_time_sec": 0
+    },
+    {
+      "id": "R02",
+      "file": "R02_03p30_Bos_Sahne_1080x1920.png",
+      "canvas_px": [
+        1080,
+        1920
+      ],
+      "poster_inner_corners_px": {
+        "top_left": [
+          204,
+          500
+        ],
+        "top_right": [
+          876,
+          500
+        ],
+        "bottom_right": [
+          876,
+          1340
+        ],
+        "bottom_left": [
+          204,
+          1340
+        ]
+      },
+      "poster_inner_box_xywh": [
+        204,
+        500,
+        672,
+        840
+      ],
+      "poster_aspect_ratio": "4:5",
+      "placeholder_rgb": [
+        192,
+        192,
+        192
+      ],
+      "overlay_text_layers": [
+        {
+          "text": "Your names. Your line.",
+          "box_xywh": [
+            84,
+            320,
+            852,
+            76
+          ],
+          "font_family": "Cormorant Garamond",
+          "font_weight": 600,
+          "font_size_px": 56,
+          "font_size_pt_at_96dpi": 42.0,
+          "horizontal_alignment": "center",
+          "vertical_alignment": "center",
+          "color_hex": "#342F29",
+          "max_lines": 1,
+          "letter_spacing_px": 0,
+          "wrap": false,
+          "rendered_in_png": false,
+          "enter_sec": [
+            2.85,
+            3.1
+          ],
+          "exit_sec": [
+            6.05,
+            6.3
+          ]
+        }
+      ],
+      "keyframe_time_sec": 3.3
+    },
+    {
+      "id": "R03",
+      "file": "R03_06p60_Bos_Sahne_1080x1920.png",
+      "canvas_px": [
+        1080,
+        1920
+      ],
+      "poster_inner_corners_px": {
+        "top_left": [
+          188,
+          480
+        ],
+        "top_right": [
+          892,
+          480
+        ],
+        "bottom_right": [
+          892,
+          1360
+        ],
+        "bottom_left": [
+          188,
+          1360
+        ]
+      },
+      "poster_inner_box_xywh": [
+        188,
+        480,
+        704,
+        880
+      ],
+      "poster_aspect_ratio": "4:5",
+      "placeholder_rgb": [
+        192,
+        192,
+        192
+      ],
+      "overlay_text_layers": [
+        {
+          "text": "The Shape of Your Connection",
+          "box_xywh": [
+            84,
+            282,
+            852,
+            68
+          ],
+          "font_family": "Cormorant Garamond",
+          "font_weight": 600,
+          "font_size_px": 54,
+          "font_size_pt_at_96dpi": 40.5,
+          "horizontal_alignment": "center",
+          "vertical_alignment": "center",
+          "color_hex": "#342F29",
+          "max_lines": 1,
+          "letter_spacing_px": 0,
+          "wrap": false,
+          "rendered_in_png": false,
+          "enter_sec": [
+            6.6,
+            6.9
+          ],
+          "hold_until_sec": 9
+        },
+        {
+          "text": "AstroLoveArt",
+          "box_xywh": [
+            84,
+            366,
+            852,
+            50
+          ],
+          "font_family": "Manrope",
+          "font_weight": 500,
+          "font_size_px": 36,
+          "font_size_pt_at_96dpi": 27.0,
+          "horizontal_alignment": "center",
+          "vertical_alignment": "center",
+          "color_hex": "#342F29",
+          "max_lines": 1,
+          "letter_spacing_px": 0,
+          "wrap": false,
+          "rendered_in_png": false,
+          "enter_sec": [
+            6.6,
+            6.9
+          ],
+          "hold_until_sec": 9
+        }
+      ],
+      "keyframe_time_sec": 6.6
+    }
+  ],
+  "reel": {
+    "duration_sec": 9,
+    "frames_per_second": 30,
+    "total_frames": 270,
+    "frame_indices": [
+      0,
+      269
+    ],
+    "scene": "One continuous view. Real poster must be composited at full opacity from frame 0.",
+    "camera": {
+      "pivot_px": [
+        540,
+        920
+      ],
+      "scale_at_t0": 1,
+      "scale_at_t6p6": 1.1,
+      "hold_sec": [
+        6.6,
+        9
+      ],
+      "formula": "s(t)=1+0.10*min(max(t,0)/6.6,1)",
+      "point_transform": "x=540+s*(x0-540); y=920+s*(y0-920)",
+      "interpolation": "linear continuous scale, no rotation or translation beyond pivot compensation"
+    },
+    "compositing_order": [
+      "Insert original 4:5 poster into R01 exact inner box",
+      "Move wall, frame and inserted poster together using the camera formula",
+      "Add screen-fixed text overlays after camera transformation"
+    ],
+    "overlay_text_layers": [
+      {
+        "text": "Cancer & Libra",
+        "box_xywh": [
+          84,
+          320,
+          852,
+          76
+        ],
+        "font_family": "Cormorant Garamond",
+        "font_weight": 600,
+        "font_size_px": 64,
+        "font_size_pt_at_96dpi": 48.0,
+        "horizontal_alignment": "center",
+        "vertical_alignment": "center",
+        "color_hex": "#342F29",
+        "max_lines": 1,
+        "letter_spacing_px": 0,
+        "wrap": false,
+        "rendered_in_png": false,
+        "enter_sec": [
+          0,
+          0.25
+        ],
+        "exit_sec": [
+          2.35,
+          2.6
+        ]
+      },
+      {
+        "text": "Your names. Your line.",
+        "box_xywh": [
+          84,
+          320,
+          852,
+          76
+        ],
+        "font_family": "Cormorant Garamond",
+        "font_weight": 600,
+        "font_size_px": 56,
+        "font_size_pt_at_96dpi": 42.0,
+        "horizontal_alignment": "center",
+        "vertical_alignment": "center",
+        "color_hex": "#342F29",
+        "max_lines": 1,
+        "letter_spacing_px": 0,
+        "wrap": false,
+        "rendered_in_png": false,
+        "enter_sec": [
+          2.85,
+          3.1
+        ],
+        "exit_sec": [
+          6.05,
+          6.3
+        ]
+      },
+      {
+        "text": "The Shape of Your Connection",
+        "box_xywh": [
+          84,
+          282,
+          852,
+          68
+        ],
+        "font_family": "Cormorant Garamond",
+        "font_weight": 600,
+        "font_size_px": 54,
+        "font_size_pt_at_96dpi": 40.5,
+        "horizontal_alignment": "center",
+        "vertical_alignment": "center",
+        "color_hex": "#342F29",
+        "max_lines": 1,
+        "letter_spacing_px": 0,
+        "wrap": false,
+        "rendered_in_png": false,
+        "enter_sec": [
+          6.6,
+          6.9
+        ],
+        "hold_until_sec": 9
+      },
+      {
+        "text": "AstroLoveArt",
+        "box_xywh": [
+          84,
+          366,
+          852,
+          50
+        ],
+        "font_family": "Manrope",
+        "font_weight": 500,
+        "font_size_px": 36,
+        "font_size_pt_at_96dpi": 27.0,
+        "horizontal_alignment": "center",
+        "vertical_alignment": "center",
+        "color_hex": "#342F29",
+        "max_lines": 1,
+        "letter_spacing_px": 0,
+        "wrap": false,
+        "rendered_in_png": false,
+        "enter_sec": [
+          6.6,
+          6.9
+        ],
+        "hold_until_sec": 9
+      }
+    ],
+    "storyboard": [
+      {
+        "time_sec": [
+          0,
+          2.6
+        ],
+        "camera": "continuous slow approach",
+        "text": "Cancer & Libra",
+        "enter_sec": [
+          0,
+          0.25
+        ],
+        "exit_sec": [
+          2.35,
+          2.6
+        ]
+      },
+      {
+        "time_sec": [
+          2.6,
+          2.85
+        ],
+        "camera": "continuous slow approach",
+        "text": null
+      },
+      {
+        "time_sec": [
+          2.85,
+          6.3
+        ],
+        "camera": "continuous slow approach",
+        "text": "Your names. Your line.",
+        "enter_sec": [
+          2.85,
+          3.1
+        ],
+        "exit_sec": [
+          6.05,
+          6.3
+        ]
+      },
+      {
+        "time_sec": [
+          6.3,
+          6.6
+        ],
+        "camera": "approach completes at 110%",
+        "text": null
+      },
+      {
+        "time_sec": [
+          6.6,
+          9
+        ],
+        "camera": "hold at 110%",
+        "text": [
+          "The Shape of Your Connection",
+          "AstroLoveArt"
+        ],
+        "enter_sec": [
+          6.6,
+          6.9
+        ],
+        "exit_sec": null
+      }
+    ],
+    "keyframe_note": "Three PNGs are storyboard camera keyframes, not a finished MP4. R03 is held through the last frame.",
+    "maximum_simultaneous_text_lines": 2
+  },
+  "design_decisions_tr": [
+    "C01 ve C03 aynı boş sahnedir. Fark, sonradan eklenecek metinlerdedir.",
+    "C02 ana sahnenin %33,33 yakın planıdır. Çiftin adı ve kişiselleştirme tek satırda anlatılır.",
+    "Gri iç alan bütün karelerde 4:5 oranındadır. Yalnız bu orandaki gerçek poster dosyası eklenmelidir.",
+    "Reel metinleri üstte tutuldu; alt bölümde ek metin yok. Bu yerleşim bir tasarım tercihidir, resmî platform güvenli alan garantisi değildir."
+  ],
+  "unverified_tr": [
+    "Referans Etsy sayfasına erişilemedi. Canlı ilanın çerçevesiyle birebir eşleşme doğrulanmadı.",
+    "Gerçek poster bu teslimde yerleştirilmedi. Sembol ve isimlerin son mobil okunurluğu doğrulanmadı.",
+    "Metinler raster olarak üretilmedi; nihai font dosyasıyla satır sığması son kompozitte doğrulanmadı.",
+    "İkinci carousel karesinin tekrar gösterilmesi iddiası doğrulanmadı; bağımsız anlaşılırlık için tasarım kararı verildi."
+  ],
+  "sources": [
+    {
+      "url": "https://www.etsy.com/listing/4570143815",
+      "status": "not accessible during this task"
+    },
+    {
+      "url": "https://developers.google.com/fonts",
+      "supports": "Open source fonts may be used in commercial projects"
+    },
+    {
+      "url": "https://github.com/google/fonts/blob/main/ofl/cormorantgaramond/METADATA.pb",
+      "supports": "Family name, OFL license, weight range"
+    },
+    {
+      "url": "https://github.com/google/fonts/blob/main/ofl/manrope/METADATA.pb",
+      "supports": "Family name, OFL license, weight range"
+    },
+    {
+      "url": "https://fonts.google.com/specimen/Cormorant+Garamond",
+      "type": "font link"
+    },
+    {
+      "url": "https://fonts.google.com/specimen/Manrope",
+      "type": "font link"
+    }
+  ],
+  "verified_output_checks": [
+    {
+      "id": "C01",
+      "size_px": [
+        1080,
+        1350
+      ],
+      "gray_core_rgb": [
+        192,
+        192,
+        192
+      ],
+      "bytes": 1352787,
+      "sha256": "35628d2185c8610eb4c612955b69158efac2f72dedca2b425d874819b7620e36"
+    },
+    {
+      "id": "C02",
+      "size_px": [
+        1080,
+        1350
+      ],
+      "gray_core_rgb": [
+        192,
+        192,
+        192
+      ],
+      "bytes": 632571,
+      "sha256": "4a658ff8c807761ef18934354d2a321891b977fb3f97dee81568ed69e58e406d"
+    },
+    {
+      "id": "C03",
+      "size_px": [
+        1080,
+        1350
+      ],
+      "gray_core_rgb": [
+        192,
+        192,
+        192
+      ],
+      "bytes": 1352787,
+      "sha256": "35628d2185c8610eb4c612955b69158efac2f72dedca2b425d874819b7620e36"
+    },
+    {
+      "id": "R01",
+      "size_px": [
+        1080,
+        1920
+      ],
+      "gray_core_rgb": [
+        192,
+        192,
+        192
+      ],
+      "bytes": 1885333,
+      "sha256": "95f7bc348e46d30772a5aa4c7017c2bdfc006c14560d40a4585e1e48922ef78e"
+    },
+    {
+      "id": "R02",
+      "size_px": [
+        1080,
+        1920
+      ],
+      "gray_core_rgb": [
+        192,
+        192,
+        192
+      ],
+      "bytes": 1642736,
+      "sha256": "184f7027e5fc36a556c17e47c53317b5a0ef7eb55a8df3fb6b4d166a6af9b8e7"
+    },
+    {
+      "id": "R03",
+      "size_px": [
+        1080,
+        1920
+      ],
+      "gray_core_rgb": [
+        192,
+        192,
+        192
+      ],
+      "bytes": 1562136,
+      "sha256": "b3761c97475704129bbbd6fc948a668957f6f5a9b5c5cde15e61ca5ed7714d71"
+    }
+  ]
+}

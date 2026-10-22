@@ -1,0 +1,6 @@
+- Aktif ilan gorselleri icin salt-okur denetim araci eklendi.
+- Sekiz iscili CDN indirme ve ETA gunlugu eklendi.
+- Cozunurluk, oran, bulaniklik, bos kare ve boyut kurallari eklendi.
+- pHash ile ilan ici tekrar ve ilanlar arasi ayni kapak denetleniyor.
+- Kapak OCR sonucu yanlis ciftte FAIL, okunamayanda BELIRSIZ oluyor.
+- Sentetik, agsiz sekiz test ve TEMP ciktili workflow eklendi.

@@ -1,0 +1,189 @@
+{
+ "SAGITTARIUS_VIRGO": {
+  "hedefe_dE": {
+   "buyuk_sembol": 0.34,
+   "kucuk_sembol_sol": 0.22,
+   "kucuk_sembol_sag": 0.58,
+   "isim1": 0.22,
+   "sonsuz": 1.8,
+   "isim2": 0.34,
+   "mesaj": 0.46,
+   "daire": 3.35
+  },
+  "ogeler_arasi_max_dE": 5.05,
+  "esik_dE": 5.0,
+  "kahve_orani": 0.0,
+  "esik_kahve": 0.02,
+  "gecti": false
+ },
+ "LEO_VIRGO": {
+  "hedefe_dE": {
+   "buyuk_sembol": 0.26,
+   "kucuk_sembol_sol": 0.98,
+   "kucuk_sembol_sag": 0.21,
+   "isim1": 1.37,
+   "sonsuz": 2.92,
+   "isim2": 0.64,
+   "mesaj": 0.3,
+   "daire": 2.37
+  },
+  "ogeler_arasi_max_dE": 5.22,
+  "esik_dE": 5.0,
+  "kahve_orani": 0.0001,
+  "esik_kahve": 0.02,
+  "gecti": false
+ },
+ "CANCER_LEO": {
+  "hedefe_dE": {
+   "buyuk_sembol": 0.26,
+   "kucuk_sembol_sol": 0.81,
+   "kucuk_sembol_sag": 0.74,
+   "isim1": 0.55,
+   "sonsuz": 3.04,
+   "isim2": 0.87,
+   "mesaj": 0.81,
+   "daire": 2.09
+  },
+  "ogeler_arasi_max_dE": 5.05,
+  "esik_dE": 5.0,
+  "kahve_orani": 0.0001,
+  "esik_kahve": 0.02,
+  "gecti": false
+ },
+ "LEO_LIBRA": {
+  "hedefe_dE": {
+   "buyuk_sembol": 0.2,
+   "kucuk_sembol_sol": 0.98,
+   "kucuk_sembol_sag": 0.55,
+   "isim1": 0.98,
+   "sonsuz": 3.09,
+   "isim2": 0.53,
+   "mesaj": 0.38,
+   "daire": 1.96
+  },
+  "ogeler_arasi_max_dE": 5.04,
+  "esik_dE": 5.0,
+  "kahve_orani": 0.0,
+  "esik_kahve": 0.02,
+  "gecti": false
+ },
+ "CAPRICORN_LEO": {
+  "hedefe_dE": {
+   "buyuk_sembol": 0.26,
+   "kucuk_sembol_sol": 0.56,
+   "kucuk_sembol_sag": 1.11,
+   "isim1": 0.45,
+   "sonsuz": 2.92,
+   "isim2": 0.87,
+   "mesaj": 1.01,
+   "daire": 2.25
+  },
+  "ogeler_arasi_max_dE": 5.05,
+  "esik_dE": 5.0,
+  "kahve_orani": 0.0,
+  "esik_kahve": 0.02,
+  "gecti": false
+ },
+ "LEO_PISCES": {
+  "hedefe_dE": {
+   "buyuk_sembol": 0.3,
+   "kucuk_sembol_sol": 0.96,
+   "kucuk_sembol_sag": 1.06,
+   "isim1": 1.6,
+   "sonsuz": 2.8,
+   "isim2": 0.4,
+   "mesaj": 0.2,
+   "daire": 2.52
+  },
+  "ogeler_arasi_max_dE": 5.31,
+  "esik_dE": 5.0,
+  "kahve_orani": 0.0,
+  "esik_kahve": 0.02,
+  "gecti": false
+ },
+ "LEO_LEO": {
+  "hedefe_dE": {
+   "buyuk_sembol": 0.34,
+   "kucuk_sembol_sol": 1.0,
+   "kucuk_sembol_sag": 1.18,
+   "isim1": 0.9,
+   "sonsuz": 3.08,
+   "isim2": 0.74,
+   "mesaj": 0.31,
+   "daire": 2.25
+  },
+  "ogeler_arasi_max_dE": 5.28,
+  "esik_dE": 5.0,
+  "kahve_orani": 0.0,
+  "esik_kahve": 0.02,
+  "gecti": false
+ },
+ "LEO_TAURUS": {
+  "hedefe_dE": {
+   "buyuk_sembol": 0.26,
+   "kucuk_sembol_sol": 0.83,
+   "kucuk_sembol_sag": 0.71,
+   "isim1": 1.42,
+   "sonsuz": 2.72,
+   "isim2": 0.88,
+   "mesaj": 0.3,
+   "daire": 2.37
+  },
+  "ogeler_arasi_max_dE": 5.05,
+  "esik_dE": 5.0,
+  "kahve_orani": 0.0,
+  "esik_kahve": 0.02,
+  "gecti": false
+ },
+ "LEO_SAGITTARIUS": {
+  "hedefe_dE": {
+   "buyuk_sembol": 0.21,
+   "kucuk_sembol_sol": 0.99,
+   "kucuk_sembol_sag": 0.2,
+   "isim1": 0.97,
+   "sonsuz": 3.06,
+   "isim2": 0.64,
+   "mesaj": 0.31,
+   "daire": 2.37
+  },
+  "ogeler_arasi_max_dE": 5.37,
+  "esik_dE": 5.0,
+  "kahve_orani": 0.0,
+  "esik_kahve": 0.02,
+  "gecti": false
+ },
+ "LEO_SCORPIO": {
+  "hedefe_dE": {
+   "buyuk_sembol": 0.21,
+   "kucuk_sembol_sol": 0.44,
+   "kucuk_sembol_sag": 0.44,
+   "isim1": 1.1,
+   "sonsuz": 2.86,
+   "isim2": 0.9,
+   "mesaj": 0.34,
+   "daire": 2.36
+  },
+  "ogeler_arasi_max_dE": 5.16,
+  "esik_dE": 5.0,
+  "kahve_orani": 0.0,
+  "esik_kahve": 0.02,
+  "gecti": false
+ },
+ "GEMINI_LEO": {
+  "hedefe_dE": {
+   "buyuk_sembol": 0.2,
+   "kucuk_sembol_sol": 0.28,
+   "kucuk_sembol_sag": 0.88,
+   "isim1": 0.55,
+   "sonsuz": 2.39,
+   "isim2": 1.42,
+   "mesaj": 0.4,
+   "daire": 1.94
+  },
+  "ogeler_arasi_max_dE": 4.29,
+  "esik_dE": 5.0,
+  "kahve_orani": 0.0,
+  "esik_kahve": 0.02,
+  "gecti": true
+ }
+}

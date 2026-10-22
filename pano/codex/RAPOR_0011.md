@@ -1,0 +1,5 @@
+- `mesaj_taslak.py`, JSON STATE kayitlarini dokumandaki alti sablona esler.
+- Her eslesen kayit icin yalniz yerel taslak ve tek `OZET.csv` uretilir.
+- Eksik alanlar uydurulmaz; `[DOLDUR: alan]` olarak birakilir.
+- Musteri alanlari stdout ve loga yazilmaz; uzun ve orta tire reddedilir.
+- Sentetik testler alti sablonu, eslesmeyeni ve eksik alani kapsar.

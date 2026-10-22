@@ -1,0 +1,82 @@
+[
+  {
+    "test": "YAML ayristirma (122 workflow)",
+    "sonuc": "PASS",
+    "detay": "hepsi gecerli"
+  },
+  {
+    "test": "bash -n tum run bloklari",
+    "sonuc": "PASS",
+    "detay": "hepsi gecerli"
+  },
+  {
+    "test": "permissions blogu kapsami",
+    "sonuc": "PASS",
+    "detay": "122/122"
+  },
+  {
+    "test": "read-only varsayilan (contents: read)",
+    "sonuc": "PASS",
+    "detay": "122/122"
+  },
+  {
+    "test": "write-all kullanan yok",
+    "sonuc": "PASS",
+    "detay": ""
+  },
+  {
+    "test": "GITHUB_TOKEN ile yazma yapan workflow yok",
+    "sonuc": "PASS",
+    "detay": "yok"
+  },
+  {
+    "test": "PAT kullananlar permissions yamasindan bagimsiz",
+    "sonuc": "PASS",
+    "detay": "ig-media-sync.yml, repo-public.yml"
+  },
+  {
+    "test": "secret dogrudan echo edilmiyor",
+    "sonuc": "PASS",
+    "detay": "0 satir"
+  },
+  {
+    "test": "secret maskeleme zinciri (52 Etsy workflow)",
+    "sonuc": "PASS",
+    "detay": "hepsi maskeli"
+  },
+  {
+    "test": "Etsy workflow'larinda etsy-token concurrency (52)",
+    "sonuc": "PASS",
+    "detay": "hepsi var"
+  },
+  {
+    "test": "Etsy kosusu ortada iptal edilmiyor",
+    "sonuc": "PASS",
+    "detay": "yok"
+  },
+  {
+    "test": "Drive token geri yazma (52)",
+    "sonuc": "PASS",
+    "detay": "hepsi var"
+  },
+  {
+    "test": "kosu sonunda token temizligi (52)",
+    "sonuc": "PASS",
+    "detay": "hepsi var"
+  },
+  {
+    "test": "guvenli durma (set -e / bilincli set +e)",
+    "sonuc": "PASS",
+    "detay": "122/122"
+  },
+  {
+    "test": "canli yazan workflow'larda ikinci kapi (18)",
+    "sonuc": "PASS",
+    "detay": "18/18"
+  },
+  {
+    "test": "GITHUB_OUTPUT yonlendirmesinde maske kaybi yok",
+    "sonuc": "PASS",
+    "detay": "yok"
+  }
+]

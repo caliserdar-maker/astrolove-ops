@@ -1,0 +1,92 @@
+{
+ "on": {
+  "xc": 398,
+  "R": 215,
+  "ust": 437,
+  "alt": 927,
+  "taban_kenar": 923,
+  "taban_sarkma": 20
+ },
+ "arka": {
+  "xc": 855,
+  "R": 215,
+  "ust": 437,
+  "alt": 927,
+  "taban_kenar": 923,
+  "taban_sarkma": 20
+ },
+ "yazi_on": [
+  [
+   336,
+   552,
+   486,
+   694
+  ],
+  [
+   322,
+   722,
+   372,
+   766
+  ],
+  [
+   445,
+   722,
+   500,
+   766
+  ],
+  [
+   274,
+   806,
+   544,
+   844
+  ],
+  [
+   297,
+   848,
+   520,
+   877
+  ]
+ ],
+ "yazi_arka": [
+  [
+   822,
+   532,
+   894,
+   602
+  ],
+  [
+   668,
+   720,
+   1048,
+   780
+  ],
+  [
+   760,
+   792,
+   958,
+   836
+  ]
+ ],
+ "s": 2.027,
+ "yerlesim": {
+  "on_merkez_x": 410,
+  "sembol_y": 623,
+  "sembol_w": 136,
+  "sembol_h": 127,
+  "glif_y": 743,
+  "glif_w": 44,
+  "glif_h": 34,
+  "isim_taban": 838,
+  "isim_cap": 23,
+  "burc_taban": 871,
+  "burc_cap": 16,
+  "nazar_x": 858,
+  "nazar_y": 567,
+  "nazar_d": 58,
+  "arka_merkez_x": 858,
+  "mesaj_taban": 762,
+  "mesaj_cap": 28,
+  "imza_taban": 823,
+  "imza_cap": 23
+ }
+}

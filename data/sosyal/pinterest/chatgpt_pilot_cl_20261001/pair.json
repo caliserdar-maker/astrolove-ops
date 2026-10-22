@@ -1,0 +1,57 @@
+{
+  "pair_display": "Cancer & Libra",
+  "framed_artwork": "assets/real_framed_cancer_libra_reference.png",
+  "colors": [
+    {
+      "label": "Midnight Blue",
+      "asset": "assets/real_midnight_blue.png",
+      "source_crop_ltrb": [
+        270,
+        500,
+        790,
+        1150
+      ]
+    },
+    {
+      "label": "Deep Black",
+      "asset": "assets/real_deep_black.png",
+      "source_crop_ltrb": [
+        1240,
+        500,
+        1760,
+        1150
+      ]
+    },
+    {
+      "label": "Pure White",
+      "asset": "assets/real_pure_white.png",
+      "source_crop_ltrb": [
+        755,
+        1310,
+        1275,
+        1960
+      ]
+    },
+    {
+      "label": "Champagne Ivory",
+      "asset": "assets/real_champagne_ivory.png",
+      "source_crop_ltrb": [
+        2210,
+        500,
+        2730,
+        1150
+      ]
+    },
+    {
+      "label": "Warm Parchment",
+      "asset": "assets/real_warm_parchment.png",
+      "source_crop_ltrb": [
+        1725,
+        1310,
+        2245,
+        1960
+      ]
+    }
+  ],
+  "target_url": "https://www.etsy.com/listing/4570143815"
+}
