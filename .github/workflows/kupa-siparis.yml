@@ -111,6 +111,9 @@ jobs:
           HEDEF: ${{ inputs.hedef || 'KUPA_SIPARIS' }}
         run: |
           set +e -uo pipefail     # FAIL kalem cikis 1 verir; Drive/STATE adimlari yine kosar, koşu sonda kirmizi (Serdar'a bildirim)
+          # A3 hedef kapisi (Serdar 23 Eki 1b; YALNIZ gelistirme dali): sahte fis yalniz test klasorune yazar; gercek siparis yolu degismez.
+          if [ -n "${SAHTE:-}" ] && [[ ! "$HEDEF" =~ ^KUPA_SIPARIS_TEST_(ESKI|TEMIZ)$ ]]; then
+            echo "::error::sahte fis yalniz KUPA_SIPARIS_TEST_ESKI / KUPA_SIPARIS_TEST_TEMIZ hedefine yazar (hedef: $HEDEF)"; exit 1; fi
           args=(--kod _kod/kupa_orchard --cikti _out --drive "gdrive:ASTROLOVE/$HEDEF")
           if [ -n "${SAHTE:-}" ]; then args+=(--receipt-json "$SAHTE")
           elif [ -n "${RID:-}" ]; then [[ "$RID" =~ ^[0-9]+$ ]] || { echo "receipt yalniz rakam"; exit 1; }; args+=(--receipt-id "$RID" --state _work/STATE.csv)
