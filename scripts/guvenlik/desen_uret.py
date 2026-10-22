@@ -190,14 +190,26 @@ def eposta_bul(metin, izin):
     return out
 
 
-def tara(kok, desen, izin=(set(), set(), set())):
+def dosya_listesi(kok):
+    """git deposu/worktree ise izli dosyalar, degilse dizindeki tum dosyalar (.git haric)."""
+    r = subprocess.run(["git", "-C", str(kok), "ls-files", "-z"], capture_output=True)
+    if r.returncode == 0 and r.stdout:
+        return [x for x in r.stdout.decode().split("\0") if x], True
+    out = []
+    for d, alt, fs in os.walk(kok):
+        alt[:] = [a for a in alt if a != ".git"]
+        out += [os.path.relpath(os.path.join(d, f), kok) for f in fs if f != ".git"]
+    return sorted(out), False
+
+
+def tara(kok, desen, izin=(set(), set(), set()), commit_tara=True):
     """git izli dosyalarin icerigi + DOSYA YOLLARI (satir 0) + HEAD commit mesajlarinda desen ara (BELLEKTE).
     -> (yerler, commitler, ozet). Deger/satir icerigi yok. Eslesme: casefold, bosluk dizisi esnek, iki yaninda harf/rakam yok
     ("_" sinir sayilir). Izin listesine uyan eslesme "izinli" isaretlenir."""
     sira = {n: i for i, n in enumerate(sorted(desen), 1)}
     alt = sorted(desen, key=len, reverse=True)
     rx = re.compile(SINIR_ONCE + "(" + "|".join(re.escape(n).replace(r"\ ", r"\s+") for n in alt) + ")" + SINIR_SONRA) if alt else None
-    dosyalar = subprocess.run(["git", "-C", str(kok), "ls-files", "-z"], capture_output=True, check=True).stdout.decode().split("\0")
+    dosyalar, git_mi = dosya_listesi(kok)
     yer, atla = [], Counter()
 
     def kaydet(yol, no, metin, ham=""):
@@ -219,7 +231,8 @@ def tara(kok, desen, izin=(set(), set(), set())):
             atla["ikili"] += 1; continue
         for no, satir in enumerate(b.decode("utf-8", "replace").split("\n"), 1):
             kaydet(yol, no, satir.casefold(), satir)
-    log = subprocess.run(["git", "-C", str(kok), "log", "--format=%H%x00%B%x01", "HEAD"], capture_output=True).stdout.decode("utf-8", "replace")
+    log = subprocess.run(["git", "-C", str(kok), "log", "--format=%H%x00%B%x01", "HEAD"], capture_output=True).stdout.decode(
+        "utf-8", "replace") if (commit_tara and git_mi) else ""
     com, n_com = [], 0
     for kayit in log.split("\x01"):
         if "\x00" not in kayit:
@@ -250,6 +263,7 @@ def main():
     ap.add_argument("--drive-json", default="")
     ap.add_argument("--tara", default="")
     ap.add_argument("--izin", default="", help="Serdar onayli izin listesi JSON (Drive, sahip-ozel)")
+    ap.add_argument("--tara-ek", default="", help="etiket=DIZIN,...: ek agaclar (P0.7 dallari, P0.5 OCR metinleri); ayri ozet")
     a = ap.parse_args()
     tuz = a.tuz or secrets.token_hex(24)
     print(f"::add-mask::{tuz}", flush=True)
@@ -282,6 +296,15 @@ def main():
         print(f"TARAMA bilgi (tek basina ad parcasi): eslesme {oz['bilgi']} | dosya {oz['bilgi_dosya']} | desen {oz['bilgi_desen']}")
         print(f"COMMIT mesaji (yalniz HEAD): taranan {oz['commit_taranan']} | eslesme {oz['commit_eslesme']} | "
               f"engel commit {oz['commit_engel']} | bilgi commit {oz['commit_bilgi']}")
+    ek = {}
+    for parca in [x for x in a.tara_ek.split(",") if x]:
+        etiket, dizin = parca.split("=", 1)
+        yer, com, oz = tara(dizin, desen, izin_oku(a.izin))
+        ek[etiket] = dict(ozet=oz, yerler=yer, commitler=com)
+        print(f"EK {etiket}: dosya {oz['dosya']} | ENGEL {oz['engel']} (tur {oz['engel_tur']}) -> {'PASS' if oz['engel'] == 0 else 'FAIL'} | "
+              f"bilgi {oz['bilgi']} | atlanan {oz['atlanan']} | commit taranan {oz['commit_taranan']} engel {oz['commit_engel']}")
+    if ek:
+        (out / "TARAMA_EK.json").write_text(json.dumps(ek, ensure_ascii=False, indent=1), encoding="utf-8")
 
 
 if __name__ == "__main__":

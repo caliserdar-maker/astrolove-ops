@@ -7,7 +7,10 @@ permissions:
   actions: read
   contents: read
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      dallar: {description: "ek taranacak dallar (virgulle; orn. temiz/siparis-gpt,temiz/kupa-orchard); bos = yalniz main", required: false, default: ""}
+      ocr: {description: "true = main + dallardaki gorseller OCR ile taranir (P0.5)", required: false, default: "false"}
 jobs:
   uret:
     runs-on: ubuntu-latest
@@ -46,13 +49,33 @@ jobs:
           echo "drive klasor: $(python3 -c "import json;print(len(json.load(open('_work/d1.json'))), len(json.load(open('_work/d2.json'))))")"
           # izin listesi (Serdar onayli, sahip-ozel); icerik loga yazilmaz
           rclone copyto "gdrive:ASTROLOVE/TEMP/DENETIM_20261021/IZIN_LISTESI.json" _work/izin.json -q 2>/dev/null || echo "izin listesi yok"
+      - name: Ek agaclar (dallar) + gorsel OCR (P0.5; metin yalniz runner'da)
+        env: {DALLAR: "${{ inputs.dallar }}", OCR: "${{ inputs.ocr }}"}
+        run: |
+          set -euo pipefail
+          EK=""; AGAC=(.)
+          IFS=',' read -ra D <<< "${DALLAR:-}"
+          for r in "${D[@]}"; do
+            [ -n "$r" ] || continue
+            [[ "$r" =~ ^[A-Za-z0-9._/-]+$ ]] || { echo "::error::dal adi"; exit 1; }
+            git fetch -q origin "+refs/heads/$r:refs/remotes/origin/$r"
+            w="_ek/$(echo "$r" | tr '/' '_')"; git worktree add -q --detach "$w" "origin/$r"
+            EK="$EK,$r=$w"; AGAC+=("$w")
+          done
+          if [ "$OCR" = "true" ]; then
+            sudo apt-get install -y -qq tesseract-ocr ffmpeg > /dev/null
+            pip install -q pillow
+            python3 scripts/guvenlik/gorsel_ocr.py --out _ek/ocr "${AGAC[@]}"
+            EK="$EK,ocr=_ek/ocr"
+          fi
+          echo "TARA_EK=${EK#,}" >> "$GITHUB_ENV"
       - name: Uret (salt okuma; yalniz sayi)
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
           TOKEN_FILE: _work/ETSY_TOKEN.json
-        run: python3 scripts/guvenlik/desen_uret.py --out _out --drive-json _work/d1.json,_work/d2.json --tara . --izin _work/izin.json
+        run: python3 scripts/guvenlik/desen_uret.py --out _out --drive-json _work/d1.json,_work/d2.json --tara . --izin _work/izin.json --tara-ek "${TARA_EK:-}"
       - name: Token geri yaz + HASH Drive'a
         if: ${{ always() }}
         run: |
@@ -65,4 +88,4 @@ jobs:
             rclone copy _out "gdrive:ASTROLOVE/TEMP/DENETIM_20261021/DESEN_URET_${GITHUB_RUN_ID}" -q && echo "HASH: DESEN_URET_${GITHUB_RUN_ID} ($(wc -l < _out/HASH.txt) satir)"
           fi
       - if: always()
-        run: rm -rf _work _out ~/.config/rclone
+        run: rm -rf _work _out _ek ~/.config/rclone
