@@ -1,0 +1,79 @@
+name: magaza-parca-yaz
+
+# ETSY'YE YAZAR: magaza metin alaninda tek parca degisimi (scripts/etsy/magaza_parca_yaz.py ISLER), tek updateShop + API geri
+# okuma. Her is ayri Serdar onayi ister (onay sozcugu). duyuru_marka: Serdar 22 Eki marka adi karari.
+# Cikti Drive ASTROLOVE/TEMP/DENETIM_20261021/MAGAZA_PARCA/<is>/.
+
+permissions:
+  actions: read
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      is: {description: "is (orn. duyuru_marka)", required: true}
+      onay: {description: "onay sozcugu (orn. DUYURU_MARKA)", required: true}
+
+env:
+  D: "gdrive:ASTROLOVE/TEMP/DENETIM_20261021/MAGAZA_PARCA"
+
+jobs:
+  yaz:
+    runs-on: ubuntu-latest
+    timeout-minutes: 140
+    steps:
+      - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2 pillow==12.3.0 numpy==2.5.3
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Token
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+      - name: Parca yaz + geri oku (tek updateShop)
+        env:
+          IS: ${{ inputs.is }}
+          ONAY: ${{ inputs.onay }}
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -o pipefail
+          [[ "$IS" =~ ^[a-z_]+$ ]] || { echo "::error::is"; exit 1; }
+          python scripts/etsy/magaza_parca_yaz.py --is "$IS" --out _out --confirm "$ONAY" 2>&1 | tee _work/kosu_duyuru.log
+          echo "KOD=${PIPESTATUS[0]}" >> "$GITHUB_ENV"
+      - name: Token geri yaz + cikti Drive'a (yalniz MAGAZA_PARCA/<is>/)
+        if: always()
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || echo "Token yenilenmedi"
+          [ -f _work/kosu_duyuru.log ] && python3 scripts/guvenlik/log_suz.py < _work/kosu_duyuru.log > "_out/kosu_duyuru_$(date -u +%Y%m%d_%H%M).txt"
+          if grep -rqE '"(access_token|refresh_token)"[[:space:]]*:[[:space:]]*"[A-Za-z0-9._-]{20,}"|x-api-key[[:space:]]*:' _out/ 2>/dev/null; then
+            echo "::error::Ciktida sir bulundu; Drive'a yazilmadi"; exit 1; fi
+          rclone copy _out "$D/${{ inputs.is }}" -q
+          cat _out/DUYURU_GERI_OKUMA.txt 2>/dev/null || true
+          [ "${KOD:-1}" = 0 ] || { echo "::error::duyuru yazma cikis ${KOD:-?} (DUYURU_GERI_OKUMA.txt)"; exit 1; }
+      - if: always()
+        run: rm -rf _work ~/.config/rclone
