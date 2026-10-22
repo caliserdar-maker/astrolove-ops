@@ -6,32 +6,47 @@ name: rclone-gecis
 #   invalid_client / unauthorized_client = gecersiz (yeni secret gerekir). Hicbir token alinmaz, hicbir sey degismez.
 # yedek: mevcut RCLONE_CONF_B64 -> RCLONE_CONF_B64_YEDEK (gh_secrets.py, OPS_ADMIN_TOKEN); deger STDIN'den, loga yazilmaz.
 #   Dogrulama: secret adi listede ve updated_at kosu anindan sonra. RCLONE_CONF_B64'e DOKUNULMAZ.
+# degistir (adim 4-6, onay SERDAR_RCLONE): kilit_bekle + siparis-* in_progress yok -> eski conf ile Drive TEMP/RCLONE_KOD*
+#   dosyasini en fazla bekle_dk bekler (Merkez yazar); okur, KALICI siler; kodu yeni token'a cevirir (scripts/common/rclone_gecis.py);
+#   yeni conf ile kapilar (tokeninfo aud, kapsam, expiry, lsf, Docs GET, Sheets GET, shared uyarisi yok) HEPSI PASS ise ve
+#   RCLONE_CONF_B64_YEDEK varsa RCLONE_CONF_B64 yazilir (siparis-* in_progress bitene kadar beklenir); degilse dokunulmaz.
+# dogrula (adim 7): guncel RCLONE_CONF_B64 ile ayni kapilar; yenileme=true ise token suresi dolmus olmali ve rclone yenilemeli.
+# geri_al (onay SERDAR_RCLONE): RCLONE_CONF_B64_YEDEK -> RCLONE_CONF_B64.
 
 permissions:
   contents: read
+  actions: read
 
 on:
   workflow_dispatch:
     inputs:
-      mod: {description: "istemci_test | yedek | secret_son4", required: true, default: "istemci_test"}
-      onay: {description: "yedek icin SERDAR_RCLONE", required: false, default: ""}
+      mod: {description: "istemci_test | yedek | secret_son4 | degistir | dogrula | geri_al", required: true, default: "istemci_test"}
+      onay: {description: "yedek / degistir / geri_al icin SERDAR_RCLONE", required: false, default: ""}
+      durum: {description: "degistir: onay baglantisindaki state degeri (gizli degil)", required: false, default: ""}
+      bekle_dk: {description: "degistir: kod dosyasini bekleme suresi (dk)", required: false, default: "30"}
+      yenileme: {description: "dogrula: true ise token yenileme testi (>= 1 saat sonra)", required: false, default: "false"}
       beklenen: {description: "secret_son4: Console'daki ENABLED secret'in son 4 karakteri (loga ve env'e yazilmaz)", required: false, default: ""}
 
 env:
   CLIENT_ID: "563638674023-srqntttm0dddc60frdrocmoas38sv9q4.apps.googleusercontent.com"
+  DOC_ID: "1jDyAmuG3PLFhiBZqe2hSl40oaSwLB1gMKXfxaPpYUic"     # RCLONE_PLAN.md (Docs GET testi)
+  SHEET_ID: "1Cg--wybFqdCON9XCE-xF3F9FTiE5n6gIDnzJcpFdYhY"   # WA_IG_PLAN (Sheets GET testi)
 
 jobs:
   gecis:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
       - name: Girdi kapisi
-        env: {MOD: "${{ inputs.mod }}", ONAY: "${{ inputs.onay }}"}
+        env: {MOD: "${{ inputs.mod }}", ONAY: "${{ inputs.onay }}", DURUM: "${{ inputs.durum }}", BEKLE: "${{ inputs.bekle_dk }}"}
         run: |
           case "$MOD" in
-            istemci_test|secret_son4) ;;
-            yedek) [ "$ONAY" = "SERDAR_RCLONE" ] || { echo "::error::yedek icin onay yok"; exit 1; } ;;
+            istemci_test|secret_son4|dogrula) ;;
+            yedek|geri_al) [ "$ONAY" = "SERDAR_RCLONE" ] || { echo "::error::$MOD icin onay yok"; exit 1; } ;;
+            degistir) [ "$ONAY" = "SERDAR_RCLONE" ] || { echo "::error::degistir icin onay yok"; exit 1; }
+                      [[ "$DURUM" =~ ^[A-Za-z0-9]{16,64}$ ]] || { echo "::error::durum (state) bicimi"; exit 1; }
+                      [[ "$BEKLE" =~ ^[0-9]{1,2}$ ]] && [ "$BEKLE" -le 60 ] || { echo "::error::bekle_dk 1-60"; exit 1; } ;;
             *) echo "::error::mod"; exit 1 ;;
           esac
       - name: istemci_test (salt okuma; yalniz hata kodu)
@@ -90,3 +105,81 @@ jobs:
           ok = d.get('name') == 'RCLONE_CONF_B64_YEDEK' and (d.get('updated_at') or '') >= t0
           print('YEDEK secret', d.get('name'), 'updated_at', d.get('updated_at'), '->', 'PASS' if ok else 'FAIL'); sys.exit(0 if ok else 1)" "$T0"
           rm -f _s.json
+      - name: Kilit (Etsy kilidi + siparis-* in_progress yok)
+        if: ${{ inputs.mod == 'degistir' || inputs.mod == 'geri_al' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 scripts/etsy/kilit_bekle.py
+          python3 scripts/common/siparis_bekle.py --dk 60
+      - name: rclone + eski conf
+        if: ${{ inputs.mod == 'degistir' || inputs.mod == 'dogrula' }}
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+      - name: Kod bekle (Drive TEMP/RCLONE_KOD*; okunur ve kalici silinir)
+        if: ${{ inputs.mod == 'degistir' }}
+        env: {DURUM: "${{ inputs.durum }}", BEKLE: "${{ inputs.bekle_dk }}"}
+        run: python3 scripts/common/rclone_gecis.py bekle --kok gdrive:ASTROLOVE/TEMP --ad RCLONE_KOD --dk "$BEKLE" --durum "$DURUM" --cikti "$RUNNER_TEMP/kod"
+      - name: Takas + adim 6 kapilari (yeni conf)
+        if: ${{ inputs.mod == 'degistir' }}
+        env:
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          python3 scripts/common/rclone_gecis.py takas --kod-dosyasi "$RUNNER_TEMP/kod" --conf-cikti "$RUNNER_TEMP/yeni.conf"
+          python3 scripts/common/rclone_gecis.py dogrula --conf "$RUNNER_TEMP/yeni.conf" --doc "$DOC_ID" --sheet "$SHEET_ID" --etiket adim6
+      - name: Yedek var mi + siparis bekle + RCLONE_CONF_B64 yaz (yalniz kapilar PASS ise buraya gelinir)
+        if: ${{ inputs.mod == 'degistir' }}
+        env:
+          OPS_ADMIN_TOKEN: ${{ secrets.OPS_ADMIN_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          pip install -q pynacl
+          curl -fsS -H "Authorization: Bearer $OPS_ADMIN_TOKEN" -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/secrets/RCLONE_CONF_B64_YEDEK" > _y.json \
+            || { echo "::error::RCLONE_CONF_B64_YEDEK yok; yazilmadi"; exit 1; }
+          python3 -c "import json;d=json.load(open('_y.json'));print('YEDEK var:', d.get('name'), d.get('updated_at'))"; rm -f _y.json
+          python3 scripts/common/siparis_bekle.py --dk 60
+          T0=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          base64 -w0 "$RUNNER_TEMP/yeni.conf" | python3 scripts/common/gh_secrets.py secret astrolove-ops RCLONE_CONF_B64 > /dev/null
+          curl -fsS -H "Authorization: Bearer $OPS_ADMIN_TOKEN" -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/secrets/RCLONE_CONF_B64" > _s.json
+          python3 -c "
+          import json,sys; d=json.load(open('_s.json')); ok=(d.get('updated_at') or '') >= sys.argv[1]
+          print('RCLONE_CONF_B64 updated_at', d.get('updated_at'), '->', 'PASS (yeni conf yazildi)' if ok else 'FAIL'); sys.exit(0 if ok else 1)" "$T0"
+          rm -f _s.json
+      - name: dogrula (adim 7; guncel RCLONE_CONF_B64)
+        if: ${{ inputs.mod == 'dogrula' }}
+        env:
+          YENILEME: ${{ inputs.yenileme }}
+        run: |
+          set -euo pipefail
+          ek=""; [ "$YENILEME" = "true" ] && ek="--yenileme-bekle"
+          python3 scripts/common/rclone_gecis.py dogrula --conf ~/.config/rclone/rclone.conf --doc "$DOC_ID" --sheet "$SHEET_ID" --etiket adim7 $ek
+      - name: geri_al (RCLONE_CONF_B64_YEDEK -> RCLONE_CONF_B64)
+        if: ${{ inputs.mod == 'geri_al' }}
+        env:
+          YEDEK: ${{ secrets.RCLONE_CONF_B64_YEDEK }}
+          OPS_ADMIN_TOKEN: ${{ secrets.OPS_ADMIN_TOKEN }}
+        run: |
+          set -euo pipefail
+          [ -n "${YEDEK:-}" ] || { echo "::error::yedek bos"; exit 1; }
+          pip install -q pynacl
+          T0=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          printf '%s' "$YEDEK" | python3 scripts/common/gh_secrets.py secret astrolove-ops RCLONE_CONF_B64 > /dev/null
+          curl -fsS -H "Authorization: Bearer $OPS_ADMIN_TOKEN" -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/secrets/RCLONE_CONF_B64" > _s.json
+          python3 -c "
+          import json,sys; d=json.load(open('_s.json')); ok=(d.get('updated_at') or '') >= sys.argv[1]
+          print('GERI_AL RCLONE_CONF_B64 updated_at', d.get('updated_at'), '->', 'PASS' if ok else 'FAIL'); sys.exit(0 if ok else 1)" "$T0"
+          rm -f _s.json
+      - if: always()
+        run: rm -rf ~/.config/rclone "$RUNNER_TEMP/kod" "$RUNNER_TEMP/yeni.conf"
