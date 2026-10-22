@@ -1,0 +1,53 @@
+name: conf-betik-kuru
+
+# rclone gecisi sonrasi (Serdar 22 Eki madde 4): rclone.conf'u DOGRUDAN okuyan 3 betik, yeni conf ile YALNIZ kuru / salt okuma:
+# start_here_append.py --dry-run, start_here_insert.py --dry-run, pin_media_perms.py (fix, --apply YOK). Yazma YOK.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+
+jobs:
+  kuru:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: rclone + conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+          printf 'B999 - CONF KURU TESTI (yazilmaz)\n' > "$RUNNER_TEMP/b999.txt"
+      - name: start_here_append --dry-run
+        continue-on-error: true
+        run: |
+          set +e
+          python3 scripts/common/start_here_append.py --file "$RUNNER_TEMP/b999.txt" --dry-run
+          rc=$?; echo "CIKIS start_here_append $rc"; exit $rc
+      - name: start_here_insert --dry-run
+        continue-on-error: true
+        run: |
+          set +e
+          python3 scripts/common/start_here_insert.py --anchor "B93 - WALLPAPER YENI HAT + ETSY TASLAK ALTYAPISI (31 Agu 2026)" --text-file "$RUNNER_TEMP/b999.txt" --dry-run
+          rc=$?; echo "CIKIS start_here_insert $rc"; exit $rc
+      - name: pin_media_perms (fix, dry-run)
+        continue-on-error: true
+        run: |
+          set +e
+          python3 scripts/pinterest/pin_media_perms.py --mode fix
+          rc=$?; echo "CIKIS pin_media_perms $rc"; exit $rc
+      - if: always()
+        run: rm -rf ~/.config/rclone
