@@ -65,10 +65,12 @@ jobs:
           [ -n "$ornek" ] || { echo "::error::ornek medya yok"; exit 1; }
           for i in $(seq 1 40); do
             a=$(curl -s -o _a.html -w '%{http_code}' "$K/app/index.html"); b=$(curl -s -o _b.html -w '%{http_code}' "$K/app/privacy.html")
-            if [ "$a" = 200 ] && [ "$b" = 200 ] && grep -q "AstroLoveArt Drive Automation" _a.html && grep -q "Limited Use" _b.html; then break; fi
+            if [ "$a" = 200 ] && [ "$b" = 200 ] && cmp -s _a.html media/app/index.html && cmp -s _b.html media/app/privacy.html; then break; fi   # yayin = kaynak bayt
             echo "[$i/40] index $a privacy $b; 15 sn"; sleep 15
           done
           c=$(curl -s -o /dev/null -w '%{http_code}' "$K/$ornek")
           echo "SONUC index $a | privacy $b | mevcut medya ornegi $c"
-          [ "$a" = 200 ] && [ "$b" = 200 ] && [ "$c" = 200 ] || { echo "::error::prob FAIL"; exit 1; }
+          cmp -s _a.html media/app/index.html && cmp -s _b.html media/app/privacy.html && e=AYNI || e=FARKLI
+          echo "yayindaki icerik = kaynak: $e"
+          [ "$a" = 200 ] && [ "$b" = 200 ] && [ "$c" = 200 ] && [ "$e" = AYNI ] || { echo "::error::prob FAIL"; exit 1; }
           echo "PASS"
