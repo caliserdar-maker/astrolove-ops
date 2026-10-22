@@ -33,10 +33,12 @@ DEGIS_METIN = [  # by78_pin_plan.py ACIKLAMA A/B/C (21 Eki onayi)
     ('This personalized print joins', 'This personalized design joins'),
 ]
 DEGIS_ALT = [('on a personalized 8x10 paper anniversary print and a 5x7 card',  # by78_pin_zamanla.py alt_metin
-              'on a personalized 8x10 digital file and a 5x7 digital card')]
+              'on a personalized 8x10 digital file and a 5x7 digital card'),
+             # gercek kalip metricool_pin_gorsel_degistir.py:30 (Serdar 22 Eki karar 2)
+             ('paper anniversary print with names and date', 'paper anniversary printable art with names and date')]
 DEGIS_BASLIK = [(' Zodiac Paper Anniversary Print with Names', ' Zodiac Paper Anniversary Printable with Names'),
                 (' Zodiac Print with Your Names and Date', ' Zodiac Printable with Your Names and Date')]
-VAAT = re.compile(r'shipped 8x10 print|8x10 (?:paper anniversary )?print\b|shipped print|shipped to you|made and shipped|your print\b',
+VAAT = re.compile(r'shipped 8x10 print|8x10 (?:paper anniversary )?print\b|paper anniversary print\b|shipped print|shipped to you|made and shipped|your print\b',
                   re.I)
 TIRE = re.compile('[\\u2013\\u2014]')
 BASLIK_AZAMI = 100

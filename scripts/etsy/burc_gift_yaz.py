@@ -15,6 +15,8 @@ Modlar:
                -> yil donumu: uretim ortagi AYRI PATCH (production_partner_ids=""); 4xx ise FAIL degil, PANEL listesi
                -> geri okuma (10 sn arayla en fazla 3 deneme: metin + envanter) -> dogrulama. Ilk FAIL'de DUR.
             Envanter PUT ile PATCH arasinda kota DUR'u yok (yarim ilan birakmamak icin); ilan basina baslarken kalan >= 30 aranir.
+  hazirlik: ETSY'YE YAZAR (--onay SERDAR_BURC_GIFT). Yil donumune ozel YENI made_to_order 1-3 gun tanimi: 1 POST + geri okuma
+            (1517641240112 ortak ve 1512772362964 eski POD tanimi kullanilmaz; Serdar 22 Eki karar 3). yaz tanim ACMAZ.
   geri_al : ETSY'YE YAZAR (--onay SERDAR_GERI_AL). --yedek-dizin'deki <id>.json'dan baslik/etiket/aciklama/materials/profil/
             uretim ortagi, envanter (baski urunleri dahil, eski hazirlik) ve stil-gorsel baglarini geri yazar; geri okuma.
             Yalniz ILK HAL yedegi kabul edilir (BY envanteri 15/5; CANCER_LIBRA 10/0). State active degilse dokunmaz.
@@ -44,6 +46,7 @@ PANEL_HATA = re.compile(r"-> (400|409):")               # yalniz bu yanitlar 'pa
 BASKI = "Shipped print 8x10"
 ESKI_PROFIL, YENI_PROFIL = 318080539024, 318577242658   # BY Print 8x10 Worldwide -> BY Digital Free Worldwide (21 Eki, PASS)
 ORTAK_HAZIRLIK = 1517641240112                          # poster + kupa + BY ortak 4-7 gun tanimi: DEGISTIRILMEZ
+ESKI_1_3 = 1512772362964                                # eski POD 1-3 gun tanimi (B97, 7 Eyl): Serdar 22 Eki karar 3, KULLANILMAZ
 MATERIALS = "digital file"
 PILOT = [("poster", "ARIES_LIBRA"), ("kupa", "LEO_LEO"), ("yildonumu", "AQUARIUS_ARIES"),
          ("yildonumu", "SAGITTARIUS_TAURUS"), ("poster", "CAPRICORN_SAGITTARIUS")]
@@ -188,7 +191,7 @@ def hazirlik_listesi(api, shop):
 def _uygun(lst):
     return [d for d in lst if d.get("readiness_state") == "made_to_order" and d.get("min_processing_days") == 1
             and d.get("max_processing_days") == 3 and d.get("processing_time_unit", "days") == "days"
-            and d.get("readiness_state_id") != ORTAK_HAZIRLIK]
+            and d.get("readiness_state_id") not in (ORTAK_HAZIRLIK, ESKI_1_3)]
 
 
 def tek_post(api, path, data):
@@ -217,7 +220,8 @@ def hazirlik_bul(api, shop, olustur):
         print(f"hazirlik POST hatasi, liste yeniden okunuyor: {str(e)[:120]}")
     uygun = _uygun(hazirlik_listesi(api, shop))
     if len(uygun) != 1:
-        raise Dur(f"hazirlik tanimi olusturma sonrasi {len(uygun)} uygun tanim (1 beklenir)")
+        raise Dur(f"hazirlik tanimi olusturma sonrasi {len(uygun)} uygun tanim (1 beklenir; Etsy ayni degerli tanimi "
+                  f"yeniden kullanmis olabilir)")
     return uygun[0]["readiness_state_id"], "olusturuldu"
 
 
@@ -456,7 +460,7 @@ def geri_al(api, shop, lid, yedek, R):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--mod", required=True, choices=["yedek", "siparis", "yaz", "geri_al"])
+    ap.add_argument("--mod", required=True, choices=["yedek", "siparis", "yaz", "geri_al", "hazirlik"])
     ap.add_argument("--once", required=True)
     ap.add_argument("--sonra", required=True)
     ap.add_argument("--kume", default="cl")
@@ -464,7 +468,7 @@ def main():
     ap.add_argument("--yedek-dizin", default="")
     ap.add_argument("--out", default="_out")
     a = ap.parse_args()
-    if a.mod == "yaz" and a.onay != ONAY:
+    if a.mod in ("yaz", "hazirlik") and a.onay != ONAY:
         raise SystemExit(f"DUR: yaz modu --onay {ONAY} ister")
     if a.mod == "geri_al" and (a.onay != ONAY_GERI or not a.yedek_dizin):
         raise SystemExit(f"DUR: geri_al modu --onay {ONAY_GERI} ve --yedek-dizin ister")
@@ -484,6 +488,17 @@ def main():
     RAPOR = {"mod": a.mod, "kume": a.kume, "ilanlar": []}
     kod = 0
     try:
+        if a.mod == "hazirlik":    # Serdar 22 Eki karar 3: yil donumune ozel YENI 1-3 gun tanimi, 1 POST + geri okuma
+            RAPOR["hazirlik_once"] = [d.get("readiness_state_id") for d in hazirlik_listesi(api, shop)]
+            hid, nasil = hazirlik_bul(api, shop, olustur=True)
+            t = api.get(f"/shops/{shop}/readiness-state-definitions/{hid}") or {}
+            RAPOR["hazirlik"] = {"id": hid, "nasil": nasil, **{k: t.get(k) for k in ("readiness_state", "min_processing_days",
+                                                                                 "max_processing_days", "processing_time_unit")}}
+            RAPOR["hazirlik_sonra"] = [d.get("readiness_state_id") for d in hazirlik_listesi(api, shop)]
+            if (t.get("readiness_state"), t.get("min_processing_days"), t.get("max_processing_days")) != ("made_to_order", 1, 3):
+                raise Dur(f"hazirlik geri okuma FAIL: {RAPOR['hazirlik']}")
+            print("HAZIRLIK", json.dumps(RAPOR["hazirlik"]))
+            return
         if a.mod == "siparis":
             RAPOR["siparis"] = siparis_say(api, shop, by_ids)
             print("SIPARIS", json.dumps(RAPOR["siparis"]))
@@ -526,9 +541,13 @@ def main():
 
         def hazirlik_al():
             if "id" not in H:
-                H["id"], H["nasil"] = hazirlik_bul(api, shop, olustur=True)
+                H["id"], H["nasil"] = hazirlik_bul(api, shop, olustur=False)   # tanim yalniz --mod hazirlik ile acilir
+                if H["id"] is None:
+                    raise Dur("yil donumu 1-3 gun tanimi yok: once --mod hazirlik")
                 RAPOR["hazirlik"] = dict(H)
             return H["id"]
+        if any(i in by_ids for i in ids):
+            hazirlik_al()    # tanim yoksa HICBIR ilana yazmadan DUR (yarim kume birakilmaz)
         t0 = time.time()
         for n, lid in enumerate(ids, 1):
             R = {"listing_id": lid, "aile": sonra[lid]["aile"], "cift": sonra[lid]["cift"]}

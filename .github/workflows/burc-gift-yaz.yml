@@ -10,9 +10,9 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-      mod: {description: "yedek | siparis | yaz | geri_al", required: true, default: "yedek"}
+      mod: {description: "yedek | siparis | hazirlik | yaz | geri_al", required: true, default: "yedek"}
       kume: {description: "cl | pilot | kalan | id1,id2 (yedek icin hepsi de olur)", required: true, default: "cl"}
-      onay: {description: "yaz icin SERDAR_BURC_GIFT, geri_al icin SERDAR_GERI_AL", required: false, default: ""}
+      onay: {description: "yaz/hazirlik icin SERDAR_BURC_GIFT, geri_al icin SERDAR_GERI_AL", required: false, default: ""}
       yedek_dizin: {description: "geri_al: TEMP/BURC_GIFT_20261022/ altindaki yedek klasoru (orn. on_yedek_123/YEDEK_yaz_cl)", required: false, default: ""}
 env:
   SONRA_SHA: 12403d91f229946c1ce43bbfc1bfeaa8db5359fdcf6e7d2299ee70ba68eead4b
@@ -28,7 +28,7 @@ jobs:
           [[ "$KUME" =~ ^(cl|pilot|kalan|hepsi|[0-9]+(,[0-9]+)*)$ ]] || { echo "::error::kume"; exit 1; }
           case "$MOD" in
             yedek|siparis) [ -z "$YD" ] || { echo "::error::yedek_dizin yalniz geri_al icin"; exit 1; } ;;
-            yaz) [ "$ONAY" = "SERDAR_BURC_GIFT" ] || { echo "::error::onay yok"; exit 1; } ;;
+            yaz|hazirlik) [ "$ONAY" = "SERDAR_BURC_GIFT" ] || { echo "::error::onay yok"; exit 1; } ;;
             geri_al) [ "$ONAY" = "SERDAR_GERI_AL" ] || { echo "::error::onay yok"; exit 1; }
                      [[ "$YD" =~ ^[A-Za-z0-9_,-]+(/[A-Za-z0-9_,-]+)*$ ]] || { echo "::error::yedek_dizin"; exit 1; } ;;
             *) echo "::error::mod"; exit 1 ;;
