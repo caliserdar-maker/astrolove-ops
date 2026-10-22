@@ -1,0 +1,75 @@
+name: media-app-sayfa
+
+# RCLONE Testing -> Production (Serdar 22 Eki): Google Branding icin iki sayfa astrolove-media Pages'e:
+#   app/index.html (ic arac tanimi) + app/privacy.html (gizlilik). Kaynak: pages/media_app/ (bu depo).
+# Yalniz app/ altina yazar; baska yol degisirse DUR. Mevcut pin/IG yollarina dokunmaz. Etsy yok.
+# Kapilar: uzun/orta tire 0, "AstroLove" yalniz (Art'siz) 0, diff yalniz 2 dosya; yayindan sonra iki URL 200 + icerik,
+# kontrol icin mevcut bir medya dosyasi 200.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      iletisim: {description: "privacy.html iletisim e-postasi", required: true}
+
+jobs:
+  sayfa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with: {path: ops}
+      - uses: actions/checkout@v4
+        with:
+          repository: caliserdar-maker/astrolove-media
+          token: ${{ secrets.OPS_ADMIN_TOKEN }}
+          path: media
+      - name: Sayfalari hazirla + kapilar
+        env: {ILETISIM: "${{ inputs.iletisim }}"}
+        run: |
+          set -euo pipefail
+          [[ "$ILETISIM" =~ ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$ ]] || { echo "::error::iletisim e-posta bicimi"; exit 1; }
+          mkdir -p media/app
+          cp ops/pages/media_app/index.html media/app/index.html
+          sed "s/__ILETISIM__/$ILETISIM/g" ops/pages/media_app/privacy.html > media/app/privacy.html
+          python3 - <<'PY'
+          import re, sys
+          hata = 0
+          for f in ("media/app/index.html", "media/app/privacy.html"):
+              t = open(f, encoding="utf-8").read()
+              for ad, rx in (("yer tutucu", r"__ILETISIM__"), ("uzun/orta tire", "[—–]"), ("AstroLove (Art'siz)", r"AstroLove(?!Art)")):
+                  n = len(re.findall(rx, t))
+                  print(f"{f} {ad}: {n}")
+                  hata += n
+          sys.exit(1 if hata else 0)
+          PY
+          cd media && git add -A app
+          git diff --cached --name-only | tee _d.txt
+          bad=$(grep -vxE "app/(index|privacy)\.html" _d.txt || true); rm -f _d.txt
+          [ -z "$bad" ] || { echo "::error::app/ disinda degisiklik"; exit 1; }
+      - name: Push
+        working-directory: media
+        run: |
+          set -euo pipefail
+          if git diff --cached --quiet; then echo "degisiklik yok"; exit 0; fi
+          git config user.name "astrolove-ops"
+          git config user.email "actions@users.noreply.github.com"
+          git commit -qm "app: AstroLoveArt Drive Automation ana sayfa + gizlilik (Google Branding)"
+          git push
+          echo "push: $(git rev-parse --short HEAD)"
+      - name: Yayin probu (en fazla 10 dk)
+        run: |
+          set -euo pipefail
+          K=https://caliserdar-maker.github.io/astrolove-media
+          ornek=$(cd media && git ls-files pinterest | grep -iE '\.(jpg|png)$' | head -1)
+          for i in $(seq 1 40); do
+            a=$(curl -s -o _a.html -w '%{http_code}' "$K/app/index.html"); b=$(curl -s -o _b.html -w '%{http_code}' "$K/app/privacy.html")
+            if [ "$a" = 200 ] && [ "$b" = 200 ] && grep -q "AstroLoveArt Drive Automation" _a.html && grep -q "Limited Use" _b.html; then break; fi
+            echo "[$i/40] index $a privacy $b; 15 sn"; sleep 15
+          done
+          c=$(curl -s -o /dev/null -w '%{http_code}' "$K/$ornek")
+          echo "SONUC index $a | privacy $b | mevcut medya ornegi $c"
+          [ "$a" = 200 ] && [ "$b" = 200 ] && [ "$c" = 200 ] || { echo "::error::prob FAIL"; exit 1; }
+          echo "PASS"
