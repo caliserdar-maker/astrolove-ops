@@ -40,7 +40,7 @@ on:
 permissions:
   contents: read
 env:
-  GPT_REF: ${{ vars.SIPARIS_GPT_REF || '243c9a49e97d37829dccf4308e57e0d4279f225c' }}   # 22 Eki A3 poster kiyasi FAIL (39850555034): temiz 66ef5e04'e gecis geri alindi
+  GPT_REF: ${{ vars.SIPARIS_GPT_REF || '66ef5e0404a957af2d185631db1217c57bc79913' }}   # 22 Eki A3 poster kiyasi FAIL (39850555034): temiz 66ef5e04'e gecis geri alindi
   ESKI_RENK_REF: ${{ vars.ESKI_RENK_REF || 'b8c8c4b17478fd956167577fa69913d06b9eb955' }}
   WP_REF: ${{ vars.SIPARIS_WP_REF || '360cbef947994c7d4b3c9ae95275f778a18af716' }}
 jobs:
