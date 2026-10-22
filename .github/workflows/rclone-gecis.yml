@@ -13,8 +13,9 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-      mod: {description: "istemci_test | yedek", required: true, default: "istemci_test"}
+      mod: {description: "istemci_test | yedek | secret_son4", required: true, default: "istemci_test"}
       onay: {description: "yedek icin SERDAR_RCLONE", required: false, default: ""}
+      beklenen: {description: "secret_son4: Console'daki ENABLED secret'in son 4 karakteri (loga ve env'e yazilmaz)", required: false, default: ""}
 
 env:
   CLIENT_ID: "563638674023-srqntttm0dddc60frdrocmoas38sv9q4.apps.googleusercontent.com"
@@ -29,7 +30,7 @@ jobs:
         env: {MOD: "${{ inputs.mod }}", ONAY: "${{ inputs.onay }}"}
         run: |
           case "$MOD" in
-            istemci_test) ;;
+            istemci_test|secret_son4) ;;
             yedek) [ "$ONAY" = "SERDAR_RCLONE" ] || { echo "::error::yedek icin onay yok"; exit 1; } ;;
             *) echo "::error::mod"; exit 1 ;;
           esac
@@ -53,6 +54,23 @@ jobs:
                    "unauthorized_client": "FAIL: istemci bu akisa yetkili degil"}.get(kod, "BILINMIYOR")
           print(f"ISTEMCI_TEST http hata kodu: {kod} -> {sonuc}")
           raise SystemExit(0 if kod == "invalid_grant" else 1)
+          PY
+      - name: secret_son4 (GOOGLE_CLIENT_SECRET son 4 = beklenen mi; yalniz EVET/HAYIR)
+        if: ${{ inputs.mod == 'secret_son4' }}
+        env:
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          # beklenen deger env'e / betik metnine KONMAZ (env blogu log basligina basilir): olay dosyasindan okunur, maskelenir
+          python3 - <<'PY'
+          import json, os, sys
+          b = (json.load(open(os.environ["GITHUB_EVENT_PATH"])).get("inputs") or {}).get("beklenen", "").strip()
+          if b:
+              print(f"::add-mask::{b}", flush=True)
+          s = os.environ.get("GOOGLE_CLIENT_SECRET", "")
+          if len(b) != 4 or len(s) < 8:
+              print("SECRET_SON4: GECERSIZ GIRDI (beklenen 4 karakter olmali / secret bos)"); sys.exit(1)
+          print("SECRET_SON4:", "EVET" if s[-4:] == b else "HAYIR")
           PY
       - name: yedek (RCLONE_CONF_B64 -> RCLONE_CONF_B64_YEDEK; deger loga yazilmaz)
         if: ${{ inputs.mod == 'yedek' }}
