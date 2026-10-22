@@ -15,7 +15,8 @@ import os
 import re
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 from urllib.parse import urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -39,6 +40,7 @@ VAAT = re.compile(r'shipped 8x10 print|8x10 (?:paper anniversary )?print\b|shipp
                   re.I)
 TIRE = re.compile('[\\u2013\\u2014]')
 BASLIK_AZAMI = 100
+YAYIN_PAYI = timedelta(hours=2)   # yayina 2 saatten az kalan pine yazilmaz (metricool_pin_gorsel_degistir ATLANDI_2SAAT kurali)
 # Yalniz degisimden sonra 100'u asan basliklara (Serdar 22 Eki: "100'e kisaltilir, anlam korunur"): burc adlari zaten
 # zodyak oldugunu soyler, "Zodiac" duser; "Printable with Names" kalir. Hala uzunsa UZUN (yazilmaz).
 KISALT_BASLIK = [(' Zodiac Paper Anniversary Printable with Names', ' Paper Anniversary Printable with Names')]
@@ -82,7 +84,7 @@ def satir(p):
             'durum': pin_durum(p), 'pinLink': pd.get('pinLink', ''), 'degisen': '|'.join(degisen), 'kalan_vaat': '|'.join(kalan),
             'eski_baslik': a['baslik'], 'yeni_baslik': h['baslik'], 'yeni_baslik_uzunluk': len(h['baslik']),
             'eski_metin': a['metin'], 'yeni_metin': h['metin'], 'eski_alt': ' || '.join(a['alt']), 'yeni_alt': ' || '.join(h['alt']),
-            'islem': islem, '_a': a, '_h': h}
+            'islem': islem, '_a': a, '_h': h, '_p': p}
 
 
 def medya_adresleri(dugum, yol=''):
@@ -157,8 +159,16 @@ def main():
     hedef = [r for r in satirlar if r['durum'] == 'PENDING' and r['islem'] == 'DEGISECEK']
     print(f"pencere {a.bas}..{a.son} | liste {len(liste)} gonderi, pinterest {len(pinler)} | {dict(sorted(say.items()))} | "
           f"hedef (PENDING+DEGISECEK) {len(hedef)} | medya host {len(host_say)}, Drive adresi {len(drive)}")
+    # kopya kapisi (bagimsiz inceleme 22 Eki): bekleyen pinlerde ayni uuid ya da ayni (saat + pinLink) varsa yazma yok
+    bek = [r for r in satirlar if r['durum'] == 'PENDING']
+    uu = [r['uuid'] for r in bek if r['uuid']]
+    sp = [(r['tarih'], r['pinLink']) for r in bek]
+    kopya = sorted({x for x in uu if uu.count(x) > 1}) + sorted({str(x) for x in sp if sp.count(x) > 1})
+    print(f'kopya kapisi: bekleyen {len(bek)}, kopya {len(kopya)}')
     if a.mod == 'kuru':
         return 0
+    if kopya:
+        raise SystemExit(f'DUR: bekleyen pinlerde kopya var ({len(kopya)}); yazma yok')
 
     sec = sorted(hedef, key=lambda r: r['tarih'], reverse=True)
     if a.mod == 'tek':
@@ -168,6 +178,11 @@ def main():
     with open(os.path.join(a.cikti, f'ONCE_SONRA_{a.mod}.csv'), 'w', newline='', encoding='utf-8') as f:
         w = csv.DictWriter(f, fieldnames=k2, lineterminator='\n', extrasaction='ignore'); w.writeheader()
         for i, r in enumerate(sec, 1):
+            pdt = (r['_p'].get('publicationDate') or {})
+            yayin = datetime.fromisoformat(pdt.get('dateTime', '')).replace(tzinfo=ZoneInfo(pdt.get('timezone') or TZ))
+            if yayin - datetime.now(timezone.utc) < YAYIN_PAYI:
+                sonuc.append(dict(r, sonuc='ATLANDI_2SAAT yayina 2 saatten az'))
+                w.writerow(sonuc[-1]); f.flush(); continue
             once = mc.istek('GET', f"/v2/scheduler/posts/{r['id']}", yok404=True)
             once = None if once is YOK or once is None else veri(once)
             if once is None or pin_durum(once) != 'PENDING' or alanlar(once) != r['_a']:
