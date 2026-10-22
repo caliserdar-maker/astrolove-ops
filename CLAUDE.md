@@ -97,9 +97,12 @@ Hedef: Serdar isim + burc yeri + tagline verir, 15 dk icinde 5 PDF Drive'da (Tes
 - CIFT ANAHTARI ALFABETIK: CAPRICORN_SAGITTARIUS (SAGITTARIUS_CAPRICORN degil). isim1 = cift adindaki ILK burc
   (posterde sol), isim2 = ikinci burc (sag). Ters sira kaynak bulamaz, tum isler ~1 dk'da FAIL (Test 2).
 - DISPATCH (siparis-dijital): Content-Type: application/json; mesaj girdisi `mesaj_b64` (UTF-8 base64);
-  `renk_ref` HER ZAMAN acikca verilir; siparis girisi (siparis-giris) bunu kendisi verir: ESKI_RENK_REF = b8c8c4b
+  `renk_ref` HER ZAMAN acikca verilir; siparis girisi (siparis-giris) bunu kendisi verir (asagidakiler is akisi VARSAYILANI;
+  repo degiskeni tanimliysa o gecerli: SIPARIS_GPT_REF tanimsiz (22 Eki kosu 39850280226), ESKI_RENK_REF / SIPARIS_WP_REF
+  dogrulanmadi). ESKI_RENK_REF = b8c8c4b
   (siparis-baski-v1 dal basindaki DB ton esitleme commit'leri DAHIL DEGIL), yalniz CI ve anahtar kapaliyken MB/DB/PW.
-  Anahtar acikken (SIPARIS_GPT_ACIK, varsayilan 1) MB/DB/PW yeni yol: siparis-gpt GPT_REF 243c9a4. WP: 360cbef. kaynak-olcum
+  Anahtar acikken (SIPARIS_GPT_ACIK, varsayilan 1) MB/DB/PW yeni yol: siparis-gpt GPT_REF 243c9a4. WP: 360cbef (giris WP'de de
+  renk_ref verir, siparis-giris.yml:97). kaynak-olcum
   varsayilani b8c8c4b. siparis-dijital renk_ref varsayilani 8a8b370 ESKI ve girisce kullanilmaz (Serdar 22 Eki A2/A2-not;
   degistirilmedi). Temiz dallara gecis (P0.7) yalniz kupada (0196e37a, A3 kiyasi PASS); poster A3 kiyasi FAIL. wp_pod_kod v1;
   receipt yalniz rakam (test: 900000000N, N >= 1).
