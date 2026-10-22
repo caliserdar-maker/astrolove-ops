@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
-"""AI beyani + marka adi (RU aciklama) ilan yazimi (Serdar 22 Eki: AI beyani kararı + marka plani B, once 4570143815).
+"""AI beyani + marka adi (RU aciklama) ilan yazimi (Serdar 22 Eki karari; 22 Eki gece B-1/B-2: yeni cumleler, uc aile).
 
-Beyan cumlesi (aynen, Serdar 22 Eki): BEYAN. Yer: EN aciklamada "Our original design joins your two zodiac symbols..." cumlesini
-  iceren paragraftan hemen sonra yeni paragraf. Zaten varsa eklenmez (idempotans). Capa paragrafi tam 1 olmali, yoksa DUR.
-Marka: RU ceviri aciklamasinda Art'siz "AstroLove" -> "AstroLoveArt" (RU baslik ve etiketlere dokunulmaz; sayilari raporlanir).
+EN beyan (aynen, B-1): BEYAN; eski poster cumlesi ESKI_BEYAN varsa kaldirilir (paragraf olarak). Yer (aileye gore, AILE):
+  poster: 1. paragraftan sonra (1. paragraf CAPA["poster"] icermeli); kupa: 1. paragraftan sonra (1. paragraf CAPA["kupa"]);
+  yil donumu: CAPA["yil"] iceren paragraftan sonra (tam 1 olmali). Kosul tutmazsa DUR. Zaten varsa eklenmez (idempotans).
+RU beyan (aynen, B-2): RU_BEYAN, poster ve kupa RU aciklamasinda 1. paragraftan sonra (yil donumunde RU ceviri yok).
+Marka: RU aciklamada Art'siz "AstroLove" -> "AstroLoveArt" (RU baslik ve etiketlere dokunulmaz; sayilari raporlanir).
+Aile, ilanin magaza bolumunden (BOLUM_AILE).
 
 Modlar:
-  kuru (varsayilan, SALT OKUMA): tum aktif ilanlar (sayfali + /listings/batch Translations) -> bolum basina capa / beyan / RU marka
-       sayilari (BEYAN_KURU.json). --ilan verilirse o ilanlarin planlanan EN/RU degisikligi PLAN_<id>.txt. --gorsel-indir: --ilan
-       ilanlarinin tum galeri gorselleri (Etsy CDN, kota harcamaz) GORSEL_<id>/<rank>.jpg (kart ornegi icin).
+  kuru (varsayilan, SALT OKUMA): tum aktif ilanlar (sayfali + /listings/batch Translations) -> aile basina plan sayilari
+       (BEYAN_KURU.json). --ilan verilirse o ilanlarin EN/RU plani PLAN_<id>.txt. --gorsel-indir: --ilan galeri gorselleri
+       (Etsy CDN, kota harcamaz) GORSEL_<id>/<rank>.jpg.
   yaz (--onay SERDAR_BEYAN_PILOT, yalniz 1 ilan): GET -> state active degilse DUR (CLAUDE.md 7 Eyl: updateListing taslagi yayina
        alir) -> yedek (ilan + RU ceviri + envanter) -> PATCH description (EN) -> PUT translations/ru (baslik ve etiketler aynen)
        -> geri okuma (en fazla 3 deneme, 10 sn): EN/RU beklenenle esit (html.unescape), state active, baslik/etiket/fiyat/adet ve
@@ -27,9 +30,17 @@ import urllib.request
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from etsy_common import Etsy, TokenStore, mask  # noqa: E402
 
-BEYAN = ("Each fusion symbol is an original AstroLoveArt design. We use AI tools to help render the gold surface finish, "
-         "and every piece is reviewed and finished by us.")
-CAPA = "Our original design joins your two zodiac symbols"
+BEYAN = ("Every fusion symbol begins as an original AstroLoveArt design. We use AI tools to help create the artwork, "
+         "and every design is reviewed and finished by us.")
+ESKI_BEYAN = ("Each fusion symbol is an original AstroLoveArt design. We use AI tools to help render the gold surface finish, "
+              "and every piece is reviewed and finished by us.")
+RU_BEYAN = ("Каждый символ, объединяющий два знака зодиака, создаётся на основе оригинального дизайна AstroLoveArt. "
+            "При создании изображений мы используем инструменты искусственного интеллекта, а затем сами проверяем и "
+            "дорабатываем каждую работу.")
+BOLUM_AILE = {"Zodiac Couple Posters": "poster", "Zodiac Couple Mugs": "kupa", "1st Anniversary Gifts": "yil"}
+CAPA = {"poster": "Our original design joins your two zodiac symbols",
+        "kupa": "your two zodiac symbols join into one original fusion symbol",
+        "yil": "Every AstroLoveArt design merges two zodiac signs into one shared symbol"}
 MARKA = re.compile(r"AstroLove(?!Art)")
 TIRE = re.compile("[—–]")
 ONAY = "SERDAR_BEYAN_PILOT"
@@ -50,23 +61,50 @@ def norm(s):
     return html.unescape(s or "").replace("\r\n", "\n")
 
 
-def en_plan(desc):
-    """(yeni aciklama | None = degisiklik yok, not). Capa paragrafi tam 1 degilse Dur."""
+def en_plan(desc, aile):
+    """(yeni aciklama | None = degisiklik yok, not). Yer kosulu tutmazsa Dur."""
+    if aile not in CAPA:
+        raise Dur(f"aile bilinmiyor ({aile})")
     d = norm(desc)
-    if BEYAN in d:
-        return None, "beyan zaten var"
     par = d.split("\n\n")
-    i = [k for k, p in enumerate(par) if CAPA in p]
-    if len(i) != 1:
-        raise Dur(f"capa paragrafi {len(i)} kez (1 olmali)")
-    par.insert(i[0] + 1, BEYAN)
-    return "\n\n".join(par), f"capa paragrafi {i[0] + 1}. paragraf; beyan {i[0] + 2}. paragraf olarak eklenir"
+    eski = sum(p.strip() == ESKI_BEYAN for p in par)
+    if ESKI_BEYAN in d and not eski:
+        raise Dur("eski beyan ayri paragraf degil")
+    par = [p for p in par if p.strip() != ESKI_BEYAN]
+    if BEYAN in d:
+        if eski:
+            return "\n\n".join(par), "beyan var; eski beyan kaldirildi"
+        return None, "beyan zaten var"
+    if aile == "yil":
+        i = [k for k, p in enumerate(par) if CAPA[aile] in p]
+        if len(i) != 1:
+            raise Dur(f"capa paragrafi {len(i)} kez (1 olmali)")
+        k = i[0]
+    else:
+        if CAPA[aile] not in par[0] or sum(CAPA[aile] in p for p in par) != 1:
+            raise Dur("1. paragraf capa icermiyor ya da capa birden cok")
+        k = 0
+    par.insert(k + 1, BEYAN)
+    return "\n\n".join(par), (f"{k + 1}. paragraftan sonra eklendi" + ("; eski beyan kaldirildi" if eski else ""))
 
 
-def ru_plan(desc):
+def ru_plan(desc, aile):
+    """(yeni RU aciklama | None, Art'siz marka sayisi, not). Beyan poster ve kupada 1. paragraftan sonra."""
     d = norm(desc)
     n = len(MARKA.findall(d))
-    return (MARKA.sub("AstroLoveArt", d) if n else None), n
+    yeni = MARKA.sub("AstroLoveArt", d)
+    notu = f"marka {n}"
+    if aile in ("poster", "kupa") and d.strip():
+        if RU_BEYAN in yeni:
+            notu += "; RU beyan zaten var"
+        else:
+            par = yeni.split("\n\n")
+            if len(par) < 2:
+                raise Dur("RU aciklamada paragraf yok (tek blok)")
+            par.insert(1, RU_BEYAN)
+            yeni = "\n\n".join(par)
+            notu += "; RU beyan 1. paragraftan sonra"
+    return (yeni if yeni != d else None), n, notu
 
 
 def ru_ceviri(L):
@@ -111,41 +149,49 @@ def kuru(api, shop, a, out):
         d = norm(L.get("description"))
         ru = ru_ceviri(L) or {}
         b = bolum.get(str(L.get("shop_section_id")), "?")
+        aile = BOLUM_AILE.get(b, "?")
         try:
-            plan = "ekle" if en_plan(d)[0] else "var"
+            en = "ekle" if en_plan(d, aile)[0] else "var"
         except Dur as e:
-            plan = f"DUR ({e})"
-        x = dict(listing_id=L.get("listing_id"), bolum=b, state=L.get("state"), capa=sum(CAPA in p for p in d.split("\n\n")),
-                 beyan=d.count(BEYAN), en_plan=plan, en_marka=len(MARKA.findall(d)), ru_var=bool(ru),
-                 ru_aciklama_marka=len(MARKA.findall(norm(ru.get("description")))),
+            en = f"DUR ({e})"
+        try:
+            rp = ru_plan(ru.get("description"), aile) if ru else (None, 0, "RU yok")
+            rus = "RU yok" if not ru else ("yaz" if rp[0] else "degisiklik yok")
+        except Dur as e:
+            rp, rus = (None, 0, ""), f"DUR ({e})"
+        x = dict(listing_id=L.get("listing_id"), bolum=b, aile=aile, state=L.get("state"), en_plan=en, ru_plan=rus,
+                 beyan=d.count(BEYAN), eski_beyan=d.count(ESKI_BEYAN), en_marka=len(MARKA.findall(d)),
+                 ru_aciklama_marka=rp[1], ru_beyan=norm(ru.get("description")).count(RU_BEYAN),
                  ru_baslik_marka=len(MARKA.findall(norm(ru.get("title")))),
                  ru_etiket_marka=sum(len(MARKA.findall(t)) for t in ru.get("tags") or []))
         satir.append(x)
-        o = oz.setdefault(b, dict(ilan=0, capa_1=0, beyan_var=0, en_plan_ekle=0, en_plan_dur=0, en_marka_ilan=0, ru_yok=0,
-                                  ru_aciklama_marka_ilan=0, ru_aciklama_marka_toplam=0, ru_baslik_marka=0, ru_etiket_marka=0))
+        o = oz.setdefault(aile, dict(ilan=0, en_ekle=0, en_var=0, en_dur=0, eski_beyan=0, ru_yok=0, ru_yaz=0, ru_dur=0,
+                                     ru_marka_ilan=0, ru_marka_toplam=0, ru_beyan_var=0, en_marka=0, ru_baslik_marka=0,
+                                     ru_etiket_marka=0, state_disi=0))
         o["ilan"] += 1
-        o["capa_1"] += x["capa"] == 1
-        o["beyan_var"] += x["beyan"] > 0
-        o["en_plan_ekle"] += plan == "ekle"
-        o["en_plan_dur"] += plan.startswith("DUR")
-        o["en_marka_ilan"] += x["en_marka"] > 0
-        o["ru_yok"] += not x["ru_var"]
-        o["ru_aciklama_marka_ilan"] += x["ru_aciklama_marka"] > 0
-        o["ru_aciklama_marka_toplam"] += x["ru_aciklama_marka"]
-        o["ru_baslik_marka"] += x["ru_baslik_marka"]
-        o["ru_etiket_marka"] += x["ru_etiket_marka"]
+        o["en_ekle"] += en == "ekle"; o["en_var"] += en == "var"; o["en_dur"] += en.startswith("DUR")
+        o["eski_beyan"] += x["eski_beyan"] > 0
+        o["ru_yok"] += rus == "RU yok"; o["ru_yaz"] += rus == "yaz"; o["ru_dur"] += rus.startswith("DUR")
+        o["ru_marka_ilan"] += rp[1] > 0; o["ru_marka_toplam"] += rp[1]; o["ru_beyan_var"] += x["ru_beyan"] > 0
+        o["en_marka"] += x["en_marka"] > 0
+        o["ru_baslik_marka"] += x["ru_baslik_marka"]; o["ru_etiket_marka"] += x["ru_etiket_marka"]
+        o["state_disi"] += L.get("state") != "active"
     (out / "BEYAN_KURU.json").write_text(json.dumps(dict(ozet=oz, ilanlar=satir), ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"AKTIF {len(ilan)} ilan (liste {len(ids)})", flush=True)
     for b, o in sorted(oz.items()):
-        print(f"BOLUM {b}: {json.dumps(o, ensure_ascii=False)}", flush=True)
+        print(f"AILE {b}: {json.dumps(o, ensure_ascii=False)}", flush=True)
+    for x in satir:
+        if x["en_plan"].startswith("DUR") or x["ru_plan"].startswith("DUR"):
+            print(f"DUR ilan {x['listing_id']} ({x['aile']}): EN {x['en_plan']} | RU {x['ru_plan']}", flush=True)
     for lid in a.ilan:
         L = next((x for x in ilan if str(x.get("listing_id")) == lid), None)
         if not L:
             print(f"PLAN {lid}: aktif listede yok", flush=True); continue
         d = norm(L.get("description")); ru = ru_ceviri(L) or {}
-        rapor = [f"ILAN {lid} | state {L.get('state')} | bolum {bolum.get(str(L.get('shop_section_id')))}"]
+        aile = BOLUM_AILE.get(bolum.get(str(L.get("shop_section_id"))), "?")
+        rapor = [f"ILAN {lid} | state {L.get('state')} | aile {aile}"]
         try:
-            yeni, notu = en_plan(d)
+            yeni, notu = en_plan(d, aile)
             rapor += [f"EN: {notu}"]
             if yeni:
                 par = yeni.split("\n\n"); k = par.index(BEYAN)
@@ -153,12 +199,18 @@ def kuru(api, shop, a, out):
                           par[k + 1] if k + 1 < len(par) else "(son)"]
         except Dur as e:
             rapor += [f"EN: DUR ({e})"]
-        ry, n = ru_plan(ru.get("description"))
-        rapor += [f"RU aciklama: Art'siz AstroLove {n} kez; RU baslik {len(MARKA.findall(norm(ru.get('title'))))}, "
-                  f"RU etiket {sum(len(MARKA.findall(t)) for t in ru.get('tags') or [])} (dokunulmaz)"]
-        if ry:
-            eski = norm(ru.get("description")).split("\n"); yeni_ru = ry.split("\n")
-            rapor += [f"RU satir: - {e}\n          + {y}" for e, y in zip(eski, yeni_ru) if e != y]
+        if ru:
+            try:
+                ry, n, rnot = ru_plan(ru.get("description"), aile)
+                rapor += [f"RU: {rnot}; RU baslik marka {len(MARKA.findall(norm(ru.get('title'))))}, "
+                          f"RU etiket marka {sum(len(MARKA.findall(t)) for t in ru.get('tags') or [])} (dokunulmaz)"]
+                if ry:
+                    par = ry.split("\n\n")
+                    rapor += ["--- RU yeni ilk 3 paragraf ---"] + par[:3]
+            except Dur as e:
+                rapor += [f"RU: DUR ({e})"]
+        else:
+            rapor += ["RU: ceviri yok"]
         (out / f"PLAN_{lid}.txt").write_text("\n".join(rapor) + "\n", encoding="utf-8")
         print("\n".join(rapor), flush=True)
         if a.gorsel_indir:
@@ -183,14 +235,16 @@ def yaz(api, shop, lid, out):
     (out / f"YEDEK_{lid}.json").write_text(json.dumps(dict(ilan=L, ru=ru, envanter=inv), ensure_ascii=False, indent=1), encoding="utf-8")
     if L.get("state") != "active":
         raise Dur(f"state {L.get('state')} (active degil): updateListing cagrilmaz")
-    en_yeni, en_not = en_plan(L.get("description"))
-    ru_yeni, ru_n = ru_plan(ru.get("description")) if ru else (None, 0)
-    for t in (en_yeni, ru_yeni):
-        if t and TIRE.search(t):
-            raise Dur("yeni metinde uzun/orta tire")
+    bolum = {str(s["shop_section_id"]): s.get("title") for s in (api.get(f"/shops/{shop}/sections") or {}).get("results") or []}
+    aile = BOLUM_AILE.get(bolum.get(str(L.get("shop_section_id"))), "?")
+    en_yeni, en_not = en_plan(L.get("description"), aile)
+    ru_yeni, ru_n, ru_not = ru_plan(ru.get("description"), aile) if ru else (None, 0, "RU yok")
+    for yeni_, eski_ in ((en_yeni, L.get("description")), (ru_yeni, ru.get("description"))):
+        if yeni_ and len(TIRE.findall(yeni_)) > len(TIRE.findall(norm(eski_))):
+            raise Dur("yazim uzun/orta tire ekliyor")
     kota(api)   # taban 10 (CLAUDE.md); baska taban Serdar onayi olmadan konmaz
     k0, sat0 = korunan(L), satilabilir(inv)
-    R = dict(ilan=lid, en=en_not, ru_marka_once=ru_n, ru_ceviri="var" if ru else "YOK (RU yazilmadi)", yazildi=[])
+    R = dict(ilan=lid, aile=aile, en=en_not, ru=ru_not, ru_marka_once=ru_n, ru_ceviri="var" if ru else "YOK (RU yazilmadi)", yazildi=[])
     if en_yeni:
         api.patch(f"/shops/{shop}/listings/{lid}", {"description": en_yeni}); R["yazildi"].append("EN description (PATCH)")
     if ru_yeni:
@@ -221,7 +275,8 @@ def yaz(api, shop, lid, out):
     if satilabilir(inv1) != sat0:
         hata.append(f"satilabilir teklif {sat0} -> {satilabilir(inv1)}")
     d1, r1 = norm(y.get("description")), norm(yru.get("description"))
-    R["sonra"] = dict(state=y.get("state"), beyan=d1.count(BEYAN), en_marka=len(MARKA.findall(d1)),
+    R["sonra"] = dict(state=y.get("state"), beyan=d1.count(BEYAN), eski_beyan=d1.count(ESKI_BEYAN), ru_beyan=r1.count(RU_BEYAN),
+                      en_marka=len(MARKA.findall(d1)),
                       ru_marka=len(MARKA.findall(r1)), ru_astroloveart=r1.count("AstroLoveArt"), satilabilir=satilabilir(inv1),
                       tire=len(TIRE.findall(d1)))
     R["hata"], R["sonuc"] = hata, ("FAIL" if hata else "PASS")
