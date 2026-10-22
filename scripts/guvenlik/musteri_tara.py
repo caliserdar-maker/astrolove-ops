@@ -29,6 +29,7 @@ IZINLI_ALAN = ("github.com", "noreply.github.com", "users.noreply.github.com", "
 IZINLI_EPOSTA_SHA = {"b7f5f765c9f06afbf4fdd09c054db80da908639fdff0a8efb3a466cf48f9ae25"}   # magaza sahibi (SAHIP_EPOSTA); deger depoda tutulmaz
 DOSYA_UZANTI = re.compile(r"\.(png|jpe?g|gif|svg|webp|js|css|py|json|txt|md|csv|ya?ml|zip|pdf|ttf|woff2?)$", re.I)
 TEST_RECEIPT = re.compile(r"^(9000000\d{3}|999001|900000000\d)$")
+SORU = r"(?:Personali[sz]ation|Name under [A-Za-z]+|(?:Left|Right) name|Your message)"
 KALIP = {
     "eposta": re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}"),
     "receipt_no": re.compile(r"receipt(?:_id|Id| id|\b)[^0-9\n]{0,25}?(\d{6,12})", re.I),
@@ -37,10 +38,13 @@ KALIP = {
     "adres": re.compile(r'"(first_line|second_line|formatted_address|line1|line2|postalOrZipCode|townOrCity|zip|city)"\s*:\s*"([^"]{2,})"'),
     "telefon": re.compile(r'"(phone|phoneNumber|phone_number|telephone)"\s*:\s*"([^"]{5,})"', re.I),
     "alici_alani": re.compile(r'"(buyer_email|buyer_name|buyer_user_id|name_on_order)"\s*:\s*"?([^",}]{2,})'),
-    "kisisellestirme": re.compile(r'"formatted_name"\s*:\s*"Personali[sz]ation[^"]*"\s*,\s*"formatted_value"\s*:\s*"([^"]{1,})"'
-                                 r'|"formatted_value"\s*:\s*"([^"]{1,})"\s*,\s*"formatted_name"\s*:\s*"Personali[sz]ation'
+    # soru bicimleri prodigi/kisisel_siparis.py:26 SORU_RE ile ayni (Serdar 22 Eki: "Name under <Burc>", "Your message" de)
+    "kisisellestirme": re.compile(r'"formatted_name"\s*:\s*"' + SORU + r'[^"]*"\s*,\s*"formatted_value"\s*:\s*"([^"]{1,})"'
+                                 r'|"formatted_value"\s*:\s*"([^"]{1,})"\s*,\s*"formatted_name"\s*:\s*"' + SORU +
                                  r'|"personali[sz]ation"\s*:\s*"([^"]{2,})"'
-                                 r'|^\s*Personali[sz]ation\s*:\s*(\S.{1,})$', re.I | re.M),
+                                 r'|"(?:question_text|question)"\s*:\s*"' + SORU + r'"\s*,\s*"(?:answer|value)"\s*:\s*"([^"]{1,})"'
+                                 r'|\(\s*"' + SORU + r'"\s*,\s*"([^"]{1,})"\s*\)'
+                                 r'|^\s*' + SORU + r'\s*:\s*(\S.{1,})$', re.I | re.M),
     "mesaj": re.compile(r'"(message_from_buyer|gift_message|buyer_note|message_from_seller)"\s*:\s*"([^"]{2,})"'),
 }
 KOD = re.compile(r"[()\[\]{}$%\\]|\.get\b|\bNone\b|\bos\.|\bf\'|^\s*(r|row|x|o|p)\.")

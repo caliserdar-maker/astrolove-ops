@@ -1,22 +1,18 @@
 name: desen-uret
 # SALT OKUMA (PLAN.md KAYIT 22 Eki): musteri desen listesinin kaynaktan (Etsy makbuzlari + Drive musteri klasorleri) yeniden
 # uretilebildigini gosterir. DEGER YAZILMAZ: yalniz tuzlu sha256 Drive TEMP/DENETIM_20261021/DESEN_URET_<run>/HASH.txt (sahip-ozel);
-# log'a yalniz sayi. scripts/guvenlik/desen_uret.py
+# log'a yalniz sayi. scripts/guvenlik/desen_uret.py. Tuz girdi DEGIL: betik uretir, maskeler, yalniz Drive'a TUZ.txt (Serdar 22 Eki 6a).
+# Ayrica main agaci BELLEKTE desen listesiyle taranir (FAZ 1 kabul yolu): yer listesi TARAMA.json yalniz Drive'a, log'a sayi.
 permissions:
   actions: read
   contents: read
 on:
-  workflow_dispatch:
-    inputs:
-      tuz: {description: "16-64 hane hex tuz", required: true}
+  workflow_dispatch: {}
 jobs:
   uret:
     runs-on: ubuntu-latest
     timeout-minutes: 140
     steps:
-      - name: Girdi kapisi
-        env: {TUZ: "${{ inputs.tuz }}"}
-        run: '[[ "$TUZ" =~ ^[0-9a-f]{16,64}$ ]] || { echo "::error::tuz"; exit 1; }'
       - uses: actions/checkout@v4
       - name: Etsy kilidi (sira bekle, iptal yok)
         env:
@@ -53,8 +49,7 @@ jobs:
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
           TOKEN_FILE: _work/ETSY_TOKEN.json
-          TUZ: ${{ inputs.tuz }}
-        run: python3 scripts/guvenlik/desen_uret.py --tuz "$TUZ" --out _out --drive-json _work/d1.json,_work/d2.json
+        run: python3 scripts/guvenlik/desen_uret.py --out _out --drive-json _work/d1.json,_work/d2.json --tara .
       - name: Token geri yaz + HASH Drive'a
         if: ${{ always() }}
         run: |
