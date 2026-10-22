@@ -36,7 +36,7 @@ jobs:
           hata = 0
           for f in ("media/app/index.html", "media/app/privacy.html"):
               t = open(f, encoding="utf-8").read()
-              for ad, rx in (("e-posta", r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.[A-Za-z]"), ("uzun/orta tire", "[—–]"), ("AstroLove (Art'siz)", r"AstroLove(?!Art)")):
+              for ad, rx in (("e-posta", r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.[A-Za-z]"), ("uzun/orta tire", "[—–]"), ("AstroLove (Art'siz, harf duyarsiz)", r"(?i)astrolove(?!art)"), ("tire entity", r"&(mdash|ndash);|&#(8211|8212|x201[34]);")):
                   n = len(re.findall(rx, t))
                   print(f"{f} {ad}: {n}")
                   hata += n
