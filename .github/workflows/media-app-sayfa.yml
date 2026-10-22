@@ -2,8 +2,9 @@ name: media-app-sayfa
 
 # RCLONE Testing -> Production (Serdar 22 Eki): Google Branding icin iki sayfa astrolove-media Pages'e:
 #   app/index.html (ic arac tanimi) + app/privacy.html (gizlilik). Kaynak: pages/media_app/ (bu depo).
+#   Iletisim e-postasi YAZILMAZ; Etsy magaza baglantisi (Serdar 22 Eki).
 # Yalniz app/ altina yazar; baska yol degisirse DUR. Mevcut pin/IG yollarina dokunmaz. Etsy yok.
-# Kapilar: uzun/orta tire 0, "AstroLove" yalniz (Art'siz) 0, diff yalniz 2 dosya; yayindan sonra iki URL 200 + icerik,
+# Kapilar: uzun/orta tire 0, "AstroLove" yalniz (Art'siz) 0, e-posta 0, diff yalniz 2 dosya; yayindan sonra iki URL 200 + icerik,
 # kontrol icin mevcut bir medya dosyasi 200.
 
 permissions:
@@ -11,8 +12,6 @@ permissions:
 
 on:
   workflow_dispatch:
-    inputs:
-      iletisim: {description: "privacy.html iletisim e-postasi", required: true}
 
 jobs:
   sayfa:
@@ -27,19 +26,17 @@ jobs:
           token: ${{ secrets.OPS_ADMIN_TOKEN }}
           path: media
       - name: Sayfalari hazirla + kapilar
-        env: {ILETISIM: "${{ inputs.iletisim }}"}
         run: |
           set -euo pipefail
-          [[ "$ILETISIM" =~ ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$ ]] || { echo "::error::iletisim e-posta bicimi"; exit 1; }
           mkdir -p media/app
           cp ops/pages/media_app/index.html media/app/index.html
-          sed "s/__ILETISIM__/$ILETISIM/g" ops/pages/media_app/privacy.html > media/app/privacy.html
+          cp ops/pages/media_app/privacy.html media/app/privacy.html
           python3 - <<'PY'
           import re, sys
           hata = 0
           for f in ("media/app/index.html", "media/app/privacy.html"):
               t = open(f, encoding="utf-8").read()
-              for ad, rx in (("yer tutucu", r"__ILETISIM__"), ("uzun/orta tire", "[—–]"), ("AstroLove (Art'siz)", r"AstroLove(?!Art)")):
+              for ad, rx in (("e-posta", r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.[A-Za-z]"), ("uzun/orta tire", "[—–]"), ("AstroLove (Art'siz)", r"AstroLove(?!Art)")):
                   n = len(re.findall(rx, t))
                   print(f"{f} {ad}: {n}")
                   hata += n
