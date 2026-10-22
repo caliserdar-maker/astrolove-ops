@@ -1,0 +1,107 @@
+name: tur-deneme
+
+# Tek pasif dijital ilanda download -> physical denemesi (Serdar 22 Eki, BAG EDISYONLARI madde 1; YALNIZ 1 ILAN).
+# kuru: tam yedek + plan (yazma yok). yaz (onay SERDAR_TUR1): once kuru + ilana ekli dijital dosyalarin Drive'da kopyasi
+# var mi (yoksa DUR, yazma yok), sonra kademeli PATCH; state inactive disina cikarsa aninda geri. Geri tur degisikligi yok.
+# Cikti: Drive DENETIM_20261021/BAG_EDISYON/TUR_<run_id>/.
+
+permissions:
+  actions: read
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      ilan: {description: "pasif dijital ilan listing_id", required: true}
+      mod: {description: "kuru | yaz", required: true, default: "kuru"}
+      onay: {description: "yaz icin SERDAR_TUR1", required: false, default: ""}
+
+env:
+  D: "gdrive:ASTROLOVE/TEMP/DENETIM_20261021/BAG_EDISYON/TUR_${{ github.run_id }}"
+
+jobs:
+  tur:
+    runs-on: ubuntu-latest
+    timeout-minutes: 140
+    steps:
+      - uses: actions/checkout@v4
+      - name: Girdi kapisi
+        env: {ILAN: "${{ inputs.ilan }}", MOD: "${{ inputs.mod }}", ONAY: "${{ inputs.onay }}"}
+        run: |
+          [[ "$ILAN" =~ ^[0-9]{6,12}$ ]] || { echo "::error::ilan"; exit 1; }
+          case "$MOD" in kuru) ;; yaz) [ "$ONAY" = "SERDAR_TUR1" ] || { echo "::error::onay yok"; exit 1; } ;; *) echo "::error::mod"; exit 1 ;; esac
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf + token
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+          mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+      - name: Kuru (yedek + plan)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          ILAN: ${{ inputs.ilan }}
+        run: python3 scripts/etsy/tur_deneme.py --ilan "$ILAN" --out _out --mod kuru
+      - name: Dijital dosyalarin Drive kopyasi var mi
+        env:
+          ILAN: ${{ inputs.ilan }}
+        run: |
+          set -euo pipefail
+          sed 's#^#**/#' "_out/TUR_DOSYA_ADLARI_${ILAN}.txt" | grep -v '^\*\*/$' > _work/inc.txt || true
+          n=$(wc -l < _work/inc.txt); echo "ilana ekli dosya: $n"
+          : > _work/bulunan.txt
+          if [ "$n" -gt 0 ]; then
+            for kok in ASTROLOVE/DIGITAL ASTROLOVE/TEMP/DIJITAL_78; do
+              rclone lsf -R --files-only "gdrive:$kok" --include-from _work/inc.txt 2>/dev/null | sed 's#.*/##' >> _work/bulunan.txt || true
+            done
+          fi
+          python3 - <<'PY'
+          import os, pathlib, json
+          ilan = os.environ["ILAN"]
+          ad = [x for x in pathlib.Path(f"_out/TUR_DOSYA_ADLARI_{ilan}.txt").read_text().splitlines() if x.strip()]
+          bul = set(pathlib.Path("_work/bulunan.txt").read_text().split("\n"))
+          eksik = [x for x in ad if x not in bul]
+          json.dump(dict(dosya=ad, eksik=eksik), open(f"_out/TUR_DRIVE_KOPYA_{ilan}.json", "w"), ensure_ascii=False, indent=1)
+          print(f"DRIVE KOPYA: dosya {len(ad)} | Drive'da {len(ad) - len(eksik)} | eksik {len(eksik)} -> {'PASS' if not eksik else 'FAIL'}")
+          open(os.environ["GITHUB_ENV"], "a").write(f"KOPYA_TAM={'1' if not eksik else '0'}\n")
+          PY
+      - name: Yaz (kademeli PATCH; yalniz Drive kopyasi tam ise)
+        if: ${{ inputs.mod == 'yaz' }}
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          ILAN: ${{ inputs.ilan }}
+          ONAY: ${{ inputs.onay }}
+        run: |
+          [ "${KOPYA_TAM:-0}" = 1 ] || { echo "::error::dijital dosyalarin Drive kopyasi eksik; yazma yapilmadi"; exit 1; }
+          python3 scripts/etsy/tur_deneme.py --ilan "$ILAN" --out _out --mod yaz --onay "$ONAY"
+      - name: Token geri yaz + cikti Drive'a
+        if: always()
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || echo "Token yenilenmedi"
+          python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/ETSY_TOKEN.json _out || { echo "::error::ciktida sir"; exit 1; }
+          rclone copy _out "$D" -q && echo "cikti: DENETIM_20261021/BAG_EDISYON/TUR_${GITHUB_RUN_ID}"
+      - if: always()
+        run: rm -rf _work ~/.config/rclone
