@@ -1,0 +1,51 @@
+name: kota-teshis
+
+# Etsy kota teshisi (Serdar 23 Eki, SIRA 1; SALT OKUMA). Etsy'ye ve Drive'a DOKUNMAZ, secret kullanmaz.
+# Son N saatin Actions kosularindan Etsy API anahtari kullanan is akislarinin job loglarini GitHub API'den okur ve
+# scripts/ops/kota_teshis.py ile YALNIZ sayilari ('istek N', 'kota N', x-remaining-today, x-limit-per-day) yazar.
+
+permissions:
+  actions: read
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      saat: {description: "geriye kac saat", required: true, default: "48"}
+
+jobs:
+  teshis:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Loglardan kota sayilari
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SAAT: ${{ inputs.saat }}
+        run: |
+          set -euo pipefail
+          [[ "$SAAT" =~ ^[0-9]{1,3}$ ]] || { echo "::error::saat"; exit 1; }
+          R="$GITHUB_REPOSITORY"; mkdir -p _l
+          SINCE=$(date -u -d "-$SAAT hours" +%Y-%m-%dT%H:%M:%SZ)
+          grep -l 'secrets.ETSY_API_KEY' .github/workflows/*.yml | xargs -n1 basename | sort > _l/etsy_wf.txt
+          gh api --paginate "repos/$R/actions/runs?per_page=100&created=>=$SINCE" \
+            -q '.workflow_runs[] | [.id, (.path|split("/")|last), .event] | @tsv' > _l/runs.tsv
+          echo "kosu (tum): $(wc -l < _l/runs.tsv) | Etsy anahtarli is akisi: $(wc -l < _l/etsy_wf.txt) | baslangic $SINCE"
+          echo "[" > _l/meta.json; ilk=1
+          while IFS=$'\t' read -r run wf ev; do
+            grep -qx "$wf" _l/etsy_wf.txt || continue
+            [ "$run" = "$GITHUB_RUN_ID" ] && continue
+            gh api "repos/$R/actions/runs/$run/jobs?per_page=50" \
+              -q '.jobs[] | [.id, .name, .started_at, .completed_at, (.conclusion // "-")] | @tsv' > _l/jobs.tsv
+            while IFS=$'\t' read -r job ad t0 t1 son; do
+              gh api "repos/$R/actions/jobs/$job/logs" > "_l/${run}_${job}.txt" 2>/dev/null || rm -f "_l/${run}_${job}.txt"
+              [ $ilk = 1 ] && ilk=0 || echo "," >> _l/meta.json
+              printf '{"run":%s,"job":%s,"workflow":"%s","olay":"%s","baslangic":"%s","bitis":"%s","sonuc":"%s"}\n' \
+                "$run" "$job" "$wf" "$ev" "$t0" "$t1" "$son" >> _l/meta.json
+            done < _l/jobs.tsv
+          done < _l/runs.tsv
+          echo "]" >> _l/meta.json
+          python3 scripts/ops/kota_teshis.py _l _l/meta.json _l/KOTA_TESHIS.csv
+      - if: always()
+        run: rm -rf _l
