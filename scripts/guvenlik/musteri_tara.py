@@ -5,6 +5,7 @@ Kaynaklar:
   loglar     : tum Actions kosularinin loglari (GET /actions/runs/{id}/logs zip)
   artifactlar: tum artifact zipleri (metin uyeleri taranir; gorsel/pdf uyeleri yalniz sayilir)
   git        : tum dallar + gecmis, metin blob'lari (<= 3 MB); bulunan blob'un dal/yol/ilk commit'i
+  commit     : tum dallarin commit MESAJLARI (Serdar 22 Eki; yeni depoda pre-commit / CI kapisi). GH_TOKEN gerekmez.
 Turler: eposta, receipt_no, prodigi_siparis, adres, telefon, alici_alani (buyer_*), kisisellestirme, mesaj, ad_adres_baglaminda.
 Test degerleri (900000000N, 9000000001, 999001) ayri sayilir (test_receipt), musteri sayilmaz.
 Ortam: GH_TOKEN (yalniz GET), GITHUB_REPOSITORY. Cikti: <out>/{LOG,ARTIFACT,GIT}_TARAMA.csv + OZET.md"""
@@ -203,6 +204,23 @@ def git(out):
     return sat
 
 
+def commitler(out):
+    """Tum dallardaki commit mesajlari: commit basina tur + sayi (mesaj metni yazilmaz)."""
+    log = subprocess.run(["git", "log", "--all", "--format=%H%x00%cs%x00%B%x01"], capture_output=True, check=True).stdout.decode("utf-8", "replace")
+    sat, n = [], 0
+    for kayit in log.split("\x01"):
+        if kayit.count("\x00") < 2:
+            continue
+        n += 1
+        sha, tarih, msj = kayit.strip().split("\x00", 2)
+        c = tara(msj)
+        if any(c.get(k) for k in MUSTERI) or c.get("test_receipt"):
+            sat.append(dict(commit=sha[:10], tarih=tarih, **c))
+    print(f"COMMIT: {n} mesaj", flush=True)
+    yaz(f"{out}/COMMIT_TARAMA.csv", sat, ["commit", "tarih", "test_receipt", *MUSTERI])
+    return sat
+
+
 def ozet(ad, sat, anahtar):
     etk = [s for s in sat if any(s.get(k) for k in MUSTERI)]
     tur = Counter()
@@ -221,13 +239,13 @@ def ozet(ad, sat, anahtar):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", required=True); ap.add_argument("--kaynak", default="loglar,artifactlar,git")
+    ap.add_argument("--out", required=True); ap.add_argument("--kaynak", default="loglar,artifactlar,git,commit")
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
-    gh = GH(os.environ["GITHUB_REPOSITORY"], os.environ["GH_TOKEN"])
+    k = a.kaynak.split(",")
+    gh = GH(os.environ["GITHUB_REPOSITORY"], os.environ["GH_TOKEN"]) if {"loglar", "artifactlar"} & set(k) else GH("", "")
     bas = ["# Acik depo musteri bilgisi taramasi (salt okur; deger YOK, yalniz tur ve sayi)", ""]
     acik, gizli = list(bas), list(bas)
-    k = a.kaynak.split(",")
 
     def ekle(parca):
         acik.extend(parca[0]); gizli.extend(parca[1])
@@ -242,6 +260,8 @@ def main():
         gs = git(a.out)
         ekle(ozet("Depo dosyalari + git gecmisi: VERI dosyalari (json/csv/txt/log...)", [x for x in gs if x["dosya_turu"] == "veri"], "yol"))
         ekle(ozet("Depo dosyalari + git gecmisi: KOD/DOKUMAN icinde (ornek ya da gercek; elle bakilmali)", [x for x in gs if x["dosya_turu"] != "veri"], "yol"))
+    if "commit" in k:
+        ekle(ozet("Commit mesajlari (tum dallar)", commitler(a.out), "commit"))
     gizli.append(f"- GitHub istek sayisi {gh.n}")
     open(f"{a.out}/OZET.md", "w", encoding="utf-8").write("\n".join(gizli) + "\n")
     print("\n".join(acik))                                # acik log: yalniz sayi + workflow adi

@@ -41,8 +41,8 @@ print("4 420 onek ->", p4["tracking_code"], "|", p4["gerekce"][-30:])
 
 # 4b) GOREV 0033: Prodigi yalniz "UPS" (hizmet bos) + 26 haneli USPS IMpb -> usps (UPS'te bulunamiyordu)
 p4b = T.etsy_plani(T.takip_bilgi({"carrier": {"name": "UPS", "service": ""},
-                                  "tracking": {"number": "92419903104126543475578595"}}))
-assert p4b["carrier_name"] == "usps" and p4b["tracking_code"] == "92419903104126543475578595", p4b
+                                  "tracking": {"number": "92411234567890123456789012"}}))
+assert p4b["carrier_name"] == "usps" and p4b["tracking_code"] == "92411234567890123456789012", p4b
 assert "tools.usps.com" in p4b["takip_url"], p4b
 # 1Z numarali duz UPS degismez
 assert T.etsy_plani(T.takip_bilgi({"carrier": {"name": "UPS"}, "tracking": {"number": "1Z999AA10123456784"}}))["carrier_name"] == "ups"
@@ -96,7 +96,7 @@ print("eski testler: 11/11 PASS")
 # ================= gecmis siparis korumasi
 
 S = T.sinir_ts(); YENI = S + 3600; ESKI = S - 86400
-N = "92419903104126543475578595"
+N = "92411234567890123456789012"
 plan = T.etsy_plani(T.takip_bilgi({"carrier": {"name": "UPS", "service": "UPS Mail Innovations"},
                                     "tracking": {"number": N, "url": "https://tracking.ups-mi.net/packageID/" + N}}))
 assert plan["carrier_name"] == "usps"
@@ -219,7 +219,7 @@ for durum, beklenen in (("HTTP 403", True), ("HTTP 429", True), ("HTTP 401", Tru
 ok_c, e_c = T.dogrula({"receipt_id": 1, "shipments": [{"carrier_name": "ups", "tracking_code": N}]}, 1, plan, "HTTP 403")
 kontrol("L 403 + yanlis carrier: yine FAIL (engel carrier hatasini ortmez)", not ok_c and any("carrier" in e for e in e_c), e_c)
 
-SP = "LX104881201NL"
+SP = "RR123456701NL"
 for rid, url, durum in (("106", "https://engel.example/" + SP, "HTTP 403"), ("107", "https://yok.example/" + SP, "HTTP 404")):
     RECEIPTS[rid] = {"receipt_id": int(rid), "create_timestamp": YENI, "shipments": [], "is_shipped": False}
     LINK[url] = durum

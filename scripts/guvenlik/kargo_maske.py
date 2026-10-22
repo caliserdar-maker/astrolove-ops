@@ -5,9 +5,9 @@ yalniz son 4 hanesiyle kalir. Drive'a yazilan dosyalar (STATE, TAKIP_DENETIM.jso
 Desenler:
 - Prodigi siparis: ord_<rakam>                                   -> ord_***1234
 - UPS: 1Z + 16 alfanumerik                                         -> ***1234
-- UPU S10 (LX104881201NL gibi): 2 harf + 9 rakam + 2 harf          -> ***01NL
+- UPU S10 (RR123456701NL gibi): 2 harf + 9 rakam + 2 harf          -> ***01NL
 - En az 12 haneli rakam dizisi (USPS IMpb, FedEx, 420+ZIP onekli)  -> ***1234
-- Buyuk harf + rakam karisik, 12+ karakter, en az 8 rakam (PRO0560NL26629002201 gibi) -> ***2201
+- Buyuk harf + rakam karisik, 12+ karakter, en az 8 rakam (PRO0000NL12345678901 gibi) -> ***2201
 Takip linklerindeki numara da ayni desenle maskelenir. Etsy receipt (10 hane) bu modulun isi degildir.
 """
 import re

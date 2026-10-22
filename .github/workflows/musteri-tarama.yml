@@ -15,10 +15,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kaynak: [loglar, artifactlar, git]
+        kaynak: [loglar, artifactlar, git, commit]
     steps:
       - uses: actions/checkout@v4
-        with: { fetch-depth: "${{ matrix.kaynak == 'git' && '0' || '1' }}" }
+        with: { fetch-depth: "${{ (matrix.kaynak == 'git' || matrix.kaynak == 'commit') && '0' || '1' }}" }
       - name: rclone
         env:
           RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
@@ -30,8 +30,8 @@ jobs:
           printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
           if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
             echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
-      - name: Tum uzak dallar (yalniz git)
-        if: ${{ matrix.kaynak == 'git' }}
+      - name: Tum uzak dallar (git + commit)
+        if: ${{ matrix.kaynak == 'git' || matrix.kaynak == 'commit' }}
         run: |
           git fetch -q origin '+refs/heads/*:refs/remotes/origin/*'
           echo "dal $(git branch -r | wc -l) | nesne $(git count-objects -vH | grep size-pack)"
