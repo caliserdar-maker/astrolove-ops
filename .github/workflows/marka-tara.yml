@@ -1,9 +1,10 @@
 name: marka-tara
 
 # SALT OKUMA (Serdar 22 Eki, marka adi AstroLoveArt): musteriye gorunen yerlerde Art'siz "AstroLove" gecisleri.
-# Etsy: magaza metin alanlari, aktif ilanlar (baslik, aciklama, etiket, malzeme, kisisellestirme, gorsel alt metni),
-# dijital ilan dosya adlari. Metricool: PENDING gonderiler. Dosya: Etsy'ye ekli dijital dosyalarin Drive kopyalari
-# (ad + PDF + ZIP ici), musteri siparis teslim klasorleri (tum adlar; PDF metni yalniz en yeni 1 siparis klasoru).
+# Etsy: magaza metin alanlari + bolumler; tum durumlarda ilanlar (baslik, aciklama, etiket, malzeme, kisisellestirme,
+# ceviriler, alt metin), dijital ilan dosya adlari; canli ilan ve magaza gorsellerinde OCR. Metricool: 1 Agu'dan itibaren
+# tum gonderiler (yayimlanmis + bekleyen). Dosya: ASTROLOVE/DIGITAL adlari + THANKYOU PDF, siparis teslim adlari,
+# en yeni 3 gercek siparisin PDF metni + metadata.
 # Yazma YOK (Etsy, Metricool, Drive kaynak). Cikti yalniz Drive DENETIM_20261021/MARKA_TARA/<run_id>/; log'a yalniz sayi.
 
 permissions:
@@ -33,7 +34,8 @@ jobs:
         run: |
           set -euo pipefail
           pip install -q requests==2.34.2
-          sudo apt-get install -y -qq poppler-utils > /dev/null
+          pip install -q pillow==12.3.0
+          sudo apt-get install -y -qq poppler-utils tesseract-ocr > /dev/null
           curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
       - name: rclone.conf + tokenlar (log'a yazilmaz)
         env:
@@ -61,6 +63,8 @@ jobs:
           set -o pipefail
           python3 scripts/etsy/marka_tara.py metricool --token-dosya _work/mc.json --out _out 2>&1 \
             | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
+      - name: Canli ilan + magaza gorselleri OCR (Etsy CDN; API kotasi kullanmaz)
+        run: python3 scripts/etsy/marka_tara.py gorsel --liste _out/GORSEL_LISTE.json --out _out --etiket gorsel_canli
       - name: Dosyalar (Etsy dijital dosyalarinin Drive kopyalari + siparis teslim klasorleri)
         run: |
           set -euo pipefail
@@ -85,14 +89,19 @@ jobs:
           print(f"Etsy dosya adi {ozet['etsy_farkli_ad']} | Drive'da bulunan {ozet['driveda_bulunan']} | bulunamayan {len(ozet['bulunamayan'])}")
           PY
           python3 scripts/etsy/marka_tara.py dosya --out _out --etiket etsy_teslim _dl/etsy
+          rclone lsf -R --files-only "gdrive:ASTROLOVE/DIGITAL" > _work/digital_adlar.txt || true
+          mkdir -p _dl/digital; rclone copy "gdrive:ASTROLOVE/DIGITAL/THANKYOU" _dl/digital --include "*.pdf" -q || true
+          echo "ASTROLOVE/DIGITAL dosya adi $(wc -l < _work/digital_adlar.txt) | THANKYOU pdf $(ls _dl/digital | wc -l)"
+          python3 scripts/etsy/marka_tara.py dosya --out _out --etiket digital_klasor --ad-listesi _work/digital_adlar.txt _dl/digital
           rclone lsf -R --files-only "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL" > _work/siparis_adlar.txt || true
           son=$(rclone lsjson --dirs-only "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL" | python3 -c "
           import json,sys; d=[x for x in json.load(sys.stdin) if x['Name'].isdigit() and not x['Name'].startswith('9000')]
-          d.sort(key=lambda x: x['ModTime']); print(d[-1]['Name'] if d else '')")
+          d.sort(key=lambda x: x['ModTime']); print(' '.join(x['Name'] for x in d[-3:]))")
           mkdir -p _dl/siparis
-          [ -n "$son" ] && rclone copy "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL/$son" _dl/siparis --include "/*.pdf" -q || true
-          echo "siparis klasoru dosya adi $(wc -l < _work/siparis_adlar.txt) | PDF metni icin en yeni 1 gercek siparis klasoru: $( [ -n "$son" ] && echo var || echo yok ), pdf $(ls _dl/siparis | wc -l)"
-          python3 scripts/etsy/marka_tara.py dosya --out _out --etiket siparis_teslim --ad-listesi _work/siparis_adlar.txt _dl/siparis
+          for k in $son; do rclone copy "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL/$k" "_dl/siparis/$k" --include "/*.pdf" -q || true; done
+          echo "siparis klasoru dosya adi $(wc -l < _work/siparis_adlar.txt) | PDF metni: en yeni $(echo $son | wc -w) gercek siparis klasoru, pdf $(find _dl/siparis -name '*.pdf' | wc -l)"
+          python3 scripts/etsy/marka_tara.py dosya --out _out --etiket siparis_ad --ad-listesi _work/siparis_adlar.txt
+          python3 scripts/etsy/marka_tara.py dosya --out _out --etiket siparis_pdf _dl/siparis
       - name: Token geri yaz + cikti Drive'a
         if: always()
         run: |
