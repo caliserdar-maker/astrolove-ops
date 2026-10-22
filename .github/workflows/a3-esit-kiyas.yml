@@ -62,8 +62,13 @@ jobs:
           EK=()
           if [ "$TUR" = poster ]; then
             [[ "$TABAN" =~ ^[0-9,]+$ ]] && [[ "$REF_ESKI" =~ ^[0-9a-f]{7,40}$ ]] && [[ "$REF_YENI" =~ ^[0-9a-f]{7,40}$ ]] || { echo "::error::poster: taban/ref"; exit 1; }
-            AE=$(git rev-parse "$REF_ESKI:motor_gpt"); AY=$(git rev-parse "$REF_YENI:motor_gpt"); echo "motor_gpt agaci: eski $AE | yeni $AY"
-            EK+=(--agac-eski "$AE" --agac-yeni "$AY" --taban)
+            RE=$(git rev-parse --verify --quiet "$REF_ESKI^{commit}") && RY=$(git rev-parse --verify --quiet "$REF_YENI^{commit}") \
+              || { echo "::error::ref bulunamadi"; exit 1; }
+            [ "$RE" != "$RY" ] || { echo "::error::ref_eski = ref_yeni"; exit 1; }
+            AE=$(git rev-parse --verify --quiet "$RE:motor_gpt") && AY=$(git rev-parse --verify --quiet "$RY:motor_gpt") \
+              || { echo "::error::motor_gpt agaci yok"; exit 1; }
+            echo "motor_gpt agaci: eski $AE | yeni $AY"
+            EK+=(--ref-eski "$RE" --ref-yeni "$RY" --agac-eski "$AE" --agac-yeni "$AY" --taban)
             IFS=, read -ra TB <<< "$TABAN"
             for r in "${TB[@]}"; do rclone copy "${T}SIPARIS_ISIM/GPT/AstroLoveArt_$r" "_t/$r" -q; EK+=("_t/$r"); done
           fi

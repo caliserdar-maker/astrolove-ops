@@ -55,7 +55,8 @@ bolumu okunmadan baslanmaz.
 
 - GALERI (Serdar 23 Eki): 78 poster galerisi `galeri77_cift.sh` / `kart02_duvar_kur.py` ile YENIDEN URETILMEZ (uc sutun,
   Framed ve Hahnemuhle metni; canli kartlar 17 Eki `eski78_gorsel_uret.py` + `kart02_iki_sutun.py` hattindan). Kart degisikligi
-  canli galeriden (`eski78_gorsel_indir.py`) bant duzenlemesiyle yapilir; bant disi piksel degismez kapisi zorunlu.
+  canli galeriden (`eski78_gorsel_indir.py`) bant duzenlemesiyle yapilir; bant disi fark kapisi zorunlu (eski78_gorsel_uret.py
+  esigi: kutu disi p99.9 <= 12 ve max <= 45, JPEG yeniden kodlama gurultusu; yeni esik ancak olcumle ve Serdar onayiyla).
 
 - Wallpaper hatti dahil tum uretim GitHub Actions'ta kosar; ChatGPT/Colab
   uretim hattinda yoktur (KARAR 3, 1 Eyl 2026).
