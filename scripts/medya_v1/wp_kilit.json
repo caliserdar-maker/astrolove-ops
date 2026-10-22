@@ -1,0 +1,136 @@
+{
+ "karar": "Serdar 1 Eki 2026: BAKIR Warm Parchment ONAYLANDI (WP PASS)",
+ "referans": {
+  "commit": "e4f65cd",
+  "kosu": 36848215749,
+  "cikti": "TEMP/WP_ORNEK/CANCER_LIBRA/WP_CANCER_LIBRA_11x14_YANYANA.jpg"
+ },
+ "ozet": {
+  "dosya": {
+   "wp_bakir.py": "4249109174510b847cb7565a6ee6c1da4d3668a0785ac75b5f436d54e52444ec",
+   "wp_katman.py": "eb8e042a316164c5a1bd7b9f86ad4bf0adf1193939cc1352a05dcf4e4ed935d6"
+  },
+  "wp_ornek_fonksiyon": {
+   "etiketle": "afe152fb4974b4f8680fab25d9c465ad3e0e9c1ed963471f43bfa34ce1cc5d76",
+   "yanyana": "23d47c3a6f67d33e20eee3a3281ce0c252820bb2859ca31557b7adf8b2981730",
+   "yanyana_baski": "f1119e9f70834a3fbf84ab0157017b16963fc5adb251568dfc0eea1ae0198756",
+   "sutun_profili": "5565a03759a472716a9b423aa62fe4da958008232e86f5fd8334c8795658779d",
+   "koyu_sutun": "aa9d5be41a98b3a854f4ff88dd7c107863934dc4fc0dedae3597add0f2b6a150",
+   "_yazi_maskesi": "f3147eb13cc53365a0ced0c87e9ce02d11550b3f663384441c749b25498c2d7f",
+   "yanyana_dedektor": "18ac1b4406838675d86df0f8913c50afabb7ce4f2840aa243ec20697142ab94c",
+   "serdar_dikis": "4842f96f9f6e546fe2b20f17fc20e19a6f4daf0a6945c9eab08c0a734dde4f9e",
+   "cift_boy": "7554d6e9284022ab4c2fbc2174f33eb658a906f1bf25c011200a597a44dfeef5",
+   "plate_adi": "bfde32ad789936b7a2bde3ee79b6591056996c2f440402b1edce6ba83efca87f",
+   "e_kagit_istisna": "ff60f33ebd99d7d38d8754ab0f8c6860bb62cb81470f141930185a6abe86501b"
+  },
+  "wp_ornek_sabit": {
+   "DUZ_RENK": [
+    "CHAMPAGNE_IVORY",
+    "MIDNIGHT_BLUE"
+   ],
+   "SERDAR_YAN": [
+    1290,
+    1311,
+    3975,
+    4234
+   ],
+   "SERDAR_SERIT": [
+    1561,
+    1567,
+    3490,
+    3750
+   ],
+   "PLATE_B_11x14": {
+    "1": [
+     "GEMINI_LIBRA",
+     "GEMINI_PISCES",
+     "LEO_LIBRA",
+     "LEO_PISCES",
+     "LEO_SAGITTARIUS",
+     "LEO_SCORPIO",
+     "LEO_TAURUS",
+     "LEO_VIRGO",
+     "LIBRA_LIBRA",
+     "LIBRA_PISCES",
+     "LIBRA_SAGITTARIUS",
+     "LIBRA_SCORPIO",
+     "LIBRA_TAURUS",
+     "PISCES_SAGITTARIUS",
+     "PISCES_VIRGO",
+     "SAGITTARIUS_SAGITTARIUS",
+     "SAGITTARIUS_SCORPIO",
+     "SCORPIO_SCORPIO"
+    ],
+    "2": [
+     "GEMINI_SAGITTARIUS",
+     "GEMINI_SCORPIO",
+     "GEMINI_TAURUS",
+     "LIBRA_VIRGO",
+     "PISCES_PISCES",
+     "TAURUS_VIRGO",
+     "VIRGO_VIRGO"
+    ],
+    "3": [
+     "GEMINI_VIRGO",
+     "LEO_LEO",
+     "PISCES_SCORPIO",
+     "PISCES_TAURUS",
+     "SAGITTARIUS_TAURUS",
+     "SAGITTARIUS_VIRGO",
+     "SCORPIO_TAURUS",
+     "SCORPIO_VIRGO",
+     "TAURUS_TAURUS"
+    ]
+   },
+   "E_KAGIT_ISTISNA": {
+    "11x14": {
+     "GEMINI_SCORPIO": 3.24,
+     "PISCES_PISCES": 3.24,
+     "VIRGO_VIRGO": 3.26,
+     "LEO_LEO": 3.23,
+     "PISCES_TAURUS": 3.23,
+     "SAGITTARIUS_TAURUS": 3.24,
+     "SCORPIO_VIRGO": 3.26
+    }
+   },
+   "E_KAGIT_ISTISNA_PAY": 0.1
+  },
+  "wp_bakir_parametre": {
+   "BAKIR_KOYU": [
+    140.0,
+    72.0,
+    28.0
+   ],
+   "T0": 4.0,
+   "KENAR_PX": 2,
+   "KOYU_ALT": 0.55,
+   "KOYU_SIKISTIR": 0.6,
+   "ESIK_DE": 5.0,
+   "MIN_ALAN_BAKIR": 12,
+   "DOLU": 0.9,
+   "DIKIS_DUZLE": 15,
+   "KABARTMA_SIGMA": [
+    1.0,
+    1.5,
+    2.5,
+    4.0
+   ],
+   "KABARTMA_ESIK": [
+    0.7,
+    1.43
+   ],
+   "DIKIS_BOY": 100,
+   "DIKIS_T": [
+    3.0,
+    30.0
+   ],
+   "DIKIS_KOMSU": 3
+  }
+ },
+ "ek_kararlar": [
+  "Serdar 2 Eki: SECENEK A, sayfa 45-78 ciftleri ikinci plate VINTAGE_B_<boy>.png (cift_boy plate secimi); kapi ve esikler ayni",
+  "Serdar 2 Eki (11x14 ek deneme): 11x14 sayfa 45-78 uc alt kume, cift bazli VINTAGE_B<k>_11x14.png (PLATE_B_11x14, plate_adi); diger boylar VINTAGE_B_<boy>.png; kapi ve esikler ayni",
+  "Serdar 2 Eki KARAR A: 7 hucre e_kagit istisnasi (11x14, E_KAGIT_ISTISNA, sinir = olculen p99 + 0.10); genel esikler degismez",
+  "Serdar 3 Eki (Test 5 tagline cift baski): hizala guvenilmez bant donusumunu kullanmaz (en yakin guvenilir bant); ikinci metin kapisi (wp_bakir.ikinci_metin, c_iz icinde); diger esikler ayni"
+ ]
+}
