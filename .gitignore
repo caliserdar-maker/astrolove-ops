@@ -1,0 +1,81 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Sanal ortamlar
+.venv/
+venv/
+env/
+ENV/
+
+# Test / lint cache
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+
+# --- Sirlar / kimlik bilgileri ---
+# Token ve kimlik dosyalari (JSON)
+token*.json
+client_secret*.json
+credentials*.json
+service_account*.json
+
+# Ortam dosyalari
+.env
+.env.*
+!.env.example
+
+# rclone yapilandirmasi
+rclone.conf
+*.rclone.conf
+
+# --- Editor / OS ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Yerel/runner font indirmeleri (workflow her kosuda indirir)
+fonts/
+
+# --- Kosu ciktilari / calisma dizinleri (asla commit edilmez) ---
+# Actions bunlari artifact olarak yukler; yerelde de script'ler buraya yazar.
+# _siparis/ MUSTERI VERISI icerir (isim, mesaj, siparis no) - Serdar karari
+# 25 Eyl 2026: musteri verisi yalniz Drive'a gider, depoya ASLA girmez.
+/out
+_a1/
+_siparis/
+_olcum/
+_kaynak/
+_parca/
+_plate/
+_denetim/
+_sayfa/
+_virgo/
+_uretim/
+_hiza/
+_canva/
