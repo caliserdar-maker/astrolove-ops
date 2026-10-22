@@ -70,7 +70,10 @@ def ru_plan(desc):
 
 
 def ru_ceviri(L):
-    return next((t for t in (L.get("translations") or []) if t.get("language") == "ru"), None)
+    tr = L.get("translations") or []
+    if isinstance(tr, dict):   # batch yaniti: {dil: ceviri} (marka_tara.py ile ayni)
+        tr = list(tr.values())
+    return next((t for t in tr if isinstance(t, dict) and t.get("language") == "ru"), None)
 
 
 def satilabilir(inv):

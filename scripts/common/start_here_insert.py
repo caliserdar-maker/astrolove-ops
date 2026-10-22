@@ -91,6 +91,9 @@ def main():
     # Capanin satiri satir sonuyla bitiyorsa oradan, degilse satir sonu ekleyerek yaz.
     ins_at = en if t.endswith("\n") else en
     payload = (text + "\n") if t.endswith("\n") else ("\n" + text)
+    son = doc["body"]["content"][-1]["endIndex"]
+    if ins_at >= son:   # capa belgenin son paragrafi: Docs son indekse eklemeyi kabul etmez (22 Eki PLAN.md, 400)
+        ins_at, payload = son - 1, "\n" + text
     log(f"capa: {t.strip()[:90]!r} (index {st}-{en}) -> ekleme indeksi {ins_at}")
     log(f"eklenecek {len(payload)} karakter, {payload.count(chr(10))} satir")
     if a.dry_run:

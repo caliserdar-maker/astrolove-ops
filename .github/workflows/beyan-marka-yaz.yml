@@ -65,7 +65,7 @@ jobs:
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
           TOKEN_FILE: _work/ETSY_TOKEN.json
         run: |
-          set -o pipefail
+          set +e -o pipefail
           [[ "$MOD" =~ ^(kuru|yaz)$ ]] || { echo "::error::mod"; exit 1; }
           [[ "$ILAN" =~ ^[0-9,]*$ ]] || { echo "::error::ilan"; exit 1; }
           args=(--mod "$MOD" --ilan "$ILAN" --out _out)

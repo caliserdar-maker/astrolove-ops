@@ -77,6 +77,9 @@ def main():
     sonuc.append(("yaz: draft -> DUR, yazma yok", isinstance(r, str) and "active degil" in r))
     api = Sahte(ru_bozuk=True); ok3, R3 = kos(api)
     sonuc.append(("yaz: RU PUT hatasi -> FAIL (EN yazili, raporlu)", ok3 is False and R3["sonuc"] == "FAIL" and "RU PUT" in R3["hata"][0]))
+    sonuc.append(("ru_ceviri: liste ve sozluk bicimi", m.ru_ceviri({"translations": {"ru": {"language": "ru", "title": "a"}}})["title"] == "a"
+                  and m.ru_ceviri({"translations": [{"language": "ru", "title": "b"}]})["title"] == "b"
+                  and m.ru_ceviri({"translations": {"en": "x"}}) is None))
     sonuc.append(("beyan metninde uzun/orta tire yok", not m.TIRE.search(m.BEYAN)))
     for ad, ok_ in sonuc:
         print(("PASS " if ok_ else "FAIL ") + ad)
