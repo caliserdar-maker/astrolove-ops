@@ -1,5 +1,5 @@
 {
- "receipt_id": 9000000008,
+ "receipt_id": 9000000108,
  "name": "Test Alici (SAHTE A3)",
  "first_line": "1 Test Street",
  "second_line": "",
@@ -11,7 +11,7 @@
  "is_shipped": false,
  "transactions": [
   {
-   "transaction_id": 9000000081,
+   "transaction_id": 9000001081,
    "sku": "POD-CAN_LIB-MB-DIGITAL",
    "quantity": 1,
    "price": {
@@ -28,7 +28,7 @@
    ]
   },
   {
-   "transaction_id": 9000000082,
+   "transaction_id": 9000001082,
    "sku": "KUPA-CANCER_LIBRA-01-11",
    "quantity": 1,
    "price": {

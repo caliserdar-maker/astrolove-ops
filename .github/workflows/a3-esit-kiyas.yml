@@ -12,7 +12,7 @@ on:
       tur: {description: "poster | kupa", required: true}
       eski: {description: "eski cikti: poster = receipt (SIPARIS_ISIM/GPT/AstroLoveArt_<r>), kupa = ASTROLOVE altindaki klasor", required: true}
       yeni: {description: "yeni cikti (ayni bicim)", required: true}
-      taban: {description: "poster: ayni ref'in en az 3 kosusu, virgullu receipt (orn. 9000000003,9000000004,9000000005)", required: false, default: ""}
+      taban: {description: "poster: ayni ref'in en az 3 kosusu, virgullu receipt (orn. 9000000102,9000000103,9000000104)", required: false, default: ""}
       ref_eski: {description: "poster: eski kod ref'i (motor_gpt agaci karsilastirilir)", required: false, default: ""}
       ref_yeni: {description: "poster: temiz kod ref'i", required: false, default: ""}
       en_erken: {description: "UTC epoch: test kosularinin ilki baslamadan once; daha eski dosya FAIL (tazelik)", required: true}

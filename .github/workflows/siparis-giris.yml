@@ -49,6 +49,14 @@ jobs:
     outputs:
       yol: ${{ steps.k.outputs.yol }}
     steps:
+      - name: Repo degiskenleri (Serdar 23 Eki 2e; commit SHA, sir degil; bos = tanimsiz ya da bos)
+        env:
+          V_GPT: ${{ vars.SIPARIS_GPT_REF }}
+          V_RENK: ${{ vars.ESKI_RENK_REF }}
+          V_WP: ${{ vars.SIPARIS_WP_REF }}
+          V_ACIK: ${{ vars.SIPARIS_GPT_ACIK }}
+        run: |
+          echo "::notice title=REPO DEGISKENLERI::SIPARIS_GPT_REF=${V_GPT:-TANIMSIZ} ESKI_RENK_REF=${V_RENK:-TANIMSIZ} SIPARIS_WP_REF=${V_WP:-TANIMSIZ} SIPARIS_GPT_ACIK=${V_ACIK:-TANIMSIZ} | etkin: GPT_REF=$GPT_REF ESKI_RENK_REF=$ESKI_RENK_REF WP_REF=$WP_REF"
       - id: k
         name: Karar
         env:
