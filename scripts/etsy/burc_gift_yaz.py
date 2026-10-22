@@ -63,6 +63,13 @@ class Dur(Exception):
     pass
 
 
+class GenelDur(Dur):
+    """Tum kosuyu durdurur (kota, siparis kapisi, hazirlik tanimi); ilan duzeyindeki Dur yalniz o ilani FAIL yapar."""
+
+
+ARDISIK_FAIL = 3   # ust uste bu kadar ilan FAIL -> sistematik hata say, kosuyu durdur
+
+
 def norm(s):
     return html.unescape(s or "").replace("\r\n", "\n")
 
@@ -73,7 +80,7 @@ def kota(api, gerek=KOTA_TABAN):
     except (TypeError, ValueError):
         return
     if r < max(gerek, KOTA_TABAN):
-        raise Dur(f"KOTA {r} < {max(gerek, KOTA_TABAN)}")
+        raise GenelDur(f"KOTA {r} < {max(gerek, KOTA_TABAN)}")
 
 
 def para(p):
@@ -201,7 +208,7 @@ def hazirlik_dogrula(api, shop):
     t = api.get(f"/shops/{shop}/readiness-state-definitions/{BY_HAZIRLIK}", ok404=True) or {}
     ok = (t.get("readiness_state"), t.get("min_processing_days"), t.get("max_processing_days")) == ("made_to_order", 1, 3)
     if not ok:
-        raise Dur(f"hazirlik tanimi {BY_HAZIRLIK} beklenen made_to_order 1-3 degil: {t}")
+        raise GenelDur(f"hazirlik tanimi {BY_HAZIRLIK} beklenen made_to_order 1-3 degil: {t}")
     return BY_HAZIRLIK
 
 
@@ -307,7 +314,7 @@ def bir_ilan(api, shop, lid, hedef, once, out, hazirlik_al, R, by_ids=()):
     if govde and nb:
         sp = siparis_say(api, shop, by_ids, toplam=False)     # kapi ile bu ilan arasinda yeni baski siparisi geldi mi
         if sp["baski_satiri"]:
-            raise Dur(f"gonderilmemis baski siparisi geldi ({sp['baski_satiri']} satir): yazma yok")
+            raise GenelDur(f"gonderilmemis baski siparisi geldi ({sp['baski_satiri']} satir): yazma yok")
     if govde:
         api.put_json(f"/listings/{lid}/inventory", govde)
         if sg0:
@@ -474,6 +481,7 @@ def main():
     ap.add_argument("--onay", default="")
     ap.add_argument("--yedek-dizin", default="")
     ap.add_argument("--out", default="_out")
+    ap.add_argument("--devam", action="store_true", help="ilan duzeyindeki FAIL'de durma, sonraki ilana gec (GenelDur yine durdurur)")
     a = ap.parse_args()
     if a.mod in ("yaz", "hazirlik") and a.onay != ONAY:
         raise SystemExit(f"DUR: yaz modu --onay {ONAY} ister")
@@ -516,7 +524,7 @@ def main():
             sp = siparis_say(api, shop, by_ids)
             RAPOR["siparis"] = sp
             if sp["baski_satiri"]:
-                raise Dur(f"gonderilmemis baski siparisi var ({sp['baski_satiri']} satir): yazma yok")
+                raise GenelDur(f"gonderilmemis baski siparisi var ({sp['baski_satiri']} satir): yazma yok")
         kayma = []
         for i, lid in enumerate(ids, 1):
             kota(api)
@@ -546,11 +554,23 @@ def main():
             return H["id"]
         if any(i in by_ids for i in ids):
             hazirlik_al()    # tanim yoksa HICBIR ilana yazmadan DUR (yarim kume birakilmaz)
-        t0 = time.time()
+        t0, ardisik = time.time(), 0
         for n, lid in enumerate(ids, 1):
             R = {"listing_id": lid, "aile": sonra[lid]["aile"], "cift": sonra[lid]["cift"]}
             RAPOR["ilanlar"].append(R)
-            bir_ilan(api, shop, lid, sonra[lid], once[lid], out, hazirlik_al, R, by_ids)
+            try:
+                bir_ilan(api, shop, lid, sonra[lid], once[lid], out, hazirlik_al, R, by_ids)
+                ardisik = 0
+            except GenelDur:
+                raise
+            except (Dur, SystemExit) as e:
+                if not a.devam or "429" in str(e):
+                    raise Dur(str(e))
+                R["sonuc"] = f"FAIL {str(e)[:200]}"     # Serdar 22 Eki: FAIL olan ilan listeden cikar, toplu is durmaz
+                print(f"::warning::FAIL {lid}: {str(e)[:200]}", flush=True)
+                ardisik += 1
+                if ardisik >= ARDISIK_FAIL:
+                    raise GenelDur(f"ust uste {ardisik} ilan FAIL: sistematik hata, kosu durdu")
             g = time.time() - t0
             print(f"[{n}/{len(ids)}] {R['aile']} {R['cift']} {R['sonuc']} | gecen {g:.0f} sn, kalan ~{g / n * (len(ids) - n):.0f} sn, "
                   f"%{100 * n // len(ids)} | kota {api.remaining}", flush=True)
@@ -566,8 +586,12 @@ def main():
         raise SystemExit(kod)
     say = {}
     for r in RAPOR["ilanlar"]:
-        say[r["sonuc"]] = say.get(r["sonuc"], 0) + 1
-    print(f"SONUC {say} | panel {len(RAPOR['panel'])} | istek {api.calls} | kota {api.remaining}")
+        k_ = "FAIL" if str(r["sonuc"]).startswith("FAIL") else r["sonuc"]
+        say[k_] = say.get(k_, 0) + 1
+    fail = [r["listing_id"] for r in RAPOR["ilanlar"] if str(r.get("sonuc", "")).startswith("FAIL")]
+    print(f"SONUC {say} | FAIL {len(fail)} {fail} | panel {len(RAPOR['panel'])} | istek {api.calls} | kota {api.remaining}")
+    if fail:
+        raise SystemExit(3)
 
 
 if __name__ == "__main__":

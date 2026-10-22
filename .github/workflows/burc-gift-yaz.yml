@@ -81,7 +81,7 @@ jobs:
           MOD: ${{ inputs.mod }}
           KUME: ${{ inputs.kume }}
           ONAY: ${{ inputs.onay }}
-        run: python3 scripts/etsy/burc_gift_yaz.py --mod "$MOD" --kume "$KUME" --onay "$ONAY" --once _work/ONCE.json --sonra _work/SONRA_234.json --out _out $( [ "$MOD" = geri_al ] && echo "--yedek-dizin _work/GERI" )
+        run: python3 scripts/etsy/burc_gift_yaz.py --mod "$MOD" --kume "$KUME" --onay "$ONAY" --once _work/ONCE.json --sonra _work/SONRA_234.json --out _out $( [ "$MOD" = geri_al ] && echo "--yedek-dizin _work/GERI" ) $( [ "$KUME" = kalan ] && echo "--devam" )
       - name: Token geri yaz + cikti Drive'a
         if: ${{ always() }}
         env:
