@@ -32,20 +32,22 @@ jobs:
           gh api --paginate "repos/$R/actions/runs?per_page=100&created=>=$SINCE" \
             -q '.workflow_runs[] | [.id, (.path|split("/")|last), .event] | @tsv' > _l/runs.tsv
           echo "kosu (tum): $(wc -l < _l/runs.tsv) | Etsy anahtarli is akisi: $(wc -l < _l/etsy_wf.txt) | baslangic $SINCE"
-          echo "[" > _l/meta.json; ilk=1
+          echo "[" > _l/meta.json; ilk=1; hata=0
           while IFS=$'\t' read -r run wf ev; do
             grep -qx "$wf" _l/etsy_wf.txt || continue
             [ "$run" = "$GITHUB_RUN_ID" ] && continue
             gh api "repos/$R/actions/runs/$run/jobs?per_page=50" \
               -q '.jobs[] | [.id, .name, .started_at, .completed_at, (.conclusion // "-")] | @tsv' > _l/jobs.tsv
             while IFS=$'\t' read -r job ad t0 t1 son; do
-              gh api "repos/$R/actions/jobs/$job/logs" > "_l/${run}_${job}.txt" 2>/dev/null || rm -f "_l/${run}_${job}.txt"
+              kod=$(curl -sS -L -m 60 -o "_l/${run}_${job}.txt" -w '%{http_code}' -H "Authorization: Bearer $GH_TOKEN" \
+                -H "Accept: application/vnd.github+json" "https://api.github.com/repos/$R/actions/jobs/$job/logs" || echo 000)
+              if [ "$kod" != 200 ]; then rm -f "_l/${run}_${job}.txt"; hata=$((hata+1)); [ $hata -le 3 ] && echo "log indirilemedi: job $job http $kod"; fi
               [ $ilk = 1 ] && ilk=0 || echo "," >> _l/meta.json
               printf '{"run":%s,"job":%s,"workflow":"%s","olay":"%s","baslangic":"%s","bitis":"%s","sonuc":"%s"}\n' \
                 "$run" "$job" "$wf" "$ev" "$t0" "$t1" "$son" >> _l/meta.json
             done < _l/jobs.tsv
           done < _l/runs.tsv
-          echo "]" >> _l/meta.json
+          echo "]" >> _l/meta.json; echo "log indirilemeyen job: $hata"
           python3 scripts/ops/kota_teshis.py _l _l/meta.json _l/KOTA_TESHIS.csv
       - if: always()
         run: rm -rf _l
