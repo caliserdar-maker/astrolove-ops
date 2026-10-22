@@ -1,0 +1,105 @@
+name: marka-tara
+
+# SALT OKUMA (Serdar 22 Eki, marka adi AstroLoveArt): musteriye gorunen yerlerde Art'siz "AstroLove" gecisleri.
+# Etsy: magaza metin alanlari, aktif ilanlar (baslik, aciklama, etiket, malzeme, kisisellestirme, gorsel alt metni),
+# dijital ilan dosya adlari. Metricool: PENDING gonderiler. Dosya: Etsy'ye ekli dijital dosyalarin Drive kopyalari
+# (ad + PDF + ZIP ici), musteri siparis teslim klasorleri (tum adlar; PDF metni yalniz en yeni 1 siparis klasoru).
+# Yazma YOK (Etsy, Metricool, Drive kaynak). Cikti yalniz Drive DENETIM_20261021/MARKA_TARA/<run_id>/; log'a yalniz sayi.
+
+permissions:
+  actions: read
+  contents: read
+
+on:
+  workflow_dispatch:
+
+env:
+  D: "gdrive:ASTROLOVE/TEMP/DENETIM_20261021/MARKA_TARA/${{ github.run_id }}"
+
+jobs:
+  tara:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Kur
+        run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          sudo apt-get install -y -qq poppler-utils > /dev/null
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf + tokenlar (log'a yazilmaz)
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+          mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/METRICOOL_TOKEN.json" _work/mc.json
+          python3 -c "import json;print('::add-mask::'+json.load(open('_work/mc.json'))['userToken'])"
+      - name: Etsy (salt okuma)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: python3 scripts/etsy/marka_tara.py etsy --out _out
+      - name: Metricool (salt okuma, PENDING)
+        run: |
+          set -o pipefail
+          python3 scripts/etsy/marka_tara.py metricool --token-dosya _work/mc.json --out _out 2>&1 \
+            | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json "$GITHUB_STEP_SUMMARY"
+      - name: Dosyalar (Etsy dijital dosyalarinin Drive kopyalari + siparis teslim klasorleri)
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, re
+          adlar = json.load(open("_out/ETSY_DOSYA_ADLARI.json"))
+          with open("_work/inc.txt", "w") as f:
+              for ad in adlar:
+                  f.write("**/" + re.sub(r"([\[\]*?{}\\])", r"\\\1", ad) + "\n")
+          print("Etsy farkli dosya adi", len(adlar))
+          PY
+          mkdir -p _dl/etsy
+          for kok in ASTROLOVE/DIGITAL ASTROLOVE/DIJITAL_78 ASTROLOVE/TEMP/DIJITAL_78; do
+            rclone copy "gdrive:$kok" "_dl/etsy/$kok" --include-from _work/inc.txt -q || echo "uyari: $kok okunamadi"
+          done
+          python3 - <<'PY'
+          import json, pathlib
+          adlar = set(json.load(open("_out/ETSY_DOSYA_ADLARI.json")))
+          bulunan = {p.name for p in pathlib.Path("_dl/etsy").rglob("*") if p.is_file()}
+          ozet = dict(etsy_farkli_ad=len(adlar), driveda_bulunan=len(adlar & bulunan), bulunamayan=sorted(adlar - bulunan))
+          json.dump(ozet, open("_out/ETSY_DOSYA_DRIVE_ESLESME.json", "w"), ensure_ascii=False, indent=1)
+          print(f"Etsy dosya adi {ozet['etsy_farkli_ad']} | Drive'da bulunan {ozet['driveda_bulunan']} | bulunamayan {len(ozet['bulunamayan'])}")
+          PY
+          python3 scripts/etsy/marka_tara.py dosya --out _out --etiket etsy_teslim _dl/etsy
+          rclone lsf -R --files-only "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL" > _work/siparis_adlar.txt || true
+          son=$(rclone lsjson --dirs-only "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL" | python3 -c "
+          import json,sys; d=[x for x in json.load(sys.stdin) if x['Name'].isdigit() and not x['Name'].startswith('9000')]
+          d.sort(key=lambda x: x['ModTime']); print(d[-1]['Name'] if d else '')")
+          mkdir -p _dl/siparis
+          [ -n "$son" ] && rclone copy "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL/$son" _dl/siparis --include "/*.pdf" -q || true
+          echo "siparis klasoru dosya adi $(wc -l < _work/siparis_adlar.txt) | PDF metni icin en yeni 1 gercek siparis klasoru: $( [ -n "$son" ] && echo var || echo yok ), pdf $(ls _dl/siparis | wc -l)"
+          python3 scripts/etsy/marka_tara.py dosya --out _out --etiket siparis_teslim --ad-listesi _work/siparis_adlar.txt _dl/siparis
+      - name: Token geri yaz + cikti Drive'a
+        if: always()
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || echo "Token yenilenmedi"
+          python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/ETSY_TOKEN.json _out || { echo "::error::ciktida sir (Etsy)"; exit 1; }
+          python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/mc.json _out || { echo "::error::ciktida sir (Metricool)"; exit 1; }
+          rclone copy _out "$D" -q && echo "cikti: DENETIM_20261021/MARKA_TARA/${GITHUB_RUN_ID}"
+      - if: always()
+        run: rm -rf _work _dl ~/.config/rclone
