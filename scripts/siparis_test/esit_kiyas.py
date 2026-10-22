@@ -11,6 +11,8 @@ ESIT TANIMI (kosulardan ONCE yazildi, bu commit):
     BASKI 2700x1050 (11 oz Printful); OZET.json kapi sonucu PASS ya da GOZ (iki tarafta ayni); PRINTFUL_TASLAK.json iki tarafta esit.
   PASS = iki kosu basarili + tum dosyalar ESIT + oran/boyut dogru + kapilar FAIL degil. Biri tutmazsa FAIL.
 Cikti: KIYAS.json + ONIZ_<ad>.jpg (uzun kenar 1600, gercek oran) Merkez kontrolu icin. Yalniz sayi/ad loga; isim/mesaj yok.
+22 Eki 2. tur (poster 1. tur FAIL 39850555034, max_fark 7): piksel tanimi DEGISMEDI; yalniz _2000 onizlemenin beklenen boyutu
+  eklendi (1. turdaki liste hatasi). 2. tur = eski ref ile iki taze kosu (belirlenimcilik tanisi).
 Kullanim: esit_kiyas.py --tur poster|kupa --eski DIZIN --yeni DIZIN --out DIZIN"""
 import argparse
 import hashlib
@@ -63,7 +65,9 @@ def main():
             if a.tur == "poster":
                 if ad_.endswith("_8x10.jpg") and (w, h) != (2400, 3000):
                     hata.append(f"{ad_}: {w}x{h}, beklenen 2400x3000 (8x10 @300 dpi)")
-                elif not ad_.endswith("_8x10.jpg") and (w, h) != (7200, 10800):
+                elif ad_.endswith("_2000.jpg") and (w, h) != (2000, 3000):   # onizleme (siparis_uret.py:5); 1. turda listede yoktu
+                    hata.append(f"{ad_}: {w}x{h}, beklenen 2000x3000 (onizleme)")
+                elif not ad_.endswith(("_8x10.jpg", "_2000.jpg")) and (w, h) != (7200, 10800):
                     hata.append(f"{ad_}: {w}x{h}, beklenen 7200x10800")
             elif ad_.startswith("BASKI_") and (w, h) != (2700, 1050):
                 hata.append(f"{ad_}: {w}x{h}, beklenen 2700x1050 (11 oz)")

@@ -43,7 +43,7 @@ on:
         required: false
         default: "8a8b370edb74cb52402b4939d38ba14d2d2105fd"
       wp_ref:
-        description: "WP kodu (wp-katman / wp-tagline-duzelt commit, tam 40 karakter SHA); bos = temiz/wp-tagline-duzelt 4d42a5bb (360cbef agaci; Serdar 22 Eki A2)"
+        description: "WP kodu (wp-katman / wp-tagline-duzelt commit, tam 40 karakter SHA); bos = 360cbef (tagline cift baski duzeltmesi; Serdar 22 Eki A2)"
         required: false
         default: ""
       wp_pod_kod:
@@ -63,7 +63,7 @@ concurrency: siparis-dijital-${{ github.event.inputs.receipt }}-${{ github.event
 
 env:
   RENK_REF: ${{ github.event.inputs.renk_ref || '8a8b370edb74cb52402b4939d38ba14d2d2105fd' }}
-  WP_REF: ${{ github.event.inputs.wp_ref || '4d42a5bbe4965a34ea59d4961e5589303695e29d' }}   # 9 Eki: giris WP icin 360cbef (tagline cift baski duzeltmesi) verir
+  WP_REF: ${{ github.event.inputs.wp_ref || '360cbef947994c7d4b3c9ae95275f778a18af716' }}   # 9 Eki: giris WP icin 360cbef (tagline cift baski duzeltmesi) verir
   AMP_MOD: ${{ github.event.inputs.amp == 'glif' && 'glif' || 'yeni' }}   # B2: tagline & (glif yalniz bilinen FAIL testi)
 
 jobs:
