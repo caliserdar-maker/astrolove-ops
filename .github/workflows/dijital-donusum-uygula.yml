@@ -58,7 +58,7 @@ jobs:
           set -euo pipefail; umask 077; mkdir -p ~/.config/rclone _work
           printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
           chmod 600 ~/.config/rclone/rclone.conf
-          [ -z "${GOOGLE_CLIENT_SECRET:-}" ] || echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi   # 757d9b60 kurali (P5 hazirlik 22 Eki)
           rclone copyto "gdrive:ASTROLOVE/TEMP/DIJITAL_DONUSUM_PLAN.csv" _work/plan.csv
           rclone copyto "gdrive:ASTROLOVE/DIJITAL_78/DIJITAL_78_KALAN_ILANLAR.csv" _work/keepers.csv
           rclone copyto "gdrive:ASTROLOVE/ETSY_TOKEN.json" _work/token.json

@@ -1,0 +1,74 @@
+name: rclone-gecis
+
+# RCLONE_PLAN (Drive 1jDyAmuG3PLFhiBZqe2hSl40oaSwLB1gMKXfxaPpYUic) adim 1 ve 3 (Serdar 22 Eki, FAZ 1 hazirligi). DEGER YAZILMAZ.
+# istemci_test: kendi OAuth istemcimiz (client_id d94bc5b2 google-oauth-bootstrap; gizli degil) + GOOGLE_CLIENT_SECRET ile Google
+#   token ucuna SAHTE refresh_token gonderir. Yalniz hata kodu yazilir: invalid_grant = istemci + secret gecerli;
+#   invalid_client / unauthorized_client = gecersiz (yeni secret gerekir). Hicbir token alinmaz, hicbir sey degismez.
+# yedek: mevcut RCLONE_CONF_B64 -> RCLONE_CONF_B64_YEDEK (gh_secrets.py, OPS_ADMIN_TOKEN); deger STDIN'den, loga yazilmaz.
+#   Dogrulama: secret adi listede ve updated_at kosu anindan sonra. RCLONE_CONF_B64'e DOKUNULMAZ.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      mod: {description: "istemci_test | yedek", required: true, default: "istemci_test"}
+      onay: {description: "yedek icin SERDAR_RCLONE", required: false, default: ""}
+
+env:
+  CLIENT_ID: "563638674023-srqntttm0dddc60frdrocmoas38sv9q4.apps.googleusercontent.com"
+
+jobs:
+  gecis:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Girdi kapisi
+        env: {MOD: "${{ inputs.mod }}", ONAY: "${{ inputs.onay }}"}
+        run: |
+          case "$MOD" in
+            istemci_test) ;;
+            yedek) [ "$ONAY" = "SERDAR_RCLONE" ] || { echo "::error::yedek icin onay yok"; exit 1; } ;;
+            *) echo "::error::mod"; exit 1 ;;
+          esac
+      - name: istemci_test (salt okuma; yalniz hata kodu)
+        if: ${{ inputs.mod == 'istemci_test' }}
+        env:
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          [ -n "${GOOGLE_CLIENT_SECRET:-}" ] || { echo "::error::GOOGLE_CLIENT_SECRET bos"; exit 1; }
+          python3 - <<'PY'
+          import json, os, urllib.error, urllib.parse, urllib.request
+          veri = urllib.parse.urlencode({"client_id": os.environ["CLIENT_ID"], "client_secret": os.environ["GOOGLE_CLIENT_SECRET"],
+                                         "grant_type": "refresh_token", "refresh_token": "1//sahte-istemci-testi"}).encode()
+          try:
+              urllib.request.urlopen(urllib.request.Request("https://oauth2.googleapis.com/token", data=veri), timeout=30)
+              print("BEKLENMEDIK: sahte token kabul edildi"); raise SystemExit(1)
+          except urllib.error.HTTPError as e:
+              kod = (json.loads(e.read() or b"{}").get("error") or "?")
+          sonuc = {"invalid_grant": "PASS: istemci + secret GECERLI", "invalid_client": "FAIL: istemci ya da secret GECERSIZ",
+                   "unauthorized_client": "FAIL: istemci bu akisa yetkili degil"}.get(kod, "BILINMIYOR")
+          print(f"ISTEMCI_TEST http hata kodu: {kod} -> {sonuc}")
+          raise SystemExit(0 if kod == "invalid_grant" else 1)
+          PY
+      - name: yedek (RCLONE_CONF_B64 -> RCLONE_CONF_B64_YEDEK; deger loga yazilmaz)
+        if: ${{ inputs.mod == 'yedek' }}
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          OPS_ADMIN_TOKEN: ${{ secrets.OPS_ADMIN_TOKEN }}
+        run: |
+          set -euo pipefail
+          [ -n "${RCLONE_CONF_B64:-}" ] || { echo "::error::RCLONE_CONF_B64 bos"; exit 1; }
+          pip install -q pynacl
+          T0=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          printf '%s' "$RCLONE_CONF_B64" | python3 scripts/common/gh_secrets.py secret astrolove-ops RCLONE_CONF_B64_YEDEK > /dev/null
+          curl -fsS -H "Authorization: Bearer $OPS_ADMIN_TOKEN" -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/secrets/RCLONE_CONF_B64_YEDEK" > _s.json
+          python3 -c "
+          import json,sys; d=json.load(open('_s.json')); t0=sys.argv[1]
+          ok = d.get('name') == 'RCLONE_CONF_B64_YEDEK' and (d.get('updated_at') or '') >= t0
+          print('YEDEK secret', d.get('name'), 'updated_at', d.get('updated_at'), '->', 'PASS' if ok else 'FAIL'); sys.exit(0 if ok else 1)" "$T0"
+          rm -f _s.json
