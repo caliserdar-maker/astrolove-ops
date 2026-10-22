@@ -1,0 +1,21 @@
+name: workflow-kapat-pod
+# Serdar 22 Eki karari (a): pod-listing-create KAPATILIR (disable). pod_listing_create.py:364/481 hazirlik tanimini degerle
+# (made_to_order 1-3) secer; o tanim (1512772362964) yil donumune ayrildi. Liste sabit, girdi yok. Silme yok;
+# geri donus: ayni uc ile /enable (once secim 1517641240112'ye sabitlenir). Gecici is akisi: P8 ile kaldirilir.
+permissions:
+  actions: write
+on:
+  workflow_dispatch: {}
+jobs:
+  kapat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Disable + durum oku
+        run: |
+          set -euo pipefail
+          gh api -X PUT "repos/${GITHUB_REPOSITORY}/actions/workflows/pod-listing-create.yml/disable" >/dev/null
+          s=$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/pod-listing-create.yml" --jq .state)
+          echo "pod-listing-create $s"; [ "$s" = "disabled_manually" ]

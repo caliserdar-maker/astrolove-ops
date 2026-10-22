@@ -1,4 +1,5 @@
 name: pod-listing-create
+# ACMA: pod_listing_create.py:364/481 hazirlik tanimini degerle (1-3 gun) secer; 1512772362964 yil donumune ayrildi (22 Eki). Acmadan once secimi 1517641240112'ye sabitle.
 
 # POD (Prodigi poster) YENI ILAN: createDraftListing + 12 gorsel (10 kare + 2 teknik kart, EK 3) + video
 # + Color(5)xSize(16) varyant + renk secenegine edisyon 01 karesi. Metin docs/POD_LISTING_TEMPLATE.md,
