@@ -1,0 +1,6 @@
+- Gorsel denetim rapor adimi, cikti olmasa da ozet uretecek bicimde duzeltildi.
+- Kopyalama hatalari TEMP/LOGS altindaki denetim loguna ekleniyor.
+- Kisisellestirme sorulari canli API'nin liste ve nesne bicimlerinden okunuyor.
+- POD burc cifti ilanin kanonik baslik semasindan belirleniyor.
+- Soru sayisi, etiketleri, talimatlari ve sinirlari POD semasiyla denetleniyor.
+- Canli sema PASS ve eksik soru FAIL senaryolari agsiz testlerle dogrulandi.

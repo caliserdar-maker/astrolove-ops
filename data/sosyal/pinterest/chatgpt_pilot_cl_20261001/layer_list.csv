@@ -1,0 +1,60 @@
+composition,layer,type,asset,bbox_xywh,text,font,font_px,font_pt_at_96dpi,color
+01_Discovery_1000x1500,00_background,background,assets/scene_empty_1000x1500.png,"[0, 0, 1000, 1500]",,,,,
+01_Discovery_1000x1500,01_brand,text,layers/01_Discovery_1000x1500/01_brand.png,"[80, 74, 182, 17]",ASTROLOVEART,Nimbus Sans,23,17.25,#947748
+01_Discovery_1000x1500,02_pair,text,layers/01_Discovery_1000x1500/02_pair.png,"[81, 132, 453, 50]",Cancer & Libra,P052,68,51.0,#111D31
+01_Discovery_1000x1500,03_hook,text,layers/01_Discovery_1000x1500/03_hook.png,"[81, 221, 363, 28]",One symbol. Your love story.,Nimbus Sans,29,21.75,#111D31
+01_Discovery_1000x1500,04_framed_poster_shadow,shadow,layers/01_Discovery_1000x1500/04_framed_poster_shadow.png,"[179, 328, 656, 826]",,,,,#201912
+01_Discovery_1000x1500,04_framed_poster,artwork,assets/real_framed_cancer_libra_reference.png,"[172, 318, 656, 826]",,,,,
+01_Discovery_1000x1500,05_personalization,text,layers/01_Discovery_1000x1500/05_personalization.png,"[254, 1222, 490, 28]",Your two names. Your own message.,Nimbus Sans,30,22.5,#111D31
+01_Discovery_1000x1500,06_formats,text,layers/01_Discovery_1000x1500/06_formats.png,"[272, 1290, 457, 14]",FINE ART PRINT  /  FRAMED PRINT  /  DIGITAL FILE,Nimbus Sans,19,14.25,#111D31
+02_Personalization_1000x1500,00_background,background,assets/bg_cream_1000x1500.png,"[0, 0, 1000, 1500]",,,,,
+02_Personalization_1000x1500,01_brand,text,layers/02_Personalization_1000x1500/01_brand.png,"[80, 66, 387, 16]",ASTROLOVEART  /  CANCER & LIBRA,Nimbus Sans,22,16.5,#947748
+02_Personalization_1000x1500,02_headline,text,layers/02_Personalization_1000x1500/02_headline.png,"[80, 124, 411, 141]","Your names.
+Your words.",P052,76,57.0,#111D31
+02_Personalization_1000x1500,03_subtitle,text,layers/02_Personalization_1000x1500/03_subtitle.png,"[80, 305, 394, 27]","A personal story, written by you.",Nimbus Sans,28,21.0,#111D31
+02_Personalization_1000x1500,04_complete_poster_shadow,shadow,layers/02_Personalization_1000x1500/04_complete_poster_shadow.png,"[181, 399, 652, 821]",,,,,#201912
+02_Personalization_1000x1500,04_complete_poster,artwork,assets/real_framed_cancer_libra_reference.png,"[174, 389, 652, 821]",,,,,
+02_Personalization_1000x1500,05_instruction,text,layers/02_Personalization_1000x1500/05_instruction.png,"[248, 1276, 501, 28]",Add two names and a short message.,Nimbus Sans,30,22.5,#111D31
+02_Personalization_1000x1500,06_rule,rule,layers/02_Personalization_1000x1500/06_rule.png,null,,,,,#947748
+02_Personalization_1000x1500,07_footer,text,layers/02_Personalization_1000x1500/07_footer.png,"[310, 1380, 381, 16]",PERSONALIZED ZODIAC COUPLE ART,Nimbus Sans,21,15.75,#947748
+03_Five_Colors_1000x1500,00_background,background,assets/bg_cream_1000x1500.png,"[0, 0, 1000, 1500]",,,,,
+03_Five_Colors_1000x1500,01_brand,text,layers/03_Five_Colors_1000x1500/01_brand.png,"[80, 66, 387, 16]",ASTROLOVEART  /  CANCER & LIBRA,Nimbus Sans,22,16.5,#947748
+03_Five_Colors_1000x1500,02_headline,text,layers/03_Five_Colors_1000x1500/02_headline.png,"[81, 123, 551, 139]","Five colors.
+One personal story.",P052,65,48.75,#111D31
+03_Five_Colors_1000x1500,03_subtitle,text,layers/03_Five_Colors_1000x1500/03_subtitle.png,"[82, 286, 418, 27]",Find the palette that feels like you.,Nimbus Sans,28,21.0,#111D31
+03_Five_Colors_1000x1500,04_color_1,artwork,assets/real_midnight_blue.png,"[80, 405, 240, 300]",,,,,
+03_Five_Colors_1000x1500,05_label_1,text,layers/03_Five_Colors_1000x1500/05_label_1.png,"[152, 734, 97, 49]","Midnight
+Blue",Nimbus Sans,26,19.5,#111D31
+03_Five_Colors_1000x1500,04_color_2,artwork,assets/real_deep_black.png,"[380, 405, 240, 300]",,,,,
+03_Five_Colors_1000x1500,05_label_2,text,layers/03_Five_Colors_1000x1500/05_label_2.png,"[470, 734, 62, 48]","Deep
+Black",Nimbus Sans,26,19.5,#111D31
+03_Five_Colors_1000x1500,04_color_3,artwork,assets/real_pure_white.png,"[680, 405, 240, 300]",,,,,
+03_Five_Colors_1000x1500,05_label_3,text,layers/03_Five_Colors_1000x1500/05_label_3.png,"[767, 734, 66, 48]","Pure
+White",Nimbus Sans,26,19.5,#111D31
+03_Five_Colors_1000x1500,04_color_4,artwork,assets/real_champagne_ivory.png,"[230, 875, 240, 300]",,,,,
+03_Five_Colors_1000x1500,05_label_4,text,layers/03_Five_Colors_1000x1500/05_label_4.png,"[280, 1204, 140, 54]","Champagne
+Ivory",Nimbus Sans,26,19.5,#111D31
+03_Five_Colors_1000x1500,04_color_5,artwork,assets/real_warm_parchment.png,"[530, 875, 240, 300]",,,,,
+03_Five_Colors_1000x1500,05_label_5,text,layers/03_Five_Colors_1000x1500/05_label_5.png,"[590, 1204, 123, 48]","Warm
+Parchment",Nimbus Sans,26,19.5,#111D31
+03_Five_Colors_1000x1500,06_rule,rule,layers/03_Five_Colors_1000x1500/06_rule.png,null,,,,,#947748
+03_Five_Colors_1000x1500,07_footer,text,layers/03_Five_Colors_1000x1500/07_footer.png,"[239, 1360, 520, 27]",The same original symbol in every edition.,Nimbus Sans,28,21.0,#111D31
+04_Anniversary_Gift_1000x1500,00_background,background,assets/bg_gift_1000x1500.png,"[0, 0, 1000, 1500]",,,,,
+04_Anniversary_Gift_1000x1500,01_brand,text,layers/04_Anniversary_Gift_1000x1500/01_brand.png,"[80, 66, 182, 17]",ASTROLOVEART,Nimbus Sans,23,17.25,#947748
+04_Anniversary_Gift_1000x1500,02_headline,text,layers/04_Anniversary_Gift_1000x1500/02_headline.png,"[80, 124, 550, 118]","An anniversary gift
+written in the stars.",P052,64,48.0,#111D31
+04_Anniversary_Gift_1000x1500,03_pair,text,layers/04_Anniversary_Gift_1000x1500/03_pair.png,"[81, 280, 489, 16]",Cancer & Libra  /  PERSONALIZED COUPLE ART,Nimbus Sans,22,16.5,#111D31
+04_Anniversary_Gift_1000x1500,04_real_framed_poster_shadow,shadow,layers/04_Anniversary_Gift_1000x1500/04_real_framed_poster_shadow.png,"[179, 428, 656, 826]",,,,,#201912
+04_Anniversary_Gift_1000x1500,04_real_framed_poster,artwork,assets/real_framed_cancer_libra_reference.png,"[172, 418, 656, 826]",,,,,
+04_Anniversary_Gift_1000x1500,05_footer,text,layers/04_Anniversary_Gift_1000x1500/05_footer.png,"[263, 1430, 473, 22]",Made personal with your names and message.,Nimbus Sans,23,17.25,#111D31
+Profile_Cover_1600x900,00_background,background,assets/bg_cream_1600x900.png,"[0, 0, 1600, 900]",,,,,
+Profile_Cover_1600x900,01_brand,text,layers/Profile_Cover_1600x900/01_brand.png,"[120, 137, 213, 20]",ASTROLOVEART,Nimbus Sans,27,20.25,#947748
+Profile_Cover_1600x900,02_headline,text,layers/Profile_Cover_1600x900/02_headline.png,"[121, 235, 610, 199]","Two signs.
+One love story.",P052,94,70.5,#111D31
+Profile_Cover_1600x900,03_subtitle,text,layers/Profile_Cover_1600x900/03_subtitle.png,"[122, 474, 418, 30]",Personalized zodiac couple art,Nimbus Sans,31,23.25,#111D31
+Profile_Cover_1600x900,04_rule,rule,layers/Profile_Cover_1600x900/04_rule.png,null,,,,,#947748
+Profile_Cover_1600x900,05_range,text,layers/Profile_Cover_1600x900/05_range.png,"[121, 587, 361, 26]",78 original zodiac pair designs,Nimbus Sans,27,20.25,#111D31
+Profile_Cover_1600x900,06_formats,text,layers/Profile_Cover_1600x900/06_formats.png,"[122, 638, 462, 23]","Fine art prints, framed prints and digital files",Nimbus Sans,24,18.0,#111D31
+Profile_Cover_1600x900,07_signature,text,layers/Profile_Cover_1600x900/07_signature.png,"[120, 704, 424, 24]",Your two names. Your own message.,Nimbus Sans,26,19.5,#665E53
+Profile_Cover_1600x900,08_real_framed_poster_shadow,shadow,layers/Profile_Cover_1600x900/08_real_framed_poster_shadow.png,"[998, 152, 489, 616]",,,,,#201912
+Profile_Cover_1600x900,08_real_framed_poster,artwork,assets/real_framed_cancer_libra_reference.png,"[991, 142, 489, 616]",,,,,

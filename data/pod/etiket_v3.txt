@@ -1,0 +1,16 @@
+# Etiket v3 (Serdar onayi 27 Eyl 2026). Satir 1 = cift etiketi sablonu, 2-13 ortak.
+# Cift etiketi: "{a} and {b}" <= 20 ise; degilse "{a} {b}" <= 20 ise; degilse YEDEK_CIFT.
+# Mevsim: 1 Ocak - 14 Subat arasi "newlywed gift" yerine "valentines day gift".
+{CIFT}
+zodiac couple print
+astrology couple art
+zodiac wall art
+astrology wall art
+personalized couple
+custom couple gift
+zodiac gift
+anniversary gift
+engagement gift
+wedding gift couple
+newlywed gift
+giclee print

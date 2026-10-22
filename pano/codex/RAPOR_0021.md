@@ -1,0 +1,6 @@
+- Tum aktif ilanlar salt okunur ve sayfali olarak denetlenir.
+- Her ilanda zorunlu iki isim ve mesaj semasi kontrol edilir.
+- Download ilanindaki ekli dosyalar adlariyla birlikte FAIL olur.
+- Anlik teslim ifadeleri FAIL, teslim suresi ifadesi ayrica raporlanir.
+- Ilan veya kargo profilindeki islem suresi alanlari kontrol edilir.
+- Sekiz sentetik agsiz senaryo gecti; canli Etsy veya Drive islemi yapilmadi.

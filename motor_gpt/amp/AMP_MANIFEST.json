@@ -1,0 +1,15 @@
+{
+ "AMP_KAYNAK.png": {
+  "sha256": "0131268524b6f5be39f42bf3b8ffbf29bdeab77ee2b5976cfebb473b6f9434de",
+  "bayt": 1278811
+ },
+ "AMP_ALFA.png": {
+  "sha256": "22517570592886ea2803aab4b4ff1603ebcf62e06af8c983c4717dfb314a1895",
+  "bayt": 21592
+ },
+ "AMP_YUZEY.png": {
+  "sha256": "5b9c024a03e0fb67c9370c620d07e77dc8d2e590ef96746e7e816b6e8fff20be",
+  "bayt": 345000
+ },
+ "not": "ChatGPT & (Serdar onayi 8 Eki 2026). Alfa: govde V esigi (parilti haric), 16 bit; yuzey: ic renk disari tasinmis. Kirpma kaynak y0:y1,x0:x1 = 328:882,357:922"
+}

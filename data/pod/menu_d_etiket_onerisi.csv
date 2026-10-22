@@ -1,0 +1,27 @@
+sira,tam_ad,uzunluk,parantez,kisa_oneri,kisa_uzunluk
+1,Digital (All 5 colors),22,True,"Digital, All Colors",19
+2,"Print, Midnight Blue",20,False,"Print, Blue",11
+3,"Print, Deep Black",17,False,"Print, Black",12
+4,"Print, Warm Parchment",21,False,"Print, Parchment",16
+5,"Print, Champagne Ivory",22,False,"Print, Ivory",12
+6,"Print, Pure White",17,False,"Print, White",12
+7,"Antique Gold Frame, Midnight Blue",33,False,"Gold Frame, Blue",16
+8,"Antique Gold Frame, Deep Black",30,False,"Gold Frame, Black",17
+9,"Antique Gold Frame, Warm Parchment",34,False,"Gold Frame, Parchment",21
+10,"Antique Gold Frame, Champagne Ivory",35,False,"Gold Frame, Ivory",17
+11,"Antique Gold Frame, Pure White",30,False,"Gold Frame, White",17
+12,"Black Frame, Midnight Blue",26,False,"Black Frame, Blue",17
+13,"Black Frame, Deep Black",23,False,"Black Frame, Black",18
+14,"Black Frame, Warm Parchment",27,False,"Black Frame, Parchment",22
+15,"Black Frame, Champagne Ivory",28,False,"Black Frame, Ivory",18
+16,"Black Frame, Pure White",23,False,"Black Frame, White",18
+17,"White Frame, Midnight Blue",26,False,"White Frame, Blue",17
+18,"White Frame, Deep Black",23,False,"White Frame, Black",18
+19,"White Frame, Warm Parchment",27,False,"White Frame, Parchment",22
+20,"White Frame, Champagne Ivory",28,False,"White Frame, Ivory",18
+21,"White Frame, Pure White",23,False,"White Frame, White",18
+22,"Natural Frame, Midnight Blue",28,False,"Wood Frame, Blue",16
+23,"Natural Frame, Deep Black",25,False,"Wood Frame, Black",17
+24,"Natural Frame, Warm Parchment",29,False,"Wood Frame, Parchment",21
+25,"Natural Frame, Champagne Ivory",30,False,"Wood Frame, Ivory",17
+26,"Natural Frame, Pure White",25,False,"Wood Frame, White",17

@@ -1,0 +1,82 @@
+{
+ "PASS_ornegi": {
+  "a": true,
+  "b": true,
+  "c": true,
+  "d": true,
+  "e": true
+ },
+ "a_FAIL": {
+  "ana_ort": 1.283,
+  "ana_p999": 11,
+  "dis_ort": 0.329,
+  "dis_p999": 9,
+  "PASS": false
+ },
+ "b_FAIL": {
+  "dE00": {
+   "kucuk1": 2.64,
+   "kucuk2": 2.6,
+   "sonsuz": 2.4,
+   "isim1": 2.79,
+   "isim2": 2.95,
+   "tagline": 2.33,
+   "cember": 2.51
+  },
+  "en_kotu": 2.95,
+  "PASS": false
+ },
+ "c_FAIL": {
+  "kucuk1": "ARIES",
+  "kucuk2": "AQUARIUS",
+  "beklenen": [
+   "AQUARIUS",
+   "ARIES"
+  ],
+  "isim1_solda": true,
+  "kucuk1_isim1_ustunde": false,
+  "PASS": false
+ },
+ "d_FAIL": {
+  "isim1": {
+   "iou": 1.0,
+   "punto": 405
+  },
+  "isim2": {
+   "iou": 1.0,
+   "punto": 405
+  },
+  "tagline": {
+   "iou": 0.0,
+   "punto": 372
+  },
+  "PASS": false
+ },
+ "e_FAIL": {
+  "ust": {
+   "adim": 8.072,
+   "komsu": 1.309,
+   "n": 2386,
+   "PASS": false
+  },
+  "alt": {
+   "adim": 8.007,
+   "komsu": 1.342,
+   "n": 2886,
+   "PASS": false
+  },
+  "sol": {
+   "adim": 8.043,
+   "komsu": 1.273,
+   "n": 2461,
+   "PASS": false
+  },
+  "sag": {
+   "adim": 7.957,
+   "komsu": 1.261,
+   "n": 2458,
+   "PASS": false
+  },
+  "PASS": false
+ }
+}

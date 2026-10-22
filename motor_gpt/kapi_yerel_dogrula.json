@@ -1,0 +1,25 @@
+{
+ "kalinlik": 46.4,
+ "leke_alan_px": 1653,
+ "PASS_ornegi": {
+  "ana_ort": 0.238,
+  "ana_p999": 5,
+  "dis_ort": 0.033,
+  "dis_p999": 4,
+  "kume_px": 1,
+  "kume_esik": 1074,
+  "kalinlik": 46.4,
+  "PASS": true
+ },
+ "FAIL_ornegi": {
+  "ana_ort": 0.398,
+  "ana_p999": 6,
+  "dis_ort": 0.227,
+  "dis_p999": 4,
+  "kume_px": 1653,
+  "kume_esik": 1074,
+  "kalinlik": 46.4,
+  "PASS": false
+ },
+ "dogru": true
+}
