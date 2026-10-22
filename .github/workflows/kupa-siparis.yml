@@ -33,7 +33,7 @@ on:
         default: "KUPA_SIPARIS"
       kod_ref:
         description: "kupa-orchard dalinda commit ya da dal"
-        default: "kupa-orchard"
+        default: "0196e37a0447d61eab42b84778a56d9261b0b201"   # temiz/kupa-orchard (kupa_orchard/ birebir; A3 kiyasi 39850054681 PASS)
 
 jobs:
   kilit:
@@ -67,7 +67,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.kod_ref || 'kupa-orchard' }}
+          ref: ${{ inputs.kod_ref || '0196e37a0447d61eab42b84778a56d9261b0b201' }}
           path: _kod
           fetch-depth: 1
       - uses: actions/setup-python@v5
