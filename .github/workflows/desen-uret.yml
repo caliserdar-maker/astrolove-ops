@@ -44,9 +44,7 @@ jobs:
           rclone lsjson --dirs-only "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL" > _work/d1.json 2>/dev/null || echo "[]" > _work/d1.json
           rclone lsjson --dirs-only --include "SIPARIS_*/" "gdrive:ASTROLOVE/TEMP" > _work/d2.json 2>/dev/null || echo "[]" > _work/d2.json
           echo "drive klasor: $(python3 -c "import json;print(len(json.load(open('_work/d1.json'))), len(json.load(open('_work/d2.json'))))")"
-          # siparis girdisi (isim/mesaj): yalniz OZET*.json; izin listesi (Serdar onayli, sahip-ozel); icerik loga yazilmaz
-          rclone copy "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/DIJITAL" _work/ozet --include "OZET*.json" --max-size 5M -q
-          echo "siparis ozet dosyasi: $(find _work/ozet -name '*.json' 2>/dev/null | wc -l)"
+          # izin listesi (Serdar onayli, sahip-ozel); icerik loga yazilmaz
           rclone copyto "gdrive:ASTROLOVE/TEMP/DENETIM_20261021/IZIN_LISTESI.json" _work/izin.json -q 2>/dev/null || echo "izin listesi yok"
       - name: Uret (salt okuma; yalniz sayi)
         env:
@@ -54,7 +52,7 @@ jobs:
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
           TOKEN_FILE: _work/ETSY_TOKEN.json
-        run: python3 scripts/guvenlik/desen_uret.py --out _out --drive-json _work/d1.json,_work/d2.json --ozet _work/ozet --tara . --izin _work/izin.json
+        run: python3 scripts/guvenlik/desen_uret.py --out _out --drive-json _work/d1.json,_work/d2.json --tara . --izin _work/izin.json
       - name: Token geri yaz + HASH Drive'a
         if: ${{ always() }}
         run: |

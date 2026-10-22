@@ -41,7 +41,8 @@ jobs:
           KAYNAK: ${{ matrix.kaynak }}
         run: |
           set -euo pipefail
-          python3 scripts/guvenlik/musteri_tara.py --out _out --kaynak "$KAYNAK"
+          rclone copyto "gdrive:ASTROLOVE/TEMP/DENETIM_20261021/IZIN_LISTESI.json" _izin.json -q 2>/dev/null || echo "izin listesi yok"
+          python3 scripts/guvenlik/musteri_tara.py --out _out --kaynak "$KAYNAK" --izin _izin.json
       - name: Drive'a (ayrinti yalniz Drive'da)
         if: ${{ always() }}
         env:

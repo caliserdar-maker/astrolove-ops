@@ -24,10 +24,11 @@ import zipfile
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 
-IZINLI_ALAN = ("github.com", "noreply.github.com", "users.noreply.github.com", "anthropic.com", "example.com", "example.org",
-               "rclone.org", "python.org", "iam.gserviceaccount.com", "prodigi.com", "metricool.com", "etsy.com", "googlegroups.com",
-               "pypi.org", "astroloveart.com", "localhost")
 IZINLI_EPOSTA_SHA = {"b7f5f765c9f06afbf4fdd09c054db80da908639fdff0a8efb3a466cf48f9ae25"}   # magaza sahibi (SAHIP_EPOSTA); deger depoda tutulmaz
+# Serdar 22 Eki: e-posta kurali = ornek alan adlari (RFC 2606/6761: example.com/org/net, .test, .example, .invalid, .localhost)
+# ve SAHIP_EPOSTA DISINDAKI her adres eslesmedir. Hizmet adresleri (bot, destek) yalniz Serdar onayli izin listesiyle (--izin).
+ORNEK_ALAN = re.compile(r"(^|\.)(example\.(com|org|net)|[a-z0-9-]+\.(test|example|invalid|localhost))$|^localhost$")
+IZINLI_EPOSTA_EK = set()         # main(): --izin JSON "epostalar" (kucuk harf)
 DOSYA_UZANTI = re.compile(r"\.(png|jpe?g|gif|svg|webp|js|css|py|json|txt|md|csv|ya?ml|zip|pdf|ttf|woff2?)$", re.I)
 TEST_RECEIPT = re.compile(r"^(9000000\d{3}|999001|900000000\d)$")
 SORU = r"(?:Personali[sz]ation|Name under [A-Za-z]+|(?:Left|Right) name|Your message)"
@@ -63,7 +64,7 @@ def tara(metin):
     for m in KALIP["eposta"].finditer(metin):
         e = m.group(0).lower()
         alan = e.split("@", 1)[1]
-        if hashlib.sha256(e.encode()).hexdigest() in IZINLI_EPOSTA_SHA or DOSYA_UZANTI.search(e) or any(alan == a or alan.endswith("." + a) for a in IZINLI_ALAN) or "[bot]" in e:
+        if hashlib.sha256(e.encode()).hexdigest() in IZINLI_EPOSTA_SHA or DOSYA_UZANTI.search(e) or ORNEK_ALAN.search(alan) or e in IZINLI_EPOSTA_EK:
             continue
         c["eposta"] += 1
     for m in KALIP["receipt_no"].finditer(metin):
@@ -240,7 +241,10 @@ def ozet(ad, sat, anahtar):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", required=True); ap.add_argument("--kaynak", default="loglar,artifactlar,git,commit")
+    ap.add_argument("--izin", default="", help="Serdar onayli izin listesi JSON (epostalar: hizmet adresleri)")
     a = ap.parse_args()
+    if a.izin and os.path.exists(a.izin):
+        IZINLI_EPOSTA_EK.update(x["adres"].lower() for x in json.load(open(a.izin, encoding="utf-8")).get("epostalar") or [])
     os.makedirs(a.out, exist_ok=True)
     k = a.kaynak.split(",")
     gh = GH(os.environ["GITHUB_REPOSITORY"], os.environ["GH_TOKEN"]) if {"loglar", "artifactlar"} & set(k) else GH("", "")

@@ -10,10 +10,11 @@ ciktilari) -> musteri klasoru kimlikleri. Test makbuzlari disarida.
 Tuz: --tuz verilmezse rastgele uretilir, ::add-mask:: ile maskelenir, yalniz <out>/TUZ.txt'ye yazilir (Serdar 22 Eki 6a).
 --tara DIR: DIR'deki git izli dosyalar BELLEKTE desen listesiyle taranir (FAZ 1 kabul taramasi yolu; Serdar 22 Eki).
 <out>/TARAMA.json yalniz yer (dosya, satir) + desen turu + desen sira no; deger ve satir icerigi YOK. Log'a yalniz sayi.
-Ek kaynaklar (Serdar 22 Eki): makbuz buyer_email, first_line/second_line/city/zip, gift_sender; --ozet: siparis girdisi
-OZET*.json (isim1/isim2/mesaj/tagline; Latin cevirisi, '&' <-> 'and'); mesajlarda 3+ kelimelik gruplar (icerme). --izin: Serdar
-onayli izin listesi (kelime / konum), eslesme "izinli" isaretlenir. Tarama ayrica HEAD commit mesajlarini da tarar.
-Kullanim: desen_uret.py --out OUT [--tuz HEX] [--drive-json a.json,b.json] [--ozet DIR] [--tara DIR] [--izin IZIN.json]"""
+Ek kaynaklar (Serdar 22 Eki): makbuz buyer_email (token'da email_r yok: bos gelir), first_line/second_line/city/zip,
+gift_sender; mesajlarda 3+ kelimelik gruplar (noktalamasiz ve noktalamali; '&' <-> 'and'); isim cifti "A / B", "A_B", "A & B",
+"A and B"; Kiril adin Latin bicimi. Siparis OZET dosyalari kapsam disi (isim/mesaj icermez). --izin: Serdar onayli izin listesi
+(kelime / kod baglami / konum). Tarama dosya icerigi + dosya yollari + HEAD commit mesajlari; "_" kelime siniridir.
+Kullanim: desen_uret.py --out OUT [--tuz HEX] [--drive-json a.json,b.json] [--tara DIR] [--izin IZIN.json]"""
 import argparse
 import hashlib
 import json
@@ -35,7 +36,8 @@ MESAJ_SORU = re.compile(r"^\s*your message\s*$", re.I)
 KOTA_TABAN = 10                  # CLAUDE.md (Serdar 15 Eki): x-remaining-today < 10 ise DUR
 TARA_AZAMI = 3_000_000           # bayt; daha buyuk dosya taranmaz (sayilir)
 ADRES_ALAN = ("first_line", "second_line", "city", "zip")
-OZET_ALAN = {"isim1": "isim", "isim2": "isim", "isim": "isim", "mesaj": "mesaj", "tagline": "mesaj"}
+SINIR_ONCE, SINIR_SONRA = r"(?<![^\W_])", r"(?![^\W_])"   # harf/rakam degil; "_" SINIRDIR (AstroLoveArt_<Ad>_<Ad>)
+KOD_BAGLAM = "_-./("                                        # izin "kod_baglami": eslesmenin hemen yaninda bu karakterlerden biri
 
 
 def norm(v):
@@ -43,12 +45,12 @@ def norm(v):
 
 
 def parcalar(v, kelime=True):
-    """Tum deger + satir / virgul parcalari; kelime=True ise 3+ harfli kelimeler de (ad icin). Mesajda kelime YOK:
-    "ever", "love" gibi genel kelimeler taramada sahte eslesme uretir."""
+    """Tum deger + satir / virgul parcalari; kelime=True ise 3+ harfli kelimeler de (ad icin). Mesajda kelime YOK ve
+    parca en az 2 kelime: "ever", "love" gibi genel kelimeler taramada sahte eslesme uretir."""
     v = str(v or "")
     out = {v}
     for ayirici in ("\n", ",", ";"):
-        out |= {p for p in v.split(ayirici)}
+        out |= {p for p in v.split(ayirici) if kelime or len(p.split()) >= 2}
     if kelime:
         out |= {w for w in re.split(r"[^\w']+", v) if len(w) >= 3}
     return {p.strip() for p in out if len(p.strip()) >= 3}
@@ -61,43 +63,13 @@ def mesaj_bicimleri(v):
     out = set()
     for b in {v, v.replace("&", " and "), re.sub(r"(?i)\band\b", "&", v)}:
         out |= parcalar(b, kelime=False)
-        k = re.findall(r"[\w'&]+", b)
-        out |= {" ".join(k[i:j]) for i in range(len(k)) for j in range(i + 3, len(k) + 1)}
+        for k in (re.findall(r"[\w'&]+", b), b.split()):   # noktalamasiz ve noktalamali (virgullu) kelime gruplari
+            out |= {" ".join(k[i:j]) for i in range(len(k)) for j in range(i + 3, len(k) + 1)}
     return out
 
 
 def latin(v):
     return "".join(KIRIL_LATIN.get(c, c) for c in str(v).upper())
-
-
-def ozet_oku(kok):
-    """Drive SIPARIS_ISIM/DIJITAL kopyasindaki siparis JSON'lari -> dosya basina [(tur, deger)]; test makbuzu disarida."""
-    hepsi = []
-
-    def gez(x, out):
-        if isinstance(x, dict):
-            for k, v in x.items():
-                if k in OZET_ALAN and isinstance(v, str) and v.strip():
-                    out.append((OZET_ALAN[k], v.strip()))
-                else:
-                    gez(v, out)
-        elif isinstance(x, list):
-            for v in x:
-                gez(v, out)
-    for f in sorted(pathlib.Path(kok).rglob("*.json")) if kok else []:
-        if any(TEST.match(p) for p in f.parts):
-            continue
-        try:
-            j = json.loads(f.read_text(encoding="utf-8"))
-        except (ValueError, UnicodeDecodeError):
-            continue
-        if TEST.match(str(j.get("receipt") or "") if isinstance(j, dict) else ""):
-            continue
-        out = []
-        gez(j, out)
-        if out:
-            hepsi.append(out)
-    return hepsi
 
 
 def kisisel(t):
@@ -127,10 +99,11 @@ def isim_ekle(ekle, tur, isim):
                 continue
             for x, y in ((a1, a2), (a2, a1)):
                 for f in (str.upper, str.title):
-                    ekle("isim_cifti", f"{f(x)} / {f(y)}"); ekle("isim_cifti", f"{f(x)}_{f(y)}")
+                    for ara in (" / ", "_", " & ", " and "):
+                        ekle("isim_cifti", f"{f(x)}{ara}{f(y)}")
 
 
-def desen_uret(api, shop, drive_json, ozet_dir=""):
+def desen_uret(api, shop, drive_json):
     """-> {norm(desen): tur}. Degerler yalniz bellekte."""
     desen, tur = {}, Counter()
 
@@ -176,35 +149,49 @@ def desen_uret(api, shop, drive_json, ozet_dir=""):
         for e in json.load(open(jf)):
             if e.get("IsDir") and e.get("ID"):
                 ekle("drive_kimlik", e["ID"])
-    oz = ozet_oku(ozet_dir)
-    for dosya in oz:
-        for _, v in [x for x in dosya if x[0] == "mesaj"]:
-            for p in mesaj_bicimleri(v):
-                ekle("siparis_mesaj", p)
-        isim_ekle(ekle, "siparis_isim", list(dict.fromkeys(v for t_, v in dosya if t_ == "isim")))
-    return desen, dict(makbuz=makbuz, test=test, ozet_dosya=len(oz), tur=dict(tur))
+    return desen, dict(makbuz=makbuz, test=test, tur=dict(tur))
 
 
 def izin_oku(yol):
-    """Serdar onayli izin listesi (Drive, sahip-ozel): {"kelimeler": [{"kelime", "gerekce"}], "konumlar": [{"dosya", "satir",
-    "gerekce"}]}. Kelime: yaygin kod/sozluk kelimesi (her yerde izinli); konum: tek dosya satiri. -> (kelime kumesi, konum kumesi)"""
+    """Serdar onayli izin listesi (Drive, sahip-ozel): {"kelimeler": [{"kelime", "gerekce"}], "kod_baglami": [{"kelime",
+    "gerekce"}], "konumlar": [{"dosya", "satir", "gerekce"}]}. Kelime: her yerde izinli; kod_baglami: yalniz tanimlayici / dosya
+    adi icinde (yaninda _ - . / ya da sonrasinda "("), tek basina gecis RAPORLANIR; konum: tek dosya satiri.
+    -> (kelime kumesi, kod baglami kumesi, konum kumesi)"""
     if not yol or not os.path.exists(yol):
-        return set(), set()
+        return set(), set(), set()
     j = json.load(open(yol, encoding="utf-8"))
     return ({norm(k["kelime"]) for k in j.get("kelimeler") or []},
+            {norm(k["kelime"]) for k in j.get("kod_baglami") or []},
             {(k["dosya"], int(k["satir"])) for k in j.get("konumlar") or []})
 
 
-def tara(kok, desen, izin=(set(), set())):
-    """git izli dosyalarda + HEAD commit mesajlarinda desen ara (BELLEKTE). -> (yerler, commitler, ozet). Deger/satir icerigi
-    yok. Eslesme: casefold, bosluk dizisi esnek, iki yaninda harf/rakam/_ yok. Izin listesindeki kelime/konum "izinli" isaretlenir."""
+def izinli(n, metin, m, izin, yer=None):
+    kelime, baglam, konum = izin
+    if n in kelime or (yer is not None and yer in konum):
+        return True
+    if n in baglam:
+        once, sonra = metin[m.start(1) - 1:m.start(1)], metin[m.end(1):m.end(1) + 1]
+        return (once != "" and once in KOD_BAGLAM[:-1]) or (sonra != "" and sonra in KOD_BAGLAM)
+    return False
+
+
+def tara(kok, desen, izin=(set(), set(), set())):
+    """git izli dosyalarin icerigi + DOSYA YOLLARI (satir 0) + HEAD commit mesajlarinda desen ara (BELLEKTE).
+    -> (yerler, commitler, ozet). Deger/satir icerigi yok. Eslesme: casefold, bosluk dizisi esnek, iki yaninda harf/rakam yok
+    ("_" sinir sayilir). Izin listesine uyan eslesme "izinli" isaretlenir."""
     sira = {n: i for i, n in enumerate(sorted(desen), 1)}
     alt = sorted(desen, key=len, reverse=True)
-    rx = re.compile(r"(?<!\w)(" + "|".join(re.escape(n).replace(r"\ ", r"\s+") for n in alt) + r")(?!\w)") if alt else None
-    kelime, konum = izin
+    rx = re.compile(SINIR_ONCE + "(" + "|".join(re.escape(n).replace(r"\ ", r"\s+") for n in alt) + ")" + SINIR_SONRA) if alt else None
     dosyalar = subprocess.run(["git", "-C", str(kok), "ls-files", "-z"], capture_output=True, check=True).stdout.decode().split("\0")
     yer, atla = [], Counter()
+
+    def kaydet(yol, no, metin):
+        for m in rx.finditer(metin) if rx else ():
+            n = " ".join(m.group(1).split())
+            yer.append(dict(dosya=yol, satir=no, tur=desen.get(n, "?"), sira=sira.get(n, 0),
+                            izinli=izinli(n, metin, m, izin, (yol, no))))
     for yol in [x for x in dosyalar if x]:
+        kaydet(yol, 0, yol.casefold())                    # dosya yolu / adi (satir 0)
         p = pathlib.Path(kok) / yol
         if not p.is_file():
             atla["yok"] += 1; continue
@@ -214,10 +201,7 @@ def tara(kok, desen, izin=(set(), set())):
         if b"\x00" in b[:8000]:
             atla["ikili"] += 1; continue
         for no, satir in enumerate(b.decode("utf-8", "replace").casefold().split("\n"), 1):
-            for m in rx.finditer(satir) if rx else ():
-                n = " ".join(m.group(1).split())
-                yer.append(dict(dosya=yol, satir=no, tur=desen.get(n, "?"), sira=sira.get(n, 0),
-                                izinli=n in kelime or (yol, no) in konum))
+            kaydet(yol, no, satir)
     log = subprocess.run(["git", "-C", str(kok), "log", "--format=%H%x00%B%x01", "HEAD"], capture_output=True).stdout.decode("utf-8", "replace")
     com, n_com = [], 0
     for kayit in log.split("\x01"):
@@ -225,9 +209,10 @@ def tara(kok, desen, izin=(set(), set())):
             continue
         n_com += 1
         sha, msj = kayit.strip().split("\x00", 1)
-        for m in rx.finditer(msj.casefold()) if rx else ():
+        msj = msj.casefold()
+        for m in rx.finditer(msj) if rx else ():
             n = " ".join(m.group(1).split())
-            com.append(dict(commit=sha[:10], tur=desen.get(n, "?"), sira=sira.get(n, 0), izinli=n in kelime))
+            com.append(dict(commit=sha[:10], tur=desen.get(n, "?"), sira=sira.get(n, 0), izinli=izinli(n, msj, m, izin)))
     disi = [y for y in yer if not y["izinli"]]
     oz = dict(dosya=len({y["dosya"] for y in yer}), eslesme=len(yer), desen=len({y["sira"] for y in yer}),
               tur=dict(Counter(y["tur"] for y in yer)), atlanan=dict(atla), izin_disi=len(disi),
@@ -242,7 +227,6 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--drive-json", default="")
     ap.add_argument("--tara", default="")
-    ap.add_argument("--ozet", default="", help="Drive SIPARIS_ISIM/DIJITAL OZET*.json kopyasi (dizin)")
     ap.add_argument("--izin", default="", help="Serdar onayli izin listesi JSON (Drive, sahip-ozel)")
     a = ap.parse_args()
     tuz = a.tuz or secrets.token_hex(24)
@@ -257,13 +241,12 @@ def main():
     if store.needs_refresh():
         store.refresh()
     api = Etsy(store)
-    desen, bilgi = desen_uret(api, os.environ["ETSY_SHOP_ID"], a.drive_json, a.ozet)
+    desen, bilgi = desen_uret(api, os.environ["ETSY_SHOP_ID"], a.drive_json)
     (out / "TUZ.txt").write_text(tuz + "\n")
     with open(out / "HASH.txt", "w") as f:
         for n in sorted(desen):
             f.write(hashlib.sha256((tuz + n).encode()).hexdigest() + "\n")
-    print(f"DESEN_URET makbuz {bilgi['makbuz']} (test disarida {bilgi['test']}) | siparis ozet dosyasi {bilgi['ozet_dosya']} | "
-          f"desen {len(desen)} | tur {bilgi['tur']} | "
+    print(f"DESEN_URET makbuz {bilgi['makbuz']} (test disarida {bilgi['test']}) | desen {len(desen)} | tur {bilgi['tur']} | "
           f"istek {api.calls} | kota {api.remaining}")
     if a.tara:
         izin = izin_oku(a.izin)
@@ -271,7 +254,7 @@ def main():
         (out / "TARAMA.json").write_text(json.dumps(dict(ozet=oz, yerler=yer, commitler=com), ensure_ascii=False, indent=1),
                                          encoding="utf-8")
         print(f"TARAMA dosya {oz['dosya']} | eslesme {oz['eslesme']} | farkli desen {oz['desen']} | tur {oz['tur']} | "
-              f"atlanan {oz['atlanan']} | izin listesi {len(izin[0])} kelime + {len(izin[1])} konum")
+              f"atlanan {oz['atlanan']} | izin listesi {len(izin[0])} kelime + {len(izin[1])} kod baglami + {len(izin[2])} konum")
         print(f"TARAMA izin disi: eslesme {oz['izin_disi']} | dosya {oz['izin_disi_dosya']} | tur {oz['izin_disi_tur']}")
         print(f"COMMIT mesaji: taranan {oz['commit_taranan']} | eslesme {oz['commit_eslesme']} | izin disi commit {oz['commit_izin_disi']}")
 
