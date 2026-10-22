@@ -20,7 +20,9 @@ Modlar:
   geri_al : ETSY'YE YAZAR (--onay SERDAR_GERI_AL). --yedek-dizin'deki <id>.json'dan baslik/etiket/aciklama/materials/profil/
             uretim ortagi, envanter (baski urunleri dahil, eski hazirlik) ve stil-gorsel baglarini geri yazar; geri okuma.
             Yalniz ILK HAL yedegi kabul edilir (BY envanteri 15/5; CANCER_LIBRA 10/0). State active degilse dokunmaz.
-DOKUNMA: 4598525642 (CANCER_LIBRA kupa) kupa_taslak.py:250'de yazma yasak (19 Eki); Serdar karari gelene kadar ATLANIR.
+KISISEL_KORU: 4598525642 (CANCER_LIBRA kupa; kupa_taslak.py:250 DOKUNMA, 19 Eki). Serdar 22 Eki: yalniz title/tags/description yazilir,
+            kisisellestirme alanlari gonderilmez; geri okumada kisisellestirme yazmadan once ile ayni olmali.
+Kume: adim2 (Serdar 22 Eki 8 ilan) | kalan (234 - adim2 = 226) | cl | pilot | id1,id2,...
 Kume: cl (CANCER_LIBRA 3 aile) | pilot (5 ilan) | kalan (geri kalan 226) | id1,id2,...
 Kullanim: burc_gift_yaz.py --mod yedek|siparis|yaz|geri_al --once ONCE.json --sonra SONRA.json --kume cl --out OUT [--onay KOD]"""
 import argparse
@@ -41,7 +43,8 @@ ONAY, ONAY_GERI = "SERDAR_BURC_GIFT", "SERDAR_GERI_AL"
 KOTA_TABAN = 10
 KOTA_ILAN = 30          # = taban 10 + ilan basina en fazla ~20 cagri (yarim ilan birakmamak icin; taban 10 degismez)
 P_FORMAT = 514
-DOKUNMA = {"4598525642"}                                 # kupa_taslak.py:250 yazma yasak (19 Eki); Serdar karari bekler
+KISISEL_KORU = {"4598525642"}                            # Serdar 22 Eki: yalniz metin; kisisellestirme alanlarina dokunulmaz
+ADIM2 = ["4570143815", "4595350971", "4598523005", "4570153208", "4598557184", "4595373902", "4595421558", "4570163968"]
 PANEL_HATA = re.compile(r"-> (400|409):")               # yalniz bu yanitlar 'panelde kaldir' sayilir; 429/5xx DUR
 BASKI = "Shipped print 8x10"
 ESKI_PROFIL, YENI_PROFIL = 318080539024, 318577242658   # BY Print 8x10 Worldwide -> BY Digital Free Worldwide (21 Eki, PASS)
@@ -290,9 +293,7 @@ def bir_ilan(api, shop, lid, hedef, once, out, hazirlik_al, R, by_ids=()):
     if x.get("state") != "active":
         R["sonuc"] = f"ATLANDI_STATE {x.get('state')}"   # updateListing taslagi yayina alir (CLAUDE.md 7 Eyl)
         return
-    if str(lid) in DOKUNMA:
-        R["sonuc"] = "ATLANDI_DOKUNMA"
-        return
+    kis0 = kisisel(api, shop, lid, x) if str(lid) in KISISEL_KORU else None
     aile = hedef["aile"]
     sonra = {"title": hedef["baslik"], "tags": hedef["etiketler"], "description": hedef["aciklama"]}
     plan = alan_plani(ozet(x), once, sonra)
@@ -382,6 +383,13 @@ def bir_ilan(api, shop, lid, hedef, once, out, hazirlik_al, R, by_ids=()):
             hata.append("price/quantity/sku_on_property degisti")
         if sg_ad(inv1, stil_gorsel(api, shop, lid)) != sg_ad(inv0, sg0):
             hata.append("stil-gorsel baglari degisti")
+    if kis0 is not None:
+        if set(data) - {"title", "tags", "description"} or govde or partner_yaz:
+            hata.append(f"kisisel koruma ilaninda metin disi yazma: {sorted(data)}")
+        kis1 = kisisel(api, shop, lid, y)
+        if kis1 != kis0:
+            hata.append("kisisellestirme alanlari degisti")
+        R["kisisel"] = "API ayni" if any(v not in (None, [], {}) for v in kis0.values()) else "merkez canli kontrol (API alan dondurmuyor)"
     R["sonra"] = dict(alan_hata=hata, istek=api.calls, kota=api.remaining)
     if hata:
         R["sonuc"] = "FAIL"
@@ -409,6 +417,14 @@ def siparis_say(api, shop, by_ids, toplam=True):
     return {"gonderilmemis_makbuz_tarandi": ofs, "baski_satiri": n_satir, "baski_makbuz": n_makbuz, "magaza_toplam_makbuz": toplam}
 
 
+def kisisel(api, shop, lid, x):
+    """Kisisellestirme alanlari: ilan alanlari + /personalization ucu (pod/ayar77_yaz.py:55 yolu; yoksa None)."""
+    k = {a: x.get(a) for a in ("is_personalizable", "personalization_is_required", "personalization_char_count_max",
+                               "personalization_instructions")}
+    k["sorular"] = (api.get(f"/listings/{lid}/personalization", ok404=True) or {}).get("personalization_questions")
+    return k
+
+
 def kume_sec(kume, sonra):
     cift = {(v["aile"], v["cift"]): k for k, v in sonra.items()}
     cl = [k for k, v in sonra.items() if v["cift"] == "CANCER_LIBRA"]
@@ -417,8 +433,10 @@ def kume_sec(kume, sonra):
         return sorted(cl)
     if kume == "pilot":
         return pilot
+    if kume == "adim2":
+        return list(ADIM2)
     if kume == "kalan":
-        return sorted(k for k in sonra if k not in cl and k not in pilot)
+        return sorted(k for k in sonra if k not in ADIM2)
     ids = [s.strip() for s in kume.split(",") if s.strip()]
     yok = [i for i in ids if i not in sonra]
     if yok or not ids:
