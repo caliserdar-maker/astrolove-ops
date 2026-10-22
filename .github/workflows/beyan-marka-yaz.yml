@@ -3,6 +3,8 @@ name: beyan-marka-yaz
 # AI beyani (EN aciklama) + marka adi (RU aciklama) - scripts/etsy/beyan_marka_yaz.py (Serdar 22 Eki: AI beyani karari, marka plani B).
 # kuru: SALT OKUMA (234 aktif ilan sayimi + --ilan plani + istege bagli galeri gorsel indirme).
 # yaz : ETSY'YE YAZAR, yalniz 1 ilan, onay SERDAR_BEYAN_PILOT (once 4570143815 -> geri okuma -> Merkez canli kontrol -> Serdar onayi).
+# toplu: ETSY'YE YAZAR, tek aile, en fazla `limit` ilan, onay SERDAR_BEYAN_TOPLU (Serdar 23 Eki: once 10, DUR, Merkez kontrol).
+#        Her ilanda kapi 1b (yedek vs geri okuma); ilk FAIL/DUR'da kosu durur. Beyani tam ilan atlanir (yeniden baslatilabilir).
 # Cikti Drive ASTROLOVE/TEMP/DENETIM_20261021/BEYAN_MARKA/<run_id>/.
 
 permissions:
@@ -12,8 +14,10 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-      mod: {description: "kuru | yaz", required: true, default: "kuru"}
-      ilan: {description: "ilan kimligi (yaz: tam 1)", required: false, default: "4570143815"}
+      mod: {description: "kuru | yaz | toplu", required: true, default: "kuru"}
+      ilan: {description: "ilan kimligi (yaz: tam 1; toplu: bos = ailedeki tum aktif)", required: false, default: "4570143815"}
+      aile: {description: "toplu: poster | kupa | yil", required: false, default: ""}
+      limit: {description: "toplu: en fazla yazilacak ilan", required: false, default: "10"}
       onay: {description: "yaz icin onay sozcugu", required: false, default: ""}
       gorsel_indir: {description: "kuru: --ilan galeri gorsellerini indir (evet/hayir)", required: false, default: "hayir"}
 
@@ -59,6 +63,8 @@ jobs:
           MOD: ${{ inputs.mod }}
           ILAN: ${{ inputs.ilan }}
           ONAY: ${{ inputs.onay }}
+          AILE: ${{ inputs.aile }}
+          LIMIT: ${{ inputs.limit }}
           GORSEL: ${{ inputs.gorsel_indir }}
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
@@ -66,10 +72,14 @@ jobs:
           TOKEN_FILE: _work/ETSY_TOKEN.json
         run: |
           set +e -o pipefail
-          [[ "$MOD" =~ ^(kuru|yaz)$ ]] || { echo "::error::mod"; exit 1; }
+          [[ "$MOD" =~ ^(kuru|yaz|toplu)$ ]] || { echo "::error::mod"; exit 1; }
           [[ "$ILAN" =~ ^[0-9,]*$ ]] || { echo "::error::ilan"; exit 1; }
           args=(--mod "$MOD" --ilan "$ILAN" --out _out)
-          [ "$MOD" = yaz ] && args+=(--onay "$ONAY")
+          [ "$MOD" != kuru ] && args+=(--onay "$ONAY")
+          if [ "$MOD" = toplu ]; then
+            [[ "$AILE" =~ ^(poster|kupa|yil)$ && "$LIMIT" =~ ^[0-9]+$ ]] || { echo "::error::aile/limit"; exit 1; }
+            args+=(--aile "$AILE" --limit "$LIMIT")
+          fi
           [ "$GORSEL" = evet ] && args+=(--gorsel-indir)
           python3 scripts/etsy/beyan_marka_yaz.py "${args[@]}" 2>&1 | tee _work/kosu.log
           echo "KOD=${PIPESTATUS[0]}" >> "$GITHUB_ENV"

@@ -16,44 +16,85 @@ KUPA = ("A personalized mug for Virgo and Virgo couples: your two zodiac symbols
 YIL = ("A personalized 1 year anniversary gift.\n\nEvery AstroLoveArt design merges two zodiac signs into one shared symbol. "
        "This listing is for the Taurus and Virgo symbol.\n\nHOW TO ORDER\n1. Choose.")
 RU = "Именной постер. Оригинальный дизайн AstroLove объединяет.\n\nО РИСУНКЕ\nрисунке AstroLove. И AstroLoveArt уже."
-BOLUMLER = {"results": [{"shop_section_id": 9, "title": "Zodiac Couple Posters"}, {"shop_section_id": 8, "title": "Zodiac Couple Mugs"}]}
+BOLUMLER = {"results": [{"shop_section_id": 9, "title": "Zodiac Couple Posters"}, {"shop_section_id": 8, "title": "Zodiac Couple Mugs"},
+                         {"shop_section_id": 7, "title": "1st Anniversary Gifts"}]}
+
+
+PARTNER = [{"production_partner_id": 5817638, "partner_name": "Printing and Fulfillment Partner", "location": "United States"}]
 
 
 class Sahte:
-    def __init__(self, en=EN, state="active", ru_bozuk=False, bolum=9):
-        self.L = dict(listing_id=1, state=state, title="T", tags=["a"], price={"amount": 1}, quantity=5, description=en,
-                      listing_type="physical", shipping_profile_id=7, shop_section_id=bolum)
-        self.ru = dict(language="ru", title="RT", description=RU, tags=["x", "y"])
+    """Cok ilanli sahte Etsy. bozan(api, lid) PATCH sonrasi cagrilir (kapi 1b testleri)."""
+    def __init__(self, en=EN, state="active", ru_bozuk=False, bolum=9, ilanlar=None, bozan=None):
+        self.ilan, self.ru, self.soru = {}, {}, {}
+        for lid, (en_, bol_, ru_) in (ilanlar or {"1": (en, bolum, RU)}).items():
+            self.ilan[lid] = dict(listing_id=int(lid), state=state, title="T", tags=["a"], price={"amount": 1}, quantity=5,
+                                  description=en_, listing_type="physical", shipping_profile_id=7, return_policy_id=3,
+                                  shop_section_id=bol_, production_partners=copy.deepcopy(PARTNER), is_personalizable=True,
+                                  personalization_is_required=True, personalization_char_count_max=256,
+                                  personalization_instructions="Names")
+            self.ru[lid] = dict(language="ru", title="RT", description=ru_, tags=["x", "y"]) if ru_ is not None else \
+                dict(language="ru", title="", description="", tags=[])   # yil donumu: tekil GET bos kayit (23 Eki 4595350971)
+            self.soru[lid] = {"personalization_questions": [{"question_id": 1, "instructions": "Names", "max_allowed_characters": 256}]}
         self.inv = dict(products=[dict(offerings=[dict(is_enabled=True, quantity=3)])])
-        self.remaining, self.calls, self.yaz, self.ru_bozuk = 500, 0, [], ru_bozuk
+        self.remaining, self.calls, self.yaz, self.ru_bozuk, self.bozan = 500, 0, [], ru_bozuk, bozan
+
+    @staticmethod
+    def lid(path):
+        p = path.split("/")
+        return p[p.index("listings") + 1]
 
     def get(self, path, params=None, ok404=False):
         self.calls += 1
         if path.endswith("/sections"):
             return BOLUMLER
+        if path == "/listings/batch":
+            res = []
+            for i in params["listing_ids"].split(","):
+                L = copy.deepcopy(self.ilan[i])
+                r = self.ru[i]
+                L["translations"] = {"ru": copy.deepcopy(r)} if r["description"] else {}
+                res.append(L)
+            return {"results": res}
+        lid = self.lid(path)
         if path.endswith("/translations/ru"):
-            return copy.deepcopy(self.ru)
+            return copy.deepcopy(self.ru[lid])
         if path.endswith("/inventory"):
             return copy.deepcopy(self.inv)
-        return copy.deepcopy(self.L)
+        if path.endswith("/personalization"):
+            return copy.deepcopy(self.soru[lid])
+        return copy.deepcopy(self.ilan[lid])
 
     def patch(self, path, data):
-        self.calls += 1; self.yaz.append(("patch", data)); self.L.update(data)
+        self.calls += 1; lid = self.lid(path); self.yaz.append(("patch", lid, data)); self.ilan[lid].update(data)
+        if self.bozan:
+            self.bozan(self, lid)
 
     def put(self, path, data):
-        self.calls += 1; self.yaz.append(("put", data))
+        self.calls += 1; lid = self.lid(path); self.yaz.append(("put", lid, data))
         if self.ru_bozuk:
             raise SystemExit("HATA: 400 x")
-        self.ru.update(dict(description=data["description"]))
+        self.ru[lid].update(dict(description=data["description"]))
 
 
-def kos(api):
+def kos(api, lid="1"):
     out = pathlib.Path(tempfile.mkdtemp())
     try:
-        ok = m.yaz(api, "1", "1", out)
+        R = m.yaz(api, "1", lid, out)
     except m.Dur as e:
         return f"DUR {e}", None
-    return ok, json.loads((out / "SONUC_1.json").read_text())
+    return R["sonuc"] != "FAIL", json.loads((out / f"SONUC_{lid}.json").read_text())
+
+
+def toplu(api, aile, ids, limit=10):
+    out = pathlib.Path(tempfile.mkdtemp())
+    a = type("A", (), dict(aile=aile, ilan=ids, limit=limit))()
+    try:
+        ok = m.toplu(api, "1", a, out)
+    except m.Dur as e:
+        ok = f"DUR {e}"
+    oz = out / "TOPLU_OZET.json"
+    return ok, (json.loads(oz.read_text()) if oz.exists() else None)
 
 
 def dur_mu(f, *a):
@@ -84,11 +125,11 @@ def main():
               and m.ru_plan("a\n\nb", "yil")[0] is None))
     api = Sahte(en=pilot); ok, R = kos(api)
     s.append(("yaz: PASS, PATCH yalniz description + PUT baslik/etiket aynen", ok is True and R["sonuc"] == "PASS"
-              and [k for k, _ in api.yaz] == ["patch", "put"] and set(api.yaz[0][1]) == {"description"}
-              and api.yaz[1][1]["title"] == "RT" and api.yaz[1][1]["tags"] == "x,y"
+              and [k for k, _, _ in api.yaz] == ["patch", "put"] and set(api.yaz[0][2]) == {"description"}
+              and api.yaz[1][2]["title"] == "RT" and api.yaz[1][2]["tags"] == "x,y"
               and R["sonra"]["beyan"] == 1 and R["sonra"]["eski_beyan"] == 0 and R["sonra"]["ru_beyan"] == 1 and R["sonra"]["ru_marka"] == 0))
     ok2, R2 = kos(api)
-    s.append(("yaz: ikinci kosu idempotent (yazma 0)", ok2 is True and len(api.yaz) == 2 and R2["yazildi"] == []))
+    s.append(("yaz: ikinci kosu ATLA (1c), yazma 0", ok2 is True and len(api.yaz) == 2 and R2["yazildi"] == [] and R2["sonuc"] == "ATLA"))
     r, _ = kos(Sahte(state="draft"))
     s.append(("yaz: draft -> DUR, yazma yok", isinstance(r, str) and "active degil" in r))
     api = Sahte(ru_bozuk=True); ok3, R3 = kos(api)
@@ -98,6 +139,69 @@ def main():
     s.append(("ru_ceviri: liste ve sozluk bicimi", m.ru_ceviri({"translations": {"ru": {"language": "ru", "title": "a"}}})["title"] == "a"
               and m.ru_ceviri({"translations": [{"language": "ru", "title": "b"}]})["title"] == "b"))
     s.append(("beyan metinlerinde uzun/orta tire yok", not m.TIRE.search(m.BEYAN + m.RU_BEYAN)))
+    # 1a: yil donumunde bos RU kaydi -> "yok", PUT yok
+    api = Sahte(ilanlar={"1": (YIL, 7, None)}); ok5, R5 = kos(api)
+    s.append(("1a: yil donumu bos RU kaydi -> ru_ceviri yok, yalniz PATCH, PASS", ok5 is True and R5["ru_ceviri"] == "yok"
+              and [k for k, _, _ in api.yaz] == ["patch"] and R5["sonuc"] == "PASS"))
+    s.append(("1a: ru_gercek bos/eksik kayit -> {}", m.ru_gercek({"language": "ru", "title": "", "description": None}) == {}
+              and m.ru_gercek(None) == {} and m.ru_gercek({"title": "x"})["title"] == "x"))
+    # 1b: her korunan alan icin PATCH sonrasi bozulma -> FAIL
+    bozanlar = {
+        "kisisellestirme acik": lambda A, l: A.ilan[l].update(is_personalizable=False),
+        "kisisellestirme zorunlu": lambda A, l: A.ilan[l].update(personalization_is_required=False),
+        "karakter siniri": lambda A, l: A.ilan[l].update(personalization_char_count_max=100),
+        "talimat": lambda A, l: A.ilan[l].update(personalization_instructions="X"),
+        "kisisellestirme sorulari": lambda A, l: A.soru[l].update(personalization_questions=[]),
+        "kargo profili": lambda A, l: A.ilan[l].update(shipping_profile_id=8),
+        "iade politikasi": lambda A, l: A.ilan[l].update(return_policy_id=4),
+        "uretim ortagi": lambda A, l: A.ilan[l].update(production_partners=[]),
+        "ilan durumu": lambda A, l: A.ilan[l].update(state="inactive"),
+        "satilabilir teklif": lambda A, l: A.inv["products"][0]["offerings"][0].update(is_enabled=False),
+        "RU baslik": lambda A, l: A.ru[l].update(title="YENI"),
+        "RU etiket": lambda A, l: A.ru[l].update(tags=["z"]),
+        "RU aciklama": lambda A, l: A.ru[l].update(description="baska"),
+    }
+    for ad, f in bozanlar.items():
+        def bz(A, l, f=f, ad=ad):
+            if ad.startswith("RU"):   # RU bozulmasi PUT'tan sonra olmali: PUT'u sar
+                eski = A.put
+                def put2(path, data):
+                    eski(path, data); f(A, l)
+                A.put = put2
+            else:
+                f(A, l)
+        okb, Rb = kos(Sahte(bozan=bz))
+        s.append((f"1b: {ad} degisirse FAIL", okb is False and Rb["sonuc"] == "FAIL" and bool(Rb["hata"])))
+    api = Sahte(); del api.ilan["1"]["production_partners"]; r, _ = kos(api)
+    s.append(("1b: production_partners alani yoksa DUR, yazma yok", isinstance(r, str) and "production_partners" in r and api.yaz == []))
+    # 1c + toplu: tamamlanmis ilan aday disi, ilk FAIL'de DUR, limit
+    dolu = m.en_plan(KUPA, "kupa")[0]
+    api = Sahte(ilanlar={"1": (dolu, 8, m.ru_plan(RU, "kupa")[0]), "2": (KUPA, 8, RU), "3": (KUPA, 8, RU), "4": (KUPA, 8, RU)})
+    okt, Z = toplu(api, "kupa", ["1", "2", "3", "4"], limit=2)
+    s.append(("toplu: beyani tam ilan aday disi (1c), limit 2 uygulanir", okt is True and Z["ozet"]["aday"] == 3
+              and Z["ozet"]["islenen"] == 2 and Z["ozet"]["pass_"] == 2 and {l for _, l, _ in api.yaz} == {"2", "3"}))
+    okt2, Z2 = toplu(api, "kupa", ["1", "2", "3", "4"], limit=10)
+    s.append(("toplu: yeniden baslatma yalniz kalan ilan (4)", okt2 is True and Z2["ozet"]["aday"] == 1
+              and {l for _, l, _ in api.yaz[-2:]} == {"4"}))
+    sayac = {"n": 0}
+    def ikinci_boz(A, l):
+        sayac["n"] += 1
+        if sayac["n"] == 2:
+            A.ilan[l].update(shipping_profile_id=99)
+    api = Sahte(ilanlar={"5": (KUPA, 8, RU), "6": (KUPA, 8, RU), "7": (KUPA, 8, RU)}, bozan=ikinci_boz)
+    okt3, Z3 = toplu(api, "kupa", ["5", "6", "7"], limit=10)
+    s.append(("toplu: 2. ilanda kapi FAIL -> DUR, 3. ilana yazma yok", okt3 is False and Z3["ozet"]["islenen"] == 2
+              and len(Z3["ozet"]["fail"]) == 1 and "7" not in {l for _, l, _ in api.yaz}))
+    api = Sahte(ilanlar={"8": (KUPA, 8, RU), "9": (KUPA, 8, RU)}); api.ilan["9"]["state"] = "draft"
+    okt4, Z4 = toplu(api, "kupa", ["8", "9"], limit=10)
+    s.append(("toplu: draft ilan -> DUR, ozet yazilir, draft'a yazma yok", isinstance(okt4, str) and "active degil" in okt4
+              and Z4["ozet"]["fail"][0]["sonuc"] == "DUR" and "9" not in {l for _, l, _ in api.yaz}))
+    api = Sahte(ilanlar={"10": (KUPA, 8, RU), "11": (EN, 9, RU)})
+    okt5, Z5 = toplu(api, "poster", ["10", "11"], limit=10)
+    s.append(("toplu: yalniz secilen aile", okt5 is True and {l for _, l, _ in api.yaz} == {"11"}))
+    api = Sahte(ilanlar={"12": (KUPA, 8, RU), "13": (KUPA, 8, RU)}); api.remaining = m.KOTA_TABAN - 1
+    okt6, Z6 = toplu(api, "kupa", ["12", "13"], limit=10)
+    s.append(("toplu: kota < taban 10 -> DUR, yazma yok", isinstance(okt6, str) and "kota" in okt6 and api.yaz == []))
     for ad, ok_ in s:
         print(("PASS " if ok_ else "FAIL ") + ad)
     n = sum(ok_ for _, ok_ in s)
