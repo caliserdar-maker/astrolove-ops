@@ -11,8 +11,7 @@ permissions:
   contents: read
 
 on:
-  schedule:
-    - cron: "37 * * * *"
+  # schedule kaldirildi (Serdar 22 Eki, P0.3): Etsy yazicisi zamanlanmis kosmaz; yalniz elle (workflow_dispatch).
   workflow_dispatch:
     inputs:
       limit: {description: "bu kosuda en fazla N ilan (0 = kota izin verdigince)", default: "0"}

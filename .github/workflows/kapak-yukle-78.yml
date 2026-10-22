@@ -25,8 +25,7 @@ on:
       kapak_ek: {description: "TEMP altinda duzeltilmis kapak klasoru (KAPAK_*.jpg son damganin USTUNE; RAPOR.md SONUC PASS sart). kuru+apply AYNI deger", required: false, default: ""}
       yenile: {description: "kuru: ayni alt+boyutta olsa da degistirilecek CIFT'ler (virgulle)", required: false, default: ""}
       sadece: {description: "kuru: yalniz bu CIFT'ler okunur ve planlanir (tamamlananlar Etsy'den okunmaz; virgulle)", required: false, default: ""}
-  schedule:
-    - cron: "5 0 29 9 *"   # tek seferlik: 2026-09-29 00:05 UTC (kapi isi tarihi dogrular)
+  # schedule kaldirildi (Serdar 22 Eki, P0.3): Etsy yazicisi zamanlanmis kosmaz; yalniz elle (workflow_dispatch).
 
 
 permissions:

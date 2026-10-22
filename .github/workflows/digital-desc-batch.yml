@@ -12,13 +12,7 @@ permissions:
   contents: read
 
 on:
-  schedule:
-    # Her 4 saatte bir (gunde 6 kez). Etsy kotasi kayan 24 saatlik pencere (15 Eyl
-    # 2026 olcumu: 05:15 UTC'de hala 26 kalmisti), o yuzden sabit saat yerine sik
-    # deneme: betik kosu basinda 1 cagrilik kota sondasi yapar, taban altindaysa
-    # hicbir ilana dokunmadan cikar. Zamanlanmis kosu her zaman APPLY=true calisir;
-    # yapacak ilan kalmadiysa Etsy'ye sifir cagriyla cikar (bos kosu).
-    - cron: "0 */4 * * *"
+  # schedule kaldirildi (Serdar 22 Eki, P0.3): Etsy yazicisi zamanlanmis kosmaz; yalniz elle (workflow_dispatch).
   workflow_dispatch:
     inputs:
       apply:

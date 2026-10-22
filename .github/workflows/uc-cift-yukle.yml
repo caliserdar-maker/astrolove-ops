@@ -21,8 +21,7 @@ on:
       video_damga: {description: "TEMP/POD_VIDEO_V2 damgalari (bosluklu; bos = otomatik)", required: false, default: ""}
       apply: {description: "true = kuru PASS ise uygula", type: boolean, default: false}
       kapak: {description: "true = kapak adimi da (varsayilan: yalniz video; 3 Terazi kapagi kapak-yukle-78 kapak_ek ile)", type: boolean, default: false}
-  schedule:
-    - cron: "5 7 29 9 *"   # tek seferlik: 2026-09-29 07:05 UTC, yalniz video (03:00 kosusu kuru okumada 429 kota; yazma yok)
+  # schedule kaldirildi (Serdar 22 Eki, P0.3): Etsy yazicisi zamanlanmis kosmaz; yalniz elle (workflow_dispatch).
 
 permissions:
   actions: read
