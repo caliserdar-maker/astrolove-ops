@@ -39,7 +39,7 @@ from etsy_common import API, Etsy, TokenStore, mask  # noqa: E402
 
 ONAY, ONAY_GERI = "SERDAR_BURC_GIFT", "SERDAR_GERI_AL"
 KOTA_TABAN = 10
-KOTA_ILAN = 30
+KOTA_ILAN = 30          # = taban 10 + ilan basina en fazla ~20 cagri (yarim ilan birakmamak icin; taban 10 degismez)
 P_FORMAT = 514
 DOKUNMA = {"4598525642"}                                 # kupa_taslak.py:250 yazma yasak (19 Eki); Serdar karari bekler
 PANEL_HATA = re.compile(r"-> (400|409):")               # yalniz bu yanitlar 'panelde kaldir' sayilir; 429/5xx DUR
@@ -190,7 +190,7 @@ def hazirlik_listesi(api, shop):
 
 def _uygun(lst):
     return [d for d in lst if d.get("readiness_state") == "made_to_order" and d.get("min_processing_days") == 1
-            and d.get("max_processing_days") == 3 and d.get("processing_time_unit", "days") == "days"
+            and d.get("max_processing_days") == 3 and (d.get("processing_time_unit") or "days") == "days"
             and d.get("readiness_state_id") not in (ORTAK_HAZIRLIK, ESKI_1_3)]
 
 
@@ -213,11 +213,16 @@ def hazirlik_bul(api, shop, olustur):
         return uygun[0]["readiness_state_id"], "var"
     if not olustur:
         return None, "yok"
+    once = {d.get("readiness_state_id") for d in hazirlik_listesi(api, shop)}
+    yeni = None
     try:
-        tek_post(api, f"/shops/{shop}/readiness-state-definitions",
-                 {"readiness_state": "made_to_order", "min_processing_time": 1, "max_processing_time": 3, "processing_time_unit": "days"})
+        yeni = (tek_post(api, f"/shops/{shop}/readiness-state-definitions",
+                         {"readiness_state": "made_to_order", "min_processing_time": 1, "max_processing_time": 3,
+                          "processing_time_unit": "days"}) or {}).get("readiness_state_id")
     except SystemExit as e:
         print(f"hazirlik POST hatasi, liste yeniden okunuyor: {str(e)[:120]}")
+    if yeni is not None and yeni in once:
+        raise Dur(f"Etsy yeni tanim yerine var olan {yeni} tanimini dondurdu: Serdar karari gerekir")
     uygun = _uygun(hazirlik_listesi(api, shop))
     if len(uygun) != 1:
         raise Dur(f"hazirlik tanimi olusturma sonrasi {len(uygun)} uygun tanim (1 beklenir; Etsy ayni degerli tanimi "
