@@ -186,7 +186,7 @@ def rapor(ozetler, kur, tarih, out):
 
 def self_test():
     o = {"id": "ord_1", "created": "2026-09-10T10:00:00Z", "status": {"stage": "Complete"}, "merchantReference": "etsy-1000000001",
-         "recipient": {"name": "Gizli Kisi", "email": "g@x.com", "address": {"line1": "1 Gizli St", "countryCode": "US"}},
+         "recipient": {"name": "Gizli Kisi", "email": "g@example.com", "address": {"line1": "1 Gizli St", "countryCode": "US"}},
          "shipments": [{"fulfillmentLocation": {"countryCode": "US", "labCode": "prodigi_us"}}],
          "charges": [{"totalCost": {"amount": "21.85", "currency": "USD"}, "items": [
              {"description": "GLOBAL-HPR-8x10", "itemSku": "GLOBAL-HPR-8x10", "cost": {"amount": "10.00", "currency": "USD"},
@@ -213,7 +213,7 @@ def self_test():
     import tempfile
     d = tempfile.mkdtemp()
     metin = rapor([dict(s, id=REF_SIPARIS)], 1.34, "2026-09-25", d) + Path(d, "PRODIGI_EKSTRA_TESIS.json").read_text()
-    for gizli in ("Gizli", "g@x.com", "1000000001"):
+    for gizli in ("Gizli", "g@example.com", "1000000001"):
         assert gizli not in metin, gizli
     assert "paket 5.36 USD" in metin, metin[:400]
 
