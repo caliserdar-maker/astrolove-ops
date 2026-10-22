@@ -1,0 +1,507 @@
+{
+  "units": "percent; x,width,tracking -> canvas width; y,height -> canvas height",
+  "font_status": "approximate substitute, not recovered original",
+  "tracking_status": "proposed additional spacing, not measured original",
+  "designs": [
+    {
+      "name": "1_Starlit",
+      "source_horizontal_to_4x5_factor": 0.9180497925311203,
+      "elements": [
+        {
+          "element": "hero",
+          "center_x": 49.6,
+          "center_y": 38.4,
+          "width": 50.6,
+          "visible_height": 39.0,
+          "approximate_sample_hex": "#E7B157"
+        },
+        {
+          "element": "left",
+          "center_x": 32.1,
+          "center_y": 63.5,
+          "width": 10.4,
+          "visible_height": 7.0,
+          "approximate_sample_hex": "#DEB46E"
+        },
+        {
+          "element": "right",
+          "center_x": 70.4,
+          "center_y": 63.6,
+          "width": 11.7,
+          "visible_height": 7.3,
+          "approximate_sample_hex": "#D7A863"
+        },
+        {
+          "element": "SERDAR",
+          "center_x": 32.2,
+          "center_y": 71.4,
+          "width": 17.4,
+          "visible_height": 3.5,
+          "approximate_sample_hex": "#F5EED3",
+          "font": "Cormorant Garamond",
+          "weight": 500,
+          "style": "normal",
+          "additional_tracking_percent_width": 0
+        },
+        {
+          "element": "LENA",
+          "center_x": 70.2,
+          "center_y": 71.4,
+          "width": 13.0,
+          "visible_height": 3.5,
+          "approximate_sample_hex": "#F5EED3",
+          "font": "Cormorant Garamond",
+          "weight": 500,
+          "style": "normal",
+          "additional_tracking_percent_width": 0
+        },
+        {
+          "element": "Paper Anniversary",
+          "center_x": 50.5,
+          "center_y": 79.5,
+          "width": 38.9,
+          "visible_height": 4.6,
+          "approximate_sample_hex": "#DEDACE",
+          "font": "Cormorant Garamond",
+          "weight": 500,
+          "style": "italic",
+          "additional_tracking_percent_width": 0
+        },
+        {
+          "element": "12 JUNE 2025",
+          "center_x": 50.3,
+          "center_y": 85.1,
+          "width": 30.1,
+          "visible_height": 1.7,
+          "approximate_sample_hex": "#A1978A",
+          "font": "Cormorant Garamond",
+          "weight": 500,
+          "style": "normal",
+          "additional_tracking_percent_width": 0.5
+        },
+        {
+          "element": "YEAR ONE",
+          "center_x": 50.1,
+          "center_y": 89.8,
+          "width": 20.5,
+          "visible_height": 1.2,
+          "approximate_sample_hex": "#BFB3A2",
+          "font": "Cormorant Garamond",
+          "weight": 500,
+          "style": "normal",
+          "additional_tracking_percent_width": 0.75
+        }
+      ],
+      "removed_dividers": {
+        "rule_x_ranges": [
+          [
+            24.3,
+            32.6
+          ],
+          [
+            67.6,
+            75.9
+          ]
+        ],
+        "rule_center_y": 84.9,
+        "rule_thickness_percent_height": 0.15,
+        "star_center_x": 50.4,
+        "star_center_y": 69,
+        "star_width": 4.4,
+        "star_height": 8.3,
+        "approximate_color": "#B39970"
+      }
+    },
+    {
+      "name": "2_Timeless",
+      "source_horizontal_to_4x5_factor": 0.9150843881856539,
+      "elements": [
+        {
+          "element": "hero",
+          "center_x": 49.1,
+          "center_y": 38.3,
+          "width": 52.7,
+          "visible_height": 40.3,
+          "approximate_sample_hex": "#9D7023"
+        },
+        {
+          "element": "left",
+          "center_x": 30.2,
+          "center_y": 63.6,
+          "width": 10.3,
+          "visible_height": 7.4,
+          "approximate_sample_hex": "#8D6120"
+        },
+        {
+          "element": "right",
+          "center_x": 70.7,
+          "center_y": 63.8,
+          "width": 12.1,
+          "visible_height": 7.4,
+          "approximate_sample_hex": "#946522"
+        },
+        {
+          "element": "SERDAR",
+          "center_x": 30.2,
+          "center_y": 71.5,
+          "width": 18.7,
+          "visible_height": 3.0,
+          "approximate_sample_hex": "#483015",
+          "font": "Cormorant Garamond",
+          "weight": 500,
+          "style": "normal",
+          "additional_tracking_percent_width": 0
+        },
+        {
+          "element": "LENA",
+          "center_x": 70.7,
+          "center_y": 71.7,
+          "width": 12.7,
+          "visible_height": 3.0,
+          "approximate_sample_hex": "#483015",
+          "font": "Cormorant Garamond",
+          "weight": 500,
+          "style": "normal",
+          "additional_tracking_percent_width": 0
+        },
+        {
+          "element": "Paper Anniversary",
+          "center_x": 50.3,
+          "center_y": 80.0,
+          "width": 40.3,
+          "visible_height": 4.2,
+          "approximate_sample_hex": "#4B381F",
+          "font": "Cormorant Garamond",
+          "weight": 500,
+          "style": "italic",
+          "additional_tracking_percent_width": 0
+        },
+        {
+          "element": "12 JUNE 2025",
+          "center_x": 49.9,
+          "center_y": 85.9,
+          "width": 29.5,
+          "visible_height": 2.1,
+          "approximate_sample_hex": "#6E593F",
+          "font": "Cormorant Garamond",
+          "weight": 500,
+          "style": "normal",
+          "additional_tracking_percent_width": 0.55
+        },
+        {
+          "element": "YEAR ONE",
+          "center_x": 50.0,
+          "center_y": 91.0,
+          "width": 20.8,
+          "visible_height": 1.5,
+          "approximate_sample_hex": "#614B32",
+          "font": "Cormorant Garamond",
+          "weight": 500,
+          "style": "normal",
+          "additional_tracking_percent_width": 0.8
+        }
+      ],
+      "removed_dividers": {
+        "rule_x_ranges": [
+          [
+            23.7,
+            32.7
+          ],
+          [
+            67.0,
+            76.0
+          ]
+        ],
+        "rule_center_y": 85.5,
+        "rule_thickness_percent_height": 0.15,
+        "star_center_x": 50.0,
+        "star_center_y": 69,
+        "star_width": 4.2,
+        "star_height": 8.4,
+        "approximate_color": "#9C7C4D"
+      }
+    },
+    {
+      "name": "3_FirstPage",
+      "source_horizontal_to_4x5_factor": 1,
+      "elements": [
+        {
+          "element": "hero",
+          "center_x": 49.9,
+          "center_y": 43.1,
+          "width": 52.8,
+          "visible_height": 39.2,
+          "approximate_sample_hex": "#732633"
+        },
+        {
+          "element": "left",
+          "center_x": 28.6,
+          "center_y": 68.4,
+          "width": 11.7,
+          "visible_height": 8.1,
+          "approximate_sample_hex": "#762734"
+        },
+        {
+          "element": "right",
+          "center_x": 71.7,
+          "center_y": 68.4,
+          "width": 14.5,
+          "visible_height": 8.5,
+          "approximate_sample_hex": "#732431"
+        },
+        {
+          "element": "SERDAR",
+          "center_x": 29.3,
+          "center_y": 77.3,
+          "width": 27.1,
+          "visible_height": 3.9,
+          "approximate_sample_hex": "#731E2D",
+          "font": "Cormorant Garamond",
+          "weight": 700,
+          "style": "normal",
+          "additional_tracking_percent_width": 0.08
+        },
+        {
+          "element": "LENA",
+          "center_x": 72.0,
+          "center_y": 77.3,
+          "width": 18.5,
+          "visible_height": 3.9,
+          "approximate_sample_hex": "#731E2D",
+          "font": "Cormorant Garamond",
+          "weight": 700,
+          "style": "normal",
+          "additional_tracking_percent_width": 0.08
+        },
+        {
+          "element": "Paper Anniversary",
+          "center_x": 50.6,
+          "center_y": 15.1,
+          "width": 79.3,
+          "visible_height": 10.7,
+          "approximate_sample_hex": "#732230",
+          "font": "Cormorant Garamond",
+          "weight": 600,
+          "style": "italic",
+          "additional_tracking_percent_width": -0.08
+        },
+        {
+          "element": "12 JUNE 2025",
+          "center_x": 50.0,
+          "center_y": 86.0,
+          "width": 32.6,
+          "visible_height": 2.4,
+          "approximate_sample_hex": "#7F6959",
+          "font": "Montserrat",
+          "weight": 400,
+          "style": "normal",
+          "additional_tracking_percent_width": 0.4
+        },
+        {
+          "element": "YEAR ONE",
+          "center_x": 50.0,
+          "center_y": 90.8,
+          "width": 22.3,
+          "visible_height": 2.2,
+          "approximate_sample_hex": "#72182A",
+          "font": "Montserrat",
+          "weight": 600,
+          "style": "normal",
+          "additional_tracking_percent_width": 0.6
+        }
+      ]
+    },
+    {
+      "name": "4_Layers",
+      "source_horizontal_to_4x5_factor": 1,
+      "elements": [
+        {
+          "element": "hero",
+          "center_x": 49.9,
+          "center_y": 36.0,
+          "width": 51.7,
+          "visible_height": 39.2,
+          "approximate_sample_hex": "#A84A2C"
+        },
+        {
+          "element": "left",
+          "center_x": 31.3,
+          "center_y": 61.1,
+          "width": 11.1,
+          "visible_height": 7.4,
+          "approximate_sample_hex": "#78452A"
+        },
+        {
+          "element": "right",
+          "center_x": 68.6,
+          "center_y": 61.1,
+          "width": 13.7,
+          "visible_height": 7.5,
+          "approximate_sample_hex": "#78452A"
+        },
+        {
+          "element": "SERDAR",
+          "center_x": 31.6,
+          "center_y": 68.3,
+          "width": 23.4,
+          "visible_height": 2.8,
+          "approximate_sample_hex": "#592319",
+          "font": "Montserrat",
+          "weight": 600,
+          "style": "normal",
+          "additional_tracking_percent_width": 0.35
+        },
+        {
+          "element": "LENA",
+          "center_x": 69.3,
+          "center_y": 68.3,
+          "width": 14.7,
+          "visible_height": 2.8,
+          "approximate_sample_hex": "#592319",
+          "font": "Montserrat",
+          "weight": 600,
+          "style": "normal",
+          "additional_tracking_percent_width": 0.35
+        },
+        {
+          "element": "Paper",
+          "center_x": 50.3,
+          "center_y": 77.6,
+          "width": 35.4,
+          "visible_height": 9.8,
+          "approximate_sample_hex": "#A34729",
+          "font": "DM Serif Display",
+          "weight": 400,
+          "style": "normal",
+          "additional_tracking_percent_width": -0.1
+        },
+        {
+          "element": "Anniversary",
+          "center_x": 50.2,
+          "center_y": 86.1,
+          "width": 70.0,
+          "visible_height": 9.9,
+          "approximate_sample_hex": "#A34729",
+          "font": "DM Serif Display",
+          "weight": 400,
+          "style": "normal",
+          "additional_tracking_percent_width": -0.15
+        },
+        {
+          "element": "12 JUNE 2025",
+          "center_x": 50.2,
+          "center_y": 93.3,
+          "width": 29.1,
+          "visible_height": 2.1,
+          "approximate_sample_hex": "#612C1F",
+          "font": "Montserrat",
+          "weight": 600,
+          "style": "normal",
+          "additional_tracking_percent_width": 0.4
+        },
+        {
+          "element": "YEAR ONE",
+          "center_x": 50.0,
+          "center_y": 11.2,
+          "width": 28.9,
+          "visible_height": 2.5,
+          "approximate_sample_hex": "#59231A",
+          "font": "Montserrat",
+          "weight": 600,
+          "style": "normal",
+          "additional_tracking_percent_width": 0.65
+        }
+      ]
+    },
+    {
+      "name": "5_Botanical",
+      "source_horizontal_to_4x5_factor": 1,
+      "elements": [
+        {
+          "element": "hero",
+          "center_x": 49.4,
+          "center_y": 43.4,
+          "width": 50.1,
+          "visible_height": 37.0,
+          "approximate_sample_hex": "#1F3B2D"
+        },
+        {
+          "element": "left",
+          "center_x": 32.9,
+          "center_y": 67.3,
+          "width": 10.2,
+          "visible_height": 6.8,
+          "approximate_sample_hex": "#1F3C2F"
+        },
+        {
+          "element": "right",
+          "center_x": 67.7,
+          "center_y": 67.3,
+          "width": 11.8,
+          "visible_height": 6.9,
+          "approximate_sample_hex": "#1F3C2F"
+        },
+        {
+          "element": "SERDAR",
+          "center_x": 33.5,
+          "center_y": 74.9,
+          "width": 22.4,
+          "visible_height": 3.4,
+          "approximate_sample_hex": "#1B382B",
+          "font": "Cormorant Garamond",
+          "weight": 700,
+          "style": "normal",
+          "additional_tracking_percent_width": 0.08
+        },
+        {
+          "element": "LENA",
+          "center_x": 67.8,
+          "center_y": 74.9,
+          "width": 15.2,
+          "visible_height": 3.2,
+          "approximate_sample_hex": "#1B382B",
+          "font": "Cormorant Garamond",
+          "weight": 700,
+          "style": "normal",
+          "additional_tracking_percent_width": 0.08
+        },
+        {
+          "element": "Paper Anniversary",
+          "center_x": 51.1,
+          "center_y": 17.4,
+          "width": 70.0,
+          "visible_height": 8.3,
+          "approximate_sample_hex": "#1B372A",
+          "font": "Cormorant Garamond",
+          "weight": 600,
+          "style": "normal",
+          "additional_tracking_percent_width": -0.05
+        },
+        {
+          "element": "12 JUNE 2025",
+          "center_x": 50.3,
+          "center_y": 83.4,
+          "width": 29.8,
+          "visible_height": 2.3,
+          "approximate_sample_hex": "#223E30",
+          "font": "Montserrat",
+          "weight": 400,
+          "style": "normal",
+          "additional_tracking_percent_width": 0.35
+        },
+        {
+          "element": "YEAR ONE",
+          "center_x": 49.7,
+          "center_y": 88.5,
+          "width": 23.6,
+          "visible_height": 2.4,
+          "approximate_sample_hex": "#1B392B",
+          "font": "Montserrat",
+          "weight": 600,
+          "style": "normal",
+          "additional_tracking_percent_width": 0.3
+        }
+      ]
+    }
+  ]
+}
