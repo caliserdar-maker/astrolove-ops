@@ -12,6 +12,9 @@ on:
       tur: {description: "poster | kupa", required: true}
       eski: {description: "eski cikti: poster = receipt (SIPARIS_ISIM/GPT/AstroLoveArt_<r>), kupa = ASTROLOVE altindaki klasor", required: true}
       yeni: {description: "yeni cikti (ayni bicim)", required: true}
+      taban: {description: "poster: ayni ref'in en az 3 kosusu, virgullu receipt (orn. 9000000003,9000000004,9000000005)", required: false, default: ""}
+      ref_eski: {description: "poster: eski kod ref'i (motor_gpt agaci karsilastirilir)", required: false, default: ""}
+      ref_yeni: {description: "poster: temiz kod ref'i", required: false, default: ""}
 
 jobs:
   kiyas:
@@ -19,6 +22,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -43,6 +48,9 @@ jobs:
           TUR: ${{ inputs.tur }}
           ESKI: ${{ inputs.eski }}
           YENI: ${{ inputs.yeni }}
+          TABAN: ${{ inputs.taban }}
+          REF_ESKI: ${{ inputs.ref_eski }}
+          REF_YENI: ${{ inputs.ref_yeni }}
         run: |
           set +e -uo pipefail
           [[ "$TUR" =~ ^(poster|kupa)$ ]] && [[ "$ESKI" =~ ^[A-Za-z0-9_/]+$ ]] && [[ "$YENI" =~ ^[A-Za-z0-9_/]+$ ]] || { echo "::error::girdi"; exit 1; }
@@ -51,9 +59,17 @@ jobs:
           else E="gdrive:ASTROLOVE/$ESKI"; Y="gdrive:ASTROLOVE/$YENI"; fi
           rclone copy "$E" _e -q; rclone copy "$Y" _y -q
           echo "eski dosya $(find _e -type f | wc -l) | yeni dosya $(find _y -type f | wc -l)"
-          python3 scripts/siparis_test/esit_kiyas.py --tur "$TUR" --eski _e --yeni _y --out _out
+          EK=()
+          if [ "$TUR" = poster ]; then
+            [[ "$TABAN" =~ ^[0-9,]+$ ]] && [[ "$REF_ESKI" =~ ^[0-9a-f]{7,40}$ ]] && [[ "$REF_YENI" =~ ^[0-9a-f]{7,40}$ ]] || { echo "::error::poster: taban/ref"; exit 1; }
+            AE=$(git rev-parse "$REF_ESKI:motor_gpt"); AY=$(git rev-parse "$REF_YENI:motor_gpt"); echo "motor_gpt agaci: eski $AE | yeni $AY"
+            EK+=(--agac-eski "$AE" --agac-yeni "$AY" --taban)
+            IFS=, read -ra TB <<< "$TABAN"
+            for r in "${TB[@]}"; do rclone copy "${T}SIPARIS_ISIM/GPT/AstroLoveArt_$r" "_t/$r" -q; EK+=("_t/$r"); done
+          fi
+          python3 scripts/siparis_test/esit_kiyas.py --tur "$TUR" --eski _e --yeni _y --out _out "${EK[@]}"
           echo "KOD=$?" >> "$GITHUB_ENV"
           rclone copy _out "gdrive:ASTROLOVE/TEMP/DENETIM_20261021/A3_KIYAS/${GITHUB_RUN_ID}_${TUR}" -q && echo "Cikti: A3_KIYAS/${GITHUB_RUN_ID}_${TUR}/"
           [ "$(cat "$GITHUB_ENV" | grep -c KOD=0)" -ge 1 ]
       - if: always()
-        run: rm -rf _e _y _out ~/.config/rclone
+        run: rm -rf _e _y _t _out ~/.config/rclone

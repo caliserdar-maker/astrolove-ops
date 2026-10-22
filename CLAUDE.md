@@ -53,6 +53,10 @@ bolumu okunmadan baslanmaz.
 
 ## Uretim
 
+- GALERI (Serdar 23 Eki): 78 poster galerisi `galeri77_cift.sh` / `kart02_duvar_kur.py` ile YENIDEN URETILMEZ (uc sutun,
+  Framed ve Hahnemuhle metni; canli kartlar 17 Eki `eski78_gorsel_uret.py` + `kart02_iki_sutun.py` hattindan). Kart degisikligi
+  canli galeriden (`eski78_gorsel_indir.py`) bant duzenlemesiyle yapilir; bant disi piksel degismez kapisi zorunlu.
+
 - Wallpaper hatti dahil tum uretim GitHub Actions'ta kosar; ChatGPT/Colab
   uretim hattinda yoktur (KARAR 3, 1 Eyl 2026).
 - Esik ve yerlesim kurallari tahminle degil, onayli dosyalardan olculerek
