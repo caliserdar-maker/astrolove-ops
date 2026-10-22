@@ -1,0 +1,59 @@
+name: a3-esit-kiyas
+
+# P0.7 / A3 kabul kiyasi (Serdar 22 Eki gece): eski ref ve temiz ref ciktilari (Drive) scripts/siparis_test/esit_kiyas.py ile.
+# Yalniz Drive OKUR; sonuc + gercek oranli onizlemeler Drive TEMP/DENETIM_20261021/A3_KIYAS/<run_id>/. Etsy / tedarikci yok.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      tur: {description: "poster | kupa", required: true}
+      eski: {description: "eski cikti: poster = receipt (SIPARIS_ISIM/GPT/AstroLoveArt_<r>), kupa = ASTROLOVE altindaki klasor", required: true}
+      yeni: {description: "yeni cikti (ayni bicim)", required: true}
+
+jobs:
+  kiyas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q numpy==2.5.3 pillow==12.3.0
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Indir + kiyas
+        env:
+          TUR: ${{ inputs.tur }}
+          ESKI: ${{ inputs.eski }}
+          YENI: ${{ inputs.yeni }}
+        run: |
+          set +e -uo pipefail
+          [[ "$TUR" =~ ^(poster|kupa)$ ]] && [[ "$ESKI" =~ ^[A-Za-z0-9_/]+$ ]] && [[ "$YENI" =~ ^[A-Za-z0-9_/]+$ ]] || { echo "::error::girdi"; exit 1; }
+          T="gdrive,root_folder_id=12N9iS2i4byMbkH5c0Inmni_nIv2zyTzH:"
+          if [ "$TUR" = poster ]; then E="${T}SIPARIS_ISIM/GPT/AstroLoveArt_$ESKI"; Y="${T}SIPARIS_ISIM/GPT/AstroLoveArt_$YENI"
+          else E="gdrive:ASTROLOVE/$ESKI"; Y="gdrive:ASTROLOVE/$YENI"; fi
+          rclone copy "$E" _e -q; rclone copy "$Y" _y -q
+          echo "eski dosya $(find _e -type f | wc -l) | yeni dosya $(find _y -type f | wc -l)"
+          python3 scripts/siparis_test/esit_kiyas.py --tur "$TUR" --eski _e --yeni _y --out _out
+          echo "KOD=$?" >> "$GITHUB_ENV"
+          rclone copy _out "gdrive:ASTROLOVE/TEMP/DENETIM_20261021/A3_KIYAS/${GITHUB_RUN_ID}_${TUR}" -q && echo "Cikti: A3_KIYAS/${GITHUB_RUN_ID}_${TUR}/"
+          [ "$(cat "$GITHUB_ENV" | grep -c KOD=0)" -ge 1 ]
+      - if: always()
+        run: rm -rf _e _y _out ~/.config/rclone
