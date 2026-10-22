@@ -1,0 +1,66 @@
+name: envanter-oku
+# SALT OKUMA (Etsy'ye yazma YOK): ilan envanteri + ilan alanlari + kargo profili karsilastirmasi (Serdar 22 Eki, "sold out" arastirmasi).
+# Cikti: Drive TEMP/BURC_GIFT_20261022/envanter_oku_<run>/. scripts/etsy/envanter_oku.py
+permissions:
+  actions: read
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      ids: {description: "virgullu listing_id", required: true, default: "4595350971,4595373902,4595421558"}
+jobs:
+  oku:
+    runs-on: ubuntu-latest
+    timeout-minutes: 140
+    steps:
+      - name: Girdi kapisi
+        env: {IDS: "${{ inputs.ids }}"}
+        run: '[[ "$IDS" =~ ^[0-9]+(,[0-9]+)*$ ]] || { echo "::error::ids"; exit 1; }'
+      - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || { sudo apt-get install -y -qq rclone >/dev/null; }
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Token
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+      - name: Oku
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          IDS: ${{ inputs.ids }}
+        run: python3 scripts/etsy/envanter_oku.py --ids "$IDS" --out _out
+      - name: Token geri yaz + cikti Drive'a
+        if: ${{ always() }}
+        run: |
+          if [ -f _work/ETSY_TOKEN.json.updated ]; then
+            rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "token geri yazildi" \
+              || { echo "::error::yenilenen token Drive'a geri yazilamadi"; exit 1; }
+          fi
+          if ls _out/* >/dev/null 2>&1; then
+            python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/ETSY_TOKEN.json _out || { echo "::error::ciktida sir"; exit 1; }
+            rclone copy _out "gdrive:ASTROLOVE/TEMP/BURC_GIFT_20261022/envanter_oku_${GITHUB_RUN_ID}" -q && echo "Cikti: envanter_oku_${GITHUB_RUN_ID}"
+          fi
+      - if: always()
+        run: rm -rf _work ~/.config/rclone
