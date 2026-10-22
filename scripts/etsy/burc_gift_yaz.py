@@ -23,7 +23,6 @@ Modlar:
 KISISEL_KORU: 4598525642 (CANCER_LIBRA kupa; kupa_taslak.py:250 DOKUNMA, 19 Eki). Serdar 22 Eki: yalniz title/tags/description yazilir,
             kisisellestirme alanlari gonderilmez; geri okumada kisisellestirme yazmadan once ile ayni olmali.
 Kume: adim2 (Serdar 22 Eki 8 ilan) | kalan (234 - adim2 = 226) | cl | pilot | id1,id2,...
-Kume: cl (CANCER_LIBRA 3 aile) | pilot (5 ilan) | kalan (geri kalan 226) | id1,id2,...
 Kullanim: burc_gift_yaz.py --mod yedek|siparis|yaz|geri_al --once ONCE.json --sonra SONRA.json --kume cl --out OUT [--onay KOD]"""
 import argparse
 import html
@@ -107,7 +106,7 @@ def inv_ozellik(inv):
 
 def satilamaz(inv):
     """Silinmemis teklifler icinde quantity < 1 ya da is_enabled degil olanlar (Serdar 22 Eki kapisi: 'sold out' onlemi)."""
-    return [(p.get("sku"), o.get("quantity"), o.get("is_enabled")) for p in (inv or {}).get("products") or []
+    return [(p.get("product_id"), o.get("offering_id"), p.get("sku"), o.get("quantity"), o.get("is_enabled")) for p in (inv or {}).get("products") or []
             for o in p.get("offerings") or [] if not o.get("is_deleted") and (not (o.get("quantity") or 0) >= 1 or o.get("is_enabled") is not True)]
 
 
@@ -300,6 +299,8 @@ def bir_ilan(api, shop, lid, hedef, once, out, hazirlik_al, R, by_ids=()):
         nb = sum(1 for k in i0 if baski_mi(k))
         if not ((len(i0) == 15 and nb == 5) or (len(i0) == 10 and nb == 0)):
             raise Dur(f"envanter {len(i0)} urun, baski {nb} (15/5 ya da 10/0 beklenir)")
+        if satilamaz(inv0):
+            raise Dur(f"yazmadan once satilamaz teklif {len(satilamaz(inv0))}: {satilamaz(inv0)[:3]} (yazma yok)")
         hazirlik = hazirlik_al()
         if nb or any(v[4] != hazirlik for v in i0.values()):
             govde = envanter_govdesi(inv0, hazirlik)
@@ -315,8 +316,10 @@ def bir_ilan(api, shop, lid, hedef, once, out, hazirlik_al, R, by_ids=()):
         sp = siparis_say(api, shop, by_ids, toplam=False)     # kapi ile bu ilan arasinda yeni baski siparisi geldi mi
         if sp["baski_satiri"]:
             raise GenelDur(f"gonderilmemis baski siparisi geldi ({sp['baski_satiri']} satir): yazma yok")
+    R["yazildi"] = []
     if govde:
         api.put_json(f"/listings/{lid}/inventory", govde)
+        R["yazildi"].append("envanter")
         if sg0:
             inv_p = api.get(f"/listings/{lid}/inventory") or {}
             if sg_ad(inv_p, stil_gorsel(api, shop, lid)) != sg_ad(inv0, sg0):
@@ -325,6 +328,8 @@ def bir_ilan(api, shop, lid, hedef, once, out, hazirlik_al, R, by_ids=()):
                     raise Dur(f"stil-gorsel baglari PUT sonrasi kayboldu ve geri gelmedi {lid}")
     if data:
         api.patch(f"/shops/{shop}/listings/{lid}", data)
+        R["yazildi"].append("metin" + ("+" + "+".join(sorted(k for k in data if k not in ("title", "tags", "description")))
+                                       if set(data) - {"title", "tags", "description"} else ""))
     if partner_yaz:
         try:
             api.patch(f"/shops/{shop}/listings/{lid}", {"production_partner_ids": ""})
@@ -382,8 +387,11 @@ def bir_ilan(api, shop, lid, hedef, once, out, hazirlik_al, R, by_ids=()):
             hata.append("kisisellestirme alanlari degisti")
         R["kisisel"] = "API ayni" if any(v not in (None, [], {}) for v in kis0.values()) else "merkez canli kontrol (API alan dondurmuyor)"
     R["sonra"] = dict(alan_hata=hata, istek=api.calls, kota=api.remaining)
+    R["geri_okuma"] = True
     if hata:
         R["sonuc"] = "FAIL"
+        if govde:   # envanteri yazilmis ilanda hasar: tekrar kosu bozuk hali 'once' sanar -> tum kosu durur (bagimsiz inceleme 22 Eki)
+            raise GenelDur(f"envanteri yazilan ilanda geri okuma FAIL {lid}: {hata}")
         raise Dur(f"geri okuma FAIL {lid}: {hata}")
     R["sonuc"] = "PASS"
 
@@ -564,7 +572,9 @@ def main():
             except GenelDur:
                 raise
             except (Dur, SystemExit) as e:
-                if not a.devam or "429" in str(e):
+                if R.get("yazildi") and not R.get("geri_okuma"):   # yarim ilan: devam etme (bagimsiz inceleme 22 Eki)
+                    raise GenelDur(f"{lid} yarim kaldi (yazilan: {R['yazildi']}): {str(e)[:200]}")
+                if not a.devam or "HATA: 429" in str(e):
                     raise Dur(str(e))
                 R["sonuc"] = f"FAIL {str(e)[:200]}"     # Serdar 22 Eki: FAIL olan ilan listeden cikar, toplu is durmaz
                 print(f"::warning::FAIL {lid}: {str(e)[:200]}", flush=True)
