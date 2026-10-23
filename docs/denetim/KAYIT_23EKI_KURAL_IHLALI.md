@@ -51,3 +51,23 @@ Kural: "Test, birkac dakika once main'e giren DOGRULANMAMIS kodla baslatilmaz" (
 | 23 Eki 10:31:17 | 18d5b9cf (main) | 39940162901 beyan-marka-yaz (Etsy yazimi) | 3 dk 58 sn | bekleme uygulandi; AMA kapi 1b degisikligi Actions'ta denenmeden ve Serdar'a sorulmadan yazima gitti (yontem degisikligi, ihlal) |
 
 Onlem (23 Eki'den itibaren): push ile kosu arasinda bekleme; tetiklemeden once yerel test cikis kodu + push/kosu zaman farki rapora yazilir; kapi/yontem degisikligi Serdar onayi olmadan Etsy yazimina gitmez.
+
+## 5. 23 Eki 14:24 UTC: gercek siparis 4208728285 basladi, siparis baslangic kapisi gosterilmedi (Merkez 23 Eki: kayda gecsin)
+
+Kural: "Her test/siparis oncesi kapi madde madde isaretlenip Serdar'a gosterilir; bir madde HAYIR ise dispatch yok" (CLAUDE.md
+SIPARIS URETIMI; docs/SIPARIS_DERSLER.md "TEST 4 BASLANGIC KAPISI"). Merkez talimati "uretime basla" (yalniz dosya uretimi) ve
+"once kuru yonlendirme" idi; kapi listesi isaretlenmeden ve Serdar'a gosterilmeden uretim dispatch edildi.
+
+| zaman (UTC) | kosu | ne |
+|---|---|---|
+| 23 Eki 14:21:35 | 39968942540 etsy-siparis-ozet (adet 5) | kisisellestirme okumasi; son 5 siparis ham olarak TEMP/SIPARIS_OZET_20261023_1422/receipts_ham.json'a yazildi (ilgisiz 4 musterinin verisi dahil; Merkez Serdar onayiyla cope atti) |
+| 23 Eki 14:23:00 | 39969143006 siparis-giris (kuru) | yonlendirme: eski yol, siparis-dijital wp_ref 360cbef + renk_ref b8c8c4b |
+| 23 Eki 14:24:15 | 39969340767 siparis-giris -> 39969370723 siparis-dijital | uretim; kapi listesi isaretlenmeden |
+
+Kapi maddeleri, sonradan durum: kod sabit (son siparis kodu degisikligi 587e8d0a, A3 testi 39874516896 ondan sonra) EVET; calisan
+prova/tani/toplu kosu yok EVET; cift alfabetik ve isim1/isim2 burclarla eslesiyor EVET; acik is listesi, bu kodla kaynak on testi
+(LIBRA_TAURUS x WP x 11x14) ve 11x14 isim on testi DOGRULANMADI; 11x14 tek JPG uctan uca ilk kez bu sipariste uretildi.
+Sonuc: kapilar PASS, Merkez onizleme ve kesiti kontrol etti; musteriye gonderim Serdar'da.
+
+Onlem: yeni siparis gelirse uretimden ONCE DUR ve Merkez'e sor (Merkez 23 Eki); kapi listesi madde madde gosterilmeden dispatch yok;
+kisisellestirme okumasi yalniz ilgili receipt (maske acigi ve ham cekme duzeltmesi teslimden sonra ayri gorev).
