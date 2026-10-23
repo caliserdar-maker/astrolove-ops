@@ -16,7 +16,7 @@ Modlar:
        alir) -> yedek (ilan + RU ceviri + envanter) -> PATCH description (EN) -> PUT translations/ru (baslik ve etiketler aynen)
        -> geri okuma (en fazla 3 deneme, 10 sn): EN/RU beklenenle esit (html.unescape), state active, baslik/etiket/fiyat/adet ve
        RU baslik/etiket ayni, satilabilir teklif sayisi ayni -> PASS.
-Kota tabani 10 (CLAUDE.md). Yanit govdeleri yalniz hata mesaji. Cikti: <out>/...; log'a ozet."""
+Kota: etsy_common esigi (genel 481/430, CLAUDE.md 23 Eki) + yerel taban 10 (esik pasifse). Yanit govdeleri yalniz hata mesaji. Cikti: <out>/...; log'a ozet."""
 import argparse
 import html
 import json
@@ -303,7 +303,10 @@ def yaz(api, shop, lid, out, bolum=None):
         raise Dur(f"{lid}: state {L.get('state')} (active degil): updateListing cagrilmaz")
     if ortak(L) is None:
         raise Dur(f"{lid}: production_partners okunamadi; kapi 1b karsilastiramaz, yazim yok")
-    if any(k not in L for k in KISISEL_ALAN):
+    # 23 Eki olcumu (kosu 39939437623, 4570031205): Etsy'nin coklu soru modelinde personalization_is_required / _char_count_max /
+    # _instructions yanitta YOK, sorular /listings/{id}/personalization'da. Kapi: is_personalizable zorunlu; eski alanlar varsa
+    # korunan() ile once/sonra kiyaslanir (yoksa ikisi de None); sorular (soru0) yazim sonrasi birebir kiyaslanir.
+    if "is_personalizable" not in L:
         raise Dur(f"{lid}: kisisellestirme alanlari API yanitinda yok; kapi 1b karsilastiramaz, yazim yok")
     if L.get("is_personalizable") and not soru0:
         raise Dur(f"{lid}: kisisellestirme acik ama sorular okunamadi; kapi 1b karsilastiramaz, yazim yok")

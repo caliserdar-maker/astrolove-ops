@@ -236,8 +236,24 @@ def main():
               and [k for k, _, _ in api.yaz] == ["put"] and m.RU_BEYAN in api.ru["20"]["description"]))
     api = Sahte(); api.soru["1"] = {}; r, _ = kos(api)
     s.append(("A3: kisisellestirme acik, sorular okunamadi -> DUR, yazma yok", isinstance(r, str) and "sorular" in r and api.yaz == []))
-    api = Sahte(); del api.ilan["1"]["personalization_char_count_max"]; r, _ = kos(api)
-    s.append(("A3: kisisellestirme alani yanitta yok -> DUR", isinstance(r, str) and "kisisellestirme alanlari" in r and api.yaz == []))
+    api = Sahte(); del api.ilan["1"]["is_personalizable"]; r, _ = kos(api)
+    s.append(("A3: is_personalizable yanitta yok -> DUR", isinstance(r, str) and "kisisellestirme alanlari" in r and api.yaz == []))
+    # 23 Eki (4570031205): coklu soru modeli, eski skaler alanlar yanitta yok; sorular var -> yazar, kapi sorulari kiyaslar
+    api = Sahte()
+    for k in ("personalization_is_required", "personalization_char_count_max", "personalization_instructions"):
+        del api.ilan["1"][k]
+    ok, R = kos(api)
+    s.append(("yeni model: eski alanlar yok, sorular var -> PASS", ok is True and R["sonuc"] == "PASS"))
+    api = Sahte()
+    for k in ("personalization_is_required", "personalization_char_count_max", "personalization_instructions"):
+        del api.ilan["1"][k]
+    _p = api.patch
+    def patch_soru(path, data, A=api):
+        r = _p(path, data); A.soru["1"]["personalization_questions"] = [{"question_id": 1, "instructions": "X", "max_allowed_characters": 9}]
+        return r
+    api.patch = patch_soru
+    ok, R = kos(api)
+    s.append(("yeni model: yazim sonrasi soru degisirse -> FAIL", ok is False and "kisisellestirme sorulari degisti" in R["hata"]))
     def gh(A, l):
         A.get_hata = True
     api = Sahte(ilanlar={"21": (KUPA, 8, RU), "22": (KUPA, 8, RU)}, bozan=gh)
