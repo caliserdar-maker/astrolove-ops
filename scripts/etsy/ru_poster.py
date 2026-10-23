@@ -17,29 +17,39 @@ AY = {"January": "января", "February": "февраля", "March": "мар�
       "December": "декабря"}
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from beyan_marka_yaz import BEYAN, RU_BEYAN  # noqa: E402  tek kaynak
+DATIF = {"Aries": "Овну", "Taurus": "Тельцу", "Gemini": "Близнецам", "Cancer": "Раку", "Leo": "Льву", "Virgo": "Деве",
+         "Libra": "Весам", "Scorpio": "Скорпиону", "Sagittarius": "Стрельцу", "Capricorn": "Козерогу", "Aquarius": "Водолею",
+         "Pisces": "Рыбам"}
+YASAK_RU = re.compile(r"Hahnem|Photo\s*Rag|Prodigi|хлопк|музейн|ISO\s*9706|жикле|gicl|\d{3}\s*г/м|AstroLove(?!Art)", re.I)
 B_RX = "(" + "|".join(BURC) + ")"
 
 
-def q(b):
-    return f"«{BURC[b]}»"
+def cift(a, b):
+    return f"{BURC[a]} и {BURC[b]}"
 
 
 def boy_ru(s):
     return s.replace(" x ", " × ")
 
 
+KUYRUK = re.compile(r"an? " + B_RX + r" gifts?(?: or (?:an? )?" + B_RX + r" gifts?)?")
+
+
 def p_giris(m, ctx):
     a, b, kuyruk = m.group(1), m.group(2), m.group(3)
-    ad = [x for x in re.findall(B_RX, kuyruk)]
-    if not ad or set(ad) - {a, b}:
+    k = KUYRUK.fullmatch(kuyruk)   # inceleme 23 Eki O1: kuyrukta burc disi bilgi varsa FAIL (sessizce atilmaz)
+    if not k:
+        raise ValueError(f"giris kuyrugu kalip disi: {kuyruk!r}")
+    ad = [x for x in k.groups() if x]
+    if set(ad) - {a, b}:
         raise ValueError(f"giris kuyrugu burclari {ad}")
     ctx["burc"] = (a, b)
-    secim = " или ".join(dict.fromkeys(q(x) for x in ad))
-    return (f"Именной постер для пары со знаками зодиака {q(a)} и {q(b)}: с вашими двумя именами и вашей короткой надписью. "
-            f"Значимый подарок молодожёнам или на первую годовщину. Наш оригинальный дизайн объединяет ваши два знака "
-            f"зодиака в один общий символ, а ваши имена располагаются под двумя небольшими знаками. Выберите цифровой файл "
-            f"или печать. Значимый подарок на годовщину, помолвку, свадьбу, День святого Валентина и день рождения. "
-            f"Хороший выбор, если вы ищете подарок для знака {secim}.")
+    secim = " или ".join(dict.fromkeys(DATIF[x] for x in ad))
+    return (f"Именной постер для пары со знаками зодиака {cift(a, b)}, с вашими именами и короткой надписью. Особенный "
+            f"подарок молодожёнам или на первую годовщину. Наш оригинальный дизайн объединяет ваши два знака зодиака в один "
+            f"общий символ, а ваши имена располагаются под двумя небольшими знаками. Выберите цифровой файл или напечатанный "
+            f"постер. Особенный подарок на годовщину, помолвку, свадьбу, День святого Валентина и день рождения. Удачный "
+            f"выбор, если вы ищете подарок {secim}.")
 
 
 def p_tarih(m, ctx):
@@ -62,13 +72,21 @@ def p_siparis(m, ctx):
             f"Идеи для надписи: {fikir}")
 
 
+def uc_kontrol(ctx, k1, b1, a1, a2):
+    """inceleme 23 Eki O6: EN'deki aralik uclari envanterde olmali."""
+    env = set(ctx.get("boylar") or [])
+    if env and {k1.replace(" ", ""), b1.replace(" ", ""), a1, a2} - env:
+        raise ValueError(f"boy uclari envanterde yok: {k1}, {b1}, {a1}, {a2}")
+
+
 def p_dijital(m, ctx):
     k1, b1, a1, a2 = m.group(1), m.group(2), m.group(3), m.group(4)
+    uc_kontrol(ctx, k1, b1, a1, a2)
     return ("ЦИФРОВОЙ ФАЙЛ\n"
             "- Один готовый к печати файл JPG в выбранном вами цвете и размере\n"
-            f"- Высокое разрешение: 300 dpi в полном выбранном размере, от {boy_ru(k1)} до {boy_ru(b1)} дюймов или от {a1} до {a2}\n"
+            f"- Высокое разрешение: 300 dpi в выбранном размере, от {boy_ru(k1)} до {boy_ru(b1)} дюймов или от {a1} до {a2}\n"
             "- Файл приходит в ваш заказ на Etsy в течение 24 часов. Перед отправкой мы вручную проверяем каждую персонализацию\n"
-            "- Скачайте его в разделе Purchases (Покупки) в браузере. Приложение Etsy не скачивает файлы\n"
+            "- Скачайте его в разделе «Покупки» (Purchases) в браузере. В приложении Etsy файлы скачать нельзя\n"
             "- Распечатайте его дома, в местной типографии или в онлайн-сервисе печати\n"
             "- Мы ничего не отправляем по почте. Только для личного использования.")
 
@@ -77,25 +95,26 @@ def p_boy(m, ctx):
     n, k1, b1, a1, a2 = int(m.group(1)), m.group(2), m.group(3), m.group(4), m.group(5)
     if ctx.get("sku_boy") is not None and n != ctx["sku_boy"]:
         raise ValueError(f"EN {n} boy, envanter {ctx['sku_boy']}")
+    uc_kontrol(ctx, k1, b1, a1, a2)
     return (f"РАЗМЕРЫ\n{n} размеров: от {boy_ru(k1)} до {boy_ru(b1)} дюймов, а также от {a1} до {a2}. Каждый размер доступен "
-            "в печати и как цифровой файл. Смотрите фото с таблицей размеров.")
+            "в виде постера и цифрового файла. Смотрите фото с таблицей размеров.")
 
 
 def p_hediye(m, ctx):
     a, b = m.group(1), m.group(2)
     if ctx.get("burc") and (a, b) != ctx["burc"]:
         raise ValueError("hediye burclari girisle ayni degil")
-    return (f"ИДЕАЛЬНЫЙ ПОДАРОК\nПамятный подарок для пары {q(a)} и {q(b)}. Мало времени? Выберите цифровой файл. Он придёт "
-            "в течение 24 часов, готовый к печати или отправке.")
+    return (f"ИДЕАЛЬНЫЙ ПОДАРОК\nПамятный подарок для пары со знаками {cift(a, b)}. Мало времени? Выберите цифровой файл. "
+            "Он придёт в течение 24 часов, и его можно сразу распечатать или переслать.")
 
 
 SABIT = {
     BEYAN: RU_BEYAN,
     "YOUR PREVIEW\nFor every print, we send you a preview via Etsy Messages within 24 hours of your order. We print as soon as you "
     "approve it. If we don't hear from you within 24 hours of receiving the preview, we print the design as shown.":
-        "ВАШ МАКЕТ\nДля каждого заказа печати мы отправляем вам макет через сообщения Etsy в течение 24 часов после заказа. "
+        "ВАШ МАКЕТ\nДля каждого заказа с печатью мы отправляем вам макет через сообщения Etsy в течение 24 часов после заказа. "
         "Мы печатаем сразу после того, как вы его одобрите. Если в течение 24 часов после получения макета мы не получим от вас "
-        "ответа, мы напечатаем дизайн в показанном виде.",
+        "ответа, мы напечатаем дизайн в том виде, как на макете.",
     "PRINT\n- Printed on premium matte art paper with long-lasting inks\nFrames shown in photos are for display only and are not "
     "included. Prints ship unframed.":
         "ПЕЧАТЬ\n- Печать на премиальной матовой художественной бумаге стойкими чернилами\nРамы на фото показаны только для "
@@ -112,16 +131,16 @@ SABIT = {
         "- Для других стран смотрите срок доставки, указанный для вашего адреса.\n- Заказы в США отправляются с трек-номером.",
     "PACKAGING\nPrints are rolled in tissue paper and sent in a thick cardboard tube. Small prints to Europe may come in a stiff "
     "flat envelope.":
-        "УПАКОВКА\nПостеры сворачиваются в папиросную бумагу и отправляются в плотном картонном тубусе. Небольшие постеры в "
-        "Европу могут прийти в жёстком плоском конверте.",
+        "УПАКОВКА\nПостеры сворачиваем в рулон, оборачиваем папиросной бумагой и отправляем в плотном картонном тубусе. "
+        "Небольшие постеры в Европу могут прийти в жёстком плоском конверте.",
     "CHANGES\nNeed to change a name or the message? Just tell us before you approve your preview.":
         "ИЗМЕНЕНИЯ\nНужно изменить имя или надпись? Просто напишите нам до того, как одобрите макет.",
     "CARE\nKeep away from direct sunlight and damp rooms.":
-        "УХОД\nХраните вдали от прямых солнечных лучей и влажных помещений.",
+        "УХОД\nНе размещайте под прямыми солнечными лучами и во влажных помещениях.",
     "RETURNS\nEvery item is personalized, so we can't accept returns or exchanges. Digital files can't be refunded once sent. If "
     "your print arrives damaged, send us a photo within 7 days and we'll replace it at no cost.":
-        "ВОЗВРАТ\nКаждый товар персонализирован, поэтому мы не принимаем возвраты и обмены. Цифровые файлы после отправки не "
-        "возвращаются. Если постер пришёл повреждённым, пришлите нам фото в течение 7 дней, и мы бесплатно заменим его.",
+        "ВОЗВРАТ\nКаждый товар персонализирован, поэтому мы не принимаем возвраты и обмены. Деньги за цифровые файлы после "
+        "отправки не возвращаются. Если постер пришёл повреждённым, пришлите нам фото в течение 7 дней, и мы бесплатно заменим его.",
     "FAQ\nCan I order the digital file and a print together? Yes. Add each one to your cart as a separate item.\nHow large can I "
     "print the digital file? At the size you choose, at 300 dpi. The largest size is 24 x 36 inches.":
         "ВОПРОСЫ И ОТВЕТЫ\nМожно ли заказать цифровой файл и печать вместе? Да. Добавьте каждый из них в корзину отдельным "
@@ -155,7 +174,7 @@ KALIP = [
 def kur(en, envanter=None):
     d = html.unescape(en or "").replace("\r\n", "\n").strip()
     par = [p.strip() for p in d.split("\n\n") if p.strip()]
-    ctx = dict(sku_boy=len((envanter or {}).get("boy") or []) or None)
+    ctx = dict(sku_boy=len((envanter or {}).get("boy") or []) or None, boylar=(envanter or {}).get("boy"))
     ru, hata = [], []
     for i, p in enumerate(par, 1):
         if p in SABIT:
@@ -177,4 +196,7 @@ def kur(en, envanter=None):
     out = "\n\n".join(ru)
     if re.search("[—–]", out):
         hata.append("RU'da uzun/orta tire")
+    yasak = sorted({m.group(0) for m in YASAK_RU.finditer(out)})
+    if yasak:   # inceleme 23 Eki O2: kagit/tedarikci/marka yasak ifadesi kosulsuz FAIL
+        hata.append(f"RU'da yasak ifade: {yasak}")
     return out, dict(pass_=not hata and len(ru) == len(par), hata=hata, paragraf_en=len(par), paragraf_ru=len(ru))

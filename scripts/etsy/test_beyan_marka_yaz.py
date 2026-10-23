@@ -110,6 +110,11 @@ def dur_mu(f, *a):
 def main():
     m.time.sleep = lambda s: None
     s = []
+    # inceleme 23 Eki E1: varsayilan poster yazimi kapali; kapi testleri (poster fixture) icin acilir, sonda geri kapatilir
+    api = Sahte(); r, _ = kos(api)
+    s.append(("E1: poster yazimi kapali (varsayilan) -> DUR, yazma yok", m.POSTER_YAZIM_KAPALI is True and isinstance(r, str)
+              and "poster yazimi kapali" in r and api.yaz == []))
+    m.POSTER_YAZIM_KAPALI = False
     par = m.en_plan(EN, "poster")[0].split("\n\n")
     s.append(("poster: beyan 1. paragraftan sonra, &#39; cozuldu", par[1] == m.BEYAN and "Valentine's" in par[0] and par[2].startswith("Cancer:")))
     pilot = EN.replace("Day.\n\n", "Day.\n\n" + m.ESKI_BEYAN + "\n\n")

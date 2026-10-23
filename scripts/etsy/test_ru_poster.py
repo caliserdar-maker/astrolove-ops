@@ -36,12 +36,17 @@ def main():
     s.append(("tum paragraflar kalipli, PASS", k["pass_"] and k["paragraf_en"] == k["paragraf_ru"] == 16))
     o = R.analiz_bir(dict(listing_id="1", aile="poster", en=EN, ru=ru, envanter=ENV, ortak=[]))
     s.append(("yeni RU olcumde sorun 0", o["sorunlar"] == ""))
-    s.append(("burc ve tarih RU", "«Овен» и «Лев»" in ru and "с 21 марта по 19 апреля" in ru and "с 23 июля по 22 августа" in ru))
+    s.append(("burc ve tarih RU", "знаками зодиака Овен и Лев" in ru and "подарок Овну или Льву" in ru and "с 21 марта по 19 апреля" in ru and "с 23 июля по 22 августа" in ru))
     s.append(("yasak ifade yok", not any(x in ru for x in ("Hahnem", "Prodigi", "308", "жикле", "хлоп", "AstroLove "))))
     s.append(("kalip disi paragraf FAIL", not P.kur(EN + "\n\nNEW\nSomething.", ENV)[1]["pass_"]))
     s.append(("envanter boy sayisi farki FAIL", not P.kur(EN, dict(ENV, boy=ENV["boy"][:12]))[1]["pass_"]))
     s.append(("beyansiz EN FAIL", not P.kur(EN.replace(P.BEYAN + "\n\n", ""), ENV)[1]["pass_"]))
     s.append(("EN'de tek harf degisirse FAIL (sabit bolum)", not P.kur(EN.replace("damp rooms", "damp room"), ENV)[1]["pass_"]))
+    s.append(("kuyrukta burc disi bilgi FAIL", not P.kur(EN.replace("an Aries gift or Leo gifts", "an Aries gift for him"), ENV)[1]["pass_"]))
+    s.append(("aralik ucu envanterde yok FAIL", not P.kur(EN, dict(ENV, boy=[b for b in ENV["boy"] if b != "24x36"] + ["20x24"]))[1]["pass_"]))
+    import re as _re
+    s.append(("yasak ifade denetimi", bool(P.YASAK_RU.search("бумага хлопковая")) and bool(P.YASAK_RU.search("AstroLove дизайн"))
+              and not P.YASAK_RU.search(ru)))
     for ad, ok in s:
         print("PASS" if ok else "FAIL", ad)
     n = sum(ok for _, ok in s)

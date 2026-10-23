@@ -89,6 +89,11 @@ def en_plan(desc, aile):
     return "\n\n".join(par), (f"{k + 1}. paragraftan sonra eklendi" + ("; eski beyan kaldirildi" if eski else ""))
 
 
+# inceleme 23 Eki E1: poster RU yalniz ru_poster ile yeniden kurulur (Serdar 23 Eki sablon karari); o yazim yolu yazilip Serdar
+# metin onayi gelene kadar poster yazimi kapali (eski RU + beyan yolu kullanilmaz). Testler kapi mantigi icin False yapar.
+POSTER_YAZIM_KAPALI = True
+
+
 def ru_plan(desc, aile):
     """(yeni RU aciklama | None, Art'siz marka sayisi, not). Beyan poster ve kupada 1. paragraftan sonra."""
     d = norm(desc)
@@ -269,7 +274,9 @@ def kuru(api, shop, a, out):
                           f"RU etiket marka {sum(len(MARKA.findall(t)) for t in ru.get('tags') or [])} (dokunulmaz)"]
                 if ry:
                     par = ry.split("\n\n")
-                    rapor += ["--- RU yeni ilk 3 paragraf ---"] + par[:3]
+                    eski = getattr(a, "ru_yeniden", False) and aile == "poster"   # inceleme 23 Eki E2
+                    rapor += ["--- RU ESKI YOL (ru_plan, eski RU + beyan; KULLANILMAZ, yeni RU: YENI_RU) ilk 3 paragraf ---" if eski
+                              else "--- RU yeni ilk 3 paragraf ---"] + par[:3]
             except Dur as e:
                 rapor += [f"RU: DUR ({e})"]
         else:
@@ -336,6 +343,8 @@ def yaz(api, shop, lid, out, bolum=None):
     if bolum is None:
         bolum = {str(s["shop_section_id"]): s.get("title") for s in (api.get(f"/shops/{shop}/sections") or {}).get("results") or []}
     aile = BOLUM_AILE.get(bolum.get(str(L.get("shop_section_id"))), "?")
+    if aile == "poster" and POSTER_YAZIM_KAPALI:   # inceleme 23 Eki E1: poster RU yalniz ru_poster ile yeniden kurulur; o yazim yolu Serdar metin onayindan sonra
+        raise Dur(f"{lid}: poster yazimi kapali (yeni RU yazim yolu yok; eski RU kullanilmaz, Serdar 23 Eki)")
     en_yeni, en_not = en_plan(L.get("description"), aile)
     ru_yeni, ru_n, ru_not = ru_plan(ru.get("description"), aile) if ru else (None, 0, "RU yok")
     R = dict(ilan=lid, aile=aile, en=en_not, ru=ru_not, ru_marka_once=ru_n, ru_ceviri="var" if ru else "yok", yazildi=[])
