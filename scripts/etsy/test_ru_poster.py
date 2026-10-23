@@ -53,6 +53,9 @@ def main():
     if kf.exists():   # 23 Eki kapsam kosusu 39961330252'de kalip disi kalan 46 gercek kuyruk
         kk = json.loads(kf.read_text())
         s.append((f"gercek {len(kk)} kuyruk kalipli", all(P.KUYRUK.fullmatch(x) for x in kk)))
+    s.append(("envanter yoksa FAIL", not P.kur(EN, {})[1]["pass_"] and not P.kur(EN, None)[1]["pass_"]))
+    s.append(("yasak desen genis (хлопок, Ханемюле, музей, 308 gsm, 100 лет)", all(P.YASAK_RU.search(x) for x in
+              ("100% хлопок", "Ханемюле", "музей", "308 gsm", "100 лет"))))
     for ad, ok in s:
         print("PASS" if ok else "FAIL", ad)
     n = sum(ok for _, ok in s)

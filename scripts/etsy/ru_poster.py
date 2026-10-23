@@ -20,7 +20,8 @@ from beyan_marka_yaz import BEYAN, RU_BEYAN  # noqa: E402  tek kaynak
 DATIF = {"Aries": "Овну", "Taurus": "Тельцу", "Gemini": "Близнецам", "Cancer": "Раку", "Leo": "Льву", "Virgo": "Деве",
          "Libra": "Весам", "Scorpio": "Скорпиону", "Sagittarius": "Стрельцу", "Capricorn": "Козерогу", "Aquarius": "Водолею",
          "Pisces": "Рыбам"}
-YASAK_RU = re.compile(r"Hahnem|Photo\s*Rag|Prodigi|хлопк|музейн|ISO\s*9706|жикле|gicl|\d{3}\s*г/м|AstroLove(?!Art)", re.I)
+YASAK_RU = re.compile(r"Hahnem|Ханем|Photo\s*Rag|Prodigi|хлоп(?:к|ок)|cotton|музе|museum|ISO\s*9706|жикле|gicl|\d{3}\s*(?:г/м|g/m|gsm)|"
+                      r"\bOBA\b|bright\s*white|12[\s-]*colou?r|\d+\s*(?:years|лет)|AstroLove(?!Art)", re.I)   # inceleme 23 Eki: genisletildi
 B_RX = "(" + "|".join(BURC) + ")"
 
 
@@ -175,6 +176,8 @@ def kur(en, envanter=None):
     d = html.unescape(en or "").replace("\r\n", "\n").strip()
     par = [p.strip() for p in d.split("\n\n") if p.strip()]
     ctx = dict(sku_boy=len((envanter or {}).get("boy") or []) or None, boylar=(envanter or {}).get("boy"))
+    if not (envanter or {}).get("boy"):   # inceleme 23 Eki: envanter okunamazsa boy/uc kontrolleri atlanmaz, FAIL
+        return "", dict(pass_=False, hata=["envanter boy listesi yok (okunamadi)"], paragraf_en=0, paragraf_ru=0)
     ru, hata = [], []
     for i, p in enumerate(par, 1):
         if p in SABIT:
@@ -194,7 +197,7 @@ def kur(en, envanter=None):
     if envanter and ctx.get("renk") is not None and len(envanter.get("renk") or []) not in (0, ctx["renk"]):
         hata.append(f"EN {ctx['renk']} renk, envanter {len(envanter['renk'])}")
     out = "\n\n".join(ru)
-    if re.search("[—–]", out):
+    if re.search("[—–―‒−]", out):
         hata.append("RU'da uzun/orta tire")
     yasak = sorted({m.group(0) for m in YASAK_RU.finditer(out)})
     if yasak:   # inceleme 23 Eki O2: kagit/tedarikci/marka yasak ifadesi kosulsuz FAIL
