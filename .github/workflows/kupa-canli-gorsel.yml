@@ -19,9 +19,13 @@ jobs:
       - uses: actions/checkout@v4
         with:
           sparse-checkout: scripts/ops/kupa_canli_kiyas.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"   # kupa-siparis ile ayni (numpy 2.5.3 orada kurulu)
       - run: |
           set -euo pipefail
-          pip install -q numpy==2.5.3 pillow==12.3.0
+          python -m pip install -q numpy==2.5.3 pillow==12.3.0
+          python -c "import numpy, PIL"   # 1. kosu 39934341210: pip ile python3 farkli yorumlayiciydi (numpy yok)
           curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null
       - name: rclone.conf
         env:
@@ -53,7 +57,7 @@ jobs:
             i=$((i+1)); kod=$(curl -s -m 60 --retry 2 -o "_c/rank$i.jpg" -w '%{http_code}' "https://i.etsystatic.com/39729443/r/il/$u.jpg")
             echo "rank $i HTTP $kod"; [ "$kod" = 200 ] || rm -f "_c/rank$i.jpg"
           done
-          python3 -I scripts/ops/kupa_canli_kiyas.py _c _g _o 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
+          python -I scripts/ops/kupa_canli_kiyas.py _c _g _o 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
           rclone copy _o "gdrive:ASTROLOVE/TEMP/DENETIM_20261021/KUPA_CANLI" -q
           echo "::notice title=KUPA CANLI::$(ls _c | wc -l) canli gorsel; Drive TEMP/DENETIM_20261021/KUPA_CANLI"
       - if: always()
