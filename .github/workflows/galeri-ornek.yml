@@ -1,0 +1,64 @@
+name: galeri-ornek
+
+# 23 eski galerili poster ilani, sira 8 galeri isi (Serdar 23 Eki B): PLAN ve ORNEK. Etsy'ye yazma YOK, Etsy API YOK, sir yok,
+# Etsy kilidi YOK (kilit kumesinde degil). scripts/etsy/galeri_ornek.py: hedef galeri (21 Eki yaziminden once alinan 17 Eki yedegi)
+# ile canli galeri (kart-sil SONRA kaydi; gorseller CDN'den) yan yana liste + gercek oranda hedef galeri sayfasi + degisen gorseller %100.
+# Cikti Drive ASTROLOVE/TEMP/DENETIM_20261021/GALERI_PLAN23/<run_id>/.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      ilan: {description: "ilan (yalniz rakam)", required: true, default: "4570155846"}
+      cift: {description: "cift (orn. ARIES_VIRGO)", required: true, default: "ARIES_VIRGO"}
+      kart_kosu: {description: "kart-sil kosusu (SONRA_<ilan>.json)", required: true, default: "40000094207"}
+
+jobs:
+  ornek:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          [[ "${{ inputs.ilan }}" =~ ^[0-9]+$ && "${{ inputs.cift }}" =~ ^[A-Z]+_[A-Z]+$ && "${{ inputs.kart_kosu }}" =~ ^[0-9]+$ ]] || { echo "::error::girdi"; exit 1; }
+          pip install -q pillow numpy
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Girdiler (Drive)
+        env:
+          L: ${{ inputs.ilan }}
+          C: ${{ inputs.cift }}
+          K: ${{ inputs.kart_kosu }}
+        run: |
+          set -euo pipefail
+          mkdir -p _work/hedef _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/GALERI_YAYIN/KOSU_20261021_1030/$L/yedek/manifest.json" _work/manifest.json
+          rclone copy "gdrive:ASTROLOVE/TEMP/GALERI_YAYIN/YEDEK/${L}_${C}" _work/hedef --include "*.jpg" -q
+          rclone copyto "gdrive:ASTROLOVE/TEMP/DENETIM_20261021/KART_SIL/$K/SONRA_$L.json" _work/simdi.json
+          echo "hedef dosya: $(ls _work/hedef | wc -l)"
+      - name: Ornek
+        run: python3 scripts/etsy/galeri_ornek.py --hedef-manifest _work/manifest.json --hedef-dir _work/hedef --simdi _work/simdi.json --out _out
+      - name: Drive'a
+        if: always()
+        run: |
+          set -euo pipefail
+          rclone copy _out "gdrive:ASTROLOVE/TEMP/DENETIM_20261021/GALERI_PLAN23/${GITHUB_RUN_ID}" -q && echo "Cikti: TEMP/DENETIM_20261021/GALERI_PLAN23/${GITHUB_RUN_ID}/"
+      - if: always()
+        run: rm -rf _work ~/.config/rclone
