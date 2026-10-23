@@ -60,13 +60,23 @@ def main():
         f"/shops/1/listings/{KUPA}/translations/ru", {"title": "t", "description": KUPA_RU})) == "gitti"))
     s.append(("kupa: Art'siz AstroLove -> gonderilmez", dene(lambda: api.put(
         f"/shops/1/listings/{KUPA}/translations/ru", {"description": "дизайн AstroLove"})) == "durdu"))
+    s.append(("kucuk harf yontem (put) de kapida", dene(lambda: api._call("put", f"/shops/1/listings/{POSTER}/translations/ru",
+              data={"description": ESKI})) == "durdu"))
+    s.append(("govde metin/tuple listesi de taranir", dene(lambda: api._call("PUT", f"/shops/1/listings/{KUPA}/translations/ru",
+              data="description=Hahnem%C3%BChle")) == "durdu" and dene(lambda: api._call("PUT", f"/shops/1/listings/{KUPA}/translations/ru",
+              data=[("description", "AstroLove x")])) == "durdu"))
+    s.append(("data + json celisirse durur", dene(lambda: api._call("PUT", f"/shops/1/listings/{KUPA}/translations/ru",
+              data={"description": "a"}, json_body={"description": "b"})) == "durdu"))
     s.append(("GET ve EN PATCH kapidan etkilenmez", dene(lambda: api.get(f"/shops/1/listings/{POSTER}/translations/ru")) == "gitti"
               and dene(lambda: api.patch(f"/shops/1/listings/{POSTER}", {"description": "x"})) == "gitti"))
     s.append(("poster listesi 78 ilan", len(E.poster_idler()) == 78 and POSTER in E.poster_idler()))
     s.append(("yasak desen eski genislikte (Serdar 23 Eki 2b): omur yili ifadeleri yakalanir, 11 букв yakalanmaz",
               all(E.RU_YASAK.search(x) for x in ("100-200 years", "более 100 лет", "служит 100 лет", "lasts 200 years"))
               and not E.RU_YASAK.search("до 11 букв, до 35 символов, 7 рабочих дней")))
-    for yol in (f"/shops/1/listings/{POSTER}/translations/RU", f"/shops/1/listings/{POSTER}/translations/ru?x=1",
+    for yol in (f"/shops/1/listings/{POSTER}/translations/./ru", f"/shops/1/listings/{POSTER}/translations/ru/.",
+                f"/shops/1/listings/{POSTER}/translations/r%2575", f"/shops/1/listings/{POSTER}//translations/ru",
+                f"/shops/1/listings/{POSTER}/translations/ru;x", f"/shops/1/listings/0{POSTER}/translations/ru",
+                f"/shops/1/listings/{POSTER}/translations/RU", f"/shops/1/listings/{POSTER}/translations/ru?x=1",
                 f"/shops/1/listings/{POSTER}/translations/ru/", f"/shops/1/listings/{POSTER}/translations/Ru#a",
                 f"/shops/1/listings/{POSTER}/translations/ru-RU", f"/shops/1/listings/{POSTER}/translations/r%75"):
         s.append((f"kapi atlanamaz (Serdar 23 Eki 2c): {yol.split('translations')[1]}", dene(lambda y=yol: api.put(

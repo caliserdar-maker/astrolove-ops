@@ -13,6 +13,7 @@ Hicbir sir loga yazilmaz; okunan her token degeri ::add-mask:: ile
 maskelenir.
 """
 import hashlib
+import posixpath
 import urllib.parse
 import json
 import os
@@ -210,7 +211,7 @@ RU_YASAK = re.compile(r"Hahnem|Ханем|Photo\s*Rag|Prodigi|хлоп(?:к|ок
                       r"\d{3}\s*(?:г/м|g/m|gsm)|\bOBA\b|bright\s*white|12[\s-]*colou?r|\d+\s*(?:years|лет)|AstroLove(?!Art)", re.I)
 RU_POSTER_IZIN = {}   # listing_id -> sha256(aciklama); yalniz ru_poster.izin_ver() doldurur
 POSTER_IDS_YOL = Path(__file__).resolve().parents[2] / "data" / "pod" / "pod78_ids.csv"
-_RU_YOL = re.compile(r"/listings/(\d+)/translations/ru(?:[-_][a-z]{2})?/?$", re.I)   # Serdar 23 Eki 2c: harf/sorgu ile atlanamaz
+_RU_YOL = re.compile(r"/listings/0*(\d+)/translations/ru(?:[-_][a-z]{2})?$")   # kanonik (kucuk harf) yol uzerinde
 
 
 def ozet(s):
@@ -224,19 +225,50 @@ def poster_idler():
         raise SystemExit(f"DUR: RU yazim kapisi: poster listesi okunamadi ({e})")
 
 
+def _kanonik_yol(path):
+    """Serdar 23 Eki 2c (inceleme 2. tur): coklu yuzde kodlama, sorgu/parca/;param, //, ./ ve ../, buyuk harf ile kapi atlanamaz."""
+    p = str(path or "")
+    for _ in range(5):
+        q = urllib.parse.unquote(p)
+        if q == p:
+            break
+        p = q
+    p = re.split(r"[?#;]", p.replace("\\", "/"))[0]
+    return posixpath.normpath("/" + p).lower()
+
+
+def _govde(g):
+    """Istek govdesini sozluge cevirir; cevrilemezse None (RU yaziminda kapi kapali kalir)."""
+    if g is None:
+        return {}
+    if isinstance(g, dict):
+        return g
+    if isinstance(g, (bytes, str)):
+        g = g.decode("utf-8", "replace") if isinstance(g, bytes) else g
+        return {k: ",".join(v) for k, v in urllib.parse.parse_qs(g, keep_blank_values=True).items()}
+    try:
+        return dict(g)
+    except (TypeError, ValueError):
+        return None
+
+
 def ru_yazim_kapisi(method, path, data=None, json_body=None):
-    """RU ceviri yazimindan once (PUT/PATCH/POST .../translations/ru). Uygun degilse SystemExit; istek gonderilmez."""
-    m = _RU_YOL.search(urllib.parse.unquote((path or "").split("?")[0].split("#")[0]))
-    if method not in ("PUT", "PATCH", "POST") or not m:
+    """RU ceviri yazimindan once (GET/HEAD/OPTIONS disi her yontem, .../translations/ru). Uygun degilse SystemExit; istek gonderilmez."""
+    m = _RU_YOL.search(_kanonik_yol(path))
+    if str(method or "").upper() in ("GET", "HEAD", "OPTIONS") or not m:
         return
-    g = data if data is not None else (json_body or {})
-    g = g if isinstance(g, dict) else {}
-    metin = " ".join(str(g.get(k) or "") for k in ("title", "description", "tags"))
+    lid = str(int(m.group(1)))
+    g1, g2 = _govde(data), _govde(json_body)
+    if g1 is None or g2 is None:
+        raise SystemExit(f"DUR: RU yazim kapisi: ilan {lid} istek govdesi okunamadi; yazim yok")
+    g = {**g2, **g1}
+    if g1 and g2 and any(g1.get(k) != g2.get(k) for k in set(g1) & set(g2)):
+        raise SystemExit(f"DUR: RU yazim kapisi: ilan {lid} data ve json govdesi celisiyor; yazim yok")
+    metin = " ".join(str(v or "") for v in g.values())
     yasak = sorted({x.group(0) for x in RU_YASAK.finditer(metin)})
     if yasak:
-        raise SystemExit(f"DUR: RU yazim kapisi: ilan {m.group(1)} RU metninde yasak ifade {yasak}; yazim yok")
-    lid = m.group(1)
-    if lid in poster_idler() and RU_POSTER_IZIN.get(lid) != ozet(g.get("description")):
+        raise SystemExit(f"DUR: RU yazim kapisi: ilan {lid} RU metninde yasak ifade {yasak}; yazim yok")
+    if lid in {str(int(x)) for x in poster_idler()} and RU_POSTER_IZIN.get(lid) != ozet(g.get("description")):
         raise SystemExit(f"DUR: RU yazim kapisi: poster ilan {lid} RU aciklamasi ru_poster sablon kurucusundan gelmiyor; yazim yok")
 
 
