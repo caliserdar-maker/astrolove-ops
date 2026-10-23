@@ -1,0 +1,77 @@
+name: kagit-tara
+
+# Kagit / tedarikci ifadesi taramasi (Serdar 23 Eki; SALT OKUMA, Etsy'ye YAZMA YOK) - scripts/etsy/kagit_tara.py.
+# Magaza metin alanlari + 234 aktif ilan (baslik/etiket/materials/EN aciklama, gorsel alt metni, gorsel OCR, eski
+# "Fine Art Paper" kartina benzerlik). Cikti Drive ASTROLOVE/TEMP/DENETIM_20261021/KAGIT_TARAMA/<run_id>/.
+
+permissions:
+  actions: read
+  contents: read
+
+on:
+  workflow_dispatch:
+
+env:
+  D: "gdrive:ASTROLOVE/TEMP/DENETIM_20261021/KAGIT_TARAMA"
+
+jobs:
+  is:
+    runs-on: ubuntu-latest
+    timeout-minutes: 140
+    steps:
+      - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: |
+          set -euo pipefail
+          python -m pip install -q requests==2.34.2 numpy==2.5.3 pillow==12.3.0
+          sudo apt-get update -qq && sudo apt-get install -y -qq tesseract-ocr >/dev/null && tesseract --version | head -1
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Token
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+      - name: Tarama
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set +e -o pipefail
+          mkdir -p _work/ref _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_KISISEL/AQUARIUS_AQUARIUS_v1/images/06_fine_art_paper.jpg" _work/ref/kart_06_fine_art_paper.jpg
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_KISISEL/AQUARIUS_AQUARIUS_v1/REVIEW/P06_06_fine_art_paper_yan_yana.jpg" _work/ref/kart_P06_yan_yana.jpg
+          ls -la _work/ref
+          python3 scripts/etsy/kagit_tara.py --out _out --ref _work/ref/*.jpg 2>&1 | tee _work/kosu.log
+          echo "KOD=${PIPESTATUS[0]}" >> "$GITHUB_ENV"
+      - name: Token geri yaz + cikti Drive'a
+        if: always()
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || echo "Token yenilenmedi"
+          [ -f _work/kosu.log ] && python3 scripts/guvenlik/log_suz.py < _work/kosu.log > "_out/kosu_$(date -u +%Y%m%d_%H%M).txt"
+          if grep -rqE '"(access_token|refresh_token)"[[:space:]]*:[[:space:]]*"[A-Za-z0-9._-]{20,}"|x-api-key[[:space:]]*:' _out/ 2>/dev/null; then
+            echo "::error::Ciktida sir bulundu; Drive'a yazilmadi"; exit 1; fi
+          rclone copy _out "$D/${GITHUB_RUN_ID}" -q && echo "::notice title=KAGIT TARAMA::Drive TEMP/DENETIM_20261021/KAGIT_TARAMA/${GITHUB_RUN_ID}/"
+          [ "${KOD:-1}" = 0 ] || { echo "::error::cikis ${KOD:-?}"; exit 1; }
+      - if: always()
+        run: rm -rf _work ~/.config/rclone

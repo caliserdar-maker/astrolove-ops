@@ -46,11 +46,12 @@ bolumu okunmadan baslanmaz.
 - "Koordinator onayi" / pano "CLAUDE ONAYI" bu eylemler icin GECERSIZDIR. Yalniz Serdar onaylar.
 - Musteri mesajlari yalniz TASLAK olarak Drive'a yazilir; gonderimi Serdar yapar ya da ayri acik onay verir.
 
-## Urun metni (25 Eyl 2026 karari; 24 Eyl B-5'i gunceller)
+## Urun metni (25 Eyl 2026 karari; 24 Eyl B-5'i gunceller; KAGIT: Serdar 23 Eki)
 
-- Birincil kaynak: Hahnemuhle Photo Rag datasheet + urun sayfasi, Prodigi HPR urun foyu.
-- Izinli: acid-free, 100% cotton, pigment-based archival inks, natural white,
-  matte, "Hahnemühle rates Photo Rag as museum quality (ISO 9706)".
+- KAGIT (Serdar 23 Eki): baski Hahnemuhle DEGIL. Kagit turu 13 Eki'de kriter olmaktan cikti; canli EN ve materials
+  "matte art paper". Hahnemuhle / Photo Rag / 308 g/m2 / giclee / Prodigi / %100 cotton / museum (ISO 9706) ifadeleri
+  HICBIR dilde yazilmaz; RU ve diger ceviriler EN ile birebir ayni bilgiyi verir. (25 Eyl Hahnemuhle izni KALDIRILDI.)
+- Izinli: yalniz canli EN aciklamadaki ifadeler (23 Eki: "premium matte art paper", "long-lasting inks").
 - Yasak: OBA-free, bright white, omur yili (orn. 100-200 years), "12-colour".
   Ingilizce metinde uzun/orta tire yok.
 - Tek kaynak ve PASS/FAIL denetim: `scripts/medya_v1/uretim/metin_kurali.py`
