@@ -66,6 +66,8 @@ def main():
               and {"Hahnem", "Photo Rag", "Prodigi", "AstroLove"} <= set(satir["2"]["ru_yasak"].split("; "))
               and "ru_yasak" in satir["2"]["sorunlar"].split()))
     k = R.analiz_bir(dict(ham[0], aile="kupa", ru=RU_IYI, ru_title="Кружка 11 oz, 100% cotton"))
+    k2 = R.analiz_bir(dict(ham[0], aile="kupa", en=EN + " Printed on Hahnemühle paper.", ru=RU_IYI, title="Mug"))
+    s.append(("en_yasak: EN aciklama da taranir", k2["en_yasak"] == "Hahnem" and "en_yasak" in k2["sorunlar"].split()))
     s.append(("ru_yasak: RU baslik da taranir (kupa)", k["ru_yasak"] == "cotton" and "ru_yasak" in k["sorunlar"].split()))
     s.append(("ozet: poster 2 ilan, 1 sorunlu", oz["poster"]["ilan"] == 2 and oz["poster"]["sorunlu"] == 1))
     api = Sahte(kapi_dur=2)

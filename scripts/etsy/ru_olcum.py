@@ -192,6 +192,10 @@ def analiz_bir(r):
     o["ru_yasak"] = "; ".join(sorted({m.group(0) for m in E.RU_YASAK.finditer(ru_hepsi)}))
     if o["ru_yasak"]:
         s.append("ru_yasak")
+    en_hepsi = " ".join([en, B.norm(r.get("title"))])   # Serdar 23 Eki A2: ayni desen EN baslik + aciklamada (bilgi; sorun sayilir)
+    o["en_yasak"] = "; ".join(sorted({m.group(0) for m in E.RU_YASAK.finditer(en_hepsi)}))
+    if o["en_yasak"]:
+        s.append("en_yasak")
     o["sorunlar"] = " ".join(s)
     return o
 
