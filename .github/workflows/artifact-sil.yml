@@ -1,0 +1,53 @@
+name: artifact-sil
+
+# TEK KULLANIMLIK (Serdar 23 Eki madde 5): acik depodaki suresi dolmamis ciktilar (magaza-ayar-denetim, saglik-raporu,
+# seo-attribute-followup) silinir. Liste "id:ad:kosu" virgulle; her biri once ad ve kosu ile karsilastirilir, tutmazsa
+# hicbiri silinmez. Silme sonrasi API'den yeniden okunur (404 = gitti). Etsy / Drive yok. Is bitince main'den kaldirilir.
+
+permissions:
+  actions: write
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      liste: {description: "id:ad:kosu,id:ad:kosu (yalniz izinli adlar)", required: true}
+
+jobs:
+  sil:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Kontrol + sil + dogrula
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LISTE: ${{ inputs.liste }}
+          R: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          H=(-H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json")
+          IFS=',' read -ra L <<< "$LISTE"
+          for x in "${L[@]}"; do   # once hepsi kontrol: biri tutmazsa hicbiri silinmez
+            IFS=':' read -r ID AD KOSU <<< "$x"
+            [[ "$ID" =~ ^[0-9]+$ && "$KOSU" =~ ^[0-9]+$ ]] || { echo "::error::kimlik $x"; exit 1; }
+            [[ "$AD" =~ ^(magaza-ayar-denetim|saglik-raporu|seo-attribute-followup)$ ]] || { echo "::error::izinsiz ad $AD"; exit 1; }
+            curl -fsS "${H[@]}" "https://api.github.com/repos/$R/actions/artifacts/$ID" > a.json
+            python3 - "$AD" "$KOSU" <<'PY'
+          import json, sys
+          a = json.load(open("a.json"))
+          ok = a["name"] == sys.argv[1] and str(a["workflow_run"]["id"]) == sys.argv[2]
+          print(f"artifact {a['id']} {a['name']} kosu {a['workflow_run']['id']} {a['size_in_bytes']} bayt expired {a['expired']} {'OK' if ok else 'TUTMADI'}")
+          sys.exit(0 if ok else 1)
+          PY
+          done
+          n=0
+          for x in "${L[@]}"; do
+            IFS=':' read -r ID AD KOSU <<< "$x"
+            A="https://api.github.com/repos/$R/actions/artifacts/$ID"
+            kod=$(curl -sS -o /dev/null -w '%{http_code}' -X DELETE "${H[@]}" "$A")
+            kod2=$(curl -sS -o /dev/null -w '%{http_code}' "${H[@]}" "$A")
+            echo "$ID $AD kosu $KOSU: DELETE $kod, yeniden okuma $kod2"
+            [ "$kod" = 204 ] && [ "$kod2" = 404 ] || { echo "::error::$ID silinemedi ($kod/$kod2)"; exit 1; }
+            n=$((n+1))
+          done
+          echo "::notice title=ARTIFACT SILINDI::$n artifact, hepsi yeniden okumada 404"
