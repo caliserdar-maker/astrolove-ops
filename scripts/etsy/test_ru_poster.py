@@ -47,6 +47,12 @@ def main():
     import re as _re
     s.append(("yasak ifade denetimi", bool(P.YASAK_RU.search("бумага хлопковая")) and bool(P.YASAK_RU.search("AstroLove дизайн"))
               and not P.YASAK_RU.search(ru)))
+    s.append(("artikelsiz kuyruk PASS (Cancer gifts or a Leo gift)", P.kur(EN.replace("an Aries gift or Leo gifts", "Aries gifts or a Leo gift"), ENV)[1]["pass_"]))
+    import json, pathlib
+    kf = pathlib.Path(__file__).with_name("test_ru_poster_kuyruk.json")
+    if kf.exists():   # 23 Eki kapsam kosusu 39961330252'de kalip disi kalan 46 gercek kuyruk
+        kk = json.loads(kf.read_text())
+        s.append((f"gercek {len(kk)} kuyruk kalipli", all(P.KUYRUK.fullmatch(x) for x in kk)))
     for ad, ok in s:
         print("PASS" if ok else "FAIL", ad)
     n = sum(ok for _, ok in s)

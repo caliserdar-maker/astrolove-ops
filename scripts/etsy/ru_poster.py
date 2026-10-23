@@ -32,7 +32,7 @@ def boy_ru(s):
     return s.replace(" x ", " × ")
 
 
-KUYRUK = re.compile(r"an? " + B_RX + r" gifts?(?: or (?:an? )?" + B_RX + r" gifts?)?")
+KUYRUK = re.compile(r"(?:an? )?" + B_RX + r" gifts?(?: or (?:an? )?" + B_RX + r" gifts?)?")   # EN: "an Aries gift", "Cancer gifts or a Leo gift"
 
 
 def p_giris(m, ctx):
