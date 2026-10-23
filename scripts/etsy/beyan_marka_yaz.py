@@ -527,7 +527,8 @@ def _yaz_dogrula(api, shop, lid, out, L, ru, soru0, en_yeni, ru_yeni, R, k0, sat
                       tire=len(TIRE.findall(d1)), uretim_ortagi=k1["uretim_ortagi"])
     R["hata"], R["sonuc"] = hata, ("FAIL" if hata else "PASS")
     R["istek"], R["kota"] = api.calls, api.remaining
-    (out / f"SONRA_{lid}.json").write_text(json.dumps(dict(ilan=y, ru=yru, kisisel_sorular=soru1), ensure_ascii=False, indent=1),
+    (out / f"SONRA_{lid}.json").write_text(json.dumps(dict(ilan=y, ru=yru, kisisel_sorular=soru1, envanter=inv1), ensure_ascii=False,
+                                                      indent=1),
                                            encoding="utf-8")
     (out / f"SONUC_{lid}.json").write_text(json.dumps(R, ensure_ascii=False, indent=1), encoding="utf-8")
     print("SONUC", json.dumps(R, ensure_ascii=False), flush=True)
