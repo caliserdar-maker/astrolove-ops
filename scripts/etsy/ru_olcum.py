@@ -166,6 +166,12 @@ def analiz(ham, out):
                 a["ornek"].append({k: o[k] for k in ("listing_id", "url", "sorunlar", "sku_boy_sayi", "ru_boy_beyan", "ru_boy_fazla",
                                                        "ru_kagit", "ru_tedarikci", "ru_sayi_en_yok")})
     (out / "RU_OZET.json").write_text(json.dumps(oz, ensure_ascii=False, indent=1), encoding="utf-8")
+    for aile in sorted({r["aile"] for r in ham}):   # elle kontrol icin aile basina 2 ornek metin (ilan metni, musteri verisi yok)
+        ornek = [r for r in ham if r["aile"] == aile][:2]
+        (out / f"ORNEK_{aile}.txt").write_text("\n\n".join(
+            f"===== {r['listing_id']} | {r.get('title')}\nENVANTER {json.dumps(r['envanter'], ensure_ascii=False)}\nORTAK {r.get('ortak')}\n"
+            f"----- RU BASLIK: {r.get('ru_title')}\n----- RU\n{B.norm(r.get('ru'))}\n----- EN\n{B.norm(r.get('en'))}" for r in ornek) + "\n",
+            encoding="utf-8")
     md = ["# RU olcum ozeti (salt okuma)", ""]
     for a, v in oz.items():
         md.append(f"- {a}: {v['ilan']} ilan, RU var {v['ru_var']}, sorunlu {v['sorunlu']}; " +
