@@ -12,6 +12,9 @@ permissions:
 
 on:
   workflow_dispatch:
+    inputs:
+      desen: {description: "kagit (varsayilan) | cerceve (Serdar 23 Eki madde 3: framed print / frame finishes)", required: false, default: "kagit"}
+      kapsam: {description: "tum (varsayilan) | poster (yalniz 78 poster ilani)", required: false, default: "tum"}
 
 env:
   D: "gdrive:ASTROLOVE/TEMP/DENETIM_20261021/KAGIT_TARAMA"
@@ -59,7 +62,8 @@ jobs:
         run: |
           set +e -o pipefail
           mkdir -p _out
-          python3 scripts/etsy/kagit_tara.py --mod oku --out _out 2>&1 | tee _work/kosu.log
+          [[ "${{ inputs.desen || 'kagit' }}" =~ ^(kagit|cerceve)$ && "${{ inputs.kapsam || 'tum' }}" =~ ^(tum|poster)$ ]] || { echo "::error::desen/kapsam"; exit 1; }
+          python3 scripts/etsy/kagit_tara.py --mod oku --out _out --desen "${{ inputs.desen || 'kagit' }}" --kapsam "${{ inputs.kapsam || 'tum' }}" 2>&1 | tee _work/kosu.log
           echo "KOD=${PIPESTATUS[0]}" >> "$GITHUB_ENV"
           ls -la _out
       - name: Token geri yaz + cikti Drive'a

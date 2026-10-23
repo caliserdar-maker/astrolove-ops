@@ -13,6 +13,7 @@ on:
   workflow_dispatch:
     inputs:
       kaynak_kosu: {description: "kagit-tara (oku) kosu kimligi", required: true}
+      desen: {description: "kagit (varsayilan) | cerceve (Serdar 23 Eki madde 3)", required: false, default: "kagit"}
 
 env:
   D: "gdrive:ASTROLOVE/TEMP/DENETIM_20261021/KAGIT_TARAMA"
@@ -65,7 +66,8 @@ jobs:
           HEDEF="$D/$K/OCR_${GITHUB_RUN_ID}"
           ( while true; do sleep 120; rclone copy _out "$HEDEF" -q || true; done ) &
           ES=$!
-          python3 scripts/etsy/kagit_tara.py --mod ocr --kaynak _work/kaynak --out _out --ref _work/ref/*.jpg --sure-dk 78 2>&1 | tee _out/kosu_ocr.log
+          DS="${{ inputs.desen || 'kagit' }}"; [[ "$DS" =~ ^(kagit|cerceve)$ ]] || { echo "::error::desen"; exit 1; }
+          python3 scripts/etsy/kagit_tara.py --mod ocr --desen "$DS" --kaynak _work/kaynak --out _out --ref _work/ref/*.jpg --sure-dk 78 2>&1 | tee _out/kosu_ocr.log
           echo "KOD=${PIPESTATUS[0]}" >> "$GITHUB_ENV"
           kill $ES 2>/dev/null || true
       - name: Cikti Drive'a

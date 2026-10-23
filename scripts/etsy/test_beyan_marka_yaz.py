@@ -184,6 +184,26 @@ def poster_yeni_yol():
     api = iki(); ok, Z = toplu(api, "poster", ["4570110121", "4570110641"], limit=3, ru_yeniden=True,
                                onay_ozetler={"4570110121": ozet_ok, "4570110641": ozet_ok})
     s.append(("parti: iki ilan PASS, ilan basina PATCH + PUT", ok is True and Z["ozet"]["pass_"] == 2 and len(api.yaz) == 4))
+    s.append(("parti: kayitta ilan basina ozet eslesmesi (74 ilan partisi)", Z["ozet"]["ozet_eslesen"] == 2
+              and all(x["ozet_eslesme"] is True and x["yarim"] is False for x in Z["ilanlar"]) and Z["ozet"]["yarim"] == []))
+    api = iki(); api.ru_bozuk = True
+    ok, Z = toplu(api, "poster", ["4570110121", "4570110641"], limit=3, ru_yeniden=True,
+                  onay_ozetler={"4570110121": ozet_ok, "4570110641": ozet_ok})
+    s.append(("parti: RU PUT hatasi -> YARIM kaydi, kosu durur, 2. ilana yazma yok", ok is False and Z["ozet"]["yarim"] == ["4570110121"]
+              and Z["ilanlar"][0]["yarim"] is True and {l for _, l, _ in api.yaz} == {"4570110121"} and Z["ozet"]["islenen"] == 1))
+    api = iki()
+    def put_ag(path, data, A=api):
+        A.yaz.append(("put", A.lid(path), data)); raise ConnectionError("ag koptu")   # SystemExit disi hata
+    api.put = put_ag
+    ok, Z = toplu(api, "poster", ["4570110121", "4570110641"], limit=3, ru_yeniden=True,
+                  onay_ozetler={"4570110121": ozet_ok, "4570110641": ozet_ok})
+    s.append(("parti: RU PUT ag hatasi -> YARIM, kosu durur, 2. ilana yazma yok", ok is False and Z["ozet"]["yarim"] == ["4570110121"]
+              and {l for _, l, _ in api.yaz} == {"4570110121"}))
+    api = iki(); api.bozan = lambda A, lid: setattr(A, "get_hata", True)   # PATCH sonrasi her GET coker (RU PUT yine gider)
+    ok, Z = toplu(api, "poster", ["4570110121", "4570110641"], limit=3, ru_yeniden=True,
+                  onay_ozetler={"4570110121": ozet_ok, "4570110641": ozet_ok})
+    s.append(("parti: yazim sonrasi geri okuma coker -> FAIL, kosu durur, 2. ilana yazma yok", ok is False
+              and Z["ilanlar"][0]["sonuc"] == "FAIL" and {l for _, l, _ in api.yaz} == {"4570110121"}))
     api = iki(); ok, Z = toplu(api, "poster", ["4570110121"], limit=1, ru_yeniden=True, onay_ozetler={"4570110121": ozet_ok})
     s.append(("parti: limit uygulanir", Z["ozet"]["islenen"] == 1))
     A = yeni(); A.ru["4570110121"]["title"] = "постер Hahnemühle"

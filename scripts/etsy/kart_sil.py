@@ -8,11 +8,15 @@ Kapilar (yazimdan once): ilan active; gorsel bu ilanda ve beklenen sirada; renk-
 Silme: DELETE /shops/{shop}/listings/{ilan}/images/{gorsel} (deleteListingImage).
 Geri okuma (PASS/FAIL): gorsel sayisi bir eksik; silinen kimlik yok; kalan kimlikler ayni goreli sirada; her birinin alt metni
 ayni; variation-images ayni; state ayni.
-Cikti: <out>/YEDEK_<ilan>.json (gorsel listesi + variation-images, silmeden once), PLAN_<ilan>.json, SONUC_<ilan>.json."""
+Cikti: <out>/YEDEK_<ilan>.json (gorsel listesi + variation-images, silmeden once), PLAN_<ilan>.json, SONUC_<ilan>.json,
+SONRA_<ilan>.json (silme sonrasi tam gorsel listesi: sira, alt metin + renk baglari).
+Coklu (Serdar 23 Eki, kalan 22 ilan): --liste "ilan:gorsel:rank,..."; ilan basina kota kapisi, ilk DUR / FAIL'de kosu durur
+(sonraki ilanlara dokunulmaz), TOPLU_OZET.json. Ek kapi: silinecek gorselin alt metninde kagit ifadesi (KAGIT) olmali."""
 import argparse
 import json
 import os
 import pathlib
+import re
 import sys
 import time
 
@@ -20,6 +24,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from etsy_common import Etsy, TokenStore  # noqa: E402
 
 ONAY = "SERDAR_KART_SIL"
+KAGIT = re.compile(r"cotton|gicl[eé]e|photo\s*rag|hahnem|\b308\b|fine\s*art\s*paper", re.I)   # eski kart alt metni (23 ilan, 23 Eki)
 ALAN = ("listing_image_id", "rank", "alt_text", "url_fullxfull", "url_570xN", "full_width", "full_height")
 
 
@@ -42,6 +47,8 @@ def kapilar(L, once, baglar, gid, rank):
         h.append(f"gorsel {gid} bu ilanda yok")
     elif int(hedef[0]["rank"] or 0) != int(rank):
         h.append(f"gorsel {gid} sira {hedef[0]['rank']} (beklenen {rank})")
+    elif not KAGIT.search(hedef[0].get("alt_text") or ""):
+        h.append(f"gorsel {gid} alt metninde kagit ifadesi yok (eski kart degil olabilir)")
     if any(str(b[2]) == str(gid) for b in baglar):
         h.append(f"gorsel {gid} renk-gorsel baginda; silinmez")
     return h
@@ -67,40 +74,21 @@ def dogrula(once, sonra, baglar0, baglar1, L0, L1, gid):
     return h
 
 
-def main():
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--ilan", required=True)
-    ap.add_argument("--gorsel", required=True)
-    ap.add_argument("--rank", type=int, required=True)
-    ap.add_argument("--onay", default="")
-    ap.add_argument("--kuru", action="store_true")
-    ap.add_argument("--out", required=True)
-    a = ap.parse_args()
-    if not (a.ilan.isdigit() and a.gorsel.isdigit()):
-        raise SystemExit("DUR: --ilan ve --gorsel yalniz rakam")
-    if not a.kuru and a.onay != ONAY:
-        raise SystemExit(f"DUR: silme icin --onay {ONAY}")
-    out = pathlib.Path(a.out); out.mkdir(parents=True, exist_ok=True)
-    k, s = os.environ.get("ETSY_API_KEY", ""), os.environ.get("ETSY_SHARED_SECRET", "")
-    store = TokenStore(os.environ["TOKEN_FILE"], k, s)
-    if store.needs_refresh():
-        store.refresh()
-    api = Etsy(store)
-    shop, lid, gid = os.environ["ETSY_SHOP_ID"], a.ilan, a.gorsel
+def isle(api, shop, lid, gid, rank, kuru, out):
+    """Tek ilan: yedek -> kapilar -> (sil) -> geri okuma. Donus: sonuc sozlugu (sonuc PLAN / PASS / FAIL / DUR)."""
     L0 = api.get(f"/listings/{lid}") or {}
     once, baglar0 = gorseller(api, lid), renk_baglari(api, shop, lid)
     (out / f"YEDEK_{lid}.json").write_text(json.dumps(dict(ilan_state=L0.get("state"), gorseller=once, renk_baglari=baglar0),
                                                       ensure_ascii=False, indent=1), encoding="utf-8")
-    h = kapilar(L0, once, baglar0, gid, a.rank)
-    plan = dict(ilan=lid, gorsel=gid, rank=a.rank, gorsel_sayisi=len(once), kapi_hata=h, kuru=a.kuru)
+    h = kapilar(L0, once, baglar0, gid, rank)
+    plan = dict(ilan=lid, gorsel=gid, rank=rank, gorsel_sayisi=len(once), kapi_hata=h, kuru=kuru,
+                alt_metin=next((x.get("alt_text") for x in once if str(x["listing_image_id"]) == str(gid)), None))
     (out / f"PLAN_{lid}.json").write_text(json.dumps(plan, ensure_ascii=False, indent=1), encoding="utf-8")
     print("PLAN", json.dumps(plan, ensure_ascii=False), flush=True)
     if h:
-        raise SystemExit(f"DUR: {lid}: {'; '.join(h)}; silme yok")
-    if a.kuru:
-        print(f"KURU: silme yok | istek {api.calls} | kota {api.remaining}", flush=True)
-        return
-    api.kota_kapisi(f"ilan {lid}")
+        return dict(ilan=lid, sonuc="DUR", hata=h)
+    if kuru:
+        return dict(ilan=lid, sonuc="PLAN", hata=[])
     api.delete(f"/shops/{shop}/listings/{lid}/images/{gid}")
     for _ in range(3):
         sonra = gorseller(api, lid)
@@ -109,12 +97,67 @@ def main():
         time.sleep(5)
     L1, baglar1 = api.get(f"/listings/{lid}") or {}, renk_baglari(api, shop, lid)
     h = dogrula(once, sonra, baglar0, baglar1, L0, L1, gid)
+    (out / f"SONRA_{lid}.json").write_text(json.dumps(dict(ilan_state=L1.get("state"), gorseller=sonra, renk_baglari=baglar1),
+                                                      ensure_ascii=False, indent=1), encoding="utf-8")
     R = dict(ilan=lid, silinen=gid, once=len(once), sonra=len(sonra), hata=h, sonuc="FAIL" if h else "PASS",
              kalan_sira=[x["listing_image_id"] for x in sonra], istek=api.calls, kota=api.remaining)
     (out / f"SONUC_{lid}.json").write_text(json.dumps(R, ensure_ascii=False, indent=1), encoding="utf-8")
     print("SONUC", json.dumps(R, ensure_ascii=False), flush=True)
+    return R
+
+
+def liste_oku(a):
+    if a.liste:
+        x = [tuple(p.split(":")) for p in a.liste.split(",") if p.strip()]
+    else:
+        x = [(a.ilan, a.gorsel, str(a.rank))]
+    if not x or any(len(p) != 3 or not all(q.isdigit() for q in p) for p in x):
+        raise SystemExit("DUR: --liste ilan:gorsel:rank (yalniz rakam) ya da --ilan --gorsel --rank")
+    if len({p[0] for p in x}) != len(x):
+        raise SystemExit("DUR: ayni ilan listede iki kez")
+    return [(p[0], p[1], int(p[2])) for p in x]
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--ilan")
+    ap.add_argument("--gorsel")
+    ap.add_argument("--rank", type=int)
+    ap.add_argument("--liste", default="", help="coklu: ilan:gorsel:rank,...")
+    ap.add_argument("--onay", default="")
+    ap.add_argument("--kuru", action="store_true")
+    ap.add_argument("--out", required=True)
+    a = ap.parse_args()
+    isler = liste_oku(a)
+    if not a.kuru and a.onay != ONAY:
+        raise SystemExit(f"DUR: silme icin --onay {ONAY}")
+    out = pathlib.Path(a.out); out.mkdir(parents=True, exist_ok=True)
+    k, s = os.environ.get("ETSY_API_KEY", ""), os.environ.get("ETSY_SHARED_SECRET", "")
+    store = TokenStore(os.environ["TOKEN_FILE"], k, s)
+    if store.needs_refresh():
+        store.refresh()
+    api = Etsy(store)
+    shop = os.environ["ETSY_SHOP_ID"]
+    sonuc, t0 = [], time.time()
+    for n, (lid, gid, rank) in enumerate(isler, 1):
+        try:
+            api.kota_kapisi(f"ilan {lid}")
+            R = isle(api, shop, lid, gid, rank, a.kuru, out)
+        except (Exception, SystemExit) as e:   # noqa: BLE001  silmeden once ya da sonra; SONUC yoksa YEDEK/PLAN'a bakilir
+            R = dict(ilan=lid, sonuc="DUR", hata=[str(e)[:300]])
+        sonuc.append({q: R.get(q) for q in ("ilan", "sonuc", "hata", "once", "sonra")})
+        el = time.time() - t0
+        print(f"[{n}/{len(isler)}] {lid} {R['sonuc']} | gecen {el:.0f}s kalan~{el / n * (len(isler) - n):.0f}s | kota {api.remaining}",
+              flush=True)
+        if R["sonuc"] in ("DUR", "FAIL"):
+            break
+    oz = dict(istenen=len(isler), islenen=len(sonuc), pass_=sum(x["sonuc"] == "PASS" for x in sonuc),
+              plan=sum(x["sonuc"] == "PLAN" for x in sonuc), dur_fail=[x for x in sonuc if x["sonuc"] in ("DUR", "FAIL")],
+              kuru=a.kuru, istek=api.calls, kota=api.remaining)
+    (out / "TOPLU_OZET.json").write_text(json.dumps(dict(ozet=oz, ilanlar=sonuc), ensure_ascii=False, indent=1), encoding="utf-8")
+    print("TOPLU_OZET", json.dumps(oz, ensure_ascii=False), flush=True)
     store.write()
-    sys.exit(0 if not h else 2)
+    sys.exit(0 if not oz["dur_fail"] else 2)
 
 
 if __name__ == "__main__":

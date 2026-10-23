@@ -392,13 +392,14 @@ def poster_plan(lid, L, ru, inv, out, onay_ozet=None):
     env = ru_olcum.envanter_ozet(inv)
     ru1, k = ru_poster.kur(en1, env)
     olc = ru_olcum.analiz_bir(dict(listing_id=lid, aile="poster", en=en1, ru=ru1, envanter=env, ortak=ortak(L)))
-    k.update(sorunlar=olc["sorunlar"])
+    oz = ru_poster.onay_ozet(en1, ru1)   # Serdar 23 Eki 2a: kuru planda onaylanan metinle birebir degilse yazim yok
+    # Serdar 23 Eki (74 ilan partisi): gercek kosunun kaydina ilan basina ozet eslesmesi
+    k.update(sorunlar=olc["sorunlar"], onay_ozet=oz, onay_ozet_kuru=onay_ozet, ozet_eslesme=bool(onay_ozet) and onay_ozet == oz)
     (out / f"YENI_EN_{lid}.txt").write_text(en1 + "\n", encoding="utf-8")
     (out / f"YENI_RU_{lid}.txt").write_text(ru1 + "\n", encoding="utf-8")
     (out / f"KONTROL_{lid}.json").write_text(json.dumps(k, ensure_ascii=False, indent=1), encoding="utf-8")
     if not k["pass_"] or olc["sorunlar"]:
         raise Dur(f"{lid}: yeni RU kontrolu FAIL: hata {k['hata']} | olcum [{olc['sorunlar']}]; yazim yok")
-    oz = ru_poster.onay_ozet(en1, ru1)   # Serdar 23 Eki 2a: kuru planda onaylanan metinle birebir degilse yazim yok
     if not onay_ozet or onay_ozet != oz:
         raise Dur(f"{lid}: yazim anindaki EN+RU metni onayli kuru planla ayni degil (onayli {str(onay_ozet)[:12]}, simdi {oz[:12]});"
                   " yazim yok")
@@ -420,12 +421,13 @@ def poster_plan(lid, L, ru, inv, out, onay_ozet=None):
 def _yaz_dogrula(api, shop, lid, out, L, ru, soru0, en_yeni, ru_yeni, R, k0, sat0, imza0, olc_fn=None):
     if en_yeni:
         api.patch(f"/shops/{shop}/listings/{lid}", {"description": en_yeni}); R["yazildi"].append("EN description (PATCH)")
+        (out / f"EN_YAZILDI_{lid}").write_text("1")   # Serdar 23 Eki: sonraki adim cokerse toplu YARIM olarak raporlar
     if ru_yeni:
         try:
             api.put(f"/shops/{shop}/listings/{lid}/translations/ru",
                     {"title": norm(ru.get("title")), "description": ru_yeni, "tags": ",".join(ru.get("tags") or [])})
             R["yazildi"].append("RU description (PUT translations/ru)")
-        except SystemExit as e:   # etsy_common hatayi SystemExit("HATA: ...") ile bildirir; EN yazildi, RU yazilamadi
+        except (SystemExit, Exception) as e:   # etsy_common SystemExit("HATA: ...") ya da ag hatasi; EN yazildi, RU yazilamadi
             R["ru_hata"] = str(e)[:300]
     bek_en = en_yeni if en_yeni else norm(L.get("description"))
     bek_ru = ru_yeni if ru_yeni and not R.get("ru_hata") else norm(ru.get("description"))
@@ -469,6 +471,14 @@ def _yaz_dogrula(api, shop, lid, out, L, ru, soru0, en_yeni, ru_yeni, R, k0, sat
     return R
 
 
+def _ozet_eslesme(out, lid):
+    """gercek kosunun KONTROL_<ilan>.json kaydindaki 2a ozet eslesmesi (poster yolu); kayit yoksa None."""
+    try:
+        return json.loads((out / f"KONTROL_{lid}.json").read_text(encoding="utf-8")).get("ozet_eslesme")
+    except (OSError, ValueError):
+        return None
+
+
 def toplu(api, shop, a, out):
     """Aile aile toplu yazim (Serdar 23 Eki 4): aktif ilanlar (bolumden aile), --ilan verilirse yalniz onlar; beyani zaten tam
     olanlar ATLA (istek: yalniz plan okumasi). Her ilanda kapi 1b; ilk FAIL ya da Dur'da tum kosu DUR. --limit yazilan ilan sayisi."""
@@ -510,15 +520,22 @@ def toplu(api, shop, a, out):
                 api.kota_kapisi(f"ilan {lid}")
             R = (yaz(api, shop, lid, out, bolum, ru_yeniden=True, onay_ozet=ozetler.get(lid)) if poster_yeni
                  else yaz(api, shop, lid, out, bolum))
-        except (Dur, Exception, SystemExit) as e:   # yazimdan ONCE durdu (state, kota, okuma hatasi): yazma yok
-            dur = str(e)[:300]; sonuc.append(dict(ilan=lid, sonuc="DUR", hata=[dur], yazildi=[]))
-            print(f"[{n}] {lid} DUR: {dur}", flush=True); break
-        sonuc.append({k: R.get(k) for k in ("ilan", "sonuc", "hata", "yazildi")})
-        print(f"[{n}/{min(len(aday), a.limit)}] {lid} {R['sonuc']} | kota {api.remaining}", flush=True)
+        except (Dur, Exception, SystemExit) as e:   # durdu; EN_YAZILDI isareti varsa EN yazildi (YARIM), yoksa yazma yok
+            dur = str(e)[:300]
+            yarim = (out / f"EN_YAZILDI_{lid}").exists()
+            sonuc.append(dict(ilan=lid, sonuc="YARIM" if yarim else "DUR", hata=[dur], yazildi=["EN description (PATCH)"] if yarim else [],
+                              ozet_eslesme=_ozet_eslesme(out, lid), yarim=yarim))
+            print(f"[{n}] {lid} {'YARIM (EN yazildi, RU yok)' if yarim else 'DUR'}: {dur}", flush=True); break
+        yarim = bool(R.get("ru_hata"))
+        sonuc.append({**{k: R.get(k) for k in ("ilan", "sonuc", "hata", "yazildi")}, "ozet_eslesme": _ozet_eslesme(out, lid),
+                      "yarim": yarim})
+        print(f"[{n}/{min(len(aday), a.limit)}] {lid} {R['sonuc']}{' YARIM (EN yazildi, RU yok)' if yarim else ''} | ozet "
+              f"{'eslesti' if sonuc[-1]['ozet_eslesme'] else 'YOK'} | kota {api.remaining}", flush=True)
         if R["sonuc"] == "FAIL":
             break
     oz = dict(aile=a.aile, aday=len(aday), islenen=len(sonuc), pass_=sum(x["sonuc"] == "PASS" for x in sonuc),
-              atla=sum(x["sonuc"] == "ATLA" for x in sonuc), fail=[x for x in sonuc if x["sonuc"] in ("FAIL", "DUR")],
+              ozet_eslesen=sum(bool(x.get("ozet_eslesme")) for x in sonuc), yarim=[x["ilan"] for x in sonuc if x.get("yarim")],
+              atla=sum(x["sonuc"] == "ATLA" for x in sonuc), fail=[x for x in sonuc if x["sonuc"] in ("FAIL", "DUR", "YARIM")],
               kota=api.remaining)
     (out / "TOPLU_OZET.json").write_text(json.dumps(dict(ozet=oz, ilanlar=sonuc), ensure_ascii=False, indent=1), encoding="utf-8")
     print("TOPLU_OZET", json.dumps(oz, ensure_ascii=False), flush=True)

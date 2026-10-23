@@ -28,11 +28,21 @@ import beyan_marka_yaz as B  # noqa: E402
 
 DESEN = re.compile(r"h[a-z]{1,3}em[uü]?h?le|photo\s*rag|\b308\b|gicl[eé]e|жикле|prodigi|cotton|pamuk|хлоп\w*|museum|музе\w*|"
                    r"fine\s*art\s*paper|ISO\s*9706", re.I)
+# Serdar 23 Eki (madde 3, SALT OKUMA): poster galerisinde cerceve ifadesi ("framed print", "frame finishes", cerceve secenegi
+# gosteren bilgi karti). "unframed" sayilmaz (\bfram: kelime basi). --desen cerceve ile oku ve ocr asamasinda bu desen kullanilir.
+CERCEVE = re.compile(r"\bfram(?:e|ed|es|ing)\b|frame\s*finish\w*|antique\s*gold|natural\s*oak|oak\s*effect", re.I)
+DESENLER = {"kagit": DESEN, "cerceve": CERCEVE}
 METIN_ALAN = ["kaynak", "listing_id", "alan", "terim", "ornek"]
 
 
 def bul(metin):
     return sorted({m.group(0).lower() for m in DESEN.finditer(metin or "")})
+
+
+def desen_sec(ad):
+    """--desen kagit (varsayilan) | cerceve: bul() bu desenle calisir."""
+    global DESEN
+    DESEN = DESENLER[ad]
 
 
 def metinler(o, yol=""):
@@ -109,6 +119,9 @@ def oku(a):
             for t in bul(sb.get("title")):
                 bulgu(kaynak="magaza", listing_id="", alan="section", terim=t, ornek=sb.get("title"))
         ids = B.aktif_idler(api, shop)
+        if getattr(a, "kapsam", "tum") == "poster":      # yalniz 78 poster ilani (data/pod/pod78_ids.csv)
+            import etsy_common as E
+            pi = E.poster_idler(); ids = [x for x in ids if x in pi]
         for i in range(0, len(ids), 100):
             ilan += (api.get("/listings/batch", {"listing_ids": ",".join(ids[i:i + 100])}) or {}).get("results") or []
             B.kota(api)
@@ -127,6 +140,7 @@ def oku(a):
                     bulgu(kaynak="alt_metin", listing_id=lid, alan=f"rank {im.get('rank')}", terim=t,
                           ornek=(im.get("alt_text") or "")[:160])
                 gorsel.append(dict(listing_id=lid, aile=aile, rank=im.get("rank"), image_id=im.get("listing_image_id"),
+                                   alt=im.get("alt_text") or "",
                                    url=im.get("url_570xN"), dosya=f"{lid}_{int(im.get('rank') or 0):02d}_{im.get('listing_image_id')}.jpg"))
             if n % 50 == 0:
                 el = time.time() - t0
@@ -219,7 +233,10 @@ def main():
     ap.add_argument("--ref", nargs="*", default=[], help="ocr: eski kart dosyalari (Drive'dan indirilmis)")
     ap.add_argument("--sure-dk", type=float, default=80, help="ocr: bu sureden sonra yeni gorsel baslatilmaz")
     ap.add_argument("--isci", type=int, default=0)
+    ap.add_argument("--desen", choices=sorted(DESENLER), default="kagit", help="kagit (varsayilan) | cerceve (Serdar 23 Eki madde 3)")
+    ap.add_argument("--kapsam", choices=["tum", "poster"], default="tum", help="oku: tum aktif ilanlar | yalniz 78 poster")
     a = ap.parse_args()
+    desen_sec(a.desen)
     if a.mod == "oku":
         oku(a)
     else:
