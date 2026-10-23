@@ -3,8 +3,10 @@
 Girdi (Drive'dan indirilmis): --hedef-manifest (GALERI_YAYIN/KOSU_20261021_1030/<lid>/yedek/manifest.json: 17 Eki galerisi, 21 Eki
 yaziminden ONCE alinan yedek; 55 yeni galerili ilanla ayni duzen), --hedef-dir (GALERI_YAYIN/YEDEK/<lid>_<CIFT>/NN_<id>.jpg),
 --simdi (KART_SIL/<kosu>/SONRA_<lid>.json: canli galeri; gorseller CDN'den indirilir, kota harcamaz).
-Esleme: her canli gorsel her hedef gorselle 768 px gri NCC ile kiyaslanir; NCC >= 0.999 ayni gorsel sayilir (eski78_gorsel_yukle ve
-GERI_YUKLE ile ayni esik). Islem: KORU (ayni gorsel, ayni alt metin) | ALT (ayni gorsel, alt metin degisir) | DEGISTIR (canli gorsel
+Esleme: her canli gorsel her hedef gorselle 768 px gri NCC ile kiyaslanir; NCC >= 0.999 aday (eski78_gorsel_yukle ve GERI_YUKLE ile
+ayni esik). Aday ayni gorsel sayilmak icin piksel fark kapisindan da gecer: hedef boyutunda RGB mutlak fark (kanal max) p99.9 <= 12 ve
+max <= 45 (eski78_gorsel_uret onayli JPEG yeniden kodlama esigi). 23 Eki ARIES_VIRGO: NCC 0.9998 / 0.9992 olan iki kart kucuk yazida
+farkliydi ("Frame not included", "four frame finishes"); NCC tek basina cerceveli / cercevesiz karti ayiramaz. Islem: KORU (ayni gorsel, ayni alt metin) | ALT (ayni gorsel, alt metin degisir) | DEGISTIR (canli gorsel
 cikar, hedef yuklenir) | CIKAR (hedefte karsiligi yok).
 Cikti: LISTE_<lid>.csv + .md, HEDEF_GALERI_<lid>.jpg (17 gorsel sirayla, gercek 4:3 oran, sira + alt metin), YAN_YANA_<lid>.jpg
 (her sira: simdi | hedef), DEGISEN/ (degisen her hedef gorsel %100, dosya oldugu gibi)."""
@@ -21,6 +23,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 ESIK = 0.999
+FARK_P999, FARK_MAX = 12, 45
 
 
 def font(n):
@@ -42,6 +45,14 @@ def ncc(a, b):
     if a.shape != b.shape:
         h = min(a.shape[0], b.shape[0]); a, b = a[:h], b[:h]
     return float((a * b).mean())
+
+
+def fark(a, b):
+    """a'yi b boyutuna getirip RGB mutlak fark (kanal max): (p99.9, max)."""
+    if a.size != b.size:
+        a = a.resize(b.size, Image.LANCZOS)
+    d = np.abs(np.asarray(a, np.int16) - np.asarray(b, np.int16)).max(2)
+    return round(float(np.percentile(d, 99.9)), 1), int(d.max())
 
 
 def indir(url):
@@ -88,9 +99,11 @@ def main():
     for x in simdi:
         sg = gri(x["im"]); n = [ncc(sg, h) for h in hg]
         j = int(np.argmax(n)); x["en_yakin"], x["ncc"] = j, round(n[j], 5)
+        x["fark"] = fark(x["im"], hedef[j]["im"]) if n[j] >= ESIK else None
+        x["ayni"] = bool(x["fark"]) and x["fark"][0] <= FARK_P999 and x["fark"][1] <= FARK_MAX
     kullanildi = {}
     for x in sorted(simdi, key=lambda x: -x["ncc"]):          # her hedef en fazla bir canli gorselle eslesir
-        if x["ncc"] >= ESIK and x["en_yakin"] not in kullanildi:
+        if x["ayni"] and x["en_yakin"] not in kullanildi:
             kullanildi[x["en_yakin"]] = x
     satir = []
     for j, h in enumerate(hedef):
@@ -102,21 +115,23 @@ def main():
             shutil.copy(h["yol"], out / "DEGISEN" / h["yol"].name)
         satir.append(dict(hedef_sira=h["rank"], hedef_gorsel=h["yol"].name, hedef_alt=h["alt"], islem=islem,
                           simdi_sira=c["rank"] if c else "", simdi_id=c["id"] if c else "", simdi_alt=c["alt"] if c else "",
-                          ncc=c["ncc"] if c else ""))
+                          ncc=c["ncc"] if c else "", fark="%s/%s" % c["fark"] if c else ""))
     eslesen = {id(x) for x in kullanildi.values()}
     for x in simdi:
         if id(x) not in eslesen:
             satir.append(dict(hedef_sira="", hedef_gorsel="", hedef_alt="", islem="CIKAR", simdi_sira=x["rank"], simdi_id=x["id"],
-                              simdi_alt=x["alt"], ncc=x["ncc"]))
-    alan = ["hedef_sira", "hedef_gorsel", "hedef_alt", "islem", "simdi_sira", "simdi_id", "simdi_alt", "ncc"]
+                              simdi_alt=x["alt"], ncc=x["ncc"], fark="%s/%s" % x["fark"] if x["fark"] else "",
+                              en_yakin_hedef=hedef[x["en_yakin"]]["rank"]))
+    alan = ["hedef_sira", "hedef_gorsel", "hedef_alt", "islem", "simdi_sira", "simdi_id", "simdi_alt", "ncc", "fark", "en_yakin_hedef"]
     with open(out / f"LISTE_{lid}.csv", "w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=alan); w.writeheader(); w.writerows(satir)
+        w = csv.DictWriter(f, fieldnames=alan, restval=""); w.writeheader(); w.writerows(satir)
     md = [f"# {lid} galeri plani (simdi {len(simdi)} gorsel -> hedef {len(hedef)})", "",
-          "| hedef sira | hedef gorsel | hedef alt metin | islem | simdi sira | simdi id | simdi alt metin | NCC |", "|---|---|---|---|---|---|---|---|"]
+          "| hedef sira | hedef gorsel | hedef alt metin | islem | simdi sira | simdi id | simdi alt metin | NCC | fark p99.9/max |",
+          "|---|---|---|---|---|---|---|---|---|"]
     md += [f"| {r['hedef_sira']} | {r['hedef_gorsel']} | {r['hedef_alt']} | {r['islem']} | {r['simdi_sira']} | {r['simdi_id']} | "
-           f"{r['simdi_alt']} | {r['ncc']} |" for r in satir]
+           f"{r['simdi_alt']} | {r['ncc']} | {r['fark']} |" for r in satir]
     sayim = {k: sum(r["islem"] == k for r in satir) for k in ("KORU", "ALT", "DEGISTIR", "CIKAR")}
-    md += ["", f"Sayim: {sayim}. Esik NCC >= {ESIK} (768 px gri). Renk baglari hedef: "
+    md += ["", f"Sayim: {sayim}. Ayni gorsel: NCC >= {ESIK} (768 px gri) ve fark p99.9 <= {FARK_P999}, max <= {FARK_MAX}. Renk baglari hedef: "
            + ", ".join(f"{v['value']} -> {v['image_id']}" for v in man.get("variation_images", []))]
     (out / f"LISTE_{lid}.md").write_text("\n".join(md) + "\n", encoding="utf-8")
     # hedef galeri: Etsy sirasi, gercek oran (4:3), 4 sutun
