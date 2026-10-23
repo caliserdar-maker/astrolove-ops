@@ -115,7 +115,7 @@ def analiz_bir(r):
     sku_b = set(inv["boy"])
     o["ru_boylar"] = " ".join(sorted(rb))
     o["ru_boy_fazla"] = " ".join(sorted(rb - sku_b)) if rb else ""
-    o["ru_boy_eksik"] = " ".join(sorted(sku_b - rb)) if rb else ""
+    o["ru_boy_eksik"] = " ".join(sorted(metin_boylar(en) - rb))   # EN'de gecen boy RU'da yok (EN de aralik yazabilir)
     o["ru_kagit"] = "; ".join(sorted({m.group(0) for m in KAGIT.finditer(ru)}))
     o["en_kagit"] = "; ".join(sorted({m.group(0) for m in KAGIT.finditer(en)}))
     o["ru_tedarikci"] = "; ".join(sorted({m.group(1) for m in TEDARIKCI.finditer(ru)}))
@@ -191,8 +191,27 @@ def analiz_bir(r):
     return o
 
 
+def insa(r):
+    """Poster: canli EN (+ beyan) ve envanterden yeni RU kur (ru_poster), yeni RU'yu ayni kurallarla olc."""
+    import ru_poster
+    en = B.norm(r.get("en"))
+    try:
+        en1 = B.en_plan(en, "poster")[0] or en
+    except B.Dur as e:
+        return dict(insa_pass=False, insa_hata=f"en_plan DUR: {e}", insa_sorun="")
+    ru, k = ru_poster.kur(en1, r["envanter"])
+    s = analiz_bir(dict(r, en=en1, ru=ru))["sorunlar"] if k["pass_"] else ""
+    return dict(insa_pass=k["pass_"] and not s, insa_hata="; ".join(k["hata"]), insa_sorun=s, _en=en1, _ru=ru)
+
+
 def analiz(ham, out):
     satir = [analiz_bir(r) for r in ham]
+    for o, r in zip(satir, ham):
+        if r["aile"] == "poster":
+            x = insa(r)
+            o.update({k: v for k, v in x.items() if not k.startswith("_")})
+        else:
+            o.update(insa_pass="", insa_hata="", insa_sorun="")
     with open(out / "RU_OLCUM.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=list(satir[0].keys()))
         w.writeheader(); w.writerows(satir)
@@ -200,6 +219,8 @@ def analiz(ham, out):
     for o in satir:
         a = oz.setdefault(o["aile"], dict(ilan=0, ru_var=0, sorunlu=0, tur={}, ornek=[]))
         a["ilan"] += 1; a["ru_var"] += o["ru_var"]
+        if o["insa_pass"] != "":
+            a["insa_pass"] = a.get("insa_pass", 0) + bool(o["insa_pass"])
         if o["sorunlar"]:
             a["sorunlu"] += 1
             for t in o["sorunlar"].split():
@@ -216,7 +237,7 @@ def analiz(ham, out):
             encoding="utf-8")
     md = ["# RU olcum ozeti (salt okuma)", ""]
     for a, v in oz.items():
-        md.append(f"- {a}: {v['ilan']} ilan, RU var {v['ru_var']}, sorunlu {v['sorunlu']}; " +
+        md.append(f"- {a}: {v['ilan']} ilan, RU var {v['ru_var']}, sorunlu {v['sorunlu']}, yeni RU kurulum PASS {v.get('insa_pass', '-')}; " +
                   ", ".join(f"{k} {n}" for k, n in sorted(v["tur"].items(), key=lambda x: -x[1])))
     (out / "RU_OZET.md").write_text("\n".join(md) + "\n", encoding="utf-8")
     print("\n".join(md), flush=True)

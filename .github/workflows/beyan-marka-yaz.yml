@@ -20,6 +20,7 @@ on:
       limit: {description: "toplu: en fazla yazilacak ilan", required: false, default: "10"}
       onay: {description: "yaz icin onay sozcugu", required: false, default: ""}
       gorsel_indir: {description: "kuru: --ilan galeri gorsellerini indir (evet/hayir)", required: false, default: "hayir"}
+      ru_yeniden: {description: "kuru: --ilan poster RU'sunu canli EN + envanterden kur, yalniz plan (evet/hayir)", required: false, default: "hayir"}
 
 env:
   D: "gdrive:ASTROLOVE/TEMP/DENETIM_20261021/BEYAN_MARKA"
@@ -66,6 +67,7 @@ jobs:
           AILE: ${{ inputs.aile }}
           LIMIT: ${{ inputs.limit }}
           GORSEL: ${{ inputs.gorsel_indir }}
+          RU_YENI: ${{ inputs.ru_yeniden }}
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
@@ -81,6 +83,7 @@ jobs:
             args+=(--aile "$AILE" --limit "$LIMIT")
           fi
           [ "$GORSEL" = evet ] && args+=(--gorsel-indir)
+          [ "$RU_YENI" = evet ] && [ "$MOD" = kuru ] && args+=(--ru-yeniden)
           python3 scripts/etsy/beyan_marka_yaz.py "${args[@]}" 2>&1 | tee _work/kosu.log
           echo "KOD=${PIPESTATUS[0]}" >> "$GITHUB_ENV"
       - name: Token geri yaz + cikti Drive'a

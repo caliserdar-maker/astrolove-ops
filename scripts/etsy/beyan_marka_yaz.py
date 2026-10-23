@@ -274,6 +274,29 @@ def kuru(api, shop, a, out):
                 rapor += [f"RU: DUR ({e})"]
         else:
             rapor += ["RU: ceviri yok"]
+        if getattr(a, "ru_yeniden", False) and aile == "poster":   # Serdar 23 Eki: poster RU canli EN + envanterden (yalniz plan)
+            import difflib
+            import ru_olcum
+            import ru_poster
+            inv = api.get(f"/listings/{lid}/inventory", ok404=True) or {}
+            kota(api)
+            env = ru_olcum.envanter_ozet(inv)
+            try:
+                en1 = en_plan(d, aile)[0] or d
+            except Dur as e:
+                en1 = None; rapor += [f"RU yeniden: EN plani DUR ({e})"]
+            if en1:
+                ru1, k = ru_poster.kur(en1, env)
+                olc = ru_olcum.analiz_bir(dict(listing_id=lid, aile=aile, en=en1, ru=ru1, envanter=env, ortak=ortak(L)))
+                k.update(sorunlar=olc["sorunlar"], pass_=k["pass_"] and not olc["sorunlar"], envanter=env,
+                         ru_baslik=(ru or {}).get("title"), ru_etiket=(ru or {}).get("tags"))
+                (out / f"YENI_EN_{lid}.txt").write_text(en1 + "\n", encoding="utf-8")
+                (out / f"YENI_RU_{lid}.txt").write_text(ru1 + "\n", encoding="utf-8")
+                (out / f"EN_FARK_{lid}.txt").write_text("".join(difflib.unified_diff(
+                    (d + "\n").splitlines(True), (en1 + "\n").splitlines(True), "EN canli", "EN yeni")), encoding="utf-8")
+                (out / f"KONTROL_{lid}.json").write_text(json.dumps(k, ensure_ascii=False, indent=1), encoding="utf-8")
+                rapor += [f"RU yeniden: kontrol {'PASS' if k['pass_'] else 'FAIL'} | paragraf EN {k['paragraf_en']} RU {k['paragraf_ru']} | "
+                          f"hata {k['hata']} | olcum sorunlari [{olc['sorunlar']}] (YENI_EN/YENI_RU/EN_FARK/KONTROL_{lid})"]
         (out / f"PLAN_{lid}.txt").write_text("\n".join(rapor) + "\n", encoding="utf-8")
         print("\n".join(rapor), flush=True)
         if a.gorsel_indir:
@@ -442,6 +465,7 @@ def main():
     ap.add_argument("--limit", type=int, default=10)
     ap.add_argument("--onay", default="")
     ap.add_argument("--gorsel-indir", action="store_true")
+    ap.add_argument("--ru-yeniden", action="store_true", help="kuru --ilan: poster RU'sunu canli EN + envanterden kur (yazim yok)")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
     a.ilan = [x for x in a.ilan.replace(" ", "").split(",") if x]
