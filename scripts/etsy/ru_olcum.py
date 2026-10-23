@@ -37,6 +37,23 @@ SURE_EN = re.compile(r"(\d+)\s*(?:to\s*\d+\s*)?(business days|days|hours)", re.I
 SURE_RU = re.compile(r"(\d+)\s*(?:[-–]\s*\d+\s*)?(рабоч\w*\s*дн\w*|дн\w*|день|дня|час\w*|недел\w*)", re.I)
 FIYAT = re.compile(r"\$\s*\d|USD|руб|₽|€|£")
 DIJITAL_RU = re.compile(r"цифров|файл|JPG|скача", re.I)
+ONIZ_EN = re.compile(r"\bpreview\b", re.I)
+ONIZ_RU = re.compile(r"превью|макет|предпросмотр|эскиз|согласован|утвержд", re.I)
+STIL_EN = re.compile(r"(\d+)\s+STYLES", re.I)
+STIL_RU = re.compile(r"(\d+)\s+СТИЛ", re.I)
+ISIM_ISTISNA_RU = re.compile(r"больше\s+\d+\s+букв", re.I)
+KIRIL_RU = re.compile(r"на русском|кириллиц", re.I)
+
+
+def basliklar(t):
+    """Bolum basligi satirlari: tamami BUYUK harf (>= 4 harf) ya da [ ... ] icinde."""
+    out = []
+    for s in (t or "").splitlines():
+        s = s.strip()
+        harf = [c for c in s if c.isalpha()]
+        if (s.startswith("[") and s.endswith("]")) or (len(harf) >= 4 and all(c.isupper() for c in harf) and len(s) <= 60):
+            out.append(s)
+    return out
 
 
 def boy_ad(v):
@@ -116,6 +133,17 @@ def analiz_bir(r):
     boy_sayilari = {x for b in sku_b | rb for x in re.findall(r"\d+", b)}
     boy_sayilari |= {str(x) for x in (o["ru_boy_beyan"], o["ru_renk_beyan"]) if x is not None}   # ayri kiyaslaniyor
     o["ru_sayi_en_yok"] = " ".join(sorted(sayilar(ru) - sayilar(en) - boy_sayilari, key=lambda x: float(x.replace(",", "."))))
+    # iki yon (inceleme 23 Eki): EN'deki bilgi RU'da var mi
+    en_boy_say = {str(x) for x in (o["en_boy_beyan"],) if x is not None}
+    o["en_sayi_ru_yok"] = " ".join(sorted(sayilar(en) - sayilar(ru) - boy_sayilari - en_boy_say, key=lambda x: float(x.replace(",", "."))))
+    o["en_baslik"], o["ru_baslik"] = len(basliklar(en)), len(basliklar(ru))
+    en_sn = {a for a, _ in SURE_EN.findall(en)}
+    ru_sn = {a for a, _ in SURE_RU.findall(ru)}
+    o["sure_ru_yok"] = " ".join(sorted(en_sn - ru_sn, key=int))
+    o["oniz_en"], o["oniz_ru"] = bool(ONIZ_EN.search(en)), bool(ONIZ_RU.search(ru))
+    o["en_stil"], o["ru_stil"] = ilk(STIL_EN, en), ilk(STIL_RU, ru)
+    o["ru_isim_istisna"] = bool(ISIM_ISTISNA_RU.search(ru))
+    o["ru_kiril_mesaj"] = bool(KIRIL_RU.search(ru))
     s = []
     if o["ru_var"]:
         if o["ru_boy_beyan"] is not None and o["ru_boy_beyan"] != o["sku_boy_sayi"]:
@@ -145,6 +173,20 @@ def analiz_bir(r):
             s.append("fiyat")
         if o["ru_sayi_en_yok"]:
             s.append("ru_sayi_en_yok")
+        if o["en_sayi_ru_yok"]:
+            s.append("en_sayi_ru_yok")
+        if o["ru_baslik"] < o["en_baslik"]:
+            s.append("bolum_eksik")
+        if o["sure_ru_yok"]:
+            s.append("sure_eksik")
+        if o["oniz_en"] and not o["oniz_ru"]:
+            s.append("onizleme_yok")
+        if o["en_stil"] != o["ru_stil"]:
+            s.append("stil_sayisi")
+        if o["ru_isim_istisna"]:
+            s.append("isim_istisna")
+        if o["ru_kiril_mesaj"] and not re.search(r"Cyrillic|Russian", en, re.I):
+            s.append("ru_ek_bilgi")
     o["sorunlar"] = " ".join(s)
     return o
 
