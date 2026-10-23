@@ -215,6 +215,19 @@ def main():
     okK, ZK = toplu(api, "kupa", ["30", "31"], limit=10)
     s.append(("kota: toplu her ilandan once kota_kapisi; esik altinda ilan 31 yazilmaz, DUR", isinstance(okK, str)
               and cagri == ["ilan 30", "ilan 31"] and {l for _, l, _ in api.yaz} == {"30"} and ZK["ozet"]["fail"][0]["sonuc"] == "DUR"))
+    # SIRA 5 (Serdar 23 Eki): GERCEK etsy_common.Etsy.kota_kapisi ile parti; esik 481 (onayli config), kalan 1. ilandan sonra 470
+    import types
+    import etsy_common as E
+    api = Sahte(ilanlar={"40": (KUPA, 8, RU), "41": (KUPA, 8, RU), "42": (KUPA, 8, RU)}); api.esik = 481
+    api.kota_kapisi = types.MethodType(E.Etsy.kota_kapisi, api)
+    _put = api.put
+    def put_dus(path, data, A=api):
+        r = _put(path, data); A.remaining = 470; return r
+    api.put = put_dus
+    okG, ZG = toplu(api, "kupa", ["40", "41", "42"], limit=10)
+    s.append(("kota (gercek kota_kapisi): parti 1. ilan sonrasi kalan 470 < 481 -> 2. ilan baslamaz, DUR, 41/42 yazilmaz",
+              isinstance(okG, str) and "kalan 470 < 481 (ilan 41 baslamadi)" in okG
+              and {l for _, l, _ in api.yaz} == {"40"} and ZG["ozet"]["islenen"] == 2))
     # inceleme 23 Eki bulgulari
     dolu_en = m.en_plan(KUPA, "kupa")[0]
     api = Sahte(ilanlar={"20": (dolu_en, 8, RU)}); api.batch_ru = False

@@ -46,12 +46,23 @@ def dur_mu(f):
 def main():
     C = dict(aktif=True, taban=400, R=15, M=51, P=1638)
     s = []
-    api = api_kur([100, 90, 80], None)
-    s.append(("config yok -> etkisiz (eski davranis)", api.esik is None and dur_mu(lambda: [api.get("/x") for _ in range(3)]) is None))
-    api = api_kur([100, 90], dict(C, aktif=False))
-    s.append(("aktif false -> etkisiz", api.esik is None and dur_mu(lambda: [api.get("/x") for _ in range(2)]) is None))
-    api = api_kur([100, 90], dict(C, aktif="true"))
-    s.append(("aktif 'true' (metin) -> etkisiz", api.esik is None))
+    kayit = []
+    eski_log, E.log = E.log, lambda m: kayit.append(m)
+    uyari = lambda: any("::warning::KOTA ESIGI PASIF" in m for m in kayit)   # noqa: E731
+
+    def tek(conf):
+        """-> (esik, sert_taban, uyari var mi, 3 istek durdu mu)"""
+        kayit.clear(); a = api_kur([100, 90, 80], conf)
+        return a.esik, a.sert_taban, uyari(), dur_mu(lambda: [a.get("/x") for _ in range(3)])
+    s.append(("config yok -> UYARI + etkisiz, kosu durmaz (Serdar 23 Eki)", tek(None) == (None, None, True, None)))
+    s.append(("aktif false -> sessiz etkisiz (uyari yok)", tek(dict(C, aktif=False)) == (None, None, False, None)))
+    tuhaf = [tek(dict(C, aktif=v)) for v in ("true", 1, None, "false")] + [tek({k: v for k, v in C.items() if k != "aktif"})]
+    s.append(("aktif 'true' / 1 / null / 'false' / alan yok -> UYARI + etkisiz, kosu durmaz",
+              all(x == (None, None, True, None) for x in tuhaf)))
+    g = tek(C)
+    s.append(("gecerli aktif config -> uyari yok (kalan 100 < 481: ilk istekten sonra DUR)", g[:3] == (481, 430, False)
+              and "kota esigi" in (g[3] or "")))
+    E.log = eski_log
     s.append(("onayli esikler: genel 481/430, pod-audit 2068/430, siparis yok/415, router muaf",
               (api_kur([1], C).esik, api_kur([1], C).sert_taban) == (481, 430)
               and (api_kur([1], C, "pod-audit").esik, api_kur([1], C, "pod-audit").sert_taban) == (2068, 430)

@@ -166,14 +166,20 @@ def kota_esigi(rol=None, dosya=None):
       pod-audit : esik taban + 2R + P, sert taban taban + 2R
       siparis   : (kupa-siparis, takip-denetim; Serdar 23 Eki) baslangic esigi yok, sert taban taban + R
       router    : muaf (kendi --quota-min 400)
-    Dosya yoksa / aktif true degilse etkisiz. Dosya okunamaz ya da alan eksikse UYARI + PASIF (Serdar 23 Eki: bozuk config
-    hicbir kosuyu durdurmaz)."""
+    aktif false ise sessizce etkisiz. Dosya yoksa, aktif true/false disinda bir degerse (ya da yoksa), dosya okunamaz ya da
+    alan eksikse UYARI + PASIF (Serdar 23 Eki: bozuk config hicbir kosuyu durdurmaz, ama sessizce de kapanmaz)."""
     p = Path(dosya or KOTA_ESIK_DOSYA)
     if not p.exists():
+        log(f"::warning::KOTA ESIGI PASIF: {p.name} yok; hicbir kosu durdurulmaz")
         return None, None
     try:
         c = json.loads(p.read_text(encoding="utf-8"))
-        if c.get("aktif") is not True:
+        aktif = c.get("aktif", "(yok)")
+        if aktif is False:
+            return None, None
+        if aktif is not True:
+            log(f"::warning::KOTA ESIGI PASIF: {p.name} aktif alani true/false degil ({str(aktif)[:20]!r}); "
+                "hicbir kosu durdurulmaz")
             return None, None
         say = [c[k] for k in ("taban", "R", "M", "P")]
         if not all(type(v) is int and 0 <= v < 5000 for v in say):

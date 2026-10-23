@@ -51,6 +51,10 @@ GOZ -> ayni, once baski dosyasina gozle bakilir.
 FAIL -> baski yok; SORU.md + musteri mesaji taslagi; Serdar mesaji gonderir ya da karar verir, duzeltilmis metinle
 `--receipt-id` ile yeniden kosulur (STATE'teki satir silinerek).
 
+## 4b. Arka yuz mesaji karari
+
+Arka yuz mesaji (KARAR C, Serdar 23 Eki): gercek kupa siparisi kodu 0196e37a (temiz/kupa-orchard) oldugu gibi kalir. Mesajin once on gorunus tuvaline cizilip silindir acilimiyla duz baski dosyasina aktarilmasi (kupa_orchard/kod/baski_kes.py:200-221) HATA DEGIL: Orchard yontem karari (Serdar 18 Eki; claude.ai proje dosyasi AstroLove_KUPA_ORCHARD_KARARLAR_20261018.md) baskinin onayli kupa gorsellerinin onden gorunusuyle birebir ayni olmasini ister; duz dosyada harflerin yatay genis gorunmesi bunun sonucudur (kupada onden normal; canli ilan 4598525642 gorselleri ve mockup kiyasi 23 Eki). Duz yazim denemesi a4e17fb3 (dal ccr-6da89be3-6ab6jb, ornekler Drive KUPA_SIPARIS_TEST_TEMIZ/9000000110) main'e alinmaz, silinmez. KUPA_STIL_ONAY_20261016 gecersizdir (7 stil); gecerli set Orchard 8 stil. Kupa siparisinde baski dosyasi Serdar onayi olmadan Printful'a gitmez (kupa-siparis Printful'a baglanmaz; siparisi Serdar ELLE_SIPARIS.txt ile elle verir).
+
 ## 5. Acik isler
 
 - Printful dokumani (files/url, POST /files, confirm) dogrudan okunup bu bolum teyit edilecek.

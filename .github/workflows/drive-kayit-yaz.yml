@@ -1,0 +1,60 @@
+name: drive-kayit-yaz
+
+# Depodaki bir denetim kaydini (docs/denetim/*.md) Drive TEMP/DENETIM_20261021/ altindaki ayni adli dosyaya yazar (Serdar 23 Eki:
+# ihlal kaydi). YALNIZ EKLEME: Drive'daki dosya varsa, onun dolu her satiri yeni dosyada ayni sirayla bulunmali; yoksa YAZMAZ.
+# Etsy / musteri / secret basimi yok.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      dosya: {description: "docs/denetim altinda dosya adi (orn. KAYIT_23EKI_KURAL_IHLALI.md)", required: true}
+
+jobs:
+  yaz:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: docs/denetim
+      - run: curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Yalniz ekleme kontrolu + yaz + geri oku
+        env:
+          D: ${{ inputs.dosya }}
+        run: |
+          set -euo pipefail
+          [[ "$D" =~ ^[A-Za-z0-9_.-]+\.md$ ]] || { echo "::error::dosya adi"; exit 1; }
+          [ -f "docs/denetim/$D" ] || { echo "::error::depoda yok"; exit 1; }
+          H="gdrive:ASTROLOVE/TEMP/DENETIM_20261021/$D"
+          rclone cat "$H" > _eski.md 2>/dev/null || : > _eski.md
+          python3 - "docs/denetim/$D" _eski.md <<'PY'
+          import sys
+          yeni = [l.strip() for l in open(sys.argv[1], encoding="utf-8") if l.strip()]
+          eski = [l.strip() for l in open(sys.argv[2], encoding="utf-8") if l.strip()]
+          i = 0
+          for l in yeni:
+              if i < len(eski) and l == eski[i]:
+                  i += 1
+          if i != len(eski):
+              sys.exit(f"YAZILMADI: Drive'daki {len(eski)} satirin yalniz {i}'i yeni dosyada sirayla var (eksiltme olur)")
+          print(f"yalniz ekleme: eski {len(eski)} satir korunuyor, yeni {len(yeni)} satir")
+          PY
+          rclone copyto "docs/denetim/$D" "$H"
+          rclone cat "$H" | cmp - "docs/denetim/$D" && echo "::notice title=DRIVE KAYIT::$D yazildi, geri okuma birebir"
+      - if: always()
+        run: rm -rf ~/.config/rclone _eski.md
