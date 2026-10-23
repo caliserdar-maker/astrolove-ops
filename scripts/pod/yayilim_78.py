@@ -442,6 +442,8 @@ def main():
     ap.add_argument("--yalniz-envanter", action="store_true", help="yaz: metin/kisisellestirme/nitelik atlanir")
     ap.add_argument("--oncelik", default=ONCELIK, help="metin2 --hepsi: once bu sira (ilki pilot: FAIL ise durur)")
     a = ap.parse_args()
+    if a.mod in ("yaz", "metin2"):   # Serdar 23 Eki madde 4: METIN_78.csv eski poster EN/RU metnini yazar; kapali
+        raise SystemExit(f"KAPALI (Serdar 23 Eki): yayilim_78 {a.mod} eski poster metnini yazar; yeni RU: scripts/etsy/ru_poster.py")
     out = pathlib.Path(a.out)
     yedek = out / "YEDEK"
     yedek.mkdir(parents=True, exist_ok=True)

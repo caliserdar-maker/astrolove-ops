@@ -346,6 +346,9 @@ def nitelik_ozeti(props):
 
 
 def main():
+    # Serdar 23 Eki madde 4: KAPALI. Sablonlar eski poster metni (Hahnemuhle/308/Prodigi/Art'siz marka) iceriyor; poster RU yalniz
+    # scripts/etsy/ru_poster.py sablon kurucusundan. METIN_78.csv uretilmez.
+    raise SystemExit("KAPALI (Serdar 23 Eki): metin_78 eski poster metni uretir; yeni RU: scripts/etsy/ru_poster.py")
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--out", default="_out/metin78")
     ap.add_argument("--katalog", default=str(KOK.parent / "etsy" / "seo" / "pod_changes_v2.json"))

@@ -12,8 +12,10 @@ Ortak Etsy v3 istemcisi (token deposu + GET/PATCH sarmali).
 Hicbir sir loga yazilmaz; okunan her token degeri ::add-mask:: ile
 maskelenir.
 """
+import hashlib
 import json
 import os
+import re
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -199,6 +201,44 @@ def kota_esigi(rol=None, dosya=None):
     return taban + 2 * r + (pp if rol == "pod-audit" else m), taban + 2 * r
 
 
+# ------------------------------------------------------------------ RU yazim kapisi
+# Serdar 23 Eki madde 4: poster RU yalniz yeni sablon kurucusundan (ru_poster.kur + ru_poster.izin_ver) yazilir. Tum betikler
+# Etsy._call'dan gectigi icin kapi burada: (1) her RU ceviri yaziminda kagit/tedarikci/Art'siz marka ifadesi -> yazim yok;
+# (2) 78 poster ilaninda (data/pod/pod78_ids.csv) aciklama ru_poster'in onayladigi metinle birebir degilse -> yazim yok.
+RU_YASAK = re.compile(r"Hahnem|Ханем|Photo\s*Rag|Prodigi|хлоп(?:к|ок)|cotton|музе|museum|ISO\s*9706|жикле|gicl|"
+                      r"\d{3}\s*(?:г/м|g/m|gsm)|\bOBA\b|bright\s*white|12[\s-]*colou?r|\d{2,3}\s*-\s*\d{2,3}\s*(?:years|лет)|(?:over|up to|более|до)\s+\d{2,3}\s*(?:years|лет)|AstroLove(?!Art)", re.I)
+RU_POSTER_IZIN = {}   # listing_id -> sha256(aciklama); yalniz ru_poster.izin_ver() doldurur
+POSTER_IDS_YOL = Path(__file__).resolve().parents[2] / "data" / "pod" / "pod78_ids.csv"
+_RU_YOL = re.compile(r"/listings/(\d+)/translations/ru/?$")
+
+
+def ozet(s):
+    return hashlib.sha256((s or "").encode("utf-8")).hexdigest()
+
+
+def poster_idler():
+    try:
+        return {x.split(",")[0].strip() for x in POSTER_IDS_YOL.read_text(encoding="utf-8").splitlines()[1:] if x.strip()}
+    except OSError as e:   # liste okunamazsa kapi kapali kalir (poster mi bilinemez)
+        raise SystemExit(f"DUR: RU yazim kapisi: poster listesi okunamadi ({e})")
+
+
+def ru_yazim_kapisi(method, path, data=None, json_body=None):
+    """RU ceviri yazimindan once (PUT/PATCH/POST .../translations/ru). Uygun degilse SystemExit; istek gonderilmez."""
+    m = _RU_YOL.search(path or "")
+    if method not in ("PUT", "PATCH", "POST") or not m:
+        return
+    g = data if data is not None else (json_body or {})
+    g = g if isinstance(g, dict) else {}
+    metin = " ".join(str(g.get(k) or "") for k in ("title", "description", "tags"))
+    yasak = sorted({x.group(0) for x in RU_YASAK.finditer(metin)})
+    if yasak:
+        raise SystemExit(f"DUR: RU yazim kapisi: ilan {m.group(1)} RU metninde yasak ifade {yasak}; yazim yok")
+    lid = m.group(1)
+    if lid in poster_idler() and RU_POSTER_IZIN.get(lid) != ozet(g.get("description")):
+        raise SystemExit(f"DUR: RU yazim kapisi: poster ilan {lid} RU aciklamasi ru_poster sablon kurucusundan gelmiyor; yazim yok")
+
+
 # ------------------------------------------------------------------ api
 class Etsy:
     def __init__(self, store):
@@ -294,6 +334,7 @@ class Etsy:
         raise SystemExit(f"HATA: POST(file) {path} tekrarlar tukendi.")
 
     def _call(self, method, path, params=None, data=None, ok404=False, json_body=None):
+        ru_yazim_kapisi(method, path, data, json_body)
         self._istek_oncesi()
         for attempt in range(3):
             self.calls += 1

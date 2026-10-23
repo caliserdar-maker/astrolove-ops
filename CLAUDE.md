@@ -55,6 +55,9 @@ bolumu okunmadan baslanmaz.
   "matte art paper". Hahnemuhle / Photo Rag / 308 g/m2 / giclee / Prodigi / %100 cotton / museum (ISO 9706) ifadeleri
   HICBIR dilde yazilmaz; RU ve diger ceviriler EN ile birebir ayni bilgiyi verir. (25 Eyl Hahnemuhle izni KALDIRILDI.)
 - Izinli: yalniz canli EN aciklamadaki ifadeler (23 Eki: "premium matte art paper", "long-lasting inks").
+- RU YAZIM KAPISI (Serdar 23 Eki madde 4): her RU ceviri yazimi `etsy_common.ru_yazim_kapisi`'ndan gecer; yasak ifade
+  (RU_YASAK) varsa istek gonderilmez. 78 poster ilaninda (data/pod/pod78_ids.csv) RU aciklama yalniz `ru_poster.kur` + kontrol
+  PASS + `ru_poster.izin_ver` ile yazilir. metin_78, yayilim_78 yaz/metin2 ve pod_ru_tags --apply KAPALI (eski poster metni).
 - Yasak: OBA-free, bright white, omur yili (orn. 100-200 years), "12-colour".
   Ingilizce metinde uzun/orta tire yok.
 - Tek kaynak ve PASS/FAIL denetim: `scripts/medya_v1/uretim/metin_kurali.py`

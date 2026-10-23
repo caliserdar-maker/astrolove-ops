@@ -17,11 +17,11 @@ AY = {"January": "января", "February": "февраля", "March": "мар�
       "December": "декабря"}
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from beyan_marka_yaz import BEYAN, RU_BEYAN  # noqa: E402  tek kaynak
+import etsy_common as E  # noqa: E402
 DATIF = {"Aries": "Овну", "Taurus": "Тельцу", "Gemini": "Близнецам", "Cancer": "Раку", "Leo": "Льву", "Virgo": "Деве",
          "Libra": "Весам", "Scorpio": "Скорпиону", "Sagittarius": "Стрельцу", "Capricorn": "Козерогу", "Aquarius": "Водолею",
          "Pisces": "Рыбам"}
-YASAK_RU = re.compile(r"Hahnem|Ханем|Photo\s*Rag|Prodigi|хлоп(?:к|ок)|cotton|музе|museum|ISO\s*9706|жикле|gicl|\d{3}\s*(?:г/м|g/m|gsm)|"
-                      r"\bOBA\b|bright\s*white|12[\s-]*colou?r|\d+\s*(?:years|лет)|AstroLove(?!Art)", re.I)   # inceleme 23 Eki: genisletildi
+YASAK_RU = E.RU_YASAK   # tek kaynak etsy_common (inceleme 23 Eki: genisletildi; madde 4 merkezi RU kapisi)
 B_RX = "(" + "|".join(BURC) + ")"
 
 
@@ -203,3 +203,10 @@ def kur(en, envanter=None):
     if yasak:   # inceleme 23 Eki O2: kagit/tedarikci/marka yasak ifadesi kosulsuz FAIL
         hata.append(f"RU'da yasak ifade: {yasak}")
     return out, dict(pass_=not hata and len(ru) == len(par), hata=hata, paragraf_en=len(par), paragraf_ru=len(ru))
+
+
+def izin_ver(lid, ru, kontrol):
+    """Serdar 23 Eki madde 4: kontrolu PASS olan yeni RU'yu bu kosu icin yazima acar (etsy_common RU kapisi yalniz bunu gecirir)."""
+    if not (kontrol or {}).get("pass_") or not ru or (kontrol or {}).get("sorunlar"):
+        raise SystemExit(f"DUR: ilan {lid} yeni RU kontrolu PASS degil; izin yok")
+    E.RU_POSTER_IZIN[str(lid)] = E.ozet(ru)

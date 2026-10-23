@@ -59,6 +59,8 @@ def main():
     g.add_argument("--dry-run", action="store_true")
     g.add_argument("--apply", action="store_true")
     a = ap.parse_args()
+    if a.apply:   # Serdar 23 Eki madde 4: eski poster RU aciklamasini aynen geri gonderiyordu; kapali (yalniz --dry-run)
+        raise SystemExit("KAPALI (Serdar 23 Eki): pod_ru_tags --apply eski poster RU aciklamasini yazar; yeni RU: scripts/etsy/ru_poster.py")
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
     rows = read_state(a.state)
     if not rows:
