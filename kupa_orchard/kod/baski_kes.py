@@ -198,13 +198,13 @@ arka[y0:y0 + h, x0:x0 + w] *= nzs / 255.0
 MASK_AR = arka.min(-1) < 245
 ax, _ = T('arka', L['arka_merkez_x'], 0)
 _, t_mes = T('arka', 0, L['mesaj_taban'])
-_hedef_m = np.full_like(arka, 255.0) if os.environ.get('MESAJ_YOK') else arka
-mes_cap, mes_tasti = satir(_hedef_m, MASK_AR, MESAJ, ITA, L['mesaj_cap'] * s, 600, ax, t_mes, min_cap=2.2 * MM,
-                           maxw_sabit=860)
+# MESAJ (Serdar 23 Eki): on gorunus tuvaline CIZILMEZ. Eski yol (satir -> arka -> silindir acilimi) duz baskida kenar harfleri
+# 1/cos(aci) kat yatay genisletiyordu (860 px gorunus genisliginde uclarda ~2,2x). Mesaj silindir izdusumunden SONRA baskiya
+# duz yazilir (harf orani korunur); sigmazsa yalniz punto kuculur (alt sinir 2,2 mm). Asagida "mesaj: baskiya duz".
+MES_GORUNUS_MAXW = 860                              # eski siniri: kupada onden gorunen en fazla genislik (px)
 _, t_imza = T('arka', 0, L['imza_taban'])
 _hedef_i = np.full_like(arka, 255.0) if os.environ.get('IMZA_YOK') else arka
 imza_cap, _ = satir(_hedef_i, MASK_AR, f'{ISIM1} & {ISIM2}', GAR, L['imza_cap'] * s, 640, ax, t_imza, maxw_sabit=760)
-adim(f'arka: mesaj cap {mes_cap / MM:.2f} mm, imza cap {imza_cap / MM:.2f} mm, nazar {L["nazar_d"] * s / MM:.1f} mm')
 
 # ---------------- silindir -> baski ----------------
 baski = np.full((FH, FW, 3), 255.0)
@@ -219,6 +219,49 @@ for yuz, tv in (('on', on), ('arka', arka)):
         col = ndimage.map_coordinates(tv[..., c], [np.repeat(yy[:, None] - oy, ok.sum(), 1),
                                                    np.repeat(xv[None, :], FH, 0)], order=1, mode='constant', cval=255)
         baski[:, np.where(ok)[0], c] = np.minimum(baski[:, np.where(ok)[0], c], col)
+
+# ---------------- mesaj: baskiya duz ----------------
+u_m = FACE['arka'] + RK * math.asin(max(-1.0, min(1.0, ax / RK)))      # gorunus merkezinin baskidaki x'i
+y_t = t_mes + TH + (FH - 2 * TH) // 2                                    # taban (baski y); silindir y'yi degistirmez
+RK11 = 3.23 / 2 * DPI                                                    # 11 oz yaricapi: 15 oz'da da ayni fiziksel sinir (cift.py 1b)
+lim_gor = 2 * RK11 * math.asin(min(1.0, MES_GORUNUS_MAXW / (2 * RK11)))  # 11 oz'da onden genislik <= 860 px olan baski genisligi
+mask_b = baski.min(-1) < 245
+
+
+def serbest_b(y0, y1):
+    """Baskida mesaj bandinda (y0..y1) merkezin iki yanindaki ilk susleme pikseline uzaklik -> serbest genislik."""
+    rows = mask_b[max(0, int(y0)):int(y1)].any(0)
+    c = int(round(u_m))
+    sol = np.where(rows[:c])[0]
+    sag = np.where(rows[c:])[0]
+    l = c - sol.max() if len(sol) else c
+    r = sag.min() if len(sag) else FW - c
+    return 2 * min(l, r) - 2 * PAY
+
+
+mes_cap = L['mesaj_cap'] * s
+while True:
+    am, bm = yazi(MESAJ, ITA, mes_cap, 600)
+    maxw_m = min(lim_gor, serbest_b(y_t - mes_cap * 1.1, y_t + mes_cap * 0.3))
+    if am.shape[1] <= maxw_m or mes_cap - 0.25 < 2.2 * MM - 1e-6:
+        break
+    mes_cap -= 0.25
+mes_tasti = am.shape[1] > maxw_m
+if not os.environ.get('MESAJ_YOK'):
+    hm, wm = am.shape
+    x0m, y0m = int(round(u_m - wm / 2)), int(round(y_t - bm))
+    baski[y0m:y0m + hm, x0m:x0m + wm] = baski[y0m:y0m + hm, x0m:x0m + wm] * (1 - am[..., None]) + RENK * am[..., None]
+    # on izleme: mesaj kupada onden nasil gorunurse (baski -> gorunus; x_v = RK sin((u - FACE) / RK))
+    katman = np.zeros((FH, FW))
+    katman[y0m:y0m + hm, x0m:x0m + wm] = am
+    xv = np.arange(2 * TW) - TW
+    uu = FACE['arka'] + RK * np.arcsin(np.clip(xv / RK, -1, 1))
+    oy = (FH - 2 * TH) // 2
+    kv = ndimage.map_coordinates(katman, [np.repeat(np.arange(2 * TH)[:, None] + oy, 2 * TW, 1),
+                                          np.repeat(uu[None, :], 2 * TH, 0)], order=1, mode='constant', cval=0)
+    arka[:] = arka * (1 - kv[..., None]) + RENK * kv[..., None]
+adim(f'arka: mesaj cap {mes_cap / MM:.2f} mm (baskida duz, genislik {am.shape[1]} / sinir {maxw_m:.0f} px), '
+     f'imza cap {imza_cap / MM:.2f} mm, nazar {L["nazar_d"] * s / MM:.1f} mm')
 Image.fromarray(np.clip(baski, 0, 255).astype(np.uint8)).save(OUT + '_baski_11oz.png', dpi=(300, 300))
 pv = np.full((2 * TH + 40, 4 * TW + 60, 3), 235.0)
 pv[20:20 + 2 * TH, 20:20 + 2 * TW] = on
