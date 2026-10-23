@@ -408,6 +408,10 @@ def yaz(api, shop, lid, out, bolum=None, ru_yeniden=False, onay_ozet=None):
         return R
     if aile in OZET_AILE:   # Serdar 23 Eki A1: kupa / yil 2a (poster ozeti poster_plan icinde)
         ozet_kapisi(lid, aile, en_yeni, ru_yeni, onay_ozet, out)
+        if ru_yeni:   # inceleme 23 Eki: RU kapisi (baslik + aciklama + etiket) EN PATCH'ten ONCE; durursa hicbir sey yazilmaz
+            import etsy_common as E
+            E.ru_yazim_kapisi("PUT", f"/shops/0/listings/{lid}/translations/ru", {"title": norm(ru.get("title")), "description": ru_yeni,
+                                                                               "tags": ",".join(ru.get("tags") or [])})
     for yeni_, eski_ in ((en_yeni, L.get("description")), (ru_yeni, ru.get("description"))):
         if yeni_ and len(TIRE.findall(yeni_)) > len(TIRE.findall(norm(eski_))):
             raise Dur(f"{lid}: yazim uzun/orta tire ekliyor")

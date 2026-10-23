@@ -359,6 +359,12 @@ def main():
     oky, Zy = toplu(api, "yil", ["52", "53"], limit=10)
     s.append(("toplu yil: yalniz EN PATCH, ozet eslesmesi 2", oky is True and Zy["ozet"]["ozet_eslesen"] == 2
               and [k for k, _, _ in api.yaz] == ["patch", "patch"]))
+    api = Sahte(en=KUPA, bolum=8); api.ru["1"]["tags"] = ["x", "100 лет"]; oz0 = kuru_ozet(api, "1")
+    try:
+        r = kos(api, onay_ozet=oz0)[0]
+    except SystemExit as e:
+        r = f"KAPI {e}"
+    s.append(("kupa: RU etiketinde yasak ifade -> EN PATCH'ten once DUR (yarim yazim yok)", isinstance(r, str) and api.yaz == []))
     api = Sahte(ilanlar={"54": (KUPA, 8, RU), "55": (KUPA, 8, RU)})
     _patch = api.patch
     def patch_dus(path, data, A=api):
