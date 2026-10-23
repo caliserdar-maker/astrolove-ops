@@ -282,6 +282,27 @@ def kuru(api, shop, a, out):
                 rapor += [f"RU: DUR ({e})"]
         else:
             rapor += ["RU: ceviri yok"]
+        if aile in OZET_AILE:   # Serdar 23 Eki A1/A3: yazimla ayni plan fonksiyonlari; ilan basina onay ozeti
+            import difflib
+            try:
+                en1, _ = en_plan(L.get("description"), aile)
+                ru1 = ru_plan(ru.get("description"), aile)[0] if ru else None
+                k = dict(aile=aile, onay_ozet=aile_ozet(en1, ru1), en_degisir=bool(en1), ru_degisir=bool(ru1),
+                         ru_ceviri=bool(ru), yazilacak=bool(en1 or ru1))
+                for ad, eski_, yeni_ in (("EN", d, en1), ("RU", norm((ru or {}).get("description")), ru1)):
+                    if yeni_:
+                        (out / f"YENI_{ad}_{lid}.txt").write_text(yeni_ + "\n", encoding="utf-8")
+                        (out / f"{ad}_FARK_{lid}.txt").write_text("".join(difflib.unified_diff(
+                            (eski_ + "\n").splitlines(True), (yeni_ + "\n").splitlines(True), f"{ad} canli", f"{ad} yeni")),
+                            encoding="utf-8")
+                (out / f"KONTROL_{lid}.json").write_text(json.dumps(k, ensure_ascii=False, indent=1), encoding="utf-8")
+                if k["yazilacak"]:
+                    of = out / "ONAY_OZET.json"
+                    oz0 = json.loads(of.read_text()) if of.exists() else {}
+                    oz0[lid] = k["onay_ozet"]; of.write_text(json.dumps(oz0, indent=1), encoding="utf-8")
+                rapor += [f"OZET ({aile}): {k['onay_ozet']} | EN degisir {k['en_degisir']} | RU degisir {k['ru_degisir']}"]
+            except Dur as e:
+                rapor += [f"OZET ({aile}): DUR ({e}); onay ozeti yok"]
         if getattr(a, "ru_yeniden", False) and aile == "poster":   # Serdar 23 Eki: poster RU canli EN + envanterden (yalniz plan)
             import difflib
             import ru_olcum
@@ -327,6 +348,27 @@ def kuru(api, shop, a, out):
             print(f"GORSEL {lid}: {len(imgs)} gorsel indirildi", flush=True)
 
 
+OZET_AILE = ("kupa", "yil")   # Serdar 23 Eki (A1): 2a ozet kontrolu kupa ve yil donumu yollarinda da (poster: poster_plan)
+
+
+def aile_ozet(en_yeni, ru_yeni):
+    """kupa / yil: yazilacak EN + RU metninin ozeti (degismeyen taraf bos). Kuru plan ve yazim ayni fonksiyonu kullanir."""
+    import ru_poster
+    return ru_poster.onay_ozet(en_yeni or "", ru_yeni or "")
+
+
+def ozet_kapisi(lid, aile, en_yeni, ru_yeni, onay_ozet, out):
+    """Yazim aninda kurulan metin kuru planda onaylanan metinle birebir degilse (ya da ozet verilmediyse) Dur, yazim yok.
+    Eslesme gercek kosunun KONTROL_<ilan>.json kaydina yazilir (toplu: _ozet_eslesme)."""
+    oz = aile_ozet(en_yeni, ru_yeni)
+    k = dict(aile=aile, onay_ozet=oz, onay_ozet_kuru=onay_ozet, ozet_eslesme=bool(onay_ozet) and onay_ozet == oz,
+             en_degisir=bool(en_yeni), ru_degisir=bool(ru_yeni))
+    (out / f"KONTROL_{lid}.json").write_text(json.dumps(k, ensure_ascii=False, indent=1), encoding="utf-8")
+    if not k["ozet_eslesme"]:
+        raise Dur(f"{lid}: {aile} yazim anindaki EN+RU metni onayli kuru planla ayni degil (onayli {str(onay_ozet)[:12]}, "
+                  f"simdi {oz[:12]}); yazim yok")
+
+
 def yaz(api, shop, lid, out, bolum=None, ru_yeniden=False, onay_ozet=None):
     """Tek ilan: yedek -> plan -> yazim -> geri okuma + kapi (1b). Donus R (sonuc PASS / ATLA / FAIL). Kapi farkinda Dur."""
     L = api.get(f"/listings/{lid}", {"includes": "Translations"}) or {}
@@ -364,6 +406,8 @@ def yaz(api, shop, lid, out, bolum=None, ru_yeniden=False, onay_ozet=None):
         (out / f"SONUC_{lid}.json").write_text(json.dumps(R, ensure_ascii=False, indent=1), encoding="utf-8")
         print("SONUC", json.dumps(R, ensure_ascii=False), flush=True)
         return R
+    if aile in OZET_AILE:   # Serdar 23 Eki A1: kupa / yil 2a (poster ozeti poster_plan icinde)
+        ozet_kapisi(lid, aile, en_yeni, ru_yeni, onay_ozet, out)
     for yeni_, eski_ in ((en_yeni, L.get("description")), (ru_yeni, ru.get("description"))):
         if yeni_ and len(TIRE.findall(yeni_)) > len(TIRE.findall(norm(eski_))):
             raise Dur(f"{lid}: yazim uzun/orta tire ekliyor")
@@ -373,6 +417,12 @@ def yaz(api, shop, lid, out, bolum=None, ru_yeniden=False, onay_ozet=None):
         return _yaz_dogrula(api, shop, lid, out, L, ru, soru0, en_yeni, ru_yeni, R, k0, sat0, imza0, olc_fn)
     except (Exception, SystemExit) as e:   # yazim sonrasi HTTP/ag hatasi: kayit birakilir, toplu kosu DURur (inceleme A5)
         R.update(sonuc="FAIL", hata=[f"istisna (yazim/geri okuma): {str(e)[:300]}"], istek=api.calls, kota=api.remaining)
+        # Serdar 23 Eki A5: PATCH sunucuda uygulanip yanit dusmus olabilir; canli EN bir kez daha okunur ve kayda yazilir
+        try:
+            R["canli_en_yazildi"] = bool(en_yeni) and norm((api.get(f"/listings/{lid}") or {}).get("description")) == en_yeni
+        except (Exception, SystemExit) as e2:   # noqa: BLE001
+            R["canli_en_yazildi"] = None; R["hata"].append(f"canli EN okunamadi: {str(e2)[:120]}")
+        R["ru_bekleniyor"] = bool(ru_yeni)
         (out / f"SONUC_{lid}.json").write_text(json.dumps(R, ensure_ascii=False, indent=1), encoding="utf-8")
         print("SONUC", json.dumps(R, ensure_ascii=False), flush=True)
         return R
@@ -493,8 +543,8 @@ def toplu(api, shop, a, out):
     poster_yeni = a.aile == "poster" and getattr(a, "ru_yeniden", False)
     if a.aile == "poster" and not poster_yeni:
         raise Dur("toplu poster yalniz --ru-yeniden + --onay-dosya ile (Serdar 23 Eki)")
-    if poster_yeni and (not a.ilan or set(a.ilan) - set(ozetler)):
-        raise Dur(f"toplu poster: --ilan acik liste olmali ve her ilanin onay ozeti olmali (eksik {sorted(set(a.ilan) - set(ozetler))})")
+    if (poster_yeni or a.aile in OZET_AILE) and (not a.ilan or set(a.ilan) - set(ozetler)):
+        raise Dur(f"toplu {a.aile}: --ilan acik liste olmali ve her ilanin onay ozeti olmali (eksik {sorted(set(a.ilan) - set(ozetler))})")
     for L in sorted(ilan, key=lambda x: int(x["listing_id"])):
         if BOLUM_AILE.get(bolum.get(str(L.get("shop_section_id")))) != a.aile:
             continue
@@ -519,14 +569,15 @@ def toplu(api, shop, a, out):
             if hasattr(api, "kota_kapisi"):   # Serdar 23 Eki 2b esigi (config aktifse): ilana baslamadan
                 api.kota_kapisi(f"ilan {lid}")
             R = (yaz(api, shop, lid, out, bolum, ru_yeniden=True, onay_ozet=ozetler.get(lid)) if poster_yeni
-                 else yaz(api, shop, lid, out, bolum))
+                 else yaz(api, shop, lid, out, bolum, onay_ozet=ozetler.get(lid)))
         except (Dur, Exception, SystemExit) as e:   # durdu; EN_YAZILDI isareti varsa EN yazildi (YARIM), yoksa yazma yok
             dur = str(e)[:300]
             yarim = (out / f"EN_YAZILDI_{lid}").exists()
             sonuc.append(dict(ilan=lid, sonuc="YARIM" if yarim else "DUR", hata=[dur], yazildi=["EN description (PATCH)"] if yarim else [],
                               ozet_eslesme=_ozet_eslesme(out, lid), yarim=yarim))
             print(f"[{n}] {lid} {'YARIM (EN yazildi, RU yok)' if yarim else 'DUR'}: {dur}", flush=True); break
-        yarim = bool(R.get("ru_hata"))
+        yarim = bool(R.get("ru_hata")) or bool(R.get("canli_en_yazildi") and R.get("ru_bekleniyor")
+                                                   and "RU description (PUT translations/ru)" not in (R.get("yazildi") or []))
         sonuc.append({**{k: R.get(k) for k in ("ilan", "sonuc", "hata", "yazildi")}, "ozet_eslesme": _ozet_eslesme(out, lid),
                       "yarim": yarim})
         print(f"[{n}/{min(len(aday), a.limit)}] {lid} {R['sonuc']}{' YARIM (EN yazildi, RU yok)' if yarim else ''} | ozet "
@@ -554,7 +605,7 @@ def main():
     ap.add_argument("--gorsel-indir", action="store_true")
     ap.add_argument("--ru-yeniden", action="store_true", help="kuru/yaz --ilan: poster EN = canli + beyan + Latin notu, RU = ru_poster "
                     "(yaz: yalniz tek ilan; toplu poster kapali)")
-    ap.add_argument("--onay-ozet", default=None, help="yaz --ru-yeniden: kuru plandaki KONTROL onay_ozet (64 hex)")
+    ap.add_argument("--onay-ozet", default=None, help="yaz: kuru plandaki KONTROL onay_ozet (64 hex; poster --ru-yeniden, kupa, yil)")
     ap.add_argument("--onay-dosya", default=None, help="toplu poster --ru-yeniden: kuru plan ONAY_OZET.json (ilan -> ozet)")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()

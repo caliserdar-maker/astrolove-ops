@@ -249,13 +249,16 @@ def analiz(ham, out):
     return oz
 
 
-def oku(api, shop, out):
+def oku(api, shop, out, aile=None):
     bolum = {str(s["shop_section_id"]): s.get("title") for s in (api.get(f"/shops/{shop}/sections") or {}).get("results") or []}
     ids = B.aktif_idler(api, shop)
     ilan = []
     for k in range(0, len(ids), 100):
         ilan += (api.get("/listings/batch", {"listing_ids": ",".join(ids[k:k + 100])}) or {}).get("results") or []
         B.kota(api)
+    if aile:   # Serdar 23 Eki A2: yalniz bir aile (ornek kupa) okunur; kota icin
+        ilan = [L for L in ilan if B.BOLUM_AILE.get(bolum.get(str(L.get("shop_section_id")))) == aile]
+        print(f"AILE {aile}: {len(ilan)} ilan", flush=True)
     ham = []
     for n, L in enumerate(sorted(ilan, key=lambda x: int(x["listing_id"])), 1):
         lid = str(L["listing_id"])
@@ -279,6 +282,7 @@ def main():
     ap.add_argument("--mod", choices=["oku", "analiz"], required=True)
     ap.add_argument("--ham", help="analiz: HAM.json.gz")
     ap.add_argument("--out", required=True)
+    ap.add_argument("--aile", choices=sorted(set(B.BOLUM_AILE.values())), default=None, help="oku: yalniz bu aile")
     a = ap.parse_args()
     out = pathlib.Path(a.out); out.mkdir(parents=True, exist_ok=True)
     if a.mod == "analiz":
@@ -292,7 +296,7 @@ def main():
             store.refresh()
         api = B.Etsy(store)
         try:
-            ham = oku(api, os.environ["ETSY_SHOP_ID"], out)
+            ham = oku(api, os.environ["ETSY_SHOP_ID"], out, a.aile)
         except B.Dur as e:
             print(f"DUR: {e} | istek {api.calls} | kota {api.remaining}", flush=True); sys.exit(3)
     analiz(ham, out)

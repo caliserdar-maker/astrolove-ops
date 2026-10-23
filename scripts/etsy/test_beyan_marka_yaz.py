@@ -80,10 +80,29 @@ class Sahte:
         self.ru[lid].update(dict(description=data["description"]))
 
 
-def kos(api, lid="1"):
-    out = pathlib.Path(tempfile.mkdtemp())
+BOLUM_AILE_TEST = {9: "poster", 8: "kupa", 7: "yil"}
+
+
+def kuru_ozet(api, lid):
+    """Kuru planin (kupa / yil) urettigi onay ozeti: ayni plan fonksiyonlari, sahte ilanin o anki metni (2a, Serdar 23 Eki A1)."""
+    L, r = api.ilan[lid], api.ru[lid]
+    aile = BOLUM_AILE_TEST.get(L.get("shop_section_id"))
+    if aile not in m.OZET_AILE:
+        return None
     try:
-        R = m.yaz(api, "1", lid, out)
+        en1 = m.en_plan(L.get("description"), aile)[0]
+        ru1 = m.ru_plan(r.get("description"), aile)[0] if r.get("description") else None
+    except m.Dur:
+        return None
+    return m.aile_ozet(en1, ru1)
+
+
+def kos(api, lid="1", onay_ozet="kuru"):
+    out = pathlib.Path(tempfile.mkdtemp())
+    if onay_ozet == "kuru":
+        onay_ozet = kuru_ozet(api, lid)
+    try:
+        R = m.yaz(api, "1", lid, out, onay_ozet=onay_ozet)
     except m.Dur as e:
         return f"DUR {e}", None
     return R["sonuc"] != "FAIL", json.loads((out / f"SONUC_{lid}.json").read_text())
@@ -91,6 +110,8 @@ def kos(api, lid="1"):
 
 def toplu(api, aile, ids, limit=10, ru_yeniden=False, onay_ozetler=None):
     out = pathlib.Path(tempfile.mkdtemp())
+    if onay_ozetler is None and aile in m.OZET_AILE:   # kuru plan taklidi: listedeki her ilanin ozeti
+        onay_ozetler = {l: o for l in ids for o in [kuru_ozet(api, l)] if o}
     a = type("A", (), dict(aile=aile, ilan=ids, limit=limit, ru_yeniden=ru_yeniden, onay_ozetler=onay_ozetler or {}))()
     try:
         ok = m.toplu(api, "1", a, out)
@@ -315,7 +336,37 @@ def main():
               and Z4["ozet"]["fail"][0]["sonuc"] == "DUR" and "9" not in {l for _, l, _ in api.yaz}))
     api = Sahte(ilanlar={"10": (KUPA, 8, RU), "11": (EN, 9, RU)})
     okt5, Z5 = toplu(api, "kupa", ["10", "11"], limit=10)
+    s.append(("toplu kupa: listedeki ilanin ozeti yoksa (aile disi) hic yazma yok", isinstance(okt5, str) and "onay ozeti" in okt5
+              and api.yaz == []))
+    api = Sahte(ilanlar={"10": (KUPA, 8, RU), "11": (EN, 9, RU)})
+    okt5, Z5 = toplu(api, "kupa", ["10", "11"], limit=10, onay_ozetler={"10": kuru_ozet(api, "10"), "11": "0" * 64})
     s.append(("toplu: yalniz secilen aile", okt5 is True and {l for _, l, _ in api.yaz} == {"10"}))
+    # Serdar 23 Eki A1: kupa / yil 2a ozet kapisi
+    api = Sahte(en=KUPA, bolum=8); r, _ = kos(api, onay_ozet=None)
+    s.append(("kupa: onay ozeti yoksa DUR, yazma yok", isinstance(r, str) and "onayli kuru planla" in r and api.yaz == []))
+    api = Sahte(en=KUPA, bolum=8); r, _ = kos(api, onay_ozet="0" * 64)
+    s.append(("kupa: ozet tutmazsa DUR, yazma yok", isinstance(r, str) and "onayli kuru planla" in r and api.yaz == []))
+    api = Sahte(ilanlar={"1": (YIL, 7, None)}); r, _ = kos(api, onay_ozet="0" * 64)
+    s.append(("yil: ozet tutmazsa DUR, yazma yok", isinstance(r, str) and "onayli kuru planla" in r and api.yaz == []))
+    api = Sahte(en=KUPA, bolum=8); oz0 = kuru_ozet(api, "1"); api.ilan["1"]["description"] += "\n\nYeni paragraf."
+    r, _ = kos(api, onay_ozet=oz0)
+    s.append(("kupa: kurudan sonra canli EN degisti -> ozet tutmaz, DUR", isinstance(r, str) and "onayli kuru planla" in r and api.yaz == []))
+    api = Sahte(ilanlar={"50": (KUPA, 8, RU), "51": (KUPA, 8, RU)})
+    okz, Zz = toplu(api, "kupa", ["50", "51"], limit=10)
+    s.append(("toplu kupa: kayitta ilan basina ozet eslesmesi", okz is True and Zz["ozet"]["ozet_eslesen"] == 2
+              and all(x["ozet_eslesme"] is True for x in Zz["ilanlar"])))
+    api = Sahte(ilanlar={"52": (YIL, 7, None), "53": (YIL, 7, None)})
+    oky, Zy = toplu(api, "yil", ["52", "53"], limit=10)
+    s.append(("toplu yil: yalniz EN PATCH, ozet eslesmesi 2", oky is True and Zy["ozet"]["ozet_eslesen"] == 2
+              and [k for k, _, _ in api.yaz] == ["patch", "patch"]))
+    api = Sahte(ilanlar={"54": (KUPA, 8, RU), "55": (KUPA, 8, RU)})
+    _patch = api.patch
+    def patch_dus(path, data, A=api):
+        _patch(path, data); raise ConnectionError("yanit dustu")   # PATCH uygulandi, yanit gelmedi
+    api.patch = patch_dus
+    oka5, Za5 = toplu(api, "kupa", ["54", "55"], limit=10)
+    s.append(("A5: PATCH uygulandi yanit dustu -> canli EN okunur, YARIM, 2. ilana yazma yok", oka5 is False
+              and Za5["ozet"]["yarim"] == ["54"] and {l for _, l, _ in api.yaz} == {"54"}))
     api = Sahte(ilanlar={"12": (KUPA, 8, RU), "13": (KUPA, 8, RU)}); api.remaining = m.KOTA_TABAN - 1
     okt6, Z6 = toplu(api, "kupa", ["12", "13"], limit=10)
     s.append(("toplu: kota < taban 10 -> DUR, yazma yok", isinstance(okt6, str) and "kota" in okt6 and api.yaz == []))

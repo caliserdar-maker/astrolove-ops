@@ -14,6 +14,7 @@ on:
     inputs:
       mod: {description: "oku | analiz", required: true, default: "oku"}
       kaynak_kosu: {description: "analiz: HAM.json.gz'nin oldugu kosu no", required: false, default: ""}
+      aile: {description: "oku: yalniz bu aile (poster | kupa | yil); bos = hepsi", required: false, default: ""}
 
 env:
   D: "gdrive:ASTROLOVE/TEMP/DENETIM_20261021/RU_OLCUM"
@@ -66,7 +67,8 @@ jobs:
           set +e -o pipefail
           mkdir -p _work _out
           case "$MOD" in
-            oku) python3 scripts/etsy/ru_olcum.py --mod oku --out _out 2>&1 | tee _work/kosu.log ;;
+            oku) AI="${{ inputs.aile }}"; [[ "$AI" =~ ^(|poster|kupa|yil)$ ]] || { echo "::error::aile"; exit 1; }
+                 python3 scripts/etsy/ru_olcum.py --mod oku --out _out ${AI:+--aile "$AI"} 2>&1 | tee _work/kosu.log ;;
             analiz) [[ "$KAYNAK" =~ ^[0-9]+$ ]] || { echo "::error::kaynak_kosu"; exit 1; }
                     rclone copyto "$D/$KAYNAK/HAM.json.gz" _work/HAM.json.gz || { echo "::error::HAM yok"; exit 1; }
                     python3 scripts/etsy/ru_olcum.py --mod analiz --ham _work/HAM.json.gz --out _out 2>&1 | tee _work/kosu.log ;;
