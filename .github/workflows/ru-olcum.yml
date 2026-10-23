@@ -1,0 +1,87 @@
+name: ru-olcum
+
+# RU aciklama olcumu (Serdar 23 Eki; SALT OKUMA, Etsy'ye YAZMA YOK) - scripts/etsy/ru_olcum.py.
+# oku   : 234 aktif ilanin EN + RU aciklamasi + envanter (boy/renk/format) okunur (ilan basina kota kapisi), HAM.json.gz + analiz.
+# analiz: Etsy'ye baglanmaz; onceki kosunun Drive HAM.json.gz'si (kaynak_kosu) yeniden analiz edilir.
+# Cikti Drive ASTROLOVE/TEMP/DENETIM_20261021/RU_OLCUM/<run_id>/ (RU_OLCUM.csv, RU_OZET.json/md, HAM.json.gz).
+
+permissions:
+  actions: read
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      mod: {description: "oku | analiz", required: true, default: "oku"}
+      kaynak_kosu: {description: "analiz: HAM.json.gz'nin oldugu kosu no", required: false, default: ""}
+
+env:
+  D: "gdrive:ASTROLOVE/TEMP/DENETIM_20261021/RU_OLCUM"
+
+jobs:
+  is:
+    runs-on: ubuntu-latest
+    timeout-minutes: 140
+    steps:
+      - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        if: ${{ inputs.mod == 'oku' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Token
+        if: ${{ inputs.mod == 'oku' }}
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+      - name: Olcum
+        env:
+          MOD: ${{ inputs.mod }}
+          KAYNAK: ${{ inputs.kaynak_kosu }}
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set +e -o pipefail
+          mkdir -p _work _out
+          case "$MOD" in
+            oku) python3 scripts/etsy/ru_olcum.py --mod oku --out _out 2>&1 | tee _work/kosu.log ;;
+            analiz) [[ "$KAYNAK" =~ ^[0-9]+$ ]] || { echo "::error::kaynak_kosu"; exit 1; }
+                    rclone copyto "$D/$KAYNAK/HAM.json.gz" _work/HAM.json.gz || { echo "::error::HAM yok"; exit 1; }
+                    python3 scripts/etsy/ru_olcum.py --mod analiz --ham _work/HAM.json.gz --out _out 2>&1 | tee _work/kosu.log ;;
+            *) echo "::error::mod"; exit 1 ;;
+          esac
+          echo "KOD=${PIPESTATUS[0]}" >> "$GITHUB_ENV"
+      - name: Token geri yaz + cikti Drive'a
+        if: always()
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || echo "Token yenilenmedi"
+          [ -f _work/kosu.log ] && python3 scripts/guvenlik/log_suz.py < _work/kosu.log > "_out/kosu_$(date -u +%Y%m%d_%H%M).txt"
+          if grep -rqE '"(access_token|refresh_token)"[[:space:]]*:[[:space:]]*"[A-Za-z0-9._-]{20,}"|x-api-key[[:space:]]*:' _out/ 2>/dev/null; then
+            echo "::error::Ciktida sir bulundu; Drive'a yazilmadi"; exit 1; fi
+          rclone copy _out "$D/${GITHUB_RUN_ID}" -q && echo "::notice title=RU OLCUM::Drive TEMP/DENETIM_20261021/RU_OLCUM/${GITHUB_RUN_ID}/"
+          [ "${KOD:-1}" = 0 ] || { echo "::error::cikis ${KOD:-?}"; exit 1; }
+      - if: always()
+        run: rm -rf _work ~/.config/rclone
