@@ -1,9 +1,9 @@
 {
  "aktif": false,
- "not": "Serdar 23 Eki SIRA 2: rakamlar ONAY BEKLIYOR; aktif=false iken etsy_common esigi etkisiz (CLAUDE.md taban 10 gecerli). Formul: genel = taban + 2R + M (kosu ve ilan baslangici), pod-audit = taban + 2R + P; aktifken HER istekten once siparis payi taban + 2R; router muaf (kendi --quota-min 400).",
+ "not": "Serdar 23 Eki ONAYLI rakamlar: R 15, M 51, P 1638 (en kotu). Esikler: genel 481 (her istekte sert taban 430), pod-audit 2068 (430), siparis rolu (kupa-siparis, takip-denetim) baslangic esigi yok, sert taban taban+R = 415; router muaf (kendi --quota-min 400). aktif yalniz 2c router testinden sonra true yapilir.",
  "taban": 400,
  "R": 15,
  "M": 51,
- "P": 546,
- "kaynak": "R: bir siparis = paket kosusu 1 receipt listesi + takip kosusu 1 liste + GET/POST/GET = 5 cagri x 3 deneme (etsy_common._call); her ek elle router kosusu +3. M: beyan_marka_yaz yaz() tekil modda en fazla 17 cagri x 3. P: pod_audit ilan basina 7 GET x 78 verified ilan (STATE'e gore degisir) = 546; denemelerle en kotu 1638."
+ "P": 1638,
+ "kaynak": "R: bir siparis = paket kosusu 1 receipt listesi + takip kosusu 1 liste + GET/POST/GET = 5 cagri x 3 deneme (etsy_common._call). M: beyan_marka_yaz yaz() tekil modda en fazla 17 cagri x 3. P: pod_audit ilan basina 7 GET x 78 ilan x 3 deneme; 78 is akisi basligindan, SAYILMADI."
 }

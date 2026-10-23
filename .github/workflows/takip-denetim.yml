@@ -123,6 +123,7 @@ jobs:
       - name: Denetle
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_KOTA_ROL: siparis   # Serdar 23 Eki: 481/430'dan muaf, sert taban 415
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
           TOKEN_FILE: _work/ETSY_TOKEN.json

@@ -26,12 +26,13 @@ bolumu okunmadan baslanmaz.
 - KURAL (tum oturumlar): Etsy kosusunu istedigin an baslat; kilit sirayi kendisi tutar,
   hicbir kosu iptal edilmez (bekleme en fazla 120 dk, asilirsa is yapmadan FAIL).
 - Hicbir sir loga yazilmaz; token degerleri `::add-mask::` ile maskelenir.
-- Etsy kota tabani 10 (Serdar 15 Eki): tum betiklerde `x-remaining-today` < 10 ise DUR. Baska taban (150/300/500 vb.)
-  Serdar onayi olmadan konmaz (14 Eki 500 tabani onaysizdi, kaldirildi).
-- KOTA ESIGI (Serdar 23 Eki): tum Etsy isleri esik formulune uyar: router disi isler kalan < taban + 2R + M ise baslamaz /
-  ilana baslamaz; pod-audit taban + 2R + P; router tabani 400. Tek kaynak `config/etsy_kota_esik.json` + `etsy_common.kota_esigi`;
-  rakamlar ve `aktif` yalniz Serdar onayindan sonra (o zamana kadar yukaridaki taban 10 gecerli). Aktifken her istekten once
-  siparis payi (taban + 2R) korunur; ilan basina `api.kota_kapisi(...)` toplu islere eklenmeli (su an yalniz beyan_marka_yaz toplu).
+- KOTA ESIGI (Serdar 23 Eki, rakamlar ONAYLI): genel Etsy isleri kalan < 481 ise baslamaz / ilana baslamaz, her istekte sert
+  taban 430; pod-audit 2068 (sert 430); siparis rolu (kupa-siparis, takip-denetim) baslangic esigi yok, sert taban 415; router 400
+  (kendi --quota-min). Formul: genel taban + 2R + M, pod-audit taban + 2R + P, siparis taban + R; taban 400, R 15, M 51, P 1638
+  (P'deki 78 ilan SAYILMADI, is akisi basligindan). Tek kaynak `config/etsy_kota_esik.json` + `etsy_common.kota_esigi`; bozuk config
+  esigi PASIF yapar (uyari, kosu durmaz). `aktif` true olana kadar eski kural gecerli (15 Eki): tum betiklerde `x-remaining-today` < 10 ise DUR; `aktif` yalniz
+  router 2c testi (router-kota-deneme) PASS olduktan sonra true yapilir. Baska taban Serdar onayi olmadan
+  konmaz. Toplu isler ilan basina `api.kota_kapisi(...)` cagirmali (su an yalniz beyan_marka_yaz toplu).
 - **updateListing bir TASLAGI otomatik yayina alir** (7 Eyl 2026 olcumu: gece
   aciklama guncellemesi 72 taslagi `active` yapti; `state_timestamp` = PATCH ani).
   Toplu guncellemede "ilan taslak kalir" varsayimi YAPILMAZ: yazmadan once state
