@@ -236,6 +236,51 @@ def poster_yeni_yol():
     return s
 
 
+class SahteMagaza(Sahte):
+    """kuru icin: /shops/{shop}/listings (aktif sayfa) ve cagri gunlugu."""
+    def __init__(self, **k):
+        super().__init__(**k); self.yollar = []
+
+    def get(self, path, params=None, ok404=False):
+        self.yollar.append(path)
+        if path.endswith("/listings"):
+            self.calls += 1
+            return {"results": [{"listing_id": int(l)} for l in self.ilan], "count": len(self.ilan)}
+        return super().get(path, params, ok404)
+
+
+def gece_aday():
+    """Gece 23 Eki: kuru --aday-aile ilanlari kendisi secer (EN ekle / RU yaz), RU tekil GET yalniz o ailede, soru okumasi yok;
+    ONAY_OZET kuru_ozet ile ayni; toplu ara ozeti her ilandan sonra, kayitta canli_en_yazildi."""
+    s = []
+    tam = m.en_plan(KUPA, "kupa")[0]
+    ru_tam = m.ru_plan(RU, "kupa")[0]
+    il = {"31": (KUPA, 8, RU), "32": (tam, 8, ru_tam), "33": (KUPA, 8, RU), "34": (YIL, 7, None), "35": (EN, 9, RU), "36": (KUPA, 8, RU)}
+    api = SahteMagaza(ilanlar=il)
+    out = pathlib.Path(tempfile.mkdtemp())
+    a = type("A", (), dict(ilan=[], aday_aile="kupa", aday_limit=2, haric=["31"], gorsel_indir=False, ru_yeniden=False))()
+    m.kuru(api, "1", a, out)
+    oz = json.loads((out / "ONAY_OZET.json").read_text()) if (out / "ONAY_OZET.json").exists() else {}
+    ru_yol = [y for y in api.yollar if y.endswith("/translations/ru")]
+    s.append(("gece: kuru --aday-aile kupa: 32 tam atlanir, 31 haric, limit 2 -> 33, 36; ozet kuru_ozet ile ayni",
+              a.ilan == ["33", "36"] and oz == {l: kuru_ozet(api, l) for l in ("33", "36")}))
+    s.append(("gece: RU tekil GET yalniz kupada (4 ilan, tekrar yok), soru okumasi yok, yazma yok",
+              len(ru_yol) == 4 and all("/35/" not in y and "/34/" not in y for y in ru_yol)
+              and not any(y.endswith("/personalization") for y in api.yollar) and api.yaz == []))
+    api = SahteMagaza(ilanlar=il); out = pathlib.Path(tempfile.mkdtemp())
+    a = type("A", (), dict(ilan=[], aday_aile="yil", aday_limit=25, haric=[], gorsel_indir=False, ru_yeniden=False))()
+    m.kuru(api, "1", a, out)
+    s.append(("gece: kuru --aday-aile yil: yalniz 34, RU tekil GET yok", a.ilan == ["34"]
+              and not any(y.endswith("/translations/ru") for y in api.yollar)
+              and list(json.loads((out / "ONAY_OZET.json").read_text())) == ["34"]))
+    api = Sahte(ilanlar={"41": (KUPA, 8, RU), "42": (KUPA, 8, RU)})
+    okg, Zg = toplu(api, "kupa", ["41", "42"], limit=1)
+    s.append(("gece: toplu limit 1 -> 1 ilan PASS, ozet eslesti, kayitta canli_en_yazildi alani", okg is True
+              and Zg["ozet"]["pass_"] == 1 and Zg["ozet"]["ozet_eslesen"] == 1 and "canli_en_yazildi" in Zg["ilanlar"][0]
+              and {l for _, l, _ in api.yaz} == {"41"}))
+    return s
+
+
 def main():
     m.time.sleep = lambda s: None
     s = []
@@ -439,6 +484,7 @@ def main():
     s.append(("A8: RU baslik var, RU aciklama bos -> DUR", isinstance(r, str) and "RU aciklama bos" in r and api.yaz == []))
     api = Sahte(); api.remaining = None; r, _ = kos(api)
     s.append(("A6: kota basligi okunamadi -> DUR, yazma yok", isinstance(r, str) and "kota" in r and api.yaz == []))
+    s += gece_aday()
     for ad, ok_ in s:
         print(("PASS " if ok_ else "FAIL ") + ad)
     n = sum(ok_ for _, ok_ in s)

@@ -199,13 +199,15 @@ def kuru(api, shop, a, out):
         r = api.get("/listings/batch", {"listing_ids": ",".join(ids[k:k + 100]), "includes": "Translations"}) or {}
         ilan += r.get("results") or []
         kota(api)
-    satir, oz, ortaklar = [], {}, {}
+    satir, oz, ortaklar, ru_onbellek = [], {}, {}, {}
+    aday_aile = getattr(a, "aday_aile", None)
     for L in ilan:
         d = norm(L.get("description"))
         b = bolum.get(str(L.get("shop_section_id")), "?")
         aile = BOLUM_AILE.get(b, "?")
-        if aile in ("poster", "kupa"):   # RU yazimla ayni kaynaktan (tekil GET); batch ceviri ile uyusmazlik sayilir
-            ru = ru_tekil(api, shop, str(L["listing_id"])); kota(api)
+        if aile in ("poster", "kupa") and aday_aile in (None, aile):   # RU yazimla ayni kaynaktan (tekil GET); batch ile uyusmazlik
+            ru = ru_tekil(api, shop, str(L["listing_id"])); kota(api)   # sayilir. --aday-aile: yalniz o ailede (kota, gece 23 Eki)
+            ru_onbellek[str(L["listing_id"])] = ru
             ru_batch_uyusmaz = bool(ru) != bool(ru_gercek(ru_ceviri(L)))
         else:
             ru, ru_batch_uyusmaz = ru_gercek(ru_ceviri(L)), False
@@ -249,16 +251,23 @@ def kuru(api, shop, a, out):
     for x in satir:
         if x["en_plan"].startswith("DUR") or x["ru_plan"].startswith("DUR"):
             print(f"DUR ilan {x['listing_id']} ({x['aile']}): EN {x['en_plan']} | RU {x['ru_plan']}", flush=True)
+    if aday_aile:   # gece 23 Eki: yazilacak ilanlar kuru icinde secilir (EN ekle ya da RU yaz; DUR plani ve active disi alinmaz)
+        haric = set(getattr(a, "haric", None) or [])
+        a.ilan = [str(x["listing_id"]) for x in sorted(satir, key=lambda x: int(x["listing_id"]))
+                  if x["aile"] == aday_aile and x["state"] == "active" and str(x["listing_id"]) not in haric
+                  and (x["en_plan"] == "ekle" or x["ru_plan"] == "yaz")][:a.aday_limit]
+        print(f"ADAY {aday_aile}: {len(a.ilan)} ilan (limit {a.aday_limit}, haric {len(haric)}): {','.join(a.ilan)}", flush=True)
     for lid in a.ilan:
         L = next((x for x in ilan if str(x.get("listing_id")) == lid), None)
         if not L:
             print(f"PLAN {lid}: aktif listede yok", flush=True); continue
         d = norm(L.get("description"))
         aile = BOLUM_AILE.get(bolum.get(str(L.get("shop_section_id"))), "?")
-        ru = ru_tekil(api, shop, lid) if aile in ("poster", "kupa") else ru_gercek(ru_ceviri(L))
-        soru = kisisel_sorular(api, shop, lid, L); kota(api)
+        ru = (ru_onbellek[lid] if lid in ru_onbellek else ru_tekil(api, shop, lid)) if aile in ("poster", "kupa") \
+            else ru_gercek(ru_ceviri(L))
+        soru = "atlandi (aday kuru)" if aday_aile else kisisel_sorular(api, shop, lid, L); kota(api)
         rapor = [f"ILAN {lid} | state {L.get('state')} | aile {aile} | kisisellestirme acik {L.get('is_personalizable')} | "
-                 f"soru {'okunamadi' if soru is None else len(soru)} | ortak {ortak(L)}"]
+                 f"soru {'okunamadi' if soru is None else (soru if isinstance(soru, str) else len(soru))} | ortak {ortak(L)}"]
         try:
             yeni, notu = en_plan(d, aile)
             rapor += [f"EN: {notu}"]
@@ -533,6 +542,15 @@ def _ozet_eslesme(out, lid):
         return None
 
 
+def _toplu_ozet_yaz(out, a, aday, sonuc, api, ara=False):
+    oz = dict(aile=a.aile, aday=len(aday), islenen=len(sonuc), pass_=sum(x["sonuc"] == "PASS" for x in sonuc),
+              ozet_eslesen=sum(bool(x.get("ozet_eslesme")) for x in sonuc), yarim=[x["ilan"] for x in sonuc if x.get("yarim")],
+              atla=sum(x["sonuc"] == "ATLA" for x in sonuc), fail=[x for x in sonuc if x["sonuc"] in ("FAIL", "DUR", "YARIM")],
+              kota=api.remaining, ara=ara)
+    (out / "TOPLU_OZET.json").write_text(json.dumps(dict(ozet=oz, ilanlar=sonuc), ensure_ascii=False, indent=1), encoding="utf-8")
+    return oz
+
+
 def toplu(api, shop, a, out):
     """Aile aile toplu yazim (Serdar 23 Eki 4): aktif ilanlar (bolumden aile), --ilan verilirse yalniz onlar; beyani zaten tam
     olanlar ATLA (istek: yalniz plan okumasi). Her ilanda kapi 1b; ilk FAIL ya da Dur'da tum kosu DUR. --limit yazilan ilan sayisi."""
@@ -582,17 +600,14 @@ def toplu(api, shop, a, out):
             print(f"[{n}] {lid} {'YARIM (EN yazildi, RU yok)' if yarim else 'DUR'}: {dur}", flush=True); break
         yarim = bool(R.get("ru_hata")) or bool(R.get("canli_en_yazildi") and R.get("ru_bekleniyor")
                                                    and "RU description (PUT translations/ru)" not in (R.get("yazildi") or []))
-        sonuc.append({**{k: R.get(k) for k in ("ilan", "sonuc", "hata", "yazildi")}, "ozet_eslesme": _ozet_eslesme(out, lid),
-                      "yarim": yarim})
+        sonuc.append({**{k: R.get(k) for k in ("ilan", "sonuc", "hata", "yazildi", "canli_en_yazildi")},
+                      "ozet_eslesme": _ozet_eslesme(out, lid), "yarim": yarim})
+        _toplu_ozet_yaz(out, a, aday, sonuc, api, ara=True)   # inceleme 23 Eki: zaman asiminda da kayit kalsin
         print(f"[{n}/{min(len(aday), a.limit)}] {lid} {R['sonuc']}{' YARIM (EN yazildi, RU yok)' if yarim else ''} | ozet "
               f"{'eslesti' if sonuc[-1]['ozet_eslesme'] else 'YOK'} | kota {api.remaining}", flush=True)
         if R["sonuc"] == "FAIL":
             break
-    oz = dict(aile=a.aile, aday=len(aday), islenen=len(sonuc), pass_=sum(x["sonuc"] == "PASS" for x in sonuc),
-              ozet_eslesen=sum(bool(x.get("ozet_eslesme")) for x in sonuc), yarim=[x["ilan"] for x in sonuc if x.get("yarim")],
-              atla=sum(x["sonuc"] == "ATLA" for x in sonuc), fail=[x for x in sonuc if x["sonuc"] in ("FAIL", "DUR", "YARIM")],
-              kota=api.remaining)
-    (out / "TOPLU_OZET.json").write_text(json.dumps(dict(ozet=oz, ilanlar=sonuc), ensure_ascii=False, indent=1), encoding="utf-8")
+    oz = _toplu_ozet_yaz(out, a, aday, sonuc, api)
     print("TOPLU_OZET", json.dumps(oz, ensure_ascii=False), flush=True)
     if dur:
         raise Dur(dur)
@@ -611,6 +626,9 @@ def main():
                     "(yaz: yalniz tek ilan; toplu poster kapali)")
     ap.add_argument("--onay-ozet", default=None, help="yaz: kuru plandaki KONTROL onay_ozet (64 hex; poster --ru-yeniden, kupa, yil)")
     ap.add_argument("--onay-dosya", default=None, help="toplu poster --ru-yeniden: kuru plan ONAY_OZET.json (ilan -> ozet)")
+    ap.add_argument("--aday-aile", choices=["kupa", "yil"], default=None, help="kuru: yazilacak ilanlari bu ailede sec (ONAY_OZET)")
+    ap.add_argument("--aday-limit", type=int, default=25)
+    ap.add_argument("--haric", default="", help="kuru --aday-aile: secilmeyecek ilanlar (virgullu)")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
     a.ilan = [x for x in a.ilan.replace(" ", "").split(",") if x]
@@ -621,6 +639,9 @@ def main():
     if a.mod == "toplu" and (a.onay != ONAY_TOPLU or not a.aile or not 1 <= a.limit <= 300):
         raise SystemExit(f"DUR: toplu icin --onay {ONAY_TOPLU}, --aile ve 1 <= --limit <= 300")
     a.onay_ozetler = json.loads(pathlib.Path(a.onay_dosya).read_text()) if a.onay_dosya else {}
+    a.haric = [x for x in a.haric.replace(" ", "").split(",") if x]
+    if a.mod == "toplu" and not a.ilan and a.onay_ozetler:   # gece 23 Eki: ilan listesi kuru planin ONAY_OZET anahtarlari
+        a.ilan = sorted(a.onay_ozetler, key=int)
     out = pathlib.Path(a.out); out.mkdir(parents=True, exist_ok=True)
     k, s = os.environ.get("ETSY_API_KEY", ""), os.environ.get("ETSY_SHARED_SECRET", "")
     mask(k); mask(s)

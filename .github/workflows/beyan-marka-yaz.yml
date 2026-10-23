@@ -1,7 +1,8 @@
 name: beyan-marka-yaz
 
 # AI beyani (EN aciklama) + marka adi (RU aciklama) - scripts/etsy/beyan_marka_yaz.py (Serdar 22 Eki: AI beyani karari, marka plani B).
-# kuru: SALT OKUMA (234 aktif ilan sayimi + --ilan plani + istege bagli galeri gorsel indirme).
+# kuru: SALT OKUMA (234 aktif ilan sayimi + --ilan plani + istege bagli galeri gorsel indirme). aile kupa|yil verilirse yazilacak
+#       ilanlar kuruda secilir (--aday-aile, en fazla limit; RU tekil GET yalniz o ailede, soru okumasi yok) ve ONAY_OZET.json yazilir.
 # yaz : ETSY'YE YAZAR, yalniz 1 ilan, onay SERDAR_BEYAN_PILOT (once 4570143815 -> geri okuma -> Merkez canli kontrol -> Serdar onayi).
 # toplu: ETSY'YE YAZAR, tek aile, en fazla `limit` ilan, onay SERDAR_BEYAN_TOPLU (Serdar 23 Eki: once 10, DUR, Merkez kontrol).
 #        Her ilanda kapi 1b (yedek vs geri okuma); ilk FAIL/DUR'da kosu durur. Beyani tam ilan atlanir (yeniden baslatilabilir).
@@ -16,7 +17,7 @@ on:
     inputs:
       mod: {description: "kuru | yaz | toplu", required: true, default: "kuru"}
       ilan: {description: "ilan kimligi (yaz: tam 1; toplu: bos = ailedeki tum aktif)", required: false, default: ""}
-      aile: {description: "toplu: poster | kupa | yil", required: false, default: ""}
+      aile: {description: "toplu: poster | kupa | yil; kuru: kupa | yil = yazilacak ilanlari sec (ONAY_OZET, en fazla limit)", required: false, default: ""}
       limit: {description: "toplu: en fazla yazilacak ilan", required: false, default: "10"}
       onay: {description: "yaz icin onay sozcugu", required: false, default: ""}
       gorsel_indir: {description: "kuru: --ilan galeri gorsellerini indir (evet/hayir)", required: false, default: "hayir"}
@@ -85,6 +86,10 @@ jobs:
           if [ "$MOD" = toplu ]; then
             [[ "$AILE" =~ ^(poster|kupa|yil)$ && "$LIMIT" =~ ^[0-9]+$ ]] || { echo "::error::aile/limit"; exit 1; }
             args+=(--aile "$AILE" --limit "$LIMIT")
+          fi
+          if [ "$MOD" = kuru ] && [ -n "$AILE" ]; then   # gece 23 Eki: kuru yazilacak ilanlari secer (aile kupa|yil, en fazla limit)
+            [[ "$AILE" =~ ^(kupa|yil)$ && "$LIMIT" =~ ^[0-9]+$ ]] || { echo "::error::kuru aile/limit"; exit 1; }
+            args+=(--aday-aile "$AILE" --aday-limit "$LIMIT")
           fi
           [ "$GORSEL" = evet ] && args+=(--gorsel-indir)
           [ "$RU_YENI" = evet ] && args+=(--ru-yeniden)
