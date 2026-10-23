@@ -18,6 +18,26 @@ AY = {"January": "января", "February": "февраля", "March": "мар�
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from beyan_marka_yaz import BEYAN, RU_BEYAN  # noqa: E402  tek kaynak
 import etsy_common as E  # noqa: E402
+# Serdar 23 Eki madde 1-2 (secenek a): baski hatti Kiril basamaz; Cinzel / EB Garamond Italic aksanli Latin harfleri basar
+# (23 Eki olcumu: E/É, O/Ö, A/Ä, U/Ü, e/é, o/ö murekkep + ust sinir farki). EN'e eklenir, RU birebir karsiligi.
+LATIN_EN = "Names and message must use English letters. Letters with accents, like É or Ö, are fine."
+LATIN_RU = "Имена и надпись должны быть написаны английскими буквами. Буквы с надстрочными знаками, например É или Ö, тоже подходят."
+LATIN_CAPA = "No emoji. Please check your spelling."
+
+
+def poster_en(desc):
+    """Poster yeni EN: canli EN + beyan (beyan_marka_yaz.en_plan) + Latin harf notu (kisisellestirme satirinda, 'No emoji.' sonrasi).
+    Not zaten varsa degismez; capa tam 1 kez degilse ValueError."""
+    import beyan_marka_yaz as B
+    d = B.norm(desc)
+    en = B.en_plan(d, "poster")[0] or d
+    if LATIN_EN in en:
+        return en
+    if en.count(LATIN_CAPA) != 1:
+        raise ValueError(f"Latin notu capasi {en.count(LATIN_CAPA)} kez (1 olmali)")
+    return en.replace(LATIN_CAPA, f"No emoji. {LATIN_EN} Please check your spelling.")
+
+
 DATIF = {"Aries": "Овну", "Taurus": "Тельцу", "Gemini": "Близнецам", "Cancer": "Раку", "Leo": "Льву", "Virgo": "Деве",
          "Libra": "Весам", "Scorpio": "Скорпиону", "Sagittarius": "Стрельцу", "Capricorn": "Козерогу", "Aquarius": "Водолею",
          "Pisces": "Рыбам"}
@@ -46,7 +66,7 @@ def p_giris(m, ctx):
         raise ValueError(f"giris kuyrugu burclari {ad}")
     ctx["burc"] = (a, b)
     secim = " или ".join(dict.fromkeys(DATIF[x] for x in ad))
-    return (f"Именной постер для пары со знаками зодиака {cift(a, b)}, с вашими именами и короткой надписью. Особенный "
+    return (f"Именной постер для пары со знаками зодиака {cift(a, b)}, с вашими двумя именами и вашей собственной короткой надписью. Особенный "
             f"подарок молодожёнам или на первую годовщину. Наш оригинальный дизайн объединяет ваши два знака зодиака в один "
             f"общий символ, а ваши имена располагаются под двумя небольшими знаками. Выберите цифровой файл или напечатанный "
             f"постер. Особенный подарок на годовщину, помолвку, свадьбу, День святого Валентина и день рождения. Удачный "
@@ -64,12 +84,12 @@ def p_siparis(m, ctx):
     renk, isim, mesaj, fikir = m.group(1), m.group(2), m.group(3), m.group(4)
     ctx.update(renk=int(renk), isim=int(isim), mesaj=int(mesaj))
     return ("КАК ЗАКАЗАТЬ\n"
-            "1. Формат (Format): выберите Digital File (цифровой файл) или Print (печать).\n"
+            "1. Формат (Format): выберите Digital File (цифровой файл) или Print (постер).\n"
             f"2. Цвет (Primary color): выберите один из {renk} цветов.\n"
             "3. Размер (Size): выберите размер. Цифровой файл создаётся в выбранном вами цвете и размере.\n"
             "4. Персонализация: впишите два имени и вашу надпись.\n"
             f"Имена: до {isim} букв каждое, печатаются заглавными буквами. Надпись: до {mesaj} символов, печатается так, "
-            "как вы её напишете. Без эмодзи. Пожалуйста, проверьте написание.\n"
+            f"как вы её напишете. Без эмодзи. {LATIN_RU} Пожалуйста, проверьте написание.\n"
             f"Идеи для надписи: {fikir}")
 
 
@@ -85,7 +105,7 @@ def p_dijital(m, ctx):
     uc_kontrol(ctx, k1, b1, a1, a2)
     return ("ЦИФРОВОЙ ФАЙЛ\n"
             "- Один готовый к печати файл JPG в выбранном вами цвете и размере\n"
-            f"- Высокое разрешение: 300 dpi в выбранном размере, от {boy_ru(k1)} до {boy_ru(b1)} дюймов или от {a1} до {a2}\n"
+            f"- Высокое разрешение: 300 dpi в полном выбранном размере, от {boy_ru(k1)} до {boy_ru(b1)} дюймов или от {a1} до {a2}\n"
             "- Файл приходит в ваш заказ на Etsy в течение 24 часов. Перед отправкой мы вручную проверяем каждую персонализацию\n"
             "- Скачайте его в разделе «Покупки» (Purchases) в браузере. В приложении Etsy файлы скачать нельзя\n"
             "- Распечатайте его дома, в местной типографии или в онлайн-сервисе печати\n"
@@ -106,16 +126,16 @@ def p_hediye(m, ctx):
     if ctx.get("burc") and (a, b) != ctx["burc"]:
         raise ValueError("hediye burclari girisle ayni degil")
     return (f"ИДЕАЛЬНЫЙ ПОДАРОК\nПамятный подарок для пары со знаками {cift(a, b)}. Мало времени? Выберите цифровой файл. "
-            "Он придёт в течение 24 часов, и его можно сразу распечатать или переслать.")
+            "Он придёт в течение 24 часов, и его можно распечатать или переслать.")
 
 
 SABIT = {
     BEYAN: RU_BEYAN,
     "YOUR PREVIEW\nFor every print, we send you a preview via Etsy Messages within 24 hours of your order. We print as soon as you "
     "approve it. If we don't hear from you within 24 hours of receiving the preview, we print the design as shown.":
-        "ВАШ МАКЕТ\nДля каждого заказа с печатью мы отправляем вам макет через сообщения Etsy в течение 24 часов после заказа. "
+        "ВАШ МАКЕТ\nДля каждого заказа постера мы отправляем вам макет через сообщения Etsy в течение 24 часов после заказа. "
         "Мы печатаем сразу после того, как вы его одобрите. Если в течение 24 часов после получения макета мы не получим от вас "
-        "ответа, мы напечатаем дизайн в том виде, как на макете.",
+        "ответа, мы напечатаем дизайн в том виде, в каком он показан на макете.",
     "PRINT\n- Printed on premium matte art paper with long-lasting inks\nFrames shown in photos are for display only and are not "
     "included. Prints ship unframed.":
         "ПЕЧАТЬ\n- Печать на премиальной матовой художественной бумаге стойкими чернилами\nРамы на фото показаны только для "
@@ -128,7 +148,7 @@ SABIT = {
     "orders are printed in the US. US delivery usually takes 5 to 8 business days after shipping.\n- For other countries, please "
     "see the delivery estimate for your address.\n- US orders ship with tracking.":
         "ПРОИЗВОДСТВО И ДОСТАВКА\n- Изготавливаем на заказ. Печатаем и отправляем в течение 7 рабочих дней после того, как вы "
-        "одобрите макет.\n- Заказы в США печатаются в США. Доставка по США обычно занимает 5-8 рабочих дней после отправки.\n"
+        "одобрите макет.\n- Заказы в США печатаются в США. Доставка по США обычно занимает от 5 до 8 рабочих дней после отправки.\n"
         "- Для других стран смотрите срок доставки, указанный для вашего адреса.\n- Заказы в США отправляются с трек-номером.",
     "PACKAGING\nPrints are rolled in tissue paper and sent in a thick cardboard tube. Small prints to Europe may come in a stiff "
     "flat envelope.":
@@ -144,7 +164,7 @@ SABIT = {
         "отправки не возвращаются. Если постер пришёл повреждённым, пришлите нам фото в течение 7 дней, и мы бесплатно заменим его.",
     "FAQ\nCan I order the digital file and a print together? Yes. Add each one to your cart as a separate item.\nHow large can I "
     "print the digital file? At the size you choose, at 300 dpi. The largest size is 24 x 36 inches.":
-        "ВОПРОСЫ И ОТВЕТЫ\nМожно ли заказать цифровой файл и печать вместе? Да. Добавьте каждый из них в корзину отдельным "
+        "ВОПРОСЫ И ОТВЕТЫ\nМожно ли заказать цифровой файл и постер вместе? Да. Добавьте каждый из них в корзину отдельным "
         "товаром.\nНасколько крупно можно напечатать цифровой файл? В выбранном вами размере, с разрешением 300 dpi. Самый "
         "большой размер: 24 × 36 дюймов.",
 }
@@ -159,7 +179,8 @@ KALIP = [
     (re.compile(r"HOW TO ORDER\n1\. Format: choose Digital File or Print\.\n2\. Primary color: choose one of (\d+) colors\.\n"
                 r"3\. Size: choose your size\. Your digital file is made in the color and size you choose\.\n4\. Personalization: "
                 r"type the two names and your message\.\nNames: up to (\d+) letters each, printed in capitals\. Message: up to "
-                r"(\d+) characters, printed as you type it\. No emoji\. Please check your spelling\.\nMessage ideas: (.+)"), p_siparis),
+                r"(\d+) characters, printed as you type it\. No emoji\. " + re.escape(LATIN_EN) + r" Please check your spelling\.\n"
+                r"Message ideas: (.+)"), p_siparis),
     (re.compile(r"DIGITAL FILE\n- One print ready JPG file in the color and size you choose\n- High resolution: 300 dpi at the "
                 r"full size you choose, from (\d+ x \d+) to (\d+ x \d+) inches, or (A\d) to (A\d)\n- Delivered to your Etsy order "
                 r"within 24 hours\. We check every personalization by hand before sending\n- Download it from Purchases in a web "

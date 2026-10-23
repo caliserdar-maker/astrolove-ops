@@ -28,6 +28,7 @@ import time
 import urllib.request
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+sys.modules.setdefault("beyan_marka_yaz", sys.modules[__name__])   # betik olarak kosunca ru_poster/ru_olcum ayni modulu (ayni Dur) kullansin
 from etsy_common import Etsy, TokenStore, mask  # noqa: E402
 
 BEYAN = ("Every fusion symbol begins as an original AstroLoveArt design. We use AI tools to help create the artwork, "
@@ -289,8 +290,8 @@ def kuru(api, shop, a, out):
             kota(api)
             env = ru_olcum.envanter_ozet(inv)
             try:
-                en1 = en_plan(d, aile)[0] or d
-            except Dur as e:
+                en1 = ru_poster.poster_en(d)   # beyan + Latin harf notu (Serdar 23 Eki madde 1-2)
+            except (Dur, ValueError) as e:
                 en1 = None; rapor += [f"RU yeniden: EN plani DUR ({e})"]
             if en1:
                 ru1, k = ru_poster.kur(en1, env)
@@ -320,7 +321,7 @@ def kuru(api, shop, a, out):
             print(f"GORSEL {lid}: {len(imgs)} gorsel indirildi", flush=True)
 
 
-def yaz(api, shop, lid, out, bolum=None):
+def yaz(api, shop, lid, out, bolum=None, ru_yeniden=False):
     """Tek ilan: yedek -> plan -> yazim -> geri okuma + kapi (1b). Donus R (sonuc PASS / ATLA / FAIL). Kapi farkinda Dur."""
     L = api.get(f"/listings/{lid}", {"includes": "Translations"}) or {}
     inv = api.get(f"/listings/{lid}/inventory", ok404=True) or {}
@@ -343,10 +344,14 @@ def yaz(api, shop, lid, out, bolum=None):
     if bolum is None:
         bolum = {str(s["shop_section_id"]): s.get("title") for s in (api.get(f"/shops/{shop}/sections") or {}).get("results") or []}
     aile = BOLUM_AILE.get(bolum.get(str(L.get("shop_section_id"))), "?")
-    if aile == "poster" and POSTER_YAZIM_KAPALI:   # inceleme 23 Eki E1: poster RU yalniz ru_poster ile yeniden kurulur; o yazim yolu Serdar metin onayindan sonra
-        raise Dur(f"{lid}: poster yazimi kapali (yeni RU yazim yolu yok; eski RU kullanilmaz, Serdar 23 Eki)")
-    en_yeni, en_not = en_plan(L.get("description"), aile)
-    ru_yeni, ru_n, ru_not = ru_plan(ru.get("description"), aile) if ru else (None, 0, "RU yok")
+    olc_fn = None
+    if aile == "poster" and ru_yeniden:   # Serdar 23 Eki madde 1-2: poster yalniz yeni yol (beyan + Latin notu + ru_poster RU)
+        en_yeni, ru_yeni, en_not, ru_not, ru_n, olc_fn = poster_plan(lid, L, ru, inv, out)
+    elif aile == "poster" and POSTER_YAZIM_KAPALI:   # inceleme 23 Eki E1: eski poster yolu (eski RU + beyan) kapali
+        raise Dur(f"{lid}: poster yazimi yalniz --ru-yeniden ile (eski RU kullanilmaz, Serdar 23 Eki)")
+    else:
+        en_yeni, en_not = en_plan(L.get("description"), aile)
+        ru_yeni, ru_n, ru_not = ru_plan(ru.get("description"), aile) if ru else (None, 0, "RU yok")
     R = dict(ilan=lid, aile=aile, en=en_not, ru=ru_not, ru_marka_once=ru_n, ru_ceviri="var" if ru else "yok", yazildi=[])
     if not en_yeni and not ru_yeni:   # yeniden baslatilabilirlik (Serdar 23 Eki 1c): beyan zaten var
         R.update(sonuc="ATLA", hata=[], istek=api.calls, kota=api.remaining)
@@ -359,7 +364,7 @@ def yaz(api, shop, lid, out, bolum=None):
     kota(api)   # taban 10 (CLAUDE.md); baska taban Serdar onayi olmadan konmaz
     k0, sat0, imza0 = korunan(L), satilabilir(inv), teklif_imza(inv)
     try:
-        return _yaz_dogrula(api, shop, lid, out, L, ru, soru0, en_yeni, ru_yeni, R, k0, sat0, imza0)
+        return _yaz_dogrula(api, shop, lid, out, L, ru, soru0, en_yeni, ru_yeni, R, k0, sat0, imza0, olc_fn)
     except (Exception, SystemExit) as e:   # yazim sonrasi HTTP/ag hatasi: kayit birakilir, toplu kosu DURur (inceleme A5)
         R.update(sonuc="FAIL", hata=[f"istisna (yazim/geri okuma): {str(e)[:300]}"], istek=api.calls, kota=api.remaining)
         (out / f"SONUC_{lid}.json").write_text(json.dumps(R, ensure_ascii=False, indent=1), encoding="utf-8")
@@ -367,7 +372,38 @@ def yaz(api, shop, lid, out, bolum=None):
         return R
 
 
-def _yaz_dogrula(api, shop, lid, out, L, ru, soru0, en_yeni, ru_yeni, R, k0, sat0, imza0):
+def poster_plan(lid, L, ru, inv, out):
+    """Poster yeni yol (Serdar 23 Eki): EN = canli + beyan + Latin notu; RU = ru_poster.kur(EN, envanter), kontrol + olcum PASS
+    olmazsa Dur. ru_poster.izin_ver ile etsy_common RU kapisi yalniz bu metni gecirir. Donus: en_yeni, ru_yeni, notlar, olcum."""
+    import ru_olcum
+    import ru_poster
+    if not ru:
+        raise Dur(f"{lid}: poster RU ceviri yok")
+    try:
+        en1 = ru_poster.poster_en(L.get("description"))
+    except (Dur, ValueError) as e:
+        raise Dur(f"{lid}: poster EN plani: {e}")
+    env = ru_olcum.envanter_ozet(inv)
+    ru1, k = ru_poster.kur(en1, env)
+    olc = ru_olcum.analiz_bir(dict(listing_id=lid, aile="poster", en=en1, ru=ru1, envanter=env, ortak=ortak(L)))
+    k.update(sorunlar=olc["sorunlar"])
+    (out / f"YENI_EN_{lid}.txt").write_text(en1 + "\n", encoding="utf-8")
+    (out / f"YENI_RU_{lid}.txt").write_text(ru1 + "\n", encoding="utf-8")
+    (out / f"KONTROL_{lid}.json").write_text(json.dumps(k, ensure_ascii=False, indent=1), encoding="utf-8")
+    if not k["pass_"] or olc["sorunlar"]:
+        raise Dur(f"{lid}: yeni RU kontrolu FAIL: hata {k['hata']} | olcum [{olc['sorunlar']}]; yazim yok")
+    ru_poster.izin_ver(lid, ru1, k)
+
+    def olc_fn(d1, r1):   # geri okunan EN/RU ayni kurallarla yeniden olculur (sorun 0 olmali)
+        s = ru_olcum.analiz_bir(dict(listing_id=lid, aile="poster", en=d1, ru=r1, envanter=env, ortak=ortak(L)))["sorunlar"]
+        return [f"geri okuma RU olcumu: {s}"] if s else []
+    en_yeni = None if norm(L.get("description")) == en1 else en1
+    ru_yeni = None if norm(ru.get("description")) == ru1 else ru1
+    return (en_yeni, ru_yeni, "poster_en (beyan + Latin notu)", "ru_poster yeni RU (kontrol PASS, olcum 0)",
+            len(MARKA.findall(norm(ru.get("description")))), olc_fn)
+
+
+def _yaz_dogrula(api, shop, lid, out, L, ru, soru0, en_yeni, ru_yeni, R, k0, sat0, imza0, olc_fn=None):
     if en_yeni:
         api.patch(f"/shops/{shop}/listings/{lid}", {"description": en_yeni}); R["yazildi"].append("EN description (PATCH)")
     if ru_yeni:
@@ -405,6 +441,8 @@ def _yaz_dogrula(api, shop, lid, out, L, ru, soru0, en_yeni, ru_yeni, R, k0, sat
     elif teklif_imza(inv1) != imza0:
         hata.append("teklif icerigi (fiyat/acik/stok) degisti")
     d1, r1 = norm(y.get("description")), norm(yru.get("description"))
+    if olc_fn:
+        hata += olc_fn(d1, r1)
     R["sonra"] = dict(state=y.get("state"), beyan=d1.count(BEYAN), eski_beyan=d1.count(ESKI_BEYAN), ru_beyan=r1.count(RU_BEYAN),
                       en_marka=len(MARKA.findall(d1)), ru_marka=len(MARKA.findall(r1)), satilabilir=satilabilir(inv1),
                       tire=len(TIRE.findall(d1)), uretim_ortagi=k1["uretim_ortagi"])
@@ -474,7 +512,8 @@ def main():
     ap.add_argument("--limit", type=int, default=10)
     ap.add_argument("--onay", default="")
     ap.add_argument("--gorsel-indir", action="store_true")
-    ap.add_argument("--ru-yeniden", action="store_true", help="kuru --ilan: poster RU'sunu canli EN + envanterden kur (yazim yok)")
+    ap.add_argument("--ru-yeniden", action="store_true", help="kuru/yaz --ilan: poster EN = canli + beyan + Latin notu, RU = ru_poster "
+                    "(yaz: yalniz tek ilan; toplu poster kapali)")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
     a.ilan = [x for x in a.ilan.replace(" ", "").split(",") if x]
@@ -497,7 +536,8 @@ def main():
             kuru(api, shop, a, out)
             print(f"KURU: yazma yok | istek {api.calls} | kota {api.remaining}", flush=True)
             return
-        ok = (yaz(api, shop, a.ilan[0], out)["sonuc"] != "FAIL") if a.mod == "yaz" else toplu(api, shop, a, out)
+        ok = ((yaz(api, shop, a.ilan[0], out, ru_yeniden=a.ru_yeniden)["sonuc"] != "FAIL") if a.mod == "yaz"
+              else toplu(api, shop, a, out))
     except Dur as e:
         print(f"DUR: {e} | istek {api.calls} | kota {api.remaining}", flush=True)
         sys.exit(3)

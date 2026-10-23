@@ -34,7 +34,7 @@ ISIM_RU = re.compile(r"до (\d+) букв", re.I)
 MESAJ_EN = re.compile(r"up to (\d+) characters", re.I)
 MESAJ_RU = re.compile(r"до (\d+) символ", re.I)
 SURE_EN = re.compile(r"(\d+)\s*(?:to\s*\d+\s*)?(business days|days|hours)", re.I)
-SURE_RU = re.compile(r"(\d+)\s*(?:[-–]\s*\d+\s*)?(рабоч\w*\s*дн\w*|дн\w*|день|дня|час\w*|недел\w*)", re.I)
+SURE_RU = re.compile(r"(\d+)\s*(?:(?:[-–]|до)\s*\d+\s*)?(рабоч\w*\s*дн\w*|дн\w*|день|дня|час\w*|недел\w*)", re.I)
 FIYAT = re.compile(r"\$\s*\d|USD|руб|₽|€|£")
 DIJITAL_RU = re.compile(r"цифров|файл|JPG|скача", re.I)
 ONIZ_EN = re.compile(r"\bpreview\b", re.I)
@@ -196,9 +196,9 @@ def insa(r):
     import ru_poster
     en = B.norm(r.get("en"))
     try:
-        en1 = B.en_plan(en, "poster")[0] or en
-    except B.Dur as e:
-        return dict(insa_pass=False, insa_hata=f"en_plan DUR: {e}", insa_sorun="")
+        en1 = ru_poster.poster_en(en)   # beyan + Latin harf notu (Serdar 23 Eki madde 1-2)
+    except (B.Dur, ValueError) as e:
+        return dict(insa_pass=False, insa_hata=f"poster_en DUR: {e}", insa_sorun="")
     ru, k = ru_poster.kur(en1, r["envanter"])
     s = analiz_bir(dict(r, en=en1, ru=ru))["sorunlar"] if k["pass_"] else ""
     return dict(insa_pass=k["pass_"] and not s, insa_hata="; ".join(k["hata"]), insa_sorun=s, _en=en1, _ru=ru)

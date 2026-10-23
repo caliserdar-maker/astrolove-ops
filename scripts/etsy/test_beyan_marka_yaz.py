@@ -107,13 +107,68 @@ def dur_mu(f, *a):
         return True
 
 
+def poster_yeni_yol():
+    """Serdar 23 Eki madde 1-2: poster tek ilan yeni yol (beyan + Latin notu + ru_poster RU), RU kapisi izni, geri okuma olcumu."""
+    import test_ru_poster as TP
+    import ru_poster as P
+    import etsy_common as E
+    boy = ["8 x 10", "11 x 14", "12 x 16", "12 x 18", "16 x 20", "16 x 24", "18 x 24", "20 x 30", "24 x 30", "24 x 36", "A4", "A3", "A2"]
+    inv = dict(products=[dict(sku=f"S{i}{j}{f}", offerings=[dict(is_enabled=True, quantity=3, price={"amount": 1})],
+                              property_values=[dict(property_name="Size", values=[b]), dict(property_name="Primary color", values=[c]),
+                                               dict(property_name="Format", values=[f])])
+                         for i, b in enumerate(boy) for j, c in enumerate("abcde") for f in ("Digital File", "Print")])
+    canli = TP.EN_CANLI.replace("\n\n" + P.BEYAN, "")   # beyansiz canli EN
+    eski_ru = "Именной постер. Печатаем на хлопковой бумаге Hahnemühle Photo Rag 308 г/м². AstroLove."
+    s = []
+
+    def yeni(en=canli):
+        api = Sahte(ilanlar={"4570110121": (en, 9, eski_ru)}); api.inv = copy.deepcopy(inv); return api
+    api = yeni(); out = pathlib.Path(tempfile.mkdtemp())
+    R = m.yaz(api, "1", "4570110121", out, ru_yeniden=True)
+    en_y = [d for k, _, d in api.yaz if k == "patch"]; ru_y = [d for k, _, d in api.yaz if k == "put"]
+    beklenen_ru = P.kur(P.poster_en(canli), __import__("ru_olcum").envanter_ozet(inv))[0]
+    s.append(("poster yeni yol: PASS, 1 PATCH + 1 PUT", R["sonuc"] == "PASS" and len(en_y) == 1 and len(ru_y) == 1))
+    s.append(("poster yeni yol: EN = beyan + Latin notu", P.BEYAN in en_y[0]["description"] and P.LATIN_EN in en_y[0]["description"]))
+    s.append(("poster yeni yol: RU = ru_poster metni, eski RU yok, baslik/etiket ayni", ru_y[0]["description"] == beklenen_ru
+              and "Hahnem" not in ru_y[0]["description"] and ru_y[0]["title"] == "RT" and ru_y[0]["tags"] == "x,y"))
+    s.append(("poster yeni yol: RU kapisi izni yalniz bu metin", E.RU_POSTER_IZIN.get("4570110121") == E.ozet(beklenen_ru)))
+    s.append(("poster yeni yol: YENI_EN/YENI_RU/KONTROL dosyalari", all((out / f"{x}_4570110121.{e}").exists()
+              for x, e in (("YENI_EN", "txt"), ("YENI_RU", "txt"), ("KONTROL", "json")))))
+    R2 = m.yaz(api, "1", "4570110121", pathlib.Path(tempfile.mkdtemp()), ru_yeniden=True)
+    s.append(("poster yeni yol: ikinci kosu ATLA", R2["sonuc"] == "ATLA" and len(api.yaz) == 2))
+    api = yeni(); api.inv["products"] = api.inv["products"][:-10]   # 12 boy: EN '13 sizes' ile celisir
+    try:
+        m.yaz(api, "1", "4570110121", pathlib.Path(tempfile.mkdtemp()), ru_yeniden=True); r = None
+    except m.Dur as e:
+        r = str(e)
+    s.append(("poster yeni yol: kontrol FAIL -> DUR, yazma yok", r is not None and "kontrolu FAIL" in r and api.yaz == []))
+    api = yeni(en=canli.replace("No emoji. ", "No emoji, please. "))
+    try:
+        m.yaz(api, "1", "4570110121", pathlib.Path(tempfile.mkdtemp()), ru_yeniden=True); r = None
+    except m.Dur as e:
+        r = str(e)
+    s.append(("poster yeni yol: Latin notu capasi yok -> DUR, yazma yok", r is not None and "capasi" in r and api.yaz == []))
+    api = yeni(); bozuk = {"n": 0}
+    _put = api.put
+
+    def put_boz(path, data, A=api):
+        _put(path, data); A.ru["4570110121"]["description"] += "\n\nHahnemühle"
+    api.put = put_boz
+    R3 = m.yaz(api, "1", "4570110121", pathlib.Path(tempfile.mkdtemp()), ru_yeniden=True)
+    s.append(("poster yeni yol: geri okunan RU bozuksa FAIL", R3["sonuc"] == "FAIL"))
+    ok, Z = toplu(yeni(), "poster", ["4570110121"], limit=1)
+    s.append(("toplu poster kapali (ru_yeniden yok) -> DUR, yazma yok", Z and Z["ozet"]["fail"] and Z["ozet"]["fail"][0]["sonuc"] == "DUR"))
+    return s
+
+
 def main():
     m.time.sleep = lambda s: None
     s = []
     # inceleme 23 Eki E1: varsayilan poster yazimi kapali; kapi testleri (poster fixture) icin acilir, sonda geri kapatilir
     api = Sahte(); r, _ = kos(api)
-    s.append(("E1: poster yazimi kapali (varsayilan) -> DUR, yazma yok", m.POSTER_YAZIM_KAPALI is True and isinstance(r, str)
-              and "poster yazimi kapali" in r and api.yaz == []))
+    s.append(("E1: poster eski yol kapali (varsayilan) -> DUR, yazma yok", m.POSTER_YAZIM_KAPALI is True and isinstance(r, str)
+              and "yalniz --ru-yeniden" in r and api.yaz == []))
+    s += poster_yeni_yol()
     m.POSTER_YAZIM_KAPALI = False
     par = m.en_plan(EN, "poster")[0].split("\n\n")
     s.append(("poster: beyan 1. paragraftan sonra, &#39; cozuldu", par[1] == m.BEYAN and "Valentine's" in par[0] and par[2].startswith("Cancer:")))
