@@ -58,6 +58,10 @@ on:
         description: "Tagline & (Serdar 10 Eki B2): bos/yeni = onayli ChatGPT & (varsayilan); glif = fontun & glifi (YALNIZ bilinen FAIL testi)"
         required: false
         default: ""
+      sira:
+        description: "Sol/sag duzen (Serdar 23 Eki, siparis basina): bos = ilandaki gibi (varsayilan); ters = 2. burc (sembol + isim) solda. Yalniz isler=wp:<boy>. isim1/isim2 yine 1./2. burcun ismi"
+        required: false
+        default: ""
 
 concurrency: siparis-dijital-${{ github.event.inputs.receipt }}-${{ github.event.inputs.isler }}
 
@@ -88,6 +92,7 @@ jobs:
           jq -re '.inputs.receipt | test("^[0-9]+$")' "$GITHUB_EVENT_PATH" >/dev/null || { echo "HATA: receipt rakam olmali" >&2; exit 1; }
           jq -re '.inputs.cift | test("^[A-Z]+_[A-Z]+$")' "$GITHUB_EVENT_PATH" >/dev/null || { echo "HATA: cift" >&2; exit 1; }
           jq -re '(.inputs.wp_ref // "") | test("^([0-9a-f]{40})?$")' "$GITHUB_EVENT_PATH" >/dev/null || { echo "HATA: wp_ref tam 40 karakter SHA olmali" >&2; exit 1; }
+          jq -re '(.inputs.sira // "") as $s | ($s == "") or ($s == "ters" and ((.inputs.isler // "") | test("^wp:[0-9A-Za-z]+(,wp:[0-9A-Za-z]+)*$")))' "$GITHUB_EVENT_PATH" >/dev/null || { echo "HATA: sira bos | ters (ters yalniz isler=wp:<boy>)" >&2; exit 1; }
           echo "::notice title=WP_REF::$WP_REF"
       - uses: actions/checkout@v4
         with:

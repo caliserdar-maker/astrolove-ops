@@ -36,7 +36,60 @@ def girdi():
     return {'receipt': g['receipt'], 'cift': cift, 'isim1': i1, 'isim2': i2, 'mesaj': mesaj,
             'normalize': norm, 'cift_girdi': g['cift'].strip().upper(),
             'isler': (g.get('isler') or '').strip(), 'onceki_kosu': (g.get('onceki_kosu') or '').strip(),
-            'tek_olcu': (g.get('tek_olcu') or '').strip()}
+            'tek_olcu': (g.get('tek_olcu') or '').strip(), 'sira': sira_oku(g)}
+
+
+SIRALAR = ('', 'ters')
+
+
+def sira_oku(g):
+    """Serdar 23 Eki (siparis 4208728285, musteri talebi KABUL): sira = '' (ilandaki duzen, varsayilan) | 'ters'.
+    ters: isim1 / isim2 yine cift adindaki 1. / 2. burcun ismidir; posterde 2. burc (sembol + isim) solda, 1. burc sagda.
+    Yalniz WP isinde (wp:<boy>); baska is istenirse DUR."""
+    s = (g.get('sira') or '').strip().lower()
+    if s not in SIRALAR:
+        raise SystemExit(f'HATA sira {s!r} (beklenen bos | ters)')
+    if s == 'ters':
+        isler = [x.strip() for x in (g.get('isler') or '').split(',') if x.strip()]
+        if not isler or any(not x.startswith('wp:') for x in isler):
+            raise SystemExit('HATA sira=ters yalniz WP isinde (isler=wp:<boy>)')
+    return s
+
+
+def sira_isim(x, g):
+    """sira=ters: baski girdisinde isim1 (sol) = 2. burcun ismi, isim2 (sag) = 1. burcun ismi; semboller sira_ters_kur ile
+    ayni yonde takas edilir, her isim kendi burcunun altinda kalir."""
+    if g.get('sira') == 'ters':
+        x['isim1'], x['isim2'] = x['isim2'], x['isim1']
+    return x
+
+
+def sira_ters_kur(wo, eu):
+    """sira=ters: yalniz SIPARIS duz renk baskisinda (receipt *_siparis) kaynaktan ayristirilan iki kucuk sembol ogesi yer
+    degistirir; poster_kur her ogeyi ismin murekkep merkezine koydugu icin 2. burcun sembolu soldaki ismin ustune gelir.
+    Ogeler kopya uzerinde takas edilir (oran_kur sonucu yerinde degismez). Ortadaki birlesik sembol, tagline ve kimlik
+    baskisi (hizalama ogrenmesi, kaynakla birebir) degismez. Doner: sayac (siparis / kimlik oran_kur cagrilari)."""
+    asil_baski, asil_oran = wo.baski, eu.oran_kur
+    say = {'etkin': False, 'takas': 0, 'takassiz': 0}
+
+    def oran_kur(*q, **k):
+        s, S = asil_oran(*q, **k)
+        if not say['etkin']:
+            say['takassiz'] += 1
+            return s, S
+        o = dict(S['oge'])
+        o['sembol_sol'], o['sembol_sag'] = S['oge']['sembol_sag'], S['oge']['sembol_sol']
+        say['takas'] += 1
+        return s, {**S, 'oge': o}
+
+    def baski(x, *q, **k):
+        say['etkin'] = str(x.get('receipt', '')).endswith('_siparis')
+        try:
+            return asil_baski(x, *q, **k)
+        finally:
+            say['etkin'] = False
+    wo.baski, eu.oran_kur = baski, oran_kur
+    return say
 
 
 TUM5 = ('MIDNIGHT_BLUE', 'DEEP_BLACK', 'PURE_WHITE', 'CHAMPAGNE_IVORY', 'WARM_PARCHMENT')
@@ -194,6 +247,8 @@ def amp_cizim(m):
     return (m.KAYIT[-1] if m.KAYIT else None) if hasattr(m, 'KAYIT') else m
 
 def renk_asamasi(a, g):
+    if g.get('sira'):
+        raise SystemExit('HATA sira=ters yalniz WP isinde')
     sd = kod_yukle(a.kod)
     no, _ = sd.sayfa_no_tablosu()
     x = sd.normalize({'receipt': g['receipt'], 'cift': g['cift'], 'renk': a.renk, 'boy': None, 'urun': 'dijital',
@@ -250,6 +305,8 @@ def renk_asamasi(a, g):
 def sayfa_asamasi(a, g):
     """TEK SAYFA (renk x oran) - HIZ (Serdar 1 Eki: MB seri 25 dk). renk_asamasi ile AYNI _dijital_is, yalniz bir oran;
     PDF paket asamasinda birlestir() ile kurulur. Cikti: <cikti>/<RENK>/<jpg>, SAYFA_<RENK>_<oran>.json."""
+    if g.get('sira'):
+        raise SystemExit('HATA sira=ters yalniz WP isinde')
     sd = kod_yukle(a.kod)
     no, _ = sd.sayfa_no_tablosu()
     x = sd.normalize({'receipt': g['receipt'], 'cift': g['cift'], 'renk': a.renk, 'boy': None, 'urun': 'dijital',
@@ -412,10 +469,15 @@ def wp_asamasi(a, g):
     x = sd.normalize({'receipt': g['receipt'], 'cift': g['cift'], 'renk': 'WARM_PARCHMENT', 'boy': a.boy,
                       'urun': 'pod', 'isim1': g['isim1'], 'isim2': g['isim2'], 'mesaj': g['mesaj']})
     x['sayfa'] = no[x['cift']]
+    sira = None
+    sira_isim(x, g)
     yol = sd.pod_kaynak(x['cift'], 'WARM_PARCHMENT', a.boy)
     with Image.open(yol) as im:
         x['hedef_px'] = list(im.size)
     sd.kisisel_hazirla()
+    if g.get('sira') == 'ters':
+        import edisyon_uret
+        sira = sira_ters_kur(wo, edisyon_uret)
     amp = amp_kur(g)
     P_ed, P_blue = sd.EdisyonPoster(), sd.BluePoster()
     cik = Path(a.cikti).resolve(); cik.mkdir(parents=True, exist_ok=True)
@@ -426,6 +488,12 @@ def wp_asamasi(a, g):
           'jpeg_kalite': kalite.get(f'BASKI_{a.boy}.jpg'), 'kapi_sayilari': r.get('kapi_sayilari'),
           'wp_bakir': r.get('wp_bakir'), 'kod': a.kod_ref,
           'wp_kilit': 'TAMAM', 'amp': amp_cizim(amp)}
+    if sira is not None:                              # kapi: siparis baskisinda takas oldu (2400 + hedef), kimlikte olmadi
+        oz['sira'] = {'sira': 'ters', 'takas': sira['takas'], 'takassiz': sira['takassiz'],
+                      'gecti': sira['takas'] >= 2 and sira['takassiz'] >= 2}
+        oz['kapilar'] = {**(oz['kapilar'] or {}), 'sira_ters': oz['sira']['gecti']}
+        oz['kapilar_gecti'] = bool(oz['kapilar_gecti'] and oz['sira']['gecti'])
+        print('WP_SIRA', a.boy, json.dumps(oz['sira']), flush=True)
     jpg = ara / f'BASKI_{a.boy}.jpg'
     if jpg.exists():
         try:                                              # Serdar 1 Eki: eski metin izi kapisi WP sayfasinda da (sayi)
