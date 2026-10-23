@@ -1,0 +1,5 @@
+- SONRAYA (Merkez 23 Eki aksam, siparis 4208728285 kapanisi; simdi yapilmaz, yalniz not):
+  - Siparis maskesi acigi: siparis-dijital / siparis-giris maskesi isimlerin yazildigi bicimi ve tamami buyuk harf bicimini, mesajin tamamini kapatiyor; base64 mesaj girdisi (mesaj_b64) ve mesajin tek tek kelimeleri maskesiz. 4208728285'in iki koşusunda log taramasi sizinti bulmadi (bagimsiz inceleme 23 Eki), ama acik depoda loglar herkese acik.
+  - Acik depoda receipt numarasi: commit mesajlari, kod yorumlari (surucu.py sira_oku, siparis_kisisel.py) ve dosya adlarinda gercek receipt numaralari var (isim / mesaj / adres yok).
+  - kisisel-v1 dali sabitlenmemis: siparis_dosyasi.kisisel_hazirla `git fetch kisisel-v1` + FETCH_HEAD kullaniyor; renk_ref / wp_ref sabit SHA iken isim / sembol render kodu dal basina bagli (su an 3a4cd64, 22 Eyl). Dal degisirse siparis ciktisi sessizce degisir.
+  - Dijital sipariste Etsy "Complete order" kargo firmasi istiyor: dijital teslim e-postayla yapildiginda siparisi kapatmak icin kargo bilgisi gerekiyor. Karar E ile birlikte ele alinacak.
