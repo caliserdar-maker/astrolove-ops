@@ -123,8 +123,20 @@ def poster_yeni_yol():
 
     def yeni(en=canli):
         api = Sahte(ilanlar={"4570110121": (en, 9, eski_ru)}); api.inv = copy.deepcopy(inv); return api
+    ozet_ok = P.onay_ozet(P.poster_en(canli), P.kur(P.poster_en(canli), __import__("ru_olcum").envanter_ozet(inv))[0])
+    api = yeni()
+    try:
+        m.yaz(api, "1", "4570110121", pathlib.Path(tempfile.mkdtemp()), ru_yeniden=True, onay_ozet="0" * 64); r = None
+    except m.Dur as e:
+        r = str(e)
+    s.append(("2a: onayli ozet tutmazsa DUR, yazma yok", r is not None and "onayli kuru planla ayni degil" in r and api.yaz == []))
+    try:
+        m.yaz(api, "1", "4570110121", pathlib.Path(tempfile.mkdtemp()), ru_yeniden=True); r = None
+    except m.Dur as e:
+        r = str(e)
+    s.append(("2a: onay ozeti verilmezse DUR, yazma yok", r is not None and api.yaz == []))
     api = yeni(); out = pathlib.Path(tempfile.mkdtemp())
-    R = m.yaz(api, "1", "4570110121", out, ru_yeniden=True)
+    R = m.yaz(api, "1", "4570110121", out, ru_yeniden=True, onay_ozet=ozet_ok)
     en_y = [d for k, _, d in api.yaz if k == "patch"]; ru_y = [d for k, _, d in api.yaz if k == "put"]
     beklenen_ru = P.kur(P.poster_en(canli), __import__("ru_olcum").envanter_ozet(inv))[0]
     s.append(("poster yeni yol: PASS, 1 PATCH + 1 PUT", R["sonuc"] == "PASS" and len(en_y) == 1 and len(ru_y) == 1))
@@ -134,7 +146,7 @@ def poster_yeni_yol():
     s.append(("poster yeni yol: RU kapisi izni yalniz bu metin", E.RU_POSTER_IZIN.get("4570110121") == E.ozet(beklenen_ru)))
     s.append(("poster yeni yol: YENI_EN/YENI_RU/KONTROL dosyalari", all((out / f"{x}_4570110121.{e}").exists()
               for x, e in (("YENI_EN", "txt"), ("YENI_RU", "txt"), ("KONTROL", "json")))))
-    R2 = m.yaz(api, "1", "4570110121", pathlib.Path(tempfile.mkdtemp()), ru_yeniden=True)
+    R2 = m.yaz(api, "1", "4570110121", pathlib.Path(tempfile.mkdtemp()), ru_yeniden=True, onay_ozet=ozet_ok)
     s.append(("poster yeni yol: ikinci kosu ATLA", R2["sonuc"] == "ATLA" and len(api.yaz) == 2))
     api = yeni(); api.inv["products"] = api.inv["products"][:-10]   # 12 boy: EN '13 sizes' ile celisir
     try:
@@ -154,7 +166,7 @@ def poster_yeni_yol():
     def put_boz(path, data, A=api):
         _put(path, data); A.ru["4570110121"]["description"] += "\n\nHahnemühle"
     api.put = put_boz
-    R3 = m.yaz(api, "1", "4570110121", pathlib.Path(tempfile.mkdtemp()), ru_yeniden=True)
+    R3 = m.yaz(api, "1", "4570110121", pathlib.Path(tempfile.mkdtemp()), ru_yeniden=True, onay_ozet=ozet_ok)
     s.append(("poster yeni yol: geri okunan RU bozuksa FAIL", R3["sonuc"] == "FAIL"))
     ok, Z = toplu(yeni(), "poster", ["4570110121"], limit=1)
     s.append(("toplu poster kapali (ru_yeniden yok) -> DUR, yazma yok", Z and Z["ozet"]["fail"] and Z["ozet"]["fail"][0]["sonuc"] == "DUR"))

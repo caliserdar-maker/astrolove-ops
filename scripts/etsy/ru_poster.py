@@ -18,10 +18,11 @@ AY = {"January": "января", "February": "февраля", "March": "мар�
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from beyan_marka_yaz import BEYAN, RU_BEYAN  # noqa: E402  tek kaynak
 import etsy_common as E  # noqa: E402
-# Serdar 23 Eki madde 1-2 (secenek a): baski hatti Kiril basamaz; Cinzel / EB Garamond Italic aksanli Latin harfleri basar
-# (23 Eki olcumu: E/É, O/Ö, A/Ä, U/Ü, e/é, o/ö murekkep + ust sinir farki). EN'e eklenir, RU birebir karsiligi.
-LATIN_EN = "Names and message must use English letters. Letters with accents, like É or Ö, are fine."
-LATIN_RU = "Имена и надпись должны быть написаны английскими буквами. Буквы с надстрочными знаками, например É или Ö, тоже подходят."
+# Serdar 23 Eki (madde 1, ikinci karar): not yalniz isim icin. Isim fontu Cinzel Kiril basamaz (0/64); mesaj fontu EB Garamond
+# Italic Kiril basar ve siparis karti Kiril mesaji kabul eder, bu yuzden mesaja kisit yok. Aksan cumlesi yok: siparis-dijital
+# isim kontrolu (siparis-dijital.yml:147/:213) aksanli ismi reddediyor (inceleme 23 Eki; destek ayri onayla, PLAN.md).
+LATIN_EN = "Names must use English letters."
+LATIN_RU = "Имена должны быть написаны английскими буквами."
 LATIN_CAPA = "No emoji. Please check your spelling."
 
 
@@ -231,3 +232,8 @@ def izin_ver(lid, ru, kontrol):
     if not (kontrol or {}).get("pass_") or not ru or (kontrol or {}).get("sorunlar"):
         raise SystemExit(f"DUR: ilan {lid} yeni RU kontrolu PASS degil; izin yok")
     E.RU_POSTER_IZIN[str(lid)] = E.ozet(ru)
+
+
+def onay_ozet(en, ru):
+    """Serdar 23 Eki 2a: kuru planda onaylanan EN + RU metninin ozeti; yazim aninda kurulan metin bununla birebir olmali."""
+    return E.ozet((en or "") + "\n\x00\n" + (ru or ""))

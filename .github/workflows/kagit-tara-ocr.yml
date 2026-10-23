@@ -1,0 +1,79 @@
+name: kagit-tara-ocr
+
+# Kagit / tedarikci ifadesi taramasi, ASAMA 2 OCR (Serdar 23 Eki madde 3). Etsy YOK, sir yok, Etsy kilidi YOK (kilit kumesinde
+# degil). Girdi: kagit-tara (asama 1) kosusunun Drive ciktisi (GORSEL.json + GORSEL.tar). Gorsel OCR (tesseract) + eski
+# "Fine Art Paper" kartina benzerlik. En fazla 90 dk: betik 78. dakikadan sonra yeni gorsel baslatmaz. Bulgular satir satir
+# GORSEL_OCR.csv'ye yazilir ve 2 dk'da bir Drive'a kopyalanir (kosu durursa da kayit kalir).
+# Cikti Drive ASTROLOVE/TEMP/DENETIM_20261021/KAGIT_TARAMA/<kaynak_kosu>/OCR_<run_id>/.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      kaynak_kosu: {description: "kagit-tara (oku) kosu kimligi", required: true}
+
+env:
+  D: "gdrive:ASTROLOVE/TEMP/DENETIM_20261021/KAGIT_TARAMA"
+
+jobs:
+  ocr:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: |
+          set -euo pipefail
+          [[ "${{ inputs.kaynak_kosu }}" =~ ^[0-9]+$ ]] || { echo "::error::kaynak_kosu"; exit 1; }
+          python -m pip install -q requests==2.34.2 numpy==2.5.3 pillow==12.3.0
+          sudo apt-get update -qq && sudo apt-get install -y -qq tesseract-ocr >/dev/null && tesseract --version | head -1
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Kaynak indir
+        env:
+          K: ${{ inputs.kaynak_kosu }}
+        run: |
+          set -euo pipefail
+          mkdir -p _work/kaynak _work/ref _out
+          rclone copyto "$D/$K/GORSEL.json" _work/kaynak/GORSEL.json
+          rclone copyto "$D/$K/GORSEL.tar" _work/kaynak/GORSEL.tar
+          tar -xf _work/kaynak/GORSEL.tar -C _work/kaynak && rm _work/kaynak/GORSEL.tar
+          echo "gorsel dosyasi: $(ls _work/kaynak/GORSEL | wc -l)"
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_KISISEL/AQUARIUS_AQUARIUS_v1/images/06_fine_art_paper.jpg" _work/ref/kart_06_fine_art_paper.jpg
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_KISISEL/AQUARIUS_AQUARIUS_v1/REVIEW/P06_06_fine_art_paper_yan_yana.jpg" _work/ref/kart_P06_yan_yana.jpg
+      - name: OCR (asamali kayit)
+        env:
+          K: ${{ inputs.kaynak_kosu }}
+        run: |
+          set +e -o pipefail
+          HEDEF="$D/$K/OCR_${GITHUB_RUN_ID}"
+          ( while true; do sleep 120; rclone copy _out "$HEDEF" -q || true; done ) &
+          ES=$!
+          python3 scripts/etsy/kagit_tara.py --mod ocr --kaynak _work/kaynak --out _out --ref _work/ref/*.jpg --sure-dk 78 2>&1 | tee _out/kosu_ocr.log
+          echo "KOD=${PIPESTATUS[0]}" >> "$GITHUB_ENV"
+          kill $ES 2>/dev/null || true
+      - name: Cikti Drive'a
+        if: always()
+        env:
+          K: ${{ inputs.kaynak_kosu }}
+        run: |
+          set -euo pipefail
+          rclone copy _out "$D/$K/OCR_${GITHUB_RUN_ID}" -q && echo "::notice title=KAGIT OCR::Drive TEMP/DENETIM_20261021/KAGIT_TARAMA/$K/OCR_${GITHUB_RUN_ID}/"
+          [ "${KOD:-1}" = 0 ] || { echo "::error::cikis ${KOD:-?}"; exit 1; }
+      - if: always()
+        run: rm -rf _work ~/.config/rclone

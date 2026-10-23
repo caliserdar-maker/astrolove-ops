@@ -63,8 +63,14 @@ def main():
     s.append(("GET ve EN PATCH kapidan etkilenmez", dene(lambda: api.get(f"/shops/1/listings/{POSTER}/translations/ru")) == "gitti"
               and dene(lambda: api.patch(f"/shops/1/listings/{POSTER}", {"description": "x"})) == "gitti"))
     s.append(("poster listesi 78 ilan", len(E.poster_idler()) == 78 and POSTER in E.poster_idler()))
-    s.append(("yasak desen: omur yili araligi var, 25 лет/11 букв yok", bool(E.RU_YASAK.search("100-200 years"))
-              and bool(E.RU_YASAK.search("более 100 лет")) and not E.RU_YASAK.search("25 лет вместе, до 11 букв")))
+    s.append(("yasak desen eski genislikte (Serdar 23 Eki 2b): omur yili ifadeleri yakalanir, 11 букв yakalanmaz",
+              all(E.RU_YASAK.search(x) for x in ("100-200 years", "более 100 лет", "служит 100 лет", "lasts 200 years"))
+              and not E.RU_YASAK.search("до 11 букв, до 35 символов, 7 рабочих дней")))
+    for yol in (f"/shops/1/listings/{POSTER}/translations/RU", f"/shops/1/listings/{POSTER}/translations/ru?x=1",
+                f"/shops/1/listings/{POSTER}/translations/ru/", f"/shops/1/listings/{POSTER}/translations/Ru#a",
+                f"/shops/1/listings/{POSTER}/translations/ru-RU", f"/shops/1/listings/{POSTER}/translations/r%75"):
+        s.append((f"kapi atlanamaz (Serdar 23 Eki 2c): {yol.split('translations')[1]}", dene(lambda y=yol: api.put(
+            y, {"title": "t", "description": ESKI})) == "durdu"))
     for b, arg in (("scripts/pod/metin_78.py", ["--out", "/tmp/x"]), ("scripts/pod/yayilim_78.py", ["yaz", "--csv", "x"]),
                    ("scripts/pod/yayilim_78.py", ["metin2", "--csv", "x"]),
                    ("scripts/etsy/pod_ru_tags.py", ["--state", "x", "--out", "/tmp/x", "--apply"])):

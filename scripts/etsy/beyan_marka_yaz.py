@@ -297,13 +297,15 @@ def kuru(api, shop, a, out):
                 ru1, k = ru_poster.kur(en1, env)
                 olc = ru_olcum.analiz_bir(dict(listing_id=lid, aile=aile, en=en1, ru=ru1, envanter=env, ortak=ortak(L)))
                 k.update(sorunlar=olc["sorunlar"], pass_=k["pass_"] and not olc["sorunlar"], envanter=env,
+                         onay_ozet=ru_poster.onay_ozet(en1, ru1),
                          ru_baslik=(ru or {}).get("title"), ru_etiket=(ru or {}).get("tags"))
                 (out / f"YENI_EN_{lid}.txt").write_text(en1 + "\n", encoding="utf-8")
                 (out / f"YENI_RU_{lid}.txt").write_text(ru1 + "\n", encoding="utf-8")
                 (out / f"EN_FARK_{lid}.txt").write_text("".join(difflib.unified_diff(
                     (d + "\n").splitlines(True), (en1 + "\n").splitlines(True), "EN canli", "EN yeni")), encoding="utf-8")
                 (out / f"KONTROL_{lid}.json").write_text(json.dumps(k, ensure_ascii=False, indent=1), encoding="utf-8")
-                rapor += [f"RU yeniden: kontrol {'PASS' if k['pass_'] else 'FAIL'} | paragraf EN {k['paragraf_en']} RU {k['paragraf_ru']} | "
+                rapor += [f"RU yeniden: onay_ozet {k['onay_ozet']} (yazimda --onay-ozet ile verilir)",
+                          f"RU yeniden: kontrol {'PASS' if k['pass_'] else 'FAIL'} | paragraf EN {k['paragraf_en']} RU {k['paragraf_ru']} | "
                           f"hata {k['hata']} | olcum sorunlari [{olc['sorunlar']}] (YENI_EN/YENI_RU/EN_FARK/KONTROL_{lid})"]
         (out / f"PLAN_{lid}.txt").write_text("\n".join(rapor) + "\n", encoding="utf-8")
         print("\n".join(rapor), flush=True)
@@ -321,7 +323,7 @@ def kuru(api, shop, a, out):
             print(f"GORSEL {lid}: {len(imgs)} gorsel indirildi", flush=True)
 
 
-def yaz(api, shop, lid, out, bolum=None, ru_yeniden=False):
+def yaz(api, shop, lid, out, bolum=None, ru_yeniden=False, onay_ozet=None):
     """Tek ilan: yedek -> plan -> yazim -> geri okuma + kapi (1b). Donus R (sonuc PASS / ATLA / FAIL). Kapi farkinda Dur."""
     L = api.get(f"/listings/{lid}", {"includes": "Translations"}) or {}
     inv = api.get(f"/listings/{lid}/inventory", ok404=True) or {}
@@ -346,7 +348,7 @@ def yaz(api, shop, lid, out, bolum=None, ru_yeniden=False):
     aile = BOLUM_AILE.get(bolum.get(str(L.get("shop_section_id"))), "?")
     olc_fn = None
     if aile == "poster" and ru_yeniden:   # Serdar 23 Eki madde 1-2: poster yalniz yeni yol (beyan + Latin notu + ru_poster RU)
-        en_yeni, ru_yeni, en_not, ru_not, ru_n, olc_fn = poster_plan(lid, L, ru, inv, out)
+        en_yeni, ru_yeni, en_not, ru_not, ru_n, olc_fn = poster_plan(lid, L, ru, inv, out, onay_ozet)
     elif aile == "poster" and POSTER_YAZIM_KAPALI:   # inceleme 23 Eki E1: eski poster yolu (eski RU + beyan) kapali
         raise Dur(f"{lid}: poster yazimi yalniz --ru-yeniden ile (eski RU kullanilmaz, Serdar 23 Eki)")
     else:
@@ -372,7 +374,7 @@ def yaz(api, shop, lid, out, bolum=None, ru_yeniden=False):
         return R
 
 
-def poster_plan(lid, L, ru, inv, out):
+def poster_plan(lid, L, ru, inv, out, onay_ozet=None):
     """Poster yeni yol (Serdar 23 Eki): EN = canli + beyan + Latin notu; RU = ru_poster.kur(EN, envanter), kontrol + olcum PASS
     olmazsa Dur. ru_poster.izin_ver ile etsy_common RU kapisi yalniz bu metni gecirir. Donus: en_yeni, ru_yeni, notlar, olcum."""
     import ru_olcum
@@ -392,6 +394,10 @@ def poster_plan(lid, L, ru, inv, out):
     (out / f"KONTROL_{lid}.json").write_text(json.dumps(k, ensure_ascii=False, indent=1), encoding="utf-8")
     if not k["pass_"] or olc["sorunlar"]:
         raise Dur(f"{lid}: yeni RU kontrolu FAIL: hata {k['hata']} | olcum [{olc['sorunlar']}]; yazim yok")
+    oz = ru_poster.onay_ozet(en1, ru1)   # Serdar 23 Eki 2a: kuru planda onaylanan metinle birebir degilse yazim yok
+    if not onay_ozet or onay_ozet != oz:
+        raise Dur(f"{lid}: yazim anindaki EN+RU metni onayli kuru planla ayni degil (onayli {str(onay_ozet)[:12]}, simdi {oz[:12]});"
+                  " yazim yok")
     ru_poster.izin_ver(lid, ru1, k)
 
     def olc_fn(d1, r1):   # geri okunan EN/RU ayni kurallarla yeniden olculur (sorun 0 olmali)
@@ -514,6 +520,7 @@ def main():
     ap.add_argument("--gorsel-indir", action="store_true")
     ap.add_argument("--ru-yeniden", action="store_true", help="kuru/yaz --ilan: poster EN = canli + beyan + Latin notu, RU = ru_poster "
                     "(yaz: yalniz tek ilan; toplu poster kapali)")
+    ap.add_argument("--onay-ozet", default=None, help="yaz --ru-yeniden: kuru plandaki KONTROL onay_ozet (64 hex)")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
     a.ilan = [x for x in a.ilan.replace(" ", "").split(",") if x]
@@ -536,7 +543,7 @@ def main():
             kuru(api, shop, a, out)
             print(f"KURU: yazma yok | istek {api.calls} | kota {api.remaining}", flush=True)
             return
-        ok = ((yaz(api, shop, a.ilan[0], out, ru_yeniden=a.ru_yeniden)["sonuc"] != "FAIL") if a.mod == "yaz"
+        ok = ((yaz(api, shop, a.ilan[0], out, ru_yeniden=a.ru_yeniden, onay_ozet=a.onay_ozet)["sonuc"] != "FAIL") if a.mod == "yaz"
               else toplu(api, shop, a, out))
     except Dur as e:
         print(f"DUR: {e} | istek {api.calls} | kota {api.remaining}", flush=True)

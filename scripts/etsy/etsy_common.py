@@ -13,6 +13,7 @@ Hicbir sir loga yazilmaz; okunan her token degeri ::add-mask:: ile
 maskelenir.
 """
 import hashlib
+import urllib.parse
 import json
 import os
 import re
@@ -206,10 +207,10 @@ def kota_esigi(rol=None, dosya=None):
 # Etsy._call'dan gectigi icin kapi burada: (1) her RU ceviri yaziminda kagit/tedarikci/Art'siz marka ifadesi -> yazim yok;
 # (2) 78 poster ilaninda (data/pod/pod78_ids.csv) aciklama ru_poster'in onayladigi metinle birebir degilse -> yazim yok.
 RU_YASAK = re.compile(r"Hahnem|Ханем|Photo\s*Rag|Prodigi|хлоп(?:к|ок)|cotton|музе|museum|ISO\s*9706|жикле|gicl|"
-                      r"\d{3}\s*(?:г/м|g/m|gsm)|\bOBA\b|bright\s*white|12[\s-]*colou?r|\d{2,3}\s*-\s*\d{2,3}\s*(?:years|лет)|(?:over|up to|более|до)\s+\d{2,3}\s*(?:years|лет)|AstroLove(?!Art)", re.I)
+                      r"\d{3}\s*(?:г/м|g/m|gsm)|\bOBA\b|bright\s*white|12[\s-]*colou?r|\d+\s*(?:years|лет)|AstroLove(?!Art)", re.I)
 RU_POSTER_IZIN = {}   # listing_id -> sha256(aciklama); yalniz ru_poster.izin_ver() doldurur
 POSTER_IDS_YOL = Path(__file__).resolve().parents[2] / "data" / "pod" / "pod78_ids.csv"
-_RU_YOL = re.compile(r"/listings/(\d+)/translations/ru/?$")
+_RU_YOL = re.compile(r"/listings/(\d+)/translations/ru(?:[-_][a-z]{2})?/?$", re.I)   # Serdar 23 Eki 2c: harf/sorgu ile atlanamaz
 
 
 def ozet(s):
@@ -225,7 +226,7 @@ def poster_idler():
 
 def ru_yazim_kapisi(method, path, data=None, json_body=None):
     """RU ceviri yazimindan once (PUT/PATCH/POST .../translations/ru). Uygun degilse SystemExit; istek gonderilmez."""
-    m = _RU_YOL.search(path or "")
+    m = _RU_YOL.search(urllib.parse.unquote((path or "").split("?")[0].split("#")[0]))
     if method not in ("PUT", "PATCH", "POST") or not m:
         return
     g = data if data is not None else (json_body or {})

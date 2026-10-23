@@ -56,17 +56,20 @@ def main():
         s.append((f"gercek {len(kk)} kuyruk kalipli", all(P.KUYRUK.fullmatch(x) for x in kk)))
     s.append(("envanter yoksa FAIL", not P.kur(EN, {})[1]["pass_"] and not P.kur(EN, None)[1]["pass_"]))
     s.append(("yasak desen genis (хлопок, Ханемюле, музей, 308 gsm, 100-200 лет)", all(P.YASAK_RU.search(x) for x in
-              ("100% хлопок", "Ханемюле", "музей", "308 gsm", "100-200 лет"))))
+              ("100% хлопок", "Ханемюле", "музей", "308 gsm", "100-200 лет", "служит 100 лет", "lasts 200 years"))))
     s.append(("Latin notu: EN'e 1 kez, 'No emoji.' sonrasi; ikinci kez degismez", EN.count(P.LATIN_EN) == 1
               and f"No emoji. {P.LATIN_EN} Please check" in EN and P.poster_en(EN) == EN))
     s.append(("Latin notu yoksa (canli EN) kur FAIL", not P.kur(EN_CANLI, ENV)[1]["pass_"]))
-    s.append(("Latin notu RU karsiligi var", ru.count(P.LATIN_RU) == 1 and "É или Ö" in ru))
+    s.append(("Latin notu RU karsiligi var (yalniz isim, aksan/mesaj kisiti yok)", ru.count(P.LATIN_RU) == 1
+              and P.LATIN_EN == "Names must use English letters." and "É" not in ru + EN and "надпись должн" not in ru))
     s.append(("6 Rusca duzeltme", all(x in ru for x in ("Print (постер)", "в полном выбранном размере", "двумя именами и вашей "
               "собственной", "в том виде, в каком он показан на макете", "от 5 до 8 рабочих дней", "цифровой файл и постер вместе",
               "заказа постера")) and "сразу распечатать" not in ru))
     s.append(("EN notunda uzun/orta tire yok", not any(c in P.LATIN_EN for c in "—–")))
     s.append(("beyansiz canli EN'den poster_en: beyan + not", P.BEYAN in P.poster_en(EN_CANLI.replace("\n\n" + P.BEYAN, ""))
               and P.LATIN_EN in P.poster_en(EN_CANLI.replace("\n\n" + P.BEYAN, ""))))
+    s.append(("onay_ozet: metin degisirse ozet degisir", P.onay_ozet(EN, ru) != P.onay_ozet(EN + " ", ru)
+              and P.onay_ozet(EN, ru) == P.onay_ozet(EN, ru) and len(P.onay_ozet(EN, ru)) == 64))
     for ad, ok in s:
         print("PASS" if ok else "FAIL", ad)
     n = sum(ok for _, ok in s)
