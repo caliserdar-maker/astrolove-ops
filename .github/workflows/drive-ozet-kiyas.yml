@@ -1,0 +1,50 @@
+name: drive-ozet-kiyas
+
+# SALT OKUMA (Serdar 23 Eki, A3 STATE kiyasi): iki Drive dosyasinin Drive tarafindaki MD5 / SHA1 ozetleri ve boyutu.
+# Dosya icerigi indirilmez, loga yalniz ozet + boyut yazilir (musteri verisi yok). Etsy / secret basimi yok.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      a: {description: "ASTROLOVE altinda yol (orn. TEMP/POD_ORDERS_STATE.csv)", required: true}
+      b: {description: "ASTROLOVE altinda yol", required: true}
+
+jobs:
+  kiyas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - run: curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Ozet kiyasi
+        env:
+          A: ${{ inputs.a }}
+          B: ${{ inputs.b }}
+        run: |
+          set -euo pipefail
+          for p in "$A" "$B"; do [[ "$p" =~ ^TEMP/[A-Za-z0-9_./-]+$ && "$p" != *..* ]] || { echo "::error::yol"; exit 1; }; done
+          oz() { local m s z
+            m=$(rclone md5sum "gdrive:ASTROLOVE/$1" | awk '{print $1}')
+            s=$(rclone sha1sum "gdrive:ASTROLOVE/$1" | awk '{print $1}')
+            z=$(rclone size --json "gdrive:ASTROLOVE/$1" | python3 -c "import json,sys;print(json.load(sys.stdin)['bytes'])")
+            echo "$m $s $z"; }
+          ra=$(oz "$A"); rb=$(oz "$B")
+          echo "A $A | md5 sha1 bayt: $ra"; echo "B $B | md5 sha1 bayt: $rb"
+          [ -n "$(echo "$ra" | awk '{print $1}')" ] || { echo "::error::A ozeti yok"; exit 1; }
+          if [ "$ra" = "$rb" ]; then echo "::notice title=DRIVE KIYAS::AYNI (md5 + sha1 + bayt)"; else echo "::error title=DRIVE KIYAS::FARKLI"; exit 1; fi
+      - if: always()
+        run: rm -rf ~/.config/rclone
