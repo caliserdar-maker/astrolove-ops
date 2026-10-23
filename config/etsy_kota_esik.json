@@ -1,6 +1,6 @@
 {
- "aktif": false,
- "not": "Serdar 23 Eki ONAYLI rakamlar: R 15, M 51, P 1638 (en kotu). Esikler: genel 481 (her istekte sert taban 430), pod-audit 2068 (430), siparis rolu (kupa-siparis, takip-denetim) baslangic esigi yok, sert taban taban+R = 415; router muaf (kendi --quota-min 400). aktif yalniz 2c router testinden sonra true yapilir.",
+ "aktif": true,
+ "not": "Serdar 23 Eki ONAYLI rakamlar: R 15, M 51, P 1638 (en kotu). Esikler: genel 481 (her istekte sert taban 430), pod-audit 2068 (430), siparis rolu (kupa-siparis, takip-denetim) baslangic esigi yok, sert taban taban+R = 415; router muaf (kendi --quota-min 400). AKTIF: 23 Eki 2c router testi PASS (39926849725 dusuk: 1 receipt + kota durmasi + kosu kirmizi; 39926979132 normal: 8 receipt, okunmayan 7 okundu, sira yeniden eskiye).",
  "taban": 400,
  "R": 15,
  "M": 51,

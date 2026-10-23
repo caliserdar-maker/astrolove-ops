@@ -136,7 +136,8 @@ def main():
     z = json.loads((o / "KOTA_DENEME.json").read_text())
     s.append(("kota-deneme: zaman damgasi yoksa sira None (sahte PASS yok)", z["sira_azalan"] is None and z["zaman_eksik"] == 3))
     gercek = json.loads((KOK / "config" / "etsy_kota_esik.json").read_text())
-    s.append(("depodaki config aktif degil (onay bekliyor)", gercek.get("aktif") is False))
+    s.append(("depodaki config: onayli rakamlar (aktif 23 Eki 2c testi sonrasi)", gercek.get("aktif") is True
+              and (gercek["taban"], gercek["R"], gercek["M"], gercek["P"]) == (400, 15, 51, 1638)))
     for ad, ok in s:
         print(("PASS " if ok else "FAIL ") + ad)
     n = sum(bool(ok) for _, ok in s)
