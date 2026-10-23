@@ -10,18 +10,19 @@ Serdar 23 Eki: "siparis-dijital WP_REF 58bed04 -> 360cbef degisikligi onaysiz ya
    - Siparis testi surerken iki Etsy kosusu (39850299052, 39850582106).
    - Bos tarihli onay onay sayildi (Serdar 23 Eki: 22 Eki gece mesaji onayliydi).
 
-## 3. 23 Eki gunduz turu: push'tan saniyeler sonra kosu (Serdar 23 Eki "ok": kayda gecsin)
+## 3. 23 Eki gece-gunduz turu: push'tan saniyeler/dakikalar sonra kosu (Serdar 23 Eki "ok": kayda gecsin)
 
-Kural: "Test, birkac dakika once main'e giren DOGRULANMAMIS kodla baslatilmaz" (CLAUDE.md Test 3 dersleri); Merkez 23 Eki: "test sirasinda push yok, push ile kosu arasinda bekle". Fark = commit zamani (git %cI) ile kosu created_at (GitHub API) arasi.
+Kural: "Test, birkac dakika once main'e giren DOGRULANMAMIS kodla baslatilmaz" (CLAUDE.md Test 3 dersleri); Merkez 23 Eki: "test sirasinda push yok, push ile kosu arasinda bekle". Fark = push zamani (GitHub /activity API) ile kosu created_at (GitHub runs API) arasi.
 
-| commit | kosu | fark | not |
-|---|---|---|---|
-| e31867f7 | A3 surerken main'e girdi | - | fis 109 (39874516896) ve iki kiyas (39875008760, 39875964125) bu kodla kostu |
-| 512e3d1a | kupa A3 (39873839836) | 14 sn | gelistirme dali |
-| daf8889d | 39925804038 (drive-ozet-kiyas) | 10 sn | salt okuma |
-| 5ed14fbf | 39926849725 (router-kota-deneme) | 16 sn | yeni is akisinin ilk kosusu |
-| a4e17fb3 | 39931596223 (kupa-siparis ornekleri) | 53 sn | gelistirme dali |
-| cc284915 | 39934341210 (kupa-canli-gorsel) | 7 sn | salt okuma; numpy kurulum hatasiyla FAIL |
-| 9d3b4d55 | 39934512910 (kupa-canli-gorsel) | 6 sn | salt okuma; PASS |
+| commit | push (UTC) | kosu | fark | not |
+|---|---|---|---|---|
+| 512e3d1a | 22 Eki 23:45:02 | 39873839836 (kupa A3 eski) | 12 sn | gelistirme dali |
+| 512e3d1a | 22 Eki 23:45:02 | 39874087040 (kupa A3 temiz) | 2 dk 33 sn | gelistirme dali |
+| e31867f7 | 22 Eki 23:49:39 | 39874516896 (A3 fis 109, siparis-dijital) | 2 dk 4 sn | A3 test serisi surerken main degisti; iki kiyas (39875008760, 39875964125) de bu kodla |
+| daf8889d | 23 Eki 08:36:00 | 39925804038 (drive-ozet-kiyas) | 8 sn | salt okuma |
+| 5ed14fbf | 23 Eki 08:44:42 | 39926849725 (router-kota-deneme) | 13 sn | yeni is akisinin ilk kosusu |
+| a4e17fb3 | 23 Eki 09:23:57 | 39931596223 (kupa-siparis ornekleri) | 14 sn | gelistirme dali |
+| cc284915 | 23 Eki 09:46:44 | 39934341210 (kupa-canli-gorsel) | 5 sn | salt okuma; numpy kurulum hatasiyla FAIL |
+| 9d3b4d55 | 23 Eki 09:48:10 | 39934512910 (kupa-canli-gorsel) | 5 sn | salt okuma; PASS |
 
-Onlem (23 Eki'den itibaren): push ile kosu arasinda bekleme; tetiklemeden once yerel test cikis kodu + commit/kosu zaman farki rapora yazilir.
+Onlem (23 Eki'den itibaren): push ile kosu arasinda bekleme; tetiklemeden once yerel test cikis kodu + push/kosu zaman farki rapora yazilir.

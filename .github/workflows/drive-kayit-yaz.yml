@@ -41,7 +41,13 @@ jobs:
           [[ "$D" =~ ^[A-Za-z0-9_.-]+\.md$ ]] || { echo "::error::dosya adi"; exit 1; }
           [ -f "docs/denetim/$D" ] || { echo "::error::depoda yok"; exit 1; }
           H="gdrive:ASTROLOVE/TEMP/DENETIM_20261021/$D"
-          rclone cat "$H" > _eski.md 2>/dev/null || : > _eski.md
+          # dosya yok -> bos kabul; VAR ama okunamiyorsa DUR (okuma hatasi "bos" sayilip ustune yazilmasin)
+          if [ -n "$(rclone lsf "gdrive:ASTROLOVE/TEMP/DENETIM_20261021/" --files-only --include "/$D")" ]; then
+            rclone cat "$H" > _eski.md || { echo "::error::Drive dosyasi var ama okunamadi; yazilmadi"; exit 1; }
+            [ -s _eski.md ] || { echo "::error::Drive dosyasi bos okundu; yazilmadi"; exit 1; }
+          else
+            : > _eski.md; echo "Drive'da yok: yeni dosya"
+          fi
           python3 - "docs/denetim/$D" _eski.md <<'PY'
           import sys
           yeni = [l.strip() for l in open(sys.argv[1], encoding="utf-8") if l.strip()]

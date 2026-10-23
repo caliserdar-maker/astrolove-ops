@@ -101,6 +101,15 @@ def main():
         return
 
     req = {"requests": [{"insertText": {"location": {"index": ins_at}, "text": payload}}]}
+    if ins_at == son - 1:
+        # Belge sonuna ekleme: yeni paragraflar son paragrafin (or. numarali liste maddesi) stilini miras alir; 22 Eki gece
+        # PLAN.md kaydi "7.-11." liste maddesi olarak dustu. Eklenen aralik duz metin yapilir (madde isareti ve stil kaldirilir).
+        bas, bit = ins_at + 1, ins_at + len(payload.encode("utf-16-le")) // 2
+        req["requests"] += [{"deleteParagraphBullets": {"range": {"startIndex": bas, "endIndex": bit}}},
+                            {"updateParagraphStyle": {"range": {"startIndex": bas, "endIndex": bit},
+                                                      "paragraphStyle": {"namedStyleType": "NORMAL_TEXT", "indentStart": {"magnitude": 0, "unit": "PT"},
+                                                                         "indentFirstLine": {"magnitude": 0, "unit": "PT"}},
+                                                      "fields": "namedStyleType,indentStart,indentFirstLine"}}]
     r = s.post(f"{DOCS}/{DOC_ID}:batchUpdate", json=req, timeout=60)
     if r.status_code != 200:
         sys.exit(f"HATA: Docs batchUpdate {r.status_code}: {r.text[:300]}")
