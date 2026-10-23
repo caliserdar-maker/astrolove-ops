@@ -23,6 +23,9 @@ bolumu okunmadan baslanmaz.
   workflow'u: `permissions: actions: read` + checkout'tan hemen sonra, token indirmeden
   ONCE `GH_TOKEN: ${{ github.token }}` ile `python3 scripts/etsy/kilit_bekle.py` adimi.
   Zamanlanmis router mesgulse turu atlar (`--mod atla`).
+  KILIT SURESI (Serdar 23 Eki): Etsy kilidini tutan kosuda uzun Etsy disi is (OCR, goruntu isleme, toplu indirme) yapilmaz;
+  Etsy okumasi biter bitmez kosu biter (ham veri Drive'a), isleme kilitsiz ayri is akisinda yapilir (kagit-tara 39947456694
+  OCR boyunca kilidi 90+ dk tuttu, pilot kuru plani bekletti).
 - KURAL (tum oturumlar): Etsy kosusunu istedigin an baslat; kilit sirayi kendisi tutar,
   hicbir kosu iptal edilmez (bekleme en fazla 120 dk, asilirsa is yapmadan FAIL).
 - Hicbir sir loga yazilmaz; token degerleri `::add-mask::` ile maskelenir.
