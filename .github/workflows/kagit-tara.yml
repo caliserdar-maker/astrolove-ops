@@ -2,9 +2,9 @@ name: kagit-tara
 
 # Kagit / tedarikci ifadesi taramasi, ASAMA 1 OKU (Serdar 23 Eki madde 3; SALT OKUMA, Etsy'ye YAZMA YOK) - kagit_tara.py --mod oku.
 # Etsy kilidi altinda yalniz okuma: magaza metin alanlari + 234 aktif ilan (baslik/etiket/materials/EN aciklama, gorsel alt metni)
-# + gorsellerin indirilmesi (570 px CDN, kota harcamaz). Kosu biter bitmez kilit birakilir. OCR ve kart benzerligi kilitsiz
+# (gorsel INDIRILMEZ; Serdar 23 Eki madde 4). Kosu biter bitmez kilit birakilir. OCR ve kart benzerligi kilitsiz
 # ayri is akisinda: kagit-tara-ocr.yml (kaynak_kosu = bu kosu). Cikti Drive ASTROLOVE/TEMP/DENETIM_20261021/KAGIT_TARAMA/<run_id>/
-# (KAGIT_METIN.csv, GORSEL.json, GORSEL.tar, OKU_OZET.json).
+# (KAGIT_METIN.csv, GORSEL.json, OKU_OZET.json).
 
 permissions:
   actions: read
@@ -61,7 +61,7 @@ jobs:
           mkdir -p _out
           python3 scripts/etsy/kagit_tara.py --mod oku --out _out 2>&1 | tee _work/kosu.log
           echo "KOD=${PIPESTATUS[0]}" >> "$GITHUB_ENV"
-          [ -d _out/GORSEL ] && tar -cf _out/GORSEL.tar -C _out GORSEL && rm -rf _out/GORSEL && ls -la _out
+          ls -la _out
       - name: Token geri yaz + cikti Drive'a
         if: always()
         run: |

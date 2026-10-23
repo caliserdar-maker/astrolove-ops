@@ -1,7 +1,7 @@
 name: kagit-tara-ocr
 
 # Kagit / tedarikci ifadesi taramasi, ASAMA 2 OCR (Serdar 23 Eki madde 3). Etsy YOK, sir yok, Etsy kilidi YOK (kilit kumesinde
-# degil). Girdi: kagit-tara (asama 1) kosusunun Drive ciktisi (GORSEL.json + GORSEL.tar). Gorsel OCR (tesseract) + eski
+# degil). Girdi: kagit-tara (asama 1) kosusunun Drive ciktisi (GORSEL.json); gorseller burada CDN'den indirilir (kilitsiz). Gorsel OCR (tesseract) + eski
 # "Fine Art Paper" kartina benzerlik. En fazla 90 dk: betik 78. dakikadan sonra yeni gorsel baslatmaz. Bulgular satir satir
 # GORSEL_OCR.csv'ye yazilir ve 2 dk'da bir Drive'a kopyalanir (kosu durursa da kayit kalir).
 # Cikti Drive ASTROLOVE/TEMP/DENETIM_20261021/KAGIT_TARAMA/<kaynak_kosu>/OCR_<run_id>/.
@@ -51,9 +51,10 @@ jobs:
           set -euo pipefail
           mkdir -p _work/kaynak _work/ref _out
           rclone copyto "$D/$K/GORSEL.json" _work/kaynak/GORSEL.json
-          rclone copyto "$D/$K/GORSEL.tar" _work/kaynak/GORSEL.tar
-          tar -xf _work/kaynak/GORSEL.tar -C _work/kaynak && rm _work/kaynak/GORSEL.tar
-          echo "gorsel dosyasi: $(ls _work/kaynak/GORSEL | wc -l)"
+          if rclone lsf "$D/$K/GORSEL.tar" >/dev/null 2>&1 && [ -n "$(rclone lsf "$D/$K/GORSEL.tar")" ]; then   # eski oku kosulari (23 Eki 15:20)
+            rclone copyto "$D/$K/GORSEL.tar" _work/kaynak/GORSEL.tar && tar -xf _work/kaynak/GORSEL.tar -C _work/kaynak && rm _work/kaynak/GORSEL.tar
+          fi
+          echo "hazir gorsel: $(ls _work/kaynak/GORSEL 2>/dev/null | wc -l) (eksikler CDN'den indirilir)"
           rclone copyto "gdrive:ASTROLOVE/TEMP/POD_KISISEL/AQUARIUS_AQUARIUS_v1/images/06_fine_art_paper.jpg" _work/ref/kart_06_fine_art_paper.jpg
           rclone copyto "gdrive:ASTROLOVE/TEMP/POD_KISISEL/AQUARIUS_AQUARIUS_v1/REVIEW/P06_06_fine_art_paper_yan_yana.jpg" _work/ref/kart_P06_yan_yana.jpg
       - name: OCR (asamali kayit)

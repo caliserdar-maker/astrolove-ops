@@ -72,12 +72,12 @@ def main():
     s.append(("oku: alt metin her ilanda", oz["metin_bulgu"]["alt_metin"] == 4 and len({r["listing_id"] for r in rows
               if r["kaynak"] == "alt_metin"}) == 2))
     s.append(("oku: ilan basina kota kapisi", api.kapi == ["ilan 1", "ilan 2"]))
-    s.append(("oku: gorsel listesi + indirme (1 hata sayilir)", oz["gorsel"] == 2 and oz["indirilen"] == 1 and len(oz["indirme_hata"]) == 1
-              and (out / "GORSEL" / "1_01_10.jpg").exists()))
+    s.append(("oku: gorsel listesi var, kilitli asamada indirme YOK (Serdar 23 Eki madde 4)", oz["gorsel"] == 2
+              and not (out / "GORSEL").exists() and "indirilen" not in oz))
     s.append(("oku: about ucu yok", oz["about_ucu"].startswith("yok")))
     # ocr asamasi: Etsy yok
     K.B.Etsy = lambda store: (_ for _ in ()).throw(AssertionError("ocr Etsy kullanmamali"))
-    jpg(out / "GORSEL" / "2_01_20.jpg", "black")
+    K.indir = lambda url, yol: jpg(yol, "white" if url == "u1" else "black")
     ref = out / "ref.jpg"; jpg(ref, "white")
     K.ocr = lambda b: "Fine Art Paper Hahnemuhle" if b == (out / "GORSEL" / "2_01_20.jpg").read_bytes() else "hello"
     o2 = pathlib.Path(tempfile.mkdtemp())

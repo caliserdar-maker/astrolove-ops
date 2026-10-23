@@ -1,0 +1,107 @@
+name: kart-sil
+
+# Eski "Fine Art Paper" kartini ilandan kaldirir (Serdar 23 Eki madde 2) - scripts/etsy/kart_sil.py. Etsy'ye YAZAR (deleteListingImage),
+# onay SERDAR_KART_SIL; mod=kuru yalniz yedek + plan. Tek ilan. Yedek: kartin tam boy dosyasi KILIT ALINMADAN once CDN'den
+# (kagit taramasi GORSEL.json adresinden; Etsy API yok, kota yok) Drive'a; sonra Etsy kilidi, yedek (gorsel listesi + renk baglari),
+# kapilar, silme, geri okuma. Cikti Drive ASTROLOVE/TEMP/DENETIM_20261021/KART_SIL/<run_id>/.
+
+permissions:
+  actions: read
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      ilan: {description: "ilan (yalniz rakam)", required: true}
+      gorsel: {description: "listing_image_id (kagit taramasi GORSEL_OCR.csv)", required: true}
+      rank: {description: "beklenen sira", required: true, default: "12"}
+      mod: {description: "kuru | sil", required: true, default: "kuru"}
+      onay: {description: "sil icin SERDAR_KART_SIL", required: false, default: ""}
+      kaynak_kosu: {description: "kagit-tara oku kosusu (GORSEL.json)", required: false, default: "39977398882"}
+
+env:
+  D: "gdrive:ASTROLOVE/TEMP/DENETIM_20261021/KART_SIL"
+
+jobs:
+  is:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          for v in "${{ inputs.ilan }}" "${{ inputs.gorsel }}" "${{ inputs.rank }}" "${{ inputs.kaynak_kosu }}"; do [[ "$v" =~ ^[0-9]+$ ]] || { echo "::error::girdi"; exit 1; }; done
+          [[ "${{ inputs.mod }}" =~ ^(kuru|sil)$ ]] || { echo "::error::mod"; exit 1; }
+          pip install -q requests==2.34.2
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Kart dosyasi yedegi (kilitten once; CDN, Etsy API yok)
+        env:
+          G: ${{ inputs.gorsel }}
+          K: ${{ inputs.kaynak_kosu }}
+        run: |
+          set -euo pipefail
+          mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/DENETIM_20261021/KAGIT_TARAMA/$K/GORSEL.json" _work/GORSEL.json
+          python3 - "$G" <<'PY'
+          import json, sys, urllib.request
+          g = [x for x in json.load(open("_work/GORSEL.json")) if str(x["image_id"]) == sys.argv[1]]
+          if len(g) != 1:
+              sys.exit(f"HATA: gorsel {sys.argv[1]} GORSEL.json'da {len(g)} kez")
+          u = g[0]["url"].replace("il_570xN", "il_fullxfull")
+          for ad, url in (("fullxfull", u), ("570xN", g[0]["url"])):
+              with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"}), timeout=60) as r:
+                  b = r.read()
+              open(f"_out/KART_{sys.argv[1]}_{ad}.jpg", "wb").write(b); print(ad, len(b), "bayt")
+          json.dump(g[0], open(f"_out/KART_{sys.argv[1]}.json", "w"), indent=1)
+          PY
+          rclone copy _out "$D/${GITHUB_RUN_ID}" -q && ls -la _out
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - name: Token
+        run: |
+          set -euo pipefail
+          umask 077
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+      - name: Kart sil
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          MOD: ${{ inputs.mod }}
+          ONAY: ${{ inputs.onay }}
+        run: |
+          set +e -o pipefail
+          args=(--ilan "${{ inputs.ilan }}" --gorsel "${{ inputs.gorsel }}" --rank "${{ inputs.rank }}" --out _out)
+          [ "$MOD" = kuru ] && args+=(--kuru) || args+=(--onay "$ONAY")
+          python3 scripts/etsy/kart_sil.py "${args[@]}" 2>&1 | tee _work/kosu.log
+          echo "KOD=${PIPESTATUS[0]}" >> "$GITHUB_ENV"
+      - name: Token geri yaz + cikti Drive'a
+        if: always()
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || echo "Token yenilenmedi"
+          [ -f _work/kosu.log ] && python3 scripts/guvenlik/log_suz.py < _work/kosu.log > "_out/kosu_$(date -u +%Y%m%d_%H%M).txt"
+          if grep -rqE '"(access_token|refresh_token)"[[:space:]]*:[[:space:]]*"[A-Za-z0-9._-]{20,}"|x-api-key[[:space:]]*:' _out/ 2>/dev/null; then
+            echo "::error::Ciktida sir bulundu; Drive'a yazilmadi"; exit 1; fi
+          rclone copy _out "$D/${GITHUB_RUN_ID}" -q && echo "::notice title=KART SIL::Drive TEMP/DENETIM_20261021/KART_SIL/${GITHUB_RUN_ID}/"
+          [ "${KOD:-1}" = 0 ] || { echo "::error::cikis ${KOD:-?}"; exit 1; }
+      - if: always()
+        run: rm -rf _work ~/.config/rclone

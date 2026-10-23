@@ -20,6 +20,7 @@ on:
       limit: {description: "toplu: en fazla yazilacak ilan", required: false, default: "10"}
       onay: {description: "yaz icin onay sozcugu", required: false, default: ""}
       gorsel_indir: {description: "kuru: --ilan galeri gorsellerini indir (evet/hayir)", required: false, default: "hayir"}
+      onay_kosu: {description: "toplu poster + ru_yeniden: kuru plan kosusu (Drive BEYAN_MARKA/<kosu>/ONAY_OZET.json)", required: false, default: ""}
       onay_ozet: {description: "yaz + ru_yeniden: kuru plan KONTROL onay_ozet (64 hex); metin farkliysa yazim yok", required: false, default: ""}
       ru_yeniden: {description: "kuru/yaz: poster EN = canli + beyan + Latin notu, RU = ru_poster (evet/hayir)", required: false, default: "hayir"}
 
@@ -70,6 +71,7 @@ jobs:
           GORSEL: ${{ inputs.gorsel_indir }}
           RU_YENI: ${{ inputs.ru_yeniden }}
           ONAY_OZET: ${{ inputs.onay_ozet }}
+          ONAY_KOSU: ${{ inputs.onay_kosu }}
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
@@ -85,7 +87,12 @@ jobs:
             args+=(--aile "$AILE" --limit "$LIMIT")
           fi
           [ "$GORSEL" = evet ] && args+=(--gorsel-indir)
-          [ "$RU_YENI" = evet ] && [ "$MOD" != toplu ] && args+=(--ru-yeniden)   # toplu poster kapali (Serdar 23 Eki)
+          [ "$RU_YENI" = evet ] && args+=(--ru-yeniden)
+          if [ -n "$ONAY_KOSU" ]; then   # Serdar 23 Eki poster partisi: ilan basina onay ozeti (2a)
+            [[ "$ONAY_KOSU" =~ ^[0-9]+$ ]] || { echo "::error::onay_kosu"; exit 1; }
+            rclone copyto "$D/$ONAY_KOSU/ONAY_OZET.json" _work/ONAY_OZET.json || { echo "::error::ONAY_OZET.json yok"; exit 1; }
+            args+=(--onay-dosya _work/ONAY_OZET.json)
+          fi
           if [ -n "$ONAY_OZET" ]; then [[ "$ONAY_OZET" =~ ^[0-9a-f]{64}$ ]] || { echo "::error::onay_ozet"; exit 1; }; args+=(--onay-ozet "$ONAY_OZET"); fi
           python3 scripts/etsy/beyan_marka_yaz.py "${args[@]}" 2>&1 | tee _work/kosu.log
           echo "KOD=${PIPESTATUS[0]}" >> "$GITHUB_ENV"

@@ -62,6 +62,11 @@ def main():
                 "mesaj_siniri"}
     s.append(("kotu RU: beklenen sorun turleri", beklenen <= set(satir["2"]["sorunlar"].split())))
     s.append(("kotu RU: fazla boy 30x40", satir["2"]["ru_boy_fazla"] == "30x40" and satir["2"]["ru_boy_beyan"] == "3" and "20" in satir["2"]["ru_sayi_en_yok"].split()))
+    s.append(("ru_yasak: kotu RU Hahnem/Photo Rag/308/Prodigi/AstroLove, iyi RU bos", satir["1"]["ru_yasak"] == ""
+              and {"Hahnem", "Photo Rag", "Prodigi", "AstroLove"} <= set(satir["2"]["ru_yasak"].split("; "))
+              and "ru_yasak" in satir["2"]["sorunlar"].split()))
+    k = R.analiz_bir(dict(ham[0], aile="kupa", ru=RU_IYI, ru_title="Кружка 11 oz, 100% cotton"))
+    s.append(("ru_yasak: RU baslik da taranir (kupa)", k["ru_yasak"] == "cotton" and "ru_yasak" in k["sorunlar"].split()))
     s.append(("ozet: poster 2 ilan, 1 sorunlu", oz["poster"]["ilan"] == 2 and oz["poster"]["sorunlu"] == 1))
     api = Sahte(kapi_dur=2)
     try:

@@ -187,6 +187,11 @@ def analiz_bir(r):
             s.append("isim_istisna")
         if o["ru_kiril_mesaj"] and not re.search(r"Cyrillic|Russian", en, re.I):
             s.append("ru_ek_bilgi")
+    import etsy_common as E   # Serdar 23 Eki not: 2b deseni (RU_YASAK) her ailenin RU baslik + aciklamasinda olculur
+    ru_hepsi = " ".join([ru, B.norm(r.get("ru_title"))])
+    o["ru_yasak"] = "; ".join(sorted({m.group(0) for m in E.RU_YASAK.finditer(ru_hepsi)}))
+    if o["ru_yasak"]:
+        s.append("ru_yasak")
     o["sorunlar"] = " ".join(s)
     return o
 

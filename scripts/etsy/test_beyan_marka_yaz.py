@@ -89,9 +89,9 @@ def kos(api, lid="1"):
     return R["sonuc"] != "FAIL", json.loads((out / f"SONUC_{lid}.json").read_text())
 
 
-def toplu(api, aile, ids, limit=10):
+def toplu(api, aile, ids, limit=10, ru_yeniden=False, onay_ozetler=None):
     out = pathlib.Path(tempfile.mkdtemp())
-    a = type("A", (), dict(aile=aile, ilan=ids, limit=limit))()
+    a = type("A", (), dict(aile=aile, ilan=ids, limit=limit, ru_yeniden=ru_yeniden, onay_ozetler=onay_ozetler or {}))()
     try:
         ok = m.toplu(api, "1", a, out)
     except m.Dur as e:
@@ -168,8 +168,30 @@ def poster_yeni_yol():
     api.put = put_boz
     R3 = m.yaz(api, "1", "4570110121", pathlib.Path(tempfile.mkdtemp()), ru_yeniden=True, onay_ozet=ozet_ok)
     s.append(("poster yeni yol: geri okunan RU bozuksa FAIL", R3["sonuc"] == "FAIL"))
-    ok, Z = toplu(yeni(), "poster", ["4570110121"], limit=1)
-    s.append(("toplu poster kapali (ru_yeniden yok) -> DUR, yazma yok", Z and Z["ozet"]["fail"] and Z["ozet"]["fail"][0]["sonuc"] == "DUR"))
+    api = yeni(); ok, Z = toplu(api, "poster", ["4570110121"], limit=1)
+    s.append(("toplu poster ru_yeniden olmadan -> DUR, yazma yok", isinstance(ok, str) and "ru-yeniden" in ok and api.yaz == []))
+    # Serdar 23 Eki parti: iki poster, ilan basina ozet
+    en2 = canli.replace("Aries and Leo", "Aries and Leo")
+    def iki():
+        A = Sahte(ilanlar={"4570110121": (canli, 9, eski_ru), "4570110641": (canli, 9, eski_ru)}); A.inv = copy.deepcopy(inv); return A
+    api = iki(); ok, Z = toplu(api, "poster", ["4570110121", "4570110641"], limit=3, ru_yeniden=True,
+                               onay_ozetler={"4570110121": ozet_ok})
+    s.append(("parti: bir ilanin ozeti yoksa hic yazma yok", isinstance(ok, str) and "onay ozeti" in ok and api.yaz == []))
+    api = iki(); ok, Z = toplu(api, "poster", ["4570110121", "4570110641"], limit=3, ru_yeniden=True,
+                               onay_ozetler={"4570110121": ozet_ok, "4570110641": "0" * 64})
+    s.append(("parti: 2. ilanin ozeti tutmazsa 1. yazilir, 2. DUR (yazma yok)", isinstance(ok, str)
+              and {l for _, l, _ in api.yaz} == {"4570110121"} and Z["ozet"]["fail"][0]["ilan"] == "4570110641"))
+    api = iki(); ok, Z = toplu(api, "poster", ["4570110121", "4570110641"], limit=3, ru_yeniden=True,
+                               onay_ozetler={"4570110121": ozet_ok, "4570110641": ozet_ok})
+    s.append(("parti: iki ilan PASS, ilan basina PATCH + PUT", ok is True and Z["ozet"]["pass_"] == 2 and len(api.yaz) == 4))
+    api = iki(); ok, Z = toplu(api, "poster", ["4570110121"], limit=1, ru_yeniden=True, onay_ozetler={"4570110121": ozet_ok})
+    s.append(("parti: limit uygulanir", Z["ozet"]["islenen"] == 1))
+    A = yeni(); A.ru["4570110121"]["title"] = "постер Hahnemühle"
+    try:
+        m.yaz(A, "1", "4570110121", pathlib.Path(tempfile.mkdtemp()), ru_yeniden=True, onay_ozet=ozet_ok); r = None
+    except (m.Dur, SystemExit) as e:
+        r = str(e)
+    s.append(("RU basliginda yasak ifade -> EN PATCH'ten once DUR (yarim yazim yok)", r is not None and A.yaz == []))
     return s
 
 
@@ -272,8 +294,8 @@ def main():
     s.append(("toplu: draft ilan -> DUR, ozet yazilir, draft'a yazma yok", isinstance(okt4, str) and "active degil" in okt4
               and Z4["ozet"]["fail"][0]["sonuc"] == "DUR" and "9" not in {l for _, l, _ in api.yaz}))
     api = Sahte(ilanlar={"10": (KUPA, 8, RU), "11": (EN, 9, RU)})
-    okt5, Z5 = toplu(api, "poster", ["10", "11"], limit=10)
-    s.append(("toplu: yalniz secilen aile", okt5 is True and {l for _, l, _ in api.yaz} == {"11"}))
+    okt5, Z5 = toplu(api, "kupa", ["10", "11"], limit=10)
+    s.append(("toplu: yalniz secilen aile", okt5 is True and {l for _, l, _ in api.yaz} == {"10"}))
     api = Sahte(ilanlar={"12": (KUPA, 8, RU), "13": (KUPA, 8, RU)}); api.remaining = m.KOTA_TABAN - 1
     okt6, Z6 = toplu(api, "kupa", ["12", "13"], limit=10)
     s.append(("toplu: kota < taban 10 -> DUR, yazma yok", isinstance(okt6, str) and "kota" in okt6 and api.yaz == []))

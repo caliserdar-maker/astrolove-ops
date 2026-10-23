@@ -304,6 +304,10 @@ def kuru(api, shop, a, out):
                 (out / f"EN_FARK_{lid}.txt").write_text("".join(difflib.unified_diff(
                     (d + "\n").splitlines(True), (en1 + "\n").splitlines(True), "EN canli", "EN yeni")), encoding="utf-8")
                 (out / f"KONTROL_{lid}.json").write_text(json.dumps(k, ensure_ascii=False, indent=1), encoding="utf-8")
+                if k["pass_"]:   # Serdar 23 Eki parti: toplu yazim bu dosyadan ilan basina ozet alir (2a)
+                    of = out / "ONAY_OZET.json"
+                    oz0 = json.loads(of.read_text()) if of.exists() else {}
+                    oz0[lid] = k["onay_ozet"]; of.write_text(json.dumps(oz0, indent=1), encoding="utf-8")
                 rapor += [f"RU yeniden: onay_ozet {k['onay_ozet']} (yazimda --onay-ozet ile verilir)",
                           f"RU yeniden: kontrol {'PASS' if k['pass_'] else 'FAIL'} | paragraf EN {k['paragraf_en']} RU {k['paragraf_ru']} | "
                           f"hata {k['hata']} | olcum sorunlari [{olc['sorunlar']}] (YENI_EN/YENI_RU/EN_FARK/KONTROL_{lid})"]
@@ -399,6 +403,10 @@ def poster_plan(lid, L, ru, inv, out, onay_ozet=None):
         raise Dur(f"{lid}: yazim anindaki EN+RU metni onayli kuru planla ayni degil (onayli {str(onay_ozet)[:12]}, simdi {oz[:12]});"
                   " yazim yok")
     ru_poster.izin_ver(lid, ru1, k)
+    # inceleme 23 Eki: RU kapisi (yasak ifade, baslik/etiket dahil) EN PATCH'ten ONCE denenir; durursa hicbir sey yazilmaz
+    import etsy_common as E
+    E.ru_yazim_kapisi("PUT", f"/shops/0/listings/{lid}/translations/ru", {"title": norm(ru.get("title")), "description": ru1,
+                                                                       "tags": ",".join(ru.get("tags") or [])})
 
     def olc_fn(d1, r1):   # geri okunan EN/RU ayni kurallarla yeniden olculur (sorun 0 olmali)
         s = ru_olcum.analiz_bir(dict(listing_id=lid, aile="poster", en=d1, ru=r1, envanter=env, ortak=ortak(L)))["sorunlar"]
@@ -471,10 +479,18 @@ def toplu(api, shop, a, out):
         ilan += (api.get("/listings/batch", {"listing_ids": ",".join(ids[k:k + 100]), "includes": "Translations"}) or {}).get("results") or []
         kota(api)
     aday = []
+    ozetler = getattr(a, "onay_ozetler", None) or {}
+    poster_yeni = a.aile == "poster" and getattr(a, "ru_yeniden", False)
+    if a.aile == "poster" and not poster_yeni:
+        raise Dur("toplu poster yalniz --ru-yeniden + --onay-dosya ile (Serdar 23 Eki)")
+    if poster_yeni and (not a.ilan or set(a.ilan) - set(ozetler)):
+        raise Dur(f"toplu poster: --ilan acik liste olmali ve her ilanin onay ozeti olmali (eksik {sorted(set(a.ilan) - set(ozetler))})")
     for L in sorted(ilan, key=lambda x: int(x["listing_id"])):
         if BOLUM_AILE.get(bolum.get(str(L.get("shop_section_id")))) != a.aile:
             continue
         lid = str(L["listing_id"])
+        if poster_yeni:   # plan yazimda (poster_plan); degisiklik yoksa ATLA, onay ozeti ilan basina
+            aday.append(lid); continue
         try:
             yap = bool(en_plan(L.get("description"), a.aile)[0])
             if not yap and a.aile in ("poster", "kupa"):   # EN tamam: RU'yu yazimla ayni kaynaktan (tekil GET) oku
@@ -492,7 +508,8 @@ def toplu(api, shop, a, out):
         try:
             if hasattr(api, "kota_kapisi"):   # Serdar 23 Eki 2b esigi (config aktifse): ilana baslamadan
                 api.kota_kapisi(f"ilan {lid}")
-            R = yaz(api, shop, lid, out, bolum)
+            R = (yaz(api, shop, lid, out, bolum, ru_yeniden=True, onay_ozet=ozetler.get(lid)) if poster_yeni
+                 else yaz(api, shop, lid, out, bolum))
         except (Dur, Exception, SystemExit) as e:   # yazimdan ONCE durdu (state, kota, okuma hatasi): yazma yok
             dur = str(e)[:300]; sonuc.append(dict(ilan=lid, sonuc="DUR", hata=[dur], yazildi=[]))
             print(f"[{n}] {lid} DUR: {dur}", flush=True); break
@@ -521,6 +538,7 @@ def main():
     ap.add_argument("--ru-yeniden", action="store_true", help="kuru/yaz --ilan: poster EN = canli + beyan + Latin notu, RU = ru_poster "
                     "(yaz: yalniz tek ilan; toplu poster kapali)")
     ap.add_argument("--onay-ozet", default=None, help="yaz --ru-yeniden: kuru plandaki KONTROL onay_ozet (64 hex)")
+    ap.add_argument("--onay-dosya", default=None, help="toplu poster --ru-yeniden: kuru plan ONAY_OZET.json (ilan -> ozet)")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
     a.ilan = [x for x in a.ilan.replace(" ", "").split(",") if x]
@@ -530,6 +548,7 @@ def main():
         raise SystemExit(f"DUR: yaz icin --onay {ONAY} ve tam 1 ilan")
     if a.mod == "toplu" and (a.onay != ONAY_TOPLU or not a.aile or not 1 <= a.limit <= 300):
         raise SystemExit(f"DUR: toplu icin --onay {ONAY_TOPLU}, --aile ve 1 <= --limit <= 300")
+    a.onay_ozetler = json.loads(pathlib.Path(a.onay_dosya).read_text()) if a.onay_dosya else {}
     out = pathlib.Path(a.out); out.mkdir(parents=True, exist_ok=True)
     k, s = os.environ.get("ETSY_API_KEY", ""), os.environ.get("ETSY_SHARED_SECRET", "")
     mask(k); mask(s)

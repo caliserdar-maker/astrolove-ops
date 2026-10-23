@@ -2,9 +2,10 @@
 """Kagit / tedarikci ifadesi taramasi (Serdar 23 Eki; SALT OKUMA, Etsy'ye yazma YOK). Iki asama (Serdar 23 Eki madde 3):
   --mod oku (Etsy kilidi altinda): magaza duzeyi metin alanlari (GET /shops/{id}, duyuru, satis/tesekkur mesajlari, politika
       alanlari) + bolum adlari + 234 aktif ilanin baslik/etiket/materials/EN aciklama + gorsel alt metinleri. Metin bulgulari
-      HEMEN yazilir (KAGIT_METIN.csv); sonra gorseller (570 px CDN kopyasi, kota harcamaz) indirilir (GORSEL/ + GORSEL.json).
+      HEMEN yazilir (KAGIT_METIN.csv) + gorsel listesi (GORSEL.json). Gorsel INDIRILMEZ (Serdar 23 Eki madde 4: kilitli kosuda
+      CDN indirmesi de yok); indirme kilitsiz ocr asamasinda.
       About ve SSS icin v3 API'de okuma ucu yok (/shops/{id}/about denenir, 404 ise "uc yok").
-  --mod ocr (kilitsiz, Etsy yok): oku ciktisindaki gorsellerde OCR (tesseract) + eski "Fine Art Paper" kartlarina benzerlik
+  --mod ocr (kilitsiz, Etsy API yok): GORSEL.json'daki 570 px gorseller CDN'den indirilir, sonra OCR (tesseract) + eski "Fine Art Paper" kartlarina benzerlik
       (64x64 gri MAE). Her gorsel bitince GORSEL_OCR.csv'ye satir eklenir (dosya her an okunabilir); --sure-dk dolunca yeni
       gorsel baslatilmaz, OCR_OZET.json "yarim" isaretiyle yazilir.
 Aranan: Hahnemuhle (OCR hatali yazimlari dahil), Photo Rag, 308, giclee, Prodigi, cotton/pamuk/хлопок, museum/музей,
@@ -137,20 +138,8 @@ def oku(a):
     t_etsy = time.time() - t0
     print(f"ETSY bitti {t_etsy:.0f}s: {len(ilan)} ilan, {len(gorsel)} gorsel | istek {api.calls} | kota {api.remaining}", flush=True)
     (out / "GORSEL.json").write_text(json.dumps(gorsel, ensure_ascii=False, indent=0), encoding="utf-8")
-    gd = out / "GORSEL"; gd.mkdir(exist_ok=True)
-    hata, t1 = [], time.time()
-    with cf.ThreadPoolExecutor(max_workers=16) as ex:
-        isler = {ex.submit(indir, g["url"], gd / g["dosya"]): g for g in gorsel}
-        for n, f in enumerate(cf.as_completed(isler), 1):
-            try:
-                f.result()
-            except Exception as e:   # noqa: BLE001  tek gorsel indirilemezse sayilir
-                hata.append(dict(dosya=isler[f]["dosya"], hata=str(e)[:120]))
-            if n % 500 == 0:
-                print(f"indirme [{n}/{len(gorsel)}] gecen {time.time() - t1:.0f}s", flush=True)
     oz = dict(asama="oku", magaza_alanlari=alanlar, about_ucu="var" if about else "yok (404)", ilan=len(ilan), gorsel=len(gorsel),
-              indirilen=len(gorsel) - len(hata), indirme_hata=hata[:20], metin_bulgu=sayac, istek=api.calls, kota=api.remaining,
-              sure_etsy_sn=round(t_etsy), sure_indirme_sn=round(time.time() - t1))
+              metin_bulgu=sayac, istek=api.calls, kota=api.remaining, sure_etsy_sn=round(t_etsy))
     (out / "OKU_OZET.json").write_text(json.dumps(oz, ensure_ascii=False, indent=1), encoding="utf-8")
     print("OKU_OZET", json.dumps({k: v for k, v in oz.items() if k != "magaza_alanlari"}, ensure_ascii=False), flush=True)
 
@@ -166,7 +155,17 @@ def gorsel_isle(g, gd, refler):
 def ocr_mod(a):
     kay, out = pathlib.Path(a.kaynak), pathlib.Path(a.out); out.mkdir(parents=True, exist_ok=True)
     gorsel = json.loads((kay / "GORSEL.json").read_text(encoding="utf-8"))
-    gd = kay / "GORSEL"
+    gd = kay / "GORSEL"; gd.mkdir(exist_ok=True)
+    eksik = [g for g in gorsel if not (gd / g["dosya"]).exists()]   # Serdar 23 Eki madde 4: indirme kilitsiz OCR asamasinda
+    ind_hata, t1 = [], time.time()
+    with cf.ThreadPoolExecutor(max_workers=16) as ex:
+        isler = {ex.submit(indir, g["url"], gd / g["dosya"]): g for g in eksik}
+        for f in cf.as_completed(isler):
+            try:
+                f.result()
+            except Exception as e:   # noqa: BLE001  tek gorsel indirilemezse sayilir
+                ind_hata.append(dict(dosya=isler[f]["dosya"], hata=str(e)[:120]))
+    print(f"indirme: {len(eksik)} gorsel, hata {len(ind_hata)}, {time.time() - t1:.0f} sn", flush=True)
     gorsel = [g for g in gorsel if (gd / g["dosya"]).exists()]
     refler = {pathlib.Path(p).stem: gri64(open(p, "rb").read()) for p in a.ref}
     alan = ["listing_id", "aile", "rank", "image_id", "ocr_bulgu"] + [f"mae_{k}" for k in refler]
@@ -201,7 +200,7 @@ def ocr_mod(a):
     for r in sonuc:
         for t in r["ocr_bulgu"].split(" ") if r["ocr_bulgu"] else []:
             terim[t] = terim.get(t, 0) + 1
-    oz = dict(asama="ocr", toplam=len(gorsel), islenen=n, hata=hata, yarim=n < len(gorsel), sure_sn=round(time.time() - t0),
+    oz = dict(asama="ocr", indirme_hata=ind_hata[:20], indirme_hata_sayi=len(ind_hata), toplam=len(gorsel), islenen=n, hata=hata, yarim=n < len(gorsel), sure_sn=round(time.time() - t0),
               isci=isci, ocr_bulgu_gorsel=sum(bool(r["ocr_bulgu"]) for r in sonuc), ocr_bulgu_ilan=len(bulgu_ilan),
               ocr_bulgu_ilan_aile={x: len({r["listing_id"] for r in sonuc if r["ocr_bulgu"] and r["aile"] == x})
                                    for x in sorted({r["aile"] for r in sonuc})},

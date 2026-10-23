@@ -1,0 +1,65 @@
+name: kart-temas
+
+# Temas sayfasi (Serdar 23 Eki madde 3): kagit taramasi gorsellerinden eski karta benzeyen 55 poster gorseli + eski kart yan yana,
+# scripts/etsy/kart_temas.py. Etsy YOK, Etsy kilidi YOK. Cikti Drive ASTROLOVE/TEMP/DENETIM_20261021/KAGIT_TARAMA/<kaynak>/TEMAS_<run_id>/.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      kaynak_kosu: {description: "kagit-tara oku kosusu (GORSEL.json + GORSEL.tar)", required: true, default: "39977398882"}
+      ocr_kosu: {description: "kagit-tara-ocr kosusu (GORSEL_OCR.csv)", required: true, default: "39978195603"}
+
+env:
+  D: "gdrive:ASTROLOVE/TEMP/DENETIM_20261021/KAGIT_TARAMA"
+
+jobs:
+  temas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          for v in "${{ inputs.kaynak_kosu }}" "${{ inputs.ocr_kosu }}"; do [[ "$v" =~ ^[0-9]+$ ]] || { echo "::error::girdi"; exit 1; }; done
+          pip install -q pillow==12.3.0
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Kaynak + temas sayfasi
+        env:
+          K: ${{ inputs.kaynak_kosu }}
+          O: ${{ inputs.ocr_kosu }}
+        run: |
+          set +e -o pipefail
+          mkdir -p _work/k _out
+          rclone copyto "$D/$K/GORSEL.json" _work/k/GORSEL.json && rclone copyto "$D/$K/GORSEL.tar" _work/k/GORSEL.tar && tar -xf _work/k/GORSEL.tar -C _work/k
+          rclone copyto "$D/$K/OCR_$O/GORSEL_OCR.csv" _work/GORSEL_OCR.csv
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_KISISEL/AQUARIUS_AQUARIUS_v1/images/06_fine_art_paper.jpg" _work/ref.jpg
+          python3 scripts/etsy/kart_temas.py --kaynak _work/k --ocr _work/GORSEL_OCR.csv --ref _work/ref.jpg --ciftler data/pod/pod78_ids.csv --out _out
+          echo "KOD=$?" >> "$GITHUB_ENV"
+      - name: Drive'a
+        if: always()
+        env:
+          K: ${{ inputs.kaynak_kosu }}
+        run: |
+          set -euo pipefail
+          rclone copy _out "$D/$K/TEMAS_${GITHUB_RUN_ID}" -q && echo "::notice title=TEMAS::Drive TEMP/DENETIM_20261021/KAGIT_TARAMA/$K/TEMAS_${GITHUB_RUN_ID}/"
+          [ "${KOD:-1}" = 0 ] || { echo "::error::cikis ${KOD:-?}"; exit 1; }
+      - if: always()
+        run: rm -rf _work ~/.config/rclone
