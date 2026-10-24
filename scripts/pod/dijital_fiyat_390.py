@@ -191,7 +191,20 @@ def ilan_isle(api, shop, lid, yaz):
         return sonuc
     body = govde(inv)
     (d / "PUT.json").write_text(json.dumps(body, ensure_ascii=False, indent=1), encoding="utf-8")
-    api.put_json(f"/listings/{lid}/inventory", body)
+    try:
+        api.put_json(f"/listings/{lid}/inventory", body)
+    except SystemExit as e:                       # Etsy hata metni rapora (job logu proxy'de okunamiyor)
+        sonuc["put_hata"] = str(e)[:600]
+        try:
+            sn2 = anlik(api, shop, lid)
+            degisti = [p.get("sku") for p, q in zip(inv.get("products") or [], sn2["inventory"].get("products") or [])
+                       if fiyatlar(p) != fiyatlar(q)]
+            sonuc["put_sonrasi_degisen_n"] = len(degisti)
+            (d / "SONRA.json").write_text(json.dumps(sn2, ensure_ascii=False, indent=1), encoding="utf-8")
+        except SystemExit as e2:
+            sonuc["put_sonrasi_okuma_hata"] = str(e2)[:300]
+        sonuc["durum"] = "FAIL_PUT"
+        return sonuc
 
     sn2 = anlik(api, shop, lid)
     L2, inv2 = sn2["listing"], sn2["inventory"]
@@ -275,7 +288,11 @@ def main():
 
     sonuclar, t0 = [], time.time()
     for i, lid in enumerate(ids, 1):
-        s = ilan_isle(api, shop, lid, yaz)
+        try:
+            s = ilan_isle(api, shop, lid, yaz)
+        except SystemExit as e:
+            s = {"ilan": lid, "durum": "FAIL_ISTISNA", "hata": str(e)[:600], "dijital_n": None,
+                 "dijital_eski": None, "kota": api.remaining}
         sonuclar.append(s)
         g = time.time() - t0
         log(f"[{i}/{len(ids)}] {100 * i // len(ids)}% gecen {g:.0f}s kalan ~{g / i * (len(ids) - i):.0f}s | "
