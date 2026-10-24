@@ -16,7 +16,7 @@ Modlar:
        alir) -> yedek (ilan + RU ceviri + envanter) -> PATCH description (EN) -> PUT translations/ru (baslik ve etiketler aynen)
        -> geri okuma (en fazla 3 deneme, 10 sn): EN/RU beklenenle esit (html.unescape), state active, baslik/etiket/fiyat/adet ve
        RU baslik/etiket ayni, satilabilir teklif sayisi ayni -> PASS.
-Kota: etsy_common esigi (genel 481/430, CLAUDE.md 23 Eki) + yerel taban 10 (esik pasifse). Yanit govdeleri yalniz hata mesaji. Cikti: <out>/...; log'a ozet."""
+Kota: siniri 10 (etsy_common.KOTA_SINIRI, Serdar 15 ve 24 Eki) + yerel taban 10. Yanit govdeleri yalniz hata mesaji. Cikti: <out>/...; log'a ozet."""
 import argparse
 import html
 import json
@@ -589,7 +589,7 @@ def toplu(api, shop, a, out):
     sonuc, dur = [], None
     for n, lid in enumerate(aday[:a.limit], 1):
         try:
-            if hasattr(api, "kota_kapisi"):   # Serdar 23 Eki 2b esigi (config aktifse): ilana baslamadan
+            if hasattr(api, "kota_kapisi"):   # kota siniri 10 (Serdar 24 Eki): ilana baslamadan
                 api.kota_kapisi(f"ilan {lid}")
             R = (yaz(api, shop, lid, out, bolum, ru_yeniden=True, onay_ozet=ozetler.get(lid)) if poster_yeni
                  else yaz(api, shop, lid, out, bolum, onay_ozet=ozetler.get(lid)))

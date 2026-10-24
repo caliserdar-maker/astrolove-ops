@@ -711,7 +711,7 @@ def main():
     ap.add_argument("--frames", default=DEFAULT_FRAMES, help="ana edisyondan alinacak kareler")
     ap.add_argument("--return-policy-id", default="")
     ap.add_argument("--return-policy-spec", default="", help="magazada iade politikasi yoksa apply'da olusturulur: returns=1,exchanges=1,deadline=30")
-    ap.add_argument("--quota-min", type=int, default=QUOTA_MIN, help="bu degerin altinda yazma yok (varsayilan 400)")
+    ap.add_argument("--quota-min", type=int, default=QUOTA_MIN, help="bu degerin altinda yazma yok (kota siniri 10)")
     ap.add_argument("--ru-dict", default="", help="Hunspell ru_RU sozluk on eki (ru_RU.dic/.aff); verilirse RU yazim denetimi")
     ap.add_argument("--origin-postal-code", default=SHIP_ORIGIN_ZIP, help="kargo profili cikis posta kodu (Mo: 28216)")
     ap.add_argument("--processing-min", type=int, default=1)

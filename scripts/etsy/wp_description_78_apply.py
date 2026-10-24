@@ -93,7 +93,7 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--confirm", default="")
-    ap.add_argument("--quota-min", type=int, default=20,
+    ap.add_argument("--quota-min", type=int, default=10,
                     help="Tahmini zorunlu cagrilar bittikten sonra kalacak guvenlik rezervi")
     args = ap.parse_args()
     if args.apply and args.confirm != "CANLI":

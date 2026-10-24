@@ -41,7 +41,7 @@ on:
       quota_min:
         description: "Etsy gunluk kota tabani; altinda yazma yok (varsayilan 400)"
         required: false
-        default: "400"
+        default: "10"
       return_policy_id:
         description: "Iade politikasi id (bos = magazada tek politika varsa o)"
         required: false

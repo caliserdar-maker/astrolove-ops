@@ -25,7 +25,7 @@ on:
       quota_min:
         description: "Kota tabani"
         required: false
-        default: "400"
+        default: "10"
 
 
 jobs:
@@ -34,7 +34,7 @@ jobs:
     timeout-minutes: 360
     env:
       DRY_RUN: ${{ inputs.dry_run || 'false' }}      # schedule ile calisirsa APPLY
-      QMIN: ${{ inputs.quota_min || '400' }}
+      QMIN: ${{ inputs.quota_min || '10' }}
     steps:
       - uses: actions/checkout@v4
       - name: Etsy kilidi (sira bekle, iptal yok)

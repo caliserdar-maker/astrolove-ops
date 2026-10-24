@@ -76,7 +76,7 @@ def main():
     ap.add_argument("--listings", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--apply", action="store_true")
-    ap.add_argument("--quota-min", type=int, default=300)
+    ap.add_argument("--quota-min", type=int, default=10)
     a = ap.parse_args()
     out = pathlib.Path(a.out)
     out.mkdir(parents=True, exist_ok=True)

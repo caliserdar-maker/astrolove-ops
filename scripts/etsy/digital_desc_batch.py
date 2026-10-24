@@ -166,7 +166,7 @@ def main():
     ap.add_argument("--skip", default="")
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--apply", action="store_true")
-    ap.add_argument("--quota-min", type=int, default=30)
+    ap.add_argument("--quota-min", type=int, default=10)
     ap.add_argument("--state-remote", default="",
                     help="verilirse durum CSV'si her ilandan sonra rclone ile buraya kopyalanir")
     a = ap.parse_args()

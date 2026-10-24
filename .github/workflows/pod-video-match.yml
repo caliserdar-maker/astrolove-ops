@@ -139,7 +139,7 @@ jobs:
           set -euo pipefail
           echo "::warning::APPLY: ilan $LISTING - YALNIZ video degisecek (${{ steps.match.outputs.ozet }})"
           python scripts/etsy/pod_hero_swap.py --listing-id "$LISTING" --out _out/etsy --apply --video-only \
-            --video _out/match/video_MB_cropped.mp4 --quota-min 300
+            --video _out/match/video_MB_cropped.mp4 --quota-min 10
       - name: Token ve cikti Drive a
         if: ${{ always() }}
         run: |

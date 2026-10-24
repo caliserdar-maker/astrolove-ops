@@ -149,7 +149,7 @@ def main():
     ap.add_argument("--listing-id", required=True)
     ap.add_argument("--pair", default="ARIES_LEO")
     ap.add_argument("--out", required=True)
-    ap.add_argument("--quota-min", type=int, default=400)
+    ap.add_argument("--quota-min", type=int, default=10)
     ap.add_argument("--ru-dict", default="", help="Hunspell ru_RU (spylls) yolu; bos = RU yazim denetimi yok")
     ap.add_argument("--expect-images", default="", help="'Renk=image_id,...' (bos = script sabiti)")
     g = ap.add_mutually_exclusive_group(required=True)

@@ -34,7 +34,7 @@ on:
       quota_min:
         description: "Kota tabani (bir ilan ~12 cagri)"
         required: false
-        default: "30"
+        default: "10"
       map_dir:
         description: "DIGITAL_POD_MAP klasoru (bos = en yenisi)"
         required: false
@@ -72,7 +72,7 @@ jobs:
       APPLY: ${{ github.event_name == 'schedule' && 'true' || inputs.apply }}
       SKIP: ${{ inputs.skip || '4552211376' }}
       LIMIT: ${{ inputs.limit || '0' }}
-      QMIN: ${{ inputs.quota_min || '30' }}
+      QMIN: ${{ inputs.quota_min || '10' }}
       MAPDIR: ${{ inputs.map_dir }}
       TPL: scripts/etsy/desc/AQUARIUS_AQUARIUS_DIGITAL_4552211376.txt
       REMOTE: gdrive:ASTROLOVE/TEMP/POD_LISTING/DIGITAL_DESC_STATE.csv

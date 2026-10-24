@@ -43,7 +43,7 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--confirm", default="")
-    ap.add_argument("--quota-min", type=int, default=30)
+    ap.add_argument("--quota-min", type=int, default=10)
     a = ap.parse_args()
     if a.apply and a.confirm != "KAPAK_EKLE":
         raise SystemExit("HATA: --apply icin --confirm KAPAK_EKLE gerekli. DUR.")

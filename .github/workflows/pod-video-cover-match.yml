@@ -135,7 +135,7 @@ jobs:
           set -euo pipefail
           args=(--listing-id "$LISTING_ID" --video-only \
             --video _out/AstroLove_AQUARIUS_GEMINI_POD_CoverMatched.mp4 \
-            --out _out/etsy --quota-min 50)
+            --out _out/etsy --quota-min 10)
           [ "$APPLY" = "true" ] && args+=(--apply)
           python scripts/etsy/pod_hero_swap.py "${args[@]}"
       - name: Token ve kanitlari sakla

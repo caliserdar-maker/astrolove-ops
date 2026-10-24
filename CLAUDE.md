@@ -29,13 +29,10 @@ bolumu okunmadan baslanmaz.
 - KURAL (tum oturumlar): Etsy kosusunu istedigin an baslat; kilit sirayi kendisi tutar,
   hicbir kosu iptal edilmez (bekleme en fazla 120 dk, asilirsa is yapmadan FAIL).
 - Hicbir sir loga yazilmaz; token degerleri `::add-mask::` ile maskelenir.
-- KOTA ESIGI (Serdar 23 Eki, rakamlar ONAYLI): genel Etsy isleri kalan < 481 ise baslamaz / ilana baslamaz, her istekte sert
-  taban 430; pod-audit 2068 (sert 430); siparis rolu (kupa-siparis, takip-denetim) baslangic esigi yok, sert taban 415; router 400
-  (kendi --quota-min). Formul: genel taban + 2R + M, pod-audit taban + 2R + P, siparis taban + R; taban 400, R 15, M 51, P 1638
-  (P'deki 78 ilan SAYILMADI, is akisi basligindan). Tek kaynak `config/etsy_kota_esik.json` + `etsy_common.kota_esigi`; bozuk config,
-  dosya yok ya da aktif true/false disi esigi PASIF yapar (::warning, kosu durmaz). AKTIF (23 Eki; router 2c testi 39926849725 + 39926979132 PASS). Eski 15 Eki taban 10 kurali bunun yerine gecti;
-  config bozulursa esik pasife duser ve o durumda taban 10 kurali yine gecerlidir. Baska taban Serdar onayi olmadan
-  konmaz. Toplu isler ilan basina `api.kota_kapisi(...)` cagirmali (su an yalniz beyan_marka_yaz toplu).
+- KOTA SINIRI: "Etsy kota sınırı 10 (Serdar 15 ve 24 Eki). Serdar açıkça söylemeden değiştirilmez; yeni eşik önerilmez."
+  Tek deger: kosu/ilan baslangic esigi ve her istekten once sert taban = 10, tum roller (genel, pod-audit, siparis, router)
+  ve tum betik/is akisi varsayilanlari (`--quota-min` vb.). Kaynak `etsy_common.KOTA_SINIRI`. 23 Eki esikleri (genel 481/430,
+  pod-audit 2068, router 400, siparis 415, ihtiyac kapisi 430) ve config/etsy_kota_esik.json KALDIRILDI (24 Eki).
 - **updateListing bir TASLAGI otomatik yayina alir** (7 Eyl 2026 olcumu: gece
   aciklama guncellemesi 72 taslagi `active` yapti; `state_timestamp` = PATCH ani).
   Toplu guncellemede "ilan taslak kalir" varsayimi YAPILMAZ: yazmadan once state

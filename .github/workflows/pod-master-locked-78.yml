@@ -26,7 +26,7 @@ on:
       quota_min:
         description: "Her yeni ilana baslarken kota tabani"
         required: false
-        default: "900"
+        default: "10"
 
 
 jobs:
@@ -37,7 +37,7 @@ jobs:
       APPLY: ${{ inputs.apply || 'false' }}
       CONFIRM: ${{ inputs.confirm || '' }}
       LIMIT: ${{ inputs.limit || '0' }}
-      QMIN: ${{ inputs.quota_min || '900' }}
+      QMIN: ${{ inputs.quota_min || '10' }}
       STATE_REMOTE: ASTROLOVE/TEMP/POD_MASTER_LOCKED_78/state.json
     steps:
       - uses: actions/checkout@v4
@@ -53,7 +53,7 @@ jobs:
           echo "APPLY=$(jq -r '.apply // false' "$file")" >> "$GITHUB_ENV"
           echo "CONFIRM=$(jq -r '.confirm // ""' "$file")" >> "$GITHUB_ENV"
           echo "LIMIT=$(jq -r '.limit // 0' "$file")" >> "$GITHUB_ENV"
-          echo "QMIN=$(jq -r '.quota_min // 900' "$file")" >> "$GITHUB_ENV"
+          echo "QMIN=$(jq -r '.quota_min // 10' "$file")" >> "$GITHUB_ENV"
       - name: Onay kapisi
         run: |
           set -euo pipefail

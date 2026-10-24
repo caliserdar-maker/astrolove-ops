@@ -31,7 +31,7 @@ on:
         default: "0"
       kota_alt:
         description: "kota tabani (varsayilan 400)"
-        default: "400"
+        default: "10"
       redirect:
         description: "yetki modlari icin kayitli redirect URI"
         default: "https://astrolove.art/oauth/callback"
@@ -85,7 +85,7 @@ jobs:
       CONFIRM: ${{ inputs.confirm || '' }}
       LISTING: ${{ inputs.listing || '4570110641' }}
       LIMIT: ${{ inputs.limit || '0' }}
-      KOTA_ALT: ${{ inputs.kota_alt || '400' }}
+      KOTA_ALT: ${{ inputs.kota_alt || '10' }}
       REDIRECT: ${{ inputs.redirect || 'https://astrolove.art/oauth/callback' }}
       KOD: ${{ inputs.kod || '' }}
       STATE: ${{ inputs.state || '' }}

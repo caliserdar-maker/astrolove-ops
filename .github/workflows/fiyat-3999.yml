@@ -24,7 +24,7 @@ on:
         default: ""
       kota_alt:
         description: "Etsy gunluk kota tabani (altinda dur)"
-        default: "400"
+        default: "10"
 
 jobs:
   fiyat:

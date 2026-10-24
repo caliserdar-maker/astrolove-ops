@@ -213,7 +213,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", required=True)
     parser.add_argument("--expected-count", type=int, default=546)
-    parser.add_argument("--quota-buffer", type=int, default=60)
+    parser.add_argument("--quota-buffer", type=int, default=10)
     args = parser.parse_args()
     key = os.environ.get("ETSY_API_KEY", "")
     secret = os.environ.get("ETSY_SHARED_SECRET", "")

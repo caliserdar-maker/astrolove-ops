@@ -15,7 +15,7 @@ on:
       quota_min:
         description: "Kota tabani"
         required: false
-        default: "200"
+        default: "10"
 
 
 permissions:
@@ -28,7 +28,7 @@ jobs:
     timeout-minutes: 180
     env:
       LIMIT: ${{ inputs.limit || '0' }}
-      QMIN: ${{ inputs.quota_min || '200' }}
+      QMIN: ${{ inputs.quota_min || '10' }}
     steps:
       - uses: actions/checkout@v4
       - name: Etsy kilidi (sira bekle, iptal yok)

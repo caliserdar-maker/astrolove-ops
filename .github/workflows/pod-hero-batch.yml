@@ -30,7 +30,7 @@ on:
       quota_min:
         description: "Etsy kota tabani"
         required: false
-        default: "400"
+        default: "10"
 
 
 jobs:
@@ -156,7 +156,7 @@ jobs:
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
           TOKEN_FILE: _work/ETSY_TOKEN.json
           SKIP: ${{ inputs.skip }}
-          QMIN: ${{ inputs.quota_min || '400' }}
+          QMIN: ${{ inputs.quota_min || '10' }}
         run: |
           set -euo pipefail
           echo "::warning::APPLY: uretimi PASS olan POD ilanlarinda 5 hero + video degisecek"

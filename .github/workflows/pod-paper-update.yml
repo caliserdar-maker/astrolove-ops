@@ -32,7 +32,7 @@ on:
       quota_min:
         description: "Kota tabani"
         required: false
-        default: "400"
+        default: "10"
 
 
 jobs:
@@ -43,7 +43,7 @@ jobs:
       APPLY: ${{ inputs.apply }}
       LIMIT: ${{ inputs.limit || '0' }}
       DRYLIMIT: ${{ inputs.dry_limit || inputs.limit || '0' }}
-      QMIN: ${{ inputs.quota_min || '400' }}
+      QMIN: ${{ inputs.quota_min || '10' }}
     steps:
       - name: Onay kapisi
         env:

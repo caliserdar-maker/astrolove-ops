@@ -30,7 +30,7 @@ on:
       quota_min:
         description: "Kota tabani"
         required: false
-        default: "400"
+        default: "10"
 
 
 jobs:
@@ -40,7 +40,7 @@ jobs:
     env:
       DRY_RUN: ${{ inputs.dry_run || 'false' }}          # schedule ile calisirsa APPLY
       PUB_LIMIT: ${{ inputs.publish_limit || '5' }}
-      QMIN: ${{ inputs.quota_min || '400' }}
+      QMIN: ${{ inputs.quota_min || '10' }}
       DESC_LIMIT: ${{ inputs.desc_limit || '0' }}
     steps:
       - uses: actions/checkout@v4

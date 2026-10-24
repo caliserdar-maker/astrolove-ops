@@ -311,7 +311,7 @@ def main():
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--ru-only", action="store_true",
                     help="yalniz RU gecisi (EN'e dokunulmaz; RU govdesi bos ilan atlanir)")
-    ap.add_argument("--quota-min", type=int, default=400)
+    ap.add_argument("--quota-min", type=int, default=10)
     g = ap.add_mutually_exclusive_group(required=True)
     g.add_argument("--dry-run", action="store_true")
     g.add_argument("--apply", action="store_true")

@@ -204,7 +204,7 @@ def main():
     ap.add_argument("--ids", default="", help="yalniz bu ilanlar (virgullu id); bos = hepsi. --limit'ten once uygulanir")
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--confirm", default="")
-    ap.add_argument("--quota-min", type=int, default=60)
+    ap.add_argument("--quota-min", type=int, default=10)
     ap.add_argument("--alanlar", default="title,description,tags",
                     help="yazilacak alanlar, virgulle (title,description,tags alt kumesi)")
     a = ap.parse_args()

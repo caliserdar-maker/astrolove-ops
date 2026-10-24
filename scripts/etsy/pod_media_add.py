@@ -98,7 +98,7 @@ def main():
     ap.add_argument("--media", required=True, help="<media>/<PAIR>/ kart + video")
     ap.add_argument("--frames", default=DEFAULT_FRAMES)
     ap.add_argument("--out", required=True)
-    ap.add_argument("--quota-min", type=int, default=400)
+    ap.add_argument("--quota-min", type=int, default=10)
     g = ap.add_mutually_exclusive_group(required=True)
     g.add_argument("--dry-run", action="store_true")
     g.add_argument("--apply", action="store_true")

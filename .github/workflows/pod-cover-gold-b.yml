@@ -88,7 +88,7 @@ jobs:
           python scripts/etsy/pod_cover_from_video.py \
             --listing-id "$LISTING_ID" \
             --out _out/generate \
-            --quota-min 50 \
+            --quota-min 10 \
             --mobile-display-compensation
           python scripts/etsy/pod_cover_gold_b_transform.py \
             --input _out/generate/Aquarius_Gemini_video_frame0_cover.png \
@@ -102,7 +102,7 @@ jobs:
             --expected-pixel-sha256 "$CANDIDATE_PIXEL_SHA256"
             --expected-old-cover-id "$EXPECTED_OLD_COVER_ID"
             --out _out/result
-            --quota-min 50
+            --quota-min 10
           )
           [ "$APPLY" = "true" ] && args+=(--apply)
           python scripts/etsy/pod_cover_replace_file.py "${args[@]}"

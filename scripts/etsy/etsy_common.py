@@ -157,50 +157,17 @@ class APIKeyStore:
         raise SystemExit("HATA: Bu is OAuth kullanmaz; public uc 401 dondurdu.")
 
 
-# ------------------------------------------------------------------ kota esigi
-# Serdar 23 Eki: genel isler kalan < taban + 2R + M ise baslamaz / ilana baslamaz (her istekte sert taban taban + 2R);
-# pod-audit taban + 2R + P; siparis rolu (kupa-siparis, takip-denetim) yalniz sert taban taban + R; router muaf (kendi
-# --quota-min 400). Rakamlar ve "aktif" config/etsy_kota_esik.json'da; dosya yoksa / aktif degilse / bozuksa etkisiz.
-KOTA_ESIK_DOSYA = Path(__file__).resolve().parents[2] / "config" / "etsy_kota_esik.json"
+# ------------------------------------------------------------------ kota siniri
+# Serdar 15 ve 24 Eki (kesin): Etsy API kota siniri 10, tek deger. Kosu/ilan baslangic esigi ve her istekten once sert taban
+# ayni: kalan < 10 ise DUR. 23 Eki esikleri (genel 481/430, pod-audit 2068, router 400, siparis 415, ihtiyac kapisi 430) ve
+# config/etsy_kota_esik.json KALDIRILDI. Serdar acikca soylemeden degistirilmez; yeni esik onerilmez.
+KOTA_SINIRI = 10
 
 
 def kota_esigi(rol=None, dosya=None):
-    """-> (esik, sert_taban) ya da (None, None). rol (ETSY_KOTA_ROL, varsayilan genel):
-      genel     : esik taban + 2R + M (kosu ve ilan baslangici), sert taban taban + 2R (her istekten once)
-      pod-audit : esik taban + 2R + P, sert taban taban + 2R
-      siparis   : (kupa-siparis, takip-denetim; Serdar 23 Eki) baslangic esigi yok, sert taban taban + R
-      router    : muaf (kendi --quota-min 400)
-    aktif false ise sessizce etkisiz. Dosya yoksa, aktif true/false disinda bir degerse (ya da yoksa), dosya okunamaz ya da
-    alan eksikse UYARI + PASIF (Serdar 23 Eki: bozuk config hicbir kosuyu durdurmaz, ama sessizce de kapanmaz)."""
-    p = Path(dosya or KOTA_ESIK_DOSYA)
-    if not p.exists():
-        log(f"::warning::KOTA ESIGI PASIF: {p.name} yok; hicbir kosu durdurulmaz")
-        return None, None
-    try:
-        c = json.loads(p.read_text(encoding="utf-8"))
-        aktif = c.get("aktif", "(yok)")
-        if aktif is False:
-            return None, None
-        if aktif is not True:
-            log(f"::warning::KOTA ESIGI PASIF: {p.name} aktif alani true/false degil ({str(aktif)[:20]!r}); "
-                "hicbir kosu durdurulmaz")
-            return None, None
-        say = [c[k] for k in ("taban", "R", "M", "P")]
-        if not all(type(v) is int and 0 <= v < 5000 for v in say):
-            raise ValueError("taban/R/M/P 0-4999 arasi tamsayi olmali")
-        taban, r, m, pp = say
-    except (ValueError, TypeError, KeyError, AttributeError, OSError) as e:
-        log(f"::warning::KOTA ESIGI PASIF: {p.name} okunamadi ya da eksik ({type(e).__name__}); hicbir kosu durdurulmaz")
-        return None, None
-    rol = rol or os.environ.get("ETSY_KOTA_ROL", "genel")
-    if rol not in ("genel", "pod-audit", "siparis", "router"):
-        log(f"::warning::ETSY_KOTA_ROL bilinmiyor ({rol}); siparis tabani (taban + R) uygulanir, siparis isi durmasin")
-        rol = "siparis"
-    if rol == "router":
-        return None, None
-    if rol == "siparis":
-        return None, taban + r
-    return taban + 2 * r + (pp if rol == "pod-audit" else m), taban + 2 * r
+    """-> (esik, sert_taban) = (KOTA_SINIRI, KOTA_SINIRI), her rol icin (genel, pod-audit, siparis, router). rol ve dosya
+    geriye uyumluluk icin kabul edilir, etkisi yoktur."""
+    return KOTA_SINIRI, KOTA_SINIRI
 
 
 # ------------------------------------------------------------------ RU yazim kapisi
@@ -281,7 +248,7 @@ class Etsy:
         self.esik, self.sert_taban = kota_esigi()
         self._kapi_bakildi = False
         if self.sert_taban is not None:
-            log(f"KOTA ESIGI aktif: kosu/ilan {self.esik if self.esik is not None else 'yok'}, sert taban (her istek) {self.sert_taban}")
+            log(f"KOTA SINIRI {self.sert_taban} (kosu/ilan baslangici ve her istek; Serdar 15 ve 24 Eki)")
         self.pace = 0.25  # sn; 5 QPS sinirinin altinda kalir
         self.verbose_quota = False  # True: her istekten sonra x-remaining-today loglanir (C gorevi, 5 Eyl 2026)
 
@@ -291,8 +258,7 @@ class Etsy:
             raise SystemExit(f"DUR: kota esigi: kalan {self.remaining} < {self.esik} ({ne} baslamadi)")
 
     def _istek_oncesi(self):
-        """Esik aktifken: ilk yanittan sonra kosu kapisi (esik) bir kez; sert taban (genel/pod-audit taban + 2R, siparis
-        taban + R) HER istekten once.
+        """Ilk yanittan sonra kosu kapisi bir kez; sert taban (KOTA_SINIRI) HER istekten once.
         SystemExit'i yakalayip devam eden betiklerde de sonraki her istek yine durur (payin altina inilmez)."""
         if self.sert_taban is None:
             return

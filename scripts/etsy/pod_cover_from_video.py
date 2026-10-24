@@ -142,7 +142,7 @@ def main() -> None:
     ap.add_argument("--out", required=True)
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--mobile-display-compensation", action="store_true")
-    ap.add_argument("--quota-min", type=int, default=50)
+    ap.add_argument("--quota-min", type=int, default=10)
     args = ap.parse_args()
 
     out = pathlib.Path(args.out)

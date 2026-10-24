@@ -31,7 +31,7 @@ on:
       quota_min:
         description: "Kota tabani"
         required: false
-        default: "400"
+        default: "10"
       verify_state:
         description: "true = ekleme sonrasi ilan state'ini yeniden oku (1 ek cagri/ilan)"
         type: boolean
@@ -46,7 +46,7 @@ jobs:
       APPLY: ${{ inputs.apply }}
       LIMIT: ${{ inputs.limit || '0' }}
       DRYLIMIT: ${{ inputs.dry_limit || inputs.limit || '0' }}
-      QMIN: ${{ inputs.quota_min || '400' }}
+      QMIN: ${{ inputs.quota_min || '10' }}
       VSTATE: ${{ inputs.verify_state }}
       PDF: _work/ASTROLOVE_DIGITAL_THANKYOU_EN.pdf
     steps:

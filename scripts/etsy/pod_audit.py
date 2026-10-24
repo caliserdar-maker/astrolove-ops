@@ -213,7 +213,7 @@ def main():
     ap.add_argument("--state", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--limit", type=int, default=0)
-    ap.add_argument("--quota-min", type=int, default=400)
+    ap.add_argument("--quota-min", type=int, default=10)
     ap.add_argument("--ref-id", default="4570031205", help="referans ilan (ozellik haritasi buradan)")
     ap.add_argument("--section-id", type=int, default=SECTION_ID)
     ap.add_argument("--shipping-profile-id", type=int, default=SHIPPING_ID)

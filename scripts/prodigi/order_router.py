@@ -721,7 +721,7 @@ def main():
     ap.add_argument("--onaylar", default="_work/SIPARIS_ONAY/ONAYLAR.json",
                     help="Claude'un Serdar onayindan sonra yazdigi ONAYLAR.json kopyasi")
     ap.add_argument("--since-days", type=int, default=0, help="yalniz son N gunun receipt'leri (0 = hepsi)")
-    ap.add_argument("--quota-min", type=int, default=400, help="Etsy kota tabani; altinda receipt okumasi durur")
+    ap.add_argument("--quota-min", type=int, default=10, help="Etsy kota siniri 10 (Serdar 15 ve 24 Eki); altinda receipt okumasi durur")
     ap.add_argument("--max-pages", type=int, default=10, help="receipt okumasinda en fazla N cagri")
     ap.add_argument("--kota-deneme", action="store_true", help="2c testi: yalniz receipt listesi okunur, isleme/yazma yok")
     ap.add_argument("--sayfa", type=int, default=100, help="--kota-deneme sayfa boyu (receipt listesi limit)")

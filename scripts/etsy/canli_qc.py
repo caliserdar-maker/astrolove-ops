@@ -36,7 +36,7 @@ import video_dogrula  # noqa: E402
 
 REF_ID, REF_A, REF_B = "4570143815", "Cancer", "Libra"
 A77 = "gdrive:ASTROLOVE/TEMP/POD_KISISEL/A1_77"
-KOTA_TABAN, CAGRI_SINIR = 230, 300
+KOTA_TABAN, CAGRI_SINIR = 10, 300
 ESIK_FOTO, ESIK_DE = 0.001, 3.0
 W4, ALAN_MIN, SIKLIK, N_MIN = 500, 40, 0.30, 5
 BURC = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn",

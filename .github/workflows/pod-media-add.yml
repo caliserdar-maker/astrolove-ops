@@ -33,7 +33,7 @@ on:
       quota_min:
         description: "Kota tabani (altinda yazma yok)"
         required: false
-        default: "400"
+        default: "10"
 
 
 jobs:

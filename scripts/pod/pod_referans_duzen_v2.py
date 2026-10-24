@@ -252,7 +252,7 @@ def main():
     ap.add_argument("--still", type=float, default=0.6)
     ap.add_argument("--fade", type=float, default=0.2)
     ap.add_argument("--motion-start", type=float, default=0.4)
-    ap.add_argument("--quota-min", type=int, default=100)
+    ap.add_argument("--quota-min", type=int, default=10)
     ap.add_argument("--apply", action="store_true")
     a = ap.parse_args()
     if a.apply:

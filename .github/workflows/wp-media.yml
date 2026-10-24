@@ -30,7 +30,7 @@ on:
       quota_stop:
         description: "Kalan kota bu degerin altina dusunce temiz cik"
         required: true
-        default: "300"
+        default: "10"
 
 
 jobs:

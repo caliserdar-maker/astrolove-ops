@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Kota esigi (Serdar 23 Eki 2b) sahte testi, ag yok: config yok/pasif = etkisiz; genel / pod-audit / router esikleri;
-ilk yanittan sonra kosu kapisi; ilan kapisi; sert taban; router receipt okumasi kota yuzunden durursa hata."""
+"""Kota siniri 10 (Serdar 15 ve 24 Eki) sahte testi, ag yok: her rol 10/10; ilk yanittan sonra kosu kapisi; ilan kapisi;
+sert taban; router receipt okumasi kota yuzunden durursa hata; router varsayilani 10."""
 import json
 import os
 import pathlib
@@ -24,11 +24,7 @@ class Depo:
     api_key_header, access_token = "k:s", "t"
 
 
-def api_kur(kalanlar, conf, rol="genel"):
-    d = pathlib.Path(tempfile.mkdtemp()) / "esik.json"
-    if conf is not None:
-        d.write_text(json.dumps(conf))
-    E.KOTA_ESIK_DOSYA = d
+def api_kur(kalanlar, rol="genel"):
     os.environ["ETSY_KOTA_ROL"] = rol
     seri = iter(kalanlar)
     E.requests.request = lambda *a, **k: Yanit(next(seri))
@@ -44,49 +40,25 @@ def dur_mu(f):
 
 
 def main():
-    C = dict(aktif=True, taban=400, R=15, M=51, P=1638)
     s = []
-    kayit = []
-    eski_log, E.log = E.log, lambda m: kayit.append(m)
-    uyari = lambda: any("::warning::KOTA ESIGI PASIF" in m for m in kayit)   # noqa: E731
-
-    def tek(conf):
-        """-> (esik, sert_taban, uyari var mi, 3 istek durdu mu)"""
-        kayit.clear(); a = api_kur([100, 90, 80], conf)
-        return a.esik, a.sert_taban, uyari(), dur_mu(lambda: [a.get("/x") for _ in range(3)])
-    s.append(("config yok -> UYARI + etkisiz, kosu durmaz (Serdar 23 Eki)", tek(None) == (None, None, True, None)))
-    s.append(("aktif false -> sessiz etkisiz (uyari yok)", tek(dict(C, aktif=False)) == (None, None, False, None)))
-    tuhaf = [tek(dict(C, aktif=v)) for v in ("true", 1, None, "false")] + [tek({k: v for k, v in C.items() if k != "aktif"})]
-    s.append(("aktif 'true' / 1 / null / 'false' / alan yok -> UYARI + etkisiz, kosu durmaz",
-              all(x == (None, None, True, None) for x in tuhaf)))
-    g = tek(C)
-    s.append(("gecerli aktif config -> uyari yok (kalan 100 < 481: ilk istekten sonra DUR)", g[:3] == (481, 430, False)
-              and "kota esigi" in (g[3] or "")))
-    E.log = eski_log
-    s.append(("onayli esikler: genel 481/430, pod-audit 2068/430, siparis yok/415, router muaf",
-              (api_kur([1], C).esik, api_kur([1], C).sert_taban) == (481, 430)
-              and (api_kur([1], C, "pod-audit").esik, api_kur([1], C, "pod-audit").sert_taban) == (2068, 430)
-              and (api_kur([1], C, "siparis").esik, api_kur([1], C, "siparis").sert_taban) == (None, 415)
-              and (api_kur([1], C, "router").esik, api_kur([1], C, "router").sert_taban) == (None, None)))
-    d = pathlib.Path(tempfile.mkdtemp()) / "bozuk.json"; d.write_text("{aktif: true,,")
-    s.append(("bozuk JSON -> PASIF, kosu durmaz (Serdar 23 Eki)", E.kota_esigi("genel", d) == (None, None)))
-    s.append(("aktif + eksik alan / tuhaf deger -> PASIF; bilinmeyen rol -> siparis tabani 415",
-              api_kur([1], dict(C, P=None), "pod-audit").sert_taban is None and api_kur([1], dict(C, taban=True)).sert_taban is None
-              and api_kur([1], dict(C, taban=40000)).sert_taban is None
-              and (api_kur([1], C, "sipars").esik, api_kur([1], C, "sipars").sert_taban) == (None, 415)))
-    api = api_kur([1000, 420, 416, 414, 400], C, "siparis")
-    r = dur_mu(lambda: [api.get("/x") for _ in range(5)])
-    s.append(("siparis rolu: 481'in altinda baslar, 415 altinda durur", bool(r) and "sert tabani" in r and api.calls == 4))
-    api = api_kur([480, 470], C)
+    E.log = lambda m: None
+    s.append(("KOTA_SINIRI 10 (Serdar 15 ve 24 Eki)", E.KOTA_SINIRI == 10))
+    s.append(("her rol (genel, pod-audit, siparis, router, bilinmeyen) -> (10, 10)",
+              all((api_kur([1], r).esik, api_kur([1], r).sert_taban) == (10, 10)
+                  for r in ("genel", "pod-audit", "siparis", "router", "sipars"))))
+    s.append(("kota_esigi rol/dosya argumani etkisiz", E.kota_esigi("pod-audit", "/yok.json") == (10, 10)))
+    s.append(("config/etsy_kota_esik.json kaldirildi", not (KOK / "config" / "etsy_kota_esik.json").exists()))
+    api = api_kur([477, 470, 300, 11])
+    s.append(("23 Eki esiklerinin altinda (477, 300, 11) kosu surer", dur_mu(lambda: [api.get("/x") for _ in range(4)]) is None
+              and api.calls == 4))
+    s.append(("ilan kapisi: kalan 11 >= 10 gecer", dur_mu(lambda: api.kota_kapisi("ilan 4")) is None))
+    api = api_kur([9, 8])
     r = dur_mu(lambda: [api.get("/x") for _ in range(2)])
-    s.append(("ilk yanit 480 < 481 -> 2. istekten once DUR", bool(r) and "kota esigi" in r and api.calls == 1))
-    api = api_kur([1000, 990, 600, 500], C)
-    s.append(("esik uzerinde baslayan kosu pay ustunde surer", dur_mu(lambda: [api.get("/x") for _ in range(4)]) is None and api.calls == 4))
-    s.append(("ilan kapisi: kalan 500 >= 481 gecer", dur_mu(lambda: api.kota_kapisi("ilan 4")) is None))
-    api = api_kur([1000, 440, 429, 400, 390], C)
-    r = dur_mu(lambda: [api.get("/x") for _ in range(5)])
-    s.append(("sert taban (430): 429 yanitindan sonra istek yok", bool(r) and "sert tabani" in r and api.calls == 3))
-    api = api_kur([1000, 429] + [400] * 50, C)
+    s.append(("ilk yanit 9 < 10 -> 2. istekten once DUR", bool(r) and "kota esigi" in r and api.calls == 1))
+    api = api_kur([500, 10, 9, 5])
+    r = dur_mu(lambda: [api.get("/x") for _ in range(4)])
+    s.append(("sert taban 10: 9 yanitindan sonra istek yok", bool(r) and "sert tabani" in r and api.calls == 3))
+    api = api_kur([500, 9] + [5] * 50)
     yutulan = 0
     for _ in range(50):   # SystemExit'i yakalayip devam eden betik (digital_desc_batch gibi)
         try:
@@ -94,9 +66,9 @@ def main():
         except SystemExit:
             yutulan += 1
     s.append(("DUR yutulsa da sonraki istekler gonderilmez", api.calls == 2 and yutulan == 48))
-    api = api_kur([1000], C)
+    api = api_kur([500])
     api.get("/x"); api.remaining = None
-    s.append(("aktifken baslik okunamazsa DUR", "okunamadi" in (dur_mu(lambda: api.get("/x")) or "")))
+    s.append(("baslik okunamazsa DUR", "okunamadi" in (dur_mu(lambda: api.get("/x")) or "")))
     import order_router as R  # noqa: E402
 
     class Api:
@@ -107,7 +79,9 @@ def main():
             return {"results": [{"receipt_id": i} for i in range(100)]}
     R.KOTA_DURDU.clear()
     out = R.etsy_receipts(Api(), "1", 7, 10, 400)
-    s.append(("router: kota 350 < 400 -> okuma durur ve KOTA_DURDU dolu", len(out) == 100 and len(R.KOTA_DURDU) == 1))
+    s.append(("router: zorlanmis taban 400, kota 350 -> okuma durur ve KOTA_DURDU dolu", len(out) == 100 and len(R.KOTA_DURDU) == 1))
+    s.append(("router --quota-min varsayilani 10", "default=10," in (KOK / "scripts" / "prodigi" / "order_router.py").read_text()
+              .split('"--quota-min"')[1][:40]))
     # router --kota-deneme (Serdar 23 Eki 4): sayfa 1, zorlanmis taban -> 1 receipt okunur, KOTA_DURDU.txt; normal -> hepsi
     FIS = [dict(receipt_id=100 + i, created_timestamp=5000 - i) for i in range(5)]
 
@@ -146,13 +120,10 @@ def main():
     R.main()
     z = json.loads((o / "KOTA_DENEME.json").read_text())
     s.append(("kota-deneme: zaman damgasi yoksa sira None (sahte PASS yok)", z["sira_azalan"] is None and z["zaman_eksik"] == 3))
-    gercek = json.loads((KOK / "config" / "etsy_kota_esik.json").read_text())
-    s.append(("depodaki config: onayli rakamlar (aktif 23 Eki 2c testi sonrasi)", gercek.get("aktif") is True
-              and (gercek["taban"], gercek["R"], gercek["M"], gercek["P"]) == (400, 15, 51, 1638)))
     for ad, ok in s:
         print(("PASS " if ok else "FAIL ") + ad)
     n = sum(bool(ok) for _, ok in s)
-    print(f"kota esigi testleri: {n}/{len(s)} PASS")
+    print(f"kota siniri testleri: {n}/{len(s)} PASS")
     sys.exit(0 if n == len(s) else 1)
 
 

@@ -204,7 +204,7 @@ def main():
     ap.add_argument("--pair", default="")
     ap.add_argument("--out", required=True)
     ap.add_argument("--limit", type=int, default=0)
-    ap.add_argument("--quota-min", type=int, default=400)
+    ap.add_argument("--quota-min", type=int, default=10)
     ap.add_argument("--pod-section", type=int, default=POD_SECTION)
     g = ap.add_mutually_exclusive_group(required=True)
     g.add_argument("--dry-run", action="store_true")

@@ -87,7 +87,7 @@ jobs:
           TOKEN_FILE: _out/ETSY_TOKEN.json
         run: |
           set -euo pipefail
-          args=(--listing-id "$LISTING_ID" --out _out/result --quota-min 50)
+          args=(--listing-id "$LISTING_ID" --out _out/result --quota-min 10)
           [ "$APPLY" = "true" ] && args+=(--apply)
           [ "$MOBILE_DISPLAY_COMPENSATION" = "true" ] && args+=(--mobile-display-compensation)
           python scripts/etsy/pod_cover_from_video.py "${args[@]}"

@@ -265,7 +265,7 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--confirm", default="")
-    ap.add_argument("--quota-buffer", type=int, default=120)
+    ap.add_argument("--quota-buffer", type=int, default=10)
     args = ap.parse_args()
     if args.apply and args.confirm != "CANLI":
         raise SystemExit("HATA: --apply icin --confirm CANLI gerekli. DUR.")

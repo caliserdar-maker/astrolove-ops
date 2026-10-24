@@ -74,7 +74,7 @@ def main():
     ap.add_argument("--state", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--limit", type=int, default=5, help="en fazla N ilan yayinlanir (0 = hepsi)")
-    ap.add_argument("--quota-min", type=int, default=400)
+    ap.add_argument("--quota-min", type=int, default=10)
     ap.add_argument("--section-id", type=int, default=SECTION_ID)
     ap.add_argument("--shipping-profile-id", type=int, default=SHIPPING_ID)
     ap.add_argument("--return-policy-id", type=int, default=RETURN_ID)

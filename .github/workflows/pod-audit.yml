@@ -23,7 +23,7 @@ on:
       quota_min:
         description: "Kota tabani (altinda durur)"
         required: false
-        default: "400"
+        default: "10"
       ref_id:
         description: "Referans ilan id (ozellik haritasi)"
         required: false

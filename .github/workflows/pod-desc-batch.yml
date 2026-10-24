@@ -35,7 +35,7 @@ on:
       quota_min:
         description: "Kota tabani"
         required: false
-        default: "400"
+        default: "10"
       template:
         description: "Metin sablonu"
         required: false
@@ -50,7 +50,7 @@ jobs:
       APPLY: ${{ inputs.apply }}
       SKIP: ${{ inputs.skip }}
       LIMIT: ${{ inputs.limit || '0' }}
-      QMIN: ${{ inputs.quota_min || '400' }}
+      QMIN: ${{ inputs.quota_min || '10' }}
       TPL: ${{ inputs.template || 'scripts/etsy/desc/AQUARIUS_AQUARIUS_4570110121.txt' }}
     steps:
       - name: Onay kapisi

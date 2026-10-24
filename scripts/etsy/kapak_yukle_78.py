@@ -581,7 +581,7 @@ def main():
     ap.add_argument("--yedek-drive")
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--confirm", default="")
-    ap.add_argument("--quota-min", type=int, default=150)
+    ap.add_argument("--quota-min", type=int, default=10)
     ap.add_argument("--devam", default="",
                     help="LISTING_ID:YENI_IMAGE_ID:ESKI_IMAGE_ID[,..] yarim kalmis ilan, kesin id ile")
     ap.add_argument("--haric", default="", help="LISTING_ID[,..] bu kosuda dokunulmayacak ilanlar")

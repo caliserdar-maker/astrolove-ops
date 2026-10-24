@@ -500,7 +500,7 @@ def main() -> None:
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--only", default="")
-    ap.add_argument("--quota-min", type=int, default=300)
+    ap.add_argument("--quota-min", type=int, default=10)
     args = ap.parse_args()
 
     catalog_path = pathlib.Path(args.catalog)

@@ -231,7 +231,7 @@ def main():
     ap.add_argument("--skip", default="")
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--pairs", default="", help="yalniz bu ciftler (virgullu)")
-    ap.add_argument("--quota-min", type=int, default=400)
+    ap.add_argument("--quota-min", type=int, default=10)
     ap.add_argument("--force", action="store_true")
     a = ap.parse_args()
     out = pathlib.Path(a.out)

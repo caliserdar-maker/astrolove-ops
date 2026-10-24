@@ -215,7 +215,7 @@ def main():
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--apply", action="store_true", help="ETSY'YE YAZ")
     ap.add_argument("--no-video", action="store_true", help="video yuklemeyi atla (asama c hazir degilse)")
-    ap.add_argument("--quota-stop", type=int, default=300, help="kalan kota bu degerin altina dusunce temiz cik")
+    ap.add_argument("--quota-stop", type=int, default=10, help="kalan kota bu degerin altina dusunce temiz cik (kota siniri 10)")
     a = ap.parse_args()
     keystring = os.environ.get("ETSY_API_KEY", ""); shared = os.environ.get("ETSY_SHARED_SECRET", "")
     shop_id = os.environ.get("ETSY_SHOP_ID", "")

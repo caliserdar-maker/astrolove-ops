@@ -31,7 +31,7 @@ on:
       quota_min:
         description: "Her ilan oncesi mutlak kota tabani"
         required: false
-        default: "300"
+        default: "10"
 
 
 jobs:
@@ -43,7 +43,7 @@ jobs:
       CONFIRM: ${{ inputs.confirm || '' }}
       LIMIT: ${{ inputs.limit || '0' }}
       ONLY_IDS: ${{ inputs.only_ids || '' }}
-      QMIN: ${{ inputs.quota_min || '300' }}
+      QMIN: ${{ inputs.quota_min || '10' }}
       STATE_REMOTE: ASTROLOVE/TEMP/POD_COVER_GOLD_B_77/state.json
     steps:
       - uses: actions/checkout@v4
@@ -60,7 +60,7 @@ jobs:
           echo "CONFIRM=$(jq -r '.confirm // ""' "$file")" >> "$GITHUB_ENV"
           echo "LIMIT=$(jq -r '.limit // 0' "$file")" >> "$GITHUB_ENV"
           echo "ONLY_IDS=$(jq -r '.only_ids // ""' "$file")" >> "$GITHUB_ENV"
-          echo "QMIN=$(jq -r '.quota_min // 300' "$file")" >> "$GITHUB_ENV"
+          echo "QMIN=$(jq -r '.quota_min // 10' "$file")" >> "$GITHUB_ENV"
       - name: Onay kapisi
         run: |
           set -euo pipefail

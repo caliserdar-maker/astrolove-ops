@@ -193,7 +193,7 @@ def main():
     ap.add_argument("--still", type=float, default=0.6)
     ap.add_argument("--fade", type=float, default=0.2)
     ap.add_argument("--motion-start", type=float, default=0.4)
-    ap.add_argument("--quota-min", type=int, default=100)
+    ap.add_argument("--quota-min", type=int, default=10)
     ap.add_argument("--dry-run", action="store_true", default=True)
     ap.add_argument("--apply", action="store_true",
                     help="HENUZ DEVRE DISI - yazma kodu yazilmadi")

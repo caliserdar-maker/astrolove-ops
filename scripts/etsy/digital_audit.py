@@ -334,7 +334,7 @@ def main():
     ap.add_argument("--dfile-state", default="_work/dfile_state.csv")
     ap.add_argument("--out", default="_out")
     ap.add_argument("--all-limit", type=int, default=0)
-    ap.add_argument("--quota-min", type=int, default=300)
+    ap.add_argument("--quota-min", type=int, default=10)
     a = ap.parse_args()
 
     out = Path(a.out)

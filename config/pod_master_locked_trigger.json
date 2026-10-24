@@ -2,7 +2,7 @@
   "apply": true,
   "confirm": "MASTER_LOCKED_78",
   "limit": 0,
-  "quota_min": 25,
+  "quota_min": 10,
   "requested_utc": "2026-09-17T21:49:00Z",
   "note": "Use remaining Etsy quota safely; stop before a listing when fewer than 25 calls remain"
 }

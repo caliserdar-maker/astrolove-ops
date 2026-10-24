@@ -77,7 +77,7 @@ def kuru(ids):
 def yaz(ids):
     sonuc, t0 = {}, time.time()
     for i, lid in enumerate(ids, 1):
-        rc, _, son = fb("yaz", lid, "--confirm", "FIYAT_B", "--kota-alt", os.environ.get("KOTA_ALT", "400"))
+        rc, _, son = fb("yaz", lid, "--confirm", "FIYAT_B", "--kota-alt", os.environ.get("KOTA_ALT", "10"))
         sonuc[lid] = {0: "PASS", 3: "ATLANDI_STATE", 4: "ZATEN"}.get(rc, f"FAIL rc={rc}: {son[:200]}")
         eta(i, len(ids), t0, f"ilan {lid} {sonuc[lid]}")
         if sonuc[lid].startswith("FAIL"):

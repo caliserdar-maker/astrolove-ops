@@ -106,7 +106,7 @@ def main():
     ap.add_argument("--pod-state", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--limit", type=int, default=0)
-    ap.add_argument("--quota-min", type=int, default=200)
+    ap.add_argument("--quota-min", type=int, default=10)
     a = ap.parse_args()
 
     out = Path(a.out)
