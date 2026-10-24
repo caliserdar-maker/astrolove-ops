@@ -1,8 +1,9 @@
 name: by-baski-ekle
 
-# Serdar onayi 24 Eki 2026 (Genel Merkez): yil donumu (bolum 60895624) ilanlarina "Shipped print 8x10" $29 geri eklenir
-# (tedarikci Printful ana + Shortrun ABD yedek). scripts/etsy/by_baski_ekle.py. oku = plan; yaz = BASKI_EKLE (tek/liste),
-# ilanlar bos = 78 ilan icin BASKI_EKLE_HEPSI. Cikti: Drive TEMP/BY_BASKI_EKLE/<kosu>/
+# Serdar onayi 24 Eki 2026 (Genel Merkez): yil donumu (bolum 60895624) ilanlarina "Shipped print 8x10" $29 + baski ayarlari
+# (v2: hazirlik 4-7 gun, uretim ortagi 5817638, materials, SKU; kargo profili degismez). scripts/etsy/by_baski_ekle.py.
+# oku = plan (yazma yok); yaz = BASKI_EKLE (tek/liste), ilanlar bos = 78 ilan icin BASKI_EKLE_HEPSI.
+# Cikti: Drive TEMP/BY_BASKI_EKLE/<kosu>/
 
 permissions:
   actions: read
@@ -23,7 +24,7 @@ on:
         default: ""
 
 jobs:
-  fiyat:
+  baski:
     runs-on: ubuntu-latest
     timeout-minutes: 150
     steps:
@@ -63,16 +64,27 @@ jobs:
         run: |
           set -euo pipefail
           case "$MOD" in oku|yaz) ;; *) echo "HATA: mod $MOD"; exit 1;; esac
+          if [ "$MOD" = yaz ]; then
+            if [ -n "$ILANLAR" ]; then [ "$ONAY" = BASKI_EKLE ] || { echo "HATA: onay BASKI_EKLE degil"; exit 1; }
+            else [ "$ONAY" = BASKI_EKLE_HEPSI ] || { echo "HATA: 78 ilan icin onay BASKI_EKLE_HEPSI"; exit 1; }; fi
+          fi
           umask 077; mkdir -p _work
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
           if [ -n "$ILANLAR" ]; then SEC=(--ilanlar "$ILANLAR"); else SEC=(--hepsi); fi
           rc=0; python scripts/etsy/by_baski_ekle.py "$MOD" "${SEC[@]}" --confirm "$ONAY" || rc=$?
-          [ -d out ] && { rclone copy out "gdrive:ASTROLOVE/TEMP/BY_BASKI_EKLE/${GITHUB_RUN_ID}" -q || echo "::warning::Drive yukleme basarisiz"; }
+          if [ -d out ]; then
+            python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/ETSY_TOKEN.json out || { echo "::error::ciktida sir"; exit 1; }
+            rclone copy out "gdrive:ASTROLOVE/TEMP/BY_BASKI_EKLE/${GITHUB_RUN_ID}" -q || { echo "::error::Drive yukleme basarisiz"; exit 1; }
+          fi
           exit $rc
       - name: Token geri yaz
         if: always()
         run: |
-          set -euo pipefail
-          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || echo "Token yenilenmedi"
+          if [ -f _work/ETSY_TOKEN.json.updated ]; then
+            rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "token geri yazildi" \
+              || { echo "::error::yenilenen token Drive'a geri yazilamadi"; exit 1; }
+          else
+            echo "token yenilenmedi"
+          fi
       - if: always()
         run: rm -rf _work out ~/.config/rclone
