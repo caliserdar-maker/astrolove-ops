@@ -558,7 +558,7 @@ def profil_ucretsiz_mi(api, shop):
         raise SystemExit(f"DUR: baski profili {PROFIL_BASKI} henuz her yere ucretsiz degil (once profil_yaz): {bad}")
 
 
-KOTA_ONEK = ("DUR: kota esigi: kalan", "DUR: kota sert tabani: kalan", "KOTA_BEKLE")   # etsy_common mesajlari + bu betik
+KOTA_ONEK = ("DUR: kota esigi: kalan", "DUR: kota sert tabani: kalan", "KOTA_BEKLE", "HATA: 429 kota")   # 429: Etsy gunluk kota (retry-after)   # etsy_common mesajlari + bu betik
 # ("DUR: kota esigi aktif ama ... basligi okunamadi" KOTA DEGIL: HATA)
 
 

@@ -288,6 +288,7 @@ def test():
     assert se([{"durum": "FAIL_DUR: kargo profili 1"}], None, False) == "HATA"
     assert se([{"durum": "DUR: Etsy 400 kotasiz"}], None, False) == "HATA"
     assert se([], "SystemExit: invalid_grant", False) == "HATA"
+    assert se([], "SystemExit: HATA: 429 kota. retry-after=7020", False) == "KOTA"
     assert se([], "SystemExit: DUR: kota esigi aktif ama x-remaining-today basligi okunamadi", False) == "HATA"
     assert se([{"durum": "FAIL"}], None, False) == "HATA"
     ok += 1
