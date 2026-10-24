@@ -206,6 +206,10 @@ def anlik(api, shop, lid):
 def ilan_isle(api, shop, lid, yaz):
     d = OUT / lid
     d.mkdir(parents=True, exist_ok=True)
+    inv0 = api.get(INV_YOL.format(lid=lid)) or {}             # once yalniz envanter: zaten hedefteyse 1 istekle gec
+    dig0, _, h0, zaten0 = plan(inv0)
+    if zaten0 and not h0:
+        return {"ilan": lid, "durum": "ZATEN", "dijital_n": len(dig0), "dijital_eski": None, "kota": api.remaining}
     sn = anlik(api, shop, lid)
     L, inv = sn["listing"], sn["inventory"]
     (d / "ONCE.json").write_text(json.dumps(sn, ensure_ascii=False, indent=1), encoding="utf-8")
