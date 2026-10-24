@@ -32,8 +32,41 @@ import kart_metin_degis as KM  # noqa: E402
 ETIKET_KUTU = (130, 78, 1300, 142)   # 24 Eki: uzun ciftler (AQUARIUS + SAGITTARIUS) icin genis; y 78-142 arasinda baska yazi yok
 
 
-def S(kutu, eski, yeni, hiza="sol", aile="oto", genis=0, agirlik=None):
-    return dict(kutu=kutu, eski=eski, yeni=yeni, hiza=hiza, aile=aile, genis=genis, agirlik=agirlik)
+def S(kutu, eski, yeni, hiza="sol", aile="oto", genis=0, agirlik=None, ara=None, parca=None):
+    """ara=(x0, x1): kutunun x sinirlari her kartta eski satirin OLCULEN murekkebinden alinir (burc adina bagli satirlar; 24 Eki
+    22 ilan TASMA bulgusu: sabit kutu pilot ARIES_VIRGO'ya gore, satir yeri/uzunlugu cifte gore degisiyor). parca=k: satirdaki
+    k. parca (aralarinda > ARA_BOSLUK px bos sutun olan murekkep obekleri; kart 4 EMILY / JAMES), None: aradaki tum murekkep."""
+    return dict(kutu=kutu, eski=eski, yeni=yeni, hiza=hiza, aile=aile, genis=genis, agirlik=agirlik, ara=ara, parca=parca)
+
+
+ARA_BOSLUK, ARA_PAY = 30, 12   # olculu kutu: kelime arasi < 30 px (Montserrat/Garamond 37-57 pt), ogeler arasi >= 45 px
+
+
+def olcu_kutu(M, op):
+    """-> (kutu, hata). Eski satirin murekkep sutunlarini ara icinde olcer; kutu = secilen obek +- ARA_PAY."""
+    x0, y0, x1, y1 = op["kutu"]; a0, a1 = op["ara"]
+    sut = M[y0:y1, a0:a1].sum(0) >= 2
+    obek, bas, son = [], None, None
+    for i in np.flatnonzero(sut):
+        if bas is not None and i - son <= ARA_BOSLUK:
+            son = i
+        else:
+            if bas is not None:
+                obek.append((bas, son))
+            bas = son = i
+    if bas is not None:
+        obek.append((bas, son))
+    if not obek:
+        return None, "olculu kutu: ara icinde murekkep yok"
+    if op["parca"] is not None:
+        if op["parca"] >= len(obek):
+            return None, f"olculu kutu: {len(obek)} parca var, {op['parca']}. istendi"
+        b, e = obek[op["parca"]]
+    else:
+        b, e = obek[0][0], obek[-1][1]
+    if b <= 1 or e >= a1 - a0 - 2:
+        return None, f"TASMA, eski satir olcum araliginin kenarina degiyor (ara x {a0}-{a1})"
+    return (int(a0 + b - ARA_PAY), y0, int(a0 + e + 1 + ARA_PAY), y1), None
 
 
 def ozellik(a, b):
@@ -55,17 +88,18 @@ def ozellik(a, b):
             S((640, 1617, 1400, 1662), "Etsy order within 24 hours.", "Etsy order within 24 hours", "merkez", aile="lato"),
             S((1500, 1526, 2420, 1569), "Premium matte art paper, long-lasting inks.", "Premium matte art paper, long-lasting inks", "merkez"),
             S((1500, 1572, 2420, 1614), "Unframed, ready for your frame.", "Unframed, ready for your frame", "merkez"),
-            S((1130, 1828, 1870, 1885), f"A personal gift for {a} and {b} couples.", f"A personal gift for {a} and {b} couples", "merkez")],
+            S((1130, 1828, 1870, 1885), f"A personal gift for {a} and {b} couples.", f"A personal gift for {a} and {b} couples", "merkez",
+              ara=(400, 2600))],
         3: [et, S((135, 192, 1580, 326), "Two signs. One shared symbol.", "Two signs, one shared symbol"),
             S((140, 330, 1520, 392), f"{a} and {b}, united in an original AstroLove design.",
-              f"{a} and {b}, united in an original AstroLoveArt design", genis=200),
+              f"{a} and {b}, united in an original AstroLoveArt design", genis=200, ara=(100, 2600)),
             S((336, 772, 935, 820), "Your individual identities.", "Your individual identities"),
             S((336, 1252, 1140, 1308), "A design that brings you together.", "A design that brings you together"),
             S((340, 1782, 1055, 1838), "Personalized with your names.", "Personalized with your names")],
         4: [et, S((138, 192, 1790, 326), "Each name goes under its own sign.", "Each name goes under its own sign"),
             S((138, 330, 1130, 392), "Type each name in the field for its sign.", "Type each name in the field for its sign"),
-            S((428, 1744, 740, 1788), f"EMILY = {A}", f"EMILY: {A}"),
-            S((755, 1744, 1100, 1788), f"JAMES = {B}", f"JAMES: {B}"),
+            S((428, 1744, 740, 1788), f"EMILY = {A}", f"EMILY: {A}", ara=(300, 2200), parca=0),
+            S((755, 1744, 1100, 1788), f"JAMES = {B}", f"JAMES: {B}", ara=(300, 2200), parca=1),
             S((890, 1890, 2110, 1966), "Names print in capitals. Your message prints as you type it.",
               "Names print in capitals and your message prints as you type it", "merkez", genis=60),
             S((1190, 2004, 1810, 2038), "We send you a preview before we finalize your order.",
@@ -240,7 +274,8 @@ def renk_sec(K, D, fd, kutu, eski, aile, w, renk):
 
 
 def ocr_satir(img):
-    b = io.BytesIO(); img.save(b, "PNG")
+    # gri ton (24 Eki ARIES_LEO: RGB kirpimda 'JAMES: LEO' -> 'SAMES- EE', gri tonda dogru okunuyor)
+    b = io.BytesIO(); img.convert("L").save(b, "PNG")
     r = subprocess.run(["tesseract", "-", "-", "--psm", "7"], input=b.getvalue(), capture_output=True)
     return r.stdout.decode("utf-8", "replace")
 
@@ -250,6 +285,15 @@ def kart_isle(yol, D, fd, ops, out, sira):
     M = murekkep_maske(K, D)
     Dk = np.asarray(D).astype(int); Ka = np.asarray(K).astype(int)
     isler, rapor, hata, noktalar = [], [], [], []
+    olculu = []
+    for op in ops:
+        if op.get("ara"):
+            kutu, h = olcu_kutu(M, op)
+            if h:
+                hata.append(f"r{sira} '{op['eski'][:30]}': {h}"); continue
+            op = dict(op, kutu=kutu)
+        olculu.append(op)
+    ops = olculu
     for op in ops:   # tasma kapisi (Serdar 24 Eki: uzun burc adlari): eski satirin murekkebi kutunun sol/sag kenarina degiyorsa
         g = op["genis"]; x0, y0, x1, y1 = op["kutu"]   # satir kutuya sigmiyor; olcum ve silme yanlis olur -> FAIL
         kx0, kx1 = (x0 - g // 2, x1 + g // 2) if op["hiza"] == "merkez" else (x0, x1 + g)
