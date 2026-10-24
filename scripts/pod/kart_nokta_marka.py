@@ -72,6 +72,7 @@ def olcu_kutu(M, op):
 def ozellik(a, b):
     """kart sira -> satir islemleri. a, b: burc adi (Aries, Virgo)."""
     A, B = a.upper(), b.upper()
+    sol, sag = ("LEFT", "RIGHT") if A == B else (A, B)
     # galeri77_kur.py:7 etiket 03-14 'ASTROLOVE  /  A + B' (cift bosluk, Montserrat 500 37); kart02_duvar_kur.py:64 tek bosluk (Lato)
     et = S(ETIKET_KUTU, f"ASTROLOVE  /  {A} + {B}", f"ASTROLOVEART  /  {A} & {B}", aile="mont", agirlik=500)
     et2 = S(ETIKET_KUTU, f"ASTROLOVE / {A} + {B}", f"ASTROLOVEART / {A} & {B}")
@@ -98,8 +99,9 @@ def ozellik(a, b):
             S((340, 1782, 1055, 1838), "Personalized with your names.", "Personalized with your names")],
         4: [et, S((138, 192, 1790, 326), "Each name goes under its own sign.", "Each name goes under its own sign"),
             S((138, 330, 1130, 392), "Type each name in the field for its sign.", "Type each name in the field for its sign"),
-            S((428, 1744, 740, 1788), f"EMILY = {A}", f"EMILY: {A}", ara=(300, 2200), parca=0),
-            S((755, 1744, 1100, 1788), f"JAMES = {B}", f"JAMES: {B}", ara=(300, 2200), parca=1),
+            # ayni burclu ciftte kart 4 baska sablon: "EMILY = LEFT  JAMES = RIGHT" (24 Eki: ARIES_ARIES, AQUARIUS_AQUARIUS)
+            S((428, 1744, 740, 1788), f"EMILY = {sol}", f"EMILY: {sol}", ara=(300, 2200), parca=0),
+            S((755, 1744, 1100, 1788), f"JAMES = {sag}", f"JAMES: {sag}", ara=(300, 2200), parca=1),
             S((890, 1890, 2110, 1966), "Names print in capitals. Your message prints as you type it.",
               "Names print in capitals and your message prints as you type it", "merkez", genis=60),
             S((1190, 2004, 1810, 2038), "We send you a preview before we finalize your order.",
@@ -225,8 +227,22 @@ def nokta_sil(Y, Ka, Dk, kutu, hiza):
                 bilesen=(say0, say1))
 
 
+def panel_ort(img):
+    """Kart OCR'indan once koyu poster/onizleme panellerini beyazla ortere (24 Eki AQUARIUS_LIBRA: panel icindeki altin el yazisi
+    'lt Reozn VU a Fhe Baan.' okundu, yanlis 'cumle sonu noktasi'). Duzenlenen tum satirlar duvar zemininde (ozellik kutulari)."""
+    from scipy.ndimage import binary_closing, label
+    L = np.asarray(img.convert("L"))
+    m, n = label(binary_closing(L < 70, iterations=8))
+    Y = np.asarray(img.convert("RGB")).copy()
+    for k in range(1, n + 1):
+        ys, xs = np.nonzero(m == k)
+        if ys.size > 100_000:
+            Y[ys.min():ys.max() + 1, xs.min():xs.max() + 1] = 255
+    return Image.fromarray(Y)
+
+
 def ocr(img):
-    b = io.BytesIO(); img.save(b, "PNG")
+    b = io.BytesIO(); panel_ort(img).save(b, "PNG")
     r = subprocess.run(["tesseract", "-", "-", "--psm", "3"], input=b.getvalue(), capture_output=True)
     return r.stdout.decode("utf-8", "replace")
 
@@ -351,7 +367,7 @@ def kart_isle(yol, D, fd, ops, out, sira):
             # (24 Eki: etikette cekirdek renk koyu kaliyordu; govde satirlarinda bu secim soluk yapiyordu, kullanilmaz)
             renk = renk_sec(K, D, fd, kutu, op["eski"], aile, agr, renk); r["renk"] = renk
         rapor.append(r)
-        isler.append(dict(kutu=kutu, eski=op["eski"], yeni=op["yeni"], aile=aile, hiza=op["hiza"], agirliklar=(agr,),
+        isler.append(dict(kutu=kutu, eski=op["eski"], yeni=op["yeni"], aile=aile, hiza=op["hiza"], agirliklar=(agr,), ara=op.get("ara"),
                           renk=renk))
     if hata:
         return None, rapor, hata
@@ -362,7 +378,7 @@ def kart_isle(yol, D, fd, ops, out, sira):
         except ValueError as e:
             hata.append(f"r{sira} '{op['eski'][:30]}': nokta silinemedi ({e})"); continue
         r.update(sira=sira, eski=op["eski"], yeni=op["yeni"], kutu=op["kutu"]); rapor.append(r)
-        isler_k = dict(kutu=op["kutu"], eski=op["eski"], yeni=op["yeni"], aile=None, hiza=op["hiza"], kip="nokta")
+        isler_k = dict(kutu=op["kutu"], eski=op["eski"], yeni=op["yeni"], aile=None, hiza=op["hiza"], kip="nokta", ara=op.get("ara"))
         isler.append(isler_k)
     if hata:
         return None, rapor, hata
@@ -405,6 +421,11 @@ def kart_isle(yol, D, fd, ops, out, sira):
         k = i["kutu"]
         def oku(im):
             return " ".join(ocr_satir(im.crop(k)).split())
+        if i.get("ara"):   # burca bagli satir: kaynak kartta beklenen eski metin gercekten var mi (24 Eki: ARIES_ARIES kart 4
+            # "EMILY = LEFT" iken "EMILY = ARIES" varsayildi, olcum/kutle kapisi farki gormedi, yanlis metin PASS oldu)
+            eo_ = difflib.SequenceMatcher(None, oku(K).lower(), i["eski"].lower()).ratio()
+            if eo_ < 0.8:
+                ocr_hata.append(f"eski satir beklenen metin degil ({eo_:.2f}): {i['eski'][:40]!r} -> {oku(K)[:40]!r}")
         yo = oku(Yj); bnz = difflib.SequenceMatcher(None, yo.lower(), i["yeni"].lower()).ratio()
         i["ocr"] = yo; i["ocr_benzerlik"] = round(bnz, 2)
         if bnz < 0.8:
