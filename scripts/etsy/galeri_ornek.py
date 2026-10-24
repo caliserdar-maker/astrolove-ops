@@ -157,9 +157,16 @@ def main():
         c = kullanildi.get(i)
         if c:
             Y.paste(c["im"].resize((tw2, th2), Image.LANCZOS), (pad, y))
-        else:
-            d.rectangle([pad, y, pad + tw2, y + th2], fill=(235, 235, 235))
-            satir_yaz(d, (pad + 20, y + th2 // 2 - 20), "canlida karsiligi yok (yeni yuklenir)", f, tw2 - 40)
+        else:   # bu hedefe en yakin CIKAR canli gorsel (eski surum) varsa o gosterilir, yoksa bos
+            eski = max((x for x in simdi if x["en_yakin"] == i and id(x) not in eslesen and x["ncc"] >= 0.9),
+                       key=lambda x: x["ncc"], default=None)
+            if eski:
+                Y.paste(eski["im"].resize((tw2, th2), Image.LANCZOS), (pad, y))
+                d.rectangle([pad, y, pad + tw2, y + 34], fill=(255, 255, 255))
+                satir_yaz(d, (pad + 6, y + 4), f"canli eski surum r{eski['rank']} (NCC {eski['ncc']}, CIKAR)", f, tw2 - 12)
+            else:
+                d.rectangle([pad, y, pad + tw2, y + th2], fill=(235, 235, 235))
+                satir_yaz(d, (pad + 20, y + th2 // 2 - 20), "canlida karsiligi yok (yeni yuklenir)", f, tw2 - 40)
         Y.paste(h["im"].resize((tw2, th2), Image.LANCZOS), (2 * pad + tw2, y))
         satir_yaz(d, (3 * pad + 2 * tw2, y + 10), f"{h['rank']}. {satir[i]['islem']}", fb, 340)
     Y.save(out / f"YAN_YANA_{lid}.jpg", quality=88)

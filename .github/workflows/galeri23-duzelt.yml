@@ -16,6 +16,7 @@ on:
   workflow_dispatch:
     inputs:
       ilanlar: {description: "virgullu ilan listesi ya da HEPSI (KOSU_20261021_1030 altindaki 23 ilan)", required: true, default: "4570155846"}
+      kart_ilanlar: {description: "kart metin duzeltmesi yapilacak ilanlar (virgullu; kutular ARIES_VIRGO'da olculdu, digerleri yerel testsiz); digerlerinde LISTE ozgun hedefe gore", required: false, default: "4570155846"}
 
 env:
   D: "gdrive:ASTROLOVE/TEMP"
@@ -82,8 +83,10 @@ jobs:
           rclone copyto "$D/GALERI_YAYIN/KOSU_20261021_1030/$L/yedek/manifest.json" $W/manifest.json -q || { echo "$L $C manifest_yok" >> _out/OZET.txt; exit 0; }
           rclone copy "$D/GALERI_YAYIN/YEDEK/${L}_${C}" $W/hedef --include "*.jpg" -q
           S=$(grep -E "/SONRA_${L}\.json$" _work/sonra.txt | sort -t/ -k1,1n | tail -1)
-          python3 scripts/pod/kart_nokta_marka.py --hedef-dir $W/hedef --manifest $W/manifest.json --duvar _work/duvar.png --fd fonts --cift $C --out $O/KART > $O/kart.log 2>&1
-          K=$?
+          if [[ ",$KART_ILANLAR," == *",$L,"* ]]; then
+            python3 scripts/pod/kart_nokta_marka.py --hedef-dir $W/hedef --manifest $W/manifest.json --duvar _work/duvar.png --fd fonts --cift $C --out $O/KART > $O/kart.log 2>&1
+            K=$?
+          else K=yok; mkdir -p $O/KART; fi
           # yalniz manifestteki dosyalar (YEDEK klasorunde ayni siranin eski surumleri de var)
           python3 -c "import json,shutil;[shutil.copy(f'$W/hedef/{int(g[\"rank\"]):02d}_{g[\"listing_image_id\"]}.jpg','$W/duz/') for g in json.load(open('$W/manifest.json'))['galeri']]"
           cp $O/KART/[0-9][0-9]_*.jpg $W/duz/ 2>/dev/null
@@ -97,11 +100,13 @@ jobs:
           echo "$L $C kart=$K ornek=$G"
           SH
           chmod +x _work/bir.sh; mkdir -p _out
-          export D GITHUB_RUN_ID
+          export D GITHUB_RUN_ID KART_ILANLAR="${{ inputs.kart_ilanlar }}"
+          [[ "$KART_ILANLAR" =~ ^[0-9]*(,[0-9]+)*$ ]] || { echo "::error::kart_ilanlar"; exit 1; }
           xargs -P 4 -L 1 _work/bir.sh < _work/is.txt
           sort _out/OZET.txt | tee _out/OZET_SIRALI.txt
           rclone copyto _out/OZET_SIRALI.txt "$D/DENETIM_20261021/GALERI_PLAN23/DUZELT_${GITHUB_RUN_ID}/OZET.txt" -q
           echo "::notice title=GALERI23::Drive TEMP/DENETIM_20261021/GALERI_PLAN23/DUZELT_${GITHUB_RUN_ID}/"
-          ! grep -qE 'kart=[^0]|ornek=[^0]|manifest_yok' _out/OZET.txt
+          grep -E 'ornek=SONRA_yok' _out/OZET.txt | sed 's/^/::warning::canli galeri kaydi (KART_SIL SONRA) yok, LISTE uretilmedi: /' || true
+          ! grep -qE 'kart=[1-9]|ornek=[1-9]|manifest_yok' _out/OZET.txt
       - if: always()
         run: rm -rf _work ~/.config/rclone

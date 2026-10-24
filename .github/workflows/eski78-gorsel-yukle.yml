@@ -18,6 +18,7 @@ on:
       duzelt_kosu: {description: "galeri23-duzelt kosusu (DUZELT_<kosu>)", required: true, default: ""}
       mod: {description: "kuru | yukle", required: true, default: "kuru"}
       onay: {description: "yukle icin SERDAR_GALERI23", required: false, default: ""}
+      devam_kosu: {description: "yarim kalan onceki yukleme kosusu (DEVAM_<ilan>.json oradan); bos = yeni", required: false, default: ""}
 
 env:
   D: "gdrive:ASTROLOVE/TEMP"
@@ -60,6 +61,9 @@ jobs:
           C=$(python3 -c "import csv,sys;print(next(r['cift'] for r in csv.DictReader(open('data/pod/pod78_ids.csv')) if r['listing_id']=='$L'))")
           P="$D/DENETIM_20261021/GALERI_PLAN23/DUZELT_$K/${L}_${C}"
           rclone copyto "$P/LISTE_$L.csv" _work/LISTE.csv
+          # kart QC kapisi (24 Eki inceleme): duzeltme kosusunda bu ilanin kart raporu PASS degilse yukleme yok
+          rclone copyto "$P/KART/RAPOR.json" _work/KART_RAPOR.json || { echo "::error::KART/RAPOR.json yok (kart duzeltmesi yapilmamis)"; exit 1; }
+          python3 -c "import json,sys; o=json.load(open('_work/KART_RAPOR.json'))['ozet']; sys.exit(0 if not o['hata'] and o['kart'] == o['pass_'] else f'kart QC FAIL: {o}')"
           rclone copy "$P/DEGISEN" _work/hedef --include "*.jpg" -q
           rclone copyto "$D/GALERI_YAYIN/KOSU_20261021_1030/$L/yedek/manifest.json" _work/manifest.json
           S=$(rclone lsf -R "$D/DENETIM_20261021/KART_SIL" --include "SONRA_${L}.json" | sort -t/ -k1,1n | tail -1)
@@ -71,6 +75,11 @@ jobs:
                   open(f"_out/YEDEK_CDN/{int(x['rank']):02d}_{x['listing_image_id']}.jpg", "wb").write(r.read())
           print("CDN yedek:", len(json.load(open("_work/simdi.json"))["gorseller"]))
           PY
+          DV="${{ inputs.devam_kosu }}"
+          if [ -n "$DV" ]; then
+            [[ "$DV" =~ ^[0-9]+$ ]] || { echo "::error::devam_kosu"; exit 1; }
+            rclone copyto "$O/$DV/DEVAM_$L.json" "_out/DEVAM_$L.json" || { echo "::error::DEVAM_$L.json yok ($DV)"; exit 1; }
+          fi
           rclone copy _out "$O/${GITHUB_RUN_ID}" -q
       - name: Etsy kilidi (sira bekle, iptal yok)
         env:

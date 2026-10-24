@@ -32,18 +32,20 @@ import kart_metin_degis as KM  # noqa: E402
 ETIKET_KUTU = (130, 78, 720, 142)
 
 
-def S(kutu, eski, yeni, hiza="sol", aile="oto", genis=0):
-    return dict(kutu=kutu, eski=eski, yeni=yeni, hiza=hiza, aile=aile, genis=genis)
+def S(kutu, eski, yeni, hiza="sol", aile="oto", genis=0, agirlik=None):
+    return dict(kutu=kutu, eski=eski, yeni=yeni, hiza=hiza, aile=aile, genis=genis, agirlik=agirlik)
 
 
 def ozellik(a, b):
     """kart sira -> satir islemleri. a, b: burc adi (Aries, Virgo)."""
     A, B = a.upper(), b.upper()
-    et = S(ETIKET_KUTU, f"ASTROLOVE / {A} + {B}", f"ASTROLOVEART / {A} & {B}", genis=420)
+    # galeri77_kur.py:7 etiket 03-14 'ASTROLOVE  /  A + B' (cift bosluk, Montserrat 500 37); kart02_duvar_kur.py:64 tek bosluk (Lato)
+    et = S(ETIKET_KUTU, f"ASTROLOVE  /  {A} + {B}", f"ASTROLOVEART  /  {A} & {B}", aile="mont", genis=420, agirlik=500)
+    et2 = S(ETIKET_KUTU, f"ASTROLOVE / {A} + {B}", f"ASTROLOVEART / {A} & {B}", genis=420)
     renk = [S((1090, 2068, 1912, 2120), "Poster color. Format selected separately.", "Poster color, format selected separately",
               "merkez")]
     return {
-        2: [et, S((135, 165, 965, 282), "Choose your format.", "Choose your format"),
+        2: [et2, S((135, 165, 965, 282), "Choose your format.", "Choose your format"),
             S((140, 322, 905, 384), "One design, two ways to enjoy it.", "One design, two ways to enjoy it"),
             # sol sutun uc satir birlikte yeniden yazilir (ayni ton; kart02_iki_sutun.py: Lato 38)
             S((640, 1526, 1400, 1569), "One print-ready JPG in your chosen color", "One print-ready JPG in your chosen color", "merkez",
@@ -152,7 +154,8 @@ def nokta_sil(Y, Ka, Dk, kutu, hiza):
             bb.append((xs.min(), ys.min(), xs.max(), ys.max(), i, len(xs)))
     if len(bb) < 2:
         raise ValueError(f"bilesen {len(bb)}")
-    M = np.isin(lab, [b[4] for b in bb])
+    M_tum = M                               # alfa icin TUM bilesenler (kucuk puntoda i noktasi 5 px; 24 Eki inceleme: "finalıze")
+    M = np.isin(lab, [b[4] for b in bb])    # nokta adayi secimi icin kirintisiz
     ys_all, xs_all = np.nonzero(M)
     yuk = ys_all.max() - ys_all.min() + 1
     nk = max(bb, key=lambda b: b[0])
@@ -166,15 +169,26 @@ def nokta_sil(Y, Ka, Dk, kutu, hiza):
     C = np.median(K_[cekirdek], 0)
     c = C - D_.reshape(-1, 3).mean(0)
     a = np.clip((v * c).sum(2) / max(float((c * c).sum()), 1.0), 0, 1)
-    a[~binary_dilation(M, iterations=3)] = 0
-    a[binary_dilation(lab == nk[4], iterations=3)] = 0
+    a[~binary_dilation(M_tum, iterations=3)] = 0
+    nokta_m = binary_dilation(lab == nk[4], iterations=3)
+    once = float(a[~nokta_m].sum())
+    a[nokta_m] = 0
+    if once <= 0 or abs(float(a.sum()) / once - 1) > 0.01:   # nokta disinda murekkep kaybi olmamali (alfa yeniden kurulumu)
+        raise ValueError(f"nokta disi murekkep kaybi ({float(a.sum()) / max(once, 1):.3f})")
     dx = 0
     if hiza == "merkez":
         dx = int(round((nk[2] - sag_diger) / 2))
         a = np.roll(a, dx, axis=1); a[:, :dx] = 0
     yeni = D_ + a[..., None] * (C - D_)
+    # bilesen kapisi (24 Eki inceleme, "finalıze"): yeniden kurulan satirda noktadan baska murekkep bileseni kaybolmamali
+    say0 = sum(1 for i in range(1, n + 1) if (lab == i).sum() >= 3)
+    lab1, n1 = label(np.abs(yeni - D_).max(2) > 40, structure=np.ones((3, 3)))
+    say1 = sum(1 for i in range(1, n1 + 1) if (lab1 == i).sum() >= 3)
+    if say1 < say0 - 1:
+        raise ValueError(f"bilesen kaybi: ozgun {say0}, nokta silinince {say1} (beklenen {say0 - 1})")
     Y[y0:y1, x0:x1] = np.clip(np.round(yeni), 0, 255).astype(np.uint8)
-    return dict(kip="nokta", nokta=(int(nk[0] + x0), int(nk[1] + y0), int(w), int(h)), kayma=dx, renk=[int(t) for t in C])
+    return dict(kip="nokta", nokta=(int(nk[0] + x0), int(nk[1] + y0), int(w), int(h)), kayma=dx, renk=[int(t) for t in C],
+                bilesen=(say0, say1))
 
 
 def ocr(img):
@@ -207,6 +221,22 @@ def agirlik_sec(K, D, fd, kutu, eski, aile, renk):
         if en is None or abs(oran - 1) < abs(en[1] - 1):
             en = (w, oran, o)
     return en
+
+
+def renk_sec(K, D, fd, kutu, eski, aile, w, renk):
+    from PIL import ImageDraw as _D
+    Ka = np.asarray(K).astype(int); x0, y0, x1, y1 = kutu
+    o = KM.olc(K, D, fd, kutu, eski, aile, agirliklar=(w,))
+    f = KM._font(fd, aile, o["punto"], w); g0, _ = KM._gen(f, eski, o["iz"])
+    zem = np.asarray(D.crop(kutu)).reshape(-1, 3).mean(0)
+    en = None
+    for t in (0.0, 0.1, 0.2, 0.3, 0.4):
+        r_ = tuple(int(round(c + t * (z - c))) for c, z in zip(renk, zem))
+        im = D.crop(kutu).copy(); KM._ciz(_D.Draw(im), (o["murekkep"][0] - g0 - x0, o["taban"] - y0), eski, f, r_, o["iz"])
+        e = float(np.abs(np.asarray(im).astype(int) - Ka[y0:y1, x0:x1]).mean())
+        if en is None or e < en[0]:
+            en = (e, r_)
+    return en[1]
 
 
 def ocr_satir(img):
@@ -257,11 +287,17 @@ def kart_isle(yol, D, fd, ops, out, sira):
         renk = tuple(int(t) for t in np.median(Ka[y0_:y1_, x0_:x1_][cek], 0)) if cek.any() else None
         r["renk"] = renk
         agr = o["agirlik"]
-        if renk and len(KM.AILE[aile][1]) > 1:
+        if op.get("agirlik"):   # belgeli agirlik (galeri77_kur.py:7 etiket Montserrat 500)
+            agr = op["agirlik"]; o2 = KM.olc(K, D, fd, kutu, op["eski"], aile, agirliklar=(agr,))
+            r.update(agirlik=agr, punto=o2["punto"], hata=o2["hata"])
+        elif renk and len(KM.AILE[aile][1]) > 1:
             agr, oran, o2 = agirlik_sec(K, D, fd, kutu, op["eski"], aile, renk)
             r.update(agirlik=agr, kutle_orani=round(oran, 3), punto=o2["punto"], hata=o2["hata"])
             if abs(oran - 1) > 0.12:
                 hata.append(f"r{sira} '{op['eski'][:30]}': murekkep kutlesi tutmuyor (oran {oran:.2f}, agirlik {agr})")
+        if renk and op.get("agirlik"):   # yalniz belgeli etiket: cekirdek renk ile zemin arasi, ESKI satiri en iyi tekrar ureten
+            # (24 Eki: etikette cekirdek renk koyu kaliyordu; govde satirlarinda bu secim soluk yapiyordu, kullanilmaz)
+            renk = renk_sec(K, D, fd, kutu, op["eski"], aile, agr, renk); r["renk"] = renk
         rapor.append(r)
         isler.append(dict(kutu=kutu, eski=op["eski"], yeni=op["yeni"], aile=aile, hiza=op["hiza"], agirliklar=(agr,),
                           renk=renk))
@@ -291,7 +327,8 @@ def kart_isle(yol, D, fd, ops, out, sira):
     if fark0.max() != 0:
         hata.append(f"r{sira}: kutu disinda piksel degisti (max {fark0.max()})")
     ad = os.path.basename(yol)
-    p = os.path.join(out, ad); Y.save(p, quality=95, subsampling=0)
+    os.makedirs(os.path.join(out, "_ARA"), exist_ok=True)   # kapilardan gecene kadar ara klasorde (FAIL kart yuklemeye gitmesin)
+    p = os.path.join(out, "_ARA", ad); Y.save(p, quality=95, subsampling=0)
     J = np.asarray(Image.open(p).convert("RGB")).astype(int)
     d = np.abs(J - Ka).max(2)[dis]
     p999, mx = float(np.percentile(d, 99.9)), int(d.max())
@@ -340,6 +377,11 @@ def kart_isle(yol, D, fd, ops, out, sira):
     O.save(os.path.join(out, "ONCE_SONRA", f"{sira:02d}.jpg"), quality=85)
     for r in rapor:
         r.update(jpeg_p999=round(p999, 1), jpeg_max=mx)
+    if not hata:   # yalniz PASS kart cikti kokune (galeri23-duzelt bunu hedefe kopyalar); FAIL kart FAIL/ altinda kalir
+        son = os.path.join(out, ad); os.replace(p, son); p = son
+    else:
+        os.makedirs(os.path.join(out, "FAIL"), exist_ok=True)
+        son = os.path.join(out, "FAIL", ad); os.replace(p, son); p = None
     return p, rapor, hata
 
 

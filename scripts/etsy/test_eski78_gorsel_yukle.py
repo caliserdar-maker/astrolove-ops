@@ -49,6 +49,7 @@ class Sahte:
         self.img = [dict(rank=r, listing_image_id=i, alt_text=f"eski {i}", url_fullxfull=f"u{i}") for r, i in canli]
         self.bag = dict(bag); self.remaining = kota; self.calls = 0; self.state = state; self.yeni = 7000
         self.yaz = []; self.vi_cagri = 0; self.max_n = len(self.img); self.boz = None
+        self.sert_taban = 430; self.sira_yut = 0   # sira_yut: ilk N rank cagrisi etkisiz (kapak_yukle_78 28 Eyl gozlemi)
 
     def kota_kapisi(self, ne):
         if self.remaining < 481:
@@ -82,6 +83,8 @@ class Sahte:
                 raise SystemExit("HATA: ag koptu (test)")
             return {"listing_image_id": self.yeni}
         iid = int(files["listing_image_id"][1]); rk = int(files["rank"][1])
+        if self.sira_yut > 0:
+            self.sira_yut -= 1; self.yaz.append(("sira_yutuldu", iid, rk)); return {"listing_image_id": iid}
         for x in self.img:
             if x["listing_image_id"] == iid:
                 x["rank"] = rk; x["alt_text"] = files["alt_text"][1]
@@ -89,8 +92,61 @@ class Sahte:
         return {"listing_image_id": iid}
 
     def post_json(self, path, body):
-        self.calls += 1; self.vi_cagri += 1
+        self.calls += 1; self.vi_cagri += 1; self.yaz.append(("bag",))
         self.bag = {k: next(v["image_id"] for v in body["variation_images"] if v["value_id"] == RENK[k][1]) for k in RENK}
+
+
+def kur_gercek(tmp):
+    """24 Eki inceleme: duzeltilmis kartlarla gercek pilot plani 1 KORU / 16 DEGISTIR / 16 CIKAR; 4 renk bagi CIKAR gorsellerinde,
+    WP bagsiz. Eski algoritma 20 gorsel sinirinda yarida duruyordu."""
+    rows, dosya = [], pathlib.Path(tmp) / "hedef"; dosya.mkdir()
+    for s in range(1, 18):
+        ad = f"{s:02d}_{900 + s}.jpg"
+        isl = "KORU" if s == 1 else "DEGISTIR"
+        if isl == "DEGISTIR":
+            (dosya / ad).write_bytes(b"jpg")
+        rows.append(dict(hedef_sira=s, hedef_gorsel=ad, hedef_alt=f"alt {s}", islem=isl, simdi_sira="", simdi_id=501 if s == 1 else "",
+                         simdi_alt="", ncc="", fark="", en_yakin_hedef=""))
+    cikar = list(range(601, 617))
+    rows += [dict(hedef_sira="", hedef_gorsel="", hedef_alt="", islem="CIKAR", simdi_sira="", simdi_id=c, simdi_alt="", ncc="",
+                  fark="", en_yakin_hedef="") for c in cikar]
+    lp = pathlib.Path(tmp) / "LISTE.csv"
+    with open(lp, "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=list(rows[0])); w.writeheader(); w.writerows(rows)
+    man = dict(listing_id="4570155846", variation_images=[dict(value=ad, image_id=900 + s) for ad, s in zip(RENK, (13, 14, 15, 16, 17))])
+    mp = pathlib.Path(tmp) / "manifest.json"; mp.write_text(json.dumps(man))
+    canli = [(1, 501)] + [(i + 1, c) for i, c in enumerate(cikar)]
+    bag = {"Midnight Blue": 613, "Deep Black": 614, "Pure White": 615, "Champagne Ivory": 616}
+    return lp, dosya, mp, canli, bag
+
+
+def gercekci():
+    s = []
+    tmp = tempfile.mkdtemp(); lp, dosya, mp, canli, bag = kur_gercek(tmp)
+    api = Sahte(canli, bag); R = kos(api, tmp, lp, dosya, mp)
+    g = sorted(api.img, key=lambda x: x["rank"])
+    s.append(("gercekci pilot (1 KORU / 16 DEG / 16 CIKAR, 4 bag CIKAR'da): PASS, en fazla 17 gorsel, 5 bag yeni kartlarda",
+              R["sonuc"] == "PASS" and api.max_n <= 17 and len(g) == 17 and api.vi_cagri == 1
+              and all(api.bag[k] == g[s_ - 1]["listing_image_id"] for k, s_ in zip(RENK, (13, 14, 15, 16, 17)))))
+    tmp = tempfile.mkdtemp(); lp, dosya, mp, canli, bag = kur_gercek(tmp)
+    api = Sahte(canli, bag, kota=520); R = kos(api, tmp, lp, dosya, mp)
+    s.append(("kota ihtiyaci: kalan 520 - tahmini istek < 430 -> yazmadan DUR", R["sonuc"] == "DUR" and "kota yetmez" in R["sorun"][0]
+              and api.yaz == []))
+    tmp = tempfile.mkdtemp(); lp, dosya, mp, canli, bag = kur_gercek(tmp)
+    api = Sahte(canli, bag); api.sira_yut = 3; R = kos(api, tmp, lp, dosya, mp)
+    s.append(("sira: ilk gecis oturmazsa ikinci gecis, PASS", R["sonuc"] == "PASS"
+              and len([y for y in api.yaz if y[0] == "sira"]) == 17 + 14))
+    tmp = tempfile.mkdtemp(); lp, dosya, mp, canli, bag = kur_gercek(tmp)
+    rows = list(csv.DictReader(open(lp, encoding="utf-8"))); rows[2]["hedef_alt"] = "original AstroLove design"
+    with open(lp, "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=list(rows[0])); w.writeheader(); w.writerows(rows)
+    api = Sahte(canli, bag); R = kos(api, tmp, lp, dosya, mp)
+    s.append(("alt metinde Art'siz marka -> DUR, yazma yok", R["sonuc"] == "DUR" and "yasak" in R["sorun"][0] and api.yaz == []))
+    a, mx = Y.adim_plani(17, list(range(601, 617)), {613, 614, 615, 616}, [dict(hedef_sira=s_, hedef_gorsel=f"{s_}") for s_ in
+                                                                          range(2, 18)], {13, 14, 15, 16, 17})
+    s.append(("adim plani: bag, 5 renk yuklemesinden hemen sonra; en fazla 17", mx == 17 and a.index(("bag",)) ==
+              max(i for i, x in enumerate(a) if x == ("yukle", "17")) + 1))
+    return s
 
 
 def kos(api, tmp, lp, dosya, mp, kuru=False):
@@ -115,9 +171,8 @@ def main():
     s.append(("renk baglari tek cagri; WP yeni gorsele, 4 renk KORU kimliklerinde", api.vi_cagri == 1
               and api.bag["Warm Parchment"] == g[16]["listing_image_id"] and api.bag["Midnight Blue"] == 514
               and api.bag["Champagne Ivory"] == 517))
-    s.append(("gorsel sayisi en fazla baslangic + 1 (18), bagli gorsel bag tasindiktan sonra silindi", api.max_n <= 18
-              and [y for y in api.yaz if y == ("sil", 613)] and api.yaz.index(("sil", 613)) > max(
-                  i for i, y in enumerate(api.yaz) if y[0] == "yukle")))
+    s.append(("gorsel sayisi en fazla 18, bagli gorsel ancak bag cagrisindan sonra silindi", api.max_n <= 18
+              and ("sil", 613) in api.yaz and api.yaz.index(("sil", 613)) > api.yaz.index(("bag",))))
     s.append(("yuklemede overwrite / rank yok (yalniz alt_text)", all(y[2] == ("alt_text",) for y in api.yaz if y[0] == "yukle")
               and len([y for y in api.yaz if y[0] == "yukle"]) == 9))
     # on kosul: canli galeri LISTE'den farkli
@@ -136,13 +191,15 @@ def main():
     api.boz = None
     # ag koptu ama gorsel Etsy'de olustu: kayitta yok -> canli galeri son kayittan farkli -> DUR (elle bakilir)
     R2 = kos(api, tmp, lp, dosya, mp)
-    s.append(("devam: yanit dusen yukleme -> ilk kosu DUR, ikinci kosu galeri kayittan farkli diye DUR (cift yukleme yok)",
-              R1["sonuc"] == "DUR" and len(dv["yuklenen"]) == 2 and R2["sonuc"] == "DUR" and "son kayittan farkli" in R2["sorun"][0]))
+    s.append(("devam: yanit dusen yukleme -> ilk kosu DUR + hata kaydi, ikinci kosu otomatik devam etmez (cift yukleme yok)",
+              R1["sonuc"] == "DUR" and len(dv["yuklenen"]) == 2 and dv.get("hata") and R2["sonuc"] == "DUR"
+              and "otomatik devam yok" in R2["sorun"][0] and len([y for y in api.yaz if y[0] == "yukle"]) == 3))
     tmp = tempfile.mkdtemp(); lp, dosya, mp, canli, bag = kur(tmp)
     api = Sahte(canli, bag); R1 = kos(api, tmp, lp, dosya, mp)
     n = api.calls; yaz = len(api.yaz); R2 = kos(api, tmp, lp, dosya, mp)
     s.append(("devam: tamamlanmis ilanda ikinci kosu yeniden yuklemez / silmez", R1["sonuc"] == "PASS" and R2["sonuc"] == "PASS"
               and len([y for y in api.yaz[yaz:] if y[0] in ("yukle", "sil")]) == 0))
+    s += gercekci()
     for ad, ok in s:
         print(("PASS " if ok else "FAIL ") + ad)
     n = sum(bool(ok) for _, ok in s)
