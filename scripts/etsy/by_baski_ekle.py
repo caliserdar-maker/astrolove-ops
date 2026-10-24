@@ -558,7 +558,8 @@ def profil_ucretsiz_mi(api, shop):
         raise SystemExit(f"DUR: baski profili {PROFIL_BASKI} henuz her yere ucretsiz degil (once profil_yaz): {bad}")
 
 
-KOTA_ONEK = ("DUR: kota esigi", "DUR: kota sert tabani", "KOTA_BEKLE")   # etsy_common mesajlari + bu betik
+KOTA_ONEK = ("DUR: kota esigi: kalan", "DUR: kota sert tabani: kalan", "KOTA_BEKLE")   # etsy_common mesajlari + bu betik
+# ("DUR: kota esigi aktif ama ... basligi okunamadi" KOTA DEGIL: HATA)
 
 
 def kota_mi(metin):
@@ -602,7 +603,7 @@ def profil_main(a):
     finally:
         et = sonuc_etiketi([], oz_hata, oz_hata is None)
         print(f"::notice::SONUC {et} {a.mod} degisecek {R.get('degisecek') if R else '-'} kota {api.remaining if api else '-'}", flush=True)
-    sys.exit(0 if oz_hata is None else 1)
+    sys.exit(0 if (oz_hata is None or kota_mi(oz_hata)) else 1)   # KOTA yesil (gece e-posta yagmuru yok); gece.sh SONUC'a bakar
 
 
 def main():
@@ -689,7 +690,7 @@ def main():
         log("OZET " + json.dumps({k: v for k, v in oz.items() if k != "ilanlar"}, ensure_ascii=False))
         print(f"::notice::SONUC {et} {a.mod} islenen {len(sonuc)}/{len(ids)} zaten {say.get('ZATEN', 0)} sayim {say} kota {oz['kota_son']}",
               flush=True)
-    sys.exit(0 if tamam else 1)
+    sys.exit(0 if (tamam or et == "KOTA") else 1)   # KOTA yesil; tamam olup olmadigi SONUC etiketinde
 
 
 if __name__ == "__main__":
