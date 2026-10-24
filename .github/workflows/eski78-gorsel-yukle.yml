@@ -22,6 +22,7 @@ on:
       mod: {description: "kuru | yukle | bag | oku", required: true, default: "kuru"}
       onay: {description: "yukle icin SERDAR_GALERI23, bag icin SERDAR_BAG24", required: false, default: ""}
       bag: {description: "bag/oku: beklenen 5 bag 'Renk=image_id,...' (bos = LISTE/manifest/DEVAM'dan)", required: false, default: ""}
+      simdi_kosu: {description: "KART_SIL SONRA'si olmayan ilan icin envanter-oku kosusu (BURC_GIFT_20261022/envanter_oku_<kosu>/SONRA_<ilan>.json)", required: false, default: ""}
       devam_kosu: {description: "yarim kalan onceki yukleme kosusu (DEVAM_<ilan>.json oradan); bos = yeni", required: false, default: ""}
 
 env:
@@ -45,7 +46,7 @@ jobs:
             bag) [ "${{ inputs.onay }}" = SERDAR_BAG24 ] || { echo "::error::onay yok"; exit 1; } ;;
           esac
           case "${{ inputs.mod }}" in bag|oku) [[ "${{ inputs.devam_kosu }}" =~ ^[0-9]+$ ]] || { echo "::error::bag/oku icin devam_kosu"; exit 1; } ;; esac
-          [[ "${{ inputs.bag }}" =~ ^([A-Za-z ]+=[0-9]+(,[A-Za-z ]+=[0-9]+)*)?$ ]] || { echo "::error::bag girdisi"; exit 1; }
+          [[ "${{ inputs.bag }}" =~ ^([A-Za-z ]+=[0-9]+(,[A-Za-z ]+=[0-9]+)*)?$ && "${{ inputs.simdi_kosu }}" =~ ^[0-9]*$ ]] || { echo "::error::bag / simdi_kosu girdisi"; exit 1; }
           pip install -q requests==2.34.2 numpy==2.1.3 pillow==11.0.0
           curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null
       - name: rclone.conf olustur
@@ -82,8 +83,18 @@ jobs:
           python3 -c "import json,sys; o=json.load(open('_work/KART_RAPOR.json'))['ozet']; sys.exit(0 if not o['hata'] and o['kart'] == o['pass_'] else f'kart QC FAIL: {o}')"
           rclone copy "$P/DEGISEN" _work/hedef --include "*.jpg" -q
           rclone copyto "$D/GALERI_YAYIN/KOSU_20261021_1030/$L/yedek/manifest.json" _work/manifest.json
+          # canli galeri kaydi (CDN yedegi icin; Serdar 24 Eki madde 4): KART_SIL SONRA, yoksa envanter-oku SONRA (Etsy okumasi,
+          # ayri kilitli kosu; bu kosu kilidi CDN indirmesi icin tutmaz, KILIT SURESI). Ikisi de yoksa yazmadan FAIL.
+          # Kayit eski olabilir: yazim betigi canli galeriyi Etsy'den okuyup LISTE ile ayni degilse yazmadan DUR verir.
           S=$(rclone lsf -R --files-only "$D/DENETIM_20261021/KART_SIL" --include "SONRA_${L}.json" | sort -t/ -k1,1n | tail -1)
-          rclone copyto "$D/DENETIM_20261021/KART_SIL/$S" _work/simdi.json
+          SK="${{ inputs.simdi_kosu }}"
+          if [ -n "$S" ]; then
+            rclone copyto "$D/DENETIM_20261021/KART_SIL/$S" _work/simdi.json; echo "canli kayit: KART_SIL/$S"
+          elif [ -n "$SK" ] && rclone copyto "$D/BURC_GIFT_20261022/envanter_oku_$SK/SONRA_${L}.json" _work/simdi.json; then
+            echo "canli kayit: envanter_oku_$SK/SONRA_${L}.json"
+          else
+            echo "::error::canli galeri kaydi yok (KART_SIL SONRA_$L yok; simdi_kosu bos ya da envanter_oku_$SK/SONRA_$L.json yok). Once envanter-oku kos."; exit 1
+          fi
           python3 - <<'PY'
           import json, urllib.request
           for x in json.load(open("_work/simdi.json"))["gorseller"]:

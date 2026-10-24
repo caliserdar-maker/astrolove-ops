@@ -303,11 +303,12 @@ class Etsy:
         """JSON govdeli PUT (updateListingInventory, updateVariationImages). Yazma cagrisi."""
         return self._call("PUT", path, json_body=body)
 
-    def post_file(self, path, files, data=None):
+    def post_file(self, path, files, data=None, tekrar=3):
         """Multipart yukleme (gorsel/dosya). Ilk denemede 400 normal olabilir
-        (B37); 3 deneme."""
+        (B37); 3 deneme. tekrar=1 (eski78_gorsel_yukle, Serdar 24 Eki): hata yanitinda yeniden GONDERMEZ (cift yukleme
+        riski); cagiran galeriyi okuyup karar verir. 401 token yenilemesi her durumda bir kez yapilir."""
         self._istek_oncesi()
-        for attempt in range(3):
+        for attempt in range(max(tekrar, 2)):
             self.calls += 1
             time.sleep(self.pace)
             for f in files.values():
@@ -326,7 +327,7 @@ class Etsy:
                 continue
             if r.status_code in (200, 201):
                 return r.json()
-            if attempt < 2:
+            if attempt < tekrar - 1:
                 time.sleep(2 * (attempt + 1))
                 continue
             raise SystemExit(f"HATA: POST(file) {path} -> {r.status_code}: {r.text[:300]}")

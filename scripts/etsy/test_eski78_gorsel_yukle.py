@@ -4,6 +4,7 @@ yok, 4 renk bagi KORU gorsellerinde, WP bagi CIKAR gorselinde) -> hedef 17; on k
 sira + alt metin, korunanlar, devam kaydi."""
 import copy
 import csv
+import io
 import json
 import pathlib
 import sys
@@ -50,7 +51,7 @@ class Sahte:
         self.bag = dict(bag); self.remaining = kota; self.calls = 0; self.state = state; self.yeni = 7000
         self.yaz = []; self.vi_cagri = 0; self.max_n = len(self.img); self.boz = None
         self.sert_taban = 10;   self.sira_yut = 0   # sira_yut: ilk N rank cagrisi etkisiz (kapak_yukle_78 28 Eyl gozlemi)
-        self.sira_bag_sil = False; self.bag_yut = False   # 40091265199 hipotezi: rank/alt POST baglari siler; bag POST oturmaz
+        self.sira_bag_sil = False; self.bag_yut = False; self.tekrar = []; self.gitmedi_oldu = False   # 40091265199 hipotezi: rank/alt POST baglari siler; bag POST oturmaz
 
     def kota_kapisi(self, ne):
         if self.remaining < 10:
@@ -74,9 +75,12 @@ class Sahte:
         self.bag = {k: v for k, v in self.bag.items() if v != iid}   # bagli gorsel silinince bag cozulur (cl_galeri faz1)
         self.img = [x for x in self.img if x["listing_image_id"] != iid]
 
-    def post_file(self, path, files=None, data=None):
+    def post_file(self, path, files=None, data=None, tekrar=3):
         self.calls += 1
         if "image" in (files or {}):
+            self.tekrar.append(tekrar)
+            if self.boz == "gitmedi" and self.yeni == 7002 and not self.gitmedi_oldu:   # hata, gorsel olusmadi
+                self.gitmedi_oldu = True; self.yaz.append(("yukle_hata",)); raise SystemExit("HATA: POST(file) -> 500 (test)")
             self.yeni += 1; self.img.append(dict(rank=99, listing_image_id=self.yeni, alt_text=data["alt_text"], url_fullxfull="u"))
             self.max_n = max(self.max_n, len(self.img)); self.yaz.append(("yukle", self.yeni, tuple(sorted(data))))
             if self.boz == "yukle" and self.yeni == 7003:
@@ -133,9 +137,24 @@ def gercekci():
               R["sonuc"] == "PASS" and api.max_n <= 17 and len(g) == 17 and api.vi_cagri == 1
               and all(api.bag[k] == g[s_ - 1]["listing_image_id"] for k, s_ in zip(RENK, (13, 14, 15, 16, 17)))))
     tmp = tempfile.mkdtemp(); lp, dosya, mp, canli, bag = kur_gercek(tmp)
-    api = Sahte(canli, bag, kota=190); R = kos(api, tmp, lp, dosya, mp)
-    s.append(("kota ihtiyaci: kalan 190 - tahmini istek 188 < 10 -> yazmadan DUR", R["sonuc"] == "DUR" and "kota yetmez" in R["sorun"][0]
-              and api.yaz == []))
+    en_kotu = Y.istek_en_kotu(Y.adim_plani(17, list(range(601, 617)), set(), [dict(hedef_sira=s_, hedef_gorsel=f"{s_}") for s_ in
+                                                                              range(2, 18)], {13, 14, 15, 16, 17})[0])
+    api = Sahte(canli, bag, kota=en_kotu + 9); R = kos(api, tmp, lp, dosya, mp)
+    s.append((f"kota: kalan {en_kotu + 9} - en kotu tahmin {en_kotu} < 10 -> yazmadan DUR", R["sonuc"] == "DUR"
+              and "kota yetmez" in R["sorun"][0] and api.yaz == []))
+    s.append((f"en kotu tahmin (16 sil / 16 yukle) {en_kotu} = 7 + 16x9 + 16x16 + 50 + 9 + 19",
+              en_kotu == 7 + 16 * 9 + 16 * 16 + 50 + 9 + 19))
+    tmp = tempfile.mkdtemp(); lp, dosya, mp, canli, bag = kur_gercek(tmp)
+    api = Sahte(canli, bag); api.sira_yut = 99; R = kos(api, tmp, lp, dosya, mp)
+    s.append(("sira 2 geciste oturmaz -> DUR, renk bagi yazilmaz", R["sonuc"] == "DUR" and "sira 2 geciste" in R["sorun"][0]
+              and api.vi_cagri == 0))
+    tmp = tempfile.mkdtemp(); lp, dosya, mp, canli, bag = kur_gercek(tmp)
+    api = Sahte(canli, bag); R = kos(api, tmp, lp, dosya, mp)
+    ky = R.get("yukleme_kaydi") or []
+    import hashlib
+    s.append(("icerik kaydi: 16 yukleme, her biri sha256 (dosyayla ayni) + Etsy gorsel kimligi", R["sonuc"] == "PASS" and len(ky) == 16
+              and all(k["listing_image_id"] for k in ky)
+              and all(k["sha256"] == hashlib.sha256((dosya / k["hedef_gorsel"]).read_bytes()).hexdigest() for k in ky)))
     tmp = tempfile.mkdtemp(); lp, dosya, mp, canli, bag = kur_gercek(tmp)
     api = Sahte(canli, bag); api.sira_yut = 3; R = kos(api, tmp, lp, dosya, mp)
     s.append(("sira: ilk gecis oturmazsa ikinci gecis, PASS", R["sonuc"] == "PASS"
@@ -158,7 +177,44 @@ def gercekci():
     s.append(("bag POST oturmaz (geri okuma bos) -> DUR, bag tek cagri, tekrar yok", R["sonuc"] == "DUR" and "renk baglari" in R["sorun"][0]
               and api.vi_cagri == 1))
     s += bag_testleri()
+    s += post_file_testleri()
     return s
+
+
+def post_file_testleri():
+    """etsy_common.post_file tekrar parametresi: tekrar=1 hata yanitinda yeniden gondermez; 401 bir kez yenilenir; varsayilan 3."""
+    import etsy_common as E
+    E.time.sleep = lambda s: None
+
+    class Y:
+        def __init__(self, kod):
+            self.status_code, self.headers, self.text = kod, {}, "x"
+
+        def json(self):
+            return {"listing_image_id": 1}
+
+    class St:
+        n = 0
+
+        def refresh(self):
+            St.n += 1
+    out = []
+    for kodlar, tekrar, bek_cagri, bek_ok in (([500, 200], 1, 1, False), ([401, 200], 1, 2, True), ([500, 500, 200], 3, 3, True),
+                                              ([500, 500, 500, 200], 3, 3, False)):
+        seri = list(kodlar); n = [0]
+
+        def post(*a, **k):
+            n[0] += 1; return Y(seri.pop(0))
+        E.requests.post = post
+        api = E.Etsy.__new__(E.Etsy); api.calls = 0; api.pace = 0; api.verbose_quota = False; api.remaining = None
+        api.store = St(); api._headers = lambda: {}; api._istek_oncesi = lambda: None
+        try:
+            api.post_file("/x", files={"image": ("a", io.BytesIO(b"1"), "image/jpeg")}, tekrar=tekrar); ok = True
+        except SystemExit:
+            ok = False
+        out.append((f"post_file {kodlar} tekrar={tekrar}: {bek_cagri} gonderim, {'basari' if bek_ok else 'hata'}",
+                    n[0] == bek_cagri and ok == bek_ok))
+    return out
 
 
 def bag_hazir():
@@ -240,16 +296,15 @@ def main():
     s.append(("state draft -> DUR, yazma yok", R["sonuc"] == "DUR" and "active" in R["sorun"][0] and api.yaz == []))
     api = Sahte(canli, bag, kota=9); R = kos(api, tmp, lp, dosya, mp)
     s.append(("kota esigi -> DUR, yazma yok", R["sonuc"] == "DUR" and "kota" in R["sorun"][0] and api.yaz == []))
-    # devam: 3. yuklemede ag koparsa kayit kalir; ikinci kosu kaldigi yerden tamamlar
+    # 24 Eki madde 2: 3. yuklemede yanit duser ama gorsel Etsy'de olusur -> galeri okunur, yuklenmis sayilir, tekrar YOK
     tmp = tempfile.mkdtemp(); lp, dosya, mp, canli, bag = kur(tmp)
     api = Sahte(canli, bag); api.boz = "yukle"; R1 = kos(api, tmp, lp, dosya, mp)
-    dv = json.loads((pathlib.Path(tmp) / "out" / "DEVAM_4570155846.json").read_text())
-    api.boz = None
-    # ag koptu ama gorsel Etsy'de olustu: kayitta yok -> canli galeri son kayittan farkli -> DUR (elle bakilir)
-    R2 = kos(api, tmp, lp, dosya, mp)
-    s.append(("devam: yanit dusen yukleme -> ilk kosu DUR + hata kaydi, ikinci kosu otomatik devam etmez (cift yukleme yok)",
-              R1["sonuc"] == "DUR" and len(dv["yuklenen"]) == 2 and dv.get("hata") and R2["sonuc"] == "DUR"
-              and "otomatik devam yok" in R2["sorun"][0] and len([y for y in api.yaz if y[0] == "yukle"]) == 3))
+    s.append(("cift yukleme yok: yanit dusen yukleme galeride bulunur, yeniden gonderilmez, PASS (9 yukleme)",
+              R1["sonuc"] == "PASS" and len([y for y in api.yaz if y[0] == "yukle"]) == 9 and set(api.tekrar) == {1}))
+    tmp = tempfile.mkdtemp(); lp, dosya, mp, canli, bag = kur(tmp)
+    api = Sahte(canli, bag); api.boz = "gitmedi"; R1 = kos(api, tmp, lp, dosya, mp)
+    s.append(("yukleme hatasi, gorsel olusmadi: galeri okunur, bir kez daha gonderilir, PASS",
+              R1["sonuc"] == "PASS" and ("yukle_hata",) in api.yaz and len([y for y in api.yaz if y[0] == "yukle"]) == 9))
     tmp = tempfile.mkdtemp(); lp, dosya, mp, canli, bag = kur(tmp)
     api = Sahte(canli, bag); R1 = kos(api, tmp, lp, dosya, mp)
     n = api.calls; yaz = len(api.yaz); R2 = kos(api, tmp, lp, dosya, mp)
