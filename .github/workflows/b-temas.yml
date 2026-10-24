@@ -81,6 +81,28 @@ jobs:
           [ -n "$CK" ] && HED="$D/$CK/$AD"
           python3 scripts/pod/b_temas.py --dir _w/os --sira "$SAT" ${SUT:+--sutun "$SUT"} ${BAS:+--baslik "$BAS"} --font 'assets/fonts/Montserrat[wght].ttf' --out "_w/$AD"
           rclone copyto "_w/$AD" "$HED"
+          if [ -n "$SUT" ]; then
+            # olcum (Serdar 24 Eki 22 ilan hazirlik 3): satirlardaki her ilanin DEGISEN gorselleri boyut + adet
+            mkdir -p _w/d
+            for s in ${SAT//,/ }; do
+              L=${s%%_*}; C=${s#*_}
+              rclone copy "$D/DUZELT_$K/${L}_${C}/DEGISEN" "_w/d/$s" --include "*.jpg" -q
+            done
+            python3 - "${HED%/*}" <<'PY2'
+          import csv, os, sys
+          from PIL import Image
+          rows, oz = [], []
+          for s in sorted(os.listdir("_w/d")):
+              fs = sorted(f for f in os.listdir(f"_w/d/{s}") if f.endswith(".jpg"))
+              bz = [Image.open(f"_w/d/{s}/{f}").size for f in fs]
+              rows += [dict(ilan_cift=s, dosya=f, w=w, h=h) for f, (w, h) in zip(fs, bz)]
+              iyi = sum(b == (3000, 2250) for b in bz)
+              oz.append(f"{s} DEGISEN {len(fs)} | 3000x2250 {iyi}/{len(fs)} | {'PASS' if fs and iyi == len(fs) else 'FAIL'}")
+          w = csv.DictWriter(open("_w/OLCUM.csv", "w", newline=""), fieldnames=["ilan_cift", "dosya", "w", "h"]); w.writeheader(); w.writerows(rows)
+          open("_w/OLCUM.txt", "w").write("\n".join(oz) + "\n"); print("\n".join(oz))
+          PY2
+            rclone copyto _w/OLCUM.csv "${HED%/*}/OLCUM_${GITHUB_RUN_ID}.csv"; rclone copyto _w/OLCUM.txt "${HED%/*}/OLCUM_${GITHUB_RUN_ID}.txt"
+          fi
           echo "::notice title=TEMAS::Drive ${HED#gdrive:ASTROLOVE/}"
       - if: always()
         run: rm -rf _w ~/.config/rclone
