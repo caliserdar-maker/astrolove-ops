@@ -116,7 +116,7 @@ def test():
     sl = d1.split("\n")
     assert sl[sl.index("- Digital card and digital file: sent in Etsy Messages as soon as you approve your preview.") + 1] == E.SATIR_TESLIM
     assert sl[sl.index("- Digital file 8x10: an 8x10 inch, 300 dpi JPG for your own printing. Nothing is shipped.") + 1] == E.SATIR_FORMAT
-    assert E.aciklama_plani(ACL)[0] == "TAMAM"; ok += 1
+    assert E.aciklama_plani(ACL)[0] == "YAZ"; ok += 1   # CL/pilot eski teslim satirli: yalniz satir guncellenir
     # 3 kismi metin -> Dur
     kismi = d0.replace(E.DEGIS[0][0], E.DEGIS[0][1])
     try:
@@ -153,8 +153,9 @@ def test():
     # 7 pilot bugunku hali: aciklama TAMAM, envanter YAZ (SKU+hazirlik), materials + ortak
     api = Api(html.unescape(ACL).replace("\r\n", "\n"), inv=inv_pilot())
     r = E.ilan(api, "1", "222", True, out)
-    assert r["durum"] == "PASS" and r["plan"]["aciklama"] == "TAMAM" and r["plan"]["envanter"] == "YAZ", r
-    assert api.patches[0].keys() == {"materials", "shipping_profile_id"}
+    assert r["durum"] == "PASS" and r["plan"]["aciklama"] == "YAZ" and r["plan"]["envanter"] == "YAZ", r
+    assert api.patches[0].keys() == {"description", "materials", "shipping_profile_id"}
+    assert E.SATIR_TESLIM in api.patches[0]["description"] and E.SATIR_TESLIM_ESKI not in api.patches[0]["description"]
     assert all(p["property_values"][1]["value_ids"] == [7777] for p in api.puts[0]["products"] if E.anahtar(p)[1] == E.BASKI); ok += 1
     # 8 yanlis kargo profili -> Dur, yazma yok
     api = Api(A77, profil=318000000000)
@@ -307,7 +308,20 @@ def test():
     except SystemExit as e:
         assert "YASAK" in str(e)
     ok += 1
-    print(f"test_by_baski_ekle: {ok}/21 PASS")
+    # 22 teslim satiri guncellemesi: eski satirli tam metin (pilot/CL) -> YAZ, yalniz o satir; sonra TAMAM; yeni metinde eski yok
+    eski_metin = d1.replace(E.SATIR_TESLIM, E.SATIR_TESLIM_ESKI)
+    assert html.unescape(ACL).replace("\r\n", "\n").count(E.SATIR_TESLIM_ESKI) == 1   # CL orijinalinde eski satir var
+    durum, g = E.aciklama_plani(eski_metin)
+    assert durum == "YAZ" and g == d1 and E.SATIR_TESLIM_ESKI not in g
+    assert E.aciklama_plani(html.unescape(ACL))[0] == "YAZ"
+    assert E.aciklama_plani(g) == ("TAMAM", g)
+    assert "worldwide" in d1 and "other countries 7 to 21 days" in d1 and "\u2014" not in E.SATIR_TESLIM and "\u2013" not in E.SATIR_TESLIM
+    try:
+        E.aciklama_plani(eski_metin + "\n" + E.SATIR_TESLIM); raise AssertionError("eski+yeni gecti")
+    except E.Dur:
+        pass
+    ok += 1
+    print(f"test_by_baski_ekle: {ok}/22 PASS")
 
 
 if __name__ == "__main__":

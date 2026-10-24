@@ -51,9 +51,12 @@ ISTEK_TAHMIN = 16   # ilan basina en fazla istek (3 oku + PUT + 2 bag + 2 PATCH 
 BEKLE_SN = 10
 OUT = Path("out")
 
-SATIR_TESLIM = ("- Shipped print: made and shipped within 4 to 7 days after your approval, with free shipping to the US, UK "
-                "and EU. Estimated delivery: US 3 to 8 days, UK and Australia 5 to 10 days, EU 5 to 12 days. For other "
-                "countries, see the delivery estimate at checkout.")
+SATIR_TESLIM_ESKI = ("- Shipped print: made and shipped within 4 to 7 days after your approval, with free shipping to the US, UK "
+                     "and EU. Estimated delivery: US 3 to 8 days, UK and Australia 5 to 10 days, EU 5 to 12 days. For other "
+                     "countries, see the delivery estimate at checkout.")
+# Serdar 24 Eki "ok" (secenek B: her yere ucretsiz; teslim gunleri baski profili 318080539024 ile ayni)
+SATIR_TESLIM = ("- Shipped print: made and shipped within 4 to 7 days after your approval, with free shipping worldwide. "
+                "Estimated delivery: US 3 to 8 days, UK and Australia 5 to 10 days, EU 5 to 12 days, other countries 7 to 21 days.")
 SATIR_FORMAT = ("- Shipped print 8x10: printed on premium matte art paper with long-lasting inks and shipped to you by our "
                 "production partner.")
 DEGIS = [  # (simdiki, yeni)
@@ -100,9 +103,22 @@ def esdeger(a, b):
 # ---------------- aciklama ----------------
 
 def aciklama_plani(d0):
-    """(durum, yeni_metin). durum: TAMAM (4 parca var, eskiler yok) | YAZ (4 parca yok, 4 capa TAM 1 kez) | Dur (kismi/kayma)."""
+    """(durum, yeni_metin). durum: TAMAM (4 parca var, eskiler yok) | YAZ (4 parca yok, 4 capa TAM 1 kez; ya da 4 parca var ama
+    teslim satiri ESKI metin: yalniz o satir yenisiyle degisir) | Dur (kismi/kayma)."""
     t = norm(d0)
     satirlar = [s.strip() for s in t.split("\n")]
+    n_eski, n_yeni = satirlar.count(SATIR_TESLIM_ESKI), satirlar.count(SATIR_TESLIM)
+    if n_eski == 1 and n_yeni == 0 and t.count(DEGIS[0][1]) == 1 and t.count(DEGIS[1][1]) == 1 and satirlar.count(SATIR_FORMAT) == 1:
+        sl = t.split("\n")
+        sl = [SATIR_TESLIM if x.strip() == SATIR_TESLIM_ESKI else x for x in sl]
+        t2 = "\n".join(sl)
+        for rx, ad in YASAK:
+            m = rx.search(t2)
+            if m:
+                raise Dur(f"aciklamada {ad}: '{m.group(0)}'")
+        return "YAZ", t2
+    if n_eski:
+        raise Dur(f"eski teslim satiri {n_eski} kez, yeni {n_yeni} kez (kismi); elle bakilmali")
     yeni_var = [t.count(DEGIS[0][1]) == 1, t.count(DEGIS[1][1]) == 1,
                 satirlar.count(SATIR_TESLIM) == 1, satirlar.count(SATIR_FORMAT) == 1]
     if all(yeni_var):
@@ -634,7 +650,7 @@ def main():
         if [x for x in ids if x not in tum]:
             raise SystemExit("DUR: ilan listesi yil donumu bolumu disinda")
         onceden = set()
-        if yaz and a.tamam and Path(a.tamam).exists():
+        if yaz and a.hepsi and a.tamam and Path(a.tamam).exists():   # acik liste verilirse atlama yok (guncelleme kosusu)
             onceden = {x.strip() for x in Path(a.tamam).read_text().split() if x.strip().isdigit()}
         atlanan = [x for x in ids if x in onceden]
         ids = [x for x in ids if x not in onceden]
