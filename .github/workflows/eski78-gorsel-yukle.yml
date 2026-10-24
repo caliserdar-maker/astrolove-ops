@@ -3,8 +3,9 @@ name: eski78-gorsel-yukle
 # 23 eski galerili poster ilani: galeriyi hedef duzene getirir - scripts/etsy/eski78_gorsel_yukle.py (Serdar 24 Eki B4; 17 Eki surumunun
 # yerine). ETSY'YE YAZAR (mod=yukle, onay SERDAR_GALERI23); mod=kuru yalniz plan. Tek ilan. Once yalniz pilot 4570155846, Serdar
 # gorsel onayindan sonra. Girdi: galeri23-duzelt kosusunun Drive ciktisi (DUZELT_<kosu>/<ilan>_<CIFT>/: LISTE_<ilan>.csv, DEGISEN/)
-# + hedef manifest (GALERI_YAYIN/KOSU_20261021_1030/<ilan>/yedek/manifest.json). Canli galerinin tam boy yedegi KILIT ALINMADAN
-# once CDN'den (KART_SIL SONRA adresleri; Etsy API yok, kota yok). Cikti Drive ASTROLOVE/TEMP/DENETIM_20261021/GALERI23_YUKLE/<run_id>/.
+# + hedef manifest (GALERI_YAYIN/KOSU_20261021_1030/<ilan>/yedek/manifest.json). Canli galerinin tam boy yedegi (YEDEK_CDN/) betigin
+# kendi Etsy galeri okumasindan, ilk yazimdan once (Serdar 24 Eki madde 4: eski kart kaydina bagli degil; kuru ve devamda yok).
+# Cikti Drive ASTROLOVE/TEMP/DENETIM_20261021/GALERI23_YUKLE/<run_id>/.
 # Yuklenen gorsellerin CDN NCC kontrolu kilitsiz galeri-ornek ile yapilir (KILIT SURESI kurali).
 # mod=bag (Serdar 24 Eki): yukleme bittikten sonra YALNIZ renk baglari, TEK variation-images cagrisi (onay SERDAR_BAG24), gorsele
 # yazim yok; galeri 17 / sira / alt metin hedefle ayni degilse yazmaz. mod=oku: salt okuma (galeri + baglar + korunanlar), yazim yok.
@@ -22,7 +23,6 @@ on:
       mod: {description: "kuru | yukle | bag | oku", required: true, default: "kuru"}
       onay: {description: "yukle icin SERDAR_GALERI23, bag icin SERDAR_BAG24", required: false, default: ""}
       bag: {description: "bag/oku: beklenen 5 bag 'Renk=image_id,...' (bos = LISTE/manifest/DEVAM'dan)", required: false, default: ""}
-      simdi_kosu: {description: "KART_SIL SONRA'si olmayan ilan icin envanter-oku kosusu (BURC_GIFT_20261022/envanter_oku_<kosu>/SONRA_<ilan>.json)", required: false, default: ""}
       devam_kosu: {description: "yarim kalan onceki yukleme kosusu (DEVAM_<ilan>.json oradan); bos = yeni", required: false, default: ""}
 
 env:
@@ -46,7 +46,7 @@ jobs:
             bag) [ "${{ inputs.onay }}" = SERDAR_BAG24 ] || { echo "::error::onay yok"; exit 1; } ;;
           esac
           case "${{ inputs.mod }}" in bag|oku) [[ "${{ inputs.devam_kosu }}" =~ ^[0-9]+$ ]] || { echo "::error::bag/oku icin devam_kosu"; exit 1; } ;; esac
-          [[ "${{ inputs.bag }}" =~ ^([A-Za-z ]+=[0-9]+(,[A-Za-z ]+=[0-9]+)*)?$ && "${{ inputs.simdi_kosu }}" =~ ^[0-9]*$ ]] || { echo "::error::bag / simdi_kosu girdisi"; exit 1; }
+          [[ "${{ inputs.bag }}" =~ ^([A-Za-z ]+=[0-9]+(,[A-Za-z ]+=[0-9]+)*)?$ ]] || { echo "::error::bag girdisi"; exit 1; }
           pip install -q requests==2.34.2 numpy==2.1.3 pillow==11.0.0
           curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null
       - name: rclone.conf olustur
@@ -61,14 +61,14 @@ jobs:
           if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
             [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
           fi
-      - name: Girdiler + canli galeri tam boy yedegi (kilit adimindan once; CDN, Etsy API yok)
+      - name: Girdiler (Drive; Etsy API yok)
         env:
           L: ${{ inputs.ilan }}
           K: ${{ inputs.duzelt_kosu }}
           MOD: ${{ inputs.mod }}
         run: |
           set -euo pipefail
-          mkdir -p _work/hedef _out/YEDEK_CDN
+          mkdir -p _work/hedef _out
           C=$(python3 -c "import csv,sys;print(next(r['cift'] for r in csv.DictReader(open('data/pod/pod78_ids.csv')) if r['listing_id']=='$L'))")
           P="$D/DENETIM_20261021/GALERI_PLAN23/DUZELT_$K/${L}_${C}"
           rclone copyto "$P/LISTE_$L.csv" _work/LISTE.csv
@@ -76,32 +76,13 @@ jobs:
             # yalniz bag / salt okuma: LISTE + hedef manifest + yukleme kosusunun DEVAM kaydi; gorsel indirme / CDN yedegi yok
             rclone copyto "$D/GALERI_YAYIN/KOSU_20261021_1030/$L/yedek/manifest.json" _work/manifest.json
             rclone copyto "$O/${{ inputs.devam_kosu }}/DEVAM_$L.json" _work/DEVAM.json || { echo "::error::DEVAM_$L.json yok"; exit 1; }
-            rmdir _out/YEDEK_CDN; exit 0
+            exit 0
           fi
           # kart QC kapisi (24 Eki inceleme): duzeltme kosusunda bu ilanin kart raporu PASS degilse yukleme yok
           rclone copyto "$P/KART/RAPOR.json" _work/KART_RAPOR.json || { echo "::error::KART/RAPOR.json yok (kart duzeltmesi yapilmamis)"; exit 1; }
           python3 -c "import json,sys; o=json.load(open('_work/KART_RAPOR.json'))['ozet']; sys.exit(0 if not o['hata'] and o['kart'] == o['pass_'] else f'kart QC FAIL: {o}')"
           rclone copy "$P/DEGISEN" _work/hedef --include "*.jpg" -q
           rclone copyto "$D/GALERI_YAYIN/KOSU_20261021_1030/$L/yedek/manifest.json" _work/manifest.json
-          # canli galeri kaydi (CDN yedegi icin; Serdar 24 Eki madde 4): KART_SIL SONRA, yoksa envanter-oku SONRA (Etsy okumasi,
-          # ayri kilitli kosu; bu kosu kilidi CDN indirmesi icin tutmaz, KILIT SURESI). Ikisi de yoksa yazmadan FAIL.
-          # Kayit eski olabilir: yazim betigi canli galeriyi Etsy'den okuyup LISTE ile ayni degilse yazmadan DUR verir.
-          S=$(rclone lsf -R --files-only "$D/DENETIM_20261021/KART_SIL" --include "SONRA_${L}.json" | sort -t/ -k1,1n | tail -1)
-          SK="${{ inputs.simdi_kosu }}"
-          if [ -n "$S" ]; then
-            rclone copyto "$D/DENETIM_20261021/KART_SIL/$S" _work/simdi.json; echo "canli kayit: KART_SIL/$S"
-          elif [ -n "$SK" ] && rclone copyto "$D/BURC_GIFT_20261022/envanter_oku_$SK/SONRA_${L}.json" _work/simdi.json; then
-            echo "canli kayit: envanter_oku_$SK/SONRA_${L}.json"
-          else
-            echo "::error::canli galeri kaydi yok (KART_SIL SONRA_$L yok; simdi_kosu bos ya da envanter_oku_$SK/SONRA_$L.json yok). Once envanter-oku kos."; exit 1
-          fi
-          python3 - <<'PY'
-          import json, urllib.request
-          for x in json.load(open("_work/simdi.json"))["gorseller"]:
-              with urllib.request.urlopen(urllib.request.Request(x["url_fullxfull"], headers={"User-Agent": "Mozilla/5.0"}), timeout=60) as r:
-                  open(f"_out/YEDEK_CDN/{int(x['rank']):02d}_{x['listing_image_id']}.jpg", "wb").write(r.read())
-          print("CDN yedek:", len(json.load(open("_work/simdi.json"))["gorseller"]))
-          PY
           DV="${{ inputs.devam_kosu }}"
           if [ -n "$DV" ]; then
             [[ "$DV" =~ ^[0-9]+$ ]] || { echo "::error::devam_kosu"; exit 1; }
