@@ -13,12 +13,14 @@ import os
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
-AILE = {"mont": ("Montserrat[wght].ttf", (300, 400, 500, 600)), "gar": ("EBGaramond[wght].ttf", (400, 500))}
+AILE = {"mont": ("Montserrat[wght].ttf", (300, 400, 500, 600)), "gar": ("EBGaramond[wght].ttf", (400, 500)),
+        "lato": ("Lato-Regular.ttf", (400,))}   # lato: sabit agirlik (degisken eksen yok; 24 Eki kart 02 govde metni)
 
 
 def _font(fd, aile, s, w):
     f = ImageFont.truetype(os.path.join(fd, AILE[aile][0]), s)
-    f.set_variation_by_axes([w])
+    if aile != "lato":
+        f.set_variation_by_axes([w])
     return f
 
 

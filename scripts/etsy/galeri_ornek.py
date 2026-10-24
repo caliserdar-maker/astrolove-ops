@@ -147,16 +147,19 @@ def main():
         d.rectangle([x, y, x + tw - 1, y + th - 1], outline=(180, 180, 180))
         satir_yaz(d, (x, y + th + 6), f"{h['rank']}. [{satir[i]['islem']}] {h['alt']}", f, tw)
     S.save(out / f"HEDEF_GALERI_{lid}.jpg", quality=92)
-    # yan yana: her hedef sira icin simdi (eslesen ya da ayni siradaki) | hedef
+    # yan yana: her hedef sira icin YALNIZ eslesen canli gorsel | hedef (24 Eki: ayni siradaki eslesmeyen canli gorsel cizilmez;
+    # 23 Eki sayfasi canli rank 17'yi hedef 17'nin yanina koyup "CI iki kez" yanilgisi yaratmisti)
     tw2 = 520; th2 = round(tw2 * 3 / 4); n = len(hedef)
     Y = Image.new("RGB", (2 * tw2 + 3 * pad + 360, 70 + n * (th2 + pad)), "white"); d = ImageDraw.Draw(Y)
-    d.text((pad, 20), f"{lid}: SIMDI (canli) | HEDEF", fill=(0, 0, 0), font=fb)
-    sira = {x["rank"]: x for x in simdi}
+    d.text((pad, 20), f"{lid}: SIMDI (canli, yalniz eslesen) | HEDEF", fill=(0, 0, 0), font=fb)
     for i, h in enumerate(hedef):
         y = 70 + i * (th2 + pad)
-        c = kullanildi.get(i) or sira.get(h["rank"])
+        c = kullanildi.get(i)
         if c:
             Y.paste(c["im"].resize((tw2, th2), Image.LANCZOS), (pad, y))
+        else:
+            d.rectangle([pad, y, pad + tw2, y + th2], fill=(235, 235, 235))
+            satir_yaz(d, (pad + 20, y + th2 // 2 - 20), "canlida karsiligi yok (yeni yuklenir)", f, tw2 - 40)
         Y.paste(h["im"].resize((tw2, th2), Image.LANCZOS), (2 * pad + tw2, y))
         satir_yaz(d, (3 * pad + 2 * tw2, y + 10), f"{h['rank']}. {satir[i]['islem']}", fb, 340)
     Y.save(out / f"YAN_YANA_{lid}.jpg", quality=88)

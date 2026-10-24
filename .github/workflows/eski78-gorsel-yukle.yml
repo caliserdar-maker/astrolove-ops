@@ -1,43 +1,43 @@
 name: eski78-gorsel-yukle
-# ESKI 78 galeri: yeni kartlari yukler (rank 1,2,3,5,7,8,9,10,12,13 overwrite + alt metin), rank 6'yi SILER. ETSY'YE YAZAR.
-# onay alani SERDAR_GORSEL_17EKI olmali (Serdar'in once/sonra onayindan sonra). mod=yukle | kontrol (salt okuma geri okuma).
-# Kaynak: Drive TEMP/ESKI78_GORSEL_20261017/ (eski78-gorsel-uret). Cikti: Drive TEMP/ESKI78_GORSEL_YUKLE_20261017/.
+
+# 23 eski galerili poster ilani: galeriyi hedef duzene getirir - scripts/etsy/eski78_gorsel_yukle.py (Serdar 24 Eki B4; 17 Eki surumunun
+# yerine). ETSY'YE YAZAR (mod=yukle, onay SERDAR_GALERI23); mod=kuru yalniz plan. Tek ilan. Once yalniz pilot 4570155846, Serdar
+# gorsel onayindan sonra. Girdi: galeri23-duzelt kosusunun Drive ciktisi (DUZELT_<kosu>/<ilan>_<CIFT>/: LISTE_<ilan>.csv, DEGISEN/)
+# + hedef manifest (GALERI_YAYIN/KOSU_20261021_1030/<ilan>/yedek/manifest.json). Canli galerinin tam boy yedegi KILIT ALINMADAN
+# once CDN'den (KART_SIL SONRA adresleri; Etsy API yok, kota yok). Cikti Drive ASTROLOVE/TEMP/DENETIM_20261021/GALERI23_YUKLE/<run_id>/.
+# Yuklenen gorsellerin CDN NCC kontrolu kilitsiz galeri-ornek ile yapilir (KILIT SURESI kurali).
+
 permissions:
   actions: read
   contents: read
+
 on:
   workflow_dispatch:
     inputs:
-      mod:
-        description: "yukle | duzelt (yalniz r2+r12, tek cift) | kontrol"
-        default: "kontrol"
-      ciftler:
-        description: "bosluklu cift listesi ya da HEPSI"
-        default: "CANCER_LIBRA"
-      onay:
-        description: "SERDAR_GORSEL_17EKI (yalniz mod=yukle)"
-        default: ""
+      ilan: {description: "tek ilan (yalniz rakam)", required: true, default: "4570155846"}
+      duzelt_kosu: {description: "galeri23-duzelt kosusu (DUZELT_<kosu>)", required: true, default: ""}
+      mod: {description: "kuru | yukle", required: true, default: "kuru"}
+      onay: {description: "yukle icin SERDAR_GALERI23", required: false, default: ""}
+
+env:
+  D: "gdrive:ASTROLOVE/TEMP"
+  O: "gdrive:ASTROLOVE/TEMP/DENETIM_20261021/GALERI23_YUKLE"
+
 jobs:
-  cerceve:
+  is:
     runs-on: ubuntu-latest
-    timeout-minutes: 300
+    timeout-minutes: 150
     steps:
-      - name: Onay kapisi
-        run: |
-          [ "${{ inputs.mod }}" = "kontrol" ] || [ "${{ inputs.onay }}" = "SERDAR_GORSEL_17EKI" ] || { echo "::error::onay yok"; exit 1; }
-          [ "${{ inputs.mod }}" != "duzelt" ] || [ "$(echo ${{ inputs.ciftler }} | wc -w)" = "1" ] || { echo "::error::duzelt tek cift"; exit 1; }
       - uses: actions/checkout@v4
-      - name: Etsy kilidi (sira bekle, iptal yok)
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: python3 scripts/etsy/kilit_bekle.py
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - run: |
           set -euo pipefail
+          [[ "${{ inputs.ilan }}" =~ ^[0-9]+$ && "${{ inputs.duzelt_kosu }}" =~ ^[0-9]+$ && "${{ inputs.mod }}" =~ ^(kuru|yukle)$ ]] || { echo "::error::girdi"; exit 1; }
+          [ "${{ inputs.mod }}" = kuru ] || [ "${{ inputs.onay }}" = SERDAR_GALERI23 ] || { echo "::error::onay yok"; exit 1; }
           pip install -q requests==2.34.2 numpy==2.1.3 pillow==11.0.0
-          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || { echo "rclone.org erisilemedi, apt"; sudo apt-get install -y -qq rclone >/dev/null; }
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null
       - name: rclone.conf olustur
         env:
           RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
@@ -50,38 +50,60 @@ jobs:
           if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
             [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
           fi
+      - name: Girdiler + canli galeri tam boy yedegi (kilit adimindan once; CDN, Etsy API yok)
+        env:
+          L: ${{ inputs.ilan }}
+          K: ${{ inputs.duzelt_kosu }}
+        run: |
+          set -euo pipefail
+          mkdir -p _work/hedef _out/YEDEK_CDN
+          C=$(python3 -c "import csv,sys;print(next(r['cift'] for r in csv.DictReader(open('data/pod/pod78_ids.csv')) if r['listing_id']=='$L'))")
+          P="$D/DENETIM_20261021/GALERI_PLAN23/DUZELT_$K/${L}_${C}"
+          rclone copyto "$P/LISTE_$L.csv" _work/LISTE.csv
+          rclone copy "$P/DEGISEN" _work/hedef --include "*.jpg" -q
+          rclone copyto "$D/GALERI_YAYIN/KOSU_20261021_1030/$L/yedek/manifest.json" _work/manifest.json
+          S=$(rclone lsf -R "$D/DENETIM_20261021/KART_SIL" --include "SONRA_${L}.json" | sort -t/ -k1,1n | tail -1)
+          rclone copyto "$D/DENETIM_20261021/KART_SIL/$S" _work/simdi.json
+          python3 - <<'PY'
+          import json, urllib.request
+          for x in json.load(open("_work/simdi.json"))["gorseller"]:
+              with urllib.request.urlopen(urllib.request.Request(x["url_fullxfull"], headers={"User-Agent": "Mozilla/5.0"}), timeout=60) as r:
+                  open(f"_out/YEDEK_CDN/{int(x['rank']):02d}_{x['listing_image_id']}.jpg", "wb").write(r.read())
+          print("CDN yedek:", len(json.load(open("_work/simdi.json"))["gorseller"]))
+          PY
+          rclone copy _out "$O/${GITHUB_RUN_ID}" -q
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
       - name: Token
         run: |
           set -euo pipefail
-          umask 077; mkdir -p _work _out
+          umask 077
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
-          K="gdrive:ASTROLOVE/TEMP/ESKI78_GORSEL_20261017"
-          if [ "${{ inputs.ciftler }}" = "HEPSI" ]; then rclone copy "$K" _work/KAY -q --transfers 8 --exclude "*/ONCE_SONRA.jpg" --exclude "*/YEDEK/**"
-          else for c in ${{ inputs.ciftler }}; do rclone copy "$K/$c" "_work/KAY/$c" -q --exclude "ONCE_SONRA.jpg" --exclude "YEDEK/**"; rclone copy "$K/_canli/$c" "_work/KAY/_canli/$c" -q; done; fi
-          rclone copy "gdrive:ASTROLOVE/TEMP/ESKI78_GORSEL_YUKLE_20261017" _out -q --include "*/rapor.json" --include "*/duzelt/rapor_duzelt.json" || true
-      - name: Calistir
+      - name: Galeri
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
           TOKEN_FILE: _work/ETSY_TOKEN.json
-          CIFTLER: ${{ inputs.ciftler }}
+          L: ${{ inputs.ilan }}
+          MOD: ${{ inputs.mod }}
         run: |
-          if [ "${{ inputs.mod }}" = "duzelt" ]; then
-            python3 scripts/etsy/eski78_gorsel_yukle.py --duzelt --kaynak _work/KAY --out _out --ciftler "$CIFTLER" --confirm ESKI78_GORSEL \
-              --yedek-drive "gdrive:ASTROLOVE/TEMP/ESKI78_GORSEL_20261017"
-          elif [ "${{ inputs.mod }}" = "yukle" ]; then
-            python3 scripts/etsy/eski78_gorsel_yukle.py --kaynak _work/KAY --out _out --ciftler "$CIFTLER" --confirm ESKI78_GORSEL \
-              --yedek-drive "gdrive:ASTROLOVE/TEMP/ESKI78_GORSEL_20261017"
-          else
-            python3 scripts/etsy/eski78_gorsel_kontrol.py --kaynak _work/KAY --out _out --ciftler "$CIFTLER"
-          fi
+          set +e -o pipefail
+          args=(--ilan "$L" --liste _work/LISTE.csv --hedef-dir _work/hedef --manifest _work/manifest.json --out _out)
+          [ "$MOD" = kuru ] && args+=(--kuru) || args+=(--confirm ESKI23_GALERI)
+          python3 scripts/etsy/eski78_gorsel_yukle.py "${args[@]}" 2>&1 | tee _work/kosu.log
+          echo "KOD=${PIPESTATUS[0]}" >> "$GITHUB_ENV"
       - name: Token geri yaz + cikti Drive'a
-        if: ${{ always() }}
+        if: always()
         run: |
-          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "token geri yazildi" || true
-          if [ -d _out ] && ls _out/* >/dev/null 2>&1; then
-            python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/ETSY_TOKEN.json _out || { echo "::error::ciktida sir"; exit 1; }
-            rclone copy _out "gdrive:ASTROLOVE/TEMP/ESKI78_GORSEL_YUKLE_20261017" -q --exclude "*/yedek/*.jpg" && echo "Cikti: TEMP/ESKI78_GORSEL_YUKLE_20261017/"
-          fi
-          rm -rf _work ~/.config/rclone
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || echo "Token yenilenmedi"
+          [ -f _work/kosu.log ] && python3 scripts/guvenlik/log_suz.py < _work/kosu.log > "_out/kosu_$(date -u +%Y%m%d_%H%M).txt"
+          if grep -rqE '"(access_token|refresh_token)"[[:space:]]*:[[:space:]]*"[A-Za-z0-9._-]{20,}"|x-api-key[[:space:]]*:' _out/ 2>/dev/null; then
+            echo "::error::Ciktida sir bulundu; Drive'a yazilmadi"; exit 1; fi
+          rclone copy _out "$O/${GITHUB_RUN_ID}" -q && echo "::notice title=GALERI23 YUKLE::Drive TEMP/DENETIM_20261021/GALERI23_YUKLE/${GITHUB_RUN_ID}/"
+          [ "${KOD:-1}" = 0 ] || { echo "::error::cikis ${KOD:-?}"; exit 1; }
+      - if: always()
+        run: rm -rf _work ~/.config/rclone

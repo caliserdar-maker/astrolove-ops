@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""SALT OKUMA geri okuma (Serdar 17 Eki): eski 78 galeri yuklemesinden sonra her ilanda
+"""KULLANIM DISI (24 Eki): 17 Eki akisinin kontrolu; eski78_gorsel_yukle.py yeniden yazildi (alt_metin / cdn_ncc yok), bu betik
+artik kosulmaz. Gecmis icin duruyor.
+SALT OKUMA geri okuma (Serdar 17 Eki): eski 78 galeri yuklemesinden sonra her ilanda
   - gorsel sayisi = uretim anindaki sayi - 1 (18 -> 17)
   - eski rank 6 gorseli (Four classic frames, uretimdeki id) YOK
   - yeni kartlar dogru sirada: kart rNN -> canli rank {1:1,2:2,3:3,5:5,7:6,8:7,9:8,10:9,12:11,13:12}, CDN NCC >= 0.999

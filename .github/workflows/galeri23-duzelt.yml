@@ -1,0 +1,105 @@
+name: galeri23-duzelt
+
+# 23 eski galerili poster ilani, sira 8 galeri isi (Serdar 24 Eki B1-B3): PLAN ve ORNEK. Etsy'ye yazma YOK, Etsy API YOK, Etsy
+# kilidi YOK (kilit kumesinde degil). Ilan basina:
+#   1) scripts/pod/kart_nokta_marka.py: hedef kartlarin metin duzeltmesi (ASTROLOVEART / A & B etiketi, cumle sonu noktasi, "+", "="
+#      yok, sira 3 AstroLoveArt) + QC PASS/FAIL (olcum, kutle, kutu disi fark, OCR)
+#   2) duzeltilmis hedef = hedef yedek + duzeltilen kartlar (ayni dosya adlari)
+#   3) scripts/etsy/galeri_ornek.py: canli galeri (KART_SIL SONRA_<ilan>.json, 23 Eki son Etsy okumasi; o tarihten beri galeriye yazim
+#      yok) ile duzeltilmis hedef: LISTE_<ilan>.csv/.md, HEDEF_GALERI, YAN_YANA (yalniz eslesen), DEGISEN (%100)
+# Cikti Drive ASTROLOVE/TEMP/DENETIM_20261021/GALERI_PLAN23/DUZELT_<run_id>/<ilan>_<CIFT>/ + OZET.csv.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      ilanlar: {description: "virgullu ilan listesi ya da HEPSI (KOSU_20261021_1030 altindaki 23 ilan)", required: true, default: "4570155846"}
+
+env:
+  D: "gdrive:ASTROLOVE/TEMP"
+
+jobs:
+  duzelt:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Kurulum
+        run: |
+          set -euo pipefail
+          [[ "${{ inputs.ilanlar }}" =~ ^(HEPSI|[0-9]+(,[0-9]+)*)$ ]] || { echo "::error::ilanlar"; exit 1; }
+          pip install -q numpy==2.1.3 pillow==11.0.0 scipy==1.14.1
+          sudo apt-get -qq update >/dev/null && sudo apt-get -qq install -y tesseract-ocr >/dev/null
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Fontlar + duvar
+        run: |
+          set -euo pipefail
+          mkdir -p fonts _work; base=https://raw.githubusercontent.com/google/fonts/main/ofl
+          curl -fsSL --retry 3 "$base/ebgaramond/EBGaramond%5Bwght%5D.ttf" -o 'fonts/EBGaramond[wght].ttf'
+          curl -fsSL --retry 3 "$base/lato/Lato-Regular.ttf" -o fonts/Lato-Regular.ttf
+          cp 'assets/fonts/Montserrat[wght].ttf' fonts/
+          python3 scripts/pod/duvar_zemin.py data/pod/kapak_sahne_v9.png guclu _work/duvar.png acik3
+      - name: Ilan listesi
+        run: |
+          set -euo pipefail
+          rclone lsf "$D/GALERI_YAYIN/KOSU_20261021_1030" --dirs-only | tr -d '/' | grep -E '^[0-9]+$' | sort > _work/kosu.txt
+          echo "KOSU_20261021_1030 ilan: $(wc -l < _work/kosu.txt)"
+          if [ "${{ inputs.ilanlar }}" = HEPSI ]; then cp _work/kosu.txt _work/ilan.txt; else echo "${{ inputs.ilanlar }}" | tr ',' '\n' > _work/ilan.txt; fi
+          rclone lsf -R "$D/DENETIM_20261021/KART_SIL" --include "SONRA_*.json" > _work/sonra.txt || true
+          python3 - <<'PY'
+          import csv
+          c = {r["listing_id"]: r["cift"] for r in csv.DictReader(open("data/pod/pod78_ids.csv"))}
+          kosu = set(open("_work/kosu.txt").read().split())
+          with open("_work/is.txt", "w") as f:
+              for l in open("_work/ilan.txt").read().split():
+                  assert l in kosu, f"{l} KOSU_20261021_1030'da yok"
+                  f.write(f"{l} {c[l]}\n")
+          PY
+          cat _work/is.txt
+      - name: Duzelt + ornek (4 paralel)
+        run: |
+          set +e
+          cat > _work/bir.sh <<'SH'
+          #!/usr/bin/env bash
+          L=$1; C=$2; W=_work/$L; O=_out/${L}_${C}; mkdir -p $W/hedef $W/duz $O
+          rclone copyto "$D/GALERI_YAYIN/KOSU_20261021_1030/$L/yedek/manifest.json" $W/manifest.json -q || { echo "$L $C manifest_yok" >> _out/OZET.txt; exit 0; }
+          rclone copy "$D/GALERI_YAYIN/YEDEK/${L}_${C}" $W/hedef --include "*.jpg" -q
+          S=$(grep -E "/SONRA_${L}\.json$" _work/sonra.txt | sort -t/ -k1,1n | tail -1)
+          python3 scripts/pod/kart_nokta_marka.py --hedef-dir $W/hedef --duvar _work/duvar.png --fd fonts --cift $C --out $O/KART > $O/kart.log 2>&1
+          K=$?
+          cp $W/hedef/*.jpg $W/duz/ && cp $O/KART/[0-9][0-9]_*.jpg $W/duz/ 2>/dev/null
+          if [ -n "$S" ]; then
+            rclone copyto "$D/DENETIM_20261021/KART_SIL/$S" $W/simdi.json -q
+            python3 scripts/etsy/galeri_ornek.py --hedef-manifest $W/manifest.json --hedef-dir $W/duz --simdi $W/simdi.json --out $O > $O/ornek.log 2>&1
+            G=$?; SAY=$(grep -o '"sayim": {[^}]*}' $O/ornek.log | tr -d ' ')
+          else G=SONRA_yok; SAY=; fi
+          echo "$L $C kart=$K ornek=$G kaynak=$S $SAY" >> _out/OZET.txt
+          rclone copy $O "$D/DENETIM_20261021/GALERI_PLAN23/DUZELT_${GITHUB_RUN_ID}/${L}_${C}" -q
+          echo "$L $C kart=$K ornek=$G"
+          SH
+          chmod +x _work/bir.sh; mkdir -p _out
+          export D GITHUB_RUN_ID
+          xargs -P 4 -L 1 _work/bir.sh < _work/is.txt
+          sort _out/OZET.txt | tee _out/OZET_SIRALI.txt
+          rclone copyto _out/OZET_SIRALI.txt "$D/DENETIM_20261021/GALERI_PLAN23/DUZELT_${GITHUB_RUN_ID}/OZET.txt" -q
+          echo "::notice title=GALERI23::Drive TEMP/DENETIM_20261021/GALERI_PLAN23/DUZELT_${GITHUB_RUN_ID}/"
+          ! grep -qE 'kart=[^0]|ornek=[^0]|manifest_yok' _out/OZET.txt
+      - if: always()
+        run: rm -rf _work ~/.config/rclone
