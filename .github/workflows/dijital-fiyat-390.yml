@@ -73,8 +73,15 @@ jobs:
           case "$MOD" in oku|yaz) ;; *) echo "HATA: mod $MOD"; exit 1;; esac
           umask 077; mkdir -p _work
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          T="gdrive:ASTROLOVE/TEMP/POD_ORDERS/DIJITAL_390/${AILE}_TAMAM.txt"
+          rclone copyto "$T" _work/tamam.txt 2>/dev/null || : > _work/tamam.txt
+          export ATLA="$(tr '\n' ',' < _work/tamam.txt),${ATLA}"
           if [ -n "$ILANLAR" ]; then SEC=(--ilanlar "$ILANLAR"); else SEC=(--hepsi); fi
           rc=0; python scripts/pod/dijital_fiyat_390.py "$MOD" "${SEC[@]}" --confirm "$ONAY" --aile "$AILE" || rc=$?
+          if [ "$MOD" = yaz ] && [ -f out/TAMAM_EK.txt ]; then
+            cat _work/tamam.txt out/TAMAM_EK.txt | grep -E '^[0-9]+$' | sort -u > _work/tamam_yeni.txt
+            rclone copyto _work/tamam_yeni.txt "$T" -q || echo "::warning::TAMAM listesi yazilamadi"
+          fi
           H="gdrive:ASTROLOVE/TEMP/POD_ORDERS/DIJITAL_390/${AILE}_${GITHUB_RUN_ID}"
           [ -d out ] && { rclone copy out "$H" -q || echo "::warning::Drive yukleme basarisiz"; }
           exit $rc

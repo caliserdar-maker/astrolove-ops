@@ -339,6 +339,11 @@ def main():
         if not ids or dis:
             raise SystemExit(f"DUR: ilan listesi bos ya da aile disinda: {dis[:5]}")
 
+    if yaz and ids and api.remaining is not None and int(api.remaining) < ISTEK_TAHMIN + 10:
+        log(f"KOTA_BEKLE: kalan {api.remaining}, {len(ids)} ilan bekliyor; yazma yok")
+        (OUT / f"DIJITAL_390_{a.mod.upper()}.json").write_text(json.dumps(
+            {"durum": "KOTA_BEKLE", "kalan_ilan": len(ids), "kota": api.remaining}, ensure_ascii=False), encoding="utf-8")
+        sys.exit(1)
     sonuclar, t0 = [], time.time()
     for i, lid in enumerate(ids, 1):
         if yaz and api.remaining is not None and int(api.remaining) < ISTEK_TAHMIN + 10:   # kural: tahmini istek + 10
@@ -366,6 +371,8 @@ def main():
             "aciklamada_fiyat_ilan": [s["ilan"] for s in sonuclar if s.get("aciklamada_fiyat")],
             "kota_son": api.remaining, "durum": "PASS" if tamam else "FAIL", "ilanlar": sonuclar}
     (OUT / f"DIJITAL_390_{a.mod.upper()}.json").write_text(json.dumps(ozet, ensure_ascii=False, indent=1), encoding="utf-8")
+    (OUT / "TAMAM_EK.txt").write_text("\n".join(s["ilan"] for s in sonuclar if s["durum"] in ("PASS", "ZATEN")) + "\n",
+                                      encoding="utf-8")
     log("OZET " + json.dumps({k: v for k, v in ozet.items() if k != "ilanlar"}, ensure_ascii=False))
     sys.exit(0 if tamam else 1)
 
