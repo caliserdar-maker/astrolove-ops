@@ -33,7 +33,7 @@ jobs:
         run: |
           set -euo pipefail
           [[ "${{ inputs.ilanlar }}" =~ ^(HEPSI|[0-9]+(,[0-9]+)*)$ ]] || { echo "::error::ilanlar"; exit 1; }
-          pip install -q numpy==2.1.3 pillow==11.0.0 scipy==1.14.1
+          pip install -q numpy==2.1.3 pillow==11.0.0 scipy==1.14.1 opencv-python-headless==4.10.0.84
           sudo apt-get -qq update >/dev/null && sudo apt-get -qq install -y tesseract-ocr >/dev/null
           curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null
       - name: rclone.conf olustur
