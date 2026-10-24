@@ -35,11 +35,14 @@ KART, DOSYA, BASKI = "Digital card 5x7", "Digital file 8x10", "Shipped print 8x1
 FIYAT = 29.00
 DIJ_FIYAT = {KART: 3.90, DOSYA: 4.90}
 BOLUM = 60895624
-PROFIL = 318577242658          # BY Digital Free Worldwide: DEGISTIRILMEZ (Serdar 24 Eki)
+PROFIL_DIJITAL, PROFIL_BASKI = 318577242658, 318080539024   # BY Digital Free Worldwide / BY Print 8x10 Worldwide
+PROFIL = PROFIL_DIJITAL        # HEDEF profil: Serdar karari bekleniyor (24 Eki inceleme: dijital profil teslimi 1-2 gun gosterir)
+KABUL_PROFIL = {PROFIL_DIJITAL, PROFIL_BASKI}
 PARTNER = 5817638              # "Printing and Fulfillment Partner", United States (kupa_taslak.py, Serdar 18 Eki)
 HAZIRLIK_BASKI = 1517641240112  # magaza ortak 4-7 gun tanimi (burc_gift_yaz.ORTAK_HAZIRLIK); okunarak dogrulanir
 MATERIALS = ["matte art paper", "ink", "digital file"]
 ONAY, ONAY_HEPSI = "BASKI_EKLE", "BASKI_EKLE_HEPSI"
+ISTEK_TAHMIN = 16   # ilan basina en fazla istek (3 oku + PUT + 2 bag + 2 PATCH + 3x2 geri okuma + bag okuma); kural: tahmini + KOTA_SINIRI
 BEKLE_SN = 10
 OUT = Path("out")
 
@@ -64,7 +67,9 @@ YASAK = [(re.compile("[–—]"), "uzun/orta tire"),
          (re.compile(r"308\s*(g|gsm)|g/m2|g/m²|100\s*%\s*cotton|%\s*100\s*cotton|cotton\s*rag|museum|iso\s*9706", re.I), "yasak kagit iddiasi"),
          (re.compile(r"oba[\s-]*free|bright\s*white|12[\s-]*colou?r", re.I), "yasak ifade"),
          (re.compile(r"\b\d{2,3}\s*(-|to)\s*\d{2,3}\s*years?\b|\b\d{2,3}\+?\s*years?\s*(of\s*)?(life|lasting|archival)", re.I), "omur yili"),
-         (re.compile(r"instant\s*download", re.I), "instant download (dijital Etsy Messages ile gider)")]
+         (re.compile(r"instant\s*download", re.I), "instant download (dijital Etsy Messages ile gider)"),
+         (re.compile(r"frame", re.I), "frame (BY cercevesiz; by78 kurali)"),
+         (re.compile(r"AstroLove(?!Art)"), "marka adi AstroLoveArt olmali")]
 
 
 class Dur(Exception):
@@ -132,12 +137,23 @@ def anahtar(p):
     return d[P_STYLE]["values"][0], d[P_FORMAT]["values"][0]
 
 
+def teklif(p):
+    canli = [o for o in p.get("offerings") or [] if not o.get("is_deleted")]
+    if len(canli) != 1:
+        raise Dur(f"urun {p.get('sku')}: silinmemis teklif sayisi {len(canli)}")
+    return canli[0]
+
+
+def urunler_canli(inv):
+    return [p for p in inv.get("products") or [] if not p.get("is_deleted")]
+
+
 def imza(inv):
-    """{(stil, format): (sku, fiyat, stok, acik, hazirlik, stil_vid, format_vid)}"""
+    """{(stil, format): (sku, fiyat, stok, acik, hazirlik, stil_vid, format_vid)}; silinmis urun/teklif sayilmaz."""
     s = {}
-    for p in inv.get("products") or []:
+    for p in urunler_canli(inv):
         d = pvd(p)
-        o = (p.get("offerings") or [{}])[0]
+        o = teklif(p)
         s[anahtar(p)] = (p.get("sku") or "", para(o["price"]), o.get("quantity"), o.get("is_enabled") is True,
                          o.get("readiness_state_id"), tuple(d[P_STYLE].get("value_ids") or []),
                          tuple(d[P_FORMAT].get("value_ids") or []))
@@ -154,7 +170,7 @@ def envanter_plani(inv):
     """(durum, govde, stiller). durum TAMAM | YAZ. Dijital urunler aynen; baski urunleri hedefe getirilir."""
     i0 = imza(inv)
     stiller = []
-    for p in inv.get("products") or []:
+    for p in urunler_canli(inv):
         st = anahtar(p)[0]
         if st not in stiller:
             stiller.append(st)
@@ -181,10 +197,10 @@ def envanter_plani(inv):
     hedef_baski = {st: baski_sku(i0[(st, DOSYA)][0]) for st in stiller}
     urunler = []
     for st in stiller:
-        for p in inv.get("products") or []:
+        for p in urunler_canli(inv):
             if anahtar(p)[0] != st:
                 continue
-            o = (p.get("offerings") or [{}])[0]
+            o = teklif(p)
             pv = [dict(property_id=v["property_id"], property_name=v.get("property_name"), value_ids=v.get("value_ids"),
                        values=v.get("values")) for v in p.get("property_values") or []]
             if anahtar(p)[1] == BASKI:
@@ -192,30 +208,31 @@ def envanter_plani(inv):
             urunler.append(dict(sku=p.get("sku") or "", property_values=pv,
                                 offerings=[dict(price=para(o["price"]), quantity=o.get("quantity"), is_enabled=o.get("is_enabled") is True,
                                                 readiness_state_id=o.get("readiness_state_id"))]))
-        mevcut = next((p for p in inv.get("products") or [] if anahtar(p) == (st, BASKI)), None)
-        stil_pv = pvd(next(p for p in inv.get("products") or [] if anahtar(p) == (st, DOSYA)))[P_STYLE]
+        mevcut = next((p for p in urunler_canli(inv) if anahtar(p) == (st, BASKI)), None)
+        dosya_pv = pvd(next(p for p in urunler_canli(inv) if anahtar(p) == (st, DOSYA)))
+        stil_pv = dosya_pv[P_STYLE]
         if mevcut:
             pv = [dict(property_id=v["property_id"], property_name=v.get("property_name"), value_ids=v.get("value_ids"),
                        values=v.get("values")) for v in mevcut.get("property_values") or []]
-            stok = (mevcut.get("offerings") or [{}])[0].get("quantity") or 0
+            stok = teklif(mevcut).get("quantity") or 0
         else:
             pv = [dict(property_id=P_STYLE, property_name=stil_pv.get("property_name") or "Style", value_ids=stil_pv.get("value_ids"),
                        values=stil_pv.get("values")),
-                  dict(property_id=P_FORMAT, property_name="Format", values=[BASKI])]
+                  dict(property_id=P_FORMAT, property_name=dosya_pv[P_FORMAT].get("property_name") or "Format", values=[BASKI])]
             stok = 0
         urunler.append(dict(sku=hedef_baski[st], property_values=pv,
                             offerings=[dict(price=FIYAT, quantity=stok if stok >= 1 else 999, is_enabled=True,
                                             readiness_state_id=HAZIRLIK_BASKI)]))
-    sku_on = sorted(set((inv.get("sku_on_property") or [])) | {P_STYLE, P_FORMAT})
-    rd_on = sorted(set((inv.get("readiness_state_on_property") or [])) | {P_FORMAT})
+    sku_on = [P_STYLE, P_FORMAT]
+    rd_on = [P_STYLE, P_FORMAT]   # iki menulu ilanda *_on_property ya bos ya iki ozellik (kupa_taslak.py:505 18 Eki 400, by78:338)
     govde = dict(products=urunler, price_on_property=inv.get("price_on_property") or [],
                  quantity_on_property=inv.get("quantity_on_property") or [], sku_on_property=sku_on,
                  readiness_state_on_property=rd_on)
-    tamam = nb == 5 and envanter_hedefte(inv, i0, hedef_baski) == []
+    tamam = nb == 5 and envanter_hedefte(inv, i0, hedef_baski, govde) == []
     return ("TAMAM" if tamam else "YAZ"), govde, stiller, hedef_baski
 
 
-def envanter_hedefte(inv, dijital_once, hedef_baski):
+def envanter_hedefte(inv, dijital_once, hedef_baski, beklenen_on=None):
     """Hedef durumdan sapmalari listeler (bos = hedefte). dijital_once: dijital urunlerin beklenen imzasi."""
     f = []
     i = imza(inv)
@@ -230,11 +247,15 @@ def envanter_hedefte(inv, dijital_once, hedef_baski):
     for (st, _), v in b.items():
         if (v[0], v[1], v[3], v[4]) != (hedef_baski.get(st), FIYAT, True, HAZIRLIK_BASKI) or not (v[2] or 0) >= 1:
             f.append(f"baski {st}: sku {v[0]} fiyat {v[1]} stok {v[2]} acik {v[3]} hazirlik {v[4]}")
-    if P_FORMAT not in (inv.get("readiness_state_on_property") or []):
+    if sorted(inv.get("readiness_state_on_property") or []) != [P_STYLE, P_FORMAT]:
         f.append(f"readiness_state_on_property {inv.get('readiness_state_on_property')}")
-    if not {P_STYLE, P_FORMAT} <= set(inv.get("sku_on_property") or []):
+    if sorted(inv.get("sku_on_property") or []) != [P_STYLE, P_FORMAT]:
         f.append(f"sku_on_property {inv.get('sku_on_property')}")
-    sat = [(p.get("sku"), o.get("quantity"), o.get("is_enabled")) for p in inv.get("products") or []
+    if beklenen_on is not None:
+        for k in ("price_on_property", "quantity_on_property"):
+            if sorted(inv.get(k) or []) != sorted(beklenen_on.get(k) or []):
+                f.append(f"{k} {inv.get(k)} (beklenen {beklenen_on.get(k)})")
+    sat = [(p.get("sku"), o.get("quantity"), o.get("is_enabled")) for p in urunler_canli(inv)
            for o in p.get("offerings") or [] if not o.get("is_deleted") and not ((o.get("quantity") or 0) >= 1 and o.get("is_enabled") is True)]
     if sat:
         f.append(f"satilamaz teklif {sat}")
@@ -291,7 +312,7 @@ def kilitli(store, shop, izin):
 
         def patch(self, path, data):
             m = re.fullmatch(rf"/shops/{shop}/listings/(\d+)", path)
-            if not m or m.group(1) not in izin or not set(data) <= {"description", "materials", "production_partner_ids"}:
+            if not m or m.group(1) not in izin or not set(data) <= {"description", "materials", "production_partner_ids", "shipping_profile_id"}:
                 raise SystemExit(f"YASAK: PATCH {path} {sorted(data)}")
             return super().patch(path, data)
 
@@ -324,8 +345,28 @@ def hazirlik_dogrula(api, shop):
 
 # ---------------- ilan ----------------
 
-def ilan(api, shop, lid, yaz, out):
-    R = {"ilan": lid, "yazildi": []}
+def stil_bag_onar(api, shop, lid, inv_simdi, hedef_ad, R):
+    """Stil-gorsel baglarini deger ADINA gore kurar (burc_gift_yaz.sg_bagla yolu); geri okuma 3 deneme. Hata listesi doner."""
+    if sg_ad(inv_simdi, stil_gorsel(api, shop, lid)) == hedef_ad:
+        return []
+    vid = deger_adlari(inv_simdi)[1]
+    istek = [{"property_id": p, "value_id": vid[(p, n)], "image_id": im} for p, n, im in hedef_ad if (p, n) in vid]
+    if len(istek) != len(hedef_ad):
+        return [f"stil-gorsel eslemesi kurulamadi {len(istek)}/{len(hedef_ad)}"]
+    api.post_json(f"/shops/{shop}/listings/{lid}/variation-images", {"variation_images": istek})
+    R["yazildi"].append("stil_gorsel")
+    R["onarim"] = "ada gore geri yazildi"
+    for _ in range(3):
+        if sg_ad(inv_simdi, stil_gorsel(api, shop, lid)) == hedef_ad:
+            return []
+        time.sleep(BEKLE_SN)
+    return ["stil-gorsel baglari geri yazilamadi"]
+
+
+def ilan(api, shop, lid, yaz, out, R=None):
+    """R disaridan verilir: istisnada da yazilan adimlar (R['yazildi']) ozete gecer."""
+    R = R if R is not None else {"ilan": lid, "yazildi": []}
+    R.setdefault("yazildi", [])
     d = out / lid
     d.mkdir(parents=True, exist_ok=True)
     x = api.get(f"/listings/{lid}") or {}
@@ -333,28 +374,32 @@ def ilan(api, shop, lid, yaz, out):
     sg0 = stil_gorsel(api, shop, lid)
     (d / "ONCE.json").write_text(json.dumps({"listing": x, "inventory": inv, "vimg": sg0}, ensure_ascii=False, indent=1), encoding="utf-8")
     R["once"] = dict(state=x.get("state"), profil=x.get("shipping_profile_id"), tip=x.get("listing_type"),
-                     materials=x.get("materials"), partner=partner_ids(x), urun=len(inv.get("products") or []),
-                     hazirlik=sorted({str(v[4]) for v in imza(inv).values()}), sku_on=inv.get("sku_on_property"),
-                     rd_on=inv.get("readiness_state_on_property"), price_on=inv.get("price_on_property"))
+                     materials=x.get("materials"), partner=partner_ids(x), urun=len(urunler_canli(inv)),
+                     sku_on=inv.get("sku_on_property"), rd_on=inv.get("readiness_state_on_property"),
+                     price_on=inv.get("price_on_property"), fiyat=x.get("price"))
     if x.get("state") != "active" or str(x.get("shop_id")) != str(shop):
         raise Dur(f"state {x.get('state')} / shop {x.get('shop_id')}: dokunulmaz")
-    if int(x.get("shipping_profile_id") or 0) != PROFIL:
-        raise Dur(f"kargo profili {x.get('shipping_profile_id')} (beklenen {PROFIL})")
+    profil0 = int(x.get("shipping_profile_id") or 0)
+    if profil0 not in KABUL_PROFIL:
+        raise Dur(f"kargo profili {profil0} (kabul {sorted(KABUL_PROFIL)})")
     if x.get("listing_type") != "physical":
         raise Dur(f"listing_type {x.get('listing_type')} (physical bekleniyordu)")
     if partner_ids(x) is None:
         raise Dur("uretim ortagi alani API yanitinda yok")
+    R["once"]["hazirlik"] = sorted({str(v[4]) for v in imza(inv).values()})
     a_durum, d1 = aciklama_plani(x.get("description"))
     e_durum, govde, stiller, hedef_baski = envanter_plani(inv)
     sg0_ad = sg_ad(inv, sg0)
     if len(sg0) != 5 or any(n.startswith("?") for _, n, _ in sg0_ad):
-        raise Dur(f"stil-gorsel baglari 5 degil ya da adsiz: {sg0_ad}")
+        raise Dur(f"stil-gorsel baglari 5 degil ya da adsiz: {sg0_ad} (onceki ONCE.json'dan elle onar)")
     yama = {}
     if a_durum == "YAZ":
         yama["description"] = d1
         (d / "ACIKLAMA_PLAN.txt").write_text(d1, encoding="utf-8")
     if not materials_ok(x):
         yama["materials"] = ",".join(MATERIALS)
+    if profil0 != PROFIL:
+        yama["shipping_profile_id"] = PROFIL
     partner_yaz = partner_ids(x) != [PARTNER]
     (d / "PUT.json").write_text(json.dumps(govde, ensure_ascii=False, indent=1), encoding="utf-8")
     R["plan"] = dict(envanter=e_durum, aciklama=a_durum, alanlar=sorted(yama), partner="YAZ" if partner_yaz else "TAMAM",
@@ -365,10 +410,18 @@ def ilan(api, shop, lid, yaz, out):
     if not yaz:
         R["durum"] = "PLAN_OK"
         return R
+    from etsy_common import KOTA_SINIRI
+    if api.remaining is not None and int(api.remaining) < ISTEK_TAHMIN + KOTA_SINIRI:   # kural: tahmini istek + 10
+        R["durum"] = f"KOTA_BEKLE kalan {api.remaining} < {ISTEK_TAHMIN} + {KOTA_SINIRI} (yazma yok)"
+        return R
     i0 = imza(inv)
+    R["onarim"] = "gerekmedi"
+    f = []
     if e_durum == "YAZ":
         api.put_json(f"/listings/{lid}/inventory", govde)
         R["yazildi"].append("envanter")
+        # baglar PUT'un HEMEN ardindan (burc_gift_yaz.py:320-326 sirasi): sonraki adim durursa ilan bagsiz kalmaz
+        f += stil_bag_onar(api, shop, lid, api.get(f"/listings/{lid}/inventory") or {}, sg0_ad, R)
     if yama:
         api.patch(f"/shops/{shop}/listings/{lid}", yama)
         R["yazildi"].append("ilan:" + "+".join(sorted(yama)))
@@ -376,45 +429,35 @@ def ilan(api, shop, lid, yaz, out):
         api.patch(f"/shops/{shop}/listings/{lid}", {"production_partner_ids": str(PARTNER)})
         R["yazildi"].append("uretim_ortagi")
     # geri okuma: bayat okumaya karsi 3 deneme
-    f = ["okunmadi"]
     for _ in range(3):
         x2 = api.get(f"/listings/{lid}") or {}
         inv2 = api.get(f"/listings/{lid}/inventory") or {}
-        f = envanter_hedefte(inv2, i0, hedef_baski)
+        g = envanter_hedefte(inv2, i0, hedef_baski, govde)
         if not esdeger(norm(x2.get("description")), d1):
-            f.append("aciklama plan ile ayni degil")
+            g.append("aciklama plan ile ayni degil")
         if not materials_ok(x2):
-            f.append(f"materials {x2.get('materials')}")
+            g.append(f"materials {x2.get('materials')}")
         if partner_ids(x2) != [PARTNER]:
-            f.append(f"uretim ortagi {partner_ids(x2)}")
-        for k in ("state", "title", "tags", "shipping_profile_id", "listing_type", "price", "shop_section_id"):
+            g.append(f"uretim ortagi {partner_ids(x2)}")
+        if int(x2.get("shipping_profile_id") or 0) != PROFIL:
+            g.append(f"kargo profili {x2.get('shipping_profile_id')} (hedef {PROFIL})")
+        for k in ("state", "title", "tags", "listing_type", "shop_section_id"):
             if x2.get(k) != x.get(k):
-                f.append(f"{k} degisti: {x.get(k)} -> {x2.get(k)}")
-        if not f:
+                g.append(f"{k} degisti: {x.get(k)} -> {x2.get(k)}")
+        if not g:
             break
         time.sleep(BEKLE_SN)
-    onarim = "gerekmedi"
+    f += g
     sg2 = stil_gorsel(api, shop, lid)
     if sg_ad(inv2, sg2) != sg0_ad:
-        vid = deger_adlari(inv2)[1]
-        istek = [{"property_id": p, "value_id": vid[(p, n)], "image_id": im} for p, n, im in sg0_ad if (p, n) in vid]
-        if len(istek) != len(sg0_ad):
-            f.append(f"stil-gorsel eslemesi kurulamadi {len(istek)}/{len(sg0_ad)}")
-        else:
-            api.post_json(f"/shops/{shop}/listings/{lid}/variation-images", {"variation_images": istek})
-            R["yazildi"].append("stil_gorsel")
-            onarim = "ada gore geri yazildi"
-            for _ in range(3):
-                sg2 = stil_gorsel(api, shop, lid)
-                if sg_ad(inv2, sg2) == sg0_ad:
-                    break
-                time.sleep(BEKLE_SN)
-            if sg_ad(inv2, sg2) != sg0_ad:
-                f.append("stil-gorsel baglari geri yazilamadi")
+        f += stil_bag_onar(api, shop, lid, inv2, sg0_ad, R)
+        sg2 = stil_gorsel(api, shop, lid)
+    if x2.get("price") != x.get("price"):
+        R["not_fiyat"] = f"ilan price alani {x.get('price')} -> {x2.get('price')} (bilgi; urun fiyatlari ayrica kontrol edildi)"
     if {k: v[5:] for k, v in imza(inv2).items() if k[1] != BASKI} != {k: v[5:] for k, v in i0.items() if k[1] != BASKI}:
         R["not"] = "dijital urunlerde value_id degisti (fiyat/SKU/stok/hazirlik ayni; baglar ada gore kontrol edildi)"
     (d / "SONRA.json").write_text(json.dumps({"listing": x2, "inventory": inv2, "vimg": sg2}, ensure_ascii=False, indent=1), encoding="utf-8")
-    R.update(hatalar=f, onarim=onarim, durum="PASS" if not f else "FAIL", kota=api.remaining)
+    R.update(hatalar=f, durum="PASS" if not f else "FAIL", kota=api.remaining)
     return R
 
 
@@ -464,13 +507,16 @@ def main():
             raise SystemExit("DUR: ilan listesi yil donumu bolumu disinda")
         if yaz:
             izin.update(ids)
+        pp = (api.get(f"/shops/{shop}/production-partners") or {}).get("results") or []
+        if PARTNER not in [p.get("production_partner_id") for p in pp]:
+            raise SystemExit(f"DUR: uretim ortagi {PARTNER} magazada yok: {pp}")
         hz = hazirlik_dogrula(api, shop)
         log(f"hazirlik {HAZIRLIK_BASKI}: {hz.get('readiness_state')} {hz.get('min_processing_days')}-{hz.get('max_processing_days')}")
         for i, lid in enumerate(ids, 1):
             R = {"ilan": lid, "yazildi": []}
             try:
                 api.kota_kapisi(f"ilan {lid}")
-                R = ilan(api, shop, lid, yaz, OUT)
+                ilan(api, shop, lid, yaz, OUT, R)
             except Dur as e:
                 R["durum"] = f"FAIL_DUR: {str(e)[:400]}"
             except SystemExit as e:
@@ -482,7 +528,9 @@ def main():
             g = time.time() - t0
             log(f"[{i}/{len(ids)}] {100 * i // len(ids)}% gecen {g:.0f}s kalan ~{g / i * (len(ids) - i):.0f}s | {lid} {R['durum'][:160]} "
                 f"yazildi={R.get('yazildi')} kota={api.remaining}")
-            if R["durum"].startswith("DUR"):
+            if R["durum"].startswith("DUR") and (yaz or "kota" in R["durum"] or R["yazildi"]):
+                break
+            if R["durum"].startswith("KOTA_BEKLE"):
                 break
             if yaz and R["durum"].startswith("FAIL"):
                 break
@@ -494,7 +542,7 @@ def main():
         for r in sonuc:
             k = r["durum"].split(" ")[0].rstrip(":")
             say[k] = say.get(k, 0) + 1
-        iyi = ("PASS", "ZATEN") if yaz else ("PLAN_OK", "ZATEN")
+        iyi = ("PASS", "ZATEN") if yaz else ("PLAN_OK", "ZATEN")   # KOTA_BEKLE = tamam degil (tekrar kosu tamamlar)
         tamam = oz_hata is None and len(sonuc) == len(ids) and all(r["durum"].split(" ")[0] in iyi for r in sonuc)
         oz = {"mod": a.mod, "istenen": len(ids), "islenen": len(sonuc), "sayim": say,
               "kota_son": api.remaining if api else None, "genel_hata": oz_hata, "durum": "PASS" if tamam else "FAIL",

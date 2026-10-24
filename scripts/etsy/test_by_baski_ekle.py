@@ -44,14 +44,15 @@ def inv_pilot():
 
 
 class Api:
-    def __init__(self, desc, inv=None, profil=E.PROFIL, partner_tutmaz=False, vid_degis=False):
+    def __init__(self, desc, inv=None, profil=E.PROFIL_DIJITAL, partner_tutmaz=False, vid_degis=False, patch_hata=False):
         self.inv, self.remaining, self.calls = inv or inv10(), 900, 0
         self.L = {"state": "active", "shop_id": 1, "shipping_profile_id": profil, "listing_type": "physical",
                   "title": "t", "tags": ["a"], "description": html.escape(desc, quote=True).replace("&#x27;", "&#39;"),
                   "materials": ["digital file"], "production_partners": [], "price": {"amount": 390, "divisor": 100},
                   "shop_section_id": E.BOLUM}
         self.v = [(513, sid, 900 + i) for i, (_, sid, _) in enumerate(STIL)]
-        self.partner_tutmaz, self.vid_degis = partner_tutmaz, vid_degis
+        self.partner_tutmaz, self.vid_degis, self.patch_hata = partner_tutmaz, vid_degis, patch_hata
+        self.sira = []
         self.puts, self.patches, self.posts = [], [], []
 
     def get(self, path, params=None, ok404=False):
@@ -82,7 +83,12 @@ class Api:
             self.v = []
 
     def patch(self, path, data):
-        self.calls += 1; self.remaining -= 1; self.patches.append(dict(data))
+        self.calls += 1; self.remaining -= 1
+        if self.patch_hata:
+            raise RuntimeError("500 sahte")
+        self.patches.append(dict(data)); self.sira.append("patch")
+        if "shipping_profile_id" in data:
+            self.L["shipping_profile_id"] = data["shipping_profile_id"]
         if "description" in data:
             self.L["description"] = html.escape(data["description"], quote=True).replace("&#x27;", "&#39;")
         if "materials" in data:
@@ -91,7 +97,7 @@ class Api:
             self.L["production_partners"] = [{"production_partner_id": int(x)} for x in data["production_partner_ids"].split(",")]
 
     def post_json(self, path, body):
-        self.calls += 1; self.remaining -= 1; self.posts.append(body)
+        self.calls += 1; self.remaining -= 1; self.posts.append(body); self.sira.append("post")
         self.v = [(x["property_id"], x["value_id"], x["image_id"]) for x in body["variation_images"]]
 
 
@@ -130,7 +136,7 @@ def test():
     r = E.ilan(api, "1", "111", True, out)
     assert r["durum"] == "PASS", r
     b = api.puts[0]
-    assert len(b["products"]) == 15 and b["readiness_state_on_property"] == [514] and b["sku_on_property"] == [513, 514]
+    assert len(b["products"]) == 15 and b["readiness_state_on_property"] == [513, 514] and b["sku_on_property"] == [513, 514]
     assert [E.anahtar(p)[1] for p in b["products"][:3]] == ["Digital card 5x7", "Digital file 8x10", "Shipped print 8x10"]
     bs = [p for p in b["products"] if E.anahtar(p)[1] == E.BASKI]
     assert {p["sku"] for p in bs} == {f"BY-ARI_LEO-{k}-PRINT8X10" for _, _, k in STIL}
@@ -150,7 +156,7 @@ def test():
     assert api.patches[0].keys() == {"materials"}
     assert all(p["property_values"][1]["value_ids"] == [7777] for p in api.puts[0]["products"] if E.anahtar(p)[1] == E.BASKI); ok += 1
     # 8 yanlis kargo profili -> Dur, yazma yok
-    api = Api(A77, profil=318080539024)
+    api = Api(A77, profil=318000000000)
     try:
         E.ilan(api, "1", "333", True, out); raise AssertionError("profil gecti")
     except E.Dur:
@@ -163,7 +169,9 @@ def test():
     api = Api(A77, vid_degis=True)
     r = E.ilan(api, "1", "555", True, out)
     assert r["durum"] == "PASS" and r["onarim"] == "ada gore geri yazildi" and "value_id" in r.get("not", ""), r
-    assert sorted(x["value_id"] for x in api.posts[0]["variation_images"]) == sorted(sid + 1 for _, sid, _ in STIL); ok += 1
+    assert sorted(x["value_id"] for x in api.posts[0]["variation_images"]) == sorted(sid + 1 for _, sid, _ in STIL)
+    assert api.sira[0] == "post", api.sira   # bag onarimi PUT'un hemen ardindan, PATCH'lerden once
+    ok += 1
     # 11 ortak tutmazsa geri okuma FAIL
     api = Api(A77, partner_tutmaz=True)
     r = E.ilan(api, "1", "666", True, out)
@@ -199,7 +207,36 @@ def test():
     except SystemExit as e:
         assert "YASAK" in str(e)
     assert etsy_common; ok += 1
-    print(f"test_by_baski_ekle: {ok}/14 PASS")
+    # 15 kota: tahmini istek + 10 alti -> KOTA_BEKLE, yazma yok
+    api = Api(A77); api.remaining = 28
+    r = E.ilan(api, "1", "901", True, out)
+    assert r["durum"].startswith("KOTA_BEKLE") and not api.puts and not api.patches, r; ok += 1
+    # 16 PUT sonrasi PATCH istisnasi: disaridan verilen R'de yazilan adim kalir
+    api = Api(A77, patch_hata=True)
+    R = {"ilan": "902", "yazildi": []}
+    try:
+        E.ilan(api, "1", "902", True, out, R); raise AssertionError("istisna yok")
+    except RuntimeError:
+        assert R["yazildi"] == ["envanter"], R; ok += 1
+    # 17 hedef profil baski profili ise shipping_profile_id yazilir ve geri okunur
+    eski = E.PROFIL
+    try:
+        E.PROFIL = E.PROFIL_BASKI
+        api = Api(A77)
+        r = E.ilan(api, "1", "903", True, out)
+        assert r["durum"] == "PASS" and api.patches[0]["shipping_profile_id"] == E.PROFIL_BASKI, r
+        r = E.ilan(api, "1", "903", True, out)
+        assert r["durum"] == "ZATEN"; ok += 1
+    finally:
+        E.PROFIL = eski
+    # 18 yasak: frame ve yalniz AstroLove
+    for y in ("fits standard frames", "by AstroLove team"):
+        try:
+            E.aciklama_plani(html.unescape(A77) + "\n" + y); raise AssertionError(y)
+        except E.Dur:
+            pass
+    assert E.aciklama_plani(A77)[0] == "YAZ"; ok += 1
+    print(f"test_by_baski_ekle: {ok}/18 PASS")
 
 
 if __name__ == "__main__":
