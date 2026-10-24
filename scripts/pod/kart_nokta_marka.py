@@ -29,7 +29,7 @@ from PIL import Image, ImageDraw
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 import kart_metin_degis as KM  # noqa: E402
 
-ETIKET_KUTU = (130, 78, 720, 142)
+ETIKET_KUTU = (130, 78, 1300, 142)   # 24 Eki: uzun ciftler (AQUARIUS + SAGITTARIUS) icin genis; y 78-142 arasinda baska yazi yok
 
 
 def S(kutu, eski, yeni, hiza="sol", aile="oto", genis=0, agirlik=None):
@@ -40,8 +40,8 @@ def ozellik(a, b):
     """kart sira -> satir islemleri. a, b: burc adi (Aries, Virgo)."""
     A, B = a.upper(), b.upper()
     # galeri77_kur.py:7 etiket 03-14 'ASTROLOVE  /  A + B' (cift bosluk, Montserrat 500 37); kart02_duvar_kur.py:64 tek bosluk (Lato)
-    et = S(ETIKET_KUTU, f"ASTROLOVE  /  {A} + {B}", f"ASTROLOVEART  /  {A} & {B}", aile="mont", genis=420, agirlik=500)
-    et2 = S(ETIKET_KUTU, f"ASTROLOVE / {A} + {B}", f"ASTROLOVEART / {A} & {B}", genis=420)
+    et = S(ETIKET_KUTU, f"ASTROLOVE  /  {A} + {B}", f"ASTROLOVEART  /  {A} & {B}", aile="mont", agirlik=500)
+    et2 = S(ETIKET_KUTU, f"ASTROLOVE / {A} + {B}", f"ASTROLOVEART / {A} & {B}")
     renk = [S((1090, 2068, 1912, 2120), "Poster color. Format selected separately.", "Poster color, format selected separately",
               "merkez")]
     return {
@@ -250,6 +250,14 @@ def kart_isle(yol, D, fd, ops, out, sira):
     M = murekkep_maske(K, D)
     Dk = np.asarray(D).astype(int); Ka = np.asarray(K).astype(int)
     isler, rapor, hata, noktalar = [], [], [], []
+    for op in ops:   # tasma kapisi (Serdar 24 Eki: uzun burc adlari): eski satirin murekkebi kutunun sol/sag kenarina degiyorsa
+        g = op["genis"]; x0, y0, x1, y1 = op["kutu"]   # satir kutuya sigmiyor; olcum ve silme yanlis olur -> FAIL
+        kx0, kx1 = (x0 - g // 2, x1 + g // 2) if op["hiza"] == "merkez" else (x0, x1 + g)
+        alt_ = M[y0:y1, max(0, kx0):min(K.width, kx1)]
+        if alt_.shape[1] > 4 and (alt_[:, :2].any() or alt_[:, -2:].any()):
+            hata.append(f"r{sira} '{op['eski'][:30]}': TASMA, eski satir kutunun kenarina degiyor (kutu x {kx0}-{kx1})")
+    if hata:
+        return None, [], hata
     for op in ops:
         if op["eski"].endswith(".") and op["yeni"] == op["eski"][:-1] and op["aile"] == "oto":
             noktalar.append(op); continue

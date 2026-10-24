@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """SALT OKUMA (Etsy'ye yazma YOK): verilen ilanlarin envanteri + ilan alanlari + kargo profili, karsilastirma tablosu.
 Serdar 22 Eki: yil donumu ilanlarinda canli sayfada "This option is sold out" -> neden arastirmasi.
-Cikti: <out>/ENVANTER_<id>.json (ham), <out>/KARSILASTIRMA.md (urun basina ozellik degerleri, quantity, is_enabled, price,
+Cikti: <out>/ENVANTER_<id>.json (ham), <out>/SONRA_<id>.json (canli galeri, 24 Eki), <out>/KARSILASTIRMA.md (urun basina ozellik degerleri, quantity, is_enabled, price,
 readiness; ilan quantity/state/profil/hazirlik; profil hedefleri). Log'a yalniz tablo (sir yok).
 Kullanim: envanter_oku.py --ids 4595350971,4595373902,4595421558 --out OUT"""
 import argparse
@@ -40,6 +40,11 @@ def main():
         vi = (api.get(f"/shops/{shop}/listings/{lid}/variation-images", ok404=True) or {}).get("results") or []
         (out / f"ENVANTER_{lid}.json").write_text(json.dumps({"ilan": x, "envanter": inv, "variation_images": vi}, ensure_ascii=False, indent=1),
                                                  encoding="utf-8")
+        # 24 Eki (Serdar B, 4570110121): canli galeri de; galeri_ornek --simdi bicimi (KART_SIL SONRA_<ilan>.json ile ayni anahtar)
+        g = sorted((api.get(f"/listings/{lid}/images", ok404=True) or {}).get("results") or [], key=lambda y: y.get("rank") or 0)
+        (out / f"SONRA_{lid}.json").write_text(json.dumps({"ilan": lid, "gorseller": [{k_: y.get(k_) for k_ in (
+            "rank", "listing_image_id", "alt_text", "url_fullxfull", "full_width", "full_height")} for y in g]}, ensure_ascii=False,
+            indent=1), encoding="utf-8")
         profiller.setdefault(x.get("shipping_profile_id"), [])
         md += [f"## {lid}", "", "ilan: " + ", ".join(f"{a_}={x.get(a_)}" for a_ in ILAN_ALAN),
                "on_property: " + ", ".join(f"{a_}={inv.get(a_)}" for a_ in ("price_on_property", "quantity_on_property", "sku_on_property",

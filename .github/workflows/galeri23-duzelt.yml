@@ -16,6 +16,8 @@ on:
   workflow_dispatch:
     inputs:
       ilanlar: {description: "virgullu ilan listesi ya da HEPSI (KOSU_20261021_1030 altindaki 23 ilan)", required: true, default: "4570155846"}
+      simdi_kosu: {description: "KART_SIL SONRA'si olmayan ilan icin envanter-oku kosusu (BURC_GIFT_20261022/envanter_oku_<kosu>/SONRA_<ilan>.json)", required: false, default: ""}
+      duz_ilanlar: {description: "LISTE'si duzeltilmis kartlarla kurulacak ilanlar (digerleri ozgun hedefe gore)", required: false, default: "4570155846"}
       kart_ilanlar: {description: "kart metin duzeltmesi yapilacak ilanlar (virgullu; kutular ARIES_VIRGO'da olculdu, digerleri yerel testsiz); digerlerinde LISTE ozgun hedefe gore", required: false, default: "4570155846"}
 
 env:
@@ -83,30 +85,38 @@ jobs:
           rclone copyto "$D/GALERI_YAYIN/KOSU_20261021_1030/$L/yedek/manifest.json" $W/manifest.json -q || { echo "$L $C manifest_yok" >> _out/OZET.txt; exit 0; }
           rclone copy "$D/GALERI_YAYIN/YEDEK/${L}_${C}" $W/hedef --include "*.jpg" -q
           S=$(grep -E "/SONRA_${L}\.json$" _work/sonra.txt | sort -t/ -k1,1n | tail -1)
-          if [[ ",$KART_ILANLAR," == *",$L,"* ]]; then
+          SK=""
+          if [ -z "$S" ] && [ -n "$SIMDI_KOSU" ]; then SK="$D/BURC_GIFT_20261022/envanter_oku_$SIMDI_KOSU/SONRA_${L}.json"; fi
+          if [ "$KART_ILANLAR" = HEPSI ] || [[ ",$KART_ILANLAR," == *",$L,"* ]]; then
             python3 scripts/pod/kart_nokta_marka.py --hedef-dir $W/hedef --manifest $W/manifest.json --duvar _work/duvar.png --fd fonts --cift $C --out $O/KART > $O/kart.log 2>&1
             K=$?
           else K=yok; mkdir -p $O/KART; fi
           # yalniz manifestteki dosyalar (YEDEK klasorunde ayni siranin eski surumleri de var)
           python3 -c "import json,shutil;[shutil.copy(f'$W/hedef/{int(g[\"rank\"]):02d}_{g[\"listing_image_id\"]}.jpg','$W/duz/') for g in json.load(open('$W/manifest.json'))['galeri']]"
-          cp $O/KART/[0-9][0-9]_*.jpg $W/duz/ 2>/dev/null
-          if [ -n "$S" ]; then
-            rclone copyto "$D/DENETIM_20261021/KART_SIL/$S" $W/simdi.json -q
+          if [[ ",$DUZ_ILANLAR," == *",$L,"* ]]; then cp $O/KART/[0-9][0-9]_*.jpg $W/duz/ 2>/dev/null; DZ=duzeltilmis; else DZ=ozgun; fi
+          if [ -n "$S" ] || { [ -n "$SK" ] && rclone copyto "$SK" $W/simdi.json -q; }; then
+            [ -n "$S" ] && rclone copyto "$D/DENETIM_20261021/KART_SIL/$S" $W/simdi.json -q
+            [ -n "$S" ] || S="envanter_oku_$SIMDI_KOSU"
             python3 scripts/etsy/galeri_ornek.py --hedef-manifest $W/manifest.json --hedef-dir $W/duz --simdi $W/simdi.json --out $O > $O/ornek.log 2>&1
             G=$?; SAY=$(grep -o '"sayim": {[^}]*}' $O/ornek.log | tr -d ' ')
           else G=SONRA_yok; SAY=; fi
-          echo "$L $C kart=$K ornek=$G kaynak=$S $SAY" >> _out/OZET.txt
+          TAS=$(grep -c "TASMA" $O/kart.log 2>/dev/null || true)
+          echo "$L $C kart=$K tasma=${TAS:-0} liste=$DZ ornek=$G kaynak=$S $SAY" >> _out/OZET.txt
           rclone copy $O "$D/DENETIM_20261021/GALERI_PLAN23/DUZELT_${GITHUB_RUN_ID}/${L}_${C}" -q
           echo "$L $C kart=$K ornek=$G"
           SH
           chmod +x _work/bir.sh; mkdir -p _out
-          export D GITHUB_RUN_ID KART_ILANLAR="${{ inputs.kart_ilanlar }}"
-          [[ "$KART_ILANLAR" =~ ^[0-9]*(,[0-9]+)*$ ]] || { echo "::error::kart_ilanlar"; exit 1; }
+          export D GITHUB_RUN_ID KART_ILANLAR="${{ inputs.kart_ilanlar }}" DUZ_ILANLAR="${{ inputs.duz_ilanlar }}" SIMDI_KOSU="${{ inputs.simdi_kosu }}"
+          [[ "$KART_ILANLAR" =~ ^(HEPSI|[0-9]*(,[0-9]+)*)$ && "$DUZ_ILANLAR" =~ ^[0-9]*(,[0-9]+)*$ && "$SIMDI_KOSU" =~ ^[0-9]*$ ]] || { echo "::error::girdi"; exit 1; }
           xargs -P 4 -L 1 _work/bir.sh < _work/is.txt
           sort _out/OZET.txt | tee _out/OZET_SIRALI.txt
           rclone copyto _out/OZET_SIRALI.txt "$D/DENETIM_20261021/GALERI_PLAN23/DUZELT_${GITHUB_RUN_ID}/OZET.txt" -q
           echo "::notice title=GALERI23::Drive TEMP/DENETIM_20261021/GALERI_PLAN23/DUZELT_${GITHUB_RUN_ID}/"
           grep -E 'ornek=SONRA_yok' _out/OZET.txt | sed 's/^/::warning::canli galeri kaydi (KART_SIL SONRA) yok, LISTE uretilmedi: /' || true
-          ! grep -qE 'kart=[1-9]|ornek=[1-9]|manifest_yok' _out/OZET.txt
+          # kosu kirmizi: LISTE uretilemedi (ornek hata / manifest yok) ya da duzeltilmis kartla LISTE kurulan ilanda kart QC FAIL.
+          # Diger ilanlarda kart FAIL / TASMA bilgi (OZET'te raporlanir; o ilanlarin LISTE'si ozgun hedefe gore).
+          bad=0; grep -qE 'ornek=[1-9]|manifest_yok' _out/OZET.txt && bad=1
+          for l in ${DUZ_ILANLAR//,/ }; do grep -qE "^$l .*kart=[1-9]" _out/OZET.txt && bad=1; done
+          [ "$bad" = 0 ]
       - if: always()
         run: rm -rf _work ~/.config/rclone
