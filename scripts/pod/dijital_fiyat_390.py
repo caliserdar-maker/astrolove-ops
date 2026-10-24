@@ -136,7 +136,7 @@ def plan(inv):
         (dig if a and b else diger).append(pr)
     if not dig:
         h.append("dijital urun bulunamadi")
-    if not diger:
+    if not diger and SECILI["sku_digital"]:          # yil donumunde baski secenegi kaldirildi (by_baski_kaldir), yalniz dijital kalabilir
         h.append("dijital disi urun bulunamadi (beklenmeyen yapi)")
     zaten = bool(dig) and all(fiyatlar(p) == [yeni_fiyat(p)] for p in dig)
     for deger, (yeni, eski) in SECILI["hedef"].items():
