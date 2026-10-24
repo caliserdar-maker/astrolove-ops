@@ -36,8 +36,11 @@ FIYAT = 29.00
 DIJ_FIYAT = {KART: 3.90, DOSYA: 4.90}
 BOLUM = 60895624
 PROFIL_DIJITAL, PROFIL_BASKI = 318577242658, 318080539024   # BY Digital Free Worldwide / BY Print 8x10 Worldwide
-PROFIL = PROFIL_DIJITAL        # HEDEF profil: Serdar karari bekleniyor (24 Eki inceleme: dijital profil teslimi 1-2 gun gosterir)
+PROFIL = PROFIL_BASKI          # HEDEF (Serdar 24 Eki secenek B): baski profili, tum hedefler ucretsiz, gercekci teslim gunleri
 KABUL_PROFIL = {PROFIL_DIJITAL, PROFIL_BASKI}
+# Baski profili hedefleri (by78_kargo_sku_aciklama.HEDEF, 15 Eki): anahtar -> (ucret simdi, ucret hedef, min gun, max gun)
+PROFIL_HEDEF = {"US": (0, 0, 3, 8), "EU": (0, 0, 5, 12), "GB": (0, 0, 5, 10), "AU": (5, 0, 5, 10), "EVERYWHERE": (12, 0, 7, 21)}
+ONAY_PROFIL = "PROFIL_UCRETSIZ"
 PARTNER = 5817638              # "Printing and Fulfillment Partner", United States (kupa_taslak.py, Serdar 18 Eki)
 HAZIRLIK_BASKI = 1517641240112  # magaza ortak 4-7 gun tanimi (burc_gift_yaz.ORTAK_HAZIRLIK); okunarak dogrulanir
 MATERIALS = ["matte art paper", "ink", "digital file"]
@@ -325,8 +328,11 @@ def kilitli(store, shop, izin):
         def post(self, *a, **k):
             raise SystemExit("YASAK: POST form")
 
-        def put(self, *a, **k):
-            raise SystemExit("YASAK: PUT form")
+        def put(self, path, data):
+            if "PROFIL" not in izin or not re.fullmatch(rf"/shops/{shop}/shipping-profiles/{PROFIL_BASKI}/destinations/\d+", path) \
+                    or set(data) != {"primary_cost", "secondary_cost", "min_delivery_days", "max_delivery_days"}:
+                raise SystemExit(f"YASAK: PUT form {path} {sorted(data)}")
+            return super().put(path, data)
 
         def post_file(self, *a, **k):
             raise SystemExit("YASAK: POST file")
@@ -476,13 +482,95 @@ def bolum_ids(api, shop):
     return ids
 
 
+def hedef_anahtar(x):
+    cc = (x.get("destination_country_iso") or "").upper()
+    rg = (x.get("destination_region") or "none").lower()
+    return cc if cc else ("EVERYWHERE" if rg == "none" else rg.upper())
+
+
+def profil_imza(P):
+    return {hedef_anahtar(x): (para(x.get("primary_cost")), para(x.get("secondary_cost")), x.get("min_delivery_days"),
+                               x.get("max_delivery_days"), x.get("shipping_profile_destination_id"))
+            for x in P.get("shipping_profile_destinations") or []}
+
+
+def profil_kullananlar(api, shop):
+    """Aktif + taslak + pasif ilanlarda baski profilini kullananlar (bolum ile). Profil ucreti degisince etkilenecekler."""
+    kim = []
+    for st in ("active", "draft", "inactive", "expired", "sold_out"):
+        off = 0
+        while True:
+            d = api.get(f"/shops/{shop}/listings", params={"state": st, "limit": 100, "offset": off}) or {}
+            r = d.get("results") or []
+            kim += [(str(x.get("listing_id")), st, x.get("shop_section_id")) for x in r
+                    if int(x.get("shipping_profile_id") or 0) == PROFIL_BASKI]
+            off += len(r)
+            if len(r) < 100:
+                break
+    return kim
+
+
+def profil_adimi(api, shop, yaz, out):
+    """Secenek B: baski profilinde AU ($5) ve diger tum ulkeler ($12) ucretsiz; teslim gunleri DEGISMEZ.
+    KAPI: profili yil donumu bolumu disinda kullanan ilan varsa DUR (o ilanlarin kargosu degisirdi)."""
+    P0 = api.get(f"/shops/{shop}/shipping-profiles/{PROFIL_BASKI}") or {}
+    (out / "PROFIL_YEDEK.json").write_text(json.dumps(P0, ensure_ascii=False, indent=1), encoding="utf-8")
+    i0 = profil_imza(P0)
+    R = {"profil": PROFIL_BASKI, "baslik": P0.get("title"), "once": {k: v[:4] for k, v in i0.items()}}
+    if set(i0) != set(PROFIL_HEDEF):
+        raise SystemExit(f"DUR: profil hedefleri beklenmedik: {sorted(i0)}")
+    for k, (simdi, hedef, a, b) in PROFIL_HEDEF.items():
+        if i0[k][2:4] != (a, b) or i0[k][0] not in (float(simdi), float(hedef)) or i0[k][0] != i0[k][1]:
+            raise SystemExit(f"DUR: {k} beklenmedik: {i0[k][:4]}")
+    kim = profil_kullananlar(api, shop)
+    R["kullanan"] = kim
+    disari = [x for x in kim if x[2] != BOLUM]
+    if disari:
+        raise SystemExit(f"DUR: profili yil donumu disinda kullanan ilan var: {disari[:10]}")
+    degis = [k for k, v in PROFIL_HEDEF.items() if i0[k][0] != float(v[1])]
+    R["degisecek"] = degis
+    if yaz:
+        for k in degis:
+            _, hedef, a, b = PROFIL_HEDEF[k]
+            api.put(f"/shops/{shop}/shipping-profiles/{PROFIL_BASKI}/destinations/{i0[k][4]}",
+                    {"primary_cost": hedef, "secondary_cost": hedef, "min_delivery_days": a, "max_delivery_days": b})
+        i1 = profil_imza(api.get(f"/shops/{shop}/shipping-profiles/{PROFIL_BASKI}") or {})
+        R["sonra"] = {k: v[:4] for k, v in i1.items()}
+        bek = {k: (float(v[1]), float(v[1]), v[2], v[3]) for k, v in PROFIL_HEDEF.items()}
+        if R["sonra"] != bek:
+            raise SystemExit(f"DUR: profil geri okuma beklenen degil: {R['sonra']} != {bek}")
+    (out / f"PROFIL_{'YAZ' if yaz else 'OKU'}.json").write_text(json.dumps(R, ensure_ascii=False, indent=1, default=str), encoding="utf-8")
+    log("PROFIL " + json.dumps(R, ensure_ascii=False, default=str))
+    return R
+
+
+def profil_ucretsiz_mi(api, shop):
+    i = profil_imza(api.get(f"/shops/{shop}/shipping-profiles/{PROFIL_BASKI}") or {})
+    bad = {k: v[:4] for k, v in i.items() if v[0] != 0 or v[1] != 0}
+    if set(i) != set(PROFIL_HEDEF) or bad:
+        raise SystemExit(f"DUR: baski profili {PROFIL_BASKI} henuz her yere ucretsiz degil (once profil_yaz): {bad}")
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("mod", choices=["oku", "yaz"])
+    ap.add_argument("mod", choices=["oku", "yaz", "profil_oku", "profil_yaz"])
     ap.add_argument("--ilanlar", default="")
     ap.add_argument("--hepsi", action="store_true")
     ap.add_argument("--confirm", default="")
     a = ap.parse_args()
+    if a.mod.startswith("profil"):
+        if a.mod == "profil_yaz" and a.confirm != ONAY_PROFIL:
+            raise SystemExit(f"DUR: profil_yaz icin --confirm {ONAY_PROFIL}")
+        from etsy_common import TokenStore, mask
+        k_, s_ = os.environ.get("ETSY_API_KEY", ""), os.environ.get("ETSY_SHARED_SECRET", "")
+        mask(k_); mask(s_)
+        store = TokenStore(os.environ["TOKEN_FILE"], k_, s_)
+        if store.needs_refresh():
+            store.refresh()
+        OUT.mkdir(exist_ok=True)
+        izin = {"PROFIL"} if a.mod == "profil_yaz" else set()
+        profil_adimi(kilitli(store, os.environ["ETSY_SHOP_ID"], izin), os.environ["ETSY_SHOP_ID"], a.mod == "profil_yaz", OUT)
+        sys.exit(0)
     yaz = a.mod == "yaz"
     if yaz and a.confirm != (ONAY_HEPSI if a.hepsi else ONAY):
         raise SystemExit(f"DUR: yaz icin --confirm {ONAY_HEPSI if a.hepsi else ONAY}")
@@ -510,6 +598,8 @@ def main():
         pp = (api.get(f"/shops/{shop}/production-partners") or {}).get("results") or []
         if PARTNER not in [p.get("production_partner_id") for p in pp]:
             raise SystemExit(f"DUR: uretim ortagi {PARTNER} magazada yok: {pp}")
+        if yaz and PROFIL == PROFIL_BASKI:
+            profil_ucretsiz_mi(api, shop)
         hz = hazirlik_dogrula(api, shop)
         log(f"hazirlik {HAZIRLIK_BASKI}: {hz.get('readiness_state')} {hz.get('min_processing_days')}-{hz.get('max_processing_days')}")
         for i, lid in enumerate(ids, 1):

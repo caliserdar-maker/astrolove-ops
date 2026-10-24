@@ -143,8 +143,9 @@ def test():
     assert all(p["offerings"][0] == {"price": 29.0, "quantity": 999, "is_enabled": True, "readiness_state_id": E.HAZIRLIK_BASKI} for p in bs)
     dj = [p for p in b["products"] if E.anahtar(p)[1] != E.BASKI]
     assert all(p["offerings"][0]["readiness_state_id"] == ESKI_HZ and p["property_values"][1]["value_ids"] for p in dj)
-    assert api.patches[0].keys() == {"description", "materials"} and api.patches[1] == {"production_partner_ids": "5817638"}
-    assert r["yazildi"] == ["envanter", "ilan:description+materials", "uretim_ortagi"] and not api.posts; ok += 1
+    assert api.patches[0].keys() == {"description", "materials", "shipping_profile_id"} and api.patches[1] == {"production_partner_ids": "5817638"}
+    assert api.patches[0]["shipping_profile_id"] == E.PROFIL_BASKI == E.PROFIL
+    assert r["yazildi"] == ["envanter", "ilan:description+materials+shipping_profile_id", "uretim_ortagi"] and not api.posts; ok += 1
     # 6 tekrar kosu: ZATEN, yalniz 3 GET, yazma yok
     n = api.calls
     r2 = E.ilan(api, "1", "111", True, out)
@@ -153,7 +154,7 @@ def test():
     api = Api(html.unescape(ACL).replace("\r\n", "\n"), inv=inv_pilot())
     r = E.ilan(api, "1", "222", True, out)
     assert r["durum"] == "PASS" and r["plan"]["aciklama"] == "TAMAM" and r["plan"]["envanter"] == "YAZ", r
-    assert api.patches[0].keys() == {"materials"}
+    assert api.patches[0].keys() == {"materials", "shipping_profile_id"}
     assert all(p["property_values"][1]["value_ids"] == [7777] for p in api.puts[0]["products"] if E.anahtar(p)[1] == E.BASKI); ok += 1
     # 8 yanlis kargo profili -> Dur, yazma yok
     api = Api(A77, profil=318000000000)
@@ -236,7 +237,44 @@ def test():
         except E.Dur:
             pass
     assert E.aciklama_plani(A77)[0] == "YAZ"; ok += 1
-    print(f"test_by_baski_ekle: {ok}/18 PASS")
+    # 19 profil adimi: AU ve diger ulkeler 0'a; teslim gunleri ayni; disari kullanan varsa DUR
+    class PApi:
+        def __init__(self, kullanan_bolum=E.BOLUM):
+            self.dest = [{"shipping_profile_destination_id": 10 + i, "destination_country_iso": c, "destination_region": r,
+                          "primary_cost": {"amount": u * 100, "divisor": 100}, "secondary_cost": {"amount": u * 100, "divisor": 100},
+                          "min_delivery_days": a, "max_delivery_days": b}
+                         for i, (c, r, u, a, b) in enumerate([("US", "none", 0, 3, 8), ("", "eu", 0, 5, 12), ("GB", "none", 0, 5, 10),
+                                                               ("AU", "none", 5, 5, 10), ("", "none", 12, 7, 21)])]
+            self.kb, self.puts = kullanan_bolum, []
+
+        def get(self, path, params=None, ok404=False):
+            if path.endswith("/listings"):
+                return {"results": [{"listing_id": 5, "shipping_profile_id": E.PROFIL_BASKI, "shop_section_id": self.kb}]
+                        if params["state"] == "active" else []}
+            return {"title": "BY Print 8x10 Worldwide", "shipping_profile_destinations": copy.deepcopy(self.dest)}
+
+        def put(self, path, data):
+            self.puts.append((path, data))
+            did = int(path.rsplit("/", 1)[1])
+            for x in self.dest:
+                if x["shipping_profile_destination_id"] == did:
+                    x["primary_cost"] = x["secondary_cost"] = {"amount": data["primary_cost"] * 100, "divisor": 100}
+    pa = PApi()
+    r = E.profil_adimi(pa, "1", True, out)
+    assert sorted(r["degisecek"]) == ["AU", "EVERYWHERE"] and len(pa.puts) == 2
+    assert all(v[0] == 0 for v in r["sonra"].values()) and r["sonra"]["EVERYWHERE"][2:] == (7, 21)
+    E.profil_ucretsiz_mi(pa, "1")
+    assert E.profil_adimi(pa, "1", True, out)["degisecek"] == []
+    try:
+        E.profil_adimi(PApi(kullanan_bolum=123), "1", True, out); raise AssertionError("disari kullanan gecti")
+    except SystemExit as e:
+        assert "disinda" in str(e)
+    try:
+        E.profil_ucretsiz_mi(PApi(), "1"); raise AssertionError("ucretli gecti")
+    except SystemExit:
+        pass
+    ok += 1
+    print(f"test_by_baski_ekle: {ok}/19 PASS")
 
 
 if __name__ == "__main__":
