@@ -67,7 +67,7 @@ jobs:
           TOKEN_FILE: _work/ETSY_TOKEN.json
         run: |
           set -euo pipefail
-          python scripts/etsy/seo_live_snapshot.py --out _out --expected-count 546 --quota-buffer 60
+          python scripts/etsy/seo_live_snapshot.py --out _out --expected-count 546 --quota-buffer 10
       - name: Token ve cikti Drive'a
         if: ${{ always() }}
         run: |

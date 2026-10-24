@@ -113,7 +113,7 @@ def write_outputs(out, results, summary):
         encoding="utf-8")
 
 
-def run(api, shop, plan, out, apply=False, quota_buffer=100, sleep_seconds=2):
+def run(api, shop, plan, out, apply=False, quota_buffer=10, sleep_seconds=2):
     out.mkdir(parents=True, exist_ok=True)
     backup = out / "backups"; backup.mkdir(exist_ok=True)
     rows = {str(x["listing_id"]): x for x in plan}
@@ -222,7 +222,7 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--confirm", default="")
-    ap.add_argument("--quota-buffer", type=int, default=100)
+    ap.add_argument("--quota-buffer", type=int, default=10)
     args = ap.parse_args()
     if args.apply and args.confirm != "CANLI":
         raise SystemExit("HATA: --apply icin --confirm CANLI gerekli. DUR.")

@@ -102,7 +102,7 @@ jobs:
           set -euo pipefail
           [ "$DRY_RUN" = "true" ] && mode=--dry-run || { echo "::warning::APPLY: ilana medya yazilacak ($LID)"; mode=--apply; }
           python scripts/etsy/pod_media_add.py --listing-id "$LID" --pair "$PAIR" --edition "$ED" \
-            --images img --media media --out _out --quota-min "${QMIN:-400}" "$mode"
+            --images img --media media --out _out --quota-min "${QMIN:-10}" "$mode"
       - name: Token/cikti Drive'a
         if: ${{ always() }}
         env:

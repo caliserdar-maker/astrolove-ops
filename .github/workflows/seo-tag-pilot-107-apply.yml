@@ -83,7 +83,7 @@ jobs:
           set -euo pipefail
           python scripts/etsy/seo_tag_pilot_107_apply.py \
             --plan _work/seo_tag_pilot_107_plan.json --out _out/apply \
-            --apply --confirm CANLI --quota-buffer 120
+            --apply --confirm CANLI --quota-buffer 10
       - name: Token ve kanit Drive'a
         if: ${{ always() }}
         run: |

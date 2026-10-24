@@ -89,7 +89,7 @@ jobs:
           set -euo pipefail
           [ "$DRY_RUN" = "true" ] && mode=--dry-run || { echo "::warning::APPLY: ilan aciklamalari Etsy'ye yazilacak"; mode=--apply; }
           python scripts/etsy/pod_desc_update.py --state _work/state.csv --out _out --limit "${LIMIT:-0}" \
-            --quota-min "${QMIN:-400}" --section "$SEC" --section-ru "$SEC_RU" --ru-dict dict/ru_RU "$mode"
+            --quota-min "${QMIN:-10}" --section "$SEC" --section-ru "$SEC_RU" --ru-dict dict/ru_RU "$mode"
       - name: Token/cikti Drive'a
         if: ${{ always() }}
         env:

@@ -86,7 +86,7 @@ jobs:
         run: |
           set -euo pipefail
           [ "$DRY_RUN" = "true" ] && mode=--dry-run || { echo "::warning::APPLY: envanter/aciklama Etsy'ye yazilacak ($LID)"; mode=--apply; }
-          python scripts/etsy/pod_inventory_update.py --listing-id "$LID" --pair "$PAIR" --out _out --quota-min "${QMIN:-400}" \
+          python scripts/etsy/pod_inventory_update.py --listing-id "$LID" --pair "$PAIR" --out _out --quota-min "${QMIN:-10}" \
             --ru-dict dict/ru_RU --expect-images "$EXPECT" "$mode"
       - name: Token/cikti Drive'a
         if: ${{ always() }}

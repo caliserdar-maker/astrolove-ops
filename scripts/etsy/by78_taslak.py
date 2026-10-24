@@ -179,7 +179,7 @@ def main():
         yaz(); raise SystemExit(f"HATA: canli referans beklenen ayarlarla uyusmuyor {kontrol}")
     kalan_ilan = sum(1 for r in rows if T.get(r["cift"], {}).get("asama") != "tamam")
     rem = int(api.remaining or 0)
-    gerek = kalan_ilan * ISTEK_ILAN + KOTA_MIN + 30
+    gerek = kalan_ilan * ISTEK_ILAN + KOTA_MIN
     R["kota_bas"] = dict(kalan=rem, gerek=gerek, ilan=kalan_ilan)
     print(f"::warning::KOTA kalan {rem}, gerek {gerek} ({kalan_ilan} ilan x {ISTEK_ILAN} + {KOTA_MIN})")
     if rem < gerek:

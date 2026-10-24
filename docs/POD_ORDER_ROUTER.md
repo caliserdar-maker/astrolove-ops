@@ -46,7 +46,7 @@ once `dijital_teslim_kapisi` ayni `ONAYLAR.json` kaydini denetler. Musteri bilgi
 yazilmaz.
 
 Kargo takibi bu asamada Etsy'ye YAZILMAZ, yalnizca raporda loglanir (ayri adim, sonra acilir).
-Etsy okumasi `--since-days 7` + en fazla `--max-pages 10` cagri, kota 400 altina inince durur
+Etsy okumasi `--since-days 7` + en fazla `--max-pages 10` cagri, kota 10 altina inince durur (kota siniri 10, 24 Eki)
 (cron basina ~1-2 cagri, ~48/gun). Yerel dogrulama: sahte receipt ile paket/idempotens testi
 (`scripts/prodigi/test_receipt_sample.json`, Prodigi ve Drive sahte).
 

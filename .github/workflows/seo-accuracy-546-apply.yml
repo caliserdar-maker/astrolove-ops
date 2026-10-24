@@ -85,7 +85,7 @@ jobs:
           set -euo pipefail
           python scripts/etsy/seo_accuracy_apply.py \
             --plan _work/plan.json --out _out/apply \
-            --apply --confirm CANLI --quota-buffer 100
+            --apply --confirm CANLI --quota-buffer 10
       - name: Token ve kanit Drive'a
         if: ${{ always() }}
         run: |

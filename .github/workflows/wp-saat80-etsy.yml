@@ -4,7 +4,7 @@ name: wp-saat80-etsy
 # ETSY'YE YAZAR (apply=true): ilan basina 4 teslim ZIP'i (DELIVERY_SAAT80, PDF'siz)
 # sil->yukle->geri oku; SET07 galeri gorseli yukle->eskisini sil, sira korunur.
 # PDF, diger 5 gorsel, fiyat, metin, state'e DOKUNULMAZ; yayinlama cagrisi YOK.
-# Kota: her istekte x-remaining-today loglanir, <400 DUR; STATE ile resume.
+# Kota: her istekte x-remaining-today loglanir, <10 DUR (kota siniri 10); STATE ile resume.
 # pairs ZORUNLU ve acik (bos verilmez). Varsayilan DRY-RUN.
 # Pilot Cancer_Libra: galeri kaynagi MOCKUP_V2/_CANDIDATE/CANCER_LIBRA; B kosusu
 # SET07 render'ini yanlislikla master klasorune yazdi -> hazirlik adimi master'i

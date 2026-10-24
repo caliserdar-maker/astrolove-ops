@@ -39,7 +39,7 @@ on:
         required: false
         default: "28216"
       quota_min:
-        description: "Etsy gunluk kota tabani; altinda yazma yok (varsayilan 400)"
+        description: "Etsy gunluk kota tabani; altinda yazma yok (kota siniri 10)"
         required: false
         default: "10"
       return_policy_id:
@@ -163,7 +163,7 @@ jobs:
             echo "::warning::APPLY modu: Etsy'ye ilan yazilacak."
             mode=--apply
           fi
-          args=(--pairs-file _work/pairs.txt --limit "${LIMIT:-0}" --images img --state _work/state.csv --out _out --primary "$PRIMARY" --quota-min "${QMIN:-400}" --origin-postal-code "${OZIP:-28216}" --ru-dict dict/ru_RU --media media "$mode")
+          args=(--pairs-file _work/pairs.txt --limit "${LIMIT:-0}" --images img --state _work/state.csv --out _out --primary "$PRIMARY" --quota-min "${QMIN:-10}" --origin-postal-code "${OZIP:-28216}" --ru-dict dict/ru_RU --media media "$mode")
           [ -n "${RPID:-}" ] && args+=(--return-policy-id "$RPID")
           [ -n "${RPSPEC:-}" ] && args+=(--return-policy-spec "$RPSPEC")
           python scripts/etsy/pod_listing_create.py "${args[@]}"

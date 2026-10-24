@@ -80,7 +80,7 @@ jobs:
         run: |
           set -euo pipefail
           python scripts/etsy/pod_audit.py --state _work/state.csv --out _out \
-            --limit "${LIMIT:-0}" --quota-min "${QMIN:-400}" --ref-id "${REF_ID:-4570031205}"
+            --limit "${LIMIT:-0}" --quota-min "${QMIN:-10}" --ref-id "${REF_ID:-4570031205}"
       - name: Token/cikti Drive'a
         if: ${{ always() }}
         run: |

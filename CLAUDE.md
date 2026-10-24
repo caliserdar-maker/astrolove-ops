@@ -33,6 +33,7 @@ bolumu okunmadan baslanmaz.
   Tek deger: kosu/ilan baslangic esigi ve her istekten once sert taban = 10, tum roller (genel, pod-audit, siparis, router)
   ve tum betik/is akisi varsayilanlari (`--quota-min` vb.). Kaynak `etsy_common.KOTA_SINIRI`. 23 Eki esikleri (genel 481/430,
   pod-audit 2068, router 400, siparis 415, ihtiyac kapisi 430) ve config/etsy_kota_esik.json KALDIRILDI (24 Eki).
+  Toplu isler ilan basina `api.kota_kapisi(...)` cagirmali (su an yalniz beyan_marka_yaz toplu).
 - **updateListing bir TASLAGI otomatik yayina alir** (7 Eyl 2026 olcumu: gece
   aciklama guncellemesi 72 taslagi `active` yapti; `state_timestamp` = PATCH ani).
   Toplu guncellemede "ilan taslak kalir" varsayimi YAPILMAZ: yazmadan once state

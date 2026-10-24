@@ -108,8 +108,8 @@ def main():
             L[str(x.get("listing_id"))] = x
     kota_bas = int(api.remaining or 0)
     print(f"toplu okuma: {len(L)}/{len(ids)} ilan | kota {kota_bas}", flush=True)
-    if kota_bas < KOTA_MIN + 10:
-        raise SystemExit(f"HATA: kota {kota_bas} < {KOTA_MIN + 10}; diger okumalar yapilmadi")
+    if kota_bas < KOTA_MIN:
+        raise SystemExit(f"HATA: kota {kota_bas} < {KOTA_MIN}; diger okumalar yapilmadi")
 
     satir, sorunlu = [], []
     for r in taslak:

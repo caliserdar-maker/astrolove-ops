@@ -30,7 +30,7 @@ on:
         description: "kac ilan (0 = hepsi)"
         default: "0"
       kota_alt:
-        description: "kota tabani (varsayilan 400)"
+        description: "kota tabani (kota siniri 10)"
         default: "10"
       redirect:
         description: "yetki modlari icin kayitli redirect URI"
