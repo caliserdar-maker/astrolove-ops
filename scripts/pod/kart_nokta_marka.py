@@ -241,8 +241,11 @@ def panel_ort(img):
     return Image.fromarray(Y)
 
 
-def ocr(img):
-    b = io.BytesIO(); panel_ort(img).save(b, "PNG")
+PANEL_KART = {4}   # Serdar 24 Eki: panel ortme yalniz kart 4'te (kart 9'da ortme OCR'i bozdu: "...WALL ART Bame te.", ARIES_LIBRA olcumu)
+
+
+def ocr(img, panel=False):
+    b = io.BytesIO(); (panel_ort(img) if panel else img).save(b, "PNG")
     r = subprocess.run(["tesseract", "-", "-", "--psm", "3"], input=b.getvalue(), capture_output=True)
     return r.stdout.decode("utf-8", "replace")
 
@@ -403,7 +406,7 @@ def kart_isle(yol, D, fd, ops, out, sira):
     if p999 > 12 or mx > 45:
         hata.append(f"r{sira}: JPEG sonrasi kutu disi fark p99.9 {p999:.1f} / max {mx} (esik 12 / 45)")
     Yj = Image.open(p).convert("RGB")
-    t = ocr(Yj)
+    t = ocr(Yj, panel=sira in PANEL_KART)
     tt = " ".join(t.split())
     ocr_hata = []
     if re.search(r"ASTROLOVE\s*/", tt):

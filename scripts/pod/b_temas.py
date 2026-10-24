@@ -12,7 +12,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dir", required=True)
     ap.add_argument("--sira", required=True)
-    ap.add_argument("--baslik", default="")
+    ap.add_argument("--baslik", default="SOL = 17 Eki hedef galeri yedegi (once), SAG = duzeltilmis (sonra). Kirmizi cerceve = degisen "
+                    "satir kutusu (QC isareti, asil gorselde yok)")
     ap.add_argument("--font", required=True)
     ap.add_argument("--out", required=True)
     a = ap.parse_args()

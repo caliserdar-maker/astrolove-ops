@@ -12,7 +12,7 @@ on:
     inputs:
       kosu: {description: "galeri23-duzelt kosusu", required: true, default: "40085594407"}
       satirlar: {description: "virgullu <ilan>_<CIFT>_<NN> (NN kart sirasi)", required: true}
-      baslik: {description: "iki satir baslik, | ile ayrilir", required: false, default: ""}
+      baslik: {description: "iki satir baslik, | ile ayrilir (bos = SOL 17 Eki hedef galeri yedegi / SAG duzeltilmis)", required: false, default: ""}
 
 env:
   D: "gdrive:ASTROLOVE/TEMP/DENETIM_20261021/GALERI_PLAN23"
@@ -52,7 +52,7 @@ jobs:
             L=${s%%_*}; R=${s#*_}; C=${R%_*}; N=${R##*_}
             rclone copyto "$D/DUZELT_$K/${L}_${C}/KART/ONCE_SONRA/$N.jpg" "_w/os/$s.jpg"
           done
-          python3 scripts/pod/b_temas.py --dir _w/os --sira "$SAT" --baslik "$BAS" --font 'assets/fonts/Montserrat[wght].ttf' --out "_w/TEMAS_${K}_${GITHUB_RUN_ID}.jpg"
+          python3 scripts/pod/b_temas.py --dir _w/os --sira "$SAT" ${BAS:+--baslik "$BAS"} --font 'assets/fonts/Montserrat[wght].ttf' --out "_w/TEMAS_${K}_${GITHUB_RUN_ID}.jpg"
           rclone copyto "_w/TEMAS_${K}_${GITHUB_RUN_ID}.jpg" "$D/TEMAS_${K}_${GITHUB_RUN_ID}.jpg"
           echo "::notice title=TEMAS::Drive TEMP/DENETIM_20261021/GALERI_PLAN23/TEMAS_${K}_${GITHUB_RUN_ID}.jpg"
       - if: always()
