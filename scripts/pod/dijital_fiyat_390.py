@@ -327,7 +327,8 @@ def main():
     OUT.mkdir(exist_ok=True)
     tum = ids_oku() if a.aile == "poster" else bolum_ids(api, shop, SECILI["bolum"])
     if a.hepsi:
-        ids = tum
+        atla = {x.strip() for x in os.environ.get("ATLA", "").split(",") if x.strip()}   # onceki kosuda PASS olanlar (kota tasarrufu)
+        ids = [x for x in tum if x not in atla]
     else:
         ids = [x.strip() for x in a.ilanlar.split(",") if x.strip()]
         dis = [x for x in ids if x not in tum]

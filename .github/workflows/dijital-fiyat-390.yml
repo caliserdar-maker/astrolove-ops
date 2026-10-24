@@ -21,6 +21,9 @@ on:
       aile:
         description: "poster | yd (yil donumu, bolum 60895624)"
         default: "poster"
+      atla:
+        description: "hepsi modunda atlanacak (zaten yazilmis) ilanlar, virgullu"
+        default: ""
       onay:
         description: "yaz icin DIJITAL_390 (ilanlar bos = 78 ilan: DIJITAL_390_HEPSI)"
         default: ""
@@ -64,6 +67,7 @@ jobs:
           ILANLAR: ${{ inputs.ilanlar }}
           ONAY: ${{ inputs.onay }}
           AILE: ${{ inputs.aile }}
+          ATLA: ${{ inputs.atla }}
         run: |
           set -euo pipefail
           case "$MOD" in oku|yaz) ;; *) echo "HATA: mod $MOD"; exit 1;; esac
