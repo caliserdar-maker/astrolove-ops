@@ -42,13 +42,15 @@ class SahteApi:
 
     def get(self, path, params=None, ok404=False):
         self._say()
-        if path.endswith("/inventory"):
+        if "/inventory" in path:
+            assert path.endswith("?max_variations_supported=3"), path
             return copy.deepcopy(self.inv)
         if path.endswith("/variation-images"):
             return {"results": copy.deepcopy(self.vimg)}
         return copy.deepcopy(self.L)
 
     def put_json(self, path, body):
+        assert path.endswith("/inventory?max_variations_supported=3"), path
         self._say()
         self.puts.append(body)
         yeni = copy.deepcopy(self.inv)
@@ -106,10 +108,10 @@ def test():
     api = SahteApi(ornek_inv()); api.L["state"] = "draft"
     s = M.ilan_isle(api, "1", "116", yaz=True)
     assert s["durum"] == "ATLANDI_STATE" and not api.puts, s; ok += 1
-    # 10 kota az: yazma yok
-    api = SahteApi(ornek_inv()); api.remaining = 20
+    # 10 eski fiyat 9.99 artik kabul edilmez
+    api = SahteApi(ornek_inv(9.99))
     s = M.ilan_isle(api, "1", "117", yaz=True)
-    assert s["durum"].startswith("DUR_KOTA") and not api.puts, s; ok += 1
+    assert s["durum"] == "FAIL_KAPI" and not api.puts, s; ok += 1
     print(f"TEST {ok}/10 PASS")
 
 

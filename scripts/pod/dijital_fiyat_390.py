@@ -25,12 +25,13 @@ KOK = Path(__file__).resolve().parent
 sys.path[:0] = [str(KOK), str(KOK.parent / "etsy")]
 
 YENI = 3.90
-ESKI_IZINLI = (9.00, 9.99)          # bugunku dijital fiyat (canli 9.00; eski kayit 9.99)
+ESKI_IZINLI = (9.00,)               # bugunku dijital fiyat (canli 9.00, 24 Eki okuma)
 ONAY = "DIJITAL_390"
+ONAY_HEPSI = "DIJITAL_390_HEPSI"   # 78 ilan birden yazmak icin ayri onay
+INV_YOL = "/listings/{lid}/inventory?max_variations_supported=3"   # 3 menulu ilan; parametresiz PUT 409 (REFERANS_ILAN_CL.md:49)
 IDS_YOL = KOK.parents[1] / "data" / "pod" / "pod78_ids.csv"
 OUT = Path("out")
 METIN_FIYAT = re.compile(r"\$\s?9(?:\.00|\.99)?\b|\b9\.(?:00|99)\s?(?:USD|\$)")
-ISTEK_TAHMIN = 9                     # 3 GET + 1 PUT + 3 GET geri okuma + olasi 1 POST + 1 GET
 
 
 def para(p):
@@ -57,7 +58,8 @@ def pv_metin(pr):
 def dijital_mi(pr):
     sku = (pr.get("sku") or "").upper()
     a = sku.endswith("-DIGITAL")
-    b = any("digital" in v.lower() for v in pv_metin(pr))
+    b = any((pv.get("property_name") or "").lower() == "format" and list(pv.get("values") or []) == ["Digital File"]
+            for pv in pr.get("property_values") or [])
     return a, b
 
 
@@ -157,7 +159,7 @@ def kisisel(L):
 
 def anlik(api, shop, lid):
     return {"listing": api.get(f"/listings/{lid}") or {},
-            "inventory": api.get(f"/listings/{lid}/inventory") or {},
+            "inventory": api.get(INV_YOL.format(lid=lid)) or {},
             "vimg": (api.get(f"/shops/{shop}/listings/{lid}/variation-images", ok404=True) or {}).get("results") or []}
 
 
@@ -168,7 +170,8 @@ def ilan_isle(api, shop, lid, yaz):
     L, inv = sn["listing"], sn["inventory"]
     (d / "ONCE.json").write_text(json.dumps(sn, ensure_ascii=False, indent=1), encoding="utf-8")
     dig, diger, h, zaten = plan(inv)
-    metin = [m.group(0) for m in METIN_FIYAT.finditer(L.get("description") or "")]
+    metin = [m.group(0) for alan in ("description", "personalization_instructions")
+             for m in METIN_FIYAT.finditer(L.get(alan) or "")]
     sonuc = {"ilan": lid, "state": L.get("state"), "dijital_n": len(dig), "diger_n": len(diger),
              "dijital_eski": sorted({f for p in dig for f in fiyatlar(p)}), "kapi": h,
              "aciklamada_fiyat": metin, "renk_bag_once": renk_haritasi(inv, sn["vimg"]), "kota": api.remaining}
@@ -185,14 +188,10 @@ def ilan_isle(api, shop, lid, yaz):
         sonuc["durum"] = "PLAN_OK"
         return sonuc
 
-    kalan = int(api.remaining or 0)
-    if kalan < ISTEK_TAHMIN + 10:
-        sonuc["durum"] = f"DUR_KOTA kalan {kalan} < {ISTEK_TAHMIN + 10}"
-        return sonuc
     body = govde(inv)
     (d / "PUT.json").write_text(json.dumps(body, ensure_ascii=False, indent=1), encoding="utf-8")
     try:
-        api.put_json(f"/listings/{lid}/inventory", body)
+        api.put_json(INV_YOL.format(lid=lid), body)
     except SystemExit as e:                       # Etsy hata metni rapora (job logu proxy'de okunamiyor)
         sonuc["put_hata"] = str(e)[:600]
         try:
@@ -223,7 +222,13 @@ def ilan_isle(api, shop, lid, yaz):
             f.append(f"fiyat {p.get('sku')} {k[1:]}: {fiyatlar(q)} != {hedef}")
         if (q.get("sku") or "") != (p.get("sku") or "") or imza(q)[2] != imza(p)[2]:
             f.append(f"fiyat disi alan degisti: {p.get('sku')} {k[1:]}")
-    for k in ("price_on_property", "quantity_on_property", "sku_on_property"):
+    if [anahtar(p) for p in inv.get("products") or []] != [anahtar(p) for p in inv2.get("products") or []]:
+        f.append("urun sirasi degisti")
+    adlar = lambda i: sorted({(pv.get("property_id"), pv.get("property_name")) for p in i.get("products") or []
+                              for pv in p.get("property_values") or []})
+    if adlar(inv) != adlar(inv2):
+        f.append(f"ozellik adlari degisti: {adlar(inv)} -> {adlar(inv2)}")
+    for k in ("price_on_property", "quantity_on_property", "sku_on_property", "readiness_state_on_property"):
         if sorted(inv.get(k) or []) != sorted(inv2.get(k) or []):
             f.append(f"{k} degisti")
     if L2.get("state") != L.get("state"):
@@ -274,8 +279,8 @@ def main():
         if not ids or dis:
             raise SystemExit(f"DUR: ilan listesi bos ya da 78 disinda: {dis[:5]}")
     yaz = a.mod == "yaz"
-    if yaz and a.confirm != ONAY:
-        raise SystemExit(f"DUR: yaz icin --confirm {ONAY} gerekir")
+    if yaz and a.confirm != (ONAY_HEPSI if a.hepsi else ONAY):
+        raise SystemExit(f"DUR: yaz icin --confirm {ONAY_HEPSI if a.hepsi else ONAY} gerekir")
 
     from etsy_common import Etsy, TokenStore, mask
     k_, s_ = os.environ.get("ETSY_API_KEY", ""), os.environ.get("ETSY_SHARED_SECRET", "")
@@ -289,6 +294,7 @@ def main():
     sonuclar, t0 = [], time.time()
     for i, lid in enumerate(ids, 1):
         try:
+            api.kota_kapisi(f"ilan {lid}")
             s = ilan_isle(api, shop, lid, yaz)
         except SystemExit as e:
             s = {"ilan": lid, "durum": "FAIL_ISTISNA", "hata": str(e)[:600], "dijital_n": None,
@@ -302,7 +308,7 @@ def main():
     say = {}
     for s in sonuclar:
         say[s["durum"].split(" ")[0]] = say.get(s["durum"].split(" ")[0], 0) + 1
-    tamam = len(sonuclar) == len(ids) and not any(s["durum"].startswith(("FAIL", "DUR")) for s in sonuclar)
+    tamam = len(sonuclar) == len(ids) and not any(s["durum"].startswith(("FAIL", "DUR", "ATLANDI")) for s in sonuclar)
     ozet = {"mod": a.mod, "istenen": len(ids), "islenen": len(sonuclar), "sayim": say,
             "aciklamada_fiyat_ilan": [s["ilan"] for s in sonuclar if s.get("aciklamada_fiyat")],
             "kota_son": api.remaining, "durum": "PASS" if tamam else "FAIL", "ilanlar": sonuclar}
