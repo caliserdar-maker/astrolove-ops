@@ -142,7 +142,7 @@ jobs:
       - name: Ornek (LISTE, HEDEF_GALERI, YAN_YANA, DEGISEN)
         run: |
           set +e
-          S=$(rclone lsf -R "$D/DENETIM_20261021/KART_SIL" --include "SONRA_${L}.json" | sort -t/ -k1,1n | tail -1)
+          S=$(rclone lsf -R --files-only "$D/DENETIM_20261021/KART_SIL" --include "SONRA_${L}.json" | sort -t/ -k1,1n | tail -1)
           G=SONRA_yok; SAY=; KY=yok
           if [ -n "$S" ] && rclone copyto "$D/DENETIM_20261021/KART_SIL/$S" W/simdi.json -q; then KY="KART_SIL/$S"
           elif [ -n "$SIMDI_KOSU" ] && rclone copyto "$D/BURC_GIFT_20261022/envanter_oku_$SIMDI_KOSU/SONRA_${L}.json" W/simdi.json -q; then KY="envanter_oku_$SIMDI_KOSU"; fi
