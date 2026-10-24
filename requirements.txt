@@ -1,6 +1,6 @@
-# Pillow 11.0.0 sabit (Serdar 24 Eki): yerel uretim ve testler Actions galeri/kart is akislariyla ayni surumle kosar;
-# 12.x glif yerlesimini degistirir (pilot kart 04 fark 87, esik 45). kart_nokta_marka / eski78_gorsel_uret / kart02_iki_sutun
-# baska surumde DUR verir (PILLOW_SERBEST=1 yalniz bilincli istisna).
+# Pillow 11.0.0 (requirements.txt kuran is akislari + galeri/kart is akislari). Kural (Serdar 24 Eki): yerel test ve uretim, test
+# edilen is akisinin kurdugu Pillow surumuyle kosar. kart_nokta_marka / eski78_gorsel_uret / kart02_iki_sutun baska surumde DUR verir
+# (PILLOW_SERBEST=1 yalniz bilincli istisna).
 requests==2.34.2
 google-api-python-client==2.200.0
 google-auth==2.57.0

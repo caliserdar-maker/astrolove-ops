@@ -184,6 +184,10 @@ jobs:
           rclone copy "$P" o --include "*/OZET_SATIR.txt" -q || true
           find o -name OZET_SATIR.txt -exec cat {} \; | sort | tee OZET.txt
           rclone copyto OZET.txt "$P/OZET.txt" -q
+          # gosterim (Serdar 24 Eki 22 ilan hazirlik 4a): her ilanin HEDEF_GALERI'si tek klasorde
+          rclone lsf -R --files-only "$P" --include "*/HEDEF_GALERI_*.jpg" | while read -r f; do
+            rclone copyto "$P/$f" "$P/GOSTERIM/${f##*/}" -q; done
+          echo "GOSTERIM: $(rclone lsf "$P/GOSTERIM" 2>/dev/null | wc -l) HEDEF_GALERI"
           echo "::notice title=GALERI23::Drive TEMP/DENETIM_20261021/GALERI_PLAN23/DUZELT_${GITHUB_RUN_ID}/ ($(wc -l < OZET.txt) ilan)"
       - if: always()
         run: rm -rf ~/.config/rclone

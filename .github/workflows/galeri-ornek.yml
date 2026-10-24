@@ -4,6 +4,9 @@ name: galeri-ornek
 # Etsy kilidi YOK (kilit kumesinde degil). scripts/etsy/galeri_ornek.py: hedef galeri (21 Eki yaziminden once alinan 17 Eki yedegi)
 # ile canli galeri (kart-sil SONRA kaydi; gorseller CDN'den) yan yana liste + gercek oranda hedef galeri sayfasi + degisen gorseller %100.
 # Cikti Drive ASTROLOVE/TEMP/DENETIM_20261021/GALERI_PLAN23/<run_id>/.
+# Icerik kontrolu (Serdar 24 Eki 22 ilan hazirlik 2): simdi_yol = canli galeri kaydi (TEMP altinda; "galeri" ya da "gorseller" listesi,
+# url_fullxfull ile CDN'den), duzelt_kosu = hedefe galeri23-duzelt DUZELT_<kosu>/<ilan>_<CIFT>/DEGISEN dosyalari bindirilir
+# (yuklenen dosyalar). LISTE'de her sira icin NCC + fark p99.9/max; ayni gorsel = KORU.
 
 permissions:
   contents: read
@@ -13,7 +16,9 @@ on:
     inputs:
       ilan: {description: "ilan (yalniz rakam)", required: true, default: "4570155846"}
       cift: {description: "cift (orn. ARIES_VIRGO)", required: true, default: "ARIES_VIRGO"}
-      kart_kosu: {description: "kart-sil kosusu (SONRA_<ilan>.json)", required: true, default: "40000094207"}
+      kart_kosu: {description: "kart-sil kosusu (SONRA_<ilan>.json); simdi_yol doluysa kullanilmaz", required: false, default: "40000094207"}
+      simdi_yol: {description: "canli galeri kaydi, ASTROLOVE/TEMP altinda yol (orn. DENETIM_20261021/GALERI23_YUKLE/<kosu>/OKU_<ilan>.json)", required: false, default: ""}
+      duzelt_kosu: {description: "hedefe bindirilecek DUZELT_<kosu>/<ilan>_<CIFT>/DEGISEN (bos = ozgun hedef)", required: false, default: ""}
 
 jobs:
   ornek:
@@ -26,7 +31,8 @@ jobs:
           python-version: "3.12"
       - run: |
           set -euo pipefail
-          [[ "${{ inputs.ilan }}" =~ ^[0-9]+$ && "${{ inputs.cift }}" =~ ^[A-Z]+_[A-Z]+$ && "${{ inputs.kart_kosu }}" =~ ^[0-9]+$ ]] || { echo "::error::girdi"; exit 1; }
+          [[ "${{ inputs.ilan }}" =~ ^[0-9]+$ && "${{ inputs.cift }}" =~ ^[A-Z]+_[A-Z]+$ && "${{ inputs.kart_kosu }}" =~ ^[0-9]*$ ]] || { echo "::error::girdi"; exit 1; }
+          [[ "${{ inputs.simdi_yol }}" =~ ^([A-Za-z0-9_/.-]+\.json)?$ && "${{ inputs.simdi_yol }}" != *..* && "${{ inputs.duzelt_kosu }}" =~ ^[0-9]*$ ]] || { echo "::error::girdi"; exit 1; }
           pip install -q pillow numpy
           curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null
       - name: rclone.conf olustur
@@ -46,12 +52,23 @@ jobs:
           L: ${{ inputs.ilan }}
           C: ${{ inputs.cift }}
           K: ${{ inputs.kart_kosu }}
+          SY: ${{ inputs.simdi_yol }}
+          DK: ${{ inputs.duzelt_kosu }}
         run: |
           set -euo pipefail
-          mkdir -p _work/hedef _out
+          mkdir -p _work/hedef _work/duz _out
           rclone copyto "gdrive:ASTROLOVE/TEMP/GALERI_YAYIN/KOSU_20261021_1030/$L/yedek/manifest.json" _work/manifest.json
           rclone copy "gdrive:ASTROLOVE/TEMP/GALERI_YAYIN/YEDEK/${L}_${C}" _work/hedef --include "*.jpg" -q
-          rclone copyto "gdrive:ASTROLOVE/TEMP/DENETIM_20261021/KART_SIL/$K/SONRA_$L.json" _work/simdi.json
+          if [ -n "$SY" ]; then
+            rclone copyto "gdrive:ASTROLOVE/TEMP/$SY" _work/simdi_ham.json
+            python3 -c "import json;d=json.load(open('_work/simdi_ham.json'));d.setdefault('gorseller',d.get('galeri'));json.dump(d,open('_work/simdi.json','w'))"
+          else
+            rclone copyto "gdrive:ASTROLOVE/TEMP/DENETIM_20261021/KART_SIL/$K/SONRA_$L.json" _work/simdi.json
+          fi
+          if [ -n "$DK" ]; then
+            rclone copy "gdrive:ASTROLOVE/TEMP/DENETIM_20261021/GALERI_PLAN23/DUZELT_$DK/${L}_${C}/DEGISEN" _work/duz --include "*.jpg" -q
+            echo "DEGISEN bindirilen: $(ls _work/duz | wc -l)"; cp _work/duz/*.jpg _work/hedef/
+          fi
           echo "hedef dosya: $(ls _work/hedef | wc -l)"
       - name: Ornek
         run: python3 scripts/etsy/galeri_ornek.py --hedef-manifest _work/manifest.json --hedef-dir _work/hedef --simdi _work/simdi.json --out _out
