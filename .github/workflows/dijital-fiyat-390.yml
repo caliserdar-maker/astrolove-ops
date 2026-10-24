@@ -18,6 +18,9 @@ on:
       ilanlar:
         description: "virgullu ilan id (bos = 78 ilanin hepsi)"
         default: ""
+      aile:
+        description: "poster | yd (yil donumu, bolum 60895624)"
+        default: "poster"
       onay:
         description: "yaz icin DIJITAL_390 (ilanlar bos = 78 ilan: DIJITAL_390_HEPSI)"
         default: ""
@@ -60,14 +63,15 @@ jobs:
           MOD: ${{ inputs.mod }}
           ILANLAR: ${{ inputs.ilanlar }}
           ONAY: ${{ inputs.onay }}
+          AILE: ${{ inputs.aile }}
         run: |
           set -euo pipefail
           case "$MOD" in oku|yaz) ;; *) echo "HATA: mod $MOD"; exit 1;; esac
           umask 077; mkdir -p _work
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
           if [ -n "$ILANLAR" ]; then SEC=(--ilanlar "$ILANLAR"); else SEC=(--hepsi); fi
-          rc=0; python scripts/pod/dijital_fiyat_390.py "$MOD" "${SEC[@]}" --confirm "$ONAY" || rc=$?
-          H="gdrive:ASTROLOVE/TEMP/POD_ORDERS/DIJITAL_390/${GITHUB_RUN_ID}"
+          rc=0; python scripts/pod/dijital_fiyat_390.py "$MOD" "${SEC[@]}" --confirm "$ONAY" --aile "$AILE" || rc=$?
+          H="gdrive:ASTROLOVE/TEMP/POD_ORDERS/DIJITAL_390/${AILE}_${GITHUB_RUN_ID}"
           [ -d out ] && { rclone copy out "$H" -q || echo "::warning::Drive yukleme basarisiz"; }
           exit $rc
       - name: Token geri yaz

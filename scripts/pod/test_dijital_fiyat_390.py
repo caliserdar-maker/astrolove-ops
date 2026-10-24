@@ -112,7 +112,23 @@ def test():
     api = SahteApi(ornek_inv(9.99))
     s = M.ilan_isle(api, "1", "117", yaz=True)
     assert s["durum"] == "FAIL_KAPI" and not api.puts, s; ok += 1
-    print(f"TEST {ok}/10 PASS")
+    # 11 yil donumu ailesi: SKU bos, Style x Format, yalniz "Digital file 8x10" degisir
+    M.SECILI = M.AILE["yd"]
+    yd = {"products": [{"sku": "", "property_values": [
+        {"property_id": 513, "property_name": "Style", "values": [st], "value_ids": [70 + i]},
+        {"property_id": 514, "property_name": "Format", "values": [fm], "value_ids": [80 + j]}],
+        "offerings": [{"price": {"amount": int(pr * 100), "divisor": 100}, "quantity": 999, "is_enabled": True}]}
+        for i, st in enumerate(["Starlit", "Timeless", "Layers"])
+        for j, (fm, pr) in enumerate([("Digital card 5x7", 5.0), ("Digital file 8x10", 9.0), ("Shipped print 8x10", 29.0)])],
+        "price_on_property": [514]}
+    dig, diger, h, z = M.plan(yd)
+    assert (len(dig), len(diger), h) == (3, 6, []), (len(dig), len(diger), h)
+    api = SahteApi(yd); api.vimg = [{"property_id": 513, "value_id": 70 + i, "image_id": 900 + i} for i in range(3)]
+    s = M.ilan_isle(api, "1", "118", yaz=True)
+    fy = sorted({(p["property_values"][1]["values"][0], p["offerings"][0]["price"]) for p in api.puts[0]["products"]})
+    assert s["durum"] == "PASS" and fy == [("Digital card 5x7", 5.0), ("Digital file 8x10", 3.9), ("Shipped print 8x10", 29.0)], (s, fy); ok += 1
+    M.SECILI = M.AILE["poster"]
+    print(f"TEST {ok}/11 PASS")
 
 
 if __name__ == "__main__":

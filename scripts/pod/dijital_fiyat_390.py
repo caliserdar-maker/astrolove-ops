@@ -30,7 +30,13 @@ ONAY = "DIJITAL_390"
 ONAY_HEPSI = "DIJITAL_390_HEPSI"   # 78 ilan birden yazmak icin ayri onay
 INV_YOL = "/listings/{lid}/inventory?max_variations_supported=3"   # 3 menulu ilan; parametresiz PUT 409 (REFERANS_ILAN_CL.md:49)
 IDS_YOL = KOK.parents[1] / "data" / "pod" / "pod78_ids.csv"
+# AILE (Serdar 24 Eki): poster = 78 poster ilani (Format "Digital File"); yd = 78 yil donumu ilani, bolum 60895624
+# ("1st Anniversary Gifts"), Format "Digital file 8x10" (by78_taslak.py FORMATS; SKU bos, Style x Format).
+AILE = {"poster": {"deger": "Digital File", "sku_digital": True},
+        "yd": {"deger": "Digital file 8x10", "sku_digital": False, "bolum": 60895624}}
+SECILI = AILE["poster"]
 OUT = Path("out")
+ISTEK_TAHMIN = 7                     # ilan basi: 3 GET + 1 PUT + 3 GET (olasi renk onarimi +2, 10 tabani karsilar)
 METIN_FIYAT = re.compile(r"\$\s?9(?:\.00|\.99)?\b|\b9\.(?:00|99)\s?(?:USD|\$)")
 
 
@@ -51,15 +57,33 @@ def ids_oku():
     return ids
 
 
+def bolum_ids(api, shop, bolum):
+    """Bolumdeki aktif ilanlar (getListingsByShopSectionId); 78 olmali."""
+    ids, off = [], 0
+    while True:
+        d = api.get(f"/shops/{shop}/shop-sections/listings", params={"shop_section_ids": bolum, "limit": 100,
+                                                                     "offset": off}) or {}
+        r = d.get("results") or []
+        ids += [str(x.get("listing_id")) for x in r if x.get("listing_id")]
+        if len(r) < 100:
+            break
+        off += 100
+    ids = list(dict.fromkeys(ids))
+    if len(ids) != 78:
+        raise SystemExit(f"DUR: bolum {bolum} ilan sayisi {len(ids)} (78 bekleniyordu)")
+    return ids
+
+
 def pv_metin(pr):
     return [str(v) for pv in pr.get("property_values") or [] for v in (pv.get("values") or [])]
 
 
 def dijital_mi(pr):
-    sku = (pr.get("sku") or "").upper()
-    a = sku.endswith("-DIGITAL")
-    b = any((pv.get("property_name") or "").lower() == "format" and list(pv.get("values") or []) == ["Digital File"]
+    b = any((pv.get("property_name") or "").lower() == "format" and list(pv.get("values") or []) == [SECILI["deger"]]
             for pv in pr.get("property_values") or [])
+    if not SECILI["sku_digital"]:
+        return b, b
+    a = (pr.get("sku") or "").upper().endswith("-DIGITAL")
     return a, b
 
 
@@ -86,7 +110,7 @@ def plan(inv):
     urunler = inv.get("products") or []
     if not urunler:
         h.append("envanter bos")
-    if any(not (p.get("sku") or "") for p in urunler):
+    if SECILI["sku_digital"] and any(not (p.get("sku") or "") for p in urunler):
         h.append("SKU'su bos urun var")
     anahtarlar = [anahtar(p) for p in urunler]          # SKU renkler arasinda tekrar eder (sku_on_property), anahtar = ozellik degerleri
     if len(set(anahtarlar)) != len(anahtarlar):
@@ -269,15 +293,10 @@ def main():
     ap.add_argument("--ilanlar", default="")
     ap.add_argument("--hepsi", action="store_true")
     ap.add_argument("--confirm", default="")
+    ap.add_argument("--aile", choices=sorted(AILE), default="poster")
     a = ap.parse_args()
-    tum = ids_oku()
-    if a.hepsi:
-        ids = tum
-    else:
-        ids = [x.strip() for x in a.ilanlar.split(",") if x.strip()]
-        dis = [x for x in ids if x not in tum]
-        if not ids or dis:
-            raise SystemExit(f"DUR: ilan listesi bos ya da 78 disinda: {dis[:5]}")
+    global SECILI
+    SECILI = AILE[a.aile]
     yaz = a.mod == "yaz"
     if yaz and a.confirm != (ONAY_HEPSI if a.hepsi else ONAY):
         raise SystemExit(f"DUR: yaz icin --confirm {ONAY_HEPSI if a.hepsi else ONAY} gerekir")
@@ -290,9 +309,22 @@ def main():
         store.refresh()
     api, shop = Etsy(store), os.environ["ETSY_SHOP_ID"]
     OUT.mkdir(exist_ok=True)
+    tum = ids_oku() if a.aile == "poster" else bolum_ids(api, shop, SECILI["bolum"])
+    if a.hepsi:
+        ids = tum
+    else:
+        ids = [x.strip() for x in a.ilanlar.split(",") if x.strip()]
+        dis = [x for x in ids if x not in tum]
+        if not ids or dis:
+            raise SystemExit(f"DUR: ilan listesi bos ya da aile disinda: {dis[:5]}")
 
     sonuclar, t0 = [], time.time()
     for i, lid in enumerate(ids, 1):
+        if yaz and api.remaining is not None and int(api.remaining) < ISTEK_TAHMIN + 10:   # kural: tahmini istek + 10
+            sonuclar.append({"ilan": lid, "durum": f"DUR_KOTA kalan {api.remaining} < {ISTEK_TAHMIN + 10}",
+                             "dijital_n": None, "dijital_eski": None, "kota": api.remaining})
+            log(f"DUR_KOTA {lid}: kalan {api.remaining}; kalan ilanlar sonraki kosuda (yazilanlar ZATEN atlanir)")
+            break
         try:
             api.kota_kapisi(f"ilan {lid}")
             s = ilan_isle(api, shop, lid, yaz)
