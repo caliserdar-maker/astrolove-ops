@@ -30,6 +30,9 @@ from concurrent.futures import ProcessPoolExecutor
 
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
+import PIL  # noqa: E402
+if PIL.__version__ != "11.0.0" and os.environ.get("PILLOW_SERBEST") != "1":   # Serdar 24 Eki: yerel = Actions (requirements.txt)
+    raise SystemExit(f"DUR: Pillow {PIL.__version__}; uretim ve test Actions ile ayni Pillow 11.0.0 ile kosar (glif yerlesimi farki)")
 
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.dirname(os.path.dirname(HERE)); sys.path.insert(0, HERE)
 from kart_metin_degis import degistir  # noqa: E402

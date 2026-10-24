@@ -6,6 +6,9 @@ name: eski78-gorsel-yukle
 # + hedef manifest (GALERI_YAYIN/KOSU_20261021_1030/<ilan>/yedek/manifest.json). Canli galerinin tam boy yedegi KILIT ALINMADAN
 # once CDN'den (KART_SIL SONRA adresleri; Etsy API yok, kota yok). Cikti Drive ASTROLOVE/TEMP/DENETIM_20261021/GALERI23_YUKLE/<run_id>/.
 # Yuklenen gorsellerin CDN NCC kontrolu kilitsiz galeri-ornek ile yapilir (KILIT SURESI kurali).
+# mod=bag (Serdar 24 Eki): yukleme bittikten sonra YALNIZ renk baglari, TEK variation-images cagrisi (onay SERDAR_BAG24), gorsele
+# yazim yok; galeri 17 / sira / alt metin hedefle ayni degilse yazmaz. mod=oku: salt okuma (galeri + baglar + korunanlar), yazim yok.
+# bag/oku icin devam_kosu = yukleme kosusu (DEVAM_<ilan>.json yuklenen kimlikleri). Cikti BAG_<ilan>.json / OKU_<ilan>.json.
 
 permissions:
   actions: read
@@ -16,8 +19,9 @@ on:
     inputs:
       ilan: {description: "tek ilan (yalniz rakam)", required: true, default: "4570155846"}
       duzelt_kosu: {description: "galeri23-duzelt kosusu (DUZELT_<kosu>)", required: true, default: ""}
-      mod: {description: "kuru | yukle", required: true, default: "kuru"}
-      onay: {description: "yukle icin SERDAR_GALERI23", required: false, default: ""}
+      mod: {description: "kuru | yukle | bag | oku", required: true, default: "kuru"}
+      onay: {description: "yukle icin SERDAR_GALERI23, bag icin SERDAR_BAG24", required: false, default: ""}
+      bag: {description: "bag/oku: beklenen 5 bag 'Renk=image_id,...' (bos = LISTE/manifest/DEVAM'dan)", required: false, default: ""}
       devam_kosu: {description: "yarim kalan onceki yukleme kosusu (DEVAM_<ilan>.json oradan); bos = yeni", required: false, default: ""}
 
 env:
@@ -35,8 +39,13 @@ jobs:
           python-version: "3.12"
       - run: |
           set -euo pipefail
-          [[ "${{ inputs.ilan }}" =~ ^[0-9]+$ && "${{ inputs.duzelt_kosu }}" =~ ^[0-9]+$ && "${{ inputs.mod }}" =~ ^(kuru|yukle)$ ]] || { echo "::error::girdi"; exit 1; }
-          [ "${{ inputs.mod }}" = kuru ] || [ "${{ inputs.onay }}" = SERDAR_GALERI23 ] || { echo "::error::onay yok"; exit 1; }
+          [[ "${{ inputs.ilan }}" =~ ^[0-9]+$ && "${{ inputs.duzelt_kosu }}" =~ ^[0-9]+$ && "${{ inputs.mod }}" =~ ^(kuru|yukle|bag|oku)$ ]] || { echo "::error::girdi"; exit 1; }
+          case "${{ inputs.mod }}" in
+            yukle) [ "${{ inputs.onay }}" = SERDAR_GALERI23 ] || { echo "::error::onay yok"; exit 1; } ;;
+            bag) [ "${{ inputs.onay }}" = SERDAR_BAG24 ] || { echo "::error::onay yok"; exit 1; } ;;
+          esac
+          case "${{ inputs.mod }}" in bag|oku) [[ "${{ inputs.devam_kosu }}" =~ ^[0-9]+$ ]] || { echo "::error::bag/oku icin devam_kosu"; exit 1; } ;; esac
+          [[ "${{ inputs.bag }}" =~ ^([A-Za-z ]+=[0-9]+(,[A-Za-z ]+=[0-9]+)*)?$ ]] || { echo "::error::bag girdisi"; exit 1; }
           pip install -q requests==2.34.2 numpy==2.1.3 pillow==11.0.0
           curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null
       - name: rclone.conf olustur
@@ -55,12 +64,19 @@ jobs:
         env:
           L: ${{ inputs.ilan }}
           K: ${{ inputs.duzelt_kosu }}
+          MOD: ${{ inputs.mod }}
         run: |
           set -euo pipefail
           mkdir -p _work/hedef _out/YEDEK_CDN
           C=$(python3 -c "import csv,sys;print(next(r['cift'] for r in csv.DictReader(open('data/pod/pod78_ids.csv')) if r['listing_id']=='$L'))")
           P="$D/DENETIM_20261021/GALERI_PLAN23/DUZELT_$K/${L}_${C}"
           rclone copyto "$P/LISTE_$L.csv" _work/LISTE.csv
+          if [ "$MOD" = bag ] || [ "$MOD" = oku ]; then
+            # yalniz bag / salt okuma: LISTE + hedef manifest + yukleme kosusunun DEVAM kaydi; gorsel indirme / CDN yedegi yok
+            rclone copyto "$D/GALERI_YAYIN/KOSU_20261021_1030/$L/yedek/manifest.json" _work/manifest.json
+            rclone copyto "$O/${{ inputs.devam_kosu }}/DEVAM_$L.json" _work/DEVAM.json || { echo "::error::DEVAM_$L.json yok"; exit 1; }
+            rmdir _out/YEDEK_CDN; exit 0
+          fi
           # kart QC kapisi (24 Eki inceleme): duzeltme kosusunda bu ilanin kart raporu PASS degilse yukleme yok
           rclone copyto "$P/KART/RAPOR.json" _work/KART_RAPOR.json || { echo "::error::KART/RAPOR.json yok (kart duzeltmesi yapilmamis)"; exit 1; }
           python3 -c "import json,sys; o=json.load(open('_work/KART_RAPOR.json'))['ozet']; sys.exit(0 if not o['hata'] and o['kart'] == o['pass_'] else f'kart QC FAIL: {o}')"
@@ -98,10 +114,16 @@ jobs:
           TOKEN_FILE: _work/ETSY_TOKEN.json
           L: ${{ inputs.ilan }}
           MOD: ${{ inputs.mod }}
+          BAG: ${{ inputs.bag }}
         run: |
           set +e -o pipefail
           args=(--ilan "$L" --liste _work/LISTE.csv --hedef-dir _work/hedef --manifest _work/manifest.json --out _out)
-          [ "$MOD" = kuru ] && args+=(--kuru) || args+=(--confirm ESKI23_GALERI)
+          case "$MOD" in
+            kuru) args+=(--kuru) ;;
+            yukle) args+=(--confirm ESKI23_GALERI) ;;
+            bag) args+=(--mod bag --devam _work/DEVAM.json --confirm ESKI23_BAG ${BAG:+--bag "$BAG"}) ;;
+            oku) args+=(--mod oku --devam _work/DEVAM.json ${BAG:+--bag "$BAG"}) ;;
+          esac
           python3 scripts/etsy/eski78_gorsel_yukle.py "${args[@]}" 2>&1 | tee _work/kosu.log
           echo "KOD=${PIPESTATUS[0]}" >> "$GITHUB_ENV"
       - name: Token geri yaz + cikti Drive'a

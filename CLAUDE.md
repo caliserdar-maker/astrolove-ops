@@ -68,6 +68,9 @@ bolumu okunmadan baslanmaz.
   canli galeriden (`eski78_gorsel_indir.py`) bant duzenlemesiyle yapilir; bant disi fark kapisi zorunlu (eski78_gorsel_uret.py
   esigi: kutu disi p99.9 <= 12 ve max <= 45, JPEG yeniden kodlama gurultusu; yeni esik ancak olcumle ve Serdar onayiyla).
 
+- PILLOW (Serdar 24 Eki): yerel uretim ve testler Actions galeri/kart is akislariyla ayni Pillow 11.0.0 ile kosar (requirements.txt;
+  12.x glif yerlesimini degistirir, pilot kart 04 farki 87 > esik 45). kart_nokta_marka / eski78_gorsel_uret / kart02_iki_sutun
+  baska surumde DUR verir. Yerel venv: `python3 -m venv v && v/bin/pip install pillow==11.0.0 numpy==2.1.3`.
 - Wallpaper hatti dahil tum uretim GitHub Actions'ta kosar; ChatGPT/Colab
   uretim hattinda yoktur (KARAR 3, 1 Eyl 2026).
 - Esik ve yerlesim kurallari tahminle degil, onayli dosyalardan olculerek

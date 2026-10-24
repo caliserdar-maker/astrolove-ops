@@ -25,6 +25,9 @@ import sys
 
 import numpy as np
 from PIL import Image, ImageDraw
+import PIL  # noqa: E402
+if PIL.__version__ != "11.0.0" and os.environ.get("PILLOW_SERBEST") != "1":   # Serdar 24 Eki: yerel = Actions (requirements.txt)
+    raise SystemExit(f"DUR: Pillow {PIL.__version__}; uretim ve test Actions ile ayni Pillow 11.0.0 ile kosar (glif yerlesimi farki)")
 
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 import kart_metin_degis as KM  # noqa: E402

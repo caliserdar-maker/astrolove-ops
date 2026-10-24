@@ -20,6 +20,9 @@ import os
 import sys
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
+import PIL  # noqa: E402
+if PIL.__version__ != "11.0.0" and os.environ.get("PILLOW_SERBEST") != "1":   # Serdar 24 Eki: yerel = Actions (requirements.txt)
+    raise SystemExit(f"DUR: Pillow {PIL.__version__}; uretim ve test Actions ile ayni Pillow 11.0.0 ile kosar (glif yerlesimi farki)")
 from scipy import ndimage as ndi
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
