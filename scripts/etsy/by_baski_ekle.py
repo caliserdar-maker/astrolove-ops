@@ -2,7 +2,8 @@
 """BIZIM YILIMIZ (yil donumu, bolum 60895624): "Shipped print 8x10" ($29) secenegini ve baski ayarlarini KURAR (v2).
 
 Serdar onayi 24 Eki 2026 (Genel Merkez): tedarikci Printful ana + Shortrun ABD yedek; baski geri gelir.
-v2 kararlari (Serdar 24 Eki "ok"): kargo profili DEGISMEZ (318577242658 BY Digital Free Worldwide, baski her yere ucretsiz);
+v2 kararlari (Serdar 24 Eki "ok"): kargo profili BASKI profili 318080539024 (secenek B: AU ve diger ulkeler de ucretsiz,
+teslim gunleri ayni; profil_yaz modu);
 baski urunlerinin hazirligi ortak 4-7 gun (1517641240112), dijitaller oldugu gibi; uretim ortagi 5817638 ("Printing and
 Fulfillment Partner", US) baglanir; materials "matte art paper", "ink", "digital file"; baski SKU = ayni stilin FILE8X10
 SKU'su -> PRINT8X10. Bagimsiz inceleme (24 Eki) bulgulari: baski 77 ilanda burc_gift_yaz.py ile kaldirildi (profil,
@@ -14,7 +15,8 @@ Ilan basina hedef:
              5 stil x Shipped print 8x10: 29.00, stok >= 1, acik, hazirlik 1517641240112, SKU ...-PRINT8X10;
              readiness_state_on_property [514]
   ilan     : aciklamada baski satirlari (4 parca, her biri TAM 1 kez), materials hedef, uretim ortagi [5817638]
-  degismez : state active, baslik, etiket, kargo profili 318577242658, listing_type physical, stil-gorsel baglari (ada gore)
+  ilan     : kargo profili 318080539024 (once profil_yaz: tum hedefler ucretsiz)
+  degismez : state active, baslik, etiket, listing_type physical, stil-gorsel baglari (ada gore)
 Modlar: oku (plan + ham veri, yazma yok, DURMAZ: her ilan raporlanir) | yaz (--confirm BASKI_EKLE; --hepsi: BASKI_EKLE_HEPSI;
 ilk FAIL'de DUR). Ozet her durumda (istisna dahil) out/BY_BASKI_EKLE_<MOD>.json'a yazilir.
 """
@@ -330,7 +332,10 @@ def kilitli(store, shop, izin):
 
         def put(self, path, data):
             if "PROFIL" not in izin or not re.fullmatch(rf"/shops/{shop}/shipping-profiles/{PROFIL_BASKI}/destinations/\d+", path) \
-                    or set(data) != {"primary_cost", "secondary_cost", "min_delivery_days", "max_delivery_days"}:
+                    or not {"primary_cost", "secondary_cost", "min_delivery_days", "max_delivery_days"} <= set(data) \
+                    or not set(data) <= {"primary_cost", "secondary_cost", "min_delivery_days", "max_delivery_days",
+                                         "destination_country_iso", "destination_region"} \
+                    or ("destination_country_iso" in data) == ("destination_region" in data):
                 raise SystemExit(f"YASAK: PUT form {path} {sorted(data)}")
             return super().put(path, data)
 
@@ -532,8 +537,10 @@ def profil_adimi(api, shop, yaz, out):
     if yaz:
         for k in degis:
             _, hedef, a, b = PROFIL_HEDEF[k]
+            hedef_alan = {"destination_country_iso": k} if k not in ("EU", "EVERYWHERE") else \
+                {"destination_region": "eu" if k == "EU" else "none"}
             api.put(f"/shops/{shop}/shipping-profiles/{PROFIL_BASKI}/destinations/{i0[k][4]}",
-                    {"primary_cost": hedef, "secondary_cost": hedef, "min_delivery_days": a, "max_delivery_days": b})
+                    {"primary_cost": hedef, "secondary_cost": hedef, "min_delivery_days": a, "max_delivery_days": b, **hedef_alan})
         i1 = profil_imza(api.get(f"/shops/{shop}/shipping-profiles/{PROFIL_BASKI}") or {})
         R["sonra"] = {k: v[:4] for k, v in i1.items()}
         bek = {k: (float(v[1]), float(v[1]), v[2], v[3]) for k, v in PROFIL_HEDEF.items()}
@@ -546,9 +553,56 @@ def profil_adimi(api, shop, yaz, out):
 
 def profil_ucretsiz_mi(api, shop):
     i = profil_imza(api.get(f"/shops/{shop}/shipping-profiles/{PROFIL_BASKI}") or {})
-    bad = {k: v[:4] for k, v in i.items() if v[0] != 0 or v[1] != 0}
+    bad = {k: v[:4] for k, v in i.items() if v[0] != 0 or v[1] != 0 or k not in PROFIL_HEDEF or v[2:4] != PROFIL_HEDEF[k][2:4]}
     if set(i) != set(PROFIL_HEDEF) or bad:
         raise SystemExit(f"DUR: baski profili {PROFIL_BASKI} henuz her yere ucretsiz degil (once profil_yaz): {bad}")
+
+
+KOTA_ONEK = ("DUR: kota esigi", "DUR: kota sert tabani", "KOTA_BEKLE")   # etsy_common mesajlari + bu betik
+
+
+def kota_mi(metin):
+    return any(o in (metin or "") for o in KOTA_ONEK)
+
+
+def sonuc_etiketi(sonuc, oz_hata, tamam):
+    """TAMAM | KOTA (yalniz kota yuzunden yarim; tekrar kosu tamamlar) | HATA (gece zinciri durur)."""
+    if oz_hata and not kota_mi(oz_hata):
+        return "HATA"
+    if any(r["durum"].startswith(("FAIL", "DUR")) and not kota_mi(r["durum"]) for r in sonuc):
+        return "HATA"
+    return "TAMAM" if tamam else "KOTA"
+
+
+def token_kur():
+    from etsy_common import TokenStore, mask
+    k_, s_ = os.environ.get("ETSY_API_KEY", ""), os.environ.get("ETSY_SHARED_SECRET", "")
+    mask(k_); mask(s_)
+    store = TokenStore(os.environ["TOKEN_FILE"], k_, s_)
+    if store.needs_refresh():
+        store.refresh()
+    return store
+
+
+def profil_main(a):
+    OUT.mkdir(exist_ok=True)
+    oz_hata, R, api = None, None, None
+    try:
+        if a.mod == "profil_yaz" and a.confirm != ONAY_PROFIL:
+            raise SystemExit(f"DUR: profil_yaz icin --confirm {ONAY_PROFIL}")
+        store = token_kur()
+        shop = os.environ["ETSY_SHOP_ID"]
+        api = kilitli(store, shop, {"PROFIL"} if a.mod == "profil_yaz" else set())
+        R = profil_adimi(api, shop, a.mod == "profil_yaz", OUT)
+    except BaseException as e:  # noqa: BLE001
+        oz_hata = f"{type(e).__name__}: {str(e)[:400]}"
+        log("PROFIL HATA " + oz_hata)
+        (OUT / "PROFIL_HATA.json").write_text(json.dumps({"hata": oz_hata, "iz": traceback.format_exc()[-1500:]}, ensure_ascii=False, indent=1),
+                                              encoding="utf-8")
+    finally:
+        et = sonuc_etiketi([], oz_hata, oz_hata is None)
+        print(f"::notice::SONUC {et} {a.mod} degisecek {R.get('degisecek') if R else '-'} kota {api.remaining if api else '-'}", flush=True)
+    sys.exit(0 if oz_hata is None else 1)
 
 
 def main():
@@ -557,37 +611,21 @@ def main():
     ap.add_argument("--ilanlar", default="")
     ap.add_argument("--hepsi", action="store_true")
     ap.add_argument("--confirm", default="")
-    ap.add_argument("--tamam", default="", help="onceki kosularda PASS/ZATEN olan ilanlar (satir basina id); bunlar atlanir")
+    ap.add_argument("--tamam", default="", help="onceki kosularda PASS/ZATEN olan ilanlar (satir basina id); yalniz yaz modunda atlanir")
     a = ap.parse_args()
     if a.mod.startswith("profil"):
-        if a.mod == "profil_yaz" and a.confirm != ONAY_PROFIL:
-            raise SystemExit(f"DUR: profil_yaz icin --confirm {ONAY_PROFIL}")
-        from etsy_common import TokenStore, mask
-        k_, s_ = os.environ.get("ETSY_API_KEY", ""), os.environ.get("ETSY_SHARED_SECRET", "")
-        mask(k_); mask(s_)
-        store = TokenStore(os.environ["TOKEN_FILE"], k_, s_)
-        if store.needs_refresh():
-            store.refresh()
-        OUT.mkdir(exist_ok=True)
-        izin = {"PROFIL"} if a.mod == "profil_yaz" else set()
-        profil_adimi(kilitli(store, os.environ["ETSY_SHOP_ID"], izin), os.environ["ETSY_SHOP_ID"], a.mod == "profil_yaz", OUT)
-        sys.exit(0)
+        profil_main(a)
     yaz = a.mod == "yaz"
-    if yaz and a.confirm != (ONAY_HEPSI if a.hepsi else ONAY):
-        raise SystemExit(f"DUR: yaz icin --confirm {ONAY_HEPSI if a.hepsi else ONAY}")
-    if a.hepsi == bool(a.ilanlar.strip()):
-        raise SystemExit("DUR: ya --ilanlar ya --hepsi")
-    from etsy_common import TokenStore, mask
-    k_, s_ = os.environ.get("ETSY_API_KEY", ""), os.environ.get("ETSY_SHARED_SECRET", "")
-    mask(k_); mask(s_)
-    store = TokenStore(os.environ["TOKEN_FILE"], k_, s_)
-    if store.needs_refresh():
-        store.refresh()
-    shop = os.environ["ETSY_SHOP_ID"]
     OUT.mkdir(exist_ok=True)
-    sonuc, t0, oz_hata, api = [], time.time(), None, None
+    sonuc, t0, oz_hata, api, tamam = [], time.time(), None, None, False
     ids = []
     try:
+        if yaz and a.confirm != (ONAY_HEPSI if a.hepsi else ONAY):
+            raise SystemExit(f"DUR: yaz icin --confirm {ONAY_HEPSI if a.hepsi else ONAY}")
+        if a.hepsi == bool(a.ilanlar.strip()):
+            raise SystemExit("DUR: ya --ilanlar ya --hepsi")
+        store = token_kur()
+        shop = os.environ["ETSY_SHOP_ID"]
         izin = set()
         api = kilitli(store, shop, izin)
         tum = bolum_ids(api, shop)
@@ -625,9 +663,9 @@ def main():
             g = time.time() - t0
             log(f"[{i}/{len(ids)}] {100 * i // len(ids)}% gecen {g:.0f}s kalan ~{g / i * (len(ids) - i):.0f}s | {lid} {R['durum'][:160]} "
                 f"yazildi={R.get('yazildi')} kota={api.remaining}")
-            if R["durum"].startswith("DUR") and (yaz or "kota" in R["durum"] or R["yazildi"]):
+            if kota_mi(R["durum"]):
                 break
-            if R["durum"].startswith("KOTA_BEKLE"):
+            if R["durum"].startswith("DUR") and (yaz or R["yazildi"]):
                 break
             if yaz and R["durum"].startswith("FAIL"):
                 break
@@ -641,18 +679,16 @@ def main():
             say[k] = say.get(k, 0) + 1
         iyi = ("PASS", "ZATEN") if yaz else ("PLAN_OK", "ZATEN")   # KOTA_BEKLE = tamam degil (tekrar kosu tamamlar)
         tamam = oz_hata is None and len(sonuc) == len(ids) and all(r["durum"].split(" ")[0] in iyi for r in sonuc)
+        et = sonuc_etiketi(sonuc, oz_hata, tamam)
         oz = {"mod": a.mod, "istenen": len(ids), "islenen": len(sonuc), "sayim": say,
               "kota_son": api.remaining if api else None, "genel_hata": oz_hata, "durum": "PASS" if tamam else "FAIL",
-              "ilanlar": sonuc}
+              "sonuc": et, "ilanlar": sonuc}
         (OUT / f"BY_BASKI_EKLE_{a.mod.upper()}.json").write_text(json.dumps(oz, ensure_ascii=False, indent=1, default=str), encoding="utf-8")
         if yaz:
             (OUT / "TAMAM_EK.txt").write_text("".join(r["ilan"] + "\n" for r in sonuc if r["durum"].split(" ")[0] in ("PASS", "ZATEN")))
-        hata = [r for r in sonuc if r["durum"].startswith(("FAIL", "DUR")) and "kota" not in r["durum"].lower()]
-        sonuc_etiket = ("HATA" if (hata or (oz_hata and "kota" not in oz_hata.lower())) else
-                        "TAMAM" if tamam else "KOTA")
-        oz["sonuc"] = sonuc_etiket
         log("OZET " + json.dumps({k: v for k, v in oz.items() if k != "ilanlar"}, ensure_ascii=False))
-        print(f"::notice::SONUC {sonuc_etiket} islenen {len(sonuc)}/{len(ids)} sayim {say} kota {oz['kota_son']}", flush=True)
+        print(f"::notice::SONUC {et} {a.mod} islenen {len(sonuc)}/{len(ids)} zaten {say.get('ZATEN', 0)} sayim {say} kota {oz['kota_son']}",
+              flush=True)
     sys.exit(0 if tamam else 1)
 
 

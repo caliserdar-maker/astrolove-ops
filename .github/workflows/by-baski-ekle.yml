@@ -1,7 +1,8 @@
 name: by-baski-ekle
+run-name: "by-baski-ekle ${{ inputs.mod }} ${{ inputs.ilanlar || 'hepsi' }}"
 
 # Serdar onayi 24 Eki 2026 (Genel Merkez): yil donumu (bolum 60895624) ilanlarina "Shipped print 8x10" $29 + baski ayarlari
-# (v2: hazirlik 4-7 gun, uretim ortagi 5817638, materials, SKU; kargo profili degismez). scripts/etsy/by_baski_ekle.py.
+# (v2: hazirlik 4-7 gun, uretim ortagi 5817638, materials, SKU; kargo: baski profili 318080539024, secenek B her yere ucretsiz).
 # oku = plan (yazma yok); yaz = BASKI_EKLE (tek/liste), ilanlar bos = 78 ilan icin BASKI_EKLE_HEPSI.
 # Cikti: Drive TEMP/BY_BASKI_EKLE/<kosu>/
 
@@ -76,13 +77,13 @@ jobs:
           T="gdrive:ASTROLOVE/TEMP/BY_BASKI_EKLE/TAMAM.txt"
           rclone copyto "$T" _work/tamam.txt 2>/dev/null || : > _work/tamam.txt
           rc=0; python scripts/etsy/by_baski_ekle.py "$MOD" ${SEC[@]+"${SEC[@]}"} --confirm "$ONAY" --tamam _work/tamam.txt || rc=$?
-          if [ "$MOD" = yaz ] && [ -f out/TAMAM_EK.txt ]; then
-            cat _work/tamam.txt out/TAMAM_EK.txt | grep -E '^[0-9]+$' | sort -u > _work/tamam_yeni.txt
-            rclone copyto _work/tamam_yeni.txt "$T" -q || { echo "::error::TAMAM listesi yazilamadi"; exit 1; }
-          fi
           if [ -d out ]; then
             python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/ETSY_TOKEN.json out || { echo "::error::ciktida sir"; exit 1; }
             rclone copy out "gdrive:ASTROLOVE/TEMP/BY_BASKI_EKLE/${GITHUB_RUN_ID}" -q || { echo "::error::Drive yukleme basarisiz"; exit 1; }
+          fi
+          if [ "$MOD" = yaz ] && [ -s out/TAMAM_EK.txt ]; then
+            { cat _work/tamam.txt out/TAMAM_EK.txt | grep -E '^[0-9]+$' || true; } | sort -u > _work/tamam_yeni.txt
+            rclone copyto _work/tamam_yeni.txt "$T" -q || { echo "::error::TAMAM listesi yazilamadi"; exit 1; }
           fi
           exit $rc
       - name: Token geri yaz

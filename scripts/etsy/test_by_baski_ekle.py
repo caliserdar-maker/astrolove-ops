@@ -262,6 +262,11 @@ def test():
     pa = PApi()
     r = E.profil_adimi(pa, "1", True, out)
     assert sorted(r["degisecek"]) == ["AU", "EVERYWHERE"] and len(pa.puts) == 2
+    govdeler = {path.rsplit("/", 1)[1]: d for path, d in pa.puts}
+    assert govdeler["13"] == {"primary_cost": 0, "secondary_cost": 0, "min_delivery_days": 5, "max_delivery_days": 10,
+                              "destination_country_iso": "AU"}, govdeler
+    assert govdeler["14"] == {"primary_cost": 0, "secondary_cost": 0, "min_delivery_days": 7, "max_delivery_days": 21,
+                              "destination_region": "none"}, govdeler
     assert all(v[0] == 0 for v in r["sonra"].values()) and r["sonra"]["EVERYWHERE"][2:] == (7, 21)
     E.profil_ucretsiz_mi(pa, "1")
     assert E.profil_adimi(pa, "1", True, out)["degisecek"] == []
@@ -274,7 +279,33 @@ def test():
     except SystemExit:
         pass
     ok += 1
-    print(f"test_by_baski_ekle: {ok}/19 PASS")
+    # 20 SONUC etiketi: kota -> KOTA, kota disi -> HATA, hepsi iyi -> TAMAM
+    se = E.sonuc_etiketi
+    assert se([{"durum": "PASS"}], None, True) == "TAMAM"
+    assert se([{"durum": "PASS"}, {"durum": "KOTA_BEKLE kalan 12 < 16 + 10 (yazma yok)"}], None, False) == "KOTA"
+    assert se([{"durum": "DUR: DUR: kota sert tabani: kalan 9 < 10"}], None, False) == "KOTA"
+    assert se([], "SystemExit: DUR: kota esigi: kalan 4 < 10 (kosu baslamadi)", False) == "KOTA"
+    assert se([{"durum": "FAIL_DUR: kargo profili 1"}], None, False) == "HATA"
+    assert se([{"durum": "DUR: Etsy 400 kotasiz"}], None, False) == "HATA"
+    assert se([], "SystemExit: invalid_grant", False) == "HATA"
+    assert se([{"durum": "FAIL"}], None, False) == "HATA"
+    ok += 1
+    # 21 kilit: profil PUT'u yalniz izinle, ulke/bolgeden tam biri
+    izin = {"PROFIL"}
+    k = E.kilitli(S(), "1", izin)
+    yol = f"/shops/1/shipping-profiles/{E.PROFIL_BASKI}/destinations/5"
+    taban = {"primary_cost": 0, "secondary_cost": 0, "min_delivery_days": 5, "max_delivery_days": 10}
+    for d in (taban, {**taban, "destination_country_iso": "AU", "destination_region": "none"}, {**taban, "title": "x"}):
+        try:
+            k.put(yol, d); raise AssertionError(f"kilit gecti {d}")
+        except SystemExit as e:
+            assert "YASAK" in str(e)
+    try:
+        E.kilitli(S(), "1", set()).put(yol, {**taban, "destination_country_iso": "AU"}); raise AssertionError("izinsiz gecti")
+    except SystemExit as e:
+        assert "YASAK" in str(e)
+    ok += 1
+    print(f"test_by_baski_ekle: {ok}/21 PASS")
 
 
 if __name__ == "__main__":
