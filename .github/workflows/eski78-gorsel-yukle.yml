@@ -7,6 +7,8 @@ name: eski78-gorsel-yukle
 # kendi Etsy galeri okumasindan, ilk yazimdan once (Serdar 24 Eki madde 4: eski kart kaydina bagli degil; kuru ve devamda yok).
 # Cikti Drive ASTROLOVE/TEMP/DENETIM_20261021/GALERI23_YUKLE/<run_id>/.
 # Yuklenen gorsellerin CDN NCC kontrolu kilitsiz galeri-ornek ile yapilir (KILIT SURESI kurali).
+# mod=kurtar (Serdar 24 Eki): kota disi DUR'dan sonra devam_kosu'nun DEVAM kaydi (plan, yuklenen kimlikler, sha256, LISTE ve uretim
+# kosusu) + iki ardisik ayni canli galeri okumasiyla kaldigi yerden; bizim alt metinli gorsel yeniden yuklenmez, belirsizde DUR.
 # mod=bag (Serdar 24 Eki): yukleme bittikten sonra YALNIZ renk baglari, TEK variation-images cagrisi (onay SERDAR_BAG24), gorsele
 # yazim yok; galeri 17 / sira / alt metin hedefle ayni degilse yazmaz. mod=oku: salt okuma (galeri + baglar + korunanlar), yazim yok.
 # bag/oku icin devam_kosu = yukleme kosusu (DEVAM_<ilan>.json yuklenen kimlikleri). Cikti BAG_<ilan>.json / OKU_<ilan>.json.
@@ -20,8 +22,8 @@ on:
     inputs:
       ilan: {description: "tek ilan (yalniz rakam)", required: true, default: "4570155846"}
       duzelt_kosu: {description: "galeri23-duzelt kosusu (DUZELT_<kosu>)", required: true, default: ""}
-      mod: {description: "kuru | yukle | bag | oku", required: true, default: "kuru"}
-      onay: {description: "yukle icin SERDAR_GALERI23, bag icin SERDAR_BAG24", required: false, default: ""}
+      mod: {description: "kuru | yukle | kurtar | bag | oku (kurtar: kota disi DUR'dan sonra devam_kosu kaydiyla surdur)", required: true, default: "kuru"}
+      onay: {description: "yukle / kurtar icin SERDAR_GALERI23, bag icin SERDAR_BAG24", required: false, default: ""}
       bag: {description: "bag/oku: beklenen 5 bag 'Renk=image_id,...' (bos = LISTE/manifest/DEVAM'dan)", required: false, default: ""}
       devam_kosu: {description: "yarim kalan onceki yukleme kosusu (DEVAM_<ilan>.json oradan); bos = yeni", required: false, default: ""}
 
@@ -40,12 +42,12 @@ jobs:
           python-version: "3.12"
       - run: |
           set -euo pipefail
-          [[ "${{ inputs.ilan }}" =~ ^[0-9]+$ && "${{ inputs.duzelt_kosu }}" =~ ^[0-9]+$ && "${{ inputs.mod }}" =~ ^(kuru|yukle|bag|oku)$ ]] || { echo "::error::girdi"; exit 1; }
+          [[ "${{ inputs.ilan }}" =~ ^[0-9]+$ && "${{ inputs.duzelt_kosu }}" =~ ^[0-9]+$ && "${{ inputs.mod }}" =~ ^(kuru|yukle|kurtar|bag|oku)$ ]] || { echo "::error::girdi"; exit 1; }
           case "${{ inputs.mod }}" in
-            yukle) [ "${{ inputs.onay }}" = SERDAR_GALERI23 ] || { echo "::error::onay yok"; exit 1; } ;;
+            yukle|kurtar) [ "${{ inputs.onay }}" = SERDAR_GALERI23 ] || { echo "::error::onay yok"; exit 1; } ;;
             bag) [ "${{ inputs.onay }}" = SERDAR_BAG24 ] || { echo "::error::onay yok"; exit 1; } ;;
           esac
-          case "${{ inputs.mod }}" in bag|oku) [[ "${{ inputs.devam_kosu }}" =~ ^[0-9]+$ ]] || { echo "::error::bag/oku icin devam_kosu"; exit 1; } ;; esac
+          case "${{ inputs.mod }}" in bag|oku|kurtar) [[ "${{ inputs.devam_kosu }}" =~ ^[0-9]+$ ]] || { echo "::error::bag/oku/kurtar icin devam_kosu"; exit 1; } ;; esac
           [[ "${{ inputs.bag }}" =~ ^([A-Za-z ]+=[0-9]+(,[A-Za-z ]+=[0-9]+)*)?$ ]] || { echo "::error::bag girdisi"; exit 1; }
           pip install -q requests==2.34.2 numpy==2.1.3 pillow==11.0.0
           curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null
@@ -107,12 +109,16 @@ jobs:
           L: ${{ inputs.ilan }}
           MOD: ${{ inputs.mod }}
           BAG: ${{ inputs.bag }}
+          K: ${{ inputs.duzelt_kosu }}
         run: |
           set +e -o pipefail
-          args=(--ilan "$L" --liste _work/LISTE.csv --hedef-dir _work/hedef --manifest _work/manifest.json --out _out)
+          args=(--ilan "$L" --liste _work/LISTE.csv --hedef-dir _work/hedef --manifest _work/manifest.json --out _out --uretim-kosu "$K")
+          # yazan modlarda DEVAM her yazimdan once / sonra Drive'a da yazilir (Serdar 24 Eki madde 3: runner kaybinda kayit kalir)
+          case "$MOD" in yukle|kurtar) export DEVAM_HEDEF="$O/${GITHUB_RUN_ID}/DEVAM_$L.json" ;; esac
           case "$MOD" in
             kuru) args+=(--kuru) ;;
             yukle) args+=(--confirm ESKI23_GALERI) ;;
+            kurtar) args+=(--confirm ESKI23_GALERI --kurtar) ;;
             bag) args+=(--mod bag --devam _work/DEVAM.json --confirm ESKI23_BAG ${BAG:+--bag "$BAG"}) ;;
             oku) args+=(--mod oku --devam _work/DEVAM.json ${BAG:+--bag "$BAG"}) ;;
           esac
