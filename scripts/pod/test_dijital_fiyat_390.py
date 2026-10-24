@@ -122,11 +122,11 @@ def test():
         for j, (fm, pr) in enumerate([("Digital card 5x7", 5.0), ("Digital file 8x10", 9.0), ("Shipped print 8x10", 29.0)])],
         "price_on_property": [514]}
     dig, diger, h, z = M.plan(yd)
-    assert (len(dig), len(diger), h) == (3, 6, []), (len(dig), len(diger), h)
+    assert (len(dig), len(diger), h) == (6, 3, []), (len(dig), len(diger), h)
     api = SahteApi(yd); api.vimg = [{"property_id": 513, "value_id": 70 + i, "image_id": 900 + i} for i in range(3)]
     s = M.ilan_isle(api, "1", "118", yaz=True)
     fy = sorted({(p["property_values"][1]["values"][0], p["offerings"][0]["price"]) for p in api.puts[0]["products"]})
-    assert s["durum"] == "PASS" and fy == [("Digital card 5x7", 5.0), ("Digital file 8x10", 3.9), ("Shipped print 8x10", 29.0)], (s, fy); ok += 1
+    assert s["durum"] == "PASS" and fy == [("Digital card 5x7", 3.9), ("Digital file 8x10", 4.9), ("Shipped print 8x10", 29.0)], (s, fy); ok += 1
     M.SECILI = M.AILE["poster"]
     print(f"TEST {ok}/11 PASS")
 

@@ -24,16 +24,16 @@ from pathlib import Path
 KOK = Path(__file__).resolve().parent
 sys.path[:0] = [str(KOK), str(KOK.parent / "etsy")]
 
-YENI = 3.90
-ESKI_IZINLI = (9.00,)               # bugunku dijital fiyat (canli 9.00, 24 Eki okuma)
 ONAY = "DIJITAL_390"
 ONAY_HEPSI = "DIJITAL_390_HEPSI"   # 78 ilan birden yazmak icin ayri onay
 INV_YOL = "/listings/{lid}/inventory?max_variations_supported=3"   # 3 menulu ilan; parametresiz PUT 409 (REFERANS_ILAN_CL.md:49)
 IDS_YOL = KOK.parents[1] / "data" / "pod" / "pod78_ids.csv"
 # AILE (Serdar 24 Eki): poster = 78 poster ilani (Format "Digital File"); yd = 78 yil donumu ilani, bolum 60895624
 # ("1st Anniversary Gifts"), Format "Digital file 8x10" (by78_taslak.py FORMATS; SKU bos, Style x Format).
-AILE = {"poster": {"deger": "Digital File", "sku_digital": True},
-        "yd": {"deger": "Digital file 8x10", "sku_digital": False, "bolum": 60895624}}
+# hedef: Format degeri -> (yeni fiyat, izinli eski fiyatlar). Serdar 24 Eki: poster dijital 3.90; yil donumu kart 3.90, dosya 4.90.
+AILE = {"poster": {"hedef": {"Digital File": (3.90, (9.00,))}, "sku_digital": True},
+        "yd": {"hedef": {"Digital card 5x7": (3.90, (5.00,)), "Digital file 8x10": (4.90, (9.00,))},
+               "sku_digital": False, "bolum": 60895624}}
 SECILI = AILE["poster"]
 OUT = Path("out")
 ISTEK_TAHMIN = 7                     # ilan basi: 3 GET + 1 PUT + 3 GET (olasi renk onarimi +2, 10 tabani karsilar)
@@ -78,9 +78,21 @@ def pv_metin(pr):
     return [str(v) for pv in pr.get("property_values") or [] for v in (pv.get("values") or [])]
 
 
+def format_degeri(pr):
+    for pv in pr.get("property_values") or []:
+        if (pv.get("property_name") or "").lower() == "format" and len(pv.get("values") or []) == 1:
+            return pv["values"][0]
+    return None
+
+
+def yeni_fiyat(pr):
+    """Hedef kapsamindaysa yeni fiyat, degilse None."""
+    h = SECILI["hedef"].get(format_degeri(pr))
+    return h[0] if h else None
+
+
 def dijital_mi(pr):
-    b = any((pv.get("property_name") or "").lower() == "format" and list(pv.get("values") or []) == [SECILI["deger"]]
-            for pv in pr.get("property_values") or [])
+    b = format_degeri(pr) in SECILI["hedef"]
     if not SECILI["sku_digital"]:
         return b, b
     a = (pr.get("sku") or "").upper().endswith("-DIGITAL")
@@ -126,14 +138,18 @@ def plan(inv):
         h.append("dijital urun bulunamadi")
     if not diger:
         h.append("dijital disi urun bulunamadi (beklenmeyen yapi)")
-    dfiyat = sorted({f for p in dig for f in fiyatlar(p)})
-    zaten = bool(dig) and dfiyat == [YENI]
-    if dig and not zaten and any(f not in ESKI_IZINLI for f in dfiyat):
-        h.append(f"dijital eski fiyat beklenmeyen: {dfiyat} (izinli {ESKI_IZINLI})")
-    if dig and len(dfiyat) > 1 and not zaten:
-        h.append(f"dijital urunlerde birden cok fiyat: {dfiyat}")
-    if any(f <= YENI for p in diger for f in fiyatlar(p)):
-        h.append("dijital disi bir urunun fiyati 3.90 veya alti (beklenmeyen)")
+    zaten = bool(dig) and all(fiyatlar(p) == [yeni_fiyat(p)] for p in dig)
+    for deger, (yeni, eski) in SECILI["hedef"].items():
+        grup = [p for p in dig if format_degeri(p) == deger]
+        if not grup:
+            h.append(f"'{deger}' urunu bulunamadi")
+            continue
+        gf = sorted({f for p in grup for f in fiyatlar(p)})
+        if gf != [yeni] and (len(gf) > 1 or gf[0] not in eski):
+            h.append(f"'{deger}' fiyati beklenmeyen: {gf} (izinli {eski} ya da hedef {yeni})")
+    tavan = max(v[0] for v in SECILI["hedef"].values())
+    if any(f <= tavan for p in diger for f in fiyatlar(p)):
+        h.append(f"dijital disi bir urunun fiyati {tavan} veya alti (beklenmeyen)")
     return dig, diger, h, zaten
 
 
@@ -154,7 +170,7 @@ def govde(inv):
             pvs.append(d)
         offs = []
         for o in pr.get("offerings") or []:
-            off = {"price": YENI if (a and b) else para(o.get("price")),
+            off = {"price": yeni_fiyat(pr) if (a and b) else para(o.get("price")),
                    "quantity": o.get("quantity"), "is_enabled": bool(o.get("is_enabled"))}
             if o.get("readiness_state_id"):
                 off["readiness_state_id"] = o["readiness_state_id"]
@@ -197,7 +213,7 @@ def ilan_isle(api, shop, lid, yaz):
     metin = [m.group(0) for alan in ("description", "personalization_instructions")
              for m in METIN_FIYAT.finditer(L.get(alan) or "")]
     sonuc = {"ilan": lid, "state": L.get("state"), "dijital_n": len(dig), "diger_n": len(diger),
-             "dijital_eski": sorted({f for p in dig for f in fiyatlar(p)}), "kapi": h,
+             "dijital_eski": sorted({f for p in dig for f in fiyatlar(p)}), "hedef": {k: v[0] for k, v in SECILI["hedef"].items()}, "kapi": h,
              "aciklamada_fiyat": metin, "renk_bag_once": renk_haritasi(inv, sn["vimg"]), "kota": api.remaining}
     if L.get("state") != "active":
         sonuc["durum"] = "ATLANDI_STATE"
@@ -241,7 +257,7 @@ def ilan_isle(api, shop, lid, yaz):
         q = sonra.get(k)
         if q is None:
             continue
-        hedef = [YENI] if k in dset else fiyatlar(p)
+        hedef = [yeni_fiyat(p)] if k in dset else fiyatlar(p)
         if fiyatlar(q) != hedef:
             f.append(f"fiyat {p.get('sku')} {k[1:]}: {fiyatlar(q)} != {hedef}")
         if (q.get("sku") or "") != (p.get("sku") or "") or imza(q)[2] != imza(p)[2]:
