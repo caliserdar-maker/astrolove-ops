@@ -61,6 +61,10 @@ def dijital_mi(pr):
     return a, b
 
 
+def anahtar(pr):
+    return tuple((pv.get("property_id"), tuple(pv.get("values") or [])) for pv in pr.get("property_values") or [])
+
+
 def imza(pr):
     """Fiyat disindaki her alan (karsilastirma icin)."""
     pvs = tuple((pv.get("property_id"), tuple(pv.get("values") or []), tuple(pv.get("value_ids") or []))
@@ -80,11 +84,11 @@ def plan(inv):
     urunler = inv.get("products") or []
     if not urunler:
         h.append("envanter bos")
-    skular = [p.get("sku") or "" for p in urunler]
-    if any(not s for s in skular):
+    if any(not (p.get("sku") or "") for p in urunler):
         h.append("SKU'su bos urun var")
-    if len(set(skular)) != len(skular):
-        h.append("tekrar eden SKU var")
+    anahtarlar = [anahtar(p) for p in urunler]          # SKU renkler arasinda tekrar eder (sku_on_property), anahtar = ozellik degerleri
+    if len(set(anahtarlar)) != len(anahtarlar):
+        h.append("tekrar eden ozellik kombinasyonu var")
     for pr in urunler:
         a, b = dijital_mi(pr)
         if a != b:
@@ -192,23 +196,20 @@ def ilan_isle(api, shop, lid, yaz):
     sn2 = anlik(api, shop, lid)
     L2, inv2 = sn2["listing"], sn2["inventory"]
     f = []
-    once = {p.get("sku"): p for p in inv.get("products") or []}
-    sonra = {p.get("sku"): p for p in inv2.get("products") or []}
-    if set(once) != set(sonra):
-        f.append(f"SKU kumesi degisti: eksik {sorted(set(once) - set(sonra))[:3]} fazla {sorted(set(sonra) - set(once))[:3]}")
-    dset = {p.get("sku") for p in dig}
-    for s, p in once.items():
-        q = sonra.get(s)
+    once = {anahtar(p): p for p in inv.get("products") or []}
+    sonra = {anahtar(p): p for p in inv2.get("products") or []}
+    if set(once) != set(sonra) or len(sonra) != len(inv2.get("products") or []):
+        f.append(f"urun kumesi degisti: once {len(once)} sonra {len(inv2.get('products') or [])}")
+    dset = {anahtar(p) for p in dig}
+    for k, p in once.items():
+        q = sonra.get(k)
         if q is None:
             continue
-        hedef = [YENI] if s in dset else fiyatlar(p)
+        hedef = [YENI] if k in dset else fiyatlar(p)
         if fiyatlar(q) != hedef:
-            f.append(f"fiyat {s}: {fiyatlar(q)} != {hedef}")
-        if imza(q)[1:] != imza(p)[1:]:
-            pv_eski = [(x[0], x[1]) for x in imza(p)[1]]
-            pv_yeni = [(x[0], x[1]) for x in imza(q)[1]]
-            if pv_eski != pv_yeni or imza(q)[2] != imza(p)[2]:
-                f.append(f"fiyat disi alan degisti: {s}")
+            f.append(f"fiyat {p.get('sku')} {k[1:]}: {fiyatlar(q)} != {hedef}")
+        if (q.get("sku") or "") != (p.get("sku") or "") or imza(q)[2] != imza(p)[2]:
+            f.append(f"fiyat disi alan degisti: {p.get('sku')} {k[1:]}")
     for k in ("price_on_property", "quantity_on_property", "sku_on_property"):
         if sorted(inv.get(k) or []) != sorted(inv2.get(k) or []):
             f.append(f"{k} degisti")

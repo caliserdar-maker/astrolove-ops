@@ -15,13 +15,13 @@ BOY = ["8x10", "A4", "11x14"]
 def ornek_inv(dijital_fiyat=9.00):
     pr = []
     for b in BOY:
-        pr.append({"sku": f"POD-ARI_LEO-{b}-DIGITAL", "property_values": [
-            {"property_id": 513, "property_name": "Format", "values": ["Digital File"], "value_ids": [1]},
-            {"property_id": 200, "property_name": "Primary color", "values": ["All 5 colors, Digital"], "value_ids": [90]},
-            {"property_id": 100, "property_name": "Size", "values": [b], "value_ids": [10 + BOY.index(b)]}],
-            "offerings": [{"price": {"amount": int(dijital_fiyat * 100), "divisor": 100}, "quantity": 999, "is_enabled": True}]})
         for i, r in enumerate(RENK):
-            pr.append({"sku": f"POD-ARI_LEO-{r[:2].upper()}-{b}", "property_values": [
+            pr.append({"sku": f"POD-ARI_LEO-{b}-DIGITAL", "property_values": [
+                {"property_id": 513, "property_name": "Format", "values": ["Digital File"], "value_ids": [1]},
+                {"property_id": 200, "property_name": "Primary color", "values": [r], "value_ids": [50 + i]},
+                {"property_id": 100, "property_name": "Size", "values": [b], "value_ids": [10 + BOY.index(b)]}],
+                "offerings": [{"price": {"amount": int(dijital_fiyat * 100), "divisor": 100}, "quantity": 999, "is_enabled": True}]})
+            pr.append({"sku": f"POD-ARI_LEO-{b}", "property_values": [
                 {"property_id": 513, "property_name": "Format", "values": ["Print"], "value_ids": [2]},
                 {"property_id": 200, "property_name": "Primary color", "values": [r], "value_ids": [50 + i]},
                 {"property_id": 100, "property_name": "Size", "values": [b], "value_ids": [10 + BOY.index(b)]}],
@@ -71,7 +71,7 @@ def test():
     M.OUT = Path(tmp)
     # 1 plan: 3 dijital, 15 baski, kapi temiz
     dig, diger, h, zaten = M.plan(ornek_inv())
-    assert (len(dig), len(diger), h, zaten) == (3, 15, [], False), (len(dig), len(diger), h, zaten); ok += 1
+    assert (len(dig), len(diger), h, zaten) == (15, 15, [], False), (len(dig), len(diger), h, zaten); ok += 1
     # 2 govde: yalniz dijital 3.90, baski fiyatlari ayni
     b = M.govde(ornek_inv())
     fy = {p["sku"]: p["offerings"][0]["price"] for p in b["products"]}
