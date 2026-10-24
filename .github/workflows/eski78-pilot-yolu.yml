@@ -4,6 +4,7 @@ name: eski78-pilot-yolu
 # tek fark kodun sabit commit'ten cekilmesi (actions/checkout ref) ve sha kaniti:
 #   mod kuru / yukle -> 1059b7730d300ab653c0304020cd49a7309287d3 (pilot yukleme kosusu 40091265199 bu kodla kostu)
 #   mod bag / oku    -> 45233945048c403623aeae309fe3a7f49c517702 (pilot bag 40092623702 ve oku 40092712384 bu kodla kostu)
+# Ikinci fark (Serdar 24 Eki onayi): Etsy kilidi kumesi main'in .github/workflows'undan (_main, kilit_bekle.py --kok _main).
 # (Etiket push'u ajan proxy'sinde 403; izinli dal main'de olmayan bir commit tasiyor, zorla push yapilmadi.)
 
 # 23 eski galerili poster ilani: galeriyi hedef duzene getirir - scripts/etsy/eski78_gorsel_yukle.py (Serdar 24 Eki B4; 17 Eki surumunun
@@ -114,10 +115,23 @@ jobs:
             rclone copyto "$O/$DV/DEVAM_$L.json" "_out/DEVAM_$L.json" || { echo "::error::DEVAM_$L.json yok ($DV)"; exit 1; }
           fi
           rclone copy _out "$O/${GITHUB_RUN_ID}" -q
+      # Serdar 24 Eki (kilit duzeltmesi): kilit kumesi sabit commit agacindan degil main'in .github/workflows'undan okunur.
+      # Sabit agacta by-baski-ekle / dijital-fiyat-390 / bu dosya yoktu (156 vs 159); 40122397497 by-baski-ekle 40122058396 ile
+      # ayni anda Etsy'ye yazdi. Pilot kodu (scripts/) sabit commit'te kalir; _main yalniz kume icin okunur.
+      - name: Kilit kumesi icin main is akislari (yalniz .github/workflows)
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: _main
+          sparse-checkout: .github/workflows
+          persist-credentials: false
       - name: Etsy kilidi (sira bekle, iptal yok)
         env:
           GH_TOKEN: ${{ github.token }}
-        run: python3 scripts/etsy/kilit_bekle.py
+        run: |
+          set -euo pipefail
+          [ -f _main/.github/workflows/eski78-pilot-yolu.yml ] || { echo "::error::_main is akislari yok; kilitsiz devam edilmez"; exit 1; }
+          python3 scripts/etsy/kilit_bekle.py --kok _main
       - name: Token
         run: |
           set -euo pipefail
