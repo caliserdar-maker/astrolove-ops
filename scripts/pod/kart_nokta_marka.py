@@ -351,18 +351,29 @@ def main():
     ap.add_argument("--cift", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--kart", default="", help="yalniz bu siralar (virgullu); bos = hepsi")
+    ap.add_argument("--manifest", default="", help="hedef manifest: dosya NN_<manifestteki id>.jpg secilir (24 Eki: YEDEK klasorunde "
+                    "ayni siranin eski surumleri de var, kosu 40064765818)")
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
     b1, b2 = [x.capitalize() for x in a.cift.split("_")]
     oz = ozellik(b1, b2)
     secim = {int(x) for x in a.kart.split(",") if x} or set(oz)
     D = Image.open(a.duvar).convert("RGB")
-    dosya = {int(f.split("_", 1)[0]): os.path.join(a.hedef_dir, f) for f in os.listdir(a.hedef_dir)
-             if re.match(r"^\d\d_\d+\.jpg$", f)}
+    if a.manifest:
+        man = json.load(open(a.manifest, encoding="utf-8"))
+        dosya = {int(g["rank"]): os.path.join(a.hedef_dir, f"{int(g['rank']):02d}_{g['listing_image_id']}.jpg") for g in man["galeri"]}
+    else:
+        dosya = {}
+        for f in sorted(os.listdir(a.hedef_dir)):
+            if re.match(r"^\d\d_\d+\.jpg$", f):
+                n = int(f.split("_", 1)[0])
+                if n in dosya:
+                    raise SystemExit(f"DUR: sira {n} icin birden cok dosya ({os.path.basename(dosya[n])}, {f}); --manifest verin")
+                dosya[n] = os.path.join(a.hedef_dir, f)
     R, tum_hata = {}, []
     for sira in sorted(secim):
-        if sira not in dosya:
-            tum_hata.append(f"r{sira}: hedef dosya yok"); continue
+        if sira not in dosya or not os.path.exists(dosya[sira]):
+            tum_hata.append(f"r{sira}: hedef dosya yok ({os.path.basename(dosya.get(sira, '?'))})"); continue
         if D.size != Image.open(dosya[sira]).size:
             tum_hata.append(f"r{sira}: boyut duvarla ayni degil"); continue
         p, rapor, hata = kart_isle(dosya[sira], D, a.fd, oz[sira], a.out, sira)

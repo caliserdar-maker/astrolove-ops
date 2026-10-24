@@ -82,9 +82,11 @@ jobs:
           rclone copyto "$D/GALERI_YAYIN/KOSU_20261021_1030/$L/yedek/manifest.json" $W/manifest.json -q || { echo "$L $C manifest_yok" >> _out/OZET.txt; exit 0; }
           rclone copy "$D/GALERI_YAYIN/YEDEK/${L}_${C}" $W/hedef --include "*.jpg" -q
           S=$(grep -E "/SONRA_${L}\.json$" _work/sonra.txt | sort -t/ -k1,1n | tail -1)
-          python3 scripts/pod/kart_nokta_marka.py --hedef-dir $W/hedef --duvar _work/duvar.png --fd fonts --cift $C --out $O/KART > $O/kart.log 2>&1
+          python3 scripts/pod/kart_nokta_marka.py --hedef-dir $W/hedef --manifest $W/manifest.json --duvar _work/duvar.png --fd fonts --cift $C --out $O/KART > $O/kart.log 2>&1
           K=$?
-          cp $W/hedef/*.jpg $W/duz/ && cp $O/KART/[0-9][0-9]_*.jpg $W/duz/ 2>/dev/null
+          # yalniz manifestteki dosyalar (YEDEK klasorunde ayni siranin eski surumleri de var)
+          python3 -c "import json,shutil;[shutil.copy(f'$W/hedef/{int(g[\"rank\"]):02d}_{g[\"listing_image_id\"]}.jpg','$W/duz/') for g in json.load(open('$W/manifest.json'))['galeri']]"
+          cp $O/KART/[0-9][0-9]_*.jpg $W/duz/ 2>/dev/null
           if [ -n "$S" ]; then
             rclone copyto "$D/DENETIM_20261021/KART_SIL/$S" $W/simdi.json -q
             python3 scripts/etsy/galeri_ornek.py --hedef-manifest $W/manifest.json --hedef-dir $W/duz --simdi $W/simdi.json --out $O > $O/ornek.log 2>&1
