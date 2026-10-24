@@ -73,7 +73,13 @@ jobs:
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
           if [ -n "$ILANLAR" ]; then SEC=(--ilanlar "$ILANLAR"); else SEC=(--hepsi); fi
           case "$MOD" in profil_*) SEC=();; esac
-          rc=0; python scripts/etsy/by_baski_ekle.py "$MOD" ${SEC[@]+"${SEC[@]}"} --confirm "$ONAY" || rc=$?
+          T="gdrive:ASTROLOVE/TEMP/BY_BASKI_EKLE/TAMAM.txt"
+          rclone copyto "$T" _work/tamam.txt 2>/dev/null || : > _work/tamam.txt
+          rc=0; python scripts/etsy/by_baski_ekle.py "$MOD" ${SEC[@]+"${SEC[@]}"} --confirm "$ONAY" --tamam _work/tamam.txt || rc=$?
+          if [ "$MOD" = yaz ] && [ -f out/TAMAM_EK.txt ]; then
+            cat _work/tamam.txt out/TAMAM_EK.txt | grep -E '^[0-9]+$' | sort -u > _work/tamam_yeni.txt
+            rclone copyto _work/tamam_yeni.txt "$T" -q || { echo "::error::TAMAM listesi yazilamadi"; exit 1; }
+          fi
           if [ -d out ]; then
             python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/ETSY_TOKEN.json out || { echo "::error::ciktida sir"; exit 1; }
             rclone copy out "gdrive:ASTROLOVE/TEMP/BY_BASKI_EKLE/${GITHUB_RUN_ID}" -q || { echo "::error::Drive yukleme basarisiz"; exit 1; }

@@ -557,6 +557,7 @@ def main():
     ap.add_argument("--ilanlar", default="")
     ap.add_argument("--hepsi", action="store_true")
     ap.add_argument("--confirm", default="")
+    ap.add_argument("--tamam", default="", help="onceki kosularda PASS/ZATEN olan ilanlar (satir basina id); bunlar atlanir")
     a = ap.parse_args()
     if a.mod.startswith("profil"):
         if a.mod == "profil_yaz" and a.confirm != ONAY_PROFIL:
@@ -593,6 +594,12 @@ def main():
         ids = tum if a.hepsi else [x.strip() for x in a.ilanlar.split(",") if x.strip()]
         if [x for x in ids if x not in tum]:
             raise SystemExit("DUR: ilan listesi yil donumu bolumu disinda")
+        onceden = set()
+        if yaz and a.tamam and Path(a.tamam).exists():
+            onceden = {x.strip() for x in Path(a.tamam).read_text().split() if x.strip().isdigit()}
+        atlanan = [x for x in ids if x in onceden]
+        ids = [x for x in ids if x not in onceden]
+        log(f"onceki kosularda tamam: {len(atlanan)} ilan atlandi; bu kosuda {len(ids)} ilan")
         if yaz:
             izin.update(ids)
         pp = (api.get(f"/shops/{shop}/production-partners") or {}).get("results") or []
@@ -638,7 +645,14 @@ def main():
               "kota_son": api.remaining if api else None, "genel_hata": oz_hata, "durum": "PASS" if tamam else "FAIL",
               "ilanlar": sonuc}
         (OUT / f"BY_BASKI_EKLE_{a.mod.upper()}.json").write_text(json.dumps(oz, ensure_ascii=False, indent=1, default=str), encoding="utf-8")
+        if yaz:
+            (OUT / "TAMAM_EK.txt").write_text("".join(r["ilan"] + "\n" for r in sonuc if r["durum"].split(" ")[0] in ("PASS", "ZATEN")))
+        hata = [r for r in sonuc if r["durum"].startswith(("FAIL", "DUR")) and "kota" not in r["durum"].lower()]
+        sonuc_etiket = ("HATA" if (hata or (oz_hata and "kota" not in oz_hata.lower())) else
+                        "TAMAM" if tamam else "KOTA")
+        oz["sonuc"] = sonuc_etiket
         log("OZET " + json.dumps({k: v for k, v in oz.items() if k != "ilanlar"}, ensure_ascii=False))
+        print(f"::notice::SONUC {sonuc_etiket} islenen {len(sonuc)}/{len(ids)} sayim {say} kota {oz['kota_son']}", flush=True)
     sys.exit(0 if tamam else 1)
 
 
