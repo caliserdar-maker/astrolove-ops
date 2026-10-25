@@ -1,0 +1,32 @@
+{
+  "kalan_satir": 78,
+  "pasif_satir": 312,
+  "havuz_toplam": 390,
+  "havuz_tekil": 390,
+  "mukerrer_id": 0,
+  "edisyon_dagilimi": {
+    "Champagne Ivory": 24,
+    "Midnight Blue": 35,
+    "Deep Black": 8,
+    "Pure White": 7,
+    "Warm Parchment": 4
+  },
+  "baslik_en_uzun": 97,
+  "etiket_uzun_cift": 0,
+  "sebep_belirsiz": 0,
+  "korumali_korundu": {
+    "4552582170": true,
+    "4555411521": true,
+    "4553832904": true
+  },
+  "siparis_toplam": 4,
+  "SONUC": "PASS",
+  "kalacak_eslesmeyen_cift": 27,
+  "kalacak_fark_ornek": [
+    "Aquarius + Aries: 20Eyl 4556468510 (Pure White) != 25Eyl 4553814114 (Midnight Blue)",
+    "Aquarius + Gemini: 20Eyl 4553805327 (Midnight Blue) != 25Eyl 4555418438 (Deep Black)",
+    "Aquarius + Sagittarius: 20Eyl 4552229669 (Champagne Ivory) != 25Eyl 4556469802 (Pure White)",
+    "Aquarius + Virgo: 20Eyl 4552561179 (Champagne Ivory) != 25Eyl 4555409327 (Deep Black)",
+    "Aries + Capricorn: 20Eyl 4555122383 (Warm Parchment) != 25Eyl 4556455827 (Pure White)"
+  ]
+}

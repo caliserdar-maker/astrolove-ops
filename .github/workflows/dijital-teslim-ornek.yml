@@ -1,0 +1,101 @@
+name: dijital-teslim-ornek
+
+# GOREV_0022/0023: kisisel dijital cikti (renk basina 5 JPEG) -> renk basina 1 PDF
+# (5 sayfa + Print and Care Guide) -> siparis_onay.py hazirla -> Drive TESLIM_ORNEK.
+# Etsy'ye HICBIR cagri yok; yalniz rclone. Musteri metni loga yazilmaz.
+# Tetik: config/dijital_teslim_ornek.trigger
+
+permissions:
+  contents: read
+
+on:
+  push:
+    paths:
+      - "config/dijital_teslim_ornek.trigger"
+  workflow_dispatch:
+
+concurrency:
+  group: dijital-teslim-ornek
+  cancel-in-progress: false
+
+jobs:
+  paketle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CIFT: CANCER_LIBRA
+      KAYNAK: "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/CANCER_LIBRA_None_DIJITAL"
+      ZIPFINAL: "gdrive:ASTROLOVE/TEMP/DIJITAL_78/ZIP_FINAL/CANCER_LIBRA"
+      HEDEF: "gdrive:ASTROLOVE/TEMP/DIJITAL_78/TESLIM_ORNEK"
+      KIMLIK: ORNEK_CANCER_LIBRA_DIJITAL
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Kur
+        run: |
+          pip install -q img2pdf==0.6.1 pypdf==5.9.0
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          git show origin/main:scripts/ops/siparis_onay.py > siparis_onay.py
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Kaynak + print guide indir
+        run: |
+          set -euo pipefail
+          mkdir -p _w/kaynak _w/zip
+          rclone copy "$KAYNAK" _w/kaynak -q --ignore-case --include "*/*.jpg" --include "*/*.jpeg" --include "*.json"
+          echo "renk klasorleri:"; ls _w/kaynak
+          ATLA=""
+          for r in MIDNIGHT_BLUE DEEP_BLACK PURE_WHITE CHAMPAGNE_IVORY WARM_PARCHMENT; do
+            if [ -d "_w/kaynak/$r" ]; then echo "$r: $(ls _w/kaynak/$r | wc -l) JPEG"
+            else echo "$r: klasor YOK (kapi FAIL) -> atlanir"; ATLA="$ATLA,$r"; fi
+          done
+          echo "ATLA=${ATLA#,}" >> "$GITHUB_ENV"
+          Z=$(rclone lsf "$ZIPFINAL" --files-only --include "*.zip" | head -1)
+          test -n "$Z"
+          rclone copyto "$ZIPFINAL/$Z" _w/zip/k.zip -q
+          python3 - <<'PY'
+          import re, zipfile
+          z = zipfile.ZipFile("_w/zip/k.zip")
+          g = [n for n in z.namelist() if re.search(r"print.*care.*guide.*\.pdf$", n, re.I)]
+          assert len(g) == 1, f"print guide sayisi {len(g)}"
+          open("_w/guide.pdf", "wb").write(z.read(g[0])); print("rehber:", g[0])
+          PY
+      - name: PDF paketle
+        run: |
+          set -euo pipefail
+          python scripts/ops/dijital_pdf_paketi.py --kaynak _w/kaynak --rehber _w/guide.pdf \
+            --cift "$CIFT" --out _w/pdf --atla "$ATLA" > /dev/null
+          python3 -c "
+          import json; r=json.load(open('_w/pdf/PDF_PAKET_RAPOR.json'))
+          for k,v in r['renkler'].items(): print(k, v.get('durum') or f\"{v['MB']} MB sayfa={v['sayfa']} birebir={v['goruntu_birebir']} gecti={v['gecti']}\")
+          print('SONUC', r['SONUC'])" | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Onay paketi hazirla (teslim YOK)
+        run: |
+          set -euo pipefail
+          ARGS=(); for f in _w/pdf/AstroLove_*.pdf; do ARGS+=(--dosya "$f"); done
+          test ${#ARGS[@]} -gt 0
+          python siparis_onay.py hazirla --kimlik "$KIMLIK" --kok _w/teslim "${ARGS[@]}"
+          cp _w/pdf/PDF_PAKET_RAPOR.json _w/teslim/$KIMLIK/
+          ls -la _w/teslim/$KIMLIK | awk '{print $5, $9}'
+      - name: Drive'a yukle + md5 dogrula
+        run: |
+          set -euo pipefail
+          rclone copy _w/teslim/$KIMLIK "$HEDEF/$KIMLIK" -q
+          rclone check _w/teslim/$KIMLIK "$HEDEF/$KIMLIK" --one-way 2>&1 | tail -3
+          echo "### teslim-ornek: Drive $HEDEF/$KIMLIK PASS" >> "$GITHUB_STEP_SUMMARY"
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone

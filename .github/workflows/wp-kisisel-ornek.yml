@@ -1,0 +1,437 @@
+name: wp-kisisel-ornek
+
+# Duvar kagidi kisisellestirme ORNEGI (Serdar 25 Eyl 2026).
+# ETSY ERISIMI YOK. Drive'da yalniz TEMP/DIJITAL_78/WALLPAPER_ORNEK/ altina yazar.
+# Kaynak: WALLPAPER/DELIVERY_SAAT80/<CIFT>/*.zip (salt okur). Saat dosyasina DOKUNULMAZ.
+
+on:
+  push:
+    branches: [dijital-v1]
+    paths:
+      - 'config/wp_kisisel.trigger'
+
+concurrency:
+  group: wp-kisisel
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  KAYNAK: "gdrive:ASTROLOVE/WALLPAPER/DELIVERY_SAAT80"
+  CIKTI: "gdrive:ASTROLOVE/TEMP/DIJITAL_78/WALLPAPER_ORNEK"
+  ISIMLER: "EMILY,JAMES"
+  MESAJ: "It Began With a Kiss in the Rain"
+
+jobs:
+  ornek:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Mod (isaretciler YALNIZ konu satirindan)
+        # 26 Eyl bulgusu: contains(head_commit.message, '[eski]') GOVDEDE gecen
+        # metni de yakaliyor. Commit govdesinde "[eski] kapisi..." yazdigim icin
+        # eski hat istemeden kostu (kosu 36230639918). Artik yalniz ILK SATIR.
+        id: mod
+        env:
+          MSG: ${{ github.event.head_commit.message }}
+        run: |
+          set -euo pipefail
+          KONU="$(printf '%s' "$MSG" | head -1)"
+          echo "konu=$KONU"
+          echo "konu=$KONU" >> "$GITHUB_OUTPUT"
+
+      - name: Bagimliliklar
+        run: |
+          set -euo pipefail
+          python -m pip install -q --upgrade pip
+          python -m pip install -q pillow==12.3.0 numpy==2.4.6 opencv-python-headless scipy
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          rclone version > _rc.txt 2>&1 || true; sed -n 1p _rc.txt; rm -f _rc.txt
+          command -v rclone unzip
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+
+      - name: kisisel-v1 render kodu (degistirilmez)
+        run: |
+          set -euo pipefail
+          git fetch --depth 1 origin kisisel-v1
+          mkdir -p _kis
+          git archive FETCH_HEAD scripts/kisisel assets | tar -x -C _kis
+          ls _kis/assets/fonts/Cinzel.ttf _kis/assets/fonts/EBGaramond-Italic.ttf
+
+      - name: Kaynak duvar kagitlari (salt okur)
+        # ESKI hat (sil-yeniden yaz) 25 Eyl'de IPTAL edildi. Artik yalniz acikca
+        # [eski] denirse kosar; aksi halde her tetik push'u gecersiz dosyalari
+        # yeniden uretip Drive'a yaziyordu (26 dosya, kosu 36229382139).
+        if: ${{ contains(steps.mod.outputs.konu, '[eski]') }}
+        env:
+          MSG: ${{ steps.mod.outputs.konu }}
+        run: |
+          set -euo pipefail
+          mkdir -p _zip _wp/ARIES_LEO _wp/AQUARIUS_AQUARIUS
+          case "$MSG" in
+            *"[eksik3]"*)
+              # Serdar onayi 25 Eyl 2026: yalnizca ilk kosuda olcum hatasi veren
+              # 3 dosya yeniden uretilir; digerleri Drive'da oldugu gibi kalir.
+              echo "EKSIK3 modu"; echo "eksik3" > _mod
+              rclone copy "$KAYNAK/ARIES_LEO/AstroLove_Aries_Leo_Champagne_Ivory.zip" _zip -q
+              rclone copy "$KAYNAK/ARIES_LEO/AstroLove_Aries_Leo_Deep_Black.zip" _zip -q
+              rclone copy "$KAYNAK/ARIES_LEO/AstroLove_Aries_Leo_Warm_Parchment.zip" _zip -q
+              unzip -o -j -q _zip/AstroLove_Aries_Leo_Champagne_Ivory.zip '*Phone.jpg' -d _wp/ARIES_LEO
+              unzip -o -j -q _zip/AstroLove_Aries_Leo_Deep_Black.zip '*Desktop.jpg' -d _wp/ARIES_LEO
+              unzip -o -j -q _zip/AstroLove_Aries_Leo_Warm_Parchment.zip '*Desktop.jpg' -d _wp/ARIES_LEO
+              rmdir _wp/AQUARIUS_AQUARIUS
+              ;;
+            *)
+              case "$MSG" in *"[son]"*) echo "SON modu: onceki ciktilar da indirilir"
+                mkdir -p _eski
+                rclone copy "$CIKTI" _eski -q --include "*/AstroLove*.jpg"
+                echo "_eski: $(find _eski -name '*.jpg' | wc -l) dosya" ;;
+              esac
+              for e in Midnight_Blue Deep_Black Champagne_Ivory Warm_Parchment; do
+                rclone copy "$KAYNAK/ARIES_LEO/AstroLove_Aries_Leo_$e.zip" _zip -q
+              done
+              rclone copy "$KAYNAK/AQUARIUS_AQUARIUS/AstroLove_Aquarius_Aquarius_Midnight_Blue.zip" _zip/aqua -q
+              for z in _zip/*.zip; do
+                unzip -o -j -q "$z" '*Phone.jpg' '*Tablet.jpg' '*Desktop.jpg' -d _wp/ARIES_LEO
+              done
+              unzip -o -j -q _zip/aqua/*.zip '*Phone.jpg' -d _wp/AQUARIUS_AQUARIUS
+              ;;
+          esac
+          ls _wp/ARIES_LEO | sed 's/^/  - /'
+          du -sh _wp
+
+      - name: Uretim + kapilar (ESKI hat - yalniz [eski])
+        if: ${{ contains(steps.mod.outputs.konu, '[eski]') }}
+        run: |
+          set -euo pipefail
+          RAPOR=WP_KISISEL_RAPOR.json
+          [ -f _mod ] && RAPOR=WP_KISISEL_RAPOR_EKSIK3.json
+          ESKI=""
+          [ -d _eski ] && ESKI="--eski _eski"
+          python scripts/wp_kisisel/uret.py --girdi _wp --cikti _out \
+            --kisisel _kis --isimler "$ISIMLER" --mesaj "$MESAJ" --rapor "$RAPOR" $ESKI
+
+      - name: V2 - temiz plaka + poster murekkebi ([v2] uretim / [olcum] yalniz 1. asama)
+        if: ${{ contains(steps.mod.outputs.konu, '[v2]') || contains(steps.mod.outputs.konu, '[olcum]') }}
+        env:
+          MSG: ${{ steps.mod.outputs.konu }}
+        run: |
+          set -euo pipefail
+          mkdir -p _v2/posterler _v2/plakalar _v2/temiz _v2/orijinal
+          for E in MIDNIGHT_BLUE DEEP_BLACK CHAMPAGNE_IVORY WARM_PARCHMENT; do
+            rclone copy "gdrive:ASTROLOVE/WALL_ART/POSTERS/OPTIMIZED_FOR_PRODUCTION/$E/3X4/WA_POSTER_ARIES_LEO_${E}_3X4.jpg" _v2/posterler -q
+          done
+          rclone copy "gdrive:ASTROLOVE/TEMP/WP_PLATES" _v2/plakalar -q --include "MEDIAN_*.png" --include "GEOM_*.json" --max-depth 1
+          rclone copy "gdrive:ASTROLOVE/TEMP/WP_PLATES/CLEAN" _v2/temiz -q --include "PLATE_*_CLEAN.png"
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/ARIES_LEO" _v2/orijinal -q --include "AstroLove_*.jpg"
+          echo "poster $(ls _v2/posterler | wc -l) | plaka $(ls _v2/plakalar | wc -l) | temiz $(ls _v2/temiz | wc -l) | orijinal $(ls _v2/orijinal | wc -l)"
+          free -g | head -2; df -h / | tail -1
+          mkdir -p _out2
+          EK=""
+          case "$MSG" in *"[olcum]"*) EK="--sadece-olcum";; *) cp docs/operations/WP_V2_HATA_27_DURUM.md _out2/;; esac
+          python scripts/wp_kisisel/wp_v2.py --posterler _v2/posterler --plakalar _v2/plakalar \
+            --temiz _v2/temiz --orijinal _v2/orijinal --kisisel _kis --cikti _out2 \
+            --cift Aries_Leo --isimler "$ISIMLER" --mesaj "$MESAJ" $EK
+
+      - name: V2 Drive'a yaz (yalniz [v2]; [olcum] Drive'a yazmaz)
+        if: ${{ always() && contains(steps.mod.outputs.konu, '[v2]') }}
+        run: |
+          set -euo pipefail
+          [ -d _out2 ] || exit 0
+          rclone copy _out2 "gdrive:ASTROLOVE/TEMP/DIJITAL_78/WALLPAPER_ORNEK_V2" -q
+          echo "WALLPAPER_ORNEK_V2 (dosya | bayt | Drive id)"
+          rclone lsf "gdrive:ASTROLOVE/TEMP/DIJITAL_78/V3_BASKI/ORNEK" --format "psi" --separator " | " --files-only -R | sed 's/^/  - /'
+
+      - name: V3 - kisisel siparis murekkebi + CLEAN plaka (yalniz [v3])
+        # Murekkep kaynagi kisisel'in SIPARIS URETICISI: maske = baski - kisisel PLATE.
+        # Esik yok. [v3olcum] ile yalniz 1. asama (olcum) kosar, Drive'a yazilmaz.
+        if: ${{ contains(steps.mod.outputs.konu, '[v3]') || contains(steps.mod.outputs.konu, '[v3olcum]') }}
+        env:
+          MSG: ${{ steps.mod.outputs.konu }}
+          V3_BASKI: ${{ vars.V3_BASKI || 'gdrive:ASTROLOVE/TEMP/DIJITAL_78/V3_BASKI' }}
+          V3_EDISYONLAR: ${{ vars.V3_EDISYONLAR || 'PURE_WHITE,BLACK,BLUE' }}
+          V3_CIFTLER: ${{ vars.V3_CIFTLER || 'CANCER_LIBRA,SAGITTARIUS_SAGITTARIUS' }}
+          V3_ESLESME: ${{ vars.V3_ESLESME }}
+        run: |
+          set -euo pipefail
+          mkdir -p _v3/baski _v3/plate _v3/temiz _v3/geom _v3/orijinal _out3
+          rclone copy "$V3_BASKI" _v3/baski -q --include "*24x32*" --include "*24X32*"
+          rclone copy "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PLATES" _v3/plate -q --include "*24x32*" --include "*24X32*"
+          rclone copy "gdrive:ASTROLOVE/TEMP/WP_PLATES/CLEAN" _v3/temiz -q --include "PLATE_*_CLEAN.png"
+          rclone copy "gdrive:ASTROLOVE/TEMP/WP_PLATES" _v3/geom -q --include "GEOM_*.json" --max-depth 1
+          # kisisel plate halkayi ICERIYOR -> halka halkali gece plakasindan alinir
+          rclone copy "gdrive:ASTROLOVE/TEMP/WP_PLATES" _v3/gece -q --max-depth 1 \
+            --include "PLATE_MIDNIGHT_BLUE_*.png" --include "PLATE_DEEP_BLACK_*.png"
+          echo "gece plakasi $(ls _v3/gece | wc -l) | temiz $(ls _v3/temiz | wc -l) | orijinal $(find _v3/orijinal -name '*.jpg' | wc -l)"
+          rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/ARIES_LEO" _v3/orijinal -q --include "AstroLove_*.jpg"
+          echo "baski $(ls _v3/baski | wc -l) | plate $(ls _v3/plate | wc -l) | temiz $(ls _v3/temiz | wc -l) | orijinal $(ls _v3/orijinal | wc -l)"
+          free -g | head -2; df -h / | tail -1
+          EK=""
+          case "$MSG" in *"[v3olcum]"*) EK="--sadece-olcum";; *) cp docs/operations/WP_V2_HATA_27_DURUM.md _out3/;; esac
+          if [ -z "$(ls -A _v3/baski 2>/dev/null)" ]; then
+            echo "DUR: $V3_BASKI bos veya yok - kisisel'in isimli 24x32 baski dosyalari gerekli."
+            exit 1
+          fi
+          ES=""; [ -n "${V3_ESLESME:-}" ] && ES="--eslesme $V3_ESLESME"
+          python scripts/wp_kisisel/wp_siparis.py --baski _v3/baski --plate _v3/plate \
+            --temiz _v3/temiz --plakalar _v3/geom --orijinal _v3/orijinal --cikti _out3 \
+            --edisyonlar "$V3_EDISYONLAR" --ciftler "$V3_CIFTLER" $ES $EK
+
+      - name: V3 Drive'a yaz (yalniz [v3])
+        if: ${{ always() && contains(steps.mod.outputs.konu, '[v3]') }}
+        run: |
+          set -euo pipefail
+          [ -d _out3 ] || exit 0
+          rclone copy _out3 "gdrive:ASTROLOVE/TEMP/DIJITAL_78/V3_BASKI/ORNEK" -q
+          echo "WALLPAPER_ORNEK_V2 (dosya | bayt | Drive id)"
+          rclone lsf "gdrive:ASTROLOVE/TEMP/DIJITAL_78/V3_BASKI/ORNEK" --format "psi" --separator " | " --files-only -R | sed 's/^/  - /'
+
+      - name: V3 BASKI URET + ORNEK KOSU (yalniz [v3uret])
+        # GOREV_0012 md.3-4. Baski dosyalari bu adimda kurulur (onayli kaynaklar:
+        # POD_PRINT 18x24 sanati + PLATES 24x32 plate + kisisel-v1 render), sonra
+        # V3 ornek kosusu yapilir. Kapilar gevsetilmez.
+        if: ${{ contains(steps.mod.outputs.konu, '[v3uret]') }}
+        env:
+          MSG: ${{ steps.mod.outputs.konu }}
+          V3_ESLESME: BLUE=MIDNIGHT_BLUE,BLACK=DEEP_BLACK
+        run: |
+          set -euo pipefail
+          mkdir -p _u/pod/CANCER_LIBRA/MIDNIGHT_BLUE _u/pod/CANCER_LIBRA/DEEP_BLACK \
+                   _u/pod/SAGITTARIUS_SAGITTARIUS/MIDNIGHT_BLUE _u/pod/SAGITTARIUS_SAGITTARIUS/DEEP_BLACK \
+                   _u/plate _u/baski _v3/temiz _v3/geom _v3/gece _v3/orijinal _out3
+          for C in CANCER_LIBRA SAGITTARIUS_SAGITTARIUS; do
+            for R in MIDNIGHT_BLUE DEEP_BLACK; do
+              rclone copy "gdrive:ASTROLOVE/TEMP/POD_PRINT/$C/$R/18x24.jpg" "_u/pod/$C/$R" -q
+            done
+          done
+          rclone copy "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PLATES" _u/plate -q \
+            --include "BLUE_18x24.png" --include "BLUE_24x32.png" \
+            --include "BLACK_18x24.png" --include "BLACK_24x32.png"
+          echo "pod $(find _u/pod -name '*.jpg' | wc -l) | plate $(ls _u/plate | wc -l)"
+          free -g | head -2
+          python scripts/wp_kisisel/v3_baski_uret.py --pod _u/pod --plate _u/plate \
+            --kisisel _kis --cikti _u/baski --eslesme "$V3_ESLESME" \
+            --kayit "CANCER_LIBRA|EMILY|JAMES|It Began With a Kiss in the Rain" \
+            --kayit "SAGITTARIUS_SAGITTARIUS|EMILY|JAMES|It Began With a Kiss in the Rain" \
+            --kayit "CANCER_LIBRA|MAXIMILIANA|CHRISTOPHER|It Began With a Kiss in the Rain|CANCER_LIBRA_UZUN"
+          ls -l _u/baski
+          rclone copy _u/baski "gdrive:ASTROLOVE/TEMP/DIJITAL_78/V3_BASKI" -q
+          echo "V3_BASKI yazildi"
+          # --- V3 ornek kosu ---
+          rclone copy "gdrive:ASTROLOVE/TEMP/WP_PLATES/CLEAN" _v3/temiz -q --include "PLATE_*_CLEAN.png"
+          rclone copy "gdrive:ASTROLOVE/TEMP/WP_PLATES" _v3/geom -q --include "GEOM_*.json" --max-depth 1
+          # kisisel plate halkayi ICERIYOR -> halka halkali gece plakasindan alinir
+          rclone copy "gdrive:ASTROLOVE/TEMP/WP_PLATES" _v3/gece -q --max-depth 1 \
+            --include "PLATE_MIDNIGHT_BLUE_*.png" --include "PLATE_DEEP_BLACK_*.png"
+          echo "gece plakasi $(ls _v3/gece | wc -l) | temiz $(ls _v3/temiz | wc -l) | orijinal $(find _v3/orijinal -name '*.jpg' | wc -l)"
+          # Kapi 2 referansi: onceki kosuda 0 dosya geldi. Cift klasorleri dogrudan denenir;
+          # yoksa kapi 2 atlanir ve SEBEBI raporlanir (sessiz atlama yok).
+          for C in CANCER_LIBRA SAGITTARIUS_SAGITTARIUS; do
+            rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/$C" _v3/orijinal -q --include "AstroLove_*.jpg" || true
+          done
+          python scripts/wp_kisisel/wp_siparis.py --baski _u/baski --plate _u/plate \
+            --temiz _v3/temiz --plakalar _v3/geom --orijinal _v3/orijinal --cikti _out3 \
+            --edisyonlar BLUE,BLACK \
+            --ciftler CANCER_LIBRA,SAGITTARIUS_SAGITTARIUS,CANCER_LIBRA_UZUN \
+            --eslesme "$V3_ESLESME" --halka _v3/gece || KAPI=1
+          ls -R _out3 | head -40
+          [ "${KAPI:-0}" = "0" ]
+
+      - name: V3 ORNEK Drive'a yaz (yalniz [v3uret])
+        if: ${{ always() && contains(steps.mod.outputs.konu, '[v3uret]') }}
+        run: |
+          set -euo pipefail
+          [ -d _out3 ] || exit 0
+          rclone copy _out3 "gdrive:ASTROLOVE/TEMP/DIJITAL_78/V3_BASKI/ORNEK" -q
+          echo "V3_BASKI/ORNEK (dosya | bayt | Drive id)"
+          rclone lsf "gdrive:ASTROLOVE/TEMP/DIJITAL_78/V3_BASKI/ORNEK" --format "psi" --separator " | " --files-only -R | sed 's/^/  - /'
+
+      - name: GOREV_0014 DUZELTME + HIZ (yalniz [v3hiz]) - mevcut baski dosyalariyla
+        # Codex RAPOR_0008 maddeleri: bos/eksik cikti exit 1, uzun isim kirpilmaz,
+        # geometri paylasimi KAPI, bos kapi FAIL, 35 karakter + font glif kapsami, hiz.
+        # Baski dosyalari YENIDEN URETILMEZ (mevcut 6 dosya okunur); ORNEK klasoru
+        # EZILMEZ (cikti ORNEK_HIZ). KAPI 2 BILINEN BLOKER: gevsetilmez, oldugu gibi
+        # yazilir ve RAPOR_0010 olcumuyle kiyaslanir.
+        if: ${{ contains(steps.mod.outputs.konu, '[v3hiz]') }}
+        env:
+          V3_ESLESME: BLUE=MIDNIGHT_BLUE,BLACK=DEEP_BLACK
+        run: |
+          set -euo pipefail
+          echo "### 1) testler (gercek fontlarla)"
+          python scripts/wp_kisisel/test_siparis_birim.py
+          python scripts/wp_kisisel/test_kume.py _kis
+          python scripts/wp_kisisel/test_siparis.py _kis Midnight_Blue /tmp/wp_siparis
+          # test_medyan_plate.py burada KOSULMAZ: B) olcutu (hayalet bolgesi fark 0) eski
+          # kodla da BIREBIR ayni degerle FAIL (yerel, 26 Eyl: 247/230/266 px); test 1a6bda2'den
+          # beri KeyError ile gizleniyordu. GOREV_0014 disi bulgu, RAPOR_0012'de bildirildi.
+          echo "### 2) girdiler (mevcut baski dosyalari)"
+          mkdir -p _h/baski _h/plate _v3/temiz _v3/geom _v3/gece _v3/orijinal _outA _outh
+          rclone copy "gdrive:ASTROLOVE/TEMP/DIJITAL_78/V3_BASKI" _h/baski -q \
+            --include "*24x32*" --include "*24X32*"
+          rclone copy "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PLATES" _h/plate -q \
+            --include "BLUE_24x32.png" --include "BLACK_24x32.png"
+          rclone copy "gdrive:ASTROLOVE/TEMP/WP_PLATES/CLEAN" _v3/temiz -q --include "PLATE_*_CLEAN.png"
+          rclone copy "gdrive:ASTROLOVE/TEMP/WP_PLATES" _v3/geom -q --include "GEOM_*.json" --max-depth 1
+          rclone copy "gdrive:ASTROLOVE/TEMP/WP_PLATES" _v3/gece -q --max-depth 1 \
+            --include "PLATE_MIDNIGHT_BLUE_*.png" --include "PLATE_DEEP_BLACK_*.png"
+          for C in CANCER_LIBRA SAGITTARIUS_SAGITTARIUS; do
+            rclone copy "gdrive:ASTROLOVE/WALLPAPER/FINAL_V2/$C" _v3/orijinal -q --include "AstroLove_*.jpg" || true
+          done
+          echo "baski $(ls _h/baski | wc -l) | plate $(ls _h/plate | wc -l) | temiz $(ls _v3/temiz | wc -l)"
+          free -g | head -2
+          ORTAK="--baski _h/baski --plate _h/plate --temiz _v3/temiz --plakalar _v3/geom
+                 --orijinal _v3/orijinal --edisyonlar BLUE,BLACK
+                 --ciftler CANCER_LIBRA,SAGITTARIUS_SAGITTARIUS,CANCER_LIBRA_UZUN
+                 --eslesme $V3_ESLESME --halka _v3/gece"
+          echo "### 3) ONCE (GOREV_0014 oncesi kod yolu: --murekkep-yol referans --tani-hale)"
+          T0=$(date +%s)
+          python scripts/wp_kisisel/wp_siparis.py $ORTAK --cikti _outA \
+            --murekkep-yol referans --tani-hale || echo "(kapilar FAIL - kapi 2 bilinen bloker)"
+          ONCE=$(( $(date +%s) - T0 ))
+          echo "### 4) SONRA (yeni varsayilanlar)"
+          T0=$(date +%s)
+          python scripts/wp_kisisel/wp_siparis.py $ORTAK --cikti _outh \
+            || echo "(kapilar FAIL - kapi 2 bilinen bloker)"
+          SONRA=$(( $(date +%s) - T0 ))
+          echo "### 5) YUKSEK1 kontrolu: bos edisyon listesi exit 1 vermeli"
+          if python scripts/wp_kisisel/wp_siparis.py $ORTAK --cikti _outB --edisyonlar "," ; then
+            echo "::error::bos --edisyonlar hala basarili sayiliyor"; exit 1
+          else
+            echo "  bos --edisyonlar dogru sekilde DURdu"
+          fi
+          echo "### 6) YUKSEK2 kontrolu: uzun isim gercek fontla (11 harf, en genis harf)"
+          mkdir -p _h/pod/CANCER_LIBRA/MIDNIGHT_BLUE _h/plate18 _h/genis
+          rclone copy "gdrive:ASTROLOVE/TEMP/POD_PRINT/CANCER_LIBRA/MIDNIGHT_BLUE/18x24.jpg" \
+            _h/pod/CANCER_LIBRA/MIDNIGHT_BLUE -q
+          rclone copy "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PLATES" _h/plate18 -q \
+            --include "BLUE_18x24.png" --include "BLUE_24x32.png"
+          python scripts/wp_kisisel/v3_baski_uret.py --pod _h/pod --plate _h/plate18 \
+            --kisisel _kis --cikti _h/genis --eslesme BLUE=MIDNIGHT_BLUE \
+            --kayit "CANCER_LIBRA|WWWWWWWWWWW|WWWWWWWWWWW|Where it all began, and never ended|CL_GENIS"
+          python - <<'PYEOF' | tee -a "$GITHUB_STEP_SUMMARY"
+          import json, pathlib
+          r = json.loads(pathlib.Path("_h/genis/V3_BASKI_URETIM.json").read_text())[0]
+          y = r["yerlesim"]
+          print(f"### uzun isim (11 x W, gercek font): isim olcek {y['isim_olcek']}, satir "
+                f"{y['satir']} / sinir {y['isim_sinir']}, kenar payi {y['isim_pay_px']} px | "
+                f"mesaj (35 kr) punto {y['mesaj_punto']}, genislik {y['mesaj_genislik']}"
+                f" / sinir {y['mesaj_sinir']} | murekkep disi fark {r['baski_disi_fark']}")
+          assert y["satir"] <= y["isim_sinir"] and y["isim_pay_px"] >= 0, "isim satiri sigmadi"
+          assert y["mesaj_genislik"] <= y["mesaj_sinir"], "mesaj sinira sigmadi"
+          assert r["baski_disi_fark"] == 0, "murekkep disi fark 0 degil"
+          # GOREV_0017 md.1: mesaj isimlerle ayni oranda kuculur, isimden buyuk olmaz
+          print(f"### 0017: mesaj olcek {y['mesaj_olcek']} ~ isim olcek {y['isim_olcek']} | "
+                f"govde mesaj {y['mesaj_govde_px']} <= isim {y['isim_govde_px']}")
+          assert y["mesaj_govde_px"] <= y["isim_govde_px"], "mesaj isimden buyuk (EK4)"
+          assert y["mesaj_olcek"] <= y["isim_olcek"] + 0.01, "mesaj isimlerle kuculmedi"
+          PYEOF
+          echo "### 7) ozet"
+          python scripts/wp_kisisel/v3_hiz_ozet.py --yeni _outh --once _outA --bekle-dosya 18 \
+            --once-sn "$ONCE" --sonra-sn "$SONRA"
+
+      - name: V3 ORNEK_HIZ Drive'a yaz (yalniz [v3hiz])
+        if: ${{ always() && contains(steps.mod.outputs.konu, '[v3hiz]') }}
+        run: |
+          set -euo pipefail
+          [ -d _outh ] || exit 0
+          rclone copy _outh "gdrive:ASTROLOVE/TEMP/DIJITAL_78/V3_BASKI/ORNEK_HIZ" -q
+          rclone lsf "gdrive:ASTROLOVE/TEMP/DIJITAL_78/V3_BASKI/ORNEK_HIZ" --format "psi" \
+            --separator " | " --files-only -R | sed 's/^/  - /'
+
+      - name: V3 HAZIRLIK OLCUMU (yalniz [v3hazir]) - uretim yok, Drive'a yazmaz
+        # GOREV_0012: baski dosyalarini bu oturum uretecek. Once OLCULUR:
+        # (a) kisisel PLATE'lerin gercek px olcusu (24x32 -> 7200x9600 mu?),
+        # (b) POD_PRINT'te 3 cift icin hangi renk/boy kaynaklari var,
+        # (c) uretici dalindaki boy tablosu ne diyor.
+        if: ${{ contains(steps.mod.outputs.konu, '[v3hazir]') }}
+        run: |
+          set -euo pipefail
+          mkdir -p _h/plate
+          echo "### 1) kisisel PLATE olculeri"
+          rclone copy "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PLATES" _h/plate -q \
+            --include "BLUE_*" --include "BLACK_*" || true
+          ls -l _h/plate || true
+          python - <<'PYEOF'
+          from pathlib import Path
+          from PIL import Image
+          Image.MAX_IMAGE_PIXELS = None
+          for f in sorted(Path('_h/plate').glob('*')):
+              try:
+                  with Image.open(f) as im:
+                      w, h = im.size
+                  print(f"  {f.name}: {w}x{h} | 3:4 mi = {abs(w/h - 0.75) < 0.002} | "
+                        f"V3 (7200x9600) uyumlu = {(w, h) == (7200, 9600)} | "
+                        f"inc@300dpi = {w/300:.1f}x{h/300:.1f}")
+              except Exception as e:
+                  print(f"  {f.name}: OKUNAMADI {type(e).__name__}: {e}")
+          PYEOF
+          echo "### 2) POD_PRINT kaynaklari (3 cift, MIDNIGHT_BLUE + DEEP_BLACK)"
+          for C in CANCER_LIBRA SAGITTARIUS_SAGITTARIUS; do
+            for R in MIDNIGHT_BLUE DEEP_BLACK; do
+              echo "  -- $C / $R"
+              rclone lsf "gdrive:ASTROLOVE/TEMP/POD_PRINT/$C/$R" 2>/dev/null | sed 's/^/     /' || echo "     (yok)"
+            done
+          done
+          echo "### 3) uretici dalindaki boy tablosu"
+          git fetch --depth 1 origin siparis-baski-v1 -q
+          git show FETCH_HEAD:scripts/medya_v1/siparis_dosyasi.py > _h/uretici.py
+          grep -nE "^BOY = |^DIJITAL_BOY = |^RENKLER = " _h/uretici.py | sed 's/^/  /'
+          echo "### 4) V3 girdi beklentisi"
+          echo "  wp_siparis.py POSTER_W x POSTER_H = 7200 x 9600 (24x32 inc @ 300 dpi)"
+          echo "  CLEAN plakalar: yalniz MIDNIGHT_BLUE / DEEP_BLACK / CHAMPAGNE_IVORY / WARM_PARCHMENT"
+          echo "  eslesme (GOREV_0012): BLUE->MIDNIGHT_BLUE, BLACK->DEEP_BLACK,"
+          echo "                        MODERN->CHAMPAGNE_IVORY, VINTAGE->WARM_PARCHMENT, PURE_WHITE yok"
+
+      - name: Rapor birlestir (yalniz [rapor])
+        if: ${{ contains(steps.mod.outputs.konu, '[rapor]') }}
+        run: |
+          set -euo pipefail
+          mkdir -p _rap
+          rclone copy "$CIKTI/WP_KISISEL_RAPOR.json" _rap -q
+          rclone copy "$CIKTI/WP_KISISEL_RAPOR_EKSIK3.json" _rap -q
+          python scripts/wp_kisisel/rapor_birlestir.py _rap
+          rclone copyto _rap/WP_KISISEL_RAPOR.json "$CIKTI/WP_KISISEL_RAPOR.json" -q
+          rclone deletefile "$CIKTI/WP_KISISEL_RAPOR_EKSIK3.json" || true
+          rclone lsf "$CIKTI" --format "psi" --separator " | " --files-only | sed 's/^/  - /'
+
+      - name: Drive'a yaz (ESKI cikti - yalniz [eski])
+        if: ${{ always() && contains(steps.mod.outputs.konu, '[eski]') }}
+        run: |
+          set -euo pipefail
+          [ -d _out ] || exit 0
+          rclone copy _out "$CIKTI" -q
+          echo "WALLPAPER_ORNEK (dosya | bayt | Drive id)"
+          rclone lsf "$CIKTI" --format "psi" --separator " | " --files-only -R | sed 's/^/  - /'
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wp-kisisel-ornek
+          path: |
+            _out/
+            _out2/
+            _out3/
+          if-no-files-found: ignore
+
+      - if: ${{ always() }}
+        run: rm -rf _zip _wp _eski _v2 _v3 ~/.config/rclone

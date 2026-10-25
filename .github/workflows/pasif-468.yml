@@ -1,0 +1,67 @@
+name: pasif-468
+
+# GOREV_0021 md.3: pasife alinacak 468 ilan (390 dijital + 78 wallpaper) KURU KOSU.
+# SALT OKUR: yalniz GET; Etsy'ye yazma YOK. Musteri verisi yazilmaz (yalniz adet).
+# Tetik: config/pasif_468.trigger (dijital-v1).
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [dijital-v1]
+    paths:
+      - "config/pasif_468.trigger"
+
+concurrency:
+  group: etsy-token
+  cancel-in-progress: false
+
+jobs:
+  kuru:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Girdiler
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/DIJITAL_78/DIJITAL_78_KALAN_ILANLAR.csv" _work/kalan.csv
+          echo "kalan satir: $(( $(wc -l < _work/kalan.csv) - 1 ))"
+      - name: Kuru kosu (SALT OKUR)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: python scripts/etsy/pasif_468.py --kalan _work/kalan.csv --out _out
+      - name: Token + Drive
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
+          [ -d _out ] && rclone copy _out "gdrive:ASTROLOVE/TEMP/DIJITAL_78" -q --include "PASIF_468*" || true
+          rclone lsf "gdrive:ASTROLOVE/TEMP/DIJITAL_78" --files-only --include "PASIF_468*" --format "psi" --separator " | " || true
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone

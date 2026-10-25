@@ -1,0 +1,67 @@
+name: dijital-78-donusum-yukle
+
+# Kuru kosu ciktilarini (repo'da bayt-birebir) Drive TEMP/DIJITAL_78'e kopyalar.
+# Etsy'ye HICBIR cagri yok; yalniz rclone. Tetik: config/donusum_kuru.trigger.
+
+permissions:
+  contents: read
+
+on:
+  push:
+    paths:
+      - "config/donusum_kuru.trigger"
+  workflow_dispatch:
+
+concurrency:
+  group: dijital-78-donusum-yukle
+  cancel-in-progress: false
+
+jobs:
+  yukle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SRC: docs/operations/dijital78_donusum
+      DST: "gdrive:ASTROLOVE/TEMP/DIJITAL_78"
+    steps:
+      - uses: actions/checkout@v4
+      - name: rclone kur
+        run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Kopyala + dogrula
+        run: |
+          set -euo pipefail
+          test -s "$SRC/DONUSUM_KURU_KOSU.csv"
+          echo "yerel satirlar:"; wc -l "$SRC"/*.csv
+          rclone copy "$SRC" "$DST" -q
+          echo "--- Drive tarafi (ad, bayt, md5):"
+          rclone lsjson "$DST" --files-only --hash > _drv.json
+          python3 - <<'PY' | tee -a "$GITHUB_STEP_SUMMARY"
+          import hashlib, json, pathlib
+          drv = {d["Name"]: d for d in json.load(open("_drv.json"))}
+          hata = 0
+          for p in sorted(pathlib.Path("docs/operations/dijital78_donusum").iterdir()):
+              d = drv.get(p.name)
+              if not d:
+                  print(f"FAIL {p.name}: Drive'da yok"); hata += 1; continue
+              yerel = hashlib.md5(p.read_bytes()).hexdigest()
+              uzak = (d.get("Hashes") or {}).get("md5")
+              ok = (yerel == uzak) and d["Size"] == p.stat().st_size
+              print(f"{'OK  ' if ok else 'FAIL'} {p.name}: {p.stat().st_size} bayt, md5 {yerel} / {uzak}")
+              hata += 0 if ok else 1
+          print(f"### donusum-yukle: {'PASS' if hata == 0 else f'FAIL ({hata})'}")
+          raise SystemExit(1 if hata else 0)
+          PY
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone
