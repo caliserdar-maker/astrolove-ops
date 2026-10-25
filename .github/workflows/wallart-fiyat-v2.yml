@@ -1,0 +1,104 @@
+name: wallart-fiyat-v2
+run-name: "wallart-fiyat-v2 ${{ inputs.mod }} ${{ inputs.ilanlar || 'hepsi' }}"
+
+# Serdar onayi 25 Eki 2026 (Genel Merkez): wall art (78 poster) print fiyatlari yeni tablo (scripts/pod/print_fiyat_v2.py)
+# + kargo profili 314711751541 tum hedefler ucretsiz (scripts/etsy/profil_ucretsiz.py). Dijital 3.90 degismez.
+# Modlar: profil_oku | profil_yaz (PROFIL_WALLART_UCRETSIZ) | oku | yaz (PRINT_FIYAT_V2; ilanlar bos = PRINT_FIYAT_V2_HEPSI).
+# Cikti: Drive TEMP/WALLART_FIYAT_V2/<kosu>/; tamamlananlar TEMP/WALLART_FIYAT_V2/TAMAM.txt (hepsi kosusunda atlanir).
+
+permissions:
+  actions: read
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      mod:
+        description: "profil_oku | profil_yaz | oku | yaz"
+        required: true
+        default: "oku"
+      ilanlar:
+        description: "virgullu ilan id (bos = 78 ilan)"
+        default: ""
+      onay:
+        description: "profil_yaz: PROFIL_WALLART_UCRETSIZ; yaz: PRINT_FIYAT_V2 (ilanlar bos: PRINT_FIYAT_V2_HEPSI)"
+        default: ""
+
+jobs:
+  wallart:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Wall art (${{ inputs.mod }})
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          MOD: ${{ inputs.mod }}
+          ILANLAR: ${{ inputs.ilanlar }}
+          ONAY: ${{ inputs.onay }}
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          T="gdrive:ASTROLOVE/TEMP/WALLART_FIYAT_V2/TAMAM.txt"
+          rc=0
+          case "$MOD" in
+            profil_oku) python3 scripts/etsy/profil_ucretsiz.py oku || rc=$? ;;
+            profil_yaz) [ "$ONAY" = PROFIL_WALLART_UCRETSIZ ] || { echo "HATA: onay"; exit 1; }
+                        python3 scripts/etsy/profil_ucretsiz.py yaz --confirm "$ONAY" || rc=$? ;;
+            oku|yaz)
+              if [ "$MOD" = yaz ]; then
+                if [ -n "$ILANLAR" ]; then [ "$ONAY" = PRINT_FIYAT_V2 ] || { echo "HATA: onay"; exit 1; }
+                else [ "$ONAY" = PRINT_FIYAT_V2_HEPSI ] || { echo "HATA: onay"; exit 1; }; fi
+              fi
+              rclone copyto "$T" _work/tamam.txt 2>/dev/null || : > _work/tamam.txt
+              if [ -n "$ILANLAR" ]; then SEC=(--ilanlar "$ILANLAR"); else SEC=(--hepsi); export ATLA="$(tr '\n' ',' < _work/tamam.txt)"; fi
+              python3 scripts/pod/print_fiyat_v2.py "$MOD" "${SEC[@]}" --confirm "$ONAY" || rc=$? ;;
+            *) echo "HATA: mod $MOD"; exit 1 ;;
+          esac
+          if [ -d out ]; then
+            python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/ETSY_TOKEN.json out || { echo "::error::ciktida sir"; exit 1; }
+            rclone copy out "gdrive:ASTROLOVE/TEMP/WALLART_FIYAT_V2/${GITHUB_RUN_ID}" -q || { echo "::error::Drive yukleme basarisiz"; exit 1; }
+          fi
+          if [ "$MOD" = yaz ] && [ -s out/TAMAM_EK.txt ]; then
+            { cat _work/tamam.txt out/TAMAM_EK.txt | grep -E '^[0-9]+$' || true; } | sort -u > _work/tamam_yeni.txt
+            rclone copyto _work/tamam_yeni.txt "$T" -q || { echo "::error::TAMAM listesi yazilamadi"; exit 1; }
+          fi
+          exit $rc
+      - name: Token geri yaz
+        if: always()
+        run: |
+          if [ -f _work/ETSY_TOKEN.json.updated ]; then
+            rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "token geri yazildi" \
+              || { echo "::error::yenilenen token Drive'a geri yazilamadi"; exit 1; }
+          else
+            echo "token yenilenmedi"
+          fi
+      - if: always()
+        run: rm -rf _work out ~/.config/rclone
