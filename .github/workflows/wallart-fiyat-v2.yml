@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
     inputs:
       mod:
-        description: "profil_oku | profil_yaz | oku | yaz"
+        description: "profil_oku | profil_yaz | oku | yaz | kupa_oku | kupa_yaz"
         required: true
         default: "oku"
       ilanlar:
@@ -80,13 +80,21 @@ jobs:
               rclone copyto "$T" _work/tamam.txt 2>/dev/null || : > _work/tamam.txt
               if [ -n "$ILANLAR" ]; then SEC=(--ilanlar "$ILANLAR"); else SEC=(--hepsi); export ATLA="$(tr '\n' ',' < _work/tamam.txt)"; fi
               python3 scripts/pod/print_fiyat_v2.py "$MOD" "${SEC[@]}" --confirm "$ONAY" || rc=$? ;;
+            kupa_oku|kupa_yaz)
+              KM=${MOD#kupa_}
+              if [ "$KM" = yaz ]; then
+                if [ -n "$ILANLAR" ]; then [ "$ONAY" = KUPA_FIYAT ] || { echo "HATA: onay"; exit 1; }
+                else [ "$ONAY" = KUPA_FIYAT_HEPSI ] || { echo "HATA: onay"; exit 1; }; fi
+              fi
+              if [ -n "$ILANLAR" ]; then SEC=(--ilanlar "$ILANLAR"); else SEC=(--hepsi); fi
+              python3 scripts/etsy/kupa_fiyat.py "$KM" "${SEC[@]}" --confirm "$ONAY" || rc=$? ;;
             *) echo "HATA: mod $MOD"; exit 1 ;;
           esac
           if [ -d out ]; then
             python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/ETSY_TOKEN.json out || { echo "::error::ciktida sir"; exit 1; }
             rclone copy out "gdrive:ASTROLOVE/TEMP/WALLART_FIYAT_V2/${GITHUB_RUN_ID}" -q || { echo "::error::Drive yukleme basarisiz"; exit 1; }
           fi
-          if [ "$MOD" = yaz ] && [ -s out/TAMAM_EK.txt ]; then
+          if [ "$MOD" = yaz ] && [ -s out/TAMAM_EK.txt ]; then   # kupa modlari TAMAM listesine yazmaz
             { cat _work/tamam.txt out/TAMAM_EK.txt | grep -E '^[0-9]+$' || true; } | sort -u > _work/tamam_yeni.txt
             rclone copyto _work/tamam_yeni.txt "$T" -q || { echo "::error::TAMAM listesi yazilamadi"; exit 1; }
           fi
