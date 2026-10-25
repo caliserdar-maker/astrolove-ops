@@ -6,6 +6,7 @@ on:
     inputs:
       urunler: {description: "Printful urun id (bosluklu)", default: "1 268"}
       ulkeler: {description: "ulke kodlari (bosluklu)", default: "US CA GB DE FR AU NO TR IL BR JP"}
+      adet: {description: "adetler (bosluklu, ornek '1 2')", default: "1"}
 permissions:
   contents: read
 jobs:
@@ -40,6 +41,7 @@ jobs:
         env:
           URUNLER: ${{ inputs.urunler }}
           ULKELER: ${{ inputs.ulkeler }}
+          ADET: ${{ inputs.adet }}
         run: |
           set -euo pipefail
           rc=0; python3 scripts/printful/poster_fiyat.py _out || rc=$?
