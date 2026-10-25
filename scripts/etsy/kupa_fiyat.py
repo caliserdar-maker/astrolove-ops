@@ -22,7 +22,7 @@ from by_baski_ekle import kota_mi, sonuc_etiketi  # noqa: E402  (ayni kurallar: 
 ONAY, ONAY_HEPSI = "KUPA_FIYAT", "KUPA_FIYAT_HEPSI"
 INV_YOL = "/listings/{lid}/inventory"
 BOLUM = 60980873
-DOKUNMA = {"4598525642", "4597843405"}
+DOKUNMA = {"4597843405"}   # 4598525642 Serdar 25 Eki aksam: "78 ilani duzenle" (artik dokunulur)
 P_RENK, P_BOY = 513, 514            # renk yerine stil (gorsel baglari stile bagli)
 HEDEF = {"11 oz": (12.90, 24.90), "15 oz": (16.90, 29.90)}   # boy -> (yeni, eski canli)
 ISTEK_TAHMIN = 16   # ilan basi en kotu: 4 oku + PUT + 3x3 geri okuma + 2 bag (kural: tahmini + KOTA_SINIRI, PUT oncesi)
