@@ -1,0 +1,50 @@
+name: printful-poster-fiyat
+# Serdar 25 Eki: Printful poster maliyet + kargo (SALT OKUMA, siparis/urun OLUSTURMAZ). scripts/printful/poster_fiyat.py.
+# Cikti: Drive TEMP/PRINTFUL_POSTER/<kosu>/ (PRINTFUL_POSTER.csv + .json).
+on:
+  workflow_dispatch:
+    inputs:
+      urunler: {description: "Printful urun id (bosluklu)", default: "1 268"}
+      ulkeler: {description: "ulke kodlari (bosluklu)", default: "US CA GB DE FR AU NO TR IL BR JP"}
+permissions:
+  contents: read
+jobs:
+  oku:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Printful token (Drive TEMP/PRINTFUL_TOKEN.json, maskeli)
+        run: |
+          set -euo pipefail
+          T=$(rclone cat "gdrive:ASTROLOVE/TEMP/PRINTFUL_TOKEN.json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["api_token"].strip())')
+          [ -n "$T" ] || { echo "HATA: api_token bos"; exit 1; }
+          echo "::add-mask::$T"
+          echo "PRINTFUL_TOKEN=$T" >> "$GITHUB_ENV"
+      - name: Printful oku
+        env:
+          URUNLER: ${{ inputs.urunler }}
+          ULKELER: ${{ inputs.ulkeler }}
+        run: |
+          set -euo pipefail
+          rc=0; python3 scripts/printful/poster_fiyat.py _out || rc=$?
+          rclone copy _out "gdrive:ASTROLOVE/TEMP/PRINTFUL_POSTER/${GITHUB_RUN_ID}" -q || { echo "::error::Drive yukleme basarisiz"; exit 1; }
+          echo "::notice::Cikti TEMP/PRINTFUL_POSTER/${GITHUB_RUN_ID}"
+          exit $rc
+      - if: always()
+        run: rm -rf _out ~/.config/rclone
