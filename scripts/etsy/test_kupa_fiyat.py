@@ -10,7 +10,7 @@ import kupa_fiyat as K  # noqa: E402
 STIL = ["Orange Blossom", "Purple Fig", "Olive Breeze", "Pomegranate Bloom", "Almond Blossom", "Lemon Grove", "Blue Grape", "Golden Loquat"]
 
 
-def inv(f11=2400, f15=2900):
+def inv(f11=2490, f15=2990):
     pr = []
     for i, st in enumerate(STIL):
         for j, (b, f) in enumerate((("11 oz", f11), ("15 oz", f15))):
@@ -28,10 +28,10 @@ def test():
     prs, h, z = K.plan(inv())
     assert not h and len(prs) == 16 and not z, h; ok += 1
     b = K.govde(inv())
-    assert sorted({o["price"] for p in b["products"] for o in p["offerings"]}) == [24.9, 29.9]
+    assert sorted({o["price"] for p in b["products"] for o in p["offerings"]}) == [12.9, 16.9]
     assert b["price_on_property"] == [513, 514] and all(p["property_values"][0]["value_ids"] for p in b["products"]); ok += 1
-    assert K.plan(inv(2490, 2990))[2]; ok += 1
-    assert K.plan(inv(2200, 2900))[1]; ok += 1
+    assert K.plan(inv(1290, 1690))[2]; ok += 1
+    assert K.plan(inv(2200, 2990))[1]; ok += 1
     x = inv(); x["products"].pop()
     assert K.plan(x)[1]; ok += 1
     vimg = [{"property_id": 513, "value_id": 100 + i, "image_id": 900 + i} for i in range(8)]

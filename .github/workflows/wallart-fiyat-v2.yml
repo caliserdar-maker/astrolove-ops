@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
     inputs:
       mod:
-        description: "profil_oku | profil_yaz | oku | yaz | kupa_oku | kupa_yaz | kupa_profil_oku | kupa_profil_yaz"
+        description: "profil_oku | profil_yaz | oku | yaz | kupa_oku | kupa_yaz | kupa_profil_oku | kupa_profil_yaz | kupa_kargo_oku | kupa_kargo_yaz"
         required: true
         default: "oku"
       ilanlar:
@@ -86,7 +86,7 @@ jobs:
                 if [ -n "$ILANLAR" ]; then [ "$ONAY" = KUPA_FIYAT ] || { echo "HATA: onay"; exit 1; }
                 else [ "$ONAY" = KUPA_FIYAT_HEPSI ] || { echo "HATA: onay"; exit 1; }; fi
               fi
-              KT="gdrive:ASTROLOVE/TEMP/WALLART_FIYAT_V2/KUPA_TAMAM.txt"   # yaz: tamamlananlar tekrar okunmaz (kota)
+              KT="gdrive:ASTROLOVE/TEMP/WALLART_FIYAT_V2/KUPA_TAMAM_V2.txt"   # yaz: tamamlananlar tekrar okunmaz (kota)
               : > _work/kupa_tamam.txt; [ "$KM" = yaz ] && { rclone copyto "$KT" _work/kupa_tamam.txt 2>/dev/null || : > _work/kupa_tamam.txt; }
               if [ -n "$ILANLAR" ]; then
                 KAL=$(echo "$ILANLAR" | tr ',' '\n' | grep -E '^[0-9]+$' | grep -vxFf <(grep -E '^[0-9]+$' _work/kupa_tamam.txt || true) | paste -sd, - || true)
@@ -95,6 +95,9 @@ jobs:
               if [ -n "$ILANLAR" ] && [ -z "$KAL" ]; then echo "::notice::SONUC TAMAM $KM listedeki ilanlarin hepsi KUPA_TAMAM'da"
               else python3 scripts/etsy/kupa_fiyat.py "$KM" "${SEC[@]}" --confirm "$ONAY" || rc=$?; fi
               ;;
+            kupa_kargo_oku) python3 scripts/etsy/kupa_kargo_ucretli.py oku || rc=$? ;;
+            kupa_kargo_yaz) [ "$ONAY" = KUPA_KARGO_UCRETLI ] || { echo "HATA: onay"; exit 1; }
+                            python3 scripts/etsy/kupa_kargo_ucretli.py yaz --confirm "$ONAY" || rc=$? ;;
             kupa_profil_oku) python3 scripts/etsy/kupa_profil.py oku || rc=$? ;;
             kupa_profil_yaz) [ "$ONAY" = KUPA_PROFIL ] || { echo "HATA: onay"; exit 1; }
                              python3 scripts/etsy/kupa_profil.py yaz --confirm "$ONAY" || rc=$? ;;

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Kupa ilanlari (bolum 60980873 "Zodiac Couple Mugs"): Size fiyatlari 11 oz 24.00 -> 24.90, 15 oz 29.00 -> 29.90
-(Serdar 25 Eki 2026, Genel Merkez, fiyat sonu .90). print_fiyat_v2.py'nin kupa uyarlamasi: yalniz PUT /listings/{id}/inventory
+"""Kupa ilanlari (bolum 60980873 "Zodiac Couple Mugs"): Size fiyatlari 11 oz 24.90 -> 12.90, 15 oz 29.90 -> 16.90
+(Serdar 25 Eki 2026 aksam, Genel Merkez: ucretsiz kargo kalkti, fark kargoya; kargo: kupa_kargo_ucretli.py).
+(Onceki tur: 24.00 -> 24.90 / 29.00 -> 29.90, 77/77 bitti.) print_fiyat_v2.py'nin kupa uyarlamasi: yalniz PUT /listings/{id}/inventory
 (2 menu: Style 513 x Size 514), fiyat disi her alan birebir; stil-gorsel baglari once/sonra ada gore. updateListing YOK.
 DOKUNMA: 4598525642 (Orchard CANCER_LIBRA, Serdar panelden duzenliyor) ve eski taslak 4597843405 yazilmaz.
 Modlar: oku | yaz (--confirm KUPA_FIYAT; --hepsi: KUPA_FIYAT_HEPSI). Kapi: tahmini istek + 10, ilk FAIL'de DUR.
@@ -23,7 +24,7 @@ INV_YOL = "/listings/{lid}/inventory"
 BOLUM = 60980873
 DOKUNMA = {"4598525642", "4597843405"}
 P_RENK, P_BOY = 513, 514            # renk yerine stil (gorsel baglari stile bagli)
-HEDEF = {"11 oz": (24.90, 24.00), "15 oz": (29.90, 29.00)}   # boy -> (yeni, eski canli)
+HEDEF = {"11 oz": (12.90, 24.90), "15 oz": (16.90, 29.90)}   # boy -> (yeni, eski canli)
 ISTEK_TAHMIN = 16   # ilan basi en kotu: 4 oku + PUT + 3x3 geri okuma + 2 bag (kural: tahmini + KOTA_SINIRI, PUT oncesi)
 METIN = re.compile(r"\$\s?\d|\bUSD\b|free shipping|shipping to", re.I)
 OUT = Path("out")
