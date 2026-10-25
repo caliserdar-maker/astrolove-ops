@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
     inputs:
       mod:
-        description: "profil_oku | profil_yaz | oku | yaz | kupa_oku | kupa_yaz"
+        description: "profil_oku | profil_yaz | oku | yaz | kupa_oku | kupa_yaz | kupa_profil_oku | kupa_profil_yaz"
         required: true
         default: "oku"
       ilanlar:
@@ -88,6 +88,9 @@ jobs:
               fi
               if [ -n "$ILANLAR" ]; then SEC=(--ilanlar "$ILANLAR"); else SEC=(--hepsi); fi
               python3 scripts/etsy/kupa_fiyat.py "$KM" "${SEC[@]}" --confirm "$ONAY" || rc=$? ;;
+            kupa_profil_oku) python3 scripts/etsy/kupa_profil.py oku || rc=$? ;;
+            kupa_profil_yaz) [ "$ONAY" = KUPA_PROFIL ] || { echo "HATA: onay"; exit 1; }
+                             python3 scripts/etsy/kupa_profil.py yaz --confirm "$ONAY" || rc=$? ;;
             *) echo "HATA: mod $MOD"; exit 1 ;;
           esac
           if [ -d out ]; then
