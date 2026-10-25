@@ -34,8 +34,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 P_STYLE, P_FORMAT = 513, 514
 KART, DOSYA, BASKI = "Digital card 5x7", "Digital file 8x10", "Shipped print 8x10"
-FIYAT = 29.00
-DIJ_FIYAT = {KART: 3.90, DOSYA: 4.90}
+FIYAT = 24.90                              # Serdar 25 Eki fiyat tablosu (8x10 print, iki kategoride ayni); onceki 29.00
+DIJ_FIYAT = {KART: 3.90, DOSYA: 3.90}      # Serdar 25 Eki: dijital her boyda 3.90
+DIJ_ESKI = {KART: (3.90,), DOSYA: (4.90, 3.90)}   # yazmadan once kabul edilen canli dijital fiyatlar
+BASKI_ESKI = (29.00, 24.90)                # yazmadan once kabul edilen canli baski fiyati
 BOLUM = 60895624
 PROFIL_DIJITAL, PROFIL_BASKI = 318577242658, 318080539024   # BY Digital Free Worldwide / BY Print 8x10 Worldwide
 PROFIL = PROFIL_BASKI          # HEDEF (Serdar 24 Eki secenek B): baski profili, tum hedefler ucretsiz, gercekci teslim gunleri
@@ -204,8 +206,10 @@ def envanter_plani(inv):
     if nb not in (0, 5) or len(i0) != 10 + nb:
         raise Dur(f"baski urunu sayisi {nb}, toplam {len(i0)}")
     for k, v in i0.items():
-        if k[1] in DIJ_FIYAT and v[1] != DIJ_FIYAT[k[1]]:
-            raise Dur(f"dijital fiyat {k}: {v[1]} (beklenen {DIJ_FIYAT[k[1]]})")
+        if k[1] in DIJ_FIYAT and v[1] not in DIJ_ESKI[k[1]]:
+            raise Dur(f"dijital fiyat {k}: {v[1]} (kabul {DIJ_ESKI[k[1]]})")
+        if k[1] == BASKI and v[1] not in BASKI_ESKI:
+            raise Dur(f"baski fiyati {k}: {v[1]} (kabul {BASKI_ESKI})")
         if k[1] in DIJ_FIYAT and not ((v[2] or 0) >= 1 and v[3]):
             raise Dur(f"dijital urun satilamaz durumda {k}: stok {v[2]} acik {v[3]}")
     for f in (KART, DOSYA):
@@ -227,7 +231,7 @@ def envanter_plani(inv):
             if anahtar(p)[1] == BASKI:
                 continue
             urunler.append(dict(sku=p.get("sku") or "", property_values=pv,
-                                offerings=[dict(price=para(o["price"]), quantity=o.get("quantity"), is_enabled=o.get("is_enabled") is True,
+                                offerings=[dict(price=DIJ_FIYAT[anahtar(p)[1]], quantity=o.get("quantity"), is_enabled=o.get("is_enabled") is True,
                                                 readiness_state_id=o.get("readiness_state_id"))]))
         mevcut = next((p for p in urunler_canli(inv) if anahtar(p) == (st, BASKI)), None)
         dosya_pv = pvd(next(p for p in urunler_canli(inv) if anahtar(p) == (st, DOSYA)))
@@ -249,8 +253,13 @@ def envanter_plani(inv):
     govde = dict(products=urunler, price_on_property=inv.get("price_on_property") or [],
                  quantity_on_property=inv.get("quantity_on_property") or [], sku_on_property=sku_on,
                  readiness_state_on_property=rd_on)
-    tamam = nb == 5 and envanter_hedefte(inv, i0, hedef_baski, govde) == []
+    tamam = nb == 5 and envanter_hedefte(inv, dijital_hedef(i0), hedef_baski, govde) == []
     return ("TAMAM" if tamam else "YAZ"), govde, stiller, hedef_baski
+
+
+def dijital_hedef(i0):
+    """imza sozlugu -> dijital urunlerin fiyati DIJ_FIYAT olacak sekilde beklenen imza (diger alanlar ayni)."""
+    return {k: ((v[0], DIJ_FIYAT[k[1]]) + tuple(v[2:]) if k[1] in DIJ_FIYAT else v) for k, v in i0.items()}
 
 
 def envanter_hedefte(inv, dijital_once, hedef_baski, beklenen_on=None):
@@ -441,7 +450,7 @@ def ilan(api, shop, lid, yaz, out, R=None):
     if api.remaining is not None and int(api.remaining) < ISTEK_TAHMIN + KOTA_SINIRI:   # kural: tahmini istek + 10
         R["durum"] = f"KOTA_BEKLE kalan {api.remaining} < {ISTEK_TAHMIN} + {KOTA_SINIRI} (yazma yok)"
         return R
-    i0 = imza(inv)
+    i0 = dijital_hedef(imza(inv))      # dijital urunlerin BEKLENEN hali: her sey ayni, fiyat DIJ_FIYAT
     R["onarim"] = "gerekmedi"
     f = []
     if e_durum == "YAZ":

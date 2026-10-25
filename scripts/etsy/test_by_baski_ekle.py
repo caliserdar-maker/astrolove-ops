@@ -140,7 +140,8 @@ def test():
     assert [E.anahtar(p)[1] for p in b["products"][:3]] == ["Digital card 5x7", "Digital file 8x10", "Shipped print 8x10"]
     bs = [p for p in b["products"] if E.anahtar(p)[1] == E.BASKI]
     assert {p["sku"] for p in bs} == {f"BY-ARI_LEO-{k}-PRINT8X10" for _, _, k in STIL}
-    assert all(p["offerings"][0] == {"price": 29.0, "quantity": 999, "is_enabled": True, "readiness_state_id": E.HAZIRLIK_BASKI} for p in bs)
+    assert all(p["offerings"][0] == {"price": 24.9, "quantity": 999, "is_enabled": True, "readiness_state_id": E.HAZIRLIK_BASKI} for p in bs)
+    assert all(p["offerings"][0]["price"] == 3.9 for p in b["products"] if E.anahtar(p)[1] != E.BASKI)   # dosya 4.90 -> 3.90
     dj = [p for p in b["products"] if E.anahtar(p)[1] != E.BASKI]
     assert all(p["offerings"][0]["readiness_state_id"] == ESKI_HZ and p["property_values"][1]["value_ids"] for p in dj)
     assert api.patches[0].keys() == {"description", "materials", "shipping_profile_id"} and api.patches[1] == {"production_partner_ids": "5817638"}
