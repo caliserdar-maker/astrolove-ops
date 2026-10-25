@@ -34,7 +34,12 @@ def test():
     assert K.plan(inv(2200, 2900))[1]; ok += 1
     x = inv(); x["products"].pop()
     assert K.plan(x)[1]; ok += 1
-    print(f"test_kupa_fiyat: {ok}/5 PASS")
+    vimg = [{"property_id": 513, "value_id": 100 + i, "image_id": 900 + i} for i in range(8)]
+    assert K.bag_gecerli(inv(), vimg); ok += 1
+    assert not K.bag_gecerli(inv(), vimg[:7]); ok += 1
+    eski = [dict(v, value_id=v["value_id"] + 50) for v in vimg]   # 8 kayit ama value_id degismis
+    assert not K.bag_gecerli(inv(), eski); ok += 1
+    print(f"test_kupa_fiyat: {ok}/8 PASS")
 
 
 if __name__ == "__main__":

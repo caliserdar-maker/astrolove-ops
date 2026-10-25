@@ -147,6 +147,14 @@ def renk_haritasi(inv, rows):
     return {ad.get((r.get("property_id"), r.get("value_id")), str(r.get("value_id"))): str(r.get("image_id")) for r in rows}
 
 
+def bag_gecerli(inv, vimg):
+    """8 stil-gorsel baginin hepsi bugunku stil value_id'lerine denk mi (inceleme 25 Eki madde 2)."""
+    stil = {i for pr in inv.get("products") or [] for pv in pr.get("property_values") or []
+            if pv.get("property_id") == P_RENK for i in pv.get("value_ids") or []}
+    bag = {r.get("value_id") for r in vimg if r.get("property_id") == P_RENK}
+    return len(vimg) == 8 and len(stil) == 8 and bag == stil
+
+
 def anlik(api, shop, lid):
     return {"listing": api.get(f"/listings/{lid}") or {},
             "inventory": api.get(INV_YOL.format(lid=lid)) or {},
@@ -166,11 +174,11 @@ def ilan_isle(api, shop, lid, yaz, R):
     pr0, h0, zaten0 = plan(inv0)
     if zaten0 and not h0:
         vimg0 = (api.get(f"/shops/{shop}/listings/{lid}/variation-images", ok404=True) or {}).get("results") or []
-        if len(vimg0) == 8:
+        if bag_gecerli(inv0, vimg0):
             R["durum"] = "ZATEN"
             R["renk_bag_sayi"] = len(vimg0)
             return R
-        R["not"] = f"fiyat hedefte ama renk bagi {len(vimg0)}: kontrol yolu"
+        R["not"] = f"fiyat hedefte ama stil bagi gecersiz ({len(vimg0)}): kontrol yolu"
     sn = anlik(api, shop, lid)
     L, inv = sn["listing"], sn["inventory"]
     (d / "ONCE.json").write_text(json.dumps(sn, ensure_ascii=False, indent=1), encoding="utf-8")
@@ -178,8 +186,8 @@ def ilan_isle(api, shop, lid, yaz, R):
     metin = sorted({m.group(0) for alan in ("description", "personalization_instructions") for m in METIN.finditer(L.get(alan) or "")})
     R.update(state=L.get("state"), print_n=len(prs), kapi=h, renk_bag_once=renk_haritasi(inv, sn["vimg"]), metinde_fiyat_kargo=metin)
     R["stil_bag_sayi"] = len(sn["vimg"])
-    if len(sn["vimg"]) != 8:
-        h.append(f"stil-gorsel bagi {len(sn['vimg'])}/8 (once onarilmali)")
+    if not bag_gecerli(inv, sn["vimg"]):
+        h.append(f"stil-gorsel bagi gecersiz ya da eksik ({len(sn['vimg'])}/8, value_id eslesmesi) (once onarilmali)")
     if L.get("state") != "active":
         R["durum"] = "ATLANDI_STATE"
         return R
@@ -197,6 +205,7 @@ def ilan_isle(api, shop, lid, yaz, R):
         return R
     body = govde(inv)
     (d / "PUT.json").write_text(json.dumps(body, ensure_ascii=False, indent=1), encoding="utf-8")
+    R["put_gonderildi"] = True   # PUT belirsiz biterse de "yazildi olabilir" (inceleme madde 3)
     api.put_json(INV_YOL.format(lid=lid), body)
     R["yazildi"] = "envanter"   # bundan sonraki her kesinti HATA (yazildi, dogrulanmadi)
     f = ["okunmadi"]
@@ -307,10 +316,12 @@ def main():
                 ilan_isle(api, shop, lid, yaz, R)
             except SystemExit as e:
                 R["durum"] = f"DUR: {str(e)[:400]}"
-                if R.get("yazildi"):
+                if R.get("yazildi") or R.get("put_gonderildi"):
                     R["durum"] = f"FAIL_YAZILDI_DOGRULANMADI: {str(e)[:300]}"
             except Exception as e:  # noqa: BLE001
                 R["durum"] = f"FAIL_ISTISNA: {type(e).__name__}: {str(e)[:300]}"
+                if R.get("yazildi") or R.get("put_gonderildi"):
+                    R["durum"] = "FAIL_YAZILDI_DOGRULANMADI: " + R["durum"]
             sonuc.append(R)
             g = time.time() - t0
             log(f"[{i}/{len(ids)}] {100 * i // len(ids)}% gecen {g:.0f}s kalan ~{g / i * (len(ids) - i):.0f}s | {lid} {R['durum'][:150]} kota={api.remaining}")
@@ -327,6 +338,8 @@ def main():
         iyi = ("PASS", "ZATEN") if yaz else ("PLAN_OK", "ZATEN")
         tamam = oz_hata is None and len(sonuc) == len(ids) and all(r["durum"].split(" ")[0] in iyi for r in sonuc)
         et = sonuc_etiketi(sonuc, oz_hata, tamam)
+        if any(r["durum"].startswith("FAIL_YAZILDI") for r in sonuc) or (yaz and any(r["durum"] == "ATLANDI_STATE" for r in sonuc)):
+            et = "HATA"   # yazildi-dogrulanmadi ya da aktif olmayan ilan asla KOTA/yesil sayilmaz (inceleme madde 1, 5)
         oz = {"mod": a.mod, "istenen": len(ids), "islenen": len(sonuc), "sayim": say, "kota_son": api.remaining if api else None,
               "genel_hata": oz_hata, "sonuc": et, "ilanlar": sonuc}
         (OUT / f"KUPA_FIYAT_{a.mod.upper()}.json").write_text(json.dumps(oz, ensure_ascii=False, indent=1, default=str), encoding="utf-8")
