@@ -187,18 +187,22 @@ def ilan_isle(api, shop, lid, yaz, R):
     pr0, h0, zaten0 = plan(inv0)
     if zaten0 and not h0:
         vimg0 = (api.get(f"/shops/{shop}/listings/{lid}/variation-images", ok404=True) or {}).get("results") or []
-        if len(vimg0) == 5:
+        if len(vimg0) >= 4:          # eski galerili ilanlarda Warm Parchment bagi yok (galeri isi tamamlar)
             R["durum"] = "ZATEN"
+            R["renk_bag_sayi"] = len(vimg0)
             return R
-        R["not"] = f"fiyat hedefte ama renk bagi {len(vimg0)}/5: onarim yolu"
+        R["not"] = f"fiyat hedefte ama renk bagi {len(vimg0)}: kontrol yolu"
     sn = anlik(api, shop, lid)
     L, inv = sn["listing"], sn["inventory"]
     (d / "ONCE.json").write_text(json.dumps(sn, ensure_ascii=False, indent=1), encoding="utf-8")
     prs, h, zaten = plan(inv)
     metin = sorted({m.group(0) for alan in ("description", "personalization_instructions") for m in METIN.finditer(L.get(alan) or "")})
     R.update(state=L.get("state"), print_n=len(prs), kapi=h, renk_bag_once=renk_haritasi(inv, sn["vimg"]), metinde_fiyat_kargo=metin)
-    if len(sn["vimg"]) != 5:
+    R["renk_bag_sayi"] = len(sn["vimg"])
+    if len(sn["vimg"]) < 4:
         h.append(f"renk-gorsel bagi {len(sn['vimg'])}/5 (once onarilmali)")
+    elif len(sn["vimg"]) == 4:
+        R["not_renk"] = "renk bagi 4/5 (eski galeri; Warm Parchment galeri isinde eklenecek). Mevcut 4 bag korunur."
     if L.get("state") != "active":
         R["durum"] = "ATLANDI_STATE"
         return R
