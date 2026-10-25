@@ -22,6 +22,7 @@ HEDEF = {"US": (11.90, 4.90), "CA": (12.90, 5.90), "GB": (10.90, 1.90), "EU": (1
          "JP": (10.90, 2.90), "EVERYWHERE": (17.90, 7.90)}
 ONCEKI = {"US": (0.0, 0.0), "CA": (0.0, 0.0), "GB": (0.0, 0.0), "EU": (0.0, 0.0), "AU": (0.0, 0.0), "JP": (0.0, 0.0),
           "EVERYWHERE": (14.90, 14.90)}
+FIYAT_PAYI = 77 * 16 + 10   # inceleme 25 Eki: kargo yazilmadan once fiyat adiminin en kotu kota ihtiyaci da hazir olmali
 OUT = Path("out")
 
 
@@ -122,8 +123,9 @@ def main():
         degis = [k for k, v in h0.items() if (v["p"], v["s"]) != HEDEF[k]]
         R["degisecek"] = degis
         if a.mod == "yaz" and degis:
-            if api.remaining is not None and int(api.remaining) < len(degis) + 2 + KOTA_SINIRI:
-                raise SystemExit(f"DUR: kota esigi: kalan {api.remaining} < {len(degis) + 2} + {KOTA_SINIRI} (yazma yok)")
+            gerek = len(degis) + 2 + KOTA_SINIRI + FIYAT_PAYI
+            if api.remaining is None or int(api.remaining) < gerek:
+                raise SystemExit(f"DUR: kota esigi: kalan {api.remaining} < {gerek} (kargo + fiyat adimi; yazma yok)")
             for k in degis:
                 v = h0[k]
                 alan = {"destination_country_iso": v["cc"]} if v["cc"] else {"destination_region": v["rg"]}
@@ -142,7 +144,8 @@ def main():
     finally:
         (OUT / f"KUPA_KARGO_{a.mod.upper()}.json").write_text(json.dumps(R, ensure_ascii=False, indent=1, default=str), encoding="utf-8")
         print("KUPA_KARGO " + json.dumps({k: v for k, v in R.items() if k != "iz"}, ensure_ascii=False, default=str), flush=True)
-        kota = hata is not None and ("kota esigi: kalan" in hata or "kota sert tabani: kalan" in hata) and not R.get("yazildi")
+        from by_baski_ekle import kota_mi
+        kota = hata is not None and kota_mi(hata) and not R.get("yazildi")
         et = "TAMAM" if hata is None else ("KOTA" if kota else "HATA")
         print(f"::notice::SONUC {et} {a.mod} degisecek {R.get('degisecek')} kullanan {R.get('kullanan_sayi')}", flush=True)
     sys.exit(0 if (hata is None or et == "KOTA") else 1)
