@@ -25,6 +25,7 @@ BOLUM = 60980873
 DOKUNMA = {"4597843405"}   # 4598525642 Serdar 25 Eki aksam: "78 ilani duzenle" (artik dokunulur)
 P_RENK, P_BOY = 513, 514            # renk yerine stil (gorsel baglari stile bagli)
 HEDEF = {"11 oz": (12.90, 24.90), "15 oz": (16.90, 29.90)}   # boy -> (yeni, eski canli)
+ESKI_EK = {"11 oz": 24.00, "15 oz": 29.00}   # 4598525642 ilk tur fiyatinda kalmisti (25 Eki okuma)
 ISTEK_TAHMIN = 16   # ilan basi en kotu: 4 oku + PUT + 3x3 geri okuma + 2 bag (kural: tahmini + KOTA_SINIRI, PUT oncesi)
 METIN = re.compile(r"\$\s?\d|\bUSD\b|free shipping|shipping to", re.I)
 OUT = Path("out")
@@ -92,7 +93,7 @@ def plan(inv):
             h.append(f"bilinmeyen boy: {deger(p, P_BOY)}")
             continue
         yeni, eski = HEDEF[k]
-        if fiyatlar(p)[0] not in (yeni, eski):
+        if fiyatlar(p)[0] not in (yeni, eski, ESKI_EK[k]):
             h.append(f"{p.get('sku')} {k}: fiyat {fiyatlar(p)[0]} (beklenen eski {eski} ya da hedef {yeni})")
         boy_say[k] = boy_say.get(k, 0) + 1
         pr_list.append(p)
