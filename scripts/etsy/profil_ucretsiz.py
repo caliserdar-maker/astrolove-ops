@@ -16,6 +16,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 PROFIL = 314711751541
 ONAY = "PROFIL_WALLART_UCRETSIZ"
+# 25 Eki salt okuma (40183025439): simdiki ucretler; yazmadan once birebir bu olmali (ya da zaten 0)
+BEKLENEN = {"EVERYWHERE": 12.0, "IL": 18.0, "NO": 14.0, "TR": 18.0, "EU": 0.0, "AU": 0.0, "CA": 0.0, "GB": 0.0, "US": 0.0}
 IDS_YOL = Path(__file__).resolve().parents[2] / "data" / "pod" / "pod78_ids.csv"
 OUT = Path("out")
 
@@ -69,9 +71,17 @@ def main():
 
         class Kilitli(type(api)):
             def put(self, path, data):
-                if not re.fullmatch(rf"/shops/{shop}/shipping-profiles/{PROFIL}/destinations/\d+", path) or a.mod != "yaz":
-                    raise SystemExit(f"YASAK: PUT {path}")
+                anah = set(data)
+                if not re.fullmatch(rf"/shops/{shop}/shipping-profiles/{PROFIL}/destinations/\d+", path) or a.mod != "yaz" \
+                        or not {"primary_cost", "secondary_cost", "min_delivery_days", "max_delivery_days"} <= anah \
+                        or not anah <= {"primary_cost", "secondary_cost", "min_delivery_days", "max_delivery_days",
+                                        "destination_country_iso", "destination_region"} \
+                        or data.get("primary_cost") != 0 or data.get("secondary_cost") != 0:
+                    raise SystemExit(f"YASAK: PUT {path} {sorted(anah)}")
                 return super().put(path, data)
+
+            def post_file(self, *x, **y):
+                raise SystemExit("YASAK: POST file")
 
             def post(self, *x, **y):
                 raise SystemExit("YASAK: POST")
@@ -92,8 +102,11 @@ def main():
         (OUT / "PROFIL_YEDEK.json").write_text(json.dumps(P0, ensure_ascii=False, indent=1), encoding="utf-8")
         h0 = hedefler(P0)
         R.update(baslik=P0.get("title"), once={k: (v["p"], v["s"], v["a"], v["b"]) for k, v in h0.items()})
-        if not h0:
-            raise SystemExit("DUR: profil hedefi yok")
+        if set(h0) != set(BEKLENEN):
+            raise SystemExit(f"DUR: profil hedefleri beklenmedik: {sorted(h0)}")
+        for k, v in h0.items():
+            if v["p"] != v["s"] or v["p"] not in (0.0, BEKLENEN[k]):
+                raise SystemExit(f"DUR: {k} ucret {v['p']}/{v['s']} (beklenen {BEKLENEN[k]} ya da 0)")
         poster = {r["listing_id"].strip() for r in csv.DictReader(open(IDS_YOL, encoding="utf-8")) if r.get("listing_id")}
         kim = kullananlar(api, shop)
         R["kullanan_sayi"] = len(kim)
@@ -104,6 +117,9 @@ def main():
         degis = [k for k, v in h0.items() if v["p"] != 0 or v["s"] != 0]
         R["degisecek"] = degis
         if a.mod == "yaz":
+            from etsy_common import KOTA_SINIRI
+            if api.remaining is not None and int(api.remaining) < len(degis) + 2 + KOTA_SINIRI:
+                raise SystemExit(f"DUR: kota esigi: kalan {api.remaining} < {len(degis) + 2} + {KOTA_SINIRI} (yazma yok)")
             for k in degis:
                 v = h0[k]
                 alan = {"destination_country_iso": v["cc"]} if v["cc"] else {"destination_region": v["rg"]}
@@ -120,9 +136,10 @@ def main():
     finally:
         (OUT / f"PROFIL_{a.mod.upper()}.json").write_text(json.dumps(R, ensure_ascii=False, indent=1, default=str), encoding="utf-8")
         print("PROFIL " + json.dumps({k: v for k, v in R.items() if k != "iz"}, ensure_ascii=False, default=str), flush=True)
-        print(f"::notice::SONUC {'TAMAM' if hata is None else 'HATA'} {a.mod} degisecek {R.get('degisecek')} kullanan {R.get('kullanan_sayi')}",
+        et = "TAMAM" if hata is None else ("KOTA" if "kota esigi: kalan" in hata or "kota sert tabani: kalan" in hata else "HATA")
+        print(f"::notice::SONUC {et} {a.mod} degisecek {R.get('degisecek')} kullanan {R.get('kullanan_sayi')}",
               flush=True)
-    sys.exit(0 if hata is None else 1)
+    sys.exit(0 if (hata is None or et == "KOTA") else 1)
 
 
 if __name__ == "__main__":

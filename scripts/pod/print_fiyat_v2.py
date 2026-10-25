@@ -21,6 +21,7 @@ from pathlib import Path
 
 KOK = Path(__file__).resolve().parent
 sys.path[:0] = [str(KOK), str(KOK.parent / "etsy")]
+from by_baski_ekle import kota_mi, sonuc_etiketi  # noqa: E402  (ayni kurallar: 4 inceleme gecti)
 
 ONAY, ONAY_HEPSI = "PRINT_FIYAT_V2", "PRINT_FIYAT_V2_HEPSI"
 INV_YOL = "/listings/{lid}/inventory?max_variations_supported=3"
@@ -31,7 +32,8 @@ DIJITAL = 3.90
 HEDEF = {"8x10": (24.90, 47.0), "A4": (24.90, 48.0), "11x14": (29.90, 51.0), "12x16": (32.90, 53.0), "A3": (32.90, 56.0),
          "12x18": (34.90, 57.0), "16x20": (39.90, 60.0), "16x24": (42.90, 61.0), "A2": (42.90, 62.0), "18x24": (44.90, 66.0),
          "20x30": (54.90, 84.0), "24x30": (59.90, 94.0), "24x36": (64.90, 109.0)}
-ISTEK_TAHMIN = 9
+ISTEK_TAHMIN = 16   # ilan basi en kotu: 4 oku + PUT + 3x3 geri okuma + 2 bag (kural: tahmini + KOTA_SINIRI, PUT oncesi)
+METIN = re.compile(r"\$\s?\d|\bUSD\b|free shipping|shipping to", re.I)
 OUT = Path("out")
 
 
@@ -70,7 +72,8 @@ def fiyatlar(pr):
 
 
 def imza(pr):
-    pvs = tuple((pv.get("property_id"), tuple(pv.get("values") or []), tuple(pv.get("value_ids") or []))
+    """value_id HARIC (Etsy PUT'ta yenileyebilir; ayrica not edilir), dijital_fiyat_390.imza ile ayni kapsam."""
+    pvs = tuple((pv.get("property_id"), pv.get("property_name"), tuple(pv.get("values") or []))
                 for pv in pr.get("property_values") or [])
     offs = tuple((o.get("quantity"), bool(o.get("is_enabled")), o.get("readiness_state_id"))
                  for o in pr.get("offerings") or [] if not o.get("is_deleted"))
@@ -171,19 +174,31 @@ def anlik(api, shop, lid):
             "vimg": (api.get(f"/shops/{shop}/listings/{lid}/variation-images", ok404=True) or {}).get("results") or []}
 
 
+def kisisel(L):
+    return {k: L.get(k) for k in ("is_personalizable", "personalization_is_required", "personalization_char_count_max",
+                                   "personalization_instructions")}
+
+
 def ilan_isle(api, shop, lid, yaz, R):
+    from etsy_common import KOTA_SINIRI
     d = OUT / lid
     d.mkdir(parents=True, exist_ok=True)
     inv0 = api.get(INV_YOL.format(lid=lid)) or {}
     pr0, h0, zaten0 = plan(inv0)
     if zaten0 and not h0:
-        R["durum"] = "ZATEN"
-        return R
+        vimg0 = (api.get(f"/shops/{shop}/listings/{lid}/variation-images", ok404=True) or {}).get("results") or []
+        if len(vimg0) == 5:
+            R["durum"] = "ZATEN"
+            return R
+        R["not"] = f"fiyat hedefte ama renk bagi {len(vimg0)}/5: onarim yolu"
     sn = anlik(api, shop, lid)
     L, inv = sn["listing"], sn["inventory"]
     (d / "ONCE.json").write_text(json.dumps(sn, ensure_ascii=False, indent=1), encoding="utf-8")
     prs, h, zaten = plan(inv)
-    R.update(state=L.get("state"), print_n=len(prs), kapi=h, renk_bag_once=renk_haritasi(inv, sn["vimg"]))
+    metin = sorted({m.group(0) for alan in ("description", "personalization_instructions") for m in METIN.finditer(L.get(alan) or "")})
+    R.update(state=L.get("state"), print_n=len(prs), kapi=h, renk_bag_once=renk_haritasi(inv, sn["vimg"]), metinde_fiyat_kargo=metin)
+    if len(sn["vimg"]) != 5:
+        h.append(f"renk-gorsel bagi {len(sn['vimg'])}/5 (once onarilmali)")
     if L.get("state") != "active":
         R["durum"] = "ATLANDI_STATE"
         return R
@@ -196,10 +211,13 @@ def ilan_isle(api, shop, lid, yaz, R):
     if not yaz:
         R["durum"] = "PLAN_OK"
         return R
+    if api.remaining is not None and int(api.remaining) < ISTEK_TAHMIN + KOTA_SINIRI:   # PUT'tan HEMEN once
+        R["durum"] = f"KOTA_BEKLE kalan {api.remaining} < {ISTEK_TAHMIN} + {KOTA_SINIRI} (yazma yok)"
+        return R
     body = govde(inv)
     (d / "PUT.json").write_text(json.dumps(body, ensure_ascii=False, indent=1), encoding="utf-8")
     api.put_json(INV_YOL.format(lid=lid), body)
-    R["yazildi"] = "envanter"
+    R["yazildi"] = "envanter"   # bundan sonraki her kesinti HATA (yazildi, dogrulanmadi)
     f = ["okunmadi"]
     for _ in range(3):
         sn2 = anlik(api, shop, lid)
@@ -222,8 +240,13 @@ def ilan_isle(api, shop, lid, yaz, R):
         for k in ("price_on_property", "quantity_on_property", "sku_on_property", "readiness_state_on_property"):
             if sorted(inv.get(k) or []) != sorted(inv2.get(k) or []):
                 f.append(f"{k} degisti")
+        if [anahtar(p) for p in inv.get("products") or [] if not p.get("is_deleted")] != \
+                [anahtar(p) for p in inv2.get("products") or [] if not p.get("is_deleted")]:
+            f.append("urun sirasi degisti")
         if L2.get("state") != L.get("state"):
             f.append(f"state {L.get('state')} -> {L2.get('state')}")
+        if kisisel(L2) != kisisel(L):
+            f.append("kisisellestirme degisti")
         if not f:
             break
         time.sleep(10)
@@ -247,6 +270,10 @@ def ilan_isle(api, shop, lid, yaz, R):
             v3 = (api.get(f"/shops/{shop}/listings/{lid}/variation-images", ok404=True) or {}).get("results") or []
             if renk_haritasi(inv2, v3) != v_once:
                 f.append("renk bagi geri yazilamadi")
+    vid = lambda i: sorted((pv.get("property_id"), v, tuple(pv.get("value_ids") or [])) for p in i.get("products") or []
+                           for pv in p.get("property_values") or [] for v in pv.get("values") or [])
+    if vid(inv) != vid(inv2):
+        R["not_vid"] = "value_id degisti (fiyat/sku/teklif ayni; renk baglari ada gore kontrol edildi)"
     (d / "SONRA.json").write_text(json.dumps(sn2, ensure_ascii=False, indent=1), encoding="utf-8")
     R.update(hatalar=f, durum="PASS" if not f else "FAIL", kota=api.remaining)
     return R
@@ -287,21 +314,19 @@ def main():
                 raise SystemExit("DUR: ilan 78 poster listesinde degil")
         for i, lid in enumerate(ids, 1):
             R = {"ilan": lid}
-            if yaz and api.remaining is not None and int(api.remaining) < ISTEK_TAHMIN + KOTA_SINIRI:
-                R["durum"] = f"KOTA_BEKLE kalan {api.remaining}"
-                sonuc.append(R)
-                break
             try:
                 api.kota_kapisi(f"ilan {lid}")
                 ilan_isle(api, shop, lid, yaz, R)
             except SystemExit as e:
                 R["durum"] = f"DUR: {str(e)[:400]}"
+                if R.get("yazildi"):
+                    R["durum"] = f"FAIL_YAZILDI_DOGRULANMADI: {str(e)[:300]}"
             except Exception as e:  # noqa: BLE001
                 R["durum"] = f"FAIL_ISTISNA: {type(e).__name__}: {str(e)[:300]}"
             sonuc.append(R)
             g = time.time() - t0
             log(f"[{i}/{len(ids)}] {100 * i // len(ids)}% gecen {g:.0f}s kalan ~{g / i * (len(ids) - i):.0f}s | {lid} {R['durum'][:150]} kota={api.remaining}")
-            if R["durum"].startswith(("FAIL", "DUR")) and (yaz or "kota" in R["durum"]):
+            if R["durum"].startswith(("FAIL", "DUR", "KOTA_BEKLE")) and (yaz or kota_mi(R["durum"])):
                 break
     except BaseException as e:  # noqa: BLE001
         oz_hata = f"{type(e).__name__}: {str(e)[:400]}"
@@ -313,8 +338,7 @@ def main():
             say[k] = say.get(k, 0) + 1
         iyi = ("PASS", "ZATEN") if yaz else ("PLAN_OK", "ZATEN")
         tamam = oz_hata is None and len(sonuc) == len(ids) and all(r["durum"].split(" ")[0] in iyi for r in sonuc)
-        kota = any(r["durum"].startswith("KOTA_BEKLE") or "kota" in r["durum"] for r in sonuc) or (oz_hata and "kota" in oz_hata)
-        et = "TAMAM" if tamam else ("KOTA" if kota and not any(r["durum"].startswith("FAIL") for r in sonuc) else "HATA")
+        et = sonuc_etiketi(sonuc, oz_hata, tamam)
         oz = {"mod": a.mod, "istenen": len(ids), "islenen": len(sonuc), "sayim": say, "kota_son": api.remaining if api else None,
               "genel_hata": oz_hata, "sonuc": et, "ilanlar": sonuc}
         (OUT / f"PRINT_FIYAT_V2_{a.mod.upper()}.json").write_text(json.dumps(oz, ensure_ascii=False, indent=1, default=str), encoding="utf-8")
