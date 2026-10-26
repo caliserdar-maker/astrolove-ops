@@ -8,14 +8,15 @@ on:
   workflow_dispatch:
     inputs:
       pilot: {description: "pilot listing_id", required: false, default: "4595350971"}
+      yalniz_pilot: {description: "1 = yalniz pilot oku; FARKLI Drive'daki YD_OZET.csv'den yeniden", required: false, default: "0"}
 jobs:
   oku:
     runs-on: ubuntu-latest
     timeout-minutes: 150
     steps:
       - name: Girdi kapisi
-        env: {PILOT: "${{ inputs.pilot }}"}
-        run: '[[ "$PILOT" =~ ^[0-9]+$ ]] || { echo "::error::pilot"; exit 1; }'
+        env: {PILOT: "${{ inputs.pilot }}", YALNIZ: "${{ inputs.yalniz_pilot }}"}
+        run: '[[ "$PILOT" =~ ^[0-9]+$ && "$YALNIZ" =~ ^[01]$ ]] || { echo "::error::girdi"; exit 1; }'
       - uses: actions/checkout@v4
       - name: Etsy kilidi (sira bekle, iptal yok)
         env:
@@ -39,11 +40,13 @@ jobs:
           if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
             echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
       - name: Token + ilan listesi
+        env: {YALNIZ: "${{ inputs.yalniz_pilot }}"}
         run: |
           set -euo pipefail
           umask 077; mkdir -p _work _out
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
           rclone copyto "gdrive:ASTROLOVE/TEMP/BY78_TASLAK_20261014/BY78_TASLAKLAR.csv" _work/LISTE.csv
+          if [ "$YALNIZ" = "1" ]; then rclone copyto "gdrive:ASTROLOVE/TEMP/YD_ENVANTER_20261026/YD_OZET.csv" _work/OZET.csv; fi
       - name: Oku
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
@@ -51,7 +54,13 @@ jobs:
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
           TOKEN_FILE: _work/ETSY_TOKEN.json
           PILOT: ${{ inputs.pilot }}
-        run: python3 scripts/etsy/yd_envanter_oku.py --liste _work/LISTE.csv --pilot "$PILOT" --out _out
+          YALNIZ: ${{ inputs.yalniz_pilot }}
+        run: |
+          if [ "$YALNIZ" = "1" ]; then
+            python3 scripts/etsy/yd_envanter_oku.py --liste _work/LISTE.csv --pilot "$PILOT" --out _out --yalniz-pilot --ozet _work/OZET.csv
+          else
+            python3 scripts/etsy/yd_envanter_oku.py --liste _work/LISTE.csv --pilot "$PILOT" --out _out
+          fi
       - name: Token geri yaz + cikti Drive'a
         if: ${{ always() }}
         run: |

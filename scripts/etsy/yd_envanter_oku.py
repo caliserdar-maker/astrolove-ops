@@ -17,7 +17,7 @@ KOK = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(KOK))
 import etsy_common as E  # noqa: E402
 
-SATIR_RX = re.compile(r"\b(style|styles|photo|photos|image|images|picture|pictures|shown|gallery|preview|colou?r)\b", re.I)
+SATIR_RX = re.compile(r"\b(style|styles|photo|photos|image|images|picture|pictures|shown|gallery|preview|colou?rs?|looks?|effects?)\b", re.I)
 
 
 def para(p):
@@ -69,7 +69,9 @@ def yapi(h):
     if stil_pid is None:                           # bag yoksa: 'Style' adli ozellik
         stil_pid = next((k for k, o in ozellik.items() if (o["ad"] or "").lower() in ("style", "stil", "design")), None)
     stil = ozellik.get(stil_pid) or {}
-    satir = [s_ for s_ in (x.get("description") or "").replace("\r\n", "\n").split("\n") if SATIR_RX.search(s_)]
+    adlar = [a_ for o in ozellik.values() for a_ in o["secenekler"] if a_]
+    satir = [s_ for s_ in (x.get("description") or "").replace("\r\n", "\n").split("\n")
+             if SATIR_RX.search(s_) or any(a_ in s_ for a_ in adlar)]
     return dict(
         listing_id=x.get("listing_id"), state=x.get("state"), title=x.get("title"), urun=len(pr),
         fiyat_aralik=[min(f for v in fiyat.values() for f in v), max(f for v in fiyat.values() for f in v)] if fiyat else None,
@@ -94,6 +96,8 @@ def main():
     ap.add_argument("--liste", required=True)
     ap.add_argument("--pilot", default="4595350971")
     ap.add_argument("--out", required=True)
+    ap.add_argument("--yalniz-pilot", action="store_true", help="yalniz pilotu oku; FARKLI'yi --ozet'ten yeniden hesapla")
+    ap.add_argument("--ozet", default="", help="mevcut YD_OZET.csv (--yalniz-pilot ile)")
     a = ap.parse_args()
     out = pathlib.Path(a.out); (out / "HAM").mkdir(parents=True, exist_ok=True)
     k_, s_ = os.environ.get("ETSY_API_KEY", ""), os.environ.get("ETSY_SHARED_SECRET", "")
@@ -109,6 +113,8 @@ def main():
     if a.pilot not in ids:
         ids = [a.pilot] + ids
     ids = sorted(dict.fromkeys(ids), key=lambda i: i != a.pilot)
+    if a.yalniz_pilot:
+        ids = [a.pilot]
     ozet, P = [], None
     for n, lid in enumerate(ids, 1):
         api.kota_kapisi(f"ilan {lid}")
@@ -122,6 +128,11 @@ def main():
         ozet.append(y)
         print(f"[{n}/{len(ids)}] {lid} {y['state']} gorsel {y['gorsel_sayisi']} stil {y['stil_ozelligi']} {len(y['stil_secenekleri'])} "
               f"bag {y['bagli_secenek']} video {len(y['video'])} istek {api.calls} kota {api.remaining}", flush=True)
+    if a.yalniz_pilot:
+        if a.ozet:
+            satirlar_o = list(csv.DictReader(open(a.ozet, encoding="utf-8")))
+            print(f"FARKLI (mevcut ozet {len(satirlar_o)} satir): {len(farkli_yaz(out, satirlar_o, a.pilot))} | istek {api.calls} | kota {api.remaining}")
+        return 0
     alan = ["listing_id", "cift", "state", "gorsel_sayisi", "kapak_image_id", "kapak_boyut", "stil_ozelligi", "stil_secenekleri",
             "bagli_secenek", "bagli_gorsel_galeride", "video", "urun", "fiyat_aralik"]
     def satir(y):
@@ -132,27 +143,32 @@ def main():
                 "-".join(map(str, y["fiyat_aralik"] or []))]
     with open(out / "YD_OZET.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f); w.writerow(alan); w.writerows(satir(y) for y in ozet)
-    farkli = []
-    for y in ozet:
-        if P is None or y is P:
-            continue
-        neden = []
-        if y["gorsel_sayisi"] != P["gorsel_sayisi"]:
-            neden.append(f"gorsel {y['gorsel_sayisi']} (pilot {P['gorsel_sayisi']})")
-        if y["stil_ozelligi"] != P["stil_ozelligi"] or y["stil_secenekleri"] != P["stil_secenekleri"]:
-            neden.append(f"stil {y['stil_ozelligi']}: {y['stil_secenekleri']} (pilot {P['stil_ozelligi']}: {P['stil_secenekleri']})")
-        if y["bagli_secenek"] < len(y["stil_secenekleri"]) or y["bagli_gorsel_galeride"] < y["bagli_secenek"]:
-            neden.append(f"bag eksigi {y['bagli_secenek']}/{len(y['stil_secenekleri'])}, galeride {y['bagli_gorsel_galeride']}")
-        if bool(y["video"]) != bool(P["video"]):
-            neden.append(f"video {'var' if y['video'] else 'yok'} (pilot {'var' if P['video'] else 'yok'})")
-        if y["state"] != "active":
-            neden.append(f"state {y['state']}")
-        if neden:
-            farkli.append([y["listing_id"], y["cift"], " ; ".join(neden)])
-    with open(out / "FARKLI.csv", "w", newline="", encoding="utf-8") as f:
-        w = csv.writer(f); w.writerow(["listing_id", "cift", "fark"]); w.writerows(farkli)
+    farkli = farkli_yaz(out, [dict(zip(alan, map(str, satir(y)))) for y in ozet], a.pilot)
     print(f"ILAN {len(ozet)} | FARKLI {len(farkli)} | istek {api.calls} | kota {api.remaining}")
     return 0
+
+
+def farkli_yaz(out, satirlar, pilot):
+    """YD_OZET satirlarini pilotla kiyaslar (gorsel, stil, bag, video, state, urun, fiyat)."""
+    P = next((r for r in satirlar if r["listing_id"] == str(pilot)), None)
+    farkli = []
+    for r in satirlar:
+        if P is None or r is P:
+            continue
+        neden = [f"{k} {r[k]} (pilot {P[k]})" for k in ("gorsel_sayisi", "stil_ozelligi", "stil_secenekleri", "urun", "fiyat_aralik")
+                 if r[k] != P[k]]
+        n = len([v for v in r["stil_secenekleri"].split(" | ") if v])
+        if int(r["bagli_secenek"]) < n or int(r["bagli_gorsel_galeride"]) < int(r["bagli_secenek"]):
+            neden.append(f"bag eksigi {r['bagli_secenek']}/{n}, galeride {r['bagli_gorsel_galeride']}")
+        if (r["video"] == "yok") != (P["video"] == "yok"):
+            neden.append(f"video {r['video']} (pilot {P['video']})")
+        if r["state"] != "active":
+            neden.append(f"state {r['state']}")
+        if neden:
+            farkli.append([r["listing_id"], r["cift"], " ; ".join(neden)])
+    with open(out / "FARKLI.csv", "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f); w.writerow(["listing_id", "cift", "fark"]); w.writerows(farkli)
+    return farkli
 
 
 if __name__ == "__main__":
