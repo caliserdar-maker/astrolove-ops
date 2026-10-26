@@ -147,12 +147,15 @@ RS_p = cv2.GaussianBlur(cv2.dilate(msym, np.ones((31, 31), np.uint8)).astype(np.
 RM_p = cv2.GaussianBlur(cv2.dilate(mmes, np.ones((11, 11), np.uint8)).astype(np.float32), (0, 0), 2.0)
 R_p = np.maximum(RS_p, RM_p)
 hm = cv2.resize((R_p > 0.02).astype(np.uint8), (P.w // 2, P.h // 2), interpolation=cv2.INTER_NEAREST)
-hi = cv2.resize(np.clip(P.img, 0, 255).astype(np.uint8), (P.w // 2, P.h // 2), interpolation=cv2.INTER_AREA)
+# v7b (26 Eki): bos hal KAPAKTAKI posterin kendi piksellerinden (POSTER_SRC yalniz maske icin). Kaynak ile Canva kapagi
+# arasindaki kucuk keskinlik/konum farki (ort 2,65) BASE = KAP + (bos - P.img) farkinda sembolu hayalet olarak birakiyordu.
+P_KAP = cv2.resize(kap_src[y0:y1, x0:x1], (P.w, P.h), interpolation=cv2.INTER_CUBIC).astype(np.float32) if _src else P.img
+hi = cv2.resize(np.clip(P_KAP, 0, 255).astype(np.uint8), (P.w // 2, P.h // 2), interpolation=cv2.INTER_AREA)
 bos = cv2.resize(cv2.inpaint(hi, cv2.dilate(hm, np.ones((3, 3), np.uint8)), 7, cv2.INPAINT_TELEA).astype(np.float32),
                  (P.w, P.h), interpolation=cv2.INTER_CUBIC)
 KAP = np.clip(np.round(cv2.resize(kap_src, (VW, VH), interpolation=cv2.INTER_AREA).astype(np.float32)), 0, 255)
 FULL = KAP
-BASE = np.clip(KAP + vid((bos - P.img) * R_p[..., None]), 0, 255)
+BASE = np.clip(KAP + vid((bos - P_KAP) * R_p[..., None]), 0, 255)
 MS, MG, MM = vid(MS_p), vid(MG_p), vid(MM_p)
 WS, WM = np.clip(vid(RS_p), 0, 1), np.clip(vid(RM_p), 0, 1)      # karisim agirliklari (kupada maske = katman farki)
 MM = cv2.dilate(MM, np.ones((3, 3), np.uint8))

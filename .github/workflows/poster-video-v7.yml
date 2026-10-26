@@ -11,8 +11,16 @@ on:
   workflow_dispatch:
     inputs:
       kapak_url:
-        description: 'Canva disa aktarma PNG baglantisi (imzali, sureli)'
-        required: true
+        description: 'Canva disa aktarma PNG baglantisi (imzali, sureli); bos ise kapak_drive_id'
+        required: false
+        default: ''
+      kapak_drive_id:
+        description: 'kapak_url bossa: Drive dosya id (3000x2250 PNG)'
+        required: false
+        default: ''
+      surum:
+        description: 'dosya adi soneki (v7, v7b); v7 disinda QC/KONTAK/log adlari da soneklidir (v7 kayitlari ezilmez)'
+        default: v7
       cift:
         description: 'cift adi (dosya adlarinda)'
         default: CANCER_LIBRA
@@ -25,6 +33,8 @@ jobs:
       POSTER_DRIVE_ID: 12WxBf0KTf7sOBIfErIfY7Teit6WvcfIo
       ESKI_KAPAK_URL: https://i.etsystatic.com/39729443/r/il/9ddacd/8705939512/il_fullxfull.8705939512_j0i3.jpg
       CIFT: ${{ inputs.cift }}
+      SURUM: ${{ inputs.surum }}
+      KAPAK_DRIVE_ID: ${{ inputs.kapak_drive_id }}
     steps:
     - name: Girdi kapisi + maske
       env:
@@ -33,7 +43,12 @@ jobs:
         set -euo pipefail
         echo "::add-mask::$KAPAK_URL"
         [[ "$CIFT" =~ ^[A-Z]+_[A-Z]+$ ]] || { echo "::error::cift gecersiz"; exit 1; }
-        [[ "$KAPAK_URL" =~ ^https://export-download\.canva\.com/ ]] || { echo "::error::kapak_url canva disa aktarma baglantisi degil"; exit 1; }
+        [[ "$SURUM" =~ ^v[0-9]+[a-z]?$ ]] || { echo "::error::surum gecersiz"; exit 1; }
+        if [ -n "$KAPAK_URL" ]; then
+          [[ "$KAPAK_URL" =~ ^https://export-download\.canva\.com/ ]] || { echo "::error::kapak_url canva disa aktarma baglantisi degil"; exit 1; }
+        else
+          [[ "$KAPAK_DRIVE_ID" =~ ^[A-Za-z0-9_-]{20,}$ ]] || { echo "::error::kapak_url ya da kapak_drive_id gerekli"; exit 1; }
+        fi
     - uses: actions/checkout@v4
     - uses: actions/setup-python@v5
       with:
@@ -62,9 +77,14 @@ jobs:
         echo "::add-mask::$KAPAK_URL"
         mkdir -p _w _o
         K=_o/KAPAK_${CIFT}_3000.png
-        H=$(curl -sS --retry 3 -o "$K" -w '%{http_code}' "$KAPAK_URL" 2>_w/curl_kapak.err || true)
-        echo "::warning::ERISIM export-download.canva.com http=$H boyut=$(stat -c %s "$K" 2>/dev/null || echo 0)"
-        [ "$H" = 200 ] || { echo "::error::kapak indirilemedi (http $H)"; sed 's/https:[^ ]*/<url>/g' _w/curl_kapak.err | head -3; exit 1; }
+        if [ -n "$KAPAK_URL" ]; then
+          H=$(curl -sS --retry 3 -o "$K" -w '%{http_code}' "$KAPAK_URL" 2>_w/curl_kapak.err || true)
+          echo "::warning::ERISIM export-download.canva.com http=$H boyut=$(stat -c %s "$K" 2>/dev/null || echo 0)"
+          [ "$H" = 200 ] || { echo "::error::kapak indirilemedi (http $H)"; sed 's/https:[^ ]*/<url>/g' _w/curl_kapak.err | head -3; exit 1; }
+        else
+          rclone backend copyid gdrive: "$KAPAK_DRIVE_ID" "$K"
+          echo "::warning::KAPAK Drive $KAPAK_DRIVE_ID sha256 $(sha256sum "$K" | cut -c1-16)"
+        fi
         python3 -I -c "
         import sys; from PIL import Image
         im = Image.open(sys.argv[1]); print('kapak', im.size, im.mode)
@@ -87,7 +107,8 @@ jobs:
     - name: Uret + QC
       run: |
         set +e -uo pipefail   # QC FAIL olsa da ciktilar Drive'a gitsin
-        V=_o/${CIFT}_ilan_video_v7.mp4
+        V=_o/${CIFT}_ilan_video_${SURUM}.mp4
+        [ "$SURUM" = v7 ] && EK= || EK=_${SURUM}
         T0=$(date +%s)
         POSTER_SRC=_w/POSTER_SRC_${CIFT}.png V6_C=sosyal/poster_video/v6_c_egri.json V6_N=58000 V6_BOLGE_REF=44274 V6_N_REF=58000 \
           python3 -I sosyal/poster_video/poster_video_v7.py _o/KAPAK_${CIFT}_3000.png "$V" murekkep > _w/uretim.log 2>&1; UR=$?
@@ -96,10 +117,11 @@ jobs:
         QC=1
         if [ "$UR" = 0 ]; then
           python3 -I sosyal/poster_video/v7_qc.py "$V" _o/KAPAK_${CIFT}_3000.png _w/uretim.log _w/qc | tee _w/qc.txt; QC=${PIPESTATUS[0]}
-          cp _w/qc/QC.json _w/qc/KONTAK.jpg _o/ 2>/dev/null
+          cp _w/qc/QC.json "_o/QC${EK}.json"; cp _w/qc/KONTAK.jpg "_o/KONTAK${EK}.jpg"
           sed 's/^/::warning::QC /' _w/qc.txt | cut -c1-3000
         fi
-        cp _w/uretim.log "_o/${CIFT}_uretim_v7.log"
+        cp _w/uretim.log "_o/${CIFT}_uretim_${SURUM}.log"
+        [ -n "$KAPAK_URL" ] || rm -f "_o/KAPAK_${CIFT}_3000.png"   # Drive'dan gelen kapak zaten orada
         rclone copy _o "$O" -q
         echo "::warning::DRIVE $(rclone lsf "$O" | tr '\n' ' ')"
         echo "RC=$(( UR + QC ))" >> "$GITHUB_ENV"

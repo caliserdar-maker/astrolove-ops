@@ -6,12 +6,16 @@ Kullanim: v7_qc.py <video.mp4> <kapak.png> <uretim_log.txt> <cikti_dir>
     4:2:0 kodlama tabani (ayni kapak libx264 crf 0 yuv420p) + 0,2
  c) <video>.ic.json 'ihlal' en buyuk <= 0 (murekkep tozun onune gecmiyor)
  d) uretim logunda 'poster kapakta X,Y WxH oran R' satiri: kutu orani (H / W) 1,29-1,31
- e) KONTAK.jpg: 0 / 0,5 / 1,5 / 2,5 / 3,5 / 4,5 / 5,9 sn (gercek oran)"""
+ e) KONTAK.jpg: 0 / 0,5 / 1,5 / 2,5 / 3,5 / 4,5 / 5,9 sn (gercek oran)
+ silinme_hayalet (Merkez 26 Eki, v7b): 0,5 sn karesinde cekirdek sembol maskesi (<video>.sembol_maske.png) icindeki ortalama (R - B)
+    ile maskenin 15-41 px cevre halkasindaki (15x15 ve 41x41 kare cekirdekle genisletme farki) ortalama (R - B) farki |.| <= 2,0
+    (Merkez olcumu: v7 7,17 FAIL, v7b 0,90 PASS; bu tanimla yerel v7 -7,20, v7b -0,89)"""
 import json, os, re, subprocess, sys
 import numpy as np, cv2
 from PIL import Image, ImageDraw, ImageFont
 
 KONTAK_SN = [0, 0.5, 1.5, 2.5, 3.5, 4.5, 5.9]
+HAYALET_SN, HAYALET_HALKA, HAYALET_ESIK = 0.5, (15, 41), 2.0
 
 
 def probe(v):
@@ -61,6 +65,13 @@ def main():
     m = re.match(r'poster kapakta (\d+),(\d+) (\d+)x(\d+)', satir[0]) if satir else None
     oran = round(int(m.group(4)) / int(m.group(3)), 4) if m else None
     K['d_kutu_orani'] = {'gecti': oran is not None and 1.29 <= oran <= 1.31, 'deger': {'satir': satir[0] if satir else None, 'oran': oran}}
+    sm = np.asarray(Image.open(v + '.sembol_maske.png').convert('L')) > 127
+    u = sm.astype(np.uint8)   # halka = 41x41 kare cekirdekle genisletilmis maske eksi 15x15 ile genisletilmis (Merkez olcum tanimi)
+    halka = (cv2.dilate(u, np.ones((HAYALET_HALKA[1],) * 2, np.uint8)) > 0) & ~(cv2.dilate(u, np.ones((HAYALET_HALKA[0],) * 2, np.uint8)) > 0)
+    k = F[int(round(HAYALET_SN * 30))].astype(np.float32); rb = k[..., 0] - k[..., 2]
+    hf = round(float(rb[sm].mean() - rb[halka].mean()), 3)
+    K['silinme_hayalet'] = {'gecti': abs(hf) <= HAYALET_ESIK, 'deger': {'sn': HAYALET_SN, 'fark_R_B': hf, 'esik': HAYALET_ESIK,
+                            'maske_px': int(sm.sum()), 'halka_px': int(halka.sum())}}
     th = 270; tw = round(F.shape[2] * th / F.shape[1]); ust = 32
     KT = Image.new('RGB', (4 * (tw + 8), 2 * (th + ust + 8)), (245, 245, 245)); dr = ImageDraw.Draw(KT)
     for n, t in enumerate(KONTAK_SN):
