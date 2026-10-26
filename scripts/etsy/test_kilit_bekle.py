@@ -4,7 +4,8 @@
  2 router atla: kumede aktif kosu varsa atla=true, yoksa false
  3 kume disi ve daha yeni kosular beklenmez; kendi kosusu sayilmaz; eski concurrency'li kosu kumede
  4 zaman asimi -> FAIL (1)
- 5 API hatasi 6 kez -> FAIL (1), kilitsiz devam yok"""
+ 5 API hatasi 6 kez -> FAIL (1), kilitsiz devam yok
+ 6 --grup onay-defteri: ayri kume; art arda 3 onay sirayla (hicbiri iptal yok), Etsy kosulari onayi beklemez ve tersi"""
 import os
 import sys
 import tempfile
@@ -20,6 +21,7 @@ W = Path(KOK, ".github/workflows"); W.mkdir(parents=True)
 (W / "eski.yml").write_text("concurrency:\n  group: etsy-token\n")
 (W / "router.yml").write_text("run: python3 scripts/etsy/kilit_bekle.py --mod atla\n")
 (W / "ilgisiz.yml").write_text("jobs: {}\n")
+(W / "onay.yml").write_text("run: python3 scripts/etsy/kilit_bekle.py --grup onay-defteri --zaman-asimi-dk 25\n")
 
 
 def kos(i, wf, st, t):
@@ -91,6 +93,32 @@ def main():
     r = K.calis("bekle", KOK, bozuk, s5.uyku, s5)
     if r != 1:
         kotu.append(f"API hatasi: {r}")
+    # 6 onay-defteri grubu
+    if K.kilit_kumesi(KOK, "onay-defteri") != {".github/workflows/onay.yml"} or ".github/workflows/onay.yml" in K.kilit_kumesi(KOK):
+        kotu.append(f"onay kumesi {K.kilit_kumesi(KOK, 'onay-defteri')} / etsy {K.kilit_kumesi(KOK)}")
+    uc = [kos(501, "onay", "in_progress", "2026-10-26T13:00:00Z"), kos(502, "onay", "queued", "2026-10-26T13:00:01Z"),
+          kos(503, "onay", "queued", "2026-10-26T13:00:02Z"), kos(100, "eski", "in_progress", "2026-10-26T12:00:00Z")]
+    sira = []
+    for rid, bekle_tur in (("501", 0), ("502", 1), ("503", 2)):      # 502 ilk onay bitene, 503 ikisi bitene kadar bekler
+        os.environ["GITHUB_RUN_ID"] = rid
+        s6 = Saat(); tur6 = {"n": 0}
+
+        def getir6():
+            tur6["n"] += 1
+            bitmis = tur6["n"] - 1                                    # her turda bir onceki onay biter
+            return [dict(k, status="completed") if k["id"] < int(rid) and int(k["id"]) - 500 <= bitmis and k["path"].endswith("onay.yml")
+                    else k for k in uc]
+        r = K.calis("bekle", KOK, getir6, s6.uyku, s6, aralik=20, grup="onay-defteri")
+        sira.append((rid, r, s6.t))
+        if r != 0 or s6.t != 20 * bekle_tur:
+            kotu.append(f"onay sira {rid}: donus {r} sure {s6.t} (beklenen {20 * bekle_tur})")
+    os.environ["GITHUB_RUN_ID"] = "200"
+    s7 = Saat()
+    r = K.calis("bekle", KOK, lambda: [kos(200, "yeni", "in_progress", "2026-10-26T13:05:00Z"),
+                                       kos(501, "onay", "in_progress", "2026-10-26T13:00:00Z")], s7.uyku, s7)
+    if r != 0 or s7.t != 0:
+        kotu.append(f"etsy kosusu onayi beklememeli: {r} {s7.t}")
+    print("onay sirasi:", sira)
     print("SELFTEST:", "PASS" if not kotu else "FAIL " + "; ".join(kotu))
     raise SystemExit(0 if not kotu else 2)
 

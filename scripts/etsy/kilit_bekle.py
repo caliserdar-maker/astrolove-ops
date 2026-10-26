@@ -9,6 +9,8 @@ GitHub API (GET /repos/{repo}/actions/runs, tek cagri/tur) ile kumedeki AKTIF ko
 Hicbir kosu iptal edilmez.
   --mod bekle (varsayilan): onde aktif kosu kalmayinca cikis 0.
   --mod atla (zamanlanmis router): kumede BASKA aktif kosu varsa beklemeden atla=true (cikis 0), yoksa atla=false.
+  --grup <ad>: ayri sira kumesi (26 Eki, Serdar onayi; siparis-onay-yaz 'onay-defteri'). Kume = '--grup <ad>' ile
+    kilit_bekle.py cagiran workflow'lar; varsayilan 'etsy' (--grup'suz cagri + eski etsy-token). Gruplar birbirini beklemez.
 Cikti: GITHUB_OUTPUT'a atla=true|false. Sir kullanmaz/basmaz (GH_TOKEN yalniz baslikta).
 Ortam: GH_TOKEN, GITHUB_REPOSITORY, GITHUB_RUN_ID, (GITHUB_API_URL).
 """
@@ -16,6 +18,7 @@ import argparse
 import glob
 import json
 import os
+import re
 import sys
 import time
 import urllib.error
@@ -32,11 +35,24 @@ def log(m):
     print(m, flush=True)
 
 
-def kilit_kumesi(kok="."):
+GRUP_RX = re.compile(r"kilit_bekle\.py([^\n]*)")
+
+
+def gruplar(t):
+    """Bir workflow metnindeki kilit gruplari ('--grup X' yoksa 'etsy'; eski 'group: etsy-token' -> 'etsy')."""
+    g = set()
+    for kuyruk in GRUP_RX.findall(t):
+        m = re.search(r"--grup[ =]([A-Za-z0-9_-]+)", kuyruk)
+        g.add(m.group(1) if m else "etsy")
+    if "group: etsy-token" in t:
+        g.add("etsy")
+    return g
+
+
+def kilit_kumesi(kok=".", grup="etsy"):
     kume = set()
     for f in glob.glob(os.path.join(kok, ".github/workflows/*.yml")) + glob.glob(os.path.join(kok, ".github/workflows/*.yaml")):
-        t = Path(f).read_text(encoding="utf-8", errors="replace")
-        if "kilit_bekle.py" in t or "group: etsy-token" in t:
+        if grup in gruplar(Path(f).read_text(encoding="utf-8", errors="replace")):
             kume.add(".github/workflows/" + os.path.basename(f))
     return kume
 
@@ -74,10 +90,10 @@ def cikti(atla):
 
 
 def calis(mod="bekle", kok=".", getir=api_kosular, uyku=time.sleep, saat=time.monotonic,
-          aralik=ARALIK, zaman_asimi_dk=ZAMAN_ASIMI_DK):
-    kume = kilit_kumesi(kok)
+          aralik=ARALIK, zaman_asimi_dk=ZAMAN_ASIMI_DK, grup="etsy"):
+    kume = kilit_kumesi(kok, grup)
     benim = os.environ["GITHUB_RUN_ID"]
-    log(f"kilit kumesi: {len(kume)} workflow | bu kosu {os.environ.get('GITHUB_WORKFLOW', '?')}#{benim} | mod {mod}")
+    log(f"kilit kumesi ({grup}): {len(kume)} workflow | bu kosu {os.environ.get('GITHUB_WORKFLOW', '?')}#{benim} | mod {mod}")
     t0, hata, benim_olus = saat(), 0, None
     while True:
         try:
@@ -120,11 +136,12 @@ def main():
     ap.add_argument("--mod", choices=["bekle", "atla"], default="bekle")
     ap.add_argument("--zaman-asimi-dk", type=int, default=ZAMAN_ASIMI_DK)
     ap.add_argument("--kok", default=".", help="kilit kumesinin okunacagi depo koku (.github/workflows)")
+    ap.add_argument("--grup", default="etsy", help="sira kumesi (varsayilan etsy; ornek onay-defteri)")
     a = ap.parse_args()
     if not os.environ.get("GH_TOKEN"):
         log("FAIL: GH_TOKEN yok (workflow permissions: actions: read + env GH_TOKEN gerekli).")
         sys.exit(1)
-    sys.exit(calis(a.mod, kok=a.kok, zaman_asimi_dk=a.zaman_asimi_dk))
+    sys.exit(calis(a.mod, kok=a.kok, zaman_asimi_dk=a.zaman_asimi_dk, grup=a.grup))
 
 
 if __name__ == "__main__":

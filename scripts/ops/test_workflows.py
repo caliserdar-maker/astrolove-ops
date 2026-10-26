@@ -46,7 +46,8 @@ def main() -> int:
     assert "siparis_onay.py hazirla" in router and "rclone copyto \"$uzak\"" in router, "paket onaya hazirlanmiyor"
     onay = (WORKFLOWS / "siparis-onay-yaz.yml").read_text(encoding="utf-8")
     assert "workflow_dispatch" in onay and "siparis_onay.py onayla" in onay, "onay workflow sozlesmesi eksik"
-    assert "group: siparis-onay-defteri" in onay and "cancel-in-progress: false" in onay, "defter yarisi korunmuyor"
+    assert "kilit_bekle.py --grup onay-defteri" in onay and "actions: read" in onay, "defter yarisi korunmuyor"
+    assert "concurrency:" not in onay, "onay-yaz concurrency grubu ortadaki kosuyu iptal eder"
     print(f"PASS: {len(files)} workflow YAML, {len(PUBLIC_AUDITS)} public denetim sozlesmesi")
     return 0
 

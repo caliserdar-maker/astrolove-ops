@@ -3,6 +3,7 @@ name: siparis-onay-yaz
 # Claude bu isi yalniz Serdar'in ilgili pakete acik onayindan sonra tetikler.
 # Workflow paketin Drive'daki tam cozunurluk dosyalarini yeniden ozetler.
 permissions:
+  actions: read
   contents: read
 
 on:
@@ -13,16 +14,20 @@ on:
         required: true
         type: string
 
-concurrency:
-  group: siparis-onay-defteri
-  cancel-in-progress: false
+# Defter sirasi (26 Eki, Serdar onayi): GitHub concurrency grubu art arda 3 onayda ortadakini iptal ediyordu.
+# Yerine sira kilidi: ayni workflow'un daha once baslamis aktif kosusu bitene kadar beklenir, hicbir kosu iptal edilmez.
+# Etsy kilidinden ayri grup (onay-defteri): Etsy kosularini beklemez, onlar da bunu beklemez.
 
 jobs:
   onay-yaz:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
+      - name: Defter sirasi (iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py --grup onay-defteri --zaman-asimi-dk 30
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
