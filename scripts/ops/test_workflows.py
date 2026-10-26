@@ -48,6 +48,9 @@ def main() -> int:
     assert "workflow_dispatch" in onay and "siparis_onay.py onayla" in onay, "onay workflow sozlesmesi eksik"
     assert "kilit_bekle.py --grup onay-defteri" in onay and "actions: read" in onay, "defter yarisi korunmuyor"
     assert "concurrency:" not in onay, "onay-yaz concurrency grubu ortadaki kosuyu iptal eder"
+    assert "printf '{}" not in onay and "onay_defteri.py oku" in onay and "onay_defteri.py yaz" in onay, "onay defteri kapisi yok"
+    assert onay.index("onay_defteri.py oku") < onay.index("siparis_onay.py onayla") < onay.index("onay_defteri.py yaz") \
+        < onay.index("if: ${{ always() }}"), "onay defteri adim sirasi bozuk"
     import sys
     sys.path.insert(0, str(ROOT / "scripts" / "etsy"))
     import kilit_bekle

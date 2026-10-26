@@ -54,13 +54,16 @@ jobs:
           set -euo pipefail
           python3 -c 'import sys; from pathlib import Path; k=sys.argv[1]; sys.exit(0 if k and k not in (".", "..") and Path(k).name == k else 2)' "$KIMLIK"
           rclone copy "gdrive:ASTROLOVE/TEMP/SIPARIS_ONAY/${KIMLIK}" "_work/SIPARIS_ONAY/${KIMLIK}" -q
-          rclone copyto "gdrive:ASTROLOVE/TEMP/SIPARIS_ONAY/ONAYLAR.json" \
-            _work/SIPARIS_ONAY/ONAYLAR.json -q 2>/dev/null || printf '{}\n' > _work/SIPARIS_ONAY/ONAYLAR.json
+          # Defter kapilari (26 Eki, Serdar onayi): okuma hatasinda bos defterle devam YOK (eski '|| printf {}' tum
+          # onaylari silebiliyordu). Dosya yoksa yalniz o zaman bos defter (ilk kayit). Yazmadan once azalmama kapisi,
+          # ONAYLAR_YEDEK_<damga>.json yedegi, yazimdan sonra sha256 geri okuma (scripts/ops/onay_defteri.py).
+          python3 scripts/ops/onay_defteri.py oku --uzak "gdrive:ASTROLOVE/TEMP/SIPARIS_ONAY" \
+            --dizin _work/SIPARIS_ONAY --durum _work/DEFTER
           python scripts/ops/siparis_onay.py onayla --kimlik "$KIMLIK" \
             --paket-dizini "_work/SIPARIS_ONAY/${KIMLIK}" \
             --onaylar _work/SIPARIS_ONAY/ONAYLAR.json
-          rclone copyto _work/SIPARIS_ONAY/ONAYLAR.json \
-            "gdrive:ASTROLOVE/TEMP/SIPARIS_ONAY/ONAYLAR.json" -q
+          python3 scripts/ops/onay_defteri.py yaz --uzak "gdrive:ASTROLOVE/TEMP/SIPARIS_ONAY" \
+            --dizin _work/SIPARIS_ONAY --durum _work/DEFTER --kimlik "$KIMLIK"
           echo "Onay kaydi SHA256 dogrulamasiyla yazildi"
       - if: ${{ always() }}
         run: rm -rf _work ~/.config/rclone
