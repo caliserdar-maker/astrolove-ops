@@ -2,7 +2,9 @@ name: eski78-pilot-yolu
 
 # Serdar 24 Eki YONTEM DEGISIKLIGI: yalniz canlida kanitlanmis yol. Bu dosya 45233945'teki eski78-gorsel-yukle.yml'nin BIREBIR kopyasi;
 # tek fark kodun sabit commit'ten cekilmesi (actions/checkout ref) ve sha kaniti:
-#   mod kuru / yukle -> 1059b7730d300ab653c0304020cd49a7309287d3 (pilot yukleme kosusu 40091265199 bu kodla kostu)
+#   mod kuru / yukle -> (26 Eki'ye kadar) 1059b773 (pilot yukleme kosusu 40091265199 ve 22 ilan bu kodla kostu)
+#     Serdar 26 Eki onayi: kuru / yukle -> fe10f665 scripts/etsy/eski78_pilot_yukle.py (1059b773 kopyasi + sira ardindan son renk
+#     bagi + girdi kapisi; rank yazimi renk bagini siler, 40232676309). Canlida henuz kosmadi: ilk gercek ilan ayri onayla.
 #   mod bag / oku    -> 45233945048c403623aeae309fe3a7f49c517702 (pilot bag 40092623702 ve oku 40092712384 bu kodla kostu)
 # Ikinci fark (Serdar 24 Eki onayi): Etsy kilidi kumesi main'in .github/workflows'undan (_main, kilit_bekle.py --kok _main).
 # (Etiket push'u ajan proxy'sinde 403; izinli dal main'de olmayan bir commit tasiyor, zorla push yapilmadi.)
@@ -42,14 +44,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ (inputs.mod == 'bag' || inputs.mod == 'oku') && '45233945048c403623aeae309fe3a7f49c517702' || '1059b7730d300ab653c0304020cd49a7309287d3' }}
+          ref: ${{ (inputs.mod == 'bag' || inputs.mod == 'oku') && '45233945048c403623aeae309fe3a7f49c517702' || 'fe10f665030cf900fcbe74e35b32611d0908a8f5' }}
       - name: Kod kaniti (sabit commit)
         env:
           MOD: ${{ inputs.mod }}
         run: |
           set -euo pipefail
           H=$(git rev-parse HEAD)
-          case "$MOD" in bag|oku) B=45233945048c403623aeae309fe3a7f49c517702 ;; *) B=1059b7730d300ab653c0304020cd49a7309287d3 ;; esac
+          case "$MOD" in bag|oku) B=45233945048c403623aeae309fe3a7f49c517702 ;; *) B=fe10f665030cf900fcbe74e35b32611d0908a8f5 ;; esac
           [ "$H" = "$B" ] || { echo "::error::kod $H beklenen $B degil"; exit 1; }
           echo "::notice title=KOD::mod $MOD commit $H"; echo "KOD_SHA=$H" >> "$GITHUB_ENV"
       - uses: actions/setup-python@v5
@@ -101,10 +103,16 @@ jobs:
           rclone copy "$P/DEGISEN" _work/hedef --include "*.jpg" -q
           rclone copyto "$D/GALERI_YAYIN/KOSU_20261021_1030/$L/yedek/manifest.json" _work/manifest.json
           S=$(rclone lsf -R --files-only "$D/DENETIM_20261021/KART_SIL" --include "SONRA_${L}.json" | sort -t/ -k1,1n | tail -1)
+          # 26 Eki: S bosken copyto tum KART_SIL'i indiriyordu (IsADirectoryError, 40227384901); acik DUR, Etsy istegi yok
+          [ -n "$S" ] || { echo "::error::DUR: KART_SIL altinda SONRA_${L}.json yok (canli galeri kaydi); Etsy'ye istek yok"; exit 1; }
           rclone copyto "$D/DENETIM_20261021/KART_SIL/$S" _work/simdi.json
+          [ -f _work/simdi.json ] && [ -s _work/simdi.json ] || { echo "::error::DUR: KART_SIL/$S dosya degil ya da bos; Etsy'ye istek yok"; exit 1; }
           python3 - <<'PY'
           import json, urllib.request
-          for x in json.load(open("_work/simdi.json"))["gorseller"]:
+          G = json.load(open("_work/simdi.json")).get("gorseller")
+          if not isinstance(G, list) or not G:
+              raise SystemExit("DUR: simdi.json 'gorseller' bos ya da liste degil; Etsy'ye istek yok")
+          for x in G:
               with urllib.request.urlopen(urllib.request.Request(x["url_fullxfull"], headers={"User-Agent": "Mozilla/5.0"}), timeout=60) as r:
                   open(f"_out/YEDEK_CDN/{int(x['rank']):02d}_{x['listing_image_id']}.jpg", "wb").write(r.read())
           print("CDN yedek:", len(json.load(open("_work/simdi.json"))["gorseller"]))
@@ -155,7 +163,8 @@ jobs:
             bag) args+=(--mod bag --devam _work/DEVAM.json --confirm ESKI23_BAG ${BAG:+--bag "$BAG"}) ;;
             oku) args+=(--mod oku --devam _work/DEVAM.json ${BAG:+--bag "$BAG"}) ;;
           esac
-          python3 scripts/etsy/eski78_gorsel_yukle.py "${args[@]}" 2>&1 | tee _work/kosu.log
+          case "$MOD" in kuru|yukle) BETIK=scripts/etsy/eski78_pilot_yukle.py ;; *) BETIK=scripts/etsy/eski78_gorsel_yukle.py ;; esac
+          python3 "$BETIK" "${args[@]}" 2>&1 | tee _work/kosu.log
           echo "KOD=${PIPESTATUS[0]}" >> "$GITHUB_ENV"
       - name: Token geri yaz + cikti Drive'a
         if: always()
