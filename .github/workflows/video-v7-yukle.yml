@@ -1,0 +1,173 @@
+name: video-v7-yukle
+
+# 78 poster ilanina v7b video (Merkez 26 Eki; video gorevi 3. adim). scripts/etsy/video_yukle_78.py --surum v7.
+# Kaynak: Drive TEMP/VIDEO_V7_78/BIRLESIK_<birlesik_damga>/ (<CIFT>.mp4 + MANIFEST.csv; video-v7-birlesik ciktisi).
+# KURU (varsayilan, Etsy salt okur, ilan basi 3 GET): PLAN.json / PLAN.csv / report.md -> TEMP/VIDEO_V7_YUKLE/KURU_<damga>/.
+#   Galeri kapisi: TEMP/POSTER_GALERI_V10_YUKLE/ILERLEME.json ilan kaydi PASS ve canli rank 1 = kayittaki v10 kapak; degilse BLOK.
+#   Kuru eski videoyu INDIRMEZ (KILIT SURESI kurali); URL'ler plana yazilir.
+# APPLY (Etsy'ye YAZAR; yalniz Serdar onayiyla, galeri yuklemesi bittikten sonra): kuru=false + confirm=VIDEO_V7_YUKLE +
+#   plan_damga (kuru kosu damgasi). Etsy kilidinden ONCE: plan, BIRLESIK videolar, eski videolarin plan URL'lerinden yedegi
+#   (TEMP/VIDEO_V7_YEDEK_<plan_damga>/<ilan>_<video>.mp4, --immutable). Kilitten sonra token + ILERLEME (durum_dosyasi oku).
+#   Ilan basi: yukle (tek gonderim) -> geri oku -> eski videoyu sil -> geri oku; updateListing YOK; ilk FAIL'de durur.
+#   Yedegi Drive'da olmayan (mp4 degilse yedek sayilmaz), galerisi v10 olmayan, canli videosu plandan farkli ilana yazilmaz.
+#   Not: kilit_bekle olusturma sirasina bakar; sonradan acilan Etsy kosulari kilit oncesi indirmeleri de bekler (~1-2 dk).
+
+on:
+  workflow_dispatch:
+    inputs:
+      birlesik_damga: {description: "TEMP/VIDEO_V7_78/BIRLESIK_<damga> (YYYYMMDD_HHMMSS); apply'da plandaki ile ayni olmali", required: true, default: ""}
+      kuru: {description: "true = yazma yok (plan); false = yazim", required: true, default: "true"}
+      confirm: {description: "yazim icin VIDEO_V7_YUKLE", required: false, default: ""}
+      plan_damga: {description: "yazim: kuru kosunun damgasi (TEMP/VIDEO_V7_YUKLE/KURU_<damga>)", required: false, default: ""}
+      haric: {description: "virgullu cift listesi (plana alinmaz / apply'da dokunulmaz)", required: false, default: ""}
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  yukle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      V: gdrive:ASTROLOVE/TEMP/VIDEO_V7_78
+      Y: gdrive:ASTROLOVE/TEMP/VIDEO_V7_YUKLE
+      G: gdrive:ASTROLOVE/TEMP/POSTER_GALERI_V10_YUKLE
+      BD: ${{ inputs.birlesik_damga }}
+      KURU: ${{ inputs.kuru }}
+      ONAY: ${{ inputs.confirm }}
+      PD: ${{ inputs.plan_damga }}
+      HARIC: ${{ inputs.haric }}
+    steps:
+      - name: Onay kapisi
+        run: |
+          set -euo pipefail
+          [[ "$BD" =~ ^[0-9]{8}_[0-9]{6}$ ]] || { echo "::error::birlesik_damga YYYYMMDD_HHMMSS olmali. DUR."; exit 1; }
+          [[ "$HARIC" =~ ^[A-Z_,]*$ ]] || { echo "::error::haric yalniz CIFT adlari. DUR."; exit 1; }
+          if [ "$KURU" = "false" ]; then
+            [ "$ONAY" = VIDEO_V7_YUKLE ] || { echo "::error::yazim icin confirm tam olarak VIDEO_V7_YUKLE olmali. DUR."; exit 1; }
+            [[ "$PD" =~ ^[0-9]{8}_[0-9]{6}$ ]] || { echo "::error::yazim icin plan_damga (kuru kosu damgasi) gerekli. DUR."; exit 1; }
+            echo "MOD=APPLY" >> "$GITHUB_ENV"
+          elif [ "$KURU" = "true" ]; then
+            echo "MOD=KURU" >> "$GITHUB_ENV"
+          else
+            echo "::error::kuru true ya da false olmali. DUR."; exit 1
+          fi
+          echo "STAMP=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Kurulum
+        timeout-minutes: 15
+        run: |
+          set -euo pipefail
+          pip install -q requests==2.32.3 numpy==2.1.3 opencv-python-headless==4.10.0.84
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Plan (yalniz apply, kilit oncesi)
+        if: env.MOD == 'APPLY'
+        run: |
+          set -euo pipefail
+          mkdir -p _work
+          rclone copyto "$Y/KURU_${PD}/PLAN.json" _work/PLAN.json
+          K=$(python3 -c 'import json;p=json.load(open("_work/PLAN.json"));print(p.get("surum"),p["kaynak"]["klasor"])')
+          [ "$K" = "v7 TEMP/VIDEO_V7_78/BIRLESIK_${BD}/" ] || { echo "::error::plan kaynagi/surumu '$K' != v7 BIRLESIK_${BD}. DUR."; exit 1; }
+      - name: BIRLESIK videolar (kilit oncesi)
+        run: |
+          set -euo pipefail
+          mkdir -p _work/video
+          rclone copy "$V/BIRLESIK_${BD}" _work/video --max-depth 1 --include "*.mp4" --include "MANIFEST.csv" --include "OZET.md" --transfers 8 -q
+          N=$(ls _work/video/*.mp4 | wc -l); M=$(( $(wc -l < _work/video/MANIFEST.csv) - 1 ))
+          OZET=$(grep -m1 '^PASS video' _work/video/OZET.md || echo '?')
+          echo "kaynak: TEMP/VIDEO_V7_78/BIRLESIK_${BD} | mp4 $N | MANIFEST $M satir | $OZET"
+          [ "$N" = 78 ] && [ "$M" = 78 ] || { echo "::error::BIRLESIK 78 mp4 / 78 MANIFEST satiri degil. DUR."; exit 1; }
+          python3 -c 'import json,sys;json.dump({"klasor":"TEMP/VIDEO_V7_78/BIRLESIK_"+sys.argv[1]+"/","ozet":sys.argv[2],"plan":sys.argv[3]},open("_work/kaynak.json","w"))' \
+            "$BD" "$OZET" "TEMP/VIDEO_V7_YUKLE/KURU_${PD:-}/PLAN.json"
+      - name: Eski video yedegi (yalniz apply, kilit oncesi; plan URL'lerinden)
+        if: env.MOD == 'APPLY'
+        run: |
+          set -euo pipefail
+          mkdir -p _work/yedek
+          python3 - <<'PY'
+          import json, pathlib, requests
+          p = json.loads(pathlib.Path("_work/PLAN.json").read_text(encoding="utf-8"))
+          ok = hata = 0
+          for r in p["satirlar"]:
+              if r.get("durum") not in ("YUKLE", "DEGISTIR"):
+                  continue
+              for v in r["eski_video"]:
+                  y = pathlib.Path("_work/yedek") / v["yedek"]
+                  try:
+                      g = requests.get(v["url"], timeout=120)
+                      g.raise_for_status()
+                      if len(g.content) < 10000 or g.content[4:8] != b"ftyp":   # HTML hata sayfasi yedek sayilmasin
+                          raise ValueError(f"mp4 degil ({len(g.content)} bayt, {g.headers.get('content-type')})")
+                      y.write_bytes(g.content); ok += 1
+                  except Exception as e:  # noqa: BLE001 yedeksiz ilana apply yazmaz (ATLANDI)
+                      hata += 1; print(f"::warning::yedek alinamadi {v['yedek']}: {str(e)[:120]}")
+          print(f"eski video yedegi: {ok} indirildi, {hata} alinamadi (o ilanlar ATLANDI)")
+          PY
+          if [ -n "$(ls -A _work/yedek)" ]; then
+            rclone copy _work/yedek "gdrive:ASTROLOVE/TEMP/VIDEO_V7_YEDEK_${PD}" --immutable -q
+            rclone check _work/yedek "gdrive:ASTROLOVE/TEMP/VIDEO_V7_YEDEK_${PD}" --one-way -q
+          fi
+          rclone lsf "gdrive:ASTROLOVE/TEMP/VIDEO_V7_YEDEK_${PD}/" --files-only > _work/yedek.txt 2>/dev/null || : > _work/yedek.txt
+          echo "yedek Drive'da: $(wc -l < _work/yedek.txt) dosya (TEMP/VIDEO_V7_YEDEK_${PD}/)"
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - name: Token + galeri ILERLEME (kilit sonrasi)
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          # galeri yazicisi ayni Etsy kilidini tutar; kilit altinda okunan ILERLEME son durumdur. Okuma hatasinda bos varsayilan YOK.
+          python3 scripts/ops/durum_dosyasi.py oku --uzak "$G/ILERLEME.json" --yerel _work/ILERLEME.json --durum _work/DURUM_ILERLEME \
+            --tur json-ilanlar
+      - name: Video yukleme (kuru / apply)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          args=(--surum v7 --video-dir _work/video --manifest _work/video/MANIFEST.csv --galeri-ilerleme _work/ILERLEME.json
+                --kaynak-bilgi _work/kaynak.json --out _out --haric "$HARIC")
+          if [ "$MOD" = "APPLY" ]; then
+            args+=(--plan _work/PLAN.json --yedek-liste _work/yedek.txt --apply --confirm "$ONAY")
+          fi
+          python3 scripts/etsy/video_yukle_78.py "${args[@]}"
+      - name: Token + cikti Drive'a
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          TOK=0
+          if [ -f _work/ETSY_TOKEN.json.updated ]; then
+            rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" \
+              || { echo "::error::yenilenen token Drive'a YAZILAMADI (refresh token kaybolabilir)"; TOK=1; }
+          fi
+          if grep -rIqE 'x-api-key|refresh_token|"access_token"' _out/ 2>/dev/null; then
+            echo "::error::ciktida sir benzeri anahtar bulundu, Drive'a yazilmadi"; exit 1
+          fi
+          [ -d _out ] && rclone copy _out "$Y/${MOD:-KURU}_${STAMP}" -q && echo "::notice title=VIDEO V7 ${MOD:-KURU}::TEMP/VIDEO_V7_YUKLE/${MOD:-KURU}_${STAMP}/ (plan_damga ${STAMP})"
+          [ -f _out/report.md ] && cat _out/report.md >> "$GITHUB_STEP_SUMMARY" || true
+          exit $TOK
+      - if: ${{ always() }}
+        run: rm -rf _work ~/.config/rclone

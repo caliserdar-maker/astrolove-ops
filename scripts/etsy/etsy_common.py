@@ -292,8 +292,9 @@ class Etsy:
     def post(self, path, data):
         return self._call("POST", path, data=data)
 
-    def delete(self, path):
-        return self._call("DELETE", path)
+    def delete(self, path, ok404=False):
+        """ok404=True: 404 -> None (5xx sonrasi yeniden denemede ilk istek islenmis olabilir; cagiran geri okur)."""
+        return self._call("DELETE", path, ok404=ok404)
 
     def post_json(self, path, body):
         """JSON govdeli POST (ic ice dizi gerektiren uclar). Yazma cagrisi."""

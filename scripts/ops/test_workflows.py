@@ -88,6 +88,20 @@ def main() -> int:
     assert kilit < gv.index("rclone copyto \"$T/ETSY_TOKEN.json\" _work") < gv.index("python3 scripts/kapak78/galeri_v10_yukle.py") \
         < gv.index("python3 scripts/ops/durum_dosyasi.py yaz"), "galeri-v10-yukle adim sirasi"
     assert "default: \"true\"" in gv and "[ \"$ONAY\" = GALERI_V10 ]" in gv and "plan_damga" in gv, "galeri-v10-yukle yazim kapisi"
+    # 26 Eki (Merkez): video v7 yukleyicisi; Drive girdileri + eski video yedegi kilitten ONCE, token + ILERLEME kilitten SONRA
+    vv = (WORKFLOWS / "video-v7-yukle.yml").read_text(encoding="utf-8")
+    assert ".github/workflows/video-v7-yukle.yml" in kilit_bekle.kilit_kumesi(str(ROOT)), "video-v7-yukle Etsy kilidinde degil"
+    assert "concurrency:" not in vv and "actions: read" in vv and "schedule" not in vv, "video-v7-yukle kilit sozlesmesi"
+    kilit = vv.index("python3 scripts/etsy/kilit_bekle.py")
+    kos = vv.index("python3 scripts/etsy/video_yukle_78.py")
+    for x in ("rclone copyto \"$Y/KURU_${PD}/PLAN.json\"", "rclone copy \"$V/BIRLESIK_${BD}\"", "g = requests.get(v[\"url\"]",
+              "VIDEO_V7_YEDEK_${PD}\" --immutable"):
+        assert x in vv and vv.index(x) < kilit, f"video-v7-yukle: kilitten once degil: {x}"
+    for x in ("rclone copyto \"gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json\" _work", "durum_dosyasi.py oku --uzak \"$G/ILERLEME.json\""):
+        assert x in vv and kilit < vv.index(x) < kos, f"video-v7-yukle: kilitten sonra / kosudan once degil: {x}"
+    assert "--ilk-kayit-izni" not in vv and "--surum v7" in vv and "updateListing YOK" in vv, "video-v7-yukle galeri / surum"
+    assert "kuru: {description: \"true = yazma yok (plan); false = yazim\", required: true, default: \"true\"}" in vv \
+        and "[ \"$ONAY\" = VIDEO_V7_YUKLE ]" in vv, "video-v7-yukle yazim kapisi"
     print(f"PASS: {len(files)} workflow YAML, {len(PUBLIC_AUDITS)} public denetim sozlesmesi")
     return 0
 
