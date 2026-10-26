@@ -1,0 +1,62 @@
+name: kapak-kaynak-oku
+# SALT OKUMA (Etsy'ye yazma YOK; Merkez 26 Eki GOREV 2, Serdar onayi): kapak uretimi icin kaynak gorsel listesi.
+# 78 poster (data/pod/pod78_ids.csv) + 78 1st Anniversary (Drive TEMP/BY78_TASLAK_20261014/BY78_TASLAKLAR.csv).
+# Ilan basina 2 GET; Etsy kilidi; cikti Drive TEMP/KAPAK_KAYNAK_20261026/.
+permissions:
+  actions: read
+  contents: read
+on:
+  workflow_dispatch:
+jobs:
+  oku:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || { sudo apt-get install -y -qq rclone >/dev/null; }
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Token + YD listesi
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/BY78_TASLAK_20261014/BY78_TASLAKLAR.csv" _work/YD.csv
+      - name: Oku
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: python3 scripts/etsy/kapak_kaynak_oku.py --poster data/pod/pod78_ids.csv --yd _work/YD.csv --out _out
+      - name: Token geri yaz + cikti Drive'a
+        if: ${{ always() }}
+        run: |
+          if [ -f _work/ETSY_TOKEN.json.updated ]; then
+            rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "token geri yazildi" \
+              || { echo "::error::yenilenen token Drive'a geri yazilamadi"; exit 1; }
+          fi
+          if ls _out/* >/dev/null 2>&1; then
+            python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/ETSY_TOKEN.json _out || { echo "::error::ciktida sir"; exit 1; }
+            rclone copy _out "gdrive:ASTROLOVE/TEMP/KAPAK_KAYNAK_20261026" -q && echo "Cikti: KAPAK_KAYNAK_20261026 (kosu ${GITHUB_RUN_ID})"
+          fi
+      - if: always()
+        run: rm -rf _work ~/.config/rclone
