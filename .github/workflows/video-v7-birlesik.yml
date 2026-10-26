@@ -1,0 +1,56 @@
+name: video-v7-birlesik
+# Poster video v7b: 78 PASS videoyu tek klasorde birlestirir (Merkez 26 Eki; Serdar onayi). Etsy API YOK, Etsy kilidi yok.
+# Girdi: TEMP/VIDEO_V7_78/<damga> klasorleri (eskiden yeniye); cift basina QC PASS olan son surum. sosyal/poster_video/v7_birlesik.py
+# Cikti: TEMP/VIDEO_V7_78/BIRLESIK_<damga>/<CIFT>.mp4 + QC/ + MANIFEST.csv + OZET.md (--immutable; mevcut dosya ezilmez).
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      klasorler:
+        description: 'virgullu VIDEO_V7_78 damgalari, eskiden yeniye'
+        default: '20261026_193253,20261026_195008,20261026_202748,20261026_204532'
+jobs:
+  birlestir:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      O: gdrive:ASTROLOVE/TEMP/VIDEO_V7_78
+    steps:
+    - name: Girdi kapisi
+      env: {KL: "${{ inputs.klasorler }}"}
+      run: '[[ "$KL" =~ ^[0-9]{8}_[0-9]{6}(,[0-9]{8}_[0-9]{6})*$ ]] || { echo "::error::klasorler"; exit 1; }'
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Kurulum
+      timeout-minutes: 15
+      run: curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+    - name: rclone.conf
+      env:
+        RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      run: |
+        set -euo pipefail
+        mkdir -p ~/.config/rclone; umask 077
+        printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+        if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+          grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+    - name: Indir + birlestir + Drive
+      env: {KL: "${{ inputs.klasorler }}"}
+      run: |
+        set -euo pipefail
+        mkdir -p _k _o; yerel=""
+        for d in ${KL//,/ }; do
+          rclone copy "$O/$d" "_k/$d" --include "*.mp4" --include "QC/*_QC.json" --transfers 8 -q
+          echo "$d: mp4 $(ls _k/$d/*.mp4 2>/dev/null | wc -l), QC $(ls _k/$d/QC/*.json 2>/dev/null | wc -l)"
+          yerel="${yerel:+$yerel,}_k/$d"
+        done
+        DAMGA=$(date -u +%Y%m%d_%H%M%S)
+        python3 sosyal/poster_video/v7_birlesik.py --klasorler "$yerel" --adlar "$KL" --out _o
+        rclone copy _o "$O/BIRLESIK_$DAMGA" --immutable --transfers 8 -q
+        rclone check _o "$O/BIRLESIK_$DAMGA" --one-way -q && echo "::notice title=BIRLESIK::TEMP/VIDEO_V7_78/BIRLESIK_$DAMGA ($(ls _o/*.mp4 | wc -l) mp4)"
+        cat _o/OZET.md >> "$GITHUB_STEP_SUMMARY"
+    - if: ${{ always() }}
+      run: rm -rf _k _o ~/.config/rclone
