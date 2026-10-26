@@ -40,7 +40,7 @@ on:
 permissions:
   contents: read
 env:
-  GPT_REF: ${{ vars.SIPARIS_GPT_REF || '6da763aa5b9820027420f73264fc69d30e120a33' }}   # 26 Eki B: 243c9a4 + olcu.py 5x7 (OLCU 1500x2100, AILE A) + B dikis kapisi kirpik ortalama (yildiz).; 22 Eki A3 kiyasi FAIL (39850555034): temiz 66ef5e04'e gecis geri alindi
+  GPT_REF: ${{ vars.SIPARIS_GPT_REF || 'd2b414ee270ec029bd5abcef4a6535414ae7d1e1' }}   # 26 Eki B: 243c9a4 + yalniz olcu.py 5x7 (OLCU 1500x2100, AILE A). 6da763aa (dikis kapisi kirpik ortalama) GERI ALINDI: inceleme, satirlarin bir kisminda kalan buyuk dikisi gizledigini olctu (MB 5x7 yildizli zeminde kapi i yanlis FAIL verebilir; guvenli yon).; 22 Eki A3 kiyasi FAIL (39850555034): temiz 66ef5e04'e gecis geri alindi
   ESKI_RENK_REF: ${{ vars.ESKI_RENK_REF || 'b8c8c4b17478fd956167577fa69913d06b9eb955' }}
   WP_REF: ${{ vars.SIPARIS_WP_REF || '360cbef947994c7d4b3c9ae95275f778a18af716' }}
 jobs:
@@ -192,10 +192,10 @@ jobs:
           python3 -c "import json,os; json.dump(dict(kosu=os.environ['GITHUB_RUN_ID'], is_basi_utc=int(os.environ['T_BAS']), giris='siparis-giris', gpt_ref=os.environ['GPT_REF']), open('/tmp/is/SURE.json','w'))"
           if [ "$RENK" = "MIDNIGHT_BLUE" ]; then
             # MB adi diger 4 renkle ayni kalip (Merkez 26 Eki B): AstroLoveArt_<B1>_<B2>_Midnight_Blue[_2000|_<Olcu>].jpg; kapilar eski adla kostu
-            for f in /tmp/is/AstroLoveArt_*.jpg; do b=$(basename "$f" .jpg); case "$b" in *_Midnight_Blue*) continue;; esac
+            for f in /tmp/is/AstroLoveArt_*.jpg; do [ -e "$f" ] || continue; b=$(basename "$f" .jpg); case "$b" in *_Midnight_Blue*) continue;; esac
               B12=$(echo "$CIFT" | tr '_' '\n' | sed 's/.*/\L&/;s/^./\u&/' | paste -sd_); r=${b#AstroLoveArt_${B12}}
               mv "$f" "/tmp/is/AstroLoveArt_${B12}_Midnight_Blue${r}.jpg"; done
-            ls /tmp/is/AstroLoveArt_*.jpg
+            ls /tmp/is/AstroLoveArt_*.jpg || echo "::warning::teslim JPG yok (uretim dustu); KAPI/siparis.json yine yuklenir"
             rclone copy /tmp/is "$D" --include "AstroLoveArt_*.jpg" --include "KAPI.json" --include "SURE.json" --include "siparis.json" --exclude "*"
           else                                                               # yalniz secilen renk: ana kopya, teslim, onizleme
             rclone copy /tmp/is/$RENK "$D" --include "AstroLoveArt_*.jpg" --exclude "*"
