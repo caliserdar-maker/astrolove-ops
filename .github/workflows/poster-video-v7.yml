@@ -41,7 +41,7 @@ jobs:
         KAPAK_URL: ${{ inputs.kapak_url }}
       run: |
         set -euo pipefail
-        echo "::add-mask::$KAPAK_URL"
+        [ -z "$KAPAK_URL" ] || echo "::add-mask::$KAPAK_URL"
         [[ "$CIFT" =~ ^[A-Z]+_[A-Z]+$ ]] || { echo "::error::cift gecersiz"; exit 1; }
         [[ "$SURUM" =~ ^v[0-9]+[a-z]?$ ]] || { echo "::error::surum gecersiz"; exit 1; }
         if [ -n "$KAPAK_URL" ]; then
@@ -74,7 +74,7 @@ jobs:
         KAPAK_URL: ${{ inputs.kapak_url }}
       run: |
         set -euo pipefail
-        echo "::add-mask::$KAPAK_URL"
+        [ -z "$KAPAK_URL" ] || echo "::add-mask::$KAPAK_URL"
         mkdir -p _w _o
         K=_o/KAPAK_${CIFT}_3000.png
         if [ -n "$KAPAK_URL" ]; then
@@ -121,7 +121,7 @@ jobs:
           sed 's/^/::warning::QC /' _w/qc.txt | cut -c1-3000
         fi
         cp _w/uretim.log "_o/${CIFT}_uretim_${SURUM}.log"
-        [ -n "$KAPAK_URL" ] || rm -f "_o/KAPAK_${CIFT}_3000.png"   # Drive'dan gelen kapak zaten orada
+        [ -z "$KAPAK_DRIVE_ID" ] || rm -f "_o/KAPAK_${CIFT}_3000.png"   # Drive'dan gelen kapak zaten orada
         rclone copy _o "$O" -q
         echo "::warning::DRIVE $(rclone lsf "$O" | tr '\n' ' ')"
         echo "RC=$(( UR + QC ))" >> "$GITHUB_ENV"
