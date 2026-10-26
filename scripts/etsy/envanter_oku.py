@@ -56,6 +56,12 @@ def main():
                 md.append(f"| {p.get('sku')} | {pv} | {o.get('quantity')} | {o.get('is_enabled')} | {o.get('is_deleted')} | "
                           f"{para(o.get('price'))} | {o.get('readiness_state_id')} |")
         md += [f"- urun {len(inv.get('products') or [])} | stil-gorsel bagi {len(vi)}", ""]
+        # 26 Eki (Merkez): galeri + bag ozeti tek satir (bagli gorsel canli galeride mi)
+        gids = {y.get("listing_image_id") for y in g}
+        bagli = [(v.get("value"), v.get("image_id")) for v in vi]
+        md.insert(-1, f"- OZET {lid} | gorsel {len(g)} | bag {len(vi)}/5 | bagli gorsel galeride "
+                      f"{sum(1 for _, i in bagli if i in gids)}/{len(bagli)} | renkler "
+                      + ", ".join(f"{a_}={i}" for a_, i in sorted(bagli, key=lambda z: str(z[0]))))
     for pid in profiller:
         sp = api.get(f"/shops/{shop}/shipping-profiles/{pid}", ok404=True) or {}
         hedef = sp.get("shipping_profile_destinations") or []
