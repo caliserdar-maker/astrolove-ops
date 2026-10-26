@@ -110,9 +110,8 @@ jobs:
     if: ${{ needs.yonlendir.outputs.yol == 'yeni' }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
-    concurrency:
-      group: siparis-gpt
-      cancel-in-progress: false
+    # concurrency YOK (Merkez 26 Eki A): 'group: siparis-gpt' GitHub'da yalniz SON bekleyeni tutar; arada bekleyen siparis
+    # sessizce iptal oluyordu (kosu 40314663079). Is basina paylasilan kaynak yok: runner ayri, cikti Drive AstroLoveArt_<receipt>.
     steps:
       - uses: actions/checkout@v4
         with: { ref: "${{ env.GPT_REF }}", fetch-depth: 1, sparse-checkout: "motor_gpt" }

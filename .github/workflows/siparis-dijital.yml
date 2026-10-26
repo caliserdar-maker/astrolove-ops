@@ -63,7 +63,8 @@ on:
         required: false
         default: ""
 
-concurrency: siparis-dijital-${{ github.event.inputs.receipt }}-${{ github.event.inputs.isler }}
+# concurrency YOK (Merkez 26 Eki A): receipt+isler grubu ayni fisteki ikinci kalemi (orn. CI 5x7 + CI A4, ayni isler) beklerken
+# ucuncu kalem gelince iptal ediyordu. Ara cikti kosu basina (SIPARIS_ARA/<run_id>); teslim klasoru fis basina.
 
 env:
   RENK_REF: ${{ github.event.inputs.renk_ref || '8a8b370edb74cb52402b4939d38ba14d2d2105fd' }}
