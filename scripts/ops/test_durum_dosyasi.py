@@ -62,8 +62,11 @@ def kupa_sil(p):
 
 def md_ekle(p, satir="- 26 Eki yeni satir"):        # drive-satir-ekle.yml'deki ekleme kodu (birebir)
     s = open(p, encoding="utf-8").read().split('\n')
+    s = [] if s == [''] else s
     i = next((k for k, x in enumerate(s) if x.startswith('## ')), None)
     if i is None:
+        while s and not s[-1].strip():          # sondaki bos satirlar: notlar arasinda bos satir olmasin
+            s.pop()
         s = [x for x in s] + [satir]
     else:
         j = i
@@ -96,8 +99,8 @@ AKIS = {
     "kupa": dict(uzak="gdrive:ASTROLOVE/KUPA_SIPARIS/STATE.csv", tur="csv", anahtar="transaction_id",
                  korunan=("durum",), ilk_izin=False,
                  ilk=kupa_ilk, degis=kupa_degis, sil=kupa_sil, bozuk=b"receipt_id,sku\n1,2\n"),
-    "md": dict(uzak="gdrive:ASTROLOVE/TEMP/YAYIN_DURUM.md", tur="md", anahtar="", korunan=(), ilk_izin=True,
-               ilk=lambda: b"# YAYIN DURUM\n- 25 Eki satir\n\n## Tablo\n| a | b |\n", degis=md_ekle, sil=md_sil, bozuk=b"\xff\xfe\x00"),
+    "md": dict(uzak="gdrive:ASTROLOVE/TEMP/OTURUM_NOTLARI.md", tur="md", anahtar="", korunan=(), ilk_izin=True,
+               ilk=lambda: b"# OTURUM NOTLARI\n- 25 Eki satir\n\n## Tablo\n| a | b |\n", degis=md_ekle, sil=md_sil, bozuk=b"\xff\xfe\x00"),
     "galeri": dict(uzak="gdrive:ASTROLOVE/TEMP/GALERI_YAYIN/ILERLEME.json", tur="json-ilanlar", anahtar="", korunan=(), ilk_izin=False,
                    ilk=lambda: json.dumps({"ilanlar": {"4570000001": {"cift": "A_A", "set": 17, "durum": "FAIL"},
                                                       "4570000002": {"cift": "B_B", "set": 19, "durum": "PASS"}}}).encode(),

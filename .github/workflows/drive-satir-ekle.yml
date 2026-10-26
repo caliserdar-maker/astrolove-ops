@@ -1,13 +1,14 @@
 name: drive-satir-ekle
 
-# Drive'daki bir .md dosyasina satir ekler (oturumlar arasi durum notu; ornek TEMP/YAYIN_DURUM.md).
+# Drive'daki bir .md dosyasina satir ekler (oturumlar arasi durum notu; varsayilan TEMP/OTURUM_NOTLARI.md).
+# TEMP/YAYIN_DURUM.md hedefi REDDEDILIR (26 Eki, Serdar onayi): yayin-durum.yml o dosyayi her gun bastan uretir, notlar silinir.
 # Satir, dosyadaki "## " ile baslayan ilk basliktan ONCE (gunluk bolumunun sonu) eklenir; baslik yoksa sona.
 # Yalniz TEMP/ altindaki .md dosyalari. Etsy YOK.
 
 on:
   workflow_dispatch:
     inputs:
-      dosya: {description: "ASTROLOVE/ altina gore yol (TEMP/....md)", required: true, default: "TEMP/YAYIN_DURUM.md"}
+      dosya: {description: "ASTROLOVE/ altina gore yol (TEMP/....md)", required: true, default: "TEMP/OTURUM_NOTLARI.md"}
       satir: {description: "eklenecek satir (tek satir)", required: true}
 
 permissions:
@@ -54,15 +55,21 @@ jobs:
         run: |
           set -euo pipefail
           [[ "$DOSYA" =~ ^TEMP/[A-Za-z0-9_./-]+\.md$ && "$DOSYA" != *..* ]] || { echo "::error::yalniz TEMP/*.md"; exit 1; }
+          if [ "$(printf '%s' "$DOSYA" | sed 's#//*#/#g; s#/\./#/#g')" = "TEMP/YAYIN_DURUM.md" ]; then
+            echo "::error::TEMP/YAYIN_DURUM.md hedeflenemez: yayin-durum her gun bu dosyayi yeniden uretir (eklenen not silinir). TEMP/OTURUM_NOTLARI.md kullanin."; exit 1
+          fi
           # Dosya kapisi (26 Eki): okuma hatasinda bos dosyayla devam YOK (eski bos varsayilan tum belgeyi tek satira indirebiliyordu).
           # Dosya Drive'da hic yoksa (ilk kayit) olusturma serbest. scripts/ops/durum_dosyasi.py (tur md: yalniz satir ekleme)
           python3 scripts/ops/durum_dosyasi.py oku --uzak "gdrive:ASTROLOVE/$DOSYA" --yerel _d.md --durum _durum_md --tur md --ilk-kayit-izni
           python3 - <<'EOF'
           import os
           s = open('_d.md', encoding='utf-8').read().split('\n')
+          s = [] if s == [''] else s          # ilk kayit (bos dosya): basa bos satir eklenmesin
           satir = os.environ['SATIR'].replace('\n', ' ').strip()
           i = next((k for k, x in enumerate(s) if x.startswith('## ')), None)
           if i is None:
+              while s and not s[-1].strip():          # sondaki bos satirlar: notlar arasinda bos satir olmasin
+                  s.pop()
               s = [x for x in s] + [satir]
           else:
               j = i
