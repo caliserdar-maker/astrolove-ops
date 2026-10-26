@@ -201,7 +201,7 @@ def calistir(api, shop, a):
                 if zaten(c, man, kayit_ids):
                     s.update(durum="ZATEN", istek=api.calls - c0)
                     if yazim and (ilerleme.get("ilanlar") or {}).get(lid, {}).get("durum") != "PASS" and (dv or {}).get("durum") != "FAIL":
-                        ilerleme.setdefault("ilanlar", {})[lid] = dict(cift=o["cift"], set=N, durum="PASS", kosu=a.kosu, plan_damga=a.plan_damga,
+                        ilerleme.setdefault("ilanlar", {})[lid] = dict(cift=o["cift"], set=N, hedef=N, durum="PASS", kosu=a.kosu, plan_damga=a.plan_damga,
                                                                        son_ids=[x.get("listing_image_id") for x in c["galeri"]])
                     continue
                 neden = kapilar(c, man, a.bes_x7)
@@ -243,7 +243,7 @@ def calistir(api, shop, a):
             if lid in (devam.get("ilanlar") or {}):
                 devam["ilanlar"][lid]["durum"] = R["sonuc"]   # PASS / FAIL (son geri okuma); exception'da DUR / BITTI kalir
             if R["sonuc"] == "PASS":
-                ilerleme.setdefault("ilanlar", {})[lid] = dict(cift=o["cift"], set=N, durum="PASS", kosu=a.kosu, plan_damga=a.plan_damga,
+                ilerleme.setdefault("ilanlar", {})[lid] = dict(cift=o["cift"], set=N, hedef=N, durum="PASS", kosu=a.kosu, plan_damga=a.plan_damga,
                                                                son_ids=R.get("son_ids"))
             else:
                 dur = f"ilan {lid} {R['sonuc']}; kosu durdu"
@@ -293,7 +293,7 @@ def bag_onar(api, shop, a):
             if d.get("hata"):
                 d.setdefault("hata_gecmis", []).append(d.pop("hata"))
             devam["ilanlar"][lid] = d
-            ilerleme.setdefault("ilanlar", {})[lid] = dict(cift=o["cift"], set=N, durum="PASS", kosu=a.kosu, plan_damga=a.plan_damga,
+            ilerleme.setdefault("ilanlar", {})[lid] = dict(cift=o["cift"], set=N, hedef=N, durum="PASS", kosu=a.kosu, plan_damga=a.plan_damga,
                                                            son_ids=[x["listing_image_id"] for x in R.get("galeri") or []])
         else:
             dur = f"ilan {lid} {R['sonuc']}; kosu durdu"

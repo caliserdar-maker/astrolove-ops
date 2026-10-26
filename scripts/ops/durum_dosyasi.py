@@ -11,7 +11,7 @@ oku: lsjson hatasi FAIL. Dosya listede varsa copyto ZORUNLU, boyut listeyle ayni
      Ilk kayit yalniz: --ilk-kayit-izni + dosya listede yok (ya da klasor yok, ust klasorden dogrulanir) + yedek yok +
      dogrudan okuma da basarisiz. csv: anahtar bos/tekrar FAIL; md: CRLF normalize.
 yaz: icerik degismediyse yazma yok (onay turunde once kimlik kaydi kontrol edilir). Azalmama (csv --korunan sutunlarda dolu
-     deger bosalmaz; json-ilanlar'da cift/set/durum bosalmaz, PASS ve set>=17 kayit geri donmez), okumadan beri uzak degismedi (sha256), yedek <klasor>/YEDEK/<ad>_<damga>_<run>
+     deger bosalmaz; json-ilanlar'da cift/set/durum bosalmaz, PASS ve set>=hedef (kayittaki beklenen gorsel sayisi, yoksa 17) kayit geri donmez), okumadan beri uzak degismedi (sha256), yedek <klasor>/YEDEK/<ad>_<damga>_<run>
      (--immutable + geri okuma; yazilamazsa asil yazma yok), yazim + sha256 geri okuma, sonra YEDEK/ icinde yalniz bu
      dosyanin yedeklerinden en yeni 30'u kalir (silme yalniz yeni yedek geri okunduktan ve asil yazim dogrulandiktan sonra).
 Her FAIL cikis 1; ::error:: satirinda yalniz neden ve sayilar (kimlik/receipt yazilmaz). RCLONE ortam degiskeni: sahte rclone."""
@@ -119,7 +119,8 @@ class Dosya:
                 if not isinstance(n, dict) or any(str((o or {}).get(f) or "") and not str(n.get(f) or "") for f in ("cift", "set", "durum")):
                     bos += 1; continue
                 try:
-                    tamam = o.get("durum") == "PASS" and int(o.get("set") or 0) >= 17      # galeri77: tekrar yuklenmeyen kayit
+                    hedef = int(o.get("hedef") or 17)   # beklenen gorsel sayisi (kayitta yoksa galeri77: 17; galeri v10: 9)
+                    tamam = o.get("durum") == "PASS" and int(o.get("set") or 0) >= hedef   # tekrar yuklenmeyen kayit
                     if tamam and (n.get("durum") != "PASS" or int(n.get("set") or 0) < int(o.get("set") or 0)):
                         geri += 1
                 except (TypeError, ValueError):

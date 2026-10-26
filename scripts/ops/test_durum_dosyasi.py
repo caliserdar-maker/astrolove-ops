@@ -284,6 +284,17 @@ class DurumTest(unittest.TestCase):
             st = R.read_state(p); st["4100000001"]["note"] = ""; R.write_state(p, st)
         rc, log = self.akis(degis=warn_bos); self.assertEqual(rc, 0, log)
 
+    def test_17_hedef_gorsel_sayisi(self):                 # galeri v10: PASS esigi kayittaki beklenen gorsel sayisi (9)
+        self.hazirla("galeri")
+        def v10(p):
+            v = json.loads(Path(p).read_text()); v["ilanlar"]["4570000009"] = {"cift": "C_C", "set": 9, "hedef": 9, "durum": "PASS"}
+            Path(p).write_text(json.dumps(v))
+        rc, log = self.akis(degis=v10); self.assertEqual(rc, 0, log)
+        def geri(p):
+            v = json.loads(Path(p).read_text()); v["ilanlar"]["4570000009"]["durum"] = "DUR"; Path(p).write_text(json.dumps(v))
+        b = self.uzak_b(); rc, log = self.akis(degis=geri)
+        self.assertEqual(rc, 1, log); self.assertIn("PASS'tan geri donen ilan 1", log); self.assertEqual(self.uzak_b(), b)
+
     def test_08_kayit_azalmasi(self):
         for ad in self.her_akis():
             b = self.hazirla(ad)
