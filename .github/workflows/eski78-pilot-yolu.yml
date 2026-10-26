@@ -5,6 +5,8 @@ name: eski78-pilot-yolu
 #   mod kuru / yukle -> (26 Eki'ye kadar) 1059b773 (pilot yukleme kosusu 40091265199 ve 22 ilan bu kodla kostu)
 #     Serdar 26 Eki onayi: kuru / yukle -> fe10f665 scripts/etsy/eski78_pilot_yukle.py (1059b773 kopyasi + sira ardindan son renk
 #     bagi + girdi kapisi; rank yazimi renk bagini siler, 40232676309). Canlida henuz kosmadi: ilk gercek ilan ayri onayla.
+#     96e9dcec (2. iterasyon, bagimsiz inceleme): devam plani DEVAM'da, kalan adim tahmini, sira oncesi/sonrasi bag olcumu,
+#     girdi icerik kapisi. Kuru / yukle bu commit'e sabit.
 #   mod bag / oku    -> 45233945048c403623aeae309fe3a7f49c517702 (pilot bag 40092623702 ve oku 40092712384 bu kodla kostu)
 # Ikinci fark (Serdar 24 Eki onayi): Etsy kilidi kumesi main'in .github/workflows'undan (_main, kilit_bekle.py --kok _main).
 # (Etiket push'u ajan proxy'sinde 403; izinli dal main'de olmayan bir commit tasiyor, zorla push yapilmadi.)
@@ -44,14 +46,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ (inputs.mod == 'bag' || inputs.mod == 'oku') && '45233945048c403623aeae309fe3a7f49c517702' || 'fe10f665030cf900fcbe74e35b32611d0908a8f5' }}
+          ref: ${{ (inputs.mod == 'bag' || inputs.mod == 'oku') && '45233945048c403623aeae309fe3a7f49c517702' || '96e9dcec3b29151979f363aeafaae5889059cb3e' }}
       - name: Kod kaniti (sabit commit)
         env:
           MOD: ${{ inputs.mod }}
         run: |
           set -euo pipefail
           H=$(git rev-parse HEAD)
-          case "$MOD" in bag|oku) B=45233945048c403623aeae309fe3a7f49c517702 ;; *) B=fe10f665030cf900fcbe74e35b32611d0908a8f5 ;; esac
+          case "$MOD" in bag|oku) B=45233945048c403623aeae309fe3a7f49c517702 ;; *) B=96e9dcec3b29151979f363aeafaae5889059cb3e ;; esac
           [ "$H" = "$B" ] || { echo "::error::kod $H beklenen $B degil"; exit 1; }
           echo "::notice title=KOD::mod $MOD commit $H"; echo "KOD_SHA=$H" >> "$GITHUB_ENV"
       - uses: actions/setup-python@v5
