@@ -32,6 +32,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: rclone kur ve yapilandir
+        timeout-minutes: 5
         env:
           RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
@@ -46,6 +47,7 @@ jobs:
             echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
           fi
       - name: Paketi dogrula ve onayi yaz
+        timeout-minutes: 5
         env:
           KIMLIK: ${{ inputs.kimlik }}
         run: |

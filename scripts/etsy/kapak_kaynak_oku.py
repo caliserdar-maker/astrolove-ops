@@ -19,6 +19,7 @@ import etsy_common as E  # noqa: E402
 from yd_envanter_oku import salt_okur  # noqa: E402
 
 KAYNAK = {"poster": "Midnight Blue", "yd": "Botanical"}
+KAYNAK_PID = {"poster": 200, "yd": 513}                     # poster Primary color; YD Style (513 posterde Size)
 ALAN = ("rank", "listing_image_id", "full_width", "full_height", "url_fullxfull", "alt_text")
 
 
@@ -40,7 +41,7 @@ def kayit(tur, lid, cift, img, vi):
     for b in bag:
         g = gid.get(b["image_id"])
         b["rank"] = g["rank"] if g else None                  # None = bagli gorsel galeride yok
-    kb = next((b for b in bag if b["value"] == KAYNAK[tur]), None)
+    kb = next((b for b in bag if b["value"] == KAYNAK[tur] and b["property_id"] == KAYNAK_PID[tur]), None)
     kg = gid.get(kb["image_id"]) if kb else None
     return dict(listing_id=lid, cift=cift, tur=tur, gorsel_sayisi=len(gor), gorseller=gor, baglar=bag,
                 kaynak_secenek=KAYNAK[tur], kaynak_image_id=kb["image_id"] if kb else None,

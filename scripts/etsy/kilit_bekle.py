@@ -35,7 +35,7 @@ def log(m):
     print(m, flush=True)
 
 
-GRUP_RX = re.compile(r"kilit_bekle\.py([^\n]*)")
+GRUP_RX = re.compile(r"^(?![ \t]*#).*?kilit_bekle\.py([^\n]*)", re.M)    # yorum satirlari sayilmaz
 
 
 def gruplar(t):
