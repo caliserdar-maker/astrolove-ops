@@ -10,7 +10,7 @@ ayni ilke), mozjpeg q97 4:4:4, JFIF 300 dpi.
 Kapilar (g): boyut = hedef px, < 20 MB, 4:4:4, 300 dpi, halka sigma 8 <= 0.10 (cozulmus - ayni olcunun yuzer kaynagi,
 murekkep disi kutularda). Sayfa kapilari aile sayfasinin kendi OZET'inden gelir.
 
-Kullanim: tek_jpg.py SAYFA.jpg OLCU CIKTI.jpg --cjpeg BIN [--json KAPI.json]
+Kullanim: tek_jpg.py SAYFA.jpg OLCU CIKTI.jpg --cjpeg BIN [--json KAPI.json] [--renk CHAMPAGNE_IVORY|WARM_PARCHMENT]
 """
 import json, os, subprocess, sys, tempfile
 import numpy as np, cv2
@@ -18,12 +18,21 @@ from PIL import Image, JpegImagePlugin
 
 Image.MAX_IMAGE_PIXELS = None
 DPI = 300
-# 13 siparis olcusu -> (aile sayfa boyu, genislik inc, yukseklik inc). Aile sayfalari: siparis_dosyasi.DIJITAL_BOY.
+# 14 siparis olcusu -> (aile sayfa boyu, genislik inc, yukseklik inc). Aile sayfalari: siparis_dosyasi.DIJITAL_BOY.
 OLCU = {'8x10': ('16x20', 8, 10), '16x20': ('16x20', 16, 20), '24x30': ('16x20', 24, 30),
         '11x14': ('11x14', 11, 14),
         '12x16': ('18x24', 12, 16), '18x24': ('18x24', 18, 24),
         '12x18': ('24x36', 12, 18), '16x24': ('24x36', 16, 24), '20x30': ('24x36', 20, 30), '24x36': ('24x36', 24, 36),
-        'A4': ('A2', 8.268, 11.693), 'A3': ('A2', 11.693, 16.535), 'A2': ('A2', 16.535, 23.386)}
+        'A4': ('A2', 8.268, 11.693), 'A3': ('A2', 11.693, 16.535), 'A2': ('A2', 16.535, 23.386),
+        '5x7': ('A2', 5, 7)}   # Merkez 26 Eki B: A ailesi + dikey merkez kirpma (%1; Serdar onayli ornekler 5X7_HAZIRLIK_20261026/ORNEK)
+# KIRPMA (yalniz aile orani siparis oranindan farkliysa, en cok %1,5; sayfa daha uzunsa): kirpilan ust/alt bantta tasarim olmamali.
+# Olcu: sayfa A4 genisligine (2480 px) indirilir, L kanali sigma 3 yumusatilir, gradyan buyuklugunun satir basina %99,5
+# yuzdeligi; bant degeri = bant satirlarinin en buyugu. Esik onayli 5 ornekten (26 Eki, A4 ciktilari) olculdu:
+#   CI bant 2,79 / 3,38, ic serit (18-300 px) 7,2, tasarim satirlari 63-67 -> esik 20
+#   WP bant 24,9 / 26,4, ic serit en cok 39,7 (doku), tasarim satirlari 46,7-53,4 -> esik 43 (doku ile tasarim arasi dar: 39,7 / 46,7)
+KIRP_MAX = 0.015
+BANT_ESIK = {'CHAMPAGNE_IVORY': 20.0, 'WARM_PARCHMENT': 43.0}
+BANT_OLCEK_W = 2480
 MB_SINIR = 20.0
 SIGMA_HALKA, ESIK_HALKA = 8, 0.10
 Q = 97
@@ -79,12 +88,29 @@ def dpi_yaz(yol, dpi=DPI):
     open(yol, 'wb').write(bytes(b))
 
 
-def uret(sayfa, olcu, cikti, cjpeg, seed=11):
+def bant_olc(S, ust, alt):
+    """Kirpilan bantlarda tasarim olcusu (BANT_ESIK aciklamasi): A4 genisligine indirilmis L, sigma 3, satir p99.5 gradyan."""
+    k = BANT_OLCEK_W / S.shape[1]
+    A = cv2.resize(S, (BANT_OLCEK_W, int(round(S.shape[0] * k))), interpolation=cv2.INTER_AREA)
+    L = cv2.GaussianBlur(cv2.cvtColor((np.clip(A, 0, 255) / 255).astype(np.float32), cv2.COLOR_RGB2Lab)[..., 0], (0, 0), 3)
+    G = np.hypot(cv2.Sobel(L, cv2.CV_32F, 1, 0), cv2.Sobel(L, cv2.CV_32F, 0, 1))
+    prof = np.percentile(G, 99.5, axis=1)
+    u, a = max(1, int(round(ust * k))), max(1, int(round(alt * k)))
+    return round(float(prof[:u].max()), 2), round(float(prof[-a:].max()), 2)
+
+
+def uret(sayfa, olcu, cikti, cjpeg, seed=11, renk=None):
     S = np.asarray(Image.open(sayfa).convert('RGB')).astype(np.float32)
     W, H = hedef_px(olcu)
     oran_s, oran_h = S.shape[1] / S.shape[0], W / H
+    kirp = None
     if abs(oran_s - oran_h) / oran_h > 0.004:
-        raise SystemExit(f'HATA en-boy farkli: sayfa {S.shape[1]}x{S.shape[0]} hedef {W}x{H}')
+        if not (oran_s < oran_h and abs(oran_s - oran_h) / oran_h <= KIRP_MAX):
+            raise SystemExit(f'HATA en-boy farkli: sayfa {S.shape[1]}x{S.shape[0]} hedef {W}x{H}')
+        hh = int(round(S.shape[1] * H / W)); k = S.shape[0] - hh; ust = k // 2; alt = k - ust
+        b = bant_olc(S, ust, alt); esik = BANT_ESIK.get(renk)
+        kirp = dict(ust=ust, alt=alt, bant=list(b), esik=esik, PASS=bool(esik is not None and max(b) <= esik))
+        S = S[ust:S.shape[0] - alt]
     kucult = W <= S.shape[1]
     P = cv2.resize(S, (W, H), interpolation=cv2.INTER_AREA if kucult else cv2.INTER_CUBIC)
     P = np.clip(P, 0, 255)
@@ -107,7 +133,7 @@ def uret(sayfa, olcu, cikti, cjpeg, seed=11):
                 break
     dpi_yaz(cikti)
     return P, bg, dict(sayfa_px=[S.shape[1], S.shape[0]], hedef_px=[W, H], kucultme=kucult, kalite=q,
-                      gren=dict(kaynak=round(g_kay or 0, 3), once=round(g_once or 0, 3), ek_sigma=round(ek, 3)))
+                      gren=dict(kaynak=round(g_kay or 0, 3), once=round(g_once or 0, 3), ek_sigma=round(ek, 3)), kirpma=kirp)
 
 
 def kapi_g(cikti, olcu, P, bg):
@@ -127,10 +153,11 @@ if __name__ == '__main__':
     a = sys.argv[1:]
     cj = a[a.index('--cjpeg') + 1]
     js = a[a.index('--json') + 1] if '--json' in a else None
-    sayfa, olcu, cikti = [x for x in a if not x.startswith('--') and x not in (cj, js)][:3]
-    P, bg, bilgi = uret(sayfa, olcu, cikti, cj)
+    rk = a[a.index('--renk') + 1] if '--renk' in a else None
+    sayfa, olcu, cikti = [x for x in a if not x.startswith('--') and x not in (cj, js, rk)][:3]
+    P, bg, bilgi = uret(sayfa, olcu, cikti, cj, renk=rk)
     g = kapi_g(cikti, olcu, P, bg)
-    out = dict(olcu=olcu, aile=OLCU[olcu][0], **bilgi, g=g, PASS=g['PASS'])
+    out = dict(olcu=olcu, aile=OLCU[olcu][0], **bilgi, g=g, PASS=g['PASS'] and (bilgi['kirpma'] or {'PASS': True})['PASS'])
     print('TEK_JPG', olcu, json.dumps({k: out[k] for k in ('aile', 'hedef_px', 'kalite', 'gren', 'PASS')}), 'MB', g['mb'], 'halka', g['halka'], flush=True)
     if js:
         json.dump(out, open(js, 'w'), indent=1)

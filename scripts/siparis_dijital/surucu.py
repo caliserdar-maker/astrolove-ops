@@ -694,7 +694,7 @@ def tek_asamasi(a, g, sd, kok):
     tek = {'olcu': olcu, 'aile': aile, 'renk': renk, 'sayfa': sayfa.name, 'sayfa_kapilari': sk}
     if sayfa.exists():
         cj = os.environ.get('CJPEG_MOZ') or str(kok / 'bin' / 'cjpeg-mozjpeg-4.1.1')
-        P, bg, bilgi = tek_jpg.uret(str(sayfa), olcu, str(hedef), cj)
+        P, bg, bilgi = tek_jpg.uret(str(sayfa), olcu, str(hedef), cj, renk=renk)
         tek.update(bilgi); tek['g'] = tek_jpg.kapi_g(str(hedef), olcu, P, bg); del P, bg
         tek['dosya'] = hedef.name
         kesit(hedef, kok / 'inceleme' / f'KESIT_TEK_{renk}_{olcu}.jpg', kok / 'inceleme' / f'ONIZLEME_TEK_{renk}_{olcu}.jpg')
@@ -712,7 +712,8 @@ def tek_asamasi(a, g, sd, kok):
                                                                            'renk_gecti', 'leke_gecti', 'eslesme')}), flush=True)
     else:
         tek['g'] = {'PASS': False, 'hata': 'aile sayfasi yok'}
-    tek['gecti'] = bool(sk.get('kapilar_gecti') and tek['g'].get('PASS') and (tek.get('amp') or {'PASS': True}).get('PASS'))
+    tek['gecti'] = bool(sk.get('kapilar_gecti') and tek['g'].get('PASS') and (tek.get('amp') or {'PASS': True}).get('PASS')
+                        and (tek.get('kirpma') or {'PASS': True}).get('PASS'))   # 5x7: kirpilan bantta tasarim yok (tek_jpg.BANT_ESIK)
     OZ = {'receipt': g['receipt'], 'cift': g['cift'], 'tek_jpg': tek, 'istenen': [renk], 'gecti': tek['gecti'],
           'normalize': {'yapildi': bool(g.get('normalize')), 'girdi': g.get('cift_girdi', g['cift']), 'cift': g['cift']}}
     kal = sorted(k for k, v in (sk.get('kapilar') or {}).items() if v is False)
@@ -721,6 +722,8 @@ def tek_asamasi(a, g, sd, kok):
            '|---|---|---|---|---|---|---|---|---|---|',
            f"| {renk} | {olcu} | {aile} | {'PASS' if sk.get('kapilar_gecti') else 'FAIL ' + str(kal)} | {tek.get('dosya', '-')} | "
            f"{gg.get('mb')} | {gg.get('boyut')} | {gg.get('ornekleme_444')} | {gg.get('dpi')} | {gg.get('halka')} |",
+           *([f"5x7 kirpma bant kapisi: {'PASS' if tek['kirpma'].get('PASS') else 'FAIL'} | ust/alt {tek['kirpma'].get('ust')}/{tek['kirpma'].get('alt')} px | "
+                f"bant {tek['kirpma'].get('bant')} (esik {tek['kirpma'].get('esik')})"] if tek.get('kirpma') else []),
            *([f"& kapisi: {'PASS' if tek['amp'].get('PASS') else 'FAIL'} | f IoU {tek['amp'].get('f')} (>= 0.90) | d kelime IoU "
                 f"{tek['amp'].get('d')} (>= 0.85, fark kumesi <= kalinlik^2) | renk dE {tek['amp'].get('renk')} (<= 5.0) | leke "
                 f"{[x and x.get('en_buyuk_kume') for x in tek['amp'].get('leke', [])]}"] if tek.get('amp') else []),

@@ -451,7 +451,7 @@ jobs:
         if: ${{ github.event.inputs.tek_olcu != '' }}
         run: |
           set -euo pipefail
-          jq -re '.inputs.tek_olcu | test("^(8x10|16x20|24x30|11x14|12x16|18x24|12x18|16x24|20x30|24x36|A4|A3|A2)$")' "$GITHUB_EVENT_PATH" >/dev/null || { echo "HATA: tek_olcu" >&2; exit 1; }
+          jq -re '.inputs.tek_olcu | test("^(5x7|8x10|16x20|24x30|11x14|12x16|18x24|12x18|16x24|20x30|24x36|A4|A3|A2)$")' "$GITHUB_EVENT_PATH" >/dev/null || { echo "HATA: tek_olcu" >&2; exit 1; }
           C="$GITHUB_WORKSPACE/_sg/motor_gpt/bin/cjpeg-mozjpeg-4.1.1"; chmod +x "$C"; "$C" -version 2>&1 | head -1
           echo "CJPEG_MOZ=$C" >> "$GITHUB_ENV"
       - name: WP PDF + ozet + kesitler

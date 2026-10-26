@@ -25,7 +25,7 @@ on:
         description: "olcu"
         required: true
         type: choice
-        options: ["8x10", "11x14", "12x16", "12x18", "16x20", "16x24", "18x24", "20x30", "24x30", "24x36", "A4", "A3", "A2"]
+        options: ["5x7", "8x10", "11x14", "12x16", "12x18", "16x20", "16x24", "18x24", "20x30", "24x30", "24x36", "A4", "A3", "A2"]
       yeni_yol:
         description: "anahtar = repo degiskeni SIPARIS_GPT_ACIK; ac = yalniz test icin yeni yol (MB, DB, PW)"
         required: true
@@ -40,7 +40,7 @@ on:
 permissions:
   contents: read
 env:
-  GPT_REF: ${{ vars.SIPARIS_GPT_REF || '243c9a49e97d37829dccf4308e57e0d4279f225c' }}   # 22 Eki A3 poster kiyasi FAIL (39850555034): temiz 66ef5e04'e gecis geri alindi
+  GPT_REF: ${{ vars.SIPARIS_GPT_REF || 'd2b414ee270ec029bd5abcef4a6535414ae7d1e1' }}   # 26 Eki B: 243c9a4 + yalniz olcu.py 5x7 (OLCU 1500x2100, AILE A). 22 Eki A3 kiyasi FAIL (39850555034): temiz 66ef5e04'e gecis geri alindi
   ESKI_RENK_REF: ${{ vars.ESKI_RENK_REF || 'b8c8c4b17478fd956167577fa69913d06b9eb955' }}
   WP_REF: ${{ vars.SIPARIS_WP_REF || '360cbef947994c7d4b3c9ae95275f778a18af716' }}
 jobs:
@@ -95,7 +95,7 @@ jobs:
           m=$(jq -r '.inputs.mesaj_b64' "$E" | base64 -d); echo "::add-mask::$m"
           R=$(jq -r .inputs.renk "$E"); O=$(jq -r .inputs.olcu "$E")
           # TEK JPG (Serdar 10 Eki, adim 4): CI ve WP siparisi PDF yerine secilen olcude tek JPG (aile sayfasindan, tek_jpg.py).
-          AILE=$(python3 -c "import sys;a={'8x10':'16x20','16x20':'16x20','24x30':'16x20','11x14':'11x14','12x16':'18x24','18x24':'18x24','12x18':'24x36','16x24':'24x36','20x30':'24x36','24x36':'24x36','A4':'A2','A3':'A2','A2':'A2'};print(a[sys.argv[1]])" "$O")
+          AILE=$(python3 -c "import sys;a={'5x7':'A2','8x10':'16x20','16x20':'16x20','24x30':'16x20','11x14':'11x14','12x16':'18x24','18x24':'18x24','12x18':'24x36','16x24':'24x36','20x30':'24x36','24x36':'24x36','A4':'A2','A3':'A2','A2':'A2'};print(a[sys.argv[1]])" "$O")
           if [ "$R" = "WARM_PARCHMENT" ]; then ISLER="wp:$AILE"; EK=(-f wp_ref="$WP_REF" -f tek_olcu="$O")
           elif [ "$R" = "CHAMPAGNE_IVORY" ]; then ISLER="renk:$R"; EK=(-f tek_olcu="$O")
           else ISLER="renk:$R"; EK=(); fi
@@ -152,7 +152,7 @@ jobs:
             rclone copy "$P" /tmp/ref --include "${CIFT}_7200x10800.jpg"
             if [ "$RENK" != "MIDNIGHT_BLUE" ]; then                            # DB/PW: eski sistemin plakasi (24x36 motor zemini + aile plakasi)
               ED=$([ "$RENK" = "DEEP_BLACK" ] && echo BLACK || echo PURE_WHITE)
-              FAM=$(python3 -c "import sys;a={'8x10':'16x20','16x20':'16x20','24x30':'16x20','11x14':'11x14','12x16':'18x24','18x24':'18x24','12x18':'24x36','16x24':'24x36','20x30':'24x36','24x36':'24x36','A4':'A2','A3':'A2','A2':'A2'};print(a[sys.argv[1]])" "$OLCU")
+              FAM=$(python3 -c "import sys;a={'5x7':'A2','8x10':'16x20','16x20':'16x20','24x30':'16x20','11x14':'11x14','12x16':'18x24','18x24':'18x24','12x18':'24x36','16x24':'24x36','20x30':'24x36','24x36':'24x36','A4':'A2','A3':'A2','A2':'A2'};print(a[sys.argv[1]])" "$OLCU")
               mkdir -p /tmp/pl; for b in 24x36 $FAM; do rclone copy "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM/PLATES/${ED}_$b.png" /tmp/pl; done
             fi ) &
           sudo mkdir -p /home/claude/ao/KANIT /home/claude/motor_klon/motor && sudo chown -R "$USER" /home/claude
@@ -191,6 +191,11 @@ jobs:
           D="gdrive,root_folder_id=12N9iS2i4byMbkH5c0Inmni_nIv2zyTzH:SIPARIS_ISIM/GPT/AstroLoveArt_${RECEIPT}"
           python3 -c "import json,os; json.dump(dict(kosu=os.environ['GITHUB_RUN_ID'], is_basi_utc=int(os.environ['T_BAS']), giris='siparis-giris', gpt_ref=os.environ['GPT_REF']), open('/tmp/is/SURE.json','w'))"
           if [ "$RENK" = "MIDNIGHT_BLUE" ]; then
+            # MB adi diger 4 renkle ayni kalip (Merkez 26 Eki B): AstroLoveArt_<B1>_<B2>_Midnight_Blue[_2000|_<Olcu>].jpg; kapilar eski adla kostu
+            for f in /tmp/is/AstroLoveArt_*.jpg; do b=$(basename "$f" .jpg); case "$b" in *_Midnight_Blue*) continue;; esac
+              B12=$(echo "$CIFT" | tr '_' '\n' | sed 's/.*/\L&/;s/^./\u&/' | paste -sd_); r=${b#AstroLoveArt_${B12}}
+              mv "$f" "/tmp/is/AstroLoveArt_${B12}_Midnight_Blue${r}.jpg"; done
+            ls /tmp/is/AstroLoveArt_*.jpg
             rclone copy /tmp/is "$D" --include "AstroLoveArt_*.jpg" --include "KAPI.json" --include "SURE.json" --include "siparis.json" --exclude "*"
           else                                                               # yalniz secilen renk: ana kopya, teslim, onizleme
             rclone copy /tmp/is/$RENK "$D" --include "AstroLoveArt_*.jpg" --exclude "*"
