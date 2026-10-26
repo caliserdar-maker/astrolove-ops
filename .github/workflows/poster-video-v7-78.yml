@@ -3,7 +3,8 @@ name: poster-video-v7-78
 # Etsy token ve kilit yok. Yukleme ayri onayla (video_yukle_78), galeri v10 yuklemesinden SONRA.
 # Cift basina: kapak Drive TEMP/POSTER_KAPAK_V10/20261026_153710/KAPAK_<CIFT>.jpg. Maske kaynagi V10 kapagin KENDISI (Serdar 26 Eki:
 # eski kapak kaynagi birkac px kayikti, 3 ornekte 2 FAIL); POSTER_SRC yok, V7_HALKASIZ=1 (ince halka JPEG'de gorunmuyor; halkasiz
-# ayristirma, poster_video_v7.PosterV._halkasiz). Uretim poster_video_v7.py (v7b), QC v7_qc.py (a-e + silinme_hayalet).
+# ayristirma, poster_video_v7.PosterV._halkasiz). V7_DOLGU=nk (2. iterasyon, Serdar 26 Eki): silinen bolge normalize Gauss ile
+# doldurulur (Telea dolgusu 18 ciftte zeminden mavi / acikti). Uretim poster_video_v7.py (v7b), QC v7_qc.py (a-e + silinme_hayalet).
 # Paralel: ilan-video-78 kalibi (grup sayisi kadar is).
 # Cikti Drive TEMP/VIDEO_V7_78/<damga>/: <CIFT>.mp4, QC/<CIFT>_QC.json, KONTAK/<CIFT>_KONTAK.jpg, LOG/<CIFT>_uretim.log,
 # OZET.md + OZET.csv (PASS sayisi), KONTAK_GENEL_<n>.jpg (12 cift / sayfa).
@@ -101,7 +102,7 @@ jobs:
           rclone copyto "$K/KAPAK_$C.jpg" "$W/KAPAK.jpg" -q || DUR="V10 kapak indirilemedi"
           [ -n "$DUR" ] || KR=0
           if [ "$KR" = 0 ]; then
-            V7_HALKASIZ=1 V6_C=sosyal/poster_video/v6_c_egri.json V6_N=58000 V6_BOLGE_REF=44274 V6_N_REF=58000 \
+            V7_DOLGU=nk V7_HALKASIZ=1 V6_C=sosyal/poster_video/v6_c_egri.json V6_N=58000 V6_BOLGE_REF=44274 V6_N_REF=58000 \
               python3 -I sosyal/poster_video/poster_video_v7.py "$W/KAPAK.jpg" "$W/$C.mp4" murekkep > "$W/uretim.log" 2>&1; UR=$?
           fi
           if [ "$UR" = 0 ]; then

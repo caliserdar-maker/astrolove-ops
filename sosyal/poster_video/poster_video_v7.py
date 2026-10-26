@@ -135,8 +135,8 @@ class PosterV(PU.PosterR):
         j0, j1 = i, i
         while j0 > 0 and bands[j0]['y0'] - bands[j0 - 1]['y1'] < 0.06 * Hp:
             j0 -= 1
-        while j1 + 1 < len(bands) and bands[j1 + 1]['y0'] - bands[j1]['y1'] < 0.06 * Hp:
-            j1 += 1
+        while j1 + 1 < len(bands) - 3 and bands[j1 + 1]['y0'] - bands[j1]['y1'] < 0.06 * Hp:   # altta en az 3 bant kalir (2. iterasyon:
+            j1 += 1                                                                    # ARIES_CAPRICORN burc bandi 153 px < 156 ile sembole katiliyordu)
         sym = [c for b in bands[j0:j1 + 1] for c in b['cs']]
         sx0 = min(c[1] for c in sym); sy0 = min(c[2] for c in sym)
         sx1 = max(c[1] + c[3] for c in sym); sy1 = max(c[2] + c[4] for c in sym)
@@ -199,8 +199,24 @@ hm = cv2.resize((R_p > 0.02).astype(np.uint8), (P.w // 2, P.h // 2), interpolati
 # arasindaki kucuk keskinlik/konum farki (ort 2,65) BASE = KAP + (bos - P.img) farkinda sembolu hayalet olarak birakiyordu.
 P_KAP = cv2.resize(kap_src[y0:y1, x0:x1], (P.w, P.h), interpolation=cv2.INTER_CUBIC).astype(np.float32) if _src else P.img
 hi = cv2.resize(np.clip(P_KAP, 0, 255).astype(np.uint8), (P.w // 2, P.h // 2), interpolation=cv2.INTER_AREA)
-bos = cv2.resize(cv2.inpaint(hi, cv2.dilate(hm, np.ones((3, 3), np.uint8)), 7, cv2.INPAINT_TELEA).astype(np.float32),
-                 (P.w, P.h), interpolation=cv2.INTER_CUBIC)
+if os.environ.get('V7_DOLGU') == 'nk':
+    # v7 toplu 2. iterasyon (Serdar 26 Eki): Telea yalniz bolge sinirindan doldurur; 18 FAIL ciftte dolgu sembolun icinden gorunen
+    # gercek zeminden mavi / acik (TAURUS_VIRGO R-B -42,35 / -41,14). Normalize Gauss: bilinmeyen bolge disindaki (ve sembolun ic
+    # bosluklarindaki) tum zemin pikselleri agirlikli ortalamayla; sigma kucukten buyuge, agirlik toplami >= 0,25 olan ilk olcek.
+    hmk = cv2.dilate(hm, np.ones((3, 3), np.uint8)) > 0
+    w = (~hmk).astype(np.float32)
+    hf = hi.astype(np.float32); dol = hf.copy(); kalan = hmk.copy()
+    for sg in (6, 12, 24, 48, 96):
+        den = cv2.GaussianBlur(w, (0, 0), sg)
+        nk = cv2.GaussianBlur(hf * w[..., None], (0, 0), sg) / np.maximum(den, 1e-6)[..., None]
+        ok = kalan & (den >= 0.25)
+        dol[ok] = nk[ok]; kalan &= ~ok
+    if kalan.any():
+        dol[kalan] = nk[kalan]
+    bos = cv2.resize(dol, (P.w, P.h), interpolation=cv2.INTER_CUBIC)
+else:
+    bos = cv2.resize(cv2.inpaint(hi, cv2.dilate(hm, np.ones((3, 3), np.uint8)), 7, cv2.INPAINT_TELEA).astype(np.float32),
+                     (P.w, P.h), interpolation=cv2.INTER_CUBIC)
 KAP = np.clip(np.round(cv2.resize(kap_src, (VW, VH), interpolation=cv2.INTER_AREA).astype(np.float32)), 0, 255)
 FULL = KAP
 BASE = np.clip(KAP + vid((bos - P_KAP) * R_p[..., None]), 0, 255)
