@@ -75,6 +75,8 @@ class PosterV(PU.PosterR):
         try:
             return super()._find_parts()
         except RuntimeError as e:
+            if 'halka bulunamadi' in str(e) and os.environ.get('V7_HALKASIZ') == '1':
+                return self._halkasiz()
             if 'kucuk burc' not in str(e):
                 raise
         Wp = self.w
@@ -108,6 +110,52 @@ class PosterV(PU.PosterR):
         self.names_row = self._union(bands[1]['cs'])
         self.msg_row = self._union([c for b in bands[2:] for c in b['cs']])
         self.halka_alti = [[int(v) for v in c[1:6]] for c in alt]
+
+
+    def _halkasiz(self):
+        """v7 toplu (Serdar 26 Eki: maske V10 kapagin kendisinden; ortam V7_HALKASIZ=1): kapaktaki poster ~1039 px, ince halka JPEG
+        renk sikistirmasinda R - B > 40 cekirdeginde gorunmuyor ('halka bulunamadi'). Halkasiz ayristirma: alan > 300 parcalar ust
+        kenarina gore 40 px bosluk kuraliyla bantlara ayrilir (PosterR ile ayni); en buyuk parcanin bandi sembol bandidir ve bosluk
+        < 0,06 x yukseklik olan komsu bantlar (sembolun ayrik parcalari) ona katilir. Sembol bandinin kutusu icinde merkezi olan alan > 50
+        parcalar da sembole katilir. Sembol bandindan sonraki bantlar: kucuk burclar, isimler, mesaj (PosterR ile ayni)."""
+        Wp, Hp = self.w, self.h
+        comps = sorted(self.comps, key=lambda c: -c[5])
+        if not comps:
+            raise RuntimeError('halkasiz: parca yok')
+        bands = []
+        for c in sorted([c for c in comps if c[5] > 300], key=lambda c: c[2]):
+            if bands and c[2] <= bands[-1]['y1'] + 40:
+                bands[-1]['cs'].append(c); bands[-1]['y1'] = max(bands[-1]['y1'], c[2] + c[4])
+            else:
+                bands.append({'cs': [c], 'y1': c[2] + c[4]})
+        for b in bands:
+            b['y0'] = min(c[2] for c in b['cs'])
+        en = comps[0]
+        i = next(k for k, b in enumerate(bands) if en in b['cs'])
+        j0, j1 = i, i
+        while j0 > 0 and bands[j0]['y0'] - bands[j0 - 1]['y1'] < 0.06 * Hp:
+            j0 -= 1
+        while j1 + 1 < len(bands) and bands[j1 + 1]['y0'] - bands[j1]['y1'] < 0.06 * Hp:
+            j1 += 1
+        sym = [c for b in bands[j0:j1 + 1] for c in b['cs']]
+        sx0 = min(c[1] for c in sym); sy0 = min(c[2] for c in sym)
+        sx1 = max(c[1] + c[3] for c in sym); sy1 = max(c[2] + c[4] for c in sym)
+        ids = {c[0] for c in sym}
+        sym += [c for c in comps if c[0] not in ids and 50 < c[5] <= 300 and sx0 < c[1] + c[3] / 2 < sx1 and sy0 < c[2] + c[4] / 2 < sy1]
+        self.ring = None
+        self.merged_parts = sym
+        self.merged = self._union(sym)
+        alt = bands[j1 + 1:]
+        if len(alt) < 3:
+            raise RuntimeError(f'halkasiz: beklenen en az 3 satir (burclar, isimler, mesaj), bulunan {len(alt)}')
+        left = [c for c in alt[0]['cs'] if c[1] + c[3] / 2 < Wp / 2]
+        right = [c for c in alt[0]['cs'] if c[1] + c[3] / 2 >= Wp / 2]
+        if not left or not right:
+            raise RuntimeError('halkasiz: sol veya sag kucuk burc bulunamadi')
+        self.sign_a, self.sign_b = self._union(left), self._union(right)
+        self.names_row = self._union(alt[1]['cs'])
+        self.msg_row = self._union([c for b in alt[2:] for c in b['cs']])
+        print(f'halkasiz ayristirma: sembol {len(sym)} parca ({sx0},{sy0})-({sx1},{sy1}), alt bant {len(alt)}', flush=True)
 
 
 try:
