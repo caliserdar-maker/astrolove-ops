@@ -17,38 +17,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import onay_defteri as D  # noqa: E402
 import siparis_onay as S  # noqa: E402
 
-SAHTE = textwrap.dedent('''
-    import json, os, shutil, sys
-    from pathlib import Path
-    kok = Path(os.environ["FAKE_ROOT"]); hata = set(filter(None, os.environ.get("FAKE_HATA", "").split(",")))
-    def yol(p): return kok / p[len("gdrive:"):] if p.startswith("gdrive:") else Path(p)
-    a = sys.argv[1:]; k = a[0]
-    if k == "lsjson":
-        if "lsjson" in hata: sys.stderr.write("sahte ag hatasi"); sys.exit(3)
-        d = yol(a[1]); ad = a[a.index("--include") + 1].lstrip("/")
-        if not d.is_dir(): sys.stderr.write("directory not found"); sys.exit(3)
-        import fnmatch
-        L = [{"Name": f.name, "Size": f.stat().st_size} for f in d.iterdir() if f.is_file() and fnmatch.fnmatch(f.name, ad)]
-        if "lsjson_bos" in hata: L = []
-        if "lsjson_bos_defter" in hata: L = [x for x in L if x["Name"] != "ONAYLAR.json"]
-        if "lsjson_cift" in hata: L += [x for x in L if x["Name"] == "ONAYLAR.json"]
-        print(json.dumps(L))
-    elif k == "cat":
-        p = yol(a[1])
-        if "cat" in hata or not p.is_file(): sys.exit(3)
-        b = p.read_bytes()
-        if "cat_bozuk_sonra" in hata and p.name == "ONAYLAR.json" and (kok / ".yazildi").exists(): b += b" "
-        sys.stdout.buffer.write(b)
-    elif k == "copyto":
-        s, h = yol(a[1]), yol(a[2])
-        if "copyto_indir" in hata and a[1].startswith("gdrive:"): sys.exit(1)
-        if "copyto_yedek" in hata and "ONAYLAR_YEDEK_" in a[2]: sys.exit(1)
-        if "copyto_defter" in hata and a[2].endswith("/ONAYLAR.json"): sys.exit(1)
-        h.parent.mkdir(parents=True, exist_ok=True); shutil.copyfile(s, h)
-        if a[2].startswith("gdrive:") and a[2].endswith("/ONAYLAR.json"): (kok / ".yazildi").touch()
-    else:
-        sys.exit(9)
-''')
+SAHTE = (Path(__file__).resolve().parent / "sahte_rclone.py").read_text()   # ortak sahte rclone (durum_dosyasi ile)
 UZAK = "gdrive:ASTROLOVE/TEMP/SIPARIS_ONAY"
 
 
@@ -94,7 +63,7 @@ class DefterTest(unittest.TestCase):
         return rc2, log + log2
 
     def yedekler(self):
-        return sorted(self.uzak_dir.glob("ONAYLAR_YEDEK_*.json"))
+        return sorted((self.uzak_dir / "YEDEK").glob("ONAYLAR_*.json"))       # 26 Eki: yedekler YEDEK/ alt klasorunde
 
     def test_1_dosya_var_normal_ekleme(self):
         once = {"eski-1": {"sha256": "a" * 64, "onay_zamani": "2026-10-01T00:00:00Z"},
@@ -196,7 +165,7 @@ class DefterTest(unittest.TestCase):
         self.uzak({"eski-1": {"sha256": "a" * 64, "onay_zamani": "x"}})
         rc, log = self.akis("sahte-001"); self.assertEqual(rc, 0, log)         # yedek olustu
         b = self.uzak()
-        rc, log = self.akis("sahte-002", hata_oku="lsjson_bos_defter,cat")      # defter listede yok, okunamiyor, yedek var
+        rc, log = self.akis("sahte-002", hata_oku="lsjson_bos_ana,cat")      # defter listede yok, okunamiyor, yedek var
         self.assertEqual(rc, 1); self.assertIn("yedek var", log); self.assertEqual(self.uzak(), b)
 
     def test_13_ayni_adli_iki_defter(self):
@@ -212,9 +181,30 @@ class DefterTest(unittest.TestCase):
         rc, log = self.akis("sahte-001", bozma=sil)
         self.assertEqual(rc, 1); self.assertNotIn("gizli-receipt-123", log)
 
+    def test_15_yedek_30_siniri_ve_eski_kok_yedekleri(self):
+        self.uzak({"eski-1": {"sha256": "a" * 64, "onay_zamani": "x"}})
+        kok_eski = [self.uzak_dir / f"ONAYLAR_YEDEK_2026102{i}T000000000000Z.json" for i in range(3)]
+        for p in kok_eski:
+            p.write_text("{}")                                     # kokteki eski yedekler: tasinmaz, silinmez
+        yd = self.uzak_dir / "YEDEK"; yd.mkdir()
+        eski = [yd / f"ONAYLAR_202610{g:02d}T000000000000Z_{g}.json" for g in range(1, 31)]
+        for p in eski:
+            p.write_text("{}")
+        rc, log = self.akis("sahte-001")
+        self.assertEqual(rc, 0, log)
+        self.assertEqual(len(self.yedekler()), 30); self.assertFalse(eski[0].exists())
+        self.assertTrue(all(p.exists() for p in kok_eski))
+
+    def test_16_kimlik_kaydi_yokken_basari_yok(self):         # defter degismedi ama kimlik kaydi yok -> FAIL (eski davranis)
+        b = self.uzak({"eski-1": {"sha256": "a" * 64, "onay_zamani": "x"}})
+        os.environ["FAKE_HATA"] = ""
+        self.assertEqual(self.kos("oku")[0], 0)
+        rc, log = self.kos("yaz", "--kimlik", "sahte-001")
+        self.assertEqual(rc, 1); self.assertIn("kaydi yok", log); self.assertEqual(self.uzak(), b)
+
     def test_10_defter_yazilamiyor(self):
         b = self.uzak({"eski-1": {"sha256": "a" * 64, "onay_zamani": "x"}})
-        rc, log = self.akis("sahte-001", hata_yaz="copyto_defter")
+        rc, log = self.akis("sahte-001", hata_yaz="copyto_ana")
         self.assertEqual(rc, 1); self.assertIn("uzaktaki defter simdi: onceki defter", log)
         self.assertEqual(self.uzak(), b); self.assertEqual(len(self.yedekler()), 1)
 

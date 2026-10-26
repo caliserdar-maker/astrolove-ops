@@ -161,7 +161,10 @@ jobs:
           if [ "${{ inputs.sadece_test }}" != "true" ]; then
             rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
           fi
-          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_ORDERS_STATE.csv" _work/state.csv 2>/dev/null || echo "STATE yok; yeni baslar"
+          # STATE kapisi (26 Eki, Serdar onayi): okuma hatasinda bos STATE ile devam YOK (eski bos varsayilan tum
+          # siparis gecmisini silebiliyordu). Okuma FAIL -> kosu kirmizi biter, sonraki kosu yeniden dener. scripts/ops/durum_dosyasi.py
+          python3 scripts/ops/durum_dosyasi.py oku --uzak "gdrive:ASTROLOVE/TEMP/POD_ORDERS_STATE.csv" --yerel _work/state.csv \
+            --durum _work/DURUM_STATE --tur csv --anahtar receipt_id --korunan stage,prodigi_order_id,tracking
           rclone copy "gdrive:ASTROLOVE/TEMP/POD_ORDERS" _work/packages --include "*.json" -q 2>/dev/null || true
           echo "hazir paket: $(ls _work/packages/*.json 2>/dev/null | wc -l)"
           if [ -n "${R_SUBMIT:-}" ]; then
@@ -251,7 +254,13 @@ jobs:
         run: |
           set -euo pipefail
           [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
-          if [ -s _work/state.csv ]; then rclone copyto _work/state.csv "gdrive:ASTROLOVE/TEMP/POD_ORDERS_STATE.csv" && echo "STATE yazildi"; fi
+          STATE_FAIL=""
+          if [ -f _work/DURUM_STATE/ONCE ]; then      # azalmama + okumadan beri degismedi + YEDEK/ + sha256 geri okuma
+            python3 scripts/ops/durum_dosyasi.py yaz --uzak "gdrive:ASTROLOVE/TEMP/POD_ORDERS_STATE.csv" --yerel _work/state.csv \
+              --durum _work/DURUM_STATE --tur csv --anahtar receipt_id --korunan stage,prodigi_order_id,tracking || STATE_FAIL=1
+          else
+            echo "::error::STATE okunamadi; Drive'daki STATE'e yazilmadi"; STATE_FAIL=1
+          fi
           ls _out/*.json >/dev/null 2>&1 && rclone copy _out "gdrive:ASTROLOVE/TEMP/POD_ORDERS" --include "*.json" --max-depth 1 -q && echo "Paketler Drive'a yazildi" || true
           stamp=$(TZ=Europe/Istanbul date +%Y%m%d_%H%M)
           [ -f _out/REPORT.md ] && rclone copyto _out/REPORT.md "gdrive:ASTROLOVE/TEMP/POD_ORDERS/REPORT_${R_ENV}_${stamp}.md" || true
@@ -268,6 +277,7 @@ jobs:
               echo "::error title=ISIM_BEKLIYOR ${kod}::Kisisellestirmeli siparis ${kod} Prodigi'ye GONDERILMEDI. Kart: https://drive.google.com/file/d/${fid}/view"
             done < _out/ISIM_YENI.txt
           fi
+          [ -z "$STATE_FAIL" ] || { echo "::error::POD_ORDERS_STATE.csv kapisi FAIL (ayrinti yukarida); kosu kirmizi"; exit 1; }
           # Serdar 23 Eki (2c): kota yuzunden okunmayan receipt sessiz gecmez; paketler/Drive yazildiktan SONRA kosu kirmizi biter.
           if [ -s _out/KOTA_DURDU.txt ]; then echo "::error title=ROUTER KOTA::$(head -c 400 _out/KOTA_DURDU.txt)"; exit 1; fi
       # Artifact'ta musteri verisi YOK (kart, paket/adres, STATE/receipt yalniz Drive'da): yalniz SKU haritasi.

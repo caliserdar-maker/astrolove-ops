@@ -11,15 +11,26 @@ on:
       satir: {description: "eklenecek satir (tek satir)", required: true}
 
 permissions:
+  actions: read
   contents: read
 
-concurrency: drive-satir-ekle
+# Sira (26 Eki, Serdar onayi): GitHub concurrency grubu bekleyen ara kosuyu iptal ediyordu; yerine sira kilidi (iptal yok).
 
 jobs:
   ekle:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 30          # sira kilidi bekleme dahil (26 Eki; eski 10 dk, concurrency kuyrugu sure saymiyordu)
     steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            scripts/etsy
+            scripts/ops
+            .github/workflows
+      - name: Sira kilidi (iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py --grup drive-satir-ekle --zaman-asimi-dk 25
       - run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
       - name: rclone.conf olustur
         env:
@@ -43,7 +54,9 @@ jobs:
         run: |
           set -euo pipefail
           [[ "$DOSYA" =~ ^TEMP/[A-Za-z0-9_./-]+\.md$ && "$DOSYA" != *..* ]] || { echo "::error::yalniz TEMP/*.md"; exit 1; }
-          rclone copyto "gdrive:ASTROLOVE/$DOSYA" _d.md 2>/dev/null || : > _d.md
+          # Dosya kapisi (26 Eki): okuma hatasinda bos dosyayla devam YOK (eski bos varsayilan tum belgeyi tek satira indirebiliyordu).
+          # Dosya Drive'da hic yoksa (ilk kayit) olusturma serbest. scripts/ops/durum_dosyasi.py (tur md: yalniz satir ekleme)
+          python3 scripts/ops/durum_dosyasi.py oku --uzak "gdrive:ASTROLOVE/$DOSYA" --yerel _d.md --durum _durum_md --tur md --ilk-kayit-izni
           python3 - <<'EOF'
           import os
           s = open('_d.md', encoding='utf-8').read().split('\n')
@@ -58,7 +71,7 @@ jobs:
               s = s[:j] + [satir] + s[j:]
           open('_d.md', 'w', encoding='utf-8').write('\n'.join(s).rstrip('\n') + '\n')
           EOF
-          rclone copyto _d.md "gdrive:ASTROLOVE/$DOSYA"
+          python3 scripts/ops/durum_dosyasi.py yaz --uzak "gdrive:ASTROLOVE/$DOSYA" --yerel _d.md --durum _durum_md --tur md --ilk-kayit-izni
           grep -c '' _d.md | xargs echo "satir sayisi:"
       - if: ${{ always() }}
         run: rm -rf ~/.config/rclone _d.md

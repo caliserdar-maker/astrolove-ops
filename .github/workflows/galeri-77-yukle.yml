@@ -69,7 +69,10 @@ jobs:
           umask 077; mkdir -p _work _paket _out
           T="gdrive:ASTROLOVE/TEMP"
           rclone copyto "$T/GALERI_77/HAZIR.csv" _work/HAZIR.csv
-          rclone copyto "$T/GALERI_YAYIN/ILERLEME.json" _work/ILERLEME.json 2>/dev/null || echo '{"ilanlar": {}}' > _work/ILERLEME.json
+          # ILERLEME kapisi (26 Eki, Serdar onayi): okuma hatasinda bos ilerleme YOK (bos ilerleme 77 ilanin galerisini yeniden
+          # yukletirdi ve geri yazimda eski kayitlari silerdi). scripts/ops/durum_dosyasi.py
+          python3 scripts/ops/durum_dosyasi.py oku --uzak "$T/GALERI_YAYIN/ILERLEME.json" --yerel _work/ILERLEME.json \
+            --durum _work/DURUM_ILERLEME --tur json-ilanlar
           python3 - > _work/yeni.txt <<'PY'
           import csv, json
           R = json.load(open("_work/ILERLEME.json")).get("ilanlar", {})
@@ -101,8 +104,15 @@ jobs:
         run: |
           [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
           if grep -rqE 'x-api-key|refresh_token|"access_token"' _out/ 2>/dev/null; then echo "::error::ciktida sir benzeri anahtar"; exit 1; fi
-          rclone copyto _work/ILERLEME.json "gdrive:ASTROLOVE/TEMP/GALERI_YAYIN/ILERLEME.json" -q
+          IL_FAIL=""
+          if [ -f _work/DURUM_ILERLEME/ONCE ]; then
+            python3 scripts/ops/durum_dosyasi.py yaz --uzak "gdrive:ASTROLOVE/TEMP/GALERI_YAYIN/ILERLEME.json" \
+              --yerel _work/ILERLEME.json --durum _work/DURUM_ILERLEME --tur json-ilanlar || IL_FAIL=1
+          else
+            echo "::error::ILERLEME okunamadi; Drive'a yazilmadi"; IL_FAIL=1
+          fi
           [ -d _out ] && rclone copy _out "gdrive:ASTROLOVE/TEMP/GALERI_YAYIN/KOSU_${DAMGA}" --exclude "*/yedek/*.jpg" -q || true
           [ -f _out/RAPOR.md ] && cat _out/RAPOR.md >> "$GITHUB_STEP_SUMMARY" || true
+          [ -z "$IL_FAIL" ] || { echo "::error::ILERLEME.json kapisi FAIL"; exit 1; }
       - if: ${{ always() }}
         run: rm -rf _work _paket ~/.config/rclone

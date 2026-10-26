@@ -94,11 +94,18 @@ jobs:
           fi
       - name: Token ve STATE
         if: ${{ inputs.sahte_receipt == '' }}
+        env:
+          HEDEF: ${{ inputs.hedef || 'KUPA_SIPARIS' }}
         run: |
           set -euo pipefail
+          [[ "$HEDEF" =~ ^[A-Za-z0-9_/-]+$ && "$HEDEF" != *..* ]] || { echo "::error::hedef gecersiz"; exit 1; }
           umask 077; mkdir -p _work
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
-          rclone copyto "gdrive:ASTROLOVE/${{ inputs.hedef || 'KUPA_SIPARIS' }}/STATE.csv" _work/STATE.csv 2>/dev/null || echo "STATE yok; yeni baslar"
+          # STATE kapisi (26 Eki, Serdar onayi): okuma hatasinda bos STATE ile devam YOK (scripts/ops/durum_dosyasi.py).
+          # Ilk kayit yalniz test hedeflerinde (KUPA_SIPARIS disi); canli KUPA_SIPARIS/STATE.csv var olmali.
+          ILK=(); [ "$HEDEF" = "KUPA_SIPARIS" ] || ILK=(--ilk-kayit-izni)
+          python3 scripts/ops/durum_dosyasi.py oku --uzak "gdrive:ASTROLOVE/$HEDEF/STATE.csv" --yerel _work/STATE.csv \
+            --durum _work/DURUM_STATE --tur csv --anahtar transaction_id --korunan durum "${ILK[@]}"
       - name: Uret, kapilar, Drive'a yaz
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
@@ -120,10 +127,18 @@ jobs:
           echo "KOD=$?" >> "$GITHUB_ENV"
       - name: Token/STATE Drive'a
         if: ${{ always() && inputs.sahte_receipt == '' }}
+        env:
+          HEDEF: ${{ inputs.hedef || 'KUPA_SIPARIS' }}
         run: |
           set -euo pipefail
           [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
-          [ -s _work/STATE.csv ] && rclone copyto _work/STATE.csv "gdrive:ASTROLOVE/${{ inputs.hedef || 'KUPA_SIPARIS' }}/STATE.csv" && echo "STATE yazildi" || true
+          ILK=(); [ "$HEDEF" = "KUPA_SIPARIS" ] || ILK=(--ilk-kayit-izni)
+          if [ -f _work/DURUM_STATE/ONCE ]; then      # azalmama + okumadan beri degismedi + YEDEK/ + sha256 geri okuma
+            python3 scripts/ops/durum_dosyasi.py yaz --uzak "gdrive:ASTROLOVE/$HEDEF/STATE.csv" --yerel _work/STATE.csv \
+              --durum _work/DURUM_STATE --tur csv --anahtar transaction_id --korunan durum "${ILK[@]}"
+          else
+            echo "::error::STATE okunamadi; Drive'daki STATE'e yazilmadi"; exit 1
+          fi
       - name: Sonuc
         if: ${{ always() }}
         run: |
