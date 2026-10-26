@@ -33,7 +33,7 @@ def main():
     if store.needs_refresh():
         store.refresh()
     api, shop = Etsy(store), os.environ["ETSY_SHOP_ID"]
-    md, profiller = ["# ENVANTER KARSILASTIRMA (salt okuma)", ""], {}
+    md, profiller, hazirlik = ["# ENVANTER KARSILASTIRMA (salt okuma)", ""], {}, set()
     for lid in [x.strip() for x in a.ids.split(",") if x.strip()]:
         x = api.get(f"/listings/{lid}") or {}
         inv = api.get(f"/listings/{lid}/inventory") or {}
@@ -53,6 +53,7 @@ def main():
         for p in inv.get("products") or []:
             pv = " ; ".join(f"{v.get('property_id')}:{'/'.join(v.get('values') or [])}{v.get('value_ids')}" for v in p.get("property_values") or [])
             for o in p.get("offerings") or []:
+                hazirlik.add(o.get("readiness_state_id"))
                 md.append(f"| {p.get('sku')} | {pv} | {o.get('quantity')} | {o.get('is_enabled')} | {o.get('is_deleted')} | "
                           f"{para(o.get('price'))} | {o.get('readiness_state_id')} |")
         md += [f"- urun {len(inv.get('products') or [])} | stil-gorsel bagi {len(vi)}", ""]
@@ -70,6 +71,12 @@ def main():
         md += [f"  - {d.get('destination_country_iso') or d.get('destination_region')}: {para(d.get('primary_cost'))} "
                f"({d.get('min_delivery_days')}-{d.get('max_delivery_days')} gun)" for d in hedef]
         (out / f"PROFIL_{pid}.json").write_text(json.dumps(sp, ensure_ascii=False, indent=1), encoding="utf-8")
+    # 26 Eki (Merkez, 5x7 hazirlik): hazirlik suresi tanimlari (urun basina readiness_state_id; benzersiz id basina 1 GET)
+    for rid in sorted(i for i in hazirlik if i):
+        t = api.get(f"/shops/{shop}/readiness-state-definitions/{rid}", ok404=True) or {}
+        md.append(f"## hazirlik {rid}: {t.get('readiness_state')} | {t.get('min_processing_days')}-{t.get('max_processing_days')} "
+                  f"{t.get('processing_days_display_label')}")
+        (out / f"HAZIRLIK_{rid}.json").write_text(json.dumps(t, ensure_ascii=False, indent=1), encoding="utf-8")
     md.append(f"\n- istek {api.calls} | kota {api.remaining}")
     (out / "KARSILASTIRMA.md").write_text("\n".join(md) + "\n", encoding="utf-8")
     print("\n".join(md))
