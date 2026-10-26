@@ -1,0 +1,110 @@
+name: poster-video-v7
+# V7 ORNEGI (Merkez 26 Eki 2026): yeni Canva kapagina uyarlanmis ilan videosu, tek cift. Etsy API KULLANILMAZ; Etsy'ye ve
+# Metricool'a YAZMA YOK; Etsy token ve kilit yok. Toplu uretim yok.
+# Kapak: kapak_url (Canva imzali baglanti; loga yazilmaz, ::add-mask::) curl ile, olcu 3000x2250 degilse FAIL.
+# Poster kaynagi (POSTER_SRC): Drive 01_8705939512.jpg (canli eski kapak kopyasi, 22 Eki) (802,326)-(2197,2140) kirpimi.
+# Uretim: sosyal/poster_video/poster_video_v7.py; QC: sosyal/poster_video/v7_qc.py (a-e). Cikti: TEMP/VIDEO_V7_20261026/.
+# Erisim notu: i.etsystatic.com (canli eski kapak) yalniz okunur ve Drive kopyasiyla sha256 kiyaslanir (bilgi; poster kaynagi Drive).
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      kapak_url:
+        description: 'Canva disa aktarma PNG baglantisi (imzali, sureli)'
+        required: true
+      cift:
+        description: 'cift adi (dosya adlarinda)'
+        default: CANCER_LIBRA
+jobs:
+  uret:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      O: gdrive:ASTROLOVE/TEMP/VIDEO_V7_20261026
+      POSTER_DRIVE_ID: 12WxBf0KTf7sOBIfErIfY7Teit6WvcfIo
+      ESKI_KAPAK_URL: https://i.etsystatic.com/39729443/r/il/9ddacd/8705939512/il_fullxfull.8705939512_j0i3.jpg
+      CIFT: ${{ inputs.cift }}
+    steps:
+    - name: Girdi kapisi + maske
+      env:
+        KAPAK_URL: ${{ inputs.kapak_url }}
+      run: |
+        set -euo pipefail
+        echo "::add-mask::$KAPAK_URL"
+        [[ "$CIFT" =~ ^[A-Z]+_[A-Z]+$ ]] || { echo "::error::cift gecersiz"; exit 1; }
+        [[ "$KAPAK_URL" =~ ^https://export-download\.canva\.com/ ]] || { echo "::error::kapak_url canva disa aktarma baglantisi degil"; exit 1; }
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Kurulum
+      run: |
+        set -euo pipefail
+        pip install -q numpy==2.1.3 pillow==11.0.0 scipy==1.14.1 opencv-python-headless==4.10.0.84
+        sudo apt-get -qq update >/dev/null && sudo apt-get -qq install -y ffmpeg fonts-dejavu-core >/dev/null
+        curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+    - name: rclone.conf
+      env:
+        RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      run: |
+        set -euo pipefail
+        mkdir -p ~/.config/rclone; umask 077
+        printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+        if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+          grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+    - name: Kapak + poster kaynagi
+      env:
+        KAPAK_URL: ${{ inputs.kapak_url }}
+      run: |
+        set -euo pipefail
+        echo "::add-mask::$KAPAK_URL"
+        mkdir -p _w _o
+        K=_o/KAPAK_${CIFT}_3000.png
+        H=$(curl -sS --retry 3 -o "$K" -w '%{http_code}' "$KAPAK_URL" 2>_w/curl_kapak.err || true)
+        echo "::warning::ERISIM export-download.canva.com http=$H boyut=$(stat -c %s "$K" 2>/dev/null || echo 0)"
+        [ "$H" = 200 ] || { echo "::error::kapak indirilemedi (http $H)"; sed 's/https:[^ ]*/<url>/g' _w/curl_kapak.err | head -3; exit 1; }
+        python3 -I -c "
+        import sys; from PIL import Image
+        im = Image.open(sys.argv[1]); print('kapak', im.size, im.mode)
+        sys.exit(0 if im.size == (3000, 2250) else 'kapak olcu ' + str(im.size) + ' (3000x2250 beklenir)')" "$K"
+        rclone backend copyid gdrive: "$POSTER_DRIVE_ID" _w/eski_kapak_drive.jpg
+        python3 -I -c "
+        import sys; from PIL import Image
+        im = Image.open(sys.argv[1]).convert('RGB')
+        if im.size != (3000, 2250): sys.exit('eski kapak olcu ' + str(im.size))
+        c = im.crop((802, 326, 2197, 2140))
+        if c.size != (1395, 1814): sys.exit('kirpim ' + str(c.size))
+        c.save(sys.argv[2]); print('POSTER_SRC', c.size)" _w/eski_kapak_drive.jpg "_w/POSTER_SRC_${CIFT}.png"
+        HE=$(curl -sS --retry 2 -o _w/eski_kapak_cdn.jpg -w '%{http_code}' "$ESKI_KAPAK_URL" || true)
+        if [ "$HE" = 200 ]; then
+          A=$(sha256sum _w/eski_kapak_cdn.jpg | cut -c1-16); B=$(sha256sum _w/eski_kapak_drive.jpg | cut -c1-16)
+          echo "::warning::ERISIM i.etsystatic.com http=200; canli sha256 $A, Drive kopyasi $B, $([ "$A" = "$B" ] && echo ayni || echo FARKLI)"
+        else
+          echo "::warning::ERISIM i.etsystatic.com http=$HE"
+        fi
+    - name: Uret + QC
+      run: |
+        set +e -uo pipefail   # QC FAIL olsa da ciktilar Drive'a gitsin
+        V=_o/${CIFT}_ilan_video_v7.mp4
+        T0=$(date +%s)
+        POSTER_SRC=_w/POSTER_SRC_${CIFT}.png V6_C=sosyal/poster_video/v6_c_egri.json V6_N=58000 V6_BOLGE_REF=44274 V6_N_REF=58000 \
+          python3 -I sosyal/poster_video/poster_video_v7.py _o/KAPAK_${CIFT}_3000.png "$V" murekkep > _w/uretim.log 2>&1; UR=$?
+        grep -E 'poster kapakta|toz renkleri|kare \(|uyusmuyor|bulunamadi|Error|Traceback' _w/uretim.log | head -8 | sed 's/^/::warning::URETIM /'
+        echo "::warning::URETIM rc=$UR $(( $(date +%s) - T0 )) sn"
+        QC=1
+        if [ "$UR" = 0 ]; then
+          python3 -I sosyal/poster_video/v7_qc.py "$V" _o/KAPAK_${CIFT}_3000.png _w/uretim.log _w/qc | tee _w/qc.txt; QC=${PIPESTATUS[0]}
+          cp _w/qc/QC.json _w/qc/KONTAK.jpg _o/ 2>/dev/null
+          sed 's/^/::warning::QC /' _w/qc.txt | cut -c1-3000
+        fi
+        cp _w/uretim.log "_o/${CIFT}_uretim_v7.log"
+        rclone copy _o "$O" -q
+        echo "::warning::DRIVE $(rclone lsf "$O" | tr '\n' ' ')"
+        echo "RC=$(( UR + QC ))" >> "$GITHUB_ENV"
+    - name: Sonuc
+      if: ${{ always() }}
+      run: |
+        rm -rf _w ~/.config/rclone
+        [ "${RC:-1}" = "0" ]
