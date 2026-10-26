@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 """eski78-pilot-yolu kuru/yukle kodu (Serdar 26 Eki onayi). 1059b773'teki eski78_gorsel_yukle.py'nin (canlida kanitli, 22 ilan)
 birebir kopyasi; iki fark:
-  A. sira + alt metin adiminin HEMEN ARDINDAN renk baglari ikinci kez TEK variation-images cagrisiyla yazilir (son bag). Rank
-     yazimi o gorselin renk bagini siler (19 Eyl olcumu, scripts/pod/pod_rank3_onar.py; 25 Eki kosu 40232676309: adim 11'de 5/5,
-     sira sonrasi {}); 1059b773 sonda bag yazmadigi icin 22 ilanin hepsi ayri bag kosusu istedi. Erken bag kalir: eski bagli
-     gorseller silinirken renkler yeni gorsellere bagli olur; bagsiz sure yalniz sira adimi (17 rank cagrisi) kadardir. Son geri
-     okuma renk baglarini tekrarli okur (var_img gecici bos donebilir; 45233945 bag/oku ile ayni).
+  A. sira + alt metin adiminin HEMEN ARDINDAN renk baglari ikinci kez TEK variation-images cagrisiyla yazilir (son bag; yazimin son
+     adimi). 40232676309: adim 11'de bag 5/5 dogrulandi, son okuma {}; arada 11 silme, 12 yukleme, 17 rank yazimi. En guclu aday
+     rank yazimi (19 Eyl notu, scripts/pod/pod_rank3_onar.py; ham olcum repoda yok); silme/yukleme dislanmadi. Son bag her durumda
+     son yazim oldugu icin duzeltme kok nedenden bagimsiz. Olcum: sira oncesi / sonrasi renk bagi sayisi loglanir ("[olcum]", 2
+     okuma). Erken bag kalir (eski bagli gorseller silinirken renkler yeni gorsellerde). Rank yazimi sebepse bagsiz sure sira adimi
+     (17 rank cagrisi, ikinci geciste 34 + okumalar) kadardir. Son geri okuma renk baglarini tekrarli okur.
+  C. devam (26 Eki inceleme): ilk kosunun adim plani DEVAM_<ilan>.json'a yazilir; devamda plan canli galeriden yeniden kurulmaz
+     (1059b773'te adim indeksi kayiyordu: basta 16 gorselde 'plan sonu 18 gorsel'). Kota tahmini yalniz kalan adimlar. 1059b773
+     DEVAM kaydinda plan yok: o kayitla devam eski davranista (yeniden kurma) kalir.
   B. girdi kapisi: --liste / --manifest dosya degilse ya da bossa, --hedef-dir klasor degilse ya da devam kaydi (--out icindeki
      DEVAM_<ilan>.json) dosya degilse token yenilemesinden ve Etsy'ye HICBIR istekten ONCE DUR (DUR_<ilan>.json).
 23 ESKI galerili poster ilani: galeriyi hedef duzene (55 yeni galerili ilanla ayni 17 gorsel) getirir. ETSY'YE YAZAR
@@ -171,8 +175,14 @@ def bir_ilan(api, shop, lid, liste, hedef_dir, manifest, out, kuru=False, kota_i
         if not (Path(hedef_dir) / r["hedef_gorsel"]).exists():
             raise Dur(f"yuklenecek dosya yok: {r['hedef_gorsel']}")
     bagli0 = {v.get("image_id") for v in G.var_img(api, shop, lid)}
-    adimlar, enfazla = adim_plani(len(g0), cikar, bagli0, yukle, set(hbag.values()))
-    tahmin = ISTEK_ADIM * sum(a[0] in ("sil", "yukle") for a in adimlar) + ISTEK_SABIT
+    if K.d.get("plan_adimlar") and K.d["son_ids"] is not None:
+        # 26 Eki (inceleme): devamda plan canli durumdan YENIDEN KURULMAZ (adim indeksi kayardi: 'plan sonu 18 gorsel');
+        # ilk kosunun plani kullanilir
+        adimlar = [tuple(x) for x in K.d["plan_adimlar"]]; enfazla = K.d.get("plan_en_fazla", 0)
+    else:
+        adimlar, enfazla = adim_plani(len(g0), cikar, bagli0, yukle, set(hbag.values()))
+    kalan = adimlar[K.d.get("adim", 0):]
+    tahmin = ISTEK_ADIM * sum(a[0] in ("sil", "yukle") for a in kalan) + ISTEK_SABIT
     plan = dict(ilan=lid, cikar=cikar, cikar_bagli=sorted(set(cikar) & bagli0), yukle=[r["hedef_gorsel"] for r in yukle],
                 baglar={k: h_id[s] for k, s in hbag.items()}, baslangic=len(g0), en_fazla_gorsel=enfazla, adimlar=adimlar,
                 tahmini_istek=tahmin)
@@ -183,6 +193,8 @@ def bir_ilan(api, shop, lid, liste, hedef_dir, manifest, out, kuru=False, kota_i
         raise Dur(f"plan {G.IMG_LIMIT} gorsel sinirini asiyor (en fazla {enfazla}); yazma yok")
     if kuru:
         return dict(ilan=lid, sonuc="KURU", plan=plan)
+    if not K.d.get("plan_adimlar"):
+        K.d["plan_adimlar"] = [list(a) for a in adimlar]; K.d["plan_en_fazla"] = enfazla
     taban = getattr(api, "sert_taban", None)
     if kota_ihtiyac and taban is not None and api.remaining is not None and int(api.remaining) - tahmin < int(taban):
         raise Dur(f"kota yetmez: kalan {api.remaining} - tahmini {tahmin} < sert taban {taban} (ilan yarida kalirdi); yazma yok")
@@ -236,10 +248,12 @@ def bir_ilan(api, shop, lid, liste, hedef_dir, manifest, out, kuru=False, kota_i
                 log(f"  [{n + 1}/{len(adimlar)}] renk baglari 5/5")
             elif a[0] == "sira":
                 son_kur()
+                log(f"  [olcum] sira oncesi renk bagi {len(G.var_img(api, shop, lid))}")
                 if set(son.values()) != ids or len(ids) != HEDEF_N:
                     raise Dur(f"sira oncesi galeri {len(ids)} gorsel, hedef kumesi ile ayni degil")
                 bek = [son[s] for s in range(1, HEDEF_N + 1)]
-                for gecis in (1, 2):   # kapak_yukle_78 (28 Eyl): rank cagrisi bazen oturmuyor; bir kez daha, sonra DUR
+                for gecis in (1, 2):   # kapak_yukle_78 (28 Eyl): rank cagrisi bazen oturmuyor; bir kez daha. Oturmazsa DUR YOK: son bag
+                                       # yine yazilir (renkler bagsiz kalmasin), son geri okuma FAIL verir (1059b773 davranisi)
                     for s in range(1, HEDEF_N + 1):
                         api.post_file(f"/shops/{shop}/listings/{lid}/images",
                                       files={"listing_image_id": (None, str(son[s])), "rank": (None, str(s)), "alt_text": (None, alt[s])})
@@ -249,6 +263,7 @@ def bir_ilan(api, shop, lid, liste, hedef_dir, manifest, out, kuru=False, kota_i
                         break
                     log(f"  sira gecis {gecis} oturmadi: {[x.get('rank') for x in g]}")
                 log(f"  [{n + 1}/{len(adimlar)}] sira + alt metin")
+                log(f"  [olcum] sira sonrasi renk bagi {len(G.var_img(api, shop, lid))}")
             K.d["adim"] = n + 1; K.yaz(ids)
     except SystemExit as e:   # etsy_common "DUR: kota ...": istek GONDERILMEDEN durur (adim yapilmadi, devam guvenli)
         if not str(e.code).startswith("DUR: kota"):
@@ -289,6 +304,8 @@ def bir_ilan(api, shop, lid, liste, hedef_dir, manifest, out, kuru=False, kota_i
 def girdi_kapisi(lid, liste, hedef_dir, manifest, out):
     """Etsy'ye istek gitmeden girdi denetimi; sorun listesi (bos = gecti)."""
     sorun = []
+    if Path(out or ".").exists() and not Path(out).is_dir():
+        sorun.append(f"DUR: --out klasor degil: {out!r}; Etsy'ye istek yok")
     for ad, yol in (("--liste", liste), ("--manifest", manifest)):
         p = Path(yol or "")
         if not str(yol or "").strip() or not p.is_file():
@@ -296,11 +313,29 @@ def girdi_kapisi(lid, liste, hedef_dir, manifest, out):
                          f"{yol!r}; Etsy'ye istek yok")
         elif p.stat().st_size == 0:
             sorun.append(f"DUR: girdi {ad} bos dosya: {yol!r}; Etsy'ye istek yok")
+        else:
+            try:   # icerik: manifest JSON + bu ilan; LISTE CSV basligi (hedef_sira, hedef_gorsel, islem, simdi_id)
+                if ad == "--manifest":
+                    m = json.loads(p.read_text(encoding="utf-8"))
+                    if str(m.get("listing_id")) != str(lid):
+                        sorun.append(f"DUR: manifest baska ilana ait ({m.get('listing_id')}); Etsy'ye istek yok")
+                else:
+                    with open(p, newline="", encoding="utf-8") as fh:
+                        bas = set(next(csv.reader(fh), []))
+                    if not {"hedef_sira", "hedef_gorsel", "hedef_alt", "islem", "simdi_id"} <= bas:
+                        sorun.append(f"DUR: LISTE basligi eksik ({sorted(bas)[:6]}); Etsy'ye istek yok")
+            except (ValueError, UnicodeDecodeError, AttributeError) as e:
+                sorun.append(f"DUR: girdi {ad} okunamadi ({type(e).__name__}); Etsy'ye istek yok")
     if not str(hedef_dir or "").strip() or not Path(hedef_dir).is_dir():
         sorun.append(f"DUR: girdi --hedef-dir klasor degil: {hedef_dir!r}; Etsy'ye istek yok")
     dv = Path(out or ".") / f"DEVAM_{lid}.json"
     if dv.exists() and (not dv.is_file() or dv.stat().st_size == 0):
         sorun.append(f"DUR: devam kaydi {dv} dosya degil ya da bos; Etsy'ye istek yok")
+    elif dv.is_file():
+        try:
+            json.loads(dv.read_text(encoding="utf-8"))
+        except (ValueError, UnicodeDecodeError):
+            sorun.append(f"DUR: devam kaydi {dv} JSON degil; Etsy'ye istek yok")
     return sorun
 
 
@@ -318,8 +353,11 @@ def main():
     gk = girdi_kapisi(a.ilan, a.liste, a.hedef_dir, a.manifest, a.out)
     if gk:   # 26 Eki: bos / klasor girdi IsADirectoryError ile cokmeden, token yenilemesi ve Etsy istegi OLMADAN durur
         R = dict(ilan=a.ilan, sonuc="DUR", sorun=gk, istek=0, kota=None)
-        Path(a.out).mkdir(parents=True, exist_ok=True)
-        (Path(a.out) / f"DUR_{a.ilan}.json").write_text(json.dumps(R, indent=1, ensure_ascii=False))
+        try:   # --out dosyaysa DUR kaydi yazilamaz; satir yine basilir
+            Path(a.out).mkdir(parents=True, exist_ok=True)
+            (Path(a.out) / f"DUR_{a.ilan}.json").write_text(json.dumps(R, indent=1, ensure_ascii=False))
+        except OSError:
+            pass
         print("ESKI23_GALERI", json.dumps({k_: R.get(k_) for k_ in ("ilan", "sonuc", "sorun", "gorsel", "istek", "kota")},
                                           ensure_ascii=False), flush=True)
         return 1

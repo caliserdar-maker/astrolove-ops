@@ -50,7 +50,7 @@ class Sahte:
         self.img = [dict(rank=r, listing_image_id=i, alt_text=f"eski {i}", url_fullxfull=f"u{i}") for r, i in canli]
         self.bag = dict(bag); self.remaining = kota; self.calls = 0; self.state = state; self.yeni = 7000
         self.yaz = []; self.vi_cagri = 0; self.max_n = len(self.img); self.boz = None
-        self.sert_taban = 430; self.sira_yut = 0   # sira_yut: ilk N rank cagrisi etkisiz (kapak_yukle_78 28 Eyl gozlemi)
+        self.sert_taban = 430; self.sira_yut = 0; self.dur_n = None   # sira_yut: ilk N rank cagrisi etkisiz (kapak_yukle_78 28 Eyl gozlemi)
 
     def kota_kapisi(self, ne):
         if self.remaining < 481:
@@ -69,14 +69,20 @@ class Sahte:
             return {"results": []}
         return dict(state=self.state, title="T", tags=["a"], description="D")
 
+    def _kota(self):
+        if self.dur_n is not None:
+            self.dur_n -= 1
+            if self.dur_n < 0:
+                raise SystemExit("DUR: kota sert tabani: kalan 9 < 10")
+
     def delete(self, path):
-        self.calls += 1; iid = int(path.rsplit("/", 1)[1]); self.yaz.append(("sil", iid))
+        self._kota(); self.calls += 1; iid = int(path.rsplit("/", 1)[1]); self.yaz.append(("sil", iid))
         if any(v == iid for v in self.bag.values()):
             raise SystemExit("HATA: renk bagli gorsel silindi (test)")
         self.img = [x for x in self.img if x["listing_image_id"] != iid]
 
     def post_file(self, path, files=None, data=None):
-        self.calls += 1
+        self._kota(); self.calls += 1
         if "image" in (files or {}):
             self.yeni += 1; self.img.append(dict(rank=99, listing_image_id=self.yeni, alt_text=data["alt_text"], url_fullxfull="u"))
             self.max_n = max(self.max_n, len(self.img)); self.yaz.append(("yukle", self.yeni, tuple(sorted(data))))
@@ -94,7 +100,7 @@ class Sahte:
         return {"listing_image_id": iid}
 
     def post_json(self, path, body):
-        self.calls += 1; self.vi_cagri += 1; self.yaz.append(("bag",))
+        self._kota(); self.calls += 1; self.vi_cagri += 1; self.yaz.append(("bag",))
         self.bag = {k: next(v["image_id"] for v in body["variation_images"] if v["value_id"] == RENK[k][1]) for k in RENK}
 
 
@@ -194,12 +200,60 @@ def yeni_26eki():
     R = kos(api, tmp, lp, dosya, mp)
     s.append(("devam: son bag eksik kayitta yalniz bag yazilir (yukleme/silme/sira yok), PASS 5/5",
               R["sonuc"] == "PASS" and [y[0] for y in api.yaz[n_yaz:]] == ["bag"] and len(R["baglar"]) == 5))
+    # C. devam (26 Eki inceleme): ilk plan DEVAM'da; kota DUR'undan sonra devam PASS, cift yazim yok
+    def kur16(tmp_):
+        lp_, dosya_, mp_, canli_, bag_ = kur_gercek(tmp_)
+        rows = [r for r in csv.DictReader(open(lp_, encoding="utf-8")) if r["simdi_id"] != "616"]
+        with open(lp_, "w", newline="", encoding="utf-8") as f:
+            w = csv.DictWriter(f, fieldnames=list(rows[0])); w.writeheader(); w.writerows(rows)
+        canli_ = [c for c in canli_ if c[1] != 616]; bag_ = {"Midnight Blue": 612, "Deep Black": 613, "Pure White": 614,
+                                                             "Champagne Ivory": 615}
+        return lp_, dosya_, mp_, canli_, bag_
+
+    def bagli_once(tmp_):   # bagli CIKAR'lar LISTE'de once (plan farkli siralanir)
+        lp_, dosya_, mp_, canli_, bag_ = kur_gercek(tmp_)
+        rows = list(csv.DictReader(open(lp_, encoding="utf-8")))
+        hed = [r for r in rows if r["hedef_sira"]]; cik = [r for r in rows if not r["hedef_sira"]]
+        cik = [r for r in cik if r["simdi_id"] in ("613", "614", "615", "616")] + [r for r in cik if r["simdi_id"] not in
+                                                                                ("613", "614", "615", "616")]
+        with open(lp_, "w", newline="", encoding="utf-8") as f:
+            w = csv.DictWriter(f, fieldnames=list(rows[0])); w.writeheader(); w.writerows(hed + cik)
+        return lp_, dosya_, mp_, canli_, bag_
+
+    for ad, kurucu, n in (("basta 16, son bag oncesi kota DUR", kur16, None), ("basta 17, ilk silmeden sonra kota DUR", kur_gercek, 1),
+                          ("basta 16, ortada kota DUR", kur16, 14), ("bagli CIKAR once, erken bagdan sonra kota DUR", bagli_once, 12),
+                          ("basta 17, sira ile son bag arasinda kota DUR", kur_gercek, 49)):
+        tmp = tempfile.mkdtemp(); lp, dosya, mp, canli, bag = kurucu(tmp)
+        api = Sahte(canli, bag)
+        if n is None:   # sira dahil her sey yazildi, son bag cagrisinda (2. variation-images) kota DUR
+            eski_pj = api.post_json
+            sayac = {"n": 0}
+
+            def pj(path, body, _e=eski_pj, _s=sayac):
+                _s["n"] += 1
+                if _s["n"] == 2:
+                    raise SystemExit("DUR: kota sert tabani: kalan 9 < 10")
+                return _e(path, body)
+            api.post_json = pj
+            R1 = kos(api, tmp, lp, dosya, mp)
+            api.post_json = eski_pj
+        else:
+            api.dur_n = n; R1 = kos(api, tmp, lp, dosya, mp); api.dur_n = None
+        yuk1 = len([y for y in api.yaz if y[0] == "yukle"])
+        R2 = kos(api, tmp, lp, dosya, mp)
+        g = sorted(api.img, key=lambda x: x["rank"])
+        s.append((f"devam ({ad}): 1. kosu DUR, 2. kosu PASS 17 gorsel 5/5, cift yukleme yok",
+                  R1["sonuc"] == "DUR" and R2["sonuc"] == "PASS" and len(g) == 17 and len(R2["baglar"]) == 5
+                  and len([y for y in api.yaz if y[0] == "yukle"]) == len({y[1] for y in api.yaz if y[0] == "yukle"})
+                  and len([y for y in api.yaz if y[0] == "yukle"]) == 16 and yuk1 <= 16))
     # B. girdi kapisi: Etsy istegi / token yenilemesi olmadan DUR
     import io
     import contextlib
     import os
     for ad, bozan in (("liste klasor", "liste_klasor"), ("liste bos yol", "liste_bos"), ("liste bos dosya", "liste_0"),
-                      ("manifest yok", "manifest_yok"), ("hedef-dir dosya", "hedef_dosya"), ("DEVAM klasor", "devam_klasor")):
+                      ("manifest yok", "manifest_yok"), ("hedef-dir dosya", "hedef_dosya"), ("DEVAM klasor", "devam_klasor"),
+                      ("manifest baska ilan", "manifest_baska"), ("manifest JSON degil", "manifest_bozuk"),
+                      ("LISTE basligi yok", "liste_baslik"), ("DEVAM JSON degil", "devam_bozuk"), ("out dosya", "out_dosya")):
         tmp = tempfile.mkdtemp(); lp, dosya, mp, canli, bag = kur_gercek(tmp)
         out = pathlib.Path(tmp) / "out"; out.mkdir()
         liste, man, hd = str(lp), str(mp), str(dosya)
@@ -215,6 +269,16 @@ def yeni_26eki():
             hd = str(lp)
         elif bozan == "devam_klasor":
             (out / "DEVAM_4570155846.json").mkdir()
+        elif bozan == "manifest_baska":
+            mp.write_text(json.dumps(dict(listing_id="1", variation_images=[])))
+        elif bozan == "manifest_bozuk":
+            mp.write_text("{bozuk")
+        elif bozan == "liste_baslik":
+            lp.write_text("a,b\n1,2\n")
+        elif bozan == "devam_bozuk":
+            (out / "DEVAM_4570155846.json").write_text("{yarim")
+        elif bozan == "out_dosya":
+            out.rmdir(); out.write_text("x")
         cagri = []
         eski_ts, eski_etsy = Y.TokenStore, Y.Etsy
         Y.TokenStore = lambda *a, **k: cagri.append("token") or (_ for _ in ()).throw(AssertionError("token"))
@@ -233,9 +297,10 @@ def yeni_26eki():
             sys.argv = argv; os.environ.clear(); os.environ.update(env); Y.TokenStore, Y.Etsy = eski_ts, eski_etsy
         dur = out / "DUR_4570155846.json"
         R = json.loads(dur.read_text()) if dur.is_file() else {}
-        s.append((f"girdi kapisi ({ad}): DUR, Etsy/token cagrisi yok, DUR_<ilan>.json",
-                  kod == 1 and cagri == [] and R.get("sonuc") == "DUR" and "Etsy'ye istek yok" in R["sorun"][0]
-                  and '"DUR"' in buf.getvalue()))
+        cikti = buf.getvalue()
+        s.append((f"girdi kapisi ({ad}): DUR, Etsy/token cagrisi yok" + ("" if bozan == "out_dosya" else ", DUR_<ilan>.json"),
+                  kod == 1 and cagri == [] and '"DUR"' in cikti and "Etsy'ye istek yok" in cikti
+                  and (bozan == "out_dosya" or (R.get("sonuc") == "DUR" and "Etsy'ye istek yok" in R["sorun"][0]))))
     return s
 
 
