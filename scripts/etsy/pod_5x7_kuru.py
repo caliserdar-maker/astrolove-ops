@@ -58,8 +58,17 @@ CELISKI = [
      "dijital artik onizleme + onay + 24 saat; '24 saatte gelir' iddiasi celisir"),
     ("Prints are rolled in tissue paper and sent in a thick cardboard tube. Small prints to Europe may come in a stiff flat envelope.",
      "PACKAGING Printful 5x7 icin dogrulanmadi"),
+    ("If we don't hear from you within 24 hours of receiving the preview, we print the design as shown.",
+     "dijitalde onay gelmezse ne olacagi yazmiyor; e-posta adresi siparis adimlarinda istenmiyor"),
+    ("- Nothing is shipped. For personal use only.",
+     "dijital varyant fiziksel ilanda: AU alicisi kargo profili tahminini (7-21 + hazirlik) gorur, metin 'Nothing is shipped' der"),
 ]
-YASAK_EN = re.compile(r"Hahnem|Photo Rag|308|g/m|gicl[eé]e|Prodigi|100% cotton|museum|ISO 9706|OBA|bright white|12-colou?r|[—–]", re.I)
+# Galeri kartlari (canli, scripts/pod/eski78_gorsel_uret.py:45-50; 17 Eki hatti): metinle celisen kart yazilari (gorsel, aciklamada degil)
+KART_CELISKI = [("kart 8", "Five colors and thirteen sizes.", "5x7 ile 14 boy"),
+                ("kart 9", "Every color comes in all thirteen sizes.", "5x7 ile 14 boy"),
+                ("kart 13", "US orders are tracked.", "takip satiri aciklamadan kaldiriliyor (Serdar 26 Eki)"),
+                ("boy kilavuzu karesi", "See the size guide photo.", "kilavuz gorselinde 5x7 yok (olculmedi)")]
+YASAK_EN = re.compile(r"Hahnem|Photo Rag|\b308\b|g/m2|gicl[eé]e|Prodigi|100% cotton|museum|ISO 9706|\bOBA\b|bright white|12-colou?r|[—–]", re.I)
 
 
 def para(p):
@@ -69,8 +78,15 @@ def para(p):
 def salt_okur(api):
     def yok(*a, **k):
         raise SystemExit("DUR: kuru kosuda Etsy yazma cagrisi")
-    for ad in ("put", "patch", "post", "put_json", "post_json", "post_file"):
+    for ad in ("put", "patch", "post", "put_json", "post_json", "post_file", "delete"):
         setattr(api, ad, yok)
+    asil = api._call
+
+    def yalniz_get(method, path, *a, **k):
+        if str(method).upper() != "GET":
+            raise SystemExit(f"DUR: kuru kosuda {method} {path}")
+        return asil(method, path, *a, **k)
+    api._call = yalniz_get
 
 
 def pv(p, pid):
@@ -79,9 +95,10 @@ def pv(p, pid):
 
 def urun_ozet(p):
     o = (p.get("offerings") or [{}])[0]
-    return (p.get("sku"), tuple((v.get("property_id"), tuple(v.get("values") or []), tuple(v.get("value_ids") or []))
-                                for v in p.get("property_values") or []),
-            para(o.get("price")), o.get("quantity"), bool(o.get("is_enabled")), o.get("readiness_state_id"))
+    return (p.get("sku"), tuple((v.get("property_id"), v.get("property_name"), v.get("scale_id"), tuple(v.get("values") or []),
+                                 tuple(v.get("value_ids") or [])) for v in p.get("property_values") or []),
+            tuple((para(x.get("price")), x.get("quantity"), bool(x.get("is_enabled")), x.get("readiness_state_id"))
+                  for x in p.get("offerings") or []), len(p.get("offerings") or []), o is not None)
 
 
 def kopya(p):
@@ -133,6 +150,10 @@ def envanter_plani(inv):
         hata.append("once/sonra: mevcut 130 urun ayni degil")
     if len(eklenen) != 10 or len(yuk["products"]) != 140:
         hata.append(f"eklenen {len(eklenen)} (10 olmali), toplam {len(yuk['products'])} (140 olmali)")
+    kombi = [(pv(p, 514).get("values", [None])[0], pv(p, 200).get("values", [None])[0], pv(p, 513).get("values", [None])[0])
+             for p in yuk["products"]]
+    if len(set(kombi)) != len(kombi) or len(set(kombi)) != 2 * 5 * 14:
+        hata.append(f"kombinasyon: {len(set(kombi))} benzersiz / {len(kombi)} (2 x 5 x 14 = 140 olmali)")
     ilk = pv(yuk["products"][0], 513).get("values", [None])[0] if yuk["products"] else None
     if ilk != ETIKET_5X7:
         hata.append(f"menu ilk boy {ilk}")
@@ -158,7 +179,10 @@ def aciklama_plani(desc, boylar):
         hata.append(f"RU kur FAIL {k.get('hata')}")
     if ru and sorted({m.group(0) for m in E.RU_YASAK.finditer(ru)}):
         hata.append("RU_YASAK")
-    celiski = [{"satir": c, "neden": n} for c, n in CELISKI if c in en]
+    celiski = [{"satir": c, "neden": n} for c, n in CELISKI if c in en] + [{"kart": k, "satir": c, "neden": n} for k, c, n in KART_CELISKI]
+    yas_ru_en = sorted({m.group(0) for m in E.RU_YASAK.finditer(en)})
+    if yas_ru_en:
+        hata.append(f"EN'de RU_YASAK kalibi {yas_ru_en}")
     return en0, en, ru, k, satir, celiski, hata
 
 
@@ -181,10 +205,12 @@ def main():
     ids = sorted(ids, key=lambda x: x != a.pilot)               # pilot once
     plan, md = [], ["# 5x7 + ACIKLAMA + AU KURU KOSU (Etsy'ye yazma yok)", ""]
     for i, lid in enumerate(ids, 1):
+        api.kota_kapisi(f"ilan {lid}")                          # CLAUDE.md: toplu islerde ilan basina kota kapisi
         x = api.get(f"/listings/{lid}") or {}
         inv = api.get(f"/listings/{lid}/inventory") or {}
         vi = (api.get(f"/shops/{shop}/listings/{lid}/variation-images", ok404=True) or {}).get("results") or []
-        ru_simdi = (api.get(f"/shops/{shop}/listings/{lid}/translations/ru", ok404=True) or {}).get("description") or ""
+        rut = api.get(f"/shops/{shop}/listings/{lid}/translations/ru", ok404=True) or {}
+        ru_simdi, ru_baslik, ru_etiket = rut.get("description") or "", rut.get("title") or "", rut.get("tags") or []
         hata = []
         if x.get("state") != "active":
             hata.append(f"state {x.get('state')} (taslak/aktif degil: updateListing yayina alir, ATLANIR)")
@@ -194,13 +220,19 @@ def main():
         if not h2:
             try:
                 R.izin_ver(lid, ru, k)
-                E.ru_yazim_kapisi("PUT", f"/shops/{shop}/listings/{lid}/translations/ru", json_body={"description": ru})
+                if not ru_baslik:
+                    raise SystemExit("RU baslik okunamadi (yazimda title zorunlu, canli korunur)")
+                # gercek yazim govdesi: canli RU baslik + etiketler AYNEN, yalniz aciklama yeni (etiketler gonderilmezse silinebilir)
+                E.ru_yazim_kapisi("PUT", f"/shops/{shop}/listings/{lid}/translations/ru",
+                                  data={"title": ru_baslik, "description": ru, "tags": ",".join(ru_etiket)})
             except SystemExit as e:
                 hata.append(f"ru_yazim_kapisi {e}")
         kayit = {"listing_id": lid, "pilot": lid == a.pilot, "state": x.get("state"), "title": x.get("title"),
                  "adet": sorted({o.get("quantity") for p in inv.get("products") or [] for o in p.get("offerings") or []}),
                  "renk_bagi": len(vi), "eklenen_5x7": eklenen, "envanter_yuk": yuk, "en_eski": en0, "en_yeni": en, "ru_simdi": ru_simdi,
-                 "ru_yeni": ru, "ru_kur": k, "en_satir": satir, "celiski": celiski, "hata": hata, "PASS": not hata}
+                 "ru_yeni": ru, "ru_kur": k, "ru_baslik": ru_baslik, "ru_etiket": ru_etiket,
+                 "ru_yazim_govdesi": {"title": ru_baslik, "description": ru, "tags": ru_etiket},
+                 "envanter_ham_yedek": inv, "renk_bagi_ham": vi, "aciklama_ham": x.get("description"), "en_satir": satir, "celiski": celiski, "hata": hata, "PASS": not hata}
         (out / f"KURU_{lid}.json").write_text(json.dumps(kayit, ensure_ascii=False, indent=1), encoding="utf-8")
         plan.append([lid, kayit["pilot"], x.get("state"), len(inv.get("products") or []), len(yuk["products"]), len(eklenen),
                      "/".join(map(str, kayit["adet"])), len(vi), len(satir), len(celiski), "PASS" if not hata else "FAIL", " | ".join(hata)])
@@ -214,11 +246,15 @@ def main():
     sp = api.get(f"/shops/{shop}/shipping-profiles/{PROFIL}") or {}
     hed = sp.get("shipping_profile_destinations") or []
     au = [d for d in hed if d.get("destination_country_iso") == "AU"]
-    pplan = {"profil": PROFIL, "baslik": sp.get("title"), "hedef_sayisi": len(hed),
+    yaz_govde = [{"yol": f"/shops/{{shop}}/shipping-profiles/{PROFIL}/destinations/{d.get('shipping_profile_destination_id')}",
+                  "govde": {"primary_cost": para(d.get("primary_cost")), "secondary_cost": para(d.get("secondary_cost")),
+                            "min_delivery_days": AU_YENI[0], "max_delivery_days": AU_YENI[1]}} for d in au]   # profil_ucretsiz.py:126 kalibi
+    pplan = {"profil": PROFIL, "baslik": sp.get("title"), "hedef_sayisi": len(hed), "once_tum_hedefler": hed, "yazim_istegi": yaz_govde,
+             "uyari": "Printful 5x7 AU teslim 20-22 gun (API, kosu 40179982544); 7-21 ust siniri asabilir; Etsy tahminine hazirlik 4-7 eklenir",
              "au_once": [{k: d.get(k) for k in ("shipping_profile_destination_id", "min_delivery_days", "max_delivery_days",
                                                "primary_cost", "secondary_cost", "mail_class", "shipping_carrier_id")} for d in au],
              "au_sonra": {"min_delivery_days": AU_YENI[0], "max_delivery_days": AU_YENI[1]},
-             "diger_hedefler_ayni": True, "hata": [] if len(au) == 1 else [f"AU hedefi {len(au)} (1 olmali)"]}
+             "diger_hedefler_ayni": "yazim yalniz AU hedef id'sine gider (yazim_istegi); once_tum_hedefler yedek", "hata": [] if len(au) == 1 else [f"AU hedefi {len(au)} (1 olmali)"]}
     # profili kullanan aktif ilanlar (salt okuma)
     say, ofs, kul = 0, 0, []
     while True:
@@ -228,6 +264,10 @@ def main():
         ofs += 100
         if not res or ofs >= (r.get("count") or 0):
             break
+    for durum in ("draft", "inactive"):                     # taslak / pasif ilanlar da profili kullaniyor mu
+        r = api.get(f"/shops/{shop}/listings", params={"state": durum, "limit": 100}) or {}
+        kul += [str(y.get("listing_id")) for y in r.get("results") or [] if y.get("shipping_profile_id") == PROFIL]
+        say += len(r.get("results") or [])
     pod = set(ids)
     pplan.update(aktif_ilan=say, profili_kullanan=len(kul), pod78_disi_kullanan=sorted(set(kul) - pod))
     (out / "PROFIL_PLAN.json").write_text(json.dumps(pplan, ensure_ascii=False, indent=1), encoding="utf-8")
@@ -238,17 +278,21 @@ def main():
         w.writerows(plan)
     tahmin = {"kuru_istek": api.calls, "kota_kalan_kosu_sonu": api.remaining,
               "yazim_tahmini": {"ilan_basina": "GET listing+inventory+variation-images (3) + PUT inventory (1) + GET inventory (1) + "
-                                               "GET variation-images (1, bag bozulursa +1 POST) + PATCH listing (1) + GET listing (1) + "
-                                               "PUT translations/ru (1) + GET translations/ru (1) = 10 (en cok 11)",
-                                "ilan": len(ids), "toplam_ilan": 10 * len(ids), "en_cok": 11 * len(ids), "profil": 3,
-                                "toplam": 10 * len(ids) + 3, "toplam_en_cok": 11 * len(ids) + 3}}
+                                               "GET variation-images (1, bag bozulursa +1 POST) + GET translations/ru (1, baslik/etiket) + "
+                                               "PATCH listing (1) + GET listing (1) + PUT translations/ru (1) + GET translations/ru (1) = 11 "
+                                               "(en cok 12); token yenileme ve 5xx tekrarlari dahil degil (tahmin)",
+                                "ilan": len(ids), "toplam_ilan": 11 * len(ids), "en_cok": 12 * len(ids), "profil": 3,
+                                "toplam": 11 * len(ids) + 3, "toplam_en_cok": 12 * len(ids) + 3,
+                                "not": "kalan kota (bu kosu sonu) ile ayni gun yazim sigmazsa iki gune bolunur; kota siniri 10"}}
     (out / "ISTEK_TAHMINI.json").write_text(json.dumps(tahmin, ensure_ascii=False, indent=1), encoding="utf-8")
     gecen = sum(1 for p in plan if p[10] == "PASS")
     md[1:1] = [f"- ilan {len(plan)}: PASS {gecen}, FAIL {len(plan) - gecen}; pilot {a.pilot}",
                f"- profil {PROFIL}: AU {pplan['au_once']} -> {AU_YENI}; profili kullanan aktif ilan {len(kul)}/{say}, 78 disi "
                f"{pplan['pod78_disi_kullanan']}",
                f"- istek {api.calls}, kota {api.remaining}; yazim tahmini {tahmin['yazim_tahmini']['toplam']}-{tahmin['yazim_tahmini']['toplam_en_cok']}",
-               "- Celisen satirlar (DEGISTIRILMEDI, Serdar karari): " + "; ".join(f"'{c}' ({n})" for c, n in CELISKI), ""]
+               "- Celisen satirlar (DEGISTIRILMEDI, Serdar karari): " + "; ".join(f"'{c}' ({n})" for c, n in CELISKI),
+               "- Celisen galeri kartlari (gorsel; ayri is, CLAUDE.md GALERI kurali): " + "; ".join(f"{k} '{c}' ({n})" for k, c, n in KART_CELISKI),
+               f"- AU uyarisi: {pplan['uyari']}", ""]
     (out / "OZET.md").write_text("\n".join(md) + "\n", encoding="utf-8")
     print("\n".join(md[:6]))
     return 0 if gecen == len(plan) and not pplan["hata"] else 1
