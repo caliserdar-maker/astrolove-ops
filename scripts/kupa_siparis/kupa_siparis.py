@@ -155,6 +155,9 @@ def metin_coz(t):
     satirlar = [x.strip() for x in ham.split("\n")]
     while satirlar and not satirlar[-1]:
         satirlar.pop()
+    # Musteri satirlari ilandaki ornege uyup numaralayabilir ("1. isim", "2) isim", "3. mesaj"; siparis 4211980623, 27 Eki).
+    # Yalniz satir basindaki ve SATIR SIRASIYLA AYNI numara atilir; metnin icindeki rakamlara ve tarihlere dokunulmaz.
+    satirlar = [re.sub(rf"^{i}\s*[.)]\s*(?=\D)", "", x, count=1).strip() for i, x in enumerate(satirlar, 1)]
     if len(satirlar) < 2 or not satirlar[0] or not satirlar[1]:
         return None, f"en az 2 satir (isim1, isim2) gerekli: {ham!r}"
     if len(satirlar) > 3:
