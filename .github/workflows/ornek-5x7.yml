@@ -1,0 +1,53 @@
+name: ornek-5x7
+# 5x7 ORNEK (Merkez 26 Eki; yayina girmez, Etsy yok, musteri yok): siparis hattinin A4 ciktisindan (test fisleri
+# 9000000501-505, CANCER_LIBRA EMILY / JAMES) 5x7 1500x2100 300 dpi; scripts/siparis_dijital/ornek_5x7.py (dikey %1 kirpma + kapi).
+# Cikti: Drive TEMP/5X7_HAZIRLIK_20261026/ORNEK/ (5 JPG + KAPI_<renk>.json).
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  uret:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Kurulum
+        run: |
+          set -euo pipefail
+          pip install -q numpy==2.1.3 pillow==11.0.0 opencv-python-headless==4.10.0.84
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: A4 -> 5x7 + kapi
+        run: |
+          set +e -uo pipefail
+          mkdir -p _a4 _o; RC=0
+          while read -r RN ID; do
+            rclone backend copyid gdrive: "$ID" "_a4/${RN}_A4.jpg" || { echo "::error::$RN indirilemedi"; RC=1; continue; }
+            K=$(python3 -I scripts/siparis_dijital/ornek_5x7.py "_a4/${RN}_A4.jpg" "_o/AstroLoveArt_Cancer_Libra_${RN}_5x7.jpg"); r=$?
+            echo "$K" > "_o/KAPI_${RN}.json"; echo "::warning::$RN rc=$r $K"
+            echo "::warning::SHA $RN $(sha256sum "_o/AstroLoveArt_Cancer_Libra_${RN}_5x7.jpg" | cut -c1-16)"
+          done <<'L'
+          Midnight_Blue 1Ra63Fa6WMTKUqGltc6xBP6G0gvk5mctn
+          Deep_Black 1ic4Xs1kbAXT3BvVeegH8j0wWspTXbqQR
+          Pure_White 1K6EqsOvqa_z9FRJEWeqCgo3o9oJAIOLW
+          Champagne_Ivory 11KaYeY02RnqgHsHXn0VzIYNvJUW71cSD
+          Warm_Parchment 1ip14SUmmOFHACxFD8FZl-1u8BDxf1KYL
+          L
+          rclone copy _o "gdrive:ASTROLOVE/TEMP/5X7_HAZIRLIK_20261026/ORNEK" -q || RC=1
+          echo "::warning::DRIVE $(rclone lsf gdrive:ASTROLOVE/TEMP/5X7_HAZIRLIK_20261026/ORNEK | tr '\n' ' ')"
+          exit $RC
+      - if: always()
+        run: rm -rf _a4 ~/.config/rclone
