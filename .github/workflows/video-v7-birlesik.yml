@@ -41,16 +41,38 @@ jobs:
       env: {KL: "${{ inputs.klasorler }}"}
       run: |
         set -euo pipefail
-        mkdir -p _k _o; yerel=""
+        # 26 Eki kosu 40401758326: paralel uret isleri ayni adla birden cok Drive klasoru acti (20261026_193253 x2; QC, KONTAK,
+        # LOG x2); yol ile kopya yalniz birini okur (19/78). Drive'a dokunmadan: ayni adli tum klasorler kimlikle (ID) okunur.
+        idler() { python3 -c "import json,sys; print(' '.join(x['ID'] for x in json.load(sys.stdin) if x['IsDir'] and x['Name']==sys.argv[1]))" "$1"; }
+        birlestir() {  # $1 kaynak, $2 hedef; ayni ad iki kopyada farkliysa DUR
+          for f in "$1"/*; do [ -f "$f" ] || continue; b=$(basename "$f")
+            if [ -e "$2/$b" ]; then cmp -s "$f" "$2/$b" || { echo "::error::$b iki Drive kopyasinda farkli"; exit 1; }
+            else mv "$f" "$2/"; fi
+          done; }
+        mkdir -p _k _o _p; yerel=""
         for d in ${KL//,/ }; do
-          rclone copy "$O/$d" "_k/$d" --include "*.mp4" --include "QC/*_QC.json" --transfers 8 -q
-          echo "$d: mp4 $(ls _k/$d/*.mp4 2>/dev/null | wc -l), QC $(ls _k/$d/QC/*.json 2>/dev/null | wc -l)"
+          mkdir -p "_k/$d/QC"; nk=0; nq=0
+          for F in $(rclone lsjson "$O" --dirs-only --no-modtime --no-mimetype | idler "$d"); do
+            nk=$((nk+1)); rm -rf _p/*
+            rclone copy gdrive: _p/v --drive-root-folder-id "$F" --max-depth 1 --include "*.mp4" --transfers 8 -q
+            mkdir -p _p/v; birlestir _p/v "_k/$d"
+            for Q in $(rclone lsjson gdrive: --drive-root-folder-id "$F" --dirs-only --no-modtime --no-mimetype | idler QC); do
+              nq=$((nq+1)); rm -rf _p/q
+              rclone copy gdrive: _p/q --drive-root-folder-id "$Q" --max-depth 1 --include "*_QC.json" --transfers 8 -q
+              mkdir -p _p/q; birlestir _p/q "_k/$d/QC"
+            done
+          done
+          echo "$d: Drive klasor kopyasi $nk, QC kopyasi $nq | mp4 $(ls _k/$d/*.mp4 2>/dev/null | wc -l), QC $(ls _k/$d/QC/*.json 2>/dev/null | wc -l)"
+          [ "$nk" -ge 1 ] || { echo "::error::$d Drive'da yok"; exit 1; }
           yerel="${yerel:+$yerel,}_k/$d"
         done
         DAMGA=$(date -u +%Y%m%d_%H%M%S)
         python3 sosyal/poster_video/v7_birlesik.py --klasorler "$yerel" --adlar "$KL" --out _o
         rclone copy _o "$O/BIRLESIK_$DAMGA" --immutable --transfers 8 -q
-        rclone check _o "$O/BIRLESIK_$DAMGA" --one-way -q && echo "::notice title=BIRLESIK::TEMP/VIDEO_V7_78/BIRLESIK_$DAMGA ($(ls _o/*.mp4 | wc -l) mp4)"
+        rclone check _o "$O/BIRLESIK_$DAMGA" --one-way -q
+        n=$(rclone lsjson "$O" --dirs-only --no-modtime --no-mimetype | idler "BIRLESIK_$DAMGA" | wc -w)
+        [ "$n" = 1 ] || { echo "::error::BIRLESIK_$DAMGA Drive'da $n kopya"; exit 1; }
+        echo "::notice title=BIRLESIK::TEMP/VIDEO_V7_78/BIRLESIK_$DAMGA ($(ls _o/*.mp4 | wc -l) mp4)"
         cat _o/OZET.md >> "$GITHUB_STEP_SUMMARY"
     - if: ${{ always() }}
-      run: rm -rf _k _o ~/.config/rclone
+      run: rm -rf _k _o _p ~/.config/rclone
