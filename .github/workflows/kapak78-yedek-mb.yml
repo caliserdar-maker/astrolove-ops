@@ -9,14 +9,15 @@ on:
     inputs:
       poster_json_id: {description: "Drive POSTER_GORSEL.json id", required: true, default: "1vah4Vp6YpA1de-wTE5VxMCCpDQmc-mll"}
       kaynak_csv_id: {description: "Drive KAPAK_KAYNAK.csv id", required: true, default: "18OaDABiN7FEBYTv6oQgjhy2_A7YdwJsc"}
+      yedek_damga: {description: "doluysa yalniz B: mevcut yedek klasorunden (POSTER_KAPAK_V10_YEDEK/<damga>) r13 kartlari okunur", required: false, default: ""}
 jobs:
   yedek:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
       - name: Girdi kapisi
-        env: {PJ: "${{ inputs.poster_json_id }}", KC: "${{ inputs.kaynak_csv_id }}"}
-        run: '[[ "$PJ" =~ ^[A-Za-z0-9_-]{20,80}$ && "$KC" =~ ^[A-Za-z0-9_-]{20,80}$ ]] || { echo "::error::girdi"; exit 1; }'
+        env: {PJ: "${{ inputs.poster_json_id }}", KC: "${{ inputs.kaynak_csv_id }}", YD: "${{ inputs.yedek_damga }}"}
+        run: '[[ "$PJ" =~ ^[A-Za-z0-9_-]{20,80}$ && "$KC" =~ ^[A-Za-z0-9_-]{20,80}$ && "$YD" =~ ^([0-9]{8}_[0-9]{6})?$ ]] || { echo "::error::girdi"; exit 1; }'
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
@@ -43,17 +44,28 @@ jobs:
           rclone backend copyid gdrive: "$PJ" _work/POSTER_GORSEL.json -q
           rclone backend copyid gdrive: "$KC" _work/KAPAK_KAYNAK.csv -q
           ls -l _work
-          echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
+          if [ -n "${{ inputs.yedek_damga }}" ]; then
+            echo "DAMGA=${{ inputs.yedek_damga }}" >> "$GITHUB_ENV"
+            rclone copy "gdrive:ASTROLOVE/TEMP/POSTER_KAPAK_V10_YEDEK/${{ inputs.yedek_damga }}" _work/YEDEK --include "*/r13_*.jpg" -q
+            echo "yalniz B: $(find _work/YEDEK -name 'r13_*.jpg' | wc -l) kart"
+          else
+            echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
+          fi
       - name: A yedek + B MB kontrol
-        run: python3 scripts/kapak78/yedek_mb_kontrol.py --poster-json _work/POSTER_GORSEL.json --kaynak-csv _work/KAPAK_KAYNAK.csv --out _out
+        run: |
+          if [ -n "${{ inputs.yedek_damga }}" ]; then
+            python3 scripts/kapak78/yedek_mb_kontrol.py --poster-json _work/POSTER_GORSEL.json --kaynak-csv _work/KAPAK_KAYNAK.csv --out _out --yalniz-mb _work/YEDEK
+          else
+            python3 scripts/kapak78/yedek_mb_kontrol.py --poster-json _work/POSTER_GORSEL.json --kaynak-csv _work/KAPAK_KAYNAK.csv --out _out
+          fi
       - name: Drive'a yaz
         if: ${{ always() }}
         run: |
           if ls _out/* >/dev/null 2>&1; then
-            rclone copy _out/YEDEK "gdrive:ASTROLOVE/TEMP/POSTER_KAPAK_V10_YEDEK/${DAMGA}" --transfers 8 -q || exit 1
+            if [ -d _out/YEDEK ]; then rclone copy _out/YEDEK "gdrive:ASTROLOVE/TEMP/POSTER_KAPAK_V10_YEDEK/${DAMGA}" --transfers 8 -q || exit 1; fi
             for f in MB_KONTROL.csv MB_REFERANS.txt REF_SAGITTARIUS_SAGITTARIUS.jpg REF_CANCER_LIBRA.jpg; do
               [ -f "_out/$f" ] && rclone copyto "_out/$f" "gdrive:ASTROLOVE/TEMP/POSTER_KAPAK_V10_YEDEK/${DAMGA}/$f" -q; done
-            echo "Cikti: TEMP/POSTER_KAPAK_V10_YEDEK/${DAMGA} ($(find _out/YEDEK -name '*.jpg' | wc -l) jpg)"
+            echo "Cikti: TEMP/POSTER_KAPAK_V10_YEDEK/${DAMGA}"
           fi
       - if: always()
         run: rm -rf _work _out ~/.config/rclone

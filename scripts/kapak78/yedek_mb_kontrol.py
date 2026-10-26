@@ -5,7 +5,9 @@ A) YEDEK: POSTER_GORSEL.json'daki 78 ilanin tum gorselleri url_fullxfull'dan ind
    Kontrol: ilan basina 17 dosya, her dosyanin boyutu JSON'daki full_width x full_height. YEDEK/OZET.md: 78 satir PASS/FAIL.
 B) MB KART ON KONTROLU: KAPAK_KAYNAK.csv'deki Midnight Blue kartinda (rank 13) poster kutusu olculur.
    Yontem: gri ton, Gauss sigma 1; her kenar icin referans kutunun +-80 px penceresinde, kenar boyunca (uclardan 200 px iceride)
-   ortalama |gradyan| profili; tepe = kenar. x0/y0 = ilk poster pikseli, x1/y1 = posterden sonraki ilk piksel.
+   ortalama |gradyan| profili; tepe = kenar. Posterin cevresinde ince bir cizgi/kenarlik var (1. deneme 40342284109: 78/78 kart
+   dis kenarda 810,150,2189,1905 = referansin 4-5 px disi); tepeden ICE dogru 3-10 px icinde, tepenin >= %15'i guclu ikinci tepe varsa
+   ic kenar o kabul edilir (2. deneme: pencere +-40, es tepe 3-10 px, >= %15). x0/y0 = ilk poster pikseli, x1/y1 = posterden sonraki ilk piksel.
    Once iki referans kart (8650688109 SAG_SAG, 8651329026 CL) referans kutuya +-2 px icinde olmali; degilse olcum gecersiz (DUR).
    Herhangi bir kenarda > 5 px sapma: BLOK. Cikti MB_KONTROL.csv (listing_id, cift, x0, y0, x1, y1, sapma, durum) + REF_*.jpg (cizimli)."""
 import argparse
@@ -22,7 +24,7 @@ from PIL import Image, ImageDraw, ImageFilter
 
 REF_KUTU = (814, 154, 2184, 1900)
 REF_KART = {"8650688109": "SAGITTARIUS_SAGITTARIUS", "8651329026": "CANCER_LIBRA"}
-PENCERE, ICERI, REF_TOL, BLOK_TOL, BEKLENEN = 80, 200, 2, 5, 17
+PENCERE, ICERI, REF_TOL, BLOK_TOL, BEKLENEN = 40, 200, 2, 5, 17
 
 
 def indir(u, p, tekrar=4):
@@ -81,14 +83,28 @@ def yedek(ilanlar, kok):
     return gecti, len(satir), toplam
 
 
-def kenar(L, eksen, merkez, a, b):
-    """eksen 'x': dikey kenar, sutun profili (satir a..b); 'y': yatay kenar, satir profili (sutun a..b). Tepe konumu + guc."""
+TANI = []
+IC_MIN, IC_MAX, IC_ORAN = 3, 10, 0.15
+
+
+def kenar(L, eksen, merkez, a, b, ic=1):
+    """eksen 'x': dikey kenar, sutun profili (satir a..b); 'y': yatay kenar, satir profili (sutun a..b).
+    ic: posterin ici yonu (+1 sol/ust kenar, -1 sag/alt kenar). Tepe konumu (ic kenar) + guc."""
     lo = max(1, merkez - PENCERE); hi = min((L.shape[1] if eksen == "x" else L.shape[0]) - 1, merkez + PENCERE)
     if eksen == "x":
         g = np.abs(L[a:b, lo:hi + 1] - L[a:b, lo - 1:hi]).mean(axis=0)
     else:
         g = np.abs(L[lo:hi + 1, a:b] - L[lo - 1:hi, a:b]).mean(axis=1)
-    i = int(np.argmax(g)); s = np.sort(g)
+    i = int(np.argmax(g))
+    TANI.append(f"{eksen}{merkez}: " + " ".join(f"{lo + int(t)}:{g[t]:.0f}" for t in sorted(np.argsort(g)[-6:])))
+
+    def tepeler(yon):
+        return [j for j in range(i + yon * IC_MIN, i + yon * (IC_MAX + 1), yon) if 0 < j < len(g) - 1
+                and g[j] >= g[j - 1] and g[j] >= g[j + 1] and g[j] >= IC_ORAN * g[i]]
+    if not tepeler(-ic):                    # en guclu tepe dis kenarsa (disinda es tepe yok), icteki es tepe ic kenardir
+        aday = tepeler(ic)
+        if aday:
+            i = max(aday, key=lambda j: g[j])
     return lo + i, round(float(g[i]), 2), round(float(g[i] / max(np.median(g), 1e-6)), 1)
 
 
@@ -96,10 +112,10 @@ def olc(p):
     im = Image.open(p).convert("L").filter(ImageFilter.GaussianBlur(1))
     L = np.asarray(im, dtype=np.float32)
     x0r, y0r, x1r, y1r = REF_KUTU
-    x0, gx0, _ = kenar(L, "x", x0r, y0r + ICERI, y1r - ICERI)
-    x1, gx1, _ = kenar(L, "x", x1r, y0r + ICERI, y1r - ICERI)
-    y0, gy0, _ = kenar(L, "y", y0r, x0r + ICERI, x1r - ICERI)
-    y1, gy1, _ = kenar(L, "y", y1r, x0r + ICERI, x1r - ICERI)
+    x0, gx0, _ = kenar(L, "x", x0r, y0r + ICERI, y1r - ICERI, +1)
+    x1, gx1, _ = kenar(L, "x", x1r, y0r + ICERI, y1r - ICERI, -1)
+    y0, gy0, _ = kenar(L, "y", y0r, x0r + ICERI, x1r - ICERI, +1)
+    y1, gy1, _ = kenar(L, "y", y1r, x0r + ICERI, x1r - ICERI, -1)
     return (x0, y0, x1, y1), min(gx0, gx1, gy0, gy1), im.size
 
 
@@ -114,9 +130,11 @@ def mb_kontrol(kaynak_csv, yedek_kok, out):
         if r["kaynak_image_id"] in REF_KART:
             if not p:
                 ref_ok = False; ref_not.append(f"{r['kaynak_image_id']} indirilemedi"); continue
+            TANI.clear()
             k, guc, _ = olc(p)
             sap = max(abs(a - b) for a, b in zip(k, REF_KUTU))
             ref_not.append(f"{REF_KART[r['kaynak_image_id']]} {r['kaynak_image_id']}: {k} sapma {sap} guc {guc}")
+            ref_not += [f"  tani {t}" for t in TANI]
             ref_ok &= sap <= REF_TOL
             im = Image.open(p).convert("RGB"); d = ImageDraw.Draw(im)
             d.rectangle(REF_KUTU, outline=(0, 255, 0), width=3); d.rectangle((k[0], k[1], k[2] - 1, k[3] - 1), outline=(255, 0, 0), width=2)
