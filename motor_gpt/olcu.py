@@ -215,7 +215,10 @@ def kapi_dikis(Y, M2, bilgi):
         x0, x1 = int(round(xc)) - hw, int(round(xc)) + hw
         if x0 < 0 or x1 > w: return None
         satir = ~M2[:, x0:x1].astype(bool).any(1)
-        pr = Y[satir, x0:x1].mean(0)                                     # (2hw, 3)
+        B_ = Y[satir, x0:x1].astype(np.float32)                          # 26 Eki: sutun ortalamasi yildiz/isilti noktalarini (zemin dokusu)
+        med = np.median(B_, axis=0, keepdims=True); m = np.abs(B_ - med) <= 20    # dikis sanmasin: sutun ortancasindan > 20 sapan piksel disarida
+        pr = (B_ * m).sum(0) / np.maximum(m.sum(0), 1)                   # (2hw, 3). Olcum 5x7 MB 9000000521: ortalama 1.748 (yildiz) -> 0.127;
+        #   sentetik dikis duyarliligi temiz tarafta ayni (+1 PASS, +2 FAIL; ortalama ve kirpik)
         i = np.arange(2 * hw); dis = (i < hw - core) | (i >= hw + core)
         en = 0.0
         for c in range(3):
