@@ -74,6 +74,20 @@ def main() -> int:
     assert "concurrency:" not in dse and "kilit_bekle.py --grup drive-satir-ekle" in dse, "drive-satir-ekle sira kilidi yok"
     assert kilit_bekle.kilit_kumesi(str(ROOT), "drive-satir-ekle") == {".github/workflows/drive-satir-ekle.yml"}
     assert ".github/workflows/drive-satir-ekle.yml" not in kilit_bekle.kilit_kumesi(str(ROOT)), "drive-satir-ekle Etsy kumesinde"
+    # 26 Eki (Serdar onayi): galeri v10 yukleyicisi; Drive girdileri ve durum okumasi Etsy kilidinden ONCE, yazma onay + plan ile
+    gv = (WORKFLOWS / "galeri-v10-yukle.yml").read_text(encoding="utf-8")
+    assert ".github/workflows/galeri-v10-yukle.yml" in kilit_bekle.kilit_kumesi(str(ROOT)), "galeri-v10-yukle Etsy kilidinde degil"
+    assert "concurrency:" not in gv and "actions: read" in gv, "galeri-v10-yukle kilit sozlesmesi"
+    kilit = gv.index("python3 scripts/etsy/kilit_bekle.py")
+    for x in ("durum_dosyasi.py oku --uzak \"$O/DEVAM.json\"", "durum_dosyasi.py oku --uzak \"$O/ILERLEME.json\"",
+              "durum_dosyasi.py oku --uzak \"$O/SONUC.csv\""):   # durum okumasi kilitten SONRA (inceleme 26 Eki: eski durumla yazim yok)
+        assert x in gv and kilit < gv.index(x) < gv.index("python3 scripts/kapak78/galeri_v10_yukle.py"), f"galeri-v10-yukle: {x}"
+    for x in ("rclone lsjson -R \"$Y\"", "rclone copy \"$T/POSTER_GALERI_V10/$GD\"",
+              "rclone copy \"$T/POSTER_KAPAK_V10/20261026_153710\"", "--files-from _work/yedek_kart.txt", "python3 scripts/kapak78/galeri_v10_liste.py"):
+        assert x in gv and gv.index(x) < kilit, f"galeri-v10-yukle: kilitten once degil: {x}"
+    assert kilit < gv.index("rclone copyto \"$T/ETSY_TOKEN.json\" _work") < gv.index("python3 scripts/kapak78/galeri_v10_yukle.py") \
+        < gv.index("python3 scripts/ops/durum_dosyasi.py yaz"), "galeri-v10-yukle adim sirasi"
+    assert "default: \"true\"" in gv and "[ \"$ONAY\" = GALERI_V10 ]" in gv and "plan_damga" in gv, "galeri-v10-yukle yazim kapisi"
     print(f"PASS: {len(files)} workflow YAML, {len(PUBLIC_AUDITS)} public denetim sozlesmesi")
     return 0
 
