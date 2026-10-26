@@ -23,7 +23,8 @@ BOY = ("SIZES\n13 sizes, from 8 x 10 to 24 x 36 inches, plus A4 to A2. Every siz
        "See the size guide photo.")
 HEDIYE = ("THE PERFECT GIFT\nA keepsake made for Aries and Leo couples. Short on time? Choose the digital file. It arrives within 24 "
           "hours, ready to print or share.")
-sabit = [k for k in P.SABIT if k != P.BEYAN]
+YENI_URETIM = [k for k in P.SABIT if k.startswith("PRODUCTION AND DELIVERY") and "tracking" not in k][0]   # 26 Eki takipsiz paragraf
+sabit = [k for k in P.SABIT if k not in (P.BEYAN, YENI_URETIM)]
 EN_CANLI = "\n\n".join([GIRIS, P.BEYAN, "Aries: March 21 to April 19. Leo: July 23 to August 22.", SIPARIS, sabit[0], DIJITAL] + sabit[1:3]
                  + [BOY] + sabit[3:] + [HEDIYE])
 EN = P.poster_en(EN_CANLI)   # Serdar 23 Eki madde 1-2: Latin harf notu
@@ -39,6 +40,14 @@ def main():
     s.append(("yeni RU olcumde sorun 0", o["sorunlar"] == ""))
     s.append(("burc ve tarih RU", "знаками зодиака Овен и Лев" in ru and "подарок Овну или Льву" in ru and "с 21 марта по 19 апреля" in ru and "с 23 июля по 22 августа" in ru))
     s.append(("yasak ifade yok", not any(x in ru for x in ("Hahnem", "Prodigi", "308", "жикле", "хлоп", "AstroLove "))))
+    # 26 Eki (Serdar): 5x7 + yeni teslim satiri + takip satiri kaldirildi -> PASS, RU karsiliklari dogru
+    eski_ur = [k for k in P.SABIT if k.startswith("PRODUCTION AND DELIVERY") and "tracking" in k][0]
+    en2 = (EN.replace("Delivered to your Etsy order within 24 hours", "We send a free preview via Etsy Messages within 24 hours. "
+                      "After you approve, your file is emailed to you within 24 hours").replace(eski_ur, YENI_URETIM)
+           .replace("13 sizes, from 8 x 10", "14 sizes, from 5 x 7").replace("from 8 x 10 to 24 x 36 inches, or", "from 5 x 7 to 24 x 36 inches, or"))
+    ru2, k2 = P.kur(en2, dict(ENV, boy=["5x7"] + ENV["boy"]))
+    s.append(("26 Eki: yeni teslim + takipsiz uretim + 14 boy PASS", k2["pass_"] and "электронную почту" in ru2 and "трек" not in ru2
+              and "14 размеров: от 5 × 7" in ru2 and "от 5 × 7 до 24 × 36 дюймов или" in ru2))
     s.append(("kalip disi paragraf FAIL", not P.kur(EN + "\n\nNEW\nSomething.", ENV)[1]["pass_"]))
     s.append(("envanter boy sayisi farki FAIL", not P.kur(EN, dict(ENV, boy=ENV["boy"][:12]))[1]["pass_"]))
     s.append(("beyansiz EN FAIL", not P.kur(EN.replace(P.BEYAN + "\n\n", ""), ENV)[1]["pass_"]))

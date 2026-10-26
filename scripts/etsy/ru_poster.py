@@ -101,13 +101,22 @@ def uc_kontrol(ctx, k1, b1, a1, a2):
         raise ValueError(f"boy uclari envanterde yok: {k1}, {b1}, {a1}, {a2}")
 
 
+# Teslim satiri (Serdar 26 Eki: dijitalde de ucretsiz onizleme, onaydan sonra e-posta). Eski satir geriye uyum icin kalir.
+TESLIM_RU = {
+    "Delivered to your Etsy order within 24 hours": "Файл приходит в ваш заказ на Etsy в течение 24 часов",
+    "We send a free preview via Etsy Messages within 24 hours. After you approve, your file is emailed to you within 24 hours":
+        "Мы бесплатно отправляем макет через сообщения Etsy в течение 24 часов. После вашего одобрения файл придёт вам на "
+        "электронную почту в течение 24 часов",
+}
+
+
 def p_dijital(m, ctx):
     k1, b1, a1, a2 = m.group(1), m.group(2), m.group(3), m.group(4)
     uc_kontrol(ctx, k1, b1, a1, a2)
     return ("ЦИФРОВОЙ ФАЙЛ\n"
             "- Один готовый к печати файл JPG в выбранном вами цвете и размере\n"
             f"- Высокое разрешение: 300 dpi в полном выбранном размере, от {boy_ru(k1)} до {boy_ru(b1)} дюймов или от {a1} до {a2}\n"
-            "- Файл приходит в ваш заказ на Etsy в течение 24 часов. Перед отправкой мы вручную проверяем каждую персонализацию\n"
+            f"- {TESLIM_RU[m.group(5)]}. Перед отправкой мы вручную проверяем каждую персонализацию\n"
             "- Скачайте его в разделе «Покупки» (Purchases) в браузере. В приложении Etsy файлы скачать нельзя\n"
             "- Распечатайте его дома, в местной типографии или в онлайн-сервисе печати\n"
             "- Мы ничего не отправляем по почте. Только для личного использования.")
@@ -151,6 +160,13 @@ SABIT = {
         "ПРОИЗВОДСТВО И ДОСТАВКА\n- Изготавливаем на заказ. Печатаем и отправляем в течение 7 рабочих дней после того, как вы "
         "одобрите макет.\n- Заказы в США печатаются в США. Доставка по США обычно занимает от 5 до 8 рабочих дней после отправки.\n"
         "- Для других стран смотрите срок доставки, указанный для вашего адреса.\n- Заказы в США отправляются с трек-номером.",
+    # Serdar 26 Eki: takip dogrulanmadi, "US orders ship with tracking." satiri kaldirildi (eski paragraf geriye uyum icin kalir)
+    "PRODUCTION AND DELIVERY\n- Made to order. Printed and shipped within 7 business days after you approve your preview.\n- US "
+    "orders are printed in the US. US delivery usually takes 5 to 8 business days after shipping.\n- For other countries, please "
+    "see the delivery estimate for your address.":
+        "ПРОИЗВОДСТВО И ДОСТАВКА\n- Изготавливаем на заказ. Печатаем и отправляем в течение 7 рабочих дней после того, как вы "
+        "одобрите макет.\n- Заказы в США печатаются в США. Доставка по США обычно занимает от 5 до 8 рабочих дней после отправки.\n"
+        "- Для других стран смотрите срок доставки, указанный для вашего адреса.",
     "PACKAGING\nPrints are rolled in tissue paper and sent in a thick cardboard tube. Small prints to Europe may come in a stiff "
     "flat envelope.":
         "УПАКОВКА\nПостеры сворачиваем в рулон, оборачиваем папиросной бумагой и отправляем в плотном картонном тубусе. "
@@ -183,8 +199,8 @@ KALIP = [
                 r"(\d+) characters, printed as you type it\. No emoji\. " + re.escape(LATIN_EN) + r" Please check your spelling\.\n"
                 r"Message ideas: (.+)"), p_siparis),
     (re.compile(r"DIGITAL FILE\n- One print ready JPG file in the color and size you choose\n- High resolution: 300 dpi at the "
-                r"full size you choose, from (\d+ x \d+) to (\d+ x \d+) inches, or (A\d) to (A\d)\n- Delivered to your Etsy order "
-                r"within 24 hours\. We check every personalization by hand before sending\n- Download it from Purchases in a web "
+                r"full size you choose, from (\d+ x \d+) to (\d+ x \d+) inches, or (A\d) to (A\d)\n- ("
+                + "|".join(re.escape(k) for k in TESLIM_RU) + r")\. We check every personalization by hand before sending\n- Download it from Purchases in a web "
                 r"browser\. The Etsy app can't download files\n- Print it at home, at a local print shop or with an online print "
                 r"service\n- Nothing is shipped\. For personal use only\."), p_dijital),
     (re.compile(r"SIZES\n(\d+) sizes, from (\d+ x \d+) to (\d+ x \d+) inches, plus (A\d) to (A\d)\. Every size is available as a "
