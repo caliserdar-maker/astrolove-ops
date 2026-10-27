@@ -201,6 +201,9 @@ class YdTest(unittest.TestCase):
         rc, log, m, rows = self.kos([("CANCER_LIBRA", 1, "DK1", url(self.url, "k1")), ("CANCER_LIBRA", 6, "DK1", url(self.url, "k2", imza="B"))])
         d = {r["ad"]: r["durum"] for r in rows}
         self.assertEqual(d["CANCER_LIBRA_Y01.jpg"], "YENI"); self.assertIn("kart_no, design_id) ayni degil", d["satir3:CANCER_LIBRA_Y06.jpg"])
+        self.kapi.write_text("cift\tkart_no\tdesign_id\tbaslik\tsatir_metni\tdurum\nCANCER_LIBRA\t\tDK1\tb\t-\tPASS\n")
+        with self.assertRaises(SystemExit):
+            self.kos([("CANCER_LIBRA", 1, "DK1", url(self.url, "k1"))])
 
 
 if __name__ == "__main__":

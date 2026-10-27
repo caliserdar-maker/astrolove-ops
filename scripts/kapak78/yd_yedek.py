@@ -24,6 +24,8 @@ CDN_UST = 3000     # etsystatic url_fullxfull uzun kenar ust siniri (olcum: kosu
 
 def boyut_ok(bt, w, h):
     """CDN dosyasi JSON boyutunda ya da JSON > 3000 ise ayni oranda uzun kenar 3000 (+-1 px)"""
+    if not isinstance(w, int) or not isinstance(h, int):
+        return False
     if bt == (w, h):
         return True
     if max(w, h) <= CDN_UST:
@@ -58,33 +60,36 @@ def yedek(ilanlar, kok, beklenen=BEKLENEN, baslik="YD 78 galeri yedegi (plan v3 
             if n % 100 == 0 or n == len(isler):
                 g = time.time() - t0
                 print(f"YEDEK {n}/{len(isler)} %{100 * n // len(isler)} gecen {g:.0f} sn kalan {g / n * (len(isler) - n):.0f} sn", flush=True)
-    toplam = 0
+    toplam = kucuk_top = 0
     for k in ilanlar:
         d = kok / f"{k['listing_id']}_{k['cift']}"
         neden = []
         if len(k["gorseller"]) != beklenen:
             neden.append(f"JSON'da {len(k['gorseller'])} gorsel (beklenen {beklenen})")
-        say = 0
+        say = kucuk = 0
         for g in k["gorseller"]:
             p = d / f"r{g['rank']}_{g['listing_image_id']}.jpg"
             if str(p) in hata or not p.exists():
                 neden.append(f"r{g['rank']} indirilemedi ({hata.get(str(p), 'yok')})"); continue
             try:
                 with Image.open(p) as im:
-                    bt = im.size
+                    bt = im.size; im.load()            # inceleme 27 Eki: yarim inmis dosya da yakalansin
             except Exception:  # noqa: BLE001
                 neden.append(f"r{g['rank']} okunamadi"); continue
             say += 1
+            if bt != (g["full_width"], g["full_height"]):
+                kucuk += 1
             if not boyut_ok(bt, g["full_width"], g["full_height"]):
                 neden.append(f"r{g['rank']} boyut {bt[0]}x{bt[1]} != {g['full_width']}x{g['full_height']}")
-        toplam += say
-        satir.append([k["listing_id"], k["cift"], say, "PASS" if not neden and say == beklenen else "FAIL", "; ".join(neden)])
+        toplam += say; kucuk_top += kucuk
+        satir.append([k["listing_id"], k["cift"], say, "PASS" if not neden and say == beklenen else "FAIL", "; ".join(neden), kucuk])
     gecti = sum(1 for s in satir if s[3] == "PASS")
     with open(kok / "OZET.md", "w", encoding="utf-8") as f:
-        f.write(f"# {baslik}\n\nilan PASS {gecti}/{len(satir)} | dosya {toplam} (beklenen {beklenen * len(satir)})\n\n"
-                "| listing_id | cift | dosya | durum | not |\n|---|---|---|---|---|\n")
+        f.write(f"# {baslik}\n\nilan PASS {gecti}/{len(satir)} | dosya {toplam} (beklenen {beklenen * len(satir)}) | CDN kucultmesi "
+                f"{kucuk_top} dosya (JSON > 3000 px; yedek bu dosyalarda 3000 px kopya)\n\n"
+                "| listing_id | cift | dosya | durum | not | cdn_kucuk |\n|---|---|---|---|---|---|\n")
         f.writelines(f"| {' | '.join(map(str, s))} |\n" for s in satir)
-    print(f"YEDEK OZET: ilan PASS {gecti}/{len(satir)} | dosya {toplam}")
+    print(f"YEDEK OZET: ilan PASS {gecti}/{len(satir)} | dosya {toplam} | CDN kucultmesi {kucuk_top}")
     return gecti, len(satir), toplam
 
 

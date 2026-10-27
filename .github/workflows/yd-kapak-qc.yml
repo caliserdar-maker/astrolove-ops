@@ -77,6 +77,7 @@ jobs:
           if [ "$MOD" = olc ]; then
             A=()
             while IFS=, read -r lid c k stil iid rank yol; do
+              yol=${yol%$'\r'}
               [ "$lid" = listing_id ] && continue
               case "$c" in CANCER_LIBRA|ARIES_LEO|SAGITTARIUS_SAGITTARIUS|CAPRICORN_SAGITTARIUS) ;; *) continue ;; esac
               f="_work/kapak/${c}_Y$(printf %02d "$k").jpg"

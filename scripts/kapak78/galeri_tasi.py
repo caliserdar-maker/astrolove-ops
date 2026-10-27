@@ -142,7 +142,10 @@ def metin_kapi_oku(yol):
     for r in rows:
         if (r.get("durum") or "").strip() == "PASS":
             c = (r.get("cift") or "").strip().upper()
-            kapi.add((c, str(int(r["kart_no"])), r["design_id"].strip()) if kartli else (c, r["design_id"].strip()))
+            try:
+                kapi.add((c, str(int(r["kart_no"])), r["design_id"].strip()) if kartli else (c, r["design_id"].strip()))
+            except (TypeError, ValueError):
+                raise SystemExit(f"FAIL: METIN_KAPI.tsv {c} PASS satirinda kart_no gecersiz ({r.get('kart_no')!r})")
     return kapi, kartli
 
 
