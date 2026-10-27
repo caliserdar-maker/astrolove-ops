@@ -71,7 +71,7 @@ jobs:
           set -euo pipefail
           rm -rf _out/_cift
           if [ -f _out/MANIFEST.csv ]; then
-            sha256sum _out/*.jpg | head -3
+            sha256sum _out/*.jpg > _out/SHA256.txt; echo "jpg: $(grep -c . _out/SHA256.txt)"
             rclone copy _out "gdrive:ASTROLOVE/TEMP/YD_KAPAK_V1/${DAMGA:?}" --max-depth 1 --immutable --transfers 8 -q
             echo "Cikti: TEMP/YD_KAPAK_V1/${DAMGA} (jpg: $(ls _out/*.jpg | wc -l))" | tee -a "$GITHUB_STEP_SUMMARY"
             head -12 _out/OZET.md >> "$GITHUB_STEP_SUMMARY"
