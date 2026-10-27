@@ -200,7 +200,19 @@ jobs:
         run: |
           set -uo pipefail
           FAIL=""
-          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "$T/ETSY_TOKEN.json" && echo "Token geri yazildi" || echo "Token yenilenmedi"
+          # Token geri yazimi (Serdar 27 Eki): yenilenen refresh token kaybolursa tum Etsy kosulari durur. 3 deneme; olmazsa
+          # kosu acik hata verir (durum dosyalari yine yazilir, cikis en sonda).
+          TOKEN_FAIL=""
+          if [ -f _work/ETSY_TOKEN.json.updated ]; then
+            TOKEN_FAIL=1
+            for n in 1 2 3; do
+              if rclone copyto _work/ETSY_TOKEN.json "$T/ETSY_TOKEN.json"; then TOKEN_FAIL=""; echo "Token geri yazildi (deneme $n)"; break; fi
+              echo "Token geri yazimi basarisiz (deneme $n)"; sleep 10
+            done
+            [ -z "$TOKEN_FAIL" ] || echo "::error::ETSY TOKEN GERI YAZILAMADI (3 deneme). Yeni refresh token kaybolabilir; Etsy kosulari baslatma, Merkez'e bildir."
+          else
+            echo "Token yenilenmedi (yenileme yok)"
+          fi
           [ -f _work/kosu.log ] && python3 scripts/guvenlik/log_suz.py < _work/kosu.log > "_out/kosu_$(date -u +%Y%m%d_%H%M).txt"
           if grep -rqE '"(access_token|refresh_token)"[[:space:]]*:[[:space:]]*"[A-Za-z0-9._-]{20,}"|x-api-key[[:space:]]*:' _out/ 2>/dev/null; then
             echo "::error::Ciktida sir bulundu; Drive'a yazilmadi"; exit 1; fi
@@ -218,6 +230,7 @@ jobs:
           [ -d _out ] && rclone copy _out "$O/KOSU/${GITHUB_RUN_ID}" -q && echo "::notice title=GALERI V10::Drive TEMP/POSTER_GALERI_V10_YUKLE/KOSU/${GITHUB_RUN_ID}/"
           [ -f _out/RAPOR.md ] && head -60 _out/RAPOR.md >> "$GITHUB_STEP_SUMMARY" || true
           [ -z "$FAIL" ] || { echo "::error::durum dosyasi kapisi FAIL"; exit 1; }
+          [ -z "$TOKEN_FAIL" ] || exit 1
           [ "${KOD:-1}" = 0 ] || { echo "::error::cikis ${KOD:-?}"; exit 1; }
       - if: always()
         run: rm -rf _work _in _hazir ~/.config/rclone
