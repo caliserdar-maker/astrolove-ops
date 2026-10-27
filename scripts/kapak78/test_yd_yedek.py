@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """yd_yedek.py yerel testi (plan v3 adim 5): sahte HTTP sunucu (127.0.0.1), pilot HAM (test_veri/HAM_4595350971.json, gercek
 yapi) url'leri sahte sunucuya cevrilir. Senaryolar: 13 dosya + boyut = JSON PASS; bir gorsel yanlis boyut FAIL; HAM dosyasi yok FAIL;
-BAGLAR.csv 5 Style bagi (Botanical rank 12); poster varsayilani (17, baslik) degismedi."""
+BAGLAR.csv 5 Style bagi (Botanical rank 12); paylasilan yedek_mb_kontrol.py'ye bagli degil."""
 import contextlib
 import csv
 import http.server
@@ -20,7 +20,6 @@ from PIL import Image
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import yd_yedek as D  # noqa: E402
-import yedek_mb_kontrol as YM  # noqa: E402
 
 HAM = json.loads((HERE / "test_veri/HAM_4595350971.json").read_text())
 
@@ -96,9 +95,9 @@ class YedekTest(unittest.TestCase):
         self.assertIn("r5 boyut 3192x2400 != 3200x2400", oz); self.assertIn("| 4595373190 | AQUARIUS_AQUARIUS | 0 | FAIL | HAM dosyasi yok |", oz)
         self.assertIn("HAM eksik 1", log)
 
-    def test_03_poster_varsayilani(self):
-        p = inspect.signature(YM.yedek).parameters
-        self.assertEqual(p["beklenen"].default, 17); self.assertEqual(p["baslik"].default, "Poster 78 galeri yedegi")
+    def test_03_paylasilan_dosyaya_bagli_degil(self):
+        self.assertNotIn("yedek_mb_kontrol", (HERE / "yd_yedek.py").read_text().split('"""', 2)[2])
+        self.assertEqual(inspect.signature(D.yedek).parameters["beklenen"].default, 13)
 
 
 if __name__ == "__main__":

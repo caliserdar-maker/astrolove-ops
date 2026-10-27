@@ -2,8 +2,8 @@
 """YD (1st Anniversary) 78 ilan galeri yedegi (plan v3 adim 5; Merkez 27 Eki). ETSY API YOK, Etsy'ye yazma yok, kilit yok.
 Girdi: TEMP/YD_ENVANTER_20261026/HAM/<listing_id>.json (yd_envanter_oku.py ciktisi; images = Etsy gorsel kayitlari, url_fullxfull,
 full_width / full_height; variation_images = Style bagi) + data/pod/yd78_ids.csv (78 ilan).
-Islem: yedek_mb_kontrol.yedek (A kismi, beklenen 13): <out>/<listing_id>_<CIFT>/r<rank>_<image_id>.jpg + GALERI.json (gorseller +
-baglar aynen) + <out>/OZET.md (ilan basina 13 dosya, boyut = JSON) + <out>/BAGLAR.csv (listing_id, cift, stil, value_id, image_id,
+Islem (yedek_mb_kontrol.py A kismiyla ayni yontem; paylasilan dosyaya dokunmamak icin buraya kopyalandi, Merkez 27 Eki):
+<out>/<listing_id>_<CIFT>/r<rank>_<image_id>.jpg + GALERI.json (gorseller + baglar aynen) + <out>/OZET.md (ilan basina 13 dosya, boyut = JSON) + <out>/BAGLAR.csv (listing_id, cift, stil, value_id, image_id,
 rank). Indirme etsystatic CDN'den (Etsy API degil).
 Kapilar: yd78 listesindeki her ilanin HAM dosyasi var ve listing_id ayni; yoksa o ilan FAIL (OZET'e yazilir). Cikis: 78/78 PASS ise 0."""
 import argparse
@@ -11,11 +11,69 @@ import csv
 import json
 import pathlib
 import sys
+import time
+from concurrent.futures import ThreadPoolExecutor
 
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
-import yedek_mb_kontrol as Y  # noqa: E402
+import requests
+from PIL import Image
 
 BEKLENEN = 13
+
+
+def indir(u, p, tekrar=4):
+    for i in range(tekrar):
+        try:
+            r = requests.get(u, timeout=90); r.raise_for_status(); p.write_bytes(r.content); return None
+        except Exception as e:  # noqa: BLE001
+            if i == tekrar - 1:
+                return f"{type(e).__name__}: {str(e)[:80]}"
+            time.sleep(2 ** i)
+
+
+def yedek(ilanlar, kok, beklenen=BEKLENEN, baslik="YD 78 galeri yedegi (plan v3 adim 5)"):
+    isler, satir = [], []
+    for k in ilanlar:
+        d = kok / f"{k['listing_id']}_{k['cift']}"; d.mkdir(parents=True, exist_ok=True)
+        (d / "GALERI.json").write_text(json.dumps(dict(gorseller=k["gorseller"], baglar=k["baglar"]), ensure_ascii=False, indent=1),
+                                       encoding="utf-8")
+        for g in k["gorseller"]:
+            isler.append((g["url_fullxfull"], d / f"r{g['rank']}_{g['listing_image_id']}.jpg"))
+    t0, hata = time.time(), {}
+    with ThreadPoolExecutor(8) as ex:
+        for n, (p, h) in enumerate(zip([i[1] for i in isler], ex.map(lambda a: indir(*a), isler)), 1):
+            if h:
+                hata[str(p)] = h
+            if n % 100 == 0 or n == len(isler):
+                g = time.time() - t0
+                print(f"YEDEK {n}/{len(isler)} %{100 * n // len(isler)} gecen {g:.0f} sn kalan {g / n * (len(isler) - n):.0f} sn", flush=True)
+    toplam = 0
+    for k in ilanlar:
+        d = kok / f"{k['listing_id']}_{k['cift']}"
+        neden = []
+        if len(k["gorseller"]) != beklenen:
+            neden.append(f"JSON'da {len(k['gorseller'])} gorsel (beklenen {beklenen})")
+        say = 0
+        for g in k["gorseller"]:
+            p = d / f"r{g['rank']}_{g['listing_image_id']}.jpg"
+            if str(p) in hata or not p.exists():
+                neden.append(f"r{g['rank']} indirilemedi ({hata.get(str(p), 'yok')})"); continue
+            try:
+                with Image.open(p) as im:
+                    bt = im.size
+            except Exception:  # noqa: BLE001
+                neden.append(f"r{g['rank']} okunamadi"); continue
+            say += 1
+            if bt != (g["full_width"], g["full_height"]):
+                neden.append(f"r{g['rank']} boyut {bt[0]}x{bt[1]} != {g['full_width']}x{g['full_height']}")
+        toplam += say
+        satir.append([k["listing_id"], k["cift"], say, "PASS" if not neden and say == beklenen else "FAIL", "; ".join(neden)])
+    gecti = sum(1 for s in satir if s[3] == "PASS")
+    with open(kok / "OZET.md", "w", encoding="utf-8") as f:
+        f.write(f"# {baslik}\n\nilan PASS {gecti}/{len(satir)} | dosya {toplam} (beklenen {beklenen * len(satir)})\n\n"
+                "| listing_id | cift | dosya | durum | not |\n|---|---|---|---|---|\n")
+        f.writelines(f"| {' | '.join(map(str, s))} |\n" for s in satir)
+    print(f"YEDEK OZET: ilan PASS {gecti}/{len(satir)} | dosya {toplam}")
+    return gecti, len(satir), toplam
 
 
 def ilanlar_oku(ham_dir, ciftler):
@@ -39,7 +97,7 @@ def main(argv=None):
     a = ap.parse_args(argv)
     out = pathlib.Path(a.out); out.mkdir(parents=True, exist_ok=True)
     rows, ilan, eksik = ilanlar_oku(a.ham_dir, a.ciftler)
-    gecti, n, dosya = Y.yedek(ilan, out, beklenen=BEKLENEN, baslik="YD 78 galeri yedegi (plan v3 adim 5)") if ilan else (0, 0, 0)
+    gecti, n, dosya = yedek(ilan, out) if ilan else (0, 0, 0)
     if eksik:
         with open(out / "OZET.md", "a", encoding="utf-8") as f:
             f.writelines(f"| {lid} | {c} | 0 | FAIL | {neden} |\n" for lid, c, neden in eksik)
