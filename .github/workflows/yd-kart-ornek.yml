@@ -1,8 +1,8 @@
 name: yd-kart-ornek
 # YD (1st Anniversary) yeni galerinin 2-5. kartlari, eski 1st Anniversary galerisinin tarzinda (Serdar 27 Eki; Merkez). ORNEK: tek cift.
 # ETSY API YOK, Canva yok, kilit yok. Girdi: adim 5 yedegi TEMP/YD_KAPAK_V1_YEDEK/<yedek_damga>/<ilan>_<CIFT>/ (GALERI.json; eski r2
-# karti = burc + ortak sembol, Botanical bagli stil gorseli). Cikti: Drive TEMP/YD_KART_ORNEK/<damga>/<CIFT>_Y02.jpg, <CIFT>_Y03.jpg,
-# ORTAK_Y04.jpg, ORTAK_Y05.jpg (3000x2250 JPEG) + KART_OZET.json. Toplu uretim YOK (Serdar ornek onayi sonrasi). scripts/kapak78/yd_kart_ornek.py
+# karti = burc + ortak sembol, Botanical ve Timeless bagli stil gorselleri). Cikti: Drive TEMP/YD_KART_ORNEK/<damga>/<CIFT>_Y02.jpg,
+# <CIFT>_Y03.jpg, ORTAK_Y04.jpg, <CIFT>_Y05.jpg (3000x2250 JPEG) + KONTAK_KUCUK.jpg (1600x1200, < 200 KB) + KART_OZET.json. Toplu uretim YOK (Serdar ornek onayi sonrasi). scripts/kapak78/yd_kart_ornek.py
 permissions:
   contents: read
 on:
@@ -53,15 +53,16 @@ jobs:
           rk = {x["listing_image_id"]: x["rank"] for x in g["gorseller"]}
           r2 = next(x for x in g["gorseller"] if x["rank"] == 2)
           bot = next(b["image_id"] for b in g["baglar"] if b["value"] == "Botanical")
+          tim = next(b["image_id"] for b in g["baglar"] if b["value"] == "Timeless")
           with open("_work/arg.env", "w") as f:
-              f.write(f"A={r['a']}\nB={r['b']}\nR2=_work/y/r2_{r2['listing_image_id']}.jpg\nBOT=_work/y/r{rk[bot]}_{bot}.jpg\n")
+              f.write(f"A={r['a']}\nB={r['b']}\nR2=_work/y/r2_{r2['listing_image_id']}.jpg\nBOT=_work/y/r{rk[bot]}_{bot}.jpg\nTIM=_work/y/r{rk[tim]}_{tim}.jpg\n")
           PY
           cat _work/arg.env
           cat _work/arg.env >> "$GITHUB_ENV"
           echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
       - name: Kartlar
         env: {CF: "${{ inputs.cift }}"}
-        run: python3 scripts/kapak78/yd_kart_ornek.py --cift "$CF" --a "$A" --b "$B" --eski-r2 "$R2" --botanical "$BOT" --out _out --ortak
+        run: python3 scripts/kapak78/yd_kart_ornek.py --cift "$CF" --a "$A" --b "$B" --eski-r2 "$R2" --botanical "$BOT" --timeless "$TIM" --out _out --ortak
       - name: Drive'a yaz
         if: ${{ always() }}
         run: |

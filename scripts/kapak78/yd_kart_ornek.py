@@ -11,10 +11,12 @@ Renk / font / punto / konum yuzde degerleri o JSON'dan okunur; cizim 3200x2400 t
                                  sagda panel: 4 satir (etiket + aciklama) + alt not.
   Y04 format (ORTAK)           : slayt 8 duzeni; 3 panel (Digital File, Print, 14 Sizes), yalniz yazi (78 ilanda ayni dosya,
                                  cifte ozel poster yok) + alt not.
-  Y05 surec (ORTAK)            : slayt 10 zemini ve yazi stilleri; 4 adim 2x2 (01-04) + alt not (ORTAK: poster yok).
+  Y05 surec (cifte ozel)       : slayt 10 (eski r8) duzeni; solda Timeless poster (yedek r10 stil gorselinden kirpim), sagda 4 adim
+                                 (01-04, etiket + metin) + alt not (Merkez 27 Eki karar d).
+  KONTAK_KUCUK.jpg (--ortak)   : 4 kart 2x2, 1600x1200, JPEG 80, < 200 KB (Merkez inceleme onizlemesi).
 Yazi kapisi: gorsele giren her metinde '.', '+', '=', tire / eksi bicimleri ve CLAUDE.md urun metni yasaklari yok; METIN KAPISI: her
 kartta cizilen satirlar sirasiyla gorev metni (beklenen()) ile ayni (buyuk/kucuk harf haric). Biri tutmazsa DUR (cikti yazilmaz).
-Kullanim: yd_kart_ornek.py --cift CANCER_LIBRA --a Cancer --b Libra --eski-r2 r2.jpg --botanical r12.jpg --out DIR [--ortak]"""
+Kullanim: yd_kart_ornek.py --cift CANCER_LIBRA --a Cancer --b Libra --eski-r2 r2.jpg --botanical r12.jpg --timeless r10.jpg --out DIR [--ortak]"""
 import argparse
 import hashlib
 import json
@@ -311,37 +313,59 @@ def y04():
     return im, dict(panel_px=[[round(v) for v in k] for k in kl])
 
 
-# ---------------------------------------------------------------- Y05 surec (ORTAK)
-def y05():
-    im = tuval(10); d = ImageDraw.Draw(im)
+# ---------------------------------------------------------------- Y05 surec (cifte ozel; Merkez 27 Eki karar d)
+def y05(a, b, r10):
+    """eski r8 (slayt 10 Free Preview) duzeni: solda Timeless poster (preview_poster kutusu + golge), sagda 4 adim (etiket + metin)"""
+    im = tuval(10)
+    pp = el(10, "preview_poster"); k = kutu(pp)
+    im = golge(im, k, pp["shadow"])
+    p, olcu = poster_kirp(r10)
+    bw, bh = k[2] - k[0], k[3] - k[1]
+    s_ = min(bw / p.width, bh / p.height); nw, nh = round(p.width * s_), round(p.height * s_)
+    im.paste(p.resize((nw, nh), Image.LANCZOS), (round((k[0] + k[2] - nw) / 2), round((k[1] + k[3] - nh) / 2)))
+    d = ImageDraw.Draw(im)
     baslik(d, 10, "Made for You, Step by Step")
-    et = stil(el(10, "after_order_label")); ac = stil(el(10, "after_order_copy"), boy=70, satir=1.32)
-    no = stil(el(2, "plus"), boy=130, agirlik=500)                 # eski altin vurgu rengi (slayt 2 '+' / ok: #977342)
-    ns = stil(el(10, "quality_check"))
+    et = stil(el(10, "after_order_label")); ac = stil(el(10, "after_order_copy"), boy=60, satir=1.3)
+    no = stil(el(2, "plus"), boy=84, agirlik=500)                  # eski altin vurgu rengi (slayt 2 '+' / ok: #977342)
+    ns = stil(el(10, "quality_check"), boy=52)                     # 60 px sutuna sigmiyor (1553 > 1408 px)
     adim = [("01", "FREE PREVIEW BEFORE YOU ORDER", "Message us your names, your date and your style, and we send you a free preview"),
             ("02", "YOUR FINAL PREVIEW", "After your order, we send your final preview in Etsy Messages within 24 hours"),
             ("03", "YOUR APPROVAL", "Once you approve, we send your digital file in Etsy Messages, or prepare your print"),
             ("04", "A FLAT PRINT", "Gold, relief and paper layer looks are printed effects, with no foil, raised layers or cut paper")]
-    sol = 0.06 * W; ara = 0.06 * W; kol = (W - 2 * sol - ara) / 2
-    gen = kol - 220
-    bloklar = [(n, et_, sar(ac, t, gen)) for n, et_, t in adim]
-    yuk = [blok_yuk(et, 1) + 0.8 * et["boy"] + blok_yuk(ac, len(t)) for _, _, t in bloklar]
-    sat_h = [max(yuk[0], yuk[1]), max(yuk[2], yuk[3])]
-    ust, alt = 0.24 * H, 0.84 * H
-    bos = (alt - ust - sum(sat_h)) / 2
-    if bos < 60:
+    lk = kutu(el(10, "after_order_label"))
+    x0 = lk[0]; gen_t = lk[2] - lk[0]; no_g = 150; gen = gen_t - no_g
+    bloklar = [(n, e, sar(ac, t, gen)) for n, e, t in adim]
+    ara_et = 0.6 * et["boy"]
+    yuk = [blok_yuk(et, 1) + ara_et + blok_yuk(ac, len(t)) for _, _, t in bloklar]
+    ust, alt = k[1], k[3]                                          # adimlar poster yuksekligi boyunca (eski r8: sag sutun poster boyunca)
+    bos = (alt - ust - sum(yuk)) / (len(yuk) - 1)
+    if bos < 50:
         raise SystemExit(f"DUR: Y05 adimlari sigmiyor (aralik {bos:.0f} px)")
     rule = el(10, "preview_rule")
-    for i, (n, e, t) in enumerate(bloklar):
-        r, c = divmod(i, 2)
-        x = sol + c * (kol + ara); y = ust + bos / 2 + r * (sat_h[0] + bos)
-        yaz(d, no, [n], x, y - 0.5 * (no["boy"] - et["boy"]), gen=200)
-        yy = y + yaz(d, et, [e], x + 220, y, gen=gen) + 0.8 * et["boy"]
-        yaz(d, ac, t, x + 220, yy, gen=gen)
-    cizgi(d, sol, W - sol, ust + bos / 2 + sat_h[0] + bos / 2, rule)
-    yaz(d, ns, ["Colors may look slightly different on screen and on paper"], W / 2, 0.875 * H, "center", 0.9 * W)
+    y = ust
+    for i, ((n, e, t), h) in enumerate(zip(bloklar, yuk)):
+        yaz(d, no, [n], x0, y - 0.5 * (no["boy"] - et["boy"]), gen=no_g)
+        yy = y + yaz(d, et, [e], x0 + no_g, y, gen=gen) + ara_et
+        yaz(d, ac, t, x0 + no_g, yy, gen=gen)
+        y += h + bos
+        if i < len(bloklar) - 1:
+            cizgi(d, x0, x0 + gen_t, y - bos / 2, rule)
+    yaz(d, ns, ["Colors may look slightly different on screen and on paper"], x0, k[3] + 0.06 * H, gen=gen_t)   # poster altindan 144 px
     marka(d, 10)
-    return im, {}
+    return im, olcu
+
+
+def kontak(yollar, hedef):
+    """KONTAK_KUCUK.jpg (Merkez 27 Eki): 4 kart 2x2, 1600x1200, JPEG 80, < 200 KB"""
+    t = Image.new("RGB", (1600, 1200), "white")
+    for i, y in enumerate(yollar):
+        r, c = divmod(i, 2)
+        t.paste(Image.open(y).convert("RGB").resize((800, 600), Image.LANCZOS), (c * 800, r * 600))
+    t.save(hedef, "JPEG", quality=80)
+    kb = hedef.stat().st_size / 1024
+    if kb >= 200:
+        raise SystemExit(f"DUR: {hedef.name} {kb:.0f} KB (200 KB alti beklenir)")
+    return round(kb, 1)
 
 
 def kaydet(im, yol):
@@ -382,14 +406,16 @@ def main(argv=None):
     ap.add_argument("--cift", required=True); ap.add_argument("--a", required=True); ap.add_argument("--b", required=True)
     ap.add_argument("--eski-r2", required=True, help="o ciftin eski galerisinin r2 karti (yedek; burc + ortak sembol)")
     ap.add_argument("--botanical", required=True, help="o ciftin Botanical stil gorseli (yedek r12, 2400x3000)")
-    ap.add_argument("--out", required=True); ap.add_argument("--ortak", action="store_true", help="ORTAK_Y04 / ORTAK_Y05 de uret")
+    ap.add_argument("--timeless", required=True, help="o ciftin Timeless stil gorseli (yedek r10, 2400x3000)")
+    ap.add_argument("--out", required=True); ap.add_argument("--ortak", action="store_true", help="ORTAK_Y04 de uret (+ KONTAK_KUCUK.jpg)")
     a = ap.parse_args(argv)
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
     YAZILAR.clear()
     islem = [(f"{a.cift}_Y02.jpg", lambda: y02(a.a, a.b, Image.open(a.eski_r2))),
              (f"{a.cift}_Y03.jpg", lambda: y03(a.a, a.b, Image.open(a.botanical)))]
     if a.ortak:
-        islem += [("ORTAK_Y04.jpg", y04), ("ORTAK_Y05.jpg", y05)]
+        islem += [("ORTAK_Y04.jpg", y04)]
+    islem += [(f"{a.cift}_Y05.jpg", lambda: y05(a.a, a.b, Image.open(a.timeless)))]
     sonuc, rapor, metin = {}, {}, {}
     for ad, fn in islem:
         n0 = len(YAZILAR)
@@ -404,8 +430,12 @@ def main(argv=None):
             raise SystemExit(f"DUR: {ad} metni gorev metninden farkli\n cizilen: {' '.join(g)}\n beklenen: {' '.join(e)}")
     for ad, im in sonuc.items():
         kaydet(im, out / ad)
+    if a.ortak:
+        kontak_kb = kontak([out / f"{a.cift}_Y02.jpg", out / f"{a.cift}_Y03.jpg", out / "ORTAK_Y04.jpg", out / f"{a.cift}_Y05.jpg"],
+                           out / "KONTAK_KUCUK.jpg")
+        rapor["KONTAK_KUCUK.jpg"] = dict(boyut=[1600, 1200], kb=kontak_kb)
     girdi = {k: dict(dosya=Path(v).name, sha256=hashlib.sha256(Path(v).read_bytes()).hexdigest()) for k, v in
-             (("eski_r2", a.eski_r2), ("botanical", a.botanical))}
+             (("eski_r2", a.eski_r2), ("botanical", a.botanical), ("timeless", a.timeless))}
     (out / "KART_OZET.json").write_text(json.dumps(dict(cift=a.cift, dosyalar=list(sonuc), girdi=girdi, surum=SURUM, olcu=rapor,
                                                         yazilar=metin, gorevde_olmayan=EK_METIN(a.a, a.b), tuval=[W, H],
                                                         cikti=list(CIKTI)), indent=1, ensure_ascii=False), encoding="utf-8")
