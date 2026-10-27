@@ -288,6 +288,8 @@ def main_yd(a):
     kosu = os.environ.get("GITHUB_RUN_ID", "yerel")
     mevcut = {}
     for p in sorted(klasor.glob("*.jpg")):
+        if p.name.startswith("KONTAK_"):                       # kontak sayfasi kart degil (yd_kart_toplu KONTAK_78.jpg; inceleme 27 Eki)
+            continue
         b = p.read_bytes(); f, bt = resim(b)
         mevcut[p.name] = (sha(b), f"{bt[0]}x{bt[1]}" if bt else "-")
     satir, fail, sure_az, dur = {}, [], [], []
@@ -406,7 +408,7 @@ def main_yd(a):
     say = lambda s_: sum(1 for v in tum if v["durum"].startswith(s_))  # noqa: E731
     with open(yeni / "OZET.md", "w", encoding="utf-8") as fh:
         fh.write(f"# YD galeri tasima\n\nKlasordeki gecerli dosya {len(beklenen) - len(eksik)} / {len(beklenen)} "
-                 f"(78 cift x 8 kart + 2 ortak) | bu kosu: YENI {say('YENI')}, ATLA {say('ATLA')}, FAIL {len(satir_fail)}, "
+                 f"(78 cift x 9 kart + 1 ortak) | bu kosu: YENI {say('YENI')}, ATLA {say('ATLA')}, FAIL {len(satir_fail)}, "
                  f"SURE_AZ {len(sure_az)}, DUR {len(dur)}\n\n")
         if satir_fail:
             fh.write("## FAIL\n" + "".join(f"- {v['ad']}: {v['durum'][5:]}\n" for v in satir_fail) + "\n")

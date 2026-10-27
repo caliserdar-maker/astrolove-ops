@@ -145,9 +145,11 @@ class YdTest(unittest.TestCase):
     def test_08_klasordeki_kare_boyut_fail_ve_url_sizmaz(self):
         self.klasor.mkdir(parents=True)
         (self.klasor / "CANCER_LIBRA_Y01.jpg").write_bytes(T.Sunucu.DOSYA["kare"])
+        (self.klasor / "KONTAK_78.jpg").write_bytes(T.Sunucu.DOSYA["kare"])           # kontak sayfasi kart sayilmaz
         rc, log, m, _ = self.kos([("AQUARIUS_AQUARIUS", 1, "DAA", url(self.url, "yasak"))])
         self.assertEqual(rc, 1)
         self.assertIn("FAIL klasordeki dosya (boyut 2400x2400)", m["CANCER_LIBRA_Y01.jpg"]["durum"])
+        self.assertNotIn("KONTAK_78.jpg", m)
         self.assertIn("HTTP 403", m["AQUARIUS_AQUARIUS_Y01.jpg"]["durum"])
         cikti = "".join((self.yeni / f).read_text() for f in ("OZET.md", "MANIFEST.csv", "IMZA.csv"))
         self.assertNotIn("GIZLI123", cikti)
