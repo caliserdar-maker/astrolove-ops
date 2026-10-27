@@ -12,21 +12,27 @@ Renk / font / punto / konum yuzde degerleri o JSON'dan okunur; cizim 3200x2400 t
   Y04 format (ORTAK)           : slayt 8 duzeni; 3 panel (Digital File, Print, 14 Sizes), yalniz yazi (78 ilanda ayni dosya,
                                  cifte ozel poster yok) + alt not.
   Y05 surec (ORTAK)            : slayt 10 zemini ve yazi stilleri; 4 adim 2x2 (01-04) + alt not (ORTAK: poster yok).
-Yazi kapisi: gorsele giren her metinde '.', '+', '=', uzun / orta tire yok; yoksa DUR (cikti yazilmaz).
+Yazi kapisi: gorsele giren her metinde '.', '+', '=', tire / eksi bicimleri ve CLAUDE.md urun metni yasaklari yok; METIN KAPISI: her
+kartta cizilen satirlar sirasiyla gorev metni (beklenen()) ile ayni (buyuk/kucuk harf haric). Biri tutmazsa DUR (cikti yazilmaz).
 Kullanim: yd_kart_ornek.py --cift CANCER_LIBRA --a Cancer --b Libra --eski-r2 r2.jpg --botanical r12.jpg --out DIR [--ortak]"""
 import argparse
+import hashlib
 import json
 import re
 import sys
 from pathlib import Path
 
 import numpy as np
+import PIL
 from PIL import Image, ImageDraw, ImageFilter, ImageFont, features
 
 HERE = Path(__file__).resolve().parent / "yd_kart"
 W, H = 3200, 2400                     # eski tuval (gallery_layout.json canvas)
 CIKTI = (3000, 2250)                  # Serdar 27 Eki: tum gorseller 4:3, 3000x2250
-YASAK = re.compile(r"[.+=–—]")
+YASAK = re.compile(r"[.+=\u2010-\u2015\u2212]")      # nokta, arti, esittir, tum tire / eksi bicimleri (ASCII '-' haric)
+YASAK_SOZ = re.compile(r"hahnem|photo rag|308|giclee|giclée|prodigi|cotton|museum|iso 9706|\boba\b|bright white|12.colou?r|years?\b.*\d|astrolove(?!art)",
+                       re.I)                       # CLAUDE.md urun metni yasaklari + marka adi
+SURUM = dict(pillow=PIL.__version__, raqm=features.check("raqm"), numpy=np.__version__)
 LAY = json.loads((HERE / "gallery_layout_eski.json").read_text(encoding="utf-8"))
 SL = {s["number"]: s for s in LAY["slides"]}
 
@@ -213,7 +219,17 @@ def poster_kirp(r12):
     ys, xs = np.nonzero(sat)[0], np.nonzero(sut)[0]
     if not len(ys) or not len(xs):
         raise SystemExit("DUR: Botanical stil gorselinde poster bulunamadi")
-    k = (int(xs[0]), int(ys[0]), int(xs[-1]) + 1, int(ys[-1]) + 1)
+    k = [int(xs[0]), int(ys[0]), int(xs[-1]) + 1, int(ys[-1]) + 1]
+    # kaba kutu poster golgesini (yumusak gri, zeminden 18+ fark) de icine aliyor (inceleme 27 Eki: sag 30, alt 47 px).
+    # Keskin poster kenari: kaba kenarin +-80 px icinde ortalama parlaklik profilinin en buyuk sicramasi.
+    lum = a.mean(axis=2)
+    ort_y = lum[k[1] + (k[3] - k[1]) // 4:k[3] - (k[3] - k[1]) // 4].mean(axis=0)
+    ort_x = lum[:, k[0] + (k[2] - k[0]) // 4:k[2] - (k[2] - k[0]) // 4].mean(axis=1)
+
+    def sicrama(pr, c):                             # pr[i] - pr[i-1] en buyuk |fark| -> kenar i (sol/ust ilk poster pikseli, sag/alt ilk disari)
+        lo, hi = max(1, c - 80), min(len(pr) - 1, c + 80)
+        return lo + int(np.argmax(np.abs(pr[lo:hi + 1] - pr[lo - 1:hi])))
+    k = (sicrama(ort_y, k[0]), sicrama(ort_x, k[1]), sicrama(ort_y, k[2]), sicrama(ort_x, k[3]))
     oran = (k[2] - k[0]) / (k[3] - k[1])
     if abs(oran - 0.8) > 0.02:
         raise SystemExit(f"DUR: poster orani {oran:.3f} (4:5 = 0.8 beklenir), kutu {k}")
@@ -237,7 +253,10 @@ def y03(a, b, r12):
     bas = stil(el(4, "heading_options"), boy=84)
     notu = stil(el(4, "shortline_limit"), boy=56)
     x0 = kutu(el(4, "names_label"))[0]; gen = kutu(el(4, "names_label"))[2] - x0
-    satir = [([f"NAME UNDER {a.upper()}", f"NAME UNDER {b.upper()}"], ac, "Up to 11 letters each, English letters, printed in capitals"),
+    # gorev metni "Name under A | Name under B": '|' iki alanin ayiricisi sayildi (gorevdeki '—' gibi); Manrope buyuk harf etiket
+    # stilinde '|' buyuk I gibi okunuyor ("NAME UNDER CANCER I", 27 Eki olcum), bu yuzden iki alan iki satir. Merkez karari bekler.
+    ad_et = [f"NAME UNDER {a.upper()}", f"NAME UNDER {b.upper()}"]
+    satir = [(ad_et, ac, "Up to 11 letters each, English letters, printed in capitals"),
              (["YOUR SPECIAL DATE"], ac, "Month in letters, for example 14 June 2025"),
              (["YOUR HEADING"], bas, "Paper Anniversary or Our First Year"),
              (["OPTIONAL SHORT LINE"], ac, "Up to 20 characters, Year One if left empty")]
@@ -276,13 +295,14 @@ def y04():
              ("Print", "Unframed print on matte art paper"),
              ("14 Sizes", "5x7, 8x10, 11x14, 12x16, 12x18, 16x20, 16x24, 18x24, 20x30, 24x30, 24x36 in, A4, A3, A2")]
     rule = el(4, "detail_rule")
-    for k, (bas, met) in zip(kl, kolon):
-        cx = (k[0] + k[2]) / 2; gen = (k[2] - k[0]) * 0.84
+    gen = (kl[0][2] - kl[0][0]) * 0.84
+    satlar = [sar(ds, met, gen) for _, met in kolon]
+    hh = max(blok_yuk(ds, len(x)) for x in satlar)   # uc sutun ayni ustten baslar (inceleme 27 Eki: ayri ayri ortalama kaymasi)
+    for k, (bas, _), sat in zip(kl, kolon, satlar):
+        cx = (k[0] + k[2]) / 2
         yb = k[1] + 0.08 * (k[3] - k[1])
         h = yaz(d, bs, [bas], cx, yb, "center", gen)
         cizgi(d, cx - 0.18 * (k[2] - k[0]), cx + 0.18 * (k[2] - k[0]), yb + h + 60, rule)
-        sat = sar(ds, met, gen)
-        hh = blok_yuk(ds, len(sat))
         ust = yb + h + 60; y = ust + ((k[3] - 0.08 * (k[3] - k[1])) - ust - hh) / 2
         yaz(d, ds, sat, cx, y, "center", gen)
     ns = stil(el(8, "subtitle"))
@@ -328,6 +348,35 @@ def kaydet(im, yol):
     im.resize(CIKTI, Image.LANCZOS).save(yol, "JPEG", quality=95, subsampling=0)
 
 
+def EK_METIN(a, b):
+    """gorev metninde olmayan, eski karttan gelen yazilar (rapora yazilir; Merkez karari bekler)"""
+    return {"Y02": [f"{a} & {b}", "An original symbol for your zodiac pairing"], "hepsi": ["ASTROLOVEART"],
+            "Y03_ayirici": "gorevdeki '|' cizilmedi; iki ad alani iki satir"}
+
+
+def beklenen(a, b):
+    """gorev metni (Merkez 27 Eki, aynen), cizim sirasiyla; buyuk/kucuk harf etiket stilidir, kapida yok sayilir"""
+    return {
+        "Y02": ["Your two signs, one shared symbol", a, b, f"{a} & {b}", "An original symbol for your zodiac pairing", "ASTROLOVEART"],
+        "Y03": ["Your Names, Your Date",
+                f"Name under {a}", f"Name under {b}", "Up to 11 letters each, English letters, printed in capitals",
+                "Your Special Date", "Month in letters, for example 14 June 2025",
+                "Your Heading", "Paper Anniversary or Our First Year",
+                "Optional Short Line", "Up to 20 characters, Year One if left empty",
+                "Please check your spelling before you order", "ASTROLOVEART"],
+        "Y04": ["Digital File or Print",
+                "Digital File", "One print ready digital file in the style and size you choose", "Nothing is shipped",
+                "Print", "Unframed print on matte art paper",
+                "14 Sizes", "5x7, 8x10, 11x14, 12x16, 12x18, 16x20, 16x24, 18x24, 20x30, 24x30, 24x36 in, A4, A3, A2",
+                "Every style and size as a print or a digital file", "ASTROLOVEART"],
+        "Y05": ["Made for You, Step by Step",
+                "01", "Free Preview Before You Order", "Message us your names, your date and your style, and we send you a free preview",
+                "02", "Your Final Preview", "After your order, we send your final preview in Etsy Messages within 24 hours",
+                "03", "Your Approval", "Once you approve, we send your digital file in Etsy Messages, or prepare your print",
+                "04", "A Flat Print", "Gold, relief and paper layer looks are printed effects, with no foil, raised layers or cut paper",
+                "Colors may look slightly different on screen and on paper", "ASTROLOVEART"]}
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--cift", required=True); ap.add_argument("--a", required=True); ap.add_argument("--b", required=True)
@@ -341,17 +390,26 @@ def main(argv=None):
              (f"{a.cift}_Y03.jpg", lambda: y03(a.a, a.b, Image.open(a.botanical)))]
     if a.ortak:
         islem += [("ORTAK_Y04.jpg", y04), ("ORTAK_Y05.jpg", y05)]
-    sonuc, rapor = {}, {}
+    sonuc, rapor, metin = {}, {}, {}
     for ad, fn in islem:
-        im, o = fn(); sonuc[ad] = im; rapor[ad] = o
-    kotu = sorted({t for t in YAZILAR if YASAK.search(t)})
+        n0 = len(YAZILAR)
+        im, o = fn(); sonuc[ad] = im; rapor[ad] = o; metin[ad] = YAZILAR[n0:]
+    kotu = sorted({t for t in YAZILAR if YASAK.search(t) or YASAK_SOZ.search(t)})
     if kotu:
-        raise SystemExit(f"DUR: yasak karakter (. + = uzun / orta tire) iceren yazi: {kotu}")
+        raise SystemExit(f"DUR: yasak karakter / sozcuk iceren yazi: {kotu}")
+    bek = beklenen(a.a, a.b)
+    for ad, sat in metin.items():                   # METIN KAPISI: cizilen satirlar, sirasiyla, gorev metni + izinli ek (buyuk/kucuk harf haric) ile ayni
+        g, e = " ".join(sat).split(), " ".join(bek[ad[-7:-4]]).split()
+        if [x.casefold() for x in g] != [x.casefold() for x in e]:
+            raise SystemExit(f"DUR: {ad} metni gorev metninden farkli\n cizilen: {' '.join(g)}\n beklenen: {' '.join(e)}")
     for ad, im in sonuc.items():
         kaydet(im, out / ad)
-    (out / "KART_OZET.json").write_text(json.dumps(dict(cift=a.cift, dosyalar=list(sonuc), olcu=rapor, yazilar=YAZILAR,
-                                                        tuval=[W, H], cikti=list(CIKTI)), indent=1, ensure_ascii=False), encoding="utf-8")
-    print(f"KART: {', '.join(sonuc)} -> {out} | yazi {len(YAZILAR)} satir, yasak karakter 0")
+    girdi = {k: dict(dosya=Path(v).name, sha256=hashlib.sha256(Path(v).read_bytes()).hexdigest()) for k, v in
+             (("eski_r2", a.eski_r2), ("botanical", a.botanical))}
+    (out / "KART_OZET.json").write_text(json.dumps(dict(cift=a.cift, dosyalar=list(sonuc), girdi=girdi, surum=SURUM, olcu=rapor,
+                                                        yazilar=metin, gorevde_olmayan=EK_METIN(a.a, a.b), tuval=[W, H],
+                                                        cikti=list(CIKTI)), indent=1, ensure_ascii=False), encoding="utf-8")
+    print(f"KART: {', '.join(sonuc)} -> {out} | yazi {len(YAZILAR)} satir, yasak 0, metin kapisi PASS {len(metin)}/{len(metin)}")
     return 0
 
 
