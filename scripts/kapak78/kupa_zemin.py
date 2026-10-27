@@ -86,4 +86,6 @@ if __name__ == "__main__":
         z.save(o / f"z_{ad}.png"); np.save(o / f"k_{ad}.npy", k)
         ys, xs = np.nonzero(k); R[ad] = dict(kutu=[int(xs.min()), int(ys.min()), int(xs.max()), int(ys.max())], **olc(z, k))
         print(ad, R[ad], flush=True)
+    import PIL
+    R["surum"] = dict(pillow=PIL.__version__, numpy=np.__version__, opencv=cv2.__version__)   # GrabCut opencv surumune duyarli
     (o / "zemin_olcum.json").write_text(json.dumps(R, indent=1))

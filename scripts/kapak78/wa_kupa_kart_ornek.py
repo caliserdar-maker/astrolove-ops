@@ -14,7 +14,8 @@ kupa_zemin.py ile zemini #F5F0E7'ye esitlenmis halde (Merkez 27 Eki madde 4); ku
   KUPA_<CIFT>_K03_KISISEL, KUPA_<CIFT>_K05_BOYUT, KUPA_<CIFT>_K06_ORNEK, KUPA_<CIFT>_K07_BAKIM
 Kapilar (PASS/FAIL, biri FAIL ise dosya yazilmaz): metin (cizilen satirlar = beklenen, sirayla), baslik / etiket Title Case (birim
 sozcukleri oz, in, cm, ml haric), yasak karakter (ondalik nokta disinda nokta, arti, esittir, tire), yasak sozcuk (yd_kart_ornek.YASAK_SOZ),
-punto >= 58, renk kapisi (cizim + JPEG), zemin kapisi (kupa fotograf kutusu ic kenar seridi #F5F0E7'den en fazla ZEMIN_ESIK),
+punto >= 58, renk kapisi (cizim + JPEG), zemin kapisi (kupa fotograf kutusu ic kenar seridi #F5F0E7'den en fazla ZEMIN_ESIK; kutu
+icinde kupa + golge parcasina (fark > 1 ile bagli) bagli olmayan, fark > 3 piksel yok),
 KONTAK_WA_KUPA.jpg < 300 KB.
 Kullanim: wa_kupa_kart_ornek.py --cift CANCER_LIBRA --a Cancer --b Libra --sembol <dir> --poster <MB 2000x3000> --sahne <z_/k_ dir> --out <dir>"""
 import argparse, hashlib, io, json, re, sys
@@ -233,26 +234,30 @@ def k05(sd):
 
 
 def k06(sd):
-    """kisa / uzun ornek: cift.py kart 6 yakin kirpimlari (KUTU, kupa yuzeyi; isimler okunur olcek ~1); dort kenar EDGE px icinde
-    zemine yumusak gecer (sert dikdortgen / panel yok; ilk 8 px tam zemin)"""
+    """kisa / uzun ornek: tam kupa gorunumleri (ML_on / ML_arka, MJ_on / MJ_arka; zemin esitlenmis, kesit yok; inceleme 27 Eki:
+    yakin kesit + yumusak gecis panel / hale gibi duruyordu). Dort kupa ayni olcekte."""
     im = K.tuval(); d = ImageDraw.Draw(im)
     K.baslik(d, "Your Names, Your Message")
-    KUTU = {"on": (525, 1090, 1525, 1610), "arka": (495, 1060, 1555, 1520)}   # cift.py kart 6 kutulari yanlardan +60 px (gecis yazi ucunu yemesin)
-    fw = 1000; xs = (W / 2 - 30 - fw, W / 2 + 30)
+    sh = {ad: sahne(sd, ad) for ad in ("ML_on", "ML_arka", "MJ_on", "MJ_arka")}
+    ku = {ad: kupa_kutu(z, k) for ad, (z, k) in sh.items()}
     y = K.ALAN[0] - 40
-    ortala(d, K.ETIKET, ["Front"], xs[0] + fw / 2, y, fw); ortala(d, K.ETIKET, ["Back"], xs[1] + fw / 2, y, fw)
-    y += K.ETIKET["boy"] + 40; kut = []
+    hmax_k = max(v[3] - v[1] for v in ku.values()); wmax_k = max(v[2] - v[0] for v in ku.values())
+    satir_h = (K.NOT_Y - 60 - (y + K.ETIKET["boy"] + 30) - 2 * (K.ETIKET["boy"] + 10) - 30) / 2
+    s = 0.97 * min(satir_h / hmax_k, 1250 / wmax_k)              # 0,97: satir aralari ve alt metin payi
+    xs = (W / 2 - 40 - 1250, W / 2 + 40)
+    ortala(d, K.ETIKET, ["Front"], xs[0] + 625, y, 1250); ortala(d, K.ETIKET, ["Back"], xs[1] + 625, y, 1250)
+    y += K.ETIKET["boy"] + 30; kut = []
     for et, on, ar in (("Short Example", "ML_on", "ML_arka"), ("Long Example", "MJ_on", "MJ_arka")):
         ortala(d, K.ETIKET, [et], W / 2, y)
-        y += K.ETIKET["boy"] + 20; hmax = 0
-        for x, ad, kk in ((xs[0], on, KUTU["on"]), (xs[1], ar, KUTU["arka"])):
-            z, _ = sahne(sd, ad)
-            r = yapistir(im, z, kk, x, y, fw / (kk[2] - kk[0]), fade=70, dort=True); kut.append(r); hmax = max(hmax, r[3] - r[1])
-        y += hmax + 50
-    if y > K.NOT_Y - 20:
+        y += K.ETIKET["boy"] + 10
+        for x, ad in ((xs[0], on), (xs[1], ar)):
+            z, _ = sh[ad]; kk = ku[ad]
+            kut.append(yapistir(im, z, kk, x + (1250 - (kk[2] - kk[0]) * s) / 2, y, s))
+        y += hmax_k * s + 30
+    if y > K.NOT_Y - 40:
         raise SystemExit(f"DUR: K06 fotograflari alt metne tasiyor ({y:.0f})")
     ortala(d, K.METIN, ["Up to 10 letters per name", "Message up to 30 characters"], W / 2, K.NOT_Y - 30)
-    return im, dict(foto=kut, olcek=round(fw / 1000, 4)), kut
+    return im, dict(foto=kut, olcek=round(s, 4)), kut
 
 
 def k07(sd):
@@ -268,6 +273,24 @@ def k07(sd):
         y += K.yaz(d, K.METIN, [t], x0 + 60, y, gen=W - K.KENAR - x0 - 60) + 70
     ortala(d, K.METIN, ["Original zodiac fusion symbols designed by AstroLoveArt"], W / 2, K.NOT_Y)
     return im, dict(foto=kut, olcek=round(s, 4)), kut
+
+
+def kopuk_ton(im, kutular, esik=3, bag=1):
+    """fotograf kutusu icinde zeminden (#F5F0E7) esik'ten fazla farkli piksellerden, kutunun en buyuk (kupa + golge) parcasina bagli
+    OLMAYANLAR (kopuk leke / ton farki / panel kalintisi; inceleme 27 Eki: kenar seridi tek basina yetmiyordu). Baglanti fark > bag
+    ile kurulur (golge kuyrugu ana golgeye soluk piksellerle baglidir). -> (kopuk piksel sayisi, parcalar [x, y, w, h, alan])"""
+    import cv2
+    a = np.asarray(im.convert("RGB")).astype(np.int16); z = np.int16(K.rgb(K.ZEMIN)); n_k = 0; liste = []
+    for x0, y0, x1, y1 in kutular:
+        f = np.abs(a[y0:y1, x0:x1] - z).max(axis=2)
+        n, lab, st, _ = cv2.connectedComponentsWithStats((f > bag).astype(np.uint8), 8)
+        if n > 2:
+            en = 1 + int(np.argmax(st[1:, 4]))
+            for i in range(1, n):
+                c = (lab == i) & (f > esik)
+                if i != en and c.any():
+                    n_k += int(c.sum()); liste.append([x0 + int(st[i, 0]), y0 + int(st[i, 1]), int(st[i, 2]), int(st[i, 3]), int(c.sum())])
+    return n_k, liste
 
 
 def zemin_kenar(im, kutular, serit=6):
@@ -355,12 +378,14 @@ def main(argv=None):
         sapj = K.renk_kapisi(Image.open(io.BytesIO(jb[ad])), pk, jpeg=True)
         if sapj:
             raise SystemExit(f"DUR: {ad} renk kapisi (JPEG) {sapj}")
-        zk = None
+        zk = kp = kl = None
         if ad.startswith("KUPA_"):                           # ZEMIN KAPISI: fotograf kutusu ic kenar seridi kart zeminine esit (panel yok)
-            zk = zemin_kenar(im, pk)
+            zk = zemin_kenar(im, pk); kp, kl = kopuk_ton(im, pk)
             if zk > ZEMIN_ESIK:
                 raise SystemExit(f"DUR: {ad} fotograf kenari zeminden farkli (en buyuk {zk:.0f} > {ZEMIN_ESIK})")
-        sonuc[ad] = im; rapor[ad] = dict(o, renk_kapisi="PASS (cizim + JPEG)", foto_kutu=pk, zemin_kenar_max=zk, yazi=yazi,
+            if kp:
+                raise SystemExit(f"DUR: {ad} fotograf kutusunda kupadan kopuk zemin disi ton {kp} px")
+        sonuc[ad] = im; rapor[ad] = dict(o, renk_kapisi="PASS (cizim + JPEG)", foto_kutu=pk, zemin_kenar_max=zk, kopuk_ton_px=kp, kopuk_parcalar=kl if zk is not None else None, yazi=yazi,
                                          kb=round(len(jb[ad]) / 1024))
     kb, q = kontak(list(sonuc.values()))
     for ad, b in jb.items():
