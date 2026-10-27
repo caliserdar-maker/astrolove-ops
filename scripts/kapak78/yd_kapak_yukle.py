@@ -1,23 +1,26 @@
 #!/usr/bin/env python3
-"""YD (1st Anniversary) 78 kapak yukleyicisi (plan v3 adim 7; Merkez 27 Eki). ETSY'YE YAZAR yalniz --kuru yokken + --confirm YD_KAPAK +
---plan-damga (kuru kosunun PLAN_YD.json'una kilitli). Kuru kosu, pilot ve yukleme ayri Serdar onayiyla (poster galerisi 78/78 sonrasi).
-Yazim yolu scripts/etsy/eski78_gorsel_yukle.py bir_ilan; poster v10 ile AYNI genellestirme, YD profili (hedef_n=13, degerler=Style 513,
-bos_alt_koru=True, cdn=False, ara_tekrar=True): adim_plani aynen (kapak yukle -> kapak rank 1 -> erken bag (5 Style bagi aynen) ->
-eski kapak sil -> sira -> son bag; en fazla 14 gorsel), yukle_guvenli (cift yukleme yok), stabil_galeri, durum_uzlas, DEVAM / kurtarma,
-sira gecisi (en fazla 2; bos alt metinli KORU satirinda alt_text alani gonderilmez), bag_kur onarimi, istek_en_kotu kota kapisi.
-CDN yedegi alinmaz: adim 5 Drive yedegi (TEMP/YD_KAPAK_V1_YEDEK) liste kapisinda dogrulanir; kilit altinda toplu indirme yok.
-Girdi: yd_liste_uret.py liste ciktisi (--hazir: LISTE_OZET.json + <ilan>/LISTE_<ilan>.csv, manifest.json, hedef/01_1.jpg),
-durum dosyalari (--devam DEVAM.json, --ilerleme ILERLEME.json; durum_dosyasi.py ile kilit sonrasi okunur; ILERLEME set = hedef = 13).
+"""YD (1st Anniversary) 78 ilan: kapak + yeni 10'lu galeri yukleyicisi, TEK SEFERDE (plan v3 adim 7; Serdar 27 Eki). ETSY'YE YAZAR
+yalniz --kuru yokken + --confirm YD_KAPAK + --plan-damga (kuru kosunun PLAN_YD.json'una kilitli). Kuru kosu, pilot ve yukleme ayri
+Serdar onayiyla (poster galerisi 78/78 sonrasi).
+Galeri (rank): 1 kapak (bagsiz), 2 sembol, 3 kisisellestirme, 4 format (ORTAK), 5 surec (ORTAK), 6 Starlit, 7 Timeless, 8 First Page,
+9 Layers, 10 Botanical. Style (513) baglari yeni kartlara: Starlit->6 ... Botanical->10. Eski 13 gorselin hepsi silinir (adim 5 yedegi).
+Yazim yolu scripts/etsy/eski78_gorsel_yukle.py bir_ilan; poster v10 ile AYNI genellestirme, YD profili (hedef_n=10, degerler=Style 513,
+cdn=False, ara_tekrar=True): adim_plani aynen (kapak yukle -> kapak rank 1 -> her stil kartindan once bagsiz bir eski gorsel sil ->
+5 stil karti -> erken bag -> diger yuklemeler (her birinden once bir eski sil) -> kalan eski silinir -> sira -> son bag; en fazla 14
+gorsel), yukle_guvenli (cift yukleme yok), stabil_galeri, durum_uzlas, DEVAM / kurtarma, sira gecisi (en fazla 2), bag_kur onarimi,
+istek_en_kotu kota kapisi. CDN yedegi alinmaz: adim 5 Drive yedegi (TEMP/YD_KAPAK_V1_YEDEK) liste kapisinda dogrulanir.
+Girdi: yd_liste_uret.py liste ciktisi (--hazir: LISTE_OZET.json + <ilan>/LISTE_<ilan>.csv, manifest.json, hedef/NN_N.jpg),
+durum dosyalari (--devam DEVAM.json, --ilerleme ILERLEME.json; durum_dosyasi.py ile kilit sonrasi okunur; ILERLEME set = hedef = 10).
 Ilan basina degerlendirme SIRASI (plan v3 adim 7): once DEVAM, sonra ZATEN, en son BLOK (liste kapisi dahil; BLOK yalniz ilk kosuda, yarim ilan BLOK'a dusmez).
   DEVAM: DEVAM.json'da bitmemis kayit -> kuru: rapor (kayitli plan_damga ile); yazim: bir_ilan kayitli plan + LISTE sha256 ile devam /
          --kurtar (bu kosunun plan_damga'si farkli olabilir). Yarim ilanin PASS disi sonucu cikis 1.
   ZATEN: rank 1 alt metni = yeni alt metin VE rank 1 kimligi kayitta (DEVAM yuklenen / ILERLEME son_ids[0]) VE galeri hedefle ayni
-         (13, rank 1..13, KORU kimlik sirasi, 5 bag yedekle ayni). Yeni alt metin var ama kayit yok (ya da galeri farkli) -> BLOK (elle).
-  BLOK : liste kapisi (QC / dosya / sha / yedek) ya da state active degil | galeri 13 degil | Style bagi 5 degil, property 513 degil,
-         tekrarli ya da bagli gorsel galeride yok | kapak (rank 1) bagli | Botanical bagli gorsel KAPAK_KAYNAK kaynak_image_id degil |
-         canli kimlik kumesi / sirasi / alt metinleri yedekten (HAM) farkli | canli baglar yedekten farkli | envanter Style degerleri
-         bag value_id'leriyle ayni degil | kapak dosyasi JPEG 2400x2400 degil / sha256 manifest + tasima MANIFEST ile ayni degil |
-         yedekte eski kapak yok | plan 20 gorseli asar | yazimda canli durum kuru plandan farkli.
+         (10, rank 1..10, alt metinler hedef sirasinda, 5 bag sira 6..10). Yeni alt metin var ama kayit yok (ya da galeri farkli) -> BLOK (elle).
+  BLOK : liste kapisi (QC / dosya / sha / yedek / alt metin) ya da state active degil | galeri 13 degil | Style bagi 5 degil, property
+         513 degil, tekrarli ya da bagli gorsel galeride yok | kapak (rank 1) bagli | Botanical bagli gorsel KAPAK_KAYNAK kaynak_image_id
+         degil | canli kimlik kumesi yedekten (HAM) farkli | canli baglar yedekten farkli | envanter Style degerleri bag value_id'leriyle
+         ayni degil | 10 dosyadan biri JPEG / karta gore boyut degil ya da sha256 manifest + tasima MANIFEST ile ayni degil | plan 20
+         gorseli asar | yazimda canli durum kuru plandan farkli.
   PLAN : kuru kosuda plan girdisi (canli kimlik sirasi + baglar + hedef sha256 + alt metin + adimlar). Plan sha256 -> plan_damga.
 Kota: ilana baslamadan kalan - (en kotu istek) < KOTA_SINIRI (10) ise kosu durur (ilan baslamaz). Ilk DUR'da kosu durur.
 Cikti --out: PLAN_YD.json (kuru), RAPOR.json, RAPOR.md, SONUC_SATIR.json; ilanlar/ (bir_ilan PLAN/YEDEK/SONRA/DEVAM)."""
@@ -44,6 +47,9 @@ ONAY_BAG = "YD_KAPAK_BAG"
 N = Y.HEDEF_YD
 STIL_PID = 513
 STILLER = ("Starlit", "Timeless", "First Page", "Layers", "Botanical")
+STIL_SIRA = {"Starlit": 6, "Timeless": 7, "First Page": 8, "Layers": 9, "Botanical": 10}   # Serdar 27 Eki
+N_ESKI = 13        # canli YD galerisi (YD_OZET 78/78); hepsi yedeklenip silinir
+KART_BOYUT = {k: ((3000, 2250) if k in (2, 3, 4, 5) else (2400, 2400)) for k in range(1, N + 1)}
 KAPI_OKUMA = 4     # ilan, galeri, variation-images, envanter
 
 
@@ -87,21 +93,20 @@ def kayit_kimlik(dv, il):
 
 
 def hedef_galeri(c, man):
-    """canli galeri hedefle ayni mi (yukleme sonrasi): 13, rank 1..13, KORU kimlik sirasi = yedek 2..13, alt metinler, 5 bag yedekle"""
+    """canli galeri hedefle ayni mi (yukleme sonrasi): 10, rank 1..10, alt metinler hedef sirasinda, 5 Style bagi sira 6..10'a"""
     g = c["galeri"]
     if len(g) != N or [x.get("rank") for x in g] != list(range(1, N + 1)):
         return False
-    if [x.get("listing_image_id") for x in g[1:]] != list(man["yedek_galeri"][1:]):
-        return False
-    alt = [Y.alt_norm(man["hedef"][0]["alt"])] + [Y.alt_norm(a) for a in man["yedek_alt"][1:]]
+    alt = [Y.alt_norm(h["alt"]) for h in sorted(man["hedef"], key=lambda h: h["sira"])]
     if [Y.alt_norm(x.get("alt_text")) for x in g] != alt:
         return False
-    b = {x.get("value"): x.get("image_id") for x in c["baglar"]}
-    return len(c["baglar"]) == 5 and b == {k: v["image_id"] for k, v in man["yedek_baglar"].items()}
+    rk = {x.get("listing_image_id"): x.get("rank") for x in g}
+    b = {x.get("value"): rk.get(x.get("image_id")) for x in c["baglar"]}
+    return len(c["baglar"]) == 5 and b == STIL_SIRA
 
 
 def zaten(c, man, kayit):
-    """-> (zaten mi, BLOK nedeni ya da None). Yeni alt metinli kapak + kayit + hedef galeri = ZATEN."""
+    """-> (zaten mi, BLOK nedeni ya da None). Yeni alt metinli kapak + kayit + hedef galeri = ZATEN (plan v3 adim 7)."""
     g = c["galeri"]
     if not g or Y.alt_norm(g[0].get("alt_text")) != Y.alt_norm(man["hedef"][0]["alt"]):
         return False, None
@@ -117,8 +122,8 @@ def kapilar(c, man):
     if c["state"] != "active":
         neden.append(f"state {c['state']} (active degil)")
     g = c["galeri"]; ids = [x.get("listing_image_id") for x in g]
-    if len(g) != N:
-        neden.append(f"canli galeri {len(g)} gorsel ({N} beklenir)")
+    if len(g) != N_ESKI:
+        neden.append(f"canli galeri {len(g)} gorsel ({N_ESKI} beklenir)")
     b = c["baglar"]; adlar = [x.get("value") for x in b]
     if len(b) != 5 or sorted(map(str, adlar)) != sorted(STILLER):
         neden.append(f"canli Style bagi {len(b)} kayit / adlar {sorted(set(map(str, adlar)))} (5 stil beklenir)")
@@ -135,11 +140,7 @@ def kapilar(c, man):
         neden.append(f"Botanical bagli gorsel {bot} KAPAK_KAYNAK kaynak_image_id {man.get('botanical_id')} degil")
     if sorted(ids) != sorted(man["yedek_ids"]):
         neden.append(f"canli kimlik kumesi yedekten farkli (+{len(set(ids) - set(man['yedek_ids']))} "
-                     f"-{len(set(man['yedek_ids']) - set(ids))})")
-    elif ids != list(man["yedek_galeri"]):
-        neden.append("canli gorsel sirasi yedekten (HAM) farkli")
-    elif [Y.alt_norm(x.get("alt_text")) for x in g[1:]] != [Y.alt_norm(a) for a in man["yedek_alt"][1:]]:
-        neden.append("canli alt metinler (rank 2-13) yedekten (HAM) farkli (sira gecisi eski metni geri yazardi)")
+                     f"-{len(set(man['yedek_ids']) - set(ids))}); silinecek gorselin yedegi olmayabilir")
     canli_bag = {x.get("value"): x.get("image_id") for x in b}
     if canli_bag != {k: v["image_id"] for k, v in man["yedek_baglar"].items()}:
         neden.append("canli Style baglari yedekteki baglardan farkli")
@@ -147,51 +148,52 @@ def kapilar(c, man):
         bag_vid = next((x.get("value_id") for x in b if x.get("value") == ad), None)
         if ad not in c["rv"] or c["rv"][ad][1] != bag_vid:
             neden.append(f"envanter Style degeri ({ad}) bag value_id ile ayni degil")
-    yk = man.get("yedek_kapak") or {}
-    if not yk or yk.get("id") != man.get("eski_kapak") or (g and g[0].get("listing_image_id") != yk.get("id")):
-        neden.append("yedekte eski kapak yok (ya da canli kapak yedekteki kapak degil)")
     return neden
 
 
 def dosya_kapisi(hazir, lid, man):
     neden = []
-    h = man["hedef"][0]
-    p = hazir / lid / "hedef" / h["ad"]
-    if not p.exists():
-        return [f"kapak dosyasi {h['ad']} yok"]
-    try:
-        with Image.open(p) as im:
-            f, bt = im.format, im.size
-    except Exception:  # noqa: BLE001
-        f, bt = None, None
-    if p.read_bytes()[:3] != b"\xff\xd8\xff" or f != "JPEG" or bt != (2400, 2400):
-        neden.append(f"kapak dosyasi JPEG 2400x2400 degil ({f} {bt})")
-    s = Y.sha256(p)
-    if not h.get("sha256") or s != h["sha256"] or s != h.get("tasima_sha256"):
-        neden.append("kapak dosyasi sha256 manifest / tasima MANIFEST (esleme tablosu) ile ayni degil")
+    if sorted(h["sira"] for h in man["hedef"]) != list(range(1, N + 1)):
+        return [f"manifest hedef siralari 1..{N} degil"]
+    for h in man["hedef"]:
+        p = hazir / lid / "hedef" / h["ad"]
+        if not p.exists():
+            neden.append(f"hedef dosya {h['ad']} yok"); continue
+        try:
+            with Image.open(p) as im:
+                f, bt = im.format, im.size
+        except Exception:  # noqa: BLE001
+            f, bt = None, None
+        bek = KART_BOYUT[h["sira"]]
+        if p.read_bytes()[:3] != b"\xff\xd8\xff" or f != "JPEG" or bt != bek:
+            neden.append(f"{h['ad']} ({h['kaynak']}) JPEG {bek[0]}x{bek[1]} degil ({f} {bt})")
+        s = Y.sha256(p)
+        if not h.get("sha256") or s != h["sha256"] or s != h.get("tasima_sha256"):
+            neden.append(f"{h['ad']} ({h['kaynak']}) sha256 manifest / tasima MANIFEST (esleme tablosu) ile ayni degil")
     return neden
 
 
 def plan_kur(hazir, lid, man):
     liste = hazir / lid / f"LISTE_{lid}.csv"
-    hedef, cikar = Y.liste_oku(liste, N, bos_alt_koru=True)
+    hedef, cikar = Y.liste_oku(liste, N)
     yukle = [r for r in hedef if r["islem"] == "DEGISTIR"]
-    if [int(r["hedef_sira"]) for r in yukle] != [1] or cikar != [man["eski_kapak"]]:
-        raise Y.Dur(f"LISTE {len(yukle)} DEGISTIR / CIKAR {cikar} (yalniz kapak DEGISTIR + eski kapak CIKAR beklenir)")
-    if any(r["islem"] != "KORU" for r in hedef if int(r["hedef_sira"]) > 1):
-        raise Y.Dur("LISTE sira 2-13 KORU degil")
+    if len(yukle) != N or sorted(cikar) != sorted(man["yedek_ids"]) or len(cikar) != N_ESKI:
+        raise Y.Dur(f"LISTE {len(yukle)} DEGISTIR / {len(cikar)} CIKAR ({N} / {N_ESKI} beklenir; CIKAR = yedek kimlikleri)")
     rv = {ad: (STIL_PID, v["value_id"]) for ad, v in man["yedek_baglar"].items()}
     hbag = Y.renk_sira(man, hedef, rv)
+    if hbag != STIL_SIRA:
+        raise Y.Dur(f"manifest Style bag siralari {hbag} (beklenen {STIL_SIRA})")
     bagli0 = {v["image_id"] for v in man["yedek_baglar"].values()}
-    adim, mx = Y.adim_plani(N, cikar, bagli0, yukle, set(hbag.values()), kapak_degisir=yukle[0], hedef_n=N)
+    kapak = next(r for r in yukle if int(r["hedef_sira"]) == 1)
+    adim, mx = Y.adim_plani(N_ESKI, cikar, bagli0, yukle, set(hbag.values()), kapak_degisir=kapak, hedef_n=N)
     return adim, mx, Y.sha256(liste)
 
 
 def plan_girdisi(lid, man, c, adim, mx, liste_sha):
     return dict(ilan=lid, cift=man["cift"], liste_sha=liste_sha,
-                canli_galeri=[[x.get("rank"), x.get("listing_image_id"), Y.alt_norm(x.get("alt_text"))] for x in c["galeri"]],
+                canli_galeri=[[x.get("rank"), x.get("listing_image_id")] for x in c["galeri"]],
                 canli_baglar=sorted([x.get("value"), x.get("value_id"), x.get("image_id")] for x in c["baglar"]),
-                hedef=[[h["sira"], h["ad"], h["sha256"], h["alt"]] for h in man["hedef"]],
+                hedef=[[h["sira"], h["ad"], h["sha256"], h["alt"]] for h in sorted(man["hedef"], key=lambda h: h["sira"])],
                 adimlar=[list(a) for a in adim], en_fazla=mx,
                 en_az=KAPI_OKUMA + Y.istek_en_az(adim, n=N), en_kotu=KAPI_OKUMA + Y.istek_en_kotu(adim, n=N))
 
@@ -225,7 +227,7 @@ def calistir(api, shop, a):
     ilan_out = out / "ilanlar"; ilan_out.mkdir(parents=True, exist_ok=True)
     oz = json.loads((hazir / "LISTE_OZET.json").read_text(encoding="utf-8"))
     if oz.get("urun") != "yd" or oz.get("n_hedef") != N:
-        raise SystemExit("DUR: LISTE_OZET yd_liste_uret.py (urun yd, 13) ciktisi degil")
+        raise SystemExit(f"DUR: LISTE_OZET yd_liste_uret.py (urun yd, {N}) ciktisi degil")
     devam = V.oku_json(a.devam, {"ilanlar": {}}); ilerleme = V.oku_json(a.ilerleme, {"ilanlar": {}})
     yazim = not a.kuru
     plan = plan_yukle(a.plan, a.plan_damga) if yazim else None
@@ -301,7 +303,7 @@ def calistir(api, shop, a):
             try:
                 R = Y.bir_ilan(api, shop, lid, hazir / lid / f"LISTE_{lid}.csv", hazir / lid / "hedef", hazir / lid / "manifest.json",
                                ilan_out, kuru=False, kurtar=a.kurtar and bitmemis and bool(dv.get("hata")), uretim_kosu=uretim,
-                               hedef_n=N, cdn=False, ara_tekrar=True, degerler=stil_degerleri, bos_alt_koru=True)
+                               hedef_n=N, cdn=False, ara_tekrar=True, degerler=stil_degerleri)
             finally:
                 os.environ.pop("DEVAM_HEDEF", None)
                 if dvp.exists():
@@ -333,7 +335,7 @@ def calistir(api, shop, a):
 
 
 def bag_onar(api, shop, a):
-    """DEVAM kaydi olan ilanlarda yalniz Style baglari (eski78 bag_kur, hedef_n=13, degerler Style). Kayitsiz ilan ATLA."""
+    """DEVAM kaydi olan ilanlarda yalniz Style baglari (eski78 bag_kur, hedef_n=10, degerler Style). Kayitsiz ilan ATLA."""
     hazir, out = Path(a.hazir), Path(a.out) / "ilanlar"; out.mkdir(parents=True, exist_ok=True)
     oz = json.loads((hazir / "LISTE_OZET.json").read_text(encoding="utf-8"))
     devam = V.oku_json(a.devam, {"ilanlar": {}}); ilerleme = V.oku_json(a.ilerleme, {"ilanlar": {}})
@@ -353,7 +355,7 @@ def bag_onar(api, shop, a):
         try:
             api.kota_kapisi(f"ilan {lid}")
             R = Y.bag_kur(api, shop, lid, hazir / lid / f"LISTE_{lid}.csv", hazir / lid / "manifest.json", dvp, out, yaz=True, hedef_n=N,
-                          degerler=stil_degerleri, bos_alt_koru=True)
+                          degerler=stil_degerleri)
         except (Y.Dur, SystemExit, Exception) as e:   # noqa: BLE001
             R = dict(sonuc="DUR", sorun=[str(getattr(e, "code", None) or e)[:300]])
         s.update(durum=R["sonuc"], neden=R.get("sorun") or [], istek=api.calls - c0)

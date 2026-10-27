@@ -44,7 +44,7 @@ from etsy_common import Etsy, TokenStore, mask  # noqa: E402
 ONAY = "ESKI23_GALERI"
 HEDEF_N = 17       # varsayilan hedef gorsel sayisi (eski 23 / 78 duzeni); v10 galeri 9 (Merkez 26 Eki, Serdar onayi)
 ONAY_V10, HEDEF_V10 = "GALERI_V10", 9
-ONAY_YD, HEDEF_YD = "YD_KAPAK", 13   # YD 1st Anniversary kapak (plan v3 adim 7, Merkez 27 Eki): scripts/kapak78/yd_kapak_yukle.py
+ONAY_YD, HEDEF_YD = "YD_KAPAK", 10   # YD 1st Anniversary kapak + 10lu galeri (plan v3 adim 7; Serdar 27 Eki): scripts/kapak78/yd_kapak_yukle.py
 YUKLE_DENEME = 2   # yukleme: en fazla 2 gonderim; ikincisi YALNIZ 429 (hiz siniri) sonrasi (Serdar 24 Eki madde 5)
 BEKLE_429 = 15     # sn
 SIRA_TEKRAR = 3    # sira / kapak rank POST'u: post_file varsayilan tekrar (ayni govde, idempotent)

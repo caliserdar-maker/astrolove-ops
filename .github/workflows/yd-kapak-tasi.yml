@@ -1,9 +1,9 @@
 name: yd-kapak-tasi
-# YD (1st Anniversary) 78 kapak: Canva disa aktarim linklerinden Drive'a TASIMA (plan v3 adim 2; Merkez 27 Eki). Etsy'ye dokunmaz.
-# Poster galeri tasima is akisinin kopyasi; farklar: --urun yd (KAPAK_<CIFT>.jpg 2400x2400, 78 beklenen), METIN_KAPI.tsv kapisi,
-# satir basina link suresi (5 dk alti SURE_AZ) + imza tekrari DUR (IMZA.csv, ham imza yok), AYRI kilit grubu yd-kapak (bekleme
-# 15 dk; poster tasimasini beklemez). Girdi: Drive TSV (cift, kart_no=1, design_id, url) + METIN_KAPI.tsv, dosya id ile; imzali URL
-# maskelenir, loga yazilmaz. Cikti: Drive TEMP/YD_KAPAK_V1/<damga>/KAPAK_<CIFT>.jpg + OZET.md + MANIFEST.csv + IMZA.csv.
+# YD (1st Anniversary) 10'lu galeri: Canva disa aktarim linklerinden Drive'a TASIMA (plan v3 adim 2; Serdar / Merkez 27 Eki). Etsy'ye dokunmaz.
+# Poster galeri tasima is akisinin kopyasi; farklar: --urun yd (<CIFT>_Y01..Y10 + ORTAK_Y04/Y05, boyut karta gore, 626 beklenen),
+# METIN_KAPI.tsv kapisi, satir basina link suresi (5 dk alti SURE_AZ) + imza tekrari DUR (IMZA.csv, ham imza yok), AYRI kilit grubu
+# yd-kapak (bekleme 15 dk; poster tasimasini beklemez). Girdi: Drive TSV (cift, kart_no 1..10, design_id, url) + METIN_KAPI.tsv, dosya id
+# ile; imzali URL maskelenir, loga yazilmaz. Cikti: Drive TEMP/YD_KAPAK_V1/<damga>/<CIFT>_Y<NN>.jpg + ORTAK_Y04/Y05 + OZET.md + MANIFEST.csv + IMZA.csv.
 # hedef_damga doluysa mevcut klasore eklenir (gruplar); mevcut dosyalar yalniz okunur (yeni dosyalar --immutable). scripts/kapak78/galeri_tasi.py
 permissions:
   actions: read
@@ -11,7 +11,7 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-      tsv_id: {description: "Drive dosya id (TSV: cift, kart_no=1, design_id, url)", required: true}
+      tsv_id: {description: "Drive dosya id (TSV: cift, kart_no 1..10, design_id, url)", required: true}
       metin_kapi_id: {description: "Drive dosya id (METIN_KAPI.tsv: cift, design_id, baslik, satir_metni, durum)", required: true}
       hedef_damga: {description: "bos = yeni klasor; dolu (YYYYMMDD_HHMMSS) = mevcut klasore ekle", required: false, default: ""}
 jobs:

@@ -1,42 +1,43 @@
 name: yd-kapak-qc
-# YD (1st Anniversary) 78 kapak olcumlu QC (plan v3 adim 4; Merkez 27 Eki). ETSY API YOK, Etsy'ye yazma yok, kilit yok, Canva yok.
-# Girdi: Drive TEMP/YD_KAPAK_V1/<kapak_damga>/KAPAK_<CIFT>.jpg (yd-kapak-tasi ciktisi); kaynak gorseller (KAPAK_KAYNAK.csv tur=yd
-# kaynak_url, etsystatic CDN, 2400x3000) bu isde indirilir.
-#   mod olc    : 3 onayli ornek + pilot kopyasi (SAGITTARIUS_SAGITTARIUS, CAPRICORN_SAGITTARIUS, ARIES_LEO, CANCER_LIBRA) ->
-#                OLCUM.json (kutu / kirp / olcek / NCC + sapma). SABLON.json bundan Merkez / Serdar onayiyla kurulur.
-#   mod kontrol: 78 kapak -> QC_RAPOR.json + QC_RAPOR.md + KONTAK.jpg. esik_id bossa durum OLCUM (PASS yok).
-# Cikti: Drive TEMP/YD_KAPAK_V1/<kapak_damga>/QC_<damga>/. scripts/kapak78/yd_kapak_qc.py
+# YD (1st Anniversary) 10'lu galeri olcumlu QC (plan v3 adim 4; Serdar / Merkez 27 Eki). ETSY API YOK, Etsy'ye yazma yok, kilit yok, Canva yok.
+# Girdi: Drive TEMP/YD_KAPAK_V1/<kapak_damga>/<CIFT>_Y<NN>.jpg + ORTAK_Y04/Y05 (yd-kapak-tasi ciktisi); kaynak gorseller adim 5 yedeginden
+# (TEMP/YD_KAPAK_V1_YEDEK/<yedek_damga>: BAGLAR.csv -> YD_STIL_KAYNAK.csv, yalniz gereken 78 x 5 stil gorseli indirilir).
+#   mod olc    : onayli ornek ciftler (CANCER_LIBRA, ARIES_LEO, SAGITTARIUS_SAGITTARIUS, CAPRICORN_SAGITTARIUS; klasorde olanlar) x
+#                Y01 + Y06-Y10 -> OLCUM.json (kart basina kutu / kirp / olcek / NCC + sapma). SABLON.json bundan Merkez / Serdar onayiyla kurulur.
+#   mod kontrol: 626 dosya -> QC_RAPOR.json + QC_RAPOR.md + KONTAK_<NN>.jpg. esik_id bossa durum OLCUM (PASS yok). Sahne referansi
+#                CANCER_LIBRA kartlari (Serdar onayli ornek, 27 Eki).
+# Cikti: Drive TEMP/YD_KAPAK_V1/<kapak_damga>/QC_<damga>/ (+ YD_STIL_KAYNAK.csv). scripts/kapak78/yd_kapak_qc.py
 permissions:
   contents: read
 on:
   workflow_dispatch:
     inputs:
       kapak_damga: {description: "TEMP/YD_KAPAK_V1/<damga> (YYYYMMDD_HHMMSS)", required: true}
+      yedek_damga: {description: "TEMP/YD_KAPAK_V1_YEDEK/<damga> (yd-kapak-yedek, 78/78 PASS)", required: true}
       mod: {description: "olc | kontrol", required: true, default: "olc"}
-      sablon_id: {description: "kontrol: Drive SABLON.json id (kutu, kaynak_kirp, maske)", required: false, default: ""}
-      sahne_ref_id: {description: "kontrol: Drive onay anindaki sablon kapak goruntusu id (2400x2400)", required: false, default: ""}
+      sablon_id: {description: "kontrol: Drive SABLON.json id (kartlar.<1,6..10>: kutu, kaynak_kirp, maske)", required: false, default: ""}
       metin_kapi_id: {description: "kontrol: Drive METIN_KAPI.tsv id", required: false, default: ""}
-      esik_id: {description: "kontrol: Drive ESIK.json id (poster_min, sahne_min; Serdar onayli); bos = OLCUM", required: false, default: ""}
+      esik_id: {description: "kontrol: Drive ESIK.json id (kartlar.<k>.poster_min / sahne_min; Serdar onayli); bos = OLCUM", required: false, default: ""}
 jobs:
   qc:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     steps:
       - name: Girdi kapisi
-        env: {KD: "${{ inputs.kapak_damga }}", MOD: "${{ inputs.mod }}", SB: "${{ inputs.sablon_id }}", SR: "${{ inputs.sahne_ref_id }}",
+        env: {KD: "${{ inputs.kapak_damga }}", YD: "${{ inputs.yedek_damga }}", MOD: "${{ inputs.mod }}", SB: "${{ inputs.sablon_id }}",
               MK: "${{ inputs.metin_kapi_id }}", ES: "${{ inputs.esik_id }}"}
         run: |
           set -euo pipefail
-          [[ "$KD" =~ ^[0-9]{8}_[0-9]{6}$ && "$MOD" =~ ^(olc|kontrol)$ ]] || { echo "::error::girdi"; exit 1; }
-          for x in "$SB" "$SR" "$MK" "$ES"; do [[ "$x" =~ ^([A-Za-z0-9_-]{20,80})?$ ]] || { echo "::error::girdi id"; exit 1; }; done
-          if [ "$MOD" = kontrol ]; then [ -n "$SB" ] && [ -n "$SR" ] && [ -n "$MK" ] || { echo "::error::kontrol: sablon_id + sahne_ref_id + metin_kapi_id gerekli"; exit 1; }; fi
+          [[ "$KD" =~ ^[0-9]{8}_[0-9]{6}$ && "$YD" =~ ^[0-9]{8}_[0-9]{6}$ && "$MOD" =~ ^(olc|kontrol)$ ]] || { echo "::error::girdi"; exit 1; }
+          for x in "$SB" "$MK" "$ES"; do [[ "$x" =~ ^([A-Za-z0-9_-]{20,80})?$ ]] || { echo "::error::girdi id"; exit 1; }; done
+          if [ "$MOD" = kontrol ]; then [ -n "$SB" ] && [ -n "$MK" ] || { echo "::error::kontrol: sablon_id + metin_kapi_id gerekli"; exit 1; }; fi
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - run: |
           set -euo pipefail
-          pip install -q pillow==11.0.0 numpy==2.1.3 opencv-python-headless==4.10.0.84 requests==2.34.2
+          pip install -q pillow==11.0.0 numpy==2.1.3 opencv-python-headless==4.10.0.84
           curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || { sudo apt-get install -y -qq rclone >/dev/null; }
       - name: rclone.conf
         env:
@@ -48,54 +49,45 @@ jobs:
           printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
           if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
             echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
-      - name: Girdiler (Drive + CDN; Etsy API yok)
-        env: {KD: "${{ inputs.kapak_damga }}", MOD: "${{ inputs.mod }}", SB: "${{ inputs.sablon_id }}", SR: "${{ inputs.sahne_ref_id }}",
+      - name: Girdiler (Drive; Etsy API yok)
+        env: {KD: "${{ inputs.kapak_damga }}", YD: "${{ inputs.yedek_damga }}", MOD: "${{ inputs.mod }}", SB: "${{ inputs.sablon_id }}",
               MK: "${{ inputs.metin_kapi_id }}", ES: "${{ inputs.esik_id }}"}
         run: |
           set -euo pipefail
-          mkdir -p _work/kapak _work/kaynak
-          rclone copy "gdrive:ASTROLOVE/TEMP/YD_KAPAK_V1/$KD" _work/kapak --include "KAPAK_*.jpg" --max-depth 1 --transfers 8 -q
-          echo "kapak: $(ls _work/kapak | wc -l)"
+          mkdir -p _work/kapak _work/yedek _out
+          rclone copy "gdrive:ASTROLOVE/TEMP/YD_KAPAK_V1/$KD" _work/kapak --include "*_Y[0-9][0-9].jpg" --max-depth 1 --transfers 8 -q
+          echo "kart: $(ls _work/kapak | wc -l)"
+          Y="gdrive:ASTROLOVE/TEMP/YD_KAPAK_V1_YEDEK/$YD"
+          rclone copyto "$Y/BAGLAR.csv" _work/BAGLAR.csv
+          python3 scripts/kapak78/yd_kapak_qc.py stil-kaynak --baglar _work/BAGLAR.csv --kaynak-csv docs/yd_kapak/KAPAK_KAYNAK.csv \
+            --ciftler data/pod/yd78_ids.csv --out _out/YD_STIL_KAYNAK.csv
+          python3 -c "import csv; open('_work/yedek.txt','w').writelines(sorted({r['yedek_yol']+'\n' for r in csv.DictReader(open('_out/YD_STIL_KAYNAK.csv'))}))"
+          rclone copy "$Y" _work/yedek --files-from _work/yedek.txt --transfers 8 -q
+          echo "kaynak: $(find _work/yedek -name '*.jpg' | wc -l) / $(wc -l < _work/yedek.txt)"
           if [ "$MOD" = kontrol ]; then
             rclone backend copyid gdrive: "$SB" _work/SABLON.json -q
-            rclone backend copyid gdrive: "$SR" _work/sahne_ref.jpg -q
             rclone backend copyid gdrive: "$MK" _work/METIN_KAPI.tsv -q
             if [ -n "$ES" ]; then rclone backend copyid gdrive: "$ES" _work/ESIK.json -q; fi
           fi
-          python3 - <<'EOF'
-          import csv, pathlib, requests, time
-          from concurrent.futures import ThreadPoolExecutor
-          rows = [r for r in csv.DictReader(open("docs/yd_kapak/KAPAK_KAYNAK.csv", encoding="utf-8")) if r["tur"] == "yd"]
-          def al(r):
-              p = pathlib.Path("_work/kaynak") / f"{r['kaynak_image_id']}.jpg"
-              for i in range(4):
-                  try:
-                      g = requests.get(r["kaynak_url"], timeout=90); g.raise_for_status(); p.write_bytes(g.content); return None
-                  except Exception as e:  # noqa: BLE001
-                      if i == 3:
-                          return f"{r['cift']}: {type(e).__name__}"
-                      time.sleep(2 ** i)
-          hata = [h for h in ThreadPoolExecutor(8).map(al, rows) if h]
-          print(f"kaynak: {len(rows) - len(hata)}/{len(rows)}", "; ".join(hata[:5]))
-          if hata:
-              raise SystemExit(1)
-          EOF
           echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
       - name: QC
         env: {MOD: "${{ inputs.mod }}"}
         run: |
           set -euo pipefail
-          mkdir -p _out
-          k() { python3 -c "import csv,sys; print([r['kaynak_image_id'] for r in csv.DictReader(open('docs/yd_kapak/KAPAK_KAYNAK.csv')) if r['tur']=='yd' and r['cift']==sys.argv[1]][0])" "$1"; }
           if [ "$MOD" = olc ]; then
             A=()
-            for c in SAGITTARIUS_SAGITTARIUS CAPRICORN_SAGITTARIUS ARIES_LEO CANCER_LIBRA; do
-              A+=(--kapak "_work/kapak/KAPAK_$c.jpg" --kaynak "_work/kaynak/$(k $c).jpg"); done
+            while IFS=, read -r lid c k stil iid rank yol; do
+              [ "$lid" = listing_id ] && continue
+              case "$c" in CANCER_LIBRA|ARIES_LEO|SAGITTARIUS_SAGITTARIUS|CAPRICORN_SAGITTARIUS) ;; *) continue ;; esac
+              f="_work/kapak/${c}_Y$(printf %02d "$k").jpg"
+              [ -f "$f" ] && A+=(--kart "$k" --kapak "$f" --kaynak "_work/yedek/$yol")
+            done < _out/YD_STIL_KAYNAK.csv
+            [ ${#A[@]} -gt 0 ] || { echo "::error::ornek kart yok"; exit 1; }
             python3 scripts/kapak78/yd_kapak_qc.py olc "${A[@]}" --out _out/OLCUM.json
           else
             E=(); [ -f _work/ESIK.json ] && E=(--esik _work/ESIK.json)
-            python3 scripts/kapak78/yd_kapak_qc.py kontrol --kapak-dir _work/kapak --kaynak-dir _work/kaynak --kaynak-csv docs/yd_kapak/KAPAK_KAYNAK.csv \
-              --ciftler data/pod/yd78_ids.csv --sablon _work/SABLON.json --sahne-ref _work/sahne_ref.jpg --metin-kapi _work/METIN_KAPI.tsv "${E[@]}" --out _out
+            python3 scripts/kapak78/yd_kapak_qc.py kontrol --kapak-dir _work/kapak --kaynak-dir _work/yedek --stil-kaynak _out/YD_STIL_KAYNAK.csv \
+              --ciftler data/pod/yd78_ids.csv --sablon _work/SABLON.json --metin-kapi _work/METIN_KAPI.tsv "${E[@]}" --out _out
           fi
       - name: Drive'a yaz
         if: ${{ always() }}
@@ -105,7 +97,7 @@ jobs:
           if ls _out/* >/dev/null 2>&1; then
             rclone copy _out "gdrive:ASTROLOVE/TEMP/YD_KAPAK_V1/$KD/QC_${DAMGA:?}" --immutable -q
             echo "Cikti: TEMP/YD_KAPAK_V1/$KD/QC_${DAMGA}"
-            [ -f _out/QC_RAPOR.md ] && head -12 _out/QC_RAPOR.md >> "$GITHUB_STEP_SUMMARY" || true
+            [ -f _out/QC_RAPOR.md ] && head -14 _out/QC_RAPOR.md >> "$GITHUB_STEP_SUMMARY" || true
           fi
       - if: always()
         run: rm -rf _work _out ~/.config/rclone

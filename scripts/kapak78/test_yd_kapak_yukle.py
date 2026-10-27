@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""YD kapak yukleyicisi yerel testi (plan v3 adim 8). Ag yok, Drive yok, Etsy yok: sahte Etsy (test_eski78_gorsel_yukle.Sahte'nin
-Style 513 / Format 514 surumu), pilot HAM'in gercek yapisi (test_veri/HAM_4595350971.json: 13 gorsel, rank 2-13 alt metni bos,
-Style bagi r9-r13, Botanical r12). Girdi yd_liste_uret.py liste ile uretilir.
-Senaryolar: YD normal akis (kuru PLAN + plan_damga, yazim 13 -> 14 -> 13, yazim sirasi, alt metinler, baglar, eski kapak silindi);
-yukleme hatasi sonrasi ikinci yukleme yok; son bag bos -> DUR + bag onarimi; bos alt metinli KORU (alt_text alani gonderilmez);
-DEVAM -> ZATEN -> BLOK sirasi (yarim ilan BLOK'a dusmez, bitmis ilan ZATEN, kayitsiz yeni alt metin BLOK); cdn_yedek kilit altinda
-cagrilmaz; durum esigi 13 (durum_dosyasi); BLOK turleri; kota kapisi; plan kilidi; en kotu istek 185 (+4 kapi okumasi)."""
+"""YD kapak + 10'lu galeri yukleyicisi yerel testi (plan v3 adim 8; Serdar 27 Eki). Ag yok, Drive yok, Etsy yok: sahte Etsy
+(test_eski78_gorsel_yukle.Sahte'nin Style 513 / Format 514 surumu), pilot HAM'in gercek yapisi (test_veri/HAM_4595350971.json: 13 gorsel,
+Style bagi r9-r13, Botanical r12). Girdi yd_liste_uret.py liste ile uretilir (test_yd_liste_uret.galeri_kur).
+Senaryolar: normal akis (kuru PLAN + plan_damga, yazim 13 -> en fazla 14 -> 10, eski 13'un hepsi silindi, bagli eski gorsel erken bagdan
+sonra silinir, baglar sira 6-10, kapak bagsiz, alt metinler); yukleme hatasi sonrasi ikinci yukleme yok; son bag bos -> DUR + kurtarma +
+bag onarimi; DEVAM -> ZATEN -> BLOK sirasi (yarim ilan BLOK'a dusmez, bitmis ilan ZATEN, kayitsiz yeni alt metin BLOK); cdn_yedek
+kilit altinda cagrilmaz; durum esigi 10 (durum_dosyasi); BLOK turleri; kota kapisi; plan kilidi; en kotu istek (kod okumasi)."""
 import contextlib
 import copy
 import io
@@ -19,6 +19,7 @@ from PIL import Image
 KOK = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(KOK / "scripts/etsy")); sys.path.insert(0, str(KOK / "scripts/kapak78")); sys.path.insert(0, str(KOK / "scripts/ops"))
 import test_eski78_gorsel_yukle as T  # noqa: E402  (G.time.sleep etkisiz)
+import test_yd_liste_uret as TL  # noqa: E402
 import eski78_gorsel_yukle as Y  # noqa: E402
 import yd_liste_uret as L  # noqa: E402
 import yd_kapak_yukle as K  # noqa: E402
@@ -81,21 +82,15 @@ class SahteYD(T.Sahte):
 DEPO = Path(tempfile.mkdtemp(prefix="ydk_"))
 
 
-def hazir_kur(ad="h", ham=HAM, kapak_boyut=(2400, 2400), qc_durum="PASS"):
+def hazir_kur(ad="h", qc_durum="PASS", kapak_boyut=None):
     d = DEPO / ad
-    for x in ("HAM", "kapak", "out"):
-        (d / x).mkdir(parents=True, exist_ok=True)
-    (d / "yd.csv").write_text(f"listing_id,cift,a,b\n{LID},{CIFT},Cancer,Libra\n")
-    (d / "HAM" / f"{LID}.json").write_text(json.dumps(ham))
-    Image.new("RGB", kapak_boyut, (40, 100, 50)).save(d / "kapak" / f"KAPAK_{CIFT}.jpg", "JPEG", quality=90)
-    s = L.sha(d / "kapak" / f"KAPAK_{CIFT}.jpg")
-    (d / "kapak" / "MANIFEST.csv").write_text(f"ad,cift,kart_no,design_id,boyut,sha256,durum\nKAPAK_{CIFT}.jpg,{CIFT},1,DAHZIAyOYA8,2400x2400,{s},YENI\n")
-    (d / "QC.json").write_text(json.dumps(dict(esik=dict(poster_min=0.9, sahne_min=0.9), dosyalar=[dict(dosya=f"KAPAK_{CIFT}.jpg", durum=qc_durum, sha256=s)])))
-    (d / "OZET.md").write_text(f"| {LID} | {CIFT} | 13 | PASS |  |\n")
-    (d / "yl.json").write_text(json.dumps([dict(Path=f"{LID}_{CIFT}/r{g['rank']}_{g['listing_image_id']}.jpg", Size=9) for g in HAM["images"]]))
+    TL.galeri_kur(d)
+    if kapak_boyut:
+        Image.new("RGB", kapak_boyut, (40, 100, 50)).save(d / "kapak" / f"{CIFT}_Y01.jpg", "JPEG", quality=90); TL.manifest(d)
+    TL.qc(d, durum=qc_durum)
     with contextlib.redirect_stdout(io.StringIO()):
         rc = L.main(["liste", "--ciftler", str(d / "yd.csv"), "--kaynak", str(KOK / "docs/yd_kapak/KAPAK_KAYNAK.csv"), "--ham-dir", str(d / "HAM"),
-                     "--kapak-dir", str(d / "kapak"), "--qc", str(d / "QC.json"), "--yedek-ozet", str(d / "OZET.md"),
+                     "--kapak-dir", str(d / "kapak"), "--qc", str(d / "QC.json"), "--alt", str(d / "ALT.csv"), "--yedek-ozet", str(d / "OZET.md"),
                      "--yedek-liste", str(d / "yl.json"), "--out", str(d / "hazir")])
     assert rc == 0
     return d / "hazir"
@@ -128,6 +123,11 @@ def durum_dosyalari(ad):
     return d / "DEVAM.json", d / "ILERLEME.json"
 
 
+ESKI = [g["listing_image_id"] for g in HAM["images"]]
+BAGLI0 = {v["image_id"] for v in HAM["variation_images"]}
+EN_KOTU = 4 + 7 + 10 * 21 + 11 + 13 * 11 + 2 * 11 + 2 * (10 * 3 + 8) + 19   # kod okumasi: kapi 4 + on okuma 7 + yukle + kapak + sil + bag + sira + son
+
+
 def normal_akis():
     hz = hazir_kur()
     api = SahteYD()
@@ -135,44 +135,49 @@ def normal_akis():
     s = R["ilanlar"][0]
     kontrol("kuru: PLAN, yazma yok, plan_damga", rc == 0 and s["durum"] == "PLAN" and not api.yaz and R["plan_damga"].startswith("111_"))
     plan = json.loads((po / "PLAN_YD.json").read_text())["girdiler"][LID]
-    kontrol("plan adimlari: yukle kapak -> kapak -> bag -> sil eski -> sira -> bag; en fazla 14",
-            plan["adimlar"] == [["yukle", "01_1.jpg"], ["kapak"], ["bag"], ["sil", 8760104081], ["sira"], ["bag"]] and plan["en_fazla"] == 14)
-    kontrol(f"en kotu istek 185 + 4 kapi okumasi = 189 (plan v3 Kota: 185) | olculen {s['en_kotu']}", s["en_kotu"] == 189)
+    ad = [a[0] for a in plan["adimlar"]]
+    kontrol(f"plan: yukle kapak -> kapak; 10 yukle, 13 sil, 2 bag, 1 sira; erken bag 5 stil kartindan sonra; en fazla {plan['en_fazla']}",
+            plan["adimlar"][:2] == [["yukle", "01_1.jpg"], ["kapak"]] and ad.count("yukle") == 10 and ad.count("sil") == 13
+            and ad.count("bag") == 2 and ad[-2:] == ["sira", "bag"] and plan["en_fazla"] == 14
+            and [a[1] for a in plan["adimlar"] if a[0] == "yukle"][1:6] == [f"{k:02d}_{k}.jpg" for k in range(6, 11)]
+            and ad.index("bag") > max(i for i, a in enumerate(plan["adimlar"]) if a[0] == "yukle" and a[1] == "10_10.jpg"))
+    kontrol(f"en kotu istek {EN_KOTU} (kod okumasi; 4 kapi okumasi dahil) | olculen {s['en_kotu']}", s["en_kotu"] == EN_KOTU)
     dv, il = durum_dosyalari("d1")
     rc, R = yaz(api, hz, po, "y1", R["plan_damga"], dv, il)
     s = R["ilanlar"][0]
-    g = sorted(api.img, key=lambda x: x["rank"])
+    g = sorted(api.img, key=lambda x: (x["rank"], x["listing_image_id"]))
     kontrol("yazim PASS", rc == 0 and s["durum"] == "PASS")
-    kontrol("13 gorsel, rank 1 yeni kapak + yeni alt metin, eski kapak silindi",
-            len(g) == 13 and g[0]["listing_image_id"] == 7001 and g[0]["alt_text"] == YENI_ALT and 8760104081 not in [x["listing_image_id"] for x in g])
-    kontrol("rank 2-13 KORU kimlik sirasi HAM ile ayni, alt metinler bos kaldi",
-            [x["listing_image_id"] for x in g[1:]] == [h["listing_image_id"] for h in HAM["images"][1:]] and all(x["alt_text"] == "" for x in g[1:]))
-    kontrol("5 Style bagi aynen (Botanical 8678064852 rank 12), kapak bagsiz",
-            api.bag == {v["value"]: v["image_id"] for v in HAM["variation_images"]} and 7001 not in api.bag.values() and g[11]["listing_image_id"] == 8678064852)
+    kontrol("10 gorsel, rank 1 yeni kapak + yeni alt metin, eski 13'un hepsi silindi",
+            len(g) == 10 and g[0]["alt_text"] == YENI_ALT and not set(ESKI) & {x["listing_image_id"] for x in g} and sorted(api.silinenler) == sorted(ESKI))
+    yk = json.loads(dv.read_text())["ilanlar"][LID]["yuklenen"]
+    kontrol("rank 1..10 = yuklenen 01..10, alt metinler hedef", [x["listing_image_id"] for x in g] == [yk[f"{k:02d}_{k}.jpg"] for k in range(1, 11)]
+            and g[3]["alt_text"] == "Format and size options card" and g[9]["alt_text"] == "Cancer and Libra card 10 alt text")
+    rk = {x["listing_image_id"]: x["rank"] for x in g}
+    kontrol(f"5 Style bagi yeni kartlarda (Starlit 6 ... Botanical 10), kapak bagsiz | {({k: rk.get(v) for k, v in api.bag.items()})}",
+            {k: rk.get(v) for k, v in api.bag.items()} == K.STIL_SIRA and g[0]["listing_image_id"] not in api.bag.values())
     kontrol(f"gorsel sayisi en fazla 14 (olculen {api.max_n})", api.max_n == 14)
-    tur = [y[0] for y in api.yaz if y[0] in ("yukle", "sil", "bag")]
-    kontrol(f"yazim sirasi: yukle, bag (erken), sil eski, bag (son) | {tur}", tur == ["yukle", "bag", "sil", "bag"])
-    kontrol(f"bos alt metinli KORU: sira POST'larinda alt_text alani yok ({api.alt_yok} POST)", api.alt_yok == 12)
+    ilk_bag = next(i for i, y in enumerate(api.yaz) if y[0] == "bag")
+    kontrol("bagli eski stil gorselleri ancak erken bagdan sonra silindi",
+            all(i > ilk_bag for i, y in enumerate(api.yaz) if y[0] == "sil" and y[1] in BAGLI0))
+    kontrol(f"izler: kapak yazimindan sonra bag hic 0 degil (en az {min(b for _, b in api.izler)})", min(b for _, b in api.izler) == 5)
+    kontrol(f"sira POST'larinda alt_text hep var ({api.alt_yok} eksik)", api.alt_yok == 0)
     ilr = json.loads(il.read_text())["ilanlar"][LID]
-    kontrol("ILERLEME set 13 hedef 13 PASS", ilr["set"] == 13 and ilr["hedef"] == 13 and ilr["durum"] == "PASS")
+    kontrol("ILERLEME set 10 hedef 10 PASS", ilr["set"] == 10 and ilr["hedef"] == 10 and ilr["durum"] == "PASS")
     dvr = json.loads(dv.read_text())["ilanlar"][LID]
-    kontrol("DEVAM kaydi bitti (adim 6/6), yuklenen kimlik 7001", dvr["adim"] == 6 and dvr["yuklenen"] == {"01_1.jpg": 7001})
-    # ZATEN: ayni girdilerle tekrar -> yazma yok
+    kontrol(f"DEVAM kaydi bitti (adim {dvr['adim']}/{len(dvr['plan'])}), 10 yukleme kaydi", dvr["adim"] == len(dvr["plan"]) and len(dvr["yuklenen"]) == 10)
     n0 = len(api.yaz)
     rc, R2, _ = kuru(api, hz, "k1b", devam=dv, ilerleme=il)
     kontrol("bitmis ilan tekrar: ZATEN, yazma yok", R2["ilanlar"][0]["durum"] == "ZATEN" and len(api.yaz) == n0)
-    hz4 = hazir_kur("h4", qc_durum="OLCUM")                                   # sonradan liste kapisi BLOK (QC yeniden kosuldu)
+    hz4 = hazir_kur("h4", qc_durum="OLCUM")
     rc, R3, _ = kuru(api, hz4, "k1c", devam=dv, ilerleme=il)
     kontrol("bitmis ilan + liste kapisi BLOK: once ZATEN (BLOK degil)", R3["ilanlar"][0]["durum"] == "ZATEN" and len(api.yaz) == n0)
-    # durum esigi 13
     D = DD.Dosya("gdrive:X/ILERLEME.json", "json-ilanlar")
-    once = {"ilanlar": {LID: ilr}}
     try:
-        D.azalmama(once, {"ilanlar": {LID: dict(ilr, durum="DUR")}}); geri = False
+        D.azalmama({"ilanlar": {LID: ilr}}, {"ilanlar": {LID: dict(ilr, durum="DUR")}}); geri = False
     except DD.DurumHatasi:
         geri = True
     D.azalmama({"ilanlar": {LID: dict(ilr, durum="DUR", set="-")}}, {"ilanlar": {LID: ilr}})
-    kontrol("durum_dosyasi: set 13 / hedef 13 PASS geri donmez (esik kayittaki hedef)", geri)
+    kontrol("durum_dosyasi: set 10 / hedef 10 PASS geri donmez (esik kayittaki hedef)", geri)
     return hz
 
 
@@ -181,7 +186,7 @@ def yukleme_hatasi(hz):
     _, R, po = kuru(api, hz, "k2")
     dv, il = durum_dosyalari("d2")
     rc, R = yaz(api, hz, po, "y2", R["plan_damga"], dv, il)
-    kontrol(f"yukleme 500 ama olustu: ikinci yukleme yok, PASS (yukleme {api.n_yukle})", R["ilanlar"][0]["durum"] == "PASS" and api.n_yukle == 1)
+    kontrol(f"yukleme 500 ama olustu: ikinci yukleme yok, PASS (yukleme {api.n_yukle})", R["ilanlar"][0]["durum"] == "PASS" and api.n_yukle == 10)
 
 
 def bag_bos(hz):
@@ -195,14 +200,15 @@ def bag_bos(hz):
     # bag onarimi: once kalan adimlar (devam, kurtar), sonra yalniz bag
     api.bag_yut = False
     rc, R = yaz(api, hz, po, "y3b", damga, dv, il, "--kurtar")
-    kontrol(f"kurtarma: kayitli plan + canli galeriyle surer, PASS (yukleme toplam {api.n_yukle})", R["ilanlar"][0]["durum"] == "PASS" and api.n_yukle == 1)
+    kontrol(f"kurtarma: kayitli plan + canli galeriyle surer, PASS (yukleme toplam {api.n_yukle})", R["ilanlar"][0]["durum"] == "PASS" and api.n_yukle == 10)
     api.bag = {}
     out = DEPO / "y3c"
     with contextlib.redirect_stdout(io.StringIO()):
         K.sonlandir(api, "1", arg(hz, out, "--bag-onar", "--confirm", "YD_KAPAK_BAG", "--plan-damga", damga, "--devam", str(dv), "--ilerleme", str(il)))
     R = json.loads((out / "RAPOR.json").read_text())
-    kontrol("bag onarimi (YD_KAPAK_BAG): 5 Style bagi geri, gorsele yazim yok",
-            R["ilanlar"][0]["durum"] == "PASS" and api.bag == {v["value"]: v["image_id"] for v in HAM["variation_images"]})
+    rk = {x["listing_image_id"]: x["rank"] for x in api.img}
+    kontrol("bag onarimi (YD_KAPAK_BAG): 5 Style bagi sira 6-10'a geri, gorsele yazim yok",
+            R["ilanlar"][0]["durum"] == "PASS" and {k: rk.get(v) for k, v in api.bag.items()} == K.STIL_SIRA)
 
 
 def devam_zaten_blok(hz):
@@ -232,10 +238,10 @@ def devam_zaten_blok(hz):
             Rk["ilanlar"][0]["durum"] == "DEVAM" and damga in Rk["ilanlar"][0]["neden"][0])
     kontrol(f"DEVAM kota tahmini son tamamlanan sil/yukle'den (devam_basla 1; en kotu {Rk['ilanlar'][0]['en_kotu']})",
             K.devam_basla([("yukle",), ("kapak",), ("bag",), ("sil", 1), ("sira",), ("bag",)], 3) == 1
-            and Rk["ilanlar"][0]["en_kotu"] == Y.istek_en_kotu([tuple(x) for x in json.loads(dv.read_text())["ilanlar"][LID]["plan"]], 1, ilk=False, n=13))
+            and Rk["ilanlar"][0]["en_kotu"] == Y.istek_en_kotu([tuple(x) for x in json.loads(dv.read_text())["ilanlar"][LID]["plan"]], 1, ilk=False, n=10))
     rc, R = yaz(api, hz, pk, "y4b", Rk["plan_damga"], dv, il)                # YENI kuru damgasiyla (inceleme 27 Eki bulgu 1)
     kontrol(f"yarim ilan, yeni kuru damgasi: kayitli planla DEVAM, PASS, ikinci yukleme yok (yukleme {api.n_yukle})",
-            R["ilanlar"][0]["durum"] == "PASS" and api.n_yukle == 1 and Rk["plan_damga"] != damga)
+            R["ilanlar"][0]["durum"] == "PASS" and api.n_yukle == 10 and Rk["plan_damga"] != damga)
     # yarim ilan + manifest yok (HAM eksik): cokmez, DUR, cikis 1, durum dosyalari yazilir
     api3 = SahteYD(); _, R, po3 = kuru(api3, hz, "k7"); d7, i7 = durum_dosyalari("d7")
     orig = api3._k
@@ -271,11 +277,10 @@ def bloklar(hz):
     a = SahteYD(); a.bag["Botanical"] = 8725886577; blok(a, "Botanical bagli gorsel 8725886577")
     a = SahteYD(); a.bag.pop("Layers"); blok(a, "canli Style bagi 4 kayit")
     a = SahteYD(); a.img[5]["listing_image_id"] = 1234; blok(a, "canli kimlik kumesi yedekten farkli")
-    a = SahteYD(); a.img[2]["rank"], a.img[3]["rank"] = a.img[3]["rank"], a.img[2]["rank"]; blok(a, "sirasi yedekten")
-    a = SahteYD(); a.img[4]["alt_text"] = "yeni elle yazilmis"; blok(a, "alt metinler (rank 2-13) yedekten")
+    a = SahteYD(); a.bag["Layers"] = a.img[2]["listing_image_id"]; blok(a, "canli Style baglari yedekteki baglardan farkli")
     hz2 = hazir_kur("h2")
-    (hz2 / LID / "hedef" / "01_1.jpg").write_bytes((hz2 / LID / "hedef" / "01_1.jpg").read_bytes() + b"x")
-    blok(SahteYD(), "sha256 manifest", hz2)
+    (hz2 / LID / "hedef" / "04_4.jpg").write_bytes((hz2 / LID / "hedef" / "04_4.jpg").read_bytes() + b"x")
+    blok(SahteYD(), "04_4.jpg (ORTAK_Y04.jpg) sha256 manifest", hz2)
     hz3 = hazir_kur("h3", kapak_boyut=(3000, 2250))
     _, R, _ = kuru(SahteYD(), hz3, "kb3")
     kontrol("BLOK (liste kapisi): kapak 3000x2250", R["ilanlar"][0]["durum"] == "BLOK" and "2400x2400" in " ".join(R["ilanlar"][0]["neden"]))
@@ -286,10 +291,10 @@ def kota_ve_kilit(hz):
     _, R, po = kuru(api, hz, "k6")
     damga = R["plan_damga"]
     dv, il = durum_dosyalari("d6")
-    api.remaining = 150
+    api.remaining = EN_KOTU + 5
     rc, R = yaz(api, hz, po, "y6", damga, dv, il)
-    kontrol("kota: kalan 150 < en kotu + 10 -> KALAN, ilan baslamadi", R["ilanlar"][0]["durum"] == "KALAN" and not api.yaz)
-    api.remaining = 5000; api.img[0]["alt_text"] = "degisti"
+    kontrol(f"kota: kalan {EN_KOTU + 5} < en kotu + 10 -> KALAN, ilan baslamadi", R["ilanlar"][0]["durum"] == "KALAN" and not api.yaz)
+    api.remaining = 5000; api.img[2]["rank"], api.img[3]["rank"] = api.img[3]["rank"], api.img[2]["rank"]
     rc, R = yaz(api, hz, po, "y6b", damga, dv, il)
     kontrol("plan kilidi: canli durum kuru plandan farkli -> BLOK", R["ilanlar"][0]["durum"] == "BLOK" and not api.yaz)
     try:
