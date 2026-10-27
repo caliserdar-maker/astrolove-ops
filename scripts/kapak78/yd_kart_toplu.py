@@ -87,25 +87,27 @@ def girdiler(d):
 
 
 def kontak(satirlar, hedef):
-    """KONTAK_78.jpg: 6 cift / satir, cift basina Y02 / Y03 / Y05 (144x108), ad + durum; < 300 KB"""
-    tw, th, et = 144, 108, 18
-    blok = 3 * tw + 12
-    sut = 6; sat = (len(satirlar) + sut - 1) // sut
-    T = Image.new("RGB", (sut * blok + 12, sat * (th + et + 8) + 8), "white"); d = ImageDraw.Draw(T)
+    """KONTAK_78.jpg: 6 cift / satir, cift basina Y02 / Y03 / Y05 kucuk + ad / durum; < 300 KB (once kalite, sonra olcek dusurulur).
+    Ilk kosu 40517375784: 144x108 kucuklerle kalite 32'de 348 KB -> DUR."""
     try:
         f = ImageFont.load_default(size=12)
     except TypeError:
         f = ImageFont.load_default()
-    for i, s in enumerate(satirlar):
-        r, c = divmod(i, sut); x0, y0 = 12 + c * blok, 8 + r * (th + et + 8)
-        d.text((x0, y0), f"{s['cift']} {s['durum']}", fill=(0, 0, 0) if s["durum"] == "PASS" else (180, 0, 0), font=f)
-        for j, p in enumerate(s.get("kucuk", [])):
-            T.paste(p, (x0 + j * tw, y0 + et))
-    for q in (70, 60, 50, 40, 32):
-        b = io.BytesIO(); T.save(b, "JPEG", quality=q)
-        if b.tell() < KONTAK_KB * 1024:
-            hedef.write_bytes(b.getvalue()); return dict(boyut=list(T.size), kalite=q, kb=round(b.tell() / 1024, 1))
-    raise SystemExit(f"DUR: KONTAK_78.jpg {b.tell() / 1024:.0f} KB (>= {KONTAK_KB})")
+    for olcek in (1.0, 0.85, 0.72, 0.6, 0.5):
+        tw, th, et = round(144 * olcek), round(108 * olcek), 18
+        blok = 3 * tw + 12; sut = 6; sat = (len(satirlar) + sut - 1) // sut
+        T = Image.new("RGB", (sut * blok + 12, sat * (th + et + 8) + 8), "white"); d = ImageDraw.Draw(T)
+        for i, s in enumerate(satirlar):
+            r, c = divmod(i, sut); x0, y0 = 12 + c * blok, 8 + r * (th + et + 8)
+            d.text((x0, y0), f"{s['cift']} {s['durum']}", fill=(0, 0, 0) if s["durum"] == "PASS" else (180, 0, 0), font=f)
+            for j, p in enumerate(s.get("kucuk", [])):
+                T.paste(p.resize((tw, th), Image.LANCZOS), (x0 + j * tw, y0 + et))
+        for q in (75, 65, 55, 45, 38):
+            b = io.BytesIO(); T.save(b, "JPEG", quality=q, optimize=True)
+            if b.tell() < KONTAK_KB * 1024:
+                hedef.write_bytes(b.getvalue())
+                return dict(boyut=list(T.size), kucuk=[tw, th], kalite=q, kb=round(b.tell() / 1024, 1), durum="PASS")
+    return dict(durum="FAIL", kb=round(b.tell() / 1024, 1))
 
 
 def cift_uret(is_):
@@ -204,6 +206,8 @@ def main(argv=None):
     with open(out / "MANIFEST.csv", "w", newline="", encoding="utf-8") as fh:
         w = csv.DictWriter(fh, fieldnames=ALAN, lineterminator="\n"); w.writeheader(); w.writerows(man)
     ko = kontak(sonuc, out / "KONTAK_78.jpg")
+    if ko["durum"] != "PASS":
+        print(f"::error::KONTAK_78.jpg {ko['kb']} KB (>= {KONTAK_KB})")
     for s in sonuc:
         s.pop("kucuk", None)
     pas = [s for s in sonuc if s["durum"] == "PASS"]; fail = [s for s in sonuc if s["durum"] != "PASS"]
@@ -219,7 +223,7 @@ def main(argv=None):
                  + "".join(f"| {s['cift']} | {s['durum']} | {s.get('r2_bant_ncc', '-')} | {s.get('y03_poster_ncc', '-')} | "
                            f"{s.get('y05_poster_ncc', '-')} |\n" for s in sonuc))
     print(f"OZET: PASS {len(pas)}/{len(rows)} | dosya {len(man)}/{beklenen_dosya} | ayni sha {len(cift_sha)} | kontak {ko}")
-    return 0 if not fail and not cift_sha and len(man) == beklenen_dosya else 1
+    return 0 if not fail and not cift_sha and len(man) == beklenen_dosya and ko["durum"] == "PASS" else 1
 
 
 if __name__ == "__main__":
