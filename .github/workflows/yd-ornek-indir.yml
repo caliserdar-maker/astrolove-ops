@@ -1,0 +1,113 @@
+name: yd-ornek-indir
+# YD ornek Canva disa aktarimlarini (kapak Y01 + stil Y06-Y10, 4:3) mevcut YD_KAPAK_V1/<hedef_damga> klasorune indirir ve MANIFEST.csv'ye
+# ekler (Merkez 27 Eki gorev A: METIN_KAPI olmadigi icin yd-kapak-tasi kullanilamadi). ETSY API YOK. Girdi: Drive TSV (cift, kart_no, design_id,
+# url) dosya id ile; imzali URL ::add-mask:: ile maskelenir, loga / Drive'a yazilmaz. Kapilar: JPEG, 3000x2250, ad <CIFT>_Y<NN> (yd78 + kart
+# 1..10), klasorde ayni ad yok (uzerine yazma yok), sha256 klasordeki hicbir dosyayla ayni degil. Biri tutmazsa o satir FAIL, dosya yazilmaz.
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      tsv_id: {description: "Drive dosya id (TSV: cift, kart_no, design_id, url)", required: true}
+      hedef_damga: {description: "TEMP/YD_KAPAK_V1/<damga>", required: true, default: "20261027_141146"}
+jobs:
+  indir:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Girdi kapisi
+        env: {TSV_ID: "${{ inputs.tsv_id }}", HD: "${{ inputs.hedef_damga }}"}
+        run: '[[ "$TSV_ID" =~ ^[A-Za-z0-9_-]{20,80}$ && "$HD" =~ ^[0-9]{8}_[0-9]{6}$ ]] || { echo "::error::girdi"; exit 1; }'
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q pillow==11.0.0
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || { sudo apt-get install -y -qq rclone >/dev/null; }
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: TSV + mevcut klasor
+        env: {TSV_ID: "${{ inputs.tsv_id }}", HD: "${{ inputs.hedef_damga }}"}
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _mevcut _yeni
+          rclone backend copyid gdrive: "$TSV_ID" _work/girdi.tsv -q
+          K="gdrive:ASTROLOVE/TEMP/YD_KAPAK_V1/$HD"
+          rclone lsjson "$K" --max-depth 1 >/dev/null || { echo "::error::hedef klasor yok: YD_KAPAK_V1/$HD"; exit 1; }
+          rclone copy "$K" _mevcut --include "*_Y[0-9][0-9].jpg" --include "MANIFEST.csv" --max-depth 1 --transfers 16 -q
+          echo "mevcut jpg: $(ls _mevcut/*.jpg | wc -l)"
+      - name: Indir + kontrol
+        run: |
+          python3 - <<'PY'
+          import csv, hashlib, io, sys
+          from pathlib import Path
+          sys.path.insert(0, "scripts/kapak78")
+          import galeri_tasi as G
+          from PIL import Image
+          ciftler = {r["cift"] for r in csv.DictReader(open("data/pod/yd78_ids.csv"))}
+          mev = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in Path("_mevcut").glob("*.jpg")}
+          shalar = set(mev.values()); yeni, fail = [], []
+          rows = [r for r in csv.DictReader(open("_work/girdi.tsv", encoding="utf-8-sig"), delimiter="\t") if r.get("url")]
+          for r in rows:
+              G.maskele(r["url"].strip())
+          for r in rows:
+              c = r["cift"].strip().upper()
+              try:
+                  k = int(r["kart_no"]); ad = f"{c}_Y{k:02d}.jpg"
+              except ValueError:
+                  fail.append((r["cift"], "kart_no gecersiz")); continue
+              if c not in ciftler or not 1 <= k <= 10:
+                  fail.append((ad, "cift / kart_no gecersiz")); continue
+              if ad in mev:
+                  fail.append((ad, "klasorde ayni ad var (uzerine yazilmaz)")); continue
+              try:
+                  b = G.indir(r["url"].strip())
+              except Exception as e:  # noqa: BLE001
+                  fail.append((ad, f"indirme {type(e).__name__} {getattr(e, 'code', '')}")); continue
+              h = hashlib.sha256(b).hexdigest()
+              try:
+                  im = Image.open(io.BytesIO(b)); f, bt = im.format, im.size
+              except Exception:  # noqa: BLE001
+                  f, bt = None, None
+              if b[:3] != b"\xff\xd8\xff" or f != "JPEG" or bt != (3000, 2250):
+                  fail.append((ad, f"JPEG 3000x2250 degil ({f} {bt})")); continue
+              if h in shalar:
+                  fail.append((ad, "sha256 klasordeki baska dosyayla ayni")); continue
+              shalar.add(h); (Path("_yeni") / ad).write_bytes(b)
+              yeni.append(dict(ad=ad, cift=c, kart_no=str(k), design_id=r["design_id"].strip()[:40], boyut="3000x2250", sha256=h, durum="YENI"))
+              print(f"{ad} YENI {len(b)} bayt sha {h[:16]}", flush=True)
+          for ad, n in fail:
+              print(f"::error::{ad} FAIL {n}")
+          if yeni:
+              alan = ["ad", "cift", "kart_no", "design_id", "boyut", "sha256", "durum"]
+              eski = list(csv.DictReader(open("_mevcut/MANIFEST.csv", encoding="utf-8"))) if Path("_mevcut/MANIFEST.csv").exists() else []
+              with open("_yeni/MANIFEST.csv", "w", newline="", encoding="utf-8") as fh:
+                  w = csv.DictWriter(fh, fieldnames=alan, lineterminator="\n"); w.writeheader()
+                  w.writerows({k: x.get(k, "") for k in alan} for x in eski + yeni)
+              print(f"MANIFEST: eski {len(eski)} + yeni {len(yeni)} = {len(eski) + len(yeni)} satir")
+          print(f"OZET: YENI {len(yeni)} FAIL {len(fail)} / {len(rows)} satir")
+          sys.exit(1 if fail or not yeni else 0)
+          PY
+      - name: Drive'a yaz
+        if: ${{ always() }}
+        env: {HD: "${{ inputs.hedef_damga }}"}
+        run: |
+          set -euo pipefail
+          K="gdrive:ASTROLOVE/TEMP/YD_KAPAK_V1/$HD"
+          if ls _yeni/*.jpg >/dev/null 2>&1; then
+            rclone copy _yeni "$K" --include "*.jpg" --max-depth 1 --immutable -q
+            rclone copyto _yeni/MANIFEST.csv "$K/MANIFEST.csv" -q
+            echo "Cikti: TEMP/YD_KAPAK_V1/$HD (yeni jpg: $(ls _yeni/*.jpg | wc -l))" | tee -a "$GITHUB_STEP_SUMMARY"
+          fi
+      - if: always()
+        run: rm -rf _work _mevcut _yeni ~/.config/rclone
