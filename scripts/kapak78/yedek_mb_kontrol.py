@@ -37,7 +37,8 @@ def indir(u, p, tekrar=4):
             time.sleep(2 ** i)
 
 
-def yedek(ilanlar, kok):
+def yedek(ilanlar, kok, beklenen=BEKLENEN, baslik="Poster 78 galeri yedegi"):
+    """A kismi. beklenen / baslik: YD (1st Anniversary) yedegi icin genellestirme (yd_yedek.py: 13, plan v3 adim 5); varsayilan poster."""
     isler, satir = [], []
     for k in ilanlar:
         d = kok / f"{k['listing_id']}_{k['cift']}"; d.mkdir(parents=True, exist_ok=True)
@@ -57,8 +58,8 @@ def yedek(ilanlar, kok):
     for k in ilanlar:
         d = kok / f"{k['listing_id']}_{k['cift']}"
         neden = []
-        if len(k["gorseller"]) != BEKLENEN:
-            neden.append(f"JSON'da {len(k['gorseller'])} gorsel (beklenen {BEKLENEN})")
+        if len(k["gorseller"]) != beklenen:
+            neden.append(f"JSON'da {len(k['gorseller'])} gorsel (beklenen {beklenen})")
         say = 0
         for g in k["gorseller"]:
             p = d / f"r{g['rank']}_{g['listing_image_id']}.jpg"
@@ -73,10 +74,10 @@ def yedek(ilanlar, kok):
             if bt != (g["full_width"], g["full_height"]):
                 neden.append(f"r{g['rank']} boyut {bt[0]}x{bt[1]} != {g['full_width']}x{g['full_height']}")
         toplam += say
-        satir.append([k["listing_id"], k["cift"], say, "PASS" if not neden and say == BEKLENEN else "FAIL", "; ".join(neden)])
+        satir.append([k["listing_id"], k["cift"], say, "PASS" if not neden and say == beklenen else "FAIL", "; ".join(neden)])
     gecti = sum(1 for s in satir if s[3] == "PASS")
     with open(kok / "OZET.md", "w", encoding="utf-8") as f:
-        f.write(f"# Poster 78 galeri yedegi\n\nilan PASS {gecti}/{len(satir)} | dosya {toplam} (beklenen {BEKLENEN * len(satir)})\n\n"
+        f.write(f"# {baslik}\n\nilan PASS {gecti}/{len(satir)} | dosya {toplam} (beklenen {beklenen * len(satir)})\n\n"
                 "| listing_id | cift | dosya | durum | not |\n|---|---|---|---|---|\n")
         f.writelines(f"| {' | '.join(map(str, s))} |\n" for s in satir)
     print(f"YEDEK OZET: ilan PASS {gecti}/{len(satir)} | dosya {toplam}")
