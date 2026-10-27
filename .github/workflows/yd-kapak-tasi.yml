@@ -55,7 +55,7 @@ jobs:
           if [ -n "$HD" ]; then
             K="gdrive:ASTROLOVE/TEMP/YD_KAPAK_V1/$HD"
             rclone lsjson "$K" --max-depth 1 >/dev/null || { echo "::error::hedef klasor yok ya da okunamadi: YD_KAPAK_V1/$HD"; exit 1; }
-            rclone copy "$K" _mevcut --include "*.jpg" --include "MANIFEST.csv" --include "IMZA.csv" --max-depth 1 --transfers 8 -q
+            rclone copy "$K" _mevcut --include "*_Y[0-9][0-9].jpg" --include "MANIFEST.csv" --include "IMZA.csv" --max-depth 1 --transfers 8 -q
             echo "mevcut: $(ls _mevcut/*.jpg 2>/dev/null | wc -l) jpg"
             echo "DAMGA=$HD" >> "$GITHUB_ENV"
           else
