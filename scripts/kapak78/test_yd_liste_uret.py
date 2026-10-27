@@ -141,6 +141,11 @@ class ListeTest(unittest.TestCase):
         (self.t / "HAM" / f"{LID}.json").write_text(json.dumps(HAM))
         galeri_kur(self.t, alt_ek={7: "Cancer and Libra — Timeless"}); self.assertIn("sira 7 alt metni gecersiz", self.neden())
         (self.t / "ALT.csv").write_text("cift,kart_no,alt\nCANCER_LIBRA,2,x\n"); self.assertIn("sira 3 alt metni gecersiz", self.neden())
+        galeri_kur(self.t, alt_ek={6: "Cancer and Libra bright white OBA-free print"}); self.assertIn("sira 6 alt metni gecersiz", self.neden())
+        galeri_kur(self.t, alt_ek={8: "Cancer & Libra First Page print"}); self.assertIn("sira 8 alt metni gecersiz", self.neden())
+        galeri_kur(self.t)
+        (self.t / "ALT.csv").write_text((self.t / "ALT.csv").read_text() + "CANCER_LIBRA,9,Layers print, shown on a wall\n")
+        self.assertEqual(kos(self.t)[0], 2)                                           # tirnaksiz virgul: girdi hatasi
 
 
 if __name__ == "__main__":

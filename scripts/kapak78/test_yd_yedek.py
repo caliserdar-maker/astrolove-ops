@@ -82,7 +82,7 @@ class YedekTest(unittest.TestCase):
     def test_01_pass_13_ve_baglar(self):
         rc, log, oz = self.kos([self.ilan("4595350971", "CANCER_LIBRA")])
         self.assertEqual(rc, 0, log + oz)
-        self.assertIn("ilan PASS 1/1 | dosya 13 (beklenen 13)", oz)
+        self.assertIn("ilan PASS 1/1 | dosya 13 (beklenen 13) | CDN kucultmesi 7 dosya", oz)
         d = self.out / "4595350971_CANCER_LIBRA"
         self.assertEqual(len(list(d.glob("r*_*.jpg"))), 13); self.assertTrue((d / "r1_8760104081.jpg").exists())
         b = list(csv.DictReader(open(self.out / "BAGLAR.csv")))
@@ -100,6 +100,7 @@ class YedekTest(unittest.TestCase):
         self.assertTrue(D.boyut_ok((3000, 2250), 3200, 2400)); self.assertTrue(D.boyut_ok((2400, 3000), 2400, 3000))
         self.assertFalse(D.boyut_ok((3000, 2000), 3200, 2400)); self.assertFalse(D.boyut_ok((2000, 1500), 2400, 1800))
         self.assertFalse(D.boyut_ok((2999, 2250), 3200, 2400))
+        self.assertFalse(D.boyut_ok((3000, 2250), None, 2400))
 
     def test_03_paylasilan_dosyaya_bagli_degil(self):
         self.assertNotIn("yedek_mb_kontrol", (HERE / "yd_yedek.py").read_text().split('"""', 2)[2])

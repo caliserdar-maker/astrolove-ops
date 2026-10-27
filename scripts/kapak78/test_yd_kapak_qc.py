@@ -70,6 +70,8 @@ class QcTest(unittest.TestCase):
                 src = cls.src[(c, k)]
                 if c == "LEO_VIRGO" and k == 7:
                     src = cls.src[("AQUARIUS_ARIES", 7)]                            # yanlis stil karti
+                if c == "AQUARIUS_ARIES" and k == 9:
+                    src = cls.src[("AQUARIUS_ARIES", 8)]                            # cift ici stil karismasi (Layers yerine First Page)
                 kart_yap(cls.sahne[k], src, c).save(cls.kapak / f"{c}_Y{k:02d}.jpg", quality=95)
         Image.fromarray(doku(900, (2400, 2400))).save(cls.kapak / "AQUARIUS_ARIES_Y02.jpg", quality=90)   # Y02 kare -> FAIL
         for k in (4, 5):
@@ -122,20 +124,43 @@ class QcTest(unittest.TestCase):
         self.assertEqual(Image.open(self.out / "KONTAK_01.jpg").size, (190 + 1500, 4 * 180))
 
     def test_03_esikle_pass_ve_fail(self):
-        (self.t / "esik.json").write_text(json.dumps(dict(kartlar={str(k): dict(poster_min=0.9, sahne_min=0.9) for k in NCC})))
+        (self.t / "esik.json").write_text(json.dumps(dict(kartlar={str(k): dict(poster_min=0.9, sahne_min=0.9, sahne_sha=self.ref_sha(k)) for k in NCC})))
         rc, log, s, J = self.kos("--esik", str(self.t / "esik.json"))
         self.assertEqual(s["CANCER_LIBRA_Y10.jpg"]["durum"], "PASS"); self.assertEqual(s["CANCER_LIBRA_Y02.jpg"]["durum"], "PASS")
         self.assertEqual(s["ORTAK_Y05.jpg"]["durum"], "PASS")
         self.assertIn("ncc_poster", " ".join(s["LEO_VIRGO_Y07.jpg"]["neden"]))
-        e2 = dict(kartlar={str(k): dict(poster_min=0.9, sahne_min=1.0001 if k == 9 else 0.9) for k in NCC})
+        e2 = dict(kartlar={str(k): dict(poster_min=0.9, sahne_min=1.0001 if k == 9 else 0.9, sahne_sha=self.ref_sha(k)) for k in NCC})
         (self.t / "esik2.json").write_text(json.dumps(e2))
         rc, log, s, J = self.kos("--esik", str(self.t / "esik2.json"))
         self.assertEqual(s["AQUARIUS_AQUARIUS_Y09.jpg"]["durum"], "FAIL"); self.assertEqual(s["AQUARIUS_AQUARIUS_Y08.jpg"]["durum"], "PASS")
+        e4 = dict(kartlar={str(k): dict(poster_min=0.9, sahne_min=0.9, sahne_sha="0" * 64) for k in NCC})
+        (self.t / "esik4.json").write_text(json.dumps(e4))
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(Q.main(["kontrol", "--kapak-dir", str(self.kapak), "--kaynak-dir", str(self.kaynak), "--stil-kaynak",
+                                     str(self.t / "STIL.csv"), "--ciftler", str(self.t / "ciftler.csv"), "--sablon", str(self.t / "SABLON.json"),
+                                     "--out", str(self.out), "--esik", str(self.t / "esik4.json")]), 2)   # sahne referansi onayli degil
         (self.t / "esik3.json").write_text(json.dumps(dict(poster_min=0.9, sahne_min=0.9)))
         with contextlib.redirect_stdout(io.StringIO()):
             self.assertEqual(Q.main(["kontrol", "--kapak-dir", str(self.kapak), "--kaynak-dir", str(self.kaynak), "--stil-kaynak",
                                      str(self.t / "STIL.csv"), "--ciftler", str(self.t / "ciftler.csv"), "--sablon", str(self.t / "SABLON.json"),
                                      "--out", str(self.out), "--esik", str(self.t / "esik3.json")]), 2)   # kart basina esik zorunlu
+
+    def ref_sha(self, k):
+        return __import__("hashlib").sha256((self.kapak / f"CANCER_LIBRA_Y{k:02d}.jpg").read_bytes()).hexdigest()
+
+    def test_06_cift_ici_stil_karismasi_ve_bicim(self):
+        rc, log, s, J = self.kos()
+        a = s["AQUARIUS_ARIES_Y09.jpg"]
+        self.assertEqual(a["en_yakin"], "AQUARIUS_ARIES"); self.assertEqual(a["en_yakin_stil"], 8)
+        self.assertIn("cift ici stil karismasi", " ".join(a["neden"]))
+        self.assertEqual(s["CANCER_LIBRA_Y02.jpg"]["olcum"], "bicim"); self.assertEqual(s["CANCER_LIBRA_Y06.jpg"]["olcum"], "ncc")
+
+    def test_07_metin_kapi_kart_no_yalniz_kapak(self):
+        (self.t / "mk2.tsv").write_text("cift\tkart_no\tdesign_id\tbaslik\tsatir_metni\tdurum\n"
+                                        + "".join(f"{c}\t1\tD\tb\t{c}\t{'FAIL' if c == 'LEO_VIRGO' else 'PASS'}\n{c}\t6\tD\tb\t-\tPASS\n" for c in CIFTLER))
+        rc, log, s, J = self.kos("--metin-kapi", str(self.t / "mk2.tsv"))
+        self.assertIn("METIN_KAPI", " ".join(s["LEO_VIRGO_Y01.jpg"]["neden"]))
+        self.assertNotIn("METIN_KAPI", " ".join(s["CANCER_LIBRA_Y01.jpg"]["neden"]))
 
     def test_04_sahne_maskesi_ve_ozet(self):
         rc, log, s, J = self.kos()
@@ -158,6 +183,7 @@ class QcTest(unittest.TestCase):
         self.assertEqual(sorted(r), [1, 6, 7, 8, 9, 10])
         self.assertEqual((r[1]["kaynak_image_id"], r[10]["kaynak_image_id"], r[6]["kaynak_image_id"]), ("8678064852", "8678064852", "8678059940"))
         self.assertEqual(r[9]["yedek_yol"], "4595350971_CANCER_LIBRA/r13_8725886577.jpg")
+        self.assertNotIn(b"\r", (self.t / "SK.csv").read_bytes())                    # LF (bash okumasi; inceleme 27 Eki)
 
 
 if __name__ == "__main__":

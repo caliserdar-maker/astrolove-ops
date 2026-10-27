@@ -240,7 +240,8 @@ def calistir(api, shop, a):
             s.update(durum="KALAN", neden=[dur]); continue
         dv = (devam.get("ilanlar") or {}).get(lid)
         bitmemis = bool(dv) and dv.get("son_ids") is not None and dv.get("adim", 0) < len(dv.get("plan") or [])
-        s["yarim"] = bitmemis       # yarim ilanin PASS disi her sonucu cikis 1 (inceleme 27 Eki: BLOK ile yesil bitmesin)
+        s["yarim"] = bitmemis or (dv or {}).get("durum") in ("FAIL", "DUR")   # yarim / son okumasi tutmamis ilanin PASS disi
+        # her sonucu cikis 1 (inceleme 27 Eki: BLOK ile yesil bitmesin)
         mp = hazir / lid / "manifest.json"
         if not bitmemis and o["durum"] != "HAZIR" and not mp.exists():
             s.update(durum="BLOK", neden=list(o["neden"])); continue
@@ -452,7 +453,7 @@ def sonlandir(api, shop, a):
         (out / "SONUC_SATIR.json").write_text(json.dumps(satir, indent=1, ensure_ascii=False), encoding="utf-8")
         if a.sonuc:
             V.sonuc_yaz(a.sonuc, satir, a)
-    kotu = [s for s in satir if s["durum"] in ("DUR", "FAIL") or (s.get("yarim") and s["durum"] not in ("PASS", "DEVAM", "KALAN"))]
+    kotu = [s for s in satir if s["durum"] in ("DUR", "FAIL") or (s.get("yarim") and s["durum"] not in ("PASS", "ZATEN", "DEVAM", "KALAN"))]
     return 1 if kotu else 0
 
 

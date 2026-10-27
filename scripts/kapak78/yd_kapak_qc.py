@@ -16,7 +16,9 @@ kontrol: 78 x 8 + 2 = 626 dosya (Merkez 27 Eki):
            (kart <-> onayli ornek ciftin (--sahne-cift, CANCER_LIBRA) ayni karti, kutu + 12 px ve SABLON maske kutulari disinda),
            en_yakin (kutu 1/8 olcekte o kartin 78 kaynagiyla NCC; en yakin kendi cifti degilse FAIL, esiksiz kapi)
          - Y01: METIN_KAPI.tsv (adim 1) satiri yan yana (PASS degilse FAIL)
-         Esikler (--esik ESIK.json: kartlar.<k>.poster_min / sahne_min) VERILMEZSE durum OLCUM (PASS yok; yukleme kapisi gecmez).
+         - Y06-Y10: en_yakin_stil (ayni ciftin 5 stil kaynagi icinde en yakin kendi stili degilse FAIL)
+         - Y02-Y05: yalniz JPEG + boyut (olcum "bicim"); icerik (dogru cift / dogru kart) Serdar'in kontak onayinda
+         Esikler (--esik ESIK.json: kartlar.<k>.poster_min / sahne_min / sahne_sha) VERILMEZSE durum OLCUM (PASS yok; yukleme kapisi gecmez).
          Esikler ornekler uzerinde olculup Serdar onayiyla sabitlenir; bu betik esik onermez.
 Cikti: QC_RAPOR.json (esik, sablon, kart_ozet, dosyalar: dosya, cift, kart_no, ncc_poster, ncc_sahne, en_yakin, sha256, durum, neden),
        QC_RAPOR.md, KONTAK_<NN>.jpg (sayfa basina 13 cift x 10 kart, durum + NCC)."""
@@ -37,6 +39,7 @@ KARTLAR = tuple(range(1, 11))
 ORTAK = (4, 5)
 KART_BOYUT = {k: ((3000, 2250) if k in (2, 3, 4, 5) else (2400, 2400)) for k in KARTLAR}
 NCC_KART = (1, 6, 7, 8, 9, 10)     # poster bolgesi olan kartlar (kapak + 5 stil karti; Merkez 27 Eki)
+STIL_NCC = (6, 7, 8, 9, 10)
 STIL_KART = {1: "Botanical", 6: "Starlit", 7: "Timeless", 8: "First Page", 9: "Layers", 10: "Botanical"}
 
 
@@ -180,11 +183,14 @@ def jpeg_kontrol(p, boyut=BOYUT):
 
 
 def metin_kapi_oku(p):
-    """cift -> satir; ayni ciftte PASS satiri varsa o (galeri_tasi metin_kapi_oku ile ayni secim)"""
+    """cift -> kapak (Y01) satiri; ayni ciftte PASS satiri varsa o. kart_no sutunu varsa yalniz kart_no 1 satirlari
+    (inceleme 27 Eki: baska kartin PASS satiri kapagi gecirmesin)."""
     if not p:
         return {}
     out = {}
     for r in csv.DictReader(open(p, encoding="utf-8-sig"), delimiter="\t"):
+        if "kart_no" in r and (r.get("kart_no") or "").strip() != "1":
+            continue
         c = (r.get("cift") or "").strip().upper()
         if c not in out or (r.get("durum") or "").strip() == "PASS":
             out[c] = r
@@ -241,10 +247,11 @@ def kontrol(a):
     esik = json.loads(Path(a.esik).read_text(encoding="utf-8")) if a.esik else None
     if esik is not None:
         try:
-            esik = {k: dict(poster_min=float(esik["kartlar"][str(k)]["poster_min"]), sahne_min=float(esik["kartlar"][str(k)]["sahne_min"]))
+            esik = {k: dict(poster_min=float(esik["kartlar"][str(k)]["poster_min"]), sahne_min=float(esik["kartlar"][str(k)]["sahne_min"]),
+                            sahne_sha=str(esik["kartlar"][str(k)]["sahne_sha"]))
                     for k in NCC_KART}
         except (KeyError, TypeError, ValueError):
-            print("::error::ESIK.json kartlar.<1,6..10>.poster_min / sahne_min sayi degil"); return 2
+            print("::error::ESIK.json kartlar.<1,6..10>.poster_min / sahne_min sayi ya da sahne_sha (onayli ornek kartin sha256'si) yok"); return 2
     ciftler = [r["cift"] for r in csv.DictReader(open(a.ciftler, encoding="utf-8-sig")) if r.get("cift")]
     if a.sahne_cift not in ciftler:
         print(f"::error::sahne cifti {a.sahne_cift} listede yok"); return 2
@@ -266,8 +273,18 @@ def kontrol(a):
             p = kdir / r["yedek_yol"] if r else None
             if p and p.exists():
                 kucuk[c] = kirp_olcekle(gri(p, 8), [v / 8 for v in k_ic], (k8w, k8h))
-        hazir[k] = dict(R2=R2, m2=sahne_maske(sb, R2.shape, 2), a8=a8, wh=(k8w, k8h), kucuk=kucuk,
-                        ref_sha=hashlib.sha256(rp.read_bytes()).hexdigest())
+        ref_sha = hashlib.sha256(rp.read_bytes()).hexdigest()
+        if esik is not None and esik[k]["sahne_sha"] != ref_sha:   # inceleme 27 Eki: referans onayli dosyaya sabit
+            print(f"::error::sahne referansi {rp.name} sha256 ESIK.json'daki onayli ornekle ayni degil"); return 2
+        stil = {}    # ayni ciftin 5 stil kaynagi bu kartin kirpimiyla (cift ici stil karismasi; inceleme 27 Eki)
+        if k in STIL_NCC:
+            for c in ciftler:
+                for k2 in STIL_NCC:
+                    r = sk.get((c, k2))
+                    p = kdir / r["yedek_yol"] if r else None
+                    if p and p.exists():
+                        stil[(c, k2)] = kirp_olcekle(gri(p, 8), [v / 8 for v in k_ic], (k8w, k8h))
+        hazir[k] = dict(R2=R2, m2=sahne_maske(sb, R2.shape, 2), a8=a8, wh=(k8w, k8h), kucuk=kucuk, stil=stil, ref_sha=ref_sha)
     satir = []
     isler = [(c, k) for c in ciftler for k in KARTLAR if k not in ORTAK] + [("ORTAK", k) for k in ORTAK]
     for n, (c, k) in enumerate(isler, 1):
@@ -297,11 +314,18 @@ def kontrol(a):
                 s["en_yakin"] = max(skor, key=skor.get); s["en_yakin_ncc"] = round(skor[s["en_yakin"]], 4)
                 if s["en_yakin"] != c:
                     s["neden"].append(f"poster bolgesi en cok {s['en_yakin']} kaynagina benziyor (kendi cifti degil)")
+                if k in STIL_NCC:
+                    ss = {k2: ncc(P8, h["stil"][(c, k2)]) for k2 in STIL_NCC if (c, k2) in h["stil"]}
+                    if ss:
+                        s["en_yakin_stil"] = max(ss, key=ss.get)
+                        if s["en_yakin_stil"] != k:
+                            s["neden"].append(f"poster bolgesi en cok Y{s['en_yakin_stil']:02d} stil kaynagina benziyor (cift ici stil karismasi)")
                 if esik is not None:
                     if s["ncc_poster"] < esik[k]["poster_min"]:
                         s["neden"].append(f"ncc_poster {s['ncc_poster']} < {esik[k]['poster_min']}")
                     if s["ncc_sahne"] < esik[k]["sahne_min"]:
                         s["neden"].append(f"ncc_sahne {s['ncc_sahne']} < {esik[k]['sahne_min']}")
+        s["olcum"] = "ncc" if k in NCC_KART else "bicim"   # Y02-Y05: yalniz JPEG + boyut; icerik Serdar'in kontak onayinda
         s["durum"] = "FAIL" if s["neden"] else ("PASS" if esik is not None else "OLCUM")
         satir.append(s)
         if n % 50 == 0 or s["neden"] or n == len(isler):
@@ -354,8 +378,8 @@ def stil_kaynak_uret(baglar, kaynak_csv, ciftler, out):
         for h in hata[:10]:
             print(f"::error::{h}")
         return 2
-    with open(out, "w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=list(rows[0])); w.writeheader(); w.writerows(rows)
+    with open(out, "w", newline="", encoding="utf-8") as f:   # LF (inceleme 27 Eki: CRLF bash okumasinda yola \r ekliyordu)
+        w = csv.DictWriter(f, fieldnames=list(rows[0]), lineterminator="\n"); w.writeheader(); w.writerows(rows)
     print(f"YD_STIL_KAYNAK: {len(rows)} satir ({len(rows) // len(STIL_KART)} cift x {len(STIL_KART)} kart) -> {out}")
     return 0
 

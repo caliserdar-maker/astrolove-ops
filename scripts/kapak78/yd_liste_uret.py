@@ -21,7 +21,8 @@ liste : ilan basina <out>/<ilan>/LISTE_<ilan>.csv + manifest.json + hedef/NN_N.j
     dosya: 10 kaynak dosya var, JPEG, karta gore boyut, sha256 tasima MANIFEST satiriyla ayni (YENI / ATLA / MEVCUT); 10 sha tekil.
     QC: QC_RAPOR.json'da 10 dosyanin her biri PASS ve sha256 bu dosyanin sha256'si (adim 4).
     yedek: adim 5 yedeginin OZET.md satiri PASS / 13 dosya; yedek klasor listesinde 13 r<rank>_<id>.jpg (boyut > 0) (hepsi silinecek).
-    alt metin: 10 sirada bos degil, <= 250, eski78 YASAK_ALT (uzun / orta tire, yasak ifade, Art'siz marka) yok.
+    alt metin: 10 sirada bos degil, <= 250, eski78 YASAK_ALT (uzun / orta tire, yasak ifade, Art'siz marka) ve etsy_common.RU_YASAK
+         (OBA, bright white, omur yili, 12-colour, ISO 9706, ...) yok; & ' " < > yok (Etsy kacisi geri okumayi bozabilir).
 Cikis: 0 (BLOK olsa da; kararlar OZET'te), 2 girdi hatasi."""
 import argparse
 import csv
@@ -35,6 +36,10 @@ from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "etsy"))
 import eski78_gorsel_yukle as Y  # noqa: E402
+from etsy_common import RU_YASAK  # noqa: E402  (CLAUDE.md urun metni yasaklari: OBA, bright white, omur yili, 12-colour, ...)
+
+import re  # noqa: E402
+HTML_KAR = re.compile(r"[&'\"<>]")   # Etsy alt metni HTML kacisli dondurebilir (inceleme 27 Eki); geri okuma eslesmesi bozulmasin
 
 N_ESKI, N_HEDEF = 13, 10
 STIL_PID = 513
@@ -191,7 +196,9 @@ def yedek_kapisi(lid, cift, g, ozet, liste):
 def alt_oku(p):
     """ALT.csv (cift, kart_no, alt) -> {(cift, kart): alt}; Canva alt_text'leri (Merkez)"""
     out = {}
-    for r in csv.DictReader(open(p, encoding="utf-8-sig")):
+    for n, r in enumerate(csv.DictReader(open(p, encoding="utf-8-sig")), 2):
+        if None in r or any(v is None for v in r.values()):      # inceleme 27 Eki: tirnaksiz virgul alt metni sessizce keserdi
+            raise SystemExit(f"ALT.csv satir {n}: sutun sayisi 3 degil (virgullu alt metin tirnak icinde olmali)")
         k = (r["cift"].strip().upper(), int(r["kart_no"]))
         if k in out and out[k] != r["alt"]:
             raise SystemExit(f"ALT.csv {k} iki farkli alt metin")
@@ -243,8 +250,8 @@ def ilan_hazirla(r, d):
             alt = alt_metin(r["a"], r["b"])
         else:
             alt = d["alt"].get((cift, k)) or (d["alt"].get(("ORTAK", k)) if k in ORTAK else None) or ""
-        if not alt or len(alt) > 250 or Y.YASAK_ALT.search(alt):
-            neden.append(f"sira {k} alt metni gecersiz (bos / >250 / yasak ifade / tire)")
+        if not alt or len(alt) > 250 or Y.YASAK_ALT.search(alt) or RU_YASAK.search(alt) or HTML_KAR.search(alt):
+            neden.append(f"sira {k} alt metni gecersiz (bos / >250 / yasak ifade / tire / & ' \" < >)")
         if kp.exists():
             shutil.copyfile(kp, hd / hedef_ad(k))
         shas[k] = s_
