@@ -2,7 +2,7 @@
 """YD (1st Anniversary) 78 ilan: kapak + yeni 10'lu galeri yukleyicisi, TEK SEFERDE (plan v3 adim 7; Serdar 27 Eki). ETSY'YE YAZAR
 yalniz --kuru yokken + --confirm YD_KAPAK + --plan-damga (kuru kosunun PLAN_YD.json'una kilitli). Kuru kosu, pilot ve yukleme ayri
 Serdar onayiyla (poster galerisi 78/78 sonrasi).
-Galeri (rank): 1 kapak (bagsiz), 2 sembol, 3 kisisellestirme, 4 format (ORTAK), 5 surec (ORTAK), 6 Starlit, 7 Timeless, 8 First Page,
+Galeri (rank): 1 kapak (bagsiz), 2 sembol, 3 kisisellestirme, 4 format (ORTAK), 5 surec (cifte ozel), 6 Starlit, 7 Timeless, 8 First Page,
 9 Layers, 10 Botanical. Style (513) baglari yeni kartlara: Starlit->6 ... Botanical->10. Eski 13 gorselin hepsi silinir (adim 5 yedegi).
 Yazim yolu scripts/etsy/eski78_gorsel_yukle.py bir_ilan; poster v10 ile AYNI genellestirme, YD profili (hedef_n=10, degerler=Style 513,
 cdn=False, ara_tekrar=True): adim_plani aynen (kapak yukle -> kapak rank 1 -> her stil kartindan once bagsiz bir eski gorsel sil ->
@@ -49,7 +49,7 @@ STIL_PID = 513
 STILLER = ("Starlit", "Timeless", "First Page", "Layers", "Botanical")
 STIL_SIRA = {"Starlit": 6, "Timeless": 7, "First Page": 8, "Layers": 9, "Botanical": 10}   # Serdar 27 Eki
 N_ESKI = 13        # canli YD galerisi (YD_OZET 78/78); hepsi yedeklenip silinir
-KART_BOYUT = {k: ((3000, 2250) if k in (2, 3, 4, 5) else (2400, 2400)) for k in range(1, N + 1)}
+KART_BOYUT = {k: (3000, 2250) for k in range(1, N + 1)}   # Merkez 27 Eki karar e: tum kartlar 4:3
 KAPI_OKUMA = 4     # ilan, galeri, variation-images, envanter
 
 

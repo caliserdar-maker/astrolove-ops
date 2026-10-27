@@ -5,17 +5,17 @@ ETSY API YOK, Drive yok: girdiler yerel. Yukleme scripts/kapak78/yd_kapak_yukle.
 kimlik: data/pod/yd78_ids.csv (listing_id, cift, a, b) KAPAK_KAYNAK.csv tur=yd satirlarindan; YD_OZET.csv ile 78/78 ayni olmali
         (ayni listing_id kumesi, ayni cift; 78 tekil cift). Tutmazsa cikis 2, dosya yazilmaz.
 liste : ilan basina <out>/<ilan>/LISTE_<ilan>.csv + manifest.json + hedef/NN_N.jpg; <out>/LISTE_OZET.json, LISTE_OZET.md, ESLEME.csv.
-  Galeri (rank): 1 kapak Y01, 2 sembol Y02, 3 kisisellestirme Y03, 4 format ORTAK_Y04, 5 surec ORTAK_Y05, 6 Starlit Y06, 7 Timeless Y07,
-  8 First Page Y08, 9 Layers Y09, 10 Botanical Y10. Y01 ve Y06-Y10 2400x2400, Y02-Y05 3000x2250.
+  Galeri (rank): 1 kapak Y01, 2 sembol Y02, 3 kisisellestirme Y03, 4 format ORTAK_Y04, 5 surec Y05 (cifte ozel; Merkez 27 Eki karar d),
+  6 Starlit Y06, 7 Timeless Y07, 8 First Page Y08, 9 Layers Y09, 10 Botanical Y10. TUM kartlar 3000x2250 (Merkez 27 Eki karar e).
   LISTE: sira 1-10 DEGISTIR (hedef_gorsel NN_N.jpg; eski78 hedef_id -> sira), eski 13 gorselin hepsi CIKAR (adim 5 yedegi).
   Alt metin: sira 1 kararlastirilan metin "<A> and <B> 1st anniversary zodiac print, paper anniversary gift" (Serdar 26 Eki aksam);
-  2-10 Canva alt_text'leri (--alt ALT.csv: cift, kart_no, alt; 4 / 5 icin cift ORTAK satiri da gecerli).
+  2-10 Canva alt_text'leri (--alt ALT.csv: cift, kart_no, alt; 4 icin cift ORTAK satiri da gecerli).
   manifest: variation_images = Style (513) bagi yeni stil kartlarina: Starlit->6, Timeless->7, First Page->8, Layers->9, Botanical->10
     (value_id HAM'dan); kapak bagsiz; yedek_ids / yedek_galeri / yedek_baglar (HAM), botanical_id (KAPAK_KAYNAK kaynak_image_id),
     hedef (10 dosya: sira, ad, kaynak, sha256, tasima_sha256, alt), qc (QC_RAPOR satirlari), ham_sha.
   ESLEME.csv: listing_id, cift, sira, kaynak (<CIFT>_Y<NN>.jpg / ORTAK_Y<NN>.jpg), hedef_gorsel (NN_N.jpg), sha256, tasima_sha256, durum.
   Ilan kapilari (biri tutmazsa BLOK; dosyalar yine yazilir, yukleyici BLOK ilana yazmaz):
-    HAM: state active, 13 gorsel, rank 1..13 tekil, tekil kimlik, kapak 2400x2400; 5 Style bagi (property 513, 5 ad, 5 farkli gorsel,
+    HAM: state active, 13 gorsel, rank 1..13 tekil, tekil kimlik, canli (eski) kapak 2400x2400; 5 Style bagi (property 513, 5 ad, 5 farkli gorsel,
          hepsi galeride, kapak bagsiz); Botanical bagli gorsel = KAPAK_KAYNAK kaynak_image_id ve rank 12; envanter Style value_id'leri
          bag value_id'leriyle ayni.
     dosya: 10 kaynak dosya var, JPEG, karta gore boyut, sha256 tasima MANIFEST satiriyla ayni (YENI / ATLA / MEVCUT); 10 sha tekil.
@@ -45,9 +45,10 @@ N_ESKI, N_HEDEF = 13, 10
 STIL_PID = 513
 STILLER = ("Starlit", "Timeless", "First Page", "Layers", "Botanical")
 STIL_SIRA = {"Starlit": 6, "Timeless": 7, "First Page": 8, "Layers": 9, "Botanical": 10}   # Serdar 27 Eki
-ORTAK = (4, 5)
-BOYUT = (2400, 2400)
-KART_BOYUT = {k: ((3000, 2250) if k in (2, 3, 4, 5) else (2400, 2400)) for k in range(1, 11)}
+ORTAK = (4,)                                   # Merkez 27 Eki karar d: Y05 cifte ozel
+BOYUT = (3000, 2250)                           # Merkez 27 Eki karar e: yeni 10 kartin hepsi 4:3
+HAM_KAPAK = (2400, 2400)                       # canli (eski) galerinin kapagi (HAM kapisi; yukleme oncesi durum)
+KART_BOYUT = {k: BOYUT for k in range(1, 11)}
 ALT_SABLON = "<A> and <B> 1st anniversary zodiac print, paper anniversary gift"   # Serdar 26 Eki aksam
 LISTE_ALAN = ["hedef_sira", "hedef_gorsel", "hedef_alt", "islem", "simdi_sira", "simdi_id"]
 ESLEME_ALAN = ["listing_id", "cift", "sira", "kaynak", "hedef_gorsel", "sha256", "tasima_sha256", "durum"]
@@ -145,7 +146,7 @@ def ham_kapisi(h, botanical_id):
         neden.append(f"HAM galeri {len(g)} gorsel / {len(set(ids))} tekil (13 beklenir)")
     if [x.get("rank") for x in g] != list(range(1, len(g) + 1)):
         neden.append(f"HAM rank 1..{len(g)} tekil/artan degil")
-    if g and (g[0].get("full_width"), g[0].get("full_height")) != BOYUT:
+    if g and (g[0].get("full_width"), g[0].get("full_height")) != HAM_KAPAK:
         neden.append(f"HAM kapak {g[0].get('full_width')}x{g[0].get('full_height')} (2400x2400 beklenir)")
     bag = {}
     for b in h.get("variation_images") or []:

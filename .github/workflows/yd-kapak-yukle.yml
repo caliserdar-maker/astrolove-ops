@@ -7,7 +7,7 @@ name: yd-kapak-yukle
 # (yazim yolu eski78_gorsel_yukle.bir_ilan, YD profili: hedef 10, Style 513, eski 13 silinir, cdn=False).
 # Drive girdileri Etsy kilidi ALINMADAN once indirilir (KILIT SURESI kurali; cdn_yedek kilit altinda YOK, adim 5 yedegi
 # TEMP/YD_KAPAK_V1_YEDEK/<yedek_damga> liste kapisinda dogrulanir): 10'lu galeri TEMP/YD_KAPAK_V1/<kapak_damga> (<CIFT>_Y<NN>.jpg,
-# ORTAK_Y04/Y05 + MANIFEST.csv), QC .../QC_<qc_damga>/QC_RAPOR.json, Canva alt metinleri (alt_id: ALT.csv cift, kart_no, alt),
+# ORTAK_Y04 + MANIFEST.csv), QC .../QC_<qc_damga>/QC_RAPOR.json, Canva alt metinleri (alt_id: ALT.csv cift, kart_no, alt),
 # HAM TEMP/<envanter>/HAM/<ilan>.json. Serdar 27 Eki: kapak + galeri tek seferde, ilan basina 10 gorsel, eski 13 silinir.
 # Durum dosyalari (scripts/ops/durum_dosyasi.py; okuma kilit SONRASI, yazma yalniz yazim / bag kosusunda):
 #   TEMP/YD_KAPAK_V1_YUKLE/DEVAM.json, ILERLEME.json (json-ilanlar; set = hedef = 10), SONUC.csv (csv, anahtar ilan).
@@ -112,8 +112,8 @@ jobs:
           R = [r for r in csv.DictReader(open("data/pod/yd78_ids.csv")) if not sa or r["listing_id"] in sa]
           if sa - {r["listing_id"] for r in R}:
               raise SystemExit(f"sadece: yd78 listesinde olmayan ilan {sorted(sa - {r['listing_id'] for r in R})}")
-          open("_work/kapak.txt", "w").writelines(["MANIFEST.csv\n", "ORTAK_Y04.jpg\n", "ORTAK_Y05.jpg\n"]
-                                                  + [f"{r['cift']}_Y{k:02d}.jpg\n" for r in R for k in (1, 2, 3, 6, 7, 8, 9, 10)])
+          open("_work/kapak.txt", "w").writelines(["MANIFEST.csv\n", "ORTAK_Y04.jpg\n"]          # Merkez 27 Eki karar d: Y05 cifte ozel
+                                                  + [f"{r['cift']}_Y{k:02d}.jpg\n" for r in R for k in (1, 2, 3, 5, 6, 7, 8, 9, 10)])
           open("_work/ham.txt", "w").writelines(f"{r['listing_id']}.json\n" for r in R)
           print(f"kapsam: {len(R)} ilan")
           PY

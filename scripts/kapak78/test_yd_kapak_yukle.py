@@ -281,9 +281,9 @@ def bloklar(hz):
     hz2 = hazir_kur("h2")
     (hz2 / LID / "hedef" / "04_4.jpg").write_bytes((hz2 / LID / "hedef" / "04_4.jpg").read_bytes() + b"x")
     blok(SahteYD(), "04_4.jpg (ORTAK_Y04.jpg) sha256 manifest", hz2)
-    hz3 = hazir_kur("h3", kapak_boyut=(3000, 2250))
+    hz3 = hazir_kur("h3", kapak_boyut=(2400, 2400))          # Merkez 27 Eki karar e: yeni kapak 3000x2250; kare BLOK
     _, R, _ = kuru(SahteYD(), hz3, "kb3")
-    kontrol("BLOK (liste kapisi): kapak 3000x2250", R["ilanlar"][0]["durum"] == "BLOK" and "2400x2400" in " ".join(R["ilanlar"][0]["neden"]))
+    kontrol("BLOK (liste kapisi): kapak 2400x2400", R["ilanlar"][0]["durum"] == "BLOK" and "3000x2250" in " ".join(R["ilanlar"][0]["neden"]))
 
 
 def kota_ve_kilit(hz):

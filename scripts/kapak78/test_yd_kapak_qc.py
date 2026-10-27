@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """yd_kapak_qc.py yerel testi (plan v3 adim 4; 10'lu galeri, Merkez 27 Eki), SAHTE gorsellerle (gercek kart / Canva yok):
-NCC kartlari (Y01, Y06-Y10) icin kart basina sahne sablonu 2400x2400 + cift x kart kaynak 2400x3000 (farkli doku) -> kart = sahne +
-kutuya olceklenmis kaynak kirpimi + cift satiri; Y02 / Y03 cift basina 3000x2250, Y04 / Y05 ORTAK.
+NCC kartlari (Y01, Y06-Y10) icin kart basina sahne sablonu 3000x2250 + cift x kart kaynak 2400x3000 (farkli doku) -> kart = sahne +
+kutuya olceklenmis kaynak kirpimi + cift satiri; Y02 / Y03 / Y05 cift basina 3000x2250, Y04 ORTAK (Merkez 27 Eki karar d, e).
 Senaryolar: olc kutuyu ve kirpimi bulur (+-3 px, iki kart); dogru dosyalar yuksek NCC + en_yakin kendi cifti; yanlis kaynak (baska
 ciftin stil karti) en_yakin ile FAIL; Y02 kare FAIL; esik yoksa OLCUM (PASS yok); esikle PASS / FAIL; METIN_KAPI yalniz Y01'de;
-626 yerine kucuk liste beklenen sayisi; stil-kaynak uretimi (BAGLAR.csv + KAPAK_KAYNAK); kontak sayfasi."""
+703 yerine kucuk liste beklenen sayisi; stil-kaynak uretimi (BAGLAR.csv + KAPAK_KAYNAK); kontak sayfasi."""
 import contextlib
 import io
 import json
@@ -38,12 +38,12 @@ def doku(seed, wh):
     return np.clip(out + 128, 0, 255).astype(np.uint8)
 
 
-def kart_yap(sahne, kaynak, metin, boyut=(2400, 2400)):
+def kart_yap(sahne, kaynak, metin, boyut=(3000, 2250)):
     im = sahne.copy()
     k = cv2.resize(kaynak[KIRP[1]:KIRP[3], KIRP[0]:KIRP[2]], (KUTU[2] - KUTU[0], KUTU[3] - KUTU[1]), interpolation=cv2.INTER_AREA)
     im[KUTU[1]:KUTU[3], KUTU[0]:KUTU[2]] = k
     p = Image.fromarray(im); ImageDraw.Draw(p).text((SATIR[0] + 20, SATIR[1] + 20), metin, fill=(255, 255, 255))
-    return p.resize(boyut) if boyut != (2400, 2400) else p
+    return p.resize(boyut) if boyut != p.size else p
 
 
 def kid(c, k):
@@ -56,7 +56,7 @@ class QcTest(unittest.TestCase):
         cls.tmp = tempfile.TemporaryDirectory(); t = Path(cls.tmp.name)
         cls.kapak, cls.kaynak, cls.out = t / "kapak", t / "yedek", t / "out"
         cls.kapak.mkdir()
-        cls.sahne = {k: doku(k, (2400, 2400)) for k in NCC}
+        cls.sahne = {k: doku(k, (3000, 2250)) for k in NCC}
         cls.src = {(c, k): doku(100 + i * 20 + k, (2400, 3000)) for i, c in enumerate(CIFTLER) for k in NCC}
         sk = []
         for i, c in enumerate(CIFTLER):
@@ -64,7 +64,7 @@ class QcTest(unittest.TestCase):
             for k in NCC:
                 Image.fromarray(cls.src[(c, k)]).save(d / f"r{k}_{kid(c, k)}.jpg", quality=95)
                 sk.append(f"{i},{c},{k},{Q.STIL_KART[k]},{kid(c, k)},{k},{i}_{c}/r{k}_{kid(c, k)}.jpg\n")
-            for k in (2, 3):
+            for k in (2, 3, 5):
                 Image.fromarray(doku(500 + i * 3 + k, (3000, 2250))).save(cls.kapak / f"{c}_Y{k:02d}.jpg", quality=90)
             for k in NCC:
                 src = cls.src[(c, k)]
@@ -74,8 +74,7 @@ class QcTest(unittest.TestCase):
                     src = cls.src[("AQUARIUS_ARIES", 8)]                            # cift ici stil karismasi (Layers yerine First Page)
                 kart_yap(cls.sahne[k], src, c).save(cls.kapak / f"{c}_Y{k:02d}.jpg", quality=95)
         Image.fromarray(doku(900, (2400, 2400))).save(cls.kapak / "AQUARIUS_ARIES_Y02.jpg", quality=90)   # Y02 kare -> FAIL
-        for k in (4, 5):
-            Image.fromarray(doku(700 + k, (3000, 2250))).save(cls.kapak / f"ORTAK_Y{k:02d}.jpg", quality=90)
+        Image.fromarray(doku(704, (3000, 2250))).save(cls.kapak / "ORTAK_Y04.jpg", quality=90)
         (t / "STIL.csv").write_text("listing_id,cift,kart_no,stil,kaynak_image_id,rank,yedek_yol\n" + "".join(sk))
         (t / "ciftler.csv").write_text("listing_id,cift,a,b\n" + "".join(f"{i},{c},x,y\n" for i, c in enumerate(CIFTLER)))
         (t / "mk.tsv").write_text("cift\tdesign_id\tbaslik\tsatir_metni\tdurum\n" + "".join(
@@ -111,7 +110,7 @@ class QcTest(unittest.TestCase):
     def test_02_olcum_esiksiz_pass_yok(self):
         rc, log, s, J = self.kos("--metin-kapi", str(self.t / "mk.tsv"))
         self.assertEqual(rc, 1, log)
-        self.assertEqual(J["beklenen"], len(CIFTLER) * 8 + 2); self.assertEqual(len(s), J["beklenen"])
+        self.assertEqual(J["beklenen"], len(CIFTLER) * 9 + 1); self.assertNotIn("ORTAK_Y05.jpg", s); self.assertEqual(len(s), J["beklenen"])
         a = s["AQUARIUS_ARIES_Y06.jpg"]
         self.assertEqual(a["durum"], "OLCUM"); self.assertEqual(J["sayilar"]["PASS"], 0)
         self.assertGreater(a["ncc_poster"], 0.95); self.assertGreater(a["ncc_sahne"], 0.95); self.assertEqual(a["en_yakin"], "AQUARIUS_ARIES")
@@ -127,7 +126,7 @@ class QcTest(unittest.TestCase):
         (self.t / "esik.json").write_text(json.dumps(dict(kartlar={str(k): dict(poster_min=0.9, sahne_min=0.9, sahne_sha=self.ref_sha(k)) for k in NCC})))
         rc, log, s, J = self.kos("--esik", str(self.t / "esik.json"))
         self.assertEqual(s["CANCER_LIBRA_Y10.jpg"]["durum"], "PASS"); self.assertEqual(s["CANCER_LIBRA_Y02.jpg"]["durum"], "PASS")
-        self.assertEqual(s["ORTAK_Y05.jpg"]["durum"], "PASS")
+        self.assertEqual(s["CANCER_LIBRA_Y05.jpg"]["durum"], "PASS"); self.assertEqual(s["CANCER_LIBRA_Y05.jpg"]["olcum"], "bicim")
         self.assertIn("ncc_poster", " ".join(s["LEO_VIRGO_Y07.jpg"]["neden"]))
         e2 = dict(kartlar={str(k): dict(poster_min=0.9, sahne_min=1.0001 if k == 9 else 0.9, sahne_sha=self.ref_sha(k)) for k in NCC})
         (self.t / "esik2.json").write_text(json.dumps(e2))

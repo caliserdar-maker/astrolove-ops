@@ -2,7 +2,7 @@
 """yd_liste_uret.py yerel testi (plan v3 adim 6; 10'lu galeri, Serdar 27 Eki). Gercek veri: pilot HAM (test_veri/HAM_4595350971.json),
 docs/yd_kapak/KAPAK_KAYNAK.csv, docs/yd_kapak/YD_OZET.csv. Sahte: 10 kart dosyasi, tasima MANIFEST, QC_RAPOR, ALT.csv, yedek OZET / liste.
 Senaryolar: kimlik 78/78 (depodaki data/pod/yd78_ids.csv ile ayni) ve uyusmazlik cikis 2; pilot LISTE (sira 1-10 DEGISTIR, kapak
-kararlastirilan alt metin, 2-10 Canva alt metni, ORTAK satiri 4 / 5; eski 13 gorsel CIKAR), manifest Style bagi sira 6-10 (value_id HAM),
+kararlastirilan alt metin, 2-10 Canva alt metni, ORTAK satiri 4 (Y05 cifte ozel); eski 13 gorsel CIKAR), manifest Style bagi sira 6-10 (value_id HAM),
 eski78 liste_oku + renk_sira; ESLEME 10 satir sha = tasima MANIFEST; BLOK: QC PASS degil / baska sha, sha farkli, karta gore boyut,
 yedekte dosya eksik, kapak bagli, Botanical farkli / rank 12 degil, alt metin eksik / uzun tire."""
 import contextlib
@@ -41,10 +41,10 @@ def galeri_kur(d, cift=CIFT, alt_ek=None, ham=HAM):
         kart(d / "kapak" / L.kaynak_ad(cift, k), k)
     manifest(d, cift)
     qc(d, cift)
-    alt = {k: f"Cancer and Libra card {k} alt text" for k in (2, 3, 6, 7, 8, 9, 10)}
+    alt = {k: f"Cancer and Libra card {k} alt text" for k in (2, 3, 5, 6, 7, 8, 9, 10)}
     alt.update(alt_ek or {})
     (d / "ALT.csv").write_text("cift,kart_no,alt\n" + "".join(f"{cift},{k},{v}\n" for k, v in alt.items())
-                               + "ORTAK,4,Format and size options card\nORTAK,5,How your print is made\n")
+                               + "ORTAK,4,Format and size options card\n")
     (d / "OZET.md").write_text(f"| listing_id | cift | dosya | durum | not |\n|---|---|---|---|---|\n| {LID} | {cift} | 13 | PASS |  |\n")
     yliste(d, ham["images"])
 
@@ -120,14 +120,15 @@ class ListeTest(unittest.TestCase):
         self.assertEqual(Y.renk_sira(man, h, rv), L.STIL_SIRA)
         e = list(csv.DictReader(open(self.t / "out/ESLEME.csv")))
         self.assertEqual(len(e), 10); self.assertTrue(all(x["durum"] == "PASS" and x["sha256"] == x["tasima_sha256"] for x in e))
-        self.assertEqual([x["kaynak"] for x in e][3:5], ["ORTAK_Y04.jpg", "ORTAK_Y05.jpg"])
+        self.assertEqual([x["kaynak"] for x in e][3:5], ["ORTAK_Y04.jpg", "CANCER_LIBRA_Y05.jpg"])
         self.assertEqual(Y.sha256(od / "hedef/04_4.jpg"), e[3]["sha256"])
 
     def test_03_blok_qc_sha_boyut(self):
         qc(self.t, durum="OLCUM"); self.assertIn("QC_RAPOR", self.neden())
         qc(self.t, sha_bozuk=8); self.assertIn("CANCER_LIBRA_Y08.jpg PASS baska dosyaya ait", self.neden())
         qc(self.t); manifest(self.t, bozuk=3); self.assertIn("CANCER_LIBRA_Y03.jpg sha256 tasima MANIFEST ile ayni degil", self.neden())
-        kart(self.t / "kapak" / "CANCER_LIBRA_Y02.jpg", 1); manifest(self.t); qc(self.t)                   # kare -> sembol karti
+        Image.new("RGB", (2400, 2400), (1, 2, 3)).save(self.t / "kapak" / "CANCER_LIBRA_Y02.jpg", "JPEG", quality=90)   # kare
+        manifest(self.t); qc(self.t)
         self.assertIn("CANCER_LIBRA_Y02.jpg: boyut 2400x2400 != 3000x2250", self.neden())
 
     def test_04_blok_yedek_ham_alt(self):
