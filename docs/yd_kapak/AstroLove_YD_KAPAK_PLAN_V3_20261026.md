@@ -2,6 +2,8 @@
 
 Depo kopyası (27 Eki): yd_ops.py, KAPAK_KAYNAK.csv ve YD_LOG_B1..B4.tsv / YD_LOG_75.tsv bu klasörde (docs/yd_kapak/). Plandaki "yd_kapak/" yolları bu klasördür.
 
+> GÜNCEL (Merkez 27 Eki kararları d / e; bu plandaki eski boyut ve ad satırlarının yerine geçer): yeni galeri 10 kart, TÜM kartlar 3000x2250 (kapak dahil; Canva'da 4:3). Y04 ORTAK, Y05 çifte özel (<CIFT>_Y05). Taşıma 78 x 9 + 1 = 703 dosya. Canlı (eski) kapak HAM kapısında 2400x2400 kalır (yükleme öncesi durum). Kod: galeri_tasi.py --urun yd, yd_kapak_qc.py, yd_liste_uret.py, yd_kapak_yukle.py.
+
 Kapsam: 78 YD ilanında yeni kare kapak (2400x2400, Botanical sahne) 1. sıraya girer. Kapak BAĞSIZ kalır; Botanical bağı kendi stil görselinde (rank 12) kalır. Eski kapağın silinmesi Serdar kararına açık (karar 2). Galeri kartları, fiyat, Heading ayrı iş. Video kapak işi bu yüklemeden SONRA, ayrı iş.
 v2'ye yapılan bağımsız incelemenin 15 bulgusu işlendi. Etsy'ye yazan her adım ayrı Serdar onayı.
 

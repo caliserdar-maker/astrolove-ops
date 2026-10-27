@@ -1,10 +1,10 @@
 name: yd-kapak-qc
 # YD (1st Anniversary) 10'lu galeri olcumlu QC (plan v3 adim 4; Serdar / Merkez 27 Eki). ETSY API YOK, Etsy'ye yazma yok, kilit yok, Canva yok.
-# Girdi: Drive TEMP/YD_KAPAK_V1/<kapak_damga>/<CIFT>_Y<NN>.jpg + ORTAK_Y04/Y05 (yd-kapak-tasi ciktisi); kaynak gorseller adim 5 yedeginden
+# Girdi: Drive TEMP/YD_KAPAK_V1/<kapak_damga>/<CIFT>_Y<NN>.jpg + ORTAK_Y04 (yd-kapak-tasi ciktisi); kaynak gorseller adim 5 yedeginden
 # (TEMP/YD_KAPAK_V1_YEDEK/<yedek_damga>: BAGLAR.csv -> YD_STIL_KAYNAK.csv, yalniz gereken 78 x 5 stil gorseli indirilir).
 #   mod olc    : onayli ornek ciftler (CANCER_LIBRA, ARIES_LEO, SAGITTARIUS_SAGITTARIUS, CAPRICORN_SAGITTARIUS; klasorde olanlar) x
 #                Y01 + Y06-Y10 -> OLCUM.json (kart basina kutu / kirp / olcek / NCC + sapma). SABLON.json bundan Merkez / Serdar onayiyla kurulur.
-#   mod kontrol: 626 dosya -> QC_RAPOR.json + QC_RAPOR.md + KONTAK_<NN>.jpg. esik_id bossa durum OLCUM (PASS yok). Sahne referansi
+#   mod kontrol: 703 dosya -> QC_RAPOR.json + QC_RAPOR.md + KONTAK_<NN>.jpg. esik_id bossa durum OLCUM (PASS yok). Sahne referansi
 #                CANCER_LIBRA kartlari (Serdar onayli ornek, 27 Eki).
 # Cikti: Drive TEMP/YD_KAPAK_V1/<kapak_damga>/QC_<damga>/ (+ YD_STIL_KAYNAK.csv). scripts/kapak78/yd_kapak_qc.py
 permissions:

@@ -9,9 +9,8 @@ Klasor kurali: iki farkli adda ayni sha256 -> FAIL (ORTAK dahil; yeni dosya yazi
 Rapor: <yeni>/OZET.md + MANIFEST.csv (ad, cift, kart_no, design_id, boyut, sha256, durum) TUM klasor uzerinden yeniden uretilir.
 Tamlik 78 x 6 + 2 = 470: eksikler listelenir, eksik olmasi FAIL degil. Satir FAIL'i varsa cikis 1.
 --urun yd (YD 1st Anniversary 10'lu galeri; plan v3 adim 2, Serdar 27 Eki tek seferde kapak + galeri): ayni kurallar, farklari:
-  kart_no 1..10 -> <CIFT>_Y<NN>.jpg; 4 ve 5 ORTAK -> ORTAK_Y04.jpg / ORTAK_Y05.jpg (cift data/pod/yd78_ids.csv). Boyut karta gore:
-  1 ve 6-10 2400x2400 (kapak, Starlit, Timeless, First Page, Layers, Botanical), 2-5 3000x2250 (sembol, kisisellestirme, format,
-  surec). Tamlik 78 x 8 + 2 = 626. Baslik disi atlanacak her satir (3 sutun, url yok) FAIL. --metin-kapi METIN_KAPI.tsv zorunlu:
+  kart_no 1..10 -> <CIFT>_Y<NN>.jpg; 4 ORTAK -> ORTAK_Y04.jpg (cift data/pod/yd78_ids.csv; Merkez 27 Eki karar d: Y05 surec cifte
+  ozel). Boyut: TUM kartlar 3000x2250 (Merkez 27 Eki karar e; kapak ve stil kartlari Canva'da 4:3). Tamlik 78 x 9 + 1 = 703. Baslik disi atlanacak her satir (3 sutun, url yok) FAIL. --metin-kapi METIN_KAPI.tsv zorunlu:
   (cift, design_id) [METIN_KAPI'da kart_no sutunu varsa (cift, kart_no, design_id)] bir PASS satiriyla ayni degilse FAIL (ORTAK dahil). Link suresi satir basina: X-Amz-Date + X-Amz-Expires - simdi < 5 dk -> indirilmez, SURE_AZ (yeniden disa
   aktarma listesi); parametre yoksa FAIL. Imza tekrari: IMZA.csv (design_id, sha256(X-Amz-Date + imza); ham imza yazilmaz) klasorde;
   ayni tasarim icin onceki kosudaki imza aynen donerse satir DUR (onbellek dongusu yok); dosya zaten klasordeyse (ayni design_id) ATLA.
@@ -36,9 +35,9 @@ HEDEF = (3000, 2250)
 CIFT_KART, ORTAK_KART = (2, 3, 6, 7, 8, 9), (4, 5)
 AD_RX = re.compile(r"^(?:(?P<c>[A-Z]+_[A-Z]+)|ORTAK)_G(?P<k>\d)\.jpg$")
 ALAN = ["ad", "cift", "kart_no", "design_id", "boyut", "sha256", "durum"]
-YD_KARE, YD_YATAY = (2400, 2400), (3000, 2250)
-YD_BOYUT = {1: YD_KARE, 2: YD_YATAY, 3: YD_YATAY, 4: YD_YATAY, 5: YD_YATAY, 6: YD_KARE, 7: YD_KARE, 8: YD_KARE, 9: YD_KARE, 10: YD_KARE}
-YD_ORTAK = (4, 5)
+YD_YATAY = (3000, 2250)                                       # Merkez 27 Eki karar e: 1-10 hepsi 4:3 3000x2250
+YD_BOYUT = {k: YD_YATAY for k in range(1, 11)}
+YD_ORTAK = (4,)                                               # Merkez 27 Eki karar d: Y05 cifte ozel
 YD_CIFT_KART = tuple(k for k in YD_BOYUT if k not in YD_ORTAK)
 YD_AD_RX = re.compile(r"^(?:(?P<c>[A-Z]+_[A-Z]+)|ORTAK)_Y(?P<k>\d\d)\.jpg$")
 
@@ -54,7 +53,7 @@ def yd_ad(cift, kart, ciftler):
     if k in YD_ORTAK:
         return (f"ORTAK_Y{k:02d}.jpg", None) if cift == "ORTAK" else (None, f"kart {k} yalniz ORTAK olabilir")
     if cift == "ORTAK":
-        return None, f"ORTAK yalniz kart 4/5 olabilir (kart {k})"
+        return None, f"ORTAK yalniz kart 4 olabilir (kart {k})"
     return (f"{cift}_Y{k:02d}.jpg", None) if cift in ciftler else (None, "cift yd78 listesinde yok")
 
 
@@ -270,7 +269,7 @@ def main(argv=None):
 
 
 def main_yd(a):
-    """--urun yd: 10'lu galeri <CIFT>_Y<NN>.jpg + ORTAK_Y04/Y05 (plan v3 adim 2; Serdar 27 Eki). Poster akisinin ayni kurallari +
+    """--urun yd: 10'lu galeri <CIFT>_Y<NN>.jpg + ORTAK_Y04 (plan v3 adim 2; Serdar 27 Eki). Poster akisinin ayni kurallari +
     satir / metin / sure / imza kapilari; boyut karta gore (YD_BOYUT)."""
     klasor, yeni = pathlib.Path(a.klasor), pathlib.Path(a.yeni)
     klasor.mkdir(parents=True, exist_ok=True); yeni.mkdir(parents=True, exist_ok=True)
