@@ -102,6 +102,25 @@ def main() -> int:
     assert "--ilk-kayit-izni" not in vv and "--surum v7" in vv and "updateListing YOK" in vv, "video-v7-yukle galeri / surum"
     assert "kuru: {description: \"true = yazma yok (plan); false = yazim\", required: true, default: \"true\"}" in vv \
         and "[ \"$ONAY\" = VIDEO_V7_YUKLE ]" in vv, "video-v7-yukle yazim kapisi"
+    # 27 Eki (Merkez, plan v3 adim 2-8): YD kapak is akislari. Tasima ayri kilit grubu yd-kapak (poster tasimasini beklemez);
+    # yedek / QC Etsy'siz ve kilitsiz; yukleyici Etsy kilidinde, Drive girdileri + yedek kapisi kilitten ONCE, cdn yedegi kilit altinda yok
+    tasi = (WORKFLOWS / "yd-kapak-tasi.yml").read_text(encoding="utf-8")
+    assert kilit_bekle.kilit_kumesi(str(ROOT), "yd-kapak") == {".github/workflows/yd-kapak-tasi.yml"}, "yd-kapak kumesi yalniz tasima"
+    assert ".github/workflows/yd-kapak-tasi.yml" not in kilit_bekle.kilit_kumesi(str(ROOT)), "yd-kapak-tasi Etsy kumesinde"
+    assert "--grup yd-kapak --zaman-asimi-dk 15" in tasi and "--urun yd" in tasi and "--immutable" in tasi and "concurrency:" not in tasi
+    for wf in ("yd-kapak-yedek.yml", "yd-kapak-qc.yml"):
+        t = (WORKFLOWS / wf).read_text(encoding="utf-8")
+        assert "ETSY_TOKEN" not in t and "ETSY_API_KEY" not in t and "kilit_bekle" not in t, f"{wf}: Etsy'ye dokunmamali"
+    yy = (WORKFLOWS / "yd-kapak-yukle.yml").read_text(encoding="utf-8")
+    assert ".github/workflows/yd-kapak-yukle.yml" in kilit_bekle.kilit_kumesi(str(ROOT)), "yd-kapak-yukle Etsy kilidinde degil"
+    assert "concurrency:" not in yy and "actions: read" in yy and "schedule" not in yy, "yd-kapak-yukle kilit sozlesmesi"
+    kilit = yy.index("python3 scripts/etsy/kilit_bekle.py")
+    for x in ("rclone copy \"$K\" _in/kapak", "QC_RAPOR.json", "rclone copy \"$T/$EN/HAM\"", "rclone lsjson -R \"$Y\"",
+              "python3 scripts/kapak78/yd_liste_uret.py liste"):
+        assert x in yy and yy.index(x) < kilit, f"yd-kapak-yukle: kilitten once degil: {x}"
+    for x in ("durum_dosyasi.py oku --uzak \"$O/DEVAM.json\"", "durum_dosyasi.py oku --uzak \"$O/ILERLEME.json\""):
+        assert x in yy and kilit < yy.index(x) < yy.index("python3 scripts/kapak78/yd_kapak_yukle.py"), f"yd-kapak-yukle: {x}"
+    assert "default: \"true\"" in yy and "[ \"$ONAY\" = YD_KAPAK ]" in yy and "plan_damga" in yy, "yd-kapak-yukle yazim kapisi"
     print(f"PASS: {len(files)} workflow YAML, {len(PUBLIC_AUDITS)} public denetim sozlesmesi")
     return 0
 

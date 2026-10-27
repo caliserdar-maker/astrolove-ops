@@ -44,6 +44,7 @@ from etsy_common import Etsy, TokenStore, mask  # noqa: E402
 ONAY = "ESKI23_GALERI"
 HEDEF_N = 17       # varsayilan hedef gorsel sayisi (eski 23 / 78 duzeni); v10 galeri 9 (Merkez 26 Eki, Serdar onayi)
 ONAY_V10, HEDEF_V10 = "GALERI_V10", 9
+ONAY_YD, HEDEF_YD = "YD_KAPAK", 13   # YD 1st Anniversary kapak (plan v3 adim 7, Merkez 27 Eki): scripts/kapak78/yd_kapak_yukle.py
 YUKLE_DENEME = 2   # yukleme: en fazla 2 gonderim; ikincisi YALNIZ 429 (hiz siniri) sonrasi (Serdar 24 Eki madde 5)
 BEKLE_429 = 15     # sn
 SIRA_TEKRAR = 3    # sira / kapak rank POST'u: post_file varsayilan tekrar (ayni govde, idempotent)
@@ -279,7 +280,9 @@ def log(m):
     print(m, flush=True)
 
 
-def liste_oku(yol, n=HEDEF_N):
+def liste_oku(yol, n=HEDEF_N, bos_alt_koru=False):
+    """bos_alt_koru=True (YD): KORU satirinda bos alt metin izinli (canlidaki bos alt metin aynen kalir; sira gecisinde alt_text
+    alani gonderilmez). Varsayilan False: her hedef satirda alt metin zorunlu (poster)."""
     rows = list(csv.DictReader(open(yol, encoding="utf-8")))
     hedef = sorted((r for r in rows if r["hedef_sira"]), key=lambda r: int(r["hedef_sira"]))
     cikar = [int(r["simdi_id"]) for r in rows if r["islem"] == "CIKAR"]
@@ -290,7 +293,7 @@ def liste_oku(yol, n=HEDEF_N):
             raise Dur(f"LISTE hedef sira {r['hedef_sira']} islem {r['islem']}")
         if r["islem"] in ("KORU", "ALT") and not r["simdi_id"]:
             raise Dur(f"LISTE hedef sira {r['hedef_sira']} {r['islem']} ama simdi_id yok")
-        if not r["hedef_alt"] or len(r["hedef_alt"]) > 250:
+        if (not r["hedef_alt"] and not (bos_alt_koru and r["islem"] == "KORU")) or len(r["hedef_alt"]) > 250:
             raise Dur(f"LISTE hedef sira {r['hedef_sira']} alt metin bos ya da 250'den uzun")
         if YASAK_ALT.search(r["hedef_alt"]):
             raise Dur(f"LISTE hedef sira {r['hedef_sira']} alt metninde yasak ifade / tire / Art'siz marka: {r['hedef_alt'][:80]!r}")
@@ -367,13 +370,21 @@ BAG_ISTEK = 30   # yalniz bag modu istek tahmini: korunanlar 2x(3-4), renk 1, ga
 ONAY_BAG = "ESKI23_BAG"
 
 
-def bag_kur(api, shop, lid, liste, manifest, devam, out, bag_arg=None, yaz=False, hedef_n=HEDEF_N):
+def sira_govde(iid, rank, alt):
+    """rank / alt metin POST govdesi; bos alt metinde alt_text alani gonderilmez (YD KORU; poster'de alt metin hic bos degil)."""
+    f = {"listing_image_id": (None, str(iid)), "rank": (None, str(rank))}
+    if alt:
+        f["alt_text"] = (None, alt)
+    return f
+
+
+def bag_kur(api, shop, lid, liste, manifest, devam, out, bag_arg=None, yaz=False, hedef_n=HEDEF_N, degerler=None, bos_alt_koru=False):
     """Serdar 24 Eki: yukleme bittikten sonra bos kalan renk baglarini TEK variation-images cagrisiyla kurar (yaz=True) ya da
     yalniz okur (yaz=False). Gorsellere hicbir yazim yok. Beklenen galeri: LISTE KORU/ALT simdi_id + DEVAM_<ilan>.json yuklenen.
     Yazmadan once canli galeri hedef_n (17; v10 9) / sira / alt metin hedefle ayni olmali; degilse DUR. Bag geri okumasi tutmazsa
     yeniden yazma YOK."""
     out = Path(out); out.mkdir(parents=True, exist_ok=True)
-    hedef, _ = liste_oku(liste, hedef_n)
+    hedef, _ = liste_oku(liste, hedef_n, bos_alt_koru)
     man = json.loads(Path(manifest).read_text())
     if str(man.get("listing_id")) != str(lid):
         raise Dur(f"manifest baska ilana ait ({man.get('listing_id')})")
@@ -388,7 +399,7 @@ def bag_kur(api, shop, lid, liste, manifest, devam, out, bag_arg=None, yaz=False
         api.kota_kapisi(f"ilan {lid}")
     if kor0["state"] != "active":
         raise Dur(f"state {kor0['state']} (active degil)")
-    rv = G.renk_degerleri(api, lid)
+    rv = (degerler or G.renk_degerleri)(api, lid)
     if len(rv) != 5:
         raise Dur(f"envanterde 5 renk yok ({sorted(rv)})")
     hbag = renk_sira(man, hedef, rv)
@@ -430,12 +441,13 @@ def bag_kur(api, shop, lid, liste, manifest, devam, out, bag_arg=None, yaz=False
 
 
 def bir_ilan(api, shop, lid, liste, hedef_dir, manifest, out, kuru=False, kota_ihtiyac=True, kurtar=False, uretim_kosu="",
-             hedef_n=HEDEF_N, cdn=True, ara_tekrar=False):
-    """hedef_n: hedef gorsel sayisi (17; v10 9). cdn=False: CDN yedegi alinmaz (v10: Drive yedegi var ve canli kimlik kumesi
-    yedekle ayni oldugu kilit oncesi kapida dogrulanir; kilit altinda toplu indirme yok)."""
+             hedef_n=HEDEF_N, cdn=True, ara_tekrar=False, degerler=None, bos_alt_koru=False):
+    """hedef_n: hedef gorsel sayisi (17; v10 9; YD 13). cdn=False: CDN yedegi alinmaz (v10 / YD: Drive yedegi var ve canli kimlik
+    kumesi yedekle ayni oldugu kilit oncesi kapida dogrulanir; kilit altinda toplu indirme yok). degerler: (api, lid) ->
+    {ad: (property_id, value_id)} bag degerleri (varsayilan renk: G.renk_degerleri; YD: Style 513). bos_alt_koru: liste_oku."""
     out = Path(out); out.mkdir(parents=True, exist_ok=True)
     c0 = api.calls   # bu ilanin istekleri (cok ilanli kosuda api.calls onceki ilanlari da sayar)
-    hedef, cikar = liste_oku(liste, hedef_n)
+    hedef, cikar = liste_oku(liste, hedef_n, bos_alt_koru)
     liste_sha = sha256(liste)
     man = json.loads(Path(manifest).read_text())
     if str(man.get("listing_id")) != str(lid):
@@ -461,7 +473,7 @@ def bir_ilan(api, shop, lid, liste, hedef_dir, manifest, out, kuru=False, kota_i
         raise Dur("kurtarma: DEVAM kaydi yok (devam_kosu gerekli)")
     alt_ad = {r["hedef_gorsel"]: r["hedef_alt"] for r in hedef}
     simdi = {int(r["simdi_id"]) for r in hedef if r["simdi_id"]} | set(cikar)
-    rv = G.renk_degerleri(api, lid)
+    rv = (degerler or G.renk_degerleri)(api, lid)
     if len(rv) != 5:
         raise Dur(f"envanterde 5 renk yok ({sorted(rv)})")
     h_id = {int(r["hedef_sira"]): hedef_id(r["hedef_gorsel"]) for r in hedef}
@@ -565,8 +577,7 @@ def bir_ilan(api, shop, lid, liste, hedef_dir, manifest, out, kuru=False, kota_i
                 son_kur()
                 if son[1] is None:
                     raise Dur("kapak gorseli henuz yok (plan hatasi)")
-                api.post_file(f"/shops/{shop}/listings/{lid}/images",
-                              files={"listing_image_id": (None, str(son[1])), "rank": (None, "1"), "alt_text": (None, alt[1])})
+                api.post_file(f"/shops/{shop}/listings/{lid}/images", files=sira_govde(son[1], 1, alt[1]))
                 g = G.kararli(lambda: G.galeri(api, lid), lambda g: bool(g) and g[0].get("listing_image_id") == son[1])
                 log(f"  [{n + 1}/{len(adimlar)}] kapak {son[1]} rank 1: {'oturdu' if g and g[0].get('listing_image_id') == son[1] else 'oturmadi (sira adimi duzeltir)'}")
             elif a[0] == "bag":
@@ -578,8 +589,7 @@ def bir_ilan(api, shop, lid, liste, hedef_dir, manifest, out, kuru=False, kota_i
                 oturdu = False
                 for gecis in (1, 2):   # kapak_yukle_78 (28 Eyl): rank cagrisi bazen oturmuyor; bir kez daha, sonra DUR
                     for s in range(1, hedef_n + 1):
-                        api.post_file(f"/shops/{shop}/listings/{lid}/images",
-                                      files={"listing_image_id": (None, str(son[s])), "rank": (None, str(s)), "alt_text": (None, alt[s])})
+                        api.post_file(f"/shops/{shop}/listings/{lid}/images", files=sira_govde(son[s], s, alt[s]))
                     g = G.kararli(lambda: G.galeri(api, lid), lambda g: not galeri_sorun(g, son, alt, hedef_n))
                     if not galeri_sorun(g, son, alt, hedef_n):   # kimlik sirasi + rank 1..n + alt metin (24 Eki inceleme O6)
                         oturdu = True; break
