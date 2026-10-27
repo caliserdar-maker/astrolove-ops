@@ -156,15 +156,22 @@ def metin_coz(t):
     while satirlar and not satirlar[-1]:
         satirlar.pop()
     # Musteri satirlari ilandaki ornege uyup numaralayabilir ("1. isim", "2) isim", "3. mesaj"; siparis 4211980623, 27 Eki).
-    # Yalniz satir basindaki ve SATIR SIRASIYLA AYNI numara atilir; metnin icindeki rakamlara ve tarihlere dokunulmaz.
-    satirlar = [re.sub(rf"^{i}\s*[.)]\s*(?=\D)", "", x, count=1).strip() for i, x in enumerate(satirlar, 1)]
+    # Denetim incelemesi (27 Eki): (a) isimler numarasizken "3. Hochzeitstag" -> "Hochzeitstag" olmamali; (b) yalniz "3." satiri
+    # baskiya gitmemeli. Kural: yalniz kendi sira numarasindan olusan satir ("3", "3.", "3)") BOS sayilir; numara ancak 1. VE 2.
+    # satirin ikisi de kendi numarasiyla basliyorsa atilir. Metnin icindeki rakam ve tarihlere dokunulmaz.
+    satirlar = ["" if re.fullmatch(rf"{i}\s*[.)]?", x) else x for i, x in enumerate(satirlar, 1)]
+    while satirlar and not satirlar[-1]:
+        satirlar.pop()
+    numarali = len(satirlar) >= 2 and all(re.match(rf"{i}\s*[.)]\s*\D", satirlar[i - 1]) for i in (1, 2))
+    if numarali:
+        satirlar = [re.sub(rf"^{i}\s*[.)]\s*(?=\D)", "", x, count=1).strip() for i, x in enumerate(satirlar, 1)]
     if len(satirlar) < 2 or not satirlar[0] or not satirlar[1]:
         return None, f"en az 2 satir (isim1, isim2) gerekli: {ham!r}"
     if len(satirlar) > 3:
         return None, f"3 satirdan fazla: {ham!r}"
     mesaj = satirlar[2] if len(satirlar) == 3 and satirlar[2] else VARSAYILAN_MESAJ
     return {"isim1": satirlar[0], "isim2": satirlar[1], "mesaj": mesaj, "mesaj_bos": mesaj == VARSAYILAN_MESAJ and
-            (len(satirlar) < 3 or not satirlar[2]), "ham": ham}, None
+            (len(satirlar) < 3 or not satirlar[2]), "ham": ham, "numara_atildi": numarali}, None
 
 
 # ------------------------------------------------------------------ kapilar
@@ -310,6 +317,8 @@ def elle_siparis_yaz(d, rc, t, s, m, png, durum):
            f"  Isim 1: {m['isim1']}",
            f"  Isim 2: {m['isim2']}",
            f"  Mesaj: {m['mesaj']}" + (" (musteri bos birakti: varsayilan)" if m["mesaj_bos"] else ""),
+           *(["  DIKKAT: musteri satirlari numaralamisti, numaralar atildi; ham metinle goz kontrolu yap:",
+              *[f"    | {x}" for x in m["ham"].split("\n")]] if m.get("numara_atildi") else []),
            "",
            "ALICI ADRESI (kopyala)",
            f"  Ad: {rc.get('name') or ''}",
@@ -418,7 +427,7 @@ def kalem_isle(kod, rc, t, d):
         ozet.update(durum="FAIL", sebep=hata or hata2, musteri_mesaji_gerekiyor=bool(hata2))
         soru_yaz(d, rc, t, {}, hata or hata2, musteri=bool(hata2))
     else:
-        ozet.update(sku_coz=s, metin={k: m[k] for k in ("isim1", "isim2", "mesaj", "mesaj_bos")})
+        ozet.update(sku_coz=s, metin={k: m[k] for k in ("isim1", "isim2", "mesaj", "mesaj_bos", "numara_atildi", "ham")})
         kap = metin_kapilari(kod, m)
         if all(v[0] == "PASS" for v in kap.values()):
             sem = d / "sembol"
