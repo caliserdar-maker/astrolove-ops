@@ -67,7 +67,8 @@ class YedekTest(unittest.TestCase):
         for g in h["images"]:
             yol = f"{lid}/{g['listing_image_id']}.jpg"
             wh = (g["full_width"], g["full_height"])
-            S.DOSYA[yol] = jpg((wh[0] - 8, wh[1]) if g["rank"] == bozuk_rank else wh)
+            cdn = (3000, 2250) if wh == (3200, 2400) else wh              # etsystatic uzun kenar 3000 (kosu 40491659087 olcumu)
+            S.DOSYA[yol] = jpg((cdn[0] - 8, cdn[1]) if g["rank"] == bozuk_rank else cdn)
             g["url_fullxfull"] = f"{self.url}/{yol}"
         (self.ham / f"{lid}.json").write_text(json.dumps(h))
         return f"{lid},{cift},A,B\n"
@@ -92,8 +93,13 @@ class YedekTest(unittest.TestCase):
     def test_02_boyut_ve_ham_eksik_fail(self):
         rc, log, oz = self.kos([self.ilan("4595350971", "CANCER_LIBRA", bozuk_rank=5), "4595373190,AQUARIUS_AQUARIUS,A,B\n"])
         self.assertEqual(rc, 1)
-        self.assertIn("r5 boyut 3192x2400 != 3200x2400", oz); self.assertIn("| 4595373190 | AQUARIUS_AQUARIUS | 0 | FAIL | HAM dosyasi yok |", oz)
+        self.assertIn("r5 boyut 2992x2250 != 3200x2400", oz); self.assertIn("| 4595373190 | AQUARIUS_AQUARIUS | 0 | FAIL | HAM dosyasi yok |", oz)
         self.assertIn("HAM eksik 1", log)
+
+    def test_04_cdn_3000_siniri(self):
+        self.assertTrue(D.boyut_ok((3000, 2250), 3200, 2400)); self.assertTrue(D.boyut_ok((2400, 3000), 2400, 3000))
+        self.assertFalse(D.boyut_ok((3000, 2000), 3200, 2400)); self.assertFalse(D.boyut_ok((2000, 1500), 2400, 1800))
+        self.assertFalse(D.boyut_ok((2999, 2250), 3200, 2400))
 
     def test_03_paylasilan_dosyaya_bagli_degil(self):
         self.assertNotIn("yedek_mb_kontrol", (HERE / "yd_yedek.py").read_text().split('"""', 2)[2])

@@ -3,7 +3,7 @@
 Girdi: TEMP/YD_ENVANTER_20261026/HAM/<listing_id>.json (yd_envanter_oku.py ciktisi; images = Etsy gorsel kayitlari, url_fullxfull,
 full_width / full_height; variation_images = Style bagi) + data/pod/yd78_ids.csv (78 ilan).
 Islem (yedek_mb_kontrol.py A kismiyla ayni yontem; paylasilan dosyaya dokunmamak icin buraya kopyalandi, Merkez 27 Eki):
-<out>/<listing_id>_<CIFT>/r<rank>_<image_id>.jpg + GALERI.json (gorseller + baglar aynen) + <out>/OZET.md (ilan basina 13 dosya, boyut = JSON) + <out>/BAGLAR.csv (listing_id, cift, stil, value_id, image_id,
+<out>/<listing_id>_<CIFT>/r<rank>_<image_id>.jpg + GALERI.json (gorseller + baglar aynen) + <out>/OZET.md (ilan basina 13 dosya, boyut = JSON; JSON uzun kenari 3000'i asarsa CDN ayni oranda 3000'e kucultur) + <out>/BAGLAR.csv (listing_id, cift, stil, value_id, image_id,
 rank). Indirme etsystatic CDN'den (Etsy API degil).
 Kapilar: yd78 listesindeki her ilanin HAM dosyasi var ve listing_id ayni; yoksa o ilan FAIL (OZET'e yazilir). Cikis: 78/78 PASS ise 0."""
 import argparse
@@ -18,6 +18,18 @@ import requests
 from PIL import Image
 
 BEKLENEN = 13
+CDN_UST = 3000     # etsystatic url_fullxfull uzun kenar ust siniri (olcum: kosu 40491659087, 78 ilanin rank 2-8'i, 546/546
+                   # JSON 3200x2400 -> CDN 3000x2250; rank 1 ve 9-13 JSON ile ayni)
+
+
+def boyut_ok(bt, w, h):
+    """CDN dosyasi JSON boyutunda ya da JSON > 3000 ise ayni oranda uzun kenar 3000 (+-1 px)"""
+    if bt == (w, h):
+        return True
+    if max(w, h) <= CDN_UST:
+        return False
+    o = CDN_UST / max(w, h)
+    return max(bt) == CDN_UST and abs(bt[0] - w * o) <= 1 and abs(bt[1] - h * o) <= 1
 
 
 def indir(u, p, tekrar=4):
@@ -63,7 +75,7 @@ def yedek(ilanlar, kok, beklenen=BEKLENEN, baslik="YD 78 galeri yedegi (plan v3 
             except Exception:  # noqa: BLE001
                 neden.append(f"r{g['rank']} okunamadi"); continue
             say += 1
-            if bt != (g["full_width"], g["full_height"]):
+            if not boyut_ok(bt, g["full_width"], g["full_height"]):
                 neden.append(f"r{g['rank']} boyut {bt[0]}x{bt[1]} != {g['full_width']}x{g['full_height']}")
         toplam += say
         satir.append([k["listing_id"], k["cift"], say, "PASS" if not neden and say == beklenen else "FAIL", "; ".join(neden)])
