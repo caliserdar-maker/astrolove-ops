@@ -13,7 +13,8 @@ Tamlik 78 x 6 + 2 = 470: eksikler listelenir, eksik olmasi FAIL degil. Satir FAI
   Baslik disi atlanacak her satir (3 sutun, url yok) FAIL. --metin-kapi METIN_KAPI.tsv zorunlu: (cift, design_id) PASS satiriyla
   ayni degilse FAIL. Link suresi satir basina: X-Amz-Date + X-Amz-Expires - simdi < 5 dk -> indirilmez, SURE_AZ (yeniden disa
   aktarma listesi); parametre yoksa FAIL. Imza tekrari: IMZA.csv (design_id, sha256(X-Amz-Date + imza); ham imza yazilmaz) klasorde;
-  ayni tasarim icin onceki kosudaki imza aynen donerse satir DUR (onbellek dongusu yok). SURE_AZ / DUR da cikis 1."""
+  ayni tasarim icin onceki kosudaki imza aynen donerse satir DUR (onbellek dongusu yok); dosya zaten klasordeyse (ayni design_id) ATLA.
+  SURE_AZ / DUR da cikis 1. Satir kayitlari (FAIL / SURE_AZ / DUR) MANIFEST'te satir<n>:<ad> anahtariyla (dosya satirindan ayri)."""
 import argparse
 import calendar
 import csv
@@ -249,7 +250,6 @@ def main_yd(a):
         print("FAIL: --urun yd icin --metin-kapi METIN_KAPI.tsv zorunlu"); return 1
     kapi = metin_kapi_oku(a.metin_kapi)
     ciftler = {r["cift"].strip() for r in csv.DictReader(open(a.ciftler, encoding="utf-8-sig")) if r.get("cift")}
-    simdi = time.time() if a.simdi is None else a.simdi
     hedef_bt = f"{YD_HEDEF[0]}x{YD_HEDEF[1]}"
     eski_manifest = {}
     if (klasor / "MANIFEST.csv").exists():
@@ -274,7 +274,9 @@ def main_yd(a):
     for n, r in enumerate(rows, 1):
         c = r["cift"].upper()
         ad = f"KAPAK_{c}.jpg" if c in ciftler else None
-        kayit0 = dict(ad=ad or f"satir{r['satir']}", cift=c[:30], kart_no=r["kart_no"][:5], design_id=r["design_id"][:40], boyut="-",
+        # satir kaydi (FAIL / SURE_AZ / DUR) dosya adiyla AYNI anahtarda olmaz: satir<n>:<ad> (inceleme 27 Eki: MANIFEST'te ayni ad
+        # iki satir -> yd_liste_uret son satiri alip gecerli dosyayi BLOK yapiyordu; eski_manifest design_id bozuluyordu)
+        kayit0 = dict(ad=f"satir{r['satir']}:{ad}" if ad else f"satir{r['satir']}", cift=c[:30], kart_no=r["kart_no"][:5], design_id=r["design_id"][:40], boyut="-",
                       sha256="-")
         if c not in ciftler:
             neden = "cift yd78 listesinde yok"
@@ -284,7 +286,7 @@ def main_yd(a):
             neden = "METIN_KAPI PASS satiri ile (cift, design_id) ayni degil" + ("" if c in kapi else " (cift PASS degil)")
         else:
             neden = None
-        kalan, iz = link_suresi(r["url"], simdi)
+        kalan, iz = link_suresi(r["url"], time.time() if a.simdi is None else a.simdi)   # kalan sure bu satirin indirme aninda
         if iz:
             imza_yeni.append(dict(design_id=r["design_id"][:40], imza_ozet=iz, kosu=kosu))
         if not neden and kalan is None:
@@ -294,6 +296,11 @@ def main_yd(a):
         if neden:
             fail.append(dict(kayit0, durum=f"FAIL {neden}"))
             print(f"[{n}/{len(rows)}] {kayit0['ad']} FAIL {neden}", flush=True); continue
+        if iz in imza_eski.get(r["design_id"], set()) and ad in mevcut and mevcut[ad][1] == hedef_bt \
+                and eski_manifest.get(ad, {}).get("design_id") == r["design_id"]:   # dosya zaten klasorde: tekrar gonderilen satir
+            satir.setdefault(ad, dict(kayit0, ad=ad, cift=c, kart_no="1", design_id=r["design_id"], boyut=mevcut[ad][1], sha256=mevcut[ad][0],
+                                      durum="ATLA (dosya mevcut, ayni imza; indirilmedi)"))
+            print(f"[{n}/{len(rows)}] {ad} ATLA dosya mevcut (ayni imza)", flush=True); continue
         if iz in imza_eski.get(r["design_id"], set()):
             dur.append(dict(kayit0, durum="DUR ayni imza onceki kosuda (onbellek linki; yeniden disa aktar)"))
             print(f"[{n}/{len(rows)}] {ad} DUR ayni imza", flush=True); continue
@@ -311,7 +318,7 @@ def main_yd(a):
             print(f"[{n}/{len(rows)}] {ad} FAIL {neden}", flush=True); continue
         h = sha(veri); f, bt = resim(veri)
         boyut = f"{bt[0]}x{bt[1]}" if bt else "-"
-        kayit = dict(kayit0, cift=c, kart_no="1", design_id=r["design_id"], boyut=boyut, sha256=h)
+        kayit = dict(kayit0, ad=ad, cift=c, kart_no="1", design_id=r["design_id"], boyut=boyut, sha256=h)
         if not (veri[:3] == b"\xff\xd8\xff" and f == "JPEG"):
             durum = f"FAIL JPEG degil ({f or 'okunamadi'})"
         elif bt != YD_HEDEF:
@@ -328,7 +335,7 @@ def main_yd(a):
         elif durum.startswith("ATLA"):
             satir.setdefault(ad, dict(kayit, durum=durum))
         else:
-            fail.append(dict(kayit, durum=durum))
+            fail.append(dict(kayit, ad=kayit0["ad"], durum=durum))
         print(f"[{n}/{len(rows)}] {ad} {f} {boyut} {durum}", flush=True)
     hepsi = {}
     for ad_, (h, bt) in mevcut.items():

@@ -55,9 +55,10 @@ class ListeTest(unittest.TestCase):
         (self.t / "kapak" / "MANIFEST.csv").write_text(
             f"ad,cift,kart_no,design_id,boyut,sha256,durum\nKAPAK_{CIFT}.jpg,{CIFT},1,DAHZIAyOYA8,2400x2400,{s},YENI\n")
 
-    def qc(self, durum):
+    def qc(self, durum, sha=None):
         (self.t / "QC_RAPOR.json").write_text(json.dumps(dict(esik=dict(poster_min=0.9, sahne_min=0.9), dosyalar=[
-            dict(dosya=f"KAPAK_{CIFT}.jpg", cift=CIFT, ncc_poster=0.99, ncc_sahne=0.99, durum=durum)])))
+            dict(dosya=f"KAPAK_{CIFT}.jpg", cift=CIFT, ncc_poster=0.99, ncc_sahne=0.99, durum=durum,
+                 sha256=sha or L.sha(self.t / "kapak" / f"KAPAK_{CIFT}.jpg"))])))
 
     def yliste(self, gorseller):
         (self.t / "yliste.json").write_text(json.dumps([dict(Path=f"{LID}_{CIFT}/r{g['rank']}_{g['listing_image_id']}.jpg", Size=1000)
@@ -116,6 +117,8 @@ class ListeTest(unittest.TestCase):
     def test_03_blok_qc_sha_boyut(self):
         self.qc("OLCUM")
         self.assertIn("QC_RAPOR", self.kos()[2]["neden"][0])
+        self.qc("PASS", sha="0" * 64)
+        self.assertIn("PASS baska dosyaya ait", " ".join(self.kos()[2]["neden"]))           # QC baska baytlara ait
         self.qc("PASS"); self.manifest(sha="0" * 64)
         self.assertIn("sha256 tasima MANIFEST ile ayni degil", " ".join(self.kos()[2]["neden"]))
         jpg(self.t / "kapak" / f"KAPAK_{CIFT}.jpg", (3000, 2250)); self.manifest()
@@ -130,6 +133,10 @@ class ListeTest(unittest.TestCase):
         self.ham(h)
         n = " ".join(self.kos()[2]["neden"])
         self.assertIn("kapak (rank 1) bagli", n); self.assertIn("Botanical bagli gorsel 8760104081", n)
+        h = json.loads(json.dumps(HAM))
+        h["images"][11]["rank"], h["images"][12]["rank"] = 13, 12                                  # Botanical rank 13'e kaymis
+        self.ham(h)
+        self.assertIn("rank 13 (12 beklenir", " ".join(self.kos()[2]["neden"]))
         h = json.loads(json.dumps(HAM)); h["images"] = h["images"][:12]; h["listing"]["state"] = "draft"
         self.ham(h)
         n = " ".join(self.kos()[2]["neden"]); self.assertIn("13 beklenir", n); self.assertIn("state draft", n)

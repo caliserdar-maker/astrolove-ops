@@ -31,6 +31,8 @@ from PIL import Image, ImageDraw, ImageFont
 
 BOYUT = (2400, 2400)
 KAYNAK_BOYUT = (2400, 3000)
+# Ayar degerleri (OLCULMEDI; sahte gorsellerle secildi): IC, SAHNE_PAY, OLCEKLER, bulaniklik 15 / asinma 31 / bant +-200.
+# NCC degerlerini etkiler; esikler bunlarla olculur. Ornek olcumunde (olc) kutu sapmasi / NCC raporlanir, degisiklik Serdar onayiyla.
 IC = 0.02          # ncc_poster: kutunun her kenarindan %2 iceride (kenar yumusatmasi / golge)
 SAHNE_PAY = 12     # ncc_sahne: kutu disina eklenen pay (px)
 OLCEKLER = np.linspace(0.30, 1.10, 81)
@@ -167,9 +169,15 @@ def jpeg_kontrol(p):
 
 
 def metin_kapi_oku(p):
+    """cift -> satir; ayni ciftte PASS satiri varsa o (galeri_tasi metin_kapi_oku ile ayni secim)"""
     if not p:
         return {}
-    return {(r.get("cift") or "").strip().upper(): r for r in csv.DictReader(open(p, encoding="utf-8-sig"), delimiter="\t")}
+    out = {}
+    for r in csv.DictReader(open(p, encoding="utf-8-sig"), delimiter="\t"):
+        c = (r.get("cift") or "").strip().upper()
+        if c not in out or (r.get("durum") or "").strip() == "PASS":
+            out[c] = r
+    return out
 
 
 def kontak(satirlar, kapak_dir, out, sutun=13, kenar=180):

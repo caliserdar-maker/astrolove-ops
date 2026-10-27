@@ -57,7 +57,7 @@ class YdTest(unittest.TestCase):
             rc = G.main(["--tsv", str(self.tsv), "--klasor", str(self.klasor), "--yeni", str(self.yeni), "--ciftler", str(CIFTLER),
                          "--urun", "yd", "--metin-kapi", str(self.kapi), "--simdi", str(SIMDI)])
         m = list(csv.DictReader(open(self.yeni / "MANIFEST.csv")))
-        return rc, o.getvalue(), {r["ad"]: r for r in m}, m
+        return rc, o.getvalue(), {r["ad"].split(":", 1)[-1]: r for r in m}, m     # satir<n>:<ad> -> <ad> (son satir)
 
     def yayinla(self):
         T.GaleriTest.yayinla(self)
@@ -158,6 +158,23 @@ class YdTest(unittest.TestCase):
             rc = G.main(["--tsv", str(self.tsv), "--klasor", str(self.klasor), "--yeni", str(self.yeni), "--ciftler", str(CIFTLER),
                          "--urun", "yd"])
         self.assertEqual(rc, 1)
+
+    def test_10_tekrar_gonderilen_satir_dosya_satirini_bozmaz(self):
+        u = url(self.url, "k1")
+        self.kos([("AQUARIUS_AQUARIUS", 1, "DAA", u)]); self.yayinla()
+        self.kapi.write_text(self.kapi.read_text().replace("AQUARIUS_AQUARIUS\tDAA", "AQUARIUS_AQUARIUS\tDAA"))
+        rc, log, m, rows = self.kos([("AQUARIUS_AQUARIUS", 1, "DAA", u),                                  # ayni link (ayni imza)
+                                     ("AQUARIUS_AQUARIUS", 1, "DAA", url(self.url, "k6", imza="B")),      # farkli bayt
+                                     ("AQUARIUS_AQUARIUS", 1, "DAX", url(self.url, "k1", imza="C"))])     # METIN_KAPI uyusmaz
+        ad = {r["ad"]: r for r in rows}
+        self.assertTrue(ad["KAPAK_AQUARIUS_AQUARIUS.jpg"]["durum"].startswith("ATLA (dosya mevcut, ayni imza"), rows)
+        self.assertEqual(ad["KAPAK_AQUARIUS_AQUARIUS.jpg"]["design_id"], "DAA")
+        self.assertEqual(sum(1 for r in rows if r["ad"] == "KAPAK_AQUARIUS_AQUARIUS.jpg"), 1)
+        self.assertEqual(sorted(r["ad"].split(":")[0] for r in rows if r["durum"].startswith("FAIL")), ["satir3", "satir4"])
+        self.assertIn("1 / 78", (self.yeni / "OZET.md").read_text())
+        self.yayinla()                                                                             # sonraki kosu: design_id korunur
+        rc, log, m, rows = self.kos([("AQUARIUS_ARIES", 1, "DAB", url(self.url, "k2", imza="D"))])
+        self.assertEqual({r["ad"]: r for r in rows}["KAPAK_AQUARIUS_AQUARIUS.jpg"]["design_id"], "DAA")
 
 
 if __name__ == "__main__":

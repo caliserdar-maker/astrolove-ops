@@ -15,10 +15,10 @@ liste : ilan basina <out>/<ilan>/LISTE_<ilan>.csv + manifest.json + hedef/01_1.j
   ESLEME.csv: listing_id, cift, kaynak (KAPAK_<CIFT>.jpg), hedef_gorsel (01_1.jpg), sha256, tasima_sha256, durum.
   Ilan kapilari (biri tutmazsa BLOK; dosyalar yine yazilir, yukleyici BLOK ilana yazmaz):
     HAM: state active, 13 gorsel, rank 1..13 tekil, tekil kimlik, kapak 2400x2400; 5 Style bagi (property 513, 5 ad, 5 farkli
-         gorsel, hepsi galeride, kapak bagsiz); Botanical bagli gorsel = KAPAK_KAYNAK kaynak_image_id; envanter Style value_id'leri
+         gorsel, hepsi galeride, kapak bagsiz); Botanical bagli gorsel = KAPAK_KAYNAK kaynak_image_id ve rank 12; envanter Style value_id'leri
          bag value_id'leriyle ayni.
     dosya: KAPAK_<CIFT>.jpg var, JPEG, 2400x2400, sha256 tasima MANIFEST.csv satiriyla ayni (durum YENI / ATLA / MEVCUT).
-    QC: QC_RAPOR.json'da dosyanin durumu PASS (adim 4; PASS degilse yukleme yok).
+    QC: QC_RAPOR.json'da dosyanin durumu PASS ve sha256 bu dosyanin sha256'si (adim 4; PASS degilse yukleme yok).
     yedek: adim 5 yedeginin OZET.md satiri PASS / 13 dosya; yedek klasor listesinde 13 r<rank>_<id>.jpg (boyut > 0), eski kapak dahil.
     alt metin: bos degil, <= 250, eski78 YASAK_ALT (tire / yasak ifade / Art'siz marka) yok.
 Cikis: 0 (BLOK olsa da; kararlar OZET'te), 2 girdi hatasi."""
@@ -147,6 +147,9 @@ def ham_kapisi(h, botanical_id):
         neden.append("HAM kapak (rank 1) bagli (bagsiz beklenir)")
     if str((bag.get("Botanical") or {}).get("image_id")) != str(botanical_id):
         neden.append(f"Botanical bagli gorsel {(bag.get('Botanical') or {}).get('image_id')} != KAPAK_KAYNAK {botanical_id}")
+    bot_rank = next((x.get("rank") for x in g if x.get("listing_image_id") == (bag.get("Botanical") or {}).get("image_id")), None)
+    if bot_rank != 12:
+        neden.append(f"Botanical bagli gorsel rank {bot_rank} (12 beklenir; Serdar 15 / 26 Eki)")
     sv = stil_degerleri(h.get("inventory"))
     for ad, b in bag.items():
         if sv.get(ad) != b.get("value_id"):
@@ -214,6 +217,8 @@ def ilan_hazirla(r, d):
     q = d["qc"].get(kaynak_ad)
     if not q or q.get("durum") != "PASS":
         neden.append(f"QC_RAPOR {kaynak_ad}: {(q or {}).get('durum', 'yok')} (PASS degil; yukleme yok)")
+    elif not s_ or q.get("sha256") != s_:      # QC PASS bu baytlara ait olmali (inceleme 27 Eki: yeniden aktarilan kapak QC'siz gecerdi)
+        neden.append(f"QC_RAPOR {kaynak_ad} PASS baska dosyaya ait (sha256 farkli); QC yeniden kosulmali")
     alt = alt_metin(r["a"], r["b"])
     if not alt or len(alt) > 250 or Y.YASAK_ALT.search(alt):
         neden.append("kapak alt metni gecersiz (bos / >250 / yasak ifade / tire)")

@@ -8,8 +8,9 @@ sira gecisi (en fazla 2; bos alt metinli KORU satirinda alt_text alani gonderilm
 CDN yedegi alinmaz: adim 5 Drive yedegi (TEMP/YD_KAPAK_V1_YEDEK) liste kapisinda dogrulanir; kilit altinda toplu indirme yok.
 Girdi: yd_liste_uret.py liste ciktisi (--hazir: LISTE_OZET.json + <ilan>/LISTE_<ilan>.csv, manifest.json, hedef/01_1.jpg),
 durum dosyalari (--devam DEVAM.json, --ilerleme ILERLEME.json; durum_dosyasi.py ile kilit sonrasi okunur; ILERLEME set = hedef = 13).
-Ilan basina degerlendirme SIRASI (plan v3 adim 7): once DEVAM, sonra ZATEN, en son BLOK (BLOK yalniz ilk koşuda; yarim ilan BLOK'a dusmez).
-  DEVAM: DEVAM.json'da bitmemis kayit -> kuru: rapor; yazim: kayit ayni plan_damga ile baslamissa bir_ilan devam / --kurtar.
+Ilan basina degerlendirme SIRASI (plan v3 adim 7): once DEVAM, sonra ZATEN, en son BLOK (liste kapisi dahil; BLOK yalniz ilk kosuda, yarim ilan BLOK'a dusmez).
+  DEVAM: DEVAM.json'da bitmemis kayit -> kuru: rapor (kayitli plan_damga ile); yazim: bir_ilan kayitli plan + LISTE sha256 ile devam /
+         --kurtar (bu kosunun plan_damga'si farkli olabilir). Yarim ilanin PASS disi sonucu cikis 1.
   ZATEN: rank 1 alt metni = yeni alt metin VE rank 1 kimligi kayitta (DEVAM yuklenen / ILERLEME son_ids[0]) VE galeri hedefle ayni
          (13, rank 1..13, KORU kimlik sirasi, 5 bag yedekle ayni). Yeni alt metin var ama kayit yok (ya da galeri farkli) -> BLOK (elle).
   BLOK : liste kapisi (QC / dosya / sha / yedek) ya da state active degil | galeri 13 degil | Style bagi 5 degil, property 513 degil,
@@ -208,6 +209,12 @@ def plan_yukle(yol, damga):
     return p
 
 
+def devam_basla(adim, n):
+    """durum_uzlas(ara_tekrar=True) son TAMAMLANAN sil / yukle adimindan sonra baslar (aradaki kapak / bag tekrarlanir): kota tahmini
+    o adimdan (inceleme 27 Eki: kayitli adim'dan tahmin eksik kaliyordu)."""
+    return max([i + 1 for i in range(min(n, len(adim))) if adim[i][0] in ("sil", "yukle")], default=0)
+
+
 def ilerleme_pass(ilerleme, lid, cift, a, son_ids):
     ilerleme.setdefault("ilanlar", {})[lid] = dict(cift=cift, set=N, hedef=N, durum="PASS", kosu=a.kosu, plan_damga=a.plan_damga,
                                                    son_ids=son_ids)
@@ -231,34 +238,43 @@ def calistir(api, shop, a):
             s.update(durum="KALAN", neden=[dur]); continue
         dv = (devam.get("ilanlar") or {}).get(lid)
         bitmemis = bool(dv) and dv.get("son_ids") is not None and dv.get("adim", 0) < len(dv.get("plan") or [])
-        if not bitmemis and o["durum"] != "HAZIR":     # liste kapisi BLOK'u yalniz ilk kosuda (yarim ilan BLOK'a dusmez)
+        s["yarim"] = bitmemis       # yarim ilanin PASS disi her sonucu cikis 1 (inceleme 27 Eki: BLOK ile yesil bitmesin)
+        mp = hazir / lid / "manifest.json"
+        if not bitmemis and o["durum"] != "HAZIR" and not mp.exists():
             s.update(durum="BLOK", neden=list(o["neden"])); continue
         if yazim and a.azami_dk and (time.time() - t0) / 60 > a.azami_dk:
             dur = f"zaman butcesi {a.azami_dk} dk doldu; ilan baslamadi"; s.update(durum="KALAN", neden=[dur]); continue
-        man = json.loads((hazir / lid / "manifest.json").read_text(encoding="utf-8"))
         c0 = api.calls; basladi = False
+        uretim = a.plan_damga
         try:
+            man = json.loads(mp.read_text(encoding="utf-8"))   # yoksa (yarim ilanda HAM eksik) DUR; kosu durumu sonlandir'da yazilir
             api.kota_kapisi(f"ilan {lid}")
-            if bitmemis:                                                    # 1) DEVAM
+            if bitmemis:                                                    # 1) DEVAM (liste kapisi BLOK'u uygulanmaz)
                 adim = [tuple(x) for x in dv["plan"]]
-                s["en_kotu"] = Y.istek_en_kotu(adim, dv.get("adim", 0), ilk=False, n=N)
-                s["en_az"] = Y.istek_en_az(adim, dv.get("adim", 0), ilk=False, n=N)
+                b = devam_basla(adim, dv.get("adim", 0))
+                s["en_kotu"] = Y.istek_en_kotu(adim, b, ilk=False, n=N)
+                s["en_az"] = Y.istek_en_az(adim, b, ilk=False, n=N)
+                uretim = str(dv.get("uretim_kosu") or "")
+                if not re.fullmatch(r"\d+_[0-9a-f]{12}", uretim):
+                    raise Y.Dur(f"DEVAM kaydi plan_damga'si gecersiz ({uretim[:30]}); elle bakilmali")
                 if not yazim:
-                    s.update(durum="DEVAM", neden=[f"DEVAM kaydi adim {dv.get('adim', 0)}/{len(adim)}"
+                    s.update(durum="DEVAM", neden=[f"DEVAM kaydi adim {dv.get('adim', 0)}/{len(adim)}, plan {uretim}"
                                                    + (" (hata kaydi: kurtar gerekir)" if dv.get("hata") else "")])
                     continue
-                if str(dv.get("uretim_kosu") or "") != a.plan_damga:
-                    s.update(durum="BLOK", neden=[f"DEVAM kaydi baska planla basladi ({dv.get('uretim_kosu')}); yazma yok"]); continue
+                if uretim != a.plan_damga:   # kayitli plan + LISTE sha256 + ids0 bir_ilan'da kilitli; yeni kuru damgasi yarim ilani durdurmaz
+                    log(f"{lid} DEVAM: kayitli plan {uretim} ile surer (bu kosu {a.plan_damga})")
             else:
                 c = canli_durum(api, shop, lid)
                 il = (ilerleme.get("ilanlar") or {}).get(lid)
-                z, zneden = zaten(c, man, kayit_kimlik(dv, il))           # 2) ZATEN
+                z, zneden = zaten(c, man, kayit_kimlik(dv, il))           # 2) ZATEN (liste kapisindan ONCE)
                 if z:
                     s.update(durum="ZATEN", istek=api.calls - c0)
                     if yazim and (il or {}).get("durum") != "PASS" and (dv or {}).get("durum") != "FAIL":
                         ilerleme_pass(ilerleme, lid, o["cift"], a, [x.get("listing_image_id") for x in c["galeri"]])
                     continue
-                neden = ([zneden] if zneden else []) + kapilar(c, man) + dosya_kapisi(hazir, lid, man)   # 3) BLOK
+                if o["durum"] != "HAZIR":                                   # 3) BLOK: liste kapisi
+                    s.update(durum="BLOK", neden=list(o["neden"]), istek=api.calls - c0); continue
+                neden = ([zneden] if zneden else []) + kapilar(c, man) + dosya_kapisi(hazir, lid, man)   # 3) BLOK: canli
                 if neden:
                     s.update(durum="BLOK", neden=neden, istek=api.calls - c0); continue
                 adim, mx, lsha = plan_kur(hazir, lid, man)
@@ -284,7 +300,7 @@ def calistir(api, shop, a):
                 os.environ["DEVAM_HEDEF"] = f"{a.devam_hedef_kok}/DEVAM_{lid}.json"
             try:
                 R = Y.bir_ilan(api, shop, lid, hazir / lid / f"LISTE_{lid}.csv", hazir / lid / "hedef", hazir / lid / "manifest.json",
-                               ilan_out, kuru=False, kurtar=a.kurtar and bitmemis and bool(dv.get("hata")), uretim_kosu=a.plan_damga,
+                               ilan_out, kuru=False, kurtar=a.kurtar and bitmemis and bool(dv.get("hata")), uretim_kosu=uretim,
                                hedef_n=N, cdn=False, ara_tekrar=True, degerler=stil_degerleri, bos_alt_koru=True)
             finally:
                 os.environ.pop("DEVAM_HEDEF", None)
@@ -434,7 +450,7 @@ def sonlandir(api, shop, a):
         (out / "SONUC_SATIR.json").write_text(json.dumps(satir, indent=1, ensure_ascii=False), encoding="utf-8")
         if a.sonuc:
             V.sonuc_yaz(a.sonuc, satir, a)
-    kotu = [s for s in satir if s["durum"] in ("DUR", "FAIL")]
+    kotu = [s for s in satir if s["durum"] in ("DUR", "FAIL") or (s.get("yarim") and s["durum"] not in ("PASS", "DEVAM", "KALAN"))]
     return 1 if kotu else 0
 
 

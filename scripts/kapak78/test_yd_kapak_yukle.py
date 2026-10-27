@@ -81,7 +81,7 @@ class SahteYD(T.Sahte):
 DEPO = Path(tempfile.mkdtemp(prefix="ydk_"))
 
 
-def hazir_kur(ad="h", ham=HAM, kapak_boyut=(2400, 2400)):
+def hazir_kur(ad="h", ham=HAM, kapak_boyut=(2400, 2400), qc_durum="PASS"):
     d = DEPO / ad
     for x in ("HAM", "kapak", "out"):
         (d / x).mkdir(parents=True, exist_ok=True)
@@ -90,7 +90,7 @@ def hazir_kur(ad="h", ham=HAM, kapak_boyut=(2400, 2400)):
     Image.new("RGB", kapak_boyut, (40, 100, 50)).save(d / "kapak" / f"KAPAK_{CIFT}.jpg", "JPEG", quality=90)
     s = L.sha(d / "kapak" / f"KAPAK_{CIFT}.jpg")
     (d / "kapak" / "MANIFEST.csv").write_text(f"ad,cift,kart_no,design_id,boyut,sha256,durum\nKAPAK_{CIFT}.jpg,{CIFT},1,DAHZIAyOYA8,2400x2400,{s},YENI\n")
-    (d / "QC.json").write_text(json.dumps(dict(esik=dict(poster_min=0.9, sahne_min=0.9), dosyalar=[dict(dosya=f"KAPAK_{CIFT}.jpg", durum="PASS")])))
+    (d / "QC.json").write_text(json.dumps(dict(esik=dict(poster_min=0.9, sahne_min=0.9), dosyalar=[dict(dosya=f"KAPAK_{CIFT}.jpg", durum=qc_durum, sha256=s)])))
     (d / "OZET.md").write_text(f"| {LID} | {CIFT} | 13 | PASS |  |\n")
     (d / "yl.json").write_text(json.dumps([dict(Path=f"{LID}_{CIFT}/r{g['rank']}_{g['listing_image_id']}.jpg", Size=9) for g in HAM["images"]]))
     with contextlib.redirect_stdout(io.StringIO()):
@@ -161,6 +161,9 @@ def normal_akis():
     n0 = len(api.yaz)
     rc, R2, _ = kuru(api, hz, "k1b", devam=dv, ilerleme=il)
     kontrol("bitmis ilan tekrar: ZATEN, yazma yok", R2["ilanlar"][0]["durum"] == "ZATEN" and len(api.yaz) == n0)
+    hz4 = hazir_kur("h4", qc_durum="OLCUM")                                   # sonradan liste kapisi BLOK (QC yeniden kosuldu)
+    rc, R3, _ = kuru(api, hz4, "k1c", devam=dv, ilerleme=il)
+    kontrol("bitmis ilan + liste kapisi BLOK: once ZATEN (BLOK degil)", R3["ilanlar"][0]["durum"] == "ZATEN" and len(api.yaz) == n0)
     # durum esigi 13
     D = DD.Dosya("gdrive:X/ILERLEME.json", "json-ilanlar")
     once = {"ilanlar": {LID: ilr}}
@@ -224,10 +227,33 @@ def devam_zaten_blok(hz):
     g = sorted(api.img, key=lambda x: (x["rank"], x["listing_image_id"]))   # sahte Etsy sirasi (Sahte.get)
     kontrol(f"yarim ilan: kota tabaninda durdu, galeri {len(g)}, rank 1 yeni alt metin", len(g) == 14 and g[0]["alt_text"] == YENI_ALT
             and R["ilanlar"][0]["durum"] in ("DUR", "KALAN"))
-    _, Rk, _ = kuru(api, hz, "k4b", devam=dv, ilerleme=il)
-    kontrol("yarim ilan kuru: DEVAM (BLOK'a dusmez; galeri 14 / yeni alt metin)", Rk["ilanlar"][0]["durum"] == "DEVAM")
-    rc, R = yaz(api, hz, po, "y4b", damga, dv, il)
-    kontrol(f"yarim ilan yazim: DEVAM ile PASS, ikinci yukleme yok (yukleme {api.n_yukle})", R["ilanlar"][0]["durum"] == "PASS" and api.n_yukle == 1)
+    _, Rk, pk = kuru(api, hz, "k4b", devam=dv, ilerleme=il)
+    kontrol("yarim ilan kuru: DEVAM (BLOK'a dusmez; galeri 14 / yeni alt metin), kayitli plan raporda",
+            Rk["ilanlar"][0]["durum"] == "DEVAM" and damga in Rk["ilanlar"][0]["neden"][0])
+    kontrol(f"DEVAM kota tahmini son tamamlanan sil/yukle'den (devam_basla 1; en kotu {Rk['ilanlar'][0]['en_kotu']})",
+            K.devam_basla([("yukle",), ("kapak",), ("bag",), ("sil", 1), ("sira",), ("bag",)], 3) == 1
+            and Rk["ilanlar"][0]["en_kotu"] == Y.istek_en_kotu([tuple(x) for x in json.loads(dv.read_text())["ilanlar"][LID]["plan"]], 1, ilk=False, n=13))
+    rc, R = yaz(api, hz, pk, "y4b", Rk["plan_damga"], dv, il)                # YENI kuru damgasiyla (inceleme 27 Eki bulgu 1)
+    kontrol(f"yarim ilan, yeni kuru damgasi: kayitli planla DEVAM, PASS, ikinci yukleme yok (yukleme {api.n_yukle})",
+            R["ilanlar"][0]["durum"] == "PASS" and api.n_yukle == 1 and Rk["plan_damga"] != damga)
+    # yarim ilan + manifest yok (HAM eksik): cokmez, DUR, cikis 1, durum dosyalari yazilir
+    api3 = SahteYD(); _, R, po3 = kuru(api3, hz, "k7"); d7, i7 = durum_dosyalari("d7")
+    orig = api3._k
+
+    def kes3():
+        if any(y[0] == "yukle" for y in api3.yaz) and not any(y[0] == "bag" for y in api3.yaz) and any(y[0] == "sira" for y in api3.yaz):
+            api3.remaining = 9
+        return orig()
+    api3._k = kes3
+    yaz(api3, hz, po3, "y7", R["plan_damga"], d7, i7)
+    api3._k = orig; api3.remaining = 5000
+    import shutil
+    hz7 = DEPO / "h7"; shutil.copytree(hz, hz7); shutil.rmtree(hz7 / LID)
+    oz = json.loads((hz7 / "LISTE_OZET.json").read_text()); oz["ilanlar"][LID].update(durum="BLOK", neden=["HAM yok"])
+    (hz7 / "LISTE_OZET.json").write_text(json.dumps(oz))
+    rc, R = yaz(api3, hz7, po3, "y7b", R["plan_damga"], d7, i7)
+    kontrol("yarim ilan + manifest yok: DUR, cikis 1, DEVAM.json yazildi (cokmedi)",
+            rc == 1 and R["ilanlar"][0]["durum"] == "DUR" and LID in json.loads(d7.read_text())["ilanlar"])
     # kayitsiz yeni alt metin -> BLOK
     api2 = SahteYD(); api2.img[0]["alt_text"] = YENI_ALT
     _, R, _ = kuru(api2, hz, "k5")
