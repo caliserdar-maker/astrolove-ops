@@ -9,7 +9,7 @@ koyu poster varsayar, krem kagitta calismaz):
 - murekkep rengi: en buyuk koyu yesil parca (lum < 140, G - R > 8) medyani; parcalar: alfa > 0,4 ve G - R > 5; alfa = yerel kagit (61 px medyan) ile murekkep medyani arasindaki oran (kapak
   pikselleri, yeniden cizim yok). Rengi murekkep medyanindan > 45 uzak parcalar (yapraklar, altin tohumlar) disarida.
 - satirlar: alan > 300 parcalar ust kenara gore 40 px bosluk kuraliyla bantlara ayrilir (v7 _halkasiz ile ayni); en buyuk parcanin
-  bandi = ortak sembol; ustundeki bantlar (Paper Anniversary) sabit; altindakiler: kucuk burclar, isimler; isimlerin altindaki tum parcalar mesaj (tarih + YEAR ONE).
+  bandi = ortak sembol; ustundeki bantlar (Paper Anniversary) sabit; altindakiler: kucuk burclar, isimler; mesaj = isimlerin altindaki yazi pikselleri (kagit -> murekkep dogrusu, tarih + YEAR ONE).
 Kullanim: yd_video.py <y01_kapak.jpg> <cikti_mp4>   (ortam: V7_DOLGU, V6_C, V6_N, V6_BOLGE_REF, V6_N_REF, TOZSUZ v7 ile ayni)"""
 import os, subprocess, sys, time
 import numpy as np, cv2
@@ -40,7 +40,8 @@ class PosterYD:
     def __init__(self, img):
         self.img = img.astype(np.float32); self.h, self.w = img.shape[:2]
         lum = self.img @ np.float32([0.299, 0.587, 0.114])
-        lbg = cv2.medianBlur(np.clip(img, 0, 255).astype(np.uint8), 61).astype(np.float32) @ np.float32([0.299, 0.587, 0.114])
+        self.bg = cv2.medianBlur(np.clip(img, 0, 255).astype(np.uint8), 61).astype(np.float32)   # yerel kagit (RGB)
+        lbg = self.bg @ np.float32([0.299, 0.587, 0.114])
         koyu = ((lum < 140) & (self.img[..., 1] - self.img[..., 0] > 8)).astype(np.uint8)
         n, lab, st, _ = cv2.connectedComponentsWithStats(koyu, 8)
         en = 1 + int(np.argmax(st[1:, 4]))
@@ -90,10 +91,33 @@ class PosterYD:
             raise RuntimeError('YD: sol veya sag kucuk burc bulunamadi')
         self.sign_a, self.sign_b = self._union(left), self._union(right)
         self.names_row = self._union(alt[1]['cs'])
-        # mesaj = isim satirinin altindaki tum murekkep parcalari (tarih + YEAR ONE; v7'de isimlerin altindaki tum bantlar).
-        # YEAR ONE harfleri bu olcekte alan < 300 (bant esigi), bu yuzden bantla degil parca ust kenariyla
+        # mesaj = isim satirinin altindaki tum yazi (tarih + YEAR ONE; v7'de isimlerin altindaki tum bantlar). Inceleme 27 Eki: ince
+        # ve acik harfler alfa > 0,4 parcalarina yalniz %28 giriyordu (tarih yarim, YEAR ONE hic silinmiyordu). Mesaj pikselleri bolgeden:
+        # kagit -> murekkep dogrusu uzerinde (artik < 22; yaprak / altin tohum disarida) ve oran > 0,15.
         ny1 = self.names_row[2] + self.names_row[4]
-        self.msg_row = self._union([c for c in comps if c[2] > ny1])
+        eski = [c for c in comps if c[2] > ny1 and self.names_row[1] <= c[1] + c[3] / 2 <= self.names_row[1] + self.names_row[3]]
+        if not eski:
+            raise RuntimeError('YD: isimlerin altinda mesaj parcasi yok')
+        e = self._union(eski)                                   # bolge: koyu mesaj parcalarinin kutusu +-%3 W, alta +%6 H (ikinci satir)
+        bx0, bx1 = e[1] - 0.03 * Wp, e[1] + e[3] + 0.03 * Wp
+        by1 = int(e[2] + e[4] + 0.06 * self.h)
+        v = self.ink_rgb[None, None, :] - self.bg
+        t = ((self.img - self.bg) * v).sum(2) / np.maximum((v * v).sum(2), 1.0)
+        art = np.linalg.norm(self.img - (self.bg + t[..., None] * v), axis=2)
+        bol = np.zeros(t.shape, bool); bol[ny1 + 10:by1, max(0, int(bx0)):int(bx1)] = True
+        m = ((t > 0.15) & (art < 22) & bol).astype(np.uint8)
+        n2, lab2, st2, _ = cv2.connectedComponentsWithStats(m, 8)
+        taban = int(self.lab.max()) + 1; yeni = []
+        for k in range(1, n2):
+            if st2[k, 4] >= 8:
+                sec = (lab2 == k) & (self.lab == 0)
+                self.lab[sec] = taban + k; yeni.append((taban + k, *(int(x) for x in st2[k])))
+        self.comps += yeni
+        mes = eski + yeni
+        self.msg_row = self._union(mes)
+        yazi = (t > 0.25) & (art < 22) & bol                   # olcum: mesaj yazisinin maskeye giren orani
+        self.mesaj_kapsam = float((np.isin(self.lab, [c[0] for c in mes]) & yazi).sum() / max(1, yazi.sum()))
+        print(f'YD mesaj: {len(eski)} eski + {len(yeni)} yeni parca, kutu {self.msg_row[1:5]}, kapsam {self.mesaj_kapsam:.3f}', flush=True)
         print(f'YD ayristirma: ust sabit bant {i}, sembol {len(sym)} parca ({sx0},{sy0})-({sx1},{sy1}), alt bant {len(alt)}, '
               f'murekkep {self.ink_rgb.round().tolist()}', flush=True)
 

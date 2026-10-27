@@ -2,7 +2,9 @@ name: yd-video-ornek
 # YD (1st Anniversary) ilan videosu ORNEGI (Merkez 27 Eki gorev B): tek cift, poster v7b ile ayni sure ve tarz (1440x1080, 6 sn).
 # ETSY API YOK, Canva yok, kilit yok, Etsy'ye yukleme yok. Girdi: Drive TEMP/YD_KAPAK_V1/<kapak_damga>/<CIFT>_Y01.jpg (yd-ornek-indir).
 # Uretim sosyal/poster_video/yd_video.py (v7b motoru birebir + YD sahne ayristirmasi; v7 78 ile ayni ortam: V7_DOLGU=nk, V6_C,
-# V6_N 58000 x bolge / 44274). QC v7_qc.py (a-e + silinme_hayalet; d kutu orani v7 posteri 1,29-1,31 icin, YD 4:5 posterde bilgi).
+# V6_N 58000 x bolge / 44274). QC v7_qc.py (a-e + silinme_hayalet). d kutu orani esigi (1,29-1,31) v7 posterine ozgu; YD 4:5 icin
+# gecerli degil ve YD kapisi tanimli degil: sonuc oldugu gibi FAIL raporlanir (esik degisikligi yalniz Serdar onayiyla). Ek olcum
+# MESAJ.json (inceleme 27 Eki): 0,5 sn karesinde mesaj yazisinin (kapakta oran > 0,3) hala koyu kalan orani; esik yok, olcum.
 # Cikti: Drive TEMP/YD_VIDEO_ORNEK/<damga>/ <CIFT>_yd_video.mp4, ONIZLEME.png (2,5 sn karesi, PNG < 290 KB, 300 KB sinirina pay), KONTAK.jpg, QC.json,
 # ic.json, uretim.log.
 permissions:
@@ -60,7 +62,29 @@ jobs:
             python3 -I sosyal/poster_video/yd_video.py _w/KAPAK.jpg "_o/${C}_yd_video.mp4" > _o/uretim.log 2>&1 || { tail -20 _o/uretim.log; exit 1; }
           grep -v '^  kare' _o/uretim.log
           set +e; python3 -I sosyal/poster_video/v7_qc.py "_o/${C}_yd_video.mp4" _w/KAPAK.jpg _o/uretim.log _w/qc; QC=$?; set -e
-          cp _w/qc/QC.json _w/qc/KONTAK.jpg _o/; mv "_o/${C}_yd_video.mp4.ic.json" _o/ic.json; rm -f _o/*.sembol_maske.png
+          for f in QC.json KONTAK.jpg; do [ -f "_w/qc/$f" ] && cp "_w/qc/$f" _o/ || echo "::warning::QC $f yok"; done
+          mv "_o/${C}_yd_video.mp4.ic.json" _o/ic.json; rm -f _o/*.sembol_maske.png
+          ffmpeg -v error -y -ss 0.5 -i "_o/${C}_yd_video.mp4" -frames:v 1 _w/k05.png
+          python3 - <<'PY'
+          import json, re
+          import numpy as np, cv2
+          from PIL import Image
+          log = open("_o/uretim.log").read()
+          px, py_, pw = map(int, re.search(r"poster kapakta (\d+),(\d+) (\d+)x", log).groups())
+          mx, my, mw, mh = map(int, re.search(r"YD mesaj: .*kutu \((\d+), (\d+), (\d+), (\d+)\)", log).groups())
+          s = pw / 2000; f = 1440 / 3000
+          xa, ya, xb, yb = [int(round(v * f)) for v in (px + mx * s, py_ + my * s, px + (mx + mw) * s, py_ + (my + mh) * s)]
+          k = cv2.resize(np.asarray(Image.open("_w/KAPAK.jpg").convert("RGB")), (1440, 1080), interpolation=cv2.INTER_AREA).astype(np.float32)
+          bg = cv2.medianBlur(k.astype(np.uint8), 31).astype(np.float32); ink = np.float32([47, 70, 56])
+          def oran(im):
+              v = ink - bg
+              return ((im - bg) * v).sum(2) / np.maximum((v * v).sum(2), 1)
+          yazi = oran(k)[ya:yb, xa:xb] > 0.3
+          fr = np.asarray(Image.open("_w/k05.png").convert("RGB")).astype(np.float32)
+          kal = float((oran(fr)[ya:yb, xa:xb][yazi] > 0.3).mean())
+          json.dump(dict(kutu_video=[xa, ya, xb, yb], yazi_px=int(yazi.sum()), sn=0.5, hala_koyu_orani=round(kal, 3)), open("_o/MESAJ.json", "w"))
+          print(f"MESAJ silinme (0,5 sn): yazi {int(yazi.sum())} px, hala koyu orani {kal:.3f}")
+          PY
           ffmpeg -v error -y -ss 2.5 -i "_o/${C}_yd_video.mp4" -frames:v 1 _w/kare.png
           python3 - <<'PY'
           from PIL import Image
@@ -82,8 +106,11 @@ jobs:
         run: |
           set -euo pipefail
           rclone copy _o "gdrive:ASTROLOVE/TEMP/YD_VIDEO_ORNEK/${DAMGA:?}" --immutable -q
-          { echo "Cikti: TEMP/YD_VIDEO_ORNEK/$DAMGA (v7_qc cikis $QC_CIKIS)"; python3 -c "
-          import json; q = json.load(open('_o/QC.json'))
-          for k, v in q['kontrol'].items(): print(k, 'PASS' if v['gecti'] else 'FAIL', json.dumps(v.get('deger'))[:160])"; } | tee -a "$GITHUB_STEP_SUMMARY"
+          { python3 -c "
+          import json; q = json.load(open('_o/QC.json')); f = [k for k, v in q['kontrol'].items() if not v['gecti']]
+          print('QC SONUC: ' + ('FAIL (' + ', '.join(f) + ')' if f else 'PASS'))
+          print('Cikti: TEMP/YD_VIDEO_ORNEK/$DAMGA (v7_qc cikis $QC_CIKIS)')
+          for k, v in q['kontrol'].items(): print(k, 'PASS' if v['gecti'] else 'FAIL', json.dumps(v.get('deger'))[:160])
+          print('MESAJ', open('_o/MESAJ.json').read())"; } | tee -a "$GITHUB_STEP_SUMMARY"
       - if: always()
         run: rm -rf _w _o ~/.config/rclone

@@ -109,7 +109,7 @@ def wa_s3():
     K.baslik(d, "Digital File or Print")
     kolon = [("Digital File", ["One print ready digital file in the color and size you choose", "Nothing is shipped"]),
              ("Print", ["Unframed print on matte art paper", "Free shipping worldwide"]),
-             ("13 Sizes", ["8x10, 11x14, 12x16, 12x18, 16x20, 16x24, 18x24, 20x30, 24x30, 24x36 in, A4, A3, A2"])]
+             ("13 Sizes", ["8x10, 11x14, 12x16, 12x18, 16x20 in", "16x24, 18x24, 20x30, 24x30, 24x36 in", "A4, A3, A2"])]   # Canva'daki 3 satir
     kg = (W - 2 * K.KENAR) / 3; gen = kg - 0.06 * W
     sat = [[K.sar_d(K.METIN, m, gen) for m in ms] for _, ms in kolon]
     ara_p = 0.6 * K.METIN["boy"]
@@ -223,7 +223,7 @@ def beklenen(a, b):
                        "Up to 35 characters, printed as you type it, no emoji", "Please check your spelling before you order"],
         "S3_FORMAT": ["Digital File or Print", "Digital File", "One print ready digital file in the color and size you choose",
                       "Nothing is shipped", "Print", "Unframed print on matte art paper", "Free shipping worldwide", "13 Sizes",
-                      "8x10, 11x14, 12x16, 12x18, 16x20, 16x24, 18x24, 20x30, 24x30, 24x36 in, A4, A3, A2",
+                      "8x10, 11x14, 12x16, 12x18, 16x20 in", "16x24, 18x24, 20x30, 24x30, 24x36 in", "A4, A3, A2",
                       "Every size as a print or a digital file"],
         "S4_SUREC": ["Made for You, Step by Step",
                      "01", "Your Preview", "For every print, we send a preview via Etsy Messages within 24 hours of your order",
@@ -258,7 +258,12 @@ def main(argv=None):
         ap.add_argument(k, required=True)
     a = ap.parse_args(argv)
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True); sem = Path(a.sembol); og = Path(a.orchard)
-    orch = {n: Image.open(next(og.glob(f"{n}_*.jpg"))).convert("RGB") for n in ("03", "05", "06", "07")}
+    orch = {}
+    for n in ("03", "05", "06", "07"):
+        f = sorted(og.glob(f"{n}_*.jpg"))
+        if len(f) != 1:
+            raise SystemExit(f"DUR: Orchard galeri kart {n}: {len(f)} dosya ({og})")
+        orch[n] = Image.open(f[0]).convert("RGB")
     for n, im in orch.items():
         if im.size != (ORCH, ORCH):
             raise SystemExit(f"DUR: Orchard kart {n} boyutu {im.size} ({ORCH}x{ORCH} beklenir)")
