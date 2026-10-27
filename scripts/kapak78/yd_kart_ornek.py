@@ -13,7 +13,8 @@ panel / golge / imza yok. Cizim dogrudan 3000x2250; eski layout yalniz yuzde kon
   Y04 format (ORTAK)           : 3 sutun panelsiz, ince dikey ayirici + alt not.
   Y05 surec (cifte ozel)       : eski r8 duzeni; solda Timeless poster (yedek r10), sagda 4 adim (01-04) + alt not.
   KONTAK_KUCUK.jpg (--ortak)   : 4 kart 2x2, 1600x1200, JPEG 80, < 200 KB (kartlar yazilmadan once denetlenir).
-RENK KAPISI: poster disindaki her piksel zemin ile yazi rengi arasinda (kenar yumusatma); PUNTO KAPISI: her yazi >= 58 px.
+RENK KAPISI (cizim + teslim JPEG): poster disinda zemin / murekkep dogrusu, ara ton yalniz murekkep kenarinda, dolu koyu blok yok.
+PUNTO KAPISI: her yazi >= 58 px. BASLIK / ETIKET satirlari gorev metniyle birebir ve Title Case.
 Yazi kapisi: gorsele giren her metinde '.', '+', '=', tire / eksi bicimleri ve CLAUDE.md urun metni yasaklari yok; METIN KAPISI: her
 kartta cizilen satirlar sirasiyla gorev metni (beklenen()) ile ayni (buyuk/kucuk harf haric). Biri tutmazsa DUR (cikti yazilmaz).
 Kullanim: yd_kart_ornek.py --cift CANCER_LIBRA --a Cancer --b Libra --eski-r2 r2.jpg --botanical r12.jpg --timeless r10.jpg --out DIR [--ortak]"""
@@ -100,6 +101,7 @@ def sar(s, metin, gen):
 
 
 YAZILAR = []
+SATIRLAR = []                                    # (tur, satir): baslik / etiket satirlari tam metin + Title Case kapisi icin
 
 
 def yaz(d, s, satirlar, x, y, hiza="left", gen=None):
@@ -109,7 +111,7 @@ def yaz(d, s, satirlar, x, y, hiza="left", gen=None):
     if s["boy"] < EN_KUCUK:
         raise SystemExit(f"DUR: punto {s['boy']} < {EN_KUCUK} px ({satirlar[:1]})")
     for j, t in enumerate(satirlar):
-        YAZILAR.append(t)
+        YAZILAR.append(t); SATIRLAR.append((s.get("tur"), t))
         tw = genislik(s, t)
         if gen and tw > gen + 1:
             raise SystemExit(f"DUR: yazi sigmiyor ({t!r}, {tw:.0f} > {gen:.0f} px)")
@@ -136,14 +138,18 @@ def blok_yuk(s, n):
 # 170 px Title Case; etiket Manrope 600 68 px Title Case; metin Manrope 400 >= 64 px; alt not >= 58 px; hicbir yazi < 58 px (3000x2250
 # cikti pikseli). Imza yok. Posterler (Y03 Botanical, Y05 Timeless) golgesiz duz kirpim. Yerlesim yuzdeleri eski layout'tan.
 ZEMIN, MUREKKEP = "#F5F0E7", "#2B2220"
-CIZGI = 3                                                       # ince cizgi / ok (px)
-BASLIK = dict(dosya="fonts/CormorantGaramond.ttf", boy=170, agirlik=500, renk=MUREKKEP, aralik=0, satir=1.15)
-ETIKET = dict(dosya="fonts/Manrope.ttf", boy=68, agirlik=600, renk=MUREKKEP, aralik=0, satir=1.2)
-METIN = dict(dosya="fonts/Manrope.ttf", boy=64, agirlik=400, renk=MUREKKEP, aralik=0, satir=1.32)
-NOT = dict(dosya="fonts/Manrope.ttf", boy=58, agirlik=400, renk=MUREKKEP, aralik=0, satir=1.2)
+CIZGI = 4                                                       # ince cizgi / ok (px; 570 px onizlemede ~0,8 px)
+BASLIK = dict(dosya="fonts/CormorantGaramond.ttf", boy=170, agirlik=500, renk=MUREKKEP, aralik=0, satir=1.15, tur="baslik")
+ETIKET = dict(dosya="fonts/Manrope.ttf", boy=68, agirlik=600, renk=MUREKKEP, aralik=0, satir=1.2, tur="etiket")
+METIN = dict(dosya="fonts/Manrope.ttf", boy=64, agirlik=400, renk=MUREKKEP, aralik=0, satir=1.32, tur="metin")
+NOT = dict(dosya="fonts/Manrope.ttf", boy=58, agirlik=400, renk=MUREKKEP, aralik=0, satir=1.2, tur="not")
 EN_KUCUK = 58
 KENAR = 0.07 * W                                                # yan bosluk
 BASLIK_Y = 0.085 * H                                            # baslik ust kenari
+NOT_Y = 0.905 * H                                               # alt not (Y03, Y04, Y05 ayni konum, ortali)
+ALAN = (BASLIK_Y + BASLIK["boy"] + 0.06 * H, NOT_Y - 0.05 * H)  # icerik alani (baslik alti .. alt not ustu)
+POSTER = (0.25 * W - 450, (ALAN[0] + ALAN[1]) / 2 - 562.5, 0.25 * W + 450, (ALAN[0] + ALAN[1]) / 2 + 562.5)   # Y03 / Y05 ayni, 900x1125
+SUTUN_X = POSTER[2] + 0.07 * W                                  # poster sagindaki sutun
 
 
 def tuval():
@@ -168,15 +174,28 @@ def poster_koy(im, k, src):
     return [x, y, x + nw, y + nh], olcu
 
 
-def adimlar(d, x0, gen, ust, alt, bloklar, no_g=0):
-    """[(numara|None, etiket satirlari, metin)] -> ust..alt arasina esit aralikli bloklar"""
-    hazir = [(n, e, sar(METIN, t, gen - no_g)) for n, e, t in bloklar]
+def sar_d(s, metin, gen):
+    """dengeli satir bolme: ayni satir sayisinda en kisa satiri en uzun yapan genislik (tek kalan kelime yok)"""
+    taban = sar(s, metin, gen); en, puan = taban, -1
+    for w in range(int(gen), int(gen * 0.55), -12):
+        L = sar(s, metin, w)
+        if len(L) > len(taban):
+            break
+        dolu = [genislik(s, x) for x in L if x]
+        if dolu and min(dolu) > puan:
+            en, puan = L, min(dolu)
+    return en
+
+
+def adimlar(d, x0, gen, bloklar, no_g=0):
+    """[(numara|None, etiket satirlari, metin)] -> icerik alaninin (ALAN) ortasina, poster ortasiyla hizali bloklar"""
+    hazir = [(n, e, sar_d(METIN, t, gen - no_g)) for n, e, t in bloklar]
     ara_et = 0.28 * ETIKET["boy"]
     yuk = [blok_yuk(ETIKET, len(e)) + ara_et + blok_yuk(METIN, len(t)) for _, e, t in hazir]
-    bos = (alt - ust - sum(yuk)) / max(1, len(yuk) - 1)
+    bos = min(140, (ALAN[1] - ALAN[0] - sum(yuk)) / max(1, len(yuk) - 1))
     if bos < 60:
         raise SystemExit(f"DUR: adimlar sigmiyor (aralik {bos:.0f} px)")
-    y = ust
+    y = (ALAN[0] + ALAN[1]) / 2 - (sum(yuk) + bos * (len(yuk) - 1)) / 2
     for (n, e, t), h in zip(hazir, yuk):
         if n:
             yaz(d, ETIKET, [n], x0, y, gen=no_g)
@@ -194,9 +213,10 @@ def sembol_al(r2, e, pay=0.06):
     a = np.asarray(im.crop([round(v) for v in k])).astype(np.float32)
     kag = np.float32(rgb(bg(2)["color_hex"]))                 # eski r2 kagidi (alfa olcumu)
     lum = a @ np.float32([0.299, 0.587, 0.114]); lk = float(kag @ np.float32([0.299, 0.587, 0.114]))
-    murekkep = np.percentile(lum, 0.5)
+    murekkep = np.percentile(lum, 3)             # cekirdek tam opak (inceleme 27 Eki: %0,5 ile cekirdek (50,40,38) kaliyordu)
     al = np.clip((lk - lum) / max(lk - murekkep, 1), 0, 1)
-    al[al < 0.04] = 0
+    al = np.clip((al - 0.2) / 0.6, 0, 1)        # keskin kenar: eski JPEG'in yumusak hale / gurultusu atilir (renk kapisi ara ton)
+    al[(al < 0.6) & ~(_kutu_toplam(al >= 0.6, 3) > 0)] = 0   # cekirdekten kopuk JPEG lekesi
     ys, xs = np.nonzero(al > 0.5)
     if len(xs) < 200:
         raise SystemExit(f"DUR: eski r2'de {e['id']} sembolu bulunamadi")
@@ -253,16 +273,15 @@ def poster_kirp(r12):
 
 def y03(a, b, r12):
     im = tuval()
-    pkutu, olcu = poster_koy(im, kutu(el(4, "sample_poster")), r12)
+    pkutu, olcu = poster_koy(im, POSTER, r12)
     d = ImageDraw.Draw(im)
     baslik(d, "Your Names, Your Date")
-    x0 = pkutu[2] + 0.075 * W; gen = W - KENAR - x0
-    son = adimlar(d, x0, gen, pkutu[1], pkutu[3] - 2.9 * NOT["boy"], [
+    adimlar(d, SUTUN_X, W - KENAR - SUTUN_X, [
         (None, [f"Name Under {a}", f"Name Under {b}"], "Up to 11 letters each, English letters, printed in capitals"),
         (None, ["Your Special Date"], "Month in letters, for example 14 June 2025"),
         (None, ["Your Heading"], "Paper Anniversary or Our First Year"),
         (None, ["Optional Short Line"], "Up to 20 characters, Year One if left empty")])
-    yaz(d, NOT, sar(NOT, "Please check your spelling before you order", gen), x0, pkutu[3] - NOT["boy"], gen=gen)
+    yaz(d, NOT, ["Please check your spelling before you order"], W / 2, NOT_Y, "center", W - 2 * KENAR)
     return im, olcu, [pkutu]
 
 
@@ -273,11 +292,10 @@ def y04():
              ("Print", "Unframed print on matte art paper"),
              ("14 Sizes", "5x7, 8x10, 11x14, 12x16, 12x18, 16x20, 16x24, 18x24, 20x30, 24x30, 24x36 in, A4, A3, A2")]
     kg = (W - 2 * KENAR) / 3; gen = kg - 0.06 * W
-    sat = [sar(METIN, m, gen) for _, m in kolon]
+    sat = [sar_d(METIN, m, gen) for _, m in kolon]
     hh = max(blok_yuk(METIN, len(x)) for x in sat)
     ara = 0.45 * ETIKET["boy"] + ETIKET["boy"]
-    blok = ara + hh + 0.11 * H + NOT["boy"]                       # sutunlar + alt not, baslik alti ile kart alti arasinda ortali
-    ust = (BASLIK_Y + BASLIK["boy"] + H - blok) / 2
+    ust = (ALAN[0] + ALAN[1]) / 2 - (ara + hh) / 2                # Y03 / Y05 ile ayni icerik alaninda ortali
     alt = ust + ara + hh
     for i, ((bas, _), t) in enumerate(zip(kolon, sat)):
         cx = KENAR + kg * (i + 0.5)
@@ -285,37 +303,52 @@ def y04():
         yaz(d, METIN, t, cx, ust + ara, "center", gen)
         if i:
             cizgi(d, (KENAR + kg * i, ust - 0.02 * H), (KENAR + kg * i, alt + 0.02 * H))   # ince dikey ayirici
-    yaz(d, NOT, ["Every style and size as a print or a digital file"], W / 2, alt + 0.11 * H, "center", W - 2 * KENAR)
+    yaz(d, NOT, ["Every style and size as a print or a digital file"], W / 2, NOT_Y, "center", W - 2 * KENAR)
     return im, dict(kolon_px=round(kg)), []
 
 
 def y05(a, b, r10):
-    """eski r8 (slayt 10) duzeni: solda Timeless poster, sagda 4 adim (Merkez 27 Eki karar d)"""
+    """eski r8 (slayt 10) duzeni: solda Timeless poster, sagda 4 adim (Merkez 27 Eki karar d); Y03 ile ayni geometri"""
     im = tuval()
-    pkutu, olcu = poster_koy(im, kutu(el(10, "preview_poster")), r10)
+    pkutu, olcu = poster_koy(im, POSTER, r10)
     d = ImageDraw.Draw(im)
     baslik(d, "Made for You, Step by Step")
-    x0 = pkutu[2] + 0.075 * W; gen = W - KENAR - x0
-    ust = BASLIK_Y + BASLIK["boy"] + 0.07 * H; alt = 0.86 * H
-    adimlar(d, x0, gen, ust, alt, [
+    adimlar(d, SUTUN_X, W - KENAR - SUTUN_X, [
         ("01", ["Free Preview Before You Order"], "Message us your names, your date and your style, and we send you a free preview"),
         ("02", ["Your Final Preview"], "After your order, we send your final preview in Etsy Messages within 24 hours"),
         ("03", ["Your Approval"], "Once you approve, we send your digital file in Etsy Messages, or prepare your print"),
         ("04", ["A Flat Print"], "Gold, relief and paper layer looks are printed effects, with no foil, raised layers or cut paper")],
         no_g=round(1.75 * ETIKET["boy"]))
-    yaz(d, NOT, ["Colors may look slightly different on screen and on paper"], W / 2, 0.915 * H, "center", W - 2 * KENAR)
+    yaz(d, NOT, ["Colors may look slightly different on screen and on paper"], W / 2, NOT_Y, "center", W - 2 * KENAR)
     return im, olcu, [pkutu]
 
 
-def renk_kapisi(im, poster_kutulari):
-    """poster disindaki her piksel zemin ile murekkep arasindaki dogru uzerinde (kenar yumusatma dahil) -> sapan piksel sayisi"""
-    a = np.asarray(im).astype(np.float32)
+def _kutu_toplam(m, r):
+    """m (bool) icin (2r+1)^2 pencere toplami (integral goruntu)"""
+    c = np.pad(np.pad(m.astype(np.int32), r).cumsum(0).cumsum(1), ((1, 0), (1, 0)))
+    n = 2 * r + 1
+    return c[n:, n:] - c[:-n, n:] - c[n:, :-n] + c[:-n, :-n]
+
+
+def renk_kapisi(im, poster_kutulari, jpeg=False):
+    """RENK KAPISI (inceleme 27 Eki: yalniz dogruya uzaklik gri / panel geciriyordu). Poster disinda:
+    (1) her piksel zemin -> murekkep dogrusu uzerinde (tolerans 6; JPEG 20),
+    (2) zeminden belirgin ayrisan ara ton (t > 0.03; JPEG 0.06) yalniz murekkep cekirdeginin (t > 0.6) 3 px (JPEG 8 px) yakininda
+        (kenar yumusatma; gri yazi / panel / koyu alan FAIL),
+    (3) 61x61 tamamen murekkep (t > 0.6) blok yok (dolu koyu alan / panel FAIL; ortak sembol kesisimleri 41 px'i asabiliyor). -> {neden: piksel}"""
+    a = np.asarray(im.convert("RGB")).astype(np.float32)
     z, m = np.float32(rgb(ZEMIN)), np.float32(rgb(MUREKKEP))
     v = m - z; t = np.clip(((a - z) @ v) / float(v @ v), 0, 1)
-    sap = np.linalg.norm(a - (z + t[..., None] * v), axis=2) > 6
+    dis = np.ones(t.shape, bool)
     for k in poster_kutulari:
-        sap[k[1]:k[3], k[0]:k[2]] = False
-    return int(sap.sum())
+        dis[k[1]:k[3], k[0]:k[2]] = False
+    tol, esik, r = (20, 0.06, 8) if jpeg else (6, 0.03, 3)
+    cekirdek = t > 0.6                                      # gri yazi (#A09992 t~0.5) cekirdek sayilmaz
+    yakin = _kutu_toplam(cekirdek, r) > 0
+    out = dict(dogru_disi=int(((np.linalg.norm(a - (z + t[..., None] * v), axis=2) > tol) & dis).sum()),
+               ara_ton=int(((t > esik) & ~yakin & dis).sum()),
+               dolu_blok=int(((_kutu_toplam(cekirdek, 30) == 61 * 61) & dis).sum()))
+    return {k: n for k, n in out.items() if n}
 
 
 def kontak(kartlar):
@@ -332,8 +365,17 @@ def kontak(kartlar):
     return b.getvalue()
 
 
-def kaydet(im, yol):
-    (im if im.size == CIKTI else im.resize(CIKTI, Image.LANCZOS)).save(yol, "JPEG", quality=95, subsampling=0)
+def jpeg_bayt(im):
+    import io
+    b = io.BytesIO(); (im if im.size == CIKTI else im.resize(CIKTI, Image.LANCZOS)).save(b, "JPEG", quality=95, subsampling=0)
+    return b.getvalue()
+
+
+def title_case(t):
+    """her sozcuk buyuk harfle (rakam ve kisa baglaclar haric)"""
+    kucuk = {"a", "an", "and", "or", "for", "by", "of", "the", "to", "in", "on", "&"}
+    w = t.split()
+    return bool(w) and all(x[0].isupper() or x[0].isdigit() or (i and x in kucuk) for i, x in enumerate(w))
 
 
 def EK_METIN(a, b):
@@ -373,31 +415,40 @@ def main(argv=None):
     ap.add_argument("--out", required=True); ap.add_argument("--ortak", action="store_true", help="ORTAK_Y04 de uret (+ KONTAK_KUCUK.jpg)")
     a = ap.parse_args(argv)
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
-    YAZILAR.clear()
+    YAZILAR.clear(); SATIRLAR.clear()
     islem = [(f"{a.cift}_Y02.jpg", lambda: y02(a.a, a.b, Image.open(a.eski_r2))),
              (f"{a.cift}_Y03.jpg", lambda: y03(a.a, a.b, Image.open(a.botanical)))]
     if a.ortak:
         islem += [("ORTAK_Y04.jpg", y04)]
     islem += [(f"{a.cift}_Y05.jpg", lambda: y05(a.a, a.b, Image.open(a.timeless)))]
-    sonuc, rapor, metin = {}, {}, {}
+    sonuc, rapor, metin, satir, jb = {}, {}, {}, {}, {}
     for ad, fn in islem:
         n0 = len(YAZILAR)
-        im, o, pk = fn(); sonuc[ad] = im; rapor[ad] = o; metin[ad] = YAZILAR[n0:]
-        sap = renk_kapisi(im, pk)                    # RENK KAPISI: poster disinda zemin / murekkep disi renk yok
+        im, o, pk = fn(); sonuc[ad] = im; metin[ad] = YAZILAR[n0:]; satir[ad] = SATIRLAR[n0:]
+        sap = renk_kapisi(im, pk)                    # RENK KAPISI (cizim): poster disinda yalniz zemin + murekkep (+ kenar yumusatma)
         if sap:
-            raise SystemExit(f"DUR: {ad} poster disinda {sap} piksel zemin #F5F0E7 / yazi #2B2220 disi renkte")
-        rapor[ad] = dict(o or {}, renk_sapan=0, poster_kutu=pk)
+            raise SystemExit(f"DUR: {ad} renk kapisi (cizim) {sap}")
+        jb[ad] = jpeg_bayt(im)
+        import io
+        sapj = renk_kapisi(Image.open(io.BytesIO(jb[ad])), pk, jpeg=True)    # teslim edilen JPEG (inceleme 27 Eki)
+        if sapj:
+            raise SystemExit(f"DUR: {ad} renk kapisi (JPEG) {sapj}")
+        rapor[ad] = dict(o or {}, renk_kapisi="PASS (cizim + JPEG)", poster_kutu=pk)
     kotu = sorted({t for t in YAZILAR if YASAK.search(t) or YASAK_SOZ.search(t)})
     if kotu:
         raise SystemExit(f"DUR: yasak karakter / sozcuk iceren yazi: {kotu}")
     bek = beklenen(a.a, a.b)
+    for ad, ss in satir.items():                    # BASLIK / ETIKET: her satir gorev metninin bir ogesiyle BIREBIR (buyuk/kucuk harf dahil)
+        for tur, t in ss:                           # ve Title Case ("Name Under A" / "Name Under B" ayri satir)
+            if tur in ("baslik", "etiket") and (t not in bek[ad[-7:-4]] or not title_case(t)):
+                raise SystemExit(f"DUR: {ad} {tur} satiri {t!r} gorev metninde birebir yok / Title Case degil")
     for ad, sat in metin.items():                   # METIN KAPISI: cizilen satirlar, sirasiyla, gorev metni + izinli ek (buyuk/kucuk harf haric) ile ayni
         g, e = " ".join(sat).split(), " ".join(bek[ad[-7:-4]]).split()
         if [x.casefold() for x in g] != [x.casefold() for x in e]:
             raise SystemExit(f"DUR: {ad} metni gorev metninden farkli\n cizilen: {' '.join(g)}\n beklenen: {' '.join(e)}")
     kb = kontak([sonuc[f"{a.cift}_Y02.jpg"], sonuc[f"{a.cift}_Y03.jpg"], sonuc["ORTAK_Y04.jpg"], sonuc[f"{a.cift}_Y05.jpg"]]) if a.ortak else None
-    for ad, im in sonuc.items():
-        kaydet(im, out / ad)
+    for ad, b in jb.items():
+        (out / ad).write_bytes(b)
     if kb:
         (out / "KONTAK_KUCUK.jpg").write_bytes(kb)
         rapor["KONTAK_KUCUK.jpg"] = dict(boyut=[1600, 1200], kb=round(len(kb) / 1024, 1))
