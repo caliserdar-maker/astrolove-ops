@@ -1,0 +1,75 @@
+name: yd-kart-ornek
+# YD (1st Anniversary) yeni galerinin 2-5. kartlari, eski 1st Anniversary galerisinin tarzinda (Serdar 27 Eki; Merkez). ORNEK: tek cift.
+# ETSY API YOK, Canva yok, kilit yok. Girdi: adim 5 yedegi TEMP/YD_KAPAK_V1_YEDEK/<yedek_damga>/<ilan>_<CIFT>/ (GALERI.json; eski r2
+# karti = burc + ortak sembol, Botanical bagli stil gorseli). Cikti: Drive TEMP/YD_KART_ORNEK/<damga>/<CIFT>_Y02.jpg, <CIFT>_Y03.jpg,
+# ORTAK_Y04.jpg, ORTAK_Y05.jpg (3000x2250 JPEG) + KART_OZET.json. Toplu uretim YOK (Serdar ornek onayi sonrasi). scripts/kapak78/yd_kart_ornek.py
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      cift: {description: "cift (data/pod/yd78_ids.csv)", required: true, default: "CANCER_LIBRA"}
+      yedek_damga: {description: "TEMP/YD_KAPAK_V1_YEDEK/<damga>", required: true, default: "20261027_105540"}
+jobs:
+  kart:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Girdi kapisi
+        env: {CF: "${{ inputs.cift }}", YD: "${{ inputs.yedek_damga }}"}
+        run: '[[ "$CF" =~ ^[A-Z]+_[A-Z]+$ && "$YD" =~ ^[0-9]{8}_[0-9]{6}$ ]] || { echo "::error::girdi"; exit 1; }'
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q pillow==11.0.0 numpy==2.1.3
+          sudo apt-get install -y -qq libfribidi0 >/dev/null || true
+          python3 -c "from PIL import features, __version__; print('pillow', __version__, 'raqm', features.check('raqm'))"
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || { sudo apt-get install -y -qq rclone >/dev/null; }
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Girdiler (Drive yedegi; Etsy API yok)
+        env: {CF: "${{ inputs.cift }}", YD: "${{ inputs.yedek_damga }}"}
+        run: |
+          set -euo pipefail
+          mkdir -p _work/y _out
+          LID=$(python3 -c "import csv,sys; print([r['listing_id'] for r in csv.DictReader(open('data/pod/yd78_ids.csv')) if r['cift']==sys.argv[1]][0])" "$CF")
+          rclone copy "gdrive:ASTROLOVE/TEMP/YD_KAPAK_V1_YEDEK/$YD/${LID}_${CF}" _work/y --max-depth 1 -q
+          python3 - "$CF" <<'PY'
+          import csv, json, sys
+          c = sys.argv[1]
+          r = next(x for x in csv.DictReader(open("data/pod/yd78_ids.csv")) if x["cift"] == c)
+          g = json.load(open("_work/y/GALERI.json"))
+          rk = {x["listing_image_id"]: x["rank"] for x in g["gorseller"]}
+          r2 = next(x for x in g["gorseller"] if x["rank"] == 2)
+          bot = next(b["image_id"] for b in g["baglar"] if b["value"] == "Botanical")
+          with open("_work/arg.env", "w") as f:
+              f.write(f"A={r['a']}\nB={r['b']}\nR2=_work/y/r2_{r2['listing_image_id']}.jpg\nBOT=_work/y/r{rk[bot]}_{bot}.jpg\n")
+          PY
+          cat _work/arg.env
+          cat _work/arg.env >> "$GITHUB_ENV"
+          echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
+      - name: Kartlar
+        env: {CF: "${{ inputs.cift }}"}
+        run: python3 scripts/kapak78/yd_kart_ornek.py --cift "$CF" --a "$A" --b "$B" --eski-r2 "$R2" --botanical "$BOT" --out _out --ortak
+      - name: Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          if ls _out/*.jpg >/dev/null 2>&1; then
+            sha256sum _out/*.jpg
+            rclone copy _out "gdrive:ASTROLOVE/TEMP/YD_KART_ORNEK/${DAMGA:?}" --immutable -q
+            echo "Cikti: TEMP/YD_KART_ORNEK/${DAMGA}" | tee -a "$GITHUB_STEP_SUMMARY"
+          fi
+      - if: always()
+        run: rm -rf _work _out ~/.config/rclone
