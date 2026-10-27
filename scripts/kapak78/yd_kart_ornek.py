@@ -355,17 +355,18 @@ def y05(a, b, r10):
     return im, olcu
 
 
-def kontak(yollar, hedef):
-    """KONTAK_KUCUK.jpg (Merkez 27 Eki): 4 kart 2x2, 1600x1200, JPEG 80, < 200 KB"""
+def kontak(kartlar):
+    """KONTAK_KUCUK.jpg (Merkez 27 Eki): 4 kart 2x2, 1600x1200, JPEG 80, < 200 KB. Kartlar diske yazilmadan once kurulur ve
+    denetlenir (inceleme 27 Eki: kontak DUR verirse yarim cikti Drive'a gitmesin). -> JPEG baytlari"""
+    import io
     t = Image.new("RGB", (1600, 1200), "white")
-    for i, y in enumerate(yollar):
+    for i, im in enumerate(kartlar):
         r, c = divmod(i, 2)
-        t.paste(Image.open(y).convert("RGB").resize((800, 600), Image.LANCZOS), (c * 800, r * 600))
-    t.save(hedef, "JPEG", quality=80)
-    kb = hedef.stat().st_size / 1024
-    if kb >= 200:
-        raise SystemExit(f"DUR: {hedef.name} {kb:.0f} KB (200 KB alti beklenir)")
-    return round(kb, 1)
+        t.paste(im.resize(CIKTI, Image.LANCZOS).resize((800, 600), Image.LANCZOS), (c * 800, r * 600))
+    b = io.BytesIO(); t.save(b, "JPEG", quality=80)
+    if b.tell() >= 200 * 1024:
+        raise SystemExit(f"DUR: KONTAK_KUCUK.jpg {b.tell() / 1024:.0f} KB (200 KB alti beklenir)")
+    return b.getvalue()
 
 
 def kaydet(im, yol):
@@ -428,12 +429,12 @@ def main(argv=None):
         g, e = " ".join(sat).split(), " ".join(bek[ad[-7:-4]]).split()
         if [x.casefold() for x in g] != [x.casefold() for x in e]:
             raise SystemExit(f"DUR: {ad} metni gorev metninden farkli\n cizilen: {' '.join(g)}\n beklenen: {' '.join(e)}")
+    kb = kontak([sonuc[f"{a.cift}_Y02.jpg"], sonuc[f"{a.cift}_Y03.jpg"], sonuc["ORTAK_Y04.jpg"], sonuc[f"{a.cift}_Y05.jpg"]]) if a.ortak else None
     for ad, im in sonuc.items():
         kaydet(im, out / ad)
-    if a.ortak:
-        kontak_kb = kontak([out / f"{a.cift}_Y02.jpg", out / f"{a.cift}_Y03.jpg", out / "ORTAK_Y04.jpg", out / f"{a.cift}_Y05.jpg"],
-                           out / "KONTAK_KUCUK.jpg")
-        rapor["KONTAK_KUCUK.jpg"] = dict(boyut=[1600, 1200], kb=kontak_kb)
+    if kb:
+        (out / "KONTAK_KUCUK.jpg").write_bytes(kb)
+        rapor["KONTAK_KUCUK.jpg"] = dict(boyut=[1600, 1200], kb=round(len(kb) / 1024, 1))
     girdi = {k: dict(dosya=Path(v).name, sha256=hashlib.sha256(Path(v).read_bytes()).hexdigest()) for k, v in
              (("eski_r2", a.eski_r2), ("botanical", a.botanical), ("timeless", a.timeless))}
     (out / "KART_OZET.json").write_text(json.dumps(dict(cift=a.cift, dosyalar=list(sonuc), girdi=girdi, surum=SURUM, olcu=rapor,

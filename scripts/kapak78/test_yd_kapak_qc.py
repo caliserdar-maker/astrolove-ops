@@ -64,12 +64,14 @@ class QcTest(unittest.TestCase):
             for k in NCC:
                 Image.fromarray(cls.src[(c, k)]).save(d / f"r{k}_{kid(c, k)}.jpg", quality=95)
                 sk.append(f"{i},{c},{k},{Q.STIL_KART[k]},{kid(c, k)},{k},{i}_{c}/r{k}_{kid(c, k)}.jpg\n")
-            for k in (2, 3, 5):
+            for k in (2,):
                 Image.fromarray(doku(500 + i * 3 + k, (3000, 2250))).save(cls.kapak / f"{c}_Y{k:02d}.jpg", quality=90)
             for k in NCC:
                 src = cls.src[(c, k)]
                 if c == "LEO_VIRGO" and k == 7:
                     src = cls.src[("AQUARIUS_ARIES", 7)]                            # yanlis stil karti
+                if c == "AQUARIUS_AQUARIUS" and k == 5:
+                    src = cls.src[("LEO_VIRGO", 5)]                                 # Y05: baska ciftin Timeless posteri
                 if c == "AQUARIUS_ARIES" and k == 9:
                     src = cls.src[("AQUARIUS_ARIES", 8)]                            # cift ici stil karismasi (Layers yerine First Page)
                 kart_yap(cls.sahne[k], src, c).save(cls.kapak / f"{c}_Y{k:02d}.jpg", quality=95)
@@ -115,6 +117,7 @@ class QcTest(unittest.TestCase):
         self.assertEqual(a["durum"], "OLCUM"); self.assertEqual(J["sayilar"]["PASS"], 0)
         self.assertGreater(a["ncc_poster"], 0.95); self.assertGreater(a["ncc_sahne"], 0.95); self.assertEqual(a["en_yakin"], "AQUARIUS_ARIES")
         self.assertIn("kendi cifti degil", s["LEO_VIRGO_Y07.jpg"]["neden"][0])
+        self.assertIn("kendi cifti degil", " ".join(s["AQUARIUS_AQUARIUS_Y05.jpg"]["neden"]))            # Y05 cifte ozel poster
         self.assertIn("3000x2250", s["AQUARIUS_ARIES_Y02.jpg"]["neden"][0])
         self.assertIn("METIN_KAPI", s["AQUARIUS_AQUARIUS_Y01.jpg"]["neden"][0])
         self.assertEqual(s["AQUARIUS_AQUARIUS_Y06.jpg"]["durum"], "OLCUM")                 # METIN_KAPI yalniz Y01
@@ -126,7 +129,8 @@ class QcTest(unittest.TestCase):
         (self.t / "esik.json").write_text(json.dumps(dict(kartlar={str(k): dict(poster_min=0.9, sahne_min=0.9, sahne_sha=self.ref_sha(k)) for k in NCC})))
         rc, log, s, J = self.kos("--esik", str(self.t / "esik.json"))
         self.assertEqual(s["CANCER_LIBRA_Y10.jpg"]["durum"], "PASS"); self.assertEqual(s["CANCER_LIBRA_Y02.jpg"]["durum"], "PASS")
-        self.assertEqual(s["CANCER_LIBRA_Y05.jpg"]["durum"], "PASS"); self.assertEqual(s["CANCER_LIBRA_Y05.jpg"]["olcum"], "bicim")
+        self.assertEqual(s["CANCER_LIBRA_Y05.jpg"]["durum"], "PASS"); self.assertEqual(s["CANCER_LIBRA_Y05.jpg"]["olcum"], "ncc")
+        self.assertEqual(s["ORTAK_Y04.jpg"]["olcum"], "bicim")
         self.assertIn("ncc_poster", " ".join(s["LEO_VIRGO_Y07.jpg"]["neden"]))
         e2 = dict(kartlar={str(k): dict(poster_min=0.9, sahne_min=1.0001 if k == 9 else 0.9, sahne_sha=self.ref_sha(k)) for k in NCC})
         (self.t / "esik2.json").write_text(json.dumps(e2))
@@ -179,7 +183,7 @@ class QcTest(unittest.TestCase):
                          "--ciftler", str(self.t / "c1.csv"), "--out", str(self.t / "SK.csv")])
         self.assertEqual(rc, 0)
         r = {int(x["kart_no"]): x for x in __import__("csv").DictReader(open(self.t / "SK.csv"))}
-        self.assertEqual(sorted(r), [1, 6, 7, 8, 9, 10])
+        self.assertEqual(sorted(r), [1, 3, 5, 6, 7, 8, 9, 10]); self.assertEqual((r[3]["stil"], r[5]["stil"]), ("Botanical", "Timeless"))
         self.assertEqual((r[1]["kaynak_image_id"], r[10]["kaynak_image_id"], r[6]["kaynak_image_id"]), ("8678064852", "8678064852", "8678059940"))
         self.assertEqual(r[9]["yedek_yol"], "4595350971_CANCER_LIBRA/r13_8725886577.jpg")
         self.assertNotIn(b"\r", (self.t / "SK.csv").read_bytes())                    # LF (bash okumasi; inceleme 27 Eki)

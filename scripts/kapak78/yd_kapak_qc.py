@@ -5,19 +5,19 @@ Galeri: Y01 kapak, Y02 sembol, Y03 kisisellestirme, Y04 format (ORTAK), Y05 sure
 Y07 Timeless, Y08 First Page, Y09 Layers, Y10 Botanical. TUM kartlar 3000x2250 (Merkez 27 Eki karar e; Y01 ve Y06-Y10 poster bolgeli).
 
 stil-kaynak: YD_STIL_KAYNAK.csv uretir: yedek BAGLAR.csv (adim 5) + KAPAK_KAYNAK tur=yd -> (cift, kart) -> kaynak gorsel (2400x3000;
-         Y01 = KAPAK_KAYNAK kaynak_image_id = Botanical bagi, Y06-Y10 = o stilin bagli gorseli), yedek klasorundeki yol.
+         Y01 = KAPAK_KAYNAK kaynak_image_id = Botanical bagi, Y03 Botanical, Y05 Timeless, Y06-Y10 = o stilin bagli gorseli).
 olc    : onayli ornek kart + o ciftin kaynak gorseli -> SABLON.json adayi (kart basina): kutu (karttaki poster bolgesi, px),
          kaynak_kirp (kutuya dusen kaynak bolgesi, px), olcek, NCC. Yontem: 1/4 olcekte kaynagin orta parcasi kartta coklu olcekli NCC
          ile aranir (cv2.matchTemplate), 1/2 olcekte inceltilir; kaynak kart duzlemine tasinir, |fark| (15 px kutu ortalamasi, Otsu
          esigi) dusuk olan satir / sutun bandi kutudur. Ayni kartta orneklerin kutu sapmasi raporlanir.
 kontrol: 78 x 9 + 1 = 703 dosya (Merkez 27 Eki):
          - her dosya JPEG ve karta gore boyut (degilse FAIL)
-         - yalniz Y01, Y06-Y10: ncc_poster (kutu <-> YD_STIL_KAYNAK kaynaginin kaynak_kirp bolgesi, ic %96, 1/2 olcek), ncc_sahne
+         - Y01, Y03, Y05, Y06-Y10 (poster bolgeli; Y03 Botanical, Y05 Timeless, bagimsiz inceleme 27 Eki): ncc_poster (kutu <-> YD_STIL_KAYNAK kaynaginin kaynak_kirp bolgesi, ic %96, 1/2 olcek), ncc_sahne
            (kart <-> onayli ornek ciftin (--sahne-cift, CANCER_LIBRA) ayni karti, kutu + 12 px ve SABLON maske kutulari disinda),
            en_yakin (kutu 1/8 olcekte o kartin 78 kaynagiyla NCC; en yakin kendi cifti degilse FAIL, esiksiz kapi)
          - Y01: METIN_KAPI.tsv (adim 1) satiri yan yana (PASS degilse FAIL)
          - Y06-Y10: en_yakin_stil (ayni ciftin 5 stil kaynagi icinde en yakin kendi stili degilse FAIL)
-         - Y02-Y05: yalniz JPEG + boyut (olcum "bicim"); icerik (dogru cift / dogru kart) Serdar'in kontak onayinda
+         - Y02, Y04: yalniz JPEG + boyut (olcum "bicim"); icerik Serdar'in kontak onayinda
          Esikler (--esik ESIK.json: kartlar.<k>.poster_min / sahne_min / sahne_sha) VERILMEZSE durum OLCUM (PASS yok; yukleme kapisi gecmez).
          Esikler ornekler uzerinde olculup Serdar onayiyla sabitlenir; bu betik esik onermez.
 Cikti: QC_RAPOR.json (esik, sablon, kart_ozet, dosyalar: dosya, cift, kart_no, ncc_poster, ncc_sahne, en_yakin, sha256, durum, neden),
@@ -38,9 +38,9 @@ KAYNAK_BOYUT = (2400, 3000)
 KARTLAR = tuple(range(1, 11))
 ORTAK = (4,)                        # Merkez 27 Eki karar d: Y05 cifte ozel
 KART_BOYUT = {k: BOYUT for k in KARTLAR}
-NCC_KART = (1, 6, 7, 8, 9, 10)     # poster bolgesi olan kartlar (kapak + 5 stil karti; Merkez 27 Eki)
+NCC_KART = (1, 3, 5, 6, 7, 8, 9, 10)   # poster bolgesi olan kartlar: kapak, Y03 (Botanical) ve Y05 (Timeless; cifte ozel, karar d), 5 stil
 STIL_NCC = (6, 7, 8, 9, 10)
-STIL_KART = {1: "Botanical", 6: "Starlit", 7: "Timeless", 8: "First Page", 9: "Layers", 10: "Botanical"}
+STIL_KART = {1: "Botanical", 3: "Botanical", 5: "Timeless", 6: "Starlit", 7: "Timeless", 8: "First Page", 9: "Layers", 10: "Botanical"}
 
 
 def kart_ad(cift, k):
@@ -251,7 +251,7 @@ def kontrol(a):
                             sahne_sha=str(esik["kartlar"][str(k)]["sahne_sha"]))
                     for k in NCC_KART}
         except (KeyError, TypeError, ValueError):
-            print("::error::ESIK.json kartlar.<1,6..10>.poster_min / sahne_min sayi ya da sahne_sha (onayli ornek kartin sha256'si) yok"); return 2
+            print("::error::ESIK.json kartlar.<1,3,5,6..10>.poster_min / sahne_min sayi ya da sahne_sha (onayli ornek kartin sha256'si) yok"); return 2
     ciftler = [r["cift"] for r in csv.DictReader(open(a.ciftler, encoding="utf-8-sig")) if r.get("cift")]
     if a.sahne_cift not in ciftler:
         print(f"::error::sahne cifti {a.sahne_cift} listede yok"); return 2
@@ -325,7 +325,7 @@ def kontrol(a):
                         s["neden"].append(f"ncc_poster {s['ncc_poster']} < {esik[k]['poster_min']}")
                     if s["ncc_sahne"] < esik[k]["sahne_min"]:
                         s["neden"].append(f"ncc_sahne {s['ncc_sahne']} < {esik[k]['sahne_min']}")
-        s["olcum"] = "ncc" if k in NCC_KART else "bicim"   # Y02-Y05: yalniz JPEG + boyut; icerik Serdar'in kontak onayinda
+        s["olcum"] = "ncc" if k in NCC_KART else "bicim"   # Y02, Y04: yalniz JPEG + boyut; icerik Serdar'in kontak onayinda
         s["durum"] = "FAIL" if s["neden"] else ("PASS" if esik is not None else "OLCUM")
         satir.append(s)
         if n % 50 == 0 or s["neden"] or n == len(isler):

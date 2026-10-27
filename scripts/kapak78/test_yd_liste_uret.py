@@ -130,6 +130,10 @@ class ListeTest(unittest.TestCase):
         Image.new("RGB", (2400, 2400), (1, 2, 3)).save(self.t / "kapak" / "CANCER_LIBRA_Y02.jpg", "JPEG", quality=90)   # kare
         manifest(self.t); qc(self.t)
         self.assertIn("CANCER_LIBRA_Y02.jpg: boyut 2400x2400 != 3000x2250", self.neden())
+        kart(self.t / "kapak" / "CANCER_LIBRA_Y02.jpg", 2)
+        Image.new("RGB", (2400, 2400), (4, 5, 6)).save(self.t / "kapak" / "CANCER_LIBRA_Y07.jpg", "JPEG", quality=90)   # stil karti kare
+        manifest(self.t); qc(self.t)
+        self.assertIn("CANCER_LIBRA_Y07.jpg: boyut 2400x2400 != 3000x2250", self.neden())
 
     def test_04_blok_yedek_ham_alt(self):
         yliste(self.t, HAM["images"][1:]); self.assertIn("yedekte 1 gorsel dosyasi yok", self.neden())
