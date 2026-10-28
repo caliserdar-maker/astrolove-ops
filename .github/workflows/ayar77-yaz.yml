@@ -98,13 +98,14 @@ jobs:
         if: ${{ always() }}
         run: |
           set -euo pipefail
-          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
+          TOKEN_RC=0; bash scripts/etsy/token_geri_yaz.sh || TOKEN_RC=1
           if [ -n "${HEDEF:-}" ]; then
             [ -f _out/SONUC.csv ] && rclone copyto _out/SONUC.csv "$HEDEF/SONUC.csv" -q || true
             [ -d _out/SONRA ] && rclone copy _out/SONRA "$HEDEF/SONRA" -q || true
             echo "Cikti: ${HEDEF#gdrive:ASTROLOVE/}/"
           fi
           [ -f _out/SONUC.csv ] && { echo '```'; cat _out/SONUC.csv; echo '```'; } >> "$GITHUB_STEP_SUMMARY" || true
+          exit $TOKEN_RC
       - name: Temizlik
         if: ${{ always() }}
         run: rm -rf _work ~/.config/rclone

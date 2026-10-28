@@ -54,11 +54,11 @@ jobs:
       - name: Token geri yaz + cikti Drive'a
         if: ${{ always() }}
         run: |
-          TOKEN_RC=0; bash scripts/etsy/token_geri_yaz.sh || TOKEN_RC=1
+          TOKEN_RC=0; OUT_RC=0; bash scripts/etsy/token_geri_yaz.sh || TOKEN_RC=1
           if ls _out/* >/dev/null 2>&1; then
             python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/ETSY_TOKEN.json _out || { echo "::error::ciktida sir"; exit 1; }
-            rclone copy _out "gdrive:ASTROLOVE/TEMP/5X7_HAZIRLIK_20261026/KURU_${GITHUB_RUN_ID}" -q && echo "Cikti: KURU_${GITHUB_RUN_ID}"
+            rclone copy _out "gdrive:ASTROLOVE/TEMP/5X7_HAZIRLIK_20261026/KURU_${GITHUB_RUN_ID}" -q && echo "Cikti: KURU_${GITHUB_RUN_ID}" || OUT_RC=1
           fi
-          exit $TOKEN_RC
+          [ "$TOKEN_RC" = 0 ] && [ "$OUT_RC" = 0 ] || exit 1
       - if: always()
         run: rm -rf _work ~/.config/rclone

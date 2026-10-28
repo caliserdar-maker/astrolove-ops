@@ -105,11 +105,12 @@ jobs:
         if: always()
         run: |
           set -euo pipefail
-          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || echo "Token yenilenmedi"
+          TOKEN_RC=0; bash scripts/etsy/token_geri_yaz.sh || TOKEN_RC=1
           [ -f _work/kosu.log ] && python3 scripts/guvenlik/log_suz.py < _work/kosu.log > "_out/kosu_$(date -u +%Y%m%d_%H%M).txt"
           if grep -rqE '"(access_token|refresh_token)"[[:space:]]*:[[:space:]]*"[A-Za-z0-9._-]{20,}"|x-api-key[[:space:]]*:' _out/ 2>/dev/null; then
             echo "::error::Ciktida sir bulundu; Drive'a yazilmadi"; exit 1; fi
           rclone copy _out "$D/${GITHUB_RUN_ID}" -q && echo "Cikti: TEMP/DENETIM_20261021/BEYAN_MARKA/${GITHUB_RUN_ID}/"
           [ "${KOD:-1}" = 0 ] || { echo "::error::cikis ${KOD:-?}"; exit 1; }
+          exit $TOKEN_RC
       - if: always()
         run: rm -rf _work ~/.config/rclone
