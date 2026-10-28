@@ -22,8 +22,10 @@ jobs:
         [[ "$T" =~ ^[0-9]{8}_[0-9]{6}$ ]] || { echo "::error::tam78"; exit 1; }
         for c in $C; do [[ "$c" =~ ^[A-Z]+_[A-Z]+$ ]] || { echo "::error::cift $c"; exit 1; }; done
     - name: rclone
-      timeout-minutes: 6
-      run: curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+      timeout-minutes: 8
+      run: |   # 28 Eki kosu 40683662329: rclone.org kurulumu 6 dk takildi; once apt, olmazsa resmi betik (zaman sinirli)
+        sudo apt-get -qq install -y rclone >/dev/null 2>&1 || timeout 240 bash -c 'curl -fsSL --max-time 120 --retry 2 https://rclone.org/install.sh | sudo bash >/dev/null 2>&1'
+        rclone version | head -1
     - name: rclone.conf
       env:
         RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
