@@ -5,15 +5,22 @@ panel / golge / imza yok, 3000x2250). Fotograf ve isim bandi gorselleri renk kap
 Wall art (kaynak: Canva POSTER_GALERI_V1 s1 sembol, s2 kisisellestirme; DAHZGSI_nLw s12 format ORTAK, s13 surec ORTAK; metinler aynen,
 SADE kurallari: '|' cizilmez, etiketler Title Case):
   WA_<CIFT>_S1_SEMBOL   burclar + ortak sembol (kupa_uretim/sembol/<CIFT> sol / sag / ana maskeleri, Midnight Blue posterinden; murekkep rengi)
-  WA_<CIFT>_S2_KISISEL  isim bandi (canli galeri karti POSTER_GALERI_V10 <CIFT>_G3 icindeki koyu bant, kirpim)
+  WA_<CIFT>_S2_KISISEL  isim bandi (Merkez 27 Eki madde 3): Midnight Blue ornek poster 2000x3000 (EMILY / JAMES / It Began With a Kiss in
+                        the Rain; test siparisi 9000000532) bant kirpimi, karta ~0,95 olcekle (G3 kartindaki bant buyutulmus ve bulanikti)
   WA_ORTAK_S3_FORMAT, WA_ORTAK_S4_SUREC
-Kupa (Orchard galerisi kupa_orchard/kod/cift.py kart 3, 5, 6, 7 = bilgi kartlari; kart 2 yakin plan ve kart 4 stil secimi fotograf
-kartidir). Fotograflar ayni ciftin Orchard galeri kartlarindan cift.py'deki yapistirma kutulariyla kirpilir (yeniden uretim yok):
-  KUPA_<CIFT>_K03_KISISEL, KUPA_<CIFT>_K05_BOYUT, KUPA_<CIFT>_K06_ORNEK, KUPA_<CIFT>_K07_BAKIM
+Kupa (Orchard galerisi kupa_orchard/kod/cift.py kart 2 yakin plan, 3, 4 stil secimi, 5, 6, 7). Fotograflar
+cift.py bolum 3 gorunumlerinden (tek_on, tek_arka, m15, ML_on/arka, MJ_on/arka; orchard_gorunum.py ile ayni kod ve surumlerle) ve
+kupa_zemin.py ile zemini #F5F0E7'ye esitlenmis halde (Merkez 27 Eki madde 4); kupa ve golgesi korunur, kulp kesilmez:
+  KUPA_<CIFT>_K02_YAKIN (tek on, buyuk olcek), KUPA_<CIFT>_K03_KISISEL, KUPA_<CIFT>_K04_STIL (8 stil), KUPA_<CIFT>_K05_BOYUT, KUPA_<CIFT>_K06_ORNEK,
+  KUPA_<CIFT>_K07_BAKIM. Merkez 28 Eki: kupa galerisi tumden 4:3 (kart 2 ve 4 dahil), galeri sirasi korunur (aciklama 3-6. fotograflara
+  atif yapar). K05 olculeri Printful White Glossy Mug katalog degerleriyle ayni (11 oz 3.8 x 3.2 in / 9.6 x 8.2 cm, 15 oz 4.7 x 3.3 in /
+  11.9 x 8.5 cm, +/- 2 mm; ml = US fl oz x 29,5735: 325,3 / 443,6).
 Kapilar (PASS/FAIL, biri FAIL ise dosya yazilmaz): metin (cizilen satirlar = beklenen, sirayla), baslik / etiket Title Case (birim
 sozcukleri oz, in, cm, ml haric), yasak karakter (ondalik nokta disinda nokta, arti, esittir, tire), yasak sozcuk (yd_kart_ornek.YASAK_SOZ),
-punto >= 58, renk kapisi (cizim + JPEG), KONTAK_WA_KUPA.jpg < 300 KB.
-Kullanim: wa_kupa_kart_ornek.py --cift CANCER_LIBRA --a Cancer --b Libra --sembol <dir> --g3 <G3.jpg> --orchard <galeri dir> --out <dir>"""
+punto >= 58, renk kapisi (cizim + JPEG), zemin kapisi (kupa fotograf kutusu ic kenar seridi #F5F0E7'den en fazla ZEMIN_ESIK; kutu
+icinde kupa + golge parcasina (fark > 1 ile bagli) bagli olmayan, fark > 3 piksel yok),
+KONTAK_WA_KUPA.jpg < 300 KB.
+Kullanim: wa_kupa_kart_ornek.py --cift CANCER_LIBRA --a Cancer --b Libra --sembol <dir> --poster <MB 2000x3000> --sahne <z_/k_ dir> --out <dir>"""
 import argparse, hashlib, io, json, re, sys
 from pathlib import Path
 
@@ -26,7 +33,11 @@ import yd_kart_ornek as K  # noqa: E402
 W, H = K.W, K.H
 YASAK = re.compile(r"(?<!\d)\.|\.(?!\d)|[+=‐-―−]")     # ondalik nokta (9.6) serbest
 BIRIM = {"oz", "in", "cm", "ml"}
-ORCH = 2048                                                            # Orchard kart boyu (cift.py S)
+ST8 = (("orange", "Orange Blossom"), ("fig", "Purple Fig"), ("olive", "Olive Breeze"), ("pomegranate", "Pomegranate Bloom"),
+       ("almond", "Almond Blossom"), ("lemon", "Lemon Grove"), ("grape", "Blue Grape"), ("loquat", "Golden Loquat"))   # cift.py ST8 sirasi
+SAHNELER = ("tek_on", "tek_arka", "m15", "ML_on", "ML_arka", "MJ_on", "MJ_arka") + tuple(f"stil_{s}" for s, _ in ST8)
+# cift.py bolum 3 gorunumleri + 8 stilin tek on gorunumu (kart 4; orchard_gorunum.py)
+ZEMIN_ESIK = 3                 # fotograf kutusu kenar seridi ile #F5F0E7 arasinda izinli en buyuk RGB farki (cizim; kupa_zemin olcumu 0-3)
 
 
 def title_ok(t):
@@ -75,21 +86,35 @@ def wa_s1(a, b, sem):
     return im, dict(glif_h=gh, sembol=[s.width, s.height]), []
 
 
-def bant_kirp(g3):
-    """canli G3 kartindaki isim bandi: en buyuk koyu (lum < 60) dikdortgen"""
-    a = np.asarray(g3.convert("RGB")).astype(np.float32); lum = a @ np.float32([0.299, 0.587, 0.114])
-    koyu = lum < 60
-    sat = np.nonzero(koyu.mean(axis=1) > 0.4)[0]; sut = np.nonzero(koyu.mean(axis=0) > 0.25)[0]
-    if not len(sat) or not len(sut):
-        raise SystemExit("DUR: G3'te isim bandi bulunamadi")
-    k = (int(sut[0]), int(sat[0]), int(sut[-1]) + 1, int(sat[-1]) + 1)
-    return g3.convert("RGB").crop(k), k
+BANT_ORAN = 1798 / 812          # canli G3 kartindaki bandin en / boy orani (20261026_181944 olcumu)
 
 
-def wa_s2(a, b, g3):
+def bant_kirp(poster):
+    """Midnight Blue ornek poster (EMILY / JAMES / It Began With a Kiss in the Rain) -> isim bandi: altin satirlar (R - B > 60)
+    halkadan sonra 3 bant (burclar, isimler, mesaj); tam genislik, yukseklik = genislik / BANT_ORAN, icerik dikeyde ortali"""
+    a = np.asarray(poster.convert("RGB")).astype(np.int16)
+    sat = ((a[..., 0] - a[..., 2] > 60) & (a[..., 0] > 120)).mean(axis=1) > 0.002
+    idx = np.nonzero(sat)[0]; bant = []; s0 = p0 = int(idx[0])
+    for i in idx[1:]:
+        if i - p0 > 15:
+            bant.append((s0, p0)); s0 = int(i)
+        p0 = int(i)
+    bant.append((s0, p0))
+    hal = max(range(len(bant)), key=lambda j: bant[j][1] - bant[j][0])
+    alt = [b_ for b_ in bant[hal + 1:] if b_[1] - b_[0] > 40][:3]
+    if len(alt) != 3:
+        raise SystemExit(f"DUR: posterde burc / isim / mesaj bantlari bulunamadi ({bant})")
+    w = a.shape[1]; h = round(w / BANT_ORAN); ust = round((alt[0][0] + alt[2][1]) / 2 - h / 2)
+    if ust < bant[hal][1] or ust + h > a.shape[0]:
+        raise SystemExit(f"DUR: bant kirpimi halkaya / kenara tasiyor ({ust}, {h})")
+    k = (0, ust, w, ust + h)
+    return poster.convert("RGB").crop(k), k
+
+
+def wa_s2(a, b, poster):
     im = K.tuval(); d = ImageDraw.Draw(im)
     K.baslik(d, "Your Names, Your Message")
-    bant, k = bant_kirp(g3)
+    bant, k = bant_kirp(poster)
     bw = 1900; bh = round(bant.height * bw / bant.width); by = round(K.ALAN[0] - 20)
     im.paste(bant.resize((bw, bh), Image.LANCZOS), (round(W / 2 - bw / 2), by))
     pk = [round(W / 2 - bw / 2), by, round(W / 2 - bw / 2) + bw, by + bh]
@@ -101,7 +126,7 @@ def wa_s2(a, b, g3):
     if y > K.NOT_Y - 40:
         raise SystemExit(f"DUR: S2 metni alt nota tasiyor ({y:.0f} > {K.NOT_Y - 40:.0f})")
     ortala(d, K.NOT, ["Please check your spelling before you order"], W / 2, K.NOT_Y)
-    return im, dict(g3_bant_kutu=list(k), bant=[bw, bh]), [pk]
+    return im, dict(poster_bant_kutu=list(k), bant=[bw, bh], olcek=round(bw / bant.width, 4)), [pk]
 
 
 def wa_s3():
@@ -133,8 +158,8 @@ def wa_s4():
     K.baslik(d, "Made for You, Step by Step")
     x0, gen = 0.2 * W, 0.6 * W
     K.adimlar(d, x0, gen, [
-        ("01", ["Your Preview"], "For every print, we send a preview via Etsy Messages within 24 hours of your order"),
-        ("02", ["Your Approval"], "We print once you approve, or as shown if there is no reply within 24 hours of the preview"),
+        ("01", ["Your Preview"], "For every order, we send a preview via Etsy Messages within 24 hours of your order"),
+        ("02", ["Your Approval"], "We make your print or file once you approve, or as shown if there is no reply within 24 hours of the preview"),
         ("03", ["Made to Order"], "Printed on matte art paper, gold tones are printed color, not metallic foil"),
         ("04", ["Free Shipping"], "Free shipping worldwide, see the listing for your delivery estimate")], no_g=round(1.75 * K.ETIKET["boy"]))
     ortala(d, K.NOT, ["Digital files are checked by hand before sending"], W / 2, K.NOT_Y)
@@ -142,76 +167,180 @@ def wa_s4():
 
 
 # ---------------------------------------------------------------- kupa (Orchard)
-def k03(a, b, src):
+def sahne(d, ad):
+    """kupa_zemin ile zemini esitlenmis Orchard gorunumu (z_<ad>.png) + kupa maskesi (k_<ad>.npy)"""
+    return Image.open(Path(d) / f"z_{ad}.png").convert("RGB"), np.load(Path(d) / f"k_{ad}.npy")
+
+
+def kupa_kutu(z, k, pay=30):
+    """kupa + golgesi: zeminden (#F5F0E7) 2'den fazla farkli piksellerin kutusu + pay (kirpim kenari golgeyi kesmesin);
+    k z'nin alt dilimi olabilir (k.shape[0] satir, z'nin son satirlari)"""
+    a = np.asarray(z)[-k.shape[0]:]
+    fark = np.abs(a.astype(np.int16) - np.int16(K.rgb(K.ZEMIN))).max(axis=2) > 2
+    ys, xs = np.nonzero(fark | (k > 0))
+    return [max(0, int(xs.min()) - pay), max(0, int(ys.min()) - pay), min(k.shape[1], int(xs.max()) + pay + 1),
+            min(k.shape[0], int(ys.max()) + pay + 1)]
+
+
+def yapistir(im, src, kutu, x, y, s, fade=0, dort=False):
+    """src[kutu] -> s olcekli, (x, y) sol ust; fade > 0: ust kenar (dort=True: dort kenar) fade px (kart olceginde) icinde zemine
+    yumusak gecis (smoothstep); ilk 8 px tam zemin (kenar seridi)"""
+    p = src.crop(kutu); w, h = round(p.width * s), round(p.height * s)
+    p = p.resize((w, h), Image.LANCZOS)
+    if fade:
+        a = np.asarray(p).astype(np.float32); z = np.float32(K.rgb(K.ZEMIN))
+        r = lambda n: np.clip((np.arange(n, dtype=np.float32) - 8) / fade, 0, 1)
+        ty = r(h)
+        if dort:
+            ty = np.minimum(ty, r(h)[::-1]); tx = np.minimum(r(w), r(w)[::-1])
+        else:
+            tx = np.ones(w, np.float32)
+        t = np.minimum(ty[:, None], tx[None, :]); t = (t * t * (3 - 2 * t))[..., None]
+        p = Image.fromarray(np.round(z + (a - z) * t).astype(np.uint8))
+    im.paste(p, (round(x), round(y)))
+    return [round(x), round(y), round(x) + w, round(y) + h]
+
+
+def k02(sd):
+    """yakin plan (cift.py kart 2 'YOUR TWO SIGNS, / ONE ORIGINAL SYMBOL'); SADE: baslik Title Case tek satir, tek on gorunumu (zemin
+    esitlenmis) alan icinde en buyuk olcekte. Orchard yakin plan sahnesi (ahsap masa, orgu, portakal) zemin esitlemesinde kalinti
+    birakti (28 Eki yerel olcum kenar 83 > ZEMIN_ESIK 3); kupa kutusu tek on ile ayni boyda (1427x1235 / 1482x1283 px)"""
+    im = K.tuval(); d = ImageDraw.Draw(im)
+    K.baslik(d, "Your Two Signs, One Original Symbol")
+    z, k = sahne(sd, "tek_on"); kk = kupa_kutu(z, k)
+    s = min((K.NOT_Y + K.NOT["boy"] - K.ALAN[0] + 20) / (kk[3] - kk[1]), (W - 2 * K.KENAR) / (kk[2] - kk[0]))
+    kut = [yapistir(im, z, kk, W / 2 - (kk[2] - kk[0]) * s / 2, K.ALAN[0] - 20, s)]
+    return im, dict(foto=kut, olcek=round(s, 4)), kut
+
+
+def k04(sd):
+    """8 stil (cift.py kart 4 'CHOOSE YOUR STYLE', ST8 sirasi): her stilin baskisi tek on sahnesinde (zemin esitlenmis), 4 x 2,
+    hepsi ayni olcekte, ad altta tek satir"""
+    im = K.tuval(); d = ImageDraw.Draw(im)
+    K.baslik(d, "Choose Your Style")
+    sh = {st: sahne(sd, f"stil_{st}") for st, _ in ST8}
+    ku = {st: kupa_kutu(z, k) for st, (z, k) in sh.items()}
+    kg = (W - 2 * K.KENAR) / 4; et = K.METIN["boy"] + 20; ara = 50   # ad METIN (64): 'Pomegranate Bloom' ETIKET'te 654 > 635 px
+    hmax = max(v[3] - v[1] for v in ku.values()); wmax = max(v[2] - v[0] for v in ku.values())
+    y0 = K.ALAN[0] - 40
+    s = min((K.NOT_Y + K.NOT["boy"] - y0 - 2 * et - ara) / (2 * hmax), (kg - 30) / wmax)
+    blok = 2 * (hmax * s + et) + ara                                  # olcek genislikten sinirli: blok alanda dikeyde ortalanir
+    y0 += max(0, (K.NOT_Y + K.NOT["boy"] - y0 - blok) / 2)
+    kut = []
+    for j, (st, ad) in enumerate(ST8):
+        z, _ = sh[st]; kk = ku[st]
+        cx = K.KENAR + kg * (j % 4 + 0.5); y = y0 + (j // 4) * (hmax * s + et + ara)
+        kut.append(yapistir(im, z, kk, cx - (kk[2] - kk[0]) * s / 2, y + (hmax - (kk[3] - kk[1])) * s, s))
+        ortala(d, K.METIN, [ad], cx, y + hmax * s + 10, kg - 10)
+    return im, dict(foto=kut, olcek=round(s, 4)), kut
+
+
+def k03(a, b, sd):
     im = K.tuval(); d = ImageDraw.Draw(im)
     K.baslik(d, "How to Personalize")
-    fw, ara = 820, 140; x0 = W / 2 - fw - ara / 2
-    kut = []
-    for j in range(2):                                   # cift.py kart 3: kupa_kirp 860x975, x = 120 + j * 948, y = 330
-        kut.append(foto(im, src, (120 + j * 948, 330, 980 + j * 948, 1305), (x0 + j * (fw + ara), K.ALAN[0] - 20, fw)))
-    y = kut[0][3] + 50
-    sol, sag = x0 + fw / 2, x0 + fw + ara + fw / 2
-    ortala(d, K.ETIKET, ["Front"], sol, y, fw); ortala(d, K.ETIKET, ["Back"], sag, y, fw)
+    (zo, ko), (za, ka) = sahne(sd, "tek_on"), sahne(sd, "tek_arka")
+    bo, ba = kupa_kutu(zo, ko), kupa_kutu(za, ka)
+    s = 900 / max(bo[3] - bo[1], ba[3] - ba[1]); ara = 60
+    wo, wa = (bo[2] - bo[0]) * s, (ba[2] - ba[0]) * s
+    x0 = W / 2 - (wo + ara + wa) / 2; y0 = K.ALAN[0] - 40
+    kut = [yapistir(im, zo, bo, x0, y0, s), yapistir(im, za, ba, x0 + wo + ara, y0, s)]
+    y = max(k[3] for k in kut) + 30
+    sol, sag = x0 + wo / 2, x0 + wo + ara + wa / 2
+    ortala(d, K.ETIKET, ["Front"], sol, y, wo); ortala(d, K.ETIKET, ["Back"], sag, y, wa)
     y += K.ETIKET["boy"] + 30
-    ortala(d, K.METIN, [f"1  Name for {a}", f"2  Name for {b}", "Up to 10 letters per name"], sol, y, fw + ara)
-    ortala(d, K.METIN, ["3  Your message", "Up to 30 characters"], sag, y, fw + ara)
+    ortala(d, K.METIN, [f"1  Name for {a}", f"2  Name for {b}", "Up to 10 letters per name"], sol, y, wo + ara)
+    ortala(d, K.METIN, ["3  Your message", "Up to 30 characters"], sag, y, wa + ara)
     ortala(d, K.METIN, ["You receive one mug, printed on both sides"], W / 2, K.NOT_Y)
-    return im, dict(foto=kut), kut
+    return im, dict(foto=kut, olcek=round(s, 4)), kut
 
 
-def k05(src):
+def k05(sd):
     im = K.tuval(); d = ImageDraw.Draw(im)
     K.baslik(d, "Two Sizes")
-    SC = 0.66; taban_k = 1430; kut = []
-    oz = (((540, (215, 380, 1575, 1705)), "11 oz", ["9.6 x 8.2 cm", "3.8 x 3.2 in", "325 ml"]),
-          ((1500, (230, 400, 1635, 2005)), "15 oz", ["11.9 x 8.5 cm", "4.7 x 3.3 in", "444 ml"]))
-    f = 1.0                                              # iki kupa ayni olcekte (boy karsilastirmasi bozulmaz)
-    taban = K.ALAN[0] + 1080
-    for i, ((cx_k, kk), et, sat) in enumerate(oz):
-        w_, h_ = round((kk[2] - kk[0]) * SC), round((kk[3] - kk[1]) * SC)   # cift.py kart 5 yapistirma kutusu
-        x_, y_ = round(cx_k - w_ / 2), round(taban_k - h_)
-        cx = W / 2 + (i - 0.5) * 1150
-        kut.append(foto(im, src, (x_, y_, x_ + w_, y_ + h_), (cx - w_ * f / 2, taban - h_ * f, round(w_ * f))))
-        y = taban + 50
+    oz = (("tek_on", "11 oz", ["9.6 x 8.2 cm", "3.8 x 3.2 in", "325 ml"]), ("m15", "15 oz", ["11.9 x 8.5 cm", "4.7 x 3.3 in", "444 ml"]))
+    sh = [sahne(sd, ad) for ad, _, _ in oz]
+    ku = [kupa_kutu(z, k) for z, k in sh]
+    s = 1020 / max(k[3] - k[1] for k in ku)                 # iki sahne ayni olcekte (cift.py kart 5 gibi; boy karsilastirmasi bozulmaz)
+    taban = K.ALAN[0] + 1060; kut = []
+    for i, ((ad, et, sat), (z, k), kk) in enumerate(zip(oz, sh, ku)):
+        alt = int(np.nonzero(k)[0].max())                   # kupa tabani ayni cizgide
+        cx = W / 2 + (i - 0.5) * 1180
+        kut.append(yapistir(im, z, kk, cx - (kk[2] - kk[0]) * s / 2, taban - (alt - kk[1]) * s, s))
+        y = taban + (kk[3] - alt) * s + 20
         y += ortala(d, K.ETIKET, [et], cx, y, 900) + 30
         ortala(d, K.METIN, sat, cx, y, 900)
     ortala(d, K.NOT, ["Height x diameter", "Approximate size comparison"], W / 2, K.NOT_Y - 40)
-    return im, dict(foto=kut), kut
+    return im, dict(foto=kut, olcek=round(s, 4)), kut
 
 
-def k06(src):
+def k06(sd):
+    """kisa / uzun ornek: tam kupa gorunumleri (ML_on / ML_arka, MJ_on / MJ_arka; zemin esitlenmis, kesit yok; inceleme 27 Eki:
+    yakin kesit + yumusak gecis panel / hale gibi duruyordu). Dort kupa ayni olcekte."""
     im = K.tuval(); d = ImageDraw.Draw(im)
     K.baslik(d, "Your Names, Your Message")
-    SUT = 864; xs_k = (128, 128 + SUT + 64)
-    KUTU = {"on": (585, 1090, 1465, 1610), "arka": (555, 1060, 1495, 1520)}   # cift.py kart 6
-    hk = {k: round((v[3] - v[1]) * SUT / (v[2] - v[0])) for k, v in KUTU.items()}
-    fw = 880; xs = (W / 2 - 40 - fw, W / 2 + 40)
+    sh = {ad: sahne(sd, ad) for ad in ("ML_on", "ML_arka", "MJ_on", "MJ_arka")}
+    ku = {ad: kupa_kutu(z, k) for ad, (z, k) in sh.items()}
     y = K.ALAN[0] - 40
-    ortala(d, K.ETIKET, ["Front"], xs[0] + fw / 2, y, fw); ortala(d, K.ETIKET, ["Back"], xs[1] + fw / 2, y, fw)
-    y += K.ETIKET["boy"] + 40; yk = 400; kut = []
-    for et in ("Short Example", "Long Example"):
+    hmax_k = max(v[3] - v[1] for v in ku.values()); wmax_k = max(v[2] - v[0] for v in ku.values())
+    satir_h = (K.NOT_Y - 60 - (y + K.ETIKET["boy"] + 30) - 2 * (K.ETIKET["boy"] + 10) - 30) / 2
+    s = 0.97 * min(satir_h / hmax_k, 1250 / wmax_k)              # 0,97: satir aralari ve alt metin payi
+    xs = (W / 2 - 40 - 1250, W / 2 + 40)
+    ortala(d, K.ETIKET, ["Front"], xs[0] + 625, y, 1250); ortala(d, K.ETIKET, ["Back"], xs[1] + 625, y, 1250)
+    y += K.ETIKET["boy"] + 30; kut = []
+    for et, on, ar in (("Short Example", "ML_on", "ML_arka"), ("Long Example", "MJ_on", "MJ_arka")):
         ortala(d, K.ETIKET, [et], W / 2, y)
-        y += K.ETIKET["boy"] + 25; hmax = 0
-        for x, xk, kk in ((xs[0], xs_k[0], "on"), (xs[1], xs_k[1], "arka")):
-            r = foto(im, src, (xk, yk + 90, xk + SUT, yk + 90 + hk[kk]), (x, y, fw)); kut.append(r); hmax = max(hmax, r[3] - r[1])
-        y += hmax + 50; yk += 90 + max(hk.values()) + 70
-    if y > K.NOT_Y - 20:
+        y += K.ETIKET["boy"] + 10
+        for x, ad in ((xs[0], on), (xs[1], ar)):
+            z, _ = sh[ad]; kk = ku[ad]
+            kut.append(yapistir(im, z, kk, x + (1250 - (kk[2] - kk[0]) * s) / 2, y, s))
+        y += hmax_k * s + 30
+    if y > K.NOT_Y - 40:
         raise SystemExit(f"DUR: K06 fotograflari alt metne tasiyor ({y:.0f})")
     ortala(d, K.METIN, ["Up to 10 letters per name", "Message up to 30 characters"], W / 2, K.NOT_Y - 30)
-    return im, dict(foto=kut), kut
+    return im, dict(foto=kut, olcek=round(s, 4)), kut
 
 
-def k07(src):
+def k07(sd):
     im = K.tuval(); d = ImageDraw.Draw(im)
     K.baslik(d, "Care & Making")
-    kut = [foto(im, src, (1130, 420, 1930, 1327), (K.POSTER[0] - 40, K.ALAN[0] - 20, 980))]    # cift.py kart 7
-    x0 = K.SUTUN_X; y = (K.ALAN[0] + K.ALAN[1]) / 2 - 330
-    for s in ["Dishwasher safe", "Microwave safe", "Glossy white ceramic, white inside", "Made to order, just for you"]:
+    z, k = sahne(sd, "tek_on"); kk = kupa_kutu(z, k)
+    s = 1000 / (kk[2] - kk[0])
+    kut = [yapistir(im, z, kk, K.POSTER[0] - 120, (K.ALAN[0] + K.ALAN[1]) / 2 - (kk[3] - kk[1]) * s / 2, s)]
+    x0 = K.SUTUN_X + 40; y = (K.ALAN[0] + K.ALAN[1]) / 2 - 330
+    for t in ["Dishwasher safe", "Microwave safe", "Glossy white ceramic, white inside", "Made to order, just for you"]:
         r = 11; cy = y + K.METIN["boy"] / 2 + 4
         d.ellipse((x0, cy - r, x0 + 2 * r, cy + r), fill=K.MUREKKEP)
-        y += K.yaz(d, K.METIN, [s], x0 + 60, y, gen=W - K.KENAR - x0 - 60) + 70
+        y += K.yaz(d, K.METIN, [t], x0 + 60, y, gen=W - K.KENAR - x0 - 60) + 70
     ortala(d, K.METIN, ["Original zodiac fusion symbols designed by AstroLoveArt"], W / 2, K.NOT_Y)
-    return im, dict(foto=kut), kut
+    return im, dict(foto=kut, olcek=round(s, 4)), kut
+
+
+def kopuk_ton(im, kutular, esik=3, bag=1):
+    """fotograf kutusu icinde zeminden (#F5F0E7) esik'ten fazla farkli piksellerden, kutunun en buyuk (kupa + golge) parcasina bagli
+    OLMAYANLAR (kopuk leke / ton farki / panel kalintisi; inceleme 27 Eki: kenar seridi tek basina yetmiyordu). Baglanti fark > bag
+    ile kurulur (golge kuyrugu ana golgeye soluk piksellerle baglidir). -> (kopuk piksel sayisi, parcalar [x, y, w, h, alan])"""
+    import cv2
+    a = np.asarray(im.convert("RGB")).astype(np.int16); z = np.int16(K.rgb(K.ZEMIN)); n_k = 0; liste = []
+    for x0, y0, x1, y1 in kutular:
+        f = np.abs(a[y0:y1, x0:x1] - z).max(axis=2)
+        n, lab, st, _ = cv2.connectedComponentsWithStats((f > bag).astype(np.uint8), 8)
+        if n > 2:
+            en = 1 + int(np.argmax(st[1:, 4]))
+            for i in range(1, n):
+                c = (lab == i) & (f > esik)
+                if i != en and c.any():
+                    n_k += int(c.sum()); liste.append([x0 + int(st[i, 0]), y0 + int(st[i, 1]), int(st[i, 2]), int(st[i, 3]), int(c.sum())])
+    return n_k, liste
+
+
+def zemin_kenar(im, kutular, serit=6):
+    """yapistirilan fotograf kutularinin ic kenar seridinde #F5F0E7'den en buyuk RGB farki (panel / kenar kapisi)"""
+    a = np.asarray(im.convert("RGB")).astype(np.float32); z = np.float32(K.rgb(K.ZEMIN)); m = 0.0
+    for x0, y0, x1, y1 in kutular:
+        p = a[y0:y1, x0:x1]
+        for sr in (p[:serit], p[-serit:], p[:, :serit], p[:, -serit:]):
+            m = max(m, float(np.abs(sr - z).max()))
+    return m
 
 
 def beklenen(a, b):
@@ -226,11 +355,13 @@ def beklenen(a, b):
                       "8x10, 11x14, 12x16, 12x18, 16x20 in", "16x24, 18x24, 20x30, 24x30, 24x36 in", "A4, A3, A2",
                       "Every size as a print or a digital file"],
         "S4_SUREC": ["Made for You, Step by Step",
-                     "01", "Your Preview", "For every print, we send a preview via Etsy Messages within 24 hours of your order",
-                     "02", "Your Approval", "We print once you approve, or as shown if there is no reply within 24 hours of the preview",
+                     "01", "Your Preview", "For every order, we send a preview via Etsy Messages within 24 hours of your order",
+                     "02", "Your Approval", "We make your print or file once you approve, or as shown if there is no reply within 24 hours of the preview",
                      "03", "Made to Order", "Printed on matte art paper, gold tones are printed color, not metallic foil",
                      "04", "Free Shipping", "Free shipping worldwide, see the listing for your delivery estimate",
                      "Digital files are checked by hand before sending"],
+        "K02_YAKIN": ["Your Two Signs, One Original Symbol"],
+        "K04_STIL": ["Choose Your Style"] + [ad for _, ad in ST8],
         "K03_KISISEL": ["How to Personalize", "Front", "Back", f"1 Name for {a}", f"2 Name for {b}", "Up to 10 letters per name",
                         "3 Your message", "Up to 30 characters", "You receive one mug, printed on both sides"],
         "K05_BOYUT": ["Two Sizes", "11 oz", "9.6 x 8.2 cm", "3.8 x 3.2 in", "325 ml", "15 oz", "11.9 x 8.5 cm", "4.7 x 3.3 in", "444 ml",
@@ -242,9 +373,10 @@ def beklenen(a, b):
 
 
 def kontak(kartlar):
-    t = Image.new("RGB", (4 * 600, 2 * 450), "white")
+    n = (len(kartlar) + 1) // 2
+    t = Image.new("RGB", (n * 600, 2 * 450), "white")
     for i, im in enumerate(kartlar):
-        r, c = divmod(i, 4); t.paste(im.resize((600, 450), Image.LANCZOS), (c * 600, r * 450))
+        r, c = divmod(i, n); t.paste(im.resize((600, 450), Image.LANCZOS), (c * 600, r * 450))
     for q in (85, 80, 75, 70, 65):
         b = io.BytesIO(); t.save(b, "JPEG", quality=q)
         if b.tell() < 300 * 1024:
@@ -254,24 +386,20 @@ def kontak(kartlar):
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    for k in ("--cift", "--a", "--b", "--sembol", "--g3", "--orchard", "--out"):
+    for k in ("--cift", "--a", "--b", "--sembol", "--poster", "--sahne", "--out"):
         ap.add_argument(k, required=True)
     a = ap.parse_args(argv)
-    out = Path(a.out); out.mkdir(parents=True, exist_ok=True); sem = Path(a.sembol); og = Path(a.orchard)
-    orch = {}
-    for n in ("03", "05", "06", "07"):
-        f = sorted(og.glob(f"{n}_*.jpg"))
-        if len(f) != 1:
-            raise SystemExit(f"DUR: Orchard galeri kart {n}: {len(f)} dosya ({og})")
-        orch[n] = Image.open(f[0]).convert("RGB")
-    for n, im in orch.items():
-        if im.size != (ORCH, ORCH):
-            raise SystemExit(f"DUR: Orchard kart {n} boyutu {im.size} ({ORCH}x{ORCH} beklenir)")
+    out = Path(a.out); out.mkdir(parents=True, exist_ok=True); sem = Path(a.sembol); sd = Path(a.sahne)
+    gerek = [sd / f"{p}_{ad}.{u}" for ad in SAHNELER for p, u in (("z", "png"), ("k", "npy"))]
+    eksik = [p.name for p in gerek if not p.exists()]
+    if eksik:
+        raise SystemExit(f"DUR: sahne dosyalari eksik: {eksik}")
     c = a.cift
-    islem = [(f"WA_{c}_S1_SEMBOL.jpg", lambda: wa_s1(a.a, a.b, sem)), (f"WA_{c}_S2_KISISEL.jpg", lambda: wa_s2(a.a, a.b, Image.open(a.g3))),
+    islem = [(f"WA_{c}_S1_SEMBOL.jpg", lambda: wa_s1(a.a, a.b, sem)), (f"WA_{c}_S2_KISISEL.jpg", lambda: wa_s2(a.a, a.b, Image.open(a.poster))),
              ("WA_ORTAK_S3_FORMAT.jpg", wa_s3), ("WA_ORTAK_S4_SUREC.jpg", wa_s4),
-             (f"KUPA_{c}_K03_KISISEL.jpg", lambda: k03(a.a, a.b, orch["03"])), (f"KUPA_{c}_K05_BOYUT.jpg", lambda: k05(orch["05"])),
-             (f"KUPA_{c}_K06_ORNEK.jpg", lambda: k06(orch["06"])), (f"KUPA_{c}_K07_BAKIM.jpg", lambda: k07(orch["07"]))]
+             (f"KUPA_{c}_K02_YAKIN.jpg", lambda: k02(sd)), (f"KUPA_{c}_K03_KISISEL.jpg", lambda: k03(a.a, a.b, sd)),
+             (f"KUPA_{c}_K04_STIL.jpg", lambda: k04(sd)), (f"KUPA_{c}_K05_BOYUT.jpg", lambda: k05(sd)),
+             (f"KUPA_{c}_K06_ORNEK.jpg", lambda: k06(sd)), (f"KUPA_{c}_K07_BAKIM.jpg", lambda: k07(sd))]
     bek = beklenen(a.a, a.b); sonuc, rapor, jb = {}, {}, {}
     for ad, fn in islem:
         anah = "_".join(ad[:-4].split("_")[-2:])
@@ -294,13 +422,21 @@ def main(argv=None):
         sapj = K.renk_kapisi(Image.open(io.BytesIO(jb[ad])), pk, jpeg=True)
         if sapj:
             raise SystemExit(f"DUR: {ad} renk kapisi (JPEG) {sapj}")
-        sonuc[ad] = im; rapor[ad] = dict(o, renk_kapisi="PASS (cizim + JPEG)", foto_kutu=pk, yazi=yazi, kb=round(len(jb[ad]) / 1024))
+        zk = kp = kl = None
+        if ad.startswith("KUPA_"):                           # ZEMIN KAPISI: fotograf kutusu ic kenar seridi kart zeminine esit (panel yok)
+            zk = zemin_kenar(im, pk); kp, kl = kopuk_ton(im, pk)
+            if zk > ZEMIN_ESIK:
+                raise SystemExit(f"DUR: {ad} fotograf kenari zeminden farkli (en buyuk {zk:.0f} > {ZEMIN_ESIK})")
+            if kp:
+                raise SystemExit(f"DUR: {ad} fotograf kutusunda kupadan kopuk zemin disi ton {kp} px")
+        sonuc[ad] = im; rapor[ad] = dict(o, renk_kapisi="PASS (cizim + JPEG)", foto_kutu=pk, zemin_kenar_max=zk, kopuk_ton_px=kp, kopuk_parcalar=kl if zk is not None else None, yazi=yazi,
+                                         kb=round(len(jb[ad]) / 1024))
     kb, q = kontak(list(sonuc.values()))
     for ad, b in jb.items():
         (out / ad).write_bytes(b)
     (out / "KONTAK_WA_KUPA.jpg").write_bytes(kb)
     girdi = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in
-             [Path(a.g3), *(sem / f"{x}.png" for x in ("sol", "sag", "ana")), *sorted(og.glob("0[3567]_*.jpg"))]}
+             [Path(a.poster), *(sem / f"{x}.png" for x in ("sol", "sag", "ana")), *gerek]}
     (out / "KART_OZET.json").write_text(json.dumps(dict(cift=c, kartlar=rapor, girdi_sha256=girdi, surum=K.SURUM, tuval=[W, H],
                                                         kontak=dict(kb=round(len(kb) / 1024, 1), kalite=q)), indent=1, ensure_ascii=False),
                                         encoding="utf-8")
