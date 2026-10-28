@@ -1,0 +1,86 @@
+name: video-v7-silme-duzelt
+# v7c silme duzeltmesi (Merkez 28 Eki; Serdar onayi): pilot 4570110121 geri alindi (video-geri-al 40651233416). Etsy API YOK, Etsy'ye
+# ve Metricool'a YAZMA YOK, kilit yok. 1) 78 mevcut video (TEMP/VIDEO_V7_78/BIRLESIK_20261026_211614) silme artigi olcumu
+# (v7_silme_olc78.py olc; 0,4 sn karesi, hedef maske poster_video_v7 v7c kurali). 2) 3 ORNEK yeni video (AQUARIUS_AQUARIUS, en genis
+# sembol, medyan): poster_video_v7.py v7c + v7_qc.py (yeni kapi silme_artik) + KONTAK + silme seridi. Toplu uretim YOK (Serdar gorsel onayi).
+# Cikti Drive TEMP/VIDEO_V7_DUZELTME/<damga>/: OLCUM.md/.csv/.json, ORNEK/<CIFT>.mp4, ORNEK/<CIFT>_QC.json, _KONTAK.jpg, _SERIT.jpg,
+# ESKI_SERIT/<CIFT>_SERIT.jpg (ayni uc ciftin mevcut videosu).
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      birlesik: {description: "TEMP/VIDEO_V7_78/BIRLESIK_<damga>", required: true, default: "20261026_211614"}
+env:
+  K: gdrive:ASTROLOVE/TEMP/POSTER_KAPAK_V10/20261026_153710
+jobs:
+  is:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+    - name: Girdi
+      env: {B: "${{ inputs.birlesik }}"}
+      run: |
+        [[ "$B" =~ ^[0-9]{8}_[0-9]{6}$ ]] || { echo "::error::birlesik"; exit 1; }
+        echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Kurulum
+      timeout-minutes: 15
+      run: |
+        set -euo pipefail
+        pip install -q numpy==2.1.3 pillow==11.0.0 scipy==1.14.1 opencv-python-headless==4.10.0.84
+        sudo apt-get -qq update >/dev/null && sudo apt-get -qq install -y ffmpeg fonts-dejavu-core >/dev/null
+        curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+    - name: rclone.conf
+      env:
+        RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      run: |
+        set -euo pipefail
+        mkdir -p ~/.config/rclone; umask 077
+        printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+        if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+          grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+    - name: Girdiler (78 kapak + 78 mevcut video)
+      env: {B: "${{ inputs.birlesik }}"}
+      run: |
+        set -euo pipefail
+        mkdir -p _k _v _o/ORNEK _o/ESKI_SERIT
+        rclone copy "$K" _k --include "KAPAK_*.jpg" --max-depth 1 --transfers 8 -q
+        rclone copy "gdrive:ASTROLOVE/TEMP/VIDEO_V7_78/BIRLESIK_$B" _v --include "*.mp4" --max-depth 1 --transfers 8 -q
+        echo "kapak $(ls _k | wc -l), video $(ls _v | wc -l)"
+        [ "$(ls _k | wc -l)" -ge 78 ] && [ "$(ls _v/*.mp4 | wc -l)" = 78 ] || { echo "::error::78 kapak / 78 video degil"; exit 1; }
+    - name: 78 olcum
+      run: |
+        set -euo pipefail
+        python3 -I sosyal/poster_video/v7_silme_olc78.py olc sosyal/poster_video/poster_video_v7.py _k _v _o 2>&1 | grep -v "^halkasiz\|^silme:"
+    - name: 3 ornek (v7c) + QC + serit
+      run: |
+        set +e -uo pipefail
+        read -r -a SEC < _o/SECIM.txt; echo "secim: ${SEC[*]}"; FAIL=0; T0=$(date +%s); I=0
+        for C in "${SEC[@]}"; do
+          I=$((I+1)); W=_w/$C; mkdir -p $W/qc
+          V7_DOLGU=nk V7_HALKASIZ=1 V6_C=sosyal/poster_video/v6_c_egri.json V6_N=58000 V6_BOLGE_REF=44274 V6_N_REF=58000 \
+            python3 -I sosyal/poster_video/poster_video_v7.py "_k/KAPAK_$C.jpg" "$W/$C.mp4" murekkep > "$W/uretim.log" 2>&1 || { echo "::error::$C uretim"; tail -5 "$W/uretim.log"; FAIL=1; continue; }
+          grep -E "silme:|halkasiz|poster kapakta" "$W/uretim.log"
+          python3 -I sosyal/poster_video/v7_qc.py "$W/$C.mp4" "_k/KAPAK_$C.jpg" "$W/uretim.log" "$W/qc" | grep -E "PASS|FAIL" || FAIL=1
+          python3 -c "import json,sys; q=json.load(open(sys.argv[1]))['kontrol']; f=[k for k,v in q.items() if not v['gecti']]; print('QC', sys.argv[2], 'FAIL '+','.join(f) if f else 'PASS'); sys.exit(1 if f else 0)" "$W/qc/QC.json" "$C" || FAIL=1
+          python3 -I sosyal/poster_video/v7_silme_olc78.py serit "$W/$C.mp4" "_o/ORNEK/${C}_SERIT.jpg"
+          python3 -I sosyal/poster_video/v7_silme_olc78.py serit "_v/$C.mp4" "_o/ESKI_SERIT/${C}_SERIT.jpg"
+          cp "$W/$C.mp4" _o/ORNEK/; cp "$W/qc/QC.json" "_o/ORNEK/${C}_QC.json"; cp "$W/qc/KONTAK.jpg" "_o/ORNEK/${C}_KONTAK.jpg"; cp "$W/uretim.log" "_o/ORNEK/${C}_uretim.log"
+          G=$(( $(date +%s) - T0 )); echo "[$I/${#SEC[@]}] $C bitti | gecen ${G}s | kalan ~$(( G / I * (${#SEC[@]} - I) ))s"
+        done
+        echo "FAIL=$FAIL" >> "$GITHUB_ENV"
+    - name: Drive
+      if: always()
+      run: |
+        set -euo pipefail
+        rclone copy _o "gdrive:ASTROLOVE/TEMP/VIDEO_V7_DUZELTME/$DAMGA" --immutable -q
+        echo "::notice title=V7 SILME::TEMP/VIDEO_V7_DUZELTME/$DAMGA"
+        [ -f _o/OLCUM.md ] && head -12 _o/OLCUM.md >> "$GITHUB_STEP_SUMMARY" || true
+        [ "${FAIL:-1}" = 0 ]
+    - if: always()
+      run: rm -rf _k _v _w ~/.config/rclone
