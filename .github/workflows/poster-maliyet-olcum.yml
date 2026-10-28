@@ -8,6 +8,7 @@ on:
     inputs:
       bolum: {description: "printful,belge,teslim,prodigi,ulke", default: "printful,belge,teslim,prodigi,ulke"}
       csv_id: {description: "Drive PRINTFUL_POSTER.csv id (25 Eki)", default: "1pK6jYu--y4ohExK0MgL-hwVMWI0AQrhl"}
+      ozet_damga: {description: "yalniz ozet: TEMP/POSTER_MALIYET/<damga> klasorleri (bosluklu) okunur, OZET.txt Google Doc olarak yazilir", default: ""}
 permissions:
   contents: read
 jobs:
@@ -16,8 +17,8 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Girdi kapisi
-        env: {B: "${{ inputs.bolum }}", C: "${{ inputs.csv_id }}"}
-        run: '[[ "$B" =~ ^[a-z,]+$ && "$C" =~ ^[A-Za-z0-9_-]{20,80}$ ]] || { echo "::error::girdi"; exit 1; }'
+        env: {B: "${{ inputs.bolum }}", C: "${{ inputs.csv_id }}", O: "${{ inputs.ozet_damga }}"}
+        run: '[[ "$B" =~ ^[a-z,]+$ && "$C" =~ ^[A-Za-z0-9_-]{20,80}$ && "$O" =~ ^([0-9]{8}_[0-9]{6} ?)*$ ]] || { echo "::error::girdi"; exit 1; }'
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
@@ -53,14 +54,26 @@ jobs:
           rclone copyto "gdrive:ASTROLOVE/TEMP/POD_ORDERS_STATE.csv" _g/POD_ORDERS_STATE.csv -q || echo "::warning::POD_ORDERS_STATE.csv yok"
           rclone copy "gdrive:ASTROLOVE/KUPA_SIPARIS" _g/kupa --include "PRINTFUL_TASLAK.json" -q || echo "::warning::KUPA_SIPARIS yok"
           echo "csv $(wc -l < _g/PRINTFUL_POSTER.csv) satir; kupa taslak $(find _g/kupa -name PRINTFUL_TASLAK.json | wc -l)"
+      - name: Ozet (ozet_damga verilirse; olcum yok)
+        if: ${{ inputs.ozet_damga != '' }}
+        env: {O: "${{ inputs.ozet_damga }}"}
+        run: |
+          set -euo pipefail
+          mkdir -p _out
+          for d in $O; do rclone copy "gdrive:ASTROLOVE/TEMP/POSTER_MALIYET/$d" _out --exclude "kosu_log.txt" --exclude "OZET*" -q; done
+          python3 -I scripts/printful/maliyet_olcum.py _out --bolum ozet
+          D=$(date -u +%Y%m%d_%H%M%S)
+          rclone copyto _out/OZET.txt "gdrive:ASTROLOVE/TEMP/POSTER_MALIYET/OZET_$D.txt" --drive-import-formats txt -q
+          echo "Ozet: TEMP/POSTER_MALIYET/OZET_$D (Google Doc)" | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Olcum
+        if: ${{ inputs.ozet_damga == '' }}
         env: {B: "${{ inputs.bolum }}"}
         run: |
           set -o pipefail
           python3 -I scripts/printful/maliyet_olcum.py _out --bolum "$B" --csv _g/PRINTFUL_POSTER.csv --pod-state _g/POD_ORDERS_STATE.csv --kupa-dir _g/kupa 2>&1 | tee _out_log.txt
           echo "KOD=${PIPESTATUS[0]}" >> "$GITHUB_ENV"
       - name: Drive'a yaz (token taramasi)
-        if: always()
+        if: ${{ always() && inputs.ozet_damga == '' }}
         run: |
           set -uo pipefail
           [ -d _out ] || exit 1

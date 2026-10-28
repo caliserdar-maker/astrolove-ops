@@ -251,6 +251,43 @@ def ulke(out, pod_state, kupa_dir):
     print("ulke:", json.dumps({k: dict(v) for k, v in U.items()}), flush=True)
 
 
+def ozet(out):
+    """mevcut ciktilardan kisa metin ozeti (OZET.txt; Drive'da Google Doc olarak okunur). Musteri verisi yok."""
+    L = []
+    if (out / "PRINTFUL_VERGI.json").exists():
+        R = json.loads((out / "PRINTFUL_VERGI.json").read_text())
+        L.append(f"# PRINTFUL VERGI: yol {R.get('yol')}")
+        for t in R.get("tahmin", []) + R.get("taslak", []):
+            c = t.get("costs") or {}
+            L.append(f"{t.get('boy')} {t.get('ulke')} HTTP {t.get('status')} baski {c.get('subtotal')} kargo {c.get('shipping')} "
+                     f"vergi {c.get('tax')} kdv {c.get('vat')} toplam {c.get('total')} {c.get('currency')} "
+                     f"{'' if t.get('status') == 200 else str((t.get('hata') or {}).get('result', ''))[:120]}")
+        L.append("A4 varyantlari: " + json.dumps(R.get("a4"), ensure_ascii=False))
+    if (out / "TESLIM_AU_JP.csv").exists():
+        L.append("# TESLIM AU / JP (PRINTFUL_POSTER.csv 25 Eki): urun, boy, ulke, kargo_adi, kargo_usd, min, max, >20")
+        L += [", ".join(r) for r in csv.reader(open(out / "TESLIM_AU_JP.csv"))][1:]
+    if (out / "PRODIGI_AU.json").exists():
+        P = json.loads((out / "PRODIGI_AU.json").read_text())
+        L.append(f"# PRODIGI AU: yavas boylar {P.get('yavas_boylar')}")
+        for k in P.get("sonuc", []):
+            L.append(f"{k['sku']}: urun HTTP {k['urun_http']} {(k.get('aciklama') or '')[:90]}")
+            for t in k.get("teklif", []):
+                L.append(f"  {t.get('yontem')}: HTTP {t.get('http')} urun {t.get('urun')} kargo {t.get('kargo')} vergi {t.get('vergi')} "
+                         f"toplam {t.get('toplam')} {t.get('para') or ''} gonderi {t.get('gonderi')} {t.get('hata') or ''}")
+    if (out / "ULKE_DAGILIMI.json").exists():
+        L.append("# ULKE DAGILIMI: " + (out / "ULKE_DAGILIMI.json").read_text())
+    if (out / "PRINTFUL_BELGE.json").exists():
+        L.append("# PRINTFUL BELGE (anahtar sozcuklu paragraflar)")
+        anahtar = re.compile(r"etsy|marketplace|manual|sales tax|\bvat\b|norway|united kingdom|\buk\b|gst|facilitator|import", re.I)
+        for a in json.loads((out / "PRINTFUL_BELGE.json").read_text()):
+            g = re.sub(r"\s+", " ", a.get("govde") or "")
+            cumle = [c.strip() for c in re.split(r"(?<=[.!?])\s+", g) if anahtar.search(c)]
+            L.append(f"## {a.get('baslik')} | {a.get('url')} | guncelleme {a.get('guncelleme')} | HTTP {a.get('status')}")
+            L += [f"- {c[:400]}" for c in cumle[:25]]
+    (out / "OZET.txt").write_text("\n".join(L) + "\n", encoding="utf-8")
+    print(f"ozet: {len(L)} satir", flush=True)
+
+
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("out"); ap.add_argument("--csv"); ap.add_argument("--pod-state")
     ap.add_argument("--kupa-dir"); ap.add_argument("--bolum", default="printful,belge,teslim,prodigi,ulke")
@@ -264,6 +301,8 @@ def main():
         prodigi(out, T)
     if "ulke" in b:
         ulke(out, a.pod_state, a.kupa_dir)
+    if "ozet" in b:
+        ozet(out)
     return 0
 
 
