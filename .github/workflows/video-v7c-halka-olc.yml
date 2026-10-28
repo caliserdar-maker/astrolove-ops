@@ -1,0 +1,94 @@
+name: video-v7c-halka-olc
+# v7c 78 dogrulama (inceleme 28 Eki bulgu 1 ve 3). Etsy API YOK. Drive: TAM78 ve BIRLESIK salt okuma; cikti yalniz bu isin yeni klasoru
+# TEMP/VIDEO_V7_DUZELTME/<tam78>/TAM78/INCELEME (--immutable) ve git dali inceleme/v7c-halka-<kosu>. 78 yeni + 78 eski videoda
+# 0,4 sn maskeden bagimsiz halka ici kalinti (v7_silme_artik.halka_ici, esik ESIK 15) ve isim / mesaj SATIR BANDI yeni - eski farki.
+permissions:
+  contents: write
+on:
+  workflow_dispatch:
+    inputs:
+      tam78: {description: 'TEMP/VIDEO_V7_DUZELTME/<damga>/TAM78', default: '20261028_100938'}
+      birlesik: {description: 'TEMP/VIDEO_V7_78/BIRLESIK_<damga>', default: '20261026_211614'}
+env:
+  K: gdrive:ASTROLOVE/TEMP/POSTER_KAPAK_V10/20261026_153710
+jobs:
+  olc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+    - name: Girdi
+      env: {T: "${{ inputs.tam78 }}", B: "${{ inputs.birlesik }}"}
+      run: '[[ "$T" =~ ^[0-9]{8}_[0-9]{6}$ && "$B" =~ ^[0-9]{8}_[0-9]{6}$ ]] || { echo "::error::girdi"; exit 1; }'
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Kurulum
+      timeout-minutes: 15
+      run: |
+        set -euo pipefail
+        pip install -q numpy==2.1.3 pillow==11.0.0 scipy==1.14.1 opencv-python-headless==4.10.0.84
+        sudo apt-get -qq update >/dev/null && sudo apt-get -qq install -y ffmpeg fonts-dejavu-core >/dev/null
+        curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+    - name: rclone.conf
+      env:
+        RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      run: |
+        set -euo pipefail
+        mkdir -p ~/.config/rclone; umask 077
+        printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+        if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+          grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+    - name: Girdiler (Drive okuma)
+      env: {T: "${{ inputs.tam78 }}", B: "${{ inputs.birlesik }}"}
+      run: |
+        set -euo pipefail
+        mkdir -p _k _y _e _l
+        rclone copy "$K" _k --include "KAPAK_*.jpg" --max-depth 1 --transfers 8 -q
+        rclone copy "gdrive:ASTROLOVE/TEMP/VIDEO_V7_DUZELTME/$T/TAM78" _y --include "*.mp4" --max-depth 1 --transfers 8 -q
+        rclone copy "gdrive:ASTROLOVE/TEMP/VIDEO_V7_DUZELTME/$T/TAM78/LOG" _l --include "*_uretim.log" --transfers 8 -q
+        rclone copy "gdrive:ASTROLOVE/TEMP/VIDEO_V7_78/BIRLESIK_$B" _e --include "*.mp4" --max-depth 1 --transfers 8 -q
+        echo "yeni $(ls _y/*.mp4 | wc -l) eski $(ls _e/*.mp4 | wc -l) log $(ls _l | wc -l)"
+        [ "$(ls _y/*.mp4 | wc -l)" = 78 ] && [ "$(ls _e/*.mp4 | wc -l)" = 78 ] && [ "$(ls _l | wc -l)" = 78 ] || { echo "::error::78 degil"; exit 1; }
+    - name: Olcum
+      run: |
+        set -uo pipefail
+        mkdir -p _o/cift
+        ls _y/*.mp4 | xargs -n1 basename | sed 's/\.mp4$//' | xargs -P 2 -I{} sh -c \
+          'python3 -I sosyal/poster_video/v7c_halka_olc.py sosyal/poster_video/poster_video_v7.py _k/KAPAK_{}.jpg _y/{}.mp4 _e/{}.mp4 _l/{}_uretim.log _o/cift {} > _o/cift/{}.txt 2>&1 || echo "HATA {}"'
+        python3 - <<'PY'
+        import csv, glob, json, os
+        R = [json.load(open(p)) for p in sorted(glob.glob("_o/cift/*.json"))]
+        hata = sorted(os.path.basename(p)[:-4] for p in glob.glob("_o/cift/*.txt") if not os.path.exists(p[:-4] + ".json"))
+        al = ["cift", "yeni_artik", "yeni_fazla_max", "eski_artik", "eski_fazla_max", "r", "isim_fark_0", "isim_fark_04", "isim_fark_max",
+              "mesaj_fark_0", "mesaj_fark_04", "mesaj_fark_max"]
+        rows = [dict(cift=r["cift"], yeni_artik=r["yeni"].get("artik", r["yeni"].get("hata")), yeni_fazla_max=r["yeni"].get("fazla_max"),
+                     eski_artik=r["eski"].get("artik", r["eski"].get("hata")), eski_fazla_max=r["eski"].get("fazla_max"), r=r["yeni"].get("r"),
+                     **{f"{a}_{b}": r[a][b] for a in ("isim", "mesaj") for b in ("fark_0", "fark_04", "fark_max")}) for r in R]
+        with open("_o/HALKA_BANT.csv", "w", newline="") as f:
+            w = csv.DictWriter(f, fieldnames=al); w.writeheader(); w.writerows(rows)
+        sayi = lambda k: [x for x in rows if not isinstance(x[k], int) or x[k] > 0]
+        mx = lambda k: max(x[k] for x in rows if isinstance(x[k], (int, float)))
+        md = ["# v7c 78: maskeden bagimsiz halka ici kalinti + isim / mesaj satir bandi", "",
+              f"- olculen {len(rows)}/78; betik hatasi: {', '.join(hata) or 'yok'}",
+              f"- YENI halka ici artik > 0 (ya da hata): {len(sayi('yeni_artik'))} cift {[x['cift'] for x in sayi('yeni_artik')]}; yeni fazla_max en buyuk {mx('yeni_fazla_max')}",
+              f"- ESKI halka ici artik > 0: {len(sayi('eski_artik'))} cift; eski fazla_max en kucuk {min(x['eski_fazla_max'] for x in rows)}",
+              f"- isim bandi yeni-eski fark: taban (0. kare) en buyuk {mx('isim_fark_0')}, 0,4 sn en buyuk {mx('isim_fark_04')}, tum kareler en buyuk {mx('isim_fark_max')}",
+              f"- mesaj bandi: taban en buyuk {mx('mesaj_fark_0')}, 0,4 sn en buyuk {mx('mesaj_fark_04')}, tum kareler en buyuk {mx('mesaj_fark_max')}"]
+        open("_o/HALKA_BANT.md", "w").write("\n".join(md) + "\n"); print("\n".join(md))
+        PY
+    - name: Cikti (Drive yeni klasor + dal)
+      env: {T: "${{ inputs.tam78 }}"}
+      run: |
+        set -euo pipefail
+        cat _o/HALKA_BANT.md >> "$GITHUB_STEP_SUMMARY"
+        rclone copy _o "gdrive:ASTROLOVE/TEMP/VIDEO_V7_DUZELTME/$T/TAM78/INCELEME" --immutable -q
+        D="inceleme/v7c-halka-$GITHUB_RUN_ID"
+        cd _o && git init -q && git checkout -q -b "$D"
+        git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git add -A && git commit -q -m "v7c halka ici + satir bandi olcumu (TAM78 $T, kosu $GITHUB_RUN_ID)"
+        git push -q "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" "$D"
+        echo "::notice title=HALKA::dal $D, Drive TEMP/VIDEO_V7_DUZELTME/$T/TAM78/INCELEME"
+    - if: ${{ always() }}
+      run: rm -rf _k _y _e _l ~/.config/rclone

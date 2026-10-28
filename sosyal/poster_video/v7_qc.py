@@ -11,7 +11,9 @@ Kullanim: v7_qc.py <video.mp4> <kapak.png> <uretim_log.txt> <cikti_dir>
     ile maskenin 15-41 px cevre halkasindaki (15x15 ve 41x41 kare cekirdekle genisletme farki) ortalama (R - B) farki |.| <= 2,0
     (Merkez olcumu: v7 7,17 FAIL, v7b 0,90 PASS; bu tanimla yerel v7 -7,20, v7b -0,89)
  silme_artik (Merkez 28 Eki, v7c): 0,4 sn karesinde (silme 0,3 sn'de biter) <video>.silme_maske.png (sembol + sembole yakin altin)
-    icinde R-B'nin yerel zemine (31 px medyan) gore fazlasi > v7_silme_artik.ESIK olan piksel sayisi 0 olmali (maske yoksa FAIL)"""
+    icinde R-B'nin yerel zemine (31 px medyan) gore fazlasi > v7_silme_artik.ESIK olan piksel sayisi 0 olmali (maske yoksa FAIL)
+ silme_halka_ici (inceleme 28 Eki, yalniz poster): ayni karede maskeden BAGIMSIZ, uydurulan altin halkanin ici (alt bant haric)
+    R-B fazlasi > ESIK piksel sayisi 0 olmali (v7_silme_artik.halka_ici)"""
 import json, os, re, subprocess, sys
 import numpy as np, cv2
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))   # -I ile betik klasoru sys.path'te degil
@@ -81,6 +83,10 @@ def main():
         sg = ic.get('silme_sinyal', 'rb')   # YD: yd_video ic.json 'koyu'; poster: yok -> 'rb'
         r = SA.artik(F[int(round(SA.KARE_SN * 30))].astype(np.float32), np.asarray(Image.open(sp).convert('L')) > 127, sg)
         K['silme_artik'] = {'gecti': r['artik'] == 0, 'deger': dict(r, sn=SA.KARE_SN, sinyal=sg, esik=SA.ESIK_YD if sg == 'koyu' else SA.ESIK)}
+        if sg == 'rb':   # inceleme 28 Eki bulgu 1: maskeden bagimsiz halka ici kalinti (yalniz poster; YD'de halka yok)
+            pk = SA.poster_kutusu(log_yol, Image.open(kap_yol).size[0], F.shape[2])
+            h = SA.halka_ici(F[int(round(SA.KARE_SN * 30))].astype(np.float32), pk) if pk else {'hata': 'logda poster kutusu yok'}
+            K['silme_halka_ici'] = {'gecti': h.get('artik') == 0, 'deger': dict(h, sn=SA.KARE_SN, esik=SA.ESIK, poster_kutusu=pk)}
     else:   # inceleme 28 Eki: maske yoksa kapi atlanmaz (v7c oncesi video / yd_video motor kopyasi maske uretmiyor)
         K['silme_artik'] = {'gecti': False, 'deger': {'hata': 'silme_maske.png yok (v7c oncesi uretim)'}}
     th = 270; tw = round(F.shape[2] * th / F.shape[1]); ust = 32

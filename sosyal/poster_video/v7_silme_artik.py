@@ -80,6 +80,43 @@ def artik(kare_rgb, maske, sinyal="rb"):
                 zemin_max=round(float(z.max()), 1) if z.size else 0.0, zemin_p999=q(z, 99.9))
 
 
+def poster_kutusu(log_yol, kapak_w, vw=VW):
+    """uretim logundaki 'poster kapakta X,Y WxH' -> video olceginde (x0, y0, x1, y1); bulunamazsa None"""
+    import re
+    for l in open(log_yol, encoding="utf-8"):
+        m = re.match(r"poster kapakta (\d+),(\d+) (\d+)x(\d+)", l)
+        if m:
+            x, y, w, h = (int(v) for v in m.groups()); k = vw / kapak_w
+            return round(x * k), round(y * k), round((x + w) * k), round((y + h) * k)
+    return None
+
+
+def halka_ici(kare_rgb, kutu):
+    """maskeden BAGIMSIZ kalinti olcumu (inceleme 28 Eki bulgu 1: silme_artik kendi maskesine kor). 0,4 sn karesinde poster kutusu
+    icinde R-B fazlasi > 12 olan en buyuk parca = altin halka; en kucuk kareler daire uydurmasi; halka ici = merkeze uzaklik < r - 7 ve
+    y < cy + 0,55 r (alt bant: kucuk burclar ve toz baslangici disarida). Artik = halka icinde R-B fazlasi > ESIK piksel sayisi.
+    Bagimsiz inceleme olcumu (78 TAM78 0,4 sn JPEG kare): halka merkez (721,6, 585,3) r 182,3; yeni en buyuk 14, eski 72/78 > 15."""
+    rb = kare_rgb[..., 0] - kare_rgb[..., 2]
+    ex = rb - (cv2.medianBlur(np.clip(rb + 128, 0, 255).astype(np.uint8), 31).astype(np.float32) - 128)
+    x0, y0, x1, y1 = kutu
+    sub = (ex[y0:y1, x0:x1] > 12).astype(np.uint8)
+    n, lab, st, _ = cv2.connectedComponentsWithStats(sub, 8)
+    if n < 2:
+        return dict(hata="halka bulunamadi")
+    i = 1 + int(np.argmax(st[1:, 4]))
+    ys, xs = np.where(lab == i); xs = xs + x0; ys = ys + y0
+    A = np.c_[2 * xs, 2 * ys, np.ones(len(xs))]
+    cx, cy, k = np.linalg.lstsq(A, (xs ** 2 + ys ** 2).astype(np.float64), rcond=None)[0]
+    r = float(np.sqrt(k + cx * cx + cy * cy))
+    if not 0.25 * (x1 - x0) < r < 0.6 * (x1 - x0):
+        return dict(hata=f"halka uydurmasi gecersiz r {r:.1f}", cx=round(float(cx), 1), cy=round(float(cy), 1))
+    Y, X = np.mgrid[:ex.shape[0], :ex.shape[1]]
+    ic = (np.hypot(X - cx, Y - cy) < r - 7) & (Y < cy + 0.55 * r)
+    e = ex[ic]
+    return dict(artik=int((e > ESIK).sum()), fazla_max=round(float(e.max()), 1), fazla_p999=round(float(np.percentile(e, 99.9)), 1),
+                cx=round(float(cx), 1), cy=round(float(cy), 1), r=round(r, 1), ic_px=int(ic.sum()))
+
+
 def kare_oku(video, sn):
     c = cv2.VideoCapture(video); fps = c.get(cv2.CAP_PROP_FPS) or 30.0
     c.set(cv2.CAP_PROP_POS_FRAMES, int(round(sn * fps)))
