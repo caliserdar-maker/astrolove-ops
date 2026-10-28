@@ -48,6 +48,12 @@ def norm(b):
     return re.sub(r"[\s\"″'”]", "", str(b)).replace("×", "x").lower()
 
 
+def sonuc(d):
+    """Printful yaniti: result sozluk ise o, degilse (hata metni) {}"""
+    r = d.get("result") if isinstance(d, dict) else None
+    return r if isinstance(r, dict) else {}
+
+
 def pf(yontem, yol, veri=None):
     for d in range(3):
         r = S.request(yontem, PF + yol, json=veri, timeout=60,
@@ -65,8 +71,8 @@ def printful(out):
     var = {}
     for uid in (1, 268):
         st, d = pf("GET", f"/products/{uid}")
-        vs = (d.get("result") or {}).get("variants") or []
-        R["urunler"][uid] = dict(status=st, ad=((d.get("result") or {}).get("product") or {}).get("title"),
+        vs = sonuc(d).get("variants") or []
+        R["urunler"][uid] = dict(status=st, ad=(sonuc(d).get("product") or {}).get("title"),
                                  varyant=[dict(id=v["id"], boy=v.get("size"), fiyat=v.get("price")) for v in vs])
         for v in vs:
             var[(uid, norm(v.get("size")))] = v
@@ -80,9 +86,9 @@ def printful(out):
             govde = {"recipient": dict(name="Test", **adr), "shipping": "STANDARD", "currency": "USD",
                      "items": [{"variant_id": v["id"], "quantity": 1, "files": [{"url": DOSYA_URL}]}]}
             st, d = pf("POST", "/orders/estimate-costs", govde)
-            R["tahmin"].append(dict(boy=b, varyant=v["id"], ulke=ul, status=st, costs=(d.get("result") or {}).get("costs"),
+            R["tahmin"].append(dict(boy=b, varyant=v["id"], ulke=ul, status=st, costs=sonuc(d).get("costs"),
                                     hata=None if st == 200 else d))
-            print(f"tahmin {b} {ul}: HTTP {st} {((d.get('result') or {}).get('costs') or {}).get('total')}", flush=True)
+            print(f"tahmin {b} {ul}: HTTP {st} {(sonuc(d).get('costs') or {}).get('total')}", flush=True)
             time.sleep(0.7)
     ok = [t for t in R["tahmin"] if t.get("status") == 200]
     if ok:
@@ -108,15 +114,15 @@ def taslak(R, hedef):
             ext = f"TEST-VERGI-{os.environ.get('GITHUB_RUN_ID', 'yerel')}-{b}-{ul}"
             st, d = pf("POST", "/orders", {"external_id": ext, "recipient": dict(name="Test", **adr), "shipping": "STANDARD",
                                            "items": [{"variant_id": v["id"], "quantity": 1, "files": [{"url": DOSYA_URL}]}]})
-            oid = (d.get("result") or {}).get("id")
+            oid = sonuc(d).get("id")
             kayit = dict(boy=b, varyant=v["id"], ulke=ul, status=st, yol="taslak", order_id=oid,
-                         durum=(d.get("result") or {}).get("status"), costs=(d.get("result") or {}).get("costs"))
+                         durum=sonuc(d).get("status"), costs=sonuc(d).get("costs"))
             if oid:
-                s2, d2 = pf("GET", f"/orders/{oid}"); kayit["oku"] = dict(status=s2, durum=(d2.get("result") or {}).get("status"))
-                if (d2.get("result") or {}).get("costs"):
+                s2, d2 = pf("GET", f"/orders/{oid}"); kayit["oku"] = dict(status=s2, durum=sonuc(d2).get("status"))
+                if sonuc(d2).get("costs"):
                     kayit["costs"] = d2["result"]["costs"]
-                s3, d3 = pf("DELETE", f"/orders/{oid}"); kayit["sil"] = dict(status=s3, durum=(d3.get("result") or {}).get("status"))
-                s4, d4 = pf("GET", f"/orders/{oid}"); kayit["sil_sonra"] = dict(status=s4, durum=(d4.get("result") or {}).get("status"))
+                s3, d3 = pf("DELETE", f"/orders/{oid}"); kayit["sil"] = dict(status=s3, durum=sonuc(d3).get("status"))
+                s4, d4 = pf("GET", f"/orders/{oid}"); kayit["sil_sonra"] = dict(status=s4, durum=sonuc(d4).get("status"))
             R["taslak"].append(kayit); print(f"taslak {b} {ul}: {kayit.get('durum')} sil {kayit.get('sil')} sonra {kayit.get('sil_sonra')}",
                                              flush=True)
             time.sleep(0.7)
@@ -220,7 +226,7 @@ def ulke(out, pod_state, kupa_dir):
     off = 0
     while True:                                                 # Printful siparis listesi (GET; ad / adres yazilmaz)
         st, d = pf("GET", f"/orders?offset={off}&limit=100")
-        rs = d.get("result") or [] if st == 200 else []
+        rs = d.get("result") if st == 200 and isinstance(d.get("result"), list) else []
         for o in rs:
             if str(o.get("external_id") or "").startswith("TEST") or TEST_RID.match(str(o.get("external_id") or "")):
                 continue
