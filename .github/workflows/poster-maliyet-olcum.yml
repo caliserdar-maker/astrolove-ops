@@ -1,0 +1,74 @@
+name: poster-maliyet-olcum
+# Poster kar tablosu eksik maliyet OLCUMU (Merkez 28 Eki, Serdar onayi). Yalniz olcum. ETSY API YOK. Printful'da siparis ONAYLANMAZ,
+# odeme yok, Etsy baglantisi kurulmaz (estimate-costs; uc yoksa taslak -> oku -> sil -> silindi kaniti). Prodigi yalniz quote (siparis degil).
+# Tokenlar Drive TEMP/PRINTFUL_TOKEN.json, TEMP/PRODIGI_TOKEN.json (maskeli; ciktida token taramasi). Musteri kayitlarindan yalniz ulke + adet.
+# Cikti Drive TEMP/POSTER_MALIYET/<damga>/. scripts/printful/maliyet_olcum.py
+on:
+  workflow_dispatch:
+    inputs:
+      bolum: {description: "printful,belge,teslim,prodigi,ulke", default: "printful,belge,teslim,prodigi,ulke"}
+      csv_id: {description: "Drive PRINTFUL_POSTER.csv id (25 Eki)", default: "1pK6jYu--y4ohExK0MgL-hwVMWI0AQrhl"}
+permissions:
+  contents: read
+jobs:
+  olc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Girdi kapisi
+        env: {B: "${{ inputs.bolum }}", C: "${{ inputs.csv_id }}"}
+        run: '[[ "$B" =~ ^[a-z,]+$ && "$C" =~ ^[A-Za-z0-9_-]{20,80}$ ]] || { echo "::error::girdi"; exit 1; }'
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -q requests==2.32.3
+      - name: rclone
+        timeout-minutes: 8
+        run: |
+          sudo apt-get -qq install -y rclone >/dev/null 2>&1 || timeout 240 bash -c 'curl -fsSL --max-time 120 --retry 2 https://rclone.org/install.sh | sudo bash >/dev/null 2>&1'
+          rclone version | head -1
+      - name: rclone.conf + tokenlar (maskeli)
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; export RCLONE_CONFIG_GDRIVE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET"; fi; fi
+          T=$(rclone cat "gdrive:ASTROLOVE/TEMP/PRINTFUL_TOKEN.json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["api_token"].strip())')
+          [ -n "$T" ] || { echo "HATA: Printful token bos"; exit 1; }
+          echo "::add-mask::$T"; echo "PRINTFUL_TOKEN=$T" >> "$GITHUB_ENV"
+          P=$(rclone cat "gdrive:ASTROLOVE/TEMP/PRODIGI_TOKEN.json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["api_key"].strip())' || true)
+          if [ -n "$P" ]; then echo "::add-mask::$P"; echo "PRODIGI_API_KEY=$P" >> "$GITHUB_ENV"; else echo "::warning::Prodigi anahtari yok"; fi
+      - name: Drive girdileri (yalniz okuma)
+        env: {C: "${{ inputs.csv_id }}"}
+        run: |
+          set -euo pipefail
+          mkdir -p _g/kupa
+          rclone backend copyid gdrive: "$C" _g/PRINTFUL_POSTER.csv -q
+          rclone copyto "gdrive:ASTROLOVE/TEMP/POD_ORDERS_STATE.csv" _g/POD_ORDERS_STATE.csv -q || echo "::warning::POD_ORDERS_STATE.csv yok"
+          rclone copy "gdrive:ASTROLOVE/KUPA_SIPARIS" _g/kupa --include "PRINTFUL_TASLAK.json" -q || echo "::warning::KUPA_SIPARIS yok"
+          echo "csv $(wc -l < _g/PRINTFUL_POSTER.csv) satir; kupa taslak $(find _g/kupa -name PRINTFUL_TASLAK.json | wc -l)"
+      - name: Olcum
+        env: {B: "${{ inputs.bolum }}"}
+        run: |
+          set -o pipefail
+          python3 -I scripts/printful/maliyet_olcum.py _out --bolum "$B" --csv _g/PRINTFUL_POSTER.csv --pod-state _g/POD_ORDERS_STATE.csv --kupa-dir _g/kupa 2>&1 | tee _out_log.txt
+          echo "KOD=${PIPESTATUS[0]}" >> "$GITHUB_ENV"
+      - name: Drive'a yaz (token taramasi)
+        if: always()
+        run: |
+          set -uo pipefail
+          [ -d _out ] || exit 1
+          cp _out_log.txt _out/kosu_log.txt 2>/dev/null || true
+          for t in "${PRINTFUL_TOKEN:-}" "${PRODIGI_API_KEY:-}"; do [ -n "$t" ] && grep -rlF "$t" _out && { echo "::error::ciktida token"; exit 1; }; done
+          D=$(date -u +%Y%m%d_%H%M%S)
+          rclone copy _out "gdrive:ASTROLOVE/TEMP/POSTER_MALIYET/$D" --immutable -q
+          echo "Cikti: TEMP/POSTER_MALIYET/$D" | tee -a "$GITHUB_STEP_SUMMARY"
+          [ "${KOD:-1}" = 0 ]
+      - if: always()
+        run: rm -rf _g _out ~/.config/rclone
