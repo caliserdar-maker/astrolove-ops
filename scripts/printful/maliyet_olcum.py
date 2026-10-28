@@ -289,6 +289,33 @@ def ulke(out, pod_state, kupa_dir):
     print("ulke:", json.dumps({k: dict(v) for k, v in U.items()}), flush=True)
 
 
+TABLO_VARYANT = [(1, 16364, "5x7"), (1, 4463, "8x10"), (1, 48505, "A4 8.27x11.69 in"), (268, 8947, "A4 21x30 cm")]
+
+
+def tablo(out):
+    """rapor tablosu: varyant x ulke (ADRES, 9 hedef) -> GET /products baski fiyati + POST /shipping/rates (siparis olusturmaz)"""
+    fiyat = {}
+    for uid in {u for u, _, _ in TABLO_VARYANT}:
+        st, d = pf("GET", f"/products/{uid}")
+        for v in sonuc(d).get("variants") or []:
+            fiyat[v["id"]] = v.get("price")
+    with open(out / "TABLO.csv", "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["boy", "urun", "varyant", "ulke", "baski_usd", "kargo_adi", "kargo_usd", "min_gun", "max_gun", "printful_vergi", "toplam_vergisiz_usd"])
+        for uid, vid, ad in TABLO_VARYANT:
+            for ul, adr in ADRES.items():
+                st, d = pf("POST", "/shipping/rates", {"recipient": dict(adr), "items": [{"variant_id": vid, "quantity": 1}], "currency": "USD"})
+                sec = d.get("result") if isinstance(d.get("result"), list) else []
+                if not sec:
+                    w.writerow([ad, uid, vid, ul, fiyat.get(vid), f"HATA {st}", "", "", "", "", ""])
+                for s_ in sec:
+                    top = round(float(fiyat.get(vid) or 0) + float(s_.get("rate") or 0), 2)
+                    w.writerow([ad, uid, vid, ul, fiyat.get(vid), s_.get("name"), s_.get("rate"), s_.get("minDeliveryDays"),
+                                s_.get("maxDeliveryDays"), "OLCULEMEDI (token orders/read yok)", top])
+                time.sleep(0.6)
+    print("tablo: TABLO.csv", flush=True)
+
+
 def ozet(out):
     """mevcut ciktilardan kisa metin ozeti (OZET.txt; Drive'da Google Doc olarak okunur). Musteri verisi yok."""
     L = []
@@ -312,6 +339,9 @@ def ozet(out):
             for t in k.get("teklif", []):
                 L.append(f"  {t.get('yontem')}: HTTP {t.get('http')} urun {t.get('urun')} kargo {t.get('kargo')} vergi {t.get('vergi')} "
                          f"toplam {t.get('toplam')} {t.get('para') or ''} gonderi {t.get('gonderi')} {t.get('hata') or ''}")
+    if (out / "TABLO.csv").exists():
+        L.append("# TABLO (28 Eki canli: GET /products + POST /shipping/rates)")
+        L += [", ".join(r) for r in csv.reader(open(out / "TABLO.csv"))]
     if (out / "GELATO_AU_13EKI.csv").exists():
         L.append("# GELATO AU (13 Eki Product API fiyat dokumu, kargo yok)")
         L += [", ".join(r) for r in csv.reader(open(out / "GELATO_AU_13EKI.csv"))]
@@ -347,6 +377,8 @@ def main():
         prodigi(out, T)
     if "ulke" in b:
         ulke(out, a.pod_state, a.kupa_dir)
+    if "tablo" in b:
+        tablo(out)
     if "gelato" in b:
         gelato(out, a.gelato_csv)
     if "pbelge" in b:
