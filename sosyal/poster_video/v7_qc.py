@@ -78,8 +78,9 @@ def main():
                             'maske_px': int(sm.sum()), 'halka_px': int(halka.sum())}}
     sp = v + '.silme_maske.png'
     if os.path.exists(sp):
-        r = SA.artik(F[int(round(SA.KARE_SN * 30))].astype(np.float32), np.asarray(Image.open(sp).convert('L')) > 127)
-        K['silme_artik'] = {'gecti': r['artik'] == 0, 'deger': dict(r, sn=SA.KARE_SN, esik=SA.ESIK)}
+        sg = ic.get('silme_sinyal', 'rb')   # YD: yd_video ic.json 'koyu'; poster: yok -> 'rb'
+        r = SA.artik(F[int(round(SA.KARE_SN * 30))].astype(np.float32), np.asarray(Image.open(sp).convert('L')) > 127, sg)
+        K['silme_artik'] = {'gecti': r['artik'] == 0, 'deger': dict(r, sn=SA.KARE_SN, sinyal=sg, esik=SA.ESIK_YD if sg == 'koyu' else SA.ESIK)}
     else:   # inceleme 28 Eki: maske yoksa kapi atlanmaz (v7c oncesi video / yd_video motor kopyasi maske uretmiyor)
         K['silme_artik'] = {'gecti': False, 'deger': {'hata': 'silme_maske.png yok (v7c oncesi uretim)'}}
     th = 270; tw = round(F.shape[2] * th / F.shape[1]); ust = 32

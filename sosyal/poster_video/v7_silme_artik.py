@@ -16,6 +16,9 @@ import numpy as np
 KARE_SN = 0.4
 ESIK = 15.0          # R-B fazlasi. 78 olcumu (video-v7-silme-duzelt 40652593650, OLCUM.csv): zemin en buyuk 13 (AQUARIUS_PISCES);
                     # eski videolarda maske ici en buyuk fazla en az 17 (LIBRA_SAGITTARIUS); v7c ornekleri en fazla 4. Esik 13 + 2.
+ESIK_YD = 15.0       # YD 'koyu' (yerel kagida gore koyuluk). Yerel olcum, tek cift (AQUARIUS_AQUARIUS Y01, 28 Eki): v7c maske icinde 0,4 sn
+                    # eski video artik 148 px (fazla en buyuk 136,5), v7c en buyuk 4,2; maske cevresi (silinmemis kagit) p99,9 9,0, en buyuk
+                    # 18,6 (lifler). Esik 10 / 15 / 20 ile eski 171 / 148 / 133, yeni 0. GECICI: YD esikleri ayri karar (Merkez 28 Eki).
 VW, VH = 1440, 1080
 
 
@@ -55,16 +58,25 @@ def hedef_maske(pv, kapak):
                    maske_px=int(m.sum()), poster_w=int(P.w))
 
 
-def artik(kare_rgb, maske):
-    """kare (RGB float) + bool maske -> dict(artik, fazla_max, fazla_p999, zemin_max, zemin_p999)"""
-    rb = kare_rgb[..., 0] - kare_rgb[..., 2]
-    bg = cv2.medianBlur(np.clip(rb + 128, 0, 255).astype(np.uint8), 31).astype(np.float32) - 128
-    ex = rb - bg
+def artik(kare_rgb, maske, sinyal="rb"):
+    """kare (RGB float) + bool maske -> dict(artik, fazla_max, fazla_p999, zemin_max, zemin_p999)
+    sinyal 'rb' (poster, altin murekkep): R-B'nin yerel zemine (31 px medyan) gore fazlasi, esik ESIK.
+    sinyal 'koyu' (YD, krem kagitta yesil murekkep; yd_video ic.json silme_sinyal): parlakligin yerel kagida (31 px medyan) gore
+    koyulugu, renk kosulu yok (silinmis bolge duz kagit dolgusu; soluk murekkep kenari da sayilir), esik ESIK_YD."""
+    if sinyal == "koyu":
+        lum = kare_rgb @ np.float32([0.299, 0.587, 0.114])
+        ex = cv2.medianBlur(np.clip(lum, 0, 255).astype(np.uint8), 31).astype(np.float32) - lum
+        esik = ESIK_YD
+    else:
+        rb = kare_rgb[..., 0] - kare_rgb[..., 2]
+        bg = cv2.medianBlur(np.clip(rb + 128, 0, 255).astype(np.uint8), 31).astype(np.float32) - 128
+        ex = rb - bg
+        esik = ESIK
     u = maske.astype(np.uint8)
     cevre = (cv2.dilate(u, np.ones((25, 25), np.uint8)) > 0) & ~(cv2.dilate(u, np.ones((13, 13), np.uint8)) > 0)
     e, z = ex[maske], ex[cevre]
     q = lambda a, p: round(float(np.percentile(a, p)), 1) if a.size else 0.0
-    return dict(artik=int((e > ESIK).sum()), fazla_max=round(float(e.max()), 1) if e.size else 0.0, fazla_p999=q(e, 99.9),
+    return dict(artik=int((e > esik).sum()), fazla_max=round(float(e.max()), 1) if e.size else 0.0, fazla_p999=q(e, 99.9),
                 zemin_max=round(float(z.max()), 1) if z.size else 0.0, zemin_p999=q(z, 99.9))
 
 

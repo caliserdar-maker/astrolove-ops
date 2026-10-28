@@ -2,7 +2,8 @@
 """YD (1st Anniversary) ilan videosu ORNEGI (Merkez 27 Eki gorev B): poster v7b ile ayni sure ve tarz (6 sn, 30 fps, 1440x1080,
 sessiz H.264 crf 17; ilk / son kare kapak; ilk 0,3 sn silme; toz iki kucuk burc glifinden ortak sembole akar, murekkep
 min(c(t), F); mesaj soldan saga yazilir; BITIS 5,0 sn, sonra sabit kapak). Sahne = YD kapagi <CIFT>_Y01.jpg (3000x2250, Canva).
-Motor: poster_video_v7.py (v7b) 'def vid' satirindan sona kadar BIREBIR kopya (asagida 'V7B MOTORU'); tek fark sonsuz = []
+Motor: poster_video_v7.py (v7b) 'def vid' satirindan sona kadar BIREBIR kopya (asagida 'V7B MOTORU'); farklar sonsuz = [] ve v7c
+silme blogunun sinyali (koyu yesil murekkep; kalinti kapisi 'koyu'; ic.json silme_sinyal, v7_qc silme_artik bunu okur)
 (YD posterinde isimler arasinda sonsuz isareti yok). Yalniz sahne ayristirmasi YD Botanical posterine gore (v7 PosterR / halka
 koyu poster varsayar, krem kagitta calismaz):
 - poster kutusu: kapakta en buyuk krem kagit parcasi (lum > 185, doygunluk < 60; 25 px kapama), 2000 px genislige buyutulur (v7 gibi).
@@ -144,6 +145,32 @@ def alfa(cs, d=7):
 
 
 msym = np.isin(P.lab, [c[0] for c in P.merged_parts]).astype(np.uint8)
+# v7c (Merkez 28 Eki, poster_video_v7 ile ayni duzeltme): sembolun ince uclari ve kucuk parcalari sembol parcalarina girmiyor, 0,4 sn
+# karesinde iz kaliyordu (AQUARIUS_AQUARIUS Y01 yerel ornegi: uclar ve orta noktalar). Kural posterle ayni (yerel zemine gore fazla >
+# YAKIN_T, sembole ilk bos 10 px banda kadar, en fazla 140 px; kucuk burc / isim / mesaj kutulari 10 px payla haric); YD'de sinyal
+# R-B degil, krem kagitta yesil murekkep: parlakligin yerel kagida (61 px medyan) gore koyulugu > YAKIN_T ve G - R'nin yerel kagida
+# gore fazlasi > YAKIN_GR (kagit lifleri kahverengi: G - R kagittan dusuk; soluk murekkep kenari kagittan yesil). Olcum (6 YD kapagi,
+# yerel ydk/*_Y01.jpg, V7_SILME=eski maskesinden uzaklik, koyuluk > 15): yesil fazla > 0 ile ilk bos bant AQUARIUS_GEMINI'de 80 px ve
+# uzak bantlarda lif pikselleri; fazla > 2 ile ilk bos bant 40-60 px (AQUARIUS_AQUARIUS 60, AQUARIUS_GEMINI 50, digerleri 40).
+# YAKIN_T 15 (poster ile ayni).
+# V7_SILME=eski: eski davranis.
+YAKIN_T, YAKIN_GR, YAKIN_MAX = 15, 2, 150
+if os.environ.get('V7_SILME', 'tam') == 'tam':
+    _uz = cv2.distanceTransform((1 - msym).astype(np.uint8), cv2.DIST_L2, 5)
+    _lum = P.img @ np.float32([0.299, 0.587, 0.114])
+    _gr = P.img[..., 1] - P.img[..., 0]
+    _alt = ((cv2.medianBlur(np.clip(_lum, 0, 255).astype(np.uint8), 61).astype(np.float32) - _lum) > YAKIN_T) & \
+        (_gr - (cv2.medianBlur(np.clip(_gr + 128, 0, 255).astype(np.uint8), 61).astype(np.float32) - 128) > YAKIN_GR)
+    for _k in (P.sign_a, P.sign_b, P.names_row, P.msg_row):
+        _, _x, _y, _w, _h, _ = _k
+        _alt[max(0, _y - 10):_y + _h + 10, max(0, _x - 10):_x + _w + 10] = False
+    SILME_D = next((d for d in range(30, YAKIN_MAX, 10) if not (_alt & (_uz >= d) & (_uz < d + 10)).any()), None)
+    SILME_VARSAYILAN = SILME_D is None
+    SILME_D = SILME_D or 30
+    _ek = (_alt & (_uz < SILME_D) & (msym == 0)).astype(np.uint8)
+    print(f'silme: sembol maskesi {int(msym.sum())} px + yakin murekkep {int(_ek.sum())} px (koyuluk > {YAKIN_T}, yesil fazla > {YAKIN_GR}, sembole < {SILME_D} px{" VARSAYILAN: bos bant yok" if SILME_VARSAYILAN else ""})',
+          flush=True)
+    msym = np.maximum(msym, _ek)
 MS_p = np.clip(P.alpha * cv2.dilate(msym, np.ones((7, 7), np.uint8)), 0, 1)
 sonsuz = []   # YD: isimler arasinda sonsuz isareti yok (v7: parcalar(P.names_row, merkez +-0,08 W))
 MG_p = np.zeros_like(P.alpha)
@@ -194,6 +221,7 @@ _g = [cv2.resize(P.alpha[y:y + h, x:x + w].astype(np.float32), (64, 64), interpo
 _g = [(g - g.mean()) / (g.std() + 1e-6) for g in _g]
 GLIF['benzerlik'] = round(float((_g[0] * _g[1]).mean()), 3)   # iki glifin NCC'si (ayni burcta yuksek olmali)
 Image.fromarray(((MS > 0.95) * 255).astype(np.uint8)).save(OUT + '.sembol_maske.png')   # QC: cekirdek sembol pikselleri
+Image.fromarray(((vid(msym.astype(np.float32)) > 0.25) * 255).astype(np.uint8)).save(OUT + '.silme_maske.png')   # QC silme_artik (v7c)
 
 
 def kapsam(m):
@@ -307,5 +335,5 @@ for i in range(nT):
 pr.stdin.close(); pr.wait()
 print(f'{nT} kare ({nT / FPS:.2f} sn), toz/yazi bitis {BITIS} sn, uretim {time.time() - t0:.0f}s', flush=True)
 import json
-json.dump({'N': N, 'bolge_px': BOLGE_PX, 'glif': GLIF, 'tane_sigma': {'v4': 0.9, 'v5': TANE}, 'c_egri': [round(float(x), 4) for x in C_EGRI], **IC}, open(OUT + '.ic.json', 'w'))
+json.dump({'silme_sinyal': 'koyu', 'N': N, 'bolge_px': BOLGE_PX, 'glif': GLIF, 'tane_sigma': {'v4': 0.9, 'v5': TANE}, 'c_egri': [round(float(x), 4) for x in C_EGRI], **IC}, open(OUT + '.ic.json', 'w'))
 print('tamam', OUT)
