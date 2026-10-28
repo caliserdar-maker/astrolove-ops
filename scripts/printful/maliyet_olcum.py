@@ -204,9 +204,14 @@ def prodigi(out, T):
     if not key:
         return print("prodigi: anahtar yok", flush=True)
     H = {"X-API-Key": key, "Content-Type": "application/json"}
-    def kod(b):                                           # '12x16' -> 12X16, 'a4(8.27x11.69)' -> A4
+    ISO = {"8.27x11.69": "A4", "11.69x16.54": "A3", "16.5x23.3": "A2", "23.3x33.1": "A1"}   # Printful inc adi -> Prodigi A boyu
+
+    def kod(b):                                           # '12x16' -> 12X16, 'a2(16.5x23.3)' -> A2, '8.27x11.69' -> A4
         m = re.match(r"^(a\d)", b)
-        return m.group(1).upper() if m else re.sub(r"[^0-9x.]", "", b).upper()
+        if m:
+            return m.group(1).upper()
+        b = re.sub(r"[^0-9x.]", "", b)
+        return ISO.get(b, b.upper())
     # yavas: AU'da en ucuz (standart) secenegin en buyuk gunu > 20 (urun 1, canli olcu ailesi)
     yavas = sorted({kod(norm(b)) for (u, b, ul), ss in T.items()
                     if ul == "AU" and u == "1" and min(ss, key=lambda s: float(s[1] or 1e9))[3] > 20})
@@ -214,7 +219,7 @@ def prodigi(out, T):
     P = []
     for kodu in boylar:
         b = kodu
-        for aile in ("EMA", "FAP", "BAP", "HPR"):
+        for aile in ("FAP", "HPR"):                         # 28 Eki: GLOBAL-FAP = "EMA, Enhanced Matte Art Paper"; EMA / BAP aileleri 404
             sku = f"GLOBAL-{aile}-{kodu}"
             r = requests.get(f"https://api.prodigi.com/v4.0/products/{sku}", headers=H, timeout=60)
             var = r.status_code == 200
@@ -240,6 +245,17 @@ def prodigi(out, T):
                     time.sleep(0.5)
             P.append(kayit); print(f"prodigi {sku}: urun {r.status_code}, teklif {len(kayit['teklif'])}", flush=True)
     (out / "PRODIGI_AU.json").write_text(json.dumps(dict(yavas_boylar=yavas, sonuc=P), indent=1, ensure_ascii=False))
+
+
+def gelato(out, yol):
+    """13 Eki Gelato Product API fiyat dokumu (GELATO_FIYAT.csv; kargo yok): AU satirlari"""
+    if not yol or not os.path.exists(yol):
+        return print("gelato: CSV yok", flush=True)
+    rows = [r for r in csv.DictReader(open(yol, encoding="utf-8")) if (r.get("ulke") or r.get("country")) == "AU"]
+    with open(out / "GELATO_AU_13EKI.csv", "w", newline="") as f:
+        if rows:
+            w = csv.DictWriter(f, fieldnames=list(rows[0].keys())); w.writeheader(); w.writerows(rows)
+    print(f"gelato: AU {len(rows)} satir; sutunlar {list(rows[0].keys()) if rows else None}", flush=True)
 
 
 def ulke(out, pod_state, kupa_dir):
@@ -296,6 +312,9 @@ def ozet(out):
             for t in k.get("teklif", []):
                 L.append(f"  {t.get('yontem')}: HTTP {t.get('http')} urun {t.get('urun')} kargo {t.get('kargo')} vergi {t.get('vergi')} "
                          f"toplam {t.get('toplam')} {t.get('para') or ''} gonderi {t.get('gonderi')} {t.get('hata') or ''}")
+    if (out / "GELATO_AU_13EKI.csv").exists():
+        L.append("# GELATO AU (13 Eki Product API fiyat dokumu, kargo yok)")
+        L += [", ".join(r) for r in csv.reader(open(out / "GELATO_AU_13EKI.csv"))]
     if (out / "ULKE_DAGILIMI.json").exists():
         L.append("# ULKE DAGILIMI: " + (out / "ULKE_DAGILIMI.json").read_text())
     if (out / "PRINTFUL_BELGE.json").exists():
@@ -317,7 +336,7 @@ def ozet(out):
 
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("out"); ap.add_argument("--csv"); ap.add_argument("--pod-state")
-    ap.add_argument("--kupa-dir"); ap.add_argument("--bolum", default="printful,belge,teslim,prodigi,ulke")
+    ap.add_argument("--kupa-dir"); ap.add_argument("--gelato-csv"); ap.add_argument("--bolum", default="printful,belge,teslim,prodigi,ulke")
     a = ap.parse_args(); out = Path(a.out); out.mkdir(parents=True, exist_ok=True); b = a.bolum.split(",")
     if "printful" in b:
         printful(out)
@@ -328,6 +347,8 @@ def main():
         prodigi(out, T)
     if "ulke" in b:
         ulke(out, a.pod_state, a.kupa_dir)
+    if "gelato" in b:
+        gelato(out, a.gelato_csv)
     if "pbelge" in b:
         pbelge(out)
     if "ozet" in b:
