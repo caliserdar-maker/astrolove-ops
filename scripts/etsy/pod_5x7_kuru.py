@@ -54,11 +54,16 @@ EN_DEGISIKLIK = [
      "We send you a preview via Etsy Messages within 24 hours of your order. We print your poster or prepare your file as soon as "
      "you approve it."),
     ("Short on time? Choose the digital file. It arrives within 24 hours, ready to print or share.",
-     "Short on time? Choose the digital file. Nothing to ship, so it is ready to print or share soon after you approve your preview."),
+     "Short on time? Choose the digital file. Nothing to ship, so it is ready to print or share within 24 hours of your approval."),
+    # Serdar 28 Eki 2. karar: sure celiskisi -> "within 24 hours of your approval" (DIGITAL FILE maddesiyle ayni sure)
     ("If we don't hear from you within 24 hours of receiving the preview, we print the design as shown.",
      "If we don't hear from you within 24 hours of receiving the preview, we go ahead with the design as shown: we print your "
      "poster, or send your digital file as a download link in Etsy Messages."),
 ]
+# Serdar 28 Eki (kapali not): "your file is emailed" + "If email doesn't suit you" metni DEGISMEZ; e-posta adresi siparis akisinda
+# onizleme mesajinda musteriden istenir, cevap yoksa Etsy Messages ile indirme linki gider (astrolove-siparis akisi).
+# Yazim betigi (henuz yok, Serdar 28 Eki): onayli kuru kosunun PLAN'ina kilitli (plan_damga + ilan basina once / sonra metin sha256);
+# canli metin plandakinden farkliysa o ilan yazilmaz ve raporlanir; yarim uygulanmis metin PASS sayilmaz.
 # Karar sonrasi celisen satirlar: DEGISTIRILMEZ, liste olarak raporlanir (Serdar karar verecek). Serdar 28 Eki: indirme, onizleme,
 # 'Short on time' ve onay gelmezse cumleleri EN_DEGISIKLIK'e alindi; ambalaj (5x7 karariyla) ve 'Nothing is shipped' (dogru) kalir.
 CELISKI = [

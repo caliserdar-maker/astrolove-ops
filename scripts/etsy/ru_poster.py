@@ -140,10 +140,10 @@ def p_boy(m, ctx):
             "в виде постера и цифрового файла. Смотрите фото с таблицей размеров.")
 
 
-HEDIYE_RU = {   # Serdar 28 Eki: dijital onizleme + onaydan sonra; eski cumle geriye uyum
+HEDIYE_RU = {   # Serdar 28 Eki (2. karar: sure DIGITAL FILE maddesiyle ayni, onaydan sonra 24 saat); eski cumle geriye uyum
     "It arrives within 24 hours, ready to print or share.": "Он придёт в течение 24 часов, и его можно распечатать или переслать.",
-    "Nothing to ship, so it is ready to print or share soon after you approve your preview.":
-        "Его не нужно отправлять по почте, поэтому его можно распечатать или переслать вскоре после того, как вы одобрите макет.",
+    "Nothing to ship, so it is ready to print or share within 24 hours of your approval.":
+        "Его не нужно отправлять по почте, поэтому его можно распечатать или переслать в течение 24 часов после вашего одобрения.",
 }
 
 
