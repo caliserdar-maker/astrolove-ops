@@ -183,6 +183,28 @@ def pbelge(out):
     print(f"pbelge: {sum(1 for d in D if d['cumle'])}/{len(D)} sayfa", flush=True)
 
 
+def belge2(out):
+    """tam metin (kesilmeden): ilgili Printful makaleleri + Merkez'in verdigi 3 kimligin her iki alan adinda durumu"""
+    D = []
+    for aid in BELGE2:
+        st, j = _get(f"https://help.printful.com/api/v2/help_center/en-us/articles/{aid}.json")
+        a = j.get("article") or {}
+        D.append(dict(id=aid, status=st, baslik=a.get("title"), url=a.get("html_url"), guncelleme=a.get("updated_at"),
+                      govde=re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", a.get("body") or ""))))
+    M = []
+    for aid in (41396638872977, 41396636552721, 360016054999):
+        for alan in ("help", "support"):
+            st, j = _get(f"https://{alan}.printful.com/api/v2/help_center/en-us/articles/{aid}.json")
+            M.append(dict(id=aid, alan=alan, status=st, baslik=(j.get("article") or {}).get("title")))
+            try:
+                r = S.get(f"https://{alan}.printful.com/hc/en-us/articles/{aid}", timeout=60, allow_redirects=False)
+                M.append(dict(id=aid, alan=alan, sayfa=r.status_code, yonlendirme=r.headers.get("location")))
+            except Exception as e:                               # noqa: BLE001
+                M.append(dict(id=aid, alan=alan, sayfa=type(e).__name__))
+    (out / "PRINTFUL_BELGE2.json").write_text(json.dumps(dict(makale=D, merkez_link=M), indent=1, ensure_ascii=False))
+    print(f"belge2: {sum(1 for d in D if d['govde'])}/{len(D)}; merkez link {M}", flush=True)
+
+
 def teslim(out, csv_yol):
     rows = list(csv.DictReader(open(csv_yol, encoding="utf-8")))
     print("teslim CSV sutunlari:", list(rows[0].keys()) if rows else None, flush=True)
@@ -276,6 +298,7 @@ def ulke(out, pod_state, kupa_dir):
     off = 0
     while True:                                                 # Printful siparis listesi (GET; ad / adres yazilmaz)
         st, d = pf("GET", f"/orders?offset={off}&limit=100")
+        U.setdefault("printful_api_http", Counter())[str(st)] += 1
         rs = d.get("result") if st == 200 and isinstance(d.get("result"), list) else []
         for o in rs:
             if str(o.get("external_id") or "").startswith("TEST") or TEST_RID.match(str(o.get("external_id") or "")):
@@ -289,7 +312,10 @@ def ulke(out, pod_state, kupa_dir):
     print("ulke:", json.dumps({k: dict(v) for k, v in U.items()}), flush=True)
 
 
-TABLO_VARYANT = [(1, 16364, "5x7"), (1, 4463, "8x10"), (1, 48505, "A4 8.27x11.69 in"), (268, 8947, "A4 21x30 cm")]
+TABLO_VARYANT = [(1, 16364, "5x7"), (1, 4463, "8x10"), (1, 48505, "A4 8.27x11.69 in"), (268, 8947, "A4 21x30 cm"), (1, 14125, "11x14"),
+                 (1, 1349, "12x16"), (1, 48504, "A3 11.69x16.54 in"), (1, 3876, "12x18"), (1, 3877, "16x20"), (1, 48495, "16x24"),
+                 (1, 19528, "A2 16.5x23.3 in"), (1, 1, "18x24"), (1, 16365, "20x30"), (1, 2, "24x36")]   # canli boylar (24x30 Printful urun 1'de yok)
+BELGE2 = [50262130009873, 50264510208273, 50262439187473, 50264510542097, 50265118303761, 50262420051985, 50264521698961]
 
 
 def tablo(out):
@@ -339,6 +365,12 @@ def ozet(out):
             for t in k.get("teklif", []):
                 L.append(f"  {t.get('yontem')}: HTTP {t.get('http')} urun {t.get('urun')} kargo {t.get('kargo')} vergi {t.get('vergi')} "
                          f"toplam {t.get('toplam')} {t.get('para') or ''} gonderi {t.get('gonderi')} {t.get('hata') or ''}")
+    if (out / "PRINTFUL_BELGE2.json").exists():
+        B = json.loads((out / "PRINTFUL_BELGE2.json").read_text())
+        L.append("# PRINTFUL BELGE2 (tam metin) + Merkez linkleri: " + json.dumps(B["merkez_link"], ensure_ascii=False))
+        for a in B["makale"]:
+            L.append(f"## {a['baslik']} | {a['url']} | guncelleme {a['guncelleme']} | HTTP {a['status']}")
+            L.append(a["govde"])
     if (out / "TABLO.csv").exists():
         L.append("# TABLO (28 Eki canli: GET /products + POST /shipping/rates)")
         L += [", ".join(r) for r in csv.reader(open(out / "TABLO.csv"))]
@@ -381,6 +413,8 @@ def main():
         tablo(out)
     if "gelato" in b:
         gelato(out, a.gelato_csv)
+    if "belge2" in b:
+        belge2(out)
     if "pbelge" in b:
         pbelge(out)
     if "ozet" in b:
