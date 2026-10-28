@@ -128,26 +128,37 @@ def taslak(R, hedef):
             time.sleep(0.7)
 
 
+def _get(url, **kw):
+    try:
+        r = S.get(url, timeout=60, **kw)
+        return r.status_code, (r.json() if r.ok else {})
+    except Exception as e:                                       # noqa: BLE001  (28 Eki: support.printful.com DNS cozulmedi)
+        return f"{type(e).__name__}", {}
+
+
 def belge(out):
     D = []
-    for alan, aid in MAKALE:
-        r = S.get(f"https://{alan}.printful.com/api/v2/help_center/en-us/articles/{aid}.json", timeout=60)
-        a = r.json().get("article", {}) if r.ok else {}
-        D.append(dict(id=aid, alan=alan, status=r.status_code, baslik=a.get("title"), url=a.get("html_url"),
+    for _, aid in MAKALE:
+        for alan in ("help", "support"):                         # makale kimligi iki alan adinda da denenir
+            st, j = _get(f"https://{alan}.printful.com/api/v2/help_center/en-us/articles/{aid}.json")
+            a = j.get("article") or {}
+            if a:
+                break
+        D.append(dict(id=aid, alan=alan, status=st, baslik=a.get("title"), url=a.get("html_url"),
                       guncelleme=a.get("updated_at"), govde=re.sub(r"<[^>]+>", " ", a.get("body") or "")))
     for q in ARAMA:
-        for alan in ("support", "help"):
-            r = S.get(f"https://{alan}.printful.com/api/v2/help_center/articles/search.json", params={"query": q}, timeout=60)
-            for a in (r.json().get("results") or [])[:6] if r.ok else []:
+        for alan in ("help", "support"):
+            st, j = _get(f"https://{alan}.printful.com/api/v2/help_center/articles/search.json", params={"query": q})
+            for a in (j.get("results") or [])[:6]:
                 if all(x["id"] != a["id"] for x in D):
-                    D.append(dict(id=a["id"], alan=alan, status=200, arama=q, baslik=a.get("title"), url=a.get("html_url"),
+                    D.append(dict(id=a["id"], alan=alan, status=st, arama=q, baslik=a.get("title"), url=a.get("html_url"),
                                   guncelleme=a.get("updated_at"), govde=re.sub(r"<[^>]+>", " ", a.get("body") or "")))
     (out / "PRINTFUL_BELGE.json").write_text(json.dumps(D, indent=1, ensure_ascii=False))
     with open(out / "PRINTFUL_BELGE.md", "w") as f:
         for a in D:
-            f.write(f"## {a.get('baslik')}\n{a.get('url')} (guncelleme {a.get('guncelleme')}, HTTP {a.get('status')})\n\n"
-                    f"{re.sub(r'[ ]+', ' ', a.get('govde') or '')[:6000]}\n\n")
-    print(f"belge: {len(D)} makale", flush=True)
+            f.write(f"## {a.get('baslik')}\n{a.get('url')} (id {a.get('id')}, guncelleme {a.get('guncelleme')}, HTTP {a.get('status')})\n\n"
+                    f"{re.sub(r'[ ]+', ' ', a.get('govde') or '')[:8000]}\n\n")
+    print(f"belge: {len(D)} makale, govdeli {sum(1 for a in D if a.get('govde'))}", flush=True)
 
 
 def teslim(out, csv_yol):
