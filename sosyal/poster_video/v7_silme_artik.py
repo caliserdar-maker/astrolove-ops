@@ -19,8 +19,8 @@ ESIK = 15.0          # R-B fazlasi. 78 olcumu (video-v7-silme-duzelt 40652593650
 VW, VH = 1440, 1080
 
 
-def hedef_maske(pv, kapak):
-    """poster_video_v7.py kaynagindan ayristirma + v7c silme kurali -> (video olcekli bool maske, bilgi)"""
+def ayristir(pv, kapak):
+    """poster_video_v7.py kaynagindan ayristirma + v7c silme kurali; uretim betiginin global sozlugu (P, vid, msym, SILME_D ...)"""
     src = open(pv, encoding="utf-8").read()
     bas, son = src.index("try:\n    P = PosterV(tmp)"), src.index("MS_p = np.clip(")
     tmp = os.path.join(os.path.dirname(os.path.abspath(kapak)), "_artik.mp4")
@@ -33,6 +33,21 @@ def hedef_maske(pv, kapak):
         exec(compile(src[src.index("def vid(m):"):son], pv, "exec"), g)
     finally:
         sys.argv = eski
+    return g
+
+
+def kutu_maske(g, kutular=("names_row", "msg_row")):
+    """isim / mesaj kutulari (poster olcegi, pay yok) -> video olcekli bool maske (v7c 78 karsilastirmasi: bu alanlar degismemeli)"""
+    P = g["P"]; m = np.zeros(P.alpha.shape, np.float32)
+    for k in kutular:
+        _, x, y, w, h, _ = getattr(P, k)
+        m[y:y + h, x:x + w] = 1
+    return g["vid"](m) > 0.5
+
+
+def hedef_maske(pv, kapak):
+    """poster_video_v7.py kaynagindan ayristirma + v7c silme kurali -> (video olcekli bool maske, bilgi)"""
+    g = ayristir(pv, kapak)
     m = g["vid"](g["msym"].astype(np.float32)) > 0.25
     P = g["P"]
     sx0 = min(c[1] for c in P.merged_parts); sx1 = max(c[1] + c[3] for c in P.merged_parts)
