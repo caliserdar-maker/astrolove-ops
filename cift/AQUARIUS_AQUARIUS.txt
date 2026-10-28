@@ -1,0 +1,3 @@
+halkasiz ayristirma: sembol 2 parca (455,840)-(1555,1142), alt bant 3
+silme: sembol maskesi 71000 px + yakin altin 23564 px (R-B fazlasi > 15, sembole < 90 px)
+AQUARIUS_AQUARIUS halka yeni 0 10.0 eski 236 | isim 0.432 0.759 | mesaj 0.829 0.993
