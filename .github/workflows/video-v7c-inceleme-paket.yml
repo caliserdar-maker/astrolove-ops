@@ -1,0 +1,71 @@
+name: video-v7c-inceleme-paket
+# v7c 78 bagimsiz inceleme paketi (Merkez 28 Eki). Etsy API YOK, Drive'a YAZMA YOK (yalniz okuma). Oturum artifact indiremiyor (ag
+# politikasi); paket ayri bir git dalina (inceleme/v7c-78-<tam78>) yazilir: kare/ (yeni 0,4 / 0,7, eski 0,4 tam kare), kutu/ (isim ve
+# mesaj kutusu eski / yeni kirpimlari), olcum/ (ffprobe + kare basina kutu farki). sosyal/poster_video/v7c_inceleme_paket.py
+permissions:
+  contents: write
+on:
+  workflow_dispatch:
+    inputs:
+      tam78: {description: 'TEMP/VIDEO_V7_DUZELTME/<damga>/TAM78', default: '20261028_100938'}
+      birlesik: {description: 'TEMP/VIDEO_V7_78/BIRLESIK_<damga>', default: '20261026_211614'}
+env:
+  K: gdrive:ASTROLOVE/TEMP/POSTER_KAPAK_V10/20261026_153710
+jobs:
+  paket:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+    - name: Girdi
+      env: {T: "${{ inputs.tam78 }}", B: "${{ inputs.birlesik }}"}
+      run: '[[ "$T" =~ ^[0-9]{8}_[0-9]{6}$ && "$B" =~ ^[0-9]{8}_[0-9]{6}$ ]] || { echo "::error::girdi"; exit 1; }'
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Kurulum
+      timeout-minutes: 15
+      run: |
+        set -euo pipefail
+        pip install -q numpy==2.1.3 pillow==11.0.0 scipy==1.14.1 opencv-python-headless==4.10.0.84
+        sudo apt-get -qq update >/dev/null && sudo apt-get -qq install -y ffmpeg fonts-dejavu-core >/dev/null
+        curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+    - name: rclone.conf
+      env:
+        RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      run: |
+        set -euo pipefail
+        mkdir -p ~/.config/rclone; umask 077
+        printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+        if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+          grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+    - name: Girdiler (Drive okuma)
+      env: {T: "${{ inputs.tam78 }}", B: "${{ inputs.birlesik }}"}
+      run: |
+        set -euo pipefail
+        mkdir -p _k _y _e
+        rclone copy "$K" _k --include "KAPAK_*.jpg" --max-depth 1 --transfers 8 -q
+        rclone copy "gdrive:ASTROLOVE/TEMP/VIDEO_V7_DUZELTME/$T/TAM78" _y --include "*.mp4" --max-depth 1 --transfers 8 -q
+        rclone copy "gdrive:ASTROLOVE/TEMP/VIDEO_V7_78/BIRLESIK_$B" _e --include "*.mp4" --max-depth 1 --transfers 8 -q
+        rclone copy "gdrive:ASTROLOVE/TEMP/VIDEO_V7_DUZELTME/$T/TAM78/RAPOR" _p/RAPOR --include "*.{csv,md,txt,jpg}" --max-depth 1 -q
+        echo "kapak $(ls _k | wc -l) yeni $(ls _y/*.mp4 | wc -l) eski $(ls _e/*.mp4 | wc -l)"
+        [ "$(ls _y/*.mp4 | wc -l)" = 78 ] && [ "$(ls _e/*.mp4 | wc -l)" = 78 ] || { echo "::error::78 degil"; exit 1; }
+    - name: Paket
+      run: |
+        set -euo pipefail
+        ls _y/*.mp4 | xargs -n1 basename | sed 's/\.mp4$//' | xargs -P 4 -I{} sh -c \
+          'python3 -I sosyal/poster_video/v7c_inceleme_paket.py sosyal/poster_video/poster_video_v7.py _k/KAPAK_{}.jpg _y/{}.mp4 _e/{}.mp4 _p {} 2>&1 | grep -v "^halkasiz\|^silme:"'
+        echo "kare $(ls _p/kare | wc -l) kutu $(ls _p/kutu | wc -l) olcum $(ls _p/olcum | wc -l)"; du -sh _p
+    - name: Dala yaz
+      env: {T: "${{ inputs.tam78 }}"}
+      run: |
+        set -euo pipefail
+        D="inceleme/v7c-78-$T"
+        cd _p && git init -q && git checkout -q -b "$D"
+        git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git add -A && git commit -q -m "v7c 78 inceleme paketi (TAM78 $T, kosu $GITHUB_RUN_ID)"
+        git push -q "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" "$D"
+        echo "::notice title=PAKET::dal $D"
+    - if: ${{ always() }}
+      run: rm -rf _k _y _e ~/.config/rclone
