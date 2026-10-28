@@ -62,7 +62,8 @@ jobs:
         timeout-minutes: 15
         run: |
           set -euo pipefail
-          pip install -q requests==2.32.3 numpy==2.1.3 opencv-python-headless==4.10.0.84
+          # pillow: video_yukle_78 -> pod_cover_from_video 'from PIL import Image' (28 Eki kuru kosu 40638126253: ModuleNotFoundError PIL)
+          pip install -q requests==2.32.3 numpy==2.1.3 opencv-python-headless==4.10.0.84 pillow==11.0.0
           curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
       - name: rclone.conf olustur
         env:
