@@ -1,0 +1,3 @@
+halkasiz ayristirma: sembol 1 parca (676,581)-(1324,1418), alt bant 3
+silme: sembol maskesi 117835 px + yakin altin 7330 px (R-B fazlasi > 15, sembole < 30 px)
+CAPRICORN_SAGITTARIUS halka yeni 0 11.0 eski 20 | isim 0.504 0.876 | mesaj 1.141 1.905

@@ -1,0 +1,3 @@
+halkasiz ayristirma: sembol 2 parca (584,577)-(1438,1327), alt bant 3
+silme: sembol maskesi 74352 px + yakin altin 12274 px (R-B fazlasi > 15, sembole < 50 px)
+AQUARIUS_TAURUS halka yeni 0 10.0 eski 292 | isim 0.397 0.643 | mesaj 0.792 1.195

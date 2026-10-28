@@ -1,0 +1,3 @@
+halkasiz ayristirma: sembol 1 parca (642,474)-(1361,1494), alt bant 3
+silme: sembol maskesi 108992 px + yakin altin 7970 px (R-B fazlasi > 15, sembole < 60 px)
+ARIES_CAPRICORN halka yeni 0 9.0 eski 88 | isim 0.557 0.759 | mesaj 0.842 0.897

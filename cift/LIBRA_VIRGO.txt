@@ -1,0 +1,3 @@
+halkasiz ayristirma: sembol 2 parca (573,574)-(1483,1398), alt bant 3
+silme: sembol maskesi 120503 px + yakin altin 14212 px (R-B fazlasi > 15, sembole < 50 px)
+LIBRA_VIRGO halka yeni 0 10.0 eski 204 | isim 0.462 0.682 | mesaj 1.102 1.799

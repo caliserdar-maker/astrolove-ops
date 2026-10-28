@@ -1,0 +1,3 @@
+halkasiz ayristirma: sembol 1 parca (687,627)-(1321,1430), alt bant 3
+silme: sembol maskesi 101496 px + yakin altin 12122 px (R-B fazlasi > 15, sembole < 40 px)
+GEMINI_GEMINI halka yeni 0 12.0 eski 85 | isim 0.491 0.805 | mesaj 0.94 1.166

@@ -1,0 +1,3 @@
+halkasiz ayristirma: sembol 1 parca (569,644)-(1451,1391), alt bant 3
+silme: sembol maskesi 106439 px + yakin altin 5877 px (R-B fazlasi > 15, sembole < 50 px)
+CAPRICORN_GEMINI halka yeni 0 10.0 eski 56 | isim 0.592 0.896 | mesaj 1.0 1.225

@@ -1,0 +1,3 @@
+halkasiz ayristirma: sembol 2 parca (576,536)-(1411,1298), alt bant 3
+silme: sembol maskesi 103214 px + yakin altin 12404 px (R-B fazlasi > 15, sembole < 60 px)
+AQUARIUS_LEO halka yeni 0 11.0 eski 541 | isim 0.482 0.793 | mesaj 0.971 1.732

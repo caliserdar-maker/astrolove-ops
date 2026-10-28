@@ -1,0 +1,3 @@
+halkasiz ayristirma: sembol 1 parca (555,597)-(1449,1486), alt bant 3
+silme: sembol maskesi 103341 px + yakin altin 4441 px (R-B fazlasi > 15, sembole < 50 px)
+ARIES_TAURUS halka yeni 0 12.0 eski 84 | isim 0.489 0.684 | mesaj 0.849 1.024

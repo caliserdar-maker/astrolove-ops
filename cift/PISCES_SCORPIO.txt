@@ -1,0 +1,3 @@
+halkasiz ayristirma: sembol 1 parca (603,629)-(1429,1422), alt bant 3
+silme: sembol maskesi 81675 px + yakin altin 10012 px (R-B fazlasi > 15, sembole < 50 px)
+PISCES_SCORPIO halka yeni 0 11.0 eski 94 | isim 0.522 0.798 | mesaj 1.147 1.992

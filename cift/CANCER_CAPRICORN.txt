@@ -1,0 +1,3 @@
+halkasiz ayristirma: sembol 2 parca (501,629)-(1502,1408), alt bant 3
+silme: sembol maskesi 105101 px + yakin altin 11135 px (R-B fazlasi > 15, sembole < 70 px)
+CANCER_CAPRICORN halka yeni 0 10.0 eski 216 | isim 0.559 0.825 | mesaj 1.177 1.793

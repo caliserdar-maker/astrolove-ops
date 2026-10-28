@@ -1,0 +1,3 @@
+halkasiz ayristirma: sembol 1 parca (581,643)-(1436,1393), alt bant 3
+silme: sembol maskesi 96671 px + yakin altin 9885 px (R-B fazlasi > 15, sembole < 50 px)
+CAPRICORN_VIRGO halka yeni 0 10.0 eski 119 | isim 0.507 0.7 | mesaj 1.105 1.795

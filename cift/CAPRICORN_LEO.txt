@@ -1,0 +1,3 @@
+halkasiz ayristirma: sembol 1 parca (545,610)-(1435,1328), alt bant 3
+silme: sembol maskesi 122926 px + yakin altin 8764 px (R-B fazlasi > 15, sembole < 50 px)
+CAPRICORN_LEO halka yeni 0 11.0 eski 102 | isim 0.505 0.821 | mesaj 1.139 1.856

@@ -1,0 +1,3 @@
+halkasiz ayristirma: sembol 1 parca (571,658)-(1441,1347), alt bant 3
+silme: sembol maskesi 136037 px + yakin altin 11279 px (R-B fazlasi > 15, sembole < 30 px)
+VIRGO_VIRGO halka yeni 0 9.0 eski 32 | isim 0.484 0.779 | mesaj 1.125 1.826

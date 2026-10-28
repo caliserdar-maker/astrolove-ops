@@ -1,0 +1,3 @@
+halkasiz ayristirma: sembol 1 parca (591,604)-(1414,1328), alt bant 3
+silme: sembol maskesi 144876 px + yakin altin 9508 px (R-B fazlasi > 15, sembole < 50 px)
+CANCER_VIRGO halka yeni 0 11.0 eski 112 | isim 0.499 0.752 | mesaj 1.106 1.792

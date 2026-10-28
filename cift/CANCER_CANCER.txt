@@ -1,0 +1,3 @@
+halkasiz ayristirma: sembol 1 parca (476,733)-(1529,1250), alt bant 3
+silme: sembol maskesi 126872 px + yakin altin 11168 px (R-B fazlasi > 15, sembole < 70 px)
+CANCER_CANCER halka yeni 0 10.0 eski 248 | isim 0.517 0.763 | mesaj 1.144 2.014

@@ -1,0 +1,3 @@
+halkasiz ayristirma: sembol 1 parca (538,617)-(1466,1412), alt bant 3
+silme: sembol maskesi 152649 px + yakin altin 9075 px (R-B fazlasi > 15, sembole < 40 px)
+CANCER_SAGITTARIUS halka yeni 0 11.0 eski 178 | isim 0.345 0.668 | mesaj 1.106 1.841

@@ -1,0 +1,3 @@
+halkasiz ayristirma: sembol 1 parca (667,553)-(1339,1376), alt bant 3
+silme: sembol maskesi 80325 px + yakin altin 7169 px (R-B fazlasi > 15, sembole < 40 px)
+GEMINI_TAURUS halka yeni 0 10.0 eski 104 | isim 0.42 0.758 | mesaj 0.905 1.212

@@ -1,0 +1,3 @@
+halkasiz ayristirma: sembol 1 parca (527,629)-(1489,1311), alt bant 3
+silme: sembol maskesi 109021 px + yakin altin 12322 px (R-B fazlasi > 15, sembole < 50 px)
+CAPRICORN_PISCES halka yeni 0 12.0 eski 120 | isim 0.526 0.826 | mesaj 1.134 1.829

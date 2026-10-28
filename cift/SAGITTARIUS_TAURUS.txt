@@ -1,0 +1,3 @@
+halkasiz ayristirma: sembol 1 parca (600,657)-(1412,1380), alt bant 3
+silme: sembol maskesi 91962 px + yakin altin 6926 px (R-B fazlasi > 15, sembole < 50 px)
+SAGITTARIUS_TAURUS halka yeni 0 12.0 eski 112 | isim 0.521 0.823 | mesaj 1.101 1.877

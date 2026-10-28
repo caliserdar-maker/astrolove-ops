@@ -1,0 +1,3 @@
+halkasiz ayristirma: sembol 3 parca (544,517)-(1451,1378), alt bant 3
+silme: sembol maskesi 132425 px + yakin altin 16943 px (R-B fazlasi > 15, sembole < 60 px)
+CANCER_LIBRA halka yeni 0 12.0 eski 442 | isim 0.458 0.703 | mesaj 1.1 1.868

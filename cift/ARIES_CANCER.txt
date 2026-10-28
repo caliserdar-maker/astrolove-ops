@@ -1,0 +1,3 @@
+halkasiz ayristirma: sembol 1 parca (591,571)-(1412,1410), alt bant 3
+silme: sembol maskesi 147506 px + yakin altin 9317 px (R-B fazlasi > 15, sembole < 60 px)
+ARIES_CANCER halka yeni 0 10.0 eski 113 | isim 0.491 0.741 | mesaj 1.046 1.731

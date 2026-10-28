@@ -1,0 +1,3 @@
+halkasiz ayristirma: sembol 2 parca (570,582)-(1377,1325), alt bant 3
+silme: sembol maskesi 116770 px + yakin altin 12239 px (R-B fazlasi > 15, sembole < 50 px)
+AQUARIUS_VIRGO halka yeni 0 9.0 eski 219 | isim 0.502 0.824 | mesaj 0.812 0.994

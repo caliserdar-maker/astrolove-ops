@@ -1,0 +1,3 @@
+halkasiz ayristirma: sembol 3 parca (599,519)-(1405,1401), alt bant 3
+silme: sembol maskesi 102796 px + yakin altin 13355 px (R-B fazlasi > 15, sembole < 50 px)
+LIBRA_PISCES halka yeni 0 10.0 eski 72 | isim 0.494 0.751 | mesaj 0.87 1.037

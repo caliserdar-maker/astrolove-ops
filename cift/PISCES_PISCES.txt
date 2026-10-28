@@ -1,0 +1,3 @@
+halkasiz ayristirma: sembol 1 parca (700,545)-(1308,1432), alt bant 3
+silme: sembol maskesi 89887 px + yakin altin 20566 px (R-B fazlasi > 15, sembole < 60 px)
+PISCES_PISCES halka yeni 0 10.0 eski 324 | isim 0.414 0.786 | mesaj 0.942 1.131

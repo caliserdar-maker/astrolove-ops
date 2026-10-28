@@ -1,0 +1,3 @@
+halkasiz ayristirma: sembol 1 parca (664,590)-(1343,1458), alt bant 3
+silme: sembol maskesi 119641 px + yakin altin 10292 px (R-B fazlasi > 15, sembole < 40 px)
+TAURUS_VIRGO halka yeni 0 10.0 eski 28 | isim 0.439 0.695 | mesaj 0.901 1.193

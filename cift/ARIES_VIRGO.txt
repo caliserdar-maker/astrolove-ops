@@ -1,0 +1,3 @@
+halkasiz ayristirma: sembol 1 parca (529,656)-(1474,1399), alt bant 3
+silme: sembol maskesi 102787 px + yakin altin 13913 px (R-B fazlasi > 15, sembole < 80 px)
+ARIES_VIRGO halka yeni 0 12.0 eski 285 | isim 0.452 0.667 | mesaj 0.778 0.874

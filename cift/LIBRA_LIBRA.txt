@@ -1,0 +1,3 @@
+halkasiz ayristirma: sembol 3 parca (530,729)-(1471,1205), alt bant 3
+silme: sembol maskesi 113873 px + yakin altin 9907 px (R-B fazlasi > 15, sembole < 50 px)
+LIBRA_LIBRA halka yeni 0 9.0 eski 133 | isim 0.547 0.816 | mesaj 1.004 1.21

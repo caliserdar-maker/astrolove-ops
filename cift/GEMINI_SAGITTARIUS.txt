@@ -1,0 +1,3 @@
+halkasiz ayristirma: sembol 1 parca (575,662)-(1443,1291), alt bant 3
+silme: sembol maskesi 83080 px + yakin altin 7778 px (R-B fazlasi > 15, sembole < 40 px)
+GEMINI_SAGITTARIUS halka yeni 0 9.0 eski 49 | isim 0.498 0.782 | mesaj 1.093 1.884

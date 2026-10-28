@@ -1,0 +1,3 @@
+halkasiz ayristirma: sembol 2 parca (611,587)-(1397,1420), alt bant 3
+silme: sembol maskesi 103848 px + yakin altin 11441 px (R-B fazlasi > 15, sembole < 40 px)
+CANCER_TAURUS halka yeni 0 10.0 eski 66 | isim 0.439 0.716 | mesaj 0.984 1.179

@@ -1,0 +1,3 @@
+halkasiz ayristirma: sembol 1 parca (630,524)-(1374,1453), alt bant 3
+silme: sembol maskesi 103153 px + yakin altin 14221 px (R-B fazlasi > 15, sembole < 90 px)
+CANCER_PISCES halka yeni 0 11.0 eski 310 | isim 0.548 0.821 | mesaj 1.033 1.884

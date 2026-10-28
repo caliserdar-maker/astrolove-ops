@@ -1,0 +1,3 @@
+halkasiz ayristirma: sembol 2 parca (723,563)-(1302,1412), alt bant 3
+silme: sembol maskesi 71811 px + yakin altin 17572 px (R-B fazlasi > 15, sembole < 90 px)
+AQUARIUS_PISCES halka yeni 0 12.0 eski 492 | isim 0.471 0.824 | mesaj 0.84 0.91

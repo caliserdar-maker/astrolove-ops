@@ -1,0 +1,3 @@
+halkasiz ayristirma: sembol 1 parca (545,653)-(1419,1258), alt bant 3
+silme: sembol maskesi 92526 px + yakin altin 11178 px (R-B fazlasi > 15, sembole < 60 px)
+AQUARIUS_SAGITTARIUS halka yeni 0 10.0 eski 232 | isim 0.448 0.841 | mesaj 0.914 1.023

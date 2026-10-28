@@ -1,0 +1,3 @@
+halkasiz ayristirma: sembol 1 parca (483,751)-(1523,1380), alt bant 3
+silme: sembol maskesi 130636 px + yakin altin 7657 px (R-B fazlasi > 15, sembole < 40 px)
+CAPRICORN_CAPRICORN halka yeni 0 9.0 eski 10 | isim 0.479 0.795 | mesaj 1.124 1.851

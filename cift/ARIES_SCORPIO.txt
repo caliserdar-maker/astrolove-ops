@@ -1,0 +1,3 @@
+halkasiz ayristirma: sembol 1 parca (509,727)-(1495,1362), alt bant 3
+silme: sembol maskesi 99807 px + yakin altin 15229 px (R-B fazlasi > 15, sembole < 110 px)
+ARIES_SCORPIO halka yeni 0 10.0 eski 360 | isim 0.559 0.699 | mesaj 0.72 0.818

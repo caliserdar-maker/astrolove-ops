@@ -1,0 +1,3 @@
+halkasiz ayristirma: sembol 2 parca (589,545)-(1414,1411), alt bant 3
+silme: sembol maskesi 118156 px + yakin altin 11382 px (R-B fazlasi > 15, sembole < 70 px)
+CANCER_LEO halka yeni 0 11.0 eski 132 | isim 0.537 0.748 | mesaj 1.012 1.854
