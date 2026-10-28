@@ -1,23 +1,18 @@
 #!/usr/bin/env python3
-"""YD (1st Anniversary) yeni galerinin 2-5. kartlari, ESKI 1st Anniversary galerisinin tarzinda (Serdar 27 Eki; Merkez gorevi).
-ETSY API YOK, Canva yok. Ornek: CANCER_LIBRA; toplu uretim Serdar ornegi onaylayinca.
-Tarz kaynagi (birebir): origin/bizim-yilimiz-v3 galeri/gallery_layout.json (yd_kart/gallery_layout_eski.json kopyasi) ve
-galeri/fonts (yd_kart/fonts: Cormorant Garamond, Manrope; OFL). Eski canli kartlar (CANCER_LIBRA r2 / r3 / r6 / r8) bu duzenden
-uretilmis: r2 = slayt 2 (Shared Symbol), r3 = slayt 8 (Formats), r6 = slayt 4 (Personalization), r8 = slayt 10 (Free Preview).
-SADE STIL (Serdar / Merkez 27 Eki "sade, easy to read"; 4 kartta aynen): zemin tek duz #F5F0E7, yazi / ok / cizgi tek renk #2B2220,
-baslik Cormorant 500 170 px Title Case, etiket Manrope 600 68 px Title Case, metin Manrope 400 64 px, alt not 58 px (en kucuk 58),
-panel / golge / imza yok. Cizim dogrudan 3000x2250; eski layout yalniz yuzde konumlar (sembol kutulari, poster kutulari).
-  Y02 sembol (cifte ozel)      : "Your Two Signs, One Shared Symbol"; burc ve ortak semboller eski r2'den (alfa, tek renge boyanir),
-                                 ok, burc adlari + "<A> & <B>".
-  Y03 kisisellestirme (cifte)  : solda Botanical poster (yedek r12 kirpimi, golgesiz), sagda 4 satir (etiket + metin) + alt not.
-  Y04 format (ORTAK)           : 3 sutun panelsiz, ince dikey ayirici + alt not.
-  Y05 surec (cifte ozel)       : eski r8 duzeni; solda Timeless poster (yedek r10), sagda 4 adim (01-04) + alt not.
-  KONTAK_KUCUK.jpg (--ortak)   : 4 kart 2x2, 1600x1200, JPEG 80, < 200 KB (kartlar yazilmadan once denetlenir).
-RENK KAPISI (cizim + teslim JPEG): poster disinda zemin / murekkep dogrusu, ara ton yalniz murekkep kenarinda, dolu koyu blok yok.
-PUNTO KAPISI: her yazi >= 58 px. BASLIK / ETIKET satirlari gorev metniyle birebir ve Title Case.
-Yazi kapisi: gorsele giren her metinde '.', '+', '=', tire / eksi bicimleri ve CLAUDE.md urun metni yasaklari yok; METIN KAPISI: her
-kartta cizilen satirlar sirasiyla gorev metni (beklenen()) ile ayni (buyuk/kucuk harf haric). Biri tutmazsa DUR (cikti yazilmaz).
-Kullanim: yd_kart_ornek.py --cift CANCER_LIBRA --a Cancer --b Libra --eski-r2 r2.jpg --botanical r12.jpg --timeless r10.jpg --out DIR [--ortak]"""
+"""YD (1st Anniversary) bilgi kartlari, KART SABLONU (Merkez 28 Eki, Serdar onayi; 27 Eki SADE stili). ETSY API YOK, Canva yok.
+Ornek: CANCER_LIBRA; toplu uretim Serdar ornegi onaylayinca (yd_kart_toplu.py bu yeni CLI'ye henuz uyarlanmadi).
+Fontlar yd_kart/fonts (Cormorant Garamond, Manrope; OFL); stil sabitleri ve yardimcilar bu dosyada, yerlesim kart_sablon.py'de
+(wall art ve kupa ile ayni kart turu ayni fonksiyon). SADE: zemin #F5F0E7, tek murekkep #2B2220, baslik Cormorant 500 170 px, etiket
+Manrope 600 68, metin 64, alt not 58 (en kucuk 58), panel / golge / imza yok, 3000x2250.
+  <CIFT>_Y02       sembol (galeri 2): iki burc + ad, Bezier baglac, ortak sembol (kupa_uretim/sembol/<CIFT>); eski "<A> & <B>" ve ok yok
+  <CIFT>_Y03       kisisellestirme (3): Botanical poster (yedek stil gorseli, 4:5 kirpim) + 4 blok (27 Eki metinleri aynen)
+  ORTAK_Y04        format (4): tablo Digital File / Print / 14 Sizes (--ortak)
+  <CIFT>_Y05       surec (5): Timeless poster + 4 adim (27 Eki metinleri aynen)
+  YD_<CIFT>_GENEL  genel bakis (6): 5 stil 3 + 2 (Starlit, Timeless, First Page / Layers, Botanical); <CIFT>_Y<NN> bicimine girmez
+Stil gorselleri adim 5 yedeginden (GALERI.json Style 513 baglari). Kapilar: renk (cizim + JPEG; baglac uclarinin 4 px yakininda ara ton
+serbest), punto >= 58, BASLIK / ETIKET satirlari gorev metniyle birebir ve Title Case, yasak karakter ('.', '+', '=', tire bicimleri) ve
+CLAUDE.md urun metni yasaklari, METIN KAPISI (cizilen satirlar sirasiyla beklenen()), yerlesim kapilari (kart_sablon.py). Biri tutmazsa DUR.
+Kullanim: yd_kart_ornek.py --cift CANCER_LIBRA --a Cancer --b Libra --yedek <yedek ilan klasoru> --sembol <dir> --out DIR [--ortak]"""
 import argparse
 import hashlib
 import json
@@ -102,6 +97,8 @@ def sar(s, metin, gen):
 
 YAZILAR = []
 SATIRLAR = []                                    # (tur, satir): baslik / etiket satirlari tam metin + Title Case kapisi icin
+KUTULAR = []                                     # (blok, tur, [x0, y0, x1, y1]) satir kutusu (yerlesim kapilari, kart_sablon.py)
+BLOK = ["?"]                                     # o an cizilen blogun adi (kart_sablon.Kayit.blok)
 
 
 def yaz(d, s, satirlar, x, y, hiza="left", gen=None):
@@ -116,6 +113,7 @@ def yaz(d, s, satirlar, x, y, hiza="left", gen=None):
         if gen and tw > gen + 1:
             raise SystemExit(f"DUR: yazi sigmiyor ({t!r}, {tw:.0f} > {gen:.0f} px)")
         x0 = x if hiza == "left" else x - tw / 2
+        KUTULAR.append((BLOK[0], s.get("tur"), [round(x0), round(y + j * adim), round(x0 + tw), round(y + j * adim + s["boy"])]))
         o = ozellik(s, t)
         ink = f.getbbox("Hg")                      # satir bazli sabit taban (iceriğe gore kayma yok)
         yy = y + j * adim + (s["boy"] - (ink[3] - ink[1])) / 2 - ink[1]
@@ -164,16 +162,6 @@ def cizgi(d, p0, p1):
     d.line([p0, p1], fill=MUREKKEP, width=CIZGI)
 
 
-def poster_koy(im, k, src):
-    """poster (golgesiz) kutuya sigdir, ortala -> gercek kutu (renk kapisi disi)"""
-    p, olcu = poster_kirp(src)
-    bw, bh = k[2] - k[0], k[3] - k[1]
-    s_ = min(bw / p.width, bh / p.height); nw, nh = round(p.width * s_), round(p.height * s_)
-    x, y = round((k[0] + k[2] - nw) / 2), round((k[1] + k[3] - nh) / 2)
-    im.paste(p.resize((nw, nh), Image.LANCZOS), (x, y))
-    return [x, y, x + nw, y + nh], olcu
-
-
 def sar_d(s, metin, gen):
     """dengeli satir bolme: ayni satir sayisinda en kisa satiri en uzun yapan genislik (tek kalan kelime yok)"""
     taban = sar(s, metin, gen); en, puan = taban, -1
@@ -205,44 +193,6 @@ def adimlar(d, x0, gen, bloklar, no_g=0):
     return y - bos
 
 
-def sembol_al(r2, e, pay=0.06):
-    """eski r2 (3000x2250 ya da 3200x2400) icinde ogenin kutusu -> RGBA sembol (murekkep rengi, alfa = kagittan uzaklik)"""
-    im = r2.convert("RGB").resize((W, H), Image.LANCZOS) if r2.size != (W, H) else r2.convert("RGB")
-    k = kutu(e); bw, bh = k[2] - k[0], k[3] - k[1]
-    k = [k[0] - pay * bw, k[1] - pay * bh, k[2] + pay * bw, k[3] + pay * bh]
-    a = np.asarray(im.crop([round(v) for v in k])).astype(np.float32)
-    kag = np.float32(rgb(bg(2)["color_hex"]))                 # eski r2 kagidi (alfa olcumu)
-    lum = a @ np.float32([0.299, 0.587, 0.114]); lk = float(kag @ np.float32([0.299, 0.587, 0.114]))
-    murekkep = np.percentile(lum, 3)             # cekirdek tam opak (inceleme 27 Eki: %0,5 ile cekirdek (50,40,38) kaliyordu)
-    al = np.clip((lk - lum) / max(lk - murekkep, 1), 0, 1)
-    al = np.clip((al - 0.2) / 0.6, 0, 1)        # keskin kenar: eski JPEG'in yumusak hale / gurultusu atilir (renk kapisi ara ton)
-    al[(al < 0.6) & ~(_kutu_toplam(al >= 0.6, 3) > 0)] = 0   # cekirdekten kopuk JPEG lekesi
-    ys, xs = np.nonzero(al > 0.5)
-    if len(xs) < 200:
-        raise SystemExit(f"DUR: eski r2'de {e['id']} sembolu bulunamadi")
-    renk = np.median(a[al > 0.9], axis=0) if (al > 0.9).any() else np.float32((40, 30, 30))
-    rgba = np.zeros(a.shape[:2] + (4,), np.uint8); rgba[..., :3] = rgb(MUREKKEP); rgba[..., 3] = (al * 255).astype(np.uint8)  # tek renk
-    return Image.fromarray(rgba), [round(v) for v in k], dict(eski_murekkep=[int(x) for x in renk], piksel=int((al > 0.5).sum()))
-
-
-
-def y02(a, b, r2):
-    im = tuval()
-    olcu = {}
-    for eid in ("cancer_symbol", "libra_symbol", "shared_symbol"):     # eski ogeler (ad Cancer/Libra; cift icin a / b)
-        rgba, k, o = sembol_al(r2, el(2, eid)); im.paste(rgba, (k[0], k[1]), rgba); olcu[eid] = o
-    d = ImageDraw.Draw(im)
-    baslik(d, "Your Two Signs, One Shared Symbol")
-    e = el(2, "merge_arrow"); (x0, y0), (x1, y1) = [(p[0] * W / 100, p[1] * H / 100) for p in e["points_pct"]]
-    cizgi(d, (x0, y0), (x1, y1))
-    uc = 24
-    d.line([(x1 - uc, y1 - uc * 0.6), (x1, y1), (x1 - uc, y1 + uc * 0.6)], fill=MUREKKEP, width=CIZGI)
-    for eid, t in (("cancer_label", a), ("libra_label", b), ("pair_label", f"{a} & {b}")):
-        k = kutu(el(2, eid))
-        yaz(d, ETIKET, [t], (k[0] + k[2]) / 2, (k[1] + k[3]) / 2 - ETIKET["boy"] / 2, "center", max(k[2] - k[0], 0.4 * W))
-    return im, olcu, []
-
-
 def poster_kirp(r12):
     """stil gorseli (2400x3000, poster acik gri zeminde) -> poster dikdortgeni (zeminden farkli en genis bilesen)"""
     a = np.asarray(r12.convert("RGB")).astype(np.float32)
@@ -271,58 +221,6 @@ def poster_kirp(r12):
 
 
 
-def y03(a, b, r12):
-    im = tuval()
-    pkutu, olcu = poster_koy(im, POSTER, r12)
-    d = ImageDraw.Draw(im)
-    baslik(d, "Your Names, Your Date")
-    adimlar(d, SUTUN_X, W - KENAR - SUTUN_X, [
-        (None, [f"Name Under {a}", f"Name Under {b}"], "Up to 11 letters each, English letters, printed in capitals"),
-        (None, ["Your Special Date"], "Month in letters, for example 14 June 2025"),
-        (None, ["Your Heading"], "Paper Anniversary or Our First Year"),
-        (None, ["Optional Short Line"], "Up to 20 characters, Year One if left empty")])
-    yaz(d, NOT, ["Please check your spelling before you order"], W / 2, NOT_Y, "center", W - 2 * KENAR)
-    return im, olcu, [pkutu]
-
-
-def y04():
-    im = tuval(); d = ImageDraw.Draw(im)
-    baslik(d, "Digital File or Print")
-    kolon = [("Digital File", "One print ready digital file in the style and size you choose\n\nNothing is shipped"),
-             ("Print", "Unframed print on matte art paper"),
-             ("14 Sizes", "5x7, 8x10, 11x14, 12x16, 12x18, 16x20, 16x24, 18x24, 20x30, 24x30, 24x36 in, A4, A3, A2")]
-    kg = (W - 2 * KENAR) / 3; gen = kg - 0.06 * W
-    sat = [sar_d(METIN, m, gen) for _, m in kolon]
-    hh = max(blok_yuk(METIN, len(x)) for x in sat)
-    ara = 0.45 * ETIKET["boy"] + ETIKET["boy"]
-    ust = (ALAN[0] + ALAN[1]) / 2 - (ara + hh) / 2                # Y03 / Y05 ile ayni icerik alaninda ortali
-    alt = ust + ara + hh
-    for i, ((bas, _), t) in enumerate(zip(kolon, sat)):
-        cx = KENAR + kg * (i + 0.5)
-        yaz(d, ETIKET, [bas], cx, ust, "center", gen)
-        yaz(d, METIN, t, cx, ust + ara, "center", gen)
-        if i:
-            cizgi(d, (KENAR + kg * i, ust - 0.02 * H), (KENAR + kg * i, alt + 0.02 * H))   # ince dikey ayirici
-    yaz(d, NOT, ["Every style and size as a print or a digital file"], W / 2, NOT_Y, "center", W - 2 * KENAR)
-    return im, dict(kolon_px=round(kg)), []
-
-
-def y05(a, b, r10):
-    """eski r8 (slayt 10) duzeni: solda Timeless poster, sagda 4 adim (Merkez 27 Eki karar d); Y03 ile ayni geometri"""
-    im = tuval()
-    pkutu, olcu = poster_koy(im, POSTER, r10)
-    d = ImageDraw.Draw(im)
-    baslik(d, "Made for You, Step by Step")
-    adimlar(d, SUTUN_X, W - KENAR - SUTUN_X, [
-        ("01", ["Free Preview Before You Order"], "Message us your names, your date and your style, and we send you a free preview"),
-        ("02", ["Your Final Preview"], "After your order, we send your final preview in Etsy Messages within 24 hours"),
-        ("03", ["Your Approval"], "Once you approve, we send your digital file in Etsy Messages, or prepare your print"),
-        ("04", ["A Flat Print"], "Gold, relief and paper layer looks are printed effects, with no foil, raised layers or cut paper")],
-        no_g=round(1.75 * ETIKET["boy"]))
-    yaz(d, NOT, ["Colors may look slightly different on screen and on paper"], W / 2, NOT_Y, "center", W - 2 * KENAR)
-    return im, olcu, [pkutu]
-
-
 def _kutu_toplam(m, r):
     """m (bool) icin (2r+1)^2 pencere toplami (integral goruntu)"""
     c = np.pad(np.pad(m.astype(np.int32), r).cumsum(0).cumsum(1), ((1, 0), (1, 0)))
@@ -330,12 +228,13 @@ def _kutu_toplam(m, r):
     return c[n:, n:] - c[:-n, n:] - c[n:, :-n] + c[:-n, :-n]
 
 
-def renk_kapisi(im, poster_kutulari, jpeg=False):
+def renk_kapisi(im, poster_kutulari, jpeg=False, muaf=(), muaf_r=4):
     """RENK KAPISI (inceleme 27 Eki: yalniz dogruya uzaklik gri / panel geciriyordu). Poster disinda:
     (1) her piksel zemin -> murekkep dogrusu uzerinde (tolerans 6; JPEG 20),
     (2) zeminden belirgin ayrisan ara ton (t > 0.03; JPEG 0.06) yalniz murekkep cekirdeginin (t > 0.6) 3 px (JPEG 8 px) yakininda
         (kenar yumusatma; gri yazi / panel / koyu alan FAIL),
-    (3) 61x61 tamamen murekkep (t > 0.6) blok yok (dolu koyu alan / panel FAIL; ortak sembol kesisimleri 41 px'i asabiliyor). -> {neden: piksel}"""
+    (3) 61x61 tamamen murekkep (t > 0.6) blok yok (dolu koyu alan / panel FAIL; ortak sembol kesisimleri 41 px'i asabiliyor).
+    muaf: (x, y) noktalari; muaf_r px yaricapta ara ton serbest (Merkez 28 Eki: baglacin uc keskin ucu). -> {neden: piksel}"""
     a = np.asarray(im.convert("RGB")).astype(np.float32)
     z, m = np.float32(rgb(ZEMIN)), np.float32(rgb(MUREKKEP))
     v = m - z; t = np.clip(((a - z) @ v) / float(v @ v), 0, 1)
@@ -345,6 +244,10 @@ def renk_kapisi(im, poster_kutulari, jpeg=False):
     tol, esik, r = (20, 0.06, 8) if jpeg else (6, 0.03, 3)
     cekirdek = t > 0.6                                      # gri yazi (#A09992 t~0.5) cekirdek sayilmaz
     yakin = _kutu_toplam(cekirdek, r) > 0
+    if muaf:
+        yy, xx = np.mgrid[0:t.shape[0], 0:t.shape[1]]
+        for mx, my in muaf:
+            yakin |= (xx - mx) ** 2 + (yy - my) ** 2 <= muaf_r * muaf_r
     out = dict(dogru_disi=int(((np.linalg.norm(a - (z + t[..., None] * v), axis=2) > tol) & dis).sum()),
                ara_ton=int(((t > esik) & ~yakin & dis).sum()),
                dolu_blok=int(((_kutu_toplam(cekirdek, 30) == 61 * 61) & dis).sum()))
@@ -379,14 +282,16 @@ def title_case(t):
 
 
 def EK_METIN(a, b):
-    """gorev metninde olmayan, eski karttan gelen yazilar (Merkez 27 Eki karar c: kalir)"""
-    return {"Y02": [f"{a} & {b}"], "Y03_ayirici": "gorevdeki '|' cizilmedi; iki ad alani iki satir (karar a)"}
+    """gorev metninde olmayan yazilar: yok (Merkez 28 Eki: Y02'deki "<A> & <B>" cift etiketi ve yatay ok kaldirildi)"""
+    return {}
 
 
 def beklenen(a, b):
-    """gorev metni (Merkez 27 Eki, aynen), cizim sirasiyla; buyuk/kucuk harf kapida yok sayilir (ayrica Title Case denetlenir)"""
+    """gorev metni (Merkez 28 Eki kart sablonu; Y03 / Y05 metinleri 27 Eki ile aynen), cizim sirasiyla; buyuk/kucuk harf kapida yok
+    sayilir (ayrica Title Case denetlenir)"""
     return {
-        "Y02": ["Your Two Signs, One Shared Symbol", a, b, f"{a} & {b}"],
+        "Y02": ["Two Signs, One Shared Symbol", f"{a} and {b} joined in an original AstroLoveArt design", a, b,
+                "Personalized with your two names and your date"],
         "Y03": ["Your Names, Your Date",
                 f"Name Under {a}", f"Name Under {b}", "Up to 11 letters each, English letters, printed in capitals",
                 "Your Special Date", "Month in letters, for example 14 June 2025",
@@ -395,7 +300,7 @@ def beklenen(a, b):
                 "Please check your spelling before you order"],
         "Y04": ["Digital File or Print",
                 "Digital File", "One print ready digital file in the style and size you choose", "Nothing is shipped",
-                "Print", "Unframed print on matte art paper",
+                "Print", "Unframed print on matte art paper", "Free shipping worldwide",
                 "14 Sizes", "5x7, 8x10, 11x14, 12x16, 12x18, 16x20, 16x24, 18x24, 20x30, 24x30, 24x36 in, A4, A3, A2",
                 "Every style and size as a print or a digital file"],
         "Y05": ["Made for You, Step by Step",
@@ -403,63 +308,113 @@ def beklenen(a, b):
                 "02", "Your Final Preview", "After your order, we send your final preview in Etsy Messages within 24 hours",
                 "03", "Your Approval", "Once you approve, we send your digital file in Etsy Messages, or prepare your print",
                 "04", "A Flat Print", "Gold, relief and paper layer looks are printed effects, with no foil, raised layers or cut paper",
-                "Colors may look slightly different on screen and on paper"]}
+                "Colors may look slightly different on screen and on paper"],
+        "GENEL": ["Choose Your Style"] + list(STILLER) + ["Every style as a print or a digital file"]}
+
+
+STILLER = ("Starlit", "Timeless", "First Page", "Layers", "Botanical")   # yeni galeri Y06-Y10 sirasi (yd_liste_uret.STIL_SIRA)
+BOYLAR = "5x7, 8x10, 11x14, 12x16, 12x18, 16x20, 16x24, 18x24, 20x30, 24x30, 24x36 in, A4, A3, A2"
+
+
+def stil_gorselleri(yedek):
+    """adim 5 yedegi (GALERI.json baglar: Style (513) -> image_id; r<rank>_<id>.jpg) -> {stil: dosya yolu}"""
+    g = json.loads((Path(yedek) / "GALERI.json").read_text(encoding="utf-8"))
+    rk = {x["listing_image_id"]: x["rank"] for x in g["gorseller"]}
+    bag = {b["value"]: b["image_id"] for b in g["baglar"] if b.get("property_id", 513) == 513}
+    eksik = [s for s in STILLER if s not in bag]
+    if eksik:
+        raise SystemExit(f"DUR: yedekte stil bagi yok: {eksik}")
+    return {s: Path(yedek) / f"r{rk[bag[s]]}_{bag[s]}.jpg" for s in STILLER}
+
+
+def yd_kartlari(a, b, sem, stil):
+    """Merkez 28 Eki sablonlari (kart_sablon.py); -> [(dosya anahtari, fn)]; fn -> (im, olcu, poster kutulari, renk muafiyeti)"""
+    import kart_sablon as S
+    p = {k: poster_kirp(Image.open(v)) for k, v in stil.items()}           # 4:5 poster (oran kapisi 0,8 +- 0,02)
+
+    def y02():
+        return S.sembol_kart(a, b, sem, "Personalized with your two names and your date")
+
+    def y03():
+        im, o, k = S.yan_kart("Your Names, Your Date", [p["Botanical"][0]], [
+            (None, [f"Name Under {a}", f"Name Under {b}"], "Up to 11 letters each, English letters, printed in capitals"),
+            (None, ["Your Special Date"], "Month in letters, for example 14 June 2025"),
+            (None, ["Your Heading"], "Paper Anniversary or Our First Year"),
+            (None, ["Optional Short Line"], "Up to 20 characters, Year One if left empty")], "Please check your spelling before you order")
+        return im, dict(o, poster=p["Botanical"][1]), k, ()
+
+    def y04():
+        im, o, k = S.tablo_kart("Digital File or Print", [
+            ("Digital File", ["One print ready digital file in the style and size you choose", "Nothing is shipped"]),
+            ("Print", ["Unframed print on matte art paper", "Free shipping worldwide"]),
+            ("14 Sizes", [BOYLAR])], "Every style and size as a print or a digital file")
+        return im, o, k, ()
+
+    def y05():
+        im, o, k = S.yan_kart("Made for You, Step by Step", [p["Timeless"][0]], [
+            ("01", ["Free Preview Before You Order"], "Message us your names, your date and your style, and we send you a free preview"),
+            ("02", ["Your Final Preview"], "After your order, we send your final preview in Etsy Messages within 24 hours"),
+            ("03", ["Your Approval"], "Once you approve, we send your digital file in Etsy Messages, or prepare your print"),
+            ("04", ["A Flat Print"], "Gold, relief and paper layer looks are printed effects, with no foil, raised layers or cut paper")],
+            "Colors may look slightly different on screen and on paper", surec=True)
+        return im, dict(o, poster=p["Timeless"][1]), k, ()
+
+    def genel():
+        im, o, k = S.secim_kart("Choose Your Style", [(s, p[s][0]) for s in STILLER], "Every style as a print or a digital file")
+        return im, dict(o, poster={s: p[s][1] for s in STILLER}), k, ()
+    return [("Y02", y02), ("Y03", y03), ("Y04", y04), ("Y05", y05), ("GENEL", genel)]
 
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--cift", required=True); ap.add_argument("--a", required=True); ap.add_argument("--b", required=True)
-    ap.add_argument("--eski-r2", required=True, help="o ciftin eski galerisinin r2 karti (yedek; burc + ortak sembol)")
-    ap.add_argument("--botanical", required=True, help="o ciftin Botanical stil gorseli (yedek r12, 2400x3000)")
-    ap.add_argument("--timeless", required=True, help="o ciftin Timeless stil gorseli (yedek r10, 2400x3000)")
-    ap.add_argument("--out", required=True); ap.add_argument("--ortak", action="store_true", help="ORTAK_Y04 de uret (+ KONTAK_KUCUK.jpg)")
+    ap.add_argument("--yedek", required=True, help="adim 5 yedek klasoru (GALERI.json + r<rank>_<id>.jpg): 5 stil gorseli")
+    ap.add_argument("--sembol", required=True, help="kupa_uretim/sembol/<CIFT> (sol.png, sag.png, ana.png)")
+    ap.add_argument("--out", required=True); ap.add_argument("--ortak", action="store_true", help="ORTAK_Y04 de uret")
     a = ap.parse_args(argv)
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
-    YAZILAR.clear(); SATIRLAR.clear()
-    islem = [(f"{a.cift}_Y02.jpg", lambda: y02(a.a, a.b, Image.open(a.eski_r2))),
-             (f"{a.cift}_Y03.jpg", lambda: y03(a.a, a.b, Image.open(a.botanical)))]
-    if a.ortak:
-        islem += [("ORTAK_Y04.jpg", y04)]
-    islem += [(f"{a.cift}_Y05.jpg", lambda: y05(a.a, a.b, Image.open(a.timeless)))]
+    YAZILAR.clear(); SATIRLAR.clear(); KUTULAR.clear()
+    stil = stil_gorselleri(a.yedek)
+    adlar = {"Y02": f"{a.cift}_Y02.jpg", "Y03": f"{a.cift}_Y03.jpg", "Y04": "ORTAK_Y04.jpg", "Y05": f"{a.cift}_Y05.jpg",
+             "GENEL": f"YD_{a.cift}_GENEL.jpg"}   # GENEL <CIFT>_Y<NN> bicimine girmez (Y06 Starlit; galeri_tasi / test_yd_kapak_qc)
+    islem = [(k, adlar[k], fn) for k, fn in yd_kartlari(a.a, a.b, Path(a.sembol), stil) if a.ortak or k != "Y04"]
     sonuc, rapor, metin, satir, jb = {}, {}, {}, {}, {}
-    for ad, fn in islem:
-        n0 = len(YAZILAR)
-        im, o, pk = fn(); sonuc[ad] = im; metin[ad] = YAZILAR[n0:]; satir[ad] = SATIRLAR[n0:]
-        sap = renk_kapisi(im, pk)                    # RENK KAPISI (cizim): poster disinda yalniz zemin + murekkep (+ kenar yumusatma)
+    import io
+    for anah, ad, fn in islem:
+        n0, n1 = len(YAZILAR), len(SATIRLAR)
+        im, o, pk, muaf = fn(); sonuc[ad] = im; metin[ad] = (anah, YAZILAR[n0:]); satir[ad] = (anah, SATIRLAR[n1:])
+        sap = renk_kapisi(im, pk, muaf=muaf)         # RENK KAPISI (cizim): poster disinda yalniz zemin + murekkep (+ kenar yumusatma)
         if sap:
             raise SystemExit(f"DUR: {ad} renk kapisi (cizim) {sap}")
         jb[ad] = jpeg_bayt(im)
-        import io
-        sapj = renk_kapisi(Image.open(io.BytesIO(jb[ad])), pk, jpeg=True)    # teslim edilen JPEG (inceleme 27 Eki)
+        sapj = renk_kapisi(Image.open(io.BytesIO(jb[ad])), pk, jpeg=True, muaf=muaf)    # teslim edilen JPEG
         if sapj:
             raise SystemExit(f"DUR: {ad} renk kapisi (JPEG) {sapj}")
-        rapor[ad] = dict(o or {}, renk_kapisi="PASS (cizim + JPEG)", poster_kutu=pk)
+        rapor[ad] = dict(o or {}, renk_kapisi="PASS (cizim + JPEG)", poster_kutu=pk, kb=round(len(jb[ad]) / 1024))
     kotu = sorted({t for t in YAZILAR if YASAK.search(t) or YASAK_SOZ.search(t)})
     if kotu:
         raise SystemExit(f"DUR: yasak karakter / sozcuk iceren yazi: {kotu}")
     bek = beklenen(a.a, a.b)
-    for ad, ss in satir.items():                    # BASLIK / ETIKET: her satir gorev metninin bir ogesiyle BIREBIR (buyuk/kucuk harf dahil)
-        for tur, t in ss:                           # ve Title Case ("Name Under A" / "Name Under B" ayri satir)
-            if tur in ("baslik", "etiket") and (t not in bek[ad[-7:-4]] or not title_case(t)):
+    for ad, (anah, ss) in satir.items():            # BASLIK / ETIKET: her satir gorev metninin bir ogesiyle BIREBIR ve Title Case
+        for tur, t in ss:
+            if tur in ("baslik", "etiket") and (t not in bek[anah] or not title_case(t)):
                 raise SystemExit(f"DUR: {ad} {tur} satiri {t!r} gorev metninde birebir yok / Title Case degil")
-    for ad, sat in metin.items():                   # METIN KAPISI: cizilen satirlar, sirasiyla, gorev metni + izinli ek (buyuk/kucuk harf haric) ile ayni
-        g, e = " ".join(sat).split(), " ".join(bek[ad[-7:-4]]).split()
+    for ad, (anah, sat) in metin.items():           # METIN KAPISI: cizilen satirlar, sirasiyla, gorev metni ile ayni (buyuk/kucuk harf haric)
+        g, e = " ".join(sat).split(), " ".join(bek[anah]).split()
         if [x.casefold() for x in g] != [x.casefold() for x in e]:
             raise SystemExit(f"DUR: {ad} metni gorev metninden farkli\n cizilen: {' '.join(g)}\n beklenen: {' '.join(e)}")
-    kb = kontak([sonuc[f"{a.cift}_Y02.jpg"], sonuc[f"{a.cift}_Y03.jpg"], sonuc["ORTAK_Y04.jpg"], sonuc[f"{a.cift}_Y05.jpg"]]) if a.ortak else None
-    for ad, b in jb.items():
-        (out / ad).write_bytes(b)
-    if kb:
-        (out / "KONTAK_KUCUK.jpg").write_bytes(kb)
-        rapor["KONTAK_KUCUK.jpg"] = dict(boyut=[1600, 1200], kb=round(len(kb) / 1024, 1))
-    girdi = {k: dict(dosya=Path(v).name, sha256=hashlib.sha256(Path(v).read_bytes()).hexdigest()) for k, v in
-             (("eski_r2", a.eski_r2), ("botanical", a.botanical), ("timeless", a.timeless))}
-    (out / "KART_OZET.json").write_text(json.dumps(dict(cift=a.cift, dosyalar=list(sonuc), girdi=girdi, surum=SURUM, olcu=rapor,
-                                                        yazilar=metin, gorevde_olmayan=EK_METIN(a.a, a.b), tuval=[W, H],
-                                                        cikti=list(CIKTI)), indent=1, ensure_ascii=False), encoding="utf-8")
-    print(f"KART: {', '.join(sonuc)} -> {out} | yazi {len(YAZILAR)} satir, yasak 0, metin kapisi PASS {len(metin)}/{len(metin)}")
+    for ad, b_ in jb.items():
+        (out / ad).write_bytes(b_)
+    girdi = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in
+             [*stil.values(), *(Path(a.sembol) / f"{x}.png" for x in ("sol", "sag", "ana"))]}
+    (out / "KART_OZET_YD.json").write_text(json.dumps(dict(cift=a.cift, dosyalar=list(sonuc), girdi_sha256=girdi,
+                                                           stil_kaynak={k: v.name for k, v in stil.items()}, surum=SURUM, olcu=rapor,
+                                                           yazilar={k: v[1] for k, v in metin.items()}, gorevde_olmayan=EK_METIN(a.a, a.b),
+                                                           tuval=[W, H], cikti=list(CIKTI)), indent=1, ensure_ascii=False), encoding="utf-8")
+    print(f"KART YD: {', '.join(sonuc)} -> {out} | yazi {len(YAZILAR)} satir, yasak 0, metin / yerlesim / renk kapisi PASS {len(metin)}/{len(metin)}")
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    import yd_kart_ornek as _M                       # kart_sablon ayni modul nesnesini (YAZILAR / KUTULAR) kullansin
+    sys.exit(_M.main())
