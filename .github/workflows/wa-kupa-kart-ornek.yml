@@ -5,6 +5,8 @@ name: wa-kupa-kart-ornek
 # mod=girdi : yerel gelistirme girdisi (Drive yalniz OKUNUR) git dalina yazilir: girdi/kart-<kosu> (MB 2000x3000 poster, YD yedek klasoru).
 # mod=uret  : Orchard gorunumleri (orchard_gorunum.py, kupa-orchard78 surumleri) + kupa_zemin.py, kartlar, kupa 4:3 kapak ornegi (01 orange +
 #             fig stil kapagi; 28 Eki ornegiyle fark), kirpim onizlemeleri, KONTAK; Drive TEMP/KART_SABLON_ORNEK/<damga>/ (--immutable).
+# mod=kapak_alt (Merkez 28 Eki, Serdar karari): kupa 4:3 kapak alternatifleri A / B / C (scripts/kapak78/kupa_kapak_alt.py); girdi Drive
+#             TEMP/KART_SABLON_ORNEK/<kapak_damga>/KAPAK43 (yalniz okuma) + temiz/kupa-orchard sahne / geo; cikti TEMP/KUPA_KAPAK_ALT/<damga>/.
 # 27 Eki ust duzey dosyalari (TEMP/WA_KUPA_KART_ORNEK/20261027_192528) 28 Eki 06:15'te ESKI/ altina tasinmisti; bu is akisi oraya dokunmaz.
 permissions:
   contents: read
@@ -14,9 +16,64 @@ on:
       cift: {description: "CIFT", required: true, default: "CANCER_LIBRA"}
       poster_id: {description: "Drive dosya id: Midnight Blue ornek poster 2000x3000 (EMILY / JAMES)", required: true, default: "1nCbiepEjZPaS_mrBKee4r4t94vIgbVfT"}
       yedek_damga: {description: "TEMP/YD_KAPAK_V1_YEDEK/<damga> (YD stil gorselleri, eski r2)", required: true, default: "20261027_105540"}
-      mod: {description: "girdi | uret", required: true, default: "uret"}
+      mod: {description: "girdi | uret | kapak_alt", required: true, default: "uret"}
+      kapak_damga: {description: "kapak_alt: TEMP/KART_SABLON_ORNEK/<damga>/KAPAK43", required: false, default: "20261028_155614"}
 jobs:
+  kapak_alt:
+    if: ${{ inputs.mod == 'kapak_alt' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Girdi kapisi
+        env: {C: "${{ inputs.cift }}", KD: "${{ inputs.kapak_damga }}"}
+        run: '[[ "$C" == "CANCER_LIBRA" && "$KD" =~ ^[0-9]{8}_[0-9]{6}$ ]] || { echo "::error::girdi"; exit 1; }'
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: temiz/kupa-orchard
+          path: _ko
+          sparse-checkout: kupa_orchard/varlik
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: pip
+        run: pip install -q pillow==11.0.0 numpy==2.1.3
+      - name: rclone
+        timeout-minutes: 8
+        run: |
+          sudo apt-get -qq install -y rclone >/dev/null 2>&1 || timeout 240 bash -c 'curl -fsSL --max-time 120 --retry 2 https://rclone.org/install.sh | sudo bash >/dev/null 2>&1'
+          rclone version | head -1
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: Alternatifler (A / B olcum, C kirpimlar, KONTAK)
+        env: {KD: "${{ inputs.kapak_damga }}"}
+        run: |
+          set -euo pipefail
+          mkdir -p _g _out
+          rclone copy "gdrive:ASTROLOVE/TEMP/KART_SABLON_ORNEK/$KD/KAPAK43" _g --include "KUPA_KAPAK43_01_orange.jpg" --include "KUPA_KAPAK_KARE_orange.jpg" -q
+          ls -la _g; sha256sum _g/*.jpg
+          python3 -I scripts/kapak78/kupa_kapak_alt.py _g/KUPA_KAPAK43_01_orange.jpg _g/KUPA_KAPAK_KARE_orange.jpg \
+            _ko/kupa_orchard/varlik/sahne/orange_k40.png _ko/kupa_orchard/varlik/gorunum/geo_kapak_k40.json _out
+          echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
+      - name: Drive'a yaz
+        run: |
+          set -euo pipefail
+          Y="TEMP/KUPA_KAPAK_ALT/${DAMGA:?}"
+          sha256sum _out/*
+          rclone copy _out "gdrive:ASTROLOVE/$Y" --immutable -q
+          echo "Cikti: $Y ($(find _out -type f | wc -l) dosya)" | tee -a "$GITHUB_STEP_SUMMARY"
+      - if: always()
+        run: rm -rf _g _out ~/.config/rclone
   kart:
+    if: ${{ inputs.mod != 'kapak_alt' }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
