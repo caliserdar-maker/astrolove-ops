@@ -11,12 +11,12 @@ SADE kurallari: '|' cizilmez, etiketler Title Case):
 Kupa (Orchard galerisi kupa_orchard/kod/cift.py kart 2 yakin plan, 3, 4 stil secimi, 5, 6, 7). Fotograflar
 cift.py bolum 3 gorunumlerinden (tek_on, tek_arka, m15, ML_on/arka, MJ_on/arka; orchard_gorunum.py ile ayni kod ve surumlerle) ve
 kupa_zemin.py ile zemini #F5F0E7'ye esitlenmis halde (Merkez 27 Eki madde 4); kupa ve golgesi korunur, kulp kesilmez:
-  KUPA_<CIFT>_K02_YAKIN (tek on, buyuk olcek), KUPA_<CIFT>_K03_KISISEL, KUPA_<CIFT>_K04_STIL (8 stil), KUPA_<CIFT>_K05_BOYUT, KUPA_<CIFT>_K06_ORNEK,
+  KUPA_<CIFT>_K02_YAKIN (tek on sembol bolgesi, oval gecis), KUPA_<CIFT>_K03_KISISEL, KUPA_<CIFT>_K04_STIL (8 stil), KUPA_<CIFT>_K05_BOYUT, KUPA_<CIFT>_K06_ORNEK,
   KUPA_<CIFT>_K07_BAKIM. Merkez 28 Eki: kupa galerisi tumden 4:3 (kart 2 ve 4 dahil), galeri sirasi korunur (aciklama 3-6. fotograflara
   atif yapar). K05 olculeri Printful White Glossy Mug katalog degerleriyle ayni (11 oz 3.8 x 3.2 in / 9.6 x 8.2 cm, 15 oz 4.7 x 3.3 in /
-  11.9 x 8.5 cm, +/- 2 mm; ml = US fl oz x 29,5735: 325,3 / 443,6).
+  11.9 x 8.5 cm, +/- 0.1 in (Printful sayfasi, web arama ozeti; birincil katalog okumasi yapilmadi); ml = US fl oz x 29,5735: 325,3 / 443,6).
 Kapilar (PASS/FAIL, biri FAIL ise dosya yazilmaz): metin (cizilen satirlar = beklenen, sirayla), baslik / etiket Title Case (birim
-sozcukleri oz, in, cm, ml haric), yasak karakter (ondalik nokta disinda nokta, arti, esittir, tire), yasak sozcuk (yd_kart_ornek.YASAK_SOZ),
+sozcukleri oz, in, cm, ml haric), yasak karakter (ondalik nokta disinda nokta, arti, esittir, uzun / orta tire; ASCII '-' serbest), yasak sozcuk (yd_kart_ornek.YASAK_SOZ),
 punto >= 58, renk kapisi (cizim + JPEG), zemin kapisi (kupa fotograf kutusu ic kenar seridi #F5F0E7'den en fazla ZEMIN_ESIK; kutu
 icinde kupa + golge parcasina (fark > 1 ile bagli) bagli olmayan, fark > 3 piksel yok),
 KONTAK_WA_KUPA.jpg < 300 KB.
@@ -201,16 +201,31 @@ def yapistir(im, src, kutu, x, y, s, fade=0, dort=False):
     return [round(x), round(y), round(x) + w, round(y) + h]
 
 
+SEMBOL_KIRP = (600, 730, 1500, 1610)   # tek on (2048) icinde sembol + kucuk burclar + isimler (28 Eki olcum: sembol 856-1256 x 814-1264)
+
+
+def oval_yapistir(im, src, kutu, x, y, s, ic=0.84, us=6):   # 28 Eki: ic 0,78 / 0,84-us 4 kosede kopuk yaprak parcasi (kopuk_ton)
+    """src[kutu] -> s olcekli (x, y); kenarlara dogru yumusak gecisle zemine (#F5F0E7) karisir: superelips (|u|^us + |v|^us)^(1/us)
+    < ic tam fotograf, 1'e kadar smoothstep, disi tam zemin (kutu kenar seridi zemin, panel kenari yok)"""
+    p = src.crop(kutu); w, h = round(p.width * s), round(p.height * s)
+    a = np.asarray(p.resize((w, h), Image.LANCZOS)).astype(np.float32); z = np.float32(K.rgb(K.ZEMIN))
+    yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
+    r = (np.abs((xx + 0.5) / w * 2 - 1) ** us + np.abs((yy + 0.5) / h * 2 - 1) ** us) ** (1 / us)
+    t = np.clip((1 - r) / (1 - ic), 0, 1); t = (t * t * (3 - 2 * t))[..., None]
+    im.paste(Image.fromarray(np.round(z + (a - z) * t).astype(np.uint8)), (round(x), round(y)))
+    return [round(x), round(y), round(x) + w, round(y) + h]
+
+
 def k02(sd):
-    """yakin plan (cift.py kart 2 'YOUR TWO SIGNS, / ONE ORIGINAL SYMBOL'); SADE: baslik Title Case tek satir, tek on gorunumu (zemin
-    esitlenmis) alan icinde en buyuk olcekte. Orchard yakin plan sahnesi (ahsap masa, orgu, portakal) zemin esitlemesinde kalinti
-    birakti (28 Eki yerel olcum kenar 83 > ZEMIN_ESIK 3); kupa kutusu tek on ile ayni boyda (1427x1235 / 1482x1283 px)"""
+    """yakin plan (cift.py kart 2 'YOUR TWO SIGNS, / ONE ORIGINAL SYMBOL'); Merkez 28 Eki (2. mesaj madde 2): on gorunumden sembol
+    bolgesine kirpim, ayni fotograf 4 kartta tekrar etmesin. SEMBOL_KIRP (zemin esitlenmis tek on) yumusak gecisle zemine karisir."""
     im = K.tuval(); d = ImageDraw.Draw(im)
     K.baslik(d, "Your Two Signs, One Original Symbol")
-    z, k = sahne(sd, "tek_on"); kk = kupa_kutu(z, k)
-    s = min((K.NOT_Y + K.NOT["boy"] - K.ALAN[0] + 20) / (kk[3] - kk[1]), (W - 2 * K.KENAR) / (kk[2] - kk[0]))
-    kut = [yapistir(im, z, kk, W / 2 - (kk[2] - kk[0]) * s / 2, K.ALAN[0] - 20, s)]
-    return im, dict(foto=kut, olcek=round(s, 4)), kut
+    z, _ = sahne(sd, "tek_on"); kk = SEMBOL_KIRP
+    ust = K.ALAN[0] - 40; alt = K.NOT_Y + K.NOT["boy"]
+    s = (alt - ust) / (kk[3] - kk[1])
+    kut = [oval_yapistir(im, z, kk, W / 2 - (kk[2] - kk[0]) * s / 2, ust, s)]
+    return im, dict(foto=kut, olcek=round(s, 4), kirpim=list(kk)), kut
 
 
 def k04(sd):

@@ -92,7 +92,8 @@ if __name__ == "__main__":
     g, o = Path(sys.argv[1]), Path(sys.argv[2]); o.mkdir(parents=True, exist_ok=True); R = {}
     ST8 = ("orange", "fig", "olive", "pomegranate", "almond", "lemon", "grape", "loquat")       # orchard_gorunum stil_<st> (kupa 04)
     ADLAR = ("tek_on", "tek_arka", "m15", "ML_on", "ML_arka", "MJ_on", "MJ_arka") + tuple(f"stil_{s}" for s in ST8)
-    # GrabCut sahne basina ~1-2 dk (2048 px): sahneler paralel (28 Eki; 16 sahne sirali ~30 dk)
+    # GrabCut sahne basina ~1-2 dk (2048 px): sahneler paralel (28 Eki yerel: 16 sahne 3 dk 19 sn, CPU toplami 11 dk 20 sn).
+    # setRNGSeed(0) ile sonuc siradan bagimsiz; 27 Eki sirali ciktiya gore tek_on disindaki sahnelerde fark 6-15 (maske degisti)
     with ProcessPoolExecutor(max_workers=os.cpu_count() or 2) as ex:
         for ad, r in ex.map(_isle, [g] * len(ADLAR), [o] * len(ADLAR), ADLAR):
             R[ad] = r
