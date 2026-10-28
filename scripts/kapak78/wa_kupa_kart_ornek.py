@@ -14,9 +14,9 @@ kupa_zemin.py ile zemini #F5F0E7'ye esitlenmis halde (Merkez 27 Eki madde 4); ku
   KUPA_<CIFT>_K02_YAKIN (tek on, buyuk olcek), KUPA_<CIFT>_K03_KISISEL, KUPA_<CIFT>_K04_STIL (8 stil), KUPA_<CIFT>_K05_BOYUT, KUPA_<CIFT>_K06_ORNEK,
   KUPA_<CIFT>_K07_BAKIM. Merkez 28 Eki: kupa galerisi tumden 4:3 (kart 2 ve 4 dahil), galeri sirasi korunur (aciklama 3-6. fotograflara
   atif yapar). K05 olculeri Printful White Glossy Mug katalog degerleriyle ayni (11 oz 3.8 x 3.2 in / 9.6 x 8.2 cm, 15 oz 4.7 x 3.3 in /
-  11.9 x 8.5 cm, +/- 2 mm; ml = US fl oz x 29,5735: 325,3 / 443,6).
+  11.9 x 8.5 cm, +/- 0.1 in (Printful sayfasi, web arama ozeti; birincil katalog okumasi yapilmadi); ml = US fl oz x 29,5735: 325,3 / 443,6).
 Kapilar (PASS/FAIL, biri FAIL ise dosya yazilmaz): metin (cizilen satirlar = beklenen, sirayla), baslik / etiket Title Case (birim
-sozcukleri oz, in, cm, ml haric), yasak karakter (ondalik nokta disinda nokta, arti, esittir, tire), yasak sozcuk (yd_kart_ornek.YASAK_SOZ),
+sozcukleri oz, in, cm, ml haric), yasak karakter (ondalik nokta disinda nokta, arti, esittir, uzun / orta tire; ASCII '-' serbest), yasak sozcuk (yd_kart_ornek.YASAK_SOZ),
 punto >= 58, renk kapisi (cizim + JPEG), zemin kapisi (kupa fotograf kutusu ic kenar seridi #F5F0E7'den en fazla ZEMIN_ESIK; kutu
 icinde kupa + golge parcasina (fark > 1 ile bagli) bagli olmayan, fark > 3 piksel yok),
 KONTAK_WA_KUPA.jpg < 300 KB.
@@ -204,7 +204,8 @@ def yapistir(im, src, kutu, x, y, s, fade=0, dort=False):
 def k02(sd):
     """yakin plan (cift.py kart 2 'YOUR TWO SIGNS, / ONE ORIGINAL SYMBOL'); SADE: baslik Title Case tek satir, tek on gorunumu (zemin
     esitlenmis) alan icinde en buyuk olcekte. Orchard yakin plan sahnesi (ahsap masa, orgu, portakal) zemin esitlemesinde kalinti
-    birakti (28 Eki yerel olcum kenar 83 > ZEMIN_ESIK 3); kupa kutusu tek on ile ayni boyda (1427x1235 / 1482x1283 px)"""
+    birakti (28 Eki yerel olcum kenar 83 > ZEMIN_ESIK 3). Kirpim (kupa + golge + 30 px pay) ~1742x1419 px, karta ~1,14x buyutulur.
+    Merkez onayi bekleyen sapma: Orchard kart 2 ayri yakin plan sahnesiydi"""
     im = K.tuval(); d = ImageDraw.Draw(im)
     K.baslik(d, "Your Two Signs, One Original Symbol")
     z, k = sahne(sd, "tek_on"); kk = kupa_kutu(z, k)
