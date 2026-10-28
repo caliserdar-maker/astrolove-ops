@@ -11,7 +11,7 @@ Kullanim: v7_qc.py <video.mp4> <kapak.png> <uretim_log.txt> <cikti_dir>
     ile maskenin 15-41 px cevre halkasindaki (15x15 ve 41x41 kare cekirdekle genisletme farki) ortalama (R - B) farki |.| <= 2,0
     (Merkez olcumu: v7 7,17 FAIL, v7b 0,90 PASS; bu tanimla yerel v7 -7,20, v7b -0,89)
  silme_artik (Merkez 28 Eki, v7c): 0,4 sn karesinde (silme 0,3 sn'de biter) <video>.silme_maske.png (sembol + sembole yakin altin)
-    icinde R-B'nin yerel zemine (31 px medyan) gore fazlasi > v7_silme_artik.ESIK olan piksel sayisi 0 olmali (maske yoksa kapi yok)"""
+    icinde R-B'nin yerel zemine (31 px medyan) gore fazlasi > v7_silme_artik.ESIK olan piksel sayisi 0 olmali (maske yoksa FAIL)"""
 import json, os, re, subprocess, sys
 import numpy as np, cv2
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))   # -I ile betik klasoru sys.path'te degil
@@ -80,6 +80,8 @@ def main():
     if os.path.exists(sp):
         r = SA.artik(F[int(round(SA.KARE_SN * 30))].astype(np.float32), np.asarray(Image.open(sp).convert('L')) > 127)
         K['silme_artik'] = {'gecti': r['artik'] == 0, 'deger': dict(r, sn=SA.KARE_SN, esik=SA.ESIK)}
+    else:   # inceleme 28 Eki: maske yoksa kapi atlanmaz (v7c oncesi video / yd_video motor kopyasi maske uretmiyor)
+        K['silme_artik'] = {'gecti': False, 'deger': {'hata': 'silme_maske.png yok (v7c oncesi uretim)'}}
     th = 270; tw = round(F.shape[2] * th / F.shape[1]); ust = 32
     KT = Image.new('RGB', (4 * (tw + 8), 2 * (th + ust + 8)), (245, 245, 245)); dr = ImageDraw.Draw(KT)
     for n, t in enumerate(KONTAK_SN):

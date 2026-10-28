@@ -185,7 +185,7 @@ msym = np.isin(P.lab, [c[0] for c in P.merged_parts]).astype(np.uint8)
 # sembolun ince uclari ve araliktaki kucuk parcalar core'a girmiyor, alfa da ~0 (lib.Poster zemini bu pikselleri kapsiyor), bu yuzden
 # 0,3-0,5 sn karelerinde altin iz kaliyordu (AQUARIUS_AQUARIUS: uclar sembolden 30-100 px, kapak R-B fazlasi 15-67; silme agirligi
 # 0,00-0,09). Duzeltme: kapak posterinde R-B'nin yerel zemine (61 px medyan) gore fazlasi > YAKIN_T olan ve sembole ilk bos 10 px
-# banda kadar (en fazla YAKIN_MAX) uzaklikta olan pikseller sembol maskesine katilir; kucuk burc, isim, mesaj kutulari (10 px pay) haric.
+# banda kadar (en fazla 140) uzaklikta olan pikseller sembol maskesine katilir; kucuk burc, isim, mesaj kutulari (10 px pay) haric.
 # Esik olcumle: AQUARIUS_AQUARIUS zemin bandi (sembolden 100-140 px) fazla en buyuk 12; halka 140 px'ten sonra. Bos bant yoksa 30 px.
 # V7_SILME=eski: eski davranis.
 YAKIN_T, YAKIN_MAX = 15, 150
@@ -196,9 +196,11 @@ if os.environ.get('V7_SILME', 'tam') == 'tam':
     for _k in (P.sign_a, P.sign_b, P.names_row, P.msg_row):
         _, _x, _y, _w, _h, _ = _k
         _alt[max(0, _y - 10):_y + _h + 10, max(0, _x - 10):_x + _w + 10] = False
-    SILME_D = next((d for d in range(30, YAKIN_MAX, 10) if not (_alt & (_uz >= d) & (_uz < d + 10)).any()), 30)
+    SILME_D = next((d for d in range(30, YAKIN_MAX, 10) if not (_alt & (_uz >= d) & (_uz < d + 10)).any()), None)
+    SILME_VARSAYILAN = SILME_D is None   # inceleme 28 Eki: bos bant bulunamazsa 30 px, logda ayrica yazilir
+    SILME_D = SILME_D or 30
     _ek = (_alt & (_uz < SILME_D) & (msym == 0)).astype(np.uint8)
-    print(f'silme: sembol maskesi {int(msym.sum())} px + yakin altin {int(_ek.sum())} px (R-B fazlasi > {YAKIN_T}, sembole < {SILME_D} px)',
+    print(f'silme: sembol maskesi {int(msym.sum())} px + yakin altin {int(_ek.sum())} px (R-B fazlasi > {YAKIN_T}, sembole < {SILME_D} px{" VARSAYILAN: bos bant yok" if SILME_VARSAYILAN else ""})',
           flush=True)
     msym = np.maximum(msym, _ek)
 MS_p = np.clip(P.alpha * cv2.dilate(msym, np.ones((7, 7), np.uint8)), 0, 1)
