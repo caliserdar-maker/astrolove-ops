@@ -110,6 +110,15 @@ TESLIM_RU = {
 }
 
 
+# Indirme satiri (Serdar 28 Eki: dosya e-postayla; e-posta uygun degilse Etsy Messages'ta indirme baglantisi). Eski satir geriye uyum.
+INDIR_RU = {
+    "Download it from Purchases in a web browser. The Etsy app can't download files":
+        "Скачайте его в разделе «Покупки» (Purchases) в браузере. В приложении Etsy файлы скачать нельзя",
+    "If email doesn't suit you, we can send you a download link through Etsy Messages.":
+        "Если вам неудобно получать файл по электронной почте, мы можем отправить ссылку для скачивания через сообщения Etsy.",
+}
+
+
 def p_dijital(m, ctx):
     k1, b1, a1, a2 = m.group(1), m.group(2), m.group(3), m.group(4)
     uc_kontrol(ctx, k1, b1, a1, a2)
@@ -117,7 +126,7 @@ def p_dijital(m, ctx):
             "- Один готовый к печати файл JPG в выбранном вами цвете и размере\n"
             f"- Высокое разрешение: 300 dpi в полном выбранном размере, от {boy_ru(k1)} до {boy_ru(b1)} дюймов или от {a1} до {a2}\n"
             f"- {TESLIM_RU[m.group(5)]}. Перед отправкой мы вручную проверяем каждую персонализацию\n"
-            "- Скачайте его в разделе «Покупки» (Purchases) в браузере. В приложении Etsy файлы скачать нельзя\n"
+            f"- {INDIR_RU[m.group(6)]}\n"
             "- Распечатайте его дома, в местной типографии или в онлайн-сервисе печати\n"
             "- Мы ничего не отправляем по почте. Только для личного использования.")
 
@@ -131,12 +140,19 @@ def p_boy(m, ctx):
             "в виде постера и цифрового файла. Смотрите фото с таблицей размеров.")
 
 
+HEDIYE_RU = {   # Serdar 28 Eki: dijital onizleme + onaydan sonra; eski cumle geriye uyum
+    "It arrives within 24 hours, ready to print or share.": "Он придёт в течение 24 часов, и его можно распечатать или переслать.",
+    "Nothing to ship, so it is ready to print or share soon after you approve your preview.":
+        "Его не нужно отправлять по почте, поэтому его можно распечатать или переслать вскоре после того, как вы одобрите макет.",
+}
+
+
 def p_hediye(m, ctx):
     a, b = m.group(1), m.group(2)
     if ctx.get("burc") and (a, b) != ctx["burc"]:
         raise ValueError("hediye burclari girisle ayni degil")
     return (f"ИДЕАЛЬНЫЙ ПОДАРОК\nПамятный подарок для пары со знаками {cift(a, b)}. Мало времени? Выберите цифровой файл. "
-            "Он придёт в течение 24 часов, и его можно распечатать или переслать.")
+            + HEDIYE_RU[m.group(3)])
 
 
 SABIT = {
@@ -146,6 +162,14 @@ SABIT = {
         "ВАШ МАКЕТ\nДля каждого заказа постера мы отправляем вам макет через сообщения Etsy в течение 24 часов после заказа. "
         "Мы печатаем сразу после того, как вы его одобрите. Если в течение 24 часов после получения макета мы не получим от вас "
         "ответа, мы напечатаем дизайн в том виде, в каком он показан на макете.",
+    # Serdar 28 Eki: onizleme ve onay gelmezse cumleleri dijitali de kapsar (eski paragraf geriye uyum icin kalir)
+    "YOUR PREVIEW\nWe send you a preview via Etsy Messages within 24 hours of your order. We print your poster or prepare your file "
+    "as soon as you approve it. If we don't hear from you within 24 hours of receiving the preview, we go ahead with the design as "
+    "shown: we print your poster, or send your digital file as a download link in Etsy Messages.":
+        "ВАШ МАКЕТ\nМы отправляем вам макет через сообщения Etsy в течение 24 часов после заказа. Мы печатаем постер или готовим "
+        "файл сразу после того, как вы его одобрите. Если в течение 24 часов после получения макета мы не получим от вас ответа, "
+        "мы продолжим работу с дизайном в том виде, в каком он показан на макете: напечатаем постер или отправим цифровой файл "
+        "в виде ссылки для скачивания в сообщениях Etsy.",
     "PRINT\n- Printed on premium matte art paper with long-lasting inks\nFrames shown in photos are for display only and are not "
     "included. Prints ship unframed.":
         "ПЕЧАТЬ\n- Печать на премиальной матовой художественной бумаге стойкими чернилами\nРамы на фото показаны только для "
@@ -200,13 +224,13 @@ KALIP = [
                 r"Message ideas: (.+)"), p_siparis),
     (re.compile(r"DIGITAL FILE\n- One print ready JPG file in the color and size you choose\n- High resolution: 300 dpi at the "
                 r"full size you choose, from (\d+ x \d+) to (\d+ x \d+) inches, or (A\d) to (A\d)\n- ("
-                + "|".join(re.escape(k) for k in TESLIM_RU) + r")\. We check every personalization by hand before sending\n- Download it from Purchases in a web "
-                r"browser\. The Etsy app can't download files\n- Print it at home, at a local print shop or with an online print "
+                + "|".join(re.escape(k) for k in TESLIM_RU) + r")\. We check every personalization by hand before sending\n- ("
+                + "|".join(re.escape(k) for k in INDIR_RU) + r")\n- Print it at home, at a local print shop or with an online print "
                 r"service\n- Nothing is shipped\. For personal use only\."), p_dijital),
     (re.compile(r"SIZES\n(\d+) sizes, from (\d+ x \d+) to (\d+ x \d+) inches, plus (A\d) to (A\d)\. Every size is available as a "
                 r"print and as a digital file\. See the size guide photo\."), p_boy),
     (re.compile(r"THE PERFECT GIFT\nA keepsake made for " + B_RX + " and " + B_RX + r" couples\. Short on time\? Choose the digital "
-                r"file\. It arrives within 24 hours, ready to print or share\."), p_hediye),
+                r"file\. (" + "|".join(re.escape(k) for k in HEDIYE_RU) + ")"), p_hediye),
 ]
 
 

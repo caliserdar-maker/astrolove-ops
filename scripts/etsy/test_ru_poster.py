@@ -24,7 +24,8 @@ BOY = ("SIZES\n13 sizes, from 8 x 10 to 24 x 36 inches, plus A4 to A2. Every siz
 HEDIYE = ("THE PERFECT GIFT\nA keepsake made for Aries and Leo couples. Short on time? Choose the digital file. It arrives within 24 "
           "hours, ready to print or share.")
 YENI_URETIM = [k for k in P.SABIT if k.startswith("PRODUCTION AND DELIVERY") and "tracking" not in k][0]   # 26 Eki takipsiz paragraf
-sabit = [k for k in P.SABIT if k not in (P.BEYAN, YENI_URETIM)]
+YENI_ONIZLEME = [k for k in P.SABIT if k.startswith("YOUR PREVIEW\nWe send you")][0]   # 28 Eki onizleme paragrafi
+sabit = [k for k in P.SABIT if k not in (P.BEYAN, YENI_URETIM, YENI_ONIZLEME)]
 EN_CANLI = "\n\n".join([GIRIS, P.BEYAN, "Aries: March 21 to April 19. Leo: July 23 to August 22.", SIPARIS, sabit[0], DIJITAL] + sabit[1:3]
                  + [BOY] + sabit[3:] + [HEDIYE])
 EN = P.poster_en(EN_CANLI)   # Serdar 23 Eki madde 1-2: Latin harf notu
@@ -48,6 +49,18 @@ def main():
     ru2, k2 = P.kur(en2, dict(ENV, boy=["5x7"] + ENV["boy"]))
     s.append(("26 Eki: yeni teslim + takipsiz uretim + 14 boy PASS", k2["pass_"] and "электронную почту" in ru2 and "трек" not in ru2
               and "14 размеров: от 5 × 7" in ru2 and "от 5 × 7 до 24 × 36 дюймов или" in ru2))
+    # 28 Eki (Serdar): celiskili 4 cumlenin yeni hali (pod_5x7_kuru EN_DEGISIKLIK) -> PASS, RU ayni bilgi
+    import pod_5x7_kuru as K
+    en3 = en2
+    for x, y in K.EN_DEGISIKLIK[4:]:
+        assert en3.count(x) == 1, x[:40]
+        en3 = en3.replace(x, y)
+    ru3, k3 = P.kur(en3, dict(ENV, boy=["5x7"] + ENV["boy"]))
+    s.append(("28 Eki: 4 cumle yeni hali PASS, RU karsiliklari", k3["pass_"] and k3["paragraf_en"] == 16
+              and "ссылку для скачивания через сообщения Etsy" in ru3 and "Покупки" not in ru3
+              and "Мы печатаем постер или готовим файл" in ru3 and "Для каждого заказа постера" not in ru3
+              and "Его не нужно отправлять по почте" in ru3 and "в течение 24 часов, и его можно" not in ru3
+              and "отправим цифровой файл в виде ссылки для скачивания" in ru3))
     s.append(("kalip disi paragraf FAIL", not P.kur(EN + "\n\nNEW\nSomething.", ENV)[1]["pass_"]))
     s.append(("envanter boy sayisi farki FAIL", not P.kur(EN, dict(ENV, boy=ENV["boy"][:12]))[1]["pass_"]))
     s.append(("beyansiz EN FAIL", not P.kur(EN.replace(P.BEYAN + "\n\n", ""), ENV)[1]["pass_"]))

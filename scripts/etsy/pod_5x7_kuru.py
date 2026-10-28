@@ -11,7 +11,7 @@ Plan (yazim ayri betik + Serdar onayi):
     readiness = blogun readiness_state_id'si, SKU POD-<CIFT>-5x7 / POD-<CIFT>-5x7-DIGITAL. Mevcut 130 urun (SKU, deger, value_id,
     fiyat, adet, acik, readiness) AYNEN. price/quantity/sku/readiness_on_property aynen.
  2) Kargo profili 314711751541: yalniz AU hedefi min/max teslim 7-21 (Serdar 26 Eki); diger her alan ayni.
- 3) Aciklama EN (4 degisiklik, her biri tam 1 kez) + RU ru_poster.kur (5x7 dahil boy listesi) + kapilar.
+ 3) Aciklama EN (8 degisiklik: 26 Eki 4 + 28 Eki celiski 4, her biri tam 1 kez) + RU ru_poster.kur (5x7 dahil boy listesi) + kapilar.
 Kapilar (ilan basina): state active (CLAUDE.md: updateListing taslagi yayina alir -> taslak ATLANIR), 130 urun / 13 bilinen boy /
 5 renk / 2 format, 5x7 yok; once/sonra karsilastirma; aciklama yasak ifade + tire; RU kur PASS + RU_YASAK + ru_yazim_kapisi.
 Cikti: <out>/KURU_<lid>.json, PLAN.csv, OZET.md (ilan basina degisiklik listesi), PROFIL_PLAN.json, ISTEK_TAHMINI.json."""
@@ -47,19 +47,23 @@ EN_DEGISIKLIK = [
     ("- Delivered to your Etsy order within 24 hours. We check every personalization by hand before sending",
      "- We send a free preview via Etsy Messages within 24 hours. After you approve, your file is emailed to you within 24 hours. "
      "We check every personalization by hand before sending"),
-]
-# Karar sonrasi celisen satirlar: DEGISTIRILMEZ, liste olarak raporlanir (Serdar karar verecek).
-CELISKI = [
+    # Serdar 28 Eki: celiskili 4 cumlenin yeni hali (canli metinden dogrulandi: KURU_4570143815.json aciklama_ham satir 16, 22, 59)
     ("Download it from Purchases in a web browser. The Etsy app can't download files",
-     "dosya e-postayla geliyorsa Etsy Purchases indirme talimati celisir"),
-    ("For every print, we send you a preview via Etsy Messages within 24 hours of your order.",
-     "dijital de onizleme aliyor; 'For every print' yalniz baskiyi soyluyor"),
+     "If email doesn't suit you, we can send you a download link through Etsy Messages."),
+    ("For every print, we send you a preview via Etsy Messages within 24 hours of your order. We print as soon as you approve it.",
+     "We send you a preview via Etsy Messages within 24 hours of your order. We print your poster or prepare your file as soon as "
+     "you approve it."),
     ("Short on time? Choose the digital file. It arrives within 24 hours, ready to print or share.",
-     "dijital artik onizleme + onay + 24 saat; '24 saatte gelir' iddiasi celisir"),
+     "Short on time? Choose the digital file. Nothing to ship, so it is ready to print or share soon after you approve your preview."),
+    ("If we don't hear from you within 24 hours of receiving the preview, we print the design as shown.",
+     "If we don't hear from you within 24 hours of receiving the preview, we go ahead with the design as shown: we print your "
+     "poster, or send your digital file as a download link in Etsy Messages."),
+]
+# Karar sonrasi celisen satirlar: DEGISTIRILMEZ, liste olarak raporlanir (Serdar karar verecek). Serdar 28 Eki: indirme, onizleme,
+# 'Short on time' ve onay gelmezse cumleleri EN_DEGISIKLIK'e alindi; ambalaj (5x7 karariyla) ve 'Nothing is shipped' (dogru) kalir.
+CELISKI = [
     ("Prints are rolled in tissue paper and sent in a thick cardboard tube. Small prints to Europe may come in a stiff flat envelope.",
      "PACKAGING Printful 5x7 icin dogrulanmadi"),
-    ("If we don't hear from you within 24 hours of receiving the preview, we print the design as shown.",
-     "dijitalde onay gelmezse ne olacagi yazmiyor; e-posta adresi siparis adimlarinda istenmiyor"),
     ("- Nothing is shipped. For personal use only.",
      "dijital varyant fiziksel ilanda: AU alicisi kargo profili tahminini (7-21 + hazirlik) gorur, metin 'Nothing is shipped' der"),
 ]
