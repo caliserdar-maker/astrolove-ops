@@ -5,17 +5,23 @@ Sorun: kupa_kapak43.py kapaginin Etsy arama kirpiminda (4:5 orta) sag kupanin me
   B) kupalar birbirine yaklastirilir (ayni sahne olcegi)
   C) mevcut kapak (karsilastirma)
 Once OLCULUR (2048 kare sahne; 4:3 kirpim y 226-1762, 3000 / 2048 = 1.4648 buyutme; 4:5 orta kirpim cikti x 600-2400 = sahne x 409.6-1638.4):
-  kulplar: govde disinda y 950-1450 bandinda sutun basina > 25 beyaz piksel (lum > 225, doygunluk < 15) -> en sol / en sag x
-  govdeler: geo_kapak_k40.json (sol / sag xl, xr); baski bolgesi: kare kapak - bos sahne farki > 25 (y >= 780); baslik: ayni fark, y < 780
+  kulplar: govde disinda y 950-1450 bandinda sutun basina > 25 acik piksel (lum > 190, doygunluk < 15) -> en sol / en sag x
+    (sag kulbun dis kenari golgede: lum > 225 esigi 1986 veriyordu, gradyanla kenar ~2004-2009; inceleme 28 Eki)
+  govdeler: geo_kapak_k40.json (sol / sag xl, xr); baski bordur dahil: kare kapak - bos sahne farki > 25 (y >= 780, govde icinde,
+    sutunda >= 20 piksel); baslik: ayni fark, y < 780
+  metin: koyu (max < 90) ve dusuk doygun (< 35) piksel satir kumeleri, govde icinde; sol kupa y >= 1400 kumeleri = isimler
+    (EMILY JAMES, CANCER LIBRA), sag kupa y >= 1250 ilk kume = mesaj, sonrakiler = isimler; x araligi govde merkezinden 30 px
+    bosluga kadar yayilim (bordur yapragi bitisikse ust sinir)
 A ve B yalniz olcum kapisi gecerse uretilir:
-  A: gereken olcek k = kirpim / icerik; k ile kuculen 2048 kare sahne 4:3 tuvali (2048 x 1536) kaplamali (2048 k >= 2048 ve 2048 k >= 1536),
-     yoksa eksik alan icin sahnede piksel yok -> URETILMEZ.
-  B: bosluk sifira insa bile kulpla icerik genisligi <= kirpim olmali; degilse kupalar ust uste biner -> URETILMEZ.
+  A: gereken olcek k = kirpim / icerik; mevcut 4:3 kapak sahnenin 2048 px genisliginin TAMAMINI kullaniyor (kirpim yalniz dikey),
+     k < 1 iken yatayda sahnede olmayan piksel gerekir -> URETILMEZ (kirpim disi dikey pikseller yalniz yuksekligi kurtarir).
+  B: bosluk sifira insa bile kulpla icerik genisligi <= kirpim olmali; degilse kupalar ust uste biner -> istendigi gibi URETILEMEZ.
 Cikti <out>: C_KAPAK_3000x2250.jpg, C_ARAMA_4x5.jpg, C_MAGAZA_1x1.jpg, OLCUM_CIZIM.jpg (kirpim ve icerik sinirlari), KONTAK_KUPA_KAPAK_ALT.jpg
 (< 300 KB, A / B / C yan yana; A ve B uretilmediyse olcum paneli), OLCUM.json (kontroller PASS / FAIL).
 Kullanim: kupa_kapak_alt.py <kapak 4:3 jpg> <kare kapak jpg> <bos sahne png> <geo json> <out>"""
 import io
 import json
+import shutil
 import sys
 from pathlib import Path
 
@@ -40,19 +46,44 @@ def font(n):
 def olc(kare, sahne, geo):
     s = np.asarray(sahne.convert("RGB")).astype(int); k = np.asarray(kare.convert("RGB")).astype(int)
     lum, sat = s.mean(2), s.max(2) - s.min(2)
-    cs = ((lum > 225) & (sat < 15))[950:1450].sum(0)
+    cs = ((lum > 190) & (sat < 15))[950:1450].sum(0)
     sol_k = min(x for x in range(0, int(geo["sol"][0])) if cs[x] > 25)
     sag_k = max(x for x in range(int(geo["sag"][1]), S) if cs[x] > 25)
     d = np.abs(k - s).max(2) > 25
     db = d.copy(); db[:780] = False; ys, xs = np.nonzero(db)
     baski = {}
     for ad in ("sol", "sag"):                      # baski yalniz govde icinde (golge / parlaklik farki govde disinda da cikiyor)
-        m = (xs >= geo[ad][0]) & (xs <= geo[ad][1])
-        baski[ad] = [int(xs[m].min()), int(xs[m].max())]
+        x0, x1 = int(geo[ad][0]), int(geo[ad][1])
+        sx = np.nonzero(db[:, x0:x1 + 1].sum(0) >= 20)[0] + x0          # tek pikselli aykiri sutunlar disarida
+        baski[ad] = [int(sx.min()), int(sx.max())]
+    koyu = (k.max(2) < 90) & ((k.max(2) - k.min(2)) < 35)
+    metin = {}
+    for ad, y_alt in (("sol", 1400), ("sag", 1250)):
+        x0, x1 = int(geo[ad][0]), int(geo[ad][1])
+        rows = np.nonzero(koyu[780:int(geo[ad][3]), x0:x1].sum(1) > 6)[0] + 780
+        kume, bas, onc = [], rows[0], rows[0]
+        for r in rows[1:]:
+            if r - onc > 6:
+                kume.append((bas, onc)); bas = r
+            onc = r
+        kume.append((bas, onc))
+        for i, (a, b) in enumerate([c for c in kume if c[0] >= y_alt and c[1] - c[0] >= 8]):   # < 8 px: gurultu / alt uzanti parcasi
+            cs_ = koyu[a:b + 1].sum(0); ink = np.nonzero(cs_[x0:x1] > 0)[0] + x0
+            if not len(ink):
+                continue
+            c = int(ink[np.argmin(abs(ink - (x0 + x1) / 2))]); L = R_ = c
+            for yon in (-1, 1):
+                x, g = c, 0
+                while x0 < x < x1 and g < 30:
+                    x += yon; g = 0 if cs_[x] else g + 1
+                    if cs_[x]:
+                        L, R_ = min(L, x), max(R_, x)
+            ad_m = "isim" if ad == "sol" else ("mesaj" if i == 0 else "isim")
+            metin.setdefault(f"{ad}_{ad_m}", []).append([L, int(a), R_, int(b)])
     dt = d.copy(); dt[780:] = False; dt[:Y0] = False; ys, xs = np.nonzero(dt)
     baslik = [int(xs.min()), int(ys.min()), int(xs.max()), int(ys.max())]
     return dict(kulp_sol_x=sol_k, kulp_sag_x=sag_k, govde_sol=[geo["sol"][0], geo["sol"][1]], govde_sag=[geo["sag"][0], geo["sag"][1]],
-                govde_arasi=round(geo["sag"][0] - geo["sol"][1], 1), baski=baski, baslik=baslik)
+                govde_arasi=round(geo["sag"][0] - geo["sol"][1], 1), baski=baski, metin=metin, baslik=baslik)
 
 
 def main():
@@ -69,23 +100,29 @@ def main():
     R["A"] = dict(gereken_olcek=round(k, 4), kuculen_sahne=round(S * k), tuval=[S, KH],
                   kaplanan_genislik_orani=round(S * k / S, 3), kaplanan_yukseklik_orani=round(min(1, S * k / KH), 3),
                   uretildi=S * k >= S and S * k >= KH,
-                  neden="kuculen kare sahne 4:3 tuvali kaplamiyor; eksik kenarlar icin sahnede piksel yok (ayna / uzatma / AI yasak)")
+                  neden="sahne zaten tam genislikte (4:3 kirpim yalniz dikey); kucultme yatayda sahnede olmayan piksel ister (ayna / uzatma / AI yasak)",
+                  kulpsuz_govde_olcek=round((kx1 - kx0) / (O["govde_sag"][1] - O["govde_sol"][0]), 4))
     # B
     sifir = icerik - O["govde_arasi"]
     R["B"] = dict(bosluk_sifir_icerik=round(sifir, 1), yalniz_govdeler=round(O["govde_sag"][1] - O["govde_sol"][0] - O["govde_arasi"], 1),
                   gereken_ust_uste=round(sifir - (kx1 - kx0), 1), uretildi=sifir <= kx1 - kx0,
-                  neden="bosluk sifirken bile icerik kirpimdan genis; kupalar ust uste binmeli ve bosalan yerin arkasi icin sahnede piksel yok")
+                  neden="yalniz iki govde yan yana bile kirpimdan genis; kupalar ust uste binmeli -> istendigi gibi uretilemez")
     # C kontrolleri
     a = np.asarray(C).astype(int)
+    # kenar seridi: tam satir / sutunu tek renk (ptp <= 6) 8 px serit; C fotograf kirpimi oldugu icin bilgi amacli (A / B uretilseydi anlamli)
     kenar = {ad: int(sum(1 for s_ in sr if (np.ptp(s_, axis=0) <= 6).all())) for ad, sr in
              (("ust", a[:8]), ("alt", a[-8:]), ("sol", a[:, :8].transpose(1, 0, 2)), ("sag", a[:, -8:].transpose(1, 0, 2)))}
-    kes = lambda x0, x1: x0 >= kx0 and x1 <= kx1
+
+    def kontrol(k0, k1):                        # sahne pikselinde kirpim; her oge icin icerde mi + tasma (cikti px, + = disarida)
+        oge = dict(baslik=(O["baslik"][0], O["baslik"][2]), sol_kulp=(O["kulp_sol_x"],) * 2, sol_govde=(O["govde_sol"][0], O["govde_sol"][1]),
+                   sag_govde=(O["govde_sag"][0], O["govde_sag"][1]), sag_kulp=(O["kulp_sag_x"],) * 2)
+        for ad, kutular in O["metin"].items():
+            oge[ad] = (min(b[0] for b in kutular), max(b[2] for b in kutular))
+        return {ad: dict(icerde=bool(x0 >= k0 and x1 <= k1), tasma_px=round(max(k0 - x0, x1 - k1, 0) * OL)) for ad, (x0, x1) in oge.items()}
     R["C"] = dict(boyut=list(C.size), boyut_ok=C.size == (OUT_W, OUT_H), kenar_tek_renk_satir=kenar,
-                  arama_45=dict(baslik=kes(O["baslik"][0], O["baslik"][2]), sol_kupa_kulp_dahil=kes(O["kulp_sol_x"], O["govde_sol"][1]),
-                                sag_kupa_kulp_dahil=kes(O["govde_sag"][0], O["kulp_sag_x"]), isimler_sol_baski=kes(*O["baski"]["sol"]),
-                                mesaj_sag_baski=kes(*O["baski"]["sag"])))
-    R["C"]["sonuc"] = "PASS" if R["C"]["boyut_ok"] and not any(kenar.values()) and all(R["C"]["arama_45"].values()) else "FAIL"
-    C.save(out / "C_KAPAK_3000x2250.jpg", quality=92)
+                  arama_45=kontrol(kx0, kx1), magaza_11_bilgi=kontrol(K11[0] / OL, K11[1] / OL))
+    R["C"]["sonuc"] = "PASS" if R["C"]["boyut_ok"] and not any(kenar.values()) and all(v["icerde"] for v in R["C"]["arama_45"].values()) else "FAIL"
+    shutil.copyfile(kapak, out / "C_KAPAK_3000x2250.jpg")                    # mevcut kapagin bayt kopyasi (yeniden kodlama yok)
     c45 = C.crop((round(K45[0]), 0, round(K45[1]), OUT_H)); c45.save(out / "C_ARAMA_4x5.jpg", quality=90)
     c11 = C.crop((round(K11[0]), 0, round(K11[1]), OUT_H)); c11.save(out / "C_MAGAZA_1x1.jpg", quality=90)
     # olcum cizimi: kirpim kutulari + icerik sinirlari (cikti pikseli)
@@ -94,7 +131,9 @@ def main():
         d.rectangle([x0, 4, x1, OUT_H - 5], outline=renk, width=10); d.text((x0 + 14, 14 if renk[2] else 70), ad, fill=renk, font=f)
     cx = lambda x: x * OL
     for x, ad in ((O["kulp_sol_x"], "sol kulp"), (O["kulp_sag_x"], "sag kulp"), (O["baski"]["sag"][1], "mesaj sonu")):
-        d.line([cx(x), 900, cx(x), 2000], fill=(230, 0, 0), width=8); d.text((cx(x) + 10, 2010 if "kulp" in ad else 840), ad, fill=(230, 0, 0), font=f)
+        d.line([cx(x), 900, cx(x), 2000], fill=(230, 0, 0), width=8)
+        tx = cx(x) - d.textlength(ad, font=f) - 10 if cx(x) > OUT_W / 2 else cx(x) + 10           # sag etiketler cizginin solunda (kenarda kesilmez)
+        d.text((tx, 2010 if "kulp" in ad else 840), ad, fill=(230, 0, 0), font=f)
     m.save(out / "OLCUM_CIZIM.jpg", quality=85)
 
     def panel(harf, satirlar):
@@ -103,12 +142,12 @@ def main():
         for t in satirlar:
             dd.text((30, y), t, fill=(40, 34, 32), font=font(27)); y += 44
         return p
-    pa = panel("A", [f"Kulpla icerik {icerik} px, 4:5 kirpim {kx1 - kx0:.0f} px (sahne).", f"Gereken olcek {k:.3f}: sahne {S * k:.0f} px.",
-                     f"Tuval 2048 x 1536; kaplanan genislik %{100 * k:.0f},", f"yukseklik %{100 * min(1, S * k / KH):.0f}.",
-                     "Eksik kenar icin sahnede piksel yok;", "ayna / uzatma / AI yasak."])
-    pb = panel("B", [f"Govde arasi bosluk {O['govde_arasi']} px.", f"Bosluk 0 iken icerik {sifir:.0f} px > {kx1 - kx0:.0f} px.",
-                     f"Kupalar {sifir - (kx1 - kx0):.0f} px ust uste binmeli.", f"Yalniz govdeler {R['B']['yalniz_govdeler']:.0f} px.",
-                     "Bosalan yerin arkasi icin", "sahnede piksel yok."])
+    pa = panel("A", ["Sahne zaten tam genislikte (4:3 kirpim", "yalniz dikey); kucultme yatayda",
+                     "sahnede olmayan piksel ister.", f"Kulpla icerik {icerik} px, 4:5 kirpim {kx1 - kx0:.0f} px:",
+                     f"olcek {k:.3f}, kaplanan genislik %{100 * k:.0f}.", f"Kulpsuz govdeler bile olcek {R['A']['kulpsuz_govde_olcek']:.3f}."])
+    pb = panel("B", [f"Govde arasi bosluk {O['govde_arasi']:.0f} px.", f"Yalniz iki govde yan yana {R['B']['yalniz_govdeler']:.0f} px",
+                     f"> 4:5 kirpim {kx1 - kx0:.0f} px.", f"Kulplarla bosluk 0 iken {sifir:.0f} px:",
+                     f"kupalar {sifir - (kx1 - kx0):.0f} px ust uste binmeli.", "Istendigi gibi uretilemez."])
     # kontak: satir 1 C (tam, 4:5, 1:1), satir 2 A paneli, B paneli, olcum cizimi
     th = 450
     def kucuk(im):
