@@ -3,7 +3,7 @@ name: wa-kupa-kart-ornek
 # Girdi (yalniz okunur): Drive dosya id poster_id (Midnight Blue ornek poster 2000x3000, isim bandi kaynagi; Merkez 27 Eki madde 3),
 # dal temiz/kupa-orchard kupa_orchard/ (Orchard gorunumleri cift.py ile ayni cagri, orchard_gorunum.py; kupa-orchard78 surumleri),
 # dal kupa-printful-sonuc kupa_uretim/sembol/<CIFT>/ (sol, sag, ana). Kupa zemini kupa_zemin.py ile #F5F0E7 (madde 4).
-# Cikti: Drive TEMP/WA_KUPA_KART_ORNEK/[<hedef>/]<damga>/ 10 kart (kupa 02 ve 04 dahil, Merkez 28 Eki) + KONTAK_WA_KUPA.jpg +
+# Cikti: Drive TEMP/WA_KUPA_KART_ORNEK/[<hedef>/]<damga>/ 10 kart (kupa 02 ve 04 dahil, Merkez 28 Eki) + KAPAK43/ (4:3 kapak ornegi) + KONTAK_WA_KUPA.jpg +
 # KART_OZET.json + zemin_olcum.json. hedef verilirse (orn. 20261027_192528) cikti onun ALT klasorune yazilir; mevcut dosyalar silinmez /
 # ustune yazilmaz (--immutable).
 # scripts/kapak78/wa_kupa_kart_ornek.py (stil ve kapilar yd_kart_ornek.py).
@@ -73,6 +73,8 @@ jobs:
           python3 scripts/kapak78/wa_kupa_kart_ornek.py --cift "$C" --a "$A" --b "$B" --sembol "_kupa/kupa_uretim/sembol/$C" \
             --poster _g/POSTER.jpg --sahne _s --out _out
           cp _s/zemin_olcum.json _out/
+          # Merkez 28 Eki 2. mesaj madde 6: kare kapaklar 4:3 ORNEK (01 orange + 08 fig); toplu uretim Serdar gorsel onayindan sonra
+          _v12/bin/python3 -I scripts/kapak78/kupa_kapak43.py _ko/kupa_orchard _s/baski "$A" "$B" _out/KAPAK43 --stiller orange,fig
           echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
       - name: Drive'a yaz
         env: {HD: "${{ inputs.hedef }}"}
