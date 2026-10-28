@@ -6,7 +6,7 @@ name: poster-maliyet-olcum
 on:
   workflow_dispatch:
     inputs:
-      bolum: {description: "printful,belge,teslim,prodigi,ulke", default: "printful,belge,teslim,prodigi,ulke"}
+      bolum: {description: "printful,belge,teslim,prodigi,ulke", default: "printful,belge,pbelge,teslim,prodigi,ulke"}
       csv_id: {description: "Drive PRINTFUL_POSTER.csv id (25 Eki)", default: "1pK6jYu--y4ohExK0MgL-hwVMWI0AQrhl"}
       ozet_damga: {description: "yalniz ozet: TEMP/POSTER_MALIYET/<damga> klasorleri (bosluklu) okunur, OZET.txt Google Doc olarak yazilir", default: ""}
 permissions:
@@ -63,7 +63,7 @@ jobs:
           for d in $O; do rclone copy "gdrive:ASTROLOVE/TEMP/POSTER_MALIYET/$d" _out --exclude "kosu_log.txt" --exclude "OZET*" -q; done
           python3 -I scripts/printful/maliyet_olcum.py _out --bolum ozet
           D=$(date -u +%Y%m%d_%H%M%S)
-          rclone copyto _out/OZET.txt "gdrive:ASTROLOVE/TEMP/POSTER_MALIYET/OZET_$D.txt" --drive-import-formats txt -q
+          rclone copyto _out/OZET.txt "gdrive:ASTROLOVE/TEMP/POSTER_MALIYET/OZET_$D.txt" --drive-import-formats txt --drive-export-formats txt -q
           echo "Ozet: TEMP/POSTER_MALIYET/OZET_$D (Google Doc)" | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Olcum
         if: ${{ inputs.ozet_damga == '' }}

@@ -161,6 +161,28 @@ def belge(out):
     print(f"belge: {len(D)} makale, govdeli {sum(1 for a in D if a.get('govde'))}", flush=True)
 
 
+PRODIGI_SAYFA = ["https://help.prodigi.com/support/solutions/articles/35000138833-tracking-availability",
+                 "https://help.prodigi.com/support/solutions/articles/35000138831-what-s-the-difference-between-budget-and-standard-shipping-",
+                 "https://help.prodigi.com/support/solutions/articles/35000225356-what-different-shipping-options-do-you-support-",
+                 "https://support.prodigi.com/hc/en-us/articles/13168768147740-What-shipping-or-courier-options-are-there",
+                 "https://www.prodigi.com/faq/shipping/", "https://www.prodigi.com/print-api/docs/reference/"]
+
+
+def pbelge(out):
+    """Prodigi kargo / takip sayfalari (HTML -> metin; salt okuma)"""
+    D = []
+    for u in PRODIGI_SAYFA:
+        try:
+            r = S.get(u, timeout=60, headers={"Accept": "text/html"})
+            t = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", re.sub(r"(?is)<(script|style).*?</\1>", " ", r.text)))
+            cumle = [c.strip() for c in re.split(r"(?<=[.!?])\s+", t) if re.search(r"track|budget|standardplus|standard plus|express|overnight", c, re.I)]
+            D.append(dict(url=u, status=r.status_code, cumle=cumle[:40]))
+        except Exception as e:                                   # noqa: BLE001
+            D.append(dict(url=u, status=type(e).__name__, cumle=[]))
+    (out / "PRODIGI_BELGE.json").write_text(json.dumps(D, indent=1, ensure_ascii=False))
+    print(f"pbelge: {sum(1 for d in D if d['cumle'])}/{len(D)} sayfa", flush=True)
+
+
 def teslim(out, csv_yol):
     rows = list(csv.DictReader(open(csv_yol, encoding="utf-8")))
     print("teslim CSV sutunlari:", list(rows[0].keys()) if rows else None, flush=True)
@@ -199,7 +221,7 @@ def prodigi(out, T):
             kayit = dict(boy=b, sku=sku, urun_var=var, urun_http=r.status_code,
                          aciklama=(r.json().get("product") or {}).get("description") if var else None, teklif=[])
             if var:
-                for y in ("Budget", "Standard", "Express"):
+                for y in ("Budget", "Standard", "StandardPlus", "Express"):
                     q = requests.post("https://api.prodigi.com/v4.0/quotes", headers=H, timeout=60, json={
                         "shippingMethod": y, "destinationCountryCode": "AU", "currencyCode": "USD",
                         "items": [{"sku": sku, "copies": 1, "assets": [{"printArea": "default"}]}]})
@@ -284,6 +306,11 @@ def ozet(out):
             cumle = [c.strip() for c in re.split(r"(?<=[.!?])\s+", g) if anahtar.search(c)]
             L.append(f"## {a.get('baslik')} | {a.get('url')} | guncelleme {a.get('guncelleme')} | HTTP {a.get('status')}")
             L += [f"- {c[:400]}" for c in cumle[:25]]
+    if (out / "PRODIGI_BELGE.json").exists():
+        L.append("# PRODIGI BELGE (kargo / takip cumleleri)")
+        for d in json.loads((out / "PRODIGI_BELGE.json").read_text()):
+            L.append(f"## {d['url']} | HTTP {d['status']}")
+            L += [f"- {c[:400]}" for c in d["cumle"]]
     (out / "OZET.txt").write_text("\n".join(L) + "\n", encoding="utf-8")
     print(f"ozet: {len(L)} satir", flush=True)
 
@@ -301,6 +328,8 @@ def main():
         prodigi(out, T)
     if "ulke" in b:
         ulke(out, a.pod_state, a.kupa_dir)
+    if "pbelge" in b:
+        pbelge(out)
     if "ozet" in b:
         ozet(out)
     return 0
