@@ -253,7 +253,7 @@ jobs:
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}      # yalniz opak receipt kodu icin
         run: |
           set -euo pipefail
-          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
+          TOKEN_RC=0; bash scripts/etsy/token_geri_yaz.sh || TOKEN_RC=1
           STATE_FAIL=""
           if [ -f _work/DURUM_STATE/ONCE ]; then      # azalmama + okumadan beri degismedi + YEDEK/ + sha256 geri okuma
             python3 scripts/ops/durum_dosyasi.py yaz --uzak "gdrive:ASTROLOVE/TEMP/POD_ORDERS_STATE.csv" --yerel _work/state.csv \
@@ -280,6 +280,7 @@ jobs:
           [ -z "$STATE_FAIL" ] || { echo "::error::POD_ORDERS_STATE.csv kapisi FAIL (ayrinti yukarida); kosu kirmizi"; exit 1; }
           # Serdar 23 Eki (2c): kota yuzunden okunmayan receipt sessiz gecmez; paketler/Drive yazildiktan SONRA kosu kirmizi biter.
           if [ -s _out/KOTA_DURDU.txt ]; then echo "::error title=ROUTER KOTA::$(head -c 400 _out/KOTA_DURDU.txt)"; exit 1; fi
+          exit $TOKEN_RC
       # Artifact'ta musteri verisi YOK (kart, paket/adres, STATE/receipt yalniz Drive'da): yalniz SKU haritasi.
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}

@@ -160,10 +160,7 @@ jobs:
         run: |
           set -euo pipefail
           TOK=0
-          if [ -f _work/ETSY_TOKEN.json.updated ]; then
-            rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" \
-              || { echo "::error::yenilenen token Drive'a YAZILAMADI (refresh token kaybolabilir)"; TOK=1; }
-          fi
+          bash scripts/etsy/token_geri_yaz.sh || TOK=1
           if grep -rIqE 'x-api-key|refresh_token|"access_token"' _out/ 2>/dev/null; then
             echo "::error::ciktida sir benzeri anahtar bulundu, Drive'a yazilmadi"; exit 1
           fi

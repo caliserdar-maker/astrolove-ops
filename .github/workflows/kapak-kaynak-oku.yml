@@ -50,13 +50,11 @@ jobs:
       - name: Token geri yaz + cikti Drive'a
         if: ${{ always() }}
         run: |
-          if [ -f _work/ETSY_TOKEN.json.updated ]; then
-            rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "token geri yazildi" \
-              || { echo "::error::yenilenen token Drive'a geri yazilamadi"; exit 1; }
-          fi
+          TOKEN_RC=0; bash scripts/etsy/token_geri_yaz.sh || TOKEN_RC=1
           if ls _out/* >/dev/null 2>&1; then
             python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/ETSY_TOKEN.json _out || { echo "::error::ciktida sir"; exit 1; }
             rclone copy _out "gdrive:ASTROLOVE/TEMP/KAPAK_KAYNAK_20261026" -q && echo "Cikti: KAPAK_KAYNAK_20261026 (kosu ${GITHUB_RUN_ID})"
           fi
+          exit $TOKEN_RC
       - if: always()
         run: rm -rf _work ~/.config/rclone

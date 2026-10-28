@@ -64,8 +64,9 @@ jobs:
           RECEIPT: ${{ inputs.receipt }}
         run: |
           set -euo pipefail
-          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || echo "Token yenilenmedi"
+          TOKEN_RC=0; bash scripts/etsy/token_geri_yaz.sh || TOKEN_RC=1
           [[ "$RECEIPT" =~ ^[0-9]+$ ]] || exit 1
           [ -f _out/KISISEL.json ] && rclone copy _out "gdrive:ASTROLOVE/SIPARIS/$RECEIPT/OKUMA_${GITHUB_RUN_ID}" -q && echo "Cikti: SIPARIS/$RECEIPT/OKUMA_${GITHUB_RUN_ID}/" || { echo "::error::KISISEL yok"; exit 1; }
+          exit $TOKEN_RC
       - if: always()
         run: rm -rf _work _out ~/.config/rclone

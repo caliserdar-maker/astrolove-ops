@@ -131,7 +131,7 @@ jobs:
           HEDEF: ${{ inputs.hedef || 'KUPA_SIPARIS' }}
         run: |
           set -euo pipefail
-          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "Token geri yazildi" || true
+          TOKEN_RC=0; bash scripts/etsy/token_geri_yaz.sh || TOKEN_RC=1
           ILK=(); [ "$HEDEF" = "KUPA_SIPARIS" ] || ILK=(--ilk-kayit-izni)
           if [ -f _work/DURUM_STATE/ONCE ]; then      # azalmama + okumadan beri degismedi + YEDEK/ + sha256 geri okuma
             python3 scripts/ops/durum_dosyasi.py yaz --uzak "gdrive:ASTROLOVE/$HEDEF/STATE.csv" --yerel _work/STATE.csv \
@@ -139,6 +139,7 @@ jobs:
           else
             echo "::error::STATE okunamadi; Drive'daki STATE'e yazilmadi"; exit 1
           fi
+          exit $TOKEN_RC
       - name: Sonuc
         if: ${{ always() }}
         run: |

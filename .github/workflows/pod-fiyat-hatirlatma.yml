@@ -101,9 +101,6 @@ jobs:
         if: ${{ always() }}
         run: |
           set -euo pipefail
-          if [ -f _work/ETSY_TOKEN.json.updated ]; then
-            rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json"
-            echo "Token geri yazildi"
-          fi
+          bash scripts/etsy/token_geri_yaz.sh
       - if: ${{ always() }}
         run: rm -rf _work ~/.config/rclone

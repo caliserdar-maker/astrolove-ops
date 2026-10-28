@@ -66,6 +66,7 @@ jobs:
           set -euo pipefail
           STAMP=$(date -u +%Y%m%d_%H%M)
           [ -d _out ] && rclone copy _out "gdrive:ASTROLOVE/TEMP/SIPARIS_OZET_$STAMP" -q || true
-          rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" || true
+          TOKEN_RC=0; bash scripts/etsy/token_geri_yaz.sh || TOKEN_RC=1
           echo "Drive: TEMP/SIPARIS_OZET_$STAMP"
           rm -rf _work _out ~/.config/rclone
+          exit $TOKEN_RC
