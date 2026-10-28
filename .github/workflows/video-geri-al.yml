@@ -1,0 +1,91 @@
+name: video-geri-al
+# Tek ilan video GERI ALMA (Merkez 28 Eki; Serdar onayi yalniz 4570110121: v7 pilotu 40648877262 geri alinir). ETSY'YE YAZAR.
+# Yedek (Drive) yuklenir, geri okunur, pilot video silinir, geri okunur; ilanda tek video = yedek. updateListing / state degisikligi YOK.
+# scripts/etsy/video_geri_al.py (video_yukle_78 v7 yukle_tek / _aktif / _bekle). Cikti TEMP/VIDEO_V7_YUKLE/GERI_AL_<damga>/.
+on:
+  workflow_dispatch:
+    inputs:
+      lid: {description: "listing_id", required: true, default: "4570110121"}
+      yedek: {description: "Drive TEMP altinda yedek mp4 yolu", required: true, default: "VIDEO_V7_YEDEK_20261028_071202/4570110121_849112911.mp4"}
+      sil_video: {description: "silinecek (pilot) video_id; ilanda TAM OLARAK bu olmali", required: true, default: "850571467"}
+      pilot_mp4: {description: "Drive TEMP altinda pilot video (karsilastirma)", required: false, default: "VIDEO_V7_78/BIRLESIK_20261026_211614/AQUARIUS_AQUARIUS.mp4"}
+      confirm: {description: "VIDEO_GERI_AL", required: true, default: ""}
+permissions:
+  actions: read
+  contents: read
+jobs:
+  geri:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Girdi + onay kapisi
+        env: {L: "${{ inputs.lid }}", Y: "${{ inputs.yedek }}", SV: "${{ inputs.sil_video }}", PM: "${{ inputs.pilot_mp4 }}", C: "${{ inputs.confirm }}"}
+        run: |
+          [[ "$L" =~ ^[0-9]+$ && "$SV" =~ ^[0-9]+$ && "$Y" =~ ^[A-Za-z0-9_./-]+\.mp4$ && "$PM" =~ ^([A-Za-z0-9_./-]+\.mp4)?$ && "$Y" != *..* && "$PM" != *..* ]] || { echo "::error::girdi"; exit 1; }
+          [ "$C" = VIDEO_GERI_AL ] || { echo "::error::confirm VIDEO_GERI_AL olmali"; exit 1; }
+          echo "STAMP=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Kurulum
+        timeout-minutes: 10
+        run: |
+          set -euo pipefail
+          pip install -q requests==2.32.3 numpy==2.1.3 opencv-python-headless==4.10.0.84 pillow==11.0.0
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Yedek + pilot (Drive, kilit oncesi)
+        env: {Y: "${{ inputs.yedek }}", PM: "${{ inputs.pilot_mp4 }}"}
+        run: |
+          set -euo pipefail
+          mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/$Y" _work/yedek.mp4
+          [ -z "$PM" ] || rclone copyto "gdrive:ASTROLOVE/TEMP/$PM" _work/pilot.mp4
+          ls -l _work
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - name: Token
+        run: |
+          set -euo pipefail
+          umask 077
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+      - name: Geri alma
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          L: ${{ inputs.lid }}
+          SV: ${{ inputs.sil_video }}
+          PM: ${{ inputs.pilot_mp4 }}
+          C: ${{ inputs.confirm }}
+        run: |
+          set +e -o pipefail
+          P=""; [ -n "$PM" ] && P="--pilot-mp4 _work/pilot.mp4"
+          python3 scripts/etsy/video_geri_al.py --lid "$L" --yedek _work/yedek.mp4 --sil-video "$SV" $P --confirm "$C" --out _out 2>&1 | tee _work/kosu.log
+          echo "KOD=${PIPESTATUS[0]}" >> "$GITHUB_ENV"
+      - name: Token + cikti Drive'a
+        if: always()
+        run: |
+          set -uo pipefail
+          TOK=0; bash scripts/etsy/token_geri_yaz.sh || TOK=1
+          [ -f _work/kosu.log ] && python3 scripts/guvenlik/log_suz.py < _work/kosu.log > _out/kosu_log.txt
+          if grep -rIqE 'x-api-key|refresh_token|"access_token"' _out/ 2>/dev/null; then echo "::error::ciktida sir"; exit 1; fi
+          [ -d _out ] && rclone copy _out "gdrive:ASTROLOVE/TEMP/VIDEO_V7_YUKLE/GERI_AL_${STAMP}" -q && echo "::notice title=GERI AL::TEMP/VIDEO_V7_YUKLE/GERI_AL_${STAMP}/"
+          [ -f _out/GERI_AL.json ] && cat _out/GERI_AL.json >> "$GITHUB_STEP_SUMMARY" || true
+          [ "$TOK" = 0 ] && [ "${KOD:-1}" = 0 ]
+      - if: always()
+        run: rm -rf _work ~/.config/rclone
