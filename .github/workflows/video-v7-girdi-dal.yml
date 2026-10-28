@@ -1,7 +1,7 @@
 name: video-v7-girdi-dal
 # Yerel gelistirme girdisi (Merkez 28 Eki, mesaj silme duzeltmesi). Etsy API YOK; Drive yalniz OKUNUR. Oturum Drive / artifact
 # dosyasi indiremiyor (ag politikasi); girdiler ayri git dalina (girdi/v7-<kosu>) yazilir: kapak/KAPAK_<CIFT>.jpg (78, V10),
-# video/<CIFT>.mp4 ve log/<CIFT>_uretim.log (secilen ciftler, TAM78 klasorunden).
+# video/<CIFT>.mp4 ve log/<CIFT>_uretim.log, _ic.json (secilen ciftler, TAM78 klasorunden), RAPOR/ ve KONTROL/ (varsa).
 permissions:
   contents: write
 on:
@@ -45,8 +45,10 @@ jobs:
         for c in $C; do
           rclone copyto "gdrive:ASTROLOVE/TEMP/VIDEO_V7_DUZELTME/$T/TAM78/$c.mp4" "_d/video/$c.mp4" -q
           rclone copyto "gdrive:ASTROLOVE/TEMP/VIDEO_V7_DUZELTME/$T/TAM78/LOG/${c}_uretim.log" "_d/log/${c}_uretim.log" -q
+          rclone copyto "gdrive:ASTROLOVE/TEMP/VIDEO_V7_DUZELTME/$T/TAM78/LOG/${c}_ic.json" "_d/log/${c}_ic.json" -q 2>/dev/null || true
         done
-        echo "kapak $(ls _d/kapak | wc -l) video $(ls _d/video | wc -l)"; du -sh _d
+        for d in RAPOR KONTROL; do rclone copy "gdrive:ASTROLOVE/TEMP/VIDEO_V7_DUZELTME/$T/TAM78/$d" "_d/$d" -q 2>/dev/null || true; done
+        echo "kapak $(ls _d/kapak | wc -l) video $(ls _d/video | wc -l) rapor $(ls _d/RAPOR 2>/dev/null | wc -l)"; du -sh _d
         D="girdi/v7-$GITHUB_RUN_ID"
         cd _d && git init -q && git checkout -q -b "$D"
         git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
