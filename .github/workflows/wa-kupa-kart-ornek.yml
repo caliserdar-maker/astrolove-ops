@@ -1,12 +1,11 @@
 name: wa-kupa-kart-ornek
-# Wall art + kupa bilgi kartlari SADE stil ORNEGI (Merkez 27 Eki gorev C; Serdar 'Ok'). Tek cift, toplu uretim YOK, ETSY YOK, Canva yok.
-# Girdi (yalniz okunur): Drive dosya id poster_id (Midnight Blue ornek poster 2000x3000, isim bandi kaynagi; Merkez 27 Eki madde 3),
-# dal temiz/kupa-orchard kupa_orchard/ (Orchard gorunumleri cift.py ile ayni cagri, orchard_gorunum.py; kupa-orchard78 surumleri),
-# dal kupa-printful-sonuc kupa_uretim/sembol/<CIFT>/ (sol, sag, ana). Kupa zemini kupa_zemin.py ile #F5F0E7 (madde 4).
-# Cikti: Drive TEMP/WA_KUPA_KART_ORNEK/[<hedef>/]<damga>/ 10 kart (kupa 02 ve 04 dahil, Merkez 28 Eki) + KAPAK43/ (4:3 kapak ornegi) + KONTAK_WA_KUPA.jpg +
-# KART_OZET.json + zemin_olcum.json. hedef verilirse (orn. 20261027_192528) cikti onun ALT klasorune yazilir; mevcut dosyalar silinmez /
-# ustune yazilmaz (--immutable).
-# scripts/kapak78/wa_kupa_kart_ornek.py (stil ve kapilar yd_kart_ornek.py).
+# KART SABLONU ORNEGI (Merkez 28 Eki, Serdar onayi): wall art + kupa + YD bilgi kartlari yeni sablonlarla, YALNIZ tek cift (CANCER_LIBRA).
+# ETSY API YOK, toplu uretim YOK, Canva yok. Kod: scripts/kapak78/kart_sablon.py (ortak yerlesim + kapilar), wa_kupa_kart_ornek.py,
+# yd_kart_ornek.py, kupa_kapak43.py. Bu dal (kart-sablon-20261028) main'e alinmaz; is akisi bu dal ref'iyle tetiklenir.
+# mod=girdi : yerel gelistirme girdisi (Drive yalniz OKUNUR) git dalina yazilir: girdi/kart-<kosu> (MB 2000x3000 poster, YD yedek klasoru).
+# mod=uret  : Orchard gorunumleri (orchard_gorunum.py, kupa-orchard78 surumleri) + kupa_zemin.py, kartlar, kupa 4:3 kapak ornegi (01 orange +
+#             fig stil kapagi; 28 Eki ornegiyle fark), kirpim onizlemeleri, KONTAK; Drive TEMP/KART_SABLON_ORNEK/<damga>/ (--immutable).
+# 27 Eki ust duzey dosyalari (TEMP/WA_KUPA_KART_ORNEK/20261027_192528) 28 Eki 06:15'te ESKI/ altina tasinmisti; bu is akisi oraya dokunmaz.
 permissions:
   contents: read
 on:
@@ -14,42 +13,57 @@ on:
     inputs:
       cift: {description: "CIFT", required: true, default: "CANCER_LIBRA"}
       poster_id: {description: "Drive dosya id: Midnight Blue ornek poster 2000x3000 (EMILY / JAMES)", required: true, default: "1nCbiepEjZPaS_mrBKee4r4t94vIgbVfT"}
-      hedef: {description: "TEMP/WA_KUPA_KART_ORNEK altindaki hedef klasor (YYYYMMDD_HHMMSS; bos = yeni damga klasoru)", required: false, default: ""}
+      yedek_damga: {description: "TEMP/YD_KAPAK_V1_YEDEK/<damga> (YD stil gorselleri, eski r2)", required: true, default: "20261027_105540"}
+      mod: {description: "girdi | uret", required: true, default: "uret"}
 jobs:
   kart:
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    permissions:
+      contents: write
     steps:
       - name: Girdi kapisi
-        env: {C: "${{ inputs.cift }}", PI: "${{ inputs.poster_id }}", HD: "${{ inputs.hedef }}"}
-        run: '[[ "$C" =~ ^[A-Z]+_[A-Z]+$ && "$PI" =~ ^[A-Za-z0-9_-]{20,80}$ && "$HD" =~ ^([0-9]{8}_[0-9]{6})?$ ]] || { echo "::error::girdi"; exit 1; }'
+        env: {C: "${{ inputs.cift }}", PI: "${{ inputs.poster_id }}", YD: "${{ inputs.yedek_damga }}", M: "${{ inputs.mod }}"}
+        run: '[[ "$C" =~ ^[A-Z]+_[A-Z]+$ && "$PI" =~ ^[A-Za-z0-9_-]{20,80}$ && "$YD" =~ ^[0-9]{8}_[0-9]{6}$ && "$M" =~ ^(girdi|uret)$ ]] || { echo "::error::girdi"; exit 1; }'
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
+        if: ${{ inputs.mod == 'uret' }}
         with:
           ref: kupa-printful-sonuc
           path: _kupa
           sparse-checkout: kupa_uretim/sembol/${{ inputs.cift }}
       - uses: actions/checkout@v4
+        if: ${{ inputs.mod == 'uret' }}
         with:
           ref: temiz/kupa-orchard
           path: _ko
           sparse-checkout: kupa_orchard
+      - uses: actions/checkout@v4
+        if: ${{ inputs.mod == 'uret' }}
+        with:
+          ref: kart-sablon-ref-20261028
+          path: _ref
+          sparse-checkout: ref/kart_sablon_20261028/poster_kaynak
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: libfribidi (raqm; yd-kart-toplu ile ayni)
+      - name: libfribidi (raqm)
+        if: ${{ inputs.mod == 'uret' }}
         timeout-minutes: 4
         continue-on-error: true
         run: dpkg -s libfribidi0 >/dev/null 2>&1 || sudo apt-get install -y -qq libfribidi0 >/dev/null
       - name: pip (kart + zemin) ve Orchard ortami (kupa-orchard78 surumleri)
+        if: ${{ inputs.mod == 'uret' }}
         timeout-minutes: 8
         run: |
           pip install -q pillow==11.0.0 numpy==2.1.3 opencv-python-headless==4.10.0.84
           python3 -m venv _v12 && _v12/bin/pip install -q numpy==2.5.3 pillow==12.3.0 scipy==1.18.1 opencv-python-headless==5.0.0.93
           python3 -c "from PIL import features, __version__; print('pillow', __version__, 'raqm', features.check('raqm'))"
       - name: rclone
-        timeout-minutes: 6
-        run: curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || { sudo apt-get install -y -qq rclone >/dev/null; }
+        timeout-minutes: 8
+        run: |   # 28 Eki kosu 40683662329: rclone.org kurulumu takildi; once apt, olmazsa resmi betik (zaman sinirli)
+          sudo apt-get -qq install -y rclone >/dev/null 2>&1 || timeout 240 bash -c 'curl -fsSL --max-time 120 --retry 2 https://rclone.org/install.sh | sudo bash >/dev/null 2>&1'
+          rclone version | head -1
       - name: rclone.conf
         env:
           RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
@@ -57,31 +71,56 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p ~/.config/rclone; umask 077
-          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
-          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
-            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
-      - name: Girdiler + kartlar
-        env: {C: "${{ inputs.cift }}", PI: "${{ inputs.poster_id }}"}
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: Drive girdileri (yalniz okuma)
+        env: {C: "${{ inputs.cift }}", PI: "${{ inputs.poster_id }}", YD: "${{ inputs.yedek_damga }}"}
+        run: |
+          set -euo pipefail
+          mkdir -p _g/yd
+          rclone backend copyid gdrive: "$PI" _g/POSTER_MB_2000.jpg -q
+          LID=$(python3 -c "import csv,sys; print([r['listing_id'] for r in csv.DictReader(open('data/pod/yd78_ids.csv')) if r['cift']==sys.argv[1]][0])" "$C")
+          rclone copy "gdrive:ASTROLOVE/TEMP/YD_KAPAK_V1_YEDEK/$YD/${LID}_${C}" _g/yd --max-depth 1 -q
+          ls -la _g _g/yd; sha256sum _g/POSTER_MB_2000.jpg
+      - name: Girdi dali (mod=girdi)
+        if: ${{ inputs.mod == 'girdi' }}
+        run: |
+          set -euo pipefail
+          D="girdi/kart-$GITHUB_RUN_ID"
+          cd _g && git init -q && git checkout -q -b "$D"
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -q -m "kart sablon girdi"
+          git push -q "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" "$D"
+          echo "::notice title=GIRDI::dal $D"
+      - name: Gorunumler + kartlar + kapak ornegi (mod=uret)
+        if: ${{ inputs.mod == 'uret' }}
+        env: {C: "${{ inputs.cift }}"}
         run: |
           set -euo pipefail
           L=$(python3 -c "import csv,sys; r=next(r for r in csv.DictReader(open('data/pod/yd78_ids.csv')) if r['cift']==sys.argv[1]); print(r['a'], r['b'])" "$C")
           read -r A B <<< "$L"
-          mkdir -p _g _s _out
-          rclone backend copyid gdrive: "$PI" _g/POSTER.jpg -q
+          mkdir -p _s _out
           _v12/bin/python3 -I scripts/kapak78/orchard_gorunum.py _ko/kupa_orchard "_kupa/kupa_uretim/sembol/$C" "$A" "$B" _s
           python3 -I scripts/kapak78/kupa_zemin.py _s/gorunum _s
           python3 scripts/kapak78/wa_kupa_kart_ornek.py --cift "$C" --a "$A" --b "$B" --sembol "_kupa/kupa_uretim/sembol/$C" \
-            --poster _g/POSTER.jpg --sahne _s --out _out
+            --poster _g/POSTER_MB_2000.jpg --mb45 data/sosyal/instagram/cl_ornek_20261003/AstroLoveArt_Emily_James_Cancer_Libra_Midnight_Blue_4x5.png \
+            --poster-kaynak _ref/ref/kart_sablon_20261028/poster_kaynak --sahne _s --out _out
+          python3 scripts/kapak78/yd_kart_ornek.py --cift "$C" --a "$A" --b "$B" --yedek _g/yd --sembol "_kupa/kupa_uretim/sembol/$C" --out _out --ortak
           cp _s/zemin_olcum.json _out/
-          # Merkez 28 Eki 2. mesaj madde 6: kare kapaklar 4:3 ORNEK (01 orange + 08 fig); toplu uretim Serdar gorsel onayindan sonra
           _v12/bin/python3 -I scripts/kapak78/kupa_kapak43.py _ko/kupa_orchard _s/baski "$A" "$B" _out/KAPAK43 --stiller orange,fig
+          mkdir -p _g/k43eski   # 28 Eki ornegi (ayni kod): fark olcumu
+          rclone copy "gdrive:ASTROLOVE/TEMP/WA_KUPA_KART_ORNEK/20261027_192528/20261028_065730/KAPAK43" _g/k43eski --include "KUPA_KAPAK43_*.jpg" -q || true
+          python3 scripts/kapak78/kart_sablon.py kapak _out/KAPAK43 _g/k43eski
+          python3 scripts/kapak78/kart_sablon.py kontak _out
           echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
-      - name: Drive'a yaz
-        env: {HD: "${{ inputs.hedef }}"}
+      - name: Drive'a yaz (mod=uret)
+        if: ${{ inputs.mod == 'uret' }}
         run: |
           set -euo pipefail
-          Y="TEMP/WA_KUPA_KART_ORNEK/${HD:+$HD/}${DAMGA:?}"
+          Y="TEMP/KART_SABLON_ORNEK/${DAMGA:?}"
+          sha256sum _out/*.jpg _out/KAPAK43/*.jpg
           rclone copy _out "gdrive:ASTROLOVE/$Y" --immutable -q
-          echo "Cikti: $Y ($(ls _out | wc -l) dosya)" | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "Cikti: $Y ($(find _out -type f | wc -l) dosya)" | tee -a "$GITHUB_STEP_SUMMARY"
       - if: always()
         run: rm -rf _g _s _out _v12 ~/.config/rclone
