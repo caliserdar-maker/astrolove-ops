@@ -18,7 +18,7 @@ jobs:
     steps:
       - name: Girdi kapisi
         env: {B: "${{ inputs.bolum }}", C: "${{ inputs.csv_id }}", O: "${{ inputs.ozet_damga }}"}
-        run: '[[ "$B" =~ ^[a-z,]+$ && "$C" =~ ^[A-Za-z0-9_-]{20,80}$ && "$O" =~ ^([0-9]{8}_[0-9]{6} ?)*$ ]] || { echo "::error::girdi"; exit 1; }'
+        run: '[[ "$B" =~ ^[a-z0-9,]+$ && "$C" =~ ^[A-Za-z0-9_-]{20,80}$ && "$O" =~ ^([0-9]{8}_[0-9]{6} ?)*$ ]] || { echo "::error::girdi"; exit 1; }'
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
