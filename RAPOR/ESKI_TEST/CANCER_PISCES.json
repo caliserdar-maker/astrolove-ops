@@ -1,0 +1,63 @@
+{
+ "gecti": false,
+ "deger": {
+  "bant": [
+   528,
+   877,
+   929,
+   907
+  ],
+  "murekkep_px": 1832,
+  "a": {
+   "en_cok_piksel": 1005,
+   "kare": 9,
+   "sag_bant_fazla_max": 182.1,
+   "kare_araligi": [
+    9,
+    149
+   ],
+   "esik": {
+    "murekkep": 40.0,
+    "ayni": 10.0,
+    "leke": 25.0
+   },
+   "piksel_seri_ilk20": [
+    1005,
+    1000,
+    1001,
+    996,
+    993,
+    982,
+    966,
+    965,
+    949,
+    938,
+    909,
+    902,
+    892,
+    883,
+    873,
+    871,
+    867,
+    861,
+    853,
+    843
+   ]
+  },
+  "b": {
+   "taban": 23,
+   "pay": 8.0,
+   "en_buyuk": 23,
+   "asan_piksel": 0
+  },
+  "c": {
+   "hata": "tozsuz video yok"
+  },
+  "gecti_abc": [
+   false,
+   true,
+   false
+  ],
+  "a_gecti": false
+ }
+}
