@@ -2,7 +2,8 @@
 """v7d 78 toplu uretim, cift satiri (Merkez 28 Eki: mesaj tam silinir, soldan saga yazilir; Etsy yok).
 Kullanim: v7d_78_cift.py <video.mp4> <QC.json> <eski_test.json|-> <uretim.log> <out> <CIFT> <deneme>
 Yazar: <out>/satir/<CIFT>.json (9 kapi + mesaj_isim ayrintisi + eski TAM78 dogruluk testi) ve <out>/kontrol/<CIFT>.jpg:
-isim + mesaj bandi yakin plani (video olcegi 2x), 0 / 0,25 / 0,4 sn, yazimin ortasi (cephe mesajin ortasinda) ve son kare."""
+isim + mesaj bandi yakin plani (video olcegi 2x), 0 / 0,25 / 0,4 sn, yazimin ortasi (cephe mesajin ortasinda), kare nB-1 (son motor
+karesi; inceleme 28 Eki: kare >= nB motorda dogrudan kapak) ve son kare."""
 import json
 import os
 import re
@@ -37,7 +38,10 @@ def main():
         s.update(mesaj_bant=mq.get("bant"), mesaj_murekkep_px=mq.get("murekkep_px"), a_piksel=mq.get("a", {}).get("en_cok_piksel"),
                  a_bant_fazla_max=mq.get("a", {}).get("sag_bant_fazla_max"), b_taban=mq.get("b", {}).get("taban"),
                  b_en_buyuk=mq.get("b", {}).get("en_buyuk"), b_asan=mq.get("b", {}).get("asan_piksel"),
-                 c_ham=(mq.get("c") or {}).get("ham_kutu_fark_max"))
+                 c_ham=(mq.get("c") or {}).get("ham_kutu_fark_max"), a_hayalet=mq.get("a", {}).get("hayalet_ort_max"),
+                 a_sol=mq.get("a", {}).get("sol_fark_ort_max"), a_pencere=mq.get("a", {}).get("pencere_fark_ort_max"),
+                 a_kapsam_disi=mq.get("a", {}).get("kapsam_disi_px"), b_sicrama=mq.get("b", {}).get("sicrama_en_buyuk"),
+                 b_sicrama_asan=mq.get("b", {}).get("sicrama_asan_piksel"))
         for k in ("isim", "sign_a", "sign_b"):
             x = (mq.get("c") or {}).get(k) or {}
             s.update({f"c_{k}_taban": x.get("taban"), f"c_{k}_en_buyuk": x.get("en_buyuk"), f"c_{k}_asan": x.get("asan_piksel")})
@@ -55,7 +59,7 @@ def main():
         x0, y0, x1, y1 = min(ix0, b[0]) - 12, iy0 - 10, max(ix1, b[2]) + 12, b[3] + 10
         ort = int(round((y["nB"] - 1) * 0.5))   # ease(0,5) = 0,5: cephe mesajin ortasinda
         kr = [(0, "0 sn"), (int(round(0.25 * 30)), "0,25 sn"), (int(round(0.4 * 30)), "0,4 sn"), (ort, f"yazim ortasi {ort / 30:.1f} sn".replace(".", ",")),
-              (len(F) - 1, "son kare")]
+              (y["nB"] - 1, f"kare {y['nB'] - 1} (son motor karesi)"), (len(F) - 1, "son kare (kapak)")]
         w, h = (x1 - x0) * 2, (y1 - y0) * 2
         im = Image.new("RGB", (len(kr) * (w + 6), h + 60), (255, 255, 255)); dr = ImageDraw.Draw(im)
         dr.text((4, 2), f"{c}  {s['sonuc']}  mesaj a {s.get('a_piksel')} px | eski TAM78 a {'PASS' if s.get('eski_a_gecti') else 'FAIL'} "

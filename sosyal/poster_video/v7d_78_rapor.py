@@ -15,7 +15,7 @@ ON19 = ["AQUARIUS_CAPRICORN", "AQUARIUS_GEMINI", "AQUARIUS_PISCES", "AQUARIUS_VI
 KAPI = ["a_bicim", "b_ilk_son_kare", "c_ihlal", "d_kutu_orani", "silinme_hayalet", "silme_artik", "silme_halka_ici", "mesaj_isim", "e_kontak"]
 ALAN = ["cift", "sonuc", "deneme", "gecen", "kapi_sayisi"] + KAPI + [
     "artik", "halka_artik", "hayalet", "motor_bant", "motor_murekkep_px", "motor_parca", "mesaj_bant", "mesaj_murekkep_px", "a_piksel",
-    "a_bant_fazla_max", "b_taban", "b_en_buyuk", "b_asan", "c_ham", "c_isim_taban", "c_isim_en_buyuk", "c_isim_asan", "c_sign_a_taban",
+    "a_bant_fazla_max", "a_hayalet", "a_sol", "a_pencere", "a_kapsam_disi", "b_taban", "b_en_buyuk", "b_asan", "b_sicrama", "b_sicrama_asan", "c_ham", "c_isim_taban", "c_isim_en_buyuk", "c_isim_asan", "c_sign_a_taban",
     "c_sign_a_en_buyuk", "c_sign_a_asan", "c_sign_b_taban", "c_sign_b_en_buyuk", "c_sign_b_asan", "eski_a_gecti", "eski_a_piksel"]
 
 
@@ -53,9 +53,11 @@ def main(argv=None):
           f"- Merkez listesi ({len(ON19)} kayit, {len(on19)} farkli cift; ARIES_SCORPIO iki kez): PASS veren {on19_pass or 'yok'}; olculemeyen {on19_yok or 'yok'}"
           + ("  -> KAPI HATALI, DUR" if on19_pass else ""),
           f"- yeni mesaj_isim: a en cok piksel {mx('a_piksel')}, a bant |fazla| en buyuk {mx('a_bant_fazla_max')} (leke esigi 25); "
-          f"b asan piksel en cok {mx('b_asan')}; c ham kutu farki en buyuk {mx('c_ham')}; c asan piksel en cok "
+          f"hayalet ort en buyuk {mx('a_hayalet')} (esik 3); cephe solu fark en buyuk {mx('a_sol')}, pencere {mx('a_pencere')} (esik 10); "
+          f"kapsam disi px en cok {mx('a_kapsam_disi')}; b (kare 149 - kapak) asan piksel en cok {mx('b_asan')}, 149->150 sicrama en buyuk "
+          f"{mx('b_sicrama')}; c ham kutu farki en buyuk {mx('c_ham')}; c asan piksel en cok "
           f"{max([mx('c_isim_asan') or 0, mx('c_sign_a_asan') or 0, mx('c_sign_b_asan') or 0])}",
-          f"- c en buyuk - taban (kodlama payi 8): isim {max([r['c_isim_en_buyuk'] - r['c_isim_taban'] for r in rows if isinstance(r.get('c_isim_taban'), int)], default=None)}, "
+          f"- c en buyuk - taban (kodlama payi 10): isim {max([r['c_isim_en_buyuk'] - r['c_isim_taban'] for r in rows if isinstance(r.get('c_isim_taban'), int)], default=None)}, "
           f"sol glif {max([r['c_sign_a_en_buyuk'] - r['c_sign_a_taban'] for r in rows if isinstance(r.get('c_sign_a_taban'), int)], default=None)}, "
           f"sag glif {max([r['c_sign_b_en_buyuk'] - r['c_sign_b_taban'] for r in rows if isinstance(r.get('c_sign_b_taban'), int)], default=None)}",
           f"- sembol kalintisi (silme_artik) en buyuk {mx('artik')}; halka ici en buyuk {mx('halka_artik')}",

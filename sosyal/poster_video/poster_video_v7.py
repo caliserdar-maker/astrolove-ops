@@ -265,9 +265,10 @@ MM_p, mmes = alfa(mes, 5)
 # bos hal bolgeleri: sembol + golgesi (31 px), mesaj (11 px); yumusak kenar
 RS_p = cv2.GaussianBlur(cv2.dilate(msym, np.ones((31, 31), np.uint8)).astype(np.float32), (0, 0), 5.0)
 RM_p = cv2.GaussianBlur(cv2.dilate(mmes, np.ones((11, 11), np.uint8)).astype(np.float32), (0, 0), 2.0)
-if MESAJ is not None:   # v7d: isim satiri ve kucuk burclar silinmez
+ISIM_ALT = 0.4   # isim satiri koruma payi (alt uzantilar), isim yuksekligi orani (yd_video ile ayni)
+if MESAJ is not None:   # v7d: isim satiri (alt uzantilar dahil) ve kucuk burclar silinmez
     for _k in (P.names_row, P.sign_a, P.sign_b):
-        RM_p[_k[2]:_k[2] + _k[4], _k[1]:_k[1] + _k[3]] = 0
+        RM_p[_k[2]:_k[2] + _k[4] + (int(ISIM_ALT * _k[4]) if _k is P.names_row else 0), _k[1]:_k[1] + _k[3]] = 0
 R_p = np.maximum(RS_p, RM_p)
 hm = cv2.resize((R_p > 0.02).astype(np.uint8), (P.w // 2, P.h // 2), interpolation=cv2.INTER_NEAREST)
 # v7b (26 Eki): bos hal KAPAKTAKI posterin kendi piksellerinden (POSTER_SRC yalniz maske icin). Kaynak ile Canva kapagi
@@ -315,6 +316,8 @@ def kapsam(m):
 
 
 mx0, mx1 = kapsam(MM)
+if MESAJ is not None:   # v7d inceleme 28 Eki bulgu 3: yazim araligi mesaj maskesinin tamami (alfa < 0,2 uc noktalari / suslar dahil);
+    mx0, mx1 = kapsam(vid(mmes.astype(np.float32)))   # eskiden sol nokta hic silinmiyor, sag nokta siliniyordu
 ease = lambda x: (lambda y: y * y * (3 - 2 * y))(min(1.0, max(0.0, x)))
 
 
@@ -381,7 +384,7 @@ HAM_KUTU, HAM_FARK = None, 0   # v7d QC (c): TOZSUZ=1 iken isim satiri (sonsuz h
 if os.environ.get('TOZSUZ'):
     _hk = np.zeros(P.alpha.shape, np.float32)
     for _k in (P.names_row, P.sign_a, P.sign_b):
-        _hk[_k[2]:_k[2] + _k[4], _k[1]:_k[1] + _k[3]] = 1
+        _hk[_k[2]:_k[2] + _k[4] + (int(ISIM_ALT * _k[4]) if _k is P.names_row else 0), _k[1]:_k[1] + _k[3]] = 1
     for _c in sonsuz:
         _hk[max(0, _c[2] - 8):_c[2] + _c[4] + 8, max(0, _c[1] - 8):_c[1] + _c[3] + 8] = 0
     HAM_KUTU = vid(_hk) > 0.5
@@ -433,7 +436,7 @@ print(f'{nT} kare ({nT / FPS:.2f} sn), toz/yazi bitis {BITIS} sn, uretim {time.t
 import json
 DONUSUM = {'x0': x0, 'y0': y0, 'cw': cw, 'ch': ch, 'pw': int(P.w), 'ph': int(P.h), 'kw': int(kap_src.shape[1]), 'kh': int(kap_src.shape[0]),
            'vw': VW, 'vh': VH}   # poster (2000 px) -> video: vx = (x0 + px * cw / pw) * vw / kw
-YAZIM = {'mx0': int(mx0), 'mx1': int(mx1), 'yum': 10, 'nB': nB, 'nS': nS, 'mesaj': MESAJ,
+YAZIM = {'mx0': int(mx0), 'mx1': int(mx1), 'yum': 10, 'nB': nB, 'nS': nS, 'mesaj': MESAJ, 'isim_alt': ISIM_ALT,
          'isim_poster': [int(v) for v in P.names_row[1:5]], 'msg_row_poster': [int(v) for v in P.msg_row[1:5]]}   # QC mesaj_isim
 if HAM_KUTU is not None:
     YAZIM['ham_kutu_fark_max'] = HAM_FARK; YAZIM['ham_kutu_px'] = int(HAM_KUTU.sum())

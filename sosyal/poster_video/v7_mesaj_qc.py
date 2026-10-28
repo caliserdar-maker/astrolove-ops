@@ -24,9 +24,20 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import v7_qc as Q  # noqa: E402
 
 MUREKKEP_T = 40.0   # Merkez 28 Eki tanimi (AQUARIUS_GEMINI ~1813 px)
-AYNI_T = 10.0       # olcum: asagida
-LEKE_T = 25.0       # olcum: asagida
-PAY = 8.0           # mp4 kodlama payi (b, c): 6 yerel ciftin (AQUARIUS_GEMINI, ARIES_GEMINI, CANCER_SAGITTARIUS, CAPRICORN_SAGITTARIUS,
+AYNI_T = 10.0       # silinmis murekkep pikseli kapaktan >= MUREKKEP_T farkli olur (kapakta murekkep fazlasi > 40, dolgu ~ yerel zemin);
+                    # |parlaklik - kapak| < 10 = silinmemis. 78 videoda bu kosulla sayim 0 (40688160261).
+LEKE_T = 25.0       # silinmis bantta murekkep disi |yerel zemin farki|: 78 video en buyuk 21,2 (40688160261), 6 yerel cift 20,3; pay 3,8.
+HAYALET_T = 3.0     # inceleme 28 Eki bulgu 1. Cephe saginda (silinmis) murekkep konumlarinda ortalama murekkep fazlasi, kare basina en
+                    # buyugu. Olcum: v7d 78 video (40688160261) en buyuk 1,49; yapay hayalet AQUARIUS_GEMINI %5 4,67, %10 8,78, %15 13,03.
+SOL_T = 10.0        # Cephe solunda (yazim agirligi 1) murekkep konumlarinda kapaktan ortalama |parlaklik farki|, kare basina en buyugu; ayni
+                    # olcu cephenin hemen gerisindeki PENCERE (40 px) icin. Olcum: 78 video sol en buyuk 5,08, pencere 4,87; yapay: harfler %80
+                    # parlaklik 18,08, %60 35,72; orta 12 px harf gec 25,44, son 60 px gec 31,24.
+PENCERE = 40        # video px
+YD_DOYGUN = 27      # YD murekkep parcasi doygunluk medyani ust siniri (mesaj 19-20 / kenar 33 / yaprak 44; tek kapak olcumu, gecici)
+HAY_PAY = 4         # hayalet olcusu cephenin bu kadar sagindan baslar: v7d ikinci surumde (yazim araligi mesajin tamami) yazimin sonunda
+                    # cephe sagindaki az sayida piksel x264 tasmasiyla ortalamayi 2,85'e cikariyordu (AQUARIUS_GEMINI, cephe dibi 1-3 px)
+PAY = 10.0          # mp4 kodlama payi (b, c). 78 video (40688160261) c en buyuk - taban: isim 3, sol glif 6, sag glif 7 -> pay 7 + 3.
+                    # Ilk turetim: 6 yerel ciftin (AQUARIUS_GEMINI, ARIES_GEMINI, CANCER_SAGITTARIUS, CAPRICORN_SAGITTARIUS,
                     # ARIES_SCORPIO, LIBRA_SAGITTARIUS; tozsuz) isim / iki glif kutusunda tum karelerin en buyuk farki - taban (kare 179 - 0)
                     # en fazla 6 (ARIES_GEMINI sol glif, 5-8. kareler: 0-0,3 sn gecisinde x264 gurultusu; ham karede fark 0); pay 6 + 2.
                     # Ham (kodlanmamis) kutu farki ayrica motordan: ic.json yazim.ham_kutu_fark_max (TOZSUZ=1) <= HAM_T.
@@ -39,9 +50,10 @@ def lum(f):
     return f.astype(np.float32) @ W3
 
 
-def fazla(f):
+def fazla(f, isaret=1.0):
+    """murekkep yonunde parlaklik fazlasi: poster (altin, lacivert zemin) isaret +1; YD (yesil, krem kagit) isaret -1 (koyuluk)"""
     l = lum(f)
-    return l - cv2.medianBlur(np.clip(l, 0, 255).astype(np.uint8), 31).astype(np.float32)
+    return isaret * (l - cv2.medianBlur(np.clip(l, 0, 255).astype(np.uint8), 31).astype(np.float32))
 
 
 def p2v(d, x, y):
@@ -59,13 +71,21 @@ def ease(x):
     return y * y * (3 - 2 * y)
 
 
-def mesaj_bandi(F0, d, isim):
-    """kapak karesinden (motordan bagimsiz) mesaj bandi + murekkep maskesi"""
+def mesaj_bandi(F0, d, isim, isaret=1.0):
+    """kapak karesinden (motordan bagimsiz) mesaj bandi + murekkep maskesi. Satir kumeleri (<= 10 px bosluk) icinden en buyugu;
+    <= max(40 poster px, 1,5 x ana kume yuksekligi) bosluklu ve en buyugun %10'undan buyuk komsu kumeler katilir (iki satirli mesaj)."""
     px0, _, px1, py1 = kutu_v(d, [0, 0, d['pw'], d['ph']])
     _, _, _, iy1 = kutu_v(d, isim)
-    ya = iy1 + 4
-    ex = fazla(F0)
+    ya = iy1 + 4 + int(round(0.4 * isim[3] * d['ch'] / d['ph'] * d['vh'] / d['kh']))   # isim alt uzantilari (J kuyrugu) mesaj sayilmaz
+    ex = fazla(F0, isaret)
     m = np.zeros(ex.shape, bool); m[ya:py1, px0:px1] = ex[ya:py1, px0:px1] > MUREKKEP_T
+    if isaret < 0:   # YD: yaprak susleri ve yirtik kagit kenari da koyu (silinmez). Parca bazinda renk doygunlugu (max - min kanal)
+        n, lab, st, _ = cv2.connectedComponentsWithStats(m.astype(np.uint8), 8)   # medyani <= YD_DOYGUN olan parcalar mesaj murekkebi.
+        if n > 1:                                  # Olcum (AQUARIUS_AQUARIUS Y01, 0. kare): mesaj 19-20, yaprak 44, kagit kenari 33.
+            dy = F0.astype(np.int16).max(-1) - F0.astype(np.int16).min(-1)
+            for k in range(1, n):
+                if float(np.median(dy[lab == k])) > YD_DOYGUN:
+                    m[lab == k] = False
     sat = m.sum(1); kum = []
     for r in np.where(sat > 0)[0]:
         if kum and r - kum[-1][1] <= 10:
@@ -74,7 +94,20 @@ def mesaj_bandi(F0, d, isim):
             kum.append([r, r])
     if not kum:
         return None, None
-    a, b = max(kum, key=lambda k: sat[k[0]:k[1] + 1].sum())
+    ag = lambda k: sat[k[0]:k[1] + 1].sum()
+    ki = max(range(len(kum)), key=lambda k: ag(kum[k]))
+    a, b = kum[ki]
+    bos = max(40 * d['vw'] / d['kw'] * d['cw'] / d['pw'], 1.5 * (b - a))   # YD: iki satir (tarih + YEAR ONE) arasi ~17 px
+    for k in range(ki - 1, -1, -1):
+        if a - kum[k][1] <= bos and ag(kum[k]) > 0.1 * ag(kum[ki]):
+            a = kum[k][0]
+        else:
+            break
+    for k in range(ki + 1, len(kum)):
+        if kum[k][0] - b <= bos and ag(kum[k]) > 0.1 * ag(kum[ki]):
+            b = kum[k][1]
+        else:
+            break
     a, b = a - 3, b + 4
     cols = np.where(m[a:b].any(0))[0]
     bant = (int(cols.min()) - 5, int(a), int(cols.max()) + 6, int(b))
@@ -86,7 +119,8 @@ def olc(F, T, ic, ic_tz=None):
     d, y = ic['donusum'], ic['yazim']
     R = {}
     F0 = F[0]
-    bant, ink = mesaj_bandi(F0, d, y['isim_poster'])
+    isaret = -1.0 if y.get('murekkep') == 'koyu' else 1.0
+    bant, ink = mesaj_bandi(F0, d, y['isim_poster'], isaret)
     if bant is None:
         return {'gecti': False, 'deger': {'hata': 'kapakta mesaj murekkebi yok'}}
     x0, y0, x1, y1 = bant
@@ -95,11 +129,21 @@ def olc(F, T, ic, ic_tz=None):
     l0 = lum(F0)
     bm = np.zeros(ink.shape, bool); bm[y0:y1, x0:x1] = True
     a_max, a_kare, a_fmax, seri = 0, None, -1e9, []
+    hay, sol_f, pen_f = [], [], []
     nS, nB, mx0, mx1, yum = y['nS'], y['nB'], y['mx0'], y['mx1'], y['yum']
     for i in range(nS, nB):
         esik = mx0 - yum + (mx1 - mx0 + 2 * yum) * ease(i / (nB - 1))
         sag = XX >= esik
-        ex = fazla(F[i]); li = lum(F[i])
+        sol = XX <= esik - yum                                   # yazim agirligi 1: kapakla ayni olmali
+        ex = fazla(F[i], isaret); li = lum(F[i])
+        hs = ink & (XX >= esik + HAY_PAY)                         # cephenin 4 px sagindan itibaren (x264 kenar tasmasi haric)
+        if hs.sum() >= 30:
+            hay.append((round(float(ex[hs].mean()), 2), i))       # silinmis murekkep konumunda ortalama murekkep fazlasi (hayalet)
+        if (ink & sol).sum() >= 30:
+            sol_f.append((round(float(np.abs(li - l0)[ink & sol].mean()), 2), i))   # yazilmis murekkep: kapaktan ortalama fark
+        pen = ink & sol & (XX >= esik - yum - PENCERE)            # cephenin hemen gerisi: gec gelen harf / kelime
+        if pen.sum() >= 30:
+            pen_f.append((round(float(np.abs(li - l0)[pen].mean()), 2), i))
         kal = ink & sag & ((ex > MUREKKEP_T) | (np.abs(li - l0) < AYNI_T))
         leke = bm & sag & ~ink & (np.abs(ex) > LEKE_T)
         n = int(kal.sum() + leke.sum())
@@ -108,19 +152,27 @@ def olc(F, T, ic, ic_tz=None):
             a_fmax = max(a_fmax, float(np.abs(ex[bm & sag]).max()))
         if n > a_max:
             a_max, a_kare = n, i
+    hm = max(hay) if hay else (None, None); sm = max(sol_f) if sol_f else (None, None); pm = max(pen_f) if pen_f else (None, None)
     R['a'] = {'en_cok_piksel': a_max, 'kare': a_kare, 'sag_bant_fazla_max': round(a_fmax, 1), 'kare_araligi': [nS, nB - 1],
-              'esik': {'murekkep': MUREKKEP_T, 'ayni': AYNI_T, 'leke': LEKE_T}, 'piksel_seri_ilk20': seri[:20]}
+              'hayalet_ort_max': hm[0], 'hayalet_kare': hm[1], 'sol_fark_ort_max': sm[0], 'sol_kare': sm[1], 'pencere_fark_ort_max': pm[0], 'pencere_kare': pm[1],
+              'esik': {'murekkep': MUREKKEP_T, 'ayni': AYNI_T, 'leke': LEKE_T, 'hayalet': HAYALET_T, 'sol': SOL_T}, 'piksel_seri_ilk20': seri[:20]}
+    ok_hay = hm[0] is not None and hm[0] <= HAYALET_T
+    ok_sol = sm[0] is not None and sm[0] <= SOL_T and pm[0] is not None and pm[0] <= SOL_T
     dfn = lambda A, B, sl: np.abs(A[sl].astype(np.int16) - B[sl].astype(np.int16)).max(-1)
     sl = (slice(y0, y1), slice(x0, x1))
-    tb = int(dfn(F[-1], F0, sl).max())
-    bmx, bn = 0, 0
-    for i in range(165, len(F)):
-        dd = dfn(F[i], F0, sl); bmx = max(bmx, int(dd.max())); bn += int((dd > tb + PAY).sum())
-    R['b'] = {'taban': tb, 'pay': PAY, 'en_buyuk': bmx, 'asan_piksel': bn}
+    tb = int(dfn(F[-1], F0, sl).max())                        # kodlama tabani: kare 179 ve 0 (ikisi de kapak)
+    # inceleme 28 Eki bulgu 2: kare >= nB motorda dogrudan kapak; gercek denetim son motor karesi (nB - 1) ile kapak ve nB-1 -> nB sicramasi
+    d1 = dfn(F[nB - 1], F0, sl); d2 = dfn(F[nB], F[nB - 1], sl)
+    bmx, bn = int(d1.max()), int((d1 > tb + PAY).sum())
+    R['b'] = {'taban': tb, 'pay': PAY, 'kare': nB - 1, 'en_buyuk': bmx, 'asan_piksel': bn,
+              'sicrama_en_buyuk': int(d2.max()), 'sicrama_asan_piksel': int((d2 > tb + PAY).sum()),
+              'sicrama_ort': round(float(d2.mean()), 3)}
+    bn += R['b']['sicrama_asan_piksel']
     if T is not None:
         T0 = T[0]
         bol = []
-        isim = kutu_v(d, y['isim_poster'], 2)
+        ip = list(y['isim_poster']); ip[3] = ip[3] + int(y.get('isim_alt', 0) * ip[3])   # alt uzantilar (J, y kuyruklari)
+        isim = kutu_v(d, ip, 2)
         mI = np.zeros(T0.shape[:2], bool); mI[isim[1]:isim[3], isim[0]:isim[2]] = True
         for s in ic['glif'].get('sonsuz', []):
             k = kutu_v(d, s, 4); mI[k[1]:k[3], k[0]:k[2]] = False
@@ -141,8 +193,11 @@ def olc(F, T, ic, ic_tz=None):
         R['c'] = dict(C, pay=PAY)
     else:
         R['c'] = {'hata': 'tozsuz video yok'}
-    ok_a = a_max == 0
-    ok_b = bn == 0
+    # yazim araligi disinda kalan murekkep (sol: hic silinmez, sag: yalniz kare nB'de birden gelir), inceleme 28 Eki bulgu 3
+    kd = ink & ((XX < mx0 - yum) | (XX > mx1))
+    R['a']['kapsam_disi_px'] = int(kd.sum())
+    ok_a = bool(a_max == 0 and ok_hay and ok_sol and int(kd.sum()) == 0)
+    ok_b = bool(bn == 0)
     ok_c = T is not None and all(v['asan_piksel'] == 0 for k, v in R['c'].items() if isinstance(v, dict))
     if T is not None:
         ham = (ic_tz or {}).get('yazim', {}).get('ham_kutu_fark_max')
