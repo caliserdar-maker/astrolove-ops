@@ -18,6 +18,7 @@ from PIL import Image
 
 KAPAK, OUT = sys.argv[1:3]
 RENK_MOD = 'murekkep'
+ISIM_ALT = 0.4   # isim satiri koruma payi (alt uzantilar: J, y kuyruklari), isim yuksekligi orani
 BITIS = 5.0
 VW, VH = 1440, 1080
 FPS, SURE, SILME = 30, 6.0, 0.3
@@ -96,7 +97,10 @@ class PosterYD:
         # ve acik harfler alfa > 0,4 parcalarina yalniz %28 giriyordu (tarih yarim, YEAR ONE hic silinmiyordu). Mesaj pikselleri bolgeden:
         # kagit -> murekkep dogrusu uzerinde (artik < 22; yaprak / altin tohum disarida) ve oran > 0,15.
         ny1 = self.names_row[2] + self.names_row[4]
-        eski = [c for c in comps if c[2] > ny1 and self.names_row[1] <= c[1] + c[3] / 2 <= self.names_row[1] + self.names_row[3]]
+        # v7d inceleme 28 Eki: JAMES'teki J kuyrugu (isim tabaninin 0-12 px alti, ayri parca) mesaja aliniyor ve siliniyordu; mesaj isim
+        # tabanindan en az ISIM_ALT x isim yuksekligi asagida baslar (6 YD kapaginda mesaj ilk satiri tabandan 115 px asagida).
+        ust = ny1 + max(10, int(ISIM_ALT * self.names_row[4]))
+        eski = [c for c in comps if c[2] > ust and self.names_row[1] <= c[1] + c[3] / 2 <= self.names_row[1] + self.names_row[3]]
         if not eski:
             raise RuntimeError('YD: isimlerin altinda mesaj parcasi yok')
         e = self._union(eski)                                   # bolge: koyu mesaj parcalarinin kutusu +-%3 W, alta +%6 H (ikinci satir)
@@ -105,7 +109,7 @@ class PosterYD:
         v = self.ink_rgb[None, None, :] - self.bg
         t = ((self.img - self.bg) * v).sum(2) / np.maximum((v * v).sum(2), 1.0)
         art = np.linalg.norm(self.img - (self.bg + t[..., None] * v), axis=2)
-        bol = np.zeros(t.shape, bool); bol[ny1 + 10:by1, max(0, int(bx0)):int(bx1)] = True
+        bol = np.zeros(t.shape, bool); bol[ust:by1, max(0, int(bx0)):int(bx1)] = True
         m = ((t > 0.15) & (art < 22) & bol).astype(np.uint8)
         n2, lab2, st2, _ = cv2.connectedComponentsWithStats(m, 8)
         taban = int(self.lab.max()) + 1; yeni = []
@@ -183,6 +187,10 @@ MM_p, mmes = alfa(mes, 5)
 # bos hal bolgeleri: sembol + golgesi (31 px), mesaj (11 px); yumusak kenar
 RS_p = cv2.GaussianBlur(cv2.dilate(msym, np.ones((31, 31), np.uint8)).astype(np.float32), (0, 0), 5.0)
 RM_p = cv2.GaussianBlur(cv2.dilate(mmes, np.ones((11, 11), np.uint8)).astype(np.float32), (0, 0), 2.0)
+for _k in (P.sign_a, P.sign_b):   # v7d: kucuk burclar ve isim satiri (alt uzantilar dahil) silinmez
+    RM_p[_k[2]:_k[2] + _k[4], _k[1]:_k[1] + _k[3]] = 0
+_nr = P.names_row
+RM_p[_nr[2]:_nr[2] + _nr[4] + int(ISIM_ALT * _nr[4]), _nr[1]:_nr[1] + _nr[3]] = 0
 R_p = np.maximum(RS_p, RM_p)
 hm = cv2.resize((R_p > 0.02).astype(np.uint8), (P.w // 2, P.h // 2), interpolation=cv2.INTER_NEAREST)
 # v7b (26 Eki): bos hal KAPAKTAKI posterin kendi piksellerinden (POSTER_SRC yalniz maske icin). Kaynak ile Canva kapagi
@@ -230,6 +238,7 @@ def kapsam(m):
 
 
 mx0, mx1 = kapsam(MM)
+mx0, mx1 = kapsam(vid(mmes.astype(np.float32)))   # v7d: yazim araligi mesaj maskesinin tamami (poster_video_v7 ile ayni)
 ease = lambda x: (lambda y: y * y * (3 - 2 * y))(min(1.0, max(0.0, x)))
 
 
@@ -292,6 +301,13 @@ def murekkep(tt):
     F = np.clip(F, 0, 1)
     return np.minimum(C_EGRI[min(len(C_EGRI) - 1, int(round(tt * (nB - 1))))], F), F   # v6: min(c(t), F)
 KAP8 = KAP.astype(np.uint8)
+HAM_KUTU, HAM_FARK = None, 0   # v7d QC (c): TOZSUZ=1 iken isim satiri (alt uzantilar dahil) ve kucuk burc kutularinda ham kare - kapak farki
+if os.environ.get('TOZSUZ'):
+    _hk = np.zeros(P.alpha.shape, np.float32)
+    for _k in (P.sign_a, P.sign_b):
+        _hk[_k[2]:_k[2] + _k[4], _k[1]:_k[1] + _k[3]] = 1
+    _hk[_nr[2]:_nr[2] + _nr[4] + int(ISIM_ALT * _nr[4]), _nr[1]:_nr[1] + _nr[3]] = 1
+    HAM_KUTU = vid(_hk) > 0.5
 pr = subprocess.Popen(['ffmpeg', '-y', '-loglevel', 'error', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-s', f'{VW}x{VH}',
                        '-r', str(FPS), '-i', '-', '-an', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '17',
                        '-preset', 'slow', '-movflags', '+faststart', OUT], stdin=subprocess.PIPE)
@@ -328,12 +344,21 @@ for i in range(nT):
     kat = cv2.GaussianBlur(kat, (0, 0), TANE) * 2.0
     rk = kat / np.maximum(al[..., None], 1e-4)
     a3 = np.clip(al, 0, 0.9)[..., None] * (0 if os.environ.get('TOZSUZ') else 1)   # TOZSUZ=1: yalniz QC (murekkep olusumu)
-    pr.stdin.write(np.clip(f * (1 - a3) + rk * a3, 0, 255).astype(np.uint8).tobytes())
+    o = np.clip(f * (1 - a3) + rk * a3, 0, 255).astype(np.uint8)
+    if HAM_KUTU is not None:
+        HAM_FARK = max(HAM_FARK, int(np.abs(o[HAM_KUTU].astype(np.int16) - KAP8[HAM_KUTU].astype(np.int16)).max()))
+    pr.stdin.write(o.tobytes())
     if i % 15 == 0:
         g = time.time() - t0
         print(f'  kare {i}/{nB} %{100 * i // nB} (gecen {g:.0f}s, kalan ~{g / i * (nB - i):.0f}s)', flush=True)
 pr.stdin.close(); pr.wait()
 print(f'{nT} kare ({nT / FPS:.2f} sn), toz/yazi bitis {BITIS} sn, uretim {time.time() - t0:.0f}s', flush=True)
 import json
-json.dump({'silme_sinyal': 'koyu', 'N': N, 'bolge_px': BOLGE_PX, 'glif': GLIF, 'tane_sigma': {'v4': 0.9, 'v5': TANE}, 'c_egri': [round(float(x), 4) for x in C_EGRI], **IC}, open(OUT + '.ic.json', 'w'))
+DONUSUM = {'x0': x0, 'y0': y0, 'cw': cw, 'ch': ch, 'pw': int(P.w), 'ph': int(P.h), 'kw': int(kap_src.shape[1]), 'kh': int(kap_src.shape[0]),
+           'vw': VW, 'vh': VH}
+YAZIM = {'mx0': int(mx0), 'mx1': int(mx1), 'yum': 10, 'nB': nB, 'nS': nS, 'murekkep': 'koyu', 'isim_alt': ISIM_ALT,
+         'isim_poster': [int(v) for v in P.names_row[1:5]], 'msg_row_poster': [int(v) for v in P.msg_row[1:5]]}   # QC mesaj_isim (YD: koyu murekkep)
+if HAM_KUTU is not None:
+    YAZIM['ham_kutu_fark_max'] = HAM_FARK; YAZIM['ham_kutu_px'] = int(HAM_KUTU.sum())
+json.dump({'donusum': DONUSUM, 'yazim': YAZIM, 'silme_sinyal': 'koyu', 'N': N, 'bolge_px': BOLGE_PX, 'glif': GLIF, 'tane_sigma': {'v4': 0.9, 'v5': TANE}, 'c_egri': [round(float(x), 4) for x in C_EGRI], **IC}, open(OUT + '.ic.json', 'w'))
 print('tamam', OUT)
