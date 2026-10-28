@@ -1,0 +1,182 @@
+name: video-v7d-78
+# Poster video v7d TOPLU uretim (Merkez 28 Eki, Serdar onayi: yuklemeden once mesaj hatasi; 19 Eki kurgusu korunur, MESAJIN TAMAMI
+# silinip soldan saga yeniden yazilir). Etsy API YOK, Etsy'ye / Metricool'a YAZMA YOK, kilit yok; video yukleme ayri onay.
+# Uretim poster_video_v7.py (v7c sembol silme + v7d mesaj bandi), ayni ortam (V7_DOLGU=nk, V7_HALKASIZ=1, V6_*). Cift basina ayrica
+# TOZSUZ=1 kopya (<CIFT>.mp4.tozsuz.mp4; QC mesaj_isim c). QC v7_qc.py: 9 kapi (7 + silme_halka_ici + mesaj_isim). En fazla 2 deneme.
+# DOGRULUK TESTI: ayni ciftin eski TAM78 videosu (TEMP/VIDEO_V7_DUZELTME/<eski_tam78>/TAM78) v7_mesaj_qc 'eski' ile, yazim cephesi eski
+# motor kaynagindan (git ed1ddf3e). Kontrol sayfasi: isim + mesaj bandi 0 / 0,25 / 0,4 sn, yazim ortasi, son kare.
+# Drive'a TEK yukleme (rapor isi), --immutable, yeni klasor TEMP/VIDEO_V7_DUZELTME/<damga>/TAM78/: <CIFT>.mp4, QC/, LOG/, KONTROL/,
+# RAPOR/ (QC.csv, OZET.md, KONTROL_<n>.jpg, satir/, ESKI_TEST/).
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      ciftler: {description: 'TUMU ya da virgulle CIFT listesi', default: 'TUMU'}
+      grup: {description: 'paralel is sayisi', default: '13'}
+      eski_tam78: {description: 'dogruluk testi: TEMP/VIDEO_V7_DUZELTME/<damga>/TAM78 (v7c)', default: '20261028_100938'}
+env:
+  K: gdrive:ASTROLOVE/TEMP/POSTER_KAPAK_V10/20261026_153710
+jobs:
+  liste:
+    runs-on: ubuntu-latest
+    outputs:
+      matris: ${{ steps.m.outputs.matris }}
+      damga: ${{ steps.m.outputs.damga }}
+    steps:
+    - uses: actions/checkout@v4
+    - id: m
+      env:
+        CIFTLER: ${{ inputs.ciftler }}
+        GRUP: ${{ inputs.grup }}
+        E: ${{ inputs.eski_tam78 }}
+      run: |
+        python3 - <<'PY'
+        import csv, json, os, re, time
+        tum = sorted(r["cift"] for r in csv.DictReader(open("data/pod/pod78_ids.csv")))
+        assert len(tum) == 78, len(tum)
+        g = os.environ["CIFTLER"].strip()
+        sec = tum if g.upper() == "TUMU" else [c.strip().upper() for c in re.split(r"[,\s]+", g) if c.strip()]
+        assert sec and not [c for c in sec if c not in tum], "bilinmeyen cift"
+        assert re.fullmatch(r"\d{1,2}", os.environ["GRUP"]), "grup"
+        assert re.fullmatch(r"\d{8}_\d{6}", os.environ["E"]), "eski_tam78"
+        d = time.strftime("%Y%m%d_%H%M%S", time.gmtime())
+        n = max(1, min(int(os.environ["GRUP"]), len(sec)))
+        m = {"include": [{"no": i + 1, "ciftler": " ".join(sec[i::n])} for i in range(n) if sec[i::n]]}
+        print(json.dumps(m), d)
+        with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+            f.write("matris=" + json.dumps(m) + "\n" + "damga=" + d + "\n")
+        PY
+
+  uret:
+    needs: liste
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.liste.outputs.matris) }}
+    name: uret ${{ matrix.no }}
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Kurulum
+      timeout-minutes: 15
+      run: |
+        set -euo pipefail
+        pip install -q numpy==2.1.3 pillow==11.0.0 scipy==1.14.1 opencv-python-headless==4.10.0.84
+        sudo apt-get -qq update >/dev/null && sudo apt-get -qq install -y ffmpeg fonts-dejavu-core >/dev/null
+        sudo apt-get -qq install -y rclone >/dev/null 2>&1 || timeout 240 bash -c 'curl -fsSL --max-time 120 --retry 2 https://rclone.org/install.sh | sudo bash >/dev/null 2>&1'
+    - name: rclone.conf
+      env:
+        RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      run: |
+        set -euo pipefail
+        mkdir -p ~/.config/rclone; umask 077
+        printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+        if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+          grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+    - name: Uret + tozsuz + QC (en fazla 2 deneme) + dogruluk testi + satir
+      env:
+        CIFTLER: ${{ matrix.ciftler }}
+        E: ${{ inputs.eski_tam78 }}
+      run: |
+        set +e -uo pipefail
+        git show ed1ddf3e:sosyal/poster_video/poster_video_v7.py > sosyal/poster_video/_eski_v7c.py || { echo "::error::eski motor kaynagi"; exit 1; }
+        mkdir -p _o/vid _o/QC _o/LOG _o/ESKI_TEST _o/satir _o/kontrol _k _e
+        ORT="V7_DOLGU=nk V7_HALKASIZ=1 V6_C=sosyal/poster_video/v6_c_egri.json V6_N=58000 V6_BOLGE_REF=44274 V6_N_REF=58000"
+        T0=$(date +%s); N=$(echo $CIFTLER | wc -w); I=0
+        for C in $CIFTLER; do
+          I=$((I+1)); W=_w/$C
+          rclone copyto "$K/KAPAK_$C.jpg" "_k/$C.jpg" -q || echo "::error::$C kapak indirilemedi"
+          rclone copyto "gdrive:ASTROLOVE/TEMP/VIDEO_V7_DUZELTME/$E/TAM78/$C.mp4" "_e/$C.mp4" -q || echo "::warning::$C eski TAM78 video yok"
+          for D in 1 2; do
+            rm -rf $W; mkdir -p $W/qc; QC=1
+            [ -f "_k/$C.jpg" ] || break
+            env $ORT python3 -I sosyal/poster_video/poster_video_v7.py "_k/$C.jpg" "$W/$C.mp4" murekkep > "$W/uretim.log" 2>&1 \
+              && env $ORT TOZSUZ=1 python3 -I sosyal/poster_video/poster_video_v7.py "_k/$C.jpg" "$W/$C.mp4.tozsuz.mp4" murekkep > "$W/tozsuz.log" 2>&1 \
+              && { python3 -I sosyal/poster_video/v7_qc.py "$W/$C.mp4" "_k/$C.jpg" "$W/uretim.log" "$W/qc" > "$W/qc.txt" 2>&1; QC=$?; }
+            echo "$C deneme $D QC $([ $QC = 0 ] && echo PASS || echo FAIL): $(grep -h '^FAIL' $W/qc.txt 2>/dev/null | cut -c1-200 | tr '\n' ' ') $(tail -1 $W/uretim.log | cut -c1-160)"
+            [ $QC = 0 ] && break
+          done
+          grep -h "^silme:\|^mesaj:" "$W/uretim.log"
+          ET=-
+          if [ -f "_e/$C.mp4" ]; then
+            python3 -I sosyal/poster_video/v7_mesaj_qc.py eski "_e/$C.mp4" "_k/$C.jpg" sosyal/poster_video/_eski_v7c.py "_o/ESKI_TEST/$C.json" 2>&1 | grep "^$C.mp4 a"
+            [ -f "_o/ESKI_TEST/$C.json" ] && ET="_o/ESKI_TEST/$C.json"
+          fi
+          python3 -I sosyal/poster_video/v7d_78_cift.py "$W/$C.mp4" "$W/qc/QC.json" "$ET" "$W/uretim.log" _o "$C" "$D" > "$W/satir.txt" 2>&1 || { echo "::error::$C satir"; tail -3 "$W/satir.txt"; }
+          [ -f "$W/$C.mp4" ] && cp "$W/$C.mp4" _o/vid/
+          [ -f "$W/qc/QC.json" ] && cp "$W/qc/QC.json" "_o/QC/${C}_QC.json"
+          [ -f "$W/qc/KONTAK.jpg" ] && cp "$W/qc/KONTAK.jpg" "_o/QC/${C}_KONTAK.jpg"
+          [ -f "$W/uretim.log" ] && cp "$W/uretim.log" "_o/LOG/${C}_uretim.log"
+          [ -f "$W/$C.mp4.ic.json" ] && cp "$W/$C.mp4.ic.json" "_o/LOG/${C}_ic.json"
+          [ -f "$W/$C.mp4.tozsuz.mp4.ic.json" ] && cp "$W/$C.mp4.tozsuz.mp4.ic.json" "_o/LOG/${C}_tozsuz_ic.json"
+          rm -rf "$W" "_e/$C.mp4"
+          G=$(( $(date +%s) - T0 )); echo "[$I/$N %$((100*I/N))] $C (gecen ${G}s, kalan ~$(( G*(N-I)/I ))s)"
+        done
+    - uses: actions/upload-artifact@v4
+      if: ${{ always() }}
+      with:
+        name: v7d-${{ matrix.no }}
+        path: _o
+        if-no-files-found: warn
+        retention-days: 7
+
+  rapor:
+    needs: [liste, uret]
+    if: ${{ always() && needs.liste.result == 'success' }}
+    runs-on: ubuntu-latest
+    env:
+      DAMGA: ${{ needs.liste.outputs.damga }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: v7d-*
+        path: _a
+        merge-multiple: true
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Kurulum
+      timeout-minutes: 15
+      run: |
+        set -euo pipefail
+        pip install -q pillow==11.0.0
+        sudo apt-get -qq update >/dev/null && sudo apt-get -qq install -y fonts-dejavu-core >/dev/null
+        sudo apt-get -qq install -y rclone >/dev/null 2>&1 || timeout 240 bash -c 'curl -fsSL --max-time 120 --retry 2 https://rclone.org/install.sh | sudo bash >/dev/null 2>&1'
+    - name: rclone.conf
+      env:
+        RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      run: |
+        set -euo pipefail
+        mkdir -p ~/.config/rclone; umask 077
+        printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+        if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+          grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+    - name: Rapor + Drive (tek yukleme)
+      env: {E: "${{ inputs.eski_tam78 }}"}
+      run: |
+        set +e -uo pipefail
+        mkdir -p _t/RAPOR
+        python3 sosyal/poster_video/v7d_78_rapor.py --satir _a/satir --kontrol _a/kontrol --out _t/RAPOR; KOD=$?
+        printf -- '- commit %s, kosu %s, dogruluk testi eski TAM78 %s\n' "$GITHUB_SHA" "$GITHUB_RUN_ID" "$E" >> _t/RAPOR/OZET.md
+        set -e
+        cp _a/vid/*.mp4 _t/ 2>/dev/null || true
+        for d in QC LOG; do [ -d "_a/$d" ] && cp -r "_a/$d" _t/; done
+        [ -d _a/kontrol ] && cp -r _a/kontrol _t/KONTROL
+        [ -d _a/satir ] && cp -r _a/satir _t/RAPOR/satir
+        [ -d _a/ESKI_TEST ] && cp -r _a/ESKI_TEST _t/RAPOR/ESKI_TEST
+        echo "mp4 $(ls _t/*.mp4 2>/dev/null | wc -l)"
+        rclone copy _t "gdrive:ASTROLOVE/TEMP/VIDEO_V7_DUZELTME/$DAMGA/TAM78" --immutable --transfers 8 -q
+        cat _t/RAPOR/OZET.md >> "$GITHUB_STEP_SUMMARY"
+        echo "::notice title=VIDEO V7D 78::TEMP/VIDEO_V7_DUZELTME/$DAMGA/TAM78 $(sed -n 3p _t/RAPOR/OZET.md)"
+        exit $KOD
+    - if: ${{ always() }}
+      run: rm -rf ~/.config/rclone

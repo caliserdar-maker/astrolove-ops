@@ -1,0 +1,197 @@
+#!/usr/bin/env python3
+"""v7 QC kapisi 'mesaj_isim' (Merkez 28 Eki, Serdar onayi: mesaj tam silinip soldan saga yeniden yazilir; isim ve kucuk burclar
+degismez). Motordan BAGIMSIZ murekkep maskesi: kapak karesinde (videonun 0. karesi) mesaj bandinda parlaklik - yerel zemin (31 px
+medyan) > MUREKKEP_T. Mesaj bandi: isim satirinin altindan poster altina kadar, parlaklik fazlasi > MUREKKEP_T satir kumelerinin en
+buyugu (motordaki gibi komsu kumeler <= 10 px bosluk ile), +-3 / +-5 px. Yazim cephesi motorun kendi yazim() ilerleyisi
+(ic.json 'yazim': mx0, mx1, yum, nB, nS; eski videolar icin bilgi_kaynaktan ile eski motor kaynagindan).
+ a) 0,3-5,0 sn (kare nS..nB-1): cephenin saginda (x >= esik, yazim agirligi 0) kalan murekkep konumlarinda ya mürekkep gibi gorunen
+    (parlaklik fazlasi > MUREKKEP_T) ya da kapakla ayni kalan (|parlaklik - kapak| < AYNI_T) piksel sayisi + ayni bolgede (bant x >= esik)
+    yerel zeminden belirgin koyu / acik (|parlaklik fazlasi| > LEKE_T) piksel sayisi. Her karede 0 olmali.
+ b) son 0,5 sn (kare 165-179): mesaj bandi ile 0. kare (kapak) farki: en buyuk mutlak fark <= taban + PAY; asan piksel 0.
+ c) tum kareler, TOZSUZ=1 ile yeniden uretilmis video: isim bandi (sonsuz kutulari haric) ve iki kucuk burc kutusu ile 0. kare farki
+    <= taban + PAY; asan piksel 0; ve motorun ham (kodlanmamis) kutu farki (tozsuz ic.json yazim.ham_kutu_fark_max) <= HAM_T (1, nicemleme).
+    (Glifler ve sonsuz toz kaynagi; tozlu videoda olculmez.)
+ Kodlama tabani: ayni bolgede |kare 179 - kare 0| (ikisi de kapak) en buyugu. Esikler olcumle (asagida kaynak).
+Kullanim: v7_mesaj_qc.py <video.mp4> <tozsuz.mp4|-> <ic.json> <cikti.json>"""
+import json
+import os
+import sys
+
+import cv2
+import numpy as np
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import v7_qc as Q  # noqa: E402
+
+MUREKKEP_T = 40.0   # Merkez 28 Eki tanimi (AQUARIUS_GEMINI ~1813 px)
+AYNI_T = 10.0       # olcum: asagida
+LEKE_T = 25.0       # olcum: asagida
+PAY = 8.0           # mp4 kodlama payi (b, c): 6 yerel ciftin (AQUARIUS_GEMINI, ARIES_GEMINI, CANCER_SAGITTARIUS, CAPRICORN_SAGITTARIUS,
+                    # ARIES_SCORPIO, LIBRA_SAGITTARIUS; tozsuz) isim / iki glif kutusunda tum karelerin en buyuk farki - taban (kare 179 - 0)
+                    # en fazla 6 (ARIES_GEMINI sol glif, 5-8. kareler: 0-0,3 sn gecisinde x264 gurultusu; ham karede fark 0); pay 6 + 2.
+                    # Ham (kodlanmamis) kutu farki ayrica motordan: ic.json yazim.ham_kutu_fark_max (TOZSUZ=1) <= HAM_T.
+HAM_T = 1           # float -> uint8 kesme (astype) nicemlemesi: kutularda BASE = KAP + Gauss kuyrugu (~1e-7); olcum ARIES_GEMINI ve
+                    # AQUARIUS_GEMINI ham fark 1 (motor kutulara dokunmuyor: BASE - KAP en buyuk 0,0, WS / WM 0)
+W3 = np.float32([0.299, 0.587, 0.114])
+
+
+def lum(f):
+    return f.astype(np.float32) @ W3
+
+
+def fazla(f):
+    l = lum(f)
+    return l - cv2.medianBlur(np.clip(l, 0, 255).astype(np.uint8), 31).astype(np.float32)
+
+
+def p2v(d, x, y):
+    return (d['x0'] + x * d['cw'] / d['pw']) * d['vw'] / d['kw'], (d['y0'] + y * d['ch'] / d['ph']) * d['vh'] / d['kh']
+
+
+def kutu_v(d, b, pay=0):
+    """poster kutusu [x, y, w, h] -> video [x0, y0, x1, y1] (disa yuvarlanmis, pay px)"""
+    xa, ya = p2v(d, b[0], b[1]); xb, yb = p2v(d, b[0] + b[2], b[1] + b[3])
+    return int(np.floor(xa)) - pay, int(np.floor(ya)) - pay, int(np.ceil(xb)) + pay, int(np.ceil(yb)) + pay
+
+
+def ease(x):
+    y = min(1.0, max(0.0, x))
+    return y * y * (3 - 2 * y)
+
+
+def mesaj_bandi(F0, d, isim):
+    """kapak karesinden (motordan bagimsiz) mesaj bandi + murekkep maskesi"""
+    px0, _, px1, py1 = kutu_v(d, [0, 0, d['pw'], d['ph']])
+    _, _, _, iy1 = kutu_v(d, isim)
+    ya = iy1 + 4
+    ex = fazla(F0)
+    m = np.zeros(ex.shape, bool); m[ya:py1, px0:px1] = ex[ya:py1, px0:px1] > MUREKKEP_T
+    sat = m.sum(1); kum = []
+    for r in np.where(sat > 0)[0]:
+        if kum and r - kum[-1][1] <= 10:
+            kum[-1][1] = r
+        else:
+            kum.append([r, r])
+    if not kum:
+        return None, None
+    a, b = max(kum, key=lambda k: sat[k[0]:k[1] + 1].sum())
+    a, b = a - 3, b + 4
+    cols = np.where(m[a:b].any(0))[0]
+    bant = (int(cols.min()) - 5, int(a), int(cols.max()) + 6, int(b))
+    ink = np.zeros(ex.shape, bool); ink[a:b, bant[0]:bant[2]] = m[a:b, bant[0]:bant[2]]
+    return bant, ink
+
+
+def olc(F, T, ic, ic_tz=None):
+    d, y = ic['donusum'], ic['yazim']
+    R = {}
+    F0 = F[0]
+    bant, ink = mesaj_bandi(F0, d, y['isim_poster'])
+    if bant is None:
+        return {'gecti': False, 'deger': {'hata': 'kapakta mesaj murekkebi yok'}}
+    x0, y0, x1, y1 = bant
+    R['bant'] = list(bant); R['murekkep_px'] = int(ink.sum())
+    XX = np.arange(F0.shape[1])[None, :].repeat(F0.shape[0], 0)
+    l0 = lum(F0)
+    bm = np.zeros(ink.shape, bool); bm[y0:y1, x0:x1] = True
+    a_max, a_kare, a_fmax, seri = 0, None, -1e9, []
+    nS, nB, mx0, mx1, yum = y['nS'], y['nB'], y['mx0'], y['mx1'], y['yum']
+    for i in range(nS, nB):
+        esik = mx0 - yum + (mx1 - mx0 + 2 * yum) * ease(i / (nB - 1))
+        sag = XX >= esik
+        ex = fazla(F[i]); li = lum(F[i])
+        kal = ink & sag & ((ex > MUREKKEP_T) | (np.abs(li - l0) < AYNI_T))
+        leke = bm & sag & ~ink & (np.abs(ex) > LEKE_T)
+        n = int(kal.sum() + leke.sum())
+        seri.append(n)
+        if (bm & sag).any():
+            a_fmax = max(a_fmax, float(np.abs(ex[bm & sag]).max()))
+        if n > a_max:
+            a_max, a_kare = n, i
+    R['a'] = {'en_cok_piksel': a_max, 'kare': a_kare, 'sag_bant_fazla_max': round(a_fmax, 1), 'kare_araligi': [nS, nB - 1],
+              'esik': {'murekkep': MUREKKEP_T, 'ayni': AYNI_T, 'leke': LEKE_T}, 'piksel_seri_ilk20': seri[:20]}
+    dfn = lambda A, B, sl: np.abs(A[sl].astype(np.int16) - B[sl].astype(np.int16)).max(-1)
+    sl = (slice(y0, y1), slice(x0, x1))
+    tb = int(dfn(F[-1], F0, sl).max())
+    bmx, bn = 0, 0
+    for i in range(165, len(F)):
+        dd = dfn(F[i], F0, sl); bmx = max(bmx, int(dd.max())); bn += int((dd > tb + PAY).sum())
+    R['b'] = {'taban': tb, 'pay': PAY, 'en_buyuk': bmx, 'asan_piksel': bn}
+    if T is not None:
+        T0 = T[0]
+        bol = []
+        isim = kutu_v(d, y['isim_poster'], 2)
+        mI = np.zeros(T0.shape[:2], bool); mI[isim[1]:isim[3], isim[0]:isim[2]] = True
+        for s in ic['glif'].get('sonsuz', []):
+            k = kutu_v(d, s, 4); mI[k[1]:k[3], k[0]:k[2]] = False
+        bol.append(('isim', mI))
+        for g in ('sign_a', 'sign_b'):
+            k = kutu_v(d, ic['glif'][g], 2); mg = np.zeros(T0.shape[:2], bool); mg[k[1]:k[3], k[0]:k[2]] = True
+            bol.append((g, mg))
+        C = {}
+        for ad, mm in bol:
+            tb_ = int(np.abs(T[-1][mm].astype(np.int16) - T0[mm].astype(np.int16)).max())
+            mx_, n_, kr = 0, 0, None
+            for i in range(len(T)):
+                dd = np.abs(T[i][mm].astype(np.int16) - T0[mm].astype(np.int16)).max(-1)
+                if int(dd.max()) > mx_:
+                    mx_, kr = int(dd.max()), i
+                n_ += int((dd > tb_ + PAY).sum())
+            C[ad] = {'taban': tb_, 'en_buyuk': mx_, 'kare': kr, 'asan_piksel': n_, 'px': int(mm.sum())}
+        R['c'] = dict(C, pay=PAY)
+    else:
+        R['c'] = {'hata': 'tozsuz video yok'}
+    ok_a = a_max == 0
+    ok_b = bn == 0
+    ok_c = T is not None and all(v['asan_piksel'] == 0 for k, v in R['c'].items() if isinstance(v, dict))
+    if T is not None:
+        ham = (ic_tz or {}).get('yazim', {}).get('ham_kutu_fark_max')
+        R['c']['ham_kutu_fark_max'] = ham
+        ok_c = ok_c and ham is not None and ham <= HAM_T
+    R['gecti_abc'] = [ok_a, ok_b, ok_c]
+    return {'gecti': ok_a and ok_b and ok_c, 'deger': R}
+
+
+def bilgi_kaynaktan(pv, kapak, tmpdir):
+    """eski videolar (ic.json'da 'yazim' yok): verilen motor kaynagini 'mx0, mx1 = kapsam(MM)' satirina kadar calistirir"""
+    src = open(pv, encoding='utf-8').read()
+    son = src.index('mx0, mx1 = kapsam(MM)')
+    son = src.index('\n', son) + 1
+    out = os.path.join(tmpdir, f'_bilgi_{os.getpid()}.mp4')
+    eski = sys.argv
+    sys.argv = [pv, kapak, out, 'murekkep']
+    os.environ['V7_HALKASIZ'] = '1'
+    g = {'__name__': 'v7_mesaj_qc_bilgi', '__file__': pv}
+    try:
+        exec(compile(src[:son], pv, 'exec'), g)
+    finally:
+        sys.argv = eski
+        for e in ('.sembol_maske.png', '.silme_maske.png'):
+            if os.path.exists(out + e):
+                os.remove(out + e)
+    P = g['P']
+    return {'donusum': {'x0': g['x0'], 'y0': g['y0'], 'cw': g['cw'], 'ch': g['ch'], 'pw': int(P.w), 'ph': int(P.h),
+                        'kw': int(g['kap_src'].shape[1]), 'kh': int(g['kap_src'].shape[0]), 'vw': g['VW'], 'vh': g['VH']},
+            'yazim': {'mx0': int(g['mx0']), 'mx1': int(g['mx1']), 'yum': 10, 'nB': int(round(g['BITIS'] * g['FPS'])),
+                      'nS': int(round(g['SILME'] * g['FPS'])), 'isim_poster': [int(v) for v in P.names_row[1:5]]},
+            'glif': {'sign_a': [int(v) for v in P.sign_a[1:5]], 'sign_b': [int(v) for v in P.sign_b[1:5]],
+                     'sonsuz': [[int(v) for v in c[1:5]] for c in g['sonsuz']]}}
+
+
+if __name__ == '__main__' and len(sys.argv) == 6 and sys.argv[1] == 'eski':
+    # dogruluk testi (eski TAM78 videolari, ic.json yok): eski <video.mp4> <kapak.jpg> <eski_motor.py> <cikti.json>; (c) tozsuz yok
+    v, kap, pv, out = sys.argv[2:6]
+    F, _ = Q.kareler(v)
+    r = olc(F, None, bilgi_kaynaktan(pv, kap, os.path.dirname(os.path.abspath(out))))
+    r['deger']['a_gecti'] = r['deger']['gecti_abc'][0]
+    json.dump(r, open(out, 'w'), indent=1)
+    print(os.path.basename(v), 'a', 'PASS' if r['deger']['a_gecti'] else 'FAIL', json.dumps(r['deger']['a'])[:300], 'b', r['deger']['b'])
+    sys.exit(0)
+elif __name__ == '__main__':
+    v, tz, icp, out = sys.argv[1:5]
+    F, _ = Q.kareler(v)
+    T = Q.kareler(tz)[0] if tz != '-' else None
+    r = olc(F, T, json.load(open(icp)), json.load(open(tz + '.ic.json')) if tz != '-' and os.path.exists(tz + '.ic.json') else None)
+    json.dump(r, open(out, 'w'), indent=1)
+    print(('PASS' if r['gecti'] else 'FAIL'), 'mesaj_isim', json.dumps({k: r['deger'].get(k) for k in ('a', 'b', 'c', 'gecti_abc')})[:900])
+    sys.exit(0 if r['gecti'] else 1)

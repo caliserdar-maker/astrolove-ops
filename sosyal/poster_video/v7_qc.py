@@ -12,6 +12,8 @@ Kullanim: v7_qc.py <video.mp4> <kapak.png> <uretim_log.txt> <cikti_dir>
     (Merkez olcumu: v7 7,17 FAIL, v7b 0,90 PASS; bu tanimla yerel v7 -7,20, v7b -0,89)
  silme_artik (Merkez 28 Eki, v7c): 0,4 sn karesinde (silme 0,3 sn'de biter) <video>.silme_maske.png (sembol + sembole yakin altin)
     icinde R-B'nin yerel zemine (31 px medyan) gore fazlasi > v7_silme_artik.ESIK olan piksel sayisi 0 olmali (maske yoksa FAIL)
+ mesaj_isim (Merkez 28 Eki, v7d; ic.json 'yazim' varsa): v7_mesaj_qc.olc (a: mesaj tam silinir / leke yok, b: son 0,5 sn kapak,
+    c: tozsuz <video>.tozsuz.mp4 uzerinde isim ve iki glif kapakla ayni)
  silme_halka_ici (inceleme 28 Eki, yalniz poster): ayni karede maskeden BAGIMSIZ, uydurulan altin halkanin ici (alt bant haric)
     R-B fazlasi > ESIK piksel sayisi 0 olmali (v7_silme_artik.halka_ici)"""
 import json, os, re, subprocess, sys
@@ -89,6 +91,12 @@ def main():
             K['silme_halka_ici'] = {'gecti': h.get('artik') == 0, 'deger': dict(h, sn=SA.KARE_SN, esik=SA.ESIK, poster_kutusu=pk)}
     else:   # inceleme 28 Eki: maske yoksa kapi atlanmaz (v7c oncesi video / yd_video motor kopyasi maske uretmiyor)
         K['silme_artik'] = {'gecti': False, 'deger': {'hata': 'silme_maske.png yok (v7c oncesi uretim)'}}
+    if 'yazim' in ic:   # v7d (Merkez 28 Eki): mesaj tam silinip yeniden yazilir, isim / glif degismez (v7_mesaj_qc; tozsuz: <video>.tozsuz.mp4)
+        import v7_mesaj_qc as MQ
+        tz = v + '.tozsuz.mp4'
+        T = MQ.Q.kareler(tz)[0] if os.path.exists(tz) else None
+        icz = json.load(open(tz + '.ic.json')) if os.path.exists(tz + '.ic.json') else None
+        K['mesaj_isim'] = MQ.olc(F, T, ic, icz)
     th = 270; tw = round(F.shape[2] * th / F.shape[1]); ust = 32
     KT = Image.new('RGB', (4 * (tw + 8), 2 * (th + ust + 8)), (245, 245, 245)); dr = ImageDraw.Draw(KT)
     for n, t in enumerate(KONTAK_SN):

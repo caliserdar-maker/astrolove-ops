@@ -210,11 +210,64 @@ for s2 in (P.sign_a, P.sign_b):
     _, x, y, w, h, _ = s2
     MG_p[y:y + h, x:x + w] = P.alpha[y:y + h, x:x + w]
 MG_p = np.maximum(MG_p, alfa(sonsuz, 5)[0])
+# v7d (Merkez 28 Eki, Serdar onayi): mesaj tam silinip soldan saga yeniden yazilir (YD 27 Eki karari ile ayni mantik). Eskiden mesaj
+# yalniz core (R-B > 40) parcalarindan ve alani > 300 parcalarin kutusundan kuruluyordu: 8 ciftte yalniz "K", 6 ciftte yarisi, digerlerinde
+# ince harfler silinmiyordu (TAM78 40669865397). Simdi (yd_video.py 95-117 gibi) mesaj isim satirinin altindaki bolgenin tamamindan:
+# parlaklik - yerel zemin (61 px medyan) > MESAJ_CEKIRDEK olan satir kumelerinin en buyugu (komsu kumeler <= 40 px bosluk ile katilir)
+# mesaj bandidir (y +-12, x +-20 px); bant icinde parlaklik fazlasi > MESAJ_KENAR olan TUM pikseller (ince harf, kenar yumusatma) mesaj
+# maskesine girer. Isim satiri ve kucuk burclar silme alanina girmez (RM_p bu kutularda 0). V7_MESAJ=eski: eski davranis.
+MESAJ_CEKIRDEK, MESAJ_KENAR = 20, 10
+MESAJ = None
+if os.environ.get('V7_MESAJ', 'tam') == 'tam':
+    _lum = P.img @ np.float32([0.299, 0.587, 0.114])
+    _ex = _lum - cv2.medianBlur(np.clip(_lum, 0, 255).astype(np.uint8), 61).astype(np.float32)
+    _ny1 = int(P.names_row[2] + P.names_row[4]) + 15
+    _xa, _xb = int(0.04 * P.w), int(0.96 * P.w)
+    _sat = (_ex[_ny1:, _xa:_xb] > MESAJ_CEKIRDEK).sum(1)
+    _kum = []
+    for _r in np.where(_sat > 0)[0]:
+        if _kum and _r - _kum[-1][1] <= 6:
+            _kum[-1][1] = _r
+        else:
+            _kum.append([_r, _r])
+    if not _kum:
+        raise SystemExit('v7d: isim satirinin altinda mesaj murekkebi yok')
+    _ki = max(range(len(_kum)), key=lambda k: _sat[_kum[k][0]:_kum[k][1] + 1].sum())
+    _a, _b = _kum[_ki]
+    for _k in range(_ki - 1, -1, -1):                                # 2 satirli mesaj: komsu kumeler
+        if _a - _kum[_k][1] <= 40 and _sat[_kum[_k][0]:_kum[_k][1] + 1].sum() > 0.1 * _sat[_kum[_ki][0]:_kum[_ki][1] + 1].sum():
+            _a = _kum[_k][0]
+        else:
+            break
+    for _k in range(_ki + 1, len(_kum)):
+        if _kum[_k][0] - _b <= 40 and _sat[_kum[_k][0]:_kum[_k][1] + 1].sum() > 0.1 * _sat[_kum[_ki][0]:_kum[_ki][1] + 1].sum():
+            _b = _kum[_k][1]
+        else:
+            break
+    _ya, _yb = max(_ny1 - 4, _ny1 + _a - 12), min(P.h, _ny1 + _b + 13)
+    _cols = np.where((_ex[_ya:_yb, _xa:_xb] > MESAJ_CEKIRDEK).any(0))[0]
+    _mxa, _mxb = max(0, _xa + int(_cols.min()) - 20), min(P.w, _xa + int(_cols.max()) + 21)
+    _mm = np.zeros(P.lab.shape, bool)
+    _mm[_ya:_yb, _mxa:_mxb] = _ex[_ya:_yb, _mxa:_mxb] > MESAJ_KENAR
+    _n2, _lab2, _st2, _ = cv2.connectedComponentsWithStats(_mm.astype(np.uint8), 8)
+    _taban = int(P.lab.max()) + 1
+    _yeni = []
+    for _k in range(1, _n2):
+        P.lab[_lab2 == _k] = _taban + _k
+        _yeni.append((_taban + _k, *(int(v) for v in _st2[_k])))
+    P.comps = [c for c in P.comps if not (_mxa <= c[1] + c[3] / 2 <= _mxb and _ya <= c[2] + c[4] / 2 <= _yb)] + _yeni
+    P.msg_row = (-1, _mxa, _ya, _mxb - _mxa, _yb - _ya, int(_mm.sum()))
+    MESAJ = {'bant_poster': [int(_mxa), int(_ya), int(_mxb), int(_yb)], 'murekkep_px': int(_mm.sum()), 'parca': len(_yeni)}
+    print(f'mesaj: bant {MESAJ["bant_poster"]} (poster), murekkep {MESAJ["murekkep_px"]} px, {len(_yeni)} parca '
+          f'(parlaklik fazlasi > {MESAJ_KENAR}, cekirdek > {MESAJ_CEKIRDEK})', flush=True)
 mes = parcalar(P.msg_row)
 MM_p, mmes = alfa(mes, 5)
 # bos hal bolgeleri: sembol + golgesi (31 px), mesaj (11 px); yumusak kenar
 RS_p = cv2.GaussianBlur(cv2.dilate(msym, np.ones((31, 31), np.uint8)).astype(np.float32), (0, 0), 5.0)
 RM_p = cv2.GaussianBlur(cv2.dilate(mmes, np.ones((11, 11), np.uint8)).astype(np.float32), (0, 0), 2.0)
+if MESAJ is not None:   # v7d: isim satiri ve kucuk burclar silinmez
+    for _k in (P.names_row, P.sign_a, P.sign_b):
+        RM_p[_k[2]:_k[2] + _k[4], _k[1]:_k[1] + _k[3]] = 0
 R_p = np.maximum(RS_p, RM_p)
 hm = cv2.resize((R_p > 0.02).astype(np.uint8), (P.w // 2, P.h // 2), interpolation=cv2.INTER_NEAREST)
 # v7b (26 Eki): bos hal KAPAKTAKI posterin kendi piksellerinden (POSTER_SRC yalniz maske icin). Kaynak ile Canva kapagi
@@ -324,6 +377,14 @@ def murekkep(tt):
     F = np.clip(F, 0, 1)
     return np.minimum(C_EGRI[min(len(C_EGRI) - 1, int(round(tt * (nB - 1))))], F), F   # v6: min(c(t), F)
 KAP8 = KAP.astype(np.uint8)
+HAM_KUTU, HAM_FARK = None, 0   # v7d QC (c): TOZSUZ=1 iken isim satiri (sonsuz haric) ve kucuk burc kutularinda ham kare - kapak farki
+if os.environ.get('TOZSUZ'):
+    _hk = np.zeros(P.alpha.shape, np.float32)
+    for _k in (P.names_row, P.sign_a, P.sign_b):
+        _hk[_k[2]:_k[2] + _k[4], _k[1]:_k[1] + _k[3]] = 1
+    for _c in sonsuz:
+        _hk[max(0, _c[2] - 8):_c[2] + _c[4] + 8, max(0, _c[1] - 8):_c[1] + _c[3] + 8] = 0
+    HAM_KUTU = vid(_hk) > 0.5
 pr = subprocess.Popen(['ffmpeg', '-y', '-loglevel', 'error', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-s', f'{VW}x{VH}',
                        '-r', str(FPS), '-i', '-', '-an', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '17',
                        '-preset', 'slow', '-movflags', '+faststart', OUT], stdin=subprocess.PIPE)
@@ -360,12 +421,21 @@ for i in range(nT):
     kat = cv2.GaussianBlur(kat, (0, 0), TANE) * 2.0
     rk = kat / np.maximum(al[..., None], 1e-4)
     a3 = np.clip(al, 0, 0.9)[..., None] * (0 if os.environ.get('TOZSUZ') else 1)   # TOZSUZ=1: yalniz QC (murekkep olusumu)
-    pr.stdin.write(np.clip(f * (1 - a3) + rk * a3, 0, 255).astype(np.uint8).tobytes())
+    o = np.clip(f * (1 - a3) + rk * a3, 0, 255).astype(np.uint8)
+    if HAM_KUTU is not None:
+        HAM_FARK = max(HAM_FARK, int(np.abs(o[HAM_KUTU].astype(np.int16) - KAP8[HAM_KUTU].astype(np.int16)).max()))
+    pr.stdin.write(o.tobytes())
     if i % 15 == 0:
         g = time.time() - t0
         print(f'  kare {i}/{nB} %{100 * i // nB} (gecen {g:.0f}s, kalan ~{g / i * (nB - i):.0f}s)', flush=True)
 pr.stdin.close(); pr.wait()
 print(f'{nT} kare ({nT / FPS:.2f} sn), toz/yazi bitis {BITIS} sn, uretim {time.time() - t0:.0f}s', flush=True)
 import json
-json.dump({'N': N, 'bolge_px': BOLGE_PX, 'glif': GLIF, 'tane_sigma': {'v4': 0.9, 'v5': TANE}, 'c_egri': [round(float(x), 4) for x in C_EGRI], **IC}, open(OUT + '.ic.json', 'w'))
+DONUSUM = {'x0': x0, 'y0': y0, 'cw': cw, 'ch': ch, 'pw': int(P.w), 'ph': int(P.h), 'kw': int(kap_src.shape[1]), 'kh': int(kap_src.shape[0]),
+           'vw': VW, 'vh': VH}   # poster (2000 px) -> video: vx = (x0 + px * cw / pw) * vw / kw
+YAZIM = {'mx0': int(mx0), 'mx1': int(mx1), 'yum': 10, 'nB': nB, 'nS': nS, 'mesaj': MESAJ,
+         'isim_poster': [int(v) for v in P.names_row[1:5]], 'msg_row_poster': [int(v) for v in P.msg_row[1:5]]}   # QC mesaj_isim
+if HAM_KUTU is not None:
+    YAZIM['ham_kutu_fark_max'] = HAM_FARK; YAZIM['ham_kutu_px'] = int(HAM_KUTU.sum())
+json.dump({'N': N, 'bolge_px': BOLGE_PX, 'glif': GLIF, 'donusum': DONUSUM, 'yazim': YAZIM, 'tane_sigma': {'v4': 0.9, 'v5': TANE}, 'c_egri': [round(float(x), 4) for x in C_EGRI], **IC}, open(OUT + '.ic.json', 'w'))
 print('tamam', OUT)
