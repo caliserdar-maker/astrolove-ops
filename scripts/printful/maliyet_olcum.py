@@ -163,9 +163,10 @@ def belge(out):
 
 def teslim(out, csv_yol):
     rows = list(csv.DictReader(open(csv_yol, encoding="utf-8")))
+    print("teslim CSV sutunlari:", list(rows[0].keys()) if rows else None, flush=True)
     T = defaultdict(list)
     for r in rows:
-        if r["ulke"] in ("AU", "JP") and r["adet"] == "1" and r["min_gun"]:
+        if r["ulke"] in ("AU", "JP") and r.get("adet", "1") == "1" and r.get("min_gun"):
             T[(r["urun"], r["boy"], r["ulke"])].append((r["kargo_adi"], r["kargo"], int(r["min_gun"]), int(r["max_gun"])))
     with open(out / "TESLIM_AU_JP.csv", "w", newline="") as f:
         w = csv.writer(f); w.writerow(["urun", "boy", "ulke", "kargo_adi", "kargo_usd", "min_gun", "max_gun", "20_gun_asar"])
