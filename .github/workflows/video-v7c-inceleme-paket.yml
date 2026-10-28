@@ -9,6 +9,7 @@ on:
     inputs:
       tam78: {description: 'TEMP/VIDEO_V7_DUZELTME/<damga>/TAM78', default: '20261028_100938'}
       birlesik: {description: 'TEMP/VIDEO_V7_78/BIRLESIK_<damga>', default: '20261026_211614'}
+      ciftler: {description: 'TUMU ya da bosluklu CIFT listesi (ilk kosu 40671603321: 4 paralelde 12 cift eksik, bellek)', default: 'TUMU'}
 env:
   K: gdrive:ASTROLOVE/TEMP/POSTER_KAPAK_V10/20261026_153710
 jobs:
@@ -52,16 +53,20 @@ jobs:
         echo "kapak $(ls _k | wc -l) yeni $(ls _y/*.mp4 | wc -l) eski $(ls _e/*.mp4 | wc -l)"
         [ "$(ls _y/*.mp4 | wc -l)" = 78 ] && [ "$(ls _e/*.mp4 | wc -l)" = 78 ] || { echo "::error::78 degil"; exit 1; }
     - name: Paket
+      env: {CIFTLER: "${{ inputs.ciftler }}"}
       run: |
-        set -euo pipefail
-        ls _y/*.mp4 | xargs -n1 basename | sed 's/\.mp4$//' | xargs -P 4 -I{} sh -c \
+        set -uo pipefail
+        if [ "$CIFTLER" = TUMU ]; then L=$(ls _y/*.mp4 | xargs -n1 basename | sed 's/\.mp4$//'); else L="$CIFTLER"; fi
+        for c in $L; do [[ "$c" =~ ^[A-Z]+_[A-Z]+$ && -f "_y/$c.mp4" ]] || { echo "::error::cift $c"; exit 1; }; done
+        echo $L | tr ' ' '\n' | xargs -P 2 -I{} sh -c \
           'python3 -I sosyal/poster_video/v7c_inceleme_paket.py sosyal/poster_video/poster_video_v7.py _k/KAPAK_{}.jpg _y/{}.mp4 _e/{}.mp4 _p {} 2>&1 | grep -v "^halkasiz\|^silme:"'
         echo "kare $(ls _p/kare | wc -l) kutu $(ls _p/kutu | wc -l) olcum $(ls _p/olcum | wc -l)"; du -sh _p
+        for c in $L; do [ -f "_p/olcum/$c.json" ] || echo "::error::$c olcum yok"; done
     - name: Dala yaz
       env: {T: "${{ inputs.tam78 }}"}
       run: |
         set -euo pipefail
-        D="inceleme/v7c-78-$T"
+        D="inceleme/v7c-78-$T-$GITHUB_RUN_ID"
         cd _p && git init -q && git checkout -q -b "$D"
         git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
         git add -A && git commit -q -m "v7c 78 inceleme paketi (TAM78 $T, kosu $GITHUB_RUN_ID)"
