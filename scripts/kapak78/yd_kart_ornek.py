@@ -239,8 +239,9 @@ def renk_kapisi(im, poster_kutulari, jpeg=False, muaf=(), muaf_r=4):
     z, m = np.float32(rgb(ZEMIN)), np.float32(rgb(MUREKKEP))
     v = m - z; t = np.clip(((a - z) @ v) / float(v @ v), 0, 1)
     dis = np.ones(t.shape, bool)
+    jp = 3 if jpeg else 0                 # JPEG 8x8 blok tasmasi gorsel kutusunun 1-2 px disina ton tasir (28 Eki S5: WP kosesi 2 px disi)
     for k in poster_kutulari:
-        dis[k[1]:k[3], k[0]:k[2]] = False
+        dis[max(0, k[1] - jp):k[3] + jp, max(0, k[0] - jp):k[2] + jp] = False
     tol, esik, r = (20, 0.06, 8) if jpeg else (6, 0.03, 3)
     cekirdek = t > 0.6                                      # gri yazi (#A09992 t~0.5) cekirdek sayilmaz
     yakin = _kutu_toplam(cekirdek, r) > 0

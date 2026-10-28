@@ -26,6 +26,10 @@ from PIL import Image, ImageDraw
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import yd_kart_ornek as K  # noqa: E402
+from PIL import features  # noqa: E402
+
+if not features.check("raqm"):     # inceleme 28 Eki: BASIC duzende Manrope satirlari 9-16 px farkli; sarma / ortalama yerelden sapar
+    raise SystemExit("DUR: Pillow raqm yok (kart olculeri raqm ile alindi)")
 
 W, H = K.W, K.H
 ARA = 150                                   # gorsel ile yazi arasi
@@ -83,8 +87,14 @@ def yerlesim_kapisi(kay, ad):
             if m < AYRI:
                 hata.append(f"{x} - {y} {m} px")
     orta = []
+    gb = {}
+    for ad_, k_ in kay.gorsel:
+        gb.setdefault(ad_, []).append(k_)
     for g in kay.gruplar:
-        k = birlesim([q for n in g for q in b[n]])
+        if isinstance(g, tuple):                        # ("gorsel", [bloklar]): yalniz gorsel kutulari (izgara satiri)
+            g = g[1]; k = birlesim([q for n in g for q in gb[n]])
+        else:
+            k = birlesim([q for n in g for q in b[n]])
         sol, sag = k[0], W - k[2]
         orta.append(dict(grup=g if len(g) < 6 else f"{len(g)} blok", kutu=k, sol=sol, sag=sag))
         if abs(sol - sag) > ORTA_TOL:
@@ -150,18 +160,19 @@ def baglac(im, xs, y0, uy, wmax=9.0, S=4, n=600):
     return np.asarray(lay).astype(np.float32) / 255, [(x, y0) for x in xs] + [(cx, uy)]
 
 
-def baglac_kapisi(im, alfa, uc, r=40):
-    """birlesme noktasinin r px yakininda iki egrinin (alfa > 0, 2 px genisletilmis) disinda murekkep (zeminden t > 0.03) yok"""
+def baglac_kapisi(im, alfa, uc, r=40, tol=0.05):
+    """birlesme noktasinin r px yakininda cizilen murekkep (zemin -> murekkep dogrusunda t) iki egrinin kendi alfasini tol'den fazla
+    asmaz: egriler disinda / arasinda ok basi ya da baska cizgi yok (inceleme 28 Eki: 2 px genisletilmis maske birlesme yakininda
+    35 px genisliyordu, eski ok basini gecirdi; bu olcum ok basini piksel piksel yakalar)"""
     a = np.asarray(im.convert("RGB")).astype(np.float32)
     z, m = np.float32(K.rgb(K.ZEMIN)), np.float32(K.rgb(K.MUREKKEP)); v = m - z
     t = np.clip(((a - z) @ v) / float(v @ v), 0, 1)
-    egri = K._kutu_toplam(alfa > 0.002, 2) > 0
     yy, xx = np.mgrid[0:H, 0:W]
     yakin = (xx - uc[0]) ** 2 + (yy - uc[1]) ** 2 <= r * r
-    dis = int(((t > 0.03) & yakin & ~egri).sum())
-    if dis:
-        raise SystemExit(f"DUR: baglac kapisi: birlesme noktasi {r} px yakininda egri disi murekkep {dis} px")
-    return dict(birlesme=[round(uc[0]), round(uc[1])], yaricap=r, egri_disi_px=0)
+    fazla = int(((t - alfa > tol) & yakin).sum())
+    if fazla:
+        raise SystemExit(f"DUR: baglac kapisi: birlesme noktasi {r} px yakininda egri disi murekkep {fazla} px")
+    return dict(birlesme=[round(uc[0]), round(uc[1])], yaricap=r, egri_disi_px=0, tolerans=tol)
 
 
 # ---------------------------------------------------------------- 1) sembol karti (wa_s1 duzeni)
@@ -296,8 +307,9 @@ def izgara_kart(baslik, ogeler, alt, sira, yerler, et_ara, sat_ara, olcek_fn):
     im = K.tuval(); kut = []; i = 0; yer = []
     for r, n in enumerate(sira):
         sat = [(yerler(r, j, n), i + j) for j in range(n)]
-        # satir grubu (gorsel + etiket kutulari) sayfada ortali: farkli genislikte gorsellerde merkez araligi korunur, satir kaydirilir
-        yar = [max(boy[k][0], K.genislik(K.ETIKET, ogeler[k][0])) / 2 for _, k in sat]
+        # satirin gorsel grubu sayfada ortali: farkli genislikte gorsellerde merkez araligi korunur, satir kaydirilir (yalniz gorsel
+        # kutularina gore; inceleme 28 Eki: etikete gore kaydirma K04 sutunlarini satirlar arasinda 22-24 px kaydiriyordu)
+        yar = [boy[k][0] / 2 for _, k in sat]
         dx = (W - min(c - h for (c, _), h in zip(sat, yar)) - max(c + h for (c, _), h in zip(sat, yar))) / 2
         yer += [(c + dx, y0 + r * (sat_h + sat_ara), r) for c, _ in sat]; i += n
     for i, ((ad, g), (w, h), (cx, y, r)) in enumerate(zip(ogeler, boy, yer)):
@@ -310,7 +322,7 @@ def izgara_kart(baslik, ogeler, alt, sira, yerler, et_ara, sat_ara, olcek_fn):
     kay.blok("not"); K.yaz(d, K.NOT, [alt], W / 2, K.NOT_Y, "center", W - 2 * K.KENAR)
     s0 = 0; kay.gruplar = []
     for n in sira:
-        kay.gruplar.append([f"hucre{i}" for i in range(s0, s0 + n)]); s0 += n
+        kay.gruplar.append(("gorsel", [f"hucre{i}" for i in range(s0, s0 + n)])); s0 += n
     o = dict(gorsel=[list(b_) for b_ in boy], satir_yuksekligi=gh)
     o["yerlesim"] = yerlesim_kapisi(kay, baslik)
     return im, o, kut
@@ -326,17 +338,17 @@ def secim_kart(baslik, ogeler, alt):
 
 
 def kontak_sayfa(satirlar, basliklar, kb_sinir=300):
-    """satirlar: [[(ad, PIL)]] (galeri sirasi); -> (JPEG baytlari, kalite)"""
+    """satirlar: [[(galeri no, ad, PIL)]] (galeri sirasi); -> (JPEG baytlari, kalite)"""
     tw, th, et = 420, 315, 30
     n = max(len(s) for s in satirlar)
     t = Image.new("RGB", (n * (tw + 8) + 160, len(satirlar) * (th + et + 8)), "white"); d = ImageDraw.Draw(t)
     for r, (sat, bas) in enumerate(zip(satirlar, basliklar)):
         y = r * (th + et + 8)
         d.text((6, y + th // 2), bas, fill=(0, 0, 0))
-        for j, (ad, im) in enumerate(sat):
+        for j, (no, ad, im) in enumerate(sat):
             x = 160 + j * (tw + 8)
             t.paste(im.convert("RGB").resize((tw, th), Image.LANCZOS), (x, y))
-            d.text((x + 2, y + th + 6), f"{j + 1}  {ad}"[:60], fill=(0, 0, 0))
+            d.text((x + 2, y + th + 6), f"{no}  {ad}"[:60], fill=(0, 0, 0))
     for q in (85, 80, 75, 70, 65):
         b = io.BytesIO(); t.save(b, "JPEG", quality=q)
         if b.tell() < kb_sinir * 1024:
@@ -352,7 +364,8 @@ def kontak_cli(out):
     ku = ["KAPAK43/KUPA_KAPAK43_01_orange", f"KUPA_{c}_K02_SEMBOL", f"KUPA_{c}_K03_KISISEL", f"KUPA_{c}_K05_BOYUT", f"KUPA_{c}_K07_SUREC",
           f"KUPA_{c}_K04_STIL", "KAPAK43/KUPA_KAPAK43_08_fig"]
     yd = [f"{c}_Y02", f"{c}_Y03", "ORTAK_Y04", f"{c}_Y05", f"YD_{c}_GENEL"]
-    sat = [[(Path(n).name, Image.open(out / f"{n}.jpg")) for n in g] for g in (wa, ku, yd)]
+    no = ([2, 3, 4, 5, 6], [1, 2, 3, 4, 5, 6, 7], [2, 3, 4, 5, 6])    # yeni galeri sirasi (WA / YD kapak 1 bu ornekte yok)
+    sat = [[(i, Path(n).name, Image.open(out / f"{n}.jpg")) for i, n in zip(ns, g)] for ns, g in zip(no, (wa, ku, yd))]
     b, q = kontak_sayfa(sat, ["WALL ART", "KUPA", "YD"])
     (out / "KONTAK_KART_SABLON.jpg").write_bytes(b)
     print(f"KONTAK_KART_SABLON.jpg {len(b) / 1024:.0f} KB q{q} ({sum(len(s) for s in sat)} gorsel, galeri sirasi)")
@@ -390,7 +403,7 @@ def kapak_cli(d, eski):
             if b_.shape == a.shape:
                 f = np.abs(a - b_)
                 r["eski_fark"] = dict(ort=round(float(f.mean()), 3), max=int(f.max()), p99=int(np.percentile(f.max(axis=2), 99)),
-                                      kaynak="TEMP/WA_KUPA_KART_ORNEK/20261027_192528/20261028_065730/KAPAK43")
+                                      kaynak=str(e))
         else:
             r["eski_fark"] = "eski dosya yok"
         R[p.name] = r

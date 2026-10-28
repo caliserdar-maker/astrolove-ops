@@ -14,12 +14,13 @@ pikselerin en kucuk kutusu + 4 px (kupa + golge). Galeri sirasi: 1 kapak, 2 semb
   KUPA_<CIFT>_K02_SEMBOL  sembol karti (eski K02 yakin plan fotografi IPTAL)
   KUPA_<CIFT>_K03_KISISEL tek on ustte, tek arka altta (30 px), her biri (icerik alani - 30) / 2 yukseklige
   KUPA_<CIFT>_K04_STIL    8 stil 4 + 4 (cift.py ST8 sirasi), ayni olcek (kupa ~452 px = onizleme 491 x 0,92), yan bosluk 150, etiket 40 px alt,
-                          satirlar 110 px; alt not "Every style in 11 oz and 15 oz" (dogrulama: 23 Eki salt okuma envanter dokumu, 25/25 kupa
-                          ilaninda 8 stil x 11 oz / 15 oz; kupa_fiyat.py envanter kapisi 11 oz 8 + 15 oz 8)
+                          satirlar 110 px; alt not "Every style in 11 oz and 15 oz" (dogrulama denetim oturumu raporunda: 23 Eki Etsy salt
+                          okuma ilan dokumleri SONRA_<ilan>.json, 25 kupa ilaninin 25'inde 8 stil x 11 oz / 15 oz; dokumler depoda degil)
   KUPA_<CIFT>_K05_BOYUT   iki kupa ayni olcekte (15 oz yuksekligi onaylanan onizlemedeki 989 px), kirpim kutusu tabanlari hizali, merkezler arasi
                           en genis kupa + 220; 90 px altta etiket, 0,3 x 68 px sonra 3 satir; yazi - alt not >= 100 px
   KUPA_<CIFT>_K07_SUREC   tek on + 4 adim (sure ve ucretsiz kargo yok)
-K05 olculeri Printful White Glossy Mug katalog degerleri (Printful API /products/19, kosu 40642887254); ml = US fl oz x 29,5735.
+K05 olculeri Printful White Glossy Mug katalog degerleri (Printful API /products/19, kosu 40642887254; kayit dal yd-kapak
+docs/wa_kupa_kart/ACIK_MADDELER.md A7); ml = US fl oz x 29,5735.
 Kapilar (PASS/FAIL, biri FAIL ise hicbir dosya yazilmaz): metin (cizilen satirlar = beklenen, sirayla), baslik / etiket Title Case (birim
 sozcukleri oz, in, cm, ml haric), yasak karakter (ondalik nokta disinda nokta, arti, esittir, uzun / orta tire), yasak sozcuk, punto >= 58,
 renk kapisi (cizim + JPEG; baglacin uc noktalarinin 4 px yakininda ara ton serbest), yerlesim kapilari (kart_sablon.py: ortalama <= 2 px,
@@ -171,15 +172,17 @@ def kopuk_ton(im, kutular, esik=3, bag=1):
     return n_k, liste
 
 
-def zemin_kenar(im, kutular, serit=2):
-    """fotograf kutularinin ic kenar seritlerinde (serit px) #F5F0E7'den farkin MEDYANI, en buyuk deger (panel / kutu kenari kapisi).
-    Kirpim payi 4 px (Merkez 28 Eki) oldugundan kupa / golge kenara yerel olarak degebilir; panel kenari tum serit boyunca fark verir."""
-    a = np.asarray(im.convert("RGB")).astype(np.float32); z = np.float32(K.rgb(K.ZEMIN)); m = 0.0
+def zemin_kenar(im, kutular, serit=2, yuzde=90):
+    """fotograf kutularinin ic kenar seritlerinde (serit px) #F5F0E7'den farkin yuzde'lik degeri, en buyuk (panel / kutu kenari kapisi).
+    Kirpim payi 4 px (Merkez 28 Eki): kupa / golge kenara yerel olarak degebilir (seridin < %10'u); panel ya da zemin farki seridin
+    tamaminda fark verir. Ayrica seritte fark > 3 piksel orani raporlanir. -> (en buyuk deger, en buyuk oran)"""
+    a = np.asarray(im.convert("RGB")).astype(np.float32); z = np.float32(K.rgb(K.ZEMIN)); m = o = 0.0
     for x0, y0, x1, y1 in kutular:
         p = a[y0:y1, x0:x1]
         for sr in (p[:serit], p[-serit:], p[:, :serit], p[:, -serit:]):
-            m = max(m, float(np.median(np.abs(sr - z).max(axis=-1))))
-    return m
+            f = np.abs(sr - z).max(axis=-1)
+            m = max(m, float(np.percentile(f, yuzde))); o = max(o, float((f > ZEMIN_ESIK).mean()))
+    return m, round(o, 4)
 
 
 def beklenen(a, b):
@@ -249,9 +252,9 @@ def main(argv=None):
         kotu = [t for t in yazi if YASAK.search(t) or K.YASAK_SOZ.search(t)]
         if kotu:
             raise SystemExit(f"DUR: {ad} yasak karakter / sozcuk: {kotu}")
-        for tur, t in sat:
-            if tur in ("baslik", "etiket") and not title_ok(t) and not t.isdigit():
-                raise SystemExit(f"DUR: {ad} {tur} satiri Title Case degil: {t!r}")
+        for tur, t in sat:                                 # BASLIK / ETIKET: beklenen listesinin bir ogesiyle BIREBIR ve Title Case
+            if tur in ("baslik", "etiket") and (t not in bek[anah] or not (title_ok(t) or t.isdigit())):
+                raise SystemExit(f"DUR: {ad} {tur} satiri {t!r} beklenen listede birebir yok / Title Case degil")
         g, e = " ".join(yazi).split(), " ".join(bek[anah]).split()
         if [x.casefold() for x in g] != [x.casefold() for x in e]:
             raise SystemExit(f"DUR: {ad} metni beklenenden farkli\n cizilen: {' '.join(g)}\n beklenen: {' '.join(e)}")
@@ -262,14 +265,14 @@ def main(argv=None):
         sapj = K.renk_kapisi(Image.open(io.BytesIO(jb[ad])), pk, jpeg=True, muaf=muaf)
         if sapj:
             raise SystemExit(f"DUR: {ad} renk kapisi (JPEG) {sapj}")
-        zk = kp = kl = None
+        zk = zo = kp = kl = None
         if ad.startswith("KUPA_") and pk:                    # ZEMIN KAPISI: fotograf kutusu kenar seritleri kart zeminine esit (panel yok)
-            zk = S_zk = zemin_kenar(im, pk); kp, kl = kopuk_ton(im, pk)
-            if S_zk > ZEMIN_ESIK:
-                raise SystemExit(f"DUR: {ad} fotograf kenari zeminden farkli (medyan {zk:.1f} > {ZEMIN_ESIK})")
+            (zk, zo), (kp, kl) = zemin_kenar(im, pk), kopuk_ton(im, pk)
+            if zk > ZEMIN_ESIK:
+                raise SystemExit(f"DUR: {ad} fotograf kenari zeminden farkli (p90 {zk:.1f} > {ZEMIN_ESIK}, fark > 3 orani {zo})")
             if kp:
                 raise SystemExit(f"DUR: {ad} fotograf kutusunda kupadan kopuk zemin disi ton {kp} px {kl[:5]}")
-        sonuc[ad] = im; rapor[ad] = dict(o, renk_kapisi="PASS (cizim + JPEG)", foto_kutu=pk, zemin_kenar_medyan_max=zk, kopuk_ton_px=kp,
+        sonuc[ad] = im; rapor[ad] = dict(o, renk_kapisi="PASS (cizim + JPEG)", foto_kutu=pk, zemin_kenar_p90_max=zk, zemin_kenar_fark3_oran=None if zk is None else zo, kopuk_ton_px=kp,
                                          yazi=yazi, kb=round(len(jb[ad]) / 1024))
     for ad, b in jb.items():
         (out / ad).write_bytes(b)
