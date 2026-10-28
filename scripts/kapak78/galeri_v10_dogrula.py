@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Galeri v10 bagimsiz dogrulama (Merkez 28 Eki madde 1; Serdar onayi). ETSY SALT OKUMA: ilan basina tek GET
-/listings/{id}/images (yd_envanter_oku.salt_okur: yazma yontemleri kapali). Kota tabani --kota-taban (varsayilan 515):
+/listings/{id}/images (yd_envanter_oku.salt_okur: yazma yontemleri kapali). Kota tabani --kota-taban (varsayilan KOTA_SINIRI 10; 28 Eki kosusu 40639208805 Merkez / Serdar talimatiyla 515 girdisiyle kostu):
 her istekten once kalan <= taban ise kosu durur (istekten sonra kalan tabanin altina inmez). KOTA_SINIRI (10) degismez.
 Girdi (Drive'dan, Etsy kilidi oncesi indirilir): PLAN_V10.json (plan_damga), ILERLEME.json, v10 kapaklari
 (TEMP/POSTER_KAPAK_V10/20261026_153710/KAPAK_<cift>.jpg), eski rank 1 yedegi (TEMP/POSTER_KAPAK_V10_YEDEK/20261026_144404/
@@ -172,7 +172,7 @@ def arg(argv=None):
     ap.add_argument("--galeri-damga", default=""); ap.add_argument("--ilerleme", required=True)
     ap.add_argument("--ciftler", required=True); ap.add_argument("--kapak-dir", required=True)
     ap.add_argument("--yedek-dir", required=True); ap.add_argument("--out", required=True)
-    ap.add_argument("--kota-taban", type=int, default=515)
+    ap.add_argument("--kota-taban", type=int, default=10)
     return ap.parse_args(argv)
 
 
@@ -186,9 +186,11 @@ def main(argv=None):
         st.refresh()
     api = Etsy(st)
     salt_okur(api)
-    # Merkez 28 Eki: kota 515'in altina inilmez. Sert taban her istekten once kalan < taban+1 ise durur; istek sonrasi kalan >= taban.
+    # Girdi KOTA_SINIRI'ndan buyukse (28 Eki: 515) istek oncesi kalan < taban+1 ise durur; istek sonrasi kalan >= taban. Ilk istekte kalan
+    # bilinmez (x-remaining-today ilk yanitta gelir): ilk istek tabansiz gider (28 Eki kosusunda ilk yanit 773).
     # Yalniz bu kosuya ozgu ve KOTA_SINIRI'ndan (10) siki; etsy_common degismez.
-    api.esik = api.sert_taban = max(int(a.kota_taban) + 1, api.sert_taban or 0)
+    if int(a.kota_taban) > (api.sert_taban or 0):
+        api.esik = api.sert_taban = int(a.kota_taban) + 1
     log(f"kota tabani bu kosu: {a.kota_taban} (istek oncesi kalan >= {api.sert_taban})")
     satir, sapma, dur = calistir(api, a)
     return rapor(satir, sapma, dur, api, a)

@@ -1,7 +1,7 @@
 name: galeri-v10-dogrula
 
 # Galeri v10 bagimsiz dogrulama (Merkez 28 Eki madde 1; Serdar onayi). ETSY SALT OKUMA: ilan basina tek GET (images), yazma
-# yontemleri kapali; kota tabani kota_taban (varsayilan 515, istek sonrasi kalan bunun altina inmez). Durum dosyalarina YAZMAZ.
+# yontemleri kapali; kota tabani kota_taban (varsayilan 10 = KOTA_SINIRI; daha yuksegi yalniz Serdar talimatiyla girdi olarak). Durum dosyalarina YAZMAZ.
 # Drive girdileri Etsy kilidi ALINMADAN once indirilir (KILIT SURESI): PLAN_V10.json (KOSU/<plan kosusu>), ILERLEME.json,
 # v10 kapaklar TEMP/POSTER_KAPAK_V10/20261026_153710, eski rank 1 yedegi TEMP/POSTER_KAPAK_V10_YEDEK/20261026_144404.
 # Cikti TEMP/POSTER_GALERI_V10_YUKLE/DOGRULA/<run_id>/ (DOGRULA.md, DOGRULA.json, SAPMA.csv, log). scripts/kapak78/galeri_v10_dogrula.py
@@ -15,7 +15,7 @@ on:
     inputs:
       plan_damga: {description: "kuru kosu plan_damga (<kosu>_<sha12>)", required: true, default: "40377589850_ab5b0d982175"}
       galeri_damga: {description: "TEMP/POSTER_GALERI_V10/<damga> (yalniz rapor)", required: true, default: "20261026_181944"}
-      kota_taban: {description: "Etsy kalan kota bu degerin altina inmez", required: true, default: "515"}
+      kota_taban: {description: "Etsy kalan kota bu degerin altina inmez (varsayilan KOTA_SINIRI 10; 28 Eki kosusu 515 ile)", required: true, default: "10"}
 
 env:
   T: "gdrive:ASTROLOVE/TEMP"
