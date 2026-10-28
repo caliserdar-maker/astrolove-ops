@@ -58,7 +58,7 @@ def main():
     ru3, k3 = P.kur(en3, dict(ENV, boy=["5x7"] + ENV["boy"]))
     s.append(("28 Eki: 4 cumle yeni hali PASS, RU karsiliklari", k3["pass_"] and k3["paragraf_en"] == 16
               and "ссылку для скачивания через сообщения Etsy" in ru3 and "Покупки" not in ru3
-              and "Мы печатаем постер или готовим файл" in ru3 and "Для каждого заказа постера" not in ru3
+              and "Мы печатаем постер или готовим файл сразу после того, как вы одобрите макет" in ru3 and "Для каждого заказа постера" not in ru3
               and "Его не нужно отправлять по почте" in ru3 and "в течение 24 часов, и его можно" not in ru3
               and "отправим цифровой файл в виде ссылки для скачивания" in ru3))
     s.append(("kalip disi paragraf FAIL", not P.kur(EN + "\n\nNEW\nSomething.", ENV)[1]["pass_"]))

@@ -167,7 +167,7 @@ SABIT = {
     "as soon as you approve it. If we don't hear from you within 24 hours of receiving the preview, we go ahead with the design as "
     "shown: we print your poster, or send your digital file as a download link in Etsy Messages.":
         "ВАШ МАКЕТ\nМы отправляем вам макет через сообщения Etsy в течение 24 часов после заказа. Мы печатаем постер или готовим "
-        "файл сразу после того, как вы его одобрите. Если в течение 24 часов после получения макета мы не получим от вас ответа, "
+        "файл сразу после того, как вы одобрите макет. Если в течение 24 часов после получения макета мы не получим от вас ответа, "
         "мы продолжим работу с дизайном в том виде, в каком он показан на макете: напечатаем постер или отправим цифровой файл "
         "в виде ссылки для скачивания в сообщениях Etsy.",
     "PRINT\n- Printed on premium matte art paper with long-lasting inks\nFrames shown in photos are for display only and are not "
