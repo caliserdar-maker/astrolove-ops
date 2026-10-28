@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """v7 silme artigi: 78 mevcut video olcumu + ornek secimi + silme seridi (Merkez 28 Eki; Etsy yok).
 olc   <poster_video_v7.py> <kapak_dir KAPAK_<CIFT>.jpg> <video_dir <CIFT>.mp4> <out>  -> OLCUM.csv, OLCUM.json, SECIM.txt
-      (secim: AQUARIUS_AQUARIUS + en genis sembol + medyan genislikteki cift)
+      (secim: AQUARIUS_AQUARIUS + AQUARIUS_AQUARIUS disinda en genis sembol + medyan genislikteki cift)
 serit <video.mp4> <out.jpg>   -> 0 / 0,1 / 0,2 / 0,3 / 0,4 / 0,5 / 1,0 sn kareleri (gercek oran, 360x270), poster merkez bolgesi buyutmesiyle
 Esik turetme: OLCUM.json'da zemin_max (silinmis bolgenin hemen cevresi, 78 video) dagilimi; artik esigi ESIK > en buyuk zemin."""
 import csv
@@ -39,7 +39,7 @@ def olc(pv, kdir, vdir, out):
         w = csv.DictWriter(f, fieldnames=alan, extrasaction="ignore"); w.writeheader(); w.writerows(R)
     json.dump(R, open(os.path.join(out, "OLCUM.json"), "w"), indent=1)
     ok = [r for r in R if "hata" not in r]
-    gen = max(ok, key=lambda r: r["sembol_genislik"])["cift"]
+    gen = max((r for r in ok if r["cift"] != "AQUARIUS_AQUARIUS"), key=lambda r: r["sembol_genislik"])["cift"]   # AQUARIUS_AQUARIUS ayrica
     srt = sorted(ok, key=lambda r: r["sembol_genislik"])
     med = srt[len(srt) // 2]["cift"]
     if med in ("AQUARIUS_AQUARIUS", gen):

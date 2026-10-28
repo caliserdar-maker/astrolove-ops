@@ -14,7 +14,8 @@ import cv2
 import numpy as np
 
 KARE_SN = 0.4
-ESIK = 20.0          # R-B fazlasi; 78 olcumunden turetildi (bkz. SILME_ARTIK_OLCUM.md)
+ESIK = 15.0          # R-B fazlasi. 78 olcumu (video-v7-silme-duzelt 40652593650, OLCUM.csv): zemin en buyuk 13 (AQUARIUS_PISCES);
+                    # eski videolarda maske ici en buyuk fazla en az 17 (LIBRA_SAGITTARIUS); v7c ornekleri en fazla 4. Esik 13 + 2.
 VW, VH = 1440, 1080
 
 
