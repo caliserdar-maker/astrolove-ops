@@ -26,7 +26,7 @@ def ayristir(pv, kapak):
     """poster_video_v7.py kaynagindan ayristirma + v7c silme kurali; uretim betiginin global sozlugu (P, vid, msym, SILME_D ...)"""
     src = open(pv, encoding="utf-8").read()
     bas, son = src.index("try:\n    P = PosterV(tmp)"), src.index("MS_p = np.clip(")
-    tmp = os.path.join(os.path.dirname(os.path.abspath(kapak)), "_artik.mp4")
+    tmp = os.path.join(os.path.dirname(os.path.abspath(kapak)), f"_artik_{os.getpid()}.mp4")   # paralel cagrilar cakismasin (28 Eki)
     eski = sys.argv
     sys.argv = [pv, kapak, tmp, "murekkep"]
     os.environ["V7_HALKASIZ"] = "1"; os.environ.setdefault("V7_SILME", "tam")
