@@ -8,7 +8,7 @@ kupa pikselleri aynen kalir; yalniz zemin (duvar + masa) duz kart rengine cekili
 - kenar: maske 1 px asindirilir ve 1,2 px yumusatilir (eski zemin rengi hale olarak kalmasin).
 Olcum (olc): kirpim kenar seridinde (10 px) #F5F0E7'ye en buyuk RGB farki; kupadan > YAKIN_PX uzak zemin piksellerinde en buyuk fark;
 kupa kenarindan 2-6 px disaridaki halkada zeminden ACIK sapma (hale) en buyuk deger.
-Kullanim: kupa_zemin.py <gorunum klasoru (tek_on.jpg ...)> <cikti>  -> z_<ad>.png, k_<ad>.npy, zemin_olcum.json
+Kullanim: kupa_zemin.py <gorunum klasoru (tek_on.jpg ..., stil_<st>.jpg)> <cikti>  -> z_<ad>.png, k_<ad>.npy, zemin_olcum.json
 (yerel dogrulama: pillow 11.0.0, numpy 2.1.3, opencv 4.10.0.84)"""
 import numpy as np, cv2
 from PIL import Image
@@ -23,6 +23,7 @@ def maske(a):
     b = 6; m[:b] = m[-b:] = cv2.GC_BGD; m[:, :b] = m[:, -b:] = cv2.GC_BGD
     rect = (int(0.03 * w), int(0.03 * h), int(0.94 * w), int(0.94 * h))
     bg, fg = np.zeros((1, 65)), np.zeros((1, 65))
+    cv2.setRNGSeed(0)       # GrabCut GMM baslangici (kmeans) RNG'ye bagli: her sahne siradan / surecten bagimsiz ayni sonucu verir
     cv2.grabCut(np.ascontiguousarray(a.astype(np.uint8)[..., ::-1]), m, rect, bg, fg, 6, cv2.GC_INIT_WITH_RECT)
     k = np.isin(m, (cv2.GC_FGD, cv2.GC_PR_FGD)).astype(np.uint8)
     n, lab, st, _ = cv2.connectedComponentsWithStats(k, 8)
@@ -77,15 +78,25 @@ def olc(out, k):
                 hale_acik_max=float(acik[halka].max()) if halka.any() else 0.0)
 
 
+def _isle(g, o, ad):
+    z, k = esitle(Image.open(g / f"{ad}.jpg"))
+    z.save(o / f"z_{ad}.png"); np.save(o / f"k_{ad}.npy", k)
+    ys, xs = np.nonzero(k)
+    return ad, dict(kutu=[int(xs.min()), int(ys.min()), int(xs.max()), int(ys.max())], **olc(z, k))
+
+
 if __name__ == "__main__":
-    import json, sys
+    import json, os, sys
+    from concurrent.futures import ProcessPoolExecutor
     from pathlib import Path
     g, o = Path(sys.argv[1]), Path(sys.argv[2]); o.mkdir(parents=True, exist_ok=True); R = {}
-    for ad in ("tek_on", "tek_arka", "m15", "ML_on", "ML_arka", "MJ_on", "MJ_arka"):
-        z, k = esitle(Image.open(g / f"{ad}.jpg"))
-        z.save(o / f"z_{ad}.png"); np.save(o / f"k_{ad}.npy", k)
-        ys, xs = np.nonzero(k); R[ad] = dict(kutu=[int(xs.min()), int(ys.min()), int(xs.max()), int(ys.max())], **olc(z, k))
-        print(ad, R[ad], flush=True)
+    ST8 = ("orange", "fig", "olive", "pomegranate", "almond", "lemon", "grape", "loquat")       # orchard_gorunum stil_<st> (kupa 04)
+    ADLAR = ("tek_on", "tek_arka", "m15", "ML_on", "ML_arka", "MJ_on", "MJ_arka") + tuple(f"stil_{s}" for s in ST8)
+    # GrabCut sahne basina ~1-2 dk (2048 px): sahneler paralel (28 Eki; 16 sahne sirali ~30 dk)
+    with ProcessPoolExecutor(max_workers=os.cpu_count() or 2) as ex:
+        for ad, r in ex.map(_isle, [g] * len(ADLAR), [o] * len(ADLAR), ADLAR):
+            R[ad] = r
+            print(ad, r, flush=True)
     import PIL
     R["surum"] = dict(pillow=PIL.__version__, numpy=np.__version__, opencv=cv2.__version__)   # GrabCut opencv surumune duyarli
     (o / "zemin_olcum.json").write_text(json.dumps(R, indent=1))

@@ -8,10 +8,13 @@ SADE kurallari: '|' cizilmez, etiketler Title Case):
   WA_<CIFT>_S2_KISISEL  isim bandi (Merkez 27 Eki madde 3): Midnight Blue ornek poster 2000x3000 (EMILY / JAMES / It Began With a Kiss in
                         the Rain; test siparisi 9000000532) bant kirpimi, karta ~0,95 olcekle (G3 kartindaki bant buyutulmus ve bulanikti)
   WA_ORTAK_S3_FORMAT, WA_ORTAK_S4_SUREC
-Kupa (Orchard galerisi kupa_orchard/kod/cift.py kart 3, 5, 6, 7 = bilgi kartlari; kart 2 yakin plan, kart 4 stil secimi). Fotograflar
+Kupa (Orchard galerisi kupa_orchard/kod/cift.py kart 2 yakin plan, 3, 4 stil secimi, 5, 6, 7). Fotograflar
 cift.py bolum 3 gorunumlerinden (tek_on, tek_arka, m15, ML_on/arka, MJ_on/arka; orchard_gorunum.py ile ayni kod ve surumlerle) ve
 kupa_zemin.py ile zemini #F5F0E7'ye esitlenmis halde (Merkez 27 Eki madde 4); kupa ve golgesi korunur, kulp kesilmez:
-  KUPA_<CIFT>_K03_KISISEL, KUPA_<CIFT>_K05_BOYUT, KUPA_<CIFT>_K06_ORNEK, KUPA_<CIFT>_K07_BAKIM
+  KUPA_<CIFT>_K02_YAKIN (tek on, buyuk olcek), KUPA_<CIFT>_K03_KISISEL, KUPA_<CIFT>_K04_STIL (8 stil), KUPA_<CIFT>_K05_BOYUT, KUPA_<CIFT>_K06_ORNEK,
+  KUPA_<CIFT>_K07_BAKIM. Merkez 28 Eki: kupa galerisi tumden 4:3 (kart 2 ve 4 dahil), galeri sirasi korunur (aciklama 3-6. fotograflara
+  atif yapar). K05 olculeri Printful White Glossy Mug katalog degerleriyle ayni (11 oz 3.8 x 3.2 in / 9.6 x 8.2 cm, 15 oz 4.7 x 3.3 in /
+  11.9 x 8.5 cm, +/- 2 mm; ml = US fl oz x 29,5735: 325,3 / 443,6).
 Kapilar (PASS/FAIL, biri FAIL ise dosya yazilmaz): metin (cizilen satirlar = beklenen, sirayla), baslik / etiket Title Case (birim
 sozcukleri oz, in, cm, ml haric), yasak karakter (ondalik nokta disinda nokta, arti, esittir, tire), yasak sozcuk (yd_kart_ornek.YASAK_SOZ),
 punto >= 58, renk kapisi (cizim + JPEG), zemin kapisi (kupa fotograf kutusu ic kenar seridi #F5F0E7'den en fazla ZEMIN_ESIK; kutu
@@ -30,7 +33,10 @@ import yd_kart_ornek as K  # noqa: E402
 W, H = K.W, K.H
 YASAK = re.compile(r"(?<!\d)\.|\.(?!\d)|[+=‐-―−]")     # ondalik nokta (9.6) serbest
 BIRIM = {"oz", "in", "cm", "ml"}
-SAHNELER = ("tek_on", "tek_arka", "m15", "ML_on", "ML_arka", "MJ_on", "MJ_arka")   # kupa_orchard cift.py bolum 3 gorunumleri
+ST8 = (("orange", "Orange Blossom"), ("fig", "Purple Fig"), ("olive", "Olive Breeze"), ("pomegranate", "Pomegranate Bloom"),
+       ("almond", "Almond Blossom"), ("lemon", "Lemon Grove"), ("grape", "Blue Grape"), ("loquat", "Golden Loquat"))   # cift.py ST8 sirasi
+SAHNELER = ("tek_on", "tek_arka", "m15", "ML_on", "ML_arka", "MJ_on", "MJ_arka") + tuple(f"stil_{s}" for s, _ in ST8)
+# cift.py bolum 3 gorunumleri + 8 stilin tek on gorunumu (kart 4; orchard_gorunum.py)
 ZEMIN_ESIK = 3                 # fotograf kutusu kenar seridi ile #F5F0E7 arasinda izinli en buyuk RGB farki (cizim; kupa_zemin olcumu 0-3)
 
 
@@ -152,8 +158,8 @@ def wa_s4():
     K.baslik(d, "Made for You, Step by Step")
     x0, gen = 0.2 * W, 0.6 * W
     K.adimlar(d, x0, gen, [
-        ("01", ["Your Preview"], "For every print, we send a preview via Etsy Messages within 24 hours of your order"),
-        ("02", ["Your Approval"], "We print once you approve, or as shown if there is no reply within 24 hours of the preview"),
+        ("01", ["Your Preview"], "For every order, we send a preview via Etsy Messages within 24 hours of your order"),
+        ("02", ["Your Approval"], "We make your print or file once you approve, or as shown if there is no reply within 24 hours of the preview"),
         ("03", ["Made to Order"], "Printed on matte art paper, gold tones are printed color, not metallic foil"),
         ("04", ["Free Shipping"], "Free shipping worldwide, see the listing for your delivery estimate")], no_g=round(1.75 * K.ETIKET["boy"]))
     ortala(d, K.NOT, ["Digital files are checked by hand before sending"], W / 2, K.NOT_Y)
@@ -193,6 +199,40 @@ def yapistir(im, src, kutu, x, y, s, fade=0, dort=False):
         p = Image.fromarray(np.round(z + (a - z) * t).astype(np.uint8))
     im.paste(p, (round(x), round(y)))
     return [round(x), round(y), round(x) + w, round(y) + h]
+
+
+def k02(sd):
+    """yakin plan (cift.py kart 2 'YOUR TWO SIGNS, / ONE ORIGINAL SYMBOL'); SADE: baslik Title Case tek satir, tek on gorunumu (zemin
+    esitlenmis) alan icinde en buyuk olcekte. Orchard yakin plan sahnesi (ahsap masa, orgu, portakal) zemin esitlemesinde kalinti
+    birakti (28 Eki yerel olcum kenar 83 > ZEMIN_ESIK 3); kupa kutusu tek on ile ayni boyda (1427x1235 / 1482x1283 px)"""
+    im = K.tuval(); d = ImageDraw.Draw(im)
+    K.baslik(d, "Your Two Signs, One Original Symbol")
+    z, k = sahne(sd, "tek_on"); kk = kupa_kutu(z, k)
+    s = min((K.NOT_Y + K.NOT["boy"] - K.ALAN[0] + 20) / (kk[3] - kk[1]), (W - 2 * K.KENAR) / (kk[2] - kk[0]))
+    kut = [yapistir(im, z, kk, W / 2 - (kk[2] - kk[0]) * s / 2, K.ALAN[0] - 20, s)]
+    return im, dict(foto=kut, olcek=round(s, 4)), kut
+
+
+def k04(sd):
+    """8 stil (cift.py kart 4 'CHOOSE YOUR STYLE', ST8 sirasi): her stilin baskisi tek on sahnesinde (zemin esitlenmis), 4 x 2,
+    hepsi ayni olcekte, ad altta tek satir"""
+    im = K.tuval(); d = ImageDraw.Draw(im)
+    K.baslik(d, "Choose Your Style")
+    sh = {st: sahne(sd, f"stil_{st}") for st, _ in ST8}
+    ku = {st: kupa_kutu(z, k) for st, (z, k) in sh.items()}
+    kg = (W - 2 * K.KENAR) / 4; et = K.METIN["boy"] + 20; ara = 50   # ad METIN (64): 'Pomegranate Bloom' ETIKET'te 654 > 635 px
+    hmax = max(v[3] - v[1] for v in ku.values()); wmax = max(v[2] - v[0] for v in ku.values())
+    y0 = K.ALAN[0] - 40
+    s = min((K.NOT_Y + K.NOT["boy"] - y0 - 2 * et - ara) / (2 * hmax), (kg - 30) / wmax)
+    blok = 2 * (hmax * s + et) + ara                                  # olcek genislikten sinirli: blok alanda dikeyde ortalanir
+    y0 += max(0, (K.NOT_Y + K.NOT["boy"] - y0 - blok) / 2)
+    kut = []
+    for j, (st, ad) in enumerate(ST8):
+        z, _ = sh[st]; kk = ku[st]
+        cx = K.KENAR + kg * (j % 4 + 0.5); y = y0 + (j // 4) * (hmax * s + et + ara)
+        kut.append(yapistir(im, z, kk, cx - (kk[2] - kk[0]) * s / 2, y + (hmax - (kk[3] - kk[1])) * s, s))
+        ortala(d, K.METIN, [ad], cx, y + hmax * s + 10, kg - 10)
+    return im, dict(foto=kut, olcek=round(s, 4)), kut
 
 
 def k03(a, b, sd):
@@ -315,11 +355,13 @@ def beklenen(a, b):
                       "8x10, 11x14, 12x16, 12x18, 16x20 in", "16x24, 18x24, 20x30, 24x30, 24x36 in", "A4, A3, A2",
                       "Every size as a print or a digital file"],
         "S4_SUREC": ["Made for You, Step by Step",
-                     "01", "Your Preview", "For every print, we send a preview via Etsy Messages within 24 hours of your order",
-                     "02", "Your Approval", "We print once you approve, or as shown if there is no reply within 24 hours of the preview",
+                     "01", "Your Preview", "For every order, we send a preview via Etsy Messages within 24 hours of your order",
+                     "02", "Your Approval", "We make your print or file once you approve, or as shown if there is no reply within 24 hours of the preview",
                      "03", "Made to Order", "Printed on matte art paper, gold tones are printed color, not metallic foil",
                      "04", "Free Shipping", "Free shipping worldwide, see the listing for your delivery estimate",
                      "Digital files are checked by hand before sending"],
+        "K02_YAKIN": ["Your Two Signs, One Original Symbol"],
+        "K04_STIL": ["Choose Your Style"] + [ad for _, ad in ST8],
         "K03_KISISEL": ["How to Personalize", "Front", "Back", f"1 Name for {a}", f"2 Name for {b}", "Up to 10 letters per name",
                         "3 Your message", "Up to 30 characters", "You receive one mug, printed on both sides"],
         "K05_BOYUT": ["Two Sizes", "11 oz", "9.6 x 8.2 cm", "3.8 x 3.2 in", "325 ml", "15 oz", "11.9 x 8.5 cm", "4.7 x 3.3 in", "444 ml",
@@ -331,9 +373,10 @@ def beklenen(a, b):
 
 
 def kontak(kartlar):
-    t = Image.new("RGB", (4 * 600, 2 * 450), "white")
+    n = (len(kartlar) + 1) // 2
+    t = Image.new("RGB", (n * 600, 2 * 450), "white")
     for i, im in enumerate(kartlar):
-        r, c = divmod(i, 4); t.paste(im.resize((600, 450), Image.LANCZOS), (c * 600, r * 450))
+        r, c = divmod(i, n); t.paste(im.resize((600, 450), Image.LANCZOS), (c * 600, r * 450))
     for q in (85, 80, 75, 70, 65):
         b = io.BytesIO(); t.save(b, "JPEG", quality=q)
         if b.tell() < 300 * 1024:
@@ -354,7 +397,8 @@ def main(argv=None):
     c = a.cift
     islem = [(f"WA_{c}_S1_SEMBOL.jpg", lambda: wa_s1(a.a, a.b, sem)), (f"WA_{c}_S2_KISISEL.jpg", lambda: wa_s2(a.a, a.b, Image.open(a.poster))),
              ("WA_ORTAK_S3_FORMAT.jpg", wa_s3), ("WA_ORTAK_S4_SUREC.jpg", wa_s4),
-             (f"KUPA_{c}_K03_KISISEL.jpg", lambda: k03(a.a, a.b, sd)), (f"KUPA_{c}_K05_BOYUT.jpg", lambda: k05(sd)),
+             (f"KUPA_{c}_K02_YAKIN.jpg", lambda: k02(sd)), (f"KUPA_{c}_K03_KISISEL.jpg", lambda: k03(a.a, a.b, sd)),
+             (f"KUPA_{c}_K04_STIL.jpg", lambda: k04(sd)), (f"KUPA_{c}_K05_BOYUT.jpg", lambda: k05(sd)),
              (f"KUPA_{c}_K06_ORNEK.jpg", lambda: k06(sd)), (f"KUPA_{c}_K07_BAKIM.jpg", lambda: k07(sd))]
     bek = beklenen(a.a, a.b); sonuc, rapor, jb = {}, {}, {}
     for ad, fn in islem:

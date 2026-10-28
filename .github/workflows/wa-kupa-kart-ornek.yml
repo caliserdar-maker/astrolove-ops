@@ -3,7 +3,9 @@ name: wa-kupa-kart-ornek
 # Girdi (yalniz okunur): Drive dosya id poster_id (Midnight Blue ornek poster 2000x3000, isim bandi kaynagi; Merkez 27 Eki madde 3),
 # dal temiz/kupa-orchard kupa_orchard/ (Orchard gorunumleri cift.py ile ayni cagri, orchard_gorunum.py; kupa-orchard78 surumleri),
 # dal kupa-printful-sonuc kupa_uretim/sembol/<CIFT>/ (sol, sag, ana). Kupa zemini kupa_zemin.py ile #F5F0E7 (madde 4).
-# Cikti: Drive TEMP/WA_KUPA_KART_ORNEK/<damga>/ 8 kart + KONTAK_WA_KUPA.jpg + KART_OZET.json + zemin_olcum.json.
+# Cikti: Drive TEMP/WA_KUPA_KART_ORNEK/[<hedef>/]<damga>/ 10 kart (kupa 02 ve 04 dahil, Merkez 28 Eki) + KONTAK_WA_KUPA.jpg +
+# KART_OZET.json + zemin_olcum.json. hedef verilirse (orn. 20261027_192528) cikti onun ALT klasorune yazilir; mevcut dosyalar silinmez /
+# ustune yazilmaz (--immutable).
 # scripts/kapak78/wa_kupa_kart_ornek.py (stil ve kapilar yd_kart_ornek.py).
 permissions:
   contents: read
@@ -12,14 +14,15 @@ on:
     inputs:
       cift: {description: "CIFT", required: true, default: "CANCER_LIBRA"}
       poster_id: {description: "Drive dosya id: Midnight Blue ornek poster 2000x3000 (EMILY / JAMES)", required: true, default: "1nCbiepEjZPaS_mrBKee4r4t94vIgbVfT"}
+      hedef: {description: "TEMP/WA_KUPA_KART_ORNEK altindaki hedef klasor (YYYYMMDD_HHMMSS; bos = yeni damga klasoru)", required: false, default: ""}
 jobs:
   kart:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
     steps:
       - name: Girdi kapisi
-        env: {C: "${{ inputs.cift }}", PI: "${{ inputs.poster_id }}"}
-        run: '[[ "$C" =~ ^[A-Z]+_[A-Z]+$ && "$PI" =~ ^[A-Za-z0-9_-]{20,80}$ ]] || { echo "::error::girdi"; exit 1; }'
+        env: {C: "${{ inputs.cift }}", PI: "${{ inputs.poster_id }}", HD: "${{ inputs.hedef }}"}
+        run: '[[ "$C" =~ ^[A-Z]+_[A-Z]+$ && "$PI" =~ ^[A-Za-z0-9_-]{20,80}$ && "$HD" =~ ^([0-9]{8}_[0-9]{6})?$ ]] || { echo "::error::girdi"; exit 1; }'
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
         with:
@@ -72,9 +75,11 @@ jobs:
           cp _s/zemin_olcum.json _out/
           echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
       - name: Drive'a yaz
+        env: {HD: "${{ inputs.hedef }}"}
         run: |
           set -euo pipefail
-          rclone copy _out "gdrive:ASTROLOVE/TEMP/WA_KUPA_KART_ORNEK/${DAMGA:?}" --immutable -q
-          echo "Cikti: TEMP/WA_KUPA_KART_ORNEK/$DAMGA ($(ls _out | wc -l) dosya)" | tee -a "$GITHUB_STEP_SUMMARY"
+          Y="TEMP/WA_KUPA_KART_ORNEK/${HD:+$HD/}${DAMGA:?}"
+          rclone copy _out "gdrive:ASTROLOVE/$Y" --immutable -q
+          echo "Cikti: $Y ($(ls _out | wc -l) dosya)" | tee -a "$GITHUB_STEP_SUMMARY"
       - if: always()
         run: rm -rf _g _s _out _v12 ~/.config/rclone
