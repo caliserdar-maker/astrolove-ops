@@ -97,7 +97,7 @@ def istek_yalin_en_az(adimlar, basla=0, ilk=True, n=HEDEF_N):
     return (1 if ilk else 6) + sum(2 if a[0] == "bag" else 1 for a in adimlar[basla:]) + 4
 
 
-def yalin_plan(cikar, yukle, hedef_n=HEDEF_N):
+def yalin_plan(cikar, yukle, hedef_n=HEDEF_N, koru=()):
     """YALIN adim plani (Merkez 29 Eki karar 3: yalniz degisen gorsel, alt metin ve sira yukleme isteginde, okuma tekrari yok):
       1. hedef gorseller hedef sirasinda yuklenir (rank = hedef sira, alt metin ayni istekte): kapak ilk yuklemeyle 1. sirada,
          yeni gorseller 1..n'de, eskiler arkada (gorsel sayisi en fazla canli + n, IMG_LIMIT altinda olmali).
@@ -105,12 +105,15 @@ def yalin_plan(cikar, yukle, hedef_n=HEDEF_N):
       3. eski gorseller silinir (bagsiz; 404 = zaten silinmis, kimlik kumesi sira_kontrol'de dogrulanir).
       4. sira_kontrol: tek galeri okumasi; kimlik sirasi / rank / alt metin hedefle ayni degilse sira + alt metin POST'u (2 gecis)
          ve ardindan renk baglari YENIDEN yazilip dogrulanir (rank yazimi bagi siler, 19 Eyl olcumu; Serdar 24 Eki: bag en sonda).
-    -> (adimlar, en fazla gorsel sayisi)"""
+    koru: yerinde kalan (KORU / ALT) hedef satirlari (galeri v11b, Serdar 29 Eki: eski MB kapak kalir); yalniz DEGISTIR yuklenir,
+    sira_kontrol KORU gorsellerini de hedef sirasina ve alt metnine getirir.
+    -> (adimlar, en fazla gorsel sayisi = canli (koru + cikar) + yukleme)"""
     yk = sorted(yukle, key=lambda r: int(r["hedef_sira"]))
-    if [int(r["hedef_sira"]) for r in yk] != list(range(1, hedef_n + 1)):
-        raise Dur(f"yalin plan: hedefin tamami (1..{hedef_n}) yuklenmeli")
+    sira = sorted([int(r["hedef_sira"]) for r in yk] + [int(r["hedef_sira"]) for r in koru])
+    if sira != list(range(1, hedef_n + 1)):
+        raise Dur(f"yalin plan: yukleme + yerinde kalan hedef siralari 1..{hedef_n} degil ({sira})")
     adim = [("yukle", r["hedef_gorsel"]) for r in yk] + [("bag",)] + [("sil", c) for c in cikar] + [("sira_kontrol",)]
-    return adim, len(cikar) + len(yk)
+    return adim, len(cikar) + len(koru) + len(yk)
 
 
 def sha256(yol):
@@ -322,10 +325,12 @@ def liste_oku(yol, n=HEDEF_N):
     if [int(r["hedef_sira"]) for r in hedef] != list(range(1, n + 1)):
         raise Dur(f"LISTE hedef siralari 1..{n} degil")
     for r in hedef:
-        if r["islem"] not in ("KORU", "ALT", "DEGISTIR"):
+        if r["islem"] not in ("KORU", "ALT", "DEGISTIR", "DOKUNMA"):
             raise Dur(f"LISTE hedef sira {r['hedef_sira']} islem {r['islem']}")
-        if r["islem"] in ("KORU", "ALT") and not r["simdi_id"]:
+        if r["islem"] in ("KORU", "ALT", "DOKUNMA") and not r["simdi_id"]:
             raise Dur(f"LISTE hedef sira {r['hedef_sira']} {r['islem']} ama simdi_id yok")
+        if r["islem"] == "DOKUNMA":   # galeri v11b sira 1 canli MB kapak (Serdar 29 Eki): hicbir yazim yok; alt metin canlidaki
+            continue                  # metin (yalniz karsilastirma), yasak ifade kapisi yazilan metinler icindir
         if not r["hedef_alt"] or len(r["hedef_alt"]) > 250:
             raise Dur(f"LISTE hedef sira {r['hedef_sira']} alt metin bos ya da 250'den uzun")
         if YASAK_ALT.search(r["hedef_alt"]):
@@ -375,8 +380,9 @@ def renk_sira(man, hedef, rv):
         if ad not in rv or hid not in sira_h:
             raise Dur(f"hedef renk bagi eslenemedi ({ad} -> {hid})")
         hbag[ad] = sira_h[hid]
-    if len(hbag) != 5:
-        raise Dur(f"hedef manifestte {len(hbag)} renk bagi (5 beklenir)")
+    bek = int(man.get("renk_bag_sayisi") or 5)   # galeri v11b: 4 (Champagne Ivory bagsiz, Serdar 29 Eki)
+    if len(hbag) != bek or len(hbag) != len(man.get("variation_images") or []):
+        raise Dur(f"hedef manifestte {len(hbag)} renk bagi ({bek} beklenir)")
     return hbag
 
 
@@ -500,6 +506,8 @@ def bir_ilan(api, shop, lid, liste, hedef_dir, manifest, out, kuru=False, kota_i
         raise Dur("kurtarma: DEVAM kaydi yok (devam_kosu gerekli)")
     alt_ad = {r["hedef_gorsel"]: r["hedef_alt"] for r in hedef}
     simdi = {int(r["simdi_id"]) for r in hedef if r["simdi_id"]} | set(cikar)
+    if {int(r["simdi_id"]) for r in hedef if r["islem"] == "DOKUNMA"} & set(cikar):
+        raise Dur("LISTE: dokunulmaz gorsel CIKAR listesinde; yazim yok")
     rv = G.renk_degerleri(api, lid)
     if len(rv) != 5:
         raise Dur(f"envanterde 5 renk yok ({sorted(rv)})")
@@ -521,7 +529,7 @@ def bir_ilan(api, shop, lid, liste, hedef_dir, manifest, out, kuru=False, kota_i
         bagli0 = {v.get("image_id") for v in G.var_img(api, shop, lid)}
         kapak = next((r for r in yukle if int(r["hedef_sira"]) == 1), None)
         if yalin:
-            adimlar, enfazla = yalin_plan(cikar, yukle, hedef_n)
+            adimlar, enfazla = yalin_plan(cikar, yukle, hedef_n, koru=[r for r in hedef if r["islem"] != "DEGISTIR"])
         else:
             adimlar, enfazla = adim_plani(len(g0), cikar, bagli0, yukle, set(hbag.values()), kapak_degisir=kapak, hedef_n=hedef_n)
         K.d["plan"] = [list(x) for x in adimlar]; K.d["en_fazla"] = enfazla; K.d["adim"] = 0
@@ -563,8 +571,9 @@ def bir_ilan(api, shop, lid, liste, hedef_dir, manifest, out, kuru=False, kota_i
     def son_kur():
         for r in hedef:
             s = int(r["hedef_sira"])
-            son[s] = int(r["simdi_id"]) if r["islem"] in ("KORU", "ALT") else K.d["yuklenen"].get(r["hedef_gorsel"])
+            son[s] = int(r["simdi_id"]) if r["islem"] in ("KORU", "ALT", "DOKUNMA") else K.d["yuklenen"].get(r["hedef_gorsel"])
     alt = {int(r["hedef_sira"]): r["hedef_alt"] for r in hedef}
+    dokun = {int(r["hedef_sira"]) for r in hedef if r["islem"] == "DOKUNMA"}
 
     def bag_yaz(n, dogrula=True):
         son_kur()
@@ -578,11 +587,11 @@ def bir_ilan(api, shop, lid, liste, hedef_dir, manifest, out, kuru=False, kota_i
 
         def bag_ok(vm):
             vm = {v.get("value"): v.get("image_id") for v in vm}
-            return len(vm) == 5 and all(vm.get(k) == v for k, v in hedef_bag.items())
+            return len(vm) == len(hedef_bag) and all(vm.get(k) == v for k, v in hedef_bag.items())
         v1 = G.kararli(lambda: G.var_img(api, shop, lid), bag_ok)
         if not bag_ok(v1):
             raise Dur(f"renk baglari dogrulanamadi: {[(v.get('value'), v.get('image_id')) for v in v1]}")
-        log(f"  [{n + 1}/{len(adimlar)}] renk baglari 5/5")
+        log(f"  [{n + 1}/{len(adimlar)}] renk baglari {len(hedef_bag)}/{len(hedef_bag)}")
     try:
         for n, a in enumerate(adimlar):
             if n < K.d.get("adim", 0):
@@ -640,6 +649,8 @@ def bir_ilan(api, shop, lid, liste, hedef_dir, manifest, out, kuru=False, kota_i
                     K.d["sira_post"] = True; K.yaz(ids)   # devam bu adimi yeniden kosarsa bag yine yazilir
                 for gecis in ((1, 2) if not oturdu else ()):   # kapak_yukle_78 (28 Eyl): rank cagrisi bazen oturmuyor; bir kez daha, sonra DUR
                     for s in range(1, hedef_n + 1):
+                        if s in dokun:   # galeri v11b: canli MB kapak dokunulmaz (sira / alt metin yazilmaz); oturmazsa DUR
+                            continue
                         api.post_file(f"/shops/{shop}/listings/{lid}/images",
                                       files={"listing_image_id": (None, str(son[s])), "rank": (None, str(s)), "alt_text": (None, alt[s])})
                     g = G.kararli(lambda: G.galeri(api, lid), lambda g: not galeri_sorun(g, son, alt, hedef_n))

@@ -194,7 +194,8 @@ class Sahte:
         self._k(); self.vi_cagri += 1; self.yaz.append(("bag",))
         if self.bag_yut:
             self.bag = {}; self._iz(); return {}
-        self.bag = {k: next(v["image_id"] for v in body["variation_images"] if v["value_id"] == RENK[k][1]) for k in RENK}
+        vi = {v["value_id"]: v["image_id"] for v in body["variation_images"]}   # Etsy: istek tum baglari degistirir (eksik renk bagsiz)
+        self.bag = {k: vi[RENK[k][1]] for k in RENK if RENK[k][1] in vi}
         self._iz()
 
 

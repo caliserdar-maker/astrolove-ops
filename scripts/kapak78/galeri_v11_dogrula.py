@@ -15,6 +15,9 @@ Ilan basina kapilar (biri tutmazsa FAIL):
   sha      kaynak dosyanin sha256'si = SONRA yukleme_kaydi sha256 (yuklenen dosya dogru kaynak)
   ncc      indirilen canli gorsel (Etsy yeniden kodlar, sha256 farkli) ile kaynak: 256x192 gri NCC; ESIKSIZ kimlik kurali: her rank'in
            en benzer kaynagi ilanin 10 kaynagi icinde kendisi olmali (argmax). min NCC raporda (dagilim).
+Profil v11b (--profil v11b, Serdar 29 Eki kesin karar): rank 1 = B1 yedegindeki (--b1, TEMP/POSTER_GALERI_V11_YEDEK/20261029_121704)
+  MB kapak kimligi (dokunulmamis: ayni listing_image_id), alt metni sablonla karsilastirilmaz; 2-10 kaynak W02-W10 (W01 yok);
+  baglar MB 7, DB 8, PW 9, WP 10 (Champagne Ivory bagsiz); yukleme kaydinda rank 1 yok.
 Cikti --out: DOGRULA.csv (ilan basina), DOGRULA.md, DOGRULA.json. Cikis 0 = hepsi PASS, 1 = FAIL var."""
 import argparse
 import csv
@@ -32,6 +35,7 @@ import galeri_v10_liste as L  # noqa: E402
 
 N = 10
 RENK_SIRA = {"Champagne Ivory": 1, "Midnight Blue": 7, "Deep Black": 8, "Pure White": 9, "Warm Parchment": 10}
+RENK_SIRA_B = {"Midnight Blue": 7, "Deep Black": 8, "Pure White": 9, "Warm Parchment": 10}
 KAYNAK = {1: "W01_KAPAK", 2: "W02_SEMBOL", 3: "W03_KISISEL", 4: "W04_FORMAT", 5: "W05_SUREC", 6: "W06_GENEL",
           7: "W07_MB", 8: "W08_DB", 9: "W09_PW", 10: "W10_WP"}
 BOY = (256, 192)
@@ -54,8 +58,10 @@ def kaynak_yol(cift, s, galeri, kart):
     return (Path(kart) if 2 <= s <= 6 else Path(galeri)) / f"{cift}_{KAYNAK[s]}.jpg"
 
 
-def ilan(lid, r, d, sonra, sab, galeri, kart):
+def ilan(lid, r, d, sonra, sab, galeri, kart, b1_r1=None):
+    """b1_r1: v11b ise B1 yedegindeki rank 1 kimligi (MB kapak dokunulmaz); None = v11."""
     neden, olc = [], {}
+    v11b = b1_r1 is not None
     j = json.loads((d / "GALERI.json").read_text(encoding="utf-8"))
     g = sorted(j.get("gorseller") or [], key=lambda x: x.get("rank") or 0)
     ids = [x["listing_image_id"] for x in g]
@@ -64,13 +70,16 @@ def ilan(lid, r, d, sonra, sab, galeri, kart):
     if ids != sonra.get("son_ids"):
         neden.append(f"kimlik sirasi SONRA son_ids ile ayni degil ({ids} != {sonra.get('son_ids')})")
     alt = L.alt_metin(sab, r["a"], r["b"])
-    kotu = [x["rank"] for x in g if x.get("alt_text") != alt.get(x["rank"])]
+    kotu = [x["rank"] for x in g if x.get("alt_text") != alt.get(x["rank"]) and not (v11b and x["rank"] == 1)]
+    if v11b and (not ids or ids[0] != b1_r1):
+        neden.append(f"rank 1 B1 yedegindeki MB kapak degil ({ids[:1]} != {b1_r1})")
     if kotu:
         neden.append(f"alt metin farkli: rank {kotu}")
     rk = {x["listing_image_id"]: x["rank"] for x in g}
     b = j.get("baglar") or []
     sira = {x.get("value"): rk.get(x.get("image_id")) for x in b}
-    if len(b) != 5 or sira != RENK_SIRA or any(x.get("property_id") != 200 for x in b):
+    rs = RENK_SIRA_B if v11b else RENK_SIRA
+    if len(b) != len(rs) or sira != rs or any(x.get("property_id") != 200 for x in b):
         neden.append(f"renk baglari {sira}")
     st = (j.get("ilan") or {}).get("state")
     if st != "active":
@@ -79,7 +88,9 @@ def ilan(lid, r, d, sonra, sab, galeri, kart):
         neden.append(f"video {len(j.get('videolar') or [])}")
     kay = {int(x["hedef_sira"]): x for x in sonra.get("yukleme_kaydi") or []}
     kv, cv = {}, {}
-    for s in range(1, N + 1):
+    if v11b and 1 in kay:
+        neden.append("rank 1 yukleme kaydinda (dokunulmaz MB kapak yeniden yuklenmis)")
+    for s in range(2 if v11b else 1, N + 1):
         p = kaynak_yol(r["cift"], s, galeri, kart)
         if not p.exists():
             neden.append(f"kaynak yok {p.name}"); continue
@@ -108,7 +119,11 @@ def main(argv=None):
     ap.add_argument("--galeri", required=True); ap.add_argument("--kart", required=True)
     ap.add_argument("--alt", required=True); ap.add_argument("--ciftler", required=True)
     ap.add_argument("--sadece", default=""); ap.add_argument("--out", required=True)
+    ap.add_argument("--profil", choices=("v11", "v11b"), default="v11")
+    ap.add_argument("--b1", default="", help="v11b: B1 yedegi (<ilan>_<CIFT>/GALERI.json; rank 1 MB kapak kimligi)")
     a = ap.parse_args(argv)
+    if a.profil == "v11b" and not a.b1:
+        raise SystemExit("v11b icin --b1 gerekli")
     sab = {int(r["sira"]): r for r in csv.DictReader(open(a.alt, encoding="utf-8-sig"))}
     if sorted(sab) != list(range(1, N + 1)):
         raise SystemExit("alt metin sablonu 1..10 degil")
@@ -127,7 +142,12 @@ def main(argv=None):
             R.append(dict(ilan=lid, cift=(r or {}).get("cift", "-"), durum="FAIL", ncc_min=None, ncc={}, state=None,
                           neden="ilan listede yok" if not r else ("canli okuma yok" if not d.is_dir() else "SONRA kaydi yok")))
         else:
-            R.append(ilan(lid, r, d, sonra[lid], sab, a.galeri, a.kart))
+            b1 = None
+            if a.profil == "v11b":
+                bp = Path(a.b1) / f"{lid}_{r['cift']}" / "GALERI.json"
+                gb = sorted(json.loads(bp.read_text(encoding="utf-8")).get("gorseller") or [], key=lambda x: x.get("rank") or 0) if bp.exists() else []
+                b1 = gb[0]["listing_image_id"] if gb else -1
+            R.append(ilan(lid, r, d, sonra[lid], sab, a.galeri, a.kart, b1))
         print(f"{lid} {R[-1]['cift']} {R[-1]['durum']} ncc_min {R[-1]['ncc_min']} {R[-1]['neden'][:200]}", flush=True)
     with open(out / "DOGRULA.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=["ilan", "cift", "durum", "state", "ncc_min", "neden"], extrasaction="ignore")

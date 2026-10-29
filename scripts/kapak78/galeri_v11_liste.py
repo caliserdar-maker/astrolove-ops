@@ -47,6 +47,15 @@ RENK_SIRA = {"Champagne Ivory": 1, "Midnight Blue": 7, "Deep Black": 8, "Pure Wh
 CANVA = {1: "W01_KAPAK", 7: "W07_MB", 8: "W08_DB", 9: "W09_PW", 10: "W10_WP"}
 KART = {2: "cift", 3: "cift", 4: "ORTAK", 5: "cift", 6: "cift"}
 RENK_KESIM = {1: ("Champagne Ivory", "CI"), 9: ("Pure White", "PW")}
+# v11b (Serdar 29 Eki kesin karar): CI kapak ve CI renk karti YOK. Sira 1 canli eski MB kapak DOKUNMA (silinmez, yeniden yuklenmez,
+# alt metni / sirasi yazilmaz), 2-6 W02-W06, 7-10 W07_MB / W08_DB / W09_PW / W10_WP. Renk baglari 4 (Champagne Ivory bagsiz).
+# Canli durum --canli-dir (liste kosusu oncesi galeri-v11-yedek-oku okumasi): canli kimlik sirasi B1 yedegiyle (v10) ayni olmali
+# (rank 1 = yedekteki MB kapak); degilse BLOK (or. v11 yazilmis 18 ilan: rank 1 CI kapak, MB kapak silinmis -> ayri geri donus karari).
+PROFIL = dict(
+    v11=dict(canva=CANVA, renk_sira=RENK_SIRA, renk_kesim=RENK_KESIM, siralar=range(1, N_HEDEF + 1)),
+    v11b=dict(canva={7: "W07_MB", 8: "W08_DB", 9: "W09_PW", 10: "W10_WP"},
+              renk_sira={"Midnight Blue": 7, "Deep Black": 8, "Pure White": 9, "Warm Parchment": 10},
+              renk_kesim={9: ("Pure White", "PW")}, siralar=range(2, N_HEDEF + 1)))
 
 
 def sablon_oku(yol):
@@ -91,7 +100,7 @@ def kart_oku(yol, format_boy=None):
 
 def kaynaklar(cift, d):
     """hedef sira -> (yol | None, neden)"""
-    k = {s: (Path(d["galeri"]) / f"{cift}_{ad}.jpg", "") for s, ad in CANVA.items()}
+    k = {s: (Path(d["galeri"]) / f"{cift}_{ad}.jpg", "") for s, ad in PROFIL[d["profil"]]["canva"].items()}
     km, kd = d["kart"], d["kart_dir"]
     for s, sahip in KART.items():
         if km is None:
@@ -159,14 +168,38 @@ def kapi_oku(p):
     return {r["dosya"]: r for r in csv.DictReader(open(p, encoding="utf-8"))}
 
 
+def canli_oku(lid, cift, d, g0):
+    """v11b: --canli-dir GALERI.json (yedek-oku bicimi). -> (galeri, baglar {renk: kayit}, neden). Kimlik sirasi B1 yedegiyle ayni olmali."""
+    p = Path(d["canli"]) / f"{lid}_{cift}" / "GALERI.json"
+    if not p.exists():
+        return [], {}, ["canli okuma GALERI.json yok (--canli-dir)"]
+    j = json.loads(p.read_text(encoding="utf-8"))
+    g = sorted(j.get("gorseller") or [], key=lambda x: x.get("rank") or 0)
+    ids, ids0 = [x.get("listing_image_id") for x in g], [x.get("listing_image_id") for x in g0]
+    neden = []
+    st = (j.get("ilan") or {}).get("state")
+    if st != "active":
+        neden.append(f"canli state {st} (active degil)")
+    if ids != ids0:
+        neden.append(f"canli galeri B1 yedeginden farkli ({len(ids)} gorsel, rank 1 {ids[:1]} / yedek {ids0[:1]}); "
+                     "v11 yazilmis olabilir (MB kapak yok), geri donus ayri karar")
+    bag = {b.get("value"): b for b in j.get("baglar") or [] if b.get("property_id") == L.RENK_PID and b.get("value") in RENKLER}
+    if len(bag) != 5:
+        neden.append(f"canli {len(bag)} renk bagi (5 beklenir)")
+    return g, bag, neden
+
+
 def ilan_hazirla(is_):
     r, sab, d = is_["satir"], is_["sablon"], is_["dizin"]
     lid, cift = r["listing_id"], r["cift"]
+    P = PROFIL[d["profil"]]
     neden = []
     yd = Path(d["yedek"]) / f"{lid}_{cift}"
     g, bag, n_ = yedek_oku(yd); neden += n_
     if g:
         neden += yedek_tamlik(lid, cift, g, d["yedek_ozet"], d["yedek_liste"])
+    if d["profil"] == "v11b" and g:
+        g, bag, n_ = canli_oku(lid, cift, d, g); neden += n_
     kay = kaynaklar(cift, d)
     for s, (p, nd) in kay.items():
         if nd:
@@ -180,22 +213,26 @@ def ilan_hazirla(is_):
         p = kay[s][0]
         if p is not None and p.name in ksha and shas.get(s) != ksha[p.name]:
             neden.append(f"W{s:02d} {p.name} kart MANIFEST sha256 ile ayni degil")
-    if len(shas) == N_HEDEF and len(set(shas.values())) != N_HEDEF:
-        neden.append(f"{N_HEDEF} hedef dosyadan en az ikisi ayni (sha256)")
-    for s, ad in CANVA.items():
+    if len(shas) == len(P["siralar"]) and len(set(shas.values())) != len(shas):
+        neden.append(f"{len(shas)} hedef dosyadan en az ikisi ayni (sha256)")
+    for s, ad in P["canva"].items():
         k = d["kapi"].get(f"{cift}_{ad}.jpg")
         if not k or k.get("durum") != "PASS":
             neden.append(f"W{s:02d} B3 kapisi PASS degil ({(k or {}).get('durum', 'KAPI.csv satiri yok')})")
         elif s in shas and k.get("sha256") != shas[s]:
             neden.append(f"W{s:02d} dosyasi B3 kapisindan gecen dosya degil (sha256)")
     alt = L.alt_metin(sab, r["a"], r["b"])
-    for s, t in alt.items():
+    for s in P["siralar"]:
+        t = alt[s]
         if not t or len(t) > 250 or Y.YASAK_ALT.search(t):
             neden.append(f"alt metin {s} gecersiz (bos / >250 / yasak ifade / tire)")
-    if d["yazim"] and any((x.get("durum") or "").strip() != "ONAYLI" for x in sab.values()):
+    if d["yazim"] and any((sab[s].get("durum") or "").strip() != "ONAYLI" for s in P["siralar"]):
         neden.append("alt metin sablonu ONAYLI degil (TASLAK; yazim yok)")
+    dokun = None
+    if d["profil"] == "v11b" and g:   # sira 1: canli MB kapak, alt metni canlidaki (yalniz karsilastirma, yazilmaz)
+        dokun = g[0]; alt[1] = dokun.get("alt_text") or ""
     renk = {}
-    for s, (ad, on) in RENK_KESIM.items():
+    for s, (ad, on) in P["renk_kesim"].items():
         p = kay[s][0]
         ke, ob = Path(d["kesim"]) / f"{on}_{cift}.png", Path(d["kesim"]) / f"{'PW' if on == 'CI' else 'CI'}_{cift}.png"
         if p is None or L.jpeg_kontrol(p) or not ke.exists() or not ob.exists():
@@ -208,18 +245,26 @@ def ilan_hazirla(is_):
         shutil.rmtree(od)
     hd.mkdir(parents=True)
     hedef = []
+    if dokun:
+        hedef.append(dict(sira=1, ad=L.hedef_ad(1), kaynak="canli", sha256="", alt=alt[1], islem="DOKUNMA",
+                          listing_image_id=dokun.get("listing_image_id")))
     for s, (p, _) in kay.items():
         if p is not None and p.exists():
             shutil.copyfile(p, hd / L.hedef_ad(s))
         hedef.append(dict(sira=s, ad=L.hedef_ad(s), kaynak=p.name if p else "", sha256=shas.get(s, ""), alt=alt[s]))
-    rows = [dict(hedef_sira=s, hedef_gorsel=L.hedef_ad(s), hedef_alt=alt[s], islem="DEGISTIR", simdi_sira="", simdi_id="")
-            for s in range(1, N_HEDEF + 1)]
+    hedef.sort(key=lambda h: h["sira"])
+    rows = []
+    if dokun:
+        rows.append(dict(hedef_sira=1, hedef_gorsel=L.hedef_ad(1), hedef_alt=alt[1], islem="DOKUNMA", simdi_sira=dokun.get("rank"),
+                         simdi_id=dokun.get("listing_image_id")))
+    rows += [dict(hedef_sira=s, hedef_gorsel=L.hedef_ad(s), hedef_alt=alt[s], islem="DEGISTIR", simdi_sira="", simdi_id="")
+             for s in P["siralar"]]
     rows += [dict(hedef_sira="", hedef_gorsel="", hedef_alt="", islem="CIKAR", simdi_sira=x.get("rank"), simdi_id=x.get("listing_image_id"))
-             for x in g]
+             for x in g if x is not dokun]
     with open(od / f"LISTE_{lid}.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=L.LISTE_ALAN); w.writeheader(); w.writerows(rows)
-    man = dict(listing_id=lid, cift=cift, profil="v11",
-               variation_images=[dict(value=ad, image_id=RENK_SIRA[ad]) for ad in RENKLER if ad in bag],
+    man = dict(listing_id=lid, cift=cift, profil=d["profil"], renk_bag_sayisi=len(P["renk_sira"]),
+               variation_images=[dict(value=ad, image_id=P["renk_sira"][ad]) for ad in RENKLER if ad in bag and ad in P["renk_sira"]],
                yedek_ids=sorted(x.get("listing_image_id") for x in g), yedek_galeri=[x.get("listing_image_id") for x in g],
                yedek_baglar={ad: dict(property_id=b.get("property_id"), value_id=b.get("value_id"), image_id=b.get("image_id"))
                              for ad, b in sorted(bag.items())},
@@ -239,7 +284,11 @@ def main(argv=None):
     ap.add_argument("--sadece", default=""); ap.add_argument("--haric", default="")
     ap.add_argument("--yazim", action="store_true", help="yazim kosusu: alt metin sablonu ONAYLI olmali")
     ap.add_argument("--is", type=int, default=os.cpu_count() or 2, dest="is_")
+    ap.add_argument("--profil", choices=sorted(PROFIL), default="v11", help="v11b: Serdar 29 Eki (MB kapak dokunulmaz, CI yok)")
+    ap.add_argument("--canli-dir", default="", help="v11b: liste oncesi canli okuma (galeri-v11-yedek-oku, <ilan>_<CIFT>/GALERI.json)")
     a = ap.parse_args(argv)
+    if a.profil == "v11b" and not a.canli_dir:
+        print("::error::v11b icin --canli-dir gerekli"); return 2
     try:
         ilanlar = L.kapsam(a.ciftler, a.sadece, a.haric)
         sab = sablon_oku(a.alt)
@@ -252,14 +301,14 @@ def main(argv=None):
         print("::error::kapsamda ilan yok"); return 2
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
     d = dict(yedek=a.yedek_dir, galeri=a.galeri_dir, kesim=a.kesim_dir, out=str(out), yazim=a.yazim, yedek_ozet=yozet, yedek_liste=yliste,
-             kapi=kapi_oku(a.kapi_csv), kart=km, kart_dir=str(kd) if kd else "")
+             kapi=kapi_oku(a.kapi_csv), kart=km, kart_dir=str(kd) if kd else "", profil=a.profil, canli=a.canli_dir)
     sonuc = []
     with ProcessPoolExecutor(max(1, a.is_)) as ex:
         for n, s in enumerate(ex.map(ilan_hazirla, [dict(satir=r, sablon=sab, dizin=d) for r in ilanlar]), 1):
             sonuc.append(s)
             print(f"[{n}/{len(ilanlar)}] {s['ilan']} {s['cift']} {s['durum']}" + (f": {s['neden'][0][:120]}" if s["neden"] else ""), flush=True)
-    alt_durum = sorted({(x.get("durum") or "").strip() for x in sab.values()})
-    oz = dict(profil="v11", alt_sablon_durum=alt_durum, alt_sablon_sha=Y.sha256(a.alt), yazim=a.yazim, ncc_min=L.NCC_MIN,
+    alt_durum = sorted({(sab[s].get("durum") or "").strip() for s in PROFIL[a.profil]["siralar"]})   # v11b: satir 1 KULLANILMAZ
+    oz = dict(profil=a.profil, alt_sablon_durum=alt_durum, alt_sablon_sha=Y.sha256(a.alt), yazim=a.yazim, ncc_min=L.NCC_MIN,
               format_boy_sayisi=(km or {}).get("format_boy_sayisi"), ilanlar={s["ilan"]: s for s in sonuc})
     (out / "LISTE_OZET.json").write_text(json.dumps(oz, indent=1, ensure_ascii=False), encoding="utf-8")
     hazir = sum(1 for s in sonuc if s["durum"] == "HAZIR")

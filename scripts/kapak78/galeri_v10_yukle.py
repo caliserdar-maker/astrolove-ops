@@ -50,15 +50,21 @@ RENKLER = ("Midnight Blue", "Deep Black", "Pure White", "Champagne Ivory", "Warm
 RENK_SIRA = {"Midnight Blue": 1, "Deep Black": 6, "Pure White": 7, "Champagne Ivory": 8, "Warm Parchment": 9}
 V11 = dict(ONAY="GALERI_V11", ONAY_BAG="GALERI_V11_BAG", N=10, CANLI_N=9, PLAN_AD="PLAN_V11.json", PROFIL="v11", YALIN=True,
            RENK_SIRA={"Champagne Ivory": 1, "Midnight Blue": 7, "Deep Black": 8, "Pure White": 9, "Warm Parchment": 10})
+# v11b (Serdar 29 Eki kesin karar): CI kapak YOK, CI renk karti YOK. Sira 1 canli eski MB kapak DOKUNULMAZ (silinmez, yeniden
+# yuklenmez, alt metni / sirasi yazilmaz), 2-6 W02-W06, 7 W07_MB, 8 W08_DB, 9 W09_PW, 10 W10_WP. Renk baglari 4: MB 7, DB 8, PW 9,
+# WP 10; Champagne Ivory bagsiz. Canli gorsel sayisi ilana gore: CANLI_N None = manifest yedek_ids (liste kosusundaki canli okuma).
+V11B = dict(V11, ONAY="GALERI_V11B", ONAY_BAG="GALERI_V11B_BAG", CANLI_N=None, PLAN_AD="PLAN_V11B.json", PROFIL="v11b",
+            RENK_SIRA={"Midnight Blue": 7, "Deep Black": 8, "Pure White": 9, "Warm Parchment": 10})
 
 
 def profil_kur(ad, ek_kapi=None):
-    """v11: modul sabitleri v11 degerlerine (galeri_v11_yukle.py). v10 testleri / is akisi bu cagriyi yapmaz."""
+    """v11 / v11b: modul sabitleri (galeri_v11_yukle.py). v10 testleri / is akisi bu cagriyi yapmaz."""
     global ONAY, ONAY_BAG, N, CANLI_N, PLAN_AD, PROFIL, RENK_SIRA, EK_KAPI, YALIN
-    if ad != "v11":
+    P = {"v11": V11, "v11b": V11B}.get(ad)
+    if P is None:
         raise SystemExit(f"bilinmeyen profil {ad}")
-    ONAY, ONAY_BAG, N, CANLI_N, YALIN = V11["ONAY"], V11["ONAY_BAG"], V11["N"], V11["CANLI_N"], V11["YALIN"]
-    PLAN_AD, PROFIL, RENK_SIRA, EK_KAPI = V11["PLAN_AD"], V11["PROFIL"], dict(V11["RENK_SIRA"]), ek_kapi
+    ONAY, ONAY_BAG, N, CANLI_N, YALIN = P["ONAY"], P["ONAY_BAG"], P["N"], P["CANLI_N"], P["YALIN"]
+    PLAN_AD, PROFIL, RENK_SIRA, EK_KAPI = P["PLAN_AD"], P["PROFIL"], dict(P["RENK_SIRA"]), ek_kapi
 RENK_PID, BOY_PID = 200, 513
 KAPI_OKUMA = 4     # ilan, galeri, variation-images, envanter
 BES_X7 = re.compile(r"^\s*5\s*[x×]\s*7(\D|$)")
@@ -147,8 +153,9 @@ def kapilar(c, man, bes_x7):
     if c["state"] != "active":
         neden.append(f"state {c['state']} (active degil)")
     g = c["galeri"]; ids = [x.get("listing_image_id") for x in g]
-    if len(g) != CANLI_N:
-        neden.append(f"canli galeri {len(g)} gorsel ({CANLI_N} beklenir)")
+    cn = CANLI_N or len(man["yedek_ids"])   # v11b: liste kosusundaki canli okuma
+    if len(g) != cn:
+        neden.append(f"canli galeri {len(g)} gorsel ({cn} beklenir)")
     b = c["baglar"]; adlar = [x.get("value") for x in b]
     if len(b) != 5 or sorted(map(str, adlar)) != sorted(RENKLER):
         neden.append(f"canli renk bagi {len(b)} kayit / adlar {sorted(set(map(str, adlar)))} (5 renk beklenir)")
@@ -187,23 +194,31 @@ def zaten(c, man, kayit_ids=None):
         return False
     rk = {x.get("listing_image_id"): x.get("rank") for x in g}
     b = {x.get("value"): rk.get(x.get("image_id")) for x in c["baglar"]}
-    return len(c["baglar"]) == 5 and b == RENK_SIRA
+    return len(c["baglar"]) == len(RENK_SIRA) and b == RENK_SIRA
 
 
 def plan_kur(hazir, lid, man):
     liste = hazir / lid / f"LISTE_{lid}.csv"
     hedef, cikar = Y.liste_oku(liste, N)
     yukle = [r for r in hedef if r["islem"] == "DEGISTIR"]
-    if len(yukle) != N or len(cikar) != CANLI_N:
+    koru = [r for r in hedef if r["islem"] != "DEGISTIR"]
+    if CANLI_N is None:   # v11b: yerinde kalan + cikan = canli (liste okumasi), yerinde kalan + yuklenen = hedef
+        if len(yukle) + len(koru) != N or len(cikar) + len(koru) != len(man["yedek_ids"]):
+            raise Y.Dur(f"LISTE {len(yukle)} DEGISTIR / {len(koru)} KORU / {len(cikar)} CIKAR (canli {len(man['yedek_ids'])}, hedef {N})")
+        if {int(r["simdi_id"]) for r in koru} | set(cikar) != set(man["yedek_ids"]):
+            raise Y.Dur("LISTE KORU + CIKAR kimlikleri canli okumayla ayni degil")
+    elif len(yukle) != N or len(cikar) != CANLI_N:
         raise Y.Dur(f"LISTE {len(yukle)} DEGISTIR / {len(cikar)} CIKAR ({N} / {CANLI_N} beklenir)")
     for h in man["hedef"]:
+        if h.get("islem") in ("KORU", "DOKUNMA"):   # v11b: yerinde kalan gorselin dosyasi yok
+            continue
         p = hazir / lid / "hedef" / h["ad"]
         if not p.exists() or Y.sha256(p) != h["sha256"]:
             raise Y.Dur(f"hedef dosya {h['ad']} yok ya da sha256 manifestten farkli")
     bagli0 = {v["image_id"] for v in man["yedek_baglar"].values()}
-    kapak = next(r for r in yukle if int(r["hedef_sira"]) == 1)
+    kapak = next((r for r in yukle if int(r["hedef_sira"]) == 1), None)
     if YALIN:
-        adim, mx = Y.yalin_plan(cikar, yukle, N)
+        adim, mx = Y.yalin_plan(cikar, yukle, N, koru=koru)
     else:
         adim, mx = Y.adim_plani(CANLI_N, cikar, bagli0, yukle, set(RENK_SIRA.values()), kapak_degisir=kapak, hedef_n=N)
     return adim, mx, Y.sha256(liste)

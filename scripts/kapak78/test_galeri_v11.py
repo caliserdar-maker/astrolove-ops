@@ -95,7 +95,8 @@ def girdi(d, takas=False, kapi_bozuk=None, kart=True, fb=None, yedek17=False):
 def alt_csv(d, durum):
     p = d / "alt.csv"
     t = (KOK / "data/pod/galeri_v11_alt.csv").read_text()
-    p.write_text(t.replace(",TASLAK\n", f",{durum}\n").replace(",ONAYLI\n", f",{durum}\n")); return p
+    p.write_text(t.replace(",TASLAK\n", f",{durum}\n").replace(",ONAYLI\n", f",{durum}\n")
+                 .replace(",KULLANILMAZ\n", f",{durum}\n")); return p   # v11 profili satir 1'i kullanir (v11b'de KULLANILMAZ)
 
 
 def liste(d, g, durum="ONAYLI", yazim=False):

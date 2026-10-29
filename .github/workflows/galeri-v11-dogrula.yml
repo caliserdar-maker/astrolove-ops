@@ -15,14 +15,16 @@ on:
       galeri_damga: {description: "TEMP/POSTER_GALERI_V11/<damga> (W01 / W07-W10)", required: true, default: "20261029_103607"}
       kart_kosu: {description: "TEMP/POSTER_GALERI_V11/<galeri_damga>/W02_W06/<kosu>", required: true, default: "40879133310"}
       sadece: {description: "virgullu listing_id (bos = okumadaki tum ilanlar)", required: false, default: ""}
+      profil: {description: "v11b (Serdar 29 Eki: rank 1 B1 MB kapak dokunulmaz, 4 renk bagi) | v11", required: true, default: "v11b"}
+      b1_damga: {description: "v11b: B1 yedegi TEMP/POSTER_GALERI_V11_YEDEK/<damga> (rank 1 MB kapak kimligi)", required: true, default: "20261029_121704"}
 jobs:
   is:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
       - name: Girdi kapisi
-        env: {D: "${{ inputs.damga }}", K: "${{ inputs.yukle_kosu }}", G: "${{ inputs.galeri_damga }}", W: "${{ inputs.kart_kosu }}", S: "${{ inputs.sadece }}"}
-        run: '[[ "$D" =~ ^[0-9]{8}_[0-9]{6}$ && "$G" =~ ^[0-9]{8}_[0-9]{6}$ && "$K" =~ ^[0-9]+(,[0-9]+)*$ && "$W" =~ ^[0-9]+$ && "$S" =~ ^([0-9]+(,[0-9]+)*)?$ ]] || { echo "::error::girdi"; exit 1; }'
+        env: {D: "${{ inputs.damga }}", K: "${{ inputs.yukle_kosu }}", G: "${{ inputs.galeri_damga }}", W: "${{ inputs.kart_kosu }}", S: "${{ inputs.sadece }}", P: "${{ inputs.profil }}", B: "${{ inputs.b1_damga }}"}
+        run: '[[ "$D" =~ ^[0-9]{8}_[0-9]{6}$ && "$G" =~ ^[0-9]{8}_[0-9]{6}$ && "$K" =~ ^[0-9]+(,[0-9]+)*$ && "$W" =~ ^[0-9]+$ && "$S" =~ ^([0-9]+(,[0-9]+)*)?$ && "$P" =~ ^(v11|v11b)$ && "$B" =~ ^[0-9]{8}_[0-9]{6}$ ]] || { echo "::error::girdi"; exit 1; }'
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
@@ -42,11 +44,12 @@ jobs:
           if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
             grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
       - name: Girdiler (Drive)
-        env: {D: "${{ inputs.damga }}", K: "${{ inputs.yukle_kosu }}", G: "${{ inputs.galeri_damga }}", W: "${{ inputs.kart_kosu }}"}
+        env: {D: "${{ inputs.damga }}", K: "${{ inputs.yukle_kosu }}", G: "${{ inputs.galeri_damga }}", W: "${{ inputs.kart_kosu }}", B: "${{ inputs.b1_damga }}"}
         run: |
           set -euo pipefail
-          T=gdrive:ASTROLOVE/TEMP; mkdir -p _y _s _g _k _o
+          T=gdrive:ASTROLOVE/TEMP; mkdir -p _y _s _g _k _o _b1
           rclone copy "$T/POSTER_GALERI_V11_YEDEK/$D" _y --include "*/GALERI.json" --transfers 8 -q
+          rclone copy "$T/POSTER_GALERI_V11_YEDEK/$B" _b1 --include "*/GALERI.json" --transfers 8 -q
           for k in ${K//,/ }; do rclone copy "$T/POSTER_GALERI_V11_YUKLE/KOSU/$k" "_s/$k" --include "SONRA_*.json" -q; done
           find _y -name GALERI.json | sed 's#.*/[0-9]*_\([A-Z_]*\)/GALERI.json#\1#' | sort -u > _ciftler.txt
           sed 's/$/_W*.jpg/' _ciftler.txt > _g.txt
@@ -57,10 +60,11 @@ jobs:
       - name: Indir (CDN)
         run: python3 -I scripts/kapak78/galeri_v11_yedek_indir.py --in _y || echo "indirme ozeti v10 (9 gorsel) kurali; dogrulama asagida"
       - name: Dogrula
-        env: {S: "${{ inputs.sadece }}"}
+        env: {S: "${{ inputs.sadece }}", P: "${{ inputs.profil }}"}
         run: |
           set -euo pipefail
-          SA=(); for d in _s/*/; do SA+=(--sonra "$d"); done
+          SA=(--profil "$P"); [ "$P" = v11b ] && SA+=(--b1 _b1)
+          for d in _s/*/; do SA+=(--sonra "$d"); done
           [ -n "$S" ] || S=$(find _y -name GALERI.json | sed 's#.*/\([0-9]*\)_[A-Z_]*/GALERI.json#\1#' | sort -u | paste -sd,)
           set +e; python3 scripts/kapak78/galeri_v11_dogrula.py --canli _y "${SA[@]}" --galeri _g --kart _k --alt data/pod/galeri_v11_alt.csv \
             --ciftler data/pod/pod78_ids.csv --sadece "$S" --out _o; RC=$?; set -e
@@ -77,4 +81,4 @@ jobs:
           [ -f _o/DOGRULA.md ] && cat _o/DOGRULA.md >> "$GITHUB_STEP_SUMMARY" || true
           [ "${RC:-1}" = 0 ] || { echo "::error::dogrulama PASS degil"; exit 1; }
       - if: always()
-        run: rm -rf _y _s _g _k _o ~/.config/rclone
+        run: rm -rf _y _s _g _k _o _b1 ~/.config/rclone
