@@ -142,8 +142,7 @@ def kos(api, hazir, out, kuru=True, plan=None, damga="", bes_x7="zorunlu"):
     return rc, json.loads((Path(out) / "RAPOR.json").read_text())
 
 
-def main():
-    t0 = Path(tempfile.mkdtemp(prefix="gv11_"))
+def govde(t0):
     d = t0 / "a"; d.mkdir(); g = girdi(d)
     rc, oz = liste(d, g, yazim=True)
     kontrol("liste: 2 ilan HAZIR, profil v11", rc == 0 and all(x["durum"] == "HAZIR" for x in oz["ilanlar"].values()) and oz["profil"] == "v11")
@@ -291,7 +290,14 @@ def main():
     p10 = json.loads((t0 / "PLAN_V11.json").read_text()); p10.pop("profil"); (t0 / "PLAN_V10x.json").write_text(json.dumps(p10))
     rc, R = kos(T10.Coklu({k: sahte(k) for k in ILAN}), hz, t0 / "o5", kuru=False, plan=t0 / "PLAN_V10x.json", damga=pd)
     kontrol("yazim: v10 planiyla DUR", rc == 9 and "profili v10" in R["hata"])
-    shutil.rmtree(t0, ignore_errors=True)   # 29 Eki: temizlenmeyen gv11_* klasorleri diski doldurdu (her kosu ~97 MB)
+
+
+def main():
+    t0 = Path(tempfile.mkdtemp(prefix="gv11_"))
+    try:
+        govde(t0)
+    finally:   # 29 Eki: temizlenmeyen gv11_* klasorleri diski doldurdu (her kosu ~97 MB); hata / istisnada da silinir
+        shutil.rmtree(t0, ignore_errors=True)
     bad = [a for a, ok in SONUC if not ok]
     print(f"\ngaleri_v11 testleri: {len(SONUC) - len(bad)}/{len(SONUC)} PASS" + (f" | FAIL: {bad}" if bad else ""))
     return 1 if bad else 0

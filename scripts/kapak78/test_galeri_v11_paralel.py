@@ -16,6 +16,8 @@ import threading
 import time
 from pathlib import Path
 
+_GERCEK_UYKU = time.sleep   # test_eski78 time.sleep'i etkisiz yapar (modul geneli); tempo testi gercek uyku ister
+
 from PIL import Image
 
 KOK = Path(__file__).resolve().parents[2]
@@ -71,6 +73,7 @@ def etsy_testi():
         time.sleep(0.02)
         return Yanit(401 if k["headers"]["Authorization"] == "Bearer A" else 200)
     eski, E.requests.request = E.requests.request, istek
+    eski_uyku, time.sleep = time.sleep, _GERCEK_UYKU
     hata = []
     try:
         th = [threading.Thread(target=lambda: (lambda: api.get("/x"))() if True else None) for _ in range(2)]
@@ -86,7 +89,7 @@ def etsy_testi():
         for t in th:
             t.join()
     finally:
-        E.requests.request = eski
+        E.requests.request = eski; time.sleep = eski_uyku
     kontrol(f"etsy: 4 isci ayni anda 401 -> TEK token yenilemesi ({d.n_yenile}), hepsi 200, kota basligi DUR'u yok ({hata})",
             d.n_yenile == 1 and not hata)
     ara = [b - a for a, b in zip(zaman, zaman[1:])]

@@ -13,6 +13,7 @@ import pathlib
 import stat
 import sys
 import tempfile
+import threading
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import cl_galeri_degistir as G  # noqa: E402
@@ -480,6 +481,8 @@ def post_file_testleri():
             return {"listing_image_id": 1}
 
     class St:
+        access_token = "A"
+
         def refresh(self):
             pass
     out = []
@@ -492,7 +495,9 @@ def post_file_testleri():
             n[0] += 1; return Yn(seri.pop(0))
         E.requests.post = post
         api = E.Etsy.__new__(E.Etsy); api.calls = 0; api.pace = 0; api.verbose_quota = False; api.remaining = None
-        api.store = St(); api._headers = lambda: {}; api._istek_oncesi = lambda: None
+        api.store = St(); api._headers = lambda *a: {}; api._istek_oncesi = lambda: None
+        api._kilit, api._yenile_kilit, api._son, api._yanit = threading.Lock(), threading.Lock(), 0.0, 0   # is parcacigi guvenli istemci
+        api._yerel = threading.local()
         try:
             api.post_file("/x", files={"image": ("a", io.BytesIO(b"1"), "image/jpeg")}, tekrar=tekrar); ok = True
         except SystemExit:
