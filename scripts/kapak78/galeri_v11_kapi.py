@@ -20,9 +20,10 @@ Kapilar (dosya basina):
      Karar esigi bant_max_px esik dosyasindan (Serdar onayli).
 Esik dosyasi (--esik, JSON): {"etiket_hp_max": n, "bant_max_px": n, "onay": "Serdar <tarih>"}; yoksa / onay bos -> etiket ve bant kapisi
 ESIK_YOK (PASS sayilmaz). --olc: onayli CANCER_LIBRA 5 gorselden (--onayli) olcum + oneri (ESIK_ONERI.json / .md); kullanilmaz, Serdar'a sunulur.
-Cikti --out: KAPI.csv (dosya basina olcumler + durum), KAPI.md. Cikis 0 = hepsi PASS."""
+Cikti --out: KAPI.csv (dosya basina sha256 + olcumler + durum; galeri_v11_liste ayni sha256'yi ister), KAPI.md. Cikis 0 = hepsi PASS."""
 import argparse
 import csv
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -102,7 +103,8 @@ def esik_oku(yol):
 
 
 def dosya_kapi(p, ad, cift, a, esik):
-    r = dict(cift=cift, ad=ad, dosya=p.name, bicim="", etiket_hp=None, etiket_onayli_fark="", v10_fark="", bant="", durum="", neden=[])
+    r = dict(cift=cift, ad=ad, dosya=p.name, sha256=hashlib.sha256(p.read_bytes()).hexdigest(), bicim="", etiket_hp=None,
+             etiket_onayli_fark="", v10_fark="", bant="", durum="", neden=[])
     try:
         with Image.open(p) as im0:
             fmt, bt = im0.format, im0.size
@@ -209,12 +211,12 @@ def main(argv=None):
         for ad in ADLAR:
             p = Path(a.dosya_dir) / f"{r['cift']}_{ad}.jpg"
             if not p.exists():
-                R.append(dict(cift=r["cift"], ad=ad, dosya=p.name, bicim="", etiket_hp="", etiket_onayli_fark="", v10_fark="", bant="",
+                R.append(dict(cift=r["cift"], ad=ad, dosya=p.name, sha256="", bicim="", etiket_hp="", etiket_onayli_fark="", v10_fark="", bant="",
                               durum="FAIL", neden=["dosya yok"]))
                 continue
             R.append(dosya_kapi(p, ad, r["cift"], a, esik))
         print(f"[{n}/{len(rows)}] {r['cift']} " + " ".join(f"{x['ad'][:3]}:{x['durum']}" for x in R[-5:]), flush=True)
-    alan = ["cift", "ad", "dosya", "bicim", "etiket_hp", "etiket_onayli_fark", "v10_fark", "bant", "durum", "neden"]
+    alan = ["cift", "ad", "dosya", "sha256", "bicim", "etiket_hp", "etiket_onayli_fark", "v10_fark", "bant", "durum", "neden"]
     with open(out / "KAPI.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=alan); w.writeheader()
         w.writerows(dict(x, neden="; ".join(x["neden"])) for x in R)
